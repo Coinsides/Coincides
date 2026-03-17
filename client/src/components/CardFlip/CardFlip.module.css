@@ -10,6 +10,7 @@
   min-height: 300px;
   transition: transform 0.5s ease;
   transform-style: preserve-3d;
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.25));
 }
 
 .cardInner.flipped {
@@ -20,9 +21,12 @@
   position: absolute;
   inset: 0;
   backface-visibility: hidden;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-xl);
-  background: var(--bg-surface);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  box-shadow: var(--glass-shadow-md);
   overflow: hidden;
 }
 
@@ -120,7 +124,10 @@
 
 .formulaDisplay {
   padding: 16px;
-  background: var(--bg-elevated);
+  background: var(--glass-elevated);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   text-align: center;
   font-size: 16px;

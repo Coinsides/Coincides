@@ -24,15 +24,20 @@
 }
 
 .card {
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  background: var(--bg-surface);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  box-shadow: var(--glass-shadow-sm);
   overflow: hidden;
-  transition: border-color var(--transition-fast);
+  transition: all var(--transition-fast);
 }
 
 .card:hover {
-  border-color: var(--text-muted);
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--glass-shadow-md);
+  transform: translateY(-1px);
 }
 
 .cardColor {
@@ -82,10 +87,11 @@
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.3px;
+  border: 1px solid var(--glass-border);
 }
 
 .weight1 {
-  background: var(--bg-hover);
+  background: var(--glass-elevated);
   color: var(--text-muted);
 }
 
@@ -104,7 +110,7 @@
   gap: 4px;
   margin-top: 14px;
   padding-top: 12px;
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--glass-border);
 }
 
 .filesBtn,
@@ -112,7 +118,7 @@
 .editBtn,
 .deleteBtn {
   padding: 6px 12px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   font-size: 12px;
   font-weight: 500;
@@ -135,7 +141,7 @@
 }
 
 .editBtn:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
   color: var(--text-primary);
 }
 
@@ -147,7 +153,7 @@
 
 /* Add card */
 .addCard {
-  border: 2px dashed var(--border-default);
+  border: 2px dashed var(--glass-border);
   border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
@@ -173,6 +179,8 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -180,8 +188,11 @@
 }
 
 .confirmDialog {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow-lg);
   border-radius: var(--radius-xl);
   padding: 24px;
   max-width: 380px;
@@ -209,27 +220,28 @@
 
 .confirmCancelBtn {
   padding: 8px 16px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-secondary);
   font-size: 13px;
 }
 
 .confirmCancelBtn:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
 }
 
 .confirmDeleteBtn {
   padding: 8px 16px;
-  background: var(--error);
+  background: var(--gradient-danger);
   color: white;
   border-radius: var(--radius-md);
   font-size: 13px;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
 .confirmDeleteBtn:hover {
-  opacity: 0.9;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
 @keyframes fadeIn {

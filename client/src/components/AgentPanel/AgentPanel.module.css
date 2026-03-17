@@ -3,6 +3,8 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 999;
   animation: fadeOverlay var(--transition-fast) ease forwards;
 }
@@ -15,8 +17,11 @@
   bottom: 0;
   width: 420px;
   max-width: 100vw;
-  background: var(--bg-surface);
-  border-left: 1px solid var(--border-default);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  border-left: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow-lg);
   z-index: 1000;
   display: flex;
   flex-direction: column;
@@ -39,7 +44,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--glass-border);
   flex-shrink: 0;
 }
 
@@ -76,7 +81,7 @@
 }
 
 .convDropdownBtn:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
 }
 
 .convLabel {
@@ -93,11 +98,13 @@
   width: 260px;
   max-height: 240px;
   overflow-y: auto;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-default);
+  background: var(--glass-elevated);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   z-index: 10;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--glass-shadow-lg);
 }
 
 .convItem {
@@ -117,7 +124,7 @@
 }
 
 .convItemBtn:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
   color: var(--text-primary);
 }
 
@@ -160,14 +167,14 @@
 }
 
 .iconBtn:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
   color: var(--text-secondary);
 }
 
 /* View tabs */
 .viewTabs {
   display: flex;
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--glass-border);
   flex-shrink: 0;
 }
 
@@ -182,6 +189,7 @@
   font-weight: 500;
   color: var(--text-muted);
   border-bottom: 2px solid transparent;
+  background: var(--glass-elevated);
 }
 
 .viewTab:hover {
@@ -191,6 +199,7 @@
 .viewTab.activeTab {
   color: var(--accent-primary);
   border-bottom-color: var(--accent-primary);
+  background: transparent;
 }
 
 .badge {
@@ -254,7 +263,7 @@
   font-size: 12px;
   font-weight: 500;
   text-align: center;
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--glass-border);
   flex-shrink: 0;
 }
 
@@ -293,7 +302,7 @@
   align-items: flex-end;
   gap: 8px;
   padding: 12px 16px;
-  border-top: 1px solid var(--border-default);
+  border-top: 1px solid var(--glass-border);
   flex-shrink: 0;
 }
 
@@ -301,8 +310,8 @@
   flex: 1;
   resize: none;
   padding: 8px 12px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-default);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-primary);
   font-size: 13px;
@@ -313,7 +322,8 @@
 }
 
 .input:focus {
-  border-color: var(--accent-primary);
+  border-color: var(--glass-border-accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .input:disabled {
@@ -326,17 +336,19 @@
 
 .sendBtn {
   padding: 8px;
-  background: var(--accent-primary);
+  background: var(--gradient-primary);
   color: white;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 .sendBtn:hover:not(:disabled) {
-  background: var(--accent-primary-hover);
+  background: var(--gradient-primary-hover);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 }
 
 .sendBtn:disabled {

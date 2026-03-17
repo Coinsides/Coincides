@@ -24,9 +24,11 @@
 
 .navBtn {
   padding: 6px 8px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  background: var(--bg-surface);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
   color: var(--text-secondary);
   display: flex;
   align-items: center;
@@ -34,7 +36,8 @@
 }
 
 .navBtn:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
+  border-color: var(--glass-border-hover);
   color: var(--text-primary);
 }
 
@@ -48,9 +51,9 @@
 
 .filterSelect {
   padding: 6px 10px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  background: var(--bg-surface);
+  background: rgba(0, 0, 0, 0.2);
   color: var(--text-secondary);
   font-size: 12px;
   margin-left: 12px;
@@ -61,28 +64,32 @@
   align-items: center;
   justify-content: center;
   padding: 6px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--accent-primary);
   margin-left: 8px;
 }
 
 .aiBtn:hover {
-  background: var(--accent-primary-bg);
+  background: var(--glass-hover);
+  border-color: var(--glass-border-accent);
 }
 
 /* Calendar grid */
 .grid {
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  background: var(--bg-surface);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  box-shadow: var(--glass-shadow-sm);
   overflow: hidden;
 }
 
 .weekHeader {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .weekDay {
@@ -105,6 +112,7 @@
   padding: 6px 8px;
   border-right: 1px solid var(--border-subtle);
   border-bottom: 1px solid var(--border-subtle);
+  background: var(--glass-elevated);
   cursor: pointer;
   transition: background var(--transition-fast);
 }
@@ -114,7 +122,7 @@
 }
 
 .dayCell:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
 }
 
 .dayCell.otherMonth {
@@ -123,6 +131,7 @@
 
 .dayCell.today {
   background: var(--accent-primary-bg);
+  border-color: var(--glass-border-accent);
 }
 
 .dayCell.selected {
@@ -159,7 +168,7 @@
 /* View toggle */
 .viewToggle {
   display: flex;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   overflow: hidden;
   margin-right: 8px;
@@ -170,13 +179,15 @@
   font-size: 12px;
   font-weight: 500;
   color: var(--text-secondary);
-  background: var(--bg-surface);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
   border: none;
   cursor: pointer;
 }
 
 .viewBtn:first-child {
-  border-right: 1px solid var(--border-default);
+  border-right: 1px solid var(--glass-border);
 }
 
 .viewBtnActive {
@@ -193,22 +204,27 @@
 }
 
 .weekColumn {
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  background: var(--bg-surface);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  box-shadow: var(--glass-shadow-sm);
   padding: 0;
   cursor: pointer;
   display: flex;
   flex-direction: column;
   min-height: 350px;
+  transition: all var(--transition-fast);
 }
 
 .weekColumn:hover {
-  border-color: var(--text-muted);
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--glass-shadow-md);
 }
 
 .weekColumnToday {
-  border-color: var(--accent-primary);
+  border-color: var(--glass-border-accent);
   background: var(--accent-primary-bg);
 }
 
@@ -257,7 +273,9 @@
   padding: 4px 6px;
   border-left: 3px solid var(--text-muted);
   border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  background: var(--bg-elevated);
+  background: var(--glass-elevated);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
 }
 
 .weekTaskDone {
@@ -285,6 +303,8 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 100;
   animation: fadeOverlay 150ms ease forwards;
 }
@@ -295,8 +315,11 @@
   right: 0;
   bottom: 0;
   width: 400px;
-  background: var(--bg-surface);
-  border-left: 1px solid var(--border-default);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  border-left: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow-lg);
   z-index: 101;
   display: flex;
   flex-direction: column;
@@ -308,7 +331,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  border-bottom: 1px solid var(--border-default);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .detailDate {
@@ -326,7 +349,7 @@
 }
 
 .closeBtn:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
   color: var(--text-secondary);
 }
 
@@ -364,11 +387,17 @@
   gap: 8px;
   padding: 8px;
   border-radius: var(--radius-md);
+  background: var(--glass-elevated);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: 1px solid var(--glass-border);
+  margin-bottom: 4px;
   transition: background var(--transition-fast);
 }
 
 .detailTaskItem:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
+  border-color: var(--glass-border-hover);
 }
 
 .addTaskBtn {
@@ -378,7 +407,7 @@
   gap: 6px;
   padding: 10px;
   margin-top: 12px;
-  border: 1px dashed var(--border-default);
+  border: 1px dashed var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-muted);
   font-size: 13px;

@@ -22,7 +22,7 @@
 }
 
 .navBackBtn:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
   color: var(--text-primary);
 }
 
@@ -39,14 +39,14 @@
 
 .progressBar {
   height: 4px;
-  background: var(--bg-hover);
+  background: var(--glass-elevated);
   border-radius: 2px;
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
-  background: var(--accent-primary);
+  background: var(--gradient-primary);
   border-radius: 2px;
   transition: width var(--transition-normal);
 }
@@ -96,6 +96,9 @@
   border-radius: var(--radius-lg);
   font-size: 14px;
   font-weight: 600;
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
   transition: transform var(--transition-fast), opacity var(--transition-fast);
 }
 
@@ -141,15 +144,17 @@
 
 .backBtn {
   padding: 8px 20px;
-  background: var(--accent-primary);
+  background: var(--gradient-primary);
   color: white;
   border-radius: var(--radius-md);
   font-size: 13px;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 .backBtn:hover {
-  background: var(--accent-primary-hover);
+  background: var(--gradient-primary-hover);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 }
 
 .loading {
@@ -183,9 +188,12 @@
 }
 
 .statCard {
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  background: var(--bg-surface);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  box-shadow: var(--glass-shadow-sm);
   padding: 20px 28px;
   text-align: center;
   min-width: 100px;
@@ -206,15 +214,17 @@
 
 .finishBtn {
   padding: 10px 28px;
-  background: var(--accent-primary);
+  background: var(--gradient-primary);
   color: white;
   border-radius: var(--radius-md);
   font-size: 14px;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 .finishBtn:hover {
-  background: var(--accent-primary-hover);
+  background: var(--gradient-primary-hover);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 }
 
 @keyframes fadeIn {

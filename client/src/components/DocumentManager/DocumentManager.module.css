@@ -2,7 +2,9 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -11,8 +13,11 @@
 }
 
 .modal {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow-lg);
   border-radius: var(--radius-xl);
   width: 100%;
   max-width: 560px;
@@ -28,7 +33,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 18px 20px;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .headerTitle {
@@ -45,15 +50,18 @@
 
 .closeBtn:hover {
   color: var(--text-primary);
-  background: var(--bg-hover);
+  background: var(--glass-hover);
 }
 
 /* Dropzone */
 .dropzone {
   margin: 16px 20px;
   padding: 24px;
-  border: 2px dashed var(--border-default);
+  border: 2px dashed var(--glass-border);
   border-radius: var(--radius-lg);
+  background: var(--glass-elevated);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -97,7 +105,7 @@
 
 /* Document item */
 .docItem {
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .docItem:last-child {
@@ -203,7 +211,7 @@
   border-radius: 9999px;
   font-size: 10px;
   font-weight: 500;
-  background: var(--bg-hover);
+  background: var(--glass-elevated);
   color: var(--text-secondary);
 }
 
@@ -246,15 +254,15 @@
   margin-left: 8px;
   padding: 2px 8px;
   font-size: 0.75rem;
-  color: var(--accent);
+  color: var(--accent-primary);
   background: transparent;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--accent-primary);
   border-radius: 4px;
   cursor: pointer;
 }
 .retryBtn:hover {
-  background: var(--accent);
-  color: var(--bg-primary);
+  background: var(--accent-primary);
+  color: white;
 }
 
 /* Summary */
@@ -263,7 +271,7 @@
   color: var(--text-secondary);
   line-height: 1.6;
   padding: 8px 0 12px 26px;
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--glass-border);
 }
 
 .chunkInfo {
@@ -290,7 +298,9 @@
 .confirmOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -298,8 +308,11 @@
 }
 
 .confirmDialog {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow-lg);
   border-radius: var(--radius-xl);
   padding: 24px;
   max-width: 380px;
@@ -327,27 +340,29 @@
 
 .confirmCancelBtn {
   padding: 8px 16px;
-  border: 1px solid var(--border-default);
+  background: var(--glass-elevated);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-secondary);
   font-size: 13px;
 }
 
 .confirmCancelBtn:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
 }
 
 .confirmDeleteBtn {
   padding: 8px 16px;
-  background: var(--error);
+  background: var(--gradient-danger);
   color: white;
   border-radius: var(--radius-md);
   font-size: 13px;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
 .confirmDeleteBtn:hover {
-  opacity: 0.9;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
 /* Animations */

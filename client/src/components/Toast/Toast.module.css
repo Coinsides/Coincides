@@ -15,20 +15,24 @@
   gap: 10px;
   padding: 10px 14px;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-default);
-  background: var(--bg-elevated);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  box-shadow: var(--glass-shadow-md);
   color: var(--text-primary);
   font-size: 13px;
   min-width: 280px;
   max-width: 400px;
   pointer-events: all;
   animation: slideUp 200ms ease forwards;
-  backdrop-filter: blur(12px);
 }
 
 .success {
   border-color: var(--success);
   background: var(--success-bg);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
 }
 
 .success svg:first-child {
@@ -38,6 +42,8 @@
 .error {
   border-color: var(--error);
   background: var(--error-bg);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
 }
 
 .error svg:first-child {
@@ -47,6 +53,8 @@
 .info {
   border-color: var(--info);
   background: var(--info-bg);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
 }
 
 .info svg:first-child {

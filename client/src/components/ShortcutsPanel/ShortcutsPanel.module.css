@@ -1,7 +1,9 @@
 .backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -10,8 +12,11 @@
 }
 
 .panel {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow-lg);
   border-radius: var(--radius-xl);
   padding: 24px;
   width: 340px;
@@ -33,7 +38,7 @@
 }
 
 .row + .row {
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--glass-border);
 }
 
 .label {
@@ -46,9 +51,11 @@
   font-weight: 600;
   color: var(--text-primary);
   padding: 2px 8px;
-  background: var(--bg-elevated);
+  background: var(--glass-elevated);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
 }
 
 @keyframes fadeOverlay {

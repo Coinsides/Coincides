@@ -4,6 +4,34 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Round 3 Step 3+4] — 2026-03-17
+
+### Glassmorphism 全面覆盖：学习页面 + 弹窗 + 面板组件
+
+#### Step 3: 学习 + 数据页面（6 个 CSS 文件）
+- **Review**: 统计卡片玻璃化，进度条/按钮渐变化
+- **CardFlip**: 卡片正反面玻璃表面 + blur + 浮动阴影
+- **Statistics**: 概览卡片/课程卡片玻璃化，图表容器 glass-elevated
+- **Calendar**: 日历网格玻璃化，日期单元格玻璃悬停，详情面板 blur
+- **Courses**: 课程卡片玻璃 + hover 发光 + 微升，确认弹窗玻璃化
+- **Goals**: 目标卡片玻璃 + 进度条渐变 + 状态标记 glass-elevated
+
+#### Step 4: 弹窗 + 面板组件（15 个 CSS 文件）
+- **6 个 Modal**（Card/CardView/Course/Deck/Goal/Task）：蒙版 blur + 对话框玻璃 + 输入框玻璃 + 渐变按钮
+- **AgentPanel + MessageBubble + ProposalList**: 面板玻璃化，消息气泡 glass-elevated，提案卡片玻璃化
+- **DocumentManager**: 玻璃模态框 + 拖拽上传区玻璃虚线
+- **TagGroupManager**: 标签组卡片玻璃 + 标签芯片保留语义色
+- **Toast**: 玻璃 + blur-lg + 保留状态色
+- **ShortcutsPanel**: 玻璃面板 + 快捷键徽章 glass-elevated
+- **Auth**: 浮动玻璃登录卡片 + blur-lg + 渐变提交按钮
+- **Settings**: 设置卡片玻璃 + 输入框/开关玻璃模式
+
+#### Files
+- 修改 21 个 CSS 文件，覆盖项目全部 26 个 CSS 模块中的剩余 21 个
+- Glassmorphism 现已 100% 覆盖所有 UI 组件
+
+---
+
 ## [Round 3 Step 1+2] — 2026-03-17
 
 ### Glassmorphism 设计系统 + 核心页面改造

@@ -1,7 +1,9 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12,8 +14,11 @@
 .modal {
   width: 100%;
   max-width: 560px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow-lg);
   border-radius: var(--radius-xl);
   padding: 24px;
   max-height: 85vh;
@@ -50,8 +55,8 @@
 .field select,
 .field textarea {
   padding: 8px 12px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-default);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-primary);
   font-size: 13px;
@@ -60,7 +65,8 @@
 .field input:focus,
 .field select:focus,
 .field textarea:focus {
-  border-color: var(--accent-primary);
+  border-color: var(--glass-border-accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
   outline: none;
 }
 
@@ -78,16 +84,17 @@
 .templateBtn {
   flex: 1;
   padding: 8px 12px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   font-size: 12px;
   font-weight: 500;
   color: var(--text-muted);
   text-align: center;
+  background: var(--glass-elevated);
 }
 
 .templateBtn:hover {
-  border-color: var(--text-muted);
+  border-color: var(--glass-border-hover);
   color: var(--text-secondary);
 }
 
@@ -100,8 +107,8 @@
 /* LaTeX preview */
 .preview {
   padding: 12px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
+  background: var(--glass-elevated);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   margin-top: 4px;
 }
@@ -126,15 +133,16 @@
 .variableRow input {
   flex: 1;
   padding: 6px 10px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-default);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   font-size: 12px;
   color: var(--text-primary);
 }
 
 .variableRow input:focus {
-  border-color: var(--accent-primary);
+  border-color: var(--glass-border-accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
   outline: none;
 }
 
@@ -157,7 +165,7 @@
 
 .addVarBtn {
   padding: 6px;
-  border: 1px dashed var(--border-default);
+  border: 1px dashed var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-muted);
   font-size: 12px;
@@ -222,7 +230,7 @@
 
 .tagLabel {
   padding: 4px 10px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: 20px;
   font-size: 11px;
   font-weight: 500;
@@ -246,7 +254,8 @@
 
 .cancelBtn {
   padding: 8px 16px;
-  border: 1px solid var(--border-default);
+  background: var(--glass-elevated);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-secondary);
   font-size: 13px;
@@ -254,20 +263,22 @@
 }
 
 .cancelBtn:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
 }
 
 .saveBtn {
   padding: 8px 20px;
-  background: var(--accent-primary);
+  background: var(--gradient-primary);
   color: white;
   border-radius: var(--radius-md);
   font-size: 13px;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 .saveBtn:hover {
-  background: var(--accent-primary-hover);
+  background: var(--gradient-primary-hover);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 }
 
 .saveBtn:disabled {

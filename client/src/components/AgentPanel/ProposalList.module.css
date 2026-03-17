@@ -12,9 +12,11 @@
 }
 
 .proposal {
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  background: var(--bg-surface);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
   overflow: hidden;
 }
 
@@ -30,7 +32,7 @@
 }
 
 .proposalHeader:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
 }
 
 .expandIcon {
@@ -64,7 +66,7 @@
 }
 
 .proposalBody {
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--glass-border);
   padding: 12px;
 }
 
@@ -87,7 +89,8 @@
   align-items: center;
   justify-content: space-between;
   padding: 6px 8px;
-  background: var(--bg-elevated);
+  background: var(--glass-elevated);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
 }
 
@@ -134,7 +137,7 @@
 .applyBtn {
   flex: 1;
   padding: 7px 0;
-  background: var(--success);
+  background: var(--gradient-success);
   color: white;
   border-radius: var(--radius-md);
   font-size: 12px;
@@ -142,19 +145,19 @@
 }
 
 .applyBtn:hover {
-  opacity: 0.9;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
 }
 
 .discardBtn {
   flex: 1;
   padding: 7px 0;
-  border: 1px solid var(--error);
-  color: var(--error);
+  background: var(--gradient-danger);
+  color: white;
   border-radius: var(--radius-md);
   font-size: 12px;
   font-weight: 600;
 }
 
 .discardBtn:hover {
-  background: var(--error-bg);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }

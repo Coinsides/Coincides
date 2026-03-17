@@ -1,7 +1,9 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12,8 +14,11 @@
 .modal {
   width: 100%;
   max-width: 520px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow-lg);
   border-radius: var(--radius-xl);
   padding: 24px;
   max-height: 85vh;
@@ -42,15 +47,18 @@
 
 .closeBtn:hover {
   color: var(--text-primary);
-  background: var(--bg-hover);
+  background: var(--glass-hover);
 }
 
 /* Tag Group Section */
 .groupSection {
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   margin-bottom: 12px;
   overflow: hidden;
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
 }
 
 .groupHeader {
@@ -58,13 +66,13 @@
   align-items: center;
   justify-content: space-between;
   padding: 10px 14px;
-  background: var(--bg-elevated);
+  background: var(--glass-elevated);
   cursor: pointer;
   user-select: none;
 }
 
 .groupHeader:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
 }
 
 .groupNameArea {
@@ -93,8 +101,8 @@
 
 .groupNameInput {
   padding: 2px 8px;
-  background: var(--bg-surface);
-  border: 1px solid var(--accent-primary);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border-accent);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-size: 13px;
@@ -123,7 +131,7 @@
 
 .iconBtn:hover {
   color: var(--text-primary);
-  background: var(--bg-hover);
+  background: var(--glass-hover);
 }
 
 .iconBtnDanger:hover {
@@ -161,6 +169,7 @@
   height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
+  border: 1px solid var(--glass-border);
 }
 
 .tagName {
@@ -188,15 +197,16 @@
 .tagNameInput {
   flex: 1;
   padding: 4px 8px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-default);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-size: 12px;
 }
 
 .tagNameInput:focus {
-  border-color: var(--accent-primary);
+  border-color: var(--glass-border-accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
   outline: none;
 }
 
@@ -206,6 +216,8 @@
   flex-wrap: wrap;
   gap: 4px;
   padding: 4px 0;
+  background: var(--glass-elevated);
+  border-radius: var(--radius-sm);
 }
 
 .colorSwatch {
@@ -228,7 +240,7 @@
 /* Add buttons */
 .addTagBtn {
   padding: 6px;
-  border: 1px dashed var(--border-default);
+  border: 1px dashed var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-muted);
   font-size: 11px;
@@ -243,7 +255,7 @@
 
 .addGroupBtn {
   padding: 10px;
-  border: 2px dashed var(--border-default);
+  border: 2px dashed var(--glass-border);
   border-radius: var(--radius-lg);
   color: var(--text-muted);
   font-size: 12px;
@@ -276,7 +288,7 @@
 
 .saveBtn {
   padding: 4px 8px;
-  background: var(--accent-primary);
+  background: var(--gradient-primary);
   color: white;
   border-radius: var(--radius-sm);
   font-size: 11px;
@@ -284,19 +296,20 @@
 }
 
 .saveBtn:hover {
-  background: var(--accent-primary-hover);
+  background: var(--gradient-primary-hover);
 }
 
 .cancelSmBtn {
   padding: 4px 8px;
-  border: 1px solid var(--border-default);
+  background: var(--glass-elevated);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
   color: var(--text-muted);
   font-size: 11px;
 }
 
 .cancelSmBtn:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
 }
 
 @keyframes fadeOverlay {

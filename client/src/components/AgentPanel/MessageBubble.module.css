@@ -10,14 +10,20 @@
 
 .user {
   align-self: flex-end;
-  background: var(--accent-primary-bg);
+  background: var(--glass-elevated);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: 1px solid var(--glass-border);
   color: var(--text-primary);
   border-bottom-right-radius: var(--radius-sm);
 }
 
 .assistant {
   align-self: flex-start;
-  background: var(--bg-elevated);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: 1px solid var(--glass-border);
   color: var(--text-primary);
   border-bottom-left-radius: var(--radius-sm);
 }
@@ -51,7 +57,7 @@
   font-size: 12px;
   overflow-x: auto;
   margin: 4px 0;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--glass-border);
 }
 
 .inlineCode {
@@ -67,7 +73,10 @@
   align-items: center;
   gap: 5px;
   padding: 3px 10px;
-  background: var(--accent-primary-bg);
+  background: var(--glass-elevated);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: 1px solid var(--glass-border);
   border-radius: 12px;
   font-size: 11px;
   color: var(--accent-primary);
