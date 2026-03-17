@@ -1,0 +1,83 @@
+.container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-default);
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+  font-size: 13px;
+  min-width: 280px;
+  max-width: 400px;
+  pointer-events: all;
+  animation: slideUp 200ms ease forwards;
+  backdrop-filter: blur(12px);
+}
+
+.success {
+  border-color: var(--success);
+  background: var(--success-bg);
+}
+
+.success svg:first-child {
+  color: var(--success);
+}
+
+.error {
+  border-color: var(--error);
+  background: var(--error-bg);
+}
+
+.error svg:first-child {
+  color: var(--error);
+}
+
+.info {
+  border-color: var(--info);
+  background: var(--info-bg);
+}
+
+.info svg:first-child {
+  color: var(--info);
+}
+
+.message {
+  flex: 1;
+}
+
+.close {
+  opacity: 0.5;
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

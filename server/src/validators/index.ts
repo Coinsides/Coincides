@@ -1,0 +1,122 @@
+import { z } from 'zod';
+
+// --- Auth ---
+
+export const registerSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+  name: z.string().min(1, 'Name is required').max(100),
+});
+
+export const loginSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(1, 'Password is required'),
+});
+
+// --- Course ---
+
+export const createCourseSchema = z.object({
+  name: z.string().min(1, 'Course name is required').max(200),
+  code: z.string().max(20).optional(),
+  color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Invalid hex color').optional(),
+  weight: z.number().int().min(1).max(10).optional(),
+  semester: z.string().max(50).optional(),
+});
+
+export const updateCourseSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  code: z.string().max(20).optional(),
+  color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Invalid hex color').optional(),
+  weight: z.number().int().min(1).max(10).optional(),
+  semester: z.string().max(50).optional(),
+});
+
+// --- Task ---
+
+const taskPriority = z.enum(['must', 'recommended', 'optional']);
+const taskStatus = z.enum(['pending', 'completed']);
+const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be YYYY-MM-DD format');
+
+export const createTaskSchema = z.object({
+  title: z.string().min(1, 'Task title is required').max(500),
+  date: dateString,
+  priority: taskPriority.optional().default('must'),
+  course_id: z.string().uuid('Invalid course ID'),
+  goal_id: z.string().uuid('Invalid goal ID').optional(),
+  recurring_group_id: z.string().uuid().optional(),
+  order_index: z.number().int().min(0).optional(),
+});
+
+export const updateTaskSchema = z.object({
+  title: z.string().min(1).max(500).optional(),
+  date: dateString.optional(),
+  priority: taskPriority.optional(),
+  status: taskStatus.optional(),
+  completed_at: z.string().nullable().optional(),
+  order_index: z.number().int().min(0).optional(),
+});
+
+export const batchCreateTasksSchema = z.object({
+  tasks: z.array(createTaskSchema).min(1, 'At least one task is required').max(100),
+});
+
+// --- Recurring Task ---
+
+export const createRecurringTaskSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(500),
+  course_id: z.string().uuid('Invalid course ID'),
+  goal_id: z.string().uuid('Invalid goal ID').optional(),
+  priority: taskPriority.optional().default('must'),
+  start_date: dateString,
+  end_date: dateString,
+  task_titles: z.array(z.string().min(1).max(500)).min(1, 'At least one task title is required'),
+});
+
+// --- Goal ---
+
+export const createGoalSchema = z.object({
+  title: z.string().min(1, 'Goal title is required').max(500),
+  description: z.string().max(2000).optional(),
+  deadline: dateString.optional(),
+  course_id: z.string().uuid('Invalid course ID'),
+  exam_mode: z.boolean().optional().default(false),
+});
+
+export const updateGoalSchema = z.object({
+  title: z.string().min(1).max(500).optional(),
+  description: z.string().max(2000).optional(),
+  deadline: dateString.optional(),
+  status: z.enum(['active', 'completed', 'archived']).optional(),
+});
+
+// --- Daily Status ---
+
+export const setDailyStatusSchema = z.object({
+  energy_level: z.enum(['energized', 'normal', 'tired']),
+  date: dateString.optional(),
+});
+
+// --- Settings ---
+
+export const updateSettingsSchema = z.object({
+  settings: z.object({
+    theme: z.enum(['dark', 'light']).optional(),
+    agent_name: z.string().max(50).optional(),
+    daily_status_enabled: z.boolean().optional(),
+    keyboard_shortcuts_enabled: z.boolean().optional(),
+    ai_providers: z.record(z.object({
+      api_key: z.string().optional(),
+      default_model: z.string().optional(),
+    })).optional(),
+    active_provider: z.string().optional(),
+  }),
+});
+
+// --- Query params ---
+
+export const dateQuerySchema = z.object({
+  date: dateString.optional(),
+  from: dateString.optional(),
+  to: dateString.optional(),
+  course_id: z.string().uuid().optional(),
+});
