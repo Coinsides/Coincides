@@ -63,26 +63,26 @@ img {
 :root {
   /* Backgrounds — glass-compatible semi-transparent */
   --bg-deepest: #0a0a1a;
-  --bg-surface: rgba(18, 18, 30, 0.6);
-  --bg-elevated: rgba(26, 26, 50, 0.5);
-  --bg-hover: rgba(37, 37, 70, 0.45);
-  --bg-active: rgba(42, 42, 80, 0.5);
+  --bg-surface: rgba(25, 25, 50, 0.65);
+  --bg-elevated: rgba(35, 35, 65, 0.55);
+  --bg-hover: rgba(50, 50, 85, 0.5);
+  --bg-active: rgba(55, 55, 95, 0.55);
 
   /* Borders — soft glass edges */
-  --border-default: rgba(255, 255, 255, 0.06);
-  --border-subtle: rgba(255, 255, 255, 0.03);
+  --border-default: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(255, 255, 255, 0.06);
   --border-focus: #6366f1;
 
   /* === Glassmorphism === */
 
   /* Background gradient — the "scene" behind the glass */
-  --bg-gradient: linear-gradient(135deg, #0a0a1a 0%, #0f0f2e 25%, #0a1628 50%, #0d0d24 75%, #0a0a1a 100%);
+  --bg-gradient: linear-gradient(135deg, #0f1022 0%, #161640 25%, #0e1e3a 50%, #141435 75%, #0f1022 100%);
 
   /* Glass surfaces */
-  --glass-surface: rgba(18, 18, 30, 0.6);
-  --glass-elevated: rgba(26, 26, 50, 0.5);
-  --glass-hover: rgba(37, 37, 70, 0.5);
-  --glass-active: rgba(42, 42, 80, 0.5);
+  --glass-surface: rgba(25, 25, 50, 0.65);
+  --glass-elevated: rgba(35, 35, 65, 0.55);
+  --glass-hover: rgba(50, 50, 85, 0.5);
+  --glass-active: rgba(55, 55, 95, 0.55);
 
   /* Glass blur levels */
   --glass-blur-sm: blur(8px);
@@ -90,8 +90,8 @@ img {
   --glass-blur-lg: blur(24px);
 
   /* Glass borders */
-  --glass-border: rgba(255, 255, 255, 0.06);
-  --glass-border-hover: rgba(255, 255, 255, 0.1);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-border-hover: rgba(255, 255, 255, 0.16);
   --glass-border-accent: rgba(99, 102, 241, 0.3);
 
   /* Glass shadows */
@@ -106,8 +106,8 @@ img {
   --gradient-danger: linear-gradient(135deg, #ef4444, #f87171);
 
   /* Ambient light orbs */
-  --orb-primary: radial-gradient(circle at center, rgba(99, 102, 241, 0.15), transparent 70%);
-  --orb-secondary: radial-gradient(circle at center, rgba(59, 130, 246, 0.1), transparent 70%);
+  --orb-primary: radial-gradient(circle at center, rgba(99, 102, 241, 0.25), transparent 70%);
+  --orb-secondary: radial-gradient(circle at center, rgba(59, 130, 246, 0.18), transparent 70%);
 
   /* Text */
   --text-primary: #e8e8f0;

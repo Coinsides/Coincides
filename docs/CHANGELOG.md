@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Round 3 Hotfix] — 2026-03-17
+
+### Glassmorphism 黑屏修复
+
+#### 问题
+- 全部 Glassmorphism 变更导致页面几乎全黑（用户截图确认）
+- 根因：背景渐变色停靠点过暗（近乎纯黑），半透明玻璃表面叠加后变得不可见
+
+#### 修复内容（仅 global.css）
+- **背景渐变**：从近黑色 (`#0a0a1a`→`#0f0f2e`) 改为可见蓝紫色调 (`#0f1022`→`#161640`→`#0e1e3a`→`#141435`)
+- **玻璃表面**：RGB 值提亮 + 不透明度微调（如 `rgba(18,18,30,0.6)` → `rgba(25,25,50,0.65)`）
+- **边框可见度**：白色透明度从 6% 提升至 10%，hover 从 10% 提升至 16%
+- **环境光球**：强度从 15%/10% 提升至 25%/18%
+- Light theme 保持不变
+
+#### Files
+- 修改 1 个文件: global.css（15 行变更）
+
+---
+
 ## [Round 3 Step 3+4] — 2026-03-17
 
 ### Glassmorphism 全面覆盖：学习页面 + 弹窗 + 面板组件
