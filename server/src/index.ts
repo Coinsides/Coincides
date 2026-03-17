@@ -13,6 +13,10 @@ import goalRoutes from './routes/goals.js';
 import dailyBriefRoutes from './routes/dailyBrief.js';
 import dailyStatusRoutes from './routes/dailyStatus.js';
 import settingsRoutes from './routes/settings.js';
+import deckRoutes from './routes/decks.js';
+import cardRoutes from './routes/cards.js';
+import tagRoutes from './routes/tags.js';
+import reviewRoutes from './routes/review.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 
@@ -23,8 +27,8 @@ const app = express();
 
 // Global middleware
 app.use(cors({
-  origin: process.env.CLIENT_ORIGIN || 'http://localhost:3000',
-  credentials: true,
+  origin: '*',
+  credentials: false,
 }));
 app.use(express.json());
 app.use(cookieParser());
@@ -40,6 +44,10 @@ app.use('/api/goals', authMiddleware, goalRoutes);
 app.use('/api/daily-brief', authMiddleware, dailyBriefRoutes);
 app.use('/api/daily-status', authMiddleware, dailyStatusRoutes);
 app.use('/api/settings', authMiddleware, settingsRoutes);
+app.use('/api/decks', authMiddleware, deckRoutes);
+app.use('/api/cards', authMiddleware, cardRoutes);
+app.use('/api/tags', authMiddleware, tagRoutes);
+app.use('/api/review', authMiddleware, reviewRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {
@@ -49,8 +57,8 @@ app.get('/api/health', (_req, res) => {
 // Global error handler (must be after routes)
 app.use(errorHandler);
 
-const server = app.listen(PORT, () => {
-  console.log(`Coincides server running on http://localhost:${PORT}`);
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Coincides server running on http://0.0.0.0:${PORT}`);
 });
 
 // Graceful shutdown

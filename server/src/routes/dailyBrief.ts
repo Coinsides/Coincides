@@ -18,8 +18,11 @@ router.get('/', (req: AuthRequest, res: Response) => {
   const recommendedTasks = tasks.filter(t => t.priority === 'recommended');
   const optionalTasks = tasks.filter(t => t.priority === 'optional');
 
-  // Cards due for review — return 0 for now (Phase 2)
-  const cardsDueCount = 0;
+  // Cards due for review
+  const dueRow = db.prepare(
+    'SELECT COUNT(*) as count FROM cards WHERE user_id = ? AND (fsrs_next_review <= ? OR fsrs_reps = 0)'
+  ).get(req.userId!, today + 'T23:59:59') as any;
+  const cardsDueCount = dueRow.count;
 
   // Recurring task progress alerts
   const groups = db.prepare(

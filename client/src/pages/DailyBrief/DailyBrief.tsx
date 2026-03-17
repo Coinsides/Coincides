@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
-import { Check, ChevronDown, Zap, Battery, BatteryLow, BarChart3 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Check, ChevronDown, Zap, Battery, BatteryLow, BarChart3, Play } from 'lucide-react';
 import { useDailyBriefStore } from '@/stores/dailyBriefStore';
 import { useCourseStore } from '@/stores/courseStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -25,6 +26,7 @@ export default function DailyBrief() {
   const { briefData, loading, fetchDailyBrief, setDailyStatus, updateTaskInBrief } = useDailyBriefStore();
   const courses = useCourseStore((s) => s.courses);
   const addToast = useUIStore((s) => s.addToast);
+  const navigate = useNavigate();
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     must: true,
@@ -172,9 +174,19 @@ export default function DailyBrief() {
         </div>
       )}
 
-      {/* Cards due placeholder */}
+      {/* Cards due */}
       <div className={styles.cardsPlaceholder}>
-        No cards due for review
+        {briefData && briefData.cards_due_count > 0 ? (
+          <div className={styles.cardsDue}>
+            <span>{briefData.cards_due_count} card{briefData.cards_due_count !== 1 ? 's' : ''} due for review</span>
+            <button className={styles.reviewLinkBtn} onClick={() => navigate('/review')}>
+              <Play size={14} />
+              Start Review
+            </button>
+          </div>
+        ) : (
+          'All caught up! No cards due for review'
+        )}
       </div>
     </div>
   );

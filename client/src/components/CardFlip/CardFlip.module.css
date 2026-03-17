@@ -1,0 +1,155 @@
+.cardContainer {
+  perspective: 1000px;
+  cursor: pointer;
+  min-width: 280px;
+}
+
+.cardInner {
+  position: relative;
+  width: 100%;
+  min-height: 300px;
+  transition: transform 0.5s ease;
+  transform-style: preserve-3d;
+}
+
+.cardInner.flipped {
+  transform: rotateY(180deg);
+}
+
+.cardFace {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  background: var(--bg-surface);
+  overflow: hidden;
+}
+
+.cardBack {
+  transform: rotateY(180deg);
+}
+
+.cardFront,
+.cardBackContent {
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  height: 100%;
+}
+
+.cardBackContent {
+  overflow-y: auto;
+}
+
+.cardTopRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.templateBadge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+}
+
+.courseDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: auto;
+}
+
+.cardTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.backTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.cardBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+}
+
+.stars {
+  display: flex;
+  gap: 2px;
+}
+
+.flipHint {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Template content styles */
+.templateContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.contentLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.contentBody {
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.formulaDisplay {
+  padding: 16px;
+  background: var(--bg-elevated);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  font-size: 16px;
+}
+
+.variableTable {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.variableRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  padding: 4px 0;
+}
+
+.variableKey {
+  color: var(--accent-primary);
+  font-weight: 500;
+  min-width: 40px;
+}
+
+.variableSep {
+  color: var(--text-muted);
+}
+
+.variableValue {
+  color: var(--text-secondary);
+}

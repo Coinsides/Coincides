@@ -112,6 +112,58 @@ export const updateSettingsSchema = z.object({
   }),
 });
 
+// --- Deck ---
+
+export const createDeckSchema = z.object({
+  name: z.string().min(1, 'Deck name is required').max(200),
+  description: z.string().max(2000).optional(),
+  course_id: z.string().uuid('Invalid course ID'),
+});
+
+export const updateDeckSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  description: z.string().max(2000).optional(),
+});
+
+// --- Card ---
+
+const templateType = z.enum(['definition', 'theorem', 'formula', 'general']);
+
+export const createCardSchema = z.object({
+  deck_id: z.string().uuid('Invalid deck ID'),
+  template_type: templateType.optional().default('general'),
+  title: z.string().min(1, 'Card title is required').max(500),
+  content: z.record(z.unknown()),
+  importance: z.number().int().min(1).max(5).optional().default(3),
+  tag_ids: z.array(z.string().uuid()).optional(),
+});
+
+export const updateCardSchema = z.object({
+  template_type: templateType.optional(),
+  title: z.string().min(1).max(500).optional(),
+  content: z.record(z.unknown()).optional(),
+  importance: z.number().int().min(1).max(5).optional(),
+  tag_ids: z.array(z.string().uuid()).optional(),
+});
+
+// --- Tag ---
+
+export const createTagSchema = z.object({
+  name: z.string().min(1, 'Tag name is required').max(50),
+  color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Invalid hex color').optional(),
+});
+
+export const updateTagSchema = z.object({
+  name: z.string().min(1).max(50).optional(),
+  color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Invalid hex color').optional(),
+});
+
+// --- Review ---
+
+export const rateCardSchema = z.object({
+  rating: z.number().int().min(1).max(4),
+});
+
 // --- Query params ---
 
 export const dateQuerySchema = z.object({

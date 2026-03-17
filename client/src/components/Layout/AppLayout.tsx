@@ -5,6 +5,8 @@ import {
   Calendar,
   Target,
   BookOpen,
+  Layers,
+  RotateCcw,
   Settings,
   PanelLeftClose,
   PanelLeftOpen,
@@ -13,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 import { useCourseStore } from '@/stores/courseStore';
+import { useTagStore } from '@/stores/tagStore';
 import { useAuthStore } from '@/stores/authStore';
 import styles from './AppLayout.module.css';
 
@@ -21,6 +24,8 @@ const navItems = [
   { to: '/calendar', icon: Calendar, label: 'Calendar' },
   { to: '/goals', icon: Target, label: 'Goals' },
   { to: '/courses', icon: BookOpen, label: 'Courses' },
+  { to: '/decks', icon: Layers, label: 'Decks' },
+  { to: '/review', icon: RotateCcw, label: 'Review' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
@@ -30,6 +35,7 @@ export default function AppLayout() {
   const openModal = useUIStore((s) => s.openModal);
   const courses = useCourseStore((s) => s.courses);
   const fetchCourses = useCourseStore((s) => s.fetchCourses);
+  const fetchTags = useTagStore((s) => s.fetchTags);
   const user = useAuthStore((s) => s.user);
   const loadUser = useAuthStore((s) => s.loadUser);
   const navigate = useNavigate();
@@ -37,6 +43,7 @@ export default function AppLayout() {
   useEffect(() => {
     loadUser();
     fetchCourses();
+    fetchTags();
   }, []);
 
   useEffect(() => {

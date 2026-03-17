@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import api from '@/services/api';
+import api, { getToken, setToken } from '@/services/api';
 import type { User, UserSettings } from '@shared/types';
 
 type SafeUser = Omit<User, 'password_hash'>;
@@ -19,7 +19,7 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
-  token: localStorage.getItem('token'),
+  token: getToken(),
   loading: false,
   error: null,
 
@@ -27,7 +27,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const { data } = await api.post('/auth/login', { email, password });
-      localStorage.setItem('token', data.token);
+      setToken(data.token);
       set({ user: data.user, token: data.token, loading: false });
     } catch (err: any) {
       set({ loading: false, error: err.response?.data?.error || 'Login failed' });
@@ -39,7 +39,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const { data } = await api.post('/auth/register', { email, password, name });
-      localStorage.setItem('token', data.token);
+      setToken(data.token);
       set({ user: data.user, token: data.token, loading: false });
     } catch (err: any) {
       set({ loading: false, error: err.response?.data?.error || 'Registration failed' });
@@ -48,7 +48,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   },
 
   logout: () => {
-    localStorage.removeItem('token');
+    setToken(null);
     set({ user: null, token: null });
   },
 
@@ -60,7 +60,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const { data } = await api.get('/auth/me');
       set({ user: data, loading: false });
     } catch {
-      localStorage.removeItem('token');
+      setToken(null);
       set({ user: null, token: null, loading: false });
     }
   },

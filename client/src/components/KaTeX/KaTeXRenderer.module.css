@@ -1,0 +1,17 @@
+.katex {
+  line-height: 1.6;
+}
+
+.katex :global(.katex) {
+  font-size: 1em;
+  color: var(--text-primary);
+}
+
+.katex :global(.katex-display) {
+  margin: 12px 0;
+  text-align: center;
+}
+
+.katex :global(.katex-display > .katex) {
+  font-size: 1.1em;
+}
