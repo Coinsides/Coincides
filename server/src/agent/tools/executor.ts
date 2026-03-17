@@ -359,6 +359,106 @@ export async function executeTool(
       return JSON.stringify({ id, message: 'Memory saved successfully' });
     }
 
+    case 'search_documents': {
+      const { query, course_id, file_type } = args as { query: string; course_id?: string; file_type?: string };
+
+      let sql = `SELECT d.id, d.filename, d.file_type, d.summary, d.page_count, d.document_type, d.chunk_count, d.parse_status,
+                        d.course_id, c.name as course_name
+                 FROM documents d
+                 JOIN courses c ON d.course_id = c.id
+                 WHERE d.user_id = ? AND d.parse_status = 'completed'
+                 AND (d.filename LIKE ? OR d.summary LIKE ? OR d.extracted_text LIKE ?)`;
+      const searchPattern = `%${query}%`;
+      const params: unknown[] = [userId, searchPattern, searchPattern, searchPattern];
+
+      if (course_id) {
+        sql += ' AND d.course_id = ?';
+        params.push(course_id);
+      }
+      if (file_type) {
+        sql += ' AND d.file_type = ?';
+        params.push(file_type);
+      }
+
+      sql += ' ORDER BY d.created_at DESC LIMIT 10';
+      const docs = db.prepare(sql).all(...params);
+
+      if ((docs as any[]).length === 0) {
+        return JSON.stringify({ results: [], message: 'No documents found matching your query.' });
+      }
+      return JSON.stringify({ results: docs, total: (docs as any[]).length });
+    }
+
+    case 'get_document_content': {
+      const { document_id, chunk_index, include_all_chunks } = args as {
+        document_id: string; chunk_index?: number; include_all_chunks?: boolean;
+      };
+
+      // Get document (verify ownership)
+      const doc = db.prepare(
+        'SELECT id, filename, file_type, extracted_text, summary, page_count, document_type, chunk_count, parse_status FROM documents WHERE id = ? AND user_id = ?'
+      ).get(document_id, userId) as {
+        id: string; filename: string; file_type: string; extracted_text: string | null;
+        summary: string | null; page_count: number | null; document_type: string | null;
+        chunk_count: number; parse_status: string;
+      } | undefined;
+
+      if (!doc) {
+        return JSON.stringify({ error: 'Document not found' });
+      }
+      if (doc.parse_status !== 'completed') {
+        return JSON.stringify({ error: `Document is not ready (status: ${doc.parse_status})` });
+      }
+
+      const meta = {
+        id: doc.id,
+        filename: doc.filename,
+        file_type: doc.file_type,
+        summary: doc.summary,
+        page_count: doc.page_count,
+        document_type: doc.document_type,
+        chunk_count: doc.chunk_count,
+      };
+
+      // If document is NOT chunked, return full text
+      if (doc.chunk_count === 0) {
+        // Truncate if extremely long (> 50K chars) to avoid overloading context
+        const text = doc.extracted_text || '';
+        const truncated = text.length > 50000 ? text.slice(0, 50000) + '\n\n[... text truncated at 50,000 characters]' : text;
+        return JSON.stringify({ ...meta, content: truncated });
+      }
+
+      // Document IS chunked
+      if (chunk_index !== undefined) {
+        // Return specific chunk
+        const chunk = db.prepare(
+          'SELECT chunk_index, content, heading, page_start, page_end FROM document_chunks WHERE document_id = ? AND chunk_index = ?'
+        ).get(document_id, chunk_index) as { chunk_index: number; content: string; heading: string | null; page_start: number | null; page_end: number | null } | undefined;
+
+        if (!chunk) {
+          return JSON.stringify({ ...meta, error: `Chunk index ${chunk_index} not found. Valid range: 0–${doc.chunk_count - 1}` });
+        }
+        return JSON.stringify({ ...meta, chunk });
+      }
+
+      if (include_all_chunks) {
+        const chunks = db.prepare(
+          'SELECT chunk_index, content, heading, page_start, page_end FROM document_chunks WHERE document_id = ? ORDER BY chunk_index'
+        ).all(document_id) as any[];
+        return JSON.stringify({ ...meta, chunks });
+      }
+
+      // Default: return first 3 chunks
+      const chunks = db.prepare(
+        'SELECT chunk_index, content, heading, page_start, page_end FROM document_chunks WHERE document_id = ? ORDER BY chunk_index LIMIT 3'
+      ).all(document_id) as any[];
+      return JSON.stringify({
+        ...meta,
+        chunks,
+        message: `Showing chunks 0–${chunks.length - 1} of ${doc.chunk_count}. Use chunk_index to fetch specific chunks, or include_all_chunks=true for all.`,
+      });
+    }
+
     default:
       return JSON.stringify({ error: `Unknown tool: ${toolName}` });
   }

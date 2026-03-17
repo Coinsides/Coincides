@@ -2,7 +2,7 @@ export function buildSystemPrompt(agentName: string, userContext: {
   userName: string;
   courses: { id: string; name: string; code: string }[];
   memories: { category: string; content: string }[];
-  documentSummaries: { filename: string; summary: string }[];
+  documentSummaries: { id: string; filename: string; summary: string }[];
   currentDate: string;
   energyLevel?: string;
 }): string {
@@ -30,7 +30,7 @@ ${userContext.memories.length > 0
     : '- No memories yet. Pay attention to their preferences and save them.'}
 
 ${userContext.documentSummaries.length > 0
-    ? `## Available Documents\n${userContext.documentSummaries.map((d) => `- ${d.filename}: ${d.summary}`).join('\n')}`
+    ? `## Available Documents\n${userContext.documentSummaries.map((d) => `- ${d.filename} [ID: ${d.id}]: ${d.summary}`).join('\n')}\n\nUse search_documents to find documents and get_document_content to read their content.`
     : ''}
 
 ## Key Rules
@@ -63,5 +63,21 @@ When asked "what should I study next?" or similar:
 1. Call suggest_next_topics to get context
 2. Use your reasoning to identify logical next steps based on the course material, completed work, and academic progression
 3. If prerequisite gaps exist, recommend addressing those first
+
+## Document-Based Card Generation
+When the student asks you to create flashcards from a document:
+1. First, use search_documents to find the relevant document
+2. Use get_document_content to read the document text (chunk by chunk for long documents)
+3. Analyze the content and identify key concepts, definitions, theorems, formulas
+4. Generate cards using create_proposal with type "batch_cards"
+   - Use appropriate template_type for each card (definition, theorem, formula, general)
+   - Include source_document_id and source_page in each card's metadata
+   - For math/science content, use LaTeX formatting ($..$ for inline, $$...$$ for display)
+5. ALWAYS use create_proposal — NEVER create cards directly in bulk
+
+When the student asks about document content (e.g., "what's in my uploaded notes?"):
+1. Use search_documents to find the document
+2. Use get_document_content to read it
+3. Summarize or answer questions based on the content
 `;
 }

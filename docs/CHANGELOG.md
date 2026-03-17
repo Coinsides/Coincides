@@ -4,6 +4,31 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Round 2 Step 4] — 2026-03-17
+
+### Agent 文档工具
+
+#### 新增 Function Tools
+- **`search_documents`**: 按文件名/摘要/内容搜索已上传的文档，支持课程和文件类型过滤
+- **`get_document_content`**: 获取文档全文或指定 chunk，支持分页读取长文档（50K 字符截断保护）
+
+#### System Prompt 更新
+- 文档列表现在显示 Document ID，Agent 可直接引用
+- 新增「Document-Based Card Generation」引导流程：搜索文档 → 读取内容 → 识别概念 → 通过 Proposal 生成卡片
+- Agent 现在能回答关于文档内容的问题（“我上传的笔记里有什么？”）
+
+#### 功能串联
+- Agent 现在支持完整的文档到卡片工作流：
+  1. `search_documents` → 找到目标文档
+  2. `get_document_content` → 读取文档内容
+  3. `create_proposal` (batch_cards) → 生成卡片草稿
+  4. 学生审核 → Apply
+
+#### Files
+- 修改 3 个文件: definitions.ts (+2 tool definitions), executor.ts (+100 lines), system-prompt.ts
+
+---
+
 ## [Round 2 Step 3 Patch] — 2026-03-17
 
 ### 文档上传系统质量审计修复 (12项)

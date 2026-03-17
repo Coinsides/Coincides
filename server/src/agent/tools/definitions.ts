@@ -222,4 +222,30 @@ export const toolDefinitions: ToolDefinition[] = [
       required: ['category', 'content'],
     },
   },
+  {
+    name: 'search_documents',
+    description: 'Search uploaded documents by filename, summary text, or content. Returns matching documents with their IDs, filenames, summaries, and course info. Use this to find relevant course materials before reading their content.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'Search keyword(s) to match against filename, summary, and extracted text' },
+        course_id: { type: 'string', description: 'Optional: filter by course ID' },
+        file_type: { type: 'string', enum: ['pdf', 'docx', 'xlsx', 'image', 'txt', 'md'], description: 'Optional: filter by file type' },
+      },
+      required: ['query'],
+    },
+  },
+  {
+    name: 'get_document_content',
+    description: 'Get the text content of a document. For short documents, returns the full extracted text. For long chunked documents, returns chunks. Use chunk_index to paginate through long documents.',
+    parameters: {
+      type: 'object',
+      properties: {
+        document_id: { type: 'string', description: 'Document ID (from search_documents results)' },
+        chunk_index: { type: 'number', description: 'Optional: specific chunk index to retrieve (0-based). If omitted for a chunked document, returns the first 3 chunks.' },
+        include_all_chunks: { type: 'boolean', description: 'If true, return ALL chunks (caution: may be very large). Default false.' },
+      },
+      required: ['document_id'],
+    },
+  },
 ];
