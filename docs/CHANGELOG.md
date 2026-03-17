@@ -4,6 +4,74 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Phase 3] — 2026-03-17
+
+### AI Agent Module — Mr. Zero
+
+#### Backend
+- **AI Provider Abstraction**: Multi-provider support (Anthropic primary, OpenAI compatible)
+  - `AnthropicProvider`: native SDK with streaming, tool_use blocks, proper message mapping
+  - `OpenAIProvider`: OpenAI-compatible API with function calling support
+  - `getProviderFromSettings()`: reads user config, falls back to .env ANTHROPIC_API_KEY
+- **Agent Orchestrator**: async generator pattern with streaming
+  - System prompt builder with user context (courses, energy, memories, doc summaries)
+  - Multi-round tool call loop (max 5 rounds per message)
+  - SSE chunk types: text, tool_call_start, tool_call_delta, tool_call_end, done, error
+  - Accumulates tool calls across rounds, saves full conversation history
+- **Function Calling**: 14 tool definitions
+  - Query tools: list_courses, get_tasks, list_goals, list_decks, list_cards, get_review_due, get_daily_brief
+  - Action tools: create_task, complete_task, create_goal, create_card
+  - Proposal tool: create_proposal (batch_cards, study_plan, schedule_adjustment)
+  - Memory tools: search_memories, save_memory
+  - Tool executor with full SQLite integration and user-scoped data access
+- **Proposal System**: Proposal → Review → Apply mechanism
+  - Three types: batch_cards (create multiple flashcards), study_plan (create tasks), schedule_adjustment (modify existing tasks)
+  - CRUD endpoints: list pending, get details, apply (transaction), discard, update (edit before applying)
+  - Apply runs in SQLite transaction: inserts cards/tasks or updates existing tasks
+- **Agent Memory**: short-term + long-term memory management
+  - Sliding window conversation history (last 20 messages per conversation)
+  - Long-term memory extraction: keyword-based relevance scoring
+  - Document summary indexing for context
+  - Conversation summarization for token optimization
+- **Agent Chat API**: SSE streaming endpoint
+  - Conversations CRUD (create, list, get messages, delete)
+  - `POST /conversations/:id/messages` → SSE stream with named events
+  - Zod validation for send message + create conversation schemas
+- New DB tables: agent_conversations, agent_messages, agent_memories, proposals
+- Dependencies: @anthropic-ai/sdk, dotenv
+
+#### Frontend
+- **Agent Floating Panel** (Ctrl+J / Cmd+J toggle):
+  - 420px slide-in panel from right with semi-transparent backdrop
+  - Conversation selector dropdown with new/delete actions
+  - Chat tab: message bubbles (user right-aligned, assistant left-aligned)
+  - SSE streaming display: partial text with blinking cursor, tool activity pill with pulse animation
+  - Simple markdown rendering: bold, italic, code blocks, lists
+  - Input textarea: Enter to send, Shift+Enter for newline, disabled during streaming
+- **Proposal UI** (Proposals tab with badge count):
+  - Expandable proposal cards with type badges (batch_cards/study_plan/schedule_adjustment)
+  - Item list with individual remove button
+  - Apply (green) and Discard (red outline) action buttons
+  - Toast notifications on apply/discard
+- **Settings AI Provider Config**:
+  - Provider selector: Anthropic / OpenAI Compatible
+  - API key input with show/hide toggle
+  - Model selection with sensible defaults (claude-sonnet-4-20250514 / gpt-4o)
+  - Save button with green "Connected" indicator when key is saved
+- **Context-Aware Invocation**:
+  - Sparkle button on Deck Detail page → opens agent with deck context
+  - Sparkle button on Calendar page → opens agent with date context
+  - Context hints passed through to backend for augmented messages
+- Zustand stores: agentStore (conversations + SSE streaming), proposalStore
+- uiStore extended: agentPanelOpen, toggleAgentPanel, openAgentWithContext
+
+#### Files
+- 8 new files (1,416 lines): agentStore, proposalStore, AgentPanel, MessageBubble, ProposalList + CSS modules
+- 10 modified files: uiStore, api.ts, Settings, AppLayout, App.tsx, DeckDetail, Calendar + CSS
+- Total: 18 files, ~3,460 lines
+
+---
+
 ## [Phase 2] — 2026-03-17
 
 ### Knowledge Card System — Decks, Cards, FSRS, Review

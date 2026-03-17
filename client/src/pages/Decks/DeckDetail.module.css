@@ -108,6 +108,20 @@
   background: var(--accent-primary-hover);
 }
 
+.aiBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--accent-primary);
+}
+
+.aiBtn:hover {
+  background: var(--accent-primary-bg);
+}
+
 /* Filter bar */
 .filterBar {
   display: flex;

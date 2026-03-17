@@ -1,0 +1,352 @@
+/* Backdrop */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 999;
+  animation: fadeOverlay var(--transition-fast) ease forwards;
+}
+
+/* Panel */
+.panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 420px;
+  max-width: 100vw;
+  background: var(--bg-surface);
+  border-left: 1px solid var(--border-default);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  animation: slideIn var(--transition-slow) ease forwards;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes fadeOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-default);
+  flex-shrink: 0;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  flex: 1;
+}
+
+.agentName {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.convSelector {
+  position: relative;
+  min-width: 0;
+  flex: 1;
+}
+
+.convDropdownBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  color: var(--text-secondary);
+  max-width: 180px;
+}
+
+.convDropdownBtn:hover {
+  background: var(--bg-hover);
+}
+
+.convLabel {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.convDropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  width: 260px;
+  max-height: 240px;
+  overflow-y: auto;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  z-index: 10;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.convItem {
+  display: flex;
+  align-items: center;
+}
+
+.convItemBtn {
+  flex: 1;
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 12px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.convItemBtn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.convItemBtn.activeConv {
+  color: var(--accent-primary);
+  background: var(--accent-primary-bg);
+}
+
+.convDeleteBtn {
+  padding: 6px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.convDeleteBtn:hover {
+  color: var(--error);
+}
+
+.convEmpty {
+  padding: 12px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.iconBtn {
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconBtn:hover {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+}
+
+/* View tabs */
+.viewTabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-default);
+  flex-shrink: 0;
+}
+
+.viewTab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+}
+
+.viewTab:hover {
+  color: var(--text-secondary);
+}
+
+.viewTab.activeTab {
+  color: var(--accent-primary);
+  border-bottom-color: var(--accent-primary);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--accent-primary);
+  color: white;
+  border-radius: 8px;
+}
+
+/* Messages area */
+.messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.emptyChat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 8px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.emptyChatIcon {
+  font-size: 36px;
+  margin-bottom: 4px;
+}
+
+.emptyChatTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.emptyChatSubtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  max-width: 280px;
+}
+
+/* Proposal banner */
+.proposalBanner {
+  padding: 8px 16px;
+  background: var(--accent-primary-bg);
+  color: var(--accent-primary);
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  border-top: 1px solid var(--border-subtle);
+  flex-shrink: 0;
+}
+
+.proposalBanner:hover {
+  background: var(--accent-primary-bg-hover);
+}
+
+/* Context hint */
+.contextHint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 5px 16px;
+  background: var(--info-bg);
+  color: var(--info);
+  font-size: 11px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.contextHint button {
+  padding: 2px;
+  border-radius: 2px;
+  color: var(--info);
+  display: flex;
+}
+
+.contextHint button:hover {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+/* Input area */
+.inputArea {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-default);
+  flex-shrink: 0;
+}
+
+.input {
+  flex: 1;
+  resize: none;
+  padding: 8px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 13px;
+  line-height: 1.4;
+  min-height: 38px;
+  max-height: 120px;
+  overflow-y: auto;
+}
+
+.input:focus {
+  border-color: var(--accent-primary);
+}
+
+.input:disabled {
+  opacity: 0.6;
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+.sendBtn {
+  padding: 8px;
+  background: var(--accent-primary);
+  color: white;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sendBtn:hover:not(:disabled) {
+  background: var(--accent-primary-hover);
+}
+
+.sendBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Proposals view */
+.proposalView {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}

@@ -164,6 +164,26 @@ export const rateCardSchema = z.object({
   rating: z.number().int().min(1).max(4),
 });
 
+// --- Agent ---
+
+export const sendMessageSchema = z.object({
+  message: z.string().min(1, 'Message is required').max(10000),
+  context_hint: z.object({
+    type: z.string(),
+    data: z.any(),
+  }).optional(),
+});
+
+export const createConversationSchema = z.object({
+  title: z.string().max(200).optional(),
+});
+
+// --- Proposals ---
+
+export const updateProposalSchema = z.object({
+  data: z.any(),
+});
+
 // --- Query params ---
 
 export const dateQuerySchema = z.object({

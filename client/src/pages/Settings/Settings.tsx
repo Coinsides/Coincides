@@ -1,8 +1,19 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, Check } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
 import styles from './Settings.module.css';
+
+const providerOptions = [
+  { value: 'anthropic', label: 'Anthropic' },
+  { value: 'openai', label: 'OpenAI Compatible' },
+];
+
+const defaultModels: Record<string, string> = {
+  anthropic: 'claude-sonnet-4-20250514',
+  openai: 'gpt-4o',
+};
 
 export default function SettingsPage() {
   const { user, updateSettings, logout } = useAuthStore();
@@ -11,6 +22,11 @@ export default function SettingsPage() {
 
   const settings = user?.settings || {};
   const [agentName, setAgentName] = useState(settings.agent_name || 'Mr. Zero');
+  const [activeProvider, setActiveProvider] = useState(settings.active_provider || 'anthropic');
+  const [apiKey, setApiKey] = useState(settings.ai_providers?.[activeProvider]?.api_key || '');
+  const [model, setModel] = useState(settings.ai_providers?.[activeProvider]?.default_model || defaultModels[activeProvider] || '');
+  const [showKey, setShowKey] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const handleTheme = async (theme: 'dark' | 'light') => {
     try {
@@ -40,10 +56,38 @@ export default function SettingsPage() {
     }
   };
 
+  const handleProviderChange = (provider: string) => {
+    setActiveProvider(provider);
+    setApiKey(settings.ai_providers?.[provider]?.api_key || '');
+    setModel(settings.ai_providers?.[provider]?.default_model || defaultModels[provider] || '');
+  };
+
+  const handleSaveProvider = async () => {
+    setSaving(true);
+    try {
+      await updateSettings({
+        active_provider: activeProvider,
+        ai_providers: {
+          ...settings.ai_providers,
+          [activeProvider]: {
+            api_key: apiKey,
+            default_model: model || defaultModels[activeProvider],
+          },
+        },
+      });
+      addToast('success', 'AI provider settings saved');
+    } catch {
+      addToast('error', 'Failed to save provider settings');
+    }
+    setSaving(false);
+  };
+
   const handleLogout = () => {
     logout();
     navigate('/login', { replace: true });
   };
+
+  const hasApiKey = !!settings.ai_providers?.[activeProvider]?.api_key;
 
   return (
     <div className={styles.page}>
@@ -103,8 +147,55 @@ export default function SettingsPage() {
             />
           </div>
           <div className={styles.row}>
-            <span className={styles.rowLabel}>AI Provider</span>
-            <span className={styles.placeholder}>Available in a future update</span>
+            <span className={styles.rowLabel}>Provider</span>
+            <div className={styles.providerSelect}>
+              {providerOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  className={`${styles.themeBtn} ${activeProvider === opt.value ? styles.active : ''}`}
+                  onClick={() => handleProviderChange(opt.value)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className={styles.row}>
+            <span className={styles.rowLabel}>
+              API Key
+              {hasApiKey && <span className={styles.connectedDot} title="Connected" />}
+            </span>
+            <div className={styles.keyInput}>
+              <input
+                className={styles.inlineInput}
+                type={showKey ? 'text' : 'password'}
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="sk-..."
+              />
+              <button className={styles.eyeBtn} onClick={() => setShowKey(!showKey)}>
+                {showKey ? <EyeOff size={14} /> : <Eye size={14} />}
+              </button>
+            </div>
+          </div>
+          <div className={styles.row}>
+            <span className={styles.rowLabel}>Model</span>
+            <input
+              className={styles.inlineInput}
+              value={model}
+              onChange={(e) => setModel(e.target.value)}
+              placeholder={defaultModels[activeProvider]}
+            />
+          </div>
+          <div className={styles.row}>
+            <span className={styles.rowLabel} />
+            <button
+              className={styles.saveProviderBtn}
+              onClick={handleSaveProvider}
+              disabled={saving}
+            >
+              {saving ? 'Saving...' : 'Save Provider Settings'}
+            </button>
           </div>
         </div>
       </div>

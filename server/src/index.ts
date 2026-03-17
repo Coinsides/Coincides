@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -17,6 +18,8 @@ import deckRoutes from './routes/decks.js';
 import cardRoutes from './routes/cards.js';
 import tagRoutes from './routes/tags.js';
 import reviewRoutes from './routes/review.js';
+import agentRoutes from './routes/agent.js';
+import proposalRoutes from './routes/proposals.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 
@@ -48,6 +51,8 @@ app.use('/api/decks', authMiddleware, deckRoutes);
 app.use('/api/cards', authMiddleware, cardRoutes);
 app.use('/api/tags', authMiddleware, tagRoutes);
 app.use('/api/review', authMiddleware, reviewRoutes);
+app.use('/api/agent', authMiddleware, agentRoutes);
+app.use('/api/proposals', authMiddleware, proposalRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

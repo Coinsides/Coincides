@@ -12,7 +12,7 @@ import {
   isSameDay,
   isToday,
 } from 'date-fns';
-import { ChevronLeft, ChevronRight, X, Plus, Check } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Plus, Check, Sparkles } from 'lucide-react';
 import { useTaskStore } from '@/stores/taskStore';
 import { useCourseStore } from '@/stores/courseStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -36,6 +36,7 @@ export default function CalendarPage() {
   const courses = useCourseStore((s) => s.courses);
   const openModal = useUIStore((s) => s.openModal);
   const addToast = useUIStore((s) => s.addToast);
+  const openAgentWithContext = useUIStore((s) => s.openAgentWithContext);
 
   // Fetch tasks for visible range
   useEffect(() => {
@@ -132,6 +133,13 @@ export default function CalendarPage() {
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
+          <button
+            className={styles.aiBtn}
+            onClick={() => openAgentWithContext('calendar', { date: format(currentMonth, 'yyyy-MM-dd') })}
+            title="Ask AI to help plan this week"
+          >
+            <Sparkles size={14} />
+          </button>
         </div>
       </div>
 

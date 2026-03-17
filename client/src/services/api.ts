@@ -3,7 +3,7 @@ import axios from 'axios';
 // Detect deployed vs local environment
 const PORT_PLACEHOLDER = '__PORT_3001__';
 const isDeployed = !PORT_PLACEHOLDER.startsWith('__');
-const API_BASE = isDeployed ? `${PORT_PLACEHOLDER}/api` : '/api';
+export const API_BASE = isDeployed ? `${PORT_PLACEHOLDER}/api` : '/api';
 
 const api = axios.create({
   baseURL: API_BASE,

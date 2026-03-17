@@ -18,12 +18,19 @@ import GoalModal from '@/components/GoalModal/GoalModal';
 import DeckModal from '@/components/DeckModal/DeckModal';
 import CardModal from '@/components/CardModal/CardModal';
 import CardViewModal from '@/components/CardViewModal/CardViewModal';
+import AgentPanel from '@/components/AgentPanel/AgentPanel';
 import ToastContainer from '@/components/Toast/Toast';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = useAuthStore((s) => s.token);
   if (!token) return <Navigate to="/login" replace />;
   return <>{children}</>;
+}
+
+function AuthenticatedOverlays() {
+  const token = useAuthStore((s) => s.token);
+  if (!token) return null;
+  return <AgentPanel />;
 }
 
 function ModalLayer() {
@@ -79,6 +86,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <ModalLayer />
+      <AuthenticatedOverlays />
       <ToastContainer />
     </HashRouter>
   );

@@ -134,6 +134,66 @@
   font-style: italic;
 }
 
+/* Provider select */
+.providerSelect {
+  display: flex;
+  gap: 6px;
+}
+
+/* Key input with eye toggle */
+.keyInput {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.keyInput .inlineInput {
+  width: 200px;
+}
+
+.eyeBtn {
+  padding: 5px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+}
+
+.eyeBtn:hover {
+  background: var(--bg-hover);
+  color: var(--text-secondary);
+}
+
+/* Connected indicator */
+.connectedDot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* Save provider button */
+.saveProviderBtn {
+  padding: 6px 16px;
+  background: var(--accent-primary);
+  color: white;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.saveProviderBtn:hover:not(:disabled) {
+  background: var(--accent-primary-hover);
+}
+
+.saveProviderBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Logout */
 .logoutBtn {
   padding: 8px 16px;

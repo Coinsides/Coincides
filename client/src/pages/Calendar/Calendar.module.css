@@ -56,6 +56,21 @@
   margin-left: 12px;
 }
 
+.aiBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--accent-primary);
+  margin-left: 8px;
+}
+
+.aiBtn:hover {
+  background: var(--accent-primary-bg);
+}
+
 /* Calendar grid */
 .grid {
   border: 1px solid var(--border-default);

@@ -16,6 +16,13 @@ interface UIState {
   openModal: (type: string, data?: any) => void;
   closeModal: () => void;
 
+  // Agent panel
+  agentPanelOpen: boolean;
+  toggleAgentPanel: () => void;
+  setAgentPanelOpen: (open: boolean) => void;
+  agentContextHint: { type: string; data?: unknown } | null;
+  openAgentWithContext: (type: string, data?: unknown) => void;
+
   // Toasts
   toasts: Toast[];
   addToast: (type: Toast['type'], message: string) => void;
@@ -32,6 +39,12 @@ export const useUIStore = create<UIState>((set, get) => ({
   modal: null,
   openModal: (type, data) => set({ modal: { type, data } }),
   closeModal: () => set({ modal: null }),
+
+  agentPanelOpen: false,
+  toggleAgentPanel: () => set({ agentPanelOpen: !get().agentPanelOpen, agentContextHint: null }),
+  setAgentPanelOpen: (open) => set({ agentPanelOpen: open, ...(!open ? { agentContextHint: null } : {}) }),
+  agentContextHint: null,
+  openAgentWithContext: (type, data) => set({ agentPanelOpen: true, agentContextHint: { type, data } }),
 
   toasts: [],
   addToast: (type, message) => {

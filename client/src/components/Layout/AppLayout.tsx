@@ -40,6 +40,8 @@ export default function AppLayout() {
   const loadUser = useAuthStore((s) => s.loadUser);
   const navigate = useNavigate();
 
+  const toggleAgentPanel = useUIStore((s) => s.toggleAgentPanel);
+
   useEffect(() => {
     loadUser();
     fetchCourses();
@@ -51,6 +53,18 @@ export default function AppLayout() {
       document.documentElement.setAttribute('data-theme', user.settings.theme);
     }
   }, [user?.settings?.theme]);
+
+  // Ctrl+J / Cmd+J to toggle agent panel
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'j') {
+        e.preventDefault();
+        toggleAgentPanel();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [toggleAgentPanel]);
 
   return (
     <div className={styles.layout}>

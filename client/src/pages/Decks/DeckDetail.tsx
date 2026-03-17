@@ -1,7 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, Plus, LayoutGrid, List, Search, Play, Star, X,
+  ArrowLeft, Plus, LayoutGrid, List, Search, Play, Star, X, Sparkles,
 } from 'lucide-react';
 import { useCardStore } from '@/stores/cardStore';
 import { useDeckStore } from '@/stores/deckStore';
@@ -46,6 +46,7 @@ export default function DeckDetailPage() {
   const dueCount = useReviewStore((s) => s.dueCount);
   const fetchDueCount = useReviewStore((s) => s.fetchDueCount);
   const openModal = useUIStore((s) => s.openModal);
+  const openAgentWithContext = useUIStore((s) => s.openAgentWithContext);
 
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [templateFilter, setTemplateFilter] = useState('');
@@ -122,6 +123,13 @@ export default function DeckDetailPage() {
               Review ({dueCount})
             </button>
           )}
+          <button
+            className={styles.aiBtn}
+            onClick={() => openAgentWithContext('deck', { deck_id: deckId, deck_name: deck?.name })}
+            title="Ask AI to help with this deck"
+          >
+            <Sparkles size={14} />
+          </button>
           <button
             className={styles.addBtn}
             onClick={() => openModal('card-create', { deckId })}
