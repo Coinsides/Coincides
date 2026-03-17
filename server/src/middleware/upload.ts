@@ -1,7 +1,8 @@
 import multer from 'multer';
 import { mkdirSync } from 'fs';
-import { join, dirname } from 'path';
+import { join, dirname, extname } from 'path';
 import { fileURLToPath } from 'url';
+import { v4 as uuidv4 } from 'uuid';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -23,13 +24,16 @@ const ALLOWED_MIMETYPES = [
 ];
 
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    cb(null, UPLOADS_DIR);
+  destination: (req, _file, cb) => {
+    // req.userId is set by auth middleware which runs before this
+    const userDir = join(UPLOADS_DIR, (req as any).userId || 'unknown');
+    mkdirSync(userDir, { recursive: true });
+    cb(null, userDir);
   },
   filename: (_req, file, cb) => {
-    // Prefix with timestamp to avoid collisions
-    const uniqueName = `${Date.now()}-${file.originalname}`;
-    cb(null, uniqueName);
+    const ext = extname(file.originalname).toLowerCase();
+    const safeName = `${Date.now()}-${uuidv4()}${ext}`;
+    cb(null, safeName);
   },
 });
 

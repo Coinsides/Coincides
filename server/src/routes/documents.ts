@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { unlinkSync } from 'fs';
+import { unlink } from 'fs/promises';
+import multer from 'multer';
 import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
@@ -56,7 +57,9 @@ router.post('/upload', upload.single('file'), (req: AuthRequest, res: Response) 
       console.error(`Document parsing failed for ${id}:`, err);
     });
 
-    res.status(201).json(document);
+    // Strip file_path from response
+    const { file_path, ...safeDoc } = document as any;
+    res.status(201).json(safeDoc);
   } catch (err) {
     if (err instanceof ZodError) {
       res.status(400).json({ error: 'Validation error', details: err.errors });
@@ -76,7 +79,7 @@ router.get('/', (req: AuthRequest, res: Response) => {
   const db = getDb();
   const documents = db
     .prepare(
-      `SELECT id, user_id, course_id, filename, file_path, file_type, file_size,
+      `SELECT id, user_id, course_id, filename, file_type, file_size,
               parse_status, parse_channel, summary, page_count, document_type,
               chunk_count, error_message, created_at, updated_at
        FROM documents WHERE course_id = ? AND user_id = ?
@@ -98,7 +101,8 @@ router.get('/:id', (req: AuthRequest, res: Response) => {
     throw new AppError(404, 'Document not found');
   }
 
-  res.json(document);
+  const { file_path, ...safeDoc } = document as any;
+  res.json(safeDoc);
 });
 
 // GET /api/documents/:id/chunks
@@ -142,8 +146,30 @@ router.get('/:id/status', (req: AuthRequest, res: Response) => {
   res.json(document);
 });
 
+// POST /api/documents/:id/retry
+router.post('/:id/retry', async (req: AuthRequest, res: Response) => {
+  const docId = req.params.id as string;
+  const db = getDb();
+  const document = db
+    .prepare('SELECT id, file_path FROM documents WHERE id = ? AND user_id = ? AND parse_status = ?')
+    .get(docId, req.userId!, 'failed') as { id: string } | undefined;
+
+  if (!document) {
+    throw new AppError(404, 'Document not found or not in failed state');
+  }
+
+  db.prepare("UPDATE documents SET parse_status = 'pending', error_message = NULL, updated_at = ? WHERE id = ?")
+    .run(new Date().toISOString(), docId);
+
+  parseDocument(docId, req.userId!).catch(err => {
+    console.error(`Retry parse failed for ${docId}:`, err);
+  });
+
+  res.json({ message: 'Retry initiated' });
+});
+
 // DELETE /api/documents/:id
-router.delete('/:id', (req: AuthRequest, res: Response) => {
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
   const db = getDb();
 
   const document = db
@@ -156,7 +182,7 @@ router.delete('/:id', (req: AuthRequest, res: Response) => {
 
   // Delete file from filesystem
   try {
-    unlinkSync(document.file_path);
+    await unlink(document.file_path);
   } catch {
     // File may already be deleted — ignore
   }
@@ -165,6 +191,23 @@ router.delete('/:id', (req: AuthRequest, res: Response) => {
   db.prepare('DELETE FROM documents WHERE id = ?').run(req.params.id);
 
   res.json({ message: 'Document deleted' });
+});
+
+// Handle multer errors (file too large, wrong type, etc.)
+router.use((err: any, _req: AuthRequest, res: Response, next: any) => {
+  if (err instanceof multer.MulterError) {
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      res.status(400).json({ error: 'File too large. Maximum size is 50MB.' });
+      return;
+    }
+    res.status(400).json({ error: `Upload error: ${err.message}` });
+    return;
+  }
+  if (err && err.message && err.message.startsWith('File type not allowed')) {
+    res.status(400).json({ error: err.message });
+    return;
+  }
+  next(err);
 });
 
 export default router;

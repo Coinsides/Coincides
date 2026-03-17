@@ -74,11 +74,13 @@ export default function DocumentManager() {
   const documents = useDocumentStore((s) => s.documents);
   const loading = useDocumentStore((s) => s.loading);
   const uploading = useDocumentStore((s) => s.uploading);
+  const uploadProgress = useDocumentStore((s) => s.uploadProgress);
   const fetchDocuments = useDocumentStore((s) => s.fetchDocuments);
   const uploadDocument = useDocumentStore((s) => s.uploadDocument);
   const deleteDocument = useDocumentStore((s) => s.deleteDocument);
   const pollStatus = useDocumentStore((s) => s.pollStatus);
   const getDocumentDetail = useDocumentStore((s) => s.getDocumentDetail);
+  const retryParse = useDocumentStore((s) => s.retryParse);
 
   const courseId = modal?.data?.courseId as string;
   const courseName = modal?.data?.courseName as string;
@@ -87,7 +89,7 @@ export default function DocumentManager() {
   const [dragOver, setDragOver] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollingRef = useRef(false);
 
   // Fetch documents on mount
   useEffect(() => {
@@ -98,22 +100,40 @@ export default function DocumentManager() {
 
   // Poll parsing documents every 3s
   useEffect(() => {
+    let cancelled = false;
+
+    const poll = async () => {
+      const docs = useDocumentStore.getState().documents;
+      const parsingDocs = docs.filter(
+        (d) => d.parse_status === 'pending' || d.parse_status === 'parsing'
+      );
+
+      if (parsingDocs.length === 0) {
+        pollingRef.current = false;
+        return;
+      }
+
+      pollingRef.current = true;
+
+      for (const d of parsingDocs) {
+        if (cancelled) return;
+        await pollStatus(d.id);
+      }
+
+      if (!cancelled) {
+        setTimeout(poll, 3000);
+      }
+    };
+
+    // Start polling when documents change and there are parsing docs
     const parsingDocs = documents.filter(
       (d) => d.parse_status === 'pending' || d.parse_status === 'parsing'
     );
-
-    if (parsingDocs.length > 0) {
-      pollIntervalRef.current = setInterval(() => {
-        parsingDocs.forEach((d) => pollStatus(d.id));
-      }, 3000);
+    if (parsingDocs.length > 0 && !pollingRef.current) {
+      poll();
     }
 
-    return () => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
-        pollIntervalRef.current = null;
-      }
-    };
+    return () => { cancelled = true; };
   }, [documents, pollStatus]);
 
   const handleUpload = useCallback(
@@ -194,7 +214,7 @@ export default function DocumentManager() {
           ) : (
             <Upload size={24} />
           )}
-          <span>{uploading ? 'Uploading...' : 'Drop files here or click to browse'}</span>
+          <span>{uploading ? `Uploading... ${uploadProgress ?? ''}%` : 'Drop files here or click to browse'}</span>
           <span className={styles.dropzoneHint}>
             PDF, DOCX, XLSX, Images, TXT, MD — up to 50MB
           </span>
@@ -258,7 +278,18 @@ export default function DocumentManager() {
 
               {/* Error message for failed docs */}
               {doc.parse_status === 'failed' && doc.error_message && (
-                <div className={styles.errorMessage}>{doc.error_message}</div>
+                <div className={styles.errorMessage}>
+                  {doc.error_message}
+                  <button
+                    className={styles.retryBtn}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      retryParse(doc.id);
+                    }}
+                  >
+                    Retry
+                  </button>
+                </div>
               )}
 
               {/* Expanded summary */}

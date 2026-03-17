@@ -1,7 +1,8 @@
-import { readFileSync } from 'fs';
+import { readFile } from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';
 import Anthropic from '@anthropic-ai/sdk';
 import pdfParse from 'pdf-parse';
+import { PDFDocument } from 'pdf-lib';
 import * as mammoth from 'mammoth';
 import * as XLSX from 'xlsx';
 import { getDb } from '../db/init.js';
@@ -9,6 +10,8 @@ import { getDb } from '../db/init.js';
 const CLAUDE_MODEL = 'claude-3-5-haiku-20241022';
 const CHUNK_SIZE = 5000;
 const MAX_TEXT_BEFORE_CHUNKING = 30000;
+const PDF_BATCH_SIZE = 50;
+const MAX_PDF_PAGES = 200;
 
 function getAnthropicClient(): Anthropic {
   return new Anthropic();
@@ -16,22 +19,6 @@ function getAnthropicClient(): Anthropic {
 
 function getFileExtension(filename: string): string {
   return filename.split('.').pop()?.toLowerCase() || '';
-}
-
-function getMimeType(filename: string): string {
-  const ext = getFileExtension(filename);
-  const mimeMap: Record<string, string> = {
-    pdf: 'application/pdf',
-    docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
-    png: 'image/png',
-    webp: 'image/webp',
-    txt: 'text/plain',
-    md: 'text/markdown',
-  };
-  return mimeMap[ext] || 'application/octet-stream';
 }
 
 function isImageFile(filename: string): boolean {
@@ -46,47 +33,69 @@ async function parsePdfNative(buffer: Buffer): Promise<{ text: string; pageCount
 
 async function parsePdfWithVision(buffer: Buffer): Promise<{ text: string; pageCount: number }> {
   const client = getAnthropicClient();
-  const base64 = buffer.toString('base64');
 
-  const response = await client.messages.create({
-    model: CLAUDE_MODEL,
-    max_tokens: 4096,
-    messages: [
-      {
-        role: 'user',
-        content: [
-          {
-            type: 'document',
-            source: {
-              type: 'base64',
-              media_type: 'application/pdf',
-              data: base64,
-            },
-          },
-          {
-            type: 'text',
-            text: 'Extract all the text content from this PDF document. Return only the extracted text, preserving the original structure as much as possible.',
-          },
-        ],
-      },
-    ],
-  });
+  // Get page count first
+  const pdfDoc = await PDFDocument.load(buffer);
+  const pageCount = pdfDoc.getPageCount();
 
-  const text = response.content
-    .filter((b): b is Anthropic.TextBlock => b.type === 'text')
-    .map((b) => b.text)
-    .join('\n');
-
-  // Try to get page count from native parse
-  let pageCount = 1;
-  try {
-    const data = await pdfParse(buffer);
-    pageCount = data.numpages;
-  } catch {
-    // Ignore — keep default
+  if (pageCount > MAX_PDF_PAGES) {
+    throw new Error(`Document exceeds 200-page limit for OCR processing`);
   }
 
-  return { text, pageCount };
+  // Process in batches of 50 pages
+  const batchCount = Math.ceil(pageCount / PDF_BATCH_SIZE);
+  const textParts: string[] = [];
+
+  for (let i = 0; i < batchCount; i++) {
+    const startPage = i * PDF_BATCH_SIZE;
+    const endPage = Math.min((i + 1) * PDF_BATCH_SIZE, pageCount);
+
+    // Extract batch pages into a new PDF
+    const batchDoc = await PDFDocument.create();
+    const pages = await batchDoc.copyPages(pdfDoc, Array.from({ length: endPage - startPage }, (_, idx) => startPage + idx));
+    pages.forEach((page) => batchDoc.addPage(page));
+    const batchBuffer = Buffer.from(await batchDoc.save());
+
+    const base64 = batchBuffer.toString('base64');
+
+    const response = await client.messages.create({
+      model: CLAUDE_MODEL,
+      max_tokens: 16384,
+      messages: [
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'document',
+              source: {
+                type: 'base64',
+                media_type: 'application/pdf',
+                data: base64,
+              },
+            },
+            {
+              type: 'text',
+              text: 'Extract all the text content from this PDF document. Return only the extracted text, preserving the original structure as much as possible.',
+            },
+          ],
+        },
+      ],
+    });
+
+    const text = response.content
+      .filter((b): b is Anthropic.TextBlock => b.type === 'text')
+      .map((b) => b.text)
+      .join('\n');
+
+    textParts.push(text);
+
+    // Rate limit delay between batches
+    if (i < batchCount - 1) {
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+  }
+
+  return { text: textParts.join('\n'), pageCount };
 }
 
 async function parseImage(buffer: Buffer, filename: string): Promise<string> {
@@ -131,33 +140,77 @@ async function parseImage(buffer: Buffer, filename: string): Promise<string> {
     .join('\n');
 }
 
-function chunkText(text: string): Array<{ content: string; heading: string | null }> {
-  if (text.length <= MAX_TEXT_BEFORE_CHUNKING) {
+function chunkText(text: string, pageCount?: number): Array<{ content: string; heading: string | null; page_start: number | null; page_end: number | null }> {
+  // If pageCount is provided and <= 50, don't chunk
+  if (pageCount !== undefined && pageCount <= 50) {
     return [];
   }
 
-  const chunks: Array<{ content: string; heading: string | null }> = [];
-  const paragraphs = text.split(/\n\n+/);
-  let currentChunk = '';
-  let currentHeading: string | null = null;
-
-  for (const para of paragraphs) {
-    if (currentChunk.length + para.length > CHUNK_SIZE && currentChunk.length > 0) {
-      chunks.push({ content: currentChunk.trim(), heading: currentHeading });
-      currentChunk = '';
-      currentHeading = null;
-    }
-
-    // Detect heading-like paragraphs
-    if (para.length < 100 && (para.startsWith('#') || para === para.toUpperCase()) && !currentHeading) {
-      currentHeading = para.replace(/^#+\s*/, '').trim();
-    }
-
-    currentChunk += para + '\n\n';
+  // If no pageCount and text is short, don't chunk
+  if (pageCount === undefined && text.length <= MAX_TEXT_BEFORE_CHUNKING) {
+    return [];
   }
 
-  if (currentChunk.trim().length > 0) {
-    chunks.push({ content: currentChunk.trim(), heading: currentHeading });
+  const chunks: Array<{ content: string; heading: string | null; page_start: number | null; page_end: number | null }> = [];
+
+  // Check for form feed characters (PDF page separators)
+  const hasPageBreaks = text.includes('\f');
+
+  if (hasPageBreaks) {
+    // Page-aware chunking for PDFs
+    const pages = text.split('\f');
+    let currentChunk = '';
+    let currentHeading: string | null = null;
+    let chunkStartPage = 1;
+    let currentPage = 1;
+
+    for (let i = 0; i < pages.length; i++) {
+      const page = pages[i];
+      currentPage = i + 1;
+
+      if (currentChunk.length + page.length > CHUNK_SIZE && currentChunk.length > 0) {
+        chunks.push({ content: currentChunk.trim(), heading: currentHeading, page_start: chunkStartPage, page_end: currentPage - 1 });
+        currentChunk = '';
+        currentHeading = null;
+        chunkStartPage = currentPage;
+      }
+
+      // Detect heading-like content
+      const firstLine = page.trim().split('\n')[0] || '';
+      if (firstLine.length < 100 && (firstLine.startsWith('#') || firstLine === firstLine.toUpperCase()) && firstLine.length > 0 && !currentHeading) {
+        currentHeading = firstLine.replace(/^#+\s*/, '').trim();
+      }
+
+      currentChunk += page + '\f';
+    }
+
+    if (currentChunk.trim().length > 0) {
+      chunks.push({ content: currentChunk.trim(), heading: currentHeading, page_start: chunkStartPage, page_end: currentPage });
+    }
+  } else {
+    // Paragraph-based chunking (non-PDF or no page markers)
+    const paragraphs = text.split(/\n\n+/);
+    let currentChunk = '';
+    let currentHeading: string | null = null;
+
+    for (const para of paragraphs) {
+      if (currentChunk.length + para.length > CHUNK_SIZE && currentChunk.length > 0) {
+        chunks.push({ content: currentChunk.trim(), heading: currentHeading, page_start: null, page_end: null });
+        currentChunk = '';
+        currentHeading = null;
+      }
+
+      // Detect heading-like paragraphs
+      if (para.length < 100 && (para.startsWith('#') || para === para.toUpperCase()) && !currentHeading) {
+        currentHeading = para.replace(/^#+\s*/, '').trim();
+      }
+
+      currentChunk += para + '\n\n';
+    }
+
+    if (currentChunk.trim().length > 0) {
+      chunks.push({ content: currentChunk.trim(), heading: currentHeading, page_start: null, page_end: null });
+    }
   }
 
   return chunks;
@@ -229,7 +282,7 @@ export async function parseDocument(documentId: string, _userId: string): Promis
       throw new Error('Document not found');
     }
 
-    const buffer = readFileSync(doc.file_path);
+    const buffer = await readFile(doc.file_path);
     const ext = getFileExtension(doc.filename);
 
     let extractedText = '';
@@ -275,12 +328,12 @@ export async function parseDocument(documentId: string, _userId: string): Promis
     }
 
     // Chunking
-    const chunks = chunkText(extractedText);
+    const chunks = chunkText(extractedText, pageCount ?? undefined);
     const chunkCount = chunks.length;
 
     if (chunkCount > 0) {
       const insertChunk = db.prepare(
-        'INSERT INTO document_chunks (id, document_id, chunk_index, content, heading, created_at) VALUES (?, ?, ?, ?, ?, ?)'
+        'INSERT INTO document_chunks (id, document_id, chunk_index, content, heading, page_start, page_end, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
       );
       const insertMany = db.transaction((items: typeof chunks) => {
         items.forEach((chunk, index) => {
@@ -290,6 +343,8 @@ export async function parseDocument(documentId: string, _userId: string): Promis
             index,
             chunk.content,
             chunk.heading,
+            chunk.page_start,
+            chunk.page_end,
             new Date().toISOString()
           );
         });

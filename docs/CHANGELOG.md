@@ -4,6 +4,37 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Round 2 Step 3 Patch] — 2026-03-17
+
+### 文档上传系统质量审计修复 (12项)
+
+#### 🔴 严重修复
+- **PDF Vision 分批处理**: 使用 pdf-lib 拆分 PDF，每 50 页一批发送 Claude API，max_tokens 提升至 16384，加 200 页上限检查
+- **异步文件读取**: `readFileSync` → `readFile` (fs/promises)，消除大文件阻塞服务器
+- **Chunk 页码追踪**: `page_start`/`page_end` 现在正确写入 document_chunks 表，基于 form-feed (\f) 页面分隔符
+- **前端 Polling 重构**: `setInterval` → `setTimeout` 递归模式，避免 interval 反复销毁重建
+
+#### 🟡 中等修复
+- **文件名安全化**: 存储使用 `{timestamp}-{uuid}.{ext}`，原始文件名仅存数据库
+- **用户目录隔离**: 文件存储改为 `uploads/{userId}/` 子目录结构
+- **API 隐藏 file_path**: GET 列表和详情接口不再返回服务器内部路径
+- **异步文件删除**: `unlinkSync` → `unlink` (fs/promises)
+- **删除死代码**: 移除未使用的 `getMimeType` 函数
+- **Multer 错误处理**: 新增中间件，文件过大/类型错误返回友好 400 错误
+
+#### 🟢 小修复
+- **上传进度条**: 使用 axios onUploadProgress 显示上传百分比
+- **分块阈值对齐 Spec**: pageCount ≤ 50 不分块（之前只按 30K 字符判断）
+- **失败重试**: 新增 POST /api/documents/:id/retry 端点 + 前端 Retry 按钮
+
+#### 依赖新增
+- pdf-lib (PDF 页面拆分)
+
+#### Files
+- 修改 6 个文件: documentParser.ts, documents.ts, upload.ts, DocumentManager.tsx, DocumentManager.module.css, documentStore.ts
+
+---
+
 ## [Round 2 Step 3] — 2026-03-17
 
 ### 文档上传 + 解析系统

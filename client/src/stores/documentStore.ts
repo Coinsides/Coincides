@@ -6,17 +6,20 @@ interface DocumentState {
   documents: Document[];
   loading: boolean;
   uploading: boolean;
+  uploadProgress: number | null;
   fetchDocuments: (courseId: string) => Promise<void>;
   uploadDocument: (courseId: string, file: File) => Promise<Document>;
   deleteDocument: (id: string) => Promise<void>;
   pollStatus: (id: string) => Promise<void>;
   getDocumentDetail: (id: string) => Promise<Document>;
+  retryParse: (id: string) => Promise<void>;
 }
 
 export const useDocumentStore = create<DocumentState>((set, get) => ({
   documents: [],
   loading: false,
   uploading: false,
+  uploadProgress: null,
 
   fetchDocuments: async (courseId) => {
     set({ loading: true });
@@ -29,7 +32,7 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
   },
 
   uploadDocument: async (courseId, file) => {
-    set({ uploading: true });
+    set({ uploading: true, uploadProgress: 0 });
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -37,11 +40,17 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
 
       const { data } = await api.post('/documents/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
+        onUploadProgress: (progressEvent) => {
+          if (progressEvent.total) {
+            const pct = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+            set({ uploadProgress: pct });
+          }
+        },
       });
-      set({ documents: [data, ...get().documents], uploading: false });
+      set({ documents: [data, ...get().documents], uploading: false, uploadProgress: null });
       return data;
     } catch (err) {
-      set({ uploading: false });
+      set({ uploading: false, uploadProgress: null });
       throw err;
     }
   },
@@ -80,5 +89,10 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
       documents: get().documents.map((d) => (d.id === id ? data : d)),
     });
     return data;
+  },
+
+  retryParse: async (id: string) => {
+    await api.post(`/documents/${id}/retry`);
+    // Poll will pick up the status change
   },
 }));
