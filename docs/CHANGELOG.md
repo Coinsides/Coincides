@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Round 2 Step 1] — 2026-03-17
+
+### 卡片尺寸修复 + KaTeX 预览渲染
+
+#### Card Grid 尺寸调整
+- Grid 列宽从 `minmax(280px, 1fr)` 改为 `minmax(200px, 1fr)`，卡片更窄、可显示更多列
+- 卡片最小高度从 130px → 200px，更高的纵向比例，显示更多内容
+- 预览文本行数从 3 行增至 4 行
+
+#### 卡片内容预览 KaTeX 渲染
+- Grid 视图：卡片内容预览现在通过 `KaTeXRenderer` 渲染，数学公式（`$...$` / `$$...$$`）不再显示原始 LaTeX
+- List 视图：标题下方新增内容预览行，同样通过 KaTeX 渲染
+- 按模板类型提取预览字段：Definition → definition, Theorem → statement, Formula → formula, General → body
+- 预览文本带长度截断（Grid 120字符，List 80字符），确保不溢出
+- KaTeX 渲染尺寸在预览区域内适当缩小（grid 0.9em, list 0.85em）
+- Display 模式公式左对齐、缩小 margin
+
+#### Files
+- 修改 2 个文件: DeckDetail.tsx, DeckDetail.module.css
+
+---
+
 ## [Polish Round 1 Patch] — 2026-03-17
 
 ### Section 管理增强 + Review 联动

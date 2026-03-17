@@ -14,6 +14,7 @@ import { useReviewStore, type DueCard } from '@/stores/reviewStore';
 import { useUIStore } from '@/stores/uiStore';
 import { CardTemplateType } from '@shared/types';
 import type { CardContent } from '@shared/types';
+import KaTeXRenderer from '@/components/KaTeX/KaTeXRenderer';
 import styles from './DeckDetail.module.css';
 
 const templateOptions = [
@@ -267,7 +268,11 @@ export default function DeckDetailPage() {
                   </div>
                 </div>
                 <div className={styles.gridCardTitle}>{card.title}</div>
-                {preview && <div className={styles.gridCardPreview}>{preview}</div>}
+                {preview && (
+                  <div className={styles.gridCardPreview}>
+                    <KaTeXRenderer text={preview.length > 120 ? preview.slice(0, 120) + '…' : preview} />
+                  </div>
+                )}
                 {card.tags && card.tags.length > 0 && (
                   <div className={styles.gridCardTags}>
                     {card.tags.map((tag) => (
@@ -306,7 +311,14 @@ export default function DeckDetailPage() {
                 onClick={(e) => e.stopPropagation()}
               />
             )}
-            <span className={styles.listColTitle}>{card.title}</span>
+            <div className={styles.listColTitle}>
+              <div className={styles.listCardName}>{card.title}</div>
+              {(() => { const p = getContentPreview(card.content); return p ? (
+                <div className={styles.listCardPreview}>
+                  <KaTeXRenderer text={p.length > 80 ? p.slice(0, 80) + '…' : p} />
+                </div>
+              ) : null; })()}
+            </div>
             <span className={styles.listColType}>
               <span className={styles.templateBadgeSm} style={{ backgroundColor: (templateColors[card.template_type] || '#8b5cf6') + '20', color: templateColors[card.template_type] || '#8b5cf6' }}>
                 {templateLabels[card.template_type] || 'GEN'}

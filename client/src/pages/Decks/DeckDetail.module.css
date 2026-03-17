@@ -370,7 +370,7 @@
 /* Grid view */
 .cardGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 12px;
 }
 
@@ -385,7 +385,7 @@
   flex-direction: column;
   gap: 10px;
   position: relative;
-  min-height: 130px;
+  min-height: 200px;
 }
 
 .gridCard:hover {
@@ -398,9 +398,19 @@
   color: var(--text-muted);
   line-height: 1.5;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  word-break: break-word;
+}
+
+.gridCardPreview :global(.katex) {
+  font-size: 0.9em;
+}
+
+.gridCardPreview :global(.katex-display) {
+  margin: 4px 0;
+  text-align: left;
 }
 
 .gridCardTop {
@@ -493,11 +503,30 @@
 
 .listColTitle {
   flex: 3;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.listCardName {
   font-weight: 500;
   color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.listCardPreview {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+.listCardPreview :global(.katex) {
+  font-size: 0.85em;
 }
 
 .listColType { flex: 1; }
