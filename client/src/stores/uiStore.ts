@@ -23,6 +23,10 @@ interface UIState {
   agentContextHint: { type: string; data?: unknown } | null;
   openAgentWithContext: (type: string, data?: unknown) => void;
 
+  // Shortcuts panel
+  shortcutsPanelOpen: boolean;
+  toggleShortcutsPanel: () => void;
+
   // Toasts
   toasts: Toast[];
   addToast: (type: Toast['type'], message: string) => void;
@@ -45,6 +49,9 @@ export const useUIStore = create<UIState>((set, get) => ({
   setAgentPanelOpen: (open) => set({ agentPanelOpen: open, ...(!open ? { agentContextHint: null } : {}) }),
   agentContextHint: null,
   openAgentWithContext: (type, data) => set({ agentPanelOpen: true, agentContextHint: { type, data } }),
+
+  shortcutsPanelOpen: false,
+  toggleShortcutsPanel: () => set({ shortcutsPanelOpen: !get().shortcutsPanelOpen }),
 
   toasts: [],
   addToast: (type, message) => {

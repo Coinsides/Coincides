@@ -1,4 +1,5 @@
 import { Router, Response } from 'express';
+import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
@@ -128,6 +129,12 @@ router.post('/:cardId/rate', (req: AuthRequest, res: Response) => {
       updatedAt,
       req.params.cardId
     );
+
+    // Log activity
+    const activityDate = now.toISOString().split('T')[0];
+    db.prepare(
+      'INSERT INTO study_activity_log (id, user_id, date, activity_type, entity_id, entity_type) VALUES (?, ?, ?, ?, ?, ?)'
+    ).run(uuidv4(), req.userId!, activityDate, 'card_reviewed', req.params.cardId, 'card');
 
     const updated = db.prepare('SELECT * FROM cards WHERE id = ?').get(req.params.cardId) as any;
     parseCardContent(updated);

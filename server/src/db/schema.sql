@@ -258,3 +258,35 @@ CREATE TABLE IF NOT EXISTS proposals (
 );
 
 CREATE INDEX IF NOT EXISTS idx_proposals_user_id ON proposals(user_id);
+
+-- ============================================================
+-- 16. StudyModeTemplate
+-- ============================================================
+CREATE TABLE IF NOT EXISTS study_mode_templates (
+  id TEXT PRIMARY KEY,
+  user_id TEXT REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  slug TEXT NOT NULL,
+  description TEXT NOT NULL,
+  strategy TEXT NOT NULL,
+  is_system INTEGER NOT NULL DEFAULT 0,
+  config TEXT NOT NULL DEFAULT '{}',
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_study_mode_templates_user ON study_mode_templates(user_id);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_study_mode_templates_system_slug ON study_mode_templates(slug) WHERE user_id IS NULL;
+
+-- ============================================================
+-- 17. StudyActivityLog
+-- ============================================================
+CREATE TABLE IF NOT EXISTS study_activity_log (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  date TEXT NOT NULL,
+  activity_type TEXT NOT NULL,
+  entity_id TEXT,
+  entity_type TEXT,
+  minutes_spent INTEGER DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_study_activity_user_date ON study_activity_log(user_id, date);

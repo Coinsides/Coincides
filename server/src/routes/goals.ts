@@ -76,6 +76,7 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     if (data.description !== undefined) { fields.push('description = ?'); values.push(data.description); }
     if (data.deadline !== undefined) { fields.push('deadline = ?'); values.push(data.deadline); }
     if (data.status !== undefined) { fields.push('status = ?'); values.push(data.status); }
+    if (data.exam_mode !== undefined) { fields.push('exam_mode = ?'); values.push(data.exam_mode ? 1 : 0); }
 
     if (fields.length === 0) {
       throw new AppError(400, 'No fields to update');

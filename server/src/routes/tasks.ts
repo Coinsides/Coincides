@@ -163,6 +163,12 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
         fields.push('completed_at = ?');
         values.push(new Date().toISOString());
 
+        // Log activity
+        const activityDate = new Date().toISOString().split('T')[0];
+        db.prepare(
+          'INSERT INTO study_activity_log (id, user_id, date, activity_type, entity_id, entity_type) VALUES (?, ?, ?, ?, ?, ?)'
+        ).run(uuidv4(), req.userId!, activityDate, 'task_completed', existing.id, 'task');
+
         // Update recurring group count if applicable
         if (existing.recurring_group_id) {
           db.prepare(

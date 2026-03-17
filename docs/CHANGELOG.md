@@ -4,6 +4,61 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Phase 4] — 2026-03-17
+
+### Statistics, Minimum Working Flow & Smart Planning
+
+#### Backend
+- **Minimum Working Flow Engine**: Daily Brief API now returns `minimum_working_flow` object with must task count, cards due, estimated study time, and exam mode status. Replaces motivational messages with actionable minimum daily targets.
+- **Study Mode Templates**: New `study_mode_templates` table with 7 built-in learning strategies:
+  - Spaced Repetition, Interleaving, Active Recall, Feynman Technique, Pomodoro, Spiral Learning, Mastery-Based
+  - Each template includes description, learning science rationale, and configurable parameters
+  - GET /api/study-templates endpoint for Agent and UI access
+- **Agent Intelligence Upgrade**:
+  - 4 new tools: `get_study_templates`, `get_statistics_overview`, `suggest_next_topics`, `generate_weekly_review`
+  - Enhanced system prompt with "Minimum Working Flow Philosophy" and "Study Plan Creation Protocol"
+  - Agent now follows 5-step flow when creating study plans: present templates → ask learning mode → ask capacity → ask prerequisite needs → generate Proposal
+  - Prerequisite/foundation knowledge support via `is_prerequisite` task flag
+  - Next-topic suggestion using course context + model reasoning
+- **Statistics API** (4 endpoints):
+  - `GET /overview`: Current/longest streak, today/week/month task + card stats
+  - `GET /heatmap?months=6`: Daily activity counts with 0-4 intensity levels
+  - `GET /trends?period=weekly&weeks=12`: Completion rate trends over time
+  - `GET /courses`: Per-course breakdown with completion rates and goal counts
+- **Study Activity Logging**: Automatic logging when tasks are completed or cards are reviewed (`study_activity_log` table)
+- **Exam Mode Logic**: Active exam goals suppress Optional tasks, boost Must tasks with `exam_boost` flag
+- **Multi-Course Conflict Arbitration**: Daily Brief sorting by exam status → deadline proximity → course weight → order index
+- New DB tables: study_mode_templates, study_activity_log
+- Tasks table extended: `is_prerequisite` column
+
+#### Frontend
+- **Daily Brief Refactored**:
+  - New MWF (Minimum Working Flow) card at top: shows must tasks, cards due, estimated minutes
+  - Exam mode warning banner when active exam goals detected
+  - Lightning bolt (⚡) indicator on exam-boosted tasks
+  - Removed generic greeting text
+- **Statistics Dashboard** (new page at /statistics):
+  - Overview cards: current streak, today/week/month stats
+  - Activity heatmap: GitHub-style SVG grid (26 weeks, 5 color levels)
+  - Trend chart: pure SVG area chart showing 12-week completion rate
+  - Per-course breakdown: progress bars, completion rates, card counts
+  - All charts built as pure SVG — no external charting libraries
+- **Exam Mode UI**: Prominent "⚡ EXAM MODE" pill on goal cards when active
+- **Keyboard Shortcuts**:
+  - `Ctrl+T` / `Cmd+T`: Create new task
+  - `Ctrl+K` / `Cmd+K`: Create new card
+  - `?`: Show shortcuts reference panel
+  - Shortcuts panel: modal overlay listing all available shortcuts
+- Navigation: Statistics page added to sidebar (BarChart3 icon)
+- Zustand store: statisticsStore for dashboard data
+
+#### Files
+- Backend: 2 new files + 11 modified (2,439 lines total)
+- Frontend: 5 new files + 7 modified (1,350 lines total)
+- Grand total: ~3,800 lines across 25 files
+
+---
+
 ## [Phase 3] — 2026-03-17
 
 ### AI Agent Module — Mr. Zero

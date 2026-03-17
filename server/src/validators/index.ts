@@ -87,6 +87,7 @@ export const updateGoalSchema = z.object({
   description: z.string().max(2000).optional(),
   deadline: dateString.optional(),
   status: z.enum(['active', 'completed', 'archived']).optional(),
+  exam_mode: z.boolean().optional(),
 });
 
 // --- Daily Status ---

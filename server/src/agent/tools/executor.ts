@@ -162,6 +162,176 @@ export async function executeTool(
       return JSON.stringify({ id, type, message: `Proposal created. The student can review and apply it from the proposals panel.` });
     }
 
+    case 'get_study_templates': {
+      const templates = db.prepare(
+        'SELECT id, name, slug, description, strategy, config, is_system FROM study_mode_templates WHERE user_id IS NULL OR user_id = ? ORDER BY is_system DESC, name'
+      ).all(userId) as any[];
+      return JSON.stringify(templates.map((t: any) => {
+        try { t.config = JSON.parse(t.config); } catch { /* keep */ }
+        return t;
+      }));
+    }
+
+    case 'get_statistics_overview': {
+      // Streak calculation
+      const activityDates = db.prepare(
+        `SELECT DISTINCT date FROM (
+           SELECT date FROM tasks WHERE user_id = ? AND status = 'completed'
+           UNION
+           SELECT date FROM study_activity_log WHERE user_id = ? AND activity_type = 'card_reviewed'
+         ) ORDER BY date DESC`
+      ).all(userId, userId) as { date: string }[];
+
+      const dateSet = new Set(activityDates.map(d => d.date));
+      let currentStreak = 0;
+      const cursor = new Date(today);
+      while (dateSet.has(cursor.toISOString().split('T')[0])) {
+        currentStreak++;
+        cursor.setDate(cursor.getDate() - 1);
+      }
+
+      // Today stats
+      const todayTasks = db.prepare(
+        `SELECT COUNT(*) as total, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
+         FROM tasks WHERE user_id = ? AND date = ?`
+      ).get(userId, today) as any;
+
+      const todayCards = db.prepare(
+        `SELECT COUNT(*) as count FROM study_activity_log
+         WHERE user_id = ? AND date = ? AND activity_type = 'card_reviewed'`
+      ).get(userId, today) as any;
+
+      // This week
+      const d = new Date(today);
+      const day = d.getDay();
+      const diff = day === 0 ? 6 : day - 1;
+      d.setDate(d.getDate() - diff);
+      const weekStart = d.toISOString().split('T')[0];
+
+      const weekTasks = db.prepare(
+        `SELECT COUNT(*) as total, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
+         FROM tasks WHERE user_id = ? AND date >= ? AND date <= ?`
+      ).get(userId, weekStart, today) as any;
+
+      const weekCards = db.prepare(
+        `SELECT COUNT(*) as count FROM study_activity_log
+         WHERE user_id = ? AND date >= ? AND date <= ? AND activity_type = 'card_reviewed'`
+      ).get(userId, weekStart, today) as any;
+
+      return JSON.stringify({
+        streak: { current: currentStreak },
+        today: { tasks_completed: todayTasks.completed || 0, tasks_total: todayTasks.total, cards_reviewed: todayCards.count },
+        this_week: { tasks_completed: weekTasks.completed || 0, tasks_total: weekTasks.total, cards_reviewed: weekCards.count },
+      });
+    }
+
+    case 'suggest_next_topics': {
+      const { course_id } = args as { course_id?: string };
+
+      let courseFilter = '';
+      const params: unknown[] = [userId];
+      if (course_id) {
+        courseFilter = ' AND c.id = ?';
+        params.push(course_id);
+      }
+
+      // Get courses with task and card stats
+      const courseStats = db.prepare(
+        `SELECT c.id, c.name, c.code,
+                (SELECT COUNT(*) FROM tasks WHERE course_id = c.id AND user_id = ? AND status = 'completed') as tasks_completed,
+                (SELECT COUNT(*) FROM tasks WHERE course_id = c.id AND user_id = ?) as tasks_total,
+                (SELECT COUNT(*) FROM cards ca JOIN card_decks d ON ca.deck_id = d.id WHERE d.course_id = c.id AND d.user_id = ?) as cards_total,
+                (SELECT COUNT(*) FROM cards ca JOIN card_decks d ON ca.deck_id = d.id WHERE d.course_id = c.id AND d.user_id = ? AND ca.fsrs_reps > 0) as cards_reviewed
+         FROM courses c WHERE c.user_id = ?${courseFilter} ORDER BY c.name`
+      ).all(userId, userId, userId, userId, ...params) as any[];
+
+      // Recent completed tasks (last 7 days)
+      const recentTasks = db.prepare(
+        `SELECT t.title, t.date, t.course_id, c.name as course_name
+         FROM tasks t JOIN courses c ON t.course_id = c.id
+         WHERE t.user_id = ? AND t.status = 'completed' AND t.date >= date('now', '-7 days')
+         ORDER BY t.date DESC LIMIT 20`
+      ).all(userId) as any[];
+
+      // Active goals
+      const goals = db.prepare(
+        `SELECT g.title, g.deadline, g.course_id, c.name as course_name, g.exam_mode
+         FROM goals g JOIN courses c ON g.course_id = c.id
+         WHERE g.user_id = ? AND g.status = 'active' ORDER BY g.deadline`
+      ).all(userId) as any[];
+
+      // Pending tasks
+      const pendingTasks = db.prepare(
+        `SELECT t.title, t.date, t.priority, t.course_id, c.name as course_name
+         FROM tasks t JOIN courses c ON t.course_id = c.id
+         WHERE t.user_id = ? AND t.status = 'pending' AND t.date >= ?
+         ORDER BY t.date LIMIT 20`
+      ).all(userId, today) as any[];
+
+      return JSON.stringify({
+        course_stats: courseStats,
+        recent_completed: recentTasks,
+        active_goals: goals,
+        upcoming_pending: pendingTasks,
+        analysis_hint: 'Use this data to suggest what topics the student should focus on next. Consider: incomplete tasks, goals with close deadlines, courses with low completion rates, and gaps in card coverage.',
+      });
+    }
+
+    case 'generate_weekly_review': {
+      const weekOffset = (args.week_offset as number) || 0;
+      const refDate = new Date(today);
+      refDate.setDate(refDate.getDate() + weekOffset * 7);
+
+      const refDay = refDate.getDay();
+      const mondayDiff = refDay === 0 ? 6 : refDay - 1;
+      const monday = new Date(refDate);
+      monday.setDate(monday.getDate() - mondayDiff);
+      const sunday = new Date(monday);
+      sunday.setDate(sunday.getDate() + 6);
+
+      const weekStartStr = monday.toISOString().split('T')[0];
+      const weekEndStr = sunday.toISOString().split('T')[0];
+
+      // Tasks completed vs total this week
+      const taskStats = db.prepare(
+        `SELECT COUNT(*) as total,
+                SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
+                SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending
+         FROM tasks WHERE user_id = ? AND date >= ? AND date <= ?`
+      ).get(userId, weekStartStr, weekEndStr) as any;
+
+      // Cards reviewed this week
+      const cardStats = db.prepare(
+        `SELECT COUNT(*) as count FROM study_activity_log
+         WHERE user_id = ? AND date >= ? AND date <= ? AND activity_type = 'card_reviewed'`
+      ).get(userId, weekStartStr, weekEndStr) as any;
+
+      // Completed tasks by course
+      const byCourse = db.prepare(
+        `SELECT c.name as course_name, COUNT(*) as completed
+         FROM tasks t JOIN courses c ON t.course_id = c.id
+         WHERE t.user_id = ? AND t.date >= ? AND t.date <= ? AND t.status = 'completed'
+         GROUP BY c.name ORDER BY completed DESC`
+      ).all(userId, weekStartStr, weekEndStr) as any[];
+
+      // Behind-schedule items (pending tasks with past dates)
+      const behindSchedule = db.prepare(
+        `SELECT t.title, t.date, c.name as course_name
+         FROM tasks t JOIN courses c ON t.course_id = c.id
+         WHERE t.user_id = ? AND t.status = 'pending' AND t.date < ? AND t.date >= ?
+         ORDER BY t.date LIMIT 10`
+      ).all(userId, today, weekStartStr) as any[];
+
+      return JSON.stringify({
+        week: { start: weekStartStr, end: weekEndStr },
+        tasks: { total: taskStats.total, completed: taskStats.completed || 0, pending: taskStats.pending || 0 },
+        cards_reviewed: cardStats.count,
+        completed_by_course: byCourse,
+        behind_schedule: behindSchedule,
+        narrative_hint: 'Use this data to narrate a weekly review: celebrate wins, highlight missed items, and suggest focus areas for next week.',
+      });
+    }
+
     case 'search_memories': {
       const { query, category } = args as { query: string; category?: string };
       let sql = 'SELECT id, category, content, created_at FROM agent_memories WHERE user_id = ? AND content LIKE ?';

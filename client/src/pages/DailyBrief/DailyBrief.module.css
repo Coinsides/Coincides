@@ -19,6 +19,52 @@
   margin-top: 4px;
 }
 
+/* MWF Card */
+.mwfCard {
+  border: 2px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.mwfTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.mwfPills {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.mwfPill {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+}
+
+.mwfExamWarning {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
+  background: var(--warning-bg);
+  color: var(--warning);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Exam boost */
+.examBoost {
+  margin-right: 4px;
+}
+
 /* Energy selector */
 .energySection {
   margin-bottom: 28px;

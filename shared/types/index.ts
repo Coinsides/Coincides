@@ -153,6 +153,8 @@ export interface Task {
   status: TaskStatus;
   completed_at: string | null;
   order_index: number;
+  exam_boost?: boolean;
+  is_prerequisite?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -406,6 +408,18 @@ export interface DailyBriefResponse {
   cards_due_count: number;
   recurring_alerts: RecurringTaskAlert[];
   energy_level: EnergyLevel | null;
+  minimum_working_flow: {
+    must_tasks_count: number;
+    cards_due_count: number;
+    estimated_minutes: number;
+    exam_mode_active: boolean;
+    exam_courses: Array<{
+      course_id: string;
+      course_name: string;
+      goal_title: string;
+      deadline: string;
+    }>;
+  };
 }
 
 export interface RecurringTaskAlert {
@@ -422,4 +436,16 @@ export interface RecurringTaskGroupWithProgress extends RecurringTaskGroup {
     completed: number;
     total: number;
   };
+}
+
+export interface StudyModeTemplate {
+  id: string;
+  user_id: string | null;
+  name: string;
+  slug: string;
+  description: string;
+  strategy: string;
+  is_system: boolean;
+  config: Record<string, unknown>;
+  created_at: string;
 }

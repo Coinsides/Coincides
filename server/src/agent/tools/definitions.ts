@@ -167,6 +167,38 @@ export const toolDefinitions: ToolDefinition[] = [
     },
   },
   {
+    name: 'get_study_templates',
+    description: 'Get available study mode templates. Show these to the student when they ask for help creating a study plan, so they can choose their preferred learning approach.',
+    parameters: { type: 'object', properties: {}, required: [] },
+  },
+  {
+    name: 'get_statistics_overview',
+    description: "Get the student's learning statistics: streak, task completion rates, review counts.",
+    parameters: { type: 'object', properties: {}, required: [] },
+  },
+  {
+    name: 'suggest_next_topics',
+    description: "Based on the student's current courses, completed tasks, and cards, suggest what they should study next. Use your reasoning to identify gaps and logical next steps.",
+    parameters: {
+      type: 'object',
+      properties: {
+        course_id: { type: 'string', description: 'Focus on a specific course' },
+      },
+      required: [],
+    },
+  },
+  {
+    name: 'generate_weekly_review',
+    description: "Generate a weekly review summary: what was accomplished, what fell behind, and suggested focus for next week.",
+    parameters: {
+      type: 'object',
+      properties: {
+        week_offset: { type: 'number', description: '0 = this week (default), -1 = last week' },
+      },
+      required: [],
+    },
+  },
+  {
     name: 'search_memories',
     description: 'Search long-term memories about the student for relevant context.',
     parameters: {

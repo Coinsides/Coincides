@@ -74,8 +74,25 @@ export default function DailyBrief() {
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.date}>{dateStr}</div>
-        <div className={styles.greeting}>{greeting}. Here's your study plan for today.</div>
+        <div className={styles.greeting}>{greeting}</div>
       </div>
+
+      {/* Minimum Working Flow card */}
+      {briefData?.minimum_working_flow && (
+        <div className={styles.mwfCard}>
+          <div className={styles.mwfTitle}>Today's Minimum</div>
+          <div className={styles.mwfPills}>
+            <span className={styles.mwfPill}>🎯 {briefData.minimum_working_flow.must_tasks_count} Must tasks</span>
+            <span className={styles.mwfPill}>📚 {briefData.minimum_working_flow.cards_due_count} cards to review</span>
+            <span className={styles.mwfPill}>⏱ ~{briefData.minimum_working_flow.estimated_minutes} min</span>
+          </div>
+          {briefData.minimum_working_flow.exam_mode_active && (
+            <div className={styles.mwfExamWarning}>
+              ⚡ Exam Mode active for {briefData.minimum_working_flow.exam_courses.map((c) => c.course_name).join(', ')}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Energy level */}
       <div className={styles.energySection}>
@@ -135,6 +152,7 @@ export default function DailyBrief() {
                         <span
                           className={`${styles.taskTitle} ${task.status === 'completed' ? styles.completed : ''}`}
                         >
+                          {task.exam_boost && <span className={styles.examBoost}>⚡</span>}
                           {task.title}
                         </span>
                         {course && (

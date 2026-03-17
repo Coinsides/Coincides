@@ -7,6 +7,7 @@ import {
   BookOpen,
   Layers,
   RotateCcw,
+  BarChart3,
   Settings,
   PanelLeftClose,
   PanelLeftOpen,
@@ -26,6 +27,7 @@ const navItems = [
   { to: '/courses', icon: BookOpen, label: 'Courses' },
   { to: '/decks', icon: Layers, label: 'Decks' },
   { to: '/review', icon: RotateCcw, label: 'Review' },
+  { to: '/statistics', icon: BarChart3, label: 'Statistics' },
   { to: '/settings', icon: Settings, label: 'Settings' },
 ];
 
@@ -41,6 +43,7 @@ export default function AppLayout() {
   const navigate = useNavigate();
 
   const toggleAgentPanel = useUIStore((s) => s.toggleAgentPanel);
+  const toggleShortcutsPanel = useUIStore((s) => s.toggleShortcutsPanel);
 
   useEffect(() => {
     loadUser();
@@ -54,17 +57,30 @@ export default function AppLayout() {
     }
   }, [user?.settings?.theme]);
 
-  // Ctrl+J / Cmd+J to toggle agent panel
+  // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'j') {
+      const mod = e.metaKey || e.ctrlKey;
+
+      if (mod && e.key === 'j') {
         e.preventDefault();
         toggleAgentPanel();
+      } else if (mod && e.key === 't') {
+        e.preventDefault();
+        openModal('task-create');
+      } else if (mod && e.key === 'k') {
+        e.preventDefault();
+        openModal('card-create');
+      } else if (e.key === '?' && !mod) {
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+        e.preventDefault();
+        toggleShortcutsPanel();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [toggleAgentPanel]);
+  }, [toggleAgentPanel, openModal, toggleShortcutsPanel]);
 
   return (
     <div className={styles.layout}>

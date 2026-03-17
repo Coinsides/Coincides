@@ -128,7 +128,11 @@ export default function GoalsPage() {
                       onClick={(e) => { e.stopPropagation(); handleExamMode(goal.id); }}
                       title={goal.exam_mode ? 'Disable exam mode' : 'Enable exam mode'}
                     >
-                      <Flame size={16} />
+                      {goal.exam_mode ? (
+                        <span className={styles.examPill}>⚡ EXAM MODE</span>
+                      ) : (
+                        <Flame size={16} />
+                      )}
                     </button>
                     <button
                       className={styles.deleteGoalBtn}

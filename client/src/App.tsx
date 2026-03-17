@@ -12,6 +12,7 @@ import SettingsPage from '@/pages/Settings/Settings';
 import DecksPage from '@/pages/Decks/Decks';
 import DeckDetailPage from '@/pages/Decks/DeckDetail';
 import ReviewPage from '@/pages/Review/Review';
+import StatisticsPage from '@/pages/Statistics/Statistics';
 import TaskModal from '@/components/TaskModal/TaskModal';
 import CourseModal from '@/components/CourseModal/CourseModal';
 import GoalModal from '@/components/GoalModal/GoalModal';
@@ -19,6 +20,7 @@ import DeckModal from '@/components/DeckModal/DeckModal';
 import CardModal from '@/components/CardModal/CardModal';
 import CardViewModal from '@/components/CardViewModal/CardViewModal';
 import AgentPanel from '@/components/AgentPanel/AgentPanel';
+import ShortcutsPanel from '@/components/ShortcutsPanel/ShortcutsPanel';
 import ToastContainer from '@/components/Toast/Toast';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -81,12 +83,14 @@ export default function App() {
           <Route path="decks" element={<DecksPage />} />
           <Route path="decks/:deckId" element={<DeckDetailPage />} />
           <Route path="review" element={<ReviewPage />} />
+          <Route path="statistics" element={<StatisticsPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <ModalLayer />
       <AuthenticatedOverlays />
+      <ShortcutsPanel />
       <ToastContainer />
     </HashRouter>
   );
