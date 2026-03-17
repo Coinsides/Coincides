@@ -21,7 +21,8 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', Roboto, Oxygen, Ubuntu, sans-serif;
   font-size: 14px;
   line-height: 1.6;
-  background-color: var(--bg-deepest);
+  background: var(--bg-gradient);
+  background-attachment: fixed;
   color: var(--text-primary);
   overflow: hidden;
 }
@@ -60,17 +61,53 @@ img {
 
 /* --- Theme Variables --- */
 :root {
-  /* Backgrounds */
-  --bg-deepest: #0a0a0f;
-  --bg-surface: #12121a;
-  --bg-elevated: #1a1a2e;
-  --bg-hover: #252540;
-  --bg-active: #2a2a48;
+  /* Backgrounds — glass-compatible semi-transparent */
+  --bg-deepest: #0a0a1a;
+  --bg-surface: rgba(18, 18, 30, 0.6);
+  --bg-elevated: rgba(26, 26, 50, 0.5);
+  --bg-hover: rgba(37, 37, 70, 0.45);
+  --bg-active: rgba(42, 42, 80, 0.5);
 
-  /* Borders */
-  --border-default: #252540;
-  --border-subtle: #1e1e35;
+  /* Borders — soft glass edges */
+  --border-default: rgba(255, 255, 255, 0.06);
+  --border-subtle: rgba(255, 255, 255, 0.03);
   --border-focus: #6366f1;
+
+  /* === Glassmorphism === */
+
+  /* Background gradient — the "scene" behind the glass */
+  --bg-gradient: linear-gradient(135deg, #0a0a1a 0%, #0f0f2e 25%, #0a1628 50%, #0d0d24 75%, #0a0a1a 100%);
+
+  /* Glass surfaces */
+  --glass-surface: rgba(18, 18, 30, 0.6);
+  --glass-elevated: rgba(26, 26, 50, 0.5);
+  --glass-hover: rgba(37, 37, 70, 0.5);
+  --glass-active: rgba(42, 42, 80, 0.5);
+
+  /* Glass blur levels */
+  --glass-blur-sm: blur(8px);
+  --glass-blur-md: blur(16px);
+  --glass-blur-lg: blur(24px);
+
+  /* Glass borders */
+  --glass-border: rgba(255, 255, 255, 0.06);
+  --glass-border-hover: rgba(255, 255, 255, 0.1);
+  --glass-border-accent: rgba(99, 102, 241, 0.3);
+
+  /* Glass shadows */
+  --glass-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --glass-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25);
+  --glass-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+
+  /* Gradient accents */
+  --gradient-primary: linear-gradient(135deg, #6366f1, #818cf8);
+  --gradient-primary-hover: linear-gradient(135deg, #818cf8, #a5b4fc);
+  --gradient-success: linear-gradient(135deg, #22c55e, #4ade80);
+  --gradient-danger: linear-gradient(135deg, #ef4444, #f87171);
+
+  /* Ambient light orbs */
+  --orb-primary: radial-gradient(circle at center, rgba(99, 102, 241, 0.15), transparent 70%);
+  --orb-secondary: radial-gradient(circle at center, rgba(59, 130, 246, 0.1), transparent 70%);
 
   /* Text */
   --text-primary: #e8e8f0;
@@ -121,14 +158,16 @@ img {
 
 /* Light theme overrides */
 [data-theme='light'] {
-  --bg-deepest: #f5f5f7;
-  --bg-surface: #ffffff;
-  --bg-elevated: #f0f0f4;
-  --bg-hover: #e8e8ee;
-  --bg-active: #dcdce4;
+  --bg-deepest: #e8e8f0;
+  --bg-surface: rgba(255, 255, 255, 0.7);
+  --bg-elevated: rgba(255, 255, 255, 0.5);
+  --bg-hover: rgba(230, 230, 240, 0.6);
+  --bg-active: rgba(220, 220, 230, 0.7);
 
-  --border-default: #d4d4dc;
-  --border-subtle: #e4e4ec;
+  --bg-gradient: linear-gradient(135deg, #e8e8f0 0%, #dde0f0 25%, #e0e4f2 50%, #dde0f0 75%, #e8e8f0 100%);
+
+  --border-default: rgba(0, 0, 0, 0.06);
+  --border-subtle: rgba(0, 0, 0, 0.03);
   --border-focus: #6366f1;
 
   --text-primary: #1a1a2e;
@@ -138,6 +177,16 @@ img {
 
   --accent-primary-bg: rgba(99, 102, 241, 0.08);
   --accent-primary-bg-hover: rgba(99, 102, 241, 0.14);
+
+  --glass-surface: rgba(255, 255, 255, 0.7);
+  --glass-elevated: rgba(255, 255, 255, 0.5);
+  --glass-hover: rgba(230, 230, 240, 0.6);
+  --glass-border: rgba(0, 0, 0, 0.06);
+  --glass-border-hover: rgba(0, 0, 0, 0.1);
+  --glass-border-accent: rgba(99, 102, 241, 0.3);
+
+  --orb-primary: radial-gradient(circle at center, rgba(99, 102, 241, 0.08), transparent 70%);
+  --orb-secondary: radial-gradient(circle at center, rgba(59, 130, 246, 0.06), transparent 70%);
 }
 
 /* --- Scrollbar --- */

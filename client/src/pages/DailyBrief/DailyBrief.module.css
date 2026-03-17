@@ -21,9 +21,12 @@
 
 /* MWF Card */
 .mwfCard {
-  border: 2px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  background: var(--bg-surface);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  box-shadow: var(--glass-shadow-sm);
   padding: 16px;
   margin-bottom: 24px;
 }
@@ -46,7 +49,10 @@
   font-weight: 500;
   padding: 6px 12px;
   border-radius: var(--radius-lg);
-  background: var(--bg-elevated);
+  background: var(--glass-elevated);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: 1px solid var(--glass-border);
   color: var(--text-secondary);
 }
 
@@ -89,9 +95,11 @@
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  background: var(--bg-surface);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
   color: var(--text-secondary);
   font-size: 13px;
   font-weight: 500;
@@ -99,8 +107,8 @@
 }
 
 .energyBtn:hover {
-  border-color: var(--text-muted);
-  background: var(--bg-elevated);
+  border-color: var(--glass-border-hover);
+  background: var(--glass-hover);
 }
 
 .energyBtn.active {
@@ -112,9 +120,12 @@
 /* Task sections */
 .taskSection {
   margin-bottom: 20px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  background: var(--bg-surface);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  box-shadow: var(--glass-shadow-sm);
   overflow: hidden;
 }
 
@@ -129,7 +140,7 @@
 }
 
 .sectionHeader:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
 }
 
 .sectionHeaderLeft {
@@ -156,7 +167,7 @@
   font-weight: 600;
   padding: 2px 8px;
   border-radius: 10px;
-  background: var(--bg-hover);
+  background: var(--glass-elevated);
   color: var(--text-muted);
 }
 
@@ -184,7 +195,7 @@
 }
 
 .taskItem:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
 }
 
 .checkbox {
@@ -245,9 +256,12 @@
   align-items: center;
   gap: 10px;
   padding: 12px 16px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  background: var(--bg-surface);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  box-shadow: var(--glass-shadow-sm);
   margin-bottom: 8px;
 }
 
@@ -268,9 +282,12 @@
 /* Cards due */
 .cardsPlaceholder {
   padding: 16px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  background: var(--bg-surface);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  box-shadow: var(--glass-shadow-sm);
   text-align: center;
   color: var(--text-muted);
   font-size: 13px;
@@ -290,22 +307,23 @@
   align-items: center;
   gap: 6px;
   padding: 6px 14px;
-  background: var(--success);
+  background: var(--gradient-success);
   color: white;
   border-radius: var(--radius-md);
   font-size: 12px;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
 }
 
 .reviewLinkBtn:hover {
-  opacity: 0.9;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
 }
 
 /* Loading */
 .skeleton {
   height: 140px;
   border-radius: var(--radius-lg);
-  background: var(--bg-surface);
+  background: var(--glass-surface);
   animation: pulse 1.5s ease-in-out infinite;
   margin-bottom: 16px;
 }

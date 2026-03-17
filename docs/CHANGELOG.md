@@ -4,6 +4,34 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Round 3 Step 1+2] — 2026-03-17
+
+### Glassmorphism 设计系统 + 核心页面改造
+
+#### Step 1: 设计基础（global.css）
+- 新增 20+ Glassmorphism CSS 变量：半透明表面、模糊等级、玻璃边框、玻璃阴影、渐变色、环境光球
+- `--bg-*` 变量从纯色改为半透明 rgba，`--border-*` 改为柔和白色透明度
+- body 背景从纯色改为 135° 渐变（深蕴 + 深蓝 + 深青）
+- 渐变按钮变量：`--gradient-primary`、`--gradient-success`、`--gradient-danger`
+- Light theme 同步适配白色系玻璃变量
+
+#### Step 2: 核心布局 + 高频页面（4 个 CSS 文件）
+- **AppLayout**: 侧边栏玻璃效果 + backdrop-blur，主内容区透明背景，固定位置环境光球（::before/::after 伪元素，零 JSX 改动）
+- **DailyBrief**: 所有卡片/容器玻璃化，保留任务优先级左侧色条，按钮渐变化
+- **DeckDetail** (839行): Section 头玻璃化，Grid 卡片玻璃 + hover 发光边框 + 微升效果，List 视图玻璃容器，过滤器渐变高亮，确认弹窗玻璃化
+- **Decks**: Deck 卡片玻璃效果 + hover 发光
+
+#### 技术细节
+- 所有 backdrop-filter 均配对 -webkit-backdrop-filter（Safari 兼容）
+- 纯 CSS 改造，零 TSX 代码变更
+- 模糊等级分层：sm(8px) 小元素 / md(16px) 标准表面 / lg(24px) 仅用于弹窗
+- 语义色彩保留（模板徽章 DEF/THM/FML/GEN、优先级色、状态色）
+
+#### Files
+- 修改 5 个文件: global.css, AppLayout.module.css, DailyBrief.module.css, DeckDetail.module.css, Decks.module.css
+
+---
+
 ## [Round 2 Step 5] — 2026-03-17
 
 ### 拖拽排序系统

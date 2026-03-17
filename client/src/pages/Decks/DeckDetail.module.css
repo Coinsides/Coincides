@@ -19,7 +19,7 @@
 }
 
 .backBtn:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
   color: var(--text-primary);
 }
 
@@ -55,7 +55,7 @@
 
 .viewToggle {
   display: flex;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   overflow: hidden;
 }
@@ -68,7 +68,7 @@
 }
 
 .viewBtn:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
 }
 
 .viewBtn.active {
@@ -81,15 +81,16 @@
   align-items: center;
   gap: 6px;
   padding: 7px 14px;
-  background: var(--success);
+  background: var(--gradient-success);
   color: white;
   border-radius: var(--radius-md);
   font-size: 13px;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.3);
 }
 
 .reviewBtn:hover {
-  opacity: 0.9;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.4);
 }
 
 .addBtn {
@@ -97,15 +98,17 @@
   align-items: center;
   gap: 6px;
   padding: 7px 14px;
-  background: var(--accent-primary);
+  background: var(--gradient-primary);
   color: white;
   border-radius: var(--radius-md);
   font-size: 13px;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 .addBtn:hover {
-  background: var(--accent-primary-hover);
+  background: var(--gradient-primary-hover);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 }
 
 .aiBtn {
@@ -113,13 +116,14 @@
   align-items: center;
   justify-content: center;
   padding: 7px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--accent-primary);
 }
 
 .aiBtn:hover {
-  background: var(--accent-primary-bg);
+  background: var(--glass-hover);
+  border-color: var(--glass-border-accent);
 }
 
 /* Filter bar */
@@ -150,15 +154,16 @@
 .searchInput {
   width: 100%;
   padding: 7px 10px 7px 30px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  background: var(--bg-surface);
+  background: rgba(0, 0, 0, 0.2);
   color: var(--text-primary);
   font-size: 12px;
 }
 
 .searchInput:focus {
-  border-color: var(--accent-primary);
+  border-color: var(--glass-border-accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
 }
 
 .clearSearch {
@@ -183,30 +188,33 @@
 
 .pill {
   padding: 5px 10px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: 20px;
   font-size: 11px;
   font-weight: 500;
   color: var(--text-muted);
   white-space: nowrap;
+  background: var(--glass-elevated);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
 }
 
 .pill:hover {
-  border-color: var(--text-muted);
+  border-color: var(--glass-border-hover);
   color: var(--text-secondary);
 }
 
 .pill.activePill {
-  border-color: var(--accent-primary);
-  background: var(--accent-primary-bg);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(99, 102, 241, 0.1));
+  border-color: rgba(99, 102, 241, 0.3);
   color: var(--accent-primary);
 }
 
 .filterSelect {
   padding: 6px 10px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  background: var(--bg-surface);
+  background: rgba(0, 0, 0, 0.2);
   color: var(--text-secondary);
   font-size: 12px;
 }
@@ -223,7 +231,11 @@
   padding: 8px 12px;
   margin-bottom: 10px;
   border-radius: var(--radius-md);
-  background: var(--bg-elevated);
+  background: var(--glass-elevated);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow-sm);
   color: var(--text-secondary);
   cursor: pointer;
   width: 100%;
@@ -231,7 +243,8 @@
 }
 
 .sectionHeader:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
+  border-color: var(--glass-border-hover);
 }
 
 .sectionName {
@@ -256,26 +269,28 @@
 .newSectionInput {
   flex: 1;
   padding: 7px 12px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  background: var(--bg-surface);
+  background: rgba(0, 0, 0, 0.2);
   color: var(--text-primary);
   font-size: 13px;
   max-width: 300px;
 }
 
 .newSectionInput:focus {
-  border-color: var(--accent-primary);
+  border-color: var(--glass-border-accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
   outline: none;
 }
 
 .newSectionSave {
   padding: 7px 14px;
-  background: var(--accent-primary);
+  background: var(--gradient-primary);
   color: white;
   border-radius: var(--radius-md);
   font-size: 12px;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 .newSectionCancel {
@@ -291,14 +306,14 @@
   align-items: center;
   justify-content: center;
   padding: 7px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-secondary);
 }
 
 .selectBtn:hover,
 .sectionAddBtn:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
   color: var(--text-primary);
 }
 
@@ -332,8 +347,11 @@
   gap: 12px;
   padding: 12px 16px;
   margin-top: 12px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-default);
+  background: var(--glass-elevated);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow-lg);
   border-radius: var(--radius-lg);
 }
 
@@ -361,7 +379,7 @@
 
 .batchCancelBtn {
   padding: 6px 14px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-secondary);
   font-size: 12px;
@@ -375,12 +393,15 @@
 }
 
 .gridCard {
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  background: var(--bg-surface);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  box-shadow: var(--glass-shadow-sm);
   padding: 16px;
   cursor: pointer;
-  transition: border-color var(--transition-fast);
+  transition: all var(--transition-fast);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -389,7 +410,9 @@
 }
 
 .gridCard:hover {
-  border-color: var(--accent-primary);
+  border-color: var(--glass-border-accent);
+  box-shadow: var(--glass-shadow-md), 0 0 20px rgba(99, 102, 241, 0.1);
+  transform: translateY(-2px);
 }
 
 /* Card content preview */
@@ -462,15 +485,18 @@
   font-size: 10px;
   padding: 2px 6px;
   border-radius: 4px;
-  background: var(--bg-hover);
+  background: var(--glass-elevated);
   color: var(--text-muted);
   font-weight: 500;
 }
 
 /* List view */
 .listView {
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
   overflow: hidden;
 }
 
@@ -478,7 +504,7 @@
   display: flex;
   align-items: center;
   padding: 10px 16px;
-  background: var(--bg-elevated);
+  background: var(--glass-elevated);
   font-size: 11px;
   font-weight: 600;
   color: var(--text-muted);
@@ -498,7 +524,7 @@
 }
 
 .listRow:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
 }
 
 .listColTitle {
@@ -545,7 +571,7 @@
 .pageBtn {
   width: 32px;
   height: 32px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   font-size: 12px;
   font-weight: 500;
@@ -553,10 +579,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  background: var(--glass-elevated);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
 }
 
 .pageBtn:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
+  border-color: var(--glass-border-hover);
 }
 
 .activePageBtn {
@@ -615,7 +645,7 @@
 }
 
 .sectionActionBtn:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
   color: var(--text-primary);
 }
 
@@ -632,15 +662,16 @@
   width: 100%;
   max-width: 300px;
   padding: 5px 10px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  background: var(--bg-surface);
+  background: rgba(0, 0, 0, 0.2);
   color: var(--text-primary);
   font-size: 12px;
 }
 
 .sectionSearchInput:focus {
-  border-color: var(--accent-primary);
+  border-color: var(--glass-border-accent);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
   outline: none;
 }
 
@@ -662,7 +693,9 @@
 .confirmOverlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -671,8 +704,11 @@
 }
 
 .confirmDialog {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-default);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow-lg);
   border-radius: var(--radius-lg);
   padding: 24px;
   max-width: 400px;
@@ -701,7 +737,7 @@
 
 .confirmCancelBtn {
   padding: 8px 16px;
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-secondary);
   font-size: 13px;
@@ -710,15 +746,16 @@
 
 .confirmDeleteBtn {
   padding: 8px 16px;
-  background: var(--error);
+  background: var(--gradient-danger);
   color: white;
   border-radius: var(--radius-md);
   font-size: 13px;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
 }
 
 .confirmDeleteBtn:hover {
-  opacity: 0.9;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
 /* Review selected button variant */
@@ -727,15 +764,17 @@
   align-items: center;
   gap: 6px;
   padding: 7px 14px;
-  background: var(--accent-primary);
+  background: var(--gradient-primary);
   color: white;
   border-radius: var(--radius-md);
   font-size: 13px;
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
 
 .reviewSelectedBtn:hover {
-  background: var(--accent-primary-hover);
+  background: var(--gradient-primary-hover);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 }
 
 /* Drag handle */
@@ -775,7 +814,7 @@
   content: '';
   display: block;
   height: 2px;
-  background: var(--accent-primary);
+  background: var(--glass-border-accent);
   margin-bottom: 8px;
   border-radius: 1px;
 }
@@ -784,7 +823,7 @@
   content: '';
   display: block;
   height: 2px;
-  background: var(--accent-primary);
+  background: var(--glass-border-accent);
   margin-top: 8px;
   border-radius: 1px;
 }
@@ -794,19 +833,19 @@
 }
 
 .cardDropBefore {
-  border-left: 2px solid var(--accent-primary);
+  border-left: 2px solid var(--glass-border-accent);
 }
 
 .cardDropAfter {
-  border-right: 2px solid var(--accent-primary);
+  border-right: 2px solid var(--glass-border-accent);
 }
 
 .listCardDropBefore {
-  border-top: 2px solid var(--accent-primary);
+  border-top: 2px solid var(--glass-border-accent);
 }
 
 .listCardDropAfter {
-  border-bottom: 2px solid var(--accent-primary);
+  border-bottom: 2px solid var(--glass-border-accent);
 }
 
 .sectionDropHighlight {
@@ -816,7 +855,7 @@
 
 .dropZone {
   min-height: 40px;
-  border: 2px dashed var(--border-default);
+  border: 2px dashed var(--glass-border);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;

@@ -7,8 +7,11 @@
 /* --- Sidebar --- */
 .sidebar {
   width: var(--sidebar-width);
-  background: var(--bg-surface);
-  border-right: 1px solid var(--border-default);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  border-right: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow-sm);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
@@ -62,7 +65,7 @@
 }
 
 .collapseBtn:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
   color: var(--text-secondary);
 }
 
@@ -90,13 +93,14 @@
 }
 
 .navItem:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
   color: var(--text-primary);
 }
 
 .navItem.active {
-  background: var(--accent-primary-bg);
-  color: var(--accent-primary);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(99, 102, 241, 0.05));
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  color: var(--accent-primary-hover);
 }
 
 .navItem svg {
@@ -130,7 +134,7 @@
 
 .sectionLabel button:hover {
   color: var(--text-secondary);
-  background: var(--bg-hover);
+  background: var(--glass-hover);
 }
 
 .courseItem {
@@ -146,7 +150,7 @@
 }
 
 .courseItem:hover {
-  background: var(--bg-hover);
+  background: var(--glass-hover);
   color: var(--text-primary);
 }
 
@@ -161,11 +165,40 @@
 .main {
   flex: 1;
   overflow-y: auto;
-  background: var(--bg-deepest);
+  background: transparent;
+  position: relative;
+}
+
+.main::before {
+  content: '';
+  position: fixed;
+  top: -20%;
+  right: -10%;
+  width: 600px;
+  height: 600px;
+  background: var(--orb-primary);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.main::after {
+  content: '';
+  position: fixed;
+  bottom: -20%;
+  left: 10%;
+  width: 500px;
+  height: 500px;
+  background: var(--orb-secondary);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
 }
 
 .content {
   max-width: 960px;
   margin: 0 auto;
   padding: 32px 40px;
+  position: relative;
+  z-index: 1;
 }
