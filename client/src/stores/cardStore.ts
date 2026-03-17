@@ -44,6 +44,7 @@ interface CardState {
   setCurrentCard: (card: CardWithTags | null) => void;
   batchDelete: (cardIds: string[]) => Promise<number>;
   batchMove: (cardIds: string[], targetDeckId: string, targetSectionId?: string) => Promise<number>;
+  reorderCards: (deckId: string, updates: { id: string; section_id: string | null; order_index: number }[]) => Promise<void>;
 }
 
 export const useCardStore = create<CardState>((set, get) => ({
@@ -100,5 +101,18 @@ export const useCardStore = create<CardState>((set, get) => ({
     });
     set({ cards: get().cards.filter((c) => !cardIds.includes(c.id)) });
     return data.moved;
+  },
+
+  reorderCards: async (deckId, updates) => {
+    // Optimistic update
+    set({
+      cards: get().cards.map((c) => {
+        const upd = updates.find((u) => u.id === c.id);
+        if (upd) return { ...c, section_id: upd.section_id, order_index: upd.order_index };
+        return c;
+      }),
+    });
+
+    await api.put('/cards/reorder', { deck_id: deckId, updates });
   },
 }));

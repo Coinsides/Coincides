@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
-import { createSectionSchema, updateSectionSchema } from '../validators/index.js';
+import { createSectionSchema, updateSectionSchema, reorderSectionsSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
 
 const router = Router();
@@ -49,6 +49,41 @@ router.post('/', (req: AuthRequest, res: Response) => {
 
     const section = db.prepare('SELECT * FROM card_sections WHERE id = ?').get(id);
     res.status(201).json(section);
+  } catch (err) {
+    if (err instanceof ZodError) {
+      res.status(400).json({ error: 'Validation error', details: err.errors });
+      return;
+    }
+    throw err;
+  }
+});
+
+// PUT /api/sections/reorder
+router.put('/reorder', (req: AuthRequest, res: Response) => {
+  try {
+    const data = reorderSectionsSchema.parse(req.body);
+    const db = getDb();
+
+    const deck = db.prepare('SELECT id FROM card_decks WHERE id = ? AND user_id = ?').get(data.deck_id, req.userId!);
+    if (!deck) {
+      throw new AppError(404, 'Deck not found');
+    }
+
+    const updateStmt = db.prepare('UPDATE card_sections SET order_index = ? WHERE id = ? AND deck_id = ? AND user_id = ?');
+
+    const batch = db.transaction(() => {
+      for (let i = 0; i < data.order.length; i++) {
+        updateStmt.run(i, data.order[i], data.deck_id, req.userId!);
+      }
+    });
+
+    batch();
+
+    const sections = db.prepare(
+      'SELECT * FROM card_sections WHERE deck_id = ? AND user_id = ? ORDER BY order_index ASC, created_at ASC'
+    ).all(data.deck_id, req.userId!);
+
+    res.json(sections);
   } catch (err) {
     if (err instanceof ZodError) {
       res.status(400).json({ error: 'Validation error', details: err.errors });

@@ -153,6 +153,15 @@ export const updateCardSchema = z.object({
 
 // --- Card Batch Operations ---
 
+export const reorderCardsSchema = z.object({
+  deck_id: z.string().uuid(),
+  updates: z.array(z.object({
+    id: z.string().uuid(),
+    section_id: z.string().uuid().nullable(),
+    order_index: z.number().int().min(0),
+  })).min(1),
+});
+
 export const batchDeleteCardsSchema = z.object({
   card_ids: z.array(z.string().uuid()).min(1, 'At least one card ID is required').max(200),
 });
@@ -164,6 +173,11 @@ export const batchMoveCardsSchema = z.object({
 });
 
 // --- Card Section ---
+
+export const reorderSectionsSchema = z.object({
+  deck_id: z.string().uuid(),
+  order: z.array(z.string().uuid()).min(1),
+});
 
 export const createSectionSchema = z.object({
   deck_id: z.string().uuid('Invalid deck ID'),

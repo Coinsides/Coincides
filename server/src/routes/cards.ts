@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
-import { createCardSchema, updateCardSchema, batchDeleteCardsSchema, batchMoveCardsSchema } from '../validators/index.js';
+import { createCardSchema, updateCardSchema, batchDeleteCardsSchema, batchMoveCardsSchema, reorderCardsSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
 
 const router = Router();
@@ -143,6 +143,47 @@ router.post('/', (req: AuthRequest, res: Response) => {
     card.tags = getCardTags(db, id);
 
     res.status(201).json(card);
+  } catch (err) {
+    if (err instanceof ZodError) {
+      res.status(400).json({ error: 'Validation error', details: err.errors });
+      return;
+    }
+    throw err;
+  }
+});
+
+// PUT /api/cards/reorder — MUST be before /:id to avoid param capture
+router.put('/reorder', (req: AuthRequest, res: Response) => {
+  try {
+    const data = reorderCardsSchema.parse(req.body);
+    const db = getDb();
+
+    // Verify deck belongs to user
+    const deck = db.prepare('SELECT id FROM card_decks WHERE id = ? AND user_id = ?').get(data.deck_id, req.userId!);
+    if (!deck) {
+      throw new AppError(404, 'Deck not found');
+    }
+
+    // Verify all cards belong to this deck
+    const getCard = db.prepare('SELECT id FROM cards WHERE id = ? AND deck_id = ? AND user_id = ?');
+    for (const upd of data.updates) {
+      const card = getCard.get(upd.id, data.deck_id, req.userId!);
+      if (!card) {
+        throw new AppError(400, `Card ${upd.id} not found in this deck`);
+      }
+    }
+
+    const updateStmt = db.prepare('UPDATE cards SET section_id = ?, order_index = ?, updated_at = ? WHERE id = ?');
+    const now = new Date().toISOString();
+
+    const batch = db.transaction(() => {
+      for (const upd of data.updates) {
+        updateStmt.run(upd.section_id, upd.order_index, now, upd.id);
+      }
+    });
+
+    batch();
+    res.json({ updated: data.updates.length });
   } catch (err) {
     if (err instanceof ZodError) {
       res.status(400).json({ error: 'Validation error', details: err.errors });

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Plus, LayoutGrid, List, Search, Play, Star, X, Sparkles,
   CheckSquare, Trash2, FolderInput, ChevronDown, ChevronRight as ChevronRightIcon, FolderPlus,
-  Edit2, Search as SearchIcon,
+  Edit2, Search as SearchIcon, GripVertical,
 } from 'lucide-react';
 import { useCardStore } from '@/stores/cardStore';
 import { useDeckStore } from '@/stores/deckStore';
@@ -52,10 +52,10 @@ export default function DeckDetailPage() {
   const { deckId } = useParams<{ deckId: string }>();
   const navigate = useNavigate();
 
-  const { cards, loading, fetchCards, batchDelete } = useCardStore();
+  const { cards, loading, fetchCards, batchDelete, reorderCards } = useCardStore();
   const decks = useDeckStore((s) => s.decks);
   const fetchDecks = useDeckStore((s) => s.fetchDecks);
-  const { sections, fetchSections, createSection, updateSection, deleteSection } = useSectionStore();
+  const { sections, fetchSections, createSection, updateSection, deleteSection, reorderSections } = useSectionStore();
   const courses = useCourseStore((s) => s.courses);
   const tags = useTagStore((s) => s.tags);
   const dueCount = useReviewStore((s) => s.dueCount);
@@ -92,6 +92,12 @@ export default function DeckDetailPage() {
   // Section search
   const [sectionSearchVisible, setSectionSearchVisible] = useState<Set<string>>(new Set());
   const [sectionSearches, setSectionSearches] = useState<Record<string, string>>({});
+
+  // Drag-and-drop state
+  const [dragType, setDragType] = useState<'section' | 'card' | null>(null);
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [dropTarget, setDropTarget] = useState<{ id: string; position: 'before' | 'after' } | null>(null);
+  const [dropSectionHighlight, setDropSectionHighlight] = useState<string | null>(null);
 
   const deck = decks.find((d) => d.id === deckId);
   const course = deck ? courses.find((c) => c.id === deck.course_id) : null;
@@ -218,6 +224,178 @@ export default function DeckDetailPage() {
     return cardList.filter((c) => c.title.toLowerCase().includes(q));
   };
 
+  // --- Drag-and-drop handlers ---
+
+  const clearDragState = () => {
+    setDragType(null);
+    setDragId(null);
+    setDropTarget(null);
+    setDropSectionHighlight(null);
+  };
+
+  // Section drag handlers
+  const handleSectionDragStart = (e: React.DragEvent, sectionId: string) => {
+    if (editingSectionId === sectionId) { e.preventDefault(); return; }
+    setDragType('section');
+    setDragId(sectionId);
+    e.dataTransfer.setData('text/plain', sectionId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleSectionDragOver = (e: React.DragEvent, targetSectionId: string) => {
+    e.preventDefault();
+    if (dragType !== 'section' && dragType !== 'card') return;
+
+    if (dragType === 'section') {
+      if (targetSectionId === dragId) return;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const midY = rect.top + rect.height / 2;
+      const position = e.clientY < midY ? 'before' : 'after';
+      setDropTarget({ id: targetSectionId, position });
+    } else if (dragType === 'card') {
+      // Card being dragged over section header = drop card into section
+      e.dataTransfer.dropEffect = 'move';
+      setDropSectionHighlight(targetSectionId);
+    }
+  };
+
+  const handleSectionDragLeave = () => {
+    setDropTarget(null);
+    setDropSectionHighlight(null);
+  };
+
+  const handleSectionDrop = async (e: React.DragEvent, targetSectionId: string) => {
+    e.preventDefault();
+    if (!deckId) { clearDragState(); return; }
+
+    if (dragType === 'section' && dragId) {
+      // Reorder sections
+      const currentOrder = sections.map((s) => s.id);
+      const fromIndex = currentOrder.indexOf(dragId);
+      const toIndex = currentOrder.indexOf(targetSectionId);
+      if (fromIndex === -1 || toIndex === -1 || fromIndex === toIndex) { clearDragState(); return; }
+
+      const newOrder = [...currentOrder];
+      newOrder.splice(fromIndex, 1);
+      const insertAt = dropTarget?.position === 'before' ? newOrder.indexOf(targetSectionId) : newOrder.indexOf(targetSectionId) + 1;
+      newOrder.splice(insertAt, 0, dragId);
+
+      try {
+        await reorderSections(deckId, newOrder);
+      } catch {
+        addToast('error', 'Failed to reorder sections');
+        fetchSections(deckId);
+      }
+    } else if (dragType === 'card' && dragId) {
+      // Move card to this section (append at end)
+      await handleCardDropOnSection(dragId, targetSectionId);
+    }
+    clearDragState();
+  };
+
+  // Card drag handlers
+  const handleCardDragStart = (e: React.DragEvent, cardId: string) => {
+    if (selectMode) { e.preventDefault(); return; }
+    setDragType('card');
+    setDragId(cardId);
+    e.dataTransfer.setData('text/plain', cardId);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleCardDragOver = (e: React.DragEvent, targetCardId: string) => {
+    e.preventDefault();
+    if (dragType !== 'card' || dragId === targetCardId) return;
+    e.dataTransfer.dropEffect = 'move';
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    if (view === 'grid') {
+      const midX = rect.left + rect.width / 2;
+      setDropTarget({ id: targetCardId, position: e.clientX < midX ? 'before' : 'after' });
+    } else {
+      const midY = rect.top + rect.height / 2;
+      setDropTarget({ id: targetCardId, position: e.clientY < midY ? 'before' : 'after' });
+    }
+  };
+
+  const handleCardDragLeave = () => {
+    setDropTarget(null);
+  };
+
+  const handleCardDropOnSection = async (cardId: string, targetSectionId: string | null) => {
+    if (!deckId) return;
+    const card = cards.find((c) => c.id === cardId);
+    if (!card) return;
+
+    // Get all cards in the target section
+    const sectionCards = cards
+      .filter((c) => (targetSectionId ? c.section_id === targetSectionId : !c.section_id) && c.id !== cardId)
+      .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0));
+
+    // Append the dragged card at end
+    const updates = sectionCards.map((c, i) => ({
+      id: c.id,
+      section_id: targetSectionId,
+      order_index: i,
+    }));
+    updates.push({ id: cardId, section_id: targetSectionId, order_index: sectionCards.length });
+
+    try {
+      await reorderCards(deckId, updates);
+    } catch {
+      addToast('error', 'Failed to move card');
+      fetchCards(deckId);
+    }
+  };
+
+  const handleCardDrop = async (e: React.DragEvent, targetCardId: string, sectionId: string | null) => {
+    e.preventDefault();
+    if (dragType !== 'card' || !dragId || !deckId) { clearDragState(); return; }
+
+    const targetCard = cards.find((c) => c.id === targetCardId);
+    if (!targetCard) { clearDragState(); return; }
+
+    // Get cards in the target section, sorted by order_index
+    const sectionCards = cards
+      .filter((c) => (sectionId ? c.section_id === sectionId : !c.section_id) && c.id !== dragId)
+      .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0));
+
+    const targetIndex = sectionCards.findIndex((c) => c.id === targetCardId);
+    const insertAt = dropTarget?.position === 'after' ? targetIndex + 1 : targetIndex;
+
+    sectionCards.splice(insertAt, 0, cards.find((c) => c.id === dragId)!);
+
+    const updates = sectionCards.map((c, i) => ({
+      id: c.id,
+      section_id: sectionId,
+      order_index: i,
+    }));
+
+    try {
+      await reorderCards(deckId, updates);
+    } catch {
+      addToast('error', 'Failed to reorder cards');
+      fetchCards(deckId);
+    }
+    clearDragState();
+  };
+
+  // Unsectioned drop zone handlers
+  const handleUnsectionedDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    if (dragType === 'card') {
+      e.dataTransfer.dropEffect = 'move';
+      setDropSectionHighlight('__unsectioned');
+    }
+  };
+
+  const handleUnsectionedDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    if (dragType === 'card' && dragId) {
+      await handleCardDropOnSection(dragId, null);
+    }
+    clearDragState();
+  };
+
   const handleReviewSelected = () => {
     if (selectedIds.size === 0 || !deck) return;
     const selectedCards = cards.filter((c) => selectedIds.has(c.id));
@@ -230,19 +408,31 @@ export default function DeckDetailPage() {
     navigate('/review');
   };
 
-  const renderCardGrid = (cardList: typeof cards) => {
+  const renderCardGrid = (cardList: typeof cards, sectionId: string | null) => {
+    const isDraggable = !selectMode;
     if (view === 'grid') {
       return (
         <div className={styles.cardGrid}>
           {cardList.map((card) => {
             const preview = getContentPreview(card.content);
+            const isDragged = dragType === 'card' && dragId === card.id;
+            const isDropTarget = dropTarget?.id === card.id;
+            const gridDropClass = isDropTarget
+              ? (dropTarget.position === 'before' ? styles.cardDropBefore : styles.cardDropAfter)
+              : '';
             return (
               <div
                 key={card.id}
-                className={`${styles.gridCard} ${selectMode && selectedIds.has(card.id) ? styles.gridCardSelected : ''}`}
+                className={`${styles.gridCard} ${selectMode && selectedIds.has(card.id) ? styles.gridCardSelected : ''} ${isDragged ? styles.cardDragging : ''} ${gridDropClass}`}
+                draggable={isDraggable}
+                onDragStart={(e) => handleCardDragStart(e, card.id)}
+                onDragOver={(e) => handleCardDragOver(e, card.id)}
+                onDragLeave={handleCardDragLeave}
+                onDrop={(e) => handleCardDrop(e, card.id, sectionId)}
+                onDragEnd={clearDragState}
                 onClick={() => selectMode ? toggleSelect(card.id) : openModal('card-view', { card, courseColor: course?.color })}
               >
-                {selectMode && (
+                {selectMode ? (
                   <input
                     type="checkbox"
                     className={styles.cardCheckbox}
@@ -250,6 +440,10 @@ export default function DeckDetailPage() {
                     onChange={() => toggleSelect(card.id)}
                     onClick={(e) => e.stopPropagation()}
                   />
+                ) : (
+                  <div className={styles.dragHandle} onMouseDown={(e) => e.stopPropagation()}>
+                    <GripVertical size={14} />
+                  </div>
                 )}
                 <div className={styles.gridCardTop}>
                   <span
@@ -289,6 +483,7 @@ export default function DeckDetailPage() {
     return (
       <div className={styles.listView}>
         <div className={styles.listHeader}>
+          {!selectMode && <span style={{ width: 22 }} />}
           {selectMode && <span style={{ width: 28 }} />}
           <span className={styles.listColTitle}>Title</span>
           <span className={styles.listColType}>Type</span>
@@ -296,45 +491,63 @@ export default function DeckDetailPage() {
           <span className={styles.listColTags}>Tags</span>
           <span className={styles.listColDue}>Due</span>
         </div>
-        {cardList.map((card) => (
-          <div
-            key={card.id}
-            className={`${styles.listRow} ${selectMode && selectedIds.has(card.id) ? styles.listRowSelected : ''}`}
-            onClick={() => selectMode ? toggleSelect(card.id) : openModal('card-view', { card, courseColor: course?.color })}
-          >
-            {selectMode && (
-              <input
-                type="checkbox"
-                className={styles.cardCheckbox}
-                checked={selectedIds.has(card.id)}
-                onChange={() => toggleSelect(card.id)}
-                onClick={(e) => e.stopPropagation()}
-              />
-            )}
-            <div className={styles.listColTitle}>
-              <div className={styles.listCardName}>{card.title}</div>
-              {(() => { const p = getContentPreview(card.content); return p ? (
-                <div className={styles.listCardPreview}>
-                  <KaTeXRenderer text={p.length > 80 ? p.slice(0, 80) + '…' : p} />
+        {cardList.map((card) => {
+          const isDragged = dragType === 'card' && dragId === card.id;
+          const isDropTarget = dropTarget?.id === card.id;
+          const listDropClass = isDropTarget
+            ? (dropTarget.position === 'before' ? styles.listCardDropBefore : styles.listCardDropAfter)
+            : '';
+          return (
+            <div
+              key={card.id}
+              className={`${styles.listRow} ${selectMode && selectedIds.has(card.id) ? styles.listRowSelected : ''} ${isDragged ? styles.cardDragging : ''} ${listDropClass}`}
+              draggable={isDraggable}
+              onDragStart={(e) => handleCardDragStart(e, card.id)}
+              onDragOver={(e) => handleCardDragOver(e, card.id)}
+              onDragLeave={handleCardDragLeave}
+              onDrop={(e) => handleCardDrop(e, card.id, sectionId)}
+              onDragEnd={clearDragState}
+              onClick={() => selectMode ? toggleSelect(card.id) : openModal('card-view', { card, courseColor: course?.color })}
+            >
+              {!selectMode && (
+                <div className={styles.dragHandle} onMouseDown={(e) => e.stopPropagation()}>
+                  <GripVertical size={14} />
                 </div>
-              ) : null; })()}
-            </div>
-            <span className={styles.listColType}>
-              <span className={styles.templateBadgeSm} style={{ backgroundColor: (templateColors[card.template_type] || '#8b5cf6') + '20', color: templateColors[card.template_type] || '#8b5cf6' }}>
-                {templateLabels[card.template_type] || 'GEN'}
+              )}
+              {selectMode && (
+                <input
+                  type="checkbox"
+                  className={styles.cardCheckbox}
+                  checked={selectedIds.has(card.id)}
+                  onChange={() => toggleSelect(card.id)}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              )}
+              <div className={styles.listColTitle}>
+                <div className={styles.listCardName}>{card.title}</div>
+                {(() => { const p = getContentPreview(card.content); return p ? (
+                  <div className={styles.listCardPreview}>
+                    <KaTeXRenderer text={p.length > 80 ? p.slice(0, 80) + '…' : p} />
+                  </div>
+                ) : null; })()}
+              </div>
+              <span className={styles.listColType}>
+                <span className={styles.templateBadgeSm} style={{ backgroundColor: (templateColors[card.template_type] || '#8b5cf6') + '20', color: templateColors[card.template_type] || '#8b5cf6' }}>
+                  {templateLabels[card.template_type] || 'GEN'}
+                </span>
               </span>
-            </span>
-            <span className={styles.listColImportance}>
-              {Array.from({ length: 5 }, (_, i) => (
-                <Star key={i} size={10} fill={i < card.importance ? '#f59e0b' : 'none'} color={i < card.importance ? '#f59e0b' : 'var(--text-muted)'} />
-              ))}
-            </span>
-            <span className={styles.listColTags}>{card.tags?.map((t) => t.name).join(', ') || '—'}</span>
-            <span className={styles.listColDue}>
-              {card.fsrs_reps === 0 ? 'New' : card.fsrs_next_review ? new Date(card.fsrs_next_review).toLocaleDateString() : '—'}
-            </span>
-          </div>
-        ))}
+              <span className={styles.listColImportance}>
+                {Array.from({ length: 5 }, (_, i) => (
+                  <Star key={i} size={10} fill={i < card.importance ? '#f59e0b' : 'none'} color={i < card.importance ? '#f59e0b' : 'var(--text-muted)'} />
+                ))}
+              </span>
+              <span className={styles.listColTags}>{card.tags?.map((t) => t.name).join(', ') || '—'}</span>
+              <span className={styles.listColDue}>
+                {card.fsrs_reps === 0 ? 'New' : card.fsrs_next_review ? new Date(card.fsrs_next_review).toLocaleDateString() : '—'}
+              </span>
+            </div>
+          );
+        })}
       </div>
     );
   };
@@ -496,9 +709,27 @@ export default function DeckDetailPage() {
             const sectionCards = cardsBySection[section.id] || [];
             const filteredCards = filterCardsBySearch(sectionCards, section.id);
             const collapsed = collapsedSections.has(section.id);
+            const isSectionDragged = dragType === 'section' && dragId === section.id;
+            const isSectionDropTarget = dropTarget?.id === section.id && dragType === 'section';
+            const isSectionCardDropHighlight = dropSectionHighlight === section.id && dragType === 'card';
+            const sectionDropClass = isSectionDropTarget
+              ? (dropTarget.position === 'before' ? styles.sectionDropBefore : styles.sectionDropAfter)
+              : '';
             return (
-              <div key={section.id} className={styles.sectionGroup}>
-                <div className={styles.sectionHeader} onClick={() => toggleSection(section.id)}>
+              <div
+                key={section.id}
+                className={`${styles.sectionGroup} ${isSectionDragged ? styles.sectionDragging : ''} ${sectionDropClass}`}
+                draggable={editingSectionId !== section.id}
+                onDragStart={(e) => handleSectionDragStart(e, section.id)}
+                onDragOver={(e) => handleSectionDragOver(e, section.id)}
+                onDragLeave={handleSectionDragLeave}
+                onDrop={(e) => handleSectionDrop(e, section.id)}
+                onDragEnd={clearDragState}
+              >
+                <div className={`${styles.sectionHeader} ${isSectionCardDropHighlight ? styles.sectionDropHighlight : ''}`} onClick={() => toggleSection(section.id)}>
+                  <div className={styles.dragHandle} onMouseDown={(e) => e.stopPropagation()}>
+                    <GripVertical size={14} />
+                  </div>
                   {collapsed ? <ChevronRightIcon size={14} /> : <ChevronDown size={14} />}
                   {editingSectionId === section.id ? (
                     <input
@@ -553,19 +784,28 @@ export default function DeckDetailPage() {
                     />
                   </div>
                 )}
-                {!collapsed && filteredCards.length > 0 && renderCardGrid(filteredCards)}
+                {!collapsed && filteredCards.length > 0 && renderCardGrid(filteredCards, section.id)}
               </div>
             );
           })}
 
           {/* Unsectioned cards */}
-          {(cardsBySection.__unsectioned?.length ?? 0) > 0 && (() => {
-            const unsectionedFiltered = filterCardsBySearch(cardsBySection.__unsectioned, '__unsectioned');
+          {(() => {
+            const unsectionedCards = cardsBySection.__unsectioned || [];
+            const unsectionedFiltered = filterCardsBySearch(unsectionedCards, '__unsectioned');
+            const isUnsectionedDropHighlight = dropSectionHighlight === '__unsectioned' && dragType === 'card';
+            const showUnsectioned = unsectionedFiltered.length > 0 || (dragType === 'card' && sections.length > 0);
+            if (!showUnsectioned) return null;
             return (
-              <div className={styles.sectionGroup}>
+              <div
+                className={styles.sectionGroup}
+                onDragOver={handleUnsectionedDragOver}
+                onDragLeave={() => setDropSectionHighlight(null)}
+                onDrop={handleUnsectionedDrop}
+              >
                 {sections.length > 0 && (
                   <>
-                    <div className={styles.sectionHeader} onClick={() => toggleSectionSearch('__unsectioned')}>
+                    <div className={`${styles.sectionHeader} ${isUnsectionedDropHighlight ? styles.sectionDropHighlight : ''}`} onClick={() => toggleSectionSearch('__unsectioned')}>
                       <span className={styles.sectionName}>Unsectioned</span>
                       <div className={styles.sectionActions}>
                         <button
@@ -591,7 +831,12 @@ export default function DeckDetailPage() {
                     )}
                   </>
                 )}
-                {unsectionedFiltered.length > 0 && renderCardGrid(unsectionedFiltered)}
+                {unsectionedFiltered.length > 0 && renderCardGrid(unsectionedFiltered, null)}
+                {unsectionedFiltered.length === 0 && dragType === 'card' && (
+                  <div className={`${styles.dropZone} ${isUnsectionedDropHighlight ? styles.dropZoneActive : ''}`}>
+                    Drop here to unsection
+                  </div>
+                )}
               </div>
             );
           })()}

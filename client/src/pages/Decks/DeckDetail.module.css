@@ -738,6 +738,101 @@
   background: var(--accent-primary-hover);
 }
 
+/* Drag handle */
+.dragHandle {
+  display: flex;
+  align-items: center;
+  color: var(--text-muted);
+  cursor: grab;
+  padding: 2px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.sectionHeader:hover .dragHandle,
+.gridCard:hover .dragHandle,
+.listRow:hover .dragHandle {
+  opacity: 0.6;
+}
+
+.dragHandle:hover {
+  opacity: 1 !important;
+  color: var(--text-secondary);
+}
+
+/* Drag-and-drop visual feedback */
+.sectionDragging {
+  opacity: 0.5;
+}
+
+.sectionDropBefore::before {
+  content: '';
+  display: block;
+  height: 2px;
+  background: var(--accent-primary);
+  margin-bottom: 8px;
+  border-radius: 1px;
+}
+
+.sectionDropAfter::after {
+  content: '';
+  display: block;
+  height: 2px;
+  background: var(--accent-primary);
+  margin-top: 8px;
+  border-radius: 1px;
+}
+
+.cardDragging {
+  opacity: 0.4;
+}
+
+.cardDropBefore {
+  border-left: 2px solid var(--accent-primary);
+}
+
+.cardDropAfter {
+  border-right: 2px solid var(--accent-primary);
+}
+
+.listCardDropBefore {
+  border-top: 2px solid var(--accent-primary);
+}
+
+.listCardDropAfter {
+  border-bottom: 2px solid var(--accent-primary);
+}
+
+.sectionDropHighlight {
+  background: var(--accent-primary-bg) !important;
+  outline: 1px dashed var(--accent-primary);
+}
+
+.dropZone {
+  min-height: 40px;
+  border: 2px dashed var(--border-default);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-top: 8px;
+  transition: all var(--transition-fast);
+}
+
+.dropZoneActive {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary-bg);
+  color: var(--accent-primary);
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }

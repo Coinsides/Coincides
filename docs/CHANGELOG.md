@@ -4,6 +4,41 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Round 2 Step 5] — 2026-03-17
+
+### 拖拽排序系统
+
+#### Section 拖拽排序
+- Section 之间可通过拖拽手柄（GripVertical）调整顺序
+- 拖拽时显示半透明效果 + 插入位置指示线
+- 后端批量更新 `order_index`（SQLite 事务保证原子性）
+
+#### Section 内卡片拖拽排序
+- 同一 Section 内的卡片可拖拽调整顺序
+- Grid 和 List 两种视图均支持拖拽
+- 卡片显示 GripVertical 拖拽手柄
+
+#### 跨 Section 拖拽卡片
+- 卡片可从一个 Section 拖拽到另一个 Section
+- 拖拽到 Section 标题上 = 移动到该 Section 末尾
+- 支持拖拽到「Unsectioned」区域（section_id 设为 null）
+- 目标 Section 高亮显示（虚线边框 + 背景色变化）
+
+#### 技术实现
+- 使用 HTML5 原生 Drag and Drop API（零依赖）
+- 乐观更新：拖拽完成后立即更新 UI，API 失败时 toast 提示并回滚
+- 批量选择模式下自动禁用拖拽（避免操作冲突）
+- Section 重命名编辑中禁用该 Section 拖拽
+
+#### 新增 API
+- `PUT /api/sections/reorder` — 批量更新 Section 顺序
+- `PUT /api/cards/reorder` — 批量更新卡片 section_id + order_index
+
+#### Files
+- 修改 7 个文件: sections.ts (routes), cards.ts (routes), validators/index.ts, sectionStore.ts, cardStore.ts, DeckDetail.tsx (+244 lines), DeckDetail.module.css
+
+---
+
 ## [Round 2 Step 4] — 2026-03-17
 
 ### Agent 文档工具

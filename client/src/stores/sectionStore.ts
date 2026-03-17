@@ -9,6 +9,7 @@ interface SectionState {
   createSection: (deckId: string, name: string, orderIndex?: number) => Promise<CardSection>;
   updateSection: (id: string, data: { name?: string; order_index?: number }) => Promise<CardSection>;
   deleteSection: (id: string) => Promise<void>;
+  reorderSections: (deckId: string, orderedIds: string[]) => Promise<void>;
 }
 
 export const useSectionStore = create<SectionState>((set, get) => ({
@@ -40,5 +41,18 @@ export const useSectionStore = create<SectionState>((set, get) => ({
   deleteSection: async (id) => {
     await api.delete(`/sections/${id}`);
     set({ sections: get().sections.filter((s) => s.id !== id) });
+  },
+
+  reorderSections: async (deckId, orderedIds) => {
+    // Optimistic update
+    const reordered = orderedIds
+      .map((id, i) => {
+        const s = get().sections.find((sec) => sec.id === id);
+        return s ? { ...s, order_index: i } : null;
+      })
+      .filter((s): s is CardSection => s !== null);
+    set({ sections: reordered });
+
+    await api.put('/sections/reorder', { deck_id: deckId, order: orderedIds });
   },
 }));
