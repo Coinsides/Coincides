@@ -4,6 +4,38 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Round 2 Step 2] — 2026-03-17
+
+### Tag Group 系统（课程级别标签分组）
+
+#### 后端
+- 新建 `tag_groups` 表：课程级别的标签分组（course_id + user_id + name，同课程内名称唯一）
+- `tags` 表新增 `tag_group_id` 字段，关联到 tag_groups（CASCADE 删除）
+- 新增 `/api/tag-groups` CRUD 路由：GET 带嵌套 tags、POST、PUT、DELETE
+- 修改 `/api/tags`：支持 `?course_id` 查询参数过滤课程标签，POST 支持 `tag_group_id`
+- 移除 `is_system` 编辑/删除限制，旧系统标签现可编辑和删除
+- 新增 Zod validators：`createTagGroupSchema`, `updateTagGroupSchema`
+
+#### 前端
+- 新增 `TagGroupManager` 组件：从课程页打开的标签管理弹窗
+  - 可展开/折叠的标签组，行内编辑名称、删除
+  - 标签显示为彩色圆点 + 名称，支持编辑/删除
+  - 预设颜色选择器（14种颜色）
+  - 添加标签组 / 添加标签内联操作
+- 课程卡片新增 "Tags" 按钮，打开 TagGroupManager
+- `CardModal` 智能切换：如果课程有 tag groups → 按组显示课程标签；否则回退显示所有用户标签
+- `tagStore` 扩展：新增 tagGroups 状态、fetchTagGroups、CRUD 方法
+
+#### 示例用法
+- 数学课 → 创建标签组 "Core" → 添加 Definition / Theorem / Formula 标签
+- 英语课 → 创建标签组 "Types" → 添加 Vocabulary / Grammar / Reading 标签
+
+#### Files
+- 新增 3 个文件: tagGroups.ts, TagGroupManager.tsx, TagGroupManager.module.css
+- 修改 11 个文件: schema.sql, init.ts, tags.ts, validators, index.ts, shared types, tagStore, CardModal, Courses 页面
+
+---
+
 ## [Round 2 Step 1] — 2026-03-17
 
 ### 卡片尺寸修复 + KaTeX 预览渲染

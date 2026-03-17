@@ -69,6 +69,13 @@ export function initDb(dbPath?: string): Database.Database {
     // Column already exists — ignore
   }
 
+  // Add tag_group_id column to tags
+  try {
+    db.exec('ALTER TABLE tags ADD COLUMN tag_group_id TEXT REFERENCES tag_groups(id) ON DELETE CASCADE;');
+  } catch (_e) {
+    // Column already exists — ignore
+  }
+
   // Seed system study templates
   seedStudyTemplates();
 

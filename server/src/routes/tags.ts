@@ -8,11 +8,25 @@ import { ZodError } from 'zod';
 
 const router = Router();
 
-// GET /api/tags
+// GET /api/tags?course_id=xxx
 router.get('/', (req: AuthRequest, res: Response) => {
   const db = getDb();
-  const tags = db.prepare('SELECT * FROM tags WHERE user_id = ? ORDER BY is_system DESC, name ASC').all(req.userId!);
-  res.json(tags);
+  const courseId = req.query.course_id as string | undefined;
+
+  if (courseId) {
+    // Return tags for a specific course (via tag_groups)
+    const tags = db.prepare(
+      `SELECT t.* FROM tags t
+       INNER JOIN tag_groups tg ON t.tag_group_id = tg.id
+       WHERE tg.course_id = ? AND t.user_id = ?
+       ORDER BY tg.order_index ASC, t.name ASC`
+    ).all(courseId, req.userId!);
+    res.json(tags);
+  } else {
+    // Return all user tags (backwards compatible)
+    const tags = db.prepare('SELECT * FROM tags WHERE user_id = ? ORDER BY is_system DESC, name ASC').all(req.userId!);
+    res.json(tags);
+  }
 });
 
 // POST /api/tags
@@ -31,8 +45,8 @@ router.post('/', (req: AuthRequest, res: Response) => {
     const now = new Date().toISOString();
 
     db.prepare(
-      'INSERT INTO tags (id, user_id, name, is_system, color, created_at) VALUES (?, ?, ?, 0, ?, ?)'
-    ).run(id, req.userId!, data.name, data.color || null, now);
+      'INSERT INTO tags (id, user_id, name, is_system, color, tag_group_id, created_at) VALUES (?, ?, ?, 0, ?, ?, ?)'
+    ).run(id, req.userId!, data.name, data.color || null, data.tag_group_id || null, now);
 
     const tag = db.prepare('SELECT * FROM tags WHERE id = ?').get(id);
     res.status(201).json(tag);
@@ -54,10 +68,6 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     const existing = db.prepare('SELECT * FROM tags WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!) as any;
     if (!existing) {
       throw new AppError(404, 'Tag not found');
-    }
-
-    if (existing.is_system) {
-      throw new AppError(403, 'Cannot edit system tags');
     }
 
     const fields: string[] = [];
@@ -99,10 +109,6 @@ router.delete('/:id', (req: AuthRequest, res: Response) => {
   const existing = db.prepare('SELECT * FROM tags WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!) as any;
   if (!existing) {
     throw new AppError(404, 'Tag not found');
-  }
-
-  if (existing.is_system) {
-    throw new AppError(403, 'Cannot delete system tags');
   }
 
   // CASCADE handles card_tags cleanup via FK constraints

@@ -176,11 +176,23 @@ export const updateSectionSchema = z.object({
   order_index: z.number().int().min(0).optional(),
 });
 
+// --- Tag Group ---
+
+export const createTagGroupSchema = z.object({
+  course_id: z.string().uuid('Invalid course ID'),
+  name: z.string().min(1, 'Tag group name is required').max(50),
+});
+
+export const updateTagGroupSchema = z.object({
+  name: z.string().min(1).max(50),
+});
+
 // --- Tag ---
 
 export const createTagSchema = z.object({
   name: z.string().min(1, 'Tag name is required').max(50),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Invalid hex color').optional(),
+  tag_group_id: z.string().uuid('Invalid tag group ID').optional(),
 });
 
 export const updateTagSchema = z.object({

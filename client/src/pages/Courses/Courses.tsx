@@ -1,13 +1,15 @@
 import { useState } from 'react';
-import { Plus, Edit2, Trash2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Tags } from 'lucide-react';
 import { useCourseStore } from '@/stores/courseStore';
 import { useUIStore } from '@/stores/uiStore';
+import TagGroupManager from '@/components/TagGroupManager/TagGroupManager';
 import type { Course } from '@shared/types';
 import styles from './Courses.module.css';
 
 export default function CoursesPage() {
   const courses = useCourseStore((s) => s.courses);
   const deleteCourse = useCourseStore((s) => s.deleteCourse);
+  const modal = useUIStore((s) => s.modal);
   const openModal = useUIStore((s) => s.openModal);
   const addToast = useUIStore((s) => s.addToast);
 
@@ -46,6 +48,13 @@ export default function CoursesPage() {
                 </span>
               </div>
               <div className={styles.cardActions}>
+                <button
+                  className={styles.tagsBtn}
+                  onClick={() => openModal('tag-group-manager', { courseId: course.id, courseName: course.name })}
+                >
+                  <Tags size={12} />
+                  Tags
+                </button>
                 <button
                   className={styles.editBtn}
                   onClick={() => openModal('course-edit', { course })}
@@ -90,6 +99,9 @@ export default function CoursesPage() {
           </div>
         </div>
       )}
+
+      {/* Tag Group Manager modal */}
+      {modal?.type === 'tag-group-manager' && <TagGroupManager />}
     </div>
   );
 }

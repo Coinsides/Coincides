@@ -107,6 +107,7 @@
   border-top: 1px solid var(--border-subtle);
 }
 
+.tagsBtn,
 .editBtn,
 .deleteBtn {
   padding: 6px 12px;
@@ -118,6 +119,12 @@
   display: flex;
   align-items: center;
   gap: 4px;
+}
+
+.tagsBtn:hover {
+  background: var(--accent-primary-bg);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
 }
 
 .editBtn:hover {

@@ -154,7 +154,22 @@ CREATE INDEX IF NOT EXISTS idx_cards_deck_id ON cards(deck_id);
 CREATE INDEX IF NOT EXISTS idx_cards_user_fsrs ON cards(user_id, fsrs_next_review);
 
 -- ============================================================
--- 8. Tag
+-- 8a. TagGroup
+-- ============================================================
+CREATE TABLE IF NOT EXISTS tag_groups (
+  id TEXT PRIMARY KEY,
+  course_id TEXT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  order_index INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(course_id, name)
+);
+
+CREATE INDEX IF NOT EXISTS idx_tag_groups_course ON tag_groups(course_id);
+
+-- ============================================================
+-- 8b. Tag
 -- ============================================================
 CREATE TABLE IF NOT EXISTS tags (
   id TEXT PRIMARY KEY,

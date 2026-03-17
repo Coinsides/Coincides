@@ -1,6 +1,7 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { Star } from 'lucide-react';
 import { useCardStore } from '@/stores/cardStore';
+import { useDeckStore } from '@/stores/deckStore';
 import { useSectionStore } from '@/stores/sectionStore';
 import { useTagStore } from '@/stores/tagStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -26,12 +27,20 @@ export default function CardModal() {
   const closeModal = useUIStore((s) => s.closeModal);
   const addToast = useUIStore((s) => s.addToast);
   const { createCard, updateCard } = useCardStore();
+  const decks = useDeckStore((s) => s.decks);
   const sections = useSectionStore((s) => s.sections);
   const tags = useTagStore((s) => s.tags);
+  const tagGroups = useTagStore((s) => s.tagGroups);
+  const fetchTagGroups = useTagStore((s) => s.fetchTagGroups);
 
   const isEdit = modal?.type === 'card-edit';
   const existing = modal?.data?.card as (Card & { tags?: { id: string }[] }) | undefined;
   const deckId = modal?.data?.deckId as string | undefined;
+
+  // Determine course_id from the deck
+  const effectiveDeckId = existing?.deck_id || deckId || '';
+  const deck = decks.find((d) => d.id === effectiveDeckId);
+  const courseId = deck?.course_id;
 
   const [templateType, setTemplateType] = useState<CardTemplateType>(CardTemplateType.General);
   const [title, setTitle] = useState('');
@@ -98,6 +107,15 @@ export default function CardModal() {
       }
     }
   }, [modal]);
+
+  // Fetch course-specific tag groups when courseId is determined
+  useEffect(() => {
+    if (courseId) {
+      fetchTagGroups(courseId);
+    }
+  }, [courseId]);
+
+  const hasTagGroups = tagGroups.length > 0;
 
   const buildContent = () => {
     switch (templateType) {
@@ -385,23 +403,50 @@ export default function CardModal() {
           {/* Tags */}
           <div className={styles.field}>
             <label>Tags</label>
-            <div className={styles.tagList}>
-              {tags.map((tag) => (
-                <label key={tag.id} className={styles.tagCheck}>
-                  <input
-                    type="checkbox"
-                    checked={selectedTags.includes(tag.id)}
-                    onChange={() => toggleTag(tag.id)}
-                  />
-                  <span
-                    className={styles.tagLabel}
-                    style={tag.color ? { borderColor: tag.color + '60', color: tag.color } : undefined}
-                  >
-                    {tag.name}
-                  </span>
-                </label>
-              ))}
-            </div>
+            {hasTagGroups ? (
+              // Show course-specific tags grouped by tag group
+              tagGroups.map((group) => (
+                <div key={group.id} className={styles.tagGroupSection}>
+                  <div className={styles.tagGroupName}>{group.name}</div>
+                  <div className={styles.tagList}>
+                    {group.tags?.map((tag) => (
+                      <label key={tag.id} className={styles.tagCheck}>
+                        <input
+                          type="checkbox"
+                          checked={selectedTags.includes(tag.id)}
+                          onChange={() => toggleTag(tag.id)}
+                        />
+                        <span
+                          className={styles.tagLabel}
+                          style={tag.color ? { borderColor: tag.color + '60', color: tag.color } : undefined}
+                        >
+                          {tag.name}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))
+            ) : (
+              // Fallback: show all user tags
+              <div className={styles.tagList}>
+                {tags.map((tag) => (
+                  <label key={tag.id} className={styles.tagCheck}>
+                    <input
+                      type="checkbox"
+                      checked={selectedTags.includes(tag.id)}
+                      onChange={() => toggleTag(tag.id)}
+                    />
+                    <span
+                      className={styles.tagLabel}
+                      style={tag.color ? { borderColor: tag.color + '60', color: tag.color } : undefined}
+                    >
+                      {tag.name}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className={styles.actions}>
