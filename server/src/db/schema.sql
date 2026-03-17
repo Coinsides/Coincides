@@ -216,6 +216,21 @@ CREATE INDEX IF NOT EXISTS idx_documents_user_id ON documents(user_id);
 CREATE INDEX IF NOT EXISTS idx_documents_course_id ON documents(course_id);
 
 -- ============================================================
+-- 10b. DocumentChunk
+-- ============================================================
+CREATE TABLE IF NOT EXISTS document_chunks (
+  id TEXT PRIMARY KEY,
+  document_id TEXT NOT NULL REFERENCES documents(id) ON DELETE CASCADE,
+  chunk_index INTEGER NOT NULL,
+  content TEXT NOT NULL,
+  page_start INTEGER,
+  page_end INTEGER,
+  heading TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+CREATE INDEX IF NOT EXISTS idx_document_chunks_document_id ON document_chunks(document_id);
+
+-- ============================================================
 -- 11. AgentConversation
 -- ============================================================
 CREATE TABLE IF NOT EXISTS agent_conversations (

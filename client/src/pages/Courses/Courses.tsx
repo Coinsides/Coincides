@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Plus, Edit2, Trash2, Tags } from 'lucide-react';
+import { Plus, Edit2, Trash2, Tags, FileText } from 'lucide-react';
 import { useCourseStore } from '@/stores/courseStore';
 import { useUIStore } from '@/stores/uiStore';
 import TagGroupManager from '@/components/TagGroupManager/TagGroupManager';
+import DocumentManager from '@/components/DocumentManager/DocumentManager';
 import type { Course } from '@shared/types';
 import styles from './Courses.module.css';
 
@@ -48,6 +49,13 @@ export default function CoursesPage() {
                 </span>
               </div>
               <div className={styles.cardActions}>
+                <button
+                  className={styles.filesBtn}
+                  onClick={() => openModal('document-manager', { courseId: course.id, courseName: course.name })}
+                >
+                  <FileText size={12} />
+                  Files
+                </button>
                 <button
                   className={styles.tagsBtn}
                   onClick={() => openModal('tag-group-manager', { courseId: course.id, courseName: course.name })}
@@ -102,6 +110,9 @@ export default function CoursesPage() {
 
       {/* Tag Group Manager modal */}
       {modal?.type === 'tag-group-manager' && <TagGroupManager />}
+
+      {/* Document Manager modal */}
+      {modal?.type === 'document-manager' && <DocumentManager />}
     </div>
   );
 }

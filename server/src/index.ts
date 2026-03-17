@@ -24,6 +24,7 @@ import proposalRoutes from './routes/proposals.js';
 import statisticsRoutes from './routes/statistics.js';
 import sectionRoutes from './routes/sections.js';
 import studyTemplateRoutes from './routes/studyTemplates.js';
+import documentRoutes from './routes/documents.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 
@@ -61,6 +62,7 @@ app.use('/api/proposals', authMiddleware, proposalRoutes);
 app.use('/api/statistics', authMiddleware, statisticsRoutes);
 app.use('/api/sections', authMiddleware, sectionRoutes);
 app.use('/api/study-templates', authMiddleware, studyTemplateRoutes);
+app.use('/api/documents', authMiddleware, documentRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

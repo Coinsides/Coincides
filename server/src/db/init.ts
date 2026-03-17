@@ -76,6 +76,27 @@ export function initDb(dbPath?: string): Database.Database {
     // Column already exists — ignore
   }
 
+  // Add document_type column to documents
+  try {
+    db.exec("ALTER TABLE documents ADD COLUMN document_type TEXT;");
+  } catch (_e) {
+    // Column already exists — ignore
+  }
+
+  // Add chunk_count column to documents
+  try {
+    db.exec('ALTER TABLE documents ADD COLUMN chunk_count INTEGER DEFAULT 0;');
+  } catch (_e) {
+    // Column already exists — ignore
+  }
+
+  // Add error_message column to documents
+  try {
+    db.exec('ALTER TABLE documents ADD COLUMN error_message TEXT;');
+  } catch (_e) {
+    // Column already exists — ignore
+  }
+
   // Seed system study templates
   seedStudyTemplates();
 

@@ -38,6 +38,18 @@ export enum DocumentFileType {
   PDF = 'pdf',
   DOCX = 'docx',
   Image = 'image',
+  XLSX = 'xlsx',
+  TXT = 'txt',
+  MD = 'md',
+}
+
+export enum DocumentType {
+  Textbook = 'textbook',
+  Notes = 'notes',
+  Slides = 'slides',
+  ProblemSet = 'problem_set',
+  Reference = 'reference',
+  Other = 'other',
 }
 
 export enum DocumentParseStatus {
@@ -271,8 +283,22 @@ export interface Document {
   extracted_text: string | null;
   summary: string | null;
   page_count: number | null;
+  document_type: DocumentType | null;
+  chunk_count: number;
+  error_message: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface DocumentChunk {
+  id: string;
+  document_id: string;
+  chunk_index: number;
+  content: string;
+  page_start: number | null;
+  page_end: number | null;
+  heading: string | null;
+  created_at: string;
 }
 
 export interface AgentConversation {

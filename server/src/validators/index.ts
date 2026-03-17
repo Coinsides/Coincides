@@ -226,6 +226,12 @@ export const updateProposalSchema = z.object({
   data: z.any(),
 });
 
+// --- Document Upload ---
+
+export const uploadDocumentSchema = z.object({
+  course_id: z.string().uuid('Invalid course ID'),
+});
+
 // --- Query params ---
 
 export const dateQuerySchema = z.object({

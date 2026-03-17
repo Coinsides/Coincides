@@ -4,6 +4,45 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Round 2 Step 3] — 2026-03-17
+
+### 文档上传 + 解析系统
+
+#### 后端
+- 新建 `document_chunks` 表：长文档分块存储（chunk_index, content, heading）
+- `documents` 表新增 `document_type`、`chunk_count`、`error_message` 字段
+- Multer 文件上传中间件：50MB 限制，支持 PDF/DOCX/XLSX/图片/TXT/MD
+- 多格式解析流水线（异步 fire-and-forget）：
+  - **PDF 双通道**: pdf-parse 原生提取 → 失败则回退到 Claude Haiku 3.5 Vision API
+  - **DOCX**: mammoth 提取纯文本
+  - **XLSX**: SheetJS 读取工作簿，每个 sheet 转 CSV
+  - **图片**: Claude Haiku 3.5 Vision API OCR
+  - **TXT/MD**: 直接 UTF-8 读取
+- 智能分块：短文档（≤30K 字符）存 `extracted_text`，长文档按段落边界分块（~5K 字符/块）
+- AI 自动摘要 + 文档类型分类（textbook/notes/slides/problem_set/reference/other）
+- REST API：upload、list、detail、chunks、status polling、delete
+- 文件存储在 `server/uploads/` 目录（已加入 .gitignore）
+
+#### 前端
+- 新增 `DocumentManager` 组件：从课程页打开的文件管理弹窗
+  - 拖拽上传区 / 点击浏览按钮
+  - 文档列表：文件类型图标（彩色）、文件名、大小、页数
+  - 状态徽章：Pending(黄) / Parsing(蓝+旋转) / Completed(绿) / Failed(红)
+  - 解析中的文档每 3 秒自动轮询状态
+  - 点击已完成文档展开显示摘要 + 分块数
+  - 删除确认弹窗
+- 课程卡片新增 "Files" 按钮（FileText 图标）
+- 新增 `documentStore`：上传/列表/轮询/删除 状态管理
+
+#### 依赖新增
+- multer (文件上传), pdf-parse (PDF文本提取), mammoth (DOCX), xlsx (SheetJS)
+
+#### Files
+- 新增 6 个文件: documents.ts (route), documentParser.ts (service), upload.ts (middleware), DocumentManager.tsx, DocumentManager.module.css, documentStore.ts, pdf-parse.d.ts, mammoth.d.ts
+- 修改 8 个文件: schema.sql, init.ts, index.ts, validators, shared types, Courses 页面, .gitignore, package.json
+
+---
+
 ## [Round 2 Step 2] — 2026-03-17
 
 ### Tag Group 系统（课程级别标签分组）
