@@ -111,6 +111,7 @@ export interface Course {
   code: string | null;
   color: string;
   weight: number;
+  description: string | null;
   semester: string | null;
   created_at: string;
   updated_at: string;
@@ -174,10 +175,12 @@ export interface Card {
   id: string;
   user_id: string;
   deck_id: string;
+  section_id: string | null;
   template_type: CardTemplateType;
   title: string;
   content: CardContent;
   importance: number;
+  order_index: number;
   source_document_id: string | null;
   source_page: number | null;
   source_excerpt: string | null;
@@ -188,6 +191,15 @@ export interface Card {
   fsrs_reps: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface CardSection {
+  id: string;
+  deck_id: string;
+  user_id: string;
+  name: string;
+  order_index: number;
+  created_at: string;
 }
 
 export type CardContent =
@@ -319,6 +331,7 @@ export interface CreateCourseRequest {
   code?: string;
   color?: string;
   weight?: number;
+  description?: string;
   semester?: string;
 }
 
@@ -327,6 +340,7 @@ export interface UpdateCourseRequest {
   code?: string;
   color?: string;
   weight?: number;
+  description?: string;
   semester?: string;
 }
 

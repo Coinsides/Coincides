@@ -85,6 +85,14 @@ router.post('/conversations/:id/messages', async (req: AuthRequest, res: Respons
     res.setHeader('X-Accel-Buffering', 'no');
     res.flushHeaders();
 
+    // 120s request-level timeout
+    const REQUEST_TIMEOUT_MS = 120_000;
+    const requestTimer = setTimeout(() => {
+      res.write(`event: error\ndata: ${JSON.stringify({ message: 'Request timed out after 120s' })}\n\n`);
+      res.write(`event: done\ndata: {}\n\n`);
+      res.end();
+    }, REQUEST_TIMEOUT_MS);
+
     const conversationId = req.params.id as string;
     try {
       for await (const chunk of runAgent(
@@ -93,6 +101,7 @@ router.post('/conversations/:id/messages', async (req: AuthRequest, res: Respons
         data.message,
         data.context_hint,
       )) {
+        if (res.writableEnded) break;
         if (chunk.type === 'text' && chunk.text) {
           res.write(`event: text\ndata: ${JSON.stringify({ content: chunk.text })}\n\n`);
         } else if (chunk.type === 'tool_call_start') {
@@ -107,10 +116,13 @@ router.post('/conversations/:id/messages', async (req: AuthRequest, res: Respons
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Agent error';
-      res.write(`event: error\ndata: ${JSON.stringify({ message })}\n\n`);
+      if (!res.writableEnded) {
+        res.write(`event: error\ndata: ${JSON.stringify({ message })}\n\n`);
+      }
     }
 
-    res.end();
+    clearTimeout(requestTimer);
+    if (!res.writableEnded) res.end();
   } catch (err) {
     if (err instanceof ZodError) {
       res.status(400).json({ error: 'Validation error', details: err.errors });

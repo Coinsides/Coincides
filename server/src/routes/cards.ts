@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
-import { createCardSchema, updateCardSchema } from '../validators/index.js';
+import { createCardSchema, updateCardSchema, batchDeleteCardsSchema, batchMoveCardsSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
 
 const router = Router();
@@ -73,7 +73,7 @@ router.get('/', (req: AuthRequest, res: Response) => {
     params.push(pattern, pattern);
   }
 
-  query += ` WHERE ${conditions.join(' AND ')} ORDER BY c.created_at DESC`;
+  query += ` WHERE ${conditions.join(' AND ')} ORDER BY c.section_id NULLS LAST, c.order_index ASC, c.created_at DESC`;
   const cards = db.prepare(query).all(...params) as any[];
 
   // Attach tags to each card
@@ -115,12 +115,13 @@ router.post('/', (req: AuthRequest, res: Response) => {
     const now = new Date().toISOString();
 
     db.prepare(
-      `INSERT INTO cards (id, user_id, deck_id, template_type, title, content, importance, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO cards (id, user_id, deck_id, section_id, template_type, title, content, importance, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(
       id,
       req.userId!,
       data.deck_id,
+      data.section_id || null,
       data.template_type,
       data.title,
       JSON.stringify(data.content),
@@ -169,6 +170,7 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     if (data.title !== undefined) { fields.push('title = ?'); values.push(data.title); }
     if (data.content !== undefined) { fields.push('content = ?'); values.push(JSON.stringify(data.content)); }
     if (data.importance !== undefined) { fields.push('importance = ?'); values.push(data.importance); }
+    if (data.section_id !== undefined) { fields.push('section_id = ?'); values.push(data.section_id); }
 
     if (fields.length > 0) {
       fields.push('updated_at = ?');
@@ -216,6 +218,94 @@ router.delete('/:id', (req: AuthRequest, res: Response) => {
   );
 
   res.json({ message: 'Card deleted' });
+});
+
+// POST /api/cards/batch-delete
+router.post('/batch-delete', (req: AuthRequest, res: Response) => {
+  try {
+    const data = batchDeleteCardsSchema.parse(req.body);
+    const db = getDb();
+
+    const deleteCard = db.prepare('DELETE FROM cards WHERE id = ? AND user_id = ?');
+    const getCard = db.prepare('SELECT id, deck_id FROM cards WHERE id = ? AND user_id = ?');
+
+    const deckCounts: Record<string, number> = {};
+    let deleted = 0;
+
+    const batch = db.transaction(() => {
+      for (const cardId of data.card_ids) {
+        const card = getCard.get(cardId, req.userId!) as any;
+        if (card) {
+          deleteCard.run(cardId, req.userId!);
+          deckCounts[card.deck_id] = (deckCounts[card.deck_id] || 0) + 1;
+          deleted++;
+        }
+      }
+
+      const now = new Date().toISOString();
+      for (const [deckId, count] of Object.entries(deckCounts)) {
+        db.prepare('UPDATE card_decks SET card_count = card_count - ?, updated_at = ? WHERE id = ?').run(count, now, deckId);
+      }
+    });
+
+    batch();
+    res.json({ deleted });
+  } catch (err) {
+    if (err instanceof ZodError) {
+      res.status(400).json({ error: 'Validation error', details: err.errors });
+      return;
+    }
+    throw err;
+  }
+});
+
+// POST /api/cards/batch-move
+router.post('/batch-move', (req: AuthRequest, res: Response) => {
+  try {
+    const data = batchMoveCardsSchema.parse(req.body);
+    const db = getDb();
+
+    // Verify target deck belongs to user
+    const targetDeck = db.prepare('SELECT id FROM card_decks WHERE id = ? AND user_id = ?').get(data.target_deck_id, req.userId!);
+    if (!targetDeck) {
+      throw new AppError(404, 'Target deck not found');
+    }
+
+    const getCard = db.prepare('SELECT id, deck_id FROM cards WHERE id = ? AND user_id = ?');
+    const moveCard = db.prepare('UPDATE cards SET deck_id = ?, section_id = ?, updated_at = ? WHERE id = ?');
+
+    const sourceDeckCounts: Record<string, number> = {};
+    let moved = 0;
+
+    const batch = db.transaction(() => {
+      const now = new Date().toISOString();
+      for (const cardId of data.card_ids) {
+        const card = getCard.get(cardId, req.userId!) as any;
+        if (card && card.deck_id !== data.target_deck_id) {
+          moveCard.run(data.target_deck_id, data.target_section_id || null, now, cardId);
+          sourceDeckCounts[card.deck_id] = (sourceDeckCounts[card.deck_id] || 0) + 1;
+          moved++;
+        }
+      }
+
+      const now2 = new Date().toISOString();
+      for (const [deckId, count] of Object.entries(sourceDeckCounts)) {
+        db.prepare('UPDATE card_decks SET card_count = card_count - ?, updated_at = ? WHERE id = ?').run(count, now2, deckId);
+      }
+      if (moved > 0) {
+        db.prepare('UPDATE card_decks SET card_count = card_count + ?, updated_at = ? WHERE id = ?').run(moved, now2, data.target_deck_id);
+      }
+    });
+
+    batch();
+    res.json({ moved });
+  } catch (err) {
+    if (err instanceof ZodError) {
+      res.status(400).json({ error: 'Validation error', details: err.errors });
+      return;
+    }
+    throw err;
+  }
 });
 
 export default router;

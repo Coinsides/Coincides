@@ -1,15 +1,18 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Plus, LayoutGrid, List, Search, Play, Star, X, Sparkles,
+  CheckSquare, Trash2, FolderInput, ChevronDown, ChevronRight as ChevronRightIcon, FolderPlus,
 } from 'lucide-react';
 import { useCardStore } from '@/stores/cardStore';
 import { useDeckStore } from '@/stores/deckStore';
+import { useSectionStore } from '@/stores/sectionStore';
 import { useCourseStore } from '@/stores/courseStore';
 import { useTagStore } from '@/stores/tagStore';
 import { useReviewStore } from '@/stores/reviewStore';
 import { useUIStore } from '@/stores/uiStore';
 import { CardTemplateType } from '@shared/types';
+import type { CardContent } from '@shared/types';
 import styles from './DeckDetail.module.css';
 
 const templateOptions = [
@@ -34,18 +37,29 @@ const templateLabels: Record<string, string> = {
   [CardTemplateType.General]: 'GEN',
 };
 
+function getContentPreview(content: CardContent): string {
+  if (!content) return '';
+  if ('definition' in content) return content.definition || '';
+  if ('statement' in content) return content.statement || '';
+  if ('formula' in content) return content.formula || '';
+  if ('body' in content) return content.body || '';
+  return '';
+}
+
 export default function DeckDetailPage() {
   const { deckId } = useParams<{ deckId: string }>();
   const navigate = useNavigate();
 
-  const { cards, loading, fetchCards } = useCardStore();
+  const { cards, loading, fetchCards, batchDelete } = useCardStore();
   const decks = useDeckStore((s) => s.decks);
   const fetchDecks = useDeckStore((s) => s.fetchDecks);
+  const { sections, fetchSections, createSection } = useSectionStore();
   const courses = useCourseStore((s) => s.courses);
   const tags = useTagStore((s) => s.tags);
   const dueCount = useReviewStore((s) => s.dueCount);
   const fetchDueCount = useReviewStore((s) => s.fetchDueCount);
   const openModal = useUIStore((s) => s.openModal);
+  const addToast = useUIStore((s) => s.addToast);
   const openAgentWithContext = useUIStore((s) => s.openAgentWithContext);
 
   const [view, setView] = useState<'grid' | 'list'>('grid');
@@ -55,6 +69,15 @@ export default function DeckDetailPage() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const perPage = 20;
+
+  // Batch select
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // Section collapse
+  const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
+  const [showNewSection, setShowNewSection] = useState(false);
+  const [newSectionName, setNewSectionName] = useState('');
 
   const deck = decks.find((d) => d.id === deckId);
   const course = deck ? courses.find((c) => c.id === deck.course_id) : null;
@@ -73,6 +96,7 @@ export default function DeckDetailPage() {
     if (!deckId) return;
     if (decks.length === 0) fetchDecks();
     fetchDueCount();
+    fetchSections(deckId);
     loadCards();
   }, [deckId]);
 
@@ -83,6 +107,155 @@ export default function DeckDetailPage() {
 
   const totalPages = Math.ceil(cards.length / perPage);
   const paginatedCards = cards.slice((page - 1) * perPage, page * perPage);
+
+  // Group cards by section
+  const cardsBySection = useMemo(() => {
+    const groups: Record<string, typeof cards> = { __unsectioned: [] };
+    for (const s of sections) groups[s.id] = [];
+    for (const card of paginatedCards) {
+      const key = card.section_id && groups[card.section_id] ? card.section_id : '__unsectioned';
+      groups[key].push(card);
+    }
+    return groups;
+  }, [paginatedCards, sections]);
+
+  const toggleSection = (sectionId: string) => {
+    setCollapsedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(sectionId)) next.delete(sectionId); else next.add(sectionId);
+      return next;
+    });
+  };
+
+  const toggleSelect = (cardId: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(cardId)) next.delete(cardId); else next.add(cardId);
+      return next;
+    });
+  };
+
+  const handleBatchDelete = async () => {
+    if (selectedIds.size === 0) return;
+    try {
+      const count = await batchDelete([...selectedIds]);
+      addToast('success', `Deleted ${count} cards`);
+      setSelectedIds(new Set());
+      setSelectMode(false);
+      loadCards();
+    } catch {
+      addToast('error', 'Failed to delete cards');
+    }
+  };
+
+  const handleAddSection = async () => {
+    if (!newSectionName.trim() || !deckId) return;
+    try {
+      await createSection(deckId, newSectionName.trim(), sections.length);
+      setNewSectionName('');
+      setShowNewSection(false);
+    } catch {
+      addToast('error', 'Failed to create section');
+    }
+  };
+
+  const renderCardGrid = (cardList: typeof cards) => {
+    if (view === 'grid') {
+      return (
+        <div className={styles.cardGrid}>
+          {cardList.map((card) => {
+            const preview = getContentPreview(card.content);
+            return (
+              <div
+                key={card.id}
+                className={`${styles.gridCard} ${selectMode && selectedIds.has(card.id) ? styles.gridCardSelected : ''}`}
+                onClick={() => selectMode ? toggleSelect(card.id) : openModal('card-view', { card, courseColor: course?.color })}
+              >
+                {selectMode && (
+                  <input
+                    type="checkbox"
+                    className={styles.cardCheckbox}
+                    checked={selectedIds.has(card.id)}
+                    onChange={() => toggleSelect(card.id)}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                )}
+                <div className={styles.gridCardTop}>
+                  <span
+                    className={styles.templateBadge}
+                    style={{
+                      backgroundColor: (templateColors[card.template_type] || '#8b5cf6') + '20',
+                      color: templateColors[card.template_type] || '#8b5cf6',
+                    }}
+                  >
+                    {templateLabels[card.template_type] || 'GEN'}
+                  </span>
+                  <div className={styles.miniStars}>
+                    {Array.from({ length: 5 }, (_, i) => (
+                      <Star key={i} size={10} fill={i < card.importance ? '#f59e0b' : 'none'} color={i < card.importance ? '#f59e0b' : 'var(--text-muted)'} />
+                    ))}
+                  </div>
+                </div>
+                <div className={styles.gridCardTitle}>{card.title}</div>
+                {preview && <div className={styles.gridCardPreview}>{preview}</div>}
+                {card.tags && card.tags.length > 0 && (
+                  <div className={styles.gridCardTags}>
+                    {card.tags.map((tag) => (
+                      <span key={tag.id} className={styles.tag} style={tag.color ? { backgroundColor: tag.color + '20', color: tag.color } : undefined}>{tag.name}</span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+    return (
+      <div className={styles.listView}>
+        <div className={styles.listHeader}>
+          {selectMode && <span style={{ width: 28 }} />}
+          <span className={styles.listColTitle}>Title</span>
+          <span className={styles.listColType}>Type</span>
+          <span className={styles.listColImportance}>Importance</span>
+          <span className={styles.listColTags}>Tags</span>
+          <span className={styles.listColDue}>Due</span>
+        </div>
+        {cardList.map((card) => (
+          <div
+            key={card.id}
+            className={`${styles.listRow} ${selectMode && selectedIds.has(card.id) ? styles.listRowSelected : ''}`}
+            onClick={() => selectMode ? toggleSelect(card.id) : openModal('card-view', { card, courseColor: course?.color })}
+          >
+            {selectMode && (
+              <input
+                type="checkbox"
+                className={styles.cardCheckbox}
+                checked={selectedIds.has(card.id)}
+                onChange={() => toggleSelect(card.id)}
+                onClick={(e) => e.stopPropagation()}
+              />
+            )}
+            <span className={styles.listColTitle}>{card.title}</span>
+            <span className={styles.listColType}>
+              <span className={styles.templateBadgeSm} style={{ backgroundColor: (templateColors[card.template_type] || '#8b5cf6') + '20', color: templateColors[card.template_type] || '#8b5cf6' }}>
+                {templateLabels[card.template_type] || 'GEN'}
+              </span>
+            </span>
+            <span className={styles.listColImportance}>
+              {Array.from({ length: 5 }, (_, i) => (
+                <Star key={i} size={10} fill={i < card.importance ? '#f59e0b' : 'none'} color={i < card.importance ? '#f59e0b' : 'var(--text-muted)'} />
+              ))}
+            </span>
+            <span className={styles.listColTags}>{card.tags?.map((t) => t.name).join(', ') || '—'}</span>
+            <span className={styles.listColDue}>
+              {card.fsrs_reps === 0 ? 'New' : card.fsrs_next_review ? new Date(card.fsrs_next_review).toLocaleDateString() : '—'}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className={styles.page}>
@@ -123,6 +296,20 @@ export default function DeckDetailPage() {
               Review ({dueCount})
             </button>
           )}
+          <button
+            className={`${styles.selectBtn} ${selectMode ? styles.selectBtnActive : ''}`}
+            onClick={() => { setSelectMode(!selectMode); setSelectedIds(new Set()); }}
+            title="Select cards"
+          >
+            <CheckSquare size={14} />
+          </button>
+          <button
+            className={styles.sectionAddBtn}
+            onClick={() => setShowNewSection(!showNewSection)}
+            title="Add section"
+          >
+            <FolderPlus size={14} />
+          </button>
           <button
             className={styles.aiBtn}
             onClick={() => openAgentWithContext('deck', { deck_id: deckId, deck_name: deck?.name })}
@@ -189,6 +376,24 @@ export default function DeckDetailPage() {
         </select>
       </div>
 
+      {/* New Section Input */}
+      {showNewSection && (
+        <div className={styles.newSectionRow}>
+          <input
+            className={styles.newSectionInput}
+            placeholder="Section name..."
+            value={newSectionName}
+            onChange={(e) => setNewSectionName(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAddSection()}
+            autoFocus
+          />
+          <button className={styles.newSectionSave} onClick={handleAddSection}>Add</button>
+          <button className={styles.newSectionCancel} onClick={() => { setShowNewSection(false); setNewSectionName(''); }}>
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
       {/* Content */}
       {loading && cards.length === 0 ? (
         <div className={styles.loading}>Loading cards...</div>
@@ -197,101 +402,50 @@ export default function DeckDetailPage() {
           <h3>No cards in this deck</h3>
           <p>Add your first flashcard to start studying.</p>
         </div>
-      ) : view === 'grid' ? (
-        <div className={styles.cardGrid}>
-          {paginatedCards.map((card) => (
-            <div
-              key={card.id}
-              className={styles.gridCard}
-              onClick={() => openModal('card-view', { card, courseColor: course?.color })}
-            >
-              <div className={styles.gridCardTop}>
-                <span
-                  className={styles.templateBadge}
-                  style={{
-                    backgroundColor: (templateColors[card.template_type] || '#8b5cf6') + '20',
-                    color: templateColors[card.template_type] || '#8b5cf6',
-                  }}
-                >
-                  {templateLabels[card.template_type] || 'GEN'}
-                </span>
-                <div className={styles.miniStars}>
-                  {Array.from({ length: 5 }, (_, i) => (
-                    <Star
-                      key={i}
-                      size={10}
-                      fill={i < card.importance ? '#f59e0b' : 'none'}
-                      color={i < card.importance ? '#f59e0b' : 'var(--text-muted)'}
-                    />
-                  ))}
-                </div>
+      ) : (
+        <>
+          {/* Render sections + unsectioned cards */}
+          {sections.map((section) => {
+            const sectionCards = cardsBySection[section.id] || [];
+            const collapsed = collapsedSections.has(section.id);
+            return (
+              <div key={section.id} className={styles.sectionGroup}>
+                <button className={styles.sectionHeader} onClick={() => toggleSection(section.id)}>
+                  {collapsed ? <ChevronRightIcon size={14} /> : <ChevronDown size={14} />}
+                  <span className={styles.sectionName}>{section.name}</span>
+                  <span className={styles.sectionCount}>{sectionCards.length}</span>
+                </button>
+                {!collapsed && sectionCards.length > 0 && renderCardGrid(sectionCards)}
               </div>
-              <div className={styles.gridCardTitle}>{card.title}</div>
-              {card.tags && card.tags.length > 0 && (
-                <div className={styles.gridCardTags}>
-                  {card.tags.map((tag) => (
-                    <span
-                      key={tag.id}
-                      className={styles.tag}
-                      style={tag.color ? { backgroundColor: tag.color + '20', color: tag.color } : undefined}
-                    >
-                      {tag.name}
-                    </span>
-                  ))}
+            );
+          })}
+
+          {/* Unsectioned cards */}
+          {(cardsBySection.__unsectioned?.length ?? 0) > 0 && (
+            <div className={styles.sectionGroup}>
+              {sections.length > 0 && (
+                <div className={styles.sectionHeader}>
+                  <span className={styles.sectionName}>Unsectioned</span>
+                  <span className={styles.sectionCount}>{cardsBySection.__unsectioned.length}</span>
                 </div>
               )}
+              {renderCardGrid(cardsBySection.__unsectioned)}
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className={styles.listView}>
-          <div className={styles.listHeader}>
-            <span className={styles.listColTitle}>Title</span>
-            <span className={styles.listColType}>Type</span>
-            <span className={styles.listColImportance}>Importance</span>
-            <span className={styles.listColTags}>Tags</span>
-            <span className={styles.listColDue}>Due</span>
-          </div>
-          {paginatedCards.map((card) => (
-            <div
-              key={card.id}
-              className={styles.listRow}
-              onClick={() => openModal('card-view', { card, courseColor: course?.color })}
-            >
-              <span className={styles.listColTitle}>{card.title}</span>
-              <span className={styles.listColType}>
-                <span
-                  className={styles.templateBadgeSm}
-                  style={{
-                    backgroundColor: (templateColors[card.template_type] || '#8b5cf6') + '20',
-                    color: templateColors[card.template_type] || '#8b5cf6',
-                  }}
-                >
-                  {templateLabels[card.template_type] || 'GEN'}
-                </span>
-              </span>
-              <span className={styles.listColImportance}>
-                {Array.from({ length: 5 }, (_, i) => (
-                  <Star
-                    key={i}
-                    size={10}
-                    fill={i < card.importance ? '#f59e0b' : 'none'}
-                    color={i < card.importance ? '#f59e0b' : 'var(--text-muted)'}
-                  />
-                ))}
-              </span>
-              <span className={styles.listColTags}>
-                {card.tags?.map((t) => t.name).join(', ') || '—'}
-              </span>
-              <span className={styles.listColDue}>
-                {card.fsrs_reps === 0
-                  ? 'New'
-                  : card.fsrs_next_review
-                    ? new Date(card.fsrs_next_review).toLocaleDateString()
-                    : '—'}
-              </span>
-            </div>
-          ))}
+          )}
+        </>
+      )}
+
+      {/* Batch action bar */}
+      {selectMode && selectedIds.size > 0 && (
+        <div className={styles.batchBar}>
+          <span className={styles.batchCount}>{selectedIds.size} selected</span>
+          <button className={styles.batchDeleteBtn} onClick={handleBatchDelete}>
+            <Trash2 size={14} />
+            Delete
+          </button>
+          <button className={styles.batchCancelBtn} onClick={() => { setSelectMode(false); setSelectedIds(new Set()); }}>
+            Cancel
+          </button>
         </div>
       )}
 

@@ -8,6 +8,8 @@ import {
   addDays,
   addMonths,
   subMonths,
+  addWeeks,
+  subWeeks,
   isSameMonth,
   isSameDay,
   isToday,
@@ -20,6 +22,8 @@ import api from '@/services/api';
 import type { Task } from '@shared/types';
 import styles from './Calendar.module.css';
 
+type CalendarView = 'month' | 'week';
+
 const PRIORITY_COLORS: Record<string, string> = {
   must: 'var(--priority-must)',
   recommended: 'var(--priority-recommended)',
@@ -31,6 +35,7 @@ export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [dayTasks, setDayTasks] = useState<Task[]>([]);
   const [courseFilter, setCourseFilter] = useState('');
+  const [view, setView] = useState<CalendarView>('month');
 
   const { tasks, fetchTasksByRange } = useTaskStore();
   const courses = useCourseStore((s) => s.courses);
@@ -40,17 +45,25 @@ export default function CalendarPage() {
 
   // Fetch tasks for visible range
   useEffect(() => {
-    const monthStart = startOfMonth(currentMonth);
-    const monthEnd = endOfMonth(currentMonth);
-    const rangeStart = startOfWeek(monthStart, { weekStartsOn: 1 });
-    const rangeEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+    let rangeStart: Date;
+    let rangeEnd: Date;
+
+    if (view === 'week') {
+      rangeStart = startOfWeek(currentMonth, { weekStartsOn: 1 });
+      rangeEnd = endOfWeek(currentMonth, { weekStartsOn: 1 });
+    } else {
+      const monthStart = startOfMonth(currentMonth);
+      const monthEnd = endOfMonth(currentMonth);
+      rangeStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+      rangeEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+    }
 
     fetchTasksByRange(
       format(rangeStart, 'yyyy-MM-dd'),
       format(rangeEnd, 'yyyy-MM-dd'),
       courseFilter || undefined
     );
-  }, [currentMonth, courseFilter]);
+  }, [currentMonth, courseFilter, view]);
 
   // Build calendar days
   const calendarDays = useMemo(() => {
@@ -66,6 +79,12 @@ export default function CalendarPage() {
       day = addDays(day, 1);
     }
     return days;
+  }, [currentMonth]);
+
+  // Build week days (for week view)
+  const weekDays = useMemo(() => {
+    const start = startOfWeek(currentMonth, { weekStartsOn: 1 });
+    return Array.from({ length: 7 }, (_, i) => addDays(start, i));
   }, [currentMonth]);
 
   // Group tasks by date string
@@ -116,13 +135,47 @@ export default function CalendarPage() {
       <div className={styles.header}>
         <div className={styles.title}>Calendar</div>
         <div className={styles.controls}>
-          <button className={styles.navBtn} onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}>
+          {/* View toggle */}
+          <div className={styles.viewToggle}>
+            <button
+              className={`${styles.viewBtn} ${view === 'month' ? styles.viewBtnActive : ''}`}
+              onClick={() => setView('month')}
+            >Month</button>
+            <button
+              className={`${styles.viewBtn} ${view === 'week' ? styles.viewBtnActive : ''}`}
+              onClick={() => setView('week')}
+            >Week</button>
+          </div>
+
+          <button className={styles.navBtn} onClick={() => setCurrentMonth(view === 'week' ? subWeeks(currentMonth, 1) : subMonths(currentMonth, 1))}>
             <ChevronLeft size={16} />
           </button>
-          <span className={styles.monthLabel}>{format(currentMonth, 'MMMM yyyy')}</span>
-          <button className={styles.navBtn} onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}>
+          <span className={styles.monthLabel}>
+            {view === 'week'
+              ? `${format(startOfWeek(currentMonth, { weekStartsOn: 1 }), 'MMM d')} – ${format(endOfWeek(currentMonth, { weekStartsOn: 1 }), 'MMM d, yyyy')}`
+              : format(currentMonth, 'MMMM yyyy')
+            }
+          </span>
+          <button className={styles.navBtn} onClick={() => setCurrentMonth(view === 'week' ? addWeeks(currentMonth, 1) : addMonths(currentMonth, 1))}>
             <ChevronRight size={16} />
           </button>
+
+          {/* Year selector */}
+          <select
+            className={styles.filterSelect}
+            value={currentMonth.getFullYear()}
+            onChange={(e) => {
+              const newYear = parseInt(e.target.value, 10);
+              const updated = new Date(currentMonth);
+              updated.setFullYear(newYear);
+              setCurrentMonth(updated);
+            }}
+          >
+            {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map((y) => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+          </select>
+
           <select
             className={styles.filterSelect}
             value={courseFilter}
@@ -144,40 +197,79 @@ export default function CalendarPage() {
       </div>
 
       {/* Grid */}
-      <div className={styles.grid}>
-        <div className={styles.weekHeader}>
-          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => (
-            <div key={d} className={styles.weekDay}>{d}</div>
-          ))}
+      {view === 'month' ? (
+        <div className={styles.grid}>
+          <div className={styles.weekHeader}>
+            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => (
+              <div key={d} className={styles.weekDay}>{d}</div>
+            ))}
+          </div>
+          <div className={styles.days}>
+            {calendarDays.map((day) => {
+              const dateStr = format(day, 'yyyy-MM-dd');
+              const dayTaskList = tasksByDate[dateStr] || [];
+              const inMonth = isSameMonth(day, currentMonth);
+              const selected = selectedDate && isSameDay(day, selectedDate);
+
+              return (
+                <div
+                  key={dateStr}
+                  className={`${styles.dayCell} ${!inMonth ? styles.otherMonth : ''} ${isToday(day) ? styles.today : ''} ${selected ? styles.selected : ''}`}
+                  onClick={() => handleDayClick(day)}
+                >
+                  <div className={styles.dayNumber}>{format(day, 'd')}</div>
+                  <div className={styles.taskDots}>
+                    {dayTaskList.slice(0, 8).map((t) => (
+                      <span
+                        key={t.id}
+                        className={styles.taskDot}
+                        style={{ backgroundColor: PRIORITY_COLORS[t.priority] || 'var(--text-muted)' }}
+                      />
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-        <div className={styles.days}>
-          {calendarDays.map((day) => {
+      ) : (
+        /* Week view */
+        <div className={styles.weekGrid}>
+          {weekDays.map((day) => {
             const dateStr = format(day, 'yyyy-MM-dd');
             const dayTaskList = tasksByDate[dateStr] || [];
-            const inMonth = isSameMonth(day, currentMonth);
             const selected = selectedDate && isSameDay(day, selectedDate);
 
             return (
               <div
                 key={dateStr}
-                className={`${styles.dayCell} ${!inMonth ? styles.otherMonth : ''} ${isToday(day) ? styles.today : ''} ${selected ? styles.selected : ''}`}
+                className={`${styles.weekColumn} ${isToday(day) ? styles.weekColumnToday : ''} ${selected ? styles.weekColumnSelected : ''}`}
                 onClick={() => handleDayClick(day)}
               >
-                <div className={styles.dayNumber}>{format(day, 'd')}</div>
-                <div className={styles.taskDots}>
-                  {dayTaskList.slice(0, 8).map((t) => (
-                    <span
-                      key={t.id}
-                      className={styles.taskDot}
-                      style={{ backgroundColor: PRIORITY_COLORS[t.priority] || 'var(--text-muted)' }}
-                    />
-                  ))}
+                <div className={styles.weekColumnHeader}>
+                  <span className={styles.weekColumnDay}>{format(day, 'EEE')}</span>
+                  <span className={`${styles.weekColumnDate} ${isToday(day) ? styles.weekColumnDateToday : ''}`}>{format(day, 'd')}</span>
+                </div>
+                <div className={styles.weekColumnTasks}>
+                  {dayTaskList.map((t) => {
+                    const course = getCourse(t.course_id);
+                    return (
+                      <div
+                        key={t.id}
+                        className={`${styles.weekTask} ${t.status === 'completed' ? styles.weekTaskDone : ''}`}
+                        style={{ borderLeftColor: PRIORITY_COLORS[t.priority] || 'var(--text-muted)' }}
+                      >
+                        <span className={styles.weekTaskTitle}>{t.title}</span>
+                        {course && <span className={styles.weekTaskCourse} style={{ color: course.color }}>{course.code || course.name}</span>}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );
           })}
         </div>
-      </div>
+      )}
 
       {/* Day detail panel */}
       {selectedDate && (

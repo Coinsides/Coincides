@@ -19,7 +19,8 @@ export const createCourseSchema = z.object({
   name: z.string().min(1, 'Course name is required').max(200),
   code: z.string().max(20).optional(),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Invalid hex color').optional(),
-  weight: z.number().int().min(1).max(10).optional(),
+  weight: z.number().int().min(1).max(3).optional(),
+  description: z.string().max(2000).optional(),
   semester: z.string().max(50).optional(),
 });
 
@@ -27,7 +28,8 @@ export const updateCourseSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   code: z.string().max(20).optional(),
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Invalid hex color').optional(),
-  weight: z.number().int().min(1).max(10).optional(),
+  weight: z.number().int().min(1).max(3).optional(),
+  description: z.string().max(2000).optional(),
   semester: z.string().max(50).optional(),
 });
 
@@ -132,6 +134,7 @@ const templateType = z.enum(['definition', 'theorem', 'formula', 'general']);
 
 export const createCardSchema = z.object({
   deck_id: z.string().uuid('Invalid deck ID'),
+  section_id: z.string().uuid().optional(),
   template_type: templateType.optional().default('general'),
   title: z.string().min(1, 'Card title is required').max(500),
   content: z.record(z.unknown()),
@@ -144,7 +147,33 @@ export const updateCardSchema = z.object({
   title: z.string().min(1).max(500).optional(),
   content: z.record(z.unknown()).optional(),
   importance: z.number().int().min(1).max(5).optional(),
+  section_id: z.string().uuid().nullable().optional(),
   tag_ids: z.array(z.string().uuid()).optional(),
+});
+
+// --- Card Batch Operations ---
+
+export const batchDeleteCardsSchema = z.object({
+  card_ids: z.array(z.string().uuid()).min(1, 'At least one card ID is required').max(200),
+});
+
+export const batchMoveCardsSchema = z.object({
+  card_ids: z.array(z.string().uuid()).min(1, 'At least one card ID is required').max(200),
+  target_deck_id: z.string().uuid('Invalid target deck ID'),
+  target_section_id: z.string().uuid().optional(),
+});
+
+// --- Card Section ---
+
+export const createSectionSchema = z.object({
+  deck_id: z.string().uuid('Invalid deck ID'),
+  name: z.string().min(1, 'Section name is required').max(200),
+  order_index: z.number().int().min(0).optional().default(0),
+});
+
+export const updateSectionSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  order_index: z.number().int().min(0).optional(),
 });
 
 // --- Tag ---

@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS courses (
   name TEXT NOT NULL,
   code TEXT,
   color TEXT NOT NULL DEFAULT '#6366f1',
-  weight INTEGER NOT NULL DEFAULT 5,
+  weight INTEGER NOT NULL DEFAULT 2,
+  description TEXT,
   semester TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -111,16 +112,32 @@ CREATE INDEX IF NOT EXISTS idx_card_decks_user_id ON card_decks(user_id);
 CREATE INDEX IF NOT EXISTS idx_card_decks_course_id ON card_decks(course_id);
 
 -- ============================================================
--- 7. Card
+-- 7a. CardSection
+-- ============================================================
+CREATE TABLE IF NOT EXISTS card_sections (
+  id TEXT PRIMARY KEY,
+  deck_id TEXT NOT NULL REFERENCES card_decks(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  order_index INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_card_sections_deck ON card_sections(deck_id);
+
+-- ============================================================
+-- 7b. Card
 -- ============================================================
 CREATE TABLE IF NOT EXISTS cards (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   deck_id TEXT NOT NULL REFERENCES card_decks(id) ON DELETE CASCADE,
+  section_id TEXT REFERENCES card_sections(id) ON DELETE SET NULL,
   template_type TEXT NOT NULL DEFAULT 'general',
   title TEXT NOT NULL,
   content TEXT NOT NULL,
   importance INTEGER NOT NULL DEFAULT 3,
+  order_index INTEGER NOT NULL DEFAULT 0,
   source_document_id TEXT REFERENCES documents(id) ON DELETE SET NULL,
   source_page INTEGER,
   source_excerpt TEXT,

@@ -22,7 +22,8 @@ export default function CourseModal() {
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [color, setColor] = useState(PRESET_COLORS[0]);
-  const [weight, setWeight] = useState(5);
+  const [weight, setWeight] = useState(2);
+  const [description, setDescription] = useState('');
   const [semester, setSemester] = useState('');
   const [saving, setSaving] = useState(false);
 
@@ -32,6 +33,7 @@ export default function CourseModal() {
       setCode(existing.code || '');
       setColor(existing.color);
       setWeight(existing.weight);
+      setDescription(existing.description || '');
       setSemester(existing.semester || '');
     }
   }, [modal]);
@@ -47,6 +49,7 @@ export default function CourseModal() {
         code: code.trim() || undefined,
         color,
         weight,
+        description: description.trim() || undefined,
         semester: semester.trim() || undefined,
       };
 
@@ -108,18 +111,35 @@ export default function CourseModal() {
           </div>
 
           <div className={styles.field}>
-            <label>Weight (1-10)</label>
-            <div className={styles.weightRow}>
-              <input
-                type="range"
-                min={1}
-                max={10}
-                value={weight}
-                onChange={(e) => setWeight(Number(e.target.value))}
-                className={styles.weightSlider}
-              />
-              <span className={styles.weightValue}>{weight}</span>
+            <label>Priority Weight</label>
+            <div className={styles.weightButtons}>
+              {([
+                { value: 1, label: 'Low', desc: 'Minor course' },
+                { value: 2, label: 'Medium', desc: 'Standard course' },
+                { value: 3, label: 'High', desc: 'Core / heavy course' },
+              ] as const).map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  className={`${styles.weightBtn} ${weight === opt.value ? styles.weightBtnActive : ''}`}
+                  onClick={() => setWeight(opt.value)}
+                >
+                  <span className={styles.weightBtnLabel}>{opt.label}</span>
+                  <span className={styles.weightBtnDesc}>{opt.desc}</span>
+                </button>
+              ))}
             </div>
+          </div>
+
+          <div className={styles.field}>
+            <label>Description</label>
+            <textarea
+              placeholder="Brief course description (optional)"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              className={styles.textarea}
+            />
           </div>
 
           <div className={styles.field}>

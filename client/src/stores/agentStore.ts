@@ -188,11 +188,27 @@ export const useAgentStore = create<AgentState>((set, get) => ({
                 break;
               }
               case 'error': {
+                let errorMessage = 'Something went wrong. Please try again.';
                 try {
                   const parsed = JSON.parse(evt.data);
-                  console.error('Agent error:', parsed.message);
+                  if (parsed.message) errorMessage = parsed.message;
                 } catch { /* ignore */ }
-                set({ streaming: false, streamingText: '', activeToolName: null });
+                const errorMsg: AgentMessage = {
+                  id: `err-${Date.now()}`,
+                  conversation_id: convId!,
+                  role: 'assistant' as AgentMessage['role'],
+                  content: `⚠️ ${errorMessage}`,
+                  tool_calls: null,
+                  tool_results: null,
+                  token_count: null,
+                  created_at: new Date().toISOString(),
+                };
+                set({
+                  streaming: false,
+                  streamingText: '',
+                  activeToolName: null,
+                  messages: [...get().messages, errorMsg],
+                });
                 break;
               }
             }
@@ -219,8 +235,24 @@ export const useAgentStore = create<AgentState>((set, get) => ({
           messages: [...get().messages, assistantMsg],
         });
       }
-    } catch {
-      set({ streaming: false, streamingText: '', activeToolName: null });
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Connection failed. Please try again.';
+      const errorMsg: AgentMessage = {
+        id: `err-${Date.now()}`,
+        conversation_id: convId!,
+        role: 'assistant' as AgentMessage['role'],
+        content: `⚠️ ${errorMessage}`,
+        tool_calls: null,
+        tool_results: null,
+        token_count: null,
+        created_at: new Date().toISOString(),
+      };
+      set({
+        streaming: false,
+        streamingText: '',
+        activeToolName: null,
+        messages: [...get().messages, errorMsg],
+      });
     }
   },
 }));

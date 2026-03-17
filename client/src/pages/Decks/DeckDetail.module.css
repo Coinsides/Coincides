@@ -211,10 +211,166 @@
   font-size: 12px;
 }
 
+/* Section groups */
+.sectionGroup {
+  margin-bottom: 16px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  color: var(--text-secondary);
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.sectionHeader:hover {
+  background: var(--bg-hover);
+}
+
+.sectionName {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sectionCount {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+/* New section input */
+.newSectionRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.newSectionInput {
+  flex: 1;
+  padding: 7px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 13px;
+  max-width: 300px;
+}
+
+.newSectionInput:focus {
+  border-color: var(--accent-primary);
+  outline: none;
+}
+
+.newSectionSave {
+  padding: 7px 14px;
+  background: var(--accent-primary);
+  color: white;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.newSectionCancel {
+  padding: 6px;
+  color: var(--text-muted);
+  display: flex;
+}
+
+/* Batch select */
+.selectBtn,
+.sectionAddBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 7px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+}
+
+.selectBtn:hover,
+.sectionAddBtn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.selectBtnActive {
+  background: var(--accent-primary-bg);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.cardCheckbox {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--accent-primary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.gridCardSelected {
+  border-color: var(--accent-primary) !important;
+  background: var(--accent-primary-bg);
+}
+
+.listRowSelected {
+  background: var(--accent-primary-bg) !important;
+}
+
+/* Batch action bar */
+.batchBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-top: 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+}
+
+.batchCount {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.batchDeleteBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--error);
+  color: white;
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.batchDeleteBtn:hover {
+  opacity: 0.9;
+}
+
+.batchCancelBtn {
+  padding: 6px 14px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
 /* Grid view */
 .cardGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 12px;
 }
 
@@ -228,10 +384,23 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  position: relative;
+  min-height: 130px;
 }
 
 .gridCard:hover {
   border-color: var(--accent-primary);
+}
+
+/* Card content preview */
+.gridCardPreview {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .gridCardTop {

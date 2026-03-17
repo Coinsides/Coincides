@@ -24,14 +24,15 @@ router.post('/', (req: AuthRequest, res: Response) => {
     const now = new Date().toISOString();
 
     db.prepare(
-      'INSERT INTO courses (id, user_id, name, code, color, weight, semester, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+      'INSERT INTO courses (id, user_id, name, code, color, weight, description, semester, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     ).run(
       id,
       req.userId!,
       data.name,
       data.code || null,
       data.color || '#6366f1',
-      data.weight ?? 5,
+      data.weight ?? 2,
+      data.description || null,
       data.semester || null,
       now,
       now
@@ -66,6 +67,7 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     if (data.code !== undefined) { fields.push('code = ?'); values.push(data.code); }
     if (data.color !== undefined) { fields.push('color = ?'); values.push(data.color); }
     if (data.weight !== undefined) { fields.push('weight = ?'); values.push(data.weight); }
+    if (data.description !== undefined) { fields.push('description = ?'); values.push(data.description); }
     if (data.semester !== undefined) { fields.push('semester = ?'); values.push(data.semester); }
 
     if (fields.length === 0) {

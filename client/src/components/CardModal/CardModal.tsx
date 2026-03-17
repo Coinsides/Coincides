@@ -1,6 +1,7 @@
 import { useState, useEffect, FormEvent } from 'react';
 import { Star } from 'lucide-react';
 import { useCardStore } from '@/stores/cardStore';
+import { useSectionStore } from '@/stores/sectionStore';
 import { useTagStore } from '@/stores/tagStore';
 import { useUIStore } from '@/stores/uiStore';
 import { CardTemplateType } from '@shared/types';
@@ -25,6 +26,7 @@ export default function CardModal() {
   const closeModal = useUIStore((s) => s.closeModal);
   const addToast = useUIStore((s) => s.addToast);
   const { createCard, updateCard } = useCardStore();
+  const sections = useSectionStore((s) => s.sections);
   const tags = useTagStore((s) => s.tags);
 
   const isEdit = modal?.type === 'card-edit';
@@ -33,6 +35,7 @@ export default function CardModal() {
 
   const [templateType, setTemplateType] = useState<CardTemplateType>(CardTemplateType.General);
   const [title, setTitle] = useState('');
+  const [sectionId, setSectionId] = useState('');
   const [importance, setImportance] = useState(3);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
@@ -53,6 +56,7 @@ export default function CardModal() {
     if (isEdit && existing) {
       setTemplateType(existing.template_type);
       setTitle(existing.title);
+      setSectionId(existing.section_id || '');
       setImportance(existing.importance);
       setSelectedTags(existing.tags?.map((t) => t.id) || []);
 
@@ -143,12 +147,14 @@ export default function CardModal() {
           title: title.trim(),
           content,
           importance,
+          section_id: sectionId || null,
           tag_ids: selectedTags,
         });
         addToast('success', 'Card updated');
       } else {
         await createCard({
           deck_id: existing?.deck_id || deckId || '',
+          section_id: sectionId || undefined,
           template_type: templateType,
           title: title.trim(),
           content,
@@ -211,6 +217,22 @@ export default function CardModal() {
               required
             />
           </div>
+
+          {/* Section */}
+          {sections.length > 0 && (
+            <div className={styles.field}>
+              <label>Section</label>
+              <select
+                value={sectionId}
+                onChange={(e) => setSectionId(e.target.value)}
+              >
+                <option value="">No section</option>
+                {sections.map((s) => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           {/* Dynamic content fields */}
           {templateType === CardTemplateType.Definition && (

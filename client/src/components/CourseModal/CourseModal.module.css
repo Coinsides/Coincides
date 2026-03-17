@@ -83,38 +83,61 @@
   box-shadow: 0 0 0 2px var(--accent-primary);
 }
 
-/* Weight slider */
-.weightRow {
+/* Weight buttons */
+.weightButtons {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
-.weightSlider {
+.weightBtn {
   flex: 1;
-  height: 4px;
-  -webkit-appearance: none;
-  appearance: none;
-  background: var(--bg-hover);
-  border-radius: 2px;
-  outline: none;
-}
-
-.weightSlider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--accent-primary);
+  padding: 10px 8px;
+  background: var(--bg-elevated);
+  border: 2px solid var(--border-default);
+  border-radius: var(--radius-md);
   cursor: pointer;
+  text-align: center;
+  transition: all var(--transition-fast);
 }
 
-.weightValue {
-  font-size: 14px;
+.weightBtn:hover {
+  border-color: var(--text-muted);
+}
+
+.weightBtnActive {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary-bg);
+}
+
+.weightBtnLabel {
+  display: block;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
-  min-width: 20px;
-  text-align: center;
+}
+
+.weightBtnDesc {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Textarea */
+.textarea {
+  padding: 8px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.textarea:focus {
+  border-color: var(--accent-primary);
+  outline: none;
 }
 
 /* Actions */

@@ -4,6 +4,67 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Polish Round 1] — 2026-03-17
+
+### Bug 修复 + 核心体验改进
+
+#### P0: Agent 卡死 Bug 修复
+- **Anthropic provider**: 补充 fallback `done` 事件 — 当 SSE 流正常结束但没有 `message_stop` 时，确保发出 `done` 信号
+- **Orchestrator**: 每轮 Agent 对话增加 30 秒超时机制，防止 API 挂起导致无限等待
+- **Agent route**: 增加 120 秒请求级超时，超时后自动发送 error + done 事件并关闭连接
+- **前端 agentStore**: error 事件现在在聊天中显示错误消息气泡（之前只 console.error，用户看不到任何反馈）
+- **前端 agentStore**: 网络异常时同样显示错误消息气泡
+
+#### Course Weight 三档化 + Description 字段
+- Weight 从 1-10 灰度条改为三档选择：重要(3) / 一般(2) / 不重要(1)
+- CourseModal 新增 Description 文本域
+- 课程卡片展示 description 和新的 weight badge
+- DB migration: courses 表新增 `description` 列
+- validators 更新: weight 限制为 1-3
+
+#### Calendar 周视图 + 年份选择
+- 新增 Month / Week 视图切换按钮
+- 新增年份选择下拉（当前年份 ±5 年范围）
+- Week 视图: 7 列（Mon-Sun），每列显示当日任务列表，支持完成/新建操作
+- 默认选中今天，月视图和周视图共享筛选逻辑
+
+#### Deck 卡片预览改进
+- Grid 视图卡片尺寸放大
+- 卡片标题下方新增内容摘要（2-3 行），按模板类型提取：
+  - Definition → definition 字段前 80 字符
+  - Theorem → statement 字段前 80 字符
+  - Formula → formula 字段
+  - General → body 字段前 80 字符
+- List 视图同步增加内容预览列
+
+#### Deck 内分组（Section）功能
+- 新增 `card_sections` 表: id, deck_id, user_id, name, order_index
+- Cards 表新增 `section_id` + `order_index` 字段
+- 新增 sections CRUD API: GET/POST/PUT/DELETE /api/sections
+- DeckDetail 页面按 Section 分组展示卡片，每组可折叠
+- 未分组卡片显示在 "Unsorted" 区域
+- 新建卡片时可选择 Section
+- CardModal 增加 Section 选择器
+
+#### 批量选取 + 批量删除/移动
+- DeckDetail header 新增 Select 模式按钮
+- 选中模式下卡片显示 checkbox
+- 底部浮动操作栏: 显示已选数量 + Delete + Move to 按钮
+- Move to 弹出目标 Deck 选择器
+- 后端新增: POST /api/cards/batch-delete, POST /api/cards/batch-move
+
+#### UI 整体字体/间距调大
+- 基础字体从 14px → 15px
+- 行高 1.4 → 1.55
+- 全局 padding/margin 增加 10-15%
+- 卡片、按钮、输入框间距统一调大
+
+#### Files
+- 新增文件: server/src/routes/sections.ts
+- 修改 22 个文件, +1,106 / -229 行
+
+---
+
 ## [Phase 4] — 2026-03-17
 
 ### Statistics, Minimum Working Flow & Smart Planning

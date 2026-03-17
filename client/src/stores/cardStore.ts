@@ -4,6 +4,7 @@ import type { Card, CardContent, CardTemplateType } from '@shared/types';
 
 interface CreateCardData {
   deck_id: string;
+  section_id?: string;
   template_type?: CardTemplateType;
   title: string;
   content: CardContent;
@@ -16,6 +17,7 @@ interface UpdateCardData {
   title?: string;
   content?: CardContent;
   importance?: number;
+  section_id?: string | null;
   tag_ids?: string[];
 }
 
@@ -40,6 +42,8 @@ interface CardState {
   updateCard: (id: string, data: UpdateCardData) => Promise<CardWithTags>;
   deleteCard: (id: string) => Promise<void>;
   setCurrentCard: (card: CardWithTags | null) => void;
+  batchDelete: (cardIds: string[]) => Promise<number>;
+  batchMove: (cardIds: string[], targetDeckId: string, targetSectionId?: string) => Promise<number>;
 }
 
 export const useCardStore = create<CardState>((set, get) => ({
@@ -81,4 +85,20 @@ export const useCardStore = create<CardState>((set, get) => ({
   },
 
   setCurrentCard: (card) => set({ currentCard: card }),
+
+  batchDelete: async (cardIds) => {
+    const { data } = await api.post('/cards/batch-delete', { card_ids: cardIds });
+    set({ cards: get().cards.filter((c) => !cardIds.includes(c.id)) });
+    return data.deleted;
+  },
+
+  batchMove: async (cardIds, targetDeckId, targetSectionId?) => {
+    const { data } = await api.post('/cards/batch-move', {
+      card_ids: cardIds,
+      target_deck_id: targetDeckId,
+      target_section_id: targetSectionId,
+    });
+    set({ cards: get().cards.filter((c) => !cardIds.includes(c.id)) });
+    return data.moved;
+  },
 }));

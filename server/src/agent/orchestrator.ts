@@ -107,36 +107,49 @@ export async function* runAgent(
     let toolInputJson = '';
 
     try {
-      for await (const chunk of provider.chat(messages, toolDefinitions, systemPrompt)) {
-        if (chunk.type === 'text') {
-          textBuffer += chunk.text || '';
-          yield chunk;
-        } else if (chunk.type === 'tool_call_start') {
-          currentToolCall = { id: chunk.tool_call?.id, name: chunk.tool_call?.name };
-          toolInputJson = '';
-        } else if (chunk.type === 'tool_call_delta') {
-          toolInputJson += chunk.text || '';
-        } else if (chunk.type === 'tool_call_end') {
-          if (chunk.tool_call?.arguments) {
-            // End event has fully parsed arguments
-            currentToolCalls.push(chunk.tool_call as ToolCall);
-          } else if (currentToolCall?.name) {
-            let args: Record<string, unknown> = {};
-            try { args = toolInputJson ? JSON.parse(toolInputJson) : {}; } catch { /* ignore */ }
-            currentToolCalls.push({
-              id: currentToolCall.id || `call_${round}_${currentToolCalls.length}`,
-              name: currentToolCall.name,
-              arguments: args,
-            });
+      const ROUND_TIMEOUT_MS = 30_000;
+      let roundTimedOut = false;
+      const timeoutHandle = setTimeout(() => { roundTimedOut = true; }, ROUND_TIMEOUT_MS);
+
+      try {
+        for await (const chunk of provider.chat(messages, toolDefinitions, systemPrompt)) {
+          if (roundTimedOut) {
+            yield { type: 'error', error: 'Agent round timed out after 30s' };
+            clearTimeout(timeoutHandle);
+            return;
           }
-          currentToolCall = null;
-          toolInputJson = '';
-        } else if (chunk.type === 'error') {
-          yield chunk;
-          return;
-        } else if (chunk.type === 'done') {
-          break;
+          if (chunk.type === 'text') {
+            textBuffer += chunk.text || '';
+            yield chunk;
+          } else if (chunk.type === 'tool_call_start') {
+            currentToolCall = { id: chunk.tool_call?.id, name: chunk.tool_call?.name };
+            toolInputJson = '';
+          } else if (chunk.type === 'tool_call_delta') {
+            toolInputJson += chunk.text || '';
+          } else if (chunk.type === 'tool_call_end') {
+            if (chunk.tool_call?.arguments) {
+              currentToolCalls.push(chunk.tool_call as ToolCall);
+            } else if (currentToolCall?.name) {
+              let args: Record<string, unknown> = {};
+              try { args = toolInputJson ? JSON.parse(toolInputJson) : {}; } catch { /* ignore */ }
+              currentToolCalls.push({
+                id: currentToolCall.id || `call_${round}_${currentToolCalls.length}`,
+                name: currentToolCall.name,
+                arguments: args,
+              });
+            }
+            currentToolCall = null;
+            toolInputJson = '';
+          } else if (chunk.type === 'error') {
+            yield chunk;
+            clearTimeout(timeoutHandle);
+            return;
+          } else if (chunk.type === 'done') {
+            break;
+          }
         }
+      } finally {
+        clearTimeout(timeoutHandle);
       }
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Provider error';

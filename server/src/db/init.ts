@@ -48,6 +48,27 @@ export function initDb(dbPath?: string): Database.Database {
     // Column already exists — ignore
   }
 
+  // Add description column to courses
+  try {
+    db.exec('ALTER TABLE courses ADD COLUMN description TEXT;');
+  } catch (_e) {
+    // Column already exists — ignore
+  }
+
+  // Add section_id column to cards
+  try {
+    db.exec('ALTER TABLE cards ADD COLUMN section_id TEXT REFERENCES card_sections(id) ON DELETE SET NULL;');
+  } catch (_e) {
+    // Column already exists — ignore
+  }
+
+  // Add order_index column to cards (for ordering within sections)
+  try {
+    db.exec('ALTER TABLE cards ADD COLUMN order_index INTEGER NOT NULL DEFAULT 0;');
+  } catch (_e) {
+    // Column already exists — ignore
+  }
+
   // Seed system study templates
   seedStudyTemplates();
 

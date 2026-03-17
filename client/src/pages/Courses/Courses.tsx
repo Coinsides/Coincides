@@ -37,13 +37,13 @@ export default function CoursesPage() {
             <div className={styles.cardBody}>
               <div className={styles.cardName}>{course.name}</div>
               <div className={styles.cardCode}>{course.code || 'No code'}{course.semester ? ` · ${course.semester}` : ''}</div>
+              {course.description && (
+                <div className={styles.cardDescription}>{course.description}</div>
+              )}
               <div className={styles.cardMeta}>
-                <span>Weight:</span>
-                <div className={styles.weightDots}>
-                  {Array.from({ length: 10 }, (_, i) => (
-                    <span key={i} className={`${styles.weightDot} ${i < course.weight ? styles.filled : ''}`} />
-                  ))}
-                </div>
+                <span className={`${styles.weightBadge} ${styles[`weight${course.weight}`]}`}>
+                  {course.weight === 1 ? 'Low' : course.weight === 2 ? 'Medium' : 'High'}
+                </span>
               </div>
               <div className={styles.cardActions}>
                 <button

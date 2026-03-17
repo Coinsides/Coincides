@@ -21,6 +21,7 @@ import reviewRoutes from './routes/review.js';
 import agentRoutes from './routes/agent.js';
 import proposalRoutes from './routes/proposals.js';
 import statisticsRoutes from './routes/statistics.js';
+import sectionRoutes from './routes/sections.js';
 import studyTemplateRoutes from './routes/studyTemplates.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
@@ -56,6 +57,7 @@ app.use('/api/review', authMiddleware, reviewRoutes);
 app.use('/api/agent', authMiddleware, agentRoutes);
 app.use('/api/proposals', authMiddleware, proposalRoutes);
 app.use('/api/statistics', authMiddleware, statisticsRoutes);
+app.use('/api/sections', authMiddleware, sectionRoutes);
 app.use('/api/study-templates', authMiddleware, studyTemplateRoutes);
 
 // Health check

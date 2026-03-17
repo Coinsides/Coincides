@@ -156,6 +156,130 @@
   border-radius: 50%;
 }
 
+/* View toggle */
+.viewToggle {
+  display: flex;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  margin-right: 8px;
+}
+
+.viewBtn {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-surface);
+  border: none;
+  cursor: pointer;
+}
+
+.viewBtn:first-child {
+  border-right: 1px solid var(--border-default);
+}
+
+.viewBtnActive {
+  background: var(--accent-primary);
+  color: white;
+}
+
+/* Week view */
+.weekGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  min-height: 400px;
+}
+
+.weekColumn {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  min-height: 350px;
+}
+
+.weekColumn:hover {
+  border-color: var(--text-muted);
+}
+
+.weekColumnToday {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary-bg);
+}
+
+.weekColumnSelected {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: -2px;
+}
+
+.weekColumnHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 10px 8px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.weekColumnDay {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.weekColumnDate {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.weekColumnDateToday {
+  color: var(--accent-primary);
+}
+
+.weekColumnTasks {
+  flex: 1;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow-y: auto;
+}
+
+.weekTask {
+  padding: 4px 6px;
+  border-left: 3px solid var(--text-muted);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--bg-elevated);
+}
+
+.weekTaskDone {
+  opacity: 0.5;
+}
+
+.weekTaskTitle {
+  display: block;
+  font-size: 11px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.weekTaskCourse {
+  display: block;
+  font-size: 10px;
+  font-weight: 500;
+  margin-top: 1px;
+}
+
 /* Day detail panel */
 .detailOverlay {
   position: fixed;

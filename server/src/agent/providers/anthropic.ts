@@ -113,6 +113,8 @@ export class AnthropicProvider implements AIProvider {
           yield { type: 'done' };
         }
       }
+      // Fallback: if stream ended without message_stop, still emit done
+      yield { type: 'done' };
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Anthropic API error';
       yield { type: 'error', error: message };
