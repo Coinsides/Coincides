@@ -4,6 +4,38 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Polish Round 1 Patch] — 2026-03-17
+
+### Section 管理增强 + Review 联动
+
+#### Section 删除（二次确认 + 级联删除）
+- Section 删除现在会弹出自定义确认对话框，显示将被删除的卡片数量
+- 后端级联删除: 删除 section 时同时删除该 section 下所有卡片，并更新 deck card_count
+- 使用 SQLite transaction 保证数据一致性
+
+#### Section 重命名（内联编辑）
+- Section header 新增编辑按钮（笔图标），hover 时显示
+- 点击后 section 名称变为可编辑输入框
+- Enter 保存，Escape 取消，blur 保存
+
+#### Section 内搜索/筛选
+- Section header 新增搜索按钮，hover 时显示
+- 点击后展开搜索输入框，支持按卡片标题模糊筛选（客户端过滤）
+- Unsectioned 区域同样支持搜索
+
+#### 批量选取 → Review 选中卡片
+- 当处于选择模式且有选中卡片时，Review 按钮变为 "Review Selected (N)"
+- 点击后仅复习选中的卡片，不受 FSRS 到期时间限制
+- reviewStore 新增 `setCustomCards` 方法，支持预加载自定义卡片列表
+- Review 页面检测到预加载卡片时跳过 fetchDueCards
+
+#### UI 细节
+- Section header 操作按钮（编辑/搜索/删除）仅在 hover 时显示，不干扰视觉
+- 删除确认对话框使用自定义 Modal（非 window.confirm），与整体设计风格一致
+- Section 内搜索输入框样式与全局搜索保持统一
+
+---
+
 ## [Polish Round 1] — 2026-03-17
 
 ### Bug 修复 + 核心体验改进

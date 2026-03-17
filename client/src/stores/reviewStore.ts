@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import api from '@/services/api';
 import type { Card } from '@shared/types';
 
-interface DueCard extends Card {
+export interface DueCard extends Card {
   deck_name: string;
   course_id: string;
   tags?: { id: string; name: string; color: string | null; is_system: boolean | number }[];
@@ -24,6 +24,7 @@ interface ReviewState {
   fetchDueCards: () => Promise<void>;
   fetchDueCount: () => Promise<void>;
   rateCard: (cardId: string, rating: number) => Promise<void>;
+  setCustomCards: (cards: DueCard[]) => void;
   startSession: () => void;
   nextCard: () => void;
   endSession: () => void;
@@ -64,6 +65,10 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
         { cardId, rating, timestamp: new Date().toISOString() },
       ],
     });
+  },
+
+  setCustomCards: (cards) => {
+    set({ dueCards: cards, currentIndex: 0, sessionResults: [] });
   },
 
   startSession: () => {

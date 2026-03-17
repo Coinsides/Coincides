@@ -3,13 +3,14 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Plus, LayoutGrid, List, Search, Play, Star, X, Sparkles,
   CheckSquare, Trash2, FolderInput, ChevronDown, ChevronRight as ChevronRightIcon, FolderPlus,
+  Edit2, Search as SearchIcon,
 } from 'lucide-react';
 import { useCardStore } from '@/stores/cardStore';
 import { useDeckStore } from '@/stores/deckStore';
 import { useSectionStore } from '@/stores/sectionStore';
 import { useCourseStore } from '@/stores/courseStore';
 import { useTagStore } from '@/stores/tagStore';
-import { useReviewStore } from '@/stores/reviewStore';
+import { useReviewStore, type DueCard } from '@/stores/reviewStore';
 import { useUIStore } from '@/stores/uiStore';
 import { CardTemplateType } from '@shared/types';
 import type { CardContent } from '@shared/types';
@@ -53,11 +54,12 @@ export default function DeckDetailPage() {
   const { cards, loading, fetchCards, batchDelete } = useCardStore();
   const decks = useDeckStore((s) => s.decks);
   const fetchDecks = useDeckStore((s) => s.fetchDecks);
-  const { sections, fetchSections, createSection } = useSectionStore();
+  const { sections, fetchSections, createSection, updateSection, deleteSection } = useSectionStore();
   const courses = useCourseStore((s) => s.courses);
   const tags = useTagStore((s) => s.tags);
   const dueCount = useReviewStore((s) => s.dueCount);
   const fetchDueCount = useReviewStore((s) => s.fetchDueCount);
+  const setCustomCards = useReviewStore((s) => s.setCustomCards);
   const openModal = useUIStore((s) => s.openModal);
   const addToast = useUIStore((s) => s.addToast);
   const openAgentWithContext = useUIStore((s) => s.openAgentWithContext);
@@ -78,6 +80,17 @@ export default function DeckDetailPage() {
   const [collapsedSections, setCollapsedSections] = useState<Set<string>>(new Set());
   const [showNewSection, setShowNewSection] = useState(false);
   const [newSectionName, setNewSectionName] = useState('');
+
+  // Section delete confirmation
+  const [confirmDeleteSection, setConfirmDeleteSection] = useState<{ id: string; name: string; cardCount: number } | null>(null);
+
+  // Section inline rename
+  const [editingSectionId, setEditingSectionId] = useState<string | null>(null);
+  const [editingSectionName, setEditingSectionName] = useState('');
+
+  // Section search
+  const [sectionSearchVisible, setSectionSearchVisible] = useState<Set<string>>(new Set());
+  const [sectionSearches, setSectionSearches] = useState<Record<string, string>>({});
 
   const deck = decks.find((d) => d.id === deckId);
   const course = deck ? courses.find((c) => c.id === deck.course_id) : null;
@@ -157,6 +170,63 @@ export default function DeckDetailPage() {
     } catch {
       addToast('error', 'Failed to create section');
     }
+  };
+
+  const handleDeleteSectionConfirm = async () => {
+    if (!confirmDeleteSection || !deckId) return;
+    try {
+      await deleteSection(confirmDeleteSection.id);
+      addToast('success', `Deleted section and ${confirmDeleteSection.cardCount} cards`);
+      setConfirmDeleteSection(null);
+      loadCards();
+      fetchDecks();
+    } catch {
+      addToast('error', 'Failed to delete section');
+    }
+  };
+
+  const handleSectionRename = async (sectionId: string) => {
+    if (!editingSectionName.trim()) {
+      setEditingSectionId(null);
+      return;
+    }
+    try {
+      await updateSection(sectionId, { name: editingSectionName.trim() });
+      setEditingSectionId(null);
+    } catch {
+      addToast('error', 'Failed to rename section');
+    }
+  };
+
+  const toggleSectionSearch = (sectionId: string) => {
+    setSectionSearchVisible((prev) => {
+      const next = new Set(prev);
+      if (next.has(sectionId)) {
+        next.delete(sectionId);
+        setSectionSearches((s) => { const copy = { ...s }; delete copy[sectionId]; return copy; });
+      } else {
+        next.add(sectionId);
+      }
+      return next;
+    });
+  };
+
+  const filterCardsBySearch = (cardList: typeof cards, sectionId: string) => {
+    const q = (sectionSearches[sectionId] || '').toLowerCase();
+    if (!q) return cardList;
+    return cardList.filter((c) => c.title.toLowerCase().includes(q));
+  };
+
+  const handleReviewSelected = () => {
+    if (selectedIds.size === 0 || !deck) return;
+    const selectedCards = cards.filter((c) => selectedIds.has(c.id));
+    const mapped: DueCard[] = selectedCards.map((c) => ({
+      ...c,
+      deck_name: deck.name,
+      course_id: deck.course_id,
+    }));
+    setCustomCards(mapped);
+    navigate('/review');
   };
 
   const renderCardGrid = (cardList: typeof cards) => {
@@ -290,12 +360,17 @@ export default function DeckDetailPage() {
               <List size={14} />
             </button>
           </div>
-          {dueCount > 0 && (
+          {selectMode && selectedIds.size > 0 ? (
+            <button className={styles.reviewSelectedBtn} onClick={handleReviewSelected}>
+              <Play size={14} />
+              Review Selected ({selectedIds.size})
+            </button>
+          ) : dueCount > 0 ? (
             <button className={styles.reviewBtn} onClick={() => navigate('/review')}>
               <Play size={14} />
               Review ({dueCount})
             </button>
-          )}
+          ) : null}
           <button
             className={`${styles.selectBtn} ${selectMode ? styles.selectBtnActive : ''}`}
             onClick={() => { setSelectMode(!selectMode); setSelectedIds(new Set()); }}
@@ -407,31 +482,107 @@ export default function DeckDetailPage() {
           {/* Render sections + unsectioned cards */}
           {sections.map((section) => {
             const sectionCards = cardsBySection[section.id] || [];
+            const filteredCards = filterCardsBySearch(sectionCards, section.id);
             const collapsed = collapsedSections.has(section.id);
             return (
               <div key={section.id} className={styles.sectionGroup}>
-                <button className={styles.sectionHeader} onClick={() => toggleSection(section.id)}>
+                <div className={styles.sectionHeader} onClick={() => toggleSection(section.id)}>
                   {collapsed ? <ChevronRightIcon size={14} /> : <ChevronDown size={14} />}
-                  <span className={styles.sectionName}>{section.name}</span>
-                  <span className={styles.sectionCount}>{sectionCards.length}</span>
-                </button>
-                {!collapsed && sectionCards.length > 0 && renderCardGrid(sectionCards)}
+                  {editingSectionId === section.id ? (
+                    <input
+                      className={styles.sectionNameInput}
+                      value={editingSectionName}
+                      onChange={(e) => setEditingSectionName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') handleSectionRename(section.id);
+                        if (e.key === 'Escape') setEditingSectionId(null);
+                      }}
+                      onBlur={() => handleSectionRename(section.id)}
+                      onClick={(e) => e.stopPropagation()}
+                      autoFocus
+                    />
+                  ) : (
+                    <span className={styles.sectionName}>{section.name}</span>
+                  )}
+                  <div className={styles.sectionActions}>
+                    <button
+                      className={styles.sectionActionBtn}
+                      onClick={(e) => { e.stopPropagation(); setEditingSectionId(section.id); setEditingSectionName(section.name); }}
+                      title="Rename section"
+                    >
+                      <Edit2 size={12} />
+                    </button>
+                    <button
+                      className={styles.sectionActionBtn}
+                      onClick={(e) => { e.stopPropagation(); toggleSectionSearch(section.id); }}
+                      title="Search in section"
+                    >
+                      <SearchIcon size={12} />
+                    </button>
+                    <button
+                      className={`${styles.sectionActionBtn} ${styles.danger}`}
+                      onClick={(e) => { e.stopPropagation(); setConfirmDeleteSection({ id: section.id, name: section.name, cardCount: sectionCards.length }); }}
+                      title="Delete section"
+                    >
+                      <Trash2 size={12} />
+                    </button>
+                  </div>
+                  <span className={styles.sectionCount}>{filteredCards.length}</span>
+                </div>
+                {sectionSearchVisible.has(section.id) && (
+                  <div className={styles.sectionSearchRow}>
+                    <input
+                      className={styles.sectionSearchInput}
+                      placeholder="Search in section..."
+                      value={sectionSearches[section.id] || ''}
+                      onChange={(e) => setSectionSearches((s) => ({ ...s, [section.id]: e.target.value }))}
+                      onClick={(e) => e.stopPropagation()}
+                      autoFocus
+                    />
+                  </div>
+                )}
+                {!collapsed && filteredCards.length > 0 && renderCardGrid(filteredCards)}
               </div>
             );
           })}
 
           {/* Unsectioned cards */}
-          {(cardsBySection.__unsectioned?.length ?? 0) > 0 && (
-            <div className={styles.sectionGroup}>
-              {sections.length > 0 && (
-                <div className={styles.sectionHeader}>
-                  <span className={styles.sectionName}>Unsectioned</span>
-                  <span className={styles.sectionCount}>{cardsBySection.__unsectioned.length}</span>
-                </div>
-              )}
-              {renderCardGrid(cardsBySection.__unsectioned)}
-            </div>
-          )}
+          {(cardsBySection.__unsectioned?.length ?? 0) > 0 && (() => {
+            const unsectionedFiltered = filterCardsBySearch(cardsBySection.__unsectioned, '__unsectioned');
+            return (
+              <div className={styles.sectionGroup}>
+                {sections.length > 0 && (
+                  <>
+                    <div className={styles.sectionHeader} onClick={() => toggleSectionSearch('__unsectioned')}>
+                      <span className={styles.sectionName}>Unsectioned</span>
+                      <div className={styles.sectionActions}>
+                        <button
+                          className={styles.sectionActionBtn}
+                          onClick={(e) => { e.stopPropagation(); toggleSectionSearch('__unsectioned'); }}
+                          title="Search in section"
+                        >
+                          <SearchIcon size={12} />
+                        </button>
+                      </div>
+                      <span className={styles.sectionCount}>{unsectionedFiltered.length}</span>
+                    </div>
+                    {sectionSearchVisible.has('__unsectioned') && (
+                      <div className={styles.sectionSearchRow}>
+                        <input
+                          className={styles.sectionSearchInput}
+                          placeholder="Search in section..."
+                          value={sectionSearches['__unsectioned'] || ''}
+                          onChange={(e) => setSectionSearches((s) => ({ ...s, '__unsectioned': e.target.value }))}
+                          autoFocus
+                        />
+                      </div>
+                    )}
+                  </>
+                )}
+                {unsectionedFiltered.length > 0 && renderCardGrid(unsectionedFiltered)}
+              </div>
+            );
+          })()}
         </>
       )}
 
@@ -461,6 +612,26 @@ export default function DeckDetailPage() {
               {i + 1}
             </button>
           ))}
+        </div>
+      )}
+
+      {/* Section delete confirmation modal */}
+      {confirmDeleteSection && (
+        <div className={styles.confirmOverlay} onClick={() => setConfirmDeleteSection(null)}>
+          <div className={styles.confirmDialog} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.confirmTitle}>Delete Section</div>
+            <div className={styles.confirmMessage}>
+              Delete section &lsquo;{confirmDeleteSection.name}&rsquo;? All {confirmDeleteSection.cardCount} card{confirmDeleteSection.cardCount !== 1 ? 's' : ''} in this section will be permanently deleted.
+            </div>
+            <div className={styles.confirmActions}>
+              <button className={styles.confirmCancelBtn} onClick={() => setConfirmDeleteSection(null)}>
+                Cancel
+              </button>
+              <button className={styles.confirmDeleteBtn} onClick={handleDeleteSectionConfirm}>
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

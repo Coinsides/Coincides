@@ -563,6 +563,152 @@
   font-size: 13px;
 }
 
+/* Section action buttons */
+.sectionActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: 8px;
+}
+
+.sectionActionBtn {
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.sectionHeader:hover .sectionActionBtn {
+  opacity: 1;
+}
+
+.sectionActionBtn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.sectionActionBtn.danger:hover {
+  color: var(--error);
+}
+
+/* Section search */
+.sectionSearchRow {
+  padding: 4px 12px 8px;
+}
+
+.sectionSearchInput {
+  width: 100%;
+  max-width: 300px;
+  padding: 5px 10px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
+.sectionSearchInput:focus {
+  border-color: var(--accent-primary);
+  outline: none;
+}
+
+/* Inline section name edit */
+.sectionNameInput {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--accent-primary);
+  outline: none;
+  padding: 0 2px;
+  width: auto;
+  min-width: 80px;
+}
+
+/* Confirm delete overlay */
+.confirmOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.15s ease;
+}
+
+.confirmDialog {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  max-width: 400px;
+  width: 90%;
+}
+
+.confirmTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.confirmMessage {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.confirmCancelBtn {
+  padding: 8px 16px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.confirmDeleteBtn {
+  padding: 8px 16px;
+  background: var(--error);
+  color: white;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.confirmDeleteBtn:hover {
+  opacity: 0.9;
+}
+
+/* Review selected button variant */
+.reviewSelectedBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: var(--accent-primary);
+  color: white;
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.reviewSelectedBtn:hover {
+  background: var(--accent-primary-hover);
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }

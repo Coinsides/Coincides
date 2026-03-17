@@ -97,15 +97,25 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
 router.delete('/:id', (req: AuthRequest, res: Response) => {
   const db = getDb();
 
-  const existing = db.prepare('SELECT id FROM card_sections WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!);
+  const existing = db.prepare('SELECT id, deck_id FROM card_sections WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!) as any;
   if (!existing) {
     throw new AppError(404, 'Section not found');
   }
 
-  // Cards with this section_id will be SET NULL via FK constraint
-  db.prepare('DELETE FROM card_sections WHERE id = ?').run(req.params.id);
+  const { count: cardCount } = db.prepare('SELECT COUNT(*) as count FROM cards WHERE section_id = ?').get(req.params.id) as any;
 
-  res.json({ message: 'Section deleted' });
+  const batch = db.transaction(() => {
+    if (cardCount > 0) {
+      db.prepare('DELETE FROM cards WHERE section_id = ?').run(req.params.id);
+      db.prepare('UPDATE card_decks SET card_count = card_count - ?, updated_at = ? WHERE id = ?').run(
+        cardCount, new Date().toISOString(), existing.deck_id
+      );
+    }
+    db.prepare('DELETE FROM card_sections WHERE id = ?').run(req.params.id);
+  });
+
+  batch();
+  res.json({ message: 'Section deleted', cards_deleted: cardCount });
 });
 
 export default router;

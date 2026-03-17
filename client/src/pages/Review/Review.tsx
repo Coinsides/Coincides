@@ -25,9 +25,13 @@ export default function ReviewPage() {
   const [rating, setRating] = useState(false);
 
   useEffect(() => {
-    fetchDueCards().then(() => {
+    if (dueCards.length > 0) {
       startSession();
-    });
+    } else {
+      fetchDueCards().then(() => {
+        startSession();
+      });
+    }
   }, []);
 
   const currentCard = dueCards[currentIndex];
