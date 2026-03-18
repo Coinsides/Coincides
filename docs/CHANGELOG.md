@@ -4,23 +4,34 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [Round 3 Hotfix] — 2026-03-17
+## [Round 3 Hotfix v2] — 2026-03-17
 
-### Glassmorphism 黑屏修复
+### Glassmorphism 黑屏彻底修复
 
 #### 问题
-- 全部 Glassmorphism 变更导致页面几乎全黑（用户截图确认）
-- 根因：背景渐变色停靠点过暗（近乎纯黑），半透明玻璃表面叠加后变得不可见
+- 用户本地仍然看到全黑屏幕，v1 hotfix 只微调了变量亮度不够
+- 根因：`--bg-*` 变量为半透明 rgba，当 `backdrop-filter` 不生效时叠加在暗色渐变上结果变黑
 
-#### 修复内容（仅 global.css）
-- **背景渐变**：从近黑色 (`#0a0a1a`→`#0f0f2e`) 改为可见蓝紫色调 (`#0f1022`→`#161640`→`#0e1e3a`→`#141435`)
-- **玻璃表面**：RGB 值提亮 + 不透明度微调（如 `rgba(18,18,30,0.6)` → `rgba(25,25,50,0.65)`）
-- **边框可见度**：白色透明度从 6% 提升至 10%，hover 从 10% 提升至 16%
-- **环境光球**：强度从 15%/10% 提升至 25%/18%
-- Light theme 保持不变
+#### 修复策略（仅 global.css）
+
+1. **`--bg-*` 变量改回实色**：不再依赖 `backdrop-filter`
+   - `--bg-surface: #1a1a3e`（旧值 `rgba(25,25,50,0.65)`）
+   - `--bg-elevated: #222250`（旧值 `rgba(35,35,65,0.55)`）
+   - `--bg-hover: #2a2a5a`、`--bg-active: #323268`
+
+2. **背景渐变再提亮**：`#12122e` → `#1a1a50` → `#132244` → `#181845`
+
+3. **玻璃表面更高不透明度**：
+   - `--glass-surface: rgba(26,26,62, 0.78)`（旧 0.65）
+   - `--glass-elevated: rgba(34,34,80, 0.72)`（旧 0.55）
+
+4. **新增 `@supports not (backdrop-filter)` fallback**：当浏览器不支持 backdrop-filter 时自动回退到实色
+
+5. **边框/光球进一步增强**：边框 12%/20%，光球 30%/22%
 
 #### Files
-- 修改 1 个文件: global.css（15 行变更）
+- 修改 1 个文件: global.css
+- 重新部署前端构建
 
 ---
 

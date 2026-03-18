@@ -61,28 +61,28 @@ img {
 
 /* --- Theme Variables --- */
 :root {
-  /* Backgrounds — glass-compatible semi-transparent */
-  --bg-deepest: #0a0a1a;
-  --bg-surface: rgba(25, 25, 50, 0.65);
-  --bg-elevated: rgba(35, 35, 65, 0.55);
-  --bg-hover: rgba(50, 50, 85, 0.5);
-  --bg-active: rgba(55, 55, 95, 0.55);
+  /* Backgrounds — SOLID fallback colors (visible even without backdrop-filter) */
+  --bg-deepest: #0e0e24;
+  --bg-surface: #1a1a3e;
+  --bg-elevated: #222250;
+  --bg-hover: #2a2a5a;
+  --bg-active: #323268;
 
-  /* Borders — soft glass edges */
-  --border-default: rgba(255, 255, 255, 0.1);
-  --border-subtle: rgba(255, 255, 255, 0.06);
+  /* Borders — visible glass edges */
+  --border-default: rgba(255, 255, 255, 0.12);
+  --border-subtle: rgba(255, 255, 255, 0.08);
   --border-focus: #6366f1;
 
   /* === Glassmorphism === */
 
-  /* Background gradient — the "scene" behind the glass */
-  --bg-gradient: linear-gradient(135deg, #0f1022 0%, #161640 25%, #0e1e3a 50%, #141435 75%, #0f1022 100%);
+  /* Background gradient — visibly colored deep blue/indigo, NOT near-black */
+  --bg-gradient: linear-gradient(135deg, #12122e 0%, #1a1a50 25%, #132244 50%, #181845 75%, #12122e 100%);
 
-  /* Glass surfaces */
-  --glass-surface: rgba(25, 25, 50, 0.65);
-  --glass-elevated: rgba(35, 35, 65, 0.55);
-  --glass-hover: rgba(50, 50, 85, 0.5);
-  --glass-active: rgba(55, 55, 95, 0.55);
+  /* Glass surfaces — higher opacity + brighter base colors */
+  --glass-surface: rgba(26, 26, 62, 0.78);
+  --glass-elevated: rgba(34, 34, 80, 0.72);
+  --glass-hover: rgba(45, 45, 95, 0.68);
+  --glass-active: rgba(50, 50, 105, 0.72);
 
   /* Glass blur levels */
   --glass-blur-sm: blur(8px);
@@ -90,14 +90,14 @@ img {
   --glass-blur-lg: blur(24px);
 
   /* Glass borders */
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --glass-border-hover: rgba(255, 255, 255, 0.16);
-  --glass-border-accent: rgba(99, 102, 241, 0.3);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-border-hover: rgba(255, 255, 255, 0.2);
+  --glass-border-accent: rgba(99, 102, 241, 0.35);
 
   /* Glass shadows */
-  --glass-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
-  --glass-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.25);
-  --glass-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --glass-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --glass-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --glass-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.35);
 
   /* Gradient accents */
   --gradient-primary: linear-gradient(135deg, #6366f1, #818cf8);
@@ -105,9 +105,9 @@ img {
   --gradient-success: linear-gradient(135deg, #22c55e, #4ade80);
   --gradient-danger: linear-gradient(135deg, #ef4444, #f87171);
 
-  /* Ambient light orbs */
-  --orb-primary: radial-gradient(circle at center, rgba(99, 102, 241, 0.25), transparent 70%);
-  --orb-secondary: radial-gradient(circle at center, rgba(59, 130, 246, 0.18), transparent 70%);
+  /* Ambient light orbs — stronger glow */
+  --orb-primary: radial-gradient(circle at center, rgba(99, 102, 241, 0.3), transparent 70%);
+  --orb-secondary: radial-gradient(circle at center, rgba(59, 130, 246, 0.22), transparent 70%);
 
   /* Text */
   --text-primary: #e8e8f0;
@@ -187,6 +187,21 @@ img {
 
   --orb-primary: radial-gradient(circle at center, rgba(99, 102, 241, 0.08), transparent 70%);
   --orb-secondary: radial-gradient(circle at center, rgba(59, 130, 246, 0.06), transparent 70%);
+}
+
+/* Fallback for browsers/devices without backdrop-filter support */
+@supports not (backdrop-filter: blur(1px)) {
+  :root {
+    --glass-surface: #1a1a3e;
+    --glass-elevated: #222250;
+    --glass-hover: #2a2a5a;
+    --glass-active: #323268;
+  }
+  [data-theme='light'] {
+    --glass-surface: #f0f0f5;
+    --glass-elevated: #e8e8f0;
+    --glass-hover: #e0e0ea;
+  }
 }
 
 /* --- Scrollbar --- */
