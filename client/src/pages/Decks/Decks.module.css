@@ -10,7 +10,7 @@
 }
 
 .title {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: -0.5px;
@@ -19,27 +19,27 @@
 .headerRight {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
 }
 
 .filterSelect {
-  padding: 6px 10px;
+  padding: 8px 13px;
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   background: rgba(0, 0, 0, 0.2);
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .addBtn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
+  gap: 7px;
+  padding: 10px 17px;
   background: var(--gradient-primary);
   color: white;
   border-radius: var(--radius-md);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
@@ -53,7 +53,7 @@
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 16px;
+  gap: 18px;
 }
 
 .deckCard {
@@ -63,12 +63,12 @@
   backdrop-filter: var(--glass-blur-md);
   -webkit-backdrop-filter: var(--glass-blur-md);
   box-shadow: var(--glass-shadow-sm);
-  padding: 18px;
+  padding: 21px;
   cursor: pointer;
   transition: all var(--transition-fast);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .deckCard:hover {
@@ -81,23 +81,23 @@
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 8px;
+  gap: 9px;
 }
 
 .deckName {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .deckActions {
   display: flex;
-  gap: 2px;
+  gap: 3px;
   flex-shrink: 0;
 }
 
 .iconBtn {
-  padding: 4px;
+  padding: 6px;
   border-radius: var(--radius-sm);
   color: var(--text-muted);
   display: flex;
@@ -110,7 +110,7 @@
 }
 
 .iconBtnDanger {
-  padding: 4px;
+  padding: 6px;
   border-radius: var(--radius-sm);
   color: var(--text-muted);
   display: flex;
@@ -123,7 +123,7 @@
 }
 
 .deckDesc {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   line-height: 1.4;
   display: -webkit-box;
@@ -135,19 +135,19 @@
 .deckMeta {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   margin-top: auto;
 }
 
 .cardCount {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   font-weight: 500;
 }
 
 .courseBadge {
-  font-size: 11px;
-  padding: 2px 8px;
+  font-size: 12px;
+  padding: 4px 10px;
   border-radius: 6px;
   font-weight: 500;
   white-space: nowrap;
@@ -156,7 +156,7 @@
 /* Empty */
 .empty {
   text-align: center;
-  padding: 60px 20px;
+  padding: 63px 23px;
   color: var(--text-muted);
 }
 
@@ -166,21 +166,21 @@
 }
 
 .empty h3 {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   margin-bottom: 8px;
   color: var(--text-secondary);
 }
 
 .empty p {
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .loading {
   text-align: center;
-  padding: 40px;
+  padding: 43px;
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 @keyframes fadeIn {

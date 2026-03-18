@@ -4,7 +4,7 @@
 }
 
 .title {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: -0.5px;
@@ -16,7 +16,7 @@
 }
 
 .sectionTitle {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -31,14 +31,14 @@
   backdrop-filter: var(--glass-blur-md);
   -webkit-backdrop-filter: var(--glass-blur-md);
   box-shadow: var(--glass-shadow-sm);
-  padding: 16px;
+  padding: 19px;
 }
 
 .row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 0;
+  padding: 13px 0;
 }
 
 .row + .row {
@@ -46,13 +46,13 @@
 }
 
 .rowLabel {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-primary);
   font-weight: 500;
 }
 
 .rowValue {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-secondary);
 }
 
@@ -91,14 +91,14 @@
 /* Theme selector */
 .themeButtons {
   display: flex;
-  gap: 6px;
+  gap: 7px;
 }
 
 .themeBtn {
-  padding: 6px 14px;
+  padding: 8px 17px;
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
   background: var(--glass-elevated);
@@ -116,12 +116,12 @@
 
 /* Input row */
 .inlineInput {
-  padding: 6px 10px;
+  padding: 8px 13px;
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: 14px;
   width: 160px;
   text-align: right;
 }
@@ -134,7 +134,7 @@
 
 /* Placeholder */
 .placeholder {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-muted);
   font-style: italic;
 }
@@ -142,14 +142,14 @@
 /* Provider select */
 .providerSelect {
   display: flex;
-  gap: 6px;
+  gap: 7px;
 }
 
 /* Key input with eye toggle */
 .keyInput {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
 }
 
 .keyInput .inlineInput {
@@ -157,7 +157,7 @@
 }
 
 .eyeBtn {
-  padding: 5px;
+  padding: 7px;
   border-radius: var(--radius-sm);
   color: var(--text-muted);
   display: flex;
@@ -182,11 +182,11 @@
 
 /* Save provider button */
 .saveProviderBtn {
-  padding: 6px 16px;
+  padding: 8px 19px;
   background: var(--gradient-primary);
   color: white;
   border-radius: var(--radius-md);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }
@@ -203,11 +203,11 @@
 
 /* Logout */
 .logoutBtn {
-  padding: 8px 16px;
+  padding: 10px 19px;
   background: var(--gradient-danger);
   border-radius: var(--radius-md);
   color: white;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   margin-top: 12px;
 }

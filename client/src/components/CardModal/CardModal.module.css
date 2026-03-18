@@ -20,14 +20,14 @@
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow-lg);
   border-radius: var(--radius-xl);
-  padding: 24px;
+  padding: 27px;
   max-height: 85vh;
   overflow-y: auto;
   animation: scaleIn 200ms ease forwards;
 }
 
 .modalTitle {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 20px;
@@ -36,17 +36,17 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
 }
 
 .field label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
 }
@@ -54,12 +54,12 @@
 .field input,
 .field select,
 .field textarea {
-  padding: 8px 12px;
+  padding: 10px 15px;
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .field input:focus,
@@ -78,15 +78,15 @@
 /* Template buttons */
 .templateBtns {
   display: flex;
-  gap: 6px;
+  gap: 7px;
 }
 
 .templateBtn {
   flex: 1;
-  padding: 8px 12px;
+  padding: 10px 15px;
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--text-muted);
   text-align: center;
@@ -106,7 +106,7 @@
 
 /* LaTeX preview */
 .preview {
-  padding: 12px;
+  padding: 15px;
   background: var(--glass-elevated);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
@@ -114,7 +114,7 @@
 }
 
 .previewLabel {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -126,17 +126,17 @@
 .variableRow {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
   margin-bottom: 6px;
 }
 
 .variableRow input {
   flex: 1;
-  padding: 6px 10px;
+  padding: 8px 13px;
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-primary);
 }
 
@@ -148,13 +148,13 @@
 
 .eq {
   color: var(--text-muted);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .removeVarBtn {
-  padding: 4px 8px;
+  padding: 6px 10px;
   color: var(--text-muted);
-  font-size: 16px;
+  font-size: 17px;
   border-radius: var(--radius-sm);
 }
 
@@ -164,11 +164,11 @@
 }
 
 .addVarBtn {
-  padding: 6px;
+  padding: 8px;
   border: 1px dashed var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 13px;
   text-align: center;
   width: 100%;
 }
@@ -181,11 +181,11 @@
 /* Stars */
 .starsInput {
   display: flex;
-  gap: 2px;
+  gap: 3px;
 }
 
 .starBtn {
-  padding: 2px;
+  padding: 4px;
   display: flex;
   align-items: center;
 }
@@ -204,7 +204,7 @@
 }
 
 .tagGroupName {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -215,7 +215,7 @@
 .tagList {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 7px;
 }
 
 .tagCheck {
@@ -229,10 +229,10 @@
 }
 
 .tagLabel {
-  padding: 4px 10px;
+  padding: 6px 13px;
   border: 1px solid var(--glass-border);
   border-radius: 20px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--text-muted);
   transition: all var(--transition-fast);
@@ -248,17 +248,17 @@
 .actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 9px;
   margin-top: 8px;
 }
 
 .cancelBtn {
-  padding: 8px 16px;
+  padding: 10px 19px;
   background: var(--glass-elevated);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
 }
 
@@ -267,11 +267,11 @@
 }
 
 .saveBtn {
-  padding: 8px 20px;
+  padding: 10px 23px;
   background: var(--gradient-primary);
   color: white;
   border-radius: var(--radius-md);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }

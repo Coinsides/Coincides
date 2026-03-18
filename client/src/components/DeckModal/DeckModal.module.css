@@ -20,14 +20,14 @@
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow-lg);
   border-radius: var(--radius-xl);
-  padding: 24px;
+  padding: 27px;
   max-height: 80vh;
   overflow-y: auto;
   animation: scaleIn 200ms ease forwards;
 }
 
 .modalTitle {
-  font-size: 16px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 20px;
@@ -36,17 +36,17 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
 }
 
 .field label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
 }
@@ -54,12 +54,12 @@
 .field input,
 .field select,
 .field textarea {
-  padding: 8px 12px;
+  padding: 10px 15px;
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .field input:focus,
@@ -78,17 +78,17 @@
 .actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
+  gap: 9px;
   margin-top: 8px;
 }
 
 .cancelBtn {
-  padding: 8px 16px;
+  padding: 10px 19px;
   background: var(--glass-elevated);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
 }
 
@@ -97,11 +97,11 @@
 }
 
 .saveBtn {
-  padding: 8px 20px;
+  padding: 10px 23px;
   background: var(--gradient-primary);
   color: white;
   border-radius: var(--radius-md);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
 }

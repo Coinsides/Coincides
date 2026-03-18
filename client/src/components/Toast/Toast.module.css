@@ -4,7 +4,7 @@
   right: 20px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
   z-index: 9999;
   pointer-events: none;
 }
@@ -12,8 +12,8 @@
 .toast {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
+  gap: 12px;
+  padding: 13px 17px;
   border-radius: var(--radius-lg);
   border: 1px solid var(--glass-border);
   background: var(--glass-surface);
@@ -21,7 +21,7 @@
   -webkit-backdrop-filter: var(--glass-blur-lg);
   box-shadow: var(--glass-shadow-md);
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: 14px;
   min-width: 280px;
   max-width: 400px;
   pointer-events: all;
@@ -67,7 +67,7 @@
 
 .close {
   opacity: 0.5;
-  padding: 2px;
+  padding: 4px;
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;

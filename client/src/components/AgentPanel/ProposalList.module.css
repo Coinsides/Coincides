@@ -1,14 +1,14 @@
 .list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 9px;
 }
 
 .empty {
-  padding: 16px;
+  padding: 19px;
   text-align: center;
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .proposal {
@@ -23,11 +23,11 @@
 .proposalHeader {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 12px;
+  gap: 9px;
+  padding: 13px 15px;
   width: 100%;
   text-align: left;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-primary);
 }
 
@@ -42,9 +42,9 @@
 }
 
 .typeBadge {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
-  padding: 2px 7px;
+  padding: 4px 9px;
   border-radius: 4px;
   text-transform: uppercase;
   letter-spacing: 0.3px;
@@ -60,18 +60,18 @@
 }
 
 .itemCount {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   flex-shrink: 0;
 }
 
 .proposalBody {
   border-top: 1px solid var(--glass-border);
-  padding: 12px;
+  padding: 15px;
 }
 
 .description {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-secondary);
   margin-bottom: 10px;
   line-height: 1.4;
@@ -80,7 +80,7 @@
 .items {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
   margin-bottom: 12px;
 }
 
@@ -88,7 +88,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 8px;
+  padding: 8px 10px;
   background: var(--glass-elevated);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
@@ -97,13 +97,13 @@
 .itemContent {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   flex: 1;
   min-width: 0;
 }
 
 .itemTitle {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -111,13 +111,13 @@
 }
 
 .itemMeta {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-muted);
   flex-shrink: 0;
 }
 
 .removeItem {
-  padding: 3px;
+  padding: 5px;
   border-radius: var(--radius-sm);
   color: var(--text-muted);
   flex-shrink: 0;
@@ -131,16 +131,16 @@
 
 .actions {
   display: flex;
-  gap: 8px;
+  gap: 9px;
 }
 
 .applyBtn {
   flex: 1;
-  padding: 7px 0;
+  padding: 9px 0;
   background: var(--gradient-success);
   color: white;
   border-radius: var(--radius-md);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -150,11 +150,11 @@
 
 .discardBtn {
   flex: 1;
-  padding: 7px 0;
+  padding: 9px 0;
   background: var(--gradient-danger);
   color: white;
   border-radius: var(--radius-md);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 600;
 }
 

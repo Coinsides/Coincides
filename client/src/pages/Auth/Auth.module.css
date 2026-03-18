@@ -9,8 +9,8 @@
 
 .card {
   width: 100%;
-  max-width: 380px;
-  padding: 36px 32px;
+  max-width: 420px;
+  padding: 40px 36px;
   background: var(--glass-surface);
   backdrop-filter: var(--glass-blur-lg);
   -webkit-backdrop-filter: var(--glass-blur-lg);
@@ -25,14 +25,14 @@
 }
 
 .logo h1 {
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: -0.5px;
 }
 
 .logo p {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-muted);
   margin-top: 4px;
 }
@@ -40,17 +40,17 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
 }
 
 .field label {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
   text-transform: uppercase;
@@ -58,12 +58,12 @@
 }
 
 .field input {
-  padding: 10px 12px;
+  padding: 12px 14px;
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: 15px;
   transition: border-color var(--transition-fast);
 }
 
@@ -78,12 +78,12 @@
 }
 
 .submit {
-  padding: 10px 16px;
+  padding: 12px 18px;
   background: var(--gradient-primary);
   color: white;
   border-radius: var(--radius-md);
   font-weight: 600;
-  font-size: 14px;
+  font-size: 15px;
   margin-top: 4px;
   transition: all var(--transition-fast);
   box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
@@ -100,17 +100,17 @@
 }
 
 .error {
-  padding: 10px 12px;
+  padding: 12px 14px;
   background: var(--error-bg);
   border: 1px solid var(--error);
   border-radius: var(--radius-md);
   color: var(--error);
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .link {
   text-align: center;
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-muted);
   margin-top: 8px;
 }

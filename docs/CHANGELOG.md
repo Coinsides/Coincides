@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Round 3 Step 3+4 Patch] — 2026-03-18
+
+### 部署黑屏修复 + 全局 UI 放大
+
+#### 部署黑屏根因
+- Vite 构建输出使用绝对路径 `/assets/...`，但部署 CDN 不在根目录，导致 JS/CSS 文件无法加载
+- 修复：vite.config.ts 添加 `base: './'`，所有资产路径变为相对路径
+
+#### UI 全局等比放大（26 个 CSS 文件）
+- **基础字号**：html 16→17px，body 14→15px
+- **导航栏**：导航项 13→14px，padding 增加，侧边栏宽度 260→270px
+- **登录页**：卡片宽度 380→420px，标题 22→26px，输入框/按钮全部放大
+- **所有页面/组件**：font-size +1～2px，padding +2～4px，gap +1～2px
+- 圆角变量均增加 1～2px
+- 未更改任何颜色、边框、阴影、玻璃效果
+
+#### Files
+- 修改 27 个文件（26 个 CSS + vite.config.ts）
+
+---
+
 ## [Round 3 Hotfix v2] — 2026-03-17
 
 ### Glassmorphism 黑屏彻底修复

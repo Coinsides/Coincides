@@ -3,7 +3,7 @@
 }
 
 .title {
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
   color: var(--text-primary);
   letter-spacing: -0.5px;
@@ -14,7 +14,7 @@
 .overviewGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
+  gap: 14px;
   margin-bottom: 28px;
 }
 
@@ -25,11 +25,11 @@
   backdrop-filter: var(--glass-blur-md);
   -webkit-backdrop-filter: var(--glass-blur-md);
   box-shadow: var(--glass-shadow-sm);
-  padding: 16px;
+  padding: 19px;
 }
 
 .overviewLabel {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -38,20 +38,20 @@
 }
 
 .overviewBig {
-  font-size: 28px;
+  font-size: 30px;
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1;
 }
 
 .overviewSmall {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   margin-top: 4px;
 }
 
 .overviewStats {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-secondary);
   line-height: 1;
 }
@@ -62,7 +62,7 @@
 }
 
 .sectionTitle {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 12px;
@@ -75,22 +75,22 @@
   backdrop-filter: var(--glass-blur-sm);
   -webkit-backdrop-filter: var(--glass-blur-sm);
   box-shadow: var(--glass-shadow-sm);
-  padding: 20px;
+  padding: 23px;
   overflow-x: auto;
 }
 
 /* Heatmap */
 .heatmapWrap {
   display: flex;
-  gap: 4px;
+  gap: 5px;
 }
 
 .heatmapLabels {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding-top: 18px;
-  font-size: 10px;
+  padding-top: 21px;
+  font-size: 11px;
   color: var(--text-muted);
   height: calc(7 * 14px);
 }
@@ -102,7 +102,7 @@
 
 .heatmapMonths {
   display: flex;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-muted);
   margin-bottom: 4px;
   height: 14px;
@@ -114,13 +114,13 @@
 
 .heatmapColumns {
   display: flex;
-  gap: 2px;
+  gap: 3px;
 }
 
 .heatmapColumn {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .heatmapCell {
@@ -136,7 +136,7 @@
 
 /* Trend chart */
 .trendSubtext {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-muted);
   margin-top: 8px;
 }
@@ -145,7 +145,7 @@
 .courseGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 12px;
+  gap: 14px;
 }
 
 .courseCard {
@@ -155,7 +155,7 @@
   backdrop-filter: var(--glass-blur-md);
   -webkit-backdrop-filter: var(--glass-blur-md);
   box-shadow: var(--glass-shadow-sm);
-  padding: 16px;
+  padding: 19px;
   transition: all var(--transition-fast);
 }
 
@@ -168,7 +168,7 @@
 .courseHeader {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   margin-bottom: 12px;
 }
 
@@ -180,7 +180,7 @@
 }
 
 .courseName {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--text-primary);
   flex: 1;
@@ -190,7 +190,7 @@
 }
 
 .courseRate {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--accent-primary);
 }
@@ -212,8 +212,8 @@
 
 .courseMeta {
   display: flex;
-  gap: 16px;
-  font-size: 12px;
+  gap: 18px;
+  font-size: 13px;
   color: var(--text-muted);
 }
 

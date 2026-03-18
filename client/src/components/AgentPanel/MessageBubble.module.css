@@ -1,8 +1,8 @@
 .bubble {
   max-width: 88%;
-  padding: 10px 14px;
+  padding: 13px 17px;
   border-radius: var(--radius-lg);
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.55;
   word-wrap: break-word;
   animation: fadeIn var(--transition-fast) ease forwards;
@@ -31,7 +31,7 @@
 .content {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .paragraph {
@@ -40,8 +40,8 @@
 
 .listItem {
   display: flex;
-  gap: 6px;
-  padding-left: 4px;
+  gap: 7px;
+  padding-left: 6px;
 }
 
 .bullet {
@@ -52,9 +52,9 @@
 .codeBlock {
   background: var(--bg-deepest);
   border-radius: var(--radius-md);
-  padding: 10px 12px;
+  padding: 13px 15px;
   font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-  font-size: 12px;
+  font-size: 13px;
   overflow-x: auto;
   margin: 4px 0;
   border: 1px solid var(--glass-border);
@@ -63,22 +63,22 @@
 .inlineCode {
   background: var(--bg-deepest);
   border-radius: 3px;
-  padding: 1px 5px;
+  padding: 3px 7px;
   font-family: 'SFMono-Regular', Consolas, monospace;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .toolPill {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 10px;
+  gap: 6px;
+  padding: 5px 13px;
   background: var(--glass-elevated);
   backdrop-filter: var(--glass-blur-sm);
   -webkit-backdrop-filter: var(--glass-blur-sm);
   border: 1px solid var(--glass-border);
   border-radius: 12px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--accent-primary);
   font-weight: 500;
   margin-bottom: 6px;
@@ -86,13 +86,13 @@
 }
 
 .toolIcon {
-  font-size: 12px;
+  font-size: 13px;
 }
 
 .cursor {
   color: var(--accent-primary);
   animation: blink 1s step-end infinite;
-  font-size: 12px;
+  font-size: 13px;
 }
 
 @keyframes blink {

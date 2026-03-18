@@ -38,7 +38,7 @@
 .cardBackContent {
   display: flex;
   flex-direction: column;
-  padding: 24px;
+  padding: 27px;
   height: 100%;
 }
 
@@ -49,14 +49,14 @@
 .cardTopRow {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   margin-bottom: 16px;
 }
 
 .templateBadge {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
-  padding: 3px 8px;
+  padding: 5px 10px;
   border-radius: 4px;
   letter-spacing: 0.5px;
 }
@@ -69,7 +69,7 @@
 }
 
 .cardTitle {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 600;
   color: var(--text-primary);
   flex: 1;
@@ -78,7 +78,7 @@
 }
 
 .backTitle {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--text-secondary);
 }
@@ -92,11 +92,11 @@
 
 .stars {
   display: flex;
-  gap: 2px;
+  gap: 3px;
 }
 
 .flipHint {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
 }
 
@@ -104,11 +104,11 @@
 .templateContent {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 .contentLabel {
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
   text-transform: uppercase;
@@ -116,35 +116,35 @@
 }
 
 .contentBody {
-  font-size: 14px;
+  font-size: 15px;
   color: var(--text-primary);
   line-height: 1.6;
   white-space: pre-wrap;
 }
 
 .formulaDisplay {
-  padding: 16px;
+  padding: 19px;
   background: var(--glass-elevated);
   backdrop-filter: var(--glass-blur-sm);
   -webkit-backdrop-filter: var(--glass-blur-sm);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   text-align: center;
-  font-size: 16px;
+  font-size: 17px;
 }
 
 .variableTable {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
 }
 
 .variableRow {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  padding: 4px 0;
+  gap: 9px;
+  font-size: 14px;
+  padding: 6px 0;
 }
 
 .variableKey {
