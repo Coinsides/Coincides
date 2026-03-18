@@ -8,6 +8,13 @@ import { ZodError } from 'zod';
 
 const router = Router();
 
+function parseTask(task: any): any {
+  if (task && task.checklist && typeof task.checklist === 'string') {
+    try { task.checklist = JSON.parse(task.checklist); } catch { task.checklist = null; }
+  }
+  return task;
+}
+
 function verifyCourseBelongsToUser(courseId: string, userId: string): void {
   const db = getDb();
   const course = db.prepare('SELECT id FROM courses WHERE id = ? AND user_id = ?').get(courseId, userId);
@@ -40,7 +47,7 @@ router.get('/', (req: AuthRequest, res: Response) => {
   query += ' ORDER BY date ASC, order_index ASC, created_at ASC';
 
   const tasks = db.prepare(query).all(...params);
-  res.json(tasks);
+  res.json(tasks.map(parseTask));
 });
 
 // POST /api/tasks
@@ -54,8 +61,8 @@ router.post('/', (req: AuthRequest, res: Response) => {
     const now = new Date().toISOString();
 
     db.prepare(
-      `INSERT INTO tasks (id, user_id, course_id, goal_id, recurring_group_id, title, date, priority, status, order_index, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)`
+      `INSERT INTO tasks (id, user_id, course_id, goal_id, recurring_group_id, title, date, priority, status, order_index, start_time, end_time, description, checklist, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?)`
     ).run(
       id,
       req.userId!,
@@ -66,12 +73,16 @@ router.post('/', (req: AuthRequest, res: Response) => {
       data.date,
       data.priority,
       data.order_index ?? 0,
+      data.start_time || null,
+      data.end_time || null,
+      data.description || null,
+      data.checklist ? JSON.stringify(data.checklist) : null,
       now,
       now
     );
 
     const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id);
-    res.status(201).json(task);
+    res.status(201).json(parseTask(task));
   } catch (err) {
     if (err instanceof ZodError) {
       res.status(400).json({ error: 'Validation error', details: err.errors });
@@ -95,8 +106,8 @@ router.post('/batch', (req: AuthRequest, res: Response) => {
     }
 
     const insert = db.prepare(
-      `INSERT INTO tasks (id, user_id, course_id, goal_id, recurring_group_id, title, date, priority, status, order_index, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)`
+      `INSERT INTO tasks (id, user_id, course_id, goal_id, recurring_group_id, title, date, priority, status, order_index, start_time, end_time, description, checklist, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?)`
     );
 
     const ids: string[] = [];
@@ -115,6 +126,10 @@ router.post('/batch', (req: AuthRequest, res: Response) => {
           task.date,
           task.priority || 'must',
           task.order_index ?? 0,
+          task.start_time || null,
+          task.end_time || null,
+          task.description || null,
+          task.checklist ? JSON.stringify(task.checklist) : null,
           now,
           now
         );
@@ -125,7 +140,7 @@ router.post('/batch', (req: AuthRequest, res: Response) => {
 
     const placeholders = ids.map(() => '?').join(',');
     const tasks = db.prepare(`SELECT * FROM tasks WHERE id IN (${placeholders})`).all(...ids);
-    res.status(201).json(tasks);
+    res.status(201).json(tasks.map(parseTask));
   } catch (err) {
     if (err instanceof ZodError) {
       res.status(400).json({ error: 'Validation error', details: err.errors });
@@ -153,6 +168,10 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     if (data.date !== undefined) { fields.push('date = ?'); values.push(data.date); }
     if (data.priority !== undefined) { fields.push('priority = ?'); values.push(data.priority); }
     if (data.order_index !== undefined) { fields.push('order_index = ?'); values.push(data.order_index); }
+    if (data.start_time !== undefined) { fields.push('start_time = ?'); values.push(data.start_time); }
+    if (data.end_time !== undefined) { fields.push('end_time = ?'); values.push(data.end_time); }
+    if (data.description !== undefined) { fields.push('description = ?'); values.push(data.description); }
+    if (data.checklist !== undefined) { fields.push('checklist = ?'); values.push(data.checklist ? JSON.stringify(data.checklist) : null); }
 
     if (data.status !== undefined) {
       fields.push('status = ?');
@@ -203,7 +222,7 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     db.prepare(`UPDATE tasks SET ${fields.join(', ')} WHERE id = ?`).run(...values);
 
     const updated = db.prepare('SELECT * FROM tasks WHERE id = ?').get(req.params.id);
-    res.json(updated);
+    res.json(parseTask(updated));
   } catch (err) {
     if (err instanceof ZodError) {
       res.status(400).json({ error: 'Validation error', details: err.errors });

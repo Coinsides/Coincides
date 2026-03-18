@@ -90,6 +90,11 @@ export enum ProposalStatus {
   Discarded = 'discarded',
 }
 
+export interface ChecklistItem {
+  text: string;
+  done: boolean;
+}
+
 // --- Entity Interfaces ---
 
 export interface User {
@@ -141,6 +146,7 @@ export interface Goal {
   deadline: string | null;
   exam_mode: boolean;
   status: GoalStatus;
+  parent_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -169,6 +175,10 @@ export interface Task {
   status: TaskStatus;
   completed_at: string | null;
   order_index: number;
+  start_time: string | null;
+  end_time: string | null;
+  description: string | null;
+  checklist: ChecklistItem[] | null;
   exam_boost?: boolean;
   is_prerequisite?: boolean;
   created_at: string;
@@ -392,6 +402,10 @@ export interface CreateTaskRequest {
   goal_id?: string;
   recurring_group_id?: string;
   order_index?: number;
+  start_time?: string;
+  end_time?: string;
+  description?: string;
+  checklist?: ChecklistItem[];
 }
 
 export interface UpdateTaskRequest {
@@ -401,6 +415,10 @@ export interface UpdateTaskRequest {
   status?: TaskStatus;
   completed_at?: string | null;
   order_index?: number;
+  start_time?: string | null;
+  end_time?: string | null;
+  description?: string | null;
+  checklist?: ChecklistItem[] | null;
 }
 
 export interface BatchCreateTasksRequest {
@@ -422,6 +440,7 @@ export interface CreateGoalRequest {
   description?: string;
   deadline?: string;
   course_id: string;
+  parent_id?: string;
 }
 
 export interface UpdateGoalRequest {
@@ -429,6 +448,7 @@ export interface UpdateGoalRequest {
   description?: string;
   deadline?: string;
   status?: GoalStatus;
+  parent_id?: string | null;
 }
 
 export interface SetDailyStatusRequest {

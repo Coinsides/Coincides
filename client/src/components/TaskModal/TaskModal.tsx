@@ -33,6 +33,10 @@ export default function TaskModal() {
   const [priority, setPriority] = useState<TaskPriority>(TaskPriority.Must);
   const [courseId, setCourseId] = useState('');
   const [goalId, setGoalId] = useState('');
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+  const [description, setDescription] = useState('');
+  const [checklist, setChecklist] = useState<{text: string; done: boolean}[]>([]);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -42,9 +46,15 @@ export default function TaskModal() {
       setPriority(existingTask.priority as TaskPriority);
       setCourseId(existingTask.course_id);
       setGoalId(existingTask.goal_id || '');
+      if (existingTask.start_time) setStartTime(existingTask.start_time);
+      if (existingTask.end_time) setEndTime(existingTask.end_time);
+      if (existingTask.description) setDescription(existingTask.description);
+      if (existingTask.checklist) setChecklist(existingTask.checklist);
     } else {
       if (modal?.data?.date) setDate(modal.data.date);
-      if (courses.length > 0 && !courseId) setCourseId(courses[0].id);
+      if (modal?.data?.course_id) setCourseId(modal.data.course_id);
+      else if (courses.length > 0 && !courseId) setCourseId(courses[0].id);
+      if (modal?.data?.goal_id) setGoalId(modal.data.goal_id);
     }
   }, [modal]);
 
@@ -58,8 +68,18 @@ export default function TaskModal() {
     setSaving(true);
 
     try {
+      const checklistPayload = checklist.length > 0 ? checklist : undefined;
+
       if (isEdit && existingTask) {
-        await updateTask(existingTask.id, { title, date, priority });
+        await updateTask(existingTask.id, {
+          title,
+          date,
+          priority,
+          start_time: startTime || null,
+          end_time: endTime || null,
+          description: description || null,
+          checklist: checklistPayload ?? null,
+        });
         addToast('success', 'Task updated');
       } else {
         await createTask({
@@ -68,6 +88,10 @@ export default function TaskModal() {
           priority,
           course_id: courseId,
           goal_id: goalId || undefined,
+          start_time: startTime || undefined,
+          end_time: endTime || undefined,
+          description: description || undefined,
+          checklist: checklistPayload,
         });
         addToast('success', 'Task created');
       }
@@ -92,6 +116,18 @@ export default function TaskModal() {
     }
   };
 
+  const addChecklistItem = () => {
+    setChecklist([...checklist, { text: '', done: false }]);
+  };
+
+  const updateChecklistItem = (index: number, field: 'text' | 'done', value: string | boolean) => {
+    setChecklist(checklist.map((item, i) => i === index ? { ...item, [field]: value } : item));
+  };
+
+  const removeChecklistItem = (index: number) => {
+    setChecklist(checklist.filter((_, i) => i !== index));
+  };
+
   const courseGoals = goals.filter((g) => g.course_id === courseId);
 
   return (
@@ -114,6 +150,60 @@ export default function TaskModal() {
           <div className={styles.field}>
             <label>Date</label>
             <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+          </div>
+
+          <div className={styles.field}>
+            <label>Time Range (optional)</label>
+            <div className={styles.timeRange}>
+              <input
+                type="datetime-local"
+                value={startTime}
+                onChange={(e) => setStartTime(e.target.value)}
+                placeholder="Start time"
+              />
+              <span className={styles.timeRangeSep}>to</span>
+              <input
+                type="datetime-local"
+                value={endTime}
+                onChange={(e) => setEndTime(e.target.value)}
+                placeholder="End time"
+              />
+            </div>
+          </div>
+
+          <div className={styles.descriptionField}>
+            <label>Description (optional)</label>
+            <textarea
+              placeholder="Task notes or details..."
+              rows={2}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+
+          <div className={styles.checklistSection}>
+            <label>Checklist</label>
+            {checklist.map((item, i) => (
+              <div key={i} className={styles.checklistItem}>
+                <input
+                  type="checkbox"
+                  checked={item.done}
+                  onChange={(e) => updateChecklistItem(i, 'done', e.target.checked)}
+                />
+                <input
+                  type="text"
+                  placeholder="Checklist item..."
+                  value={item.text}
+                  onChange={(e) => updateChecklistItem(i, 'text', e.target.value)}
+                />
+                <button type="button" className={styles.removeChecklistBtn} onClick={() => removeChecklistItem(i)}>
+                  &times;
+                </button>
+              </div>
+            ))}
+            <button type="button" className={styles.addChecklistBtn} onClick={addChecklistItem}>
+              + Add checklist item
+            </button>
           </div>
 
           <div className={styles.field}>

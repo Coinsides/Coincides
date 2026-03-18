@@ -39,6 +39,11 @@ const taskPriority = z.enum(['must', 'recommended', 'optional']);
 const taskStatus = z.enum(['pending', 'completed']);
 const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be YYYY-MM-DD format');
 
+const checklistItemSchema = z.object({
+  text: z.string().min(1).max(500),
+  done: z.boolean(),
+});
+
 export const createTaskSchema = z.object({
   title: z.string().min(1, 'Task title is required').max(500),
   date: dateString,
@@ -47,6 +52,10 @@ export const createTaskSchema = z.object({
   goal_id: z.string().uuid('Invalid goal ID').optional(),
   recurring_group_id: z.string().uuid().optional(),
   order_index: z.number().int().min(0).optional(),
+  start_time: z.string().optional(),
+  end_time: z.string().optional(),
+  description: z.string().max(5000).optional(),
+  checklist: z.array(checklistItemSchema).optional(),
 });
 
 export const updateTaskSchema = z.object({
@@ -56,6 +65,10 @@ export const updateTaskSchema = z.object({
   status: taskStatus.optional(),
   completed_at: z.string().nullable().optional(),
   order_index: z.number().int().min(0).optional(),
+  start_time: z.string().nullable().optional(),
+  end_time: z.string().nullable().optional(),
+  description: z.string().max(5000).nullable().optional(),
+  checklist: z.array(checklistItemSchema).nullable().optional(),
 });
 
 export const batchCreateTasksSchema = z.object({
@@ -82,6 +95,7 @@ export const createGoalSchema = z.object({
   deadline: dateString.optional(),
   course_id: z.string().uuid('Invalid course ID'),
   exam_mode: z.boolean().optional().default(false),
+  parent_id: z.string().uuid('Invalid parent goal ID').optional(),
 });
 
 export const updateGoalSchema = z.object({
@@ -90,6 +104,7 @@ export const updateGoalSchema = z.object({
   deadline: dateString.optional(),
   status: z.enum(['active', 'completed', 'archived']).optional(),
   exam_mode: z.boolean().optional(),
+  parent_id: z.string().uuid('Invalid parent goal ID').nullable().optional(),
 });
 
 // --- Daily Status ---
