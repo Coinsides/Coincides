@@ -4,6 +4,7 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import * as sqliteVec from 'sqlite-vec';
+import { runMigrations } from './migrate.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -19,7 +20,7 @@ export function getDb(): Database.Database {
   return db;
 }
 
-export function initDb(dbPath?: string): Database.Database {
+export async function initDb(dbPath?: string): Promise<Database.Database> {
   const resolvedPath = dbPath || join(__dirname, '..', '..', 'coincides.db');
 
   db = new Database(resolvedPath);
@@ -28,11 +29,10 @@ export function initDb(dbPath?: string): Database.Database {
   db.pragma('journal_mode = WAL');
   db.pragma('foreign_keys = ON');
 
-  // Run schema
+  // Run base schema (CREATE TABLE IF NOT EXISTS — safe to re-run)
   const schemaPath = join(__dirname, 'schema.sql');
   const schema = readFileSync(schemaPath, 'utf-8');
 
-  // Execute schema statements (split by semicolons, skip PRAGMA since we set them above)
   const statements = schema
     .split(';')
     .map(s => s.trim())
@@ -74,42 +74,7 @@ export function initDb(dbPath?: string): Database.Database {
     // Table already exists or vec0 not available — ignore
   }
 
-  // Add is_prerequisite column to tasks (ALTER TABLE doesn't support IF NOT EXISTS)
-  try {
-    db.exec('ALTER TABLE tasks ADD COLUMN is_prerequisite INTEGER NOT NULL DEFAULT 0;');
-  } catch (_e) {
-    // Column already exists — ignore
-  }
-
-  // Add description column to courses
-  try {
-    db.exec('ALTER TABLE courses ADD COLUMN description TEXT;');
-  } catch (_e) {
-    // Column already exists — ignore
-  }
-
-  // Add section_id column to cards
-  try {
-    db.exec('ALTER TABLE cards ADD COLUMN section_id TEXT REFERENCES card_sections(id) ON DELETE SET NULL;');
-  } catch (_e) {
-    // Column already exists — ignore
-  }
-
-  // Add order_index column to cards (for ordering within sections)
-  try {
-    db.exec('ALTER TABLE cards ADD COLUMN order_index INTEGER NOT NULL DEFAULT 0;');
-  } catch (_e) {
-    // Column already exists — ignore
-  }
-
-  // Add tag_group_id column to tags
-  try {
-    db.exec('ALTER TABLE tags ADD COLUMN tag_group_id TEXT REFERENCES tag_groups(id) ON DELETE CASCADE;');
-  } catch (_e) {
-    // Column already exists — ignore
-  }
-
-  // FTS5 full-text search for document chunks
+  // FTS5 full-text search virtual tables
   try {
     db.exec(`
       CREATE VIRTUAL TABLE IF NOT EXISTS document_chunks_fts USING fts5(
@@ -118,11 +83,8 @@ export function initDb(dbPath?: string): Database.Database {
         content_rowid='rowid'
       )
     `);
-  } catch (_e) {
-    // FTS5 table already exists — ignore
-  }
+  } catch (_e) { /* already exists */ }
 
-  // FTS5 full-text search for agent memories
   try {
     db.exec(`
       CREATE VIRTUAL TABLE IF NOT EXISTS agent_memories_fts USING fts5(
@@ -131,9 +93,7 @@ export function initDb(dbPath?: string): Database.Database {
         content_rowid='rowid'
       )
     `);
-  } catch (_e) {
-    // FTS5 table already exists — ignore
-  }
+  } catch (_e) { /* already exists */ }
 
   // FTS5 sync triggers for document_chunks
   try {
@@ -153,9 +113,7 @@ export function initDb(dbPath?: string): Database.Database {
         INSERT INTO document_chunks_fts(rowid, content) VALUES (new.rowid, new.content);
       END
     `);
-  } catch (_e) {
-    // Triggers already exist — ignore
-  }
+  } catch (_e) { /* triggers already exist */ }
 
   // FTS5 sync triggers for agent_memories
   try {
@@ -175,11 +133,9 @@ export function initDb(dbPath?: string): Database.Database {
         INSERT INTO agent_memories_fts(rowid, content) VALUES (new.rowid, new.content);
       END
     `);
-  } catch (_e) {
-    // Triggers already exist — ignore
-  }
+  } catch (_e) { /* triggers already exist */ }
 
-  // Backfill FTS5 index from existing data (idempotent — only inserts missing rows)
+  // Backfill FTS5 index from existing data (idempotent)
   try {
     const ftsChunkCount = (db.prepare('SELECT COUNT(*) AS cnt FROM document_chunks_fts').get() as any)?.cnt || 0;
     const chunkCount = (db.prepare('SELECT COUNT(*) AS cnt FROM document_chunks').get() as any)?.cnt || 0;
@@ -196,26 +152,8 @@ export function initDb(dbPath?: string): Database.Database {
     }
   } catch (_e) { /* ignore */ }
 
-  // Add document_type column to documents
-  try {
-    db.exec("ALTER TABLE documents ADD COLUMN document_type TEXT;");
-  } catch (_e) {
-    // Column already exists — ignore
-  }
-
-  // Add chunk_count column to documents
-  try {
-    db.exec('ALTER TABLE documents ADD COLUMN chunk_count INTEGER DEFAULT 0;');
-  } catch (_e) {
-    // Column already exists — ignore
-  }
-
-  // Add error_message column to documents
-  try {
-    db.exec('ALTER TABLE documents ADD COLUMN error_message TEXT;');
-  } catch (_e) {
-    // Column already exists — ignore
-  }
+  // Run versioned migrations (handles all schema evolution from v1.1+)
+  await runMigrations(db);
 
   // Seed system study templates
   seedStudyTemplates();

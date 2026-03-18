@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { initDb, closeDb } from './db/init.js';
+import { validateConfig } from './db/validateConfig.js';
 import { authMiddleware } from './middleware/auth.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
@@ -29,8 +30,11 @@ import embeddingRoutes from './routes/embedding.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 
-// Initialize database
-initDb();
+// Validate configuration before anything else
+validateConfig();
+
+// Initialize database (async — runs migrations)
+await initDb();
 
 const app = express();
 
