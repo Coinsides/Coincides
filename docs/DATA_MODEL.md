@@ -1,7 +1,8 @@
 # Coincides — Data Model
 
-**Version**: 0.1 (Draft)
+**Version**: 1.0
 **Created**: 2026-03-17
+**Updated**: 2026-03-18
 
 ---
 
@@ -16,19 +17,30 @@
            ▼
 ┌──────────────────────────────────────────────────────────┐
 │                        Course                            │
-│  (id, user_id, name, code, color, weight, created_at)    │
+│  (id, user_id, name, code, color, weight, description)   │
 └───┬──────────┬──────────┬──────────┬─────────────────────┘
     │ 1:N      │ 1:N      │ 1:N      │ 1:N
     ▼          ▼          ▼          ▼
-  Goal     CardDeck   Document   Statistics
-    │          │
-    │ 1:N      │ 1:N
-    ▼          ▼
-  Task       Card ──── CardTag (M:N)
-    │
-    │ N:1 (optional)
-    ▼
-RecurringTaskGroup
+  Goal     CardDeck   Document   TagGroup
+    │          │          │          │
+    │ 1:N      │ 1:N      │ 1:N      │ 1:N
+    ▼          ▼          ▼          ▼
+  Task    CardSection  DocChunk    Tag
+    │          │                     │
+    │ N:1      │ 1:N                 │ M:N
+    ▼          ▼                     ▼
+ RecurringGrp Card ────────────── CardTag
+
+Agent System:
+  AgentConversation → AgentMessage
+  AgentMemory (long-term, vector-indexed)
+  Proposal (pending → applied/discarded)
+
+Virtual Tables:
+  doc_chunk_vec (sqlite-vec 1024d)
+  agent_memory_vec (sqlite-vec 1024d)
+  document_chunks_fts (FTS5)
+  agent_memories_fts (FTS5)
 ```
 
 ---
@@ -43,7 +55,7 @@ RecurringTaskGroup
 | email | TEXT | UNIQUE, NOT NULL | Login email |
 | password_hash | TEXT | NOT NULL | Bcrypt hashed password |
 | name | TEXT | NOT NULL | Display name |
-| settings | JSON | DEFAULT '{}' | User preferences (theme, agent name, AI provider config) |
+| settings | JSON | DEFAULT '{}' | User preferences (theme, AI config, embedding config) |
 | created_at | DATETIME | NOT NULL | Account creation timestamp |
 | updated_at | DATETIME | NOT NULL | Last update timestamp |
 
@@ -52,11 +64,10 @@ RecurringTaskGroup
 {
   "theme": "dark",
   "agent_name": "Mr. Zero",
-  "ai_providers": {
-    "openai": { "api_key": "encrypted_...", "default_model": "gpt-5.4" },
-    "anthropic": { "api_key": "encrypted_...", "default_model": "claude-opus" }
-  },
-  "active_provider": "openai",
+  "anthropicKey": "sk-ant-...",
+  "voyageKey": "pa-...",
+  "selectedModel": "claude-haiku-4-5-20251001",
+  "embeddingProvider": "voyage",
   "daily_status_enabled": true,
   "keyboard_shortcuts_enabled": true
 }
@@ -71,7 +82,8 @@ RecurringTaskGroup
 | name | TEXT | NOT NULL | Course display name (e.g., "Applied Mathematics") |
 | code | TEXT | | Course code (e.g., "AMS231") |
 | color | TEXT | DEFAULT '#6366f1' | Course accent color for UI differentiation |
-| weight | INTEGER | DEFAULT 5 | Priority weight 1-10 (used in cross-course arbitration) |
+| weight | INTEGER | DEFAULT 2 | Priority: 1=不重要, 2=一般, 3=重要 |
+| description | TEXT | | Course description |
 | semester | TEXT | | Semester label (e.g., "2026 Spring") |
 | created_at | DATETIME | NOT NULL | |
 | updated_at | DATETIME | NOT NULL | |
@@ -86,7 +98,7 @@ RecurringTaskGroup
 | title | TEXT | NOT NULL | Goal name (e.g., "Master Linear Algebra Ch.4-8") |
 | description | TEXT | | Detailed description |
 | deadline | DATE | | Target completion date (e.g., exam date) |
-| exam_mode | BOOLEAN | DEFAULT FALSE | Whether exam mode is active for this goal |
+| exam_mode | INTEGER | DEFAULT 0 | Whether exam mode is active for this goal |
 | status | TEXT | DEFAULT 'active' | active / completed / archived |
 | created_at | DATETIME | NOT NULL | |
 | updated_at | DATETIME | NOT NULL | |
@@ -97,10 +109,10 @@ RecurringTaskGroup
 |--------|------|-------------|-------------|
 | id | TEXT (UUID) | PK | |
 | user_id | TEXT | FK → User.id, NOT NULL | |
-| goal_id | TEXT | FK → Goal.id | Optional parent goal |
+| goal_id | TEXT | FK → Goal.id, ON DELETE SET NULL | Optional parent goal |
 | title | TEXT | NOT NULL | Group name (e.g., "Read Chapters 4-8") |
 | total_tasks | INTEGER | NOT NULL | Total number of sub-tasks |
-| completed_tasks | INTEGER | DEFAULT 0 | Completed count (derived, or cached) |
+| completed_tasks | INTEGER | DEFAULT 0 | Completed count |
 | start_date | DATE | NOT NULL | First task date |
 | end_date | DATE | NOT NULL | Last task date |
 | created_at | DATETIME | NOT NULL | |
@@ -112,14 +124,15 @@ RecurringTaskGroup
 | id | TEXT (UUID) | PK | |
 | user_id | TEXT | FK → User.id, NOT NULL | |
 | course_id | TEXT | FK → Course.id, NOT NULL | Parent course |
-| goal_id | TEXT | FK → Goal.id | Optional parent goal |
-| recurring_group_id | TEXT | FK → RecurringTaskGroup.id | NULL for one-time tasks |
+| goal_id | TEXT | FK → Goal.id, ON DELETE SET NULL | Optional parent goal |
+| recurring_group_id | TEXT | FK → RecurringTaskGroup.id, ON DELETE CASCADE | NULL for one-time tasks |
 | title | TEXT | NOT NULL | Task description |
 | date | DATE | NOT NULL | Scheduled date |
 | priority | TEXT | NOT NULL, DEFAULT 'must' | must / recommended / optional |
 | status | TEXT | DEFAULT 'pending' | pending / completed |
 | completed_at | DATETIME | | When the task was checked off |
 | order_index | INTEGER | DEFAULT 0 | Display order within same date + priority |
+| is_prerequisite | INTEGER | DEFAULT 0 | Whether this task is a prerequisite |
 | created_at | DATETIME | NOT NULL | |
 | updated_at | DATETIME | NOT NULL | |
 
@@ -141,18 +154,33 @@ RecurringTaskGroup
 | created_at | DATETIME | NOT NULL | |
 | updated_at | DATETIME | NOT NULL | |
 
-### 2.7 Card
+### 2.7 CardSection
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | TEXT (UUID) | PK | |
+| deck_id | TEXT | FK → CardDeck.id, ON DELETE CASCADE | Parent deck |
+| user_id | TEXT | FK → User.id, NOT NULL | |
+| name | TEXT | NOT NULL | Section name (e.g., "Chapter 4") |
+| order_index | INTEGER | DEFAULT 0 | Display order within deck |
+| created_at | DATETIME | NOT NULL | |
+
+**Index:** `(deck_id)`
+
+### 2.8 Card
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
 | id | TEXT (UUID) | PK | |
 | user_id | TEXT | FK → User.id, NOT NULL | |
 | deck_id | TEXT | FK → CardDeck.id, NOT NULL | Parent deck |
+| section_id | TEXT | FK → CardSection.id, ON DELETE SET NULL | Optional section grouping |
 | template_type | TEXT | DEFAULT 'general' | definition / theorem / formula / general |
 | title | TEXT | NOT NULL | Card front — displayed in list and flip face |
 | content | JSON | NOT NULL | Card back — structured content (see below) |
 | importance | INTEGER | DEFAULT 3 | 1-5 scale |
-| source_document_id | TEXT | FK → Document.id | Source document if generated from uploaded material |
+| order_index | INTEGER | DEFAULT 0 | Display order within section/deck |
+| source_document_id | TEXT | FK → Document.id, ON DELETE SET NULL | Source document if generated from uploaded material |
 | source_page | INTEGER | | Page number in source document |
 | source_excerpt | TEXT | | Relevant excerpt from source for context |
 | fsrs_stability | REAL | | FSRS: memory stability (S) |
@@ -177,7 +205,7 @@ Definition:
 Theorem:
 ```json
 {
-  "statement": "\\oint_C \\mathbf{F} \\cdot d\\mathbf{r} = \\iint_D \\left( \\frac{\\partial Q}{\\partial x} - \\frac{\\partial P}{\\partial y} \\right) dA",
+  "statement": "\\oint_C \\mathbf{F} \\cdot d\\mathbf{r} = ...",
   "conditions": "C is a positively oriented, piecewise smooth, simple closed curve...",
   "proof_sketch": "Optional proof outline",
   "notes": "Optional"
@@ -188,11 +216,7 @@ Formula:
 ```json
 {
   "formula": "e^{i\\pi} + 1 = 0",
-  "variables": {
-    "e": "Euler's number",
-    "i": "Imaginary unit",
-    "\\pi": "Pi"
-  },
+  "variables": { "e": "Euler's number", "i": "Imaginary unit" },
   "applicable_conditions": "Fundamental relationship in complex analysis",
   "notes": "Optional"
 }
@@ -210,20 +234,35 @@ General:
 - `(deck_id)` — List cards in a deck
 - `(user_id, fsrs_next_review)` — Find cards due for review (Daily Brief)
 
-### 2.8 Tag
+### 2.9 TagGroup
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | TEXT (UUID) | PK | |
+| course_id | TEXT | FK → Course.id, ON DELETE CASCADE | Parent course |
+| user_id | TEXT | FK → User.id, NOT NULL | |
+| name | TEXT | NOT NULL | Group name (e.g., "Topic", "Difficulty") |
+| order_index | INTEGER | DEFAULT 0 | Display order |
+| created_at | DATETIME | NOT NULL | |
+
+**UNIQUE constraint:** `(course_id, name)`
+**Index:** `(course_id)`
+
+### 2.10 Tag
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
 | id | TEXT (UUID) | PK | |
 | user_id | TEXT | FK → User.id, NOT NULL | |
 | name | TEXT | NOT NULL | Tag name (e.g., "Definition", "Important") |
-| is_system | BOOLEAN | DEFAULT FALSE | System tags (Definition, Theorem, Formula) cannot be deleted |
+| is_system | INTEGER | DEFAULT 0 | System tags cannot be deleted |
 | color | TEXT | | Optional tag color |
+| tag_group_id | TEXT | FK → TagGroup.id, ON DELETE CASCADE | Optional group membership |
 | created_at | DATETIME | NOT NULL | |
 
 **UNIQUE constraint:** `(user_id, name)`
 
-### 2.9 CardTag (Junction Table)
+### 2.11 CardTag (Junction Table)
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
@@ -232,7 +271,7 @@ General:
 
 **PK:** `(card_id, tag_id)`
 
-### 2.10 Document
+### 2.12 Document
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
@@ -241,17 +280,35 @@ General:
 | course_id | TEXT | FK → Course.id, NOT NULL | Parent course |
 | filename | TEXT | NOT NULL | Original filename |
 | file_path | TEXT | NOT NULL | Storage path on server |
-| file_type | TEXT | NOT NULL | pdf / docx / image |
+| file_type | TEXT | NOT NULL | pdf / docx / xlsx / image / txt |
 | file_size | INTEGER | | Size in bytes |
 | parse_status | TEXT | DEFAULT 'pending' | pending / parsing / completed / failed |
-| parse_channel | TEXT | | 'native' or 'ocr' (set after auto-detection) |
-| extracted_text | TEXT | | Full extracted text (for search) |
+| parse_channel | TEXT | | 'native' or 'vision' (set after auto-detection) |
+| extracted_text | TEXT | | Full extracted text (for search, also stores small docs that aren't chunked) |
 | summary | TEXT | | AI-generated summary (for Agent context) |
 | page_count | INTEGER | | Number of pages |
+| document_type | TEXT | | Detected document type |
+| chunk_count | INTEGER | DEFAULT 0 | Number of chunks created |
+| error_message | TEXT | | Error details if parse_status='failed' |
 | created_at | DATETIME | NOT NULL | |
 | updated_at | DATETIME | NOT NULL | |
 
-### 2.11 AgentConversation
+### 2.13 DocumentChunk
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | TEXT (UUID) | PK | |
+| document_id | TEXT | FK → Document.id, ON DELETE CASCADE | Parent document |
+| chunk_index | INTEGER | NOT NULL | Order within document |
+| content | TEXT | NOT NULL | Chunk text content |
+| page_start | INTEGER | | Start page |
+| page_end | INTEGER | | End page |
+| heading | TEXT | | Section heading if detected |
+| created_at | DATETIME | NOT NULL | |
+
+**Index:** `(document_id)`
+
+### 2.14 AgentConversation
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
@@ -261,7 +318,7 @@ General:
 | created_at | DATETIME | NOT NULL | |
 | updated_at | DATETIME | NOT NULL | |
 
-### 2.12 AgentMessage
+### 2.15 AgentMessage
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
@@ -274,7 +331,7 @@ General:
 | token_count | INTEGER | | Token count for this message |
 | created_at | DATETIME | NOT NULL | |
 
-### 2.13 AgentMemory
+### 2.16 AgentMemory
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
@@ -282,12 +339,12 @@ General:
 | user_id | TEXT | FK → User.id, NOT NULL | |
 | category | TEXT | NOT NULL | preference / course_context / decision / general |
 | content | TEXT | NOT NULL | The memory content |
-| source_conversation_id | TEXT | FK → AgentConversation.id | Where this memory was created |
+| source_conversation_id | TEXT | FK → AgentConversation.id, ON DELETE SET NULL | Where this memory was created |
 | relevance_score | REAL | DEFAULT 1.0 | Decayed relevance for retrieval ranking |
 | created_at | DATETIME | NOT NULL | |
 | last_accessed | DATETIME | | Last time this memory was retrieved |
 
-### 2.14 DailyStatus
+### 2.17 DailyStatus
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
@@ -299,26 +356,88 @@ General:
 
 **UNIQUE constraint:** `(user_id, date)`
 
-### 2.15 Proposal
+### 2.18 Proposal
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
 | id | TEXT (UUID) | PK | |
 | user_id | TEXT | FK → User.id, NOT NULL | |
-| conversation_id | TEXT | FK → AgentConversation.id | Which conversation generated this |
+| conversation_id | TEXT | FK → AgentConversation.id, ON DELETE SET NULL | Which conversation generated this |
 | type | TEXT | NOT NULL | study_plan / batch_cards / schedule_adjustment |
 | status | TEXT | DEFAULT 'pending' | pending / applied / discarded |
 | data | JSON | NOT NULL | The proposed changes (tasks, cards, etc.) |
 | created_at | DATETIME | NOT NULL | |
 | resolved_at | DATETIME | | When applied or discarded |
 
+### 2.19 StudyModeTemplate
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | TEXT (UUID) | PK | |
+| user_id | TEXT | FK → User.id, ON DELETE CASCADE | NULL for system templates |
+| name | TEXT | NOT NULL | Template display name |
+| slug | TEXT | NOT NULL | URL-safe identifier |
+| description | TEXT | NOT NULL | Short description |
+| strategy | TEXT | NOT NULL | Detailed strategy explanation |
+| is_system | INTEGER | DEFAULT 0 | System templates cannot be deleted |
+| config | JSON | DEFAULT '{}' | Template-specific configuration |
+| created_at | DATETIME | NOT NULL | |
+
+**Indexes:**
+- `(user_id)` — User's custom templates
+- `UNIQUE (slug) WHERE user_id IS NULL` — System template slugs must be unique
+
+**7 System Templates (seeded on DB init):**
+Spaced Repetition, Interleaving, Active Recall, Feynman Technique, Pomodoro, Spiral Learning, Mastery-Based
+
+### 2.20 StudyActivityLog
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | TEXT (UUID) | PK | |
+| user_id | TEXT | FK → User.id, NOT NULL | |
+| date | DATE | NOT NULL | Activity date |
+| activity_type | TEXT | NOT NULL | Type of activity (review, task_complete, etc.) |
+| entity_id | TEXT | | Related entity ID |
+| entity_type | TEXT | | Related entity type (card, task, etc.) |
+| minutes_spent | INTEGER | DEFAULT 0 | Duration in minutes |
+| created_at | DATETIME | NOT NULL | |
+
+**Index:** `(user_id, date)`
+
 ---
 
-## 3. System-Seeded Data
+## 3. Virtual Tables
+
+### 3.1 Vector Search Tables (sqlite-vec v0.1.7)
+
+| Table | PK | Vector | Dimension | Purpose |
+|-------|-----|--------|-----------|---------|
+| doc_chunk_vec | chunk_id TEXT | embedding float[1024] | 1024 | Voyage AI embeddings for document chunks |
+| agent_memory_vec | memory_id TEXT | embedding float[1024] | 1024 | Voyage AI embeddings for agent memories |
+
+Created via `vec0` module after `sqliteVec.load(db)`.
+
+### 3.2 FTS5 Full-Text Search Tables
+
+| Table | Content Source | Sync Mode | Indexed Column |
+|-------|---------------|-----------|----------------|
+| document_chunks_fts | document_chunks | content-sync (triggers) | content |
+| agent_memories_fts | agent_memories | content-sync (triggers) | content |
+
+**Sync Triggers (6 total):**
+- `document_chunks_ai` / `_ad` / `_au` — INSERT/DELETE/UPDATE sync for document chunks
+- `agent_memories_ai` / `_ad` / `_au` — INSERT/DELETE/UPDATE sync for agent memories
+
+On DB init, a `'rebuild'` command backfills the FTS5 index from existing data if counts are mismatched.
+
+---
+
+## 4. System-Seeded Data
 
 On user registration, the following are auto-created:
 
-### Default Tags (is_system = true)
+### Default Tags (is_system = 1)
 - Definition
 - Theorem
 - Formula
@@ -327,9 +446,12 @@ On user registration, the following are auto-created:
 
 These cannot be deleted but the user can create additional custom tags.
 
+### System Study Templates (7 total, seeded on DB init)
+Spaced Repetition, Interleaving, Active Recall, Feynman Technique, Pomodoro, Spiral Learning, Mastery-Based
+
 ---
 
-## 4. Key Queries (Performance Considerations)
+## 5. Key Queries (Performance Considerations)
 
 | Query | Used By | Index Strategy |
 |-------|---------|---------------|
@@ -338,5 +460,10 @@ These cannot be deleted but the user can create additional custom tags.
 | Get all cards due for review today | Daily Brief, Review Session | `(user_id, fsrs_next_review)` |
 | Get all cards in deck, filtered by tag | Card Browser | `(deck_id)` + join on CardTag |
 | Get task completion rate for date range | Statistics | `(user_id, status, date)` |
-| Search documents by content | Agent | Full-text search on `extracted_text` |
-| Retrieve relevant memories | Agent | `(user_id, category)` + text search on `content` |
+| Semantic search documents | Agent (RAG) | `doc_chunk_vec` KNN via `vec_distance_cosine` |
+| FTS5 search document chunks | Agent (fallback) | `document_chunks_fts` MATCH query |
+| LIKE keyword search | Agent (last resort) | Sequential scan on `extracted_text` |
+| Semantic search memories | Agent | `agent_memory_vec` KNN via `vec_distance_cosine` |
+| FTS5 search memories | Agent (fallback) | `agent_memories_fts` MATCH query |
+| Three-way hybrid search | Agent | Vector → FTS5 → LIKE, auto-deduplicate by chunk_id/memory_id |
+| Unfragmented doc search | Agent | LIKE on `documents.extracted_text` for docs with chunk_count=0 |

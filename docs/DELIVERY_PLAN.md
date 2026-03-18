@@ -1,151 +1,173 @@
 # Coincides — Phased Delivery Plan
 
-**Version**: 0.1 (Draft)
+**Version**: 1.0
 **Created**: 2026-03-17
+**Updated**: 2026-03-18
 
 ---
 
 ## Overview
 
-The project is delivered in 4 phases, each producing a usable increment. Phases are sequential — each builds on the previous.
+The project was delivered in 4 initial phases plus 4 polish/feature rounds, culminating in v1.0. All phases are complete.
 
-After Phase 4, the project enters **Polish Rounds** — iterative refinement cycles driven by user feedback.
+**Total development time:** ~22 hours across multiple sessions
+**Total commits:** 27
+**Total code:** ~21,400 lines
 
 ---
 
-## Phase 1 — Foundation & Core Data Layer
+## Phase 0 — Documentation ✅
+
+**Deliverables:** PRD, Data Model, Architecture, Delivery Plan
+**Status:** ✅ Completed
+
+---
+
+## Phase 1 — Foundation & Core Data Layer ✅
 
 **Goal**: A running application with user system, course management, calendar, tasks, and goals.
 
-### Deliverables
-
-| # | Feature | Acceptance Criteria |
-|---|---------|-------------------|
-| 1.1 | Project scaffolding | React + Vite frontend, Express backend, SQLite database, shared types. `npm run setup` works on a clean machine. |
-| 1.2 | User authentication | Register with email/password, login, JWT-based session, logout. Protected routes redirect to login. |
-| 1.3 | Course CRUD | Create, edit, delete courses. Each course has name, code, color, weight. Courses listed in sidebar. |
-| 1.4 | Task system | Create one-time tasks with date, priority (Must/Recommended/Optional), course link. Toggle complete (checkbox). Tasks appear on calendar. |
-| 1.5 | Recurring tasks | Create a recurring task group that generates multiple one-time tasks across a date range. Progress bar showing completion. |
-| 1.6 | Calendar views | Monthly calendar view showing task density. Daily view showing task list for selected date. Filter by course. |
-| 1.7 | Goal Manager | Create goals linked to a course with deadline. Batch-create tasks from a goal (manual — specify dates and titles). View goal progress (% of child tasks completed). |
-| 1.8 | Daily Brief page | Home page showing: today's Must/Recommended/Optional tasks from all courses, recurring task progress alerts. |
-| 1.9 | Basic UI shell | Navigation sidebar, dark theme, responsive layout, page routing. |
-| 1.10 | Settings page | Basic settings: user profile, theme toggle, course management shortcut. |
-
-### Verification
-- User can register → login → create 2 courses → add tasks for the next week → view them on calendar → check them off → see progress on Daily Brief.
+| # | Feature | Status |
+|---|---------|--------|
+| 1.1 | Project scaffolding (React + Vite + Express + SQLite) | ✅ |
+| 1.2 | User authentication (register, login, JWT) | ✅ |
+| 1.3 | Course CRUD | ✅ |
+| 1.4 | Task system (date, priority, course link) | ✅ |
+| 1.5 | Recurring tasks | ✅ |
+| 1.6 | Calendar views (monthly + daily) | ✅ |
+| 1.7 | Goal Manager | ✅ |
+| 1.8 | Daily Brief page | ✅ |
+| 1.9 | Basic UI shell (sidebar, dark theme, routing) | ✅ |
+| 1.10 | Settings page | ✅ |
 
 ---
 
-## Phase 2 — Knowledge Card System
+## Phase 2 — Knowledge Card System ✅
 
-**Goal**: Complete card system with decks, templates, tags, LaTeX rendering, visual editor, and FSRS spaced repetition.
+**Goal**: Complete card system with decks, templates, tags, LaTeX rendering, and FSRS spaced repetition.
 
-### Deliverables
-
-| # | Feature | Acceptance Criteria |
-|---|---------|-------------------|
-| 2.1 | Card Deck CRUD | Create, edit, delete decks. Each deck linked to a course. Deck list page with course filter. |
-| 2.2 | Card CRUD | Create, edit, delete cards within a deck. Card has title, content (structured by template), importance level. |
-| 2.3 | Card templates | Four templates: Definition, Theorem, Formula, General. Each renders differently. Template auto-selected when tag is set, or manually chosen. |
-| 2.4 | Tag system | System tags (Definition, Theorem, Formula, Important, Exam-relevant) pre-seeded. User can create custom tags. Cards can have multiple tags. |
-| 2.5 | LaTeX rendering | All card content renders LaTeX via KaTeX. Formulas display beautifully, never as raw code. |
-| 2.6 | Visual formula editor | MathQuill-based editor for creating/editing formulas. Student types math naturally → editor outputs LaTeX → KaTeX renders it. Preview in real-time. |
-| 2.7 | Card flip interaction | Single card view: shows title (front), click to flip and reveal content (back). Smooth flip animation. |
-| 2.8 | Batch browse mode | Grid view showing all cards in a deck with content visible. For 8 cards: 2x4 or 4x2 grid. For 64+ cards: paginated grid with search/filter. |
-| 2.9 | Batch recall mode | All cards face-down → student flips one by one → marks as "Knew it" or "Forgot". Results tracked. |
-| 2.10 | Card filtering | Filter cards by: tag, importance, template type. Search by title/content. |
-| 2.11 | FSRS integration | ts-fsrs integrated. Each card tracks S/D/R values. After review, FSRS calculates next review date. Cards due for review surfaced in Daily Brief. |
-| 2.12 | Review session | Dedicated review mode: shows due cards one at a time → flip → rate (Forgot/Hard/Good/Easy) → FSRS updates scheduling. |
-
-### Verification
-- User can create a deck under AMS231 → add 10 cards (mix of Definition, Theorem, Formula) → use visual editor for a formula card → browse cards in grid → start a review session → rate cards → next day, only cards FSRS scheduled appear as due.
+| # | Feature | Status |
+|---|---------|--------|
+| 2.1 | Card Deck CRUD | ✅ |
+| 2.2 | Card CRUD | ✅ |
+| 2.3 | Card templates (definition/theorem/formula/general) | ✅ |
+| 2.4 | Tag system (system tags + custom tags) | ✅ |
+| 2.5 | LaTeX rendering via KaTeX | ✅ |
+| 2.6 | Visual formula editor (MathQuill) | ❌ Not implemented — KaTeX preview in card modal instead |
+| 2.7 | Card flip interaction (3D flip animation) | ✅ |
+| 2.8 | Batch browse mode (grid view) | ✅ |
+| 2.9 | Batch recall mode | ✅ |
+| 2.10 | Card filtering (tag, importance, search) | ✅ |
+| 2.11 | FSRS integration (ts-fsrs) | ✅ |
+| 2.12 | Review session | ✅ |
 
 ---
 
-## Phase 3 — Agent (Mr. Zero)
+## Phase 3 — Agent (Mr. Zero) ✅
 
 **Goal**: Fully functional AI agent with document analysis, card generation, study planning, and Proposal mechanism.
 
-**Prerequisite**: User provides a temporary API key for testing.
-
-### Deliverables
-
-| # | Feature | Acceptance Criteria |
-|---|---------|-------------------|
-| 3.1 | Provider abstraction | Unified AI provider interface. OpenAI and Anthropic implementations. User-configurable API key + model in Settings. |
-| 3.2 | Agent chat UI | Floating panel accessible from any page via keyboard shortcut (Ctrl+J or similar). Chat interface with message history. Streaming responses. |
-| 3.3 | Function calling | Agent can call all backend actions: create/query tasks, goals, cards, query calendar, query statistics. Function definitions registered with provider. |
-| 3.4 | Natural language task creation | User says "Add a task for tomorrow to review Chapter 5 for AMS231" → Agent creates the task correctly. |
-| 3.5 | Document upload & parsing | Upload PDF/DOCX via Agent or Documents page. Auto-detect native vs scanned. Parse via appropriate channel. Store extracted text + summary. |
-| 3.6 | Document-based card generation | User uploads lecture note → asks Agent to generate cards → Agent extracts key concepts → generates card drafts as a Proposal → user reviews, edits, applies. |
-| 3.7 | Study plan generation | User describes goal or uploads document → Agent asks preference questions (hours/day, exam date, study style) → generates Proposal with daily task allocation respecting Must/Recommended/Optional → user edits → applies to calendar. |
-| 3.8 | Proposal UI | Interactive proposal view: editable list/timeline of proposed tasks or cards. Each item editable, deletable, reorderable. Apply / Discard buttons. |
-| 3.9 | Agent memory — short-term | Sliding window conversation context. Conversation history stored in database. |
-| 3.10 | Agent memory — long-term | User preferences and decisions extracted and stored. Retrieved at conversation start via keyword search. |
-| 3.11 | Agent memory — document | Analyzed documents summarized and indexed. Agent references summaries during conversation, not full text. |
-| 3.12 | Token optimization | Conversation summarization after N turns. Tool result compression. Document summaries used instead of full text. |
-| 3.13 | Context-aware invocation | Clicking "Ask Mr. Zero" from a card page pre-loads card context. From calendar pre-loads date context. |
-| 3.14 | Agent name customization | User can rename Agent in Settings. All UI and Agent self-references use the custom name. |
-| 3.15 | Additional provider support | GenericOpenAI provider for any compatible API. User can add custom API endpoint + key. |
-
-### Verification
-- User uploads a 20-page Linear Algebra lecture note PDF → asks Mr. Zero to "create cards for the key theorems in this document" → Agent parses PDF, extracts theorems, generates a Proposal with 8 card drafts → user edits 2 of them → applies → cards appear in the correct deck with LaTeX rendered → user then asks "make me a 2-week study plan for the midterm on April 1" → Agent generates a Proposal with daily tasks → user adjusts and applies → tasks appear on calendar with correct priorities.
+| # | Feature | Status |
+|---|---------|--------|
+| 3.1 | Provider abstraction (Anthropic primary) | ✅ (OpenAI code exists, excluded from v1.0) |
+| 3.2 | Agent chat UI (floating panel, Ctrl+J) | ✅ |
+| 3.3 | Function calling (18+ tools) | ✅ |
+| 3.4 | Natural language task creation | ✅ |
+| 3.5 | Document upload & parsing (PDF/DOCX/XLSX/image/TXT) | ✅ |
+| 3.6 | Document-based card generation via Proposal | ✅ |
+| 3.7 | Study plan generation via Proposal | ✅ |
+| 3.8 | Proposal UI (review, edit, apply/discard) | ✅ |
+| 3.9 | Agent memory — short-term (sliding window) | ✅ |
+| 3.10 | Agent memory — long-term (keyword + vector) | ✅ |
+| 3.11 | Agent memory — document (summary + chunk RAG) | ✅ |
+| 3.12 | Token optimization (summarization, compression) | ✅ |
+| 3.13 | Context-aware invocation | ✅ |
+| 3.14 | Agent name customization | ✅ |
+| 3.15 | Additional provider support (GenericOpenAI) | ⚠️ Code exists, excluded from v1.0 |
 
 ---
 
-## Phase 4 — Statistics, Polish & Advanced Features
+## Phase 4 — Statistics, Polish & Advanced Features ✅
 
 **Goal**: Statistics dashboard, review system, exam mode, conflict arbitration, daily status, and offline support.
 
-### Deliverables
-
-| # | Feature | Acceptance Criteria |
-|---|---------|-------------------|
-| 4.1 | Statistics dashboard | Task completion rates (daily/weekly/monthly), per-course breakdowns, streak tracking. |
-| 4.2 | Streak visualization | GitHub-style contribution heatmap showing study activity per day. |
-| 4.3 | Trend charts | Line charts for completion rate trends. Bar charts for per-course comparison. |
-| 4.4 | Motivational messages | Data-driven encouraging messages displayed alongside stats. Based on actual achievement, not generic. |
-| 4.5 | Weekly Review | Agent-generated summary: what was accomplished, what fell behind, suggested focus. Triggered via Agent or auto-suggested. |
-| 4.6 | Monthly & Semester Review | Broader retrospective reports, same mechanism as weekly but larger scope. |
-| 4.7 | Exam Mode | Activatable per goal. Increases Must task density. Increases card review frequency. Suppresses Optional tasks for the course. Visual indicator on UI. |
-| 4.8 | Daily status input | Energy level selector on Daily Brief (Energized/Normal/Tired). Agent adjusts recommendations accordingly. |
-| 4.9 | Multi-course conflict arbitration | When tasks from multiple courses overlap: auto-prioritize by deadline proximity, behind-schedule status, and course weight. Reflected in Daily Brief ordering. |
-| 4.10 | Recurring task progress visualization | Progress bar + "X of Y completed" for each recurring task group. Behind-schedule alerts. Offer to let Agent readjust. |
-| 4.11 | Offline support | Service Worker caches card data and calendar for offline review and viewing. Sync on reconnect. |
-| 4.12 | Keyboard shortcuts | Global shortcuts for: open Agent (Ctrl+J), create task (Ctrl+T), create card (Ctrl+K), navigate pages. Shortcut reference panel. |
-
-### Verification
-- User has been using the app for a simulated 2 weeks of data → opens Statistics → sees streak heatmap, completion charts, per-course breakdown → asks Mr. Zero for a weekly review → receives a meaningful summary → activates Exam Mode for AMS231 midterm → sees task density increase → sets status to "Tired" → Daily Brief reduces to essential Must tasks only → disconnects internet → can still review cards and view calendar.
+| # | Feature | Status |
+|---|---------|--------|
+| 4.1 | Statistics dashboard | ✅ |
+| 4.2 | Streak visualization | ✅ |
+| 4.3 | Trend charts (custom CSS/SVG) | ✅ |
+| 4.4 | Motivational messages | ✅ |
+| 4.5 | Weekly Review (Agent-generated) | ✅ |
+| 4.6 | Monthly & Semester Review | ✅ |
+| 4.7 | Exam Mode | ⚠️ exam_mode field exists, no UI behavior change implemented |
+| 4.8 | Daily status input (energy level) | ✅ |
+| 4.9 | Multi-course conflict arbitration | ❌ Not implemented |
+| 4.10 | Recurring task progress visualization | ✅ |
+| 4.11 | Offline support (Service Worker) | ❌ Not implemented |
+| 4.12 | Keyboard shortcuts | ⚠️ Only Ctrl+J (Agent panel) implemented |
 
 ---
 
-## Post-Phase: Polish Rounds
+## Post-Phase: Polish & Feature Rounds
 
-After Phase 4, the project enters iterative polish:
+After Phase 4, the project entered iterative rounds — each adding polish and new capabilities.
 
-| Round | Focus |
-|-------|-------|
-| Polish 1 | UI refinement — colors, spacing, typography, animations, transitions |
-| Polish 2 | Agent intelligence — prompt tuning, better proposals, edge case handling |
-| Polish 3 | Performance — loading speed, large dataset handling, memory usage |
-| Polish 4 | Accessibility — screen reader support, keyboard navigation completeness |
-| Polish 5 | Advanced features — Obsidian export, multi-agent routing, custom themes |
+### Round 1 (Polish Round 1) ✅
 
-Each polish round is one conversation. User provides feedback → developer implements → user reviews.
+| Step | Feature |
+|------|---------|
+| Polish Round 1 | Agent fixes, course weight system (1/2/3), calendar improvements |
+| Patch | Card sections (grouping within decks) |
 
-**Version 1.0** is declared when the user is satisfied with the polish level.
+### Round 2 ✅
+
+| Step | Feature |
+|------|---------|
+| Step 1 | Card grid + KaTeX preview in card list |
+| Step 2 | Tag Group system (course-level tag organization) |
+| Step 3 | Document upload + multi-format parsing (PDF双通道/DOCX/XLSX/image/TXT) |
+| Step 3 Patch | 12 audit fixes across upload and parsing |
+| Step 4 | Agent document tools (search_documents, get_document_content) |
+| Step 5 | Drag-and-drop sorting (cards, sections, tasks) |
+
+### Round 3 ✅
+
+| Step | Feature |
+|------|---------|
+| Step 1+2 | Glassmorphism design system + core pages |
+| Step 3+4 | Glassmorphism complete — all 26 CSS modules |
+| Hotfix v2 | Glassmorphism black screen fix (--bg-* variables to solid colors + @supports fallback) |
+| Patch | Deployment black screen fix + global UI scale-up (8-12%) |
+| Step 5 | Review mode selector (7 modes) + Agent image upload panel |
+
+### Round 4 ✅
+
+| Step | Feature |
+|------|---------|
+| Step 1 | sqlite-vec + Voyage AI embedding pipeline |
+| Step 2 | Semantic search + Agent RAG (vector-powered document retrieval) |
+| Step 3 | FTS5 full-text search + three-way hybrid search engine |
+
+### v1.0 Hotfix ✅
+
+| Fix | Description |
+|-----|-------------|
+| Model ID | Update Haiku model ID to `claude-haiku-4-5-20251001` |
+| API Key | documentParser reads API key from user Settings (priority: Settings > .env) |
 
 ---
 
-## Estimated Conversation Count
+## v1.0 Summary
 
-| Phase | Est. Conversations |
-|-------|-------------------|
-| Phase 0 (立项) | 1 (this one) |
-| Phase 1 | 2-3 |
-| Phase 2 | 2-3 |
-| Phase 3 | 3-4 |
-| Phase 4 | 2-3 |
-| Polish Rounds | 3-5+ |
-| **Total** | **~13-19 conversations** |
+**Round 4 completion = Coincides v1.0 milestone.**
+
+| Metric | Value |
+|--------|-------|
+| Total features planned | 49 |
+| ✅ Completed | 43 (88%) |
+| ⚠️ Partially implemented | 3 (6%) |
+| ❌ Not implemented | 3 (6%) |
+| Total commits | 27 |
+| Lines of code | ~21,400 |
+| Database tables | 20 physical + 4 virtual |
+| Development time | ~22 hours |

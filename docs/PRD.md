@@ -1,9 +1,10 @@
 # Coincides — Product Requirements Document (PRD)
 
-**Version**: 0.1 (Draft)
+**Version**: 1.0
 **Created**: 2026-03-17
+**Updated**: 2026-03-18
 **Author**: Perplexity Computer (on behalf of henryfeng349)
-**Status**: Pending Review
+**Status**: Active
 
 ---
 
@@ -322,9 +323,9 @@ Inspired by Notion's usability and Apple's humanistic design:
 
 ### 4.3 Offline Capability
 
-- Card review and calendar viewing should work offline
-- Local-first data layer with Service Worker caching
-- Sync when back online
+> **v1.0 Status**: Offline support (Service Worker) was NOT implemented in v1.0. The app requires network for all features. This remains a future consideration.
+
+- Card review and calendar viewing could work offline (future)
 - Agent requires network (API calls)
 
 ---
@@ -340,10 +341,10 @@ These are explicitly NOT part of Coincides:
 
 ---
 
-## 6. Open Questions (To Be Resolved)
+## 6. Open Questions
 
-1. **External integrations**: Should Coincides support import/export with Obsidian, Anki, or other tools? (Deferred to post-v1)
-2. **Multi-agent architecture**: Should Mr. Zero internally route to specialized sub-agents? (Decided yes in discussion — details TBD during Phase 3)
-3. **Versioning strategy**: When is v1.0? (Decided: after all phases + polish rounds are complete)
-4. **Long-term memory retrieval**: Exact mechanism for "finding lost memories" in truncated conversations. (To be designed in Phase 3)
-5. **Obsidian / NotebookLM integration**: Potential for external knowledge base connection. (Deferred)
+1. **External integrations**: Should Coincides support import/export with Obsidian, Anki, or other tools? — Deferred to post-v1
+2. **Multi-agent architecture**: Should Mr. Zero internally route to specialized sub-agents? — ✅ Resolved: Single agent with 18+ function tools, no sub-agent routing needed for v1.0
+3. **Versioning strategy**: When is v1.0? — ✅ Resolved: v1.0 = Round 4 completion (Phase 0-4 + 4 polish rounds)
+4. **Long-term memory retrieval**: Exact mechanism for retrieval — ✅ Resolved: Three-way hybrid search (Voyage AI vectors + FTS5 + LIKE fallback)
+5. **Obsidian / NotebookLM integration**: Potential for external knowledge base connection — Deferred to post-v1

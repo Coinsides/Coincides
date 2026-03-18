@@ -1,7 +1,8 @@
 # Coincides — Technical Architecture
 
-**Version**: 0.1 (Draft)
+**Version**: 1.0
 **Created**: 2026-03-17
+**Updated**: 2026-03-18
 
 ---
 
@@ -11,48 +12,56 @@
 ┌─────────────────────────────────────────────────┐
 │                   Client (Browser)               │
 │                                                   │
-│  React + TypeScript + Vite                        │
-│  ├── Pages (Daily Brief, Calendar, Cards, etc.)   │
-│  ├── Agent UI (floating panel)                    │
+│  React 18 + TypeScript + Vite 5                   │
+│  ├── Pages (8: DailyBrief, Calendar, Decks, etc.) │
+│  ├── Agent Panel (floating, Ctrl+J)               │
 │  ├── KaTeX (LaTeX rendering)                      │
-│  ├── MathQuill (visual formula editor)            │
-│  ├── Chart.js (statistics visualization)          │
-│  └── Service Worker (offline caching)             │
+│  ├── Zustand (state management, 16 stores)        │
+│  ├── CSS Modules + Glassmorphism design           │
+│  ├── lucide-react (icons)                         │
+│  └── date-fns (date utilities)                    │
 │                                                   │
 └──────────────────┬──────────────────────────────┘
-                   │ REST API (JSON)
+                   │ REST API (JSON) + SSE (Agent streaming)
                    ▼
 ┌─────────────────────────────────────────────────┐
 │                   Server (Node.js)               │
 │                                                   │
-│  Express.js + TypeScript                          │
+│  Express 4 + TypeScript (tsx runtime)             │
 │  ├── Auth middleware (JWT)                         │
-│  ├── REST API routes                              │
+│  ├── REST API routes (18 modules)                 │
 │  ├── Agent orchestrator                           │
-│  │   ├── Provider abstraction layer               │
-│  │   ├── Function calling executor                │
-│  │   ├── Memory manager                           │
+│  │   ├── Anthropic Claude (Haiku 4.5 / Sonnet 4)  │
+│  │   ├── 18+ function tools                       │
+│  │   ├── Memory manager (short + long term)       │
 │  │   └── Proposal engine                          │
 │  ├── Document processor                           │
-│  │   ├── Channel detector                         │
-│  │   ├── Marker (native PDF)                      │
-│  │   └── PaddleOCR (scanned PDF)                  │
+│  │   ├── pdf-parse (native PDF text extraction)   │
+│  │   ├── Claude Haiku Vision (scanned/image PDF)  │
+│  │   ├── mammoth (DOCX), xlsx (Excel)             │
+│  │   └── Direct read (TXT), Vision API (images)   │
+│  ├── Embedding pipeline                           │
+│  │   ├── Voyage AI voyage-4 (1024d embeddings)    │
+│  │   └── sqlite-vec v0.1.7 (vector storage + KNN) │
+│  ├── FTS5 (full-text search, content-sync mode)   │
 │  ├── FSRS engine (ts-fsrs)                        │
-│  └── SQLite via better-sqlite3                    │
+│  └── SQLite via better-sqlite3 (WAL mode)         │
 │                                                   │
 └──────────────────┬──────────────────────────────┘
                    │
                    ▼
 ┌─────────────────────────────────────────────────┐
 │              SQLite Database (Local)              │
-│  coincides.db                                     │
+│  coincides.db — 20 tables + 4 virtual tables     │
 └─────────────────────────────────────────────────┘
                    │
               (API calls)
                    ▼
 ┌─────────────────────────────────────────────────┐
-│           External AI Providers                   │
-│  OpenAI / Anthropic / Google / Compatible APIs    │
+│           External AI Services                    │
+│  Anthropic Claude (chat + Vision OCR)             │
+│  Voyage AI (text embedding)                       │
+│  Note: OpenAI provider exists but excluded in v1.0│
 └─────────────────────────────────────────────────┘
 ```
 
@@ -65,36 +74,30 @@
 **Why React:**
 - Largest ecosystem for component libraries, UI primitives
 - Component model fits well: Card, Task, Calendar, Agent Panel are all natural components
-- React's state management (zustand or jotai) handles complex UI state (open panels, filters, edit modes)
-- Abundant open-source calendar, chart, and editor components
+- Zustand for state management handles complex UI state (open panels, filters, edit modes)
 
 **Why TypeScript:**
-- This is a product-grade application. Type safety prevents entire categories of bugs.
+- Product-grade application. Type safety prevents entire categories of bugs.
 - Shared types between frontend and backend (shared `types/` directory)
 
 **Why Vite:**
 - Fast development builds (HMR in milliseconds)
 - Optimized production builds
 - Native ESM support
-- Simple configuration
+- `base: './'` configured for portable deployment
 
 ### 2.2 Backend: Node.js + Express + TypeScript
 
 **Why Node.js:**
 - Same language (TypeScript) as frontend — shared types, shared logic
 - Excellent for I/O-heavy workloads (API calls to AI providers, file processing)
-- Massive package ecosystem (PDF parsing, crypto, auth libraries)
 - Student can run it locally with a single `npm start`
 
 **Why Express:**
 - Minimal, unopinionated — we control the architecture
 - Most documented and understood Node.js framework
-- Easy for future contributors to understand
 
-**Why not Next.js or similar fullstack framework:**
-- This application has distinct frontend and backend concerns
-- The backend does heavy processing (PDF parsing, Agent orchestration) that benefits from clean separation
-- Keeping them separate makes it possible to eventually deploy the backend independently
+**Runtime:** tsx (TypeScript execution without compilation step)
 
 ### 2.3 Database: SQLite via better-sqlite3
 
@@ -102,8 +105,8 @@
 - **Zero setup**: No database server to install. The entire database is a single file.
 - **Local-first**: Data lives on the user's machine. Full privacy.
 - **Portable**: Copy the .db file and you have a complete backup.
-- **Fast enough**: For a single-user or small multi-user application, SQLite handles thousands of queries per second.
-- **Reliable**: SQLite is the most deployed database engine in the world.
+- **WAL mode**: Enabled for better concurrent read performance.
+- **Foreign keys**: Enabled for referential integrity.
 
 **Why better-sqlite3 (not sqlite3 or Prisma):**
 - Synchronous API — simpler code, no callback hell
@@ -111,85 +114,99 @@
 - Direct SQL — full control, no ORM abstraction hiding performance issues
 - Prepared statements for security and performance
 
-**Migration path to PostgreSQL:**
-- If the application scales to many users, the SQL is standard enough to migrate
-- The data access layer will use a thin abstraction (repository pattern) to make this swap feasible
+### 2.4 AI Providers
 
-### 2.4 AI Provider Abstraction
+**Anthropic Claude** — Primary chat + OCR provider
+- `claude-haiku-4-5-20251001` — Default model for Agent conversation + Vision OCR
+- `claude-sonnet-4-20250514` — Available for heavier tasks
+- Used via `@anthropic-ai/sdk`
 
+**Voyage AI** — Embedding provider
+- `voyage-4` model, 1024 dimensions, $0.06/M tokens
+- Used for document chunk and agent memory vectorization
+
+**Provider abstraction layer:**
 ```typescript
-interface AIProvider {
-  name: string;
-  chat(messages: Message[], tools?: Tool[]): Promise<AIResponse>;
-  chatStream(messages: Message[], tools?: Tool[]): AsyncGenerator<AIChunk>;
-}
-
-class OpenAIProvider implements AIProvider { ... }
-class AnthropicProvider implements AIProvider { ... }
-class GenericOpenAIProvider implements AIProvider { ... }  // For any OpenAI-compatible API
+// server/src/agent/providers/
+AnthropicProvider — Implements streaming chat + function calling
+OpenAIProvider — Code exists but excluded from v1.0 (user cannot bind payment)
 ```
 
-**Why abstraction layer:**
-- User can switch providers without any code change
-- Future providers added by implementing one interface
-- Function calling / tool use normalized across providers (OpenAI and Anthropic have different formats)
+**API key priority:** `User Settings > .env environment variable > Error`
 
-**API key security:**
-- Keys stored encrypted in the database (AES-256)
-- Decrypted only in memory when making API calls
-- Never sent to frontend; frontend triggers actions, backend executes with stored keys
+Both documentParser and embedding modules follow this priority. Keys are stored as plaintext in the user's `settings` JSON field (not encrypted).
 
-### 2.5 PDF Processing
+### 2.5 Document Processing
 
-**Marker (Channel A — Native PDFs):**
-- Open source, 15k+ GitHub stars
-- Handles LaTeX, tables, code blocks, multi-column layouts
-- Outputs structured Markdown
-- Runs as a Python subprocess called from Node.js
+All document processing is done in Node.js — no Python required.
 
-**PaddleOCR (Channel B — Scanned PDFs):**
-- Best spatial structure preservation among OCR engines
-- Handles Chinese and English text
-- Called as a Python subprocess
+**Supported formats:**
+| Format | Library | Method |
+|--------|---------|--------|
+| PDF (digital) | pdf-parse | Native text extraction |
+| PDF (scanned/image) | Claude Haiku 4.5 Vision | Send page images in batches of 50 |
+| DOCX | mammoth | HTML → text conversion |
+| XLSX | xlsx | Sheet → text extraction |
+| Images (PNG/JPG) | Claude Haiku 4.5 Vision | Direct OCR via Vision API |
+| TXT | Node.js fs | Direct read |
 
-**Auto-detection logic:**
+**PDF auto-detection logic:**
 ```
-1. Attempt text extraction via Marker
-2. If extracted text length < (page_count * 100 characters):
-   → Classify as scanned → Route to PaddleOCR
-3. For math formula regions detected by layout analysis:
-   → Send region image to Vision API → Get LaTeX output
+1. Attempt text extraction via pdf-parse
+2. If extracted text < threshold → classify as scanned
+   → Split into page images via pdf-lib
+   → Send to Claude Haiku 4.5 Vision API (50 pages per batch)
+3. Long documents chunked for embedding storage
 ```
 
-**Note:** Both Marker and PaddleOCR are Python tools. They will be installed in a Python virtual environment alongside the Node.js application. Node.js calls them via `child_process.spawn`.
+### 2.6 Embedding + Vector Search
 
-### 2.6 Spaced Repetition: ts-fsrs
+**Pipeline:** Document text → chunk → Voyage AI embedding → sqlite-vec storage
+
+- **Voyage AI voyage-4**: 1024-dimensional embeddings
+- **sqlite-vec v0.1.7**: Vector storage as `vec0` virtual tables, KNN via `vec_distance_cosine`
+- **Graceful degradation**: If no embedding provider configured, falls back to text-only search
+
+**Three-way hybrid search (for both documents and memories):**
+```
+Priority 1: Semantic vector search (Voyage AI + sqlite-vec KNN)
+    ↓ if results insufficient
+Priority 2: FTS5 full-text search (BM25 ranking)
+    ↓ if results insufficient
+Priority 3: LIKE keyword search (last resort)
+    → Auto-deduplicate across all three result sets
+```
+
+### 2.7 FTS5 Full-Text Search
+
+- Two FTS5 virtual tables: `document_chunks_fts`, `agent_memories_fts`
+- Content-sync mode: triggers automatically sync INSERT/DELETE/UPDATE
+- Backfill on startup: if FTS count < source count, runs `'rebuild'`
+- Used as fallback when vector search unavailable or returns insufficient results
+
+### 2.8 Spaced Repetition: ts-fsrs
 
 - Official TypeScript implementation of FSRS algorithm
 - MIT licensed
 - Handles: scheduling, difficulty calculation, stability tracking
-- We wrap it in a `ReviewEngine` class that interfaces with our Card table
+- Integrated with the Card table's `fsrs_*` fields
 
-### 2.7 LaTeX Rendering: KaTeX
+### 2.9 LaTeX Rendering: KaTeX
 
 **Why KaTeX over MathJax:**
 - 100x faster rendering
-- Server-side rendering capable (for offline caching)
 - Smaller bundle size
 - Covers 95%+ of math notation students need
 
-### 2.8 Visual Formula Editor: MathQuill (or math-field)
+Card content is stored with LaTeX markup, rendered client-side via KaTeX. Students can write LaTeX directly or use the preview in card creation modal.
 
-- Students type naturally; the editor renders LaTeX in real-time
-- Output is LaTeX source code (stored in card content)
-- Displayed via KaTeX
-- Student never sees raw LaTeX unless they choose to
+### 2.10 Statistics Visualization
 
-### 2.9 Charts: Chart.js
-
-- Lightweight, well-documented
-- Covers all our needs: line charts (trends), bar charts (completion), calendar heatmap (streaks)
-- Animated, responsive
+Statistics are rendered using custom CSS and SVG — no external charting library is used. This includes:
+- Task completion rate displays
+- Study streak tracking
+- Per-course breakdowns
+- Motivational messages based on actual data
 
 ---
 
@@ -197,67 +214,60 @@ class GenericOpenAIProvider implements AIProvider { ... }  // For any OpenAI-com
 
 ```
 Coincides/
-├── docs/                    # Project documentation
-│   ├── PRD.md
-│   ├── DATA_MODEL.md
-│   ├── ARCHITECTURE.md
-│   ├── DELIVERY_PLAN.md
-│   └── CHANGELOG.md
-├── client/                  # Frontend (React + TypeScript)
+├── docs/                    # Project documentation (see docs/README.md)
+│   ├── README.md            # Documentation index
+│   ├── PRD.md, DATA_MODEL.md, ARCHITECTURE.md
+│   ├── DELIVERY_PLAN.md, Coincides-Roadmap.md
+│   ├── workflow/            # Workflow + Onboarding docs
+│   └── changelog/           # Per-version changelogs
+├── client/                  # Frontend (React + TypeScript + Vite)
 │   ├── src/
-│   │   ├── components/      # Reusable UI components
-│   │   ├── pages/           # Page-level components
-│   │   │   ├── DailyBrief/
-│   │   │   ├── Calendar/
-│   │   │   ├── Cards/
-│   │   │   ├── Goals/
-│   │   │   ├── Documents/
-│   │   │   ├── Statistics/
-│   │   │   └── Settings/
-│   │   ├── features/        # Feature-specific logic
-│   │   │   ├── agent/       # Agent panel UI + chat logic
-│   │   │   ├── cards/       # Card flip, review mode, editor
-│   │   │   └── calendar/    # Calendar views
-│   │   ├── hooks/           # Custom React hooks
-│   │   ├── stores/          # State management (zustand)
-│   │   ├── services/        # API client functions
-│   │   ├── types/           # Shared TypeScript types
-│   │   ├── utils/           # Utilities
-│   │   └── styles/          # Global styles, theme
-│   ├── public/
-│   ├── index.html
-│   ├── vite.config.ts
-│   ├── tsconfig.json
+│   │   ├── App.tsx          # HashRouter route definitions
+│   │   ├── main.tsx         # Entry point
+│   │   ├── services/api.ts  # Axios + JWT interceptors
+│   │   ├── stores/          # 16 Zustand stores
+│   │   ├── pages/           # 8 page components
+│   │   │   ├── Auth/, DailyBrief/, Courses/
+│   │   │   ├── Decks/, Goals/, Calendar/
+│   │   │   ├── Review/, Statistics/, Settings/
+│   │   └── components/      # Reusable components
+│   │       ├── AgentPanel/  # AI chat panel (Ctrl+J)
+│   │       ├── CardFlip/    # 3D flip card
+│   │       ├── CardModal/   # Card create/edit
+│   │       ├── DocumentManager/
+│   │       ├── TagGroupManager/
+│   │       └── KaTeX/       # LaTeX renderer
+│   ├── vite.config.ts       # base: './'
 │   └── package.json
 ├── server/                  # Backend (Node.js + Express)
 │   ├── src/
-│   │   ├── routes/          # Express route handlers
-│   │   ├── middleware/       # Auth, error handling
-│   │   ├── services/        # Business logic
-│   │   │   ├── agent/       # Agent orchestration
-│   │   │   │   ├── providers/    # AI provider implementations
-│   │   │   │   ├── tools/        # Function definitions for Agent
-│   │   │   │   ├── memory/       # Long-term memory manager
-│   │   │   │   └── proposal/     # Proposal generation & management
-│   │   │   ├── documents/   # PDF processing pipeline
-│   │   │   ├── cards/       # Card CRUD + FSRS integration
-│   │   │   └── stats/       # Statistics aggregation
-│   │   ├── db/              # Database setup, migrations, queries
-│   │   ├── types/           # Shared TypeScript types
-│   │   └── utils/           # Utilities (encryption, validation)
-│   ├── tsconfig.json
+│   │   ├── index.ts         # Express entry, port 3001
+│   │   ├── db/
+│   │   │   ├── schema.sql   # 20 tables + indexes
+│   │   │   └── init.ts      # DB init + FTS5 + sqlite-vec + seeds
+│   │   ├── routes/          # 18 route modules
+│   │   ├── agent/
+│   │   │   ├── orchestrator.ts    # SSE streaming, max 5 tool rounds
+│   │   │   ├── system-prompt.ts   # System prompt builder
+│   │   │   ├── providers/         # Anthropic + OpenAI adapters
+│   │   │   ├── tools/
+│   │   │   │   ├── definitions.ts # 18+ function tool definitions
+│   │   │   │   └── executor.ts    # Tool executor (hybrid search)
+│   │   │   └── memory/manager.ts  # Short + long term memory
+│   │   ├── embedding/
+│   │   │   ├── index.ts           # Embedding pipeline entry
+│   │   │   ├── voyage.ts          # Voyage AI client
+│   │   │   ├── vectorStore.ts     # sqlite-vec + three-way search
+│   │   │   └── types.ts
+│   │   ├── services/
+│   │   │   └── documentParser.ts  # Multi-format parser
+│   │   └── middleware/            # auth, errorHandler, upload
 │   └── package.json
-├── shared/                  # Shared types between client and server
-│   └── types/
-├── scripts/                 # Setup, migration, and utility scripts
-│   ├── setup.sh             # One-command setup for new users
-│   └── migrate.ts           # Database migration runner
-├── python/                  # Python environment for PDF processing
-│   ├── requirements.txt     # Marker, PaddleOCR dependencies
-│   └── process_pdf.py       # PDF processing entry point
+├── shared/
+│   └── types/index.ts       # Frontend + backend shared types
+├── .env                     # ANTHROPIC_API_KEY + VOYAGE_API_KEY
 ├── .gitignore
-├── package.json             # Root workspace config
-└── README.md
+└── package.json             # Root: npm run setup, install:all
 ```
 
 ---
@@ -285,79 +295,111 @@ Coincides/
 | GET | /api/tasks?date=YYYY-MM-DD | Get tasks for a date |
 | GET | /api/tasks?from=...&to=... | Get tasks in date range |
 | POST | /api/tasks | Create task |
-| PUT | /api/tasks/:id | Update task (including toggle complete) |
+| PUT | /api/tasks/:id | Update task |
 | DELETE | /api/tasks/:id | Delete task |
-| POST | /api/tasks/batch | Create multiple tasks (from Proposal) |
+| PUT | /api/tasks/reorder | Reorder tasks (drag-and-drop) |
 
 ### Goals
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | /api/goals?course_id=... | List goals, optionally filtered by course |
+| GET | /api/goals | List goals |
 | POST | /api/goals | Create goal |
 | PUT | /api/goals/:id | Update goal |
-| PUT | /api/goals/:id/exam-mode | Toggle exam mode |
 | DELETE | /api/goals/:id | Delete goal |
 
-### Cards & Decks
+### Decks & Cards
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | /api/decks?course_id=... | List decks |
+| GET | /api/decks | List decks |
 | POST | /api/decks | Create deck |
-| GET | /api/decks/:id/cards?tag=... | List cards in deck, with optional tag filter |
+| PUT | /api/decks/:id | Update deck |
+| DELETE | /api/decks/:id | Delete deck |
+| GET | /api/cards?deck_id=... | List cards in deck |
 | POST | /api/cards | Create card |
 | PUT | /api/cards/:id | Update card |
-| POST | /api/cards/:id/review | Submit review result (FSRS update) |
-| GET | /api/cards/due | Get cards due for review today |
-| POST | /api/cards/batch | Create multiple cards (from Proposal) |
+| DELETE | /api/cards/:id | Delete card |
+| PUT | /api/cards/reorder | Reorder cards |
+
+### Sections
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/sections?deck_id=... | List sections in deck |
+| POST | /api/sections | Create section |
+| PUT | /api/sections/:id | Update section |
+| DELETE | /api/sections/:id | Delete section |
+
+### Tags & Tag Groups
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/tags | List user's tags |
+| POST | /api/tags | Create tag |
+| GET | /api/tag-groups?course_id=... | List tag groups |
+| POST | /api/tag-groups | Create tag group |
 
 ### Documents
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | /api/documents/upload | Upload document |
+| POST | /api/documents/upload | Upload + auto-parse document |
 | GET | /api/documents?course_id=... | List documents |
-| GET | /api/documents/:id | Get document details + extracted text |
+| GET | /api/documents/:id | Get document details + text |
+| DELETE | /api/documents/:id | Delete document |
+
+### Embedding
+| Method | Path | Description |
+|--------|------|-------------|
+| POST | /api/embedding/search | Semantic search documents |
+| GET | /api/embedding/status | Check embedding provider status |
 
 ### Agent
 | Method | Path | Description |
 |--------|------|-------------|
-| POST | /api/agent/chat | Send message, receive response (streaming) |
-| GET | /api/agent/conversations | List conversations |
-| GET | /api/agent/conversations/:id | Get conversation messages |
-| POST | /api/agent/proposals/:id/apply | Apply a proposal |
-| POST | /api/agent/proposals/:id/discard | Discard a proposal |
+| GET | /api/conversations | List conversations |
+| POST | /api/conversations | Create conversation |
+| POST | /api/conversations/:id/messages | Send message (SSE streaming) |
+| GET | /api/conversations/:id/messages | Get conversation messages |
 
-### Statistics
+### Proposals
 | Method | Path | Description |
 |--------|------|-------------|
-| GET | /api/stats/daily?date=... | Daily stats |
-| GET | /api/stats/range?from=...&to=... | Stats for date range |
-| GET | /api/stats/streak | Current streak data |
-| GET | /api/stats/course/:id | Per-course statistics |
+| GET | /api/proposals | List proposals |
+| POST | /api/proposals/:id/apply | Apply a proposal |
+| POST | /api/proposals/:id/discard | Discard a proposal |
+
+### Review
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/review/due | Get cards due for review |
+| POST | /api/review/:cardId | Submit review result (FSRS) |
+
+### Daily Brief & Status
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/daily-brief | Aggregated daily view |
+| GET | /api/daily-status | Get today's status |
+| POST | /api/daily-status | Set energy level |
+
+### Statistics & Study Templates
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | /api/statistics/overview | Overview stats |
+| GET | /api/study-templates | List study mode templates |
 
 ### Settings
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | /api/settings | Get user settings |
 | PUT | /api/settings | Update settings |
-| PUT | /api/settings/ai-provider | Update AI provider config |
-
-### Daily Brief
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | /api/daily-brief | Aggregated daily view (tasks + due cards + alerts) |
-| POST | /api/daily-status | Set today's energy level |
 
 ---
 
 ## 5. Security Considerations
 
-- **JWT Authentication**: All API routes (except auth) require valid JWT
-- **API Key Encryption**: User's AI provider keys encrypted with AES-256 before storage
+- **JWT Authentication**: All API routes (except auth) require valid JWT in-memory token
+- **API Key Storage**: Keys stored as plaintext in user's `settings` JSON field. Future improvement: encrypt at rest.
 - **Input Validation**: All inputs validated and sanitized (zod schemas)
 - **SQL Injection Prevention**: Parameterized queries via better-sqlite3 prepared statements
 - **CORS**: Configured to allow only the frontend origin
-- **Rate Limiting**: Applied to auth routes and Agent chat endpoint
-- **File Upload**: Size limits, type validation, sandboxed storage
+- **File Upload**: Size limits (multer), type validation, sandboxed storage in `uploads/` directory
 
 ---
 
@@ -367,28 +409,32 @@ For the student to run on Windows 11:
 
 ### Prerequisites
 - Node.js 20+ (LTS)
-- Python 3.10+ (for PDF processing)
+- No Python required (all processing is Node.js native)
 
-### Setup (One Command)
+### Setup
 ```bash
 # Clone the repository
 git clone https://github.com/Coinsides/Coincides.git
 cd Coincides
 
-# Run setup script (installs all dependencies)
+# Install all dependencies (root + server + client)
 npm run setup
 
-# Start the application
-npm start
+# Create .env file with API keys
+# ANTHROPIC_API_KEY=sk-ant-...
+# VOYAGE_API_KEY=pa-...
+
+# Start backend (Terminal 1)
+npx tsx server/src/index.ts
+# → Running on http://localhost:3001
+
+# Start frontend (Terminal 2)
+cd client && npm run dev
+# → Running on http://localhost:5173
 ```
 
-`npm start` launches both the backend (Express) and frontend (Vite dev server or built static files).
-
-The application opens at `http://localhost:3000`.
-
-### What `npm run setup` does:
-1. Install Node.js dependencies for client and server
-2. Create Python virtual environment
-3. Install Marker and PaddleOCR in the venv
-4. Initialize SQLite database with schema
-5. Seed system tags
+**Important:**
+- Server must be started from project root directory (dotenv reads .env from cwd)
+- `npm run setup` = `npm run install:all` = installs root + server + client dependencies
+- sqlite-vec is a native module; if Node.js version changes after `git pull`, run `npm install` in server/
+- API keys can also be entered in the Settings page (takes priority over .env)

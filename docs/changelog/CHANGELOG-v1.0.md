@@ -1,6 +1,37 @@
-# Coincides — Changelog
+# Coincides — Changelog (v1.0)
 
 All notable changes to this project will be documented in this file.
+
+---
+
+## [docs: full audit update] — 2026-03-18
+
+### 全量文档审计更新
+
+- **DATA_MODEL.md**: 版本升级到 1.0，补全 5 张缺失表（card_sections, tag_groups, document_chunks, study_mode_templates, study_activity_log），修正 course.weight 范围（1/2/3），新增虚拟表和 FTS5 文档，更新 settings JSON 示例，更新 Key Queries 增加向量搜索和混合搜索
+- **ARCHITECTURE.md**: 版本升级到 1.0，移除未使用的依赖（MathQuill/Chart.js/ServiceWorker/Marker/PaddleOCR），补全实际技术栈（Voyage AI/sqlite-vec/FTS5/mammoth/xlsx），更新 PDF 处理架构为 pdf-parse + Claude Vision，更新 API 端点列表，修正部署说明
+- **DELIVERY_PLAN.md**: 版本升级到 1.0，为所有 49 个功能点添加完成状态标记（43✅/3⚠️/3❌），替换计划的 Polish Rounds 为实际完成的 Round 1-4 详细记录
+- **PRD.md**: 版本升级到 1.0，状态改为 Active，标注离线功能未实现，更新 Open Questions 的解决状态
+
+#### Files
+- 修改 4 文件：DATA_MODEL.md, ARCHITECTURE.md, DELIVERY_PLAN.md, PRD.md
+
+---
+
+## [docs: restructure] — 2026-03-18
+
+### docs/ 目录重构
+
+- CHANGELOG.md → changelog/CHANGELOG-v1.0.md（重命名为 v1.0 建设日志）
+- 新建 changelog/CHANGELOG.md 版本索引
+- 新建 workflow/ 目录，加入 Workflow.md 和 Onboarding.md
+- 新建 docs/README.md 目录索引
+- Workflow 更新：GitHub 为唯一事实源，目录规则，同步检查清单
+- Onboarding 更新：反映新目录结构
+
+#### Files
+- 新建 4 文件：docs/README.md, docs/changelog/CHANGELOG.md, docs/workflow/Coincides-Workflow.md, docs/workflow/Coincides-Onboarding.md
+- 重命名 1 文件：CHANGELOG.md → changelog/CHANGELOG-v1.0.md
 
 ---
 
