@@ -16,7 +16,30 @@ const MAX_TEXT_BEFORE_CHUNKING = 30000;
 const PDF_BATCH_SIZE = 50;
 const MAX_PDF_PAGES = 200;
 
-function getAnthropicClient(): Anthropic {
+/**
+ * Get Anthropic client — reads API key from user Settings first, falls back to .env.
+ * This allows users to configure their key in the Settings UI without needing a .env file.
+ */
+function getAnthropicClient(userId?: string): Anthropic {
+  // Try user settings first
+  if (userId) {
+    try {
+      const db = getDb();
+      const user = db.prepare('SELECT settings FROM users WHERE id = ?').get(userId) as { settings: string } | undefined;
+      if (user?.settings) {
+        const settings = JSON.parse(user.settings);
+        const aiProviders = settings?.ai_providers as Record<string, Record<string, string>> | undefined;
+        const anthropicConfig = aiProviders?.anthropic;
+        if (anthropicConfig?.api_key) {
+          return new Anthropic({ apiKey: anthropicConfig.api_key });
+        }
+      }
+    } catch {
+      // Fall through to env
+    }
+  }
+
+  // Fallback to env (requires ANTHROPIC_API_KEY in .env)
   return new Anthropic();
 }
 
@@ -34,8 +57,8 @@ async function parsePdfNative(buffer: Buffer): Promise<{ text: string; pageCount
   return { text: data.text, pageCount: data.numpages };
 }
 
-async function parsePdfWithVision(buffer: Buffer): Promise<{ text: string; pageCount: number }> {
-  const client = getAnthropicClient();
+async function parsePdfWithVision(buffer: Buffer, userId?: string): Promise<{ text: string; pageCount: number }> {
+  const client = getAnthropicClient(userId);
 
   // Get page count first
   const pdfDoc = await PDFDocument.load(buffer);
@@ -101,8 +124,8 @@ async function parsePdfWithVision(buffer: Buffer): Promise<{ text: string; pageC
   return { text: textParts.join('\n'), pageCount };
 }
 
-async function parseImage(buffer: Buffer, filename: string): Promise<string> {
-  const client = getAnthropicClient();
+async function parseImage(buffer: Buffer, filename: string, userId?: string): Promise<string> {
+  const client = getAnthropicClient(userId);
   const base64 = buffer.toString('base64');
   const ext = getFileExtension(filename);
   const mediaTypeMap: Record<string, string> = {
@@ -220,9 +243,10 @@ function chunkText(text: string, pageCount?: number): Array<{ content: string; h
 }
 
 async function generateSummary(
-  text: string
+  text: string,
+  userId?: string
 ): Promise<{ summary: string; documentType: string }> {
-  const client = getAnthropicClient();
+  const client = getAnthropicClient(userId);
   const truncated = text.slice(0, 10000);
 
   const response = await client.messages.create({
@@ -264,7 +288,7 @@ ${truncated}`,
   return { summary: responseText.slice(0, 500), documentType: 'other' };
 }
 
-export async function parseDocument(documentId: string, _userId: string): Promise<void> {
+export async function parseDocument(documentId: string, userId: string): Promise<void> {
   const db = getDb();
 
   // Update status to parsing
@@ -304,7 +328,7 @@ export async function parseDocument(documentId: string, _userId: string): Promis
           throw new Error('Insufficient text extracted — likely scanned');
         }
       } catch {
-        const vision = await parsePdfWithVision(buffer);
+        const vision = await parsePdfWithVision(buffer, userId);
         extractedText = vision.text;
         parseChannel = 'ocr';
         pageCount = vision.pageCount;
@@ -321,7 +345,7 @@ export async function parseDocument(documentId: string, _userId: string): Promis
       }).join('\n\n');
       parseChannel = 'native';
     } else if (isImageFile(doc.filename)) {
-      extractedText = await parseImage(buffer, doc.filename);
+      extractedText = await parseImage(buffer, doc.filename, userId);
       parseChannel = 'ocr';
     } else if (ext === 'txt' || ext === 'md') {
       extractedText = buffer.toString('utf-8');
@@ -359,7 +383,7 @@ export async function parseDocument(documentId: string, _userId: string): Promis
     let summary = '';
     let documentType = 'other';
     try {
-      const result = await generateSummary(extractedText);
+      const result = await generateSummary(extractedText, userId);
       summary = result.summary;
       documentType = result.documentType;
     } catch {
@@ -390,7 +414,7 @@ export async function parseDocument(documentId: string, _userId: string): Promis
     );
 
     // Generate embeddings asynchronously (don't block parse completion)
-    generateChunkEmbeddings(documentId, _userId).catch((embErr) => {
+    generateChunkEmbeddings(documentId, userId).catch((embErr) => {
       console.warn(`Embedding generation failed for document ${documentId}:`, embErr);
     });
   } catch (err) {
