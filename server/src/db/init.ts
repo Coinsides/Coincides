@@ -3,6 +3,7 @@ import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
+import * as sqliteVec from 'sqlite-vec';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -39,6 +40,38 @@ export function initDb(dbPath?: string): Database.Database {
 
   for (const stmt of statements) {
     db.exec(stmt + ';');
+  }
+
+  // Load sqlite-vec extension for vector storage
+  try {
+    sqliteVec.load(db);
+    const { vec_version } = db.prepare('SELECT vec_version() AS vec_version').get() as any;
+    console.log(`sqlite-vec loaded: v${vec_version}`);
+  } catch (err) {
+    console.warn('Failed to load sqlite-vec extension:', err);
+  }
+
+  // Create vec0 virtual tables (must be after sqliteVec.load)
+  try {
+    db.exec(`
+      CREATE VIRTUAL TABLE IF NOT EXISTS doc_chunk_vec USING vec0(
+        chunk_id TEXT PRIMARY KEY,
+        embedding float[1024]
+      )
+    `);
+  } catch (_e) {
+    // Table already exists or vec0 not available — ignore
+  }
+
+  try {
+    db.exec(`
+      CREATE VIRTUAL TABLE IF NOT EXISTS agent_memory_vec USING vec0(
+        memory_id TEXT PRIMARY KEY,
+        embedding float[1024]
+      )
+    `);
+  } catch (_e) {
+    // Table already exists or vec0 not available — ignore
   }
 
   // Add is_prerequisite column to tasks (ALTER TABLE doesn't support IF NOT EXISTS)

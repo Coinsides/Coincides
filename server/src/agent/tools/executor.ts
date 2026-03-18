@@ -1,5 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../../db/init.js';
+import { getEmbeddingProvider } from '../../embedding/index.js';
+import { VectorStore } from '../../embedding/vectorStore.js';
 
 export async function executeTool(
   toolName: string,
@@ -356,6 +358,22 @@ export async function executeTool(
       db.prepare(
         'INSERT INTO agent_memories (id, user_id, category, content, relevance_score, created_at) VALUES (?, ?, ?, ?, ?, ?)',
       ).run(id, userId, category, content, 1.0, now);
+
+      // Generate embedding asynchronously (don't block tool response)
+      (async () => {
+        try {
+          const provider = getEmbeddingProvider(userId);
+          if (!provider) return;
+          const embeddings = await provider.embed([content], 'document');
+          if (embeddings.length > 0) {
+            const store = new VectorStore();
+            store.upsertMemoryEmbedding(id, embeddings[0]);
+          }
+        } catch (err) {
+          console.warn('Failed to generate memory embedding:', err);
+        }
+      })();
+
       return JSON.stringify({ id, message: 'Memory saved successfully' });
     }
 

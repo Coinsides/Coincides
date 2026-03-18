@@ -216,6 +216,33 @@
   box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
 }
 
+/* Embedding actions row */
+.embeddingActions {
+  display: flex;
+  gap: 8px;
+}
+
+.backfillBtn {
+  padding: 8px 19px;
+  background: var(--glass-elevated);
+  border: 1px solid var(--glass-border);
+  color: var(--text-secondary);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.backfillBtn:hover:not(:disabled) {
+  background: var(--glass-hover);
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+}
+
+.backfillBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }

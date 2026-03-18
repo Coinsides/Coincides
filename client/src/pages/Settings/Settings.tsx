@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Check } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
+import api from '@/services/api';
 import styles from './Settings.module.css';
 
 const providerOptions = [
@@ -14,6 +15,25 @@ const defaultModels: Record<string, string> = {
   anthropic: 'claude-sonnet-4-20250514',
   openai: 'gpt-4o',
 };
+
+const embeddingProviderOptions = [
+  { value: 'voyage', label: 'Voyage AI' },
+];
+
+const embeddingModelOptions: Record<string, Array<{ value: string; label: string }>> = {
+  voyage: [
+    { value: 'voyage-3', label: 'voyage-3' },
+    { value: 'voyage-3-lite', label: 'voyage-3-lite' },
+    { value: 'voyage-3-large', label: 'voyage-3-large' },
+  ],
+};
+
+interface EmbeddingStatus {
+  configured: boolean;
+  provider_name: string | null;
+  chunks: { total: number; embedded: number };
+  memories: { total: number; embedded: number };
+}
 
 export default function SettingsPage() {
   const { user, updateSettings, logout } = useAuthStore();
@@ -87,7 +107,59 @@ export default function SettingsPage() {
     navigate('/login', { replace: true });
   };
 
+  // Embedding provider state
+  const [embProvider, setEmbProvider] = useState(settings.embedding_provider || 'voyage');
+  const [embApiKey, setEmbApiKey] = useState(settings.embedding_api_key || '');
+  const [embModel, setEmbModel] = useState(settings.embedding_model || 'voyage-3');
+  const [showEmbKey, setShowEmbKey] = useState(false);
+  const [savingEmb, setSavingEmb] = useState(false);
+  const [embStatus, setEmbStatus] = useState<EmbeddingStatus | null>(null);
+  const [backfilling, setBackfilling] = useState(false);
+
+  useEffect(() => {
+    fetchEmbeddingStatus();
+  }, []);
+
+  const fetchEmbeddingStatus = async () => {
+    try {
+      const res = await api.get('/embedding/status');
+      setEmbStatus(res.data);
+    } catch {
+      // Silently fail
+    }
+  };
+
+  const handleSaveEmbedding = async () => {
+    setSavingEmb(true);
+    try {
+      await updateSettings({
+        embedding_provider: embProvider,
+        embedding_api_key: embApiKey,
+        embedding_model: embModel,
+      });
+      addToast('success', 'Embedding provider settings saved');
+      fetchEmbeddingStatus();
+    } catch {
+      addToast('error', 'Failed to save embedding settings');
+    }
+    setSavingEmb(false);
+  };
+
+  const handleBackfill = async () => {
+    setBackfilling(true);
+    try {
+      const res = await api.post('/embedding/backfill');
+      const { chunks_processed, memories_processed } = res.data;
+      addToast('success', `Backfill complete: ${chunks_processed} chunks, ${memories_processed} memories`);
+      fetchEmbeddingStatus();
+    } catch {
+      addToast('error', 'Backfill failed');
+    }
+    setBackfilling(false);
+  };
+
   const hasApiKey = !!settings.ai_providers?.[activeProvider]?.api_key;
+  const hasEmbApiKey = !!settings.embedding_api_key;
 
   return (
     <div className={styles.page}>
@@ -196,6 +268,98 @@ export default function SettingsPage() {
             >
               {saving ? 'Saving...' : 'Save Provider Settings'}
             </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Embedding Provider */}
+      <div className={styles.section}>
+        <div className={styles.sectionTitle}>Embedding Provider</div>
+        <div className={styles.card}>
+          <div className={styles.row}>
+            <span className={styles.rowLabel}>Provider</span>
+            <div className={styles.providerSelect}>
+              {embeddingProviderOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  className={`${styles.themeBtn} ${embProvider === opt.value ? styles.active : ''}`}
+                  onClick={() => {
+                    setEmbProvider(opt.value);
+                    setEmbModel(embeddingModelOptions[opt.value]?.[0]?.value || '');
+                  }}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className={styles.row}>
+            <span className={styles.rowLabel}>
+              API Key
+              {hasEmbApiKey && <span className={styles.connectedDot} title="Connected" />}
+            </span>
+            <div className={styles.keyInput}>
+              <input
+                className={styles.inlineInput}
+                type={showEmbKey ? 'text' : 'password'}
+                value={embApiKey}
+                onChange={(e) => setEmbApiKey(e.target.value)}
+                placeholder="pa-..."
+              />
+              <button className={styles.eyeBtn} onClick={() => setShowEmbKey(!showEmbKey)}>
+                {showEmbKey ? <EyeOff size={14} /> : <Eye size={14} />}
+              </button>
+            </div>
+          </div>
+          <div className={styles.row}>
+            <span className={styles.rowLabel}>Model</span>
+            <select
+              className={styles.inlineInput}
+              value={embModel}
+              onChange={(e) => setEmbModel(e.target.value)}
+            >
+              {(embeddingModelOptions[embProvider] || []).map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          {embStatus && (
+            <div className={styles.row}>
+              <span className={styles.rowLabel}>Status</span>
+              <span className={styles.rowValue}>
+                {embStatus.configured ? (
+                  <>
+                    <span className={styles.connectedDot} />
+                    {' '}Chunks: {embStatus.chunks.embedded}/{embStatus.chunks.total} &middot; Memories: {embStatus.memories.embedded}/{embStatus.memories.total}
+                  </>
+                ) : (
+                  'Not configured'
+                )}
+              </span>
+            </div>
+          )}
+          <div className={styles.row}>
+            <span className={styles.rowLabel} />
+            <div className={styles.embeddingActions}>
+              <button
+                className={styles.saveProviderBtn}
+                onClick={handleSaveEmbedding}
+                disabled={savingEmb}
+              >
+                {savingEmb ? 'Saving...' : 'Save'}
+              </button>
+              {embStatus && (embStatus.chunks.total > embStatus.chunks.embedded || embStatus.memories.total > embStatus.memories.embedded) && (
+                <button
+                  className={styles.backfillBtn}
+                  onClick={handleBackfill}
+                  disabled={backfilling || !embStatus.configured}
+                >
+                  {backfilling ? 'Processing...' : 'Backfill Embeddings'}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

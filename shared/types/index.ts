@@ -109,6 +109,9 @@ export interface UserSettings {
   active_provider?: string;
   daily_status_enabled?: boolean;
   keyboard_shortcuts_enabled?: boolean;
+  embedding_provider?: string;
+  embedding_api_key?: string;
+  embedding_model?: string;
 }
 
 export interface AIProviderConfig {

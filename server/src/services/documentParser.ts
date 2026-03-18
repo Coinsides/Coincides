@@ -7,8 +7,10 @@ import { PDFDocument } from 'pdf-lib';
 import * as mammoth from 'mammoth';
 import * as XLSX from 'xlsx';
 import { getDb } from '../db/init.js';
+import { getEmbeddingProvider } from '../embedding/index.js';
+import { VectorStore } from '../embedding/vectorStore.js';
 
-const CLAUDE_MODEL = 'claude-3-5-haiku-20241022';
+const CLAUDE_MODEL = 'claude-haiku-4-20250414';
 const CHUNK_SIZE = 5000;
 const MAX_TEXT_BEFORE_CHUNKING = 30000;
 const PDF_BATCH_SIZE = 50;
@@ -386,10 +388,58 @@ export async function parseDocument(documentId: string, _userId: string): Promis
       new Date().toISOString(),
       documentId
     );
+
+    // Generate embeddings asynchronously (don't block parse completion)
+    generateChunkEmbeddings(documentId, _userId).catch((embErr) => {
+      console.warn(`Embedding generation failed for document ${documentId}:`, embErr);
+    });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown parsing error';
     db.prepare(
       "UPDATE documents SET parse_status = 'failed', error_message = ?, updated_at = ? WHERE id = ?"
     ).run(errorMessage, new Date().toISOString(), documentId);
   }
+}
+
+/**
+ * Generate embeddings for all chunks of a document and store in vec table.
+ */
+async function generateChunkEmbeddings(documentId: string, userId: string): Promise<void> {
+  const provider = getEmbeddingProvider(userId);
+  if (!provider) {
+    console.warn('No embedding provider configured — skipping chunk embeddings');
+    return;
+  }
+
+  const db = getDb();
+  const chunks = db
+    .prepare('SELECT id, content FROM document_chunks WHERE document_id = ? ORDER BY chunk_index')
+    .all(documentId) as Array<{ id: string; content: string }>;
+
+  if (chunks.length === 0) {
+    // No chunks — embed the full extracted_text as a single "virtual" chunk
+    // (small documents aren't chunked but we still want them searchable)
+    const doc = db.prepare('SELECT id, extracted_text FROM documents WHERE id = ?').get(documentId) as { id: string; extracted_text: string | null } | undefined;
+    if (!doc?.extracted_text) return;
+
+    const embeddings = await provider.embed([doc.extracted_text], 'document');
+    if (embeddings.length > 0) {
+      // Store using the document ID as chunk_id (convention for un-chunked docs)
+      const store = new VectorStore();
+      store.upsertChunkEmbeddings([{ id: doc.id, embedding: embeddings[0] }]);
+    }
+    return;
+  }
+
+  const texts = chunks.map((c) => c.content);
+  const embeddings = await provider.embed(texts, 'document');
+
+  const store = new VectorStore();
+  const items = chunks.map((chunk, i) => ({
+    id: chunk.id,
+    embedding: embeddings[i],
+  }));
+  store.upsertChunkEmbeddings(items);
+
+  console.log(`Generated embeddings for ${items.length} chunks of document ${documentId}`);
 }

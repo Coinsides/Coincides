@@ -112,6 +112,9 @@ export const updateSettingsSchema = z.object({
       default_model: z.string().optional(),
     })).optional(),
     active_provider: z.string().optional(),
+    embedding_provider: z.enum(['voyage', 'openai', 'cohere']).optional(),
+    embedding_api_key: z.string().optional(),
+    embedding_model: z.string().optional(),
   }),
 });
 

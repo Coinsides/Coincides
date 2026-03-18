@@ -4,6 +4,47 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Round 4 Step 1] — 2026-03-18
+
+### sqlite-vec 向量存储 + Voyage AI Embedding 管线
+
+#### 向量存储基础设施
+- 集成 sqlite-vec v0.1.7 作为向量存储引擎
+- 新建 `doc_chunk_vec` 虚拟表：存储文档 chunk 的 1024 维向量
+- 新建 `agent_memory_vec` 虚拟表：存储 Agent 记忆的 1024 维向量
+- 数据库初始化时自动创建向量表
+
+#### Voyage AI Embedding 集成
+- 接入 Voyage AI `voyage-4` 模型（1024 维，$0.06/M tokens）
+- 支持 document / query 两种 input_type 区分索引与检索
+- 批量 embedding 接口，最大 128 条/批
+- 环境变量 `VOYAGE_API_KEY` 后备 + 用户 Settings 优先的配置策略
+
+#### 自动 Embedding 管线
+- 文档上传后自动触发 embedding 生成（documentParser 集成）
+- 未分块短文档直接作为整体 embedding
+- 分块文档按 chunk 逐批 embedding
+- Agent 工具执行器集成：create_memory 时自动生成向量
+
+#### API 端点
+- `GET /api/embedding/status`：查询当前用户的 embedding 统计（配置状态、chunk/memory 嵌入数量）
+- `POST /api/embedding/backfill`：批量补全所有未嵌入的 chunks 和 memories
+
+#### Settings UI
+- 设置页面新增 Embedding 配置区域
+- 支持选择 provider（Voyage AI）、输入 API Key、选择模型
+- 与后端用户 settings 联动，实时生效
+
+#### 其他
+- 修复 Claude 模型版本：`claude-3-5-haiku-20241022` → `claude-haiku-4-20250414`
+- 新增 `UserSettings` 类型：embedding_provider / embedding_api_key / embedding_model
+
+#### Files
+- 新增 5 文件：embedding/types.ts, embedding/voyage.ts, embedding/index.ts, embedding/vectorStore.ts, routes/embedding.ts
+- 修改 9 文件：db/init.ts, documentParser.ts, executor.ts, index.ts, validators/index.ts, Settings.tsx, Settings.module.css, shared/types/index.ts, server/package.json
+
+---
+
 ## [Round 3 Step 5] — 2026-03-18
 
 ### Review Groups + Agent 图片上传
