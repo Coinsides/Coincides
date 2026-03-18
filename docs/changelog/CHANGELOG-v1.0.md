@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [docs: iteration workflow + version roadmap] — 2026-03-18
+
+### 版本迭代工作流 + 版本路线规划
+
+- **Workflow.md**: 新增「版本迭代工作流」章节—5 阶段迭代循环（规划→开发→验收→发布→复盘）、版本规划模板、commit 格式变更、文件管理规则
+- **Onboarding.md**: 更新目录结构（新增 releases/）、新增版本路线表（v1.1–v1.5/2.0）、记录开发模式切换（建造→迭代）、更新 Git 提交计数
+- 新建 `docs/releases/` 目录（存放各版本规划文档）
+
+#### Files
+- 修改 2 文件：Coincides-Workflow.md, Coincides-Onboarding.md
+- 新建 1 目录：docs/releases/
+
+---
+
 ## [docs: full audit update] — 2026-03-18
 
 ### 全量文档审计更新
