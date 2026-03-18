@@ -82,7 +82,8 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
       const query = params.toString();
       const { data } = await api.get(`/review/due${query ? `?${query}` : ''}`);
       set({ dueCards: data, loading: false, reviewFilters: filters || null });
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch due cards:', err);
       set({ loading: false });
     }
   },
@@ -91,7 +92,8 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
     try {
       const { data } = await api.get('/review/due/count');
       set({ dueCount: data.count });
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch browse tree:', err);
       // silently fail
     }
   },

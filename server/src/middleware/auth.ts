@@ -38,7 +38,8 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
 
     req.userId = decoded.userId;
     next();
-  } catch {
+  } catch (err) {
+    console.error('Auth verification failed:', err);
     res.status(401).json({ error: 'Invalid or expired token' });
   }
 }

@@ -23,7 +23,8 @@ export const useTaskStore = create<TaskState>((set, get) => ({
     try {
       const { data } = await api.get('/tasks', { params: { date } });
       set({ tasks: data, loading: false });
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch tasks:', err);
       set({ loading: false });
     }
   },
@@ -35,7 +36,8 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       if (courseId) params.course_id = courseId;
       const { data } = await api.get('/tasks', { params });
       set({ tasks: data, loading: false });
-    } catch {
+    } catch (err) {
+      console.error('Failed to update task:', err);
       set({ loading: false });
     }
   },

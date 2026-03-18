@@ -116,7 +116,8 @@ export class AnthropicProvider implements AIProvider {
             let args: Record<string, unknown> = {};
             try {
               args = currentToolInputJson ? JSON.parse(currentToolInputJson) : {};
-            } catch {
+            } catch (err) {
+              console.error('Anthropic stream error:', err);
               // If JSON parse fails, use empty args
             }
             yield {

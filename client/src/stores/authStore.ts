@@ -59,7 +59,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const { data } = await api.get('/auth/me');
       set({ user: data, loading: false });
-    } catch {
+    } catch (err) {
+      console.error('Failed to verify auth token:', err);
       setToken(null);
       set({ user: null, token: null, loading: false });
     }

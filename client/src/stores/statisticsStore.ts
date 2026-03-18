@@ -30,7 +30,8 @@ export const useStatisticsStore = create<StatisticsState>((set) => ({
     try {
       const { data } = await api.get('/statistics/overview');
       set({ overview: data, loading: false });
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch deck statistics:', err);
       set({ loading: false });
     }
   },
@@ -39,7 +40,8 @@ export const useStatisticsStore = create<StatisticsState>((set) => ({
     try {
       const { data } = await api.get('/statistics/heatmap', { params: { months } });
       set({ heatmap: data });
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch daily stats:', err);
       // silently fail
     }
   },
@@ -48,7 +50,8 @@ export const useStatisticsStore = create<StatisticsState>((set) => ({
     try {
       const { data } = await api.get('/statistics/trends', { params: { period, weeks: count } });
       set({ trends: data });
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch retention stats:', err);
       // silently fail
     }
   },
@@ -57,7 +60,8 @@ export const useStatisticsStore = create<StatisticsState>((set) => ({
     try {
       const { data } = await api.get('/statistics/courses');
       set({ courseStats: data });
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch streak stats:', err);
       // silently fail
     }
   },

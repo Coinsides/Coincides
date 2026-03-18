@@ -23,7 +23,8 @@ export const useGoalStore = create<GoalState>((set, get) => ({
       const params = courseId ? { course_id: courseId } : {};
       const { data } = await api.get('/goals', { params });
       set({ goals: data, loading: false });
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch goals:', err);
       set({ loading: false });
     }
   },

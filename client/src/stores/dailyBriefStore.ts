@@ -19,7 +19,8 @@ export const useDailyBriefStore = create<DailyBriefState>((set, get) => ({
     try {
       const { data } = await api.get('/daily-brief');
       set({ briefData: data, loading: false });
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch daily brief:', err);
       set({ loading: false });
     }
   },
@@ -31,7 +32,8 @@ export const useDailyBriefStore = create<DailyBriefState>((set, get) => ({
       if (brief) {
         set({ briefData: { ...brief, energy_level: energyLevel } });
       }
-    } catch {
+    } catch (err) {
+      console.error('Failed to trigger daily brief generation:', err);
       // Silently fail
     }
   },

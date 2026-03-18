@@ -143,7 +143,8 @@ export default function DocumentManager() {
         try {
           await uploadDocument(courseId, file);
           addToast('success', `Uploaded ${file.name}`);
-        } catch {
+        } catch (err) {
+          console.error('Failed to upload document:', err);
           addToast('error', `Failed to upload ${file.name}`);
         }
       }
@@ -165,7 +166,8 @@ export default function DocumentManager() {
       await deleteDocument(id);
       addToast('success', 'Document deleted');
       setConfirmDeleteId(null);
-    } catch {
+    } catch (err) {
+      console.error('Failed to delete document:', err);
       addToast('error', 'Failed to delete document');
     }
   };
@@ -179,7 +181,9 @@ export default function DocumentManager() {
     if (doc.parse_status === 'completed' && !doc.summary) {
       try {
         await getDocumentDetail(doc.id);
-      } catch {
+      } catch (err) {
+        console.error('Failed to load document details:', err);
+        addToast('error', 'Failed to parse document');
         // Continue with what we have
       }
     }

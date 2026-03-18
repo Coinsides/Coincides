@@ -34,8 +34,8 @@ function getAnthropicClient(userId?: string): Anthropic {
           return new Anthropic({ apiKey: anthropicConfig.api_key });
         }
       }
-    } catch {
-      // Fall through to env
+    } catch (err) {
+      console.error('Failed to load Anthropic config from settings:', err);
     }
   }
 
@@ -281,8 +281,8 @@ ${truncated}`,
         documentType: parsed.document_type || 'other',
       };
     }
-  } catch {
-    // Fall through to default
+  } catch (err) {
+    console.error('Failed to parse summary response as JSON:', err);
   }
 
   return { summary: responseText.slice(0, 500), documentType: 'other' };
@@ -327,7 +327,8 @@ export async function parseDocument(documentId: string, userId: string): Promise
         } else {
           throw new Error('Insufficient text extracted — likely scanned');
         }
-      } catch {
+      } catch (err) {
+        console.error('Native PDF parse failed, falling back to OCR:', err);
         const vision = await parsePdfWithVision(buffer, userId);
         extractedText = vision.text;
         parseChannel = 'ocr';
@@ -386,7 +387,8 @@ export async function parseDocument(documentId: string, userId: string): Promise
       const result = await generateSummary(extractedText, userId);
       summary = result.summary;
       documentType = result.documentType;
-    } catch {
+    } catch (err) {
+      console.error('Summary generation failed:', err);
       summary = 'Summary generation failed.';
     }
 

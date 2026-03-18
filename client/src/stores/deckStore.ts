@@ -35,7 +35,8 @@ export const useDeckStore = create<DeckState>((set, get) => ({
       if (courseId) params.course_id = courseId;
       const { data } = await api.get('/decks', { params });
       set({ decks: data, loading: false });
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch decks:', err);
       set({ loading: false, error: 'Failed to fetch decks' });
     }
   },

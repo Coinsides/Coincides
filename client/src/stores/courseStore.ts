@@ -23,7 +23,8 @@ export const useCourseStore = create<CourseState>((set, get) => ({
     try {
       const { data } = await api.get('/courses');
       set({ courses: data, loading: false });
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch courses:', err);
       set({ loading: false });
     }
   },

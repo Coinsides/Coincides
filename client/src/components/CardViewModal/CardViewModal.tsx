@@ -27,7 +27,8 @@ export default function CardViewModal() {
       await deleteCard(card.id);
       addToast('success', 'Card deleted');
       closeModal();
-    } catch {
+    } catch (err) {
+      console.error('Failed to delete card:', err);
       addToast('error', 'Failed to delete card');
     }
   };

@@ -163,7 +163,8 @@ export default function DeckDetailPage() {
       setSelectedIds(new Set());
       setSelectMode(false);
       loadCards();
-    } catch {
+    } catch (err) {
+      console.error('Failed to delete cards:', err);
       addToast('error', 'Failed to delete cards');
     }
   };
@@ -174,7 +175,8 @@ export default function DeckDetailPage() {
       await createSection(deckId, newSectionName.trim(), sections.length);
       setNewSectionName('');
       setShowNewSection(false);
-    } catch {
+    } catch (err) {
+      console.error('Failed to create section:', err);
       addToast('error', 'Failed to create section');
     }
   };
@@ -187,7 +189,8 @@ export default function DeckDetailPage() {
       setConfirmDeleteSection(null);
       loadCards();
       fetchDecks();
-    } catch {
+    } catch (err) {
+      console.error('Failed to delete section:', err);
       addToast('error', 'Failed to delete section');
     }
   };
@@ -200,7 +203,8 @@ export default function DeckDetailPage() {
     try {
       await updateSection(sectionId, { name: editingSectionName.trim() });
       setEditingSectionId(null);
-    } catch {
+    } catch (err) {
+      console.error('Failed to rename section:', err);
       addToast('error', 'Failed to rename section');
     }
   };
@@ -282,7 +286,8 @@ export default function DeckDetailPage() {
 
       try {
         await reorderSections(deckId, newOrder);
-      } catch {
+      } catch (err) {
+        console.error('Failed to reorder sections:', err);
         addToast('error', 'Failed to reorder sections');
         fetchSections(deckId);
       }
@@ -341,7 +346,8 @@ export default function DeckDetailPage() {
 
     try {
       await reorderCards(deckId, updates);
-    } catch {
+    } catch (err) {
+      console.error('Failed to move card:', err);
       addToast('error', 'Failed to move card');
       fetchCards(deckId);
     }
@@ -372,7 +378,8 @@ export default function DeckDetailPage() {
 
     try {
       await reorderCards(deckId, updates);
-    } catch {
+    } catch (err) {
+      console.error('Failed to reorder cards:', err);
       addToast('error', 'Failed to reorder cards');
       fetchCards(deckId);
     }

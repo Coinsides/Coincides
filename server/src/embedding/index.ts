@@ -21,7 +21,8 @@ export function getEmbeddingProvider(userId?: string): EmbeddingProvider | null 
           return createProvider(config);
         }
       }
-    } catch {
+    } catch (err) {
+      console.error('Embedding generation failed:', err);
       // Fall through to env
     }
   }

@@ -166,7 +166,8 @@ export default function ReviewPage() {
         // Session done — show summary
       }
       nextCard();
-    } catch {
+    } catch (err) {
+      console.error('Failed to rate card:', err);
       addToast('error', 'Failed to rate card');
     }
   };

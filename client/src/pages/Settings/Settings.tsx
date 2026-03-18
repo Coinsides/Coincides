@@ -52,7 +52,8 @@ export default function SettingsPage() {
     try {
       await updateSettings({ theme });
       document.documentElement.setAttribute('data-theme', theme);
-    } catch {
+    } catch (err) {
+      console.error('Failed to load API keys:', err);
       addToast('error', 'Failed to update settings');
     }
   };
@@ -60,7 +61,8 @@ export default function SettingsPage() {
   const handleToggle = async (key: 'daily_status_enabled' | 'keyboard_shortcuts_enabled') => {
     try {
       await updateSettings({ [key]: !settings[key] });
-    } catch {
+    } catch (err) {
+      console.error('Failed to save API keys:', err);
       addToast('error', 'Failed to update settings');
     }
   };
@@ -70,7 +72,8 @@ export default function SettingsPage() {
       try {
         await updateSettings({ agent_name: agentName.trim() });
         addToast('success', 'Agent name updated');
-      } catch {
+      } catch (err) {
+        console.error('Failed to test Anthropic key:', err);
         addToast('error', 'Failed to update');
       }
     }
@@ -96,7 +99,8 @@ export default function SettingsPage() {
         },
       });
       addToast('success', 'AI provider settings saved');
-    } catch {
+    } catch (err) {
+      console.error('Failed to save provider settings:', err);
       addToast('error', 'Failed to save provider settings');
     }
     setSaving(false);
@@ -124,8 +128,8 @@ export default function SettingsPage() {
     try {
       const res = await api.get('/embedding/status');
       setEmbStatus(res.data);
-    } catch {
-      // Silently fail
+    } catch (err) {
+      console.error('Failed to load embedding status:', err);
     }
   };
 
@@ -139,7 +143,8 @@ export default function SettingsPage() {
       });
       addToast('success', 'Embedding provider settings saved');
       fetchEmbeddingStatus();
-    } catch {
+    } catch (err) {
+      console.error('Failed to save embedding settings:', err);
       addToast('error', 'Failed to save embedding settings');
     }
     setSavingEmb(false);
@@ -152,7 +157,8 @@ export default function SettingsPage() {
       const { chunks_processed, memories_processed } = res.data;
       addToast('success', `Backfill complete: ${chunks_processed} chunks, ${memories_processed} memories`);
       fetchEmbeddingStatus();
-    } catch {
+    } catch (err) {
+      console.error('Failed to backfill embeddings:', err);
       addToast('error', 'Backfill failed');
     }
     setBackfilling(false);

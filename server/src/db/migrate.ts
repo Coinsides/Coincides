@@ -61,8 +61,8 @@ async function loadMigrations(): Promise<Migration[]> {
     files = readdirSync(migrationsDir)
       .filter(f => f.endsWith('.ts') || f.endsWith('.js'))
       .sort(); // Lexicographic sort ensures 001 < 002 < 003
-  } catch {
-    // migrations/ directory doesn't exist yet — nothing to run
+  } catch (err) {
+    console.warn('migrations/ directory not found, skipping:', err);
     return [];
   }
 

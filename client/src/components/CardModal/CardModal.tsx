@@ -182,7 +182,8 @@ export default function CardModal() {
         addToast('success', 'Card created');
       }
       closeModal();
-    } catch {
+    } catch (err) {
+      console.error('Failed to save card:', err);
       addToast('error', isEdit ? 'Failed to update card' : 'Failed to create card');
     } finally {
       setSaving(false);

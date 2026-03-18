@@ -56,7 +56,8 @@ export default function DailyBrief() {
     try {
       const { data } = await api.put(`/tasks/${task.id}`, { status: newStatus });
       updateTaskInBrief(data);
-    } catch {
+    } catch (err) {
+      console.error('Failed to load daily brief:', err);
       addToast('error', 'Failed to update task');
     }
   };

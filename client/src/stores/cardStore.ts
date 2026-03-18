@@ -63,7 +63,8 @@ export const useCardStore = create<CardState>((set, get) => ({
       if (filters?.search) params.search = filters.search;
       const { data } = await api.get('/cards', { params });
       set({ cards: data, loading: false });
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch cards:', err);
       set({ loading: false, error: 'Failed to fetch cards' });
     }
   },

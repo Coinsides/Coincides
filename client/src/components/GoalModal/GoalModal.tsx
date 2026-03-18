@@ -92,7 +92,8 @@ export default function GoalModal() {
 
       addToast('success', parentId ? 'Sub-goal created' : 'Goal created');
       closeModal();
-    } catch {
+    } catch (err) {
+      console.error('Failed to create goal:', err);
       addToast('error', 'Failed to create goal');
     } finally {
       setSaving(false);

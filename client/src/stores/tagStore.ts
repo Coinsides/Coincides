@@ -53,7 +53,8 @@ export const useTagStore = create<TagState>((set, get) => ({
     try {
       const { data } = await api.get('/tags');
       set({ tags: data, loading: false });
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch tag groups:', err);
       set({ loading: false });
     }
   },
@@ -94,7 +95,8 @@ export const useTagStore = create<TagState>((set, get) => ({
     try {
       const { data } = await api.get('/tag-groups', { params: { course_id: courseId } });
       set({ tagGroups: data.tag_groups, tagGroupsLoading: false });
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch tags:', err);
       set({ tagGroupsLoading: false });
     }
   },
@@ -126,7 +128,8 @@ export const useTagStore = create<TagState>((set, get) => ({
     try {
       const { data } = await api.get('/tags', { params: { course_id: courseId } });
       set({ courseTags: data, courseTagsLoading: false });
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch tags for card:', err);
       set({ courseTagsLoading: false });
     }
   },

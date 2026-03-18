@@ -67,7 +67,8 @@ export default function TagGroupManager() {
       setNewGroupName('');
       setAddingGroup(false);
       addToast('success', 'Tag group created');
-    } catch {
+    } catch (err) {
+      console.error('Failed to create tag group:', err);
       addToast('error', 'Failed to create tag group');
     }
   };
@@ -78,7 +79,8 @@ export default function TagGroupManager() {
       await updateTagGroup(id, { name: editingGroupName.trim() });
       setEditingGroupId(null);
       addToast('success', 'Tag group updated');
-    } catch {
+    } catch (err) {
+      console.error('Failed to update tag group:', err);
       addToast('error', 'Failed to update tag group');
     }
   };
@@ -87,7 +89,8 @@ export default function TagGroupManager() {
     try {
       await deleteTagGroup(group.id);
       addToast('success', 'Tag group deleted');
-    } catch {
+    } catch (err) {
+      console.error('Failed to delete tag group:', err);
       addToast('error', 'Failed to delete tag group');
     }
   };
@@ -102,7 +105,8 @@ export default function TagGroupManager() {
       setNewTagColor(PRESET_COLORS[0]);
       setAddingTagToGroup(null);
       addToast('success', 'Tag created');
-    } catch {
+    } catch (err) {
+      console.error('Failed to create tag:', err);
       addToast('error', 'Failed to create tag');
     }
   };
@@ -114,7 +118,8 @@ export default function TagGroupManager() {
       await fetchTagGroups(courseId);
       setEditingTagId(null);
       addToast('success', 'Tag updated');
-    } catch {
+    } catch (err) {
+      console.error('Failed to update tag:', err);
       addToast('error', 'Failed to update tag');
     }
   };
@@ -123,7 +128,8 @@ export default function TagGroupManager() {
     try {
       await deleteTag(tag.id);
       addToast('success', 'Tag deleted');
-    } catch {
+    } catch (err) {
+      console.error('Failed to delete tag:', err);
       addToast('error', 'Failed to delete tag');
     }
   };

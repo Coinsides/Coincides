@@ -21,7 +21,8 @@ export const useSectionStore = create<SectionState>((set, get) => ({
     try {
       const { data } = await api.get('/sections', { params: { deck_id: deckId } });
       set({ sections: data, loading: false });
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch sections:', err);
       set({ loading: false });
     }
   },

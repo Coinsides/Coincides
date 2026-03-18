@@ -183,7 +183,8 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
   // Delete file from filesystem
   try {
     await unlink(document.file_path);
-  } catch {
+  } catch (err) {
+    console.error('Document deletion error:', err);
     // File may already be deleted — ignore
   }
 

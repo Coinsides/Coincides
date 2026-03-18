@@ -22,7 +22,8 @@ export default function CoursesPage() {
       await deleteCourse(confirmDelete.id);
       addToast('success', 'Course deleted');
       setConfirmDelete(null);
-    } catch {
+    } catch (err) {
+      console.error('Failed to load courses:', err);
       addToast('error', 'Failed to delete course');
     }
   };

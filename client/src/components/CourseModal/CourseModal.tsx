@@ -61,7 +61,8 @@ export default function CourseModal() {
         addToast('success', 'Course created');
       }
       closeModal();
-    } catch {
+    } catch (err) {
+      console.error('Failed to save course:', err);
       addToast('error', 'Failed to save course');
     } finally {
       setSaving(false);

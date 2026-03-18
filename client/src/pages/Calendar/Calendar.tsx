@@ -105,7 +105,9 @@ export default function CalendarPage() {
     try {
       const { data } = await api.get('/tasks', { params: { date: dateStr } });
       setDayTasks(data);
-    } catch {
+    } catch (err) {
+      console.error('Failed to load calendar tasks:', err);
+      addToast('error', 'Failed to load tasks');
       setDayTasks([]);
     }
   };
@@ -115,7 +117,8 @@ export default function CalendarPage() {
     try {
       const { data } = await api.put(`/tasks/${task.id}`, { status: newStatus });
       setDayTasks((prev) => prev.map((t) => (t.id === task.id ? data : t)));
-    } catch {
+    } catch (err) {
+      console.error('Failed to update task:', err);
       addToast('error', 'Failed to update task');
     }
   };
@@ -167,7 +170,8 @@ export default function CalendarPage() {
       }
       fetchTasksByRange(format(rangeStart, 'yyyy-MM-dd'), format(rangeEnd, 'yyyy-MM-dd'), courseFilter || undefined);
       addToast('success', 'Task deleted');
-    } catch {
+    } catch (err) {
+      console.error('Failed to update task time:', err);
       addToast('error', 'Failed to delete task');
     }
   };

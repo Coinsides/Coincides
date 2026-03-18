@@ -15,7 +15,8 @@ function renderSegment(segment: string, isDisplay: boolean): string {
       throwOnError: false,
       trust: true,
     });
-  } catch {
+  } catch (err) {
+    console.warn('KaTeX rendering failed:', err);
     return segment;
   }
 }

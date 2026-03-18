@@ -26,7 +26,8 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
     try {
       const { data } = await api.get(`/documents?course_id=${courseId}`);
       set({ documents: data, loading: false });
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch documents:', err);
       set({ loading: false });
     }
   },
@@ -77,7 +78,8 @@ export const useDocumentStore = create<DocumentState>((set, get) => ({
             : d
         ),
       });
-    } catch {
+    } catch (err) {
+      console.error('Failed to get document detail:', err);
       // Ignore poll errors
     }
   },

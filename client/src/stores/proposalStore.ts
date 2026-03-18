@@ -35,7 +35,8 @@ export const useProposalStore = create<ProposalState>((set, get) => ({
     try {
       const { data } = await api.get('/proposals', { params: { status: 'pending' } });
       set({ proposals: data, loading: false });
-    } catch {
+    } catch (err) {
+      console.error('Failed to fetch proposals:', err);
       set({ loading: false });
     }
   },

@@ -48,7 +48,9 @@ export default function GoalsPage() {
         const { data } = await api.get('/tasks', { params: { course_id: goal.course_id } });
         const filtered = data.filter((t: Task) => t.goal_id === goal.id);
         setGoalTasks((prev) => ({ ...prev, [goal.id]: filtered }));
-      } catch {
+      } catch (err) {
+        console.error('Failed to delete goal:', err);
+        addToast('error', 'Failed to delete goal');
         // silently fail
       }
     }
@@ -58,7 +60,8 @@ export default function GoalsPage() {
     try {
       await deleteGoal(id);
       addToast('success', 'Goal deleted');
-    } catch {
+    } catch (err) {
+      console.error('Failed to delete goal:', err);
       addToast('error', 'Failed to delete goal');
     }
   };
@@ -66,7 +69,8 @@ export default function GoalsPage() {
   const handleExamMode = async (id: string) => {
     try {
       await toggleExamMode(id);
-    } catch {
+    } catch (err) {
+      console.error('Failed to toggle exam mode:', err);
       addToast('error', 'Failed to toggle exam mode');
     }
   };

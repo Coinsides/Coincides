@@ -26,7 +26,8 @@ export default function DecksPage() {
     try {
       await deleteDeck(id);
       addToast('success', 'Deck deleted');
-    } catch {
+    } catch (err) {
+      console.error('Failed to load decks:', err);
       addToast('error', 'Failed to delete deck');
     }
   };

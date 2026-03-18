@@ -51,7 +51,8 @@ export default function DeckModal() {
         addToast('success', 'Deck created');
       }
       closeModal();
-    } catch {
+    } catch (err) {
+      console.error('Failed to save deck:', err);
       addToast('error', isEdit ? 'Failed to update deck' : 'Failed to create deck');
     } finally {
       setSaving(false);

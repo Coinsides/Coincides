@@ -54,7 +54,8 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     try {
       const { data } = await api.get('/agent/conversations');
       set({ conversations: data });
-    } catch {
+    } catch (err) {
+      console.error('Failed to send agent message:', err);
       // ignore
     }
   },
@@ -76,7 +77,8 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     try {
       const { data } = await api.get(`/agent/conversations/${conversationId}/messages`);
       set({ messages: data });
-    } catch {
+    } catch (err) {
+      console.error('Failed to cancel agent:', err);
       // ignore
     }
   },

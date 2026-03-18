@@ -1,12 +1,14 @@
 import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
+import { useUIStore } from '@/stores/uiStore';
 import styles from './Auth.module.css';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { login, loading, error, clearError } = useAuthStore();
+  const addToast = useUIStore((s) => s.addToast);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
@@ -14,7 +16,9 @@ export default function Login() {
     try {
       await login(email, password);
       navigate('/', { replace: true });
-    } catch {
+    } catch (err) {
+      console.error('Login failed:', err);
+      addToast('error', 'Login failed');
       // Error is handled by store
     }
   };

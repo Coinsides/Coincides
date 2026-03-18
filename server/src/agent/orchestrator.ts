@@ -44,7 +44,8 @@ export async function* runAgent(
   let settings: Record<string, unknown>;
   try {
     settings = JSON.parse(user.settings || '{}');
-  } catch {
+  } catch (err) {
+    console.error('Agent orchestration error:', err);
     settings = {};
   }
 

@@ -97,7 +97,8 @@ export default function TaskModal() {
       }
       fetchDailyBrief();
       closeModal();
-    } catch {
+    } catch (err) {
+      console.error('Failed to save task:', err);
       addToast('error', 'Failed to save task');
     } finally {
       setSaving(false);
@@ -111,7 +112,8 @@ export default function TaskModal() {
       addToast('success', 'Task deleted');
       fetchDailyBrief();
       closeModal();
-    } catch {
+    } catch (err) {
+      console.error('Failed to delete task:', err);
       addToast('error', 'Failed to delete task');
     }
   };

@@ -29,7 +29,8 @@ export default function ProposalList() {
     try {
       await applyProposal(id);
       addToast('success', 'Proposal applied successfully');
-    } catch {
+    } catch (err) {
+      console.error('Failed to apply proposal:', err);
       addToast('error', 'Failed to apply proposal');
     }
   };
@@ -38,7 +39,8 @@ export default function ProposalList() {
     try {
       await discardProposal(id);
       addToast('info', 'Proposal discarded');
-    } catch {
+    } catch (err) {
+      console.error('Failed to discard proposal:', err);
       addToast('error', 'Failed to discard proposal');
     }
   };

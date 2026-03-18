@@ -1,6 +1,7 @@
 import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
+import { useUIStore } from '@/stores/uiStore';
 import styles from './Auth.module.css';
 
 export default function Register() {
@@ -8,6 +9,7 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const { register, loading, error, clearError } = useAuthStore();
+  const addToast = useUIStore((s) => s.addToast);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
@@ -15,7 +17,9 @@ export default function Register() {
     try {
       await register(email, password, name);
       navigate('/', { replace: true });
-    } catch {
+    } catch (err) {
+      console.error('Registration failed:', err);
+      addToast('error', 'Registration failed');
       // Error is handled by store
     }
   };
