@@ -33,6 +33,16 @@
   margin-bottom: 20px;
 }
 
+.parentHint {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 14px;
+  padding: 8px 12px;
+  background: var(--glass-elevated);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+}
+
 .form {
   display: flex;
   flex-direction: column;

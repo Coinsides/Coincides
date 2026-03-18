@@ -19,11 +19,13 @@ export default function GoalModal() {
   const closeModal = useUIStore((s) => s.closeModal);
   const addToast = useUIStore((s) => s.addToast);
   const courses = useCourseStore((s) => s.courses);
-  const { createGoal } = useGoalStore();
+  const { goals, createGoal } = useGoalStore();
   const { batchCreateTasks } = useTaskStore();
 
   const isEdit = modal?.type === 'goal-edit';
   const existing = modal?.data?.goal as Goal | undefined;
+  const parentId = modal?.data?.parent_id as string | undefined;
+  const parentGoal = parentId ? goals.find((g) => g.id === parentId) : undefined;
 
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -39,7 +41,12 @@ export default function GoalModal() {
       setDeadline(existing.deadline || '');
       setCourseId(existing.course_id);
     } else {
-      if (courses.length > 0) setCourseId(courses[0].id);
+      // Pre-fill course_id from parent goal if creating sub-goal
+      if (parentGoal) {
+        setCourseId(parentGoal.course_id);
+      } else if (courses.length > 0) {
+        setCourseId(courses[0].id);
+      }
     }
   }, [modal]);
 
@@ -66,6 +73,7 @@ export default function GoalModal() {
         description: description.trim() || undefined,
         deadline: deadline || undefined,
         course_id: courseId,
+        parent_id: parentId,
       });
 
       // Batch create tasks if any
@@ -82,7 +90,7 @@ export default function GoalModal() {
         );
       }
 
-      addToast('success', 'Goal created');
+      addToast('success', parentId ? 'Sub-goal created' : 'Goal created');
       closeModal();
     } catch {
       addToast('error', 'Failed to create goal');
@@ -94,7 +102,12 @@ export default function GoalModal() {
   return (
     <div className={styles.overlay} onClick={(e) => e.target === e.currentTarget && closeModal()}>
       <div className={styles.modal}>
-        <div className={styles.modalTitle}>{isEdit ? 'Edit Goal' : 'New Goal'}</div>
+        <div className={styles.modalTitle}>{isEdit ? 'Edit Goal' : parentId ? 'New Sub-Goal' : 'New Goal'}</div>
+        {parentGoal && (
+          <div className={styles.parentHint}>
+            Sub-goal of: <strong>{parentGoal.title}</strong>
+          </div>
+        )}
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.field}>
             <label>Title</label>
@@ -164,7 +177,7 @@ export default function GoalModal() {
               Cancel
             </button>
             <button type="submit" className={styles.saveBtn} disabled={saving || !title.trim() || !courseId}>
-              {saving ? 'Saving...' : 'Create Goal'}
+              {saving ? 'Saving...' : parentId ? 'Create Sub-Goal' : 'Create Goal'}
             </button>
           </div>
         </form>

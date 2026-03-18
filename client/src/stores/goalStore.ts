@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import api from '@/services/api';
-import type { Goal, CreateGoalRequest, UpdateGoalRequest } from '@shared/types';
+import type { Goal, Task, CreateGoalRequest, UpdateGoalRequest, CreateTaskRequest } from '@shared/types';
 
 interface GoalState {
   goals: Goal[];
@@ -10,6 +10,7 @@ interface GoalState {
   updateGoal: (id: string, data: UpdateGoalRequest) => Promise<Goal>;
   deleteGoal: (id: string) => Promise<void>;
   toggleExamMode: (id: string) => Promise<Goal>;
+  addTaskToGoal: (goalId: string, taskData: CreateTaskRequest) => Promise<Task>;
 }
 
 export const useGoalStore = create<GoalState>((set, get) => ({
@@ -47,6 +48,11 @@ export const useGoalStore = create<GoalState>((set, get) => ({
   toggleExamMode: async (id) => {
     const { data } = await api.put(`/goals/${id}/exam-mode`);
     set({ goals: get().goals.map((g) => (g.id === id ? data : g)) });
+    return data;
+  },
+
+  addTaskToGoal: async (goalId, taskData) => {
+    const { data } = await api.post(`/goals/${goalId}/tasks`, taskData);
     return data;
   },
 }));

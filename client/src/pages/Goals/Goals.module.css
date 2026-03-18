@@ -203,6 +203,55 @@
   flex-shrink: 0;
 }
 
+/* Child goal indentation */
+.childGoalCard {
+  margin-left: 20px;
+  border-left: 3px solid var(--accent-primary);
+}
+
+/* Goal card action buttons */
+.goalCardActions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: 8px;
+}
+
+.addTaskBtn,
+.addSubGoalBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.addTaskBtn:hover,
+.addSubGoalBtn:hover {
+  background: var(--glass-hover);
+  color: var(--accent-primary);
+}
+
+.childCount {
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: var(--glass-elevated);
+  white-space: nowrap;
+}
+
+.parentRef {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-style: italic;
+  white-space: nowrap;
+}
+
 /* Empty state */
 .empty {
   text-align: center;
