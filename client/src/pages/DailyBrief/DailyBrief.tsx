@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
-import { Check, ChevronDown, Zap, Battery, BatteryLow, BarChart3, Play } from 'lucide-react';
+import { Check, ChevronDown, Zap, Battery, BatteryLow, BarChart3, Play, Clock, CheckSquare } from 'lucide-react';
 import { useDailyBriefStore } from '@/stores/dailyBriefStore';
 import { useCourseStore } from '@/stores/courseStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -17,10 +17,17 @@ const energyOptions: { value: EnergyLevel; label: string; icon: typeof Zap }[] =
 ];
 
 const priorityConfig = {
-  must: { label: 'Must', color: 'var(--priority-must)', defaultOpen: true },
+  must: { label: 'Must Do', color: 'var(--priority-must)', defaultOpen: true },
   recommended: { label: 'Recommended', color: 'var(--priority-recommended)', defaultOpen: false },
   optional: { label: 'Optional', color: 'var(--priority-optional)', defaultOpen: false },
 } as const;
+
+const formatTimeRange = (start: string, end: string): string => {
+  const s = new Date(start);
+  const e = new Date(end);
+  const fmt = (d: Date) => d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  return `${fmt(s)} – ${fmt(e)}`;
+};
 
 export default function DailyBrief() {
   const { briefData, loading, fetchDailyBrief, setDailyStatus, updateTaskInBrief } = useDailyBriefStore();
@@ -119,7 +126,7 @@ export default function DailyBrief() {
         const completedCount = tasks.filter((t) => t.status === 'completed').length;
 
         return (
-          <div key={priority} className={styles.taskSection}>
+          <div key={priority} className={styles.taskSection} style={{ borderLeftColor: config.color }}>
             <div className={styles.sectionHeader} onClick={() => toggleSection(priority)}>
               <div className={styles.sectionHeaderLeft}>
                 <span className={styles.priorityDot} style={{ backgroundColor: config.color }} />
@@ -141,6 +148,8 @@ export default function DailyBrief() {
                 ) : (
                   tasks.map((task) => {
                     const course = getCourse(task.course_id);
+                    const checklistDone = task.checklist?.filter((c) => c.done).length ?? 0;
+                    const checklistTotal = task.checklist?.length ?? 0;
                     return (
                       <div key={task.id} className={styles.taskItem}>
                         <button
@@ -149,12 +158,35 @@ export default function DailyBrief() {
                         >
                           {task.status === 'completed' && <Check size={12} color="white" />}
                         </button>
-                        <span
-                          className={`${styles.taskTitle} ${task.status === 'completed' ? styles.completed : ''}`}
-                        >
-                          {task.exam_boost && <span className={styles.examBoost}>⚡</span>}
-                          {task.title}
-                        </span>
+                        <div className={styles.taskInfo}>
+                          <span
+                            className={`${styles.taskTitle} ${task.status === 'completed' ? styles.completed : ''}`}
+                          >
+                            {task.exam_boost && <span className={styles.examBoost}>⚡</span>}
+                            {task.title}
+                          </span>
+                          {task.description && (
+                            <div className={styles.taskDescription}>
+                              {task.description.split('\n')[0].slice(0, 80)}
+                            </div>
+                          )}
+                          {(task.start_time || checklistTotal > 0) && (
+                            <div className={styles.taskTime}>
+                              {task.start_time && task.end_time && (
+                                <>
+                                  <Clock size={10} />
+                                  {formatTimeRange(task.start_time, task.end_time)}
+                                </>
+                              )}
+                              {checklistTotal > 0 && (
+                                <span className={styles.checklistMini}>
+                                  <CheckSquare size={10} />
+                                  {checklistDone}/{checklistTotal} items
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
                         {course && (
                           <span
                             className={styles.courseBadge}

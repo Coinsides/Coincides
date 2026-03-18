@@ -428,6 +428,149 @@
   font-size: 14px;
 }
 
+/* Context menu */
+.contextMenu {
+  position: fixed;
+  z-index: 1000;
+  min-width: 160px;
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--glass-shadow-lg);
+  padding: 6px;
+  animation: fadeIn 100ms ease forwards;
+}
+
+.contextMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--text-primary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  transition: background var(--transition-fast);
+}
+
+.contextMenuItem:hover {
+  background: var(--glass-hover);
+}
+
+.contextMenuDanger {
+  color: var(--error);
+}
+
+.contextMenuDanger:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Week view — all-day section */
+.allDaySection {
+  padding: 4px 8px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.allDayLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 2px 0;
+}
+
+/* Week view — timed section */
+.timedSection {
+  position: relative;
+  flex: 1;
+  min-height: 600px;
+  margin: 4px 4px 8px;
+}
+
+.timeBlock {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  border-radius: var(--radius-sm);
+  padding: 4px 6px;
+  overflow: hidden;
+  cursor: pointer;
+  border-left: 3px solid var(--text-muted);
+  min-height: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: opacity var(--transition-fast);
+}
+
+.timeBlock:hover {
+  opacity: 0.85;
+}
+
+.timeBlockDone {
+  opacity: 0.5;
+}
+
+.timeBlockTime {
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.2;
+}
+
+.timeBlockTitle {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.95);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.3;
+}
+
+/* Clickable task titles in day detail */
+.taskClickable {
+  cursor: pointer;
+  flex: 1;
+  font-size: 13px;
+  transition: color var(--transition-fast);
+}
+
+.taskClickable:hover {
+  color: var(--accent-primary);
+}
+
+/* Task meta info in day detail */
+.taskMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.taskMetaItem {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+/* Week task time display */
+.weekTaskTime {
+  display: block;
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }

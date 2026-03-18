@@ -121,6 +121,7 @@
 .taskSection {
   margin-bottom: 20px;
   border: 1px solid var(--glass-border);
+  border-left: 4px solid var(--glass-border);
   border-radius: var(--radius-lg);
   background: var(--glass-surface);
   backdrop-filter: var(--glass-blur-md);
@@ -187,7 +188,7 @@
 /* Task item */
 .taskItem {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   padding: 10px;
   border-radius: var(--radius-md);
@@ -196,6 +197,39 @@
 
 .taskItem:hover {
   background: var(--glass-hover);
+}
+
+.taskInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.taskTime {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+}
+
+.taskDescription {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.checklistMini {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-top: 3px;
+  margin-left: 8px;
 }
 
 .checkbox {

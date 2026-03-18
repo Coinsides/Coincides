@@ -14,7 +14,7 @@ import {
   isSameDay,
   isToday,
 } from 'date-fns';
-import { ChevronLeft, ChevronRight, X, Plus, Check, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Plus, Check, Sparkles, Edit3, Trash2, Clock, AlignLeft, CheckSquare } from 'lucide-react';
 import { useTaskStore } from '@/stores/taskStore';
 import { useCourseStore } from '@/stores/courseStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -37,7 +37,9 @@ export default function CalendarPage() {
   const [courseFilter, setCourseFilter] = useState('');
   const [view, setView] = useState<CalendarView>('month');
 
-  const { tasks, fetchTasksByRange } = useTaskStore();
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; task: Task } | null>(null);
+
+  const { tasks, fetchTasksByRange, deleteTask } = useTaskStore();
   const courses = useCourseStore((s) => s.courses);
   const openModal = useUIStore((s) => s.openModal);
   const addToast = useUIStore((s) => s.addToast);
@@ -128,6 +130,67 @@ export default function CalendarPage() {
     }
     return groups;
   }, [dayTasks]);
+
+  // Close context menu on any click
+  useEffect(() => {
+    const handler = () => setContextMenu(null);
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
+  }, []);
+
+  const handleContextMenu = (e: React.MouseEvent, task: Task) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setContextMenu({ x: e.clientX, y: e.clientY, task });
+  };
+
+  const handleDeleteTask = async (taskId: string) => {
+    setContextMenu(null);
+    try {
+      await deleteTask(taskId);
+      if (selectedDate) {
+        const dateStr = format(selectedDate, 'yyyy-MM-dd');
+        const { data } = await api.get('/tasks', { params: { date: dateStr } });
+        setDayTasks(data);
+      }
+      // Re-fetch the visible range
+      let rangeStart: Date;
+      let rangeEnd: Date;
+      if (view === 'week') {
+        rangeStart = startOfWeek(currentMonth, { weekStartsOn: 1 });
+        rangeEnd = endOfWeek(currentMonth, { weekStartsOn: 1 });
+      } else {
+        const monthStart = startOfMonth(currentMonth);
+        const monthEnd = endOfMonth(currentMonth);
+        rangeStart = startOfWeek(monthStart, { weekStartsOn: 1 });
+        rangeEnd = endOfWeek(monthEnd, { weekStartsOn: 1 });
+      }
+      fetchTasksByRange(format(rangeStart, 'yyyy-MM-dd'), format(rangeEnd, 'yyyy-MM-dd'), courseFilter || undefined);
+      addToast('success', 'Task deleted');
+    } catch {
+      addToast('error', 'Failed to delete task');
+    }
+  };
+
+  const getTimePosition = (timeStr: string): number => {
+    const date = new Date(timeStr);
+    const hours = date.getHours() + date.getMinutes() / 60;
+    return (hours / 24) * 100;
+  };
+
+  const getBlockHeight = (start: string, end: string): number => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const durationHours = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60);
+    return Math.max((durationHours / 24) * 100, 2.5); // min 2.5% so it's visible
+  };
+
+  const formatTimeRange = (start: string, end: string): string => {
+    const s = new Date(start);
+    const e = new Date(end);
+    const fmt = (d: Date) => d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+    return `${fmt(s)} – ${fmt(e)}`;
+  };
 
   return (
     <div className={styles.page}>
@@ -239,6 +302,8 @@ export default function CalendarPage() {
             const dateStr = format(day, 'yyyy-MM-dd');
             const dayTaskList = tasksByDate[dateStr] || [];
             const selected = selectedDate && isSameDay(day, selectedDate);
+            const allDayTasks = dayTaskList.filter((t) => !t.start_time || !t.end_time);
+            const timedTasks = dayTaskList.filter((t) => t.start_time && t.end_time);
 
             return (
               <div
@@ -250,17 +315,48 @@ export default function CalendarPage() {
                   <span className={styles.weekColumnDay}>{format(day, 'EEE')}</span>
                   <span className={`${styles.weekColumnDate} ${isToday(day) ? styles.weekColumnDateToday : ''}`}>{format(day, 'd')}</span>
                 </div>
-                <div className={styles.weekColumnTasks}>
-                  {dayTaskList.map((t) => {
-                    const course = getCourse(t.course_id);
+                {/* All-day tasks */}
+                {allDayTasks.length > 0 && (
+                  <div className={styles.allDaySection}>
+                    {allDayTasks.map((t) => {
+                      const course = getCourse(t.course_id);
+                      return (
+                        <div
+                          key={t.id}
+                          className={`${styles.weekTask} ${t.status === 'completed' ? styles.weekTaskDone : ''}`}
+                          style={{ borderLeftColor: PRIORITY_COLORS[t.priority] || 'var(--text-muted)' }}
+                          onContextMenu={(e) => handleContextMenu(e, t)}
+                        >
+                          <span className={styles.weekTaskTitle}>{t.title}</span>
+                          {course && <span className={styles.weekTaskCourse} style={{ color: course.color }}>{course.code || course.name}</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {/* Timed tasks */}
+                <div className={styles.timedSection}>
+                  {timedTasks.map((t) => {
+                    const top = getTimePosition(t.start_time!);
+                    const height = getBlockHeight(t.start_time!, t.end_time!);
+                    const bgColor = PRIORITY_COLORS[t.priority] || 'var(--text-muted)';
                     return (
                       <div
                         key={t.id}
-                        className={`${styles.weekTask} ${t.status === 'completed' ? styles.weekTaskDone : ''}`}
-                        style={{ borderLeftColor: PRIORITY_COLORS[t.priority] || 'var(--text-muted)' }}
+                        className={`${styles.timeBlock} ${t.status === 'completed' ? styles.timeBlockDone : ''}`}
+                        style={{
+                          top: `${top}%`,
+                          height: `${height}%`,
+                          backgroundColor: bgColor,
+                          borderLeftColor: bgColor,
+                        }}
+                        onContextMenu={(e) => handleContextMenu(e, t)}
+                        title={`${t.title}\n${formatTimeRange(t.start_time!, t.end_time!)}`}
                       >
-                        <span className={styles.weekTaskTitle}>{t.title}</span>
-                        {course && <span className={styles.weekTaskCourse} style={{ color: course.color }}>{course.code || course.name}</span>}
+                        <span className={styles.timeBlockTime}>
+                          {formatTimeRange(t.start_time!, t.end_time!)}
+                        </span>
+                        <span className={styles.timeBlockTitle}>{t.title}</span>
                       </div>
                     );
                   })}
@@ -268,6 +364,30 @@ export default function CalendarPage() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Context menu */}
+      {contextMenu && (
+        <div
+          className={styles.contextMenu}
+          style={{ left: contextMenu.x, top: contextMenu.y }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            className={styles.contextMenuItem}
+            onClick={() => { openModal('task-edit', { task: contextMenu.task }); setContextMenu(null); }}
+          >
+            <Edit3 size={14} />
+            Edit
+          </button>
+          <button
+            className={`${styles.contextMenuItem} ${styles.contextMenuDanger}`}
+            onClick={() => handleDeleteTask(contextMenu.task.id)}
+          >
+            <Trash2 size={14} />
+            Delete
+          </button>
         </div>
       )}
 
@@ -297,8 +417,14 @@ export default function CalendarPage() {
                       </div>
                       {group.map((task) => {
                         const course = getCourse(task.course_id);
+                        const checklistDone = task.checklist?.filter((c) => c.done).length ?? 0;
+                        const checklistTotal = task.checklist?.length ?? 0;
                         return (
-                          <div key={task.id} className={styles.detailTaskItem}>
+                          <div
+                            key={task.id}
+                            className={styles.detailTaskItem}
+                            onContextMenu={(e) => handleContextMenu(e, task)}
+                          >
                             <button
                               className={`${styles.checkbox} ${task.status === 'completed' ? styles.checked : ''}`}
                               onClick={() => toggleTask(task)}
@@ -306,9 +432,35 @@ export default function CalendarPage() {
                             >
                               {task.status === 'completed' && <Check size={12} color="white" />}
                             </button>
-                            <span style={{ flex: 1, fontSize: 13, color: task.status === 'completed' ? 'var(--text-muted)' : 'var(--text-primary)', textDecoration: task.status === 'completed' ? 'line-through' : 'none' }}>
+                            <div
+                              className={styles.taskClickable}
+                              onClick={(e) => { e.stopPropagation(); openModal('task-edit', { task }); }}
+                              style={{ color: task.status === 'completed' ? 'var(--text-muted)' : 'var(--text-primary)', textDecoration: task.status === 'completed' ? 'line-through' : 'none' }}
+                            >
                               {task.title}
-                            </span>
+                              {(task.start_time || task.description || (checklistTotal > 0)) && (
+                                <div className={styles.taskMeta}>
+                                  {task.start_time && task.end_time && (
+                                    <span className={styles.taskMetaItem}>
+                                      <Clock size={10} />
+                                      {formatTimeRange(task.start_time, task.end_time)}
+                                    </span>
+                                  )}
+                                  {task.description && (
+                                    <span className={styles.taskMetaItem}>
+                                      <AlignLeft size={10} />
+                                      {task.description.split('\n')[0].slice(0, 50)}
+                                    </span>
+                                  )}
+                                  {checklistTotal > 0 && (
+                                    <span className={styles.taskMetaItem}>
+                                      <CheckSquare size={10} />
+                                      {checklistDone}/{checklistTotal} items
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                             {course && (
                               <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 6, backgroundColor: course.color + '18', color: course.color, fontWeight: 500 }}>
                                 {course.code || course.name}
