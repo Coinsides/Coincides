@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [v1.0 Hotfix] — 2026-03-18
+
+### 文档解析器 API Key 读取修复
+
+- `documentParser` 现在优先从用户 Settings 读取 Anthropic API key，再回退到 `.env` 环境变量
+- 解决了“在 Settings 里填了 API key 但上传图片/扫描版 PDF 报错”的问题
+- 与 Embedding provider 保持一致的优先级策略：用户 Settings > 环境变量 > 报错
+- 影响范围：图片 OCR、扫描版 PDF Vision、AI 摘要生成
+
+#### Files
+- 修改 1 文件：documentParser.ts
+
+---
+
 ## [Round 4 Step 3] — 2026-03-18
 
 ### FTS5 全文搜索 + 三路混合搜索
