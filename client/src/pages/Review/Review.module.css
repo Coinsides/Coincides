@@ -353,3 +353,145 @@
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Custom Selection - Browse Tree */
+.browseTree {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  margin-top: 16px;
+}
+
+.browseEmpty {
+  text-align: center;
+  padding: 24px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.browseGroup {
+  margin-bottom: 4px;
+}
+
+.browseDeckRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 6px;
+  border-radius: 6px;
+}
+
+.browseDeckRow:hover {
+  background: var(--bg-hover);
+}
+
+.browseDeckName {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  flex: 1;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.browseDeckContent {
+  padding-left: 20px;
+}
+
+.browseSectionGroup {
+  margin-top: 2px;
+}
+
+.browseSectionRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 4px;
+}
+
+.browseSectionRow:hover {
+  background: var(--bg-hover);
+}
+
+.browseSectionName {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  flex: 1;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.browseCardRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 6px 4px 24px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.browseCardRow:hover {
+  background: var(--bg-hover);
+}
+
+.browseCardTitle {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 280px;
+}
+
+.browseCheckbox {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  cursor: pointer;
+  accent-color: var(--primary);
+}
+
+.browseCount {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-left: auto;
+}
+
+.expandIcon {
+  transition: transform 150ms ease;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+.expandIconOpen {
+  transform: rotate(90deg);
+}
+
+.dueIndicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--text-muted);
+  opacity: 0.3;
+}
+
+.dueIndicatorActive {
+  background: #22c55e;
+  opacity: 1;
+}
+
+.selectedCount {
+  text-align: center;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--primary);
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+}

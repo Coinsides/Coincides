@@ -20,6 +20,27 @@ export interface ReviewFilters {
   tagId?: string;
 }
 
+export interface BrowseCard {
+  id: string;
+  title: string;
+  fsrs_reps: number;
+  fsrs_next_review: string | null;
+}
+
+export interface BrowseSection {
+  id: string;
+  name: string;
+  cards: BrowseCard[];
+}
+
+export interface BrowseTree {
+  id: string;
+  name: string;
+  course_id: string;
+  sections: BrowseSection[];
+  unsectioned_cards: BrowseCard[];
+}
+
 interface ReviewState {
   dueCards: DueCard[];
   currentIndex: number;
@@ -28,6 +49,7 @@ interface ReviewState {
   loading: boolean;
   dueCount: number;
   reviewFilters: ReviewFilters | null;
+  browseTree: BrowseTree[];
   fetchDueCards: (filters?: ReviewFilters) => Promise<void>;
   fetchDueCount: () => Promise<void>;
   rateCard: (cardId: string, rating: number) => Promise<void>;
@@ -36,6 +58,8 @@ interface ReviewState {
   nextCard: () => void;
   endSession: () => void;
   setReviewFilters: (filters: ReviewFilters | null) => void;
+  fetchBrowseTree: () => Promise<void>;
+  startCustomSession: (cardIds: string[]) => Promise<void>;
 }
 
 export const useReviewStore = create<ReviewState>((set, get) => ({
@@ -46,6 +70,7 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
   loading: false,
   dueCount: 0,
   reviewFilters: null,
+  browseTree: [],
 
   fetchDueCards: async (filters?: ReviewFilters) => {
     set({ loading: true });
@@ -99,5 +124,25 @@ export const useReviewStore = create<ReviewState>((set, get) => ({
 
   setReviewFilters: (filters) => {
     set({ reviewFilters: filters });
+  },
+
+  fetchBrowseTree: async () => {
+    try {
+      const { data } = await api.get('/review/browse');
+      set({ browseTree: data });
+    } catch (err) {
+      console.error('Failed to fetch browse tree:', err);
+    }
+  },
+
+  startCustomSession: async (cardIds) => {
+    set({ loading: true });
+    try {
+      const { data } = await api.post('/review/custom', { card_ids: cardIds });
+      set({ dueCards: data, currentIndex: 0, sessionResults: [], loading: false, sessionActive: true });
+    } catch (err) {
+      console.error('Failed to start custom session:', err);
+      set({ loading: false });
+    }
   },
 }));

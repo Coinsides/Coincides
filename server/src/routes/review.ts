@@ -188,4 +188,70 @@ router.post('/:cardId/rate', (req: AuthRequest, res: Response) => {
   }
 });
 
+// GET /api/review/browse — deck→section→card tree for custom selector
+router.get('/browse', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+
+  const decks = db.prepare(
+    'SELECT id, name, course_id FROM card_decks WHERE user_id = ? ORDER BY name'
+  ).all(req.userId!) as any[];
+
+  const result = decks.map((deck: any) => {
+    const sections = db.prepare(
+      'SELECT id, name FROM card_sections WHERE deck_id = ? ORDER BY order_index'
+    ).all(deck.id) as any[];
+
+    const unsectionedCards = db.prepare(
+      `SELECT id, title, fsrs_reps, fsrs_next_review
+       FROM cards WHERE deck_id = ? AND section_id IS NULL AND user_id = ?
+       ORDER BY order_index`
+    ).all(deck.id, req.userId!) as any[];
+
+    const sectionData = sections.map((section: any) => {
+      const cards = db.prepare(
+        `SELECT id, title, fsrs_reps, fsrs_next_review
+         FROM cards WHERE section_id = ? AND user_id = ?
+         ORDER BY order_index`
+      ).all(section.id, req.userId!) as any[];
+      return { ...section, cards };
+    });
+
+    return {
+      ...deck,
+      sections: sectionData,
+      unsectioned_cards: unsectionedCards,
+    };
+  });
+
+  res.json(result);
+});
+
+// POST /api/review/custom — review arbitrary card IDs
+router.post('/custom', (req: AuthRequest, res: Response) => {
+  const { card_ids } = req.body;
+  if (!Array.isArray(card_ids) || card_ids.length === 0) {
+    throw new AppError(400, 'card_ids must be a non-empty array');
+  }
+  if (card_ids.length > 500) {
+    throw new AppError(400, 'Maximum 500 cards per custom review session');
+  }
+
+  const db = getDb();
+  const placeholders = card_ids.map(() => '?').join(',');
+  const cards = db.prepare(
+    `SELECT c.*, cd.name as deck_name, cd.course_id
+     FROM cards c
+     INNER JOIN card_decks cd ON cd.id = c.deck_id
+     WHERE c.id IN (${placeholders}) AND c.user_id = ?
+     ORDER BY c.fsrs_reps ASC, c.fsrs_next_review ASC`
+  ).all(...card_ids, req.userId!) as any[];
+
+  const result = cards.map(card => {
+    parseCardContent(card);
+    return { ...card, tags: getCardTags(db, card.id) };
+  });
+
+  res.json(result);
+});
+
 export default router;

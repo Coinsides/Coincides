@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, RotateCcw, Layers, BookOpen, FolderOpen, Tag } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Layers, BookOpen, FolderOpen, Tag, CheckSquare, ChevronRight } from 'lucide-react';
 import { useReviewStore } from '@/stores/reviewStore';
-import type { ReviewFilters } from '@/stores/reviewStore';
+import type { ReviewFilters, BrowseTree } from '@/stores/reviewStore';
 import { useDeckStore } from '@/stores/deckStore';
 import { useTagStore } from '@/stores/tagStore';
 import { useSectionStore } from '@/stores/sectionStore';
@@ -17,7 +17,7 @@ const ratingConfig = [
   { value: 4, label: 'Easy', color: '#3b82f6' },
 ];
 
-type ReviewMode = 'all' | 'deck' | 'section' | 'tag';
+type ReviewMode = 'all' | 'deck' | 'section' | 'tag' | 'custom';
 
 export default function ReviewPage() {
   const navigate = useNavigate();
@@ -25,6 +25,7 @@ export default function ReviewPage() {
   const {
     dueCards, currentIndex, sessionActive, sessionResults,
     loading, fetchDueCards, rateCard, startSession, nextCard, endSession,
+    browseTree, fetchBrowseTree, startCustomSession,
   } = useReviewStore();
   const addToast = useUIStore((s) => s.addToast);
 
@@ -42,6 +43,9 @@ export default function ReviewPage() {
   const [selectedDeckId, setSelectedDeckId] = useState<string>('');
   const [selectedSectionId, setSelectedSectionId] = useState<string>('');
   const [selectedTagId, setSelectedTagId] = useState<string>('');
+  const [selectedCardIds, setSelectedCardIds] = useState<Set<string>>(new Set());
+  const [expandedDecks, setExpandedDecks] = useState<Set<string>>(new Set());
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
   // Check for URL params (quick-entry from DeckDetail)
   useEffect(() => {
@@ -73,6 +77,12 @@ export default function ReviewPage() {
   }, [selectedDeckId]);
 
   const handleStartReview = () => {
+    if (selectedMode === 'custom') {
+      if (selectedCardIds.size === 0) return;
+      setShowSelector(false);
+      startCustomSession(Array.from(selectedCardIds));
+      return;
+    }
     const filters: ReviewFilters = {};
     if (selectedMode === 'deck' && selectedDeckId) {
       filters.deckId = selectedDeckId;
@@ -90,7 +100,58 @@ export default function ReviewPage() {
   const canStart = selectedMode === 'all'
     || (selectedMode === 'deck' && selectedDeckId)
     || (selectedMode === 'section' && selectedSectionId)
-    || (selectedMode === 'tag' && selectedTagId);
+    || (selectedMode === 'tag' && selectedTagId)
+    || (selectedMode === 'custom' && selectedCardIds.size > 0);
+
+  const toggleCard = (id: string) => {
+    setSelectedCardIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleAllInList = (cardIds: string[]) => {
+    setSelectedCardIds(prev => {
+      const next = new Set(prev);
+      const allSelected = cardIds.every(id => next.has(id));
+      if (allSelected) {
+        cardIds.forEach(id => next.delete(id));
+      } else {
+        cardIds.forEach(id => next.add(id));
+      }
+      return next;
+    });
+  };
+
+  const getAllDeckCardIds = (deck: BrowseTree): string[] => {
+    const ids: string[] = [];
+    deck.unsectioned_cards.forEach(c => ids.push(c.id));
+    deck.sections.forEach(s => s.cards.forEach(c => ids.push(c.id)));
+    return ids;
+  };
+
+  const toggleDeckExpand = (id: string) => {
+    setExpandedDecks(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleSectionExpand = (id: string) => {
+    setExpandedSections(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const isDue = (card: { fsrs_reps: number; fsrs_next_review: string | null }) => {
+    if (card.fsrs_reps === 0) return true;
+    if (!card.fsrs_next_review) return true;
+    return new Date(card.fsrs_next_review) <= new Date();
+  };
 
   const currentCard = dueCards[currentIndex];
   const isFinished = sessionActive && currentIndex >= dueCards.length;
@@ -157,6 +218,13 @@ export default function ReviewPage() {
               <Tag size={22} />
               <span>By Tag</span>
             </button>
+            <button
+              className={`${styles.modeCard} ${selectedMode === 'custom' ? styles.modeCardActive : ''}`}
+              onClick={() => { setSelectedMode('custom'); fetchBrowseTree(); }}
+            >
+              <CheckSquare size={22} />
+              <span>Custom Selection</span>
+            </button>
           </div>
 
           {selectedMode === 'deck' && (
@@ -222,6 +290,101 @@ export default function ReviewPage() {
             </div>
           )}
 
+          {selectedMode === 'custom' && (
+            <div className={styles.browseTree}>
+              {browseTree.length === 0 ? (
+                <div className={styles.browseEmpty}>No decks found.</div>
+              ) : (
+                browseTree.map(deck => {
+                  const deckCardIds = getAllDeckCardIds(deck);
+                  const deckAllSelected = deckCardIds.length > 0 && deckCardIds.every(id => selectedCardIds.has(id));
+                  const deckSomeSelected = deckCardIds.some(id => selectedCardIds.has(id));
+                  const isDeckExpanded = expandedDecks.has(deck.id);
+
+                  return (
+                    <div key={deck.id} className={styles.browseGroup}>
+                      <div className={styles.browseDeckRow}>
+                        <input
+                          type="checkbox"
+                          className={styles.browseCheckbox}
+                          checked={deckAllSelected}
+                          ref={el => { if (el) el.indeterminate = deckSomeSelected && !deckAllSelected; }}
+                          onChange={() => toggleAllInList(deckCardIds)}
+                        />
+                        <div className={styles.browseDeckName} onClick={() => toggleDeckExpand(deck.id)}>
+                          <ChevronRight size={14} className={`${styles.expandIcon} ${isDeckExpanded ? styles.expandIconOpen : ''}`} />
+                          <BookOpen size={14} />
+                          <span>{deck.name}</span>
+                          <span className={styles.browseCount}>{deckCardIds.length} cards</span>
+                        </div>
+                      </div>
+
+                      {isDeckExpanded && (
+                        <div className={styles.browseDeckContent}>
+                          {deck.unsectioned_cards.map(card => (
+                            <label key={card.id} className={styles.browseCardRow}>
+                              <input
+                                type="checkbox"
+                                className={styles.browseCheckbox}
+                                checked={selectedCardIds.has(card.id)}
+                                onChange={() => toggleCard(card.id)}
+                              />
+                              <span className={`${styles.dueIndicator} ${isDue(card) ? styles.dueIndicatorActive : ''}`} />
+                              <span className={styles.browseCardTitle}>{card.title}</span>
+                            </label>
+                          ))}
+
+                          {deck.sections.map(section => {
+                            const sectionCardIds = section.cards.map(c => c.id);
+                            const secAllSelected = sectionCardIds.length > 0 && sectionCardIds.every(id => selectedCardIds.has(id));
+                            const secSomeSelected = sectionCardIds.some(id => selectedCardIds.has(id));
+                            const isSectionExpanded = expandedSections.has(section.id);
+
+                            return (
+                              <div key={section.id} className={styles.browseSectionGroup}>
+                                <div className={styles.browseSectionRow}>
+                                  <input
+                                    type="checkbox"
+                                    className={styles.browseCheckbox}
+                                    checked={secAllSelected}
+                                    ref={el => { if (el) el.indeterminate = secSomeSelected && !secAllSelected; }}
+                                    onChange={() => toggleAllInList(sectionCardIds)}
+                                  />
+                                  <div className={styles.browseSectionName} onClick={() => toggleSectionExpand(section.id)}>
+                                    <ChevronRight size={12} className={`${styles.expandIcon} ${isSectionExpanded ? styles.expandIconOpen : ''}`} />
+                                    <FolderOpen size={12} />
+                                    <span>{section.name}</span>
+                                    <span className={styles.browseCount}>{sectionCardIds.length}</span>
+                                  </div>
+                                </div>
+
+                                {isSectionExpanded && section.cards.map(card => (
+                                  <label key={card.id} className={styles.browseCardRow}>
+                                    <input
+                                      type="checkbox"
+                                      className={styles.browseCheckbox}
+                                      checked={selectedCardIds.has(card.id)}
+                                      onChange={() => toggleCard(card.id)}
+                                    />
+                                    <span className={`${styles.dueIndicator} ${isDue(card) ? styles.dueIndicatorActive : ''}`} />
+                                    <span className={styles.browseCardTitle}>{card.title}</span>
+                                  </label>
+                                ))}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+              {selectedCardIds.size > 0 && (
+                <div className={styles.selectedCount}>{selectedCardIds.size} card{selectedCardIds.size !== 1 ? 's' : ''} selected</div>
+              )}
+            </div>
+          )}
+
           <div className={styles.modeSelectorActions}>
             <button className={styles.backBtn} onClick={() => navigate('/decks')}>
               Back
@@ -231,7 +394,9 @@ export default function ReviewPage() {
               onClick={handleStartReview}
               disabled={!canStart}
             >
-              Start Review
+              {selectedMode === 'custom' && selectedCardIds.size > 0
+                ? `Start Review (${selectedCardIds.size} card${selectedCardIds.size !== 1 ? 's' : ''})`
+                : 'Start Review'}
             </button>
           </div>
         </div>
