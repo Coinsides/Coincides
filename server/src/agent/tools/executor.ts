@@ -336,8 +336,9 @@ export async function executeTool(
 
     case 'search_memories': {
       const { query, category } = args as { query: string; category?: string };
+      const store = new VectorStore();
 
-      // Keyword search (always runs as baseline)
+      // --- Path 1: LIKE keyword search (always runs as baseline) ---
       let keywordSql = 'SELECT id, category, content, created_at FROM agent_memories WHERE user_id = ? AND content LIKE ?';
       const keywordParams: unknown[] = [userId, `%${query}%`];
       if (category) { keywordSql += ' AND category = ?'; keywordParams.push(category); }
@@ -346,38 +347,42 @@ export async function executeTool(
         id: string; category: string; content: string; created_at: string;
       }>;
 
-      // Semantic search (if embedding provider available)
-      let results: Array<{ id: string; category: string; content: string; created_at: string; similarity_score?: number }> = [];
+      // --- Path 2: FTS5 full-text search ---
+      const ftsResults = store.ftsSearchMemories(query, 10, userId);
+
+      // --- Path 3: Semantic vector search (if provider available) ---
+      let semanticMapped: Array<{ id: string; category: string; content: string; created_at: string; similarity_score: number }> = [];
       try {
         const provider = getEmbeddingProvider(userId);
         if (provider) {
-          const store = new VectorStore();
           const queryEmbeddings = await provider.embed([query], 'query');
           if (queryEmbeddings.length > 0) {
             const semanticResults = store.searchMemoriesWithContent(queryEmbeddings[0], 10, userId);
-            // Convert distance to similarity (lower distance = higher similarity)
-            const semanticMapped = semanticResults.map((r) => ({
+            semanticMapped = semanticResults.map((r) => ({
               id: r.memory_id,
               category: r.category,
               content: r.content,
               created_at: r.created_at,
               similarity_score: Math.round((1 - r.distance) * 100) / 100,
             }));
-            // Merge: semantic first, then keyword, deduplicate
-            const seenIds = new Set<string>();
-            for (const m of semanticMapped) { seenIds.add(m.id); results.push(m); }
-            for (const m of keywordMemories) {
-              if (!seenIds.has(m.id)) { seenIds.add(m.id); results.push(m); }
-            }
           }
         }
       } catch (err) {
-        console.warn('Semantic memory search failed, using keyword fallback:', err);
+        console.warn('Semantic memory search failed:', err);
       }
 
-      // Fallback if semantic search didn't run
-      if (results.length === 0) {
-        results = keywordMemories;
+      // --- Three-way merge: semantic > FTS5 > LIKE, deduplicate ---
+      let results: Array<{ id: string; category: string; content: string; created_at: string; similarity_score?: number }> = [];
+      const seenIds = new Set<string>();
+      for (const m of semanticMapped) { if (!seenIds.has(m.id)) { seenIds.add(m.id); results.push(m); } }
+      for (const r of ftsResults) {
+        if (!seenIds.has(r.memory_id)) {
+          seenIds.add(r.memory_id);
+          results.push({ id: r.memory_id, category: r.category, content: r.content, created_at: r.created_at });
+        }
+      }
+      for (const m of keywordMemories) {
+        if (!seenIds.has(m.id)) { seenIds.add(m.id); results.push(m); }
       }
 
       results = results.slice(0, 10);
@@ -419,98 +424,101 @@ export async function executeTool(
 
     case 'search_documents': {
       const { query, course_id, file_type } = args as { query: string; course_id?: string; file_type?: string };
+      const store = new VectorStore();
 
-      // Keyword search on filename + summary (always runs as baseline)
-      let keywordSql = `SELECT d.id, d.filename, d.file_type, d.summary, d.page_count, d.document_type, d.chunk_count,
-                                d.course_id, c.name as course_name
-                         FROM documents d
-                         JOIN courses c ON d.course_id = c.id
-                         WHERE d.user_id = ? AND d.parse_status = 'completed'
-                         AND (d.filename LIKE ? OR d.summary LIKE ?)`;
-      const searchPattern = `%${query}%`;
-      const keywordParams: unknown[] = [userId, searchPattern, searchPattern];
-
-      if (course_id) { keywordSql += ' AND d.course_id = ?'; keywordParams.push(course_id); }
-      if (file_type) { keywordSql += ' AND d.file_type = ?'; keywordParams.push(file_type); }
-      keywordSql += ' ORDER BY d.created_at DESC LIMIT 10';
-
-      const keywordDocs = db.prepare(keywordSql).all(...keywordParams) as Array<{
-        id: string; filename: string; file_type: string; summary: string;
-        page_count: number; document_type: string; chunk_count: number;
-        course_id: string; course_name: string;
-      }>;
-
-      // Semantic search on chunk content (if embedding provider available)
+      // Helper: look up document metadata for a set of document IDs
       interface DocResult {
         id: string; filename: string; file_type: string; summary: string;
         page_count: number; document_type: string; chunk_count: number;
         course_id: string; course_name: string;
-        relevant_chunks?: Array<{ content: string; chunk_index: number; similarity: number }>;
+        relevant_chunks?: Array<{ content: string; chunk_index: number; similarity: number; source: string }>;
       }
-      let results: DocResult[] = [];
 
+      const lookupDocs = (docIds: string[]): DocResult[] => {
+        if (docIds.length === 0) return [];
+        const placeholders = docIds.map(() => '?').join(',');
+        let docSql = `SELECT d.id, d.filename, d.file_type, d.summary, d.page_count, d.document_type, d.chunk_count,
+                             d.course_id, c.name as course_name
+                      FROM documents d JOIN courses c ON d.course_id = c.id
+                      WHERE d.user_id = ? AND d.id IN (${placeholders})`;
+        const docParams: unknown[] = [userId, ...docIds];
+        if (course_id) { docSql += ' AND d.course_id = ?'; docParams.push(course_id); }
+        if (file_type) { docSql += ' AND d.file_type = ?'; docParams.push(file_type); }
+        return db.prepare(docSql).all(...docParams) as DocResult[];
+      };
+
+      // Accumulator: doc_id -> chunk snippets (from all sources)
+      const docChunkMap = new Map<string, Array<{ content: string; chunk_index: number; similarity: number; source: string }>>();
+      const addChunks = (chunks: Array<{ document_id: string; content: string; chunk_index: number; distance: number }>, source: string) => {
+        for (const chunk of chunks) {
+          if (!docChunkMap.has(chunk.document_id)) docChunkMap.set(chunk.document_id, []);
+          const existing = docChunkMap.get(chunk.document_id)!;
+          // Deduplicate by chunk_id content
+          if (!existing.some((e) => e.chunk_index === chunk.chunk_index)) {
+            existing.push({
+              content: chunk.content.slice(0, 500),
+              chunk_index: chunk.chunk_index,
+              similarity: Math.round((1 - chunk.distance) * 100) / 100,
+              source,
+            });
+          }
+        }
+      };
+
+      // --- Path 1: Semantic vector search ---
       try {
         const provider = getEmbeddingProvider(userId);
         if (provider) {
-          const store = new VectorStore();
           const queryEmbeddings = await provider.embed([query], 'query');
           if (queryEmbeddings.length > 0) {
             const semanticChunks = store.searchChunksWithContent(queryEmbeddings[0], 10, userId);
-
-            // Group chunks by document, attach relevant snippets
-            const docChunkMap = new Map<string, Array<{ content: string; chunk_index: number; similarity: number }>>();
-            for (const chunk of semanticChunks) {
-              const docId = chunk.document_id;
-              if (!docChunkMap.has(docId)) docChunkMap.set(docId, []);
-              docChunkMap.get(docId)!.push({
-                content: chunk.content.slice(0, 500),
-                chunk_index: chunk.chunk_index,
-                similarity: Math.round((1 - chunk.distance) * 100) / 100,
-              });
-            }
-
-            // Look up document metadata for semantic results
-            if (docChunkMap.size > 0) {
-              const docIds = Array.from(docChunkMap.keys());
-              const placeholders = docIds.map(() => '?').join(',');
-              let docSql = `SELECT d.id, d.filename, d.file_type, d.summary, d.page_count, d.document_type, d.chunk_count,
-                                   d.course_id, c.name as course_name
-                            FROM documents d
-                            JOIN courses c ON d.course_id = c.id
-                            WHERE d.user_id = ? AND d.id IN (${placeholders})`;
-              const docParams: unknown[] = [userId, ...docIds];
-
-              if (course_id) { docSql += ' AND d.course_id = ?'; docParams.push(course_id); }
-              if (file_type) { docSql += ' AND d.file_type = ?'; docParams.push(file_type); }
-
-              const semanticDocs = db.prepare(docSql).all(...docParams) as DocResult[];
-
-              // Attach chunk snippets to documents
-              for (const doc of semanticDocs) {
-                doc.relevant_chunks = docChunkMap.get(doc.id) || [];
-              }
-
-              // Merge: semantic first (sorted by best chunk similarity), then keyword, deduplicate
-              const seenIds = new Set<string>();
-              const sortedSemantic = semanticDocs.sort((a, b) => {
-                const bestA = Math.max(...(a.relevant_chunks || []).map((c) => c.similarity));
-                const bestB = Math.max(...(b.relevant_chunks || []).map((c) => c.similarity));
-                return bestB - bestA;
-              });
-              for (const doc of sortedSemantic) { seenIds.add(doc.id); results.push(doc); }
-              for (const doc of keywordDocs) {
-                if (!seenIds.has(doc.id)) { seenIds.add(doc.id); results.push(doc); }
-              }
-            }
+            addChunks(semanticChunks, 'semantic');
           }
         }
       } catch (err) {
-        console.warn('Semantic document search failed, using keyword fallback:', err);
+        console.warn('Semantic document search failed:', err);
       }
 
-      // Fallback if semantic search didn't run
-      if (results.length === 0) {
-        results = keywordDocs;
+      // --- Path 2: FTS5 full-text search ---
+      const ftsChunks = store.ftsSearchChunks(query, 10, userId);
+      addChunks(ftsChunks, 'fts5');
+
+      // --- Path 3: LIKE keyword search on filename + summary ---
+      let keywordSql = `SELECT d.id, d.filename, d.file_type, d.summary, d.page_count, d.document_type, d.chunk_count,
+                                d.course_id, c.name as course_name
+                         FROM documents d JOIN courses c ON d.course_id = c.id
+                         WHERE d.user_id = ? AND d.parse_status = 'completed'
+                         AND (d.filename LIKE ? OR d.summary LIKE ?)`;
+      const searchPattern = `%${query}%`;
+      const keywordParams: unknown[] = [userId, searchPattern, searchPattern];
+      if (course_id) { keywordSql += ' AND d.course_id = ?'; keywordParams.push(course_id); }
+      if (file_type) { keywordSql += ' AND d.file_type = ?'; keywordParams.push(file_type); }
+      keywordSql += ' ORDER BY d.created_at DESC LIMIT 10';
+      const keywordDocs = db.prepare(keywordSql).all(...keywordParams) as DocResult[];
+
+      // --- Three-way merge: semantic+FTS5 docs first (with chunks), then LIKE docs ---
+      let results: DocResult[] = [];
+      const seenIds = new Set<string>();
+
+      // Documents found via chunk search (semantic + FTS5)
+      if (docChunkMap.size > 0) {
+        const chunkDocIds = Array.from(docChunkMap.keys());
+        const chunkDocs = lookupDocs(chunkDocIds);
+        for (const doc of chunkDocs) {
+          doc.relevant_chunks = (docChunkMap.get(doc.id) || []).sort((a, b) => b.similarity - a.similarity);
+        }
+        // Sort by best chunk similarity
+        chunkDocs.sort((a, b) => {
+          const bestA = Math.max(...(a.relevant_chunks || []).map((c) => c.similarity), 0);
+          const bestB = Math.max(...(b.relevant_chunks || []).map((c) => c.similarity), 0);
+          return bestB - bestA;
+        });
+        for (const doc of chunkDocs) { seenIds.add(doc.id); results.push(doc); }
+      }
+
+      // Add LIKE keyword docs that weren't found by chunk search
+      for (const doc of keywordDocs) {
+        if (!seenIds.has(doc.id)) { seenIds.add(doc.id); results.push(doc); }
       }
 
       results = results.slice(0, 10);

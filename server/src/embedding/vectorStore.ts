@@ -264,6 +264,134 @@ export class VectorStore {
         };
       });
   }
+
+  // ─── FTS5 Full-Text Search Methods ───────────────────────────
+
+  /**
+   * FTS5 full-text search on document chunks, filtered by user ownership.
+   * Returns chunks with BM25 rank and content.
+   */
+  ftsSearchChunks(
+    query: string,
+    topK: number,
+    userId: string,
+  ): ChunkSearchResult[] {
+    const db = getDb();
+
+    // Sanitize query for FTS5 (escape double quotes, strip special chars)
+    const safeQuery = query.replace(/["']/g, ' ').replace(/[^\w\s\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff]/g, ' ').trim();
+    if (!safeQuery) return [];
+
+    const results: ChunkSearchResult[] = [];
+
+    // Search chunked documents via FTS5
+    try {
+      const rows = db
+        .prepare(
+          `SELECT dc.id AS chunk_id, dc.content, dc.document_id, dc.chunk_index,
+                  rank AS bm25_rank
+           FROM document_chunks_fts fts
+           JOIN document_chunks dc ON dc.rowid = fts.rowid
+           JOIN documents d ON dc.document_id = d.id
+           WHERE document_chunks_fts MATCH ? AND d.user_id = ?
+           ORDER BY rank
+           LIMIT ?`
+        )
+        .all(safeQuery, userId, topK) as Array<{
+          chunk_id: string; content: string; document_id: string;
+          chunk_index: number; bm25_rank: number;
+        }>;
+
+      for (const r of rows) {
+        results.push({
+          chunk_id: r.chunk_id,
+          content: r.content,
+          document_id: r.document_id,
+          chunk_index: r.chunk_index,
+          distance: Math.max(0, Math.min(1, 1 + r.bm25_rank / 10)),
+        });
+      }
+    } catch (err) {
+      console.warn('FTS5 chunk search failed:', err);
+    }
+
+    // Also search un-chunked documents (extracted_text stored directly in documents table)
+    try {
+      const unchunked = db
+        .prepare(
+          `SELECT d.id AS chunk_id, d.extracted_text AS content, d.id AS document_id, 0 AS chunk_index
+           FROM documents d
+           WHERE d.user_id = ? AND d.parse_status = 'completed'
+           AND (d.chunk_count = 0 OR d.chunk_count IS NULL)
+           AND d.extracted_text IS NOT NULL
+           AND d.extracted_text LIKE ?
+           ORDER BY d.created_at DESC
+           LIMIT ?`
+        )
+        .all(userId, `%${safeQuery.split(/\s+/)[0]}%`, topK) as Array<{
+          chunk_id: string; content: string; document_id: string; chunk_index: number;
+        }>;
+
+      // Filter: at least one query word must appear in extracted_text
+      const queryWords = safeQuery.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
+      for (const row of unchunked) {
+        const textLower = (row.content || '').toLowerCase();
+        const matchCount = queryWords.filter((w) => textLower.includes(w)).length;
+        if (matchCount > 0 && !results.some((r) => r.document_id === row.document_id)) {
+          results.push({
+            ...row,
+            distance: Math.max(0.1, 1 - matchCount / queryWords.length),
+          });
+        }
+      }
+    } catch (err) {
+      console.warn('Un-chunked document text search failed:', err);
+    }
+
+    return results.slice(0, topK);
+  }
+
+  /**
+   * FTS5 full-text search on agent memories, filtered by user ownership.
+   */
+  ftsSearchMemories(
+    query: string,
+    topK: number,
+    userId: string,
+  ): MemorySearchResult[] {
+    const db = getDb();
+
+    const safeQuery = query.replace(/["']/g, ' ').replace(/[^\w\s\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff]/g, ' ').trim();
+    if (!safeQuery) return [];
+
+    try {
+      const rows = db
+        .prepare(
+          `SELECT m.id AS memory_id, m.content, m.category, m.created_at,
+                  rank AS bm25_rank
+           FROM agent_memories_fts fts
+           JOIN agent_memories m ON m.rowid = fts.rowid
+           WHERE agent_memories_fts MATCH ? AND m.user_id = ?
+           ORDER BY rank
+           LIMIT ?`
+        )
+        .all(safeQuery, userId, topK) as Array<{
+          memory_id: string; content: string; category: string;
+          created_at: string; bm25_rank: number;
+        }>;
+
+      return rows.map((r) => ({
+        memory_id: r.memory_id,
+        content: r.content,
+        category: r.category,
+        distance: Math.max(0, Math.min(1, 1 + r.bm25_rank / 10)),
+        created_at: r.created_at,
+      }));
+    } catch (err) {
+      console.warn('FTS5 memory search failed:', err);
+      return [];
+    }
+  }
 }
 
 /**

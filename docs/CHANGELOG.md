@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Round 4 Step 3] — 2026-03-18
+
+### FTS5 全文搜索 + 三路混合搜索
+
+#### FTS5 全文搜索基础设施
+- 新建 `document_chunks_fts` FTS5 虚拟表（content-sync 模式，自动同步 document_chunks 表）
+- 新建 `agent_memories_fts` FTS5 虚拟表（content-sync 模式，自动同步 agent_memories 表）
+- 创建 INSERT/DELETE/UPDATE 触发器实现自动数据同步
+- 数据库初始化时自动执行 FTS5 'rebuild' 命令回填已有数据
+
+#### 三路混合搜索引擎
+- `search_documents` 升级为三路搜索：语义向量 > FTS5 全文 > LIKE 关键词
+- `search_memories` 同步升级为三路搜索
+- 搜索优先级：语义结果最优先（按相似度排序）→ FTS5 结果补充（按 rank 排序）→ LIKE 结果兜底
+- 三路结果自动去重合并（基于 chunk_id / memory_id）
+
+#### 未分块文档搜索修复
+- 发现问题：小文档（chunk_count=0）内容存于 `documents.extracted_text`，不在 `document_chunks` 表中，FTS5 搜不到
+- 修复方案：`ftsSearchChunks()` 增加未分块文档回退搜索——当 FTS5 结果不足时，对 `documents.extracted_text` 执行 LIKE 搜索
+- 搜索结果统一为 FtsChunkResult 格式返回
+
+#### VectorStore 新增方法
+- `ftsSearchChunks(query, courseId, limit)` — FTS5 搜索文档 chunks + 未分块文档回退
+- `ftsSearchMemories(query, userId, limit)` — FTS5 搜索 Agent 记忆
+
+#### Files
+- 修改 3 文件：db/init.ts, embedding/vectorStore.ts, agent/tools/executor.ts
+
+---
+
 ## [Round 4 Step 2] — 2026-03-18
 
 ### 语义搜索 + Agent RAG

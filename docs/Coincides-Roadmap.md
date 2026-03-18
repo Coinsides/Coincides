@@ -1,7 +1,7 @@
 # Coincides 开发路线图
 
 > 最后更新：2026-03-18
-> 状态：Round 1 ✅ 完成 | Round 2 ✅ 完成 | Round 3 ✅ 完成 | Round 4 🔄 进行中
+> 状态：Round 1 ✅ 完成 | Round 2 ✅ 完成 | Round 3 ✅ 完成 | Round 4 ✅ 完成 | 🎉 v1.0 发布
 
 ---
 
@@ -105,9 +105,11 @@
 
 ---
 
-## Round 4：记忆系统（向量搜索 + RAG）
+## Round 4：记忆系统（向量搜索 + RAG）✅
 
-> 状态：Step 1 ✅ 完成 | Step 2 ✅ 完成 | Step 3 待开始
+> 状态：Step 1 ✅ 完成 | Step 2 ✅ 完成 | Step 3 ✅ 完成
+>
+> 🎉 **Round 4 完成 = Coincides v1.0 正式版本发布**
 
 ### Step 1：sqlite-vec 向量存储 + Voyage AI Embedding 管线 ✅
 - [x] 集成 sqlite-vec v0.1.7（npm 安装，与 better-sqlite3 无缝集成）
@@ -129,17 +131,19 @@
 - [x] System Prompt 新增 RAG 使用指导
 - 完成：2026-03-18
 
-### Step 3：混合搜索 + 打磨
-- [ ] SQLite FTS5 全文搜索 + sqlite-vec 语义搜索
-- [ ] 两路结果合并 + 去重 + 重排序
-- [ ] 学习 NotebookLM 的"只引用上传来源"策略，减少幻觉
+### Step 3：FTS5 全文搜索 + 三路混合搜索 ✅
+- [x] SQLite FTS5 虚拟表（document_chunks_fts + agent_memories_fts）+ 触发器自动同步
+- [x] 三路混合搜索引擎：语义向量 > FTS5 全文 > LIKE 关键词
+- [x] 三路结果自动去重合并 + 优先级排序
+- [x] 未分块文档搜索修复（documents.extracted_text 回退搜索）
+- 完成：2026-03-18
 
 ### 技术决策记录
 | 决策 | 选择 | 理由 |
 |---|---|---|
 | 向量数据库 | sqlite-vec | 与 better-sqlite3 无缝集成，零外部依赖，npm install 即用 |
 | Embedding 模型 | Voyage AI voyage-4（已集成） | 1024 维，$0.06/M tokens，Anthropic 官方合作伙伴 |
-| 搜索策略 | Phase 1: SQL LIKE → Phase 2: 语义搜索 → Phase 3: 混合搜索 | 分阶段降低复杂度 |
+| 搜索策略 | Phase 1: SQL LIKE ✅ → Phase 2: 语义搜索 ✅ → Phase 3: 三路混合搜索 ✅ | 分阶段降低复杂度，全部完成 |
 
 ---
 

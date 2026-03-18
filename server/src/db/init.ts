@@ -109,6 +109,93 @@ export function initDb(dbPath?: string): Database.Database {
     // Column already exists — ignore
   }
 
+  // FTS5 full-text search for document chunks
+  try {
+    db.exec(`
+      CREATE VIRTUAL TABLE IF NOT EXISTS document_chunks_fts USING fts5(
+        content,
+        content='document_chunks',
+        content_rowid='rowid'
+      )
+    `);
+  } catch (_e) {
+    // FTS5 table already exists — ignore
+  }
+
+  // FTS5 full-text search for agent memories
+  try {
+    db.exec(`
+      CREATE VIRTUAL TABLE IF NOT EXISTS agent_memories_fts USING fts5(
+        content,
+        content='agent_memories',
+        content_rowid='rowid'
+      )
+    `);
+  } catch (_e) {
+    // FTS5 table already exists — ignore
+  }
+
+  // FTS5 sync triggers for document_chunks
+  try {
+    db.exec(`
+      CREATE TRIGGER IF NOT EXISTS document_chunks_ai AFTER INSERT ON document_chunks BEGIN
+        INSERT INTO document_chunks_fts(rowid, content) VALUES (new.rowid, new.content);
+      END
+    `);
+    db.exec(`
+      CREATE TRIGGER IF NOT EXISTS document_chunks_ad AFTER DELETE ON document_chunks BEGIN
+        INSERT INTO document_chunks_fts(document_chunks_fts, rowid, content) VALUES('delete', old.rowid, old.content);
+      END
+    `);
+    db.exec(`
+      CREATE TRIGGER IF NOT EXISTS document_chunks_au AFTER UPDATE ON document_chunks BEGIN
+        INSERT INTO document_chunks_fts(document_chunks_fts, rowid, content) VALUES('delete', old.rowid, old.content);
+        INSERT INTO document_chunks_fts(rowid, content) VALUES (new.rowid, new.content);
+      END
+    `);
+  } catch (_e) {
+    // Triggers already exist — ignore
+  }
+
+  // FTS5 sync triggers for agent_memories
+  try {
+    db.exec(`
+      CREATE TRIGGER IF NOT EXISTS agent_memories_ai AFTER INSERT ON agent_memories BEGIN
+        INSERT INTO agent_memories_fts(rowid, content) VALUES (new.rowid, new.content);
+      END
+    `);
+    db.exec(`
+      CREATE TRIGGER IF NOT EXISTS agent_memories_ad AFTER DELETE ON agent_memories BEGIN
+        INSERT INTO agent_memories_fts(agent_memories_fts, rowid, content) VALUES('delete', old.rowid, old.content);
+      END
+    `);
+    db.exec(`
+      CREATE TRIGGER IF NOT EXISTS agent_memories_au AFTER UPDATE ON agent_memories BEGIN
+        INSERT INTO agent_memories_fts(agent_memories_fts, rowid, content) VALUES('delete', old.rowid, old.content);
+        INSERT INTO agent_memories_fts(rowid, content) VALUES (new.rowid, new.content);
+      END
+    `);
+  } catch (_e) {
+    // Triggers already exist — ignore
+  }
+
+  // Backfill FTS5 index from existing data (idempotent — only inserts missing rows)
+  try {
+    const ftsChunkCount = (db.prepare('SELECT COUNT(*) AS cnt FROM document_chunks_fts').get() as any)?.cnt || 0;
+    const chunkCount = (db.prepare('SELECT COUNT(*) AS cnt FROM document_chunks').get() as any)?.cnt || 0;
+    if (ftsChunkCount < chunkCount) {
+      db.exec('INSERT INTO document_chunks_fts(document_chunks_fts) VALUES(\'rebuild\')');
+    }
+  } catch (_e) { /* ignore */ }
+
+  try {
+    const ftsMemCount = (db.prepare('SELECT COUNT(*) AS cnt FROM agent_memories_fts').get() as any)?.cnt || 0;
+    const memCount = (db.prepare('SELECT COUNT(*) AS cnt FROM agent_memories').get() as any)?.cnt || 0;
+    if (ftsMemCount < memCount) {
+      db.exec('INSERT INTO agent_memories_fts(agent_memories_fts) VALUES(\'rebuild\')');
+    }
+  } catch (_e) { /* ignore */ }
+
   // Add document_type column to documents
   try {
     db.exec("ALTER TABLE documents ADD COLUMN document_type TEXT;");
