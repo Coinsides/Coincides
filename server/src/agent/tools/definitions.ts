@@ -200,7 +200,7 @@ export const toolDefinitions: ToolDefinition[] = [
   },
   {
     name: 'search_memories',
-    description: 'Search long-term memories about the student for relevant context.',
+    description: 'Search long-term memories about the student using semantic similarity. Finds memories related to the query even without exact keyword matches. Results include similarity scores when semantic search is available.',
     parameters: {
       type: 'object',
       properties: {
@@ -224,11 +224,11 @@ export const toolDefinitions: ToolDefinition[] = [
   },
   {
     name: 'search_documents',
-    description: 'Search uploaded documents by filename, summary text, or content. Returns matching documents with their IDs, filenames, summaries, and course info. Use this to find relevant course materials before reading their content.',
+    description: 'Search uploaded documents using semantic similarity and keyword matching. Returns matching documents with relevant content snippets from the most similar passages. For simple questions, the snippets may contain enough context to answer directly without calling get_document_content.',
     parameters: {
       type: 'object',
       properties: {
-        query: { type: 'string', description: 'Search keyword(s) to match against filename, summary, and extracted text' },
+        query: { type: 'string', description: 'Natural language search query. Semantic search finds related content even without exact keyword matches.' },
         course_id: { type: 'string', description: 'Optional: filter by course ID' },
         file_type: { type: 'string', enum: ['pdf', 'docx', 'xlsx', 'image', 'txt', 'md'], description: 'Optional: filter by file type' },
       },

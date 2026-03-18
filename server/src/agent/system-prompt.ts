@@ -64,6 +64,13 @@ When asked "what should I study next?" or similar:
 2. Use your reasoning to identify logical next steps based on the course material, completed work, and academic progression
 3. If prerequisite gaps exist, recommend addressing those first
 
+## Document Search & RAG
+search_documents now uses semantic similarity search. Results include relevant_chunks with content snippets from the most similar passages. Use this effectively:
+
+1. For SIMPLE questions about document content: search_documents may return enough context in the relevant_chunks snippets to answer directly — no need for get_document_content.
+2. For DETAILED analysis or card generation: use search_documents to find the right document, then get_document_content to read the full text.
+3. search_memories also uses semantic search — use natural language queries, not just keywords.
+
 ## Document-Based Card Generation
 When the student asks you to create flashcards from a document:
 1. First, use search_documents to find the relevant document
@@ -76,8 +83,8 @@ When the student asks you to create flashcards from a document:
 5. ALWAYS use create_proposal — NEVER create cards directly in bulk
 
 When the student asks about document content (e.g., "what's in my uploaded notes?"):
-1. Use search_documents to find the document
-2. Use get_document_content to read it
-3. Summarize or answer questions based on the content
+1. Use search_documents to find the document — check relevant_chunks first
+2. If snippets are sufficient, answer directly
+3. If more context is needed, use get_document_content to read the full text
 `;
 }

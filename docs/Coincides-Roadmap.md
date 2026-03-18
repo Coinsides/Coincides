@@ -107,7 +107,7 @@
 
 ## Round 4：记忆系统（向量搜索 + RAG）
 
-> 状态：Step 1 ✅ 完成 | Step 2 进行中
+> 状态：Step 1 ✅ 完成 | Step 2 ✅ 完成 | Step 3 待开始
 
 ### Step 1：sqlite-vec 向量存储 + Voyage AI Embedding 管线 ✅
 - [x] 集成 sqlite-vec v0.1.7（npm 安装，与 better-sqlite3 无缝集成）
@@ -120,11 +120,14 @@
 - [x] 环境变量后备 + 用户 Settings 优先的双层配置策略
 - 完成：2026-03-18
 
-### Step 2：语义搜索 + Agent RAG（下一步）
-- [ ] Agent `search_documents` 工具升级为语义搜索
-- [ ] 用户问题 → Embedding → sqlite-vec KNN → Top-K 相关 chunks
-- [ ] 将相关 chunks 注入 Agent 上下文（RAG pipeline）
-- [ ] Agent `search_memories` 语义搜索记忆
+### Step 2：语义搜索 + Agent RAG ✅
+- [x] `search_documents` 升级为语义 + 关键词混合搜索
+- [x] query → Voyage AI embedding → sqlite-vec KNN → Top-10 chunks
+- [x] 返回 `relevant_chunks` 内容片段（RAG 上下文注入）
+- [x] `search_memories` 升级为语义搜索，含 similarity_score
+- [x] 优雅降级：无 provider / API 失败时自动回退 LIKE
+- [x] System Prompt 新增 RAG 使用指导
+- 完成：2026-03-18
 
 ### Step 3：混合搜索 + 打磨
 - [ ] SQLite FTS5 全文搜索 + sqlite-vec 语义搜索

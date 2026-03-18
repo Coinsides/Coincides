@@ -4,6 +4,46 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Round 4 Step 2] — 2026-03-18
+
+### 语义搜索 + Agent RAG
+
+#### 混合搜索引擎
+- `search_documents` 升级：语义向量搜索 + 关键词 LIKE 双路融合
+- 语义搜索流程：query → Voyage AI embedding → sqlite-vec KNN → Top-10 chunks
+- 关键词搜索作为 baseline 始终运行，结果去重合并
+- 语义结果优先排序（按相似度降序），关键词结果补充
+- 距离阈值：仅返回 distance < 0.8 的语义结果
+
+#### RAG 上下文注入
+- search_documents 现返回 `relevant_chunks` 数组（每个 chunk 前 500 字符 + 相似度分数）
+- Agent 可直接从搜索结果中获取相关段落，无需额外调用 get_document_content
+- 简单问题可一步到位，复杂分析仍可读取完整文档
+
+#### search_memories 语义升级
+- 记忆搜索也升级为语义 + 关键词混合搜索
+- 返回结果包含 `similarity_score`（语义结果）
+- 自然语言查询可找到相关记忆，不需要精确关键词
+
+#### 优雅降级
+- 无 embedding provider 时自动回退到原始 LIKE 搜索
+- API 调用失败（如频率限制）时也自动回退
+- 零功能回退，无配置时体验与之前完全一致
+
+#### VectorStore 增强
+- 新增 `searchChunksWithContent()` — 一次查询返回 chunk 内容 + 文档信息 + 距离分数
+- 新增 `searchMemoriesWithContent()` — 一次查询返回记忆内容 + 分类 + 距离分数
+- 新增 `ChunkSearchResult` / `MemorySearchResult` 接口类型
+
+#### System Prompt
+- 新增 RAG 使用指导：简单问题直接用 snippet，复杂分析再读全文
+- 更新工具描述：说明语义搜索能力
+
+#### Files
+- 修改 4 文件：vectorStore.ts, executor.ts, definitions.ts, system-prompt.ts
+
+---
+
 ## [Round 4 Step 1] — 2026-03-18
 
 ### sqlite-vec 向量存储 + Voyage AI Embedding 管线
