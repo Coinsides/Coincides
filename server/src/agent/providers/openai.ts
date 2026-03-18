@@ -25,7 +25,7 @@ export class OpenAIProvider implements AIProvider {
       if (m.tool_calls && m.tool_calls.length > 0) {
         openaiMessages.push({
           role: 'assistant',
-          content: m.content || null,
+          content: (typeof m.content === 'string' ? m.content : null) || null,
           tool_calls: m.tool_calls.map((tc) => ({
             id: tc.id,
             type: 'function',
@@ -40,6 +40,18 @@ export class OpenAIProvider implements AIProvider {
             content: tr.content,
           });
         }
+      } else if (Array.isArray(m.content)) {
+        // Map content blocks to OpenAI format
+        const parts = m.content.map((block) => {
+          if (block.type === 'image') {
+            return {
+              type: 'image_url',
+              image_url: { url: `data:${block.source.media_type};base64,${block.source.data}` },
+            };
+          }
+          return { type: 'text', text: block.text };
+        });
+        openaiMessages.push({ role: m.role, content: parts });
       } else {
         openaiMessages.push({ role: m.role, content: m.content });
       }

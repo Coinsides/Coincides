@@ -101,7 +101,7 @@ function renderInline(text: string): React.ReactNode[] {
 }
 
 interface MessageBubbleProps {
-  message: AgentMessage;
+  message: AgentMessage & { image_preview?: string };
 }
 
 export default function MessageBubble({ message }: MessageBubbleProps) {
@@ -109,6 +109,9 @@ export default function MessageBubble({ message }: MessageBubbleProps) {
 
   return (
     <div className={`${styles.bubble} ${isUser ? styles.user : styles.assistant}`}>
+      {message.image_preview && (
+        <img src={message.image_preview} alt="Uploaded" className={styles.messageImage} />
+      )}
       {isUser ? (
         <div className={styles.content}>{message.content}</div>
       ) : (

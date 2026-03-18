@@ -4,6 +4,37 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Round 3 Step 5] — 2026-03-18
+
+### Review Groups + Agent 图片上传
+
+#### Review Mode 选择器
+- Review 页面新增模式选择界面，4 种复习模式：
+  - **All Due Cards**：默认模式，复习所有到期卡片
+  - **By Deck**：按 Deck 筛选，选择特定 Deck 进行复习
+  - **By Section**：按 Section 筛选，专注于特定章节
+  - **By Tag**：按 Tag 筛选，按知识类型复习
+- 2×2 卡片式 UI，每个模式带独立图标（Layers/BookOpen/FolderOpen/Tag）
+- 选择模式后动态加载对应的筛选选项
+- 后端 Review API 扩展：支持 `deck_id`、`section_id`、`tag_id` 查询参数
+- `reviewStore` 新增 `reviewMode` + `reviewFilter` 状态管理
+
+#### Agent 图片上传（Vision API）
+- Agent 聊天输入区新增图片上传按钮（ImagePlus 图标）
+- 支持 `image/*` 类型文件，前端转 base64 编码
+- 上传后显示图片预览缩略图，可取消
+- 后端 Agent route 扩展：消息体支持 `image` 字段（base64 + media_type）
+- Anthropic provider：构建 `image` content block，调用 Claude Vision API
+- OpenAI provider：构建 `image_url` content block（data URI 格式）
+- Agent 可基于图片内容生成卡片、回答问题
+
+#### Files
+- 修改 15 个文件
+- Backend (7): review.ts, agent.ts, validators/index.ts, orchestrator.ts, providers/types.ts, anthropic.ts, openai.ts
+- Frontend (8): Review.tsx, Review.module.css, reviewStore.ts, AgentPanel.tsx, AgentPanel.module.css, agentStore.ts, MessageBubble.tsx, MessageBubble.module.css
+
+---
+
 ## [Round 3 Step 3+4 Patch] — 2026-03-18
 
 ### 部署黑屏修复 + 全局 UI 放大

@@ -100,6 +100,7 @@ router.post('/conversations/:id/messages', async (req: AuthRequest, res: Respons
         conversationId,
         data.message,
         data.context_hint,
+        data.image,
       )) {
         if (res.writableEnded) break;
         if (chunk.type === 'text' && chunk.text) {

@@ -104,6 +104,16 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Message image */
+.messageImage {
+  max-width: 200px;
+  max-height: 150px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  margin-bottom: 8px;
+}
+
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.6; }

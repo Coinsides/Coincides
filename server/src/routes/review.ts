@@ -28,15 +28,43 @@ function parseCardContent(card: any) {
 router.get('/due', (req: AuthRequest, res: Response) => {
   const db = getDb();
   const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
+  const deckId = req.query.deckId as string | undefined;
+  const sectionId = req.query.sectionId as string | undefined;
+  const tagId = req.query.tagId as string | undefined;
 
-  // Cards due: fsrs_next_review <= date OR new cards (fsrs_reps == 0)
-  const cards = db.prepare(
-    `SELECT c.*, cd.name as deck_name, cd.course_id
+  // Build dynamic query with optional filters
+  let sql = `SELECT c.*, cd.name as deck_name, cd.course_id
      FROM cards c
-     INNER JOIN card_decks cd ON cd.id = c.deck_id
-     WHERE c.user_id = ? AND (c.fsrs_next_review <= ? OR c.fsrs_reps = 0)
-     ORDER BY c.fsrs_reps ASC, c.fsrs_next_review ASC`
-  ).all(req.userId!, date + 'T23:59:59') as any[];
+     INNER JOIN card_decks cd ON cd.id = c.deck_id`;
+  const params: unknown[] = [];
+
+  if (tagId) {
+    sql += ` INNER JOIN card_tags ct ON ct.card_id = c.id`;
+  }
+
+  sql += ` WHERE c.user_id = ? AND (c.fsrs_next_review <= ? OR c.fsrs_reps = 0)`;
+  params.push(req.userId!, date + 'T23:59:59');
+
+  if (deckId) {
+    sql += ` AND c.deck_id = ?`;
+    params.push(deckId);
+  }
+  if (sectionId) {
+    sql += ` AND c.section_id = ?`;
+    params.push(sectionId);
+  }
+  if (tagId) {
+    sql += ` AND ct.tag_id = ?`;
+    params.push(tagId);
+  }
+
+  if (tagId) {
+    sql += ` GROUP BY c.id`;
+  }
+
+  sql += ` ORDER BY c.fsrs_reps ASC, c.fsrs_next_review ASC`;
+
+  const cards = db.prepare(sql).all(...params) as any[];
 
   const result = cards.map(card => {
     parseCardContent(card);

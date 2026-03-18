@@ -16,7 +16,7 @@ interface AgentState {
   selectConversation: (id: string) => Promise<void>;
   fetchMessages: (conversationId: string) => Promise<void>;
   deleteConversation: (id: string) => Promise<void>;
-  sendMessage: (message: string, contextHint?: { type: string; data?: unknown }) => Promise<void>;
+  sendMessage: (message: string, contextHint?: { type: string; data?: unknown }, image?: { media_type: string; data: string }) => Promise<void>;
 }
 
 function parseSSEEvents(text: string): Array<{ event: string; data: string }> {
@@ -90,7 +90,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     });
   },
 
-  sendMessage: async (message, contextHint?) => {
+  sendMessage: async (message, contextHint?, image?) => {
     let convId = get().activeConversationId;
 
     // Auto-create conversation if none active
@@ -100,7 +100,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
     }
 
     // Add user message to local state immediately
-    const userMsg: AgentMessage = {
+    const userMsg: AgentMessage & { image_preview?: string } = {
       id: `temp-${Date.now()}`,
       conversation_id: convId,
       role: 'user' as AgentMessage['role'],
@@ -109,6 +109,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
       tool_results: null,
       token_count: null,
       created_at: new Date().toISOString(),
+      ...(image ? { image_preview: `data:${image.media_type};base64,${image.data}` } : {}),
     };
     set({ messages: [...get().messages, userMsg], streaming: true, streamingText: '', activeToolName: null });
 
@@ -120,7 +121,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ message, context_hint: contextHint }),
+        body: JSON.stringify({ message, context_hint: contextHint, ...(image ? { image } : {}) }),
       });
 
       if (!res.ok) {

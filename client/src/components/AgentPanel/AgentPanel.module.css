@@ -356,6 +356,53 @@
   cursor: not-allowed;
 }
 
+/* Image upload */
+.imageUploadBtn {
+  padding: 10px;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.imageUploadBtn:hover {
+  background: var(--glass-hover);
+  color: var(--text-secondary);
+}
+
+.imagePreview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 19px;
+  border-top: 1px solid var(--glass-border);
+  flex-shrink: 0;
+}
+
+.imagePreviewImg {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+}
+
+.imagePreviewRemove {
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+}
+
+.imagePreviewRemove:hover {
+  background: var(--glass-hover);
+  color: var(--error);
+}
+
 /* Proposals view */
 .proposalView {
   flex: 1;

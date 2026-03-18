@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { X, Plus, Send, ChevronDown, ClipboardList, MessageSquare, Trash2 } from 'lucide-react';
+import { X, Plus, Send, ChevronDown, ClipboardList, MessageSquare, Trash2, ImagePlus } from 'lucide-react';
 import { useAgentStore } from '@/stores/agentStore';
 import { useProposalStore } from '@/stores/proposalStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -36,8 +36,10 @@ export default function AgentPanel() {
   const [input, setInput] = useState('');
   const [view, setView] = useState<PanelView>('chat');
   const [showConvDropdown, setShowConvDropdown] = useState(false);
+  const [pendingImage, setPendingImage] = useState<{ media_type: string; data: string; preview: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const agentName = user?.settings?.agent_name || 'Mr. Zero';
 
@@ -62,16 +64,33 @@ export default function AgentPanel() {
     }
   }, [agentContextHint, agentPanelOpen]);
 
+  const handleImageSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const base64 = result.split(',')[1];
+      const media_type = file.type || 'image/jpeg';
+      setPendingImage({ media_type, data: base64, preview: result });
+    };
+    reader.readAsDataURL(file);
+    // Reset file input so same file can be selected again
+    e.target.value = '';
+  }, []);
+
   const handleSend = useCallback(async () => {
     const text = input.trim();
     if (!text || streaming) return;
 
     setInput('');
+    const imageData = pendingImage ? { media_type: pendingImage.media_type, data: pendingImage.data } : undefined;
+    setPendingImage(null);
     const contextHint = agentContextHint || undefined;
     // Clear context hint after sending
     useUIStore.setState({ agentContextHint: null });
-    await sendMessage(text, contextHint);
-  }, [input, streaming, agentContextHint, sendMessage]);
+    await sendMessage(text, contextHint, imageData);
+  }, [input, streaming, agentContextHint, pendingImage, sendMessage]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -213,8 +232,28 @@ export default function AgentPanel() {
               </div>
             )}
 
+            {/* Image preview */}
+            {pendingImage && (
+              <div className={styles.imagePreview}>
+                <img src={pendingImage.preview} alt="Upload preview" className={styles.imagePreviewImg} />
+                <button className={styles.imagePreviewRemove} onClick={() => setPendingImage(null)}>
+                  <X size={12} />
+                </button>
+              </div>
+            )}
+
             {/* Input */}
             <div className={styles.inputArea}>
+              <label className={styles.imageUploadBtn} title="Upload image">
+                <ImagePlus size={18} />
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={handleImageSelect}
+                />
+              </label>
               <textarea
                 ref={inputRef}
                 className={styles.input}

@@ -1,6 +1,6 @@
 import { getDb } from '../db/init.js';
 import { getProviderFromSettings } from './providers/index.js';
-import type { ProviderMessage, StreamChunk, ToolCall, ToolResult } from './providers/types.js';
+import type { ProviderMessage, StreamChunk, ToolCall, ToolResult, ContentBlock } from './providers/types.js';
 import { toolDefinitions } from './tools/definitions.js';
 import { executeTool } from './tools/executor.js';
 import { MemoryManager } from './memory/manager.js';
@@ -29,6 +29,7 @@ export async function* runAgent(
   conversationId: string,
   userMessage: string,
   contextHint?: { type: string; data?: unknown },
+  image?: { media_type: string; data: string },
 ): AsyncGenerator<StreamChunk> {
   const db = getDb();
   const memory = new MemoryManager(userId);
@@ -91,9 +92,17 @@ export async function* runAgent(
   memory.saveMessage(conversationId, 'user', augmentedMessage);
 
   // 7. Build messages array
+  let userContent: string | ContentBlock[] = augmentedMessage;
+  if (image) {
+    userContent = [
+      { type: 'text', text: augmentedMessage },
+      { type: 'image', source: { type: 'base64', media_type: image.media_type, data: image.data } },
+    ];
+  }
+
   const messages: ProviderMessage[] = [
     ...history,
-    { role: 'user', content: augmentedMessage },
+    { role: 'user', content: userContent },
   ];
 
   // 8. Agent loop (handle tool calls)

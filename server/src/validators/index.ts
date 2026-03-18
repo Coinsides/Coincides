@@ -228,6 +228,10 @@ export const sendMessageSchema = z.object({
     type: z.string(),
     data: z.any(),
   }).optional(),
+  image: z.object({
+    media_type: z.string(),
+    data: z.string(),
+  }).optional(),
 });
 
 export const createConversationSchema = z.object({

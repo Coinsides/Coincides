@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, RotateCcw } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, RotateCcw, Layers, BookOpen, FolderOpen, Tag } from 'lucide-react';
 import { useReviewStore } from '@/stores/reviewStore';
+import type { ReviewFilters } from '@/stores/reviewStore';
+import { useDeckStore } from '@/stores/deckStore';
+import { useTagStore } from '@/stores/tagStore';
+import { useSectionStore } from '@/stores/sectionStore';
 import { useUIStore } from '@/stores/uiStore';
 import CardFlip from '@/components/CardFlip/CardFlip';
 import styles from './Review.module.css';
@@ -13,26 +17,80 @@ const ratingConfig = [
   { value: 4, label: 'Easy', color: '#3b82f6' },
 ];
 
+type ReviewMode = 'all' | 'deck' | 'section' | 'tag';
+
 export default function ReviewPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const {
     dueCards, currentIndex, sessionActive, sessionResults,
     loading, fetchDueCards, rateCard, startSession, nextCard, endSession,
   } = useReviewStore();
   const addToast = useUIStore((s) => s.addToast);
 
+  const decks = useDeckStore((s) => s.decks);
+  const fetchDecks = useDeckStore((s) => s.fetchDecks);
+  const tags = useTagStore((s) => s.tags);
+  const fetchTags = useTagStore((s) => s.fetchTags);
+  const sections = useSectionStore((s) => s.sections);
+  const fetchSections = useSectionStore((s) => s.fetchSections);
+
   const [flipped, setFlipped] = useState(false);
   const [rating, setRating] = useState(false);
+  const [showSelector, setShowSelector] = useState(true);
+  const [selectedMode, setSelectedMode] = useState<ReviewMode>('all');
+  const [selectedDeckId, setSelectedDeckId] = useState<string>('');
+  const [selectedSectionId, setSelectedSectionId] = useState<string>('');
+  const [selectedTagId, setSelectedTagId] = useState<string>('');
 
+  // Check for URL params (quick-entry from DeckDetail)
   useEffect(() => {
-    if (dueCards.length > 0) {
-      startSession();
-    } else {
-      fetchDueCards().then(() => {
+    const deckId = searchParams.get('deckId');
+    const sectionId = searchParams.get('sectionId');
+    const tagId = searchParams.get('tagId');
+
+    if (deckId || sectionId || tagId) {
+      const filters: ReviewFilters = {};
+      if (deckId) filters.deckId = deckId;
+      if (sectionId) filters.sectionId = sectionId;
+      if (tagId) filters.tagId = tagId;
+      setShowSelector(false);
+      fetchDueCards(filters).then(() => {
         startSession();
       });
+    } else {
+      // Load data for selector dropdowns
+      fetchDecks();
+      fetchTags();
     }
   }, []);
+
+  // When deck changes, load its sections
+  useEffect(() => {
+    if (selectedDeckId) {
+      fetchSections(selectedDeckId);
+    }
+  }, [selectedDeckId]);
+
+  const handleStartReview = () => {
+    const filters: ReviewFilters = {};
+    if (selectedMode === 'deck' && selectedDeckId) {
+      filters.deckId = selectedDeckId;
+    } else if (selectedMode === 'section' && selectedSectionId) {
+      filters.sectionId = selectedSectionId;
+    } else if (selectedMode === 'tag' && selectedTagId) {
+      filters.tagId = selectedTagId;
+    }
+    setShowSelector(false);
+    fetchDueCards(Object.keys(filters).length > 0 ? filters : undefined).then(() => {
+      startSession();
+    });
+  };
+
+  const canStart = selectedMode === 'all'
+    || (selectedMode === 'deck' && selectedDeckId)
+    || (selectedMode === 'section' && selectedSectionId)
+    || (selectedMode === 'tag' && selectedTagId);
 
   const currentCard = dueCards[currentIndex];
   const isFinished = sessionActive && currentIndex >= dueCards.length;
@@ -61,6 +119,125 @@ export default function ReviewPage() {
     endSession();
     navigate('/decks');
   };
+
+  // Mode Selector
+  if (showSelector) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.modeSelector}>
+          <h2 className={styles.modeSelectorTitle}>Review Mode</h2>
+          <p className={styles.modeSelectorSubtitle}>Choose which cards to review</p>
+
+          <div className={styles.modeGrid}>
+            <button
+              className={`${styles.modeCard} ${selectedMode === 'all' ? styles.modeCardActive : ''}`}
+              onClick={() => setSelectedMode('all')}
+            >
+              <Layers size={22} />
+              <span>All Due Cards</span>
+            </button>
+            <button
+              className={`${styles.modeCard} ${selectedMode === 'deck' ? styles.modeCardActive : ''}`}
+              onClick={() => setSelectedMode('deck')}
+            >
+              <BookOpen size={22} />
+              <span>By Deck</span>
+            </button>
+            <button
+              className={`${styles.modeCard} ${selectedMode === 'section' ? styles.modeCardActive : ''}`}
+              onClick={() => setSelectedMode('section')}
+            >
+              <FolderOpen size={22} />
+              <span>By Section</span>
+            </button>
+            <button
+              className={`${styles.modeCard} ${selectedMode === 'tag' ? styles.modeCardActive : ''}`}
+              onClick={() => setSelectedMode('tag')}
+            >
+              <Tag size={22} />
+              <span>By Tag</span>
+            </button>
+          </div>
+
+          {selectedMode === 'deck' && (
+            <div className={styles.filterDropdown}>
+              <label className={styles.filterLabel}>Select a deck</label>
+              <select
+                className={styles.filterSelect}
+                value={selectedDeckId}
+                onChange={(e) => setSelectedDeckId(e.target.value)}
+              >
+                <option value="">Choose deck...</option>
+                {decks.map((d) => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {selectedMode === 'section' && (
+            <div className={styles.filterDropdown}>
+              <label className={styles.filterLabel}>Select a deck first</label>
+              <select
+                className={styles.filterSelect}
+                value={selectedDeckId}
+                onChange={(e) => { setSelectedDeckId(e.target.value); setSelectedSectionId(''); }}
+              >
+                <option value="">Choose deck...</option>
+                {decks.map((d) => (
+                  <option key={d.id} value={d.id}>{d.name}</option>
+                ))}
+              </select>
+              {selectedDeckId && (
+                <>
+                  <label className={styles.filterLabel}>Select a section</label>
+                  <select
+                    className={styles.filterSelect}
+                    value={selectedSectionId}
+                    onChange={(e) => setSelectedSectionId(e.target.value)}
+                  >
+                    <option value="">Choose section...</option>
+                    {sections.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                </>
+              )}
+            </div>
+          )}
+
+          {selectedMode === 'tag' && (
+            <div className={styles.filterDropdown}>
+              <label className={styles.filterLabel}>Select a tag</label>
+              <select
+                className={styles.filterSelect}
+                value={selectedTagId}
+                onChange={(e) => setSelectedTagId(e.target.value)}
+              >
+                <option value="">Choose tag...</option>
+                {tags.map((t) => (
+                  <option key={t.id} value={t.id}>{t.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          <div className={styles.modeSelectorActions}>
+            <button className={styles.backBtn} onClick={() => navigate('/decks')}>
+              Back
+            </button>
+            <button
+              className={styles.startBtn}
+              onClick={handleStartReview}
+              disabled={!canStart}
+            >
+              Start Review
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading && dueCards.length === 0) {
     return (

@@ -1,6 +1,22 @@
+export interface ImageContentBlock {
+  type: 'image';
+  source: {
+    type: 'base64';
+    media_type: string;
+    data: string;
+  };
+}
+
+export interface TextContentBlock {
+  type: 'text';
+  text: string;
+}
+
+export type ContentBlock = TextContentBlock | ImageContentBlock;
+
 export interface ProviderMessage {
   role: 'user' | 'assistant' | 'system';
-  content: string;
+  content: string | ContentBlock[];
   tool_calls?: ToolCall[];
   tool_results?: ToolResult[];
 }

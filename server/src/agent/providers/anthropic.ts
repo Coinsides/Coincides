@@ -20,7 +20,7 @@ export class AnthropicProvider implements AIProvider {
       if (m.tool_calls && m.tool_calls.length > 0) {
         // Assistant message with tool use
         const content: Anthropic.ContentBlockParam[] = [];
-        if (m.content) {
+        if (m.content && typeof m.content === 'string') {
           content.push({ type: 'text', text: m.content });
         }
         for (const tc of m.tool_calls) {
@@ -42,6 +42,24 @@ export class AnthropicProvider implements AIProvider {
           content: tr.content,
         }));
         return { role: 'user' as const, content };
+      }
+
+      // Handle content blocks (e.g. image + text)
+      if (Array.isArray(m.content)) {
+        const content: Anthropic.ContentBlockParam[] = m.content.map((block) => {
+          if (block.type === 'image') {
+            return {
+              type: 'image' as const,
+              source: {
+                type: 'base64' as const,
+                media_type: block.source.media_type as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp',
+                data: block.source.data,
+              },
+            };
+          }
+          return { type: 'text' as const, text: block.text };
+        });
+        return { role: m.role === 'assistant' ? 'assistant' as const : 'user' as const, content };
       }
 
       return { role: m.role === 'assistant' ? 'assistant' as const : 'user' as const, content: m.content };
