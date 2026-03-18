@@ -44,3 +44,100 @@
 - Migration 文件使用 TypeScript + ESM dynamic import，与项目技术栈一致
 - 选择文件系统 migration（非 SQL-only）以支持复杂 migration 逻辑（如数据回填）
 - `001_baseline` 不改变实际 schema，仅标记基线，确保升级路径安全
+
+---
+
+## Step 2：Task 数据模型升级（M-1）
+
+**日期**：2026-03-18
+
+### 新增
+
+- `server/src/db/migrations/002_task_upgrade.ts` — Task 字段升级 Migration
+  - 新增 4 列：`start_time`、`end_time`、`description`、`checklist`
+  - 全部 nullable，不影响已有数据
+  - `checklist` 以 JSON 字符串存储：`[{text, done}]`
+
+- `shared/types/index.ts` — 新增 `ChecklistItem` 接口
+
+### 修改
+
+- `shared/types/index.ts` — `Task`、`CreateTaskRequest`、`UpdateTaskRequest` 新增字段
+- `server/src/validators/index.ts` — `createTaskSchema`、`updateTaskSchema` 新增字段验证
+- `server/src/routes/tasks.ts`
+  - POST / PUT 支持 `start_time`、`end_time`、`description`、`checklist`
+  - 新增 `parseTask()` 辅助函数：读取时将 checklist JSON 字符串解析为对象
+  - GET / POST / PUT 所有返回值经过 `parseTask()` 处理
+- `client/src/components/TaskModal/TaskModal.tsx`
+  - 新增时间范围输入（`datetime-local` × 2）
+  - 新增描述文本框
+  - 新增 checklist 动态列表（添加/删除/勾选）
+- `client/src/components/TaskModal/TaskModal.module.css` — 新增时间范围、描述、checklist 样式
+
+### 技术决策
+
+- `priority` 列已在 schema.sql 中存在，Migration 不重复添加
+- checklist 使用 JSON 字符串而非关系表，简化 CRUD，适合小规模子项
+
+---
+
+## Step 3：Goal 嵌套支持（M-2 + G-1）
+
+**日期**：2026-03-18
+
+### 新增
+
+- `server/src/db/migrations/003_goal_nesting.ts` — Goal 嵌套 Migration
+  - goals 表新增 `parent_id TEXT REFERENCES goals(id) ON DELETE CASCADE`
+
+- `server/src/routes/goals.ts` — 两个新端点
+  - `GET /api/goals/:id/children` — 获取子目标列表
+  - `POST /api/goals/:id/tasks` — 向已有 Goal 添加任务（**修复 G-1**）
+
+### 修改
+
+- `shared/types/index.ts` — `Goal`、`CreateGoalRequest`、`UpdateGoalRequest` 新增 `parent_id`
+- `server/src/validators/index.ts` — create/update goal schema 新增 `parent_id` 验证
+- `server/src/routes/goals.ts`
+  - GET 支持 `?parent_id=null`（顶级）/ `?parent_id=xxx`（子级）过滤
+  - POST 支持 `parent_id`，自动继承父目标的 `course_id`
+  - PUT 支持修改 `parent_id`
+- `client/src/stores/goalStore.ts` — 新增 `addTaskToGoal` 方法
+- `client/src/components/GoalModal/GoalModal.tsx` — 支持创建子目标（接收 `parent_id`）
+- `client/src/pages/Goals/Goals.tsx`
+  - `buildHierarchy()` 构建层级结构
+  - 子目标缩进展示（20px + 左边框）
+  - 每个 Goal 卡片新增「+ Task」和「+ Sub-goal」按钮
+  - 子目标数量指示器
+
+### UX 痛点修复
+
+- **G-1 修复**：用户现在可以随时向已有 Goal 添加新任务
+
+---
+
+## Step 4：日历 CRUD 补全（C-1 + C-2 + G-2）
+
+**日期**：2026-03-18
+
+### 修改
+
+- `client/src/pages/Calendar/Calendar.tsx`
+  - **周视图时间块**：有 `start_time`/`end_time` 的 Task 按时间位置渲染为色块
+  - **右键菜单**：桌面端右键弹出「编辑/删除」菜单（**修复 C-1、C-2**）
+  - **点击编辑**：日详情面板中点击任务标题打开编辑弹窗
+  - **任务元信息**：显示时间范围、描述预览、checklist 完成进度
+  - 无时间范围的旧任务仍作为全天事件正常显示
+
+- `client/src/pages/DailyBrief/DailyBrief.tsx`
+  - **优先级分层展示**（**修复 G-2**）：Must Do / Recommended / Optional 三个独立区块
+  - 每个区块有彩色左边框标识
+  - 任务卡片显示时间范围、描述摘要、checklist 进度
+
+- CSS 更新：`Calendar.module.css`、`DailyBrief.module.css` 新增对应样式
+
+### UX 痛点修复
+
+- **C-1 修复**：右键菜单支持删除日历事件
+- **C-2 修复**：右键菜单支持编辑日历事件，点击标题也可编辑
+- **G-2 修复**：DailyBrief 按 Must / Recommended / Optional 三级优先级分层展示
