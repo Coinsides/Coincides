@@ -10,7 +10,7 @@ import { getDb } from '../db/init.js';
 import { getEmbeddingProvider } from '../embedding/index.js';
 import { VectorStore } from '../embedding/vectorStore.js';
 
-const CLAUDE_MODEL = 'claude-haiku-4-20250414';
+const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
 const CHUNK_SIZE = 5000;
 const MAX_TEXT_BEFORE_CHUNKING = 30000;
 const PDF_BATCH_SIZE = 50;
