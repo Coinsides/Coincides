@@ -141,3 +141,87 @@
 - **C-1 修复**：右键菜单支持删除日历事件
 - **C-2 修复**：右键菜单支持编辑日历事件，点击标题也可编辑
 - **G-2 修复**：DailyBrief 按 Must / Recommended / Optional 三级优先级分层展示
+
+---
+
+## Step 5：跨 Deck 复习会话（R-1）
+
+**日期**：2026-03-18
+
+### 新增
+
+- `server/src/routes/review.ts` — 两个新端点
+  - `GET /api/review/browse` — 返回 deck→section→card 树状结构，包含 FSRS 状态
+  - `POST /api/review/custom` — 接收任意 `card_ids` 数组，启动自定义复习会话
+
+- `client/src/stores/reviewStore.ts`
+  - 新增 `BrowseTree`、`BrowseSection`、`BrowseCard` 接口
+  - 新增 `browseTree` 状态、`fetchBrowseTree()`、`startCustomSession()`
+
+- `client/src/pages/Review/Review.tsx`
+  - 新增「Custom Selection」复习模式（第 5 个模式按钮）
+  - 可折叠的 Deck→Section→Card 树状选择器
+  - Deck/Section 级别全选复选框（带 indeterminate 状态）
+  - 每张卡片旁显示 due 状态指示灯（绿色 = 到期/新卡）
+  - Start 按钮动态显示已选卡片数：`Start Review (N cards)`
+
+- `client/src/pages/Review/Review.module.css` — browse tree 样式
+
+### 技术决策
+
+- browse API 返回完整树而非分层请求，减少网络往返
+- 自定义复习绕过 FSRS due 过滤，让用户完全自主选择
+
+---
+
+## Step 6：空 catch 块清理（T-1）
+
+**日期**：2026-03-18
+
+### 修改
+
+- **41 个文件**，消除所有空 `} catch {}` 块：
+  - 组件（TSX）：`console.error(context, err)` + `addToast('error', msg)`
+  - Store（TS）：仅 `console.error(context, err)`
+  - 服务端：`console.error(context, err)`
+  - KaTeX 渲染器：`console.warn` 降级提示
+  - Login/Register 页面补充 `useUIStore` 导入
+
+### 保留的合理空 catch
+
+- `JSON.parse()` 回退（`/* keep as string */`）
+- SSE 流解析（`/* ignore */`）
+- Migration `safeAlter()`（`/* column already exists */`）
+
+### 影响
+
+- 所有静默失败改为可观测错误
+- 用户侧 toast 提供明确的失败反馈
+
+---
+
+## Step 7：DeckDetail 组件拆分（T-2）
+
+**日期**：2026-03-18
+
+### 修改
+
+- `client/src/pages/Decks/DeckDetail.tsx`：907 行 → 270 行
+  - 仅保留状态管理、handler、组合子组件
+
+### 新增（子组件）
+
+- `components/DeckHeader.tsx`（107 行）— 页头：返回、deck 名、视图切换、操作按钮
+- `components/FilterBar.tsx`（78 行）— 搜索框、模板类型 pills、标签/重要度筛选
+- `components/CardGrid.tsx`（193 行）— Grid / List 视图卡片渲染
+- `components/SectionList.tsx`（280 行）— Section 头部、拖拽、搜索、展开/折叠
+- `components/BatchBar.tsx`（23 行）— 批量操作栏
+- `components/ConfirmDialog.tsx`（27 行）— 通用删除确认弹窗
+- `components/useDeckDragDrop.ts`（153 行）— 拖拽逻辑自定义 Hook
+- `components/types.ts`（33 行）— 共享常量 + `getContentPreview` 工具函数
+
+### 技术决策
+
+- CSS Modules 保持单文件（`DeckDetail.module.css`），子组件通过父路径导入
+- 拖拽逻辑提取为 Hook 而非组件，避免 prop drilling 过深
+- 所有文件 ≤ 300 行，最大文件 SectionList.tsx = 280 行
