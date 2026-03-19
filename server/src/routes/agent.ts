@@ -116,14 +116,20 @@ router.post('/conversations/:id/messages', async (req: AuthRequest, res: Respons
         }
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Agent error';
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred. Please try again.';
+      console.error('Agent SSE stream error:', err);
       if (!res.writableEnded) {
         res.write(`event: error\ndata: ${JSON.stringify({ message })}\n\n`);
+        res.write(`event: done\ndata: {}\n\n`);
       }
     }
 
     clearTimeout(requestTimer);
-    if (!res.writableEnded) res.end();
+    // Always ensure stream ends with done event
+    if (!res.writableEnded) {
+      res.write(`event: done\ndata: {}\n\n`);
+      res.end();
+    }
   } catch (err) {
     if (err instanceof ZodError) {
       res.status(400).json({ error: 'Validation error', details: err.errors });

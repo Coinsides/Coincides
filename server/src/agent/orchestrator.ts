@@ -184,7 +184,8 @@ export async function* runAgent(
         toolResults.push({ tool_call_id: tc.id, content: result });
       } catch (err: unknown) {
         const errMsg = err instanceof Error ? err.message : 'Tool execution error';
-        toolResults.push({ tool_call_id: tc.id, content: JSON.stringify({ error: errMsg }) });
+        console.error(`Tool execution failed [${tc.name}]:`, err);
+        toolResults.push({ tool_call_id: tc.id, content: JSON.stringify({ error: `Tool '${tc.name}' failed: ${errMsg}` }) });
       }
     }
 
