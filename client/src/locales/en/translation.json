@@ -83,6 +83,32 @@
     "embeddingProvider": "Embedding Provider",
     "saved": "Settings saved"
   },
+  "timeBlocks": {
+    "title": "Time Blocks",
+    "create": "Create Time Block",
+    "label": "Label",
+    "type": "Type",
+    "study": "Study",
+    "sleep": "Sleep",
+    "custom": "Custom",
+    "save": "Save",
+    "cancel": "Cancel",
+    "created": "Time block created",
+    "deleted": "Time block deleted",
+    "dragHint": "Drag to create a time block",
+    "overlapHint": "Time blocks overlap",
+    "shrinkWarning": "Study time reduced. Today's tasks may not fit. Reschedule?",
+    "reschedule": "Reschedule",
+    "ignore": "Ignore"
+  },
+  "dependencies": {
+    "prerequisite": "Prerequisite",
+    "setPrerequisite": "Set prerequisite",
+    "added": "Prerequisite added",
+    "removed": "Prerequisite removed",
+    "noAvailable": "No available goals",
+    "cycleError": "Cannot add: would create a circular dependency"
+  },
   "auth": {
     "login": "Log In",
     "register": "Sign Up",

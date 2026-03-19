@@ -83,6 +83,32 @@
     "embeddingProvider": "嵌入服务商",
     "saved": "设置已保存"
   },
+  "timeBlocks": {
+    "title": "时间块",
+    "create": "创建时间块",
+    "label": "标签",
+    "type": "类型",
+    "study": "学习",
+    "sleep": "睡觉",
+    "custom": "自定义",
+    "save": "保存",
+    "cancel": "取消",
+    "created": "时间块已创建",
+    "deleted": "时间块已删除",
+    "dragHint": "拖拽以创建时间块",
+    "overlapHint": "时间块重叠",
+    "shrinkWarning": "学习时间缩短了，今天的任务可能完不成。是否需要重新排期？",
+    "reschedule": "重新排期",
+    "ignore": "忽略"
+  },
+  "dependencies": {
+    "prerequisite": "前置目标",
+    "setPrerequisite": "设置前置目标",
+    "added": "前置目标已添加",
+    "removed": "前置目标已移除",
+    "noAvailable": "没有可选的目标",
+    "cycleError": "无法添加：会形成循环依赖"
+  },
   "auth": {
     "login": "登录",
     "register": "注册",

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import api from '@/services/api';
-import type { Goal, Task, CreateGoalRequest, UpdateGoalRequest, CreateTaskRequest } from '@shared/types';
+import type { Goal, Task, GoalDependency, CreateGoalRequest, UpdateGoalRequest, CreateTaskRequest } from '@shared/types';
 
 interface GoalProgress {
   goal_id: string;
@@ -21,6 +21,7 @@ interface GoalState {
   goals: Goal[];
   loading: boolean;
   progressMap: Record<string, GoalProgress>;
+  dependencyMap: Record<string, GoalDependency[]>;
   fetchGoals: (courseId?: string) => Promise<void>;
   createGoal: (data: CreateGoalRequest) => Promise<Goal>;
   updateGoal: (id: string, data: UpdateGoalRequest) => Promise<Goal>;
@@ -30,12 +31,17 @@ interface GoalState {
   reorderGoals: (items: ReorderItem[]) => Promise<void>;
   fetchProgress: (goalId: string) => Promise<GoalProgress>;
   fetchAllProgress: () => Promise<void>;
+  // Dependencies
+  fetchDependencies: (goalId: string) => Promise<GoalDependency[]>;
+  addDependency: (goalId: string, dependsOnGoalId: string) => Promise<GoalDependency>;
+  removeDependency: (goalId: string, depId: string) => Promise<void>;
 }
 
 export const useGoalStore = create<GoalState>((set, get) => ({
   goals: [],
   loading: false,
   progressMap: {},
+  dependencyMap: {},
 
   fetchGoals: async (courseId) => {
     set({ loading: true });
@@ -119,5 +125,24 @@ export const useGoalStore = create<GoalState>((set, get) => ({
     );
     
     set({ progressMap: { ...get().progressMap, ...progressMap } });
+  },
+
+  fetchDependencies: async (goalId) => {
+    const { data } = await api.get(`/goals/${goalId}/dependencies`);
+    set({ dependencyMap: { ...get().dependencyMap, [goalId]: data } });
+    return data;
+  },
+
+  addDependency: async (goalId, dependsOnGoalId) => {
+    const { data } = await api.post(`/goals/${goalId}/dependencies`, { depends_on_goal_id: dependsOnGoalId });
+    const current = get().dependencyMap[goalId] || [];
+    set({ dependencyMap: { ...get().dependencyMap, [goalId]: [...current, data] } });
+    return data;
+  },
+
+  removeDependency: async (goalId, depId) => {
+    await api.delete(`/goals/${goalId}/dependencies/${depId}`);
+    const current = get().dependencyMap[goalId] || [];
+    set({ dependencyMap: { ...get().dependencyMap, [goalId]: current.filter((d) => d.id !== depId) } });
   },
 }));

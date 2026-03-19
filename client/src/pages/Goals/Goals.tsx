@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, useMemo } from 'react';
 import { format } from 'date-fns';
 import {
   Plus, Flame, Trash2, ChevronRight, ListPlus, GitBranchPlus,
-  GripVertical, CheckCircle2, Circle, Pause, MoreHorizontal,
+  GripVertical, CheckCircle2, Circle, Pause, MoreHorizontal, Link2, X,
 } from 'lucide-react';
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor,
@@ -15,7 +15,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { useGoalStore } from '@/stores/goalStore';
 import { useCourseStore } from '@/stores/courseStore';
 import { useUIStore } from '@/stores/uiStore';
-import type { Goal, Task } from '@shared/types';
+import type { Goal, Task, GoalDependency } from '@shared/types';
 import api from '@/services/api';
 import styles from './Goals.module.css';
 
@@ -81,14 +81,21 @@ interface SortableGoalRowProps {
   goalTasks: Task[];
   showTasks: boolean;
   onToggleTasks: (goal: Goal) => void;
+  // Dependencies
+  dependencies: GoalDependency[];
+  allGoals: Goal[];
+  onAddDependency: (goalId: string, depGoalId: string) => void;
+  onRemoveDependency: (goalId: string, depId: string) => void;
 }
 
 function SortableGoalRow({
   node, isExpanded, onToggleExpand, onToggleStatus, onDelete,
   onExamMode, onAddTask, onAddSubGoal, getCourse, progress,
   goalTasks, showTasks, onToggleTasks,
+  dependencies, allGoals, onAddDependency, onRemoveDependency,
 }: SortableGoalRowProps) {
   const { goal, children, depth } = node;
+  const [showDepPicker, setShowDepPicker] = useState(false);
   const course = getCourse(goal.course_id);
   const hasChildren = children.length > 0;
   const StatusIcon = STATUS_ICONS[goal.status] || Circle;
@@ -172,6 +179,23 @@ function SortableGoalRow({
             {children.length} sub-goal{children.length !== 1 ? 's' : ''}
           </span>
         )}
+        {/* Dependency badges */}
+        {dependencies.length > 0 && dependencies.map((dep) => {
+          const depGoal = allGoals.find((g) => g.id === dep.depends_on_goal_id);
+          if (!depGoal) return null;
+          return (
+            <span key={dep.id} className={styles.depBadge} title={`Prerequisite: ${depGoal.title}`}>
+              <Link2 size={9} />
+              {depGoal.title.length > 14 ? depGoal.title.slice(0, 14) + '…' : depGoal.title}
+              <button
+                className={styles.depRemoveBtn}
+                onClick={(e) => { e.stopPropagation(); onRemoveDependency(goal.id, dep.id); }}
+              >
+                <X size={9} />
+              </button>
+            </span>
+          );
+        })}
       </div>
 
       {/* Progress */}
@@ -192,6 +216,34 @@ function SortableGoalRow({
         <button className={styles.actionBtn} onClick={() => onAddSubGoal(goal)} title="Add sub-goal">
           <GitBranchPlus size={14} />
         </button>
+        <div style={{ position: 'relative' }}>
+          <button
+            className={styles.actionBtn}
+            onClick={() => setShowDepPicker(!showDepPicker)}
+            title="Set prerequisite"
+          >
+            <Link2 size={14} />
+          </button>
+          {showDepPicker && (
+            <div className={styles.depPicker} onClick={(e) => e.stopPropagation()}>
+              <div className={styles.depPickerTitle}>Set prerequisite</div>
+              {allGoals
+                .filter((g) => g.id !== goal.id && g.course_id === goal.course_id && !dependencies.some((d) => d.depends_on_goal_id === g.id))
+                .map((g) => (
+                  <button
+                    key={g.id}
+                    className={styles.depPickerItem}
+                    onClick={() => { onAddDependency(goal.id, g.id); setShowDepPicker(false); }}
+                  >
+                    {g.title}
+                  </button>
+                ))}
+              {allGoals.filter((g) => g.id !== goal.id && g.course_id === goal.course_id && !dependencies.some((d) => d.depends_on_goal_id === g.id)).length === 0 && (
+                <div className={styles.depPickerEmpty}>No available goals</div>
+              )}
+            </div>
+          )}
+        </div>
         <button
           className={`${styles.actionBtn} ${goal.exam_mode ? styles.examActive : ''}`}
           onClick={() => onExamMode(goal.id)}
@@ -237,7 +289,7 @@ function SortableGoalRow({
 // ─── Main Page ──────────────────────────────────────────────
 
 export default function GoalsPage() {
-  const { goals, loading, fetchGoals, toggleExamMode, deleteGoal, updateGoal, reorderGoals, progressMap, fetchProgress, fetchAllProgress } = useGoalStore();
+  const { goals, loading, fetchGoals, toggleExamMode, deleteGoal, updateGoal, reorderGoals, progressMap, fetchProgress, fetchAllProgress, dependencyMap, fetchDependencies, addDependency, removeDependency } = useGoalStore();
   const courses = useCourseStore((s) => s.courses);
   const openModal = useUIStore((s) => s.openModal);
   const addToast = useUIStore((s) => s.addToast);
@@ -257,10 +309,12 @@ export default function GoalsPage() {
     fetchGoals(courseFilter || undefined);
   }, [courseFilter]);
 
-  // Fetch progress for all goals after loading
+  // Fetch progress + dependencies for all goals after loading
   useEffect(() => {
     if (goals.length > 0) {
       fetchAllProgress();
+      // Fetch dependencies for each goal
+      goals.forEach((g) => fetchDependencies(g.id));
     }
   }, [goals.length]);
 
@@ -338,6 +392,25 @@ export default function GoalsPage() {
 
   const handleAddSubGoal = (goal: Goal) => {
     openModal('goal-create', { parent_id: goal.id });
+  };
+
+  const handleAddDependency = async (goalId: string, depGoalId: string) => {
+    try {
+      await addDependency(goalId, depGoalId);
+      addToast('success', 'Prerequisite added');
+    } catch (err: any) {
+      const msg = err?.response?.data?.error || 'Failed to add prerequisite';
+      addToast('error', msg);
+    }
+  };
+
+  const handleRemoveDependency = async (goalId: string, depId: string) => {
+    try {
+      await removeDependency(goalId, depId);
+      addToast('success', 'Prerequisite removed');
+    } catch {
+      addToast('error', 'Failed to remove prerequisite');
+    }
   };
 
   // ─── Drag & Drop ──────
@@ -442,6 +515,10 @@ export default function GoalsPage() {
                     goalTasks={goalTasks[node.goal.id] || []}
                     showTasks={showTasksFor === node.goal.id}
                     onToggleTasks={handleToggleTasks}
+                    dependencies={dependencyMap[node.goal.id] || []}
+                    allGoals={filteredGoals}
+                    onAddDependency={handleAddDependency}
+                    onRemoveDependency={handleRemoveDependency}
                   />
                 );
               })}

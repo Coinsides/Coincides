@@ -645,6 +645,185 @@
   gap: 4px;
 }
 
+/* ─── Time Block background (week view) ─────────── */
+
+.tbBackground {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.tbLabel {
+  display: block;
+  font-size: 10px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 2px 6px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── Time Block overlap ────────────────────────── */
+
+.tbOverlap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  border-radius: var(--radius-sm);
+  pointer-events: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+.tbOverlapIcon {
+  margin: 3px;
+  color: rgba(255, 255, 255, 0.7);
+  pointer-events: auto;
+  cursor: help;
+}
+
+/* ─── Drag-select preview ───────────────────────── */
+
+.tbDragPreview {
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  background: rgba(59, 130, 246, 0.2);
+  border: 2px dashed rgba(59, 130, 246, 0.6);
+  border-radius: var(--radius-sm);
+  z-index: 5;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tbDragLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent-primary);
+}
+
+/* ─── Time Block creation form popup ────────────── */
+
+.tbFormPopup {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-lg);
+  -webkit-backdrop-filter: var(--glass-blur-lg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--glass-shadow-lg);
+  padding: 10px;
+  min-width: 180px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tbFormInput {
+  padding: 6px 8px;
+  font-size: 13px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.tbFormInput:focus {
+  border-color: var(--accent-primary);
+}
+
+.tbFormSelect {
+  padding: 5px 8px;
+  font-size: 12px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--text-secondary);
+}
+
+.tbFormTime {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.tbFormActions {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.tbFormCancel {
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  background: transparent;
+  border: 1px solid var(--glass-border);
+}
+
+.tbFormCancel:hover {
+  background: var(--glass-hover);
+}
+
+.tbFormSave {
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: var(--radius-sm);
+  color: white;
+  background: var(--accent-primary);
+  border: none;
+}
+
+.tbFormSave:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.tbFormSave:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+/* ─── Task blocks (renamed from timeBlock to avoid confusion) */
+
+.taskBlock {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  border-radius: var(--radius-sm);
+  padding: 4px 6px;
+  overflow: hidden;
+  cursor: pointer;
+  border-left: 3px solid var(--text-muted);
+  min-height: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: opacity var(--transition-fast);
+  z-index: 3;
+}
+
+.taskBlock:hover {
+  opacity: 0.85;
+}
+
+.taskBlockDone {
+  opacity: 0.5;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
