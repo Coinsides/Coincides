@@ -158,3 +158,14 @@
 - `client/src/pages/Calendar/Calendar.module.css` — `.taskActions`、`.taskActionBtn`、`.taskActionBtnDanger` 样式
 - `client/src/components/CardFlip/CardFlip.module.css` — 移除 `.cardFace` 的 `backdrop-filter`
 - `client/src/pages/Decks/components/types.ts` — formula 预览包裹 `$...$`
+
+## Patch — schema.sql 与 migration 同步修复
+
+### 修复
+- **新库启动崩溃（`no such column: parent_id`）**：`schema.sql` 的 `goals` 表定义缺少 `parent_id` 列，但 schema.sql 末尾有 `CREATE INDEX ... ON goals(parent_id)`。对于全新数据库，表建完后 index 找不到列直接崩溃，migration 根本没机会执行
+- 将所有 migration 添加的列同步到 `schema.sql` 基础表定义中：
+  - `goals` 表：新增 `parent_id`
+  - `tasks` 表：新增 `description`、`start_time`、`end_time`、`is_prerequisite`、`serves_must`、`checklist`
+  - `tags` 表：新增 `tag_group_id`
+  - `documents` 表：新增 `document_type`、`chunk_count`、`error_message`
+- 这确保了无论是新库建表还是老库跑 migration，列都完整一致

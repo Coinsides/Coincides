@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS goals (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   course_id TEXT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  parent_id TEXT REFERENCES goals(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   description TEXT,
   deadline TEXT,
@@ -84,11 +85,17 @@ CREATE TABLE IF NOT EXISTS tasks (
   goal_id TEXT REFERENCES goals(id) ON DELETE SET NULL,
   recurring_group_id TEXT REFERENCES recurring_task_groups(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
+  description TEXT,
   date TEXT NOT NULL,
+  start_time TEXT,
+  end_time TEXT,
   priority TEXT NOT NULL DEFAULT 'must',
   status TEXT NOT NULL DEFAULT 'pending',
   completed_at TEXT,
   order_index INTEGER NOT NULL DEFAULT 0,
+  is_prerequisite INTEGER NOT NULL DEFAULT 0,
+  serves_must TEXT,
+  checklist TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -180,6 +187,7 @@ CREATE TABLE IF NOT EXISTS tags (
   name TEXT NOT NULL,
   is_system INTEGER NOT NULL DEFAULT 0,
   color TEXT,
+  tag_group_id TEXT REFERENCES tag_groups(id) ON DELETE CASCADE,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   UNIQUE(user_id, name)
 );
@@ -211,6 +219,9 @@ CREATE TABLE IF NOT EXISTS documents (
   extracted_text TEXT,
   summary TEXT,
   page_count INTEGER,
+  document_type TEXT,
+  chunk_count INTEGER DEFAULT 0,
+  error_message TEXT,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
