@@ -824,6 +824,46 @@
   opacity: 0.5;
 }
 
+/* ─── Task action buttons (day detail panel) ────── */
+
+.taskActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.taskActionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+  opacity: 0;
+}
+
+.detailTaskItem:hover .taskActionBtn {
+  opacity: 1;
+}
+
+.taskActionBtn:hover {
+  background: var(--glass-hover);
+  color: var(--text-primary);
+}
+
+.taskActionBtnDanger:hover {
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--error);
+}
+
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }

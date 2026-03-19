@@ -767,11 +767,27 @@ export default function CalendarPage() {
                                 </div>
                               )}
                             </div>
-                            {course && (
-                              <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 6, backgroundColor: courseColor + '18', color: courseColor, fontWeight: 500, flexShrink: 0 }}>
-                                {course.code || course.name}
-                              </span>
-                            )}
+                            <div className={styles.taskActions}>
+                              {course && (
+                                <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 6, backgroundColor: courseColor + '18', color: courseColor, fontWeight: 500, flexShrink: 0 }}>
+                                  {course.code || course.name}
+                                </span>
+                              )}
+                              <button
+                                className={styles.taskActionBtn}
+                                onClick={(e) => { e.stopPropagation(); openModal('task-edit', { task }); }}
+                                title="Edit task"
+                              >
+                                <Edit3 size={13} />
+                              </button>
+                              <button
+                                className={`${styles.taskActionBtn} ${styles.taskActionBtnDanger}`}
+                                onClick={(e) => { e.stopPropagation(); handleDeleteTask(task.id); }}
+                                title="Delete task"
+                              >
+                                <Trash2 size={13} />
+                              </button>
+                            </div>
                           </div>
                         );
                       })}

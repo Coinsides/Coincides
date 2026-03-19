@@ -24,8 +24,6 @@
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-xl);
   background: var(--glass-surface);
-  backdrop-filter: var(--glass-blur-md);
-  -webkit-backdrop-filter: var(--glass-blur-md);
   box-shadow: var(--glass-shadow-md);
   overflow: hidden;
 }

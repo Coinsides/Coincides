@@ -27,7 +27,7 @@ export function getContentPreview(content: CardContent): string {
   if (!content) return '';
   if ('definition' in content) return content.definition || '';
   if ('statement' in content) return content.statement || '';
-  if ('formula' in content) return content.formula || '';
+  if ('formula' in content) return content.formula ? '$' + content.formula + '$' : '';
   if ('body' in content) return content.body || '';
   return '';
 }

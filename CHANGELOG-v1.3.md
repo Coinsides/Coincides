@@ -145,3 +145,16 @@
 - `docs/Coincides-Roadmap.md`：v1.3 标记完成（✅），更新状态行
 - `docs/PRD.md`：新增 3.9 Time Block 系统、3.10 L1 入驻流，Goal Dependencies 描述
 - `docs/workflow/Coincides-Onboarding.md`：更新状态为 v1.3 完成
+
+## Patch — v1.3 Bug 修复（3 项）
+
+### 修复
+- **日历事件删改不可发现**：侧边栏 Day Detail 面板的任务项仅通过右键菜单支持编辑/删除，用户无法发现。新增可见的 ✏️ 编辑 / 🗑️ 删除图标按钮，hover 时显示（`Calendar.tsx` + `Calendar.module.css`）
+- **卡片翻面镜像**：`.cardFace` 上的 `backdrop-filter`（glassmorphism 模糊效果）破坏了 `backface-visibility: hidden`，导致背面内容在正面以镜像形式透出。移除 `.cardFace` 的 `backdrop-filter`，3D 翻转恢复正常（`CardFlip.module.css`）
+- **公式卡片预览不渲染**：`getContentPreview()` 返回的 formula 文本缺少 `$...$` 定界符，KaTeXRenderer 将其当作纯文本输出。为 formula 类型内容包裹 `$...$`（`types.ts`）
+
+### 变更文件
+- `client/src/pages/Calendar/Calendar.tsx` — 新增 Edit/Delete 按钮
+- `client/src/pages/Calendar/Calendar.module.css` — `.taskActions`、`.taskActionBtn`、`.taskActionBtnDanger` 样式
+- `client/src/components/CardFlip/CardFlip.module.css` — 移除 `.cardFace` 的 `backdrop-filter`
+- `client/src/pages/Decks/components/types.ts` — formula 预览包裹 `$...$`
