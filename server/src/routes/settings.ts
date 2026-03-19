@@ -51,4 +51,12 @@ router.put('/', (req: AuthRequest, res: Response) => {
   }
 });
 
+// PUT /api/settings/onboarding-complete
+router.put('/onboarding-complete', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+  const now = new Date().toISOString();
+  db.prepare('UPDATE users SET onboarding_completed = 1, updated_at = ? WHERE id = ?').run(now, req.userId!);
+  res.json({ onboarding_completed: true });
+});
+
 export default router;

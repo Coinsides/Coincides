@@ -18,6 +18,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { useCourseStore } from '@/stores/courseStore';
 import { useTagStore } from '@/stores/tagStore';
 import { useAuthStore } from '@/stores/authStore';
+import Onboarding from '@/components/Onboarding/Onboarding';
 import styles from './AppLayout.module.css';
 
 const navItems = [
@@ -82,8 +83,11 @@ export default function AppLayout() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [toggleAgentPanel, openModal, toggleShortcutsPanel]);
 
+  const showOnboarding = user && !user.onboarding_completed;
+
   return (
     <div className={styles.layout}>
+      {showOnboarding && <Onboarding />}
       {/* Sidebar */}
       <aside className={`${styles.sidebar} ${!sidebarOpen ? styles.collapsed : ''}`}>
         <div className={styles.sidebarHeader}>

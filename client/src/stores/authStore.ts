@@ -14,6 +14,7 @@ interface AuthState {
   logout: () => void;
   loadUser: () => Promise<void>;
   updateSettings: (settings: Partial<UserSettings>) => Promise<void>;
+  completeOnboarding: () => Promise<void>;
   clearError: () => void;
 }
 
@@ -75,6 +76,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       }
     } catch (err: any) {
       throw err;
+    }
+  },
+
+  completeOnboarding: async () => {
+    try {
+      await api.put('/settings/onboarding-complete');
+      const user = get().user;
+      if (user) {
+        set({ user: { ...user, onboarding_completed: true } });
+      }
+    } catch (err) {
+      console.error('Failed to complete onboarding:', err);
     }
   },
 

@@ -48,6 +48,7 @@ router.post('/register', (req: AuthRequest, res: Response) => {
         email: data.email,
         name: data.name,
         settings: JSON.parse(defaultSettings),
+        onboarding_completed: false,
         created_at: now,
         updated_at: now,
       },
@@ -86,6 +87,7 @@ router.post('/login', (req: AuthRequest, res: Response) => {
         email: user.email,
         name: user.name,
         settings: JSON.parse(user.settings || '{}'),
+        onboarding_completed: !!user.onboarding_completed,
         created_at: user.created_at,
         updated_at: user.updated_at,
       },
@@ -102,7 +104,7 @@ router.post('/login', (req: AuthRequest, res: Response) => {
 // GET /api/auth/me
 router.get('/me', authMiddleware, (req: AuthRequest, res: Response) => {
   const db = getDb();
-  const user = db.prepare('SELECT id, email, name, settings, created_at, updated_at FROM users WHERE id = ?').get(req.userId!) as any;
+  const user = db.prepare('SELECT id, email, name, settings, onboarding_completed, created_at, updated_at FROM users WHERE id = ?').get(req.userId!) as any;
 
   if (!user) {
     throw new AppError(404, 'User not found');
@@ -111,6 +113,7 @@ router.get('/me', authMiddleware, (req: AuthRequest, res: Response) => {
   res.json({
     ...user,
     settings: JSON.parse(user.settings || '{}'),
+    onboarding_completed: !!user.onboarding_completed,
   });
 });
 

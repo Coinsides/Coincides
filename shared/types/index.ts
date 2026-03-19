@@ -103,6 +103,7 @@ export interface User {
   password_hash: string;
   name: string;
   settings: UserSettings;
+  onboarding_completed: boolean;
   created_at: string;
   updated_at: string;
 }
