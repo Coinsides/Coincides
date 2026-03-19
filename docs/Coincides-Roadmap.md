@@ -171,7 +171,7 @@
 - Step 1：System Prompt 重写（MWF 脚手架 + 设计宪法）
 - Step 2：Agent 工具升级（目标拆解 + 优先级标注）
 - Step 3：Goal Manager 完整树形 UI + 拖拽
-- Step 4：Goal-日历颜色联动
+- Step 4：日历 Course 着色 + Goal 标签
 - Step 5：新用户引导流程
 - Step 6：i18n 国际化框架（中/英）
 - Step 7：Agent 报错排查（A-1 遗留项）
