@@ -135,6 +135,19 @@ export async function executeTool(
       return JSON.stringify(decks);
     }
 
+    case 'create_deck': {
+      const { course_id, name, description } = args as { course_id: string; name: string; description?: string };
+      // Verify course exists and belongs to user
+      const course = db.prepare('SELECT id, name FROM courses WHERE id = ? AND user_id = ?').get(course_id, userId) as { id: string; name: string } | undefined;
+      if (!course) return JSON.stringify({ error: 'Course not found' });
+      const deckId = uuidv4();
+      const now = new Date().toISOString();
+      db.prepare(
+        'INSERT INTO card_decks (id, user_id, course_id, name, description, card_count, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 0, ?, ?)',
+      ).run(deckId, userId, course_id, name, description || null, now, now);
+      return JSON.stringify({ id: deckId, name, course_id, course_name: course.name, message: 'Deck created successfully' });
+    }
+
     case 'list_cards': {
       const { deck_id, template_type, search } = args as Record<string, string | undefined>;
       let query = 'SELECT id, title, template_type, importance, fsrs_next_review FROM cards WHERE deck_id = ? AND user_id = ?';

@@ -58,13 +58,29 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
 
   if (!proposal) throw new AppError(404, 'Proposal not found or already resolved');
 
-  const data = JSON.parse(proposal.data) as { items: Array<Record<string, unknown>> };
+  const data = JSON.parse(proposal.data) as { items: Array<Record<string, unknown>>; deck_id?: string };
   const now = new Date().toISOString();
 
   const applyTransaction = db.transaction(() => {
     switch (proposal.type) {
       case 'batch_cards': {
+        // Resolve deck_id: item-level > proposal-level top-level field
+        const topLevelDeckId = data.deck_id as string | undefined;
+
         for (const item of data.items) {
+          const deckId = (item.deck_id as string) || topLevelDeckId;
+          if (!deckId) {
+            throw new AppError(400, `Card "${item.title || 'Untitled'}" is missing deck_id. Please select a deck before applying.`);
+          }
+
+          // Verify deck exists and belongs to user
+          const deck = db.prepare(
+            'SELECT id FROM card_decks WHERE id = ? AND user_id = ?',
+          ).get(deckId, req.userId!) as { id: string } | undefined;
+          if (!deck) {
+            throw new AppError(400, `Deck not found (id: ${deckId.slice(0, 8)}...). The deck may have been deleted. Please create a new deck and try again.`);
+          }
+
           const cardId = uuidv4();
           const templateType = (item.template_type as string) || 'general';
           const rawContent = (item.content as Record<string, unknown>) || {};
@@ -72,8 +88,8 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
           db.prepare(
             'INSERT INTO cards (id, user_id, deck_id, template_type, title, content, importance, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
           ).run(
-            cardId, req.userId!, item.deck_id, templateType,
-            item.title, JSON.stringify(normalizedContent), item.importance || 3, now, now,
+            cardId, req.userId!, deckId, templateType,
+            item.title || 'Untitled', JSON.stringify(normalizedContent), item.importance || 3, now, now,
           );
 
           // Attach tags
@@ -86,7 +102,7 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
           }
 
           // Update deck card count
-          db.prepare('UPDATE card_decks SET card_count = card_count + 1, updated_at = ? WHERE id = ?').run(now, item.deck_id);
+          db.prepare('UPDATE card_decks SET card_count = card_count + 1, updated_at = ? WHERE id = ?').run(now, deckId);
         }
         break;
       }

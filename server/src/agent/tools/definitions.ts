@@ -109,6 +109,19 @@ export const toolDefinitions: ToolDefinition[] = [
     },
   },
   {
+    name: 'create_deck',
+    description: 'Create a new card deck for a course. Use this when the student needs cards but no suitable deck exists. Returns the new deck ID.',
+    parameters: {
+      type: 'object',
+      properties: {
+        course_id: { type: 'string', description: 'Course ID this deck belongs to' },
+        name: { type: 'string', description: 'Deck name (e.g., "Chapter 5 Review", "Midterm Formulas")' },
+        description: { type: 'string', description: 'Optional deck description' },
+      },
+      required: ['course_id', 'name'],
+    },
+  },
+  {
     name: 'list_cards',
     description: 'List cards in a deck with optional filters.',
     parameters: {

@@ -123,14 +123,14 @@ export async function* runAgent(
     let toolInputJson = '';
 
     try {
-      const ROUND_TIMEOUT_MS = 120_000;
+      const ROUND_TIMEOUT_MS = 300_000;
       let roundTimedOut = false;
       const timeoutHandle = setTimeout(() => { roundTimedOut = true; }, ROUND_TIMEOUT_MS);
 
       try {
         for await (const chunk of provider.chat(messages, toolDefinitions, systemPrompt)) {
           if (roundTimedOut) {
-            yield { type: 'error', error: 'Agent round timed out after 30s' };
+            yield { type: 'error', error: 'Request timed out after 300s' };
             clearTimeout(timeoutHandle);
             return;
           }

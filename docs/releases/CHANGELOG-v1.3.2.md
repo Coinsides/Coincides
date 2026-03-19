@@ -97,3 +97,39 @@ Agent 创建卡片时未检查已有卡片组，将卡片放到了不相关的 d
 
 ### 变更文件
 - `server/src/agent/system-prompt.ts`
+
+---
+
+## Bug 6 (P1): Proposal Apply 失败——batch_cards 缺少 deck_id 验证
+
+### 问题
+Agent 生成的 batch_cards 类型 Proposal，用户点击 Apply 后显示“Failed to apply proposal”。
+
+### 根因
+1. **Agent 没有 `create_deck` 工具**——当用户删除了旧的卡片组后，Agent 无法自己创建新 deck，导致 proposal items 中的 `deck_id` 指向已删除的 deck 或完全缺失
+2. **`proposals.ts` 的 apply 路由缺少验证**——直接将 `item.deck_id` 传入 INSERT，未检查是否存在或为 undefined，触发 SQLite 外键约束失败 / better-sqlite3 报错
+3. **前端错误提示固定**——handleApply 的 catch 块始终显示“Failed to apply proposal”，未展示后端返回的具体原因
+
+### 修复
+- `proposals.ts` — batch_cards 分支增加：
+  - deck_id 解析链：item.deck_id > data.deck_id（顶层 fallback）
+  - 缺少 deck_id 时抛出 400 错误，提示“请先选择 deck”
+  - 插入前验证 deck 存在且属于当前用户，不存在时提示“deck 可能已删除”
+  - title 字段增加 `|| 'Untitled'` 兆底
+- `ProposalList.tsx` — handleApply 的 catch 块改为从 `err.response.data.error` 提取后端错误信息，显示具体原因
+- `definitions.ts` + `executor.ts` — 新增 `create_deck` 工具，让 Agent 能自行创建 deck
+- `system-prompt.ts` — Card Generation 流程新增第 4 步“准备目标 deck”，要求 Agent 先 list_decks 检查，无合适 deck 则 create_deck，确保 proposal items 中包含有效 deck_id
+
+### 变更文件
+- `server/src/routes/proposals.ts`
+- `client/src/components/AgentPanel/ProposalList.tsx`
+- `server/src/agent/tools/definitions.ts`
+- `server/src/agent/tools/executor.ts`
+- `server/src/agent/system-prompt.ts`
+
+---
+
+## 其它改进
+
+### Agent 超时时间调整
+- `orchestrator.ts` — Agent 单次 tool call 超时从 120s 提升到 300s，避免处理长文档时超时失败

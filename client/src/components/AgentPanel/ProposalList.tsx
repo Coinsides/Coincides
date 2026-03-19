@@ -48,9 +48,10 @@ export default function ProposalList() {
     try {
       await applyProposal(id);
       addToast('success', 'Proposal applied successfully');
-    } catch (err) {
+    } catch (err: any) {
       console.error('Failed to apply proposal:', err);
-      addToast('error', 'Failed to apply proposal');
+      const msg = err?.response?.data?.error || 'Failed to apply proposal';
+      addToast('error', msg);
     }
   };
 
