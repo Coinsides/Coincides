@@ -1,9 +1,9 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
+  background: rgba(0, 0, 0, 0.55);
+  /* NOTE: backdrop-filter removed — it breaks backface-visibility:hidden
+     on the CardFlip inside this modal. Increased opacity to compensate. */
   display: flex;
   align-items: center;
   justify-content: center;

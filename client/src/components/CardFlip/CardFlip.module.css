@@ -10,7 +10,10 @@
   min-height: 300px;
   transition: transform 0.5s ease;
   transform-style: preserve-3d;
-  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.25));
+  /* NOTE: filter (drop-shadow) removed — filter creates a new stacking
+     context that flattens transform-style:preserve-3d, breaking
+     backface-visibility:hidden and causing mirror bleed-through.
+     Shadow is moved to .cardFace via box-shadow instead. */
 }
 
 .cardInner.flipped {
@@ -20,11 +23,12 @@
 .cardFace {
   position: absolute;
   inset: 0;
+  -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-xl);
   background: var(--glass-surface);
-  box-shadow: var(--glass-shadow-md);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), var(--glass-shadow-md);
   overflow: hidden;
 }
 
@@ -123,8 +127,7 @@
 .formulaDisplay {
   padding: 19px;
   background: var(--glass-elevated);
-  backdrop-filter: var(--glass-blur-sm);
-  -webkit-backdrop-filter: var(--glass-blur-sm);
+  /* NOTE: backdrop-filter removed — breaks backface-visibility in CardFlip */
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   text-align: center;
