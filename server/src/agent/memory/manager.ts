@@ -45,35 +45,53 @@ export class MemoryManager {
       return msg;
     });
 
-    // Sanitize: ensure every tool_use has a matching tool_result and vice versa.
-    // If the first message is a tool_result without a preceding tool_use, drop it.
-    // If the last message is a tool_use without a following tool_result, drop it.
+    // Sanitize: Anthropic API requires every tool_use block to have a matching
+    // tool_result in the immediately following user message. Process pairs together
+    // to guarantee both sides survive or neither does.
     const sanitized: ProviderMessage[] = [];
-    for (let i = 0; i < messages.length; i++) {
+    let i = 0;
+    while (i < messages.length) {
       const msg = messages[i];
-      if (msg.tool_results && msg.tool_results.length > 0) {
-        // This is a tool_result message — only keep if previous message has matching tool_calls
-        const prev = sanitized[sanitized.length - 1];
-        if (prev?.tool_calls && prev.tool_calls.length > 0) {
-          // Filter tool_results to only include IDs that exist in the previous tool_calls
-          const validIds = new Set(prev.tool_calls.map(tc => tc.id));
-          const filtered = msg.tool_results.filter(tr => validIds.has(tr.tool_call_id));
-          if (filtered.length > 0) {
-            sanitized.push({ ...msg, tool_results: filtered });
-          }
-          // else: drop orphaned tool_results
-        }
-        // else: drop orphaned tool_results (no preceding tool_use)
-      } else if (msg.tool_calls && msg.tool_calls.length > 0) {
-        // This is a tool_use message — only keep if next message has tool_results
+
+      // Case 1: assistant message with tool_calls — must pair with next tool_results
+      if (msg.tool_calls && msg.tool_calls.length > 0) {
         const next = messages[i + 1];
         if (next?.tool_results && next.tool_results.length > 0) {
-          sanitized.push(msg);
+          // Filter tool_results to only include IDs present in tool_calls
+          const validIds = new Set(msg.tool_calls.map(tc => tc.id));
+          const filtered = next.tool_results.filter(tr => validIds.has(tr.tool_call_id));
+
+          if (filtered.length === msg.tool_calls.length) {
+            // Perfect match — keep both as-is
+            sanitized.push(msg);
+            sanitized.push({ ...next, tool_results: filtered });
+          } else if (filtered.length > 0) {
+            // Partial match — only keep the tool_calls that have results
+            const resultIds = new Set(filtered.map(tr => tr.tool_call_id));
+            const matchedCalls = msg.tool_calls.filter(tc => resultIds.has(tc.id));
+            sanitized.push({ ...msg, tool_calls: matchedCalls });
+            sanitized.push({ ...next, tool_results: filtered });
+          }
+          // else: no matching IDs at all — drop both messages
+          i += 2; // skip the pair
+          continue;
         }
-        // else: drop orphaned tool_use (no following tool_result)
-      } else {
-        sanitized.push(msg);
+        // No following tool_results — drop this orphaned tool_use
+        i++;
+        continue;
       }
+
+      // Case 2: user message with tool_results but no preceding tool_calls
+      // (shouldn't happen after Case 1, but guard against DB corruption)
+      if (msg.tool_results && msg.tool_results.length > 0) {
+        // Orphaned tool_results — drop
+        i++;
+        continue;
+      }
+
+      // Case 3: normal message (text only)
+      sanitized.push(msg);
+      i++;
     }
 
     return sanitized;

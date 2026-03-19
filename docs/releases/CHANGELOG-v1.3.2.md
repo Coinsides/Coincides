@@ -133,3 +133,22 @@ Agent 生成的 batch_cards 类型 Proposal，用户点击 Apply 后显示“Fai
 
 ### Agent 超时时间调整
 - `orchestrator.ts` — Agent 单次 tool call 超时从 120s 提升到 300s，避免处理长文档时超时失败
+
+---
+
+## Bug 7 (P0): Agent 400 错误——tool_use/tool_result 消息配对失败
+
+### 问题
+Agent 对话中出现 Anthropic API 400 错误：`tool_use ids were found without tool_result blocks immediately after`。导致 Agent 完全无法使用，重发消息也无法恢复。
+
+### 根因
+1. **消息历史清理逻辑 (sanitization) 存在边界 Bug**——`getConversationHistory()` 采用单独评估每条消息的方式：tool_use 消息检查原始数组的下一条是否有 tool_results，若有则加入 sanitized；tool_results 消息检查 sanitized 的最后一条是否有 tool_calls。但当两者的 ID 不匹配时，tool_use 已被加入而 tool_results 被丢弃，导致 sanitized 结果中存在孤立的 tool_use
+2. **无最终安全检查**——发送给 Anthropic API 前没有再次验证消息格式的正确性
+
+### 修复
+- `manager.ts` — 重写 sanitization 逻辑，改为“配对处理”模式：tool_use 和 tool_result 作为一对同时评估，ID 完全匹配则保留两者，部分匹配则裁剪同步，无匹配则两者均丢弃
+- `anthropic.ts` — 在消息发送前增加最终安全检查：遍历已转换的 Anthropic 格式消息，确认每个 tool_use block 在下一条 user 消息中都有对应的 tool_result，不匹配的对整体丢弃
+
+### 变更文件
+- `server/src/agent/memory/manager.ts`
+- `server/src/agent/providers/anthropic.ts`

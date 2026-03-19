@@ -65,6 +65,41 @@ export class AnthropicProvider implements AIProvider {
       return { role: m.role === 'assistant' ? 'assistant' as const : 'user' as const, content: m.content };
     });
 
+    // Final safety pass: ensure every tool_use has a matching tool_result
+    // This guards against any edge case the history sanitizer might miss
+    const validatedMessages: Anthropic.MessageParam[] = [];
+    for (let idx = 0; idx < anthropicMessages.length; idx++) {
+      const am = anthropicMessages[idx];
+      // Check if this is an assistant message containing tool_use blocks
+      if (am.role === 'assistant' && Array.isArray(am.content)) {
+        const toolUseBlocks = (am.content as Anthropic.ContentBlockParam[]).filter(
+          (b: any) => b.type === 'tool_use',
+        );
+        if (toolUseBlocks.length > 0) {
+          const nextMsg = anthropicMessages[idx + 1];
+          if (nextMsg?.role === 'user' && Array.isArray(nextMsg.content)) {
+            const toolResultBlocks = (nextMsg.content as any[]).filter(
+              (b: any) => b.type === 'tool_result',
+            );
+            const resultIds = new Set(toolResultBlocks.map((b: any) => b.tool_use_id));
+            const allMatched = toolUseBlocks.every((b: any) => resultIds.has(b.id));
+            if (allMatched) {
+              validatedMessages.push(am);
+              validatedMessages.push(nextMsg);
+              idx++; // skip the tool_result message (already added)
+              continue;
+            }
+            // Mismatch — drop both the tool_use assistant msg and tool_result user msg
+            idx++; // skip the next message too
+            continue;
+          }
+          // No following tool_result — drop this assistant message
+          continue;
+        }
+      }
+      validatedMessages.push(am);
+    }
+
     // Map tool definitions to Anthropic format
     const anthropicTools: Anthropic.Tool[] = tools.map((t) => ({
       name: t.name,
@@ -77,7 +112,7 @@ export class AnthropicProvider implements AIProvider {
         model: this.model,
         max_tokens: 4096,
         system: systemPrompt,
-        messages: anthropicMessages,
+        messages: validatedMessages,
         tools: anthropicTools.length > 0 ? anthropicTools : undefined,
       });
 
