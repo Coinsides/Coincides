@@ -29,16 +29,30 @@ function parseAndRender(text: string): string {
       const latex = part.slice(2, -2).trim();
       return renderSegment(latex, true);
     }
-    // Then handle inline: $...$
-    return part.replace(/\$([^$\n]+?)\$/g, (_match, latex: string) => {
+    // Handle inline: $...$
+    let result = part.replace(/\$([^$\n]+?)\$/g, (_match, latex: string) => {
       return renderSegment(latex.trim(), false);
     });
+    // Handle orphaned $ with LaTeX-like content after it (e.g. "$\mathbb{R}^n")
+    // If a lone $ remains followed by backslash or common LaTeX chars, try to render it
+    result = result.replace(/\$([\\^_{}a-zA-Z0-9 .+\-*/=()]+)$/g, (_match, latex: string) => {
+      if (latex.includes('\\') || latex.includes('^') || latex.includes('_')) {
+        return renderSegment(latex.trim(), false);
+      }
+      return _match;
+    });
+    return result;
   });
   return rendered.join('');
 }
 
 export default function KaTeXRenderer({ text, className }: KaTeXRendererProps) {
-  const html = useMemo(() => parseAndRender(text), [text]);
+  const html = useMemo(() => {
+    if (!text) return '';
+    return parseAndRender(text);
+  }, [text]);
+
+  if (!text) return null;
 
   return (
     <span

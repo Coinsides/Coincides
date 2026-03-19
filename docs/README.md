@@ -31,7 +31,14 @@
 | v1.2 | [v1.2-plan.md](./releases/v1.2-plan.md) | [CHANGELOG-v1.2.md](./releases/CHANGELOG-v1.2.md) | [RELEASE-NOTES-v1.2.md](./releases/RELEASE-NOTES-v1.2.md) |
 | v1.3 | [v1.3-plan.md](./releases/v1.3-plan.md) | [CHANGELOG-v1.3.md](./releases/CHANGELOG-v1.3.md) | [RELEASE-NOTES-v1.3.md](./releases/RELEASE-NOTES-v1.3.md) |
 | v1.3.1 | — | [CHANGELOG-v1.3.1.md](./releases/CHANGELOG-v1.3.1.md) | [RELEASE-NOTES-v1.3.1.md](./releases/RELEASE-NOTES-v1.3.1.md) |
+| v1.3.2 | — | [CHANGELOG-v1.3.2.md](./releases/CHANGELOG-v1.3.2.md) | — |
 | v1.4 | [v1.4-plan.md](./releases/v1.4-plan.md) | — | — |
+
+## 问题追踪
+
+| 文件 | 说明 |
+|------|------|
+| [issues/v1.3.2-issues.md](./issues/v1.3.2-issues.md) | v1.3.2 问题清单（5 个 Bug） |
 
 ## 变更日志索引
 

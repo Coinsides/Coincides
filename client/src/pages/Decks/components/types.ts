@@ -24,10 +24,12 @@ export const templateLabels: Record<string, string> = {
 };
 
 export function getContentPreview(content: CardContent): string {
-  if (!content) return '';
+  if (!content || typeof content !== 'object') return '';
   if ('definition' in content) return content.definition || '';
   if ('statement' in content) return content.statement || '';
   if ('formula' in content) return content.formula ? '$' + content.formula + '$' : '';
   if ('body' in content) return content.body || '';
-  return '';
+  // Fallback: try to extract any string value from content
+  const values = Object.values(content).filter((v): v is string => typeof v === 'string' && v.length > 0);
+  return values[0] || '';
 }

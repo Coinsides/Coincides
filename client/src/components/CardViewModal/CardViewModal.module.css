@@ -14,9 +14,10 @@
 .modal {
   width: 100%;
   max-width: 520px;
-  background: var(--glass-surface);
-  backdrop-filter: var(--glass-blur-lg);
-  -webkit-backdrop-filter: var(--glass-blur-lg);
+  background: var(--bg-secondary, var(--glass-surface));
+  /* NOTE: backdrop-filter removed — it breaks backface-visibility:hidden
+     on CardFlip inside this modal, causing mirror text bleed-through.
+     See commit 92d0712 for the same fix on .cardFace. */
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow-lg);
   border-radius: var(--radius-xl);

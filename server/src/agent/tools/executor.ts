@@ -3,6 +3,68 @@ import { getDb } from '../../db/init.js';
 import { getEmbeddingProvider } from '../../embedding/index.js';
 import { VectorStore } from '../../embedding/vectorStore.js';
 
+/**
+ * Normalize card content to match the expected template structure.
+ * Prevents crashes when the Agent provides mismatched content fields.
+ *
+ * Expected structures:
+ *   definition → { definition, example?, notes? }
+ *   theorem    → { statement, conditions?, proof_sketch?, notes? }
+ *   formula    → { formula, variables?, applicable_conditions?, notes? }
+ *   general    → { body, notes? }
+ */
+function normalizeCardContent(
+  templateType: string,
+  content: Record<string, unknown>,
+): Record<string, unknown> {
+  // Helper: extract a string from content, trying multiple field names
+  const getString = (...keys: string[]): string => {
+    for (const k of keys) {
+      if (typeof content[k] === 'string' && (content[k] as string).length > 0) {
+        return content[k] as string;
+      }
+    }
+    return '';
+  };
+
+  switch (templateType) {
+    case 'definition': {
+      const definition = getString('definition', 'body', 'statement', 'formula');
+      return {
+        definition: definition || 'No definition provided',
+        ...(content.example !== undefined && { example: content.example }),
+        ...(content.notes !== undefined && { notes: content.notes }),
+      };
+    }
+    case 'theorem': {
+      const statement = getString('statement', 'body', 'definition');
+      return {
+        statement: statement || 'No statement provided',
+        ...(content.conditions !== undefined && { conditions: content.conditions }),
+        ...(content.proof_sketch !== undefined && { proof_sketch: content.proof_sketch }),
+        ...(content.notes !== undefined && { notes: content.notes }),
+      };
+    }
+    case 'formula': {
+      const formula = getString('formula', 'body', 'definition', 'statement');
+      return {
+        formula: formula || 'No formula provided',
+        ...(content.variables !== undefined && { variables: content.variables }),
+        ...(content.applicable_conditions !== undefined && { applicable_conditions: content.applicable_conditions }),
+        ...(content.notes !== undefined && { notes: content.notes }),
+      };
+    }
+    case 'general':
+    default: {
+      const body = getString('body', 'definition', 'statement', 'formula');
+      return {
+        body: body || 'No content provided',
+        ...(content.notes !== undefined && { notes: content.notes }),
+      };
+    }
+  }
+}
+
 export async function executeTool(
   toolName: string,
   args: Record<string, unknown>,
@@ -150,11 +212,16 @@ export async function executeTool(
         deck_id: string; template_type: string; title: string;
         content: Record<string, unknown>; importance?: number; tag_ids?: string[];
       };
+
+      // Normalize content to match expected template structure
+      const resolvedType = template_type || 'general';
+      const normalizedContent = normalizeCardContent(resolvedType, content || {});
+
       const id = uuidv4();
       const now = new Date().toISOString();
       db.prepare(
         'INSERT INTO cards (id, user_id, deck_id, template_type, title, content, importance, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      ).run(id, userId, deck_id, template_type || 'general', title, JSON.stringify(content), importance || 3, now, now);
+      ).run(id, userId, deck_id, resolvedType, title, JSON.stringify(normalizedContent), importance || 3, now, now);
 
       // Attach tags
       if (tag_ids && tag_ids.length > 0) {

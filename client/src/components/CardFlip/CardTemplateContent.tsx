@@ -19,7 +19,7 @@ function DefinitionView({ content }: { content: DefinitionContent }) {
     <div className={styles.templateContent}>
       <div className={styles.contentLabel}>Definition:</div>
       <div className={styles.contentBody}>
-        <KaTeXRenderer text={content.definition} />
+        <KaTeXRenderer text={content.definition || ''} />
       </div>
       {content.example && (
         <>
@@ -46,7 +46,7 @@ function TheoremView({ content }: { content: TheoremContent }) {
     <div className={styles.templateContent}>
       <div className={styles.contentLabel}>Statement:</div>
       <div className={styles.contentBody}>
-        <KaTeXRenderer text={content.statement} />
+        <KaTeXRenderer text={content.statement || ''} />
       </div>
       {content.conditions && (
         <>
@@ -79,9 +79,13 @@ function TheoremView({ content }: { content: TheoremContent }) {
 function FormulaView({ content }: { content: FormulaContent }) {
   return (
     <div className={styles.templateContent}>
-      <div className={styles.formulaDisplay}>
-        <KaTeXRenderer text={`$$${content.formula}$$`} />
-      </div>
+      {content.formula ? (
+        <div className={styles.formulaDisplay}>
+          <KaTeXRenderer text={`$$${content.formula}$$`} />
+        </div>
+      ) : (
+        <div className={styles.contentBody} style={{ color: 'var(--text-muted)' }}>No formula</div>
+      )}
       {content.variables && Object.keys(content.variables).length > 0 && (
         <>
           <div className={styles.contentLabel}>Variables:</div>
@@ -119,10 +123,12 @@ function FormulaView({ content }: { content: FormulaContent }) {
 }
 
 function GeneralView({ content }: { content: GeneralContent }) {
+  // Fallback: if body is missing, try to show any available content field
+  const body = content.body || (content as any).definition || (content as any).statement || (content as any).formula || '';
   return (
     <div className={styles.templateContent}>
       <div className={styles.contentBody}>
-        <KaTeXRenderer text={content.body} />
+        <KaTeXRenderer text={body} />
       </div>
       {content.notes && (
         <>
@@ -137,6 +143,10 @@ function GeneralView({ content }: { content: GeneralContent }) {
 }
 
 export default function CardTemplateContent({ templateType, content }: CardTemplateContentProps) {
+  if (!content || typeof content !== 'object') {
+    return <div className={styles.templateContent}><div className={styles.contentBody} style={{ color: 'var(--text-muted)' }}>No content</div></div>;
+  }
+
   switch (templateType) {
     case CardTemplateType.Definition:
       return <DefinitionView content={content as DefinitionContent} />;

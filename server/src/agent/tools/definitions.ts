@@ -130,7 +130,7 @@ export const toolDefinitions: ToolDefinition[] = [
         deck_id: { type: 'string', description: 'Deck ID' },
         template_type: { type: 'string', enum: ['definition', 'theorem', 'formula', 'general'], description: 'Card template type' },
         title: { type: 'string', description: 'Card title (front)' },
-        content: { type: 'object', description: 'Card content object (template-specific fields)' },
+        content: { type: 'object', description: 'Card content object. MUST match template_type: definition→{definition,example?,notes?}, theorem→{statement,conditions?,proof_sketch?,notes?}, formula→{formula,variables?,applicable_conditions?,notes?}, general→{body,notes?}' },
         importance: { type: 'number', description: 'Importance 1-5, default 3' },
         tag_ids: { type: 'array', items: { type: 'string' }, description: 'Tag IDs to attach' },
       },
