@@ -90,11 +90,45 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
         for (const item of data.items) {
           const taskId = uuidv4();
           db.prepare(
-            'INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, order_index, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            'INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, description, start_time, end_time, checklist, serves_must, order_index, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
           ).run(
             taskId, req.userId!, item.course_id, item.goal_id || null,
-            item.title, item.date, item.priority || 'must', 'pending', 0, now, now,
+            item.title, item.date, item.priority || 'must', 'pending',
+            item.description || null, item.start_time || null, item.end_time || null,
+            item.checklist ? JSON.stringify(item.checklist) : null,
+            item.serves_must || null, 0, now, now,
           );
+        }
+        break;
+      }
+      case 'goal_breakdown': {
+        // Process items in order; goals first, then tasks that may reference them
+        const idMap = new Map<string, string>(); // _temp_id -> real ID
+        for (const item of data.items) {
+          if (item.type === 'goal') {
+            const goalId = uuidv4();
+            const resolvedParentId = item.parent_id && idMap.has(item.parent_id as string)
+              ? idMap.get(item.parent_id as string)
+              : item.parent_id || null;
+            db.prepare(
+              'INSERT INTO goals (id, user_id, course_id, parent_id, title, description, deadline, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            ).run(goalId, req.userId!, item.course_id, resolvedParentId, item.title, item.description || null, item.deadline || null, 'active', now, now);
+            if (item._temp_id) idMap.set(item._temp_id as string, goalId);
+          } else if (item.type === 'task') {
+            const taskId = uuidv4();
+            const resolvedGoalId = item.goal_id && idMap.has(item.goal_id as string)
+              ? idMap.get(item.goal_id as string)
+              : item.goal_id || null;
+            db.prepare(
+              'INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, description, start_time, end_time, checklist, serves_must, order_index, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            ).run(
+              taskId, req.userId!, item.course_id, resolvedGoalId,
+              item.title, item.date, item.priority || 'must', 'pending',
+              item.description || null, item.start_time || null, item.end_time || null,
+              item.checklist ? JSON.stringify(item.checklist) : null,
+              item.serves_must || null, 0, now, now,
+            );
+          }
         }
         break;
       }

@@ -38,12 +38,12 @@ export async function executeTool(
     }
 
     case 'create_task': {
-      const { title, date, priority, course_id, goal_id } = args as Record<string, string>;
+      const { title, date, priority, course_id, goal_id, description, start_time, end_time, checklist, serves_must } = args as Record<string, any>;
       const id = uuidv4();
       const now = new Date().toISOString();
       db.prepare(
-        'INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, order_index, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      ).run(id, userId, course_id, goal_id || null, title, date, priority || 'must', 'pending', 0, now, now);
+        'INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, description, start_time, end_time, checklist, serves_must, order_index, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      ).run(id, userId, course_id, goal_id || null, title, date, priority || 'must', 'pending', description || null, start_time || null, end_time || null, checklist ? JSON.stringify(checklist) : null, serves_must || null, 0, now, now);
       return JSON.stringify({ id, title, date, priority, message: 'Task created successfully' });
     }
 
@@ -58,12 +58,41 @@ export async function executeTool(
     }
 
     case 'list_goals': {
-      const { course_id } = args as { course_id?: string };
-      let query = 'SELECT g.id, g.title, g.description, g.deadline, g.status, g.course_id, c.name as course_name FROM goals g JOIN courses c ON g.course_id = c.id WHERE g.user_id = ?';
+      const { course_id, include_hierarchy } = args as { course_id?: string; include_hierarchy?: boolean };
+      let query = 'SELECT g.id, g.title, g.description, g.deadline, g.status, g.course_id, g.parent_id, c.name as course_name FROM goals g JOIN courses c ON g.course_id = c.id WHERE g.user_id = ?';
       const params: unknown[] = [userId];
       if (course_id) { query += ' AND g.course_id = ?'; params.push(course_id); }
       query += ' ORDER BY g.created_at DESC';
-      const goals = db.prepare(query).all(...params);
+      const goals = db.prepare(query).all(...params) as Array<Record<string, unknown>>;
+
+      if (include_hierarchy) {
+        // Enrich each goal with children and tasks
+        const goalMap = new Map<string, Record<string, unknown>>();
+        for (const g of goals) {
+          g.children = [];
+          g.tasks = [];
+          goalMap.set(g.id as string, g);
+        }
+        // Attach children
+        for (const g of goals) {
+          if (g.parent_id && goalMap.has(g.parent_id as string)) {
+            (goalMap.get(g.parent_id as string)!.children as unknown[]).push(g);
+          }
+        }
+        // Attach tasks to their goals
+        const allTasks = db.prepare(
+          'SELECT id, title, date, priority, status, goal_id, serves_must FROM tasks WHERE user_id = ? AND goal_id IS NOT NULL ORDER BY date'
+        ).all(userId) as Array<Record<string, unknown>>;
+        for (const t of allTasks) {
+          if (t.goal_id && goalMap.has(t.goal_id as string)) {
+            (goalMap.get(t.goal_id as string)!.tasks as unknown[]).push(t);
+          }
+        }
+        // Return only top-level goals (parent_id is null)
+        const topLevel = goals.filter(g => !g.parent_id);
+        return JSON.stringify(topLevel);
+      }
+
       return JSON.stringify(goals);
     }
 
@@ -75,6 +104,24 @@ export async function executeTool(
         'INSERT INTO goals (id, user_id, course_id, title, description, deadline, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
       ).run(id, userId, course_id, title, description || null, deadline || null, 'active', now, now);
       return JSON.stringify({ id, title, message: 'Goal created successfully' });
+    }
+
+    case 'create_sub_goal': {
+      const { title, parent_id, course_id, deadline, description } = args as Record<string, string | undefined>;
+      // Look up parent to inherit course_id if not provided
+      let resolvedCourseId = course_id;
+      if (!resolvedCourseId && parent_id) {
+        const parent = db.prepare('SELECT course_id FROM goals WHERE id = ? AND user_id = ?').get(parent_id, userId) as { course_id: string } | undefined;
+        if (!parent) return JSON.stringify({ error: 'Parent goal not found' });
+        resolvedCourseId = parent.course_id;
+      }
+      if (!resolvedCourseId) return JSON.stringify({ error: 'course_id required (could not inherit from parent)' });
+      const id = uuidv4();
+      const now = new Date().toISOString();
+      db.prepare(
+        'INSERT INTO goals (id, user_id, course_id, parent_id, title, description, deadline, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      ).run(id, userId, resolvedCourseId, parent_id || null, title, description || null, deadline || null, 'active', now, now);
+      return JSON.stringify({ id, title, parent_id, message: 'Sub-goal created successfully' });
     }
 
     case 'list_decks': {

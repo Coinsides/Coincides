@@ -27,7 +27,7 @@ export const toolDefinitions: ToolDefinition[] = [
   },
   {
     name: 'create_task',
-    description: 'Create a single task for the student.',
+    description: 'Create a single task for the student. For recommended/optional tasks, use serves_must to annotate which Must task it supports.',
     parameters: {
       type: 'object',
       properties: {
@@ -36,6 +36,11 @@ export const toolDefinitions: ToolDefinition[] = [
         priority: { type: 'string', enum: ['must', 'recommended', 'optional'], description: 'Task priority' },
         course_id: { type: 'string', description: 'Course ID' },
         goal_id: { type: 'string', description: 'Optional goal ID' },
+        description: { type: 'string', description: 'Brief task description' },
+        start_time: { type: 'string', description: 'Start time (ISO 8601 datetime)' },
+        end_time: { type: 'string', description: 'End time (ISO 8601 datetime)' },
+        checklist: { type: 'array', items: { type: 'object', properties: { text: { type: 'string' }, done: { type: 'boolean' } } }, description: 'Sub-steps checklist' },
+        serves_must: { type: 'string', description: 'For recommended/optional: which Must task this serves' },
       },
       required: ['title', 'date', 'priority', 'course_id'],
     },
@@ -53,11 +58,12 @@ export const toolDefinitions: ToolDefinition[] = [
   },
   {
     name: 'list_goals',
-    description: "List the student's goals, optionally filtered by course.",
+    description: "List the student's goals, optionally filtered by course. Use include_hierarchy=true to get full tree with children and tasks.",
     parameters: {
       type: 'object',
       properties: {
         course_id: { type: 'string', description: 'Filter by course ID' },
+        include_hierarchy: { type: 'boolean', description: 'If true, return goals with their sub-goals (children) and associated tasks' },
       },
       required: [],
     },
@@ -74,6 +80,21 @@ export const toolDefinitions: ToolDefinition[] = [
         description: { type: 'string', description: 'Optional description' },
       },
       required: ['title', 'course_id'],
+    },
+  },
+  {
+    name: 'create_sub_goal',
+    description: 'Create a sub-goal under an existing goal. Inherits course_id from parent if not specified.',
+    parameters: {
+      type: 'object',
+      properties: {
+        title: { type: 'string', description: 'Sub-goal title' },
+        parent_id: { type: 'string', description: 'Parent goal ID' },
+        course_id: { type: 'string', description: 'Course ID (optional, inherited from parent)' },
+        deadline: { type: 'string', description: 'Optional deadline (YYYY-MM-DD)' },
+        description: { type: 'string', description: 'Optional description' },
+      },
+      required: ['title', 'parent_id'],
     },
   },
   {
@@ -140,14 +161,14 @@ export const toolDefinitions: ToolDefinition[] = [
   },
   {
     name: 'create_proposal',
-    description: 'Create a proposal for the student to review and approve before applying. Use this for batch card creation, study plans, or schedule adjustments.',
+    description: 'Create a proposal for the student to review and approve before applying. Use for batch cards, study plans, goal breakdowns, or schedule adjustments.',
     parameters: {
       type: 'object',
       properties: {
         type: {
           type: 'string',
-          enum: ['batch_cards', 'study_plan', 'schedule_adjustment'],
-          description: 'Proposal type',
+          enum: ['batch_cards', 'study_plan', 'goal_breakdown', 'schedule_adjustment'],
+          description: 'Proposal type: batch_cards (flashcards), study_plan (daily tasks), goal_breakdown (big goal → sub-goals + tasks), schedule_adjustment (modify existing tasks)',
         },
         data: {
           type: 'object',
