@@ -14,9 +14,10 @@ import {
   isSameDay,
   isToday,
 } from 'date-fns';
-import { ChevronLeft, ChevronRight, X, Plus, Check, Sparkles, Edit3, Trash2, Clock, AlignLeft, CheckSquare } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Plus, Check, Sparkles, Edit3, Trash2, Clock, AlignLeft, CheckSquare, Target } from 'lucide-react';
 import { useTaskStore } from '@/stores/taskStore';
 import { useCourseStore } from '@/stores/courseStore';
+import { useGoalStore } from '@/stores/goalStore';
 import { useUIStore } from '@/stores/uiStore';
 import api from '@/services/api';
 import type { Task } from '@shared/types';
@@ -30,6 +31,8 @@ const PRIORITY_COLORS: Record<string, string> = {
   optional: 'var(--priority-optional)',
 };
 
+const DEFAULT_COURSE_COLOR = '#6366f1';
+
 export default function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -41,6 +44,7 @@ export default function CalendarPage() {
 
   const { tasks, fetchTasksByRange, deleteTask } = useTaskStore();
   const courses = useCourseStore((s) => s.courses);
+  const { goals, fetchGoals } = useGoalStore();
   const openModal = useUIStore((s) => s.openModal);
   const addToast = useUIStore((s) => s.addToast);
   const openAgentWithContext = useUIStore((s) => s.openAgentWithContext);
@@ -66,6 +70,11 @@ export default function CalendarPage() {
       courseFilter || undefined
     );
   }, [currentMonth, courseFilter, view]);
+
+  // Fetch goals for goal label lookup
+  useEffect(() => {
+    fetchGoals();
+  }, []);
 
   // Build calendar days
   const calendarDays = useMemo(() => {
@@ -99,6 +108,17 @@ export default function CalendarPage() {
     return map;
   }, [tasks]);
 
+  // Lookup helpers
+  const getCourse = (id: string) => courses.find((c) => c.id === id);
+  const getGoal = (id: string | null) => id ? goals.find((g) => g.id === id) : null;
+  const getCourseColor = (courseId: string) => getCourse(courseId)?.color || DEFAULT_COURSE_COLOR;
+
+  // Courses that have tasks in current view (for legend)
+  const activeCourses = useMemo(() => {
+    const courseIds = new Set(tasks.map((t) => t.course_id));
+    return courses.filter((c) => courseIds.has(c.id));
+  }, [tasks, courses]);
+
   const handleDayClick = async (date: Date) => {
     setSelectedDate(date);
     const dateStr = format(date, 'yyyy-MM-dd');
@@ -122,8 +142,6 @@ export default function CalendarPage() {
       addToast('error', 'Failed to update task');
     }
   };
-
-  const getCourse = (id: string) => courses.find((c) => c.id === id);
 
   const groupedDayTasks = useMemo(() => {
     const groups = { must: [] as Task[], recommended: [] as Task[], optional: [] as Task[] };
@@ -263,6 +281,18 @@ export default function CalendarPage() {
         </div>
       </div>
 
+      {/* Course color legend */}
+      {activeCourses.length > 0 && (
+        <div className={styles.courseLegend}>
+          {activeCourses.map((c) => (
+            <div key={c.id} className={styles.legendItem}>
+              <span className={styles.legendDot} style={{ backgroundColor: c.color || DEFAULT_COURSE_COLOR }} />
+              <span className={styles.legendLabel}>{c.code || c.name}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Grid */}
       {view === 'month' ? (
         <div className={styles.grid}>
@@ -290,7 +320,7 @@ export default function CalendarPage() {
                       <span
                         key={t.id}
                         className={styles.taskDot}
-                        style={{ backgroundColor: PRIORITY_COLORS[t.priority] || 'var(--text-muted)' }}
+                        style={{ backgroundColor: getCourseColor(t.course_id) }}
                       />
                     ))}
                   </div>
@@ -319,31 +349,37 @@ export default function CalendarPage() {
                   <span className={styles.weekColumnDay}>{format(day, 'EEE')}</span>
                   <span className={`${styles.weekColumnDate} ${isToday(day) ? styles.weekColumnDateToday : ''}`}>{format(day, 'd')}</span>
                 </div>
-                {/* All-day tasks */}
+                {/* All-day tasks — colored by course */}
                 {allDayTasks.length > 0 && (
                   <div className={styles.allDaySection}>
                     {allDayTasks.map((t) => {
-                      const course = getCourse(t.course_id);
+                      const courseColor = getCourseColor(t.course_id);
+                      const goal = getGoal(t.goal_id);
                       return (
                         <div
                           key={t.id}
                           className={`${styles.weekTask} ${t.status === 'completed' ? styles.weekTaskDone : ''}`}
-                          style={{ borderLeftColor: PRIORITY_COLORS[t.priority] || 'var(--text-muted)' }}
+                          style={{ borderLeftColor: courseColor }}
                           onContextMenu={(e) => handleContextMenu(e, t)}
                         >
                           <span className={styles.weekTaskTitle}>{t.title}</span>
-                          {course && <span className={styles.weekTaskCourse} style={{ color: course.color }}>{course.code || course.name}</span>}
+                          {goal && (
+                            <span className={styles.goalBadge} title={goal.title}>
+                              <Target size={9} />
+                              {goal.title.length > 12 ? goal.title.slice(0, 12) + '…' : goal.title}
+                            </span>
+                          )}
                         </div>
                       );
                     })}
                   </div>
                 )}
-                {/* Timed tasks */}
+                {/* Timed tasks — colored by course */}
                 <div className={styles.timedSection}>
                   {timedTasks.map((t) => {
                     const top = getTimePosition(t.start_time!);
                     const height = getBlockHeight(t.start_time!, t.end_time!);
-                    const bgColor = PRIORITY_COLORS[t.priority] || 'var(--text-muted)';
+                    const courseColor = getCourseColor(t.course_id);
                     return (
                       <div
                         key={t.id}
@@ -351,8 +387,8 @@ export default function CalendarPage() {
                         style={{
                           top: `${top}%`,
                           height: `${height}%`,
-                          backgroundColor: bgColor,
-                          borderLeftColor: bgColor,
+                          backgroundColor: courseColor + '22',
+                          borderLeftColor: courseColor,
                         }}
                         onContextMenu={(e) => handleContextMenu(e, t)}
                         title={`${t.title}\n${formatTimeRange(t.start_time!, t.end_time!)}`}
@@ -421,18 +457,21 @@ export default function CalendarPage() {
                       </div>
                       {group.map((task) => {
                         const course = getCourse(task.course_id);
+                        const goal = getGoal(task.goal_id);
+                        const courseColor = course?.color || DEFAULT_COURSE_COLOR;
                         const checklistDone = task.checklist?.filter((c) => c.done).length ?? 0;
                         const checklistTotal = task.checklist?.length ?? 0;
                         return (
                           <div
                             key={task.id}
                             className={styles.detailTaskItem}
+                            style={{ borderLeftColor: courseColor }}
                             onContextMenu={(e) => handleContextMenu(e, task)}
                           >
                             <button
                               className={`${styles.checkbox} ${task.status === 'completed' ? styles.checked : ''}`}
                               onClick={() => toggleTask(task)}
-                              style={{ width: 18, height: 18, border: `2px solid var(--border-default)`, borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: task.status === 'completed' ? 'var(--accent-primary)' : 'transparent', borderColor: task.status === 'completed' ? 'var(--accent-primary)' : undefined }}
+                              style={{ width: 18, height: 18, border: `2px solid var(--border-default)`, borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: task.status === 'completed' ? courseColor : 'transparent', borderColor: task.status === 'completed' ? courseColor : undefined }}
                             >
                               {task.status === 'completed' && <Check size={12} color="white" />}
                             </button>
@@ -441,7 +480,15 @@ export default function CalendarPage() {
                               onClick={(e) => { e.stopPropagation(); openModal('task-edit', { task }); }}
                               style={{ color: task.status === 'completed' ? 'var(--text-muted)' : 'var(--text-primary)', textDecoration: task.status === 'completed' ? 'line-through' : 'none' }}
                             >
-                              {task.title}
+                              <div className={styles.taskTitleRow}>
+                                {task.title}
+                                {goal && (
+                                  <span className={styles.goalLabel}>
+                                    <Target size={10} />
+                                    {goal.title}
+                                  </span>
+                                )}
+                              </div>
                               {(task.start_time || task.description || (checklistTotal > 0)) && (
                                 <div className={styles.taskMeta}>
                                   {task.start_time && task.end_time && (
@@ -466,7 +513,7 @@ export default function CalendarPage() {
                               )}
                             </div>
                             {course && (
-                              <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 6, backgroundColor: course.color + '18', color: course.color, fontWeight: 500 }}>
+                              <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 6, backgroundColor: courseColor + '18', color: courseColor, fontWeight: 500, flexShrink: 0 }}>
                                 {course.code || course.name}
                               </span>
                             )}
