@@ -1,7 +1,7 @@
 # Coincides 开发路线图
 
 > 最后更新：2026-03-19
-> 状态：v1.0 🎉 发布 | v1.1 ✅ 完成 | v1.2 📋 规划中
+> 状态：v1.0 🎉 发布 | v1.1 ✅ 完成 | v1.2 ✅ 完成 | v1.3 📋 规划中
 
 ---
 
@@ -163,10 +163,11 @@
 
 ---
 
-## v1.2（AI 交互重构 + Goal Manager + 新用户引导 + i18n）📋
+## v1.2（AI 交互重构 + Goal Manager + 新用户引导 + i18n）✅
 
-> 状态：规划完成，待开发
+> 状态：全部完成（Step 1-7），已打 Tag v1.2.0
 > 详细规划：[v1.2-plan.md](releases/v1.2-plan.md)
+> 变更日志：[CHANGELOG-v1.2.md](releases/CHANGELOG-v1.2.md)
 
 - Step 1：System Prompt 重写（MWF 脚手架 + 设计宪法）
 - Step 2：Agent 工具升级（目标拆解 + 优先级标注）
@@ -175,6 +176,21 @@
 - Step 5：新用户引导流程
 - Step 6：i18n 国际化框架（中/英）
 - Step 7：Agent 报错排查（A-1 遗留项）
+
+---
+
+## v1.3（工作流引擎 + Time Block + L1 入驻流 + 设计宪法审计）📋
+
+> 状态：规划完成，待开发
+> 详细规划：[v1.3-plan.md](releases/v1.3-plan.md)
+
+- Step 1：Time Block 数据模型 + CRUD API
+- Step 2：Time Block 前端 UI（Settings + 日历集成）
+- Step 3：Agent 排期引擎 + Time Block 感知
+- Step 4：L1 入驻流全链路
+- Step 5：设计宪法全面审计
+- Step 6：DailyBrief 升级 + serves_must 可视化
+- Step 7：补全 + 集成测试
 
 ---
 
