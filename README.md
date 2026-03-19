@@ -53,62 +53,76 @@ Built around the **Minimum Working Flow** philosophy: maintain learning continui
 
 ### Prerequisites
 
-- **Node.js** 18+ (tested with 20.x)
-- **npm** 9+
-- **Anthropic API Key** — get one at [console.anthropic.com](https://console.anthropic.com)
-- **Voyage AI API Key** (optional, for semantic search) — get one at [dash.voyageai.com](https://dash.voyageai.com)
+- **Node.js** 18+ (recommended 20.x) — download at [nodejs.org](https://nodejs.org)
+- **npm** 9+ (comes with Node.js)
+- **Anthropic API Key** — sign up at [console.anthropic.com](https://console.anthropic.com), go to API Keys and create one
+- **Voyage AI API Key** (optional, enables semantic search) — sign up at [dash.voyageai.com](https://dash.voyageai.com)
 
-### Installation
+### 1. Clone & Install
 
 ```bash
 # Clone the repo
 git clone https://github.com/Coinsides/Coincides.git
 cd Coincides
 
-# Install all dependencies (root + server + client)
-npm run setup
+# Install dependencies for server
+cd server
+npm install
+
+# Install dependencies for client
+cd ../client
+npm install
 ```
 
-### Configuration
+### 2. Configure API Keys
 
-Create a `.env` file in the `server/` directory:
+Create a file called `.env` inside the `server/` folder:
 
-```bash
+```
 # server/.env
 
-# Required — Anthropic API key for Mr. Zero
-ANTHROPIC_API_KEY=sk-ant-xxxxx
+# Required — Anthropic API key for the AI agent (Mr. Zero)
+ANTHROPIC_API_KEY=sk-ant-api03-xxxxx
 
-# Optional — Voyage AI for semantic search & RAG
+# Optional — Voyage AI key for semantic search & document RAG
 VOYAGE_API_KEY=pa-xxxxx
-
-# Optional — Server port (default: 3001)
-PORT=3001
 ```
 
-### Running
+> **How to get an Anthropic key:** Go to [console.anthropic.com](https://console.anthropic.com) → Sign up → API Keys → Create Key. You need to add credit to your account for API usage.
+
+### 3. Start the App
+
+You need **two terminal windows** (or two tabs):
+
+**Terminal 1 — Start the backend:**
 
 ```bash
-# Terminal 1 — Start the backend
-npm run dev:server
-
-# Terminal 2 — Start the frontend
-npm run dev:client
+cd Coincides/server
+npx tsx src/index.ts
 ```
 
-Or run both at once:
+You should see: `Server running on port 3001`
+
+**Terminal 2 — Start the frontend:**
 
 ```bash
-npm run dev:all
+cd Coincides/client
+npm run dev
 ```
 
-Then open **http://localhost:5173** in your browser.
+You should see: `Local: http://localhost:5173/`
 
-### First Launch
+### 4. Open in Browser
 
-1. Register an account (data stays local in SQLite)
-2. Follow the onboarding: create a course → upload materials → set your time blocks → let AI plan
-3. Start chatting with Mr. Zero to build your study plan
+Go to **http://localhost:5173** — you're in.
+
+### 5. First Time Setup
+
+1. **Register** — Create an account (everything stays on your computer, no cloud)
+2. **Create a course** — e.g. "Linear Algebra"
+3. **Upload materials** — Drop your lecture PDFs or notes
+4. **Set your schedule** — Drag on the calendar to mark when you study (optional)
+5. **Talk to Mr. Zero** — Ask the AI to build you a study plan. It will create a Proposal for you to review and approve.
 
 ---
 
