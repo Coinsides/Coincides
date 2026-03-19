@@ -112,6 +112,7 @@ Course
 - Description of what the goal covers
 - Can batch-generate tasks (one-time and recurring)
 - Status tracking: percentage of child tasks completed
+- **Goal Dependencies (v1.3)**: Goals can have prerequisite goals (same course). DAG structure with DFS cycle detection. Agent respects dependency order when scheduling.
 
 #### Exam Mode
 - Activated manually or suggested by Agent when a goal's deadline is approaching
@@ -284,7 +285,46 @@ When tasks from multiple courses overlap on the same day:
 - Student can manually set course weight ("This semester, math is most important")
 - Agent considers all factors when generating Proposals
 
-### 3.9 User System
+### 3.9 Time Block 系统 (v1.3)
+
+用户可以定义每周的时间块模板，标记学习/睡眠/自定义时段。
+
+#### 周模板
+- 每个 Time Block 绑定星期几 + 开始/结束时间
+- 类型：study（学习）、sleep（睡眠）、custom（自定义）
+- 支持拖拽框选创建（日历周视图，30 分钟网格对齐）
+- 支持跨午夜时间块（如 23:00-01:00）
+
+#### 单日覆盖
+- 可修改某一天的时间块，不影响周模板
+- start_time 为 null 表示当天删除该 Block
+
+#### Agent 集成
+- Agent 排期时自动读取 Time Block 计算每日可用学习分钟数
+- 无 Time Block 的用户退化为每天 120 分钟默认容量
+- 缩短 Time Block 时弹出中性提示，用户可选“重新排期”或“忽略”
+
+#### 设计宪法合规
+- 无 Time Block 时不提示设置（§2）
+- 重叠不阻止保存，仅视觉提示（§2）
+- 不向用户暴露 estimated_minutes（§3）
+
+### 3.10 L1 入驻流 (v1.3)
+
+新用户首次登录后的引导流程，4 步完成初始设置。
+
+#### Onboarding 步骤
+1. 创建课程
+2. 上传学习材料
+3. 设置时间安排（引导到日历周视图框选 Time Block，可跳过）
+4. 让 AI 帮你规划（打开 Agent Panel，带 L1 上下文）
+
+#### L1 Protocol
+- Agent 侦测到新用户上下文时激活 6 步参数收集流
+- 每次只问一个问题，不堆积
+- 收集完成后自动生成 Proposal（包含 scheduled_date）
+
+### 3.11 User System
 
 #### Authentication
 - Email + password registration/login

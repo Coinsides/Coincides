@@ -156,7 +156,15 @@ export function getDailyCapacities(userId: string, startDate: string, endDate: s
       if (b.type === 'study') {
         const [sh, sm] = st.split(':').map(Number);
         const [eh, em] = et.split(':').map(Number);
-        studyRanges.push({ start: sh * 60 + sm, end: eh * 60 + em });
+        const sMin = sh * 60 + sm;
+        const eMin = eh * 60 + em;
+        if (eMin > sMin) {
+          studyRanges.push({ start: sMin, end: eMin });
+        } else {
+          // Midnight-crossing block: split into two ranges
+          if (sMin < 1440) studyRanges.push({ start: sMin, end: 1440 });
+          if (eMin > 0) studyRanges.push({ start: 0, end: eMin });
+        }
       }
     }
 
@@ -234,8 +242,13 @@ export function scheduleTasksAcrossDays(input: ScheduleInput): ScheduleResult {
     for (const cap of daily_capacities) {
       const remaining = dayBudget.get(cap.date) || 0;
 
-      // Must tasks: strict capacity check
-      if (task.priority === 'must' && remaining < est && cap.available_study_minutes > 0) {
+      // Strict capacity check (only when user has Time Blocks)
+      if (cap.available_study_minutes > 0 && remaining < est) {
+        continue;
+      }
+
+      // Soft cap in fallback mode (no Time Blocks): don't overload a single day
+      if (cap.available_study_minutes === 0 && remaining <= 0) {
         continue;
       }
 

@@ -36,21 +36,40 @@ function timeToMinutes(t: string): number {
 }
 
 /**
+ * Convert a time block's start/end to minute ranges.
+ * Handles midnight-crossing blocks (e.g. 23:00–01:00) by splitting into two ranges.
+ */
+function toMinuteRanges(startTime: string, endTime: string): Array<{ start: number; end: number }> {
+  const s = timeToMinutes(startTime);
+  const e = timeToMinutes(endTime);
+  if (e > s) return [{ start: s, end: e }];
+  // Crosses midnight: split into [s, 1440) + [0, e)
+  const ranges: Array<{ start: number; end: number }> = [];
+  if (s < 1440) ranges.push({ start: s, end: 1440 });
+  if (e > 0) ranges.push({ start: 0, end: e });
+  return ranges;
+}
+
+/**
  * Detect overlapping time blocks. Returns pairs of overlapping IDs.
  * Does NOT prevent saving — visual-only concern (Design Constitution §2).
  */
 export function detectOverlaps(blocks: Array<{ id: string; start_time: string; end_time: string }>): Array<[string, string]> {
+  // Expand each block into minute ranges (handles midnight-crossing)
+  const expanded = blocks.map(b => ({
+    id: b.id,
+    ranges: toMinuteRanges(b.start_time, b.end_time),
+  }));
+
   const overlaps: Array<[string, string]> = [];
-  for (let i = 0; i < blocks.length; i++) {
-    for (let j = i + 1; j < blocks.length; j++) {
-      const a = blocks[i], b = blocks[j];
-      const aStart = timeToMinutes(a.start_time);
-      const aEnd = timeToMinutes(a.end_time);
-      const bStart = timeToMinutes(b.start_time);
-      const bEnd = timeToMinutes(b.end_time);
-      // Overlap = ranges intersect
-      if (aStart < bEnd && bStart < aEnd) {
-        overlaps.push([a.id, b.id]);
+  for (let i = 0; i < expanded.length; i++) {
+    for (let j = i + 1; j < expanded.length; j++) {
+      // Check if any range pair overlaps
+      const hasOverlap = expanded[i].ranges.some(ar =>
+        expanded[j].ranges.some(br => ar.start < br.end && br.start < ar.end)
+      );
+      if (hasOverlap) {
+        overlaps.push([expanded[i].id, expanded[j].id]);
       }
     }
   }
@@ -115,21 +134,16 @@ export function getResolvedBlocksForDate(userId: string, date: string): Resolved
   return resolved;
 }
 
-/**
- * Get available study minutes for a specific date.
- * Only counts type='study' blocks; merges overlapping ranges (union).
- */
 export function getAvailableStudyMinutes(userId: string, date: string): number {
   const blocks = getResolvedBlocksForDate(userId, date)
     .filter(b => b.type === 'study');
 
   if (blocks.length === 0) return 0;
 
-  // Convert to minute ranges, merge overlapping, sum
-  const ranges = blocks.map(b => ({
-    start: timeToMinutes(b.start_time),
-    end: timeToMinutes(b.end_time),
-  })).sort((a, b) => a.start - b.start);
+  // Convert to minute ranges (handles midnight-crossing), merge overlapping, sum
+  const ranges = blocks
+    .flatMap(b => toMinuteRanges(b.start_time, b.end_time))
+    .sort((a, b) => a.start - b.start);
 
   // Merge overlapping ranges
   const merged: Array<{ start: number; end: number }> = [ranges[0]];

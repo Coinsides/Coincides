@@ -405,6 +405,57 @@ Spaced Repetition, Interleaving, Active Recall, Feynman Technique, Pomodoro, Spi
 
 **Index:** `(user_id, date)`
 
+### 2.21 TimeBlock (v1.3)
+
+周模板时间块，定义用户每周的学习/睡眠/自定义时段。
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | TEXT | PK | UUID |
+| user_id | TEXT | FK → users(id) CASCADE | 所属用户 |
+| label | TEXT | NOT NULL | 时间块标签（如“上午学习”） |
+| type | TEXT | NOT NULL DEFAULT 'study' | 类型：study / sleep / custom |
+| day_of_week | INTEGER | NOT NULL (0-6) | 星期几（0=周日） |
+| start_time | TEXT | NOT NULL (HH:MM) | 开始时间 |
+| end_time | TEXT | NOT NULL (HH:MM) | 结束时间 |
+| color | TEXT | | 自定义颜色 |
+| created_at | TEXT | DEFAULT now | |
+| updated_at | TEXT | DEFAULT now | |
+
+**Index:** `(user_id, day_of_week)`
+
+### 2.22 TimeBlockOverride (v1.3)
+
+单日覆盖，允许用户修改某一天的时间块（不影响周模板）。
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | TEXT | PK | UUID |
+| user_id | TEXT | FK → users(id) CASCADE | 所属用户 |
+| time_block_id | TEXT | FK → time_blocks(id) CASCADE | 关联的周模板时间块 |
+| override_date | TEXT | NOT NULL (YYYY-MM-DD) | 覆盖日期 |
+| start_time | TEXT | nullable (null = 当天删除) | 覆盖后开始时间 |
+| end_time | TEXT | nullable | 覆盖后结束时间 |
+| created_at | TEXT | DEFAULT now | |
+
+**Index:** `(user_id, override_date)`
+**Unique:** `(time_block_id, override_date)`
+
+### 2.23 GoalDependency (v1.3)
+
+目标依赖关系（DAG 兼容，v1.3 仅用线性链）。
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | TEXT | PK | UUID |
+| goal_id | TEXT | FK → goals(id) CASCADE | 当前目标 |
+| depends_on_goal_id | TEXT | FK → goals(id) CASCADE | 前置目标 |
+| created_at | TEXT | DEFAULT now | |
+
+**Index:** `(goal_id)`, `(depends_on_goal_id)`
+**Unique:** `(goal_id, depends_on_goal_id)`
+**环检测:** DFS 深度优先搜索，插入前检查是否会形成环
+
 ---
 
 ## 3. Virtual Tables

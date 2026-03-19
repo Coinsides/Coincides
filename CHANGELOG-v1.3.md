@@ -120,3 +120,28 @@
 
 ### i18n
 - `client/src/locales/{en,zh}/translation.json`：新增 `dailyBriefPage` 键（studySchedule、noStudyBlocks）
+
+---
+
+## Step 7 — 边界修复 + 集成测试 + 文档更新
+### 边界修复
+- **跨午夜 Time Block**：新增 `toMinuteRanges()` 函数，将 23:00-01:00 类型的块拆分为 [23:00, 24:00) + [00:00, 01:00)，修复 `getAvailableStudyMinutes`、`detectOverlaps`、`getDailyCapacities` 三处计算
+- **排期引擎容量满**：无 Time Block 用户退化为 120 min/天软上限，防止全部 Task 堆积在第一天
+- **Goal 依赖级联删除**：已通过 `ON DELETE CASCADE` 外键 + `PRAGMA foreign_keys = ON` 保证
+
+### 代码审查（9 场景集成测试）
+- ✅ 新用户全链路：Onboarding 4 步 → Agent L1 Protocol → Proposal → Apply
+- ✅ 老用户补充 Time Block：日历框选 → Agent 重新排期
+- ✅ 跨课程排期：拓扑排序 + 课程着色
+- ✅ 单日覆盖：Override CRUD + 排期引擎读取
+- ✅ 无 Time Block 用户：120 min 软上限退化
+- ✅ Goal 依赖排期：Kahn 拓扑排序，前置目标 Task 全部在后续目标之前
+- ✅ Time Block 缩短重排：中性提示 + 只动 pending Task
+- ✅ Time Block 重叠：叠加混合色 + ℹ️ 图标（不阻止保存）
+- ✅ 环检测：DFS 深度优先搜索，拒绝环形依赖 + 友好提示
+
+### 文档更新
+- `docs/DATA_MODEL.md`：新增 2.21 TimeBlock、2.22 TimeBlockOverride、2.23 GoalDependency 表文档
+- `docs/Coincides-Roadmap.md`：v1.3 标记完成（✅），更新状态行
+- `docs/PRD.md`：新增 3.9 Time Block 系统、3.10 L1 入驻流，Goal Dependencies 描述
+- `docs/workflow/Coincides-Onboarding.md`：更新状态为 v1.3 完成

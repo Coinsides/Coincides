@@ -1,7 +1,7 @@
 # Coincides 开发路线图
 
 > 最后更新：2026-03-19
-> 状态：v1.0 🎉 发布 | v1.1 ✅ 完成 | v1.2 ✅ 完成 | v1.3 📋 规划中
+> 状态：v1.0 🎉 发布 | v1.1 ✅ 完成 | v1.2 ✅ 完成 | v1.3 ✅ 完成
 
 ---
 
@@ -179,18 +179,19 @@
 
 ---
 
-## v1.3（工作流引擎 + Time Block + L1 入驻流 + 设计宪法审计）📋
+## v1.3（工作流引擎 + Time Block + L1 入驻流 + 设计宪法审计）✅
 
-> 状态：规划完成，待开发
+> 状态：全部完成（Step 1-7）
 > 详细规划：[v1.3-plan.md](releases/v1.3-plan.md)
+> 变更日志：[CHANGELOG-v1.3.md](../CHANGELOG-v1.3.md)
 
-- Step 1：Time Block 数据模型 + CRUD API
-- Step 2：Time Block 前端 UI（Settings + 日历集成）
-- Step 3：Agent 排期引擎 + Time Block 感知
-- Step 4：L1 入驻流全链路
-- Step 5：设计宪法全面审计
-- Step 6：DailyBrief 升级 + serves_must 可视化
-- Step 7：补全 + 集成测试
+- Step 1：Time Block 数据模型 + CRUD API ✅
+- Step 2：Time Block 前端 UI（日历周视图 + 拖拽框选）+ Goal 依赖 UI ✅
+- Step 3：Agent 排期引擎 + Time Block 感知 + 增量重排 ✅
+- Step 4：L1 入驻流全链路（4 步 Onboarding + L1 Protocol）✅
+- Step 5：设计宪法全面审计（3 个 P0 修复）✅
+- Step 6：DailyBrief 升级（time_blocks + serves_must）✅
+- Step 7：边界修复 + 集成测试 + 文档更新 ✅
 
 ---
 
