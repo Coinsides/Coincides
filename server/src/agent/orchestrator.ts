@@ -71,6 +71,7 @@ export async function* runAgent(
   ).get(userId, today) as EnergyRow | undefined;
 
   // 3. Build system prompt
+  const parsedSettings = JSON.parse(user.settings || '{}');
   const systemPrompt = buildSystemPrompt(agentName, {
     userName: user.name,
     courses,
@@ -78,6 +79,7 @@ export async function* runAgent(
     documentSummaries: docSummaries,
     currentDate: today,
     energyLevel: energyStatus?.energy_level,
+    language: parsedSettings.language,
   });
 
   // 4. Get conversation history

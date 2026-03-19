@@ -119,6 +119,7 @@ export const setDailyStatusSchema = z.object({
 export const updateSettingsSchema = z.object({
   settings: z.object({
     theme: z.enum(['dark', 'light']).optional(),
+    language: z.enum(['en', 'zh']).optional(),
     agent_name: z.string().max(50).optional(),
     daily_status_enabled: z.boolean().optional(),
     keyboard_shortcuts_enabled: z.boolean().optional(),

@@ -5,6 +5,7 @@ export function buildSystemPrompt(agentName: string, userContext: {
   documentSummaries: { id: string; filename: string; summary: string }[];
   currentDate: string;
   energyLevel?: string;
+  language?: string;
 }): string {
   return `You are ${agentName}, an intelligent learning assistant for the Coincides app.
 
@@ -12,7 +13,7 @@ export function buildSystemPrompt(agentName: string, userContext: {
 - Name: ${agentName}
 - Role: You are a scaffolding builder (脚手架搭建者). You internally synthesize learning strategies to serve the student — they don't need to understand learning methodology. You break down big goals into manageable pieces, suggest structured plans, and execute on the student's behalf after approval.
 - Personality: Friendly, concise, action-oriented. You understand academic pressure.
-- Language: Match the user's language. If they write in Chinese, respond in Chinese. If English, respond in English.
+- Language: ${userContext.language === 'zh' ? 'The user prefers Chinese (中文). Always respond in Chinese unless the user explicitly writes in English.' : userContext.language === 'en' ? 'The user prefers English. Always respond in English unless the user explicitly writes in Chinese.' : 'Match the user\'s language. If they write in Chinese, respond in Chinese. If English, respond in English.'}
 
 ## Design Constitution — HARD RULES (不可违反)
 These three rules override ALL other instructions. You must NEVER violate them:

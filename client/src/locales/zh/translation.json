@@ -1,0 +1,95 @@
+{
+  "nav": {
+    "dailyBrief": "每日简报",
+    "calendar": "日历",
+    "goals": "目标",
+    "courses": "课程",
+    "decks": "卡组",
+    "review": "复习",
+    "statistics": "统计",
+    "settings": "设置"
+  },
+  "sidebar": {
+    "courses": "课程",
+    "noCourses": "暂无课程"
+  },
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "delete": "删除",
+    "edit": "编辑",
+    "create": "创建",
+    "close": "关闭",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "confirm": "确认",
+    "search": "搜索",
+    "allCourses": "全部课程",
+    "noResults": "未找到结果"
+  },
+  "goals": {
+    "title": "目标",
+    "newGoal": "新建目标",
+    "noGoals": "暂无目标",
+    "noGoalsDescription": "创建你的第一个目标，开始追踪学习进度。",
+    "subGoals": "{{count}} 个子目标",
+    "subGoals_plural": "{{count}} 个子目标",
+    "addTask": "添加任务",
+    "addSubGoal": "添加子目标",
+    "examMode": "考试模式",
+    "disableExamMode": "关闭考试模式",
+    "enableExamMode": "开启考试模式",
+    "goalDeleted": "目标已删除",
+    "goalMarkedAs": "目标已标记为{{status}}",
+    "active": "进行中",
+    "completed": "已完成",
+    "paused": "已暂停"
+  },
+  "calendar": {
+    "title": "日历",
+    "month": "月视图",
+    "week": "周视图",
+    "noTasks": "这一天没有任务",
+    "addTask": "添加任务",
+    "taskDeleted": "任务已删除"
+  },
+  "onboarding": {
+    "welcome": "欢迎使用 Coincides！",
+    "step1Description": "你在学什么？先创建一门课程吧——所有的资料、目标和任务都在课程里。",
+    "step1Action": "创建课程",
+    "step2Title": "添加学习材料",
+    "step2Description": "上传教材、课件或笔记到课程中。AI 可以帮你生成闪卡和学习计划。",
+    "step2Action": "前往课程",
+    "step3Title": "和 Mr. Zero 聊聊",
+    "step3Description": "按 Ctrl+J（或 Cmd+J）打开 AI 助手。告诉它你的学习目标，它会帮你拆解成可执行的步骤。",
+    "step3Action": "打开 AI 助手",
+    "skipStep": "跳过这一步",
+    "finish": "完成"
+  },
+  "settings": {
+    "title": "设置",
+    "appearance": "外观",
+    "theme": "主题",
+    "dark": "深色",
+    "light": "浅色",
+    "language": "语言",
+    "english": "English",
+    "chinese": "中文",
+    "aiProvider": "AI 服务商",
+    "agentName": "助手名称",
+    "apiKey": "API 密钥",
+    "model": "模型",
+    "embeddingProvider": "嵌入服务商",
+    "saved": "设置已保存"
+  },
+  "auth": {
+    "login": "登录",
+    "register": "注册",
+    "email": "邮箱",
+    "password": "密码",
+    "name": "姓名",
+    "loginFailed": "登录失败",
+    "registerFailed": "注册失败"
+  }
+}

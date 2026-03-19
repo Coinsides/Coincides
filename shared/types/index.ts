@@ -110,6 +110,7 @@ export interface User {
 
 export interface UserSettings {
   theme?: 'dark' | 'light';
+  language?: 'en' | 'zh';
   agent_name?: string;
   ai_providers?: Record<string, AIProviderConfig>;
   active_provider?: string;

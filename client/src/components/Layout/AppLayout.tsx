@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
   Home,
@@ -22,14 +23,14 @@ import Onboarding from '@/components/Onboarding/Onboarding';
 import styles from './AppLayout.module.css';
 
 const navItems = [
-  { to: '/', icon: Home, label: 'Daily Brief' },
-  { to: '/calendar', icon: Calendar, label: 'Calendar' },
-  { to: '/goals', icon: Target, label: 'Goals' },
-  { to: '/courses', icon: BookOpen, label: 'Courses' },
-  { to: '/decks', icon: Layers, label: 'Decks' },
-  { to: '/review', icon: RotateCcw, label: 'Review' },
-  { to: '/statistics', icon: BarChart3, label: 'Statistics' },
-  { to: '/settings', icon: Settings, label: 'Settings' },
+  { to: '/', icon: Home, labelKey: 'nav.dailyBrief' },
+  { to: '/calendar', icon: Calendar, labelKey: 'nav.calendar' },
+  { to: '/goals', icon: Target, labelKey: 'nav.goals' },
+  { to: '/courses', icon: BookOpen, labelKey: 'nav.courses' },
+  { to: '/decks', icon: Layers, labelKey: 'nav.decks' },
+  { to: '/review', icon: RotateCcw, labelKey: 'nav.review' },
+  { to: '/statistics', icon: BarChart3, labelKey: 'nav.statistics' },
+  { to: '/settings', icon: Settings, labelKey: 'nav.settings' },
 ];
 
 export default function AppLayout() {
@@ -45,6 +46,7 @@ export default function AppLayout() {
 
   const toggleAgentPanel = useUIStore((s) => s.toggleAgentPanel);
   const toggleShortcutsPanel = useUIStore((s) => s.toggleShortcutsPanel);
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     loadUser();
@@ -57,6 +59,13 @@ export default function AppLayout() {
       document.documentElement.setAttribute('data-theme', user.settings.theme);
     }
   }, [user?.settings?.theme]);
+
+  // Sync language setting
+  useEffect(() => {
+    if (user?.settings?.language && i18n.language !== user.settings.language) {
+      i18n.changeLanguage(user.settings.language);
+    }
+  }, [user?.settings?.language]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -105,7 +114,7 @@ export default function AppLayout() {
         </div>
 
         <nav className={styles.nav}>
-          {navItems.map(({ to, icon: Icon, label }) => (
+          {navItems.map(({ to, icon: Icon, labelKey }) => (
             <NavLink
               key={to}
               to={to}
@@ -115,14 +124,14 @@ export default function AppLayout() {
               }
             >
               <Icon size={18} />
-              {sidebarOpen && <span className={styles.navLabel}>{label}</span>}
+              {sidebarOpen && <span className={styles.navLabel}>{t(labelKey)}</span>}
             </NavLink>
           ))}
 
           {sidebarOpen && (
             <>
               <div className={styles.sectionLabel}>
-                <span>Courses</span>
+                <span>{t('sidebar.courses')}</span>
                 <button onClick={() => openModal('course-create')}>
                   <Plus size={14} />
                 </button>
@@ -142,7 +151,7 @@ export default function AppLayout() {
               ))}
               {courses.length === 0 && (
                 <div style={{ padding: '4px 16px', fontSize: 12, color: 'var(--text-muted)' }}>
-                  No courses yet
+                  {t('sidebar.noCourses')}
                 </div>
               )}
             </>

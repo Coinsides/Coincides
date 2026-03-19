@@ -1,0 +1,95 @@
+{
+  "nav": {
+    "dailyBrief": "Daily Brief",
+    "calendar": "Calendar",
+    "goals": "Goals",
+    "courses": "Courses",
+    "decks": "Decks",
+    "review": "Review",
+    "statistics": "Statistics",
+    "settings": "Settings"
+  },
+  "sidebar": {
+    "courses": "Courses",
+    "noCourses": "No courses yet"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "close": "Close",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "confirm": "Confirm",
+    "search": "Search",
+    "allCourses": "All courses",
+    "noResults": "No results found"
+  },
+  "goals": {
+    "title": "Goals",
+    "newGoal": "New Goal",
+    "noGoals": "No goals yet",
+    "noGoalsDescription": "Create your first goal to start tracking your study progress.",
+    "subGoals": "{{count}} sub-goal",
+    "subGoals_plural": "{{count}} sub-goals",
+    "addTask": "Add task",
+    "addSubGoal": "Add sub-goal",
+    "examMode": "Exam Mode",
+    "disableExamMode": "Disable exam mode",
+    "enableExamMode": "Enable exam mode",
+    "goalDeleted": "Goal deleted",
+    "goalMarkedAs": "Goal marked as {{status}}",
+    "active": "active",
+    "completed": "completed",
+    "paused": "paused"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "month": "Month",
+    "week": "Week",
+    "noTasks": "No tasks for this day",
+    "addTask": "Add task",
+    "taskDeleted": "Task deleted"
+  },
+  "onboarding": {
+    "welcome": "Welcome to Coincides!",
+    "step1Description": "What are you studying? Start by creating a course — it's where all your materials, goals, and tasks live.",
+    "step1Action": "Create a Course",
+    "step2Title": "Add Your Materials",
+    "step2Description": "Upload textbooks, slides, or notes into your course. The AI can generate flashcards and study plans from them.",
+    "step2Action": "Go to Courses",
+    "step3Title": "Chat with Mr. Zero",
+    "step3Description": "Press Ctrl+J (or Cmd+J) to open the AI assistant. Tell it your learning goal, and it will help you break it down into actionable steps.",
+    "step3Action": "Open AI Assistant",
+    "skipStep": "Skip this step",
+    "finish": "Finish"
+  },
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "theme": "Theme",
+    "dark": "Dark",
+    "light": "Light",
+    "language": "Language",
+    "english": "English",
+    "chinese": "中文",
+    "aiProvider": "AI Provider",
+    "agentName": "Agent Name",
+    "apiKey": "API Key",
+    "model": "Model",
+    "embeddingProvider": "Embedding Provider",
+    "saved": "Settings saved"
+  },
+  "auth": {
+    "login": "Log In",
+    "register": "Sign Up",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "loginFailed": "Login failed",
+    "registerFailed": "Registration failed"
+  }
+}

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -40,6 +41,7 @@ export default function SettingsPage() {
   const addToast = useUIStore((s) => s.addToast);
   const navigate = useNavigate();
 
+  const { t, i18n } = useTranslation();
   const settings = user?.settings || {};
   const [agentName, setAgentName] = useState(settings.agent_name || 'Mr. Zero');
   const [activeProvider, setActiveProvider] = useState(settings.active_provider || 'anthropic');
@@ -204,6 +206,29 @@ export default function SettingsPage() {
                 onClick={() => handleTheme('light')}
               >
                 Light
+              </button>
+            </div>
+          </div>
+          <div className={styles.row}>
+            <span className={styles.rowLabel}>Language</span>
+            <div className={styles.themeButtons}>
+              <button
+                className={`${styles.themeBtn} ${(settings.language || 'en') === 'en' ? styles.active : ''}`}
+                onClick={async () => {
+                  await updateSettings({ language: 'en' });
+                  i18n.changeLanguage('en');
+                }}
+              >
+                English
+              </button>
+              <button
+                className={`${styles.themeBtn} ${settings.language === 'zh' ? styles.active : ''}`}
+                onClick={async () => {
+                  await updateSettings({ language: 'zh' });
+                  i18n.changeLanguage('zh');
+                }}
+              >
+                中文
               </button>
             </div>
           </div>
