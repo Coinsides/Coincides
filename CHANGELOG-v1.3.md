@@ -38,3 +38,25 @@
   - 环检测错误友好提示
 - **i18n**：中英双语新增 `timeBlocks` + `dependencies` 翻译键
 - 缩短重排提示 i18n 文案就位（`shrinkWarning` / `reschedule` / `ignore`）
+
+---
+
+## Step 3 — Agent 排期引擎 + Time Block 感知
+### 新增
+- `server/src/agent/tools/definitions.ts`：新增 `get_time_blocks` 和 `get_goal_dependencies` 工具定义
+  - `get_time_blocks`：按日期/周/纯模板三种模式返回 Time Block + 每日可用学习分钟数
+  - `get_goal_dependencies`：按 goal_id/course_id 返回依赖关系，支持 `include_chain` 递归链
+- `server/src/agent/tools/executor.ts`：两个新工具的执行逻辑
+  - `get_time_blocks`：解析周模板 + Override 合并，计算 study 类型总分钟数
+  - `get_goal_dependencies`：查询依赖关系 + 可选递归链遍历
+- `server/src/agent/scheduling.ts`：排期引擎
+  - `scheduleTasksAcrossDays()`：贪心排期算法（Goal 依赖拓扑序 × 优先级 × 日容量）
+  - `getGoalTopologicalOrder()`：Kahn 算法拓扑排序（尊重前置依赖）
+  - `getDailyCapacities()`：基于 Time Block 计算日期范围内每天的可用学习分钟数
+- `server/src/agent/system-prompt.ts`：
+  - 新增「排期协议 Scheduling Protocol」：排期前必须获取 Time Block + Goal 依赖，只分配到天，时间估算不暴露
+  - 新增「重排协议 Rescheduling Protocol」：增量重排流程，3 个中性选项让用户选择，只动 pending Task
+
+### 修改
+- `server/src/agent/tools/definitions.ts`：`create_proposal` 描述更新，study_plan items 新增 `scheduled_date` 字段说明
+- `server/src/routes/proposals.ts`：study_plan 和 goal_breakdown 的 Apply 逻辑支持 `scheduled_date`（优先于 `date`，向后兼容）

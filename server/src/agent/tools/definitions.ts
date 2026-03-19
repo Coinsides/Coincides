@@ -168,17 +168,17 @@ export const toolDefinitions: ToolDefinition[] = [
         type: {
           type: 'string',
           enum: ['batch_cards', 'study_plan', 'goal_breakdown', 'schedule_adjustment'],
-          description: 'Proposal type: batch_cards (flashcards), study_plan (daily tasks), goal_breakdown (big goal → sub-goals + tasks), schedule_adjustment (modify existing tasks)',
+          description: 'Proposal type: batch_cards (flashcards), study_plan (daily tasks with scheduled_date), goal_breakdown (big goal → sub-goals + tasks), schedule_adjustment (modify existing tasks)',
         },
         data: {
           type: 'object',
           properties: {
             title: { type: 'string', description: 'Proposal title' },
-            description: { type: 'string', description: 'Brief description of what this proposal does' },
+            description: { type: 'string', description: 'Brief description of what this proposal does. NEVER include time estimates.' },
             items: {
               type: 'array',
               items: { type: 'object' },
-              description: 'Array of items to create/modify. For batch_cards: card drafts. For study_plan: task drafts. For schedule_adjustment: task modifications.',
+              description: 'Array of items to create/modify. For study_plan: each item should include { title, course_id, priority, goal_id, scheduled_date (YYYY-MM-DD), description, serves_must }. The scheduled_date determines which day the task lands on in the calendar. For batch_cards: card drafts. For schedule_adjustment: { task_id, date, priority, status }.',
             },
           },
           required: ['title', 'description', 'items'],
@@ -241,6 +241,32 @@ export const toolDefinitions: ToolDefinition[] = [
         content: { type: 'string', description: 'Memory content' },
       },
       required: ['category', 'content'],
+    },
+  },
+  {
+    name: 'get_time_blocks',
+    description: "Get the student's time block schedule. Returns weekly template blocks and/or resolved blocks for a date range, plus available study minutes per day. Use this before scheduling tasks to understand the student's time structure.",
+    parameters: {
+      type: 'object',
+      properties: {
+        date: { type: 'string', description: 'Specific date to get resolved blocks for (YYYY-MM-DD). Returns that day\'s blocks with overrides applied.' },
+        week_of: { type: 'string', description: 'Get resolved blocks for the entire week containing this date (YYYY-MM-DD). Returns 7 days of data.' },
+        templates_only: { type: 'boolean', description: 'If true, return only the weekly template blocks (no date-specific resolution). Default false.' },
+      },
+      required: [],
+    },
+  },
+  {
+    name: 'get_goal_dependencies',
+    description: "Get dependency information for goals. Returns which goals depend on which, and the full dependency chain. Use this before scheduling to respect prerequisite ordering.",
+    parameters: {
+      type: 'object',
+      properties: {
+        goal_id: { type: 'string', description: 'Get dependencies for a specific goal' },
+        course_id: { type: 'string', description: 'Get all dependencies for goals in a course' },
+        include_chain: { type: 'boolean', description: 'If true, return the full recursive dependency chain (A→B→C). Default false.' },
+      },
+      required: [],
     },
   },
   {

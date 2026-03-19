@@ -469,6 +469,134 @@ export async function executeTool(
       return JSON.stringify({ id, message: 'Memory saved successfully' });
     }
 
+    case 'get_time_blocks': {
+      const { date, week_of, templates_only } = args as { date?: string; week_of?: string; templates_only?: boolean };
+
+      if (templates_only) {
+        const templates = db.prepare(
+          'SELECT id, label, type, day_of_week, start_time, end_time, color FROM time_blocks WHERE user_id = ? ORDER BY day_of_week, start_time'
+        ).all(userId);
+        return JSON.stringify({ templates });
+      }
+
+      if (week_of) {
+        // Import helper logic inline — compute resolved blocks for 7 days
+        const startDate = new Date(week_of);
+        const dayOW = startDate.getUTCDay();
+        const mondayOff = dayOW === 0 ? -6 : 1 - dayOW;
+        startDate.setUTCDate(startDate.getUTCDate() + mondayOff);
+
+        const weekResult: Record<string, any> = {};
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(startDate);
+          d.setUTCDate(d.getUTCDate() + i);
+          const dateStr = d.toISOString().split('T')[0];
+          const dow = d.getUTCDay();
+
+          const tmpl = db.prepare('SELECT * FROM time_blocks WHERE user_id = ? AND day_of_week = ?').all(userId, dow) as any[];
+          const overrides = db.prepare('SELECT * FROM time_block_overrides WHERE user_id = ? AND override_date = ?').all(userId, dateStr) as any[];
+          const overMap = new Map(overrides.map((o: any) => [o.time_block_id, o]));
+
+          const blocks: any[] = [];
+          let studyMin = 0;
+          for (const t of tmpl) {
+            const ov = overMap.get(t.id) as any;
+            if (ov && ov.start_time === null) continue; // deleted for this day
+            const st = ov ? ov.start_time : t.start_time;
+            const et = ov ? ov.end_time : t.end_time;
+            blocks.push({ id: t.id, label: t.label, type: t.type, start_time: st, end_time: et });
+            if (t.type === 'study') {
+              const [sh, sm] = st.split(':').map(Number);
+              const [eh, em] = et.split(':').map(Number);
+              studyMin += (eh * 60 + em) - (sh * 60 + sm);
+            }
+          }
+          weekResult[dateStr] = { blocks, available_study_minutes: Math.max(studyMin, 0) };
+        }
+        return JSON.stringify(weekResult);
+      }
+
+      if (date) {
+        const d = new Date(date);
+        const dow = d.getUTCDay();
+        const tmpl = db.prepare('SELECT * FROM time_blocks WHERE user_id = ? AND day_of_week = ?').all(userId, dow) as any[];
+        const overrides = db.prepare('SELECT * FROM time_block_overrides WHERE user_id = ? AND override_date = ?').all(userId, date) as any[];
+        const overMap = new Map(overrides.map((o: any) => [o.time_block_id, o]));
+
+        const blocks: any[] = [];
+        let studyMin = 0;
+        for (const t of tmpl) {
+          const ov = overMap.get(t.id) as any;
+          if (ov && ov.start_time === null) continue;
+          const st = ov ? ov.start_time : t.start_time;
+          const et = ov ? ov.end_time : t.end_time;
+          blocks.push({ id: t.id, label: t.label, type: t.type, start_time: st, end_time: et });
+          if (t.type === 'study') {
+            const [sh, sm] = st.split(':').map(Number);
+            const [eh, em] = et.split(':').map(Number);
+            studyMin += (eh * 60 + em) - (sh * 60 + sm);
+          }
+        }
+        return JSON.stringify({ date, blocks, available_study_minutes: Math.max(studyMin, 0) });
+      }
+
+      // Default: return templates
+      const templates = db.prepare(
+        'SELECT id, label, type, day_of_week, start_time, end_time, color FROM time_blocks WHERE user_id = ? ORDER BY day_of_week, start_time'
+      ).all(userId);
+      return JSON.stringify({ templates });
+    }
+
+    case 'get_goal_dependencies': {
+      const { goal_id, course_id: depCourseId, include_chain } = args as { goal_id?: string; course_id?: string; include_chain?: boolean };
+
+      if (goal_id) {
+        const deps = db.prepare(
+          'SELECT gd.id, gd.goal_id, gd.depends_on_goal_id, g.title as depends_on_title FROM goal_dependencies gd JOIN goals g ON gd.depends_on_goal_id = g.id WHERE gd.goal_id = ?'
+        ).all(goal_id);
+
+        if (include_chain) {
+          // Recursive chain: follow depends_on_goal_id
+          const chain: Array<{ goal_id: string; title: string }> = [];
+          const visited = new Set<string>();
+          let current = goal_id;
+          while (current && !visited.has(current)) {
+            visited.add(current);
+            const dep = db.prepare(
+              'SELECT gd.depends_on_goal_id, g.title FROM goal_dependencies gd JOIN goals g ON gd.depends_on_goal_id = g.id WHERE gd.goal_id = ? LIMIT 1'
+            ).get(current) as any;
+            if (!dep) break;
+            chain.unshift({ goal_id: dep.depends_on_goal_id, title: dep.title });
+            current = dep.depends_on_goal_id;
+          }
+          return JSON.stringify({ goal_id, dependencies: deps, chain });
+        }
+
+        return JSON.stringify({ goal_id, dependencies: deps });
+      }
+
+      if (depCourseId) {
+        const deps = db.prepare(
+          `SELECT gd.id, gd.goal_id, g1.title as goal_title, gd.depends_on_goal_id, g2.title as depends_on_title
+           FROM goal_dependencies gd
+           JOIN goals g1 ON gd.goal_id = g1.id
+           JOIN goals g2 ON gd.depends_on_goal_id = g2.id
+           WHERE g1.course_id = ?`
+        ).all(depCourseId);
+        return JSON.stringify({ course_id: depCourseId, dependencies: deps });
+      }
+
+      // All dependencies for user
+      const deps = db.prepare(
+        `SELECT gd.id, gd.goal_id, g1.title as goal_title, gd.depends_on_goal_id, g2.title as depends_on_title
+         FROM goal_dependencies gd
+         JOIN goals g1 ON gd.goal_id = g1.id
+         JOIN goals g2 ON gd.depends_on_goal_id = g2.id
+         WHERE g1.user_id = ?`
+      ).all(userId);
+      return JSON.stringify({ dependencies: deps });
+    }
+
     case 'search_documents': {
       const { query, course_id, file_type } = args as { query: string; course_id?: string; file_type?: string };
       const store = new VectorStore();

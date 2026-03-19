@@ -89,11 +89,13 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
       case 'study_plan': {
         for (const item of data.items) {
           const taskId = uuidv4();
+          // v1.3: scheduled_date takes precedence over date for calendar placement
+          const taskDate = (item.scheduled_date || item.date) as string;
           db.prepare(
             'INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, description, start_time, end_time, checklist, serves_must, order_index, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
           ).run(
             taskId, req.userId!, item.course_id, item.goal_id || null,
-            item.title, item.date, item.priority || 'must', 'pending',
+            item.title, taskDate, item.priority || 'must', 'pending',
             item.description || null, item.start_time || null, item.end_time || null,
             item.checklist ? JSON.stringify(item.checklist) : null,
             item.serves_must || null, 0, now, now,
@@ -119,11 +121,13 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
             const resolvedGoalId = item.goal_id && idMap.has(item.goal_id as string)
               ? idMap.get(item.goal_id as string)
               : item.goal_id || null;
+            // v1.3: scheduled_date takes precedence over date
+            const taskDate = (item.scheduled_date || item.date) as string;
             db.prepare(
               'INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, description, start_time, end_time, checklist, serves_must, order_index, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             ).run(
               taskId, req.userId!, item.course_id, resolvedGoalId,
-              item.title, item.date, item.priority || 'must', 'pending',
+              item.title, taskDate, item.priority || 'must', 'pending',
               item.description || null, item.start_time || null, item.end_time || null,
               item.checklist ? JSON.stringify(item.checklist) : null,
               item.serves_must || null, 0, now, now,
