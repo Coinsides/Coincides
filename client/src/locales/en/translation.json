@@ -120,5 +120,9 @@
     "name": "Name",
     "loginFailed": "Login failed",
     "registerFailed": "Registration failed"
+  },
+  "dailyBriefPage": {
+    "studySchedule": "Today's Study Schedule",
+    "noStudyBlocks": "No study blocks today"
   }
 }

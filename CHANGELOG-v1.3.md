@@ -101,3 +101,22 @@
 - **V-02**: 移除 recurring alert 中 `{days_behind} behind schedule` 措辞，改为中性 `{completed}/{total} completed`（§3）
 - **V-03**: 后端 `/api/daily-brief` 移除 `estimated_minutes` 计算和 `days_behind` / `expected_completed` 响应字段（§3）
 - `shared/types/index.ts`：`DailyBriefData` 移除 `estimated_minutes`，`RecurringTaskAlert` 移除 `expected_completed` + `days_behind`
+
+---
+
+## Step 6 — DailyBrief 升级 + serves_must 可视化
+### 后端
+- `server/src/routes/dailyBrief.ts`：API 新增 `time_blocks` 字段，返回当天解析后的 Time Block 列表
+- `server/src/routes/timeBlocks.ts`：导出 `getResolvedBlocksForDate` 函数供 DailyBrief 引用
+- `shared/types/index.ts`：
+  - `DailyBriefResponse` 新增 `time_blocks: ResolvedTimeBlock[]`
+  - `Task` 新增 `serves_must?: string | null`
+
+### 前端
+- `client/src/pages/DailyBrief/DailyBrief.tsx`：
+  - 新增学习时段概览（Time Block Overview）—— 页面顶部显示今日 study 类型 Time Block（无 Block 时不显示，不提示设置，§2）
+  - Recommended/Optional Task 旁新增 `serves_must` 标注（→ 前缀，显示服务于哪个 Must Task）
+- `client/src/pages/DailyBrief/DailyBrief.module.css`：新增样式（`.timeBlockOverview`、`.timeBlockChip`、`.servesMust` 等）
+
+### i18n
+- `client/src/locales/{en,zh}/translation.json`：新增 `dailyBriefPage` 键（studySchedule、noStudyBlocks）

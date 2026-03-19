@@ -61,7 +61,7 @@ export function detectOverlaps(blocks: Array<{ id: string; start_time: string; e
  * Get resolved time blocks for a specific date.
  * Merges weekly template with any single-day overrides.
  */
-function getResolvedBlocksForDate(userId: string, date: string): ResolvedTimeBlock[] {
+export function getResolvedBlocksForDate(userId: string, date: string): ResolvedTimeBlock[] {
   const db = getDb();
   const d = new Date(date);
   const dayOfWeek = d.getUTCDay(); // 0=Sun

@@ -120,5 +120,9 @@
     "name": "姓名",
     "loginFailed": "登录失败",
     "registerFailed": "注册失败"
+  },
+  "dailyBriefPage": {
+    "studySchedule": "今日学习时段",
+    "noStudyBlocks": "今天没有学习时段"
   }
 }

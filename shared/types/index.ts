@@ -188,6 +188,7 @@ export interface Task {
   end_time: string | null;
   description: string | null;
   checklist: ChecklistItem[] | null;
+  serves_must?: string | null;
   exam_boost?: boolean;
   is_prerequisite?: boolean;
   created_at: string;
@@ -571,6 +572,7 @@ export interface DailyBriefResponse {
   cards_due_count: number;
   recurring_alerts: RecurringTaskAlert[];
   energy_level: EnergyLevel | null;
+  time_blocks: ResolvedTimeBlock[];
   minimum_working_flow: {
     must_tasks_count: number;
     cards_due_count: number;

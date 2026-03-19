@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
+import { getResolvedBlocksForDate } from './timeBlocks.js';
 
 const router = Router();
 
@@ -141,6 +142,9 @@ router.get('/', (req: AuthRequest, res: Response) => {
     deadline: g.deadline,
   }));
 
+  // Get today's time blocks (empty array if none — never prompt user to set up, §2)
+  const timeBlocks = getResolvedBlocksForDate(userId, today);
+
   res.json({
     date: today,
     tasks: {
@@ -151,6 +155,7 @@ router.get('/', (req: AuthRequest, res: Response) => {
     cards_due_count: cardsDueCount,
     recurring_alerts: recurringAlerts,
     energy_level: dailyStatus?.energy_level || null,
+    time_blocks: timeBlocks,
     minimum_working_flow: {
       must_tasks_count: mustPendingCount,
       cards_due_count: cardsDueCount,

@@ -66,6 +66,70 @@
   font-weight: 600;
 }
 
+/* Time Block Overview */
+.timeBlockOverview {
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-md);
+  -webkit-backdrop-filter: var(--glass-blur-md);
+  box-shadow: var(--glass-shadow-sm);
+  padding: 16px 19px;
+  margin-bottom: 16px;
+}
+
+.timeBlockTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 10px;
+}
+
+.timeBlockList {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.timeBlockChip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  background: var(--accent-primary-bg);
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 20%, transparent);
+}
+
+.timeBlockTime {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-primary);
+}
+
+.timeBlockLabel {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.timeBlockEmpty {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* serves_must annotation */
+.servesMust {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
 /* Exam boost */
 .examBoost {
   margin-right: 4px;

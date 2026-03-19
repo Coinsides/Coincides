@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
-import { Check, ChevronDown, Zap, Battery, BatteryLow, BarChart3, Play, Clock, CheckSquare } from 'lucide-react';
+import { Check, ChevronDown, Zap, Battery, BatteryLow, BarChart3, Play, Clock, CheckSquare, ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useDailyBriefStore } from '@/stores/dailyBriefStore';
 import { useCourseStore } from '@/stores/courseStore';
 import { useUIStore } from '@/stores/uiStore';
 import api from '@/services/api';
 import { EnergyLevel } from '@shared/types';
-import type { Task } from '@shared/types';
+import type { Task, ResolvedTimeBlock } from '@shared/types';
 import styles from './DailyBrief.module.css';
 
 const energyOptions: { value: EnergyLevel; label: string; icon: typeof Zap }[] = [
@@ -34,6 +35,7 @@ export default function DailyBrief() {
   const courses = useCourseStore((s) => s.courses);
   const addToast = useUIStore((s) => s.addToast);
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [openSections, setOpenSections] = useState<Record<string, boolean>>({
     must: true,
@@ -84,6 +86,30 @@ export default function DailyBrief() {
         <div className={styles.date}>{dateStr}</div>
         <div className={styles.greeting}>{greeting}</div>
       </div>
+
+      {/* Time Block overview — only shown when user has blocks (§2: never prompt to set up) */}
+      {briefData && briefData.time_blocks && briefData.time_blocks.length > 0 && (
+        <div className={styles.timeBlockOverview}>
+          <div className={styles.timeBlockTitle}>
+            <Clock size={14} />
+            {t('dailyBriefPage.studySchedule', "Today's Study Schedule")}
+          </div>
+          <div className={styles.timeBlockList}>
+            {briefData.time_blocks
+              .filter((b: ResolvedTimeBlock) => b.type === 'study')
+              .sort((a: ResolvedTimeBlock, b: ResolvedTimeBlock) => a.start_time.localeCompare(b.start_time))
+              .map((block: ResolvedTimeBlock) => (
+                <div key={block.id} className={styles.timeBlockChip}>
+                  <span className={styles.timeBlockTime}>{block.start_time} – {block.end_time}</span>
+                  <span className={styles.timeBlockLabel}>{block.label}</span>
+                </div>
+              ))}
+            {briefData.time_blocks.filter((b: ResolvedTimeBlock) => b.type === 'study').length === 0 && (
+              <span className={styles.timeBlockEmpty}>{t('dailyBriefPage.noStudyBlocks', 'No study blocks today')}</span>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Minimum Working Flow card */}
       {briefData?.minimum_working_flow && (
@@ -166,6 +192,12 @@ export default function DailyBrief() {
                             {task.exam_boost && <span className={styles.examBoost}>⚡</span>}
                             {task.title}
                           </span>
+                          {task.serves_must && priority !== 'must' && (
+                            <div className={styles.servesMust}>
+                              <ArrowRight size={10} />
+                              {task.serves_must}
+                            </div>
+                          )}
                           {task.description && (
                             <div className={styles.taskDescription}>
                               {task.description.split('\n')[0].slice(0, 80)}
