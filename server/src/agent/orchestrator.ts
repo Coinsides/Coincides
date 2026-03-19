@@ -123,7 +123,7 @@ export async function* runAgent(
     let toolInputJson = '';
 
     try {
-      const ROUND_TIMEOUT_MS = 30_000;
+      const ROUND_TIMEOUT_MS = 120_000;
       let roundTimedOut = false;
       const timeoutHandle = setTimeout(() => { roundTimedOut = true; }, ROUND_TIMEOUT_MS);
 
