@@ -116,6 +116,23 @@
   flex-shrink: 0;
 }
 
+.itemDate {
+  font-size: 11px;
+  color: var(--accent-primary);
+  font-weight: 500;
+  flex-shrink: 0;
+  padding: 1px 6px;
+  background: rgba(99, 102, 241, 0.08);
+  border-radius: 3px;
+}
+
+.itemServes {
+  font-size: 10px;
+  color: var(--text-muted);
+  font-style: italic;
+  flex-shrink: 0;
+}
+
 .removeItem {
   padding: 5px;
   border-radius: var(--radius-sm);

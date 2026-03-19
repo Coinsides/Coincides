@@ -7,12 +7,14 @@ import styles from './ProposalList.module.css';
 const typeBadgeColors: Record<string, { bg: string; text: string }> = {
   batch_cards: { bg: 'rgba(99, 102, 241, 0.12)', text: '#6366f1' },
   study_plan: { bg: 'rgba(34, 197, 94, 0.12)', text: '#22c55e' },
+  goal_breakdown: { bg: 'rgba(59, 130, 246, 0.12)', text: '#3b82f6' },
   schedule_adjustment: { bg: 'rgba(245, 158, 11, 0.12)', text: '#f59e0b' },
 };
 
 const typeLabels: Record<string, string> = {
   batch_cards: 'Cards',
   study_plan: 'Study Plan',
+  goal_breakdown: 'Goals',
   schedule_adjustment: 'Schedule',
 };
 
@@ -98,11 +100,16 @@ export default function ProposalList() {
                         {item.template_type ? (
                           <span className={styles.itemMeta}>{String(item.template_type)}</span>
                         ) : null}
-                        {item.date ? (
-                          <span className={styles.itemMeta}>{String(item.date)}</span>
+                        {(item.scheduled_date || item.date) ? (
+                          <span className={styles.itemDate}>
+                            {String(item.scheduled_date || item.date)}
+                          </span>
                         ) : null}
                         {item.priority ? (
                           <span className={styles.itemMeta}>{String(item.priority)}</span>
+                        ) : null}
+                        {item.serves_must ? (
+                          <span className={styles.itemServes}>→ {String(item.serves_must)}</span>
                         ) : null}
                       </div>
                       <button

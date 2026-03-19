@@ -72,6 +72,8 @@ export async function* runAgent(
 
   // 3. Build system prompt
   const parsedSettings = JSON.parse(user.settings || '{}');
+  // Detect L1 onboarding context
+  const isNewUser = contextHint?.type === 'l1_onboarding';
   const systemPrompt = buildSystemPrompt(agentName, {
     userName: user.name,
     courses,
@@ -80,6 +82,7 @@ export async function* runAgent(
     currentDate: today,
     energyLevel: energyStatus?.energy_level,
     language: parsedSettings.language,
+    isNewUser,
   });
 
   // 4. Get conversation history

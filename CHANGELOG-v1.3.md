@@ -60,3 +60,30 @@
 ### 修改
 - `server/src/agent/tools/definitions.ts`：`create_proposal` 描述更新，study_plan items 新增 `scheduled_date` 字段说明
 - `server/src/routes/proposals.ts`：study_plan 和 goal_breakdown 的 Apply 逻辑支持 `scheduled_date`（优先于 `date`，向后兼容）
+
+---
+
+## Step 4 — L1 入驻流全链路
+### 新增
+- **Onboarding 组件升级**（4 步流程）：
+  - Step 1：创建课程（保持不变）
+  - Step 2：上传材料（保持不变）
+  - Step 3：设置时间安排（新）— 引导用户前往日历周视图框选 Time Block，可跳过
+  - Step 4：让 AI 帮你规划（新）— 打开 Agent Panel，带 L1 上下文
+- **System Prompt L1 Protocol**：
+  - `buildSystemPrompt` 新增 `isNewUser` 参数
+  - 新用户首次对话时注入 L1 Protocol 指令段
+  - 6 步参数收集流：学习目标 → 截止日期 → Time Block 确认 → 颗粒度 → 特殊要求 → 生成 Proposal
+  - 每次只问一个问题，不堆积
+- **Orchestrator**：检测 `l1_onboarding` contextHint，自动传递 `isNewUser` 标志
+- **ProposalList 升级**：
+  - 新增 `goal_breakdown` 类型徽章（蓝色）
+  - 每个 item 显示 `scheduled_date`（强调日期分配，而非原始 date）
+  - 显示 `serves_must` 标注（→ 前缀）
+  - 新 CSS：`.itemDate`、`.itemServes`
+
+### 修改
+- `client/src/components/Onboarding/Onboarding.tsx`：重写为 4 步流程 + i18n + `openAgentWithContext`
+- `server/src/agent/system-prompt.ts`：新增 L1 Protocol 条件注入段
+- `server/src/agent/orchestrator.ts`：检测 L1 上下文并传递 `isNewUser`
+- `client/src/locales/{en,zh}/translation.json`：新增 Step 3/4 文案（时间安排 + AI 规划）

@@ -1,39 +1,58 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Upload, MessageSquare, X, ChevronRight, GraduationCap } from 'lucide-react';
+import { Upload, Clock, MessageSquare, X, ChevronRight, GraduationCap } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
 import styles from './Onboarding.module.css';
 
-const STEPS = [
+interface StepConfig {
+  icon: typeof GraduationCap;
+  titleKey: string;
+  descriptionKey: string;
+  actionKey: string;
+  route: string | null;
+  agentContext?: { type: string; data?: unknown };
+}
+
+const STEPS: StepConfig[] = [
   {
     icon: GraduationCap,
-    title: 'Welcome to Coincides!',
-    description: 'What are you studying? Start by creating a course — it\'s where all your materials, goals, and tasks live.',
-    action: 'Create a Course',
+    titleKey: 'onboarding.welcome',
+    descriptionKey: 'onboarding.step1Description',
+    actionKey: 'onboarding.step1Action',
     route: '/courses',
   },
   {
     icon: Upload,
-    title: 'Add Your Materials',
-    description: 'Upload textbooks, slides, or notes into your course. The AI can generate flashcards and study plans from them.',
-    action: 'Go to Courses',
+    titleKey: 'onboarding.step2Title',
+    descriptionKey: 'onboarding.step2Description',
+    actionKey: 'onboarding.step2Action',
     route: '/courses',
   },
   {
+    icon: Clock,
+    titleKey: 'onboarding.step3Title',
+    descriptionKey: 'onboarding.step3Description',
+    actionKey: 'onboarding.step3Action',
+    route: '/calendar',
+  },
+  {
     icon: MessageSquare,
-    title: 'Chat with Mr. Zero',
-    description: 'Press Ctrl+J (or Cmd+J) to open the AI assistant. Tell it your learning goal, and it will help you break it down into actionable steps.',
-    action: 'Open AI Assistant',
-    route: null, // opens agent panel instead
+    titleKey: 'onboarding.step4Title',
+    descriptionKey: 'onboarding.step4Description',
+    actionKey: 'onboarding.step4Action',
+    route: null,
+    agentContext: { type: 'l1_onboarding', data: { isNewUser: true } },
   },
 ];
 
 export default function Onboarding() {
   const [step, setStep] = useState(0);
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const completeOnboarding = useAuthStore((s) => s.completeOnboarding);
-  const toggleAgentPanel = useUIStore((s) => s.toggleAgentPanel);
+  const openAgentWithContext = useUIStore((s) => s.openAgentWithContext);
   const openModal = useUIStore((s) => s.openModal);
 
   const currentStep = STEPS[step];
@@ -45,8 +64,9 @@ export default function Onboarding() {
       if (step === 0) {
         openModal('course-create');
       }
-    } else {
-      toggleAgentPanel();
+    } else if (currentStep.agentContext) {
+      // Step 4: open agent with L1 context
+      openAgentWithContext(currentStep.agentContext.type, currentStep.agentContext.data);
     }
     handleNext();
   };
@@ -68,7 +88,7 @@ export default function Onboarding() {
   return (
     <div className={styles.overlay}>
       <div className={styles.card}>
-        <button className={styles.skipBtn} onClick={handleSkip} title="Skip onboarding">
+        <button className={styles.skipBtn} onClick={handleSkip} title={t('onboarding.skipStep')}>
           <X size={18} />
         </button>
 
@@ -83,17 +103,17 @@ export default function Onboarding() {
         <div className={styles.iconWrap}>
           <Icon size={32} />
         </div>
-        <h2 className={styles.title}>{currentStep.title}</h2>
-        <p className={styles.description}>{currentStep.description}</p>
+        <h2 className={styles.title}>{t(currentStep.titleKey)}</h2>
+        <p className={styles.description}>{t(currentStep.descriptionKey)}</p>
 
         {/* Actions */}
         <div className={styles.actions}>
           <button className={styles.actionBtn} onClick={handleAction}>
-            {currentStep.action}
+            {t(currentStep.actionKey)}
             <ChevronRight size={16} />
           </button>
           <button className={styles.textBtn} onClick={handleNext}>
-            {isLast ? 'Finish' : 'Skip this step'}
+            {isLast ? t('onboarding.finish') : t('onboarding.skipStep')}
           </button>
         </div>
       </div>
