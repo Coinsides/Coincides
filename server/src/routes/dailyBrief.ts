@@ -115,14 +115,13 @@ router.get('/', (req: AuthRequest, res: Response) => {
     const completed = stats.completed || 0;
     const daysBehind = Math.max(0, expectedProgress - completed);
 
+    // Show alert when progress is behind, but only expose neutral facts (§3: 不制造挫败感)
     if (daysBehind > 0) {
       recurringAlerts.push({
         group_id: group.id,
         title: group.title,
         total_tasks: group.total_tasks,
         completed_tasks: completed,
-        expected_completed: expectedProgress,
-        days_behind: daysBehind,
       });
     }
   }
@@ -132,9 +131,8 @@ router.get('/', (req: AuthRequest, res: Response) => {
     'SELECT energy_level FROM daily_statuses WHERE user_id = ? AND date = ?'
   ).get(userId, today) as any;
 
-  // Minimum Working Flow
+  // Minimum Working Flow (no estimated_minutes — §3: 不制造挫败感)
   const mustPendingCount = mustTasks.filter((t: any) => t.status === 'pending').length;
-  const estimatedMinutes = mustPendingCount * 10 + cardsDueCount * 2;
 
   const examCourses = examGoals.map((g: any) => ({
     course_id: g.course_id,
@@ -156,7 +154,6 @@ router.get('/', (req: AuthRequest, res: Response) => {
     minimum_working_flow: {
       must_tasks_count: mustPendingCount,
       cards_due_count: cardsDueCount,
-      estimated_minutes: estimatedMinutes,
       exam_mode_active: examModeActive,
       exam_courses: examCourses,
     },

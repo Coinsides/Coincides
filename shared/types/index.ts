@@ -574,7 +574,6 @@ export interface DailyBriefResponse {
   minimum_working_flow: {
     must_tasks_count: number;
     cards_due_count: number;
-    estimated_minutes: number;
     exam_mode_active: boolean;
     exam_courses: Array<{
       course_id: string;
@@ -590,8 +589,6 @@ export interface RecurringTaskAlert {
   title: string;
   total_tasks: number;
   completed_tasks: number;
-  expected_completed: number;
-  days_behind: number;
 }
 
 export interface RecurringTaskGroupWithProgress extends RecurringTaskGroup {

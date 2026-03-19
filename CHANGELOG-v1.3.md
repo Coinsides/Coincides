@@ -87,3 +87,17 @@
 - `server/src/agent/system-prompt.ts`：新增 L1 Protocol 条件注入段
 - `server/src/agent/orchestrator.ts`：检测 L1 上下文并传递 `isNewUser`
 - `client/src/locales/{en,zh}/translation.json`：新增 Step 3/4 文案（时间安排 + AI 规划）
+
+---
+
+## Step 5 — 设计宪法审计 + 违规修复
+### 审计
+- 逐模块审计 12 个检查点，覆盖 DailyBrief、Statistics、Calendar、Agent、Time Block、Goal 依赖
+- 发现 3 个 P0 违规（均为 v1.2 遗留），9 个 PASS
+- 审计报告输出至 `docs/audits/design-constitution-v1.3.md`
+
+### 修复（P0 × 3）
+- **V-01**: 移除 DailyBrief MWF 卡片 `⏱ ~{estimated_minutes} min` 显示（§3 + v1.3 规则）
+- **V-02**: 移除 recurring alert 中 `{days_behind} behind schedule` 措辞，改为中性 `{completed}/{total} completed`（§3）
+- **V-03**: 后端 `/api/daily-brief` 移除 `estimated_minutes` 计算和 `days_behind` / `expected_completed` 响应字段（§3）
+- `shared/types/index.ts`：`DailyBriefData` 移除 `estimated_minutes`，`RecurringTaskAlert` 移除 `expected_completed` + `days_behind`

@@ -92,7 +92,7 @@ export default function DailyBrief() {
           <div className={styles.mwfPills}>
             <span className={styles.mwfPill}>🎯 {briefData.minimum_working_flow.must_tasks_count} Must tasks</span>
             <span className={styles.mwfPill}>📚 {briefData.minimum_working_flow.cards_due_count} cards to review</span>
-            <span className={styles.mwfPill}>⏱ ~{briefData.minimum_working_flow.estimated_minutes} min</span>
+
           </div>
           {briefData.minimum_working_flow.exam_mode_active && (
             <div className={styles.mwfExamWarning}>
@@ -218,7 +218,6 @@ export default function DailyBrief() {
               <BarChart3 size={16} className={styles.alertIcon} style={{ color: 'var(--warning)' }} />
               <div className={styles.alertText}>
                 <strong>{alert.title}</strong> — {alert.completed_tasks}/{alert.total_tasks} completed
-                ({alert.days_behind} behind schedule)
               </div>
             </div>
           ))}
