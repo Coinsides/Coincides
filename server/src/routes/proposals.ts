@@ -4,6 +4,7 @@ import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { updateProposalSchema } from '../validators/index.js';
+import { normalizeCardContent } from '../agent/tools/normalizeContent.js';
 import { ZodError } from 'zod';
 
 const router = Router();
@@ -65,11 +66,14 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
       case 'batch_cards': {
         for (const item of data.items) {
           const cardId = uuidv4();
+          const templateType = (item.template_type as string) || 'general';
+          const rawContent = (item.content as Record<string, unknown>) || {};
+          const normalizedContent = normalizeCardContent(templateType, rawContent);
           db.prepare(
             'INSERT INTO cards (id, user_id, deck_id, template_type, title, content, importance, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
           ).run(
-            cardId, req.userId!, item.deck_id, item.template_type || 'general',
-            item.title, JSON.stringify(item.content || {}), item.importance || 3, now, now,
+            cardId, req.userId!, item.deck_id, templateType,
+            item.title, JSON.stringify(normalizedContent), item.importance || 3, now, now,
           );
 
           // Attach tags

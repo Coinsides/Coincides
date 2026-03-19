@@ -18,6 +18,23 @@ const typeLabels: Record<string, string> = {
   schedule_adjustment: 'Schedule',
 };
 
+/**
+ * Safely extract items array from proposal data.
+ * Agent may produce malformed data — guard against all shapes.
+ */
+function safeItems(data: unknown): Array<Record<string, unknown>> {
+  if (!data || typeof data !== 'object') return [];
+  const d = data as Record<string, unknown>;
+  if (Array.isArray(d.items)) return d.items;
+  return [];
+}
+
+function safeString(val: unknown, fallback = ''): string {
+  if (typeof val === 'string') return val;
+  if (val != null) return String(val);
+  return fallback;
+}
+
 export default function ProposalList() {
   const { proposals, loading, fetchProposals, applyProposal, discardProposal } = useProposalStore();
   const addToast = useUIStore((s) => s.addToast);
@@ -48,7 +65,8 @@ export default function ProposalList() {
   };
 
   const handleRemoveItem = (proposal: ProposalItem, itemIndex: number) => {
-    const newItems = [...proposal.data.items];
+    const items = safeItems(proposal.data);
+    const newItems = [...items];
     newItems.splice(itemIndex, 1);
     const newData: ProposalData = { ...proposal.data, items: newItems };
     useProposalStore.getState().updateProposal(proposal.id, newData);
@@ -67,6 +85,9 @@ export default function ProposalList() {
       {proposals.map((proposal) => {
         const expanded = expandedId === proposal.id;
         const badgeColor = typeBadgeColors[proposal.type] || typeBadgeColors.batch_cards;
+        const items = safeItems(proposal.data);
+        const title = safeString(proposal.data?.title, 'Untitled proposal');
+        const description = safeString(proposal.data?.description);
 
         return (
           <div key={proposal.id} className={styles.proposal}>
@@ -83,33 +104,33 @@ export default function ProposalList() {
               >
                 {typeLabels[proposal.type] || proposal.type}
               </span>
-              <span className={styles.proposalTitle}>{proposal.data.title}</span>
-              <span className={styles.itemCount}>{proposal.data.items.length} items</span>
+              <span className={styles.proposalTitle}>{title}</span>
+              <span className={styles.itemCount}>{items.length} items</span>
             </button>
 
             {expanded && (
               <div className={styles.proposalBody}>
-                <p className={styles.description}>{proposal.data.description}</p>
+                {description && <p className={styles.description}>{description}</p>}
                 <div className={styles.items}>
-                  {proposal.data.items.map((item, i) => (
+                  {items.map((item, i) => (
                     <div key={i} className={styles.item}>
                       <div className={styles.itemContent}>
                         <span className={styles.itemTitle}>
-                          {(item.title as string) || `Item ${i + 1}`}
+                          {safeString(item.title, `Item ${i + 1}`)}
                         </span>
                         {item.template_type ? (
-                          <span className={styles.itemMeta}>{String(item.template_type)}</span>
+                          <span className={styles.itemMeta}>{safeString(item.template_type)}</span>
                         ) : null}
                         {(item.scheduled_date || item.date) ? (
                           <span className={styles.itemDate}>
-                            {String(item.scheduled_date || item.date)}
+                            {safeString(item.scheduled_date || item.date)}
                           </span>
                         ) : null}
                         {item.priority ? (
-                          <span className={styles.itemMeta}>{String(item.priority)}</span>
+                          <span className={styles.itemMeta}>{safeString(item.priority)}</span>
                         ) : null}
                         {item.serves_must ? (
-                          <span className={styles.itemServes}>→ {String(item.serves_must)}</span>
+                          <span className={styles.itemServes}>→ {safeString(item.serves_must)}</span>
                         ) : null}
                       </div>
                       <button
