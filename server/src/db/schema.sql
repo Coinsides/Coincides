@@ -47,12 +47,14 @@ CREATE TABLE IF NOT EXISTS goals (
   deadline TEXT,
   exam_mode INTEGER NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'active',
+  sort_order INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_goals_user_id ON goals(user_id);
 CREATE INDEX IF NOT EXISTS idx_goals_course_id ON goals(course_id);
+CREATE INDEX IF NOT EXISTS idx_goals_parent_id ON goals(parent_id);
 
 -- ============================================================
 -- 4. RecurringTaskGroup

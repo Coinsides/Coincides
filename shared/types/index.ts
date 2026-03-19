@@ -147,6 +147,7 @@ export interface Goal {
   exam_mode: boolean;
   status: GoalStatus;
   parent_id: string | null;
+  sort_order: number;
   created_at: string;
   updated_at: string;
 }

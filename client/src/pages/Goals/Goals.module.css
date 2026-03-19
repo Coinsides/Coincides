@@ -49,14 +49,12 @@
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 }
 
-/* Goal cards */
+/* ─── Goal Tree List ──────────────────────────────── */
+
 .goalList {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-}
-
-.goalCard {
+  gap: 2px;
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   background: var(--glass-surface);
@@ -64,176 +62,171 @@
   -webkit-backdrop-filter: var(--glass-blur-md);
   box-shadow: var(--glass-shadow-sm);
   overflow: hidden;
-  transition: all var(--transition-fast);
+  padding: 6px 0;
 }
 
-.goalCard:hover {
-  border-color: var(--glass-border-hover);
-  box-shadow: var(--glass-shadow-md);
-  transform: translateY(-1px);
-}
+/* ─── Goal Row ────────────────────────────────────── */
 
-.goalHeader {
+.goalRow {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 17px 19px;
-  cursor: pointer;
+  gap: 6px;
+  padding: 10px 16px;
+  position: relative;
+  transition: background var(--transition-fast);
+  min-height: 44px;
+  flex-wrap: wrap;
 }
 
-.goalInfo {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex: 1;
-  min-width: 0;
-}
-
-.goalTitle {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.courseBadge {
-  font-size: 12px;
-  padding: 4px 10px;
-  border-radius: 6px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.deadline {
-  font-size: 12px;
-  color: var(--text-muted);
-  white-space: nowrap;
-}
-
-.goalActions {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.examToggle {
-  padding: 6px;
-  border-radius: var(--radius-sm);
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-}
-
-.examToggle:hover {
+.goalRow:hover {
   background: var(--glass-hover);
 }
 
-.examToggle.active {
-  color: var(--error);
+/* ─── Connector lines ──────────────────────────────── */
+
+.connectorLines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  pointer-events: none;
 }
 
-.examPill {
-  font-size: 11px;
-  font-weight: 700;
-  padding: 4px 10px;
-  border-radius: 6px;
-  background: var(--error-bg);
-  color: var(--error);
-  white-space: nowrap;
-  letter-spacing: 0.5px;
+.verticalLine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--glass-border);
 }
 
-.deleteGoalBtn {
-  padding: 6px;
+.horizontalLine {
+  position: absolute;
+  top: 50%;
+  width: 18px;
+  height: 1px;
+  background: var(--glass-border);
+}
+
+/* ─── Drag handle ──────────────────────────────────── */
+
+.dragHandle {
+  display: flex;
+  align-items: center;
+  padding: 4px 2px;
+  color: var(--text-muted);
+  opacity: 0;
+  cursor: grab;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.goalRow:hover .dragHandle {
+  opacity: 0.6;
+}
+
+.dragHandle:hover {
+  opacity: 1 !important;
+  color: var(--text-secondary);
+  background: var(--glass-hover);
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+/* ─── Expand button ────────────────────────────────── */
+
+.expandBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
   border-radius: var(--radius-sm);
   color: var(--text-muted);
-  display: flex;
-  align-items: center;
+  flex-shrink: 0;
+  transition: transform 150ms, background var(--transition-fast);
 }
 
-.deleteGoalBtn:hover {
-  color: var(--error);
-  background: var(--error-bg);
-}
-
-/* Progress bar */
-.progressRow {
-  padding: 0 19px 15px;
-}
-
-.progressBar {
-  height: 4px;
-  background: var(--glass-elevated);
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.progressFill {
-  height: 100%;
-  background: var(--gradient-success);
-  border-radius: 2px;
-  transition: width var(--transition-normal);
-}
-
-.progressText {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-top: 4px;
-}
-
-/* Expanded tasks */
-.goalTasks {
-  padding: 0 19px 15px;
-  border-top: 1px solid var(--glass-border);
-}
-
-.goalTaskItem {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 8px 0;
-  font-size: 13px;
+.expandBtn:hover {
+  background: var(--glass-hover);
   color: var(--text-secondary);
 }
 
-.goalTaskItem .dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background: var(--text-muted);
+.expandBtn.expanded {
+  transform: rotate(90deg);
+}
+
+.expandPlaceholder {
+  width: 22px;
   flex-shrink: 0;
 }
 
-/* Child goal indentation */
-.childGoalCard {
-  margin-left: 20px;
-  border-left: 3px solid var(--accent-primary);
-}
+/* ─── Status icon ──────────────────────────────────── */
 
-/* Goal card action buttons */
-.goalCardActions {
+.statusIcon {
   display: flex;
   align-items: center;
-  gap: 5px;
-  margin-right: 8px;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: color var(--transition-fast);
 }
 
-.addTaskBtn,
-.addSubGoalBtn {
+.statusIcon:hover {
+  opacity: 0.8;
+}
+
+.status_active {
+  color: var(--text-muted);
+}
+
+.status_completed {
+  color: var(--success);
+}
+
+.status_paused {
+  color: var(--warning, #f59e0b);
+}
+
+/* ─── Goal content ─────────────────────────────────── */
+
+.goalContent {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 5px 10px;
-  border-radius: var(--radius-sm);
-  font-size: 12px;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.goalTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.courseBadge {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 6px;
   font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.deadline {
+  font-size: 11px;
   color: var(--text-muted);
   white-space: nowrap;
-}
-
-.addTaskBtn:hover,
-.addSubGoalBtn:hover {
-  background: var(--glass-hover);
-  color: var(--accent-primary);
+  flex-shrink: 0;
 }
 
 .childCount {
@@ -243,16 +236,135 @@
   border-radius: 10px;
   background: var(--glass-elevated);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.parentRef {
+/* ─── Progress mini bar ────────────────────────────── */
+
+.progressMini {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  width: 90px;
+}
+
+.progressBarMini {
+  height: 4px;
+  flex: 1;
+  background: var(--glass-elevated);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressFillMini {
+  height: 100%;
+  background: var(--gradient-success);
+  border-radius: 2px;
+  transition: width var(--transition-normal);
+}
+
+.progressLabel {
   font-size: 11px;
   color: var(--text-muted);
-  font-style: italic;
-  white-space: nowrap;
+  min-width: 28px;
+  text-align: right;
 }
 
-/* Empty state */
+/* ─── Action buttons ───────────────────────────────── */
+
+.goalActions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.goalRow:hover .goalActions {
+  opacity: 1;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  transition: all var(--transition-fast);
+}
+
+.actionBtn:hover {
+  background: var(--glass-hover);
+  color: var(--accent-primary);
+}
+
+.deleteBtn:hover {
+  color: var(--error);
+  background: var(--error-bg);
+}
+
+.examActive {
+  color: var(--error);
+}
+
+.examPill {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: var(--error-bg);
+  color: var(--error);
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+
+/* ─── Task list (expanded) ─────────────────────────── */
+
+.taskList {
+  width: 100%;
+  padding: 4px 0 2px;
+  border-top: 1px solid var(--glass-border);
+  margin-top: 4px;
+}
+
+.taskItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.taskDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.taskDate {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ─── Drag overlay ─────────────────────────────────── */
+
+.dragOverlay {
+  background: var(--glass-surface);
+  border: 1px solid var(--accent-primary);
+  border-radius: var(--radius-md);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  padding: 10px 16px;
+  opacity: 0.9;
+}
+
+/* ─── Empty state ──────────────────────────────────── */
+
 .empty {
   text-align: center;
   padding: 63px 23px;

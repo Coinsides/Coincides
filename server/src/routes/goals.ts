@@ -35,7 +35,7 @@ router.get('/', (req: AuthRequest, res: Response) => {
     params.push(parent_id);
   }
 
-  query += ' ORDER BY created_at DESC';
+  query += ' ORDER BY sort_order ASC, created_at ASC';
 
   const goals = db.prepare(query).all(...params);
   res.json(goals);
@@ -50,8 +50,106 @@ router.get('/:id/children', (req: AuthRequest, res: Response) => {
     throw new AppError(404, 'Goal not found');
   }
 
-  const children = db.prepare('SELECT * FROM goals WHERE parent_id = ? AND user_id = ? ORDER BY created_at DESC').all(req.params.id, req.userId!);
+  const children = db.prepare('SELECT * FROM goals WHERE parent_id = ? AND user_id = ? ORDER BY sort_order ASC, created_at ASC').all(req.params.id, req.userId!);
   res.json(children);
+});
+
+// GET /api/goals/:id/progress — compute progress for a goal and its descendants
+router.get('/:id/progress', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+
+  const goal = db.prepare('SELECT * FROM goals WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!) as any;
+  if (!goal) {
+    throw new AppError(404, 'Goal not found');
+  }
+
+  // Get all tasks under this goal
+  const directTasks = db.prepare(
+    'SELECT id, status FROM tasks WHERE goal_id = ? AND user_id = ?'
+  ).all(req.params.id, req.userId!) as any[];
+
+  // Get all descendant goals recursively
+  function getDescendantGoalIds(parentId: string): string[] {
+    const children = db.prepare(
+      'SELECT id FROM goals WHERE parent_id = ? AND user_id = ?'
+    ).all(parentId, req.userId!) as any[];
+    const ids: string[] = [];
+    for (const child of children) {
+      ids.push(child.id);
+      ids.push(...getDescendantGoalIds(child.id));
+    }
+    return ids;
+  }
+
+  const goalId = req.params.id as string;
+  const descendantIds = getDescendantGoalIds(goalId);
+
+  // Get tasks from all descendant goals
+  let descendantTasks: any[] = [];
+  if (descendantIds.length > 0) {
+    const placeholders = descendantIds.map(() => '?').join(',');
+    descendantTasks = db.prepare(
+      `SELECT id, status FROM tasks WHERE goal_id IN (${placeholders}) AND user_id = ?`
+    ).all(...descendantIds, req.userId!) as any[];
+  }
+
+  const allTasks = [...directTasks, ...descendantTasks];
+  const totalCount = allTasks.length;
+  const completedCount = allTasks.filter(t => t.status === 'completed').length;
+  const progress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+  // Get direct children count
+  const childrenCount = db.prepare(
+    'SELECT COUNT(*) as count FROM goals WHERE parent_id = ? AND user_id = ?'
+  ).get(req.params.id, req.userId!) as any;
+
+  res.json({
+    goal_id: req.params.id,
+    direct_tasks: { total: directTasks.length, completed: directTasks.filter(t => t.status === 'completed').length },
+    all_tasks: { total: totalCount, completed: completedCount },
+    progress,
+    children_count: childrenCount.count,
+    descendant_goal_count: descendantIds.length,
+  });
+});
+
+// PUT /api/goals/reorder — batch update sort_order and parent_id
+router.put('/reorder', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+  const { items } = req.body;
+
+  if (!Array.isArray(items)) {
+    throw new AppError(400, 'items must be an array');
+  }
+
+  // Validate all items
+  for (const item of items) {
+    if (!item.id || typeof item.sort_order !== 'number') {
+      throw new AppError(400, 'Each item must have id and sort_order');
+    }
+  }
+
+  const updateStmt = db.prepare(
+    'UPDATE goals SET sort_order = ?, parent_id = ?, updated_at = ? WHERE id = ? AND user_id = ?'
+  );
+
+  const now = new Date().toISOString();
+
+  db.transaction(() => {
+    for (const item of items) {
+      updateStmt.run(
+        item.sort_order,
+        item.parent_id ?? null,
+        now,
+        item.id,
+        req.userId!
+      );
+    }
+  })();
+
+  // Return updated goals
+  const goals = db.prepare('SELECT * FROM goals WHERE user_id = ? ORDER BY sort_order ASC, created_at ASC').all(req.userId!);
+  res.json(goals);
 });
 
 // POST /api/goals
@@ -79,13 +177,22 @@ router.post('/', (req: AuthRequest, res: Response) => {
       throw new AppError(404, 'Course not found');
     }
 
+    // Auto-assign sort_order: max + 1 among siblings
+    const maxOrder = db.prepare(
+      data.parent_id
+        ? 'SELECT COALESCE(MAX(sort_order), -1) as max_order FROM goals WHERE user_id = ? AND parent_id = ?'
+        : 'SELECT COALESCE(MAX(sort_order), -1) as max_order FROM goals WHERE user_id = ? AND parent_id IS NULL'
+    ).get(...(data.parent_id ? [req.userId!, data.parent_id] : [req.userId!])) as any;
+
+    const sortOrder = (maxOrder?.max_order ?? -1) + 1;
+
     const id = uuidv4();
     const now = new Date().toISOString();
 
     db.prepare(
-      `INSERT INTO goals (id, user_id, course_id, title, description, deadline, exam_mode, status, parent_id, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?)`
-    ).run(id, req.userId!, courseId, data.title, data.description || null, data.deadline || null, data.exam_mode ? 1 : 0, data.parent_id || null, now, now);
+      `INSERT INTO goals (id, user_id, course_id, title, description, deadline, exam_mode, status, parent_id, sort_order, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?)`
+    ).run(id, req.userId!, courseId, data.title, data.description || null, data.deadline || null, data.exam_mode ? 1 : 0, data.parent_id || null, sortOrder, now, now);
 
     const goal = db.prepare('SELECT * FROM goals WHERE id = ?').get(id);
     res.status(201).json(goal);
