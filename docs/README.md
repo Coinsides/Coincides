@@ -22,7 +22,18 @@
 | [workflow/Coincides-Workflow.md](./workflow/Coincides-Workflow.md) | 开发协作工作流（PM ↔ Engineer 流程定义） |
 | [workflow/Coincides-Onboarding.md](./workflow/Coincides-Onboarding.md) | 工程师入职指南 / 上下文恢复手册 |
 
-## 变更日志
+## 版本发布文档
+
+| 版本 | 计划书 | 变更日志（开发者向） | 发布说明（用户向） |
+|------|--------|---------------------|-------------------|
+| v1.0 | — | [CHANGELOG-v1.0.md](./changelog/CHANGELOG-v1.0.md) | [RELEASE-NOTES-v1.0.md](./releases/RELEASE-NOTES-v1.0.md) |
+| v1.1 | [v1.1-plan.md](./releases/v1.1-plan.md) | [CHANGELOG-v1.1.md](./releases/CHANGELOG-v1.1.md) | [RELEASE-NOTES-v1.1.md](./releases/RELEASE-NOTES-v1.1.md) |
+| v1.2 | [v1.2-plan.md](./releases/v1.2-plan.md) | [CHANGELOG-v1.2.md](./releases/CHANGELOG-v1.2.md) | [RELEASE-NOTES-v1.2.md](./releases/RELEASE-NOTES-v1.2.md) |
+| v1.3 | [v1.3-plan.md](./releases/v1.3-plan.md) | [CHANGELOG-v1.3.md](./releases/CHANGELOG-v1.3.md) | [RELEASE-NOTES-v1.3.md](./releases/RELEASE-NOTES-v1.3.md) |
+| v1.3.1 | — | [CHANGELOG-v1.3.1.md](./releases/CHANGELOG-v1.3.1.md) | [RELEASE-NOTES-v1.3.1.md](./releases/RELEASE-NOTES-v1.3.1.md) |
+| v1.4 | [v1.4-plan.md](./releases/v1.4-plan.md) | — | — |
+
+## 变更日志索引
 
 | 文件 | 说明 |
 |------|------|

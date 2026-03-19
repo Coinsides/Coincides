@@ -1,7 +1,7 @@
 # Coincides 开发路线图
 
 > 最后更新：2026-03-19
-> 状态：v1.0 🎉 发布 | v1.1 ✅ 完成 | v1.2 ✅ 完成 | v1.3 ✅ 完成 | v1.4 📋 规划完成
+> 状态：v1.0 🎉 发布 | v1.1 ✅ 完成 | v1.2 ✅ 完成 | v1.3 ✅ 完成 | v1.3.1 ✅ 补丁 | v1.4 📋 规划完成
 
 ---
 
@@ -152,6 +152,7 @@
 > 状态：全部完成（Step 1-7），A-1 Agent 报错延后至 v1.2
 > 详细规划：[v1.1-plan.md](releases/v1.1-plan.md)
 > 变更日志：[CHANGELOG-v1.1.md](releases/CHANGELOG-v1.1.md)
+> 发布说明：[RELEASE-NOTES-v1.1.md](releases/RELEASE-NOTES-v1.1.md)
 
 - Step 1：DB Migration 机制 + 配置验证（T-3 + T-4）✅
 - Step 2：Task 数据模型升级（M-1）✅
@@ -168,6 +169,7 @@
 > 状态：全部完成（Step 1-7），已打 Tag v1.2.0
 > 详细规划：[v1.2-plan.md](releases/v1.2-plan.md)
 > 变更日志：[CHANGELOG-v1.2.md](releases/CHANGELOG-v1.2.md)
+> 发布说明：[RELEASE-NOTES-v1.2.md](releases/RELEASE-NOTES-v1.2.md)
 
 - Step 1：System Prompt 重写（MWF 脚手架 + 设计宪法）
 - Step 2：Agent 工具升级（目标拆解 + 优先级标注）
@@ -183,7 +185,8 @@
 
 > 状态：全部完成（Step 1-7）
 > 详细规划：[v1.3-plan.md](releases/v1.3-plan.md)
-> 变更日志：[CHANGELOG-v1.3.md](../CHANGELOG-v1.3.md)
+> 变更日志：[CHANGELOG-v1.3.md](releases/CHANGELOG-v1.3.md)
+> 发布说明：[RELEASE-NOTES-v1.3.md](releases/RELEASE-NOTES-v1.3.md)
 
 - Step 1：Time Block 数据模型 + CRUD API ✅
 - Step 2：Time Block 前端 UI（日历周视图 + 拖拽框选）+ Goal 依赖 UI ✅
@@ -192,6 +195,20 @@
 - Step 5：设计宪法全面审计（3 个 P0 修复）✅
 - Step 6：DailyBrief 升级（time_blocks + serves_must）✅
 - Step 7：边界修复 + 集成测试 + 文档更新 ✅
+
+---
+
+## v1.3.1（补丁版本：bug 修复 + 兼容性 + Agent 稳定性）✅
+
+> 状态：已发布
+> 变更日志：[CHANGELOG-v1.3.1.md](releases/CHANGELOG-v1.3.1.md)
+> 发布说明：[RELEASE-NOTES-v1.3.1.md](releases/RELEASE-NOTES-v1.3.1.md)
+
+- 3 个 UI bug 修复：日历事件编辑/删除可见性、卡片翻转镜像、公式预览渲染 ✅
+- schema.sql 与 migration 同步，修复新库启动崩溃 ✅
+- tsx → jiti 替换，修复 Windows 兼容性问题 ✅
+- Agent tool_result 持久化 + 超时 120s + 历史清洗 ✅
+- Release Notes 工作流正式加入发布流程 ✅
 
 ---
 

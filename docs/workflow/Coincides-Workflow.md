@@ -2,7 +2,7 @@
 
 > PM：henryfeng349@gmail.com
 > 全栈工程师：Perplexity Computer
-> 最后更新：2026-03-18（新增版本迭代工作流）
+> 最后更新：2026-03-19（新增 Release Notes 工作流）
 
 ---
 
@@ -35,9 +35,15 @@ docs/
 │   ├── Coincides-Workflow.md         ← 本文件：开发工作流
 │   └── Coincides-Onboarding.md       ← 工程师入职指南 / 上下文恢复手册
 │
-├── releases/                         ← 版本计划书目录（v1.1+ 迭代模式新增）
-│   ├── v1.1-plan.md
+├── releases/                         ← 版本迭代文档目录（v1.1+ 迭代模式新增）
+│   ├── v1.1-plan.md                 ← 版本计划书
 │   ├── v1.2-plan.md
+│   ├── ...
+│   ├── CHANGELOG-v1.1.md            ← 版本变更日志（开发者向）
+│   ├── CHANGELOG-v1.2.md
+│   ├── ...
+│   ├── RELEASE-NOTES-v1.1.md        ← 版本发布说明（用户向）
+│   ├── RELEASE-NOTES-v1.2.md
 │   └── ...
 │
 └── changelog/
@@ -57,7 +63,9 @@ docs/
 | **DELIVERY_PLAN.md** | Step 完成时 | 工程师 | 各 Round/Step 的交付内容与完成标记 |
 | **Coincides-Roadmap.md** | Round 完成或新 Round 开始时 | 工程师 | 版本规划、里程碑、当前进度 |
 | **workflow/** | 工作流程变更时 | 工程师（PM 审批）| Workflow 和 Onboarding 两个过程文档 |
-| **releases/** | 每个版本的阶段 0（规划） | 工程师撰写，PM 审批 | 版本计划书（v1.1+ 迭代模式新增） |
+| **releases/v1.X-plan.md** | 每个版本的阶段 0（规划） | 工程师撰写，PM 审批 | 版本计划书（v1.1+ 迭代模式新增） |
+| **releases/CHANGELOG-v1.X.md** | 阶段 1 起持续更新 | 工程师 | 版本变更日志——开发者视角的技术细节 |
+| **releases/RELEASE-NOTES-v1.X.md** | 阶段 3（发布） | 工程师撰写，PM 审批 | 版本发布说明——用户视角的功能更新摘要 |
 | **changelog/** | 每次 Push 时 | 工程师 | 按版本独立的变更日志文件 |
 
 ### changelog 规则
@@ -67,6 +75,39 @@ docs/
 - `CHANGELOG.md` 是索引文件，链接到各版本日志
 - 新版本开始时，创建新的日志文件（如 `CHANGELOG-v2.0.md`）
 - 单条日志必须包含：标题、日期、变更内容、影响文件列表
+
+### Release Notes 规则
+
+- **Release Notes ≠ CHANGELOG**：
+  - CHANGELOG = 开发者向的技术变更记录（改了什么代码、影响了哪些文件）
+  - Release Notes = 用户向的版本发布说明（新增了什么功能、修复了什么问题）
+- 命名格式：`RELEASE-NOTES-v{版本号}.md`，存放于 `docs/releases/`
+- 每个版本发布时（阶段 3）必须创建对应的 Release Notes
+- Release Notes 内容应面向非技术用户，用简洁易懂的语言描述
+- Release Notes 模板：
+
+```markdown
+# Coincides vX.Y 发布说明
+
+> 发布日期：YYYY-MM-DD
+
+## 版本概述
+一句话总结这个版本给用户带来了什么。
+
+## ✨ 新增功能
+- ...
+
+## 🛠 改进
+- ...
+
+## 🐛 修复
+- ...
+
+## ℹ️ 更新方式
+1. git pull
+2. npm run setup
+3. 重启服务
+```
 
 ### 不在 GitHub 中的内容（PM 在 Google Drive 管理）
 
@@ -232,11 +273,12 @@ Coincides 有两套工作流：
 
 1. **最终测试**：确认所有功能正常
 2. **更新版本号**：在 CHANGELOG 标记版本号
-3. **更新 Roadmap**：标记 Round 完成
-4. **全量文档审计**：检查所有 docs/ 文件是否与代码一致
-5. **Push 到 GitHub**
-6. **更新入职指南**：把新版本的变更写进 `Coincides-Onboarding.md`
-7. **通知 PM 更新本地**：
+3. **撰写 Release Notes**：创建 `RELEASE-NOTES-v1.X.md`，面向用户描述本版本更新
+4. **更新 Roadmap**：标记 Round 完成
+5. **全量文档审计**：检查所有 docs/ 文件是否与代码一致
+6. **Push 到 GitHub**
+7. **更新入职指南**：把新版本的变更写进 `Coincides-Onboarding.md`
+8. **通知 PM 更新本地**：
    ```
    git pull
    npm run setup
@@ -436,6 +478,7 @@ Coincides 有两套工作流：
 ```
 □ 全部 Step + Patch 已提交
 □ CHANGELOG-v1.X.md 已完成（包含所有 Step 和 Patch 的记录）
+□ RELEASE-NOTES-v1.X.md 已创建（用户向发布说明）
 □ CHANGELOG.md 索引已更新
 □ Coincides-Roadmap.md 已更新（标记版本完成）
 □ 受影响的核心文档已更新（DATA_MODEL / ARCHITECTURE / PRD / DELIVERY_PLAN）
@@ -471,7 +514,8 @@ Coincides 有两套工作流：
 | 文件 | 什么时候创建/更新 | 谁更新 |
 |---|---|---|
 | `docs/releases/v1.X-plan.md` | 阶段 0（规划） | 工程师撰写，PM 审批 |
-| `docs/changelog/CHANGELOG-v1.X.md` | 阶段 1 起持续更新，阶段 4 写复盘 | 工程师 |
+| `docs/releases/CHANGELOG-v1.X.md` | 阶段 1 起持续更新，阶段 4 写复盘 | 工程师 |
+| `docs/releases/RELEASE-NOTES-v1.X.md` | 阶段 3（发布） | 工程师撰写，PM 审批 |
 | `docs/changelog/CHANGELOG.md` | 阶段 3（发布） | 工程师 |
 | `docs/Coincides-Roadmap.md` | 阶段 0 + 阶段 3 | 工程师 |
 
