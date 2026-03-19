@@ -1,7 +1,7 @@
 # Coincides 开发路线图
 
-> 最后更新：2026-03-18
-> 状态：Round 1 ✅ 完成 | Round 2 ✅ 完成 | Round 3 ✅ 完成 | Round 4 ✅ 完成 | 🎉 v1.0 发布
+> 最后更新：2026-03-19
+> 状态：v1.0 🎉 发布 | v1.1 ✅ 完成 | v1.2 📋 规划中
 
 ---
 
@@ -144,6 +144,37 @@
 | 向量数据库 | sqlite-vec | 与 better-sqlite3 无缝集成，零外部依赖，npm install 即用 |
 | Embedding 模型 | Voyage AI voyage-4（已集成） | 1024 维，$0.06/M tokens，Anthropic 官方合作伙伴 |
 | 搜索策略 | Phase 1: SQL LIKE ✅ → Phase 2: 语义搜索 ✅ → Phase 3: 三路混合搜索 ✅ | 分阶段降低复杂度，全部完成 |
+
+---
+
+## v1.1（UX 痛点修复 + 技术债偿还 + 数据模型升级）✅
+
+> 状态：全部完成（Step 1-7），A-1 Agent 报错延后至 v1.2
+> 详细规划：[v1.1-plan.md](releases/v1.1-plan.md)
+> 变更日志：[CHANGELOG-v1.1.md](releases/CHANGELOG-v1.1.md)
+
+- Step 1：DB Migration 机制 + 配置验证（T-3 + T-4）✅
+- Step 2：Task 数据模型升级（M-1）✅
+- Step 3：Goal 嵌套支持（M-2 + G-1）✅
+- Step 4：日历 CRUD 补全（C-1 + C-2 + G-2）✅
+- Step 5：跨 Deck 复习选择器（R-1）✅
+- Step 6：空 catch 块清理（T-1）41 个文件）✅
+- Step 7：DeckDetail 组件拆分（T-2，907→270 行）✅
+
+---
+
+## v1.2（AI 交互重构 + Goal Manager + 新用户引导 + i18n）📋
+
+> 状态：规划完成，待开发
+> 详细规划：[v1.2-plan.md](releases/v1.2-plan.md)
+
+- Step 1：System Prompt 重写（MWF 脚手架 + 设计宪法）
+- Step 2：Agent 工具升级（目标拆解 + 优先级标注）
+- Step 3：Goal Manager 完整树形 UI + 拖拽
+- Step 4：Goal-日历颜色联动
+- Step 5：新用户引导流程
+- Step 6：i18n 国际化框架（中/英）
+- Step 7：Agent 报错排查（A-1 遗留项）
 
 ---
 
