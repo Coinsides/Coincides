@@ -113,7 +113,8 @@ export async function* runAgent(
 
   // 8. Agent loop (handle tool calls)
   let fullResponse = '';
-  const toolCallsAccumulated: ToolCall[] = [];
+  let lastRoundText = '';
+  let lastRoundHadTools = false;
 
   for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
     const currentToolCalls: ToolCall[] = [];
@@ -173,11 +174,14 @@ export async function* runAgent(
     }
 
     fullResponse += textBuffer;
+    lastRoundText = textBuffer;
 
     // If no tool calls, we're done
     if (currentToolCalls.length === 0) {
+      lastRoundHadTools = false;
       break;
     }
+    lastRoundHadTools = true;
 
     // Execute tool calls
     const toolResults: ToolResult[] = [];
@@ -204,16 +208,32 @@ export async function* runAgent(
       tool_results: toolResults,
     });
 
-    toolCallsAccumulated.push(...currentToolCalls);
+    // Persist intermediate tool round to DB so history stays complete
+    // (each tool_use must have a matching tool_result in conversation history)
+    memory.saveMessage(
+      conversationId,
+      'assistant',
+      textBuffer,
+      JSON.stringify(currentToolCalls),
+    );
+    memory.saveMessage(
+      conversationId,
+      'user',
+      '',
+      null,
+      JSON.stringify(toolResults),
+    );
   }
 
-  // 9. Save assistant response
-  memory.saveMessage(
-    conversationId,
-    'assistant',
-    fullResponse,
-    toolCallsAccumulated.length > 0 ? JSON.stringify(toolCallsAccumulated) : null,
-  );
+  // 9. Save final assistant text response
+  // Only save if the last round had NO tool calls (otherwise it was already saved in the loop)
+  if (lastRoundText && !lastRoundHadTools) {
+    memory.saveMessage(
+      conversationId,
+      'assistant',
+      lastRoundText,
+    );
+  }
 
   // 10. Extract memories from this exchange
   memory.extractMemories(conversationId, userMessage, fullResponse);
