@@ -257,7 +257,7 @@
 | 层级 | 技术 |
 |---|---|
 | 前端 | React + TypeScript + Vite, CSS Modules |
-| 后端 | Node.js + Express + TypeScript |
+| 后端 | Node.js 22.x + Express + TypeScript (jiti) |
 | 数据库 | SQLite (better-sqlite3), WAL 模式 |
 | AI | Anthropic Claude API (Haiku 4.5 / Sonnet 4.5) |
 | 卡片算法 | ts-fsrs (间隔重复) |

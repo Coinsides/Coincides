@@ -6,7 +6,7 @@ Coincides helps students organize their entire semester through intelligent stud
 
 Built around the **Minimum Working Flow** philosophy: maintain learning continuity through a small daily minimum, not cramming.
 
-![Status](https://img.shields.io/badge/version-1.3-blue)
+![Status](https://img.shields.io/badge/version-1.3.1-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
 ---
@@ -53,7 +53,7 @@ Built around the **Minimum Working Flow** philosophy: maintain learning continui
 
 ### Prerequisites
 
-- **Node.js** 18+ (recommended 20.x) — download at [nodejs.org](https://nodejs.org)
+- **Node.js** 22.x (LTS) — download at [nodejs.org](https://nodejs.org). Node 25 has known ESM compatibility issues on Windows.
 - **npm** 9+ (comes with Node.js)
 - **Anthropic API Key** — sign up at [console.anthropic.com](https://console.anthropic.com), go to API Keys and create one
 - **Voyage AI API Key** (optional, enables semantic search) — sign up at [dash.voyageai.com](https://dash.voyageai.com)
@@ -65,21 +65,16 @@ Built around the **Minimum Working Flow** philosophy: maintain learning continui
 git clone https://github.com/Coinsides/Coincides.git
 cd Coincides
 
-# Install dependencies for server
-cd server
-npm install
-
-# Install dependencies for client
-cd ../client
-npm install
+# Install all dependencies (root + server + client)
+npm run setup
 ```
 
 ### 2. Configure API Keys
 
-Create a file called `.env` inside the `server/` folder:
+Create a file called `.env` in the **project root** folder (not inside server/):
 
 ```
-# server/.env
+# .env (project root)
 
 # Required — Anthropic API key for the AI agent (Mr. Zero)
 ANTHROPIC_API_KEY=sk-ant-api03-xxxxx
@@ -89,6 +84,8 @@ VOYAGE_API_KEY=pa-xxxxx
 ```
 
 > **How to get an Anthropic key:** Go to [console.anthropic.com](https://console.anthropic.com) → Sign up → API Keys → Create Key. You need to add credit to your account for API usage.
+>
+> **Note:** The `.env` file must be in the project root, not inside `server/`. The server reads it from `cwd` using dotenv.
 
 ### 3. Start the App
 
@@ -97,8 +94,8 @@ You need **two terminal windows** (or two tabs):
 **Terminal 1 — Start the backend:**
 
 ```bash
-cd Coincides/server
-npx tsx src/index.ts
+cd Coincides
+node --import jiti/register server/src/index.ts
 ```
 
 You should see: `Server running on port 3001`

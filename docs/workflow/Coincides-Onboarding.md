@@ -24,7 +24,7 @@
 | 层级 | 技术 |
 |---|---|
 | 前端 | React 18 + TypeScript + Vite 5, CSS Modules, Zustand 状态管理 |
-| 后端 | Node.js + Express 4 + TypeScript (tsx 运行) |
+| 后端 | Node.js 22.x + Express 4 + TypeScript (jiti 运行) |
 | 数据库 | SQLite (better-sqlite3), WAL 模式, 外键启用 |
 | AI 对话 | Anthropic Claude API (claude-haiku-4-5-20251001 / claude-sonnet-4-20250514) |
 | AI Embedding | Voyage AI voyage-4 (1024 维, $0.06/M tokens) |
@@ -227,7 +227,8 @@ node --import jiti/register server/src/index.ts
 **注意事项**：
 - 服务器**必须**从项目根目录启动（不是 /server），否则 dotenv 找不到 .env
 - `npm run setup` = `npm run install:all` = 安装根 + server + client 三层依赖
-- sqlite-vec 是 native module，`git pull` 后如果 Node 版本变化需要重新 `npm install`
+- sqlite-vec 和 better-sqlite3 是 native module，`git pull` 后如果 Node 版本变化需要 `npm rebuild` 或重新 `npm run setup`
+- Node.js 要求 22.x LTS，Node 25 在 Windows 下有 ESM 兼容性问题
 
 ---
 

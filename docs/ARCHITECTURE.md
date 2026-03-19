@@ -27,7 +27,7 @@
 ┌─────────────────────────────────────────────────┐
 │                   Server (Node.js)               │
 │                                                   │
-│  Express 4 + TypeScript (tsx runtime)             │
+│  Express 4 + TypeScript (jiti runtime)             │
 │  ├── Auth middleware (JWT)                         │
 │  ├── REST API routes (18 modules)                 │
 │  ├── Agent orchestrator                           │
@@ -97,7 +97,7 @@
 - Minimal, unopinionated — we control the architecture
 - Most documented and understood Node.js framework
 
-**Runtime:** tsx (TypeScript execution without compilation step)
+**Runtime:** jiti (TypeScript execution without compilation step; replaced tsx in v1.3.1 due to Windows ESM compatibility issues)
 
 ### 2.3 Database: SQLite via better-sqlite3
 
@@ -408,7 +408,7 @@ Coincides/
 For the student to run on Windows 11:
 
 ### Prerequisites
-- Node.js 20+ (LTS)
+- Node.js 22.x LTS (Node 25 has known ESM compatibility issues on Windows)
 - No Python required (all processing is Node.js native)
 
 ### Setup
@@ -424,8 +424,8 @@ npm run setup
 # ANTHROPIC_API_KEY=sk-ant-...
 # VOYAGE_API_KEY=pa-...
 
-# Start backend (Terminal 1)
-npx tsx server/src/index.ts
+# Start backend (Terminal 1) — must run from project root
+node --import jiti/register server/src/index.ts
 # → Running on http://localhost:3001
 
 # Start frontend (Terminal 2)
@@ -436,5 +436,5 @@ cd client && npm run dev
 **Important:**
 - Server must be started from project root directory (dotenv reads .env from cwd)
 - `npm run setup` = `npm run install:all` = installs root + server + client dependencies
-- sqlite-vec is a native module; if Node.js version changes after `git pull`, run `npm install` in server/
+- sqlite-vec and better-sqlite3 are native modules; if Node.js version changes after `git pull`, run `npm rebuild` or `npm run setup`
 - API keys can also be entered in the Settings page (takes priority over .env)
