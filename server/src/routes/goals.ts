@@ -37,7 +37,17 @@ router.get('/', (req: AuthRequest, res: Response) => {
 
   query += ' ORDER BY sort_order ASC, created_at ASC';
 
-  const goals = db.prepare(query).all(...params);
+  const goals = db.prepare(query).all(...params) as any[];
+
+  // Enrich each goal with its dependency info
+  const depsStmt = db.prepare(
+    'SELECT depends_on_goal_id FROM goal_dependencies WHERE goal_id = ?'
+  );
+  for (const goal of goals) {
+    const deps = depsStmt.all(goal.id) as Array<{ depends_on_goal_id: string }>;
+    goal.dependencies = deps.map(d => d.depends_on_goal_id);
+  }
+
   res.json(goals);
 });
 
@@ -305,9 +315,170 @@ router.delete('/:id', (req: AuthRequest, res: Response) => {
     throw new AppError(404, 'Goal not found');
   }
 
+  // goal_dependencies has ON DELETE CASCADE, so dependencies auto-cleaned
   db.prepare('DELETE FROM goals WHERE id = ?').run(req.params.id);
 
   res.json({ message: 'Goal deleted' });
+});
+
+// ── Goal Dependencies (v1.3) ────────────────────────────────
+
+/**
+ * DFS cycle detection.
+ * Before adding edge "goalId depends on newDepId", check if newDepId
+ * can already reach goalId through existing edges → cycle.
+ */
+function detectCycle(db: any, userId: string, goalId: string, newDependsOnId: string): boolean {
+  // If adding A depends on B, check: can we reach A from B through existing deps?
+  // i.e., does B transitively depend on A already?
+  const visited = new Set<string>();
+
+  function dfs(current: string): boolean {
+    if (current === goalId) return true; // cycle found
+    if (visited.has(current)) return false;
+    visited.add(current);
+
+    const deps = db.prepare(
+      `SELECT depends_on_goal_id FROM goal_dependencies
+       WHERE goal_id = ? AND goal_id IN (SELECT id FROM goals WHERE user_id = ?)`
+    ).all(current, userId) as Array<{ depends_on_goal_id: string }>;
+
+    for (const dep of deps) {
+      if (dfs(dep.depends_on_goal_id)) return true;
+    }
+    return false;
+  }
+
+  return dfs(newDependsOnId);
+}
+
+// GET /api/goals/:id/dependencies
+router.get('/:id/dependencies', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+
+  const goal = db.prepare('SELECT id FROM goals WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!);
+  if (!goal) throw new AppError(404, 'Goal not found');
+
+  // Get direct dependencies (what this goal depends on)
+  const dependsOn = db.prepare(
+    `SELECT gd.*, g.title as depends_on_title, g.status as depends_on_status
+     FROM goal_dependencies gd
+     JOIN goals g ON g.id = gd.depends_on_goal_id
+     WHERE gd.goal_id = ?`
+  ).all(req.params.id);
+
+  // Get dependents (what depends on this goal)
+  const dependents = db.prepare(
+    `SELECT gd.*, g.title as goal_title, g.status as goal_status
+     FROM goal_dependencies gd
+     JOIN goals g ON g.id = gd.goal_id
+     WHERE gd.depends_on_goal_id = ?`
+  ).all(req.params.id);
+
+  res.json({ depends_on: dependsOn, dependents });
+});
+
+// POST /api/goals/:id/dependencies — add dependency (with cycle detection)
+router.post('/:id/dependencies', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+  const { depends_on_goal_id } = req.body;
+
+  if (!depends_on_goal_id) {
+    throw new AppError(400, 'depends_on_goal_id is required');
+  }
+
+  // Can't depend on self
+  if (req.params.id === depends_on_goal_id) {
+    throw new AppError(400, 'A goal cannot depend on itself');
+  }
+
+  // Verify both goals exist and belong to user
+  const goal = db.prepare('SELECT id, course_id FROM goals WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!) as any;
+  if (!goal) throw new AppError(404, 'Goal not found');
+
+  const depGoal = db.prepare('SELECT id, course_id FROM goals WHERE id = ? AND user_id = ?').get(depends_on_goal_id, req.userId!) as any;
+  if (!depGoal) throw new AppError(404, 'Dependency goal not found');
+
+  // Check for existing dependency
+  const existing = db.prepare(
+    'SELECT id FROM goal_dependencies WHERE goal_id = ? AND depends_on_goal_id = ?'
+  ).get(req.params.id, depends_on_goal_id);
+  if (existing) {
+    throw new AppError(409, 'Dependency already exists');
+  }
+
+  // DFS cycle detection
+  if (detectCycle(db, req.userId!, req.params.id as string, depends_on_goal_id)) {
+    throw new AppError(400, 'Adding this dependency would create a circular dependency');
+  }
+
+  const id = uuidv4();
+  const now = new Date().toISOString();
+  db.prepare(
+    'INSERT INTO goal_dependencies (id, goal_id, depends_on_goal_id, created_at) VALUES (?, ?, ?, ?)'
+  ).run(id, req.params.id, depends_on_goal_id, now);
+
+  const created = db.prepare(
+    `SELECT gd.*, g.title as depends_on_title
+     FROM goal_dependencies gd
+     JOIN goals g ON g.id = gd.depends_on_goal_id
+     WHERE gd.id = ?`
+  ).get(id);
+
+  res.status(201).json(created);
+});
+
+// DELETE /api/goals/:id/dependencies/:depId — remove dependency
+router.delete('/:id/dependencies/:depId', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+
+  // Verify the goal belongs to user
+  const goal = db.prepare('SELECT id FROM goals WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!);
+  if (!goal) throw new AppError(404, 'Goal not found');
+
+  const dep = db.prepare(
+    'SELECT id FROM goal_dependencies WHERE id = ? AND goal_id = ?'
+  ).get(req.params.depId, req.params.id);
+  if (!dep) throw new AppError(404, 'Dependency not found');
+
+  db.prepare('DELETE FROM goal_dependencies WHERE id = ?').run(req.params.depId);
+  res.json({ message: 'Dependency removed' });
+});
+
+// GET /api/goals/:id/dependency-chain — full ordered chain (for scheduling)
+router.get('/:id/dependency-chain', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+
+  const goal = db.prepare('SELECT id FROM goals WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!);
+  if (!goal) throw new AppError(404, 'Goal not found');
+
+  // Walk backwards through dependencies: A depends on B depends on C → [C, B, A]
+  const chain: string[] = [];
+  const visited = new Set<string>();
+
+  function walkBack(currentId: string): void {
+    if (visited.has(currentId)) return;
+    visited.add(currentId);
+
+    const deps = db.prepare(
+      'SELECT depends_on_goal_id FROM goal_dependencies WHERE goal_id = ?'
+    ).all(currentId) as Array<{ depends_on_goal_id: string }>;
+
+    for (const dep of deps) {
+      walkBack(dep.depends_on_goal_id);
+    }
+
+    chain.push(currentId);
+  }
+
+  walkBack(req.params.id as string);
+
+  // Enrich with goal data
+  const goals = chain.map(id =>
+    db.prepare('SELECT id, title, status, course_id, deadline FROM goals WHERE id = ?').get(id)
+  ).filter(Boolean);
+
+  res.json(goals);
 });
 
 export default router;

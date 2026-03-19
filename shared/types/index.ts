@@ -90,6 +90,12 @@ export enum ProposalStatus {
   Discarded = 'discarded',
 }
 
+export enum TimeBlockType {
+  Study = 'study',
+  Sleep = 'sleep',
+  Custom = 'custom',
+}
+
 export interface ChecklistItem {
   text: string;
   done: boolean;
@@ -364,6 +370,86 @@ export interface Proposal {
   data: unknown;
   created_at: string;
   resolved_at: string | null;
+}
+
+// --- Time Block ---
+
+export interface TimeBlock {
+  id: string;
+  user_id: string;
+  label: string;
+  type: TimeBlockType;
+  day_of_week: number;           // 0=Sun, 1=Mon, ..., 6=Sat
+  start_time: string;            // 'HH:MM'
+  end_time: string;              // 'HH:MM'
+  color: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TimeBlockOverride {
+  id: string;
+  user_id: string;
+  time_block_id: string;
+  override_date: string;         // 'YYYY-MM-DD'
+  start_time: string | null;     // null = delete this block on that day
+  end_time: string | null;
+  created_at: string;
+}
+
+export interface GoalDependency {
+  id: string;
+  goal_id: string;
+  depends_on_goal_id: string;
+  created_at: string;
+}
+
+// --- Time Block Computed ---
+
+export interface ResolvedTimeBlock {
+  id: string;
+  label: string;
+  type: TimeBlockType;
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  color: string | null;
+  is_override: boolean;
+  override_id?: string;
+}
+
+// --- Time Block Request Types ---
+
+export interface CreateTimeBlockRequest {
+  label: string;
+  type?: TimeBlockType;
+  day_of_week: number;
+  start_time: string;
+  end_time: string;
+  color?: string;
+}
+
+export interface BatchCreateTimeBlockRequest {
+  blocks: CreateTimeBlockRequest[];
+}
+
+export interface UpdateTimeBlockRequest {
+  label?: string;
+  type?: TimeBlockType;
+  start_time?: string;
+  end_time?: string;
+  color?: string;
+}
+
+export interface CreateTimeBlockOverrideRequest {
+  time_block_id: string;
+  override_date: string;
+  start_time?: string | null;
+  end_time?: string | null;
+}
+
+export interface CreateGoalDependencyRequest {
+  depends_on_goal_id: string;
 }
 
 // --- API Request Types ---

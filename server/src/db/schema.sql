@@ -327,7 +327,55 @@ CREATE INDEX IF NOT EXISTS idx_study_mode_templates_user ON study_mode_templates
 CREATE UNIQUE INDEX IF NOT EXISTS idx_study_mode_templates_system_slug ON study_mode_templates(slug) WHERE user_id IS NULL;
 
 -- ============================================================
--- 17. StudyActivityLog
+-- 17. TimeBlock (v1.3)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS time_blocks (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  label TEXT NOT NULL,
+  type TEXT NOT NULL DEFAULT 'custom',
+  day_of_week INTEGER NOT NULL,
+  start_time TEXT NOT NULL,
+  end_time TEXT NOT NULL,
+  color TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_time_blocks_user ON time_blocks(user_id);
+CREATE INDEX IF NOT EXISTS idx_time_blocks_user_day ON time_blocks(user_id, day_of_week);
+
+-- ============================================================
+-- 18. TimeBlockOverride (v1.3)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS time_block_overrides (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  time_block_id TEXT NOT NULL REFERENCES time_blocks(id) ON DELETE CASCADE,
+  override_date TEXT NOT NULL,
+  start_time TEXT,
+  end_time TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_tbo_user_date ON time_block_overrides(user_id, override_date);
+
+-- ============================================================
+-- 19. GoalDependency (v1.3)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS goal_dependencies (
+  id TEXT PRIMARY KEY,
+  goal_id TEXT NOT NULL REFERENCES goals(id) ON DELETE CASCADE,
+  depends_on_goal_id TEXT NOT NULL REFERENCES goals(id) ON DELETE CASCADE,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE(goal_id, depends_on_goal_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_goal_deps_goal ON goal_dependencies(goal_id);
+CREATE INDEX IF NOT EXISTS idx_goal_deps_depends ON goal_dependencies(depends_on_goal_id);
+
+-- ============================================================
+-- 20. StudyActivityLog
 -- ============================================================
 CREATE TABLE IF NOT EXISTS study_activity_log (
   id TEXT PRIMARY KEY,
