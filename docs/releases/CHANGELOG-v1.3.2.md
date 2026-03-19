@@ -152,3 +152,21 @@ Agent 对话中出现 Anthropic API 400 错误：`tool_use ids were found withou
 ### 变更文件
 - `server/src/agent/memory/manager.ts`
 - `server/src/agent/providers/anthropic.ts`
+
+---
+
+## Bug 8 (P1): Formula 卡片公式显示为原始 LaTeX 文本
+
+### 问题
+Formula 类型的卡片，公式区域显示原始 LaTeX 源码（如 `$S = \int_a^b ...$`）而非渲染后的数学公式。
+
+### 根因
+Agent 生成的 `formula` 字段内容自带 `$...$` 分隔符，但 `FormulaView` 在渲染时又在外层包裹 `$$...$$`，导致实际传给 KaTeX 的是 `$$$...$$$`，KaTeX 无法解析而 fallback 显示原文。
+
+### 修复
+- `CardTemplateContent.tsx` — 新增 `stripLatexDelimiters()` 函数，在包裹 `$$` 之前先剥离内容自带的 `$`/`$$` 分隔符；应用于 formula 字段和 variable key 的渲染
+- `normalizeContent.ts` — 同样新增 `stripLatexDelimiters()`，在 formula 字段存入 DB 前就清理分隔符，从源头防止问题
+
+### 变更文件
+- `client/src/components/CardFlip/CardTemplateContent.tsx`
+- `server/src/agent/tools/normalizeContent.ts`

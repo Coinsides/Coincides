@@ -9,6 +9,25 @@ import type {
 import { CardTemplateType } from '@shared/types';
 import styles from './CardFlip.module.css';
 
+/**
+ * Strip wrapping $ or $$ delimiters from a LaTeX string.
+ * The Agent sometimes stores formula content WITH delimiters (e.g. "$S = ...$")
+ * but the rendering code adds its own delimiters, causing double-wrapping
+ * like "$$$S = ...$$$" which KaTeX cannot parse.
+ */
+function stripLatexDelimiters(text: string): string {
+  let s = text.trim();
+  // Strip $$ ... $$ first (display mode)
+  if (s.startsWith('$$') && s.endsWith('$$') && s.length > 4) {
+    s = s.slice(2, -2).trim();
+  }
+  // Strip $ ... $ (inline mode)
+  else if (s.startsWith('$') && s.endsWith('$') && s.length > 2) {
+    s = s.slice(1, -1).trim();
+  }
+  return s;
+}
+
 interface CardTemplateContentProps {
   templateType: CardTemplateType;
   content: CardContent;
@@ -81,7 +100,7 @@ function FormulaView({ content }: { content: FormulaContent }) {
     <div className={styles.templateContent}>
       {content.formula ? (
         <div className={styles.formulaDisplay}>
-          <KaTeXRenderer text={`$$${content.formula}$$`} />
+          <KaTeXRenderer text={`$$${stripLatexDelimiters(content.formula)}$$`} />
         </div>
       ) : (
         <div className={styles.contentBody} style={{ color: 'var(--text-muted)' }}>No formula</div>
@@ -93,7 +112,7 @@ function FormulaView({ content }: { content: FormulaContent }) {
             {Object.entries(content.variables).map(([key, value]) => (
               <div key={key} className={styles.variableRow}>
                 <span className={styles.variableKey}>
-                  <KaTeXRenderer text={`$${key}$`} />
+                  <KaTeXRenderer text={`$${stripLatexDelimiters(key)}$`} />
                 </span>
                 <span className={styles.variableSep}>=</span>
                 <span className={styles.variableValue}>{value}</span>

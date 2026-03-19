@@ -8,6 +8,21 @@
  *   formula    → { formula, variables?, applicable_conditions?, notes? }
  *   general    → { body, notes? }
  */
+/**
+ * Strip wrapping $ or $$ delimiters from a LaTeX string.
+ * The Agent sometimes includes delimiters (e.g. "$S = ...$") but the frontend
+ * adds its own, causing double-wrapping that KaTeX cannot parse.
+ */
+function stripLatexDelimiters(text: string): string {
+  let s = text.trim();
+  if (s.startsWith('$$') && s.endsWith('$$') && s.length > 4) {
+    s = s.slice(2, -2).trim();
+  } else if (s.startsWith('$') && s.endsWith('$') && s.length > 2) {
+    s = s.slice(1, -1).trim();
+  }
+  return s;
+}
+
 export function normalizeCardContent(
   templateType: string,
   content: Record<string, unknown>,
@@ -41,7 +56,8 @@ export function normalizeCardContent(
       };
     }
     case 'formula': {
-      const formula = getString('formula', 'body', 'definition', 'statement');
+      const rawFormula = getString('formula', 'body', 'definition', 'statement');
+      const formula = rawFormula ? stripLatexDelimiters(rawFormula) : '';
       return {
         formula: formula || 'No formula provided',
         ...(content.variables !== undefined && { variables: content.variables }),
