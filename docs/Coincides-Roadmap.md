@@ -1,7 +1,7 @@
 # Coincides 开发路线图
 
 > 最后更新：2026-03-20
-> 状态：v1.0 🎉 发布 | v1.1 ✅ 完成 | v1.2 ✅ 完成 | v1.3 ✅ 完成 | v1.3.1 ✅ 补丁 | v1.3.2 ✅ 补丁 | v1.4~v1.8 📋 规划完成
+> 状态：v1.0 🎉 发布 | v1.1 ✅ 完成 | v1.2 ✅ 完成 | v1.3 ✅ 完成 | v1.3.1 ✅ 补丁 | v1.3.2 ✅ 补丁 | v1.4 ✅ 完成 | v1.5~v1.8 📋 规划完成
 
 ---
 
@@ -212,20 +212,20 @@
 
 ---
 
-## v1.4（Time Block L1 补全 + 卡片数据模型升级）📋
+## v1.4（Time Block L1 补全 + 卡片数据模型升级）✅
 
-> 状态：规划完成，待开发
+> 状态：全部完成（Step 1-5）
 > 需求条目：TB-L1a/b/c, CD-1/2/3（6 条）
-> 详细规划：[v1.4-plan.md](releases/v1.4-plan.md)（待更新）
+> 详细规划：[v1.4-plan.md](releases/v1.4-plan.md)
+> 变更日志：[CHANGELOG-v1.4.md](releases/CHANGELOG-v1.4.md)
 
 主题：补齐 v1.3 Time Block 的可视化缺口，同时升级卡片数据模型为后续复习体验打基础。
 
-- Time Block 24h 刻度线 + 横线网格（TB-L1a）
-- Time Block 时间标签显示（TB-L1b）
-- 右键编辑/删除 Time Block（TB-L1c）
-- 卡片详情视图放大（CD-1）
-- 所有卡片类型增加 Example 字段（CD-2）
-- Theorem 增加 Condition 字段（CD-3）
+- Step 1：卡片 Example 字段（CD-2）+ Condition 确认已存在（CD-3）✅
+- Step 2：卡片详情视图放大（CD-1）✅
+- Step 3：Time Block 24h 刻度线 + 时间标签（TB-L1a/b）✅
+- Step 4：Time Block 右键编辑/删除（TB-L1c）✅
+- Step 5：文档更新 + 版本收尾 ✅
 
 ---
 

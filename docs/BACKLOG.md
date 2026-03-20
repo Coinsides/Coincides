@@ -25,9 +25,9 @@
 
 | ID | 需求 | 复杂度 | 版本 | 状态 |
 |----|------|--------|------|------|
-| TB-L1a | 24h 刻度线 + 横线网格 | 低 | v1.4 | pending |
-| TB-L1b | Time Block 时间标签显示 | 低 | v1.4 | pending |
-| TB-L1c | 右键编辑/删除 Time Block | 低-中 | v1.4 | pending |
+| TB-L1a | 24h 刻度线 + 横线网格 | 低 | v1.4 | done |
+| TB-L1b | Time Block 时间标签显示 | 低 | v1.4 | done |
+| TB-L1c | 右键编辑/删除 Time Block | 低-中 | v1.4 | done |
 
 ### Layer 2（高级交互）
 
@@ -44,9 +44,9 @@
 
 | ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
 |----|------|--------|------|------|------|
-| CD-1 | 卡片详情视图放大（纯 CSS，容纳数学内容） | 低 | v1.4 | pending | |
-| CD-2 | 所有卡片类型增加 Example 字段 | 中 | v1.4 | pending | Schema 变更 + 迁移 + UI |
-| CD-3 | Theorem 增加 Condition 字段 | 中 | v1.4 | pending | 与 CD-5 撕胶带交互强相关 |
+| CD-1 | 卡片详情视图放大（纯 CSS，容纳数学内容） | 低 | v1.4 | done | |
+| CD-2 | 所有卡片类型增加 Example 字段 | 中 | v1.4 | done | Schema 变更 + 迁移 + UI |
+| CD-3 | Theorem 增加 Condition 字段 | 中 | v1.4 | done | v1.3 已实现（conditions + proof_sketch） |
 | CD-4 | AI 写推导过程按钮（仅 Theorem） | 中 | v1.5 | pending | 用户主动触发，符合设计宪法 |
 | CD-5 | Review "撕胶带"遮挡交互 | 中-高 | v1.5 | pending | 全新 Review UI 组件，分层遮挡 |
 | CD-6 | 各类型独立复习模板系统 | 高 | v1.7 | pending | DEF/THM/FML/GEN 各自模板，含浏览+复习 |

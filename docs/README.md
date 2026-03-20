@@ -33,7 +33,7 @@
 | v1.3 | [v1.3-plan.md](./releases/v1.3-plan.md) | [CHANGELOG-v1.3.md](./releases/CHANGELOG-v1.3.md) | [RELEASE-NOTES-v1.3.md](./releases/RELEASE-NOTES-v1.3.md) |
 | v1.3.1 | — | [CHANGELOG-v1.3.1.md](./releases/CHANGELOG-v1.3.1.md) | [RELEASE-NOTES-v1.3.1.md](./releases/RELEASE-NOTES-v1.3.1.md) |
 | v1.3.2 | — | [CHANGELOG-v1.3.2.md](./releases/CHANGELOG-v1.3.2.md) | — |
-| v1.4 | [v1.4-plan.md](./releases/v1.4-plan.md) | — | — |
+| v1.4 | [v1.4-plan.md](./releases/v1.4-plan.md) | [CHANGELOG-v1.4.md](./releases/CHANGELOG-v1.4.md) | — |
 
 ## 问题追踪
 

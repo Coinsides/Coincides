@@ -208,6 +208,7 @@ Theorem:
   "statement": "\\oint_C \\mathbf{F} \\cdot d\\mathbf{r} = ...",
   "conditions": "C is a positively oriented, piecewise smooth, simple closed curve...",
   "proof_sketch": "Optional proof outline",
+  "example": "Optional illustrative example (v1.4+)",
   "notes": "Optional"
 }
 ```
@@ -218,6 +219,7 @@ Formula:
   "formula": "e^{i\\pi} + 1 = 0",
   "variables": { "e": "Euler's number", "i": "Imaginary unit" },
   "applicable_conditions": "Fundamental relationship in complex analysis",
+  "example": "Optional illustrative example (v1.4+)",
   "notes": "Optional"
 }
 ```
@@ -226,6 +228,7 @@ General:
 ```json
 {
   "body": "Free-form content with LaTeX support",
+  "example": "Optional illustrative example (v1.4+)",
   "notes": "Optional"
 }
 ```

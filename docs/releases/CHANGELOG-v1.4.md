@@ -1,7 +1,7 @@
 # Coincides v1.4 — CHANGELOG
 
 > Time Block L1 补全 + 卡片数据模型升级
-> 开发中
+> 完成日期：2026-03-20
 
 ---
 
