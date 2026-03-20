@@ -14,6 +14,7 @@
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | 技术架构与依赖说明 | 架构决策变更时 |
 | [DELIVERY_PLAN.md](./DELIVERY_PLAN.md) | 阶段交付清单与完成状态 | Step 完成时 |
 | [Coincides-Roadmap.md](./Coincides-Roadmap.md) | 开发路线图与版本规划 | Round 完成时 |
+| [BACKLOG.md](./BACKLOG.md) | 需求池 — 所有待开发需求的清单 | 有新需求或需求完成时 |
 
 ## 工作流文档
 

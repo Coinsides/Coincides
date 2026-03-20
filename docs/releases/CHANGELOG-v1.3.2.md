@@ -5,6 +5,19 @@
 
 ---
 
+## docs: 新增 BACKLOG.md 需求池
+
+### 变更
+- 新建 `docs/BACKLOG.md` — 42 条待开发需求，按 8 个功能领域分组，标注优先级和状态
+- 更新 `docs/README.md` — 产品文档表格新增 BACKLOG.md 条目
+- 来源：Session 1 + Session 2 会议记录综合整理
+
+### 变更文件
+- `docs/BACKLOG.md`（新增）
+- `docs/README.md`
+
+---
+
 ## Bug 2 (P0): GEN 卡片白屏崩溃
 
 ### 问题
