@@ -113,17 +113,19 @@
 
 ---
 
-## fix(calendar): Time Block 创建表单底部按钮被截断
+## fix(calendar): Time Block 创建表单被截断（垂直 + 水平）
 
 ### 问题
-- 在靠近一天底部区域（约 70% 以后）拖拽创建 Time Block 时，弹出的创建表单向下延伸超出容器可视区域，Save / Cancel 按钮被裁切不可见
+1. 在靠近一天底部区域（约 70% 以后）拖拽创建 Time Block 时，表单向下延伸超出容器，Save / Cancel 按钮被裁切
+2. 表单 `min-width: 180px` 超过列宽，右侧按钮被相邻列遮挡
 
 ### 修复
-- `Calendar.tsx` — 创建表单改用 IIFE 计算位置：当 `endTime` 超过 70% 时，改为从底部（`bottom`）定位，表单向上展开
+- `Calendar.tsx` — 创建表单改用 IIFE 计算位置：`endTime` > 70% 时用 `bottom` 定位，表单向上展开
 - `Calendar.module.css` —
-  - 新增 `.tbFormPopupFlip` 类（配合 `bottom` 定位）
-  - `.weekColumn` 新增 `overflow: visible`，防止 `border-radius` 隐式裁切绝对定位子元素
-  - `.weekColumn` 移除遗留的 `cursor: pointer`（上一个 fix 的遗留）
+  - `.tbFormPopup` 去掉 `min-width: 180px` / `left: 50%; transform: translateX(-50%)`，改为 `left: 4px; right: 4px` 自适应列宽
+  - `z-index` 20 → 30，确保不被相邻列遮挡
+  - input / select / button 尺寸微调，确保窄列内完整显示
+  - `.weekColumn` 新增 `overflow: visible`，移除遗留 `cursor: pointer`
 
 ### 变更文件
 - `client/src/pages/Calendar/Calendar.tsx`

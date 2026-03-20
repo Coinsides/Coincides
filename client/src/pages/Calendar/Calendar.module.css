@@ -780,20 +780,19 @@
 
 .tbFormPopup {
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 20;
+  left: 4px;
+  right: 4px;
+  z-index: 30;
   background: var(--glass-surface);
   backdrop-filter: var(--glass-blur-lg);
   -webkit-backdrop-filter: var(--glass-blur-lg);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   box-shadow: var(--glass-shadow-lg);
-  padding: 10px;
-  min-width: 180px;
+  padding: 8px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
 /* When block is near bottom, popup opens upward from the selection */
@@ -802,13 +801,15 @@
 }
 
 .tbFormInput {
-  padding: 6px 8px;
-  font-size: 13px;
+  padding: 5px 6px;
+  font-size: 12px;
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
   background: rgba(0, 0, 0, 0.2);
   color: var(--text-primary);
   outline: none;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .tbFormInput:focus {
@@ -816,12 +817,14 @@
 }
 
 .tbFormSelect {
-  padding: 5px 8px;
-  font-size: 12px;
+  padding: 4px 6px;
+  font-size: 11px;
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
   background: rgba(0, 0, 0, 0.2);
   color: var(--text-secondary);
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .tbFormTime {
@@ -837,8 +840,8 @@
 }
 
 .tbFormCancel {
-  padding: 4px 10px;
-  font-size: 12px;
+  padding: 4px 8px;
+  font-size: 11px;
   border-radius: var(--radius-sm);
   color: var(--text-muted);
   background: transparent;
@@ -850,8 +853,8 @@
 }
 
 .tbFormSave {
-  padding: 4px 10px;
-  font-size: 12px;
+  padding: 4px 8px;
+  font-size: 11px;
   border-radius: var(--radius-sm);
   color: white;
   background: var(--accent-primary);
