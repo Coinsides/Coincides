@@ -488,6 +488,21 @@ export default function CalendarPage() {
       ) : (
         /* Week view */
         <div className={styles.weekGrid}>
+          {/* 24h time gutter */}
+          <div className={styles.timeGutter}>
+            <div className={styles.timeGutterHeader} />
+            <div className={styles.timeGutterBody}>
+              {Array.from({ length: 24 }, (_, h) => (
+                <div
+                  key={h}
+                  className={styles.timeGutterLabel}
+                  style={{ top: `${(h / 24) * 100}%` }}
+                >
+                  {`${h}:00`}
+                </div>
+              ))}
+            </div>
+          </div>
           {weekDays.map((day, dayIdx) => {
             const dateStr = format(day, 'yyyy-MM-dd');
             const dayTaskList = tasksByDate[dateStr] || [];
@@ -546,6 +561,15 @@ export default function CalendarPage() {
                   onMouseDown={(e) => handleTBMouseDown(dayIdx, e)}
                   onMouseMove={(e) => handleTBMouseMove(e, dayIdx)}
                 >
+                  {/* Hour gridlines */}
+                  {Array.from({ length: 24 }, (_, h) => (
+                    <div
+                      key={`grid-${h}`}
+                      className={styles.hourGridline}
+                      style={{ top: `${(h / 24) * 100}%` }}
+                    />
+                  ))}
+
                   {/* Time Block background layer */}
                   {resolvedBlocks.map((block) => {
                     const top = timeStrToPercent(block.start_time);
@@ -564,6 +588,7 @@ export default function CalendarPage() {
                         title={`${block.label} (${formatHHMM(block.start_time)}–${formatHHMM(block.end_time)})`}
                       >
                         <span className={styles.tbLabel}>{block.label}</span>
+                        <span className={styles.tbTime}>{formatHHMM(block.start_time)}–{formatHHMM(block.end_time)}</span>
                       </div>
                     );
                   })}

@@ -48,3 +48,26 @@
 ### 变更文件
 - `client/src/components/CardViewModal/CardViewModal.module.css`
 - `client/src/components/CardFlip/CardFlip.module.css`
+
+---
+
+## feat(calendar): 周视图 24h 刻度线 + Time Block 时间标签（TB-L1a + TB-L1b）
+
+### 变更
+- `Calendar.tsx` — 周视图新增：
+  - 左侧 24h 时间刻度栏（timeGutter），显示 0:00∼23:00
+  - 每列 timedSection 内部渲染 24 条小时横线网格（hourGridline）
+  - 每个 Time Block 新增起止时间标签（tbTime）
+- `Calendar.module.css` — 样式新增：
+  - `.weekGrid` 网格从 `repeat(7,1fr)` 改为 `48px repeat(7,1fr)`，左侧给刻度栏留位
+  - `.timeGutter` / `.timeGutterHeader` / `.timeGutterBody` / `.timeGutterLabel` — 刻度栏布局和样式
+  - `.hourGridline` — 小时横线（超淡 border-top，不宣宾夺主）
+  - `.tbTime` — Time Block 上的起止时间显示，字号小于标签
+
+### 备注
+- 刻度线和 Time Block 使用相同的百分比定位算法（timeStrToPercent），保证对齐
+- 现有 Task 事件显示不受影响
+
+### 变更文件
+- `client/src/pages/Calendar/Calendar.tsx`
+- `client/src/pages/Calendar/Calendar.module.css`

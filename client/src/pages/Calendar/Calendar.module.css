@@ -198,9 +198,41 @@
 /* Week view */
 .weekGrid {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 9px;
+  grid-template-columns: 48px repeat(7, 1fr);
+  gap: 0 9px;
   min-height: 400px;
+}
+
+/* ─── Time gutter (24h labels on the left) ────────── */
+
+.timeGutter {
+  display: flex;
+  flex-direction: column;
+}
+
+.timeGutterHeader {
+  /* Matches .weekColumnHeader height — keep in sync */
+  height: 56px;
+  flex-shrink: 0;
+}
+
+.timeGutterBody {
+  position: relative;
+  flex: 1;
+  min-height: 600px;
+  margin: 4px 0 8px;
+}
+
+.timeGutterLabel {
+  position: absolute;
+  right: 4px;
+  transform: translateY(-50%);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-muted);
+  line-height: 1;
+  white-space: nowrap;
+  user-select: none;
 }
 
 .weekColumn {
@@ -661,11 +693,35 @@
   font-size: 10px;
   font-weight: 500;
   color: rgba(255, 255, 255, 0.6);
-  padding: 2px 6px;
+  padding: 2px 6px 0;
   line-height: 1.3;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.tbTime {
+  display: block;
+  font-size: 9px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.45);
+  padding: 0 6px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ─── Hour gridlines ──────────────────────────────────── */
+
+.hourGridline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+  pointer-events: none;
+  z-index: 0;
 }
 
 /* ─── Time Block overlap ────────────────────────── */
