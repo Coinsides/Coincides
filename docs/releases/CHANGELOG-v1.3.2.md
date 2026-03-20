@@ -5,15 +5,22 @@
 
 ---
 
-## docs: 新增 BACKLOG.md 需求池
+## docs: 版本拆分（v1.4→v1.8）+ 新增 BACKLOG.md
 
 ### 变更
-- 新建 `docs/BACKLOG.md` — 42 条待开发需求，按 8 个功能领域分组，标注优先级和状态
+- 新建 `docs/BACKLOG.md` — 42 条待开发需求，按 8 个功能领域分组，已分配版本归属
+- 更新 `docs/Coincides-Roadmap.md` — 原 v1.4 拆分为 v1.4~v1.8 五个版本
+  - v1.4：Time Block L1 补全 + 卡片数据模型升级（6 条）
+  - v1.5：复习体验升级 + 错题本（13 条）
+  - v1.6：激励系统 + 洞察面板（10 条）
+  - v1.7：Goal DAG + 复习模板（5 条）
+  - v1.8：Time Block L2 + Electron + 基础设施（8 条）
 - 更新 `docs/README.md` — 产品文档表格新增 BACKLOG.md 条目
 - 来源：Session 1 + Session 2 会议记录综合整理
 
 ### 变更文件
 - `docs/BACKLOG.md`（新增）
+- `docs/Coincides-Roadmap.md`
 - `docs/README.md`
 
 ---

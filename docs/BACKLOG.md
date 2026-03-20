@@ -3,7 +3,7 @@
 > 所有已确认的待开发需求。按功能领域分组，标注优先级、分配版本和当前状态。
 > 新需求先加到这里，版本归属是第二步。
 >
-> 最后更新：2026-03-19
+> 最后更新：2026-03-20
 > 来源：Session 1 + Session 2 会议记录 · 全面需求汇总
 
 ---
@@ -25,18 +25,18 @@
 
 | ID | 需求 | 复杂度 | 版本 | 状态 |
 |----|------|--------|------|------|
-| TB-L1a | 24h 刻度线 + 横线网格 | 低 | 待定 | pending |
-| TB-L1b | Time Block 时间标签显示 | 低 | 待定 | pending |
-| TB-L1c | 右键编辑/删除 Time Block | 低-中 | 待定 | pending |
+| TB-L1a | 24h 刻度线 + 横线网格 | 低 | v1.4 | pending |
+| TB-L1b | Time Block 时间标签显示 | 低 | v1.4 | pending |
+| TB-L1c | 右键编辑/删除 Time Block | 低-中 | v1.4 | pending |
 
 ### Layer 2（高级交互）
 
 | ID | 需求 | 复杂度 | 版本 | 状态 |
 |----|------|--------|------|------|
-| TB-L2a | Time Block 模板系统（预设日程模板） | 高 | 待定 | pending |
-| TB-L2b | 格子点选创建交互（替代拖拽框选） | 中 | 待定 | pending |
-| TB-L2c | Agent 工具 create_time_block | 中 | 待定 | pending |
-| TB-L2d | Agent 引导设置 Time Block 流程 | 中 | 待定 | pending |
+| TB-L2a | Time Block 模板系统（预设日程模板） | 高 | v1.8 | pending |
+| TB-L2b | 格子点选创建交互（替代拖拽框选） | 中 | v1.8 | pending |
+| TB-L2c | Agent 工具 create_time_block | 中 | v1.8 | pending |
+| TB-L2d | Agent 引导设置 Time Block 流程 | 中 | v1.8 | pending |
 
 ---
 
@@ -44,12 +44,12 @@
 
 | ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
 |----|------|--------|------|------|------|
-| CD-1 | 卡片详情视图放大（纯 CSS，容纳数学内容） | 低 | 待定 | pending | |
-| CD-2 | 所有卡片类型增加 Example 字段 | 中 | 待定 | pending | Schema 变更 + 迁移 + UI |
-| CD-3 | Theorem 增加 Condition 字段 | 中 | 待定 | pending | 与 CD-5 撕胶带交互强相关 |
-| CD-4 | AI 写推导过程按钮（仅 Theorem） | 中 | 待定 | pending | 用户主动触发，符合设计宪法 |
-| CD-5 | Review "撕胶带"遮挡交互 | 中-高 | 待定 | pending | 全新 Review UI 组件，分层遮挡 |
-| CD-6 | 各类型独立复习模板系统 | 高 | 待定 | pending | DEF/THM/FML/GEN 各自模板，含浏览+复习 |
+| CD-1 | 卡片详情视图放大（纯 CSS，容纳数学内容） | 低 | v1.4 | pending | |
+| CD-2 | 所有卡片类型增加 Example 字段 | 中 | v1.4 | pending | Schema 变更 + 迁移 + UI |
+| CD-3 | Theorem 增加 Condition 字段 | 中 | v1.4 | pending | 与 CD-5 撕胶带交互强相关 |
+| CD-4 | AI 写推导过程按钮（仅 Theorem） | 中 | v1.5 | pending | 用户主动触发，符合设计宪法 |
+| CD-5 | Review "撕胶带"遮挡交互 | 中-高 | v1.5 | pending | 全新 Review UI 组件，分层遮挡 |
+| CD-6 | 各类型独立复习模板系统 | 高 | v1.7 | pending | DEF/THM/FML/GEN 各自模板，含浏览+复习 |
 
 ---
 
@@ -57,12 +57,12 @@
 
 | ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
 |----|------|--------|------|------|------|
-| RV-1 | 复习模式选择（翻面/填空/选择题/混合） | 中 | 待定 | pending | |
-| RV-2 | 填空题模式（自动遮掩 → 输入 → 对比 → 评分） | 中 | 待定 | pending | |
-| RV-3 | 选择题模式（同 Deck/Section 卡片生成干扰项） | 中 | 待定 | pending | |
-| RV-4 | 混合模式（三种模式随机切换） | 中 | 待定 | pending | |
-| RV-5 | 复习模式偏好（Settings 设默认 + 临时切换） | 中 | 待定 | pending | |
-| RV-6 | Time Block 排期（Agent 将复习排入 study Time Block） | 中 | 待定 | pending | |
+| RV-1 | 复习模式选择（翻面/填空/选择题/混合） | 中 | v1.5 | pending | |
+| RV-2 | 填空题模式（自动遮掩 → 输入 → 对比 → 评分） | 中 | v1.5 | pending | |
+| RV-3 | 选择题模式（同 Deck/Section 卡片生成干扰项） | 中 | v1.5 | pending | |
+| RV-4 | 混合模式（三种模式随机切换） | 中 | v1.5 | pending | |
+| RV-5 | 复习模式偏好（Settings 设默认 + 临时切换） | 中 | v1.5 | pending | |
+| RV-6 | Time Block 排期（Agent 将复习排入 study Time Block） | 中 | v1.5 | pending | |
 
 ---
 
@@ -70,11 +70,11 @@
 
 | ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
 |----|------|--------|------|------|------|
-| WB-1 | 错题记录（评分为 1 的卡片自动标记） | 中 | 待定 | pending | |
-| WB-2 | 错题本入口（Review 页面"需要加强"入口） | 中 | 待定 | pending | |
-| WB-3 | 错题本复习（直接发起复习会话） | 中 | 待定 | pending | |
-| WB-4 | 错题本移除（连续 2 次 ≥3 自动移出 + 手动移除） | 中 | 待定 | pending | 符合设计宪法：不强调"错误" |
-| WB-5 | Agent 感知（get_weak_cards 工具） | 中 | 待定 | pending | |
+| WB-1 | 错题记录（评分为 1 的卡片自动标记） | 中 | v1.5 | pending | |
+| WB-2 | 错题本入口（Review 页面"需要加强"入口） | 中 | v1.5 | pending | |
+| WB-3 | 错题本复习（直接发起复习会话） | 中 | v1.5 | pending | |
+| WB-4 | 错题本移除（连续 2 次 ≥3 自动移出 + 手动移除） | 中 | v1.5 | pending | 符合设计宪法：不强调"错误" |
+| WB-5 | Agent 感知（get_weak_cards 工具） | 中 | v1.5 | pending | |
 
 ---
 
@@ -82,12 +82,12 @@
 
 | ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
 |----|------|--------|------|------|------|
-| AC-1 | 成就数据模型（achievements + user_achievements 表） | 中 | 待定 | pending | |
-| AC-2 | 成就类型定义（里程碑型，覆盖复习/任务/目标） | 中 | 待定 | pending | |
-| AC-3 | 成就检测引擎（被动检测，已有事件触发点检查） | 中 | 待定 | pending | |
-| AC-4 | 成就展示页面（卡片式布局） | 中 | 待定 | pending | |
-| AC-5 | 解锁通知（Toast 一次性提示，可关闭） | 中 | 待定 | pending | |
-| AC-6 | 设计宪法合规（无 streak 型、无完成率型成就） | 中 | 待定 | pending | 硬性约束 |
+| AC-1 | 成就数据模型（achievements + user_achievements 表） | 中 | v1.6 | pending | |
+| AC-2 | 成就类型定义（里程碑型，覆盖复习/任务/目标） | 中 | v1.6 | pending | |
+| AC-3 | 成就检测引擎（被动检测，已有事件触发点检查） | 中 | v1.6 | pending | |
+| AC-4 | 成就展示页面（卡片式布局） | 中 | v1.6 | pending | |
+| AC-5 | 解锁通知（Toast 一次性提示，可关闭） | 中 | v1.6 | pending | |
+| AC-6 | 设计宪法合规（无 streak 型、无完成率型成就） | 中 | v1.6 | pending | 硬性约束 |
 
 ---
 
@@ -95,10 +95,10 @@
 
 | ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
 |----|------|--------|------|------|------|
-| ST-1 | 复习洞察（记忆保持率曲线、卡片难度分布、每周复习量趋势） | 中 | 待定 | pending | |
-| ST-2 | 学习节奏（基于 Task 完成时间戳分析——被动展示） | 中 | 待定 | pending | 符合设计宪法：不监控用户 |
-| ST-3 | 课程深度（Goal 完成进度、卡片掌握度分布、错题卡片数） | 中 | 待定 | pending | |
-| ST-4 | 数据导出（用户可导出 Statistics 数据为 CSV） | 中 | 待定 | pending | |
+| ST-1 | 复习洞察（记忆保持率曲线、卡片难度分布、每周复习量趋势） | 中 | v1.6 | pending | |
+| ST-2 | 学习节奏（基于 Task 完成时间戳分析——被动展示） | 中 | v1.6 | pending | 符合设计宪法：不监控用户 |
+| ST-3 | 课程深度（Goal 完成进度、卡片掌握度分布、错题卡片数） | 中 | v1.6 | pending | |
+| ST-4 | 数据导出（用户可导出 Statistics 数据为 CSV） | 中 | v1.6 | pending | |
 
 ---
 
@@ -106,10 +106,10 @@
 
 | ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
 |----|------|--------|------|------|------|
-| GD-5 | 多依赖选择（编辑 Goal 时支持多选前置 Goal） | 中 | 待定 | pending | |
-| GD-6 | DAG 可视化（Goal Manager 显示完整 DAG 图） | 中-高 | 待定 | pending | |
-| GD-7 | Agent DAG 排期（理解 DAG 拓扑序） | 中-高 | 待定 | pending | |
-| GD-8 | 动态优先级（考试模式紧急度权重） | 中 | 待定 | pending | |
+| GD-5 | 多依赖选择（编辑 Goal 时支持多选前置 Goal） | 中 | v1.7 | pending | |
+| GD-6 | DAG 可视化（Goal Manager 显示完整 DAG 图） | 中-高 | v1.7 | pending | |
+| GD-7 | Agent DAG 排期（理解 DAG 拓扑序） | 中-高 | v1.7 | pending | |
+| GD-8 | 动态优先级（考试模式紧急度权重） | 中 | v1.7 | pending | |
 
 ---
 
@@ -117,10 +117,10 @@
 
 | ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
 |----|------|--------|------|------|------|
-| INF-1 | Electron 打包 + 分发 | 高 | 待定 | pending | |
-| INF-2 | 通知系统 | 中 | 待定 | pending | |
-| INF-3 | 自动化测试 | 高 | 待定 | pending | |
-| INF-4 | 安全加固 | 中 | 待定 | pending | |
+| INF-1 | Electron 打包 + 分发 | 高 | v1.8 | pending | |
+| INF-2 | 通知系统 | 中 | v1.8 | pending | |
+| INF-3 | 自动化测试 | 高 | v1.8 | pending | |
+| INF-4 | 安全加固 | 中 | v1.8 | pending | |
 
 ---
 
