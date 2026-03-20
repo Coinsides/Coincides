@@ -195,6 +195,40 @@
   color: white;
 }
 
+/* ─── Edit mode toggle ──────────────────────────────── */
+
+.editModeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  transition: all var(--transition-fast);
+}
+
+.editModeBtn:hover {
+  background: var(--glass-hover);
+  border-color: var(--glass-border-hover);
+  color: var(--text-primary);
+}
+
+.editModeBtnActive {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: white;
+}
+
+.editModeBtnActive:hover {
+  background: var(--accent-primary-hover, var(--accent-primary));
+  border-color: var(--accent-primary-hover, var(--accent-primary));
+  color: white;
+}
+
 /* Week view */
 .weekGrid {
   display: grid;
@@ -263,6 +297,11 @@
 .weekColumnSelected {
   outline: 2px solid var(--accent-primary);
   outline-offset: -2px;
+}
+
+.weekColumnEditMode {
+  border-color: var(--accent-primary);
+  border-style: dashed;
 }
 
 .weekColumnHeader {
@@ -733,27 +772,6 @@
   z-index: 0;
 }
 
-/* ─── Time Block overlap ────────────────────────── */
-
-.tbOverlap {
-  position: absolute;
-  left: 0;
-  right: 0;
-  z-index: 1;
-  border-radius: var(--radius-sm);
-  pointer-events: none;
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
-}
-
-.tbOverlapIcon {
-  margin: 3px;
-  color: rgba(255, 255, 255, 0.7);
-  pointer-events: auto;
-  cursor: help;
-}
-
 /* ─── Drag-select preview ───────────────────────── */
 
 .tbDragPreview {
@@ -776,29 +794,7 @@
   color: var(--accent-primary);
 }
 
-/* ─── Time Block creation form popup ────────────── */
-
-.tbFormPopup {
-  position: absolute;
-  left: 4px;
-  right: 4px;
-  z-index: 30;
-  background: var(--glass-surface);
-  backdrop-filter: var(--glass-blur-lg);
-  -webkit-backdrop-filter: var(--glass-blur-lg);
-  border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
-  box-shadow: var(--glass-shadow-lg);
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-/* When block is near bottom, popup opens upward from the selection */
-.tbFormPopupFlip {
-  /* Anchored from bottom instead of top — no layout change needed */
-}
+/* ─── Time Block form inputs (shared by create + edit modals) ── */
 
 .tbFormInput {
   padding: 5px 6px;
@@ -825,18 +821,6 @@
   color: var(--text-secondary);
   width: 100%;
   box-sizing: border-box;
-}
-
-.tbFormTime {
-  font-size: 11px;
-  color: var(--text-muted);
-  text-align: center;
-}
-
-.tbFormActions {
-  display: flex;
-  gap: 6px;
-  justify-content: flex-end;
 }
 
 .tbFormCancel {

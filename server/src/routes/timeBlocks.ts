@@ -195,6 +195,19 @@ router.post('/', (req: AuthRequest, res: Response) => {
     }
   }
 
+  // Study Block single-per-day constraint (TB-R10)
+  for (const item of items) {
+    const blockType = item.type || 'custom';
+    if (blockType === 'study') {
+      const existing = db.prepare(
+        'SELECT id FROM time_blocks WHERE user_id = ? AND day_of_week = ? AND type = ?'
+      ).get(req.userId!, item.day_of_week, 'study') as any;
+      if (existing) {
+        throw new AppError(400, `Only one Study Block allowed per day (day_of_week=${item.day_of_week} already has one)`);
+      }
+    }
+  }
+
   const stmt = db.prepare(
     `INSERT INTO time_blocks (id, user_id, label, type, day_of_week, start_time, end_time, color, created_at, updated_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
@@ -227,6 +240,17 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
   if (!existing) throw new AppError(404, 'Time block not found');
 
   const { label, type, start_time, end_time, color } = req.body;
+
+  // Study Block single-per-day constraint (TB-R10)
+  if (type === 'study' && (existing as any).type !== 'study') {
+    const existingStudy = db.prepare(
+      'SELECT id FROM time_blocks WHERE user_id = ? AND day_of_week = ? AND type = ? AND id != ?'
+    ).get(req.userId!, (existing as any).day_of_week, 'study', req.params.id) as any;
+    if (existingStudy) {
+      throw new AppError(400, 'Only one Study Block allowed per day');
+    }
+  }
+
   const fields: string[] = [];
   const values: unknown[] = [];
 

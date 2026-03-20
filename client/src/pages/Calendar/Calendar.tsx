@@ -14,7 +14,7 @@ import {
   isSameDay,
   isToday,
 } from 'date-fns';
-import { ChevronLeft, ChevronRight, X, Plus, Check, Sparkles, Edit3, Trash2, Clock, AlignLeft, CheckSquare, Target, Info } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Plus, Check, Sparkles, Edit3, Trash2, Clock, AlignLeft, CheckSquare, Target, Pencil, Grid3x3 } from 'lucide-react';
 import { useTaskStore } from '@/stores/taskStore';
 import { useCourseStore } from '@/stores/courseStore';
 import { useGoalStore } from '@/stores/goalStore';
@@ -72,26 +72,17 @@ function pctToHHMM(pct: number): string {
   return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
 }
 
-/** Blend two hex colors (for overlap visualization) */
-function blendColors(c1: string, c2: string): string {
-  const parse = (c: string) => {
-    const hex = c.replace('#', '');
-    return [parseInt(hex.slice(0, 2), 16), parseInt(hex.slice(2, 4), 16), parseInt(hex.slice(4, 6), 16)];
-  };
-  const [r1, g1, b1] = parse(c1);
-  const [r2, g2, b2] = parse(c2);
-  const r = Math.round((r1 + r2) / 2);
-  const g = Math.round((g1 + g2) / 2);
-  const b = Math.round((b1 + b2) / 2);
-  return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-}
-
 export default function CalendarPage() {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [dayTasks, setDayTasks] = useState<Task[]>([]);
   const [courseFilter, setCourseFilter] = useState('');
   const [view, setView] = useState<CalendarView>('month');
+  const [editMode, setEditMode] = useState(false);
+  const [gridPreference, setGridPreference] = useState<'always' | 'edit-only'>(() => {
+    return (localStorage.getItem('tb-grid-preference') as 'always' | 'edit-only') || 'edit-only';
+  });
+  const showGridlines = editMode || gridPreference === 'always';
 
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; task: Task } | null>(null);
 
@@ -107,9 +98,17 @@ export default function CalendarPage() {
 
   // Time Block drag-select state
   const [dragSelect, setDragSelect] = useState<{ dayIdx: number; startPct: number; currentPct: number } | null>(null);
-  const [showTBForm, setShowTBForm] = useState<{ dayIdx: number; startTime: string; endTime: string } | null>(null);
-  const [tbFormLabel, setTBFormLabel] = useState('');
-  const [tbFormType, setTBFormType] = useState<'study' | 'sleep' | 'custom'>('study');
+  // After drag completes, persist the selection for right-click menu
+  const [dragSelection, setDragSelection] = useState<{ dayIdx: number; startTime: string; endTime: string } | null>(null);
+  // Right-click create menu position
+  const [tbCreateMenu, setTBCreateMenu] = useState<{ x: number; y: number } | null>(null);
+  // Create modal (overlay edit panel for new TB)
+  const [showTBCreateModal, setShowTBCreateModal] = useState(false);
+  const [tbCreateLabel, setTBCreateLabel] = useState('');
+  const [tbCreateType, setTBCreateType] = useState<'study' | 'sleep' | 'custom'>('study');
+  const [tbCreateStart, setTBCreateStart] = useState('');
+  const [tbCreateEnd, setTBCreateEnd] = useState('');
+  const [tbCreateColor, setTBCreateColor] = useState('');
   const timedSectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const { tasks, fetchTasksByRange, deleteTask } = useTaskStore();
@@ -233,7 +232,7 @@ export default function CalendarPage() {
 
   // Close context menus on any click
   useEffect(() => {
-    const handler = () => { setContextMenu(null); setTBContextMenu(null); };
+    const handler = () => { setContextMenu(null); setTBContextMenu(null); setTBCreateMenu(null); };
     document.addEventListener('click', handler);
     return () => document.removeEventListener('click', handler);
   }, []);
@@ -347,11 +346,12 @@ export default function CalendarPage() {
   // ── Time Block drag-select handlers ───────────────────────
 
   const handleTBMouseDown = useCallback((dayIdx: number, e: React.MouseEvent<HTMLDivElement>) => {
+    if (!editMode) return; // Only allow drag-select in edit mode
     const rect = e.currentTarget.getBoundingClientRect();
     const pct = snapToGrid(((e.clientY - rect.top) / rect.height) * 100);
     setDragSelect({ dayIdx, startPct: pct, currentPct: pct });
     e.preventDefault();
-  }, []);
+  }, [editMode]);
 
   const handleTBMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>, dayIdx: number) => {
     if (!dragSelect || dragSelect.dayIdx !== dayIdx) return;
@@ -370,13 +370,12 @@ export default function CalendarPage() {
       setDragSelect(null);
       return;
     }
-    setShowTBForm({
+    // Keep selection highlighted, wait for right-click
+    setDragSelection({
       dayIdx: dragSelect.dayIdx,
       startTime: pctToHHMM(topPct),
       endTime: pctToHHMM(botPct),
     });
-    setTBFormLabel('');
-    setTBFormType('study');
     setDragSelect(null);
   }, [dragSelect]);
 
@@ -389,46 +388,48 @@ export default function CalendarPage() {
     return () => window.removeEventListener('mouseup', handler);
   }, [dragSelect, handleTBMouseUp]);
 
-  const handleTBFormSubmit = async () => {
-    if (!showTBForm || !tbFormLabel.trim()) return;
-    const day = weekDays[showTBForm.dayIdx];
+  // Right-click on the timed section after drag-selection
+  const handleTimedSectionContextMenu = useCallback((e: React.MouseEvent, dayIdx: number) => {
+    if (!dragSelection || dragSelection.dayIdx !== dayIdx) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setTBCreateMenu({ x: e.clientX, y: e.clientY });
+  }, [dragSelection]);
+
+  // Open the create modal from the right-click menu
+  const openTBCreateModal = () => {
+    if (!dragSelection) return;
+    setTBCreateMenu(null);
+    setTBCreateLabel('');
+    setTBCreateType('study');
+    setTBCreateStart(dragSelection.startTime);
+    setTBCreateEnd(dragSelection.endTime);
+    setTBCreateColor('');
+    setShowTBCreateModal(true);
+  };
+
+  const handleTBCreateSubmit = async () => {
+    if (!dragSelection || !tbCreateLabel.trim()) return;
+    const day = weekDays[dragSelection.dayIdx];
     const dayOfWeek = day.getDay(); // 0=Sun
     try {
       await createBlocks([{
-        label: tbFormLabel.trim(),
-        type: tbFormType as any,
+        label: tbCreateLabel.trim(),
+        type: tbCreateType as any,
         day_of_week: dayOfWeek,
-        start_time: showTBForm.startTime,
-        end_time: showTBForm.endTime,
+        start_time: tbCreateStart,
+        end_time: tbCreateEnd,
+        color: tbCreateColor || undefined,
       }]);
       // Refresh week data
       const weekStart = startOfWeek(currentMonth, { weekStartsOn: 1 });
       fetchWeek(format(weekStart, 'yyyy-MM-dd'));
-      setShowTBForm(null);
+      setShowTBCreateModal(false);
+      setDragSelection(null);
       addToast('success', 'Time block created');
     } catch {
       addToast('error', 'Failed to create time block');
     }
-  };
-
-  // Build overlap map for a given day's resolved blocks
-  const getOverlapSegments = (blocks: ResolvedTimeBlock[], overlaps: [string, string][]) => {
-    const segments: Array<{ top: number; height: number; color: string }> = [];
-    for (const [id1, id2] of overlaps) {
-      const b1 = blocks.find((b) => b.id === id1);
-      const b2 = blocks.find((b) => b.id === id2);
-      if (!b1 || !b2) continue;
-      const start = Math.max(timeStrToPercent(b1.start_time), timeStrToPercent(b2.start_time));
-      const end = Math.min(timeStrToPercent(b1.end_time), timeStrToPercent(b2.end_time));
-      if (end > start) {
-        segments.push({
-          top: start,
-          height: end - start,
-          color: blendColors(getTBColor(b1), getTBColor(b2)),
-        });
-      }
-    }
-    return segments;
   };
 
   return (
@@ -488,6 +489,28 @@ export default function CalendarPage() {
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </select>
+          {view === 'week' && (
+            <>
+              <button
+                className={`${styles.editModeBtn} ${editMode ? styles.editModeBtnActive : ''}`}
+                onClick={() => { setEditMode(!editMode); if (editMode) { setDragSelection(null); setDragSelect(null); } }}
+                title={editMode ? 'Exit edit mode' : 'Enter edit mode to create Time Blocks'}
+              >
+                <Pencil size={14} />
+              </button>
+              <button
+                className={`${styles.editModeBtn} ${gridPreference === 'always' ? styles.editModeBtnActive : ''}`}
+                onClick={() => {
+                  const next = gridPreference === 'always' ? 'edit-only' : 'always';
+                  setGridPreference(next);
+                  localStorage.setItem('tb-grid-preference', next);
+                }}
+                title={gridPreference === 'always' ? 'Grid: always shown (click to toggle)' : 'Grid: edit mode only (click to toggle)'}
+              >
+                <Grid3x3 size={14} />
+              </button>
+            </>
+          )}
           <button
             className={styles.aiBtn}
             onClick={() => openAgentWithContext('calendar', { date: format(currentMonth, 'yyyy-MM-dd') })}
@@ -572,18 +595,20 @@ export default function CalendarPage() {
             const timedTasks = dayTaskList.filter((t) => t.start_time && t.end_time);
             const dayBlocks = weekData[dateStr];
             const resolvedBlocks = dayBlocks?.blocks || [];
-            const dayOverlaps = dayBlocks?.overlaps || [];
-            const overlapSegments = getOverlapSegments(resolvedBlocks, dayOverlaps);
 
-            // Drag-select preview for this column
+            // Drag-select preview for this column (active drag or persistent selection)
             const isDraggingHere = dragSelect?.dayIdx === dayIdx;
+            const hasSelection = dragSelection?.dayIdx === dayIdx;
             const dragTop = isDraggingHere ? Math.min(dragSelect!.startPct, dragSelect!.currentPct) : 0;
             const dragHeight = isDraggingHere ? Math.abs(dragSelect!.currentPct - dragSelect!.startPct) : 0;
+            // Persistent selection preview
+            const selTop = hasSelection ? timeStrToPercent(dragSelection!.startTime) : 0;
+            const selHeight = hasSelection ? timeStrToPercent(dragSelection!.endTime) - selTop : 0;
 
             return (
               <div
                 key={dateStr}
-                className={`${styles.weekColumn} ${isToday(day) ? styles.weekColumnToday : ''} ${selected ? styles.weekColumnSelected : ''}`}
+                className={`${styles.weekColumn} ${isToday(day) ? styles.weekColumnToday : ''} ${selected ? styles.weekColumnSelected : ''} ${editMode ? styles.weekColumnEditMode : ''}`}
               >
                 <div className={styles.weekColumnHeader}>
                   <span className={styles.weekColumnDay}>{format(day, 'EEE')}</span>
@@ -622,11 +647,13 @@ export default function CalendarPage() {
                 <div
                   className={styles.timedSection}
                   ref={(el) => { timedSectionRefs.current[dayIdx] = el; }}
-                  onMouseDown={(e) => handleTBMouseDown(dayIdx, e)}
+                  style={editMode ? { cursor: 'crosshair' } : undefined}
+                  onMouseDown={(e) => { setDragSelection(null); setTBCreateMenu(null); handleTBMouseDown(dayIdx, e); }}
                   onMouseMove={(e) => handleTBMouseMove(e, dayIdx)}
+                  onContextMenu={(e) => handleTimedSectionContextMenu(e, dayIdx)}
                 >
-                  {/* Hour gridlines */}
-                  {Array.from({ length: 24 }, (_, h) => (
+                  {/* Hour gridlines (visible in edit mode or when preference is 'always') */}
+                  {showGridlines && Array.from({ length: 24 }, (_, h) => (
                     <div
                       key={`grid-${h}`}
                       className={styles.hourGridline}
@@ -658,22 +685,7 @@ export default function CalendarPage() {
                     );
                   })}
 
-                  {/* Overlap blended segments + info icon */}
-                  {overlapSegments.map((seg, i) => (
-                    <div
-                      key={`overlap-${i}`}
-                      className={styles.tbOverlap}
-                      style={{
-                        top: `${seg.top}%`,
-                        height: `${seg.height}%`,
-                        backgroundColor: seg.color + '35',
-                      }}
-                    >
-                      <Info size={12} className={styles.tbOverlapIcon} />
-                    </div>
-                  ))}
-
-                  {/* Drag-select preview */}
+                  {/* Drag-select preview (active dragging) */}
                   {isDraggingHere && dragHeight > 0 && (
                     <div
                       className={styles.tbDragPreview}
@@ -685,47 +697,17 @@ export default function CalendarPage() {
                     </div>
                   )}
 
-                  {/* Time Block creation mini-form */}
-                  {showTBForm && showTBForm.dayIdx === dayIdx && (() => {
-                    const endPct = timeStrToPercent(showTBForm.endTime);
-                    const flipUp = endPct > 70;
-                    return (
+                  {/* Persistent selection highlight (after mouseup, before right-click) */}
+                  {hasSelection && selHeight > 0 && (
                     <div
-                      className={`${styles.tbFormPopup} ${flipUp ? styles.tbFormPopupFlip : ''}`}
-                      style={flipUp
-                        ? { bottom: `${100 - endPct}%` }
-                        : { top: `${timeStrToPercent(showTBForm.startTime)}%` }
-                      }
-                      onClick={(e) => e.stopPropagation()}
+                      className={styles.tbDragPreview}
+                      style={{ top: `${selTop}%`, height: `${selHeight}%` }}
                     >
-                      <input
-                        type="text"
-                        className={styles.tbFormInput}
-                        placeholder="Label (e.g. Study)"
-                        value={tbFormLabel}
-                        onChange={(e) => setTBFormLabel(e.target.value)}
-                        autoFocus
-                        onKeyDown={(e) => { if (e.key === 'Enter') handleTBFormSubmit(); if (e.key === 'Escape') setShowTBForm(null); }}
-                      />
-                      <select
-                        className={styles.tbFormSelect}
-                        value={tbFormType}
-                        onChange={(e) => setTBFormType(e.target.value as any)}
-                      >
-                        <option value="study">Study</option>
-                        <option value="sleep">Sleep</option>
-                        <option value="custom">Custom</option>
-                      </select>
-                      <div className={styles.tbFormTime}>
-                        {formatHHMM(showTBForm.startTime)} – {formatHHMM(showTBForm.endTime)}
-                      </div>
-                      <div className={styles.tbFormActions}>
-                        <button className={styles.tbFormCancel} onClick={() => setShowTBForm(null)}>Cancel</button>
-                        <button className={styles.tbFormSave} onClick={handleTBFormSubmit} disabled={!tbFormLabel.trim()}>Save</button>
-                      </div>
+                      <span className={styles.tbDragLabel}>
+                        {formatHHMM(dragSelection!.startTime)} – {formatHHMM(dragSelection!.endTime)}
+                      </span>
                     </div>
-                    );
-                  })()}
+                  )}
 
                   {/* Timed tasks — float above Time Blocks */}
                   {timedTasks.map((t) => {
@@ -904,7 +886,7 @@ export default function CalendarPage() {
         </>
       )}
 
-      {/* Time Block context menu */}
+      {/* Time Block context menu (existing block) */}
       {tbContextMenu && (
         <div
           className={styles.contextMenu}
@@ -928,8 +910,118 @@ export default function CalendarPage() {
         </div>
       )}
 
+      {/* Time Block create context menu (after drag-select) */}
+      {tbCreateMenu && (
+        <div
+          className={styles.contextMenu}
+          style={{ left: tbCreateMenu.x, top: tbCreateMenu.y }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            className={styles.contextMenuItem}
+            onClick={openTBCreateModal}
+          >
+            <Plus size={14} />
+            Add Time Block
+          </button>
+          <button
+            className={styles.contextMenuItem}
+            onClick={() => { setDragSelection(null); setTBCreateMenu(null); }}
+          >
+            <X size={14} />
+            Cancel
+          </button>
+        </div>
+      )}
+
+      {/* Time Block create modal (overlay edit panel) */}
+      {showTBCreateModal && (() => {
+        // Check if this day already has a study block
+        const dayStr = dragSelection ? format(weekDays[dragSelection.dayIdx], 'yyyy-MM-dd') : '';
+        const dayBlocks = dayStr ? (weekData[dayStr]?.blocks || []) : [];
+        const hasStudyBlock = dayBlocks.some(b => b.type === 'study');
+        const studyConflict = tbCreateType === 'study' && hasStudyBlock;
+        return (
+        <div className={styles.overlay} onClick={(e) => { if (e.target === e.currentTarget) { setShowTBCreateModal(false); setDragSelection(null); } }}>
+          <div className={styles.tbEditModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.tbEditTitle}>New Time Block</div>
+            <div className={styles.tbEditField}>
+              <label>Label</label>
+              <input
+                type="text"
+                value={tbCreateLabel}
+                onChange={(e) => setTBCreateLabel(e.target.value)}
+                className={styles.tbFormInput}
+                placeholder="e.g. Study, Rest, Meal"
+                autoFocus
+                onKeyDown={(e) => { if (e.key === 'Enter' && tbCreateLabel.trim()) handleTBCreateSubmit(); if (e.key === 'Escape') { setShowTBCreateModal(false); setDragSelection(null); } }}
+              />
+            </div>
+            <div className={styles.tbEditField}>
+              <label>Type</label>
+              <select
+                value={tbCreateType}
+                onChange={(e) => setTBCreateType(e.target.value as any)}
+                className={styles.tbFormSelect}
+              >
+                <option value="study">Study</option>
+                <option value="sleep">Sleep</option>
+                <option value="custom">Custom</option>
+              </select>
+            </div>
+            <div className={styles.tbEditRow}>
+              <div className={styles.tbEditField}>
+                <label>Start</label>
+                <input
+                  type="time"
+                  value={tbCreateStart}
+                  onChange={(e) => setTBCreateStart(e.target.value)}
+                  className={styles.tbFormInput}
+                />
+              </div>
+              <div className={styles.tbEditField}>
+                <label>End</label>
+                <input
+                  type="time"
+                  value={tbCreateEnd}
+                  onChange={(e) => setTBCreateEnd(e.target.value)}
+                  className={styles.tbFormInput}
+                />
+              </div>
+            </div>
+            <div className={styles.tbEditField}>
+              <label>Color (optional)</label>
+              <input
+                type="color"
+                value={tbCreateColor || '#8b5cf6'}
+                onChange={(e) => setTBCreateColor(e.target.value)}
+                className={styles.tbColorInput}
+              />
+            </div>
+            {studyConflict && (
+              <p style={{ color: 'var(--error, #ef4444)', fontSize: 12, margin: '0 0 8px' }}>
+                This day already has a Study Block. Only one Study Block per day is allowed.
+              </p>
+            )}
+            <div className={styles.tbEditActions}>
+              <button className={styles.tbFormCancel} onClick={() => { setShowTBCreateModal(false); setDragSelection(null); }}>Cancel</button>
+              <button className={styles.tbFormSave} onClick={handleTBCreateSubmit} disabled={!tbCreateLabel.trim() || studyConflict}>Save</button>
+            </div>
+          </div>
+        </div>
+        );
+      })()}
+
       {/* Time Block edit modal */}
-      {tbEditBlock && (
+      {tbEditBlock && (() => {
+        // Study constraint check for edit: if changing to study, check day already has one
+        const editDayKey = Object.keys(weekData).find(d => {
+          const blocks = weekData[d]?.blocks || [];
+          return blocks.some(b => b.id === tbEditBlock.id);
+        });
+        const editDayBlocks = editDayKey ? (weekData[editDayKey]?.blocks || []) : [];
+        const editStudyConflict = tbEditType === 'study' && tbEditBlock.type !== 'study' && editDayBlocks.some(b => b.type === 'study' && b.id !== tbEditBlock.id);
+        return (
         <div className={styles.overlay} onClick={(e) => e.target === e.currentTarget && setTBEditBlock(null)}>
           <div className={styles.tbEditModal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.tbEditTitle}>Edit Time Block</div>
@@ -984,13 +1076,19 @@ export default function CalendarPage() {
                 className={styles.tbColorInput}
               />
             </div>
+            {editStudyConflict && (
+              <p style={{ color: 'var(--error, #ef4444)', fontSize: 12, margin: '0 0 8px' }}>
+                This day already has a Study Block. Only one Study Block per day is allowed.
+              </p>
+            )}
             <div className={styles.tbEditActions}>
               <button className={styles.tbFormCancel} onClick={() => setTBEditBlock(null)}>Cancel</button>
-              <button className={styles.tbFormSave} onClick={handleTBEditSave} disabled={!tbEditLabel.trim()}>Save</button>
+              <button className={styles.tbFormSave} onClick={handleTBEditSave} disabled={!tbEditLabel.trim() || editStudyConflict}>Save</button>
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {/* Time Block delete confirm */}
       {tbDeleteConfirm && (
