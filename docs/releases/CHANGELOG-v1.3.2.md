@@ -1,6 +1,6 @@
 # Coincides v1.3.2 — CHANGELOG
 
-> 补丁版本：5 项 Bug 修复（客户端防崩 + Agent 行为规范）
+> 补丁版本：8 项 Bug 修复 + 1 项功能增强（客户端防崩 + Agent 行为规范 + Section 支持）
 > 发布日期：2026-03-19
 
 ---
@@ -170,3 +170,37 @@ Agent 生成的 `formula` 字段内容自带 `$...$` 分隔符，但 `FormulaVie
 ### 变更文件
 - `client/src/components/CardFlip/CardTemplateContent.tsx`
 - `server/src/agent/tools/normalizeContent.ts`
+
+---
+
+## 功能增强: Agent Section 支持——自动按章节组织卡片
+
+### 问题
+Agent 生成复习卡片和知识卡片时，所有卡片平铺放入 deck 中，没有按章节/主题分组。用户看到的是一堆没有组织结构的卡片，难以管理。虽然 Section 功能已经存在（REST API + 前端 UI），但 Agent 完全没有使用它。
+
+### 方案
+给 Agent 新增 section 工具 + system prompt 规则，依赖强模型本身的思考能力自动分组，无需结构化表单。
+
+### 变更详情
+
+#### 新增工具
+- `list_sections(deck_id)` — 查询 deck 内已有的 section
+- `create_section(deck_id, name, order_index?)` — 创建新 section，自动追加到末尾
+
+#### 工具增强
+- `create_card` 新增 `section_id` 参数，允许卡片放入指定 section
+- `batch_cards` proposal apply 路由支持 `section_id`，批量创建卡片时自动分配 section
+
+#### System Prompt 规则
+- Card creation 规则新增「Section organization」：选择 deck 后必须检查并组织 section
+- Document-Based Card Generation 新增第 5 步「Organize by sections」：
+  - 分析源材料结构，按章节/主题分组
+  - 复用已有 section 或创建新的
+  - 每张卡片必须有 section_id
+  - 无明确结构时创建以文档名命名的单一 section
+
+### 变更文件
+- `server/src/agent/tools/definitions.ts` — 新增 list_sections、create_section 工具定义；create_card 新增 section_id 参数
+- `server/src/agent/tools/executor.ts` — 新增 list_sections、create_section 执行逻辑；create_card INSERT 支持 section_id
+- `server/src/routes/proposals.ts` — batch_cards apply 支持 section_id
+- `server/src/agent/system-prompt.ts` — 新增 section 组织规则

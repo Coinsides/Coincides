@@ -85,10 +85,11 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
           const templateType = (item.template_type as string) || 'general';
           const rawContent = (item.content as Record<string, unknown>) || {};
           const normalizedContent = normalizeCardContent(templateType, rawContent);
+          const sectionId = (item.section_id as string) || null;
           db.prepare(
-            'INSERT INTO cards (id, user_id, deck_id, template_type, title, content, importance, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            'INSERT INTO cards (id, user_id, deck_id, section_id, template_type, title, content, importance, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
           ).run(
-            cardId, req.userId!, deckId, templateType,
+            cardId, req.userId!, deckId, sectionId, templateType,
             item.title || 'Untitled', JSON.stringify(normalizedContent), item.importance || 3, now, now,
           );
 

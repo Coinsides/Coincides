@@ -148,6 +148,35 @@ export async function executeTool(
       return JSON.stringify({ id: deckId, name, course_id, course_name: course.name, message: 'Deck created successfully' });
     }
 
+    case 'list_sections': {
+      const { deck_id: secDeckId } = args as { deck_id: string };
+      const sections = db.prepare(
+        'SELECT id, name, order_index FROM card_sections WHERE deck_id = ? AND user_id = ? ORDER BY order_index ASC, created_at ASC',
+      ).all(secDeckId, userId);
+      return JSON.stringify(sections);
+    }
+
+    case 'create_section': {
+      const { deck_id: csDeckId, name: csName, order_index: csOrder } = args as { deck_id: string; name: string; order_index?: number };
+      // Verify deck exists and belongs to user
+      const csDeck = db.prepare('SELECT id FROM card_decks WHERE id = ? AND user_id = ?').get(csDeckId, userId);
+      if (!csDeck) return JSON.stringify({ error: 'Deck not found' });
+      const csId = uuidv4();
+      const csNow = new Date().toISOString();
+      // Default order_index: append after existing sections
+      let resolvedOrder = csOrder;
+      if (resolvedOrder === undefined) {
+        const maxOrder = db.prepare(
+          'SELECT MAX(order_index) as mx FROM card_sections WHERE deck_id = ? AND user_id = ?',
+        ).get(csDeckId, userId) as { mx: number | null };
+        resolvedOrder = (maxOrder?.mx ?? -1) + 1;
+      }
+      db.prepare(
+        'INSERT INTO card_sections (id, deck_id, user_id, name, order_index, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+      ).run(csId, csDeckId, userId, csName, resolvedOrder, csNow);
+      return JSON.stringify({ id: csId, name: csName, deck_id: csDeckId, order_index: resolvedOrder, message: 'Section created successfully' });
+    }
+
     case 'list_cards': {
       const { deck_id, template_type, search } = args as Record<string, string | undefined>;
       let query = 'SELECT id, title, template_type, importance, fsrs_next_review FROM cards WHERE deck_id = ? AND user_id = ?';
@@ -160,8 +189,8 @@ export async function executeTool(
     }
 
     case 'create_card': {
-      const { deck_id, template_type, title, content, importance, tag_ids } = args as {
-        deck_id: string; template_type: string; title: string;
+      const { deck_id, section_id, template_type, title, content, importance, tag_ids } = args as {
+        deck_id: string; section_id?: string; template_type: string; title: string;
         content: Record<string, unknown>; importance?: number; tag_ids?: string[];
       };
 
@@ -172,8 +201,8 @@ export async function executeTool(
       const id = uuidv4();
       const now = new Date().toISOString();
       db.prepare(
-        'INSERT INTO cards (id, user_id, deck_id, template_type, title, content, importance, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      ).run(id, userId, deck_id, resolvedType, title, JSON.stringify(normalizedContent), importance || 3, now, now);
+        'INSERT INTO cards (id, user_id, deck_id, section_id, template_type, title, content, importance, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      ).run(id, userId, deck_id, section_id || null, resolvedType, title, JSON.stringify(normalizedContent), importance || 3, now, now);
 
       // Attach tags
       if (tag_ids && tag_ids.length > 0) {

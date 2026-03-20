@@ -122,6 +122,30 @@ export const toolDefinitions: ToolDefinition[] = [
     },
   },
   {
+    name: 'list_sections',
+    description: 'List sections in a deck. Sections organize cards by chapter/topic within a deck.',
+    parameters: {
+      type: 'object',
+      properties: {
+        deck_id: { type: 'string', description: 'Deck ID' },
+      },
+      required: ['deck_id'],
+    },
+  },
+  {
+    name: 'create_section',
+    description: 'Create a new section within a deck. Use to organize cards by chapter, topic, or module. Returns the new section ID.',
+    parameters: {
+      type: 'object',
+      properties: {
+        deck_id: { type: 'string', description: 'Deck ID this section belongs to' },
+        name: { type: 'string', description: 'Section name (e.g., "Chapter 3: Vectors", "Week 5: Integration")' },
+        order_index: { type: 'number', description: 'Position in section list (0-based). Higher = further down.' },
+      },
+      required: ['deck_id', 'name'],
+    },
+  },
+  {
     name: 'list_cards',
     description: 'List cards in a deck with optional filters.',
     parameters: {
@@ -136,11 +160,12 @@ export const toolDefinitions: ToolDefinition[] = [
   },
   {
     name: 'create_card',
-    description: 'Create a single flashcard in a deck.',
+    description: 'Create a single flashcard in a deck, optionally inside a section.',
     parameters: {
       type: 'object',
       properties: {
         deck_id: { type: 'string', description: 'Deck ID' },
+        section_id: { type: 'string', description: 'Section ID to place this card in. Omit for unsectioned.' },
         template_type: { type: 'string', enum: ['definition', 'theorem', 'formula', 'general'], description: 'Card template type' },
         title: { type: 'string', description: 'Card title (front)' },
         content: { type: 'object', description: 'Card content object. MUST match template_type: definition→{definition,example?,notes?}, theorem→{statement,conditions?,proof_sketch?,notes?}, formula→{formula,variables?,applicable_conditions?,notes?}, general→{body,notes?}' },
