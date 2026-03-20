@@ -253,6 +253,7 @@ export interface TheoremContent {
   statement: string;
   conditions?: string;
   proof_sketch?: string;
+  example?: string;
   notes?: string;
 }
 
@@ -260,11 +261,13 @@ export interface FormulaContent {
   formula: string;
   variables?: Record<string, string>;
   applicable_conditions?: string;
+  example?: string;
   notes?: string;
 }
 
 export interface GeneralContent {
   body: string;
+  example?: string;
   notes?: string;
 }
 

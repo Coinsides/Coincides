@@ -83,6 +83,14 @@ function TheoremView({ content }: { content: TheoremContent }) {
           </div>
         </>
       )}
+      {content.example && (
+        <>
+          <div className={styles.contentLabel}>Example:</div>
+          <div className={styles.contentBody}>
+            <KaTeXRenderer text={content.example} />
+          </div>
+        </>
+      )}
       {content.notes && (
         <>
           <div className={styles.contentLabel}>Notes:</div>
@@ -129,6 +137,14 @@ function FormulaView({ content }: { content: FormulaContent }) {
           </div>
         </>
       )}
+      {content.example && (
+        <>
+          <div className={styles.contentLabel}>Example:</div>
+          <div className={styles.contentBody}>
+            <KaTeXRenderer text={content.example} />
+          </div>
+        </>
+      )}
       {content.notes && (
         <>
           <div className={styles.contentLabel}>Notes:</div>
@@ -149,6 +165,14 @@ function GeneralView({ content }: { content: GeneralContent }) {
       <div className={styles.contentBody}>
         <KaTeXRenderer text={body} />
       </div>
+      {content.example && (
+        <>
+          <div className={styles.contentLabel}>Example:</div>
+          <div className={styles.contentBody}>
+            <KaTeXRenderer text={content.example} />
+          </div>
+        </>
+      )}
       {content.notes && (
         <>
           <div className={styles.contentLabel}>Notes:</div>

@@ -4,9 +4,9 @@
  *
  * Expected structures:
  *   definition → { definition, example?, notes? }
- *   theorem    → { statement, conditions?, proof_sketch?, notes? }
- *   formula    → { formula, variables?, applicable_conditions?, notes? }
- *   general    → { body, notes? }
+ *   theorem    → { statement, conditions?, proof_sketch?, example?, notes? }
+ *   formula    → { formula, variables?, applicable_conditions?, example?, notes? }
+ *   general    → { body, example?, notes? }
  */
 /**
  * Strip wrapping $ or $$ delimiters from a LaTeX string.
@@ -52,6 +52,7 @@ export function normalizeCardContent(
         statement: statement || 'No statement provided',
         ...(content.conditions !== undefined && { conditions: content.conditions }),
         ...(content.proof_sketch !== undefined && { proof_sketch: content.proof_sketch }),
+        ...(content.example !== undefined && { example: content.example }),
         ...(content.notes !== undefined && { notes: content.notes }),
       };
     }
@@ -62,6 +63,7 @@ export function normalizeCardContent(
         formula: formula || 'No formula provided',
         ...(content.variables !== undefined && { variables: content.variables }),
         ...(content.applicable_conditions !== undefined && { applicable_conditions: content.applicable_conditions }),
+        ...(content.example !== undefined && { example: content.example }),
         ...(content.notes !== undefined && { notes: content.notes }),
       };
     }
@@ -70,6 +72,7 @@ export function normalizeCardContent(
       const body = getString('body', 'definition', 'statement', 'formula');
       return {
         body: body || 'No content provided',
+        ...(content.example !== undefined && { example: content.example }),
         ...(content.notes !== undefined && { notes: content.notes }),
       };
     }

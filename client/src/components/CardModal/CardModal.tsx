@@ -83,6 +83,7 @@ export default function CardModal() {
           setStatement(c.statement || '');
           setConditions(c.conditions || '');
           setProofSketch(c.proof_sketch || '');
+          setExample(c.example || '');
           setNotes(c.notes || '');
           break;
         }
@@ -95,12 +96,14 @@ export default function CardModal() {
               : []
           );
           setApplicableConditions(c.applicable_conditions || '');
+          setExample(c.example || '');
           setNotes(c.notes || '');
           break;
         }
         case CardTemplateType.General: {
           const c = content as GeneralContent;
           setBody(c.body || '');
+          setExample(c.example || '');
           setNotes(c.notes || '');
           break;
         }
@@ -130,6 +133,7 @@ export default function CardModal() {
           statement,
           ...(conditions && { conditions }),
           ...(proofSketch && { proof_sketch: proofSketch }),
+          ...(example && { example }),
           ...(notes && { notes }),
         };
       case CardTemplateType.Formula: {
@@ -141,12 +145,14 @@ export default function CardModal() {
           formula,
           ...(Object.keys(vars).length > 0 && { variables: vars }),
           ...(applicableConditions && { applicable_conditions: applicableConditions }),
+          ...(example && { example }),
           ...(notes && { notes }),
         };
       }
       case CardTemplateType.General:
         return {
           body,
+          ...(example && { example }),
           ...(notes && { notes }),
         };
     }
@@ -303,6 +309,14 @@ export default function CardModal() {
                   onChange={(e) => setProofSketch(e.target.value)}
                 />
               </div>
+              <div className={styles.field}>
+                <label>Example (optional)</label>
+                <textarea
+                  placeholder="An illustrative example. Use $...$ for LaTeX."
+                  value={example}
+                  onChange={(e) => setExample(e.target.value)}
+                />
+              </div>
             </>
           )}
 
@@ -355,19 +369,37 @@ export default function CardModal() {
                   onChange={(e) => setApplicableConditions(e.target.value)}
                 />
               </div>
+              <div className={styles.field}>
+                <label>Example (optional)</label>
+                <textarea
+                  placeholder="An illustrative example. Use $...$ for LaTeX."
+                  value={example}
+                  onChange={(e) => setExample(e.target.value)}
+                />
+              </div>
             </>
           )}
 
           {templateType === CardTemplateType.General && (
-            <div className={styles.field}>
-              <label>Body</label>
-              <textarea
-                placeholder="Card content. Use $...$ for inline LaTeX, $$...$$ for display."
-                value={body}
-                onChange={(e) => setBody(e.target.value)}
-                required
-              />
-            </div>
+            <>
+              <div className={styles.field}>
+                <label>Body</label>
+                <textarea
+                  placeholder="Card content. Use $...$ for inline LaTeX, $$...$$ for display."
+                  value={body}
+                  onChange={(e) => setBody(e.target.value)}
+                  required
+                />
+              </div>
+              <div className={styles.field}>
+                <label>Example (optional)</label>
+                <textarea
+                  placeholder="An illustrative example. Use $...$ for LaTeX."
+                  value={example}
+                  onChange={(e) => setExample(e.target.value)}
+                />
+              </div>
+            </>
           )}
 
           {/* Notes (shared across all types) */}
