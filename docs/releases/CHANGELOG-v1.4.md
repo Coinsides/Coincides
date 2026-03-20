@@ -95,3 +95,36 @@
 ### 变更文件
 - `client/src/pages/Calendar/Calendar.tsx`
 - `client/src/pages/Calendar/Calendar.module.css`
+
+---
+
+## fix(calendar): 周视图框选 Time Block 不再误触 Day Detail 面板
+
+### 问题
+- 在周视图拖拽框选创建 Time Block 后，mouseup 触发 weekColumn 的 onClick → Day Detail 面板弹出，遮挡刚弹出的创建表单
+
+### 修复
+- `Calendar.tsx` — 将 `handleDayClick` 从 `.weekColumn` 的 `onClick` 移到 `.weekColumnDate` 日期数字上（仅点击日期数字才打开 Day Detail）
+- `Calendar.module.css` — 日期数字 `.weekColumnDate` 新增 `cursor: pointer` + 悬停下划线样式，提升交互暗示
+
+### 变更文件
+- `client/src/pages/Calendar/Calendar.tsx`
+- `client/src/pages/Calendar/Calendar.module.css`
+
+---
+
+## fix(calendar): Time Block 创建表单底部按钮被截断
+
+### 问题
+- 在靠近一天底部区域（约 70% 以后）拖拽创建 Time Block 时，弹出的创建表单向下延伸超出容器可视区域，Save / Cancel 按钮被裁切不可见
+
+### 修复
+- `Calendar.tsx` — 创建表单改用 IIFE 计算位置：当 `endTime` 超过 70% 时，改为从底部（`bottom`）定位，表单向上展开
+- `Calendar.module.css` —
+  - 新增 `.tbFormPopupFlip` 类（配合 `bottom` 定位）
+  - `.weekColumn` 新增 `overflow: visible`，防止 `border-radius` 隐式裁切绝对定位子元素
+  - `.weekColumn` 移除遗留的 `cursor: pointer`（上一个 fix 的遗留）
+
+### 变更文件
+- `client/src/pages/Calendar/Calendar.tsx`
+- `client/src/pages/Calendar/Calendar.module.css`

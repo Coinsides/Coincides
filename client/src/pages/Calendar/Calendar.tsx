@@ -686,10 +686,16 @@ export default function CalendarPage() {
                   )}
 
                   {/* Time Block creation mini-form */}
-                  {showTBForm && showTBForm.dayIdx === dayIdx && (
+                  {showTBForm && showTBForm.dayIdx === dayIdx && (() => {
+                    const endPct = timeStrToPercent(showTBForm.endTime);
+                    const flipUp = endPct > 70;
+                    return (
                     <div
-                      className={styles.tbFormPopup}
-                      style={{ top: `${timeStrToPercent(showTBForm.startTime)}%` }}
+                      className={`${styles.tbFormPopup} ${flipUp ? styles.tbFormPopupFlip : ''}`}
+                      style={flipUp
+                        ? { bottom: `${100 - endPct}%` }
+                        : { top: `${timeStrToPercent(showTBForm.startTime)}%` }
+                      }
                       onClick={(e) => e.stopPropagation()}
                     >
                       <input
@@ -718,7 +724,8 @@ export default function CalendarPage() {
                         <button className={styles.tbFormSave} onClick={handleTBFormSubmit} disabled={!tbFormLabel.trim()}>Save</button>
                       </div>
                     </div>
-                  )}
+                    );
+                  })()}
 
                   {/* Timed tasks — float above Time Blocks */}
                   {timedTasks.map((t) => {
