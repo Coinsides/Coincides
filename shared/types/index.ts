@@ -500,6 +500,7 @@ export interface CreateTaskRequest {
   end_time?: string;
   description?: string;
   checklist?: ChecklistItem[];
+  time_block_id?: string;
 }
 
 export interface UpdateTaskRequest {
@@ -513,6 +514,7 @@ export interface UpdateTaskRequest {
   end_time?: string | null;
   description?: string | null;
   checklist?: ChecklistItem[] | null;
+  time_block_id?: string | null;
 }
 
 export interface BatchCreateTasksRequest {

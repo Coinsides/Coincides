@@ -361,6 +361,11 @@
   opacity: 0.5;
 }
 
+.weekTaskUnassigned {
+  border-left-style: dashed;
+  opacity: 0.65;
+}
+
 .weekTaskTitle {
   display: block;
   font-size: 12px;
@@ -1153,4 +1158,109 @@
 @keyframes fadeScaleIn {
   from { transform: translate(-50%, -50%) scale(0.96); opacity: 0; }
   to { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+/* ─── TB Hover Task Panel ────────────────────────── */
+
+.tbHoverPanel {
+  position: fixed;
+  z-index: 250;
+  width: 300px;
+  max-height: 400px;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-secondary, var(--glass-surface));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: var(--glass-shadow-lg, 0 8px 32px rgba(0,0,0,0.3));
+  animation: fadeIn 120ms ease forwards;
+  pointer-events: auto;
+}
+
+.tbHoverHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-left: 4px solid;
+  border-radius: var(--radius-lg, 12px) var(--radius-lg, 12px) 0 0;
+  background: rgba(255, 255, 255, 0.03);
+  flex-shrink: 0;
+}
+
+.tbHoverType {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.tbHoverTime {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.tbHoverBody {
+  padding: 8px 0;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.tbHoverEmpty {
+  padding: 16px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-muted, var(--text-secondary));
+}
+
+.tbHoverGroup {
+  padding: 0 12px;
+  margin-bottom: 8px;
+}
+
+.tbHoverGroup:last-child {
+  margin-bottom: 0;
+}
+
+.tbHoverGroupLabel {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 4px 4px 4px;
+  margin-bottom: 2px;
+}
+
+.tbHoverTask {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm, 6px);
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.tbHoverTask:hover {
+  background: var(--glass-hover, rgba(255, 255, 255, 0.06));
+}
+
+.tbHoverTaskDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tbHoverTaskTitle {
+  font-size: 13px;
+  color: var(--text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
 }

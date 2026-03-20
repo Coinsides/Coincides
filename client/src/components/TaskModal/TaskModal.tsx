@@ -1,8 +1,9 @@
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, useMemo, FormEvent } from 'react';
 import { format } from 'date-fns';
 import { useCourseStore } from '@/stores/courseStore';
 import { useGoalStore } from '@/stores/goalStore';
 import { useTaskStore } from '@/stores/taskStore';
+import { useTimeBlockStore } from '@/stores/timeBlockStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useDailyBriefStore } from '@/stores/dailyBriefStore';
 import { TaskPriority } from '@shared/types';
@@ -23,6 +24,7 @@ export default function TaskModal() {
   const goals = useGoalStore((s) => s.goals);
   const fetchGoals = useGoalStore((s) => s.fetchGoals);
   const { createTask, updateTask, deleteTask } = useTaskStore();
+  const weekData = useTimeBlockStore((s) => s.weekData);
   const fetchDailyBrief = useDailyBriefStore((s) => s.fetchDailyBrief);
 
   const isEdit = modal?.type === 'task-edit';
@@ -37,6 +39,7 @@ export default function TaskModal() {
   const [endTime, setEndTime] = useState('');
   const [description, setDescription] = useState('');
   const [checklist, setChecklist] = useState<{text: string; done: boolean}[]>([]);
+  const [timeBlockId, setTimeBlockId] = useState('');
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -50,11 +53,13 @@ export default function TaskModal() {
       if (existingTask.end_time) setEndTime(existingTask.end_time);
       if (existingTask.description) setDescription(existingTask.description);
       if (existingTask.checklist) setChecklist(existingTask.checklist);
+      setTimeBlockId(existingTask.time_block_id || '');
     } else {
       if (modal?.data?.date) setDate(modal.data.date);
       if (modal?.data?.course_id) setCourseId(modal.data.course_id);
       else if (courses.length > 0 && !courseId) setCourseId(courses[0].id);
       if (modal?.data?.goal_id) setGoalId(modal.data.goal_id);
+      if (modal?.data?.time_block_id) setTimeBlockId(modal.data.time_block_id);
     }
   }, [modal]);
 
@@ -79,6 +84,7 @@ export default function TaskModal() {
           end_time: endTime || null,
           description: description || null,
           checklist: checklistPayload ?? null,
+          time_block_id: timeBlockId || null,
         });
         addToast('success', 'Task updated');
       } else {
@@ -92,6 +98,7 @@ export default function TaskModal() {
           end_time: endTime || undefined,
           description: description || undefined,
           checklist: checklistPayload,
+          time_block_id: timeBlockId || undefined,
         });
         addToast('success', 'Task created');
       }
@@ -131,6 +138,13 @@ export default function TaskModal() {
   };
 
   const courseGoals = goals.filter((g) => g.course_id === courseId);
+
+  // Time blocks for the selected date
+  const dateBlocks = useMemo(() => {
+    const dayData = weekData[date];
+    if (!dayData) return [];
+    return dayData.blocks;
+  }, [weekData, date]);
 
   return (
     <div className={styles.overlay} onClick={(e) => e.target === e.currentTarget && closeModal()}>
@@ -241,6 +255,20 @@ export default function TaskModal() {
                 <option value="">No goal</option>
                 {courseGoals.map((g) => (
                   <option key={g.id} value={g.id}>{g.title}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {dateBlocks.length > 0 && (
+            <div className={styles.field}>
+              <label>Time Block (optional)</label>
+              <select value={timeBlockId} onChange={(e) => setTimeBlockId(e.target.value)}>
+                <option value="">Not assigned</option>
+                {dateBlocks.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.type.charAt(0).toUpperCase() + b.type.slice(1)} ({b.start_time}–{b.end_time})
+                  </option>
                 ))}
               </select>
             </div>

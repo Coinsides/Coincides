@@ -169,6 +169,40 @@ export default function CalendarPage() {
   const [tbCreateEnd, setTBCreateEnd] = useState('');
   const [tbCreateColor, setTBCreateColor] = useState('');
   const [tbCustomTypeInput, setTBCustomTypeInput] = useState('');  // Custom type input for combobox
+
+  // Hover task panel state
+  const [hoverBlock, setHoverBlock] = useState<{ block: ResolvedTimeBlock; dateStr: string } | null>(null);
+  const [hoverPos, setHoverPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const hoverEnterTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hoverExitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearHoverTimers = useCallback(() => {
+    if (hoverEnterTimer.current) { clearTimeout(hoverEnterTimer.current); hoverEnterTimer.current = null; }
+    if (hoverExitTimer.current) { clearTimeout(hoverExitTimer.current); hoverExitTimer.current = null; }
+  }, []);
+
+  const handleTBMouseEnter = useCallback((e: React.MouseEvent, block: ResolvedTimeBlock, dateStr: string) => {
+    if (hoverExitTimer.current) { clearTimeout(hoverExitTimer.current); hoverExitTimer.current = null; }
+    hoverEnterTimer.current = setTimeout(() => {
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      setHoverPos({ x: rect.right + 8, y: rect.top });
+      setHoverBlock({ block, dateStr });
+    }, 300);
+  }, []);
+
+  const handleTBMouseLeave = useCallback(() => {
+    if (hoverEnterTimer.current) { clearTimeout(hoverEnterTimer.current); hoverEnterTimer.current = null; }
+    hoverExitTimer.current = setTimeout(() => setHoverBlock(null), 200);
+  }, []);
+
+  const handlePanelMouseEnter = useCallback(() => {
+    if (hoverExitTimer.current) { clearTimeout(hoverExitTimer.current); hoverExitTimer.current = null; }
+  }, []);
+
+  const handlePanelMouseLeave = useCallback(() => {
+    hoverExitTimer.current = setTimeout(() => setHoverBlock(null), 200);
+  }, []);
+
   const timedSectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const { tasks, fetchTasksByRange, deleteTask } = useTaskStore();
@@ -277,6 +311,18 @@ export default function CalendarPage() {
     }
     return map;
   }, [tasks]);
+
+  // Get tasks for hovered block
+  const hoverBlockTasks = useMemo(() => {
+    if (!hoverBlock) return { must: [] as Task[], recommended: [] as Task[], optional: [] as Task[] };
+    const dayTaskList = tasksByDate[hoverBlock.dateStr] || [];
+    const blockTasks = dayTaskList.filter((t) => t.time_block_id === hoverBlock.block.id);
+    return {
+      must: blockTasks.filter((t) => t.priority === 'must'),
+      recommended: blockTasks.filter((t) => t.priority === 'recommended'),
+      optional: blockTasks.filter((t) => t.priority === 'optional'),
+    };
+  }, [hoverBlock, tasksByDate]);
 
   // Lookup helpers
   const getCourse = (id: string) => courses.find((c) => c.id === id);
@@ -755,10 +801,11 @@ export default function CalendarPage() {
                     {allDayTasks.map((t) => {
                       const courseColor = getCourseColor(t.course_id);
                       const goal = getGoal(t.goal_id);
+                      const isUnassigned = !t.time_block_id && resolvedBlocks.length > 0;
                       return (
                         <div
                           key={t.id}
-                          className={`${styles.weekTask} ${t.status === 'completed' ? styles.weekTaskDone : ''}`}
+                          className={`${styles.weekTask} ${t.status === 'completed' ? styles.weekTaskDone : ''} ${isUnassigned ? styles.weekTaskUnassigned : ''}`}
                           style={{ borderLeftColor: courseColor }}
                           onContextMenu={(e) => handleContextMenu(e, t)}
                         >
@@ -820,6 +867,8 @@ export default function CalendarPage() {
                           }}
                           title={`${block.type.charAt(0).toUpperCase() + block.type.slice(1)} (${formatHHMM(block.start_time)}–${formatHHMM(block.end_time)})`}
                           onContextMenu={(e) => handleTBContextMenu(e, block)}
+                          onMouseEnter={(e) => handleTBMouseEnter(e, block, dateStr)}
+                          onMouseLeave={handleTBMouseLeave}
                         >
                           <span className={styles.tbLabel}>{block.type.charAt(0).toUpperCase() + block.type.slice(1)}</span>
                           <span className={styles.tbTime}>{formatHHMM(block.start_time)}–{formatHHMM(block.end_time)}</span>
@@ -1324,6 +1373,86 @@ export default function CalendarPage() {
           </div>
         </div>
       )}
+
+      {/* TB Hover Task Panel */}
+      {hoverBlock && (() => {
+        const allTasks = [...hoverBlockTasks.must, ...hoverBlockTasks.recommended, ...hoverBlockTasks.optional];
+        const hbColor = getTBColor(hoverBlock.block);
+        const totalCount = allTasks.length;
+        return (
+          <div
+            className={styles.tbHoverPanel}
+            style={{ left: hoverPos.x, top: hoverPos.y }}
+            onMouseEnter={handlePanelMouseEnter}
+            onMouseLeave={handlePanelMouseLeave}
+          >
+            <div className={styles.tbHoverHeader} style={{ borderLeftColor: hbColor }}>
+              <span className={styles.tbHoverType}>
+                {hoverBlock.block.type.charAt(0).toUpperCase() + hoverBlock.block.type.slice(1)}
+              </span>
+              <span className={styles.tbHoverTime}>
+                {formatHHMM(hoverBlock.block.start_time)}–{formatHHMM(hoverBlock.block.end_time)}
+              </span>
+            </div>
+            <div className={styles.tbHoverBody}>
+              {totalCount === 0 ? (
+                <div className={styles.tbHoverEmpty}>No tasks assigned</div>
+              ) : (
+                <>
+                  {hoverBlockTasks.must.length > 0 && (
+                    <div className={styles.tbHoverGroup}>
+                      <div className={styles.tbHoverGroupLabel} style={{ color: 'var(--priority-must, #ef4444)' }}>Must ({hoverBlockTasks.must.length})</div>
+                      {hoverBlockTasks.must.map((t) => (
+                        <div
+                          key={t.id}
+                          className={styles.tbHoverTask}
+                          onClick={() => { openModal('task-edit', { task: t }); setHoverBlock(null); clearHoverTimers(); }}
+                          style={{ textDecoration: t.status === 'completed' ? 'line-through' : 'none', opacity: t.status === 'completed' ? 0.6 : 1 }}
+                        >
+                          <span className={styles.tbHoverTaskDot} style={{ backgroundColor: 'var(--priority-must, #ef4444)' }} />
+                          <span className={styles.tbHoverTaskTitle}>{t.title}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {hoverBlockTasks.recommended.length > 0 && (
+                    <div className={styles.tbHoverGroup}>
+                      <div className={styles.tbHoverGroupLabel} style={{ color: 'var(--priority-recommended, #3b82f6)' }}>Recommended ({hoverBlockTasks.recommended.length})</div>
+                      {hoverBlockTasks.recommended.map((t) => (
+                        <div
+                          key={t.id}
+                          className={styles.tbHoverTask}
+                          onClick={() => { openModal('task-edit', { task: t }); setHoverBlock(null); clearHoverTimers(); }}
+                          style={{ textDecoration: t.status === 'completed' ? 'line-through' : 'none', opacity: t.status === 'completed' ? 0.6 : 1 }}
+                        >
+                          <span className={styles.tbHoverTaskDot} style={{ backgroundColor: 'var(--priority-recommended, #3b82f6)' }} />
+                          <span className={styles.tbHoverTaskTitle}>{t.title}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {hoverBlockTasks.optional.length > 0 && (
+                    <div className={styles.tbHoverGroup}>
+                      <div className={styles.tbHoverGroupLabel} style={{ color: 'var(--priority-optional, #6b7280)' }}>Optional ({hoverBlockTasks.optional.length})</div>
+                      {hoverBlockTasks.optional.map((t) => (
+                        <div
+                          key={t.id}
+                          className={styles.tbHoverTask}
+                          onClick={() => { openModal('task-edit', { task: t }); setHoverBlock(null); clearHoverTimers(); }}
+                          style={{ textDecoration: t.status === 'completed' ? 'line-through' : 'none', opacity: t.status === 'completed' ? 0.6 : 1 }}
+                        >
+                          <span className={styles.tbHoverTaskDot} style={{ backgroundColor: 'var(--priority-optional, #6b7280)' }} />
+                          <span className={styles.tbHoverTaskTitle}>{t.title}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }
