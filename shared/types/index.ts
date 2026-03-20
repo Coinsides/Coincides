@@ -383,7 +383,7 @@ export interface TimeBlock {
   id: string;
   user_id: string;
   label: string;
-  type: TimeBlockType;
+  type: string;
   day_of_week: number;           // 0=Sun, 1=Mon, ..., 6=Sat
   start_time: string;            // 'HH:MM'
   end_time: string;              // 'HH:MM'
@@ -414,7 +414,7 @@ export interface GoalDependency {
 export interface ResolvedTimeBlock {
   id: string;
   label: string;
-  type: TimeBlockType;
+  type: string;
   day_of_week: number;
   start_time: string;
   end_time: string;
@@ -427,7 +427,7 @@ export interface ResolvedTimeBlock {
 
 export interface CreateTimeBlockRequest {
   label: string;
-  type?: TimeBlockType;
+  type?: string;
   day_of_week: number;
   start_time: string;
   end_time: string;
@@ -440,7 +440,7 @@ export interface BatchCreateTimeBlockRequest {
 
 export interface UpdateTimeBlockRequest {
   label?: string;
-  type?: TimeBlockType;
+  type?: string;
   start_time?: string;
   end_time?: string;
   color?: string;

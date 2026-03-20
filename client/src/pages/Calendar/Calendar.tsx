@@ -22,7 +22,6 @@ import { useTimeBlockStore } from '@/stores/timeBlockStore';
 import { useUIStore } from '@/stores/uiStore';
 import api from '@/services/api';
 import type { Task, ResolvedTimeBlock } from '@shared/types';
-import { TimeBlockType } from '@shared/types';
 import styles from './Calendar.module.css';
 
 type CalendarView = 'month' | 'week';
@@ -35,15 +34,22 @@ const PRIORITY_COLORS: Record<string, string> = {
 
 const DEFAULT_COURSE_COLOR = '#6366f1';
 
-// Time Block colors by type
-const TB_COLORS: Record<string, string> = {
-  study: '#3b82f6',   // blue
-  sleep: '#4b5563',   // dark gray
-  custom: '#8b5cf6',  // purple
-};
+// Time Block preset types with default colors
+const TB_PRESET_TYPES = [
+  { value: 'study', label: 'Study', color: '#3b82f6' },
+  { value: 'sleep', label: 'Sleep', color: '#4b5563' },
+  { value: 'exercise', label: 'Exercise', color: '#10b981' },
+  { value: 'entertainment', label: 'Entertainment', color: '#f59e0b' },
+  { value: 'rest', label: 'Rest', color: '#06b6d4' },
+  { value: 'meal', label: 'Meal', color: '#ef4444' },
+];
+
+const TB_COLORS: Record<string, string> = Object.fromEntries(
+  TB_PRESET_TYPES.map(p => [p.value, p.color])
+);
 
 function getTBColor(block: ResolvedTimeBlock): string {
-  return block.color || TB_COLORS[block.type] || TB_COLORS.custom;
+  return block.color || TB_COLORS[block.type] || '#8b5cf6';
 }
 
 /** Convert 'HH:MM' to percentage position in a 24h column (fallback) */
@@ -143,7 +149,7 @@ export default function CalendarPage() {
   const [tbContextMenu, setTBContextMenu] = useState<{ x: number; y: number; block: ResolvedTimeBlock } | null>(null);
   const [tbEditBlock, setTBEditBlock] = useState<ResolvedTimeBlock | null>(null);
   const [tbEditLabel, setTBEditLabel] = useState('');
-  const [tbEditType, setTBEditType] = useState<'study' | 'sleep' | 'custom'>('study');
+  const [tbEditType, setTBEditType] = useState('study');
   const [tbEditStart, setTBEditStart] = useState('');
   const [tbEditEnd, setTBEditEnd] = useState('');
   const [tbEditColor, setTBEditColor] = useState('');
@@ -158,10 +164,11 @@ export default function CalendarPage() {
   // Create modal (overlay edit panel for new TB)
   const [showTBCreateModal, setShowTBCreateModal] = useState(false);
   const [tbCreateLabel, setTBCreateLabel] = useState('');
-  const [tbCreateType, setTBCreateType] = useState<'study' | 'sleep' | 'custom'>('study');
+  const [tbCreateType, setTBCreateType] = useState('study');
   const [tbCreateStart, setTBCreateStart] = useState('');
   const [tbCreateEnd, setTBCreateEnd] = useState('');
   const [tbCreateColor, setTBCreateColor] = useState('');
+  const [tbCustomTypeInput, setTBCustomTypeInput] = useState('');  // Custom type input for combobox
   const timedSectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const { tasks, fetchTasksByRange, deleteTask } = useTaskStore();
@@ -282,6 +289,23 @@ export default function CalendarPage() {
     return courses.filter((c) => courseIds.has(c.id));
   }, [tasks, courses]);
 
+  // Compute all available TB type options: presets + user custom types from existing blocks
+  const tbTypeOptions = useMemo(() => {
+    const presetValues = new Set(TB_PRESET_TYPES.map(p => p.value));
+    const customTypes = new Set<string>();
+    for (const dayData of Object.values(weekData)) {
+      for (const block of dayData?.blocks || []) {
+        if (!presetValues.has(block.type)) {
+          customTypes.add(block.type);
+        }
+      }
+    }
+    return [
+      ...TB_PRESET_TYPES,
+      ...Array.from(customTypes).sort().map(t => ({ value: t, label: t.charAt(0).toUpperCase() + t.slice(1), color: '#8b5cf6' })),
+    ];
+  }, [weekData]);
+
   const handleDayClick = async (date: Date) => {
     setSelectedDate(date);
     const dateStr = format(date, 'yyyy-MM-dd');
@@ -368,8 +392,8 @@ export default function CalendarPage() {
   const openTBEdit = (block: ResolvedTimeBlock) => {
     setTBContextMenu(null);
     setTBEditBlock(block);
-    setTBEditLabel(block.label);
-    setTBEditType(block.type as 'study' | 'sleep' | 'custom');
+    setTBEditLabel(block.type);
+    setTBEditType(block.type);
     setTBEditStart(block.start_time);
     setTBEditEnd(block.end_time);
     setTBEditColor(block.color || '');
@@ -379,8 +403,8 @@ export default function CalendarPage() {
     if (!tbEditBlock) return;
     try {
       await updateBlock(tbEditBlock.id, {
-        label: tbEditLabel.trim() || undefined,
-        type: tbEditType as any,
+        label: tbEditType.trim() || undefined,
+        type: tbEditType.trim() as any,
         start_time: tbEditStart || undefined,
         end_time: tbEditEnd || undefined,
         color: tbEditColor || undefined,
@@ -500,13 +524,13 @@ export default function CalendarPage() {
   };
 
   const handleTBCreateSubmit = async () => {
-    if (!dragSelection || !tbCreateLabel.trim()) return;
+    if (!dragSelection || !tbCreateType.trim()) return;
     const day = weekDays[dragSelection.dayIdx];
     const dayOfWeek = day.getDay(); // 0=Sun
     try {
       await createBlocks([{
-        label: tbCreateLabel.trim(),
-        type: tbCreateType as any,
+        label: tbCreateType.trim(),
+        type: tbCreateType.trim() as any,
         day_of_week: dayOfWeek,
         start_time: tbCreateStart,
         end_time: tbCreateEnd,
@@ -690,11 +714,16 @@ export default function CalendarPage() {
             const dayBlocks = weekData[dateStr];
             const resolvedBlocks = dayBlocks?.blocks || [];
             const nestingLevels = computeNestingLevels(resolvedBlocks);
-            // Count tasks associated with each block
-            const blockTaskCounts = new Map<string, number>();
+            // Count tasks per priority for each block
+            const blockPriorityCounts = new Map<string, { must: number; recommended: number; optional: number }>();
             for (const t of dayTaskList) {
               if (t.time_block_id) {
-                blockTaskCounts.set(t.time_block_id, (blockTaskCounts.get(t.time_block_id) || 0) + 1);
+                if (!blockPriorityCounts.has(t.time_block_id)) {
+                  blockPriorityCounts.set(t.time_block_id, { must: 0, recommended: 0, optional: 0 });
+                }
+                const counts = blockPriorityCounts.get(t.time_block_id)!;
+                const p = t.priority as 'must' | 'recommended' | 'optional';
+                if (p in counts) counts[p]++;
               }
             }
 
@@ -750,7 +779,7 @@ export default function CalendarPage() {
                   className={styles.timedSection}
                   ref={(el) => { timedSectionRefs.current[dayIdx] = el; }}
                   style={editMode ? { cursor: 'crosshair' } : undefined}
-                  onMouseDown={(e) => { setDragSelection(null); setTBCreateMenu(null); handleTBMouseDown(dayIdx, e); }}
+                  onMouseDown={(e) => { if (e.button === 2) return; setDragSelection(null); setTBCreateMenu(null); handleTBMouseDown(dayIdx, e); }}
                   onMouseMove={(e) => handleTBMouseMove(e, dayIdx)}
                   onContextMenu={(e) => handleTimedSectionContextMenu(e, dayIdx)}
                 >
@@ -789,16 +818,29 @@ export default function CalendarPage() {
                             borderLeft: `3px solid ${color}${borderOpacity}`,
                             zIndex: level,
                           }}
-                          title={`${block.label} (${formatHHMM(block.start_time)}–${formatHHMM(block.end_time)})`}
+                          title={`${block.type.charAt(0).toUpperCase() + block.type.slice(1)} (${formatHHMM(block.start_time)}–${formatHHMM(block.end_time)})`}
                           onContextMenu={(e) => handleTBContextMenu(e, block)}
                         >
-                          <span className={styles.tbLabel}>{block.label}</span>
+                          <span className={styles.tbLabel}>{block.type.charAt(0).toUpperCase() + block.type.slice(1)}</span>
                           <span className={styles.tbTime}>{formatHHMM(block.start_time)}–{formatHHMM(block.end_time)}</span>
-                          {(blockTaskCounts.get(block.id) || 0) > 0 && (
-                            <span className={styles.tbTaskBadge}>
-                              {blockTaskCounts.get(block.id)} task{blockTaskCounts.get(block.id)! > 1 ? 's' : ''}
-                            </span>
-                          )}
+                          {blockPriorityCounts.has(block.id) && (() => {
+                            const c = blockPriorityCounts.get(block.id)!;
+                            const parts: Array<{ label: string; count: number; color: string }> = [];
+                            if (c.must > 0) parts.push({ label: 'M', count: c.must, color: 'var(--priority-must, #ef4444)' });
+                            if (c.recommended > 0) parts.push({ label: 'R', count: c.recommended, color: 'var(--priority-recommended, #3b82f6)' });
+                            if (c.optional > 0) parts.push({ label: 'O', count: c.optional, color: 'var(--priority-optional, #6b7280)' });
+                            if (parts.length === 0) return null;
+                            return (
+                              <span className={styles.tbPriorityBadge}>
+                                {parts.map((p, i) => (
+                                  <Fragment key={p.label}>
+                                    {i > 0 && <span className={styles.tbBadgeSep}>·</span>}
+                                    <span className={styles.tbBadgeItem} style={{ color: p.color }}>{p.count}{p.label}</span>
+                                  </Fragment>
+                                ))}
+                              </span>
+                            );
+                          })()}
                         </div>
                         {/* Annotation lines at block edges */}
                         <div
@@ -1078,28 +1120,50 @@ export default function CalendarPage() {
           <div className={styles.tbEditModal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.tbEditTitle}>New Time Block</div>
             <div className={styles.tbEditField}>
-              <label>Label</label>
-              <input
-                type="text"
-                value={tbCreateLabel}
-                onChange={(e) => setTBCreateLabel(e.target.value)}
-                className={styles.tbFormInput}
-                placeholder="e.g. Study, Rest, Meal"
-                autoFocus
-                onKeyDown={(e) => { if (e.key === 'Enter' && tbCreateLabel.trim()) handleTBCreateSubmit(); if (e.key === 'Escape') { setShowTBCreateModal(false); setDragSelection(null); } }}
-              />
-            </div>
-            <div className={styles.tbEditField}>
               <label>Type</label>
-              <select
-                value={tbCreateType}
-                onChange={(e) => setTBCreateType(e.target.value as any)}
-                className={styles.tbFormSelect}
-              >
-                <option value="study">Study</option>
-                <option value="sleep">Sleep</option>
-                <option value="custom">Custom</option>
-              </select>
+              <div className={styles.tbTypeGrid}>
+                {tbTypeOptions.map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={`${styles.tbTypeOption} ${tbCreateType === opt.value ? styles.tbTypeSelected : ''}`}
+                    onClick={() => setTBCreateType(opt.value)}
+                  >
+                    <span className={styles.tbTypeDot} style={{ backgroundColor: opt.color }} />
+                    {opt.label}
+                  </button>
+                ))}
+                {tbCreateType && !tbTypeOptions.some(o => o.value === tbCreateType) && (
+                  <button type="button" className={`${styles.tbTypeOption} ${styles.tbTypeSelected}`}>
+                    <span className={styles.tbTypeDot} style={{ backgroundColor: '#8b5cf6' }} />
+                    {tbCreateType.charAt(0).toUpperCase() + tbCreateType.slice(1)}
+                  </button>
+                )}
+                <div className={styles.tbCustomTypeRow}>
+                  <input
+                    type="text"
+                    className={styles.tbFormInput}
+                    placeholder="Custom type..."
+                    value={tbCustomTypeInput}
+                    onChange={(e) => setTBCustomTypeInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && tbCustomTypeInput.trim()) {
+                        setTBCreateType(tbCustomTypeInput.trim().toLowerCase());
+                        setTBCustomTypeInput('');
+                      }
+                      if (e.key === 'Escape') { setShowTBCreateModal(false); setDragSelection(null); }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className={styles.tbCustomTypeAdd}
+                    disabled={!tbCustomTypeInput.trim()}
+                    onClick={() => { setTBCreateType(tbCustomTypeInput.trim().toLowerCase()); setTBCustomTypeInput(''); }}
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
+              </div>
             </div>
             <div className={styles.tbEditRow}>
               <div className={styles.tbEditField}>
@@ -1137,7 +1201,7 @@ export default function CalendarPage() {
             )}
             <div className={styles.tbEditActions}>
               <button className={styles.tbFormCancel} onClick={() => { setShowTBCreateModal(false); setDragSelection(null); }}>Cancel</button>
-              <button className={styles.tbFormSave} onClick={handleTBCreateSubmit} disabled={!tbCreateLabel.trim() || studyConflict}>Save</button>
+              <button className={styles.tbFormSave} onClick={handleTBCreateSubmit} disabled={!tbCreateType.trim() || studyConflict}>Save</button>
             </div>
           </div>
         </div>
@@ -1158,26 +1222,49 @@ export default function CalendarPage() {
           <div className={styles.tbEditModal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.tbEditTitle}>Edit Time Block</div>
             <div className={styles.tbEditField}>
-              <label>Label</label>
-              <input
-                type="text"
-                value={tbEditLabel}
-                onChange={(e) => setTBEditLabel(e.target.value)}
-                className={styles.tbFormInput}
-                autoFocus
-              />
-            </div>
-            <div className={styles.tbEditField}>
               <label>Type</label>
-              <select
-                value={tbEditType}
-                onChange={(e) => setTBEditType(e.target.value as any)}
-                className={styles.tbFormSelect}
-              >
-                <option value="study">Study</option>
-                <option value="sleep">Sleep</option>
-                <option value="custom">Custom</option>
-              </select>
+              <div className={styles.tbTypeGrid}>
+                {tbTypeOptions.map(opt => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    className={`${styles.tbTypeOption} ${tbEditType === opt.value ? styles.tbTypeSelected : ''}`}
+                    onClick={() => setTBEditType(opt.value)}
+                  >
+                    <span className={styles.tbTypeDot} style={{ backgroundColor: opt.color }} />
+                    {opt.label}
+                  </button>
+                ))}
+                {tbEditType && !tbTypeOptions.some(o => o.value === tbEditType) && (
+                  <button type="button" className={`${styles.tbTypeOption} ${styles.tbTypeSelected}`}>
+                    <span className={styles.tbTypeDot} style={{ backgroundColor: '#8b5cf6' }} />
+                    {tbEditType.charAt(0).toUpperCase() + tbEditType.slice(1)}
+                  </button>
+                )}
+                <div className={styles.tbCustomTypeRow}>
+                  <input
+                    type="text"
+                    className={styles.tbFormInput}
+                    placeholder="Custom type..."
+                    value={tbCustomTypeInput}
+                    onChange={(e) => setTBCustomTypeInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && tbCustomTypeInput.trim()) {
+                        setTBEditType(tbCustomTypeInput.trim().toLowerCase());
+                        setTBCustomTypeInput('');
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    className={styles.tbCustomTypeAdd}
+                    disabled={!tbCustomTypeInput.trim()}
+                    onClick={() => { setTBEditType(tbCustomTypeInput.trim().toLowerCase()); setTBCustomTypeInput(''); }}
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
+              </div>
             </div>
             <div className={styles.tbEditRow}>
               <div className={styles.tbEditField}>
@@ -1215,7 +1302,7 @@ export default function CalendarPage() {
             )}
             <div className={styles.tbEditActions}>
               <button className={styles.tbFormCancel} onClick={() => setTBEditBlock(null)}>Cancel</button>
-              <button className={styles.tbFormSave} onClick={handleTBEditSave} disabled={!tbEditLabel.trim() || editStudyConflict}>Save</button>
+              <button className={styles.tbFormSave} onClick={handleTBEditSave} disabled={!tbEditType.trim() || editStudyConflict}>Save</button>
             </div>
           </div>
         </div>
@@ -1228,7 +1315,7 @@ export default function CalendarPage() {
           <div className={styles.tbEditModal} onClick={(e) => e.stopPropagation()}>
             <div className={styles.tbEditTitle}>Delete Time Block</div>
             <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: '8px 0 20px' }}>
-              Delete "{tbDeleteConfirm.label}" ({formatHHMM(tbDeleteConfirm.start_time)}–{formatHHMM(tbDeleteConfirm.end_time)})? This cannot be undone.
+              Delete "{tbDeleteConfirm.type.charAt(0).toUpperCase() + tbDeleteConfirm.type.slice(1)}" ({formatHHMM(tbDeleteConfirm.start_time)}–{formatHHMM(tbDeleteConfirm.end_time)})? This cannot be undone.
             </p>
             <div className={styles.tbEditActions}>
               <button className={styles.tbFormCancel} onClick={() => setTBDeleteConfirm(null)}>Cancel</button>

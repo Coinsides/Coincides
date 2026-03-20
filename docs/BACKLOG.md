@@ -46,6 +46,16 @@
 | TB-R11 | 创建交互重构：框选后右键菜单 → 编辑面板（含时间选择器） | 中 | v1.5 | done | 替代旧的内嵌弹出表单，解决列宽不足问题 |
 | TB-R12 | 全局内容区拓宽：去除页面左右多余留白 | 低 | v1.5 | done | max-width + padding 缩减，日历等宽屏页面撑满 |
 
+### Layer 2.1（v1.5.1 UX 优化）
+
+| ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
+|----|------|--------|------|------|------|
+| TB-P1 | Bug：框选后右键创建 TB 不生效 | 低 | v1.5.1 | done | onMouseDown 右键时跳过清空 dragSelection |
+| TB-P2 | 类型即名字：去掉独立 label 字段 | 中 | v1.5.1 | done | type 直接作为显示名称，label 自动等于 type |
+| TB-P3 | 开放类型系统：预设 + 自定义类型 | 中 | v1.5.1 | done | Type Grid combobox，内置 6 预设 + 用户自定义输入 |
+| TB-P4 | 优先级 Badge：must/recommended/optional 分类计数 | 中 | v1.5.1 | done | 替代旧的总任务数 badge，格式 2M·1R·3O |
+| TB-P5 | Day Detail 居中浮层 | 低 | v1.5.1 | done | 从右侧侧边栏改为居中 overlay（600px，80vh） |
+
 ### Layer 3（高级交互）
 
 | ID | 需求 | 复杂度 | 版本 | 状态 |

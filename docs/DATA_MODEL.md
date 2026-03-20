@@ -418,8 +418,8 @@ Spaced Repetition, Interleaving, Active Recall, Feynman Technique, Pomodoro, Spi
 |--------|------|-------------|-------------|
 | id | TEXT | PK | UUID |
 | user_id | TEXT | FK → users(id) CASCADE | 所属用户 |
-| label | TEXT | NOT NULL | 时间块标签（如“上午学习”） |
-| type | TEXT | NOT NULL DEFAULT 'study' | 类型：study / sleep / custom |
+| label | TEXT | NOT NULL | 时间块标签（v1.5.1 起自动等于 type，不再单独设置） |
+| type | TEXT | NOT NULL DEFAULT 'custom' | 类型（开放字符串）。内置预设：study / sleep / exercise / entertainment / rest / meal；用户可自定义任意类型。study 保持每天最多 1 个的约束。 |
 | day_of_week | INTEGER | NOT NULL (0-6) | 星期几（0=周日） |
 | start_time | TEXT | NOT NULL (HH:MM) | 开始时间 |
 | end_time | TEXT | NOT NULL (HH:MM) | 结束时间 |
