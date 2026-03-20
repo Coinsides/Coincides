@@ -358,7 +358,7 @@ e18735c Initial commit
 
 ### 当前状态
 v1.4 已完成（Time Block L1 补全 + 卡片数据模型升级）。
-当前处于 **迭代模式**，已规划 v1.1–v1.5/2.0 版本路线。
+当前处于 **迭代模式**，已规划 v1.1–v1.9 版本路线。
 
 ### 版本路线（已确认）
 | 版本 | 主题 | 核心内容 |
@@ -368,8 +368,11 @@ v1.4 已完成（Time Block L1 补全 + 卡片数据模型升级）。
 | v1.3 | 工作流引擎 + Time Block | 工作流引擎 + Time Block 系统 + 设计宪法审计 |
 | v1.3.1 | 补丁版本 | 3 个 UI bug 修复 + schema.sql 同步 + tsx→jiti 兼容性 + Agent 稳定性 |
 | v1.4 | Time Block L1 补全 + 卡片升级 | 24h 刻度线 + 时间标签 + TB 右键编辑删除 + Example 字段 + CardView 放大 |
-| v1.5 | 复习体验 + 激励 | 填空/选择题 + 错题本 + 成就系统 + Statistics 深度洞察 |
-| v2.0 | Electron + 分发 | Electron 打包 + 通知系统 + 自动化测试 + 安全加固 |
+| v1.5 | Time Block 重构 | 图层嵌套 + 浮空预览 + 编辑模式 + 任务关联 Block + Agent 可用时间计算 |
+| v1.6 | 复习体验 + 错题本 | 填空/选择题 + 撕胶带交互 + 错题本系统 |
+| v1.7 | 激励系统 + 洞察 | 成就系统 + Statistics 深度洞察 |
+| v1.8 | Goal DAG + 复习模板 | Goal 多依赖 DAG + 各类型复习模板 |
+| v1.9 | Electron + 基础设施 | Electron 打包 + 通知系统 + 自动化测试 + 安全加固 |
 
 详细版本规划文档存放于 `docs/releases/v1.X-plan.md`。
 
