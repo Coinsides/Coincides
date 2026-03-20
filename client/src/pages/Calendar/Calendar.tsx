@@ -755,7 +755,7 @@ export default function CalendarPage() {
             const dateStr = format(day, 'yyyy-MM-dd');
             const dayTaskList = tasksByDate[dateStr] || [];
             const selected = selectedDate && isSameDay(day, selectedDate);
-            const allDayTasks = dayTaskList.filter((t) => !t.start_time || !t.end_time);
+            const allDayTasks = dayTaskList.filter((t) => (!t.start_time || !t.end_time) && !t.time_block_id);
             const timedTasks = dayTaskList.filter((t) => t.start_time && t.end_time);
             const dayBlocks = weekData[dateStr];
             const resolvedBlocks = dayBlocks?.blocks || [];

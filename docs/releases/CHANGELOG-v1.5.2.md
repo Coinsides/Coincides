@@ -87,6 +87,17 @@
 | `client/src/pages/Calendar/Calendar.module.css` | hover 面板样式 + 未归类样式 |
 | `server/src/routes/tasks.ts` | 已有 `time_block_id` 支持 |
 
+## 追加修复：已关联 TB 的任务不再直接显示在日历列
+
+**问题**：已关联到 Time Block 的任务仍然出现在 allDay 区域，与 hover 面板重复展示。
+
+**修复**：
+- `Calendar.tsx` — `allDayTasks` 过滤条件增加 `&& !t.time_block_id`
+- 已关联 TB 的任务仅通过 hover 面板查看，不再占用 allDay 区域空间
+- 未关联 TB 的任务继续显示（带虚线边框视觉提示）
+
+---
+
 ## 设计宪法合规
 
 - **不替用户做决定**：TB 选择器默认 "Not assigned"，不自动分配
