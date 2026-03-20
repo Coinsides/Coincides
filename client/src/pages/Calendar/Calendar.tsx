@@ -95,6 +95,16 @@ export default function CalendarPage() {
 
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; task: Task } | null>(null);
 
+  // Time Block context menu + edit state
+  const [tbContextMenu, setTBContextMenu] = useState<{ x: number; y: number; block: ResolvedTimeBlock } | null>(null);
+  const [tbEditBlock, setTBEditBlock] = useState<ResolvedTimeBlock | null>(null);
+  const [tbEditLabel, setTBEditLabel] = useState('');
+  const [tbEditType, setTBEditType] = useState<'study' | 'sleep' | 'custom'>('study');
+  const [tbEditStart, setTBEditStart] = useState('');
+  const [tbEditEnd, setTBEditEnd] = useState('');
+  const [tbEditColor, setTBEditColor] = useState('');
+  const [tbDeleteConfirm, setTBDeleteConfirm] = useState<ResolvedTimeBlock | null>(null);
+
   // Time Block drag-select state
   const [dragSelect, setDragSelect] = useState<{ dayIdx: number; startPct: number; currentPct: number } | null>(null);
   const [showTBForm, setShowTBForm] = useState<{ dayIdx: number; startTime: string; endTime: string } | null>(null);
@@ -108,7 +118,7 @@ export default function CalendarPage() {
   const openModal = useUIStore((s) => s.openModal);
   const addToast = useUIStore((s) => s.addToast);
   const openAgentWithContext = useUIStore((s) => s.openAgentWithContext);
-  const { weekData, fetchWeek, createBlocks } = useTimeBlockStore();
+  const { weekData, fetchWeek, createBlocks, updateBlock, deleteBlock } = useTimeBlockStore();
 
   // Fetch time blocks for week view
   useEffect(() => {
@@ -221,9 +231,9 @@ export default function CalendarPage() {
     return groups;
   }, [dayTasks]);
 
-  // Close context menu on any click
+  // Close context menus on any click
   useEffect(() => {
-    const handler = () => setContextMenu(null);
+    const handler = () => { setContextMenu(null); setTBContextMenu(null); };
     document.addEventListener('click', handler);
     return () => document.removeEventListener('click', handler);
   }, []);
@@ -260,6 +270,57 @@ export default function CalendarPage() {
     } catch (err) {
       console.error('Failed to update task time:', err);
       addToast('error', 'Failed to delete task');
+    }
+  };
+
+  // ── Time Block right-click handlers ──────────────────
+
+  const handleTBContextMenu = (e: React.MouseEvent, block: ResolvedTimeBlock) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setTBContextMenu({ x: e.clientX, y: e.clientY, block });
+  };
+
+  const openTBEdit = (block: ResolvedTimeBlock) => {
+    setTBContextMenu(null);
+    setTBEditBlock(block);
+    setTBEditLabel(block.label);
+    setTBEditType(block.type as 'study' | 'sleep' | 'custom');
+    setTBEditStart(block.start_time);
+    setTBEditEnd(block.end_time);
+    setTBEditColor(block.color || '');
+  };
+
+  const handleTBEditSave = async () => {
+    if (!tbEditBlock) return;
+    try {
+      await updateBlock(tbEditBlock.id, {
+        label: tbEditLabel.trim() || undefined,
+        type: tbEditType as any,
+        start_time: tbEditStart || undefined,
+        end_time: tbEditEnd || undefined,
+        color: tbEditColor || undefined,
+      });
+      // Refresh week data
+      const weekStart = startOfWeek(currentMonth, { weekStartsOn: 1 });
+      fetchWeek(format(weekStart, 'yyyy-MM-dd'));
+      setTBEditBlock(null);
+      addToast('success', 'Time block updated');
+    } catch {
+      addToast('error', 'Failed to update time block');
+    }
+  };
+
+  const handleTBDelete = async () => {
+    if (!tbDeleteConfirm) return;
+    try {
+      await deleteBlock(tbDeleteConfirm.id);
+      const weekStart = startOfWeek(currentMonth, { weekStartsOn: 1 });
+      fetchWeek(format(weekStart, 'yyyy-MM-dd'));
+      setTBDeleteConfirm(null);
+      addToast('success', 'Time block deleted');
+    } catch {
+      addToast('error', 'Failed to delete time block');
     }
   };
 
@@ -586,6 +647,7 @@ export default function CalendarPage() {
                           borderLeft: `3px solid ${color}55`,
                         }}
                         title={`${block.label} (${formatHHMM(block.start_time)}–${formatHHMM(block.end_time)})`}
+                        onContextMenu={(e) => handleTBContextMenu(e, block)}
                       >
                         <span className={styles.tbLabel}>{block.label}</span>
                         <span className={styles.tbTime}>{formatHHMM(block.start_time)}–{formatHHMM(block.end_time)}</span>
@@ -830,6 +892,110 @@ export default function CalendarPage() {
             </div>
           </div>
         </>
+      )}
+
+      {/* Time Block context menu */}
+      {tbContextMenu && (
+        <div
+          className={styles.contextMenu}
+          style={{ left: tbContextMenu.x, top: tbContextMenu.y }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            className={styles.contextMenuItem}
+            onClick={() => openTBEdit(tbContextMenu.block)}
+          >
+            <Edit3 size={14} />
+            Edit
+          </button>
+          <button
+            className={`${styles.contextMenuItem} ${styles.contextMenuDanger}`}
+            onClick={() => { setTBDeleteConfirm(tbContextMenu.block); setTBContextMenu(null); }}
+          >
+            <Trash2 size={14} />
+            Delete
+          </button>
+        </div>
+      )}
+
+      {/* Time Block edit modal */}
+      {tbEditBlock && (
+        <div className={styles.overlay} onClick={(e) => e.target === e.currentTarget && setTBEditBlock(null)}>
+          <div className={styles.tbEditModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.tbEditTitle}>Edit Time Block</div>
+            <div className={styles.tbEditField}>
+              <label>Label</label>
+              <input
+                type="text"
+                value={tbEditLabel}
+                onChange={(e) => setTBEditLabel(e.target.value)}
+                className={styles.tbFormInput}
+                autoFocus
+              />
+            </div>
+            <div className={styles.tbEditField}>
+              <label>Type</label>
+              <select
+                value={tbEditType}
+                onChange={(e) => setTBEditType(e.target.value as any)}
+                className={styles.tbFormSelect}
+              >
+                <option value="study">Study</option>
+                <option value="sleep">Sleep</option>
+                <option value="custom">Custom</option>
+              </select>
+            </div>
+            <div className={styles.tbEditRow}>
+              <div className={styles.tbEditField}>
+                <label>Start</label>
+                <input
+                  type="time"
+                  value={tbEditStart}
+                  onChange={(e) => setTBEditStart(e.target.value)}
+                  className={styles.tbFormInput}
+                />
+              </div>
+              <div className={styles.tbEditField}>
+                <label>End</label>
+                <input
+                  type="time"
+                  value={tbEditEnd}
+                  onChange={(e) => setTBEditEnd(e.target.value)}
+                  className={styles.tbFormInput}
+                />
+              </div>
+            </div>
+            <div className={styles.tbEditField}>
+              <label>Color (optional)</label>
+              <input
+                type="color"
+                value={tbEditColor || '#8b5cf6'}
+                onChange={(e) => setTBEditColor(e.target.value)}
+                className={styles.tbColorInput}
+              />
+            </div>
+            <div className={styles.tbEditActions}>
+              <button className={styles.tbFormCancel} onClick={() => setTBEditBlock(null)}>Cancel</button>
+              <button className={styles.tbFormSave} onClick={handleTBEditSave} disabled={!tbEditLabel.trim()}>Save</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Time Block delete confirm */}
+      {tbDeleteConfirm && (
+        <div className={styles.overlay} onClick={(e) => e.target === e.currentTarget && setTBDeleteConfirm(null)}>
+          <div className={styles.tbEditModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.tbEditTitle}>Delete Time Block</div>
+            <p style={{ color: 'var(--text-secondary)', fontSize: 14, margin: '8px 0 20px' }}>
+              Delete "{tbDeleteConfirm.label}" ({formatHHMM(tbDeleteConfirm.start_time)}–{formatHHMM(tbDeleteConfirm.end_time)})? This cannot be undone.
+            </p>
+            <div className={styles.tbEditActions}>
+              <button className={styles.tbFormCancel} onClick={() => setTBDeleteConfirm(null)}>Cancel</button>
+              <button className={styles.tbDeleteBtn} onClick={handleTBDelete}>Delete</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

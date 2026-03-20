@@ -684,7 +684,8 @@
   left: 0;
   right: 0;
   border-radius: var(--radius-sm);
-  pointer-events: none;
+  pointer-events: auto;
+  cursor: default;
   z-index: 0;
 }
 
@@ -918,6 +919,95 @@
 .taskActionBtnDanger:hover {
   background: rgba(239, 68, 68, 0.12);
   color: var(--error);
+}
+
+/* ─── Time Block edit modal ────────────────────────── */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  animation: fadeOverlay 150ms ease forwards;
+}
+
+.tbEditModal {
+  width: 100%;
+  max-width: 380px;
+  background: var(--bg-secondary, var(--glass-surface));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow-lg);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  animation: scaleIn 200ms ease forwards;
+}
+
+.tbEditTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 18px;
+}
+
+.tbEditField {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+
+.tbEditField label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.tbEditRow {
+  display: flex;
+  gap: 12px;
+}
+
+.tbEditRow .tbEditField {
+  flex: 1;
+}
+
+.tbColorInput {
+  width: 48px;
+  height: 32px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+  padding: 2px;
+}
+
+.tbEditActions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.tbDeleteBtn {
+  padding: 6px 14px;
+  font-size: 13px;
+  border-radius: var(--radius-sm);
+  color: white;
+  background: var(--gradient-danger, #ef4444);
+  border: none;
+  cursor: pointer;
+}
+
+.tbDeleteBtn:hover {
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes fadeIn {

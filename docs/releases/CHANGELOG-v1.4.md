@@ -71,3 +71,27 @@
 ### 变更文件
 - `client/src/pages/Calendar/Calendar.tsx`
 - `client/src/pages/Calendar/Calendar.module.css`
+
+---
+
+## feat(calendar): Time Block 右键编辑/删除（TB-L1c）
+
+### 变更
+- `Calendar.tsx` — Time Block 新增右键交互：
+  - 右键点击 Time Block 弹出上下文菜单（编辑 / 删除）
+  - 编辑弹窗：可修改 Label、Type、起止时间、颜色，调用 PUT API 保存
+  - 删除确认弹窗：确认后调用 DELETE API，日历即时刷新
+  - `.tbBackground` 从 `pointer-events: none` 改为 `auto`，支持右键事件
+- `Calendar.module.css` — 新增样式：
+  - `.overlay` / `.tbEditModal` / `.tbEditTitle` / `.tbEditField` / `.tbEditRow` — 编辑弹窗布局
+  - `.tbColorInput` — 颜色选择器
+  - `.tbEditActions` / `.tbDeleteBtn` — 操作按钮
+
+### 备注
+- 复用已有 `.contextMenu` / `.contextMenuItem` 样式
+- 左键行为不变（拖拽创建 Time Block 不受影响）
+- 编辑/删除调用 `timeBlockStore` 的 `updateBlock` / `deleteBlock`，后端已有 API
+
+### 变更文件
+- `client/src/pages/Calendar/Calendar.tsx`
+- `client/src/pages/Calendar/Calendar.module.css`
