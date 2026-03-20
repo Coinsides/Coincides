@@ -7,7 +7,7 @@
 .cardInner {
   position: relative;
   width: 100%;
-  min-height: 300px;
+  min-height: 340px;
   transition: transform 0.5s ease;
   transform-style: preserve-3d;
   /* NOTE: filter (drop-shadow) removed — filter creates a new stacking
@@ -118,20 +118,20 @@
 }
 
 .contentBody {
-  font-size: 15px;
+  font-size: 15.5px;
   color: var(--text-primary);
-  line-height: 1.6;
+  line-height: 1.65;
   white-space: pre-wrap;
 }
 
 .formulaDisplay {
-  padding: 19px;
+  padding: 22px;
   background: var(--glass-elevated);
   /* NOTE: backdrop-filter removed — breaks backface-visibility in CardFlip */
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   text-align: center;
-  font-size: 17px;
+  font-size: 18px;
 }
 
 .variableTable {

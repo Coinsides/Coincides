@@ -24,3 +24,27 @@
 - `client/src/components/CardFlip/CardTemplateContent.tsx`
 - `server/src/agent/tools/normalizeContent.ts`
 - `server/src/agent/tools/definitions.ts`
+
+---
+
+## feat(cards): CardViewModal 详情视图放大（CD-1）
+
+### 变更
+- `CardViewModal.module.css` — 弹窗尺寸放大：
+  - `max-width` 520px → 680px
+  - `padding` 27px → 32px
+  - `max-height` 85vh → 88vh
+  - `cardWrapper min-height` 300px → 360px
+  - 新增 `@media (max-width: 720px)` 响应式回退
+- `CardFlip.module.css` — 翻转卡片同步调整：
+  - `cardInner min-height` 300px → 340px
+  - `contentBody font-size` 15px → 15.5px，行高 1.6 → 1.65
+  - `formulaDisplay` padding 19px → 22px，font-size 17px → 18px
+
+### 备注
+- 放大后数学公式和新增 Example/Condition 字段有更充足的展示空间
+- Electron 桌面环境下响应式风险低，但仍做了小窗口兜底
+
+### 变更文件
+- `client/src/components/CardViewModal/CardViewModal.module.css`
+- `client/src/components/CardFlip/CardFlip.module.css`
