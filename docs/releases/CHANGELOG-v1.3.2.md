@@ -5,6 +5,22 @@
 
 ---
 
+## docs: 重写 v1.4-plan.md（新范围：TB-L1 + CD-1/2/3，5 个 Step）
+
+### 变更
+- 重写 `docs/releases/v1.4-plan.md` — 范围缩减为 6 条需求，拆分 5 个 Step
+  - Step 1：卡片数据模型升级（CD-2 Example + CD-3 Condition）
+  - Step 2：卡片详情视图放大（CD-1）
+  - Step 3：Time Block 24h 刻度线 + 时间标签（TB-L1a + TB-L1b）
+  - Step 4：Time Block 右键编辑/删除（TB-L1c）
+  - Step 5：文档更新 + 版本收尾
+- 预估 3~4 次对话完成
+
+### 变更文件
+- `docs/releases/v1.4-plan.md`
+
+---
+
 ## docs: 版本拆分（v1.4→v1.8）+ 新增 BACKLOG.md
 
 ### 变更
