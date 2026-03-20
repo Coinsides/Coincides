@@ -2,7 +2,7 @@
 
 > PM：henryfeng349@gmail.com
 > 全栈工程师：Perplexity Computer
-> 最后更新：2026-03-19（新增 Release Notes 工作流）
+> 最后更新：2026-03-20（新增 BACKLOG.md 到工作流）
 
 ---
 
@@ -30,6 +30,7 @@ docs/
 ├── ARCHITECTURE.md                   ← 技术架构与依赖说明
 ├── DELIVERY_PLAN.md                  ← 阶段交付清单
 ├── Coincides-Roadmap.md              ← 开发路线图
+├── BACKLOG.md                        ← 功能积压清单（待办/已完成事项池）
 │
 ├── workflow/
 │   ├── Coincides-Workflow.md         ← 本文件：开发工作流
@@ -62,6 +63,7 @@ docs/
 | **ARCHITECTURE.md** | 架构 / 依赖变化时 | 工程师 | 技术栈、模块划分、数据流、第三方依赖 |
 | **DELIVERY_PLAN.md** | Step 完成时 | 工程师 | 各 Round/Step 的交付内容与完成标记 |
 | **Coincides-Roadmap.md** | Round 完成或新 Round 开始时 | 工程师 | 版本规划、里程碑、当前进度 |
+| **BACKLOG.md** | 版本规划（阶段 0）或 Step 完成时 | 工程师 | 待办功能池——候选事项、已完成标记、来源追溯 |
 | **workflow/** | 工作流程变更时 | 工程师（PM 审批）| Workflow 和 Onboarding 两个过程文档 |
 | **releases/v1.X-plan.md** | 每个版本的阶段 0（规划） | 工程师撰写，PM 审批 | 版本计划书（v1.1+ 迭代模式新增） |
 | **releases/CHANGELOG-v1.X.md** | 阶段 1 起持续更新 | 工程师 | 版本变更日志——开发者视角的技术细节 |
@@ -172,6 +174,7 @@ Coincides 有两套工作流：
 2. **读取上下文**
    - 读 `docs/changelog/` 下最新版本的日志确认当前状态
    - 读 `docs/Coincides-Roadmap.md` 确认进度
+   - 读 `docs/BACKLOG.md` 了解当前待办事项池和已完成事项
    - 如果是新 Task：读 `docs/workflow/Coincides-Onboarding.md` 恢复上下文
 
 3. **编码实施**
@@ -257,6 +260,7 @@ Coincides 有两套工作流：
 □ 如果有架构变更 → ARCHITECTURE.md 已更新
 □ 如果有新 Step 完成 → DELIVERY_PLAN.md 已更新
 □ 如果 Round 完成 → Roadmap 已更新
+□ 如果有 BACKLOG 事项完成 → BACKLOG.md 已更新
 □ 所有变更已 push 到 GitHub
 ```
 
@@ -322,7 +326,8 @@ Coincides 有两套工作流：
 2. Clone 仓库
 3. 读 `docs/workflow/Coincides-Onboarding.md` 恢复完整上下文
 4. 读 `docs/changelog/` 和 `docs/Coincides-Roadmap.md` 确认最新状态
-5. 告诉你"我已恢复上下文，当前在 vX.X，最后的 commit 是 XXX，准备好了"
+5. 读 `docs/BACKLOG.md` 了解待办事项池
+6. 告诉你"我已恢复上下文，当前在 vX.X，最后的 commit 是 XXX，准备好了"
 
 **预计恢复时间**：1-2 分钟
 
@@ -412,10 +417,11 @@ Coincides 有两套工作流：
 **触发条件**：上一个版本复盘完成，或首次进入迭代模式。
 
 **步骤**：
-1. PM 和工程师讨论本版本的目标和范围
-2. 工程师评估每个事项的工作量，分 Step
-3. 工程师撰写版本计划书：`docs/releases/v1.X-plan.md`
-4. PM 审批计划书后，正式进入开发
+1. 工程师读取 `docs/BACKLOG.md` 和 `docs/Coincides-Roadmap.md`，了解待办事项池
+2. PM 和工程师讨论本版本的目标和范围（从 BACKLOG 中选取事项）
+3. 工程师评估每个事项的工作量，分 Step
+4. 工程师撰写版本计划书：`docs/releases/v1.X-plan.md`
+5. PM 审批计划书后，正式进入开发
 
 **版本计划书模板**：
 
@@ -481,6 +487,7 @@ Coincides 有两套工作流：
 □ RELEASE-NOTES-v1.X.md 已创建（用户向发布说明）
 □ CHANGELOG.md 索引已更新
 □ Coincides-Roadmap.md 已更新（标记版本完成）
+□ BACKLOG.md 已更新（本版本完成的事项标记 ✅）
 □ 受影响的核心文档已更新（DATA_MODEL / ARCHITECTURE / PRD / DELIVERY_PLAN）
 □ Coincides-Onboarding.md 已更新（状态、新增表/组件/工具等）
 □ Git Tag 已打（git tag v1.X.0 && git push --tags）
@@ -518,6 +525,7 @@ Coincides 有两套工作流：
 | `docs/releases/RELEASE-NOTES-v1.X.md` | 阶段 3（发布） | 工程师撰写，PM 审批 |
 | `docs/changelog/CHANGELOG.md` | 阶段 3（发布） | 工程师 |
 | `docs/Coincides-Roadmap.md` | 阶段 0 + 阶段 3 | 工程师 |
+| `docs/BACKLOG.md` | 阶段 0（规划选取事项）+ 阶段 1（完成标记）| 工程师 |
 
 ---
 

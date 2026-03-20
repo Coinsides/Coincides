@@ -1,7 +1,7 @@
 # Coincides — 工程师入职指南
 
 > 本文档供 Perplexity Computer 在新 Task 中恢复项目上下文使用。
-> 最后更新：2026-03-19
+> 最后更新：2026-03-20
 > 状态：v1.4 已完成（Time Block L1 补全 + 卡片数据模型升级）
 
 ---
@@ -125,6 +125,7 @@ Coincides/
     ├── ARCHITECTURE.md                # 技术架构
     ├── DELIVERY_PLAN.md               # 交付清单
     ├── Coincides-Roadmap.md           # 开发路线图
+    ├── BACKLOG.md                     # 功能积压清单（待办/已完成事项池）
     ├── workflow/
     │   ├── Coincides-Workflow.md      # 开发工作流
     │   └── Coincides-Onboarding.md    # 本文件：入职指南
@@ -356,7 +357,7 @@ e18735c Initial commit
 ## 十三、已知问题 & 未来方向
 
 ### 当前状态
-v1.3.1 已发布（补丁版本），v1.4 规划完成待开发。
+v1.4 已完成（Time Block L1 补全 + 卡片数据模型升级）。
 当前处于 **迭代模式**，已规划 v1.1–v1.5/2.0 版本路线。
 
 ### 版本路线（已确认）
@@ -366,8 +367,9 @@ v1.3.1 已发布（补丁版本），v1.4 规划完成待开发。
 | v1.2 | AI 交互 + i18n + 引导 | System-prompt 重写 + 多语言 + 新用户引导 + Agent 改进 |
 | v1.3 | 工作流引擎 + Time Block | 工作流引擎 + Time Block 系统 + 设计宪法审计 |
 | v1.3.1 | 补丁版本 | 3 个 UI bug 修复 + schema.sql 同步 + tsx→jiti 兼容性 + Agent 稳定性 |
-| v1.4 | 复习体验 + 激励 | 填空/选择题 + 错题本 + 成就系统 + Statistics 深度洞察 |
-| v1.5/2.0 | Electron + 分发 | Electron 打包 + 通知系统 + 自动化测试 + 安全加固 |
+| v1.4 | Time Block L1 补全 + 卡片升级 | 24h 刻度线 + 时间标签 + TB 右键编辑删除 + Example 字段 + CardView 放大 |
+| v1.5 | 复习体验 + 激励 | 填空/选择题 + 错题本 + 成就系统 + Statistics 深度洞察 |
+| v2.0 | Electron + 分发 | Electron 打包 + 通知系统 + 自动化测试 + 安全加固 |
 
 详细版本规划文档存放于 `docs/releases/v1.X-plan.md`。
 
@@ -417,6 +419,7 @@ v1.3.1 已发布（补丁版本），v1.4 规划完成待开发。
 5. 查看最新 commit：`git log --oneline -5`
 6. 读取 `docs/changelog/` 下最新版本日志了解最新变更
 7. 读取 `docs/Coincides-Roadmap.md` 了解当前进度
-8. 准备好接受用户的下一个任务
+8. 读取 `docs/BACKLOG.md` 了解待办事项池和已完成事项
+9. 准备好接受用户的下一个任务
 
 **所有文档都在 GitHub repo 中**，不需要访问 Google Drive。本文档已包含所有关键上下文，包括技术栈、数据库结构、设计决策、用户偏好等。只需 clone + 读日志/Roadmap 确认最新状态即可。
