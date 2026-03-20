@@ -584,11 +584,14 @@ export default function CalendarPage() {
               <div
                 key={dateStr}
                 className={`${styles.weekColumn} ${isToday(day) ? styles.weekColumnToday : ''} ${selected ? styles.weekColumnSelected : ''}`}
-                onClick={() => handleDayClick(day)}
               >
                 <div className={styles.weekColumnHeader}>
                   <span className={styles.weekColumnDay}>{format(day, 'EEE')}</span>
-                  <span className={`${styles.weekColumnDate} ${isToday(day) ? styles.weekColumnDateToday : ''}`}>{format(day, 'd')}</span>
+                  <span
+                    className={`${styles.weekColumnDate} ${isToday(day) ? styles.weekColumnDateToday : ''}`}
+                    onClick={() => handleDayClick(day)}
+                    title="View day tasks"
+                  >{format(day, 'd')}</span>
                 </div>
                 {/* All-day tasks — colored by course */}
                 {allDayTasks.length > 0 && (
