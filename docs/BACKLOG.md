@@ -33,7 +33,7 @@
 
 | ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
 |----|------|--------|------|------|------|
-| TB-R1 | 周视图 Bug：框选 Time Block 后误触 Day Detail 面板 | 低 | v1.5 | pending | 点击日期数字才开 Day Detail，不是点击整列 |
+| TB-R1 | 周视图 Bug：框选 Time Block 后误触 Day Detail 面板 | 低 | v1.4 | done | v1.4 hotfix 修复：点击日期数字才开 Day Detail |
 | TB-R2 | 图层嵌套渲染：长 Block 包裹短 Block，缩进显示 | 高 | v1.5 | pending | 按时长排序 z-index，子 Block 内缩 padding |
 | TB-R3 | 去掉默认网格线，浮空预览视图 | 中 | v1.5 | pending | Block 边缘延伸时间标注线，末端显示时间数字 |
 | TB-R4 | 动态时间范围：视图起止 = 当周最早/最晚 Block ± 留白 | 中 | v1.5 | pending | 不再固定 0:00–24:00，自动裁剪 |
@@ -43,6 +43,8 @@
 | TB-R8 | 任务显式关联 Time Block（DB + UI） | 高 | v1.5 | pending | 任务归属具体 Block，Block 内列表展示任务 |
 | TB-R9 | Agent 读取可用学习时间（Study Block − 叠加非学习 Block） | 中 | v1.5 | pending | Agent 排期逻辑重写 |
 | TB-R10 | 单层约束：每天最多 1 个 Study Block，Meal/Rest/Custom 不限 | 低 | v1.5 | pending | 前端校验 + 后端校验 |
+| TB-R11 | 创建交互重构：框选后右键菜单 → 编辑面板（含时间选择器） | 中 | v1.5 | pending | 替代旧的内嵌弹出表单，解决列宽不足问题 |
+| TB-R12 | 全局内容区拓宽：去除页面左右多余留白 | 低 | v1.5 | pending | max-width + padding 缩减，日历等宽屏页面擑满 |
 
 ### Layer 3（高级交互）
 
@@ -144,7 +146,7 @@
 | 领域 | 条目数 | 来源 |
 |------|--------|------|
 | Time Block 系统 (L1) | 3 | Session 2，v1.4 已完成 |
-| Time Block 重构 (L2) | 10 | Session 3 新增，v1.5 |
+| Time Block 重构 (L2) | 12 | Session 3 新增 + Session 4 补充，v1.5 |
 | Time Block 高级交互 (L3) | 4 | Session 2，v1.9 |
 | 卡片数据模型升级 | 6 | Session 2 新增 |
 | 复习体验升级 | 6 | Session 1 原规划 |
@@ -153,7 +155,7 @@
 | Statistics 深度洞察 | 4 | Session 1 原规划 |
 | Goal 多依赖 DAG | 4 | Session 1 原规划 |
 | 基础设施 / 分发 | 4 | Session 1 路线图 |
-| **合计** | **52** | |
+| **合计** | **54** | |
 
 ---
 

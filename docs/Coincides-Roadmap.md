@@ -231,9 +231,10 @@
 
 ## v1.5（Time Block 重构：图层嵌套 + 编辑模式 + 任务关联）📋
 
-> 状态：待规划
-> 需求条目：TB-R1~R10（10 条）
-> 来源：Session 3 讨论
+> 状态：规划完成
+> 需求条目：TB-R2~R12（11 条，TB-R1 已在 v1.4 hotfix 修复）
+> 详细规划：[v1.5-plan.md](releases/v1.5-plan.md)
+> 来源：Session 3 + Session 4 讨论
 
 主题：重新定义 Time Block 的视觉呈现和交互模型。Study Block 作为主层，Meal/Rest/Custom 嵌套叠加；Agent 读取可用学习时间制定计划；任务显式关联 Block 并以列表展示。
 
@@ -244,18 +245,20 @@
 - 默认无网格线，浮空预览；Block 边缘延伸时间标注线
 - 动态时间范围：视图起止 = 当周最早/最晚 Block ± 留白
 - 编辑模式切换：进入后显示网格，支持框选创建
+- 框选后右键菜单触发创建，编辑面板含时间选择器可修正误差
+- 全局内容区拓宽，日历等宽屏页面充分利用屏幕
 
-具体条目：
-- Bug 修复：框选后误触 Day Detail（TB-R1）
-- 图层嵌套渲染（TB-R2）
-- 浮空预览视图 + 时间标注线（TB-R3）
-- 动态时间范围（TB-R4）
-- 编辑模式切换（TB-R5）
-- 网格线偏好开关（TB-R6）
-- 删除重叠警告（TB-R7）
-- 任务显式关联 Block（TB-R8）
-- Agent 可用时间计算（TB-R9）
-- Study Block 单层约束（TB-R10）
+10 个 Step（精细拆分）：
+- Step 1：全局布局拓宽（TB-R12）
+- Step 2：创建交互重构（TB-R11）
+- Step 3：编辑模式切换（TB-R5）
+- Step 4：网格线偏好 + 去重叠警告（TB-R6 + TB-R7）
+- Step 5：Study Block 单层约束（TB-R10）
+- Step 6：图层嵌套渲染（TB-R2）
+- Step 7：浮空预览 + 动态时间范围（TB-R3 + TB-R4）
+- Step 8：任务显式关联 Block（TB-R8）
+- Step 9：Agent 可用时间计算重写（TB-R9）
+- Step 10：文档更新 + 版本收尾
 
 ---
 
