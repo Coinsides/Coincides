@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback, Fragment } from 'react';
 import {
   format,
   startOfMonth,
@@ -46,10 +46,24 @@ function getTBColor(block: ResolvedTimeBlock): string {
   return block.color || TB_COLORS[block.type] || TB_COLORS.custom;
 }
 
-/** Convert 'HH:MM' to percentage position in a 24h column */
+/** Convert 'HH:MM' to percentage position in a 24h column (fallback) */
 function timeStrToPercent(t: string): number {
   const [h, m] = t.split(':').map(Number);
   return ((h + m / 60) / 24) * 100;
+}
+
+/** Convert 'HH:MM' to percentage within a dynamic [rangeStart, rangeEnd] (in hours) */
+function timeStrToPercentDynamic(t: string, rangeStartH: number, rangeEndH: number): number {
+  const [h, m] = t.split(':').map(Number);
+  const hours = h + m / 60;
+  const span = rangeEndH - rangeStartH;
+  if (span <= 0) return 0;
+  return ((hours - rangeStartH) / span) * 100;
+}
+
+/** Convert minutes-from-midnight to hours (e.g. 510 → 8.5) */
+function minToHours(min: number): number {
+  return min / 60;
 }
 
 /** Convert 'HH:MM' to a display label like '9:00' */
@@ -58,18 +72,57 @@ function formatHHMM(t: string): string {
   return `${h}:${m.toString().padStart(2, '0')}`;
 }
 
-/** Snap a percentage (0-100) to 30-min grid */
-function snapToGrid(pct: number): number {
-  const minutes = (pct / 100) * 1440;
+/** Snap a percentage (0-100) to 30-min grid within a dynamic hour range */
+function snapToGridDynamic(pct: number, rangeStartH: number, rangeEndH: number): number {
+  const span = rangeEndH - rangeStartH;
+  const minutes = (pct / 100) * span * 60 + rangeStartH * 60;
   const snapped = Math.round(minutes / 30) * 30;
-  return Math.min(Math.max((snapped / 1440) * 100, 0), 100);
+  const clampedMin = Math.max(rangeStartH * 60, Math.min(rangeEndH * 60, snapped));
+  return ((clampedMin - rangeStartH * 60) / (span * 60)) * 100;
 }
 
-function pctToHHMM(pct: number): string {
-  const totalMin = Math.round((pct / 100) * 1440);
-  const h = Math.floor(totalMin / 60);
-  const m = totalMin % 60;
+function pctToHHMMDynamic(pct: number, rangeStartH: number, rangeEndH: number): string {
+  const span = rangeEndH - rangeStartH;
+  const totalMin = Math.round((pct / 100) * span * 60 + rangeStartH * 60);
+  const clamped = Math.max(0, Math.min(1440, totalMin));
+  const h = Math.floor(clamped / 60);
+  const m = clamped % 60;
   return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
+}
+
+/** Compute nesting depth for each block. Longer blocks are parents; shorter blocks nested inside get depth+1 */
+function computeNestingLevels(blocks: ResolvedTimeBlock[]): Map<string, number> {
+  if (blocks.length === 0) return new Map();
+
+  // Sort by duration descending (longest first = bottom layer)
+  const sorted = [...blocks].sort((a, b) => {
+    const durA = timeStrToPercent(a.end_time) - timeStrToPercent(a.start_time);
+    const durB = timeStrToPercent(b.end_time) - timeStrToPercent(b.start_time);
+    return durB - durA;
+  });
+
+  const levels = new Map<string, number>();
+
+  for (const block of sorted) {
+    const bStart = timeStrToPercent(block.start_time);
+    const bEnd = timeStrToPercent(block.end_time);
+    let maxParentLevel = -1;
+
+    // Check if this block is fully contained within any already-processed (longer) block
+    for (const parent of sorted) {
+      if (parent.id === block.id) continue;
+      if (!levels.has(parent.id)) continue; // not processed yet = shorter, skip
+      const pStart = timeStrToPercent(parent.start_time);
+      const pEnd = timeStrToPercent(parent.end_time);
+      if (bStart >= pStart && bEnd <= pEnd) {
+        maxParentLevel = Math.max(maxParentLevel, levels.get(parent.id)!);
+      }
+    }
+
+    levels.set(block.id, maxParentLevel + 1);
+  }
+
+  return levels;
 }
 
 export default function CalendarPage() {
@@ -175,6 +228,38 @@ export default function CalendarPage() {
     const start = startOfWeek(currentMonth, { weekStartsOn: 1 });
     return Array.from({ length: 7 }, (_, i) => addDays(start, i));
   }, [currentMonth]);
+
+  // Dynamic time range for week view (TB-R4)
+  const { rangeStartH, rangeEndH } = useMemo(() => {
+    const DEFAULT_START = 8;
+    const DEFAULT_END = 22;
+    if (!weekData || Object.keys(weekData).length === 0) {
+      return { rangeStartH: DEFAULT_START, rangeEndH: DEFAULT_END };
+    }
+    let minStart = 24;
+    let maxEnd = 0;
+    let hasBlocks = false;
+    for (const dayData of Object.values(weekData)) {
+      for (const block of dayData.blocks || []) {
+        hasBlocks = true;
+        const [sh, sm] = block.start_time.split(':').map(Number);
+        const [eh, em] = block.end_time.split(':').map(Number);
+        const startH = sh + sm / 60;
+        const endH = eh + em / 60;
+        if (startH < minStart) minStart = startH;
+        if (endH > maxEnd) maxEnd = endH;
+      }
+    }
+    if (!hasBlocks) return { rangeStartH: DEFAULT_START, rangeEndH: DEFAULT_END };
+    // Pad ±1 hour, clamp to [0, 24]
+    return {
+      rangeStartH: Math.max(0, Math.floor(minStart) - 1),
+      rangeEndH: Math.min(24, Math.ceil(maxEnd) + 1),
+    };
+  }, [weekData]);
+
+  // Helper: convert HH:MM to percent using the dynamic range
+  const toPct = useCallback((t: string) => timeStrToPercentDynamic(t, rangeStartH, rangeEndH), [rangeStartH, rangeEndH]);
 
   // Group tasks by date string
   const tasksByDate = useMemo(() => {
@@ -323,18 +408,22 @@ export default function CalendarPage() {
     }
   };
 
-  const getTimePosition = (timeStr: string): number => {
+  const getTimePosition = useCallback((timeStr: string): number => {
     const date = new Date(timeStr);
     const hours = date.getHours() + date.getMinutes() / 60;
-    return (hours / 24) * 100;
-  };
+    const span = rangeEndH - rangeStartH;
+    if (span <= 0) return 0;
+    return ((hours - rangeStartH) / span) * 100;
+  }, [rangeStartH, rangeEndH]);
 
-  const getBlockHeight = (start: string, end: string): number => {
+  const getBlockHeight = useCallback((start: string, end: string): number => {
     const startDate = new Date(start);
     const endDate = new Date(end);
     const durationHours = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60);
-    return Math.max((durationHours / 24) * 100, 2.5); // min 2.5% so it's visible
-  };
+    const span = rangeEndH - rangeStartH;
+    if (span <= 0) return 0;
+    return Math.max((durationHours / span) * 100, 2.5); // min 2.5% so it's visible
+  }, [rangeStartH, rangeEndH]);
 
   const formatTimeRange = (start: string, end: string): string => {
     const s = new Date(start);
@@ -348,19 +437,21 @@ export default function CalendarPage() {
   const handleTBMouseDown = useCallback((dayIdx: number, e: React.MouseEvent<HTMLDivElement>) => {
     if (!editMode) return; // Only allow drag-select in edit mode
     const rect = e.currentTarget.getBoundingClientRect();
-    const pct = snapToGrid(((e.clientY - rect.top) / rect.height) * 100);
+    const rawPct = ((e.clientY - rect.top) / rect.height) * 100;
+    const pct = snapToGridDynamic(rawPct, rangeStartH, rangeEndH);
     setDragSelect({ dayIdx, startPct: pct, currentPct: pct });
     e.preventDefault();
-  }, [editMode]);
+  }, [editMode, rangeStartH, rangeEndH]);
 
   const handleTBMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>, dayIdx: number) => {
     if (!dragSelect || dragSelect.dayIdx !== dayIdx) return;
     const ref = timedSectionRefs.current[dayIdx];
     if (!ref) return;
     const rect = ref.getBoundingClientRect();
-    const pct = snapToGrid(((e.clientY - rect.top) / rect.height) * 100);
+    const rawPct = ((e.clientY - rect.top) / rect.height) * 100;
+    const pct = snapToGridDynamic(rawPct, rangeStartH, rangeEndH);
     setDragSelect((prev) => prev ? { ...prev, currentPct: pct } : null);
-  }, [dragSelect]);
+  }, [dragSelect, rangeStartH, rangeEndH]);
 
   const handleTBMouseUp = useCallback(() => {
     if (!dragSelect) return;
@@ -373,11 +464,11 @@ export default function CalendarPage() {
     // Keep selection highlighted, wait for right-click
     setDragSelection({
       dayIdx: dragSelect.dayIdx,
-      startTime: pctToHHMM(topPct),
-      endTime: pctToHHMM(botPct),
+      startTime: pctToHHMMDynamic(topPct, rangeStartH, rangeEndH),
+      endTime: pctToHHMMDynamic(botPct, rangeStartH, rangeEndH),
     });
     setDragSelect(null);
-  }, [dragSelect]);
+  }, [dragSelect, rangeStartH, rangeEndH]);
 
   // Global mouseup to end drag
   useEffect(() => {
@@ -572,19 +663,22 @@ export default function CalendarPage() {
       ) : (
         /* Week view */
         <div className={styles.weekGrid}>
-          {/* 24h time gutter */}
+          {/* Dynamic time gutter */}
           <div className={styles.timeGutter}>
             <div className={styles.timeGutterHeader} />
             <div className={styles.timeGutterBody}>
-              {Array.from({ length: 24 }, (_, h) => (
-                <div
-                  key={h}
-                  className={styles.timeGutterLabel}
-                  style={{ top: `${(h / 24) * 100}%` }}
-                >
-                  {`${h}:00`}
-                </div>
-              ))}
+              {Array.from({ length: rangeEndH - rangeStartH }, (_, i) => {
+                const hour = rangeStartH + i;
+                return (
+                  <div
+                    key={hour}
+                    className={styles.timeGutterLabel}
+                    style={{ top: `${(i / (rangeEndH - rangeStartH)) * 100}%` }}
+                  >
+                    {`${hour}:00`}
+                  </div>
+                );
+              })}
             </div>
           </div>
           {weekDays.map((day, dayIdx) => {
@@ -595,6 +689,14 @@ export default function CalendarPage() {
             const timedTasks = dayTaskList.filter((t) => t.start_time && t.end_time);
             const dayBlocks = weekData[dateStr];
             const resolvedBlocks = dayBlocks?.blocks || [];
+            const nestingLevels = computeNestingLevels(resolvedBlocks);
+            // Count tasks associated with each block
+            const blockTaskCounts = new Map<string, number>();
+            for (const t of dayTaskList) {
+              if (t.time_block_id) {
+                blockTaskCounts.set(t.time_block_id, (blockTaskCounts.get(t.time_block_id) || 0) + 1);
+              }
+            }
 
             // Drag-select preview for this column (active drag or persistent selection)
             const isDraggingHere = dragSelect?.dayIdx === dayIdx;
@@ -602,8 +704,8 @@ export default function CalendarPage() {
             const dragTop = isDraggingHere ? Math.min(dragSelect!.startPct, dragSelect!.currentPct) : 0;
             const dragHeight = isDraggingHere ? Math.abs(dragSelect!.currentPct - dragSelect!.startPct) : 0;
             // Persistent selection preview
-            const selTop = hasSelection ? timeStrToPercent(dragSelection!.startTime) : 0;
-            const selHeight = hasSelection ? timeStrToPercent(dragSelection!.endTime) - selTop : 0;
+            const selTop = hasSelection ? toPct(dragSelection!.startTime) : 0;
+            const selHeight = hasSelection ? toPct(dragSelection!.endTime) - selTop : 0;
 
             return (
               <div
@@ -653,35 +755,65 @@ export default function CalendarPage() {
                   onContextMenu={(e) => handleTimedSectionContextMenu(e, dayIdx)}
                 >
                   {/* Hour gridlines (visible in edit mode or when preference is 'always') */}
-                  {showGridlines && Array.from({ length: 24 }, (_, h) => (
-                    <div
-                      key={`grid-${h}`}
-                      className={styles.hourGridline}
-                      style={{ top: `${(h / 24) * 100}%` }}
-                    />
-                  ))}
-
-                  {/* Time Block background layer */}
-                  {resolvedBlocks.map((block) => {
-                    const top = timeStrToPercent(block.start_time);
-                    const height = timeStrToPercent(block.end_time) - top;
-                    const color = getTBColor(block);
+                  {showGridlines && Array.from({ length: rangeEndH - rangeStartH }, (_, i) => {
+                    const hour = rangeStartH + i;
                     return (
                       <div
-                        key={`tb-${block.id}`}
-                        className={styles.tbBackground}
-                        style={{
-                          top: `${top}%`,
-                          height: `${height}%`,
-                          backgroundColor: color + '25',
-                          borderLeft: `3px solid ${color}55`,
-                        }}
-                        title={`${block.label} (${formatHHMM(block.start_time)}–${formatHHMM(block.end_time)})`}
-                        onContextMenu={(e) => handleTBContextMenu(e, block)}
-                      >
-                        <span className={styles.tbLabel}>{block.label}</span>
-                        <span className={styles.tbTime}>{formatHHMM(block.start_time)}–{formatHHMM(block.end_time)}</span>
-                      </div>
+                        key={`grid-${hour}`}
+                        className={styles.hourGridline}
+                        style={{ top: `${(i / (rangeEndH - rangeStartH)) * 100}%` }}
+                      />
+                    );
+                  })}
+
+                  {/* Time Block background layer — with nesting indentation */}
+                  {resolvedBlocks.map((block) => {
+                    const top = toPct(block.start_time);
+                    const height = toPct(block.end_time) - top;
+                    const color = getTBColor(block);
+                    const level = nestingLevels.get(block.id) || 0;
+                    // Deeper nesting → more indent + higher opacity + higher z-index
+                    const indent = level * 8; // 8px per nesting level
+                    const bgOpacity = level === 0 ? '20' : level === 1 ? '30' : '40';
+                    const borderOpacity = level === 0 ? '40' : level === 1 ? '60' : '80';
+                    return (
+                      <Fragment key={`tb-group-${block.id}`}>
+                        <div
+                          className={styles.tbBackground}
+                          style={{
+                            top: `${top}%`,
+                            height: `${height}%`,
+                            left: `${indent}px`,
+                            right: '0px',
+                            backgroundColor: color + bgOpacity,
+                            borderLeft: `3px solid ${color}${borderOpacity}`,
+                            zIndex: level,
+                          }}
+                          title={`${block.label} (${formatHHMM(block.start_time)}–${formatHHMM(block.end_time)})`}
+                          onContextMenu={(e) => handleTBContextMenu(e, block)}
+                        >
+                          <span className={styles.tbLabel}>{block.label}</span>
+                          <span className={styles.tbTime}>{formatHHMM(block.start_time)}–{formatHHMM(block.end_time)}</span>
+                          {(blockTaskCounts.get(block.id) || 0) > 0 && (
+                            <span className={styles.tbTaskBadge}>
+                              {blockTaskCounts.get(block.id)} task{blockTaskCounts.get(block.id)! > 1 ? 's' : ''}
+                            </span>
+                          )}
+                        </div>
+                        {/* Annotation lines at block edges */}
+                        <div
+                          className={styles.tbAnnotationLine}
+                          style={{ top: `${top}%`, zIndex: level + 10 }}
+                        >
+                          <span className={styles.tbAnnotationLabel}>{formatHHMM(block.start_time)}</span>
+                        </div>
+                        <div
+                          className={styles.tbAnnotationLine}
+                          style={{ top: `${top + height}%`, zIndex: level + 10 }}
+                        >
+                          <span className={styles.tbAnnotationLabel}>{formatHHMM(block.end_time)}</span>
+                        </div>
+                      </Fragment>
                     );
                   })}
 
@@ -692,7 +824,7 @@ export default function CalendarPage() {
                       style={{ top: `${dragTop}%`, height: `${dragHeight}%` }}
                     >
                       <span className={styles.tbDragLabel}>
-                        {pctToHHMM(dragTop)} – {pctToHHMM(dragTop + dragHeight)}
+                        {pctToHHMMDynamic(dragTop, rangeStartH, rangeEndH)} – {pctToHHMMDynamic(dragTop + dragHeight, rangeStartH, rangeEndH)}
                       </span>
                     </div>
                   )}

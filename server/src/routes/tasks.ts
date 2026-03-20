@@ -61,8 +61,8 @@ router.post('/', (req: AuthRequest, res: Response) => {
     const now = new Date().toISOString();
 
     db.prepare(
-      `INSERT INTO tasks (id, user_id, course_id, goal_id, recurring_group_id, title, date, priority, status, order_index, start_time, end_time, description, checklist, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO tasks (id, user_id, course_id, goal_id, recurring_group_id, title, date, priority, status, order_index, start_time, end_time, description, checklist, time_block_id, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?)`
     ).run(
       id,
       req.userId!,
@@ -77,6 +77,7 @@ router.post('/', (req: AuthRequest, res: Response) => {
       data.end_time || null,
       data.description || null,
       data.checklist ? JSON.stringify(data.checklist) : null,
+      data.time_block_id || null,
       now,
       now
     );
@@ -106,8 +107,8 @@ router.post('/batch', (req: AuthRequest, res: Response) => {
     }
 
     const insert = db.prepare(
-      `INSERT INTO tasks (id, user_id, course_id, goal_id, recurring_group_id, title, date, priority, status, order_index, start_time, end_time, description, checklist, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO tasks (id, user_id, course_id, goal_id, recurring_group_id, title, date, priority, status, order_index, start_time, end_time, description, checklist, time_block_id, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?)`
     );
 
     const ids: string[] = [];
@@ -130,6 +131,7 @@ router.post('/batch', (req: AuthRequest, res: Response) => {
           task.end_time || null,
           task.description || null,
           task.checklist ? JSON.stringify(task.checklist) : null,
+          task.time_block_id || null,
           now,
           now
         );
@@ -172,6 +174,7 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     if (data.end_time !== undefined) { fields.push('end_time = ?'); values.push(data.end_time); }
     if (data.description !== undefined) { fields.push('description = ?'); values.push(data.description); }
     if (data.checklist !== undefined) { fields.push('checklist = ?'); values.push(data.checklist ? JSON.stringify(data.checklist) : null); }
+    if (data.time_block_id !== undefined) { fields.push('time_block_id = ?'); values.push(data.time_block_id); }
 
     if (data.status !== undefined) {
       fields.push('status = ?');

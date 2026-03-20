@@ -39,12 +39,12 @@ export async function executeTool(
     }
 
     case 'create_task': {
-      const { title, date, priority, course_id, goal_id, description, start_time, end_time, checklist, serves_must } = args as Record<string, any>;
+      const { title, date, priority, course_id, goal_id, description, start_time, end_time, checklist, serves_must, time_block_id } = args as Record<string, any>;
       const id = uuidv4();
       const now = new Date().toISOString();
       db.prepare(
-        'INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, description, start_time, end_time, checklist, serves_must, order_index, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      ).run(id, userId, course_id, goal_id || null, title, date, priority || 'must', 'pending', description || null, start_time || null, end_time || null, checklist ? JSON.stringify(checklist) : null, serves_must || null, 0, now, now);
+        'INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, description, start_time, end_time, checklist, serves_must, time_block_id, order_index, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+      ).run(id, userId, course_id, goal_id || null, title, date, priority || 'must', 'pending', description || null, start_time || null, end_time || null, checklist ? JSON.stringify(checklist) : null, serves_must || null, time_block_id || null, 0, now, now);
       return JSON.stringify({ id, title, date, priority, message: 'Task created successfully' });
     }
 

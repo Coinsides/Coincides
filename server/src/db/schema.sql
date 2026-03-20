@@ -96,6 +96,7 @@ CREATE TABLE IF NOT EXISTS tasks (
   is_prerequisite INTEGER NOT NULL DEFAULT 0,
   serves_must TEXT,
   checklist TEXT,
+  time_block_id TEXT REFERENCES time_blocks(id) ON DELETE SET NULL,
   created_at TEXT NOT NULL DEFAULT (datetime('now')),
   updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
@@ -103,6 +104,7 @@ CREATE TABLE IF NOT EXISTS tasks (
 CREATE INDEX IF NOT EXISTS idx_tasks_user_date ON tasks(user_id, date);
 CREATE INDEX IF NOT EXISTS idx_tasks_user_course_date ON tasks(user_id, course_id, date);
 CREATE INDEX IF NOT EXISTS idx_tasks_recurring_group ON tasks(recurring_group_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_time_block ON tasks(time_block_id);
 
 -- ============================================================
 -- 6. CardDeck

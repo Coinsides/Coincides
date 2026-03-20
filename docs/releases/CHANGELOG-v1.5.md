@@ -116,3 +116,119 @@
 ### 变更文件
 - `server/src/routes/timeBlocks.ts`
 - `client/src/pages/Calendar/Calendar.tsx`
+
+---
+
+## Step 6: feat(calendar): 图层嵌套渲染（TB-R2）
+
+### 变更
+- `Calendar.tsx` — 新增 `computeNestingLevels()` 算法：
+  - 按时长降序排列 Block，最长的为 depth 0
+  - 完全被包含在已处理 Block 内的 → depth = parentDepth + 1
+- Block 渲染应用嵌套层级：
+  - `left: indent = level × 8px`（每层内缩 8px）
+  - `backgroundColor` 透明度随层级增加（0.20 → 0.30 → 0.40）
+  - `borderLeft` 透明度随层级增加
+  - `zIndex = level`
+
+### 效果
+- 短 Block 在长 Block 上方嵌套显示，视觉有层次感
+- 最多支持 5 层嵌套（实际 1-3 层为主）
+
+### 变更文件
+- `client/src/pages/Calendar/Calendar.tsx`
+
+---
+
+## Step 7: feat(calendar): 浮空预览 + 动态时间范围（TB-R3 + TB-R4）
+
+### 变更
+- `Calendar.tsx` — 动态时间范围：
+  - 新增 `timeStrToPercentDynamic()`、`snapToGridDynamic()`、`pctToHHMMDynamic()` 辅助函数
+  - `useMemo` 计算 `rangeStartH` / `rangeEndH`：扫描当周所有 Block，最早 start − 1h ~ 最晚 end + 1h，fallback 8:00–22:00
+  - `toPct` callback 封装动态范围转换
+  - 时间刻度栏、网格线、Block 渲染、拖拽预览、持久选区、Timed Tasks 全部基于动态范围
+- `Calendar.module.css` — 浮空标注线：
+  - 新增 `.tbAnnotationLine`（虚线）+ `.tbAnnotationLabel`（末端时间数字）
+  - Block 上下边缘各一条标注线
+
+### 效果
+- 只有 8:00–18:00 有 Block 时，视图范围约 7:00–19:00
+- 完全没有 Block 时显示 8:00–22:00
+- Block 边缘有标注线延伸到列右侧
+
+### 变更文件
+- `client/src/pages/Calendar/Calendar.tsx`
+- `client/src/pages/Calendar/Calendar.module.css`
+
+---
+
+## Step 8: feat(task-block): 任务显式关联 Time Block（TB-R8）
+
+### 变更
+- **数据库** — Migration `009_task_time_block.ts`：
+  - `tasks` 表新增 `time_block_id TEXT REFERENCES time_blocks(id) ON DELETE SET NULL`
+  - 新增索引 `idx_tasks_time_block`
+- **shared/types** — `Task` 接口新增 `time_block_id?: string | null`
+- **validators** — `createTaskSchema` / `updateTaskSchema` 新增 `time_block_id` 字段
+- **后端** `tasks.ts` — `POST`、`POST /batch`、`PUT` 均支持 `time_block_id`
+- **后端** `timeBlocks.ts` — 新增 `GET /api/time-blocks/:id/tasks` 端点
+- **前端** `Calendar.tsx` — Block 内显示关联任务数量 badge
+- **CSS** — 新增 `.tbTaskBadge` 样式
+
+### 效果
+- 创建任务时可选择关联 Time Block
+- Block 上显示关联任务数量 badge
+- 删除 Block 后关联任务的 time_block_id 自动置空
+
+### 变更文件
+- `server/src/db/migrations/009_task_time_block.ts` （新增）
+- `server/src/db/schema.sql`
+- `shared/types/index.ts`
+- `server/src/validators/index.ts`
+- `server/src/routes/tasks.ts`
+- `server/src/routes/timeBlocks.ts`
+- `client/src/pages/Calendar/Calendar.tsx`
+- `client/src/pages/Calendar/Calendar.module.css`
+
+---
+
+## Step 9: feat(agent): 可用时间计算重写（TB-R9）
+
+### 变更
+- `scheduling.ts` — `getDailyCapacities()` 重写：
+  - 取当天所有 Block（包含非学习类型）
+  - Study Block 总时长 − 嵌套在 Study Block 内的非学习 Block overlap = 净可用学习时间
+  - 新增 `hhmmToMin()` 辅助函数
+- `definitions.ts` — Agent 工具描述更新：
+  - `create_task` 新增 `time_block_id` 参数
+  - `get_time_blocks` 描述补充“可用时间 = Study Block − 嵌套非学习 Block”
+- `system-prompt.ts` — 排期规则补充嵌套扣减说明 + `time_block_id` 使用说明
+- `executor.ts` — `create_task` handler 支持 `time_block_id` 参数
+
+### 效果
+- Study Block 8:00–18:00 内嵌 Eat 12:00–13:00 → 可用 540min，不是 600min
+- 没有 Study Block 时 fallback 120min
+- Agent 创建任务时可指定 time_block_id
+
+### 变更文件
+- `server/src/agent/scheduling.ts`
+- `server/src/agent/tools/definitions.ts`
+- `server/src/agent/tools/executor.ts`
+- `server/src/agent/system-prompt.ts`
+
+---
+
+## Step 10: docs: 文档更新 + 版本收尾
+
+### 变更
+- `BACKLOG.md` — TB-R2~R9 状态改为 done
+- `Coincides-Roadmap.md` — v1.5 状态改为 ✅ 完成
+- `DATA_MODEL.md` — 补充 `tasks.time_block_id` 字段
+- `CHANGELOG-v1.5.md` — 记录 Steps 6-10 所有变更
+
+### 变更文件
+- `docs/BACKLOG.md`
+- `docs/Coincides-Roadmap.md`
+- `docs/DATA_MODEL.md`
+- `docs/releases/CHANGELOG-v1.5.md`

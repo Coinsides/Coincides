@@ -56,6 +56,7 @@ export const createTaskSchema = z.object({
   end_time: z.string().optional(),
   description: z.string().max(5000).optional(),
   checklist: z.array(checklistItemSchema).optional(),
+  time_block_id: z.string().uuid().optional(),
 });
 
 export const updateTaskSchema = z.object({
@@ -69,6 +70,7 @@ export const updateTaskSchema = z.object({
   end_time: z.string().nullable().optional(),
   description: z.string().max(5000).nullable().optional(),
   checklist: z.array(checklistItemSchema).nullable().optional(),
+  time_block_id: z.string().uuid().nullable().optional(),
 });
 
 export const batchCreateTasksSchema = z.object({

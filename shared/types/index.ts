@@ -188,6 +188,7 @@ export interface Task {
   end_time: string | null;
   description: string | null;
   checklist: ChecklistItem[] | null;
+  time_block_id?: string | null;
   serves_must?: string | null;
   exam_boost?: boolean;
   is_prerequisite?: boolean;

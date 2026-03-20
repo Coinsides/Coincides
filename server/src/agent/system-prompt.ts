@@ -123,6 +123,8 @@ When the student asks you to create a study plan or schedule tasks:
    - Assign tasks to **days only** (use \`scheduled_date\`). NEVER lock tasks to specific time slots (e.g., "14:00-14:47"). This violates Design Constitution §3.
    - Respect goal dependency ordering: if Goal A depends on Goal B, all of B's tasks must be scheduled before A's tasks.
    - Must tasks take priority. Each day's Must tasks should not exceed that day's available study minutes.
+   - Available study time = Study Block duration minus nested non-study blocks (e.g. a "Lunch" block 12:00-13:00 inside a Study Block 8:00-18:00 subtracts 60min).
+   - When creating tasks, you may optionally set \`time_block_id\` to associate a task with a specific Time Block on the calendar.
    - If the student has no Time Blocks set up, fall back to even distribution across days (do NOT ask them to set up Time Blocks — Constitution §2).
    - \`estimated_minutes\` is for internal scheduling logic ONLY. NEVER show time estimates to the student in your responses or in proposal descriptions.
 

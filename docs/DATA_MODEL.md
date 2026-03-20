@@ -133,6 +133,7 @@ Virtual Tables:
 | completed_at | DATETIME | | When the task was checked off |
 | order_index | INTEGER | DEFAULT 0 | Display order within same date + priority |
 | is_prerequisite | INTEGER | DEFAULT 0 | Whether this task is a prerequisite |
+| time_block_id | TEXT | FK → time_blocks(id), ON DELETE SET NULL | 关联的 Time Block（v1.5 新增） |
 | created_at | DATETIME | NOT NULL | |
 | updated_at | DATETIME | NOT NULL | |
 
@@ -140,6 +141,7 @@ Virtual Tables:
 - `(user_id, date)` — Fast lookup for Daily Brief
 - `(user_id, course_id, date)` — Course-filtered calendar
 - `(recurring_group_id)` — Progress tracking for recurring tasks
+- `(time_block_id)` — 任务按 Block 分组查询
 
 ### 2.6 CardDeck
 

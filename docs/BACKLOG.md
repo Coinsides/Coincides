@@ -34,14 +34,14 @@
 | ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
 |----|------|--------|------|------|------|
 | TB-R1 | 周视图 Bug：框选 Time Block 后误触 Day Detail 面板 | 低 | v1.4 | done | v1.4 hotfix 修复：点击日期数字才开 Day Detail |
-| TB-R2 | 图层嵌套渲染：长 Block 包裹短 Block，缩进显示 | 高 | v1.5 | pending | 按时长排序 z-index，子 Block 内缩 padding |
-| TB-R3 | 去掉默认网格线，浮空预览视图 | 中 | v1.5 | pending | Block 边缘延伸时间标注线，末端显示时间数字 |
-| TB-R4 | 动态时间范围：视图起止 = 当周最早/最晚 Block ± 留白 | 中 | v1.5 | pending | 不再固定 0:00–24:00，自动裁剪 |
+| TB-R2 | 图层嵌套渲染：长 Block 包裹短 Block，缩进显示 | 高 | v1.5 | done | 按时长排序 z-index，子 Block 内缩 8px/level |
+| TB-R3 | 去掉默认网格线，浮空预览视图 | 中 | v1.5 | done | Block 边缘延伸标注线，末端时间数字 |
+| TB-R4 | 动态时间范围：视图起止 = 当周最早/最晚 Block ± 留白 | 中 | v1.5 | done | 自动裁剪，fallback 8:00–22:00 |
 | TB-R5 | 编辑模式切换：图标按钮进入/退出编辑模式 | 中 | v1.5 | done | 编辑模式显示网格，支持框选/模板创建 |
 | TB-R6 | 网格线显示偏好开关（非编辑模式下可常开） | 低 | v1.5 | done | 存 Settings / localStorage |
 | TB-R7 | 删除重叠警告，嵌套叠加为正常功能 | 低 | v1.5 | done | overlap 检测 + 警告图标全部移除 |
-| TB-R8 | 任务显式关联 Time Block（DB + UI） | 高 | v1.5 | pending | 任务归属具体 Block，Block 内列表展示任务 |
-| TB-R9 | Agent 读取可用学习时间（Study Block − 叠加非学习 Block） | 中 | v1.5 | pending | Agent 排期逻辑重写 |
+| TB-R8 | 任务显式关联 Time Block（DB + UI） | 高 | v1.5 | done | tasks.time_block_id FK，Block 内 badge 显示任务数 |
+| TB-R9 | Agent 读取可用学习时间（Study Block − 叠加非学习 Block） | 中 | v1.5 | done | getDailyCapacities() 重写，扣减嵌套非学习 Block |
 | TB-R10 | 单层约束：每天最多 1 个 Study Block，Meal/Rest/Custom 不限 | 低 | v1.5 | done | 前端校验 + 后端校验 |
 | TB-R11 | 创建交互重构：框选后右键菜单 → 编辑面板（含时间选择器） | 中 | v1.5 | done | 替代旧的内嵌弹出表单，解决列宽不足问题 |
 | TB-R12 | 全局内容区拓宽：去除页面左右多余留白 | 低 | v1.5 | done | max-width + padding 缩减，日历等宽屏页面撑满 |

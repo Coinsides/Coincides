@@ -27,7 +27,7 @@ export const toolDefinitions: ToolDefinition[] = [
   },
   {
     name: 'create_task',
-    description: 'Create a single task for the student. For recommended/optional tasks, use serves_must to annotate which Must task it supports.',
+    description: 'Create a single task for the student. For recommended/optional tasks, use serves_must to annotate which Must task it supports. Optionally associate with a Time Block via time_block_id.',
     parameters: {
       type: 'object',
       properties: {
@@ -41,6 +41,7 @@ export const toolDefinitions: ToolDefinition[] = [
         end_time: { type: 'string', description: 'End time (ISO 8601 datetime)' },
         checklist: { type: 'array', items: { type: 'object', properties: { text: { type: 'string' }, done: { type: 'boolean' } } }, description: 'Sub-steps checklist' },
         serves_must: { type: 'string', description: 'For recommended/optional: which Must task this serves' },
+        time_block_id: { type: 'string', description: 'Optional Time Block ID to associate this task with a specific block on the calendar' },
       },
       required: ['title', 'date', 'priority', 'course_id'],
     },
@@ -283,7 +284,7 @@ export const toolDefinitions: ToolDefinition[] = [
   },
   {
     name: 'get_time_blocks',
-    description: "Get the student's time block schedule. Returns weekly template blocks and/or resolved blocks for a date range, plus available study minutes per day. Use this before scheduling tasks to understand the student's time structure.",
+    description: "Get the student's time block schedule. Returns weekly template blocks and/or resolved blocks for a date range, plus available study minutes per day. Available study time = Study Block duration minus nested non-study blocks (e.g. meal, rest). Use this before scheduling tasks to understand the student's time structure.",
     parameters: {
       type: 'object',
       properties: {

@@ -118,8 +118,16 @@ export function getGoalTopologicalOrder(userId: string, courseId?: string): stri
   return order;
 }
 
+/** Parse 'HH:MM' to total minutes from midnight */
+function hhmmToMin(t: string): number {
+  const [h, m] = t.split(':').map(Number);
+  return h * 60 + m;
+}
+
 /**
  * Get available study minutes for each day in a date range.
+ * v1.5: Subtracts nested non-study blocks from study block time.
+ *   available = Study Block total − Σ(non-study blocks nested inside study block)
  */
 export function getDailyCapacities(userId: string, startDate: string, endDate: string): DayCapacity[] {
   const db = getDb();
@@ -132,10 +140,10 @@ export function getDailyCapacities(userId: string, startDate: string, endDate: s
     const dateStr = d.toISOString().split('T')[0];
     const dow = d.getDay(); // 0=Sun
 
-    // Get time blocks for this day of week
+    // Get ALL time blocks for this day of week
     const blocks = db.prepare(
-      'SELECT start_time, end_time, type FROM time_blocks WHERE user_id = ? AND day_of_week = ?'
-    ).all(userId, dow) as Array<{ start_time: string; end_time: string; type: string }>;
+      'SELECT id, start_time, end_time, type FROM time_blocks WHERE user_id = ? AND day_of_week = ?'
+    ).all(userId, dow) as Array<{ id: string; start_time: string; end_time: string; type: string }>;
 
     // Check for overrides
     const overrides = db.prepare(
@@ -144,41 +152,45 @@ export function getDailyCapacities(userId: string, startDate: string, endDate: s
 
     const overMap = new Map(overrides.map(o => [o.time_block_id, o]));
 
-    // Compute study minutes (union of study blocks)
-    const studyRanges: Array<{ start: number; end: number }> = [];
+    // Resolve each block's effective start/end, filtering out deleted overrides
+    const resolved: Array<{ id: string; type: string; startMin: number; endMin: number }> = [];
     for (const b of blocks) {
-      const ov = overMap.get((b as any).id);
-      if (ov && ov.start_time === null) continue; // deleted
+      const ov = overMap.get(b.id);
+      if (ov && ov.start_time === null) continue; // deleted by override
 
       const st = ov ? ov.start_time! : b.start_time;
       const et = ov ? ov.end_time! : b.end_time;
+      const sMin = hhmmToMin(st);
+      const eMin = hhmmToMin(et);
+      if (eMin > sMin) {
+        resolved.push({ id: b.id, type: b.type, startMin: sMin, endMin: eMin });
+      }
+    }
 
-      if (b.type === 'study') {
-        const [sh, sm] = st.split(':').map(Number);
-        const [eh, em] = et.split(':').map(Number);
-        const sMin = sh * 60 + sm;
-        const eMin = eh * 60 + em;
-        if (eMin > sMin) {
-          studyRanges.push({ start: sMin, end: eMin });
-        } else {
-          // Midnight-crossing block: split into two ranges
-          if (sMin < 1440) studyRanges.push({ start: sMin, end: 1440 });
-          if (eMin > 0) studyRanges.push({ start: 0, end: eMin });
+    // Separate study and non-study blocks
+    const studyBlocks = resolved.filter(b => b.type === 'study');
+    const nonStudyBlocks = resolved.filter(b => b.type !== 'study');
+
+    // Compute gross study time
+    let studyMinutes = 0;
+    for (const sb of studyBlocks) {
+      studyMinutes += sb.endMin - sb.startMin;
+    }
+
+    // Subtract non-study blocks that are nested inside any study block
+    let nestedSubtract = 0;
+    for (const nsb of nonStudyBlocks) {
+      for (const sb of studyBlocks) {
+        // Calculate overlap between non-study block and study block
+        const overlapStart = Math.max(nsb.startMin, sb.startMin);
+        const overlapEnd = Math.min(nsb.endMin, sb.endMin);
+        if (overlapEnd > overlapStart) {
+          nestedSubtract += overlapEnd - overlapStart;
         }
       }
     }
 
-    // Merge overlapping ranges
-    studyRanges.sort((a, b) => a.start - b.start);
-    const merged: typeof studyRanges = [];
-    for (const r of studyRanges) {
-      if (merged.length > 0 && r.start <= merged[merged.length - 1].end) {
-        merged[merged.length - 1].end = Math.max(merged[merged.length - 1].end, r.end);
-      } else {
-        merged.push({ ...r });
-      }
-    }
-    const studyMinutes = merged.reduce((sum, r) => sum + (r.end - r.start), 0);
+    const netStudyMinutes = Math.max(0, studyMinutes - nestedSubtract);
 
     // Count existing tasks
     const existing = db.prepare(
@@ -187,9 +199,9 @@ export function getDailyCapacities(userId: string, startDate: string, endDate: s
 
     capacities.push({
       date: dateStr,
-      available_study_minutes: studyMinutes,
+      available_study_minutes: netStudyMinutes,
       existing_task_count: existing.cnt,
-      existing_must_minutes: 0, // simplified for v1.3
+      existing_must_minutes: 0,
     });
   }
 

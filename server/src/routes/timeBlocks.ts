@@ -372,4 +372,28 @@ router.delete('/override/:id', (req: AuthRequest, res: Response) => {
   res.json({ message: 'Override deleted' });
 });
 
+// GET /api/time-blocks/:id/tasks — Retrieve tasks associated with a specific time block
+router.get('/:id/tasks', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+
+  // Verify the time block belongs to this user
+  const block = db.prepare(
+    'SELECT id FROM time_blocks WHERE id = ? AND user_id = ?'
+  ).get(req.params.id, req.userId!);
+  if (!block) throw new AppError(404, 'Time block not found');
+
+  const tasks = db.prepare(
+    'SELECT * FROM tasks WHERE time_block_id = ? AND user_id = ? ORDER BY order_index, created_at'
+  ).all(req.params.id, req.userId!);
+
+  // Parse checklist JSON
+  for (const t of tasks as any[]) {
+    if (t.checklist && typeof t.checklist === 'string') {
+      try { t.checklist = JSON.parse(t.checklist); } catch { t.checklist = null; }
+    }
+  }
+
+  res.json(tasks);
+});
+
 export default router;
