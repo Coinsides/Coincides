@@ -183,8 +183,9 @@ export default function CalendarPage() {
 
   const handleTBMouseEnter = useCallback((e: React.MouseEvent, block: ResolvedTimeBlock, dateStr: string) => {
     if (hoverExitTimer.current) { clearTimeout(hoverExitTimer.current); hoverExitTimer.current = null; }
+    // Capture rect before setTimeout — React recycles the event object
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     hoverEnterTimer.current = setTimeout(() => {
-      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
       setHoverPos({ x: rect.right + 8, y: rect.top });
       setHoverBlock({ block, dateStr });
     }, 300);
