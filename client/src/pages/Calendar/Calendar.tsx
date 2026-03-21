@@ -14,7 +14,7 @@ import {
   isSameDay,
   isToday,
 } from 'date-fns';
-import { ChevronLeft, ChevronRight, X, Plus, Check, Sparkles, Edit3, Trash2, Clock, AlignLeft, CheckSquare, Target, Pencil, Grid3x3, LayoutTemplate } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Plus, Check, Sparkles, Edit3, Trash2, Clock, AlignLeft, CheckSquare, Target, Pencil, Grid3x3, LayoutTemplate, ArrowRightLeft } from 'lucide-react';
 import TemplateEditorModal from '@/components/TemplateEditor/TemplateEditorModal';
 import { useTaskStore } from '@/stores/taskStore';
 import { useCourseStore } from '@/stores/courseStore';
@@ -165,6 +165,10 @@ export default function CalendarPage() {
   // Create modal (overlay edit panel for new TB)
   const [showTBCreateModal, setShowTBCreateModal] = useState(false);
   const [showTemplateEditor, setShowTemplateEditor] = useState(false);
+  // Move task to another date
+  const [moveTask, setMoveTask] = useState<Task | null>(null);
+  const [moveDate, setMoveDate] = useState('');
+  const [moveTimeBlockId, setMoveTimeBlockId] = useState('');
   const [tbCreateLabel, setTBCreateLabel] = useState('');
   const [tbCreateType, setTBCreateType] = useState('study');
   const [tbCreateStart, setTBCreateStart] = useState('');
@@ -216,7 +220,7 @@ export default function CalendarPage() {
   const timedSectionRefs = useRef<(HTMLDivElement | null)[]>([]);
   const gutterBodyRef = useRef<HTMLDivElement | null>(null);
 
-  const { tasks, fetchTasksByRange, deleteTask } = useTaskStore();
+  const { tasks, fetchTasksByRange, deleteTask, updateTask } = useTaskStore();
   const courses = useCourseStore((s) => s.courses);
   const { goals, fetchGoals } = useGoalStore();
   const openModal = useUIStore((s) => s.openModal);
@@ -464,6 +468,54 @@ export default function CalendarPage() {
       addToast('error', 'Failed to delete task');
     }
   };
+
+
+  // ── Move task to another date ─────────────────────────
+
+  const openMoveTask = (task: Task) => {
+    setContextMenu(null);
+    setMoveTask(task);
+    setMoveDate(task.date);
+    setMoveTimeBlockId(task.time_block_id || '');
+  };
+
+  const handleMoveTask = async () => {
+    if (!moveTask || !moveDate) return;
+    try {
+      await updateTask(moveTask.id, {
+        date: moveDate,
+        time_block_id: moveTimeBlockId || null,
+      } as any);
+      setMoveTask(null);
+      // Refresh
+      let rangeStart: Date, rangeEnd: Date;
+      if (view === 'week') {
+        rangeStart = startOfWeek(currentMonth, { weekStartsOn: 1 });
+        rangeEnd = endOfWeek(currentMonth, { weekStartsOn: 1 });
+      } else {
+        const ms = startOfMonth(currentMonth);
+        const me = endOfMonth(currentMonth);
+        rangeStart = startOfWeek(ms, { weekStartsOn: 1 });
+        rangeEnd = endOfWeek(me, { weekStartsOn: 1 });
+      }
+      fetchTasksByRange(format(rangeStart, 'yyyy-MM-dd'), format(rangeEnd, 'yyyy-MM-dd'), courseFilter || undefined);
+      if (selectedDate) {
+        const dateStr = format(selectedDate, 'yyyy-MM-dd');
+        const { data } = await api.get('/tasks', { params: { date: dateStr } });
+        setDayTasks(data);
+      }
+      addToast('success', '任务已移动');
+    } catch {
+      addToast('error', '移动失败');
+    }
+  };
+
+  // Available time blocks for the selected move date
+  const moveTargetBlocks = useMemo(() => {
+    if (!moveDate) return [];
+    const dayData = weekData[moveDate];
+    return dayData?.blocks || [];
+  }, [moveDate, weekData]);
 
   // ── Time Block right-click handlers ──────────────────
 
@@ -1029,6 +1081,13 @@ export default function CalendarPage() {
             Edit
           </button>
           <button
+            className={styles.contextMenuItem}
+            onClick={() => openMoveTask(contextMenu.task)}
+          >
+            <ArrowRightLeft size={14} />
+            Move to...
+          </button>
+          <button
             className={`${styles.contextMenuItem} ${styles.contextMenuDanger}`}
             onClick={() => handleDeleteTask(contextMenu.task.id)}
           >
@@ -1516,6 +1575,48 @@ export default function CalendarPage() {
             }
           }}
         />
+      )}
+
+      {/* Move Task Modal */}
+      {moveTask && (
+        <div className={styles.overlay} onClick={(e) => { if (e.target === e.currentTarget) setMoveTask(null); }}>
+          <div className={styles.tbEditModal} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.tbEditTitle}>移动任务</div>
+            <p style={{ color: 'var(--text-primary)', fontSize: 14, margin: '4px 0 12px', fontWeight: 500 }}>
+              {moveTask.title}
+            </p>
+            <div className={styles.tbEditField}>
+              <label>目标日期</label>
+              <input
+                type="date"
+                value={moveDate}
+                onChange={(e) => { setMoveDate(e.target.value); setMoveTimeBlockId(''); }}
+                className={styles.tbFormInput}
+              />
+            </div>
+            {moveTargetBlocks.length > 0 && (
+              <div className={styles.tbEditField}>
+                <label>放入 Time Block（可选）</label>
+                <select
+                  value={moveTimeBlockId}
+                  onChange={(e) => setMoveTimeBlockId(e.target.value)}
+                  className={styles.tbFormInput}
+                >
+                  <option value="">不放入 Time Block</option>
+                  {moveTargetBlocks.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.type.charAt(0).toUpperCase() + b.type.slice(1)} ({b.start_time}\u2013{b.end_time})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            <div className={styles.tbEditActions}>
+              <button className={styles.tbFormCancel} onClick={() => setMoveTask(null)}>取消</button>
+              <button className={styles.tbFormSave} onClick={handleMoveTask} disabled={!moveDate}>确认移动</button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
