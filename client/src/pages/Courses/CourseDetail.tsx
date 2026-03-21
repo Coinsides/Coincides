@@ -101,6 +101,13 @@ export default function CourseDetailPage() {
 
   // Separate root goals (no parent) from sub-goals
   const rootGoals = goals.filter((g) => !g.parent_id);
+  // Count sub-goals for each root goal
+  const subGoalCounts = new Map<string, number>();
+  for (const g of goals) {
+    if (g.parent_id) {
+      subGoalCounts.set(g.parent_id, (subGoalCounts.get(g.parent_id) || 0) + 1);
+    }
+  }
 
   return (
     <div className={styles.page}>
@@ -189,6 +196,9 @@ export default function CourseDetailPage() {
                         <span className={styles.goalDeadline}>
                           Due {new Date(goal.deadline).toLocaleDateString()}
                         </span>
+                      )}
+                      {(subGoalCounts.get(goal.id) || 0) > 0 && (
+                        <span>{subGoalCounts.get(goal.id)} sub-goals</span>
                       )}
                     </div>
                     {goal.exam_mode && (

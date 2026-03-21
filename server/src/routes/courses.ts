@@ -102,15 +102,28 @@ router.get('/:id/summary', (req: AuthRequest, res: Response) => {
     throw new AppError(404, 'Course not found');
   }
 
-  // Goals with task counts
+  // Goals with task counts (recursive — includes tasks under all descendant sub-goals)
   const goals = db.prepare(`
+    WITH RECURSIVE goal_tree(id) AS (
+      SELECT id FROM goals WHERE course_id = ? AND user_id = ?
+      UNION ALL
+      SELECT g.id FROM goals g JOIN goal_tree gt ON g.parent_id = gt.id
+    )
     SELECT g.*,
-      (SELECT COUNT(*) FROM tasks t WHERE t.goal_id = g.id) as task_count,
-      (SELECT COUNT(*) FROM tasks t WHERE t.goal_id = g.id AND t.status = 'completed') as completed_task_count
+      (SELECT COUNT(*) FROM tasks t WHERE t.goal_id IN (
+        WITH RECURSIVE sub(id) AS (
+          SELECT g.id UNION ALL SELECT g2.id FROM goals g2 JOIN sub s ON g2.parent_id = s.id
+        ) SELECT id FROM sub
+      )) as task_count,
+      (SELECT COUNT(*) FROM tasks t WHERE t.status = 'completed' AND t.goal_id IN (
+        WITH RECURSIVE sub(id) AS (
+          SELECT g.id UNION ALL SELECT g2.id FROM goals g2 JOIN sub s ON g2.parent_id = s.id
+        ) SELECT id FROM sub
+      )) as completed_task_count
     FROM goals g
     WHERE g.course_id = ? AND g.user_id = ?
     ORDER BY g.sort_order ASC, g.created_at ASC
-  `).all(courseId, userId);
+  `).all(courseId, userId, courseId, userId);
 
   // Decks with card counts and due review counts
   const decks = db.prepare(`
