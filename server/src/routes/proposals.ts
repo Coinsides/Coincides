@@ -133,14 +133,28 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
           const taskId = uuidv4();
           // v1.3: scheduled_date takes precedence over date for calendar placement
           const taskDate = (item.scheduled_date || item.date) as string;
+
+          // v1.7.2: Defensive time_block_id fill — if Agent omitted it, look up by day_of_week
+          let timeBlockId = item.time_block_id || null;
+          if (!timeBlockId && taskDate) {
+            const dateObj = new Date(taskDate + 'T00:00:00');
+            const dayOfWeek = dateObj.getDay(); // 0=Sun, 6=Sat
+            const matchingBlock = db.prepare(
+              `SELECT id FROM time_blocks WHERE user_id = ? AND day_of_week = ? AND type = 'study' ORDER BY start_time ASC LIMIT 1`,
+            ).get(req.userId!, dayOfWeek) as { id: string } | undefined;
+            if (matchingBlock) {
+              timeBlockId = matchingBlock.id;
+            }
+          }
+
           db.prepare(
-            'INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, description, start_time, end_time, checklist, serves_must, order_index, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            'INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, description, start_time, end_time, checklist, serves_must, time_block_id, order_index, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
           ).run(
             taskId, req.userId!, item.course_id, item.goal_id || null,
             item.title, taskDate, item.priority || 'must', 'pending',
             item.description || null, item.start_time || null, item.end_time || null,
             (() => { const cl = normalizeChecklist(item.checklist); return cl ? JSON.stringify(cl) : null; })(),
-            item.serves_must || null, 0, now, now,
+            item.serves_must || null, timeBlockId, 0, now, now,
           );
         }
         break;
@@ -193,6 +207,25 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
               db.prepare(`UPDATE tasks SET ${updates.join(', ')} WHERE id = ? AND user_id = ?`).run(...params);
             }
           }
+        }
+        break;
+      }
+      case 'time_block_setup': {
+        // v1.7.2: Create Time Blocks from proposal items
+        for (const item of data.items) {
+          const blockId = uuidv4();
+          db.prepare(
+            'INSERT INTO time_blocks (id, user_id, label, type, day_of_week, start_time, end_time, color, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+          ).run(
+            blockId, req.userId!,
+            item.label || `Study Block`,
+            item.type || 'study',
+            item.day_of_week,
+            item.start_time,
+            item.end_time,
+            item.color || null,
+            now, now,
+          );
         }
         break;
       }

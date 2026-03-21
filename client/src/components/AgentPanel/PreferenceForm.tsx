@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { FileText, Check, ChevronDown, ChevronRight } from 'lucide-react';
 import type { PreferenceFormMessage, PreferenceQuestion } from '@/stores/agentStore';
 import { useAgentStore } from '@/stores/agentStore';
+import MonthCalendar from '@/components/MonthCalendar';
 import styles from './PreferenceForm.module.css';
 
 interface PreferenceFormProps {
@@ -17,6 +18,8 @@ export default function PreferenceForm({ form }: PreferenceFormProps) {
       if (q.default_value !== undefined) {
         defaults[q.id] = q.default_value;
       } else if (q.type === 'multi_choice' || q.type === 'document_select') {
+        defaults[q.id] = [];
+      } else if (q.type === 'date_picker') {
         defaults[q.id] = [];
       } else if (q.type === 'number_input') {
         defaults[q.id] = '';
@@ -47,6 +50,10 @@ export default function PreferenceForm({ form }: PreferenceFormProps) {
 
   const handleNumberInput = useCallback((questionId: string, value: string) => {
     setResponses((prev) => ({ ...prev, [questionId]: value }));
+  }, []);
+
+  const handleDatePicker = useCallback((questionId: string, dates: string[]) => {
+    setResponses((prev) => ({ ...prev, [questionId]: dates }));
   }, []);
 
   const handleDocSelect = useCallback((questionId: string, docId: string, maxSelect?: number) => {
@@ -93,6 +100,13 @@ export default function PreferenceForm({ form }: PreferenceFormProps) {
             } else if (q.type === 'multi_choice') {
               const vals = val as string[] | undefined;
               display = vals?.map((v) => q.options?.find((o) => o.value === v)?.label || v).join('、') || '—';
+            } else if (q.type === 'date_picker') {
+              const vals = val as string[] | undefined;
+              if (vals && vals.length > 0) {
+                display = vals.length === 1 ? vals[0] : `${vals[0]} 至 ${vals[vals.length - 1]}（${vals.length}天）`;
+              } else {
+                display = '—';
+              }
             } else if (q.type === 'document_select') {
               const vals = val as string[] | undefined;
               display = vals?.map((v) => q.documents?.find((d) => d.id === v)?.filename || v).join('、') || '—';
@@ -126,6 +140,7 @@ export default function PreferenceForm({ form }: PreferenceFormProps) {
             onSingleChoice={handleSingleChoice}
             onMultiChoice={handleMultiChoice}
             onNumberInput={handleNumberInput}
+            onDatePicker={handleDatePicker}
             onDocSelect={handleDocSelect}
             expandedDocs={expandedDocs}
             onToggleDocExpand={toggleDocExpand}
@@ -146,6 +161,7 @@ interface QuestionRendererProps {
   onSingleChoice: (id: string, value: string) => void;
   onMultiChoice: (id: string, value: string, maxSelect?: number) => void;
   onNumberInput: (id: string, value: string) => void;
+  onDatePicker: (id: string, dates: string[]) => void;
   onDocSelect: (id: string, docId: string, maxSelect?: number) => void;
   expandedDocs: Set<string>;
   onToggleDocExpand: (docId: string) => void;
@@ -157,6 +173,7 @@ function QuestionRenderer({
   onSingleChoice,
   onMultiChoice,
   onNumberInput,
+  onDatePicker,
   onDocSelect,
   expandedDocs,
   onToggleDocExpand,
@@ -226,6 +243,17 @@ function QuestionRenderer({
           min={1}
           max={20}
         />
+      )}
+
+      {q.type === 'date_picker' && (
+        <div className={styles.datePickerWrap}>
+          <MonthCalendar
+            selectedDates={(value as string[]) || []}
+            onDatesChange={(dates) => onDatePicker(q.id, dates)}
+            minDate={q.date_config?.min_date}
+            maxDate={q.date_config?.max_date}
+          />
+        </div>
       )}
 
       {q.type === 'document_select' && q.documents && (

@@ -174,8 +174,8 @@ export const toolDefinitions: ToolDefinition[] = [
       properties: {
         type: {
           type: 'string',
-          enum: ['batch_cards', 'study_plan', 'goal_breakdown', 'schedule_adjustment'],
-          description: 'Proposal type: batch_cards (flashcards), study_plan (daily tasks with scheduled_date), goal_breakdown (big goal → sub-goals + tasks), schedule_adjustment (modify existing tasks)',
+          enum: ['batch_cards', 'study_plan', 'goal_breakdown', 'schedule_adjustment', 'time_block_setup'],
+          description: 'Proposal type: batch_cards (flashcards), study_plan (daily tasks with scheduled_date), goal_breakdown (big goal → sub-goals + tasks), schedule_adjustment (modify existing tasks), time_block_setup (create Time Blocks for days missing study blocks)',
         },
         data: {
           type: 'object',
@@ -185,7 +185,7 @@ export const toolDefinitions: ToolDefinition[] = [
             items: {
               type: 'array',
               items: { type: 'object' },
-              description: 'Array of items to create/modify. For study_plan: each item should include { title, course_id, priority, goal_id, scheduled_date (YYYY-MM-DD), description, serves_must, checklist?: [{text: string, done: boolean}] }. The checklist MUST be an array of objects with "text" and "done" fields (NOT plain strings). For batch_cards: each item should include { deck_id, section_id, template_type, title, content }. For schedule_adjustment: { task_id, date, priority, status }.',
+              description: 'Array of items to create/modify. For study_plan: each item should include { title, course_id, priority, goal_id, scheduled_date (YYYY-MM-DD), description, serves_must, time_block_id, checklist?: [{text: string, done: boolean}] }. The checklist MUST be an array of objects with "text" and "done" fields (NOT plain strings). For batch_cards: each item should include { deck_id, section_id, template_type, title, content }. For schedule_adjustment: { task_id, date, priority, status }. For time_block_setup: each item should include { label, day_of_week (0=Sun..6=Sat), start_time (HH:MM), end_time (HH:MM), type ("study") }.',
             },
           },
           required: ['title', 'description', 'items'],
@@ -314,7 +314,7 @@ export const toolDefinitions: ToolDefinition[] = [
             type: 'object',
             properties: {
               id: { type: 'string', description: 'Unique question identifier (e.g., "scheduling_mode", "documents", "daily_limit")' },
-              type: { type: 'string', enum: ['single_choice', 'multi_choice', 'number_input', 'document_select'], description: 'Question type: single_choice (radio), multi_choice (checkboxes), number_input (numeric), document_select (pick from uploaded docs)' },
+              type: { type: 'string', enum: ['single_choice', 'multi_choice', 'number_input', 'document_select', 'date_picker'], description: 'Question type: single_choice (radio), multi_choice (checkboxes), number_input (numeric), document_select (pick from uploaded docs), date_picker (month calendar for selecting study dates — returns sorted string[] of YYYY-MM-DD)' },
               label: { type: 'string', description: 'Question text shown to the student' },
               options: {
                 type: 'array',
@@ -346,6 +346,14 @@ export const toolDefinitions: ToolDefinition[] = [
                 description: 'Available documents for document_select type. Get these from search_documents first.',
               },
               placeholder: { type: 'string', description: 'Placeholder text for number_input' },
+              date_config: {
+                type: 'object',
+                properties: {
+                  min_date: { type: 'string', description: 'Earliest selectable date (YYYY-MM-DD). Default: tomorrow.' },
+                  max_date: { type: 'string', description: 'Latest selectable date (YYYY-MM-DD). Default: 90 days from today.' },
+                },
+                description: 'Configuration for date_picker type. Controls selectable date range.',
+              },
             },
             required: ['id', 'type', 'label'],
           },

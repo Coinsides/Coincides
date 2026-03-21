@@ -154,6 +154,14 @@
   padding: 4px 0 0 2px;
 }
 
+/* Date picker wrapper */
+.datePickerWrap {
+  background: var(--glass-elevated);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+}
+
 /* Number input */
 .numberInput {
   width: 100%;

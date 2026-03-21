@@ -1,0 +1,122 @@
+/* ============================================================
+   MonthCalendar — Date picker with drag-select + single-click
+   ============================================================ */
+
+.container {
+  width: 100%;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* --- Header: month navigation --- */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.navBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.navBtn:hover {
+  background: var(--glass-hover);
+  color: var(--text-primary);
+}
+
+.monthLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: 0.3px;
+}
+
+/* --- Weekday headers --- */
+.weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 4px;
+}
+
+.weekdayCell {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  padding: 4px 0;
+}
+
+/* --- Day grid --- */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.dayCell {
+  position: relative;
+  text-align: center;
+  font-size: 13px;
+  padding: 8px 0;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.dayCell:hover:not(.disabled):not(.outsideMonth) {
+  background: var(--glass-hover);
+}
+
+/* Outside current month — dimmed */
+.outsideMonth {
+  color: var(--text-muted);
+  opacity: 0.4;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Disabled (past dates or out of range) */
+.disabled {
+  color: var(--text-muted);
+  opacity: 0.3;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Selected state */
+.selected {
+  background: var(--accent-primary-bg);
+  color: var(--accent-primary-hover);
+  font-weight: 600;
+}
+
+.selected:hover {
+  background: var(--accent-primary-bg-hover);
+}
+
+/* Drag preview — highlighted range being dragged */
+.dragPreview {
+  background: rgba(99, 102, 241, 0.2);
+  color: var(--accent-primary-hover);
+  font-weight: 600;
+}
+
+/* --- Summary text --- */
+.summary {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-align: center;
+  line-height: 1.4;
+}

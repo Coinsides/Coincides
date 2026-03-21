@@ -139,7 +139,7 @@
 
 ---
 
-## v1.7.2 — 学习计划流程完善（计划中）
+## v1.7.2 — 学习计划流程完善
 
 > 详见 [v1.7.2-plan.md](v1.7.2-plan.md)
 
@@ -153,6 +153,23 @@
 ### 修复
 - 学习计划中任务未挂载到 Time Block 的问题
 - 偏好收集表单缺少日期选择字段的问题
+
+### 新增文件
+| 文件 | 说明 |
+|------|------|
+| `client/src/components/MonthCalendar/MonthCalendar.tsx` | 月历日期选择组件：拖选 + 单击 |
+| `client/src/components/MonthCalendar/MonthCalendar.module.css` | 月历样式 |
+| `client/src/components/MonthCalendar/index.ts` | 导出入口 |
+
+### 修改文件
+| 文件 | 变更 |
+|------|------|
+| `server/src/agent/tools/definitions.ts` | `collect_preferences` 新增 `date_picker` 类型 + `date_config` 属性；`create_proposal` 新增 `time_block_setup` 类型 + `time_block_id` 字段说明 |
+| `server/src/agent/system-prompt.ts` | 偏好表单新增 study_dates 字段；Step 4 新增 Time Block 缺口检测流程；Anti-Patterns 新增 2 条；排期协议强化 time_block_id |
+| `server/src/routes/proposals.ts` | `study_plan` apply 新增防御性 time_block_id 填充；新增 `time_block_setup` apply 逻辑 |
+| `client/src/stores/agentStore.ts` | `PreferenceQuestion.type` 新增 `date_picker`；新增 `date_config` 字段 |
+| `client/src/components/AgentPanel/PreferenceForm.tsx` | 集成 MonthCalendar；新增 date_picker 渲染 + 提交摘要 |
+| `client/src/components/AgentPanel/PreferenceForm.module.css` | 新增 datePickerWrap 样式 |
 
 ---
 

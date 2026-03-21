@@ -4,7 +4,7 @@ import type { AgentConversation, AgentMessage } from '@shared/types';
 
 export interface PreferenceQuestion {
   id: string;
-  type: 'single_choice' | 'multi_choice' | 'number_input' | 'document_select';
+  type: 'single_choice' | 'multi_choice' | 'number_input' | 'document_select' | 'date_picker';
   label: string;
   options?: Array<{ value: string; label: string; description?: string }>;
   default_value?: string;
@@ -12,6 +12,7 @@ export interface PreferenceQuestion {
   max_select?: number;
   documents?: Array<{ id: string; filename: string; page_count: number; summary: string; document_type?: string }>;
   placeholder?: string;
+  date_config?: { min_date?: string; max_date?: string };
 }
 
 export interface PreferenceFormMessage {
