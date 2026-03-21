@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
-import { ChevronDown, ChevronRight, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Trash2, LayoutGrid } from 'lucide-react';
 import { useProposalStore, type ProposalItem, type ProposalData } from '@/stores/proposalStore';
 import { useUIStore } from '@/stores/uiStore';
 import TimePickerInline from './TimePickerInline';
+import ProposalWeekEditor from './ProposalWeekEditor';
 import styles from './ProposalList.module.css';
 
 const typeBadgeColors: Record<string, { bg: string; text: string }> = {
@@ -56,6 +57,7 @@ export default function ProposalList() {
   const { proposals, loading, fetchProposals, applyProposal, discardProposal } = useProposalStore();
   const addToast = useUIStore((s) => s.addToast);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [weekEditorProposalId, setWeekEditorProposalId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchProposals();
@@ -231,6 +233,15 @@ export default function ProposalList() {
                   })}
                 </div>
                 <div className={styles.actions}>
+                  {proposal.type === 'time_block_setup' && (
+                    <button
+                      className={styles.weekEditBtn}
+                      onClick={() => setWeekEditorProposalId(proposal.id)}
+                    >
+                      <LayoutGrid size={13} />
+                      周视图编辑
+                    </button>
+                  )}
                   <button className={styles.applyBtn} onClick={() => handleApply(proposal.id)}>
                     Apply
                   </button>
@@ -243,6 +254,37 @@ export default function ProposalList() {
           </div>
         );
       })}
+
+      {/* Week Editor for time_block_setup proposals */}
+      {weekEditorProposalId && (() => {
+        const proposal = proposals.find(p => p.id === weekEditorProposalId);
+        if (!proposal || proposal.type !== 'time_block_setup') return null;
+        const items = safeItems(proposal.data);
+        const allowedDates = [...new Set(items.map(item => safeString(item.date)).filter(Boolean))].sort();
+        const tbItems = items.map(item => ({
+          label: safeString(item.label, 'study'),
+          date: safeString(item.date),
+          start_time: safeString(item.start_time, '09:00'),
+          end_time: safeString(item.end_time, '18:00'),
+          type: safeString(item.type, 'study'),
+        }));
+        return (
+          <ProposalWeekEditor
+            items={tbItems}
+            allowedDates={allowedDates}
+            onSave={(newItems) => {
+              const newData: ProposalData = {
+                ...proposal.data,
+                items: newItems as unknown as Array<Record<string, unknown>>,
+              };
+              useProposalStore.getState().updateProposal(proposal.id, newData);
+              setWeekEditorProposalId(null);
+              addToast('success', `已更新 ${newItems.length} 个 Time Block`);
+            }}
+            onClose={() => setWeekEditorProposalId(null)}
+          />
+        );
+      })()}
     </div>
   );
 }
