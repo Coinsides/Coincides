@@ -240,21 +240,14 @@
 /* ─── Time gutter (24h labels on the left) ────────── */
 
 .timeGutter {
-  display: flex;
-  flex-direction: column;
-}
-
-.timeGutterHeader {
-  /* Matches .weekColumnHeader height — keep in sync */
-  height: 56px;
-  flex-shrink: 0;
+  position: relative;
 }
 
 .timeGutterBody {
-  position: relative;
-  flex: 1;
-  min-height: 600px;
-  margin: 4px 0 8px;
+  position: absolute;
+  left: 0;
+  right: 0;
+  /* top + height set via JS to match timedSection exactly */
 }
 
 .timeGutterLabel {

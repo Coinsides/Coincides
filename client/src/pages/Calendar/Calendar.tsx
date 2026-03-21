@@ -205,6 +205,7 @@ export default function CalendarPage() {
   }, []);
 
   const timedSectionRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const gutterBodyRef = useRef<HTMLDivElement | null>(null);
 
   const { tasks, fetchTasksByRange, deleteTask } = useTaskStore();
   const courses = useCourseStore((s) => s.courses);
@@ -248,6 +249,33 @@ export default function CalendarPage() {
   useEffect(() => {
     fetchGoals();
   }, []);
+
+  // Sync time gutter labels with the first day column's timedSection
+  // The gutter body must start and end at the same Y as timedSection for % alignment
+  const [gutterSync, setGutterSync] = useState<{ top: number; height: number } | null>(null);
+  useEffect(() => {
+    if (view !== 'week') return;
+    const syncLayout = () => {
+      const firstTimed = timedSectionRefs.current[0];
+      const gutter = gutterBodyRef.current;
+      if (!firstTimed || !gutter) return;
+      const gutterParent = gutter.parentElement;
+      if (!gutterParent) return;
+      const parentRect = gutterParent.getBoundingClientRect();
+      const timedRect = firstTimed.getBoundingClientRect();
+      setGutterSync({
+        top: timedRect.top - parentRect.top,
+        height: timedRect.height,
+      });
+    };
+    const raf = requestAnimationFrame(syncLayout);
+    const observer = new ResizeObserver(syncLayout);
+    if (timedSectionRefs.current[0]?.parentElement) observer.observe(timedSectionRefs.current[0].parentElement);
+    return () => {
+      cancelAnimationFrame(raf);
+      observer.disconnect();
+    };
+  }, [view, weekData, tasks]);
 
   // Build calendar days
   const calendarDays = useMemo(() => {
@@ -734,23 +762,27 @@ export default function CalendarPage() {
       ) : (
         /* Week view */
         <div className={styles.weekGrid}>
-          {/* Dynamic time gutter */}
-          <div className={styles.timeGutter}>
-            <div className={styles.timeGutterHeader} />
-            <div className={styles.timeGutterBody}>
-              {Array.from({ length: rangeEndH - rangeStartH }, (_, i) => {
-                const hour = rangeStartH + i;
-                return (
-                  <div
-                    key={hour}
-                    className={styles.timeGutterLabel}
-                    style={{ top: `${(i / (rangeEndH - rangeStartH)) * 100}%` }}
-                  >
-                    {`${hour}:00`}
-                  </div>
-                );
-              })}
-            </div>
+          {/* Dynamic time gutter — absolutely positioned to align with timedSection */}
+          <div className={styles.timeGutter} ref={gutterBodyRef}>
+            {gutterSync && (
+              <div
+                className={styles.timeGutterBody}
+                style={{ top: gutterSync.top, height: gutterSync.height }}
+              >
+                {Array.from({ length: rangeEndH - rangeStartH }, (_, i) => {
+                  const hour = rangeStartH + i;
+                  return (
+                    <div
+                      key={hour}
+                      className={styles.timeGutterLabel}
+                      style={{ top: `${(i / (rangeEndH - rangeStartH)) * 100}%` }}
+                    >
+                      {`${hour}:00`}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
           {weekDays.map((day, dayIdx) => {
             const dateStr = format(day, 'yyyy-MM-dd');
