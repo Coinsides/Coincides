@@ -110,7 +110,7 @@ export class AnthropicProvider implements AIProvider {
     try {
       const stream = this.client.messages.stream({
         model: this.model,
-        max_tokens: 4096,
+        max_tokens: 16384,
         system: systemPrompt,
         messages: validatedMessages,
         tools: anthropicTools.length > 0 ? anthropicTools : undefined,
