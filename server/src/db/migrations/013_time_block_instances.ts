@@ -10,13 +10,15 @@ export default {
     // 2. Drop the overrides table (no longer needed with date-based instances)
     db.exec(`DROP TABLE IF EXISTS time_block_overrides`);
 
-    // 3. Recreate time_blocks as date-based instances
-    //    SQLite doesn't support DROP COLUMN or complex ALTER, so we rebuild the table.
-    db.exec(`
-      -- Rename old table
-      ALTER TABLE time_blocks RENAME TO time_blocks_old;
+    // 3. Drop old indexes that reference old columns
+    db.exec(`DROP INDEX IF EXISTS idx_time_blocks_user`);
+    db.exec(`DROP INDEX IF EXISTS idx_time_blocks_user_day`);
 
-      -- Create new table with date instead of day_of_week
+    // 4. Recreate time_blocks as date-based instances
+    //    SQLite doesn't support DROP COLUMN or complex ALTER, so we rebuild the table.
+    db.exec(`ALTER TABLE time_blocks RENAME TO time_blocks_old`);
+
+    db.exec(`
       CREATE TABLE time_blocks (
         id TEXT PRIMARY KEY,
         user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -29,13 +31,13 @@ export default {
         color TEXT,
         created_at TEXT NOT NULL DEFAULT (datetime('now')),
         updated_at TEXT NOT NULL DEFAULT (datetime('now'))
-      );
-
-      CREATE INDEX IF NOT EXISTS idx_time_blocks_user ON time_blocks(user_id);
-      CREATE INDEX IF NOT EXISTS idx_time_blocks_user_date ON time_blocks(user_id, date);
-
-      -- Drop old table (data is intentionally NOT migrated — clean slate)
-      DROP TABLE time_blocks_old;
+      )
     `);
+
+    db.exec(`CREATE INDEX idx_time_blocks_user ON time_blocks(user_id)`);
+    db.exec(`CREATE INDEX idx_time_blocks_user_date ON time_blocks(user_id, date)`);
+
+    // 5. Drop old table (data is intentionally NOT migrated — clean slate)
+    db.exec(`DROP TABLE IF EXISTS time_blocks_old`);
   },
 };
