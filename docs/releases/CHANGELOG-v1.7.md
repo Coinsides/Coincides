@@ -139,10 +139,27 @@
 
 ---
 
+## v1.7.2 — 学习计划流程完善（计划中）
+
+> 详见 [v1.7.2-plan.md](v1.7.2-plan.md)
+
+### 新增功能
+- 月历日期选择组件（MonthCalendar）：拖选连续范围 + 单击选择离散日期
+- `collect_preferences` 新增 `date_picker` 类型问题
+- Time Block 缺口检测 + 两步 Proposal 流程（先补全 Time Block → 再生成学习计划）
+- `create_proposal` 新增 `time_block_setup` 类型
+- 任务 `time_block_id` 防御性自动填充
+
+### 修复
+- 学习计划中任务未挂载到 Time Block 的问题
+- 偏好收集表单缺少日期选择字段的问题
+
+---
+
 ## 设计宪法遵循
 
 | 宪法条款 | 实施措施 |
 |---|---|
-| 不替用户做决定 | Task-Card 关联由用户或 Agent proposal 提出，用户审批后执行 |
-| 不监控用户 | 不追踪关联卡片复习情况；不根据关联数量生成分析 |
-| 不制造挫败感 | 未关联卡片的任务不标红/不警告；无统计式完成率 |
+| 不替用户做决定 | Task-Card 关联由用户或 Agent proposal 提出，用户审批后执行；Time Block 补全通过 Proposal 审批 |
+| 不监控用户 | 不追踪关联卡片复习情况；不根据关联数量生成分析；不根据 Time Block 推断学习习惯 |
+| 不制造挫败感 | 未关联卡片的任务不标红/不警告；Time Block 缺口提示语气中性 |
