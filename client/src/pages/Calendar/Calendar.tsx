@@ -188,7 +188,14 @@ export default function CalendarPage() {
     // Capture rect before setTimeout — React recycles the event object
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     hoverEnterTimer.current = setTimeout(() => {
-      setHoverPos({ x: rect.right + 8, y: rect.top });
+      // Panel is ~240px wide. If it would overflow viewport right edge, show to the left instead.
+      const panelWidth = 240;
+      const viewportWidth = window.innerWidth;
+      const x = (rect.right + 8 + panelWidth > viewportWidth)
+        ? rect.left - panelWidth - 8
+        : rect.right + 8;
+      const y = Math.max(8, Math.min(rect.top, window.innerHeight - 300));
+      setHoverPos({ x, y });
       setHoverBlock({ block, dateStr });
     }, 300);
   }, []);

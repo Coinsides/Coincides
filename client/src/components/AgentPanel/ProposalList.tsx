@@ -164,15 +164,11 @@ export default function ProposalList() {
                               {safeString(item.date)}
                             </span>
                           )}
-                          {isTimeBlockSetup && !!(item.start_time || item.end_time) && (
-                            <span className={styles.itemMeta}>
-                              {safeString(item.start_time)} – {safeString(item.end_time)}
-                            </span>
-                          )}
+
                           {item.template_type ? (
                             <span className={styles.itemMeta}>{safeString(item.template_type)}</span>
                           ) : null}
-                          {(item.scheduled_date || item.date) ? (
+                          {!isTimeBlockSetup && (item.scheduled_date || item.date) ? (
                             <span className={styles.itemDate}>
                               {safeString(item.scheduled_date || item.date)}
                             </span>
@@ -187,6 +183,23 @@ export default function ProposalList() {
 
                         {/* Calendar Event mode: editable start/end time */}
                         {calendarMode && (
+                          <div className={styles.timeEditors}>
+                            <TimePickerInline
+                              label="Start"
+                              value={safeString(item.start_time)}
+                              onChange={(t) => handleTimeChange(proposal, i, 'start_time', t)}
+                            />
+                            <span className={styles.timeSeparator}>–</span>
+                            <TimePickerInline
+                              label="End"
+                              value={safeString(item.end_time)}
+                              onChange={(t) => handleTimeChange(proposal, i, 'end_time', t)}
+                            />
+                          </div>
+                        )}
+
+                        {/* Time Block Setup: editable start/end time */}
+                        {isTimeBlockSetup && (
                           <div className={styles.timeEditors}>
                             <TimePickerInline
                               label="Start"
