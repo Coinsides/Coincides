@@ -14,7 +14,8 @@ import {
   isSameDay,
   isToday,
 } from 'date-fns';
-import { ChevronLeft, ChevronRight, X, Plus, Check, Sparkles, Edit3, Trash2, Clock, AlignLeft, CheckSquare, Target, Pencil, Grid3x3 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Plus, Check, Sparkles, Edit3, Trash2, Clock, AlignLeft, CheckSquare, Target, Pencil, Grid3x3, LayoutTemplate } from 'lucide-react';
+import TemplateEditorModal from '@/components/TemplateEditor/TemplateEditorModal';
 import { useTaskStore } from '@/stores/taskStore';
 import { useCourseStore } from '@/stores/courseStore';
 import { useGoalStore } from '@/stores/goalStore';
@@ -163,6 +164,7 @@ export default function CalendarPage() {
   const [tbCreateMenu, setTBCreateMenu] = useState<{ x: number; y: number } | null>(null);
   // Create modal (overlay edit panel for new TB)
   const [showTBCreateModal, setShowTBCreateModal] = useState(false);
+  const [showTemplateEditor, setShowTemplateEditor] = useState(false);
   const [tbCreateLabel, setTBCreateLabel] = useState('');
   const [tbCreateType, setTBCreateType] = useState('study');
   const [tbCreateStart, setTBCreateStart] = useState('');
@@ -639,6 +641,14 @@ export default function CalendarPage() {
               onClick={() => setView('week')}
             >Week</button>
           </div>
+          <button
+            className={styles.templateBtn}
+            onClick={() => setShowTemplateEditor(true)}
+            title="Time Block 模板"
+          >
+            <LayoutTemplate size={14} />
+            模板
+          </button>
 
           <button className={styles.navBtn} onClick={() => setCurrentMonth(view === 'week' ? subWeeks(currentMonth, 1) : subMonths(currentMonth, 1))}>
             <ChevronLeft size={16} />
@@ -1486,6 +1496,20 @@ export default function CalendarPage() {
           </div>
         );
       })()}
+
+      {/* Template Editor Modal */}
+      {showTemplateEditor && (
+        <TemplateEditorModal
+          onClose={() => setShowTemplateEditor(false)}
+          onApplied={() => {
+            // Refresh week data after applying template
+            if (view === 'week') {
+              const weekStart = startOfWeek(currentMonth, { weekStartsOn: 1 });
+              fetchWeek(format(weekStart, 'yyyy-MM-dd'));
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
