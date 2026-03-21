@@ -153,6 +153,7 @@
 ### 修复
 - 学习计划中任务未挂载到 Time Block 的问题
 - 偏好收集表单缺少日期选择字段的问题
+- **删除目标级联删除任务**：删除目标时现在会自动删除该目标及其所有子目标下的任务（原先行为是 tasks.goal_id 置 NULL，任务保留但失去归属）
 
 ### 新增文件
 | 文件 | 说明 |
@@ -170,6 +171,9 @@
 | `client/src/stores/agentStore.ts` | `PreferenceQuestion.type` 新增 `date_picker`；新增 `date_config` 字段 |
 | `client/src/components/AgentPanel/PreferenceForm.tsx` | 集成 MonthCalendar；新增 date_picker 渲染 + 提交摘要 |
 | `client/src/components/AgentPanel/PreferenceForm.module.css` | 新增 datePickerWrap 样式 |
+| `server/src/routes/goals.ts` | 删除目标时递归收集子目标 ID，事务内批量删除关联任务 |
+| `client/src/stores/goalStore.ts` | deleteGoal 后同步清理 taskStore 中已删除目标的任务 |
+| `client/src/pages/Goals/Goals.tsx` | 删除目标 toast 改为中文提示“目标及其下属任务已删除” |
 
 ---
 
