@@ -8,6 +8,7 @@
 
 | 版本 | 文件 | 说明 |
 |------|------|------|
+| v1.7.1 | [CHANGELOG-v1.7.md](../releases/CHANGELOG-v1.7.md) | Agent 效率深度优化：并行执行 + Playbook + Context 预注入 |
 | v1.3.1 | [CHANGELOG-v1.3.1.md](../releases/CHANGELOG-v1.3.1.md) | 补丁版本：3 个 bug 修复 + Windows 兼容性 + Agent 稳定性 |
 | v1.3 | [CHANGELOG-v1.3.md](../releases/CHANGELOG-v1.3.md) | Time Block + AI 排期 + L1 入驻流 + 设计宪法审计 |
 | v1.2 | [CHANGELOG-v1.2.md](../releases/CHANGELOG-v1.2.md) | AI 交互重构 + Goal Manager + 新用户引导 + i18n |
