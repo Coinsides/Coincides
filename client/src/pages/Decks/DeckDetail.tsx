@@ -38,8 +38,7 @@ export default function DeckDetailPage() {
   const [tagFilter, setTagFilter] = useState('');
   const [importanceFilter, setImportanceFilter] = useState(0);
   const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
-  const perPage = 20;
+  // No pagination — show all cards (infinite scroll feel)
 
   const [selectMode, setSelectMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -86,20 +85,19 @@ export default function DeckDetailPage() {
     loadCards();
   }, [deckId]);
 
-  useEffect(() => { loadCards(); setPage(1); }, [templateFilter, tagFilter, importanceFilter, search]);
+  useEffect(() => { loadCards(); }, [templateFilter, tagFilter, importanceFilter, search]);
 
-  const totalPages = Math.ceil(cards.length / perPage);
-  const paginatedCards = cards.slice((page - 1) * perPage, page * perPage);
+
 
   const cardsBySection = useMemo(() => {
     const groups: Record<string, typeof cards> = { __unsectioned: [] };
     for (const s of sections) groups[s.id] = [];
-    for (const card of paginatedCards) {
+    for (const card of cards) {
       const key = card.section_id && groups[card.section_id] ? card.section_id : '__unsectioned';
       groups[key].push(card);
     }
     return groups;
-  }, [paginatedCards, sections]);
+  }, [cards, sections]);
 
   const toggleSection = (sectionId: string) => {
     setCollapsedSections((prev) => {
@@ -249,13 +247,7 @@ export default function DeckDetailPage() {
         <BatchBar selectedCount={selectedIds.size} onDelete={handleBatchDelete} onCancel={() => { setSelectMode(false); setSelectedIds(new Set()); }} />
       )}
 
-      {totalPages > 1 && (
-        <div className={styles.pagination}>
-          {Array.from({ length: totalPages }, (_, i) => (
-            <button key={i} className={`${styles.pageBtn} ${page === i + 1 ? styles.activePageBtn : ''}`} onClick={() => setPage(i + 1)}>{i + 1}</button>
-          ))}
-        </div>
-      )}
+
 
       {confirmDeleteSection && (
         <ConfirmDialog
