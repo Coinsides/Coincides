@@ -185,7 +185,7 @@ export const toolDefinitions: ToolDefinition[] = [
             items: {
               type: 'array',
               items: { type: 'object' },
-              description: 'Array of items to create/modify. For study_plan: each item should include { title, course_id, priority, goal_id, scheduled_date (YYYY-MM-DD), description, serves_must }. The scheduled_date determines which day the task lands on in the calendar. For batch_cards: card drafts. For schedule_adjustment: { task_id, date, priority, status }.',
+              description: 'Array of items to create/modify. For study_plan: each item should include { title, course_id, priority, goal_id, scheduled_date (YYYY-MM-DD), description, serves_must, checklist?: [{text: string, done: boolean}] }. The checklist MUST be an array of objects with "text" and "done" fields (NOT plain strings). For batch_cards: each item should include { deck_id, section_id, template_type, title, content }. For schedule_adjustment: { task_id, date, priority, status }.',
             },
           },
           required: ['title', 'description', 'items'],

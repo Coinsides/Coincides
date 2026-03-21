@@ -9,6 +9,27 @@ import { ZodError } from 'zod';
 
 const router = Router();
 
+/**
+ * Normalize checklist to [{text, done}] format.
+ * Agent might send: string[], [{text}], [{text, done}], or other variants.
+ */
+function normalizeChecklist(raw: unknown): { text: string; done: boolean }[] | null {
+  if (!raw || !Array.isArray(raw) || raw.length === 0) return null;
+  return raw.map((item: unknown) => {
+    if (typeof item === 'string') {
+      return { text: item, done: false };
+    }
+    if (typeof item === 'object' && item !== null) {
+      const obj = item as Record<string, unknown>;
+      return {
+        text: String(obj.text || obj.label || obj.content || obj.name || ''),
+        done: Boolean(obj.done || obj.completed || false),
+      };
+    }
+    return { text: String(item), done: false };
+  }).filter((item) => item.text.length > 0);
+}
+
 interface ProposalRow {
   id: string;
   user_id: string;
@@ -118,7 +139,7 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
             taskId, req.userId!, item.course_id, item.goal_id || null,
             item.title, taskDate, item.priority || 'must', 'pending',
             item.description || null, item.start_time || null, item.end_time || null,
-            item.checklist ? JSON.stringify(item.checklist) : null,
+            (() => { const cl = normalizeChecklist(item.checklist); return cl ? JSON.stringify(cl) : null; })(),
             item.serves_must || null, 0, now, now,
           );
         }
@@ -150,7 +171,7 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
               taskId, req.userId!, item.course_id, resolvedGoalId,
               item.title, taskDate, item.priority || 'must', 'pending',
               item.description || null, item.start_time || null, item.end_time || null,
-              item.checklist ? JSON.stringify(item.checklist) : null,
+              (() => { const cl = normalizeChecklist(item.checklist); return cl ? JSON.stringify(cl) : null; })(),
               item.serves_must || null, 0, now, now,
             );
           }

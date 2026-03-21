@@ -70,6 +70,20 @@
 
 ---
 
+## Checklist 格式兼容 + max_tokens 修复
+
+### max_tokens 4096→16384
+- `anthropic.ts` 中 Claude API 的 `max_tokens` 从 4096 提升到 16384
+- 4096 导致 batch_cards proposal 的大 JSON 被截断，Agent 反复重试但永远无法完成
+
+### Checklist 格式防御性处理
+- `proposals.ts` 新增 `normalizeChecklist()` 函数
+- 兼容 Agent 可能发送的多种格式：纯字符串数组、`{text}` 数组、`{text, done}` 数组
+- study_plan 和 goal_breakdown apply 时统一转换为 `[{text: string, done: boolean}]`
+- `definitions.ts` 中 `create_proposal` 的 items 描述明确了 checklist 格式要求
+
+---
+
 ## Proposal 机制强制化（Bug Fix）
 
 ### 问题
