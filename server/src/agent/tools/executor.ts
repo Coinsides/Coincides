@@ -39,13 +39,8 @@ export async function executeTool(
     }
 
     case 'create_task': {
-      const { title, date, priority, course_id, goal_id, description, start_time, end_time, checklist, serves_must, time_block_id } = args as Record<string, any>;
-      const id = uuidv4();
-      const now = new Date().toISOString();
-      db.prepare(
-        'INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, description, start_time, end_time, checklist, serves_must, time_block_id, order_index, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      ).run(id, userId, course_id, goal_id || null, title, date, priority || 'must', 'pending', description || null, start_time || null, end_time || null, checklist ? JSON.stringify(checklist) : null, serves_must || null, time_block_id || null, 0, now, now);
-      return JSON.stringify({ id, title, date, priority, message: 'Task created successfully' });
+      // GUARD: Direct task creation by Agent is blocked. Use create_proposal(study_plan) instead.
+      return JSON.stringify({ error: 'BLOCKED: Direct task creation is not allowed. You MUST use create_proposal with type "study_plan" or "goal_breakdown" to create tasks. The student must review and approve the proposal first. This is a Design Constitution requirement — do not attempt to bypass it.' });
     }
 
     case 'complete_task': {
@@ -189,38 +184,8 @@ export async function executeTool(
     }
 
     case 'create_card': {
-      const { deck_id, section_id, template_type, title, content, importance, tag_ids } = args as {
-        deck_id: string; section_id?: string; template_type: string; title: string;
-        content: Record<string, unknown>; importance?: number; tag_ids?: string[];
-      };
-
-      // Enforce section_id requirement
-      if (!section_id) {
-        return JSON.stringify({ error: 'section_id is required. Every card must belong to a section. Use create_section first if needed.' });
-      }
-
-      // Normalize content to match expected template structure
-      const resolvedType = template_type || 'general';
-      const normalizedContent = normalizeCardContent(resolvedType, content || {});
-
-      const id = uuidv4();
-      const now = new Date().toISOString();
-      db.prepare(
-        'INSERT INTO cards (id, user_id, deck_id, section_id, template_type, title, content, importance, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      ).run(id, userId, deck_id, section_id, resolvedType, title, JSON.stringify(normalizedContent), importance || 3, now, now);
-
-      // Attach tags
-      if (tag_ids && tag_ids.length > 0) {
-        const insertTag = db.prepare('INSERT OR IGNORE INTO card_tags (card_id, tag_id) VALUES (?, ?)');
-        for (const tagId of tag_ids) {
-          insertTag.run(id, tagId);
-        }
-      }
-
-      // Update deck card count
-      db.prepare('UPDATE card_decks SET card_count = card_count + 1, updated_at = ? WHERE id = ?').run(now, deck_id);
-
-      return JSON.stringify({ id, title, message: 'Card created successfully' });
+      // GUARD: Direct card creation by Agent is blocked. Use create_proposal(batch_cards) instead.
+      return JSON.stringify({ error: 'BLOCKED: Direct card creation is not allowed. You MUST use create_proposal with type "batch_cards" to create cards. The student must review and approve the proposal first. This is a Design Constitution requirement — do not attempt to bypass it.' });
     }
 
     case 'get_review_due': {

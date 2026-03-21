@@ -25,27 +25,9 @@ export const toolDefinitions: ToolDefinition[] = [
       required: [],
     },
   },
-  {
-    name: 'create_task',
-    description: 'Create a single task for the student. For recommended/optional tasks, use serves_must to annotate which Must task it supports. Optionally associate with a Time Block via time_block_id.',
-    parameters: {
-      type: 'object',
-      properties: {
-        title: { type: 'string', description: 'Task title' },
-        date: { type: 'string', description: 'Task date (YYYY-MM-DD)' },
-        priority: { type: 'string', enum: ['must', 'recommended', 'optional'], description: 'Task priority' },
-        course_id: { type: 'string', description: 'Course ID' },
-        goal_id: { type: 'string', description: 'Optional goal ID' },
-        description: { type: 'string', description: 'Brief task description' },
-        start_time: { type: 'string', description: 'Start time (ISO 8601 datetime)' },
-        end_time: { type: 'string', description: 'End time (ISO 8601 datetime)' },
-        checklist: { type: 'array', items: { type: 'object', properties: { text: { type: 'string' }, done: { type: 'boolean' } } }, description: 'Sub-steps checklist' },
-        serves_must: { type: 'string', description: 'For recommended/optional: which Must task this serves' },
-        time_block_id: { type: 'string', description: 'Optional Time Block ID to associate this task with a specific block on the calendar' },
-      },
-      required: ['title', 'date', 'priority', 'course_id'],
-    },
-  },
+  // NOTE: create_task has been REMOVED from Agent tools.
+  // Tasks MUST be created via create_proposal (study_plan / goal_breakdown).
+  // The proposal apply route handles actual task insertion.
   {
     name: 'complete_task',
     description: 'Mark a task as completed.',
@@ -159,23 +141,9 @@ export const toolDefinitions: ToolDefinition[] = [
       required: ['deck_id'],
     },
   },
-  {
-    name: 'create_card',
-    description: 'Create a single flashcard in a deck. MUST specify section_id — use create_section first if needed.',
-    parameters: {
-      type: 'object',
-      properties: {
-        deck_id: { type: 'string', description: 'Deck ID' },
-        section_id: { type: 'string', description: 'REQUIRED — Section ID. Every card must belong to a section. Create sections first with create_card_section if needed.' },
-        template_type: { type: 'string', enum: ['definition', 'theorem', 'formula', 'general'], description: 'Card template type' },
-        title: { type: 'string', description: 'Card title (front)' },
-        content: { type: 'object', description: 'Card content object. MUST match template_type: definition→{definition,example?,notes?}, theorem→{statement,conditions?,proof_sketch?,example?,notes?}, formula→{formula,variables?,applicable_conditions?,example?,notes?}, general→{body,example?,notes?}' },
-        importance: { type: 'number', description: 'Importance 1-5, default 3' },
-        tag_ids: { type: 'array', items: { type: 'string' }, description: 'Tag IDs to attach' },
-      },
-      required: ['deck_id', 'section_id', 'template_type', 'title', 'content'],
-    },
-  },
+  // NOTE: create_card has been REMOVED from Agent tools.
+  // Cards MUST be created via create_proposal (batch_cards).
+  // The proposal apply route handles actual card insertion.
   {
     name: 'get_review_due',
     description: 'Get the count and list of cards due for review.',

@@ -70,6 +70,32 @@
 
 ---
 
+## Proposal 机制强制化（Bug Fix）
+
+### 问题
+- Agent 绕过 Proposal 直接调用 `create_card` / `create_task` 创建卡片和任务
+- Agent 擅自创建新 Deck，即使已有匹配的 Deck
+- 违反设计宪法第一条：“不替用户做决定”
+
+### 修复措施
+
+#### 1. 工具定义层（最强拦截）
+- 从 `definitions.ts` 删除 `create_card` 和 `create_task` 工具定义
+- Claude 无法看到这两个工具，从根本上无法调用
+- Proposal apply 路由不受影响（直接操作 SQL）
+
+#### 2. Executor 层守卫（双保险）
+- `create_card` 和 `create_task` 的 executor case 改为返回 BLOCKED 错误
+- 即使未来工具定义被误加回，executor 仍然拦截
+
+#### 3. System Prompt 硬化
+- Proposal 规则从“建议”升级为“强制”，删除“single quick tasks can create directly”漏洞
+- 明确列出允许直接调用的工具白名单
+- 新增 Deck 创建规则：已有匹配 Deck 时禁止新建
+- Anti-Patterns 新增：禁止重复输出相同消息不调用工具
+
+---
+
 ## Agent 效率深度优化
 
 ### SSE 超时对齐（commit `7b600ec`）
