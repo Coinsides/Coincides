@@ -221,12 +221,23 @@ export async function executeTool(
 
     case 'create_proposal': {
       const { type, data } = args as { type: string; data: Record<string, unknown> };
+
+      // Defensive: if data is missing or items is empty, warn the Agent
+      if (!data || typeof data !== 'object') {
+        return JSON.stringify({ error: 'data must be an object with { title, description, items }' });
+      }
+      const items = Array.isArray(data.items) ? data.items : [];
+      if (items.length === 0) {
+        console.warn(`[create_proposal] WARNING: Agent created ${type} proposal with 0 items. Args:`, JSON.stringify(args).slice(0, 500));
+        return JSON.stringify({ error: `Proposal has 0 items. You must include the actual items in data.items array. Do not call create_proposal with an empty items array.` });
+      }
+
       const id = uuidv4();
       const now = new Date().toISOString();
       db.prepare(
         'INSERT INTO proposals (id, user_id, type, status, data, created_at) VALUES (?, ?, ?, ?, ?, ?)',
       ).run(id, userId, type, 'pending', JSON.stringify(data), now);
-      return JSON.stringify({ id, type, message: `Proposal created. The student can review and apply it from the proposals panel.` });
+      return JSON.stringify({ id, type, items_count: items.length, message: `Proposal created with ${items.length} items. The student can review and apply it from the proposals panel.` });
     }
 
     case 'get_study_templates': {
