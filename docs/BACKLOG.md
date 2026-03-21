@@ -3,8 +3,8 @@
 > 所有已确认的待开发需求。按功能领域分组，标注优先级、分配版本和当前状态。
 > 新需求先加到这里，版本归属是第二步。
 >
-> 最后更新：2026-03-20
-> 来源：Session 1 + Session 2 + Session 3 会议记录 · 全面需求汇总
+> 最后更新：2026-03-21
+> 来源：Session 1 ~ Session 6 会议记录 · 全面需求汇总
 
 ---
 
@@ -33,28 +33,36 @@
 
 | ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
 |----|------|--------|------|------|------|
-| TB-R1 | 周视图 Bug：框选 Time Block 后误触 Day Detail 面板 | 低 | v1.4 | done | v1.4 hotfix 修复：点击日期数字才开 Day Detail |
-| TB-R2 | 图层嵌套渲染：长 Block 包裹短 Block，缩进显示 | 高 | v1.5 | done | 按时长排序 z-index，子 Block 内缩 8px/level |
-| TB-R3 | 去掉默认网格线，浮空预览视图 | 中 | v1.5 | done | Block 边缘延伸标注线，末端时间数字 |
-| TB-R4 | 动态时间范围：视图起止 = 当周最早/最晚 Block ± 留白 | 中 | v1.5 | done | 自动裁剪，fallback 8:00–22:00 |
-| TB-R5 | 编辑模式切换：图标按钮进入/退出编辑模式 | 中 | v1.5 | done | 编辑模式显示网格，支持框选/模板创建 |
-| TB-R6 | 网格线显示偏好开关（非编辑模式下可常开） | 低 | v1.5 | done | 存 Settings / localStorage |
-| TB-R7 | 删除重叠警告，嵌套叠加为正常功能 | 低 | v1.5 | done | overlap 检测 + 警告图标全部移除 |
-| TB-R8 | 任务显式关联 Time Block（DB + UI） | 高 | v1.5 | done | tasks.time_block_id FK，Block 内 badge 显示任务数 |
-| TB-R9 | Agent 读取可用学习时间（Study Block − 叠加非学习 Block） | 中 | v1.5 | done | getDailyCapacities() 重写，扣减嵌套非学习 Block |
-| TB-R10 | 单层约束：每天最多 1 个 Study Block，Meal/Rest/Custom 不限 | 低 | v1.5 | done | 前端校验 + 后端校验 |
-| TB-R11 | 创建交互重构：框选后右键菜单 → 编辑面板（含时间选择器） | 中 | v1.5 | done | 替代旧的内嵌弹出表单，解决列宽不足问题 |
-| TB-R12 | 全局内容区拓宽：去除页面左右多余留白 | 低 | v1.5 | done | max-width + padding 缩减，日历等宽屏页面撑满 |
+| TB-R1 | 周视图 Bug：框选 Time Block 后误触 Day Detail 面板 | 低 | v1.4 | done | v1.4 hotfix 修复 |
+| TB-R2 | 图层嵌套渲染：长 Block 包裹短 Block，缩进显示 | 高 | v1.5 | done | |
+| TB-R3 | 去掉默认网格线，浮空预览视图 | 中 | v1.5 | done | |
+| TB-R4 | 动态时间范围：视图起止 = 当周最早/最晚 Block ± 留白 | 中 | v1.5 | done | |
+| TB-R5 | 编辑模式切换：图标按钮进入/退出编辑模式 | 中 | v1.5 | done | |
+| TB-R6 | 网格线显示偏好开关 | 低 | v1.5 | done | |
+| TB-R7 | 删除重叠警告，嵌套叠加为正常功能 | 低 | v1.5 | done | |
+| TB-R8 | 任务显式关联 Time Block（DB + UI） | 高 | v1.5 | done | |
+| TB-R9 | Agent 读取可用学习时间 | 中 | v1.5 | done | |
+| TB-R10 | 单层约束：每天最多 1 个 Study Block | 低 | v1.5 | done | |
+| TB-R11 | 创建交互重构：框选后编辑面板 | 中 | v1.5 | done | |
+| TB-R12 | 全局内容区拓宽 | 低 | v1.5 | done | |
 
 ### Layer 2.1（v1.5.1 UX 优化）
 
+| ID | 需求 | 复杂度 | 版本 | 状态 |
+|----|------|--------|------|------|
+| TB-P1 | Bug：框选后右键创建 TB 不生效 | 低 | v1.5.1 | done |
+| TB-P2 | 类型即名字：去掉独立 label 字段 | 中 | v1.5.1 | done |
+| TB-P3 | 开放类型系统：预设 + 自定义类型 | 中 | v1.5.1 | done |
+| TB-P4 | 优先级 Badge | 中 | v1.5.1 | done |
+| TB-P5 | Day Detail 居中浮层 | 低 | v1.5.1 | done |
+
+### Layer 2.2（v1.5.2~v1.5.3 补充）
+
 | ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
 |----|------|--------|------|------|------|
-| TB-P1 | Bug：框选后右键创建 TB 不生效 | 低 | v1.5.1 | done | onMouseDown 右键时跳过清空 dragSelection |
-| TB-P2 | 类型即名字：去掉独立 label 字段 | 中 | v1.5.1 | done | type 直接作为显示名称，label 自动等于 type |
-| TB-P3 | 开放类型系统：预设 + 自定义类型 | 中 | v1.5.1 | done | Type Grid combobox，内置 6 预设 + 用户自定义输入 |
-| TB-P4 | 优先级 Badge：must/recommended/optional 分类计数 | 中 | v1.5.1 | done | 替代旧的总任务数 badge，格式 2M·1R·3O |
-| TB-P5 | Day Detail 居中浮层 | 低 | v1.5.1 | done | 从右侧侧边栏改为居中 overlay（600px，80vh） |
+| TB-P6 | Task-Block 关联 UI 修复 | 低 | v1.5.2 | done | hover 面板 + allDay 隐藏 |
+| TB-P7 | Agent TB 工具（create/update/delete_time_blocks） | 中 | v1.5.3 | done | 原 TB-L2c |
+| TB-P8 | 问卷收集 + 双模式排期 + 文档感知 | 高 | v1.5.3 | done | 含 PreferenceForm + TimePickerInline |
 
 ### Layer 3（高级交互）
 
@@ -62,8 +70,6 @@
 |----|------|--------|------|------|
 | TB-L2a | Time Block 模板系统（预设日程模板） | 高 | v1.9 | pending |
 | TB-L2b | 格子点选创建交互（替代拖拽框选） | 中 | v1.9 | pending |
-| TB-L2c | Agent 工具 create_time_block | 中 | v1.9 | pending |
-| TB-L2d | Agent 引导设置 Time Block 流程 | 中 | v1.9 | pending |
 
 ---
 
@@ -71,12 +77,36 @@
 
 | ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
 |----|------|--------|------|------|------|
-| CD-1 | 卡片详情视图放大（纯 CSS，容纳数学内容） | 低 | v1.4 | done | |
-| CD-2 | 所有卡片类型增加 Example 字段 | 中 | v1.4 | done | Schema 变更 + 迁移 + UI |
-| CD-3 | Theorem 增加 Condition 字段 | 中 | v1.4 | done | v1.3 已实现（conditions + proof_sketch） |
-| CD-4 | AI 写推导过程按钮（仅 Theorem） | 中 | v1.6 | pending | 用户主动触发，符合设计宪法 |
-| CD-5 | Review "撕胶带"遮挡交互 | 中-高 | v1.6 | pending | 全新 Review UI 组件，分层遮挡 |
-| CD-6 | 各类型独立复习模板系统 | 高 | v1.8 | pending | DEF/THM/FML/GEN 各自模板，含浏览+复习 |
+| CD-1 | 卡片详情视图放大 | 低 | v1.4 | done | |
+| CD-2 | 所有卡片类型增加 Example 字段 | 中 | v1.4 | done | |
+| CD-3 | Theorem 增加 Condition 字段 | 中 | v1.4 | done | v1.3 已实现 |
+| CD-4 | AI 写推导过程按钮（仅 Theorem） | 中 | Backlog | deferred | 原 v1.6，已推迟 |
+| CD-5 | Review "撕胶带"遮挡交互 | 中-高 | Backlog | deferred | 原 v1.6，已推迟 |
+| CD-6 | 各类型独立复习模板系统 | 高 | v1.8 | pending | |
+
+---
+
+## Course 中心化 + UI 结构重组（v1.6 新增）
+
+| ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
+|----|------|--------|------|------|------|
+| CU-1 | Course 详情页（Goals + Decks + Docs 聚合展示） | 中 | v1.6 | done | `/courses/:courseId` 路由 |
+| CU-2 | 侧边栏移除 Review 导航项 | 低 | v1.6 | done | Review 改为 Deck 卡片按钮入口 |
+| CU-3 | Deck 列表 + Course 详情 Review 按钮 | 低 | v1.6 | done | 跳转 `/review?deckId=xxx` |
+| CU-4 | Card Section 强制化（DB 迁移 + API + Agent + UI） | 中 | v1.6 | done | 禁止 section_id=NULL |
+| CU-5 | Agent Section-First Card Creation 协议 | 低 | v1.6 | done | 先建章节再建卡片 |
+
+---
+
+## Task-Card 联动（v1.7 规划）
+
+| ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
+|----|------|--------|------|------|------|
+| TC-1 | `task_cards` M:N 关联表 + CRUD API | 中 | v1.7 | pending | 支持任务级 + checklist 条目级关联 |
+| TC-2 | Agent `link_task_cards` 工具 | 低 | v1.7 | pending | |
+| TC-3 | TaskViewModal（只读查看模式） | 中 | v1.7 | pending | 点击任务→查看→编辑 |
+| TC-4 | CardBubble 组件（任务查看中的卡片气泡） | 中 | v1.7 | pending | |
+| TC-5 | Agent Task-Card 关联协议 | 低 | v1.7 | pending | |
 
 ---
 
@@ -84,12 +114,12 @@
 
 | ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
 |----|------|--------|------|------|------|
-| RV-1 | 复习模式选择（翻面/填空/选择题/混合） | 中 | v1.6 | pending | |
-| RV-2 | 填空题模式（自动遮掩 → 输入 → 对比 → 评分） | 中 | v1.6 | pending | |
-| RV-3 | 选择题模式（同 Deck/Section 卡片生成干扰项） | 中 | v1.6 | pending | |
-| RV-4 | 混合模式（三种模式随机切换） | 中 | v1.6 | pending | |
-| RV-5 | 复习模式偏好（Settings 设默认 + 临时切换） | 中 | v1.6 | pending | |
-| RV-6 | Time Block 排期（Agent 将复习排入 study Time Block） | 中 | v1.6 | pending | |
+| RV-1 | 复习模式选择（翻面/填空/选择题/混合） | 中 | Backlog | deferred | 原 v1.6，已推迟 |
+| RV-2 | 填空题模式 | 中 | Backlog | deferred | 原 v1.6，已推迟 |
+| RV-3 | 选择题模式 | 中 | Backlog | deferred | 原 v1.6，已推迟 |
+| RV-4 | 混合模式 | 中 | Backlog | deferred | 原 v1.6，已推迟 |
+| RV-5 | 复习模式偏好 | 中 | Backlog | deferred | 原 v1.6，已推迟 |
+| RV-6 | Time Block 排期 | 中 | Backlog | deferred | 原 v1.6，已推迟 |
 
 ---
 
@@ -97,11 +127,11 @@
 
 | ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
 |----|------|--------|------|------|------|
-| WB-1 | 错题记录（评分为 1 的卡片自动标记） | 中 | v1.6 | pending | |
-| WB-2 | 错题本入口（Review 页面"需要加强"入口） | 中 | v1.6 | pending | |
-| WB-3 | 错题本复习（直接发起复习会话） | 中 | v1.6 | pending | |
-| WB-4 | 错题本移除（连续 2 次 ≥3 自动移出 + 手动移除） | 中 | v1.6 | pending | 符合设计宪法：不强调"错误" |
-| WB-5 | Agent 感知（get_weak_cards 工具） | 中 | v1.6 | pending | |
+| WB-1 | 错题记录（评分为 1 的卡片自动标记） | 中 | Backlog | deferred | 原 v1.6，已推迟 |
+| WB-2 | 错题本入口 | 中 | Backlog | deferred | 原 v1.6，已推迟 |
+| WB-3 | 错题本复习 | 中 | Backlog | deferred | 原 v1.6，已推迟 |
+| WB-4 | 错题本移除 | 中 | Backlog | deferred | 原 v1.6，已推迟 |
+| WB-5 | Agent 感知（get_weak_cards 工具） | 中 | Backlog | deferred | 原 v1.6，已推迟 |
 
 ---
 
@@ -109,12 +139,12 @@
 
 | ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
 |----|------|--------|------|------|------|
-| AC-1 | 成就数据模型（achievements + user_achievements 表） | 中 | v1.7 | pending | |
-| AC-2 | 成就类型定义（里程碑型，覆盖复习/任务/目标） | 中 | v1.7 | pending | |
-| AC-3 | 成就检测引擎（被动检测，已有事件触发点检查） | 中 | v1.7 | pending | |
-| AC-4 | 成就展示页面（卡片式布局） | 中 | v1.7 | pending | |
-| AC-5 | 解锁通知（Toast 一次性提示，可关闭） | 中 | v1.7 | pending | |
-| AC-6 | 设计宪法合规（无 streak 型、无完成率型成就） | 中 | v1.7 | pending | 硬性约束 |
+| AC-1 | 成就数据模型 | 中 | Backlog | deferred | 原 v1.7，已推迟 |
+| AC-2 | 成就类型定义（里程碑型） | 中 | Backlog | deferred | 原 v1.7，已推迟 |
+| AC-3 | 成就检测引擎 | 中 | Backlog | deferred | 原 v1.7，已推迟 |
+| AC-4 | 成就展示页面 | 中 | Backlog | deferred | 原 v1.7，已推迟 |
+| AC-5 | 解锁通知 | 中 | Backlog | deferred | 原 v1.7，已推迟 |
+| AC-6 | 设计宪法合规 | 中 | Backlog | deferred | 原 v1.7，已推迟；无 streak 型 |
 
 ---
 
@@ -122,50 +152,51 @@
 
 | ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
 |----|------|--------|------|------|------|
-| ST-1 | 复习洞察（记忆保持率曲线、卡片难度分布、每周复习量趋势） | 中 | v1.7 | pending | |
-| ST-2 | 学习节奏（基于 Task 完成时间戳分析——被动展示） | 中 | v1.7 | pending | 符合设计宪法：不监控用户 |
-| ST-3 | 课程深度（Goal 完成进度、卡片掌握度分布、错题卡片数） | 中 | v1.7 | pending | |
-| ST-4 | 数据导出（用户可导出 Statistics 数据为 CSV） | 中 | v1.7 | pending | |
+| ST-1 | 复习洞察（记忆保持率曲线、卡片难度分布） | 中 | Backlog | deferred | 原 v1.7，已推迟 |
+| ST-2 | 学习节奏 | 中 | Backlog | deferred | 原 v1.7，已推迟；被动展示 |
+| ST-3 | 课程深度 | 中 | Backlog | deferred | 原 v1.7，已推迟 |
+| ST-4 | 数据导出 CSV | 中 | Backlog | deferred | 原 v1.7，已推迟 |
 
 ---
 
 ## Goal 多依赖 DAG
 
-| ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
-|----|------|--------|------|------|------|
-| GD-5 | 多依赖选择（编辑 Goal 时支持多选前置 Goal） | 中 | v1.8 | pending | |
-| GD-6 | DAG 可视化（Goal Manager 显示完整 DAG 图） | 中-高 | v1.8 | pending | |
-| GD-7 | Agent DAG 排期（理解 DAG 拓扑序） | 中-高 | v1.8 | pending | |
-| GD-8 | 动态优先级（考试模式紧急度权重） | 中 | v1.8 | pending | |
+| ID | 需求 | 复杂度 | 版本 | 状态 |
+|----|------|--------|------|------|
+| GD-5 | 多依赖选择 UI | 中 | v1.8 | pending |
+| GD-6 | DAG 可视化图 | 中-高 | v1.8 | pending |
+| GD-7 | Agent DAG 排期 | 中-高 | v1.8 | pending |
+| GD-8 | 动态优先级 | 中 | v1.8 | pending |
 
 ---
 
 ## 基础设施 / 分发
 
-| ID | 需求 | 复杂度 | 版本 | 状态 | 备注 |
-|----|------|--------|------|------|------|
-| INF-1 | Electron 打包 + 分发 | 高 | v1.9 | pending | |
-| INF-2 | 通知系统 | 中 | v1.9 | pending | |
-| INF-3 | 自动化测试 | 高 | v1.9 | pending | |
-| INF-4 | 安全加固 | 中 | v1.9 | pending | |
+| ID | 需求 | 复杂度 | 版本 | 状态 |
+|----|------|--------|------|------|
+| INF-1 | Electron 打包 + 分发 | 高 | v1.9 | pending |
+| INF-2 | 通知系统 | 中 | v1.9 | pending |
+| INF-3 | 自动化测试 | 高 | v1.9 | pending |
+| INF-4 | 安全加固 | 中 | v1.9 | pending |
 
 ---
 
 ## 统计摘要
 
-| 领域 | 条目数 | 来源 |
-|------|--------|------|
-| Time Block 系统 (L1) | 3 | Session 2，v1.4 已完成 |
-| Time Block 重构 (L2) | 12 | Session 3 新增 + Session 4 补充，v1.5 |
-| Time Block 高级交互 (L3) | 4 | Session 2，v1.9 |
-| 卡片数据模型升级 | 6 | Session 2 新增 |
-| 复习体验升级 | 6 | Session 1 原规划 |
-| 错题本系统 | 5 | Session 1 原规划 |
-| 成就系统 | 6 | Session 1 原规划 |
-| Statistics 深度洞察 | 4 | Session 1 原规划 |
-| Goal 多依赖 DAG | 4 | Session 1 原规划 |
-| 基础设施 / 分发 | 4 | Session 1 路线图 |
-| **合计** | **54** | |
+| 领域 | 总条目 | done | pending/deferred |
+|------|--------|------|------------------|
+| Time Block 系统 (L1~L2.2) | 21 | 21 | 0 |
+| Time Block 高级交互 (L3) | 2 | 0 | 2 |
+| 卡片数据模型升级 | 6 | 3 | 3 |
+| Course 中心化 (v1.6) | 5 | 5 | 0 |
+| Task-Card 联动 (v1.7) | 5 | 0 | 5 |
+| 复习体验升级 | 6 | 0 | 6 |
+| 错题本系统 | 5 | 0 | 5 |
+| 成就系统 | 6 | 0 | 6 |
+| Statistics 深度洞察 | 4 | 0 | 4 |
+| Goal 多依赖 DAG | 4 | 0 | 4 |
+| 基础设施 / 分发 | 4 | 0 | 4 |
+| **合计** | **68** | **29** | **39** |
 
 ---
 

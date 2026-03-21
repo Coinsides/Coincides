@@ -1,7 +1,7 @@
 # Coincides 开发路线图
 
-> 最后更新：2026-03-20
-> 状态：v1.0 🎉 发布 | v1.1 ✅ 完成 | v1.2 ✅ 完成 | v1.3 ✅ 完成 | v1.3.1 ✅ 补丁 | v1.3.2 ✅ 补丁 | v1.4 ✅ 完成 | v1.5 ✅ 完成 | v1.5.1 ✅ 补丁 | v1.6~v1.9 📋 规划完成
+> 最后更新：2026-03-21
+> 状态：v1.0 🎉 发布 | v1.1~v1.5.3 ✅ 完成 | v1.6 ✅ 完成 | v1.7 📋 规划完成 | v1.8~v1.9 📋 待规划
 
 ---
 
@@ -29,285 +29,168 @@
 
 ---
 
-## Round 2（当前）
+## Round 2（功能扩展）✅
 
-### Step 1：卡片修复 ✅
-- [x] 卡片尺寸调整：grid 卡片从"太宽"改为更高更窄的比例
-- [x] 卡片内容预览渲染：接入 KaTeXRenderer，渲染数学公式和 Markdown（目前显示原始文本）
-- 完成：1 次对话
-
-### Step 2：Tag Group 系统 ✅
-- [x] 新建 `tag_groups` 表（课程级别的标签组）
-- [x] 每个课程可有自己的 tag group，tag group 下创建自定义 tag（名称 + 颜色）
-- [x] UI：Course 设置 → 管理 tag groups → 添加/编辑/删除 tags → 颜色选择器
-- [x] 卡片创建/编辑时，根据所属课程显示对应 tag group 的 tags
-- [x] 替换现有全局 system tags 系统
-- 示例：数学课 → Definition / Theorem / Formula；英语课 → Vocabulary / Grammar / Reading
-- 完成：1 次对话
-
-### Step 3：文档上传 + 解析 ✅
-- [x] 新建 `document_chunks` 表（长文档分块存储）
-- [x] documents 表增加 `document_type`, `chunk_count`, `error_message` 字段
-- [x] 后端文件上传（multer）+ 异步解析流水线：
-  - PDF → pdf-parse（数字版）→ 失败则 Haiku 3.5 Vision API（扫描版）
-  - DOCX → mammoth
-  - XLSX → SheetJS
-  - 图片 → Haiku 3.5 Vision API
-  - txt/md → 直接存储
-- [x] 分块逻辑：短文档（≤30K字符）存 `extracted_text`，长文档按段落边界分块
-- [x] AI 自动分类文档类型 + 生成摘要
-- [x] 前端：Course 页面 Files 按钮 → DocumentManager 弹窗（拖拽上传、状态轮询、摘要展示）
-- 完成：1 次对话
-
-### Step 4：Agent 文档工具 ✅
-- [x] 新增 Agent function tool：`search_documents`（SQL LIKE 搜索文件名 + 摘要 + 内容）
-- [x] 新增 Agent function tool：`get_document_content`（获取完整文本或按 chunk 获取，支持分页）
-- [x] System prompt 引导 Agent 从文档生成卡片（通过 Proposal 机制）
-- 完成：1 次对话
-
-### Step 5：拖拽排序 ✅
-- [x] Section 之间拖拽排序（调整 order_index）
-- [x] Section 内卡片拖拽排序
-- [x] 跨 Section 拖拽卡片（卡片移动到另一个 Section）
-- [x] 使用 HTML5 drag-and-drop 原生 API（不引入额外库）
-- 完成：1 次对话
-
-**Round 2 总计：6-8 次对话**
+- Step 1：卡片修复（尺寸 + KaTeX 预览渲染）
+- Step 2：Tag Group 系统（课程级标签组）
+- Step 3：文档上传 + 解析（PDF/DOCX/XLSX/IMG/TXT）
+- Step 4：Agent 文档工具（search_documents + get_document_content）
+- Step 5：拖拽排序（Section + 卡片跨 Section 拖拽）
 
 ---
 
-## Round 3（UI/体验打磨）
+## Round 3（UI/体验打磨）✅
 
-### Step 1+2：Glassmorphism 设计基础 + 核心页面 ✅
-- [x] 新增 20+ glass CSS 变量（表面、模糊、边框、阴影、渐变、光球）
-- [x] body 背景渐变 + 半透明表面变量体系
-- [x] AppLayout 侧边栏玻璃化 + 环境光球
-- [x] DailyBrief、DeckDetail、Decks 核心页面玻璃化
-- 完成：1 次对话
-
-### Step 3+4：全面 Glassmorphism 覆盖 ✅
-- [x] Review、CardFlip、Statistics、Calendar、Courses、Goals 玻璃化
-- [x] 所有 Modal（6个）、AgentPanel、DocumentManager 等玻璃化
-- [x] Toast、ShortcutsPanel、Auth、Settings 玻璃化
-- [x] 26/26 CSS 模块全部完成 Glassmorphism 改造
-- 完成：1 次对话（与 Step 1+2 同次）
-
-### Step 5：Review Groups + Agent 图片上传 ✅
-- [x] Review 页面新增模式选择器：All Due Cards / By Deck / By Section / By Tag
-- [x] 2×2 卡片式 UI，每个模式带独立图标
-- [x] 后端 Review API 支持 deck_id / section_id / tag_id 筛选
-- [x] Agent 对话中可直接上传图片（ImagePlus 按钮 + base64 编码）
-- [x] Anthropic Vision API + OpenAI 图片支持
-- [x] 用于拍照上传手写笔记、截图等场景
-- 完成：2026-03-18
-
-**Round 3 总计：3 次对话（Step 1+2、Step 3+4+Hotfix、Step 5）**
+- Step 1+2：Glassmorphism 设计基础 + 核心页面
+- Step 3+4：全面 Glassmorphism 覆盖（26/26 CSS 模块）
+- Step 5：Review Groups + Agent 图片上传
 
 ---
 
 ## Round 4：记忆系统（向量搜索 + RAG）✅
 
-> 状态：Step 1 ✅ 完成 | Step 2 ✅ 完成 | Step 3 ✅ 完成
->
-> 🎉 **Round 4 完成 = Coincides v1.0 正式版本发布**
+- Step 1：sqlite-vec 向量存储 + Voyage AI Embedding
+- Step 2：语义搜索 + Agent RAG
+- Step 3：FTS5 全文搜索 + 三路混合搜索
 
-### Step 1：sqlite-vec 向量存储 + Voyage AI Embedding 管线 ✅
-- [x] 集成 sqlite-vec v0.1.7（npm 安装，与 better-sqlite3 无缝集成）
-- [x] 新建 `doc_chunk_vec` + `agent_memory_vec` 虚拟表（1024 维向量）
-- [x] 接入 Voyage AI `voyage-4` 模型（1024 维，$0.06/M tokens）
-- [x] 文档上传自动触发 embedding 生成（未分块 / 分块两种路径）
-- [x] Agent create_memory 自动生成记忆向量
-- [x] API：`GET /api/embedding/status` + `POST /api/embedding/backfill`
-- [x] Settings UI：Embedding provider / API Key / Model 配置
-- [x] 环境变量后备 + 用户 Settings 优先的双层配置策略
-- 完成：2026-03-18
-
-### Step 2：语义搜索 + Agent RAG ✅
-- [x] `search_documents` 升级为语义 + 关键词混合搜索
-- [x] query → Voyage AI embedding → sqlite-vec KNN → Top-10 chunks
-- [x] 返回 `relevant_chunks` 内容片段（RAG 上下文注入）
-- [x] `search_memories` 升级为语义搜索，含 similarity_score
-- [x] 优雅降级：无 provider / API 失败时自动回退 LIKE
-- [x] System Prompt 新增 RAG 使用指导
-- 完成：2026-03-18
-
-### Step 3：FTS5 全文搜索 + 三路混合搜索 ✅
-- [x] SQLite FTS5 虚拟表（document_chunks_fts + agent_memories_fts）+ 触发器自动同步
-- [x] 三路混合搜索引擎：语义向量 > FTS5 全文 > LIKE 关键词
-- [x] 三路结果自动去重合并 + 优先级排序
-- [x] 未分块文档搜索修复（documents.extracted_text 回退搜索）
-- 完成：2026-03-18
-
-### 技术决策记录
-| 决策 | 选择 | 理由 |
-|---|---|---|
-| 向量数据库 | sqlite-vec | 与 better-sqlite3 无缝集成，零外部依赖，npm install 即用 |
-| Embedding 模型 | Voyage AI voyage-4（已集成） | 1024 维，$0.06/M tokens，Anthropic 官方合作伙伴 |
-| 搜索策略 | Phase 1: SQL LIKE ✅ → Phase 2: 语义搜索 ✅ → Phase 3: 三路混合搜索 ✅ | 分阶段降低复杂度，全部完成 |
+🎉 **Round 4 完成 = Coincides v1.0 正式版本发布**
 
 ---
 
 ## v1.1（UX 痛点修复 + 技术债偿还 + 数据模型升级）✅
 
-> 状态：全部完成（Step 1-7），A-1 Agent 报错延后至 v1.2
 > 详细规划：[v1.1-plan.md](releases/v1.1-plan.md)
 > 变更日志：[CHANGELOG-v1.1.md](releases/CHANGELOG-v1.1.md)
-> 发布说明：[RELEASE-NOTES-v1.1.md](releases/RELEASE-NOTES-v1.1.md)
 
-- Step 1：DB Migration 机制 + 配置验证（T-3 + T-4）✅
-- Step 2：Task 数据模型升级（M-1）✅
-- Step 3：Goal 嵌套支持（M-2 + G-1）✅
-- Step 4：日历 CRUD 补全（C-1 + C-2 + G-2）✅
-- Step 5：跨 Deck 复习选择器（R-1）✅
-- Step 6：空 catch 块清理（T-1）41 个文件）✅
-- Step 7：DeckDetail 组件拆分（T-2，907→270 行）✅
+- DB Migration 机制 + 配置验证
+- Task 数据模型升级 + Goal 嵌套支持
+- 日历 CRUD 补全 + 跨 Deck 复习选择器
+- 空 catch 块清理 + DeckDetail 组件拆分
 
 ---
 
 ## v1.2（AI 交互重构 + Goal Manager + 新用户引导 + i18n）✅
 
-> 状态：全部完成（Step 1-7），已打 Tag v1.2.0
 > 详细规划：[v1.2-plan.md](releases/v1.2-plan.md)
 > 变更日志：[CHANGELOG-v1.2.md](releases/CHANGELOG-v1.2.md)
-> 发布说明：[RELEASE-NOTES-v1.2.md](releases/RELEASE-NOTES-v1.2.md)
 
-- Step 1：System Prompt 重写（MWF 脚手架 + 设计宪法）
-- Step 2：Agent 工具升级（目标拆解 + 优先级标注）
-- Step 3：Goal Manager 完整树形 UI + 拖拽
-- Step 4：日历 Course 着色 + Goal 标签
-- Step 5：新用户引导流程
-- Step 6：i18n 国际化框架（中/英）
-- Step 7：Agent 报错排查（A-1 遗留项）
+- System Prompt 重写（MWF 脚手架 + 设计宪法）
+- Agent 工具升级 + Goal Manager 完整树形 UI + 拖拽
+- 日历 Course 着色 + 新用户引导流程 + i18n
 
 ---
 
 ## v1.3（工作流引擎 + Time Block + L1 入驻流 + 设计宪法审计）✅
 
-> 状态：全部完成（Step 1-7）
 > 详细规划：[v1.3-plan.md](releases/v1.3-plan.md)
 > 变更日志：[CHANGELOG-v1.3.md](releases/CHANGELOG-v1.3.md)
-> 发布说明：[RELEASE-NOTES-v1.3.md](releases/RELEASE-NOTES-v1.3.md)
 
-- Step 1：Time Block 数据模型 + CRUD API ✅
-- Step 2：Time Block 前端 UI（日历周视图 + 拖拽框选）+ Goal 依赖 UI ✅
-- Step 3：Agent 排期引擎 + Time Block 感知 + 增量重排 ✅
-- Step 4：L1 入驻流全链路（4 步 Onboarding + L1 Protocol）✅
-- Step 5：设计宪法全面审计（3 个 P0 修复）✅
-- Step 6：DailyBrief 升级（time_blocks + serves_must）✅
-- Step 7：边界修复 + 集成测试 + 文档更新 ✅
+- Time Block 数据模型 + CRUD + 前端 UI + 拖拽框选
+- Agent 排期引擎 + Time Block 感知 + 增量重排
+- L1 入驻流全链路 + 设计宪法全面审计
+- DailyBrief 升级（time_blocks + serves_must）
 
 ---
 
-## v1.3.1（补丁版本：bug 修复 + 兼容性 + Agent 稳定性）✅
+## v1.3.1（补丁：bug 修复 + 兼容性 + Agent 稳定性）✅
 
-> 状态：已发布
 > 变更日志：[CHANGELOG-v1.3.1.md](releases/CHANGELOG-v1.3.1.md)
-> 发布说明：[RELEASE-NOTES-v1.3.1.md](releases/RELEASE-NOTES-v1.3.1.md)
 
-- 3 个 UI bug 修复：日历事件编辑/删除可见性、卡片翻转镜像、公式预览渲染 ✅
-- schema.sql 与 migration 同步，修复新库启动崩溃 ✅
-- tsx → jiti 替换，修复 Windows 兼容性问题 ✅
-- Agent tool_result 持久化 + 超时 120s + 历史清洗 ✅
-- Release Notes 工作流正式加入发布流程 ✅
+- 3 个 UI bug 修复 + schema.sql 与 migration 同步
+- tsx → jiti 替换（Windows 兼容）+ Agent 稳定性增强
+
+---
+
+## v1.3.2（补丁：Agent 工具修复）✅
+
+> 变更日志：[CHANGELOG-v1.3.2.md](releases/CHANGELOG-v1.3.2.md)
 
 ---
 
 ## v1.4（Time Block L1 补全 + 卡片数据模型升级）✅
 
-> 状态：全部完成（Step 1-5）
-> 需求条目：TB-L1a/b/c, CD-1/2/3（6 条）
 > 详细规划：[v1.4-plan.md](releases/v1.4-plan.md)
 > 变更日志：[CHANGELOG-v1.4.md](releases/CHANGELOG-v1.4.md)
 
-主题：补齐 v1.3 Time Block 的可视化缺口，同时升级卡片数据模型为后续复习体验打基础。
-
-- Step 1：卡片 Example 字段（CD-2）+ Condition 确认已存在（CD-3）✅
-- Step 2：卡片详情视图放大（CD-1）✅
-- Step 3：Time Block 24h 刻度线 + 时间标签（TB-L1a/b）✅
-- Step 4：Time Block 右键编辑/删除（TB-L1c）✅
-- Step 5：文档更新 + 版本收尾 ✅
+- 卡片 Example 字段 + 详情视图放大
+- Time Block 24h 刻度线 + 时间标签 + 右键编辑/删除
 
 ---
 
 ## v1.5（Time Block 重构：图层嵌套 + 编辑模式 + 任务关联）✅
 
-> 状态：规划完成
-> 需求条目：TB-R2~R12（11 条，TB-R1 已在 v1.4 hotfix 修复）
 > 详细规划：[v1.5-plan.md](releases/v1.5-plan.md)
-> 来源：Session 3 + Session 4 讨论
+> 变更日志：[CHANGELOG-v1.5.md](releases/CHANGELOG-v1.5.md)
 
-主题：重新定义 Time Block 的视觉呈现和交互模型。Study Block 作为主层，Meal/Rest/Custom 嵌套叠加；Agent 读取可用学习时间制定计划；任务显式关联 Block 并以列表展示。
+主题：重新定义 Time Block 的视觉呈现和交互模型。
 
-设计理念：
-- 每天最多 1 个 Study Block，非学习 Block（Meal/Rest/Custom）不限
-- 可用学习时间 = Study Block 时长 − 叠加的非学习 Block 时长
-- 图层嵌套：时间最长的 Block 在最底层，短 Block 内缩显示
-- 默认无网格线，浮空预览；Block 边缘延伸时间标注线
-- 动态时间范围：视图起止 = 当周最早/最晚 Block ± 留白
-- 编辑模式切换：进入后显示网格，支持框选创建
-- 框选后右键菜单触发创建，编辑面板含时间选择器可修正误差
-- 全局内容区拓宽，日历等宽屏页面充分利用屏幕
-
-10 个 Step（精细拆分）：
-- Step 1：全局布局拓宽（TB-R12）
-- Step 2：创建交互重构（TB-R11）
-- Step 3：编辑模式切换（TB-R5）
-- Step 4：网格线偏好 + 去重叠警告（TB-R6 + TB-R7）
-- Step 5：Study Block 单层约束（TB-R10）
-- Step 6：图层嵌套渲染（TB-R2）
-- Step 7：浮空预览 + 动态时间范围（TB-R3 + TB-R4）
-- Step 8：任务显式关联 Block（TB-R8）
-- Step 9：Agent 可用时间计算重写（TB-R9）
-- Step 10：文档更新 + 版本收尾
+- 全局布局拓宽 + 创建交互重构（框选→编辑面板）
+- 编辑模式切换 + 网格线偏好 + 去重叠警告
+- Study Block 单层约束 + 图层嵌套渲染
+- 浮空预览 + 动态时间范围
+- 任务显式关联 Block + Agent 可用时间计算重写
 
 ---
 
 ## v1.5.1（Time Block UX 优化）✅
 
-> 状态：✅ 完成
-> 需求条目：TB-P1~P5（5 条）
 > 详细规划：[v1.5.1-plan.md](releases/v1.5.1-plan.md)
+> 变更日志：[CHANGELOG-v1.5.1.md](releases/CHANGELOG-v1.5.1.md)
 
-主题：Bug 修复 + 类型系统重构（type 即名字，开放自定义类型）+ 视觉优化。
-
-- Step 1：修右键创建 TB Bug + Day Detail 居中浮层（TB-P1 + TB-P5）
-- Step 2：类型即名字，去掉 label（TB-P2）
-- Step 3：开放类型系统 combobox（TB-P3）
-- Step 4：优先级 Badge（TB-P4）
-- Step 5：文档更新 + CHANGELOG + Push
+- 修右键创建 TB Bug + Day Detail 居中浮层
+- 类型即名字（去掉 label）+ 开放类型系统 combobox
+- 优先级 Badge（2M·1R·3O 格式）
 
 ---
 
-## v1.6（复习体验升级 + 错题本）📋
+## v1.5.2（Task-Block 关联完善）✅
 
-> 状态：待规划
-> 需求条目：RV-1~6, CD-4/5, WB-1~5（13 条）
+> 变更日志：[CHANGELOG-v1.5.2.md](releases/CHANGELOG-v1.5.2.md)
 
-主题：复习模式引擎（填空/选择/混合）+ 撕胶带交互 + 错题本系统。
-
-- 复习模式选择器（RV-1）
-- 填空题 / 选择题 / 混合模式（RV-2/3/4）
-- 复习模式偏好设置（RV-5）
-- Time Block 复习排期（RV-6）
-- AI 写推导过程按钮（CD-4）
-- 撕胶带遮挡交互（CD-5）
-- 错题本数据模型 + 记录 + 入口 + 复习 + 移除（WB-1~4）
-- Agent 错题本感知（WB-5）
+- Task-Block 关联 UI 修复
+- Hover 面板不显示修复（React 事件回收问题）
+- 已关联 TB 的任务隐藏于 allDay 区域
 
 ---
 
-## v1.7（激励系统 + 洞察面板）📋
+## v1.5.3（Agent 智能规划升级）✅
 
-> 状态：待规划
-> 需求条目：AC-1~6, ST-1~4（10 条）
+> 详细规划：[v1.5.3-plan.md](releases/v1.5.3-plan.md)
+> 变更日志：[CHANGELOG-v1.5.3.md](releases/CHANGELOG-v1.5.3.md)
 
-主题：成就系统（里程碑型，无 streak）+ Statistics 深度洞察。
+- 问卷收集工具 `collect_preferences` + PreferenceForm 前端组件
+- Agent TB 工具扩展：create/update/delete_time_blocks + MAX_TOOL_ROUNDS=8
+- System Prompt 升级：计划前问卷协议 + 双模式排期协议 + 文档感知协议
+- Proposal 时间编辑 UI（TimePickerInline + Calendar Event 模式）
+- 周视图时间轴对齐 bug 修复
 
-- 成就数据模型 + 类型定义 + 检测引擎（AC-1/2/3）
-- 成就展示页 + 解锁通知（AC-4/5）
-- 设计宪法合规审计（AC-6）
-- 复习洞察 + 学习节奏 + 课程深度（ST-1/2/3）
-- 数据导出 CSV（ST-4）
+---
+
+## v1.6（知识图谱整合 Phase 1：Course 中心化 + UI 结构重组）✅
+
+> 详细规划：[v1.6-v1.7-plan.md](releases/v1.6-v1.7-plan.md)
+> 变更日志：[CHANGELOG-v1.6.md](releases/CHANGELOG-v1.6.md)
+
+主题：Course 从列表页升级为知识中心，合并冗余导航，强制 Section 归属。
+
+- **Course 详情页**：新增 `/courses/:courseId` 路由，展示 Goals（含任务计数+进度条）、Card Decks（含卡片数+待复习数+Review 按钮）、Documents
+- **侧边栏精简**：移除 `/review` 导航项，Review 功能改为 Deck 卡片上的按钮入口
+- **Section 强制化**：DB 迁移处理历史 NULL section_id；API + Agent 工具 + 前端三层校验
+- **Agent 协议升级**：Section-First Card Creation Protocol（先建章节→再建卡片）
+
+---
+
+## v1.7（知识图谱整合 Phase 2：Task-Card 联动）📋
+
+> 详细规划：[v1.6-v1.7-plan.md](releases/v1.6-v1.7-plan.md)
+> 状态：规划完成，待实施
+
+主题：打通 Task ↔ Card 双向关联，建立完整知识图谱链路。
+
+- **Task-Card 关联数据模型**：新增 `task_cards` M:N 关联表，支持任务级 + checklist 条目级两种粒度
+- **TaskViewModal（查看模式）**：点击任务先进入只读查看，再点编辑进入编辑模式
+- **CardBubble 组件**：查看模式下展示关联卡片气泡
+- **Agent 关联协议**：Agent 创建学习计划时自动建立 Task ↔ Card 关联
 
 ---
 
@@ -316,36 +199,35 @@
 > 状态：待规划
 > 需求条目：GD-5~8, CD-6（5 条）
 
-主题：Goal 多依赖 DAG 完整实现 + 各卡片类型独立复习模板。
-
-- 多依赖选择 UI（GD-5）
-- DAG 可视化图（GD-6）
-- Agent DAG 排期（GD-7）
-- 动态优先级（GD-8）
-- 各类型独立复习模板系统（CD-6）
+- 多依赖选择 UI + DAG 可视化图
+- Agent DAG 排期 + 动态优先级
+- 各类型独立复习模板系统
 
 ---
 
-## v1.9（Time Block L3 + Electron + 基础设施）📋
+## v1.9（Electron + 基础设施 + Time Block L3）📋
 
 > 状态：待规划
-> 需求条目：TB-L2a~d, INF-1~4（8 条）
+> 需求条目：TB-L2a/b, INF-1~4（6 条）
 
-主题：Time Block 高级交互 + Electron 打包分发 + 测试/安全。
+- Time Block 模板系统 + 格子点选创建
+- Electron 打包 + 分发
+- 通知系统 + 自动化测试 + 安全加固
 
-- Time Block 模板系统（TB-L2a）
-- 格子点选创建（TB-L2b）
-- Agent 创建/引导 Time Block（TB-L2c/d）
-- Electron 打包 + 分发（INF-1）
-- 通知系统（INF-2）
-- 自动化测试（INF-3）
-- 安全加固（INF-4）
+---
+
+## Backlog（待排期）
+
+以下需求已确认但未分配版本：
+
+- 复习体验升级：复习模式引擎（填空/选择/混合）+ 撕胶带交互 + 错题本系统（RV-1~6, CD-4/5, WB-1~5）
+- 成就系统：里程碑型成就（无 streak）+ 解锁通知（AC-1~6）
+- Statistics 深度洞察：记忆保持率曲线 + 学习节奏 + 课程深度 + 数据导出（ST-1~4）
+- AI 推导过程按钮（CD-4）
 
 ---
 
 ## 架构决策记录（ADR）
-
-已决定在 `docs/decisions/` 目录维护 ADR 文档，每个重要技术决策写一份简短记录。
 
 | ADR 编号 | 标题 | 状态 |
 |---|---|---|
@@ -358,22 +240,12 @@
 
 ---
 
-## 已产出的策略文档
-
-| 文档 | 内容 | 日期 |
-|---|---|---|
-| 文档处理策略报告 | 主流产品对比、五大格式处理方案、推荐架构 | 2026-03-17 |
-| 策略跟进报告（Report 1） | pdf-parse 可靠性、Vision API 成本、800页处理、Markdown 结构、ADR | 2026-03-17 |
-| 记忆系统调研（Report 2） | RAG 原理、5 家产品对比、sqlite-vec 推荐、分阶段实施方案 | 2026-03-17 |
-
----
-
 ## 技术栈
 
 | 层级 | 技术 |
 |---|---|
-| 前端 | React + TypeScript + Vite, CSS Modules |
-| 后端 | Node.js 22.x + Express + TypeScript (jiti) |
+| 前端 | React 18 + TypeScript + Vite 5, CSS Modules, Zustand |
+| 后端 | Node.js 22.x + Express 4 + TypeScript (jiti) |
 | 数据库 | SQLite (better-sqlite3), WAL 模式 |
 | AI | Anthropic Claude API (Haiku 4.5 / Sonnet 4.5) |
 | 卡片算法 | ts-fsrs (间隔重复) |
@@ -388,6 +260,7 @@
 1. **Proposal 机制**：所有 AI 生成的变更必须经过 Proposal → Review → Apply
 2. **Minimum Working Flow**：任务分为 Must / Recommended / Optional，Agent 帮助学生维持最低日常学习
 3. **Agent 不做详细解题**：Agent 定位是学习伙伴，不是解题工具
-4. **CHANGELOG**：每次 Push 同步更新 `docs/CHANGELOG.md` 并导出到 Google Drive
+4. **CHANGELOG**：每次 Push 同步更新 `docs/releases/CHANGELOG-vX.X.md`
 5. **ADR**：每次架构变更创建 `docs/decisions/NNNN-标题.md`
-6. **文件入口统一**：文件统一在 Course 文件池上传，Agent 通过 function tool 读取，不设 Agent 独立上传按钮
+6. **文件入口统一**：文件统一在 Course 文件池上传，Agent 通过 function tool 读取
+7. **设计宪法**：三条不可违反——不替用户做决定、不监控用户、不制造挫败感
