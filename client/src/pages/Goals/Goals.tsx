@@ -372,7 +372,7 @@ export default function GoalsPage() {
   const handleDelete = async (id: string) => {
     try {
       await deleteGoal(id);
-      addToast('success', 'Goal deleted');
+      addToast('success', '目标及其下属任务已删除');
     } catch {
       addToast('error', 'Failed to delete goal');
     }

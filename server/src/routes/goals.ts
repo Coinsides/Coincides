@@ -315,10 +315,35 @@ router.delete('/:id', (req: AuthRequest, res: Response) => {
     throw new AppError(404, 'Goal not found');
   }
 
-  // goal_dependencies has ON DELETE CASCADE, so dependencies auto-cleaned
-  db.prepare('DELETE FROM goals WHERE id = ?').run(req.params.id);
+  // v1.7.2: Cascade-delete all tasks under this goal and its sub-goals.
+  // goals.parent_id has ON DELETE CASCADE, so sub-goals are auto-deleted by SQLite.
+  // But tasks.goal_id has ON DELETE SET NULL (not CASCADE), so we must delete tasks
+  // explicitly before deleting the goal. We also need to collect sub-goal IDs because
+  // once the parent goal is deleted, sub-goals vanish and their task.goal_id becomes NULL.
+  const collectGoalIds = (parentId: string): string[] => {
+    const children = db.prepare('SELECT id FROM goals WHERE parent_id = ?').all(parentId) as { id: string }[];
+    const ids = [parentId];
+    for (const child of children) {
+      ids.push(...collectGoalIds(child.id));
+    }
+    return ids;
+  };
 
-  res.json({ message: 'Goal deleted' });
+  const goalId = req.params.id as string;
+  const allGoalIds = collectGoalIds(goalId);
+
+  const deleteTransaction = db.transaction(() => {
+    // Delete all tasks under these goals (task_cards cleaned via ON DELETE CASCADE on task_id)
+    const placeholders = allGoalIds.map(() => '?').join(',');
+    db.prepare(`DELETE FROM tasks WHERE goal_id IN (${placeholders}) AND user_id = ?`).run(...allGoalIds, req.userId!);
+
+    // Delete the goal (sub-goals + goal_dependencies auto-cascade)
+    db.prepare('DELETE FROM goals WHERE id = ?').run(req.params.id);
+  });
+
+  deleteTransaction();
+
+  res.json({ message: 'Goal and associated tasks deleted', tasks_deleted: true });
 });
 
 // ── Goal Dependencies (v1.3) ────────────────────────────────

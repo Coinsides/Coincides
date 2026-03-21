@@ -83,6 +83,13 @@ export const useGoalStore = create<GoalState>((set, get) => ({
     };
     findChildren(id);
     set({ goals: get().goals.filter((g) => !removeIds.has(g.id)) });
+
+    // v1.7.2: Also remove associated tasks from taskStore (server already deleted them)
+    const { useTaskStore } = await import('./taskStore');
+    const taskStore = useTaskStore.getState();
+    useTaskStore.setState({
+      tasks: taskStore.tasks.filter((t) => !t.goal_id || !removeIds.has(t.goal_id)),
+    });
   },
 
   toggleExamMode: async (id) => {
