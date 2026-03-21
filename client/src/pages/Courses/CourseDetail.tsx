@@ -1,11 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft, Edit2, Trash2, Plus, Target, Layers, FileText,
+  ArrowLeft, Edit2, Trash2, Plus, Target, Layers, FileText, Upload,
   CheckCircle2, Circle, Pause, RotateCcw, BookOpen,
 } from 'lucide-react';
 import { useCourseStore } from '@/stores/courseStore';
 import { useUIStore } from '@/stores/uiStore';
+import DocumentManager from '@/components/DocumentManager/DocumentManager';
 import api from '@/services/api';
 import type { Course, Goal } from '@shared/types';
 import styles from './CourseDetail.module.css';
@@ -49,6 +50,7 @@ const STATUS_ICONS: Record<string, typeof Circle> = {
 export default function CourseDetailPage() {
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
+  const modal = useUIStore((s) => s.modal);
   const openModal = useUIStore((s) => s.openModal);
   const addToast = useUIStore((s) => s.addToast);
   const deleteCourse = useCourseStore((s) => s.deleteCourse);
@@ -273,12 +275,15 @@ export default function CourseDetailPage() {
             <span>Documents</span>
             <span className={styles.sectionCount}>{documents.length}</span>
           </div>
-          <button
-            className={styles.sectionAddBtn}
-            onClick={() => openModal('document-manager', { courseId: course.id, courseName: course.name })}
-          >
-            Manage
-          </button>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <button
+              className={styles.sectionAddBtn}
+              onClick={() => openModal('document-manager', { courseId: course.id, courseName: course.name })}
+            >
+              <Upload size={14} />
+              上传 / 管理
+            </button>
+          </div>
         </div>
         {documents.length === 0 ? (
           <div className={styles.empty}>No documents yet</div>
@@ -299,6 +304,9 @@ export default function CourseDetailPage() {
           </div>
         )}
       </div>
+
+      {/* Document Manager Modal */}
+      {modal?.type === 'document-manager' && <DocumentManager />}
 
       {/* Delete Confirmation */}
       {confirmDelete && (
