@@ -134,8 +134,21 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
           // v1.3: scheduled_date takes precedence over date for calendar placement
           const taskDate = (item.scheduled_date || item.date) as string;
 
-          // v1.7.2: Defensive time_block_id fill — if Agent omitted it, look up by day_of_week
-          let timeBlockId = item.time_block_id || null;
+          // v1.7.2: Defensive time_block_id fill — if Agent omitted it, look up by day_of_week.
+          // Also validate any Agent-provided ID actually exists (FK safety).
+          let timeBlockId: string | null = (item.time_block_id as string) || null;
+
+          // If Agent provided an ID, verify it exists in DB
+          if (timeBlockId) {
+            const exists = db.prepare(
+              'SELECT id FROM time_blocks WHERE id = ? AND user_id = ?',
+            ).get(timeBlockId, req.userId!) as { id: string } | undefined;
+            if (!exists) {
+              timeBlockId = null; // Invalid ID — clear it to avoid FK violation
+            }
+          }
+
+          // If still no time_block_id, try to find one by day_of_week
           if (!timeBlockId && taskDate) {
             const dateObj = new Date(taskDate + 'T00:00:00');
             const dayOfWeek = dateObj.getDay(); // 0=Sun, 6=Sat

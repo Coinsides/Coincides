@@ -10,6 +10,7 @@ const typeBadgeColors: Record<string, { bg: string; text: string }> = {
   study_plan: { bg: 'rgba(34, 197, 94, 0.12)', text: '#22c55e' },
   goal_breakdown: { bg: 'rgba(59, 130, 246, 0.12)', text: '#3b82f6' },
   schedule_adjustment: { bg: 'rgba(245, 158, 11, 0.12)', text: '#f59e0b' },
+  time_block_setup: { bg: 'rgba(168, 85, 247, 0.12)', text: '#a855f7' },
 };
 
 const typeLabels: Record<string, string> = {
@@ -17,7 +18,10 @@ const typeLabels: Record<string, string> = {
   study_plan: 'Study Plan',
   goal_breakdown: 'Goals',
   schedule_adjustment: 'Schedule',
+  time_block_setup: 'Time Block',
 };
+
+const DAY_NAMES = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 
 /**
  * Safely extract items array from proposal data.
@@ -142,13 +146,29 @@ export default function ProposalList() {
                   {items.map((item, i) => {
                     const calendarMode = proposal.type === 'study_plan' && isCalendarEventMode(proposal);
                     const tbLabel = safeString(item.time_block_label);
+                    const isTimeBlockSetup = proposal.type === 'time_block_setup';
+
+                    // For time_block_setup items, build a descriptive title from label + day_of_week + times
+                    const itemTitle = isTimeBlockSetup
+                      ? safeString(item.label, `Time Block ${i + 1}`)
+                      : safeString(item.title, `Item ${i + 1}`);
 
                     return (
                       <div key={i} className={styles.item}>
                         <div className={styles.itemContent}>
                           <span className={styles.itemTitle}>
-                            {safeString(item.title, `Item ${i + 1}`)}
+                            {itemTitle}
                           </span>
+                          {isTimeBlockSetup && item.day_of_week != null && (
+                            <span className={styles.itemMeta}>
+                              {DAY_NAMES[Number(item.day_of_week)] || `Day ${String(item.day_of_week)}`}
+                            </span>
+                          )}
+                          {isTimeBlockSetup && !!(item.start_time || item.end_time) && (
+                            <span className={styles.itemDate}>
+                              {safeString(item.start_time)} – {safeString(item.end_time)}
+                            </span>
+                          )}
                           {item.template_type ? (
                             <span className={styles.itemMeta}>{safeString(item.template_type)}</span>
                           ) : null}
