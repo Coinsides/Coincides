@@ -85,10 +85,10 @@ router.post('/conversations/:id/messages', async (req: AuthRequest, res: Respons
     res.setHeader('X-Accel-Buffering', 'no');
     res.flushHeaders();
 
-    // 120s request-level timeout
-    const REQUEST_TIMEOUT_MS = 120_000;
+    // 300s request-level timeout (aligned with orchestrator ROUND_TIMEOUT_MS)
+    const REQUEST_TIMEOUT_MS = 300_000;
     const requestTimer = setTimeout(() => {
-      res.write(`event: error\ndata: ${JSON.stringify({ message: 'Request timed out after 120s' })}\n\n`);
+      res.write(`event: error\ndata: ${JSON.stringify({ message: 'Request timed out after 300s' })}\n\n`);
       res.write(`event: done\ndata: {}\n\n`);
       res.end();
     }, REQUEST_TIMEOUT_MS);
