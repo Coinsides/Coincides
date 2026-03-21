@@ -14,6 +14,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { useGoalStore } from '@/stores/goalStore';
 import { useCourseStore } from '@/stores/courseStore';
+import { useTaskStore } from '@/stores/taskStore';
 import { useUIStore } from '@/stores/uiStore';
 import type { Goal, Task, GoalDependency } from '@shared/types';
 import api from '@/services/api';
@@ -81,6 +82,8 @@ interface SortableGoalRowProps {
   goalTasks: Task[];
   showTasks: boolean;
   onToggleTasks: (goal: Goal) => void;
+  onOpenTask: (task: Task) => void;
+  onDeleteTask: (taskId: string) => void;
   // Dependencies
   dependencies: GoalDependency[];
   allGoals: Goal[];
@@ -91,7 +94,7 @@ interface SortableGoalRowProps {
 function SortableGoalRow({
   node, isExpanded, onToggleExpand, onToggleStatus, onDelete,
   onExamMode, onAddTask, onAddSubGoal, getCourse, progress,
-  goalTasks, showTasks, onToggleTasks,
+  goalTasks, showTasks, onToggleTasks, onOpenTask, onDeleteTask,
   dependencies, allGoals, onAddDependency, onRemoveDependency,
 }: SortableGoalRowProps) {
   const { goal, children, depth } = node;
@@ -263,23 +266,53 @@ function SortableGoalRow({
       {/* Expanded task list */}
       {showTasks && goalTasks.length > 0 && (
         <div className={styles.taskList} style={{ marginLeft: `${depth * 28 + 48}px` }}>
-          {goalTasks.map((task) => (
-            <div key={task.id} className={styles.taskItem}>
-              <span
-                className={styles.taskDot}
-                style={{ background: task.status === 'completed' ? 'var(--success)' : 'var(--text-muted)' }}
-              />
-              <span
-                style={{
-                  textDecoration: task.status === 'completed' ? 'line-through' : 'none',
-                  opacity: task.status === 'completed' ? 0.6 : 1,
-                }}
+          {goalTasks.map((task) => {
+            const checklistDone = task.checklist
+              ? task.checklist.filter((c: any) => c.done).length
+              : 0;
+            const checklistTotal = task.checklist ? task.checklist.length : 0;
+            const priorityColor = task.priority === 'must' ? 'var(--priority-must)'
+              : task.priority === 'recommended' ? 'var(--priority-recommended)'
+              : 'var(--text-muted)';
+            return (
+              <div
+                key={task.id}
+                className={styles.taskItem}
+                onClick={() => onOpenTask(task)}
+                style={{ cursor: 'pointer' }}
               >
-                {task.title}
-              </span>
-              <span className={styles.taskDate}>{task.date}</span>
-            </div>
-          ))}
+                <span
+                  className={styles.taskDot}
+                  style={{ background: task.status === 'completed' ? 'var(--success)' : priorityColor }}
+                />
+                <div className={styles.taskInfo}>
+                  <span
+                    className={styles.taskTitle}
+                    style={{
+                      textDecoration: task.status === 'completed' ? 'line-through' : 'none',
+                      opacity: task.status === 'completed' ? 0.6 : 1,
+                    }}
+                  >
+                    {task.title}
+                  </span>
+                  {task.description && (
+                    <span className={styles.taskDesc}>{task.description}</span>
+                  )}
+                </div>
+                <span className={styles.taskDate}>{task.date}</span>
+                {checklistTotal > 0 && (
+                  <span className={styles.taskChecklist}>{checklistDone}/{checklistTotal}</span>
+                )}
+                <button
+                  className={styles.taskDeleteBtn}
+                  onClick={(e) => { e.stopPropagation(); onDeleteTask(task.id); }}
+                  title="删除任务"
+                >
+                  <Trash2 size={12} />
+                </button>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
@@ -388,6 +421,21 @@ export default function GoalsPage() {
 
   const handleAddTask = (goal: Goal) => {
     openModal('task-create', { goal_id: goal.id, course_id: goal.course_id });
+  };
+
+  const { deleteTask } = useTaskStore();
+  const handleDeleteTask = async (taskId: string) => {
+    try {
+      await deleteTask(taskId);
+      // Refresh the task list for the currently shown goal
+      if (showTasksFor) {
+        const { data } = await api.get('/tasks', { params: { goal_id: showTasksFor } });
+        setGoalTasks((prev) => ({ ...prev, [showTasksFor]: data }));
+      }
+      addToast('success', '任务已删除');
+    } catch {
+      addToast('error', '删除失败');
+    }
   };
 
   const handleAddSubGoal = (goal: Goal) => {
@@ -515,6 +563,8 @@ export default function GoalsPage() {
                     goalTasks={goalTasks[node.goal.id] || []}
                     showTasks={showTasksFor === node.goal.id}
                     onToggleTasks={handleToggleTasks}
+                    onOpenTask={(task) => openModal('task-view', { task })}
+                    onDeleteTask={handleDeleteTask}
                     dependencies={dependencyMap[node.goal.id] || []}
                     allGoals={filteredGoals}
                     onAddDependency={handleAddDependency}
