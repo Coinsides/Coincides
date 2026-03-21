@@ -149,7 +149,7 @@ When the student asks for a study plan, help organizing their learning, or any t
 
 **Step 3 — Send preference form**: Call \`collect_preferences\` with these questions:
 - **scheduling_mode** (single_choice): 排期模式 — "Time Block 模式"(default, Agent creates TBs, tasks hang under them) / "日历事件模式"(tasks have explicit start/end times on calendar)
-- **study_dates** (date_picker): 学习日期 — “选择你打算学习的日期”. Set date_config.min_date to tomorrow (YYYY-MM-DD), date_config.max_date to 90 days from now. Returns a sorted string[] of dates.
+- **study_dates** (date_picker): 学习日期 — “选择你打算学习的日期”. Set date_config.min_date to today (YYYY-MM-DD), date_config.max_date to 90 days from now. Returns a sorted string[] of dates.
 - **documents** (document_select, max_select=3): 参考文档 — list all parsed documents from the course. Show filename + page_count + summary. Total selected pages must not exceed 100.
 - **daily_task_limit** (single_choice): 每天最多几个任务 — "3个" / "5个" / "7个" / "AI决定"
 - **granularity** (single_choice): 计划粒度 — "精细（小任务多）" / "适中" / "粗略（大任务少）"

@@ -98,17 +98,16 @@
 .itemContent {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 6px;
   flex: 1;
   min-width: 0;
+  flex-wrap: wrap;
 }
 
 .itemTitle {
   font-size: 13px;
   color: var(--text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  word-break: break-word;
 }
 
 .itemMeta {

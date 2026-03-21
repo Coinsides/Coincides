@@ -94,6 +94,7 @@ router.post('/conversations/:id/messages', async (req: AuthRequest, res: Respons
     }, REQUEST_TIMEOUT_MS);
 
     const conversationId = req.params.id as string;
+    let doneSent = false;
     try {
       for await (const chunk of runAgent(
         req.userId!,
@@ -113,6 +114,7 @@ router.post('/conversations/:id/messages', async (req: AuthRequest, res: Respons
           res.write(`event: preference_form\ndata: ${JSON.stringify({ questions: chunk.data })}\n\n`);
         } else if (chunk.type === 'done') {
           res.write(`event: done\ndata: {}\n\n`);
+          doneSent = true;
         } else if (chunk.type === 'error') {
           res.write(`event: error\ndata: ${JSON.stringify({ message: chunk.error })}\n\n`);
         }
@@ -127,9 +129,11 @@ router.post('/conversations/:id/messages', async (req: AuthRequest, res: Respons
     }
 
     clearTimeout(requestTimer);
-    // Always ensure stream ends with done event
+    // Ensure stream ends with done event (only if not already sent)
     if (!res.writableEnded) {
-      res.write(`event: done\ndata: {}\n\n`);
+      if (!doneSent) {
+        res.write(`event: done\ndata: {}\n\n`);
+      }
       res.end();
     }
   } catch (err) {
