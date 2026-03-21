@@ -21,7 +21,7 @@ import { useGoalStore } from '@/stores/goalStore';
 import { useTimeBlockStore } from '@/stores/timeBlockStore';
 import { useUIStore } from '@/stores/uiStore';
 import api from '@/services/api';
-import type { Task, ResolvedTimeBlock } from '@shared/types';
+import type { Task, TimeBlock } from '@shared/types';
 import styles from './Calendar.module.css';
 
 type CalendarView = 'month' | 'week';
@@ -48,7 +48,7 @@ const TB_COLORS: Record<string, string> = Object.fromEntries(
   TB_PRESET_TYPES.map(p => [p.value, p.color])
 );
 
-function getTBColor(block: ResolvedTimeBlock): string {
+function getTBColor(block: TimeBlock): string {
   return block.color || TB_COLORS[block.type] || '#8b5cf6';
 }
 
@@ -97,7 +97,7 @@ function pctToHHMMDynamic(pct: number, rangeStartH: number, rangeEndH: number): 
 }
 
 /** Compute nesting depth for each block. Longer blocks are parents; shorter blocks nested inside get depth+1 */
-function computeNestingLevels(blocks: ResolvedTimeBlock[]): Map<string, number> {
+function computeNestingLevels(blocks: TimeBlock[]): Map<string, number> {
   if (blocks.length === 0) return new Map();
 
   // Sort by duration descending (longest first = bottom layer)
@@ -146,14 +146,14 @@ export default function CalendarPage() {
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; task: Task } | null>(null);
 
   // Time Block context menu + edit state
-  const [tbContextMenu, setTBContextMenu] = useState<{ x: number; y: number; block: ResolvedTimeBlock } | null>(null);
-  const [tbEditBlock, setTBEditBlock] = useState<ResolvedTimeBlock | null>(null);
+  const [tbContextMenu, setTBContextMenu] = useState<{ x: number; y: number; block: TimeBlock } | null>(null);
+  const [tbEditBlock, setTBEditBlock] = useState<TimeBlock | null>(null);
   const [tbEditLabel, setTBEditLabel] = useState('');
   const [tbEditType, setTBEditType] = useState('study');
   const [tbEditStart, setTBEditStart] = useState('');
   const [tbEditEnd, setTBEditEnd] = useState('');
   const [tbEditColor, setTBEditColor] = useState('');
-  const [tbDeleteConfirm, setTBDeleteConfirm] = useState<ResolvedTimeBlock | null>(null);
+  const [tbDeleteConfirm, setTBDeleteConfirm] = useState<TimeBlock | null>(null);
 
   // Time Block drag-select state
   const [dragSelect, setDragSelect] = useState<{ dayIdx: number; startPct: number; currentPct: number } | null>(null);
@@ -171,7 +171,7 @@ export default function CalendarPage() {
   const [tbCustomTypeInput, setTBCustomTypeInput] = useState('');  // Custom type input for combobox
 
   // Hover task panel state
-  const [hoverBlock, setHoverBlock] = useState<{ block: ResolvedTimeBlock; dateStr: string } | null>(null);
+  const [hoverBlock, setHoverBlock] = useState<{ block: TimeBlock; dateStr: string } | null>(null);
   const [hoverPos, setHoverPos] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const hoverEnterTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hoverExitTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -181,7 +181,7 @@ export default function CalendarPage() {
     if (hoverExitTimer.current) { clearTimeout(hoverExitTimer.current); hoverExitTimer.current = null; }
   }, []);
 
-  const handleTBMouseEnter = useCallback((e: React.MouseEvent, block: ResolvedTimeBlock, dateStr: string) => {
+  const handleTBMouseEnter = useCallback((e: React.MouseEvent, block: TimeBlock, dateStr: string) => {
     if (hoverExitTimer.current) { clearTimeout(hoverExitTimer.current); hoverExitTimer.current = null; }
     // Capture rect before setTimeout — React recycles the event object
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
@@ -213,7 +213,7 @@ export default function CalendarPage() {
   const openModal = useUIStore((s) => s.openModal);
   const addToast = useUIStore((s) => s.addToast);
   const openAgentWithContext = useUIStore((s) => s.openAgentWithContext);
-  const { weekData, fetchWeek, createBlocks, updateBlock, deleteBlock } = useTimeBlockStore();
+  const { weekData, fetchWeek, createInstances, updateInstance, deleteInstance } = useTimeBlockStore();
 
   // Fetch time blocks for week view
   useEffect(() => {
@@ -458,13 +458,13 @@ export default function CalendarPage() {
 
   // ── Time Block right-click handlers ──────────────────
 
-  const handleTBContextMenu = (e: React.MouseEvent, block: ResolvedTimeBlock) => {
+  const handleTBContextMenu = (e: React.MouseEvent, block: TimeBlock) => {
     e.preventDefault();
     e.stopPropagation();
     setTBContextMenu({ x: e.clientX, y: e.clientY, block });
   };
 
-  const openTBEdit = (block: ResolvedTimeBlock) => {
+  const openTBEdit = (block: TimeBlock) => {
     setTBContextMenu(null);
     setTBEditBlock(block);
     setTBEditLabel(block.type);
@@ -477,7 +477,7 @@ export default function CalendarPage() {
   const handleTBEditSave = async () => {
     if (!tbEditBlock) return;
     try {
-      await updateBlock(tbEditBlock.id, {
+      await updateInstance(tbEditBlock.id, {
         label: tbEditType.trim() || undefined,
         type: tbEditType.trim() as any,
         start_time: tbEditStart || undefined,
@@ -497,7 +497,7 @@ export default function CalendarPage() {
   const handleTBDelete = async () => {
     if (!tbDeleteConfirm) return;
     try {
-      await deleteBlock(tbDeleteConfirm.id);
+      await deleteInstance(tbDeleteConfirm.id);
       const weekStart = startOfWeek(currentMonth, { weekStartsOn: 1 });
       fetchWeek(format(weekStart, 'yyyy-MM-dd'));
       setTBDeleteConfirm(null);
@@ -601,12 +601,12 @@ export default function CalendarPage() {
   const handleTBCreateSubmit = async () => {
     if (!dragSelection || !tbCreateType.trim()) return;
     const day = weekDays[dragSelection.dayIdx];
-    const dayOfWeek = day.getDay(); // 0=Sun
+    const dateStr = format(day, 'yyyy-MM-dd');
     try {
-      await createBlocks([{
+      await createInstances([{
         label: tbCreateType.trim(),
         type: tbCreateType.trim() as any,
-        day_of_week: dayOfWeek,
+        date: dateStr,
         start_time: tbCreateStart,
         end_time: tbCreateEnd,
         color: tbCreateColor || undefined,

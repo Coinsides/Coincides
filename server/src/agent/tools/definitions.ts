@@ -185,7 +185,7 @@ export const toolDefinitions: ToolDefinition[] = [
             items: {
               type: 'array',
               items: { type: 'object' },
-              description: 'Array of items to create/modify. For study_plan: each item should include { title, course_id, priority, goal_id, scheduled_date (YYYY-MM-DD), description, serves_must, time_block_id, checklist?: [{text: string, done: boolean}] }. The checklist MUST be an array of objects with "text" and "done" fields (NOT plain strings). For batch_cards: each item should include { deck_id, section_id, template_type, title, content }. For schedule_adjustment: { task_id, date, priority, status }. For time_block_setup: each item should include { label, day_of_week (0=Sun..6=Sat), start_time (HH:MM), end_time (HH:MM), type ("study") }.',
+              description: 'Array of items to create/modify. For study_plan: each item should include { title, course_id, priority, goal_id, scheduled_date (YYYY-MM-DD), description, serves_must, time_block_id, checklist?: [{text: string, done: boolean}] }. The checklist MUST be an array of objects with "text" and "done" fields (NOT plain strings). For batch_cards: each item should include { deck_id, section_id, template_type, title, content }. For schedule_adjustment: { task_id, date, priority, status }. For time_block_setup: each item should include { label, date (YYYY-MM-DD), start_time (HH:MM), end_time (HH:MM), type ("study") }.',
             },
           },
           required: ['title', 'description', 'items'],
@@ -252,13 +252,13 @@ export const toolDefinitions: ToolDefinition[] = [
   },
   {
     name: 'get_time_blocks',
-    description: "Get the student's time block schedule. Returns weekly template blocks and/or resolved blocks for a date range, plus available study minutes per day. Available study time = Study Block duration minus nested non-study blocks (e.g. meal, rest). Use this before scheduling tasks to understand the student's time structure.",
+    description: "Get the student's time block instances for specific dates. Time Blocks are now date-based instances (not weekly templates). Returns blocks for the requested date range plus available study minutes per day.",
     parameters: {
       type: 'object',
       properties: {
-        date: { type: 'string', description: 'Specific date to get resolved blocks for (YYYY-MM-DD). Returns that day\'s blocks with overrides applied.' },
-        week_of: { type: 'string', description: 'Get resolved blocks for the entire week containing this date (YYYY-MM-DD). Returns 7 days of data.' },
-        templates_only: { type: 'boolean', description: 'If true, return only the weekly template blocks (no date-specific resolution). Default false.' },
+        date: { type: 'string', description: 'Specific date (YYYY-MM-DD). Returns that day\'s time block instances.' },
+        from_date: { type: 'string', description: 'Start of date range (YYYY-MM-DD). Use with to_date.' },
+        to_date: { type: 'string', description: 'End of date range (YYYY-MM-DD). Use with from_date.' },
       },
       required: [],
     },
@@ -365,7 +365,7 @@ export const toolDefinitions: ToolDefinition[] = [
   },
   {
     name: 'create_time_blocks',
-    description: 'Create one or more Time Blocks in the weekly template. Use when the student describes their schedule (e.g., "I study from 8am to 6pm") and you need to set up Time Blocks before assigning tasks. Returns the created block IDs. Note: only one Study Block per day is allowed.',
+    description: 'Create one or more Time Block instances for specific dates. Time Blocks are now date-based (each instance belongs to a single date). Use when the student needs time blocks for specific dates that don\'t already have them.',
     parameters: {
       type: 'object',
       properties: {
@@ -376,14 +376,14 @@ export const toolDefinitions: ToolDefinition[] = [
             properties: {
               label: { type: 'string', description: 'Block label (e.g., "Morning Study", "Lunch Break")' },
               type: { type: 'string', enum: ['study', 'rest', 'meal', 'exercise', 'custom'], description: 'Block type. Use "study" for study sessions.' },
-              day_of_week: { type: 'number', description: 'Day of week: 0=Sunday, 1=Monday, ..., 6=Saturday' },
+              date: { type: 'string', description: 'Specific date (YYYY-MM-DD) for this time block instance' },
               start_time: { type: 'string', description: 'Start time in HH:MM format (e.g., "08:00")' },
               end_time: { type: 'string', description: 'End time in HH:MM format (e.g., "18:00")' },
               color: { type: 'string', description: 'Optional hex color (e.g., "#4CAF50")' },
             },
-            required: ['label', 'type', 'day_of_week', 'start_time', 'end_time'],
+            required: ['label', 'type', 'date', 'start_time', 'end_time'],
           },
-          description: 'Array of Time Blocks to create',
+          description: 'Array of Time Block instances to create',
         },
       },
       required: ['blocks'],
@@ -391,11 +391,11 @@ export const toolDefinitions: ToolDefinition[] = [
   },
   {
     name: 'update_time_block',
-    description: 'Update an existing Time Block template. Can change label, type, start/end time, or color.',
+    description: 'Update an existing Time Block instance. Only affects this specific instance (date), not other days.',
     parameters: {
       type: 'object',
       properties: {
-        block_id: { type: 'string', description: 'Time Block ID to update' },
+        block_id: { type: 'string', description: 'Time Block instance ID to update' },
         label: { type: 'string', description: 'New label' },
         type: { type: 'string', enum: ['study', 'rest', 'meal', 'exercise', 'custom'], description: 'New type' },
         start_time: { type: 'string', description: 'New start time (HH:MM)' },
@@ -407,11 +407,11 @@ export const toolDefinitions: ToolDefinition[] = [
   },
   {
     name: 'delete_time_block',
-    description: 'Delete a Time Block template. This removes the block from all days. Associated task links are preserved but the block reference becomes stale.',
+    description: 'Delete a Time Block instance. Only removes this specific instance (date), not other days.',
     parameters: {
       type: 'object',
       properties: {
-        block_id: { type: 'string', description: 'Time Block ID to delete' },
+        block_id: { type: 'string', description: 'Time Block instance ID to delete' },
       },
       required: ['block_id'],
     },

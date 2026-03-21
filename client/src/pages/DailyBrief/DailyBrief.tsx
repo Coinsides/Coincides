@@ -8,7 +8,7 @@ import { useCourseStore } from '@/stores/courseStore';
 import { useUIStore } from '@/stores/uiStore';
 import api from '@/services/api';
 import { EnergyLevel } from '@shared/types';
-import type { Task, ResolvedTimeBlock } from '@shared/types';
+import type { Task, TimeBlock } from '@shared/types';
 import styles from './DailyBrief.module.css';
 
 const energyOptions: { value: EnergyLevel; label: string; icon: typeof Zap }[] = [
@@ -96,15 +96,15 @@ export default function DailyBrief() {
           </div>
           <div className={styles.timeBlockList}>
             {briefData.time_blocks
-              .filter((b: ResolvedTimeBlock) => b.type === 'study')
-              .sort((a: ResolvedTimeBlock, b: ResolvedTimeBlock) => a.start_time.localeCompare(b.start_time))
-              .map((block: ResolvedTimeBlock) => (
+              .filter((b: TimeBlock) => b.type === 'study')
+              .sort((a: TimeBlock, b: TimeBlock) => a.start_time.localeCompare(b.start_time))
+              .map((block: TimeBlock) => (
                 <div key={block.id} className={styles.timeBlockChip}>
                   <span className={styles.timeBlockTime}>{block.start_time} – {block.end_time}</span>
                   <span className={styles.timeBlockLabel}>{block.label}</span>
                 </div>
               ))}
-            {briefData.time_blocks.filter((b: ResolvedTimeBlock) => b.type === 'study').length === 0 && (
+            {briefData.time_blocks.filter((b: TimeBlock) => b.type === 'study').length === 0 && (
               <span className={styles.timeBlockEmpty}>{t('dailyBriefPage.noStudyBlocks', 'No study blocks today')}</span>
             )}
           </div>

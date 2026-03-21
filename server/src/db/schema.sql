@@ -339,14 +339,15 @@ CREATE INDEX IF NOT EXISTS idx_study_mode_templates_user ON study_mode_templates
 CREATE UNIQUE INDEX IF NOT EXISTS idx_study_mode_templates_system_slug ON study_mode_templates(slug) WHERE user_id IS NULL;
 
 -- ============================================================
--- 17. TimeBlock (v1.3)
+-- 17. TimeBlock Instance (v1.7.3 — date-based, no longer weekly template)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS time_blocks (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  template_id TEXT,              -- traces back to time_block_templates.id (nullable)
   label TEXT NOT NULL,
-  type TEXT NOT NULL DEFAULT 'custom',
-  day_of_week INTEGER NOT NULL,
+  type TEXT NOT NULL DEFAULT 'study',
+  date TEXT NOT NULL,            -- YYYY-MM-DD (each instance is date-specific)
   start_time TEXT NOT NULL,
   end_time TEXT NOT NULL,
   color TEXT,
@@ -355,22 +356,32 @@ CREATE TABLE IF NOT EXISTS time_blocks (
 );
 
 CREATE INDEX IF NOT EXISTS idx_time_blocks_user ON time_blocks(user_id);
-CREATE INDEX IF NOT EXISTS idx_time_blocks_user_day ON time_blocks(user_id, day_of_week);
+CREATE INDEX IF NOT EXISTS idx_time_blocks_user_date ON time_blocks(user_id, date);
 
 -- ============================================================
--- 18. TimeBlockOverride (v1.3)
+-- 18. TimeBlockTemplateSet + TimeBlockTemplate (v1.7.3)
 -- ============================================================
-CREATE TABLE IF NOT EXISTS time_block_overrides (
+CREATE TABLE IF NOT EXISTS time_block_template_sets (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  time_block_id TEXT NOT NULL REFERENCES time_blocks(id) ON DELETE CASCADE,
-  override_date TEXT NOT NULL,
-  start_time TEXT,
-  end_time TEXT,
-  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  name TEXT NOT NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE INDEX IF NOT EXISTS idx_tbo_user_date ON time_block_overrides(user_id, override_date);
+CREATE TABLE IF NOT EXISTS time_block_templates (
+  id TEXT PRIMARY KEY,
+  template_set_id TEXT NOT NULL REFERENCES time_block_template_sets(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  label TEXT NOT NULL,
+  type TEXT NOT NULL DEFAULT 'study',
+  day_of_week INTEGER NOT NULL,
+  start_time TEXT NOT NULL,
+  end_time TEXT NOT NULL,
+  color TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
 
 -- ============================================================
 -- 19. GoalDependency (v1.3)

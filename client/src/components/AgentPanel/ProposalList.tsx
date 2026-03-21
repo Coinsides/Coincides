@@ -148,7 +148,7 @@ export default function ProposalList() {
                     const tbLabel = safeString(item.time_block_label);
                     const isTimeBlockSetup = proposal.type === 'time_block_setup';
 
-                    // For time_block_setup items, build a descriptive title from label + day_of_week + times
+                    // For time_block_setup items, build a descriptive title from label + date + times
                     const itemTitle = isTimeBlockSetup
                       ? safeString(item.label, `Time Block ${i + 1}`)
                       : safeString(item.title, `Item ${i + 1}`);
@@ -159,13 +159,13 @@ export default function ProposalList() {
                           <span className={styles.itemTitle}>
                             {itemTitle}
                           </span>
-                          {isTimeBlockSetup && item.day_of_week != null && (
-                            <span className={styles.itemMeta}>
-                              {DAY_NAMES[Number(item.day_of_week)] || `Day ${String(item.day_of_week)}`}
+                          {isTimeBlockSetup && !!item.date && (
+                            <span className={styles.itemDate}>
+                              {safeString(item.date)}
                             </span>
                           )}
                           {isTimeBlockSetup && !!(item.start_time || item.end_time) && (
-                            <span className={styles.itemDate}>
+                            <span className={styles.itemMeta}>
                               {safeString(item.start_time)} – {safeString(item.end_time)}
                             </span>
                           )}

@@ -148,13 +148,11 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
             }
           }
 
-          // If still no time_block_id, try to find one by day_of_week
+          // v1.7.3: If still no time_block_id, try to find one by date
           if (!timeBlockId && taskDate) {
-            const dateObj = new Date(taskDate + 'T00:00:00');
-            const dayOfWeek = dateObj.getDay(); // 0=Sun, 6=Sat
             const matchingBlock = db.prepare(
-              `SELECT id FROM time_blocks WHERE user_id = ? AND day_of_week = ? AND type = 'study' ORDER BY start_time ASC LIMIT 1`,
-            ).get(req.userId!, dayOfWeek) as { id: string } | undefined;
+              `SELECT id FROM time_blocks WHERE user_id = ? AND date = ? AND type = 'study' ORDER BY start_time ASC LIMIT 1`,
+            ).get(req.userId!, taskDate) as { id: string } | undefined;
             if (matchingBlock) {
               timeBlockId = matchingBlock.id;
             }
@@ -224,16 +222,17 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
         break;
       }
       case 'time_block_setup': {
-        // v1.7.2: Create Time Blocks from proposal items
+        // v1.7.3: Create date-based Time Block instances from proposal items
         for (const item of data.items) {
           const blockId = uuidv4();
           db.prepare(
-            'INSERT INTO time_blocks (id, user_id, label, type, day_of_week, start_time, end_time, color, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            'INSERT INTO time_blocks (id, user_id, template_id, label, type, date, start_time, end_time, color, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
           ).run(
             blockId, req.userId!,
+            null,
             item.label || `Study Block`,
             item.type || 'study',
-            item.day_of_week,
+            item.date,
             item.start_time,
             item.end_time,
             item.color || null,

@@ -139,6 +139,43 @@
 
 ---
 
+## v1.7.3 — Time Block 模板化（数据层 + API + 日历适配）
+
+> 详见 [v1.7.3-plan.md](v1.7.3-plan.md)
+
+### 架构重构
+- **Time Block 从周模板改为日期实例**：`time_blocks` 表从 `day_of_week` 改为 `date` 字段，每个实例绑定具体日期
+- **新增模板表**：`time_block_template_sets`（模板集）+ `time_block_templates`（模板条目）
+- **删除 `time_block_overrides` 表**：不再需要（实例本身就是按日期的）
+- **清空旧 Time Block 数据**：迁移时重建表结构，旧数据不保留
+
+### 新增 API
+- 模板集 CRUD：`GET/POST/PUT/DELETE /api/time-blocks/templates/sets`
+- 模板条目：`GET/POST /api/time-blocks/templates/sets/:setId/items`
+- 模板应用：`POST /api/time-blocks/templates/sets/:setId/apply`（日期范围 + 覆盖选项）
+- 实例查询：`GET /api/time-blocks?from=&to=`（日期范围查询）
+
+### 文件变更
+| 文件 | 变更 |
+|------|------|
+| `server/src/db/migrations/012_time_block_templates.ts` | 新建模板集 + 模板条目表 |
+| `server/src/db/migrations/013_time_block_instances.ts` | 重建 time_blocks 表（date-based）、删除 overrides、清空任务引用 |
+| `server/src/routes/timeBlocks.ts` | 全重写：实例 CRUD + 模板 CRUD + 应用逻辑 |
+| `server/src/routes/dailyBrief.ts` | getResolvedBlocksForDate → getBlocksForDate |
+| `server/src/routes/proposals.ts` | time_block_setup apply 改为 date-based；study_plan 防御填充改为按 date 查找 |
+| `server/src/agent/tools/definitions.ts` | get_time_blocks 参数改为 from_date/to_date；create_time_blocks 改为 date-based |
+| `server/src/agent/tools/executor.ts` | 全部 time block 工具重写为 date-based 查询 |
+| `server/src/agent/system-prompt.ts` | 更新所有 Time Block 相关协议（模板→实例、day_of_week→date） |
+| `server/src/agent/scheduling.ts` | 容量计算改为按 date 查询实例 |
+| `shared/types/index.ts` | TimeBlock 改为 date-based；新增 TemplateSet/Template 类型；删除 ResolvedTimeBlock/Override |
+| `client/src/stores/timeBlockStore.ts` | 全重写：实例 CRUD + 模板 CRUD + 应用 |
+| `client/src/pages/Calendar/Calendar.tsx` | ResolvedTimeBlock→TimeBlock；创建实例改为 date-based |
+| `client/src/pages/DailyBrief/DailyBrief.tsx` | ResolvedTimeBlock→TimeBlock |
+| `client/src/components/AgentPanel/ProposalList.tsx` | time_block_setup 渲染改为显示 date |
+| `server/src/db/schema.sql` | 更新表结构文档 |
+
+---
+
 ## v1.7.2 — 学习计划流程完善
 
 > 详见 [v1.7.2-plan.md](v1.7.2-plan.md)

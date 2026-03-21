@@ -1,7 +1,7 @@
 import { Router, Response } from 'express';
 import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
-import { getResolvedBlocksForDate } from './timeBlocks.js';
+import { getBlocksForDate } from './timeBlocks.js';
 
 const router = Router();
 
@@ -143,7 +143,7 @@ router.get('/', (req: AuthRequest, res: Response) => {
   }));
 
   // Get today's time blocks (empty array if none — never prompt user to set up, §2)
-  const timeBlocks = getResolvedBlocksForDate(userId, today);
+  const timeBlocks = getBlocksForDate(userId, today);
 
   res.json({
     date: today,

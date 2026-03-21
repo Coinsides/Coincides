@@ -140,28 +140,15 @@ export function getDailyCapacities(userId: string, startDate: string, endDate: s
     const dateStr = d.toISOString().split('T')[0];
     const dow = d.getDay(); // 0=Sun
 
-    // Get ALL time blocks for this day of week
+    // v1.7.3: Get date-based time block instances directly
     const blocks = db.prepare(
-      'SELECT id, start_time, end_time, type FROM time_blocks WHERE user_id = ? AND day_of_week = ?'
-    ).all(userId, dow) as Array<{ id: string; start_time: string; end_time: string; type: string }>;
+      'SELECT id, start_time, end_time, type FROM time_blocks WHERE user_id = ? AND date = ?'
+    ).all(userId, dateStr) as Array<{ id: string; start_time: string; end_time: string; type: string }>;
 
-    // Check for overrides
-    const overrides = db.prepare(
-      'SELECT time_block_id, start_time, end_time FROM time_block_overrides WHERE user_id = ? AND override_date = ?'
-    ).all(userId, dateStr) as Array<{ time_block_id: string; start_time: string | null; end_time: string | null }>;
-
-    const overMap = new Map(overrides.map(o => [o.time_block_id, o]));
-
-    // Resolve each block's effective start/end, filtering out deleted overrides
     const resolved: Array<{ id: string; type: string; startMin: number; endMin: number }> = [];
     for (const b of blocks) {
-      const ov = overMap.get(b.id);
-      if (ov && ov.start_time === null) continue; // deleted by override
-
-      const st = ov ? ov.start_time! : b.start_time;
-      const et = ov ? ov.end_time! : b.end_time;
-      const sMin = hhmmToMin(st);
-      const eMin = hhmmToMin(et);
+      const sMin = hhmmToMin(b.start_time);
+      const eMin = hhmmToMin(b.end_time);
       if (eMin > sMin) {
         resolved.push({ id: b.id, type: b.type, startMin: sMin, endMin: eMin });
       }

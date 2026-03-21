@@ -488,81 +488,62 @@ export async function executeTool(
     }
 
     case 'get_time_blocks': {
-      const { date, week_of, templates_only } = args as { date?: string; week_of?: string; templates_only?: boolean };
+      // v1.7.3: Date-based instances (no more weekly templates / overrides)
+      const { date, from_date, to_date } = args as { date?: string; from_date?: string; to_date?: string };
 
-      if (templates_only) {
-        const templates = db.prepare(
-          'SELECT id, label, type, day_of_week, start_time, end_time, color FROM time_blocks WHERE user_id = ? ORDER BY day_of_week, start_time'
-        ).all(userId);
-        return JSON.stringify({ templates });
-      }
-
-      if (week_of) {
-        // Import helper logic inline — compute resolved blocks for 7 days
-        const startDate = new Date(week_of);
-        const dayOW = startDate.getUTCDay();
-        const mondayOff = dayOW === 0 ? -6 : 1 - dayOW;
-        startDate.setUTCDate(startDate.getUTCDate() + mondayOff);
-
-        const weekResult: Record<string, any> = {};
-        for (let i = 0; i < 7; i++) {
-          const d = new Date(startDate);
-          d.setUTCDate(d.getUTCDate() + i);
-          const dateStr = d.toISOString().split('T')[0];
-          const dow = d.getUTCDay();
-
-          const tmpl = db.prepare('SELECT * FROM time_blocks WHERE user_id = ? AND day_of_week = ?').all(userId, dow) as any[];
-          const overrides = db.prepare('SELECT * FROM time_block_overrides WHERE user_id = ? AND override_date = ?').all(userId, dateStr) as any[];
-          const overMap = new Map(overrides.map((o: any) => [o.time_block_id, o]));
-
-          const blocks: any[] = [];
-          let studyMin = 0;
-          for (const t of tmpl) {
-            const ov = overMap.get(t.id) as any;
-            if (ov && ov.start_time === null) continue; // deleted for this day
-            const st = ov ? ov.start_time : t.start_time;
-            const et = ov ? ov.end_time : t.end_time;
-            blocks.push({ id: t.id, label: t.label, type: t.type, start_time: st, end_time: et });
-            if (t.type === 'study') {
-              const [sh, sm] = st.split(':').map(Number);
-              const [eh, em] = et.split(':').map(Number);
-              studyMin += (eh * 60 + em) - (sh * 60 + sm);
-            }
+      const computeStudyMin = (blocks: any[]): number => {
+        let total = 0;
+        for (const b of blocks) {
+          if (b.type === 'study') {
+            const [sh, sm] = b.start_time.split(':').map(Number);
+            const [eh, em] = b.end_time.split(':').map(Number);
+            total += (eh * 60 + em) - (sh * 60 + sm);
           }
-          weekResult[dateStr] = { blocks, available_study_minutes: Math.max(studyMin, 0) };
         }
-        return JSON.stringify(weekResult);
+        return Math.max(total, 0);
+      };
+
+      if (from_date && to_date) {
+        const blocks = db.prepare(
+          'SELECT id, label, type, date, start_time, end_time, color FROM time_blocks WHERE user_id = ? AND date >= ? AND date <= ? ORDER BY date, start_time'
+        ).all(userId, from_date, to_date) as any[];
+
+        // Group by date
+        const byDate: Record<string, any[]> = {};
+        for (const b of blocks) {
+          if (!byDate[b.date]) byDate[b.date] = [];
+          byDate[b.date].push(b);
+        }
+
+        const result: Record<string, any> = {};
+        // Fill in all dates in range (including empty ones)
+        const cur = new Date(from_date + 'T00:00:00');
+        const end = new Date(to_date + 'T00:00:00');
+        while (cur <= end) {
+          const ds = cur.toISOString().split('T')[0];
+          const dayBlocks = byDate[ds] || [];
+          result[ds] = { blocks: dayBlocks, available_study_minutes: computeStudyMin(dayBlocks) };
+          cur.setDate(cur.getDate() + 1);
+        }
+        return JSON.stringify(result);
       }
 
       if (date) {
-        const d = new Date(date);
-        const dow = d.getUTCDay();
-        const tmpl = db.prepare('SELECT * FROM time_blocks WHERE user_id = ? AND day_of_week = ?').all(userId, dow) as any[];
-        const overrides = db.prepare('SELECT * FROM time_block_overrides WHERE user_id = ? AND override_date = ?').all(userId, date) as any[];
-        const overMap = new Map(overrides.map((o: any) => [o.time_block_id, o]));
-
-        const blocks: any[] = [];
-        let studyMin = 0;
-        for (const t of tmpl) {
-          const ov = overMap.get(t.id) as any;
-          if (ov && ov.start_time === null) continue;
-          const st = ov ? ov.start_time : t.start_time;
-          const et = ov ? ov.end_time : t.end_time;
-          blocks.push({ id: t.id, label: t.label, type: t.type, start_time: st, end_time: et });
-          if (t.type === 'study') {
-            const [sh, sm] = st.split(':').map(Number);
-            const [eh, em] = et.split(':').map(Number);
-            studyMin += (eh * 60 + em) - (sh * 60 + sm);
-          }
-        }
-        return JSON.stringify({ date, blocks, available_study_minutes: Math.max(studyMin, 0) });
+        const blocks = db.prepare(
+          'SELECT id, label, type, date, start_time, end_time, color FROM time_blocks WHERE user_id = ? AND date = ? ORDER BY start_time'
+        ).all(userId, date) as any[];
+        return JSON.stringify({ date, blocks, available_study_minutes: computeStudyMin(blocks) });
       }
 
-      // Default: return templates
-      const templates = db.prepare(
-        'SELECT id, label, type, day_of_week, start_time, end_time, color FROM time_blocks WHERE user_id = ? ORDER BY day_of_week, start_time'
-      ).all(userId);
-      return JSON.stringify({ templates });
+      // Default: return blocks for next 14 days
+      const today = new Date().toISOString().split('T')[0];
+      const twoWeeks = new Date();
+      twoWeeks.setDate(twoWeeks.getDate() + 14);
+      const endDate = twoWeeks.toISOString().split('T')[0];
+      const blocks = db.prepare(
+        'SELECT id, label, type, date, start_time, end_time, color FROM time_blocks WHERE user_id = ? AND date >= ? AND date <= ? ORDER BY date, start_time'
+      ).all(userId, today, endDate) as any[];
+      return JSON.stringify({ from: today, to: endDate, blocks });
     }
 
     case 'get_goal_dependencies': {
@@ -804,9 +785,10 @@ export async function executeTool(
     }
 
     case 'create_time_blocks': {
+      // v1.7.3: Date-based instances
       const { blocks } = args as {
         blocks: Array<{
-          label: string; type?: string; day_of_week: number;
+          label: string; type?: string; date: string;
           start_time: string; end_time: string; color?: string;
         }>;
       };
@@ -815,47 +797,33 @@ export async function executeTool(
         return JSON.stringify({ error: 'No blocks provided' });
       }
 
-      // Validate
       for (const item of blocks) {
-        if (!item.label || item.day_of_week === undefined || !item.start_time || !item.end_time) {
-          return JSON.stringify({ error: 'Each block requires label, day_of_week, start_time, end_time' });
+        if (!item.label || !item.date || !item.start_time || !item.end_time) {
+          return JSON.stringify({ error: 'Each block requires label, date, start_time, end_time' });
         }
-        if (item.day_of_week < 0 || item.day_of_week > 6) {
-          return JSON.stringify({ error: 'day_of_week must be 0-6' });
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(item.date)) {
+          return JSON.stringify({ error: 'date must be YYYY-MM-DD format' });
         }
         if (!/^\d{2}:\d{2}$/.test(item.start_time) || !/^\d{2}:\d{2}$/.test(item.end_time)) {
           return JSON.stringify({ error: 'start_time and end_time must be HH:MM format' });
         }
       }
 
-      // Study Block single-per-day constraint
-      for (const item of blocks) {
-        const blockType = item.type || 'custom';
-        if (blockType === 'study') {
-          const existing = db.prepare(
-            'SELECT id FROM time_blocks WHERE user_id = ? AND day_of_week = ? AND type = ?'
-          ).get(userId, item.day_of_week, 'study') as any;
-          if (existing) {
-            return JSON.stringify({ error: `Only one Study Block allowed per day (day_of_week=${item.day_of_week} already has one)` });
-          }
-        }
-      }
-
       const stmt = db.prepare(
-        `INSERT INTO time_blocks (id, user_id, label, type, day_of_week, start_time, end_time, color, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+        `INSERT INTO time_blocks (id, user_id, template_id, label, type, date, start_time, end_time, color, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
       );
 
       const now = new Date().toISOString();
-      const created: Array<{ id: string; label: string; type: string; day_of_week: number; start_time: string; end_time: string }> = [];
+      const created: Array<{ id: string; label: string; type: string; date: string; start_time: string; end_time: string }> = [];
 
       db.transaction(() => {
         for (const item of blocks) {
           const id = uuidv4();
-          stmt.run(id, userId, item.label, item.type || 'custom', item.day_of_week, item.start_time, item.end_time, item.color || null, now, now);
+          stmt.run(id, userId, null, item.label, item.type || 'custom', item.date, item.start_time, item.end_time, item.color || null, now, now);
           created.push({
             id, label: item.label, type: item.type || 'custom',
-            day_of_week: item.day_of_week, start_time: item.start_time, end_time: item.end_time,
+            date: item.date, start_time: item.start_time, end_time: item.end_time,
           });
         }
       })();
@@ -874,16 +842,6 @@ export async function executeTool(
       ).get(block_id, userId) as any;
       if (!existing) {
         return JSON.stringify({ error: 'Time block not found' });
-      }
-
-      // Study Block single-per-day constraint
-      if (type === 'study' && existing.type !== 'study') {
-        const existingStudy = db.prepare(
-          'SELECT id FROM time_blocks WHERE user_id = ? AND day_of_week = ? AND type = ? AND id != ?'
-        ).get(userId, existing.day_of_week, 'study', block_id) as any;
-        if (existingStudy) {
-          return JSON.stringify({ error: 'Only one Study Block allowed per day' });
-        }
       }
 
       const fields: string[] = [];

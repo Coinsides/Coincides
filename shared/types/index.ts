@@ -390,6 +390,29 @@ export interface Proposal {
 export interface TimeBlock {
   id: string;
   user_id: string;
+  template_id: string | null;    // Source template (for tracing), nullable
+  label: string;
+  type: string;
+  date: string;                  // 'YYYY-MM-DD' — each instance is date-specific
+  start_time: string;            // 'HH:MM'
+  end_time: string;              // 'HH:MM'
+  color: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TimeBlockTemplateSet {
+  id: string;
+  user_id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TimeBlockTemplate {
+  id: string;
+  template_set_id: string;
+  user_id: string;
   label: string;
   type: string;
   day_of_week: number;           // 0=Sun, 1=Mon, ..., 6=Sat
@@ -400,16 +423,6 @@ export interface TimeBlock {
   updated_at: string;
 }
 
-export interface TimeBlockOverride {
-  id: string;
-  user_id: string;
-  time_block_id: string;
-  override_date: string;         // 'YYYY-MM-DD'
-  start_time: string | null;     // null = delete this block on that day
-  end_time: string | null;
-  created_at: string;
-}
-
 export interface GoalDependency {
   id: string;
   goal_id: string;
@@ -417,33 +430,16 @@ export interface GoalDependency {
   created_at: string;
 }
 
-// --- Time Block Computed ---
-
-export interface ResolvedTimeBlock {
-  id: string;
-  label: string;
-  type: string;
-  day_of_week: number;
-  start_time: string;
-  end_time: string;
-  color: string | null;
-  is_override: boolean;
-  override_id?: string;
-}
-
 // --- Time Block Request Types ---
 
-export interface CreateTimeBlockRequest {
+export interface CreateTimeBlockInstanceRequest {
   label: string;
   type?: string;
-  day_of_week: number;
+  date: string;                 // 'YYYY-MM-DD'
   start_time: string;
   end_time: string;
   color?: string;
-}
-
-export interface BatchCreateTimeBlockRequest {
-  blocks: CreateTimeBlockRequest[];
+  template_id?: string;
 }
 
 export interface UpdateTimeBlockRequest {
@@ -454,11 +450,24 @@ export interface UpdateTimeBlockRequest {
   color?: string;
 }
 
-export interface CreateTimeBlockOverrideRequest {
-  time_block_id: string;
-  override_date: string;
-  start_time?: string | null;
-  end_time?: string | null;
+export interface ApplyTemplateRequest {
+  dates: string[];              // Array of 'YYYY-MM-DD'
+  overwrite: boolean;
+}
+
+export interface CreateTemplateSetRequest {
+  name: string;
+}
+
+export interface SaveTemplateItemsRequest {
+  items: Array<{
+    label: string;
+    type?: string;
+    day_of_week: number;
+    start_time: string;
+    end_time: string;
+    color?: string;
+  }>;
 }
 
 export interface CreateGoalDependencyRequest {
@@ -586,7 +595,7 @@ export interface DailyBriefResponse {
   cards_due_count: number;
   recurring_alerts: RecurringTaskAlert[];
   energy_level: EnergyLevel | null;
-  time_blocks: ResolvedTimeBlock[];
+  time_blocks: TimeBlock[];
   minimum_working_flow: {
     must_tasks_count: number;
     cards_due_count: number;

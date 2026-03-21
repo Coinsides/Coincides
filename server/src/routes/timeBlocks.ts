@@ -4,148 +4,79 @@ import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 
-// Inline types (mirroring shared/types for server-side use)
+// Inline types
 interface TimeBlockRow {
-  id: string; user_id: string; label: string; type: string;
-  day_of_week: number; start_time: string; end_time: string;
+  id: string; user_id: string; template_id: string | null; label: string;
+  type: string; date: string; start_time: string; end_time: string;
   color: string | null; created_at: string; updated_at: string;
 }
 
-interface TimeBlockOverrideRow {
-  id: string; user_id: string; time_block_id: string;
-  override_date: string; start_time: string | null;
-  end_time: string | null; created_at: string;
+interface TemplateSetRow {
+  id: string; user_id: string; name: string;
+  created_at: string; updated_at: string;
 }
 
-interface ResolvedTimeBlock {
-  id: string; label: string; type: string; day_of_week: number;
+interface TemplateItemRow {
+  id: string; template_set_id: string; user_id: string;
+  label: string; type: string; day_of_week: number;
   start_time: string; end_time: string; color: string | null;
-  is_override: boolean; override_id?: string;
+  created_at: string; updated_at: string;
 }
 
 const router = Router();
 
 // ── Helpers ──────────────────────────────────────────────────
 
-/**
- * Convert "HH:MM" to total minutes from midnight.
- */
 function timeToMinutes(t: string): number {
   const [h, m] = t.split(':').map(Number);
   return h * 60 + m;
 }
 
-/**
- * Convert a time block's start/end to minute ranges.
- * Handles midnight-crossing blocks (e.g. 23:00–01:00) by splitting into two ranges.
- */
 function toMinuteRanges(startTime: string, endTime: string): Array<{ start: number; end: number }> {
   const s = timeToMinutes(startTime);
   const e = timeToMinutes(endTime);
   if (e > s) return [{ start: s, end: e }];
-  // Crosses midnight: split into [s, 1440) + [0, e)
   const ranges: Array<{ start: number; end: number }> = [];
   if (s < 1440) ranges.push({ start: s, end: 1440 });
   if (e > 0) ranges.push({ start: 0, end: e });
   return ranges;
 }
 
-/**
- * Detect overlapping time blocks. Returns pairs of overlapping IDs.
- * Does NOT prevent saving — visual-only concern (Design Constitution §2).
- */
 export function detectOverlaps(blocks: Array<{ id: string; start_time: string; end_time: string }>): Array<[string, string]> {
-  // Expand each block into minute ranges (handles midnight-crossing)
   const expanded = blocks.map(b => ({
     id: b.id,
     ranges: toMinuteRanges(b.start_time, b.end_time),
   }));
-
   const overlaps: Array<[string, string]> = [];
   for (let i = 0; i < expanded.length; i++) {
     for (let j = i + 1; j < expanded.length; j++) {
-      // Check if any range pair overlaps
       const hasOverlap = expanded[i].ranges.some(ar =>
         expanded[j].ranges.some(br => ar.start < br.end && br.start < ar.end)
       );
-      if (hasOverlap) {
-        overlaps.push([expanded[i].id, expanded[j].id]);
-      }
+      if (hasOverlap) overlaps.push([expanded[i].id, expanded[j].id]);
     }
   }
   return overlaps;
 }
 
 /**
- * Get resolved time blocks for a specific date.
- * Merges weekly template with any single-day overrides.
+ * Get time block instances for a specific date (v1.7.3 — date-based).
  */
-export function getResolvedBlocksForDate(userId: string, date: string): ResolvedTimeBlock[] {
+export function getBlocksForDate(userId: string, date: string): TimeBlockRow[] {
   const db = getDb();
-  const d = new Date(date);
-  const dayOfWeek = d.getUTCDay(); // 0=Sun
-
-  // Get template blocks for this day of week
-  const templates = db.prepare(
-    'SELECT * FROM time_blocks WHERE user_id = ? AND day_of_week = ?'
-  ).all(userId, dayOfWeek) as TimeBlockRow[];
-
-  // Get overrides for this specific date
-  const overrides = db.prepare(
-    'SELECT * FROM time_block_overrides WHERE user_id = ? AND override_date = ?'
-  ).all(userId, date) as TimeBlockOverrideRow[];
-
-  const overrideMap = new Map<string, TimeBlockOverrideRow>();
-  for (const o of overrides) {
-    overrideMap.set(o.time_block_id, o);
-  }
-
-  const resolved: ResolvedTimeBlock[] = [];
-  for (const tmpl of templates) {
-    const override = overrideMap.get(tmpl.id);
-    if (override) {
-      // start_time is null → block deleted for this day
-      if (override.start_time === null) continue;
-      resolved.push({
-        id: tmpl.id,
-        label: tmpl.label,
-        type: tmpl.type as any,
-        day_of_week: dayOfWeek,
-        start_time: override.start_time!,
-        end_time: override.end_time!,
-        color: tmpl.color,
-        is_override: true,
-        override_id: override.id,
-      });
-    } else {
-      resolved.push({
-        id: tmpl.id,
-        label: tmpl.label,
-        type: tmpl.type as any,
-        day_of_week: dayOfWeek,
-        start_time: tmpl.start_time,
-        end_time: tmpl.end_time,
-        color: tmpl.color,
-        is_override: false,
-      });
-    }
-  }
-
-  return resolved;
+  return db.prepare(
+    'SELECT * FROM time_blocks WHERE user_id = ? AND date = ? ORDER BY start_time'
+  ).all(userId, date) as TimeBlockRow[];
 }
 
 export function getAvailableStudyMinutes(userId: string, date: string): number {
-  const blocks = getResolvedBlocksForDate(userId, date)
-    .filter(b => b.type === 'study');
-
+  const blocks = getBlocksForDate(userId, date).filter(b => b.type === 'study');
   if (blocks.length === 0) return 0;
 
-  // Convert to minute ranges (handles midnight-crossing), merge overlapping, sum
   const ranges = blocks
     .flatMap(b => toMinuteRanges(b.start_time, b.end_time))
     .sort((a, b) => a.start - b.start);
 
-  // Merge overlapping ranges
   const merged: Array<{ start: number; end: number }> = [ranges[0]];
   for (let i = 1; i < ranges.length; i++) {
     const prev = merged[merged.length - 1];
@@ -159,58 +90,85 @@ export function getAvailableStudyMinutes(userId: string, date: string): number {
   return merged.reduce((sum, r) => sum + (r.end - r.start), 0);
 }
 
+// ══════════════════════════════════════════════════════════════
+// INSTANCE ROUTES — /api/time-blocks
+// ══════════════════════════════════════════════════════════════
 
-// ── Routes ───────────────────────────────────────────────────
-
-// GET /api/time-blocks — all template blocks for user
+// GET /api/time-blocks?from=YYYY-MM-DD&to=YYYY-MM-DD  (or ?date=YYYY-MM-DD)
 router.get('/', (req: AuthRequest, res: Response) => {
   const db = getDb();
+  const { date, from, to } = req.query;
+
+  if (date) {
+    const blocks = getBlocksForDate(req.userId!, date as string);
+    const overlaps = detectOverlaps(blocks);
+    res.json({ blocks, available_study_minutes: getAvailableStudyMinutes(req.userId!, date as string), overlaps });
+    return;
+  }
+
+  if (from && to) {
+    const blocks = db.prepare(
+      'SELECT * FROM time_blocks WHERE user_id = ? AND date >= ? AND date <= ? ORDER BY date, start_time'
+    ).all(req.userId!, from, to) as TimeBlockRow[];
+    res.json(blocks);
+    return;
+  }
+
+  // Fallback: all instances
   const blocks = db.prepare(
-    'SELECT * FROM time_blocks WHERE user_id = ? ORDER BY day_of_week, start_time'
+    'SELECT * FROM time_blocks WHERE user_id = ? ORDER BY date, start_time'
   ).all(req.userId!);
   res.json(blocks);
 });
 
-// POST /api/time-blocks — create single or batch
+// GET /api/time-blocks/week/:date — instances for a full week (Calendar compatibility)
+router.get('/week/:date', (req: AuthRequest, res: Response) => {
+  const startDate = new Date(req.params.date as string);
+  const day = startDate.getUTCDay();
+  const mondayOffset = day === 0 ? -6 : 1 - day;
+  startDate.setUTCDate(startDate.getUTCDate() + mondayOffset);
+
+  const weekData: Record<string, { blocks: TimeBlockRow[]; available_study_minutes: number; overlaps: Array<[string, string]> }> = {};
+
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(startDate);
+    d.setUTCDate(d.getUTCDate() + i);
+    const dateStr = d.toISOString().split('T')[0];
+    const blocks = getBlocksForDate(req.userId!, dateStr);
+    weekData[dateStr] = {
+      blocks,
+      available_study_minutes: getAvailableStudyMinutes(req.userId!, dateStr),
+      overlaps: detectOverlaps(blocks),
+    };
+  }
+
+  res.json(weekData);
+});
+
+// POST /api/time-blocks — create instance(s) for specific date(s)
 router.post('/', (req: AuthRequest, res: Response) => {
   const db = getDb();
   const { blocks } = req.body;
-
-  // Support both single block and batch
   const items: Array<{
-    label: string; type?: string; day_of_week: number;
-    start_time: string; end_time: string; color?: string;
+    label: string; type?: string; date: string;
+    start_time: string; end_time: string; color?: string; template_id?: string;
   }> = Array.isArray(blocks) ? blocks : [req.body];
 
-  // Validate
   for (const item of items) {
-    if (!item.label || item.day_of_week === undefined || !item.start_time || !item.end_time) {
-      throw new AppError(400, 'Each block requires label, day_of_week, start_time, end_time');
+    if (!item.label || !item.date || !item.start_time || !item.end_time) {
+      throw new AppError(400, 'Each block requires label, date, start_time, end_time');
     }
-    if (item.day_of_week < 0 || item.day_of_week > 6) {
-      throw new AppError(400, 'day_of_week must be 0-6');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(item.date)) {
+      throw new AppError(400, 'date must be YYYY-MM-DD format');
     }
     if (!/^\d{2}:\d{2}$/.test(item.start_time) || !/^\d{2}:\d{2}$/.test(item.end_time)) {
       throw new AppError(400, 'start_time and end_time must be HH:MM format');
     }
   }
 
-  // Study Block single-per-day constraint (TB-R10)
-  for (const item of items) {
-    const blockType = item.type || 'custom';
-    if (blockType === 'study') {
-      const existing = db.prepare(
-        'SELECT id FROM time_blocks WHERE user_id = ? AND day_of_week = ? AND type = ?'
-      ).get(req.userId!, item.day_of_week, 'study') as any;
-      if (existing) {
-        throw new AppError(400, `Only one Study Block allowed per day (day_of_week=${item.day_of_week} already has one)`);
-      }
-    }
-  }
-
   const stmt = db.prepare(
-    `INSERT INTO time_blocks (id, user_id, label, type, day_of_week, start_time, end_time, color, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO time_blocks (id, user_id, template_id, label, type, date, start_time, end_time, color, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   );
 
   const now = new Date().toISOString();
@@ -219,10 +177,12 @@ router.post('/', (req: AuthRequest, res: Response) => {
   db.transaction(() => {
     for (const item of items) {
       const id = uuidv4();
-      stmt.run(id, req.userId!, item.label, item.type || 'custom', item.day_of_week, item.start_time, item.end_time, item.color || null, now, now);
+      stmt.run(id, req.userId!, item.template_id || null, item.label, item.type || 'custom',
+        item.date, item.start_time, item.end_time, item.color || null, now, now);
       created.push({
-        id, user_id: req.userId!, label: item.label, type: item.type || 'custom',
-        day_of_week: item.day_of_week, start_time: item.start_time, end_time: item.end_time,
+        id, user_id: req.userId!, template_id: item.template_id || null,
+        label: item.label, type: item.type || 'custom', date: item.date,
+        start_time: item.start_time, end_time: item.end_time,
         color: item.color || null, created_at: now, updated_at: now,
       });
     }
@@ -231,7 +191,7 @@ router.post('/', (req: AuthRequest, res: Response) => {
   res.status(201).json(Array.isArray(blocks) ? created : created[0]);
 });
 
-// PUT /api/time-blocks/:id — update a template block
+// PUT /api/time-blocks/:id — update a single instance
 router.put('/:id', (req: AuthRequest, res: Response) => {
   const db = getDb();
   const existing = db.prepare(
@@ -240,17 +200,6 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
   if (!existing) throw new AppError(404, 'Time block not found');
 
   const { label, type, start_time, end_time, color } = req.body;
-
-  // Study Block single-per-day constraint (TB-R10)
-  if (type === 'study' && (existing as any).type !== 'study') {
-    const existingStudy = db.prepare(
-      'SELECT id FROM time_blocks WHERE user_id = ? AND day_of_week = ? AND type = ? AND id != ?'
-    ).get(req.userId!, (existing as any).day_of_week, 'study', req.params.id) as any;
-    if (existingStudy) {
-      throw new AppError(400, 'Only one Study Block allowed per day');
-    }
-  }
-
   const fields: string[] = [];
   const values: unknown[] = [];
 
@@ -267,12 +216,11 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
   values.push(req.params.id);
 
   db.prepare(`UPDATE time_blocks SET ${fields.join(', ')} WHERE id = ?`).run(...values);
-
   const updated = db.prepare('SELECT * FROM time_blocks WHERE id = ?').get(req.params.id);
   res.json(updated);
 });
 
-// DELETE /api/time-blocks/:id — delete template block (cascades overrides)
+// DELETE /api/time-blocks/:id — delete a single instance
 router.delete('/:id', (req: AuthRequest, res: Response) => {
   const db = getDb();
   const existing = db.prepare(
@@ -284,99 +232,9 @@ router.delete('/:id', (req: AuthRequest, res: Response) => {
   res.json({ message: 'Time block deleted' });
 });
 
-// GET /api/time-blocks/day/:date — resolved blocks for a single day
-router.get('/day/:date', (req: AuthRequest, res: Response) => {
-  const date = req.params.date as string;
-  const blocks = getResolvedBlocksForDate(req.userId!, date);
-  const studyMinutes = getAvailableStudyMinutes(req.userId!, date);
-  const overlaps = detectOverlaps(blocks);
-  res.json({ blocks, available_study_minutes: studyMinutes, overlaps });
-});
-
-// GET /api/time-blocks/week/:date — resolved blocks for a full week
-router.get('/week/:date', (req: AuthRequest, res: Response) => {
-  const startDate = new Date(req.params.date as string);
-  // Snap to Monday (ISO week start)
-  const day = startDate.getUTCDay();
-  const mondayOffset = day === 0 ? -6 : 1 - day;
-  startDate.setUTCDate(startDate.getUTCDate() + mondayOffset);
-
-  const weekData: Record<string, { blocks: ResolvedTimeBlock[]; available_study_minutes: number; overlaps: Array<[string, string]> }> = {};
-
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(startDate);
-    d.setUTCDate(d.getUTCDate() + i);
-    const dateStr = d.toISOString().split('T')[0];
-    const blocks = getResolvedBlocksForDate(req.userId!, dateStr);
-    weekData[dateStr] = {
-      blocks,
-      available_study_minutes: getAvailableStudyMinutes(req.userId!, dateStr),
-      overlaps: detectOverlaps(blocks),
-    };
-  }
-
-  res.json(weekData);
-});
-
-// POST /api/time-blocks/override — create a single-day override
-router.post('/override', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const { time_block_id, override_date, start_time, end_time } = req.body;
-
-  if (!time_block_id || !override_date) {
-    throw new AppError(400, 'time_block_id and override_date are required');
-  }
-
-  // Verify the time block belongs to user
-  const block = db.prepare(
-    'SELECT id FROM time_blocks WHERE id = ? AND user_id = ?'
-  ).get(time_block_id, req.userId!);
-  if (!block) throw new AppError(404, 'Time block not found');
-
-  // Check if override already exists for this block + date
-  const existing = db.prepare(
-    'SELECT id FROM time_block_overrides WHERE time_block_id = ? AND override_date = ? AND user_id = ?'
-  ).get(time_block_id, override_date, req.userId!) as any;
-
-  if (existing) {
-    // Update existing override
-    db.prepare(
-      'UPDATE time_block_overrides SET start_time = ?, end_time = ? WHERE id = ?'
-    ).run(start_time ?? null, end_time ?? null, existing.id);
-
-    const updated = db.prepare('SELECT * FROM time_block_overrides WHERE id = ?').get(existing.id);
-    res.json(updated);
-    return;
-  }
-
-  const id = uuidv4();
-  const now = new Date().toISOString();
-  db.prepare(
-    `INSERT INTO time_block_overrides (id, user_id, time_block_id, override_date, start_time, end_time, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
-  ).run(id, req.userId!, time_block_id, override_date, start_time ?? null, end_time ?? null, now);
-
-  const created = db.prepare('SELECT * FROM time_block_overrides WHERE id = ?').get(id);
-  res.status(201).json(created);
-});
-
-// DELETE /api/time-blocks/override/:id — remove an override (restore template)
-router.delete('/override/:id', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const existing = db.prepare(
-    'SELECT id FROM time_block_overrides WHERE id = ? AND user_id = ?'
-  ).get(req.params.id, req.userId!);
-  if (!existing) throw new AppError(404, 'Override not found');
-
-  db.prepare('DELETE FROM time_block_overrides WHERE id = ?').run(req.params.id);
-  res.json({ message: 'Override deleted' });
-});
-
-// GET /api/time-blocks/:id/tasks — Retrieve tasks associated with a specific time block
+// GET /api/time-blocks/:id/tasks — tasks under a specific time block instance
 router.get('/:id/tasks', (req: AuthRequest, res: Response) => {
   const db = getDb();
-
-  // Verify the time block belongs to this user
   const block = db.prepare(
     'SELECT id FROM time_blocks WHERE id = ? AND user_id = ?'
   ).get(req.params.id, req.userId!);
@@ -386,7 +244,6 @@ router.get('/:id/tasks', (req: AuthRequest, res: Response) => {
     'SELECT * FROM tasks WHERE time_block_id = ? AND user_id = ? ORDER BY order_index, created_at'
   ).all(req.params.id, req.userId!);
 
-  // Parse checklist JSON
   for (const t of tasks as any[]) {
     if (t.checklist && typeof t.checklist === 'string') {
       try { t.checklist = JSON.parse(t.checklist); } catch { t.checklist = null; }
@@ -394,6 +251,194 @@ router.get('/:id/tasks', (req: AuthRequest, res: Response) => {
   }
 
   res.json(tasks);
+});
+
+// ══════════════════════════════════════════════════════════════
+// TEMPLATE ROUTES — /api/time-blocks/templates
+// ══════════════════════════════════════════════════════════════
+
+// GET /api/time-blocks/templates/sets — all template sets
+router.get('/templates/sets', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+  const sets = db.prepare(
+    'SELECT * FROM time_block_template_sets WHERE user_id = ? ORDER BY created_at'
+  ).all(req.userId!) as TemplateSetRow[];
+  res.json(sets);
+});
+
+// POST /api/time-blocks/templates/sets — create template set
+router.post('/templates/sets', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+  const { name } = req.body;
+  if (!name) throw new AppError(400, 'name is required');
+
+  const id = uuidv4();
+  const now = new Date().toISOString();
+  db.prepare(
+    'INSERT INTO time_block_template_sets (id, user_id, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)'
+  ).run(id, req.userId!, name, now, now);
+
+  const created = db.prepare('SELECT * FROM time_block_template_sets WHERE id = ?').get(id);
+  res.status(201).json(created);
+});
+
+// PUT /api/time-blocks/templates/sets/:id — rename template set
+router.put('/templates/sets/:id', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+  const existing = db.prepare(
+    'SELECT id FROM time_block_template_sets WHERE id = ? AND user_id = ?'
+  ).get(req.params.id, req.userId!);
+  if (!existing) throw new AppError(404, 'Template set not found');
+
+  const { name } = req.body;
+  if (!name) throw new AppError(400, 'name is required');
+
+  const now = new Date().toISOString();
+  db.prepare(
+    'UPDATE time_block_template_sets SET name = ?, updated_at = ? WHERE id = ?'
+  ).run(name, now, req.params.id);
+
+  const updated = db.prepare('SELECT * FROM time_block_template_sets WHERE id = ?').get(req.params.id);
+  res.json(updated);
+});
+
+// DELETE /api/time-blocks/templates/sets/:id — delete template set (CASCADE deletes items)
+router.delete('/templates/sets/:id', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+  const existing = db.prepare(
+    'SELECT id FROM time_block_template_sets WHERE id = ? AND user_id = ?'
+  ).get(req.params.id, req.userId!);
+  if (!existing) throw new AppError(404, 'Template set not found');
+
+  db.prepare('DELETE FROM time_block_template_sets WHERE id = ?').run(req.params.id);
+  res.json({ message: 'Template set deleted' });
+});
+
+// GET /api/time-blocks/templates/sets/:setId/items — get template items
+router.get('/templates/sets/:setId/items', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+  const set = db.prepare(
+    'SELECT id FROM time_block_template_sets WHERE id = ? AND user_id = ?'
+  ).get(req.params.setId, req.userId!);
+  if (!set) throw new AppError(404, 'Template set not found');
+
+  const items = db.prepare(
+    'SELECT * FROM time_block_templates WHERE template_set_id = ? ORDER BY day_of_week, start_time'
+  ).all(req.params.setId) as TemplateItemRow[];
+
+  res.json(items);
+});
+
+// POST /api/time-blocks/templates/sets/:setId/items — save (replace all) template items
+router.post('/templates/sets/:setId/items', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+  const set = db.prepare(
+    'SELECT id FROM time_block_template_sets WHERE id = ? AND user_id = ?'
+  ).get(req.params.setId, req.userId!);
+  if (!set) throw new AppError(404, 'Template set not found');
+
+  const { items } = req.body;
+  if (!Array.isArray(items)) throw new AppError(400, 'items must be an array');
+
+  for (const item of items) {
+    if (!item.label || item.day_of_week === undefined || !item.start_time || !item.end_time) {
+      throw new AppError(400, 'Each item requires label, day_of_week, start_time, end_time');
+    }
+  }
+
+  const now = new Date().toISOString();
+
+  db.transaction(() => {
+    // Clear existing items for this set
+    db.prepare('DELETE FROM time_block_templates WHERE template_set_id = ?').run(req.params.setId);
+
+    // Insert new items
+    const stmt = db.prepare(
+      `INSERT INTO time_block_templates (id, template_set_id, user_id, label, type, day_of_week, start_time, end_time, color, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    );
+    for (const item of items) {
+      stmt.run(uuidv4(), req.params.setId, req.userId!, item.label, item.type || 'study',
+        item.day_of_week, item.start_time, item.end_time, item.color || null, now, now);
+    }
+  })();
+
+  const saved = db.prepare(
+    'SELECT * FROM time_block_templates WHERE template_set_id = ? ORDER BY day_of_week, start_time'
+  ).all(req.params.setId);
+
+  res.json(saved);
+});
+
+// POST /api/time-blocks/templates/sets/:setId/apply — instantiate template to date range
+router.post('/templates/sets/:setId/apply', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+  const set = db.prepare(
+    'SELECT id FROM time_block_template_sets WHERE id = ? AND user_id = ?'
+  ).get(req.params.setId, req.userId!);
+  if (!set) throw new AppError(404, 'Template set not found');
+
+  const { dates, overwrite } = req.body;
+  if (!Array.isArray(dates) || dates.length === 0) {
+    throw new AppError(400, 'dates must be a non-empty array of YYYY-MM-DD strings');
+  }
+
+  const templates = db.prepare(
+    'SELECT * FROM time_block_templates WHERE template_set_id = ? ORDER BY day_of_week, start_time'
+  ).all(req.params.setId) as TemplateItemRow[];
+
+  const now = new Date().toISOString();
+  let createdCount = 0;
+  let skippedDates: string[] = [];
+
+  const insertStmt = db.prepare(
+    `INSERT INTO time_blocks (id, user_id, template_id, label, type, date, start_time, end_time, color, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  );
+
+  db.transaction(() => {
+    for (const date of dates as string[]) {
+      const dayOfWeek = new Date(date + 'T00:00:00').getDay();
+      const matchingTemplates = templates.filter(t => t.day_of_week === dayOfWeek);
+
+      if (matchingTemplates.length === 0) continue; // No templates for this day of week
+
+      // Check if date already has time blocks
+      const existing = db.prepare(
+        'SELECT id FROM time_blocks WHERE user_id = ? AND date = ? LIMIT 1'
+      ).get(req.userId!, date);
+
+      if (existing && !overwrite) {
+        skippedDates.push(date);
+        continue;
+      }
+
+      if (existing && overwrite) {
+        // Clear tasks' time_block_id references for blocks we're about to delete
+        db.prepare(
+          `UPDATE tasks SET time_block_id = NULL WHERE time_block_id IN (
+            SELECT id FROM time_blocks WHERE user_id = ? AND date = ?
+          )`
+        ).run(req.userId!, date);
+        // Delete existing blocks for this date
+        db.prepare('DELETE FROM time_blocks WHERE user_id = ? AND date = ?').run(req.userId!, date);
+      }
+
+      for (const tmpl of matchingTemplates) {
+        insertStmt.run(
+          uuidv4(), req.userId!, tmpl.id, tmpl.label, tmpl.type,
+          date, tmpl.start_time, tmpl.end_time, tmpl.color, now, now
+        );
+        createdCount++;
+      }
+    }
+  })();
+
+  res.json({
+    message: `Applied template: ${createdCount} time blocks created`,
+    created_count: createdCount,
+    skipped_dates: skippedDates,
+  });
 });
 
 export default router;
