@@ -64,6 +64,38 @@
 | `client/src/pages/Calendar/Calendar.tsx` | 6 处 `task-edit` → `task-view` |
 | `shared/types/index.ts` | 新增 `TaskCardLink` interface |
 | `docs/DATA_MODEL.md` | 新增 2.24 TaskCard 表描述 |
+| `server/src/routes/agent.ts` | SSE 超时 120s→300s 对齐 orchestrator |
+| `server/src/agent/orchestrator.ts` | 并行工具执行 + Deck/Section 预加载注入 |
+| `server/src/agent/system-prompt.ts` | Tool Efficiency Playbook 重写 + Available Decks 上下文 |
+
+---
+
+## Agent 效率深度优化
+
+### SSE 超时对齐（commit `7b600ec`）
+- `server/src/routes/agent.ts` 中 `REQUEST_TIMEOUT_MS` 从 120s → 300s，与 orchestrator 一致
+- 新增基础 Tool Efficiency 协议（4 条规则）
+
+### 深度优化三部曲
+
+#### 1. Orchestrator 并行工具执行
+- `orchestrator.ts`：`for` 循环改为 `Promise.all`
+- Claude 同轮返回多个 tool_use 时并行执行，不再顺序等待
+- 安全性：better-sqlite3 同步写入无并发冲突，异步操作（embedding API）受益于并行
+
+#### 2. System Prompt Playbook 重写
+- Tool Efficiency 从 4 条泛规则 → 完整的分场景 Playbook
+- 卡片生成：目标 3–4 轮（原 7+ 轮）
+- 学习计划：目标 3–5 轮
+- 目标拆解：目标 2–3 轮
+- 文档查找：目标 1 轮
+- 新增 Anti-Patterns 清单（明确禁止的低效行为）
+- 更新「基于文档生成卡片」和「Deck 选择 / Section 组织」等协议段，与新效率标准一致
+
+#### 3. System Context 预注入
+- `orchestrator.ts`：对话开始前预加载用户所有 Deck + Section 信息
+- `system-prompt.ts`：新增「Available Decks」上下文区块，展示 deck ID、名称、卡片数、课程链接、section 列表
+- 大幅减少 Agent 调用 `list_decks` / `list_sections` 的需要
 
 ---
 

@@ -70,6 +70,21 @@ export async function* runAgent(
     'SELECT energy_level FROM daily_statuses WHERE user_id = ? AND date = ?',
   ).get(userId, today) as EnergyRow | undefined;
 
+  // Pre-load decks with their sections to reduce tool call rounds
+  const decks = db.prepare(
+    'SELECT d.id, d.name, d.course_id, d.card_count FROM card_decks d WHERE d.user_id = ? ORDER BY d.name',
+  ).all(userId) as { id: string; name: string; course_id: string; card_count: number }[];
+  const deckSections = new Map<string, { id: string; name: string }[]>();
+  if (decks.length > 0) {
+    const sections = db.prepare(
+      `SELECT id, deck_id, name FROM card_sections WHERE user_id = ? ORDER BY order_index`,
+    ).all(userId) as { id: string; deck_id: string; name: string }[];
+    for (const s of sections) {
+      if (!deckSections.has(s.deck_id)) deckSections.set(s.deck_id, []);
+      deckSections.get(s.deck_id)!.push({ id: s.id, name: s.name });
+    }
+  }
+
   // 3. Build system prompt
   const parsedSettings = JSON.parse(user.settings || '{}');
   // Detect L1 onboarding context
@@ -79,6 +94,13 @@ export async function* runAgent(
     courses,
     memories: memories.map((m) => ({ category: m.category, content: m.content })),
     documentSummaries: docSummaries,
+    decks: decks.map((d) => ({
+      id: d.id,
+      name: d.name,
+      course_id: d.course_id,
+      card_count: d.card_count,
+      sections: deckSections.get(d.id) || [],
+    })),
     currentDate: today,
     energyLevel: energyStatus?.energy_level,
     language: parsedSettings.language,
@@ -183,14 +205,14 @@ export async function* runAgent(
     }
     lastRoundHadTools = true;
 
-    // Execute tool calls
-    const toolResults: ToolResult[] = [];
+    // Execute tool calls in parallel for maximum efficiency
+    // All tool calls in a single round are independent (Claude decides to call them together)
     let hasPreferenceForm = false;
     let preferenceFormData: unknown = null;
-    for (const tc of currentToolCalls) {
+
+    const toolResultPromises = currentToolCalls.map(async (tc) => {
       try {
         const result = await executeTool(tc.name, tc.arguments, userId);
-        toolResults.push({ tool_call_id: tc.id, content: result });
 
         // Detect preference_form from collect_preferences tool
         if (tc.name === 'collect_preferences') {
@@ -202,12 +224,16 @@ export async function* runAgent(
             }
           } catch { /* ignore parse errors */ }
         }
+
+        return { tool_call_id: tc.id, content: result } as ToolResult;
       } catch (err: unknown) {
         const errMsg = err instanceof Error ? err.message : 'Tool execution error';
         console.error(`Tool execution failed [${tc.name}]:`, err);
-        toolResults.push({ tool_call_id: tc.id, content: JSON.stringify({ error: `Tool '${tc.name}' failed: ${errMsg}` }) });
+        return { tool_call_id: tc.id, content: JSON.stringify({ error: `Tool '${tc.name}' failed: ${errMsg}` }) } as ToolResult;
       }
-    }
+    });
+
+    const toolResults = await Promise.all(toolResultPromises);
 
     // If a preference form was generated, emit it as a special SSE event
     if (hasPreferenceForm && preferenceFormData) {
