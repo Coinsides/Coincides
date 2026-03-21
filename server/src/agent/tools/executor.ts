@@ -958,6 +958,41 @@ export async function executeTool(
       return JSON.stringify({ message: 'Time block deleted' });
     }
 
+    case 'link_task_cards': {
+      const { task_id, links } = args as { task_id: string; links: { card_id: string; checklist_index?: number }[] };
+
+      // Verify task belongs to user
+      const taskRow = db.prepare('SELECT id FROM tasks WHERE id = ? AND user_id = ?').get(task_id, userId);
+      if (!taskRow) {
+        return JSON.stringify({ error: 'Task not found' });
+      }
+
+      let created = 0;
+      let skipped = 0;
+
+      const insertLink = db.prepare(
+        'INSERT OR IGNORE INTO task_cards (id, task_id, card_id, checklist_index) VALUES (?, ?, ?, ?)'
+      );
+
+      const batch = db.transaction(() => {
+        for (const link of links) {
+          // Verify card belongs to user
+          const cardRow = db.prepare('SELECT id FROM cards WHERE id = ? AND user_id = ?').get(link.card_id, userId);
+          if (!cardRow) {
+            skipped++;
+            continue;
+          }
+          const linkId = uuidv4();
+          const result = insertLink.run(linkId, task_id, link.card_id, link.checklist_index ?? null);
+          if (result.changes > 0) created++;
+          else skipped++;
+        }
+      });
+
+      batch();
+      return JSON.stringify({ task_id, created, skipped, message: `Linked ${created} card(s) to task` });
+    }
+
     default:
       return JSON.stringify({ error: `Unknown tool: ${toolName}` });
   }

@@ -461,6 +461,21 @@ Spaced Repetition, Interleaving, Active Recall, Feynman Technique, Pomodoro, Spi
 **Unique:** `(goal_id, depends_on_goal_id)`
 **环检测:** DFS 深度优先搜索，插入前检查是否会形成环
 
+### 2.24 TaskCard (v1.7)
+
+Task ↔ Card 多对多关联表，支持任务级和 Checklist 条目级关联。
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | TEXT | PK | UUID |
+| task_id | TEXT | FK → tasks(id) CASCADE | 关联任务 |
+| card_id | TEXT | FK → cards(id) CASCADE | 关联卡片 |
+| checklist_index | INTEGER | NULLABLE | checklist 条目索引（0-based），NULL 表示任务级关联 |
+| created_at | TEXT | DEFAULT now | |
+
+**Index:** `(task_id)`, `(card_id)`
+**Unique:** `(task_id, card_id, checklist_index)`
+
 ---
 
 ## 3. Virtual Tables

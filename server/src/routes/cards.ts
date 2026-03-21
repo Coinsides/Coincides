@@ -354,4 +354,32 @@ router.post('/batch-move', (req: AuthRequest, res: Response) => {
   }
 });
 
+// ============================================================
+// Card-Task reverse lookup (v1.7)
+// ============================================================
+
+// GET /api/cards/:cardId/tasks — get all tasks linked to a card
+router.get('/:cardId/tasks', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+  const { cardId } = req.params;
+
+  // Verify card belongs to user
+  const card = db.prepare('SELECT id FROM cards WHERE id = ? AND user_id = ?').get(cardId, req.userId!);
+  if (!card) {
+    throw new AppError(404, 'Card not found');
+  }
+
+  const links = db.prepare(`
+    SELECT tc.id, tc.task_id, tc.checklist_index, tc.created_at,
+           t.title as task_title, t.date as task_date, t.status as task_status,
+           t.priority as task_priority
+    FROM task_cards tc
+    JOIN tasks t ON tc.task_id = t.id
+    WHERE tc.card_id = ?
+    ORDER BY t.date DESC, tc.created_at ASC
+  `).all(cardId);
+
+  res.json(links);
+});
+
 export default router;

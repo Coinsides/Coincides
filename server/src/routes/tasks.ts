@@ -263,4 +263,92 @@ router.delete('/:id', (req: AuthRequest, res: Response) => {
   res.json({ message: 'Task deleted' });
 });
 
+// ============================================================
+// Task-Card Linkage (v1.7)
+// ============================================================
+
+// GET /api/tasks/:taskId/cards — get all cards linked to a task
+router.get('/:taskId/cards', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+  const { taskId } = req.params;
+
+  // Verify task belongs to user
+  const task = db.prepare('SELECT id FROM tasks WHERE id = ? AND user_id = ?').get(taskId, req.userId!);
+  if (!task) {
+    throw new AppError(404, 'Task not found');
+  }
+
+  const links = db.prepare(`
+    SELECT tc.id, tc.card_id, tc.checklist_index, tc.created_at,
+           c.title as card_title, c.template_type, c.deck_id,
+           d.name as deck_name
+    FROM task_cards tc
+    JOIN cards c ON tc.card_id = c.id
+    JOIN card_decks d ON c.deck_id = d.id
+    WHERE tc.task_id = ?
+    ORDER BY tc.checklist_index ASC NULLS LAST, tc.created_at ASC
+  `).all(taskId);
+
+  res.json(links);
+});
+
+// POST /api/tasks/:taskId/cards — create a task-card link
+router.post('/:taskId/cards', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+  const { taskId } = req.params;
+  const { card_id, checklist_index } = req.body;
+
+  if (!card_id) {
+    throw new AppError(400, 'card_id is required');
+  }
+
+  // Verify task belongs to user
+  const task = db.prepare('SELECT id FROM tasks WHERE id = ? AND user_id = ?').get(taskId, req.userId!);
+  if (!task) {
+    throw new AppError(404, 'Task not found');
+  }
+
+  // Verify card belongs to user
+  const card = db.prepare('SELECT id FROM cards WHERE id = ? AND user_id = ?').get(card_id, req.userId!);
+  if (!card) {
+    throw new AppError(404, 'Card not found');
+  }
+
+  // Check for duplicate
+  const existing = db.prepare(
+    'SELECT id FROM task_cards WHERE task_id = ? AND card_id = ? AND checklist_index IS ?'
+  ).get(taskId, card_id, checklist_index ?? null);
+  if (existing) {
+    res.status(409).json({ error: 'Link already exists' });
+    return;
+  }
+
+  const id = uuidv4();
+  db.prepare(
+    'INSERT INTO task_cards (id, task_id, card_id, checklist_index) VALUES (?, ?, ?, ?)'
+  ).run(id, taskId, card_id, checklist_index ?? null);
+
+  const link = db.prepare('SELECT * FROM task_cards WHERE id = ?').get(id);
+  res.status(201).json(link);
+});
+
+// DELETE /api/tasks/:taskId/cards/:linkId — remove a task-card link
+router.delete('/:taskId/cards/:linkId', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+  const { taskId, linkId } = req.params;
+
+  // Verify task belongs to user
+  const task = db.prepare('SELECT id FROM tasks WHERE id = ? AND user_id = ?').get(taskId, req.userId!);
+  if (!task) {
+    throw new AppError(404, 'Task not found');
+  }
+
+  const result = db.prepare('DELETE FROM task_cards WHERE id = ? AND task_id = ?').run(linkId, taskId);
+  if (result.changes === 0) {
+    throw new AppError(404, 'Link not found');
+  }
+
+  res.status(204).send();
+});
+
 export default router;

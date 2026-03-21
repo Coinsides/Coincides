@@ -1006,7 +1006,7 @@ export default function CalendarPage() {
         >
           <button
             className={styles.contextMenuItem}
-            onClick={() => { openModal('task-edit', { task: contextMenu.task }); setContextMenu(null); }}
+            onClick={() => { openModal('task-view', { task: contextMenu.task }); setContextMenu(null); }}
           >
             <Edit3 size={14} />
             Edit
@@ -1067,7 +1067,7 @@ export default function CalendarPage() {
                             </button>
                             <div
                               className={styles.taskClickable}
-                              onClick={(e) => { e.stopPropagation(); openModal('task-edit', { task }); }}
+                              onClick={(e) => { e.stopPropagation(); openModal('task-view', { task }); }}
                               style={{ color: task.status === 'completed' ? 'var(--text-muted)' : 'var(--text-primary)', textDecoration: task.status === 'completed' ? 'line-through' : 'none' }}
                             >
                               <div className={styles.taskTitleRow}>
@@ -1110,7 +1110,7 @@ export default function CalendarPage() {
                               )}
                               <button
                                 className={styles.taskActionBtn}
-                                onClick={(e) => { e.stopPropagation(); openModal('task-edit', { task }); }}
+                                onClick={(e) => { e.stopPropagation(); openModal('task-view', { task }); }}
                                 title="Edit task"
                               >
                                 <Edit3 size={13} />
@@ -1439,7 +1439,7 @@ export default function CalendarPage() {
                         <div
                           key={t.id}
                           className={styles.tbHoverTask}
-                          onClick={() => { openModal('task-edit', { task: t }); setHoverBlock(null); clearHoverTimers(); }}
+                          onClick={() => { openModal('task-view', { task: t }); setHoverBlock(null); clearHoverTimers(); }}
                           style={{ textDecoration: t.status === 'completed' ? 'line-through' : 'none', opacity: t.status === 'completed' ? 0.6 : 1 }}
                         >
                           <span className={styles.tbHoverTaskDot} style={{ backgroundColor: 'var(--priority-must, #ef4444)' }} />
@@ -1455,7 +1455,7 @@ export default function CalendarPage() {
                         <div
                           key={t.id}
                           className={styles.tbHoverTask}
-                          onClick={() => { openModal('task-edit', { task: t }); setHoverBlock(null); clearHoverTimers(); }}
+                          onClick={() => { openModal('task-view', { task: t }); setHoverBlock(null); clearHoverTimers(); }}
                           style={{ textDecoration: t.status === 'completed' ? 'line-through' : 'none', opacity: t.status === 'completed' ? 0.6 : 1 }}
                         >
                           <span className={styles.tbHoverTaskDot} style={{ backgroundColor: 'var(--priority-recommended, #3b82f6)' }} />
@@ -1471,7 +1471,7 @@ export default function CalendarPage() {
                         <div
                           key={t.id}
                           className={styles.tbHoverTask}
-                          onClick={() => { openModal('task-edit', { task: t }); setHoverBlock(null); clearHoverTimers(); }}
+                          onClick={() => { openModal('task-view', { task: t }); setHoverBlock(null); clearHoverTimers(); }}
                           style={{ textDecoration: t.status === 'completed' ? 'line-through' : 'none', opacity: t.status === 'completed' ? 0.6 : 1 }}
                         >
                           <span className={styles.tbHoverTaskDot} style={{ backgroundColor: 'var(--priority-optional, #6b7280)' }} />

@@ -440,4 +440,27 @@ export const toolDefinitions: ToolDefinition[] = [
       required: ['block_id'],
     },
   },
+  {
+    name: 'link_task_cards',
+    description: 'Batch-create Task-Card associations. Links cards to a task, optionally at the checklist-item level. Use after creating tasks and cards to establish knowledge relationships.',
+    parameters: {
+      type: 'object',
+      properties: {
+        task_id: { type: 'string', description: 'Task ID to link cards to' },
+        links: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              card_id: { type: 'string', description: 'Card ID to link' },
+              checklist_index: { type: 'integer', description: 'Index of the checklist item this card relates to (0-based). Omit for task-level association.' },
+            },
+            required: ['card_id'],
+          },
+          description: 'Array of card links to create',
+        },
+      },
+      required: ['task_id', 'links'],
+    },
+  },
 ];

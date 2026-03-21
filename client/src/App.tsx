@@ -20,6 +20,7 @@ import GoalModal from '@/components/GoalModal/GoalModal';
 import DeckModal from '@/components/DeckModal/DeckModal';
 import CardModal from '@/components/CardModal/CardModal';
 import CardViewModal from '@/components/CardViewModal/CardViewModal';
+import TaskViewModal from '@/components/TaskViewModal/TaskViewModal';
 import AgentPanel from '@/components/AgentPanel/AgentPanel';
 import ShortcutsPanel from '@/components/ShortcutsPanel/ShortcutsPanel';
 import ToastContainer from '@/components/Toast/Toast';
@@ -58,6 +59,8 @@ function ModalLayer() {
       return <CardModal />;
     case 'card-view':
       return <CardViewModal />;
+    case 'task-view':
+      return <TaskViewModal />;
     default:
       return null;
   }

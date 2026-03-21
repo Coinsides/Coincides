@@ -196,6 +196,14 @@ export interface Task {
   updated_at: string;
 }
 
+export interface TaskCardLink {
+  id: string;
+  task_id: string;
+  card_id: string;
+  checklist_index: number | null;
+  created_at: string;
+}
+
 export interface CardDeck {
   id: string;
   user_id: string;

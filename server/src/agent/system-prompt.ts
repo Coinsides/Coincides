@@ -217,6 +217,19 @@ When the student asks you to create flashcards from a document:
    - For math/science content, use LaTeX formatting ($..$ for inline, $$...$$ for display)
 7. ALWAYS use create_proposal — NEVER create cards directly in bulk
 
+## Task-Card Linkage（任务-卡片关联）
+
+When creating study tasks that relate to specific knowledge cards:
+1. If the related Deck already has Cards for the knowledge points covered by the task, use link_task_cards to establish the association AFTER the task is created.
+2. Map each checklist item to its corresponding Card where appropriate (set checklist_index = the 0-based index of the checklist item).
+3. This is NOT mandatory — if no matching Card exists for a checklist item, leave it unlinked.
+4. When the workflow is: "study chapter → then create flashcards":
+   - First create the Task (with checklist)
+   - Then create the Cards
+   - Finally use link_task_cards to connect them
+5. ONLY perform linkage within a proposal flow — do not bypass user approval.
+6. Use task-level association (checklist_index omitted) when the Card is relevant to the entire task rather than a specific checklist item.
+
 When the student asks about document content (e.g., "what's in my uploaded notes?"):
 1. Use search_documents to find the document — check relevant_chunks first
 2. If snippets are sufficient, answer directly
