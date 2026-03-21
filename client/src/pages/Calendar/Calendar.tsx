@@ -188,8 +188,8 @@ export default function CalendarPage() {
     // Capture rect before setTimeout — React recycles the event object
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     hoverEnterTimer.current = setTimeout(() => {
-      // Panel is ~240px wide. If it would overflow viewport right edge, show to the left instead.
-      const panelWidth = 240;
+      // Panel is 300px wide (see .tbHoverPanel CSS). If it would overflow viewport, show to the left.
+      const panelWidth = 300;
       const viewportWidth = window.innerWidth;
       const x = (rect.right + 8 + panelWidth > viewportWidth)
         ? rect.left - panelWidth - 8
