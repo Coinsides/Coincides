@@ -194,6 +194,11 @@ export async function executeTool(
         content: Record<string, unknown>; importance?: number; tag_ids?: string[];
       };
 
+      // Enforce section_id requirement
+      if (!section_id) {
+        return JSON.stringify({ error: 'section_id is required. Every card must belong to a section. Use create_section first if needed.' });
+      }
+
       // Normalize content to match expected template structure
       const resolvedType = template_type || 'general';
       const normalizedContent = normalizeCardContent(resolvedType, content || {});
@@ -202,7 +207,7 @@ export async function executeTool(
       const now = new Date().toISOString();
       db.prepare(
         'INSERT INTO cards (id, user_id, deck_id, section_id, template_type, title, content, importance, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      ).run(id, userId, deck_id, section_id || null, resolvedType, title, JSON.stringify(normalizedContent), importance || 3, now, now);
+      ).run(id, userId, deck_id, section_id, resolvedType, title, JSON.stringify(normalizedContent), importance || 3, now, now);
 
       // Attach tags
       if (tag_ids && tag_ids.length > 0) {

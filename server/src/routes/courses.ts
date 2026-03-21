@@ -91,6 +91,53 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
   }
 });
 
+// GET /api/courses/:id/summary
+router.get('/:id/summary', (req: AuthRequest, res: Response) => {
+  const db = getDb();
+  const courseId = req.params.id;
+  const userId = req.userId!;
+
+  const course = db.prepare('SELECT * FROM courses WHERE id = ? AND user_id = ?').get(courseId, userId) as any;
+  if (!course) {
+    throw new AppError(404, 'Course not found');
+  }
+
+  // Goals with task counts
+  const goals = db.prepare(`
+    SELECT g.*,
+      (SELECT COUNT(*) FROM tasks t WHERE t.goal_id = g.id) as task_count,
+      (SELECT COUNT(*) FROM tasks t WHERE t.goal_id = g.id AND t.status = 'completed') as completed_task_count
+    FROM goals g
+    WHERE g.course_id = ? AND g.user_id = ?
+    ORDER BY g.sort_order ASC, g.created_at ASC
+  `).all(courseId, userId);
+
+  // Decks with card counts and due review counts
+  const decks = db.prepare(`
+    SELECT d.*,
+      (SELECT COUNT(*) FROM cards c WHERE c.deck_id = d.id) as card_count,
+      (SELECT COUNT(*) FROM cards c WHERE c.deck_id = d.id AND c.fsrs_next_review IS NOT NULL AND c.fsrs_next_review <= datetime('now')) as due_count
+    FROM card_decks d
+    WHERE d.course_id = ? AND d.user_id = ?
+    ORDER BY d.created_at DESC
+  `).all(courseId, userId);
+
+  // Documents
+  const documents = db.prepare(`
+    SELECT id, filename, file_type, parse_status, page_count, created_at
+    FROM documents
+    WHERE course_id = ? AND user_id = ?
+    ORDER BY created_at DESC
+  `).all(courseId, userId);
+
+  res.json({
+    course,
+    goals,
+    decks,
+    documents,
+  });
+});
+
 // DELETE /api/courses/:id
 router.delete('/:id', (req: AuthRequest, res: Response) => {
   const db = getDb();

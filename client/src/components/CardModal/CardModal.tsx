@@ -161,6 +161,10 @@ export default function CardModal() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!title.trim()) return;
+    if (!sectionId) {
+      addToast('error', 'Please select a section');
+      return;
+    }
     setSaving(true);
 
     try {
@@ -171,14 +175,14 @@ export default function CardModal() {
           title: title.trim(),
           content,
           importance,
-          section_id: sectionId || null,
+          section_id: sectionId,
           tag_ids: selectedTags,
         });
         addToast('success', 'Card updated');
       } else {
         await createCard({
           deck_id: existing?.deck_id || deckId || '',
-          section_id: sectionId || undefined,
+          section_id: sectionId,
           template_type: templateType,
           title: title.trim(),
           content,
@@ -243,21 +247,26 @@ export default function CardModal() {
             />
           </div>
 
-          {/* Section */}
-          {sections.length > 0 && (
-            <div className={styles.field}>
-              <label>Section</label>
+          {/* Section (required) */}
+          <div className={styles.field}>
+            <label>Section <span style={{ color: 'var(--error)', fontSize: 12 }}>*</span></label>
+            {sections.length > 0 ? (
               <select
                 value={sectionId}
                 onChange={(e) => setSectionId(e.target.value)}
+                required
               >
-                <option value="">No section</option>
+                <option value="">Select a section...</option>
                 {sections.map((s) => (
                   <option key={s.id} value={s.id}>{s.name}</option>
                 ))}
               </select>
-            </div>
-          )}
+            ) : (
+              <div style={{ fontSize: 13, color: 'var(--text-muted)', padding: '8px 0' }}>
+                No sections in this deck. Create a section first.
+              </div>
+            )}
+          </div>
 
           {/* Dynamic content fields */}
           {templateType === CardTemplateType.Definition && (

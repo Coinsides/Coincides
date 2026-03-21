@@ -161,19 +161,19 @@ export const toolDefinitions: ToolDefinition[] = [
   },
   {
     name: 'create_card',
-    description: 'Create a single flashcard in a deck, optionally inside a section.',
+    description: 'Create a single flashcard in a deck. MUST specify section_id — use create_section first if needed.',
     parameters: {
       type: 'object',
       properties: {
         deck_id: { type: 'string', description: 'Deck ID' },
-        section_id: { type: 'string', description: 'Section ID to place this card in. Omit for unsectioned.' },
+        section_id: { type: 'string', description: 'REQUIRED — Section ID. Every card must belong to a section. Create sections first with create_card_section if needed.' },
         template_type: { type: 'string', enum: ['definition', 'theorem', 'formula', 'general'], description: 'Card template type' },
         title: { type: 'string', description: 'Card title (front)' },
         content: { type: 'object', description: 'Card content object. MUST match template_type: definition→{definition,example?,notes?}, theorem→{statement,conditions?,proof_sketch?,example?,notes?}, formula→{formula,variables?,applicable_conditions?,example?,notes?}, general→{body,example?,notes?}' },
         importance: { type: 'number', description: 'Importance 1-5, default 3' },
         tag_ids: { type: 'array', items: { type: 'string' }, description: 'Tag IDs to attach' },
       },
-      required: ['deck_id', 'template_type', 'title', 'content'],
+      required: ['deck_id', 'section_id', 'template_type', 'title', 'content'],
     },
   },
   {

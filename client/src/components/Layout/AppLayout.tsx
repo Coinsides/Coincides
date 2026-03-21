@@ -7,7 +7,6 @@ import {
   Target,
   BookOpen,
   Layers,
-  RotateCcw,
   BarChart3,
   Settings,
   PanelLeftClose,
@@ -28,7 +27,6 @@ const navItems = [
   { to: '/goals', icon: Target, labelKey: 'nav.goals' },
   { to: '/courses', icon: BookOpen, labelKey: 'nav.courses' },
   { to: '/decks', icon: Layers, labelKey: 'nav.decks' },
-  { to: '/review', icon: RotateCcw, labelKey: 'nav.review' },
   { to: '/statistics', icon: BarChart3, labelKey: 'nav.statistics' },
   { to: '/settings', icon: Settings, labelKey: 'nav.settings' },
 ];
@@ -140,7 +138,7 @@ export default function AppLayout() {
                 <button
                   key={course.id}
                   className={styles.courseItem}
-                  onClick={() => navigate(`/courses`)}
+                  onClick={() => navigate(`/courses/${course.id}`)}
                 >
                   <span
                     className={styles.courseDot}

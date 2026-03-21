@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Edit2, Trash2, Tags, FileText } from 'lucide-react';
 import { useCourseStore } from '@/stores/courseStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -14,6 +15,7 @@ export default function CoursesPage() {
   const openModal = useUIStore((s) => s.openModal);
   const addToast = useUIStore((s) => s.addToast);
 
+  const navigate = useNavigate();
   const [confirmDelete, setConfirmDelete] = useState<Course | null>(null);
 
   const handleDelete = async () => {
@@ -36,7 +38,7 @@ export default function CoursesPage() {
 
       <div className={styles.grid}>
         {courses.map((course) => (
-          <div key={course.id} className={styles.card}>
+          <div key={course.id} className={styles.card} onClick={() => navigate(`/courses/${course.id}`)} style={{ cursor: 'pointer' }}>
             <div className={styles.cardColor} style={{ backgroundColor: course.color }} />
             <div className={styles.cardBody}>
               <div className={styles.cardName}>{course.name}</div>
@@ -52,28 +54,28 @@ export default function CoursesPage() {
               <div className={styles.cardActions}>
                 <button
                   className={styles.filesBtn}
-                  onClick={() => openModal('document-manager', { courseId: course.id, courseName: course.name })}
+                  onClick={(e) => { e.stopPropagation(); openModal('document-manager', { courseId: course.id, courseName: course.name }); }}
                 >
                   <FileText size={12} />
                   Files
                 </button>
                 <button
                   className={styles.tagsBtn}
-                  onClick={() => openModal('tag-group-manager', { courseId: course.id, courseName: course.name })}
+                  onClick={(e) => { e.stopPropagation(); openModal('tag-group-manager', { courseId: course.id, courseName: course.name }); }}
                 >
                   <Tags size={12} />
                   Tags
                 </button>
                 <button
                   className={styles.editBtn}
-                  onClick={() => openModal('course-edit', { course })}
+                  onClick={(e) => { e.stopPropagation(); openModal('course-edit', { course }); }}
                 >
                   <Edit2 size={12} />
                   Edit
                 </button>
                 <button
                   className={styles.deleteBtn}
-                  onClick={() => setConfirmDelete(course)}
+                  onClick={(e) => { e.stopPropagation(); setConfirmDelete(course); }}
                 >
                   <Trash2 size={12} />
                   Delete

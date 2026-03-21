@@ -8,6 +8,7 @@ import DailyBrief from '@/pages/DailyBrief/DailyBrief';
 import CalendarPage from '@/pages/Calendar/Calendar';
 import GoalsPage from '@/pages/Goals/Goals';
 import CoursesPage from '@/pages/Courses/Courses';
+import CourseDetailPage from '@/pages/Courses/CourseDetail';
 import SettingsPage from '@/pages/Settings/Settings';
 import DecksPage from '@/pages/Decks/Decks';
 import DeckDetailPage from '@/pages/Decks/DeckDetail';
@@ -80,6 +81,7 @@ export default function App() {
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="goals" element={<GoalsPage />} />
           <Route path="courses" element={<CoursesPage />} />
+          <Route path="courses/:courseId" element={<CourseDetailPage />} />
           <Route path="decks" element={<DecksPage />} />
           <Route path="decks/:deckId" element={<DeckDetailPage />} />
           <Route path="review" element={<ReviewPage />} />

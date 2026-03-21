@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, Pencil, Trash2, Layers } from 'lucide-react';
+import { Plus, Pencil, Trash2, Layers, RotateCcw } from 'lucide-react';
 import { useDeckStore } from '@/stores/deckStore';
 import { useCourseStore } from '@/stores/courseStore';
 import { useUIStore } from '@/stores/uiStore';
@@ -108,6 +108,13 @@ export default function DecksPage() {
                     </span>
                   )}
                 </div>
+                <button
+                  className={styles.reviewBtn}
+                  onClick={(e) => { e.stopPropagation(); navigate(`/review?deckId=${deck.id}`); }}
+                >
+                  <RotateCcw size={13} />
+                  Review
+                </button>
               </div>
             );
           })}

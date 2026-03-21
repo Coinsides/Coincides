@@ -153,6 +153,28 @@
   white-space: nowrap;
 }
 
+/* Review button */
+.reviewBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 14px;
+  border: 1px solid var(--accent-primary);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--accent-primary);
+  background: var(--accent-primary-bg);
+  transition: all var(--transition-fast);
+  width: 100%;
+}
+
+.reviewBtn:hover {
+  background: var(--accent-primary);
+  color: white;
+}
+
 /* Empty */
 .empty {
   text-align: center;

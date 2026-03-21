@@ -111,6 +111,11 @@ router.post('/', (req: AuthRequest, res: Response) => {
       throw new AppError(404, 'Deck not found');
     }
 
+    // Enforce section_id requirement
+    if (!data.section_id) {
+      throw new AppError(400, 'section_id is required — every card must belong to a section');
+    }
+
     const id = uuidv4();
     const now = new Date().toISOString();
 
@@ -121,7 +126,7 @@ router.post('/', (req: AuthRequest, res: Response) => {
       id,
       req.userId!,
       data.deck_id,
-      data.section_id || null,
+      data.section_id,
       data.template_type,
       data.title,
       JSON.stringify(data.content),
