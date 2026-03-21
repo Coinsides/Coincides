@@ -39,10 +39,11 @@ export interface ToolDefinition {
 }
 
 export interface StreamChunk {
-  type: 'text' | 'tool_call_start' | 'tool_call_delta' | 'tool_call_end' | 'done' | 'error';
+  type: 'text' | 'tool_call_start' | 'tool_call_delta' | 'tool_call_end' | 'done' | 'error' | 'preference_form';
   text?: string;
   tool_call?: Partial<ToolCall>;
   error?: string;
+  data?: unknown;
 }
 
 export interface ProviderConfig {

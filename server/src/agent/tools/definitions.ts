@@ -334,4 +334,110 @@ export const toolDefinitions: ToolDefinition[] = [
       required: ['document_id'],
     },
   },
+  {
+    name: 'collect_preferences',
+    description: 'Send a structured preference form to the student before creating a study plan. The form appears as interactive cards in the chat. MUST be called before generating any study_plan or goal_breakdown proposal. The student\'s responses will be returned as a structured JSON message in the next conversation turn.',
+    parameters: {
+      type: 'object',
+      properties: {
+        questions: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: { type: 'string', description: 'Unique question identifier (e.g., "scheduling_mode", "documents", "daily_limit")' },
+              type: { type: 'string', enum: ['single_choice', 'multi_choice', 'number_input', 'document_select'], description: 'Question type: single_choice (radio), multi_choice (checkboxes), number_input (numeric), document_select (pick from uploaded docs)' },
+              label: { type: 'string', description: 'Question text shown to the student' },
+              options: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    value: { type: 'string', description: 'Machine-readable value' },
+                    label: { type: 'string', description: 'Display text' },
+                    description: { type: 'string', description: 'Optional helper text' },
+                  },
+                },
+                description: 'Choices for single_choice / multi_choice types',
+              },
+              default_value: { type: 'string', description: 'Pre-selected value' },
+              required: { type: 'boolean', description: 'Whether the student must answer. Default true' },
+              max_select: { type: 'number', description: 'Max selections for multi_choice / document_select. Default 3 for document_select' },
+              documents: {
+                type: 'array',
+                items: {
+                  type: 'object',
+                  properties: {
+                    id: { type: 'string', description: 'Document ID' },
+                    filename: { type: 'string', description: 'File name' },
+                    page_count: { type: 'number', description: 'Number of pages' },
+                    summary: { type: 'string', description: 'Document summary' },
+                    document_type: { type: 'string', description: 'Document type (notes, textbook, slides, etc.)' },
+                  },
+                },
+                description: 'Available documents for document_select type. Get these from search_documents first.',
+              },
+              placeholder: { type: 'string', description: 'Placeholder text for number_input' },
+            },
+            required: ['id', 'type', 'label'],
+          },
+          description: 'Array of questions to present to the student',
+        },
+      },
+      required: ['questions'],
+    },
+  },
+  {
+    name: 'create_time_blocks',
+    description: 'Create one or more Time Blocks in the weekly template. Use when the student describes their schedule (e.g., "I study from 8am to 6pm") and you need to set up Time Blocks before assigning tasks. Returns the created block IDs. Note: only one Study Block per day is allowed.',
+    parameters: {
+      type: 'object',
+      properties: {
+        blocks: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              label: { type: 'string', description: 'Block label (e.g., "Morning Study", "Lunch Break")' },
+              type: { type: 'string', enum: ['study', 'rest', 'meal', 'exercise', 'custom'], description: 'Block type. Use "study" for study sessions.' },
+              day_of_week: { type: 'number', description: 'Day of week: 0=Sunday, 1=Monday, ..., 6=Saturday' },
+              start_time: { type: 'string', description: 'Start time in HH:MM format (e.g., "08:00")' },
+              end_time: { type: 'string', description: 'End time in HH:MM format (e.g., "18:00")' },
+              color: { type: 'string', description: 'Optional hex color (e.g., "#4CAF50")' },
+            },
+            required: ['label', 'type', 'day_of_week', 'start_time', 'end_time'],
+          },
+          description: 'Array of Time Blocks to create',
+        },
+      },
+      required: ['blocks'],
+    },
+  },
+  {
+    name: 'update_time_block',
+    description: 'Update an existing Time Block template. Can change label, type, start/end time, or color.',
+    parameters: {
+      type: 'object',
+      properties: {
+        block_id: { type: 'string', description: 'Time Block ID to update' },
+        label: { type: 'string', description: 'New label' },
+        type: { type: 'string', enum: ['study', 'rest', 'meal', 'exercise', 'custom'], description: 'New type' },
+        start_time: { type: 'string', description: 'New start time (HH:MM)' },
+        end_time: { type: 'string', description: 'New end time (HH:MM)' },
+        color: { type: 'string', description: 'New color' },
+      },
+      required: ['block_id'],
+    },
+  },
+  {
+    name: 'delete_time_block',
+    description: 'Delete a Time Block template. This removes the block from all days. Associated task links are preserved but the block reference becomes stale.',
+    parameters: {
+      type: 'object',
+      properties: {
+        block_id: { type: 'string', description: 'Time Block ID to delete' },
+      },
+      required: ['block_id'],
+    },
+  },
 ];

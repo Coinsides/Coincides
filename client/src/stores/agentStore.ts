@@ -2,10 +2,31 @@ import { create } from 'zustand';
 import api, { getToken, API_BASE } from '@/services/api';
 import type { AgentConversation, AgentMessage } from '@shared/types';
 
+export interface PreferenceQuestion {
+  id: string;
+  type: 'single_choice' | 'multi_choice' | 'number_input' | 'document_select';
+  label: string;
+  options?: Array<{ value: string; label: string; description?: string }>;
+  default_value?: string;
+  required?: boolean;
+  max_select?: number;
+  documents?: Array<{ id: string; filename: string; page_count: number; summary: string; document_type?: string }>;
+  placeholder?: string;
+}
+
+export interface PreferenceFormMessage {
+  id: string;
+  type: 'preference_form';
+  questions: PreferenceQuestion[];
+  submitted?: boolean;
+  responses?: Record<string, unknown>;
+}
+
 interface AgentState {
   conversations: AgentConversation[];
   activeConversationId: string | null;
   messages: AgentMessage[];
+  preferenceForms: PreferenceFormMessage[];
   streaming: boolean;
   streamingText: string;
   activeToolName: string | null;
@@ -17,6 +38,7 @@ interface AgentState {
   fetchMessages: (conversationId: string) => Promise<void>;
   deleteConversation: (id: string) => Promise<void>;
   sendMessage: (message: string, contextHint?: { type: string; data?: unknown }, image?: { media_type: string; data: string }) => Promise<void>;
+  submitPreferenceForm: (formId: string, responses: Record<string, unknown>) => void;
 }
 
 function parseSSEEvents(text: string): Array<{ event: string; data: string }> {
@@ -45,6 +67,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   conversations: [],
   activeConversationId: null,
   messages: [],
+  preferenceForms: [],
   streaming: false,
   streamingText: '',
   activeToolName: null,
@@ -68,7 +91,7 @@ export const useAgentStore = create<AgentState>((set, get) => ({
   },
 
   selectConversation: async (id) => {
-    set({ activeConversationId: id, messages: [], loading: true });
+    set({ activeConversationId: id, messages: [], preferenceForms: [], loading: true });
     await get().fetchMessages(id);
     set({ loading: false });
   },
@@ -170,6 +193,19 @@ export const useAgentStore = create<AgentState>((set, get) => ({
                 set({ activeToolName: null });
                 break;
               }
+              case 'preference_form': {
+                try {
+                  const parsed = JSON.parse(evt.data);
+                  const formMsg: PreferenceFormMessage = {
+                    id: `pref-${Date.now()}`,
+                    type: 'preference_form',
+                    questions: parsed.questions || [],
+                    submitted: false,
+                  };
+                  set({ preferenceForms: [...get().preferenceForms, formMsg] });
+                } catch { /* ignore */ }
+                break;
+              }
               case 'done': {
                 // Add assistant message to messages
                 const assistantMsg: AgentMessage = {
@@ -257,5 +293,17 @@ export const useAgentStore = create<AgentState>((set, get) => ({
         messages: [...get().messages, errorMsg],
       });
     }
+  },
+
+  submitPreferenceForm: (formId: string, responses: Record<string, unknown>) => {
+    // Mark the form as submitted
+    const forms = get().preferenceForms.map((f) =>
+      f.id === formId ? { ...f, submitted: true, responses } : f
+    );
+    set({ preferenceForms: forms });
+
+    // Send the responses as a structured user message
+    const responseText = `[PREFERENCE_RESPONSE]\n${JSON.stringify(responses, null, 2)}`;
+    get().sendMessage(responseText);
   },
 }));

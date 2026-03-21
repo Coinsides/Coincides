@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { ChevronDown, ChevronRight, Trash2 } from 'lucide-react';
 import { useProposalStore, type ProposalItem, type ProposalData } from '@/stores/proposalStore';
 import { useUIStore } from '@/stores/uiStore';
+import TimePickerInline from './TimePickerInline';
 import styles from './ProposalList.module.css';
 
 const typeBadgeColors: Record<string, { bg: string; text: string }> = {
@@ -33,6 +34,18 @@ function safeString(val: unknown, fallback = ''): string {
   if (typeof val === 'string') return val;
   if (val != null) return String(val);
   return fallback;
+}
+
+/**
+ * Detect if a proposal uses Calendar Event scheduling mode.
+ * Check proposal-level scheduling_mode or per-item start_time/end_time.
+ */
+function isCalendarEventMode(proposal: ProposalItem): boolean {
+  const data = proposal.data as unknown as Record<string, unknown>;
+  if (data?.scheduling_mode === 'calendar_event') return true;
+  // Also detect if any item already has start_time/end_time set
+  const items = safeItems(data);
+  return items.some((item) => item.start_time || item.end_time);
 }
 
 export default function ProposalList() {
@@ -72,6 +85,19 @@ export default function ProposalList() {
     const newData: ProposalData = { ...proposal.data, items: newItems };
     useProposalStore.getState().updateProposal(proposal.id, newData);
   };
+
+  /** Update a single item's time field and persist via updateProposal */
+  const handleTimeChange = useCallback(
+    (proposal: ProposalItem, itemIndex: number, field: 'start_time' | 'end_time', time: string) => {
+      const items = safeItems(proposal.data);
+      const newItems = items.map((item, i) =>
+        i === itemIndex ? { ...item, [field]: time } : item,
+      );
+      const newData: ProposalData = { ...proposal.data, items: newItems };
+      useProposalStore.getState().updateProposal(proposal.id, newData);
+    },
+    [],
+  );
 
   if (loading && proposals.length === 0) {
     return <div className={styles.empty}>Loading proposals...</div>;
@@ -113,35 +139,63 @@ export default function ProposalList() {
               <div className={styles.proposalBody}>
                 {description && <p className={styles.description}>{description}</p>}
                 <div className={styles.items}>
-                  {items.map((item, i) => (
-                    <div key={i} className={styles.item}>
-                      <div className={styles.itemContent}>
-                        <span className={styles.itemTitle}>
-                          {safeString(item.title, `Item ${i + 1}`)}
-                        </span>
-                        {item.template_type ? (
-                          <span className={styles.itemMeta}>{safeString(item.template_type)}</span>
-                        ) : null}
-                        {(item.scheduled_date || item.date) ? (
-                          <span className={styles.itemDate}>
-                            {safeString(item.scheduled_date || item.date)}
+                  {items.map((item, i) => {
+                    const calendarMode = proposal.type === 'study_plan' && isCalendarEventMode(proposal);
+                    const tbLabel = safeString(item.time_block_label);
+
+                    return (
+                      <div key={i} className={styles.item}>
+                        <div className={styles.itemContent}>
+                          <span className={styles.itemTitle}>
+                            {safeString(item.title, `Item ${i + 1}`)}
                           </span>
-                        ) : null}
-                        {item.priority ? (
-                          <span className={styles.itemMeta}>{safeString(item.priority)}</span>
-                        ) : null}
-                        {item.serves_must ? (
-                          <span className={styles.itemServes}>→ {safeString(item.serves_must)}</span>
-                        ) : null}
+                          {item.template_type ? (
+                            <span className={styles.itemMeta}>{safeString(item.template_type)}</span>
+                          ) : null}
+                          {(item.scheduled_date || item.date) ? (
+                            <span className={styles.itemDate}>
+                              {safeString(item.scheduled_date || item.date)}
+                            </span>
+                          ) : null}
+                          {item.priority ? (
+                            <span className={styles.itemMeta}>{safeString(item.priority)}</span>
+                          ) : null}
+                          {item.serves_must ? (
+                            <span className={styles.itemServes}>→ {safeString(item.serves_must)}</span>
+                          ) : null}
+                        </div>
+
+                        {/* Calendar Event mode: editable start/end time */}
+                        {calendarMode && (
+                          <div className={styles.timeEditors}>
+                            <TimePickerInline
+                              label="Start"
+                              value={safeString(item.start_time)}
+                              onChange={(t) => handleTimeChange(proposal, i, 'start_time', t)}
+                            />
+                            <span className={styles.timeSeparator}>–</span>
+                            <TimePickerInline
+                              label="End"
+                              value={safeString(item.end_time)}
+                              onChange={(t) => handleTimeChange(proposal, i, 'end_time', t)}
+                            />
+                          </div>
+                        )}
+
+                        {/* Time Block mode: read-only TB label */}
+                        {!calendarMode && tbLabel && (
+                          <span className={styles.tbBadge}>{tbLabel}</span>
+                        )}
+
+                        <button
+                          className={styles.removeItem}
+                          onClick={() => handleRemoveItem(proposal, i)}
+                        >
+                          <Trash2 size={12} />
+                        </button>
                       </div>
-                      <button
-                        className={styles.removeItem}
-                        onClick={() => handleRemoveItem(proposal, i)}
-                      >
-                        <Trash2 size={12} />
-                      </button>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <div className={styles.actions}>
                   <button className={styles.applyBtn} onClick={() => handleApply(proposal.id)}>

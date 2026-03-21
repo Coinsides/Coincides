@@ -5,6 +5,7 @@ import { useProposalStore } from '@/stores/proposalStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useAuthStore } from '@/stores/authStore';
 import MessageBubble, { StreamingBubble } from './MessageBubble';
+import PreferenceForm from './PreferenceForm';
 import ProposalList from './ProposalList';
 import styles from './AgentPanel.module.css';
 
@@ -20,6 +21,7 @@ export default function AgentPanel() {
     conversations,
     activeConversationId,
     messages,
+    preferenceForms,
     streaming,
     streamingText,
     activeToolName,
@@ -208,6 +210,9 @@ export default function AgentPanel() {
               )}
               {messages.map((msg) => (
                 <MessageBubble key={msg.id} message={msg} />
+              ))}
+              {preferenceForms.map((form) => (
+                <PreferenceForm key={form.id} form={form} />
               ))}
               {streaming && (
                 <StreamingBubble text={streamingText} toolName={activeToolName} />

@@ -6,7 +6,7 @@ import { executeTool } from './tools/executor.js';
 import { MemoryManager } from './memory/manager.js';
 import { buildSystemPrompt } from './system-prompt.js';
 
-const MAX_TOOL_ROUNDS = 5;
+const MAX_TOOL_ROUNDS = 8;
 
 interface UserRow {
   id: string;
@@ -185,15 +185,33 @@ export async function* runAgent(
 
     // Execute tool calls
     const toolResults: ToolResult[] = [];
+    let hasPreferenceForm = false;
+    let preferenceFormData: unknown = null;
     for (const tc of currentToolCalls) {
       try {
         const result = await executeTool(tc.name, tc.arguments, userId);
         toolResults.push({ tool_call_id: tc.id, content: result });
+
+        // Detect preference_form from collect_preferences tool
+        if (tc.name === 'collect_preferences') {
+          try {
+            const parsed = JSON.parse(result);
+            if (parsed.__type === 'preference_form') {
+              hasPreferenceForm = true;
+              preferenceFormData = parsed.questions;
+            }
+          } catch { /* ignore parse errors */ }
+        }
       } catch (err: unknown) {
         const errMsg = err instanceof Error ? err.message : 'Tool execution error';
         console.error(`Tool execution failed [${tc.name}]:`, err);
         toolResults.push({ tool_call_id: tc.id, content: JSON.stringify({ error: `Tool '${tc.name}' failed: ${errMsg}` }) });
       }
+    }
+
+    // If a preference form was generated, emit it as a special SSE event
+    if (hasPreferenceForm && preferenceFormData) {
+      yield { type: 'preference_form', data: preferenceFormData };
     }
 
     // Add assistant message with tool calls + tool results to messages

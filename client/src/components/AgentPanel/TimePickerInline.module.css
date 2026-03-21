@@ -1,0 +1,109 @@
+.container {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.label {
+  font-size: 11px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* --- Badge (collapsed state) --- */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.badgeSet {
+  background: rgba(99, 102, 241, 0.12);
+  color: var(--accent-primary);
+}
+
+.badgeSet:hover {
+  background: rgba(99, 102, 241, 0.22);
+}
+
+.badgeEmpty {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-muted);
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+}
+
+.badgeEmpty:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* --- Editor (expanded state) --- */
+
+.editor {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: var(--glass-elevated);
+  border: 1px solid var(--glass-border-accent);
+  border-radius: 6px;
+  padding: 3px 6px;
+}
+
+.timeInput {
+  width: 28px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 2px 0;
+}
+
+.timeInput::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.timeInput:focus {
+  background: rgba(99, 102, 241, 0.08);
+  border-radius: 3px;
+}
+
+.colon {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+  user-select: none;
+}
+
+.confirmBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--success);
+  background: transparent;
+  margin-left: 2px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.confirmBtn:hover {
+  background: var(--success-bg);
+}

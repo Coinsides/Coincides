@@ -822,6 +822,137 @@ export async function executeTool(
       });
     }
 
+    case 'collect_preferences': {
+      const { questions } = args as { questions: Array<Record<string, unknown>> };
+      // Return a special marker that the orchestrator will detect
+      // and send as a preference_form SSE event to the frontend
+      return JSON.stringify({
+        __type: 'preference_form',
+        questions,
+        message: 'Preference form sent to student. Wait for their response in the next message.',
+      });
+    }
+
+    case 'create_time_blocks': {
+      const { blocks } = args as {
+        blocks: Array<{
+          label: string; type?: string; day_of_week: number;
+          start_time: string; end_time: string; color?: string;
+        }>;
+      };
+
+      if (!blocks || blocks.length === 0) {
+        return JSON.stringify({ error: 'No blocks provided' });
+      }
+
+      // Validate
+      for (const item of blocks) {
+        if (!item.label || item.day_of_week === undefined || !item.start_time || !item.end_time) {
+          return JSON.stringify({ error: 'Each block requires label, day_of_week, start_time, end_time' });
+        }
+        if (item.day_of_week < 0 || item.day_of_week > 6) {
+          return JSON.stringify({ error: 'day_of_week must be 0-6' });
+        }
+        if (!/^\d{2}:\d{2}$/.test(item.start_time) || !/^\d{2}:\d{2}$/.test(item.end_time)) {
+          return JSON.stringify({ error: 'start_time and end_time must be HH:MM format' });
+        }
+      }
+
+      // Study Block single-per-day constraint
+      for (const item of blocks) {
+        const blockType = item.type || 'custom';
+        if (blockType === 'study') {
+          const existing = db.prepare(
+            'SELECT id FROM time_blocks WHERE user_id = ? AND day_of_week = ? AND type = ?'
+          ).get(userId, item.day_of_week, 'study') as any;
+          if (existing) {
+            return JSON.stringify({ error: `Only one Study Block allowed per day (day_of_week=${item.day_of_week} already has one)` });
+          }
+        }
+      }
+
+      const stmt = db.prepare(
+        `INSERT INTO time_blocks (id, user_id, label, type, day_of_week, start_time, end_time, color, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+      );
+
+      const now = new Date().toISOString();
+      const created: Array<{ id: string; label: string; type: string; day_of_week: number; start_time: string; end_time: string }> = [];
+
+      db.transaction(() => {
+        for (const item of blocks) {
+          const id = uuidv4();
+          stmt.run(id, userId, item.label, item.type || 'custom', item.day_of_week, item.start_time, item.end_time, item.color || null, now, now);
+          created.push({
+            id, label: item.label, type: item.type || 'custom',
+            day_of_week: item.day_of_week, start_time: item.start_time, end_time: item.end_time,
+          });
+        }
+      })();
+
+      return JSON.stringify({ created, message: `Created ${created.length} time block(s)` });
+    }
+
+    case 'update_time_block': {
+      const { block_id, label, type, start_time, end_time, color } = args as {
+        block_id: string; label?: string; type?: string;
+        start_time?: string; end_time?: string; color?: string;
+      };
+
+      const existing = db.prepare(
+        'SELECT * FROM time_blocks WHERE id = ? AND user_id = ?'
+      ).get(block_id, userId) as any;
+      if (!existing) {
+        return JSON.stringify({ error: 'Time block not found' });
+      }
+
+      // Study Block single-per-day constraint
+      if (type === 'study' && existing.type !== 'study') {
+        const existingStudy = db.prepare(
+          'SELECT id FROM time_blocks WHERE user_id = ? AND day_of_week = ? AND type = ? AND id != ?'
+        ).get(userId, existing.day_of_week, 'study', block_id) as any;
+        if (existingStudy) {
+          return JSON.stringify({ error: 'Only one Study Block allowed per day' });
+        }
+      }
+
+      const fields: string[] = [];
+      const values: unknown[] = [];
+
+      if (label !== undefined) { fields.push('label = ?'); values.push(label); }
+      if (type !== undefined) { fields.push('type = ?'); values.push(type); }
+      if (start_time !== undefined) { fields.push('start_time = ?'); values.push(start_time); }
+      if (end_time !== undefined) { fields.push('end_time = ?'); values.push(end_time); }
+      if (color !== undefined) { fields.push('color = ?'); values.push(color); }
+
+      if (fields.length === 0) {
+        return JSON.stringify({ error: 'No fields to update' });
+      }
+
+      fields.push('updated_at = ?');
+      values.push(new Date().toISOString());
+      values.push(block_id);
+
+      db.prepare(`UPDATE time_blocks SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+
+      const updated = db.prepare('SELECT * FROM time_blocks WHERE id = ?').get(block_id);
+      return JSON.stringify({ updated, message: 'Time block updated' });
+    }
+
+    case 'delete_time_block': {
+      const { block_id } = args as { block_id: string };
+
+      const existing = db.prepare(
+        'SELECT id FROM time_blocks WHERE id = ? AND user_id = ?'
+      ).get(block_id, userId) as any;
+      if (!existing) {
+        return JSON.stringify({ error: 'Time block not found' });
+      }
+
+      db.prepare('DELETE FROM time_blocks WHERE id = ?').run(block_id);
+      return JSON.stringify({ message: 'Time block deleted' });
+    }
+
     default:
       return JSON.stringify({ error: `Unknown tool: ${toolName}` });
   }

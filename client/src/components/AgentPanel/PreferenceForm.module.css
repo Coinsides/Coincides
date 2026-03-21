@@ -1,0 +1,317 @@
+.formContainer {
+  max-width: 88%;
+  align-self: flex-start;
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur-sm);
+  -webkit-backdrop-filter: var(--glass-blur-sm);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 16px 18px;
+  animation: fadeIn var(--transition-fast) ease forwards;
+}
+
+.formHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.headerText {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.checkIcon {
+  color: var(--accent-success);
+}
+
+.questions {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.question {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.questionLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.optional {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-size: 12px;
+  margin-left: 6px;
+}
+
+/* Single / Multi choice */
+.optionGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.optionBtn {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  background: var(--glass-elevated);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--transition-fast);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.optionBtn:hover {
+  background: var(--glass-hover);
+  border-color: var(--accent-primary);
+}
+
+.optionBtn.selected {
+  background: rgba(99, 102, 241, 0.08);
+  border-color: var(--accent-primary);
+}
+
+.radioCircle {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+  transition: border-color var(--transition-fast);
+}
+
+.selected .radioCircle {
+  border-color: var(--accent-primary);
+}
+
+.radioDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+}
+
+.checkBox {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  border-radius: 3px;
+  border: 2px solid var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+  transition: all var(--transition-fast);
+  color: white;
+}
+
+.selected .checkBox {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary);
+}
+
+.optionContent {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.optionLabel {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.optionDesc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+.maxHint {
+  font-size: 11px;
+  color: var(--text-muted);
+  padding: 4px 0 0 2px;
+}
+
+/* Number input */
+.numberInput {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--glass-elevated);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.numberInput:focus {
+  border-color: var(--accent-primary);
+}
+
+.numberInput::placeholder {
+  color: var(--text-muted);
+}
+
+/* Document select */
+.docList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.docItem {
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: all var(--transition-fast);
+}
+
+.docItem.docSelected {
+  border-color: var(--accent-primary);
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.docRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.docRow:hover {
+  background: var(--glass-hover);
+}
+
+.docIcon {
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.docInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  flex: 1;
+  min-width: 0;
+}
+
+.docName {
+  font-size: 13px;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.docMeta {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.docExpandBtn {
+  padding: 4px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.docExpandBtn:hover {
+  background: var(--glass-elevated);
+}
+
+.docSummary {
+  font-size: 12px;
+  color: var(--text-secondary);
+  padding: 6px 12px 10px 38px;
+  line-height: 1.4;
+  border-top: 1px solid var(--glass-border);
+  background: var(--glass-surface);
+}
+
+/* Submit */
+.submitBtn {
+  margin-top: 14px;
+  width: 100%;
+  padding: 10px;
+  background: var(--accent-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.submitBtn:hover {
+  opacity: 0.9;
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Submitted summary */
+.submittedSummary {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.summaryRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.summaryRow:last-child {
+  border-bottom: none;
+}
+
+.summaryLabel {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.summaryValue {
+  font-size: 13px;
+  color: var(--text-primary);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
