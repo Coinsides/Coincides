@@ -6,19 +6,16 @@
  */
 import { app, BrowserWindow, shell, dialog } from 'electron';
 import { join } from 'path';
-import { existsSync, mkdirSync } from 'fs';
-import { fork, ChildProcess } from 'child_process';
+import { existsSync, mkdirSync, readFileSync } from 'fs';
+import { spawn, ChildProcess } from 'child_process';
 
 // ── Path Resolution ─────────────────────────────────────────
-// In packaged app: app.getAppPath() = .../resources/app
-// In dev: __dirname = .../dist-electron
 const appRoot = app.isPackaged
-  ? app.getAppPath()          // .../resources/app
-  : join(__dirname, '..');    // project root
+  ? app.getAppPath()
+  : join(__dirname, '..');
 
 const serverDir = join(appRoot, 'server');
 const serverEntry = join(serverDir, 'src', 'index.ts');
-const clientDist = join(appRoot, 'client', 'dist');
 
 // ── Data Directory ──────────────────────────────────────────
 const userDataPath = app.getPath('userData');
@@ -29,28 +26,41 @@ if (!existsSync(dataDir)) mkdirSync(dataDir, { recursive: true });
 if (!existsSync(uploadsDir)) mkdirSync(uploadsDir, { recursive: true });
 
 const DB_PATH = join(dataDir, 'coincides.db');
+const PORT = '3001';
 
 // Load .env from userData if it exists (for API keys)
 const userEnvPath = join(userDataPath, '.env');
+const envVars: Record<string, string> = {};
 if (existsSync(userEnvPath)) {
-  const envContent = require('fs').readFileSync(userEnvPath, 'utf-8');
+  const envContent = readFileSync(userEnvPath, 'utf-8');
+  for (const line of envContent.split('\n')) {
+    const trimmed = line.trim();
+    if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
+      const idx = trimmed.indexOf('=');
+      envVars[trimmed.slice(0, idx).trim()] = trimmed.slice(idx + 1).trim();
+    }
+  }
+  console.log('[Electron] Loaded .env from userData');
+}
+
+// Also try loading from server/.env (dev mode)
+const serverEnvPath = join(serverDir, '.env');
+if (existsSync(serverEnvPath)) {
+  const envContent = readFileSync(serverEnvPath, 'utf-8');
   for (const line of envContent.split('\n')) {
     const trimmed = line.trim();
     if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
       const idx = trimmed.indexOf('=');
       const key = trimmed.slice(0, idx).trim();
-      const val = trimmed.slice(idx + 1).trim();
-      if (!process.env[key]) process.env[key] = val;
+      if (!envVars[key]) envVars[key] = trimmed.slice(idx + 1).trim();
     }
   }
-  console.log('[Electron] Loaded .env from userData');
+  console.log('[Electron] Loaded .env from server dir');
 }
-const PORT = '3001';
 
 console.log(`[Electron] Packaged: ${app.isPackaged}`);
 console.log(`[Electron] App root: ${appRoot}`);
 console.log(`[Electron] Server entry: ${serverEntry}`);
-console.log(`[Electron] Client dist: ${clientDist}`);
 console.log(`[Electron] Database: ${DB_PATH}`);
 
 let mainWindow: BrowserWindow | null = null;
@@ -68,22 +78,26 @@ function startServer(): Promise<void> {
       return;
     }
 
-    // Find jiti in server's node_modules
-    const jitiPath = join(serverDir, 'node_modules', 'jiti', 'register.mjs');
-    const nodeOptions = existsSync(jitiPath)
-      ? `--import ${jitiPath}`
-      : '--import jiti/register';
+    // Use spawn with explicit node and jiti register path
+    const jitiRegister = join(serverDir, 'node_modules', 'jiti', 'register.cjs');
+    const nodeExecutable = process.execPath; // Electron's bundled Node
 
-    console.log(`[Electron] Starting server with NODE_OPTIONS: ${nodeOptions}`);
+    console.log(`[Electron] Node: ${nodeExecutable}`);
+    console.log(`[Electron] Jiti: ${jitiRegister} (exists: ${existsSync(jitiRegister)})`);
 
-    serverProcess = fork(serverEntry, [], {
+    // Use --require instead of --import for CJS compatibility
+    serverProcess = spawn(nodeExecutable, [
+      '--require', jitiRegister,
+      serverEntry,
+    ], {
       cwd: serverDir,
       env: {
         ...process.env,
+        ...envVars,
         DB_PATH,
         UPLOAD_DIR: uploadsDir,
         PORT,
-        NODE_OPTIONS: nodeOptions,
+        ELECTRON_RUN_AS_NODE: '1', // Tell Electron's node to act as plain Node.js
       },
       stdio: 'pipe',
     });
@@ -101,27 +115,27 @@ function startServer(): Promise<void> {
 
     serverProcess.stderr?.on('data', (data: Buffer) => {
       const msg = data.toString().trim();
-      console.error(`[Server Error] ${msg}`);
-      // If server crashes on startup, show error to user
-      if (!started && (msg.includes('Error') || msg.includes('error'))) {
-        console.error(`[Electron] Server startup error detected`);
-      }
+      if (msg) console.error(`[Server] ${msg}`);
     });
 
     serverProcess.on('error', (err) => {
       console.error('[Electron] Server process error:', err);
-      if (!started) reject(err);
+      if (!started) {
+        dialog.showErrorBox('Coincides', `Server failed to start: ${err.message}`);
+        reject(err);
+      }
     });
 
     serverProcess.on('exit', (code) => {
-      console.log(`[Electron] Server process exited with code ${code}`);
+      console.log(`[Electron] Server exited with code ${code}`);
       if (!started) {
-        reject(new Error(`Server exited with code ${code} before starting`));
+        const msg = `Server exited with code ${code} before starting`;
+        dialog.showErrorBox('Coincides - Startup Error', msg);
+        reject(new Error(msg));
       }
       serverProcess = null;
     });
 
-    // Timeout — if server doesn't start in 20s, try to open window anyway
     setTimeout(() => {
       if (!started) {
         console.warn('[Electron] Server start timeout, opening window anyway...');
@@ -149,14 +163,12 @@ function createWindow(): void {
     show: false,
   });
 
-  // Load from the Express server (which serves client/dist as static)
   mainWindow.loadURL(`http://localhost:${PORT}`);
 
   mainWindow.once('ready-to-show', () => {
     mainWindow?.show();
   });
 
-  // Retry loading if server isn't ready yet
   mainWindow.webContents.on('did-fail-load', () => {
     console.log('[Electron] Page load failed, retrying in 2s...');
     setTimeout(() => {
@@ -182,7 +194,6 @@ app.whenReady().then(async () => {
     createWindow();
   } catch (err: any) {
     console.error('[Electron] Fatal error:', err);
-    dialog.showErrorBox('Coincides - Startup Error', err?.message || String(err));
     app.quit();
   }
 
