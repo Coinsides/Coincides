@@ -596,7 +596,7 @@ export async function executeTool(
 
       // --- Path 2: FTS5 full-text search ---
       const ftsChunks = store.ftsSearchChunks(query, 10, userId);
-      addChunks(ftsChunks, 'fts5');
+      addChunks(ftsChunks, 'fulltext');
 
       // --- Path 3: LIKE keyword search on filename + summary ---
       let keywordSql = `SELECT d.id, d.filename, d.file_type, d.summary, d.page_count, d.document_type, d.chunk_count,
