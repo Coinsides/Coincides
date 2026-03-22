@@ -81,7 +81,7 @@ router.post('/login', async (req: AuthRequest, res: Response) => {
         id: user.id,
         email: user.email,
         name: user.name,
-        settings: JSON.parse(user.settings || '{}'),
+        settings: (user.settings || {}),
         onboarding_completed: !!user.onboarding_completed,
         created_at: user.created_at,
         updated_at: user.updated_at,
@@ -106,7 +106,7 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
 
   res.json({
     ...user,
-    settings: JSON.parse(user.settings || '{}'),
+    settings: (user.settings || {}),
     onboarding_completed: !!user.onboarding_completed,
   });
 });

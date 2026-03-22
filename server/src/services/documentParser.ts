@@ -28,7 +28,7 @@ async function getAnthropicClient(userId?: string): Promise<Anthropic> {
     try {
       const user = await queryOne(`SELECT settings FROM users WHERE id = $1`, [userId]) as { settings: string } | undefined;
       if (user?.settings) {
-        const settings = JSON.parse(user.settings);
+        const settings = (user.settings || {}) as any;
         const aiProviders = settings?.ai_providers as Record<string, Record<string, string>> | undefined;
         const anthropicConfig = aiProviders?.anthropic;
         if (anthropicConfig?.api_key) {

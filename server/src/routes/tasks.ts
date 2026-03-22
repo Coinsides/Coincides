@@ -11,7 +11,7 @@ const router = Router();
 
 function parseTask(task: any): any {
   if (task && task.checklist && typeof task.checklist === 'string') {
-    try { task.checklist = JSON.parse(task.checklist); } catch { task.checklist = null; }
+    try { task.checklist = (typeof task.checklist === "string" ? JSON.parse(task.checklist) : task.checklist); } catch { task.checklist = null; }
   }
   return task;
 }

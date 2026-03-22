@@ -43,7 +43,7 @@ export async function* runAgent(
 
   let settings: Record<string, unknown>;
   try {
-    settings = JSON.parse(user.settings || '{}');
+    settings = (user.settings || {});
   } catch (err) {
     console.error('Agent orchestration error:', err);
     settings = {};
@@ -80,7 +80,7 @@ export async function* runAgent(
   }
 
   // 3. Build system prompt
-  const parsedSettings = JSON.parse(user.settings || '{}');
+  const parsedSettings = (user.settings || {});
   // Detect L1 onboarding context
   const isNewUser = contextHint?.type === 'l1_onboarding';
   const systemPrompt = buildSystemPrompt(agentName, {

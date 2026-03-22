@@ -8,7 +8,7 @@ const router = Router();
 
 function parseConfig(row: any) {
   if (row && typeof row.config === 'string') {
-    try { row.config = JSON.parse(row.config); } catch { /* keep as string */ }
+    try { row.config = row.config; } catch { /* keep as string */ }
   }
   return row;
 }

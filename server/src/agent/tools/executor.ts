@@ -219,7 +219,7 @@ export async function executeTool(
     case 'get_study_templates': {
       const templates = await queryAll(`SELECT id, name, slug, description, strategy, config, is_system FROM study_mode_templates WHERE user_id IS NULL OR user_id = $1 ORDER BY is_system DESC, name`, [userId]);
       return JSON.stringify(templates.map((t: any) => {
-        try { t.config = JSON.parse(t.config); } catch { /* keep */ }
+        try { t.config = t.config; } catch { /* keep */ }
         return t;
       }));
     }

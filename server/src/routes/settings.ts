@@ -16,7 +16,7 @@ router.get('/', async (req: AuthRequest, res: Response) => {
     throw new AppError(404, 'User not found');
   }
 
-  res.json(JSON.parse(user.settings || '{}'));
+  res.json((user.settings || {}));
 });
 
 // PUT /api/settings
@@ -29,7 +29,7 @@ router.put('/', async (req: AuthRequest, res: Response) => {
     }
 
     // Merge existing settings with new ones
-    const currentSettings = JSON.parse(user.settings || '{}');
+    const currentSettings = (user.settings || {});
     const mergedSettings = { ...currentSettings, ...data.settings };
 
     const now = new Date().toISOString();

@@ -35,10 +35,10 @@ export class MemoryManager {
         content: row.content,
       };
       if (row.tool_calls) {
-        try { msg.tool_calls = JSON.parse(row.tool_calls); } catch { /* ignore */ }
+        try { msg.tool_calls = (typeof row.tool_calls === "string" ? JSON.parse(row.tool_calls) : row.tool_calls); } catch { /* ignore */ }
       }
       if (row.tool_results) {
-        try { msg.tool_results = JSON.parse(row.tool_results); } catch { /* ignore */ }
+        try { msg.tool_results = (typeof row.tool_results === "string" ? JSON.parse(row.tool_results) : row.tool_results); } catch { /* ignore */ }
       }
       return msg;
     });

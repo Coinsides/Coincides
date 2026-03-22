@@ -223,7 +223,7 @@ router.get('/:id/tasks', async (req: AuthRequest, res: Response) => {
 
   for (const t of tasks as any[]) {
     if (t.checklist && typeof t.checklist === 'string') {
-      try { t.checklist = JSON.parse(t.checklist); } catch { t.checklist = null; }
+      try { t.checklist = (typeof t.checklist === "string" ? JSON.parse(t.checklist) : t.checklist); } catch { t.checklist = null; }
     }
   }
 
