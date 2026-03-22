@@ -7,7 +7,7 @@
 import { app, BrowserWindow, shell, dialog } from 'electron';
 import { join } from 'path';
 import { existsSync, mkdirSync, readFileSync } from 'fs';
-import { spawn, ChildProcess } from 'child_process';
+import { spawn, ChildProcess, execSync } from 'child_process';
 
 // ── Path Resolution ─────────────────────────────────────────
 const appRoot = app.isPackaged
@@ -68,6 +68,39 @@ console.log(`[Electron] Database: ${DB_PATH}`);
 let mainWindow: BrowserWindow | null = null;
 let serverProcess: ChildProcess | null = null;
 
+// ── Find System Node ────────────────────────────────────────
+
+/**
+ * Locate the system Node.js executable.
+ * We must use system Node (not Electron's embedded one) because native
+ * modules like better-sqlite3 are compiled against the system Node ABI.
+ */
+function findSystemNode(): string {
+  // In packaged mode, we bundle a Node binary alongside the app
+  const bundledNode = join(appRoot, 'node', process.platform === 'win32' ? 'node.exe' : 'node');
+  if (existsSync(bundledNode)) {
+    return bundledNode;
+  }
+
+  // In dev mode, find system node via PATH
+  try {
+    const cmd = process.platform === 'win32' ? 'where node' : 'which node';
+    const result = execSync(cmd, { encoding: 'utf-8' }).trim();
+    // 'where' on Windows may return multiple lines; take the first
+    const nodePath = result.split('\n')[0].trim();
+    if (nodePath && existsSync(nodePath)) {
+      return nodePath;
+    }
+  } catch {
+    // fall through
+  }
+
+  // Fallback: use Electron's node with ELECTRON_RUN_AS_NODE
+  // (will fail for native modules but better than crashing here)
+  console.warn('[Electron] System node not found, falling back to Electron node');
+  return process.execPath;
+}
+
 // ── Start Server ────────────────────────────────────────────
 
 function startServer(): Promise<void> {
@@ -88,7 +121,10 @@ function startServer(): Promise<void> {
       return;
     }
 
-    const nodeExecutable = process.execPath; // Electron's bundled Node
+    // Use system Node.js for the server process to avoid native module ABI mismatch.
+    // Electron's embedded Node has a different NODE_MODULE_VERSION than system Node,
+    // which breaks native modules like better-sqlite3.
+    const nodeExecutable = findSystemNode();
 
     console.log(`[Electron] Node: ${nodeExecutable}`);
     console.log(`[Electron] Server loader: ${serverLoader} (exists: ${existsSync(serverLoader)})`);
@@ -104,7 +140,6 @@ function startServer(): Promise<void> {
         DB_PATH,
         UPLOAD_DIR: uploadsDir,
         PORT,
-        ELECTRON_RUN_AS_NODE: '1', // Tell Electron's node to act as plain Node.js
       },
       stdio: 'pipe',
     });
