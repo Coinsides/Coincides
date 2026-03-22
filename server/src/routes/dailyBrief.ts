@@ -14,7 +14,7 @@ router.get('/', async (req: AuthRequest, res: Response) => {
   // Get active exam mode goals
   const examGoals = await queryAll(`SELECT g.id, g.title, g.course_id, g.deadline, c.name as course_name
      FROM goals g JOIN courses c ON g.course_id = c.id
-     WHERE g.user_id = $1 AND g.exam_mode = 1 AND g.status = 'active' AND g.deadline >= $2`, [userId, today]);
+     WHERE g.user_id = $1 AND g.exam_mode = TRUE AND g.status = 'active' AND g.deadline >= $2`, [userId, today]);
 
   const examCourseIds = new Set<string>(examGoals.map((g: any) => g.course_id));
   const examModeActive = examGoals.length > 0;

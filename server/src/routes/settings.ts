@@ -51,7 +51,7 @@ router.put('/', async (req: AuthRequest, res: Response) => {
 // PUT /api/settings/onboarding-complete
 router.put('/onboarding-complete', async (req: AuthRequest, res: Response) => {
   const now = new Date().toISOString();
-  await execute(`UPDATE users SET onboarding_completed = 1, updated_at = $1 WHERE id = $2`, [now, req.userId!]);
+  await execute(`UPDATE users SET onboarding_completed = TRUE, updated_at = $1 WHERE id = $2`, [now, req.userId!]);
   res.json({ onboarding_completed: true });
 });
 

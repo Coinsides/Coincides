@@ -40,7 +40,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
     const id = uuidv4();
     const now = new Date().toISOString();
 
-    await execute(`INSERT INTO tags (id, user_id, name, is_system, color, tag_group_id, created_at) VALUES ($1, $2, $3, 0, $4, $5, $6)`, [id, req.userId!, data.name, data.color || null, data.tag_group_id || null, now]);
+    await execute(`INSERT INTO tags (id, user_id, name, is_system, color, tag_group_id, created_at) VALUES ($1, $2, $3, FALSE, $4, $5, $6)`, [id, req.userId!, data.name, data.color || null, data.tag_group_id || null, now]);
 
     const tag = await queryOne(`SELECT * FROM tags WHERE id = $1`, [id]);
     res.status(201).json(tag);
