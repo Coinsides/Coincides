@@ -154,7 +154,7 @@ export class MemoryManager {
         const existing = await queryOne('SELECT id FROM agent_memories WHERE user_id = $1 AND content = $2', [this.userId, content]);
         if (!existing) {
           const category = this.categorizeMemory(content);
-          await execute('INSERT INTO agent_memories (id, user_id, category, content, source_conversation_id, relevance_score, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)', [uuidv4(]), this.userId, category, content, conversationId, 1.0, now);
+          await execute('INSERT INTO agent_memories (id, user_id, category, content, source_conversation_id, relevance_score, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)', [uuidv4(), this.userId, category, content, conversationId, 1.0]);
         }
       }
     }
@@ -185,12 +185,12 @@ export class MemoryManager {
     return await queryAll(query, params)as { id: string; filename: string; summary: string }[];
   }
 
-  summarizeOldMessages(conversationId: string, keepRecent: number = 10): string | null {
+  async summarizeOldMessages(conversationId: string, keepRecent: number = 10): Promise<string | null> {
     const totalCount = await queryOne('SELECT COUNT(*) as count FROM agent_messages WHERE conversation_id = $1', [conversationId]);
 
     if (totalCount.count <= keepRecent) return null;
 
-    const oldMessages = await queryAll('SELECT role, content FROM agent_messages WHERE conversation_id = $1 ORDER BY created_at ASC LIMIT $2', [conversationId, totalCount.count - keepRecent]); content: string }>;
+    const oldMessages = await queryAll('SELECT role, content FROM agent_messages WHERE conversation_id = $1 ORDER BY created_at ASC LIMIT $2', [conversationId, totalCount.count - keepRecent]);
 
     // Build a simple summary
     const parts: string[] = [];

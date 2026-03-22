@@ -69,7 +69,7 @@ export async function* runAgent(
   const energyStatus = await queryOne('SELECT energy_level FROM daily_statuses WHERE user_id = $1 AND date = $2', [userId, today]);
 
   // Pre-load decks with their sections to reduce tool call rounds
-  const decks = await queryAll('SELECT d.id, d.name, d.course_id, d.card_count FROM card_decks d WHERE d.user_id = $1 ORDER BY d.name', [userId]); name: string; course_id: string; card_count: number }[];
+  const decks = await queryAll('SELECT d.id, d.name, d.course_id, d.card_count FROM card_decks d WHERE d.user_id = $1 ORDER BY d.name', [userId]) as { id: string; name: string; course_id: string; card_count: number }[];
   const deckSections = new Map<string, { id: string; name: string }[]>();
   if (decks.length > 0) {
     const sections = await queryAll(`SELECT id, deck_id, name FROM card_sections WHERE user_id = $1 ORDER BY order_index`, [userId]) as { id: string; deck_id: string; name: string }[];

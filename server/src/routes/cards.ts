@@ -119,7 +119,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
       data.section_id,
       data.template_type,
       data.title,
-      JSON.stringify(data.content]),
+      JSON.stringify(data.content),
       data.importance,
       now,
       now
@@ -240,7 +240,7 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
   await execute(`DELETE FROM cards WHERE id = $1`, [req.params.id]);
 
   // Decrement deck card_count
-  await execute(`UPDATE card_decks SET card_count = card_count - 1, updated_at = $1 WHERE id = $2`, [new Date(]).toISOString(),
+  await execute(`UPDATE card_decks SET card_count = card_count - 1, updated_at = $1 WHERE id = $2`, [new Date().toISOString(),
     existing.deck_id
   );
 

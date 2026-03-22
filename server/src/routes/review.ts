@@ -141,7 +141,7 @@ router.post('/:cardId/rate', async (req: AuthRequest, res: Response) => {
         updated_at = $6
        WHERE id = $7`, [newCard.stability,
       newCard.difficulty,
-      newCard.last_review ? (newCard.last_review as Date]).toISOString() : updatedAt,
+      newCard.last_review ? (newCard.last_review as Date).toISOString() : updatedAt,
       newCard.due.toISOString(),
       newCard.reps,
       updatedAt,

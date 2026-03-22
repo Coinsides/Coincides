@@ -258,7 +258,7 @@ router.post('/:id/tasks', async (req: AuthRequest, res: Response) => {
     const now = new Date().toISOString();
 
     await execute(`INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, order_index, start_time, end_time, description, checklist, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending', $8, $9, $10, $11, $12, $13, $14)`, [id, req.userId!, courseId, goal.id, data.title, data.date, data.priority || 'must', data.order_index ?? 0, data.start_time || null, data.end_time || null, data.description || null, data.checklist ? JSON.stringify(data.checklist]) : null, now, now);
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending', $8, $9, $10, $11, $12, $13, $14)`, [id, req.userId!, courseId, goal.id, data.title, data.date, data.priority || 'must', data.order_index ?? 0, data.start_time || null, data.end_time || null, data.description || null, data.checklist ? JSON.stringify(data.checklist) : null, now, now);
 
     const task = await queryOne(`SELECT * FROM tasks WHERE id = $1`, [id]);
     res.status(201).json(parseTask(task));
@@ -284,7 +284,7 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
   // explicitly before deleting the goal. We also need to collect sub-goal IDs because
   // once the parent goal is deleted, sub-goals vanish and their task.goal_id becomes NULL.
   const collectGoalIds = (parentId: string): string[] => {
-    const children = await queryAll(`SELECT id FROM goals WHERE parent_id = $1`, [parentId])as { id: string }[];
+    const children = await queryAll(`SELECT id FROM goals WHERE parent_id = $1`, [parentId]) as { id: string }[];
     const ids = [parentId];
     for (const child of children) {
       ids.push(...collectGoalIds(child.id));

@@ -50,7 +50,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
         const dateStr = taskDate.toISOString().split('T')[0];
 
         await execute(`INSERT INTO tasks (id, user_id, course_id, goal_id, recurring_group_id, title, date, priority, status, order_index, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending', $9, $10, $11)`, [uuidv4(]),
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending', $9, $10, $11)`, [uuidv4(),
           req.userId!,
           data.course_id,
           data.goal_id || null,

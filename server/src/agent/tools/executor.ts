@@ -57,7 +57,7 @@ export async function executeTool(
       const params: unknown[] = [userId];
       if (course_id) { query += ' AND g.course_id = ?'; params.push(course_id); }
       query += ' ORDER BY g.created_at DESC';
-      const goals = await queryAll(query, params)>;
+      const goals = await queryAll(query, params);
 
       if (include_hierarchy) {
         // Enrich each goal with children and tasks
@@ -212,7 +212,7 @@ export async function executeTool(
 
       const id = uuidv4();
       const now = new Date().toISOString();
-      await execute('INSERT INTO proposals (id, user_id, type, status, data, created_at) VALUES ($1, $2, $3, $4, $5, $6)', [id, userId, type, 'pending', JSON.stringify(data]), now);
+      await execute('INSERT INTO proposals (id, user_id, type, status, data, created_at) VALUES ($1, $2, $3, $4, $5, $6)', [id, userId, type, 'pending', JSON.stringify(data), now]);
       return JSON.stringify({ id, type, items_count: items.length, message: `Proposal created with ${items.length} items. The student can review and apply it from the proposals panel.` });
     }
 

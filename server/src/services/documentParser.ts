@@ -290,7 +290,7 @@ ${truncated}`,
 
 export async function parseDocument(documentId: string, userId: string): Promise<void> {
   // Update status to parsing
-  await execute(`UPDATE documents SET parse_status = 'parsing', updated_at = $1 WHERE id = $2`, [new Date(]).toISOString(),
+  await execute(`UPDATE documents SET parse_status = 'parsing', updated_at = $1 WHERE id = $2`, [new Date().toISOString(),
     documentId
   );
 
@@ -401,7 +401,7 @@ export async function parseDocument(documentId: string, userId: string): Promise
       pageCount,
       documentType,
       chunkCount,
-      new Date(]).toISOString(),
+      new Date().toISOString(),
       documentId
     );
 
@@ -411,7 +411,7 @@ export async function parseDocument(documentId: string, userId: string): Promise
     });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown parsing error';
-    await execute(`UPDATE documents SET parse_status = 'failed', error_message = $1, updated_at = $2 WHERE id = $3`, [errorMessage, new Date(]).toISOString(), documentId);
+    await execute(`UPDATE documents SET parse_status = 'failed', error_message = $1, updated_at = $2 WHERE id = $3`, [errorMessage, new Date().toISOString(), documentId);
   }
 }
 

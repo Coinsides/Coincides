@@ -70,7 +70,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
       data.start_time || null,
       data.end_time || null,
       data.description || null,
-      data.checklist ? JSON.stringify(data.checklist]) : null,
+      data.checklist ? JSON.stringify(data.checklist) : null,
       data.time_block_id || null,
       now,
       now
@@ -118,7 +118,7 @@ router.post('/batch', async (req: AuthRequest, res: Response) => {
           task.start_time || null,
           task.end_time || null,
           task.description || null,
-          task.checklist ? JSON.stringify(task.checklist]) : null,
+          task.checklist ? JSON.stringify(task.checklist) : null,
           task.time_block_id || null,
           now,
           now
@@ -173,7 +173,7 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
 
         // Log activity
         const activityDate = new Date().toISOString().split('T')[0];
-        await execute(`INSERT INTO study_activity_log (id, user_id, date, activity_type, entity_id, entity_type) VALUES ($1, $2, $3, $4, $5, $6)`, [uuidv4(]), req.userId!, activityDate, 'task_completed', existing.id, 'task');
+        await execute(`INSERT INTO study_activity_log (id, user_id, date, activity_type, entity_id, entity_type) VALUES ($1, $2, $3, $4, $5, $6)`, [uuidv4(), req.userId!, activityDate, 'task_completed', existing.id, 'task');
 
         // Update recurring group count if applicable
         if (existing.recurring_group_id) {
