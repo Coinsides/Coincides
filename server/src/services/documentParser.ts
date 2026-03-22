@@ -1,6 +1,7 @@
 import { readFile } from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';
 import Anthropic from '@anthropic-ai/sdk';
+// @ts-ignore — pdf-parse has no proper ESM types
 import * as pdfParseModule from 'pdf-parse';
 const pdfParse = (pdfParseModule as any).default || pdfParseModule;
 import { PDFDocument } from 'pdf-lib';
@@ -9,7 +10,7 @@ import * as XLSX from 'xlsx';
 import { getEmbeddingProvider } from '../embedding/index.js';
 import { VectorStore } from '../embedding/vectorStore.js';
 
-import { execute, queryOne, transaction } from '../db/pool.js';
+import { execute, queryAll, queryOne, transaction } from '../db/pool.js';
 
 const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
 const CHUNK_SIZE = 5000;
@@ -424,9 +425,7 @@ async function generateChunkEmbeddings(documentId: string, userId: string): Prom
     console.warn('No embedding provider configured — skipping chunk embeddings');
     return;
   }
-  const chunks = db
-    .prepare('SELECT id, content FROM document_chunks WHERE document_id = ? ORDER BY chunk_index')
-    .all(documentId) as Array<{ id: string; content: string }>;
+  const chunks = await queryAll('SELECT id, content FROM document_chunks WHERE document_id = $1 ORDER BY chunk_index', [documentId]) as Array<{ id: string; content: string }>;
 
   if (chunks.length === 0) {
     // No chunks — embed the full extracted_text as a single "virtual" chunk

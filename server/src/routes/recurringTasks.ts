@@ -65,8 +65,6 @@ router.post('/', async (req: AuthRequest, res: Response) => {
       }
     });
 
-    createAll();
-
     // Return group with tasks
     const group = await queryOne(`SELECT * FROM recurring_task_groups WHERE id = $1`, [groupId]);
     const tasks = await queryAll(`SELECT * FROM tasks WHERE recurring_group_id = $1 ORDER BY date ASC`, [groupId]);

@@ -41,7 +41,7 @@ router.get('/', async (req: AuthRequest, res: Response) => {
 
   // Enrich each goal with its dependency info
   for (const goal of goals) {
-    const deps = await queryAll(`SELECT depends_on_goal_id FROM goal_dependencies WHERE goal_id = $1`, [goal.id])<{ depends_on_goal_id: string }>;
+    const deps = await (await queryAll(`SELECT depends_on_goal_id FROM goal_dependencies WHERE goal_id = $1`, [goal.id])) as { depends_on_goal_id: string }[];
     goal.dependencies = deps.map(d => d.depends_on_goal_id);
   }
 
@@ -75,13 +75,13 @@ router.get('/:id/progress', async (req: AuthRequest, res: Response) => {
     const ids: string[] = [];
     for (const child of children) {
       ids.push(child.id);
-      ids.push(...getDescendantGoalIds(child.id));
+      ids.push(...(await getDescendantGoalIds(child.id)));
     }
     return ids;
   }
 
   const goalId = req.params.id as string;
-  const descendantIds = getDescendantGoalIds(goalId);
+  const descendantIds = await getDescendantGoalIds(goalId);
 
   // Get tasks from all descendant goals
   let descendantTasks: any[] = [];
@@ -287,13 +287,13 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
     const children = await queryAll(`SELECT id FROM goals WHERE parent_id = $1`, [parentId]) as { id: string }[];
     const ids = [parentId];
     for (const child of children) {
-      ids.push(...collectGoalIds(child.id));
+      ids.push(...(await collectGoalIds(child.id)));
     }
     return ids;
   };
 
   const goalId = req.params.id as string;
-  const allGoalIds = collectGoalIds(goalId);
+  const allGoalIds = await collectGoalIds(goalId);
 
   const deleteTransaction = await transaction(async (client) => {
     // Delete all tasks under these goals (task_cards cleaned via ON DELETE CASCADE on task_id)
@@ -304,8 +304,7 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
     await execute(`DELETE FROM goals WHERE id = $1`, [req.params.id]);
   });
 
-  deleteTransaction();
-
+  
   res.json({ message: 'Goal and associated tasks deleted', tasks_deleted: true });
 });
 
@@ -316,7 +315,7 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
  * Before adding edge "goalId depends on newDepId", check if newDepId
  * can already reach goalId through existing edges → cycle.
  */
-function detectCycle(db: any, userId: string, goalId: string, newDependsOnId: string): boolean {
+async function detectCycle(userId: string, goalId: string, newDependsOnId: string): Promise<boolean> {
   // If adding A depends on B, check: can we reach A from B through existing deps?
   // i.e., does B transitively depend on A already?
   const visited = new Set<string>();
@@ -326,16 +325,16 @@ function detectCycle(db: any, userId: string, goalId: string, newDependsOnId: st
     if (visited.has(current)) return false;
     visited.add(current);
 
-    const deps = await queryAll(`SELECT depends_on_goal_id FROM goal_dependencies
-       WHERE goal_id = $1 AND goal_id IN (SELECT id FROM goals WHERE user_id = $2)`, [current, userId])<{ depends_on_goal_id: string }>;
+    const deps = await (await queryAll(`SELECT depends_on_goal_id FROM goal_dependencies
+       WHERE goal_id = $1 AND goal_id IN (SELECT id FROM goals WHERE user_id = $2)`, [current, userId])) as { depends_on_goal_id: string }[];
 
     for (const dep of deps) {
-      if (dfs(dep.depends_on_goal_id)) return true;
+      if (await dfs(dep.depends_on_goal_id)) return true;
     }
     return false;
   }
 
-  return dfs(newDependsOnId);
+  return await dfs(newDependsOnId);
 }
 
 // GET /api/goals/:id/dependencies
@@ -385,7 +384,7 @@ router.post('/:id/dependencies', async (req: AuthRequest, res: Response) => {
   }
 
   // DFS cycle detection
-  if (detectCycle(req.userId!, req.params.id as string, depends_on_goal_id)) {
+  if (await detectCycle(req.userId!, req.params.id as string, depends_on_goal_id)) {
     throw new AppError(400, 'Adding this dependency would create a circular dependency');
   }
 
@@ -427,7 +426,7 @@ router.get('/:id/dependency-chain', async (req: AuthRequest, res: Response) => {
     if (visited.has(currentId)) return;
     visited.add(currentId);
 
-    const deps = await queryAll(`SELECT depends_on_goal_id FROM goal_dependencies WHERE goal_id = $1`, [currentId])<{ depends_on_goal_id: string }>;
+    const deps = await (await queryAll(`SELECT depends_on_goal_id FROM goal_dependencies WHERE goal_id = $1`, [currentId])) as { depends_on_goal_id: string }[];
 
     for (const dep of deps) {
       walkBack(dep.depends_on_goal_id);

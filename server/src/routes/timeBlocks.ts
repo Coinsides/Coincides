@@ -67,8 +67,8 @@ export async function getBlocksForDate(userId: string, date: string): Promise<Ti
   return await queryAll(`SELECT * FROM time_blocks WHERE user_id = $1 AND date = $2 ORDER BY start_time`, [userId, date]);
 }
 
-export function getAvailableStudyMinutes(userId: string, date: string): number {
-  const blocks = getBlocksForDate(userId, date).filter(b => b.type === 'study');
+export async function getAvailableStudyMinutes(userId: string, date: string): Promise<number> {
+  const blocks = (await getBlocksForDate(userId, date)).filter((b: any) => b.type === 'study');
   if (blocks.length === 0) return 0;
 
   const ranges = blocks
@@ -97,9 +97,9 @@ router.get('/', async (req: AuthRequest, res: Response) => {
   const { date, from, to } = req.query;
 
   if (date) {
-    const blocks = getBlocksForDate(req.userId!, date as string);
+    const blocks = await getBlocksForDate(req.userId!, date as string);
     const overlaps = detectOverlaps(blocks);
-    res.json({ blocks, available_study_minutes: getAvailableStudyMinutes(req.userId!, date as string), overlaps });
+    res.json({ blocks, available_study_minutes: await getAvailableStudyMinutes(req.userId!, date as string), overlaps });
     return;
   }
 
@@ -127,10 +127,10 @@ router.get('/week/:date', async (req: AuthRequest, res: Response) => {
     const d = new Date(startDate);
     d.setUTCDate(d.getUTCDate() + i);
     const dateStr = d.toISOString().split('T')[0];
-    const blocks = getBlocksForDate(req.userId!, dateStr);
+    const blocks = await getBlocksForDate(req.userId!, dateStr);
     weekData[dateStr] = {
       blocks,
-      available_study_minutes: getAvailableStudyMinutes(req.userId!, dateStr),
+      available_study_minutes: await getAvailableStudyMinutes(req.userId!, dateStr),
       overlaps: detectOverlaps(blocks),
     };
   }

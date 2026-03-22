@@ -23,7 +23,7 @@ interface DbMessage {
 export class MemoryManager {
   constructor(private userId: string) {}
 
-  async getConversationHistory(conversationId: string): Promise<ProviderMessage[]> {
+  async getConversationHistory(conversationId: string, limit: number = 50): Promise<ProviderMessage[]> {
     const rows = await queryAll('SELECT role, content, tool_calls, tool_results FROM agent_messages WHERE conversation_id = $1 ORDER BY created_at DESC LIMIT $2', [conversationId, limit]);
 
     // Reverse to get chronological order

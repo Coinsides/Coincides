@@ -69,15 +69,11 @@ router.get('/', async (req: AuthRequest, res: Response) => {
   if (!courseId) {
     throw new AppError(400, 'course_id query parameter is required');
   }
-  const documents = db
-    .prepare(
-      `SELECT id, user_id, course_id, filename, file_type, file_size,
+  const documents = await queryAll(`SELECT id, user_id, course_id, filename, file_type, file_size,
               parse_status, parse_channel, summary, page_count, document_type,
               chunk_count, error_message, created_at, updated_at
-       FROM documents WHERE course_id = ? AND user_id = ?
-       ORDER BY created_at DESC`
-    )
-    .all(courseId, req.userId!);
+       FROM documents WHERE course_id = $1 AND user_id = $2
+       ORDER BY created_at DESC`, [courseId, req.userId!]);
 
   res.json(documents);
 });
@@ -109,17 +105,7 @@ router.get('/:id/chunks', async (req: AuthRequest, res: Response) => {
 
 // GET /api/documents/:id/status
 router.get('/:id/status', async (req: AuthRequest, res: Response) => {
-  const document = db
-    .prepare(
-      'SELECT parse_status, parse_channel, page_count, chunk_count, error_message FROM documents WHERE id = ? AND user_id = ?'
-    )
-    .get(req.params.id, req.userId!) as {
-    parse_status: string;
-    parse_channel: string | null;
-    page_count: number | null;
-    chunk_count: number;
-    error_message: string | null;
-  } | undefined;
+  const document = await queryOne('SELECT parse_status, parse_channel, page_count, chunk_count, error_message FROM documents WHERE id = $1 AND user_id = $2', [req.params.id, req.userId!]);
 
   if (!document) {
     throw new AppError(404, 'Document not found');

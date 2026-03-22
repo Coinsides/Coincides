@@ -219,7 +219,6 @@ router.post('/:id/apply', async (req: AuthRequest, res: Response) => {
     await execute(`UPDATE proposals SET status = 'applied', resolved_at = $1 WHERE id = $2`, [now, proposal.id]);
   });
 
-  applyTransaction();
   res.json({ message: 'Proposal applied successfully', items_count: data.items.length });
 });
 

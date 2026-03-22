@@ -63,7 +63,7 @@ export async function* runAgent(
 
   // 2. Build context
   const courses = await queryAll(`SELECT id, name, code FROM courses WHERE user_id = $1`, [userId]);
-  const memories = memory.retrieveMemories(userMessage);
+  const memories = await memory.retrieveMemories(userMessage);
   const docSummaries = await memory.getDocumentSummaries();
   const today = new Date().toISOString().split('T')[0];
   const energyStatus = await queryOne('SELECT energy_level FROM daily_statuses WHERE user_id = $1 AND date = $2', [userId, today]);

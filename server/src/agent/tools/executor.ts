@@ -618,7 +618,7 @@ export async function executeTool(
       // Documents found via chunk search (semantic + FTS5)
       if (docChunkMap.size > 0) {
         const chunkDocIds = Array.from(docChunkMap.keys());
-        const chunkDocs = lookupDocs(chunkDocIds);
+        const chunkDocs = await lookupDocs(chunkDocIds);
         for (const doc of chunkDocs) {
           doc.relevant_chunks = (docChunkMap.get(doc.id) || []).sort((a, b) => b.similarity - a.similarity);
         }
