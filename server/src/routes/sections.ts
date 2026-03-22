@@ -90,16 +90,17 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
 
     const fields: string[] = [];
     const values: unknown[] = [];
+    let paramIdx = 1;
 
-    if (data.name !== undefined) { fields.push('name = ?'); values.push(data.name); }
-    if (data.order_index !== undefined) { fields.push('order_index = ?'); values.push(data.order_index); }
+    if (data.name !== undefined) { fields.push(`name = $${paramIdx++}`); values.push(data.name); }
+    if (data.order_index !== undefined) { fields.push(`order_index = $${paramIdx++}`); values.push(data.order_index); }
 
     if (fields.length === 0) {
       throw new AppError(400, 'No fields to update');
     }
 
     values.push(req.params.id);
-    await execute(`UPDATE card_sections SET ${fields.join(', ')} WHERE id = $1`, [...values]);
+    await execute(`UPDATE card_sections SET ${fields.join(', ')} WHERE id = $${paramIdx}`, [...values]);
 
     const updated = await queryOne(`SELECT * FROM card_sections WHERE id = $1`, [req.params.id]);
     res.json(updated);

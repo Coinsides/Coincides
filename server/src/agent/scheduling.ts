@@ -65,10 +65,11 @@ const DEFAULT_TASK_MINUTES = 30; // fallback estimate
  * Returns goal IDs ordered so prerequisites come first.
  */
 export async function getGoalTopologicalOrder(userId: string, courseId?: string): Promise<string[]> {
-  let goalsQuery = 'SELECT id FROM goals WHERE user_id = ?';
+  let goalsQuery = 'SELECT id FROM goals WHERE user_id = $1';
   const params: unknown[] = [userId];
+  let paramIdx = 2;
   if (courseId) {
-    goalsQuery += ' AND course_id = ?';
+    goalsQuery += ` AND course_id = $${paramIdx++}`;
     params.push(courseId);
   }
 

@@ -20,18 +20,19 @@ export async function executeTool(
 
     case 'get_tasks': {
       const { date, from_date, to_date, course_id, status } = args as Record<string, string | undefined>;
-      let query = 'SELECT t.id, t.title, t.date, t.priority, t.status, t.course_id, c.name as course_name FROM tasks t JOIN courses c ON t.course_id = c.id WHERE t.user_id = ?';
+      let query = 'SELECT t.id, t.title, t.date, t.priority, t.status, t.course_id, c.name as course_name FROM tasks t JOIN courses c ON t.course_id = c.id WHERE t.user_id = $1';
       const params: unknown[] = [userId];
+      let paramIdx = 2;
 
       if (date) {
-        query += ' AND t.date = ?';
+        query += ` AND t.date = $${paramIdx++}`;
         params.push(date);
       } else {
-        if (from_date) { query += ' AND t.date >= ?'; params.push(from_date); }
-        if (to_date) { query += ' AND t.date <= ?'; params.push(to_date); }
+        if (from_date) { query += ` AND t.date >= $${paramIdx++}`; params.push(from_date); }
+        if (to_date) { query += ` AND t.date <= $${paramIdx++}`; params.push(to_date); }
       }
-      if (course_id) { query += ' AND t.course_id = ?'; params.push(course_id); }
-      if (status) { query += ' AND t.status = ?'; params.push(status); }
+      if (course_id) { query += ` AND t.course_id = $${paramIdx++}`; params.push(course_id); }
+      if (status) { query += ` AND t.status = $${paramIdx++}`; params.push(status); }
 
       query += ' ORDER BY t.date, t.priority, t.order_index LIMIT 50';
       const tasks = await queryAll(query, params);
@@ -53,9 +54,10 @@ export async function executeTool(
 
     case 'list_goals': {
       const { course_id, include_hierarchy } = args as { course_id?: string; include_hierarchy?: boolean };
-      let query = 'SELECT g.id, g.title, g.description, g.deadline, g.status, g.course_id, g.parent_id, c.name as course_name FROM goals g JOIN courses c ON g.course_id = c.id WHERE g.user_id = ?';
+      let query = 'SELECT g.id, g.title, g.description, g.deadline, g.status, g.course_id, g.parent_id, c.name as course_name FROM goals g JOIN courses c ON g.course_id = c.id WHERE g.user_id = $1';
       const params: unknown[] = [userId];
-      if (course_id) { query += ' AND g.course_id = ?'; params.push(course_id); }
+      let paramIdx = 2;
+      if (course_id) { query += ` AND g.course_id = $${paramIdx++}`; params.push(course_id); }
       query += ' ORDER BY g.created_at DESC';
       const goals = await queryAll(query, params);
 
@@ -114,9 +116,10 @@ export async function executeTool(
 
     case 'list_decks': {
       const { course_id } = args as { course_id?: string };
-      let query = 'SELECT d.id, d.name, d.description, d.card_count, d.course_id, c.name as course_name FROM card_decks d JOIN courses c ON d.course_id = c.id WHERE d.user_id = ?';
+      let query = 'SELECT d.id, d.name, d.description, d.card_count, d.course_id, c.name as course_name FROM card_decks d JOIN courses c ON d.course_id = c.id WHERE d.user_id = $1';
       const params: unknown[] = [userId];
-      if (course_id) { query += ' AND d.course_id = ?'; params.push(course_id); }
+      let paramIdx = 2;
+      if (course_id) { query += ` AND d.course_id = $${paramIdx++}`; params.push(course_id); }
       query += ' ORDER BY d.created_at DESC';
       const decks = await queryAll(query, params);
       return JSON.stringify(decks);
@@ -158,10 +161,11 @@ export async function executeTool(
 
     case 'list_cards': {
       const { deck_id, template_type, search } = args as Record<string, string | undefined>;
-      let query = 'SELECT id, title, template_type, importance, fsrs_next_review FROM cards WHERE deck_id = ? AND user_id = ?';
+      let query = 'SELECT id, title, template_type, importance, fsrs_next_review FROM cards WHERE deck_id = $1 AND user_id = $2';
       const params: unknown[] = [deck_id, userId];
-      if (template_type) { query += ' AND template_type = ?'; params.push(template_type); }
-      if (search) { query += ' AND title LIKE ?'; params.push(`%${search}%`); }
+      let paramIdx = 3;
+      if (template_type) { query += ` AND template_type = $${paramIdx++}`; params.push(template_type); }
+      if (search) { query += ` AND title LIKE $${paramIdx++}`; params.push(`%${search}%`); }
       query += ' ORDER BY created_at DESC LIMIT 50';
       const cards = await queryAll(query, params);
       return JSON.stringify(cards);
@@ -273,7 +277,7 @@ export async function executeTool(
       let courseFilter = '';
       const params: unknown[] = [userId];
       if (course_id) {
-        courseFilter = ' AND c.id = ?';
+        courseFilter = ' AND c.id = $6';
         params.push(course_id);
       }
 
@@ -288,7 +292,7 @@ export async function executeTool(
       // Recent completed tasks (last 7 days)
       const recentTasks = await queryAll(`SELECT t.title, t.date, t.course_id, c.name as course_name
          FROM tasks t JOIN courses c ON t.course_id = c.id
-         WHERE t.user_id = $1 AND t.status = 'completed' AND t.date >= date('now', '-7 days')
+         WHERE t.user_id = $1 AND t.status = 'completed' AND t.date >= (CURRENT_DATE - INTERVAL '7 days')
          ORDER BY t.date DESC LIMIT 20`, [userId]);
 
       // Active goals
@@ -363,9 +367,10 @@ export async function executeTool(
       const store = new VectorStore();
 
       // --- Path 1: LIKE keyword search (always runs as baseline) ---
-      let keywordSql = 'SELECT id, category, content, created_at FROM agent_memories WHERE user_id = ? AND content LIKE ?';
+      let keywordSql = 'SELECT id, category, content, created_at FROM agent_memories WHERE user_id = $1 AND content LIKE $2';
       const keywordParams: unknown[] = [userId, `%${query}%`];
-      if (category) { keywordSql += ' AND category = ?'; keywordParams.push(category); }
+      let memParamIdx = 3;
+      if (category) { keywordSql += ` AND category = $${memParamIdx++}`; keywordParams.push(category); }
       keywordSql += ' ORDER BY relevance_score DESC, created_at DESC LIMIT 10';
       const keywordMemories = await queryAll(keywordSql, keywordParams);
 
@@ -551,14 +556,17 @@ export async function executeTool(
 
       const lookupDocs = async (docIds: string[]): Promise<DocResult[]> => {
         if (docIds.length === 0) return [];
-        const placeholders = docIds.map(() => '?').join(',');
+        let pIdx = 1;
+        const docParams: unknown[] = [userId];
+        pIdx++; // userId is $1
+        const placeholders = docIds.map(() => `$${pIdx++}`).join(',');
+        docIds.forEach(id => docParams.push(id));
         let docSql = `SELECT d.id, d.filename, d.file_type, d.summary, d.page_count, d.document_type, d.chunk_count,
                              d.course_id, c.name as course_name
                       FROM documents d JOIN courses c ON d.course_id = c.id
-                      WHERE d.user_id = ? AND d.id IN (${placeholders})`;
-        const docParams: unknown[] = [userId, ...docIds];
-        if (course_id) { docSql += ' AND d.course_id = ?'; docParams.push(course_id); }
-        if (file_type) { docSql += ' AND d.file_type = ?'; docParams.push(file_type); }
+                      WHERE d.user_id = $1 AND d.id IN (${placeholders})`;
+        if (course_id) { docSql += ` AND d.course_id = $${pIdx++}`; docParams.push(course_id); }
+        if (file_type) { docSql += ` AND d.file_type = $${pIdx++}`; docParams.push(file_type); }
         return await queryAll(docSql, docParams);
       };
 
@@ -599,15 +607,16 @@ export async function executeTool(
       addChunks(ftsChunks, 'fulltext');
 
       // --- Path 3: LIKE keyword search on filename + summary ---
+      let kwIdx = 4;
       let keywordSql = `SELECT d.id, d.filename, d.file_type, d.summary, d.page_count, d.document_type, d.chunk_count,
                                 d.course_id, c.name as course_name
                          FROM documents d JOIN courses c ON d.course_id = c.id
-                         WHERE d.user_id = ? AND d.parse_status = 'completed'
-                         AND (d.filename LIKE ? OR d.summary LIKE ?)`;
+                         WHERE d.user_id = $1 AND d.parse_status = 'completed'
+                         AND (d.filename LIKE $2 OR d.summary LIKE $3)`;
       const searchPattern = `%${query}%`;
       const keywordParams: unknown[] = [userId, searchPattern, searchPattern];
-      if (course_id) { keywordSql += ' AND d.course_id = ?'; keywordParams.push(course_id); }
-      if (file_type) { keywordSql += ' AND d.file_type = ?'; keywordParams.push(file_type); }
+      if (course_id) { keywordSql += ` AND d.course_id = $${kwIdx++}`; keywordParams.push(course_id); }
+      if (file_type) { keywordSql += ` AND d.file_type = $${kwIdx++}`; keywordParams.push(file_type); }
       keywordSql += ' ORDER BY d.created_at DESC LIMIT 10';
       const keywordDocs = await queryAll(keywordSql, keywordParams);
 
@@ -773,22 +782,23 @@ export async function executeTool(
 
       const fields: string[] = [];
       const values: unknown[] = [];
+      let tbParamIdx = 1;
 
-      if (label !== undefined) { fields.push('label = ?'); values.push(label); }
-      if (type !== undefined) { fields.push('type = ?'); values.push(type); }
-      if (start_time !== undefined) { fields.push('start_time = ?'); values.push(start_time); }
-      if (end_time !== undefined) { fields.push('end_time = ?'); values.push(end_time); }
-      if (color !== undefined) { fields.push('color = ?'); values.push(color); }
+      if (label !== undefined) { fields.push(`label = $${tbParamIdx++}`); values.push(label); }
+      if (type !== undefined) { fields.push(`type = $${tbParamIdx++}`); values.push(type); }
+      if (start_time !== undefined) { fields.push(`start_time = $${tbParamIdx++}`); values.push(start_time); }
+      if (end_time !== undefined) { fields.push(`end_time = $${tbParamIdx++}`); values.push(end_time); }
+      if (color !== undefined) { fields.push(`color = $${tbParamIdx++}`); values.push(color); }
 
       if (fields.length === 0) {
         return JSON.stringify({ error: 'No fields to update' });
       }
 
-      fields.push('updated_at = ?');
+      fields.push(`updated_at = $${tbParamIdx++}`);
       values.push(new Date().toISOString());
       values.push(block_id);
 
-      await execute(`UPDATE time_blocks SET ${fields.join(', ')} WHERE id = $1`, [...values]);
+      await execute(`UPDATE time_blocks SET ${fields.join(', ')} WHERE id = $${tbParamIdx}`, [...values]);
 
       const updated = await queryOne(`SELECT * FROM time_blocks WHERE id = $1`, [block_id]);
       return JSON.stringify({ updated, message: 'Time block updated' });

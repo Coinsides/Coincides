@@ -35,24 +35,25 @@ router.get('/due', async (req: AuthRequest, res: Response) => {
      FROM cards c
      INNER JOIN card_decks cd ON cd.id = c.deck_id`;
   const params: unknown[] = [];
+  let paramIdx = 1;
 
   if (tagId) {
     sql += ` INNER JOIN card_tags ct ON ct.card_id = c.id`;
   }
 
-  sql += ` WHERE c.user_id = ? AND (c.fsrs_next_review <= ? OR c.fsrs_reps = 0)`;
+  sql += ` WHERE c.user_id = $${paramIdx++} AND (c.fsrs_next_review <= $${paramIdx++} OR c.fsrs_reps = 0)`;
   params.push(req.userId!, date + 'T23:59:59');
 
   if (deckId) {
-    sql += ` AND c.deck_id = ?`;
+    sql += ` AND c.deck_id = $${paramIdx++}`;
     params.push(deckId);
   }
   if (sectionId) {
-    sql += ` AND c.section_id = ?`;
+    sql += ` AND c.section_id = $${paramIdx++}`;
     params.push(sectionId);
   }
   if (tagId) {
-    sql += ` AND ct.tag_id = ?`;
+    sql += ` AND ct.tag_id = $${paramIdx++}`;
     params.push(tagId);
   }
 
@@ -213,11 +214,12 @@ router.post('/custom', async (req: AuthRequest, res: Response) => {
   if (card_ids.length > 500) {
     throw new AppError(400, 'Maximum 500 cards per custom review session');
   }
-  const placeholders = card_ids.map(() => '?').join(',');
+  let pIdx = 1;
+  const placeholders = card_ids.map(() => `$${pIdx++}`).join(',');
   const cards = await queryAll(`SELECT c.*, cd.name as deck_name, cd.course_id
      FROM cards c
      INNER JOIN card_decks cd ON cd.id = c.deck_id
-     WHERE c.id IN (${placeholders}) AND c.user_id = $1
+     WHERE c.id IN (${placeholders}) AND c.user_id = $${pIdx}
      ORDER BY c.fsrs_reps ASC, c.fsrs_next_review ASC`, [...card_ids, req.userId!]);
 
   const result = await Promise.all(cards.map(async card => {

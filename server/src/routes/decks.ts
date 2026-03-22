@@ -13,11 +13,12 @@ const router = Router();
 router.get('/', async (req: AuthRequest, res: Response) => {
   const courseId = req.query.course_id as string | undefined;
 
-  let query = 'SELECT * FROM card_decks WHERE user_id = ?';
+  let query = 'SELECT * FROM card_decks WHERE user_id = $1';
   const params: unknown[] = [req.userId!];
+  let paramIdx = 2;
 
   if (courseId) {
-    query += ' AND course_id = ?';
+    query += ` AND course_id = $${paramIdx++}`;
     params.push(courseId);
   }
 
@@ -63,19 +64,20 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
 
     const fields: string[] = [];
     const values: unknown[] = [];
+    let paramIdx = 1;
 
-    if (data.name !== undefined) { fields.push('name = ?'); values.push(data.name); }
-    if (data.description !== undefined) { fields.push('description = ?'); values.push(data.description); }
+    if (data.name !== undefined) { fields.push(`name = $${paramIdx++}`); values.push(data.name); }
+    if (data.description !== undefined) { fields.push(`description = $${paramIdx++}`); values.push(data.description); }
 
     if (fields.length === 0) {
       throw new AppError(400, 'No fields to update');
     }
 
-    fields.push('updated_at = ?');
+    fields.push(`updated_at = $${paramIdx++}`);
     values.push(new Date().toISOString());
     values.push(req.params.id);
 
-    await execute(`UPDATE card_decks SET ${fields.join(', ')} WHERE id = $1`, [...values]);
+    await execute(`UPDATE card_decks SET ${fields.join(', ')} WHERE id = $${paramIdx}`, [...values]);
 
     const updated = await queryOne(`SELECT * FROM card_decks WHERE id = $1`, [req.params.id]);
     res.json(updated);

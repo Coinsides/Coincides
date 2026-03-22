@@ -187,20 +187,21 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
   const { label, type, start_time, end_time, color } = req.body;
   const fields: string[] = [];
   const values: unknown[] = [];
+  let paramIdx = 1;
 
-  if (label !== undefined) { fields.push('label = ?'); values.push(label); }
-  if (type !== undefined) { fields.push('type = ?'); values.push(type); }
-  if (start_time !== undefined) { fields.push('start_time = ?'); values.push(start_time); }
-  if (end_time !== undefined) { fields.push('end_time = ?'); values.push(end_time); }
-  if (color !== undefined) { fields.push('color = ?'); values.push(color); }
+  if (label !== undefined) { fields.push(`label = $${paramIdx++}`); values.push(label); }
+  if (type !== undefined) { fields.push(`type = $${paramIdx++}`); values.push(type); }
+  if (start_time !== undefined) { fields.push(`start_time = $${paramIdx++}`); values.push(start_time); }
+  if (end_time !== undefined) { fields.push(`end_time = $${paramIdx++}`); values.push(end_time); }
+  if (color !== undefined) { fields.push(`color = $${paramIdx++}`); values.push(color); }
 
   if (fields.length === 0) throw new AppError(400, 'No fields to update');
 
-  fields.push('updated_at = ?');
+  fields.push(`updated_at = $${paramIdx++}`);
   values.push(new Date().toISOString());
   values.push(req.params.id);
 
-  await execute(`UPDATE time_blocks SET ${fields.join(', ')} WHERE id = $1`, [...values]);
+  await execute(`UPDATE time_blocks SET ${fields.join(', ')} WHERE id = $${paramIdx}`, [...values]);
   const updated = await queryOne(`SELECT * FROM time_blocks WHERE id = $1`, [req.params.id]);
   res.json(updated);
 });

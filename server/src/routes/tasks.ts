@@ -27,19 +27,20 @@ async function verifyCourseBelongsToUser(courseId: string, userId: string): Prom
 router.get('/', async (req: AuthRequest, res: Response) => {
   const { date, from, to, course_id } = req.query;
 
-  let query = 'SELECT * FROM tasks WHERE user_id = ?';
+  let query = 'SELECT * FROM tasks WHERE user_id = $1';
   const params: unknown[] = [req.userId!];
+  let paramIdx = 2;
 
   if (date) {
-    query += ' AND date = ?';
+    query += ` AND date = $${paramIdx++}`;
     params.push(date);
   } else if (from && to) {
-    query += ' AND date >= ? AND date <= ?';
+    query += ` AND date >= $${paramIdx++} AND date <= $${paramIdx++}`;
     params.push(from, to);
   }
 
   if (course_id) {
-    query += ' AND course_id = ?';
+    query += ` AND course_id = $${paramIdx++}`;
     params.push(course_id);
   }
 
@@ -126,7 +127,8 @@ router.post('/batch', async (req: AuthRequest, res: Response) => {
       }
     });
 
-    const placeholders = ids.map(() => '?').join(',');
+    let batchIdx = 1;
+    const placeholders = ids.map(() => `$${batchIdx++}`).join(',');
     const tasks = await queryAll(`SELECT * FROM tasks WHERE id IN (${placeholders})`, [...ids]);
     res.status(201).json(tasks.map(parseTask));
   } catch (err) {
@@ -149,24 +151,25 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
 
     const fields: string[] = [];
     const values: unknown[] = [];
+    let paramIdx = 1;
 
-    if (data.title !== undefined) { fields.push('title = ?'); values.push(data.title); }
-    if (data.date !== undefined) { fields.push('date = ?'); values.push(data.date); }
-    if (data.priority !== undefined) { fields.push('priority = ?'); values.push(data.priority); }
-    if (data.order_index !== undefined) { fields.push('order_index = ?'); values.push(data.order_index); }
-    if (data.start_time !== undefined) { fields.push('start_time = ?'); values.push(data.start_time); }
-    if (data.end_time !== undefined) { fields.push('end_time = ?'); values.push(data.end_time); }
-    if (data.description !== undefined) { fields.push('description = ?'); values.push(data.description); }
-    if (data.checklist !== undefined) { fields.push('checklist = ?'); values.push(data.checklist ? JSON.stringify(data.checklist) : null); }
-    if (data.time_block_id !== undefined) { fields.push('time_block_id = ?'); values.push(data.time_block_id); }
+    if (data.title !== undefined) { fields.push(`title = $${paramIdx++}`); values.push(data.title); }
+    if (data.date !== undefined) { fields.push(`date = $${paramIdx++}`); values.push(data.date); }
+    if (data.priority !== undefined) { fields.push(`priority = $${paramIdx++}`); values.push(data.priority); }
+    if (data.order_index !== undefined) { fields.push(`order_index = $${paramIdx++}`); values.push(data.order_index); }
+    if (data.start_time !== undefined) { fields.push(`start_time = $${paramIdx++}`); values.push(data.start_time); }
+    if (data.end_time !== undefined) { fields.push(`end_time = $${paramIdx++}`); values.push(data.end_time); }
+    if (data.description !== undefined) { fields.push(`description = $${paramIdx++}`); values.push(data.description); }
+    if (data.checklist !== undefined) { fields.push(`checklist = $${paramIdx++}`); values.push(data.checklist ? JSON.stringify(data.checklist) : null); }
+    if (data.time_block_id !== undefined) { fields.push(`time_block_id = $${paramIdx++}`); values.push(data.time_block_id); }
 
     if (data.status !== undefined) {
-      fields.push('status = ?');
+      fields.push(`status = $${paramIdx++}`);
       values.push(data.status);
 
       // Auto-set completed_at when marking complete, clear when marking pending
       if (data.status === 'completed' && existing.status !== 'completed') {
-        fields.push('completed_at = ?');
+        fields.push(`completed_at = $${paramIdx++}`);
         values.push(new Date().toISOString());
 
         // Log activity
@@ -178,7 +181,7 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
           await execute(`UPDATE recurring_task_groups SET completed_tasks = completed_tasks + 1 WHERE id = $1`, [existing.recurring_group_id]);
         }
       } else if (data.status === 'pending' && existing.status === 'completed') {
-        fields.push('completed_at = ?');
+        fields.push(`completed_at = $${paramIdx++}`);
         values.push(null);
 
         if (existing.recurring_group_id) {
@@ -188,7 +191,7 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
     }
 
     if (data.completed_at !== undefined && data.status === undefined) {
-      fields.push('completed_at = ?');
+      fields.push(`completed_at = $${paramIdx++}`);
       values.push(data.completed_at);
     }
 
@@ -196,11 +199,11 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
       throw new AppError(400, 'No fields to update');
     }
 
-    fields.push('updated_at = ?');
+    fields.push(`updated_at = $${paramIdx++}`);
     values.push(new Date().toISOString());
     values.push(req.params.id);
 
-    await execute(`UPDATE tasks SET ${fields.join(', ')} WHERE id = $1`, [...values]);
+    await execute(`UPDATE tasks SET ${fields.join(', ')} WHERE id = $${paramIdx}`, [...values]);
 
     const updated = await queryOne(`SELECT * FROM tasks WHERE id = $1`, [req.params.id]);
     res.json(parseTask(updated));

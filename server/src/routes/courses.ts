@@ -55,23 +55,24 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
 
     const fields: string[] = [];
     const values: unknown[] = [];
+    let paramIdx = 1;
 
-    if (data.name !== undefined) { fields.push('name = ?'); values.push(data.name); }
-    if (data.code !== undefined) { fields.push('code = ?'); values.push(data.code); }
-    if (data.color !== undefined) { fields.push('color = ?'); values.push(data.color); }
-    if (data.weight !== undefined) { fields.push('weight = ?'); values.push(data.weight); }
-    if (data.description !== undefined) { fields.push('description = ?'); values.push(data.description); }
-    if (data.semester !== undefined) { fields.push('semester = ?'); values.push(data.semester); }
+    if (data.name !== undefined) { fields.push(`name = $${paramIdx++}`); values.push(data.name); }
+    if (data.code !== undefined) { fields.push(`code = $${paramIdx++}`); values.push(data.code); }
+    if (data.color !== undefined) { fields.push(`color = $${paramIdx++}`); values.push(data.color); }
+    if (data.weight !== undefined) { fields.push(`weight = $${paramIdx++}`); values.push(data.weight); }
+    if (data.description !== undefined) { fields.push(`description = $${paramIdx++}`); values.push(data.description); }
+    if (data.semester !== undefined) { fields.push(`semester = $${paramIdx++}`); values.push(data.semester); }
 
     if (fields.length === 0) {
       throw new AppError(400, 'No fields to update');
     }
 
-    fields.push('updated_at = ?');
+    fields.push(`updated_at = $${paramIdx++}`);
     values.push(new Date().toISOString());
     values.push(req.params.id);
 
-    await execute(`UPDATE courses SET ${fields.join(', ')} WHERE id = $1`, [...values]);
+    await execute(`UPDATE courses SET ${fields.join(', ')} WHERE id = $${paramIdx}`, [...values]);
 
     const updated = await queryOne(`SELECT * FROM courses WHERE id = $1`, [req.params.id]);
     res.json(updated);

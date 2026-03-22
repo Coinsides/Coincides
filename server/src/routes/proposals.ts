@@ -45,10 +45,11 @@ interface ProposalRow {
 // GET /api/proposals — list pending proposals
 router.get('/', async (req: AuthRequest, res: Response) => {
   const { status } = req.query;
-  let query = 'SELECT * FROM proposals WHERE user_id = ?';
+  let query = 'SELECT * FROM proposals WHERE user_id = $1';
   const params: unknown[] = [req.userId!];
+  let paramIdx = 2;
   if (status) {
-    query += ' AND status = ?';
+    query += ` AND status = $${paramIdx++}`;
     params.push(status);
   } else {
     query += " AND status = 'pending'";
@@ -184,14 +185,15 @@ router.post('/:id/apply', async (req: AuthRequest, res: Response) => {
           if (item.task_id) {
             const updates: string[] = [];
             const params: unknown[] = [];
-            if (item.title !== undefined) { updates.push('title = ?'); params.push(item.title); }
-            if (item.date !== undefined) { updates.push('date = ?'); params.push(item.date); }
-            if (item.priority !== undefined) { updates.push('priority = ?'); params.push(item.priority); }
-            if (item.status !== undefined) { updates.push('status = ?'); params.push(item.status); }
+            let pIdx = 1;
+            if (item.title !== undefined) { updates.push(`title = $${pIdx++}`); params.push(item.title); }
+            if (item.date !== undefined) { updates.push(`date = $${pIdx++}`); params.push(item.date); }
+            if (item.priority !== undefined) { updates.push(`priority = $${pIdx++}`); params.push(item.priority); }
+            if (item.status !== undefined) { updates.push(`status = $${pIdx++}`); params.push(item.status); }
             if (updates.length > 0) {
-              updates.push('updated_at = ?');
+              updates.push(`updated_at = $${pIdx++}`);
               params.push(now, item.task_id, req.userId!);
-              await execute(`UPDATE tasks SET ${updates.join(', ')} WHERE id = $1 AND user_id = $2`, [...params]);
+              await execute(`UPDATE tasks SET ${updates.join(', ')} WHERE id = $${pIdx++} AND user_id = $${pIdx}`, [...params]);
             }
           }
         }

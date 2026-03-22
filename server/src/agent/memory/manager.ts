@@ -117,10 +117,11 @@ export class MemoryManager {
       return await queryAll('SELECT id, category, content, created_at, last_accessed FROM agent_memories WHERE user_id = $1 ORDER BY relevance_score DESC, created_at DESC LIMIT $2', [this.userId, limit]);
     }
 
-    const conditions = words.map(() => 'LOWER(content) LIKE ?').join(' OR ');
+    let paramIdx = 2;
+    const conditions = words.map(() => `LOWER(content) LIKE $${paramIdx++}`).join(' OR ');
     const params: unknown[] = [this.userId, ...words.map((w) => `%${w}%`), limit];
 
-    const memories = await queryAll(`SELECT id, category, content, created_at, last_accessed FROM agent_memories WHERE user_id = $1 AND (${conditions}) ORDER BY relevance_score DESC, created_at DESC LIMIT $2`, [...params]) as AgentMemory[];
+    const memories = await queryAll(`SELECT id, category, content, created_at, last_accessed FROM agent_memories WHERE user_id = $1 AND (${conditions}) ORDER BY relevance_score DESC, created_at DESC LIMIT $${paramIdx}`, params) as AgentMemory[];
 
     // Update last_accessed
     const now = new Date().toISOString();
@@ -175,10 +176,11 @@ export class MemoryManager {
   }
 
   async getDocumentSummaries(courseId?: string): Promise<{ id: string; filename: string; summary: string }[]> {
-    let query = 'SELECT id, filename, summary FROM documents WHERE user_id = ? AND summary IS NOT NULL';
+    let query = 'SELECT id, filename, summary FROM documents WHERE user_id = $1 AND summary IS NOT NULL';
     const params: unknown[] = [this.userId];
+    let paramIdx = 2;
     if (courseId) {
-      query += ' AND course_id = ?';
+      query += ` AND course_id = $${paramIdx++}`;
       params.push(courseId);
     }
     query += ' LIMIT 10';

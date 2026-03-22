@@ -87,8 +87,9 @@ router.get('/:id/progress', async (req: AuthRequest, res: Response) => {
   // Get tasks from all descendant goals
   let descendantTasks: any[] = [];
   if (descendantIds.length > 0) {
-    const placeholders = descendantIds.map(() => '?').join(',');
-    descendantTasks = await queryAll(`SELECT id, status FROM tasks WHERE goal_id IN (${placeholders}) AND user_id = $1`, [...descendantIds, req.userId!]);
+    let pIdx = 1;
+    const placeholders = descendantIds.map(() => `$${pIdx++}`).join(',');
+    descendantTasks = await queryAll(`SELECT id, status FROM tasks WHERE goal_id IN (${placeholders}) AND user_id = $${pIdx}`, [...descendantIds, req.userId!]);
   }
 
   const allTasks = [...directTasks, ...descendantTasks];
@@ -199,23 +200,24 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
 
     const fields: string[] = [];
     const values: unknown[] = [];
+    let paramIdx = 1;
 
-    if (data.title !== undefined) { fields.push('title = ?'); values.push(data.title); }
-    if (data.description !== undefined) { fields.push('description = ?'); values.push(data.description); }
-    if (data.deadline !== undefined) { fields.push('deadline = ?'); values.push(data.deadline); }
-    if (data.status !== undefined) { fields.push('status = ?'); values.push(data.status); }
-    if (data.exam_mode !== undefined) { fields.push('exam_mode = ?'); values.push(data.exam_mode ? 1 : 0); }
-    if (data.parent_id !== undefined) { fields.push('parent_id = ?'); values.push(data.parent_id); }
+    if (data.title !== undefined) { fields.push(`title = $${paramIdx++}`); values.push(data.title); }
+    if (data.description !== undefined) { fields.push(`description = $${paramIdx++}`); values.push(data.description); }
+    if (data.deadline !== undefined) { fields.push(`deadline = $${paramIdx++}`); values.push(data.deadline); }
+    if (data.status !== undefined) { fields.push(`status = $${paramIdx++}`); values.push(data.status); }
+    if (data.exam_mode !== undefined) { fields.push(`exam_mode = $${paramIdx++}`); values.push(data.exam_mode ? true : false); }
+    if (data.parent_id !== undefined) { fields.push(`parent_id = $${paramIdx++}`); values.push(data.parent_id); }
 
     if (fields.length === 0) {
       throw new AppError(400, 'No fields to update');
     }
 
-    fields.push('updated_at = ?');
+    fields.push(`updated_at = $${paramIdx++}`);
     values.push(new Date().toISOString());
     values.push(req.params.id);
 
-    await execute(`UPDATE goals SET ${fields.join(', ')} WHERE id = $1`, [...values]);
+    await execute(`UPDATE goals SET ${fields.join(', ')} WHERE id = $${paramIdx}`, [...values]);
 
     const updated = await queryOne(`SELECT * FROM goals WHERE id = $1`, [req.params.id]);
     res.json(updated);
@@ -298,8 +300,9 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
 
   const deleteTransaction = await transaction(async (client) => {
     // Delete all tasks under these goals (task_cards cleaned via ON DELETE CASCADE on task_id)
-    const placeholders = allGoalIds.map(() => '?').join(',');
-    await execute(`DELETE FROM tasks WHERE goal_id IN (${placeholders}) AND user_id = $1`, [...allGoalIds, req.userId!]);
+    let delIdx = 1;
+    const placeholders = allGoalIds.map(() => `$${delIdx++}`).join(',');
+    await execute(`DELETE FROM tasks WHERE goal_id IN (${placeholders}) AND user_id = $${delIdx}`, [...allGoalIds, req.userId!]);
 
     // Delete the goal (sub-goals + goal_dependencies auto-cascade)
     await execute(`DELETE FROM goals WHERE id = $1`, [req.params.id]);

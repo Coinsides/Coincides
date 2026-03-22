@@ -45,27 +45,28 @@ router.get('/', async (req: AuthRequest, res: Response) => {
 
   let query = 'SELECT DISTINCT c.* FROM cards c';
   const params: unknown[] = [];
-  const conditions: string[] = ['c.deck_id = ?', 'c.user_id = ?'];
+  let paramIdx = 1;
+  const conditions: string[] = [`c.deck_id = $${paramIdx++}`, `c.user_id = $${paramIdx++}`];
   params.push(deck_id, req.userId!);
 
   if (tag_id) {
     query += ' INNER JOIN card_tags ct ON ct.card_id = c.id';
-    conditions.push('ct.tag_id = ?');
+    conditions.push(`ct.tag_id = $${paramIdx++}`);
     params.push(tag_id);
   }
 
   if (template_type) {
-    conditions.push('c.template_type = ?');
+    conditions.push(`c.template_type = $${paramIdx++}`);
     params.push(template_type);
   }
 
   if (importance) {
-    conditions.push('c.importance = ?');
+    conditions.push(`c.importance = $${paramIdx++}`);
     params.push(parseInt(importance, 10));
   }
 
   if (search) {
-    conditions.push('(c.title LIKE ? OR c.content LIKE ?)');
+    conditions.push(`(c.title LIKE $${paramIdx++} OR c.content LIKE $${paramIdx++})`);
     const pattern = `%${search}%`;
     params.push(pattern, pattern);
   }
@@ -193,18 +194,19 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
 
     const fields: string[] = [];
     const values: unknown[] = [];
+    let paramIdx = 1;
 
-    if (data.template_type !== undefined) { fields.push('template_type = ?'); values.push(data.template_type); }
-    if (data.title !== undefined) { fields.push('title = ?'); values.push(data.title); }
-    if (data.content !== undefined) { fields.push('content = ?'); values.push(JSON.stringify(data.content)); }
-    if (data.importance !== undefined) { fields.push('importance = ?'); values.push(data.importance); }
-    if (data.section_id !== undefined) { fields.push('section_id = ?'); values.push(data.section_id); }
+    if (data.template_type !== undefined) { fields.push(`template_type = $${paramIdx++}`); values.push(data.template_type); }
+    if (data.title !== undefined) { fields.push(`title = $${paramIdx++}`); values.push(data.title); }
+    if (data.content !== undefined) { fields.push(`content = $${paramIdx++}`); values.push(JSON.stringify(data.content)); }
+    if (data.importance !== undefined) { fields.push(`importance = $${paramIdx++}`); values.push(data.importance); }
+    if (data.section_id !== undefined) { fields.push(`section_id = $${paramIdx++}`); values.push(data.section_id); }
 
     if (fields.length > 0) {
-      fields.push('updated_at = ?');
+      fields.push(`updated_at = $${paramIdx++}`);
       values.push(new Date().toISOString());
       values.push(req.params.id);
-      await execute(`UPDATE cards SET ${fields.join(', ')} WHERE id = $1`, [...values]);
+      await execute(`UPDATE cards SET ${fields.join(', ')} WHERE id = $${paramIdx}`, [...values]);
     }
 
     // Update tags if provided

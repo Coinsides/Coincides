@@ -25,3 +25,39 @@
 2. Electron Node ABI ≠ 系统 Node ABI — native 模块（better-sqlite3）无法跨运行时加载
 3. jiti ESM hooks Windows bug — resolve()/load() 返回裸路径而非 file:// URL
 4. 架构不匹配 — 运行时 TS 编译 + ESM + native 模块的组合与 Electron 天然冲突
+
+## Step 2 — SQLite → PostgreSQL 迁移
+
+### Step 2a+2d — PostgreSQL 基础设施
+- 新增 `server/src/db/pool.ts`：PostgreSQL 连接池（query/queryOne/queryAll/execute/transaction）
+- 重写 `server/src/db/schema.sql`：转换为 PostgreSQL 语法（BOOLEAN, TIMESTAMPTZ, JSONB, GIN 索引等）
+- 重写 `server/src/db/init.ts`：PostgreSQL 初始化
+- 重写 `server/src/db/migrate.ts`：PostgreSQL 迁移机制，标记 SQLite 001-014 迁移为已应用
+- 新增 `server/src/db/migrations-pg/` 目录
+- 删除 `server/src/db/migrations/`（旧 SQLite 迁移）
+
+### Step 2b — 自动化 db.prepare() → pool 查询转换
+- 自动转换 411 处 `db.prepare().get()`/`.all()`/`.run()` 为 `queryOne()`/`queryAll()`/`execute()`
+- `?` 占位符 → `$1, $2, ...` 编号参数
+
+### Step 2c — 向量搜索 + 全文搜索适配
+- 重写 `vectorStore.ts`：FTS5 → tsvector/tsquery + GIN 索引
+- sqlite-vec → stubbed（pgvector 后续加入）
+- 移除 better-sqlite3 和 sqlite-vec npm 依赖
+
+### Step 2 后续修复
+- 修复 64 处 TypeScript 语法错误（自动转换遗漏）
+- 修复 96 处类型/语义错误（多轮修复）
+- 运行时修复：boolean 0/1 → TRUE/FALSE
+- 运行时修复：JSONB 字段 JSON.parse 移除（PostgreSQL 自动解析 JSONB）
+- 运行时修复：`goals.ts` 动态查询 `?` → `$N`
+- **全面修复动态 SQL 查询**：修复 69+ 处动态构建的 SQL 中遗留的 `?` 占位符
+  - 涉及 13 个文件：executor.ts, tasks.ts, goals.ts, courses.ts, cards.ts, timeBlocks.ts, review.ts, proposals.ts, decks.ts, sections.ts, tags.ts, manager.ts, scheduling.ts
+  - 三类问题：
+    1. `fields.push('col = ?')` → `fields.push(\`col = $\${paramIdx++}\`)`（动态 SET 子句）
+    2. `sql += ' AND col = ?'` → 带 `$N` 的模板字符串（动态 WHERE 条件）
+    3. `ids.map(() => '?')` → `ids.map(() => \`$\${idx++}\`)`（动态 IN 列表）
+  - 同时修复：单引号字符串内 `$${paramIdx++}` 无法插值的 bug（必须用反引号模板字符串）
+  - 修复 `WHERE id = $1` 与动态 SET 子句的参数编号冲突
+  - 修复 SQLite `date('now', '-7 days')` → PostgreSQL `CURRENT_DATE - INTERVAL '7 days'`
+  - 修复 `retrieveMemories` 中 LIKE 条件全部引用 `$1` 的逻辑错误

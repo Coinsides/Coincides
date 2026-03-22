@@ -64,6 +64,7 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
 
     const fields: string[] = [];
     const values: unknown[] = [];
+    let paramIdx = 1;
 
     if (data.name !== undefined) {
       // Check uniqueness of new name
@@ -71,17 +72,17 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
       if (duplicate) {
         throw new AppError(409, 'A tag with this name already exists');
       }
-      fields.push('name = ?');
+      fields.push(`name = $${paramIdx++}`);
       values.push(data.name);
     }
-    if (data.color !== undefined) { fields.push('color = ?'); values.push(data.color); }
+    if (data.color !== undefined) { fields.push(`color = $${paramIdx++}`); values.push(data.color); }
 
     if (fields.length === 0) {
       throw new AppError(400, 'No fields to update');
     }
 
     values.push(req.params.id);
-    await execute(`UPDATE tags SET ${fields.join(', ')} WHERE id = $1`, [...values]);
+    await execute(`UPDATE tags SET ${fields.join(', ')} WHERE id = $${paramIdx}`, [...values]);
 
     const updated = await queryOne(`SELECT * FROM tags WHERE id = $1`, [req.params.id]);
     res.json(updated);
