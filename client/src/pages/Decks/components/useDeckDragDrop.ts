@@ -23,7 +23,7 @@ interface UseDeckDragDropOptions {
   reorderSections: (deckId: string, order: string[]) => Promise<void>;
   fetchCards: (deckId: string) => void;
   fetchSections: (deckId: string) => void;
-  addToast: (type: string, msg: string) => void;
+  addToast: (type: 'error' | 'success' | 'info', msg: string) => void;
 }
 
 export default function useDeckDragDrop({
