@@ -6,6 +6,8 @@ import { sendMessageSchema, createConversationSchema } from '../validators/index
 import { ZodError } from 'zod';
 import { runAgent } from '../agent/orchestrator.js';
 
+import { execute, queryAll, queryOne } from '../db/pool.js';
+
 const router = Router();
 
 // GET /api/agent/conversations — list conversations

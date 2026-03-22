@@ -16,7 +16,7 @@ function parseTask(task: any): any {
   return task;
 }
 
-function verifyCourseBelongsToUser(courseId: string, userId: string): void {
+async function verifyCourseBelongsToUser(courseId: string, userId: string): void {
   const course = await queryOne(`SELECT id FROM courses WHERE id = $1 AND user_id = $2`, [courseId, userId]);
   if (!course) {
     throw new AppError(404, 'Course not found');

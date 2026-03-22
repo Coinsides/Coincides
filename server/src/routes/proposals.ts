@@ -6,7 +6,7 @@ import { updateProposalSchema } from '../validators/index.js';
 import { normalizeCardContent } from '../agent/tools/normalizeContent.js';
 import { ZodError } from 'zod';
 
-import { execute, queryAll, transaction } from '../db/pool.js';
+import { execute, queryAll, queryOne, transaction } from '../db/pool.js';
 
 const router = Router();
 

@@ -12,7 +12,7 @@ import { execute, queryAll, queryOne } from '../db/pool.js';
 const router = Router();
 const f = fsrs(generatorParameters());
 
-function getCardTags(cardId: unknown) {
+async function getCardTags(cardId: unknown) {
   return await queryAll(`SELECT t.* FROM tags t INNER JOIN card_tags ct ON ct.tag_id = t.id WHERE ct.card_id = $1`, [cardId]);
 }
 
@@ -64,10 +64,10 @@ router.get('/due', async (req: AuthRequest, res: Response) => {
 
   const cards = await queryAll(sql, params);
 
-  const result = cards.map(card => {
+  const result = await Promise.all(cards.map(async card => {
     parseCardContent(card);
     return { ...card, tags: await getCardTags(card.id) };
-  });
+  }));
 
   res.json(result);
 });
@@ -220,10 +220,10 @@ router.post('/custom', async (req: AuthRequest, res: Response) => {
      WHERE c.id IN (${placeholders}) AND c.user_id = $1
      ORDER BY c.fsrs_reps ASC, c.fsrs_next_review ASC`, [...card_ids, req.userId!]);
 
-  const result = cards.map(card => {
+  const result = await Promise.all(cards.map(async card => {
     parseCardContent(card);
     return { ...card, tags: await getCardTags(card.id) };
-  });
+  }));
 
   res.json(result);
 });

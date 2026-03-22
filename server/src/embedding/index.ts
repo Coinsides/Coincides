@@ -8,7 +8,7 @@ export type { EmbeddingProvider, EmbeddingConfig, SearchResult } from './types.j
  * Get the embedding provider based on user settings or env vars.
  * Returns null if no API key is available (graceful degradation).
  */
-export function getEmbeddingProvider(userId?: string): EmbeddingProvider | null {
+export async function getEmbeddingProvider(userId?: string): EmbeddingProvider | null {
   // Try user settings first
   if (userId) {
     try {

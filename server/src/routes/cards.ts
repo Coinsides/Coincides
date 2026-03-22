@@ -9,11 +9,11 @@ import { execute, queryAll, queryOne, transaction } from '../db/pool.js';
 
 const router = Router();
 
-function getCardTags(cardId: unknown) {
+async function getCardTags(cardId: unknown) {
   return await queryAll(`SELECT t.* FROM tags t INNER JOIN card_tags ct ON ct.tag_id = t.id WHERE ct.card_id = $1`, [cardId]);
 }
 
-function setCardTags(cardId: unknown, tagIds: string[]) {
+async function setCardTags(cardId: unknown, tagIds: string[]) {
   await execute(`DELETE FROM card_tags WHERE card_id = $1`, [cardId]);
   if (tagIds.length > 0) {
     for (const tagId of tagIds) {
@@ -74,10 +74,10 @@ router.get('/', async (req: AuthRequest, res: Response) => {
   const cards = await queryAll(query, params);
 
   // Attach tags to each card
-  const result = cards.map(card => {
+  const result = await Promise.all(cards.map(async card => {
     parseCardContent(card);
     return { ...card, tags: await getCardTags(card.id) };
-  });
+  }));
 
   res.json(result);
 });

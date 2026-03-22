@@ -23,7 +23,7 @@ interface DbMessage {
 export class MemoryManager {
   constructor(private userId: string) {}
 
-  getConversationHistory(conversationId: string, limit: number = 50): ProviderMessage[] {
+  async getConversationHistory(conversationId: string, limit: number = 50): ProviderMessage[] {
     const rows = await queryAll('SELECT role, content, tool_calls, tool_results FROM agent_messages WHERE conversation_id = $1 ORDER BY created_at DESC LIMIT $2', [conversationId, limit]);
 
     // Reverse to get chronological order
@@ -95,7 +95,7 @@ export class MemoryManager {
     return sanitized;
   }
 
-  saveMessage(
+  async saveMessage(
     conversationId: string,
     role: string,
     content: string,
@@ -131,7 +131,7 @@ export class MemoryManager {
     return memories;
   }
 
-  extractMemories(conversationId: string, userMessage: string, assistantResponse: string): void {
+  async extractMemories(conversationId: string, userMessage: string, assistantResponse: string): void {
     // Simple pattern matching for memory extraction from user messages
     const patterns = [
       /I prefer\s+(.+?)(?:\.|$)/i,
