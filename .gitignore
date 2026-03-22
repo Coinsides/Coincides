@@ -30,9 +30,3 @@ server/uploads/
 *.log
 npm-debug.log*
 
-# Electron
-dist-electron/
-release/
-*.exe
-*.dmg
-*.AppImage

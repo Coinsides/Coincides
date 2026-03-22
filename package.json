@@ -5,7 +5,6 @@
   "description": "Coincides — AI-Powered Learning System for STEM Students",
   "author": "Coincides",
   "license": "MIT",
-  "main": "dist-electron/main.js",
   "engines": {
     "node": ">=22.0.0"
   },
@@ -15,74 +14,9 @@
     "dev:client": "cd client && npm run dev",
     "dev:all": "npm run dev:server & npm run dev:client",
     "build": "cd server && npm run build",
-    "start": "cd server && npm run start",
-    "install:all": "npm install && cd server && npm install && cd ../client && npm install",
-    "setup": "npm run install:all",
     "build:client": "cd client && npm run build",
-    "build:electron": "tsc -p electron/tsconfig.json",
-    "build:all": "npm run build:client && npm run build:electron",
-    "electron:dev": "npm run patch:jiti && npm run build:electron && electron .",
-    "electron:pack": "npm run patch:jiti && npm run build:all && electron-builder --dir",
-    "electron:dist": "npm run patch:jiti && npm run build:all && electron-builder",
-    "postinstall": "electron-builder install-app-deps",
-    "patch:jiti": "node scripts/patch-jiti-windows.cjs"
-  },
-  "build": {
-    "appId": "com.coincides.app",
-    "productName": "Coincides",
-    "copyright": "Copyright © 2026 Coincides",
-    "asar": false,
-    "directories": {
-      "output": "release"
-    },
-    "files": [
-      "dist-electron/**/*",
-      "electron/server-loader.cjs",
-      "client/dist/**/*",
-      "server/src/**/*",
-      "server/package.json",
-      "server/node_modules/**/*",
-      "shared/**/*",
-      "package.json"
-    ],
-    "win": {
-      "target": [
-        {
-          "target": "nsis",
-          "arch": ["x64"]
-        }
-      ],
-      "icon": "assets/icon.ico"
-    },
-    "mac": {
-      "target": ["dmg"],
-      "icon": "assets/icon.icns",
-      "category": "public.app-category.education"
-    },
-    "linux": {
-      "target": ["AppImage"],
-      "icon": "assets/icon.png",
-      "category": "Education"
-    },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true
-    },
-    "publish": {
-      "provider": "github",
-      "owner": "Coinsides",
-      "repo": "Coincides"
-    }
-  },
-  "devDependencies": {
-    "electron": "^33.0.0",
-    "electron-builder": "^25.0.0",
-    "typescript": "^5.7.0"
-  },
-  "dependencies": {
-    "electron-updater": "^6.3.0"
+    "start": "cd server && npm run start",
+    "install:all": "cd server && npm install && cd ../client && npm install",
+    "setup": "npm run install:all"
   }
 }
