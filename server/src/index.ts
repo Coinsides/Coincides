@@ -100,10 +100,10 @@ const server = app.listen(PORT, '0.0.0.0', () => {
 });
 
 // Graceful shutdown
-function shutdown() {
+async function shutdown() {
   console.log('\nShutting down...');
-  server.close(() => {
-    closeDb();
+  server.close(async () => {
+    await closeDb();
     process.exit(0);
   });
 }

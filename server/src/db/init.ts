@@ -1,181 +1,92 @@
-import Database from 'better-sqlite3';
+/**
+ * Database Initialization for PostgreSQL
+ * 
+ * Connects to PostgreSQL, runs schema creation, migrations, and seeds.
+ * Called once during server startup.
+ */
+
 import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
-import * as sqliteVec from 'sqlite-vec';
+import { initPool, getPool, query, transaction, closePool } from './pool.js';
 import { runMigrations } from './migrate.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-let db: Database.Database;
+/**
+ * Initialize the database: connect, create schema, run migrations, seed data.
+ */
+export async function initDb(): Promise<void> {
+  // Initialize connection pool
+  const databaseUrl = process.env.DATABASE_URL;
+  initPool(databaseUrl);
 
-const SYSTEM_TAGS = ['Definition', 'Theorem', 'Formula', 'Important', 'Exam-relevant'];
-
-export function getDb(): Database.Database {
-  if (!db) {
-    throw new Error('Database not initialized. Call initDb() first.');
+  // Test connection
+  try {
+    const result = await query('SELECT NOW() AS now');
+    console.log(`PostgreSQL connected: ${result.rows[0].now}`);
+  } catch (err: any) {
+    console.error('Failed to connect to PostgreSQL:', err.message);
+    throw err;
   }
-  return db;
-}
-
-export async function initDb(dbPath?: string): Promise<Database.Database> {
-  const resolvedPath = dbPath || process.env.DB_PATH || join(__dirname, '..', '..', 'coincides.db');
-
-  db = new Database(resolvedPath);
-
-  // Enable WAL mode for better concurrent performance
-  db.pragma('journal_mode = WAL');
-  db.pragma('foreign_keys = ON');
 
   // Run base schema (CREATE TABLE IF NOT EXISTS — safe to re-run)
   const schemaPath = join(__dirname, 'schema.sql');
-  const schema = readFileSync(schemaPath, 'utf-8');
+  const rawSchema = readFileSync(schemaPath, 'utf-8');
+
+  // Strip SQL comments, then split on semicolons
+  const schema = rawSchema
+    .split('\n')
+    .filter(line => !line.trim().startsWith('--'))
+    .join('\n');
 
   const statements = schema
     .split(';')
     .map(s => s.trim())
-    .filter(s => s.length > 0 && !s.startsWith('PRAGMA'));
+    .filter(s => s.length > 0);
 
   for (const stmt of statements) {
-    db.exec(stmt + ';');
-  }
-
-  // Load sqlite-vec extension for vector storage
-  try {
-    sqliteVec.load(db);
-    const { vec_version } = db.prepare('SELECT vec_version() AS vec_version').get() as any;
-    console.log(`sqlite-vec loaded: v${vec_version}`);
-  } catch (err) {
-    console.warn('Failed to load sqlite-vec extension:', err);
-  }
-
-  // Create vec0 virtual tables (must be after sqliteVec.load)
-  try {
-    db.exec(`
-      CREATE VIRTUAL TABLE IF NOT EXISTS doc_chunk_vec USING vec0(
-        chunk_id TEXT PRIMARY KEY,
-        embedding float[1024]
-      )
-    `);
-  } catch (_e) {
-    // Table already exists or vec0 not available — ignore
-  }
-
-  try {
-    db.exec(`
-      CREATE VIRTUAL TABLE IF NOT EXISTS agent_memory_vec USING vec0(
-        memory_id TEXT PRIMARY KEY,
-        embedding float[1024]
-      )
-    `);
-  } catch (_e) {
-    // Table already exists or vec0 not available — ignore
-  }
-
-  // FTS5 full-text search virtual tables
-  try {
-    db.exec(`
-      CREATE VIRTUAL TABLE IF NOT EXISTS document_chunks_fts USING fts5(
-        content,
-        content='document_chunks',
-        content_rowid='rowid'
-      )
-    `);
-  } catch (_e) { /* already exists */ }
-
-  try {
-    db.exec(`
-      CREATE VIRTUAL TABLE IF NOT EXISTS agent_memories_fts USING fts5(
-        content,
-        content='agent_memories',
-        content_rowid='rowid'
-      )
-    `);
-  } catch (_e) { /* already exists */ }
-
-  // FTS5 sync triggers for document_chunks
-  try {
-    db.exec(`
-      CREATE TRIGGER IF NOT EXISTS document_chunks_ai AFTER INSERT ON document_chunks BEGIN
-        INSERT INTO document_chunks_fts(rowid, content) VALUES (new.rowid, new.content);
-      END
-    `);
-    db.exec(`
-      CREATE TRIGGER IF NOT EXISTS document_chunks_ad AFTER DELETE ON document_chunks BEGIN
-        INSERT INTO document_chunks_fts(document_chunks_fts, rowid, content) VALUES('delete', old.rowid, old.content);
-      END
-    `);
-    db.exec(`
-      CREATE TRIGGER IF NOT EXISTS document_chunks_au AFTER UPDATE ON document_chunks BEGIN
-        INSERT INTO document_chunks_fts(document_chunks_fts, rowid, content) VALUES('delete', old.rowid, old.content);
-        INSERT INTO document_chunks_fts(rowid, content) VALUES (new.rowid, new.content);
-      END
-    `);
-  } catch (_e) { /* triggers already exist */ }
-
-  // FTS5 sync triggers for agent_memories
-  try {
-    db.exec(`
-      CREATE TRIGGER IF NOT EXISTS agent_memories_ai AFTER INSERT ON agent_memories BEGIN
-        INSERT INTO agent_memories_fts(rowid, content) VALUES (new.rowid, new.content);
-      END
-    `);
-    db.exec(`
-      CREATE TRIGGER IF NOT EXISTS agent_memories_ad AFTER DELETE ON agent_memories BEGIN
-        INSERT INTO agent_memories_fts(agent_memories_fts, rowid, content) VALUES('delete', old.rowid, old.content);
-      END
-    `);
-    db.exec(`
-      CREATE TRIGGER IF NOT EXISTS agent_memories_au AFTER UPDATE ON agent_memories BEGIN
-        INSERT INTO agent_memories_fts(agent_memories_fts, rowid, content) VALUES('delete', old.rowid, old.content);
-        INSERT INTO agent_memories_fts(rowid, content) VALUES (new.rowid, new.content);
-      END
-    `);
-  } catch (_e) { /* triggers already exist */ }
-
-  // Backfill FTS5 index from existing data (idempotent)
-  try {
-    const ftsChunkCount = (db.prepare('SELECT COUNT(*) AS cnt FROM document_chunks_fts').get() as any)?.cnt || 0;
-    const chunkCount = (db.prepare('SELECT COUNT(*) AS cnt FROM document_chunks').get() as any)?.cnt || 0;
-    if (ftsChunkCount < chunkCount) {
-      db.exec('INSERT INTO document_chunks_fts(document_chunks_fts) VALUES(\'rebuild\')');
+    try {
+      await query(stmt);
+    } catch (err: any) {
+      // Ignore "already exists" errors for indexes/tables
+      if (!err.message.includes('already exists')) {
+        console.error(`Schema statement failed: ${stmt.substring(0, 80)}...`);
+        throw err;
+      }
     }
-  } catch (_e) { /* ignore */ }
+  }
 
-  try {
-    const ftsMemCount = (db.prepare('SELECT COUNT(*) AS cnt FROM agent_memories_fts').get() as any)?.cnt || 0;
-    const memCount = (db.prepare('SELECT COUNT(*) AS cnt FROM agent_memories').get() as any)?.cnt || 0;
-    if (ftsMemCount < memCount) {
-      db.exec('INSERT INTO agent_memories_fts(agent_memories_fts) VALUES(\'rebuild\')');
-    }
-  } catch (_e) { /* ignore */ }
+  // Run versioned migrations
+  await runMigrations();
 
-  // Run versioned migrations (handles all schema evolution from v1.1+)
-  await runMigrations(db);
+  // Seed system data
+  await seedStudyTemplates();
 
-  // Seed system study templates
-  seedStudyTemplates();
-
-  return db;
+  console.log('Database initialization complete.');
 }
 
-export function seedSystemTags(userId: string): void {
-  const db = getDb();
-  const insert = db.prepare(
-    'INSERT OR IGNORE INTO tags (id, user_id, name, is_system, created_at) VALUES (?, ?, ?, 1, datetime(\'now\'))'
-  );
+/**
+ * Seed system tags for a new user.
+ */
+const SYSTEM_TAGS = ['Definition', 'Theorem', 'Formula', 'Important', 'Exam-relevant'];
 
-  const insertMany = db.transaction((tags: string[]) => {
-    for (const tag of tags) {
-      insert.run(uuidv4(), userId, tag);
-    }
-  });
-
-  insertMany(SYSTEM_TAGS);
+export async function seedSystemTags(userId: string): Promise<void> {
+  for (const tag of SYSTEM_TAGS) {
+    await query(
+      `INSERT INTO tags (id, user_id, name, is_system, created_at)
+       VALUES ($1, $2, $3, TRUE, NOW())
+       ON CONFLICT (user_id, name) DO NOTHING`,
+      [uuidv4(), userId, tag]
+    );
+  }
 }
 
+/**
+ * Seed system study templates.
+ */
 const SYSTEM_TEMPLATES = [
   {
     name: 'Spaced Repetition',
@@ -228,24 +139,20 @@ const SYSTEM_TEMPLATES = [
   },
 ];
 
-function seedStudyTemplates(): void {
-  const database = getDb();
-  const insert = database.prepare(
-    `INSERT OR IGNORE INTO study_mode_templates (id, user_id, name, slug, description, strategy, is_system, config, created_at)
-     VALUES (?, NULL, ?, ?, ?, ?, 1, ?, datetime('now'))`
-  );
-
-  const insertMany = database.transaction((templates: typeof SYSTEM_TEMPLATES) => {
-    for (const t of templates) {
-      insert.run(uuidv4(), t.name, t.slug, t.description, t.strategy, JSON.stringify(t.config));
-    }
-  });
-
-  insertMany(SYSTEM_TEMPLATES);
+async function seedStudyTemplates(): Promise<void> {
+  for (const t of SYSTEM_TEMPLATES) {
+    await query(
+      `INSERT INTO study_mode_templates (id, user_id, name, slug, description, strategy, is_system, config, created_at)
+       VALUES ($1, NULL, $2, $3, $4, $5, TRUE, $6, NOW())
+       ON CONFLICT DO NOTHING`,
+      [uuidv4(), t.name, t.slug, t.description, t.strategy, JSON.stringify(t.config)]
+    );
+  }
 }
 
-export function closeDb(): void {
-  if (db) {
-    db.close();
-  }
+/**
+ * Close the database connection pool.
+ */
+export async function closeDb(): Promise<void> {
+  await closePool();
 }

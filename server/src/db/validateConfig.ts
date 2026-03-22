@@ -14,6 +14,11 @@ interface ConfigRule {
 
 const CONFIG_RULES: ConfigRule[] = [
   {
+    key: 'DATABASE_URL',
+    required: true,
+    description: 'PostgreSQL connection string. Example: postgresql://user:password@localhost:5432/coincides',
+  },
+  {
     key: 'ANTHROPIC_API_KEY',
     required: false,
     description: 'Anthropic API key for AI chat and document OCR. Can also be set in user Settings.',
@@ -21,7 +26,7 @@ const CONFIG_RULES: ConfigRule[] = [
   {
     key: 'VOYAGE_API_KEY',
     required: false,
-    description: 'Voyage AI API key for semantic embedding. Without it, search degrades to FTS5 + LIKE.',
+    description: 'Voyage AI API key for semantic embedding. Without it, search degrades to full-text search.',
   },
 ];
 
