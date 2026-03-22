@@ -36,6 +36,7 @@
     },
     "files": [
       "dist-electron/**/*",
+      "electron/server-loader.cjs",
       "client/dist/**/*",
       "server/src/**/*",
       "server/package.json",

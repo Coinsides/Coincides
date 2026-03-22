@@ -16,6 +16,7 @@ const appRoot = app.isPackaged
 
 const serverDir = join(appRoot, 'server');
 const serverEntry = join(serverDir, 'src', 'index.ts');
+const serverLoader = join(appRoot, 'electron', 'server-loader.cjs');
 
 // ── Data Directory ──────────────────────────────────────────
 const userDataPath = app.getPath('userData');
@@ -60,6 +61,7 @@ if (existsSync(serverEnvPath)) {
 
 console.log(`[Electron] Packaged: ${app.isPackaged}`);
 console.log(`[Electron] App root: ${appRoot}`);
+console.log(`[Electron] Server loader: ${serverLoader}`);
 console.log(`[Electron] Server entry: ${serverEntry}`);
 console.log(`[Electron] Database: ${DB_PATH}`);
 
@@ -70,6 +72,14 @@ let serverProcess: ChildProcess | null = null;
 
 function startServer(): Promise<void> {
   return new Promise((resolve, reject) => {
+    if (!existsSync(serverLoader)) {
+      const msg = `Server loader not found: ${serverLoader}`;
+      console.error(`[Electron] ${msg}`);
+      dialog.showErrorBox('Coincides', msg);
+      reject(new Error(msg));
+      return;
+    }
+
     if (!existsSync(serverEntry)) {
       const msg = `Server entry not found: ${serverEntry}`;
       console.error(`[Electron] ${msg}`);
@@ -78,17 +88,14 @@ function startServer(): Promise<void> {
       return;
     }
 
-    // Use spawn with explicit node and jiti register path
-    const jitiRegister = join(serverDir, 'node_modules', 'jiti', 'register.cjs');
     const nodeExecutable = process.execPath; // Electron's bundled Node
 
     console.log(`[Electron] Node: ${nodeExecutable}`);
-    console.log(`[Electron] Jiti: ${jitiRegister} (exists: ${existsSync(jitiRegister)})`);
+    console.log(`[Electron] Server loader: ${serverLoader} (exists: ${existsSync(serverLoader)})`);
 
-    // Use --require instead of --import for CJS compatibility
+    // Use our CJS loader that bootstraps jiti to run TypeScript directly
     serverProcess = spawn(nodeExecutable, [
-      '--require', jitiRegister,
-      serverEntry,
+      serverLoader,
     ], {
       cwd: serverDir,
       env: {

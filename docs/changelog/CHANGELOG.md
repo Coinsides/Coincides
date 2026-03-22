@@ -8,6 +8,7 @@
 
 | 版本 | 文件 | 说明 |
 |------|------|------|
+| v1.8 | [CHANGELOG-v1.8.md](../releases/CHANGELOG-v1.8.md) | Electron 桌面应用打包：主进程 + jiti loader + electron-builder |
 | v1.7.1 | [CHANGELOG-v1.7.md](../releases/CHANGELOG-v1.7.md) | Agent 效率深度优化：并行执行 + Playbook + Context 预注入 |
 | v1.3.1 | [CHANGELOG-v1.3.1.md](../releases/CHANGELOG-v1.3.1.md) | 补丁版本：3 个 bug 修复 + Windows 兼容性 + Agent 稳定性 |
 | v1.3 | [CHANGELOG-v1.3.md](../releases/CHANGELOG-v1.3.md) | Time Block + AI 排期 + L1 入驻流 + 设计宪法审计 |
