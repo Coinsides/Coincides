@@ -1,10 +1,11 @@
-import { getDb } from '../db/init.js';
 import { getProviderFromSettings } from './providers/index.js';
 import type { ProviderMessage, StreamChunk, ToolCall, ToolResult, ContentBlock } from './providers/types.js';
 import { toolDefinitions } from './tools/definitions.js';
 import { executeTool } from './tools/executor.js';
 import { MemoryManager } from './memory/manager.js';
 import { buildSystemPrompt } from './system-prompt.js';
+
+import { queryAll, queryOne } from '../db/pool.js';
 
 const MAX_TOOL_ROUNDS = 8;
 
@@ -31,11 +32,10 @@ export async function* runAgent(
   contextHint?: { type: string; data?: unknown },
   image?: { media_type: string; data: string },
 ): AsyncGenerator<StreamChunk> {
-  const db = getDb();
   const memory = new MemoryManager(userId);
 
   // 1. Get user settings, build provider
-  const user = db.prepare('SELECT id, name, settings FROM users WHERE id = ?').get(userId) as UserRow | undefined;
+  const user = await queryOne(`SELECT id, name, settings FROM users WHERE id = $1`, [userId]) | undefined;
   if (!user) {
     yield { type: 'error', error: 'User not found' };
     return;
@@ -62,23 +62,17 @@ export async function* runAgent(
   const agentName = (settings.agent_name as string) || 'Mr. Zero';
 
   // 2. Build context
-  const courses = db.prepare('SELECT id, name, code FROM courses WHERE user_id = ?').all(userId) as CourseRow[];
+  const courses = await queryAll(`SELECT id, name, code FROM courses WHERE user_id = $1`, [userId]);
   const memories = memory.retrieveMemories(userMessage);
   const docSummaries = memory.getDocumentSummaries();
   const today = new Date().toISOString().split('T')[0];
-  const energyStatus = db.prepare(
-    'SELECT energy_level FROM daily_statuses WHERE user_id = ? AND date = ?',
-  ).get(userId, today) as EnergyRow | undefined;
+  const energyStatus = await queryOne('SELECT energy_level FROM daily_statuses WHERE user_id = $1 AND date = $2', [userId, today]);
 
   // Pre-load decks with their sections to reduce tool call rounds
-  const decks = db.prepare(
-    'SELECT d.id, d.name, d.course_id, d.card_count FROM card_decks d WHERE d.user_id = ? ORDER BY d.name',
-  ).all(userId) as { id: string; name: string; course_id: string; card_count: number }[];
+  const decks = await queryAll('SELECT d.id, d.name, d.course_id, d.card_count FROM card_decks d WHERE d.user_id = $1 ORDER BY d.name', [userId]); name: string; course_id: string; card_count: number }[];
   const deckSections = new Map<string, { id: string; name: string }[]>();
   if (decks.length > 0) {
-    const sections = db.prepare(
-      `SELECT id, deck_id, name FROM card_sections WHERE user_id = ? ORDER BY order_index`,
-    ).all(userId) as { id: string; deck_id: string; name: string }[];
+    const sections = await queryAll(`SELECT id, deck_id, name FROM card_sections WHERE user_id = $1 ORDER BY order_index`, [userId]) as { id: string; deck_id: string; name: string }[];
     for (const s of sections) {
       if (!deckSections.has(s.deck_id)) deckSections.set(s.deck_id, []);
       deckSections.get(s.deck_id)!.push({ id: s.id, name: s.name });

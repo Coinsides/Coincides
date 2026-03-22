@@ -1,6 +1,6 @@
 import type { EmbeddingProvider, EmbeddingConfig } from './types.js';
 import { VoyageProvider } from './voyage.js';
-import { getDb } from '../db/init.js';
+import { queryOne } from '../db/pool.js';
 
 export type { EmbeddingProvider, EmbeddingConfig, SearchResult } from './types.js';
 
@@ -12,8 +12,7 @@ export function getEmbeddingProvider(userId?: string): EmbeddingProvider | null 
   // Try user settings first
   if (userId) {
     try {
-      const db = getDb();
-      const user = db.prepare('SELECT settings FROM users WHERE id = ?').get(userId) as { settings: string } | undefined;
+      const user = await queryOne(`SELECT settings FROM users WHERE id = $1`, [userId])as { settings: string } | undefined;
       if (user?.settings) {
         const settings = JSON.parse(user.settings);
         const config = getConfigFromSettings(settings);

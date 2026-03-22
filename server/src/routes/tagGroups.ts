@@ -1,70 +1,58 @@
 import { Router, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { createTagGroupSchema, updateTagGroupSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
 
+import { execute, queryAll, queryOne } from '../db/pool.js';
+
 const router = Router();
 
 // GET /api/tag-groups?course_id=xxx
-router.get('/', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.get('/', async (req: AuthRequest, res: Response) => {
   const courseId = req.query.course_id as string | undefined;
 
   if (!courseId) {
     throw new AppError(400, 'course_id query parameter is required');
   }
 
-  const groups = db.prepare(
-    'SELECT * FROM tag_groups WHERE course_id = ? AND user_id = ? ORDER BY order_index ASC, name ASC'
-  ).all(courseId, req.userId!) as any[];
+  const groups = await queryAll(`SELECT * FROM tag_groups WHERE course_id = $1 AND user_id = $2 ORDER BY order_index ASC, name ASC`, [courseId, req.userId!]);
 
   // Fetch tags for each group
-  const tagStmt = db.prepare(
-    'SELECT id, name, color, tag_group_id FROM tags WHERE tag_group_id = ? AND user_id = ? ORDER BY name ASC'
-  );
-
   const result = groups.map((group) => ({
     ...group,
-    tags: tagStmt.all(group.id, req.userId!),
+    tags: await queryAll(`SELECT id, name, color, tag_group_id FROM tags WHERE tag_group_id = $1 AND user_id = $2 ORDER BY name ASC`, [group.id, req.userId!]),
   }));
 
   res.json({ tag_groups: result });
 });
 
 // POST /api/tag-groups
-router.post('/', (req: AuthRequest, res: Response) => {
+router.post('/', async (req: AuthRequest, res: Response) => {
   try {
     const data = createTagGroupSchema.parse(req.body);
-    const db = getDb();
-
     // Verify course belongs to user
-    const course = db.prepare('SELECT id FROM courses WHERE id = ? AND user_id = ?').get(data.course_id, req.userId!);
+    const course = await queryOne(`SELECT id FROM courses WHERE id = $1 AND user_id = $2`, [data.course_id, req.userId!]);
     if (!course) {
       throw new AppError(404, 'Course not found');
     }
 
     // Check uniqueness within course
-    const existing = db.prepare('SELECT id FROM tag_groups WHERE course_id = ? AND name = ?').get(data.course_id, data.name);
+    const existing = await queryOne(`SELECT id FROM tag_groups WHERE course_id = $1 AND name = $2`, [data.course_id, data.name]);
     if (existing) {
       throw new AppError(409, 'A tag group with this name already exists in this course');
     }
 
     // Get next order_index
-    const maxOrder = db.prepare(
-      'SELECT COALESCE(MAX(order_index), -1) as max_idx FROM tag_groups WHERE course_id = ?'
-    ).get(data.course_id) as any;
+    const maxOrder = await queryOne(`SELECT COALESCE(MAX(order_index), -1) as max_idx FROM tag_groups WHERE course_id = $1`, [data.course_id]);
 
     const id = uuidv4();
     const now = new Date().toISOString();
 
-    db.prepare(
-      'INSERT INTO tag_groups (id, course_id, user_id, name, order_index, created_at) VALUES (?, ?, ?, ?, ?, ?)'
-    ).run(id, data.course_id, req.userId!, data.name, (maxOrder?.max_idx ?? -1) + 1, now);
+    await execute(`INSERT INTO tag_groups (id, course_id, user_id, name, order_index, created_at) VALUES ($1, $2, $3, $4, $5, $6)`, [id, data.course_id, req.userId!, data.name, (maxOrder?.max_idx ?? -1]) + 1, now);
 
-    const created = db.prepare('SELECT * FROM tag_groups WHERE id = ?').get(id);
+    const created = await queryOne(`SELECT * FROM tag_groups WHERE id = $1`, [id]);
     res.status(201).json(created);
   } catch (err) {
     if (err instanceof ZodError) {
@@ -76,27 +64,23 @@ router.post('/', (req: AuthRequest, res: Response) => {
 });
 
 // PUT /api/tag-groups/:id
-router.put('/:id', (req: AuthRequest, res: Response) => {
+router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const data = updateTagGroupSchema.parse(req.body);
-    const db = getDb();
-
-    const existing = db.prepare('SELECT * FROM tag_groups WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!) as any;
+    const existing = await queryOne(`SELECT * FROM tag_groups WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
     if (!existing) {
       throw new AppError(404, 'Tag group not found');
     }
 
     // Check name uniqueness within course
-    const duplicate = db.prepare(
-      'SELECT id FROM tag_groups WHERE course_id = ? AND name = ? AND id != ?'
-    ).get(existing.course_id, data.name, req.params.id);
+    const duplicate = await queryOne(`SELECT id FROM tag_groups WHERE course_id = $1 AND name = $2 AND id != $3`, [existing.course_id, data.name, req.params.id]);
     if (duplicate) {
       throw new AppError(409, 'A tag group with this name already exists in this course');
     }
 
-    db.prepare('UPDATE tag_groups SET name = ? WHERE id = ?').run(data.name, req.params.id);
+    await execute(`UPDATE tag_groups SET name = $1 WHERE id = $2`, [data.name, req.params.id]);
 
-    const updated = db.prepare('SELECT * FROM tag_groups WHERE id = ?').get(req.params.id);
+    const updated = await queryOne(`SELECT * FROM tag_groups WHERE id = $1`, [req.params.id]);
     res.json(updated);
   } catch (err) {
     if (err instanceof ZodError) {
@@ -108,16 +92,14 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
 });
 
 // DELETE /api/tag-groups/:id
-router.delete('/:id', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-
-  const existing = db.prepare('SELECT * FROM tag_groups WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!);
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
+  const existing = await queryOne(`SELECT * FROM tag_groups WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
   if (!existing) {
     throw new AppError(404, 'Tag group not found');
   }
 
   // CASCADE handles tags and card_tags cleanup
-  db.prepare('DELETE FROM tag_groups WHERE id = ?').run(req.params.id);
+  await execute(`DELETE FROM tag_groups WHERE id = $1`, [req.params.id]);
 
   res.json({ message: 'Tag group deleted' });
 });

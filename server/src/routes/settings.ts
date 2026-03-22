@@ -1,16 +1,16 @@
 import { Router, Response } from 'express';
-import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { updateSettingsSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
 
+import { execute, queryOne } from '../db/pool.js';
+
 const router = Router();
 
 // GET /api/settings
-router.get('/', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const user = db.prepare('SELECT settings FROM users WHERE id = ?').get(req.userId!) as any;
+router.get('/', async (req: AuthRequest, res: Response) => {
+  const user = await queryOne(`SELECT settings FROM users WHERE id = $1`, [req.userId!]);
 
   if (!user) {
     throw new AppError(404, 'User not found');
@@ -20,12 +20,10 @@ router.get('/', (req: AuthRequest, res: Response) => {
 });
 
 // PUT /api/settings
-router.put('/', (req: AuthRequest, res: Response) => {
+router.put('/', async (req: AuthRequest, res: Response) => {
   try {
     const data = updateSettingsSchema.parse(req.body);
-    const db = getDb();
-
-    const user = db.prepare('SELECT settings FROM users WHERE id = ?').get(req.userId!) as any;
+    const user = await queryOne(`SELECT settings FROM users WHERE id = $1`, [req.userId!]);
     if (!user) {
       throw new AppError(404, 'User not found');
     }
@@ -35,8 +33,7 @@ router.put('/', (req: AuthRequest, res: Response) => {
     const mergedSettings = { ...currentSettings, ...data.settings };
 
     const now = new Date().toISOString();
-    db.prepare('UPDATE users SET settings = ?, updated_at = ? WHERE id = ?').run(
-      JSON.stringify(mergedSettings),
+    await execute(`UPDATE users SET settings = $1, updated_at = $2 WHERE id = $3`, [JSON.stringify(mergedSettings]),
       now,
       req.userId!
     );
@@ -52,10 +49,9 @@ router.put('/', (req: AuthRequest, res: Response) => {
 });
 
 // PUT /api/settings/onboarding-complete
-router.put('/onboarding-complete', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.put('/onboarding-complete', async (req: AuthRequest, res: Response) => {
   const now = new Date().toISOString();
-  db.prepare('UPDATE users SET onboarding_completed = 1, updated_at = ? WHERE id = ?').run(now, req.userId!);
+  await execute(`UPDATE users SET onboarding_completed = 1, updated_at = $1 WHERE id = $2`, [now, req.userId!]);
   res.json({ onboarding_completed: true });
 });
 

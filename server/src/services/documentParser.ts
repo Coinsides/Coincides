@@ -6,9 +6,10 @@ const pdfParse = (pdfParseModule as any).default || pdfParseModule;
 import { PDFDocument } from 'pdf-lib';
 import * as mammoth from 'mammoth';
 import * as XLSX from 'xlsx';
-import { getDb } from '../db/init.js';
 import { getEmbeddingProvider } from '../embedding/index.js';
 import { VectorStore } from '../embedding/vectorStore.js';
+
+import { execute, queryOne, transaction } from '../db/pool.js';
 
 const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
 const CHUNK_SIZE = 5000;
@@ -24,8 +25,7 @@ function getAnthropicClient(userId?: string): Anthropic {
   // Try user settings first
   if (userId) {
     try {
-      const db = getDb();
-      const user = db.prepare('SELECT settings FROM users WHERE id = ?').get(userId) as { settings: string } | undefined;
+      const user = await queryOne(`SELECT settings FROM users WHERE id = $1`, [userId])as { settings: string } | undefined;
       if (user?.settings) {
         const settings = JSON.parse(user.settings);
         const aiProviders = settings?.ai_providers as Record<string, Record<string, string>> | undefined;
@@ -289,16 +289,13 @@ ${truncated}`,
 }
 
 export async function parseDocument(documentId: string, userId: string): Promise<void> {
-  const db = getDb();
-
   // Update status to parsing
-  db.prepare("UPDATE documents SET parse_status = 'parsing', updated_at = ? WHERE id = ?").run(
-    new Date().toISOString(),
+  await execute(`UPDATE documents SET parse_status = 'parsing', updated_at = $1 WHERE id = $2`, [new Date(]).toISOString(),
     documentId
   );
 
   try {
-    const doc = db.prepare('SELECT * FROM documents WHERE id = ?').get(documentId) as {
+    const doc = await queryOne(`SELECT * FROM documents WHERE id = $1`, [documentId])as {
       id: string;
       filename: string;
       file_path: string;
@@ -360,13 +357,9 @@ export async function parseDocument(documentId: string, userId: string): Promise
     const chunkCount = chunks.length;
 
     if (chunkCount > 0) {
-      const insertChunk = db.prepare(
-        'INSERT INTO document_chunks (id, document_id, chunk_index, content, heading, page_start, page_end, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-      );
-      const insertMany = db.transaction((items: typeof chunks) => {
+      const insertMany = await transaction(async (client) => {
         items.forEach((chunk, index) => {
-          insertChunk.run(
-            uuidv4(),
+          await execute(`INSERT INTO document_chunks (id, document_id, chunk_index, content, heading, page_start, page_end, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, [uuidv4(]),
             documentId,
             index,
             chunk.content,
@@ -393,25 +386,22 @@ export async function parseDocument(documentId: string, userId: string): Promise
     }
 
     // Update document record
-    db.prepare(
-      `UPDATE documents SET
+    await execute(`UPDATE documents SET
         parse_status = 'completed',
-        parse_channel = ?,
-        extracted_text = ?,
-        summary = ?,
-        page_count = ?,
-        document_type = ?,
-        chunk_count = ?,
-        updated_at = ?
-      WHERE id = ?`
-    ).run(
-      parseChannel,
+        parse_channel = $1,
+        extracted_text = $2,
+        summary = $3,
+        page_count = $4,
+        document_type = $5,
+        chunk_count = $6,
+        updated_at = $7
+      WHERE id = $8`, [parseChannel,
       extractedText,
       summary,
       pageCount,
       documentType,
       chunkCount,
-      new Date().toISOString(),
+      new Date(]).toISOString(),
       documentId
     );
 
@@ -421,9 +411,7 @@ export async function parseDocument(documentId: string, userId: string): Promise
     });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown parsing error';
-    db.prepare(
-      "UPDATE documents SET parse_status = 'failed', error_message = ?, updated_at = ? WHERE id = ?"
-    ).run(errorMessage, new Date().toISOString(), documentId);
+    await execute(`UPDATE documents SET parse_status = 'failed', error_message = $1, updated_at = $2 WHERE id = $3`, [errorMessage, new Date(]).toISOString(), documentId);
   }
 }
 
@@ -436,8 +424,6 @@ async function generateChunkEmbeddings(documentId: string, userId: string): Prom
     console.warn('No embedding provider configured — skipping chunk embeddings');
     return;
   }
-
-  const db = getDb();
   const chunks = db
     .prepare('SELECT id, content FROM document_chunks WHERE document_id = ? ORDER BY chunk_index')
     .all(documentId) as Array<{ id: string; content: string }>;
@@ -445,7 +431,7 @@ async function generateChunkEmbeddings(documentId: string, userId: string): Prom
   if (chunks.length === 0) {
     // No chunks — embed the full extracted_text as a single "virtual" chunk
     // (small documents aren't chunked but we still want them searchable)
-    const doc = db.prepare('SELECT id, extracted_text FROM documents WHERE id = ?').get(documentId) as { id: string; extracted_text: string | null } | undefined;
+    const doc = await queryOne(`SELECT id, extracted_text FROM documents WHERE id = $1`, [documentId])as { id: string; extracted_text: string | null } | undefined;
     if (!doc?.extracted_text) return;
 
     const embeddings = await provider.embed([doc.extracted_text], 'document');

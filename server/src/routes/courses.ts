@@ -1,32 +1,28 @@
 import { Router, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { createCourseSchema, updateCourseSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
 
+import { execute, queryAll, queryOne } from '../db/pool.js';
+
 const router = Router();
 
 // GET /api/courses
-router.get('/', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const courses = db.prepare('SELECT * FROM courses WHERE user_id = ? ORDER BY created_at DESC').all(req.userId!);
+router.get('/', async (req: AuthRequest, res: Response) => {
+  const courses = await queryAll(`SELECT * FROM courses WHERE user_id = $1 ORDER BY created_at DESC`, [req.userId!]);
   res.json(courses);
 });
 
 // POST /api/courses
-router.post('/', (req: AuthRequest, res: Response) => {
+router.post('/', async (req: AuthRequest, res: Response) => {
   try {
     const data = createCourseSchema.parse(req.body);
-    const db = getDb();
     const id = uuidv4();
     const now = new Date().toISOString();
 
-    db.prepare(
-      'INSERT INTO courses (id, user_id, name, code, color, weight, description, semester, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
-    ).run(
-      id,
+    await execute(`INSERT INTO courses (id, user_id, name, code, color, weight, description, semester, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`, [id,
       req.userId!,
       data.name,
       data.code || null,
@@ -35,10 +31,9 @@ router.post('/', (req: AuthRequest, res: Response) => {
       data.description || null,
       data.semester || null,
       now,
-      now
-    );
+      now]);
 
-    const course = db.prepare('SELECT * FROM courses WHERE id = ?').get(id);
+    const course = await queryOne(`SELECT * FROM courses WHERE id = $1`, [id]);
     res.status(201).json(course);
   } catch (err) {
     if (err instanceof ZodError) {
@@ -50,12 +45,10 @@ router.post('/', (req: AuthRequest, res: Response) => {
 });
 
 // PUT /api/courses/:id
-router.put('/:id', (req: AuthRequest, res: Response) => {
+router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const data = updateCourseSchema.parse(req.body);
-    const db = getDb();
-
-    const existing = db.prepare('SELECT * FROM courses WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!) as any;
+    const existing = await queryOne(`SELECT * FROM courses WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
     if (!existing) {
       throw new AppError(404, 'Course not found');
     }
@@ -78,9 +71,9 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     values.push(new Date().toISOString());
     values.push(req.params.id);
 
-    db.prepare(`UPDATE courses SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+    await execute(`UPDATE courses SET ${fields.join(', ')} WHERE id = $1`, [...values]);
 
-    const updated = db.prepare('SELECT * FROM courses WHERE id = ?').get(req.params.id);
+    const updated = await queryOne(`SELECT * FROM courses WHERE id = $1`, [req.params.id]);
     res.json(updated);
   } catch (err) {
     if (err instanceof ZodError) {
@@ -92,20 +85,19 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
 });
 
 // GET /api/courses/:id/summary
-router.get('/:id/summary', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.get('/:id/summary', async (req: AuthRequest, res: Response) => {
   const courseId = req.params.id;
   const userId = req.userId!;
 
-  const course = db.prepare('SELECT * FROM courses WHERE id = ? AND user_id = ?').get(courseId, userId) as any;
+  const course = await queryOne(`SELECT * FROM courses WHERE id = $1 AND user_id = $2`, [courseId, userId]);
   if (!course) {
     throw new AppError(404, 'Course not found');
   }
 
   // Goals with task counts (recursive — includes tasks under all descendant sub-goals)
-  const goals = db.prepare(`
+  const goals = await queryAll(`
     WITH RECURSIVE goal_tree(id) AS (
-      SELECT id FROM goals WHERE course_id = ? AND user_id = ?
+      SELECT id FROM goals WHERE course_id = $1 AND user_id = $2
       UNION ALL
       SELECT g.id FROM goals g JOIN goal_tree gt ON g.parent_id = gt.id
     )
@@ -121,27 +113,27 @@ router.get('/:id/summary', (req: AuthRequest, res: Response) => {
         ) SELECT id FROM sub
       )) as completed_task_count
     FROM goals g
-    WHERE g.course_id = ? AND g.user_id = ?
+    WHERE g.course_id = $3 AND g.user_id = $4
     ORDER BY g.sort_order ASC, g.created_at ASC
-  `).all(courseId, userId, courseId, userId);
+  `, [courseId, userId, courseId, userId]);
 
   // Decks with card counts and due review counts
-  const decks = db.prepare(`
+  const decks = await queryAll(`
     SELECT d.*,
       (SELECT COUNT(*) FROM cards c WHERE c.deck_id = d.id) as card_count,
-      (SELECT COUNT(*) FROM cards c WHERE c.deck_id = d.id AND c.fsrs_next_review IS NOT NULL AND c.fsrs_next_review <= datetime('now')) as due_count
+      (SELECT COUNT(*) FROM cards c WHERE c.deck_id = d.id AND c.fsrs_next_review IS NOT NULL AND c.fsrs_next_review <= NOW()) as due_count
     FROM card_decks d
-    WHERE d.course_id = ? AND d.user_id = ?
+    WHERE d.course_id = $1 AND d.user_id = $2
     ORDER BY d.created_at DESC
-  `).all(courseId, userId);
+  `, [courseId, userId]);
 
   // Documents
-  const documents = db.prepare(`
+  const documents = await queryAll(`
     SELECT id, filename, file_type, parse_status, page_count, created_at
     FROM documents
-    WHERE course_id = ? AND user_id = ?
+    WHERE course_id = $1 AND user_id = $2
     ORDER BY created_at DESC
-  `).all(courseId, userId);
+  `, [courseId, userId]);
 
   res.json({
     course,
@@ -152,16 +144,14 @@ router.get('/:id/summary', (req: AuthRequest, res: Response) => {
 });
 
 // DELETE /api/courses/:id
-router.delete('/:id', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-
-  const existing = db.prepare('SELECT id FROM courses WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!);
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
+  const existing = await queryOne(`SELECT id FROM courses WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
   if (!existing) {
     throw new AppError(404, 'Course not found');
   }
 
   // CASCADE handles related data deletion via FK constraints
-  db.prepare('DELETE FROM courses WHERE id = ?').run(req.params.id);
+  await execute(`DELETE FROM courses WHERE id = $1`, [req.params.id]);
 
   res.json({ message: 'Course deleted' });
 });

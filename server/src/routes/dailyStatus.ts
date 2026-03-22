@@ -1,35 +1,30 @@
 import { Router, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { setDailyStatusSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
 
+import { execute, queryOne } from '../db/pool.js';
+
 const router = Router();
 
 // POST /api/daily-status
-router.post('/', (req: AuthRequest, res: Response) => {
+router.post('/', async (req: AuthRequest, res: Response) => {
   try {
     const data = setDailyStatusSchema.parse(req.body);
-    const db = getDb();
-
     const date = data.date || new Date().toISOString().split('T')[0];
     const now = new Date().toISOString();
 
     // Upsert: insert or replace for the same user + date
-    const existing = db.prepare(
-      'SELECT id FROM daily_statuses WHERE user_id = ? AND date = ?'
-    ).get(req.userId!, date) as any;
+    const existing = await queryOne(`SELECT id FROM daily_statuses WHERE user_id = $1 AND date = $2`, [req.userId!, date]);
 
     if (existing) {
-      db.prepare('UPDATE daily_statuses SET energy_level = ? WHERE id = ?').run(data.energy_level, existing.id);
+      await execute(`UPDATE daily_statuses SET energy_level = $1 WHERE id = $2`, [data.energy_level, existing.id]);
     } else {
-      db.prepare(
-        'INSERT INTO daily_statuses (id, user_id, date, energy_level, created_at) VALUES (?, ?, ?, ?, ?)'
-      ).run(uuidv4(), req.userId!, date, data.energy_level, now);
+      await execute(`INSERT INTO daily_statuses (id, user_id, date, energy_level, created_at) VALUES ($1, $2, $3, $4, $5)`, [uuidv4(]), req.userId!, date, data.energy_level, now);
     }
 
-    const status = db.prepare('SELECT * FROM daily_statuses WHERE user_id = ? AND date = ?').get(req.userId!, date);
+    const status = await queryOne(`SELECT * FROM daily_statuses WHERE user_id = $1 AND date = $2`, [req.userId!, date]);
     res.json(status);
   } catch (err) {
     if (err instanceof ZodError) {
@@ -41,11 +36,10 @@ router.post('/', (req: AuthRequest, res: Response) => {
 });
 
 // GET /api/daily-status
-router.get('/', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.get('/', async (req: AuthRequest, res: Response) => {
   const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
 
-  const status = db.prepare('SELECT * FROM daily_statuses WHERE user_id = ? AND date = ?').get(req.userId!, date);
+  const status = await queryOne(`SELECT * FROM daily_statuses WHERE user_id = $1 AND date = $2`, [req.userId!, date]);
 
   if (!status) {
     res.json(null);

@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
-import { getDb } from '../../db/init.js';
 import type { ProviderMessage } from '../providers/types.js';
+
+import { execute, queryAll } from '../../db/pool.js';
 
 interface AgentMemory {
   id: string;
@@ -23,10 +24,7 @@ export class MemoryManager {
   constructor(private userId: string) {}
 
   getConversationHistory(conversationId: string, limit: number = 50): ProviderMessage[] {
-    const db = getDb();
-    const rows = db.prepare(
-      'SELECT role, content, tool_calls, tool_results FROM agent_messages WHERE conversation_id = ? ORDER BY created_at DESC LIMIT ?',
-    ).all(conversationId, limit) as DbMessage[];
+    const rows = await queryAll('SELECT role, content, tool_calls, tool_results FROM agent_messages WHERE conversation_id = $1 ORDER BY created_at DESC LIMIT $2', [conversationId, limit]);
 
     // Reverse to get chronological order
     rows.reverse();
@@ -104,38 +102,30 @@ export class MemoryManager {
     toolCalls?: string | null,
     toolResults?: string | null,
   ): void {
-    const db = getDb();
     const id = uuidv4();
     const now = new Date().toISOString();
-    db.prepare(
-      'INSERT INTO agent_messages (id, conversation_id, role, content, tool_calls, tool_results, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-    ).run(id, conversationId, role, content, toolCalls || null, toolResults || null, now);
+    await execute('INSERT INTO agent_messages (id, conversation_id, role, content, tool_calls, tool_results, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)', [id, conversationId, role, content, toolCalls || null, toolResults || null, now]);
 
     // Update conversation updated_at
-    db.prepare('UPDATE agent_conversations SET updated_at = ? WHERE id = ?').run(now, conversationId);
+    await execute(`UPDATE agent_conversations SET updated_at = $1 WHERE id = $2`, [now, conversationId]);
   }
 
   retrieveMemories(query: string, limit: number = 5): AgentMemory[] {
-    const db = getDb();
     // Simple keyword search — split query into words and match any
     const words = query.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
     if (words.length === 0) {
-      return db.prepare(
-        'SELECT id, category, content, created_at, last_accessed FROM agent_memories WHERE user_id = ? ORDER BY relevance_score DESC, created_at DESC LIMIT ?',
-      ).all(this.userId, limit) as AgentMemory[];
+      return await queryAll('SELECT id, category, content, created_at, last_accessed FROM agent_memories WHERE user_id = $1 ORDER BY relevance_score DESC, created_at DESC LIMIT $2', [this.userId, limit]);
     }
 
     const conditions = words.map(() => 'LOWER(content) LIKE ?').join(' OR ');
     const params: unknown[] = [this.userId, ...words.map((w) => `%${w}%`), limit];
 
-    const memories = db.prepare(
-      `SELECT id, category, content, created_at, last_accessed FROM agent_memories WHERE user_id = ? AND (${conditions}) ORDER BY relevance_score DESC, created_at DESC LIMIT ?`,
-    ).all(...params) as AgentMemory[];
+    const memories = await queryAll(`SELECT id, category, content, created_at, last_accessed FROM agent_memories WHERE user_id = $1 AND (${conditions}) ORDER BY relevance_score DESC, created_at DESC LIMIT $2`, [...params]) as AgentMemory[];
 
     // Update last_accessed
     const now = new Date().toISOString();
     for (const m of memories) {
-      db.prepare('UPDATE agent_memories SET last_accessed = ? WHERE id = ?').run(now, m.id);
+      await execute(`UPDATE agent_memories SET last_accessed = $1 WHERE id = $2`, [now, m.id]);
     }
 
     return memories;
@@ -154,8 +144,6 @@ export class MemoryManager {
       /My goal is\s+(.+?)(?:\.|$)/i,
       /I need to\s+(.+?)(?:by|before)\s+(.+?)(?:\.|$)/i,
     ];
-
-    const db = getDb();
     const now = new Date().toISOString();
 
     for (const pattern of patterns) {
@@ -163,14 +151,10 @@ export class MemoryManager {
       if (match) {
         const content = match[0].trim();
         // Check for duplicate
-        const existing = db.prepare(
-          'SELECT id FROM agent_memories WHERE user_id = ? AND content = ?',
-        ).get(this.userId, content);
+        const existing = await queryOne('SELECT id FROM agent_memories WHERE user_id = $1 AND content = $2', [this.userId, content]);
         if (!existing) {
           const category = this.categorizeMemory(content);
-          db.prepare(
-            'INSERT INTO agent_memories (id, user_id, category, content, source_conversation_id, relevance_score, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-          ).run(uuidv4(), this.userId, category, content, conversationId, 1.0, now);
+          await execute('INSERT INTO agent_memories (id, user_id, category, content, source_conversation_id, relevance_score, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)', [uuidv4(]), this.userId, category, content, conversationId, 1.0, now);
         }
       }
     }
@@ -191,7 +175,6 @@ export class MemoryManager {
   }
 
   getDocumentSummaries(courseId?: string): { id: string; filename: string; summary: string }[] {
-    const db = getDb();
     let query = 'SELECT id, filename, summary FROM documents WHERE user_id = ? AND summary IS NOT NULL';
     const params: unknown[] = [this.userId];
     if (courseId) {
@@ -199,20 +182,15 @@ export class MemoryManager {
       params.push(courseId);
     }
     query += ' LIMIT 10';
-    return db.prepare(query).all(...params) as { id: string; filename: string; summary: string }[];
+    return await queryAll(query, params)as { id: string; filename: string; summary: string }[];
   }
 
   summarizeOldMessages(conversationId: string, keepRecent: number = 10): string | null {
-    const db = getDb();
-    const totalCount = db.prepare(
-      'SELECT COUNT(*) as count FROM agent_messages WHERE conversation_id = ?',
-    ).get(conversationId) as { count: number };
+    const totalCount = await queryOne('SELECT COUNT(*) as count FROM agent_messages WHERE conversation_id = $1', [conversationId]);
 
     if (totalCount.count <= keepRecent) return null;
 
-    const oldMessages = db.prepare(
-      'SELECT role, content FROM agent_messages WHERE conversation_id = ? ORDER BY created_at ASC LIMIT ?',
-    ).all(conversationId, totalCount.count - keepRecent) as Array<{ role: string; content: string }>;
+    const oldMessages = await queryAll('SELECT role, content FROM agent_messages WHERE conversation_id = $1 ORDER BY created_at ASC LIMIT $2', [conversationId, totalCount.count - keepRecent]); content: string }>;
 
     // Build a simple summary
     const parts: string[] = [];

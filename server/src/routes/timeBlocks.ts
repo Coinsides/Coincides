@@ -1,8 +1,9 @@
 import { Router, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
+
+import { execute, queryAll, queryOne, transaction } from '../db/pool.js';
 
 // Inline types
 interface TimeBlockRow {
@@ -63,10 +64,7 @@ export function detectOverlaps(blocks: Array<{ id: string; start_time: string; e
  * Get time block instances for a specific date (v1.7.3 — date-based).
  */
 export function getBlocksForDate(userId: string, date: string): TimeBlockRow[] {
-  const db = getDb();
-  return db.prepare(
-    'SELECT * FROM time_blocks WHERE user_id = ? AND date = ? ORDER BY start_time'
-  ).all(userId, date) as TimeBlockRow[];
+  return await queryAll(`SELECT * FROM time_blocks WHERE user_id = $1 AND date = $2 ORDER BY start_time`, [userId, date]);
 }
 
 export function getAvailableStudyMinutes(userId: string, date: string): number {
@@ -95,8 +93,7 @@ export function getAvailableStudyMinutes(userId: string, date: string): number {
 // ══════════════════════════════════════════════════════════════
 
 // GET /api/time-blocks?from=YYYY-MM-DD&to=YYYY-MM-DD  (or ?date=YYYY-MM-DD)
-router.get('/', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.get('/', async (req: AuthRequest, res: Response) => {
   const { date, from, to } = req.query;
 
   if (date) {
@@ -107,22 +104,18 @@ router.get('/', (req: AuthRequest, res: Response) => {
   }
 
   if (from && to) {
-    const blocks = db.prepare(
-      'SELECT * FROM time_blocks WHERE user_id = ? AND date >= ? AND date <= ? ORDER BY date, start_time'
-    ).all(req.userId!, from, to) as TimeBlockRow[];
+    const blocks = await queryAll(`SELECT * FROM time_blocks WHERE user_id = $1 AND date >= $2 AND date <= $3 ORDER BY date, start_time`, [req.userId!, from, to]);
     res.json(blocks);
     return;
   }
 
   // Fallback: all instances
-  const blocks = db.prepare(
-    'SELECT * FROM time_blocks WHERE user_id = ? ORDER BY date, start_time'
-  ).all(req.userId!);
+  const blocks = await queryAll(`SELECT * FROM time_blocks WHERE user_id = $1 ORDER BY date, start_time`, [req.userId!]);
   res.json(blocks);
 });
 
 // GET /api/time-blocks/week/:date — instances for a full week (Calendar compatibility)
-router.get('/week/:date', (req: AuthRequest, res: Response) => {
+router.get('/week/:date', async (req: AuthRequest, res: Response) => {
   const startDate = new Date(req.params.date as string);
   const day = startDate.getUTCDay();
   const mondayOffset = day === 0 ? -6 : 1 - day;
@@ -146,8 +139,7 @@ router.get('/week/:date', (req: AuthRequest, res: Response) => {
 });
 
 // POST /api/time-blocks — create instance(s) for specific date(s)
-router.post('/', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.post('/', async (req: AuthRequest, res: Response) => {
   const { blocks } = req.body;
   const items: Array<{
     label: string; type?: string; date: string;
@@ -166,19 +158,15 @@ router.post('/', (req: AuthRequest, res: Response) => {
     }
   }
 
-  const stmt = db.prepare(
-    `INSERT INTO time_blocks (id, user_id, template_id, label, type, date, start_time, end_time, color, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  );
-
   const now = new Date().toISOString();
   const created: any[] = [];
 
-  db.transaction(() => {
+  await transaction(async (client) => {
     for (const item of items) {
       const id = uuidv4();
-      stmt.run(id, req.userId!, item.template_id || null, item.label, item.type || 'custom',
-        item.date, item.start_time, item.end_time, item.color || null, now, now);
+      await execute(`INSERT INTO time_blocks (id, user_id, template_id, label, type, date, start_time, end_time, color, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, [id, req.userId!, item.template_id || null, item.label, item.type || 'custom',
+        item.date, item.start_time, item.end_time, item.color || null, now, now]);
       created.push({
         id, user_id: req.userId!, template_id: item.template_id || null,
         label: item.label, type: item.type || 'custom', date: item.date,
@@ -186,17 +174,14 @@ router.post('/', (req: AuthRequest, res: Response) => {
         color: item.color || null, created_at: now, updated_at: now,
       });
     }
-  })();
+  });
 
   res.status(201).json(Array.isArray(blocks) ? created : created[0]);
 });
 
 // PUT /api/time-blocks/:id — update a single instance
-router.put('/:id', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const existing = db.prepare(
-    'SELECT * FROM time_blocks WHERE id = ? AND user_id = ?'
-  ).get(req.params.id, req.userId!);
+router.put('/:id', async (req: AuthRequest, res: Response) => {
+  const existing = await queryOne(`SELECT * FROM time_blocks WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
   if (!existing) throw new AppError(404, 'Time block not found');
 
   const { label, type, start_time, end_time, color } = req.body;
@@ -215,34 +200,26 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
   values.push(new Date().toISOString());
   values.push(req.params.id);
 
-  db.prepare(`UPDATE time_blocks SET ${fields.join(', ')} WHERE id = ?`).run(...values);
-  const updated = db.prepare('SELECT * FROM time_blocks WHERE id = ?').get(req.params.id);
+  await execute(`UPDATE time_blocks SET ${fields.join(', ')} WHERE id = $1`, [...values]);
+  const updated = await queryOne(`SELECT * FROM time_blocks WHERE id = $1`, [req.params.id]);
   res.json(updated);
 });
 
 // DELETE /api/time-blocks/:id — delete a single instance
-router.delete('/:id', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const existing = db.prepare(
-    'SELECT id FROM time_blocks WHERE id = ? AND user_id = ?'
-  ).get(req.params.id, req.userId!);
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
+  const existing = await queryOne(`SELECT id FROM time_blocks WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
   if (!existing) throw new AppError(404, 'Time block not found');
 
-  db.prepare('DELETE FROM time_blocks WHERE id = ?').run(req.params.id);
+  await execute(`DELETE FROM time_blocks WHERE id = $1`, [req.params.id]);
   res.json({ message: 'Time block deleted' });
 });
 
 // GET /api/time-blocks/:id/tasks — tasks under a specific time block instance
-router.get('/:id/tasks', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const block = db.prepare(
-    'SELECT id FROM time_blocks WHERE id = ? AND user_id = ?'
-  ).get(req.params.id, req.userId!);
+router.get('/:id/tasks', async (req: AuthRequest, res: Response) => {
+  const block = await queryOne(`SELECT id FROM time_blocks WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
   if (!block) throw new AppError(404, 'Time block not found');
 
-  const tasks = db.prepare(
-    'SELECT * FROM tasks WHERE time_block_id = ? AND user_id = ? ORDER BY order_index, created_at'
-  ).all(req.params.id, req.userId!);
+  const tasks = await queryAll(`SELECT * FROM tasks WHERE time_block_id = $1 AND user_id = $2 ORDER BY order_index, created_at`, [req.params.id, req.userId!]);
 
   for (const t of tasks as any[]) {
     if (t.checklist && typeof t.checklist === 'string') {
@@ -258,83 +235,61 @@ router.get('/:id/tasks', (req: AuthRequest, res: Response) => {
 // ══════════════════════════════════════════════════════════════
 
 // GET /api/time-blocks/templates/sets — all template sets
-router.get('/templates/sets', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const sets = db.prepare(
-    'SELECT * FROM time_block_template_sets WHERE user_id = ? ORDER BY created_at'
-  ).all(req.userId!) as TemplateSetRow[];
+router.get('/templates/sets', async (req: AuthRequest, res: Response) => {
+  const sets = await queryAll(`SELECT * FROM time_block_template_sets WHERE user_id = $1 ORDER BY created_at`, [req.userId!]);
   res.json(sets);
 });
 
 // POST /api/time-blocks/templates/sets — create template set
-router.post('/templates/sets', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.post('/templates/sets', async (req: AuthRequest, res: Response) => {
   const { name } = req.body;
   if (!name) throw new AppError(400, 'name is required');
 
   const id = uuidv4();
   const now = new Date().toISOString();
-  db.prepare(
-    'INSERT INTO time_block_template_sets (id, user_id, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)'
-  ).run(id, req.userId!, name, now, now);
+  await execute(`INSERT INTO time_block_template_sets (id, user_id, name, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)`, [id, req.userId!, name, now, now]);
 
-  const created = db.prepare('SELECT * FROM time_block_template_sets WHERE id = ?').get(id);
+  const created = await queryOne(`SELECT * FROM time_block_template_sets WHERE id = $1`, [id]);
   res.status(201).json(created);
 });
 
 // PUT /api/time-blocks/templates/sets/:id — rename template set
-router.put('/templates/sets/:id', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const existing = db.prepare(
-    'SELECT id FROM time_block_template_sets WHERE id = ? AND user_id = ?'
-  ).get(req.params.id, req.userId!);
+router.put('/templates/sets/:id', async (req: AuthRequest, res: Response) => {
+  const existing = await queryOne(`SELECT id FROM time_block_template_sets WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
   if (!existing) throw new AppError(404, 'Template set not found');
 
   const { name } = req.body;
   if (!name) throw new AppError(400, 'name is required');
 
   const now = new Date().toISOString();
-  db.prepare(
-    'UPDATE time_block_template_sets SET name = ?, updated_at = ? WHERE id = ?'
-  ).run(name, now, req.params.id);
+  await execute(`UPDATE time_block_template_sets SET name = $1, updated_at = $2 WHERE id = $3`, [name, now, req.params.id]);
 
-  const updated = db.prepare('SELECT * FROM time_block_template_sets WHERE id = ?').get(req.params.id);
+  const updated = await queryOne(`SELECT * FROM time_block_template_sets WHERE id = $1`, [req.params.id]);
   res.json(updated);
 });
 
 // DELETE /api/time-blocks/templates/sets/:id — delete template set (CASCADE deletes items)
-router.delete('/templates/sets/:id', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const existing = db.prepare(
-    'SELECT id FROM time_block_template_sets WHERE id = ? AND user_id = ?'
-  ).get(req.params.id, req.userId!);
+router.delete('/templates/sets/:id', async (req: AuthRequest, res: Response) => {
+  const existing = await queryOne(`SELECT id FROM time_block_template_sets WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
   if (!existing) throw new AppError(404, 'Template set not found');
 
-  db.prepare('DELETE FROM time_block_template_sets WHERE id = ?').run(req.params.id);
+  await execute(`DELETE FROM time_block_template_sets WHERE id = $1`, [req.params.id]);
   res.json({ message: 'Template set deleted' });
 });
 
 // GET /api/time-blocks/templates/sets/:setId/items — get template items
-router.get('/templates/sets/:setId/items', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const set = db.prepare(
-    'SELECT id FROM time_block_template_sets WHERE id = ? AND user_id = ?'
-  ).get(req.params.setId, req.userId!);
+router.get('/templates/sets/:setId/items', async (req: AuthRequest, res: Response) => {
+  const set = await queryOne(`SELECT id FROM time_block_template_sets WHERE id = $1 AND user_id = $2`, [req.params.setId, req.userId!]);
   if (!set) throw new AppError(404, 'Template set not found');
 
-  const items = db.prepare(
-    'SELECT * FROM time_block_templates WHERE template_set_id = ? ORDER BY day_of_week, start_time'
-  ).all(req.params.setId) as TemplateItemRow[];
+  const items = await queryAll(`SELECT * FROM time_block_templates WHERE template_set_id = $1 ORDER BY day_of_week, start_time`, [req.params.setId]);
 
   res.json(items);
 });
 
 // POST /api/time-blocks/templates/sets/:setId/items — save (replace all) template items
-router.post('/templates/sets/:setId/items', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const set = db.prepare(
-    'SELECT id FROM time_block_template_sets WHERE id = ? AND user_id = ?'
-  ).get(req.params.setId, req.userId!);
+router.post('/templates/sets/:setId/items', async (req: AuthRequest, res: Response) => {
+  const set = await queryOne(`SELECT id FROM time_block_template_sets WHERE id = $1 AND user_id = $2`, [req.params.setId, req.userId!]);
   if (!set) throw new AppError(404, 'Template set not found');
 
   const { items } = req.body;
@@ -348,34 +303,26 @@ router.post('/templates/sets/:setId/items', (req: AuthRequest, res: Response) =>
 
   const now = new Date().toISOString();
 
-  db.transaction(() => {
+  await transaction(async (client) => {
     // Clear existing items for this set
-    db.prepare('DELETE FROM time_block_templates WHERE template_set_id = ?').run(req.params.setId);
+    await execute(`DELETE FROM time_block_templates WHERE template_set_id = $1`, [req.params.setId]);
 
     // Insert new items
-    const stmt = db.prepare(
-      `INSERT INTO time_block_templates (id, template_set_id, user_id, label, type, day_of_week, start_time, end_time, color, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-    );
     for (const item of items) {
-      stmt.run(uuidv4(), req.params.setId, req.userId!, item.label, item.type || 'study',
+      await execute(`INSERT INTO time_blocks (id, user_id, template_id, label, type, date, start_time, end_time, color, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, [uuidv4(]), req.params.setId, req.userId!, item.label, item.type || 'study',
         item.day_of_week, item.start_time, item.end_time, item.color || null, now, now);
     }
-  })();
+  });
 
-  const saved = db.prepare(
-    'SELECT * FROM time_block_templates WHERE template_set_id = ? ORDER BY day_of_week, start_time'
-  ).all(req.params.setId);
+  const saved = await queryAll(`SELECT * FROM time_block_templates WHERE template_set_id = $1 ORDER BY day_of_week, start_time`, [req.params.setId]);
 
   res.json(saved);
 });
 
 // POST /api/time-blocks/templates/sets/:setId/apply — instantiate template to date range
-router.post('/templates/sets/:setId/apply', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const set = db.prepare(
-    'SELECT id FROM time_block_template_sets WHERE id = ? AND user_id = ?'
-  ).get(req.params.setId, req.userId!);
+router.post('/templates/sets/:setId/apply', async (req: AuthRequest, res: Response) => {
+  const set = await queryOne(`SELECT id FROM time_block_template_sets WHERE id = $1 AND user_id = $2`, [req.params.setId, req.userId!]);
   if (!set) throw new AppError(404, 'Template set not found');
 
   const { dates, overwrite } = req.body;
@@ -383,20 +330,13 @@ router.post('/templates/sets/:setId/apply', (req: AuthRequest, res: Response) =>
     throw new AppError(400, 'dates must be a non-empty array of YYYY-MM-DD strings');
   }
 
-  const templates = db.prepare(
-    'SELECT * FROM time_block_templates WHERE template_set_id = ? ORDER BY day_of_week, start_time'
-  ).all(req.params.setId) as TemplateItemRow[];
+  const templates = await queryAll(`SELECT * FROM time_block_templates WHERE template_set_id = $1 ORDER BY day_of_week, start_time`, [req.params.setId]);
 
   const now = new Date().toISOString();
   let createdCount = 0;
   let skippedDates: string[] = [];
 
-  const insertStmt = db.prepare(
-    `INSERT INTO time_blocks (id, user_id, template_id, label, type, date, start_time, end_time, color, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  );
-
-  db.transaction(() => {
+  await transaction(async (client) => {
     for (const date of dates as string[]) {
       const dayOfWeek = new Date(date + 'T00:00:00').getDay();
       const matchingTemplates = templates.filter(t => t.day_of_week === dayOfWeek);
@@ -404,9 +344,7 @@ router.post('/templates/sets/:setId/apply', (req: AuthRequest, res: Response) =>
       if (matchingTemplates.length === 0) continue; // No templates for this day of week
 
       // Check if date already has time blocks
-      const existing = db.prepare(
-        'SELECT id FROM time_blocks WHERE user_id = ? AND date = ? LIMIT 1'
-      ).get(req.userId!, date);
+      const existing = await queryOne(`SELECT id FROM time_blocks WHERE user_id = $1 AND date = $2 LIMIT 1`, [req.userId!, date]);
 
       if (existing && !overwrite) {
         skippedDates.push(date);
@@ -415,24 +353,22 @@ router.post('/templates/sets/:setId/apply', (req: AuthRequest, res: Response) =>
 
       if (existing && overwrite) {
         // Clear tasks' time_block_id references for blocks we're about to delete
-        db.prepare(
-          `UPDATE tasks SET time_block_id = NULL WHERE time_block_id IN (
-            SELECT id FROM time_blocks WHERE user_id = ? AND date = ?
-          )`
-        ).run(req.userId!, date);
+        await execute(`UPDATE tasks SET time_block_id = NULL WHERE time_block_id IN (
+            SELECT id FROM time_blocks WHERE user_id = $1 AND date = $2
+          )`, [req.userId!, date]);
         // Delete existing blocks for this date
-        db.prepare('DELETE FROM time_blocks WHERE user_id = ? AND date = ?').run(req.userId!, date);
+        await execute(`DELETE FROM time_blocks WHERE user_id = $1 AND date = $2`, [req.userId!, date]);
       }
 
       for (const tmpl of matchingTemplates) {
-        insertStmt.run(
-          uuidv4(), req.userId!, tmpl.id, tmpl.label, tmpl.type,
+        await execute(`INSERT INTO time_blocks (id, user_id, template_id, label, type, date, start_time, end_time, color, created_at, updated_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, [uuidv4(]), req.userId!, tmpl.id, tmpl.label, tmpl.type,
           date, tmpl.start_time, tmpl.end_time, tmpl.color, now, now
         );
         createdCount++;
       }
     }
-  })();
+  });
 
   res.json({
     message: `Applied template: ${createdCount} time blocks created`,

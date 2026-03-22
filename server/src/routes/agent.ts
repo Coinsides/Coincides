@@ -1,6 +1,5 @@
 import { Router, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { sendMessageSchema, createConversationSchema } from '../validators/index.js';
@@ -10,24 +9,18 @@ import { runAgent } from '../agent/orchestrator.js';
 const router = Router();
 
 // GET /api/agent/conversations — list conversations
-router.get('/conversations', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const conversations = db.prepare(
-    'SELECT id, title, created_at, updated_at FROM agent_conversations WHERE user_id = ? ORDER BY updated_at DESC',
-  ).all(req.userId!);
+router.get('/conversations', async (req: AuthRequest, res: Response) => {
+  const conversations = await queryAll('SELECT id, title, created_at, updated_at FROM agent_conversations WHERE user_id = $1 ORDER BY updated_at DESC', [req.userId!]);
   res.json(conversations);
 });
 
 // POST /api/agent/conversations — create conversation
-router.post('/conversations', (req: AuthRequest, res: Response) => {
+router.post('/conversations', async (req: AuthRequest, res: Response) => {
   try {
     const data = createConversationSchema.parse(req.body);
-    const db = getDb();
     const id = uuidv4();
     const now = new Date().toISOString();
-    db.prepare(
-      'INSERT INTO agent_conversations (id, user_id, title, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
-    ).run(id, req.userId!, data.title || 'New conversation', now, now);
+    await execute('INSERT INTO agent_conversations (id, user_id, title, created_at, updated_at) VALUES ($1, $2, $3, $4, $5)', [id, req.userId!, data.title || 'New conversation', now, now]);
     res.status(201).json({ id, title: data.title || 'New conversation', created_at: now, updated_at: now });
   } catch (err) {
     if (err instanceof ZodError) {
@@ -38,26 +31,18 @@ router.post('/conversations', (req: AuthRequest, res: Response) => {
 });
 
 // GET /api/agent/conversations/:id/messages — get messages
-router.get('/conversations/:id/messages', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const conv = db.prepare(
-    'SELECT id FROM agent_conversations WHERE id = ? AND user_id = ?',
-  ).get(req.params.id, req.userId!) as { id: string } | undefined;
+router.get('/conversations/:id/messages', async (req: AuthRequest, res: Response) => {
+  const conv = await queryOne('SELECT id FROM agent_conversations WHERE id = $1 AND user_id = $2', [req.params.id, req.userId!]);
 
   if (!conv) throw new AppError(404, 'Conversation not found');
 
-  const messages = db.prepare(
-    'SELECT id, role, content, tool_calls, tool_results, created_at FROM agent_messages WHERE conversation_id = ? ORDER BY created_at ASC',
-  ).all(req.params.id);
+  const messages = await queryAll('SELECT id, role, content, tool_calls, tool_results, created_at FROM agent_messages WHERE conversation_id = $1 ORDER BY created_at ASC', [req.params.id]);
   res.json(messages);
 });
 
 // DELETE /api/agent/conversations/:id — delete conversation
-router.delete('/conversations/:id', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const result = db.prepare(
-    'DELETE FROM agent_conversations WHERE id = ? AND user_id = ?',
-  ).run(req.params.id, req.userId!);
+router.delete('/conversations/:id', async (req: AuthRequest, res: Response) => {
+  const result = await execute('DELETE FROM agent_conversations WHERE id = $1 AND user_id = $2', [req.params.id, req.userId!]);
   if (result.changes === 0) throw new AppError(404, 'Conversation not found');
   res.json({ message: 'Conversation deleted' });
 });
@@ -66,12 +51,8 @@ router.delete('/conversations/:id', (req: AuthRequest, res: Response) => {
 router.post('/conversations/:id/messages', async (req: AuthRequest, res: Response) => {
   try {
     const data = sendMessageSchema.parse(req.body);
-    const db = getDb();
-
     // Verify conversation belongs to user
-    const conv = db.prepare(
-      'SELECT id FROM agent_conversations WHERE id = ? AND user_id = ?',
-    ).get(req.params.id, req.userId!) as { id: string } | undefined;
+    const conv = await queryOne('SELECT id FROM agent_conversations WHERE id = $1 AND user_id = $2', [req.params.id, req.userId!]);
 
     if (!conv) {
       res.status(404).json({ error: 'Conversation not found' });

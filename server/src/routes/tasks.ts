@@ -1,10 +1,11 @@
 import { Router, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { createTaskSchema, updateTaskSchema, batchCreateTasksSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
+
+import { execute, queryAll, queryOne, transaction } from '../db/pool.js';
 
 const router = Router();
 
@@ -16,16 +17,14 @@ function parseTask(task: any): any {
 }
 
 function verifyCourseBelongsToUser(courseId: string, userId: string): void {
-  const db = getDb();
-  const course = db.prepare('SELECT id FROM courses WHERE id = ? AND user_id = ?').get(courseId, userId);
+  const course = await queryOne(`SELECT id FROM courses WHERE id = $1 AND user_id = $2`, [courseId, userId]);
   if (!course) {
     throw new AppError(404, 'Course not found');
   }
 }
 
 // GET /api/tasks
-router.get('/', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.get('/', async (req: AuthRequest, res: Response) => {
   const { date, from, to, course_id } = req.query;
 
   let query = 'SELECT * FROM tasks WHERE user_id = ?';
@@ -46,25 +45,20 @@ router.get('/', (req: AuthRequest, res: Response) => {
 
   query += ' ORDER BY date ASC, order_index ASC, created_at ASC';
 
-  const tasks = db.prepare(query).all(...params);
+  const tasks = await queryAll(query, params);
   res.json(tasks.map(parseTask));
 });
 
 // POST /api/tasks
-router.post('/', (req: AuthRequest, res: Response) => {
+router.post('/', async (req: AuthRequest, res: Response) => {
   try {
     const data = createTaskSchema.parse(req.body);
     verifyCourseBelongsToUser(data.course_id, req.userId!);
-
-    const db = getDb();
     const id = uuidv4();
     const now = new Date().toISOString();
 
-    db.prepare(
-      `INSERT INTO tasks (id, user_id, course_id, goal_id, recurring_group_id, title, date, priority, status, order_index, start_time, end_time, description, checklist, time_block_id, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?)`
-    ).run(
-      id,
+    await execute(`INSERT INTO tasks (id, user_id, course_id, goal_id, recurring_group_id, title, date, priority, status, order_index, start_time, end_time, description, checklist, time_block_id, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending', $9, $10, $11, $12, $13, $14, $15, $16)`, [id,
       req.userId!,
       data.course_id,
       data.goal_id || null,
@@ -76,13 +70,13 @@ router.post('/', (req: AuthRequest, res: Response) => {
       data.start_time || null,
       data.end_time || null,
       data.description || null,
-      data.checklist ? JSON.stringify(data.checklist) : null,
+      data.checklist ? JSON.stringify(data.checklist]) : null,
       data.time_block_id || null,
       now,
       now
     );
 
-    const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id);
+    const task = await queryOne(`SELECT * FROM tasks WHERE id = $1`, [id]);
     res.status(201).json(parseTask(task));
   } catch (err) {
     if (err instanceof ZodError) {
@@ -94,10 +88,9 @@ router.post('/', (req: AuthRequest, res: Response) => {
 });
 
 // POST /api/tasks/batch
-router.post('/batch', (req: AuthRequest, res: Response) => {
+router.post('/batch', async (req: AuthRequest, res: Response) => {
   try {
     const data = batchCreateTasksSchema.parse(req.body);
-    const db = getDb();
     const now = new Date().toISOString();
 
     // Verify all courses belong to user
@@ -106,19 +99,14 @@ router.post('/batch', (req: AuthRequest, res: Response) => {
       verifyCourseBelongsToUser(courseId, req.userId!);
     }
 
-    const insert = db.prepare(
-      `INSERT INTO tasks (id, user_id, course_id, goal_id, recurring_group_id, title, date, priority, status, order_index, start_time, end_time, description, checklist, time_block_id, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?)`
-    );
-
     const ids: string[] = [];
 
-    const insertAll = db.transaction(() => {
+    const insertAll = await transaction(async (client) => {
       for (const task of data.tasks) {
         const id = uuidv4();
         ids.push(id);
-        insert.run(
-          id,
+        await execute(`INSERT INTO tasks (id, user_id, course_id, goal_id, recurring_group_id, title, date, priority, status, order_index, start_time, end_time, description, checklist, time_block_id, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending', $9, $10, $11, $12, $13, $14, $15, $16)`, [id,
           req.userId!,
           task.course_id,
           task.goal_id || null,
@@ -130,7 +118,7 @@ router.post('/batch', (req: AuthRequest, res: Response) => {
           task.start_time || null,
           task.end_time || null,
           task.description || null,
-          task.checklist ? JSON.stringify(task.checklist) : null,
+          task.checklist ? JSON.stringify(task.checklist]) : null,
           task.time_block_id || null,
           now,
           now
@@ -141,7 +129,7 @@ router.post('/batch', (req: AuthRequest, res: Response) => {
     insertAll();
 
     const placeholders = ids.map(() => '?').join(',');
-    const tasks = db.prepare(`SELECT * FROM tasks WHERE id IN (${placeholders})`).all(...ids);
+    const tasks = await queryAll(`SELECT * FROM tasks WHERE id IN (${placeholders})`, [...ids]);
     res.status(201).json(tasks.map(parseTask));
   } catch (err) {
     if (err instanceof ZodError) {
@@ -153,12 +141,10 @@ router.post('/batch', (req: AuthRequest, res: Response) => {
 });
 
 // PUT /api/tasks/:id
-router.put('/:id', (req: AuthRequest, res: Response) => {
+router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const data = updateTaskSchema.parse(req.body);
-    const db = getDb();
-
-    const existing = db.prepare('SELECT * FROM tasks WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!) as any;
+    const existing = await queryOne(`SELECT * FROM tasks WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
     if (!existing) {
       throw new AppError(404, 'Task not found');
     }
@@ -187,24 +173,18 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
 
         // Log activity
         const activityDate = new Date().toISOString().split('T')[0];
-        db.prepare(
-          'INSERT INTO study_activity_log (id, user_id, date, activity_type, entity_id, entity_type) VALUES (?, ?, ?, ?, ?, ?)'
-        ).run(uuidv4(), req.userId!, activityDate, 'task_completed', existing.id, 'task');
+        await execute(`INSERT INTO study_activity_log (id, user_id, date, activity_type, entity_id, entity_type) VALUES ($1, $2, $3, $4, $5, $6)`, [uuidv4(]), req.userId!, activityDate, 'task_completed', existing.id, 'task');
 
         // Update recurring group count if applicable
         if (existing.recurring_group_id) {
-          db.prepare(
-            'UPDATE recurring_task_groups SET completed_tasks = completed_tasks + 1 WHERE id = ?'
-          ).run(existing.recurring_group_id);
+          await execute(`UPDATE recurring_task_groups SET completed_tasks = completed_tasks + 1 WHERE id = $1`, [existing.recurring_group_id]);
         }
       } else if (data.status === 'pending' && existing.status === 'completed') {
         fields.push('completed_at = ?');
         values.push(null);
 
         if (existing.recurring_group_id) {
-          db.prepare(
-            'UPDATE recurring_task_groups SET completed_tasks = MAX(0, completed_tasks - 1) WHERE id = ?'
-          ).run(existing.recurring_group_id);
+          await execute(`UPDATE recurring_task_groups SET completed_tasks = MAX(0, completed_tasks - 1) WHERE id = $1`, [existing.recurring_group_id]);
         }
       }
     }
@@ -222,9 +202,9 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     values.push(new Date().toISOString());
     values.push(req.params.id);
 
-    db.prepare(`UPDATE tasks SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+    await execute(`UPDATE tasks SET ${fields.join(', ')} WHERE id = $1`, [...values]);
 
-    const updated = db.prepare('SELECT * FROM tasks WHERE id = ?').get(req.params.id);
+    const updated = await queryOne(`SELECT * FROM tasks WHERE id = $1`, [req.params.id]);
     res.json(parseTask(updated));
   } catch (err) {
     if (err instanceof ZodError) {
@@ -236,29 +216,23 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
 });
 
 // DELETE /api/tasks/:id
-router.delete('/:id', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-
-  const existing = db.prepare('SELECT * FROM tasks WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!) as any;
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
+  const existing = await queryOne(`SELECT * FROM tasks WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
   if (!existing) {
     throw new AppError(404, 'Task not found');
   }
 
   // If this was a completed task in a recurring group, decrement the count
   if (existing.recurring_group_id && existing.status === 'completed') {
-    db.prepare(
-      'UPDATE recurring_task_groups SET completed_tasks = MAX(0, completed_tasks - 1) WHERE id = ?'
-    ).run(existing.recurring_group_id);
+    await execute(`UPDATE recurring_task_groups SET completed_tasks = MAX(0, completed_tasks - 1) WHERE id = $1`, [existing.recurring_group_id]);
   }
 
   // Also decrement total_tasks for the recurring group
   if (existing.recurring_group_id) {
-    db.prepare(
-      'UPDATE recurring_task_groups SET total_tasks = MAX(0, total_tasks - 1) WHERE id = ?'
-    ).run(existing.recurring_group_id);
+    await execute(`UPDATE recurring_task_groups SET total_tasks = MAX(0, total_tasks - 1) WHERE id = $1`, [existing.recurring_group_id]);
   }
 
-  db.prepare('DELETE FROM tasks WHERE id = ?').run(req.params.id);
+  await execute(`DELETE FROM tasks WHERE id = $1`, [req.params.id]);
 
   res.json({ message: 'Task deleted' });
 });
@@ -268,33 +242,31 @@ router.delete('/:id', (req: AuthRequest, res: Response) => {
 // ============================================================
 
 // GET /api/tasks/:taskId/cards — get all cards linked to a task
-router.get('/:taskId/cards', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.get('/:taskId/cards', async (req: AuthRequest, res: Response) => {
   const { taskId } = req.params;
 
   // Verify task belongs to user
-  const task = db.prepare('SELECT id FROM tasks WHERE id = ? AND user_id = ?').get(taskId, req.userId!);
+  const task = await queryOne(`SELECT id FROM tasks WHERE id = $1 AND user_id = $2`, [taskId, req.userId!]);
   if (!task) {
     throw new AppError(404, 'Task not found');
   }
 
-  const links = db.prepare(`
+  const links = await queryAll(`
     SELECT tc.id, tc.card_id, tc.checklist_index, tc.created_at,
            c.title as card_title, c.template_type, c.deck_id,
            d.name as deck_name
     FROM task_cards tc
     JOIN cards c ON tc.card_id = c.id
     JOIN card_decks d ON c.deck_id = d.id
-    WHERE tc.task_id = ?
+    WHERE tc.task_id = $1
     ORDER BY tc.checklist_index ASC NULLS LAST, tc.created_at ASC
-  `).all(taskId);
+  `, [taskId]);
 
   res.json(links);
 });
 
 // POST /api/tasks/:taskId/cards — create a task-card link
-router.post('/:taskId/cards', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.post('/:taskId/cards', async (req: AuthRequest, res: Response) => {
   const { taskId } = req.params;
   const { card_id, checklist_index } = req.body;
 
@@ -303,47 +275,42 @@ router.post('/:taskId/cards', (req: AuthRequest, res: Response) => {
   }
 
   // Verify task belongs to user
-  const task = db.prepare('SELECT id FROM tasks WHERE id = ? AND user_id = ?').get(taskId, req.userId!);
+  const task = await queryOne(`SELECT id FROM tasks WHERE id = $1 AND user_id = $2`, [taskId, req.userId!]);
   if (!task) {
     throw new AppError(404, 'Task not found');
   }
 
   // Verify card belongs to user
-  const card = db.prepare('SELECT id FROM cards WHERE id = ? AND user_id = ?').get(card_id, req.userId!);
+  const card = await queryOne(`SELECT id FROM cards WHERE id = $1 AND user_id = $2`, [card_id, req.userId!]);
   if (!card) {
     throw new AppError(404, 'Card not found');
   }
 
   // Check for duplicate
-  const existing = db.prepare(
-    'SELECT id FROM task_cards WHERE task_id = ? AND card_id = ? AND checklist_index IS ?'
-  ).get(taskId, card_id, checklist_index ?? null);
+  const existing = await queryOne(`SELECT id FROM task_cards WHERE task_id = $1 AND card_id = $2 AND checklist_index IS $3`, [taskId, card_id, checklist_index ?? null]);
   if (existing) {
     res.status(409).json({ error: 'Link already exists' });
     return;
   }
 
   const id = uuidv4();
-  db.prepare(
-    'INSERT INTO task_cards (id, task_id, card_id, checklist_index) VALUES (?, ?, ?, ?)'
-  ).run(id, taskId, card_id, checklist_index ?? null);
+  await execute(`INSERT INTO task_cards (id, task_id, card_id, checklist_index) VALUES ($1, $2, $3, $4)`, [id, taskId, card_id, checklist_index ?? null]);
 
-  const link = db.prepare('SELECT * FROM task_cards WHERE id = ?').get(id);
+  const link = await queryOne(`SELECT * FROM task_cards WHERE id = $1`, [id]);
   res.status(201).json(link);
 });
 
 // DELETE /api/tasks/:taskId/cards/:linkId — remove a task-card link
-router.delete('/:taskId/cards/:linkId', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.delete('/:taskId/cards/:linkId', async (req: AuthRequest, res: Response) => {
   const { taskId, linkId } = req.params;
 
   // Verify task belongs to user
-  const task = db.prepare('SELECT id FROM tasks WHERE id = ? AND user_id = ?').get(taskId, req.userId!);
+  const task = await queryOne(`SELECT id FROM tasks WHERE id = $1 AND user_id = $2`, [taskId, req.userId!]);
   if (!task) {
     throw new AppError(404, 'Task not found');
   }
 
-  const result = db.prepare('DELETE FROM task_cards WHERE id = ? AND task_id = ?').run(linkId, taskId);
+  const result = await execute(`DELETE FROM task_cards WHERE id = $1 AND task_id = $2`, [linkId, taskId]);
   if (result.changes === 0) {
     throw new AppError(404, 'Link not found');
   }

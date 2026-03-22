@@ -1,6 +1,5 @@
 import { Router, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { rateCardSchema } from '../validators/index.js';
@@ -8,13 +7,13 @@ import { ZodError } from 'zod';
 import { createEmptyCard, fsrs, generatorParameters, Rating, State } from 'ts-fsrs';
 import type { Card as FSRSCard } from 'ts-fsrs';
 
+import { execute, queryAll, queryOne } from '../db/pool.js';
+
 const router = Router();
 const f = fsrs(generatorParameters());
 
-function getCardTags(db: ReturnType<typeof getDb>, cardId: unknown) {
-  return db.prepare(
-    'SELECT t.* FROM tags t INNER JOIN card_tags ct ON ct.tag_id = t.id WHERE ct.card_id = ?'
-  ).all(cardId);
+function getCardTags(cardId: unknown) {
+  return await queryAll(`SELECT t.* FROM tags t INNER JOIN card_tags ct ON ct.tag_id = t.id WHERE ct.card_id = $1`, [cardId]);
 }
 
 function parseCardContent(card: any) {
@@ -25,8 +24,7 @@ function parseCardContent(card: any) {
 }
 
 // GET /api/review/due
-router.get('/due', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.get('/due', async (req: AuthRequest, res: Response) => {
   const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
   const deckId = req.query.deckId as string | undefined;
   const sectionId = req.query.sectionId as string | undefined;
@@ -64,7 +62,7 @@ router.get('/due', (req: AuthRequest, res: Response) => {
 
   sql += ` ORDER BY c.fsrs_reps ASC, c.fsrs_next_review ASC`;
 
-  const cards = db.prepare(sql).all(...params) as any[];
+  const cards = await queryAll(sql, params)[];
 
   const result = cards.map(card => {
     parseCardContent(card);
@@ -75,25 +73,20 @@ router.get('/due', (req: AuthRequest, res: Response) => {
 });
 
 // GET /api/review/due/count
-router.get('/due/count', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.get('/due/count', async (req: AuthRequest, res: Response) => {
   const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
 
-  const row = db.prepare(
-    `SELECT COUNT(*) as count FROM cards
-     WHERE user_id = ? AND (fsrs_next_review <= ? OR fsrs_reps = 0)`
-  ).get(req.userId!, date + 'T23:59:59') as any;
+  const row = await queryOne(`SELECT COUNT(*) as count FROM cards
+     WHERE user_id = $1 AND (fsrs_next_review <= $2 OR fsrs_reps = 0)`, [req.userId!, date + 'T23:59:59']);
 
   res.json({ count: row.count });
 });
 
 // POST /api/review/:cardId/rate
-router.post('/:cardId/rate', (req: AuthRequest, res: Response) => {
+router.post('/:cardId/rate', async (req: AuthRequest, res: Response) => {
   try {
     const data = rateCardSchema.parse(req.body);
-    const db = getDb();
-
-    const card = db.prepare('SELECT * FROM cards WHERE id = ? AND user_id = ?').get(req.params.cardId, req.userId!) as any;
+    const card = await queryOne(`SELECT * FROM cards WHERE id = $1 AND user_id = $2`, [req.params.cardId, req.userId!]);
     if (!card) {
       throw new AppError(404, 'Card not found');
     }
@@ -139,19 +132,16 @@ router.post('/:cardId/rate', (req: AuthRequest, res: Response) => {
 
     // Update card in database
     const updatedAt = now.toISOString();
-    db.prepare(
-      `UPDATE cards SET
-        fsrs_stability = ?,
-        fsrs_difficulty = ?,
-        fsrs_last_review = ?,
-        fsrs_next_review = ?,
-        fsrs_reps = ?,
-        updated_at = ?
-       WHERE id = ?`
-    ).run(
-      newCard.stability,
+    await execute(`UPDATE cards SET
+        fsrs_stability = $1,
+        fsrs_difficulty = $2,
+        fsrs_last_review = $3,
+        fsrs_next_review = $4,
+        fsrs_reps = $5,
+        updated_at = $6
+       WHERE id = $7`, [newCard.stability,
       newCard.difficulty,
-      newCard.last_review ? (newCard.last_review as Date).toISOString() : updatedAt,
+      newCard.last_review ? (newCard.last_review as Date]).toISOString() : updatedAt,
       newCard.due.toISOString(),
       newCard.reps,
       updatedAt,
@@ -160,11 +150,9 @@ router.post('/:cardId/rate', (req: AuthRequest, res: Response) => {
 
     // Log activity
     const activityDate = now.toISOString().split('T')[0];
-    db.prepare(
-      'INSERT INTO study_activity_log (id, user_id, date, activity_type, entity_id, entity_type) VALUES (?, ?, ?, ?, ?, ?)'
-    ).run(uuidv4(), req.userId!, activityDate, 'card_reviewed', req.params.cardId, 'card');
+    await execute(`INSERT INTO study_activity_log (id, user_id, date, activity_type, entity_id, entity_type) VALUES ($1, $2, $3, $4, $5, $6)`, [uuidv4(]), req.userId!, activityDate, 'card_reviewed', req.params.cardId, 'card');
 
-    const updated = db.prepare('SELECT * FROM cards WHERE id = ?').get(req.params.cardId) as any;
+    const updated = await queryOne(`SELECT * FROM cards WHERE id = $1`, [req.params.cardId]);
     parseCardContent(updated);
     updated.tags = getCardTags(db, req.params.cardId);
 
@@ -189,30 +177,20 @@ router.post('/:cardId/rate', (req: AuthRequest, res: Response) => {
 });
 
 // GET /api/review/browse — deck→section→card tree for custom selector
-router.get('/browse', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-
-  const decks = db.prepare(
-    'SELECT id, name, course_id FROM card_decks WHERE user_id = ? ORDER BY name'
-  ).all(req.userId!) as any[];
+router.get('/browse', async (req: AuthRequest, res: Response) => {
+  const decks = await queryAll(`SELECT id, name, course_id FROM card_decks WHERE user_id = $1 ORDER BY name`, [req.userId!]);
 
   const result = decks.map((deck: any) => {
-    const sections = db.prepare(
-      'SELECT id, name FROM card_sections WHERE deck_id = ? ORDER BY order_index'
-    ).all(deck.id) as any[];
+    const sections = await queryAll(`SELECT id, name FROM card_sections WHERE deck_id = $1 ORDER BY order_index`, [deck.id]);
 
-    const unsectionedCards = db.prepare(
-      `SELECT id, title, fsrs_reps, fsrs_next_review
-       FROM cards WHERE deck_id = ? AND section_id IS NULL AND user_id = ?
-       ORDER BY order_index`
-    ).all(deck.id, req.userId!) as any[];
+    const unsectionedCards = await queryAll(`SELECT id, title, fsrs_reps, fsrs_next_review
+       FROM cards WHERE deck_id = $1 AND section_id IS NULL AND user_id = $2
+       ORDER BY order_index`, [deck.id, req.userId!]);
 
     const sectionData = sections.map((section: any) => {
-      const cards = db.prepare(
-        `SELECT id, title, fsrs_reps, fsrs_next_review
-         FROM cards WHERE section_id = ? AND user_id = ?
-         ORDER BY order_index`
-      ).all(section.id, req.userId!) as any[];
+      const cards = await queryAll(`SELECT id, title, fsrs_reps, fsrs_next_review
+         FROM cards WHERE section_id = $1 AND user_id = $2
+         ORDER BY order_index`, [section.id, req.userId!]);
       return { ...section, cards };
     });
 
@@ -227,7 +205,7 @@ router.get('/browse', (req: AuthRequest, res: Response) => {
 });
 
 // POST /api/review/custom — review arbitrary card IDs
-router.post('/custom', (req: AuthRequest, res: Response) => {
+router.post('/custom', async (req: AuthRequest, res: Response) => {
   const { card_ids } = req.body;
   if (!Array.isArray(card_ids) || card_ids.length === 0) {
     throw new AppError(400, 'card_ids must be a non-empty array');
@@ -235,16 +213,12 @@ router.post('/custom', (req: AuthRequest, res: Response) => {
   if (card_ids.length > 500) {
     throw new AppError(400, 'Maximum 500 cards per custom review session');
   }
-
-  const db = getDb();
   const placeholders = card_ids.map(() => '?').join(',');
-  const cards = db.prepare(
-    `SELECT c.*, cd.name as deck_name, cd.course_id
+  const cards = await queryAll(`SELECT c.*, cd.name as deck_name, cd.course_id
      FROM cards c
      INNER JOIN card_decks cd ON cd.id = c.deck_id
-     WHERE c.id IN (${placeholders}) AND c.user_id = ?
-     ORDER BY c.fsrs_reps ASC, c.fsrs_next_review ASC`
-  ).all(...card_ids, req.userId!) as any[];
+     WHERE c.id IN (${placeholders}) AND c.user_id = $1
+     ORDER BY c.fsrs_reps ASC, c.fsrs_next_review ASC`, [...card_ids, req.userId!]);
 
   const result = cards.map(card => {
     parseCardContent(card);

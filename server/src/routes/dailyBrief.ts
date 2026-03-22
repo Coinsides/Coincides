@@ -1,30 +1,26 @@
 import { Router, Response } from 'express';
-import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { getBlocksForDate } from './timeBlocks.js';
+
+import { queryAll, queryOne } from '../db/pool.js';
 
 const router = Router();
 
 // GET /api/daily-brief
-router.get('/', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.get('/', async (req: AuthRequest, res: Response) => {
   const today = new Date().toISOString().split('T')[0];
   const userId = req.userId!;
 
   // Get active exam mode goals
-  const examGoals = db.prepare(
-    `SELECT g.id, g.title, g.course_id, g.deadline, c.name as course_name
+  const examGoals = await queryAll(`SELECT g.id, g.title, g.course_id, g.deadline, c.name as course_name
      FROM goals g JOIN courses c ON g.course_id = c.id
-     WHERE g.user_id = ? AND g.exam_mode = 1 AND g.status = 'active' AND g.deadline >= ?`
-  ).all(userId, today) as any[];
+     WHERE g.user_id = $1 AND g.exam_mode = 1 AND g.status = 'active' AND g.deadline >= $2`, [userId, today]);
 
   const examCourseIds = new Set<string>(examGoals.map((g: any) => g.course_id));
   const examModeActive = examGoals.length > 0;
 
   // Get today's tasks grouped by priority
-  const allTasks = db.prepare(
-    'SELECT * FROM tasks WHERE user_id = ? AND date = ? ORDER BY order_index ASC, created_at ASC'
-  ).all(userId, today) as any[];
+  const allTasks = await queryAll(`SELECT * FROM tasks WHERE user_id = $1 AND date = $2 ORDER BY order_index ASC, created_at ASC`, [userId, today]);
 
   // Apply exam mode filtering + boost
   const tasks = allTasks
@@ -45,17 +41,13 @@ router.get('/', (req: AuthRequest, res: Response) => {
 
   // Conflict arbitration sorting within each priority tier
   // Get goal deadlines for ranking
-  const goalDeadlines = db.prepare(
-    `SELECT g.course_id, MIN(g.deadline) as nearest_deadline
-     FROM goals g WHERE g.user_id = ? AND g.status = 'active' AND g.deadline IS NOT NULL
-     GROUP BY g.course_id`
-  ).all(userId) as { course_id: string; nearest_deadline: string }[];
+  const goalDeadlines = await queryAll(`SELECT g.course_id, MIN(g.deadline) as nearest_deadline
+     FROM goals g WHERE g.user_id = $1 AND g.status = 'active' AND g.deadline IS NOT NULL
+     GROUP BY g.course_id`, [userId])as { course_id: string; nearest_deadline: string }[];
   const deadlineMap = new Map(goalDeadlines.map(g => [g.course_id, g.nearest_deadline]));
 
   // Get course weights
-  const courseWeights = db.prepare(
-    'SELECT id, weight FROM courses WHERE user_id = ?'
-  ).all(userId) as { id: string; weight: number }[];
+  const courseWeights = await queryAll(`SELECT id, weight FROM courses WHERE user_id = $1`, [userId])as { id: string; weight: number }[];
   const weightMap = new Map(courseWeights.map(c => [c.id, c.weight]));
 
   function sortTasks(taskList: any[]): any[] {
@@ -85,15 +77,11 @@ router.get('/', (req: AuthRequest, res: Response) => {
   const optionalTasks = sortTasks(tasks.filter(t => t.priority === 'optional'));
 
   // Cards due for review
-  const dueRow = db.prepare(
-    'SELECT COUNT(*) as count FROM cards WHERE user_id = ? AND (fsrs_next_review <= ? OR fsrs_reps = 0)'
-  ).get(userId, today + 'T23:59:59') as any;
+  const dueRow = await queryOne(`SELECT COUNT(*) as count FROM cards WHERE user_id = $1 AND (fsrs_next_review <= $2 OR fsrs_reps = 0)`, [userId, today + 'T23:59:59']);
   const cardsDueCount = dueRow.count;
 
   // Recurring task progress alerts
-  const groups = db.prepare(
-    'SELECT * FROM recurring_task_groups WHERE user_id = ? AND end_date >= ?'
-  ).all(userId, today) as any[];
+  const groups = await queryAll(`SELECT * FROM recurring_task_groups WHERE user_id = $1 AND end_date >= $2`, [userId, today]);
 
   const recurringAlerts = [];
 
@@ -109,9 +97,7 @@ router.get('/', (req: AuthRequest, res: Response) => {
     const expectedProgress = Math.round((daysPassed / totalDays) * group.total_tasks);
 
     // Get actual completed count
-    const stats = db.prepare(
-      'SELECT SUM(CASE WHEN status = \'completed\' THEN 1 ELSE 0 END) as completed FROM tasks WHERE recurring_group_id = ?'
-    ).get(group.id) as any;
+    const stats = await queryOne(`SELECT SUM(CASE WHEN status = \'completed\' THEN 1 ELSE 0 END) as completed FROM tasks WHERE recurring_group_id = $1`, [group.id]);
 
     const completed = stats.completed || 0;
     const daysBehind = Math.max(0, expectedProgress - completed);
@@ -128,9 +114,7 @@ router.get('/', (req: AuthRequest, res: Response) => {
   }
 
   // Get today's energy level
-  const dailyStatus = db.prepare(
-    'SELECT energy_level FROM daily_statuses WHERE user_id = ? AND date = ?'
-  ).get(userId, today) as any;
+  const dailyStatus = await queryOne(`SELECT energy_level FROM daily_statuses WHERE user_id = $1 AND date = $2`, [userId, today]);
 
   // Minimum Working Flow (no estimated_minutes — §3: 不制造挫败感)
   const mustPendingCount = mustTasks.filter((t: any) => t.status === 'pending').length;

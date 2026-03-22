@@ -1,21 +1,20 @@
 import { Router, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { createRecurringTaskSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
 
+import { execute, queryAll, queryOne, transaction } from '../db/pool.js';
+
 const router = Router();
 
 // POST /api/recurring-tasks
-router.post('/', (req: AuthRequest, res: Response) => {
+router.post('/', async (req: AuthRequest, res: Response) => {
   try {
     const data = createRecurringTaskSchema.parse(req.body);
-    const db = getDb();
-
     // Verify course belongs to user
-    const course = db.prepare('SELECT id FROM courses WHERE id = ? AND user_id = ?').get(data.course_id, req.userId!);
+    const course = await queryOne(`SELECT id FROM courses WHERE id = $1 AND user_id = $2`, [data.course_id, req.userId!]);
     if (!course) {
       throw new AppError(404, 'Course not found');
     }
@@ -35,19 +34,12 @@ router.post('/', (req: AuthRequest, res: Response) => {
     const msPerDay = 24 * 60 * 60 * 1000;
     const totalDays = Math.floor((endDate.getTime() - startDate.getTime()) / msPerDay) + 1;
 
-    const createAll = db.transaction(() => {
+    const createAll = await transaction(async (client) => {
       // Create recurring task group
-      db.prepare(
-        `INSERT INTO recurring_task_groups (id, user_id, goal_id, title, total_tasks, completed_tasks, start_date, end_date, created_at)
-         VALUES (?, ?, ?, ?, ?, 0, ?, ?, ?)`
-      ).run(groupId, req.userId!, data.goal_id || null, data.title, totalTasks, data.start_date, data.end_date, now);
+      await execute(`INSERT INTO recurring_task_groups (id, user_id, goal_id, title, total_tasks, completed_tasks, start_date, end_date, created_at)
+         VALUES ($1, $2, $3, $4, $5, 0, $6, $7, $8)`, [groupId, req.userId!, data.goal_id || null, data.title, totalTasks, data.start_date, data.end_date, now]);
 
       // Generate individual tasks distributed across the date range
-      const insertTask = db.prepare(
-        `INSERT INTO tasks (id, user_id, course_id, goal_id, recurring_group_id, title, date, priority, status, order_index, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?)`
-      );
-
       for (let i = 0; i < totalTasks; i++) {
         // Distribute tasks evenly across date range
         const dayOffset = totalTasks > 1
@@ -57,8 +49,8 @@ router.post('/', (req: AuthRequest, res: Response) => {
         const taskDate = new Date(startDate.getTime() + dayOffset * msPerDay);
         const dateStr = taskDate.toISOString().split('T')[0];
 
-        insertTask.run(
-          uuidv4(),
+        await execute(`INSERT INTO tasks (id, user_id, course_id, goal_id, recurring_group_id, title, date, priority, status, order_index, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending', $9, $10, $11)`, [uuidv4(]),
           req.userId!,
           data.course_id,
           data.goal_id || null,
@@ -76,8 +68,8 @@ router.post('/', (req: AuthRequest, res: Response) => {
     createAll();
 
     // Return group with tasks
-    const group = db.prepare('SELECT * FROM recurring_task_groups WHERE id = ?').get(groupId);
-    const tasks = db.prepare('SELECT * FROM tasks WHERE recurring_group_id = ? ORDER BY date ASC').all(groupId);
+    const group = await queryOne(`SELECT * FROM recurring_task_groups WHERE id = $1`, [groupId]);
+    const tasks = await queryAll(`SELECT * FROM tasks WHERE recurring_group_id = $1 ORDER BY date ASC`, [groupId]);
 
     res.status(201).json({ group, tasks });
   } catch (err) {
@@ -90,18 +82,14 @@ router.post('/', (req: AuthRequest, res: Response) => {
 });
 
 // GET /api/recurring-tasks/:id
-router.get('/:id', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-
-  const group = db.prepare('SELECT * FROM recurring_task_groups WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!) as any;
+router.get('/:id', async (req: AuthRequest, res: Response) => {
+  const group = await queryOne(`SELECT * FROM recurring_task_groups WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
   if (!group) {
     throw new AppError(404, 'Recurring task group not found');
   }
 
   // Get actual completed count from tasks
-  const stats = db.prepare(
-    'SELECT COUNT(*) as total, SUM(CASE WHEN status = \'completed\' THEN 1 ELSE 0 END) as completed FROM tasks WHERE recurring_group_id = ?'
-  ).get(req.params.id) as any;
+  const stats = await queryOne(`SELECT COUNT(*) as total, SUM(CASE WHEN status = \'completed\' THEN 1 ELSE 0 END) as completed FROM tasks WHERE recurring_group_id = $1`, [req.params.id]);
 
   res.json({
     ...group,
@@ -113,16 +101,14 @@ router.get('/:id', (req: AuthRequest, res: Response) => {
 });
 
 // DELETE /api/recurring-tasks/:id
-router.delete('/:id', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-
-  const group = db.prepare('SELECT id FROM recurring_task_groups WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!);
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
+  const group = await queryOne(`SELECT id FROM recurring_task_groups WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
   if (!group) {
     throw new AppError(404, 'Recurring task group not found');
   }
 
   // CASCADE handles task deletion via FK constraints
-  db.prepare('DELETE FROM recurring_task_groups WHERE id = ?').run(req.params.id);
+  await execute(`DELETE FROM recurring_task_groups WHERE id = $1`, [req.params.id]);
 
   res.json({ message: 'Recurring task group and all its tasks deleted' });
 });

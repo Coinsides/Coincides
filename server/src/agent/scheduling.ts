@@ -1,3 +1,4 @@
+import { queryAll, queryOne } from '../db/pool.js';
 /**
  * Coincides v1.3 — Task Scheduling Engine
  *
@@ -13,8 +14,6 @@
  *   - estimated_minutes is internal only, never exposed to user
  *   - Only moves 'pending' tasks during rescheduling
  */
-
-import { getDb } from '../db/init.js';
 
 // ── Types ──────────────────────────────────────────────
 
@@ -66,8 +65,6 @@ const DEFAULT_TASK_MINUTES = 30; // fallback estimate
  * Returns goal IDs ordered so prerequisites come first.
  */
 export function getGoalTopologicalOrder(userId: string, courseId?: string): string[] {
-  const db = getDb();
-
   let goalsQuery = 'SELECT id FROM goals WHERE user_id = ?';
   const params: unknown[] = [userId];
   if (courseId) {
@@ -75,14 +72,16 @@ export function getGoalTopologicalOrder(userId: string, courseId?: string): stri
     params.push(courseId);
   }
 
-  const goals = db.prepare(goalsQuery).all(...params) as Array<{ id: string }>;
+  const goals = await queryAll(goalsQuery, params);
   const goalIds = new Set(goals.map(g => g.id));
 
   // Build adjacency: goal_id depends_on depends_on_goal_id
-  const deps = db.prepare(
-    'SELECT goal_id, depends_on_goal_id FROM goal_dependencies WHERE goal_id IN (' +
-    Array.from(goalIds).map(() => '?').join(',') + ')'
-  ).all(...Array.from(goalIds)) as Array<{ goal_id: string; depends_on_goal_id: string }>;
+  const goalIdArr = Array.from(goalIds);
+  const placeholders = goalIdArr.map((_, i) => `$${i + 1}`).join(',');
+  const deps = await queryAll(
+    `SELECT goal_id, depends_on_goal_id FROM goal_dependencies WHERE goal_id IN (${placeholders})`,
+    goalIdArr
+  ) as Array<{ goal_id: string; depends_on_goal_id: string }>;
 
   // Build in-degree map + adjacency list
   const inDegree = new Map<string, number>();
@@ -130,7 +129,6 @@ function hhmmToMin(t: string): number {
  *   available = Study Block total − Σ(non-study blocks nested inside study block)
  */
 export function getDailyCapacities(userId: string, startDate: string, endDate: string): DayCapacity[] {
-  const db = getDb();
   const capacities: DayCapacity[] = [];
 
   const start = new Date(startDate);
@@ -141,9 +139,7 @@ export function getDailyCapacities(userId: string, startDate: string, endDate: s
     const dow = d.getDay(); // 0=Sun
 
     // v1.7.3: Get date-based time block instances directly
-    const blocks = db.prepare(
-      'SELECT id, start_time, end_time, type FROM time_blocks WHERE user_id = ? AND date = ?'
-    ).all(userId, dateStr) as Array<{ id: string; start_time: string; end_time: string; type: string }>;
+    const blocks = await queryAll(`SELECT id, start_time, end_time, type FROM time_blocks WHERE user_id = $1 AND date = $2`, [userId, dateStr])<{ id: string; start_time: string; end_time: string; type: string }>;
 
     const resolved: Array<{ id: string; type: string; startMin: number; endMin: number }> = [];
     for (const b of blocks) {
@@ -180,9 +176,7 @@ export function getDailyCapacities(userId: string, startDate: string, endDate: s
     const netStudyMinutes = Math.max(0, studyMinutes - nestedSubtract);
 
     // Count existing tasks
-    const existing = db.prepare(
-      'SELECT COUNT(*) as cnt FROM tasks WHERE user_id = ? AND date = ? AND status = ?'
-    ).get(userId, dateStr, 'pending') as { cnt: number };
+    const existing = await queryOne(`SELECT COUNT(*) as cnt FROM tasks WHERE user_id = $1 AND date = $2 AND status = $3`, [userId, dateStr, 'pending'])as { cnt: number };
 
     capacities.push({
       date: dateStr,

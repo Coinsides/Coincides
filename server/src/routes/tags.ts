@@ -1,42 +1,38 @@
 import { Router, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { createTagSchema, updateTagSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
 
+import { execute, queryAll, queryOne } from '../db/pool.js';
+
 const router = Router();
 
 // GET /api/tags?course_id=xxx
-router.get('/', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.get('/', async (req: AuthRequest, res: Response) => {
   const courseId = req.query.course_id as string | undefined;
 
   if (courseId) {
     // Return tags for a specific course (via tag_groups)
-    const tags = db.prepare(
-      `SELECT t.* FROM tags t
+    const tags = await queryAll(`SELECT t.* FROM tags t
        INNER JOIN tag_groups tg ON t.tag_group_id = tg.id
-       WHERE tg.course_id = ? AND t.user_id = ?
-       ORDER BY tg.order_index ASC, t.name ASC`
-    ).all(courseId, req.userId!);
+       WHERE tg.course_id = $1 AND t.user_id = $2
+       ORDER BY tg.order_index ASC, t.name ASC`, [courseId, req.userId!]);
     res.json(tags);
   } else {
     // Return all user tags (backwards compatible)
-    const tags = db.prepare('SELECT * FROM tags WHERE user_id = ? ORDER BY is_system DESC, name ASC').all(req.userId!);
+    const tags = await queryAll(`SELECT * FROM tags WHERE user_id = $1 ORDER BY is_system DESC, name ASC`, [req.userId!]);
     res.json(tags);
   }
 });
 
 // POST /api/tags
-router.post('/', (req: AuthRequest, res: Response) => {
+router.post('/', async (req: AuthRequest, res: Response) => {
   try {
     const data = createTagSchema.parse(req.body);
-    const db = getDb();
-
     // Check uniqueness
-    const existing = db.prepare('SELECT id FROM tags WHERE user_id = ? AND name = ?').get(req.userId!, data.name);
+    const existing = await queryOne(`SELECT id FROM tags WHERE user_id = $1 AND name = $2`, [req.userId!, data.name]);
     if (existing) {
       throw new AppError(409, 'A tag with this name already exists');
     }
@@ -44,11 +40,9 @@ router.post('/', (req: AuthRequest, res: Response) => {
     const id = uuidv4();
     const now = new Date().toISOString();
 
-    db.prepare(
-      'INSERT INTO tags (id, user_id, name, is_system, color, tag_group_id, created_at) VALUES (?, ?, ?, 0, ?, ?, ?)'
-    ).run(id, req.userId!, data.name, data.color || null, data.tag_group_id || null, now);
+    await execute(`INSERT INTO tags (id, user_id, name, is_system, color, tag_group_id, created_at) VALUES ($1, $2, $3, 0, $4, $5, $6)`, [id, req.userId!, data.name, data.color || null, data.tag_group_id || null, now]);
 
-    const tag = db.prepare('SELECT * FROM tags WHERE id = ?').get(id);
+    const tag = await queryOne(`SELECT * FROM tags WHERE id = $1`, [id]);
     res.status(201).json(tag);
   } catch (err) {
     if (err instanceof ZodError) {
@@ -60,12 +54,10 @@ router.post('/', (req: AuthRequest, res: Response) => {
 });
 
 // PUT /api/tags/:id
-router.put('/:id', (req: AuthRequest, res: Response) => {
+router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const data = updateTagSchema.parse(req.body);
-    const db = getDb();
-
-    const existing = db.prepare('SELECT * FROM tags WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!) as any;
+    const existing = await queryOne(`SELECT * FROM tags WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
     if (!existing) {
       throw new AppError(404, 'Tag not found');
     }
@@ -75,7 +67,7 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
 
     if (data.name !== undefined) {
       // Check uniqueness of new name
-      const duplicate = db.prepare('SELECT id FROM tags WHERE user_id = ? AND name = ? AND id != ?').get(req.userId!, data.name, req.params.id);
+      const duplicate = await queryOne(`SELECT id FROM tags WHERE user_id = $1 AND name = $2 AND id != $3`, [req.userId!, data.name, req.params.id]);
       if (duplicate) {
         throw new AppError(409, 'A tag with this name already exists');
       }
@@ -89,9 +81,9 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     }
 
     values.push(req.params.id);
-    db.prepare(`UPDATE tags SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+    await execute(`UPDATE tags SET ${fields.join(', ')} WHERE id = $1`, [...values]);
 
-    const updated = db.prepare('SELECT * FROM tags WHERE id = ?').get(req.params.id);
+    const updated = await queryOne(`SELECT * FROM tags WHERE id = $1`, [req.params.id]);
     res.json(updated);
   } catch (err) {
     if (err instanceof ZodError) {
@@ -103,16 +95,14 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
 });
 
 // DELETE /api/tags/:id
-router.delete('/:id', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-
-  const existing = db.prepare('SELECT * FROM tags WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!) as any;
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
+  const existing = await queryOne(`SELECT * FROM tags WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
   if (!existing) {
     throw new AppError(404, 'Tag not found');
   }
 
   // CASCADE handles card_tags cleanup via FK constraints
-  db.prepare('DELETE FROM tags WHERE id = ?').run(req.params.id);
+  await execute(`DELETE FROM tags WHERE id = $1`, [req.params.id]);
 
   res.json({ message: 'Tag deleted' });
 });

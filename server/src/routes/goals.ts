@@ -1,10 +1,11 @@
 import { Router, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { createGoalSchema, updateGoalSchema, createTaskSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
+
+import { execute, queryAll, queryOne, transaction } from '../db/pool.js';
 
 const router = Router();
 
@@ -16,8 +17,7 @@ function parseTask(task: any): any {
 }
 
 // GET /api/goals
-router.get('/', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.get('/', async (req: AuthRequest, res: Response) => {
   const { course_id, parent_id } = req.query;
 
   let query = 'SELECT * FROM goals WHERE user_id = ?';
@@ -37,14 +37,11 @@ router.get('/', (req: AuthRequest, res: Response) => {
 
   query += ' ORDER BY sort_order ASC, created_at ASC';
 
-  const goals = db.prepare(query).all(...params) as any[];
+  const goals = await queryAll(query, params)[];
 
   // Enrich each goal with its dependency info
-  const depsStmt = db.prepare(
-    'SELECT depends_on_goal_id FROM goal_dependencies WHERE goal_id = ?'
-  );
   for (const goal of goals) {
-    const deps = depsStmt.all(goal.id) as Array<{ depends_on_goal_id: string }>;
+    const deps = await queryAll(`SELECT depends_on_goal_id FROM goal_dependencies WHERE goal_id = $1`, [goal.id])<{ depends_on_goal_id: string }>;
     goal.dependencies = deps.map(d => d.depends_on_goal_id);
   }
 
@@ -52,37 +49,29 @@ router.get('/', (req: AuthRequest, res: Response) => {
 });
 
 // GET /api/goals/:id/children
-router.get('/:id/children', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-
-  const goal = db.prepare('SELECT * FROM goals WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!);
+router.get('/:id/children', async (req: AuthRequest, res: Response) => {
+  const goal = await queryOne(`SELECT * FROM goals WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
   if (!goal) {
     throw new AppError(404, 'Goal not found');
   }
 
-  const children = db.prepare('SELECT * FROM goals WHERE parent_id = ? AND user_id = ? ORDER BY sort_order ASC, created_at ASC').all(req.params.id, req.userId!);
+  const children = await queryAll(`SELECT * FROM goals WHERE parent_id = $1 AND user_id = $2 ORDER BY sort_order ASC, created_at ASC`, [req.params.id, req.userId!]);
   res.json(children);
 });
 
 // GET /api/goals/:id/progress — compute progress for a goal and its descendants
-router.get('/:id/progress', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-
-  const goal = db.prepare('SELECT * FROM goals WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!) as any;
+router.get('/:id/progress', async (req: AuthRequest, res: Response) => {
+  const goal = await queryOne(`SELECT * FROM goals WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
   if (!goal) {
     throw new AppError(404, 'Goal not found');
   }
 
   // Get all tasks under this goal
-  const directTasks = db.prepare(
-    'SELECT id, status FROM tasks WHERE goal_id = ? AND user_id = ?'
-  ).all(req.params.id, req.userId!) as any[];
+  const directTasks = await queryAll(`SELECT id, status FROM tasks WHERE goal_id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
 
   // Get all descendant goals recursively
   function getDescendantGoalIds(parentId: string): string[] {
-    const children = db.prepare(
-      'SELECT id FROM goals WHERE parent_id = ? AND user_id = ?'
-    ).all(parentId, req.userId!) as any[];
+    const children = await queryAll(`SELECT id FROM goals WHERE parent_id = $1 AND user_id = $2`, [parentId, req.userId!]);
     const ids: string[] = [];
     for (const child of children) {
       ids.push(child.id);
@@ -98,9 +87,7 @@ router.get('/:id/progress', (req: AuthRequest, res: Response) => {
   let descendantTasks: any[] = [];
   if (descendantIds.length > 0) {
     const placeholders = descendantIds.map(() => '?').join(',');
-    descendantTasks = db.prepare(
-      `SELECT id, status FROM tasks WHERE goal_id IN (${placeholders}) AND user_id = ?`
-    ).all(...descendantIds, req.userId!) as any[];
+    descendantTasks = await queryAll(`SELECT id, status FROM tasks WHERE goal_id IN (${placeholders}) AND user_id = $1`, [...descendantIds, req.userId!]);
   }
 
   const allTasks = [...directTasks, ...descendantTasks];
@@ -109,9 +96,7 @@ router.get('/:id/progress', (req: AuthRequest, res: Response) => {
   const progress = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   // Get direct children count
-  const childrenCount = db.prepare(
-    'SELECT COUNT(*) as count FROM goals WHERE parent_id = ? AND user_id = ?'
-  ).get(req.params.id, req.userId!) as any;
+  const childrenCount = await queryOne(`SELECT COUNT(*) as count FROM goals WHERE parent_id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
 
   res.json({
     goal_id: req.params.id,
@@ -124,8 +109,7 @@ router.get('/:id/progress', (req: AuthRequest, res: Response) => {
 });
 
 // PUT /api/goals/reorder — batch update sort_order and parent_id
-router.put('/reorder', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.put('/reorder', async (req: AuthRequest, res: Response) => {
   const { items } = req.body;
 
   if (!Array.isArray(items)) {
@@ -139,39 +123,31 @@ router.put('/reorder', (req: AuthRequest, res: Response) => {
     }
   }
 
-  const updateStmt = db.prepare(
-    'UPDATE goals SET sort_order = ?, parent_id = ?, updated_at = ? WHERE id = ? AND user_id = ?'
-  );
-
   const now = new Date().toISOString();
 
-  db.transaction(() => {
+  await transaction(async (client) => {
     for (const item of items) {
-      updateStmt.run(
-        item.sort_order,
+      await execute(`UPDATE goals SET sort_order = $1, parent_id = $2, updated_at = $3 WHERE id = $4 AND user_id = $5`, [item.sort_order,
         item.parent_id ?? null,
         now,
         item.id,
-        req.userId!
-      );
+        req.userId!]);
     }
-  })();
+  });
 
   // Return updated goals
-  const goals = db.prepare('SELECT * FROM goals WHERE user_id = ? ORDER BY sort_order ASC, created_at ASC').all(req.userId!);
+  const goals = await queryAll(`SELECT * FROM goals WHERE user_id = $1 ORDER BY sort_order ASC, created_at ASC`, [req.userId!]);
   res.json(goals);
 });
 
 // POST /api/goals
-router.post('/', (req: AuthRequest, res: Response) => {
+router.post('/', async (req: AuthRequest, res: Response) => {
   try {
     const data = createGoalSchema.parse(req.body);
-    const db = getDb();
-
     // If parent_id is provided, verify parent exists and belongs to user
     let courseId = data.course_id;
     if (data.parent_id) {
-      const parent = db.prepare('SELECT * FROM goals WHERE id = ? AND user_id = ?').get(data.parent_id, req.userId!) as any;
+      const parent = await queryOne(`SELECT * FROM goals WHERE id = $1 AND user_id = $2`, [data.parent_id, req.userId!]);
       if (!parent) {
         throw new AppError(404, 'Parent goal not found');
       }
@@ -182,29 +158,25 @@ router.post('/', (req: AuthRequest, res: Response) => {
     }
 
     // Verify course belongs to user
-    const course = db.prepare('SELECT id FROM courses WHERE id = ? AND user_id = ?').get(courseId, req.userId!);
+    const course = await queryOne(`SELECT id FROM courses WHERE id = $1 AND user_id = $2`, [courseId, req.userId!]);
     if (!course) {
       throw new AppError(404, 'Course not found');
     }
 
     // Auto-assign sort_order: max + 1 among siblings
-    const maxOrder = db.prepare(
-      data.parent_id
-        ? 'SELECT COALESCE(MAX(sort_order), -1) as max_order FROM goals WHERE user_id = ? AND parent_id = ?'
-        : 'SELECT COALESCE(MAX(sort_order), -1) as max_order FROM goals WHERE user_id = ? AND parent_id IS NULL'
-    ).get(...(data.parent_id ? [req.userId!, data.parent_id] : [req.userId!])) as any;
+    const maxOrder = data.parent_id
+      ? await queryOne('SELECT COALESCE(MAX(sort_order), -1) as max_order FROM goals WHERE user_id = $1 AND parent_id = $2', [req.userId!, data.parent_id])
+      : await queryOne('SELECT COALESCE(MAX(sort_order), -1) as max_order FROM goals WHERE user_id = $1 AND parent_id IS NULL', [req.userId!]) as any;
 
     const sortOrder = (maxOrder?.max_order ?? -1) + 1;
 
     const id = uuidv4();
     const now = new Date().toISOString();
 
-    db.prepare(
-      `INSERT INTO goals (id, user_id, course_id, title, description, deadline, exam_mode, status, parent_id, sort_order, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?, ?, ?, ?)`
-    ).run(id, req.userId!, courseId, data.title, data.description || null, data.deadline || null, data.exam_mode ? 1 : 0, data.parent_id || null, sortOrder, now, now);
+    await execute(`INSERT INTO goals (id, user_id, course_id, title, description, deadline, exam_mode, status, parent_id, sort_order, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 'active', $8, $9, $10, $11)`, [id, req.userId!, courseId, data.title, data.description || null, data.deadline || null, data.exam_mode ? 1 : 0, data.parent_id || null, sortOrder, now, now]);
 
-    const goal = db.prepare('SELECT * FROM goals WHERE id = ?').get(id);
+    const goal = await queryOne(`SELECT * FROM goals WHERE id = $1`, [id]);
     res.status(201).json(goal);
   } catch (err) {
     if (err instanceof ZodError) {
@@ -216,12 +188,10 @@ router.post('/', (req: AuthRequest, res: Response) => {
 });
 
 // PUT /api/goals/:id
-router.put('/:id', (req: AuthRequest, res: Response) => {
+router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const data = updateGoalSchema.parse(req.body);
-    const db = getDb();
-
-    const existing = db.prepare('SELECT * FROM goals WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!);
+    const existing = await queryOne(`SELECT * FROM goals WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
     if (!existing) {
       throw new AppError(404, 'Goal not found');
     }
@@ -244,9 +214,9 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     values.push(new Date().toISOString());
     values.push(req.params.id);
 
-    db.prepare(`UPDATE goals SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+    await execute(`UPDATE goals SET ${fields.join(', ')} WHERE id = $1`, [...values]);
 
-    const updated = db.prepare('SELECT * FROM goals WHERE id = ?').get(req.params.id);
+    const updated = await queryOne(`SELECT * FROM goals WHERE id = $1`, [req.params.id]);
     res.json(updated);
   } catch (err) {
     if (err instanceof ZodError) {
@@ -258,10 +228,8 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
 });
 
 // PUT /api/goals/:id/exam-mode
-router.put('/:id/exam-mode', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-
-  const existing = db.prepare('SELECT * FROM goals WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!) as any;
+router.put('/:id/exam-mode', async (req: AuthRequest, res: Response) => {
+  const existing = await queryOne(`SELECT * FROM goals WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
   if (!existing) {
     throw new AppError(404, 'Goal not found');
   }
@@ -269,17 +237,16 @@ router.put('/:id/exam-mode', (req: AuthRequest, res: Response) => {
   const newExamMode = existing.exam_mode ? 0 : 1;
   const now = new Date().toISOString();
 
-  db.prepare('UPDATE goals SET exam_mode = ?, updated_at = ? WHERE id = ?').run(newExamMode, now, req.params.id);
+  await execute(`UPDATE goals SET exam_mode = $1, updated_at = $2 WHERE id = $3`, [newExamMode, now, req.params.id]);
 
-  const updated = db.prepare('SELECT * FROM goals WHERE id = ?').get(req.params.id);
+  const updated = await queryOne(`SELECT * FROM goals WHERE id = $1`, [req.params.id]);
   res.json(updated);
 });
 
 // POST /api/goals/:id/tasks — G-1 fix: add task to existing goal
-router.post('/:id/tasks', (req: AuthRequest, res: Response) => {
+router.post('/:id/tasks', async (req: AuthRequest, res: Response) => {
   try {
-    const db = getDb();
-    const goal = db.prepare('SELECT * FROM goals WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!) as any;
+    const goal = await queryOne(`SELECT * FROM goals WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
     if (!goal) throw new AppError(404, 'Goal not found');
 
     const data = createTaskSchema.parse(req.body);
@@ -290,12 +257,10 @@ router.post('/:id/tasks', (req: AuthRequest, res: Response) => {
     const id = uuidv4();
     const now = new Date().toISOString();
 
-    db.prepare(
-      `INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, order_index, start_time, end_time, description, checklist, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?)`
-    ).run(id, req.userId!, courseId, goal.id, data.title, data.date, data.priority || 'must', data.order_index ?? 0, data.start_time || null, data.end_time || null, data.description || null, data.checklist ? JSON.stringify(data.checklist) : null, now, now);
+    await execute(`INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, order_index, start_time, end_time, description, checklist, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending', $8, $9, $10, $11, $12, $13, $14)`, [id, req.userId!, courseId, goal.id, data.title, data.date, data.priority || 'must', data.order_index ?? 0, data.start_time || null, data.end_time || null, data.description || null, data.checklist ? JSON.stringify(data.checklist]) : null, now, now);
 
-    const task = db.prepare('SELECT * FROM tasks WHERE id = ?').get(id);
+    const task = await queryOne(`SELECT * FROM tasks WHERE id = $1`, [id]);
     res.status(201).json(parseTask(task));
   } catch (err) {
     if (err instanceof ZodError) {
@@ -307,10 +272,8 @@ router.post('/:id/tasks', (req: AuthRequest, res: Response) => {
 });
 
 // DELETE /api/goals/:id
-router.delete('/:id', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-
-  const existing = db.prepare('SELECT id FROM goals WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!);
+router.delete('/:id', async (req: AuthRequest, res: Response) => {
+  const existing = await queryOne(`SELECT id FROM goals WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
   if (!existing) {
     throw new AppError(404, 'Goal not found');
   }
@@ -321,7 +284,7 @@ router.delete('/:id', (req: AuthRequest, res: Response) => {
   // explicitly before deleting the goal. We also need to collect sub-goal IDs because
   // once the parent goal is deleted, sub-goals vanish and their task.goal_id becomes NULL.
   const collectGoalIds = (parentId: string): string[] => {
-    const children = db.prepare('SELECT id FROM goals WHERE parent_id = ?').all(parentId) as { id: string }[];
+    const children = await queryAll(`SELECT id FROM goals WHERE parent_id = $1`, [parentId])as { id: string }[];
     const ids = [parentId];
     for (const child of children) {
       ids.push(...collectGoalIds(child.id));
@@ -332,13 +295,13 @@ router.delete('/:id', (req: AuthRequest, res: Response) => {
   const goalId = req.params.id as string;
   const allGoalIds = collectGoalIds(goalId);
 
-  const deleteTransaction = db.transaction(() => {
+  const deleteTransaction = await transaction(async (client) => {
     // Delete all tasks under these goals (task_cards cleaned via ON DELETE CASCADE on task_id)
     const placeholders = allGoalIds.map(() => '?').join(',');
-    db.prepare(`DELETE FROM tasks WHERE goal_id IN (${placeholders}) AND user_id = ?`).run(...allGoalIds, req.userId!);
+    await execute(`DELETE FROM tasks WHERE goal_id IN (${placeholders}) AND user_id = $1`, [...allGoalIds, req.userId!]);
 
     // Delete the goal (sub-goals + goal_dependencies auto-cascade)
-    db.prepare('DELETE FROM goals WHERE id = ?').run(req.params.id);
+    await execute(`DELETE FROM goals WHERE id = $1`, [req.params.id]);
   });
 
   deleteTransaction();
@@ -363,10 +326,8 @@ function detectCycle(db: any, userId: string, goalId: string, newDependsOnId: st
     if (visited.has(current)) return false;
     visited.add(current);
 
-    const deps = db.prepare(
-      `SELECT depends_on_goal_id FROM goal_dependencies
-       WHERE goal_id = ? AND goal_id IN (SELECT id FROM goals WHERE user_id = ?)`
-    ).all(current, userId) as Array<{ depends_on_goal_id: string }>;
+    const deps = await queryAll(`SELECT depends_on_goal_id FROM goal_dependencies
+       WHERE goal_id = $1 AND goal_id IN (SELECT id FROM goals WHERE user_id = $2)`, [current, userId])<{ depends_on_goal_id: string }>;
 
     for (const dep of deps) {
       if (dfs(dep.depends_on_goal_id)) return true;
@@ -378,34 +339,27 @@ function detectCycle(db: any, userId: string, goalId: string, newDependsOnId: st
 }
 
 // GET /api/goals/:id/dependencies
-router.get('/:id/dependencies', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-
-  const goal = db.prepare('SELECT id FROM goals WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!);
+router.get('/:id/dependencies', async (req: AuthRequest, res: Response) => {
+  const goal = await queryOne(`SELECT id FROM goals WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
   if (!goal) throw new AppError(404, 'Goal not found');
 
   // Get direct dependencies (what this goal depends on)
-  const dependsOn = db.prepare(
-    `SELECT gd.*, g.title as depends_on_title, g.status as depends_on_status
+  const dependsOn = await queryAll(`SELECT gd.*, g.title as depends_on_title, g.status as depends_on_status
      FROM goal_dependencies gd
      JOIN goals g ON g.id = gd.depends_on_goal_id
-     WHERE gd.goal_id = ?`
-  ).all(req.params.id);
+     WHERE gd.goal_id = $1`, [req.params.id]);
 
   // Get dependents (what depends on this goal)
-  const dependents = db.prepare(
-    `SELECT gd.*, g.title as goal_title, g.status as goal_status
+  const dependents = await queryAll(`SELECT gd.*, g.title as goal_title, g.status as goal_status
      FROM goal_dependencies gd
      JOIN goals g ON g.id = gd.goal_id
-     WHERE gd.depends_on_goal_id = ?`
-  ).all(req.params.id);
+     WHERE gd.depends_on_goal_id = $1`, [req.params.id]);
 
   res.json({ depends_on: dependsOn, dependents });
 });
 
 // POST /api/goals/:id/dependencies — add dependency (with cycle detection)
-router.post('/:id/dependencies', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.post('/:id/dependencies', async (req: AuthRequest, res: Response) => {
   const { depends_on_goal_id } = req.body;
 
   if (!depends_on_goal_id) {
@@ -418,16 +372,14 @@ router.post('/:id/dependencies', (req: AuthRequest, res: Response) => {
   }
 
   // Verify both goals exist and belong to user
-  const goal = db.prepare('SELECT id, course_id FROM goals WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!) as any;
+  const goal = await queryOne(`SELECT id, course_id FROM goals WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
   if (!goal) throw new AppError(404, 'Goal not found');
 
-  const depGoal = db.prepare('SELECT id, course_id FROM goals WHERE id = ? AND user_id = ?').get(depends_on_goal_id, req.userId!) as any;
+  const depGoal = await queryOne(`SELECT id, course_id FROM goals WHERE id = $1 AND user_id = $2`, [depends_on_goal_id, req.userId!]);
   if (!depGoal) throw new AppError(404, 'Dependency goal not found');
 
   // Check for existing dependency
-  const existing = db.prepare(
-    'SELECT id FROM goal_dependencies WHERE goal_id = ? AND depends_on_goal_id = ?'
-  ).get(req.params.id, depends_on_goal_id);
+  const existing = await queryOne(`SELECT id FROM goal_dependencies WHERE goal_id = $1 AND depends_on_goal_id = $2`, [req.params.id, depends_on_goal_id]);
   if (existing) {
     throw new AppError(409, 'Dependency already exists');
   }
@@ -439,42 +391,32 @@ router.post('/:id/dependencies', (req: AuthRequest, res: Response) => {
 
   const id = uuidv4();
   const now = new Date().toISOString();
-  db.prepare(
-    'INSERT INTO goal_dependencies (id, goal_id, depends_on_goal_id, created_at) VALUES (?, ?, ?, ?)'
-  ).run(id, req.params.id, depends_on_goal_id, now);
+  await execute(`INSERT INTO goal_dependencies (id, goal_id, depends_on_goal_id, created_at) VALUES ($1, $2, $3, $4)`, [id, req.params.id, depends_on_goal_id, now]);
 
-  const created = db.prepare(
-    `SELECT gd.*, g.title as depends_on_title
+  const created = await queryOne(`SELECT gd.*, g.title as depends_on_title
      FROM goal_dependencies gd
      JOIN goals g ON g.id = gd.depends_on_goal_id
-     WHERE gd.id = ?`
-  ).get(id);
+     WHERE gd.id = $1`, [id]);
 
   res.status(201).json(created);
 });
 
 // DELETE /api/goals/:id/dependencies/:depId — remove dependency
-router.delete('/:id/dependencies/:depId', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-
+router.delete('/:id/dependencies/:depId', async (req: AuthRequest, res: Response) => {
   // Verify the goal belongs to user
-  const goal = db.prepare('SELECT id FROM goals WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!);
+  const goal = await queryOne(`SELECT id FROM goals WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
   if (!goal) throw new AppError(404, 'Goal not found');
 
-  const dep = db.prepare(
-    'SELECT id FROM goal_dependencies WHERE id = ? AND goal_id = ?'
-  ).get(req.params.depId, req.params.id);
+  const dep = await queryOne(`SELECT id FROM goal_dependencies WHERE id = $1 AND goal_id = $2`, [req.params.depId, req.params.id]);
   if (!dep) throw new AppError(404, 'Dependency not found');
 
-  db.prepare('DELETE FROM goal_dependencies WHERE id = ?').run(req.params.depId);
+  await execute(`DELETE FROM goal_dependencies WHERE id = $1`, [req.params.depId]);
   res.json({ message: 'Dependency removed' });
 });
 
 // GET /api/goals/:id/dependency-chain — full ordered chain (for scheduling)
-router.get('/:id/dependency-chain', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-
-  const goal = db.prepare('SELECT id FROM goals WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!);
+router.get('/:id/dependency-chain', async (req: AuthRequest, res: Response) => {
+  const goal = await queryOne(`SELECT id FROM goals WHERE id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
   if (!goal) throw new AppError(404, 'Goal not found');
 
   // Walk backwards through dependencies: A depends on B depends on C → [C, B, A]
@@ -485,9 +427,7 @@ router.get('/:id/dependency-chain', (req: AuthRequest, res: Response) => {
     if (visited.has(currentId)) return;
     visited.add(currentId);
 
-    const deps = db.prepare(
-      'SELECT depends_on_goal_id FROM goal_dependencies WHERE goal_id = ?'
-    ).all(currentId) as Array<{ depends_on_goal_id: string }>;
+    const deps = await queryAll(`SELECT depends_on_goal_id FROM goal_dependencies WHERE goal_id = $1`, [currentId])<{ depends_on_goal_id: string }>;
 
     for (const dep of deps) {
       walkBack(dep.depends_on_goal_id);
@@ -500,8 +440,7 @@ router.get('/:id/dependency-chain', (req: AuthRequest, res: Response) => {
 
   // Enrich with goal data
   const goals = chain.map(id =>
-    db.prepare('SELECT id, title, status, course_id, deadline FROM goals WHERE id = ?').get(id)
-  ).filter(Boolean);
+    await queryOne(`SELECT id, title, status, course_id, deadline FROM goals WHERE id = $1`, [id])).filter(Boolean);
 
   res.json(goals);
 });

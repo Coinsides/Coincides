@@ -1,5 +1,4 @@
 import { Router, Response } from 'express';
-import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { getEmbeddingProvider } from '../embedding/index.js';
 import { VectorStore } from '../embedding/vectorStore.js';
@@ -10,8 +9,7 @@ const router = Router();
  * GET /api/embedding/status
  * Returns embedding statistics for the current user.
  */
-router.get('/status', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.get('/status', async (req: AuthRequest, res: Response) => {
   const userId = req.userId!;
 
   // Total chunks for user's documents
@@ -95,8 +93,6 @@ router.post('/backfill', async (req: AuthRequest, res: Response) => {
     res.status(400).json({ error: 'No embedding provider configured' });
     return;
   }
-
-  const db = getDb();
   const store = new VectorStore();
   let chunksProcessed = 0;
   let memoriesProcessed = 0;

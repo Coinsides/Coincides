@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { getDb } from '../db/init.js';
+import { queryOne } from '../db/pool.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'coincides-dev-secret-change-in-production';
 
@@ -29,8 +29,7 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
     const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
 
     // Verify user still exists
-    const db = getDb();
-    const user = db.prepare('SELECT id FROM users WHERE id = ?').get(decoded.userId) as { id: string } | undefined;
+    const user = await queryOne(`SELECT id FROM users WHERE id = $1`, [decoded.userId])as { id: string } | undefined;
     if (!user) {
       res.status(401).json({ error: 'User not found' });
       return;

@@ -1,5 +1,6 @@
-import { getDb } from '../db/init.js';
 import type { SearchResult } from './types.js';
+
+import { execute, transaction } from '../db/pool.js';
 
 export interface ChunkSearchResult {
   chunk_id: string;
@@ -25,15 +26,11 @@ export class VectorStore {
    * Insert or update embeddings for document chunks.
    */
   upsertChunkEmbeddings(chunks: Array<{ id: string; embedding: number[] }>): void {
-    const db = getDb();
-    const del = db.prepare('DELETE FROM doc_chunk_vec WHERE chunk_id = ?');
-    const insert = db.prepare('INSERT INTO doc_chunk_vec (chunk_id, embedding) VALUES (?, ?)');
-
-    const upsertMany = db.transaction((items: typeof chunks) => {
+    const upsertMany = await transaction(async (client) => {
       for (const chunk of items) {
         const vecBuf = float32ArrayToBuffer(chunk.embedding);
-        del.run(chunk.id);
-        insert.run(chunk.id, vecBuf);
+        await execute(`DELETE FROM doc_chunk_vec WHERE chunk_id = $1`, [chunk.id]);
+        await execute(`INSERT INTO doc_chunk_vec (chunk_id, embedding) VALUES ($1, $2)`, [chunk.id, vecBuf]);
       }
     });
 
@@ -44,21 +41,18 @@ export class VectorStore {
    * Insert or update embedding for an agent memory.
    */
   upsertMemoryEmbedding(memoryId: string, embedding: number[]): void {
-    const db = getDb();
     const vecBuf = float32ArrayToBuffer(embedding);
-    db.prepare('DELETE FROM agent_memory_vec WHERE memory_id = ?').run(memoryId);
-    db.prepare('INSERT INTO agent_memory_vec (memory_id, embedding) VALUES (?, ?)').run(memoryId, vecBuf);
+    await execute(`DELETE FROM agent_memory_vec WHERE memory_id = $1`, [memoryId]);
+    await execute(`INSERT INTO agent_memory_vec (memory_id, embedding) VALUES ($1, $2)`, [memoryId, vecBuf]);
   }
 
   /**
    * Delete embeddings for document chunks.
    */
   deleteChunkEmbeddings(chunkIds: string[]): void {
-    const db = getDb();
-    const del = db.prepare('DELETE FROM doc_chunk_vec WHERE chunk_id = ?');
-    const deleteMany = db.transaction((ids: string[]) => {
+    const deleteMany = await transaction(async (client) => {
       for (const id of ids) {
-        del.run(id);
+        await execute(`DELETE FROM doc_chunk_vec WHERE chunk_id = $1`, [id]);
       }
     });
     deleteMany(chunkIds);
@@ -68,15 +62,13 @@ export class VectorStore {
    * Delete embedding for an agent memory.
    */
   deleteMemoryEmbedding(memoryId: string): void {
-    const db = getDb();
-    db.prepare('DELETE FROM agent_memory_vec WHERE memory_id = ?').run(memoryId);
+    await execute(`DELETE FROM agent_memory_vec WHERE memory_id = $1`, [memoryId]);
   }
 
   /**
    * KNN search for document chunks, filtered by user ownership.
    */
   searchChunks(queryEmbedding: number[], topK: number, userId: string): SearchResult[] {
-    const db = getDb();
     const vecBuf = float32ArrayToBuffer(queryEmbedding);
 
     // KNN search via sqlite-vec, then join to verify user ownership
@@ -115,7 +107,6 @@ export class VectorStore {
     userId: string,
     maxDistance: number = 0.8,
   ): ChunkSearchResult[] {
-    const db = getDb();
     const vecBuf = float32ArrayToBuffer(queryEmbedding);
 
     // KNN search — fetch extra to account for ownership filter + distance threshold
@@ -184,7 +175,6 @@ export class VectorStore {
    * KNN search for agent memories, filtered by user ownership.
    */
   searchMemories(queryEmbedding: number[], topK: number, userId: string): SearchResult[] {
-    const db = getDb();
     const vecBuf = float32ArrayToBuffer(queryEmbedding);
 
     const rows = db
@@ -219,7 +209,6 @@ export class VectorStore {
     userId: string,
     maxDistance: number = 0.8,
   ): MemorySearchResult[] {
-    const db = getDb();
     const vecBuf = float32ArrayToBuffer(queryEmbedding);
 
     const rows = db
@@ -276,8 +265,6 @@ export class VectorStore {
     topK: number,
     userId: string,
   ): ChunkSearchResult[] {
-    const db = getDb();
-
     // Sanitize query for FTS5 (escape double quotes, strip special chars)
     const safeQuery = query.replace(/["']/g, ' ').replace(/[^\w\s\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff]/g, ' ').trim();
     if (!safeQuery) return [];
@@ -359,8 +346,6 @@ export class VectorStore {
     topK: number,
     userId: string,
   ): MemorySearchResult[] {
-    const db = getDb();
-
     const safeQuery = query.replace(/["']/g, ' ').replace(/[^\w\s\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff]/g, ' ').trim();
     if (!safeQuery) return [];
 

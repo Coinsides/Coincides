@@ -2,13 +2,14 @@ import { Router, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { unlink } from 'fs/promises';
 import multer from 'multer';
-import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { upload } from '../middleware/upload.js';
 import { uploadDocumentSchema } from '../validators/index.js';
 import { parseDocument } from '../services/documentParser.js';
 import { ZodError } from 'zod';
+
+import { execute, queryOne } from '../db/pool.js';
 
 const router = Router();
 
@@ -23,16 +24,13 @@ function fileTypeFromMimetype(mimetype: string): string {
 }
 
 // POST /api/documents/upload
-router.post('/upload', upload.single('file'), (req: AuthRequest, res: Response) => {
+router.post('/upload', upload.single('file'), async (req: AuthRequest, res: Response) => {
   try {
     const data = uploadDocumentSchema.parse(req.body);
 
     if (!req.file) {
       throw new AppError(400, 'No file uploaded');
     }
-
-    const db = getDb();
-
     // Verify course belongs to user
     const course = db
       .prepare('SELECT id FROM courses WHERE id = ? AND user_id = ?')
@@ -45,12 +43,10 @@ router.post('/upload', upload.single('file'), (req: AuthRequest, res: Response) 
     const now = new Date().toISOString();
     const fileType = fileTypeFromMimetype(req.file.mimetype);
 
-    db.prepare(
-      `INSERT INTO documents (id, user_id, course_id, filename, file_path, file_type, file_size, parse_status, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', ?, ?)`
-    ).run(id, req.userId!, data.course_id, req.file.originalname, req.file.path, fileType, req.file.size, now, now);
+    await execute(`INSERT INTO documents (id, user_id, course_id, filename, file_path, file_type, file_size, parse_status, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending', $8, $9)`, [id, req.userId!, data.course_id, req.file.originalname, req.file.path, fileType, req.file.size, now, now]);
 
-    const document = db.prepare('SELECT * FROM documents WHERE id = ?').get(id);
+    const document = await queryOne(`SELECT * FROM documents WHERE id = $1`, [id]);
 
     // Fire-and-forget: kick off async parsing
     parseDocument(id, req.userId!).catch((err) => {
@@ -70,13 +66,11 @@ router.post('/upload', upload.single('file'), (req: AuthRequest, res: Response) 
 });
 
 // GET /api/documents?course_id=xxx
-router.get('/', (req: AuthRequest, res: Response) => {
+router.get('/', async (req: AuthRequest, res: Response) => {
   const courseId = req.query.course_id as string;
   if (!courseId) {
     throw new AppError(400, 'course_id query parameter is required');
   }
-
-  const db = getDb();
   const documents = db
     .prepare(
       `SELECT id, user_id, course_id, filename, file_type, file_size,
@@ -91,8 +85,7 @@ router.get('/', (req: AuthRequest, res: Response) => {
 });
 
 // GET /api/documents/:id
-router.get('/:id', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.get('/:id', async (req: AuthRequest, res: Response) => {
   const document = db
     .prepare('SELECT * FROM documents WHERE id = ? AND user_id = ?')
     .get(req.params.id, req.userId!);
@@ -106,9 +99,7 @@ router.get('/:id', (req: AuthRequest, res: Response) => {
 });
 
 // GET /api/documents/:id/chunks
-router.get('/:id/chunks', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-
+router.get('/:id/chunks', async (req: AuthRequest, res: Response) => {
   // Verify document belongs to user
   const document = db
     .prepare('SELECT id FROM documents WHERE id = ? AND user_id = ?')
@@ -125,8 +116,7 @@ router.get('/:id/chunks', (req: AuthRequest, res: Response) => {
 });
 
 // GET /api/documents/:id/status
-router.get('/:id/status', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.get('/:id/status', async (req: AuthRequest, res: Response) => {
   const document = db
     .prepare(
       'SELECT parse_status, parse_channel, page_count, chunk_count, error_message FROM documents WHERE id = ? AND user_id = ?'
@@ -149,7 +139,6 @@ router.get('/:id/status', (req: AuthRequest, res: Response) => {
 // POST /api/documents/:id/retry
 router.post('/:id/retry', async (req: AuthRequest, res: Response) => {
   const docId = req.params.id as string;
-  const db = getDb();
   const document = db
     .prepare('SELECT id, file_path FROM documents WHERE id = ? AND user_id = ? AND parse_status = ?')
     .get(docId, req.userId!, 'failed') as { id: string } | undefined;
@@ -158,8 +147,7 @@ router.post('/:id/retry', async (req: AuthRequest, res: Response) => {
     throw new AppError(404, 'Document not found or not in failed state');
   }
 
-  db.prepare("UPDATE documents SET parse_status = 'pending', error_message = NULL, updated_at = ? WHERE id = ?")
-    .run(new Date().toISOString(), docId);
+  await execute(`UPDATE documents SET parse_status = 'pending', error_message = NULL, updated_at = $1 WHERE id = $2`, [new Date().toISOString(), docId]);
 
   parseDocument(docId, req.userId!).catch(err => {
     console.error(`Retry parse failed for ${docId}:`, err);
@@ -170,8 +158,6 @@ router.post('/:id/retry', async (req: AuthRequest, res: Response) => {
 
 // DELETE /api/documents/:id
 router.delete('/:id', async (req: AuthRequest, res: Response) => {
-  const db = getDb();
-
   const document = db
     .prepare('SELECT id, file_path FROM documents WHERE id = ? AND user_id = ?')
     .get(req.params.id, req.userId!) as { id: string; file_path: string } | undefined;
@@ -189,7 +175,7 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
   }
 
   // Delete DB record (CASCADE handles chunks)
-  db.prepare('DELETE FROM documents WHERE id = ?').run(req.params.id);
+  await execute(`DELETE FROM documents WHERE id = $1`, [req.params.id]);
 
   res.json({ message: 'Document deleted' });
 });

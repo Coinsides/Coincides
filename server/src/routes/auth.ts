@@ -1,23 +1,22 @@
 import { Router, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
-import { getDb } from '../db/init.js';
-import { seedSystemTags } from '../db/init.js';
 import { AuthRequest, authMiddleware, generateToken } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { registerSchema, loginSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
 
+import { execute, queryOne } from '../db/pool.js';
+
+import { seedSystemTags } from '../db/init.js';
 const router = Router();
 
 // POST /api/auth/register
-router.post('/register', (req: AuthRequest, res: Response) => {
+router.post('/register', async (req: AuthRequest, res: Response) => {
   try {
     const data = registerSchema.parse(req.body);
-    const db = getDb();
-
     // Check if email already exists
-    const existing = db.prepare('SELECT id FROM users WHERE email = ?').get(data.email);
+    const existing = await queryOne(`SELECT id FROM users WHERE email = $1`, [data.email]);
     if (existing) {
       throw new AppError(409, 'Email already registered');
     }
@@ -32,9 +31,7 @@ router.post('/register', (req: AuthRequest, res: Response) => {
       keyboard_shortcuts_enabled: true,
     });
 
-    db.prepare(
-      'INSERT INTO users (id, email, password_hash, name, settings, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
-    ).run(id, data.email, passwordHash, data.name, defaultSettings, now, now);
+    await execute(`INSERT INTO users (id, email, password_hash, name, settings, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7)`, [id, data.email, passwordHash, data.name, defaultSettings, now, now]);
 
     // Seed system tags for new user
     seedSystemTags(id);
@@ -63,12 +60,10 @@ router.post('/register', (req: AuthRequest, res: Response) => {
 });
 
 // POST /api/auth/login
-router.post('/login', (req: AuthRequest, res: Response) => {
+router.post('/login', async (req: AuthRequest, res: Response) => {
   try {
     const data = loginSchema.parse(req.body);
-    const db = getDb();
-
-    const user = db.prepare('SELECT * FROM users WHERE email = ?').get(data.email) as any;
+    const user = await queryOne(`SELECT * FROM users WHERE email = $1`, [data.email]);
     if (!user) {
       throw new AppError(401, 'Invalid email or password');
     }
@@ -102,9 +97,8 @@ router.post('/login', (req: AuthRequest, res: Response) => {
 });
 
 // GET /api/auth/me
-router.get('/me', authMiddleware, (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const user = db.prepare('SELECT id, email, name, settings, onboarding_completed, created_at, updated_at FROM users WHERE id = ?').get(req.userId!) as any;
+router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
+  const user = await queryOne(`SELECT id, email, name, settings, onboarding_completed, created_at, updated_at FROM users WHERE id = $1`, [req.userId!]);
 
   if (!user) {
     throw new AppError(404, 'User not found');

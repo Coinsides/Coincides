@@ -1,7 +1,8 @@
 import { Router, Response } from 'express';
-import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
+
+import { queryAll, queryOne } from '../db/pool.js';
 
 const router = Router();
 
@@ -13,27 +14,21 @@ function parseConfig(row: any) {
 }
 
 // GET /api/study-templates
-router.get('/', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.get('/', async (req: AuthRequest, res: Response) => {
   const userId = req.userId!;
 
   // Return all system templates + user's custom templates
-  const templates = db.prepare(
-    'SELECT * FROM study_mode_templates WHERE user_id IS NULL OR user_id = ? ORDER BY is_system DESC, name ASC'
-  ).all(userId) as any[];
+  const templates = await queryAll(`SELECT * FROM study_mode_templates WHERE user_id IS NULL OR user_id = $1 ORDER BY is_system DESC, name ASC`, [userId]);
 
   res.json(templates.map(parseConfig));
 });
 
 // GET /api/study-templates/:id
-router.get('/:id', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.get('/:id', async (req: AuthRequest, res: Response) => {
   const userId = req.userId!;
   const templateId = req.params.id as string;
 
-  const template = db.prepare(
-    'SELECT * FROM study_mode_templates WHERE id = ? AND (user_id IS NULL OR user_id = ?)'
-  ).get(templateId, userId) as any;
+  const template = await queryOne(`SELECT * FROM study_mode_templates WHERE id = $1 AND (user_id IS NULL OR user_id = $2)`, [templateId, userId]);
 
   if (!template) {
     throw new AppError(404, 'Study template not found');

@@ -1,11 +1,12 @@
 import { Router, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { updateProposalSchema } from '../validators/index.js';
 import { normalizeCardContent } from '../agent/tools/normalizeContent.js';
 import { ZodError } from 'zod';
+
+import { execute, queryAll, transaction } from '../db/pool.js';
 
 const router = Router();
 
@@ -42,8 +43,7 @@ interface ProposalRow {
 }
 
 // GET /api/proposals — list pending proposals
-router.get('/', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.get('/', async (req: AuthRequest, res: Response) => {
   const { status } = req.query;
   let query = 'SELECT * FROM proposals WHERE user_id = ?';
   const params: unknown[] = [req.userId!];
@@ -54,35 +54,29 @@ router.get('/', (req: AuthRequest, res: Response) => {
     query += " AND status = 'pending'";
   }
   query += ' ORDER BY created_at DESC';
-  const proposals = db.prepare(query).all(...params) as ProposalRow[];
+  const proposals = await queryAll(query, params);
   const result = proposals.map((p) => ({ ...p, data: JSON.parse(p.data) }));
   res.json(result);
 });
 
 // GET /api/proposals/:id — get proposal details
-router.get('/:id', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const proposal = db.prepare(
-    'SELECT * FROM proposals WHERE id = ? AND user_id = ?',
-  ).get(req.params.id, req.userId!) as ProposalRow | undefined;
+router.get('/:id', async (req: AuthRequest, res: Response) => {
+  const proposal = await queryOne('SELECT * FROM proposals WHERE id = $1 AND user_id = $2', [req.params.id, req.userId!]);
 
   if (!proposal) throw new AppError(404, 'Proposal not found');
   res.json({ ...proposal, data: JSON.parse(proposal.data) });
 });
 
 // POST /api/proposals/:id/apply — apply proposal
-router.post('/:id/apply', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const proposal = db.prepare(
-    "SELECT * FROM proposals WHERE id = ? AND user_id = ? AND status = 'pending'",
-  ).get(req.params.id, req.userId!) as ProposalRow | undefined;
+router.post('/:id/apply', async (req: AuthRequest, res: Response) => {
+  const proposal = await queryOne(`SELECT * FROM proposals WHERE id = $1 AND user_id = $2 AND status = 'pending'`, [req.params.id, req.userId!]) as ProposalRow | undefined;
 
   if (!proposal) throw new AppError(404, 'Proposal not found or already resolved');
 
   const data = JSON.parse(proposal.data) as { items: Array<Record<string, unknown>>; deck_id?: string };
   const now = new Date().toISOString();
 
-  const applyTransaction = db.transaction(() => {
+  const applyTransaction = await transaction(async (client) => {
     switch (proposal.type) {
       case 'batch_cards': {
         // Resolve deck_id: item-level > proposal-level top-level field
@@ -95,9 +89,7 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
           }
 
           // Verify deck exists and belongs to user
-          const deck = db.prepare(
-            'SELECT id FROM card_decks WHERE id = ? AND user_id = ?',
-          ).get(deckId, req.userId!) as { id: string } | undefined;
+          const deck = await queryOne('SELECT id FROM card_decks WHERE id = $1 AND user_id = $2', [deckId, req.userId!]);
           if (!deck) {
             throw new AppError(400, `Deck not found (id: ${deckId.slice(0, 8)}...). The deck may have been deleted. Please create a new deck and try again.`);
           }
@@ -107,24 +99,20 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
           const rawContent = (item.content as Record<string, unknown>) || {};
           const normalizedContent = normalizeCardContent(templateType, rawContent);
           const sectionId = (item.section_id as string) || null;
-          db.prepare(
-            'INSERT INTO cards (id, user_id, deck_id, section_id, template_type, title, content, importance, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-          ).run(
-            cardId, req.userId!, deckId, sectionId, templateType,
-            item.title || 'Untitled', JSON.stringify(normalizedContent), item.importance || 3, now, now,
+          await execute('INSERT INTO cards (id, user_id, deck_id, section_id, template_type, title, content, importance, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [cardId, req.userId!, deckId, sectionId, templateType,
+            item.title || 'Untitled', JSON.stringify(normalizedContent]), item.importance || 3, now, now,
           );
 
           // Attach tags
           const tagIds = item.tag_ids as string[] | undefined;
           if (tagIds && tagIds.length > 0) {
-            const insertTag = db.prepare('INSERT OR IGNORE INTO card_tags (card_id, tag_id) VALUES (?, ?)');
             for (const tagId of tagIds) {
-              insertTag.run(cardId, tagId);
+              await execute(`INSERT INTO card_tags (card_id, tag_id) VALUES ($1, $2)`, [cardId, tagId]);
             }
           }
 
           // Update deck card count
-          db.prepare('UPDATE card_decks SET card_count = card_count + 1, updated_at = ? WHERE id = ?').run(now, deckId);
+          await execute(`UPDATE card_decks SET card_count = card_count + 1, updated_at = $1 WHERE id = $2`, [now, deckId]);
         }
         break;
       }
@@ -140,9 +128,7 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
 
           // If Agent provided an ID, verify it exists in DB
           if (timeBlockId) {
-            const exists = db.prepare(
-              'SELECT id FROM time_blocks WHERE id = ? AND user_id = ?',
-            ).get(timeBlockId, req.userId!) as { id: string } | undefined;
+            const exists = await queryOne('SELECT id FROM time_blocks WHERE id = $1 AND user_id = $2', [timeBlockId, req.userId!]);
             if (!exists) {
               timeBlockId = null; // Invalid ID — clear it to avoid FK violation
             }
@@ -150,21 +136,16 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
 
           // v1.7.3: If still no time_block_id, try to find one by date
           if (!timeBlockId && taskDate) {
-            const matchingBlock = db.prepare(
-              `SELECT id FROM time_blocks WHERE user_id = ? AND date = ? AND type = 'study' ORDER BY start_time ASC LIMIT 1`,
-            ).get(req.userId!, taskDate) as { id: string } | undefined;
+            const matchingBlock = await queryOne(`SELECT id FROM time_blocks WHERE user_id = $1 AND date = $2 AND type = 'study' ORDER BY start_time ASC LIMIT 1`, [req.userId!, taskDate]) as { id: string } | undefined;
             if (matchingBlock) {
               timeBlockId = matchingBlock.id;
             }
           }
 
-          db.prepare(
-            'INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, description, start_time, end_time, checklist, serves_must, time_block_id, order_index, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-          ).run(
-            taskId, req.userId!, item.course_id, item.goal_id || null,
+          await execute('INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, description, start_time, end_time, checklist, serves_must, time_block_id, order_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)', [taskId, req.userId!, item.course_id, item.goal_id || null,
             item.title, taskDate, item.priority || 'must', 'pending',
             item.description || null, item.start_time || null, item.end_time || null,
-            (() => { const cl = normalizeChecklist(item.checklist); return cl ? JSON.stringify(cl) : null; })(),
+            ((]) => { const cl = normalizeChecklist(item.checklist); return cl ? JSON.stringify(cl) : null; })(),
             item.serves_must || null, timeBlockId, 0, now, now,
           );
         }
@@ -179,9 +160,7 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
             const resolvedParentId = item.parent_id && idMap.has(item.parent_id as string)
               ? idMap.get(item.parent_id as string)
               : item.parent_id || null;
-            db.prepare(
-              'INSERT INTO goals (id, user_id, course_id, parent_id, title, description, deadline, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            ).run(goalId, req.userId!, item.course_id, resolvedParentId, item.title, item.description || null, item.deadline || null, 'active', now, now);
+            await execute('INSERT INTO goals (id, user_id, course_id, parent_id, title, description, deadline, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [goalId, req.userId!, item.course_id, resolvedParentId, item.title, item.description || null, item.deadline || null, 'active', now, now]);
             if (item._temp_id) idMap.set(item._temp_id as string, goalId);
           } else if (item.type === 'task') {
             const taskId = uuidv4();
@@ -190,13 +169,10 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
               : item.goal_id || null;
             // v1.3: scheduled_date takes precedence over date
             const taskDate = (item.scheduled_date || item.date) as string;
-            db.prepare(
-              'INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, description, start_time, end_time, checklist, serves_must, order_index, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-            ).run(
-              taskId, req.userId!, item.course_id, resolvedGoalId,
+            await execute('INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, description, start_time, end_time, checklist, serves_must, order_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)', [taskId, req.userId!, item.course_id, resolvedGoalId,
               item.title, taskDate, item.priority || 'must', 'pending',
               item.description || null, item.start_time || null, item.end_time || null,
-              (() => { const cl = normalizeChecklist(item.checklist); return cl ? JSON.stringify(cl) : null; })(),
+              ((]) => { const cl = normalizeChecklist(item.checklist); return cl ? JSON.stringify(cl) : null; })(),
               item.serves_must || null, 0, now, now,
             );
           }
@@ -215,7 +191,7 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
             if (updates.length > 0) {
               updates.push('updated_at = ?');
               params.push(now, item.task_id, req.userId!);
-              db.prepare(`UPDATE tasks SET ${updates.join(', ')} WHERE id = ? AND user_id = ?`).run(...params);
+              await execute(`UPDATE tasks SET ${updates.join(', ')} WHERE id = $1 AND user_id = $2`, [...params]);
             }
           }
         }
@@ -225,10 +201,7 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
         // v1.7.3: Create date-based Time Block instances from proposal items
         for (const item of data.items) {
           const blockId = uuidv4();
-          db.prepare(
-            'INSERT INTO time_blocks (id, user_id, template_id, label, type, date, start_time, end_time, color, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-          ).run(
-            blockId, req.userId!,
+          await execute('INSERT INTO time_blocks (id, user_id, template_id, label, type, date, start_time, end_time, color, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)', [blockId, req.userId!,
             null,
             item.label || `Study Block`,
             item.type || 'study',
@@ -236,17 +209,14 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
             item.start_time,
             item.end_time,
             item.color || null,
-            now, now,
-          );
+            now, now,]);
         }
         break;
       }
     }
 
     // Mark proposal as applied
-    db.prepare(
-      "UPDATE proposals SET status = 'applied', resolved_at = ? WHERE id = ?",
-    ).run(now, proposal.id);
+    await execute(`UPDATE proposals SET status = 'applied', resolved_at = $1 WHERE id = $2`, [now, proposal.id]);
   });
 
   applyTransaction();
@@ -254,26 +224,20 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
 });
 
 // POST /api/proposals/:id/discard — discard proposal
-router.post('/:id/discard', (req: AuthRequest, res: Response) => {
-  const db = getDb();
+router.post('/:id/discard', async (req: AuthRequest, res: Response) => {
   const now = new Date().toISOString();
-  const result = db.prepare(
-    "UPDATE proposals SET status = 'discarded', resolved_at = ? WHERE id = ? AND user_id = ? AND status = 'pending'",
-  ).run(now, req.params.id, req.userId!);
+  const result = await execute(`UPDATE proposals SET status = 'discarded', resolved_at = $1 WHERE id = $2 AND user_id = $3 AND status = 'pending'`, [now, req.params.id, req.userId!]);
 
   if (result.changes === 0) throw new AppError(404, 'Proposal not found or already resolved');
   res.json({ message: 'Proposal discarded' });
 });
 
 // PUT /api/proposals/:id — update proposal data
-router.put('/:id', (req: AuthRequest, res: Response) => {
+router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const body = updateProposalSchema.parse(req.body);
-    const db = getDb();
     const now = new Date().toISOString();
-    const result = db.prepare(
-      "UPDATE proposals SET data = ?, resolved_at = NULL WHERE id = ? AND user_id = ? AND status = 'pending'",
-    ).run(JSON.stringify(body.data), req.params.id, req.userId!);
+    const result = await execute(`UPDATE proposals SET data = $1, resolved_at = NULL WHERE id = $2 AND user_id = $3 AND status = 'pending'`, [JSON.stringify(body.data]), req.params.id, req.userId!);
 
     if (result.changes === 0) throw new AppError(404, 'Proposal not found or already resolved');
     res.json({ message: 'Proposal updated' });

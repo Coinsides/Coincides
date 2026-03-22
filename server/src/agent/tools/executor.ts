@@ -1,20 +1,20 @@
 import { v4 as uuidv4 } from 'uuid';
-import { getDb } from '../../db/init.js';
 import { getEmbeddingProvider } from '../../embedding/index.js';
 import { VectorStore } from '../../embedding/vectorStore.js';
 import { normalizeCardContent } from './normalizeContent.js';
+
+import { execute, queryAll, queryOne, transaction } from '../../db/pool.js';
 
 export async function executeTool(
   toolName: string,
   args: Record<string, unknown>,
   userId: string,
 ): Promise<string> {
-  const db = getDb();
   const today = new Date().toISOString().split('T')[0];
 
   switch (toolName) {
     case 'list_courses': {
-      const courses = db.prepare('SELECT id, name, code, color, weight FROM courses WHERE user_id = ? ORDER BY name').all(userId);
+      const courses = await queryAll(`SELECT id, name, code, color, weight FROM courses WHERE user_id = $1 ORDER BY name`, [userId]);
       return JSON.stringify(courses);
     }
 
@@ -34,7 +34,7 @@ export async function executeTool(
       if (status) { query += ' AND t.status = ?'; params.push(status); }
 
       query += ' ORDER BY t.date, t.priority, t.order_index LIMIT 50';
-      const tasks = db.prepare(query).all(...params);
+      const tasks = await queryAll(query, params);
       return JSON.stringify(tasks);
     }
 
@@ -46,9 +46,7 @@ export async function executeTool(
     case 'complete_task': {
       const { task_id } = args as { task_id: string };
       const now = new Date().toISOString();
-      const result = db.prepare(
-        'UPDATE tasks SET status = ?, completed_at = ?, updated_at = ? WHERE id = ? AND user_id = ?',
-      ).run('completed', now, now, task_id, userId);
+      const result = await execute('UPDATE tasks SET status = $1, completed_at = $2, updated_at = $3 WHERE id = $4 AND user_id = $5', ['completed', now, now, task_id, userId]);
       if (result.changes === 0) return JSON.stringify({ error: 'Task not found or not owned by user' });
       return JSON.stringify({ task_id, status: 'completed', message: 'Task marked as completed' });
     }
@@ -59,7 +57,7 @@ export async function executeTool(
       const params: unknown[] = [userId];
       if (course_id) { query += ' AND g.course_id = ?'; params.push(course_id); }
       query += ' ORDER BY g.created_at DESC';
-      const goals = db.prepare(query).all(...params) as Array<Record<string, unknown>>;
+      const goals = await queryAll(query, params)>;
 
       if (include_hierarchy) {
         // Enrich each goal with children and tasks
@@ -76,9 +74,7 @@ export async function executeTool(
           }
         }
         // Attach tasks to their goals
-        const allTasks = db.prepare(
-          'SELECT id, title, date, priority, status, goal_id, serves_must FROM tasks WHERE user_id = ? AND goal_id IS NOT NULL ORDER BY date'
-        ).all(userId) as Array<Record<string, unknown>>;
+        const allTasks = await queryAll(`SELECT id, title, date, priority, status, goal_id, serves_must FROM tasks WHERE user_id = $1 AND goal_id IS NOT NULL ORDER BY date`, [userId])<Record<string, unknown>>;
         for (const t of allTasks) {
           if (t.goal_id && goalMap.has(t.goal_id as string)) {
             (goalMap.get(t.goal_id as string)!.tasks as unknown[]).push(t);
@@ -96,9 +92,7 @@ export async function executeTool(
       const { title, course_id, deadline, description } = args as Record<string, string | undefined>;
       const id = uuidv4();
       const now = new Date().toISOString();
-      db.prepare(
-        'INSERT INTO goals (id, user_id, course_id, title, description, deadline, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      ).run(id, userId, course_id, title, description || null, deadline || null, 'active', now, now);
+      await execute('INSERT INTO goals (id, user_id, course_id, title, description, deadline, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)', [id, userId, course_id, title, description || null, deadline || null, 'active', now, now]);
       return JSON.stringify({ id, title, message: 'Goal created successfully' });
     }
 
@@ -107,16 +101,14 @@ export async function executeTool(
       // Look up parent to inherit course_id if not provided
       let resolvedCourseId = course_id;
       if (!resolvedCourseId && parent_id) {
-        const parent = db.prepare('SELECT course_id FROM goals WHERE id = ? AND user_id = ?').get(parent_id, userId) as { course_id: string } | undefined;
+        const parent = await queryOne(`SELECT course_id FROM goals WHERE id = $1 AND user_id = $2`, [parent_id, userId])as { course_id: string } | undefined;
         if (!parent) return JSON.stringify({ error: 'Parent goal not found' });
         resolvedCourseId = parent.course_id;
       }
       if (!resolvedCourseId) return JSON.stringify({ error: 'course_id required (could not inherit from parent)' });
       const id = uuidv4();
       const now = new Date().toISOString();
-      db.prepare(
-        'INSERT INTO goals (id, user_id, course_id, parent_id, title, description, deadline, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      ).run(id, userId, resolvedCourseId, parent_id || null, title, description || null, deadline || null, 'active', now, now);
+      await execute('INSERT INTO goals (id, user_id, course_id, parent_id, title, description, deadline, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [id, userId, resolvedCourseId, parent_id || null, title, description || null, deadline || null, 'active', now, now]);
       return JSON.stringify({ id, title, parent_id, message: 'Sub-goal created successfully' });
     }
 
@@ -126,49 +118,41 @@ export async function executeTool(
       const params: unknown[] = [userId];
       if (course_id) { query += ' AND d.course_id = ?'; params.push(course_id); }
       query += ' ORDER BY d.created_at DESC';
-      const decks = db.prepare(query).all(...params);
+      const decks = await queryAll(query, params);
       return JSON.stringify(decks);
     }
 
     case 'create_deck': {
       const { course_id, name, description } = args as { course_id: string; name: string; description?: string };
       // Verify course exists and belongs to user
-      const course = db.prepare('SELECT id, name FROM courses WHERE id = ? AND user_id = ?').get(course_id, userId) as { id: string; name: string } | undefined;
+      const course = await queryOne(`SELECT id, name FROM courses WHERE id = $1 AND user_id = $2`, [course_id, userId])as { id: string; name: string } | undefined;
       if (!course) return JSON.stringify({ error: 'Course not found' });
       const deckId = uuidv4();
       const now = new Date().toISOString();
-      db.prepare(
-        'INSERT INTO card_decks (id, user_id, course_id, name, description, card_count, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 0, ?, ?)',
-      ).run(deckId, userId, course_id, name, description || null, now, now);
+      await execute('INSERT INTO card_decks (id, user_id, course_id, name, description, card_count, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, 0, $6, $7)', [deckId, userId, course_id, name, description || null, now, now]);
       return JSON.stringify({ id: deckId, name, course_id, course_name: course.name, message: 'Deck created successfully' });
     }
 
     case 'list_sections': {
       const { deck_id: secDeckId } = args as { deck_id: string };
-      const sections = db.prepare(
-        'SELECT id, name, order_index FROM card_sections WHERE deck_id = ? AND user_id = ? ORDER BY order_index ASC, created_at ASC',
-      ).all(secDeckId, userId);
+      const sections = await queryAll('SELECT id, name, order_index FROM card_sections WHERE deck_id = $1 AND user_id = $2 ORDER BY order_index ASC, created_at ASC', [secDeckId, userId]);
       return JSON.stringify(sections);
     }
 
     case 'create_section': {
       const { deck_id: csDeckId, name: csName, order_index: csOrder } = args as { deck_id: string; name: string; order_index?: number };
       // Verify deck exists and belongs to user
-      const csDeck = db.prepare('SELECT id FROM card_decks WHERE id = ? AND user_id = ?').get(csDeckId, userId);
+      const csDeck = await queryOne(`SELECT id FROM card_decks WHERE id = $1 AND user_id = $2`, [csDeckId, userId]);
       if (!csDeck) return JSON.stringify({ error: 'Deck not found' });
       const csId = uuidv4();
       const csNow = new Date().toISOString();
       // Default order_index: append after existing sections
       let resolvedOrder = csOrder;
       if (resolvedOrder === undefined) {
-        const maxOrder = db.prepare(
-          'SELECT MAX(order_index) as mx FROM card_sections WHERE deck_id = ? AND user_id = ?',
-        ).get(csDeckId, userId) as { mx: number | null };
+        const maxOrder = await queryOne('SELECT MAX(order_index) as mx FROM card_sections WHERE deck_id = $1 AND user_id = $2', [csDeckId, userId]);
         resolvedOrder = (maxOrder?.mx ?? -1) + 1;
       }
-      db.prepare(
-        'INSERT INTO card_sections (id, deck_id, user_id, name, order_index, created_at) VALUES (?, ?, ?, ?, ?, ?)',
-      ).run(csId, csDeckId, userId, csName, resolvedOrder, csNow);
+      await execute('INSERT INTO card_sections (id, deck_id, user_id, name, order_index, created_at) VALUES ($1, $2, $3, $4, $5, $6)', [csId, csDeckId, userId, csName, resolvedOrder, csNow]);
       return JSON.stringify({ id: csId, name: csName, deck_id: csDeckId, order_index: resolvedOrder, message: 'Section created successfully' });
     }
 
@@ -179,7 +163,7 @@ export async function executeTool(
       if (template_type) { query += ' AND template_type = ?'; params.push(template_type); }
       if (search) { query += ' AND title LIKE ?'; params.push(`%${search}%`); }
       query += ' ORDER BY created_at DESC LIMIT 50';
-      const cards = db.prepare(query).all(...params);
+      const cards = await queryAll(query, params);
       return JSON.stringify(cards);
     }
 
@@ -190,25 +174,19 @@ export async function executeTool(
 
     case 'get_review_due': {
       const date = (args.date as string) || today;
-      const dueCards = db.prepare(
-        "SELECT c.id, c.title, c.deck_id, d.name as deck_name FROM cards c JOIN card_decks d ON c.deck_id = d.id WHERE c.user_id = ? AND (c.fsrs_next_review IS NULL OR c.fsrs_next_review <= ?) LIMIT 20",
-      ).all(userId, date) as Array<Record<string, unknown>>;
+      const dueCards = await queryAll(`SELECT c.id, c.title, c.deck_id, d.name as deck_name FROM cards c JOIN card_decks d ON c.deck_id = d.id WHERE c.user_id = $1 AND (c.fsrs_next_review IS NULL OR c.fsrs_next_review <= $2) LIMIT 20`, [userId, date]) as Array<Record<string, unknown>>;
       return JSON.stringify({ count: dueCards.length, cards: dueCards });
     }
 
     case 'get_daily_brief': {
       const date = (args.date as string) || today;
-      const tasks = db.prepare(
-        'SELECT t.id, t.title, t.priority, t.status, t.course_id, c.name as course_name FROM tasks t JOIN courses c ON t.course_id = c.id WHERE t.user_id = ? AND t.date = ? ORDER BY t.priority, t.order_index',
-      ).all(userId, date) as Array<Record<string, unknown>>;
+      const tasks = await queryAll('SELECT t.id, t.title, t.priority, t.status, t.course_id, c.name as course_name FROM tasks t JOIN courses c ON t.course_id = c.id WHERE t.user_id = $1 AND t.date = $2 ORDER BY t.priority, t.order_index', [userId, date]);
 
       const must = tasks.filter((t) => t.priority === 'must');
       const recommended = tasks.filter((t) => t.priority === 'recommended');
       const optional = tasks.filter((t) => t.priority === 'optional');
 
-      const dueCount = db.prepare(
-        "SELECT COUNT(*) as count FROM cards WHERE user_id = ? AND (fsrs_next_review IS NULL OR fsrs_next_review <= ?)",
-      ).get(userId, date) as { count: number };
+      const dueCount = await queryOne(`SELECT COUNT(*) as count FROM cards WHERE user_id = $1 AND (fsrs_next_review IS NULL OR fsrs_next_review <= $2)`, [userId, date]) as { count: number };
 
       return JSON.stringify({
         date,
@@ -234,16 +212,12 @@ export async function executeTool(
 
       const id = uuidv4();
       const now = new Date().toISOString();
-      db.prepare(
-        'INSERT INTO proposals (id, user_id, type, status, data, created_at) VALUES (?, ?, ?, ?, ?, ?)',
-      ).run(id, userId, type, 'pending', JSON.stringify(data), now);
+      await execute('INSERT INTO proposals (id, user_id, type, status, data, created_at) VALUES ($1, $2, $3, $4, $5, $6)', [id, userId, type, 'pending', JSON.stringify(data]), now);
       return JSON.stringify({ id, type, items_count: items.length, message: `Proposal created with ${items.length} items. The student can review and apply it from the proposals panel.` });
     }
 
     case 'get_study_templates': {
-      const templates = db.prepare(
-        'SELECT id, name, slug, description, strategy, config, is_system FROM study_mode_templates WHERE user_id IS NULL OR user_id = ? ORDER BY is_system DESC, name'
-      ).all(userId) as any[];
+      const templates = await queryAll(`SELECT id, name, slug, description, strategy, config, is_system FROM study_mode_templates WHERE user_id IS NULL OR user_id = $1 ORDER BY is_system DESC, name`, [userId]);
       return JSON.stringify(templates.map((t: any) => {
         try { t.config = JSON.parse(t.config); } catch { /* keep */ }
         return t;
@@ -252,13 +226,11 @@ export async function executeTool(
 
     case 'get_statistics_overview': {
       // Streak calculation
-      const activityDates = db.prepare(
-        `SELECT DISTINCT date FROM (
-           SELECT date FROM tasks WHERE user_id = ? AND status = 'completed'
+      const activityDates = await queryAll(`SELECT DISTINCT date FROM (
+           SELECT date FROM tasks WHERE user_id = $1 AND status = 'completed'
            UNION
-           SELECT date FROM study_activity_log WHERE user_id = ? AND activity_type = 'card_reviewed'
-         ) ORDER BY date DESC`
-      ).all(userId, userId) as { date: string }[];
+           SELECT date FROM study_activity_log WHERE user_id = $2 AND activity_type = 'card_reviewed'
+         ) ORDER BY date DESC`, [userId, userId])as { date: string }[];
 
       const dateSet = new Set(activityDates.map(d => d.date));
       let currentStreak = 0;
@@ -269,15 +241,11 @@ export async function executeTool(
       }
 
       // Today stats
-      const todayTasks = db.prepare(
-        `SELECT COUNT(*) as total, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
-         FROM tasks WHERE user_id = ? AND date = ?`
-      ).get(userId, today) as any;
+      const todayTasks = await queryOne(`SELECT COUNT(*) as total, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
+         FROM tasks WHERE user_id = $1 AND date = $2`, [userId, today]);
 
-      const todayCards = db.prepare(
-        `SELECT COUNT(*) as count FROM study_activity_log
-         WHERE user_id = ? AND date = ? AND activity_type = 'card_reviewed'`
-      ).get(userId, today) as any;
+      const todayCards = await queryOne(`SELECT COUNT(*) as count FROM study_activity_log
+         WHERE user_id = $1 AND date = $2 AND activity_type = 'card_reviewed'`, [userId, today]);
 
       // This week
       const d = new Date(today);
@@ -286,15 +254,11 @@ export async function executeTool(
       d.setDate(d.getDate() - diff);
       const weekStart = d.toISOString().split('T')[0];
 
-      const weekTasks = db.prepare(
-        `SELECT COUNT(*) as total, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
-         FROM tasks WHERE user_id = ? AND date >= ? AND date <= ?`
-      ).get(userId, weekStart, today) as any;
+      const weekTasks = await queryOne(`SELECT COUNT(*) as total, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed
+         FROM tasks WHERE user_id = $1 AND date >= $2 AND date <= $3`, [userId, weekStart, today]);
 
-      const weekCards = db.prepare(
-        `SELECT COUNT(*) as count FROM study_activity_log
-         WHERE user_id = ? AND date >= ? AND date <= ? AND activity_type = 'card_reviewed'`
-      ).get(userId, weekStart, today) as any;
+      const weekCards = await queryOne(`SELECT COUNT(*) as count FROM study_activity_log
+         WHERE user_id = $1 AND date >= $2 AND date <= $3 AND activity_type = 'card_reviewed'`, [userId, weekStart, today]);
 
       return JSON.stringify({
         streak: { current: currentStreak },
@@ -314,37 +278,29 @@ export async function executeTool(
       }
 
       // Get courses with task and card stats
-      const courseStats = db.prepare(
-        `SELECT c.id, c.name, c.code,
-                (SELECT COUNT(*) FROM tasks WHERE course_id = c.id AND user_id = ? AND status = 'completed') as tasks_completed,
-                (SELECT COUNT(*) FROM tasks WHERE course_id = c.id AND user_id = ?) as tasks_total,
-                (SELECT COUNT(*) FROM cards ca JOIN card_decks d ON ca.deck_id = d.id WHERE d.course_id = c.id AND d.user_id = ?) as cards_total,
-                (SELECT COUNT(*) FROM cards ca JOIN card_decks d ON ca.deck_id = d.id WHERE d.course_id = c.id AND d.user_id = ? AND ca.fsrs_reps > 0) as cards_reviewed
-         FROM courses c WHERE c.user_id = ?${courseFilter} ORDER BY c.name`
-      ).all(userId, userId, userId, userId, ...params) as any[];
+      const courseStats = await queryAll(`SELECT c.id, c.name, c.code,
+                (SELECT COUNT(*) FROM tasks WHERE course_id = c.id AND user_id = $1 AND status = 'completed') as tasks_completed,
+                (SELECT COUNT(*) FROM tasks WHERE course_id = c.id AND user_id = $2) as tasks_total,
+                (SELECT COUNT(*) FROM cards ca JOIN card_decks d ON ca.deck_id = d.id WHERE d.course_id = c.id AND d.user_id = $3) as cards_total,
+                (SELECT COUNT(*) FROM cards ca JOIN card_decks d ON ca.deck_id = d.id WHERE d.course_id = c.id AND d.user_id = $4 AND ca.fsrs_reps > 0) as cards_reviewed
+         FROM courses c WHERE c.user_id = $5${courseFilter} ORDER BY c.name`, [userId, userId, userId, userId, ...params]);
 
       // Recent completed tasks (last 7 days)
-      const recentTasks = db.prepare(
-        `SELECT t.title, t.date, t.course_id, c.name as course_name
+      const recentTasks = await queryAll(`SELECT t.title, t.date, t.course_id, c.name as course_name
          FROM tasks t JOIN courses c ON t.course_id = c.id
-         WHERE t.user_id = ? AND t.status = 'completed' AND t.date >= date('now', '-7 days')
-         ORDER BY t.date DESC LIMIT 20`
-      ).all(userId) as any[];
+         WHERE t.user_id = $1 AND t.status = 'completed' AND t.date >= date('now', '-7 days')
+         ORDER BY t.date DESC LIMIT 20`, [userId]);
 
       // Active goals
-      const goals = db.prepare(
-        `SELECT g.title, g.deadline, g.course_id, c.name as course_name, g.exam_mode
+      const goals = await queryAll(`SELECT g.title, g.deadline, g.course_id, c.name as course_name, g.exam_mode
          FROM goals g JOIN courses c ON g.course_id = c.id
-         WHERE g.user_id = ? AND g.status = 'active' ORDER BY g.deadline`
-      ).all(userId) as any[];
+         WHERE g.user_id = $1 AND g.status = 'active' ORDER BY g.deadline`, [userId]);
 
       // Pending tasks
-      const pendingTasks = db.prepare(
-        `SELECT t.title, t.date, t.priority, t.course_id, c.name as course_name
+      const pendingTasks = await queryAll(`SELECT t.title, t.date, t.priority, t.course_id, c.name as course_name
          FROM tasks t JOIN courses c ON t.course_id = c.id
-         WHERE t.user_id = ? AND t.status = 'pending' AND t.date >= ?
-         ORDER BY t.date LIMIT 20`
-      ).all(userId, today) as any[];
+         WHERE t.user_id = $1 AND t.status = 'pending' AND t.date >= $2
+         ORDER BY t.date LIMIT 20`, [userId, today]);
 
       return JSON.stringify({
         course_stats: courseStats,
@@ -371,34 +327,26 @@ export async function executeTool(
       const weekEndStr = sunday.toISOString().split('T')[0];
 
       // Tasks completed vs total this week
-      const taskStats = db.prepare(
-        `SELECT COUNT(*) as total,
+      const taskStats = await queryOne(`SELECT COUNT(*) as total,
                 SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed,
                 SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending
-         FROM tasks WHERE user_id = ? AND date >= ? AND date <= ?`
-      ).get(userId, weekStartStr, weekEndStr) as any;
+         FROM tasks WHERE user_id = $1 AND date >= $2 AND date <= $3`, [userId, weekStartStr, weekEndStr]);
 
       // Cards reviewed this week
-      const cardStats = db.prepare(
-        `SELECT COUNT(*) as count FROM study_activity_log
-         WHERE user_id = ? AND date >= ? AND date <= ? AND activity_type = 'card_reviewed'`
-      ).get(userId, weekStartStr, weekEndStr) as any;
+      const cardStats = await queryOne(`SELECT COUNT(*) as count FROM study_activity_log
+         WHERE user_id = $1 AND date >= $2 AND date <= $3 AND activity_type = 'card_reviewed'`, [userId, weekStartStr, weekEndStr]);
 
       // Completed tasks by course
-      const byCourse = db.prepare(
-        `SELECT c.name as course_name, COUNT(*) as completed
+      const byCourse = await queryAll(`SELECT c.name as course_name, COUNT(*) as completed
          FROM tasks t JOIN courses c ON t.course_id = c.id
-         WHERE t.user_id = ? AND t.date >= ? AND t.date <= ? AND t.status = 'completed'
-         GROUP BY c.name ORDER BY completed DESC`
-      ).all(userId, weekStartStr, weekEndStr) as any[];
+         WHERE t.user_id = $1 AND t.date >= $2 AND t.date <= $3 AND t.status = 'completed'
+         GROUP BY c.name ORDER BY completed DESC`, [userId, weekStartStr, weekEndStr]);
 
       // Behind-schedule items (pending tasks with past dates)
-      const behindSchedule = db.prepare(
-        `SELECT t.title, t.date, c.name as course_name
+      const behindSchedule = await queryAll(`SELECT t.title, t.date, c.name as course_name
          FROM tasks t JOIN courses c ON t.course_id = c.id
-         WHERE t.user_id = ? AND t.status = 'pending' AND t.date < ? AND t.date >= ?
-         ORDER BY t.date LIMIT 10`
-      ).all(userId, today, weekStartStr) as any[];
+         WHERE t.user_id = $1 AND t.status = 'pending' AND t.date < $2 AND t.date >= $3
+         ORDER BY t.date LIMIT 10`, [userId, today, weekStartStr]);
 
       return JSON.stringify({
         week: { start: weekStartStr, end: weekEndStr },
@@ -419,9 +367,7 @@ export async function executeTool(
       const keywordParams: unknown[] = [userId, `%${query}%`];
       if (category) { keywordSql += ' AND category = ?'; keywordParams.push(category); }
       keywordSql += ' ORDER BY relevance_score DESC, created_at DESC LIMIT 10';
-      const keywordMemories = db.prepare(keywordSql).all(...keywordParams) as Array<{
-        id: string; category: string; content: string; created_at: string;
-      }>;
+      const keywordMemories = await queryAll(keywordSql, keywordParams);
 
       // --- Path 2: FTS5 full-text search ---
       const ftsResults = store.ftsSearchMemories(query, 10, userId);
@@ -466,7 +412,7 @@ export async function executeTool(
       // Update last_accessed
       const now = new Date().toISOString();
       for (const m of results) {
-        db.prepare('UPDATE agent_memories SET last_accessed = ? WHERE id = ?').run(now, m.id);
+        await execute(`UPDATE agent_memories SET last_accessed = $1 WHERE id = $2`, [now, m.id]);
       }
 
       return JSON.stringify(results);
@@ -476,9 +422,7 @@ export async function executeTool(
       const { category, content } = args as { category: string; content: string };
       const id = uuidv4();
       const now = new Date().toISOString();
-      db.prepare(
-        'INSERT INTO agent_memories (id, user_id, category, content, relevance_score, created_at) VALUES (?, ?, ?, ?, ?, ?)',
-      ).run(id, userId, category, content, 1.0, now);
+      await execute('INSERT INTO agent_memories (id, user_id, category, content, relevance_score, created_at) VALUES ($1, $2, $3, $4, $5, $6)', [id, userId, category, content, 1.0, now]);
 
       // Generate embedding asynchronously (don't block tool response)
       (async () => {
@@ -493,7 +437,7 @@ export async function executeTool(
         } catch (err) {
           console.warn('Failed to generate memory embedding:', err);
         }
-      })();
+      });
 
       return JSON.stringify({ id, message: 'Memory saved successfully' });
     }
@@ -515,9 +459,7 @@ export async function executeTool(
       };
 
       if (from_date && to_date) {
-        const blocks = db.prepare(
-          'SELECT id, label, type, date, start_time, end_time, color FROM time_blocks WHERE user_id = ? AND date >= ? AND date <= ? ORDER BY date, start_time'
-        ).all(userId, from_date, to_date) as any[];
+        const blocks = await queryAll(`SELECT id, label, type, date, start_time, end_time, color FROM time_blocks WHERE user_id = $1 AND date >= $2 AND date <= $3 ORDER BY date, start_time`, [userId, from_date, to_date]);
 
         // Group by date
         const byDate: Record<string, any[]> = {};
@@ -540,9 +482,7 @@ export async function executeTool(
       }
 
       if (date) {
-        const blocks = db.prepare(
-          'SELECT id, label, type, date, start_time, end_time, color FROM time_blocks WHERE user_id = ? AND date = ? ORDER BY start_time'
-        ).all(userId, date) as any[];
+        const blocks = await queryAll(`SELECT id, label, type, date, start_time, end_time, color FROM time_blocks WHERE user_id = $1 AND date = $2 ORDER BY start_time`, [userId, date]);
         return JSON.stringify({ date, blocks, available_study_minutes: computeStudyMin(blocks) });
       }
 
@@ -551,9 +491,7 @@ export async function executeTool(
       const twoWeeks = new Date();
       twoWeeks.setDate(twoWeeks.getDate() + 14);
       const endDate = twoWeeks.toISOString().split('T')[0];
-      const blocks = db.prepare(
-        'SELECT id, label, type, date, start_time, end_time, color FROM time_blocks WHERE user_id = ? AND date >= ? AND date <= ? ORDER BY date, start_time'
-      ).all(userId, today, endDate) as any[];
+      const blocks = await queryAll(`SELECT id, label, type, date, start_time, end_time, color FROM time_blocks WHERE user_id = $1 AND date >= $2 AND date <= $3 ORDER BY date, start_time`, [userId, today, endDate]);
       return JSON.stringify({ from: today, to: endDate, blocks });
     }
 
@@ -561,9 +499,7 @@ export async function executeTool(
       const { goal_id, course_id: depCourseId, include_chain } = args as { goal_id?: string; course_id?: string; include_chain?: boolean };
 
       if (goal_id) {
-        const deps = db.prepare(
-          'SELECT gd.id, gd.goal_id, gd.depends_on_goal_id, g.title as depends_on_title FROM goal_dependencies gd JOIN goals g ON gd.depends_on_goal_id = g.id WHERE gd.goal_id = ?'
-        ).all(goal_id);
+        const deps = await queryAll(`SELECT gd.id, gd.goal_id, gd.depends_on_goal_id, g.title as depends_on_title FROM goal_dependencies gd JOIN goals g ON gd.depends_on_goal_id = g.id WHERE gd.goal_id = $1`, [goal_id]);
 
         if (include_chain) {
           // Recursive chain: follow depends_on_goal_id
@@ -572,9 +508,7 @@ export async function executeTool(
           let current = goal_id;
           while (current && !visited.has(current)) {
             visited.add(current);
-            const dep = db.prepare(
-              'SELECT gd.depends_on_goal_id, g.title FROM goal_dependencies gd JOIN goals g ON gd.depends_on_goal_id = g.id WHERE gd.goal_id = ? LIMIT 1'
-            ).get(current) as any;
+            const dep = await queryOne(`SELECT gd.depends_on_goal_id, g.title FROM goal_dependencies gd JOIN goals g ON gd.depends_on_goal_id = g.id WHERE gd.goal_id = $1 LIMIT 1`, [current]);
             if (!dep) break;
             chain.unshift({ goal_id: dep.depends_on_goal_id, title: dep.title });
             current = dep.depends_on_goal_id;
@@ -586,24 +520,20 @@ export async function executeTool(
       }
 
       if (depCourseId) {
-        const deps = db.prepare(
-          `SELECT gd.id, gd.goal_id, g1.title as goal_title, gd.depends_on_goal_id, g2.title as depends_on_title
+        const deps = await queryAll(`SELECT gd.id, gd.goal_id, g1.title as goal_title, gd.depends_on_goal_id, g2.title as depends_on_title
            FROM goal_dependencies gd
            JOIN goals g1 ON gd.goal_id = g1.id
            JOIN goals g2 ON gd.depends_on_goal_id = g2.id
-           WHERE g1.course_id = ?`
-        ).all(depCourseId);
+           WHERE g1.course_id = $1`, [depCourseId]);
         return JSON.stringify({ course_id: depCourseId, dependencies: deps });
       }
 
       // All dependencies for user
-      const deps = db.prepare(
-        `SELECT gd.id, gd.goal_id, g1.title as goal_title, gd.depends_on_goal_id, g2.title as depends_on_title
+      const deps = await queryAll(`SELECT gd.id, gd.goal_id, g1.title as goal_title, gd.depends_on_goal_id, g2.title as depends_on_title
          FROM goal_dependencies gd
          JOIN goals g1 ON gd.goal_id = g1.id
          JOIN goals g2 ON gd.depends_on_goal_id = g2.id
-         WHERE g1.user_id = ?`
-      ).all(userId);
+         WHERE g1.user_id = $1`, [userId]);
       return JSON.stringify({ dependencies: deps });
     }
 
@@ -629,7 +559,7 @@ export async function executeTool(
         const docParams: unknown[] = [userId, ...docIds];
         if (course_id) { docSql += ' AND d.course_id = ?'; docParams.push(course_id); }
         if (file_type) { docSql += ' AND d.file_type = ?'; docParams.push(file_type); }
-        return db.prepare(docSql).all(...docParams) as DocResult[];
+        return await queryAll(docSql, docParams);
       };
 
       // Accumulator: doc_id -> chunk snippets (from all sources)
@@ -679,7 +609,7 @@ export async function executeTool(
       if (course_id) { keywordSql += ' AND d.course_id = ?'; keywordParams.push(course_id); }
       if (file_type) { keywordSql += ' AND d.file_type = ?'; keywordParams.push(file_type); }
       keywordSql += ' ORDER BY d.created_at DESC LIMIT 10';
-      const keywordDocs = db.prepare(keywordSql).all(...keywordParams) as DocResult[];
+      const keywordDocs = await queryAll(keywordSql, keywordParams);
 
       // --- Three-way merge: semantic+FTS5 docs first (with chunks), then LIKE docs ---
       let results: DocResult[] = [];
@@ -720,9 +650,7 @@ export async function executeTool(
       };
 
       // Get document (verify ownership)
-      const doc = db.prepare(
-        'SELECT id, filename, file_type, extracted_text, summary, page_count, document_type, chunk_count, parse_status FROM documents WHERE id = ? AND user_id = ?'
-      ).get(document_id, userId) as {
+      const doc = await queryOne(`SELECT id, filename, file_type, extracted_text, summary, page_count, document_type, chunk_count, parse_status FROM documents WHERE id = $1 AND user_id = $2`, [document_id, userId])as {
         id: string; filename: string; file_type: string; extracted_text: string | null;
         summary: string | null; page_count: number | null; document_type: string | null;
         chunk_count: number; parse_status: string;
@@ -756,9 +684,7 @@ export async function executeTool(
       // Document IS chunked
       if (chunk_index !== undefined) {
         // Return specific chunk
-        const chunk = db.prepare(
-          'SELECT chunk_index, content, heading, page_start, page_end FROM document_chunks WHERE document_id = ? AND chunk_index = ?'
-        ).get(document_id, chunk_index) as { chunk_index: number; content: string; heading: string | null; page_start: number | null; page_end: number | null } | undefined;
+        const chunk = await queryOne(`SELECT chunk_index, content, heading, page_start, page_end FROM document_chunks WHERE document_id = $1 AND chunk_index = $2`, [document_id, chunk_index])as { chunk_index: number; content: string; heading: string | null; page_start: number | null; page_end: number | null } | undefined;
 
         if (!chunk) {
           return JSON.stringify({ ...meta, error: `Chunk index ${chunk_index} not found. Valid range: 0–${doc.chunk_count - 1}` });
@@ -767,16 +693,12 @@ export async function executeTool(
       }
 
       if (include_all_chunks) {
-        const chunks = db.prepare(
-          'SELECT chunk_index, content, heading, page_start, page_end FROM document_chunks WHERE document_id = ? ORDER BY chunk_index'
-        ).all(document_id) as any[];
+        const chunks = await queryAll(`SELECT chunk_index, content, heading, page_start, page_end FROM document_chunks WHERE document_id = $1 ORDER BY chunk_index`, [document_id]);
         return JSON.stringify({ ...meta, chunks });
       }
 
       // Default: return first 3 chunks
-      const chunks = db.prepare(
-        'SELECT chunk_index, content, heading, page_start, page_end FROM document_chunks WHERE document_id = ? ORDER BY chunk_index LIMIT 3'
-      ).all(document_id) as any[];
+      const chunks = await queryAll(`SELECT chunk_index, content, heading, page_start, page_end FROM document_chunks WHERE document_id = $1 ORDER BY chunk_index LIMIT 3`, [document_id]);
       return JSON.stringify({
         ...meta,
         chunks,
@@ -820,24 +742,20 @@ export async function executeTool(
         }
       }
 
-      const stmt = db.prepare(
-        `INSERT INTO time_blocks (id, user_id, template_id, label, type, date, start_time, end_time, color, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-      );
-
       const now = new Date().toISOString();
       const created: Array<{ id: string; label: string; type: string; date: string; start_time: string; end_time: string }> = [];
 
-      db.transaction(() => {
+      await transaction(async (client) => {
         for (const item of blocks) {
           const id = uuidv4();
-          stmt.run(id, userId, null, item.label, item.type || 'custom', item.date, item.start_time, item.end_time, item.color || null, now, now);
+          await execute(`INSERT INTO time_blocks (id, user_id, template_id, label, type, date, start_time, end_time, color, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, [id, userId, null, item.label, item.type || 'custom', item.date, item.start_time, item.end_time, item.color || null, now, now]);
           created.push({
             id, label: item.label, type: item.type || 'custom',
             date: item.date, start_time: item.start_time, end_time: item.end_time,
           });
         }
-      })();
+      });
 
       return JSON.stringify({ created, message: `Created ${created.length} time block(s)` });
     }
@@ -848,9 +766,7 @@ export async function executeTool(
         start_time?: string; end_time?: string; color?: string;
       };
 
-      const existing = db.prepare(
-        'SELECT * FROM time_blocks WHERE id = ? AND user_id = ?'
-      ).get(block_id, userId) as any;
+      const existing = await queryOne(`SELECT * FROM time_blocks WHERE id = $1 AND user_id = $2`, [block_id, userId]);
       if (!existing) {
         return JSON.stringify({ error: 'Time block not found' });
       }
@@ -872,23 +788,21 @@ export async function executeTool(
       values.push(new Date().toISOString());
       values.push(block_id);
 
-      db.prepare(`UPDATE time_blocks SET ${fields.join(', ')} WHERE id = ?`).run(...values);
+      await execute(`UPDATE time_blocks SET ${fields.join(', ')} WHERE id = $1`, [...values]);
 
-      const updated = db.prepare('SELECT * FROM time_blocks WHERE id = ?').get(block_id);
+      const updated = await queryOne(`SELECT * FROM time_blocks WHERE id = $1`, [block_id]);
       return JSON.stringify({ updated, message: 'Time block updated' });
     }
 
     case 'delete_time_block': {
       const { block_id } = args as { block_id: string };
 
-      const existing = db.prepare(
-        'SELECT id FROM time_blocks WHERE id = ? AND user_id = ?'
-      ).get(block_id, userId) as any;
+      const existing = await queryOne(`SELECT id FROM time_blocks WHERE id = $1 AND user_id = $2`, [block_id, userId]);
       if (!existing) {
         return JSON.stringify({ error: 'Time block not found' });
       }
 
-      db.prepare('DELETE FROM time_blocks WHERE id = ?').run(block_id);
+      await execute(`DELETE FROM time_blocks WHERE id = $1`, [block_id]);
       return JSON.stringify({ message: 'Time block deleted' });
     }
 
@@ -896,7 +810,7 @@ export async function executeTool(
       const { task_id, links } = args as { task_id: string; links: { card_id: string; checklist_index?: number }[] };
 
       // Verify task belongs to user
-      const taskRow = db.prepare('SELECT id FROM tasks WHERE id = ? AND user_id = ?').get(task_id, userId);
+      const taskRow = await queryOne(`SELECT id FROM tasks WHERE id = $1 AND user_id = $2`, [task_id, userId]);
       if (!taskRow) {
         return JSON.stringify({ error: 'Task not found' });
       }
@@ -904,20 +818,16 @@ export async function executeTool(
       let created = 0;
       let skipped = 0;
 
-      const insertLink = db.prepare(
-        'INSERT OR IGNORE INTO task_cards (id, task_id, card_id, checklist_index) VALUES (?, ?, ?, ?)'
-      );
-
-      const batch = db.transaction(() => {
+      const batch = await transaction(async (client) => {
         for (const link of links) {
           // Verify card belongs to user
-          const cardRow = db.prepare('SELECT id FROM cards WHERE id = ? AND user_id = ?').get(link.card_id, userId);
+          const cardRow = await queryOne(`SELECT id FROM cards WHERE id = $1 AND user_id = $2`, [link.card_id, userId]);
           if (!cardRow) {
             skipped++;
             continue;
           }
           const linkId = uuidv4();
-          const result = insertLink.run(linkId, task_id, link.card_id, link.checklist_index ?? null);
+          const result = await execute(`INSERT INTO task_cards (id, task_id, card_id, checklist_index) VALUES ($1, $2, $3, $4)`, [linkId, task_id, link.card_id, link.checklist_index ?? null]);
           if (result.changes > 0) created++;
           else skipped++;
         }
