@@ -1,8 +1,8 @@
 # Coincides — 工程师入职指南
 
 > 本文档供 Perplexity Computer 在新 Task 中恢复项目上下文使用。
-> 最后更新：2026-03-20
-> 状态：v1.4 已完成（Time Block L1 补全 + 卡片数据模型升级）
+> 最后更新：2026-03-22
+> 状态：v1.8 Step 1 已完成（Electron 清理），方向转为云端部署 + PWA
 
 ---
 
@@ -34,7 +34,7 @@
 | 数学渲染 | KaTeX |
 | 路由 | HashRouter (react-router-dom v6) |
 | 认证 | JWT (内存 token) |
-| 部署 | 用户本地 Windows 11 |
+| 部署 | 本地开发 → v1.8 迁移至云端（阿里云国际版香港区域） |
 
 ---
 

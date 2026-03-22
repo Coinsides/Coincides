@@ -2,7 +2,7 @@
 
 > PM：henryfeng349@gmail.com
 > 全栈工程师：Perplexity Computer
-> 最后更新：2026-03-20（新增 BACKLOG.md 到工作流）
+> 最后更新：2026-03-22（新增 Git 分支策略）
 
 ---
 
@@ -529,6 +529,54 @@ Coincides 有两套工作流：
 
 ---
 
+## Git 分支策略
+
+### 什么时候用分支
+
+| 场景 | 分支策略 |
+|------|----------|
+| **Bug 修复、文档更新、小改动** | 直接在 `main` 上提交 |
+| **大型改动**（数据库迁移、架构重构、新基础设施） | 新建功能分支，完成后合并回 `main` |
+
+### 分支命名规范
+
+```
+feat/<版本号>-<描述>     ← 功能开发
+  例：feat/v1.8-cloud-deploy
+  例：feat/v2.0-community
+
+fix/<问题描述>              ← 紧急修复（需要多次提交才能解决的复杂 bug）
+  例：fix/agent-sse-duplicate
+```
+
+### 分支工作流
+
+```
+1. 创建分支
+   git checkout -b feat/v1.8-cloud-deploy
+
+2. 在分支上开发（可多次提交）
+   git add -A && git commit -m "..."
+   git push origin feat/v1.8-cloud-deploy
+
+3. 完成后合并回 main
+   git checkout main
+   git merge feat/v1.8-cloud-deploy
+   git push origin main
+
+4. 删除分支
+   git branch -d feat/v1.8-cloud-deploy
+   git push origin --delete feat/v1.8-cloud-deploy
+```
+
+### 核心原则
+- `main` 始终保持可运行状态
+- 分支上的代码不影响 `main`，可以大胆改
+- 如果分支改坏了，可以直接丢弃重来：`git checkout main && git branch -D feat/xxx`
+- 合并前确认功能完整、测试通过
+
+---
+
 ## 版本控制核心规则
 
 1. **GitHub `docs/` 是唯一事实源**——所有文档以 repo 版本为准
@@ -537,3 +585,4 @@ Coincides 有两套工作流：
 4. **如果 Drive 和 repo 不一致，以 repo 为准**
 5. **文档债务不过 Step**——每个 Step 完成时必须同步所有受影响的文档
 6. **版本范围不蚂食**——审批后的版本计划不随意加需求，新想法记入下个版本
+7. **大型改动用分支**——数据库迁移、架构重构等影响面大的变更，在功能分支上开发，完成后合并
