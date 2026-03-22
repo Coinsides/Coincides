@@ -21,10 +21,11 @@
     "build:client": "cd client && npm run build",
     "build:electron": "tsc -p electron/tsconfig.json",
     "build:all": "npm run build:client && npm run build:electron",
-    "electron:dev": "npm run build:electron && electron .",
-    "electron:pack": "npm run build:all && electron-builder --dir",
-    "electron:dist": "npm run build:all && electron-builder",
-    "postinstall": "electron-builder install-app-deps"
+    "electron:dev": "npm run patch:jiti && npm run build:electron && electron .",
+    "electron:pack": "npm run patch:jiti && npm run build:all && electron-builder --dir",
+    "electron:dist": "npm run patch:jiti && npm run build:all && electron-builder",
+    "postinstall": "electron-builder install-app-deps",
+    "patch:jiti": "node scripts/patch-jiti-windows.cjs"
   },
   "build": {
     "appId": "com.coincides.app",

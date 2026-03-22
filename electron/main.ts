@@ -16,7 +16,6 @@ const appRoot = app.isPackaged
 
 const serverDir = join(appRoot, 'server');
 const serverEntry = join(serverDir, 'src', 'index.ts');
-const serverLoader = join(appRoot, 'electron', 'server-loader.cjs');
 
 // ── Data Directory ──────────────────────────────────────────
 const userDataPath = app.getPath('userData');
@@ -61,7 +60,6 @@ if (existsSync(serverEnvPath)) {
 
 console.log(`[Electron] Packaged: ${app.isPackaged}`);
 console.log(`[Electron] App root: ${appRoot}`);
-console.log(`[Electron] Server loader: ${serverLoader}`);
 console.log(`[Electron] Server entry: ${serverEntry}`);
 console.log(`[Electron] Database: ${DB_PATH}`);
 

@@ -19,13 +19,15 @@
 - 禁用 asar 打包（解决路径解析问题）
 - 支持从 `%APPDATA%/coincides/.env` 和 `server/.env` 双路径读取 API 密钥
 
-### Step 2.1 — jiti v2 兼容性修复
-- **问题**：jiti v2 不再提供 `register.cjs`，`--require jiti/register.cjs` 启动失败
-- **方案**：新增 `electron/server-loader.cjs`，使用 jiti 的 `createJiti` + `jiti.import()` 异步加载服务端 TypeScript
-  - 绕过 jiti v2 仅提供 ESM register hook 的限制
-  - 正确支持 `top-level await` 和 `import.meta.url` 等 ESM 特性
-- Electron 主进程 `spawn` 改为直接执行 `server-loader.cjs`（不再依赖 `--require`）
-- electron-builder `files` 配置加入 `electron/server-loader.cjs`
+### Step 2.1 — jiti v2 兼容性 + Windows 路径修复
+- **问题1**：jiti v2 不再提供 `register.cjs`，`--require jiti/register.cjs` 启动失败
+- **问题2**：Electron 内置 Node 的 ABI 版本与系统 Node 不同，better-sqlite3 无法加载
+- **问题3**：jiti v2 的 ESM hooks 在 Windows 下返回裸路径（`D:\...`）而非 `file://` URL，导致 `ERR_UNSUPPORTED_ESM_URL_SCHEME`
+- **方案**：
+  - 用系统 Node（`findSystemNode()`）替代 Electron 内置 Node 运行 server 子进程
+  - 直接用 `node --import jiti/register src/index.ts`（与 server 的 dev 命令一致）
+  - 新增 `scripts/patch-jiti-windows.cjs` 修复 jiti-hooks.mjs 的 Windows 路径问题
+  - `electron:dev` / `electron:dist` 命令自动运行 patch
 - 移除废弃的 `electron/jiti-register.cjs`
 
 ---
@@ -34,10 +36,10 @@
 
 | 文件 | 操作 | 说明 |
 |------|------|------|
-| `electron/main.ts` | 新增/修改 | Electron 主进程，spawn server-loader.cjs |
-| `electron/server-loader.cjs` | 新增 | CJS 引导脚本，jiti async import 加载 TS 服务 |
+| `electron/main.ts` | 新增/修改 | Electron 主进程，findSystemNode + --import jiti/register |
 | `electron/tsconfig.json` | 新增 | CommonJS 输出配置 |
-| `package.json` | 修改 | electron-builder + scripts + v1.8.0 |
+| `scripts/patch-jiti-windows.cjs` | 新增 | 修复 jiti ESM hooks 的 Windows 路径问题 |
+| `package.json` | 修改 | electron-builder + scripts + patch:jiti + v1.8.0 |
 | `server/src/index.ts` | 修改 | express.static + SPA fallback |
 | `server/src/db/init.ts` | 修改 | 支持 DB_PATH 环境变量 |
 | `server/src/middleware/upload.ts` | 修改 | 支持 UPLOAD_DIR 环境变量 |
