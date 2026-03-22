@@ -171,7 +171,7 @@ router.get('/courses', async (req: AuthRequest, res: Response) => {
 
   const courses = await queryAll(`SELECT id, name, color FROM courses WHERE user_id = $1 ORDER BY name`, [userId]) as { id: string; name: string; color: string }[];
 
-  const result = courses.map(course => {
+  const result = await Promise.all(courses.map(async course => {
     const taskStats = await queryOne(`SELECT COUNT(*) as total, SUM(CASE WHEN status = \'completed\' THEN 1 ELSE 0 END) as completed FROM tasks WHERE user_id = $1 AND course_id = $2`, [userId, course.id]) as { total: number; completed: number };
 
     const cardStats = await queryOne(`SELECT COUNT(*) as total, SUM(CASE WHEN fsrs_reps > 0 THEN 1 ELSE 0 END) as reviewed FROM cards c JOIN card_decks d ON c.deck_id = d.id WHERE d.user_id = $1 AND d.course_id = $2`, [userId, course.id]) as { total: number; reviewed: number };
@@ -192,7 +192,7 @@ router.get('/courses', async (req: AuthRequest, res: Response) => {
       cards_reviewed: cardStats.reviewed || 0,
       active_goals: activeGoals.count,
     };
-  });
+  }));
 
   res.json(result);
 });

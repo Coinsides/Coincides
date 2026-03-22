@@ -180,26 +180,26 @@ router.post('/:cardId/rate', async (req: AuthRequest, res: Response) => {
 router.get('/browse', async (req: AuthRequest, res: Response) => {
   const decks = await queryAll(`SELECT id, name, course_id FROM card_decks WHERE user_id = $1 ORDER BY name`, [req.userId!]);
 
-  const result = decks.map((deck: any) => {
+  const result = await Promise.all(decks.map(async (deck: any) => {
     const sections = await queryAll(`SELECT id, name FROM card_sections WHERE deck_id = $1 ORDER BY order_index`, [deck.id]);
 
     const unsectionedCards = await queryAll(`SELECT id, title, fsrs_reps, fsrs_next_review
        FROM cards WHERE deck_id = $1 AND section_id IS NULL AND user_id = $2
        ORDER BY order_index`, [deck.id, req.userId!]);
 
-    const sectionData = sections.map((section: any) => {
+    const sectionData = await Promise.all(sections.map(async (section: any) => {
       const cards = await queryAll(`SELECT id, title, fsrs_reps, fsrs_next_review
          FROM cards WHERE section_id = $1 AND user_id = $2
          ORDER BY order_index`, [section.id, req.userId!]);
       return { ...section, cards };
-    });
+    }));
 
     return {
       ...deck,
       sections: sectionData,
       unsectioned_cards: unsectionedCards,
     };
-  });
+  }));
 
   res.json(result);
 });

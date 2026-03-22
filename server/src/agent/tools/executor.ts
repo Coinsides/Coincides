@@ -74,7 +74,7 @@ export async function executeTool(
           }
         }
         // Attach tasks to their goals
-        const allTasks = await queryAll(`SELECT id, title, date, priority, status, goal_id, serves_must FROM tasks WHERE user_id = $1 AND goal_id IS NOT NULL ORDER BY date`, [userId])<Record<string, unknown>>;
+        const allTasks = (await queryAll(`SELECT id, title, date, priority, status, goal_id, serves_must FROM tasks WHERE user_id = $1 AND goal_id IS NOT NULL ORDER BY date`, [userId])) as unknown as Array<Record<string, unknown>>;
         for (const t of allTasks) {
           if (t.goal_id && goalMap.has(t.goal_id as string)) {
             (goalMap.get(t.goal_id as string)!.tasks as unknown[]).push(t);
@@ -549,7 +549,7 @@ export async function executeTool(
         relevant_chunks?: Array<{ content: string; chunk_index: number; similarity: number; source: string }>;
       }
 
-      const lookupDocs = (docIds: string[]): DocResult[] => {
+      const lookupDocs = async (docIds: string[]): Promise<DocResult[]> => {
         if (docIds.length === 0) return [];
         const placeholders = docIds.map(() => '?').join(',');
         let docSql = `SELECT d.id, d.filename, d.file_type, d.summary, d.page_count, d.document_type, d.chunk_count,

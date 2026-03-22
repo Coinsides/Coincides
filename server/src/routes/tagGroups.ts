@@ -20,10 +20,10 @@ router.get('/', async (req: AuthRequest, res: Response) => {
   const groups = await queryAll(`SELECT * FROM tag_groups WHERE course_id = $1 AND user_id = $2 ORDER BY order_index ASC, name ASC`, [courseId, req.userId!]);
 
   // Fetch tags for each group
-  const result = groups.map((group) => ({
+  const result = await Promise.all(groups.map(async (group) => ({
     ...group,
     tags: await queryAll(`SELECT id, name, color, tag_group_id FROM tags WHERE tag_group_id = $1 AND user_id = $2 ORDER BY name ASC`, [group.id, req.userId!]),
-  }));
+  })));
 
   res.json({ tag_groups: result });
 });

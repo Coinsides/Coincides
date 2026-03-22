@@ -283,7 +283,7 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
   // But tasks.goal_id has ON DELETE SET NULL (not CASCADE), so we must delete tasks
   // explicitly before deleting the goal. We also need to collect sub-goal IDs because
   // once the parent goal is deleted, sub-goals vanish and their task.goal_id becomes NULL.
-  const collectGoalIds = (parentId: string): string[] => {
+  const collectGoalIds = async (parentId: string): Promise<string[]> => {
     const children = await queryAll(`SELECT id FROM goals WHERE parent_id = $1`, [parentId]) as { id: string }[];
     const ids = [parentId];
     for (const child of children) {
@@ -439,8 +439,8 @@ router.get('/:id/dependency-chain', async (req: AuthRequest, res: Response) => {
   await walkBack(req.params.id as string);
 
   // Enrich with goal data
-  const goals = chain.map(id =>
-    await queryOne(`SELECT id, title, status, course_id, deadline FROM goals WHERE id = $1`, [id])).filter(Boolean);
+  const goals = await Promise.all(chain.map(async id =>
+    await queryOne(`SELECT id, title, status, course_id, deadline FROM goals WHERE id = $1`, [id]))).then(r => r.filter(Boolean));
 
   res.json(goals);
 });

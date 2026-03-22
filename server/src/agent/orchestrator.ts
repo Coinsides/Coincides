@@ -64,7 +64,7 @@ export async function* runAgent(
   // 2. Build context
   const courses = await queryAll(`SELECT id, name, code FROM courses WHERE user_id = $1`, [userId]);
   const memories = memory.retrieveMemories(userMessage);
-  const docSummaries = memory.getDocumentSummaries();
+  const docSummaries = await memory.getDocumentSummaries();
   const today = new Date().toISOString().split('T')[0];
   const energyStatus = await queryOne('SELECT energy_level FROM daily_statuses WHERE user_id = $1 AND date = $2', [userId, today]);
 
@@ -102,7 +102,7 @@ export async function* runAgent(
   });
 
   // 4. Get conversation history
-  const history = memory.getConversationHistory(conversationId);
+  const history = await memory.getConversationHistory(conversationId);
 
   // 5. Add context hint if provided
   let augmentedMessage = userMessage;
@@ -111,7 +111,7 @@ export async function* runAgent(
   }
 
   // 6. Save user message
-  memory.saveMessage(conversationId, 'user', augmentedMessage);
+  await memory.saveMessage(conversationId, 'user', augmentedMessage);
 
   // 7. Build messages array
   let userContent: string | ContentBlock[] = augmentedMessage;
@@ -248,13 +248,13 @@ export async function* runAgent(
 
     // Persist intermediate tool round to DB so history stays complete
     // (each tool_use must have a matching tool_result in conversation history)
-    memory.saveMessage(
+    await memory.saveMessage(
       conversationId,
       'assistant',
       textBuffer,
       JSON.stringify(currentToolCalls),
     );
-    memory.saveMessage(
+    await memory.saveMessage(
       conversationId,
       'user',
       '',
@@ -266,7 +266,7 @@ export async function* runAgent(
   // 9. Save final assistant text response
   // Only save if the last round had NO tool calls (otherwise it was already saved in the loop)
   if (lastRoundText && !lastRoundHadTools) {
-    memory.saveMessage(
+    await memory.saveMessage(
       conversationId,
       'assistant',
       lastRoundText,
@@ -274,7 +274,7 @@ export async function* runAgent(
   }
 
   // 10. Extract memories from this exchange
-  memory.extractMemories(conversationId, userMessage, fullResponse);
+  await memory.extractMemories(conversationId, userMessage, fullResponse);
 
   yield { type: 'done' };
 }

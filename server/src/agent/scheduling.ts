@@ -139,7 +139,7 @@ export async function getDailyCapacities(userId: string, startDate: string, endD
     const dow = d.getDay(); // 0=Sun
 
     // v1.7.3: Get date-based time block instances directly
-    const blocks = await queryAll(`SELECT id, start_time, end_time, type FROM time_blocks WHERE user_id = $1 AND date = $2`, [userId, dateStr])<{ id: string; start_time: string; end_time: string; type: string }>;
+    const blocks = (await queryAll(`SELECT id, start_time, end_time, type FROM time_blocks WHERE user_id = $1 AND date = $2`, [userId, dateStr])) as unknown as Array<{ id: string; start_time: string; end_time: string; type: string }>;
 
     const resolved: Array<{ id: string; type: string; startMin: number; endMin: number }> = [];
     for (const b of blocks) {

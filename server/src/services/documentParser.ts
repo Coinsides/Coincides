@@ -58,7 +58,7 @@ async function parsePdfNative(buffer: Buffer): Promise<{ text: string; pageCount
 }
 
 async function parsePdfWithVision(buffer: Buffer, userId?: string): Promise<{ text: string; pageCount: number }> {
-  const client = getAnthropicClient(userId);
+  const client = await getAnthropicClient(userId);
 
   // Get page count first
   const pdfDoc = await PDFDocument.load(buffer);
@@ -125,7 +125,7 @@ async function parsePdfWithVision(buffer: Buffer, userId?: string): Promise<{ te
 }
 
 async function parseImage(buffer: Buffer, filename: string, userId?: string): Promise<string> {
-  const client = getAnthropicClient(userId);
+  const client = await getAnthropicClient(userId);
   const base64 = buffer.toString('base64');
   const ext = getFileExtension(filename);
   const mediaTypeMap: Record<string, string> = {
@@ -246,7 +246,7 @@ async function generateSummary(
   text: string,
   userId?: string
 ): Promise<{ summary: string; documentType: string }> {
-  const client = getAnthropicClient(userId);
+  const client = await getAnthropicClient(userId);
   const truncated = text.slice(0, 10000);
 
   const response = await client.messages.create({
