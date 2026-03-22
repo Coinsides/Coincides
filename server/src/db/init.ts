@@ -21,7 +21,7 @@ export function getDb(): Database.Database {
 }
 
 export async function initDb(dbPath?: string): Promise<Database.Database> {
-  const resolvedPath = dbPath || join(__dirname, '..', '..', 'coincides.db');
+  const resolvedPath = dbPath || process.env.DB_PATH || join(__dirname, '..', '..', 'coincides.db');
 
   db = new Database(resolvedPath);
 

@@ -1,7 +1,11 @@
 {
   "name": "coincides",
-  "version": "1.3.1",
+  "version": "1.8.0",
   "private": true,
+  "description": "Coincides — AI-Powered Learning System for STEM Students",
+  "author": "Coincides",
+  "license": "MIT",
+  "main": "dist-electron/main.js",
   "engines": {
     "node": ">=22.0.0"
   },
@@ -13,6 +17,76 @@
     "build": "cd server && npm run build",
     "start": "cd server && npm run start",
     "install:all": "npm install && cd server && npm install && cd ../client && npm install",
-    "setup": "npm run install:all"
+    "setup": "npm run install:all",
+    "build:client": "cd client && npm run build",
+    "build:electron": "tsc -p electron/tsconfig.json",
+    "build:all": "npm run build:client && npm run build:electron",
+    "electron:dev": "npm run build:electron && electron .",
+    "electron:pack": "npm run build:all && electron-builder --dir",
+    "electron:dist": "npm run build:all && electron-builder",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "build": {
+    "appId": "com.coincides.app",
+    "productName": "Coincides",
+    "copyright": "Copyright © 2026 Coincides",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist-electron/**/*",
+      "client/dist/**/*",
+      "server/src/**/*",
+      "server/package.json",
+      "server/node_modules/**/*",
+      "shared/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "server/node_modules/better-sqlite3/build",
+        "to": "better-sqlite3-build",
+        "filter": ["**/*"]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": ["dmg"],
+      "icon": "assets/icon.icns",
+      "category": "public.app-category.education"
+    },
+    "linux": {
+      "target": ["AppImage"],
+      "icon": "assets/icon.png",
+      "category": "Education"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "Coinsides",
+      "repo": "Coincides"
+    }
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0",
+    "typescript": "^5.7.0"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.0"
   }
 }

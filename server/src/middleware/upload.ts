@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const UPLOADS_DIR = join(__dirname, '..', '..', 'uploads');
+const UPLOADS_DIR = process.env.UPLOAD_DIR || join(__dirname, '..', '..', 'uploads');
 
 // Ensure uploads directory exists
 mkdirSync(UPLOADS_DIR, { recursive: true });

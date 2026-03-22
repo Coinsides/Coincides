@@ -2,6 +2,8 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { initDb, closeDb } from './db/init.js';
 import { validateConfig } from './db/validateConfig.js';
 import { authMiddleware } from './middleware/auth.js';
@@ -76,6 +78,19 @@ app.use('/api/time-blocks', authMiddleware, timeBlockRoutes);
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
+
+// Serve built client files in production / Electron mode
+import { existsSync } from 'fs';
+const clientDistPath = join(dirname(fileURLToPath(import.meta.url)), '..', '..', 'client', 'dist');
+if (existsSync(clientDistPath)) {
+  app.use(express.static(clientDistPath));
+  // SPA fallback: serve index.html for all non-API routes
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(join(clientDistPath, 'index.html'));
+  });
+  console.log(`Serving client from ${clientDistPath}`);
+}
 
 // Global error handler (must be after routes)
 app.use(errorHandler);
