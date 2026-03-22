@@ -1,7 +1,7 @@
 # Coincides 开发路线图
 
-> 最后更新：2026-03-21
-> 状态：v1.0 🎉 发布 | v1.1~v1.5.3 ✅ 完成 | v1.6 ✅ 完成 | v1.7 📋 规划完成 | v1.8~v1.9 📋 待规划
+> 最后更新：2026-03-22
+> 状态：v1.0 🎉 发布 | v1.1~v1.7.3 ✅ 完成 | v1.8 (Electron 打包) 📋 待实施 | v2.0+ 📋 远期规划
 
 ---
 
@@ -180,50 +180,67 @@
 
 ---
 
-## v1.7（知识图谱整合 Phase 2：Task-Card 联动）📋
+## v1.7（知识图谱整合 Phase 2：Task-Card 联动）✅
 
-> 详细规划：[v1.6-v1.7-plan.md](releases/v1.6-v1.7-plan.md)
-> 状态：规划完成，待实施
+> 详细规划：[v1.7-plan.md](releases/v1.7-plan.md)
+> 变更日志：[CHANGELOG-v1.7.md](releases/CHANGELOG-v1.7.md)
 
 主题：打通 Task ↔ Card 双向关联，建立完整知识图谱链路。
 
-- **Task-Card 关联数据模型**：新增 `task_cards` M:N 关联表，支持任务级 + checklist 条目级两种粒度
-- **TaskViewModal（查看模式）**：点击任务先进入只读查看，再点编辑进入编辑模式
-- **CardBubble 组件**：查看模式下展示关联卡片气泡
-- **Agent 关联协议**：Agent 创建学习计划时自动建立 Task ↔ Card 关联
+- **v1.7.0**：Task-Card 关联数据模型 + TaskViewModal + CardBubble + Agent 关联协议
+- **v1.7.1**：Agent 效率深度优化（并行工具执行 + 分场景 Playbook + Context 预注入）
+- **v1.7.2**：学习计划流程完善（MonthCalendar 日期选择 + Time Block 缺口检测 + 两步 Proposal）
+- **v1.7.3**：Time Block 模板化（date-based 实例 + 多套模板 + 周视图编辑器 + Proposal 周视图编辑）
+- **Bug Fixes**：Proposal 机制强制化、max_tokens 修复、Checklist 格式兼容、目标级联删除任务、FK 修复、消息重复修复、Goals 任务详情增强、Move to 功能
 
 ---
 
-## v1.8（Goal DAG + 复习模板系统）📋
+## v1.8（Electron 桌面应用打包）📋
 
-> 状态：待规划
-> 需求条目：GD-5~8, CD-6（5 条）
+> 状态：待实施
+> 里程碑：v1.x 系列最终版本，可分发的桌面应用
 
-- 多依赖选择 UI + DAG 可视化图
-- Agent DAG 排期 + 动态优先级
-- 各类型独立复习模板系统
+主题：将 Coincides 打包为独立桌面应用，用户双击安装即可使用。
+
+- Electron 壳配置（主进程启动 Express + React）
+- `electron-builder` 打包（.exe / .dmg / .AppImage）
+- `electron-updater` 自动更新（连 GitHub Releases）
+- 数据存储路径迁移到用户目录（`appData`）
+- Migration 系统确保版本更新时数据无缝升级
+
+> 更新规范详见：[Update-Migration-Guide.md](workflow/Update-Migration-Guide.md)
 
 ---
 
-## v1.9（Electron + 基础设施 + Time Block L3）📋
+## v2.0+（远期规划 — 云化 + 社区 + 知识图谱进阶）📋
 
-> 状态：待规划
-> 需求条目：TB-L2a/b, INF-1~4（6 条）
+> 状态：远期规划，待 v1.8 完成后启动
 
-- Time Block 模板系统 + 格子点选创建
-- Electron 打包 + 分发
+这是从“个人工具”到“社区平台”的分水岭。
+
+### v2.0 核心
+- **云化部署**：Express 上云 + SQLite → PostgreSQL + 多用户注册/登录
+- **社区模板市场**：用户设计卡片模板（类似魔兽争霸地图编辑器）+ 社区投票 + 奖励机制
+- **课堂协作**：以课程为单位的学生群体共创卡片集
+- **多端应用**：Electron 桌面端作为离线客户端 + Web 端 + 移动端
+
+### v2.x 进阶
+- **Goal DAG 可视化**：目标依赖图自动布局 + 跨课程依赖 + Agent 全局排期
+- **卡片关系层**：card_relations（prerequisite / sequence / comparison）+ 知识 DAG
+- **知识画布**：白板 UI，卡片自由拼装 + 连接件 + DAG 可视化
+- **开放模板引擎**：用户自定义卡片模板（字段结构 + 渲染方式）
+- **复习模式引擎**：填空 / 选择 / 混合复习 + 错题本
+
+---
+
+## Backlog（待排期——归入 v2.x 规划）
+
+- 复习体验升级：复习模式引擎（填空/选择/混合）+ 错题本系统
+- 成就系统：里程碑型成就（无 streak）+ 解锁通知
+- Statistics 深度洞察：记忆保持率曲线 + 学习节奏 + 课程深度 + 数据导出
 - 通知系统 + 自动化测试 + 安全加固
 
----
-
-## Backlog（待排期）
-
-以下需求已确认但未分配版本：
-
-- 复习体验升级：复习模式引擎（填空/选择/混合）+ 撕胶带交互 + 错题本系统（RV-1~6, CD-4/5, WB-1~5）
-- 成就系统：里程碑型成就（无 streak）+ 解锁通知（AC-1~6）
-- Statistics 深度洞察：记忆保持率曲线 + 学习节奏 + 课程深度 + 数据导出（ST-1~4）
-- AI 推导过程按钮（CD-4）
+> 以上均待 v1.8 Electron 版稳定后，在 v2.x 中规划实施。
 
 ---
 
