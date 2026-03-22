@@ -1,7 +1,7 @@
 # Coincides 开发路线图
 
 > 最后更新：2026-03-22
-> 状态：v1.0 🎉 发布 | v1.1~v1.7.3 ✅ 完成 | v1.8 (Electron 打包) 📋 待实施 | v2.0+ 📋 远期规划
+> 状态：v1.0 🎉 发布 | v1.1~v1.7.3 ✅ 完成 | v1.8 (云端部署 + PWA) 📋 待实施 | v2.0+ 📋 远期规划
 
 ---
 
@@ -195,34 +195,34 @@
 
 ---
 
-## v1.8（Electron 桌面应用打包）📋
+## v1.8（云端部署 + PWA 离线支持）📋
 
 > 状态：待实施
-> 里程碑：v1.x 系列最终版本，可分发的桌面应用
+> 详细规划：[v1.8-plan.md](releases/v1.8-plan.md)
+> 里程碑：从“本地工具”转型为“在线服务”，为 v2.0 社区功能铺路
+> 方向变更：原计划 Electron 桌面打包，因架构不匹配放弃（详见 Plan 中「为什么放弃 Electron」）
 
-主题：将 Coincides 打包为独立桌面应用，用户双击安装即可使用。
+主题：从本地单机工具转型为在线服务，支持多用户注册和离线使用。
 
-- Electron 壳配置（主进程启动 Express + React）
-- `electron-builder` 打包（.exe / .dmg / .AppImage）
-- `electron-updater` 自动更新（连 GitHub Releases）
-- 数据存储路径迁移到用户目录（`appData`）
-- Migration 系统确保版本更新时数据无缝升级
-
-> 更新规范详见：[Update-Migration-Guide.md](workflow/Update-Migration-Guide.md)
+- Step 1：清理 Electron 残留 + 仓库整理
+- Step 2：SQLite → PostgreSQL 迁移（最大工作量）
+- Step 3：多用户支持强化（user_id 隔离 + 文件云存储）
+- Step 4：部署上线（Railway + Supabase + Cloudflare）
+- Step 5：PWA 离线支持（Service Worker + IndexedDB 缓存）
+- Step 6：本地数据迁移工具（可选）
 
 ---
 
-## v2.0+（远期规划 — 云化 + 社区 + 知识图谱进阶）📋
+## v2.0+（社区平台 + 知识图谱进阶）📋
 
-> 状态：远期规划，待 v1.8 完成后启动
+> 状态：远期规划，待 v1.8 云端部署完成后启动
 
-这是从“个人工具”到“社区平台”的分水岭。
+这是从“在线工具”到“社区平台”的分水岭。
 
 ### v2.0 核心
-- **云化部署**：Express 上云 + SQLite → PostgreSQL + 多用户注册/登录
 - **社区模板市场**：用户设计卡片模板（类似魔兽争霸地图编辑器）+ 社区投票 + 奖励机制
 - **课堂协作**：以课程为单位的学生群体共创卡片集
-- **多端应用**：Electron 桌面端作为离线客户端 + Web 端 + 移动端
+- **开放模板引擎**：用户自定义卡片模板（字段结构 + 渲染方式）
 
 ### v2.x 进阶
 - **Goal DAG 可视化**：目标依赖图自动布局 + 跨课程依赖 + Agent 全局排期
@@ -240,7 +240,7 @@
 - Statistics 深度洞察：记忆保持率曲线 + 学习节奏 + 课程深度 + 数据导出
 - 通知系统 + 自动化测试 + 安全加固
 
-> 以上均待 v1.8 Electron 版稳定后，在 v2.x 中规划实施。
+> 以上均待 v1.8 云端版稳定后，在 v2.x 中规划实施。
 
 ---
 
@@ -268,7 +268,7 @@
 | 卡片算法 | ts-fsrs (间隔重复) |
 | 数学渲染 | KaTeX |
 | 向量搜索 | sqlite-vec v0.1.7 + Voyage AI voyage-4 (1024 维) |
-| 部署 | 本地 Windows 11 |
+| 部署 | 本地开发 → v1.8 迁移至云端（Railway + Cloudflare + Supabase） |
 
 ---
 
