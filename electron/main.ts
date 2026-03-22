@@ -105,14 +105,6 @@ function findSystemNode(): string {
 
 function startServer(): Promise<void> {
   return new Promise((resolve, reject) => {
-    if (!existsSync(serverLoader)) {
-      const msg = `Server loader not found: ${serverLoader}`;
-      console.error(`[Electron] ${msg}`);
-      dialog.showErrorBox('Coincides', msg);
-      reject(new Error(msg));
-      return;
-    }
-
     if (!existsSync(serverEntry)) {
       const msg = `Server entry not found: ${serverEntry}`;
       console.error(`[Electron] ${msg}`);
@@ -127,11 +119,13 @@ function startServer(): Promise<void> {
     const nodeExecutable = findSystemNode();
 
     console.log(`[Electron] Node: ${nodeExecutable}`);
-    console.log(`[Electron] Server loader: ${serverLoader} (exists: ${existsSync(serverLoader)})`);
 
-    // Use our CJS loader that bootstraps jiti to run TypeScript directly
+    // Use Node's native --import flag with jiti/register to handle TypeScript.
+    // This is the same mechanism as `npm run dev` in the server package.
+    // We use system Node (not Electron's) so native modules like better-sqlite3 work.
     serverProcess = spawn(nodeExecutable, [
-      serverLoader,
+      '--import', 'jiti/register',
+      serverEntry,
     ], {
       cwd: serverDir,
       env: {
