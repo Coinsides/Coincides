@@ -5,13 +5,9 @@
  * then opens the React frontend in a BrowserWindow.
  */
 import { app, BrowserWindow, shell } from 'electron';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
-import { fork, type ChildProcess } from 'child_process';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { fork, ChildProcess } from 'child_process';
 
 // ── Data Directory ──────────────────────────────────────────
 const userDataPath = app.getPath('userData');
@@ -34,7 +30,6 @@ let serverProcess: ChildProcess | null = null;
 
 function startServer(): Promise<void> {
   return new Promise((resolve, reject) => {
-    // The server entry point — runs via jiti (same as dev mode)
     const serverEntry = join(__dirname, '..', 'server', 'src', 'index.ts');
 
     serverProcess = fork(serverEntry, [], {
@@ -52,7 +47,6 @@ function startServer(): Promise<void> {
     serverProcess.stdout?.on('data', (data: Buffer) => {
       const msg = data.toString().trim();
       console.log(`[Server] ${msg}`);
-      // Detect server ready
       if (msg.includes('running on')) {
         resolve();
       }
@@ -72,7 +66,6 @@ function startServer(): Promise<void> {
       serverProcess = null;
     });
 
-    // Timeout — if server doesn't start in 15s, continue anyway
     setTimeout(() => resolve(), 15000);
   });
 }
@@ -86,7 +79,6 @@ function createWindow(): void {
     minWidth: 1000,
     minHeight: 700,
     title: 'Coincides',
-    icon: join(__dirname, '..', 'assets', 'icon.png'),
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -95,7 +87,6 @@ function createWindow(): void {
     show: false,
   });
 
-  // In production, the server serves the client too
   mainWindow.loadURL(`http://localhost:${PORT}`);
 
   mainWindow.once('ready-to-show', () => {
