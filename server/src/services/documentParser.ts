@@ -21,7 +21,7 @@ const MAX_PDF_PAGES = 200;
  * Get Anthropic client — reads API key from user Settings first, falls back to .env.
  * This allows users to configure their key in the Settings UI without needing a .env file.
  */
-function getAnthropicClient(userId?: string): Anthropic {
+async function getAnthropicClient(userId?: string): Promise<Anthropic> {
   // Try user settings first
   if (userId) {
     try {
@@ -357,9 +357,10 @@ export async function parseDocument(documentId: string, userId: string): Promise
     const chunkCount = chunks.length;
 
     if (chunkCount > 0) {
-      const insertMany = await transaction(async (client) => {
-        items.forEach((chunk, index) => {
-          await execute(`INSERT INTO document_chunks (id, document_id, chunk_index, content, heading, page_start, page_end, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, [uuidv4(),
+      await transaction(async (client) => {
+        for (let index = 0; index < chunks.length; index++) {
+          const chunk = chunks[index];
+          await client.query(`INSERT INTO document_chunks (id, document_id, chunk_index, content, heading, page_start, page_end, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, [uuidv4(),
             documentId,
             index,
             chunk.content,
@@ -368,9 +369,8 @@ export async function parseDocument(documentId: string, userId: string): Promise
             chunk.page_end,
             new Date().toISOString()
           ]);
-        });
+        }
       });
-      insertMany(chunks);
     }
 
     // AI summary
@@ -419,7 +419,7 @@ export async function parseDocument(documentId: string, userId: string): Promise
  * Generate embeddings for all chunks of a document and store in vec table.
  */
 async function generateChunkEmbeddings(documentId: string, userId: string): Promise<void> {
-  const provider = getEmbeddingProvider(userId);
+  const provider = await getEmbeddingProvider(userId);
   if (!provider) {
     console.warn('No embedding provider configured — skipping chunk embeddings');
     return;

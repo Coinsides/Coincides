@@ -199,7 +199,7 @@ router.get('/courses', async (req: AuthRequest, res: Response) => {
 
 // --- Helpers ---
 
-function calculateStreak(userId: string, today: string): { current: number; longest: number } {
+async function calculateStreak(userId: string, today: string): Promise<{ current: number; longest: number }> {
   // Get all dates with activity (task completed or card reviewed), ordered descending
   const activityDates = await queryAll(`SELECT DISTINCT date FROM (
        SELECT date FROM tasks WHERE user_id = $1 AND status = 'completed'

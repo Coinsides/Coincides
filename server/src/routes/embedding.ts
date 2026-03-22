@@ -36,7 +36,7 @@ router.get('/status', async (req: AuthRequest, res: Response) => {
   );
 
   const totalEmbeddable = (totalChunks?.count || 0) + (unchunkedDocs?.count || 0);
-  const provider = getEmbeddingProvider(userId);
+  const provider = await getEmbeddingProvider(userId);
 
   res.json({
     configured: !!provider,
@@ -60,7 +60,7 @@ router.get('/status', async (req: AuthRequest, res: Response) => {
  */
 router.post('/backfill', async (req: AuthRequest, res: Response) => {
   const userId = req.userId!;
-  const provider = getEmbeddingProvider(userId);
+  const provider = await getEmbeddingProvider(userId);
 
   if (!provider) {
     res.status(400).json({ error: 'No embedding provider configured' });

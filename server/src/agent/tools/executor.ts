@@ -370,16 +370,16 @@ export async function executeTool(
       const keywordMemories = await queryAll(keywordSql, keywordParams);
 
       // --- Path 2: FTS5 full-text search ---
-      const ftsResults = store.ftsSearchMemories(query, 10, userId);
+      const ftsResults = await store.ftsSearchMemories(query, 10, userId);
 
       // --- Path 3: Semantic vector search (if provider available) ---
       let semanticMapped: Array<{ id: string; category: string; content: string; created_at: string; similarity_score: number }> = [];
       try {
-        const provider = getEmbeddingProvider(userId);
+        const provider = await getEmbeddingProvider(userId);
         if (provider) {
           const queryEmbeddings = await provider.embed([query], 'query');
           if (queryEmbeddings.length > 0) {
-            const semanticResults = store.searchMemoriesWithContent(queryEmbeddings[0], 10, userId);
+            const semanticResults = await store.searchMemoriesWithContent(queryEmbeddings[0], 10, userId);
             semanticMapped = semanticResults.map((r) => ({
               id: r.memory_id,
               category: r.category,
@@ -427,12 +427,12 @@ export async function executeTool(
       // Generate embedding asynchronously (don't block tool response)
       (async () => {
         try {
-          const provider = getEmbeddingProvider(userId);
+          const provider = await getEmbeddingProvider(userId);
           if (!provider) return;
           const embeddings = await provider.embed([content], 'document');
           if (embeddings.length > 0) {
             const store = new VectorStore();
-            store.upsertMemoryEmbedding(id, embeddings[0]);
+            await store.upsertMemoryEmbedding(id, embeddings[0]);
           }
         } catch (err) {
           console.warn('Failed to generate memory embedding:', err);
@@ -582,11 +582,11 @@ export async function executeTool(
 
       // --- Path 1: Semantic vector search ---
       try {
-        const provider = getEmbeddingProvider(userId);
+        const provider = await getEmbeddingProvider(userId);
         if (provider) {
           const queryEmbeddings = await provider.embed([query], 'query');
           if (queryEmbeddings.length > 0) {
-            const semanticChunks = store.searchChunksWithContent(queryEmbeddings[0], 10, userId);
+            const semanticChunks = await store.searchChunksWithContent(queryEmbeddings[0], 10, userId);
             addChunks(semanticChunks, 'semantic');
           }
         }
@@ -595,7 +595,7 @@ export async function executeTool(
       }
 
       // --- Path 2: FTS5 full-text search ---
-      const ftsChunks = store.ftsSearchChunks(query, 10, userId);
+      const ftsChunks = await store.ftsSearchChunks(query, 10, userId);
       addChunks(ftsChunks, 'fulltext');
 
       // --- Path 3: LIKE keyword search on filename + summary ---
@@ -832,8 +832,6 @@ export async function executeTool(
           else skipped++;
         }
       });
-
-      batch();
       return JSON.stringify({ task_id, created, skipped, message: `Linked ${created} card(s) to task` });
     }
 

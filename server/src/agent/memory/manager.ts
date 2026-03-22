@@ -1,7 +1,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ProviderMessage } from '../providers/types.js';
 
-import { execute, queryAll } from '../../db/pool.js';
+import { execute, queryAll, queryOne } from '../../db/pool.js';
 
 interface AgentMemory {
   id: string;
@@ -23,7 +23,7 @@ interface DbMessage {
 export class MemoryManager {
   constructor(private userId: string) {}
 
-  async getConversationHistory(conversationId: string, limit: number = 50): ProviderMessage[] {
+  async getConversationHistory(conversationId: string): Promise<ProviderMessage[]> {
     const rows = await queryAll('SELECT role, content, tool_calls, tool_results FROM agent_messages WHERE conversation_id = $1 ORDER BY created_at DESC LIMIT $2', [conversationId, limit]);
 
     // Reverse to get chronological order
@@ -101,7 +101,7 @@ export class MemoryManager {
     content: string,
     toolCalls?: string | null,
     toolResults?: string | null,
-  ): void {
+  ): Promise<void> {
     const id = uuidv4();
     const now = new Date().toISOString();
     await execute('INSERT INTO agent_messages (id, conversation_id, role, content, tool_calls, tool_results, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7)', [id, conversationId, role, content, toolCalls || null, toolResults || null, now]);
@@ -110,7 +110,7 @@ export class MemoryManager {
     await execute(`UPDATE agent_conversations SET updated_at = $1 WHERE id = $2`, [now, conversationId]);
   }
 
-  retrieveMemories(query: string, limit: number = 5): AgentMemory[] {
+  async retrieveMemories(query: string, limit: number = 5): Promise<AgentMemory[]> {
     // Simple keyword search — split query into words and match any
     const words = query.toLowerCase().split(/\s+/).filter((w) => w.length > 2);
     if (words.length === 0) {
@@ -131,7 +131,7 @@ export class MemoryManager {
     return memories;
   }
 
-  async extractMemories(conversationId: string, userMessage: string, assistantResponse: string): void {
+  async extractMemories(conversationId: string, userMessage: string, assistantResponse: string): Promise<void> {
     // Simple pattern matching for memory extraction from user messages
     const patterns = [
       /I prefer\s+(.+?)(?:\.|$)/i,
@@ -174,7 +174,7 @@ export class MemoryManager {
     return 'general';
   }
 
-  getDocumentSummaries(courseId?: string): { id: string; filename: string; summary: string }[] {
+  async getDocumentSummaries(courseId?: string): Promise<{ id: string; filename: string; summary: string }[]> {
     let query = 'SELECT id, filename, summary FROM documents WHERE user_id = ? AND summary IS NOT NULL';
     const params: unknown[] = [this.userId];
     if (courseId) {

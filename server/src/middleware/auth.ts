@@ -16,7 +16,7 @@ export function generateToken(userId: string): string {
   return jwt.sign({ userId } as JwtPayload, JWT_SECRET, { expiresIn: '7d' });
 }
 
-export function authMiddleware(req: AuthRequest, res: Response, next: NextFunction): void {
+export async function authMiddleware(req: AuthRequest, res: Response, next: NextFunction): Promise<void> {
   const authHeader = req.headers.authorization;
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
 

@@ -35,7 +35,7 @@ export async function* runAgent(
   const memory = new MemoryManager(userId);
 
   // 1. Get user settings, build provider
-  const user = await queryOne(`SELECT id, name, settings FROM users WHERE id = $1`, [userId]) | undefined;
+  const user = await queryOne(`SELECT id, name, settings FROM users WHERE id = $1`, [userId]) as any | undefined;
   if (!user) {
     yield { type: 'error', error: 'User not found' };
     return;

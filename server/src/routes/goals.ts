@@ -70,7 +70,7 @@ router.get('/:id/progress', async (req: AuthRequest, res: Response) => {
   const directTasks = await queryAll(`SELECT id, status FROM tasks WHERE goal_id = $1 AND user_id = $2`, [req.params.id, req.userId!]);
 
   // Get all descendant goals recursively
-  function getDescendantGoalIds(parentId: string): string[] {
+  async function getDescendantGoalIds(parentId: string): Promise<string[]> {
     const children = await queryAll(`SELECT id FROM goals WHERE parent_id = $1 AND user_id = $2`, [parentId, req.userId!]);
     const ids: string[] = [];
     for (const child of children) {
@@ -321,7 +321,7 @@ function detectCycle(db: any, userId: string, goalId: string, newDependsOnId: st
   // i.e., does B transitively depend on A already?
   const visited = new Set<string>();
 
-  function dfs(current: string): boolean {
+  async function dfs(current: string): Promise<boolean> {
     if (current === goalId) return true; // cycle found
     if (visited.has(current)) return false;
     visited.add(current);
@@ -385,7 +385,7 @@ router.post('/:id/dependencies', async (req: AuthRequest, res: Response) => {
   }
 
   // DFS cycle detection
-  if (detectCycle(db, req.userId!, req.params.id as string, depends_on_goal_id)) {
+  if (detectCycle(req.userId!, req.params.id as string, depends_on_goal_id)) {
     throw new AppError(400, 'Adding this dependency would create a circular dependency');
   }
 
@@ -423,7 +423,7 @@ router.get('/:id/dependency-chain', async (req: AuthRequest, res: Response) => {
   const chain: string[] = [];
   const visited = new Set<string>();
 
-  function walkBack(currentId: string): void {
+  async function walkBack(currentId: string): Promise<void> {
     if (visited.has(currentId)) return;
     visited.add(currentId);
 
@@ -436,7 +436,7 @@ router.get('/:id/dependency-chain', async (req: AuthRequest, res: Response) => {
     chain.push(currentId);
   }
 
-  walkBack(req.params.id as string);
+  await walkBack(req.params.id as string);
 
   // Enrich with goal data
   const goals = chain.map(id =>

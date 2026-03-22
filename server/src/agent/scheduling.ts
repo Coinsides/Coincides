@@ -64,7 +64,7 @@ const DEFAULT_TASK_MINUTES = 30; // fallback estimate
  * Get topological sort order for goals based on dependencies.
  * Returns goal IDs ordered so prerequisites come first.
  */
-export function getGoalTopologicalOrder(userId: string, courseId?: string): string[] {
+export async function getGoalTopologicalOrder(userId: string, courseId?: string): Promise<string[]> {
   let goalsQuery = 'SELECT id FROM goals WHERE user_id = ?';
   const params: unknown[] = [userId];
   if (courseId) {
@@ -128,7 +128,7 @@ function hhmmToMin(t: string): number {
  * v1.5: Subtracts nested non-study blocks from study block time.
  *   available = Study Block total − Σ(non-study blocks nested inside study block)
  */
-export function getDailyCapacities(userId: string, startDate: string, endDate: string): DayCapacity[] {
+export async function getDailyCapacities(userId: string, startDate: string, endDate: string): Promise<DayCapacity[]> {
   const capacities: DayCapacity[] = [];
 
   const start = new Date(startDate);

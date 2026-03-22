@@ -127,7 +127,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 
     // Set tags
     if (data.tag_ids && data.tag_ids.length > 0) {
-      setCardTags(db, id, data.tag_ids);
+      await setCardTags(id, data.tag_ids);
     }
 
     // Increment deck card_count
@@ -172,8 +172,6 @@ router.put('/reorder', async (req: AuthRequest, res: Response) => {
         await execute(`UPDATE cards SET section_id = $1, order_index = $2, updated_at = $3 WHERE id = $4`, [upd.section_id, upd.order_index, now, upd.id]);
       }
     });
-
-    batch();
     res.json({ updated: data.updates.length });
   } catch (err) {
     if (err instanceof ZodError) {
@@ -212,7 +210,7 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
     // Update tags if provided
     const cardId = req.params.id;
     if (data.tag_ids !== undefined) {
-      setCardTags(db, cardId, data.tag_ids);
+      await setCardTags(cardId, data.tag_ids);
     }
 
     const updated = await queryOne(`SELECT * FROM cards WHERE id = $1`, [cardId]);
@@ -269,8 +267,6 @@ router.post('/batch-delete', async (req: AuthRequest, res: Response) => {
         await execute(`UPDATE card_decks SET card_count = card_count - $1, updated_at = $2 WHERE id = $3`, [count, now, deckId]);
       }
     });
-
-    batch();
     res.json({ deleted });
   } catch (err) {
     if (err instanceof ZodError) {
@@ -313,8 +309,6 @@ router.post('/batch-move', async (req: AuthRequest, res: Response) => {
         await execute(`UPDATE card_decks SET card_count = card_count + $1, updated_at = $2 WHERE id = $3`, [moved, now2, data.target_deck_id]);
       }
     });
-
-    batch();
     res.json({ moved });
   } catch (err) {
     if (err instanceof ZodError) {

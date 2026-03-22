@@ -67,8 +67,6 @@ router.put('/reorder', async (req: AuthRequest, res: Response) => {
       }
     });
 
-    batch();
-
     const sections = await queryAll(`SELECT * FROM card_sections WHERE deck_id = $1 AND user_id = $2 ORDER BY order_index ASC, created_at ASC`, [data.deck_id, req.userId!]);
 
     res.json(sections);
@@ -131,8 +129,6 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
     }
     await execute(`DELETE FROM card_sections WHERE id = $1`, [req.params.id]);
   });
-
-  batch();
   res.json({ message: 'Section deleted', cards_deleted: cardCount });
 });
 

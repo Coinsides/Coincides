@@ -63,7 +63,7 @@ export function detectOverlaps(blocks: Array<{ id: string; start_time: string; e
 /**
  * Get time block instances for a specific date (v1.7.3 — date-based).
  */
-export function getBlocksForDate(userId: string, date: string): TimeBlockRow[] {
+export async function getBlocksForDate(userId: string, date: string): Promise<TimeBlockRow[]> {
   return await queryAll(`SELECT * FROM time_blocks WHERE user_id = $1 AND date = $2 ORDER BY start_time`, [userId, date]);
 }
 

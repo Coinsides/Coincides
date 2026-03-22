@@ -8,8 +8,8 @@ import { upload } from '../middleware/upload.js';
 import { uploadDocumentSchema } from '../validators/index.js';
 import { parseDocument } from '../services/documentParser.js';
 import { ZodError } from 'zod';
+import { execute, queryAll, queryOne } from '../db/pool.js';
 
-import { execute, queryOne } from '../db/pool.js';
 
 const router = Router();
 
@@ -32,9 +32,7 @@ router.post('/upload', upload.single('file'), async (req: AuthRequest, res: Resp
       throw new AppError(400, 'No file uploaded');
     }
     // Verify course belongs to user
-    const course = db
-      .prepare('SELECT id FROM courses WHERE id = ? AND user_id = ?')
-      .get(data.course_id, req.userId!);
+    const course = await queryOne('SELECT id FROM courses WHERE id = $1 AND user_id = $2', [data.course_id, req.userId!]);
     if (!course) {
       throw new AppError(404, 'Course not found');
     }
@@ -86,9 +84,7 @@ router.get('/', async (req: AuthRequest, res: Response) => {
 
 // GET /api/documents/:id
 router.get('/:id', async (req: AuthRequest, res: Response) => {
-  const document = db
-    .prepare('SELECT * FROM documents WHERE id = ? AND user_id = ?')
-    .get(req.params.id, req.userId!);
+  const document = await queryOne('SELECT * FROM documents WHERE id = $1 AND user_id = $2', [req.params.id, req.userId!]);
 
   if (!document) {
     throw new AppError(404, 'Document not found');
@@ -101,16 +97,12 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
 // GET /api/documents/:id/chunks
 router.get('/:id/chunks', async (req: AuthRequest, res: Response) => {
   // Verify document belongs to user
-  const document = db
-    .prepare('SELECT id FROM documents WHERE id = ? AND user_id = ?')
-    .get(req.params.id, req.userId!);
+  const document = await queryOne('SELECT id FROM documents WHERE id = $1 AND user_id = $2', [req.params.id, req.userId!]);
   if (!document) {
     throw new AppError(404, 'Document not found');
   }
 
-  const chunks = db
-    .prepare('SELECT * FROM document_chunks WHERE document_id = ? ORDER BY chunk_index')
-    .all(req.params.id);
+  const chunks = await queryAll('SELECT * FROM document_chunks WHERE document_id = $1 ORDER BY chunk_index', [req.params.id]);
 
   res.json(chunks);
 });
@@ -139,9 +131,7 @@ router.get('/:id/status', async (req: AuthRequest, res: Response) => {
 // POST /api/documents/:id/retry
 router.post('/:id/retry', async (req: AuthRequest, res: Response) => {
   const docId = req.params.id as string;
-  const document = db
-    .prepare('SELECT id, file_path FROM documents WHERE id = ? AND user_id = ? AND parse_status = ?')
-    .get(docId, req.userId!, 'failed') as { id: string } | undefined;
+  const document = await queryOne('SELECT id, file_path FROM documents WHERE id = $1 AND user_id = $2 AND parse_status = $3', [docId, req.userId!, 'failed']);
 
   if (!document) {
     throw new AppError(404, 'Document not found or not in failed state');
@@ -158,9 +148,7 @@ router.post('/:id/retry', async (req: AuthRequest, res: Response) => {
 
 // DELETE /api/documents/:id
 router.delete('/:id', async (req: AuthRequest, res: Response) => {
-  const document = db
-    .prepare('SELECT id, file_path FROM documents WHERE id = ? AND user_id = ?')
-    .get(req.params.id, req.userId!) as { id: string; file_path: string } | undefined;
+  const document = await queryOne('SELECT id, file_path FROM documents WHERE id = $1 AND user_id = $2', [req.params.id, req.userId!]) as { id: string; file_path: string } | undefined;
 
   if (!document) {
     throw new AppError(404, 'Document not found');
