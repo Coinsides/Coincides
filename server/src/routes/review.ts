@@ -62,11 +62,11 @@ router.get('/due', async (req: AuthRequest, res: Response) => {
 
   sql += ` ORDER BY c.fsrs_reps ASC, c.fsrs_next_review ASC`;
 
-  const cards = await queryAll(sql, params)[];
+  const cards = await queryAll(sql, params);
 
   const result = cards.map(card => {
     parseCardContent(card);
-    return { ...card, tags: getCardTags(db, card.id) };
+    return { ...card, tags: await getCardTags(card.id) };
   });
 
   res.json(result);
@@ -146,15 +146,15 @@ router.post('/:cardId/rate', async (req: AuthRequest, res: Response) => {
       newCard.reps,
       updatedAt,
       req.params.cardId
-    );
+    ]);
 
     // Log activity
     const activityDate = now.toISOString().split('T')[0];
-    await execute(`INSERT INTO study_activity_log (id, user_id, date, activity_type, entity_id, entity_type) VALUES ($1, $2, $3, $4, $5, $6)`, [uuidv4(]), req.userId!, activityDate, 'card_reviewed', req.params.cardId, 'card');
+    await execute(`INSERT INTO study_activity_log (id, user_id, date, activity_type, entity_id, entity_type) VALUES ($1, $2, $3, $4, $5, $6)`, [uuidv4(), req.userId!, activityDate, 'card_reviewed', req.params.cardId, 'card']);
 
     const updated = await queryOne(`SELECT * FROM cards WHERE id = $1`, [req.params.cardId]);
     parseCardContent(updated);
-    updated.tags = getCardTags(db, req.params.cardId);
+    updated.tags = await getCardTags(req.params.cardId);
 
     res.json({
       card: updated,
@@ -222,7 +222,7 @@ router.post('/custom', async (req: AuthRequest, res: Response) => {
 
   const result = cards.map(card => {
     parseCardContent(card);
-    return { ...card, tags: getCardTags(db, card.id) };
+    return { ...card, tags: await getCardTags(card.id) };
   });
 
   res.json(result);

@@ -21,7 +21,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
     if (existing) {
       await execute(`UPDATE daily_statuses SET energy_level = $1 WHERE id = $2`, [data.energy_level, existing.id]);
     } else {
-      await execute(`INSERT INTO daily_statuses (id, user_id, date, energy_level, created_at) VALUES ($1, $2, $3, $4, $5)`, [uuidv4(]), req.userId!, date, data.energy_level, now);
+      await execute(`INSERT INTO daily_statuses (id, user_id, date, energy_level, created_at) VALUES ($1, $2, $3, $4, $5)`, [uuidv4(), req.userId!, date, data.energy_level, now]);
     }
 
     const status = await queryOne(`SELECT * FROM daily_statuses WHERE user_id = $1 AND date = $2`, [req.userId!, date]);

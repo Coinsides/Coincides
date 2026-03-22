@@ -100,7 +100,7 @@ router.post('/:id/apply', async (req: AuthRequest, res: Response) => {
           const normalizedContent = normalizeCardContent(templateType, rawContent);
           const sectionId = (item.section_id as string) || null;
           await execute('INSERT INTO cards (id, user_id, deck_id, section_id, template_type, title, content, importance, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [cardId, req.userId!, deckId, sectionId, templateType,
-            item.title || 'Untitled', JSON.stringify(normalizedContent]), item.importance || 3, now, now
+            item.title || 'Untitled', JSON.stringify(normalizedContent), item.importance || 3, now, now
           ]);
 
           // Attach tags
@@ -228,7 +228,7 @@ router.post('/:id/discard', async (req: AuthRequest, res: Response) => {
   const now = new Date().toISOString();
   const result = await execute(`UPDATE proposals SET status = 'discarded', resolved_at = $1 WHERE id = $2 AND user_id = $3 AND status = 'pending'`, [now, req.params.id, req.userId!]);
 
-  if (result.changes === 0) throw new AppError(404, 'Proposal not found or already resolved');
+  if (result.rowCount === 0) throw new AppError(404, 'Proposal not found or already resolved');
   res.json({ message: 'Proposal discarded' });
 });
 
@@ -237,9 +237,9 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
   try {
     const body = updateProposalSchema.parse(req.body);
     const now = new Date().toISOString();
-    const result = await execute(`UPDATE proposals SET data = $1, resolved_at = NULL WHERE id = $2 AND user_id = $3 AND status = 'pending'`, [JSON.stringify(body.data]), req.params.id, req.userId!);
+    const result = await execute(`UPDATE proposals SET data = $1, resolved_at = NULL WHERE id = $2 AND user_id = $3 AND status = 'pending'`, [JSON.stringify(body.data), req.params.id, req.userId!]);
 
-    if (result.changes === 0) throw new AppError(404, 'Proposal not found or already resolved');
+    if (result.rowCount === 0) throw new AppError(404, 'Proposal not found or already resolved');
     res.json({ message: 'Proposal updated' });
   } catch (err) {
     if (err instanceof ZodError) {

@@ -182,7 +182,7 @@ export class MemoryManager {
       params.push(courseId);
     }
     query += ' LIMIT 10';
-    return await queryAll(query, params)as { id: string; filename: string; summary: string }[];
+    return await queryAll(query, params) as { id: string; filename: string; summary: string }[];
   }
 
   async summarizeOldMessages(conversationId: string, keepRecent: number = 10): Promise<string | null> {

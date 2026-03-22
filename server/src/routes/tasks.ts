@@ -74,7 +74,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
       data.time_block_id || null,
       now,
       now
-    );
+    ]);
 
     const task = await queryOne(`SELECT * FROM tasks WHERE id = $1`, [id]);
     res.status(201).json(parseTask(task));
@@ -122,7 +122,7 @@ router.post('/batch', async (req: AuthRequest, res: Response) => {
           task.time_block_id || null,
           now,
           now
-        );
+        ]);
       }
     });
 
@@ -173,7 +173,7 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
 
         // Log activity
         const activityDate = new Date().toISOString().split('T')[0];
-        await execute(`INSERT INTO study_activity_log (id, user_id, date, activity_type, entity_id, entity_type) VALUES ($1, $2, $3, $4, $5, $6)`, [uuidv4(), req.userId!, activityDate, 'task_completed', existing.id, 'task');
+        await execute(`INSERT INTO study_activity_log (id, user_id, date, activity_type, entity_id, entity_type) VALUES ($1, $2, $3, $4, $5, $6)`, [uuidv4(), req.userId!, activityDate, 'task_completed', existing.id, 'task']);
 
         // Update recurring group count if applicable
         if (existing.recurring_group_id) {
@@ -311,7 +311,7 @@ router.delete('/:taskId/cards/:linkId', async (req: AuthRequest, res: Response) 
   }
 
   const result = await execute(`DELETE FROM task_cards WHERE id = $1 AND task_id = $2`, [linkId, taskId]);
-  if (result.changes === 0) {
+  if (result.rowCount === 0) {
     throw new AppError(404, 'Link not found');
   }
 

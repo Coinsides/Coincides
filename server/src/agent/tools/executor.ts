@@ -47,7 +47,7 @@ export async function executeTool(
       const { task_id } = args as { task_id: string };
       const now = new Date().toISOString();
       const result = await execute('UPDATE tasks SET status = $1, completed_at = $2, updated_at = $3 WHERE id = $4 AND user_id = $5', ['completed', now, now, task_id, userId]);
-      if (result.changes === 0) return JSON.stringify({ error: 'Task not found or not owned by user' });
+      if (result.rowCount === 0) return JSON.stringify({ error: 'Task not found or not owned by user' });
       return JSON.stringify({ task_id, status: 'completed', message: 'Task marked as completed' });
     }
 
@@ -101,7 +101,7 @@ export async function executeTool(
       // Look up parent to inherit course_id if not provided
       let resolvedCourseId = course_id;
       if (!resolvedCourseId && parent_id) {
-        const parent = await queryOne(`SELECT course_id FROM goals WHERE id = $1 AND user_id = $2`, [parent_id, userId])as { course_id: string } | undefined;
+        const parent = await queryOne(`SELECT course_id FROM goals WHERE id = $1 AND user_id = $2`, [parent_id, userId]) as { course_id: string } | undefined;
         if (!parent) return JSON.stringify({ error: 'Parent goal not found' });
         resolvedCourseId = parent.course_id;
       }
@@ -125,7 +125,7 @@ export async function executeTool(
     case 'create_deck': {
       const { course_id, name, description } = args as { course_id: string; name: string; description?: string };
       // Verify course exists and belongs to user
-      const course = await queryOne(`SELECT id, name FROM courses WHERE id = $1 AND user_id = $2`, [course_id, userId])as { id: string; name: string } | undefined;
+      const course = await queryOne(`SELECT id, name FROM courses WHERE id = $1 AND user_id = $2`, [course_id, userId]) as { id: string; name: string } | undefined;
       if (!course) return JSON.stringify({ error: 'Course not found' });
       const deckId = uuidv4();
       const now = new Date().toISOString();
@@ -230,7 +230,7 @@ export async function executeTool(
            SELECT date FROM tasks WHERE user_id = $1 AND status = 'completed'
            UNION
            SELECT date FROM study_activity_log WHERE user_id = $2 AND activity_type = 'card_reviewed'
-         ) ORDER BY date DESC`, [userId, userId])as { date: string }[];
+         ) ORDER BY date DESC`, [userId, userId]) as { date: string }[];
 
       const dateSet = new Set(activityDates.map(d => d.date));
       let currentStreak = 0;
@@ -650,7 +650,7 @@ export async function executeTool(
       };
 
       // Get document (verify ownership)
-      const doc = await queryOne(`SELECT id, filename, file_type, extracted_text, summary, page_count, document_type, chunk_count, parse_status FROM documents WHERE id = $1 AND user_id = $2`, [document_id, userId])as {
+      const doc = await queryOne(`SELECT id, filename, file_type, extracted_text, summary, page_count, document_type, chunk_count, parse_status FROM documents WHERE id = $1 AND user_id = $2`, [document_id, userId]) as {
         id: string; filename: string; file_type: string; extracted_text: string | null;
         summary: string | null; page_count: number | null; document_type: string | null;
         chunk_count: number; parse_status: string;
@@ -684,7 +684,7 @@ export async function executeTool(
       // Document IS chunked
       if (chunk_index !== undefined) {
         // Return specific chunk
-        const chunk = await queryOne(`SELECT chunk_index, content, heading, page_start, page_end FROM document_chunks WHERE document_id = $1 AND chunk_index = $2`, [document_id, chunk_index])as { chunk_index: number; content: string; heading: string | null; page_start: number | null; page_end: number | null } | undefined;
+        const chunk = await queryOne(`SELECT chunk_index, content, heading, page_start, page_end FROM document_chunks WHERE document_id = $1 AND chunk_index = $2`, [document_id, chunk_index]) as { chunk_index: number; content: string; heading: string | null; page_start: number | null; page_end: number | null } | undefined;
 
         if (!chunk) {
           return JSON.stringify({ ...meta, error: `Chunk index ${chunk_index} not found. Valid range: 0–${doc.chunk_count - 1}` });
@@ -828,7 +828,7 @@ export async function executeTool(
           }
           const linkId = uuidv4();
           const result = await execute(`INSERT INTO task_cards (id, task_id, card_id, checklist_index) VALUES ($1, $2, $3, $4)`, [linkId, task_id, link.card_id, link.checklist_index ?? null]);
-          if (result.changes > 0) created++;
+          if (result.rowCount > 0) created++;
           else skipped++;
         }
       });

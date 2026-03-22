@@ -311,7 +311,7 @@ router.post('/templates/sets/:setId/items', async (req: AuthRequest, res: Respon
     for (const item of items) {
       await execute(`INSERT INTO time_blocks (id, user_id, template_id, label, type, date, start_time, end_time, color, created_at, updated_at)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, [uuidv4(), req.params.setId, req.userId!, item.label, item.type || 'study',
-        item.day_of_week, item.start_time, item.end_time, item.color || null, now, now);
+        item.day_of_week, item.start_time, item.end_time, item.color || null, now, now]);
     }
   });
 
@@ -364,7 +364,7 @@ router.post('/templates/sets/:setId/apply', async (req: AuthRequest, res: Respon
         await execute(`INSERT INTO time_blocks (id, user_id, template_id, label, type, date, start_time, end_time, color, created_at, updated_at)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, [uuidv4(), req.userId!, tmpl.id, tmpl.label, tmpl.type,
           date, tmpl.start_time, tmpl.end_time, tmpl.color, now, now
-        );
+        ]);
         createdCount++;
       }
     }

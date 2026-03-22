@@ -127,7 +127,7 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
     if (cardCount > 0) {
       await execute(`DELETE FROM cards WHERE section_id = $1`, [req.params.id]);
       await execute(`UPDATE card_decks SET card_count = card_count - $1, updated_at = $2 WHERE id = $3`, [cardCount, new Date().toISOString(), existing.deck_id
-      );
+      ]);
     }
     await execute(`DELETE FROM card_sections WHERE id = $1`, [req.params.id]);
   });

@@ -37,7 +37,7 @@ router.get('/', async (req: AuthRequest, res: Response) => {
 
   query += ' ORDER BY sort_order ASC, created_at ASC';
 
-  const goals = await queryAll(query, params)[];
+  const goals = await queryAll(query, params);
 
   // Enrich each goal with its dependency info
   for (const goal of goals) {
@@ -258,7 +258,7 @@ router.post('/:id/tasks', async (req: AuthRequest, res: Response) => {
     const now = new Date().toISOString();
 
     await execute(`INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, order_index, start_time, end_time, description, checklist, created_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending', $8, $9, $10, $11, $12, $13, $14)`, [id, req.userId!, courseId, goal.id, data.title, data.date, data.priority || 'must', data.order_index ?? 0, data.start_time || null, data.end_time || null, data.description || null, data.checklist ? JSON.stringify(data.checklist) : null, now, now);
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 'pending', $8, $9, $10, $11, $12, $13, $14)`, [id, req.userId!, courseId, goal.id, data.title, data.date, data.priority || 'must', data.order_index ?? 0, data.start_time || null, data.end_time || null, data.description || null, data.checklist ? JSON.stringify(data.checklist) : null, now, now]);
 
     const task = await queryOne(`SELECT * FROM tasks WHERE id = $1`, [id]);
     res.status(201).json(parseTask(task));

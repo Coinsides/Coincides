@@ -12,7 +12,7 @@ export function getEmbeddingProvider(userId?: string): EmbeddingProvider | null 
   // Try user settings first
   if (userId) {
     try {
-      const user = await queryOne(`SELECT settings FROM users WHERE id = $1`, [userId])as { settings: string } | undefined;
+      const user = await queryOne(`SELECT settings FROM users WHERE id = $1`, [userId]) as { settings: string } | undefined;
       if (user?.settings) {
         const settings = JSON.parse(user.settings);
         const config = getConfigFromSettings(settings);

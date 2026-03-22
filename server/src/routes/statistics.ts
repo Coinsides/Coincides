@@ -14,25 +14,25 @@ router.get('/overview', async (req: AuthRequest, res: Response) => {
   const streak = calculateStreak(userId, today);
 
   // Today's stats
-  const todayTasks = await queryOne(`SELECT COUNT(*) as total, SUM(CASE WHEN status = \'completed\' THEN 1 ELSE 0 END) as completed FROM tasks WHERE user_id = $1 AND date = $2`, [userId, today])as { total: number; completed: number };
+  const todayTasks = await queryOne(`SELECT COUNT(*) as total, SUM(CASE WHEN status = \'completed\' THEN 1 ELSE 0 END) as completed FROM tasks WHERE user_id = $1 AND date = $2`, [userId, today]) as { total: number; completed: number };
 
-  const todayCards = await queryOne(`SELECT COUNT(*) as count FROM study_activity_log WHERE user_id = $1 AND date = $2 AND activity_type = \'card_reviewed\'`, [userId, today])as { count: number };
+  const todayCards = await queryOne(`SELECT COUNT(*) as count FROM study_activity_log WHERE user_id = $1 AND date = $2 AND activity_type = \'card_reviewed\'`, [userId, today]) as { count: number };
 
   // This week stats (Monday to Sunday)
   const weekStart = getWeekStart(today);
   const weekEnd = getWeekEnd(today);
 
-  const weekTasks = await queryOne(`SELECT COUNT(*) as total, SUM(CASE WHEN status = \'completed\' THEN 1 ELSE 0 END) as completed FROM tasks WHERE user_id = $1 AND date >= $2 AND date <= $3`, [userId, weekStart, weekEnd])as { total: number; completed: number };
+  const weekTasks = await queryOne(`SELECT COUNT(*) as total, SUM(CASE WHEN status = \'completed\' THEN 1 ELSE 0 END) as completed FROM tasks WHERE user_id = $1 AND date >= $2 AND date <= $3`, [userId, weekStart, weekEnd]) as { total: number; completed: number };
 
-  const weekCards = await queryOne(`SELECT COUNT(*) as count FROM study_activity_log WHERE user_id = $1 AND date >= $2 AND date <= $3 AND activity_type = \'card_reviewed\'`, [userId, weekStart, weekEnd])as { count: number };
+  const weekCards = await queryOne(`SELECT COUNT(*) as count FROM study_activity_log WHERE user_id = $1 AND date >= $2 AND date <= $3 AND activity_type = \'card_reviewed\'`, [userId, weekStart, weekEnd]) as { count: number };
 
   // This month stats
   const monthStart = today.substring(0, 7) + '-01';
   const monthEnd = getMonthEnd(today);
 
-  const monthTasks = await queryOne(`SELECT COUNT(*) as total, SUM(CASE WHEN status = \'completed\' THEN 1 ELSE 0 END) as completed FROM tasks WHERE user_id = $1 AND date >= $2 AND date <= $3`, [userId, monthStart, monthEnd])as { total: number; completed: number };
+  const monthTasks = await queryOne(`SELECT COUNT(*) as total, SUM(CASE WHEN status = \'completed\' THEN 1 ELSE 0 END) as completed FROM tasks WHERE user_id = $1 AND date >= $2 AND date <= $3`, [userId, monthStart, monthEnd]) as { total: number; completed: number };
 
-  const monthCards = await queryOne(`SELECT COUNT(*) as count FROM study_activity_log WHERE user_id = $1 AND date >= $2 AND date <= $3 AND activity_type = \'card_reviewed\'`, [userId, monthStart, monthEnd])as { count: number };
+  const monthCards = await queryOne(`SELECT COUNT(*) as count FROM study_activity_log WHERE user_id = $1 AND date >= $2 AND date <= $3 AND activity_type = \'card_reviewed\'`, [userId, monthStart, monthEnd]) as { count: number };
 
   res.json({
     streak,
@@ -65,12 +65,12 @@ router.get('/heatmap', async (req: AuthRequest, res: Response) => {
   // Get task completions by date
   const taskCounts = await queryAll(`SELECT date, COUNT(*) as count FROM tasks
      WHERE user_id = $1 AND date >= $2 AND date <= $3 AND status = 'completed'
-     GROUP BY date`, [userId, startDate, today])as { date: string; count: number }[];
+     GROUP BY date`, [userId, startDate, today]) as { date: string; count: number }[];
 
   // Get card reviews by date
   const reviewCounts = await queryAll(`SELECT date, COUNT(*) as count FROM study_activity_log
      WHERE user_id = $1 AND date >= $2 AND date <= $3 AND activity_type = 'card_reviewed'
-     GROUP BY date`, [userId, startDate, today])as { date: string; count: number }[];
+     GROUP BY date`, [userId, startDate, today]) as { date: string; count: number }[];
 
   // Merge counts per date
   const countMap = new Map<string, number>();
@@ -120,11 +120,11 @@ router.get('/trends', async (req: AuthRequest, res: Response) => {
               COUNT(*) as tasks_total,
               SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as tasks_completed
        FROM tasks WHERE user_id = $1 AND date >= $2
-       GROUP BY period_label ORDER BY period_label`, [userId, startDate])as { period_label: string; tasks_total: number; tasks_completed: number }[];
+       GROUP BY period_label ORDER BY period_label`, [userId, startDate]) as { period_label: string; tasks_total: number; tasks_completed: number }[];
 
     const cardRows = await queryAll(`SELECT strftime('%Y-%m', date) as period_label, COUNT(*) as cards_reviewed
        FROM study_activity_log WHERE user_id = $1 AND date >= $2 AND activity_type = 'card_reviewed'
-       GROUP BY period_label ORDER BY period_label`, [userId, startDate])as { period_label: string; cards_reviewed: number }[];
+       GROUP BY period_label ORDER BY period_label`, [userId, startDate]) as { period_label: string; cards_reviewed: number }[];
 
     const cardMap = new Map(cardRows.map(r => [r.period_label, r.cards_reviewed]));
 
@@ -145,11 +145,11 @@ router.get('/trends', async (req: AuthRequest, res: Response) => {
               COUNT(*) as tasks_total,
               SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as tasks_completed
        FROM tasks WHERE user_id = $1 AND date >= $2
-       GROUP BY period_label ORDER BY period_label`, [userId, startDate])as { period_label: string; tasks_total: number; tasks_completed: number }[];
+       GROUP BY period_label ORDER BY period_label`, [userId, startDate]) as { period_label: string; tasks_total: number; tasks_completed: number }[];
 
     const cardRows = await queryAll(`SELECT strftime('%Y-W%W', date) as period_label, COUNT(*) as cards_reviewed
        FROM study_activity_log WHERE user_id = $1 AND date >= $2 AND activity_type = 'card_reviewed'
-       GROUP BY period_label ORDER BY period_label`, [userId, startDate])as { period_label: string; cards_reviewed: number }[];
+       GROUP BY period_label ORDER BY period_label`, [userId, startDate]) as { period_label: string; cards_reviewed: number }[];
 
     const cardMap = new Map(cardRows.map(r => [r.period_label, r.cards_reviewed]));
 
@@ -169,14 +169,14 @@ router.get('/trends', async (req: AuthRequest, res: Response) => {
 router.get('/courses', async (req: AuthRequest, res: Response) => {
   const userId = req.userId!;
 
-  const courses = await queryAll(`SELECT id, name, color FROM courses WHERE user_id = $1 ORDER BY name`, [userId])as { id: string; name: string; color: string }[];
+  const courses = await queryAll(`SELECT id, name, color FROM courses WHERE user_id = $1 ORDER BY name`, [userId]) as { id: string; name: string; color: string }[];
 
   const result = courses.map(course => {
-    const taskStats = await queryOne(`SELECT COUNT(*) as total, SUM(CASE WHEN status = \'completed\' THEN 1 ELSE 0 END) as completed FROM tasks WHERE user_id = $1 AND course_id = $2`, [userId, course.id])as { total: number; completed: number };
+    const taskStats = await queryOne(`SELECT COUNT(*) as total, SUM(CASE WHEN status = \'completed\' THEN 1 ELSE 0 END) as completed FROM tasks WHERE user_id = $1 AND course_id = $2`, [userId, course.id]) as { total: number; completed: number };
 
-    const cardStats = await queryOne(`SELECT COUNT(*) as total, SUM(CASE WHEN fsrs_reps > 0 THEN 1 ELSE 0 END) as reviewed FROM cards c JOIN card_decks d ON c.deck_id = d.id WHERE d.user_id = $1 AND d.course_id = $2`, [userId, course.id])as { total: number; reviewed: number };
+    const cardStats = await queryOne(`SELECT COUNT(*) as total, SUM(CASE WHEN fsrs_reps > 0 THEN 1 ELSE 0 END) as reviewed FROM cards c JOIN card_decks d ON c.deck_id = d.id WHERE d.user_id = $1 AND d.course_id = $2`, [userId, course.id]) as { total: number; reviewed: number };
 
-    const activeGoals = await queryOne(`SELECT COUNT(*) as count FROM goals WHERE user_id = $1 AND course_id = $2 AND status = \'active\'`, [userId, course.id])as { count: number };
+    const activeGoals = await queryOne(`SELECT COUNT(*) as count FROM goals WHERE user_id = $1 AND course_id = $2 AND status = \'active\'`, [userId, course.id]) as { count: number };
 
     const total = taskStats.total || 0;
     const completed = taskStats.completed || 0;
@@ -205,7 +205,7 @@ function calculateStreak(userId: string, today: string): { current: number; long
        SELECT date FROM tasks WHERE user_id = $1 AND status = 'completed'
        UNION
        SELECT date FROM study_activity_log WHERE user_id = $2 AND activity_type = 'card_reviewed'
-     ) ORDER BY date DESC`, [userId, userId])as { date: string }[];
+     ) ORDER BY date DESC`, [userId, userId]) as { date: string }[];
 
   const dateSet = new Set(activityDates.map(d => d.date));
 

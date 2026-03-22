@@ -61,7 +61,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
           i,
           now,
           now
-        );
+        ]);
       }
     });
 

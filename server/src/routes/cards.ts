@@ -71,12 +71,12 @@ router.get('/', async (req: AuthRequest, res: Response) => {
   }
 
   query += ` WHERE ${conditions.join(' AND ')} ORDER BY c.section_id NULLS LAST, c.order_index ASC, c.created_at DESC`;
-  const cards = await queryAll(query, params)[];
+  const cards = await queryAll(query, params);
 
   // Attach tags to each card
   const result = cards.map(card => {
     parseCardContent(card);
-    return { ...card, tags: getCardTags(db, card.id) };
+    return { ...card, tags: await getCardTags(card.id) };
   });
 
   res.json(result);
@@ -90,7 +90,7 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
   }
 
   parseCardContent(card);
-  card.tags = getCardTags(db, card.id);
+  card.tags = await getCardTags(card.id);
   res.json(card);
 });
 
@@ -123,7 +123,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
       data.importance,
       now,
       now
-    );
+    ]);
 
     // Set tags
     if (data.tag_ids && data.tag_ids.length > 0) {
@@ -135,7 +135,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 
     const card = await queryOne(`SELECT * FROM cards WHERE id = $1`, [id]);
     parseCardContent(card);
-    card.tags = getCardTags(db, id);
+    card.tags = await getCardTags(id);
 
     res.status(201).json(card);
   } catch (err) {
@@ -217,7 +217,7 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
 
     const updated = await queryOne(`SELECT * FROM cards WHERE id = $1`, [cardId]);
     parseCardContent(updated);
-    updated.tags = getCardTags(db, cardId);
+    updated.tags = await getCardTags(cardId);
 
     res.json(updated);
   } catch (err) {
@@ -242,7 +242,7 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
   // Decrement deck card_count
   await execute(`UPDATE card_decks SET card_count = card_count - 1, updated_at = $1 WHERE id = $2`, [new Date().toISOString(),
     existing.deck_id
-  );
+  ]);
 
   res.json({ message: 'Card deleted' });
 });

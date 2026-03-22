@@ -25,7 +25,7 @@ function getAnthropicClient(userId?: string): Anthropic {
   // Try user settings first
   if (userId) {
     try {
-      const user = await queryOne(`SELECT settings FROM users WHERE id = $1`, [userId])as { settings: string } | undefined;
+      const user = await queryOne(`SELECT settings FROM users WHERE id = $1`, [userId]) as { settings: string } | undefined;
       if (user?.settings) {
         const settings = JSON.parse(user.settings);
         const aiProviders = settings?.ai_providers as Record<string, Record<string, string>> | undefined;
@@ -292,10 +292,10 @@ export async function parseDocument(documentId: string, userId: string): Promise
   // Update status to parsing
   await execute(`UPDATE documents SET parse_status = 'parsing', updated_at = $1 WHERE id = $2`, [new Date().toISOString(),
     documentId
-  );
+  ]);
 
   try {
-    const doc = await queryOne(`SELECT * FROM documents WHERE id = $1`, [documentId])as {
+    const doc = await queryOne(`SELECT * FROM documents WHERE id = $1`, [documentId]) as {
       id: string;
       filename: string;
       file_path: string;
@@ -359,7 +359,7 @@ export async function parseDocument(documentId: string, userId: string): Promise
     if (chunkCount > 0) {
       const insertMany = await transaction(async (client) => {
         items.forEach((chunk, index) => {
-          await execute(`INSERT INTO document_chunks (id, document_id, chunk_index, content, heading, page_start, page_end, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, [uuidv4(]),
+          await execute(`INSERT INTO document_chunks (id, document_id, chunk_index, content, heading, page_start, page_end, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`, [uuidv4(),
             documentId,
             index,
             chunk.content,
@@ -367,7 +367,7 @@ export async function parseDocument(documentId: string, userId: string): Promise
             chunk.page_start,
             chunk.page_end,
             new Date().toISOString()
-          );
+          ]);
         });
       });
       insertMany(chunks);
@@ -403,7 +403,7 @@ export async function parseDocument(documentId: string, userId: string): Promise
       chunkCount,
       new Date().toISOString(),
       documentId
-    );
+    ]);
 
     // Generate embeddings asynchronously (don't block parse completion)
     generateChunkEmbeddings(documentId, userId).catch((embErr) => {
@@ -411,7 +411,7 @@ export async function parseDocument(documentId: string, userId: string): Promise
     });
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown parsing error';
-    await execute(`UPDATE documents SET parse_status = 'failed', error_message = $1, updated_at = $2 WHERE id = $3`, [errorMessage, new Date().toISOString(), documentId);
+    await execute(`UPDATE documents SET parse_status = 'failed', error_message = $1, updated_at = $2 WHERE id = $3`, [errorMessage, new Date().toISOString(), documentId]);
   }
 }
 
@@ -431,7 +431,7 @@ async function generateChunkEmbeddings(documentId: string, userId: string): Prom
   if (chunks.length === 0) {
     // No chunks — embed the full extracted_text as a single "virtual" chunk
     // (small documents aren't chunked but we still want them searchable)
-    const doc = await queryOne(`SELECT id, extracted_text FROM documents WHERE id = $1`, [documentId])as { id: string; extracted_text: string | null } | undefined;
+    const doc = await queryOne(`SELECT id, extracted_text FROM documents WHERE id = $1`, [documentId]) as { id: string; extracted_text: string | null } | undefined;
     if (!doc?.extracted_text) return;
 
     const embeddings = await provider.embed([doc.extracted_text], 'document');

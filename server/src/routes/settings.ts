@@ -36,7 +36,7 @@ router.put('/', async (req: AuthRequest, res: Response) => {
     await execute(`UPDATE users SET settings = $1, updated_at = $2 WHERE id = $3`, [JSON.stringify(mergedSettings),
       now,
       req.userId!
-    );
+    ]);
 
     res.json(mergedSettings);
   } catch (err) {

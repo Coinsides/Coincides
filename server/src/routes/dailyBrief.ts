@@ -43,11 +43,11 @@ router.get('/', async (req: AuthRequest, res: Response) => {
   // Get goal deadlines for ranking
   const goalDeadlines = await queryAll(`SELECT g.course_id, MIN(g.deadline) as nearest_deadline
      FROM goals g WHERE g.user_id = $1 AND g.status = 'active' AND g.deadline IS NOT NULL
-     GROUP BY g.course_id`, [userId])as { course_id: string; nearest_deadline: string }[];
+     GROUP BY g.course_id`, [userId]) as { course_id: string; nearest_deadline: string }[];
   const deadlineMap = new Map(goalDeadlines.map(g => [g.course_id, g.nearest_deadline]));
 
   // Get course weights
-  const courseWeights = await queryAll(`SELECT id, weight FROM courses WHERE user_id = $1`, [userId])as { id: string; weight: number }[];
+  const courseWeights = await queryAll(`SELECT id, weight FROM courses WHERE user_id = $1`, [userId]) as { id: string; weight: number }[];
   const weightMap = new Map(courseWeights.map(c => [c.id, c.weight]));
 
   function sortTasks(taskList: any[]): any[] {

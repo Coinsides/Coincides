@@ -29,7 +29,7 @@ export function authMiddleware(req: AuthRequest, res: Response, next: NextFuncti
     const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload;
 
     // Verify user still exists
-    const user = await queryOne(`SELECT id FROM users WHERE id = $1`, [decoded.userId])as { id: string } | undefined;
+    const user = await queryOne(`SELECT id FROM users WHERE id = $1`, [decoded.userId]) as { id: string } | undefined;
     if (!user) {
       res.status(401).json({ error: 'User not found' });
       return;

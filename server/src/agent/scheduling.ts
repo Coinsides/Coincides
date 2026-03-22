@@ -176,7 +176,7 @@ export function getDailyCapacities(userId: string, startDate: string, endDate: s
     const netStudyMinutes = Math.max(0, studyMinutes - nestedSubtract);
 
     // Count existing tasks
-    const existing = await queryOne(`SELECT COUNT(*) as cnt FROM tasks WHERE user_id = $1 AND date = $2 AND status = $3`, [userId, dateStr, 'pending'])as { cnt: number };
+    const existing = await queryOne(`SELECT COUNT(*) as cnt FROM tasks WHERE user_id = $1 AND date = $2 AND status = $3`, [userId, dateStr, 'pending']) as { cnt: number };
 
     capacities.push({
       date: dateStr,

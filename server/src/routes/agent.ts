@@ -43,7 +43,7 @@ router.get('/conversations/:id/messages', async (req: AuthRequest, res: Response
 // DELETE /api/agent/conversations/:id — delete conversation
 router.delete('/conversations/:id', async (req: AuthRequest, res: Response) => {
   const result = await execute('DELETE FROM agent_conversations WHERE id = $1 AND user_id = $2', [req.params.id, req.userId!]);
-  if (result.changes === 0) throw new AppError(404, 'Conversation not found');
+  if (result.rowCount === 0) throw new AppError(404, 'Conversation not found');
   res.json({ message: 'Conversation deleted' });
 });
 
