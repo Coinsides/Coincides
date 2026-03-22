@@ -20,18 +20,19 @@ function parseTask(task: any): any {
 router.get('/', async (req: AuthRequest, res: Response) => {
   const { course_id, parent_id } = req.query;
 
-  let query = 'SELECT * FROM goals WHERE user_id = ?';
+  let query = 'SELECT * FROM goals WHERE user_id = $1';
   const params: unknown[] = [req.userId!];
+  let paramIdx = 2;
 
   if (course_id) {
-    query += ' AND course_id = ?';
+    query += ` AND course_id = $${paramIdx++}`;
     params.push(course_id);
   }
 
   if (parent_id === 'null') {
     query += ' AND parent_id IS NULL';
   } else if (parent_id) {
-    query += ' AND parent_id = ?';
+    query += ` AND parent_id = $${paramIdx++}`;
     params.push(parent_id);
   }
 
