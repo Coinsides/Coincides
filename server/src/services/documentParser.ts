@@ -15,6 +15,7 @@ import { getEmbeddingProvider } from '../embedding/index.js';
 import { VectorStore } from '../embedding/vectorStore.js';
 
 import { execute, queryAll, queryOne, transaction } from '../db/pool.js';
+import { decrypt } from '../utils/crypto.js';
 
 const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
 const CHUNK_SIZE = 5000;
@@ -36,7 +37,7 @@ async function getAnthropicClient(userId?: string): Promise<Anthropic> {
         const aiProviders = settings?.ai_providers as Record<string, Record<string, string>> | undefined;
         const anthropicConfig = aiProviders?.anthropic;
         if (anthropicConfig?.api_key) {
-          return new Anthropic({ apiKey: anthropicConfig.api_key });
+          return new Anthropic({ apiKey: decrypt(anthropicConfig.api_key) });
         }
       }
     } catch (err) {

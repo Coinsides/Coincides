@@ -1,6 +1,7 @@
 import type { AIProvider, ProviderConfig } from './types.js';
 import { AnthropicProvider } from './anthropic.js';
 import { OpenAIProvider } from './openai.js';
+import { decrypt } from '../../utils/crypto.js';
 
 export function createProvider(providerName: string, config: ProviderConfig): AIProvider {
   switch (providerName) {
@@ -22,7 +23,7 @@ export function getProviderFromSettings(userSettings: Record<string, unknown>): 
   const aiProviders = userSettings?.ai_providers as Record<string, Record<string, string>> | undefined;
   const providerConfig = aiProviders?.[activeProvider];
 
-  let apiKey = providerConfig?.api_key;
+  let apiKey = providerConfig?.api_key ? decrypt(providerConfig.api_key) : undefined;
   let model = providerConfig?.default_model;
 
   // Fallback to env

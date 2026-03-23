@@ -70,3 +70,22 @@
   - 修复 `MAX(0, x)` → PostgreSQL `GREATEST(0, x)`（3 处）
   - 修复 `IS $3` → `IS NOT DISTINCT FROM $3`（NULL 值比较）
   - 修复 template items 误写入 `time_blocks` 表 → 改为 `time_block_templates` 表
+
+## Step 3 — 多用户支持强化
+
+### API Key AES-256 加密
+- 新增 `utils/crypto.ts`：AES-256-GCM 加密/解密工具
+  - `encrypt()` / `decrypt()`：单值加解密
+  - `encryptApiKeysInSettings()` / `decryptApiKeysInSettings()`：settings 对象深度加解密
+  - `maskApiKeysInSettings()`：前端显示用遮罩（`sk-ant-...xyz`）
+  - 需要 `ENCRYPTION_KEY` 环境变量（64位 hex = 32字节）
+  - 未配置时透明透传（开发环境兼容）
+- 写入时加密：`settings.ts` PUT 端点保存前加密 api_key
+- 读取时解密：`providers/index.ts`、`documentParser.ts`、`embedding/index.ts`
+- 前端返回遮罩：`auth.ts`、`settings.ts` GET 端点返回遮罩后的 key
+- 智能合并：前端发回遮罩 key 时保留数据库中已加密的原值
+
+### 安全审计
+- 文件上传：按用户隔离目录、UUID文件名、MIME白名单、大小限制
+- 查询过滤：所有路由 handler 均有 user_id 权限检查（先查后删模式）
+- API 返回：file_path 不暴露给前端

@@ -7,6 +7,7 @@ import { registerSchema, loginSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
 
 import { execute, queryOne } from '../db/pool.js';
+import { maskApiKeysInSettings } from '../utils/crypto.js';
 
 import { seedSystemTags } from '../db/init.js';
 const router = Router();
@@ -81,7 +82,7 @@ router.post('/login', async (req: AuthRequest, res: Response) => {
         id: user.id,
         email: user.email,
         name: user.name,
-        settings: (user.settings || {}),
+        settings: maskApiKeysInSettings((user.settings || {}) as Record<string, any>),
         onboarding_completed: !!user.onboarding_completed,
         created_at: user.created_at,
         updated_at: user.updated_at,
@@ -106,7 +107,7 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
 
   res.json({
     ...user,
-    settings: (user.settings || {}),
+    settings: maskApiKeysInSettings((user.settings || {}) as Record<string, any>),
     onboarding_completed: !!user.onboarding_completed,
   });
 });

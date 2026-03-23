@@ -1,6 +1,7 @@
 import type { EmbeddingProvider, EmbeddingConfig } from './types.js';
 import { VoyageProvider } from './voyage.js';
 import { queryOne } from '../db/pool.js';
+import { decrypt } from '../utils/crypto.js';
 
 export type { EmbeddingProvider, EmbeddingConfig, SearchResult } from './types.js';
 
@@ -40,9 +41,11 @@ export async function getEmbeddingProvider(userId?: string): Promise<EmbeddingPr
  */
 function getConfigFromSettings(settings: Record<string, unknown>): EmbeddingConfig | null {
   const provider = settings.embedding_provider as string | undefined;
-  const apiKey = settings.embedding_api_key as string | undefined;
+  const rawApiKey = settings.embedding_api_key as string | undefined;
   const model = settings.embedding_model as string | undefined;
 
+  if (!rawApiKey) return null;
+  const apiKey = decrypt(rawApiKey);
   if (!apiKey) return null;
 
   return {
