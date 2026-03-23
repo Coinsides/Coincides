@@ -144,7 +144,7 @@ router.post('/:id/apply', async (req: AuthRequest, res: Response) => {
           }
 
           await execute('INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, description, start_time, end_time, checklist, serves_must, time_block_id, order_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)', [taskId, req.userId!, item.course_id, item.goal_id || null,
-            item.title, taskDate, item.priority || 'must', 'pending',
+            item.title || item.description || 'Untitled Task', taskDate, item.priority || 'must', 'pending',
             item.description || null, item.start_time || null, item.end_time || null,
             (() => { const cl = normalizeChecklist(item.checklist); return cl ? JSON.stringify(cl) : null; })(),
             item.serves_must || null, timeBlockId, 0, now, now
@@ -161,7 +161,7 @@ router.post('/:id/apply', async (req: AuthRequest, res: Response) => {
             const resolvedParentId = item.parent_id && idMap.has(item.parent_id as string)
               ? idMap.get(item.parent_id as string)
               : item.parent_id || null;
-            await execute('INSERT INTO goals (id, user_id, course_id, parent_id, title, description, deadline, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [goalId, req.userId!, item.course_id, resolvedParentId, item.title, item.description || null, item.deadline || null, 'active', now, now]);
+            await execute('INSERT INTO goals (id, user_id, course_id, parent_id, title, description, deadline, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [goalId, req.userId!, item.course_id, resolvedParentId, item.title || 'Untitled Goal', item.description || null, item.deadline || null, 'active', now, now]);
             if (item._temp_id) idMap.set(item._temp_id as string, goalId);
           } else if (item.type === 'task') {
             const taskId = uuidv4();
@@ -171,7 +171,7 @@ router.post('/:id/apply', async (req: AuthRequest, res: Response) => {
             // v1.3: scheduled_date takes precedence over date
             const taskDate = (item.scheduled_date || item.date) as string;
             await execute('INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, description, start_time, end_time, checklist, serves_must, order_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)', [taskId, req.userId!, item.course_id, resolvedGoalId,
-              item.title, taskDate, item.priority || 'must', 'pending',
+              item.title || item.description || 'Untitled Task', taskDate, item.priority || 'must', 'pending',
               item.description || null, item.start_time || null, item.end_time || null,
               (() => { const cl = normalizeChecklist(item.checklist); return cl ? JSON.stringify(cl) : null; })(),
               item.serves_must || null, 0, now, now
