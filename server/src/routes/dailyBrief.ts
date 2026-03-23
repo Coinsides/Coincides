@@ -20,7 +20,14 @@ router.get('/', async (req: AuthRequest, res: Response) => {
   const examModeActive = examGoals.length > 0;
 
   // Get today's tasks grouped by priority
-  const allTasks = await queryAll(`SELECT * FROM tasks WHERE user_id = $1 AND date = $2 ORDER BY order_index ASC, created_at ASC`, [userId, today]);
+  const allTasksRaw = await queryAll(`SELECT * FROM tasks WHERE user_id = $1 AND date = $2 ORDER BY order_index ASC, created_at ASC`, [userId, today]);
+  // Parse checklist JSON strings into arrays
+  const allTasks = allTasksRaw.map((t: any) => {
+    if (t.checklist && typeof t.checklist === 'string') {
+      try { t.checklist = JSON.parse(t.checklist); } catch { t.checklist = null; }
+    }
+    return t;
+  });
 
   // Apply exam mode filtering + boost
   const tasks = allTasks
@@ -97,7 +104,7 @@ router.get('/', async (req: AuthRequest, res: Response) => {
     const expectedProgress = Math.round((daysPassed / totalDays) * group.total_tasks);
 
     // Get actual completed count
-    const stats = await queryOne(`SELECT SUM(CASE WHEN status = \'completed\' THEN 1 ELSE 0 END) as completed FROM tasks WHERE recurring_group_id = $1`, [group.id]);
+    const stats = await queryOne(`SELECT SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed FROM tasks WHERE recurring_group_id = $1`, [group.id]);
 
     const completed = stats.completed || 0;
     const daysBehind = Math.max(0, expectedProgress - completed);
@@ -127,7 +134,7 @@ router.get('/', async (req: AuthRequest, res: Response) => {
   }));
 
   // Get today's time blocks (empty array if none — never prompt user to set up, §2)
-  const timeBlocks = getBlocksForDate(userId, today);
+  const timeBlocks = await getBlocksForDate(userId, today);
 
   res.json({
     date: today,

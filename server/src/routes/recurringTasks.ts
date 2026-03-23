@@ -87,7 +87,7 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
   }
 
   // Get actual completed count from tasks
-  const stats = await queryOne(`SELECT COUNT(*) as total, SUM(CASE WHEN status = \'completed\' THEN 1 ELSE 0 END) as completed FROM tasks WHERE recurring_group_id = $1`, [req.params.id]);
+  const stats = await queryOne(`SELECT COUNT(*) as total, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed FROM tasks WHERE recurring_group_id = $1`, [req.params.id]);
 
   res.json({
     ...group,
