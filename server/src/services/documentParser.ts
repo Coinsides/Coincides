@@ -1,9 +1,13 @@
 import { readFile } from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';
 import Anthropic from '@anthropic-ai/sdk';
-// @ts-ignore — pdf-parse has no proper ESM types
-import * as pdfParseModule from 'pdf-parse';
-const pdfParse = (pdfParseModule as any).default || pdfParseModule;
+// @ts-ignore — pdf-parse CJS module, use dynamic import at runtime
+let pdfParse: ((buffer: Buffer) => Promise<{ text: string; numpages: number }>) | null = null;
+try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const mod = await import('pdf-parse');
+  pdfParse = (mod.default || mod) as any;
+} catch { /* pdf-parse optional */ }
 import { PDFDocument } from 'pdf-lib';
 import * as mammoth from 'mammoth';
 import * as XLSX from 'xlsx';
@@ -54,6 +58,7 @@ function isImageFile(filename: string): boolean {
 }
 
 async function parsePdfNative(buffer: Buffer): Promise<{ text: string; pageCount: number }> {
+  if (!pdfParse) throw new Error('pdf-parse module not available');
   const data = await pdfParse(buffer);
   return { text: data.text, pageCount: data.numpages };
 }

@@ -292,7 +292,7 @@ export async function executeTool(
       // Recent completed tasks (last 7 days)
       const recentTasks = await queryAll(`SELECT t.title, t.date, t.course_id, c.name as course_name
          FROM tasks t JOIN courses c ON t.course_id = c.id
-         WHERE t.user_id = $1 AND t.status = 'completed' AND t.date >= (CURRENT_DATE - INTERVAL '7 days')
+         WHERE t.user_id = $1 AND t.status = 'completed' AND t.date >= (CURRENT_DATE - INTERVAL '7 days')::text
          ORDER BY t.date DESC LIMIT 20`, [userId]);
 
       // Active goals

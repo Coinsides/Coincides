@@ -122,7 +122,7 @@ router.get('/:id/summary', async (req: AuthRequest, res: Response) => {
   const decks = await queryAll(`
     SELECT d.*,
       (SELECT COUNT(*) FROM cards c WHERE c.deck_id = d.id) as card_count,
-      (SELECT COUNT(*) FROM cards c WHERE c.deck_id = d.id AND c.fsrs_next_review IS NOT NULL AND c.fsrs_next_review <= NOW()) as due_count
+      (SELECT COUNT(*) FROM cards c WHERE c.deck_id = d.id AND c.fsrs_next_review IS NOT NULL AND c.fsrs_next_review <= NOW()::text) as due_count
     FROM card_decks d
     WHERE d.course_id = $1 AND d.user_id = $2
     ORDER BY d.created_at DESC
