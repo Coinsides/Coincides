@@ -11,7 +11,7 @@ router.get('/overview', async (req: AuthRequest, res: Response) => {
   const today = new Date().toISOString().split('T')[0];
 
   // Calculate streak
-  const streak = calculateStreak(userId, today);
+  const streak = await calculateStreak(userId, today);
 
   // Today's stats
   const todayTasks = await queryOne(`SELECT COUNT(*) as total, SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as completed FROM tasks WHERE user_id = $1 AND date = $2`, [userId, today]) as { total: number; completed: number };
@@ -116,13 +116,13 @@ router.get('/trends', async (req: AuthRequest, res: Response) => {
     const months = Math.ceil(weeks / 4);
     const startDate = subtractMonths(today, months);
 
-    const rows = await queryAll(`SELECT strftime('%Y-%m', date) as period_label,
+    const rows = await queryAll(`SELECT to_char(date::date, 'YYYY-MM') as period_label,
               COUNT(*) as tasks_total,
               SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as tasks_completed
        FROM tasks WHERE user_id = $1 AND date >= $2
        GROUP BY period_label ORDER BY period_label`, [userId, startDate]) as { period_label: string; tasks_total: number; tasks_completed: number }[];
 
-    const cardRows = await queryAll(`SELECT strftime('%Y-%m', date) as period_label, COUNT(*) as cards_reviewed
+    const cardRows = await queryAll(`SELECT to_char(date::date, 'YYYY-MM') as period_label, COUNT(*) as cards_reviewed
        FROM study_activity_log WHERE user_id = $1 AND date >= $2 AND activity_type = 'card_reviewed'
        GROUP BY period_label ORDER BY period_label`, [userId, startDate]) as { period_label: string; cards_reviewed: number }[];
 
@@ -141,13 +141,13 @@ router.get('/trends', async (req: AuthRequest, res: Response) => {
     // weekly
     const startDate = subtractDays(today, weeks * 7);
 
-    const rows = await queryAll(`SELECT strftime('%Y-W%W', date) as period_label,
+    const rows = await queryAll(`SELECT to_char(date::date, 'IYYY-"W"IW') as period_label,
               COUNT(*) as tasks_total,
               SUM(CASE WHEN status = 'completed' THEN 1 ELSE 0 END) as tasks_completed
        FROM tasks WHERE user_id = $1 AND date >= $2
        GROUP BY period_label ORDER BY period_label`, [userId, startDate]) as { period_label: string; tasks_total: number; tasks_completed: number }[];
 
-    const cardRows = await queryAll(`SELECT strftime('%Y-W%W', date) as period_label, COUNT(*) as cards_reviewed
+    const cardRows = await queryAll(`SELECT to_char(date::date, 'IYYY-"W"IW') as period_label, COUNT(*) as cards_reviewed
        FROM study_activity_log WHERE user_id = $1 AND date >= $2 AND activity_type = 'card_reviewed'
        GROUP BY period_label ORDER BY period_label`, [userId, startDate]) as { period_label: string; cards_reviewed: number }[];
 
@@ -205,7 +205,7 @@ async function calculateStreak(userId: string, today: string): Promise<{ current
        SELECT date FROM tasks WHERE user_id = $1 AND status = 'completed'
        UNION
        SELECT date FROM study_activity_log WHERE user_id = $2 AND activity_type = 'card_reviewed'
-     ) ORDER BY date DESC`, [userId, userId]) as { date: string }[];
+     ) AS activity_dates ORDER BY date DESC`, [userId, userId]) as { date: string }[];
 
   const dateSet = new Set(activityDates.map(d => d.date));
 
