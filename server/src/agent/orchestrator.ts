@@ -6,6 +6,7 @@ import { MemoryManager } from './memory/manager.js';
 import { buildSystemPrompt } from './system-prompt.js';
 
 import { queryAll, queryOne } from '../db/pool.js';
+import { getTodayInTimezone } from '../utils/dates.js';
 
 const MAX_TOOL_ROUNDS = 8;
 
@@ -65,7 +66,7 @@ export async function* runAgent(
   const courses = await queryAll(`SELECT id, name, code FROM courses WHERE user_id = $1`, [userId]);
   const memories = await memory.retrieveMemories(userMessage);
   const docSummaries = await memory.getDocumentSummaries();
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayInTimezone();
   const energyStatus = await queryOne('SELECT energy_level FROM daily_statuses WHERE user_id = $1 AND date = $2', [userId, today]);
 
   // Pre-load decks with their sections to reduce tool call rounds

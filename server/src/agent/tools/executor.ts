@@ -4,13 +4,14 @@ import { VectorStore } from '../../embedding/vectorStore.js';
 import { normalizeCardContent } from './normalizeContent.js';
 
 import { execute, queryAll, queryOne, transaction } from '../../db/pool.js';
+import { getTodayInTimezone } from '../../utils/dates.js';
 
 export async function executeTool(
   toolName: string,
   args: Record<string, unknown>,
   userId: string,
 ): Promise<string> {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayInTimezone();
 
   switch (toolName) {
     case 'list_courses': {
@@ -492,7 +493,6 @@ export async function executeTool(
       }
 
       // Default: return blocks for next 14 days
-      const today = new Date().toISOString().split('T')[0];
       const twoWeeks = new Date();
       twoWeeks.setDate(twoWeeks.getDate() + 14);
       const endDate = twoWeeks.toISOString().split('T')[0];

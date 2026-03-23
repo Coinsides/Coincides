@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { AuthRequest } from '../middleware/auth.js';
 import { getBlocksForDate } from './timeBlocks.js';
+import { getTodayFromRequest } from '../utils/dates.js';
 
 import { queryAll, queryOne } from '../db/pool.js';
 
@@ -8,7 +9,7 @@ const router = Router();
 
 // GET /api/daily-brief
 router.get('/', async (req: AuthRequest, res: Response) => {
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayFromRequest(req);
   const userId = req.userId!;
 
   // Get active exam mode goals

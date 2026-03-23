@@ -4,6 +4,7 @@ import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { createTaskSchema, updateTaskSchema, batchCreateTasksSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
+import { getTodayFromRequest } from '../utils/dates.js';
 
 import { execute, queryAll, queryOne, transaction } from '../db/pool.js';
 
@@ -173,7 +174,7 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
         values.push(new Date().toISOString());
 
         // Log activity
-        const activityDate = new Date().toISOString().split('T')[0];
+        const activityDate = getTodayFromRequest(req);
         await execute(`INSERT INTO study_activity_log (id, user_id, date, activity_type, entity_id, entity_type) VALUES ($1, $2, $3, $4, $5, $6)`, [uuidv4(), req.userId!, activityDate, 'task_completed', existing.id, 'task']);
 
         // Update recurring group count if applicable

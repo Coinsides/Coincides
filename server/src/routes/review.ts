@@ -1,3 +1,4 @@
+import { getTodayFromRequest, getTodayInTimezone, getTimezoneFromRequest } from '../utils/dates.js';
 import { Router, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { AuthRequest } from '../middleware/auth.js';
@@ -25,7 +26,7 @@ function parseCardContent(card: any) {
 
 // GET /api/review/due
 router.get('/due', async (req: AuthRequest, res: Response) => {
-  const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
+  const date = (req.query.date as string) || getTodayFromRequest(req);
   const deckId = req.query.deckId as string | undefined;
   const sectionId = req.query.sectionId as string | undefined;
   const tagId = req.query.tagId as string | undefined;
@@ -75,7 +76,7 @@ router.get('/due', async (req: AuthRequest, res: Response) => {
 
 // GET /api/review/due/count
 router.get('/due/count', async (req: AuthRequest, res: Response) => {
-  const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
+  const date = (req.query.date as string) || getTodayFromRequest(req);
 
   const row = await queryOne(`SELECT COUNT(*) as count FROM cards
      WHERE user_id = $1 AND (fsrs_next_review <= $2 OR fsrs_reps = 0)`, [req.userId!, date + 'T23:59:59']);

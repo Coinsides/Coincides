@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { AuthRequest } from '../middleware/auth.js';
 import { setDailyStatusSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
+import { getTodayFromRequest } from '../utils/dates.js';
 
 import { execute, queryOne } from '../db/pool.js';
 
@@ -12,7 +13,7 @@ const router = Router();
 router.post('/', async (req: AuthRequest, res: Response) => {
   try {
     const data = setDailyStatusSchema.parse(req.body);
-    const date = data.date || new Date().toISOString().split('T')[0];
+    const date = data.date || getTodayFromRequest(req);
     const now = new Date().toISOString();
 
     // Upsert: insert or replace for the same user + date
@@ -37,7 +38,7 @@ router.post('/', async (req: AuthRequest, res: Response) => {
 
 // GET /api/daily-status
 router.get('/', async (req: AuthRequest, res: Response) => {
-  const date = (req.query.date as string) || new Date().toISOString().split('T')[0];
+  const date = (req.query.date as string) || getTodayFromRequest(req);
 
   const status = await queryOne(`SELECT * FROM daily_statuses WHERE user_id = $1 AND date = $2`, [req.userId!, date]);
 

@@ -1,5 +1,6 @@
 import { Router, Response } from 'express';
 import { AuthRequest } from '../middleware/auth.js';
+import { getTodayFromRequest } from '../utils/dates.js';
 
 import { queryAll, queryOne } from '../db/pool.js';
 
@@ -8,7 +9,7 @@ const router = Router();
 // GET /api/statistics/overview
 router.get('/overview', async (req: AuthRequest, res: Response) => {
   const userId = req.userId!;
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayFromRequest(req);
 
   // Calculate streak
   const streak = await calculateStreak(userId, today);
@@ -58,7 +59,7 @@ router.get('/overview', async (req: AuthRequest, res: Response) => {
 router.get('/heatmap', async (req: AuthRequest, res: Response) => {
   const userId = req.userId!;
   const months = parseInt(req.query.months as string) || 6;
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayFromRequest(req);
 
   const startDate = subtractMonths(today, months);
 
@@ -110,7 +111,7 @@ router.get('/trends', async (req: AuthRequest, res: Response) => {
   const userId = req.userId!;
   const period = (req.query.period as string) || 'weekly';
   const weeks = parseInt(req.query.weeks as string) || 12;
-  const today = new Date().toISOString().split('T')[0];
+  const today = getTodayFromRequest(req);
 
   if (period === 'monthly') {
     const months = Math.ceil(weeks / 4);
