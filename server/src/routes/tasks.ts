@@ -185,7 +185,7 @@ router.put('/:id', async (req: AuthRequest, res: Response) => {
         values.push(null);
 
         if (existing.recurring_group_id) {
-          await execute(`UPDATE recurring_task_groups SET completed_tasks = MAX(0, completed_tasks - 1) WHERE id = $1`, [existing.recurring_group_id]);
+          await execute(`UPDATE recurring_task_groups SET completed_tasks = GREATEST(0, completed_tasks - 1) WHERE id = $1`, [existing.recurring_group_id]);
         }
       }
     }
@@ -225,12 +225,12 @@ router.delete('/:id', async (req: AuthRequest, res: Response) => {
 
   // If this was a completed task in a recurring group, decrement the count
   if (existing.recurring_group_id && existing.status === 'completed') {
-    await execute(`UPDATE recurring_task_groups SET completed_tasks = MAX(0, completed_tasks - 1) WHERE id = $1`, [existing.recurring_group_id]);
+    await execute(`UPDATE recurring_task_groups SET completed_tasks = GREATEST(0, completed_tasks - 1) WHERE id = $1`, [existing.recurring_group_id]);
   }
 
   // Also decrement total_tasks for the recurring group
   if (existing.recurring_group_id) {
-    await execute(`UPDATE recurring_task_groups SET total_tasks = MAX(0, total_tasks - 1) WHERE id = $1`, [existing.recurring_group_id]);
+    await execute(`UPDATE recurring_task_groups SET total_tasks = GREATEST(0, total_tasks - 1) WHERE id = $1`, [existing.recurring_group_id]);
   }
 
   await execute(`DELETE FROM tasks WHERE id = $1`, [req.params.id]);
@@ -288,7 +288,7 @@ router.post('/:taskId/cards', async (req: AuthRequest, res: Response) => {
   }
 
   // Check for duplicate
-  const existing = await queryOne(`SELECT id FROM task_cards WHERE task_id = $1 AND card_id = $2 AND checklist_index IS $3`, [taskId, card_id, checklist_index ?? null]);
+  const existing = await queryOne(`SELECT id FROM task_cards WHERE task_id = $1 AND card_id = $2 AND checklist_index IS NOT DISTINCT FROM $3`, [taskId, card_id, checklist_index ?? null]);
   if (existing) {
     res.status(409).json({ error: 'Link already exists' });
     return;

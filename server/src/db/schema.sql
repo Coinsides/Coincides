@@ -347,13 +347,16 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_study_mode_templates_system_slug ON study_
 CREATE TABLE IF NOT EXISTS time_blocks (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  template_id TEXT,
   date TEXT NOT NULL,
   type TEXT NOT NULL DEFAULT 'study',
   label TEXT,
   start_time TEXT NOT NULL,
   end_time TEXT NOT NULL,
+  color TEXT,
   template_set_id TEXT,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_time_blocks_user_date ON time_blocks(user_id, date);
@@ -366,23 +369,25 @@ CREATE TABLE IF NOT EXISTS time_block_template_sets (
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   is_active BOOLEAN NOT NULL DEFAULT FALSE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_tb_template_sets_user ON time_block_template_sets(user_id);
 
 CREATE TABLE IF NOT EXISTS time_block_templates (
   id TEXT PRIMARY KEY,
-  set_id TEXT NOT NULL REFERENCES time_block_template_sets(id) ON DELETE CASCADE,
+  template_set_id TEXT NOT NULL REFERENCES time_block_template_sets(id) ON DELETE CASCADE,
   day_of_week INTEGER NOT NULL,
   type TEXT NOT NULL DEFAULT 'study',
   label TEXT,
   start_time TEXT NOT NULL,
   end_time TEXT NOT NULL,
+  color TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX IF NOT EXISTS idx_tb_templates_set ON time_block_templates(set_id);
+CREATE INDEX IF NOT EXISTS idx_tb_templates_set ON time_block_templates(template_set_id);
 
 -- ============================================================
 -- 19. GoalDependency
@@ -418,11 +423,15 @@ CREATE INDEX IF NOT EXISTS idx_study_activity_user_date ON study_activity_log(us
 -- 21. TaskCards (M:N junction, migration 011)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS task_cards (
+  id TEXT PRIMARY KEY,
   task_id TEXT NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
   card_id TEXT NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
-  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  PRIMARY KEY (task_id, card_id)
+  checklist_index INTEGER,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE INDEX IF NOT EXISTS idx_task_cards_task ON task_cards(task_id);
+CREATE INDEX IF NOT EXISTS idx_task_cards_card ON task_cards(card_id);
 
 -- ============================================================
 -- 22. Migration Tracking

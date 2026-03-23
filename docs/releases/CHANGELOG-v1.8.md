@@ -61,3 +61,12 @@
   - 修复 `WHERE id = $1` 与动态 SET 子句的参数编号冲突
   - 修复 SQLite `date('now', '-7 days')` → PostgreSQL `CURRENT_DATE - INTERVAL '7 days'`
   - 修复 `retrieveMemories` 中 LIKE 条件全部引用 `$1` 的逻辑错误
+- **全面排查 schema vs 代码字段不匹配**：
+  - `time_blocks` 缺失 3 列：`template_id TEXT`, `color TEXT`, `updated_at TIMESTAMPTZ`
+  - `task_cards` 缺失 2 列 + PK 错误：添加 `id TEXT PRIMARY KEY`, `checklist_index INTEGER`
+  - `time_block_template_sets` 缺失 `updated_at TIMESTAMPTZ`
+  - `time_block_templates` 缺失 `color TEXT`，且 `set_id` 应为 `template_set_id`
+  - 新增迁移 015：ALTER TABLE 添加以上缺失字段（兼容已有数据库）
+  - 修复 `MAX(0, x)` → PostgreSQL `GREATEST(0, x)`（3 处）
+  - 修复 `IS $3` → `IS NOT DISTINCT FROM $3`（NULL 值比较）
+  - 修复 template items 误写入 `time_blocks` 表 → 改为 `time_block_templates` 表

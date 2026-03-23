@@ -310,9 +310,9 @@ router.post('/templates/sets/:setId/items', async (req: AuthRequest, res: Respon
 
     // Insert new items
     for (const item of items) {
-      await execute(`INSERT INTO time_blocks (id, user_id, template_id, label, type, date, start_time, end_time, color, created_at, updated_at)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`, [uuidv4(), req.params.setId, req.userId!, item.label, item.type || 'study',
-        item.day_of_week, item.start_time, item.end_time, item.color || null, now, now]);
+      await execute(`INSERT INTO time_block_templates (id, template_set_id, day_of_week, type, label, start_time, end_time, color, created_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`, [uuidv4(), req.params.setId, item.day_of_week, item.type || 'study',
+        item.label, item.start_time, item.end_time, item.color || null, now]);
     }
   });
 
