@@ -123,8 +123,23 @@ router.post('/:id/apply', async (req: AuthRequest, res: Response) => {
           // v1.3: scheduled_date takes precedence over date for calendar placement
           const taskDate = (item.scheduled_date || item.date) as string;
 
-          // v1.7.2: Defensive time_block_id fill — if Agent omitted it, look up by day_of_week.
-          // Also validate any Agent-provided ID actually exists (FK safety).
+          // Validate FK references — Agent may hallucinate IDs
+          let goalId: string | null = (item.goal_id as string) || null;
+          if (goalId) {
+            const exists = await queryOne('SELECT id FROM goals WHERE id = $1 AND user_id = $2', [goalId, req.userId!]);
+            if (!exists) goalId = null;
+          }
+          let courseId: string = item.course_id as string;
+          if (courseId) {
+            const exists = await queryOne('SELECT id FROM courses WHERE id = $1 AND user_id = $2', [courseId, req.userId!]);
+            if (!exists) {
+              // Skip this task — invalid course
+              console.warn(`Proposal: skipping task "${item.title}" — course_id ${courseId} not found`);
+              continue;
+            }
+          }
+
+          // v1.7.2: Defensive time_block_id fill
           let timeBlockId: string | null = (item.time_block_id as string) || null;
 
           // If Agent provided an ID, verify it exists in DB
@@ -143,7 +158,7 @@ router.post('/:id/apply', async (req: AuthRequest, res: Response) => {
             }
           }
 
-          await execute('INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, description, start_time, end_time, checklist, serves_must, time_block_id, order_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)', [taskId, req.userId!, item.course_id, item.goal_id || null,
+          await execute('INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, description, start_time, end_time, checklist, serves_must, time_block_id, order_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)', [taskId, req.userId!, courseId, goalId,
             item.title || item.description || 'Untitled Task', taskDate, item.priority || 'must', 'pending',
             item.description || null, item.start_time || null, item.end_time || null,
             (() => { const cl = normalizeChecklist(item.checklist); return cl ? JSON.stringify(cl) : null; })(),
@@ -158,19 +173,41 @@ router.post('/:id/apply', async (req: AuthRequest, res: Response) => {
         for (const item of data.items) {
           if (item.type === 'goal') {
             const goalId = uuidv4();
-            const resolvedParentId = item.parent_id && idMap.has(item.parent_id as string)
-              ? idMap.get(item.parent_id as string)
-              : item.parent_id || null;
-            await execute('INSERT INTO goals (id, user_id, course_id, parent_id, title, description, deadline, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [goalId, req.userId!, item.course_id, resolvedParentId, item.title || 'Untitled Goal', item.description || null, item.deadline || null, 'active', now, now]);
+            let resolvedParentId = item.parent_id && idMap.has(item.parent_id as string)
+              ? idMap.get(item.parent_id as string)!
+              : (item.parent_id as string) || null;
+            // Validate parent_id FK
+            if (resolvedParentId) {
+              const exists = await queryOne('SELECT id FROM goals WHERE id = $1', [resolvedParentId]);
+              if (!exists) resolvedParentId = null;
+            }
+            // Validate course_id FK
+            const goalCourseId = item.course_id as string;
+            if (goalCourseId) {
+              const exists = await queryOne('SELECT id FROM courses WHERE id = $1 AND user_id = $2', [goalCourseId, req.userId!]);
+              if (!exists) { console.warn(`Proposal: skipping goal "${item.title}" — course_id ${goalCourseId} not found`); continue; }
+            }
+            await execute('INSERT INTO goals (id, user_id, course_id, parent_id, title, description, deadline, status, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)', [goalId, req.userId!, goalCourseId, resolvedParentId, item.title || 'Untitled Goal', item.description || null, item.deadline || null, 'active', now, now]);
             if (item._temp_id) idMap.set(item._temp_id as string, goalId);
           } else if (item.type === 'task') {
             const taskId = uuidv4();
-            const resolvedGoalId = item.goal_id && idMap.has(item.goal_id as string)
-              ? idMap.get(item.goal_id as string)
-              : item.goal_id || null;
+            let resolvedGoalId = item.goal_id && idMap.has(item.goal_id as string)
+              ? idMap.get(item.goal_id as string)!
+              : (item.goal_id as string) || null;
+            // Validate goal FK
+            if (resolvedGoalId) {
+              const exists = await queryOne('SELECT id FROM goals WHERE id = $1', [resolvedGoalId]);
+              if (!exists) resolvedGoalId = null;
+            }
+            // Validate course FK
+            const gbCourseId = item.course_id as string;
+            if (gbCourseId) {
+              const exists = await queryOne('SELECT id FROM courses WHERE id = $1 AND user_id = $2', [gbCourseId, req.userId!]);
+              if (!exists) { console.warn(`Proposal: skipping task — course_id ${gbCourseId} not found`); continue; }
+            }
             // v1.3: scheduled_date takes precedence over date
             const taskDate = (item.scheduled_date || item.date) as string;
-            await execute('INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, description, start_time, end_time, checklist, serves_must, order_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)', [taskId, req.userId!, item.course_id, resolvedGoalId,
+            await execute('INSERT INTO tasks (id, user_id, course_id, goal_id, title, date, priority, status, description, start_time, end_time, checklist, serves_must, order_index, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)', [taskId, req.userId!, gbCourseId, resolvedGoalId,
               item.title || item.description || 'Untitled Task', taskDate, item.priority || 'must', 'pending',
               item.description || null, item.start_time || null, item.end_time || null,
               (() => { const cl = normalizeChecklist(item.checklist); return cl ? JSON.stringify(cl) : null; })(),
