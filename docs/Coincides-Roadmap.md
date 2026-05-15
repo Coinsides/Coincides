@@ -1,7 +1,7 @@
 # Coincides 开发路线图
 
-> 最后更新：2026-03-22
-> 状态：v1.0 🎉 发布 | v1.1~v1.7.3 ✅ 完成 | v1.8 (云端部署 + PWA) 📋 待实施 | v2.0+ 📋 远期规划
+> 最后更新：2026-05-12
+> 状态：v1.0 🎉 发布 | v1.1~v1.7.3 ✅ 完成 | v1.8 Cloud/PWA 计划已暂停/历史保留 | v1.9 Local-first Stable Core 📋 规划中 | v2.x Note + Composable Learning System 📋 初步规划
 
 ---
 
@@ -195,41 +195,78 @@
 
 ---
 
-## v1.8（云端部署 + PWA 离线支持）📋
+## v1.8 Cloud/PWA Plan（Postponed / Superseded）📋
 
-> 状态：待实施
+> 状态：历史保留，不再作为当前 v1.x → v2.x 的主线前置
 > 详细规划：[v1.8-plan.md](releases/v1.8-plan.md)
-> 里程碑：从“本地工具”转型为“在线服务”，为 v2.0 社区功能铺路
-> 方向变更：原计划 Electron 桌面打包，因架构不匹配放弃（详见 Plan 中「为什么放弃 Electron」）
+> 方向变更：旧方案假设 Coincides 要优先变成在线服务；当前主线已改为 local-first、open-source、self-hostable。
 
-主题：从本地单机工具转型为在线服务，支持多用户注册和离线使用。
+原 v1.8 计划包含 SQLite → PostgreSQL、云端部署、多用户在线服务、PWA 离线支持等内容。该方案保留为历史架构记录，但不再阻塞 v2.0，也不再作为社区能力的必要前置条件。
 
-- Step 1：清理 Electron 残留 + 仓库整理
-- Step 2：SQLite → PostgreSQL 迁移（最大工作量）
-- Step 3：多用户支持强化（user_id 隔离 + 文件云存储）
-- Step 4：部署上线（Railway + Supabase + Cloudflare）
-- Step 5：PWA 离线支持（Service Worker + IndexedDB 缓存）
-- Step 6：本地数据迁移工具（可选）
+云端托管、PostgreSQL、PWA、账号体系仍可在未来作为 optional hosted services 重新评估，但当前不进入主路径。
 
 ---
 
-## v2.0+（社区平台 + 知识图谱进阶）📋
+## v1.9（Local-first Stable Core）📋
 
-> 状态：远期规划，待 v1.8 云端部署完成后启动
+> 状态：规划中
+> 里程碑：把 Coincides 稳定为本地优先、开源、自托管的学习材料与学习路径整理器。
 
-这是从“在线工具”到“社区平台”的分水岭。
+v1.9 的目标不是新增大量可见功能，而是为 v2.x 的 Note、Recovery、社区包和外部 Agent 集成打地基。
 
-### v2.0 核心
-- **社区模板市场**：用户设计卡片模板（类似魔兽争霸地图编辑器）+ 社区投票 + 奖励机制
-- **课堂协作**：以课程为单位的学生群体共创卡片集
-- **开放模板引擎**：用户自定义卡片模板（字段结构 + 渲染方式）
+- **Local Profile / Local Workspace**：默认产品语言从云账号心智转向本地工作区；内部可继续保留 `user_id`，但 UI 不应暗示 Coincides 默认提供云账号。
+- **Local-first setup**：改善首次启动、本地数据目录、环境诊断、API key 配置、升级安全、备份和恢复路径。
+- **Minimal Recovery Layer**：为核心对象加入 soft delete、Recent Changes、OperationBatch、AI Proposal apply log 的最小实现。
+- **Core flow hardening**：稳定 course / deck / card / document / proposal 主流程，确保后续 AI 批量生成和外部导入出现错误时可以纠正。
+- **Design Constitution alignment**：继续遵守不替用户做决定、不监控用户、不制造挫败感；Coincides 是学习材料和学习路径整理器，不假装成人类导师。
 
-### v2.x 进阶
-- **Goal DAG 可视化**：目标依赖图自动布局 + 跨课程依赖 + Agent 全局排期
-- **卡片关系层**：card_relations（prerequisite / sequence / comparison）+ 知识 DAG
-- **知识画布**：白板 UI，卡片自由拼装 + 连接件 + DAG 可视化
-- **开放模板引擎**：用户自定义卡片模板（字段结构 + 渲染方式）
-- **复习模式引擎**：填空 / 选择 / 混合复习 + 错题本
+---
+
+## v2.0+（Note + Composable Learning System）📋
+
+> 状态：初步规划，详见 [v2-note-system-draft.md](v2-note-system-draft.md)
+> 范围说明：以下是分阶段方向，不代表 v2.0 一次性交付所有能力。
+
+### v2.0：Note Foundation
+- 建立 `Note` / `NoteBlock` / `NoteTemplate` 基础模型。
+- 提供手动 Note 创建与编辑。
+- 支持基础 block：Definition、Theorem、Example、Proof、Formula、Image、Sidenote 等。
+- 提供 Study View / Edit View / Export View；Markdown 继续作为导出格式，不作为核心存储格式。
+
+### v2.1：AI Note Proposal
+- 从上传文档、OCR、解析结果生成 Note Proposal。
+- 保留 source order、source link、AI confidence 和 block boundary。
+- 用户确认后再 apply，避免 AI 直接改动正式结构。
+- 图像先以原始区域截图 + caption 的方式保留，不急于 AI 重画。
+
+### v2.2：Template + Style Registry
+- 建立 schema-first 的模板和样式 registry。
+- 第一阶段开放 NoteBlockTemplate、CardTemplate、NoteTheme、BlockStyle。
+- 社区包先只支持模板和样式，不执行任意 JS。
+- 支持 package preview、duplicate、local customization、compatibility metadata。
+
+### v2.3：Learning Material Analytics
+- 让用户“玩自己的笔记和知识”：对上传材料、NoteBlocks、Cards 生成轻量统计。
+- 支持 concept bubble chart、chapter heatmap、concept frequency、block type distribution、source density map、review readiness views。
+- 统计表达保持事实性，例如“出现频率高”，避免替用户下判断或制造挫败感。
+
+### v2.4：External Agent Capability Layer
+- 让 Coincides 作为未来 AI 管家系统下的 Learning Module 被调用。
+- 通过 capability API 暴露 `import_source`、`create_note_proposal`、`generate_knowledge_points`、`create_card_proposal`、`get_job_status`、`get_result_link` 等能力。
+- 默认使用 Learning Inbox + Proposal，避免外部 Agent 误创建正式 course、deck、note 或 card。
+- 结构性创建、合并、删除、批量移动必须经过用户确认或明确 scoped permission。
+
+### v2.5：Scoped Knowledge Map
+- 不主动生成全局大型知识图谱。
+- 由用户选择 courses、decks、blocks、concepts 和关系类型，再生成局部知识联系图。
+- 优先 2.5D / pencil sketch 风格，降低大型 3D 图谱的视觉噪音和注意力消耗。
+- 可作为 Learning Material Analytics 的进阶视图。
+
+### Later
+- 社区网站：发布文档、下载主版本、展示/分享模板样式包，论坛或讨论区保持可选。
+- 完整 CommunityPackage 生态：布局规则、学习路径规则、渲染预设、导入导出适配器。
+- 沙盒插件能力：只有在安全模型成熟后才允许社区逻辑执行。
+- Optional hosted services：云同步、PWA、托管社区服务、PostgreSQL 等可作为未来分支重新评估。
 
 ---
 
@@ -240,7 +277,7 @@
 - Statistics 深度洞察：记忆保持率曲线 + 学习节奏 + 课程深度 + 数据导出
 - 通知系统 + 自动化测试 + 安全加固
 
-> 以上均待 v1.8 云端版稳定后，在 v2.x 中规划实施。
+> 以上不再依赖 v1.8 云端版。后续排期以 local-first 稳定核心、Note 系统、Recovery Layer 和可组合社区包为主线。
 
 ---
 
@@ -268,7 +305,7 @@
 | 卡片算法 | ts-fsrs (间隔重复) |
 | 数学渲染 | KaTeX |
 | 向量搜索 | sqlite-vec v0.1.7 + Voyage AI voyage-4 (1024 维) |
-| 部署 | 本地开发 → v1.8 迁移至云端（Railway + Cloudflare + Supabase） |
+| 部署 | Local-first / self-hostable；Railway + Cloudflare + Supabase 仅作为未来 optional hosted services |
 
 ---
 
