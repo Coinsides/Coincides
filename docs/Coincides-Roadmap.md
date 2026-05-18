@@ -1,6 +1,6 @@
 # Coincides Roadmap
 
-**Updated**: 2026-05-16  
+**Updated**: 2026-05-17  
 **Current mainline**: v2.0 NoteBlock Foundation on `feat/v2.0-noteblock`
 
 ---
@@ -10,6 +10,8 @@
 Coincides is moving toward a **Personal Learning Material OS / 学习管家**.
 
 The product is not trying to become a general AI teacher. Its core value is to help learners organize scattered learning material into source-grounded, editable, reviewable structures.
+
+The v2 architecture treats Workspace / Local Profile as the global user context and Course as the learning-domain root. Course Material Library becomes a first-class asset under each Course.
 
 ---
 
@@ -47,59 +49,71 @@ Goal: establish the minimum durable foundation for NoteBlock Library without try
 
 Major themes:
 
+- define Course-rooted learning content model,
 - define NoteBlock conceptual and storage model,
 - preserve source traceability expectations,
-- introduce projection vocabulary,
+- introduce Projection and ProjectionSnapshot vocabulary,
+- reserve compatibility for TypedProposal and OperationBatch,
+- keep status/trash and summary dependency concepts in mind where relevant,
 - define migration relationship from Card/Deck to NoteBlock/Review Projection,
-- define API and agent-tool contracts before implementation,
 - keep existing v1 flows usable while the v2 substrate is introduced.
+
+v2.0 should not implement the full Course Material Library, Source Snapshot Viewer, Material Reconciliation, or cross-course concept system. It should avoid blocking those later layers.
 
 ---
 
-## v2.1 — AI Note Proposal
+## v2.1 — AI Note Proposal + Course Material Library Seed
 
-Goal: turn parsed/OCR material into reviewed note proposals.
+Goal: turn parsed/OCR material into reviewed note proposals while introducing the first course-level material library behavior.
 
 Expected themes:
 
 - SourceFragment extraction pipeline,
-- FragmentClassifier,
-- BlockRouter,
-- Note Proposal payloads,
-- user review/apply flow,
-- confidence and source bounding/crop preservation,
+- FragmentClassifier and BlockRouter,
+- early MaterialSegment detection for chapters, weeks, sections, page ranges, or lecture units,
+- Material Map Proposal,
+- scope-based note generation,
+- confidence and source reference preservation,
 - first organized-note generation for real study material.
 
 ---
 
-## v2.2 — Package Schemas And Official Math Pack
+## v2.2 — Material Reconciliation
 
-Goal: abstract reusable schemas before building a community editor.
+Goal: make multi-batch, messy, duplicate, out-of-order learning materials usable.
 
 Expected themes:
 
-- Style Pack / Theme Pack schema,
-- Block Vocabulary schema,
-- Layout Recipe schema,
-- Review Projection Rule schema,
-- official Math Pack,
-- validator and preview contracts.
+- cross-batch reconciliation within one Course,
+- duplicate detection and canonical NoteBlock creation,
+- source evidence list for merged blocks,
+- recommended learning order proposal,
+- user drag/reorder/edit of material map and note order,
+- exclusion/restoration of source scopes,
+- stable recovery behavior for merge mistakes.
+
+Principle:
+
+```text
+Raw source order is preserved, but learning order is reconstructed.
+Duplicate knowledge is merged, but source evidence is retained.
+Evidence list first, evidence interpretation later.
+```
 
 ---
 
-## v2.3 — Package Studio Lite
+## v2.3 — Source Snapshot Viewer + Scope Selection
 
-Goal: build the first auxiliary tool for creating and previewing learning packages.
+Goal: let users inspect sources, select source ranges, and jump from generated notes back to source evidence.
 
 Expected themes:
 
-- sample note preview,
-- Style Pack editor,
-- validator,
-- import/export,
-- developer-first workflow before community release.
-
-Package Studio is not a prerequisite for v2.0. First build the learning capabilities, then build the editing tool for packages.
+- Source Snapshot Viewer as the generalized successor to PDF Reader Lite,
+- page-level source reference jump from NoteBlock or Projection to source page,
+- page/page-range/chapter/week scope selection,
+- lazy snapshot generation for large sources,
+- stored-but-not-imported and excluded-from-current-scope states,
+- no requirement for bbox highlight or full PDF editing in the first version.
 
 ---
 
@@ -107,11 +121,8 @@ Package Studio is not a prerequisite for v2.0. First build the learning capabili
 
 Possible directions:
 
-- Block Vocabulary Editor,
-- Layout Recipe Editor,
-- Review Projection Editor,
-- Routing Rules Editor,
-- community package sharing,
+- Study Scope Planner for weekly/chapter/exam pacing,
+- Adaptive Layered Summaries and stale/refresh behavior,
 - Concept / ConceptMention expansion,
 - Concept Focus Notes,
 - Scoped Knowledge Maps,
@@ -120,7 +131,11 @@ Possible directions:
 - Material Scale Router,
 - textbook-scale indexing,
 - optional rerank model for task-aware retrieval,
+- Package Studio Lite and later package editors,
+- cross-course concept candidates as a long-term idea,
 - desktop packaging and hosted services after the v2 foundation proves useful.
+
+Cross-course knowledge graphs are intentionally delayed. They should not enter the v2.0-v2.2 mainline.
 
 ---
 
@@ -132,3 +147,4 @@ Possible directions:
 - Prefer factual organization language.
 - Do not protect old Card/Deck architecture if it blocks the better product.
 - Do not make packaging, cloud, or community tooling a precondition for the NoteBlock foundation.
+- Agent Memory stores user preferences; Course Material Library stores learning content.
