@@ -40,6 +40,8 @@ Each document layer has a different job.
 - **Version Plan**: current version boundary, committed scope, out-of-scope, contracts, and acceptance criteria.
 - **Engineering Spec**: concrete implementation design such as real tables, fields, API routes, payloads, migrations, UI entry points, and tests.
 - **Step Plan**: small executable work unit inside the current version.
+- **Quality Review**: engineering quality state for code, tests, data, security, scope, and docs.
+- **Experience Review**: product-experience state for UI, interaction, workflow, accessibility, density, and product fit.
 - **Changelog / Release Notes**: what changed, what was verified, and what remains open.
 
 Roadmap does not define real tables or API endpoints. Version Plan locks the current version boundary. Engineering Spec locks implementation details.
@@ -59,6 +61,8 @@ Product Intent / PRD
   -> Step Implementation Plan
   -> Implementation
   -> Verification
+  -> Quality Review
+  -> Experience Review
   -> Release Notes / Changelog
   -> Human Acceptance
   -> Merge / Hold
@@ -118,14 +122,131 @@ Each plan must include:
 - **Migration**: how existing data is preserved, transformed, backed up, or left untouched.
 - **Test Matrix**: Codex-side tests and Henry-side acceptance checks.
 - **Acceptance Criteria**: the concrete bar for calling the version complete.
+- **Implementation State Checklist**: the live state machine for the version.
 
 Current version plans must be decision-complete before implementation. Future versions may remain directional in the roadmap until they become active.
 
 If the version scope changes materially, update the plan before continuing implementation.
 
+### 6.1 Implementation State Checklist Rule
+
+Every active version plan must include an `Implementation State Checklist` near the top of the file, before long-form scope details.
+
+The checklist is the single source of truth for the current construction state. It exists so Henry and Codex can recover progress after context loss, thread compaction, local restarts, or handoff to another agent.
+
+The checklist must:
+
+- use checkbox syntax (`- [ ]`, `- [x]`);
+- track implementation steps, verification steps, documentation steps, human acceptance, and known follow-up issues;
+- record short status notes under completed or blocked items when something material happened;
+- include commit ids, PR links, or branch notes when they clarify what is already on GitHub;
+- distinguish `implemented`, `verified`, `accepted`, `deferred`, and `pending commit/push`;
+- be checked before any new implementation work starts;
+- be updated immediately after meaningful progress, not only at the end of a release.
+
+If chat memory and the checklist disagree, treat the checklist as the stronger state source, then verify against GitHub and local status before editing.
+
+Do not mark an item complete just because code was written. Mark it complete only when the checklist's stated completion condition is satisfied.
+
 ---
 
-## 7. Engineering Spec Rule
+## 7. Bidirectional Feedback Rule
+
+Every active v2 minor version uses a bidirectional feedback system.
+
+Codex provides three structured feedback surfaces after each engineering loop:
+
+- `docs/releases/v2.X-plan.md`: progress state through the Implementation State Checklist.
+- `docs/releases/v2.X-review.md`: engineering quality state.
+- `docs/releases/v2.X-experience-review.md`: product experience state.
+
+Henry provides product-side feedback after real use:
+
+- product direction authorization;
+- subjective experience acceptance;
+- learning-output usefulness and faithfulness judgment;
+- priority changes;
+- fix-now versus defer decisions;
+- push, PR, merge, release, or hold authorization.
+
+Codex may perform the engineering inner loop automatically:
+
+- implementation;
+- tests, builds, migrations, and browser smoke;
+- code review;
+- scope review;
+- documentation review;
+- secret scan;
+- checklist updates;
+- quality review updates;
+- experience review drafts and severity recommendations.
+
+Codex must not bypass Henry's authorization for subjective product acceptance, priority changes, external-account actions, push/PR/merge/release decisions, or any action involving secrets or credentials.
+
+Review and changelog files must be version-scoped. Do not create a cross-version mega-log. Heavy versions should remain readable by keeping their construction state inside their own `v2.X-*` files.
+
+---
+
+## 8. Version Review File Rule
+
+Each active minor version should maintain these files:
+
+```text
+docs/releases/v2.X-plan.md
+docs/releases/v2.X-engineering-spec.md
+docs/releases/v2.X-review.md
+docs/releases/v2.X-experience-review.md
+docs/releases/CHANGELOG-v2.X.md
+```
+
+`v2.X-review.md` is the engineering quality state machine. It must include:
+
+- Current Review Status;
+- Code Review;
+- Test / Build Review;
+- Migration / Data Review;
+- Scope Review;
+- Security / Secret Review;
+- Documentation Review;
+- Development Log;
+- Open Engineering Follow-ups;
+- Henry Authorization Needed.
+
+`v2.X-experience-review.md` is the product experience state machine. It must include:
+
+- Current Experience Status;
+- UI / Visual Findings;
+- Interaction Findings;
+- Workflow Findings;
+- Product Fit Findings;
+- Accessibility / Density Findings;
+- Deferred UX Debt;
+- Henry Acceptance / Priority Decisions.
+
+Allowed Codex review statuses:
+
+- `PASS`;
+- `PASS_WITH_FOLLOWUP`;
+- `FAIL_BLOCKER`;
+- `FAIL_REWORK`;
+- `DEFER_RECOMMENDED`.
+
+Allowed Henry decision statuses:
+
+- `ACCEPTED`;
+- `REJECTED`;
+- `DEFER_ACCEPTED`;
+- `PRIORITY_CHANGED`;
+- `RELEASE_APPROVED`;
+- `HOLD`.
+
+Plan checklist items may be checked only after the relevant quality and experience gates satisfy the item's completion condition. If quality review has a blocker, do not proceed to final Henry acceptance. If experience review has medium or low UX debt, Henry decides whether to fix in the current version or defer.
+
+Development Log entries belong in the active version's `v2.X-review.md`. They should record only facts that help future recovery or decision-making, such as failed gates, rebase conflicts, environment blockers, auth/session issues, and defer decisions. Do not record ordinary file-by-file activity.
+
+---
+
+## 9. Engineering Spec Rule
 
 Before code implementation begins for a minor version, create an engineering spec:
 
@@ -148,7 +269,7 @@ The engineering spec is the handoff document an engineer or agent should be able
 
 ---
 
-## 8. Step Plan Rule
+## 10. Step Plan Rule
 
 A minor version should be broken into small implementation steps. Do not ask Codex to implement an entire major architecture change in one pass.
 
@@ -165,22 +286,23 @@ A step is complete only when verification has been run and affected docs are ali
 
 ---
 
-## 9. Implementation Loop
+## 11. Implementation Loop
 
 For each step:
 
 1. Confirm branch and scope.
-2. Read the relevant plan/spec sections.
-3. Inspect the current code before editing.
-4. Implement the smallest coherent change.
-5. Run required verification.
-6. Review the diff for unrelated edits, secrets, stale docs, and migration risk.
-7. Update docs/changelog if affected.
-8. Hand off what changed, what was verified, and what still needs Henry's validation.
+2. Read the active version plan's Implementation State Checklist.
+3. Read the relevant plan/spec sections.
+4. Inspect the current code before editing.
+5. Implement the smallest coherent change.
+6. Run required verification.
+7. Review the diff for unrelated edits, secrets, stale docs, and migration risk.
+8. Update the Implementation State Checklist, quality review, experience review, and docs/changelog if affected.
+9. Hand off what changed, what was verified, which gates passed or failed, and what still needs Henry's validation.
 
 ---
 
-## 10. Release Gate
+## 12. Release Gate
 
 A minor version is not complete until these gates pass:
 
@@ -190,6 +312,8 @@ A minor version is not complete until these gates pass:
 - Migration verified on empty and existing data where applicable.
 - API/build/tests verified.
 - Browser smoke completed if UI changed.
+- Quality review completed.
+- Experience review completed if user-facing behavior changed.
 - Agent/proposal contracts verified if AI operations changed.
 - Docs updated.
 - Changelog or release notes updated.
@@ -201,7 +325,7 @@ If any gate fails, the version remains in progress or hold.
 
 ---
 
-## 11. Test Matrix Template
+## 13. Test Matrix Template
 
 Each active version should maintain a test matrix similar to:
 
@@ -219,7 +343,7 @@ Docs-only changes do not require code tests, but still require link, diff, and s
 
 ---
 
-## 12. Documentation Debt Rule
+## 14. Documentation Debt Rule
 
 A Step is not complete until its documentation is aligned.
 
@@ -227,6 +351,8 @@ At minimum, check whether the change affects:
 
 - `docs/releases/v2.X-plan.md`
 - `docs/releases/v2.X-engineering-spec.md`
+- `docs/releases/v2.X-review.md`
+- `docs/releases/v2.X-experience-review.md`
 - `docs/Coincides-Roadmap.md`
 - `docs/ARCHITECTURE.md`
 - `docs/DATA_MODEL.md`
@@ -239,7 +365,7 @@ Large structure changes must update the plan and usually an ADR first. Backlog-s
 
 ---
 
-## 13. Proposal Safety Rule
+## 15. Proposal Safety Rule
 
 AI-generated structural changes must follow:
 
@@ -257,7 +383,7 @@ Avoid judgmental or diagnostic language such as "you are weak here" or "you must
 
 ---
 
-## 14. Secret Handling
+## 16. Secret Handling
 
 - Real API keys must never be written into docs, source files, issues, PR descriptions, or screenshots.
 - Docs may use neutral placeholders such as `<provider-api-key>`.
@@ -266,7 +392,7 @@ Avoid judgmental or diagnostic language such as "you are weak here" or "you must
 
 ---
 
-## 15. Test Responsibilities
+## 17. Test Responsibilities
 
 Codex is responsible for:
 
@@ -277,6 +403,7 @@ Codex is responsible for:
 - Agent tool contract checks.
 - Browser smoke tests for changed frontend flows.
 - Documentation consistency checks and secret scans.
+- Quality review and experience review drafts.
 
 Henry is responsible for:
 
@@ -285,10 +412,11 @@ Henry is responsible for:
 - Subjective AI output quality: whether organized notes are useful, readable, and faithful.
 - UI feel and learning-product taste.
 - Final acceptance of whether the feature improves study efficiency.
+- Priority decisions and release/hold authorization.
 
 ---
 
-## 16. Retro Rule
+## 18. Retro Rule
 
 At the end of each minor version, record a short retro in the release note or a dedicated retro section:
 
@@ -302,7 +430,7 @@ The retro can be short. Its purpose is to make the one-person team remember less
 
 ---
 
-## 17. Product Direction Reference
+## 19. Product Direction Reference
 
 Workflow should not duplicate the full product roadmap. For current product direction, use:
 
