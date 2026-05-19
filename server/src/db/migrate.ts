@@ -17,7 +17,7 @@
 import type Database from 'better-sqlite3';
 import { readdirSync } from 'fs';
 import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -70,7 +70,7 @@ async function loadMigrations(): Promise<Migration[]> {
   for (const file of files) {
     const filePath = join(migrationsDir, file);
     // Dynamic import for ESM compatibility
-    const mod = await import(filePath);
+    const mod = await import(pathToFileURL(filePath).href);
     const migration: Migration = mod.default || mod;
     
     if (!migration.id || !migration.description || !migration.up) {

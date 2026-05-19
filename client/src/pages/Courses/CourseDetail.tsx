@@ -34,6 +34,13 @@ interface DocSummary {
   created_at: string;
 }
 
+interface NoteSummary {
+  id: string;
+  title: string;
+  description: string | null;
+  updated_at: string;
+}
+
 interface CourseSummaryData {
   course: Course;
   goals: GoalSummary[];
@@ -56,6 +63,7 @@ export default function CourseDetailPage() {
   const deleteCourse = useCourseStore((s) => s.deleteCourse);
 
   const [data, setData] = useState<CourseSummaryData | null>(null);
+  const [notes, setNotes] = useState<NoteSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
@@ -63,8 +71,12 @@ export default function CourseDetailPage() {
     if (!courseId) return;
     setLoading(true);
     try {
-      const res = await api.get(`/courses/${courseId}/summary`);
-      setData(res.data);
+      const [summaryRes, notesRes] = await Promise.all([
+        api.get(`/courses/${courseId}/summary`),
+        api.get(`/notes?course_id=${courseId}`),
+      ]);
+      setData(summaryRes.data);
+      setNotes(notesRes.data);
     } catch (err) {
       console.error('Failed to fetch course summary:', err);
       addToast('error', 'Failed to load course');
@@ -86,6 +98,21 @@ export default function CourseDetailPage() {
       navigate('/courses');
     } catch {
       addToast('error', 'Failed to delete course');
+    }
+  };
+
+  const handleCreateNote = async () => {
+    if (!courseId || !data) return;
+    try {
+      const res = await api.post('/notes', {
+        course_id: courseId,
+        title: 'Untitled note',
+      });
+      addToast('success', 'Note created');
+      navigate(`/notes/${res.data.id}`);
+    } catch (err) {
+      console.error('Failed to create note:', err);
+      addToast('error', 'Failed to create note');
     }
   };
 
@@ -216,6 +243,45 @@ export default function CourseDetailPage() {
                 </div>
               );
             })}
+          </div>
+        )}
+      </div>
+
+      {/* Notes Section */}
+      <div className={styles.section}>
+        <div className={styles.sectionHeader}>
+          <div className={styles.sectionTitle}>
+            <BookOpen size={18} />
+            <span>Notes</span>
+            <span className={styles.sectionCount}>{notes.length}</span>
+          </div>
+          <button
+            className={styles.sectionAddBtn}
+            onClick={handleCreateNote}
+          >
+            <Plus size={15} />
+            Add Note
+          </button>
+        </div>
+        {notes.length === 0 ? (
+          <div className={styles.empty}>No notes yet</div>
+        ) : (
+          <div className={styles.noteGrid}>
+            {notes.map((note) => (
+              <div
+                key={note.id}
+                className={styles.noteCard}
+                onClick={() => navigate(`/notes/${note.id}`)}
+              >
+                <div className={styles.noteTitle}>{note.title}</div>
+                {note.description && (
+                  <div className={styles.noteDesc}>{note.description}</div>
+                )}
+                <div className={styles.noteMeta}>
+                  Updated {new Date(note.updated_at).toLocaleDateString()}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>

@@ -26,6 +26,48 @@ The current application is built around:
 
 This model remains the migration source for v2 work.
 
+### v2.0 NoteBlock Foundation Tables
+
+v2.0 adds an additive NoteBlock foundation. Existing Card/Deck tables remain unchanged.
+
+#### operation_batches
+
+Tracks user-visible structural operations for future Proposal -> Review -> Apply compatibility.
+
+Key fields: `id`, `user_id`, `course_id`, `source_type`, `source_id`, `label`, `status`, `metadata`, `created_at`, `applied_at`, `reverted_at`.
+
+#### notes
+
+Course-rooted note containers. A note is an ordered view over course-rooted NoteBlocks.
+
+Key fields: `id`, `user_id`, `course_id`, `title`, `description`, `status`, `source_kind`, `page_format`, `metadata`, `operation_batch_id`, `created_at`, `updated_at`, `trashed_at`.
+
+#### note_blocks
+
+Course-rooted canonical learning blocks.
+
+Committed v2.0 block types: `heading`, `paragraph`, `definition`, `theorem`, `proof`, `formula`, `example`, `exercise`, `answer`, `sidenote`.
+
+Key fields: `id`, `user_id`, `course_id`, `block_type`, `title`, `content_json`, `plain_text`, `status`, `source_kind`, `metadata`, `operation_batch_id`, `created_at`, `updated_at`, `trashed_at`.
+
+#### note_block_placements
+
+Connects notes to ordered blocks.
+
+Key fields: `id`, `note_id`, `block_id`, `parent_placement_id`, `order_index`, `display_mode`, `display_overrides_json`.
+
+#### note_block_sources
+
+Stores early SourceReference pointers against existing `documents` and `document_chunks`.
+
+Key fields: `id`, `block_id`, `document_id`, `document_chunk_id`, `source_page_start`, `source_page_end`, `source_excerpt`, `reference_type`, `confidence`, `metadata`.
+
+#### projections
+
+Stores stable projection snapshots. v2.0 supports `organized_note`.
+
+Key fields: `id`, `user_id`, `course_id`, `type`, `title`, `status`, `snapshot_json`, `source_refs_json`, `source_versions_json`, `operation_batch_id`, `metadata`, `created_at`, `updated_at`, `trashed_at`.
+
 ---
 
 ## 2. Root Model

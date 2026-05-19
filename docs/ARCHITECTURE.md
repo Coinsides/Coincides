@@ -20,6 +20,24 @@ Coincides currently runs as a local-first web application stack:
 
 This architecture is real and should be respected during migration work, but it is not the final v2 knowledge architecture.
 
+### v2.0 NoteBlock Foundation Implementation
+
+v2.0 introduces a course-rooted NoteBlock foundation while leaving the existing Card/Deck system usable.
+
+The backend surface is additive:
+
+- `server/src/routes/notes.ts` exposes note creation, note metadata updates, block listing, block creation, block reorder, and note trash behavior.
+- `server/src/routes/noteBlocks.ts` exposes block update and trash behavior.
+- `server/src/routes/projections.ts` exposes stable projection snapshot creation and reads.
+- `server/src/db/migrations/015_v2_note_foundation.ts` adds the v2 tables without rewriting v1 Card/Deck data.
+
+The frontend surface is intentionally small:
+
+- Course detail pages show a Notes entry point.
+- `client/src/pages/Notes/NoteDetail.tsx` provides basic manual block editing, reordering, trashing, and KaTeX-friendly preview.
+
+Projection snapshots are stored as snapshots and should not silently re-render from live blocks after creation. AI note proposal, Source Snapshot Viewer, Course Material Library UI, and Card/Deck migration remain out of v2.0 scope.
+
 ---
 
 ## 2. v2 Root Model

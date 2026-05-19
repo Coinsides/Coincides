@@ -1,7 +1,7 @@
 import { readFile } from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';
 import Anthropic from '@anthropic-ai/sdk';
-import * as pdfParseModule from 'pdf-parse';
+import pdfParseModule from 'pdf-parse';
 const pdfParse = (pdfParseModule as any).default || pdfParseModule;
 import { PDFDocument } from 'pdf-lib';
 import * as mammoth from 'mammoth';

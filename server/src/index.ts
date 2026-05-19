@@ -30,6 +30,9 @@ import studyTemplateRoutes from './routes/studyTemplates.js';
 import documentRoutes from './routes/documents.js';
 import embeddingRoutes from './routes/embedding.js';
 import timeBlockRoutes from './routes/timeBlocks.js';
+import noteRoutes from './routes/notes.js';
+import noteBlockRoutes from './routes/noteBlocks.js';
+import projectionRoutes from './routes/projections.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 
@@ -73,6 +76,9 @@ app.use('/api/study-templates', authMiddleware, studyTemplateRoutes);
 app.use('/api/documents', authMiddleware, documentRoutes);
 app.use('/api/embedding', authMiddleware, embeddingRoutes);
 app.use('/api/time-blocks', authMiddleware, timeBlockRoutes);
+app.use('/api/notes', authMiddleware, noteRoutes);
+app.use('/api/note-blocks', authMiddleware, noteBlockRoutes);
+app.use('/api/projections', authMiddleware, projectionRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

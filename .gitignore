@@ -30,3 +30,7 @@ server/uploads/
 *.log
 npm-debug.log*
 
+# Local tooling caches
+.superpowers/
+npm-cache/
+

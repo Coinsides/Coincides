@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "node --import jiti/register src/index.ts",
     "dev:tsx": "tsx watch src/index.ts",
+    "test:v2": "node --import tsx --test src/__tests__/v2NoteFoundation.test.ts",
     "build": "tsc",
     "start": "node dist/index.js"
   },

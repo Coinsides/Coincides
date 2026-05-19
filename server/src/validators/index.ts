@@ -38,6 +38,20 @@ export const updateCourseSchema = z.object({
 const taskPriority = z.enum(['must', 'recommended', 'optional']);
 const taskStatus = z.enum(['pending', 'completed']);
 const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Date must be YYYY-MM-DD format');
+const jsonObjectSchema = z.record(z.unknown());
+const v2StatusSchema = z.enum(['active', 'archived', 'trashed']);
+export const noteBlockTypeSchema = z.enum([
+  'heading',
+  'paragraph',
+  'definition',
+  'theorem',
+  'proof',
+  'formula',
+  'example',
+  'exercise',
+  'answer',
+  'sidenote',
+]);
 
 const checklistItemSchema = z.object({
   text: z.string().min(1).max(500),
@@ -269,6 +283,74 @@ export const updateProposalSchema = z.object({
 
 export const uploadDocumentSchema = z.object({
   course_id: z.string().uuid('Invalid course ID'),
+});
+
+// --- v2 Notes / NoteBlocks ---
+
+export const createNoteSchema = z.object({
+  course_id: z.string().uuid('Invalid course ID'),
+  title: z.string().min(1, 'Note title is required').max(300),
+  description: z.string().max(2000).optional(),
+  page_format: z.string().max(50).optional().default('flow'),
+  metadata: jsonObjectSchema.optional(),
+});
+
+export const updateNoteSchema = z.object({
+  title: z.string().min(1).max(300).optional(),
+  description: z.string().max(2000).nullable().optional(),
+  page_format: z.string().max(50).optional(),
+  metadata: jsonObjectSchema.optional(),
+  status: v2StatusSchema.optional(),
+});
+
+const sourceReferenceSchema = z.object({
+  document_id: z.string().uuid().optional(),
+  document_chunk_id: z.string().uuid().optional(),
+  source_page_start: z.number().int().min(1).optional(),
+  source_page_end: z.number().int().min(1).optional(),
+  source_excerpt: z.string().max(5000).optional(),
+  reference_type: z.string().max(50).optional().default('page'),
+  confidence: z.number().min(0).max(1).optional(),
+  metadata: jsonObjectSchema.optional(),
+}).refine(
+  data => data.source_page_start === undefined || data.source_page_end === undefined || data.source_page_end >= data.source_page_start,
+  { message: 'source_page_end must be greater than or equal to source_page_start', path: ['source_page_end'] }
+);
+
+export const createNoteBlockSchema = z.object({
+  block_type: noteBlockTypeSchema,
+  title: z.string().max(300).optional(),
+  content_json: jsonObjectSchema.optional().default({}),
+  plain_text: z.string().max(20000).optional(),
+  metadata: jsonObjectSchema.optional(),
+  source_references: z.array(sourceReferenceSchema).max(20).optional(),
+});
+
+export const updateNoteBlockSchema = z.object({
+  block_type: noteBlockTypeSchema.optional(),
+  title: z.string().max(300).nullable().optional(),
+  content_json: jsonObjectSchema.optional(),
+  plain_text: z.string().max(20000).nullable().optional(),
+  metadata: jsonObjectSchema.optional(),
+  status: v2StatusSchema.optional(),
+});
+
+export const reorderNoteBlocksSchema = z.object({
+  placements: z.array(z.object({
+    placement_id: z.string().uuid(),
+    order_index: z.number().int().min(0),
+  })).min(1),
+});
+
+export const createProjectionSchema = z.object({
+  course_id: z.string().uuid('Invalid course ID'),
+  type: z.enum(['organized_note']),
+  title: z.string().min(1).max(300),
+  source_note_id: z.string().uuid().optional(),
+  snapshot_json: jsonObjectSchema.optional(),
+  source_refs_json: z.array(z.unknown()).optional(),
+  source_versions_json: jsonObjectSchema.optional(),
+  metadata: jsonObjectSchema.optional(),
 });
 
 // --- Query params ---
