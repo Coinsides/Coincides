@@ -1,6 +1,6 @@
 # Coincides Documentation
 
-**Updated**: 2026-05-16  
+**Updated**: 2026-05-19  
 **Current development branch**: `feat/v2.0-noteblock`
 
 This folder is the source of truth for Coincides product direction, architecture, data model, workflow, and release planning.
@@ -9,10 +9,10 @@ This folder is the source of truth for Coincides product direction, architecture
 
 ## Current v2 Entry Points
 
-- [Roadmap](Coincides-Roadmap.md): high-level product timeline and version direction.
-- [v2.x Brainstorm](brainstorm/v2.x-brainstorm.md): living idea pool for NoteBlock Library, projections, large-material processing, model roles, and Package Studio.
+- [Roadmap](Coincides-Roadmap.md): formal v2.x version direction, boundaries, and candidate conceptual entities.
+- [v2.x Brainstorm](brainstorm/v2.x-brainstorm.md): living idea pool for NoteBlock Library, Course Material Library, material reconciliation, projections, large-material processing, model roles, and Package Studio.
 - [v2 Note System Draft](v2-note-system-draft.md): early Note/NoteBlock design draft.
-- [v2.0 Plan](releases/v2.0-plan.md): execution entry for v2.0 NoteBlock Foundation.
+- [v2.0 Plan](releases/v2.0-plan.md): current version plan for v2.0 NoteBlock Foundation.
 
 ---
 
