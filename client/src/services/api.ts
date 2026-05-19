@@ -12,15 +12,33 @@ const api = axios.create({
   },
 });
 
-// In-memory token store (sandboxed iframe — no persistent storage)
+const TOKEN_STORAGE_KEY = 'coincides_auth_token';
 let _token: string | null = null;
 
 export function getToken(): string | null {
+  if (_token) return _token;
+
+  try {
+    _token = window.localStorage.getItem(TOKEN_STORAGE_KEY);
+  } catch {
+    _token = null;
+  }
+
   return _token;
 }
 
 export function setToken(token: string | null): void {
   _token = token;
+
+  try {
+    if (token) {
+      window.localStorage.setItem(TOKEN_STORAGE_KEY, token);
+    } else {
+      window.localStorage.removeItem(TOKEN_STORAGE_KEY);
+    }
+  } catch {
+    // Keep the in-memory fallback for sandboxed or restricted browser contexts.
+  }
 }
 
 // Attach JWT token to every request
@@ -32,7 +50,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 responses — clear token and redirect
+// Handle 401 responses: clear token and redirect
 api.interceptors.response.use(
   (response) => response,
   (error) => {
