@@ -16,4 +16,6 @@
 
 ### Verification
 
-- Local dependency installation is currently blocked by Windows filesystem permission errors in npm cache directories, so automated tests/builds still need to be rerun in a working npm environment.
+- `server` v2 behavior tests pass: additive tables, ordered note placements, and stable projection snapshots.
+- `server` TypeScript build passes.
+- `client` production build passes, with existing Vite bundle-size/dynamic-import warnings.
