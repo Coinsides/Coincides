@@ -19,3 +19,8 @@
 - `server` v2 behavior tests pass: additive tables, ordered note placements, and stable projection snapshots.
 - `server` TypeScript build passes.
 - `client` production build passes, with existing Vite bundle-size/dynamic-import warnings.
+
+### Release decision
+
+- Released as the v2.0 NoteBlock Foundation baseline.
+- Deferred UX debt and product polish are tracked in `docs/releases/v2.0-experience-review.md`.
