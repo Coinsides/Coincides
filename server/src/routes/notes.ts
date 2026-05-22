@@ -10,6 +10,7 @@ import {
   reorderNoteBlocksSchema,
   updateNoteSchema,
 } from '../validators/index.js';
+import { mergeNoteBlockTemplateMetadata } from '../lib/noteBlockTemplates.js';
 
 const router = Router();
 
@@ -283,7 +284,7 @@ router.post('/:id/blocks', (req: AuthRequest, res: Response) => {
         data.title || null,
         stringifyJson(data.content_json, {}),
         data.plain_text || null,
-        stringifyJson(data.metadata, {}),
+        stringifyJson(mergeNoteBlockTemplateMetadata(data.metadata, data.block_type), {}),
         operationBatchId,
         now,
         now

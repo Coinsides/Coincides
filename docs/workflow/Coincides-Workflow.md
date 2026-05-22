@@ -42,6 +42,7 @@ Each document layer has a different job.
 - **Step Plan**: small executable work unit inside the current version.
 - **Quality Review**: engineering quality state for code, tests, data, security, scope, and docs.
 - **Experience Review**: product-experience state for UI, interaction, workflow, accessibility, density, and product fit.
+- **Continuity Register**: cross-version carryover state for deferred items, risks, and decisions that must survive minor-version boundaries.
 - **Changelog / Release Notes**: what changed, what was verified, and what remains open.
 
 Roadmap does not define real tables or API endpoints. Version Plan locks the current version boundary. Engineering Spec locks implementation details.
@@ -187,6 +188,141 @@ Review and changelog files must be version-scoped. Do not create a cross-version
 
 ---
 
+## 7.1 Continuity Folder Rule
+
+All continuity files live under:
+
+```text
+docs/continuity/
+```
+
+The top-level continuity folder must expose only the project-level general continuity file plus major-version folders:
+
+```text
+docs/continuity/
+  Coincides-Continuity.md
+  2.x/
+    v2.x-continuity.md
+  3.x/
+    v3.x-continuity.md
+```
+
+Do not place continuity files in `docs/releases/`.
+
+`docs/continuity/Coincides-Continuity.md` is the project-level long-term continuity register. It is comparable in importance to roadmap, workflow, and PRD-level documents.
+
+Major-version continuity files, such as `docs/continuity/2.x/v2.x-continuity.md`, track carryovers within one major version.
+
+Only promote a major-version continuity item into general continuity when it affects multiple major versions, product principles, architecture direction, repeated deferred work, or a future engine candidate.
+
+When a general continuity item links to a major-version continuity item, both records must be updated when the item is promoted, implemented, verified, closed, or superseded. If the records disagree, reconcile them before marking the active plan or review complete.
+
+---
+
+## 7.2 General Continuity Rule
+
+Use `docs/continuity/Coincides-Continuity.md` for long-lived project memory:
+
+- cross-major-version carryovers;
+- product principles;
+- architecture decisions;
+- repeated deferred work;
+- historical carryovers;
+- future engine candidates;
+- known risks that outlive one major version.
+
+General continuity is not a development log, changelog, roadmap, PRD, or replacement for major-version continuity files. Ordinary implementation activity belongs in active version review files. Final version results belong in changelogs.
+
+Codex must inspect general continuity before:
+
+- starting major-version planning;
+- starting patch-version planning;
+- major architecture work;
+- historical carryover work;
+- resolving deferred issues;
+- work that claims to close a long-lived product or engineering item.
+
+When Codex proposes to solve a historical or deferred item, it must inspect both general continuity and the current major-version continuity file. If a solution closes or supersedes an item, update every linked continuity record in the same work loop.
+
+---
+
+## 7.3 Version Continuity Rule
+
+v2.x uses a lightweight continuity register:
+
+`docs/continuity/2.x/v2.x-continuity.md`
+
+The continuity register exists to prevent cross-version carryover from depending on chat memory. It records only items that affect later planning or implementation, such as:
+
+- deferred UX debt;
+- deferred engineering follow-ups;
+- product decisions;
+- known risks;
+- future-version candidates;
+- unresolved questions;
+- release or hold carryovers.
+
+Continuity is not a cross-version development log. Ordinary implementation activity belongs in the active version's `v2.X-review.md`. Product experience findings belong in `v2.X-experience-review.md`. Final summaries belong in `CHANGELOG-v2.X.md`.
+
+Each continuity item must include:
+
+- `ID`;
+- `From`;
+- `Type`;
+- `Status`;
+- `Priority`;
+- `Suggested Version`;
+- `Owner`;
+- `Context`;
+- `Decision So Far`;
+- `Next Action`.
+
+Allowed continuity statuses:
+
+- `OPEN`;
+- `PROMOTED`;
+- `DEFERRED`;
+- `CLOSED`;
+- `SUPERSEDED`.
+
+At the end of each minor version, Codex must inspect the version plan, quality review, experience review, changelog, and current major-version continuity file. Any item that will affect a later version must be added to or updated in the continuity register.
+
+At the start of each minor version, Codex must inspect the current major-version continuity register and promote relevant items into the active version plan, engineering spec, or review files. If an item is intentionally not promoted, keep it in continuity with a short reason.
+
+---
+
+## 7.4 Startup / Resume Protocol
+
+Codex must run the startup/resume reading sequence before:
+
+- starting a new minor version;
+- resuming after context compaction or thread restart;
+- switching agent or engineering executor;
+- entering the formal implementation loop;
+- continuing after a long pause where current state may be stale.
+
+Required reading order:
+
+1. `docs/workflow/Coincides-Workflow.md`
+2. `docs/Coincides-Roadmap.md`
+3. `docs/continuity/2.x/v2.x-continuity.md` for v2.x work, or the matching current major-version continuity file
+4. `docs/continuity/Coincides-Continuity.md` when starting patch-version planning, major-version planning, historical/deferred issue work, or major architecture work
+5. active version `docs/releases/v2.X-plan.md`
+6. active version `docs/releases/v2.X-engineering-spec.md`, if it exists
+7. previous version plan, quality review, experience review, and changelog
+
+After reading, Codex must briefly report:
+
+- active version and branch;
+- current checklist state;
+- relevant continuity items;
+- current blockers or Henry decisions needed;
+- next intended action.
+
+If chat memory disagrees with these files, prefer the files, then verify against local git state and GitHub when network/source-of-truth rules require it.
+
+---
+
 ## 8. Version Review File Rule
 
 Each active minor version should maintain these files:
@@ -243,6 +379,8 @@ Allowed Henry decision statuses:
 Plan checklist items may be checked only after the relevant quality and experience gates satisfy the item's completion condition. If quality review has a blocker, do not proceed to final Henry acceptance. If experience review has medium or low UX debt, Henry decides whether to fix in the current version or defer.
 
 Development Log entries belong in the active version's `v2.X-review.md`. They should record only facts that help future recovery or decision-making, such as failed gates, rebase conflicts, environment blockers, auth/session issues, and defer decisions. Do not record ordinary file-by-file activity.
+
+Small version decisions may be recorded in a `Decision Log` section inside `v2.X-review.md` when they affect current implementation but do not deserve an ADR. Major architecture decisions still require ADRs. If a decision affects later versions, also add or update a continuity item.
 
 ---
 
@@ -380,6 +518,26 @@ Coincides should use factual language:
 - "This concept appears in these places."
 
 Avoid judgmental or diagnostic language such as "you are weak here" or "you must learn this first" unless the user explicitly asks for diagnostic tutoring.
+
+---
+
+## 15.1 External Tool Gate
+
+Before adding a new dependency, package, external service, open-source tool, or hosted integration, Codex must justify why the existing stack is insufficient.
+
+The tool review must cover:
+
+- intended job;
+- why built-in code or existing dependencies are not enough;
+- license and commercial-use risk;
+- maintenance status;
+- Windows/local compatibility;
+- package size or operational complexity;
+- security and secret-handling impact;
+- alternatives considered;
+- rollback or removal path.
+
+Henry must authorize new external tools before Codex adds them to source code, package manifests, setup scripts, or production workflow. Purely read-only research about a candidate tool does not require authorization, but adoption does.
 
 ---
 

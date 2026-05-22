@@ -4,6 +4,7 @@ import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { updateNoteBlockSchema } from '../validators/index.js';
+import { mergeNoteBlockTemplateMetadata } from '../lib/noteBlockTemplates.js';
 
 const router = Router();
 
@@ -20,10 +21,10 @@ function parseJson<T>(value: string | null | undefined, fallback: T): T {
   }
 }
 
-function getOwnedBlock(blockId: string, userId: string): { id: string; course_id: string } {
+function getOwnedBlock(blockId: string, userId: string): { id: string; course_id: string; block_type: string; metadata: string } {
   const block = getDb()
-    .prepare('SELECT id, course_id FROM note_blocks WHERE id = ? AND user_id = ?')
-    .get(blockId, userId) as { id: string; course_id: string } | undefined;
+    .prepare('SELECT id, course_id, block_type, metadata FROM note_blocks WHERE id = ? AND user_id = ?')
+    .get(blockId, userId) as { id: string; course_id: string; block_type: string; metadata: string } | undefined;
   if (!block) throw new AppError(404, 'Note block not found');
   return block;
 }
@@ -40,7 +41,7 @@ function hydrateBlock(row: any) {
 router.put('/:id', (req: AuthRequest, res: Response) => {
   try {
     const blockId = req.params.id as string;
-    getOwnedBlock(blockId, req.userId!);
+    const currentBlock = getOwnedBlock(blockId, req.userId!);
     const data = updateNoteBlockSchema.parse(req.body);
     const fields: string[] = [];
     const values: unknown[] = [];
@@ -49,7 +50,18 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     if (data.title !== undefined) { fields.push('title = ?'); values.push(data.title); }
     if (data.content_json !== undefined) { fields.push('content_json = ?'); values.push(stringifyJson(data.content_json, {})); }
     if (data.plain_text !== undefined) { fields.push('plain_text = ?'); values.push(data.plain_text); }
-    if (data.metadata !== undefined) { fields.push('metadata = ?'); values.push(stringifyJson(data.metadata, {})); }
+    if (data.metadata !== undefined || data.block_type !== undefined) {
+      const currentMetadata = parseJson<Record<string, unknown>>(currentBlock.metadata, {});
+      const mergedMetadata = {
+        ...currentMetadata,
+        ...(data.metadata || {}),
+      };
+      fields.push('metadata = ?');
+      values.push(stringifyJson(
+        mergeNoteBlockTemplateMetadata(mergedMetadata, data.block_type || currentBlock.block_type),
+        {},
+      ));
+    }
     if (data.status !== undefined) {
       fields.push('status = ?');
       values.push(data.status);

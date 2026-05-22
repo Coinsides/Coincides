@@ -279,6 +279,33 @@ export const updateProposalSchema = z.object({
   data: z.any(),
 });
 
+export const createMaterialMapProposalSchema = z.object({
+  course_id: z.string().uuid('Invalid course ID'),
+  document_ids: z.array(z.string().uuid()).optional(),
+  source_material_ids: z.array(z.string().uuid()).optional(),
+  source_scope_ids: z.array(z.string().uuid()).optional(),
+  source_board_id: z.string().uuid().optional(),
+});
+
+export const createOrganizedNoteProposalSchema = z.object({
+  course_id: z.string().uuid('Invalid course ID'),
+  source_material_ids: z.array(z.string().uuid()).optional(),
+  segment_ids: z.array(z.string().uuid()).optional(),
+  document_ids: z.array(z.string().uuid()).optional(),
+  source_scope_ids: z.array(z.string().uuid()).optional(),
+  source_board_id: z.string().uuid().optional(),
+  note_title: z.string().min(1).max(200).optional(),
+});
+
+export const createMaterialReconciliationProposalSchema = z.object({
+  course_id: z.string().uuid('Invalid course ID'),
+  document_ids: z.array(z.string().uuid()).optional(),
+  source_material_ids: z.array(z.string().uuid()).optional(),
+  segment_ids: z.array(z.string().uuid()).optional(),
+  source_scope_ids: z.array(z.string().uuid()).optional(),
+  source_board_id: z.string().uuid().optional(),
+});
+
 // --- Document Upload ---
 
 export const uploadDocumentSchema = z.object({
@@ -350,6 +377,16 @@ export const createProjectionSchema = z.object({
   snapshot_json: jsonObjectSchema.optional(),
   source_refs_json: z.array(z.unknown()).optional(),
   source_versions_json: jsonObjectSchema.optional(),
+  metadata: jsonObjectSchema.optional(),
+});
+
+// --- v2.1 Course Materials ---
+
+export const updateMaterialSegmentSchema = z.object({
+  title: z.string().min(1).max(300).optional(),
+  summary: z.string().max(2000).nullable().optional(),
+  status: z.enum(['proposed', 'accepted', 'needs_review', 'discarded']).optional(),
+  order_index: z.number().int().min(0).optional(),
   metadata: jsonObjectSchema.optional(),
 });
 

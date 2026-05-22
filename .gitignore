@@ -3,7 +3,17 @@ node_modules/
 
 # Build output
 dist/
+build/
+coverage/
 *.js.map
+*.tsbuildinfo
+
+# Tool caches
+.cache/
+.vite/
+.turbo/
+.next/
+.parcel-cache/
 
 # Database
 *.db

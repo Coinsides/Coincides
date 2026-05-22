@@ -3,8 +3,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
-import { updateProposalSchema } from '../validators/index.js';
+import {
+  createMaterialMapProposalSchema,
+  createMaterialReconciliationProposalSchema,
+  createOrganizedNoteProposalSchema,
+  updateProposalSchema,
+} from '../validators/index.js';
 import { normalizeCardContent } from '../agent/tools/normalizeContent.js';
+import { applyMaterialMapProposal, createMaterialMapProposal } from '../services/materialMapProposals.js';
+import { applyMaterialReconciliationProposal, createMaterialReconciliationProposal } from '../services/materialReconciliationProposals.js';
+import { applyOrganizedNoteProposal, createOrganizedNoteProposal } from '../services/organizedNoteProposals.js';
 import { ZodError } from 'zod';
 
 const router = Router();
@@ -60,6 +68,48 @@ router.get('/', (req: AuthRequest, res: Response) => {
 });
 
 // GET /api/proposals/:id — get proposal details
+router.post('/material-map', (req: AuthRequest, res: Response) => {
+  try {
+    const body = createMaterialMapProposalSchema.parse(req.body);
+    const proposal = createMaterialMapProposal(getDb(), req.userId!, body);
+    res.status(201).json(proposal);
+  } catch (err) {
+    if (err instanceof ZodError) {
+      res.status(400).json({ error: 'Validation error', details: err.errors });
+      return;
+    }
+    throw err;
+  }
+});
+
+router.post('/organized-note', async (req: AuthRequest, res: Response) => {
+  try {
+    const body = createOrganizedNoteProposalSchema.parse(req.body);
+    const proposal = await createOrganizedNoteProposal(getDb(), req.userId!, body);
+    res.status(201).json(proposal);
+  } catch (err) {
+    if (err instanceof ZodError) {
+      res.status(400).json({ error: 'Validation error', details: err.errors });
+      return;
+    }
+    throw err;
+  }
+});
+
+router.post('/material-reconciliation', (req: AuthRequest, res: Response) => {
+  try {
+    const body = createMaterialReconciliationProposalSchema.parse(req.body);
+    const proposal = createMaterialReconciliationProposal(getDb(), req.userId!, body);
+    res.status(201).json(proposal);
+  } catch (err) {
+    if (err instanceof ZodError) {
+      res.status(400).json({ error: 'Validation error', details: err.errors });
+      return;
+    }
+    throw err;
+  }
+});
+
 router.get('/:id', (req: AuthRequest, res: Response) => {
   const db = getDb();
   const proposal = db.prepare(
@@ -79,16 +129,29 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
 
   if (!proposal) throw new AppError(404, 'Proposal not found or already resolved');
 
-  const data = JSON.parse(proposal.data) as { items: Array<Record<string, unknown>>; deck_id?: string };
+  const data = JSON.parse(proposal.data) as { items?: Array<Record<string, unknown>>; deck_id?: string };
   const now = new Date().toISOString();
+  let applyResult: Record<string, unknown> = { message: 'Proposal applied successfully' };
 
   const applyTransaction = db.transaction(() => {
     switch (proposal.type) {
+      case 'material_map': {
+        applyResult = applyMaterialMapProposal(db, req.userId!, proposal);
+        break;
+      }
+      case 'organized_note': {
+        applyResult = applyOrganizedNoteProposal(db, req.userId!, proposal);
+        break;
+      }
+      case 'material_reconciliation': {
+        applyResult = applyMaterialReconciliationProposal(db, req.userId!, proposal, req.body);
+        break;
+      }
       case 'batch_cards': {
         // Resolve deck_id: item-level > proposal-level top-level field
         const topLevelDeckId = data.deck_id as string | undefined;
 
-        for (const item of data.items) {
+        for (const item of data.items || []) {
           const deckId = (item.deck_id as string) || topLevelDeckId;
           if (!deckId) {
             throw new AppError(400, `Card "${item.title || 'Untitled'}" is missing deck_id. Please select a deck before applying.`);
@@ -129,7 +192,7 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
         break;
       }
       case 'study_plan': {
-        for (const item of data.items) {
+        for (const item of data.items || []) {
           const taskId = uuidv4();
           // v1.3: scheduled_date takes precedence over date for calendar placement
           const taskDate = (item.scheduled_date || item.date) as string;
@@ -173,7 +236,7 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
       case 'goal_breakdown': {
         // Process items in order; goals first, then tasks that may reference them
         const idMap = new Map<string, string>(); // _temp_id -> real ID
-        for (const item of data.items) {
+        for (const item of data.items || []) {
           if (item.type === 'goal') {
             const goalId = uuidv4();
             const resolvedParentId = item.parent_id && idMap.has(item.parent_id as string)
@@ -204,7 +267,7 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
         break;
       }
       case 'schedule_adjustment': {
-        for (const item of data.items) {
+        for (const item of data.items || []) {
           if (item.task_id) {
             const updates: string[] = [];
             const params: unknown[] = [];
@@ -223,7 +286,7 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
       }
       case 'time_block_setup': {
         // v1.7.3: Create date-based Time Block instances from proposal items
-        for (const item of data.items) {
+        for (const item of data.items || []) {
           const blockId = uuidv4();
           db.prepare(
             'INSERT INTO time_blocks (id, user_id, template_id, label, type, date, start_time, end_time, color, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
@@ -250,7 +313,7 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
   });
 
   applyTransaction();
-  res.json({ message: 'Proposal applied successfully', items_count: data.items.length });
+  res.json({ ...applyResult, items_count: data.items?.length || 0 });
 });
 
 // POST /api/proposals/:id/discard — discard proposal

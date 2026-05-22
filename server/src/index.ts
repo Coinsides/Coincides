@@ -33,6 +33,14 @@ import timeBlockRoutes from './routes/timeBlocks.js';
 import noteRoutes from './routes/notes.js';
 import noteBlockRoutes from './routes/noteBlocks.js';
 import projectionRoutes from './routes/projections.js';
+import courseMaterialRoutes from './routes/courseMaterials.js';
+import materialSegmentRoutes from './routes/materialSegments.js';
+import reconciliationRoutes from './routes/reconciliation.js';
+import sourceAnchorRoutes from './routes/sourceAnchors.js';
+import sourceBoardRoutes from './routes/sourceBoards.js';
+import sourceBoardNodeRoutes from './routes/sourceBoardNodes.js';
+import sourceScopeRoutes from './routes/sourceScopes.js';
+import sourceSnapshotRoutes from './routes/sourceSnapshots.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 
@@ -79,6 +87,14 @@ app.use('/api/time-blocks', authMiddleware, timeBlockRoutes);
 app.use('/api/notes', authMiddleware, noteRoutes);
 app.use('/api/note-blocks', authMiddleware, noteBlockRoutes);
 app.use('/api/projections', authMiddleware, projectionRoutes);
+app.use('/api/course-materials', authMiddleware, courseMaterialRoutes);
+app.use('/api/material-segments', authMiddleware, materialSegmentRoutes);
+app.use('/api/reconciliation', authMiddleware, reconciliationRoutes);
+app.use('/api/source-anchors', authMiddleware, sourceAnchorRoutes);
+app.use('/api/source-boards', authMiddleware, sourceBoardRoutes);
+app.use('/api/source-board-nodes', authMiddleware, sourceBoardNodeRoutes);
+app.use('/api/source-scopes', authMiddleware, sourceScopeRoutes);
+app.use('/api/source-snapshots', authMiddleware, sourceSnapshotRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {
