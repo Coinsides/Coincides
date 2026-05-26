@@ -41,6 +41,18 @@ import sourceBoardRoutes from './routes/sourceBoards.js';
 import sourceBoardNodeRoutes from './routes/sourceBoardNodes.js';
 import sourceScopeRoutes from './routes/sourceScopes.js';
 import sourceSnapshotRoutes from './routes/sourceSnapshots.js';
+import learningCanvasRoutes from './routes/learningCanvases.js';
+import canvasNodeRoutes from './routes/canvasNodes.js';
+import canvasEdgeRoutes from './routes/canvasEdges.js';
+import relationLayerRoutes from './routes/relationLayers.js';
+import objectRelationRoutes from './routes/objectRelations.js';
+import templateRoutes from './routes/templates.js';
+import compositionTemplateRoutes from './routes/compositionTemplates.js';
+import packageManifestRoutes from './routes/packageManifests.js';
+import domainBlockSetRoutes from './routes/domainBlockSets.js';
+import packageExportRoutes from './routes/packageExports.js';
+import packageImportRoutes from './routes/packageImports.js';
+import domainRefinementRoutes from './routes/domainRefinements.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 
@@ -95,6 +107,18 @@ app.use('/api/source-boards', authMiddleware, sourceBoardRoutes);
 app.use('/api/source-board-nodes', authMiddleware, sourceBoardNodeRoutes);
 app.use('/api/source-scopes', authMiddleware, sourceScopeRoutes);
 app.use('/api/source-snapshots', authMiddleware, sourceSnapshotRoutes);
+app.use('/api/canvases', authMiddleware, learningCanvasRoutes);
+app.use('/api/canvas-nodes', authMiddleware, canvasNodeRoutes);
+app.use('/api/canvas-edges', authMiddleware, canvasEdgeRoutes);
+app.use('/api/relation-layers', authMiddleware, relationLayerRoutes);
+app.use('/api/object-relations', authMiddleware, objectRelationRoutes);
+app.use('/api/templates', authMiddleware, templateRoutes);
+app.use('/api/composition-templates', authMiddleware, compositionTemplateRoutes);
+app.use('/api/package-manifests', authMiddleware, packageManifestRoutes);
+app.use('/api/domain-block-sets', authMiddleware, domainBlockSetRoutes);
+app.use('/api/package-exports', authMiddleware, packageExportRoutes);
+app.use('/api/package-imports', authMiddleware, packageImportRoutes);
+app.use('/api/domain-refinements', authMiddleware, domainRefinementRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

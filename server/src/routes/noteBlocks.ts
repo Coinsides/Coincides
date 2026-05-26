@@ -4,7 +4,7 @@ import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { updateNoteBlockSchema } from '../validators/index.js';
-import { mergeNoteBlockTemplateMetadata } from '../lib/noteBlockTemplates.js';
+import { mergeRuntimeNoteBlockTemplateMetadata } from '../services/templateDefinitions.js';
 
 const router = Router();
 
@@ -37,6 +37,14 @@ function hydrateBlock(row: any) {
   };
 }
 
+function hasTemplateReference(metadata: Record<string, unknown> | undefined): boolean {
+  return Boolean(metadata && (
+    typeof metadata.template_definition_id === 'string'
+    || typeof metadata.template_key === 'string'
+    || typeof metadata.template_id === 'string'
+  ));
+}
+
 // PUT /api/note-blocks/:id
 router.put('/:id', (req: AuthRequest, res: Response) => {
   try {
@@ -58,7 +66,13 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
       };
       fields.push('metadata = ?');
       values.push(stringifyJson(
-        mergeNoteBlockTemplateMetadata(mergedMetadata, data.block_type || currentBlock.block_type),
+        mergeRuntimeNoteBlockTemplateMetadata(
+          getDb(),
+          req.userId!,
+          mergedMetadata,
+          data.block_type || currentBlock.block_type,
+          { allowUnknownTemplateFallback: !hasTemplateReference(data.metadata) },
+        ).metadata,
         {},
       ));
     }

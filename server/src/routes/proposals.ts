@@ -6,6 +6,10 @@ import { AppError } from '../middleware/errorHandler.js';
 import {
   createMaterialMapProposalSchema,
   createMaterialReconciliationProposalSchema,
+  createCanvasLayoutProposalSchema,
+  createCompositionTemplateProposalSchema,
+  createDomainRefinementProposalSchema,
+  createTemplateMigrationProposalSchema,
   createOrganizedNoteProposalSchema,
   updateProposalSchema,
 } from '../validators/index.js';
@@ -13,6 +17,10 @@ import { normalizeCardContent } from '../agent/tools/normalizeContent.js';
 import { applyMaterialMapProposal, createMaterialMapProposal } from '../services/materialMapProposals.js';
 import { applyMaterialReconciliationProposal, createMaterialReconciliationProposal } from '../services/materialReconciliationProposals.js';
 import { applyOrganizedNoteProposal, createOrganizedNoteProposal } from '../services/organizedNoteProposals.js';
+import { applyCanvasLayoutProposal, createCanvasLayoutProposal } from '../services/canvasLayoutProposals.js';
+import { applyCompositionTemplateProposal, createCompositionTemplateProposal } from '../services/compositionTemplates.js';
+import { applyDomainRefinementProposal, createDomainRefinementProposal } from '../services/domainRefinementProposals.js';
+import { applyTemplateMigrationProposal, createTemplateMigrationProposal } from '../services/templateMigrationProposals.js';
 import { ZodError } from 'zod';
 
 const router = Router();
@@ -110,6 +118,62 @@ router.post('/material-reconciliation', (req: AuthRequest, res: Response) => {
   }
 });
 
+router.post('/canvas-layout', (req: AuthRequest, res: Response) => {
+  try {
+    const body = createCanvasLayoutProposalSchema.parse(req.body);
+    const proposal = createCanvasLayoutProposal(getDb(), req.userId!, body);
+    res.status(201).json(proposal);
+  } catch (err) {
+    if (err instanceof ZodError) {
+      res.status(400).json({ error: 'Validation error', details: err.errors });
+      return;
+    }
+    throw err;
+  }
+});
+
+router.post('/composition-template', (req: AuthRequest, res: Response) => {
+  try {
+    const body = createCompositionTemplateProposalSchema.parse(req.body);
+    const proposal = createCompositionTemplateProposal(getDb(), req.userId!, body);
+    res.status(201).json(proposal);
+  } catch (err) {
+    if (err instanceof ZodError) {
+      res.status(400).json({ error: 'Validation error', details: err.errors });
+      return;
+    }
+    throw err;
+  }
+});
+
+router.post('/template-migration', (req: AuthRequest, res: Response) => {
+  try {
+    const body = createTemplateMigrationProposalSchema.parse(req.body);
+    const proposal = createTemplateMigrationProposal(getDb(), req.userId!, body);
+    res.status(201).json(proposal);
+  } catch (err) {
+    if (err instanceof ZodError) {
+      res.status(400).json({ error: 'Validation error', details: err.errors });
+      return;
+    }
+    throw err;
+  }
+});
+
+router.post('/domain-refinement', (req: AuthRequest, res: Response) => {
+  try {
+    const body = createDomainRefinementProposalSchema.parse(req.body);
+    const proposal = createDomainRefinementProposal(getDb(), req.userId!, body);
+    res.status(201).json(proposal);
+  } catch (err) {
+    if (err instanceof ZodError) {
+      res.status(400).json({ error: 'Validation error', details: err.errors });
+      return;
+    }
+    throw err;
+  }
+});
+
 router.get('/:id', (req: AuthRequest, res: Response) => {
   const db = getDb();
   const proposal = db.prepare(
@@ -145,6 +209,22 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
       }
       case 'material_reconciliation': {
         applyResult = applyMaterialReconciliationProposal(db, req.userId!, proposal, req.body);
+        break;
+      }
+      case 'canvas_layout': {
+        applyResult = applyCanvasLayoutProposal(db, req.userId!, proposal);
+        break;
+      }
+      case 'composition_template': {
+        applyResult = applyCompositionTemplateProposal(db, req.userId!, proposal);
+        break;
+      }
+      case 'template_migration': {
+        applyResult = applyTemplateMigrationProposal(db, req.userId!, proposal);
+        break;
+      }
+      case 'domain_refinement': {
+        applyResult = applyDomainRefinementProposal(db, req.userId!, proposal);
         break;
       }
       case 'batch_cards': {

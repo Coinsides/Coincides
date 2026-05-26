@@ -35,6 +35,7 @@ Thumbs.db
 
 # Uploads
 server/uploads/
+local-test-materials/
 
 # Logs
 *.log
@@ -43,4 +44,6 @@ npm-debug.log*
 # Local tooling caches
 .superpowers/
 npm-cache/
+tmp-smoke/
+tmp/
 

@@ -1,7 +1,7 @@
 # Coincides General Continuity Register
 
 **Created**: 2026-05-21
-**Updated**: 2026-05-21
+**Updated**: 2026-05-23
 **Status**: Active
 
 This file is the project-level continuity register for Coincides.
@@ -173,6 +173,46 @@ Allowed item types:
 - **Linked Major Continuity Items**: None yet
 - **Next Checkpoint**: Ensure v2.1.1 template engine and later v2.x plans reinforce learning semantics rather than copying generic block editor taxonomy.
 - **Resolution Evidence**: Pending
+
+### GC-006: v2.x must end with a Neo4j / graph-native rebuild research gate before v3.x
+
+- [ ] Promoted into active version plan
+- [ ] Implemented
+- [ ] Verified
+- [ ] Closed
+
+- **ID**: `GC-006`
+- **Origin**: `v2.4 research discussion / docs/brainstorm/v2.4-research_里程碑-边与图数据库节点与未来方向/relation-layer-extra-ideas.md`
+- **Type**: `ARCHITECTURE_DECISION`
+- **Status**: `OPEN`
+- **Priority**: High
+- **Applies To**: v2.x closeout, v3.x planning
+- **Owner**: Henry for product/architecture direction / Codex for research and migration planning
+- **Problem**: Coincides is evolving from a learning assistant into a source-grounded information-processing workspace. Its mature form likely needs graph-native storage and query capabilities. However, the current v2.x system still needs to clarify what should become graph nodes, graph edges, provenance objects, projection objects, SQL-owned business records, and package/export records before a graph database migration is safe.
+- **Decision So Far**: Treat Neo4j as the main v3.x graph-native candidate, with Kuzu or embedded graph options kept as alternatives. Do not switch the v2.x source of truth away from SQLite midstream. Use v2.x to finish graph-ready semantics and collect migration evidence. Recent v2.4 evidence says CanvasNode, CanvasFrame, viewport, and canvas_layout proposal records are projection/view state, while semantic NoteBlocks and ObjectRelations are graph-truth candidates. v2.4.4 clarifies that CanvasEdge is a visual/projection connector and can be incomplete or visual-only; only an explicitly bound ObjectRelation should become a semantic graph edge candidate. RelationLayer may become graph perspective, policy, display grouping, or relationship metadata in v3.x. v2.4.5 clarifies that CommandContext, SelectedObjectScope, ToolMode, InputBinding, and AICommandContext are operation/interaction bridges. They should help users and future agents operate over graph/projection objects, but they are not themselves durable knowledge truth. v2.5 research adds the next evidence layer: `TemplateDefinition`, `CompositionTemplate`, `DomainBlockSet`, `PackageManifest`, proposals, migration proposals, package import/export, and editor adapter state have been classified in `docs/brainstorm/V2.5Research/r13-v2.5-graph-native-migration-evidence.md`. v2.5.2 adds concrete runtime evidence: `CompositionTemplate` is a graph node candidate, `CompositionInstance` may become a usage node, slot usage may become an edge or edge-like property, and `relation_blueprint` remains design intent rather than graph truth. Before v3.x begins, run a detailed internal architecture research and Neo4j rebuild planning pass covering node/edge/provenance/projection modeling, package/import/export impact, local/service deployment, and migration strategy.
+- **Linked Major Continuity Items**: `V2X-018`
+- **Next Checkpoint**: At v2.x closeout, create a formal v3.x graph-native rebuild research package and decide whether to run a Neo4j mirror/spike before committing to the v3.x architecture.
+- **Resolution Evidence**: Pending
+
+### GC-007: Coincides needs an AI-readable internal operating manual like a project skill
+
+- [x] Promoted into active version plan
+- [x] Implemented
+- [x] Verified
+- [ ] Closed
+
+- **ID**: `GC-007`
+- **Origin**: `2026-05-23 v2.5 package/template research discussion`
+- **Type**: `ENGINEERING_FOLLOWUP`
+- **Status**: `PARTIALLY_RESOLVED`
+- **Priority**: High
+- **Applies To**: v2.5+, v3.x planning
+- **Owner**: Henry for product/agent direction / Codex for manual structure and maintenance
+- **Problem**: Coincides is becoming an AI-operable information workspace with templates, composition templates, package manifests, source behavior, relation behavior, proposal behavior, canvas projections, and future graph-native migration rules. Future agents should not have to reverse-engineer the data model before safely extending the system. They need an explicit operating manual that works like a project skill.
+- **Decision So Far**: Create an AI-readable internal operating manual that teaches future Codex/agent workers how to add or modify core extension objects safely, including `system_type`, `TemplateDefinition`, `CompositionTemplate`, `DomainBlockSet`, `PackageManifest`, template/package proposals, migration proposals, source/relation behavior, and graph-native migration notes. v2.5.0 created the first scaffold at `docs/internal/Coincides-Agent-Operating-Manual.md`, focused on TemplateDefinition runtime, resolver order, metadata, source/relation/proposal behavior boundaries, and proposal-first rules. v2.5.2 added CompositionTemplate rules for slot resolution, proposal-first apply, skipped slots, relation blueprint safety, and new-record-only mutation boundaries.
+- **Linked Major Continuity Items**: `V2X-021`
+- **Next Checkpoint**: Update the manual when v2.5.1+ implements template editor, CompositionTemplate, DomainBlockSet, PackageManifest, migration proposals, or package import/export behavior.
+- **Resolution Evidence**: `docs/internal/Coincides-Agent-Operating-Manual.md`; v2.5 R14 development guidance: `docs/brainstorm/V2.5Research/r14-v2.5-roadmap-plan-revision-recommendations.md`
 
 ---
 

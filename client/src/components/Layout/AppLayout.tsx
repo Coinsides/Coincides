@@ -8,6 +8,7 @@ import {
   BookOpen,
   Layers,
   BarChart3,
+  LayoutTemplate,
   Settings,
   PanelLeftClose,
   PanelLeftOpen,
@@ -27,6 +28,7 @@ const navItems = [
   { to: '/goals', icon: Target, labelKey: 'nav.goals' },
   { to: '/courses', icon: BookOpen, labelKey: 'nav.courses' },
   { to: '/decks', icon: Layers, labelKey: 'nav.decks' },
+  { to: '/templates', icon: LayoutTemplate, labelKey: 'nav.templates' },
   { to: '/statistics', icon: BarChart3, labelKey: 'nav.statistics' },
   { to: '/settings', icon: Settings, labelKey: 'nav.settings' },
 ];

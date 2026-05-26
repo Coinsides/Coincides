@@ -306,6 +306,89 @@ export const createMaterialReconciliationProposalSchema = z.object({
   source_board_id: z.string().uuid().optional(),
 });
 
+export const createCanvasLayoutProposalSchema = z.object({
+  course_id: z.string().uuid('Invalid course ID'),
+  canvas_id: z.string().uuid('Invalid canvas ID'),
+  source_board_id: z.string().uuid().optional(),
+  canvas_node_ids: z.array(z.string().uuid()).optional(),
+  source_scope_ids: z.array(z.string().uuid()).optional(),
+  note_block_ids: z.array(z.string().uuid()).optional(),
+  layout_goal: z.enum(['a4_reading', 'board_overview']).optional(),
+});
+
+export const createCompositionTemplateProposalSchema = z.object({
+  course_id: z.string().uuid('Invalid course ID'),
+  canvas_id: z.string().uuid('Invalid canvas ID'),
+  composition_template_id: z.string().uuid().optional(),
+  composition_key: z.string().max(160).optional(),
+  source_scope_ids: z.array(z.string().uuid()).optional(),
+  source_board_id: z.string().uuid().optional(),
+  slot_inputs: z.array(z.object({
+    slot_key: z.string().min(1).max(120),
+    template_definition_id: z.string().uuid().optional(),
+    template_key: z.string().max(160).optional(),
+    title: z.string().max(200).optional(),
+    plain_text: z.string().max(20000).optional(),
+    content_json: jsonObjectSchema.optional(),
+    source_references: z.array(jsonObjectSchema).optional(),
+    metadata: jsonObjectSchema.optional(),
+  })).optional(),
+  partial_slot_keys: z.array(z.string().max(120)).optional(),
+  layout_goal: z.enum(['a4_section', 'canvas_cluster']).optional(),
+});
+
+export const createTemplateMigrationProposalSchema = z.object({
+  source_template_id: z.string().uuid('Invalid source template ID'),
+  target_template_id: z.string().uuid('Invalid target template ID').optional(),
+  target_template_patch: jsonObjectSchema.optional(),
+  migration_mode: z.enum(['alias_mapping', 'soft_migration', 'hard_cascade']),
+  course_id: z.string().uuid('Invalid course ID').optional(),
+  reason: z.string().max(1000).optional(),
+}).refine((value) => value.target_template_id || value.target_template_patch, {
+  message: 'target_template_id or target_template_patch is required',
+  path: ['target_template_id'],
+});
+
+const domainMembershipChangeSchema = z.object({
+  change_action: z.enum(['add', 'remove', 'update']).optional().default('add'),
+  template_definition_id: z.string().uuid().optional(),
+  template_key: z.string().max(160).optional(),
+  template_version: z.string().max(50).optional(),
+  composition_template_id: z.string().uuid().optional(),
+  composition_key: z.string().max(160).optional(),
+  composition_version: z.string().max(50).optional(),
+  member_role: z.string().max(120).optional(),
+  required: z.boolean().optional(),
+  order_index: z.number().int().min(0).optional(),
+  metadata: jsonObjectSchema.optional(),
+});
+
+const domainObjectReclassificationSchema = z.object({
+  target_type: z.enum(['note_block', 'template_definition', 'composition_template']),
+  target_id: z.string().uuid('Invalid object ID'),
+  target_domain_id: z.string().uuid().optional(),
+  target_domain_key: z.string().max(160).optional(),
+  classification_role: z.string().max(120).optional(),
+  confidence: z.number().min(0).max(1).optional(),
+  metadata: jsonObjectSchema.optional(),
+});
+
+export const createDomainRefinementProposalSchema = z.object({
+  source_domain_id: z.string().uuid('Invalid source domain ID'),
+  target_domain_id: z.string().uuid('Invalid target domain ID').optional(),
+  target_domain_patch: jsonObjectSchema.optional(),
+  refinement_action: z.enum(['rename', 'promote', 'split', 'merge', 'fork', 'deprecate', 'reclassify']),
+  migration_mode: z.enum(['alias_mapping', 'soft_migration', 'hard_cascade']),
+  course_id: z.string().uuid('Invalid course ID').optional(),
+  template_membership_changes: z.array(domainMembershipChangeSchema).optional(),
+  composition_membership_changes: z.array(domainMembershipChangeSchema).optional(),
+  object_reclassifications: z.array(domainObjectReclassificationSchema).optional(),
+  reason: z.string().max(1000).optional(),
+}).refine((value) => value.target_domain_id || value.target_domain_patch || value.refinement_action === 'deprecate', {
+  message: 'target_domain_id, target_domain_patch, or deprecate action is required',
+  path: ['target_domain_id'],
+});
+
 // --- Document Upload ---
 
 export const uploadDocumentSchema = z.object({

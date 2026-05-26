@@ -3,12 +3,14 @@ import assert from 'node:assert/strict';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
+import Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 import { initDb, closeDb } from '../db/init.js';
 import { listCourseMaterials, listMaterialSegments, listSourceFragments } from '../services/courseMaterials.js';
 import { applyMaterialMapProposal, createMaterialMapProposal } from '../services/materialMapProposals.js';
 import { applyOrganizedNoteProposal, createOrganizedNoteProposal } from '../services/organizedNoteProposals.js';
 import { applyMaterialReconciliationProposal, createMaterialReconciliationProposal } from '../services/materialReconciliationProposals.js';
+import { applyCanvasLayoutProposal, createCanvasLayoutProposal } from '../services/canvasLayoutProposals.js';
 import { reopenConflict, resolveConflict, restoreExclusion } from '../services/reconciliationSafety.js';
 import { generateSourceAnchors, getSourceAnchorJumpTarget, listSourceAnchors, refreshSourceAnchor } from '../services/sourceAnchors.js';
 import {
@@ -29,8 +31,51 @@ import {
   restoreSourceBoardNode,
   seedSourceBoardFromScopes,
 } from '../services/sourceBoards.js';
+import {
+  archiveCanvasNode,
+  archiveCanvasEdge,
+  bindCanvasEdgeRelation,
+  createCanvasEdge,
+  archiveLearningCanvas,
+  createCanvasNoteBlock,
+  createCanvasNode,
+  getCanvasCommandContext,
+  createLearningCanvas,
+  getCanvasNodeJumpTarget,
+  getLearningCanvasDetail,
+  listObjectRelations,
+  listRelationLayers,
+  listLearningCanvases,
+  restoreCanvasNode,
+  restoreCanvasEdge,
+  restoreLearningCanvas,
+  seedCanvasFromSourceBoard,
+  unbindCanvasEdgeRelation,
+  updateCanvasNode,
+  updateCanvasViewport,
+} from '../services/learningCanvases.js';
 import { generateSourceSnapshots, getSourceSnapshot, listSourceSnapshots } from '../services/sourceSnapshots.js';
 import { inferNoteBlockTemplateMetadata } from '../lib/noteBlockTemplates.js';
+import {
+  activateTemplateDefinition,
+  archiveTemplateDefinition,
+  copyTemplateDefinition,
+  createUserTemplateDefinition,
+  deprecateTemplateDefinition,
+  getTemplateCompatibilityReport,
+  getTemplateUsage,
+  listTemplateDefinitions,
+  mergeRuntimeNoteBlockTemplateMetadata,
+  seedSystemTemplateDefinitions,
+  updateTemplateDefinition,
+} from '../services/templateDefinitions.js';
+import {
+  applyCompositionTemplateProposal,
+  createCompositionTemplateProposal,
+  getCompositionTemplateCompatibilityReport,
+  listCompositionTemplates,
+  seedSystemCompositionTemplates,
+} from '../services/compositionTemplates.js';
 
 async function withDb(run: (db: Awaited<ReturnType<typeof initDb>>) => void | Promise<void>) {
   const dir = mkdtempSync(join(tmpdir(), 'coincides-v21-'));
@@ -102,6 +147,7 @@ test('v2.1 material proposal migration creates additive material tables', async 
       'excluded_material_scopes',
       'conflict_review_items',
       'reconciliation_recovery_events',
+      'template_definitions',
     ]) {
       assert.equal(tableNames.includes(tableName), true, `${tableName} should exist`);
     }
@@ -156,6 +202,94 @@ test('v2.3.3 source board migration creates additive board tables', async () => 
     assert.equal(tableNames.includes('source_boards'), true);
     assert.equal(tableNames.includes('source_board_nodes'), true);
   });
+});
+
+test('v2.4.0 learning canvas migration creates additive canvas tables', async () => {
+  await withDb((db) => {
+    const tableNames = db
+      .prepare("SELECT name FROM sqlite_master WHERE type = 'table'")
+      .all()
+      .map((row: any) => row.name);
+
+    for (const tableName of [
+      'learning_canvases',
+      'canvas_nodes',
+      'canvas_edges',
+      'canvas_frames',
+      'canvas_viewport_states',
+    ]) {
+      assert.equal(tableNames.includes(tableName), true, `${tableName} should exist`);
+    }
+  });
+});
+
+test('v2.4.4 relation migration creates edge relation and layer structures', async () => {
+  await withDb((db) => {
+    const tableNames = db
+      .prepare("SELECT name FROM sqlite_master WHERE type = 'table'")
+      .all()
+      .map((row: any) => row.name);
+
+    assert.equal(tableNames.includes('canvas_edges'), true);
+    assert.equal(tableNames.includes('object_relations'), true);
+    assert.equal(tableNames.includes('relation_layers'), true);
+
+    const edgeColumns = db.prepare('PRAGMA table_info(canvas_edges)').all().map((row: any) => row.name);
+    for (const columnName of [
+      'source_port',
+      'target_port',
+      'loose_target_x',
+      'loose_target_y',
+      'object_relation_id',
+      'relation_layer_id',
+      'connection_state',
+      'style_key',
+    ]) {
+      assert.equal(edgeColumns.includes(columnName), true, `${columnName} should exist`);
+    }
+  });
+});
+
+test('v2.4.4 startup upgrades an existing pre-relation canvas_edges table', async () => {
+  const dir = mkdtempSync(join(tmpdir(), 'coincides-v244-old-edge-'));
+  const dbPath = join(dir, 'test.db');
+
+  try {
+    const oldDb = new Database(dbPath);
+    oldDb.exec(`
+      CREATE TABLE canvas_edges (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        course_id TEXT NOT NULL,
+        canvas_id TEXT NOT NULL,
+        source_node_id TEXT NOT NULL,
+        target_node_id TEXT NOT NULL,
+        relation_kind TEXT,
+        label TEXT,
+        status TEXT NOT NULL DEFAULT 'active',
+        metadata TEXT NOT NULL DEFAULT '{}',
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    oldDb.close();
+
+    const db = await initDb(dbPath);
+    const columns = db.prepare('PRAGMA table_info(canvas_edges)').all() as Array<{ name: string; notnull: number }>;
+    const columnNames = columns.map((column) => column.name);
+    assert.ok(columnNames.includes('object_relation_id'));
+    assert.ok(columnNames.includes('relation_layer_id'));
+    assert.equal(columns.find((column) => column.name === 'target_node_id')?.notnull, 0);
+
+    const indexes = db.prepare("SELECT name FROM sqlite_master WHERE type = 'index' AND tbl_name = 'canvas_edges'")
+      .all()
+      .map((row: any) => row.name);
+    assert.ok(indexes.includes('idx_canvas_edges_relation'));
+    assert.ok(indexes.includes('idx_canvas_edges_layer'));
+  } finally {
+    closeDb();
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test('generating source snapshots from parsed documents creates page-like source views idempotently', async () => {
@@ -675,7 +809,7 @@ test('organized note proposal uses deterministic fallback without an AI key', as
     assert.equal(proposal.data.generation_mode, 'deterministic_fallback');
     assert.equal(proposal.data.warnings.some((warning: string) => warning.includes('AI generation was not used')), true);
     assert.equal(proposal.data.blocks.length > 0, true);
-    assert.equal(proposal.data.blocks.every((block: any) => block.metadata?.taxonomy_version === 'v2.1.1'), true);
+    assert.equal(proposal.data.blocks.every((block: any) => block.metadata?.taxonomy_version === 'v2.5.0'), true);
     assert.equal(proposal.data.blocks.some((block: any) => block.metadata?.template_id === 'text.heading'), true);
     assert.equal(proposal.data.blocks.some((block: any) => block.metadata?.template_id === 'text.paragraph'), true);
     assert.equal(proposal.data.blocks[0].source_references.length > 0, true);
@@ -711,6 +845,315 @@ test('legacy NoteBlock types map to template-aware taxonomy metadata', () => {
   });
 });
 
+test('v2.5 template runtime seeds system templates idempotently', async () => {
+  await withDb((db) => {
+    const { userId } = seedUserCourse(db);
+
+    const firstSeed = seedSystemTemplateDefinitions(db, userId);
+    const secondSeed = seedSystemTemplateDefinitions(db, userId);
+    const templates = listTemplateDefinitions(db, userId, {});
+
+    assert.equal(firstSeed.length >= 13, true);
+    assert.equal(secondSeed.length, firstSeed.length);
+    assert.equal(templates.length, firstSeed.length);
+    assert.equal(templates.some((template) => template.template_key === 'definition.basic'), true);
+    assert.equal(templates.every((template) => template.version === '1.0.0'), true);
+    assert.equal(templates.every((template) => template.origin === 'system_seed'), true);
+    assert.equal(templates.every((template) => template.scope_type === 'global'), true);
+  });
+});
+
+test('runtime template metadata resolves explicit and legacy NoteBlock inputs', async () => {
+  await withDb((db) => {
+    const { userId } = seedUserCourse(db);
+
+    const explicit = mergeRuntimeNoteBlockTemplateMetadata(db, userId, {
+      template_id: 'definition.basic',
+      custom_key: 'preserved',
+    }, 'definition');
+    const inferred = mergeRuntimeNoteBlockTemplateMetadata(db, userId, {}, 'formula');
+
+    assert.equal(explicit.metadata.custom_key, 'preserved');
+    assert.equal(explicit.metadata.template_id, 'definition.basic');
+    assert.equal(explicit.metadata.template_key, 'definition.basic');
+    assert.equal(explicit.metadata.template_version, '1.0.0');
+    assert.equal(explicit.metadata.template_resolution_status, 'runtime_resolved');
+    assert.equal(explicit.metadata.taxonomy_version, 'v2.5.0');
+    assert.equal(typeof explicit.metadata.template_definition_id, 'string');
+
+    assert.equal(inferred.metadata.template_id, 'formula.math');
+    assert.equal(inferred.metadata.template_key, 'formula.math');
+    assert.equal(inferred.metadata.system_type, 'latex');
+    assert.equal(inferred.metadata.learning_role, 'formula');
+    assert.equal(inferred.resolution_status, 'legacy_inferred');
+
+    assert.throws(() => mergeRuntimeNoteBlockTemplateMetadata(db, userId, {
+      template_id: 'unknown.template',
+    }, 'paragraph'), /Unknown NoteBlock template/);
+  });
+});
+
+test('template compatibility report classifies runtime, legacy, and missing template blocks', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    seedSystemTemplateDefinitions(db, userId);
+    const definitionTemplate = listTemplateDefinitions(db, userId, { template_key: 'definition.basic' })[0];
+
+    db.prepare(`
+      INSERT INTO note_blocks (
+        id, user_id, course_id, block_type, content_json, plain_text, metadata, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, '{}', ?, ?, datetime('now'), datetime('now'))
+    `).run(uuidv4(), userId, courseId, 'definition', 'Runtime block', JSON.stringify({
+      template_definition_id: definitionTemplate.id,
+      template_key: 'definition.basic',
+      template_version: '1.0.0',
+    }));
+    db.prepare(`
+      INSERT INTO note_blocks (
+        id, user_id, course_id, block_type, content_json, plain_text, metadata, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, '{}', ?, ?, datetime('now'), datetime('now'))
+    `).run(uuidv4(), userId, courseId, 'formula', 'Legacy inferred block', JSON.stringify({}));
+    db.prepare(`
+      INSERT INTO note_blocks (
+        id, user_id, course_id, block_type, content_json, plain_text, metadata, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, '{}', ?, ?, datetime('now'), datetime('now'))
+    `).run(uuidv4(), userId, courseId, 'paragraph', 'Missing template block', JSON.stringify({
+      template_id: 'missing.template',
+    }));
+
+    const report = getTemplateCompatibilityReport(db, userId, { course_id: courseId });
+
+    assert.equal(report.totals.total_blocks, 3);
+    assert.equal(report.totals.runtime_resolved, 1);
+    assert.equal(report.totals.legacy_inferred, 1);
+    assert.equal(report.totals.template_missing, 1);
+    assert.equal(report.totals.manual_review_required, 1);
+    assert.equal(report.details.some((detail) => detail.status === 'template_missing'), true);
+  });
+});
+
+test('v2.5.1 template editor copies system templates into user drafts', async () => {
+  await withDb((db) => {
+    const { userId } = seedUserCourse(db);
+    seedSystemTemplateDefinitions(db, userId);
+    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'definition.basic' })[0];
+
+    const draft = copyTemplateDefinition(db, userId, systemTemplate.id, {
+      template_key: 'definition.custom',
+      label: 'Custom Definition',
+    });
+
+    assert.equal(draft.origin, 'user');
+    assert.equal(draft.is_system, false);
+    assert.equal(draft.status, 'draft');
+    assert.equal(draft.scope_type, 'global');
+    assert.equal(draft.template_key, 'definition.custom');
+    assert.equal(draft.label, 'Custom Definition');
+    assert.deepEqual(draft.field_schema, systemTemplate.field_schema);
+    assert.deepEqual(draft.source_behavior, systemTemplate.source_behavior);
+    assert.equal(draft.metadata.copied_from_template_definition_id, systemTemplate.id);
+
+    const original = listTemplateDefinitions(db, userId, { template_key: 'definition.basic' })[0];
+    assert.equal(original.origin, 'system_seed');
+    assert.equal(original.is_system, true);
+    assert.equal(original.status, 'active');
+  });
+});
+
+test('v2.5.1 template editor rejects direct system template updates', async () => {
+  await withDb((db) => {
+    const { userId } = seedUserCourse(db);
+    seedSystemTemplateDefinitions(db, userId);
+    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'definition.basic' })[0];
+
+    assert.throws(() => updateTemplateDefinition(db, userId, systemTemplate.id, {
+      label: 'Edited system definition',
+    }), /System templates are read-only/);
+  });
+});
+
+test('v2.5.1 template editor creates, edits, and activates user drafts', async () => {
+  await withDb((db) => {
+    const { userId } = seedUserCourse(db);
+
+    const draft = createUserTemplateDefinition(db, userId, {
+      template_key: 'concept.research',
+      label: 'Research Concept',
+      description: 'Concept template for research notes.',
+      system_type: 'text',
+      learning_role: 'concept',
+      field_schema: [
+        { key: 'term', label: 'Term', kind: 'text', required: true },
+        { key: 'body', label: 'Body', kind: 'textarea', required: true },
+      ],
+      default_content: { term: '', body: '' },
+      summary_for_agent: 'Use for compact concept explanations in research notes.',
+    });
+
+    const edited = updateTemplateDefinition(db, userId, draft.id, {
+      field_schema: [
+        { key: 'term', label: 'Term', kind: 'text', required: true },
+        { key: 'body', label: 'Explanation', kind: 'textarea', required: true },
+        { key: 'tags', label: 'Tags', kind: 'list', required: false },
+      ],
+      default_content: { term: '', body: '', tags: [] },
+      source_behavior: { source_reference_policy: 'recommended' },
+    });
+    const active = activateTemplateDefinition(db, userId, draft.id);
+
+    assert.equal(edited.field_schema.length, 3);
+    assert.deepEqual(edited.source_behavior, { source_reference_policy: 'recommended' });
+    assert.equal(active.status, 'active');
+    assert.equal(active.origin, 'user');
+  });
+});
+
+test('v2.5.1 active templates with usage reject structural edits but allow safe edits', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    seedSystemTemplateDefinitions(db, userId);
+    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'definition.basic' })[0];
+    const draft = copyTemplateDefinition(db, userId, systemTemplate.id, {
+      template_key: 'definition.used',
+      label: 'Used Definition',
+    });
+    const active = activateTemplateDefinition(db, userId, draft.id);
+
+    db.prepare(`
+      INSERT INTO note_blocks (
+        id, user_id, course_id, block_type, content_json, plain_text, metadata, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, '{}', ?, ?, datetime('now'), datetime('now'))
+    `).run(uuidv4(), userId, courseId, 'definition', 'Used runtime block', JSON.stringify({
+      template_definition_id: active.id,
+      template_key: active.template_key,
+      template_version: active.version,
+    }));
+
+    assert.throws(() => updateTemplateDefinition(db, userId, active.id, {
+      field_schema: [
+        { key: 'body', label: 'Changed Body', kind: 'textarea', required: true },
+      ],
+    }), /proposal_required/);
+
+    const edited = updateTemplateDefinition(db, userId, active.id, {
+      label: 'Used Definition Updated',
+      summary_for_agent: 'Updated safe summary.',
+      render_hints: { reading: { intent: 'definition' } },
+    });
+
+    assert.equal(edited.label, 'Used Definition Updated');
+    assert.equal(edited.summary_for_agent, 'Updated safe summary.');
+    assert.equal(edited.status, 'active');
+  });
+});
+
+test('v2.5.1 archive rejects templates with usage while deprecate remains resolvable', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    seedSystemTemplateDefinitions(db, userId);
+    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'definition.basic' })[0];
+    const draft = copyTemplateDefinition(db, userId, systemTemplate.id, {
+      template_key: 'definition.deprecated-user',
+      label: 'Deprecated User Definition',
+    });
+    const active = activateTemplateDefinition(db, userId, draft.id);
+
+    db.prepare(`
+      INSERT INTO note_blocks (
+        id, user_id, course_id, block_type, content_json, plain_text, metadata, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, '{}', ?, ?, datetime('now'), datetime('now'))
+    `).run(uuidv4(), userId, courseId, 'definition', 'Deprecated runtime block', JSON.stringify({
+      template_definition_id: active.id,
+      template_key: active.template_key,
+      template_version: active.version,
+    }));
+
+    assert.throws(() => archiveTemplateDefinition(db, userId, active.id), /Cannot archive template with existing usage/);
+
+    const deprecated = deprecateTemplateDefinition(db, userId, active.id);
+    const resolved = mergeRuntimeNoteBlockTemplateMetadata(db, userId, {
+      template_definition_id: active.id,
+      template_key: active.template_key,
+      template_version: active.version,
+    }, 'definition');
+
+    assert.equal(deprecated.status, 'deprecated');
+    assert.equal(resolved.metadata.template_definition_id, active.id);
+    assert.equal(resolved.metadata.template_resolution_status, 'template_deprecated');
+  });
+});
+
+test('v2.5.1 template usage counts runtime, key-version, and legacy template references', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    seedSystemTemplateDefinitions(db, userId);
+    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'definition.basic' })[0];
+    const draft = copyTemplateDefinition(db, userId, systemTemplate.id, {
+      template_key: 'definition.usage',
+      label: 'Usage Definition',
+    });
+    const active = activateTemplateDefinition(db, userId, draft.id);
+
+    const metadataRows = [
+      { template_definition_id: active.id, template_key: active.template_key, template_version: active.version },
+      { template_key: active.template_key, template_version: active.version },
+      { template_id: active.template_key },
+    ];
+
+    metadataRows.forEach((metadata, index) => {
+      db.prepare(`
+        INSERT INTO note_blocks (
+          id, user_id, course_id, block_type, content_json, plain_text, metadata, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, '{}', ?, ?, datetime('now'), datetime('now'))
+      `).run(uuidv4(), userId, courseId, 'definition', `Usage block ${index + 1}`, JSON.stringify(metadata));
+    });
+
+    const usage = getTemplateUsage(db, userId, active.id);
+
+    assert.equal(usage.total_blocks, 3);
+    assert.equal(usage.runtime_reference_count, 1);
+    assert.equal(usage.key_version_reference_count, 2);
+    assert.equal(usage.legacy_template_id_count, 1);
+  });
+});
+
+test('v2.5.1 canvas block insertion accepts runtime user templates', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    seedSystemTemplateDefinitions(db, userId);
+    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'definition.basic' })[0];
+    const userTemplate = activateTemplateDefinition(db, userId, copyTemplateDefinition(db, userId, systemTemplate.id, {
+      template_key: 'definition.canvas-user',
+      label: 'Canvas User Definition',
+    }).id);
+    const canvas = createLearningCanvas(db, userId, {
+      course_id: courseId,
+      title: 'Template Runtime Canvas',
+    }) as any;
+
+    const result = createCanvasNoteBlock(db, userId, canvas.id, {
+      template_id: userTemplate.template_key,
+      metadata: {
+        template_definition_id: userTemplate.id,
+        template_key: userTemplate.template_key,
+        template_version: userTemplate.version,
+      },
+      plain_text: 'A canvas-created runtime definition.',
+      content_json: { body: 'A canvas-created runtime definition.' },
+      x: 80,
+      y: 120,
+      width: 320,
+      height: 180,
+    }) as any;
+
+    assert.equal(result.block.metadata.template_definition_id, userTemplate.id);
+    assert.equal(result.block.metadata.template_key, userTemplate.template_key);
+    assert.equal(result.block.metadata.taxonomy_version, 'v2.5.0');
+    assert.equal(result.canvas_node.node_type, 'note_block');
+    assert.equal(result.canvas_node.note_block_id, result.block.id);
+  });
+});
+
 test('applying an organized note proposal creates a note with blocks, placements, sources, and operation batch', async () => {
   await withDb(async (db) => {
     const { userId, courseId } = seedUserCourse(db);
@@ -737,7 +1180,7 @@ test('applying an organized note proposal creates a note with blocks, placements
     assert.equal(blocks.length, result.blocks_count);
     assert.equal(blocks.every((block) => block.source_kind === 'proposal'), true);
     assert.equal(blocks.every((block) => block.operation_batch_id === result.operation_batch_id), true);
-    assert.equal(blocks.every((block) => JSON.parse(block.metadata).taxonomy_version === 'v2.1.1'), true);
+    assert.equal(blocks.every((block) => JSON.parse(block.metadata).taxonomy_version === 'v2.5.0'), true);
     assert.equal(blocks.some((block) => JSON.parse(block.metadata).template_id === 'text.heading'), true);
 
     const placements = db.prepare('SELECT order_index FROM note_block_placements WHERE note_id = ? ORDER BY order_index ASC')
@@ -1430,3 +1873,864 @@ test('empty source board warns and falls back to course-level proposal behavior'
     assert.equal(proposal.data.warnings.some((warning: string) => warning.includes('Source board has no active source scope nodes')), true);
   });
 });
+
+test('learning canvases default to A4 page preset and support reversible archive state', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+
+    const canvas = createLearningCanvas(db, userId, { course_id: courseId, title: 'Canvas note' }) as any;
+
+    assert.equal(canvas.title, 'Canvas note');
+    assert.equal(canvas.status, 'active');
+    assert.equal(canvas.canvas_kind, 'finite');
+    assert.equal(canvas.preset, 'page');
+    assert.equal(canvas.page_size, 'a4');
+    assert.equal(canvas.orientation, 'portrait');
+    assert.equal(canvas.width, 794);
+    assert.equal(canvas.height, 1123);
+    assert.equal(listLearningCanvases(db, userId, { course_id: courseId, status: 'active' }).length, 1);
+
+    const archived = archiveLearningCanvas(db, userId, canvas.id) as any;
+    assert.equal(archived.status, 'archived');
+    assert.equal(listLearningCanvases(db, userId, { course_id: courseId, status: 'active' }).length, 0);
+
+    const restored = restoreLearningCanvas(db, userId, canvas.id) as any;
+    assert.equal(restored.status, 'active');
+  });
+});
+
+test('learning canvas nodes reference targets without mutating source board nodes', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    seedParsedDocument(db, userId, courseId);
+    listCourseMaterials(db, userId, courseId);
+    generateSourceSnapshots(db, userId, { course_id: courseId });
+    const snapshot = (listSourceSnapshots(db, userId, courseId) as any[])[0];
+    const scope = createSourceScope(db, userId, {
+      course_id: courseId,
+      source_snapshot_id: snapshot.id,
+      scope_kind: 'page',
+      label: 'Canvas source page',
+      page_start: 1,
+    }) as any;
+    const board = createSourceBoard(db, userId, { course_id: courseId, title: 'Canvas source board' }) as any;
+    seedSourceBoardFromScopes(db, userId, board.id);
+    const boardNode = (listSourceBoardNodes(db, userId, board.id, { status: 'active' }) as any[])[0];
+    const beforeBoardNode = db.prepare('SELECT * FROM source_board_nodes WHERE id = ?').get(boardNode.id);
+    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
+
+    const node = createCanvasNode(db, userId, canvas.id, {
+      node_type: 'source_board_node',
+      source_board_node_id: boardNode.id,
+      x: 24,
+      y: 48,
+      width: 320,
+      height: 180,
+    }) as any;
+
+    assert.equal(node.node_type, 'source_board_node');
+    assert.equal(node.target_id, boardNode.id);
+    assert.equal(node.source_scope_id, scope.id);
+    assert.equal(node.x, 24);
+    assert.equal(node.y, 48);
+    assert.equal(node.width, 320);
+    assert.equal(node.height, 180);
+    assert.deepEqual(db.prepare('SELECT * FROM source_board_nodes WHERE id = ?').get(boardNode.id), beforeBoardNode);
+
+    const detail = getLearningCanvasDetail(db, userId, canvas.id) as any;
+    assert.equal(detail.canvas.id, canvas.id);
+    assert.equal(detail.nodes.length, 1);
+
+    const jump = getCanvasNodeJumpTarget(db, userId, node.id) as any;
+    assert.equal(jump.node.id, node.id);
+    assert.equal(jump.scope.id, scope.id);
+    assert.equal(jump.snapshot.id, snapshot.id);
+
+    const archivedNode = archiveCanvasNode(db, userId, node.id) as any;
+    assert.equal(archivedNode.status, 'archived');
+    const restoredNode = restoreCanvasNode(db, userId, node.id) as any;
+    assert.equal(restoredNode.status, 'active');
+  });
+});
+
+test('learning canvas node layout updates persist only projection layout', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    seedParsedDocument(db, userId, courseId);
+    listCourseMaterials(db, userId, courseId);
+    generateSourceSnapshots(db, userId, { course_id: courseId });
+    const snapshot = (listSourceSnapshots(db, userId, courseId) as any[])[0];
+    createSourceScope(db, userId, {
+      course_id: courseId,
+      source_snapshot_id: snapshot.id,
+      scope_kind: 'page',
+      label: 'Layout source page',
+      page_start: 1,
+    });
+    const board = createSourceBoard(db, userId, { course_id: courseId, title: 'Layout source board' }) as any;
+    seedSourceBoardFromScopes(db, userId, board.id);
+    const boardNode = (listSourceBoardNodes(db, userId, board.id, { status: 'active' }) as any[])[0];
+    const beforeBoardNode = db.prepare('SELECT * FROM source_board_nodes WHERE id = ?').get(boardNode.id);
+    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
+    const node = createCanvasNode(db, userId, canvas.id, {
+      node_type: 'source_board_node',
+      source_board_node_id: boardNode.id,
+      x: 10,
+      y: 20,
+      width: 260,
+      height: 140,
+    }) as any;
+
+    const updated = updateCanvasNode(db, userId, node.id, {
+      x: 144,
+      y: 288,
+      width: 360,
+      height: 220,
+    }) as any;
+
+    assert.equal(updated.x, 144);
+    assert.equal(updated.y, 288);
+    assert.equal(updated.width, 360);
+    assert.equal(updated.height, 220);
+    assert.deepEqual(db.prepare('SELECT * FROM source_board_nodes WHERE id = ?').get(boardNode.id), beforeBoardNode);
+
+    const detail = getLearningCanvasDetail(db, userId, canvas.id) as any;
+    assert.equal(detail.nodes[0].x, 144);
+    assert.equal(detail.nodes[0].y, 288);
+  });
+});
+
+test('learning canvas seeding from source boards is idempotent and skips archived board nodes', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    seedParsedDocument(db, userId, courseId);
+    listCourseMaterials(db, userId, courseId);
+    generateSourceSnapshots(db, userId, { course_id: courseId });
+    const snapshot = (listSourceSnapshots(db, userId, courseId) as any[])[0];
+    createSourceScope(db, userId, {
+      course_id: courseId,
+      source_snapshot_id: snapshot.id,
+      scope_kind: 'page',
+      label: 'Active source page',
+      page_start: 1,
+    });
+    const archivedScope = createSourceScope(db, userId, {
+      course_id: courseId,
+      source_snapshot_id: snapshot.id,
+      scope_kind: 'page_range',
+      label: 'Archived scope should not seed',
+      page_start: 3,
+      page_end: 4,
+    }) as any;
+    archiveSourceScope(db, userId, archivedScope.id);
+    const board = createSourceBoard(db, userId, { course_id: courseId, title: 'Canvas seed board' }) as any;
+    seedSourceBoardFromScopes(db, userId, board.id);
+    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
+
+    const firstSeed = seedCanvasFromSourceBoard(db, userId, canvas.id, board.id) as any;
+    const secondSeed = seedCanvasFromSourceBoard(db, userId, canvas.id, board.id) as any;
+
+    assert.equal(firstSeed.nodes_created_count, 1);
+    assert.equal(secondSeed.nodes_created_count, 0);
+    assert.equal((getLearningCanvasDetail(db, userId, canvas.id) as any).nodes.length, 1);
+
+    const seededNode = (getLearningCanvasDetail(db, userId, canvas.id) as any).nodes[0];
+    archiveCanvasNode(db, userId, seededNode.id);
+    const restoredSeed = seedCanvasFromSourceBoard(db, userId, canvas.id, board.id) as any;
+    const restoredDetail = getLearningCanvasDetail(db, userId, canvas.id) as any;
+    assert.equal(restoredSeed.nodes_created_count, 0);
+    assert.equal(restoredSeed.nodes_restored_count, 1);
+    assert.equal(restoredDetail.nodes.length, 1);
+    assert.equal(restoredDetail.archived_nodes.length, 0);
+
+    archiveSourceBoard(db, userId, board.id);
+    assert.throws(() => seedCanvasFromSourceBoard(db, userId, canvas.id, board.id), /Source board is archived/);
+  });
+});
+
+test('re-adding an archived canvas node restores the existing projection instead of duplicating it', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    seedParsedDocument(db, userId, courseId);
+    listCourseMaterials(db, userId, courseId);
+    generateSourceSnapshots(db, userId, { course_id: courseId });
+    const snapshot = (listSourceSnapshots(db, userId, courseId) as any[])[0];
+    createSourceScope(db, userId, {
+      course_id: courseId,
+      source_snapshot_id: snapshot.id,
+      scope_kind: 'page',
+      label: 'Reusable page',
+      page_start: 1,
+    });
+    const board = createSourceBoard(db, userId, { course_id: courseId, title: 'Restore board' }) as any;
+    seedSourceBoardFromScopes(db, userId, board.id);
+    const boardNode = (listSourceBoardNodes(db, userId, board.id, { status: 'active' }) as any[])[0];
+    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
+
+    const node = createCanvasNode(db, userId, canvas.id, {
+      node_type: 'source_board_node',
+      source_board_node_id: boardNode.id,
+      x: 80,
+      y: 120,
+    }) as any;
+
+    archiveCanvasNode(db, userId, node.id);
+    const archivedDetail = getLearningCanvasDetail(db, userId, canvas.id) as any;
+    assert.equal(archivedDetail.nodes.length, 0);
+    assert.equal(archivedDetail.archived_nodes.length, 1);
+
+    const restored = createCanvasNode(db, userId, canvas.id, {
+      node_type: 'source_board_node',
+      source_board_node_id: boardNode.id,
+      x: 480,
+      y: 520,
+    }) as any;
+
+    assert.equal(restored.id, node.id);
+    assert.equal(restored.status, 'active');
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes WHERE canvas_id = ? AND target_id = ?')
+      .get(canvas.id, boardNode.id) as any).count, 1);
+    assert.equal((getLearningCanvasDetail(db, userId, canvas.id) as any).nodes.length, 1);
+  });
+});
+
+test('learning canvas viewport state is per-user session data', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
+    const beforeCanvas = db.prepare('SELECT * FROM learning_canvases WHERE id = ?').get(canvas.id);
+
+    const viewport = updateCanvasViewport(db, userId, canvas.id, {
+      zoom: 0.75,
+      viewport_x: 120,
+      viewport_y: 240,
+      metadata: { sidebar: 'source' },
+    }) as any;
+
+    assert.equal(viewport.zoom, 0.75);
+    assert.equal(viewport.viewport_x, 120);
+    assert.equal(viewport.viewport_y, 240);
+    assert.deepEqual(viewport.metadata, { sidebar: 'source' });
+    assert.deepEqual(db.prepare('SELECT * FROM learning_canvases WHERE id = ?').get(canvas.id), beforeCanvas);
+  });
+});
+
+test('learning canvas block insertion creates template-aware NoteBlock and CanvasNode projection', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    const canvas = createLearningCanvas(db, userId, { course_id: courseId, title: 'Template canvas' }) as any;
+
+    const result = createCanvasNoteBlock(db, userId, canvas.id, {
+      template_id: 'definition.basic',
+      title: 'Derivative definition',
+      plain_text: 'A derivative is the instantaneous rate of change.',
+      content_json: { body: 'A derivative is the instantaneous rate of change.' },
+      x: 128,
+      y: 192,
+      width: 340,
+      height: 180,
+    }) as any;
+
+    assert.equal(result.note.course_id, courseId);
+    assert.equal(result.note.metadata.purpose, 'canvas_backing_note');
+    assert.equal(result.note.metadata.canvas_id, canvas.id);
+
+    assert.equal(result.block.block_type, 'definition');
+    assert.equal(result.block.title, 'Derivative definition');
+    assert.equal(result.block.plain_text, 'A derivative is the instantaneous rate of change.');
+    assert.equal(result.block.metadata.template_id, 'definition.basic');
+    assert.equal(result.block.metadata.system_type, 'text');
+    assert.equal(result.block.metadata.learning_role, 'definition');
+    assert.equal(result.block.metadata.taxonomy_version, 'v2.5.0');
+
+    const placement = db.prepare('SELECT * FROM note_block_placements WHERE note_id = ? AND block_id = ?')
+      .get(result.note.id, result.block.id) as any;
+    assert.equal(placement.order_index, 0);
+
+    assert.equal(result.canvas_node.node_type, 'note_block');
+    assert.equal(result.canvas_node.target_id, result.block.id);
+    assert.equal(result.canvas_node.note_block_id, result.block.id);
+    assert.equal(result.canvas_node.title, 'Derivative definition');
+    assert.equal(result.canvas_node.x, 128);
+    assert.equal(result.canvas_node.y, 192);
+    assert.equal(result.canvas_node.width, 340);
+    assert.equal(result.canvas_node.height, 180);
+
+    const detail = getLearningCanvasDetail(db, userId, canvas.id) as any;
+    assert.equal(detail.nodes.some((node: any) => node.id === result.canvas_node.id), true);
+  });
+});
+
+test('learning canvas block insertion reuses backing note for repeated inserts', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    const canvas = createLearningCanvas(db, userId, { course_id: courseId, title: 'Repeated insert canvas' }) as any;
+
+    const first = createCanvasNoteBlock(db, userId, canvas.id, {
+      template_id: 'example.general',
+      plain_text: 'First example',
+      content_json: { body: 'First example' },
+    }) as any;
+    const second = createCanvasNoteBlock(db, userId, canvas.id, {
+      template_id: 'formula.math',
+      plain_text: 'f(x)=x^2',
+      content_json: { body: 'f(x)=x^2' },
+      x: 420,
+      y: 88,
+    }) as any;
+
+    assert.equal(first.note.id, second.note.id);
+    const noteCount = db.prepare('SELECT COUNT(*) AS count FROM notes WHERE user_id = ? AND course_id = ?').get(userId, courseId) as any;
+    const blockCount = db.prepare('SELECT COUNT(*) AS count FROM note_blocks WHERE user_id = ? AND course_id = ?').get(userId, courseId) as any;
+    const nodeCount = db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes WHERE user_id = ? AND course_id = ? AND node_type = ?').get(userId, courseId, 'note_block') as any;
+    assert.equal(noteCount.count, 1);
+    assert.equal(blockCount.count, 2);
+    assert.equal(nodeCount.count, 2);
+    assert.equal(second.block.metadata.template_id, 'formula.math');
+    assert.equal(second.block.block_type, 'formula');
+  });
+});
+
+test('learning canvas block insertion rejects unknown templates without partial rows', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
+
+    const beforeNotes = db.prepare('SELECT COUNT(*) AS count FROM notes').get() as any;
+    const beforeBlocks = db.prepare('SELECT COUNT(*) AS count FROM note_blocks').get() as any;
+    const beforeNodes = db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes').get() as any;
+
+    assert.throws(() => createCanvasNoteBlock(db, userId, canvas.id, {
+      template_id: 'unknown.template',
+      plain_text: 'Should not be created',
+      content_json: { body: 'Should not be created' },
+    } as any), /Unknown NoteBlock template/);
+
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM notes').get() as any).count, beforeNotes.count);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM note_blocks').get() as any).count, beforeBlocks.count);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes').get() as any).count, beforeNodes.count);
+  });
+});
+
+test('canvas layout proposal plans existing and missing source board nodes without mutating on create', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    seedParsedDocument(db, userId, courseId);
+    listCourseMaterials(db, userId, courseId);
+    generateSourceSnapshots(db, userId, { course_id: courseId });
+    const snapshot = (listSourceSnapshots(db, userId, courseId) as any[])[0];
+    createSourceScope(db, userId, {
+      course_id: courseId,
+      source_snapshot_id: snapshot.id,
+      scope_kind: 'page',
+      label: 'Layout page 1',
+      page_start: 1,
+    });
+    createSourceScope(db, userId, {
+      course_id: courseId,
+      source_snapshot_id: snapshot.id,
+      scope_kind: 'page_range',
+      label: 'Layout pages 2-3',
+      page_start: 2,
+      page_end: 3,
+    });
+    const board = createSourceBoard(db, userId, { course_id: courseId, title: 'Layout board' }) as any;
+    seedSourceBoardFromScopes(db, userId, board.id);
+    const boardNodes = listSourceBoardNodes(db, userId, board.id, { status: 'active' }) as any[];
+    const canvas = createLearningCanvas(db, userId, { course_id: courseId, title: 'Layout proposal canvas' }) as any;
+    const existingNode = createCanvasNode(db, userId, canvas.id, {
+      node_type: 'source_board_node',
+      source_board_node_id: boardNodes[0].id,
+      x: 12,
+      y: 24,
+      width: 260,
+      height: 140,
+    }) as any;
+
+    const beforeNodes = db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes WHERE canvas_id = ?').get(canvas.id) as any;
+    const beforeFrames = db.prepare('SELECT COUNT(*) AS count FROM canvas_frames WHERE canvas_id = ?').get(canvas.id) as any;
+    const beforeBoardRows = db.prepare('SELECT COUNT(*) AS count FROM source_board_nodes WHERE source_board_id = ?').get(board.id) as any;
+    const beforeNotes = db.prepare('SELECT COUNT(*) AS count FROM note_blocks WHERE user_id = ?').get(userId) as any;
+
+    const proposal = createCanvasLayoutProposal(db, userId, {
+      course_id: courseId,
+      canvas_id: canvas.id,
+      source_board_id: board.id,
+      layout_goal: 'a4_reading',
+    }) as any;
+
+    assert.equal(proposal.type, 'canvas_layout');
+    assert.equal(proposal.data.proposal_kind, 'canvas_layout');
+    assert.equal(proposal.data.apply_behavior, 'layout_records_only');
+    assert.equal(proposal.data.node_layouts.length, 2);
+    assert.equal(proposal.data.node_layouts.filter((layout: any) => layout.action === 'update_layout').length, 1);
+    assert.equal(proposal.data.node_layouts.filter((layout: any) => layout.action === 'create_node').length, 1);
+    assert.equal(proposal.data.node_layouts.some((layout: any) => layout.canvas_node_id === existingNode.id), true);
+    assert.equal(proposal.data.frames.length, 1);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes WHERE canvas_id = ?').get(canvas.id) as any).count, beforeNodes.count);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_frames WHERE canvas_id = ?').get(canvas.id) as any).count, beforeFrames.count);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM source_board_nodes WHERE source_board_id = ?').get(board.id) as any).count, beforeBoardRows.count);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM note_blocks WHERE user_id = ?').get(userId) as any).count, beforeNotes.count);
+
+    const storedProposal = db.prepare('SELECT * FROM proposals WHERE id = ? AND user_id = ?').get(proposal.id, userId) as any;
+    const applyResult = applyCanvasLayoutProposal(db, userId, storedProposal) as any;
+
+    assert.equal(applyResult.nodes_updated_count, 1);
+    assert.equal(applyResult.nodes_created_count, 1);
+    assert.equal(applyResult.frames_created_count, 1);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes WHERE canvas_id = ? AND status = ?').get(canvas.id, 'active') as any).count, 2);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_frames WHERE canvas_id = ? AND status = ?').get(canvas.id, 'active') as any).count, 1);
+    const updatedExisting = db.prepare('SELECT * FROM canvas_nodes WHERE id = ?').get(existingNode.id) as any;
+    assert.notEqual(updatedExisting.x, 12);
+    assert.equal(updatedExisting.metadata.includes('canvas_layout_proposal'), true);
+    const createdNode = db.prepare('SELECT * FROM canvas_nodes WHERE canvas_id = ? AND source_board_node_id = ?')
+      .get(canvas.id, boardNodes[1].id) as any;
+    assert.equal(createdNode.node_type, 'source_board_node');
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM note_blocks WHERE user_id = ?').get(userId) as any).count, beforeNotes.count);
+  });
+});
+
+test('canvas layout proposal rejects empty and cross-course inputs without partial writes', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    const otherCourseId = uuidv4();
+    db.prepare(`
+      INSERT INTO courses (id, user_id, name, created_at, updated_at)
+      VALUES (?, ?, 'Other course', datetime('now'), datetime('now'))
+    `).run(otherCourseId, userId);
+    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
+    const otherBoard = createSourceBoard(db, userId, { course_id: otherCourseId, title: 'Other board' }) as any;
+    const beforeProposalCount = db.prepare('SELECT COUNT(*) AS count FROM proposals').get() as any;
+
+    assert.throws(() => createCanvasLayoutProposal(db, userId, {
+      course_id: courseId,
+      canvas_id: canvas.id,
+    } as any), /No canvas layout objects/);
+
+    assert.throws(() => createCanvasLayoutProposal(db, userId, {
+      course_id: courseId,
+      canvas_id: canvas.id,
+      source_board_id: otherBoard.id,
+    } as any), /different course/);
+
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM proposals').get() as any).count, beforeProposalCount.count);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes WHERE canvas_id = ?').get(canvas.id) as any).count, 0);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_frames WHERE canvas_id = ?').get(canvas.id) as any).count, 0);
+  });
+});
+
+test('canvas relation layers seed defaults idempotently per canvas', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
+
+    const first = listRelationLayers(db, userId, { course_id: courseId, canvas_id: canvas.id }) as any[];
+    const second = listRelationLayers(db, userId, { course_id: courseId, canvas_id: canvas.id }) as any[];
+
+    assert.deepEqual(first.map((layer) => layer.layer_kind), [
+      'visual',
+      'learning_logic',
+      'source_evidence',
+      'ai_suggested',
+      'ai_hidden',
+    ]);
+    assert.deepEqual(second.map((layer) => layer.id), first.map((layer) => layer.id));
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM relation_layers WHERE canvas_id = ?').get(canvas.id) as any).count, 5);
+  });
+});
+
+test('canvas edges support incomplete and visual states without semantic relation rows', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
+    const first = createCanvasNoteBlock(db, userId, canvas.id, {
+      template_id: 'definition.basic',
+      plain_text: 'A limit is the value a function approaches.',
+      content_json: { body: 'A limit is the value a function approaches.' },
+    }) as any;
+    const second = createCanvasNoteBlock(db, userId, canvas.id, {
+      template_id: 'example.general',
+      plain_text: 'Example: lim x->0 sin(x)/x = 1.',
+      content_json: { body: 'Example: lim x->0 sin(x)/x = 1.' },
+      x: 420,
+    }) as any;
+
+    const incomplete = createCanvasEdge(db, userId, canvas.id, {
+      source_node_id: first.canvas_node.id,
+      source_port: 'right',
+      loose_target_x: 620,
+      loose_target_y: 140,
+      label: 'unfinished thought',
+    }) as any;
+
+    assert.equal(incomplete.connection_state, 'incomplete');
+    assert.equal(incomplete.target_node_id, null);
+    assert.equal(incomplete.loose_target_x, 620);
+    assert.throws(() => bindCanvasEdgeRelation(db, userId, incomplete.id, {
+      relation_type: 'read_before',
+    } as any), /Incomplete canvas edges cannot bind semantic relations/);
+
+    const visual = createCanvasEdge(db, userId, canvas.id, {
+      source_node_id: first.canvas_node.id,
+      source_port: 'right',
+      target_node_id: second.canvas_node.id,
+      target_port: 'left',
+      label: 'read before',
+    }) as any;
+
+    assert.equal(visual.connection_state, 'visual_only');
+    assert.equal(visual.object_relation_id, null);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM object_relations').get() as any).count, 0);
+
+    const detail = getLearningCanvasDetail(db, userId, canvas.id) as any;
+    assert.equal(detail.edges.length, 2);
+    assert.equal(detail.edges.some((edge: any) => edge.id === incomplete.id), true);
+    assert.equal(detail.edges.some((edge: any) => edge.id === visual.id), true);
+  });
+});
+
+test('canvas visual edge can bind and unbind an ObjectRelation safely', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
+    const source = createCanvasNoteBlock(db, userId, canvas.id, {
+      template_id: 'definition.basic',
+      plain_text: 'Green theorem relates circulation to double integrals.',
+      content_json: { body: 'Green theorem relates circulation to double integrals.' },
+    }) as any;
+    const target = createCanvasNoteBlock(db, userId, canvas.id, {
+      template_id: 'formula.math',
+      plain_text: '\\oint_C P dx + Q dy = \\iint_D (Q_x - P_y)dA',
+      content_json: { body: '\\oint_C P dx + Q dy = \\iint_D (Q_x - P_y)dA' },
+      x: 420,
+    }) as any;
+    const edge = createCanvasEdge(db, userId, canvas.id, {
+      source_node_id: source.canvas_node.id,
+      source_port: 'right',
+      target_node_id: target.canvas_node.id,
+      target_port: 'left',
+    }) as any;
+    const layer = (listRelationLayers(db, userId, { course_id: courseId, canvas_id: canvas.id }) as any[])
+      .find((item) => item.layer_kind === 'learning_logic');
+
+    const bound = bindCanvasEdgeRelation(db, userId, edge.id, {
+      relation_type: 'uses_formula',
+      relation_layer_id: layer.id,
+      label: 'uses this formula',
+    }) as any;
+
+    assert.equal(bound.edge.connection_state, 'relation_backed');
+    assert.equal(bound.edge.object_relation_id, bound.relation.id);
+    assert.equal(bound.relation.source_type, 'note_block');
+    assert.equal(bound.relation.source_id, source.block.id);
+    assert.equal(bound.relation.target_type, 'note_block');
+    assert.equal(bound.relation.target_id, target.block.id);
+    assert.equal(bound.relation.relation_type, 'uses_formula');
+    assert.equal(bound.relation.relation_layer_id, layer.id);
+    assert.equal((listObjectRelations(db, userId, { course_id: courseId, canvas_id: canvas.id }) as any[]).length, 1);
+
+    const unbound = unbindCanvasEdgeRelation(db, userId, edge.id) as any;
+    assert.equal(unbound.edge.connection_state, 'visual_only');
+    assert.equal(unbound.edge.object_relation_id, null);
+    const relationRow = db.prepare('SELECT * FROM object_relations WHERE id = ?').get(bound.relation.id) as any;
+    assert.equal(relationRow.status, 'detached');
+  });
+});
+
+test('canvas edge archive and restore only change projection edge status', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
+    const source = createCanvasNoteBlock(db, userId, canvas.id, {
+      template_id: 'definition.basic',
+      plain_text: 'Source block',
+      content_json: { body: 'Source block' },
+    }) as any;
+    const target = createCanvasNoteBlock(db, userId, canvas.id, {
+      template_id: 'example.general',
+      plain_text: 'Target block',
+      content_json: { body: 'Target block' },
+      x: 420,
+    }) as any;
+    const beforeSourceBlock = db.prepare('SELECT * FROM note_blocks WHERE id = ?').get(source.block.id);
+    const edge = createCanvasEdge(db, userId, canvas.id, {
+      source_node_id: source.canvas_node.id,
+      source_port: 'bottom',
+      target_node_id: target.canvas_node.id,
+      target_port: 'top',
+    }) as any;
+
+    const archived = archiveCanvasEdge(db, userId, edge.id) as any;
+    assert.equal(archived.status, 'archived');
+    assert.equal((getLearningCanvasDetail(db, userId, canvas.id) as any).edges.length, 0);
+
+    const restored = restoreCanvasEdge(db, userId, edge.id) as any;
+    assert.equal(restored.status, 'active');
+    assert.equal((getLearningCanvasDetail(db, userId, canvas.id) as any).edges.length, 1);
+    assert.deepEqual(db.prepare('SELECT * FROM note_blocks WHERE id = ?').get(source.block.id), beforeSourceBlock);
+  });
+});
+
+test('canvas command context exposes global commands without selection and stays read-only', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
+    const beforeOperationBatches = db.prepare('SELECT COUNT(*) AS count FROM operation_batches').get() as any;
+    const beforeCanvasNodes = db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes').get() as any;
+    const beforeEdges = db.prepare('SELECT COUNT(*) AS count FROM canvas_edges').get() as any;
+
+    const context = getCanvasCommandContext(db, userId, canvas.id, { selected_type: 'none' }) as any;
+
+    assert.equal(context.version, 'v2.4.5');
+    assert.equal(context.canvas_id, canvas.id);
+    assert.equal(context.course_id, courseId);
+    assert.equal(context.selected_scope.kind, 'none');
+    assert.deepEqual(context.tool_modes, ['select', 'connect', 'insert_block']);
+    assert.equal(context.ai_command_context.proposal_first, true);
+    assert.equal(context.ai_command_context.selected_object_count, 0);
+    assert.equal(commandById(context, 'canvas.zoom_in').enabled, true);
+    assert.equal(commandById(context, 'canvas.plan_layout').proposal_required, true);
+    assert.equal(commandById(context, 'canvas.open_selected_target').enabled, false);
+    assert.equal(commandById(context, 'canvas.open_selected_target').disabled_reason, 'No canvas object selected');
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM operation_batches').get() as any).count, beforeOperationBatches.count);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes').get() as any).count, beforeCanvasNodes.count);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_edges').get() as any).count, beforeEdges.count);
+  });
+});
+
+test('canvas command context resolves selected node and selected edge scopes', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
+    const source = createCanvasNoteBlock(db, userId, canvas.id, {
+      template_id: 'definition.basic',
+      plain_text: 'Definition content',
+      content_json: { body: 'Definition content' },
+    }) as any;
+    const target = createCanvasNoteBlock(db, userId, canvas.id, {
+      template_id: 'example.general',
+      plain_text: 'Example content',
+      content_json: { body: 'Example content' },
+      x: 420,
+    }) as any;
+    const edge = createCanvasEdge(db, userId, canvas.id, {
+      source_node_id: source.canvas_node.id,
+      source_port: 'right',
+      target_node_id: target.canvas_node.id,
+      target_port: 'left',
+    }) as any;
+    const bound = bindCanvasEdgeRelation(db, userId, edge.id, {
+      relation_type: 'read_before',
+      label: 'Read before',
+    }) as any;
+
+    const nodeContext = getCanvasCommandContext(db, userId, canvas.id, {
+      selected_type: 'canvas_node',
+      selected_id: source.canvas_node.id,
+    }) as any;
+    assert.equal(nodeContext.selected_scope.kind, 'canvas_node');
+    assert.equal(nodeContext.selected_scope.canvas_node_id, source.canvas_node.id);
+    assert.equal(nodeContext.selected_scope.target_type, 'note_block');
+    assert.equal(nodeContext.selected_scope.target_id, source.block.id);
+    assert.equal(nodeContext.ai_command_context.selected_object_count, 1);
+    assert.equal(commandById(nodeContext, 'canvas.open_selected_target').enabled, true);
+    assert.equal(commandById(nodeContext, 'canvas.archive_selected_node').enabled, true);
+    assert.equal(commandById(nodeContext, 'canvas.archive_selected_edge').enabled, false);
+
+    const edgeContext = getCanvasCommandContext(db, userId, canvas.id, {
+      selected_type: 'canvas_edge',
+      selected_id: edge.id,
+    }) as any;
+    assert.equal(edgeContext.selected_scope.kind, 'canvas_edge');
+    assert.equal(edgeContext.selected_scope.canvas_edge_id, edge.id);
+    assert.equal(edgeContext.selected_scope.connection_state, 'relation_backed');
+    assert.equal(edgeContext.selected_scope.object_relation_id, bound.relation.id);
+    assert.equal(commandById(edgeContext, 'canvas.bind_selected_edge_relation').enabled, true);
+    assert.equal(commandById(edgeContext, 'canvas.unbind_selected_edge_relation').enabled, true);
+    assert.equal(commandById(edgeContext, 'canvas.archive_selected_edge').enabled, true);
+  });
+});
+
+test('canvas command context rejects invalid selected objects without mutation', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
+    const otherCanvas = createLearningCanvas(db, userId, { course_id: courseId, title: 'Other canvas' }) as any;
+    const otherNode = createCanvasNoteBlock(db, userId, otherCanvas.id, {
+      template_id: 'definition.basic',
+      plain_text: 'Other node',
+      content_json: { body: 'Other node' },
+    }) as any;
+    const beforeRows = {
+      operations: (db.prepare('SELECT COUNT(*) AS count FROM operation_batches').get() as any).count,
+      nodes: (db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes').get() as any).count,
+      edges: (db.prepare('SELECT COUNT(*) AS count FROM canvas_edges').get() as any).count,
+    };
+
+    assert.throws(() => getCanvasCommandContext(db, userId, canvas.id, {
+      selected_type: 'canvas_node',
+      selected_id: otherNode.canvas_node.id,
+    }), /Canvas node belongs to a different canvas/);
+
+    assert.throws(() => getCanvasCommandContext(db, userId, canvas.id, {
+      selected_type: 'canvas_edge',
+      selected_id: uuidv4(),
+    }), /Canvas edge not found/);
+
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM operation_batches').get() as any).count, beforeRows.operations);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes').get() as any).count, beforeRows.nodes);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_edges').get() as any).count, beforeRows.edges);
+  });
+});
+
+test('v2.5.2 migration creates composition template tables', async () => {
+  await withDb((db) => {
+    const tableNames = db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'")
+      .all()
+      .map((row: any) => row.name);
+
+    assert.equal(tableNames.includes('composition_templates'), true);
+    assert.equal(tableNames.includes('composition_instances'), true);
+    assert.equal(tableNames.includes('composition_instance_slots'), true);
+  });
+});
+
+test('v2.5.2 seeds system composition templates and validates slot references', async () => {
+  await withDb((db) => {
+    const { userId } = seedUserCourse(db);
+
+    const firstSeed = seedSystemCompositionTemplates(db, userId);
+    const secondSeed = seedSystemCompositionTemplates(db, userId);
+    const templates = listCompositionTemplates(db, userId, {});
+    const report = getCompositionTemplateCompatibilityReport(db, userId) as any;
+
+    assert.equal(firstSeed.length >= 6, true);
+    assert.equal(secondSeed.length, firstSeed.length);
+    assert.equal(templates.some((item: any) => item.composition_key === 'formula_sheet.basic'), true);
+    assert.equal(templates.some((item: any) => item.composition_key === 'theorem_proof_example.basic'), true);
+    assert.equal(report.invalid_slot_reference_count, 0);
+    assert.equal(report.templates_checked >= 6, true);
+  });
+});
+
+test('v2.5.2 composition proposal previews without mutating content or canvas records', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
+    const composition = seedSystemCompositionTemplates(db, userId)
+      .find((item: any) => item.composition_key === 'theorem_proof_example.basic') as any;
+    const beforeRows = {
+      notes: (db.prepare('SELECT COUNT(*) AS count FROM notes').get() as any).count,
+      blocks: (db.prepare('SELECT COUNT(*) AS count FROM note_blocks').get() as any).count,
+      nodes: (db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes').get() as any).count,
+      frames: (db.prepare('SELECT COUNT(*) AS count FROM canvas_frames').get() as any).count,
+      instances: (db.prepare('SELECT COUNT(*) AS count FROM composition_instances').get() as any).count,
+    };
+
+    const proposal = createCompositionTemplateProposal(db, userId, {
+      course_id: courseId,
+      canvas_id: canvas.id,
+      composition_template_id: composition.id,
+      layout_goal: 'a4_section',
+      slot_inputs: [
+        { slot_key: 'theorem', plain_text: 'If a function is differentiable, then it is continuous.' },
+        { slot_key: 'proof', plain_text: 'Use the limit definition of derivative to show continuity.' },
+        { slot_key: 'example', plain_text: 'The polynomial x^2 is differentiable and continuous.' },
+      ],
+    }) as any;
+
+    assert.equal(proposal.type, 'composition_template');
+    assert.equal(proposal.data.proposal_kind, 'composition_template');
+    assert.equal(proposal.data.apply_behavior, 'create_new_content_and_projection_records_only');
+    assert.equal(proposal.data.slot_plan.filter((slot: any) => slot.status === 'filled').length, 3);
+    assert.equal(proposal.data.relation_blueprint_suggestions.length > 0, true);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM notes').get() as any).count, beforeRows.notes);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM note_blocks').get() as any).count, beforeRows.blocks);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes').get() as any).count, beforeRows.nodes);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_frames').get() as any).count, beforeRows.frames);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM composition_instances').get() as any).count, beforeRows.instances);
+  });
+});
+
+test('v2.5.2 applying composition proposal creates new blocks, canvas records, and slot history only', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
+    const composition = seedSystemCompositionTemplates(db, userId)
+      .find((item: any) => item.composition_key === 'theorem_proof_example.basic') as any;
+    const proposal = createCompositionTemplateProposal(db, userId, {
+      course_id: courseId,
+      canvas_id: canvas.id,
+      composition_template_id: composition.id,
+      slot_inputs: [
+        { slot_key: 'theorem', plain_text: 'Every convergent sequence is bounded.' },
+        { slot_key: 'proof', plain_text: 'Convergence gives a finite tail bound and the head is finite.' },
+        { slot_key: 'example', plain_text: 'The sequence 1/n is convergent and bounded.' },
+      ],
+    }) as any;
+    const proposalRow = db.prepare('SELECT * FROM proposals WHERE id = ? AND user_id = ?')
+      .get(proposal.id, userId) as any;
+    const beforeRelations = (db.prepare('SELECT COUNT(*) AS count FROM object_relations').get() as any).count;
+
+    const result = applyCompositionTemplateProposal(db, userId, proposalRow) as any;
+
+    assert.equal(result.blocks_created_count, 3);
+    assert.equal(result.canvas_nodes_created_count, 3);
+    assert.equal(typeof result.composition_instance_id, 'string');
+    assert.equal(typeof result.canvas_frame_id, 'string');
+
+    const instance = db.prepare('SELECT * FROM composition_instances WHERE id = ?')
+      .get(result.composition_instance_id) as any;
+    assert.equal(instance.composition_key, 'theorem_proof_example.basic');
+    assert.equal(instance.canvas_id, canvas.id);
+    assert.equal(instance.source_proposal_id, proposal.id);
+
+    const slots = db.prepare('SELECT * FROM composition_instance_slots WHERE composition_instance_id = ? ORDER BY slot_index ASC')
+      .all(result.composition_instance_id) as any[];
+    assert.equal(slots.length, 3);
+    assert.equal(slots.every((slot) => slot.status === 'filled'), true);
+    assert.equal(slots.every((slot) => Boolean(slot.note_block_id) && Boolean(slot.canvas_node_id)), true);
+
+    const createdBlock = db.prepare('SELECT metadata FROM note_blocks WHERE id = ?')
+      .get(slots[0].note_block_id) as any;
+    const metadata = JSON.parse(createdBlock.metadata);
+    assert.equal(metadata.composition_template_id, composition.id);
+    assert.equal(metadata.composition_instance_id, result.composition_instance_id);
+    assert.equal(metadata.template_key, 'theorem.basic');
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM object_relations').get() as any).count, beforeRelations);
+  });
+});
+
+test('v2.5.2 partial composition proposal records skipped slots and discard is non-mutating', async () => {
+  await withDb((db) => {
+    const { userId, courseId } = seedUserCourse(db);
+    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
+    const composition = seedSystemCompositionTemplates(db, userId)
+      .find((item: any) => item.composition_key === 'source_quote_interpretation.basic') as any;
+    const proposal = createCompositionTemplateProposal(db, userId, {
+      course_id: courseId,
+      canvas_id: canvas.id,
+      composition_template_id: composition.id,
+      partial_slot_keys: ['interpretation'],
+      slot_inputs: [
+        { slot_key: 'source_quote', plain_text: 'Original source sentence.' },
+      ],
+    }) as any;
+
+    assert.equal(proposal.data.slot_plan.some((slot: any) => slot.slot_key === 'interpretation' && slot.status === 'skipped'), true);
+    assert.equal(proposal.data.warnings.some((warning: string) => warning.includes('interpretation')), true);
+
+    db.prepare("UPDATE proposals SET status = 'discarded', resolved_at = datetime('now') WHERE id = ? AND user_id = ?")
+      .run(proposal.id, userId);
+
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM note_blocks').get() as any).count, 0);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes').get() as any).count, 0);
+    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM composition_instances').get() as any).count, 0);
+  });
+});
+
+function commandById(context: any, commandId: string) {
+  const command = context.available_commands.find((item: any) => item.command_id === commandId);
+  assert.ok(command, `missing command ${commandId}`);
+  return command;
+}

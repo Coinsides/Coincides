@@ -2,6 +2,12 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, ChevronDown, ChevronUp, Eye, Plus, Save, Trash2, X } from 'lucide-react';
 import api from '@/services/api';
+import {
+  loadRuntimeTemplateOptions,
+  metadataForTemplateOption,
+  STATIC_TEMPLATE_OPTIONS,
+  type TemplateOption,
+} from '@/services/templateOptions';
 import { useUIStore } from '@/stores/uiStore';
 import KaTeXRenderer from '@/components/KaTeX/KaTeXRenderer';
 import sharedTypes from '@shared/types';
@@ -9,12 +15,7 @@ import styles from './NoteDetail.module.css';
 
 const {
   getNoteBlockTemplateLabel,
-  legacyBlockTypeForTemplate,
-  listNoteBlockTemplates,
-  mergeNoteBlockTemplateMetadata,
 } = sharedTypes;
-
-const TEMPLATE_OPTIONS = listNoteBlockTemplates();
 
 interface Note {
   id: string;
@@ -96,6 +97,8 @@ export default function NoteDetailPage() {
   const [loading, setLoading] = useState(true);
   const [titleDraft, setTitleDraft] = useState('');
   const [newTemplateId, setNewTemplateId] = useState('text.paragraph');
+  const [templateOptions, setTemplateOptions] = useState<TemplateOption[]>(STATIC_TEMPLATE_OPTIONS);
+  const [templateWarning, setTemplateWarning] = useState<string | null>(null);
   const [newBlockText, setNewBlockText] = useState('');
   const [savingBlockId, setSavingBlockId] = useState<string | null>(null);
   const [anchorsBySourceRef, setAnchorsBySourceRef] = useState<Record<string, SourceAnchor>>({});
@@ -130,6 +133,19 @@ export default function NoteDetailPage() {
   useEffect(() => {
     fetchNote();
   }, [fetchNote]);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadRuntimeTemplateOptions().then(({ options, warning }) => {
+      if (cancelled) return;
+      setTemplateOptions(options);
+      setTemplateWarning(warning);
+      if (!options.some((template) => template.template_id === newTemplateId)) {
+        setNewTemplateId(options[0]?.template_id || 'text.paragraph');
+      }
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   const fetchSourceAnchors = useCallback(async (courseId: string) => {
     try {
@@ -170,9 +186,11 @@ export default function NoteDetailPage() {
   const addBlock = async () => {
     if (!note || !newBlockText.trim()) return;
     try {
-      const metadata = mergeNoteBlockTemplateMetadata({ template_id: newTemplateId }, legacyBlockTypeForTemplate(newTemplateId));
+      const selectedTemplate = templateOptions.find((template) => template.template_id === newTemplateId) || templateOptions[0];
+      if (!selectedTemplate) return;
+      const metadata = metadataForTemplateOption(selectedTemplate);
       await api.post(`/notes/${note.id}/blocks`, {
-        block_type: legacyBlockTypeForTemplate(newTemplateId),
+        block_type: selectedTemplate.legacy_block_type,
         content_json: { body: newBlockText.trim() },
         plain_text: newBlockText.trim(),
         metadata,
@@ -283,10 +301,11 @@ export default function NoteDetailPage() {
           value={newTemplateId}
           onChange={(event) => setNewTemplateId(event.target.value)}
         >
-          {TEMPLATE_OPTIONS.map((template) => (
+          {templateOptions.map((template) => (
             <option key={template.template_id} value={template.template_id}>{template.label}</option>
           ))}
         </select>
+        {templateWarning && <div className={styles.templateWarning}>{templateWarning}</div>}
         <textarea
           className={styles.newBlockText}
           value={newBlockText}

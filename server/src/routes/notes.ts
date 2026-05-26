@@ -10,7 +10,7 @@ import {
   reorderNoteBlocksSchema,
   updateNoteSchema,
 } from '../validators/index.js';
-import { mergeNoteBlockTemplateMetadata } from '../lib/noteBlockTemplates.js';
+import { mergeRuntimeNoteBlockTemplateMetadata } from '../services/templateDefinitions.js';
 
 const router = Router();
 
@@ -284,7 +284,7 @@ router.post('/:id/blocks', (req: AuthRequest, res: Response) => {
         data.title || null,
         stringifyJson(data.content_json, {}),
         data.plain_text || null,
-        stringifyJson(mergeNoteBlockTemplateMetadata(data.metadata, data.block_type), {}),
+        stringifyJson(mergeRuntimeNoteBlockTemplateMetadata(db, req.userId!, data.metadata, data.block_type).metadata, {}),
         operationBatchId,
         now,
         now

@@ -10,6 +10,7 @@ import GoalsPage from '@/pages/Goals/Goals';
 import CoursesPage from '@/pages/Courses/Courses';
 import CourseDetailPage from '@/pages/Courses/CourseDetail';
 import NoteDetailPage from '@/pages/Notes/NoteDetail';
+import TemplateStudioPage from '@/pages/Templates/TemplateStudio';
 import SettingsPage from '@/pages/Settings/Settings';
 import DecksPage from '@/pages/Decks/Decks';
 import DeckDetailPage from '@/pages/Decks/DeckDetail';
@@ -87,6 +88,7 @@ export default function App() {
           <Route path="courses" element={<CoursesPage />} />
           <Route path="courses/:courseId" element={<CourseDetailPage />} />
           <Route path="notes/:noteId" element={<NoteDetailPage />} />
+          <Route path="templates" element={<TemplateStudioPage />} />
           <Route path="decks" element={<DecksPage />} />
           <Route path="decks/:deckId" element={<DeckDetailPage />} />
           <Route path="review" element={<ReviewPage />} />

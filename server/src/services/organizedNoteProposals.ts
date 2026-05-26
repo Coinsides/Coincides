@@ -4,10 +4,9 @@ import { AppError } from '../middleware/errorHandler.js';
 import { getProviderFromSettings } from '../agent/providers/index.js';
 import { ensureSegmentsForMaterial, listCourseMaterials } from './courseMaterials.js';
 import {
-  getNoteBlockTemplate,
-  inferNoteBlockTemplateMetadata,
-  mergeNoteBlockTemplateMetadata,
-} from '../lib/noteBlockTemplates.js';
+  legacyBlockTypeForRuntimeTemplate,
+  mergeRuntimeNoteBlockTemplateMetadata,
+} from './templateDefinitions.js';
 import { resolveSourceBoardForProposal } from './sourceBoards.js';
 import { resolveSourceScopesForProposal } from './sourceScopes.js';
 
@@ -187,19 +186,21 @@ function sourceReferencesForSegment(db: Database.Database, segment: any): Source
   }));
 }
 
-function deterministicBlocks(db: Database.Database, segments: any[]): OrganizedNoteBlock[] {
+function deterministicBlocks(db: Database.Database, userId: string, segments: any[]): OrganizedNoteBlock[] {
   const blocks: OrganizedNoteBlock[] = [];
   for (const segment of segments) {
     const refs = sourceReferencesForSegment(db, segment);
     const excerpt = refs[0]?.source_excerpt || segment.summary || segment.title;
     const headingText = segment.title || 'Source segment';
+    const headingMetadata = mergeRuntimeNoteBlockTemplateMetadata(db, userId, {}, 'heading');
+    const paragraphMetadata = mergeRuntimeNoteBlockTemplateMetadata(db, userId, {}, 'paragraph');
     blocks.push({
       temp_id: `block-${blocks.length + 1}`,
-      block_type: 'heading',
+      block_type: legacyBlockTypeForRuntimeTemplate(headingMetadata.template),
       title: headingText,
       content_json: { body: headingText },
       plain_text: headingText,
-      metadata: mergeNoteBlockTemplateMetadata({}, 'heading'),
+      metadata: headingMetadata.metadata,
       order_index: blocks.length,
       source_references: refs,
       confidence: segment.confidence ?? 0.7,
@@ -207,11 +208,11 @@ function deterministicBlocks(db: Database.Database, segments: any[]): OrganizedN
     });
     blocks.push({
       temp_id: `block-${blocks.length + 1}`,
-      block_type: 'paragraph',
+      block_type: legacyBlockTypeForRuntimeTemplate(paragraphMetadata.template),
       title: null,
       content_json: { body: excerpt },
       plain_text: excerpt,
-      metadata: mergeNoteBlockTemplateMetadata({}, 'paragraph'),
+      metadata: paragraphMetadata.metadata,
       order_index: blocks.length,
       source_references: refs,
       confidence: segment.confidence ?? 0.7,
@@ -221,7 +222,13 @@ function deterministicBlocks(db: Database.Database, segments: any[]): OrganizedN
   return blocks;
 }
 
-function sanitizeAiBlock(block: any, fallbackRefs: SourceReference[], orderIndex: number): OrganizedNoteBlock | null {
+function sanitizeAiBlock(
+  db: Database.Database,
+  userId: string,
+  block: any,
+  fallbackRefs: SourceReference[],
+  orderIndex: number,
+): OrganizedNoteBlock | null {
   const allowedTypes = new Set([
     'heading',
     'paragraph',
@@ -250,22 +257,29 @@ function sanitizeAiBlock(block: any, fallbackRefs: SourceReference[], orderIndex
     : typeof inputMetadata.learning_role === 'string'
       ? inputMetadata.learning_role
       : undefined;
-  const template = getNoteBlockTemplate(requestedTemplateId);
-  const metadata = mergeNoteBlockTemplateMetadata(
-    template ? { ...inputMetadata, template_id: template.template_id } : inputMetadata,
+  const resolved = mergeRuntimeNoteBlockTemplateMetadata(
+    db,
+    userId,
+    requestedTemplateId ? { ...inputMetadata, template_id: requestedTemplateId } : inputMetadata,
     blockType,
+    { allowUnknownTemplateFallback: true },
   );
+  const metadata = resolved.metadata;
+  const normalizedBlockType = legacyBlockTypeForRuntimeTemplate(resolved.template);
   const plainText = String(block?.plain_text || block?.content_json?.body || block?.title || '').trim();
   if (!plainText) return null;
-  const warnings = Array.isArray(block?.warnings) ? block.warnings.map(String) : [];
-  if (requestedTemplateId && !template) {
+  const warnings = [
+    ...(Array.isArray(block?.warnings) ? block.warnings.map(String) : []),
+    ...resolved.warnings,
+  ];
+  if (requestedTemplateId && resolved.resolution_status === 'template_missing') {
     warnings.push(`Unknown template_id "${requestedTemplateId}" was mapped to ${metadata.template_id}.`);
   } else if (requestedRole && requestedRole !== metadata.learning_role) {
     warnings.push(`Unsupported learning_role "${requestedRole}" was mapped to ${metadata.learning_role}.`);
   }
   return {
     temp_id: String(block?.temp_id || `ai-block-${orderIndex + 1}`),
-    block_type: blockType,
+    block_type: normalizedBlockType,
     title: typeof block?.title === 'string' ? block.title : null,
     content_json: typeof block?.content_json === 'object' && block.content_json !== null
       ? block.content_json
@@ -316,7 +330,7 @@ async function tryGenerateAiBlocks(
 
     const fallbackRefs = segments.flatMap((segment) => sourceReferencesForSegment(db, segment)).slice(0, 3);
     const blocks = parsed.blocks
-      .map((block, index) => sanitizeAiBlock(block, fallbackRefs, index))
+      .map((block, index) => sanitizeAiBlock(db, userId, block, fallbackRefs, index))
       .filter((block): block is OrganizedNoteBlock => Boolean(block));
     return blocks.length > 0 ? blocks : null;
   } catch {
@@ -345,7 +359,7 @@ export async function createOrganizedNoteProposal(
   const title = input.note_title || `${course.name} Organized Notes`;
   const settings = getUserSettings(db, userId);
   const aiBlocks = await tryGenerateAiBlocks(db, userId, settings, title, segments);
-  const blocks = aiBlocks || deterministicBlocks(db, segments);
+  const blocks = aiBlocks || deterministicBlocks(db, userId, segments);
   const generationMode = aiBlocks ? 'ai' as const : 'deterministic_fallback' as const;
   const allWarnings = aiBlocks
     ? [...resolvedBoard.warnings, ...resolvedScopes.warnings, ...warnings]
@@ -466,7 +480,13 @@ export function applyOrganizedNoteProposal(db: Database.Database, userId: string
       JSON.stringify(block.content_json || {}),
       block.plain_text || null,
       JSON.stringify({
-        ...mergeNoteBlockTemplateMetadata(block.metadata || inferNoteBlockTemplateMetadata(block.block_type), block.block_type),
+        ...mergeRuntimeNoteBlockTemplateMetadata(
+          db,
+          userId,
+          block.metadata || {},
+          block.block_type,
+          { allowUnknownTemplateFallback: true },
+        ).metadata,
         proposal_id: proposal.id,
         temp_id: block.temp_id,
       }),

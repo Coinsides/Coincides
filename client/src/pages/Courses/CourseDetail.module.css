@@ -1172,6 +1172,221 @@
   color: var(--error);
 }
 
+/* v2.4 Canvas seed */
+.canvasWorkspaceSection {
+  position: relative;
+}
+
+.canvasWorkspaceShell {
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--glass-shadow-sm);
+  padding: 16px;
+}
+
+.canvasWorkspaceExpanded {
+  background: var(--bg-deepest);
+  inset: 18px 18px 0 286px;
+  margin: 0;
+  overflow: auto;
+  padding: 0;
+  position: fixed;
+  z-index: 220;
+}
+
+.canvasWorkspaceExpanded .canvasWorkspaceShell {
+  background: var(--bg-surface);
+  min-height: 100%;
+}
+
+.canvasWorkspaceHeader {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.canvasWorkspaceHint {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  margin-top: 7px;
+  max-width: 760px;
+}
+
+.canvasWorkspaceActions,
+.canvasWorkspaceTabs {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.canvasCompositionSelect {
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 13px;
+  min-height: 34px;
+  max-width: 220px;
+  min-width: 170px;
+  outline: none;
+  padding: 6px 9px;
+}
+
+.canvasCompositionSelect:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary) 18%, transparent);
+}
+
+.canvasCompositionSelect:disabled {
+  opacity: 0.58;
+}
+
+.canvasWorkspaceTabs {
+  justify-content: flex-start;
+  margin-bottom: 12px;
+}
+
+.canvasWorkspaceBody {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.canvasWorkspaceMeta {
+  color: var(--text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 12px;
+  gap: 8px;
+}
+
+.canvasWorkspaceMeta span {
+  background: var(--glass-elevated);
+  border: 1px solid var(--glass-border);
+  border-radius: 9999px;
+  padding: 4px 8px;
+}
+
+.canvasWorkspaceEmpty {
+  border: 1px dashed var(--glass-border);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: 13px;
+  min-height: 300px;
+  padding: 48px 16px;
+  text-align: center;
+}
+
+.canvasPanel {
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  background: var(--glass-surface);
+  padding: 14px;
+}
+
+.canvasDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.canvasPreviewFrame {
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--bg-primary) 88%, var(--accent-primary) 12%);
+  max-height: 520px;
+  overflow: auto;
+  padding: 18px;
+}
+
+.canvasPagePreview {
+  position: relative;
+  width: 640px;
+  min-height: 900px;
+  margin: 0 auto;
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  background:
+    linear-gradient(rgba(120, 120, 120, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 120, 120, 0.08) 1px, transparent 1px),
+    var(--bg-primary);
+  background-size: 24px 24px;
+  box-shadow: var(--glass-shadow-md);
+}
+
+.canvasEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.canvasNodeCard {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--glass-surface);
+  box-shadow: var(--glass-shadow-sm);
+  padding: 10px;
+}
+
+.canvasNodeOpenBtn {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-start;
+  min-width: 0;
+  text-align: left;
+}
+
+.canvasNodeOpenBtn span {
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 700;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.canvasNodeOpenBtn small {
+  color: var(--text-muted);
+  display: -webkit-box;
+  font-size: 11px;
+  line-height: 1.35;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.canvasNodeArchiveBtn {
+  align-self: flex-start;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 11px;
+  padding: 4px 7px;
+}
+
+.canvasNodeArchiveBtn:hover {
+  background: var(--glass-hover);
+  color: var(--text-primary);
+}
+
 /* Confirm dialog (reuse pattern) */
 .confirmOverlay {
   position: fixed;
@@ -1263,6 +1478,19 @@
 
   .materialWorkspace {
     grid-template-columns: 1fr;
+  }
+
+  .canvasWorkspaceExpanded {
+    inset: 12px;
+  }
+
+  .canvasWorkspaceHeader {
+    flex-direction: column;
+  }
+
+  .canvasWorkspaceActions {
+    justify-content: flex-start;
+    width: 100%;
   }
 
   .proposalItem {
