@@ -1,15 +1,25 @@
-# Coincides Roadmap
+# Coincides Roadmap v2.0-v2.5.6 (Closed Foundation Roadmap)
 
-**Updated**: 2026-05-24
-**Current mainline**: v2.5 Template / Package Runtime planning on `feat/v2.0-noteblock`
+**Updated**: 2026-06-05
+**Roadmap status**: CLOSED / historical foundation roadmap.
+**Closed at**: v2.5.6 DomainRefinementProposal Seed.
+**Historical mainline**: v2.0-v2.5.6 foundation work on `feat/v2.0-noteblock`
+**Next roadmap**: `docs/Coincides-Better-Notebook-Roadmap.md`
 
 ---
 
 ## 1. Roadmap Role
 
-This roadmap is the formal v2.x version-direction document.
+This roadmap is the closed formal v2.0-v2.5.6 version-direction document.
 
 It defines product direction, version themes, candidate conceptual entities, and major boundaries. It does not lock real database table names, fields, API endpoints, migrations, or UI implementation details.
+
+Closure note:
+
+- This document is now a historical foundation roadmap. It should preserve the v2.0-v2.5.6 engineering, source, canvas, template, package, and graph-readiness decisions.
+- Do not append the Better Notebook product rebuild / mature notebook UX roadmap here.
+- The next roadmap is `docs/Coincides-Better-Notebook-Roadmap.md`. It starts from the Product Improvement Issue Register, PI-046/PI-048 research, R15 GraphRAG decision work, Better Notebook research, and Henry's post-v2.5 product decision.
+- v2.6+, v3.x, and later sections below are retained as historical candidates, not as active commitments.
 
 Document responsibilities:
 
@@ -36,7 +46,9 @@ Current execution entry:
 - v2.5 R12 Rich Editor Adapter Criteria: `docs/brainstorm/V2.5Research/r12-rich-editor-adapter-spike-criteria.md`
 - v2.5 R13 Graph-Native Migration Evidence: `docs/brainstorm/V2.5Research/r13-v2.5-graph-native-migration-evidence.md`
 - v2.5 R14 Development Guidance: `docs/brainstorm/V2.5Research/r14-v2.5-roadmap-plan-revision-recommendations.md`
-- Current version plan: v2.5.x planning track, promoted from this roadmap before implementation.
+- Closed final version plan: `docs/releases/v2.5.6-plan.md`
+- Closed final engineering spec: `docs/releases/v2.5.6-engineering-spec.md`
+- Next roadmap entry: `docs/Coincides-Better-Notebook-Roadmap.md`
 
 ---
 
@@ -60,7 +72,7 @@ source-grounded information workspace
   -> graph-ready / future graph-native knowledge operating system
 ```
 
-Current roadmap shape after v2.4 research:
+Closed roadmap shape after v2.5.6:
 
 ```text
 v2.4.x:
@@ -72,14 +84,15 @@ v2.5.x:
   Template / Composition / Domain / Package Runtime Infrastructure
   portable workspace and graph-native evidence foundation
 
-v2.6+:
-  larger source-grounded knowledge operations
-  report / briefing / investigation / AI workbench expansion
+post-v2.5.6:
+  old roadmap closed
+  Better Notebook roadmap to be written separately
+  mature notebook UX, editor behavior, source reconstruction, and AI-assisted note/report assembly should be replanned from research
 
 v3.x:
-  graph-native architecture decision
+  graph-native architecture decision remains a future candidate
   Neo4j candidate evaluation
-  graph migration from v2.x evidence
+  graph migration from v2.x evidence should be reconsidered after Better Notebook planning
 ```
 
 Core reliability ladder:
@@ -159,13 +172,13 @@ Practical consequences:
 - v2.2.x: Material Reconciliation foundation track completed through v2.2.3; Henry batch acceptance may be deferred.
 - v2.3.x: Source Snapshot / Anchor / Scope / Source Board foundation track completed through v2.3.4 planning patch; Henry batch acceptance is deferred until Canvas / Source Board maturity.
 - v2.4.x: Canvas / Relation foundation track completed through v2.4.5; Henry batch acceptance may be deferred.
-- v2.5.x: active Template / Package Runtime Infrastructure planning track.
+- v2.5.x: Template / Package Runtime Infrastructure track closed through v2.5.6. v2.5.7 was not promoted in this roadmap.
 
 Version locking rule:
 
 - Each active minor or patch version must become decision-complete in `docs/releases/v2.X-plan.md` and later `v2.X-engineering-spec.md` before code work.
-- `v2.2+` remain directional in this roadmap. Their candidate entities are planning hints, not final table names or implementation commitments.
-- Before starting any later minor version, promote that roadmap section into `docs/releases/v2.X-plan.md` and then an engineering spec.
+- `v2.2+` entries in this document are now historical directional records. Their candidate entities are planning hints, not final table names or implementation commitments.
+- Do not promote new post-v2.5.6 work from this closed roadmap. Start a separate Better Notebook roadmap and promote future work from that new document.
 
 ---
 
@@ -596,9 +609,15 @@ Boundary notes:
 
 ## 12. v2.5.x — Template / Composition / Domain / Package Runtime Infrastructure
 
-**Status**: active planning track; promote each patch into a version plan before implementation.
+**Status**: closed through v2.5.6. v2.5.7 was not promoted in this roadmap.
 
 Goal: establish the runtime, governance, package, and migration foundations that let templates become a durable extension layer for NoteBlocks, compositions, domains, AI behavior, packages, and future graph-native migration.
+
+Closeout note:
+
+- v2.5.0-v2.5.6 completed the runtime/governance foundation needed for later notebook work: TemplateDefinition, Template Studio seed, CompositionTemplate, DomainBlockSet, PackageManifest, TemplateMigrationProposal, package import/export, and DomainRefinementProposal.
+- The original v2.5.7 rich editor adapter spike remains deferred. Its concerns are now part of the separate Better Notebook roadmap discussion rather than this closed foundation roadmap.
+- Future work should not continue this section by inertia. Use this section as evidence and background for the new roadmap.
 
 R14 guidance: v2.5 is not a "template editor" track. It is the **Template / Composition / Domain / Package Runtime Infrastructure Track**. User-facing template editing matters, but it must come after runtime identity, compatibility, behavior boundaries, AI-readable summaries, and proposal-first migration safety.
 
@@ -701,11 +720,12 @@ Suggested patch breakdown:
   - Generate dry-run impact reports over `DomainBlockSet`, template memberships, composition memberships, package manifests, compatibility reports, and affected NoteBlocks.
   - Apply only conservative metadata/mapping changes with operation batches and recovery records; do not silently rewrite old NoteBlocks or package contents.
   - Preserve domain evolution evidence for future graph-native migration: domain successor links, membership changes, package compatibility impact, and provenance.
-- `v2.5.7`: Rich NoteBlock Editor Adapter Spike, only if needed.
+- `v2.5.7`: Rich NoteBlock Editor Adapter Spike, deferred / not promoted in this closed roadmap.
   - Do not run this just because the UI is rough.
   - Candidate order if needed: Tiptap/ProseMirror, Lexical, BlockNote, Milkdown, BlockSuite as reference.
   - Any adapter must prove NoteBlock identity, template metadata, source markers, ObjectRelation truth, proposal-first safety, selected object scope, and adapter removability.
   - Editor document model must not become Coincides domain model.
+  - Post-v2.5.6 decision: this topic should be reconsidered inside the separate Better Notebook roadmap, together with PI-046 editor/product research and the Product Improvement Issue Register.
 
 Boundary notes:
 
@@ -720,7 +740,7 @@ Boundary notes:
 
 ## 13. v2.6+ — Larger Knowledge Operations Expansion
 
-**Status**: long-range direction; candidate scope only.
+**Status**: historical long-range candidate scope only; superseded by the separate Better Notebook roadmap process for active planning.
 
 Goal: expand beyond learning-only workflows after source grounding, reconciliation, canvas projection, and template systems are stable.
 
@@ -756,6 +776,7 @@ Boundary notes:
 
 - These are durable directions, not v2.2-v2.5 commitments.
 - Personal knowledge operations should grow from source-grounded learning primitives rather than replacing them.
+- After the v2.0-v2.5.6 roadmap closeout, these ideas should be re-evaluated in the new Better Notebook roadmap instead of treated as automatic v2.6 work.
 
 ---
 

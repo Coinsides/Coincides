@@ -1,242 +1,221 @@
 # Coincides Architecture
 
-**Updated**: 2026-05-17  
-**Status**: v1 implemented architecture plus v2 target architecture
+**Updated**: 2026-06-06
+**Status**: Active architecture boundary for the Better Notebook track
+**Active roadmap**: `docs/Coincides-Better-Notebook-Roadmap.md`
 
 ---
 
-## 1. Current Implemented Architecture
+## 1. Architecture Role
+
+This document describes the active architecture boundary for Coincides after the v2.0-v2.5.6 foundation work.
+
+The earlier v2 foundation remains valuable: notes, source snapshots, source scopes, source boards, learning canvas, canvas edges, object relations, template definitions, composition templates, domain packages, package import/export, and proposal-first mutation are the current substrate.
+
+The next track is not more raw foundation expansion. It is Better Notebook productization: turning the substrate into a mature notebook/report surface.
+
+---
+
+## 2. Current Stack
 
 Coincides currently runs as a local-first web application stack:
 
-- **Frontend**: React, TypeScript, Vite, Zustand, CSS modules.
-- **Backend**: Node.js, Express, TypeScript runtime.
-- **Database**: SQLite with migrations and local persistence.
-- **Math rendering**: KaTeX.
-- **Review**: FSRS.
-- **Document processing**: uploaded files are parsed, chunked, indexed, and made available to agent tools.
-- **Search/RAG**: full-text and embedding-based retrieval.
-- **AI workflow**: agent proposes structured operations; user reviews before applying.
+- frontend: React, TypeScript, Vite, Zustand-style client state, CSS modules;
+- backend: Node.js, Express, TypeScript runtime;
+- database: SQLite with additive migrations;
+- math rendering: KaTeX;
+- review: FSRS;
+- document processing: upload, parse, chunk, index, search;
+- AI workflow: proposal-first operations and review/apply behavior.
 
-This architecture is real and should be respected during migration work, but it is not the final v2 knowledge architecture.
-
-### v2.0 NoteBlock Foundation Implementation
-
-v2.0 introduces a course-rooted NoteBlock foundation while leaving the existing Card/Deck system usable.
-
-The backend surface is additive:
-
-- `server/src/routes/notes.ts` exposes note creation, note metadata updates, block listing, block creation, block reorder, and note trash behavior.
-- `server/src/routes/noteBlocks.ts` exposes block update and trash behavior.
-- `server/src/routes/projections.ts` exposes stable projection snapshot creation and reads.
-- `server/src/db/migrations/015_v2_note_foundation.ts` adds the v2 tables without rewriting v1 Card/Deck data.
-
-The frontend surface is intentionally small:
-
-- Course detail pages show a Notes entry point.
-- `client/src/pages/Notes/NoteDetail.tsx` provides basic manual block editing, reordering, trashing, and KaTeX-friendly preview.
-
-Projection snapshots are stored as snapshots and should not silently re-render from live blocks after creation. AI note proposal, Source Snapshot Viewer, Course Material Library UI, and Card/Deck migration remain out of v2.0 scope.
+This stack remains the implementation base for Better Notebook work.
 
 ---
 
-## 2. v2 Root Model
+## 3. Core Architecture Principle
 
-The v2 product should separate global/user context from learning-domain content:
+Coincides Core owns truth.
 
 ```text
-Workspace / Local Profile
-  -> Course
-    -> Schedule / Goals / Tasks
-    -> Source Library
-    -> Course Material Library
-    -> NoteBlock Library
-    -> Projection System
-    -> Concept Index
+Coincides Core
+  owns content, source, relation, template, package, operation history.
+
+Editor / Canvas Surface
+  renders and edits projections of core objects.
+
+Adapters / External Tools
+  produce candidates, proposals, indexes, or projections.
+  They do not become canonical truth by default.
 ```
 
-`Workspace / Local Profile` stores global settings, model configuration, user preferences, and future cross-course relationships.
-
-`Course` is the learning-content root. Course-level material, notes, review sets, concepts, source references, and learning projections should be scoped there first.
-
-Agent Memory should stay lightweight and preference-oriented. It may remember language, style, learning preferences, and interaction habits. It should not become the primary store for course knowledge. Course knowledge belongs in Course Material Library.
+This applies to AFFiNE/BlockSuite, GraphRAG, OCR/VLM tools, source reconstruction tools, external agents, import/export packages, and future graph databases.
 
 ---
 
-## 3. v2 Processing Flow
+## 4. Better Notebook Object Boundary
 
-The target material flow is:
+### Content Truth
+
+`NoteBlock` is the canonical content unit. It stores meaningful content such as paragraph, heading, formula, definition, proof, example, exercise, source quote, callout, code, or future template-backed block variants.
+
+Editing text or structured content updates NoteBlock content. Moving or resizing does not.
+
+Structured NoteBlocks may store template-guided field values. For example, a definition block may have `concept_name` and `description`; a formula block may have `formula_name`, `latex_input`, and `variables`. These fields are content truth. Their visual boxes, positions, typography, and page arrangement are layout/render state.
+
+`TemplateDefinition` may define field schema and render guidance. Ordinary note editing changes field values and field layout. Changing the available fields belongs to Template Studio or another template-governance flow.
+
+### Layout Truth
+
+`BlockBox`, `CanvasNode`, placement, page position, size, z-order, and export role are layout/projection state.
+
+Layout state answers:
+
+- where the block appears;
+- how large it is;
+- whether it is page-in or page-out;
+- whether it is formal or scratch;
+- whether it is included in export;
+- whether it is visible to AI by default.
+
+### Page And Canvas Surface
+
+The Better Notebook surface is page-first and canvas-backed.
+
+- Page/document mode provides a stable writing and export surface.
+- Canvas/reasoning mode provides room for scratch, derivation, local graph, and exploratory layout.
+
+The surface is not the source of truth. It projects Coincides objects.
+
+### Source Truth
+
+Source objects preserve evidence and provenance:
+
+- source document identity;
+- source version identity;
+- original material or registered source;
+- normalized source snapshot;
+- source anchor;
+- source scope;
+- source board;
+- future source region.
+
+Generated or user-authored blocks may attach source references later. A source-free user block is valid; an unsupported AI-generated claim should be visibly different.
+
+Source truth belongs to Coincides Core. The editor/canvas surface may display source badges, inspectors, warnings, and pickers, but it must not own source truth. A source reference may point to an external source version or an internal artifact such as a note, report, section, or NoteBlock.
+
+Source import intent belongs to Coincides Core. A source should be able to record whether it is being used as unprocessed evidence, a condensed note, an agent briefing, a human interpretation note, a draft report, a final report, a reasoning trace, or an archive-only material. This intent is not just UI text; it affects reconstruction, source-chain interpretation, AI visibility, and future alignment or merge proposals.
+
+Condensed raw sources need preservation-first handling. A handwritten note, lecture note, or imported briefing may already encode layout, diagrams, formula placement, human interpretation, or reasoning state. Reconstruction adapters may recover regions and candidates, but they must not silently summarize, delete, or rewrite those materials as if they were unprocessed textbooks.
+
+External source snapshots may become missing because a user deletes files outside the app. Source versions may become outdated, deprecated, archived, deleted, broken, degraded, or recovered. These states should be represented as source-chain health, not as editor runtime errors.
+
+Internal source chain is a provenance graph. It is not the same thing as semantic `ObjectRelation`, although relation systems and future GraphRAG adapters may read source provenance as evidence input.
+
+### Relation Truth
+
+`ObjectRelation` is semantic relation truth. `CanvasEdge` or future `CanvasConnector` is visual/projection interaction.
+
+Users may draw a connector without creating a confirmed relation. A confirmed relation requires a relation type, resolvable endpoints, and lifecycle state.
+
+Relation design follows `docs/Coincides-Relation-Product-Design.md`.
+
+### Link Truth
+
+`Link` / `InternalLink` is navigation state. It lets the user jump to another note, block, page, source view, or future view target. It is not evidence truth and it is not semantic relation truth.
 
 ```text
-Upload / Import
-  -> Original Source
-  -> Normalized Source Snapshot
-  -> SourceFragment
-  -> MaterialSegment
-  -> Material Reconciliation
-  -> Canonical NoteBlock
-  -> Projection Snapshot
+Link:
+  where to go.
+
+SourceReference:
+  what evidence supports this content.
+
+ObjectRelation:
+  what semantic relation exists between objects.
 ```
 
-Key layers:
+These may coexist on the same block, but one must not automatically create the others.
 
-- **Original Source**: the uploaded PDF, Word file, image, scan, slide deck, textbook, or mixed material preserved as user evidence.
-- **Normalized Source Snapshot**: a uniform viewing/reference layer, such as page images plus optional text layer. This expands the PDF Reader idea into a source viewer for many file types.
-- **SourceFragment**: raw extraction units with source order, page, optional bbox, raw text, image crop, OCR/parser confidence, and extraction method.
-- **MaterialSegment**: a course-level selectable learning range such as chapter, week, part, section, page range, lecture unit, or topic cluster.
-- **Material Reconciliation**: the layer that handles out-of-order uploads, duplicate knowledge, missing-bridge candidates, excluded scopes, and recommended learning order.
-- **Canonical NoteBlock**: a reconciled learning block such as theorem, formula, definition, proof, example, exercise, answer, diagram crop, or paragraph.
-- **Projection Snapshot**: a stable generated view such as organized note, review set, formula sheet, concept focus note, or exam review set.
+---
 
-The principle is:
+## 5. Adapter Boundary
+
+Adapters are allowed and expected, but they must not replace Coincides Core.
+
+### Editor Runtime Adapter
+
+An editor runtime may render page/canvas objects and provide selection, text editing, layout, or connector interaction. It must map changes back to Coincides objects.
+
+It must not swallow source grounding, NoteBlock identity, ObjectRelation identity, template metadata, or operation history.
+
+### Source Reconstruction Adapter
+
+OCR, VLM, formula recognition, web extraction, and layout extraction tools should produce:
 
 ```text
-Raw source order is preserved, but learning order is reconstructed.
-Duplicate knowledge is merged, but source evidence is retained.
-Evidence list first, evidence interpretation later.
+SourceRegion
+  -> NoteBlockCandidate
+  -> proposal
+  -> reviewed NoteBlock / source anchor / source scope
 ```
 
----
+They should not directly create final note truth without review.
 
-## 4. Source Evidence And Canonical Blocks
+Source reconstruction is not the same thing as note generation. Reconstruction recovers source regions, reading order, formulas, tables, image crops, diagrams, and layout evidence. Note generation decides what to select, condense, rewrite, merge, cite, or lay out as a refined note/report. Existing-note import may choose preservation-first reconstruction instead of summarization.
 
-Source evidence and canonical NoteBlocks must remain separate.
+Visible arrows, spatial grouping, or diagram marks in an imported condensed source may become relation clues or relation candidates. They must not automatically create confirmed ObjectRelations.
 
-A theorem may appear in three or sixty sources. The canonical NoteBlock should not erase those sources or pretend that all sources are identical. Early v2 should simply keep an evidence list:
+Adapters, OCR/VLM tools, GraphRAG, importers, and external agents may produce source candidates, SourceRegions, indexes, or proposals. They must not overwrite canonical SourceVersion, SourceReference, or SourceChain truth directly.
 
-```text
-Canonical theorem block
-  -> source A page 3
-  -> source B page 12
-  -> source C page 40
-```
+### GraphRAG / Graph Adapter
 
-Ranking sources by detail, authority, or usefulness can come later. The first reliable version should list evidence, preserve source references, and let the user inspect where the material came from.
+GraphRAG may help discover candidate relationships or provide a query/index layer. It must not define Coincides relation truth.
 
----
+Accepted ObjectRelations may be exported into a graph/RAG sidecar later, but the sidecar remains adapter/index state unless a future version explicitly changes the storage model.
 
-## 5. Projection Architecture
+### Package Adapter
 
-A projection is a user-facing view over course material and NoteBlocks.
-
-Examples:
-
-- Organized Notes,
-- Review Card Sets,
-- Exercise Sets,
-- Formula Sheets,
-- Theorem-Proof Lists,
-- Concept Focus Notes,
-- Scoped Knowledge Maps,
-- Study Scope Plans.
-
-Generated projections should be stable snapshots. If an underlying NoteBlock changes later, the existing projection should not silently mutate. The system may show that newer source material or block versions are available and offer regenerate, compare, or ignore actions.
+`.coincides` packages and future import/export flows are portability boundaries. Import preview and records protect recovery and provenance. Packages do not silently overwrite existing truth.
 
 ---
 
-## 6. Adaptive Layered Summaries
+## 6. Operation Safety
 
-Coincides should not summarize only by file length. Summary depth should be driven by content structure, density, importance, and concept coverage.
+Structural changes should be reviewable, recoverable, and explainable.
 
-Useful summary layers include:
+Current foundation patterns remain valid:
 
-- **Source Overview Summary**: what a source is and what it broadly covers.
-- **Structural Summary**: chapters, sections, weeks, parts, and detected boundaries.
-- **Concept Coverage Summary**: which concepts appear where and in what form.
-- **MaterialSegment Summary**: what each selectable learning range contains.
-- **NoteBlock Library Summary**: inventory of definitions, theorems, formulas, examples, exercises, diagrams, and source references.
-- **Projection Summary**: what a generated note or review set covers and which material it used.
+- proposal-first mutation for risky generated or migration operations;
+- operation batches for applied structural changes;
+- migration/record tables for template, domain, package, and future relation changes;
+- undo/redo for ordinary notebook editing where the user expects direct manipulation.
 
-Summaries must track dependencies. If source material, segments, blocks, or projections change, dependent summaries should be marked stale rather than treated as current truth.
+Ordinary block deletion should feel direct but must support undo. Dangerous migrations should remain proposal-first.
 
 ---
 
-## 7. Typed Proposal System
+## 7. Active Product Surface Priorities
 
-Proposal is not just a modal. It is Coincides' safety execution protocol.
+Better Notebook architecture should prioritize:
 
-Future proposal types may include:
+1. product shell and navigation;
+2. natural page writing;
+3. freeform NoteBlock boxes and layout mode;
+4. page/canvas/export boundaries;
+5. block visual language and control layer;
+6. stable data contract;
+7. source attachment UX;
+8. relation definition runtime;
+9. relation inspector and relation mode;
+10. local relation graph and supernode folding;
+11. concept-lite search and inspector.
 
-- `material_map_proposal`,
-- `scope_plan_proposal`,
-- `source_import_proposal`,
-- `note_block_merge_proposal`,
-- `organized_note_proposal`,
-- `review_projection_proposal`,
-- `cross_course_link_proposal` later.
-
-Each proposal should be able to describe affected objects, preview results, carry source evidence, accept user edits, apply changes, and support rollback where feasible.
-
----
-
-## 8. State, Trash, And Recovery
-
-Course material objects need explicit state, not only existence.
-
-Candidate states include:
-
-```text
-uploaded -> parsed -> indexed -> segmented -> reconciled -> ready_for_note -> used_in_projection
-```
-
-Other state flags may include:
-
-```text
-excluded_from_scope
-needs_review
-failed
-stale
-trashed
-```
-
-Deletion should be status-based:
-
-```text
-active -> trashed -> permanently_deleted
-```
-
-Trash should not be a separate storage universe. It should preserve references and support restore until the user permanently deletes the item.
+Full AI note assembly should wait until the human writing and layout surface is stable.
 
 ---
 
-## 9. Model Roles
+## 8. Historical Notes
 
-The architecture should support model roles without requiring every role in v2.0.
+The closed v2.0-v2.5.6 roadmap remains historical foundation evidence in `docs/Coincides-Roadmap.md`.
 
-- `thinking_model`: reasoning, proposal generation, extraction decisions, routing decisions, reconciliation, and hard synthesis.
-- `embedding_model`: semantic indexing and retrieval.
-- `vision_or_ocr_model`: optional role for scanned notes, diagrams, and image-heavy PDFs.
-- `rerank_model`: future optional role for textbook-scale, full-course, or multi-source retrieval where task-aware ordering matters.
-- `fast_model`: optional role for low-latency classification or UI assistance; can be replaced by the thinking model when speed is not critical.
-
-Provider choice should remain separate from role design.
-
----
-
-## 10. API And Contract Rule
-
-Every v2 version plan must define affected contracts before implementation:
-
-- backend API routes,
-- frontend service contracts,
-- database migration contracts,
-- agent tool input/output contracts,
-- proposal payload shape,
-- operation batch behavior,
-- validation and rollback expectations.
-
-APIs should be designed for stability, efficiency, and output quality. Do not add an API only because it is convenient for one UI screen if it weakens the long-term model.
-
----
-
-## 11. Local-First Direction
-
-The active architecture remains local-first and self-hostable. Desktop packaging, cloud sync, hosted accounts, and PostgreSQL may be revisited later, but they are not prerequisites for v2.0.
-
-The architecture should not assume that user material leaves the local environment unless the user explicitly configures an AI provider or hosted service.
-
----
-
-## 12. Secret Handling
-
-Architecture docs must never include real API keys. Use placeholders such as `<provider-api-key>` in examples, or describe the configuration path without showing a value.
+Do not append Better Notebook feature work to the closed roadmap.

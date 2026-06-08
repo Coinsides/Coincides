@@ -1,10 +1,10 @@
 # Coincides Workflow
 
-**Updated**: 2026-05-19  
-**Current development branch**: `feat/v2.0-noteblock`  
+**Updated**: 2026-06-07
+**Current development branch**: `feat/v2.0-noteblock`
 **Stable branch**: `main`
 
-This document defines how Coincides v2.x work moves from product intent to implementation, verification, release, and retrospective.
+This document defines how Coincides v2.x and Better Notebook (`V2.BN.x`) work moves from product intent to implementation, verification, review, and retrospective.
 
 ---
 
@@ -33,8 +33,12 @@ Coincides is currently developed by a one-person product team with Codex as the 
 
 Each document layer has a different job.
 
-- **PRD**: product identity, user value, and non-goals.
-- **Roadmap**: version direction, sequencing, and candidate conceptual entities.
+- **PRODUCT**: current product north star, audience, product commitments, design principles, and product identity.
+- **PRD**: product requirements, user value, non-goals, and active product commitments.
+- **Architecture**: active truth/projection/adapter boundaries.
+- **Data Model**: conceptual truth layers, data ownership, and future contract candidates.
+- **Roadmap**: version/phase direction, sequencing, gates, and candidate conceptual entities.
+- **Product Contract Docs**: domain-specific active references such as relation design, UX inventory, implementation reality check, and agent/manual guidance.
 - **Brainstorm**: open idea pool and unresolved architecture/product thinking.
 - **ADR**: durable architecture decisions that should not be re-litigated every implementation step.
 - **Version Plan**: current version boundary, committed scope, out-of-scope, contracts, and acceptance criteria.
@@ -47,15 +51,18 @@ Each document layer has a different job.
 
 Roadmap does not define real tables or API endpoints. Version Plan locks the current version boundary. Engineering Spec locks implementation details.
 
+For the Better Notebook track, `docs/Coincides-Roadmap.md` is historical foundation evidence. `docs/Coincides-Better-Notebook-Roadmap.md` is the active productization roadmap.
+
 ---
 
 ## 4. Small-Version Lifecycle
 
-Every v2 minor version should move through this lifecycle:
+Every v2 minor version or Better Notebook version should move through this lifecycle:
 
 ```text
-Product Intent / PRD
-  -> Roadmap
+Product Intent / PRODUCT / PRD
+  -> Active Roadmap
+  -> Active Product Contract Docs
   -> ADR
   -> Version Plan
   -> Engineering Spec
@@ -64,13 +71,15 @@ Product Intent / PRD
   -> Verification
   -> Quality Review
   -> Experience Review
-  -> Release Notes / Changelog
+  -> Changelog
   -> Human Acceptance
   -> Merge / Hold
   -> Retro
 ```
 
 The active version can move forward only when the previous layer is clear enough for the next layer. Do not let implementation outrun the written contract.
+
+For Better Notebook work, future `V2.BN.x` plans must use `docs/internal/Better-Notebook-Phase-Plan-Template.md` as the planning checklist. Product references, current code capability, data objects touched, UI states touched, source/relation/export/AI visibility impact, and browser smoke expectations must be named before implementation begins.
 
 ---
 
@@ -108,9 +117,16 @@ ADR should be short. Its job is to preserve the decision, not repeat every brain
 
 ## 6. Version Plan Rule
 
-Every v2 minor version must have a plan file before implementation begins:
+Every v2 minor version or Better Notebook version must have a plan file before implementation begins:
 
-`docs/releases/v2.X-plan.md`
+```text
+Historical/foundation v2.x:
+  docs/releases/v2.X-plan.md
+
+Better Notebook:
+  docs/releases/V2.BN.x-plan.md
+  docs/releases/V2.BN.x.y-plan.md when a sub-version is needed
+```
 
 Each plan must include:
 
@@ -126,6 +142,20 @@ Each plan must include:
 - **Implementation State Checklist**: the live state machine for the version.
 
 Current version plans must be decision-complete before implementation. Future versions may remain directional in the roadmap until they become active.
+
+Better Notebook plans must list their active references explicitly. At minimum, consider:
+
+- `PRODUCT.md`;
+- `docs/PRD.md`;
+- `docs/ARCHITECTURE.md`;
+- `docs/DATA_MODEL.md`;
+- `docs/Coincides-Better-Notebook-Roadmap.md`;
+- `docs/internal/Better-Notebook-Phase-Plan-Template.md`;
+- `docs/internal/Better-Notebook-Implementation-Reality-Check.md`;
+- `docs/brainstorm/BetterNoteBook Research/Better-Notebook-UX-Inventory-and-Interaction-Contract.md`;
+- `docs/brainstorm/产品完善/product-improvement-issue-register.md`.
+
+Add `docs/Coincides-Relation-Product-Design.md` when relation, connector, local graph, GraphRAG mapping, source-vs-relation boundary, or semantic edge behavior is touched.
 
 If the version scope changes materially, update the plan before continuing implementation.
 
@@ -148,6 +178,32 @@ The checklist must:
 If chat memory and the checklist disagree, treat the checklist as the stronger state source, then verify against GitHub and local status before editing.
 
 Do not mark an item complete just because code was written. Mark it complete only when the checklist's stated completion condition is satisfied.
+
+---
+
+## 6.2 Research Gate Rule
+
+Some roadmap phases depend on research gates. These gates must be treated as active blockers, not optional reading.
+
+When the active roadmap names a research gate:
+
+- the phase plan must name the gate in its startup checklist;
+- Codex must read the gate's outline and completed reports before writing the phase plan;
+- if the gate is split into partial and full depth, the phase plan must state which depth is required;
+- implementation cannot start until the required gate depth is completed or Henry explicitly accepts a narrower assumption;
+- if a later research result changes an earlier phase's assumptions, update the roadmap, active plan, and affected product contract docs before implementing dependent work.
+
+Example:
+
+```text
+PI-048 Contract Intake:
+  required before Phase A6 Better Notebook Data Contract.
+
+PI-048 Full Research:
+  required before Phase G Source Reconstruction And AI Note Assembly Readiness.
+```
+
+Research gates should prevent repeated rediscovery after context compaction and should keep `PRODUCT`, PRD, architecture, data model, roadmap, and UX contracts from drifting apart.
 
 ---
 
@@ -304,17 +360,32 @@ Codex must run the startup/resume reading sequence before:
 Required reading order:
 
 1. `docs/workflow/Coincides-Workflow.md`
-2. `docs/Coincides-Roadmap.md`
-3. `docs/continuity/2.x/v2.x-continuity.md` for v2.x work, or the matching current major-version continuity file
-4. `docs/continuity/Coincides-Continuity.md` when starting patch-version planning, major-version planning, historical/deferred issue work, or major architecture work
-5. active version `docs/releases/v2.X-plan.md`
-6. active version `docs/releases/v2.X-engineering-spec.md`, if it exists
-7. previous version plan, quality review, experience review, and changelog
+2. `PRODUCT.md`
+3. `docs/PRD.md`
+4. `docs/ARCHITECTURE.md`
+5. `docs/DATA_MODEL.md`
+6. active roadmap:
+   - `docs/Coincides-Better-Notebook-Roadmap.md` for Better Notebook work;
+   - `docs/Coincides-Roadmap.md` for historical v2.x foundation evidence or non-Better-Notebook legacy work.
+7. relevant product contract docs:
+   - `docs/Coincides-Relation-Product-Design.md` when relation, connector, local graph, GraphRAG mapping, or source-vs-relation boundary is touched;
+   - `docs/brainstorm/BetterNoteBook Research/Better-Notebook-UX-Inventory-and-Interaction-Contract.md` when UI, UX, writing, layout, source operation, link, or interaction behavior is touched;
+   - `docs/internal/Better-Notebook-Implementation-Reality-Check.md` before implementation planning;
+   - `docs/brainstorm/产品完善/product-improvement-issue-register.md` when converting brainstorm items into roadmap or version scope.
+8. `docs/continuity/2.x/v2.x-continuity.md` for v2.x / V2.BN work, or the matching current major-version continuity file
+9. `docs/continuity/Coincides-Continuity.md` when starting patch-version planning, major-version planning, historical/deferred issue work, or major architecture work
+10. active version plan:
+    - `docs/releases/v2.X-plan.md` for historical/foundation versions;
+    - `docs/releases/V2.BN.x-plan.md` or `docs/releases/V2.BN.x.y-plan.md` for Better Notebook versions.
+11. active version engineering spec, if it exists
+12. previous version plan, quality review, experience review, and changelog
 
 After reading, Codex must briefly report:
 
 - active version and branch;
 - current checklist state;
+- active roadmap and product contract docs used;
+- required research gates and whether they are complete;
 - relevant continuity items;
 - current blockers or Henry decisions needed;
 - next intended action.
@@ -328,14 +399,22 @@ If chat memory disagrees with these files, prefer the files, then verify against
 Each active minor version should maintain these files:
 
 ```text
-docs/releases/v2.X-plan.md
-docs/releases/v2.X-engineering-spec.md
-docs/releases/v2.X-review.md
-docs/releases/v2.X-experience-review.md
-docs/releases/CHANGELOG-v2.X.md
+Historical/foundation v2.x:
+  docs/releases/v2.X-plan.md
+  docs/releases/v2.X-engineering-spec.md
+  docs/releases/v2.X-review.md
+  docs/releases/v2.X-experience-review.md
+  docs/releases/CHANGELOG-v2.X.md
+
+Better Notebook:
+  docs/releases/V2.BN.x-plan.md
+  docs/releases/V2.BN.x-engineering-spec.md
+  docs/releases/V2.BN.x-review.md
+  docs/releases/V2.BN.x-experience-review.md
+  docs/releases/CHANGELOG-V2.BN.x.md
 ```
 
-`v2.X-review.md` is the engineering quality state machine. It must include:
+The review file is the engineering quality state machine. It must include:
 
 - Current Review Status;
 - Code Review;
@@ -348,7 +427,7 @@ docs/releases/CHANGELOG-v2.X.md
 - Open Engineering Follow-ups;
 - Henry Authorization Needed.
 
-`v2.X-experience-review.md` is the product experience state machine. It must include:
+The experience review file is the product experience state machine. It must include:
 
 - Current Experience Status;
 - UI / Visual Findings;
@@ -378,9 +457,9 @@ Allowed Henry decision statuses:
 
 Plan checklist items may be checked only after the relevant quality and experience gates satisfy the item's completion condition. If quality review has a blocker, do not proceed to final Henry acceptance. If experience review has medium or low UX debt, Henry decides whether to fix in the current version or defer.
 
-Development Log entries belong in the active version's `v2.X-review.md`. They should record only facts that help future recovery or decision-making, such as failed gates, rebase conflicts, environment blockers, auth/session issues, and defer decisions. Do not record ordinary file-by-file activity.
+Development Log entries belong in the active version's review file. They should record only facts that help future recovery or decision-making, such as failed gates, rebase conflicts, environment blockers, auth/session issues, and defer decisions. Do not record ordinary file-by-file activity.
 
-Small version decisions may be recorded in a `Decision Log` section inside `v2.X-review.md` when they affect current implementation but do not deserve an ADR. Major architecture decisions still require ADRs. If a decision affects later versions, also add or update a continuity item.
+Small version decisions may be recorded in a `Decision Log` section inside the review file when they affect current implementation but do not deserve an ADR. Major architecture decisions still require ADRs. If a decision affects later versions, also add or update a continuity item.
 
 ---
 
@@ -388,7 +467,10 @@ Small version decisions may be recorded in a `Decision Log` section inside `v2.X
 
 Before code implementation begins for a minor version, create an engineering spec:
 
-`docs/releases/v2.X-engineering-spec.md`
+```text
+docs/releases/v2.X-engineering-spec.md
+docs/releases/V2.BN.x-engineering-spec.md
+```
 
 The spec must define concrete implementation details:
 
@@ -431,12 +513,14 @@ For each step:
 1. Confirm branch and scope.
 2. Read the active version plan's Implementation State Checklist.
 3. Read the relevant plan/spec sections.
-4. Inspect the current code before editing.
-5. Implement the smallest coherent change.
-6. Run required verification.
-7. Review the diff for unrelated edits, secrets, stale docs, and migration risk.
-8. Update the Implementation State Checklist, quality review, experience review, and docs/changelog if affected.
-9. Hand off what changed, what was verified, which gates passed or failed, and what still needs Henry's validation.
+4. Read any active product contract docs named by the plan.
+5. Confirm required research gates are complete or explicitly deferred.
+6. Inspect the current code before editing.
+7. Implement the smallest coherent change.
+8. Run required verification.
+9. Review the diff for unrelated edits, secrets, stale docs, and migration risk.
+10. Update the Implementation State Checklist, quality review, experience review, and docs/changelog if affected.
+11. Hand off what changed, what was verified, which gates passed or failed, and what still needs Henry's validation.
 
 ---
 
@@ -491,10 +575,21 @@ At minimum, check whether the change affects:
 - `docs/releases/v2.X-engineering-spec.md`
 - `docs/releases/v2.X-review.md`
 - `docs/releases/v2.X-experience-review.md`
+- `docs/releases/V2.BN.x-plan.md`
+- `docs/releases/V2.BN.x-engineering-spec.md`
+- `docs/releases/V2.BN.x-review.md`
+- `docs/releases/V2.BN.x-experience-review.md`
+- `PRODUCT.md`
 - `docs/Coincides-Roadmap.md`
+- `docs/Coincides-Better-Notebook-Roadmap.md`
+- `docs/Coincides-Relation-Product-Design.md`
 - `docs/ARCHITECTURE.md`
 - `docs/DATA_MODEL.md`
 - `docs/PRD.md`
+- `docs/internal/Better-Notebook-Phase-Plan-Template.md`
+- `docs/internal/Better-Notebook-Implementation-Reality-Check.md`
+- `docs/brainstorm/BetterNoteBook Research/Better-Notebook-UX-Inventory-and-Interaction-Contract.md`
+- `docs/brainstorm/产品完善/product-improvement-issue-register.md`
 - `docs/workflow/*`
 - ADRs in `docs/decisions/*`
 - changelog or release notes for the active version
@@ -592,9 +687,16 @@ The retro can be short. Its purpose is to make the one-person team remember less
 
 Workflow should not duplicate the full product roadmap. For current product direction, use:
 
+- `PRODUCT.md`
 - `docs/PRD.md`
-- `docs/Coincides-Roadmap.md`
-- `docs/brainstorm/v2.x-brainstorm.md`
+- `docs/ARCHITECTURE.md`
+- `docs/DATA_MODEL.md`
+- `docs/Coincides-Better-Notebook-Roadmap.md` for the active Better Notebook productization track
+- `docs/Coincides-Roadmap.md` as historical v2.x foundation evidence
+- `docs/Coincides-Relation-Product-Design.md` for relation, connector, local graph, and GraphRAG boundary work
+- `docs/brainstorm/BetterNoteBook Research/Better-Notebook-UX-Inventory-and-Interaction-Contract.md` for Better Notebook interaction contracts
+- `docs/internal/Better-Notebook-Implementation-Reality-Check.md` for current code capability and known gaps
+- `docs/brainstorm/产品完善/product-improvement-issue-register.md` for open idea pool and brainstorm anchors
 - relevant ADRs in `docs/decisions/`
 
 Workflow defines how work moves. Product docs define what Coincides becomes.

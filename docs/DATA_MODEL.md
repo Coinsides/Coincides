@@ -1,288 +1,352 @@
 # Coincides Data Model
 
-**Updated**: 2026-05-17  
-**Status**: current v1 model summary plus v2 conceptual target model
-
-This document distinguishes implemented tables from v2 conceptual entities. A conceptual v2 entity is not automatically an existing table.
-
----
-
-## 1. Current Implemented Model Summary
-
-The current application is built around:
-
-- users / local profile assumptions,
-- courses,
-- goals and tasks,
-- time blocks,
-- decks,
-- cards,
-- card sections,
-- tags and tag groups,
-- documents and document chunks,
-- embeddings / vector search metadata,
-- proposals and agent operation records,
-- FSRS review state.
-
-This model remains the migration source for v2 work.
-
-### v2.0 NoteBlock Foundation Tables
-
-v2.0 adds an additive NoteBlock foundation. Existing Card/Deck tables remain unchanged.
-
-#### operation_batches
-
-Tracks user-visible structural operations for future Proposal -> Review -> Apply compatibility.
-
-Key fields: `id`, `user_id`, `course_id`, `source_type`, `source_id`, `label`, `status`, `metadata`, `created_at`, `applied_at`, `reverted_at`.
-
-#### notes
-
-Course-rooted note containers. A note is an ordered view over course-rooted NoteBlocks.
-
-Key fields: `id`, `user_id`, `course_id`, `title`, `description`, `status`, `source_kind`, `page_format`, `metadata`, `operation_batch_id`, `created_at`, `updated_at`, `trashed_at`.
-
-#### note_blocks
-
-Course-rooted canonical learning blocks.
-
-Committed v2.0 block types: `heading`, `paragraph`, `definition`, `theorem`, `proof`, `formula`, `example`, `exercise`, `answer`, `sidenote`.
-
-Key fields: `id`, `user_id`, `course_id`, `block_type`, `title`, `content_json`, `plain_text`, `status`, `source_kind`, `metadata`, `operation_batch_id`, `created_at`, `updated_at`, `trashed_at`.
-
-#### note_block_placements
-
-Connects notes to ordered blocks.
-
-Key fields: `id`, `note_id`, `block_id`, `parent_placement_id`, `order_index`, `display_mode`, `display_overrides_json`.
-
-#### note_block_sources
-
-Stores early SourceReference pointers against existing `documents` and `document_chunks`.
-
-Key fields: `id`, `block_id`, `document_id`, `document_chunk_id`, `source_page_start`, `source_page_end`, `source_excerpt`, `reference_type`, `confidence`, `metadata`.
-
-#### projections
-
-Stores stable projection snapshots. v2.0 supports `organized_note`.
-
-Key fields: `id`, `user_id`, `course_id`, `type`, `title`, `status`, `snapshot_json`, `source_refs_json`, `source_versions_json`, `operation_batch_id`, `metadata`, `created_at`, `updated_at`, `trashed_at`.
+**Updated**: 2026-06-06
+**Status**: Active conceptual model for the Better Notebook track
+**Note**: This document distinguishes conceptual model boundaries from implemented SQLite tables.
 
 ---
 
-## 2. Root Model
+## 1. Data Model Role
 
-### Workspace
+The Better Notebook track needs a clear separation between:
 
-A global/local user context. It owns global settings, model/provider configuration, user preferences, future backup/sync configuration, and future cross-course concept candidates.
+- content truth;
+- layout/projection truth;
+- source truth;
+- relation truth;
+- template/package capability truth;
+- adapter/index state.
 
-### Course
-
-The learning-domain root. Course should own course-specific schedules, goals, tasks, source materials, material library, NoteBlocks, projections, concepts, and analytics.
-
-Course should not be treated as a weak tag. It is the primary boundary for learning content.
-
----
-
-## 3. Course Material Library Concepts
-
-### CourseMaterialLibrary
-
-A course-level material asset. It is the structured layer that lets Coincides reason about uploaded material without relying on heavy Agent Memory.
-
-It may expose material status, selected scopes, excluded scopes, source evidence, summaries, and generated projections.
-
-### SourceMaterial
-
-The original user-uploaded or registered source:
-
-- PDF,
-- Word document,
-- slide deck,
-- scan,
-- image,
-- textbook chapter,
-- old notes,
-- problem set,
-- mixed course archive.
-
-Original sources should be preserved where possible.
-
-### SourceSnapshot
-
-A normalized viewing/reference representation of a source. It may be page images plus optional text layer. It is the long-term direction for PDF Reader Lite and should support page-level references across many source types.
-
-Early reference behavior can be page-level. Region/bbox highlighting can come later.
-
-### SourceFragment
-
-A source-preserving extraction unit. It should capture:
-
-- source material id,
-- source snapshot/page reference,
-- page or logical location,
-- source order,
-- raw text,
-- image crop reference,
-- bounding box when available,
-- OCR/parser confidence,
-- extraction method,
-- status.
-
-### MaterialSegment
-
-A selectable learning range inside a course material library. It may represent:
-
-- chapter,
-- week,
-- part,
-- section,
-- page range,
-- lecture unit,
-- topic cluster,
-- user-selected source range.
-
-MaterialSegment lets users generate notes by scope instead of processing an entire course archive at once.
-
-### MaterialSegmentSummary
-
-A structured summary of a segment, including concepts, density, estimated study time, source coverage, block inventory, and readiness for note/review generation.
+Existing SQLite tables remain the current implementation substrate. Future versions may add or change tables, but the conceptual ownership boundaries below should remain stable.
 
 ---
 
-## 4. NoteBlock And Evidence Concepts
+## 2. Project / Course
 
-### CanonicalNoteBlock
+User-facing product language should prefer `Project`.
 
-The reconciled reusable learning fragment. It may represent title, paragraph, definition, theorem, proof, formula, example, exercise, answer, diagram crop, image, sidenote, separator, checklist, or step.
+A project may represent:
 
-This is the future canonical unit for notes and review projections.
+- a course;
+- a research workspace;
+- a report package;
+- a case file;
+- a focused collection of source material.
 
-### SourceReference
+Internal implementation names such as `course_id` may remain. They should be treated as engineering details, not product identity.
 
-A link from a block, segment, projection, or proposal back to source evidence. Early versions can store page-level reference; later versions may support bbox/crop-level reference.
+Project/Course is the main boundary for:
 
-### MergedSourceEvidence
-
-A relation indicating that multiple source fragments or source references support the same canonical block.
-
-Early behavior should list evidence, not interpret it. Detailedness ranking, authority scoring, and source comparison can come later.
-
----
-
-## 5. Projection Concepts
-
-### Projection
-
-A user-facing view generated from NoteBlocks and selected material scopes.
-
-Projection types may include organized note, review card set, exercise set, formula sheet, theorem-proof list, concept focus note, scoped knowledge map, exam review set, or study scope plan.
-
-### ProjectionSnapshot
-
-A stable generated projection. It should record generated content, source block ids, source block versions, source references, generation time, and proposal/apply history.
-
-Existing projections should not silently change when an underlying block changes. The system may show that updates are available.
+- source material;
+- notes;
+- NoteBlocks;
+- canvas/page surfaces;
+- relations;
+- templates and domain packages when scoped;
+- proposals and operation history.
 
 ---
 
-## 6. Summary Concepts
+## 3. Note
 
-### AdaptiveSummary
+A `Note` is the user-facing document/workspace container.
 
-A summary generated at a granularity determined by content structure, density, importance, concept coverage, and user intent, not just source length.
+It may contain:
 
-Types may include:
+- formal page content;
+- scratch/thinking content;
+- canvas placements;
+- source-linked blocks;
+- user-authored source-free blocks;
+- relation-visible and relation-hidden structures.
 
-- source overview summary,
-- structural summary,
-- concept coverage summary,
-- material segment summary,
-- NoteBlock library summary,
-- projection summary.
-
-### SummaryDependency
-
-A record of what a summary was based on: source ids, fragment ids, segment ids, block ids, projection ids, versions, and generation time.
-
-When dependencies change, the summary should become stale rather than remain silently trusted.
+A note is not merely a vertical list. Better Notebook should support page-first, canvas-backed layout.
 
 ---
 
-## 7. Proposal And Recovery Concepts
+## 4. NoteBlock
 
-### TypedProposal
+`NoteBlock` is content truth.
 
-A typed proposal is a reviewed change plan, not just a UI popup.
+It stores meaningful content such as:
 
-Possible types:
+- paragraph;
+- heading;
+- definition;
+- theorem;
+- proof;
+- formula;
+- example;
+- exercise;
+- answer;
+- source quote;
+- callout;
+- code;
+- future template-backed variants.
 
-- material map proposal,
-- scope plan proposal,
-- source import proposal,
-- note block merge proposal,
-- organized note proposal,
-- review projection proposal,
-- future cross-course link proposal.
+Important rules:
 
-TypedProposal should know its affected objects, preview payload, source evidence, user edits, apply operation, and rollback expectations where feasible.
+- Moving a block does not change NoteBlock content.
+- Resizing a block does not change NoteBlock content.
+- User-authored blocks may exist without source references.
+- AI-generated source-free claims should be distinguishable from user-authored source-free content.
+- Template metadata helps render and interpret blocks but should not hide the underlying content.
 
-### TrashState
-
-Deletion should be status-based:
+Better Notebook should distinguish freeform blocks from structured blocks:
 
 ```text
-active -> trashed -> permanently_deleted
+Freeform block:
+  paragraph / text / simple note.
+  Content can remain ordinary rich text.
+
+Structured block:
+  definition / formula / theorem / proof / example / exercise / source quote / code.
+  Content is stored as field values guided by a TemplateDefinition.
 ```
 
-Trashed objects remain restorable and should preserve enough relationship data to recover references until permanent deletion.
+Structured block concepts:
 
----
+- `FieldSchema`: template-defined field contract, such as `concept_name`, `description`, `latex_input`, `variables`, or `statement`.
+- `FieldValue`: the actual value stored on one NoteBlock for one field.
+- `FieldLayout` / `RenderTemplate`: how fields are arranged, styled, hidden, or resized on the page/canvas.
 
-## 8. Concept Model
+Structured fields are system-readable data. Field layout is presentation. A user may edit field values and adjust field layout, but adding, removing, or renaming fields is a template-editing action, not ordinary note editing.
 
-### Concept
+Examples:
 
-A course-local concept entity such as `gradient`, `Riemann sum`, or `chain rule`.
+```text
+DefinitionBlock.concept_name
+  -> local graph node label
 
-Concepts should not be global universal truths by default. The same term can mean different things across courses or subjects.
+DefinitionBlock.description
+  -> AI readable definition body
 
-### ConceptMention
-
-A record that a concept appears in a SourceFragment, MaterialSegment, NoteBlock, formula, example, exercise, diagram, or projection.
-
-Cross-course concept linking is a long-term direction. Current design should keep compatibility space but not force global merging.
-
----
-
-## 9. v1 Card/Deck Interpretation
-
-v1 Card/Deck should be understood as an early experiment in structured learning units. It validated typed learning material, formula rendering, source-linked AI generation, review collections, and proposal review.
-
-Future migrations may map old Card/Deck records into NoteBlocks and Review Projections:
-
-- `cards.front/back` or typed fields -> NoteBlock content,
-- card type -> NoteBlock kind or review projection template,
-- deck -> projection group or note collection,
-- section -> ordering/grouping metadata,
-- tags -> concept hints or projection metadata,
-- FSRS state -> review projection scheduling metadata.
-
-The migration goal is to preserve the user's material and review history while allowing the product to move beyond the old Card table.
-
----
-
-## 10. Settings And Keys
-
-Provider credentials are configuration, not data model documentation.
-
-Examples should use neutral placeholders only:
-
-```json
-{
-  "thinkingModelKey": "<configured-locally>",
-  "embeddingModelKey": "<configured-locally>"
-}
+FormulaBlock.latex_input
+  -> rendered formula and formula search payload
 ```
 
-Never commit real provider keys to docs, source code, database fixtures, or migration examples.
+---
+
+## 5. BlockBox / CanvasNode / Placement
+
+`BlockBox`, `CanvasNode`, or placement state is layout/projection truth.
+
+It answers:
+
+- where a NoteBlock appears;
+- page-in or page-out position;
+- width and height;
+- z-order;
+- selected/hover/editing layout state;
+- formal vs scratch role;
+- included/excluded from export;
+- AI visible/hidden by default.
+
+One conceptual NoteBlock may later support multiple placements if reusable blocks or multi-view placement becomes explicit. Until then, ordinary user deletion should delete the block with undo rather than create hidden ghost placements.
+
+---
+
+## 6. Page / Canvas
+
+Better Notebook uses a page-first, canvas-backed surface.
+
+Conceptual states:
+
+- locked page/document mode for writing and export;
+- open canvas/reasoning mode for scratch work, derivations, and exploration;
+- export preview mode;
+- layout edit mode;
+- relation mode;
+- debug mode.
+
+Page and canvas state should not become content truth.
+
+---
+
+## 7. Source Truth
+
+Source truth preserves where information came from.
+
+Important source concepts:
+
+- `SourceDocument`: a source identity, such as a textbook, report, web article, PDF, Word file, image, code file, or other imported source.
+- `SourceVersion`: a concrete snapshot of a SourceDocument at a specific time. References should bind to a version, not a vague mutable file identity.
+- `SourceArtifact`: an internal Coincides object that can be cited later, such as a Note, Report, Section, or NoteBlock.
+- `SourceReference`: a citation/provenance link from a NoteBlock, Note, Relation, or Section to an external SourceVersion or internal SourceArtifact.
+- `SourceUsage`: project/course usage metadata that distinguishes direct upload from usage via citation.
+- `SourceChain`: a traversable provenance path that can show direct source, root source, and full internal processing chain.
+- `SourceSnapshot`: normalized source representation.
+- `SourceAnchor`: stable location within a source.
+- `SourceScope`: selected range or segment of source material.
+- `SourceBoard`: course/project-level organization surface for source scopes and anchors.
+- `SourceRegion`: future reconstructed region from OCR/VLM/layout extraction.
+- `SourceTombstone` / `DeletedSourceRecord`: minimal recovery and warning record retained when a source, note, or block that participates in a chain is deleted.
+
+Source import should record intent separately from file type:
+
+- `ImportMode`: first-version import intent, such as `evidence_source`, `reconstruct_existing_note`, or `archive_only`.
+- `SourceKind` / `SourceIntent`: higher-level source role, such as `unprocessed_evidence`, `condensed_note`, `agent_briefing`, `human_interpretation_note`, `draft_report`, `final_report`, or `reasoning_trace`.
+
+A `Condensed Raw Source` is an external material that has already been processed by a human or AI but has not yet become Coincides internal truth. It may become a source root, an internal source chain starting point, a SourceRegion origin, or the basis for future NoteBlockCandidates.
+
+Coincides should eventually distinguish:
+
+```text
+Evidence
+  External factual basis.
+
+Interpretation
+  Human or AI explanation, summary, judgment, or condensed understanding.
+
+Reasoning State
+  Hypotheses, assumptions, uncertainty, constraints, missing facts, and inference paths.
+```
+
+Source grounding should support page labels, ranges, anchors, future bbox/crops, confidence, tool provenance, and warnings.
+
+First-version internal source granularity should stop at NoteBlock. Sentence-level internal citation, rich-text offset tracking, and block-internal range preservation are deferred. A copied excerpt may keep an excerpt snapshot for human inspection, but the canonical reference should still point to the source NoteBlock.
+
+Source lifecycle and chain health should distinguish at least:
+
+```text
+active
+changed
+outdated
+deprecated
+archived
+deleted
+missing
+broken
+degraded
+recovered
+```
+
+Important boundaries:
+
+- Removing a `SourceReference` from a block does not delete the source object.
+- Clearing all sources from a block removes that block's references only.
+- Deleting a source document or source version is a dangerous object deletion that can degrade existing chains.
+- If a user removes a source snapshot file outside the app, Coincides should mark the affected references as `missing` or `degraded` rather than crashing or silently deleting the chain.
+- External sources may be used by multiple projects/courses. A project source list should distinguish `uploaded_in_this_project` from `used_via_citation`.
+- New source versions do not rewrite old references. Migration from one version to another should be explicit and reviewable.
+
+Source reconstruction should happen before serious chunking when possible:
+
+```text
+source type detection
+  -> reconstruction route
+  -> SourceRegion
+  -> NoteBlockCandidate
+  -> proposal
+  -> reviewed NoteBlock
+```
+
+---
+
+## 8. Relation Truth
+
+`ObjectRelation` is semantic relation truth.
+
+It should eventually be governed by:
+
+- `RelationType`;
+- `RelationGroup` / `RelationPack`;
+- directionality;
+- condition kind;
+- composition kind;
+- visibility;
+- provenance;
+- lifecycle state.
+
+`CanvasEdge` or future `CanvasConnector` is visual/projection state. A user may draw a connector without creating a confirmed ObjectRelation.
+
+Relation design follows `docs/Coincides-Relation-Product-Design.md`.
+
+---
+
+## 9. Link Truth
+
+`Link` / `InternalLink` is navigation truth. It answers where the user can jump, not why a claim is true and not what semantic relation exists.
+
+Possible targets include:
+
+- Note;
+- Section;
+- NoteBlock;
+- page or page label;
+- source view;
+- local graph view or other future view target.
+
+Important boundaries:
+
+```text
+Link:
+  navigation / jump target.
+
+SourceReference:
+  evidence / provenance.
+
+ObjectRelation:
+  semantic relation.
+```
+
+A body link to another note does not automatically become a SourceReference. A SourceReference does not need to appear as a body link. An ObjectRelation can exist without a visible link.
+
+---
+
+## 10. Template / Composition / Domain / Package
+
+Runtime capability objects remain important:
+
+- `TemplateDefinition`: block contract, field schema, rendering guidance, source behavior, relation behavior, and agent guidance.
+- `CompositionTemplate`: reusable section made from multiple template blocks.
+- `DomainBlockSet`: domain package of relevant templates and compositions.
+- `PackageManifest`: portable contract for template/domain/package bundles.
+
+These objects guide block creation and AI/tool behavior. They are not user content by themselves.
+
+---
+
+## 11. Concept-Lite Future
+
+`Concept` should begin as a lightweight search/refinement dimension, not a giant ontology.
+
+Concept-lite may help:
+
+- filter blocks;
+- improve search;
+- support local graph entry points;
+- provide future GraphRAG adapter context.
+
+Full concept ontology and refinement proposals are deferred.
+
+---
+
+## 12. Adapter / Index State
+
+Adapters may create derived state:
+
+- editor runtime snapshots;
+- GraphRAG sidecar/index;
+- OCR/VLM reconstruction outputs;
+- import/export recovery records;
+- package previews;
+- AI candidate relations;
+- search embeddings.
+
+Derived state must be explainable and rebuildable from Coincides Core whenever possible.
+
+Adapter/index state is not canonical truth unless a future version explicitly promotes it.
+
+---
+
+## 12. Current Implementation Reminder
+
+The current app already has many v2.x foundation tables and APIs. They are the implementation substrate, not the final Better Notebook experience.
+
+Before each `V2.BN.x` implementation, consult:
+
+- `docs/internal/Better-Notebook-Phase-Plan-Template.md`
+- `docs/internal/Better-Notebook-Implementation-Reality-Check.md`
+- `docs/Coincides-Better-Notebook-Roadmap.md`
+- `docs/Coincides-Relation-Product-Design.md`

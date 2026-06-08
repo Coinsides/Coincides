@@ -42,8 +42,13 @@ local-test-materials/
 npm-debug.log*
 
 # Local tooling caches
+.codegraph/
 .superpowers/
 npm-cache/
 tmp-smoke/
 tmp/
 
+
+# External research repos
+_external_research/
+_external_tools/
