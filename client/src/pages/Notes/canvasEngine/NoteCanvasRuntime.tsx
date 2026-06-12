@@ -46,14 +46,28 @@ import {
   filterSlashCommands,
   findTemplateForCommand,
   removeSlashTrigger,
-  SLASH_COMMAND_GROUP_LABELS,
   type NoteSlashCommand,
   type SlashTrigger,
 } from '../noteSlashCommands';
 import {
   buildNoteCanvasRuntimeModel,
 } from './engineModel';
+import {
+  combinedDefinitionText,
+  contentForEditedBlock,
+  contentForTemplate,
+  definitionFieldsFromBlock,
+  formulaFieldsFromBlock,
+  formulaPreviewText,
+  plainTextForBlockContent,
+  presentationKindForBlock,
+  stringValue,
+  textFromContent,
+  type BlockPresentationKind,
+  type FieldValueRecord,
+} from './blockContentService';
 import { useNoteCanvasRuntime } from './hooks/useNoteCanvasRuntime';
+import { SlashMenuLayer } from './layers/SlashMenuLayer';
 import {
   estimateTextBlockHeight,
   measureBlockContentHeight,
@@ -96,6 +110,7 @@ import {
   type ExportRole,
   type LayoutHistoryEntry,
   type SnapGuide,
+  type SlashMenuAnchor,
   type SurfaceMode,
 } from './runtimeLayout';
 import type { BlockPlacementModel } from './types';
@@ -182,13 +197,6 @@ type SlashTarget = {
   anchor: SlashMenuAnchor | null;
 };
 
-interface SlashMenuAnchor {
-  x: number;
-  y: number;
-}
-
-type FieldValueRecord = Record<string, unknown>;
-type BlockPresentationKind = 'definition' | 'formula' | 'heading' | 'code' | 'sourceQuote' | 'paragraph';
 type TemplateCategoryKey = 'default' | 'math' | 'userDefined';
 
 const INSERT_TEMPLATE_CATEGORIES: Array<{ key: TemplateCategoryKey; label: string }> = [
@@ -208,200 +216,6 @@ const DEFAULT_INSERT_TEMPLATE_KEYS = [
 const MATH_INSERT_TEMPLATE_KEYS = [
   'formula.math',
 ];
-
-function stringValue(value: unknown): string {
-  return typeof value === 'string' ? value : '';
-}
-
-function firstString(...values: unknown[]): string {
-  for (const value of values) {
-    if (typeof value === 'string' && value.length > 0) return value;
-  }
-  return '';
-}
-
-function readFieldValues(content: Record<string, unknown>, metadata?: Record<string, unknown>): FieldValueRecord {
-  const fieldValues = content.field_values;
-  if (isRecord(fieldValues)) return fieldValues;
-  const legacyStructured = content.structured_fields;
-  if (isRecord(legacyStructured)) return legacyStructured;
-  const metadataFields = metadata?.structured_fields;
-  if (isRecord(metadataFields)) return metadataFields;
-  return {};
-}
-
-function templateKeyForBlock(block: NoteBlock): string {
-  return firstString(
-    block.metadata?.template_key,
-    block.metadata?.template_id,
-    block.metadata?.legacy_template_id,
-  );
-}
-
-function presentationKindForBlock(block: NoteBlock): BlockPresentationKind {
-  const templateKey = templateKeyForBlock(block);
-  if (block.block_type === 'definition' || templateKey.includes('definition')) return 'definition';
-  if (block.block_type === 'formula' || templateKey.includes('formula')) return 'formula';
-  if (block.block_type === 'heading' || templateKey.includes('heading')) return 'heading';
-  if (templateKey.includes('code') || stringValue(block.content_json?.language)) return 'code';
-  if (templateKey.includes('source.quote') || templateKey.includes('quote')) return 'sourceQuote';
-  return 'paragraph';
-}
-
-function definitionFieldsFromText(text: string): { concept_name: string; description: string } {
-  const trimmed = text.trim();
-  return {
-    concept_name: '',
-    description: trimmed,
-  };
-}
-
-function definitionFieldsFromBlock(
-  block: NoteBlock,
-  draftText?: string,
-  draftFields?: FieldValueRecord,
-): { concept_name: string; description: string } {
-  if (draftFields) {
-    return {
-      concept_name: stringValue(draftFields.concept_name),
-      description: stringValue(draftFields.description),
-    };
-  }
-  const fields = readFieldValues(block.content_json, block.metadata);
-  const bodyFallback = stringValue(block.content_json?.body) || block.plain_text || '';
-  const parsed = definitionFieldsFromText(bodyFallback);
-  return {
-    concept_name: stringValue(fields.concept_name),
-    description: draftText !== undefined
-      ? draftText
-      : firstString(fields.description, parsed.description, bodyFallback),
-  };
-}
-
-function formulaFieldsFromBlock(
-  block: NoteBlock,
-  draftText?: string,
-  draftFields?: FieldValueRecord,
-): { latex_input: string; formula_name: string; explanation: string } {
-  const fields = readFieldValues(block.content_json, block.metadata);
-  const effectiveFields = draftFields || fields;
-  const bodyFallback = draftText !== undefined ? draftText : stringValue(block.content_json?.body) || block.plain_text || '';
-  return {
-    latex_input: draftFields ? stringValue(effectiveFields.latex_input) : firstString(effectiveFields.latex_input, bodyFallback),
-    formula_name: stringValue(effectiveFields.formula_name),
-    explanation: stringValue(effectiveFields.explanation),
-  };
-}
-
-function combinedDefinitionText(conceptName: string, description: string): string {
-  const name = conceptName.trim();
-  const body = description.trim();
-  if (name && body) return `${name}: ${body}`;
-  return name || body;
-}
-
-function formulaPreviewText(latexInput: string): string {
-  const trimmed = latexInput.trim();
-  if (!trimmed) return '';
-  if (trimmed.includes('$')) return trimmed;
-  return `$${trimmed}$`;
-}
-
-function contentForDefinition(
-  text: string,
-  previous: Record<string, unknown> = {},
-  fieldValuesOverride?: FieldValueRecord,
-): Record<string, unknown> {
-  const fields = fieldValuesOverride
-    ? {
-      concept_name: stringValue(fieldValuesOverride.concept_name),
-      description: stringValue(fieldValuesOverride.description),
-    }
-    : definitionFieldsFromText(text);
-  const body = combinedDefinitionText(fields.concept_name, fields.description);
-  const fieldValues = {
-    concept_name: fields.concept_name,
-    description: fields.description,
-  };
-  return {
-    ...previous,
-    body,
-    field_values: fieldValues,
-    structured_fields: fieldValues,
-  };
-}
-
-function contentForFormula(
-  text: string,
-  previous: Record<string, unknown> = {},
-  fieldValuesOverride?: FieldValueRecord,
-): Record<string, unknown> {
-  const latex = text.trim();
-  const previousFields = readFieldValues(previous);
-  const fieldValues = {
-    latex_input: fieldValuesOverride ? stringValue(fieldValuesOverride.latex_input) : latex,
-    formula_name: stringValue(fieldValuesOverride?.formula_name) || stringValue(previousFields.formula_name),
-    explanation: stringValue(fieldValuesOverride?.explanation) || stringValue(previousFields.explanation),
-  };
-  const latexInput = fieldValues.latex_input;
-  return {
-    ...previous,
-    body: latexInput,
-    field_values: fieldValues,
-    structured_fields: {
-      latex_input: latexInput,
-    },
-  };
-}
-
-function plainTextForBlockContent(kind: BlockPresentationKind, content: Record<string, unknown>, fallback: string): string {
-  const fields = readFieldValues(content);
-  if (kind === 'definition') {
-    return combinedDefinitionText(stringValue(fields.concept_name), stringValue(fields.description));
-  }
-  if (kind === 'formula') {
-    return stringValue(fields.latex_input) || stringValue(content.body) || fallback;
-  }
-  return stringValue(content.body) || fallback;
-}
-
-function textFromContent(block: NoteBlock): string {
-  const kind = presentationKindForBlock(block);
-  if (kind === 'definition') {
-    const fields = definitionFieldsFromBlock(block);
-    return combinedDefinitionText(fields.concept_name, fields.description);
-  }
-  if (kind === 'formula') {
-    return formulaFieldsFromBlock(block).latex_input;
-  }
-  const body = block.content_json?.body;
-  if (typeof body === 'string') return body;
-  return block.plain_text || '';
-}
-
-function contentForTemplate(template: TemplateOption, body: string): Record<string, unknown> {
-  if (template.template_key === 'definition.basic' || template.learning_role === 'definition') {
-    return contentForDefinition(body, template.default_content || {});
-  }
-  if (template.template_key === 'formula.math' || template.learning_role === 'formula') {
-    return contentForFormula(body, template.default_content || {});
-  }
-  return {
-    ...(template.default_content || {}),
-    body,
-  };
-}
-
-function contentForEditedBlock(
-  block: NoteBlock,
-  body: string,
-  fieldValuesOverride?: FieldValueRecord,
-): Record<string, unknown> {
-  const kind = presentationKindForBlock(block);
-  if (kind === 'definition') return contentForDefinition(body, block.content_json, fieldValuesOverride);
-  if (kind === 'formula') return contentForFormula(body, block.content_json, fieldValuesOverride);
-  return { ...block.content_json, body };
-}
 
 function findTemplateByKey(options: TemplateOption[], templateKey: string): TemplateOption | null {
   return options.find((template) => template.template_key === templateKey)
@@ -469,10 +283,6 @@ function shouldShowPreview(block: NoteBlock, text: string): boolean {
 function isEditableDomTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   return Boolean(target.closest('input, textarea, select, [contenteditable="true"]'));
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value && typeof value === 'object' && !Array.isArray(value));
 }
 
 function clamp(value: number, min: number, max: number): number {
@@ -2034,7 +1844,7 @@ export default function NoteCanvasRuntime() {
             )}
 
             {slashTarget && (
-              <SlashMenu
+              <SlashMenuLayer
                 commands={slashCommands}
                 onSelect={handleSelectSlashCommand}
                 anchor={slashTarget.anchor}
@@ -2050,53 +1860,6 @@ export default function NoteCanvasRuntime() {
         </section>
 
       </div>
-    </div>
-  );
-}
-
-function SlashMenu({
-  commands,
-  onSelect,
-  anchor,
-}: {
-  commands: NoteSlashCommand[];
-  onSelect: (command: NoteSlashCommand) => void;
-  anchor: SlashMenuAnchor | null;
-}) {
-  const grouped = commands.reduce<Record<string, NoteSlashCommand[]>>((acc, command) => {
-    acc[command.group] = [...(acc[command.group] || []), command];
-    return acc;
-  }, {});
-
-  return (
-    <div
-      className={styles.slashMenu}
-      style={anchor ? { left: anchor.x, top: anchor.y } : undefined}
-    >
-      {commands.length === 0 ? (
-        <div className={styles.slashEmpty}>No matching block type</div>
-      ) : (
-        (Object.keys(grouped) as Array<keyof typeof SLASH_COMMAND_GROUP_LABELS>).map((group) => (
-          <div key={group} className={styles.slashGroup}>
-            <div className={styles.slashGroupLabel}>{SLASH_COMMAND_GROUP_LABELS[group]}</div>
-            {grouped[group].map((command) => (
-              <button
-                key={command.id}
-                className={styles.slashItem}
-                onMouseDown={(event) => {
-                  event.preventDefault();
-                  onSelect(command);
-                }}
-                disabled={Boolean(command.disabledReason)}
-                title={command.disabledReason || command.description}
-              >
-                <span>{command.label}</span>
-                <small>{command.disabledReason || command.description}</small>
-              </button>
-            ))}
-          </div>
-        ))
-      )}
     </div>
   );
 }

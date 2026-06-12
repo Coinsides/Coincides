@@ -1,5 +1,7 @@
+export * from './blockContentService';
 export * from './engineModel';
 export * from './geometry';
+export * from './layers/SlashMenuLayer';
 export * from './measurementService';
 export * from './NoteCanvasRuntimeProvider';
 export * from './pageFrameService';

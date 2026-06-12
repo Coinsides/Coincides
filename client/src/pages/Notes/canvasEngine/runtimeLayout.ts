@@ -29,6 +29,11 @@ export interface LayoutHistoryEntry {
   after: Record<string, BlockBoxLayout>;
 }
 
+export interface SlashMenuAnchor {
+  x: number;
+  y: number;
+}
+
 export const NOTE_LAYOUT_KEY = 'better_notebook_layout';
 export const DEFAULT_PAGE_CONTENT_WIDTH = DEFAULT_PRIMARY_PAGE_FRAME.width;
 export const DEFAULT_PAGE_FRAME_HEIGHT = DEFAULT_PRIMARY_PAGE_FRAME.height;

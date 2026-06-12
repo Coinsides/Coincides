@@ -210,6 +210,54 @@ client build: passed
 - resize width 后 text reflow 是否仍然稳定；
 - measurement registry 尚未完成，当前仍是 service seed。
 
+### L6 - Block Content Service Seed
+
+```text
+status: in progress
+client build: passed
+```
+
+已完成部分：
+
+- 新增 `blockContentService.ts`；
+- 从 `NoteCanvasRuntime.tsx` 迁出第一批 block content truth / projection helper：
+  - `FieldValueRecord`；
+  - `BlockPresentationKind`；
+  - structured field reader；
+  - definition / formula field extraction；
+  - definition / formula save payload builder；
+  - plain text projection；
+  - block presentation kind detection；
+  - formula preview text wrapper。
+- 当前拆分先稳定内容解释边界，不直接硬搬整个 `BlockEditor`。
+
+仍需验收：
+
+- `BlockEditor` 组件本体仍在 `NoteCanvasRuntime.tsx`；
+- Source badge、policy badge、structured field editor、measurement callback 仍耦合在组件内；
+- 下一轮 L6 应继续把 `BlockEditor` 拆成 Canvas Engine DOM projection layer。
+
+### L9 - Slash Menu Layer Seed
+
+```text
+status: in progress
+client build: passed
+```
+
+已完成部分：
+
+- 新增 `layers/SlashMenuLayer.tsx`；
+- 新增 `SlashMenuAnchor` runtime layout type；
+- `NoteCanvasRuntime.tsx` 不再内联 `SlashMenu` 渲染函数；
+- 主 runtime 只保留 slash trigger、anchor 计算和 command selection；
+- slash menu rendering 进入 floating overlay layer seed。
+
+仍需验收：
+
+- slash menu anchor 仍由 `NoteCanvasRuntime.tsx` 计算；
+- overlay portal / z-index service 尚未建立；
+- block control bar、preview panel、source jump 等浮层尚未迁出。
+
 ## Henry Must Decide
 
 - 是否确认第一版主路线为 self-owned minimal hybrid NoteCanvas Engine；

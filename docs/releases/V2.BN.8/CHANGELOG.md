@@ -108,3 +108,18 @@
   - text block estimated height。
 - `NoteCanvasRuntime.tsx` 仍保留 block-specific measurement wrapper，后续继续迁入 measurement registry。
 - L7 seed 抽离后 client build passed。
+
+## Changed - V2.BN.8.1 L6/L9 Seeds
+
+- 新增 `blockContentService.ts`，集中处理 block content truth / projection helper：
+  - field values 读取；
+  - definition / formula fields；
+  - structured block save payload；
+  - plain text projection；
+  - presentation kind detection；
+  - formula preview text。
+- 新增 `layers/SlashMenuLayer.tsx`，把 slash command menu 渲染迁入 floating overlay layer seed。
+- 新增 `SlashMenuAnchor` runtime layout type。
+- `NoteCanvasRuntime.tsx` 不再内联 slash menu 渲染函数。
+- 本轮 L6 先拆出内容解释服务，`BlockEditor` 组件本体暂不硬搬，留给下一轮 projection layer checkpoint。
+- L6/L9 seed 抽离后 client build passed。
