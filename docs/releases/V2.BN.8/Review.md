@@ -240,7 +240,7 @@ client build: passed
 - 下一轮可以继续把 block toolbar、structured field editor、source badge 拆成更小 projection sublayers；
 - 需要 browser smoke 验证 definition / formula / code / source badge 的表现没有回归。
 
-### L9 - Slash Menu Layer Seed
+### L9 - Overlay Layer Seed
 
 ```text
 status: in progress
@@ -252,14 +252,20 @@ client build: passed
 - 新增 `layers/SlashMenuLayer.tsx`；
 - 新增 `SlashMenuAnchor` runtime layout type；
 - `NoteCanvasRuntime.tsx` 不再内联 `SlashMenu` 渲染函数；
-- 主 runtime 只保留 slash trigger、anchor 计算和 command selection；
-- slash menu rendering 进入 floating overlay layer seed。
+- 新增 `overlayService.ts`；
+- slash menu anchor 计算已从 `NoteCanvasRuntime.tsx` 迁入 overlay service；
+- 主 runtime 只保留 slash trigger 和 command selection；
+- slash menu rendering 进入 floating overlay layer seed；
+- 新增 `exportPreviewService.ts`；
+- 新增 `layers/ExportPreviewLayer.tsx`；
+- export preview 的 model、row label、group rendering 已从 runtime 主文件迁出；
+- `NoteCanvasRuntime.tsx` 现在只负责控制 preview 开关与 preview overlay callbacks。
 
 仍需验收：
 
-- slash menu anchor 仍由 `NoteCanvasRuntime.tsx` 计算；
 - overlay portal / z-index service 尚未建立；
-- block control bar、preview panel、source jump 等浮层尚未迁出。
+- block control bar、note info、more actions、insert panel、source jump 等浮层尚未迁出；
+- formula help tooltip 仍未进入统一 overlay layer。
 
 ### L8 - Interaction Controller Seed
 

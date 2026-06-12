@@ -81,7 +81,7 @@ L3/L4 service extraction: implemented, not browser-smoked
 L5 placement service extraction: implemented, not browser-smoked
 L7 measurement seed extraction: implemented, not browser-smoked
 L6 block projection layer: implemented, not browser-smoked
-L9 slash menu layer seed: implemented, not browser-smoked
+L9 slash menu / preview overlay seed: implemented, not browser-smoked
 L8 interaction controller seed: implemented, not browser-smoked
 L10 mode policy seed: implemented, not browser-smoked
 ```
@@ -97,7 +97,8 @@ L10 mode policy seed: implemented, not browser-smoked
 - 如果后续出现 Definition / Formula 内容保存、plain text、preview 文本不一致，应优先检查 `blockContentService.ts` 和 `layers/BlockEditorLayer.tsx`。
 - 如果后续出现 block toolbar、source badge、resize handle、structured field editing 视觉或操作异常，应优先检查 `layers/BlockEditorLayer.tsx`。
 - 如果后续出现 slash menu 样式或点击回调异常，应优先检查 `layers/SlashMenuLayer.tsx`。
-- slash menu anchor 仍由 runtime 主文件计算，本轮没有声明其体验问题已修复。
+- 如果后续出现 slash menu 定位异常，应优先检查 `overlayService.ts`。
+- 如果后续出现 export preview 面板、overlay toggle、preview group list 异常，应优先检查 `layers/ExportPreviewLayer.tsx` 和 `exportPreviewService.ts`。
 - 如果后续出现“选中 / 编辑 / 拖动 / 缩放状态看起来错乱”，应优先检查 `interactionController.ts` 和 canvas root 上的 `data-canvas-interaction-*` debug attributes。
 - 如果后续出现 Page / Canvas 切换、workspace block 可见性、双击空白落点或弹性避让规则不符合预期，应优先检查 `modePolicyService.ts`。
 - 本轮有一个有意的体验变化：Page mode 且 snap alignment 开启时，双击空白创建 draft 会进入自然写作流；snap 关闭或 Canvas mode 下才使用双击位置。

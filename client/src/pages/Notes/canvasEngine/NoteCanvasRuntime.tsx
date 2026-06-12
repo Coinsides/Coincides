@@ -13,22 +13,16 @@ import {
 import { useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
-  CircleHelp,
   CornerDownLeft,
   Eye,
-  EyeOff,
   FileText,
-  FileX,
-  GripVertical,
   Info,
   LayoutDashboard,
   MoreHorizontal,
   PanelTopClose,
   PanelTopOpen,
   Plus,
-  Save,
   Star,
-  Trash2,
   X,
 } from 'lucide-react';
 import api from '@/services/api';
@@ -50,6 +44,7 @@ import {
 import {
   buildNoteCanvasRuntimeModel,
 } from './engineModel';
+import { clamp } from './geometry';
 import {
   combinedDefinitionText,
   contentForEditedBlock,
@@ -63,6 +58,7 @@ import {
 } from './blockContentService';
 import { useNoteCanvasRuntime } from './hooks/useNoteCanvasRuntime';
 import { BlockEditorLayer } from './layers/BlockEditorLayer';
+import { ExportPreviewLayer } from './layers/ExportPreviewLayer';
 import { SlashMenuLayer } from './layers/SlashMenuLayer';
 import {
   draggingBlockInteraction,
@@ -105,6 +101,8 @@ import {
   snapToTargets,
   writeLayoutOverride,
 } from './placementService';
+import { buildExportPreviewModel } from './exportPreviewService';
+import { getSlashMenuAnchor } from './overlayService';
 import {
   DEFAULT_BLOCK_HEIGHT,
   DEFAULT_PAGE_CONTENT_WIDTH,
@@ -112,9 +110,6 @@ import {
   MIN_BLOCK_HEIGHT,
   MIN_BLOCK_WIDTH,
   NOTE_LAYOUT_KEY,
-  SLASH_MENU_HEIGHT_ESTIMATE,
-  SLASH_MENU_OFFSET,
-  SLASH_MENU_WIDTH,
   type AIVisibility,
   type BlockBoxLayout,
   type ExportRole,
@@ -231,26 +226,6 @@ function isEditableDomTarget(target: EventTarget | null): boolean {
   return Boolean(target.closest('input, textarea, select, [contenteditable="true"]'));
 }
 
-function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max);
-}
-
-function getSlashMenuAnchor(element: HTMLElement | null, container: HTMLElement | null): SlashMenuAnchor | null {
-  if (!element || !container) return null;
-
-  const elementRect = element.getBoundingClientRect();
-  const containerRect = container.getBoundingClientRect();
-  const menuWidth = Math.min(SLASH_MENU_WIDTH, Math.max(0, containerRect.width));
-  const maxX = Math.max(0, containerRect.width - menuWidth);
-  const x = clamp(elementRect.left - containerRect.left, 0, maxX);
-  const belowY = elementRect.bottom - containerRect.top + SLASH_MENU_OFFSET;
-  const aboveY = elementRect.top - containerRect.top - SLASH_MENU_HEIGHT_ESTIMATE - SLASH_MENU_OFFSET;
-  const wouldOverflowViewport = elementRect.bottom + SLASH_MENU_OFFSET + SLASH_MENU_HEIGHT_ESTIMATE > window.innerHeight;
-  const y = wouldOverflowViewport && aboveY > 0 ? aboveY : belowY;
-
-  return { x, y: Math.max(0, y) };
-}
-
 function estimateBlockHeightForText(block: NoteBlock, text: string, width: number): number {
   return estimateTextBlockHeight({
     text,
@@ -263,16 +238,6 @@ function estimateBlockHeightForText(block: NoteBlock, text: string, width: numbe
 
 function estimateBlockHeight(block: NoteBlock, width: number): number {
   return estimateBlockHeightForText(block, textFromContent(block), width);
-}
-
-function exportRoleLabel(role: ExportRole): string {
-  if (role === 'included') return 'Export';
-  if (role === 'excluded') return 'Excluded';
-  return 'Scratch';
-}
-
-function aiVisibilityLabel(visibility: AIVisibility): string {
-  return visibility === 'visible' ? 'AI visible' : 'AI hidden';
 }
 
 export default function NoteCanvasRuntime() {
@@ -446,55 +411,8 @@ export default function NoteCanvasRuntime() {
   }, [canvasBlockPlacements, pageContentHeight, primaryPageFrame, surfaceMode]);
 
   const exportPreview = useMemo(() => {
-    const rows = visibleBlocks.map((block) => {
-      const layout = blockLayouts[block.id];
-      const boundary = layout ? getBoundaryKind(layout) : 'inside';
-      const exportRole = layout ? getEffectiveExportRole(layout) : 'included';
-      const aiVisibility = layout ? getEffectiveAIVisibility(layout) : 'visible';
-      return { block, layout, boundary, exportRole, aiVisibility };
-    });
-    const includedRows = rows.filter((row) => row.exportRole === 'included');
-    const excludedRows = rows.filter((row) => row.exportRole !== 'included');
-    const aiVisibleRows = rows.filter((row) => row.aiVisibility === 'visible');
-    const aiHiddenRows = rows.filter((row) => row.aiVisibility === 'hidden');
-    return {
-      rows,
-      includedRows,
-      excludedRows,
-      aiVisibleRows,
-      aiHiddenRows,
-      included: includedRows.length,
-      excluded: excludedRows.length,
-      scratch: rows.filter((row) => row.exportRole === 'scratch').length,
-      aiVisible: aiVisibleRows.length,
-      aiHidden: aiHiddenRows.length,
-      crossing: rows.filter((row) => row.boundary === 'crossing').length,
-      outside: rows.filter((row) => row.boundary === 'outside').length,
-    };
+    return buildExportPreviewModel(visibleBlocks, blockLayouts);
   }, [visibleBlocks, blockLayouts]);
-
-  const renderExportPreviewGroup = (
-    label: string,
-    rows: typeof exportPreview.rows,
-    meta: (row: typeof exportPreview.rows[number]) => string,
-  ) => (
-    <details className={styles.exportPreviewGroup}>
-      <summary>
-        <span>{label}</span>
-        <strong>{rows.length}</strong>
-      </summary>
-      <div className={styles.exportPreviewList}>
-        {rows.length === 0 ? (
-          <div className={styles.exportPreviewEmpty}>No blocks in this group.</div>
-        ) : rows.map((row) => (
-          <div key={`${label}-${row.block.id}`} className={styles.exportPreviewRow}>
-            <span>{row.block.title || textFromContent(row.block).slice(0, 72) || 'Untitled block'}</span>
-            <small>{meta(row)}</small>
-          </div>
-        ))}
-      </div>
-    </details>
-  );
 
   const fetchNote = useCallback(async () => {
     if (!noteId) return;
@@ -1175,7 +1093,7 @@ export default function NoteCanvasRuntime() {
         MIN_BLOCK_WIDTH,
         Math.max(MIN_BLOCK_WIDTH, contentWidth - layout.x),
       );
-      const snappedRight = snapEnabled
+      const snappedRight: { value: number; snapped?: number } = snapEnabled
         ? snapToTargets(layout.x + width, [
           contentWidth,
           ...Object.entries(blockLayouts)
@@ -1454,115 +1372,19 @@ export default function NoteCanvasRuntime() {
             )}
 
             {showExportPreview && (
-              <div className={`${styles.infoPopover} ${styles.exportPopover}`}>
-                <div className={styles.popoverHeader}>
-                  <div>
-                    <div className={styles.popoverEyebrow}>Export preview</div>
-                    <strong>Boundary seed</strong>
-                  </div>
-                  <button
-                  className={styles.iconBtn}
-                  onClick={() => {
-                    setShowExportPreview(false);
-                  }}
-                  title="Close"
-                  >
-                    <X size={15} />
-                  </button>
-                </div>
-                <div className={styles.exportStats}>
-                  <div>
-                    <strong>{exportPreview.included}</strong>
-                    <span>Included</span>
-                  </div>
-                  <div>
-                    <strong>{exportPreview.excluded}</strong>
-                    <span>Excluded</span>
-                  </div>
-                  <div>
-                    <strong>{exportPreview.aiVisible}</strong>
-                    <span>AI visible</span>
-                  </div>
-                  <div>
-                    <strong>{exportPreview.aiHidden}</strong>
-                    <span>AI hidden</span>
-                  </div>
-                </div>
-                <div className={styles.previewOverlayControls} aria-label="Preview overlay controls">
-                  <div className={styles.previewOverlayControl}>
-                    <button
-                      type="button"
-                      className={`${styles.previewOverlayToggle} ${showPreviewBlockTypes ? styles.previewOverlayToggleOn : styles.previewOverlayToggleOff}`}
-                      onClick={() => setShowPreviewBlockTypes((value) => !value)}
-                      aria-label="Toggle block type overlay"
-                      aria-pressed={showPreviewBlockTypes}
-                      title={showPreviewBlockTypes ? 'Hide block type overlay' : 'Show block type overlay'}
-                    >
-                      <LayoutDashboard size={20} />
-                    </button>
-                    <span
-                      className={styles.previewOverlayHelp}
-                      data-tip="Show or hide block type badges across the page."
-                      aria-label="Block type overlay help"
-                    >
-                      <CircleHelp size={13} />
-                    </span>
-                  </div>
-                  <div className={styles.previewOverlayControl}>
-                    <button
-                      type="button"
-                      className={`${styles.previewOverlayToggle} ${showPreviewAIVisibility ? styles.previewOverlayToggleOn : styles.previewOverlayToggleOff}`}
-                      onClick={() => setShowPreviewAIVisibility((value) => !value)}
-                      aria-label="Toggle AI visibility overlay"
-                      aria-pressed={showPreviewAIVisibility}
-                      title={showPreviewAIVisibility ? 'Hide AI visibility overlay' : 'Show AI visibility overlay'}
-                    >
-                      {showPreviewAIVisibility ? <Eye size={20} /> : <EyeOff size={20} />}
-                    </button>
-                    <span
-                      className={styles.previewOverlayHelp}
-                      data-tip="Show which blocks are visible or hidden from AI context."
-                      aria-label="AI visibility overlay help"
-                    >
-                      <CircleHelp size={13} />
-                    </span>
-                  </div>
-                  <div className={styles.previewOverlayControl}>
-                    <button
-                      type="button"
-                      className={`${styles.previewOverlayToggle} ${showPreviewExportStatus ? styles.previewOverlayToggleOn : styles.previewOverlayToggleOff}`}
-                      onClick={() => setShowPreviewExportStatus((value) => !value)}
-                      aria-label="Toggle export status overlay"
-                      aria-pressed={showPreviewExportStatus}
-                      title={showPreviewExportStatus ? 'Hide export status overlay' : 'Show export status overlay'}
-                    >
-                      {showPreviewExportStatus ? <FileText size={20} /> : <FileX size={20} />}
-                    </button>
-                    <span
-                      className={styles.previewOverlayHelp}
-                      data-tip="Show which blocks are included, excluded, or scratch-only."
-                      aria-label="Export status overlay help"
-                    >
-                      <CircleHelp size={13} />
-                    </span>
-                  </div>
-                </div>
-                {(exportPreview.crossing > 0 || exportPreview.outside > 0) && (
-                  <div className={styles.exportWarning}>
-                    {exportPreview.crossing > 0 && <p>{exportPreview.crossing} block crosses the formal page boundary.</p>}
-                    {exportPreview.outside > 0 && <p>{exportPreview.outside} block is in the scratch workspace.</p>}
-                  </div>
-                )}
-                <div className={styles.exportPreviewGroups}>
-                  {renderExportPreviewGroup('Included in export', exportPreview.includedRows, (row) => `${aiVisibilityLabel(row.aiVisibility)} / ${row.boundary}`)}
-                  {renderExportPreviewGroup('Excluded / scratch', exportPreview.excludedRows, (row) => `${aiVisibilityLabel(row.aiVisibility)} / ${row.boundary}`)}
-                  {renderExportPreviewGroup('AI visible', exportPreview.aiVisibleRows, (row) => `${exportRoleLabel(row.exportRole)} / ${row.boundary}`)}
-                  {renderExportPreviewGroup('AI hidden', exportPreview.aiHiddenRows, (row) => `${exportRoleLabel(row.exportRole)} / ${row.boundary}`)}
-                </div>
-                <p className={styles.popoverNote}>
-                  This is a boundary preview seed, not the final PDF export engine.
-                </p>
-              </div>
+              <ExportPreviewLayer
+                preview={exportPreview}
+                showBlockTypes={showPreviewBlockTypes}
+                showAIVisibility={showPreviewAIVisibility}
+                showExportStatus={showPreviewExportStatus}
+                onToggleBlockTypes={() => setShowPreviewBlockTypes((value) => !value)}
+                onToggleAIVisibility={() => setShowPreviewAIVisibility((value) => !value)}
+                onToggleExportStatus={() => setShowPreviewExportStatus((value) => !value)}
+                onClose={() => {
+                  setShowExportPreview(false);
+                  setInteractionState(idleInteraction());
+                }}
+              />
             )}
 
           </div>

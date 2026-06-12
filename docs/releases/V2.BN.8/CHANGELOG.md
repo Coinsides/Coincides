@@ -126,6 +126,14 @@
 - `NoteCanvasRuntime.tsx` 不再内联 `BlockEditor` 组件本体。
 - L6/L9 layer 抽离后 client build passed。
 
+## Changed - V2.BN.8.1 L9 Overlay Preview Layer
+
+- 新增 `overlayService.ts`，把 slash menu anchor 计算从 `NoteCanvasRuntime.tsx` 迁出。
+- 新增 `exportPreviewService.ts`，集中生成 export preview model、row label、AI visibility label 和 export role label。
+- 新增 `layers/ExportPreviewLayer.tsx`，把 export preview panel 与 preview group rendering 从 runtime 主文件迁出。
+- `NoteCanvasRuntime.tsx` 继续保留 preview 开关状态和 callbacks，但不再内联 preview panel 结构。
+- L9 overlay preview layer 抽离后 client build passed。
+
 ## Changed - V2.BN.8.1 L8/L10 Seeds
 
 - 新增 `interactionController.ts`，建立 Canvas Engine 第一版 interaction state boundary：

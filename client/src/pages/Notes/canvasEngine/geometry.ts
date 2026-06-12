@@ -7,6 +7,10 @@ import type {
   PageFrameModel,
 } from './types';
 
+export function clamp(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
+}
+
 export function worldToScreen(point: CanvasPoint, viewport: CanvasViewport): CanvasPoint {
   return {
     x: (point.x - viewport.x) * viewport.zoom,
