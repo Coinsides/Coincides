@@ -102,11 +102,13 @@
 ## Changed - V2.BN.8.1 L7 Seed
 
 - 新增 `measurementService.ts`。
+- 新增 `hooks/useBlockMeasurement.ts`。
 - 从 `NoteCanvasRuntime.tsx` 迁出第一批 measurement seed：
   - textarea content resize；
   - block DOM content height measurement；
   - text block estimated height。
-- `NoteCanvasRuntime.tsx` 仍保留 block-specific measurement wrapper，后续继续迁入 measurement registry。
+- `BlockEditorLayer.tsx` 不再直接拥有 `ResizeObserver` / block content height measurement wiring。
+- `NoteCanvasRuntime.tsx` 仍保留 measured height -> placement/reflow 的 runtime 回调，后续继续迁入 measurement registry。
 - L7 seed 抽离后 client build passed。
 
 ## Changed - V2.BN.8.1 L6/L9 Layers
@@ -160,8 +162,10 @@
 - 新增 `blocks/DefinitionBlockProjection.tsx`。
 - 新增 `blocks/FormulaBlockProjection.tsx`。
 - 新增 `blocks/TextBlockProjection.tsx`。
+- 新增 `layers/BlockResizeHandleLayer.tsx`。
 - `BlockEditorLayer.tsx` 不再内联 Definition / Formula / Text 的具体 JSX projection。
-- `BlockEditorLayer.tsx` 继续保留 block shell、measurement callback、control/source/status sublayer composition，后续再迁入 measurement registry / shell boundary。
+- `BlockEditorLayer.tsx` 不再内联 resize handle。
+- `BlockEditorLayer.tsx` 继续保留 block shell 和 control/source/status/content sublayer composition，后续再迁入 shell boundary / selected overlay anchor。
 - L6 block projection sublayers 抽离后 client build passed。
 
 ## Changed - V2.BN.8.1 L8/L10 Seeds

@@ -91,12 +91,13 @@ L10 mode policy seed: implemented, not browser-smoked
 - PageFrame height 现在不再被 Canvas workspace 高度撑开，理论上应减少 Canvas mode 巨大空白；
 - workspace block 不应继续影响 formal PageFrame height，但还需要浏览器里创建 workspace block 验证；
 - placement 读写、snap、reflow 已迁入 service，理论上行为应保持不变；
-- textarea resize、DOM measured height、text estimated height 已进入 measurement service seed；
+- textarea resize、DOM measured height、text estimated height 已进入 measurement service / hook seed；
 - 如果后续出现 block 位置、snap、reload 后布局变化，应优先检查 `placementService.ts`。
-- 如果后续出现 Definition / Formula 展开穿模，应优先检查 `measurementService.ts` 和后续 measurement registry。
+- 如果后续出现 Definition / Formula 展开穿模，应优先检查 `measurementService.ts`、`hooks/useBlockMeasurement.ts` 和后续 measurement registry。
 - 如果后续出现 Definition / Formula 内容保存、plain text、preview 文本不一致，应优先检查 `blockContentService.ts`、`blocks/DefinitionBlockProjection.tsx` 和 `blocks/FormulaBlockProjection.tsx`。
 - 如果后续出现 paragraph / heading / code / quote textarea 输入异常，应优先检查 `blocks/TextBlockProjection.tsx`。
-- 如果后续出现 block toolbar、source badge、resize handle 或 block shell 视觉/操作异常，应优先检查 `layers/BlockEditorLayer.tsx`。
+- 如果后续出现 resize handle 异常，应优先检查 `layers/BlockResizeHandleLayer.tsx`。
+- 如果后续出现 block shell 视觉/操作异常，应优先检查 `layers/BlockEditorLayer.tsx`。
 - 如果后续只出现 block type、AI visibility、export status、Page boundary badges 异常，应优先检查 `layers/BlockStatusBadgeLayer.tsx`。
 - 如果后续只出现 block control bar 的移动、导出、AI 可见性、保存、删除按钮异常，应优先检查 `layers/BlockControlBarLayer.tsx`。
 - 如果后续只出现 source reference badge 或 View source jump button 异常，应优先检查 `layers/BlockSourceReferenceLayer.tsx`。

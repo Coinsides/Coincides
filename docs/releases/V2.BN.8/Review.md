@@ -197,18 +197,20 @@ client build: passed
 已完成部分：
 
 - 新增 `measurementService.ts`；
+- 新增 `hooks/useBlockMeasurement.ts`；
 - 迁出第一批 measurement seed：
   - textarea auto-height；
   - DOM content height measurement；
   - text block estimated height。
-- `NoteCanvasRuntime.tsx` 仍保留 block-specific height wrapper，但不再直接写文本高度估算公式。
+- `BlockEditorLayer.tsx` 不再直接拥有 `ResizeObserver` / measured rect callback wiring。
+- `NoteCanvasRuntime.tsx` 仍保留 measured height -> placement/reflow 的 runtime 回调，后续继续迁入 measurement registry。
 
 仍需验收：
 
 - Formula input expanded/collapsed 是否触发稳定 measurement；
 - Definition fields active/editing 是否稳定推开下方 block；
 - resize width 后 text reflow 是否仍然稳定；
-- measurement registry 尚未完成，当前仍是 service seed。
+- measurement registry 尚未完成，当前仍是 service + hook seed。
 
 ### L6 - Block Projection Layer
 
@@ -239,11 +241,12 @@ client build: passed
 - 新增 `blocks/DefinitionBlockProjection.tsx`，把 Definition structured field editor / read projection 从 `BlockEditorLayer` 中迁出。
 - 新增 `blocks/FormulaBlockProjection.tsx`，把 Formula preview / LaTeX input projection 从 `BlockEditorLayer` 中迁出。
 - 新增 `blocks/TextBlockProjection.tsx`，把 paragraph / heading / code / quote textarea projection 从 `BlockEditorLayer` 中迁出。
+- 新增 `layers/BlockResizeHandleLayer.tsx`，把 resize handle 从 `BlockEditorLayer` 中迁出。
 
 仍需验收：
 
-- `BlockEditorLayer` 内部仍包含 measurement callback 和 projection composition；
-- 下一轮可以继续把 measurement registry / resize handle / block shell 边界拆出；
+- `BlockEditorLayer` 内部仍包含 block shell 和 projection composition；
+- 下一轮可以继续把 block shell / selected overlay anchor 边界拆出；
 - 需要 browser smoke 验证 definition / formula / code / source badge 的表现没有回归。
 
 ### L9 - Overlay Layer Seed

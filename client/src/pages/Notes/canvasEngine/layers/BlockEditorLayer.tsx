@@ -1,6 +1,5 @@
 import {
   useEffect,
-  useLayoutEffect,
   useRef,
   type KeyboardEvent,
   type PointerEvent as ReactPointerEvent,
@@ -13,7 +12,6 @@ import {
   type FieldValueRecord,
 } from '../blockContentService';
 import {
-  measureBlockContentHeight,
   resizeTextareaToContent,
 } from '../measurementService';
 import {
@@ -21,10 +19,7 @@ import {
   getEffectiveAIVisibility,
   getEffectiveExportRole,
 } from '../placementService';
-import {
-  DEFAULT_BLOCK_HEIGHT,
-  type BlockBoxLayout,
-} from '../runtimeLayout';
+import type { BlockBoxLayout } from '../runtimeLayout';
 import type {
   NoteBlock,
   SourceAnchor,
@@ -32,7 +27,9 @@ import type {
 import { DefinitionBlockProjection } from '../blocks/DefinitionBlockProjection';
 import { FormulaBlockProjection } from '../blocks/FormulaBlockProjection';
 import { TextBlockProjection } from '../blocks/TextBlockProjection';
+import { useBlockMeasurement } from '../hooks/useBlockMeasurement';
 import { BlockControlBarLayer } from './BlockControlBarLayer';
+import { BlockResizeHandleLayer } from './BlockResizeHandleLayer';
 import { BlockSourceReferenceLayer } from './BlockSourceReferenceLayer';
 import { BlockStatusBadgeLayer } from './BlockStatusBadgeLayer';
 import styles from '../../NoteDetail.module.css';
@@ -115,22 +112,14 @@ export function BlockEditorLayer({
   const blockTypeLabel = getNoteBlockTemplateLabel(block.metadata, block.block_type);
   const showContextualTypeBadge = active || showBlockTypeBadge;
 
-  useLayoutEffect(() => {
-    resizeTextareaToContent(textareaRef.current);
-    const element = blockContentRef.current;
-    if (!element) {
-      onMeasuredHeight(DEFAULT_BLOCK_HEIGHT);
-      return undefined;
-    }
-
-    const measure = () => onMeasuredHeight(measureBlockContentHeight(element));
-    measure();
-
-    if (typeof ResizeObserver === 'undefined') return undefined;
-    const observer = new ResizeObserver(measure);
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [text, layout.width, active, onMeasuredHeight]);
+  useBlockMeasurement({
+    blockContentRef,
+    textareaRef,
+    text,
+    width: layout.width,
+    active,
+    onMeasuredHeight,
+  });
 
   useEffect(() => {
     if (!autoFocus) return;
@@ -219,12 +208,7 @@ export function BlockEditorLayer({
         />
       </div>
 
-      <div
-        className={styles.resizeHandleRight}
-        onPointerDown={onBeginResize}
-        title="Resize block"
-        aria-label="Resize block"
-      />
+      <BlockResizeHandleLayer onBeginResize={onBeginResize} />
     </article>
   );
 }
