@@ -1,5 +1,17 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 L9 Slash Command Controller Experience Note
+
+```text
+L9 slash command controller hook: implemented, not browser-smoked
+```
+
+体验风险：
+
+- 本次迁移理论上不改变 slash command 的视觉和交互，只改变 slash state / controller 的归属。
+- 如果后续出现 slash menu 不出现、位置跳到页面顶部、Esc 不能关闭、Ctrl+Enter 保存异常、或 block 转换后焦点丢失，应优先检查 `hooks/useSlashCommandController.ts`。
+- `SlashMenuLayer.tsx` 和 `overlayService.ts` 仍分别负责菜单渲染与 anchor 计算；本次没有完成完整 overlay portal，也没有迁出 note info / more actions / insert panel / preview 的状态。
+
 ## V2.BN.8.1 L8 Placement Interaction Session Experience Note
 
 ```text

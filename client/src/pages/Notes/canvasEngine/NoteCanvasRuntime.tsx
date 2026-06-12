@@ -5,7 +5,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type KeyboardEvent,
   type MouseEvent,
   type CSSProperties,
 } from 'react';
@@ -27,14 +26,6 @@ import {
 import type { TemplateOption } from '@/services/templateOptions';
 import { useUIStore } from '@/stores/uiStore';
 import {
-  detectSlashTrigger,
-  filterSlashCommands,
-  findTemplateForCommand,
-  removeSlashTrigger,
-  type NoteSlashCommand,
-  type SlashTrigger,
-} from '../noteSlashCommands';
-import {
   buildNoteCanvasRuntimeModel,
 } from './engineModel';
 import {
@@ -48,6 +39,7 @@ import { useBlockPlacementInteractions } from './hooks/useBlockPlacementInteract
 import { useNoteCanvasDataAdapter } from './hooks/useNoteCanvasDataAdapter';
 import { useNoteCanvasRuntime } from './hooks/useNoteCanvasRuntime';
 import { usePlacementHistory } from './hooks/usePlacementHistory';
+import { useSlashCommandController } from './hooks/useSlashCommandController';
 import { BlockEditorLayer } from './layers/BlockEditorLayer';
 import { ExportPreviewLayer } from './layers/ExportPreviewLayer';
 import { SlashMenuLayer } from './layers/SlashMenuLayer';
@@ -83,14 +75,12 @@ import {
   normalizeBlockLayout,
 } from './placementService';
 import { buildExportPreviewModel } from './exportPreviewService';
-import { getSlashMenuAnchor } from './overlayService';
 import {
   DEFAULT_BLOCK_HEIGHT,
   LAYOUT_MEASURE_SUPPRESSION_MS,
   MIN_BLOCK_HEIGHT,
   type BlockBoxLayout,
   type SnapGuide,
-  type SlashMenuAnchor,
   type SurfaceMode,
 } from './runtimeLayout';
 import type { BlockPlacementModel } from './types';
@@ -102,13 +92,6 @@ import {
   createRuntimeWorld,
 } from './viewportService';
 import styles from '../NoteDetail.module.css';
-
-type SlashTarget = {
-  target: 'draft' | 'block';
-  blockId?: string;
-  trigger: SlashTrigger;
-  anchor: SlashMenuAnchor | null;
-};
 
 function isFormulaLikeBlock(block: NoteBlock): boolean {
   const templateKey = typeof block.metadata?.template_key === 'string' ? block.metadata.template_key : '';
@@ -148,7 +131,6 @@ export default function NoteCanvasRuntime() {
   const [draftFocusNonce, setDraftFocusNonce] = useState(0);
   const [focusBlockId, setFocusBlockId] = useState<string | null>(null);
   const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
-  const [slashTarget, setSlashTarget] = useState<SlashTarget | null>(null);
   const [chromeCollapsed, setChromeCollapsed] = useState(false);
   const [showAdvancedInsert, setShowAdvancedInsert] = useState(false);
   const [showNoteInfo, setShowNoteInfo] = useState(false);
@@ -234,16 +216,6 @@ export default function NoteCanvasRuntime() {
   const blockListRef = useRef<HTMLDivElement | null>(null);
   const movingBlockIdRef = useRef<string | null>(null);
   const suppressMeasuredReflowUntilRef = useRef(0);
-
-  const slashCommands = useMemo(() => (
-    slashTarget
-      ? filterSlashCommands(slashTarget.trigger.query).map((command) => (
-        findTemplateForCommand(command, insertTemplateOptions)
-          ? command
-          : { ...command, disabledReason: `${command.label} is not enabled in this notebook build yet.` }
-      ))
-      : []
-  ), [slashTarget, insertTemplateOptions]);
 
   const sourceReferenceCount = useMemo(
     () => sortedBlocks.reduce((total, block) => total + block.source_references.length, 0),
@@ -428,7 +400,6 @@ export default function NoteCanvasRuntime() {
       draftTextRef.current = '';
       setDraftActive(false);
       setDraftLayout(null);
-      setSlashTarget(null);
       setFocusBlockId(created.id);
     } finally {
       creatingDraftRef.current = false;
@@ -452,111 +423,33 @@ export default function NoteCanvasRuntime() {
     setInteractionState(idleInteraction());
   }, []);
 
-  const updateSlashTarget = (
-    target: SlashTarget['target'],
-    text: string,
-    caret: number,
-    blockId?: string,
-    anchorElement?: HTMLElement | null,
-  ) => {
-    const trigger = detectSlashTrigger(text, caret);
-    setSlashTarget(trigger ? {
-      target,
-      blockId,
-      trigger,
-      anchor: getSlashMenuAnchor(anchorElement || null, blockListRef.current),
-    } : null);
-    setInteractionState(trigger
-      ? openingMenuInteraction('slashMenu', blockId)
-      : target === 'block'
-        ? editingTextInteraction(blockId)
-        : editingTextInteraction());
-  };
-
-  const handleDraftChange = (value: string, caret: number, anchorElement?: HTMLElement | null) => {
-    setDraftText(value);
-    draftTextRef.current = value;
-    updateSlashTarget('draft', value, caret, undefined, anchorElement);
-  };
-
-  const handleBlockTextChange = (
-    blockId: string,
-    value: string,
-    caret: number,
-    anchorElement?: HTMLElement | null,
-  ) => {
-    setBlockTextDrafts((current) => ({ ...current, [blockId]: value }));
-    updateSlashTarget('block', value, caret, blockId, anchorElement);
-  };
-
-  const handleSelectSlashCommand = async (command: NoteSlashCommand) => {
-    if (!slashTarget) return;
-    if (command.disabledReason) {
-      addToast('info', command.disabledReason);
-      return;
-    }
-
-    const template = findTemplateForCommand(command, templateOptions);
-    if (!template) {
-      addToast('error', `${command.label} template is not available`);
-      return;
-    }
-
-    if (slashTarget.target === 'draft') {
-      const cleanedText = removeSlashTrigger(draftTextRef.current, slashTarget.trigger);
-      setSlashTarget(null);
-      setDraftText(cleanedText);
-      draftTextRef.current = cleanedText;
-      await persistDraft(cleanedText, template);
-      return;
-    }
-
-    const blockId = slashTarget.blockId;
-    const block = blockId ? blocks.find((item) => item.id === blockId) : undefined;
-    if (!block) return;
-
-    const currentText = blockTextDrafts[block.id] ?? textFromContent(block);
-    const cleanedText = removeSlashTrigger(currentText, slashTarget.trigger);
-    setSlashTarget(null);
-    setBlockTextDrafts((current) => ({ ...current, [block.id]: cleanedText }));
-
-    if (!cleanedText.trim()) {
-      const updated = await applyTemplateToBlock(block, template, cleanedText);
-      if (updated) setFocusBlockId(block.id);
-      return;
-    }
-
-    const updated = await applyTemplateToBlock(block, template, cleanedText);
-    if (updated) setFocusBlockId(block.id);
-  };
-
-  const handleDraftKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === 'Escape' && slashTarget?.target === 'draft') {
-      event.preventDefault();
-      setSlashTarget(null);
-      return;
-    }
-
-    if (event.key === 'Enter' && event.ctrlKey) {
-      event.preventDefault();
-      void persistDraft(draftText);
-    }
-  };
-
-  const handleBlockKeyDown = (block: NoteBlock, text: string, event: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (event.key === 'Escape') {
-      if (slashTarget?.target === 'block') {
-        event.preventDefault();
-        setSlashTarget(null);
-      }
-      return;
-    }
-
-    if (event.key === 'Enter' && event.ctrlKey) {
-      event.preventDefault();
-      void saveBlock(block, text, { silent: true }).then(() => activateDraft());
-    }
-  };
+  const {
+    clearSlashTarget,
+    handleBlockKeyDown,
+    handleBlockTextChange,
+    handleDraftChange,
+    handleDraftKeyDown,
+    handleSelectSlashCommand,
+    slashCommands,
+    slashTarget,
+  } = useSlashCommandController({
+    addToast,
+    applyTemplateToBlock,
+    blockListRef,
+    blocks,
+    blockTextDrafts,
+    draftText,
+    draftTextRef,
+    insertTemplateOptions,
+    persistDraft,
+    saveBlock,
+    setBlockTextDrafts,
+    setDraftText,
+    setFocusBlockId,
+    setInteractionState,
+    templateOptions,
+    activateDraft,
+  });
 
   const handlePageSpaceClick = (event: MouseEvent<HTMLDivElement>) => {
     if (event.target !== event.currentTarget) return;
@@ -1062,7 +955,7 @@ export default function NoteCanvasRuntime() {
                       draftTextRef.current = '';
                       setDraftActive(false);
                       setDraftLayout(null);
-                      setSlashTarget(null);
+                      clearSlashTarget();
                       setInteractionState(idleInteraction());
                     }
                   }}

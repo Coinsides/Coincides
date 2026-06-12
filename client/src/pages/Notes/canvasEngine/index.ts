@@ -11,6 +11,7 @@ export * from './hooks/useBlockPlacementInteractions';
 export * from './hooks/useCanvasContentWidth';
 export * from './hooks/useNoteCanvasDataAdapter';
 export * from './hooks/usePlacementHistory';
+export * from './hooks/useSlashCommandController';
 export * from './layers/BlockControlBarLayer';
 export * from './layers/ExportPreviewLayer';
 export * from './layers/SlashMenuLayer';

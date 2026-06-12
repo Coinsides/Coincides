@@ -1,5 +1,28 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 L9 Slash Command Controller Hook Seed
+
+```text
+status: in progress
+client build: passed
+```
+
+已完成部分：
+
+- 新增 `hooks/useSlashCommandController.ts`。
+- Slash command 的 target state、命令列表、template availability 判断、draft/block change handler、Esc / Ctrl+Enter handler 和 command selection flow 已从 `NoteCanvasRuntime.tsx` 迁出。
+- `NoteCanvasRuntime.tsx` 不再直接拥有 slash trigger detection / command filtering / slash anchor calculation。
+- `SlashMenuLayer.tsx` 继续负责菜单渲染；`overlayService.ts` 继续负责 anchor 计算。
+- hook 边界显式接收 draft persistence、block save、template conversion、block text draft setter、focus setter 和 interaction state setter。
+
+仍需验收：
+
+- Browser smoke 验证 draft 中输入 `/` 时菜单仍出现在 caret 附近。
+- Browser smoke 验证已有 block 中输入 `/definition` / `/formula` 仍能打开菜单并转换。
+- Browser smoke 验证 Esc 能关闭 draft/block slash menu。
+- Browser smoke 验证 Ctrl+Enter 在 draft/block 场景仍保持原行为。
+- 后续 L9 仍需继续迁出 note info / more actions / insert panel / preview state 到统一 floating overlay controller 或 overlay portal。
+
 ## V2.BN.8.1 L8 Placement Interaction Session Hook Seed
 
 ```text

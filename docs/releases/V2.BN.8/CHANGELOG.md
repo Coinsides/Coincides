@@ -1,5 +1,14 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 L9 Slash Command Controller Hook Seed
+
+- 新增 `hooks/useSlashCommandController.ts`。
+- 将 slash command 的 target state、命令过滤、template availability 判断、draft/block 文本触发检测、Esc / Ctrl+Enter 键盘处理和命令选择后的 template 转换流程从 `NoteCanvasRuntime.tsx` 迁入 Canvas Engine hook。
+- `NoteCanvasRuntime.tsx` 不再直接导入 `detectSlashTrigger`、`filterSlashCommands`、`findTemplateForCommand`、`removeSlashTrigger` 或 `getSlashMenuAnchor`。
+- Slash menu rendering 仍由 `layers/SlashMenuLayer.tsx` 负责；本次迁移只抽离 controller / state orchestration，不改变菜单视觉或命令行为。
+- `NoteCanvasRuntime.tsx` 继续提供 draft persistence、block save、template conversion、focus setter 和 interaction state setter 作为边界输入，后续可继续收口到 Floating Overlay Layer / overlay portal。
+- L9 slash command controller hook seed 迁出后 client build passed。
+
 ## Changed - V2.BN.8.1 L8 Placement Interaction Session Hook Seed
 
 - 新增 `hooks/useBlockPlacementInteractions.ts`。
