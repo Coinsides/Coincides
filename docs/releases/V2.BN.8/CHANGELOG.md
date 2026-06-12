@@ -1,5 +1,14 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 L8 Block Selection Controller Hook Seed
+
+- 新增 `hooks/useBlockSelectionController.ts`。
+- 将 `focusBlockId` / `activeBlockId` / `selectedBlockId` state，以及 block focus / select / clear selection 编排从 `NoteCanvasRuntime.tsx` 迁入 Canvas Engine hook。
+- `NoteCanvasRuntime.tsx` 继续把 selection setters 传给 draft / slash / placement hooks，保持当前 block 创建、slash 转换、move / resize 的既有边界。
+- block focus / select 仍写入 `editingTextInteraction(blockId)` / `selectedBlockInteraction(blockId)`，debug interaction state 不变。
+- 本轮属于 L8 selection controller seed，不改变 block 视觉选中态、layout mode、drag / resize、空白双击创建或 surface click 清空行为。
+- L8 block selection controller hook seed 迁出后 client build / server build passed。
+
 ## Changed - V2.BN.8.1 L8 Draft Block Controller Hook Seed
 
 - 新增 `hooks/useDraftBlockController.ts`。

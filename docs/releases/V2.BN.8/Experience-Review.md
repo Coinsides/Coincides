@@ -1,5 +1,17 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 L8 Block Selection Controller Experience Note
+
+```text
+L8 block selection controller hook: implemented, not browser-smoked
+```
+
+体验风险：
+
+- 本次迁移理论上不改变单击选中、进入文本编辑、空白处取消选中、drag / resize 后保持选中的体验，只改变 selection lifecycle 的归属。
+- 如果后续出现 block 选中态丢失、toolbar 不出现、文本 focus 后不能编辑、空白点击不取消选中、或 move / resize 后 interaction debug state 错乱，应优先检查 `hooks/useBlockSelectionController.ts` 与它传给 draft / slash / placement hooks 的 setter 边界。
+- 本次没有完成 L8 的全部 Interaction Controller：双击创建策略、snap policy、elastic avoidance、Ctrl+Z / Ctrl+Y 等仍属于后续替换层。
+
 ## V2.BN.8.1 L8 Draft Block Controller Experience Note
 
 ```text

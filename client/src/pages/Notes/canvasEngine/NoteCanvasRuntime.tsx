@@ -33,6 +33,7 @@ import {
 } from './blockContentService';
 import { useCanvasContentWidth } from './hooks/useCanvasContentWidth';
 import { useBlockPlacementInteractions } from './hooks/useBlockPlacementInteractions';
+import { useBlockSelectionController } from './hooks/useBlockSelectionController';
 import { useDraftBlockController } from './hooks/useDraftBlockController';
 import { useFloatingOverlayController } from './hooks/useFloatingOverlayController';
 import { useNoteCanvasDataAdapter } from './hooks/useNoteCanvasDataAdapter';
@@ -44,9 +45,7 @@ import { BlockEditorLayer } from './layers/BlockEditorLayer';
 import { ExportPreviewLayer } from './layers/ExportPreviewLayer';
 import { SlashMenuLayer } from './layers/SlashMenuLayer';
 import {
-  editingTextInteraction,
   idleInteraction,
-  selectedBlockInteraction,
 } from './interactionController';
 import {
   applyMeasuredBlockHeightToLayouts,
@@ -118,14 +117,14 @@ export default function NoteCanvasRuntime() {
   const { noteId } = useNoteCanvasRuntime();
   const navigate = useNavigate();
   const addToast = useUIStore((s) => s.addToast);
-  const [focusBlockId, setFocusBlockId] = useState<string | null>(null);
-  const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
   const [layoutMode, setLayoutMode] = useState(false);
-  const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [layoutDrafts, setLayoutDrafts] = useState<Record<string, BlockBoxLayout>>({});
   const [snapGuide, setSnapGuide] = useState<SnapGuide | null>(null);
   const [snapEnabled, setSnapEnabled] = useState(true);
   const [interactionState, setInteractionState] = useState(idleInteraction());
+  const blockListRef = useRef<HTMLDivElement | null>(null);
+  const movingBlockIdRef = useRef<string | null>(null);
+  const suppressMeasuredReflowUntilRef = useRef(0);
 
   const {
     chromeCollapsed,
@@ -148,12 +147,25 @@ export default function NoteCanvasRuntime() {
     togglePreviewExportStatus,
   } = useFloatingOverlayController({ setInteractionState });
 
-  const clearBlockSelection = useCallback(() => {
-    setSelectedBlockId(null);
-    setActiveBlockId(null);
-    setFocusBlockId(null);
-    setInteractionState(idleInteraction());
+  const suppressMeasuredReflowForSelection = useCallback(() => {
+    suppressMeasuredReflowUntilRef.current = Date.now() + LAYOUT_MEASURE_SUPPRESSION_MS;
   }, []);
+
+  const {
+    activeBlockId,
+    clearBlockSelection,
+    focusBlockId,
+    markBlockFocused,
+    markBlockSelected,
+    selectedBlockId,
+    setActiveBlockId,
+    setFocusBlockId,
+    setSelectedBlockId,
+  } = useBlockSelectionController({
+    onBeforeBlockFocus: suppressMeasuredReflowForSelection,
+    onBeforeBlockSelect: suppressMeasuredReflowForSelection,
+    setInteractionState,
+  });
 
   const {
     pageOffsetX,
@@ -168,9 +180,8 @@ export default function NoteCanvasRuntime() {
 
   const handleNoteLoaded = useCallback(() => {
     setLayoutDrafts({});
-    setSelectedBlockId(null);
-    setInteractionState(idleInteraction());
-  }, []);
+    clearBlockSelection();
+  }, [clearBlockSelection]);
 
   const clearLayoutDraftForBlock = useCallback((blockId: string) => {
     setLayoutDrafts((current) => {
@@ -226,10 +237,6 @@ export default function NoteCanvasRuntime() {
     clearLayoutDraftForBlock,
     setLayoutDraftForBlock,
   });
-
-  const blockListRef = useRef<HTMLDivElement | null>(null);
-  const movingBlockIdRef = useRef<string | null>(null);
-  const suppressMeasuredReflowUntilRef = useRef(0);
 
   const sourceReferenceCount = useMemo(
     () => sortedBlocks.reduce((total, block) => total + block.source_references.length, 0),
@@ -784,13 +791,7 @@ export default function NoteCanvasRuntime() {
                   saving={savingBlockId === block.id}
                   active={isActive}
                   autoFocus={focusBlockId === block.id}
-                  onFocused={() => {
-                    suppressMeasuredReflowUntilRef.current = Date.now() + LAYOUT_MEASURE_SUPPRESSION_MS;
-                    setSelectedBlockId(block.id);
-                    setActiveBlockId(block.id);
-                    setFocusBlockId(null);
-                    setInteractionState(editingTextInteraction(block.id));
-                  }}
+                  onFocused={() => markBlockFocused(block.id)}
                   onTextChange={(value, caret, anchorElement) => handleBlockTextChange(block.id, value, caret, anchorElement)}
                   onFieldDraftChange={(fieldValues) => {
                     setBlockFieldDrafts((current) => ({ ...current, [block.id]: fieldValues }));
@@ -803,13 +804,7 @@ export default function NoteCanvasRuntime() {
                   }}
                   onSave={(silent, fieldValues) => saveBlock(block, text, { silent, fieldValues })}
                   onTrash={() => trashBlock(block.id)}
-                  onSelect={() => {
-                    suppressMeasuredReflowUntilRef.current = Date.now() + LAYOUT_MEASURE_SUPPRESSION_MS;
-                    setSelectedBlockId(block.id);
-                    setActiveBlockId((current) => current === block.id ? current : null);
-                    setFocusBlockId((current) => current === block.id ? current : null);
-                    setInteractionState(selectedBlockInteraction(block.id));
-                  }}
+                  onSelect={() => markBlockSelected(block.id)}
                   onBeginMove={(event) => beginMoveBlock(event, block, layout)}
                   onBeginResize={(event) => beginResizeBlock(event, block, text, layout)}
                   onToggleExportRole={() => toggleBlockExportRole(block, layout)}

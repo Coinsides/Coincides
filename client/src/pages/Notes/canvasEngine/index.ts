@@ -8,6 +8,7 @@ export * from './geometry';
 export * from './interactionController';
 export * from './hooks/useBlockMeasurement';
 export * from './hooks/useBlockPlacementInteractions';
+export * from './hooks/useBlockSelectionController';
 export * from './hooks/useCanvasContentWidth';
 export * from './hooks/useDraftBlockController';
 export * from './hooks/useFloatingOverlayController';

@@ -1,5 +1,34 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 L8 Block Selection Controller Hook Seed
+
+```text
+status: in progress
+client build: passed
+server build: passed
+```
+
+已完成部分：
+
+- 新增 `hooks/useBlockSelectionController.ts`。
+- block selection 的本地状态已从 `NoteCanvasRuntime.tsx` 迁出：
+  - focus block；
+  - active block；
+  - selected block。
+- clear selection / mark focused / mark selected 三个动作已迁入 hook。
+- block focus 和 block select 仍会写入对应 interaction state。
+- 进入 focus / select 前的 measurement suppression 仍由 runtime 注入 hook，避免本轮改变测量/重排行为。
+- `NoteCanvasRuntime.tsx` 仍把 selection setter 传给 draft / slash / placement hooks，后续可继续把这些边界收口到更完整的 L8 controller。
+
+仍需验收：
+
+- 点击 block 后 toolbar / badge / active 样式是否仍正常；
+- 文本 block focus 后是否仍进入编辑态；
+- 空白区域点击是否仍取消选中；
+- draft 创建后是否仍能 focus 到新 block；
+- drag / resize 后是否仍保持 selected block；
+- 浏览器 smoke 尚未执行。
+
 ## V2.BN.8.1 L8 Draft Block Controller Hook Seed
 
 ```text
