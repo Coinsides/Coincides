@@ -1,5 +1,17 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 L5/L7 Layout Draft Controller Experience Note
+
+```text
+L5/L7 layout draft controller hook: implemented, not browser-smoked
+```
+
+体验风险：
+
+- 本次迁移理论上不改变 block move / resize、measured height reflow、formula 展开推开后续 block、definition active 后扩张、或 placement undo / redo 的体验，只改变 layout draft state 和写入动作的归属。
+- 如果后续出现 move / resize 视觉即时反馈丢失、block 重新加载后位置不保存、测量后无法推开下方 block、或 undo / redo 不能恢复布局，应优先检查 `hooks/useLayoutDraftController.ts` 与 `hooks/useBlockPlacementInteractions.ts` / `hooks/usePlacementHistory.ts` 的边界。
+- resolved `blockLayouts` 仍在 `NoteCanvasRuntime.tsx` 中；后续若要继续迁出，应先处理 data adapter -> visible block -> placement service 的依赖顺序。
+
 ## V2.BN.8.1 L8 Layout Interaction Controller Experience Note
 
 ```text

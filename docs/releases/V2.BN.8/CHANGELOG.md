@@ -1,5 +1,14 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 L5/L7 Layout Draft Controller Hook Seed
+
+- 新增 `hooks/useLayoutDraftController.ts`。
+- 将 `layoutDrafts` state、单 block draft 写入/清理、note load reset、history draft merge、measured height draft update 从 `NoteCanvasRuntime.tsx` 迁入 Canvas Engine hook。
+- `NoteCanvasRuntime.tsx` 仍保留 resolved `blockLayouts` 的计算，因为它目前需要等待 `useNoteCanvasDataAdapter()` 提供 `visibleBlocks` 后才能安全计算，避免在 data adapter 和 placement service 之间制造依赖环。
+- `useNoteCanvasDataAdapter()`、`useBlockPlacementInteractions()`、`usePlacementHistory()` 继续通过 hook 暴露的 draft writer 工作，保持 layout persistence / undo history / move / resize 行为不变。
+- 本轮属于 L5 placement service 与 L7 measurement / reflow service 的交界 seed，不改变 block layout truth、collision resolution、measurement tolerance 或 persistence payload。
+- L5/L7 layout draft controller hook seed 迁出后 client build / server build passed。
+
 ## Changed - V2.BN.8.1 L8 Layout Interaction Controller Hook Seed
 
 - 新增 `hooks/useLayoutInteractionController.ts`。

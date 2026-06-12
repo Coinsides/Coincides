@@ -1,5 +1,31 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 L5/L7 Layout Draft Controller Hook Seed
+
+```text
+status: in progress
+client build: passed
+server build: passed
+```
+
+已完成部分：
+
+- 新增 `hooks/useLayoutDraftController.ts`。
+- `layoutDrafts` state 已从 `NoteCanvasRuntime.tsx` 迁出。
+- `resetLayoutDrafts()` 已迁入 hook，并继续在 note loaded 时调用。
+- `clearLayoutDraftForBlock()` / `setLayoutDraftForBlock()` 已迁入 hook，继续供 data adapter 在 trash / persist layout 时使用。
+- `mergeLayoutDrafts()` 已迁入 hook，继续供 placement history undo / redo draft merge 使用。
+- measured height -> layout draft reflow 已通过 `applyMeasuredBlockHeightDraft()` 进入 hook。
+- resolved `blockLayouts` 暂时仍留在 `NoteCanvasRuntime.tsx`，原因是它需要 `visibleBlocks` / `contentWidth` / `surfaceMode`，而这些数据目前横跨 data adapter、surface policy 和 placement seed。强行迁出会制造新的依赖环。
+
+仍需验收：
+
+- block move / resize 后 draft 是否仍即时生效；
+- block move / resize 后 reload 是否仍落盘；
+- formula / definition measured height 变化是否仍推开后续 block；
+- undo / redo placement history 是否仍能合并 draft；
+- 浏览器 smoke 尚未执行。
+
 ## V2.BN.8.1 L8 Layout Interaction Controller Hook Seed
 
 ```text

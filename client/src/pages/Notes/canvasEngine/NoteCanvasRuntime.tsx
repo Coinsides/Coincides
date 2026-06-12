@@ -36,6 +36,7 @@ import { useBlockSelectionController } from './hooks/useBlockSelectionController
 import { useCanvasSurfacePointerController } from './hooks/useCanvasSurfacePointerController';
 import { useDraftBlockController } from './hooks/useDraftBlockController';
 import { useFloatingOverlayController } from './hooks/useFloatingOverlayController';
+import { useLayoutDraftController } from './hooks/useLayoutDraftController';
 import { useLayoutInteractionController } from './hooks/useLayoutInteractionController';
 import { useNoteCanvasDataAdapter } from './hooks/useNoteCanvasDataAdapter';
 import { useNoteCanvasRuntime } from './hooks/useNoteCanvasRuntime';
@@ -48,10 +49,7 @@ import { SlashMenuLayer } from './layers/SlashMenuLayer';
 import {
   idleInteraction,
 } from './interactionController';
-import {
-  applyMeasuredBlockHeightToLayouts,
-  estimateTextBlockHeight,
-} from './measurementService';
+import { estimateTextBlockHeight } from './measurementService';
 import {
   getVisibleBlocksForSurface,
   shouldResolvePageCollisions,
@@ -116,7 +114,6 @@ export default function NoteCanvasRuntime() {
   const { noteId } = useNoteCanvasRuntime();
   const navigate = useNavigate();
   const addToast = useUIStore((s) => s.addToast);
-  const [layoutDrafts, setLayoutDrafts] = useState<Record<string, BlockBoxLayout>>({});
   const [interactionState, setInteractionState] = useState(idleInteraction());
   const blockListRef = useRef<HTMLDivElement | null>(null);
   const movingBlockIdRef = useRef<string | null>(null);
@@ -130,6 +127,15 @@ export default function NoteCanvasRuntime() {
     toggleLayoutMode,
     toggleSnapEnabled,
   } = useLayoutInteractionController();
+  const {
+    applyMeasuredBlockHeightDraft,
+    clearLayoutDraftForBlock,
+    layoutDrafts,
+    mergeLayoutDrafts,
+    resetLayoutDrafts,
+    setLayoutDraftForBlock,
+    setLayoutDrafts,
+  } = useLayoutDraftController();
 
   const {
     chromeCollapsed,
@@ -184,21 +190,9 @@ export default function NoteCanvasRuntime() {
   });
 
   const handleNoteLoaded = useCallback(() => {
-    setLayoutDrafts({});
+    resetLayoutDrafts();
     clearBlockSelection();
-  }, [clearBlockSelection]);
-
-  const clearLayoutDraftForBlock = useCallback((blockId: string) => {
-    setLayoutDrafts((current) => {
-      const next = { ...current };
-      delete next[blockId];
-      return next;
-    });
-  }, []);
-
-  const setLayoutDraftForBlock = useCallback((blockId: string, layout: BlockBoxLayout) => {
-    setLayoutDrafts((current) => ({ ...current, [blockId]: layout }));
-  }, []);
+  }, [clearBlockSelection, resetLayoutDrafts]);
 
   const {
     note,
@@ -372,12 +366,8 @@ export default function NoteCanvasRuntime() {
     });
   }, [blocks, persistBlockLayout]);
 
-  const applyLayoutHistoryDrafts = useCallback((layouts: Record<string, BlockBoxLayout>) => {
-    setLayoutDrafts((current) => ({ ...current, ...layouts }));
-  }, []);
-
   const { pushLayoutHistory } = usePlacementHistory({
-    applyLayoutDrafts: applyLayoutHistoryDrafts,
+    applyLayoutDrafts: mergeLayoutDrafts,
     persistLayoutSnapshot,
   });
 
@@ -807,16 +797,13 @@ export default function NoteCanvasRuntime() {
                     const allowActiveFormulaReflow = isActive && presentationKindForBlock(block) === 'formula';
                     if (movingBlockIdRef.current) return;
                     if (!allowActiveFormulaReflow && Date.now() < suppressMeasuredReflowUntilRef.current) return;
-                    setLayoutDrafts((current) => {
-                      return applyMeasuredBlockHeightToLayouts({
-                        currentLayouts: current,
-                        baseLayouts: blockLayouts,
-                        blockId: block.id,
-                        fallbackLayout: layout,
-                        measuredHeight: height,
-                        orderedBlockIds: visibleBlocks.map((item) => item.id),
-                        resolveCollisions: shouldResolvePageCollisions(surfacePolicy),
-                      });
+                    applyMeasuredBlockHeightDraft({
+                      baseLayouts: blockLayouts,
+                      blockId: block.id,
+                      fallbackLayout: layout,
+                      measuredHeight: height,
+                      orderedBlockIds: visibleBlocks.map((item) => item.id),
+                      resolveCollisions: shouldResolvePageCollisions(surfacePolicy),
                     });
                   }}
                   pageOffsetX={pageOffsetX}

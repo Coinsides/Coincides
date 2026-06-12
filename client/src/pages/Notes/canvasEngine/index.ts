@@ -13,6 +13,7 @@ export * from './hooks/useCanvasContentWidth';
 export * from './hooks/useCanvasSurfacePointerController';
 export * from './hooks/useDraftBlockController';
 export * from './hooks/useFloatingOverlayController';
+export * from './hooks/useLayoutDraftController';
 export * from './hooks/useLayoutInteractionController';
 export * from './hooks/useNoteCanvasDataAdapter';
 export * from './hooks/usePlacementHistory';
