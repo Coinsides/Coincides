@@ -1,4 +1,7 @@
 export * from './blockContentService';
+export * from './blocks/DefinitionBlockProjection';
+export * from './blocks/FormulaBlockProjection';
+export * from './blocks/TextBlockProjection';
 export * from './engineModel';
 export * from './exportPreviewService';
 export * from './geometry';

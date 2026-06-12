@@ -236,11 +236,14 @@ client build: passed
 - 新增 `layers/BlockControlBarLayer.tsx`，把 block control bar 从 `BlockEditorLayer` 内联 JSX 中迁出。
 - 新增 `layers/BlockSourceReferenceLayer.tsx`，把 source reference / source jump view entry 从 `BlockEditorLayer` 内联 JSX 中迁出。
 - 新增 `layers/BlockStatusBadgeLayer.tsx`，把 block type / AI / export / boundary badges 从 `BlockEditorLayer` 内联 JSX 中迁出。
+- 新增 `blocks/DefinitionBlockProjection.tsx`，把 Definition structured field editor / read projection 从 `BlockEditorLayer` 中迁出。
+- 新增 `blocks/FormulaBlockProjection.tsx`，把 Formula preview / LaTeX input projection 从 `BlockEditorLayer` 中迁出。
+- 新增 `blocks/TextBlockProjection.tsx`，把 paragraph / heading / code / quote textarea projection 从 `BlockEditorLayer` 中迁出。
 
 仍需验收：
 
-- `BlockEditorLayer` 内部仍包含 structured field editor、measurement callback；
-- 下一轮可以继续把 structured field editor 拆成更小 projection sublayers；
+- `BlockEditorLayer` 内部仍包含 measurement callback 和 projection composition；
+- 下一轮可以继续把 measurement registry / resize handle / block shell 边界拆出；
 - 需要 browser smoke 验证 definition / formula / code / source badge 的表现没有回归。
 
 ### L9 - Overlay Layer Seed

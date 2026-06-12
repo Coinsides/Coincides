@@ -155,6 +155,15 @@
 - status badges 仍是 projection sublayer，后续是否 viewport overlay 化取决于 preview/debug overlay 体验。
 - L6 status badge layer 抽离后 client build passed。
 
+## Changed - V2.BN.8.1 L6 Block Projection Sublayers
+
+- 新增 `blocks/DefinitionBlockProjection.tsx`。
+- 新增 `blocks/FormulaBlockProjection.tsx`。
+- 新增 `blocks/TextBlockProjection.tsx`。
+- `BlockEditorLayer.tsx` 不再内联 Definition / Formula / Text 的具体 JSX projection。
+- `BlockEditorLayer.tsx` 继续保留 block shell、measurement callback、control/source/status sublayer composition，后续再迁入 measurement registry / shell boundary。
+- L6 block projection sublayers 抽离后 client build passed。
+
 ## Changed - V2.BN.8.1 L8/L10 Seeds
 
 - 新增 `interactionController.ts`，建立 Canvas Engine 第一版 interaction state boundary：
