@@ -3,7 +3,6 @@ import {
   useMemo,
   useRef,
   useState,
-  type MouseEvent,
   type CSSProperties,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -34,6 +33,7 @@ import {
 import { useCanvasContentWidth } from './hooks/useCanvasContentWidth';
 import { useBlockPlacementInteractions } from './hooks/useBlockPlacementInteractions';
 import { useBlockSelectionController } from './hooks/useBlockSelectionController';
+import { useCanvasSurfacePointerController } from './hooks/useCanvasSurfacePointerController';
 import { useDraftBlockController } from './hooks/useDraftBlockController';
 import { useFloatingOverlayController } from './hooks/useFloatingOverlayController';
 import { useNoteCanvasDataAdapter } from './hooks/useNoteCanvasDataAdapter';
@@ -52,7 +52,6 @@ import {
   estimateTextBlockHeight,
 } from './measurementService';
 import {
-  createBlankDraftLayout,
   getVisibleBlocksForSurface,
   shouldResolvePageCollisions,
 } from './modePolicyService';
@@ -422,26 +421,19 @@ export default function NoteCanvasRuntime() {
     activateDraft,
   });
 
-  const handlePageSpaceClick = (event: MouseEvent<HTMLDivElement>) => {
-    if (event.target !== event.currentTarget) return;
-    const rect = event.currentTarget.getBoundingClientRect();
-    const rawX = event.clientX - rect.left - pageOffsetX;
-    const rawY = event.clientY - rect.top;
-    activateDraft(createBlankDraftLayout({
-      policy: surfacePolicy,
-      snapEnabled,
-      rawX,
-      rawY,
-      contentWidth,
-      defaultDraftLayout,
-    }));
-  };
-
-  const handleSurfacePointerDown = (event: MouseEvent<HTMLElement>) => {
-    const target = event.target as HTMLElement;
-    if (target.closest('article, aside, button, input, textarea, select, [role="dialog"]')) return;
-    clearBlockSelection();
-  };
+  const {
+    handleBlockListMouseDown,
+    handlePageSpaceDoubleClick,
+    handleSurfacePointerDown,
+  } = useCanvasSurfacePointerController({
+    activateDraft,
+    clearBlockSelection,
+    contentWidth,
+    defaultDraftLayout,
+    pageOffsetX,
+    snapEnabled,
+    surfacePolicy,
+  });
 
   if (loading || !note) {
     return (
@@ -759,10 +751,8 @@ export default function NoteCanvasRuntime() {
               '--formal-page-width': `${primaryPageFrame.width}px`,
               '--canvas-world-width': `${noteCanvasRuntime.world.width}px`,
             } as CSSProperties}
-            onMouseDown={(event) => {
-              if (event.target === event.currentTarget) clearBlockSelection();
-            }}
-            onDoubleClick={handlePageSpaceClick}
+            onMouseDown={handleBlockListMouseDown}
+            onDoubleClick={handlePageSpaceDoubleClick}
           >
             {surfaceMode === 'canvas' && (
               <>

@@ -1,5 +1,30 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 L8 Canvas Surface Pointer Controller Hook Seed
+
+```text
+status: in progress
+client build: passed
+server build: passed
+```
+
+已完成部分：
+
+- 新增 `hooks/useCanvasSurfacePointerController.ts`。
+- document shell 的空白点击取消 selection 已从 `NoteCanvasRuntime.tsx` 迁出。
+- block list 的空白点击取消 selection 已从 `NoteCanvasRuntime.tsx` 迁出。
+- PageFrame 空白双击创建 draft 的落点计算已迁入 hook。
+- `createBlankDraftLayout()` 现在由 surface pointer controller 调用，不再由 runtime 主文件直接调用。
+- 新 draft 落点仍使用当前 `surfacePolicy` / `snapEnabled` / `pageOffsetX` / `contentWidth` / `defaultDraftLayout`，保持行为不变。
+
+仍需验收：
+
+- 点空白处是否仍取消 block 选中；
+- 点击 block / toolbar / input / panel 是否不会误清 selection；
+- 双击 PageFrame 空白处是否仍创建 draft；
+- snap on/off 下 draft 落点是否仍符合现有策略；
+- 浏览器 smoke 尚未执行。
+
 ## V2.BN.8.1 L8 Block Selection Controller Hook Seed
 
 ```text

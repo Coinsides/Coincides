@@ -1,5 +1,17 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 L8 Canvas Surface Pointer Controller Experience Note
+
+```text
+L8 canvas surface pointer controller hook: implemented, not browser-smoked
+```
+
+体验风险：
+
+- 本次迁移理论上不改变空白点击取消选中、双击空白创建 draft、snap on/off 新 block 落点的体验，只改变这些 surface pointer handler 的归属。
+- 如果后续出现点击普通 block 却被取消选中、点击面板/按钮误清 selection、双击空白不出 draft、或 snap on/off 下 draft 位置异常，应优先检查 `hooks/useCanvasSurfacePointerController.ts`。
+- 这一步还没有实现 pan / zoom / viewport pointer capture；它只是先把 PageFrame 空白创建与 surface click clearing 从 runtime 主文件中剥离。
+
 ## V2.BN.8.1 L8 Block Selection Controller Experience Note
 
 ```text

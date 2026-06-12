@@ -10,6 +10,7 @@ export * from './hooks/useBlockMeasurement';
 export * from './hooks/useBlockPlacementInteractions';
 export * from './hooks/useBlockSelectionController';
 export * from './hooks/useCanvasContentWidth';
+export * from './hooks/useCanvasSurfacePointerController';
 export * from './hooks/useDraftBlockController';
 export * from './hooks/useFloatingOverlayController';
 export * from './hooks/useNoteCanvasDataAdapter';
