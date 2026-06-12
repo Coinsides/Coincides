@@ -1,5 +1,30 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 L8 Layout Interaction Controller Hook Seed
+
+```text
+status: in progress
+client build: passed
+server build: passed
+```
+
+已完成部分：
+
+- 新增 `hooks/useLayoutInteractionController.ts`。
+- `layoutMode` state 已从 `NoteCanvasRuntime.tsx` 迁出。
+- `snapGuide` state 已从 `NoteCanvasRuntime.tsx` 迁出。
+- `snapEnabled` state 已从 `NoteCanvasRuntime.tsx` 迁出。
+- Layout 按钮 toggle 逻辑已迁入 hook。
+- Snap alignment toggle 逻辑已迁入 hook。
+- toggle layout / snap 时清空 snap guide 的规则已集中到 hook。
+
+仍需验收：
+
+- Layout 按钮是否仍能进入/退出 layout mode；
+- Snap alignment 开关是否仍能切换 On / Off；
+- move / resize 时 snap guide 是否仍正常出现并清理；
+- 浏览器 smoke 尚未执行。
+
 ## V2.BN.8.1 L8 Canvas Surface Pointer Controller Hook Seed
 
 ```text

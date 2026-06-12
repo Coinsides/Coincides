@@ -1,5 +1,14 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 L8 Layout Interaction Controller Hook Seed
+
+- 新增 `hooks/useLayoutInteractionController.ts`。
+- 将 `layoutMode` / `snapGuide` / `snapEnabled` state 从 `NoteCanvasRuntime.tsx` 迁入 Canvas Engine hook。
+- Layout 按钮和 Snap alignment 开关现在调用 `toggleLayoutMode()` / `toggleSnapEnabled()`，并由 hook 统一清除当前 snap guide。
+- `NoteCanvasRuntime.tsx` 继续把 `setLayoutMode` / `setSnapGuide` / `snapEnabled` 传给 placement interaction hook，保持 move / resize 行为不变。
+- 本轮属于 L8 layout interaction state seed，不改变 snap 计算、guide 渲染、layout mode 视觉或 More actions 面板内容。
+- L8 layout interaction controller hook seed 迁出后 client build / server build passed。
+
 ## Changed - V2.BN.8.1 L8 Canvas Surface Pointer Controller Hook Seed
 
 - 新增 `hooks/useCanvasSurfacePointerController.ts`。

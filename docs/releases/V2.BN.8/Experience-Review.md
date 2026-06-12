@@ -1,5 +1,17 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 L8 Layout Interaction Controller Experience Note
+
+```text
+L8 layout interaction controller hook: implemented, not browser-smoked
+```
+
+体验风险：
+
+- 本次迁移理论上不改变 Layout 按钮、Snap alignment 开关、snap guide 显示或 drag / resize 行为，只改变 layout interaction state 的归属。
+- 如果后续出现 Layout 按钮状态不亮、Snap alignment 开关不更新、snap guide 残留、或拖拽/缩放时 guide 不出现，应优先检查 `hooks/useLayoutInteractionController.ts` 与 `hooks/useBlockPlacementInteractions.ts` 的 setter 边界。
+- 本次没有改变 snap / elastic avoidance 算法；它只是先把这些开关和 guide state 从 runtime 主文件中剥离。
+
 ## V2.BN.8.1 L8 Canvas Surface Pointer Controller Experience Note
 
 ```text

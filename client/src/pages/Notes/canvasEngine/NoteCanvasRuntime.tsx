@@ -36,6 +36,7 @@ import { useBlockSelectionController } from './hooks/useBlockSelectionController
 import { useCanvasSurfacePointerController } from './hooks/useCanvasSurfacePointerController';
 import { useDraftBlockController } from './hooks/useDraftBlockController';
 import { useFloatingOverlayController } from './hooks/useFloatingOverlayController';
+import { useLayoutInteractionController } from './hooks/useLayoutInteractionController';
 import { useNoteCanvasDataAdapter } from './hooks/useNoteCanvasDataAdapter';
 import { useNoteCanvasRuntime } from './hooks/useNoteCanvasRuntime';
 import { usePlacementHistory } from './hooks/usePlacementHistory';
@@ -72,7 +73,6 @@ import {
   LAYOUT_MEASURE_SUPPRESSION_MS,
   MIN_BLOCK_HEIGHT,
   type BlockBoxLayout,
-  type SnapGuide,
 } from './runtimeLayout';
 import type { BlockPlacementModel } from './types';
 import type {
@@ -116,14 +116,20 @@ export default function NoteCanvasRuntime() {
   const { noteId } = useNoteCanvasRuntime();
   const navigate = useNavigate();
   const addToast = useUIStore((s) => s.addToast);
-  const [layoutMode, setLayoutMode] = useState(false);
   const [layoutDrafts, setLayoutDrafts] = useState<Record<string, BlockBoxLayout>>({});
-  const [snapGuide, setSnapGuide] = useState<SnapGuide | null>(null);
-  const [snapEnabled, setSnapEnabled] = useState(true);
   const [interactionState, setInteractionState] = useState(idleInteraction());
   const blockListRef = useRef<HTMLDivElement | null>(null);
   const movingBlockIdRef = useRef<string | null>(null);
   const suppressMeasuredReflowUntilRef = useRef(0);
+  const {
+    layoutMode,
+    setLayoutMode,
+    setSnapGuide,
+    snapEnabled,
+    snapGuide,
+    toggleLayoutMode,
+    toggleSnapEnabled,
+  } = useLayoutInteractionController();
 
   const {
     chromeCollapsed,
@@ -502,10 +508,7 @@ export default function NoteCanvasRuntime() {
               </button>
               <button
                 className={`${styles.modePill} ${layoutMode ? styles.modePillActive : ''}`}
-                onClick={() => {
-                  setSnapGuide(null);
-                  setLayoutMode((value) => !value);
-                }}
+                onClick={toggleLayoutMode}
                 title="Toggle layout mode"
                 aria-pressed={layoutMode}
               >
@@ -594,10 +597,7 @@ export default function NoteCanvasRuntime() {
                 </div>
                 <button
                   className={styles.moreAction}
-                  onClick={() => {
-                    setSnapGuide(null);
-                    setSnapEnabled((value) => !value);
-                  }}
+                  onClick={toggleSnapEnabled}
                 >
                   <LayoutDashboard size={15} />
                   <span>Snap alignment</span>
