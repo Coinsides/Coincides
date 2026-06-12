@@ -59,6 +59,21 @@
 
 这符合 V2.BN.8 的保守策略：先不要牺牲已经磨出来的普通写作体验，再逐步把坐标、overlay、measurement、workspace 边界从 `NoteDetail` 中拆出去。
 
+## V2.BN.8.1 Experience Baseline
+
+```text
+L0 baseline: completed
+L1 clean local smoke data: completed
+active smoke note: V2.BN.8.1 Smoke Note
+```
+
+体验基线更新：
+
+- 当前 smoke Note 是干净 note，不继承旧 `better_notebook_layout` payload；
+- 下一轮体验测试应从空 note 创建 text / definition / formula / code blocks；
+- 如果新 runtime 的表现低于 V2.BN.5 旧 runtime，需要记录为 regression，而不是把旧数据问题当作原因；
+- Henry 手动确认之前，V2.BN.8.1 体验验收不能标记 passed。
+
 ## 同步规则
 
 - 每次视觉/交互 patch 后更新本文。

@@ -48,3 +48,27 @@
 - 新增 `V2.BN.8.1-Runtime-Replacement-Plan.md`，作为 Canvas Engine 第一个小版本的逐层接管蓝图。
 - 明确 `V2.BN.8.1` 的目标是让 Canvas Engine 接管旧 `NoteDetail.tsx` runtime，使 `NoteDetail.tsx` 退化为 route/data shell。
 - 明确本地测试数据 reset 策略：停止 server、备份 `server/coincides.db*`、重建本地 dev database、重新创建 smoke account/project/note。
+
+## Changed - V2.BN.8.1 L0-L1
+
+- 完成 V2.BN.8.1 startup baseline：
+  - 当前 branch 确认是 `codex/v2-bn-canvas-engine`；
+  - client build passed；
+  - server build passed；
+  - `NoteDetail.tsx` 仍是旧 runtime 主体，`canvasEngine/` 仍是 seed。
+- 完成本地 dev data reset：
+  - 旧 `server/coincides.db*` 已备份到 `.codex-tmp/local-db-backups/20260612-155215`；
+  - 本地 `server/uploads` 测试文件已备份并清空；
+  - 新 dev database 已通过 `initDb()` 重建；
+  - 已创建本地 smoke account / Project / Note。
+
+## Changed - V2.BN.8.1 L2
+
+- 将旧 `NoteDetail.tsx` 中的大段 runtime 主体迁入 `client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx`。
+- 将 `NoteDetail.tsx` 缩成 route shell：
+  - 读取 `noteId`；
+  - 通过 `NoteCanvasRuntimeProvider` 注入 runtime context；
+  - 渲染 `NoteCanvasRuntime`。
+- 新增 `NoteCanvasRuntimeProvider.tsx` 和 `hooks/useNoteCanvasRuntime.ts`，作为后续 viewport、placement、overlay、interaction 分层接管的上下文入口。
+- `canvasEngine/index.ts` 导出 runtime provider。
+- L2 迁移后 client build passed。
