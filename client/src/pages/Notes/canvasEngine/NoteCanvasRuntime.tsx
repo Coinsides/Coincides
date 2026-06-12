@@ -70,6 +70,8 @@ import {
   selectedBlockInteraction,
 } from './interactionController';
 import {
+  applyMeasuredBlockHeightToLayouts,
+  applyMeasuredBlockLayoutToLayouts,
   estimateTextBlockHeight,
   resizeTextareaToContent,
 } from './measurementService';
@@ -96,7 +98,6 @@ import {
   getEffectiveExportRole,
   layoutsEqual,
   normalizeBlockLayout,
-  reflowLayoutsAfterHeightChange,
   resolveStackedLayoutCollisions,
   snapToTargets,
   writeLayoutOverride,
@@ -1109,12 +1110,15 @@ export default function NoteCanvasRuntime() {
       };
       setSnapGuide(snappedRight.snapped !== undefined ? { x: snappedRight.snapped } : null);
       setLayoutDrafts((current) => {
-        const previousLayout = current[block.id] || layout;
-        const baseline = { ...blockLayouts, ...current };
-        const reflowedLayouts = reflowLayoutsAfterHeightChange(baseline, block.id, previousLayout, latestLayout);
-        latestLayouts = shouldResolvePageCollisions(surfacePolicy)
-          ? resolveStackedLayoutCollisions(reflowedLayouts, visibleBlocks.map((item) => item.id))
-          : reflowedLayouts;
+        latestLayouts = applyMeasuredBlockLayoutToLayouts({
+          currentLayouts: current,
+          baseLayouts: blockLayouts,
+          blockId: block.id,
+          fallbackLayout: layout,
+          nextLayout: latestLayout,
+          orderedBlockIds: visibleBlocks.map((item) => item.id),
+          resolveCollisions: shouldResolvePageCollisions(surfacePolicy),
+        });
         return latestLayouts;
       });
     };
@@ -1582,16 +1586,16 @@ export default function NoteCanvasRuntime() {
                     const allowActiveFormulaReflow = isActive && presentationKindForBlock(block) === 'formula';
                     if (movingBlockIdRef.current) return;
                     if (!allowActiveFormulaReflow && Date.now() < suppressMeasuredReflowUntilRef.current) return;
-                    if (Math.abs(height - layout.height) <= 2) return;
                     setLayoutDrafts((current) => {
-                      const previousLayout = current[block.id] || layout;
-                      if (Math.abs(height - previousLayout.height) <= 2) return current;
-                      const nextLayout = { ...previousLayout, height };
-                      const baseline = { ...blockLayouts, ...current };
-                      const reflowedLayouts = reflowLayoutsAfterHeightChange(baseline, block.id, previousLayout, nextLayout);
-                      return shouldResolvePageCollisions(surfacePolicy)
-                        ? resolveStackedLayoutCollisions(reflowedLayouts, visibleBlocks.map((item) => item.id))
-                        : reflowedLayouts;
+                      return applyMeasuredBlockHeightToLayouts({
+                        currentLayouts: current,
+                        baseLayouts: blockLayouts,
+                        blockId: block.id,
+                        fallbackLayout: layout,
+                        measuredHeight: height,
+                        orderedBlockIds: visibleBlocks.map((item) => item.id),
+                        resolveCollisions: shouldResolvePageCollisions(surfacePolicy),
+                      });
                     });
                   }}
                   pageOffsetX={pageOffsetX}

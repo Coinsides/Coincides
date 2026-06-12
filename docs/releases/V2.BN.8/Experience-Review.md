@@ -92,8 +92,9 @@ L10 mode policy seed: implemented, not browser-smoked
 - workspace block 不应继续影响 formal PageFrame height，但还需要浏览器里创建 workspace block 验证；
 - placement 读写、snap、reflow 已迁入 service，理论上行为应保持不变；
 - textarea resize、DOM measured height、text estimated height 已进入 measurement service / hook seed；
+- measured height / resize width 后的 placement reflow application 已进入 `measurementService.ts`；
 - 如果后续出现 block 位置、snap、reload 后布局变化，应优先检查 `placementService.ts`。
-- 如果后续出现 Definition / Formula 展开穿模，应优先检查 `measurementService.ts`、`hooks/useBlockMeasurement.ts` 和后续 measurement registry。
+- 如果后续出现 Definition / Formula 展开穿模、resize 后下方 block 推开异常，应优先检查 `measurementService.ts`、`hooks/useBlockMeasurement.ts` 和后续 measurement registry。
 - 如果后续出现 Definition / Formula 内容保存、plain text、preview 文本不一致，应优先检查 `blockContentService.ts`、`blocks/DefinitionBlockProjection.tsx` 和 `blocks/FormulaBlockProjection.tsx`。
 - 如果后续出现 paragraph / heading / code / quote textarea 输入异常，应优先检查 `blocks/TextBlockProjection.tsx`。
 - 如果后续出现 resize handle 异常，应优先检查 `layers/BlockResizeHandleLayer.tsx`。

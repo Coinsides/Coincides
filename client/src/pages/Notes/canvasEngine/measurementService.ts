@@ -5,7 +5,12 @@ import {
   MIN_BLOCK_HEIGHT,
   TEXT_AVERAGE_CHAR_WIDTH,
   TEXT_LINE_HEIGHT,
+  type BlockBoxLayout,
 } from './runtimeLayout';
+import {
+  reflowLayoutsAfterHeightChange,
+  resolveStackedLayoutCollisions,
+} from './placementService';
 
 export interface TextBlockHeightEstimate {
   text: string;
@@ -13,6 +18,21 @@ export interface TextBlockHeightEstimate {
   title?: string | null;
   showPreview?: boolean;
   sourceReferenceCount?: number;
+}
+
+export interface ApplyMeasuredBlockLayoutInput {
+  currentLayouts: Record<string, BlockBoxLayout>;
+  baseLayouts: Record<string, BlockBoxLayout>;
+  blockId: string;
+  fallbackLayout: BlockBoxLayout;
+  nextLayout: BlockBoxLayout;
+  orderedBlockIds: string[];
+  resolveCollisions: boolean;
+}
+
+export interface ApplyMeasuredBlockHeightInput extends Omit<ApplyMeasuredBlockLayoutInput, 'nextLayout'> {
+  measuredHeight: number;
+  tolerance?: number;
 }
 
 export function resizeTextareaToContent(textarea: HTMLTextAreaElement | null): void {
@@ -44,4 +64,39 @@ export function estimateTextBlockHeight({
   const sourceExtra = sourceReferenceCount > 0 ? 34 : 0;
 
   return Math.max(MIN_BLOCK_HEIGHT, BLOCK_VERTICAL_CHROME + rows * TEXT_LINE_HEIGHT + previewExtra + sourceExtra);
+}
+
+export function applyMeasuredBlockLayoutToLayouts({
+  currentLayouts,
+  baseLayouts,
+  blockId,
+  fallbackLayout,
+  nextLayout,
+  orderedBlockIds,
+  resolveCollisions,
+}: ApplyMeasuredBlockLayoutInput): Record<string, BlockBoxLayout> {
+  const previousLayout = currentLayouts[blockId] || fallbackLayout;
+  const baseline = { ...baseLayouts, ...currentLayouts };
+  const reflowedLayouts = reflowLayoutsAfterHeightChange(baseline, blockId, previousLayout, nextLayout);
+  return resolveCollisions
+    ? resolveStackedLayoutCollisions(reflowedLayouts, orderedBlockIds)
+    : reflowedLayouts;
+}
+
+export function applyMeasuredBlockHeightToLayouts({
+  currentLayouts,
+  measuredHeight,
+  tolerance = 2,
+  ...input
+}: ApplyMeasuredBlockHeightInput): Record<string, BlockBoxLayout> {
+  const previousLayout = currentLayouts[input.blockId] || input.fallbackLayout;
+  if (Math.abs(measuredHeight - previousLayout.height) <= tolerance) return currentLayouts;
+  return applyMeasuredBlockLayoutToLayouts({
+    ...input,
+    currentLayouts,
+    nextLayout: {
+      ...previousLayout,
+      height: measuredHeight,
+    },
+  });
 }

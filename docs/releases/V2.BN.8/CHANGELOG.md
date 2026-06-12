@@ -107,8 +107,11 @@
   - textarea content resize；
   - block DOM content height measurement；
   - text block estimated height。
+- `measurementService.ts` 新增 measured height / resized layout -> placement reflow application helpers：
+  - `applyMeasuredBlockHeightToLayouts`；
+  - `applyMeasuredBlockLayoutToLayouts`。
 - `BlockEditorLayer.tsx` 不再直接拥有 `ResizeObserver` / block content height measurement wiring。
-- `NoteCanvasRuntime.tsx` 仍保留 measured height -> placement/reflow 的 runtime 回调，后续继续迁入 measurement registry。
+- `NoteCanvasRuntime.tsx` 仍保留 React state update entrypoint，但不再直接拼装 measured height / resize reflow。
 - L7 seed 抽离后 client build passed。
 
 ## Changed - V2.BN.8.1 L6/L9 Layers

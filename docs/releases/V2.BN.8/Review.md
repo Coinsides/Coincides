@@ -202,15 +202,18 @@ client build: passed
   - textarea auto-height；
   - DOM content height measurement；
   - text block estimated height。
+- 迁出 measured height / resized layout -> placement reflow application：
+  - `applyMeasuredBlockHeightToLayouts`；
+  - `applyMeasuredBlockLayoutToLayouts`。
 - `BlockEditorLayer.tsx` 不再直接拥有 `ResizeObserver` / measured rect callback wiring。
-- `NoteCanvasRuntime.tsx` 仍保留 measured height -> placement/reflow 的 runtime 回调，后续继续迁入 measurement registry。
+- `NoteCanvasRuntime.tsx` 仍保留 measured height 的 state entrypoint，但不再直接拼装 measured height reflow。
 
 仍需验收：
 
 - Formula input expanded/collapsed 是否触发稳定 measurement；
 - Definition fields active/editing 是否稳定推开下方 block；
 - resize width 后 text reflow 是否仍然稳定；
-- measurement registry 尚未完成，当前仍是 service + hook seed。
+- measurement registry 尚未完成，当前仍是 service + hook seed，runtime 仍持有 React state update 入口。
 
 ### L6 - Block Projection Layer
 
