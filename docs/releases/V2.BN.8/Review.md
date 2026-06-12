@@ -233,11 +233,12 @@ client build: passed
   - formula preview text wrapper。
 - `BlockEditor` 组件本体已从 `NoteCanvasRuntime.tsx` 迁入 Canvas Engine DOM projection layer。
 - `NoteCanvasRuntime.tsx` 现在只负责把 block 的 runtime state 和 callbacks 传给 `BlockEditorLayer`。
+- 新增 `layers/BlockControlBarLayer.tsx`，把 block control bar 从 `BlockEditorLayer` 内联 JSX 中迁出。
 
 仍需验收：
 
 - `BlockEditorLayer` 内部仍包含 Source badge、policy badge、structured field editor、measurement callback；
-- 下一轮可以继续把 block toolbar、structured field editor、source badge 拆成更小 projection sublayers；
+- 下一轮可以继续把 structured field editor、source badge 拆成更小 projection sublayers；
 - 需要 browser smoke 验证 definition / formula / code / source badge 的表现没有回归。
 
 ### L9 - Overlay Layer Seed
@@ -260,11 +261,14 @@ client build: passed
 - 新增 `layers/ExportPreviewLayer.tsx`；
 - export preview 的 model、row label、group rendering 已从 runtime 主文件迁出；
 - `NoteCanvasRuntime.tsx` 现在只负责控制 preview 开关与 preview overlay callbacks。
+- 新增 `layers/BlockControlBarLayer.tsx`；
+- block control bar 已从 block projection 主体中迁出，后续可继续接入 selected block anchor / overlay portal。
 
 仍需验收：
 
 - overlay portal / z-index service 尚未建立；
-- block control bar、note info、more actions、insert panel、source jump 等浮层尚未迁出；
+- block control bar 仍使用当前 block 内部定位样式，尚未完全 viewport overlay 化；
+- note info、more actions、insert panel、source jump 等浮层尚未迁出；
 - formula help tooltip 仍未进入统一 overlay layer。
 
 ### L8 - Interaction Controller Seed

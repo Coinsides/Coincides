@@ -134,6 +134,13 @@
 - `NoteCanvasRuntime.tsx` 继续保留 preview 开关状态和 callbacks，但不再内联 preview panel 结构。
 - L9 overlay preview layer 抽离后 client build passed。
 
+## Changed - V2.BN.8.1 L9 Block Control Bar Layer
+
+- 新增 `layers/BlockControlBarLayer.tsx`。
+- `BlockEditorLayer.tsx` 不再内联 block control bar 的移动、导出、AI 可见性、保存、删除按钮结构。
+- block control bar 仍复用当前 block 内部定位样式，后续再接入 selected block anchor / overlay portal / z-index service。
+- L9 block control bar layer 抽离后 client build passed。
+
 ## Changed - V2.BN.8.1 L8/L10 Seeds
 
 - 新增 `interactionController.ts`，建立 Canvas Engine 第一版 interaction state boundary：

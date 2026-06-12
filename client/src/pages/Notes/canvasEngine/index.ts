@@ -3,6 +3,7 @@ export * from './engineModel';
 export * from './exportPreviewService';
 export * from './geometry';
 export * from './interactionController';
+export * from './layers/BlockControlBarLayer';
 export * from './layers/ExportPreviewLayer';
 export * from './layers/SlashMenuLayer';
 export * from './layers/BlockEditorLayer';

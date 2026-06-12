@@ -10,9 +10,6 @@ import {
   EyeOff,
   FileText,
   FileX,
-  GripVertical,
-  Save,
-  Trash2,
 } from 'lucide-react';
 import KaTeXRenderer from '@/components/KaTeX/KaTeXRenderer';
 import sharedTypes from '@shared/types';
@@ -43,6 +40,7 @@ import type {
   NoteBlock,
   SourceAnchor,
 } from '../runtimeDataTypes';
+import { BlockControlBarLayer } from './BlockControlBarLayer';
 import styles from '../../NoteDetail.module.css';
 
 const {
@@ -226,40 +224,16 @@ export function BlockEditorLayer({
           )}
         </div>
       )}
-      <div className={styles.blockToolbar}>
-        <div className={styles.blockActions}>
-          <button
-            className={`${styles.iconBtn} ${styles.dragHandle}`}
-            onPointerDown={onBeginMove}
-            title="Move block"
-            aria-label="Move block"
-          >
-            <GripVertical size={15} />
-          </button>
-          <button
-            className={`${styles.iconBtn} ${exportRole === 'included' ? styles.policyBtnOn : ''}`}
-            onClick={onToggleExportRole}
-            title={exportRole === 'included' ? 'Exclude from export' : 'Include in export'}
-            aria-label={exportRole === 'included' ? 'Exclude from export' : 'Include in export'}
-          >
-            <FileText size={15} />
-          </button>
-          <button
-            className={`${styles.iconBtn} ${aiVisibility === 'visible' ? styles.policyBtnOn : ''}`}
-            onClick={onToggleAIVisibility}
-            title={aiVisibility === 'visible' ? 'Hide from AI context' : 'Allow AI context'}
-            aria-label={aiVisibility === 'visible' ? 'Hide from AI context' : 'Allow AI context'}
-          >
-            <Eye size={15} />
-          </button>
-          <button className={styles.iconBtn} onClick={() => onSave(false)} disabled={saving} title="Save block">
-            <Save size={16} />
-          </button>
-          <button className={`${styles.iconBtn} ${styles.dangerBtn}`} onClick={onTrash} title="Move to trash">
-            <Trash2 size={16} />
-          </button>
-        </div>
-      </div>
+      <BlockControlBarLayer
+        exportRole={exportRole}
+        aiVisibility={aiVisibility}
+        saving={saving}
+        onBeginMove={onBeginMove}
+        onToggleExportRole={onToggleExportRole}
+        onToggleAIVisibility={onToggleAIVisibility}
+        onSaveBlock={() => onSave(false)}
+        onTrash={onTrash}
+      />
 
       <div ref={blockContentRef}>
         {presentationKind === 'definition' && definitionFields ? (
