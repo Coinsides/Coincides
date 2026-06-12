@@ -1,5 +1,18 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 L9 Note Chrome And Floating Panel Layer Experience Note
+
+```text
+L9 note chrome / floating panel layer: implemented, not browser-smoked
+```
+
+体验风险：
+
+- 本次迁移理论上不改变顶部工具栏、note info、more actions、preview、insert panel 或 source jump panel 的视觉与交互，只改变这些 shell / floating panel JSX 的归属。
+- 如果后续出现标题保存失效、Page/Canvas 切换按钮状态不更新、Preview 面板无法打开、overlay toggles 丢失、Insert 添加 block 后不能 focus、或 Source jump 面板无法关闭，应优先检查 `layers/NoteChromeLayer.tsx` 的 props 边界。
+- 这一步仍没有完成完整 overlay portal，也没有把 `documentShell` / `writingSurface` / `BlockEditorLayer` 从 runtime root 中迁出；它只是 L9 的 chrome/panel layer seed。
+- `NoteCanvasRuntime.tsx` 现在更接近 runtime composition root，但仍然持有 block layout resolution、page frame composition、block projection map、draft textarea 和 slash menu layer wiring。
+
 ## V2.BN.8.1 L5/L7 Layout Draft Controller Experience Note
 
 ```text

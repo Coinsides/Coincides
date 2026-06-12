@@ -1,5 +1,41 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 L9 Note Chrome And Floating Panel Layer Seed
+
+```text
+status: in progress
+client build: passed
+server build: passed
+```
+
+已完成部分：
+
+- 新增 `layers/NoteChromeLayer.tsx`。
+- 顶部 note chrome 已从 `NoteCanvasRuntime.tsx` 迁入 `NoteChromeLayer`：
+  - back project；
+  - title input；
+  - Page / Canvas mode button；
+  - Preview button；
+  - Layout button；
+  - favorite placeholder；
+  - note info；
+  - more actions；
+  - chrome collapse / expand。
+- Note info、More actions、Export preview 的 popover 编排已随 note chrome 迁入 layer。
+- Insert page tool rail / Advanced insert panel 已迁入 `NoteFloatingPanelLayer`。
+- Source jump panel 已迁入 `NoteFloatingPanelLayer`。
+- `NoteCanvasRuntime.tsx` 从约 874 行降到约 640 行，继续保留 controller、data adapter、block layout、block projection composition 和 runtime model composition。
+
+仍需验收：
+
+- server build；
+- Note title blur / Enter 保存是否仍正常；
+- Page / Canvas、Preview、Layout、Info、More、Collapse / Expand 按钮是否仍正常；
+- Advanced insert 是否仍能添加 block 并 focus 到新 block；
+- Source jump panel 是否仍能打开和关闭；
+- Preview overlay toggles 是否仍在关闭 panel 后保留；
+- 浏览器 smoke 尚未执行。
+
 ## V2.BN.8.1 L5/L7 Layout Draft Controller Hook Seed
 
 ```text

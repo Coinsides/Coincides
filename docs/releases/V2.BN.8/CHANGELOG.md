@@ -1,5 +1,14 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 L9 Note Chrome And Floating Panel Layer Seed
+
+- 新增 `layers/NoteChromeLayer.tsx`。
+- 将顶部 note chrome、collapsed chrome、note info popover、more actions popover、export preview 入口编排从 `NoteCanvasRuntime.tsx` 迁入 Canvas Engine layer。
+- 将 Insert floating panel 与 source jump panel 从 `NoteCanvasRuntime.tsx` 迁入同一层文件中的 `NoteFloatingPanelLayer`。
+- `NoteCanvasRuntime.tsx` 继续持有 controller / adapter / callback 边界，只把 title save、surface mode、layout mode、preview overlay、snap toggle、insert block、source jump close 等动作作为 props 传入 layer。
+- 本轮属于 L9 floating overlay layer seed，不改变按钮顺序、popover 样式、insert 行为、source jump 内容、preview overlay state 或 top chrome collapsed state。
+- L9 note chrome / floating panel layer seed 迁出后 client build / server build passed。
+
 ## Changed - V2.BN.8.1 L5/L7 Layout Draft Controller Hook Seed
 
 - 新增 `hooks/useLayoutDraftController.ts`。

@@ -6,18 +6,7 @@ import {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  ArrowLeft,
   CornerDownLeft,
-  Eye,
-  FileText,
-  Info,
-  LayoutDashboard,
-  MoreHorizontal,
-  PanelTopClose,
-  PanelTopOpen,
-  Plus,
-  Star,
-  X,
 } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 import {
@@ -44,7 +33,10 @@ import { useRuntimeInteractionController } from './hooks/useRuntimeInteractionCo
 import { useSlashCommandController } from './hooks/useSlashCommandController';
 import { useSurfaceModeController } from './hooks/useSurfaceModeController';
 import { BlockEditorLayer } from './layers/BlockEditorLayer';
-import { ExportPreviewLayer } from './layers/ExportPreviewLayer';
+import {
+  NoteChromeLayer,
+  NoteFloatingPanelLayer,
+} from './layers/NoteChromeLayer';
 import { SlashMenuLayer } from './layers/SlashMenuLayer';
 import { estimateTextBlockHeight } from './measurementService';
 import {
@@ -441,187 +433,40 @@ export default function NoteCanvasRuntime() {
 
   return (
     <div className={styles.page}>
-      <div className={styles.chromeWrap}>
-        {chromeCollapsed ? (
-          <div className={styles.chromeCollapsed}>
-            <button className={styles.backBtn} onClick={() => navigate(`/projects/${note.course_id}`)}>
-              <ArrowLeft size={18} />
-              Project
-            </button>
-            <button
-              className={styles.iconBtn}
-              onClick={expandChrome}
-              title="Show note tools"
-              aria-label="Show note tools"
-            >
-              <PanelTopOpen size={16} />
-            </button>
-          </div>
-        ) : (
-          <div className={styles.noteChrome}>
-            <button className={styles.backBtn} onClick={() => navigate(`/projects/${note.course_id}`)}>
-              <ArrowLeft size={18} />
-              Project
-            </button>
-
-            <input
-              className={styles.titleInput}
-              value={titleDraft}
-              onChange={(event) => setTitleDraft(event.target.value)}
-              onBlur={saveTitle}
-              onKeyDown={(event) => {
-                if (event.key !== 'Enter') return;
-                event.preventDefault();
-                void saveTitle();
-              }}
-              aria-label="Note title"
-            />
-
-            <div className={styles.chromeActions}>
-              <button
-                className={`${styles.modePill} ${surfaceMode === 'canvas' ? styles.modePillActive : ''}`}
-                onClick={toggleSurfaceMode}
-                title={surfacePolicy.nextModeLabel}
-                aria-pressed={surfaceMode === 'canvas'}
-              >
-                <FileText size={15} />
-                {surfacePolicy.label}
-              </button>
-              <button
-                className={`${styles.modePill} ${showExportPreview ? styles.modePillActive : ''}`}
-                onClick={toggleExportPreview}
-                title="Preview export boundary"
-                aria-pressed={showExportPreview}
-              >
-                <Eye size={15} />
-                Preview
-              </button>
-              <button
-                className={`${styles.modePill} ${layoutMode ? styles.modePillActive : ''}`}
-                onClick={toggleLayoutMode}
-                title="Toggle layout mode"
-                aria-pressed={layoutMode}
-              >
-                <LayoutDashboard size={15} />
-                Layout
-              </button>
-              <button
-                className={styles.iconBtn}
-                onClick={() => addToast('info', 'Favorites will become persistent in a later Better Notebook patch')}
-                title="Add to favorites"
-                aria-label="Add to favorites"
-              >
-                <Star size={16} />
-              </button>
-              <button
-                className={styles.iconBtn}
-                onClick={toggleNoteInfo}
-                title="View info"
-                aria-label="View info"
-              >
-                <Info size={16} />
-              </button>
-              <button
-                className={styles.iconBtn}
-                onClick={toggleMoreActions}
-                title="More note actions"
-                aria-label="More note actions"
-              >
-                <MoreHorizontal size={16} />
-              </button>
-              <button
-                className={styles.iconBtn}
-                onClick={collapseChrome}
-                title="Hide note tools"
-                aria-label="Hide note tools"
-              >
-                <PanelTopClose size={16} />
-              </button>
-            </div>
-
-            {showNoteInfo && (
-              <div className={styles.infoPopover}>
-                <div className={styles.popoverHeader}>
-                  <div>
-                    <div className={styles.popoverEyebrow}>Note info</div>
-                    <strong>{note.title || 'Untitled note'}</strong>
-                  </div>
-                  <button className={styles.iconBtn} onClick={closeOverlay} title="Close">
-                    <X size={15} />
-                  </button>
-                </div>
-                <dl className={styles.infoGrid}>
-                  <div>
-                    <dt>Mode</dt>
-                    <dd>{surfaceMode === 'page' ? 'Page' : 'Canvas'}</dd>
-                  </div>
-                  <div>
-                    <dt>Blocks</dt>
-                    <dd>{sortedBlocks.length}</dd>
-                  </div>
-                  <div>
-                    <dt>Sources</dt>
-                    <dd>{sourceReferenceCount}</dd>
-                  </div>
-                  <div>
-                    <dt>Status</dt>
-                    <dd>{note.status}</dd>
-                  </div>
-                </dl>
-                <p className={styles.popoverNote}>
-                  Full source, relation, export, and history details will move into the Better Notebook inspector.
-                </p>
-              </div>
-            )}
-
-            {showMoreActions && (
-              <div className={`${styles.infoPopover} ${styles.actionsPopover}`}>
-                <div className={styles.popoverHeader}>
-                  <div>
-                    <div className={styles.popoverEyebrow}>Note actions</div>
-                    <strong>More</strong>
-                  </div>
-                  <button className={styles.iconBtn} onClick={closeOverlay} title="Close">
-                    <X size={15} />
-                  </button>
-                </div>
-                <button
-                  className={styles.moreAction}
-                  onClick={toggleSnapEnabled}
-                >
-                  <LayoutDashboard size={15} />
-                  <span>Snap alignment</span>
-                  <small>
-                    {snapEnabled
-                      ? 'On: moving and resizing can align to page and neighbor edges.'
-                      : 'Off: moving and resizing use free placement.'}
-                  </small>
-                  <span className={`${styles.togglePill} ${snapEnabled ? styles.togglePillOn : styles.togglePillOff}`}>
-                    {snapEnabled ? 'On' : 'Off'}
-                  </span>
-                </button>
-                <p className={styles.popoverNote}>
-                  Page settings, history, export, and inspector actions will live here as they become real.
-                </p>
-              </div>
-            )}
-
-            {showExportPreview && (
-              <ExportPreviewLayer
-                preview={exportPreview}
-                showBlockTypes={showPreviewBlockTypes}
-                showAIVisibility={showPreviewAIVisibility}
-                showExportStatus={showPreviewExportStatus}
-                onToggleBlockTypes={togglePreviewBlockTypes}
-                onToggleAIVisibility={togglePreviewAIVisibility}
-                onToggleExportStatus={togglePreviewExportStatus}
-                onClose={closeOverlay}
-              />
-            )}
-
-          </div>
-        )}
-      </div>
+      <NoteChromeLayer
+        chromeCollapsed={chromeCollapsed}
+        exportPreview={exportPreview}
+        layoutMode={layoutMode}
+        note={note}
+        showExportPreview={showExportPreview}
+        showMoreActions={showMoreActions}
+        showNoteInfo={showNoteInfo}
+        showPreviewAIVisibility={showPreviewAIVisibility}
+        showPreviewBlockTypes={showPreviewBlockTypes}
+        showPreviewExportStatus={showPreviewExportStatus}
+        snapEnabled={snapEnabled}
+        sortedBlockCount={sortedBlocks.length}
+        sourceReferenceCount={sourceReferenceCount}
+        surfaceMode={surfaceMode}
+        surfacePolicy={surfacePolicy}
+        titleDraft={titleDraft}
+        onAddFavorite={() => addToast('info', 'Favorites will become persistent in a later Better Notebook patch')}
+        onBackProject={() => navigate(`/projects/${note.course_id}`)}
+        onCloseOverlay={closeOverlay}
+        onCollapseChrome={collapseChrome}
+        onExpandChrome={expandChrome}
+        onSaveTitle={saveTitle}
+        onTitleDraftChange={setTitleDraft}
+        onToggleExportPreview={toggleExportPreview}
+        onToggleLayoutMode={toggleLayoutMode}
+        onToggleMoreActions={toggleMoreActions}
+        onToggleNoteInfo={toggleNoteInfo}
+        onTogglePreviewAIVisibility={togglePreviewAIVisibility}
+        onTogglePreviewBlockTypes={togglePreviewBlockTypes}
+        onTogglePreviewExportStatus={togglePreviewExportStatus}
+        onToggleSnapEnabled={toggleSnapEnabled}
+        onToggleSurfaceMode={toggleSurfaceMode}
+      />
 
       <div
         className={`${styles.documentShell} ${surfaceMode === 'canvas' ? styles.documentShellCanvas : ''}`}
@@ -629,99 +474,20 @@ export default function NoteCanvasRuntime() {
       >
         {templateWarning && <div className={styles.templateWarning}>{templateWarning}</div>}
 
-        <div className={styles.pageToolRail} aria-label="Page tools">
-          <button
-            className={styles.pageToolBtn}
-            onClick={toggleAdvancedInsert}
-            title="Insert block"
-            aria-label="Insert block"
-          >
-            <Plus size={16} />
-            Insert
-          </button>
-        </div>
-
-        {showAdvancedInsert && (
-          <aside className={styles.insertPanel} aria-label="Advanced insert panel">
-            <div className={styles.popoverHeader}>
-              <div>
-                <div className={styles.popoverEyebrow}>Block insert</div>
-                <strong>Advanced insert</strong>
-              </div>
-              <button className={styles.iconBtn} onClick={closeOverlay} title="Close">
-                <X size={15} />
-              </button>
-            </div>
-            <p className={styles.popoverNote}>
-              Use this when you want to pick a precise block type. The natural path is still clicking the page or typing /.
-            </p>
-            <div className={styles.addBlock}>
-              <select
-                className={styles.typeSelect}
-                value={newTemplateId}
-                onChange={(event) => setNewTemplateId(event.target.value)}
-              >
-                {insertTemplateGroups.map((group) => (
-                  <optgroup key={group.key} label={group.label}>
-                    {group.templates.map((template) => (
-                      <option key={`${group.key}-${template.template_id}`} value={template.template_id}>
-                        {template.label}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-              <textarea
-                className={styles.newBlockText}
-                value={newBlockText}
-                onChange={(event) => setNewBlockText(event.target.value)}
-                placeholder="Write the block content here."
-              />
-              <button
-                className={styles.addBlockBtn}
-                onClick={async () => {
-                  const created = await addBlock();
-                  if (created) {
-                    setFocusBlockId(created.id);
-                    closeOverlay();
-                  }
-                }}
-              >
-                <Plus size={16} />
-                Add block
-              </button>
-            </div>
-          </aside>
-        )}
-
-        {sourceJumpTarget && (
-          <div className={styles.sourceJumpPanel}>
-            <div className={styles.sourceJumpHeader}>
-              <div>
-                <div className={styles.sourceJumpEyebrow}>Source snapshot</div>
-                <div className={styles.sourceJumpTitle}>{sourceJumpTarget.snapshot.title}</div>
-                <div className={styles.sourceJumpMeta}>
-                  {sourceJumpTarget.snapshot.source_filename} - {sourceJumpTarget.page.page_label || `p.${sourceJumpTarget.page.page_number}`}
-                </div>
-              </div>
-              <button
-                className={styles.iconBtn}
-                onClick={() => setSourceJumpTarget(null)}
-                title="Close source"
-              >
-                <X size={16} />
-              </button>
-            </div>
-            <div className={styles.sourceJumpPage}>
-              <div className={styles.sourceJumpPageLabel}>
-                Focused source page
-                {sourceJumpTarget.focus.page_start ? ` ${sourceJumpTarget.focus.page_start}` : ''}
-                {sourceJumpTarget.focus.page_end && sourceJumpTarget.focus.page_end !== sourceJumpTarget.focus.page_start ? `-${sourceJumpTarget.focus.page_end}` : ''}
-              </div>
-              <p>{sourceJumpTarget.page.text_content}</p>
-            </div>
-          </div>
-        )}
+        <NoteFloatingPanelLayer
+          insertTemplateGroups={insertTemplateGroups}
+          newBlockText={newBlockText}
+          newTemplateId={newTemplateId}
+          showAdvancedInsert={showAdvancedInsert}
+          sourceJumpTarget={sourceJumpTarget}
+          onAddBlock={addBlock}
+          onCloseOverlay={closeOverlay}
+          onCloseSourceJump={() => setSourceJumpTarget(null)}
+          onFocusBlock={setFocusBlockId}
+          onNewBlockTextChange={setNewBlockText}
+          onNewTemplateChange={setNewTemplateId}
+          onToggleAdvancedInsert={toggleAdvancedInsert}
+        />
 
         <section className={`${styles.writingSurface} ${surfaceMode === 'canvas' ? styles.writingSurfaceCanvas : styles.writingSurfacePage}`}>
           <div
