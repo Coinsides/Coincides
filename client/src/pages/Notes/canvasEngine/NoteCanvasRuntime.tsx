@@ -46,6 +46,7 @@ import {
 } from './blockContentService';
 import { useNoteCanvasDataAdapter } from './hooks/useNoteCanvasDataAdapter';
 import { useNoteCanvasRuntime } from './hooks/useNoteCanvasRuntime';
+import { usePlacementHistory } from './hooks/usePlacementHistory';
 import { BlockEditorLayer } from './layers/BlockEditorLayer';
 import { ExportPreviewLayer } from './layers/ExportPreviewLayer';
 import { SlashMenuLayer } from './layers/SlashMenuLayer';
@@ -82,7 +83,6 @@ import {
 import {
   applyMoveSnap,
   buildDefaultBlockLayouts,
-  buildLayoutHistoryEntry,
   getBoundaryKind,
   layoutsEqual,
   normalizeBlockLayout,
@@ -96,7 +96,6 @@ import {
   MIN_BLOCK_HEIGHT,
   MIN_BLOCK_WIDTH,
   type BlockBoxLayout,
-  type LayoutHistoryEntry,
   type SnapGuide,
   type SlashMenuAnchor,
   type SurfaceMode,
@@ -130,11 +129,6 @@ function isFormulaLikeBlock(block: NoteBlock): boolean {
 
 function shouldShowPreview(block: NoteBlock, text: string): boolean {
   return isFormulaLikeBlock(block) && text.trim().length > 0;
-}
-
-function isEditableDomTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
-  return Boolean(target.closest('input, textarea, select, [contenteditable="true"]'));
 }
 
 function estimateBlockHeightForText(block: NoteBlock, text: string, width: number): number {
@@ -248,8 +242,6 @@ export default function NoteCanvasRuntime() {
   const blockListRef = useRef<HTMLDivElement | null>(null);
   const movingBlockIdRef = useRef<string | null>(null);
   const suppressMeasuredReflowUntilRef = useRef(0);
-  const layoutUndoStackRef = useRef<LayoutHistoryEntry[]>([]);
-  const layoutRedoStackRef = useRef<LayoutHistoryEntry[]>([]);
 
   const slashCommands = useMemo(() => (
     slashTarget
@@ -409,52 +401,14 @@ export default function NoteCanvasRuntime() {
     });
   }, [blocks, persistBlockLayout]);
 
-  const pushLayoutHistory = useCallback((
-    before: Record<string, BlockBoxLayout>,
-    after: Record<string, BlockBoxLayout>,
-  ) => {
-    const entry = buildLayoutHistoryEntry(before, after);
-    if (!entry) return;
-    layoutUndoStackRef.current = [...layoutUndoStackRef.current, entry].slice(-60);
-    layoutRedoStackRef.current = [];
+  const applyLayoutHistoryDrafts = useCallback((layouts: Record<string, BlockBoxLayout>) => {
+    setLayoutDrafts((current) => ({ ...current, ...layouts }));
   }, []);
 
-  const undoLayoutHistory = useCallback(() => {
-    const entry = layoutUndoStackRef.current.pop();
-    if (!entry) return false;
-    layoutRedoStackRef.current.push(entry);
-    setLayoutDrafts((current) => ({ ...current, ...entry.before }));
-    persistLayoutSnapshot(entry.before);
-    return true;
-  }, [persistLayoutSnapshot]);
-
-  const redoLayoutHistory = useCallback(() => {
-    const entry = layoutRedoStackRef.current.pop();
-    if (!entry) return false;
-    layoutUndoStackRef.current.push(entry);
-    setLayoutDrafts((current) => ({ ...current, ...entry.after }));
-    persistLayoutSnapshot(entry.after);
-    return true;
-  }, [persistLayoutSnapshot]);
-
-  useEffect(() => {
-    const handleLayoutHistoryKeys = (event: globalThis.KeyboardEvent) => {
-      if (!(event.ctrlKey || event.metaKey) || isEditableDomTarget(event.target)) return;
-      const key = event.key.toLowerCase();
-      if (key === 'z' && !event.shiftKey) {
-        if (!undoLayoutHistory()) return;
-        event.preventDefault();
-        return;
-      }
-      if (key === 'y' || (key === 'z' && event.shiftKey)) {
-        if (!redoLayoutHistory()) return;
-        event.preventDefault();
-      }
-    };
-
-    window.addEventListener('keydown', handleLayoutHistoryKeys);
-    return () => window.removeEventListener('keydown', handleLayoutHistoryKeys);
-  }, [redoLayoutHistory, undoLayoutHistory]);
+  const { pushLayoutHistory } = usePlacementHistory({
+    applyLayoutDrafts: applyLayoutHistoryDrafts,
+    persistLayoutSnapshot,
+  });
 
   const persistDraft = useCallback(async (
     initialText?: string,

@@ -85,6 +85,7 @@ L6 block projection layer: implemented, not browser-smoked
 L9 slash menu / preview / block control bar / source reference overlay seed: implemented, not browser-smoked
 L8 interaction controller seed: implemented, not browser-smoked
 L10 mode policy seed: implemented, not browser-smoked
+L11 placement history seed: implemented, not browser-smoked
 ```
 
 体验风险：
@@ -112,6 +113,7 @@ L10 mode policy seed: implemented, not browser-smoked
 - 如果后续出现 block drag/resize 时 snap、弹性避让或宽度计算异常，应优先检查 `interactionController.ts` 的 drag/resize layout calculation helpers。
 - 如果后续出现 drag / resize 松手不落盘、pointerup 后仍在拖动、或窗口外松手状态残留，应优先检查 `interactionController.ts` 的 `attachWindowPointerSession` 以及 `NoteCanvasRuntime.tsx` 里的 finish callbacks。
 - 如果后续出现 Page / Canvas 切换、workspace block 可见性、双击空白落点或弹性避让规则不符合预期，应优先检查 `modePolicyService.ts`。
+- 如果后续出现 Ctrl+Z / Ctrl+Y 对 move / resize 的撤回重做异常，应优先检查 `hooks/usePlacementHistory.ts` 和传入它的 layout draft / persistence callbacks。
 - 本轮有一个有意的体验变化：Page mode 且 snap alignment 开启时，双击空白创建 draft 会进入自然写作流；snap 关闭或 Canvas mode 下才使用双击位置。
 
 ## 同步规则

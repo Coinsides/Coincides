@@ -81,6 +81,14 @@
 - `canvasEngine/index.ts` 导出 `useNoteCanvasDataAdapter`。
 - L2 data adapter seed 抽离后 client build passed。
 
+## Changed - V2.BN.8.1 L11 Placement History Seed
+
+- 新增 `hooks/usePlacementHistory.ts`。
+- 将 placement move / resize 的 undo stack、redo stack 和 Ctrl+Z / Ctrl+Y keyboard listener 从 `NoteCanvasRuntime.tsx` 迁入 placement history hook。
+- `NoteCanvasRuntime.tsx` 继续提供 layout draft application 和 layout snapshot persistence callbacks。
+- `canvasEngine/index.ts` 导出 `usePlacementHistory`。
+- L11 placement history seed 抽离后 client build passed。
+
 ## Changed - V2.BN.8.1 L3-L4
 
 - 新增 `viewportService.ts`，集中处理 runtime viewport / world / primary page offset seed。

@@ -8,6 +8,7 @@ export * from './geometry';
 export * from './interactionController';
 export * from './hooks/useBlockMeasurement';
 export * from './hooks/useNoteCanvasDataAdapter';
+export * from './hooks/usePlacementHistory';
 export * from './layers/BlockControlBarLayer';
 export * from './layers/ExportPreviewLayer';
 export * from './layers/SlashMenuLayer';

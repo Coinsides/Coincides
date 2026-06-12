@@ -339,7 +339,7 @@ client build: passed
 
 仍需验收：
 
-- 后续需要继续把 begin move / begin resize session orchestration、blank click、keyboard undo 的 controller 行为迁出；
+- 后续需要继续把 begin move / begin resize session orchestration 和 blank click 的 controller 行为迁出；
 - 需要 browser smoke 验证 pointer session helper 没有改变 drag / resize 手感；
 - 需要 browser smoke 验证 interaction debug state 不影响现有手感。
 
@@ -373,6 +373,35 @@ snap off 或 Canvas mode -> 使用双击位置创建 draft
 - Canvas mode 的全局 scroll / workspace fill / PageFrame boundary 仍需要浏览器验证；
 - mode policy 还没有接管完整 pan / zoom / viewport scroll 行为；
 - Page mode 和 Canvas mode 的 toolbar / shell CSS 仍在主 runtime JSX 内。
+
+### L11 - State Persistence And Undo Boundary Seed
+
+```text
+status: in progress
+client build: passed
+```
+
+已完成部分：
+
+- 新增 `hooks/usePlacementHistory.ts`；
+- `NoteCanvasRuntime.tsx` 不再直接持有 placement undo / redo refs；
+- `NoteCanvasRuntime.tsx` 不再直接注册 Ctrl+Z / Ctrl+Y keyboard listener；
+- `usePlacementHistory` 现在集中负责：
+  - move / resize 前后 layout snapshot 生成；
+  - undo stack；
+  - redo stack；
+  - Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z；
+  - 避开 input / textarea / select / contenteditable 内部输入时的快捷键冲突。
+- `NoteCanvasRuntime.tsx` 仍提供：
+  - `applyLayoutDrafts`；
+  - `persistLayoutSnapshot`；
+  - move / resize 完成时调用 `pushLayoutHistory`。
+
+仍需验收：
+
+- 需要 browser smoke 验证 move / resize 后 Ctrl+Z / Ctrl+Y 仍然稳定；
+- create block / delete empty draft / convert block type 的 undo 仍未进入 L11；
+- placement history 仍通过 runtime callback 持久化，后续可以进一步迁入 placement writer boundary。
 
 ## Henry Must Decide
 
