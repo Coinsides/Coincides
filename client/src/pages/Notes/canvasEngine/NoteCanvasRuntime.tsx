@@ -44,7 +44,6 @@ import {
 import {
   buildNoteCanvasRuntimeModel,
 } from './engineModel';
-import { clamp } from './geometry';
 import {
   combinedDefinitionText,
   contentForEditedBlock,
@@ -63,6 +62,8 @@ import { SlashMenuLayer } from './layers/SlashMenuLayer';
 import {
   draggingBlockInteraction,
   editingTextInteraction,
+  calculateDraggedBlockLayouts,
+  calculateResizedBlockLayouts,
   idleInteraction,
   openingMenuInteraction,
   previewingInteraction,
@@ -71,7 +72,6 @@ import {
 } from './interactionController';
 import {
   applyMeasuredBlockHeightToLayouts,
-  applyMeasuredBlockLayoutToLayouts,
   estimateTextBlockHeight,
   resizeTextareaToContent,
 } from './measurementService';
@@ -98,8 +98,6 @@ import {
   getEffectiveExportRole,
   layoutsEqual,
   normalizeBlockLayout,
-  resolveStackedLayoutCollisions,
-  snapToTargets,
   writeLayoutOverride,
 } from './placementService';
 import { buildExportPreviewModel } from './exportPreviewService';
@@ -1034,25 +1032,26 @@ export default function NoteCanvasRuntime() {
 
     const handlePointerMove = (moveEvent: PointerEvent) => {
       setLayoutDrafts(() => {
-        const baseline = startLayouts;
-        const currentLayout = baseline[block.id] || layout;
-        const rawLayout = {
-          ...currentLayout,
-          x: clamp(currentLayout.x + moveEvent.clientX - startClientX, 0, Math.max(0, contentWidth - currentLayout.width)),
-          y: Math.max(0, currentLayout.y + moveEvent.clientY - startClientY),
-        };
-        const snapped = snapEnabled
-          ? applyMoveSnap(rawLayout, block.id, baseline, contentWidth)
-          : { layout: rawLayout, guide: null };
-        const candidateLayouts = { ...baseline, [block.id]: snapped.layout };
-        latestLayouts = shouldUseElasticAvoidance({
-          policy: surfacePolicy,
+        const currentLayout = startLayouts[block.id] || layout;
+        const deltaX = moveEvent.clientX - startClientX;
+        const deltaY = moveEvent.clientY - startClientY;
+        const result = calculateDraggedBlockLayouts({
+          blockId: block.id,
+          startLayouts,
+          initialLayout: layout,
+          deltaX,
+          deltaY,
+          contentWidth,
           snapEnabled,
-          deltaY: snapped.layout.y - currentLayout.y,
-        })
-          ? resolveStackedLayoutCollisions(candidateLayouts, visibleBlocks.map((item) => item.id))
-          : candidateLayouts;
-        setSnapGuide(snapped.guide);
+          orderedBlockIds: visibleBlocks.map((item) => item.id),
+          useElasticAvoidance: shouldUseElasticAvoidance({
+            policy: surfacePolicy,
+            snapEnabled,
+            deltaY,
+          }),
+        });
+        latestLayouts = result.layouts;
+        setSnapGuide(result.guide);
         return latestLayouts;
       });
     };
@@ -1084,41 +1083,26 @@ export default function NoteCanvasRuntime() {
     setInteractionState(resizingBlockInteraction(block.id));
     setLayoutMode(true);
     const startClientX = event.clientX;
-    let latestLayout = layout;
     let latestLayouts: Record<string, BlockBoxLayout> = blockLayouts;
     const startLayouts = { ...blockLayouts };
 
     const handlePointerMove = (moveEvent: PointerEvent) => {
-      const width = clamp(
-        layout.width + moveEvent.clientX - startClientX,
-        MIN_BLOCK_WIDTH,
-        Math.max(MIN_BLOCK_WIDTH, contentWidth - layout.x),
-      );
-      const snappedRight: { value: number; snapped?: number } = snapEnabled
-        ? snapToTargets(layout.x + width, [
-          contentWidth,
-          ...Object.entries(blockLayouts)
-            .filter(([id]) => id !== block.id)
-            .flatMap(([, item]) => [item.x, item.x + item.width]),
-        ])
-        : { value: layout.x + width };
-      const nextWidth = clamp(snappedRight.value - layout.x, MIN_BLOCK_WIDTH, Math.max(MIN_BLOCK_WIDTH, contentWidth - layout.x));
-      latestLayout = {
-        ...layout,
-        width: nextWidth,
-        height: estimateBlockHeightForText(block, text, nextWidth),
-      };
-      setSnapGuide(snappedRight.snapped !== undefined ? { x: snappedRight.snapped } : null);
+      const deltaX = moveEvent.clientX - startClientX;
       setLayoutDrafts((current) => {
-        latestLayouts = applyMeasuredBlockLayoutToLayouts({
-          currentLayouts: current,
-          baseLayouts: blockLayouts,
+        const result = calculateResizedBlockLayouts({
           blockId: block.id,
-          fallbackLayout: layout,
-          nextLayout: latestLayout,
+          baseLayouts: blockLayouts,
+          currentLayouts: current,
+          initialLayout: layout,
+          deltaX,
+          contentWidth,
+          snapEnabled,
           orderedBlockIds: visibleBlocks.map((item) => item.id),
           resolveCollisions: shouldResolvePageCollisions(surfacePolicy),
+          estimateHeight: (width) => estimateBlockHeightForText(block, text, width),
         });
+        latestLayouts = result.layouts;
+        setSnapGuide(result.guide);
         return latestLayouts;
       });
     };

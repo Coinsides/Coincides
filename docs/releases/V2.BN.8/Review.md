@@ -316,11 +316,15 @@ client build: passed
   - `data-canvas-interaction-mode`；
   - `data-canvas-interaction-target`；
   - `data-canvas-interaction-block`。
+- `interactionController.ts` 新增第一批 drag/resize layout calculation helpers：
+  - `calculateDraggedBlockLayouts`；
+  - `calculateResizedBlockLayouts`。
+- `NoteCanvasRuntime.tsx` 不再内联 drag move / resize move 的 layout math，只保留 pointer listener 和 React state entrypoint。
 
 仍需验收：
 
-- 目前 interaction controller 仍是 state boundary seed，真正的 drag/resize pointer math 仍在 `NoteCanvasRuntime.tsx`；
-- 后续需要继续把 begin move / begin resize / blank click / keyboard undo 的 controller 行为迁出；
+- pointer listener 生命周期仍在 `NoteCanvasRuntime.tsx`；
+- 后续需要继续把 begin move / begin resize session、blank click、keyboard undo 的 controller 行为迁出；
 - 需要 browser smoke 验证 interaction debug state 不影响现有手感。
 
 ### L10 - Page / Canvas Mode Policy Seed

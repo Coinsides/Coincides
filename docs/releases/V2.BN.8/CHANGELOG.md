@@ -188,6 +188,10 @@
   - `data-canvas-interaction-mode`；
   - `data-canvas-interaction-target`；
   - `data-canvas-interaction-block`。
+- `interactionController.ts` 新增 drag/resize layout calculation helpers：
+  - `calculateDraggedBlockLayouts`；
+  - `calculateResizedBlockLayouts`。
+- `NoteCanvasRuntime.tsx` 不再内联 drag move / resize move 的布局计算；pointer listener 和 React state entrypoint 暂时保留在 runtime 主文件。
 - 新增 `modePolicyService.ts`，集中处理第一批 Page/Canvas policy：
   - visible block filtering；
   - PageFrame offset；
