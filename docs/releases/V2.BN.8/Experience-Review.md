@@ -74,6 +74,23 @@ active smoke note: V2.BN.8.1 Smoke Note
 - 如果新 runtime 的表现低于 V2.BN.5 旧 runtime，需要记录为 regression，而不是把旧数据问题当作原因；
 - Henry 手动确认之前，V2.BN.8.1 体验验收不能标记 passed。
 
+## V2.BN.8.1 L3-L5 Experience Risk Note
+
+```text
+L3/L4 service extraction: implemented, not browser-smoked
+L5 placement service extraction: implemented, not browser-smoked
+L7 measurement seed extraction: implemented, not browser-smoked
+```
+
+体验风险：
+
+- PageFrame height 现在不再被 Canvas workspace 高度撑开，理论上应减少 Canvas mode 巨大空白；
+- workspace block 不应继续影响 formal PageFrame height，但还需要浏览器里创建 workspace block 验证；
+- placement 读写、snap、reflow 已迁入 service，理论上行为应保持不变；
+- textarea resize、DOM measured height、text estimated height 已进入 measurement service seed；
+- 如果后续出现 block 位置、snap、reload 后布局变化，应优先检查 `placementService.ts`。
+- 如果后续出现 Definition / Formula 展开穿模，应优先检查 `measurementService.ts` 和后续 measurement registry。
+
 ## 同步规则
 
 - 每次视觉/交互 patch 后更新本文。

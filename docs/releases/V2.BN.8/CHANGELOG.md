@@ -72,3 +72,39 @@
 - 新增 `NoteCanvasRuntimeProvider.tsx` 和 `hooks/useNoteCanvasRuntime.ts`，作为后续 viewport、placement、overlay、interaction 分层接管的上下文入口。
 - `canvasEngine/index.ts` 导出 runtime provider。
 - L2 迁移后 client build passed。
+
+## Changed - V2.BN.8.1 L3-L4
+
+- 新增 `viewportService.ts`，集中处理 runtime viewport / world / primary page offset seed。
+- 新增 `pageFrameService.ts`，集中处理 default draft placement、PageFrame height 和 runtime PageFrame 构造。
+- `NoteCanvasRuntime.tsx` 不再直接手写 viewport/world/PageFrame 构造。
+- Canvas mode 下 PageFrame height 不再使用完整 workspace height，改为 formal page 内容底部驱动，避免把 PageFrame 撑成巨大空白。
+- L3-L4 抽离后 client build passed。
+
+## Changed - V2.BN.8.1 L5
+
+- 新增 `placementService.ts`，集中处理 placement 读写和布局计算。
+- 从 `NoteCanvasRuntime.tsx` 迁出：
+  - `readStoredLayout`；
+  - `isCanvasWorkspaceBlock`；
+  - `normalizeBlockLayout`；
+  - `buildDefaultBlockLayouts`；
+  - `buildLayoutPayload` / `writeLayoutOverride`；
+  - `layoutsEqual` / `buildLayoutHistoryEntry`；
+  - `getBoundaryKind`；
+  - `getEffectiveExportRole` / `getEffectiveAIVisibility`；
+  - `resolveStackedLayoutCollisions`；
+  - `reflowLayoutsAfterHeightChange`；
+  - `snapToTargets` / `applyMoveSnap`。
+- `placementService.ts` 使用泛型 placement seed，不直接绑定 `NoteBlock`，为后续 CanvasObject placement 预留接口。
+- L5 抽离后 client build passed。
+
+## Changed - V2.BN.8.1 L7 Seed
+
+- 新增 `measurementService.ts`。
+- 从 `NoteCanvasRuntime.tsx` 迁出第一批 measurement seed：
+  - textarea content resize；
+  - block DOM content height measurement；
+  - text block estimated height。
+- `NoteCanvasRuntime.tsx` 仍保留 block-specific measurement wrapper，后续继续迁入 measurement registry。
+- L7 seed 抽离后 client build passed。

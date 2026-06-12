@@ -123,6 +123,93 @@ L2 尚未完成部分：
 - `NoteCanvasRuntime.tsx` 内部仍保留 note/project API loading、navigation、save title 等页面级数据逻辑；
 - 下一步需要继续抽出 data adapter，使 `NoteCanvasRuntime` 更接近纯 runtime root。
 
+### L3 / L4 - Viewport, World, PageFrame And Workspace
+
+```text
+status: in progress
+client build: passed
+```
+
+已完成部分：
+
+- 新增 `viewportService.ts`：
+  - `getPrimaryPageOffsetX(surfaceMode)`；
+  - `createRuntimeViewport(surfaceMode, pageFrameHeight)`；
+  - `createRuntimeWorld(surfaceMode, pageFrameHeight)`。
+- 新增 `pageFrameService.ts`：
+  - `createDefaultDraftLayout(...)`；
+  - `calculatePageFrameHeight(...)`；
+  - `createRuntimePageFrame(...)`。
+- `NoteCanvasRuntime.tsx` 不再直接手写 viewport/world/PageFrame 构造。
+- PageFrame 高度不再在 Canvas mode 下直接使用 `CANVAS_WORKSPACE_HEIGHT`。
+- PageFrame 高度现在按正式页面内容计算：
+
+```text
+max(default page frame height, bottom-most in-frame block bottom + bottom padding)
+```
+
+仍需验收：
+
+- Canvas mode 是否仍存在双滚动条；
+- Canvas mode 是否保留 PageFrame boundary / margin；
+- workspace block 是否不再撑高 formal PageFrame；
+- sidebar 收起后 workspace 是否自动填充。
+
+### L5 - Placement Service
+
+```text
+status: in progress
+client build: passed
+```
+
+已完成部分：
+
+- 新增 `placementService.ts`；
+- 迁出 `NoteCanvasRuntime.tsx` 中的 placement 周边逻辑：
+  - stored layout read；
+  - workspace block 判断；
+  - default block layout；
+  - normalized block layout；
+  - layout payload writer；
+  - boundary kind；
+  - export role / AI visibility effective state；
+  - layout equality；
+  - layout history entry；
+  - stacked collision resolve；
+  - measured-height reflow；
+  - snap target / move snap。
+- `placementService.ts` 使用泛型 `PlacementSeedBlock`，不直接绑定 `NoteBlock`，为后续 CanvasObject / image / shape placement 留入口。
+
+仍需验收：
+
+- 移动后 reload 位置是否保持；
+- resize 后 reload 宽高是否保持；
+- Page/Canvas 切换是否仍把 workspace block 夹回 PageFrame；
+- snap on/off 是否只影响 placement 计算，不污染 content truth。
+
+### L7 - Measurement And Reflow Service
+
+```text
+status: in progress
+client build: passed
+```
+
+已完成部分：
+
+- 新增 `measurementService.ts`；
+- 迁出第一批 measurement seed：
+  - textarea auto-height；
+  - DOM content height measurement；
+  - text block estimated height。
+- `NoteCanvasRuntime.tsx` 仍保留 block-specific height wrapper，但不再直接写文本高度估算公式。
+
+仍需验收：
+
+- Formula input expanded/collapsed 是否触发稳定 measurement；
+- Definition fields active/editing 是否稳定推开下方 block；
+- resize width 后 text reflow 是否仍然稳定；
+- measurement registry 尚未完成，当前仍是 service seed。
+
 ## Henry Must Decide
 
 - 是否确认第一版主路线为 self-owned minimal hybrid NoteCanvas Engine；

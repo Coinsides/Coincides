@@ -31,6 +31,8 @@ export interface LayoutHistoryEntry {
 
 export const NOTE_LAYOUT_KEY = 'better_notebook_layout';
 export const DEFAULT_PAGE_CONTENT_WIDTH = DEFAULT_PRIMARY_PAGE_FRAME.width;
+export const DEFAULT_PAGE_FRAME_HEIGHT = DEFAULT_PRIMARY_PAGE_FRAME.height;
+export const PAGE_FRAME_BOTTOM_PADDING = 96;
 export const CANVAS_WORKSPACE_WIDTH = DEFAULT_CANVAS_WORLD.width;
 export const CANVAS_WORKSPACE_HEIGHT = DEFAULT_CANVAS_WORLD.height;
 export const DEFAULT_BLOCK_HEIGHT = 72;

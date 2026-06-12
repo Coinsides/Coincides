@@ -51,19 +51,36 @@ import {
   type SlashTrigger,
 } from '../noteSlashCommands';
 import {
-  CANVAS_PRIMARY_PAGE_OFFSET_X,
-  DEFAULT_CANVAS_WORLD,
   buildNoteCanvasRuntimeModel,
-  createPrimaryPageFrame,
-  createViewport,
 } from './engineModel';
 import { useNoteCanvasRuntime } from './hooks/useNoteCanvasRuntime';
 import {
-  BLOCK_HORIZONTAL_CHROME,
-  BLOCK_VERTICAL_CHROME,
-  CANVAS_WORKSPACE_HEIGHT,
-  CANVAS_WORKSPACE_WIDTH,
-  DEFAULT_BLOCK_GAP,
+  estimateTextBlockHeight,
+  measureBlockContentHeight,
+  resizeTextareaToContent,
+} from './measurementService';
+import {
+  calculatePageFrameHeight,
+  createDefaultDraftLayout,
+  createRuntimePageFrame,
+} from './pageFrameService';
+import {
+  applyMoveSnap,
+  buildDefaultBlockLayouts,
+  buildLayoutHistoryEntry,
+  buildLayoutPayload,
+  getBoundaryKind,
+  getEffectiveAIVisibility,
+  getEffectiveExportRole,
+  isCanvasWorkspaceBlock,
+  layoutsEqual,
+  normalizeBlockLayout,
+  reflowLayoutsAfterHeightChange,
+  resolveStackedLayoutCollisions,
+  snapToTargets,
+  writeLayoutOverride,
+} from './placementService';
+import {
   DEFAULT_BLOCK_HEIGHT,
   DEFAULT_PAGE_CONTENT_WIDTH,
   ELASTIC_AVOIDANCE_ACTIVATION_DISTANCE,
@@ -74,19 +91,19 @@ import {
   SLASH_MENU_HEIGHT_ESTIMATE,
   SLASH_MENU_OFFSET,
   SLASH_MENU_WIDTH,
-  SNAP_THRESHOLD,
-  STACKED_BLOCK_GAP,
-  TEXT_AVERAGE_CHAR_WIDTH,
-  TEXT_LINE_HEIGHT,
   type AIVisibility,
   type BlockBoxLayout,
-  type BoundaryKind,
   type ExportRole,
   type LayoutHistoryEntry,
   type SnapGuide,
   type SurfaceMode,
 } from './runtimeLayout';
 import type { BlockPlacementModel } from './types';
+import {
+  createRuntimeViewport,
+  createRuntimeWorld,
+  getPrimaryPageOffsetX,
+} from './viewportService';
 import styles from '../NoteDetail.module.css';
 
 const {
@@ -169,8 +186,6 @@ interface SlashMenuAnchor {
   x: number;
   y: number;
 }
-
-const CANVAS_PAGE_OFFSET_X = CANVAS_PRIMARY_PAGE_OFFSET_X;
 
 type FieldValueRecord = Record<string, unknown>;
 type BlockPresentationKind = 'definition' | 'formula' | 'heading' | 'code' | 'sourceQuote' | 'paragraph';
@@ -451,17 +466,6 @@ function shouldShowPreview(block: NoteBlock, text: string): boolean {
   return isFormulaLikeBlock(block) && text.trim().length > 0;
 }
 
-function resizeTextarea(textarea: HTMLTextAreaElement | null) {
-  if (!textarea) return;
-  textarea.style.height = 'auto';
-  textarea.style.height = `${textarea.scrollHeight}px`;
-}
-
-function measureBlockContentHeight(element: HTMLElement | null): number {
-  if (!element) return DEFAULT_BLOCK_HEIGHT;
-  return Math.max(MIN_BLOCK_HEIGHT, Math.ceil(element.scrollHeight + BLOCK_VERTICAL_CHROME));
-}
-
 function isEditableDomTarget(target: EventTarget | null): boolean {
   if (!(target instanceof HTMLElement)) return false;
   return Boolean(target.closest('input, textarea, select, [contenteditable="true"]'));
@@ -491,169 +495,18 @@ function getSlashMenuAnchor(element: HTMLElement | null, container: HTMLElement 
   return { x, y: Math.max(0, y) };
 }
 
-function readStoredLayout(block: NoteBlock): Partial<BlockBoxLayout> | null {
-  const layout = block.display_overrides_json?.[NOTE_LAYOUT_KEY];
-  if (!isRecord(layout)) return null;
-  return {
-    ...layout,
-    rotation: typeof layout.rotation === 'number' ? layout.rotation : undefined,
-    export_role: isExportRole(layout.export_role) ? layout.export_role : undefined,
-    ai_visibility: isAIVisibility(layout.ai_visibility) ? layout.ai_visibility : undefined,
-    surface: isStoredLayoutSurface(layout.surface) ? layout.surface : undefined,
-  };
-}
-
-function isExportRole(value: unknown): value is ExportRole {
-  return value === 'included' || value === 'excluded' || value === 'scratch';
-}
-
-function isAIVisibility(value: unknown): value is AIVisibility {
-  return value === 'visible' || value === 'hidden';
-}
-
-function isStoredLayoutSurface(value: unknown): value is NonNullable<BlockBoxLayout['surface']> {
-  return value === 'formal_page' || value === 'canvas_workspace';
-}
-
-function isCanvasWorkspaceBlock(block: NoteBlock, contentWidth: number): boolean {
-  const stored = readStoredLayout(block);
-  if (stored?.surface === 'canvas_workspace') return true;
-  if (stored?.surface === 'formal_page') return false;
-
-  // Legacy canvas-workspace placements may not have a surface flag yet.
-  return typeof stored?.x === 'number' && stored.x >= contentWidth;
-}
-
 function estimateBlockHeightForText(block: NoteBlock, text: string, width: number): number {
-  const titleRows = block.title ? 1 : 0;
-  const textWidth = Math.max(80, width - BLOCK_HORIZONTAL_CHROME);
-  const charsPerLine = Math.max(12, Math.floor(textWidth / TEXT_AVERAGE_CHAR_WIDTH));
-  const wrappedRows = text
-    .split('\n')
-    .reduce((total, line) => total + Math.max(1, Math.ceil(line.length / charsPerLine)), 0);
-  const rows = Math.max(1, wrappedRows) + titleRows;
-  const previewExtra = shouldShowPreview(block, text) ? 72 : 0;
-  const sourceExtra = block.source_references?.length > 0 ? 34 : 0;
-  return Math.max(MIN_BLOCK_HEIGHT, BLOCK_VERTICAL_CHROME + rows * TEXT_LINE_HEIGHT + previewExtra + sourceExtra);
+  return estimateTextBlockHeight({
+    text,
+    width,
+    title: block.title,
+    showPreview: shouldShowPreview(block, text),
+    sourceReferenceCount: block.source_references?.length || 0,
+  });
 }
 
 function estimateBlockHeight(block: NoteBlock, width: number): number {
   return estimateBlockHeightForText(block, textFromContent(block), width);
-}
-
-function normalizeBlockLayout(
-  block: NoteBlock,
-  fallback: BlockBoxLayout,
-  contentWidth: number,
-  surfaceMode: SurfaceMode,
-): BlockBoxLayout {
-  const stored = readStoredLayout(block);
-  const useStoredPlacement = !(surfaceMode === 'page' && stored?.surface === 'canvas_workspace');
-  const width = clamp(
-    useStoredPlacement && typeof stored?.width === 'number' ? stored.width : fallback.width,
-    MIN_BLOCK_WIDTH,
-    Math.max(MIN_BLOCK_WIDTH, contentWidth),
-  );
-  const x = clamp(
-    useStoredPlacement && typeof stored?.x === 'number' ? stored.x : fallback.x,
-    0,
-    Math.max(0, contentWidth - width),
-  );
-  const y = Math.max(0, useStoredPlacement && typeof stored?.y === 'number' ? stored.y : fallback.y);
-  const naturalHeight = estimateBlockHeight(block, width);
-  const height = Math.max(MIN_BLOCK_HEIGHT, naturalHeight);
-
-  return {
-    x,
-    y,
-    width,
-    height,
-    rotation: typeof stored?.rotation === 'number' ? stored.rotation : undefined,
-    export_role: stored?.export_role,
-    ai_visibility: stored?.ai_visibility,
-    surface: useStoredPlacement ? stored?.surface : undefined,
-  };
-}
-
-function buildDefaultBlockLayouts(blocks: NoteBlock[], contentWidth: number): Record<string, BlockBoxLayout> {
-  let cursorY = 0;
-  const width = Math.min(DEFAULT_PAGE_CONTENT_WIDTH, contentWidth);
-  return blocks.reduce<Record<string, BlockBoxLayout>>((acc, block) => {
-    const height = estimateBlockHeight(block, width);
-    acc[block.id] = { x: 0, y: cursorY, width, height };
-    cursorY += height + DEFAULT_BLOCK_GAP;
-    return acc;
-  }, {});
-}
-
-function buildLayoutPayload(layout: BlockBoxLayout): Record<string, unknown> {
-  const payload: Record<string, unknown> = {
-    x: Math.round(layout.x),
-    y: Math.round(layout.y),
-    width: Math.round(layout.width),
-    height: Math.round(layout.height),
-    surface: getBoundaryKind(layout) === 'inside' ? 'formal_page' : 'canvas_workspace',
-    version: 'V2.BN.8',
-  };
-  if (typeof layout.rotation === 'number' && layout.rotation !== 0) payload.rotation = layout.rotation;
-  if (layout.export_role) payload.export_role = layout.export_role;
-  if (layout.ai_visibility) payload.ai_visibility = layout.ai_visibility;
-  return payload;
-}
-
-function writeLayoutOverride(block: NoteBlock, layout: BlockBoxLayout): Record<string, unknown> {
-  return {
-    ...block.display_overrides_json,
-    [NOTE_LAYOUT_KEY]: buildLayoutPayload(layout),
-  };
-}
-
-function layoutsEqual(a: BlockBoxLayout, b: BlockBoxLayout): boolean {
-  return Math.round(a.x) === Math.round(b.x)
-    && Math.round(a.y) === Math.round(b.y)
-    && Math.round(a.width) === Math.round(b.width)
-    && Math.round(a.height) === Math.round(b.height)
-    && Math.round((a.rotation || 0) * 1000) === Math.round((b.rotation || 0) * 1000)
-    && a.export_role === b.export_role
-    && a.ai_visibility === b.ai_visibility
-    && a.surface === b.surface;
-}
-
-function buildLayoutHistoryEntry(
-  before: Record<string, BlockBoxLayout>,
-  after: Record<string, BlockBoxLayout>,
-): LayoutHistoryEntry | null {
-  const beforeChanged: Record<string, BlockBoxLayout> = {};
-  const afterChanged: Record<string, BlockBoxLayout> = {};
-  const ids = new Set([...Object.keys(before), ...Object.keys(after)]);
-
-  ids.forEach((id) => {
-    const beforeLayout = before[id];
-    const afterLayout = after[id];
-    if (!beforeLayout || !afterLayout || layoutsEqual(beforeLayout, afterLayout)) return;
-    beforeChanged[id] = { ...beforeLayout };
-    afterChanged[id] = { ...afterLayout };
-  });
-
-  return Object.keys(afterChanged).length > 0
-    ? { before: beforeChanged, after: afterChanged }
-    : null;
-}
-
-function getBoundaryKind(layout: Pick<BlockBoxLayout, 'x' | 'width'>): BoundaryKind {
-  if (layout.x >= DEFAULT_PAGE_CONTENT_WIDTH) return 'outside';
-  if (layout.x + layout.width <= DEFAULT_PAGE_CONTENT_WIDTH) return 'inside';
-  return 'crossing';
-}
-
-function getEffectiveExportRole(layout: BlockBoxLayout): ExportRole {
-  if (layout.export_role) return layout.export_role;
-  return getBoundaryKind(layout) === 'outside' ? 'scratch' : 'included';
-}
-
-function getEffectiveAIVisibility(layout: BlockBoxLayout): AIVisibility {
-  if (layout.ai_visibility) return layout.ai_visibility;
-  return getBoundaryKind(layout) === 'outside' ? 'hidden' : 'visible';
 }
 
 function exportRoleLabel(role: ExportRole): string {
@@ -664,88 +517,6 @@ function exportRoleLabel(role: ExportRole): string {
 
 function aiVisibilityLabel(visibility: AIVisibility): string {
   return visibility === 'visible' ? 'AI visible' : 'AI hidden';
-}
-
-function hasHorizontalOverlap(a: BlockBoxLayout, b: BlockBoxLayout): boolean {
-  return Math.min(a.x + a.width, b.x + b.width) > Math.max(a.x, b.x) + 1;
-}
-
-function resolveStackedLayoutCollisions(
-  layouts: Record<string, BlockBoxLayout>,
-  orderedBlockIds: string[],
-): Record<string, BlockBoxLayout> {
-  const nextLayouts = { ...layouts };
-  const orderedIds = orderedBlockIds
-    .filter((id) => nextLayouts[id])
-    .sort((a, b) => {
-      const layoutA = nextLayouts[a];
-      const layoutB = nextLayouts[b];
-      return layoutA.y - layoutB.y || orderedBlockIds.indexOf(a) - orderedBlockIds.indexOf(b);
-    });
-
-  orderedIds.forEach((id, index) => {
-    let current = nextLayouts[id];
-    for (let previousIndex = 0; previousIndex < index; previousIndex += 1) {
-      const previous = nextLayouts[orderedIds[previousIndex]];
-      if (!hasHorizontalOverlap(current, previous)) continue;
-      const minimumY = previous.y + previous.height + STACKED_BLOCK_GAP;
-      if (current.y < minimumY && current.y >= previous.y - 1) {
-        current = { ...current, y: minimumY };
-        nextLayouts[id] = current;
-      }
-    }
-  });
-
-  return nextLayouts;
-}
-
-function reflowLayoutsAfterHeightChange(
-  layouts: Record<string, BlockBoxLayout>,
-  blockId: string,
-  previousLayout: BlockBoxLayout,
-  nextLayout: BlockBoxLayout,
-): Record<string, BlockBoxLayout> {
-  const delta = nextLayout.height - previousLayout.height;
-  const nextLayouts = { ...layouts, [blockId]: nextLayout };
-  if (Math.abs(delta) < 1) return nextLayouts;
-
-  const previousBottom = previousLayout.y + previousLayout.height;
-  Object.entries(layouts).forEach(([id, layout]) => {
-    if (id === blockId) return;
-    if (layout.y < previousBottom - 1) return;
-    if (!hasHorizontalOverlap(layout, previousLayout)) return;
-    nextLayouts[id] = { ...layout, y: Math.max(0, layout.y + delta) };
-  });
-
-  return nextLayouts;
-}
-function snapToTargets(value: number, targets: number[]): { value: number; snapped?: number } {
-  for (const target of targets) {
-    if (Math.abs(value - target) <= SNAP_THRESHOLD) {
-      return { value: target, snapped: target };
-    }
-  }
-  return { value };
-}
-
-function applyMoveSnap(
-  layout: BlockBoxLayout,
-  blockId: string,
-  layouts: Record<string, BlockBoxLayout>,
-  contentWidth: number,
-): { layout: BlockBoxLayout; guide: SnapGuide | null } {
-  const otherLayouts = Object.entries(layouts)
-    .filter(([id]) => id !== blockId)
-    .map(([, item]) => item);
-  const xTargets = [0, contentWidth - layout.width, ...otherLayouts.flatMap((item) => [item.x, item.x + item.width])];
-  const yTargets = [0, ...otherLayouts.flatMap((item) => [item.y, item.y + item.height])];
-  const snappedX = snapToTargets(layout.x, xTargets);
-  const snappedY = snapToTargets(layout.y, yTargets);
-  const next = { ...layout, x: snappedX.value, y: snappedY.value };
-  const guide = snappedX.snapped !== undefined || snappedY.snapped !== undefined
-    ? { x: snappedX.snapped, y: snappedY.snapped }
-    : null;
-  return { layout: next, guide };
 }
 
 export default function NoteCanvasRuntime() {
@@ -846,36 +617,39 @@ export default function NoteCanvasRuntime() {
   );
 
   const blockLayouts = useMemo(() => {
-    const defaults = buildDefaultBlockLayouts(visibleBlocks, contentWidth);
+    const defaults = buildDefaultBlockLayouts(visibleBlocks, contentWidth, estimateBlockHeight);
     const resolvedLayouts = visibleBlocks.reduce<Record<string, BlockBoxLayout>>((acc, block) => {
       const draft = layoutDrafts[block.id];
-      acc[block.id] = draft || normalizeBlockLayout(block, defaults[block.id], contentWidth, surfaceMode);
+      acc[block.id] = draft || normalizeBlockLayout({
+        block,
+        fallback: defaults[block.id],
+        contentWidth,
+        surfaceMode,
+        estimateHeight: estimateBlockHeight,
+      });
       return acc;
     }, {});
     return resolvedLayouts;
   }, [visibleBlocks, contentWidth, layoutDrafts, surfaceMode]);
 
-  const pageOffsetX = surfaceMode === 'canvas' ? CANVAS_PAGE_OFFSET_X : 0;
+  const pageOffsetX = getPrimaryPageOffsetX(surfaceMode);
 
   const defaultDraftLayout = useMemo(() => {
-    const bottoms = Object.values(blockLayouts).map((layout) => layout.y + layout.height);
-    const y = bottoms.length > 0 ? Math.max(...bottoms) + DEFAULT_BLOCK_GAP : 0;
-    const width = Math.min(DEFAULT_PAGE_CONTENT_WIDTH, contentWidth);
-    return { x: 0, y, width, height: DEFAULT_BLOCK_HEIGHT };
+    return createDefaultDraftLayout(blockLayouts, contentWidth);
   }, [blockLayouts, contentWidth]);
 
   const pageContentHeight = useMemo(() => {
-    const blockBottoms = Object.values(blockLayouts).map((layout) => layout.y + layout.height);
-    const draftBottom = draftActive ? (draftLayout || defaultDraftLayout).y + (draftLayout || defaultDraftLayout).height : 0;
-    const minimumHeight = surfaceMode === 'canvas' ? CANVAS_WORKSPACE_HEIGHT : 580;
-    return Math.max(minimumHeight, ...blockBottoms, draftBottom) + 96;
-  }, [blockLayouts, draftActive, draftLayout, defaultDraftLayout, surfaceMode]);
+    return calculatePageFrameHeight({
+      blockLayouts,
+      draftActive,
+      draftLayout,
+      defaultDraftLayout,
+    });
+  }, [blockLayouts, draftActive, draftLayout, defaultDraftLayout]);
 
   const primaryPageFrame = useMemo(
-    () => createPrimaryPageFrame({
+    () => createRuntimePageFrame({
       x: pageOffsetX,
-      y: 0,
-      width: DEFAULT_PAGE_CONTENT_WIDTH,
       height: pageContentHeight,
     }),
     [pageContentHeight, pageOffsetX],
@@ -900,21 +674,11 @@ export default function NoteCanvasRuntime() {
   );
 
   const noteCanvasRuntime = useMemo(() => {
-    const viewport = createViewport({
-      width: surfaceMode === 'canvas' ? CANVAS_WORKSPACE_WIDTH : DEFAULT_PAGE_CONTENT_WIDTH,
-      height: pageContentHeight,
-      zoom: 1,
-    });
+    const viewport = createRuntimeViewport(surfaceMode, pageContentHeight);
 
     return buildNoteCanvasRuntimeModel({
       mode: surfaceMode,
-      world: surfaceMode === 'canvas'
-        ? DEFAULT_CANVAS_WORLD
-        : {
-          origin: { x: 0, y: 0 },
-          width: DEFAULT_PAGE_CONTENT_WIDTH,
-          height: pageContentHeight,
-        },
+      world: createRuntimeWorld(surfaceMode, pageContentHeight),
       primaryPageFrame,
       viewport,
       blockPlacements: canvasBlockPlacements,
@@ -1027,12 +791,12 @@ export default function NoteCanvasRuntime() {
     if (!draftActive) return;
     window.setTimeout(() => {
       draftRef.current?.focus();
-      resizeTextarea(draftRef.current);
+      resizeTextareaToContent(draftRef.current);
     }, 0);
   }, [draftActive, draftFocusNonce]);
 
   useLayoutEffect(() => {
-    resizeTextarea(draftRef.current);
+    resizeTextareaToContent(draftRef.current);
     if (!draftActive || !draftRef.current) return;
     const nextHeight = Math.max(DEFAULT_BLOCK_HEIGHT, draftRef.current.scrollHeight + 34);
     setDraftLayout((current) => (
@@ -1046,7 +810,7 @@ export default function NoteCanvasRuntime() {
     const updateContentWidth = () => {
       const width = blockListRef.current?.clientWidth;
       if (width && Number.isFinite(width)) {
-        const availableWidth = surfaceMode === 'canvas' ? width - CANVAS_PAGE_OFFSET_X : width;
+        const availableWidth = surfaceMode === 'canvas' ? width - pageOffsetX : width;
         setContentWidth(Math.max(MIN_BLOCK_WIDTH, availableWidth));
       }
     };
@@ -1063,7 +827,7 @@ export default function NoteCanvasRuntime() {
       observer?.disconnect();
       window.removeEventListener('resize', updateContentWidth);
     };
-  }, [surfaceMode]);
+  }, [pageOffsetX, surfaceMode]);
 
   const fetchSourceAnchors = useCallback(async (courseId: string) => {
     try {
@@ -2239,7 +2003,7 @@ export default function NoteCanvasRuntime() {
                   className={styles.pageTextArea}
                   value={draftText}
                   onChange={(event) => {
-                    resizeTextarea(event.currentTarget);
+                    resizeTextareaToContent(event.currentTarget);
                     const nextHeight = Math.max(DEFAULT_BLOCK_HEIGHT, event.currentTarget.scrollHeight + 34);
                     setDraftLayout((current) => (
                       current ? { ...current, height: nextHeight } : current
@@ -2430,7 +2194,7 @@ function BlockEditor({
   };
 
   useLayoutEffect(() => {
-    resizeTextarea(textareaRef.current);
+    resizeTextareaToContent(textareaRef.current);
     const element = blockContentRef.current;
     if (!element) {
       onMeasuredHeight(DEFAULT_BLOCK_HEIGHT);
@@ -2454,7 +2218,7 @@ function BlockEditor({
       textarea.focus();
       textarea.selectionStart = textarea.value.length;
       textarea.selectionEnd = textarea.value.length;
-      resizeTextarea(textarea);
+      resizeTextareaToContent(textarea);
     }, 0);
   }, [autoFocus]);
 
@@ -2559,7 +2323,7 @@ function BlockEditor({
                     value={definitionFields.description}
                     onFocus={onFocused}
                     onChange={(event) => {
-                      resizeTextarea(event.currentTarget);
+                      resizeTextareaToContent(event.currentTarget);
                       updateDefinitionDraft({ description: event.currentTarget.value }, event.currentTarget);
                     }}
                     onBlur={() => onSave(true, definitionFields)}
@@ -2600,7 +2364,7 @@ function BlockEditor({
                   value={formulaFields.latex_input}
                   onFocus={onFocused}
                   onChange={(event) => {
-                    resizeTextarea(event.currentTarget);
+                    resizeTextareaToContent(event.currentTarget);
                     updateFormulaDraft({ latex_input: event.currentTarget.value }, event.currentTarget);
                   }}
                   onBlur={() => onSave(true, formulaFields)}
@@ -2619,7 +2383,7 @@ function BlockEditor({
             value={text}
             onFocus={onFocused}
             onChange={(event) => {
-              resizeTextarea(event.currentTarget);
+              resizeTextareaToContent(event.currentTarget);
               onTextChange(event.currentTarget.value, event.currentTarget.selectionStart, event.currentTarget);
             }}
             onBlur={() => onSave(true)}
