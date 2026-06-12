@@ -125,3 +125,32 @@
 - `NoteCanvasRuntime.tsx` 不再内联 slash menu 渲染函数。
 - `NoteCanvasRuntime.tsx` 不再内联 `BlockEditor` 组件本体。
 - L6/L9 layer 抽离后 client build passed。
+
+## Changed - V2.BN.8.1 L8/L10 Seeds
+
+- 新增 `interactionController.ts`，建立 Canvas Engine 第一版 interaction state boundary：
+  - idle；
+  - hoveringBlock；
+  - selectedBlock；
+  - editingText；
+  - draggingBlock；
+  - resizingBlock；
+  - panningCanvas；
+  - openingMenu；
+  - previewing。
+- `NoteCanvasRuntime.tsx` 开始在 block focus/select、drag、resize、slash menu、preview、info/more/insert panel 等入口写入 interaction state。
+- canvas root 新增 interaction debug data attributes，方便后续 smoke 和 browser harness 验证：
+  - `data-canvas-interaction-mode`；
+  - `data-canvas-interaction-target`；
+  - `data-canvas-interaction-block`。
+- 新增 `modePolicyService.ts`，集中处理第一批 Page/Canvas policy：
+  - visible block filtering；
+  - PageFrame offset；
+  - mode label；
+  - collision resolve policy；
+  - elastic avoidance policy；
+  - blank double-click draft placement。
+- 双击空白创建 block 的规则调整为：
+  - Page mode + snap alignment on：进入自然写作流；
+  - snap alignment off 或 Canvas mode：落在双击位置。
+- L8/L10 seed 抽离后 client build passed。

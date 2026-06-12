@@ -261,6 +261,75 @@ client build: passed
 - overlay portal / z-index service 尚未建立；
 - block control bar、preview panel、source jump 等浮层尚未迁出。
 
+### L8 - Interaction Controller Seed
+
+```text
+status: in progress
+client build: passed
+```
+
+已完成部分：
+
+- 新增 `interactionController.ts`；
+- 建立第一版 runtime interaction state：
+  - `idle`；
+  - `hoveringBlock`；
+  - `selectedBlock`；
+  - `editingText`；
+  - `draggingBlock`；
+  - `resizingBlock`；
+  - `panningCanvas`；
+  - `openingMenu`；
+  - `previewing`。
+- `NoteCanvasRuntime.tsx` 已开始在这些入口写入 interaction state：
+  - block focus / select；
+  - block drag start / drag end；
+  - block resize start / resize end；
+  - draft editing；
+  - slash menu；
+  - preview / note info / more actions / insert panel。
+- canvas root 现在输出 debug data attributes：
+  - `data-canvas-interaction-mode`；
+  - `data-canvas-interaction-target`；
+  - `data-canvas-interaction-block`。
+
+仍需验收：
+
+- 目前 interaction controller 仍是 state boundary seed，真正的 drag/resize pointer math 仍在 `NoteCanvasRuntime.tsx`；
+- 后续需要继续把 begin move / begin resize / blank click / keyboard undo 的 controller 行为迁出；
+- 需要 browser smoke 验证 interaction debug state 不影响现有手感。
+
+### L10 - Page / Canvas Mode Policy Seed
+
+```text
+status: in progress
+client build: passed
+```
+
+已完成部分：
+
+- 新增 `modePolicyService.ts`；
+- 集中处理第一批 Page/Canvas policy：
+  - mode label / next mode label；
+  - primary page offset；
+  - Page mode 是否隐藏 workspace blocks；
+  - Page mode 是否允许 page collision resolve；
+  - elastic avoidance 触发条件；
+  - blank double-click draft placement。
+- `visibleBlocks` 不再在 runtime 主文件里直接判断 `surfaceMode === 'page'`；
+- 双击空白创建 block 的规则进入 mode policy：
+
+```text
+snap on + Page mode -> 使用自然写作流的 default draft layout
+snap off 或 Canvas mode -> 使用双击位置创建 draft
+```
+
+仍需验收：
+
+- Canvas mode 的全局 scroll / workspace fill / PageFrame boundary 仍需要浏览器验证；
+- mode policy 还没有接管完整 pan / zoom / viewport scroll 行为；
+- Page mode 和 Canvas mode 的 toolbar / shell CSS 仍在主 runtime JSX 内。
+
 ## Henry Must Decide
 
 - 是否确认第一版主路线为 self-owned minimal hybrid NoteCanvas Engine；

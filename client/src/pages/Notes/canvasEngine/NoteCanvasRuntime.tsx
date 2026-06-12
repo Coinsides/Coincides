@@ -65,9 +65,26 @@ import { useNoteCanvasRuntime } from './hooks/useNoteCanvasRuntime';
 import { BlockEditorLayer } from './layers/BlockEditorLayer';
 import { SlashMenuLayer } from './layers/SlashMenuLayer';
 import {
+  draggingBlockInteraction,
+  editingTextInteraction,
+  idleInteraction,
+  openingMenuInteraction,
+  previewingInteraction,
+  resizingBlockInteraction,
+  selectedBlockInteraction,
+} from './interactionController';
+import {
   estimateTextBlockHeight,
   resizeTextareaToContent,
 } from './measurementService';
+import {
+  createBlankDraftLayout,
+  createSurfaceModePolicy,
+  getNextSurfaceMode,
+  getVisibleBlocksForSurface,
+  shouldResolvePageCollisions,
+  shouldUseElasticAvoidance,
+} from './modePolicyService';
 import {
   calculatePageFrameHeight,
   createDefaultDraftLayout,
@@ -81,7 +98,6 @@ import {
   getBoundaryKind,
   getEffectiveAIVisibility,
   getEffectiveExportRole,
-  isCanvasWorkspaceBlock,
   layoutsEqual,
   normalizeBlockLayout,
   reflowLayoutsAfterHeightChange,
@@ -92,7 +108,6 @@ import {
 import {
   DEFAULT_BLOCK_HEIGHT,
   DEFAULT_PAGE_CONTENT_WIDTH,
-  ELASTIC_AVOIDANCE_ACTIVATION_DISTANCE,
   LAYOUT_MEASURE_SUPPRESSION_MS,
   MIN_BLOCK_HEIGHT,
   MIN_BLOCK_WIDTH,
@@ -118,7 +133,6 @@ import type {
 import {
   createRuntimeViewport,
   createRuntimeWorld,
-  getPrimaryPageOffsetX,
 } from './viewportService';
 import styles from '../NoteDetail.module.css';
 
@@ -303,6 +317,7 @@ export default function NoteCanvasRuntime() {
   const [contentWidth, setContentWidth] = useState(DEFAULT_PAGE_CONTENT_WIDTH);
   const [snapGuide, setSnapGuide] = useState<SnapGuide | null>(null);
   const [snapEnabled, setSnapEnabled] = useState(true);
+  const [interactionState, setInteractionState] = useState(idleInteraction());
 
   const draftRef = useRef<HTMLTextAreaElement | null>(null);
   const draftTextRef = useRef('');
@@ -351,11 +366,14 @@ export default function NoteCanvasRuntime() {
     [sortedBlocks],
   );
 
+  const surfacePolicy = useMemo(
+    () => createSurfaceModePolicy(surfaceMode),
+    [surfaceMode],
+  );
+
   const visibleBlocks = useMemo(
-    () => surfaceMode === 'page'
-      ? sortedBlocks.filter((block) => !isCanvasWorkspaceBlock(block, contentWidth))
-      : sortedBlocks,
-    [sortedBlocks, surfaceMode, contentWidth],
+    () => getVisibleBlocksForSurface(sortedBlocks, surfacePolicy, contentWidth),
+    [sortedBlocks, surfacePolicy, contentWidth],
   );
 
   const blockLayouts = useMemo(() => {
@@ -374,7 +392,7 @@ export default function NoteCanvasRuntime() {
     return resolvedLayouts;
   }, [visibleBlocks, contentWidth, layoutDrafts, surfaceMode]);
 
-  const pageOffsetX = getPrimaryPageOffsetX(surfaceMode);
+  const pageOffsetX = surfacePolicy.pageOffsetX;
 
   const defaultDraftLayout = useMemo(() => {
     return createDefaultDraftLayout(blockLayouts, contentWidth);
@@ -492,6 +510,7 @@ export default function NoteCanvasRuntime() {
       setBlockTextDrafts({});
       setLayoutDrafts({});
       setSelectedBlockId(null);
+      setInteractionState(idleInteraction());
       setDraftLayout(null);
     } catch (err) {
       console.error('Failed to load note:', err);
@@ -895,12 +914,14 @@ export default function NoteCanvasRuntime() {
     setDraftFocusNonce((value) => value + 1);
     setActiveBlockId(null);
     setSelectedBlockId(null);
+    setInteractionState(editingTextInteraction());
   }, [defaultDraftLayout]);
 
   const clearBlockSelection = useCallback(() => {
     setSelectedBlockId(null);
     setActiveBlockId(null);
     setFocusBlockId(null);
+    setInteractionState(idleInteraction());
   }, []);
 
   const addBlock = async (): Promise<boolean> => {
@@ -986,6 +1007,11 @@ export default function NoteCanvasRuntime() {
       trigger,
       anchor: getSlashMenuAnchor(anchorElement || null, blockListRef.current),
     } : null);
+    setInteractionState(trigger
+      ? openingMenuInteraction('slashMenu', blockId)
+      : target === 'block'
+        ? editingTextInteraction(blockId)
+        : editingTextInteraction());
   };
 
   const handleDraftChange = (value: string, caret: number, anchorElement?: HTMLElement | null) => {
@@ -1079,6 +1105,7 @@ export default function NoteCanvasRuntime() {
     event.preventDefault();
     event.stopPropagation();
     setSelectedBlockId(block.id);
+    setInteractionState(draggingBlockInteraction(block.id));
     setLayoutMode(true);
     const startClientX = event.clientX;
     const startClientY = event.clientY;
@@ -1099,8 +1126,11 @@ export default function NoteCanvasRuntime() {
           ? applyMoveSnap(rawLayout, block.id, baseline, contentWidth)
           : { layout: rawLayout, guide: null };
         const candidateLayouts = { ...baseline, [block.id]: snapped.layout };
-        const movedEnoughForElasticAvoidance = Math.abs(snapped.layout.y - currentLayout.y) >= ELASTIC_AVOIDANCE_ACTIVATION_DISTANCE;
-        latestLayouts = surfaceMode === 'page' && !snapEnabled && movedEnoughForElasticAvoidance
+        latestLayouts = shouldUseElasticAvoidance({
+          policy: surfacePolicy,
+          snapEnabled,
+          deltaY: snapped.layout.y - currentLayout.y,
+        })
           ? resolveStackedLayoutCollisions(candidateLayouts, visibleBlocks.map((item) => item.id))
           : candidateLayouts;
         setSnapGuide(snapped.guide);
@@ -1114,13 +1144,14 @@ export default function NoteCanvasRuntime() {
       suppressMeasuredReflowUntilRef.current = Date.now() + LAYOUT_MEASURE_SUPPRESSION_MS;
       movingBlockIdRef.current = null;
       setSnapGuide(null);
+      setInteractionState(selectedBlockInteraction(block.id));
       pushLayoutHistory(startLayouts, latestLayouts);
       persistChangedBlockLayouts(latestLayouts);
     };
 
     window.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointerup', handlePointerUp, { once: true });
-  }, [blockLayouts, contentWidth, persistChangedBlockLayouts, pushLayoutHistory, snapEnabled, surfaceMode, visibleBlocks]);
+  }, [blockLayouts, contentWidth, persistChangedBlockLayouts, pushLayoutHistory, snapEnabled, surfacePolicy, visibleBlocks]);
 
   const beginResizeBlock = useCallback((
     event: ReactPointerEvent<HTMLElement>,
@@ -1131,6 +1162,7 @@ export default function NoteCanvasRuntime() {
     event.preventDefault();
     event.stopPropagation();
     setSelectedBlockId(block.id);
+    setInteractionState(resizingBlockInteraction(block.id));
     setLayoutMode(true);
     const startClientX = event.clientX;
     let latestLayout = layout;
@@ -1162,7 +1194,7 @@ export default function NoteCanvasRuntime() {
         const previousLayout = current[block.id] || layout;
         const baseline = { ...blockLayouts, ...current };
         const reflowedLayouts = reflowLayoutsAfterHeightChange(baseline, block.id, previousLayout, latestLayout);
-        latestLayouts = surfaceMode === 'page'
+        latestLayouts = shouldResolvePageCollisions(surfacePolicy)
           ? resolveStackedLayoutCollisions(reflowedLayouts, visibleBlocks.map((item) => item.id))
           : reflowedLayouts;
         return latestLayouts;
@@ -1173,28 +1205,32 @@ export default function NoteCanvasRuntime() {
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerUp);
       setSnapGuide(null);
+      setInteractionState(selectedBlockInteraction(block.id));
       pushLayoutHistory(startLayouts, latestLayouts);
       persistChangedBlockLayouts(latestLayouts);
     };
 
     window.addEventListener('pointermove', handlePointerMove);
     window.addEventListener('pointerup', handlePointerUp, { once: true });
-  }, [blockLayouts, contentWidth, persistChangedBlockLayouts, pushLayoutHistory, snapEnabled, surfaceMode, visibleBlocks]);
+  }, [blockLayouts, contentWidth, persistChangedBlockLayouts, pushLayoutHistory, snapEnabled, surfacePolicy, visibleBlocks]);
 
   const handlePageSpaceClick = (event: MouseEvent<HTMLDivElement>) => {
     if (event.target !== event.currentTarget) return;
     const rect = event.currentTarget.getBoundingClientRect();
     const rawX = event.clientX - rect.left - pageOffsetX;
     const rawY = event.clientY - rect.top;
-    const availableWidth = Math.max(MIN_BLOCK_WIDTH, contentWidth - rawX);
-    const width = Math.min(DEFAULT_PAGE_CONTENT_WIDTH, availableWidth);
-    const x = clamp(rawX, 0, Math.max(0, contentWidth - width));
-    const y = Math.max(0, rawY);
-    activateDraft({ x, y, width, height: DEFAULT_BLOCK_HEIGHT });
+    activateDraft(createBlankDraftLayout({
+      policy: surfacePolicy,
+      snapEnabled,
+      rawX,
+      rawY,
+      contentWidth,
+      defaultDraftLayout,
+    }));
   };
 
   const toggleSurfaceMode = () => {
-    setSurfaceMode((current) => current === 'page' ? 'canvas' : 'page');
+    setSurfaceMode((current) => getNextSurfaceMode(current));
     setShowAdvancedInsert(false);
     setShowNoteInfo(false);
     setShowMoreActions(false);
@@ -1259,11 +1295,11 @@ export default function NoteCanvasRuntime() {
               <button
                 className={`${styles.modePill} ${surfaceMode === 'canvas' ? styles.modePillActive : ''}`}
                 onClick={toggleSurfaceMode}
-                title={surfaceMode === 'page' ? 'Switch to open canvas mode' : 'Switch to locked page mode'}
+                title={surfacePolicy.nextModeLabel}
                 aria-pressed={surfaceMode === 'canvas'}
               >
                 <FileText size={15} />
-                {surfaceMode === 'page' ? 'Page' : 'Canvas'}
+                {surfacePolicy.label}
               </button>
               <button
                 className={`${styles.modePill} ${showExportPreview ? styles.modePillActive : ''}`}
@@ -1271,7 +1307,9 @@ export default function NoteCanvasRuntime() {
                   setShowAdvancedInsert(false);
                   setShowNoteInfo(false);
                   setShowMoreActions(false);
-                  setShowExportPreview((value) => !value);
+                  const nextPreviewState = !showExportPreview;
+                  setShowExportPreview(nextPreviewState);
+                  setInteractionState(nextPreviewState ? previewingInteraction() : idleInteraction());
                 }}
                 title="Preview export boundary"
                 aria-pressed={showExportPreview}
@@ -1305,7 +1343,9 @@ export default function NoteCanvasRuntime() {
                   setShowAdvancedInsert(false);
                   setShowExportPreview(false);
                   setShowMoreActions(false);
-                  setShowNoteInfo((value) => !value);
+                  const nextNoteInfoState = !showNoteInfo;
+                  setShowNoteInfo(nextNoteInfoState);
+                  setInteractionState(nextNoteInfoState ? openingMenuInteraction('noteInfo') : idleInteraction());
                 }}
                 title="View info"
                 aria-label="View info"
@@ -1318,7 +1358,9 @@ export default function NoteCanvasRuntime() {
                   setShowAdvancedInsert(false);
                   setShowNoteInfo(false);
                   setShowExportPreview(false);
-                  setShowMoreActions((value) => !value);
+                  const nextMoreActionsState = !showMoreActions;
+                  setShowMoreActions(nextMoreActionsState);
+                  setInteractionState(nextMoreActionsState ? openingMenuInteraction('moreActions') : idleInteraction());
                 }}
                 title="More note actions"
                 aria-label="More note actions"
@@ -1539,7 +1581,9 @@ export default function NoteCanvasRuntime() {
             onClick={() => {
               setShowNoteInfo(false);
               setShowMoreActions(false);
-              setShowAdvancedInsert((value) => !value);
+              const nextInsertState = !showAdvancedInsert;
+              setShowAdvancedInsert(nextInsertState);
+              setInteractionState(nextInsertState ? openingMenuInteraction('insert') : idleInteraction());
             }}
             title="Insert block"
             aria-label="Insert block"
@@ -1636,6 +1680,10 @@ export default function NoteCanvasRuntime() {
             data-canvas-engine-route={noteCanvasRuntime.route}
             data-canvas-visible-blocks={noteCanvasRuntime.visibleBlockIds.length}
             data-canvas-page-frame={noteCanvasRuntime.primaryPageFrame?.id || 'none'}
+            data-canvas-surface-mode={surfacePolicy.mode}
+            data-canvas-interaction-mode={interactionState.mode}
+            data-canvas-interaction-target={interactionState.target}
+            data-canvas-interaction-block={interactionState.blockId || ''}
             style={{
               minHeight: pageContentHeight,
               '--formal-page-offset-x': `${pageOffsetX}px`,
@@ -1679,6 +1727,7 @@ export default function NoteCanvasRuntime() {
                     setSelectedBlockId(block.id);
                     setActiveBlockId(block.id);
                     setFocusBlockId(null);
+                    setInteractionState(editingTextInteraction(block.id));
                   }}
                   onTextChange={(value, caret, anchorElement) => handleBlockTextChange(block.id, value, caret, anchorElement)}
                   onFieldDraftChange={(fieldValues) => {
@@ -1697,6 +1746,7 @@ export default function NoteCanvasRuntime() {
                     setSelectedBlockId(block.id);
                     setActiveBlockId((current) => current === block.id ? current : null);
                     setFocusBlockId((current) => current === block.id ? current : null);
+                    setInteractionState(selectedBlockInteraction(block.id));
                   }}
                   onBeginMove={(event) => beginMoveBlock(event, block, layout)}
                   onBeginResize={(event) => beginResizeBlock(event, block, text, layout)}
@@ -1717,7 +1767,7 @@ export default function NoteCanvasRuntime() {
                       const nextLayout = { ...previousLayout, height };
                       const baseline = { ...blockLayouts, ...current };
                       const reflowedLayouts = reflowLayoutsAfterHeightChange(baseline, block.id, previousLayout, nextLayout);
-                      return surfaceMode === 'page'
+                      return shouldResolvePageCollisions(surfacePolicy)
                         ? resolveStackedLayoutCollisions(reflowedLayouts, visibleBlocks.map((item) => item.id))
                         : reflowedLayouts;
                     });
@@ -1762,6 +1812,7 @@ export default function NoteCanvasRuntime() {
                       setDraftActive(false);
                       setDraftLayout(null);
                       setSlashTarget(null);
+                      setInteractionState(idleInteraction());
                     }
                   }}
                   onKeyDown={handleDraftKeyDown}
