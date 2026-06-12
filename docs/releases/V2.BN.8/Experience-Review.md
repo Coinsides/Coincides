@@ -1,5 +1,17 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 L8 Draft Block Controller Experience Note
+
+```text
+L8 draft block controller hook: implemented, not browser-smoked
+```
+
+体验风险：
+
+- 本次迁移理论上不改变双击空白创建 draft、draft 自动聚焦、draft 文本高度扩张、Ctrl+Enter 保存、blur 保存或空草稿消失的体验，只改变 draft lifecycle 的归属。
+- 如果后续出现双击空白不出光标、draft 不自动 focus、输入长文本时草稿高度不扩张、空草稿残留、blur 后没有保存、或 `/` 从 draft 创建 block 异常，应优先检查 `hooks/useDraftBlockController.ts` 与 `hooks/useSlashCommandController.ts` 的边界。
+- 本次没有实现 create block / delete empty draft 的 undo；L11 目前仍只覆盖 placement move / resize 的撤回重做 seed。
+
 ## V2.BN.8.1 L10 Surface Mode Controller Experience Note
 
 ```text

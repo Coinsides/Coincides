@@ -1,7 +1,5 @@
 import {
   useCallback,
-  useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -23,7 +21,6 @@ import {
   Star,
   X,
 } from 'lucide-react';
-import type { TemplateOption } from '@/services/templateOptions';
 import { useUIStore } from '@/stores/uiStore';
 import {
   buildNoteCanvasRuntimeModel,
@@ -36,6 +33,7 @@ import {
 } from './blockContentService';
 import { useCanvasContentWidth } from './hooks/useCanvasContentWidth';
 import { useBlockPlacementInteractions } from './hooks/useBlockPlacementInteractions';
+import { useDraftBlockController } from './hooks/useDraftBlockController';
 import { useFloatingOverlayController } from './hooks/useFloatingOverlayController';
 import { useNoteCanvasDataAdapter } from './hooks/useNoteCanvasDataAdapter';
 import { useNoteCanvasRuntime } from './hooks/useNoteCanvasRuntime';
@@ -53,7 +51,6 @@ import {
 import {
   applyMeasuredBlockHeightToLayouts,
   estimateTextBlockHeight,
-  resizeTextareaToContent,
 } from './measurementService';
 import {
   createBlankDraftLayout,
@@ -74,7 +71,6 @@ import {
 } from './placementService';
 import { buildExportPreviewModel } from './exportPreviewService';
 import {
-  DEFAULT_BLOCK_HEIGHT,
   LAYOUT_MEASURE_SUPPRESSION_MS,
   MIN_BLOCK_HEIGHT,
   type BlockBoxLayout,
@@ -122,16 +118,11 @@ export default function NoteCanvasRuntime() {
   const { noteId } = useNoteCanvasRuntime();
   const navigate = useNavigate();
   const addToast = useUIStore((s) => s.addToast);
-  const [draftActive, setDraftActive] = useState(false);
-  const [draftText, setDraftText] = useState('');
-  const [creatingDraft, setCreatingDraft] = useState(false);
-  const [draftFocusNonce, setDraftFocusNonce] = useState(0);
   const [focusBlockId, setFocusBlockId] = useState<string | null>(null);
   const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
   const [layoutMode, setLayoutMode] = useState(false);
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [layoutDrafts, setLayoutDrafts] = useState<Record<string, BlockBoxLayout>>({});
-  const [draftLayout, setDraftLayout] = useState<BlockBoxLayout | null>(null);
   const [snapGuide, setSnapGuide] = useState<SnapGuide | null>(null);
   const [snapEnabled, setSnapEnabled] = useState(true);
   const [interactionState, setInteractionState] = useState(idleInteraction());
@@ -179,7 +170,6 @@ export default function NoteCanvasRuntime() {
     setLayoutDrafts({});
     setSelectedBlockId(null);
     setInteractionState(idleInteraction());
-    setDraftLayout(null);
   }, []);
 
   const clearLayoutDraftForBlock = useCallback((blockId: string) => {
@@ -237,9 +227,6 @@ export default function NoteCanvasRuntime() {
     setLayoutDraftForBlock,
   });
 
-  const draftRef = useRef<HTMLTextAreaElement | null>(null);
-  const draftTextRef = useRef('');
-  const creatingDraftRef = useRef(false);
   const blockListRef = useRef<HTMLDivElement | null>(null);
   const movingBlockIdRef = useRef<string | null>(null);
   const suppressMeasuredReflowUntilRef = useRef(0);
@@ -279,6 +266,30 @@ export default function NoteCanvasRuntime() {
   const defaultDraftLayout = useMemo(() => {
     return createDefaultDraftLayout(blockLayouts, contentWidth);
   }, [blockLayouts, contentWidth]);
+
+  const {
+    activateDraft,
+    creatingDraft,
+    discardDraft,
+    draftActive,
+    draftLayout,
+    draftRef,
+    draftText,
+    draftTextRef,
+    persistDraft,
+    resizeDraftFromTextarea,
+    setDraftText,
+  } = useDraftBlockController({
+    createBlock,
+    defaultDraftLayout,
+    defaultTextTemplate,
+    note,
+    saveBlock,
+    setActiveBlockId,
+    setFocusBlockId,
+    setInteractionState,
+    setSelectedBlockId,
+  });
 
   const pageContentHeight = useMemo(() => {
     return calculatePageFrameHeight({
@@ -331,25 +342,6 @@ export default function NoteCanvasRuntime() {
     return buildExportPreviewModel(visibleBlocks, blockLayouts);
   }, [visibleBlocks, blockLayouts]);
 
-  useEffect(() => {
-    if (!draftActive) return;
-    window.setTimeout(() => {
-      draftRef.current?.focus();
-      resizeTextareaToContent(draftRef.current);
-    }, 0);
-  }, [draftActive, draftFocusNonce]);
-
-  useLayoutEffect(() => {
-    resizeTextareaToContent(draftRef.current);
-    if (!draftActive || !draftRef.current) return;
-    const nextHeight = Math.max(DEFAULT_BLOCK_HEIGHT, draftRef.current.scrollHeight + 34);
-    setDraftLayout((current) => (
-      current && nextHeight > current.height + 2
-        ? { ...current, height: nextHeight }
-        : current
-    ));
-  }, [draftText, draftActive]);
-
   const persistChangedBlockLayouts = useCallback((nextLayouts: Record<string, BlockBoxLayout>) => {
     Object.entries(nextLayouts).forEach(([blockId, nextLayout]) => {
       const previousLayout = blockLayouts[blockId];
@@ -394,49 +386,6 @@ export default function NoteCanvasRuntime() {
     suppressMeasuredReflowUntilRef,
     surfacePolicy,
   });
-
-  const persistDraft = useCallback(async (
-    initialText?: string,
-    explicitTemplate?: TemplateOption,
-  ) => {
-    if (!note || creatingDraftRef.current) return;
-    const template = explicitTemplate || defaultTextTemplate;
-    const textToCreate = (initialText ?? draftTextRef.current).trimEnd();
-    if (!template || (!textToCreate.trim() && !explicitTemplate)) return;
-
-    creatingDraftRef.current = true;
-    setCreatingDraft(true);
-    try {
-      const created = await createBlock(template, textToCreate, {
-        layout: draftLayout || defaultDraftLayout,
-        silent: true,
-      });
-      if (!created) return;
-
-      const latestText = draftTextRef.current.trimEnd();
-      if (latestText.trim() && latestText !== textToCreate) {
-        await saveBlock(created, latestText, { silent: true });
-      }
-
-      setDraftText('');
-      draftTextRef.current = '';
-      setDraftActive(false);
-      setDraftLayout(null);
-      setFocusBlockId(created.id);
-    } finally {
-      creatingDraftRef.current = false;
-      setCreatingDraft(false);
-    }
-  }, [note, defaultTextTemplate, draftLayout, defaultDraftLayout, createBlock, saveBlock]);
-
-  const activateDraft = useCallback((layout?: BlockBoxLayout) => {
-    setDraftLayout(layout || defaultDraftLayout);
-    setDraftActive(true);
-    setDraftFocusNonce((value) => value + 1);
-    setActiveBlockId(null);
-    setSelectedBlockId(null);
-    setInteractionState(editingTextInteraction());
-  }, [defaultDraftLayout]);
 
   const {
     clearSlashTarget,
@@ -908,11 +857,7 @@ export default function NoteCanvasRuntime() {
                   className={styles.pageTextArea}
                   value={draftText}
                   onChange={(event) => {
-                    resizeTextareaToContent(event.currentTarget);
-                    const nextHeight = Math.max(DEFAULT_BLOCK_HEIGHT, event.currentTarget.scrollHeight + 34);
-                    setDraftLayout((current) => (
-                      current ? { ...current, height: nextHeight } : current
-                    ));
+                    resizeDraftFromTextarea(event.currentTarget);
                     handleDraftChange(event.currentTarget.value, event.currentTarget.selectionStart, event.currentTarget);
                   }}
                   onBlur={() => {
@@ -920,12 +865,8 @@ export default function NoteCanvasRuntime() {
                     if (draftText.trim()) {
                       void persistDraft(draftText);
                     } else {
-                      setDraftText('');
-                      draftTextRef.current = '';
-                      setDraftActive(false);
-                      setDraftLayout(null);
+                      discardDraft();
                       clearSlashTarget();
-                      setInteractionState(idleInteraction());
                     }
                   }}
                   onKeyDown={handleDraftKeyDown}

@@ -1,5 +1,13 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 L8 Draft Block Controller Hook Seed
+
+- 新增 `hooks/useDraftBlockController.ts`。
+- 将 draft block state、draft textarea focus / height effect、draft persistence、empty draft discard、draft activation 从 `NoteCanvasRuntime.tsx` 迁入 Canvas Engine hook。
+- `NoteCanvasRuntime.tsx` 继续把 draft controller 暴露的 `draftText` / `draftTextRef` / `persistDraft` / `activateDraft` 接给 slash command controller，保持 `/` 创建或转换 block 的现有行为。
+- draft textarea onChange 现在通过 `resizeDraftFromTextarea()` 进入 draft controller，不再由 runtime 主文件直接计算草稿高度。
+- 本轮属于 L8 natural writing / blank draft creation 的 controller seed，不改变 draft block 视觉、保存 API 或 slash command 行为。
+
 ## Changed - V2.BN.8.1 L10 Surface Mode Controller Hook Seed
 
 - 新增 `hooks/useSurfaceModeController.ts`。

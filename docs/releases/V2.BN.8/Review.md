@@ -1,5 +1,41 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 L8 Draft Block Controller Hook Seed
+
+```text
+status: in progress
+client build: passed
+server build: passed
+```
+
+已完成部分：
+
+- 新增 `hooks/useDraftBlockController.ts`。
+- draft block 的本地状态已从 `NoteCanvasRuntime.tsx` 迁出：
+  - active state；
+  - text state；
+  - creating state；
+  - focus nonce；
+  - draft layout；
+  - draft textarea ref；
+  - draft text ref；
+  - creating guard ref。
+- draft focus / auto-height effect 已迁入 hook。
+- `persistDraft()` 已迁入 hook，仍复用现有 `createBlock()` / `saveBlock()` API。
+- `activateDraft()` 已迁入 hook，仍负责取消当前 active/selected block 并写入 `editingTextInteraction()`。
+- empty draft discard 已迁入 hook，runtime 只在 blur 时决定调用它并清理 slash target。
+- draft textarea height update 已通过 `resizeDraftFromTextarea()` 进入 hook。
+
+仍需验收：
+
+- server build；
+- 双击空白创建 draft 后是否仍自动 focus；
+- 输入 `/` 后 slash menu 是否仍正常；
+- draft blur 后有内容是否仍保存成 block；
+- draft blur 后无内容是否仍自然消失；
+- `/formula` / `/definition` 从 draft 创建 structured block 是否仍正常；
+- 浏览器 smoke 尚未执行。
+
 ## V2.BN.8.1 L10 Surface Mode Controller Hook Seed
 
 ```text
