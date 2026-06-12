@@ -574,8 +574,17 @@ export const NOTE_BLOCK_TEMPLATES: NoteBlockTemplateDefinition[] = [
     system_type: 'text',
     learning_role: 'definition',
     description: 'A precise definition.',
-    fields: [{ key: 'body', label: 'Definition', kind: 'textarea', required: true }],
-    default_content: { body: '' },
+    fields: [
+      { key: 'concept_name', label: 'Concept name', kind: 'text', required: true },
+      { key: 'description', label: 'Description', kind: 'textarea', required: true },
+    ],
+    default_content: {
+      body: '',
+      field_values: {
+        concept_name: '',
+        description: '',
+      },
+    },
     render_hint: 'definition',
     proposal_allowed: true,
     source_reference_allowed: true,
@@ -613,8 +622,19 @@ export const NOTE_BLOCK_TEMPLATES: NoteBlockTemplateDefinition[] = [
     system_type: 'latex',
     learning_role: 'formula',
     description: 'A math formula or equation.',
-    fields: [{ key: 'body', label: 'Formula', kind: 'latex', required: true }],
-    default_content: { body: '' },
+    fields: [
+      { key: 'latex_input', label: 'LaTeX input', kind: 'latex', required: true },
+      { key: 'formula_name', label: 'Formula name', kind: 'text', required: false },
+      { key: 'explanation', label: 'Explanation', kind: 'textarea', required: false },
+    ],
+    default_content: {
+      body: '',
+      field_values: {
+        latex_input: '',
+        formula_name: '',
+        explanation: '',
+      },
+    },
     render_hint: 'formula',
     proposal_allowed: true,
     source_reference_allowed: true,

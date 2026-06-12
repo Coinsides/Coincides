@@ -22,23 +22,33 @@ export default function CoursesPage() {
     if (!confirmDelete) return;
     try {
       await deleteCourse(confirmDelete.id);
-      addToast('success', 'Course deleted');
+      addToast('success', 'Project deleted');
       setConfirmDelete(null);
     } catch (err) {
-      console.error('Failed to load courses:', err);
-      addToast('error', 'Failed to delete course');
+      console.error('Failed to delete project:', err);
+      addToast('error', 'Failed to delete project');
     }
   };
 
   return (
     <div className={styles.page}>
       <div className={styles.header}>
-        <div className={styles.title}>Courses</div>
+        <div>
+          <div className={styles.eyebrow}>Notebook workspace</div>
+          <div className={styles.title}>Projects</div>
+          <p className={styles.subtitle}>
+            Organize course material, research packs, reports, and source-backed notes in one focused place.
+          </p>
+        </div>
+        <button className={styles.primaryAction} onClick={() => openModal('course-create')}>
+          <Plus size={16} />
+          New Project
+        </button>
       </div>
 
       <div className={styles.grid}>
         {courses.map((course) => (
-          <div key={course.id} className={styles.card} onClick={() => navigate(`/courses/${course.id}`)} style={{ cursor: 'pointer' }}>
+          <div key={course.id} className={styles.card} onClick={() => navigate(`/projects/${course.id}`)} style={{ cursor: 'pointer' }}>
             <div className={styles.cardColor} style={{ backgroundColor: course.color }} />
             <div className={styles.cardBody}>
               <div className={styles.cardName}>{course.name}</div>
@@ -57,7 +67,7 @@ export default function CoursesPage() {
                   onClick={(e) => { e.stopPropagation(); openModal('document-manager', { courseId: course.id, courseName: course.name }); }}
                 >
                   <FileText size={12} />
-                  Files
+                  Sources
                 </button>
                 <button
                   className={styles.tagsBtn}
@@ -87,17 +97,26 @@ export default function CoursesPage() {
 
         <button className={styles.addCard} onClick={() => openModal('course-create')}>
           <Plus size={20} />
-          Add Course
+          Add Project
         </button>
       </div>
+
+      {courses.length === 0 && (
+        <div className={styles.emptyState}>
+          <div className={styles.emptyTitle}>Start with a project</div>
+          <p>
+            A project can be a course, a research folder, a report workspace, or any focused collection of notes and sources.
+          </p>
+        </div>
+      )}
 
       {/* Delete confirmation */}
       {confirmDelete && (
         <div className={styles.confirmOverlay} onClick={() => setConfirmDelete(null)}>
           <div className={styles.confirmDialog} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.confirmTitle}>Delete Course</div>
+            <div className={styles.confirmTitle}>Delete Project</div>
             <div className={styles.confirmText}>
-              Are you sure you want to delete "{confirmDelete.name}"? This will also delete all associated tasks, goals, and data. This action cannot be undone.
+              Are you sure you want to delete "{confirmDelete.name}"? This still uses the existing course deletion behavior and will remove associated tasks, goals, and data. This action cannot be undone.
             </div>
             <div className={styles.confirmActions}>
               <button className={styles.confirmCancelBtn} onClick={() => setConfirmDelete(null)}>

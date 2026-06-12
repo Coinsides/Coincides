@@ -8,6 +8,7 @@ import {
   createNoteBlockSchema,
   createNoteSchema,
   reorderNoteBlocksSchema,
+  updateNoteBlockPlacementSchema,
   updateNoteSchema,
 } from '../validators/index.js';
 import { mergeRuntimeNoteBlockTemplateMetadata } from '../services/templateDefinitions.js';
@@ -291,9 +292,11 @@ router.post('/:id/blocks', (req: AuthRequest, res: Response) => {
       );
 
       db.prepare(`
-        INSERT INTO note_block_placements (id, note_id, block_id, order_index, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(placementId, note.id, id, nextOrder, now, now);
+        INSERT INTO note_block_placements (
+          id, note_id, block_id, order_index, display_overrides_json, created_at, updated_at
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).run(placementId, note.id, id, nextOrder, stringifyJson(data.display_overrides_json, {}), now, now);
 
       for (const ref of data.source_references || []) {
         if (ref.document_id) {
@@ -331,13 +334,58 @@ router.post('/:id/blocks', (req: AuthRequest, res: Response) => {
     })();
 
     const created = db.prepare(`
-      SELECT nbp.id AS placement_id, nbp.order_index, nb.*
+      SELECT nbp.id AS placement_id, nbp.order_index, nbp.display_overrides_json, nb.*
       FROM note_block_placements nbp
       JOIN note_blocks nb ON nb.id = nbp.block_id
       WHERE nb.id = ?
     `).get(id) as Record<string, unknown>;
 
     res.status(201).json(hydrateBlock({ ...created, source_references: stringifyJson(data.source_references || [], []) }));
+  } catch (err) {
+    if (err instanceof ZodError) {
+      res.status(400).json({ error: 'Validation error', details: err.errors });
+      return;
+    }
+    throw err;
+  }
+});
+
+// PUT /api/notes/:id/block-placements/:placementId
+router.put('/:id/block-placements/:placementId', (req: AuthRequest, res: Response) => {
+  try {
+    const noteId = req.params.id as string;
+    const placementId = req.params.placementId as string;
+    const note = getOwnedNote(noteId, req.userId!);
+    const data = updateNoteBlockPlacementSchema.parse(req.body);
+    const db = getDb();
+
+    const placement = db.prepare(`
+      SELECT nbp.id, nbp.block_id
+      FROM note_block_placements nbp
+      JOIN note_blocks nb ON nb.id = nbp.block_id
+      WHERE nbp.id = ?
+        AND nbp.note_id = ?
+        AND nb.user_id = ?
+        AND nb.status = 'active'
+    `).get(placementId, note.id, req.userId!) as { id: string; block_id: string } | undefined;
+
+    if (!placement) throw new AppError(404, 'Note block placement not found');
+
+    const now = new Date().toISOString();
+    db.prepare(`
+      UPDATE note_block_placements
+      SET display_overrides_json = ?, updated_at = ?
+      WHERE id = ? AND note_id = ?
+    `).run(stringifyJson(data.display_overrides_json, {}), now, placementId, note.id);
+
+    db.prepare('UPDATE notes SET updated_at = ? WHERE id = ?').run(now, note.id);
+
+    res.json({
+      id: placementId,
+      block_id: placement.block_id,
+      display_overrides_json: data.display_overrides_json,
+      updated_at: now,
+    });
   } catch (err) {
     if (err instanceof ZodError) {
       res.status(400).json({ error: 'Validation error', details: err.errors });

@@ -133,6 +133,70 @@ Debug mode:
   工程细节、ids、operation batch、runtime metadata。
 ```
 
+### 2.4.1 Application Chrome / Tool Surface
+
+Better Notebook 的页面和开放画布都需要尽量保留给内容本身。工具 chrome 应该是可控、可收起、可恢复的，不应该被写进正式 page flow。
+
+第一版 surface 分层：
+
+```text
+Left sidebar:
+  Home / Projects / Source Library / Template Studio / Settings / Favorites / Recent / Trash。
+  可以折叠成 icon rail，折叠后保留展开按钮。
+
+Top bar:
+  返回 Project、note title、save/status、favorite、info、more、page/canvas mode switch、future export/share。
+  可以折叠成轻量 chrome，折叠后保留恢复按钮。
+
+Page / Canvas area:
+  只承载 note/report/scratch/relation objects，不承载长期表单面板。
+
+Bottom dock:
+  只承载空间工具或 canvas/layout 工具，例如 select、pan、block tool、shape、pen、connector、frame、sticky、image。
+  它不应该替代正文写作入口。
+
+Floating toolbar:
+  只在选中文字、block、relation 或 source badge 时出现。
+
+Right inspector / popover:
+  承载 source、relation、template、export、AI visibility、debug、manual insert 等低频或详细操作。
+```
+
+Top bar 折叠规则：
+
+- 正常 page mode 下，top bar 可以常驻但必须轻；
+- open canvas / edgeless mode 下，top bar 应可隐藏，让用户获得最大画布空间；
+- 折叠后必须留下一个明确的恢复按钮，不能让用户找不到工具；
+- `Back to Project` 是导航安全出口，可以保留为轻量入口；
+- title / save 不应成为页面内容流的一部分，避免在长页或开放画布里阻碍移动和缩放。
+
+`Advanced block form` 这类 fallback/debug 创建入口不应放在页面底部。它可以进入：
+
+- top bar 的 more / plus popover；
+- right inspector；
+- debug / fallback panel；
+- future command palette。
+
+普通用户的创建路径仍然应该是点击写作、slash command、inline plus、context menu 或 canvas/block tool。
+
+Block control bar：
+
+- 是当前选中 block 的操作层，不是 block 内容的一部分；
+- 可以显示 block type、drag handle、source/export/AI visibility 快捷操作、delete、more 等；
+- 不应该因为相邻 block 贴近而遮挡下一块内容的主要操作；
+- 不应该永久占用 page flow；
+- move up / move down 这类能被直接拖动替代的低价值按钮，不应作为默认高频按钮；
+- 后续可研究停靠在 block 上方、侧边、浮动工具条或 inspector 中，但第一版要保证不遮挡正文阅读。
+
+Preview / debug overlay：
+
+- `Block type overlay`、`AI visibility overlay`、`Export status overlay` 属于 preview/debug layer；
+- 默认不应该一直显示，避免干扰写作；
+- 用户应能在 Preview 面板里用轻量图标开关控制这些 overlay；
+- overlay 开关改变的是查看状态，不改变 NoteBlock 内容、SourceReference、ObjectRelation 或 export truth；
+- overlay popover 打开时应遮盖底层 selected toolbar，避免图层混乱；
+- 批量检查时可以显示所有 block 的 type / AI / export 状态；普通写作时保持安静。
+
 ### 2.5 UX 决策必须服务数据主权
 
 即使未来采用 BlockSuite 或其他成熟 runtime，也不能让外部 editor snapshot 成为 Coincides truth。
@@ -1666,6 +1730,60 @@ Snap toggle 规则：
 - 两个 block 的边界需要部分重叠，但实际内容不重叠；
 - 用户要做非常细的位置微调；
 - 用户在页面外 scratch 区做自由排布。
+
+### 10.4 Elastic Avoidance / 弹性避让
+
+`Elastic Avoidance` 是 Page layout editing 的轻量辅助行为：当用户拖动一个 block 从垂直方向靠近另一个 block，并且两者在水平方向有重叠时，系统可以像轻微弹簧一样把被挤压的 block 推开，避免页面排版被意外叠烂。
+
+第一版先保持保守，只做纵向 stacked avoidance，不做横向弹性避让，也不允许 Page mode 因为“挤不动”而自动 overlap：
+
+```text
+top -> bottom:
+  当前保留。上方 block 向下挤压，下方 block 可以轻微下移。
+
+bottom -> top:
+  暂缓。后续需要明确 top boundary / clamp / rollback 行为后再做。
+
+left -> right:
+  暂缓。Page mode 第一版不需要左右避让。
+
+right -> left:
+  暂缓。Page mode 第一版不需要左右避让。
+```
+
+这个行为来自 V2.BN 开发中的一次意外发现：原本的 collision avoidance 在 smoke test 中产生了类似“弹簧”的手感。该手感可以保留为正式产品特性，但必须有边界。
+
+触发条件：
+
+```text
+Page mode
+  + Layout mode / block arranging
+  + Snap alignment 关闭，或用户正在进行自由放置
+  -> 可以触发 Elastic Avoidance
+```
+
+不应触发：
+
+```text
+普通正文写作:
+  不要让文字输入时自动推开其它 block。
+
+Snap alignment 开启:
+  优先遵循稳定吸附和对齐，不叠加明显弹性。
+
+Canvas / Edgeless workspace:
+  默认允许 block、sticky、image、shape、scratch object 有意重叠。
+  不要强行弹开对象。
+```
+
+产品规则：
+
+- Elastic Avoidance 是 layout assist，不是 content truth；
+- 它只改变 placement / preview，不改写 NoteBlock 内容；
+- 它不替代 snap guide；
+- 它不是 Page-mode overlap permission；如果被推动对象已经到页面边界，后续正确行为应该是 stop / clamp / rollback，而不是继续重叠；
+- 它不应该阻止用户在开放画布里故意叠放对象；
+- 后续如果开放设置，可以拆成 `Snap alignment`、`Collision assist`、`Allow overlap` 三个控制项。
 
 ---
 

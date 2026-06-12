@@ -1,5 +1,6 @@
 .page {
   animation: fadeIn var(--transition-normal) ease forwards;
+  max-width: none;
 }
 
 .loading {
@@ -14,7 +15,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .backBtn {
@@ -67,11 +68,13 @@
 
 /* Course Info */
 .courseInfo {
-  margin-bottom: 32px;
+  border-bottom: 1px solid var(--glass-border);
+  margin-bottom: 22px;
+  padding-bottom: 20px;
 }
 
 .colorBar {
-  height: 4px;
+  height: 3px;
   border-radius: 2px;
   margin-bottom: 16px;
 }
@@ -98,6 +101,61 @@
   color: var(--text-secondary);
   line-height: 1.6;
   margin-top: 8px;
+}
+
+.workspacePage {
+  min-height: 100%;
+}
+
+.workspaceHero {
+  align-items: flex-end;
+  border-bottom: 1px solid var(--glass-border);
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+  margin-bottom: 18px;
+  padding-bottom: 20px;
+}
+
+.workspaceHero h1 {
+  color: var(--text-primary);
+  font-size: 28px;
+  line-height: 1.15;
+  margin: 0;
+}
+
+.workspaceHero p {
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.55;
+  margin: 8px 0 0;
+  max-width: 720px;
+}
+
+.workspaceEyebrow {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.workspaceHeroMeta {
+  align-items: center;
+  color: var(--text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 12px;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.workspaceHeroMeta span {
+  background: var(--glass-elevated);
+  border: 1px solid var(--glass-border);
+  border-radius: 9999px;
+  padding: 4px 8px;
 }
 
 .weightBadge {
@@ -127,7 +185,7 @@
 
 /* Sections */
 .section {
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
 .sectionHeader {
@@ -182,6 +240,99 @@
 .sectionAddBtn:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+.workspaceActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.workspaceGrid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+}
+
+.workspaceCard {
+  align-items: flex-start;
+  background: var(--glass-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  display: flex;
+  gap: 12px;
+  min-height: 132px;
+  padding: 15px;
+  text-align: left;
+  transition: border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.workspaceCard:hover:not(:disabled) {
+  background: var(--glass-elevated);
+  border-color: var(--glass-border-hover);
+  box-shadow: var(--glass-shadow-sm);
+}
+
+.workspaceCard:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.workspaceCardIcon {
+  align-items: center;
+  background: var(--bg-elevated);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--accent-primary);
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 32px;
+  justify-content: center;
+  width: 32px;
+}
+
+.workspaceCardBody {
+  min-width: 0;
+}
+
+.workspaceCardType {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.workspaceCardTitle {
+  color: var(--text-primary);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.workspaceCardDesc {
+  color: var(--text-secondary);
+  display: -webkit-box;
+  font-size: 13px;
+  line-height: 1.45;
+  margin-top: 6px;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.workspaceCardMeta {
+  color: var(--text-muted);
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 12px;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .empty {
@@ -888,10 +1039,8 @@
   gap: 12px;
   padding: 14px 16px;
   border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   background: var(--glass-surface);
-  backdrop-filter: var(--glass-blur-md);
-  -webkit-backdrop-filter: var(--glass-blur-md);
   cursor: pointer;
   transition: all var(--transition-fast);
   position: relative;
@@ -986,10 +1135,8 @@
 .deckCard {
   padding: 16px;
   border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   background: var(--glass-surface);
-  backdrop-filter: var(--glass-blur-md);
-  -webkit-backdrop-filter: var(--glass-blur-md);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
@@ -997,7 +1144,6 @@
 .deckCard:hover {
   border-color: var(--glass-border-hover);
   box-shadow: var(--glass-shadow-sm);
-  transform: translateY(-1px);
 }
 
 .deckName {
@@ -1068,10 +1214,8 @@
 .noteCard {
   padding: 16px;
   border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   background: var(--glass-surface);
-  backdrop-filter: var(--glass-blur-md);
-  -webkit-backdrop-filter: var(--glass-blur-md);
   cursor: pointer;
   transition: all var(--transition-fast);
 }
@@ -1079,7 +1223,6 @@
 .noteCard:hover {
   border-color: var(--glass-border-hover);
   box-shadow: var(--glass-shadow-sm);
-  transform: translateY(-1px);
 }
 
 .noteTitle {
@@ -1177,16 +1320,28 @@
   position: relative;
 }
 
+.workspacePage .canvasWorkspaceSection {
+  margin-bottom: 0;
+}
+
 .canvasWorkspaceShell {
-  background: var(--glass-surface);
+  background: var(--bg-primary);
   border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--glass-shadow-sm);
-  padding: 16px;
+  border-radius: var(--radius-md);
+  box-shadow: none;
+  padding: 18px;
+}
+
+.workspacePage .canvasWorkspaceShell {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
 }
 
 .canvasWorkspaceExpanded {
-  background: var(--bg-deepest);
+  background: var(--bg-primary);
   inset: 18px 18px 0 286px;
   margin: 0;
   overflow: auto;
@@ -1196,7 +1351,7 @@
 }
 
 .canvasWorkspaceExpanded .canvasWorkspaceShell {
-  background: var(--bg-surface);
+  background: var(--bg-primary);
   min-height: 100%;
 }
 
@@ -1210,7 +1365,7 @@
 
 .canvasWorkspaceHint {
   color: var(--text-muted);
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.5;
   margin-top: 7px;
   max-width: 760px;
@@ -1286,7 +1441,7 @@
 
 .canvasPanel {
   border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   background: var(--glass-surface);
   padding: 14px;
 }
@@ -1300,7 +1455,7 @@
 .canvasPreviewFrame {
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--bg-primary) 88%, var(--accent-primary) 12%);
+  background: var(--bg-elevated);
   max-height: 520px;
   overflow: auto;
   padding: 18px;
@@ -1314,11 +1469,11 @@
   border: 1px solid var(--glass-border);
   border-radius: 6px;
   background:
-    linear-gradient(rgba(120, 120, 120, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(120, 120, 120, 0.08) 1px, transparent 1px),
+    linear-gradient(color-mix(in srgb, var(--text-muted) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--text-muted) 12%, transparent) 1px, transparent 1px),
     var(--bg-primary);
   background-size: 24px 24px;
-  box-shadow: var(--glass-shadow-md);
+  box-shadow: var(--glass-shadow-sm);
 }
 
 .canvasEmpty {
@@ -1392,8 +1547,6 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1402,11 +1555,9 @@
 
 .confirmDialog {
   background: var(--glass-surface);
-  backdrop-filter: var(--glass-blur-lg);
-  -webkit-backdrop-filter: var(--glass-blur-lg);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow-lg);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-md);
   padding: 27px;
   max-width: 400px;
   width: 100%;

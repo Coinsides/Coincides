@@ -3,17 +3,16 @@ import { useTranslation } from 'react-i18next';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import {
   Home,
-  Calendar,
-  Target,
   BookOpen,
-  Layers,
-  BarChart3,
   LayoutTemplate,
   Settings,
   PanelLeftClose,
   PanelLeftOpen,
   Plus,
-  GraduationCap,
+  NotebookText,
+  LibraryBig,
+  Star,
+  Clock3,
 } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 import { useCourseStore } from '@/stores/courseStore';
@@ -23,13 +22,10 @@ import Onboarding from '@/components/Onboarding/Onboarding';
 import styles from './AppLayout.module.css';
 
 const navItems = [
-  { to: '/', icon: Home, labelKey: 'nav.dailyBrief' },
-  { to: '/calendar', icon: Calendar, labelKey: 'nav.calendar' },
-  { to: '/goals', icon: Target, labelKey: 'nav.goals' },
-  { to: '/courses', icon: BookOpen, labelKey: 'nav.courses' },
-  { to: '/decks', icon: Layers, labelKey: 'nav.decks' },
+  { to: '/', icon: Home, labelKey: 'nav.home' },
+  { to: '/projects', icon: BookOpen, labelKey: 'nav.projects' },
+  { to: '/sources', icon: LibraryBig, labelKey: 'nav.sources' },
   { to: '/templates', icon: LayoutTemplate, labelKey: 'nav.templates' },
-  { to: '/statistics', icon: BarChart3, labelKey: 'nav.statistics' },
   { to: '/settings', icon: Settings, labelKey: 'nav.settings' },
 ];
 
@@ -47,6 +43,8 @@ export default function AppLayout() {
   const toggleAgentPanel = useUIStore((s) => s.toggleAgentPanel);
   const toggleShortcutsPanel = useUIStore((s) => s.toggleShortcutsPanel);
   const { t, i18n } = useTranslation();
+  const favoriteProjects = courses.slice(0, 3);
+  const recentProjects = [...courses].slice(-4).reverse();
 
   useEffect(() => {
     loadUser();
@@ -103,7 +101,7 @@ export default function AppLayout() {
           {sidebarOpen && (
             <div className={styles.brand}>
               <div className={styles.brandIcon}>
-                <GraduationCap size={14} color="white" />
+                <NotebookText size={14} color="white" />
               </div>
               <span className={styles.brandName}>Coincides</span>
             </div>
@@ -131,7 +129,7 @@ export default function AppLayout() {
           {sidebarOpen && (
             <>
               <div className={styles.sectionLabel}>
-                <span>{t('sidebar.courses')}</span>
+                <span>{t('sidebar.projects')}</span>
                 <button onClick={() => openModal('course-create')}>
                   <Plus size={14} />
                 </button>
@@ -140,7 +138,7 @@ export default function AppLayout() {
                 <button
                   key={course.id}
                   className={styles.courseItem}
-                  onClick={() => navigate(`/courses/${course.id}`)}
+                  onClick={() => navigate(`/projects/${course.id}`)}
                 >
                   <span
                     className={styles.courseDot}
@@ -150,9 +148,45 @@ export default function AppLayout() {
                 </button>
               ))}
               {courses.length === 0 && (
-                <div style={{ padding: '4px 16px', fontSize: 12, color: 'var(--text-muted)' }}>
-                  {t('sidebar.noCourses')}
-                </div>
+                <div className={styles.emptyHint}>{t('sidebar.noProjects')}</div>
+              )}
+
+              <div className={styles.sectionLabel}>
+                <span>{t('sidebar.favorites')}</span>
+                <Star size={13} />
+              </div>
+              {favoriteProjects.length === 0 ? (
+                <div className={styles.emptyHint}>{t('sidebar.noFavorites')}</div>
+              ) : (
+                favoriteProjects.map((project) => (
+                  <button
+                    key={`favorite-${project.id}`}
+                    className={styles.utilityItem}
+                    onClick={() => navigate(`/projects/${project.id}`)}
+                  >
+                    <Star size={13} />
+                    <span>{project.name}</span>
+                  </button>
+                ))
+              )}
+
+              <div className={styles.sectionLabel}>
+                <span>{t('sidebar.recent')}</span>
+                <Clock3 size={13} />
+              </div>
+              {recentProjects.length === 0 ? (
+                <div className={styles.emptyHint}>{t('sidebar.noRecent')}</div>
+              ) : (
+                recentProjects.map((project) => (
+                  <button
+                    key={`recent-${project.id}`}
+                    className={styles.utilityItem}
+                    onClick={() => navigate(`/projects/${project.id}`)}
+                  >
+                    <Clock3 size={13} />
+                    <span>{project.name}</span>
+                  </button>
+                ))
               )}
             </>
           )}

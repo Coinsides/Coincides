@@ -42,6 +42,7 @@ local-test-materials/
 npm-debug.log*
 
 # Local tooling caches
+.codex-tmp/
 .codegraph/
 .superpowers/
 npm-cache/

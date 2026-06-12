@@ -110,7 +110,9 @@ BlockBox / SurfaceObject:
 
 主笔记表面应该首先像一个正式页面，而不是像一个技术画布面板。
 
-但它仍然保留 canvas 的能力：
+更准确的模型是：Note 底层拥有一张 canvas。Page 是这张 canvas 上的正式可导出 frame，页面尺寸例如 A4/A3/A2/A1 只描述 Page frame 的尺寸，不描述整张 canvas。Page frame 外的 scratch/workspace 是同一张 canvas 上的非正式区域，不是第三种独立 surface。
+
+这意味着它仍然保留 canvas 的能力：
 
 - A4 / formal page area；
 - 页面外 scratch workspace；
@@ -119,6 +121,8 @@ BlockBox / SurfaceObject:
 - page-in 和 page-out 导出边界；
 - 手动自由排版；
 - 未来局部知识图谱和 side-note 空间。
+
+Canvas preset / Page preset 的切换不能被设计成普通开关。如果用户从 Infinite Canvas 迁移到 A4 Page，或从 A4 迁移到更大 PageFrame，应该创建新 note 或新 target canvas，把 NoteBlocks / SourceReferences / ObjectRelations 复制过去，再生成 AI-assisted repagination proposal，由用户确认后应用。
 
 ### 3.4 工程 metadata 必须退到幕后
 
@@ -250,6 +254,58 @@ AI note assembly、Source Reconstruction、OCR/VLM import、GraphRAG、external 
 
 任何涉及产品定位、NoteBlock 体验、relation、source grounding、GraphRAG adapter、external adapter 或具体用户交互的 phase，都必须先读这些 active reference 文档。
 
+### Contract / Spec Documents
+
+`PRODUCT.md` 和 UX Inventory 不能替代数据契约。凡是会同时影响数据结构、UI 行为、导出、AI 可读性、迁移或 adapter 的核心对象，都应该有单独的 contract/spec 文档。
+
+这些文档的职责是回答：
+
+```text
+这个对象是什么？
+它的 canonical truth 在哪里？
+它有哪些状态？
+哪些字段是稳定契约，哪些只是 UI cache / projection？
+它如何被创建、更新、删除、恢复、迁移？
+它和 source / relation / template / export / AI visibility 的边界是什么？
+旧数据如何兼容？
+```
+
+第一批应优先建立：
+
+- `docs/contracts/Block-Contract.md`
+  - 定义 NoteBlock、BlockBox / placement、primitive family、template variant、field schema、field value、field layout、reading/selected/editing/debug 状态。
+- `docs/contracts/Source-Reconstruction-Contract-Intake.md`
+  - 定义 SourceRegion、NoteBlockCandidate、source type detection、reconstruction-aware chunking、adapter candidate/proposal 边界。
+- `docs/contracts/Source-Provenance-Contract.md`
+  - 定义 SourceDocument、SourceVersion、SourceReference、SourceChain、SourceUsage、tombstone、broken/degraded/recovered 状态。
+- `docs/contracts/Canvas-Page-Surface-Contract.md`
+  - 定义 NoteCanvas、PageFrame、FrameOutsideWorkspace、placement、rotation future、connector endpoint 预留和 Canvas Engine clean branch/fallback 边界。
+- `docs/contracts/Link-Source-Relation-Boundary-Contract.md`
+  - 定义 Link、SourceReference、ObjectRelation 三分法，并预留 CandidateRelation / relation budget 边界。
+- `docs/contracts/Template-Category-Contract.md`
+  - 定义 TemplateDefinition、template variant、category/domain membership、Template Studio Productization、field schema 与 render/layout 的边界。
+- `docs/contracts/Editor-State-Rebuild-Contract.md`
+  - 定义 editor state、operation/undo 边界、rebuild 行为和 adapter rebuild 限制。
+
+这些 contract/spec 文档不是替代 Product、Roadmap 或 UX Inventory，而是把其中成熟下来的对象规则固化成工程可执行契约。后续小版本如果改变这些对象的数据结构或生命周期，必须同步更新相应 contract/spec。
+
+### CodeGraph / 索引使用规则
+
+CodeGraph 是后续 Better Notebook 代码实施时的结构阅读和导航工具，但它不是事实本身，也不是 build / test / lint 的替代品。
+
+规则：
+
+- 写代码前，如果需要理解现有结构、调用关系或影响范围，优先使用 CodeGraph。
+- 改完代码后，如果还要继续依赖 CodeGraph 判断刚改过的文件、调用关系或影响范围，必须先检查 CodeGraph status。
+- 如果 CodeGraph 显示 pending sync，或者工具提示某些文件 edited since last index sync，不能把旧索引当作当前事实；要直接读取 pending 文件，或等待/重试 status 直到同步完成。
+- 每个涉及代码实现的 `V2.BN.x` / `V2.BN.x.y` plan checklist 都必须包含：
+
+```text
+CodeGraph status checked after edits before further CodeGraph-dependent analysis
+```
+
+- CodeGraph 可以帮助找结构和减少盲搜，但最终验收仍以源码、测试、build、browser smoke 和 Henry 人工通过为准。
+
 ### Better Notebook Research
 
 主参考：
@@ -354,13 +410,16 @@ Phase A4 - Page / Canvas / Export Boundary
 Phase A5 - Block Visual Language And Control Layer
 Gate     - PI-048 Contract Intake
 Phase A6 - Better Notebook Data Contract
-Phase B0 - Editor Runtime Spike Gate
-Phase A7a - Source Library And Provenance Foundation
-Phase A7a.1 - Source Operations And Degraded Chain UX
-Phase A7b - Relation Definition Runtime And Model Maturity
-Phase A7c - Relation Inspector And Relation Mode Seed
-Phase A7d - Local Relation Graph And Supernode Folding
-Phase A7e - Concept-Lite Search And Inspector UX
+Phase A7 - Runtime Autopsy, Branch Closure, And Canvas Engine Gate
+Phase A8 - Canvas Engine Foundation
+Phase A8.x - Canvas Engine Reliability And UX Polish Buffer
+Phase A9 - Template Studio Productization And Block Template Categories
+Phase A9a - Source Library And Provenance Foundation
+Phase A9a.1 - Source Operations And Degraded Chain UX
+Phase A9b - Relation Definition Runtime And Model Maturity
+Phase A9c - Relation Inspector And Relation Mode Seed
+Phase A9d - Local Relation Graph And Supernode Folding
+Phase A9e - Concept-Lite Search And Inspector UX
 Phase F  - Performance / Rebuild / Package Safety
 Gate     - PI-048 Full Research
 Phase G  - Source Reconstruction And AI Note Assembly Readiness
@@ -431,9 +490,12 @@ Settings
 - 产品 shell 重构。
 - Sidebar 支持 projects 和 favorites。
 - Note-first workspace area。
+- Project detail 必须先展示 note list / note dashboard，而不是直接把用户送进某一个 Canvas Document。
+- 打开 note 之后，Canvas Document / page editor 才成为主 workspace。
 - Template Studio / Package Studio 进入 advanced tool area。
 - source、board、proposal、debug surface 退出日常写作主路径。
-- Canvas Document 成为主 note surface，而不是 Course Detail 里的右侧面板。
+- Canvas Document 成为主 note surface，而不是 Course Detail 里的右侧面板或嵌套 dashboard card。
+- 第一轮 shell 不应该继续强化紫色 glassmorphism / 透明卡片风格。视觉基线 reset 拆成 `V2.BN.1.1`，紧跟 `V2.BN.1` 执行。
 
 ### 不做
 
@@ -445,8 +507,26 @@ Settings
 ### 验收
 
 - 用户可以从导航直接进入某篇 note。
+- 用户进入 Project 后先看到 note-first project detail，而不是自动打开 Canvas Document。
 - Favorite 能让重要 note 不必先进入 project detail。
 - 日常工作区看起来像 notebook，而不是长 admin dashboard。
+- 打开 note 后，工作区是顶层写作/画布表面，不是多层悬浮卡片里的小画布。
+
+### 建议小版本拆分
+
+```text
+V2.BN.1:
+  Product shell and note-first navigation.
+  修正 Project -> Note -> Workspace 的信息架构。
+
+V2.BN.1.1:
+  Visual baseline and theme reset.
+  移除默认 purple glassmorphism，建立纯白 / 纯黑初始主题、实色 surface、清晰按钮和统一控制样式。
+
+V2.BN.1.2:
+  Note-first workspace restructure.
+  Project detail 先展示 notes / canvas documents，打开具体 note 后才进入顶层 workspace。
+```
 
 ---
 
@@ -490,6 +570,26 @@ Settings
 - Paragraph 转 structured block 第一版使用 deterministic guess + user confirm，不依赖 AI。
 - 页面体验接近 Notion/AFFiNE 的写作，而不是当前工程卡片。
 
+### 建议小版本拆分
+
+```text
+V2.BN.2:
+  Natural page writing seed.
+  空白 note 可以点击写作，slash command 支持基础 create / convert。
+
+V2.BN.2.1:
+  Paragraph flow spacing patch.
+  收紧 paragraph block 间距，去掉隐藏 toolbar 对正文 flow 的占位，让相邻 text block 更像自然换行。
+
+V2.BN.2.2:
+  Note chrome and tool surface patch.
+  把 title / save / favorite / info / more / mode switch 归到 top bar；
+  top bar 支持像 sidebar 一样折叠并保留恢复按钮；
+  Advanced block form 从页面底部移到 popover / inspector / fallback surface；
+  修复长内容 block 高度不能自然撑开的 auto-resize 问题；
+  为后续 page mode / open canvas mode 切换预留工具 chrome 边界。
+```
+
 ---
 
 ## 10. Phase A3 - Freeform NoteBlock Box And Layout Mode
@@ -506,6 +606,7 @@ Settings
 - 左侧 block 缩窄后，右侧空白处可以创建并排 block。
 - image、formula、code、text、quote 可以自然左右并排。
 - layout mode 显示边框、handle、resize affordance 和 snap guide。
+- Page mode 中保留 `Elastic Avoidance / 弹性避让` 作为轻量 collision assist：第一版只保留保守纵向 stacked avoidance，不把它当作 Page-mode overlap permission；横向避让、反向挤压和边界 clamp 行为留给后续 layout engine 打磨。open canvas / edgeless workspace 默认允许 intentional overlap。
 - reading mode 隐藏重工程边框。
 
 ### 必须支持的用户场景
@@ -580,15 +681,48 @@ formal page area 内的对象默认可导出。formal page area 外的对象默�
 
 ### 新工作
 
-- paragraph、heading、formula、image、code、table、source quote、callout、sticky note 的基础视觉语言。
-- structured field display：definition/formula/theorem 等 block 能显示字段，而不是只能显示一整段文本。
-- field box / field layout controls：字段位置、宽度、字体、边框和显示样式可调整。
+- 第一版默认 block visual language 先收窄到高频、基础、可解释的集合：paragraph/text、heading、definition、formula、code、source quote、sticky/scratch note。
+- heading 是视觉/结构辅助 block，不是知识对象。
+- formula 是第一版纯 LaTeX structured block。
+- definition 是第一版 structured knowledge block。
+- Field Values 是 `V2.BN.5` 必须先想清楚的核心规则：definition/formula 不能只是一整段文本，至少要明确字段值第一版存放、读取、编辑和 fallback 方式。
+- Definition / Formula 的字段化体验是本版本的 structured block seed：它们要证明“字段化内容 + 自由排版”这条路可用。
+- Field Layout 在本版本只做固定视觉样板和边界确认，不做成熟字段布局编辑器。
+- Category Membership 在本版本只定规则：Default、Math、User Defined；不做重型分类管理。
+- theorem、proof、example、exercise、answer、table、image/diagram 暂不作为第一版默认 structured preset；它们可以保留为兼容 template、Template Studio 高级入口或后续用户自建 template variant。
+- callout 不作为 Better Notebook 默认 block 或推荐用户自建方向；如果旧 runtime 数据包含 callout/warning template，只保留兼容读取。
+- structured field display：definition/formula 等第一版 structured block 能显示字段，而不是只能显示一整段文本。
+- field box / field layout controls：本阶段先提供固定样板和轻量呈现，不把字段位置、字体、边框、显示样式的成熟编辑做进本版本。
 - selected block floating toolbar。
 - right-click menu。
 - inspector tabs。
 - hover 和 selected state。
 - source/relation/template/debug indicator 移到 badge 和 inspector。
 - 重做 hide、archive、remove、delete、restore 的文案。
+
+### 默认 block 与模板边界
+
+`V2.BN.5` 的默认 block 入口不等于系统全部 `TemplateDefinition` 能力。
+
+第一版日常 slash / insert 只展示少量默认 block，避免把用户第一次写作体验变成模板库浏览器。更细的学科模板，例如 `formula.math`、`formula.engineering`、`definition.chemistry`、`definition.biology`、theorem/proof/example/exercise 变体，应进入 `V2.BN.9 Template Studio Productization`。
+
+### 三个周边契约的阶段归属
+
+```text
+Field Values:
+  V2.BN.5 必须定义第一版规则。
+  V2.BN.6 正式数据契约化。
+
+Field Layout:
+  V2.BN.5 只做固定视觉样板。
+  V2.BN.6 定义 layout truth / override 边界。
+  V2.BN.9 进入 Template Studio 默认 layout 编辑。
+
+Category Membership:
+  V2.BN.5 只定 Default / Math / User Defined 规则。
+  V2.BN.6 定义 category membership 数据边界。
+  V2.BN.9 在 Template Studio 中产品化。
+```
 
 ### 不做
 
@@ -604,6 +738,9 @@ formal page area 内的对象默认可导出。formal page area 外的对象默�
 - Selected mode 看操作。
 - Inspector mode 看结构。
 - Structured block 的字段值可读，字段布局可调，但字段 schema 由 template 控制。
+- Formula / Definition 的 field values 有明确第一版规则，AI / search / export 不需要只靠猜整段文本。
+- Field Layout 不被误做成完整 layout editor。
+- Category Membership 不被误做成完整 taxonomy。
 - Debug mode 才看 ids 和后端状态。
 
 ---
@@ -630,6 +767,8 @@ formal page area 内的对象默认可导出。formal page area 外的对象默�
 
 ```text
 DocumentSurface
+NoteCanvas
+PageFrame
 SurfaceObject / BlockBox
 NoteBlock
 SourceReference
@@ -648,18 +787,27 @@ CanvasEdge
 ObjectRelation
 RelationLayer
 TemplateDefinition
+PrimitiveBlockFamily
+TemplateVariant
+TemplateCategory / TemplateDomainMembership
 FieldSchema
 FieldValue
 FieldLayout / RenderTemplate
-Concept
+Concept (internal/search/AI dimension, not user-facing insert block)
 EditorSnapshot
 OperationBatch
+CanvasPresetConversionProposal (future)
 ```
 
 ### 新工作
 
+- 建立第一批 Better Notebook contract/spec 文档，至少包括 block、source、relation、template 四类核心对象。
 - 定义 layout truth 与 content truth。
 - 定义 page/canvas surface object contract。
+- 定义 NoteCanvas / PageFrame / frame-outside workspace 的统一模型。
+- 定义 page size 只表示 Canvas 内可导出 PageFrame 的尺寸。
+- 定义 canvas-first note 与 page-first note 的边界。
+- 定义 canvas preset conversion 不是直接 toggle，而是 duplicate note + AI-assisted repagination proposal 的未来迁移路线。
 - 定义 export role。
 - 定义 AI visibility。
 - 定义 placement role。
@@ -678,7 +826,16 @@ OperationBatch
 - 定义 Evidence / Interpretation / Reasoning State 的产品和数据边界。
 - 定义 Link / InternalLink 与 SourceReference / ObjectRelation 的边界。
 - 定义 structured block schema、field values、field layout / render template。
+- 确认 V2.BN.5 的临时 field values 规则是否升级为长期 `NoteBlock` 内容契约，或需要迁移到更正式的字段结构。
+- 定义 field layout 的两层边界：template default layout 与 block-level layout override。
 - 定义 TemplateDefinition 如何承载 structured fields，而不让 editor runtime 拥有字段 truth。
+- 定义 primitive block family、template variant 和 template category membership 的边界：
+  - `formula` / `definition` / `text` / `code` 是 primitive family；
+  - `formula.math`、`formula.engineering`、`definition.chemistry`、`definition.biology` 是 template variant；
+  - 第一版 category 入口只保留 Default、Math、User Defined；
+  - 不预置 Physics、Chemistry、Biology、History、Engineering、Research 等入口；
+  - 同一个 template variant 可以出现在多个 category 中；
+  - category 不应该变成无限嵌套的 type tree，也不应该成为 canonical block identity。
 
 ### 不做
 
@@ -698,51 +855,245 @@ OperationBatch
 - Existing note / agent briefing / reasoning trace 不会被默认当作未加工 source 总结掉。
 - Link 只表示 navigation，不自动创建 SourceReference 或 ObjectRelation。
 - Graph/local graph/AI/export 可以读取 structured fields，例如 concept_name、description、latex_input。
+- Slash / insert / Template Studio 可以按 category 展示 template variant，但 canonical truth 仍由 `TemplateDefinition` 与字段契约承载。
+- `docs/contracts/Block-Contract.md`、`Source-Reconstruction-Contract-Intake.md`、`Canvas-Page-Surface-Contract.md`、`Source-Provenance-Contract.md`、`Link-Source-Relation-Boundary-Contract.md`、`Template-Category-Contract.md`、`Editor-State-Rebuild-Contract.md` 至少有第一版可执行草案，且不与 Product / UX Inventory / Roadmap 冲突。
 
 ---
 
-## 14. Phase B0 - Editor Runtime Spike Gate
+## 14. Phase A7 - Runtime Autopsy, Branch Closure, And Canvas Engine Gate
 
 ### 目标
 
-在大规模实现前，决定使用 BlockSuite、hybrid runtime，还是 self-owned editor surface。
+把前几个版本已经做出来的 self-owned editor surface 系统做结案审计，给当前 branch 收口，并为下一阶段 Canvas Engine clean branch 准备证据、需求和调研缺口。
 
-### Spike 候选
+这一阶段不是继续无限打磨交互，也不是正式开发无限画布引擎。它是一次“先做实物，再反推图纸”的沉淀版本：把已经跑通的 natural writing、slash command、block control bar、resize/reflow、layout mode、overlay、structured field value、undo/redo 等能力整理成清晰的 runtime autopsy，并判断哪些经验应进入 Canvas Engine，哪些旧实现不应被继承。
 
-1. BlockSuite PageEditor + Coincides overlay。
-2. BlockSuite Edgeless-as-page。
-3. Self-owned minimal surface fallback。
+### 前置条件
 
-### 必须验证
+- `V2.BN.2-V2.BN.5` 已经做出 self-owned editor surface 的真实交互雏形。
+- `V2.BN.6` 已定义 NoteBlock、BlockBox/Placement、FieldValue、FieldLayout、Link、SourceReference、ObjectRelation、NoteCanvas/PageFrame 等关键数据边界。
+- 现有 runtime patch 已经暴露出真实风险：block resize、auto-height、slash menu 定位、preview overlay、layout mode、elastic avoidance、undo/redo、page/canvas 切换等。
 
-- natural writing；
-- slash command；
-- selected toolbar；
-- freeform block-box resize；
-- right-side spatial insertion；
-- A4 formal page；
-- outside workspace；
-- stable xywh mapping；
-- Coincides id sidecar；
-- source/relation badges；
-- snapshot deletion and rebuild；
-- 50-100 page performance feasibility。
+### 新工作
+
+- Current runtime autopsy：列出现有 runtime 已经证明的产品规则、踩过的坑、未来必须重建的 engine 能力。
+- Branch closure report：把当前 branch 定位为 experiment / fallback / reference，不再把它误当成未来 Canvas Engine 的长期地基。
+- Canvas Engine requirement draft：整理下一阶段必须具备的 NoteCanvas、PageFrame、viewport、pan/zoom、selection、placement、measurement、overlay、connector reserve 等基础能力。
+- Canvas Engine research gap report：复用 PI-046 / Better Notebook 旧调研，标出哪些结论可用、哪些必须重估、哪些需要新增调研或技术 spike。
+- Route decision draft：比较 self-owned Canvas Engine、hybrid route、AFFiNE/BlockSuite-first route，并给出默认路线和 fallback trigger。
+- Hardening checklist：列出 Canvas Engine 前必须压住的技术风险，例如 coordinate model、focus/selection state、overlay z-index、auto-height measurement、large note performance、snapshot rebuild。
+
+### 当前状态判断
+
+```text
+Self-owned editor runtime seed:
+  已经有相当多真实肌肉，但还不是成熟引擎。
+
+Runtime autopsy / branch closure:
+  已经完成一部分风险探索，但缺少系统沉淀、branch 收口、Canvas Engine 需求草案和调研缺口报告。
+
+Mature canvas-backed notebook:
+  仍然需要后续 Canvas Engine Foundation 才能成立。
+```
+
+这一阶段要避免两个误区：
+
+- 不要因为已有 prototype 就假设 runtime 已经成熟；
+- 不要因为交互还有瑕疵就无限补丁化，把 gate 变成无底洞。
+
+允许小规模代码修补，但每个修补都必须服务于 runtime contract、路线确认或风险压实。
 
 ### 不做
 
-- 不做全产品迁移；
+- 不做完整 Canvas Engine；
+- 不做真正 infinite canvas pan/zoom；
+- 不做 Template Studio 产品化；
+- 不做 Source Library；
+- 不做 Relation runtime；
 - 不做 AI note assembly；
+- 不做全产品迁移；
 - 不让 BlockSuite/AFFiNE snapshot 成为 Coincides truth。
 
 ### 验收
 
-- 明确选择外部 runtime、hybrid route 或 self-owned fallback。
-- 如果外部 runtime 失败，fallback scope 清楚。
-- 后续 phase 不依赖悬空的 editor optimism。
+- 明确当前 branch 作为 experiment / fallback / reference 的定位。
+- 明确哪些体验规则要继承到 Canvas Engine，哪些实现方式不能继承。
+- 明确第八阶段 Canvas Engine Foundation 的最低能力。
+- 明确哪些 Canvas Engine 问题已有调研可用，哪些必须补调研。
+- 如果保留 AFFiNE / BlockSuite 作为备选，必须写清楚 fallback trigger。
+- 后续 Canvas Engine、Template Studio、Source、Relation 不依赖悬空的 editor optimism。
 
 ---
 
-## 15. Phase A7a - Source Library And Provenance Foundation
+## 15. Phase A8 - Canvas Engine Foundation
+
+### 目标
+
+在 editor runtime 路线确认后，正式把 Coincides 的 document surface 从“有限 page-like surface”推进为真正 canvas-backed note：一个 Note 拥有统一 NoteCanvas，PageFrame 是 Canvas 内可导出的固定区域，FrameOutsideWorkspace 是 PageFrame 外的自由工作区。
+
+V2.BN.8 正式调研后的第一版推荐路线是：
+
+```text
+Self-owned Minimal Hybrid NoteCanvas Engine
+  DOM NoteBlock content layer
+  SVG/DOM overlay layer
+  CSS transform viewport
+  explicit world/screen coordinate conversion
+  measurement cache
+  visible render window
+  PageFrame + Workspace unified coordinate model
+  CanvasObject / RelationEndpoint placeholders
+```
+
+这里的 `Hybrid` 是经过 DOM / SVG / HTML Canvas / WebGL / hybrid / existing engine 比较后的结论，不是默认假设。tldraw、Excalidraw、React Flow、Konva、Fabric.js、PixiJS、BlockSuite / AFFiNE Edgeless 都作为参考或未来局部 adapter，不作为 V2.BN.8 第一版主 runtime。
+
+路线依据：
+
+- `docs/releases/V2.BN.8/Canvas-Engine-Research/Summary-Report.md`
+- `docs/releases/V2.BN.8/Canvas-Engine-Research/R9-route-decision-report.md`
+
+### 必须验证
+
+- PageFrame inside canvas；
+- canvas-first note seed；
+- outside workspace；
+- frame-outside objects stay outside formal page；
+- stable xywh mapping；
+- basic pan/zoom/viewport model；
+- page-first note 与 canvas-first note 的差异；
+- PageFrame 内外对象不被模式切换硬夹回 page；
+- exportable PageFrame 与 non-export workspace 的边界；
+- 50-100 page performance feasibility。
+- clean branch feasibility：Canvas Engine 可以在新 branch 中重写 Canvas-native runtime，不要求长期兼容当前实验性 `better_notebook_layout`；
+- fallback feasibility：如果 infinite canvas 在大量 blocks、relation 渲染或媒体内容下不可控，可以回到当前有限大画布路线。
+
+### V2.BN.8.x 打磨空间
+
+V2.BN.8 不应该被设计成“一次性做完 Canvas Engine”的单版本。Canvas Engine 是 Better Notebook 后续所有高级能力的地基，必须预留 `V2.BN.8.1`、`V2.BN.8.2`、`V2.BN.8.3` 等小版本空间，用来反复打磨新建的 Canvas 画布。
+
+这些小版本的目标不是堆新功能，而是让 Canvas Engine 达到两个标准：
+
+```text
+1. 工程可靠
+   坐标、viewport、selection、measurement、resize、overlay、rebuild、fallback 都稳定。
+
+2. 用户体验可靠
+   至少接近 V2.BN.1-V2.BN.5 已经磨合出的自然写作、block control、preview overlay、page/canvas boundary、structured field editing 等稳定体验；
+   如果 Canvas-native 架构允许，应逐步超过旧 runtime 的手感和可解释性。
+```
+
+建议预留方向：
+
+- `V2.BN.8.1` Engine Shell：建立 NoteCanvasRuntime、CanvasViewport、CanvasWorld、PageFrame、BlockLayer、OverlayLayer。
+- `V2.BN.8.2` Canvas Writing And Measurement：把 natural writing、slash command、block control bar、resize/reflow、formula input、popover 定位迁到 canvas-native runtime。
+- `V2.BN.8.3` Canvas Overlay And Interaction Polish：打磨 preview overlay、AI/export/source badges、selection、snap、control bar、empty block cleanup。
+- `V2.BN.8.4` Canvas Scale And Benchmark：验证 50/200/1000 blocks、formula-heavy、workspace outside frame、visible render window。
+- `V2.BN.8.5` CanvasObject And Relation Endpoint Reserve：只稳定 CanvasObject / endpoint / SVG relation layer 预留，不做完整 drawing 或 relation runtime。
+- `V2.BN.8.x` 视实际测试追加：只要 Canvas Engine 没达到工程可靠和用户体验可靠，就不要急着进入 Template Studio、Source Library 或 Relation runtime。
+
+### 不做
+
+- 不做 Template Studio；
+- 不做 source/relation 的完整 UI；
+- 不做 AI note assembly；
+- 不做 canvas preset 之间的直接 destructive switch；
+- 不做 AI repagination proposal，只保留未来接口。
+
+### 验收
+
+- NoteCanvas / PageFrame / FrameOutsideWorkspace 的 runtime 行为可解释。
+- Page mode 只显示 PageFrame 的正式区域，Canvas mode 能显示 PageFrame 外 workspace。
+- frame-outside blocks 不会在切换回 page mode 时污染正式 PageFrame。
+- 后续 source、relation、local graph 可以基于稳定 xywh 和 viewport 模型工作。
+- Canvas Engine branch 有明确 clean reset / fallback 决策记录。
+- Roadmap 明确预留 V2.BN.8.x 打磨空间，不把 Canvas Engine 当作一版完成的功能。
+
+---
+
+## 16. Phase A9 - Template Studio Productization And Block Template Categories
+
+### 目标
+
+把 v2.5.1 的工程版 Template Studio 升级成 Better Notebook 的用户能力：用户可以创建、复制、分类、编辑、预览并使用自己的 block/template variant。
+
+如果只有默认排版和默认 block，Coincides 更像一张更好的 paper surface。Template Studio Productization 让用户能够建立自己的知识表达系统，才真正进入 Better Notebook。
+
+### 前置条件
+
+- `V2.BN.5` 已完成默认 block visual language 和基础 insert/slash 体验。
+- `V2.BN.6` 已定义 primitive family、template variant、category membership、FieldSchema、FieldValue、FieldLayout / RenderTemplate 的边界。
+- `V2.BN.7` 已完成 runtime autopsy、branch closure 和 Canvas Engine gate。
+- `V2.BN.8` 已启动或完成 Canvas Engine Foundation，至少证明 Template Studio 产出的 block/template variant 能进入可靠的 canvas-native runtime。
+- v2.5.x `TemplateDefinition` runtime 和工程版 Template Studio 可以作为地基复用。
+
+### 新工作
+
+- Block Template Studio 的用户入口，放在 advanced tool area，不污染日常写作。
+- 创建 user-owned template variant。
+- 从 system/default template copy 成用户草稿。
+- 编辑 template label、description、summary_for_agent、category membership。
+- 编辑字段 schema 的安全子集，例如字段 key、label、kind、required、默认值。
+- 编辑默认 field layout / render template 的安全子集，例如字段位置、宽度、基础字体、边框、显示/隐藏。
+- 定义并管理 category membership：Default、Math、User Defined。
+- 不在第一版预置 Physics、Chemistry、Biology、History、Engineering、Research 等 category；这些应由用户后续通过 User Defined 建立，或由未来 domain/package 机制提供。
+- 同一个 template variant 可以加入多个 category。
+- Slash / insert menu 能按 category 展示 template variant。
+- Template Studio 里能预览 reading / editing / debug / proposal 状态。
+- Template Studio 里能区分 primitive family、template variant 和 category，不让用户误以为它们是同一层 type。
+
+### 第一版默认策略
+
+```text
+Primitive family:
+  text / heading / definition / formula / code / source_quote / sticky
+
+Default visible template variants:
+  text.paragraph
+  text.heading
+  definition.basic
+  formula.basic or formula.math.basic
+  code.snippet
+  source.quote
+  sticky.note
+
+Deferred user/system variants:
+  theorem.*
+  proof.*
+  example.*
+  exercise.*
+  answer.*
+  table.*
+  image.*
+
+Compatibility/internal only:
+  concept.*
+  warning.callout / callout.* only if old runtime data needs compatibility
+```
+
+### 不做
+
+- 不做 full Style Studio；
+- 不做完整 Appearance Studio；
+- 不做用户自由写底层 CSS；
+- 不做箭头样式编辑器；
+- 不做 marketplace；
+- 不做 package import/export 重新设计；
+- 不做 AI 自动判断并创建 template；
+- 不做普通 note 编辑中的 schema 级修改。
+
+### 验收
+
+- 用户可以创建自己的 template variant。
+- 用户可以把一个 template variant 加入多个 category。
+- Slash / insert 不再平铺所有 runtime template，而是按高频、最近使用、category 和搜索组织。
+- `formula` 与 `definition` 是第一版可正式使用的 structured block。
+- theorem/proof/example/exercise 可以作为后续 template variant 出现，但不强行成为第一版默认 preset。
+- 用户能理解 family、variant、category 的区别。
+- Template Studio 的产物能回到普通 note 中被创建、预览和编辑字段值。
+
+---
+
+## 17. Phase A9a - Source Library And Provenance Foundation
 
 ### 目标
 
@@ -784,7 +1135,7 @@ OperationBatch
 
 ---
 
-## 15.1 Phase A7a.1 - Source Operations And Degraded Chain UX
+## 17.1 Phase A9a.1 - Source Operations And Degraded Chain UX
 
 ### 目标
 
@@ -820,7 +1171,7 @@ OperationBatch
 
 ---
 
-## 16. Phase A7b - Relation Definition Runtime And Model Maturity
+## 18. Phase A9b - Relation Definition Runtime And Model Maturity
 
 ### 目标
 
@@ -838,6 +1189,8 @@ Relation 是 NoteBlock 之间真正产生结构联系的地方。Block 本身相
 - relation visibility：visible / hidden / AI-only / export-hidden。
 - relation provenance：human-created / AI-candidate / source-derived / imported / recovered。
 - relation lifecycle：candidate / confirmed / stale / broken / deprecated / recovered。
+- relation budget：默认不全量生成或渲染所有潜在关系；每个视图、节点、relation type 和 AI proposal flow 都需要预算。
+- CandidateRelation：GraphRAG / AI / importer 发现的关系默认是 candidate/proposal/query result，不自动进入 confirmed ObjectRelation。
 - visual connector 与 ObjectRelation 的绑定、解绑、冲突和恢复规则。
 - 一个 visual connector 可承载多个 ObjectRelation 的 relation bundle contract。
 - 自定义 RelationType 的最低安全规则。
@@ -857,12 +1210,14 @@ Relation 是 NoteBlock 之间真正产生结构联系的地方。Block 本身相
 - RelationType 不再只是固定字符串，而是有清晰契约。
 - 系统能表达 directed、bidirectional、undirected 和基本 group relation。
 - 系统能区分 visible relation、hidden relation、AI-only relation 和 export-hidden relation。
+- 系统能区分 CandidateRelation / proposal / query-time relation 和 confirmed ObjectRelation。
+- 系统有 relation budget / noise control 的第一版规则，避免把 Project 变成无限增殖关系垃圾场。
 - 一条视觉 connector 和一条或多条语义 ObjectRelation 的关系可解释。
 - 后续 Relation Inspector、Local Graph、GraphRAG adapter 都能复用这套定义。
 
 ---
 
-## 17. Phase A7c - Relation Inspector And Relation Mode Seed
+## 19. Phase A9c - Relation Inspector And Relation Mode Seed
 
 ### 目标
 
@@ -872,7 +1227,7 @@ Relation 是 NoteBlock 之间真正产生结构联系的地方。Block 本身相
 
 - selected block relation badge。
 - relation inspector。
-- 复用 A7b 的 relation lifecycle：visual connector、candidate、confirmed ObjectRelation、hidden relation、stale/broken/recovered relation。
+- 复用 A9b 的 relation lifecycle：visual connector、candidate、confirmed ObjectRelation、hidden relation、stale/broken/recovered relation。
 - same-page visible relation line，在有价值时显示。
 - cross-page relation 默认显示为 badge/jump list。
 - relation layer filter。
@@ -897,7 +1252,7 @@ Relation 是 NoteBlock 之间真正产生结构联系的地方。Block 本身相
 
 ---
 
-## 18. Phase A7d - Local Relation Graph And Supernode Folding
+## 20. Phase A9d - Local Relation Graph And Supernode Folding
 
 ### 目标
 
@@ -934,7 +1289,7 @@ Relation 是 NoteBlock 之间真正产生结构联系的地方。Block 本身相
 
 ---
 
-## 19. Phase A7e - Concept-Lite Search And Inspector UX
+## 21. Phase A9e - Concept-Lite Search And Inspector UX
 
 ### 目标
 
@@ -963,7 +1318,7 @@ Relation 是 NoteBlock 之间真正产生结构联系的地方。Block 本身相
 
 ---
 
-## 20. Phase F - Performance / Rebuild / Package Safety
+## 22. Phase F - Performance / Rebuild / Package Safety
 
 ### 目标
 
@@ -1005,7 +1360,7 @@ Relation 是 NoteBlock 之间真正产生结构联系的地方。Block 本身相
 
 ---
 
-## 21. Phase G - Source Reconstruction And AI Note Assembly Readiness
+## 23. Phase G - Source Reconstruction And AI Note Assembly Readiness
 
 ### 目标
 
@@ -1056,7 +1411,7 @@ Relation 是 NoteBlock 之间真正产生结构联系的地方。Block 本身相
 
 ---
 
-## 22. 明确推后
+## 24. 明确推后
 
 除非后续 phase plan 明确提升，否则第一轮 Better Notebook 不拉入这些内容：
 
@@ -1079,7 +1434,7 @@ Relation 是 NoteBlock 之间真正产生结构联系的地方。Block 本身相
 
 ---
 
-## 23. 版本拆分建议
+## 25. 版本拆分建议
 
 这份路线图先使用 phase。等某个 phase 足够清楚后，再拆成一个或多个版本计划。
 
@@ -1100,6 +1455,8 @@ V2.BN.x
 
 这个命名用于区分 Better Notebook 产品化阶段和 v2.0-v2.5.6 的工程 foundation sprint。
 
+Better Notebook 不预设小版本上限。这个阶段的目标不是凑一个最小 MVP，而是把 Coincides 打磨成成熟的 notebook/report 软件；如果产品体验、数据契约、模板能力、source、relation、performance 或 AI 可读性需要继续细分，就继续增加 `V2.BN.x` 或 `V2.BN.x.y`。
+
 建议第一轮执行顺序：
 
 ```text
@@ -1108,6 +1465,12 @@ V2.BN.0:
 
 V2.BN.1:
   Product shell and navigation.
+
+V2.BN.1.1:
+  Visual baseline and theme reset.
+
+V2.BN.1.2:
+  Note-first workspace restructure.
 
 V2.BN.2:
   Natural page writing.
@@ -1125,24 +1488,30 @@ V2.BN.6:
   Better Notebook data contract.
 
 V2.BN.7:
-  Editor runtime spike gate.
+  Runtime autopsy, branch closure, and Canvas Engine gate.
 
 V2.BN.8:
-  Source library and provenance foundation.
-
-V2.BN.8.1:
-  Source operations and degraded chain UX.
+  Canvas Engine foundation.
 
 V2.BN.9:
-  Relation definition runtime and model maturity.
+  Template Studio productization and block template categories.
 
 V2.BN.10:
-  Relation inspector and relation mode seed.
+  Source library and provenance foundation.
+
+V2.BN.10.1:
+  Source operations and degraded chain UX.
 
 V2.BN.11:
-  Local relation graph and supernode folding.
+  Relation definition runtime and model maturity.
 
 V2.BN.12:
+  Relation inspector and relation mode seed.
+
+V2.BN.13:
+  Local relation graph and supernode folding.
+
+V2.BN.14:
   Concept-lite search and inspector UX.
 ```
 
@@ -1154,7 +1523,7 @@ V2.BN.12:
 
 ---
 
-## 24. 最终决定
+## 26. 最终决定
 
 Coincides 下一阶段不是继续做 foundation-feature sprint。
 

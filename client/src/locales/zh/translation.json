@@ -1,9 +1,12 @@
 {
   "nav": {
+    "home": "首页",
     "dailyBrief": "每日简报",
     "calendar": "日历",
     "goals": "目标",
     "courses": "课程",
+    "projects": "项目",
+    "sources": "来源库",
     "decks": "卡组",
     "templates": "模板工作室",
     "review": "复习",
@@ -12,7 +15,13 @@
   },
   "sidebar": {
     "courses": "课程",
-    "noCourses": "暂无课程"
+    "projects": "项目",
+    "favorites": "收藏",
+    "recent": "最近",
+    "noCourses": "暂无课程",
+    "noProjects": "暂无项目",
+    "noFavorites": "暂无收藏",
+    "noRecent": "暂无最近项目"
   },
   "common": {
     "save": "保存",

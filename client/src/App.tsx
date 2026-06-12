@@ -10,6 +10,7 @@ import GoalsPage from '@/pages/Goals/Goals';
 import CoursesPage from '@/pages/Courses/Courses';
 import CourseDetailPage from '@/pages/Courses/CourseDetail';
 import NoteDetailPage from '@/pages/Notes/NoteDetail';
+import SourceLibraryPage from '@/pages/Sources/SourceLibrary';
 import TemplateStudioPage from '@/pages/Templates/TemplateStudio';
 import SettingsPage from '@/pages/Settings/Settings';
 import DecksPage from '@/pages/Decks/Decks';
@@ -85,9 +86,14 @@ export default function App() {
           <Route index element={<DailyBrief />} />
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="goals" element={<GoalsPage />} />
+          <Route path="projects" element={<CoursesPage />} />
+          <Route path="projects/:courseId/notes/:canvasId" element={<CourseDetailPage />} />
+          <Route path="projects/:courseId" element={<CourseDetailPage />} />
           <Route path="courses" element={<CoursesPage />} />
+          <Route path="courses/:courseId/notes/:canvasId" element={<CourseDetailPage />} />
           <Route path="courses/:courseId" element={<CourseDetailPage />} />
           <Route path="notes/:noteId" element={<NoteDetailPage />} />
+          <Route path="sources" element={<SourceLibraryPage />} />
           <Route path="templates" element={<TemplateStudioPage />} />
           <Route path="decks" element={<DecksPage />} />
           <Route path="decks/:deckId" element={<DeckDetailPage />} />

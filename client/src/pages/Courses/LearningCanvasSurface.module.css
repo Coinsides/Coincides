@@ -59,11 +59,11 @@
 
 .surface {
   background:
-    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--text-muted) 25%, transparent) 1px, transparent 0),
-    color-mix(in srgb, var(--bg-primary) 86%, var(--accent-primary) 14%);
+    radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--text-muted) 18%, transparent) 1px, transparent 0),
+    var(--bg-elevated);
   background-size: 22px 22px;
   border: 1px solid var(--glass-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-sm);
   cursor: grab;
   height: min(66vh, 680px);
   min-height: 440px;
@@ -87,10 +87,10 @@
 }
 
 .insertPanel {
-  background: color-mix(in srgb, var(--glass-surface) 96%, var(--accent-primary) 4%);
+  background: var(--glass-surface);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  box-shadow: var(--glass-shadow-md);
+  box-shadow: var(--glass-shadow-sm);
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -119,7 +119,7 @@
 .insertFields select,
 .insertFields input,
 .insertPanel textarea {
-  background: color-mix(in srgb, var(--bg-primary) 88%, var(--accent-primary) 12%);
+  background: var(--bg-elevated);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
   color: var(--text-primary);
@@ -182,13 +182,13 @@
 
 .page {
   background:
-    linear-gradient(rgba(120, 120, 120, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(120, 120, 120, 0.08) 1px, transparent 1px),
+    linear-gradient(color-mix(in srgb, var(--text-muted) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in srgb, var(--text-muted) 12%, transparent) 1px, transparent 1px),
     var(--bg-primary);
   background-size: 24px 24px;
   border: 1px solid var(--glass-border);
   border-radius: 8px;
-  box-shadow: var(--glass-shadow-md);
+  box-shadow: var(--glass-shadow-sm);
   left: 0;
   position: absolute;
   top: 0;
@@ -265,7 +265,7 @@
 }
 
 .previewFrame span {
-  background: color-mix(in srgb, var(--bg-primary) 86%, var(--accent-primary) 14%);
+  background: var(--bg-primary);
   border: 1px solid color-mix(in srgb, var(--accent-primary) 40%, transparent);
   border-radius: var(--radius-sm);
   padding: 3px 7px;
@@ -311,7 +311,7 @@
 }
 
 .node {
-  background: color-mix(in srgb, var(--glass-surface) 94%, var(--accent-primary) 6%);
+  background: var(--glass-surface);
   border: 1px solid var(--glass-border);
   border-radius: 8px;
   box-shadow: var(--glass-shadow-sm);
@@ -329,7 +329,7 @@
 
 .nodeSelected {
   border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary) 28%, transparent), var(--glass-shadow-md);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary) 28%, transparent), var(--glass-shadow-sm);
 }
 
 .nodeDragArea {
@@ -532,7 +532,7 @@
 
 .commandList kbd {
   align-items: center;
-  background: color-mix(in srgb, var(--bg-primary) 88%, var(--accent-primary) 12%);
+  background: var(--bg-elevated);
   border: 1px solid var(--glass-border);
   border-radius: 4px;
   color: var(--text-muted);
@@ -675,7 +675,7 @@
 
 .edgeInspectorGrid select,
 .edgeInspectorGrid input {
-  background: color-mix(in srgb, var(--bg-primary) 88%, var(--accent-primary) 12%);
+  background: var(--bg-elevated);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
   color: var(--text-primary);

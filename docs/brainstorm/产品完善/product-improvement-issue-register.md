@@ -2085,6 +2085,55 @@ into one editable, traceable, relation-aware understanding system.
   - How should Coincides mark claims that are interpretation rather than evidence?
   - When should an imported note become a `SourceArtifact` that can itself be cited by later notes?
 
+### PI-051: Canvas Page Frame And Repagination Proposal
+
+- **Status**: Open
+- **Source**:
+  - Added after the Better Notebook V2.BN.6 canvas/page/scratch model discussion.
+- **Problem**:
+  - Coincides previously treated page mode, canvas mode, and scratch/workspace as if they could become three separate concepts.
+  - The cleaner model is that a Note owns an underlying canvas, while a Page is a fixed exportable frame inside that canvas.
+  - Scratch / Workspace content is the area outside the Page frame on the same canvas, not a separate document type.
+- **Canonical Product Language**:
+  - `Canvas`:
+    - the underlying spatial workspace for a Note.
+    - eventually may be infinite / edgeless.
+  - `PageFrame`:
+    - a fixed exportable region inside the canvas.
+    - page size such as A4 / A3 / A2 / A1 refers to the frame size, not the canvas size.
+  - `FrameOutsideWorkspace` / `ScratchArea`:
+    - the canvas area outside the PageFrame.
+    - used for scratch work, derivation, temporary layout, drawings, exploratory notes, and canvas-first reasoning.
+- **Page-First Note**:
+  - Starts with a PageFrame as the primary working area.
+  - Best for PDF/image export, sharing, formal reading, and report-like notes.
+  - The surrounding canvas remains available for scratch/workspace content.
+- **Canvas-First Note**:
+  - Starts from the open canvas as the primary working area.
+  - Best for spatial understanding, relation exploration, large layouts, presentation-style navigation, and non-linear learning/research.
+  - First version should not promise normal PDF export for a canvas-first note.
+- **Important Conversion Rule**:
+  - Canvas/page preset switching should not be a direct toggle.
+  - If the user wants to move from Infinite Canvas to A4 Page, A4 to A2, or another preset, the safer model is:
+    1. duplicate the note or create a target note/canvas;
+    2. copy selected NoteBlocks, SourceReferences, ObjectRelations, and relevant layout metadata;
+    3. generate an AI-assisted repagination / relayout proposal;
+    4. let the user review and apply the proposal.
+- **Why It Matters**:
+  - A canvas-first note may contain hundreds of blocks placed in all directions.
+  - Forcing those blocks into an A4 frame as a simple mode switch would destroy user intent.
+  - A proposal-first repagination flow preserves data, makes layout migration reversible, and keeps user judgment in control.
+- **Likely Roadmap Impact**:
+  - V2.BN.6 should define the contract language: `Canvas`, `PageFrame`, `FrameOutsideWorkspace`, page preset, canvas-first, page-first.
+  - V2.BN.8 / Editor Runtime / Canvas Engine Spike Gate should validate whether the chosen editor runtime can support this model.
+  - AI-assisted repagination proposal belongs after the Better Notebook human-writing foundation is stable, not in the current Better Notebook core slice.
+- **Open Questions**:
+  - Which page presets should be offered first: A4 only, A4 + Letter, or a small set of common print/presentation frames?
+  - Should canvas-first notes support region export, frame export, screenshot export, or presentation path export before PDF export?
+  - How should users select which objects are copied into a target repagination proposal?
+  - Should source references and object relations be copied by default, or selected per migration proposal?
+  - How much should AI be allowed to rearrange block order, grouping, relation lines, and scratch content during repagination?
+
 ## 3. Open Questions For Future Brainstorming
 
 1. Should `Project` become a product-label-only change first, or should v2.x add a real project model before v3.x?
@@ -2257,6 +2306,8 @@ Theme / Asset / Appearance Editing Strategy
 Minimal Default App Shell / Workspace UX
 Calendar / Goals / Planning Module Boundary Review
 Page Canvas Modes / Outside-Page Workspace Model
+Canvas PageFrame / Frame-Outside Workspace Model
+Canvas Preset Repagination Proposal
 Favorites / Quick Access Navigation
 Input / Output / Retrieval Architecture Audit
 Current Capability Maturity Map

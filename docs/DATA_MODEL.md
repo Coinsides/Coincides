@@ -299,15 +299,41 @@ A body link to another note does not automatically become a SourceReference. A S
 Runtime capability objects remain important:
 
 - `TemplateDefinition`: block contract, field schema, rendering guidance, source behavior, relation behavior, and agent guidance.
+- `TemplateVariant`: the user-selectable concrete template identity, such as `definition.basic` or `formula.math`.
+- `TemplateCategoryMembership`: discovery and organization state for slash menu, insert menu, and Template Studio. It is not canonical block identity.
 - `CompositionTemplate`: reusable section made from multiple template blocks.
 - `DomainBlockSet`: domain package of relevant templates and compositions.
 - `PackageManifest`: portable contract for template/domain/package bundles.
 
 These objects guide block creation and AI/tool behavior. They are not user content by themselves.
 
+First-version category entries are intentionally narrow:
+
+```text
+Default
+Math
+User Defined
+```
+
+Category membership cannot change primitive family, field schema, source semantics, relation semantics, export role, or AI visibility.
+
 ---
 
-## 11. Concept-Lite Future
+## 11. Editor Snapshot / Operation State
+
+Editor runtime state must not be confused with content truth.
+
+- `EditorSnapshot`: optional runtime/session state such as viewport, zoom, selection, open panels, overlay toggles, or layout mode.
+- `OperationBatch`: operation audit/recovery seed. It is not yet a complete undo/redo system.
+- `OperationRecord`: future granular mutation record with affected objects, before/after payload, reversibility, and provenance.
+
+Persistent truth includes content, field values, placement, source references, object relations, template identity, export role, and AI visibility. Transient state such as hover, selection, drag ghost, resize ghost, slash menu, and preview popover should not enter export or AI context.
+
+Derived state such as `plain_text`, preview overlays, adapter indexes, SourceChain health, or future frame thumbnails should be rebuildable from canonical truth whenever possible.
+
+---
+
+## 12. Concept-Lite Future
 
 `Concept` should begin as a lightweight search/refinement dimension, not a giant ontology.
 
@@ -322,7 +348,7 @@ Full concept ontology and refinement proposals are deferred.
 
 ---
 
-## 12. Adapter / Index State
+## 13. Adapter / Index State
 
 Adapters may create derived state:
 
@@ -340,7 +366,7 @@ Adapter/index state is not canonical truth unless a future version explicitly pr
 
 ---
 
-## 12. Current Implementation Reminder
+## 14. Current Implementation Reminder
 
 The current app already has many v2.x foundation tables and APIs. They are the implementation substrate, not the final Better Notebook experience.
 

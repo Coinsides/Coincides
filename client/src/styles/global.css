@@ -1,5 +1,5 @@
 /* ============================================================
-   Coincides — Global Styles & Dark Theme
+   Coincides - Global Styles
    ============================================================ */
 
 /* --- CSS Reset --- */
@@ -22,7 +22,6 @@ body {
   font-size: 15px;
   line-height: 1.6;
   background: var(--bg-gradient);
-  background-attachment: fixed;
   color: var(--text-primary);
   overflow: hidden;
 }
@@ -61,65 +60,57 @@ img {
 
 /* --- Theme Variables --- */
 :root {
-  /* Backgrounds — SOLID fallback colors (visible even without backdrop-filter) */
-  --bg-deepest: #0e0e24;
-  --bg-surface: #1a1a3e;
-  --bg-elevated: #222250;
-  --bg-hover: #2a2a5a;
-  --bg-active: #323268;
+  /* Backgrounds */
+  --bg-deepest: #0b0b0c;
+  --bg-primary: #0f0f10;
+  --bg-surface: #151516;
+  --bg-elevated: #1d1d1f;
+  --bg-hover: #252528;
+  --bg-active: #2f3034;
+  --bg-gradient: #0f0f10;
 
-  /* Borders — visible glass edges */
-  --border-default: rgba(255, 255, 255, 0.12);
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-focus: #6366f1;
+  /* Borders */
+  --border-default: #2c2d31;
+  --border-subtle: #232427;
+  --border-focus: #2563eb;
 
-  /* === Glassmorphism === */
+  /* Legacy glass variables now resolve to solid product surfaces. */
+  --glass-surface: #151516;
+  --glass-elevated: #1d1d1f;
+  --glass-hover: #252528;
+  --glass-active: #2f3034;
+  --glass-blur-sm: none;
+  --glass-blur-md: none;
+  --glass-blur-lg: none;
+  --glass-border: #2c2d31;
+  --glass-border-hover: #3a3b40;
+  --glass-border-accent: #2563eb;
+  --glass-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.28);
+  --glass-shadow-md: 0 8px 18px rgba(0, 0, 0, 0.22);
+  --glass-shadow-lg: 0 18px 48px rgba(0, 0, 0, 0.34);
 
-  /* Background gradient — visibly colored deep blue/indigo, NOT near-black */
-  --bg-gradient: linear-gradient(135deg, #12122e 0%, #1a1a50 25%, #132244 50%, #181845 75%, #12122e 100%);
-
-  /* Glass surfaces — higher opacity + brighter base colors */
-  --glass-surface: rgba(26, 26, 62, 0.78);
-  --glass-elevated: rgba(34, 34, 80, 0.72);
-  --glass-hover: rgba(45, 45, 95, 0.68);
-  --glass-active: rgba(50, 50, 105, 0.72);
-
-  /* Glass blur levels */
-  --glass-blur-sm: blur(8px);
-  --glass-blur-md: blur(16px);
-  --glass-blur-lg: blur(24px);
-
-  /* Glass borders */
-  --glass-border: rgba(255, 255, 255, 0.12);
-  --glass-border-hover: rgba(255, 255, 255, 0.2);
-  --glass-border-accent: rgba(99, 102, 241, 0.35);
-
-  /* Glass shadows */
-  --glass-shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
-  --glass-shadow-md: 0 4px 16px rgba(0, 0, 0, 0.3);
-  --glass-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.35);
-
-  /* Gradient accents */
-  --gradient-primary: linear-gradient(135deg, #6366f1, #818cf8);
-  --gradient-primary-hover: linear-gradient(135deg, #818cf8, #a5b4fc);
+  /* Accents */
+  --gradient-primary: #2563eb;
+  --gradient-primary-hover: #1d4ed8;
   --gradient-success: linear-gradient(135deg, #22c55e, #4ade80);
   --gradient-danger: linear-gradient(135deg, #ef4444, #f87171);
 
-  /* Ambient light orbs — stronger glow */
-  --orb-primary: radial-gradient(circle at center, rgba(99, 102, 241, 0.3), transparent 70%);
-  --orb-secondary: radial-gradient(circle at center, rgba(59, 130, 246, 0.22), transparent 70%);
+  --orb-primary: transparent;
+  --orb-secondary: transparent;
 
   /* Text */
-  --text-primary: #e8e8f0;
-  --text-secondary: #a0a0b8;
-  --text-muted: #6b6b80;
+  --text-primary: #f5f5f5;
+  --text-secondary: #b7b8bd;
+  --text-muted: #777a82;
   --text-inverse: #0a0a0f;
 
   /* Accent */
-  --accent-primary: #6366f1;
-  --accent-primary-hover: #818cf8;
-  --accent-primary-bg: rgba(99, 102, 241, 0.12);
-  --accent-primary-bg-hover: rgba(99, 102, 241, 0.2);
+  --accent-primary: #2563eb;
+  --accent-primary-hover: #3b82f6;
+  --accent-primary-bg: rgba(37, 99, 235, 0.16);
+  --accent-primary-bg-hover: rgba(37, 99, 235, 0.24);
+  --accent-success: #14b8a6;
+  --danger: #ef4444;
 
   /* Priority */
   --priority-must: #ef4444;
@@ -158,50 +149,38 @@ img {
 
 /* Light theme overrides */
 [data-theme='light'] {
-  --bg-deepest: #e8e8f0;
-  --bg-surface: rgba(255, 255, 255, 0.7);
-  --bg-elevated: rgba(255, 255, 255, 0.5);
-  --bg-hover: rgba(230, 230, 240, 0.6);
-  --bg-active: rgba(220, 220, 230, 0.7);
+  --bg-deepest: #f4f5f7;
+  --bg-primary: #ffffff;
+  --bg-surface: #ffffff;
+  --bg-elevated: #f7f8fa;
+  --bg-hover: #eff1f4;
+  --bg-active: #e7eaf0;
+  --bg-gradient: #ffffff;
 
-  --bg-gradient: linear-gradient(135deg, #e8e8f0 0%, #dde0f0 25%, #e0e4f2 50%, #dde0f0 75%, #e8e8f0 100%);
+  --border-default: #dfe3ea;
+  --border-subtle: #edf0f4;
+  --border-focus: #2563eb;
 
-  --border-default: rgba(0, 0, 0, 0.06);
-  --border-subtle: rgba(0, 0, 0, 0.03);
-  --border-focus: #6366f1;
-
-  --text-primary: #1a1a2e;
-  --text-secondary: #52526b;
-  --text-muted: #8888a0;
+  --text-primary: #17181a;
+  --text-secondary: #4f5661;
+  --text-muted: #7a828e;
   --text-inverse: #ffffff;
 
-  --accent-primary-bg: rgba(99, 102, 241, 0.08);
-  --accent-primary-bg-hover: rgba(99, 102, 241, 0.14);
+  --accent-primary-bg: rgba(37, 99, 235, 0.08);
+  --accent-primary-bg-hover: rgba(37, 99, 235, 0.14);
 
-  --glass-surface: rgba(255, 255, 255, 0.7);
-  --glass-elevated: rgba(255, 255, 255, 0.5);
-  --glass-hover: rgba(230, 230, 240, 0.6);
-  --glass-border: rgba(0, 0, 0, 0.06);
-  --glass-border-hover: rgba(0, 0, 0, 0.1);
-  --glass-border-accent: rgba(99, 102, 241, 0.3);
-
-  --orb-primary: radial-gradient(circle at center, rgba(99, 102, 241, 0.08), transparent 70%);
-  --orb-secondary: radial-gradient(circle at center, rgba(59, 130, 246, 0.06), transparent 70%);
-}
-
-/* Fallback for browsers/devices without backdrop-filter support */
-@supports not (backdrop-filter: blur(1px)) {
-  :root {
-    --glass-surface: #1a1a3e;
-    --glass-elevated: #222250;
-    --glass-hover: #2a2a5a;
-    --glass-active: #323268;
-  }
-  [data-theme='light'] {
-    --glass-surface: #f0f0f5;
-    --glass-elevated: #e8e8f0;
-    --glass-hover: #e0e0ea;
-  }
+  --glass-surface: #ffffff;
+  --glass-elevated: #f7f8fa;
+  --glass-hover: #eff1f4;
+  --glass-active: #e7eaf0;
+  --glass-border: #dfe3ea;
+  --glass-border-hover: #c8ced8;
+  --glass-border-accent: #2563eb;
+  --glass-shadow-sm: 0 1px 2px rgba(18, 24, 38, 0.06);
+  --glass-shadow-md: 0 8px 18px rgba(18, 24, 38, 0.08);
+  --glass-shadow-lg: 0 18px 48px rgba(18, 24, 38, 0.12);
+  --orb-primary: transparent;
+  --orb-secondary: transparent;
 }
 
 /* --- Scrollbar --- */

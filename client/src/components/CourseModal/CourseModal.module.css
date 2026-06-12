@@ -2,8 +2,6 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -15,11 +13,9 @@
   width: 100%;
   max-width: 440px;
   background: var(--glass-surface);
-  backdrop-filter: var(--glass-blur-lg);
-  -webkit-backdrop-filter: var(--glass-blur-lg);
   border: 1px solid var(--glass-border);
   box-shadow: var(--glass-shadow-lg);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-md);
   padding: 27px;
   animation: scaleIn 200ms ease forwards;
 }
@@ -51,7 +47,7 @@
 
 .field input {
   padding: 10px 15px;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--bg-elevated);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-primary);
@@ -60,7 +56,7 @@
 
 .field input:focus {
   border-color: var(--glass-border-accent);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-primary) 14%, transparent);
   outline: none;
 }
 
@@ -132,7 +128,7 @@
 /* Textarea */
 .textarea {
   padding: 10px 15px;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--bg-elevated);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-primary);
@@ -143,7 +139,7 @@
 
 .textarea:focus {
   border-color: var(--glass-border-accent);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-primary) 14%, transparent);
   outline: none;
 }
 
@@ -177,12 +173,11 @@
   border-radius: var(--radius-md);
   font-size: 14px;
   font-weight: 600;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+  box-shadow: none;
 }
 
 .saveBtn:hover {
   background: var(--gradient-primary-hover);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
 }
 
 .saveBtn:disabled {

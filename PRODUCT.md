@@ -43,9 +43,11 @@ User-facing language should prefer `Project` as the main container name. A proje
 
 Coincides should separate the formal document layer from the thinking layer. The formal layer is what becomes a note, report, export, or shareable reading surface. The thinking layer includes sticky notes, remarks, scratch work, temporary reasoning, and page-outside canvas objects. These objects may still be useful to the user and AI, but they should not silently pollute the formal document structure or default export.
 
+The clean product model is canvas-backed rather than three separate surfaces. A Note owns an underlying infinite canvas/workspace. A Page is a fixed exportable frame inside that canvas, with a realistic page size such as A4 only describing the frame, not the whole canvas. Scratch / Workspace content is the area outside the Page frame on the same canvas, not a third independent document type.
+
 User-authored blocks do not need to start with source references. A user may create an original thought, summary, side note, or explanation first, then later attach one source, multiple sources, a page, a range, or a more precise anchor. Source grounding should be easy to add, inspect, and revise without making manual writing feel bureaucratic.
 
-Canvas behavior should support two broad modes. A locked page/document mode gives the user a stable writing and export surface. An open canvas/reasoning mode gives the user space for exploration, derivation, comparison, and temporary layout. AI-generated formal notes should respect the selected page/document boundary unless the user asks for exploratory canvas work.
+Canvas behavior should support two broad modes. A Page-first note gives the user a stable Page frame for writing, export, sharing, and formal reading while still keeping an outside-canvas workspace for scratch thinking. A Canvas-first note lets the user start directly from the open infinite workspace for non-linear understanding, presentation, relation exploration, and large spatial layouts. AI-generated formal notes should respect the selected Page frame unless the user asks for exploratory canvas work.
 
 Relations are semantic structures, not merely visible lines. A line may be useful at close range, especially inside one page or local graph view, but the durable value is that blocks can have inspectable, queryable, filterable relationships. Relations should support local graph exploration, AI reading, and user correction without requiring every relation to appear as a permanent visual edge.
 
@@ -129,6 +131,8 @@ Source references, relations, templates, concepts, operation history, and debug 
 
 Free writing and structured knowledge objects should coexist. A user can write a normal paragraph first, then later convert it into a structured Definition, Formula, Theorem, Proof, Example, Exercise, or other template-backed NoteBlock. Structured fields make the system readable to graph views, AI, export, and search, while field layout and visual style remain user-adjustable.
 
+First-version structured conversion should stay conservative. Converting a paragraph into a Formula should place the current text into `latex_input`; converting a paragraph into a Definition should place the current text into `description` and leave `concept_name` empty. Coincides should not use brittle punctuation rules, such as colon splitting, to pretend it understands semantic fields. AI-assisted semantic conversion belongs later as a reviewable proposal, not as silent deterministic rewriting.
+
 Navigation, evidence, and semantic meaning are separate concerns:
 
 ```text
@@ -163,6 +167,18 @@ AI may help organize material, deduplicate knowledge, suggest layout, build rela
 
 Coincides should support left text and right image, formulas beside explanations, notes beside proofs, scratch work outside the formal page, and other spatial layouts. But freedom should come with alignment guides, snapping, export boundaries, and clear interaction states.
 
+Coincides may also preserve useful interaction discoveries when they improve the feel of writing. One example is `Elastic Avoidance`: a light page-layout assist where one block can gently push another block away while the user is arranging objects. This began as an accidental behavior noticed during development, but it matches the desired notebook feel: flexible, tactile, and less brittle than simple overlap.
+
+Elastic Avoidance should remain bounded:
+
+- it belongs to Page mode and layout editing, not every surface;
+- it should only appear when snap alignment is off or when the user is doing free placement;
+- its first implementation should stay conservative and vertical-only until boundary behavior is mature;
+- it must not rewrite NoteBlock content;
+- it is not permission for Page-mode overlap; if a block cannot be pushed within page bounds, it should stop rather than overlap;
+- it must not prevent intentional overlap in open canvas / edgeless workspace;
+- it should feel like gentle assistance, not the system fighting the user.
+
 ### 9. Engineering Reliability Comes Before Polish
 
 Visual polish matters, but it must sit on stable data. Notes, sources, relations, templates, layouts, exports, and recovery records must remain reconstructable and safe.
@@ -170,6 +186,16 @@ Visual polish matters, but it must sit on stable data. Notes, sources, relations
 ### 10. The Interface Should Stay Quiet By Default
 
 Advanced structure should be available without becoming visual clutter. Template metadata, relation details, source anchors, concept tags, debug records, and operation history belong in contextual surfaces such as inspectors, hover states, local graph views, command menus, and export previews.
+
+Application chrome should protect the work surface. The sidebar, top bar, bottom dock, inspector, and floating toolbars are product controls, not page content. They should be collapsible or contextual where possible, and they must leave clear recovery controls when hidden. The page/canvas area should stay focused on the user's note, report, scratch work, and relation objects rather than carrying permanent engineering panels.
+
+Block identity and block operations should be separated:
+
+- `Block Control Bar` is the floating operation surface for move, resize, save, source/export/AI visibility, delete, and future block actions.
+- `Block Type Badge` is a lightweight identity marker for Definition, Formula, Code, Image, and other block types.
+- The control bar should appear only in hover, selected, layout, or explicit editing states.
+- The type badge should be outside-first and non-obstructive: it should not occupy content layout, should not cover image/text content by default, and should not intercept normal block clicks.
+- Preview/debug surfaces may provide a `Show block types` switch so users can inspect all block identities at once without making the writing surface permanently noisy.
 
 ### 11. Project Surfaces Should Support Different Work Types
 

@@ -407,7 +407,7 @@ function formatRoleLabel(value: string | undefined): string {
 }
 
 export default function CourseDetailPage() {
-  const { courseId } = useParams<{ courseId: string }>();
+  const { courseId, canvasId } = useParams<{ courseId: string; canvasId?: string }>();
   const navigate = useNavigate();
   const modal = useUIStore((s) => s.modal);
   const openModal = useUIStore((s) => s.openModal);
@@ -551,15 +551,35 @@ export default function CourseDetailPage() {
       const res = await api.get('/canvases', { params: { course_id: courseId, status: 'active' } });
       const canvases = res.data as LearningCanvasSummary[];
       setLearningCanvases(canvases);
-      if (!activeLearningCanvas && canvases.length > 0) {
-        const detailRes = await api.get(`/canvases/${canvases[0].id}`);
-        setActiveLearningCanvas(detailRes.data);
+      if (canvasId) {
+        if (activeLearningCanvas?.canvas.id !== canvasId) {
+          const detailRes = await api.get(`/canvases/${canvasId}`);
+          setActiveLearningCanvas(detailRes.data);
+        }
+      } else {
+        setActiveLearningCanvas(null);
       }
     } catch (err) {
       console.error('Failed to fetch canvases:', err);
       setLearningCanvases([]);
+      if (canvasId) {
+        setActiveLearningCanvas(null);
+      }
     }
-  }, [courseId, activeLearningCanvas]);
+  }, [courseId, canvasId, activeLearningCanvas?.canvas.id]);
+
+  const fetchCanvasDetail = useCallback(async (targetCanvasId: string) => {
+    try {
+      const detailRes = await api.get(`/canvases/${targetCanvasId}`);
+      setActiveLearningCanvas(detailRes.data);
+    } catch (err) {
+      console.error('Failed to fetch canvas detail:', err);
+      addToast('error', 'Failed to open canvas document');
+      if (courseId) {
+        navigate(`/projects/${courseId}`);
+      }
+    }
+  }, [addToast, courseId, navigate]);
 
   const fetchActiveLearningCanvas = useCallback(async () => {
     if (!activeLearningCanvas?.canvas.id) return;
@@ -1047,8 +1067,8 @@ export default function CourseDetailPage() {
       });
       addToast('success', 'Canvas document created');
       await fetchLearningCanvases();
-      const detailRes = await api.get(`/canvases/${res.data.id}`);
-      setActiveLearningCanvas(detailRes.data);
+      await fetchCanvasDetail(res.data.id);
+      navigate(`/projects/${courseId}/notes/${res.data.id}`);
     } catch (err: any) {
       console.error('Failed to create canvas:', err);
       addToast('error', err?.response?.data?.error || 'Failed to create canvas document');
@@ -1057,11 +1077,12 @@ export default function CourseDetailPage() {
     }
   };
 
-  const handleSelectLearningCanvas = async (canvasId: string) => {
-    setSourceSnapshotBusy(`canvas-${canvasId}`);
+  const handleSelectLearningCanvas = async (selectedCanvasId: string) => {
+    if (!courseId) return;
+    setSourceSnapshotBusy(`canvas-${selectedCanvasId}`);
     try {
-      const res = await api.get(`/canvases/${canvasId}`);
-      setActiveLearningCanvas(res.data);
+      await fetchCanvasDetail(selectedCanvasId);
+      navigate(`/projects/${courseId}/notes/${selectedCanvasId}`);
     } catch (err: any) {
       console.error('Failed to open canvas:', err);
       addToast('error', err?.response?.data?.error || 'Failed to open canvas');
@@ -1326,6 +1347,7 @@ export default function CourseDetailPage() {
       subGoalCounts.set(g.parent_id, (subGoalCounts.get(g.parent_id) || 0) + 1);
     }
   }
+  const workspaceCount = notes.length + learningCanvases.length;
 
   const canvasWorkspaceSection = (
     <div className={`${styles.section} ${styles.canvasWorkspaceSection} ${canvasFocusMode ? styles.canvasWorkspaceExpanded : ''}`}>
@@ -1334,11 +1356,11 @@ export default function CourseDetailPage() {
           <div>
             <div className={styles.sectionTitle}>
               <LayoutDashboard size={18} />
-              <span>Canvas Document</span>
+              <span>{activeLearningCanvas?.canvas.title || 'Canvas Document'}</span>
               <span className={styles.sectionCount}>{learningCanvases.length}</span>
             </div>
             <div className={styles.canvasWorkspaceHint}>
-              Canvas is the primary document surface. Source panels remain reference tools; the canvas should not live inside the growing material rail.
+              This canvas is opened as a note workspace. Project material, sources, and proposals remain supporting surfaces behind this writing space.
             </div>
           </div>
           <div className={styles.canvasWorkspaceActions}>
@@ -1459,13 +1481,166 @@ export default function CourseDetailPage() {
     </div>
   );
 
+  const workspaceLandingSection = (
+    <div className={styles.section}>
+      <div className={styles.sectionHeader}>
+        <div className={styles.sectionTitle}>
+          <BookOpen size={18} />
+          <span>Notes & Canvas Documents</span>
+          <span className={styles.sectionCount}>{workspaceCount}</span>
+        </div>
+        <div className={styles.workspaceActions}>
+          <button
+            className={styles.sectionAddBtn}
+            onClick={handleCreateNote}
+          >
+            <Plus size={15} />
+            New Note
+          </button>
+          <button
+            type="button"
+            className={styles.sectionAddBtn}
+            onClick={handleCreateLearningCanvas}
+            disabled={sourceSnapshotBusy !== null}
+          >
+            <LayoutDashboard size={14} />
+            New Canvas
+          </button>
+        </div>
+      </div>
+
+      {workspaceCount === 0 ? (
+        <div className={styles.empty}>No notes yet. Create a note or canvas document to begin.</div>
+      ) : (
+        <div className={styles.workspaceGrid}>
+          {learningCanvases.map((canvas) => (
+            <button
+              key={canvas.id}
+              type="button"
+              className={styles.workspaceCard}
+              onClick={() => handleSelectLearningCanvas(canvas.id)}
+              disabled={sourceSnapshotBusy !== null}
+            >
+              <div className={styles.workspaceCardIcon}>
+                <LayoutDashboard size={17} />
+              </div>
+              <div className={styles.workspaceCardBody}>
+                <div className={styles.workspaceCardType}>Canvas document</div>
+                <div className={styles.workspaceCardTitle}>{canvas.title}</div>
+                <div className={styles.workspaceCardMeta}>
+                  <span>{canvas.page_size.toUpperCase()} {canvas.orientation}</span>
+                  <span>{canvas.canvas_kind}</span>
+                </div>
+              </div>
+            </button>
+          ))}
+
+          {notes.map((note) => (
+            <button
+              key={note.id}
+              type="button"
+              className={styles.workspaceCard}
+              onClick={() => navigate(`/notes/${note.id}`)}
+            >
+              <div className={styles.workspaceCardIcon}>
+                <FileText size={17} />
+              </div>
+              <div className={styles.workspaceCardBody}>
+                <div className={styles.workspaceCardType}>Note</div>
+                <div className={styles.workspaceCardTitle}>{note.title}</div>
+                {note.description && (
+                  <div className={styles.workspaceCardDesc}>{note.description}</div>
+                )}
+                <div className={styles.workspaceCardMeta}>
+                  <span>Updated {new Date(note.updated_at).toLocaleDateString()}</span>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const deleteConfirmation = confirmDelete && (
+    <div className={styles.confirmOverlay} onClick={() => setConfirmDelete(false)}>
+      <div className={styles.confirmDialog} onClick={(e) => e.stopPropagation()}>
+        <div className={styles.confirmTitle}>Delete Project</div>
+        <div className={styles.confirmText}>
+          Are you sure you want to delete "{course.name}"? This still uses the existing course deletion behavior and will remove associated goals, tasks, decks, cards, and documents. This action cannot be undone.
+        </div>
+        <div className={styles.confirmActions}>
+          <button className={styles.confirmCancelBtn} onClick={() => setConfirmDelete(false)}>
+            Cancel
+          </button>
+          <button className={styles.confirmDeleteBtn} onClick={handleDelete}>
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (canvasId) {
+    return (
+      <div className={`${styles.page} ${styles.workspacePage}`}>
+        <div className={styles.header}>
+          <button className={styles.backBtn} onClick={() => navigate(`/projects/${course.id}`)}>
+            <ArrowLeft size={18} />
+            <span>Project</span>
+          </button>
+          <div className={styles.headerRight}>
+            <button
+              className={styles.headerAction}
+              onClick={() => openModal('course-edit', { course })}
+            >
+              <Edit2 size={15} />
+              Edit Project
+            </button>
+            <button
+              className={`${styles.headerAction} ${styles.headerActionDanger}`}
+              onClick={() => setConfirmDelete(true)}
+            >
+              <Trash2 size={15} />
+              Delete
+            </button>
+          </div>
+        </div>
+
+        <div className={styles.workspaceHero}>
+          <div>
+            <div className={styles.workspaceEyebrow}>{course.name}</div>
+            <h1>{activeLearningCanvas?.canvas.title || 'Canvas Document'}</h1>
+            <p>
+              A top-level note workspace for writing, arranging blocks, and reviewing canvas relations.
+            </p>
+          </div>
+          <div className={styles.workspaceHeroMeta}>
+            {activeLearningCanvas ? (
+              <>
+                <span>{activeLearningCanvas.canvas.page_size.toUpperCase()} {activeLearningCanvas.canvas.orientation}</span>
+                <span>{activeLearningCanvas.nodes.length} nodes</span>
+                <span>{activeLearningCanvas.edges.length} edges</span>
+              </>
+            ) : (
+              <span>Loading canvas...</span>
+            )}
+          </div>
+        </div>
+
+        {canvasWorkspaceSection}
+        {deleteConfirmation}
+      </div>
+    );
+  }
+
   return (
     <div className={styles.page}>
       {/* Header */}
       <div className={styles.header}>
-        <button className={styles.backBtn} onClick={() => navigate('/courses')}>
+        <button className={styles.backBtn} onClick={() => navigate('/projects')}>
           <ArrowLeft size={18} />
-          <span>Courses</span>
+          <span>Projects</span>
         </button>
         <div className={styles.headerRight}>
           <button
@@ -1485,7 +1660,7 @@ export default function CourseDetailPage() {
         </div>
       </div>
 
-      {/* Course Info */}
+      {/* Project Info */}
       <div className={styles.courseInfo}>
         <div className={styles.colorBar} style={{ backgroundColor: course.color }} />
         <div className={styles.courseTitle}>{course.name}</div>
@@ -1501,14 +1676,14 @@ export default function CourseDetailPage() {
         )}
       </div>
 
-      {canvasWorkspaceSection}
+      {workspaceLandingSection}
 
-      {/* Course Material / Proposal Section */}
+      {/* Project Material / Proposal Section */}
       <div className={styles.section}>
         <div className={styles.sectionHeader}>
           <div className={styles.sectionTitle}>
             <Sparkles size={18} />
-            <span>Course Material</span>
+            <span>Project Material</span>
             <span className={styles.sectionCount}>{materials.length}</span>
           </div>
           <div className={styles.materialActions}>
@@ -1540,9 +1715,9 @@ export default function CourseDetailPage() {
         </div>
 
         {materialLoading ? (
-          <div className={styles.empty}>Loading course materials...</div>
+          <div className={styles.empty}>Loading project materials...</div>
         ) : materials.length === 0 ? (
-          <div className={styles.empty}>No parsed course materials yet</div>
+          <div className={styles.empty}>No parsed project materials yet</div>
         ) : (
           <div className={styles.materialWorkspace}>
             <div className={styles.materialList}>
@@ -2191,45 +2366,6 @@ export default function CourseDetailPage() {
         )}
       </div>
 
-      {/* Notes Section */}
-      <div className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <div className={styles.sectionTitle}>
-            <BookOpen size={18} />
-            <span>Notes</span>
-            <span className={styles.sectionCount}>{notes.length}</span>
-          </div>
-          <button
-            className={styles.sectionAddBtn}
-            onClick={handleCreateNote}
-          >
-            <Plus size={15} />
-            Add Note
-          </button>
-        </div>
-        {notes.length === 0 ? (
-          <div className={styles.empty}>No notes yet</div>
-        ) : (
-          <div className={styles.noteGrid}>
-            {notes.map((note) => (
-              <div
-                key={note.id}
-                className={styles.noteCard}
-                onClick={() => navigate(`/notes/${note.id}`)}
-              >
-                <div className={styles.noteTitle}>{note.title}</div>
-                {note.description && (
-                  <div className={styles.noteDesc}>{note.description}</div>
-                )}
-                <div className={styles.noteMeta}>
-                  Updated {new Date(note.updated_at).toLocaleDateString()}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
       {/* Card Decks Section */}
       <div className={styles.section}>
         <div className={styles.sectionHeader}>
@@ -2301,7 +2437,7 @@ export default function CourseDetailPage() {
               onClick={() => openModal('document-manager', { courseId: course.id, courseName: course.name })}
             >
               <Upload size={14} />
-              涓婁紶 / 绠＄悊
+              Upload / Manage
             </button>
           </div>
         </div>
@@ -2329,24 +2465,7 @@ export default function CourseDetailPage() {
       {modal?.type === 'document-manager' && <DocumentManager />}
 
       {/* Delete Confirmation */}
-      {confirmDelete && (
-        <div className={styles.confirmOverlay} onClick={() => setConfirmDelete(false)}>
-          <div className={styles.confirmDialog} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.confirmTitle}>Delete Course</div>
-            <div className={styles.confirmText}>
-              Are you sure you want to delete "{course.name}"? This will also delete all associated goals, tasks, decks, cards, and documents. This action cannot be undone.
-            </div>
-            <div className={styles.confirmActions}>
-              <button className={styles.confirmCancelBtn} onClick={() => setConfirmDelete(false)}>
-                Cancel
-              </button>
-              <button className={styles.confirmDeleteBtn} onClick={handleDelete}>
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {deleteConfirmation}
     </div>
   );
 }

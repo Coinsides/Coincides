@@ -433,6 +433,7 @@ export const createNoteBlockSchema = z.object({
   content_json: jsonObjectSchema.optional().default({}),
   plain_text: z.string().max(20000).optional(),
   metadata: jsonObjectSchema.optional(),
+  display_overrides_json: jsonObjectSchema.optional(),
   source_references: z.array(sourceReferenceSchema).max(20).optional(),
 });
 
@@ -450,6 +451,10 @@ export const reorderNoteBlocksSchema = z.object({
     placement_id: z.string().uuid(),
     order_index: z.number().int().min(0),
   })).min(1),
+});
+
+export const updateNoteBlockPlacementSchema = z.object({
+  display_overrides_json: jsonObjectSchema,
 });
 
 export const createProjectionSchema = z.object({

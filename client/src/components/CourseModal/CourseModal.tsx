@@ -55,15 +55,15 @@ export default function CourseModal() {
 
       if (isEdit && existing) {
         await updateCourse(existing.id, payload);
-        addToast('success', 'Course updated');
+        addToast('success', 'Project updated');
       } else {
         await createCourse(payload);
-        addToast('success', 'Course created');
+        addToast('success', 'Project created');
       }
       closeModal();
     } catch (err) {
-      console.error('Failed to save course:', err);
-      addToast('error', 'Failed to save course');
+      console.error('Failed to save project:', err);
+      addToast('error', 'Failed to save project');
     } finally {
       setSaving(false);
     }
@@ -72,13 +72,13 @@ export default function CourseModal() {
   return (
     <div className={styles.overlay} onClick={(e) => e.target === e.currentTarget && closeModal()}>
       <div className={styles.modal}>
-        <div className={styles.modalTitle}>{isEdit ? 'Edit Course' : 'New Course'}</div>
+        <div className={styles.modalTitle}>{isEdit ? 'Edit Project' : 'New Project'}</div>
         <form className={styles.form} onSubmit={handleSubmit}>
           <div className={styles.field}>
-            <label>Course Name</label>
+            <label>Project Name</label>
             <input
               type="text"
-              placeholder="e.g. Linear Algebra"
+              placeholder="e.g. Linear Algebra, PI-046 Research, Case Notes"
               value={name}
               onChange={(e) => setName(e.target.value)}
               autoFocus
@@ -87,10 +87,10 @@ export default function CourseModal() {
           </div>
 
           <div className={styles.field}>
-            <label>Course Code</label>
+            <label>Short Code</label>
             <input
               type="text"
-              placeholder="e.g. MATH201"
+              placeholder="e.g. MATH201 or RESEARCH"
               value={code}
               onChange={(e) => setCode(e.target.value)}
             />
@@ -115,9 +115,9 @@ export default function CourseModal() {
             <label>Priority Weight</label>
             <div className={styles.weightButtons}>
               {([
-                { value: 1, label: 'Low', desc: 'Minor course' },
-                { value: 2, label: 'Medium', desc: 'Standard course' },
-                { value: 3, label: 'High', desc: 'Core / heavy course' },
+                { value: 1, label: 'Low', desc: 'Reference project' },
+                { value: 2, label: 'Medium', desc: 'Active project' },
+                { value: 3, label: 'High', desc: 'Core / heavy project' },
               ] as const).map((opt) => (
                 <button
                   key={opt.value}
@@ -135,7 +135,7 @@ export default function CourseModal() {
           <div className={styles.field}>
             <label>Description</label>
             <textarea
-              placeholder="Brief course description (optional)"
+              placeholder="Brief project description (optional)"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}

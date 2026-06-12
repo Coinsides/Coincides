@@ -1,9 +1,12 @@
 {
   "nav": {
+    "home": "Home",
     "dailyBrief": "Daily Brief",
     "calendar": "Calendar",
     "goals": "Goals",
     "courses": "Courses",
+    "projects": "Projects",
+    "sources": "Source Library",
     "decks": "Decks",
     "templates": "Template Studio",
     "review": "Review",
@@ -12,7 +15,13 @@
   },
   "sidebar": {
     "courses": "Courses",
-    "noCourses": "No courses yet"
+    "projects": "Projects",
+    "favorites": "Favorites",
+    "recent": "Recent",
+    "noCourses": "No courses yet",
+    "noProjects": "No projects yet",
+    "noFavorites": "No favorites yet",
+    "noRecent": "No recent projects yet"
   },
   "common": {
     "save": "Save",

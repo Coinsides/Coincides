@@ -62,7 +62,7 @@ User-facing language should prefer `Project` as the main container. A project ma
 
 Coincides must feel like a mature notebook/report product, not an engineering panel. A blank note should invite writing. The user should be able to click and write before understanding `NoteBlock`, `CanvasNode`, `SourceScope`, or relation metadata.
 
-The writing surface should support both free blocks and structured blocks. `paragraph` / `text` blocks are freeform. Common knowledge blocks such as `definition`, `formula`, `theorem`, `proof`, `example`, and `exercise` can have structured fields. Users may create these blocks directly with slash commands, or write freely first and convert an existing block into a structured block later.
+The writing surface should support both free blocks and structured blocks. `paragraph` / `text` blocks are freeform. First-version structured defaults should stay narrow: `definition` and `formula` are the primary structured knowledge blocks, while theorem/proof/example/exercise-style variants should come through Template Studio or later domain packages instead of crowding the default menu. Users may create structured blocks directly with slash commands, or write freely first and convert an existing block into a structured block later.
 
 Slash commands must support two behaviors:
 
@@ -74,7 +74,7 @@ Non-empty paragraph + /definition
   -> convert current block to DefinitionBlock with user confirmation
 ```
 
-First-version conversion should use deterministic guesses plus user confirmation, not mandatory AI. Users should edit field values in the note surface. Adding, removing, or renaming fields belongs to Template Studio.
+First-version conversion should be conservative and predictable, not clever. Paragraph-to-definition should move the full paragraph into `description` and leave `concept_name` blank. Paragraph-to-formula should move the full paragraph into `latex_input`. The first version should not infer field meaning from colons, dollar signs, regular expressions, or brittle scripts. Smarter conversion belongs to a later AI-assisted workflow. Users should edit field values in the note surface. Adding, removing, or renaming fields belongs to Template Studio.
 
 Navigation, evidence, and semantic relation must remain separate:
 
