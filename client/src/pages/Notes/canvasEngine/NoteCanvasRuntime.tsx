@@ -2,7 +2,6 @@ import {
   useCallback,
   useMemo,
   useRef,
-  useState,
   type CSSProperties,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -41,14 +40,12 @@ import { useLayoutInteractionController } from './hooks/useLayoutInteractionCont
 import { useNoteCanvasDataAdapter } from './hooks/useNoteCanvasDataAdapter';
 import { useNoteCanvasRuntime } from './hooks/useNoteCanvasRuntime';
 import { usePlacementHistory } from './hooks/usePlacementHistory';
+import { useRuntimeInteractionController } from './hooks/useRuntimeInteractionController';
 import { useSlashCommandController } from './hooks/useSlashCommandController';
 import { useSurfaceModeController } from './hooks/useSurfaceModeController';
 import { BlockEditorLayer } from './layers/BlockEditorLayer';
 import { ExportPreviewLayer } from './layers/ExportPreviewLayer';
 import { SlashMenuLayer } from './layers/SlashMenuLayer';
-import {
-  idleInteraction,
-} from './interactionController';
 import { estimateTextBlockHeight } from './measurementService';
 import {
   getVisibleBlocksForSurface,
@@ -114,7 +111,10 @@ export default function NoteCanvasRuntime() {
   const { noteId } = useNoteCanvasRuntime();
   const navigate = useNavigate();
   const addToast = useUIStore((s) => s.addToast);
-  const [interactionState, setInteractionState] = useState(idleInteraction());
+  const {
+    interactionState,
+    setInteractionState,
+  } = useRuntimeInteractionController();
   const blockListRef = useRef<HTMLDivElement | null>(null);
   const movingBlockIdRef = useRef<string | null>(null);
   const suppressMeasuredReflowUntilRef = useRef(0);
