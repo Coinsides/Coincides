@@ -78,6 +78,7 @@ active smoke note: V2.BN.8.1 Smoke Note
 
 ```text
 L3/L4 service extraction: implemented, not browser-smoked
+L2 data adapter seed extraction: implemented, not browser-smoked
 L5 placement service extraction: implemented, not browser-smoked
 L7 measurement seed extraction: implemented, not browser-smoked
 L6 block projection layer: implemented, not browser-smoked
@@ -91,6 +92,8 @@ L10 mode policy seed: implemented, not browser-smoked
 - PageFrame height 现在不再被 Canvas workspace 高度撑开，理论上应减少 Canvas mode 巨大空白；
 - workspace block 不应继续影响 formal PageFrame height，但还需要浏览器里创建 workspace block 验证；
 - placement 读写、snap、reflow 已迁入 service，理论上行为应保持不变；
+- note/block/template/source-anchor API 胶水已进入 `hooks/useNoteCanvasDataAdapter.ts`，理论上不改变写作体验；
+- 如果后续出现 note 加载、标题保存、manual insert、block 保存/转换/删除、source jump 异常，应优先检查 `hooks/useNoteCanvasDataAdapter.ts`。
 - textarea resize、DOM measured height、text estimated height 已进入 measurement service / hook seed；
 - measured height / resize width 后的 placement reflow application 已进入 `measurementService.ts`；
 - 如果后续出现 block 位置、snap、reload 后布局变化，应优先检查 `placementService.ts`。
@@ -107,6 +110,7 @@ L10 mode policy seed: implemented, not browser-smoked
 - 如果后续出现 export preview 面板、overlay toggle、preview group list 异常，应优先检查 `layers/ExportPreviewLayer.tsx` 和 `exportPreviewService.ts`。
 - 如果后续出现“选中 / 编辑 / 拖动 / 缩放状态看起来错乱”，应优先检查 `interactionController.ts` 和 canvas root 上的 `data-canvas-interaction-*` debug attributes。
 - 如果后续出现 block drag/resize 时 snap、弹性避让或宽度计算异常，应优先检查 `interactionController.ts` 的 drag/resize layout calculation helpers。
+- 如果后续出现 drag / resize 松手不落盘、pointerup 后仍在拖动、或窗口外松手状态残留，应优先检查 `interactionController.ts` 的 `attachWindowPointerSession` 以及 `NoteCanvasRuntime.tsx` 里的 finish callbacks。
 - 如果后续出现 Page / Canvas 切换、workspace block 可见性、双击空白落点或弹性避让规则不符合预期，应优先检查 `modePolicyService.ts`。
 - 本轮有一个有意的体验变化：Page mode 且 snap alignment 开启时，双击空白创建 draft 会进入自然写作流；snap 关闭或 Canvas mode 下才使用双击位置。
 

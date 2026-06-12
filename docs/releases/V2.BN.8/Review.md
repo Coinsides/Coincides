@@ -120,8 +120,22 @@ L2 已完成部分：
 
 L2 尚未完成部分：
 
-- `NoteCanvasRuntime.tsx` 内部仍保留 note/project API loading、navigation、save title 等页面级数据逻辑；
-- 下一步需要继续抽出 data adapter，使 `NoteCanvasRuntime` 更接近纯 runtime root。
+- 新增 `hooks/useNoteCanvasDataAdapter.ts`；
+- `NoteCanvasRuntime.tsx` 不再直接持有 note / blocks / template options / source anchors / block CRUD / title save 的 API state 和 API calls；
+- `useNoteCanvasDataAdapter` 现在集中负责：
+  - note / block loading；
+  - runtime template options loading；
+  - source anchor generation / loading；
+  - title save；
+  - create / save / convert / trash / reorder block；
+  - block layout persistence；
+  - source jump target loading。
+- `NoteCanvasRuntime.tsx` 仍保留 route chrome、focus、draft、selection、placement draft、interaction state 和 canvas UI composition。
+
+L2 仍需继续：
+
+- data adapter 目前仍通过 callbacks 清理 runtime layout draft，后续可以用 provider/model boundary 继续收紧；
+- `NoteCanvasRuntime.tsx` 仍然较胖，后续 L3-L11 需要继续迁出 viewport、measurement、interaction session 和 overlay state。
 
 ### L3 / L4 - Viewport, World, PageFrame And Workspace
 
@@ -319,12 +333,14 @@ client build: passed
 - `interactionController.ts` 新增第一批 drag/resize layout calculation helpers：
   - `calculateDraggedBlockLayouts`；
   - `calculateResizedBlockLayouts`。
-- `NoteCanvasRuntime.tsx` 不再内联 drag move / resize move 的 layout math，只保留 pointer listener 和 React state entrypoint。
+- `interactionController.ts` 新增 `attachWindowPointerSession`，集中管理 window pointermove / pointerup session lifecycle。
+- `NoteCanvasRuntime.tsx` 不再内联 drag move / resize move 的 layout math，也不再直接 add/remove window pointer listeners。
+- `NoteCanvasRuntime.tsx` 仍保留 begin move / begin resize 的 session orchestration、finish callbacks 和 React state entrypoint。
 
 仍需验收：
 
-- pointer listener 生命周期仍在 `NoteCanvasRuntime.tsx`；
-- 后续需要继续把 begin move / begin resize session、blank click、keyboard undo 的 controller 行为迁出；
+- 后续需要继续把 begin move / begin resize session orchestration、blank click、keyboard undo 的 controller 行为迁出；
+- 需要 browser smoke 验证 pointer session helper 没有改变 drag / resize 手感；
 - 需要 browser smoke 验证 interaction debug state 不影响现有手感。
 
 ### L10 - Page / Canvas Mode Policy Seed

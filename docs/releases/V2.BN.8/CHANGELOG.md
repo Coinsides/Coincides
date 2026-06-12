@@ -73,6 +73,14 @@
 - `canvasEngine/index.ts` 导出 runtime provider。
 - L2 迁移后 client build passed。
 
+## Changed - V2.BN.8.1 L2 Data Adapter Seed
+
+- 新增 `hooks/useNoteCanvasDataAdapter.ts`。
+- 将 note / blocks / template options / source anchors / block CRUD / title save / source jump target loading 从 `NoteCanvasRuntime.tsx` 迁入 data adapter hook。
+- `NoteCanvasRuntime.tsx` 继续负责 focus、draft、selection、placement draft、interaction state 和 canvas UI composition。
+- `canvasEngine/index.ts` 导出 `useNoteCanvasDataAdapter`。
+- L2 data adapter seed 抽离后 client build passed。
+
 ## Changed - V2.BN.8.1 L3-L4
 
 - 新增 `viewportService.ts`，集中处理 runtime viewport / world / primary page offset seed。
@@ -191,7 +199,9 @@
 - `interactionController.ts` 新增 drag/resize layout calculation helpers：
   - `calculateDraggedBlockLayouts`；
   - `calculateResizedBlockLayouts`。
-- `NoteCanvasRuntime.tsx` 不再内联 drag move / resize move 的布局计算；pointer listener 和 React state entrypoint 暂时保留在 runtime 主文件。
+- `interactionController.ts` 新增 `attachWindowPointerSession`，集中处理 drag / resize 期间的 window pointermove / pointerup session lifecycle。
+- `NoteCanvasRuntime.tsx` 不再内联 drag move / resize move 的布局计算，也不再直接 add/remove window pointer listeners。
+- `NoteCanvasRuntime.tsx` 仍暂时保留 begin move / begin resize session orchestration、finish callbacks 和 React state entrypoint。
 - 新增 `modePolicyService.ts`，集中处理第一批 Page/Canvas policy：
   - visible block filtering；
   - PageFrame offset；
@@ -203,3 +213,4 @@
   - Page mode + snap alignment on：进入自然写作流；
   - snap alignment off 或 Canvas mode：落在双击位置。
 - L8/L10 seed 抽离后 client build passed。
+- L8 pointer session helper 抽离后 client build passed。
