@@ -1,5 +1,17 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 L8 Placement Interaction Session Experience Note
+
+```text
+L8 placement interaction session hook: implemented, not browser-smoked
+```
+
+体验风险：
+
+- 本次迁出理论上不改变 drag / resize 手感，只改变 pointer session lifecycle 的归属。
+- 如果后续出现拖动不落盘、松手后仍处于拖动状态、resize 后 snap guide 不消失、move / resize 撤回重做异常，应优先检查 `hooks/useBlockPlacementInteractions.ts`。
+- 这一步还没有把 selection、blank double-click draft creation、surface pointer handling 迁入 controller；它只迁出 block move / resize session 编排。
+
 ## V2.BN.8.1 L3 Content Width Hook Experience Note
 
 ```text

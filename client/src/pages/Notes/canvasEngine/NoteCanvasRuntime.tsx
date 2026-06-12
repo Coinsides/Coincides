@@ -7,7 +7,6 @@ import {
   useState,
   type KeyboardEvent,
   type MouseEvent,
-  type PointerEvent as ReactPointerEvent,
   type CSSProperties,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -45,6 +44,7 @@ import {
   textFromContent,
 } from './blockContentService';
 import { useCanvasContentWidth } from './hooks/useCanvasContentWidth';
+import { useBlockPlacementInteractions } from './hooks/useBlockPlacementInteractions';
 import { useNoteCanvasDataAdapter } from './hooks/useNoteCanvasDataAdapter';
 import { useNoteCanvasRuntime } from './hooks/useNoteCanvasRuntime';
 import { usePlacementHistory } from './hooks/usePlacementHistory';
@@ -52,15 +52,10 @@ import { BlockEditorLayer } from './layers/BlockEditorLayer';
 import { ExportPreviewLayer } from './layers/ExportPreviewLayer';
 import { SlashMenuLayer } from './layers/SlashMenuLayer';
 import {
-  attachWindowPointerSession,
-  draggingBlockInteraction,
   editingTextInteraction,
-  calculateDraggedBlockLayouts,
-  calculateResizedBlockLayouts,
   idleInteraction,
   openingMenuInteraction,
   previewingInteraction,
-  resizingBlockInteraction,
   selectedBlockInteraction,
 } from './interactionController';
 import {
@@ -74,7 +69,6 @@ import {
   getNextSurfaceMode,
   getVisibleBlocksForSurface,
   shouldResolvePageCollisions,
-  shouldUseElasticAvoidance,
 } from './modePolicyService';
 import {
   calculatePageFrameHeight,
@@ -389,6 +383,24 @@ export default function NoteCanvasRuntime() {
     persistLayoutSnapshot,
   });
 
+  const { beginMoveBlock, beginResizeBlock } = useBlockPlacementInteractions({
+    blockLayouts,
+    contentWidth,
+    estimateBlockHeightForText,
+    movingBlockIdRef,
+    orderedBlocks: visibleBlocks,
+    persistChangedBlockLayouts,
+    pushLayoutHistory,
+    setInteractionState,
+    setLayoutDrafts,
+    setLayoutMode,
+    setSelectedBlockId,
+    setSnapGuide,
+    snapEnabled,
+    suppressMeasuredReflowUntilRef,
+    surfacePolicy,
+  });
+
   const persistDraft = useCallback(async (
     initialText?: string,
     explicitTemplate?: TemplateOption,
@@ -545,107 +557,6 @@ export default function NoteCanvasRuntime() {
       void saveBlock(block, text, { silent: true }).then(() => activateDraft());
     }
   };
-
-  const beginMoveBlock = useCallback((
-    event: ReactPointerEvent<HTMLElement>,
-    block: NoteBlock,
-    layout: BlockBoxLayout,
-  ) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setSelectedBlockId(block.id);
-    setInteractionState(draggingBlockInteraction(block.id));
-    setLayoutMode(true);
-    const startClientX = event.clientX;
-    const startClientY = event.clientY;
-    const startLayouts = { ...blockLayouts };
-    let latestLayouts: Record<string, BlockBoxLayout> = startLayouts;
-    movingBlockIdRef.current = block.id;
-
-    const handlePointerMove = (moveEvent: PointerEvent) => {
-      setLayoutDrafts(() => {
-        const deltaX = moveEvent.clientX - startClientX;
-        const deltaY = moveEvent.clientY - startClientY;
-        const result = calculateDraggedBlockLayouts({
-          blockId: block.id,
-          startLayouts,
-          initialLayout: layout,
-          deltaX,
-          deltaY,
-          contentWidth,
-          snapEnabled,
-          orderedBlockIds: visibleBlocks.map((item) => item.id),
-          useElasticAvoidance: shouldUseElasticAvoidance({
-            policy: surfacePolicy,
-            snapEnabled,
-            deltaY,
-          }),
-        });
-        latestLayouts = result.layouts;
-        setSnapGuide(result.guide);
-        return latestLayouts;
-      });
-    };
-
-    attachWindowPointerSession({
-      onMove: handlePointerMove,
-      onEnd: () => {
-        suppressMeasuredReflowUntilRef.current = Date.now() + LAYOUT_MEASURE_SUPPRESSION_MS;
-        movingBlockIdRef.current = null;
-        setSnapGuide(null);
-        setInteractionState(selectedBlockInteraction(block.id));
-        pushLayoutHistory(startLayouts, latestLayouts);
-        persistChangedBlockLayouts(latestLayouts);
-      },
-    });
-  }, [blockLayouts, contentWidth, persistChangedBlockLayouts, pushLayoutHistory, snapEnabled, surfacePolicy, visibleBlocks]);
-
-  const beginResizeBlock = useCallback((
-    event: ReactPointerEvent<HTMLElement>,
-    block: NoteBlock,
-    text: string,
-    layout: BlockBoxLayout,
-  ) => {
-    event.preventDefault();
-    event.stopPropagation();
-    setSelectedBlockId(block.id);
-    setInteractionState(resizingBlockInteraction(block.id));
-    setLayoutMode(true);
-    const startClientX = event.clientX;
-    let latestLayouts: Record<string, BlockBoxLayout> = blockLayouts;
-    const startLayouts = { ...blockLayouts };
-
-    const handlePointerMove = (moveEvent: PointerEvent) => {
-      const deltaX = moveEvent.clientX - startClientX;
-      setLayoutDrafts((current) => {
-        const result = calculateResizedBlockLayouts({
-          blockId: block.id,
-          baseLayouts: blockLayouts,
-          currentLayouts: current,
-          initialLayout: layout,
-          deltaX,
-          contentWidth,
-          snapEnabled,
-          orderedBlockIds: visibleBlocks.map((item) => item.id),
-          resolveCollisions: shouldResolvePageCollisions(surfacePolicy),
-          estimateHeight: (width) => estimateBlockHeightForText(block, text, width),
-        });
-        latestLayouts = result.layouts;
-        setSnapGuide(result.guide);
-        return latestLayouts;
-      });
-    };
-
-    attachWindowPointerSession({
-      onMove: handlePointerMove,
-      onEnd: () => {
-        setSnapGuide(null);
-        setInteractionState(selectedBlockInteraction(block.id));
-        pushLayoutHistory(startLayouts, latestLayouts);
-        persistChangedBlockLayouts(latestLayouts);
-      },
-    });
-  }, [blockLayouts, contentWidth, persistChangedBlockLayouts, pushLayoutHistory, snapEnabled, surfacePolicy, visibleBlocks]);
 
   const handlePageSpaceClick = (event: MouseEvent<HTMLDivElement>) => {
     if (event.target !== event.currentTarget) return;

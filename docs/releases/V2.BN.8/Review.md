@@ -1,5 +1,27 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 L8 Placement Interaction Session Hook Seed
+
+```text
+status: in progress
+client build: passed
+```
+
+已完成部分：
+
+- 新增 `hooks/useBlockPlacementInteractions.ts`。
+- block move / resize 的 pointer session lifecycle 已从 `NoteCanvasRuntime.tsx` 迁出。
+- `NoteCanvasRuntime.tsx` 不再直接拥有 `attachWindowPointerSession` 调用。
+- drag / resize 仍通过 `interactionController.ts` 的 `calculateDraggedBlockLayouts` / `calculateResizedBlockLayouts` 执行核心布局计算。
+- hook 边界显式接收 layout draft writer、history writer、persistence callback、measurement suppression refs 和 mode policy。
+
+仍需验收：
+
+- Browser smoke 验证拖动 block 的 snap / elastic avoidance 手感是否保持。
+- Browser smoke 验证 resize block 后下方 block 是否仍能稳定 reflow。
+- Browser smoke 验证 Ctrl+Z / Ctrl+Y 对 move / resize 的撤回重做是否仍然有效。
+- 后续 L8 仍需继续迁出 blank click / selection / draft creation / mode transitions 等 interaction controller 行为。
+
 ## V2.BN.8.1 L3 Content Width Hook Seed
 
 ```text

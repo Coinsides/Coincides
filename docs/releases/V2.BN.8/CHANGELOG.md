@@ -1,5 +1,14 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 L8 Placement Interaction Session Hook Seed
+
+- 新增 `hooks/useBlockPlacementInteractions.ts`。
+- 将 block move / resize 的 pointer session orchestration 从 `NoteCanvasRuntime.tsx` 迁入 Canvas Engine hook。
+- `NoteCanvasRuntime.tsx` 不再直接调用 `attachWindowPointerSession`，也不再内联 drag / resize session 的 pointermove / pointerup lifecycle。
+- move / resize 仍复用 `interactionController.ts` 中已有的 layout calculation helpers，行为目标保持不变。
+- `NoteCanvasRuntime.tsx` 继续提供 layout drafts、history、persistence 和 measurement suppression refs 作为边界输入，后续可继续收口到 placement writer / interaction controller。
+- L8 placement interaction session hook seed 迁出后 client build passed。
+
 ## Changed - V2.BN.8.1 L3 Content Width Hook Seed
 
 - 新增 `hooks/useCanvasContentWidth.ts`。
