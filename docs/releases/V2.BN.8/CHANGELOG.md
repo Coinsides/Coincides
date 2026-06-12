@@ -141,6 +141,13 @@
 - block control bar 仍复用当前 block 内部定位样式，后续再接入 selected block anchor / overlay portal / z-index service。
 - L9 block control bar layer 抽离后 client build passed。
 
+## Changed - V2.BN.8.1 L9 Source Reference Layer
+
+- 新增 `layers/BlockSourceReferenceLayer.tsx`。
+- `BlockEditorLayer.tsx` 不再内联 source reference badge 和 View source jump button。
+- source jump 仍是 block 内 entry seed，后续再接入统一 source jump overlay / z-index service。
+- L9 source reference layer 抽离后 client build passed。
+
 ## Changed - V2.BN.8.1 L8/L10 Seeds
 
 - 新增 `interactionController.ts`，建立 Canvas Engine 第一版 interaction state boundary：

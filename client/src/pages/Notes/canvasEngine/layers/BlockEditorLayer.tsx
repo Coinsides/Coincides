@@ -41,6 +41,7 @@ import type {
   SourceAnchor,
 } from '../runtimeDataTypes';
 import { BlockControlBarLayer } from './BlockControlBarLayer';
+import { BlockSourceReferenceLayer } from './BlockSourceReferenceLayer';
 import styles from '../../NoteDetail.module.css';
 
 const {
@@ -328,33 +329,12 @@ export function BlockEditorLayer({
           />
         )}
 
-        {block.source_references?.length > 0 && (
-          <div className={styles.sources}>
-            {block.source_references.map((source, sourceIndex) => {
-              const anchor = source.id ? anchorsBySourceRef[source.id] : undefined;
-              return (
-                <span key={source.id || sourceIndex} className={styles.sourceRef}>
-                  <span>
-                    Source
-                    {source.source_page_start ? ` p.${source.source_page_start}` : ''}
-                    {source.source_page_end && source.source_page_end !== source.source_page_start ? `-${source.source_page_end}` : ''}
-                  </span>
-                  {anchor && (
-                    <button
-                      type="button"
-                      className={styles.sourceRefAction}
-                      disabled={sourceJumpBusy === anchor.id}
-                      onClick={() => onViewSource(anchor.id)}
-                    >
-                      <Eye size={13} />
-                      View
-                    </button>
-                  )}
-                </span>
-              );
-            })}
-          </div>
-        )}
+        <BlockSourceReferenceLayer
+          sourceReferences={block.source_references}
+          anchorsBySourceRef={anchorsBySourceRef}
+          sourceJumpBusy={sourceJumpBusy}
+          onViewSource={onViewSource}
+        />
       </div>
 
       <div
