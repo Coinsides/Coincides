@@ -210,7 +210,7 @@ client build: passed
 - resize width 后 text reflow 是否仍然稳定；
 - measurement registry 尚未完成，当前仍是 service seed。
 
-### L6 - Block Content Service Seed
+### L6 - Block Projection Layer
 
 ```text
 status: in progress
@@ -220,6 +220,8 @@ client build: passed
 已完成部分：
 
 - 新增 `blockContentService.ts`；
+- 新增 `layers/BlockEditorLayer.tsx`；
+- 新增 `runtimeDataTypes.ts`；
 - 从 `NoteCanvasRuntime.tsx` 迁出第一批 block content truth / projection helper：
   - `FieldValueRecord`；
   - `BlockPresentationKind`；
@@ -229,13 +231,14 @@ client build: passed
   - plain text projection；
   - block presentation kind detection；
   - formula preview text wrapper。
-- 当前拆分先稳定内容解释边界，不直接硬搬整个 `BlockEditor`。
+- `BlockEditor` 组件本体已从 `NoteCanvasRuntime.tsx` 迁入 Canvas Engine DOM projection layer。
+- `NoteCanvasRuntime.tsx` 现在只负责把 block 的 runtime state 和 callbacks 传给 `BlockEditorLayer`。
 
 仍需验收：
 
-- `BlockEditor` 组件本体仍在 `NoteCanvasRuntime.tsx`；
-- Source badge、policy badge、structured field editor、measurement callback 仍耦合在组件内；
-- 下一轮 L6 应继续把 `BlockEditor` 拆成 Canvas Engine DOM projection layer。
+- `BlockEditorLayer` 内部仍包含 Source badge、policy badge、structured field editor、measurement callback；
+- 下一轮可以继续把 block toolbar、structured field editor、source badge 拆成更小 projection sublayers；
+- 需要 browser smoke 验证 definition / formula / code / source badge 的表现没有回归。
 
 ### L9 - Slash Menu Layer Seed
 

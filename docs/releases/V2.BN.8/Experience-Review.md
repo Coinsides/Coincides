@@ -80,7 +80,7 @@ active smoke note: V2.BN.8.1 Smoke Note
 L3/L4 service extraction: implemented, not browser-smoked
 L5 placement service extraction: implemented, not browser-smoked
 L7 measurement seed extraction: implemented, not browser-smoked
-L6 block content service seed: implemented, not browser-smoked
+L6 block projection layer: implemented, not browser-smoked
 L9 slash menu layer seed: implemented, not browser-smoked
 ```
 
@@ -92,7 +92,8 @@ L9 slash menu layer seed: implemented, not browser-smoked
 - textarea resize、DOM measured height、text estimated height 已进入 measurement service seed；
 - 如果后续出现 block 位置、snap、reload 后布局变化，应优先检查 `placementService.ts`。
 - 如果后续出现 Definition / Formula 展开穿模，应优先检查 `measurementService.ts` 和后续 measurement registry。
-- 如果后续出现 Definition / Formula 内容保存、plain text、preview 文本不一致，应优先检查 `blockContentService.ts`。
+- 如果后续出现 Definition / Formula 内容保存、plain text、preview 文本不一致，应优先检查 `blockContentService.ts` 和 `layers/BlockEditorLayer.tsx`。
+- 如果后续出现 block toolbar、source badge、resize handle、structured field editing 视觉或操作异常，应优先检查 `layers/BlockEditorLayer.tsx`。
 - 如果后续出现 slash menu 样式或点击回调异常，应优先检查 `layers/SlashMenuLayer.tsx`。
 - slash menu anchor 仍由 runtime 主文件计算，本轮没有声明其体验问题已修复。
 
