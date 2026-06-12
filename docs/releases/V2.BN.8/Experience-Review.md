@@ -1,5 +1,17 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 L10 Surface Mode Controller Experience Note
+
+```text
+L10 surface mode controller hook: implemented, not browser-smoked
+```
+
+体验风险：
+
+- 本次迁移理论上不改变 Page / Canvas 按钮、label、active 状态或模式切换后的视觉结果，只改变 mode state / policy / toggle side effects 的归属。
+- 如果后续出现 Page / Canvas label 错误、模式切换后浮层残留、snap guide 残留、或已选中 block 没有取消选中，应优先检查 `hooks/useSurfaceModeController.ts`。
+- 本次不实现 pan / zoom / viewport scroll 接管；Canvas mode 的双滚动条、workspace fill、PageFrame boundary 等体验问题仍属于后续 L3/L10 深化验收。
+
 ## V2.BN.8.1 L9 Floating Overlay Controller Experience Note
 
 ```text

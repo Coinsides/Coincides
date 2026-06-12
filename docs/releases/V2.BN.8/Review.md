@@ -1,5 +1,32 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 L10 Surface Mode Controller Hook Seed
+
+```text
+status: in progress
+client build: passed
+server build: passed
+```
+
+已完成部分：
+
+- 新增 `hooks/useSurfaceModeController.ts`。
+- `surfaceMode` state 已从 `NoteCanvasRuntime.tsx` 迁出。
+- `surfacePolicy` / `pageOffsetX` 派生已进入 surface mode controller。
+- Page / Canvas mode toggle 的副作用已统一收口到 controller：
+  - close overlay；
+  - clear snap guide；
+  - clear current block selection。
+- `NoteCanvasRuntime.tsx` 不再直接调用 `createSurfaceModePolicy()` / `getNextSurfaceMode()`。
+
+仍需验收：
+
+- client build / server build；
+- Page / Canvas toggle 是否仍保持原有视觉行为；
+- Preview / Insert / Info / More overlay 是否在切换模式时正常关闭；
+- snap guide 是否在切换模式时清空；
+- selected block 是否在切换模式时取消选中。
+
 ## V2.BN.8.1 L9 Floating Overlay Controller Hook Seed
 
 ```text

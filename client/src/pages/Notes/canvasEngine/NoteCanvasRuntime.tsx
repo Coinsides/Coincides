@@ -41,6 +41,7 @@ import { useNoteCanvasDataAdapter } from './hooks/useNoteCanvasDataAdapter';
 import { useNoteCanvasRuntime } from './hooks/useNoteCanvasRuntime';
 import { usePlacementHistory } from './hooks/usePlacementHistory';
 import { useSlashCommandController } from './hooks/useSlashCommandController';
+import { useSurfaceModeController } from './hooks/useSurfaceModeController';
 import { BlockEditorLayer } from './layers/BlockEditorLayer';
 import { ExportPreviewLayer } from './layers/ExportPreviewLayer';
 import { SlashMenuLayer } from './layers/SlashMenuLayer';
@@ -56,8 +57,6 @@ import {
 } from './measurementService';
 import {
   createBlankDraftLayout,
-  createSurfaceModePolicy,
-  getNextSurfaceMode,
   getVisibleBlocksForSurface,
   shouldResolvePageCollisions,
 } from './modePolicyService';
@@ -80,7 +79,6 @@ import {
   MIN_BLOCK_HEIGHT,
   type BlockBoxLayout,
   type SnapGuide,
-  type SurfaceMode,
 } from './runtimeLayout';
 import type { BlockPlacementModel } from './types';
 import type {
@@ -131,7 +129,6 @@ export default function NoteCanvasRuntime() {
   const [focusBlockId, setFocusBlockId] = useState<string | null>(null);
   const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
   const [layoutMode, setLayoutMode] = useState(false);
-  const [surfaceMode, setSurfaceMode] = useState<SurfaceMode>('page');
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [layoutDrafts, setLayoutDrafts] = useState<Record<string, BlockBoxLayout>>({});
   const [draftLayout, setDraftLayout] = useState<BlockBoxLayout | null>(null);
@@ -159,6 +156,24 @@ export default function NoteCanvasRuntime() {
     togglePreviewBlockTypes,
     togglePreviewExportStatus,
   } = useFloatingOverlayController({ setInteractionState });
+
+  const clearBlockSelection = useCallback(() => {
+    setSelectedBlockId(null);
+    setActiveBlockId(null);
+    setFocusBlockId(null);
+    setInteractionState(idleInteraction());
+  }, []);
+
+  const {
+    pageOffsetX,
+    surfaceMode,
+    surfacePolicy,
+    toggleSurfaceMode,
+  } = useSurfaceModeController({
+    clearBlockSelection,
+    closeOverlay,
+    setSnapGuide,
+  });
 
   const handleNoteLoaded = useCallback(() => {
     setLayoutDrafts({});
@@ -234,11 +249,6 @@ export default function NoteCanvasRuntime() {
     [sortedBlocks],
   );
 
-  const surfacePolicy = useMemo(
-    () => createSurfaceModePolicy(surfaceMode),
-    [surfaceMode],
-  );
-  const pageOffsetX = surfacePolicy.pageOffsetX;
   const contentWidth = useCanvasContentWidth({
     containerRef: blockListRef,
     pageOffsetX,
@@ -428,13 +438,6 @@ export default function NoteCanvasRuntime() {
     setInteractionState(editingTextInteraction());
   }, [defaultDraftLayout]);
 
-  const clearBlockSelection = useCallback(() => {
-    setSelectedBlockId(null);
-    setActiveBlockId(null);
-    setFocusBlockId(null);
-    setInteractionState(idleInteraction());
-  }, []);
-
   const {
     clearSlashTarget,
     handleBlockKeyDown,
@@ -476,13 +479,6 @@ export default function NoteCanvasRuntime() {
       contentWidth,
       defaultDraftLayout,
     }));
-  };
-
-  const toggleSurfaceMode = () => {
-    setSurfaceMode((current) => getNextSurfaceMode(current));
-    closeOverlay();
-    setSnapGuide(null);
-    clearBlockSelection();
   };
 
   const handleSurfacePointerDown = (event: MouseEvent<HTMLElement>) => {

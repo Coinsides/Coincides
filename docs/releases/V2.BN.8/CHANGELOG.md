@@ -1,5 +1,13 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 L10 Surface Mode Controller Hook Seed
+
+- 新增 `hooks/useSurfaceModeController.ts`。
+- 将 `surfaceMode` state、`surfacePolicy` 派生、`pageOffsetX` 派生，以及 Page / Canvas mode toggle 的副作用从 `NoteCanvasRuntime.tsx` 迁入 Canvas Engine hook。
+- `NoteCanvasRuntime.tsx` 不再直接调用 `createSurfaceModePolicy()` 或 `getNextSurfaceMode()`；runtime 只消费 controller 返回的 mode / policy / toggle。
+- mode toggle 仍会统一关闭浮层、清除 snap guide、取消当前 block selection，保持前序体验不变。
+- 本轮属于 L10 Page / Canvas Mode Policy 的 controller seed，不改变 pan / zoom / viewport scroll 行为。
+
 ## Changed - V2.BN.8.1 L9 Floating Overlay Controller Hook Seed
 
 - 新增 `hooks/useFloatingOverlayController.ts`。

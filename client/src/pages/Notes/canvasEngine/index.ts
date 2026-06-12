@@ -13,6 +13,7 @@ export * from './hooks/useFloatingOverlayController';
 export * from './hooks/useNoteCanvasDataAdapter';
 export * from './hooks/usePlacementHistory';
 export * from './hooks/useSlashCommandController';
+export * from './hooks/useSurfaceModeController';
 export * from './layers/BlockControlBarLayer';
 export * from './layers/ExportPreviewLayer';
 export * from './layers/SlashMenuLayer';
