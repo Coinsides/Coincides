@@ -5,12 +5,6 @@ import {
   type KeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
-import {
-  Eye,
-  EyeOff,
-  FileText,
-  FileX,
-} from 'lucide-react';
 import KaTeXRenderer from '@/components/KaTeX/KaTeXRenderer';
 import sharedTypes from '@shared/types';
 import {
@@ -32,9 +26,7 @@ import {
 } from '../placementService';
 import {
   DEFAULT_BLOCK_HEIGHT,
-  type AIVisibility,
   type BlockBoxLayout,
-  type ExportRole,
 } from '../runtimeLayout';
 import type {
   NoteBlock,
@@ -42,6 +34,7 @@ import type {
 } from '../runtimeDataTypes';
 import { BlockControlBarLayer } from './BlockControlBarLayer';
 import { BlockSourceReferenceLayer } from './BlockSourceReferenceLayer';
+import { BlockStatusBadgeLayer } from './BlockStatusBadgeLayer';
 import styles from '../../NoteDetail.module.css';
 
 const {
@@ -76,16 +69,6 @@ interface BlockEditorLayerProps {
   anchorsBySourceRef: Record<string, SourceAnchor>;
   sourceJumpBusy: string | null;
   onViewSource: (anchorId: string) => void;
-}
-
-function exportRoleLabel(role: ExportRole): string {
-  if (role === 'included') return 'Export';
-  if (role === 'excluded') return 'Excluded';
-  return 'Scratch';
-}
-
-function aiVisibilityLabel(visibility: AIVisibility): string {
-  return visibility === 'visible' ? 'AI visible' : 'AI hidden';
 }
 
 export function BlockEditorLayer({
@@ -131,7 +114,6 @@ export function BlockEditorLayer({
     : null;
   const blockTypeLabel = getNoteBlockTemplateLabel(block.metadata, block.block_type);
   const showContextualTypeBadge = active || showBlockTypeBadge;
-  const showStatusBadges = showContextualTypeBadge || showAIStatusBadge || showExportStatusBadge;
 
   const updateDefinitionDraft = (
     patch: Partial<{ concept_name: string; description: string }>,
@@ -194,37 +176,15 @@ export function BlockEditorLayer({
       }}
       onMouseDown={onSelect}
     >
-      {showStatusBadges && (
-        <div className={styles.blockStatusBadges}>
-          {showContextualTypeBadge && (
-            <span className={styles.blockStatusBadge}>{blockTypeLabel}</span>
-          )}
-          {showAIStatusBadge && (
-            <span
-              className={`${styles.blockStatusBadge} ${aiVisibility === 'visible' ? styles.blockStatusBadgeOn : styles.blockStatusBadgeMuted}`}
-              title={aiVisibilityLabel(aiVisibility)}
-            >
-              {aiVisibility === 'visible' ? <Eye size={12} /> : <EyeOff size={12} />}
-              {aiVisibility === 'visible' ? 'AI' : 'AI hidden'}
-            </span>
-          )}
-          {showExportStatusBadge && (
-            <span
-              className={`${styles.blockStatusBadge} ${exportRole === 'included' ? styles.blockStatusBadgeOn : styles.blockStatusBadgeMuted}`}
-              title={exportRoleLabel(exportRole)}
-            >
-              {exportRole === 'included' ? <FileText size={12} /> : <FileX size={12} />}
-              {exportRoleLabel(exportRole)}
-            </span>
-          )}
-          {showExportStatusBadge && boundary === 'crossing' && (
-            <span className={`${styles.blockStatusBadge} ${styles.blockStatusBadgeWarning}`}>Crosses page</span>
-          )}
-          {showExportStatusBadge && boundary === 'outside' && (
-            <span className={`${styles.blockStatusBadge} ${styles.blockStatusBadgeMuted}`}>Page outside</span>
-          )}
-        </div>
-      )}
+      <BlockStatusBadgeLayer
+        blockTypeLabel={blockTypeLabel}
+        boundary={boundary}
+        exportRole={exportRole}
+        aiVisibility={aiVisibility}
+        showContextualTypeBadge={showContextualTypeBadge}
+        showAIStatusBadge={showAIStatusBadge}
+        showExportStatusBadge={showExportStatusBadge}
+      />
       <BlockControlBarLayer
         exportRole={exportRole}
         aiVisibility={aiVisibility}

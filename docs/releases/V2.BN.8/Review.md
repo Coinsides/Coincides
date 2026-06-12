@@ -235,11 +235,12 @@ client build: passed
 - `NoteCanvasRuntime.tsx` 现在只负责把 block 的 runtime state 和 callbacks 传给 `BlockEditorLayer`。
 - 新增 `layers/BlockControlBarLayer.tsx`，把 block control bar 从 `BlockEditorLayer` 内联 JSX 中迁出。
 - 新增 `layers/BlockSourceReferenceLayer.tsx`，把 source reference / source jump view entry 从 `BlockEditorLayer` 内联 JSX 中迁出。
+- 新增 `layers/BlockStatusBadgeLayer.tsx`，把 block type / AI / export / boundary badges 从 `BlockEditorLayer` 内联 JSX 中迁出。
 
 仍需验收：
 
-- `BlockEditorLayer` 内部仍包含 structured field editor、status badge、measurement callback；
-- 下一轮可以继续把 structured field editor、status badge 拆成更小 projection sublayers；
+- `BlockEditorLayer` 内部仍包含 structured field editor、measurement callback；
+- 下一轮可以继续把 structured field editor 拆成更小 projection sublayers；
 - 需要 browser smoke 验证 definition / formula / code / source badge 的表现没有回归。
 
 ### L9 - Overlay Layer Seed

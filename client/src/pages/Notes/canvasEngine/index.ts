@@ -8,6 +8,7 @@ export * from './layers/ExportPreviewLayer';
 export * from './layers/SlashMenuLayer';
 export * from './layers/BlockEditorLayer';
 export * from './layers/BlockSourceReferenceLayer';
+export * from './layers/BlockStatusBadgeLayer';
 export * from './measurementService';
 export * from './modePolicyService';
 export * from './overlayService';

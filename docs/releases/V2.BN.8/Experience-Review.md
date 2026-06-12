@@ -96,6 +96,7 @@ L10 mode policy seed: implemented, not browser-smoked
 - 如果后续出现 Definition / Formula 展开穿模，应优先检查 `measurementService.ts` 和后续 measurement registry。
 - 如果后续出现 Definition / Formula 内容保存、plain text、preview 文本不一致，应优先检查 `blockContentService.ts` 和 `layers/BlockEditorLayer.tsx`。
 - 如果后续出现 block toolbar、source badge、resize handle、structured field editing 视觉或操作异常，应优先检查 `layers/BlockEditorLayer.tsx`。
+- 如果后续只出现 block type、AI visibility、export status、Page boundary badges 异常，应优先检查 `layers/BlockStatusBadgeLayer.tsx`。
 - 如果后续只出现 block control bar 的移动、导出、AI 可见性、保存、删除按钮异常，应优先检查 `layers/BlockControlBarLayer.tsx`。
 - 如果后续只出现 source reference badge 或 View source jump button 异常，应优先检查 `layers/BlockSourceReferenceLayer.tsx`。
 - 如果后续出现 slash menu 样式或点击回调异常，应优先检查 `layers/SlashMenuLayer.tsx`。
