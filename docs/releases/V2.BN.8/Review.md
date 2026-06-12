@@ -1,5 +1,28 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 L9 Floating Overlay Controller Hook Seed
+
+```text
+status: in progress
+client build: passed
+```
+
+已完成部分：
+
+- 新增 `hooks/useFloatingOverlayController.ts`。
+- 顶部 chrome collapsed state 已从 `NoteCanvasRuntime.tsx` 迁出。
+- Insert / Note info / More actions / Preview 的互斥打开状态已从 `NoteCanvasRuntime.tsx` 迁出。
+- Preview debug overlay toggles 已从 `NoteCanvasRuntime.tsx` 迁出，并继续保持关闭 preview 后不丢开关状态。
+- `NoteCanvasRuntime.tsx` 不再直接写入 `openingMenuInteraction('noteInfo' | 'moreActions' | 'insert')` 或 `previewingInteraction()`；这些 interaction state 由 floating overlay controller 管理。
+
+仍需验收：
+
+- Browser smoke 验证 Insert / Preview / Info / More 任意时刻仍只有一个打开。
+- Browser smoke 验证关闭 panel 后 interaction state 能回到 idle。
+- Browser smoke 验证关闭 Preview 后，block type / AI visibility / export status overlay 开关状态仍保留。
+- Browser smoke 验证折叠 / 展开 top chrome 后页面工具仍可使用。
+- 后续 L9 仍需决定是否把这些面板 JSX 继续迁入独立 `FloatingOverlayLayer` / `NoteChromeLayer`。
+
 ## V2.BN.8.1 L9 Slash Command Controller Hook Seed
 
 ```text

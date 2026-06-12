@@ -1,5 +1,14 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 L9 Floating Overlay Controller Hook Seed
+
+- 新增 `hooks/useFloatingOverlayController.ts`。
+- 将 top chrome collapsed state、Insert / Note info / More actions / Preview 的互斥浮层状态，以及 preview 中 block type / AI visibility / export status overlay toggles 从 `NoteCanvasRuntime.tsx` 迁入 Canvas Engine hook。
+- `NoteCanvasRuntime.tsx` 不再直接调用 `openingMenuInteraction('noteInfo' | 'moreActions' | 'insert')` 或 `previewingInteraction()`；这些 interaction state 写入现在由 floating overlay controller 统一处理。
+- Preview overlay toggle 状态仍然在关闭 preview panel 后保留，保持前序体验约定。
+- 本次迁移不改变浮层视觉、位置或面板内容，只收口顶部 chrome / floating overlay state orchestration。
+- L9 floating overlay controller hook seed 迁出后 client build passed。
+
 ## Changed - V2.BN.8.1 L9 Slash Command Controller Hook Seed
 
 - 新增 `hooks/useSlashCommandController.ts`。

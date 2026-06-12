@@ -9,6 +9,7 @@ export * from './interactionController';
 export * from './hooks/useBlockMeasurement';
 export * from './hooks/useBlockPlacementInteractions';
 export * from './hooks/useCanvasContentWidth';
+export * from './hooks/useFloatingOverlayController';
 export * from './hooks/useNoteCanvasDataAdapter';
 export * from './hooks/usePlacementHistory';
 export * from './hooks/useSlashCommandController';

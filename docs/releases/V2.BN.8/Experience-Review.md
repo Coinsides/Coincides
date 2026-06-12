@@ -1,5 +1,17 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 L9 Floating Overlay Controller Experience Note
+
+```text
+L9 floating overlay controller hook: implemented, not browser-smoked
+```
+
+体验风险：
+
+- 本次迁移理论上不改变 Insert / Preview / Info / More 的视觉与入口，只改变顶部 chrome / floating overlay state orchestration 的归属。
+- 如果后续出现多个浮层同时打开、Preview 关闭后 overlay toggle 丢失、折叠 top chrome 后状态残留、或 interaction debug state 不回 idle，应优先检查 `hooks/useFloatingOverlayController.ts`。
+- 面板 JSX 仍在 `NoteCanvasRuntime.tsx` 中，本次只是先迁出状态控制；后续是否迁入 `FloatingOverlayLayer` / `NoteChromeLayer` 需要结合 L9 继续收口。
+
 ## V2.BN.8.1 L9 Slash Command Controller Experience Note
 
 ```text

@@ -36,6 +36,7 @@ import {
 } from './blockContentService';
 import { useCanvasContentWidth } from './hooks/useCanvasContentWidth';
 import { useBlockPlacementInteractions } from './hooks/useBlockPlacementInteractions';
+import { useFloatingOverlayController } from './hooks/useFloatingOverlayController';
 import { useNoteCanvasDataAdapter } from './hooks/useNoteCanvasDataAdapter';
 import { useNoteCanvasRuntime } from './hooks/useNoteCanvasRuntime';
 import { usePlacementHistory } from './hooks/usePlacementHistory';
@@ -46,8 +47,6 @@ import { SlashMenuLayer } from './layers/SlashMenuLayer';
 import {
   editingTextInteraction,
   idleInteraction,
-  openingMenuInteraction,
-  previewingInteraction,
   selectedBlockInteraction,
 } from './interactionController';
 import {
@@ -131,14 +130,6 @@ export default function NoteCanvasRuntime() {
   const [draftFocusNonce, setDraftFocusNonce] = useState(0);
   const [focusBlockId, setFocusBlockId] = useState<string | null>(null);
   const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
-  const [chromeCollapsed, setChromeCollapsed] = useState(false);
-  const [showAdvancedInsert, setShowAdvancedInsert] = useState(false);
-  const [showNoteInfo, setShowNoteInfo] = useState(false);
-  const [showMoreActions, setShowMoreActions] = useState(false);
-  const [showExportPreview, setShowExportPreview] = useState(false);
-  const [showPreviewBlockTypes, setShowPreviewBlockTypes] = useState(false);
-  const [showPreviewAIVisibility, setShowPreviewAIVisibility] = useState(false);
-  const [showPreviewExportStatus, setShowPreviewExportStatus] = useState(false);
   const [layoutMode, setLayoutMode] = useState(false);
   const [surfaceMode, setSurfaceMode] = useState<SurfaceMode>('page');
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
@@ -147,6 +138,27 @@ export default function NoteCanvasRuntime() {
   const [snapGuide, setSnapGuide] = useState<SnapGuide | null>(null);
   const [snapEnabled, setSnapEnabled] = useState(true);
   const [interactionState, setInteractionState] = useState(idleInteraction());
+
+  const {
+    chromeCollapsed,
+    closeOverlay,
+    collapseChrome,
+    expandChrome,
+    showAdvancedInsert,
+    showExportPreview,
+    showMoreActions,
+    showNoteInfo,
+    showPreviewAIVisibility,
+    showPreviewBlockTypes,
+    showPreviewExportStatus,
+    toggleAdvancedInsert,
+    toggleExportPreview,
+    toggleMoreActions,
+    toggleNoteInfo,
+    togglePreviewAIVisibility,
+    togglePreviewBlockTypes,
+    togglePreviewExportStatus,
+  } = useFloatingOverlayController({ setInteractionState });
 
   const handleNoteLoaded = useCallback(() => {
     setLayoutDrafts({});
@@ -468,10 +480,7 @@ export default function NoteCanvasRuntime() {
 
   const toggleSurfaceMode = () => {
     setSurfaceMode((current) => getNextSurfaceMode(current));
-    setShowAdvancedInsert(false);
-    setShowNoteInfo(false);
-    setShowMoreActions(false);
-    setShowExportPreview(false);
+    closeOverlay();
     setSnapGuide(null);
     clearBlockSelection();
   };
@@ -501,7 +510,7 @@ export default function NoteCanvasRuntime() {
             </button>
             <button
               className={styles.iconBtn}
-              onClick={() => setChromeCollapsed(false)}
+              onClick={expandChrome}
               title="Show note tools"
               aria-label="Show note tools"
             >
@@ -540,14 +549,7 @@ export default function NoteCanvasRuntime() {
               </button>
               <button
                 className={`${styles.modePill} ${showExportPreview ? styles.modePillActive : ''}`}
-                onClick={() => {
-                  setShowAdvancedInsert(false);
-                  setShowNoteInfo(false);
-                  setShowMoreActions(false);
-                  const nextPreviewState = !showExportPreview;
-                  setShowExportPreview(nextPreviewState);
-                  setInteractionState(nextPreviewState ? previewingInteraction() : idleInteraction());
-                }}
+                onClick={toggleExportPreview}
                 title="Preview export boundary"
                 aria-pressed={showExportPreview}
               >
@@ -576,14 +578,7 @@ export default function NoteCanvasRuntime() {
               </button>
               <button
                 className={styles.iconBtn}
-                onClick={() => {
-                  setShowAdvancedInsert(false);
-                  setShowExportPreview(false);
-                  setShowMoreActions(false);
-                  const nextNoteInfoState = !showNoteInfo;
-                  setShowNoteInfo(nextNoteInfoState);
-                  setInteractionState(nextNoteInfoState ? openingMenuInteraction('noteInfo') : idleInteraction());
-                }}
+                onClick={toggleNoteInfo}
                 title="View info"
                 aria-label="View info"
               >
@@ -591,14 +586,7 @@ export default function NoteCanvasRuntime() {
               </button>
               <button
                 className={styles.iconBtn}
-                onClick={() => {
-                  setShowAdvancedInsert(false);
-                  setShowNoteInfo(false);
-                  setShowExportPreview(false);
-                  const nextMoreActionsState = !showMoreActions;
-                  setShowMoreActions(nextMoreActionsState);
-                  setInteractionState(nextMoreActionsState ? openingMenuInteraction('moreActions') : idleInteraction());
-                }}
+                onClick={toggleMoreActions}
                 title="More note actions"
                 aria-label="More note actions"
               >
@@ -606,13 +594,7 @@ export default function NoteCanvasRuntime() {
               </button>
               <button
                 className={styles.iconBtn}
-                onClick={() => {
-                  setShowAdvancedInsert(false);
-                  setShowNoteInfo(false);
-                  setShowMoreActions(false);
-                  setShowExportPreview(false);
-                  setChromeCollapsed(true);
-                }}
+                onClick={collapseChrome}
                 title="Hide note tools"
                 aria-label="Hide note tools"
               >
@@ -627,7 +609,7 @@ export default function NoteCanvasRuntime() {
                     <div className={styles.popoverEyebrow}>Note info</div>
                     <strong>{note.title || 'Untitled note'}</strong>
                   </div>
-                  <button className={styles.iconBtn} onClick={() => setShowNoteInfo(false)} title="Close">
+                  <button className={styles.iconBtn} onClick={closeOverlay} title="Close">
                     <X size={15} />
                   </button>
                 </div>
@@ -662,7 +644,7 @@ export default function NoteCanvasRuntime() {
                     <div className={styles.popoverEyebrow}>Note actions</div>
                     <strong>More</strong>
                   </div>
-                  <button className={styles.iconBtn} onClick={() => setShowMoreActions(false)} title="Close">
+                  <button className={styles.iconBtn} onClick={closeOverlay} title="Close">
                     <X size={15} />
                   </button>
                 </div>
@@ -696,13 +678,10 @@ export default function NoteCanvasRuntime() {
                 showBlockTypes={showPreviewBlockTypes}
                 showAIVisibility={showPreviewAIVisibility}
                 showExportStatus={showPreviewExportStatus}
-                onToggleBlockTypes={() => setShowPreviewBlockTypes((value) => !value)}
-                onToggleAIVisibility={() => setShowPreviewAIVisibility((value) => !value)}
-                onToggleExportStatus={() => setShowPreviewExportStatus((value) => !value)}
-                onClose={() => {
-                  setShowExportPreview(false);
-                  setInteractionState(idleInteraction());
-                }}
+                onToggleBlockTypes={togglePreviewBlockTypes}
+                onToggleAIVisibility={togglePreviewAIVisibility}
+                onToggleExportStatus={togglePreviewExportStatus}
+                onClose={closeOverlay}
               />
             )}
 
@@ -719,13 +698,7 @@ export default function NoteCanvasRuntime() {
         <div className={styles.pageToolRail} aria-label="Page tools">
           <button
             className={styles.pageToolBtn}
-            onClick={() => {
-              setShowNoteInfo(false);
-              setShowMoreActions(false);
-              const nextInsertState = !showAdvancedInsert;
-              setShowAdvancedInsert(nextInsertState);
-              setInteractionState(nextInsertState ? openingMenuInteraction('insert') : idleInteraction());
-            }}
+            onClick={toggleAdvancedInsert}
             title="Insert block"
             aria-label="Insert block"
           >
@@ -741,7 +714,7 @@ export default function NoteCanvasRuntime() {
                 <div className={styles.popoverEyebrow}>Block insert</div>
                 <strong>Advanced insert</strong>
               </div>
-              <button className={styles.iconBtn} onClick={() => setShowAdvancedInsert(false)} title="Close">
+              <button className={styles.iconBtn} onClick={closeOverlay} title="Close">
                 <X size={15} />
               </button>
             </div>
@@ -776,7 +749,7 @@ export default function NoteCanvasRuntime() {
                   const created = await addBlock();
                   if (created) {
                     setFocusBlockId(created.id);
-                    setShowAdvancedInsert(false);
+                    closeOverlay();
                   }
                 }}
               >
