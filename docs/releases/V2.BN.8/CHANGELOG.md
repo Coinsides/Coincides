@@ -1,5 +1,13 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 L3 Content Width Hook Seed
+
+- 新增 `hooks/useCanvasContentWidth.ts`。
+- 将 `NoteCanvasRuntime.tsx` 中的 content width state、`ResizeObserver` 和 `window.resize` 监听迁入 Canvas Engine hook。
+- `NoteCanvasRuntime.tsx` 继续使用 `contentWidth` 作为 block layout / visible block / PageFrame 计算输入，但不再直接拥有宽度监听职责。
+- 这一步属于 L3 Viewport And World 的窄迁出，为后续 viewport / pan / zoom / world-screen transform 接管减少主 runtime 里的直接 DOM 监听。
+- L3 content width hook seed 迁出后 client build passed。
+
 ## Added
 
 - 新增 `docs/releases/V2.BN.8/` 局部密集文档区。

@@ -1,5 +1,25 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 L3 Content Width Hook Seed
+
+```text
+status: in progress
+client build: passed
+```
+
+已完成部分：
+
+- 新增 `hooks/useCanvasContentWidth.ts`。
+- `NoteCanvasRuntime.tsx` 不再直接维护 content width state。
+- `ResizeObserver`、`window.resize` 监听和 Page/Canvas mode 下的 available width 计算已迁入 hook。
+- `canvasEngine/index.ts` 导出 `useCanvasContentWidth`，作为后续 viewport hook / viewport service 继续收口的入口之一。
+
+仍需验收：
+
+- Browser smoke 验证 sidebar 收起 / 展开后 Page mode 宽度是否仍然正确。
+- Browser smoke 验证 Canvas mode 下 workspace 宽度是否仍然按 PageFrame offset 正常计算。
+- 后续 L3 仍需把真实 viewport state、pan / zoom、world-screen transform 和 overlay anchor 统一起来；本次只迁出 content width observer。
+
 ## 负责什么
 
 本文负责 V2.BN.8 / V2.BN.8.x 的工程质量 review：

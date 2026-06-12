@@ -44,6 +44,7 @@ import {
   stringValue,
   textFromContent,
 } from './blockContentService';
+import { useCanvasContentWidth } from './hooks/useCanvasContentWidth';
 import { useNoteCanvasDataAdapter } from './hooks/useNoteCanvasDataAdapter';
 import { useNoteCanvasRuntime } from './hooks/useNoteCanvasRuntime';
 import { usePlacementHistory } from './hooks/usePlacementHistory';
@@ -91,10 +92,8 @@ import { buildExportPreviewModel } from './exportPreviewService';
 import { getSlashMenuAnchor } from './overlayService';
 import {
   DEFAULT_BLOCK_HEIGHT,
-  DEFAULT_PAGE_CONTENT_WIDTH,
   LAYOUT_MEASURE_SUPPRESSION_MS,
   MIN_BLOCK_HEIGHT,
-  MIN_BLOCK_WIDTH,
   type BlockBoxLayout,
   type SnapGuide,
   type SlashMenuAnchor,
@@ -169,7 +168,6 @@ export default function NoteCanvasRuntime() {
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
   const [layoutDrafts, setLayoutDrafts] = useState<Record<string, BlockBoxLayout>>({});
   const [draftLayout, setDraftLayout] = useState<BlockBoxLayout | null>(null);
-  const [contentWidth, setContentWidth] = useState(DEFAULT_PAGE_CONTENT_WIDTH);
   const [snapGuide, setSnapGuide] = useState<SnapGuide | null>(null);
   const [snapEnabled, setSnapEnabled] = useState(true);
   const [interactionState, setInteractionState] = useState(idleInteraction());
@@ -262,6 +260,12 @@ export default function NoteCanvasRuntime() {
     () => createSurfaceModePolicy(surfaceMode),
     [surfaceMode],
   );
+  const pageOffsetX = surfacePolicy.pageOffsetX;
+  const contentWidth = useCanvasContentWidth({
+    containerRef: blockListRef,
+    pageOffsetX,
+    surfaceMode,
+  });
 
   const visibleBlocks = useMemo(
     () => getVisibleBlocksForSurface(sortedBlocks, surfacePolicy, contentWidth),
@@ -283,8 +287,6 @@ export default function NoteCanvasRuntime() {
     }, {});
     return resolvedLayouts;
   }, [visibleBlocks, contentWidth, layoutDrafts, surfaceMode]);
-
-  const pageOffsetX = surfacePolicy.pageOffsetX;
 
   const defaultDraftLayout = useMemo(() => {
     return createDefaultDraftLayout(blockLayouts, contentWidth);
@@ -359,29 +361,6 @@ export default function NoteCanvasRuntime() {
         : current
     ));
   }, [draftText, draftActive]);
-
-  useLayoutEffect(() => {
-    const updateContentWidth = () => {
-      const width = blockListRef.current?.clientWidth;
-      if (width && Number.isFinite(width)) {
-        const availableWidth = surfaceMode === 'canvas' ? width - pageOffsetX : width;
-        setContentWidth(Math.max(MIN_BLOCK_WIDTH, availableWidth));
-      }
-    };
-    updateContentWidth();
-
-    const element = blockListRef.current;
-    const observer = typeof ResizeObserver !== 'undefined' && element
-      ? new ResizeObserver(updateContentWidth)
-      : null;
-    observer?.observe(element as Element);
-
-    window.addEventListener('resize', updateContentWidth);
-    return () => {
-      observer?.disconnect();
-      window.removeEventListener('resize', updateContentWidth);
-    };
-  }, [pageOffsetX, surfaceMode]);
 
   const persistChangedBlockLayouts = useCallback((nextLayouts: Record<string, BlockBoxLayout>) => {
     Object.entries(nextLayouts).forEach(([blockId, nextLayout]) => {

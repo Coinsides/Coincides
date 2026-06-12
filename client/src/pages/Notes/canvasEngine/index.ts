@@ -7,6 +7,7 @@ export * from './exportPreviewService';
 export * from './geometry';
 export * from './interactionController';
 export * from './hooks/useBlockMeasurement';
+export * from './hooks/useCanvasContentWidth';
 export * from './hooks/useNoteCanvasDataAdapter';
 export * from './hooks/usePlacementHistory';
 export * from './layers/BlockControlBarLayer';

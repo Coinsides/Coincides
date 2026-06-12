@@ -1,5 +1,17 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 L3 Content Width Hook Experience Note
+
+```text
+L3 content width observer hook: implemented, not browser-smoked
+```
+
+体验风险：
+
+- 本次迁出理论上不改变视觉行为，只改变 content width 监听归属。
+- 如果后续出现 Page mode block 宽度异常、Canvas mode workspace 宽度异常、sidebar 收起后页面没有自动填充、slash menu / draft layout 宽度偏移，应优先检查 `hooks/useCanvasContentWidth.ts`。
+- 这一步尚未证明真实 viewport/pan/zoom 行为；它只是把未来 viewport 接管前的一段 DOM observer 从主 runtime 中剥离。
+
 ## 负责什么
 
 本文负责 V2.BN.8 / V2.BN.8.x 的体验验收。
