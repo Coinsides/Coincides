@@ -74,6 +74,33 @@ export function getInteractionBlockId(state: RuntimeInteractionState): string | 
   return state.blockId || null;
 }
 
+export interface WindowPointerSessionOptions {
+  onMove: (event: PointerEvent) => void;
+  onEnd: (event: PointerEvent) => void;
+  target?: Window;
+}
+
+export function attachWindowPointerSession({
+  onMove,
+  onEnd,
+  target = window,
+}: WindowPointerSessionOptions): () => void {
+  let handlePointerUp: (event: PointerEvent) => void;
+  const cleanup = () => {
+    target.removeEventListener('pointermove', onMove);
+    target.removeEventListener('pointerup', handlePointerUp);
+  };
+
+  handlePointerUp = (event: PointerEvent) => {
+    cleanup();
+    onEnd(event);
+  };
+
+  target.addEventListener('pointermove', onMove);
+  target.addEventListener('pointerup', handlePointerUp, { once: true });
+  return cleanup;
+}
+
 export interface CalculateDraggedBlockLayoutsInput {
   blockId: string;
   startLayouts: Record<string, BlockBoxLayout>;

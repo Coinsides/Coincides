@@ -60,6 +60,7 @@ import { BlockEditorLayer } from './layers/BlockEditorLayer';
 import { ExportPreviewLayer } from './layers/ExportPreviewLayer';
 import { SlashMenuLayer } from './layers/SlashMenuLayer';
 import {
+  attachWindowPointerSession,
   draggingBlockInteraction,
   editingTextInteraction,
   calculateDraggedBlockLayouts,
@@ -1032,7 +1033,6 @@ export default function NoteCanvasRuntime() {
 
     const handlePointerMove = (moveEvent: PointerEvent) => {
       setLayoutDrafts(() => {
-        const currentLayout = startLayouts[block.id] || layout;
         const deltaX = moveEvent.clientX - startClientX;
         const deltaY = moveEvent.clientY - startClientY;
         const result = calculateDraggedBlockLayouts({
@@ -1056,19 +1056,17 @@ export default function NoteCanvasRuntime() {
       });
     };
 
-    const handlePointerUp = () => {
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerup', handlePointerUp);
-      suppressMeasuredReflowUntilRef.current = Date.now() + LAYOUT_MEASURE_SUPPRESSION_MS;
-      movingBlockIdRef.current = null;
-      setSnapGuide(null);
-      setInteractionState(selectedBlockInteraction(block.id));
-      pushLayoutHistory(startLayouts, latestLayouts);
-      persistChangedBlockLayouts(latestLayouts);
-    };
-
-    window.addEventListener('pointermove', handlePointerMove);
-    window.addEventListener('pointerup', handlePointerUp, { once: true });
+    attachWindowPointerSession({
+      onMove: handlePointerMove,
+      onEnd: () => {
+        suppressMeasuredReflowUntilRef.current = Date.now() + LAYOUT_MEASURE_SUPPRESSION_MS;
+        movingBlockIdRef.current = null;
+        setSnapGuide(null);
+        setInteractionState(selectedBlockInteraction(block.id));
+        pushLayoutHistory(startLayouts, latestLayouts);
+        persistChangedBlockLayouts(latestLayouts);
+      },
+    });
   }, [blockLayouts, contentWidth, persistChangedBlockLayouts, pushLayoutHistory, snapEnabled, surfacePolicy, visibleBlocks]);
 
   const beginResizeBlock = useCallback((
@@ -1107,17 +1105,15 @@ export default function NoteCanvasRuntime() {
       });
     };
 
-    const handlePointerUp = () => {
-      window.removeEventListener('pointermove', handlePointerMove);
-      window.removeEventListener('pointerup', handlePointerUp);
-      setSnapGuide(null);
-      setInteractionState(selectedBlockInteraction(block.id));
-      pushLayoutHistory(startLayouts, latestLayouts);
-      persistChangedBlockLayouts(latestLayouts);
-    };
-
-    window.addEventListener('pointermove', handlePointerMove);
-    window.addEventListener('pointerup', handlePointerUp, { once: true });
+    attachWindowPointerSession({
+      onMove: handlePointerMove,
+      onEnd: () => {
+        setSnapGuide(null);
+        setInteractionState(selectedBlockInteraction(block.id));
+        pushLayoutHistory(startLayouts, latestLayouts);
+        persistChangedBlockLayouts(latestLayouts);
+      },
+    });
   }, [blockLayouts, contentWidth, persistChangedBlockLayouts, pushLayoutHistory, snapEnabled, surfacePolicy, visibleBlocks]);
 
   const handlePageSpaceClick = (event: MouseEvent<HTMLDivElement>) => {
