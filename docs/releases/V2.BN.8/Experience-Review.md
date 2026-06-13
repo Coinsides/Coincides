@@ -1,5 +1,28 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 L12 Runtime Ownership Experience Note
+
+```text
+NoteDetail is no longer the user-facing runtime body; the note page now enters Canvas Engine first.
+```
+
+体验判断：
+
+- 从当前代码结构看，用户打开 note 时已经进入 `NoteCanvasRuntimeProvider` / `NoteCanvasRuntime`，而不是旧 `NoteDetail.tsx` 大页面主体。
+- 这对用户应该是不可见的工程变化：如果体验正确，用户看到的是同一个 note 页面，而不是一次明显换壳。
+- 后续体验风险集中在 Canvas Engine 内部：
+  - block measurement / reflow 是否稳定；
+  - Page / Canvas mode 切换是否稳定；
+  - slash menu / preview / toolbar 这些 overlay 是否仍在正确位置；
+  - undo / redo 是否仍符合用户直觉；
+  - PageFrame outer boundary 与 content area 是否看起来像真实页面。
+
+仍需人工观察：
+
+- Henry 重新打开 note 后，原有写作、创建 block、移动、resize、preview、Page/Canvas 切换是否没有明显退化。
+- Browser Harness 在 Chrome remote debugging 授权后需要补跑；当前不能把 browser smoke 记为 passed。
+- 性能 seed 仍需用 50 blocks、200 blocks、长段落、formula-heavy note、page + workspace mixed note 复测。
+
 ## V2.BN.8.1 PageFrame Content Inset Experience Note
 
 ```text

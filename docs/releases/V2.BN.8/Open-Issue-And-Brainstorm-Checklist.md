@@ -26,6 +26,22 @@ Status: 初步人工测试中
 - [x] Note 页面已经挂在新的 engine seed 上。
 - [x] 视觉体验与上一版本相比没有明显退化。
 
+## Runtime Replacement Checkpoint
+
+```text
+status: L12 code decommission achieved, acceptance incomplete
+date: 2026-06-12
+```
+
+当前判断：
+
+- `NoteDetail.tsx` 已经退化为 route shell；
+- Note 页面真实 runtime path 已经进入 `canvasEngine/NoteCanvasRuntime.tsx`；
+- 后续 patch 不应继续把旧 `NoteDetail.tsx` 当作主要修补对象；
+- 新问题优先落到 Canvas Engine 的 layer / hook / service 边界中处理；
+- 本清单中较早提到“旧 NoteDetail 仍承担 runtime 主体”的条目保留为历史问题来源，当前已被 L12 decommission audit 覆盖；
+- `V2.BN.8.1` 仍未完成，因为 browser smoke、performance seed、Henry manual passed 仍是硬验收。
+
 ## Open Issue Checklist
 
 ### L5 Runtime Placement Record Checkpoint

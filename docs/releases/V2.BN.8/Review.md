@@ -1,5 +1,30 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 L12 Decommission Evidence Audit
+
+```text
+status: code decommission achieved, acceptance incomplete
+scope: L12 NoteDetail decommission / runtime replacement evidence
+branch: codex/v2-bn-canvas-engine
+current commit: ab25d5f
+browser smoke: blocked by Chrome remote debugging authorization
+Henry manual pass: still required
+```
+
+Current code evidence:
+
+- `client/src/pages/Notes/NoteDetail.tsx` now reads only the `noteId` route param.
+- `NoteDetail.tsx` mounts `NoteCanvasRuntimeProvider` and renders `NoteCanvasRuntime`.
+- The old NoteDetail runtime body is no longer present in `NoteDetail.tsx`.
+- The following L12 cleanup symbols are absent from `NoteDetail.tsx`: `blockLayouts`, `layoutDrafts`, `normalizeBlockLayout`, `beginMoveBlock`, `beginResizeBlock`, `getSlashMenuAnchor`, `SlashMenu`, `BlockEditor`.
+- Canvas Engine now owns the note-page runtime path through `client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx` and `hooks/useNoteCanvasRuntimeController.ts`.
+
+Interpretation:
+
+- Earlier sections that say `NoteDetail.tsx` is still the old runtime body are historical startup snapshots from before the replacement work.
+- The current risk has shifted from "old NoteDetail still owns runtime" to "Canvas Engine owns runtime, but its controller/layer/service boundaries still need acceptance hardening."
+- `V2.BN.8.1` is therefore not complete yet: browser smoke, performance seed, and Henry manual `passed` are still required before closing the stage.
+
 ## V2.BN.8.1 PageFrame Content Inset Seed
 
 ```text

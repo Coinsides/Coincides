@@ -1,5 +1,12 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 L12 Decommission Evidence Audit
+
+- `V2.BN.8.1-Runtime-Replacement-Plan.md` 更新当前状态：`NoteDetail.tsx` 已经不是旧 runtime 主体，而是 `noteId` route shell + `NoteCanvasRuntimeProvider` + `NoteCanvasRuntime`。
+- `Review.md` 新增 L12 decommission evidence audit，明确旧 startup snapshot 已被当前代码状态 superseded。
+- `Experience-Review.md` 新增 L12 runtime ownership note，说明用户进入 note 页面时已经进入 Canvas Engine runtime path。
+- 本轮不改产品代码；仍不把 V2.BN.8.1 标记为完成，因为 browser smoke、performance seed 和 Henry manual pass 仍未完成。
+
 ## Changed - V2.BN.8.1 PageFrame Content Inset Seed
 
 - `PageFrameModel` 新增 `contentInset`，用来区分 formal page outer boundary 和正式书写 content area。
