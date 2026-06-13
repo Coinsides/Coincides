@@ -1,5 +1,16 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Non-Browser Verification Refresh
+
+- 刷新 `V2.BN.8.1` 非浏览器验收证据：
+  - `npm run build:client` passed；
+  - `npm run smoke:canvas-engine-performance` passed；
+  - `server/npm run build` passed；
+  - `git diff --check` passed；
+  - changed-file secret scan 无新增文件可扫。
+- `Review.md` 明确记录：Browser Harness 暂按 Henry 指示延后到全部工程完成后统一跑。
+- `Open-Issue-And-Brainstorm-Checklist.md` 明确区分 `V2.BN.8.1` runtime replacement 硬门槛与后续 `V2.BN.8.x` polish backlog。
+
 ## Changed - V2.BN.8.1 Runtime Presentation Controller Seed
 
 - 新增 `hooks/useRuntimePresentationController.ts`，把 PageFrame / Canvas runtime model composition 与 `NoteChromeLayer` / `NoteRuntimeDocumentLayer` props composition 收进一个 L4/L9/L12 presentation boundary。

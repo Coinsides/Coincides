@@ -1863,3 +1863,35 @@ browser smoke: deferred by Henry until all replacement work is complete
 - Benchmark 或 browser smoke 失败时更新本文。
 - 工程风险变成体验风险时同步 `Experience-Review.md`。
 - 路线风险触发时同步 `Canvas-Engine-Fallback-Strategy.md`。
+
+## V2.BN.8.1 Non-Browser Verification Refresh - 2026-06-13
+
+```text
+status: passed for non-browser gates
+scope: current codex/v2-bn-canvas-engine branch
+browser harness: intentionally deferred until all replacement work is ready for one combined pass
+Henry manual pass: still required
+```
+
+本轮只刷新非浏览器证据，不运行 Browser Harness。
+
+已通过：
+
+- `npm run build:client`；
+- `npm run smoke:canvas-engine-performance`；
+- `server/npm run build`；
+- `git diff --check`；
+- changed-file secret scan：当前没有 changed/untracked files，因此没有可扫描的新增文件。
+
+当前工程判断：
+
+- `client/src/pages/Notes/NoteDetail.tsx` 仍然只是 route/provider shell；
+- `NoteCanvasRuntime.tsx` 仍然是 Note 页面 runtime host；
+- `useNoteCanvasRuntimeController()` 继续只组合 surface state、document data、layout model、block operations、presentation boundary controller；
+- 本轮没有新增产品代码改动，也没有发现新的非浏览器工程红灯。
+
+未完成项保持不变：
+
+- 最终 Browser Harness smoke；
+- Henry 手动视觉/交互验收；
+- `Open-Issue-And-Brainstorm-Checklist.md` 中被保留为后续 polish / patch backlog 的项目。

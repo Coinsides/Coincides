@@ -990,3 +990,21 @@ D &\subset \mathbb{R}^2,\quad
 - [ ] Patch Q: 将 slash menu / formula preview / inline math conversion / structured block measurement / draft block placement / code block visual language / canvas shell layout / PageFrame ruler 经验同步到 `Canvas-Engine-Interaction-Contract.md`。
   - [x] 已同步 FormulaBlock input sanitizer / help seed / inline formula boundary。
   - [x] 已同步 FloatingOverlayLayer portal seed / preview-info-more actions stacking boundary。
+
+## Current V2.BN.8.1 Closure Status - 2026-06-13
+
+```text
+code replacement: effectively closed for the current layer-by-layer replacement goal
+non-browser verification: refreshed and passed
+browser harness: deferred until the combined final pass
+manual acceptance: pending Henry
+```
+
+当前未勾选的 Patch B / E / F / G / H / I / J / Q 不再被视为阻塞 `V2.BN.8.1` runtime replacement 的硬门槛。它们进入后续 `V2.BN.8.x` polish / interaction backlog，除非 Henry 在最终手测中明确把其中某项提升为当前小版本必须修复的问题。
+
+保留这个区分的原因：
+
+- `V2.BN.8.1` 的核心目标是旧 `NoteDetail` runtime 的逐层接管；
+- 当前代码已经证明 `NoteDetail.tsx` 不再承载旧 runtime 主体；
+- 未勾选 patch 多数属于体验细节、长期契约或后续 block / formula / code polish；
+- Browser Harness 和 Henry manual pass 仍是最终是否通过的硬验收。
