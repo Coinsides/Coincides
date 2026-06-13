@@ -2054,7 +2054,7 @@ browser harness: not used
 - Canvas Engine performance seed；
 - diff whitespace / conflict-marker hygiene。
 
-changed-file secret scan 仍保留为单独人工/脚本检查，因为它依赖当前 changed-file 列表，不适合隐藏在 build 聚合命令里。
+当时 changed-file secret scan 仍保留为单独检查；后续已通过 `npm run check:changed-file-secrets` 脚本化，并纳入 `npm run verify:v2-bn8-runtime`。
 
 ## V2.BN.8.1 Changed-File Secret Scan Script - 2026-06-13
 

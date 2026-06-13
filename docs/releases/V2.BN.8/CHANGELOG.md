@@ -673,7 +673,7 @@
 
 - `npm run verify:v2-bn8-runtime` 现在包含 `git diff --check`。
 - `V2.BN.8.1-Final-Smoke-Protocol.md` 同步更新：diff hygiene 已纳入非浏览器聚合 gate。
-- changed-file secret scan 仍作为独立检查保留。
+- 当时 changed-file secret scan 仍作为独立检查保留；后续已在下一条记录中纳入聚合 gate。
 - `npm run verify:v2-bn8-runtime` passed。
 
 ## Added - V2.BN.8.1 Changed-File Secret Scan
