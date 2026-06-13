@@ -1,5 +1,22 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Runtime Block History Controller Experience Note
+
+```text
+Block trash history now has a small controller boundary instead of living in the runtime root controller.
+```
+
+体验判断：
+
+- 这一步不应该改变用户可见行为；toolbar 删除 block 后仍应进入 `trashedBlock` history seed。
+- 工程价值是让 create/trash/undo 这条路更清楚：`useRuntimeBlockHistoryController()` 拿到 block lifecycle callback，并把它接到 `usePlacementHistory()`。
+- Browser Harness 暂时不跑；等全部替换工作结束后再统一补真实浏览器验证。
+
+仍需人工观察：
+
+- Henry 后续复测 toolbar 删除后，Ctrl+Z 是否恢复被删 block，Ctrl+Y 是否再次删除。
+- 如果后续出现删除后不能撤回、撤回后 block 内容丢失、或输入框内部快捷键被抢，应优先检查 `hooks/useRuntimeBlockHistoryController.ts` 与 `hooks/usePlacementHistory.ts`。
+
 ## V2.BN.8.1 Runtime History Direct Draft Bridge Experience Note
 
 ```text

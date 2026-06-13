@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUIStore } from '@/stores/uiStore';
 import { useBlockFieldDraftController } from './useBlockFieldDraftController';
@@ -20,9 +20,9 @@ import {
 } from './useNoteCanvasLayoutModel';
 import { useNoteCanvasRuntime } from './useNoteCanvasRuntime';
 import { useNoteLoadResetController } from './useNoteLoadResetController';
-import { usePlacementHistory } from './usePlacementHistory';
 import { useRuntimeInteractionController } from './useRuntimeInteractionController';
 import { useRuntimeLayoutRefsController } from './useRuntimeLayoutRefsController';
+import { useRuntimeBlockHistoryController } from './useRuntimeBlockHistoryController';
 import { useSlashCommandController } from './useSlashCommandController';
 import { useSurfaceModeController } from './useSurfaceModeController';
 import { estimateBlockHeightForText } from '../measurementService';
@@ -189,14 +189,15 @@ export function useNoteCanvasRuntimeController() {
   });
 
   const {
+    handleTrashBlock,
     pushCreatedBlockHistory,
     pushLayoutHistory,
-    pushTrashedBlockHistory,
-  } = usePlacementHistory({
+  } = useRuntimeBlockHistoryController({
     applyLayoutDrafts: mergeLayoutDrafts,
+    blocks,
     persistLayoutSnapshot,
     restoreBlockForHistory: restoreBlock,
-    trashBlockForHistory: trashBlock,
+    trashBlock,
   });
 
   const {
@@ -252,12 +253,6 @@ export function useNoteCanvasRuntimeController() {
     suppressMeasuredReflowUntilRef,
     surfacePolicy,
   });
-
-  const handleTrashBlock = useCallback(async (blockId: string) => {
-    const block = blocks.find((item) => item.id === blockId);
-    const removed = await trashBlock(blockId);
-    if (removed && block) pushTrashedBlockHistory(block);
-  }, [blocks, pushTrashedBlockHistory, trashBlock]);
 
   const { beginMoveBlock, beginResizeBlock } = useBlockPlacementInteractions({
     blockLayouts,

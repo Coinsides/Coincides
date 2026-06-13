@@ -1,5 +1,12 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Runtime Block History Controller Seed
+
+- 新增 `hooks/useRuntimeBlockHistoryController.ts`，把 `usePlacementHistory()` 与 block trash history glue 从 `useNoteCanvasRuntimeController()` 中迁出。
+- `useNoteCanvasRuntimeController()` 继续组合 runtime controllers，但不再直接拥有 placement history hook 或 toolbar trash 后的 history 登记逻辑。
+- `trashBlock()` 成功后登记 `trashedBlock` history 的行为保持不变；draft 创建仍直接接入 `pushCreatedBlockHistory`。
+- 本轮不改变 create / trash / undo / redo 的用户可见行为，只继续压缩 runtime root 的历史状态边界。
+
 ## Changed - V2.BN.8.1 Runtime History Direct Draft Bridge Cleanup
 
 - `useNoteCanvasRuntimeController()` 不再用 `pushCreatedBlockHistoryRef` 桥接 draft 创建历史。

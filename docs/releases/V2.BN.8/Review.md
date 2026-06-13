@@ -1,5 +1,36 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Runtime Block History Controller Seed
+
+```text
+scope: L11 state persistence / L12 runtime root compression
+status: applied
+browser smoke: deferred by Henry until all replacement work is complete
+```
+
+### What Changed
+
+- Added `client/src/pages/Notes/canvasEngine/hooks/useRuntimeBlockHistoryController.ts`.
+- Moved the direct `usePlacementHistory()` call out of `useNoteCanvasRuntimeController()`.
+- Moved toolbar trash history glue into the new controller:
+  - find the current block before trash;
+  - call `trashBlock(blockId)`;
+  - when trash succeeds, register `pushTrashedBlockHistory(block)`.
+- `useNoteCanvasRuntimeController()` now consumes:
+  - `handleTrashBlock`;
+  - `pushCreatedBlockHistory`;
+  - `pushLayoutHistory`.
+
+### Review Judgment
+
+This is a good small L11/L12 cut. It does not solve every runtime-history concern, but it removes another direct history/service coupling from the large root controller. The new boundary is narrow enough to review: it only connects block lifecycle callbacks to placement history.
+
+### Residual Risk
+
+- Browser smoke is intentionally deferred per Henry instruction.
+- The behavior still depends on `usePlacementHistory()` for actual undo / redo stack execution.
+- Empty draft undo, convert-block undo, source/relation undo, and inline formula undo remain out of scope.
+
 ## V2.BN.8.1 Runtime History Direct Draft Bridge Cleanup
 
 ```text

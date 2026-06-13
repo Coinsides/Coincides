@@ -101,6 +101,12 @@ patch: V2.BN.8.1 Surface Mode Controller Seed + Surface Mode Transition Policy S
 
 ## L11 Runtime History Checkpoint
 
+最新补充：
+
+- [x] `useRuntimeBlockHistoryController()` 已接管 `usePlacementHistory()` 的挂载和 toolbar trash 后的 history 登记。
+- [x] `useNoteCanvasRuntimeController()` 不再直接拥有 placement history hook，也不再内联 trash history glue。
+- [ ] Henry 手动复测：toolbar 删除 block 后，Ctrl+Z / Ctrl+Y 的恢复和再次删除仍然符合预期。
+
 ```text
 status: keyboard intent service seed expanded, pending Henry visual retest
 patch: V2.BN.8.1 Runtime History Boundary Seed + Runtime History Keyboard Intent Service Seed
