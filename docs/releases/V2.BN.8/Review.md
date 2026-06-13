@@ -1909,3 +1909,17 @@ Henry manual pass: still required
 - `NoteDetail.tsx` shell、Canvas Engine runtime root、runtime controller composition boundary、非浏览器 gates 均已有证据；
 - Browser Harness smoke 和 Henry manual pass 仍是最终硬门槛；
 - 未勾选的 formula / inline math / structured block / code block / ruler 等条目被归入后续 `V2.BN.8.x` polish backlog，不再混同为当前 runtime replacement 的硬阻塞。
+
+## V2.BN.8.1 Final Smoke Protocol - 2026-06-13
+
+新增最终验收协议：
+
+- `docs/releases/V2.BN.8/V2.BN.8.1-Final-Smoke-Protocol.md`
+
+协议用途：
+
+- 固定最终 Browser Harness smoke 的检查范围；
+- 固定 Henry manual pass 的验收口径；
+- 明确 local test data reset 不是默认动作，必须由 Henry 决定或由旧数据污染触发；
+- 明确哪些 polish backlog 不阻塞 `V2.BN.8.1`；
+- 明确只有 Browser Harness smoke 和 Henry manual pass 都完成后，才能关闭本目标。

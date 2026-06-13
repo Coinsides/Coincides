@@ -1008,3 +1008,17 @@ manual acceptance: pending Henry
 - 当前代码已经证明 `NoteDetail.tsx` 不再承载旧 runtime 主体；
 - 未勾选 patch 多数属于体验细节、长期契约或后续 block / formula / code polish；
 - Browser Harness 和 Henry manual pass 仍是最终是否通过的硬验收。
+
+## Final Smoke Protocol
+
+```text
+status: ready for later execution
+document: docs/releases/V2.BN.8/V2.BN.8.1-Final-Smoke-Protocol.md
+browser harness: not run yet
+Henry manual pass: pending
+```
+
+- [x] Final smoke protocol created.
+- [ ] Browser Harness smoke executed by protocol.
+- [ ] Henry manual pass recorded by protocol.
+- [ ] Failure/pass result synced back to Review / Experience Review / CHANGELOG.
