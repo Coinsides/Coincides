@@ -1,5 +1,14 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 L3-L5 Layout Model Hook Seed
+
+- 新增 `hooks/useNoteCanvasLayoutModel.ts`。
+- 将 visible blocks resolution、resolved `blockLayouts`、default draft layout、PageFrame height、primary PageFrame、canvas block placements、runtime model composition 和 export preview model 从 `NoteCanvasRuntime.tsx` 迁入 Canvas Engine hook。
+- 将 formula-like block 高度估算辅助函数从 `NoteCanvasRuntime.tsx` 迁入 `measurementService.ts`，让 root runtime 不再直接持有 formula preview height heuristic。
+- `NoteCanvasRuntime.tsx` 继续保留 placement persistence callback、measured-height reflow decision、field draft -> text draft derivation 和 controller composition；本轮只收口 L3-L5 的 layout/model composition 边界。
+- 本轮不改变 Page / Canvas mode 行为、layout payload、PageFrame 尺寸规则、export preview 分组、block measurement tolerance 或 persistence API。
+- L3-L5 layout model hook seed 迁出后 client build / server build passed。
+
 ## Changed - V2.BN.8.1 L6/L9 Writing Surface Layer Seed
 
 - 新增 `layers/NoteWritingSurfaceLayer.tsx`。

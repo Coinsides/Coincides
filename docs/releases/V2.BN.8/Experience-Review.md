@@ -1,5 +1,18 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 L3-L5 Layout Model Hook Experience Note
+
+```text
+L3-L5 layout model hook: implemented, not browser-smoked
+```
+
+体验风险：
+
+- 本次迁移理论上不改变用户可见行为，只改变 layout/model composition 的归属。
+- 如果后续出现 Page mode workspace block 泄漏、Canvas mode workspace block 消失、PageFrame 高度异常、Preview 统计错误、或 slash/draft 默认落点异常，应优先检查 `hooks/useNoteCanvasLayoutModel.ts`。
+- `NoteCanvasRuntime.tsx` 现在更接近 runtime composition root，但仍保留 placement persistence callback、field draft text derivation、measured height reflow decision 和 controller wiring；这些仍是后续 L6-L12 的继续瘦身点。
+- 浏览器 smoke 需要重点看 Page / Canvas 切换、Preview 面板统计、双击空白创建 draft、长文本粘贴后 PageFrame 高度、以及 workspace block 不污染 Page mode。
+
 ## V2.BN.8.1 Current Runtime Experience Snapshot
 
 ```text

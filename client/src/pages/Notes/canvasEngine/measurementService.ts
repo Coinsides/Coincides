@@ -11,6 +11,8 @@ import {
   reflowLayoutsAfterHeightChange,
   resolveStackedLayoutCollisions,
 } from './placementService';
+import { textFromContent } from './blockContentService';
+import type { NoteBlock } from './runtimeDataTypes';
 
 export interface TextBlockHeightEstimate {
   text: string;
@@ -64,6 +66,34 @@ export function estimateTextBlockHeight({
   const sourceExtra = sourceReferenceCount > 0 ? 34 : 0;
 
   return Math.max(MIN_BLOCK_HEIGHT, BLOCK_VERTICAL_CHROME + rows * TEXT_LINE_HEIGHT + previewExtra + sourceExtra);
+}
+
+export function isFormulaLikeBlock(block: NoteBlock): boolean {
+  const templateKey = typeof block.metadata?.template_key === 'string' ? block.metadata.template_key : '';
+  const templateId = typeof block.metadata?.template_id === 'string' ? block.metadata.template_id : '';
+  const legacyTemplateId = typeof block.metadata?.legacy_template_id === 'string' ? block.metadata.legacy_template_id : '';
+  return block.block_type === 'formula'
+    || templateKey.includes('formula')
+    || templateId.includes('formula')
+    || legacyTemplateId.includes('formula');
+}
+
+export function shouldShowFormulaPreview(block: NoteBlock, text: string): boolean {
+  return isFormulaLikeBlock(block) && text.trim().length > 0;
+}
+
+export function estimateBlockHeightForText(block: NoteBlock, text: string, width: number): number {
+  return estimateTextBlockHeight({
+    text,
+    width,
+    title: block.title,
+    showPreview: shouldShowFormulaPreview(block, text),
+    sourceReferenceCount: block.source_references?.length || 0,
+  });
+}
+
+export function estimateBlockHeight(block: NoteBlock, width: number): number {
+  return estimateBlockHeightForText(block, textFromContent(block), width);
 }
 
 export function applyMeasuredBlockLayoutToLayouts({

@@ -6,13 +6,9 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useUIStore } from '@/stores/uiStore';
 import {
-  buildNoteCanvasRuntimeModel,
-} from './engineModel';
-import {
   combinedDefinitionText,
   presentationKindForBlock,
   stringValue,
-  textFromContent,
 } from './blockContentService';
 import { useCanvasContentWidth } from './hooks/useCanvasContentWidth';
 import { useBlockPlacementInteractions } from './hooks/useBlockPlacementInteractions';
@@ -24,6 +20,10 @@ import { useLayoutDraftController } from './hooks/useLayoutDraftController';
 import { useLayoutInteractionController } from './hooks/useLayoutInteractionController';
 import { useNoteCanvasDataAdapter } from './hooks/useNoteCanvasDataAdapter';
 import { useNoteCanvasRuntime } from './hooks/useNoteCanvasRuntime';
+import {
+  useNoteCanvasFrameModel,
+  useNoteCanvasResolvedLayoutModel,
+} from './hooks/useNoteCanvasLayoutModel';
 import { usePlacementHistory } from './hooks/usePlacementHistory';
 import { useRuntimeInteractionController } from './hooks/useRuntimeInteractionController';
 import { useSlashCommandController } from './hooks/useSlashCommandController';
@@ -33,66 +33,18 @@ import {
   NoteFloatingPanelLayer,
 } from './layers/NoteChromeLayer';
 import { NoteWritingSurfaceLayer } from './layers/NoteWritingSurfaceLayer';
-import { estimateTextBlockHeight } from './measurementService';
+import { estimateBlockHeightForText } from './measurementService';
 import {
-  getVisibleBlocksForSurface,
   shouldResolvePageCollisions,
 } from './modePolicyService';
 import {
-  calculatePageFrameHeight,
-  createDefaultDraftLayout,
-  createRuntimePageFrame,
-} from './pageFrameService';
-import {
-  applyMoveSnap,
-  buildDefaultBlockLayouts,
-  getBoundaryKind,
   layoutsEqual,
-  normalizeBlockLayout,
 } from './placementService';
-import { buildExportPreviewModel } from './exportPreviewService';
 import {
   LAYOUT_MEASURE_SUPPRESSION_MS,
-  MIN_BLOCK_HEIGHT,
   type BlockBoxLayout,
 } from './runtimeLayout';
-import type { BlockPlacementModel } from './types';
-import type {
-  NoteBlock,
-} from './runtimeDataTypes';
-import {
-  createRuntimeViewport,
-  createRuntimeWorld,
-} from './viewportService';
 import styles from '../NoteDetail.module.css';
-
-function isFormulaLikeBlock(block: NoteBlock): boolean {
-  const templateKey = typeof block.metadata?.template_key === 'string' ? block.metadata.template_key : '';
-  const templateId = typeof block.metadata?.template_id === 'string' ? block.metadata.template_id : '';
-  const legacyTemplateId = typeof block.metadata?.legacy_template_id === 'string' ? block.metadata.legacy_template_id : '';
-  return block.block_type === 'formula'
-    || templateKey.includes('formula')
-    || templateId.includes('formula')
-    || legacyTemplateId.includes('formula');
-}
-
-function shouldShowPreview(block: NoteBlock, text: string): boolean {
-  return isFormulaLikeBlock(block) && text.trim().length > 0;
-}
-
-function estimateBlockHeightForText(block: NoteBlock, text: string, width: number): number {
-  return estimateTextBlockHeight({
-    text,
-    width,
-    title: block.title,
-    showPreview: shouldShowPreview(block, text),
-    sourceReferenceCount: block.source_references?.length || 0,
-  });
-}
-
-function estimateBlockHeight(block: NoteBlock, width: number): number {
-  return estimateBlockHeightForText(block, textFromContent(block), width);
-}
 
 export default function NoteCanvasRuntime() {
   const { noteId } = useNoteCanvasRuntime();
@@ -235,30 +187,17 @@ export default function NoteCanvasRuntime() {
     surfaceMode,
   });
 
-  const visibleBlocks = useMemo(
-    () => getVisibleBlocksForSurface(sortedBlocks, surfacePolicy, contentWidth),
-    [sortedBlocks, surfacePolicy, contentWidth],
-  );
-
-  const blockLayouts = useMemo(() => {
-    const defaults = buildDefaultBlockLayouts(visibleBlocks, contentWidth, estimateBlockHeight);
-    const resolvedLayouts = visibleBlocks.reduce<Record<string, BlockBoxLayout>>((acc, block) => {
-      const draft = layoutDrafts[block.id];
-      acc[block.id] = draft || normalizeBlockLayout({
-        block,
-        fallback: defaults[block.id],
-        contentWidth,
-        surfaceMode,
-        estimateHeight: estimateBlockHeight,
-      });
-      return acc;
-    }, {});
-    return resolvedLayouts;
-  }, [visibleBlocks, contentWidth, layoutDrafts, surfaceMode]);
-
-  const defaultDraftLayout = useMemo(() => {
-    return createDefaultDraftLayout(blockLayouts, contentWidth);
-  }, [blockLayouts, contentWidth]);
+  const {
+    blockLayouts,
+    defaultDraftLayout,
+    visibleBlocks,
+  } = useNoteCanvasResolvedLayoutModel({
+    contentWidth,
+    layoutDrafts,
+    sortedBlocks,
+    surfaceMode,
+    surfacePolicy,
+  });
 
   const {
     activateDraft,
@@ -284,56 +223,20 @@ export default function NoteCanvasRuntime() {
     setSelectedBlockId,
   });
 
-  const pageContentHeight = useMemo(() => {
-    return calculatePageFrameHeight({
-      blockLayouts,
-      draftActive,
-      draftLayout,
-      defaultDraftLayout,
-    });
-  }, [blockLayouts, draftActive, draftLayout, defaultDraftLayout]);
-
-  const primaryPageFrame = useMemo(
-    () => createRuntimePageFrame({
-      x: pageOffsetX,
-      height: pageContentHeight,
-    }),
-    [pageContentHeight, pageOffsetX],
-  );
-
-  const canvasBlockPlacements = useMemo<BlockPlacementModel[]>(
-    () => visibleBlocks.flatMap((block) => {
-      const layout = blockLayouts[block.id];
-      if (!layout) return [];
-      const boundary = getBoundaryKind(layout);
-      return [{
-        blockId: block.id,
-        x: layout.x + pageOffsetX,
-        y: layout.y,
-        width: layout.width,
-        height: layout.height,
-        rotation: layout.rotation || 0,
-        surface: boundary === 'inside' ? 'formal_page' : 'canvas_workspace',
-      }];
-    }),
-    [blockLayouts, pageOffsetX, visibleBlocks],
-  );
-
-  const noteCanvasRuntime = useMemo(() => {
-    const viewport = createRuntimeViewport(surfaceMode, pageContentHeight);
-
-    return buildNoteCanvasRuntimeModel({
-      mode: surfaceMode,
-      world: createRuntimeWorld(surfaceMode, pageContentHeight),
-      primaryPageFrame,
-      viewport,
-      blockPlacements: canvasBlockPlacements,
-    });
-  }, [canvasBlockPlacements, pageContentHeight, primaryPageFrame, surfaceMode]);
-
-  const exportPreview = useMemo(() => {
-    return buildExportPreviewModel(visibleBlocks, blockLayouts);
-  }, [visibleBlocks, blockLayouts]);
+  const {
+    exportPreview,
+    noteCanvasRuntime,
+    pageContentHeight,
+    primaryPageFrame,
+  } = useNoteCanvasFrameModel({
+    blockLayouts,
+    defaultDraftLayout,
+    draftActive,
+    draftLayout,
+    pageOffsetX,
+    surfaceMode,
+    visibleBlocks,
+  });
 
   const persistChangedBlockLayouts = useCallback((nextLayouts: Record<string, BlockBoxLayout>) => {
     Object.entries(nextLayouts).forEach(([blockId, nextLayout]) => {

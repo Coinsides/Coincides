@@ -1,5 +1,37 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 L3-L5 Layout Model Hook Seed
+
+```text
+status: in progress
+client build: passed
+server build: passed
+```
+
+已完成部分：
+
+- 新增 `hooks/useNoteCanvasLayoutModel.ts`。
+- `NoteCanvasRuntime.tsx` 不再直接组合以下模型：
+  - visible blocks for current surface；
+  - resolved `blockLayouts`；
+  - default draft layout；
+  - PageFrame content height；
+  - primary PageFrame；
+  - canvas block placements；
+  - `noteCanvasRuntime` model；
+  - export preview model。
+- `measurementService.ts` 现在提供 `estimateBlockHeightForText()` / `estimateBlockHeight()`，root runtime 不再内联 formula-like height heuristic。
+- 本轮保持 `useDraftBlockController()` 所需的 `defaultDraftLayout` 顺序不变：先由 layout model hook 解析 block layout，再把 default draft layout 注入 draft controller，最后由 frame model hook 使用 draft 状态组合 PageFrame/runtime model。
+
+仍需验收：
+
+- Page mode visible blocks 是否仍过滤 workspace block；
+- Canvas mode 是否仍显示 workspace block；
+- PageFrame height 是否仍跟随 page block 和 draft block bottom；
+- export preview Included / Excluded / AI visible / AI hidden 统计是否仍正常；
+- move / resize 后 reload 是否仍保持 placement；
+- 浏览器 smoke 尚未执行。
+
 ## V2.BN.8.1 Current Runtime Decommission Snapshot
 
 ```text
