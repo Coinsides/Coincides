@@ -1,5 +1,32 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Current Runtime Decommission Snapshot
+
+```text
+status: in progress
+NoteDetail shell: achieved
+runtime replacement: partially achieved
+```
+
+当前事实：
+
+- `client/src/pages/Notes/NoteDetail.tsx` 当前只负责读取 `noteId` route param，并通过 `NoteCanvasRuntimeProvider` 渲染 `NoteCanvasRuntime`。
+- 旧的 `NoteDetail.tsx` 大型 runtime 主体已经清退；当前剩余替换工作集中在 `canvasEngine/NoteCanvasRuntime.tsx` 内部继续分层。
+- `NoteCanvasRuntime.tsx` 当前仍保留：
+  - `blockLayouts` resolved layout 计算；
+  - PageFrame / runtime model composition；
+  - field draft -> text draft derivation；
+  - measured height -> layout draft reflow decision；
+  - placement persistence callback boundary；
+  - controller / layer composition。
+- 因此当前状态不是“NoteDetail 仍是旧 runtime”，而是“Canvas Engine 已成为 note 页面 runtime root，但 runtime root 内部仍需继续瘦身和验收”。
+
+下一步验收重点：
+
+- 继续减少 `NoteCanvasRuntime.tsx` 对 layout / measurement / persistence decision 的直接持有；
+- 对 Page / Canvas mode、block edit、draft、slash、resize/reflow、preview overlay 做浏览器 smoke；
+- 完成 L12 acceptance 后再判断 `V2.BN.8.1` 是否可以关闭。
+
 ## V2.BN.8.1 L6/L9 Writing Surface Layer Seed
 
 ```text
@@ -32,7 +59,6 @@ server build: passed
 
 仍需验收：
 
-- server build；
 - block focus / select / toolbar 是否仍正常；
 - block text change / field draft change / save 是否仍正常；
 - measured height reflow 是否仍推开后续 block；
@@ -69,7 +95,6 @@ server build: passed
 
 仍需验收：
 
-- server build；
 - Note title blur / Enter 保存是否仍正常；
 - Page / Canvas、Preview、Layout、Info、More、Collapse / Expand 按钮是否仍正常；
 - Advanced insert 是否仍能添加 block 并 focus 到新 block；

@@ -1,5 +1,17 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Current Runtime Experience Snapshot
+
+```text
+NoteDetail shell achieved; Canvas Engine runtime root still needs browser smoke
+```
+
+体验判断：
+
+- 从代码结构看，用户进入 note 页面时已经通过 `NoteCanvasRuntimeProvider` 进入 Canvas Engine runtime root；`NoteDetail.tsx` 不再是体验主体。
+- 当前风险不再是“旧 NoteDetail 页面继续承载核心体验”，而是“新的 `NoteCanvasRuntime.tsx` composition root 仍聚合了较多 layout / measurement / persistence decision”。
+- 后续体验验收不能只看页面是否能打开；必须逐项验证自然写作、block 选中、field editing、formula 展开、slash menu、resize/reflow、Page/Canvas 切换、preview overlay 与 source jump。
+
 ## V2.BN.8.1 L6/L9 Writing Surface Layer Experience Note
 
 ```text
