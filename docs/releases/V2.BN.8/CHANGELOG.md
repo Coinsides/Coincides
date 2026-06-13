@@ -1,5 +1,15 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Shared Overlay Placement Helper Seed
+
+- `overlayService.ts` 新增 `placeOverlayInViewport()`，作为第一版 shared viewport overlay placement helper。
+- Slash menu、selected block control bar、Formula help tooltip 现在都通过同一个 helper 做 viewport padding、基础 clamp 和简单 fallback placement。
+- Slash menu 继续优先出现在 caret 下方，空间不足时可翻到上方。
+- Block control bar 继续优先出现在 selected block 右侧，右侧空间不足时可翻到左侧。
+- Formula help tooltip 继续优先出现在 help button 下方，底部空间不足时可翻到上方。
+- 这仍是 L9 seed，不是完整 collision / flip / viewport clamp engine；未来 pan/zoom/world transform 仍需要更正式的 anchor service。
+- client build passed。
+
 ## Changed - V2.BN.8.1 Formula Help Overlay Portal Seed
 
 - `FormulaBlockProjection` 的 `?` help tooltip 现在通过 `FloatingOverlayLayer` free placement 渲染，不再作为 block-local hover 子元素参与 block DOM 层级。

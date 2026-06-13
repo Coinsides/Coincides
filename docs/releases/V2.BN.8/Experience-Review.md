@@ -1,5 +1,25 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Shared Overlay Placement Helper Experience Note
+
+```text
+Slash menu, block control bar, and Formula help now share the same first-version viewport placement helper.
+```
+
+体验判断：
+
+- 这一步不是给用户增加新按钮，而是减少三个浮层“各算各的位置”的不稳定来源。
+- Slash menu、selected block control bar、Formula help tooltip 都应该遵守相同的 viewport padding 和基础翻转规则。
+- 对用户来说，预期体验是：靠近屏幕边缘时，浮层不要跑出视野，也不要因为 block 的局部 DOM 层级被裁切。
+- 这一步仍不是完整 overlay collision engine；多个浮层同时打开时的互斥、遮挡和优先级还要继续用后续 L9/L12 验收确认。
+
+仍需人工观察：
+
+- 页面底部输入 `/` 时，slash menu 是否向上翻转或保持可见；
+- 右侧边缘选中 block 时，control bar 是否保持可点；
+- Formula help tooltip 在 viewport 底部是否完整可读；
+- Preview / More / Info 与 selected toolbar 同时出现时是否仍由正确层级覆盖。
+
 ## V2.BN.8.1 Formula Help Overlay Portal Experience Note
 
 ```text

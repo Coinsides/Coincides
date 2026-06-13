@@ -7,6 +7,18 @@ import {
 import { clamp } from './geometry';
 
 type ClientRectLike = Pick<DOMRect, 'left' | 'right' | 'top' | 'bottom'>;
+type OverlaySide = 'below' | 'right';
+type OverlayAlign = 'start' | 'end';
+
+interface ViewportOverlayPlacementOptions {
+  anchorRect: ClientRectLike;
+  overlayWidth: number;
+  overlayHeight: number;
+  offset?: number;
+  viewportPadding?: number;
+  preferredSide?: OverlaySide;
+  align?: OverlayAlign;
+}
 
 const MIRROR_STYLE_PROPERTIES = [
   'boxSizing',
@@ -29,6 +41,49 @@ const MIRROR_STYLE_PROPERTIES = [
   'textAlign',
   'textTransform',
 ] as const;
+
+export function placeOverlayInViewport({
+  anchorRect,
+  overlayWidth,
+  overlayHeight,
+  offset = 8,
+  viewportPadding = 16,
+  preferredSide = 'below',
+  align = 'start',
+}: ViewportOverlayPlacementOptions): SlashMenuAnchor {
+  const maxX = Math.max(viewportPadding, window.innerWidth - overlayWidth - viewportPadding);
+  const maxY = Math.max(viewportPadding, window.innerHeight - overlayHeight - viewportPadding);
+  const alignedX = align === 'end'
+    ? anchorRect.right - overlayWidth
+    : anchorRect.left;
+  const alignedY = align === 'end'
+    ? anchorRect.bottom - overlayHeight
+    : anchorRect.top;
+
+  if (preferredSide === 'right') {
+    const rightX = anchorRect.right + offset;
+    const leftX = anchorRect.left - overlayWidth - offset;
+    const canOpenRight = rightX + overlayWidth <= window.innerWidth - viewportPadding;
+    const canOpenLeft = leftX >= viewportPadding;
+    const rawX = canOpenRight || !canOpenLeft ? rightX : leftX;
+
+    return {
+      x: clamp(rawX, viewportPadding, maxX),
+      y: clamp(alignedY, viewportPadding, maxY),
+    };
+  }
+
+  const belowY = anchorRect.bottom + offset;
+  const aboveY = anchorRect.top - overlayHeight - offset;
+  const canOpenBelow = belowY + overlayHeight <= window.innerHeight - viewportPadding;
+  const canOpenAbove = aboveY >= viewportPadding;
+  const rawY = canOpenBelow || !canOpenAbove ? belowY : aboveY;
+
+  return {
+    x: clamp(alignedX, viewportPadding, maxX),
+    y: clamp(rawY, viewportPadding, maxY),
+  };
+}
 
 function getTextInputCaretRect(element: HTMLElement, caret?: number): ClientRectLike | null {
   if (
@@ -95,53 +150,39 @@ export function getSlashMenuAnchor(
   const anchorRect = getTextInputCaretRect(element, caret) || elementRect;
   const viewportPadding = 16;
   const menuWidth = Math.min(SLASH_MENU_WIDTH, Math.max(0, window.innerWidth - (viewportPadding * 2)));
-  const maxX = Math.max(viewportPadding, window.innerWidth - menuWidth - viewportPadding);
-  const x = clamp(anchorRect.left, viewportPadding, maxX);
-  const belowY = anchorRect.bottom + SLASH_MENU_OFFSET;
-  const aboveY = anchorRect.top - SLASH_MENU_HEIGHT_ESTIMATE - SLASH_MENU_OFFSET;
-  const wouldOverflowViewport = anchorRect.bottom + SLASH_MENU_OFFSET + SLASH_MENU_HEIGHT_ESTIMATE > window.innerHeight;
-  const y = wouldOverflowViewport && aboveY > 0 ? aboveY : belowY;
 
-  return { x, y: Math.max(viewportPadding, y) };
+  return placeOverlayInViewport({
+    anchorRect,
+    overlayWidth: menuWidth,
+    overlayHeight: SLASH_MENU_HEIGHT_ESTIMATE,
+    offset: SLASH_MENU_OFFSET,
+    viewportPadding,
+    preferredSide: 'below',
+  });
 }
 
 export function getBlockControlAnchor(element: HTMLElement | null | undefined): SlashMenuAnchor | null {
   if (!element) return null;
 
   const rect = element.getBoundingClientRect();
-  const viewportPadding = 16;
-  const toolbarWidthEstimate = 220;
-  const toolbarHeightEstimate = 34;
-  const offset = 8;
-  const rightSideX = rect.right + offset;
-  const leftSideX = rect.left;
-  const rawX = rightSideX + toolbarWidthEstimate > window.innerWidth - viewportPadding
-    ? leftSideX
-    : rightSideX;
-  const maxX = Math.max(viewportPadding, window.innerWidth - toolbarWidthEstimate - viewportPadding);
-  const maxY = Math.max(viewportPadding, window.innerHeight - toolbarHeightEstimate - viewportPadding);
 
-  return {
-    x: clamp(rawX, viewportPadding, maxX),
-    y: clamp(rect.top, viewportPadding, maxY),
-  };
+  return placeOverlayInViewport({
+    anchorRect: rect,
+    overlayWidth: 220,
+    overlayHeight: 34,
+    preferredSide: 'right',
+  });
 }
 
 export function getTooltipAnchor(element: HTMLElement | null | undefined): SlashMenuAnchor | null {
   if (!element) return null;
 
   const rect = element.getBoundingClientRect();
-  const viewportPadding = 16;
-  const tooltipWidthEstimate = 320;
-  const tooltipHeightEstimate = 82;
-  const offset = 8;
-  const maxX = Math.max(viewportPadding, window.innerWidth - tooltipWidthEstimate - viewportPadding);
-  const belowY = rect.bottom + offset;
-  const aboveY = rect.top - tooltipHeightEstimate - offset;
-  const wouldOverflowViewport = belowY + tooltipHeightEstimate > window.innerHeight - viewportPadding;
 
-  return {
-    x: clamp(rect.left, viewportPadding, maxX),
-    y: Math.max(viewportPadding, wouldOverflowViewport && aboveY > viewportPadding ? aboveY : belowY),
-  };
+  return placeOverlayInViewport({
+    anchorRect: rect,
+    overlayWidth: 320,
+    overlayHeight: 82,
+    preferredSide: 'below',
+  });
 }

@@ -1,5 +1,27 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Shared Overlay Placement Helper Seed
+
+```text
+status: technical validation passed, browser smoke deferred
+scope: L9 Floating Overlay Layer
+client build: passed
+browser smoke: deferred until the full replacement pass, per Henry instruction
+```
+
+Completed:
+
+- Added `placeOverlayInViewport()` as a shared viewport overlay placement helper.
+- Rewired slash menu, selected block control bar, and Formula help tooltip to use the same helper.
+- Centralized viewport padding, basic clamp, below/above fallback, and right/left fallback behavior.
+- Kept existing overlay ownership unchanged: `FloatingOverlayLayer` renders the portal; individual layer/components still own their visual content.
+
+Still intentionally out of scope:
+
+- No real world/screen transform anchor service for future pan/zoom yet.
+- No full collision engine for multiple simultaneous overlays.
+- No browser smoke in this checkpoint; browser harness testing is intentionally deferred until the current replacement pass is complete.
+
 ## V2.BN.8.1 Formula Help Overlay Portal Seed
 
 ```text

@@ -46,7 +46,7 @@ date: 2026-06-12
 
 ```text
 status: portal seed expanded again, pending Henry visual retest
-patch: V2.BN.8.1 Floating Overlay Portal Seed + Insert/Source Overlay Portal Seed + Slash Menu Portal Seed + Block Control Overlay Portal Seed + Formula Help Overlay Portal Seed
+patch: V2.BN.8.1 Floating Overlay Portal Seed + Insert/Source Overlay Portal Seed + Slash Menu Portal Seed + Block Control Overlay Portal Seed + Formula Help Overlay Portal Seed + Shared Overlay Placement Helper Seed
 ```
 
 已完成：
@@ -59,11 +59,12 @@ patch: V2.BN.8.1 Floating Overlay Portal Seed + Insert/Source Overlay Portal See
 - Slash menu 已进入 `FloatingOverlayLayer` free placement，并使用 viewport/caret anchor seed；
 - Block control bar 已进入 `FloatingOverlayLayer` free placement，并使用 selected block viewport anchor seed；
 - Formula help tooltip 已进入 `FloatingOverlayLayer` free placement，并使用 help-button viewport anchor seed；
+- Slash menu / Block control bar / Formula help tooltip 已共用第一版 viewport placement helper seed；
 - portal shell 不吞掉页面点击，只有实际面板可交互。
 
 仍未完成：
 
-- full caret/world anchor service、collision / flip / viewport clamp service 尚未完成；
+- full caret/world anchor service、完整 collision / flip / viewport clamp service 尚未完成；
 - 需要 Henry 手动复测 Preview 是否覆盖 selected block toolbar，而不是混层。
 
 ## Open Issue Checklist
