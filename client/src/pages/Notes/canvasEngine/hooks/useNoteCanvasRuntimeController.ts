@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUIStore } from '@/stores/uiStore';
 import { useBlockFieldDraftController } from './useBlockFieldDraftController';
@@ -26,7 +26,6 @@ import { useRuntimeLayoutRefsController } from './useRuntimeLayoutRefsController
 import { useSlashCommandController } from './useSlashCommandController';
 import { useSurfaceModeController } from './useSurfaceModeController';
 import { estimateBlockHeightForText } from '../measurementService';
-import type { NoteBlock } from '../runtimeDataTypes';
 
 export function useNoteCanvasRuntimeController() {
   const { noteId } = useNoteCanvasRuntime();
@@ -179,7 +178,26 @@ export function useNoteCanvasRuntimeController() {
     surfaceMode,
     surfacePolicy,
   });
-  const pushCreatedBlockHistoryRef = useRef<((block: NoteBlock) => void) | null>(null);
+
+  const {
+    persistChangedBlockLayouts,
+    persistLayoutSnapshot,
+  } = useLayoutPersistenceController({
+    blocks,
+    blockLayouts,
+    persistBlockLayout,
+  });
+
+  const {
+    pushCreatedBlockHistory,
+    pushLayoutHistory,
+    pushTrashedBlockHistory,
+  } = usePlacementHistory({
+    applyLayoutDrafts: mergeLayoutDrafts,
+    persistLayoutSnapshot,
+    restoreBlockForHistory: restoreBlock,
+    trashBlockForHistory: trashBlock,
+  });
 
   const {
     activateDraft,
@@ -198,7 +216,7 @@ export function useNoteCanvasRuntimeController() {
     defaultDraftLayout,
     defaultTextTemplate,
     note,
-    onDraftPersisted: (block) => pushCreatedBlockHistoryRef.current?.(block),
+    onDraftPersisted: pushCreatedBlockHistory,
     saveBlock,
     setActiveBlockId,
     setFocusBlockId,
@@ -221,15 +239,6 @@ export function useNoteCanvasRuntimeController() {
     visibleBlocks,
   });
 
-  const {
-    persistChangedBlockLayouts,
-    persistLayoutSnapshot,
-  } = useLayoutPersistenceController({
-    blocks,
-    blockLayouts,
-    persistBlockLayout,
-  });
-
   const { updateBlockFieldDraft } = useBlockFieldDraftController({
     setBlockFieldDrafts,
     setBlockTextDrafts,
@@ -243,18 +252,6 @@ export function useNoteCanvasRuntimeController() {
     suppressMeasuredReflowUntilRef,
     surfacePolicy,
   });
-
-  const {
-    pushCreatedBlockHistory,
-    pushLayoutHistory,
-    pushTrashedBlockHistory,
-  } = usePlacementHistory({
-    applyLayoutDrafts: mergeLayoutDrafts,
-    persistLayoutSnapshot,
-    restoreBlockForHistory: restoreBlock,
-    trashBlockForHistory: trashBlock,
-  });
-  pushCreatedBlockHistoryRef.current = pushCreatedBlockHistory;
 
   const handleTrashBlock = useCallback(async (blockId: string) => {
     const block = blocks.find((item) => item.id === blockId);

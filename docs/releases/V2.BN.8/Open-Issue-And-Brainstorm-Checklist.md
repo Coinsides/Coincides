@@ -112,6 +112,7 @@ patch: V2.BN.8.1 Runtime History Boundary Seed + Runtime History Keyboard Intent
 - created block / trashed block 已通过 soft-delete / restore 进入 runtime history seed；
 - Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z 的按键意图判断已迁入 `historyService.ts`；
 - `usePlacementHistory()` 继续负责 stack 与实际 mutation callback。
+- draft 创建历史已去掉 `useNoteCanvasRuntimeController()` 内的临时 ref bridge，改为直接接入 `pushCreatedBlockHistory`。
 
 仍未完成：
 

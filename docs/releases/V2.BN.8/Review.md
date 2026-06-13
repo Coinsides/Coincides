@@ -1,5 +1,26 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Runtime History Direct Draft Bridge Cleanup
+
+```text
+status: technical validation passed, browser smoke deferred
+scope: L11 history boundary / L12 runtime root compression
+client build: passed
+browser smoke: deferred until the full replacement pass, per Henry instruction
+```
+
+Completed:
+
+- Removed the `pushCreatedBlockHistoryRef` bridge from `useNoteCanvasRuntimeController()`.
+- Moved `usePlacementHistory()` earlier in the root hook order so draft persistence can receive `pushCreatedBlockHistory` directly.
+- Kept `usePlacementHistory()` as the owner of layout/create/trash undo-redo stacks.
+- Kept visual behavior and data mutation callbacks unchanged.
+
+Still intentionally out of scope:
+
+- No new undo scope beyond the existing layout/create/trash seed.
+- No browser smoke in this checkpoint.
+
 ## V2.BN.8.1 Canvas Engine Performance Seed
 
 ```text
@@ -22,7 +43,7 @@ Completed:
   - `formula-heavy note`;
   - `page + workspace mixed note`.
 - The seed exercises production pure functions for placement, collision resolution, height-change reflow, snap, runtime model assembly, relation endpoint reserve, and layout history diff.
-- Latest run passed with a total reported seed time of `7.83ms`.
+- Latest run passed with a total reported seed time of `8.89ms`.
 
 Still intentionally out of scope:
 

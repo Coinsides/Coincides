@@ -1,5 +1,21 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Runtime History Direct Draft Bridge Experience Note
+
+```text
+Draft block creation now connects to runtime history without a temporary root ref bridge.
+```
+
+体验判断：
+
+- 这一步不应该改变用户可见行为；创建 draft block 后，仍应进入 created block history seed。
+- 价值主要在工程侧：runtime root 少一条临时 ref glue，后续检查 create / trash / undo 的路径更直。
+
+仍需人工观察：
+
+- Browser Harness 统一补跑时，验证 Ctrl+Z 能撤回刚创建的 block，Ctrl+Y 能恢复。
+- Henry 手动确认前，不能把 create/trash undo-redo 体验标为最终 passed。
+
 ## V2.BN.8.1 Canvas Engine Performance Seed Experience Note
 
 ```text

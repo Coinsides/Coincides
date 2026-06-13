@@ -1,5 +1,11 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Runtime History Direct Draft Bridge Cleanup
+
+- `useNoteCanvasRuntimeController()` 不再用 `pushCreatedBlockHistoryRef` 桥接 draft 创建历史。
+- `usePlacementHistory()` 现在在 draft controller 之前初始化，`onDraftPersisted` 直接接入 `pushCreatedBlockHistory`。
+- 该改动不改变 create / trash / undo / redo 行为，只减少 runtime root 内的临时 ref glue。
+
 ## Added - V2.BN.8.1 Canvas Engine Performance Seed
 
 - 新增 `npm run smoke:canvas-engine-performance`，作为不依赖浏览器的 Canvas Engine 纯逻辑性能 seed。
