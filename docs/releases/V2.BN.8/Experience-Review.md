@@ -1,5 +1,20 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Runtime Layer Props Side Effect Boundary Experience Note
+
+```text
+The runtime root no longer owns navigation or global toast side effects; the nearest UI-facing hook boundaries own them.
+```
+
+体验判断：
+- 这一步不应该改变用户可见行为；返回 Project、点击 Favorite 占位提示、slash command 的 disabled reason / template unavailable 提示都应该保持原样。
+- 工程价值是让 runtime root 更像纯 engine controller composition，而不是同时碰 router、UI store、layer props 和 block operation wiring。
+- Browser Harness 暂时不跑；等全部替换工作结束后再统一补真实浏览器验证。
+
+仍需人工观察：
+- Henry 后续复测 Back Project、Favorite 按钮、`/` 命令禁用提示、模板不可用提示时，应确认提示和导航没有退化。
+- 如果后续出现返回 Project 无效、Favorite 没提示、或 slash command toast 不出现，优先检查 `hooks/useNoteCanvasLayerProps.ts` 与 `hooks/useRuntimeBlockOperationsController.ts`。
+
 ## V2.BN.8.1 Runtime Block Operations Controller Experience Note
 
 ```text

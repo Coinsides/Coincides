@@ -1,3 +1,4 @@
+import { useUIStore } from '@/stores/uiStore';
 import {
   useRuntimeBlockEditingController,
   type UseRuntimeBlockEditingControllerOptions,
@@ -17,13 +18,14 @@ import {
 
 export type UseRuntimeBlockOperationsControllerOptions =
   UseRuntimeBlockHistoryControllerOptions &
-  Omit<UseRuntimeNaturalWritingControllerOptions, 'onDraftPersisted'> &
+  Omit<UseRuntimeNaturalWritingControllerOptions, 'addToast' | 'onDraftPersisted'> &
   UseRuntimeBlockEditingControllerOptions &
   Omit<UseRuntimePlacementInteractionControllerOptions, 'pushLayoutHistory'>;
 
 export function useRuntimeBlockOperationsController(
   options: UseRuntimeBlockOperationsControllerOptions,
 ) {
+  const addToast = useUIStore((s) => s.addToast);
   const {
     handleTrashBlock,
     pushCreatedBlockHistory,
@@ -32,6 +34,7 @@ export function useRuntimeBlockOperationsController(
 
   const naturalWriting = useRuntimeNaturalWritingController({
     ...options,
+    addToast,
     onDraftPersisted: pushCreatedBlockHistory,
   });
 

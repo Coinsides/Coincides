@@ -1,5 +1,35 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Runtime Layer Props Side Effect Boundary Seed
+
+```text
+scope: L8 block operations side effects / L9 layer props UI side effects / L12 runtime root compression
+status: applied
+browser smoke: deferred by Henry until all replacement work is complete
+```
+
+### What Changed
+
+- `useRuntimeBlockOperationsController()` now reads `addToast` from `useUIStore()` for natural writing / slash command feedback.
+- `useNoteCanvasLayerProps()` now reads `navigate` from `useNavigate()` for Back Project and `addToast` from `useUIStore()` for Favorite placeholder feedback.
+- `useNoteCanvasRuntimeController()` no longer imports or calls `useNavigate()` or `useUIStore()`.
+- The runtime root still passes the same callbacks and state into the layer props boundary, but it no longer owns these two UI-side effects.
+
+### Review Notes
+
+- This checkpoint is a boundary extraction only.
+- Back Project navigation, Favorite placeholder toast, slash command disabled reason toast, template unavailable toast, and all block operations are unchanged.
+- The ownership rule is now cleaner: runtime root composes engine controllers; UI-facing hook boundaries own UI store and navigation side effects.
+- Browser Harness is intentionally deferred until the full replacement pass is complete.
+
+### Verification
+
+- `npm run build:client` passed.
+- `npm run smoke:canvas-engine-performance` passed.
+- `server` `npm run build` passed.
+- `git diff --check` passed.
+- Changed-file secret scan passed.
+
 ## V2.BN.8.1 Runtime Block Operations Controller Seed
 
 ```text

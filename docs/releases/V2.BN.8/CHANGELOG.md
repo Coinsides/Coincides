@@ -1,5 +1,12 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Runtime Layer Props Side Effect Boundary Seed
+
+- `useNoteCanvasLayerProps()` 现在自己读取 route navigation 和 favorite toast callback，不再要求 `useNoteCanvasRuntimeController()` 传入 `navigate` 或 favorite `addToast`。
+- `useRuntimeBlockOperationsController()` 现在自己读取 slash/natural-writing 所需的 toast callback，不再要求 runtime root 传入 `addToast`。
+- `useNoteCanvasRuntimeController()` 不再直接导入 `useNavigate()` 或 `useUIStore()`；root 继续只组合 runtime controllers、frame model 和 layer props。
+- 本轮不改变返回 Project、Favorite 提示、slash command disabled/template warning toast 或任何用户可见行为。
+
 ## Changed - V2.BN.8.1 Runtime Block Operations Controller Seed
 
 - 新增 `hooks/useRuntimeBlockOperationsController.ts`，把 block lifecycle history、natural writing、structured field editing、measured reflow、move / resize placement interaction 组合进一个 L6/L7/L8/L11 block operations boundary。

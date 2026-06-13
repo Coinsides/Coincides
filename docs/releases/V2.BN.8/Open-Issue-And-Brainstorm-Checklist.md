@@ -20,6 +20,19 @@ Stage: V2.BN.8 engine seed manual smoke
 Status: 初步人工测试中
 ```
 
+## Runtime Layer Props Side Effect Boundary Seed
+
+patch: V2.BN.8.1 Runtime Layer Props Side Effect Boundary Seed
+status: code applied, full non-browser verification passed
+
+- [x] Move Favorite placeholder toast lookup into `useNoteCanvasLayerProps()`.
+- [x] Move Back Project navigation lookup into `useNoteCanvasLayerProps()`.
+- [x] Move natural-writing slash toast lookup into `useRuntimeBlockOperationsController()`.
+- [x] Remove direct root controller imports of `useNavigate()` and `useUIStore()`.
+- [x] Run full non-browser checks.
+- [ ] Henry manual visual retest: Back Project, Favorite placeholder toast, and slash command warning toasts should not regress.
+- [ ] Browser Harness retest deferred until the full replacement pass is done.
+
 ## Runtime Block Operations Controller Seed
 
 patch: V2.BN.8.1 Runtime Block Operations Controller Seed

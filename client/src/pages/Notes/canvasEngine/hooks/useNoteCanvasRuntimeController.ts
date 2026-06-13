@@ -1,5 +1,3 @@
-import { useNavigate } from 'react-router-dom';
-import { useUIStore } from '@/stores/uiStore';
 import { useNoteCanvasLayerProps } from './useNoteCanvasLayerProps';
 import { useNoteCanvasRuntime } from './useNoteCanvasRuntime';
 import { useRuntimeBlockOperationsController } from './useRuntimeBlockOperationsController';
@@ -10,8 +8,6 @@ import { useRuntimeSurfaceStateController } from './useRuntimeSurfaceStateContro
 
 export function useNoteCanvasRuntimeController() {
   const { noteId } = useNoteCanvasRuntime();
-  const navigate = useNavigate();
-  const addToast = useUIStore((s) => s.addToast);
   const {
     activeBlockId,
     blockListRef,
@@ -148,7 +144,6 @@ export function useNoteCanvasRuntimeController() {
     beginMoveBlock,
     beginResizeBlock,
   } = useRuntimeBlockOperationsController({
-    addToast,
     applyLayoutDrafts: mergeLayoutDrafts,
     applyMeasuredBlockHeightDraft,
     applyTemplateToBlock,
@@ -203,7 +198,6 @@ export function useNoteCanvasRuntimeController() {
 
   const layerProps = useNoteCanvasLayerProps({
     activeBlockId,
-    addToast,
     anchorsBySourceRef,
     blockFieldDrafts,
     blockLayouts,
@@ -221,7 +215,6 @@ export function useNoteCanvasRuntimeController() {
     insertTemplateGroups,
     interactionState,
     layoutMode,
-    navigate,
     newBlockText,
     newTemplateId,
     note,

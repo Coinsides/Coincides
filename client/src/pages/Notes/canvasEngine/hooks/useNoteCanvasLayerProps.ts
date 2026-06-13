@@ -3,8 +3,8 @@ import type {
   Dispatch,
   SetStateAction,
 } from 'react';
-import type { NavigateFunction } from 'react-router-dom';
-import type { Toast } from '@/stores/uiStore';
+import { useNavigate } from 'react-router-dom';
+import { useUIStore } from '@/stores/uiStore';
 import type {
   NoteChromeLayerProps,
 } from '../layers/NoteChromeLayer';
@@ -22,8 +22,6 @@ type UseNoteCanvasLayerPropsInput =
   & Omit<NoteWritingSurfaceLayerProps, 'onFocusBlock'>
   & Pick<NoteRuntimeDocumentLayerProps, 'onSurfacePointerDown' | 'templateWarning'>
   & {
-    addToast: (type: Toast['type'], message: string) => void;
-    navigate: NavigateFunction;
     note: Note | null;
     onFloatingPanelFocusBlock: NoteFloatingPanelLayerProps['onFocusBlock'];
     onWritingSurfaceFocusBlock: NoteWritingSurfaceLayerProps['onFocusBlock'];
@@ -34,16 +32,18 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
   chromeProps: NoteChromeLayerProps;
   documentLayerProps: NoteRuntimeDocumentLayerProps;
 } | null {
+  const navigate = useNavigate();
+  const addToast = useUIStore((s) => s.addToast);
   const courseId = input.note?.course_id;
 
   const handleAddFavorite = useCallback(() => {
-    input.addToast('info', 'Favorites will become persistent in a later Better Notebook patch');
-  }, [input]);
+    addToast('info', 'Favorites will become persistent in a later Better Notebook patch');
+  }, [addToast]);
 
   const handleBackProject = useCallback(() => {
     if (!courseId) return;
-    input.navigate(`/projects/${courseId}`);
-  }, [courseId, input]);
+    navigate(`/projects/${courseId}`);
+  }, [courseId, navigate]);
 
   const handleCloseSourceJump = useCallback(() => {
     input.setSourceJumpTarget(null);
