@@ -115,6 +115,7 @@ connectingRelationFuture
 - zoom 改变时 overlay 尺寸可选择 screen-fixed，但 anchor 必须跟随对象；
 - PageFrame 和 workspace 使用同一 world coordinate；
 - PageFrame 外对象不应在切换视图时被硬夹回 PageFrame。
+- Page / Canvas 模式切换必须清掉 transient UI state：关闭浮层、清除 snap guide、清除 block selection；这些是 mode transition policy，不是随机 UI side effect。
 - V2.BN.8.1 当前先使用 workspace scroll 作为 pan/zoom seed 的替代；Canvas mode 下禁止外层页面滚动，只允许 writing surface / workspace 自己滚动。
 - `+ Insert` 属于 viewport floating action，不属于 canvas content；它不随 world 内容滚动，也不参与 PageFrame / block measurement。
 

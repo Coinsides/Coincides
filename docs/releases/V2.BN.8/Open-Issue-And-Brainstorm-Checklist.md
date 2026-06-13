@@ -70,6 +70,25 @@ patch: V2.BN.8.1 Floating Overlay Portal Seed + Insert/Source Overlay Portal See
 - full caret/world anchor service、完整 collision / flip / viewport clamp service 尚未完成；
 - 需要 Henry 手动复测 Preview 是否覆盖 selected block toolbar，而不是混层。
 
+## L10 Surface Mode Policy Checkpoint
+
+```text
+status: transition policy seed expanded, pending Henry visual retest
+patch: V2.BN.8.1 Surface Mode Controller Seed + Surface Mode Transition Policy Seed
+```
+
+已完成：
+
+- Page / Canvas label、next label、page offset、workspace visibility、blank draft placement 已进入 `modePolicyService`；
+- Page / Canvas 切换时关闭 overlay、清空 snap guide、清除 block selection 的规则已进入 `createSurfaceModeTransitionPolicy()`；
+- `useSurfaceModeController()` 现在执行 transition record，不再自行定义这些清理规则。
+
+仍未完成：
+
+- full pan / zoom transition policy 尚未完成；
+- viewport scroll ownership policy beyond current shell seed 尚未完成；
+- 需要 Henry 手动复测模式切换后是否还会残留 overlay、snap guide 或 selected block。
+
 ## Open Issue Checklist
 
 ### L5 Runtime Placement Record Checkpoint

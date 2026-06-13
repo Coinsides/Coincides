@@ -1,7 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
 import {
   createSurfaceModePolicy,
-  getNextSurfaceMode,
+  createSurfaceModeTransitionPolicy,
 } from '../modePolicyService';
 import type { SnapGuide, SurfaceMode } from '../runtimeLayout';
 
@@ -23,11 +23,12 @@ export function useSurfaceModeController({
   );
 
   const toggleSurfaceMode = useCallback(() => {
-    setSurfaceMode((current) => getNextSurfaceMode(current));
-    closeOverlay();
-    setSnapGuide(null);
-    clearBlockSelection();
-  }, [clearBlockSelection, closeOverlay, setSnapGuide]);
+    const transition = createSurfaceModeTransitionPolicy(surfaceMode);
+    setSurfaceMode(transition.nextMode);
+    if (transition.closeOverlay) closeOverlay();
+    if (transition.clearSnapGuide) setSnapGuide(null);
+    if (transition.clearBlockSelection) clearBlockSelection();
+  }, [clearBlockSelection, closeOverlay, setSnapGuide, surfaceMode]);
 
   return {
     pageOffsetX: surfacePolicy.pageOffsetX,

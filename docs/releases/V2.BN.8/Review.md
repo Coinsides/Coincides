@@ -1301,6 +1301,9 @@ client build: passed
   - Page mode 是否允许 page collision resolve；
   - elastic avoidance 触发条件；
   - blank double-click draft placement。
+- `modePolicyService.ts` 新增 `createSurfaceModeTransitionPolicy()`；
+- Page / Canvas 切换时关闭 overlay、清空 snap guide、清除 block selection 的 transient cleanup 规则现在由 mode policy 输出；
+- `useSurfaceModeController()` 只执行 transition record，不再自行决定切换副作用；
 - `visibleBlocks` 不再在 runtime 主文件里直接判断 `surfaceMode === 'page'`；
 - 双击空白创建 block 的规则进入 mode policy：
 

@@ -23,6 +23,13 @@ export interface SurfaceModePolicy {
   useGlobalPageScroll: boolean;
 }
 
+export interface SurfaceModeTransitionPolicy {
+  nextMode: SurfaceMode;
+  closeOverlay: boolean;
+  clearSnapGuide: boolean;
+  clearBlockSelection: boolean;
+}
+
 export function createSurfaceModePolicy(surfaceMode: SurfaceMode): SurfaceModePolicy {
   const isCanvasMode = surfaceMode === 'canvas';
   return {
@@ -39,6 +46,15 @@ export function createSurfaceModePolicy(surfaceMode: SurfaceMode): SurfaceModePo
 
 export function getNextSurfaceMode(surfaceMode: SurfaceMode): SurfaceMode {
   return surfaceMode === 'page' ? 'canvas' : 'page';
+}
+
+export function createSurfaceModeTransitionPolicy(surfaceMode: SurfaceMode): SurfaceModeTransitionPolicy {
+  return {
+    nextMode: getNextSurfaceMode(surfaceMode),
+    closeOverlay: true,
+    clearSnapGuide: true,
+    clearBlockSelection: true,
+  };
 }
 
 export function getVisibleBlocksForSurface<TBlock extends PlacementSeedBlock>(

@@ -1,5 +1,12 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Surface Mode Transition Policy Seed
+
+- `modePolicyService.ts` 新增 `SurfaceModeTransitionPolicy` 和 `createSurfaceModeTransitionPolicy()`。
+- Page / Canvas 切换时的 transient cleanup 规则现在由 mode policy 产出：关闭 overlay、清空 snap guide、清除 block selection。
+- `useSurfaceModeController()` 不再自行决定这些副作用，只执行 mode policy 返回的 transition record。
+- 本轮不改变 Page / Canvas 的用户可见行为，也不实现 pan / zoom；它只是 L10 mode policy 的进一步收口。
+
 ## Changed - V2.BN.8.1 Overlay Callers Anchor Record Migration
 
 - `getSlashMenuAnchor()`、`getBlockControlAnchor()` 和 `getTooltipAnchor()` 现在先创建 `ViewportOverlayAnchor`，再通过 `placeAnchoredOverlay()` 进入 shared placement helper。
