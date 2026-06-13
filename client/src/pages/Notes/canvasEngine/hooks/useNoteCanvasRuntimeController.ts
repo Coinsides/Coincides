@@ -1,13 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { useUIStore } from '@/stores/uiStore';
-import { useLayoutDraftController } from './useLayoutDraftController';
-import { useNoteCanvasDataAdapter } from './useNoteCanvasDataAdapter';
 import { useNoteCanvasLayerProps } from './useNoteCanvasLayerProps';
 import { useNoteCanvasRuntime } from './useNoteCanvasRuntime';
-import { useNoteLoadResetController } from './useNoteLoadResetController';
 import { useRuntimeBlockEditingController } from './useRuntimeBlockEditingController';
 import { useRuntimeBlockHistoryController } from './useRuntimeBlockHistoryController';
-import { useRuntimeDocumentStatsController } from './useRuntimeDocumentStatsController';
+import { useRuntimeDocumentDataController } from './useRuntimeDocumentDataController';
 import { useRuntimeFrameModelController } from './useRuntimeFrameModelController';
 import { useRuntimeLayoutModelController } from './useRuntimeLayoutModelController';
 import { useRuntimeNaturalWritingController } from './useRuntimeNaturalWritingController';
@@ -65,20 +62,6 @@ export function useNoteCanvasRuntimeController() {
   } = useRuntimeSurfaceStateController();
   const {
     applyMeasuredBlockHeightDraft,
-    clearLayoutDraftForBlock,
-    layoutDrafts,
-    mergeLayoutDrafts,
-    resetLayoutDrafts,
-    setLayoutDraftForBlock,
-    setLayoutDrafts,
-  } = useLayoutDraftController();
-
-  const { handleNoteLoaded } = useNoteLoadResetController({
-    clearBlockSelection,
-    resetLayoutDrafts,
-  });
-
-  const {
     note,
     blocks,
     sortedBlocks,
@@ -114,14 +97,14 @@ export function useNoteCanvasRuntimeController() {
     trashBlock,
     restoreBlock,
     handleViewSource,
-  } = useNoteCanvasDataAdapter({
+    layoutDrafts,
+    mergeLayoutDrafts,
+    setLayoutDrafts,
+    sourceReferenceCount,
+  } = useRuntimeDocumentDataController({
+    clearBlockSelection,
     noteId,
-    onNoteLoaded: handleNoteLoaded,
-    clearLayoutDraftForBlock,
-    setLayoutDraftForBlock,
   });
-
-  const { sourceReferenceCount } = useRuntimeDocumentStatsController({ sortedBlocks });
 
   const {
     blockLayouts,

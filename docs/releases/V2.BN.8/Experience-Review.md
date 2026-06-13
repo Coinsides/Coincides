@@ -1,5 +1,21 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Runtime Document Data Controller Experience Note
+
+```text
+Note/block data loading, layout draft state, note-load reset, and source stats now share a document data controller boundary.
+```
+
+体验判断：
+- 这一步不应该改变用户可见行为；note 加载、title 保存、block 创建/保存/删除、source jump、layout draft 和 Preview/Chrome 里的 source stats 都应该保持原样。
+- 工程价值是把“文档数据进入 runtime 之后的第一层整理”收进一个 controller，root 不再直接把 data adapter、layout draft reset 和 source stats 串在一起。
+- Browser Harness 暂时不跑；等全部替换工作结束后再统一补真实浏览器验证。
+
+仍需人工观察：
+- Henry 后续复测进入 note 后 block 数据加载正常，刷新后 layout 保持，title / block 保存没有退化。
+- 后续复测 source jump 和 Preview / Chrome 的 source reference 数量没有异常。
+- 如果后续出现换 note 后残留旧 selection/layout draft、source 数量错误、或 block 保存后草稿状态错乱，优先检查 `hooks/useRuntimeDocumentDataController.ts` 与 `hooks/useNoteCanvasDataAdapter.ts` 的边界。
+
 ## V2.BN.8.1 Runtime Surface State Controller Experience Note
 
 ```text

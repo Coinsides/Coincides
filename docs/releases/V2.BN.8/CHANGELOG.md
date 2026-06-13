@@ -1,5 +1,11 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Runtime Document Data Controller Seed
+
+- 新增 `hooks/useRuntimeDocumentDataController.ts`，把 layout draft state、note load reset、note data adapter 和 note-level source stats 组合进一个 L2/L5/L6 document data boundary。
+- `useNoteCanvasRuntimeController()` 不再直接调用 `useLayoutDraftController()`、`useNoteLoadResetController()`、`useNoteCanvasDataAdapter()` 或 `useRuntimeDocumentStatsController()`。
+- 本轮不改变 note/block API、layout draft truth、source reference count、title 保存、block 创建/保存/删除或 source jump 行为，只继续压缩 runtime root 的 document data composition。
+
 ## Changed - V2.BN.8.1 Runtime Surface State Controller Seed
 
 - 新增 `hooks/useRuntimeSurfaceStateController.ts`，把 interaction state、layout/snap mode、floating overlay、block selection、surface mode 和 layout refs 组合进一个 L8/L9/L10 surface state boundary。

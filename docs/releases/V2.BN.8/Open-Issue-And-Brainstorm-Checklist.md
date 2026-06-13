@@ -20,6 +20,21 @@ Stage: V2.BN.8 engine seed manual smoke
 Status: 初步人工测试中
 ```
 
+## Runtime Document Data Controller Seed
+
+patch: V2.BN.8.1 Runtime Document Data Controller Seed
+status: code applied, full non-browser verification passed
+
+- [x] Add `useRuntimeDocumentDataController.ts`.
+- [x] Keep note/block API behavior unchanged.
+- [x] Keep layout draft truth and note-load reset behavior unchanged.
+- [x] Keep source reference stats unchanged.
+- [x] Keep title, block draft, source anchor, and source jump state unchanged.
+- [x] Remove direct root controller imports of `useLayoutDraftController()`, `useNoteLoadResetController()`, `useNoteCanvasDataAdapter()`, and `useRuntimeDocumentStatsController()`.
+- [x] Run full non-browser checks.
+- [ ] Henry manual visual retest: note load, title save, block save/create/trash, layout reload, and source stats should not regress.
+- [ ] Browser Harness retest deferred until the full replacement pass is done.
+
 ## Runtime Surface State Controller Seed
 
 patch: V2.BN.8.1 Runtime Surface State Controller Seed

@@ -1,5 +1,39 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Runtime Document Data Controller Seed
+
+```text
+scope: L2 runtime data adapter / L5 layout draft state / L6 document stats / L12 runtime root compression
+status: applied
+browser smoke: deferred by Henry until all replacement work is complete
+```
+
+### What Changed
+
+- Added `client/src/pages/Notes/canvasEngine/hooks/useRuntimeDocumentDataController.ts`.
+- The new controller composes:
+  - `useLayoutDraftController()`;
+  - `useNoteLoadResetController()`;
+  - `useNoteCanvasDataAdapter()`;
+  - `useRuntimeDocumentStatsController()`.
+- `useNoteCanvasRuntimeController()` no longer imports or calls those four document/data hooks directly.
+- The document data controller returns the same note/block data, layout draft callbacks, and `sourceReferenceCount` consumed by the rest of the runtime.
+
+### Review Notes
+
+- This checkpoint is a boundary extraction only.
+- Note/block API behavior, title draft, block text/field drafts, source anchors, source jump state, layout draft truth, layout persistence callbacks, and source reference stats are unchanged.
+- The useful ownership change is that note-load cleanup now lives beside the document data adapter instead of being hand-wired in the runtime root.
+- Browser Harness is intentionally deferred until the full replacement pass is complete.
+
+### Verification
+
+- `npm run build:client` passed.
+- `npm run smoke:canvas-engine-performance` passed.
+- `server` `npm run build` passed.
+- `git diff --check` passed.
+- Changed-file secret scan passed.
+
 ## V2.BN.8.1 Runtime Surface State Controller Seed
 
 ```text
