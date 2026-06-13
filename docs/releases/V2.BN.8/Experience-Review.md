@@ -1,5 +1,20 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Runtime Placement Interaction Controller Experience Note
+
+```text
+Move / resize interaction wiring now has a runtime placement interaction controller boundary.
+```
+
+体验判断：
+- 这一步不应该改变用户可见行为；拖动、resize、snap、弹性避让和 resize 后文字高度估算应该保持原样。
+- 工程价值是让 runtime root 不再直接知道 move/resize session 需要哪个 measurement helper。
+- Browser Harness 暂时不跑；等全部替换工作结束后再统一补真实浏览器验证。
+
+仍需人工观察：
+- Henry 后续复测 move / resize、snap on/off、elastic avoidance、resize 后下方 block 推开没有退化。
+- 如果后续出现 resize 高度不准、弹性避让异常、或移动后 history 不对，优先检查 `hooks/useRuntimePlacementInteractionController.ts` 和 `hooks/useBlockPlacementInteractions.ts` 的边界。
+
 ## V2.BN.8.1 Runtime Document Stats Controller Experience Note
 
 ```text

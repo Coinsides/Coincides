@@ -1,5 +1,32 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Runtime Placement Interaction Controller Seed
+
+```text
+scope: L5 placement interaction / L7 text height estimate dependency / L8 pointer session / L12 runtime root compression
+status: applied
+browser smoke: deferred by Henry until all replacement work is complete
+```
+
+### What Changed
+
+- Added `client/src/pages/Notes/canvasEngine/hooks/useRuntimePlacementInteractionController.ts`.
+- The new controller wraps `useBlockPlacementInteractions()` and supplies `estimateBlockHeightForText()` internally.
+- `useNoteCanvasRuntimeController()` no longer imports:
+  - `useBlockPlacementInteractions`;
+  - `estimateBlockHeightForText`.
+
+### Review Notes
+
+- This checkpoint is a boundary extraction only.
+- Move / resize behavior, snap behavior, elastic avoidance, layout history, and persistence callbacks are unchanged.
+- Text height estimation remains the same function; it is just no longer wired directly by the runtime root.
+- Browser Harness is intentionally deferred until the full replacement pass is complete.
+
+### Verification
+
+- Non-browser verification is pending for this checkpoint.
+
 ## V2.BN.8.1 Runtime Document Stats Controller Seed
 
 ```text

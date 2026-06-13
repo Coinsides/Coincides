@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import { useUIStore } from '@/stores/uiStore';
-import { useBlockPlacementInteractions } from './useBlockPlacementInteractions';
 import { useBlockSelectionController } from './useBlockSelectionController';
 import { useCanvasSurfacePointerController } from './useCanvasSurfacePointerController';
 import { useDraftBlockController } from './useDraftBlockController';
@@ -18,9 +17,9 @@ import { useRuntimeFrameModelController } from './useRuntimeFrameModelController
 import { useRuntimeInteractionController } from './useRuntimeInteractionController';
 import { useRuntimeLayoutRefsController } from './useRuntimeLayoutRefsController';
 import { useRuntimeLayoutModelController } from './useRuntimeLayoutModelController';
+import { useRuntimePlacementInteractionController } from './useRuntimePlacementInteractionController';
 import { useSlashCommandController } from './useSlashCommandController';
 import { useSurfaceModeController } from './useSurfaceModeController';
-import { estimateBlockHeightForText } from '../measurementService';
 
 export function useNoteCanvasRuntimeController() {
   const { noteId } = useNoteCanvasRuntime();
@@ -237,10 +236,9 @@ export function useNoteCanvasRuntimeController() {
     surfacePolicy,
   });
 
-  const { beginMoveBlock, beginResizeBlock } = useBlockPlacementInteractions({
+  const { beginMoveBlock, beginResizeBlock } = useRuntimePlacementInteractionController({
     blockLayouts,
     contentWidth,
-    estimateBlockHeightForText,
     movingBlockIdRef,
     orderedBlocks: visibleBlocks,
     persistChangedBlockLayouts,

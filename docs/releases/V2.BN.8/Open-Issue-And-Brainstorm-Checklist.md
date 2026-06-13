@@ -20,6 +20,19 @@ Stage: V2.BN.8 engine seed manual smoke
 Status: 初步人工测试中
 ```
 
+## Runtime Placement Interaction Controller Seed
+
+patch: V2.BN.8.1 Runtime Placement Interaction Controller Seed
+status: code applied, non-browser verification pending
+
+- [x] Add `useRuntimePlacementInteractionController.ts`.
+- [x] Keep move / resize interaction behavior unchanged.
+- [x] Keep text height estimate function unchanged.
+- [x] Remove direct root controller import of `useBlockPlacementInteractions()` and `estimateBlockHeightForText()`.
+- [ ] Run non-browser checks.
+- [ ] Henry manual visual retest: move / resize / snap / elastic avoidance should not regress.
+- [ ] Browser Harness retest deferred until the full replacement pass is done.
+
 ## Runtime Document Stats Controller Seed
 
 patch: V2.BN.8.1 Runtime Document Stats Controller Seed

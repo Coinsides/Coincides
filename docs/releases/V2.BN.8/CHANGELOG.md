@@ -1,5 +1,11 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Runtime Placement Interaction Controller Seed
+
+- 新增 `hooks/useRuntimePlacementInteractionController.ts`，把 block move / resize interaction session 与 text height estimate dependency 收进一个 L5/L7/L8 controller boundary。
+- `useNoteCanvasRuntimeController()` 不再直接调用 `useBlockPlacementInteractions()`，也不再直接导入 `estimateBlockHeightForText()`。
+- 本轮不改变 move / resize、snap、elastic avoidance、layout history 或 measured reflow 行为，只继续压缩 runtime root 对 placement interaction 细节的感知。
+
 ## Changed - V2.BN.8.1 Runtime Document Stats Controller Seed
 
 - 新增 `hooks/useRuntimeDocumentStatsController.ts`，把 note-level source reference count 从 runtime root 中迁出。
