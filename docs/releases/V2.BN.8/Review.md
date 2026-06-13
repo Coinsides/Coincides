@@ -1,5 +1,34 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Runtime Natural Writing Controller Seed
+
+```text
+scope: L8 natural writing / L9 slash command / L10 surface policy entry / L12 runtime root compression
+status: applied
+browser smoke: deferred by Henry until all replacement work is complete
+```
+
+### What Changed
+
+- Added `client/src/pages/Notes/canvasEngine/hooks/useRuntimeNaturalWritingController.ts`.
+- The new controller composes:
+  - `useDraftBlockController()`;
+  - `useSlashCommandController()`;
+  - `useCanvasSurfacePointerController()`.
+- `useNoteCanvasRuntimeController()` no longer imports or calls those three lower-level natural writing hooks directly.
+- The natural writing controller returns the same draft, slash, and surface pointer callbacks consumed by `useNoteCanvasLayerProps()`.
+
+### Review Notes
+
+- This checkpoint is a boundary extraction only.
+- Draft persistence, slash command filtering/selection, Ctrl+Enter behavior, blank double-click placement, snap on/off placement policy, and blank surface selection clearing are unchanged.
+- Browser Harness is intentionally deferred until the full replacement pass is complete.
+
+### Verification
+
+- `npm run build:client` passed as an early type/build check.
+- Full non-browser checkpoint verification is still pending.
+
 ## V2.BN.8.1 Runtime Placement Interaction Controller Seed
 
 ```text

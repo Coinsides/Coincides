@@ -20,6 +20,20 @@ Stage: V2.BN.8 engine seed manual smoke
 Status: 初步人工测试中
 ```
 
+## Runtime Natural Writing Controller Seed
+
+patch: V2.BN.8.1 Runtime Natural Writing Controller Seed
+status: code applied, full non-browser verification pending
+
+- [x] Add `useRuntimeNaturalWritingController.ts`.
+- [x] Keep draft block lifecycle behavior unchanged.
+- [x] Keep slash command behavior unchanged.
+- [x] Keep blank surface pointer and double-click creation behavior unchanged.
+- [x] Remove direct root controller imports of `useDraftBlockController()`, `useSlashCommandController()`, and `useCanvasSurfacePointerController()`.
+- [ ] Run full non-browser checks.
+- [ ] Henry manual visual retest: draft creation, slash menu, Ctrl+Enter, and blank click/double-click should not regress.
+- [ ] Browser Harness retest deferred until the full replacement pass is done.
+
 ## Runtime Placement Interaction Controller Seed
 
 patch: V2.BN.8.1 Runtime Placement Interaction Controller Seed

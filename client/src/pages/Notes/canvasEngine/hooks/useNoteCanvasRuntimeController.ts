@@ -1,8 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useUIStore } from '@/stores/uiStore';
 import { useBlockSelectionController } from './useBlockSelectionController';
-import { useCanvasSurfacePointerController } from './useCanvasSurfacePointerController';
-import { useDraftBlockController } from './useDraftBlockController';
 import { useFloatingOverlayController } from './useFloatingOverlayController';
 import { useLayoutDraftController } from './useLayoutDraftController';
 import { useLayoutInteractionController } from './useLayoutInteractionController';
@@ -17,8 +15,8 @@ import { useRuntimeFrameModelController } from './useRuntimeFrameModelController
 import { useRuntimeInteractionController } from './useRuntimeInteractionController';
 import { useRuntimeLayoutRefsController } from './useRuntimeLayoutRefsController';
 import { useRuntimeLayoutModelController } from './useRuntimeLayoutModelController';
+import { useRuntimeNaturalWritingController } from './useRuntimeNaturalWritingController';
 import { useRuntimePlacementInteractionController } from './useRuntimePlacementInteractionController';
-import { useSlashCommandController } from './useSlashCommandController';
 import { useSurfaceModeController } from './useSurfaceModeController';
 
 export function useNoteCanvasRuntimeController() {
@@ -184,27 +182,49 @@ export function useNoteCanvasRuntimeController() {
 
   const {
     activateDraft,
+    clearSlashTarget,
     creatingDraft,
     discardDraft,
     draftActive,
     draftLayout,
     draftRef,
     draftText,
-    draftTextRef,
+    handleBlockKeyDown,
+    handleBlockListMouseDown,
+    handleBlockTextChange,
+    handleDraftChange,
+    handleDraftKeyDown,
+    handlePageSpaceDoubleClick,
+    handleSelectSlashCommand,
+    handleSurfacePointerDown,
     persistDraft,
     resizeDraftFromTextarea,
-    setDraftText,
-  } = useDraftBlockController({
+    slashCommands,
+    slashTarget,
+  } = useRuntimeNaturalWritingController({
+    addToast,
+    applyTemplateToBlock,
+    blockListRef,
+    blocks,
+    blockTextDrafts,
+    clearBlockSelection,
+    contentWidth,
     createBlock,
     defaultDraftLayout,
     defaultTextTemplate,
+    insertTemplateOptions,
     note,
     onDraftPersisted: pushCreatedBlockHistory,
+    pageOffsetX,
     saveBlock,
+    setBlockTextDrafts,
     setActiveBlockId,
     setFocusBlockId,
     setInteractionState,
     setSelectedBlockId,
+    snapEnabled,
+    surfacePolicy,
+    templateOptions,
   });
 
   const {
@@ -250,48 +270,6 @@ export function useNoteCanvasRuntimeController() {
     setSnapGuide,
     snapEnabled,
     suppressMeasuredReflowUntilRef,
-    surfacePolicy,
-  });
-
-  const {
-    clearSlashTarget,
-    handleBlockKeyDown,
-    handleBlockTextChange,
-    handleDraftChange,
-    handleDraftKeyDown,
-    handleSelectSlashCommand,
-    slashCommands,
-    slashTarget,
-  } = useSlashCommandController({
-    addToast,
-    applyTemplateToBlock,
-    blockListRef,
-    blocks,
-    blockTextDrafts,
-    draftText,
-    draftTextRef,
-    insertTemplateOptions,
-    persistDraft,
-    saveBlock,
-    setBlockTextDrafts,
-    setDraftText,
-    setFocusBlockId,
-    setInteractionState,
-    templateOptions,
-    activateDraft,
-  });
-
-  const {
-    handleBlockListMouseDown,
-    handlePageSpaceDoubleClick,
-    handleSurfacePointerDown,
-  } = useCanvasSurfacePointerController({
-    activateDraft,
-    clearBlockSelection,
-    contentWidth,
-    defaultDraftLayout,
-    pageOffsetX,
-    snapEnabled,
     surfacePolicy,
   });
 

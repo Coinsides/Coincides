@@ -1,5 +1,11 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Runtime Natural Writing Controller Seed
+
+- 新增 `hooks/useRuntimeNaturalWritingController.ts`，把 draft block lifecycle、slash command controller 和 blank surface pointer creation/selection clearing 组合进一个 L8/L9/L10 natural writing boundary。
+- `useNoteCanvasRuntimeController()` 不再直接调用 `useDraftBlockController()`、`useSlashCommandController()` 或 `useCanvasSurfacePointerController()`。
+- 本轮不改变 draft 持久化、`/` 命令、Ctrl+Enter、新 block 落点、snap on/off 或空白点击取消选中行为，只继续压缩 runtime root 的自然写作入口 composition。
+
 ## Changed - V2.BN.8.1 Runtime Placement Interaction Controller Seed
 
 - 新增 `hooks/useRuntimePlacementInteractionController.ts`，把 block move / resize interaction session 与 text height estimate dependency 收进一个 L5/L7/L8 controller boundary。

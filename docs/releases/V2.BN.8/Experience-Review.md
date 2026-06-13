@@ -1,5 +1,20 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Runtime Natural Writing Controller Experience Note
+
+```text
+Draft creation, slash command behavior, and blank surface pointer handling now share a natural writing controller boundary.
+```
+
+体验判断：
+- 这一步不应该改变用户可见行为；空白双击创建 block、`/` 命令、Ctrl+Enter、draft 保存、空白点击取消选中都应该保持原样。
+- 工程价值是把“用户开始写作”的入口合并进一个 controller，root 不再分别感知 draft / slash / surface pointer 三套底层 hook。
+- Browser Harness 暂时不跑；等全部替换工作结束后再统一补真实浏览器验证。
+
+仍需人工观察：
+- Henry 后续复测空白双击、snap on/off 下的新 block 落点、`/definition`/`/formula`、Ctrl+Enter 持久化和空白点击取消选中。
+- 如果后续出现 slash menu anchor 错位、draft 保存异常、或空白双击落点退化，优先检查 `hooks/useRuntimeNaturalWritingController.ts` 与其三组子 controller。
+
 ## V2.BN.8.1 Runtime Placement Interaction Controller Experience Note
 
 ```text
