@@ -1956,3 +1956,25 @@ chrome://inspect/#remote-debugging
 ```
 
 勾选 `Allow remote debugging for this browser instance`，并在弹窗中点击 `Allow`。之后再按 `V2.BN.8.1-Final-Smoke-Protocol.md` 重跑最终 Browser Harness smoke。
+
+## V2.BN.8.1 Deferred Browser Smoke Recheck - 2026-06-13
+
+```text
+status: non-browser gates passed again
+browser harness: intentionally deferred by Henry until all remaining work is done
+branch: codex/v2-bn-canvas-engine
+worktree: clean before and after recheck
+```
+
+本轮不运行 Browser Harness。Henry 已明确要求先不要用 Browser Harness 做中途测试，等全部做完后再统一补跑。
+
+重新验证通过：
+
+- `npm run build:client`；
+- `npm run build`；
+- `npm run smoke:canvas-engine-performance`；
+- `git diff --check`；
+- `NoteDetail.tsx` 仍然只是 route/provider shell；
+- 旧 runtime 符号没有回流到 `NoteDetail.tsx`。
+
+本轮没有新增产品代码改动。`V2.BN.8.1` 仍不能关闭，因为最终 Browser Harness smoke 和 Henry manual pass 仍是硬门槛。

@@ -640,3 +640,13 @@
   - snap alignment off 或 Canvas mode：落在双击位置。
 - L8/L10 seed 抽离后 client build passed。
 - L8 pointer session helper 抽离后 client build passed。
+
+## Verified - V2.BN.8.1 Deferred Browser Smoke Recheck
+
+- 按 Henry 要求，Browser Harness 中途测试暂缓到最终统一验收。
+- 重新通过 `npm run build:client`。
+- 重新通过 `npm run build`。
+- 重新通过 `npm run smoke:canvas-engine-performance`。
+- 重新通过 `git diff --check`。
+- 确认 `NoteDetail.tsx` 仍然只是 route/provider shell。
+- 确认旧 runtime 符号没有回流到 `NoteDetail.tsx`。

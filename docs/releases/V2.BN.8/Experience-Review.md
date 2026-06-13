@@ -912,3 +912,24 @@ browser: deferred by Henry until the replacement pass is complete
 - Browser smoke 后更新本文。
 - 如果体验低于旧 runtime，必须同步 `Review.md` 和 `Canvas-Engine-Fallback-Strategy.md`。
 - 如果体验规则稳定，收口时考虑 promotion 到 UX Inventory 或 interaction contract。
+
+## V2.BN.8.1 Browser Smoke Deferral Confirmation - 2026-06-13
+
+```text
+status: deferred by Henry
+scope: final V2.BN.8.1 experience gate
+```
+
+Henry 已明确要求：暂时不要用 Browser Harness 做中途测试，等全部做完后再一起用 Browser Harness 做最终体验验证。
+
+因此本文当前只记录代码和体验风险判断，不声称 Browser smoke passed。后续最终体验验证仍需要覆盖：
+
+- note 页面真实打开；
+- Page / Canvas mode 切换；
+- slash menu；
+- Preview panel；
+- block create/edit/move/resize；
+- Definition / Formula / CodeBlock；
+- undo/redo；
+- reload 后 layout 保持；
+- Henry manual pass。
