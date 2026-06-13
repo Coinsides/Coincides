@@ -126,3 +126,22 @@ export function getBlockControlAnchor(element: HTMLElement | null | undefined): 
     y: clamp(rect.top, viewportPadding, maxY),
   };
 }
+
+export function getTooltipAnchor(element: HTMLElement | null | undefined): SlashMenuAnchor | null {
+  if (!element) return null;
+
+  const rect = element.getBoundingClientRect();
+  const viewportPadding = 16;
+  const tooltipWidthEstimate = 320;
+  const tooltipHeightEstimate = 82;
+  const offset = 8;
+  const maxX = Math.max(viewportPadding, window.innerWidth - tooltipWidthEstimate - viewportPadding);
+  const belowY = rect.bottom + offset;
+  const aboveY = rect.top - tooltipHeightEstimate - offset;
+  const wouldOverflowViewport = belowY + tooltipHeightEstimate > window.innerHeight - viewportPadding;
+
+  return {
+    x: clamp(rect.left, viewportPadding, maxX),
+    y: Math.max(viewportPadding, wouldOverflowViewport && aboveY > viewportPadding ? aboveY : belowY),
+  };
+}

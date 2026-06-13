@@ -1104,29 +1104,22 @@
   outline: none;
 }
 
-.formulaHelpTooltip {
+.formulaHelpTooltipFloating {
   background: var(--bg-primary);
   border: 1px solid var(--border-default);
   border-radius: 8px;
   box-shadow: 0 18px 44px rgba(0, 0, 0, 0.38);
   color: var(--text-secondary);
-  display: none;
+  display: block;
   font-size: 12px;
   font-weight: 600;
   line-height: 1.45;
   max-width: min(360px, 72vw);
   padding: 10px 12px;
   position: absolute;
-  right: 0;
   text-transform: none;
-  top: calc(100% + 8px);
   width: 320px;
-  z-index: 90;
-}
-
-.formulaHelpWrap:hover .formulaHelpTooltip,
-.formulaHelpWrap:focus-within .formulaHelpTooltip {
-  display: block;
+  pointer-events: none;
 }
 
 .formulaPreview {

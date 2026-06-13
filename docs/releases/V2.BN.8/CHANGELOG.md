@@ -1,5 +1,14 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Formula Help Overlay Portal Seed
+
+- `FormulaBlockProjection` 的 `?` help tooltip 现在通过 `FloatingOverlayLayer` free placement 渲染，不再作为 block-local hover 子元素参与 block DOM 层级。
+- `overlayService.ts` 新增 `getTooltipAnchor`，用 help button 的 viewport rect 计算第一版 tooltip anchor，并在靠近 viewport 底部时向上翻转。
+- Formula help tooltip 继续只说明独立 FormulaBlock 的 LaTeX body / delimiter 规则，不改变 `latex_input` field truth、paste sanitizer、preview render 或保存路径。
+- `NoteDetail.module.css` 新增 `formulaHelpTooltipFloating`，让说明气泡作为 pointer-events isolated 的 viewport overlay 显示。
+- 本轮仍不实现完整 overlay collision / flip service，也不实现正文 inline formula conversion。
+- client build passed。
+
 ## Changed - V2.BN.8.1 Slash Menu And Block Control Overlay Portal Seed
 
 - `SlashMenuLayer` 现在通过 `FloatingOverlayLayer` free placement 渲染，菜单坐标从 block-list-relative seed 改成 viewport/caret anchor seed。
@@ -8,7 +17,7 @@
 - `overlayService.ts` 新增 `getBlockControlAnchor`，先用 selected block 的 viewport rect 做第一版锚点计算。
 - `NoteDetail.module.css` 新增 `blockToolbarFloating`，让 portal 内 control bar 可交互且不依赖 `.blockActive .blockToolbar` 局部层级。
 - 本轮不改变 control bar 的按钮能力；Move、AI visibility、export status、save、trash 仍沿用既有回调。
-- formula help tooltip 和完整 overlay collision / flip service 仍留给后续 L9 work。
+- 完整 overlay collision / flip service 仍留给后续 L9 work。
 - client build passed。
 
 ## Changed - V2.BN.8.1 Insert And Source Overlay Portal Seed

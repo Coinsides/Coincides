@@ -1,5 +1,28 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Formula Help Overlay Portal Seed
+
+```text
+status: technical validation passed, browser smoke blocked
+scope: L9 Floating Overlay Layer
+client build: passed
+browser smoke: blocked by Chrome remote debugging authorization handshake
+```
+
+Completed:
+
+- Moved FormulaBlock `?` help tooltip into `FloatingOverlayLayer` free placement.
+- Added `getTooltipAnchor()` as a first-version viewport anchor for help / small explanatory overlays.
+- Formula help now follows the help button viewport rect and can flip above the button near the viewport bottom.
+- The tooltip no longer participates in block measurement, block-local clipping, or selected block stacking.
+- Formula input rules, paste sanitizer, preview rendering, and `latex_input` field truth are unchanged.
+
+Still intentionally out of scope:
+
+- No complete collision / flip / viewport clamp service yet.
+- No inline TextBlock `Convert to formula` command yet.
+- Browser visual smoke is blocked by the Chrome remote debugging authorization handshake; Henry manual retest is still required.
+
 ## V2.BN.8.1 Slash Menu And Block Control Overlay Portal Seed
 
 ```text
@@ -21,7 +44,6 @@ Completed:
 
 Still intentionally out of scope:
 
-- Formula help tooltip remains block-local.
 - No full overlay collision / flip service yet.
 - Browser visual smoke and Henry manual retest are still required.
 
@@ -47,7 +69,7 @@ Still intentionally out of scope:
 
 - Slash menu remains writing-surface anchored.
 - Block control bar remains block-local.
-- Formula help tooltip remains block-local.
+- Formula help tooltip is now covered by the later Formula Help Overlay Portal Seed checkpoint.
 - No overlay collision / flip / viewport clamp service yet.
 
 ## V2.BN.8.1 Floating Overlay Portal Seed
@@ -73,7 +95,7 @@ Still intentionally out of scope:
 - Slash menu remains in the writing surface layer.
 - Insert panel and source jump panel remain in `NoteFloatingPanelLayer`.
 - Block control bar remains block-local rather than viewport anchored.
-- Formula help tooltip remains block-local.
+- Formula help tooltip is now covered by the later Formula Help Overlay Portal Seed checkpoint.
 - No overlay collision/flip service yet.
 
 Review note:
@@ -237,7 +259,7 @@ manual formula paste smoke: pending Henry retest
 - `contentForFormula()` 保存时也会清洗 `latex_input`，让 field truth 保持为公式 body，而不是 display/inline wrapper。
 - `FormulaBlockProjection` 增加 paste sanitizer：用户粘贴完整包裹公式时，插入进 textarea 的就是 body。
 - Formula input 失焦保存前会再次归一化，降低旧 wrapper 被保存回字段 truth 的风险。
-- active Formula editor 增加 `?` help seed，先作为 block-local tooltip，后续可迁入统一 FloatingOverlayLayer。
+- active Formula editor 增加 `?` help seed；它最初作为 block-local tooltip 落地，当前已由后续 checkpoint 迁入统一 FloatingOverlayLayer。
 
 已验证：
 
@@ -425,7 +447,7 @@ client build: passed
 
 - 浏览器里编辑 FormulaBlock 并保存后，确认 reload 后仍保留纯 LaTeX body；
 - `cases` / `matrix` / `array` 等常见环境仍需补测；
-- Formula help tooltip 和完整输入说明还未进入统一 overlay layer。
+- Formula help tooltip 已进入统一 overlay layer；完整输入说明与正文 inline formula conversion 仍需后续补齐。
 
 ## V2.BN.8.1 L7/L12 Runtime Refs And Load Reset Controller Seed
 
@@ -1194,7 +1216,7 @@ client build: passed
 - block control bar 仍使用当前 block 内部定位样式，尚未完全 viewport overlay 化；
 - source jump 仍只是 view entry 抽层，尚未完全 viewport overlay 化；
 - note info、more actions、insert panel 等浮层尚未迁出；
-- formula help tooltip 仍未进入统一 overlay layer。
+- formula help tooltip 已由后续 checkpoint 迁入统一 overlay layer。
 
 ### L8 - Interaction Controller Seed
 

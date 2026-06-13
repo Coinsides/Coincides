@@ -1,5 +1,25 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Formula Help Overlay Portal Experience Note
+
+```text
+Formula help now behaves like a viewport overlay instead of a block-local hover child.
+```
+
+体验判断：
+
+- FormulaBlock 的 `?` 帮助说明不再长在 block 内部，而是进入 viewport-level floating overlay。
+- 用户 hover / focus 问号时，说明气泡应靠近问号按钮显示；靠近屏幕底部时可以向上翻转。
+- 说明气泡不再挤压 block、不再影响 measured height，也不应该被窄 block、下方 block 或 PageFrame 裁切。
+- 这仍只是说明入口，不改变 FormulaBlock 的输入方式、保存方式或渲染方式。
+
+仍需人工观察：
+
+- 在页面底部的 FormulaBlock 中 hover `?`，tooltip 是否仍完整可读；
+- 在很窄的 FormulaBlock 中 hover `?`，tooltip 是否不遮住用户正在输入的位置；
+- 在 Canvas mode / Page mode 下 tooltip 是否都跟随按钮位置；
+- tooltip 是否高于 selected block toolbar、preview panel 之下的层级是否可接受。
+
 ## V2.BN.8.1 Slash Menu And Block Control Overlay Portal Experience Note
 
 ```text
@@ -158,7 +178,7 @@ FormulaBlock now treats LaTeX input as formula body; pending Henry paste/hover r
 - 带 delimiter 的简单公式粘贴后，输入区是否变成纯 body；
 - Green theorem 这类多行公式粘贴后，预览是否符合用户预期；
 - help tooltip 在窄 block、靠近页面右侧、靠近 viewport 底部时是否仍可读；
-- 是否需要把 help tooltip 尽快迁入 FloatingOverlayLayer，而不是长期留在 block-local tooltip。
+- 迁入 FloatingOverlayLayer 后，help tooltip 是否仍需要更完整的 collision / flip / clamp service。
 
 ## V2.BN.8.1 Canvas Shell And PageFrame Boundary Experience Note
 
@@ -594,7 +614,7 @@ status: partial technical validation passed
 
 - 这次只做技术规则和 KaTeX display validation；
 - 浏览器内编辑、保存、reload 后的 FormulaBlock 体验还需要单独 smoke；
-- hover help tooltip 和公式输入说明仍未做。
+- hover help tooltip 已进入 viewport overlay seed；更完整的公式输入说明和正文 inline formula conversion 仍未做。
 
 ## 同步规则
 

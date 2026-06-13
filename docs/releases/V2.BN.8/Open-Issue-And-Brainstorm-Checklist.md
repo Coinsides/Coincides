@@ -46,7 +46,7 @@ date: 2026-06-12
 
 ```text
 status: portal seed expanded again, pending Henry visual retest
-patch: V2.BN.8.1 Floating Overlay Portal Seed + Insert/Source Overlay Portal Seed + Slash Menu Portal Seed + Block Control Overlay Portal Seed
+patch: V2.BN.8.1 Floating Overlay Portal Seed + Insert/Source Overlay Portal Seed + Slash Menu Portal Seed + Block Control Overlay Portal Seed + Formula Help Overlay Portal Seed
 ```
 
 已完成：
@@ -58,11 +58,11 @@ patch: V2.BN.8.1 Floating Overlay Portal Seed + Insert/Source Overlay Portal See
 - Source jump panel 已进入 `FloatingOverlayLayer` viewport overlay stack；
 - Slash menu 已进入 `FloatingOverlayLayer` free placement，并使用 viewport/caret anchor seed；
 - Block control bar 已进入 `FloatingOverlayLayer` free placement，并使用 selected block viewport anchor seed；
+- Formula help tooltip 已进入 `FloatingOverlayLayer` free placement，并使用 help-button viewport anchor seed；
 - portal shell 不吞掉页面点击，只有实际面板可交互。
 
 仍未完成：
 
-- formula help tooltip 尚未迁入同一 overlay 层；
 - full caret/world anchor service、collision / flip / viewport clamp service 尚未完成；
 - 需要 Henry 手动复测 Preview 是否覆盖 selected block toolbar，而不是混层。
 
@@ -203,6 +203,7 @@ FormulaBlock UI 需要一个轻量帮助入口：
 - [ ] 确认右键菜单和 floating toolbar 是否共用同一套 command registry。
 - [ ] 确认 undo 是走 text operation history，还是走 block-level operation history。
 - [x] 已新增 FormulaBlock `?` help seed。
+- [x] 已将 FormulaBlock `?` help tooltip 迁入 `FloatingOverlayLayer` free placement。
 - [x] 已新增 FormulaBlock paste sanitizer。
 
 ### 3. Definition block field draft 初始化错误
@@ -724,7 +725,7 @@ D &\subset \mathbb{R}^2,\quad
 - [x] Patch A: 修复 slash command menu anchor。
 - [ ] Patch B: 重写 Formula block preview input contract。
 - [x] Patch C: 增加 formula paste sanitizer。
-- [x] Patch D: 增加 FormulaBlock help tooltip。
+- [x] Patch D: 增加 FormulaBlock help tooltip，并迁入 viewport overlay seed。
 - [ ] Patch E: 设计正文选区 `Convert to formula` 右键菜单入口。
 - [ ] Patch F: 修复 DefinitionBlock field draft 初始化和 Tab focus 行为。
 - [ ] Patch G: 修复 active structured block measurement / reflow 穿模。

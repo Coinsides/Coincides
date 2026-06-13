@@ -79,7 +79,7 @@ connectingRelationFuture
 - definition / formula 使用 structured field editor；
 - formula 默认显示 preview，input 按需展开。
 - 独立 FormulaBlock 的 `latex_input` 是公式 body。用户可以粘贴 `$...$`、`$$...$$`、`\(...\)`、`\[...\]`，但保存层应归一成 body，不把外层 delimiter 当作 field truth。
-- 独立 FormulaBlock 需要轻量帮助入口解释输入约定；第一版可以是 block-local `?` tooltip，后续若出现裁切/遮挡，应迁入统一 FloatingOverlayLayer。
+- 独立 FormulaBlock 需要轻量帮助入口解释输入约定；当前 `?` tooltip 已进入 `FloatingOverlayLayer` free placement，不参与 block measurement 或 block-local clipping。
 - 正文 TextBlock / Definition 描述中的 inline formula 不自动拆成 FormulaBlock；后续通过选区右键或 floating toolbar 的 `Convert to formula` 显式转换，并必须支持撤回。
 
 ### 选择与布局
@@ -104,7 +104,7 @@ connectingRelationFuture
 - debug overlay 可显隐 block type / AI / export status。
 - control bar 不参与 block measurement；
 - formula input 展开属于 block content measurement，不属于 floating overlay；
-- formula help tooltip 属于临时说明 overlay，不应参与 block measurement；如果 block-local tooltip 出现裁切，应迁入 viewport overlay。
+- formula help tooltip 属于临时说明 overlay，已迁入 viewport overlay seed，不应参与 block measurement。
 - selected / editing block 在 viewport virtualize 时必须强制渲染。
 
 ### Pan / Zoom

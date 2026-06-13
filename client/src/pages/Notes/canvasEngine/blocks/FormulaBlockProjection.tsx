@@ -3,7 +3,12 @@ import type {
   KeyboardEvent,
   Ref,
 } from 'react';
-import { useRef } from 'react';
+import {
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import KaTeXRenderer from '@/components/KaTeX/KaTeXRenderer';
 import {
   formulaPreviewText,
@@ -11,6 +16,8 @@ import {
   type FieldValueRecord,
 } from '../blockContentService';
 import { resizeTextareaToContent } from '../measurementService';
+import { getTooltipAnchor } from '../overlayService';
+import { FloatingOverlayLayer } from '../layers/FloatingOverlayLayer';
 import styles from '../../NoteDetail.module.css';
 
 interface FormulaBlockProjectionProps {
@@ -39,7 +46,36 @@ export function FormulaBlockProjection({
   onKeyDown,
 }: FormulaBlockProjectionProps) {
   const latestFieldsRef = useRef(fields);
+  const helpButtonRef = useRef<HTMLButtonElement | null>(null);
+  const helpTooltipId = useId();
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [helpAnchor, setHelpAnchor] = useState<{ x: number; y: number } | null>(null);
   latestFieldsRef.current = fields;
+
+  const updateHelpAnchor = () => {
+    setHelpAnchor(getTooltipAnchor(helpButtonRef.current));
+  };
+
+  const openHelp = () => {
+    updateHelpAnchor();
+    setHelpOpen(true);
+  };
+
+  useLayoutEffect(() => {
+    if (!active || !helpOpen) {
+      setHelpAnchor(null);
+      return undefined;
+    }
+
+    updateHelpAnchor();
+    window.addEventListener('resize', updateHelpAnchor);
+    window.addEventListener('scroll', updateHelpAnchor, true);
+
+    return () => {
+      window.removeEventListener('resize', updateHelpAnchor);
+      window.removeEventListener('scroll', updateHelpAnchor, true);
+    };
+  }, [active, helpOpen]);
 
   const updateDraft = (
     patch: Partial<typeof fields>,
@@ -97,15 +133,32 @@ export function FormulaBlockProjection({
             LaTeX input
             <span className={styles.formulaHelpWrap}>
               <button
+                ref={helpButtonRef}
                 type="button"
                 className={styles.formulaHelpButton}
                 aria-label="Formula input help"
+                aria-describedby={helpOpen ? helpTooltipId : undefined}
+                onMouseEnter={openHelp}
+                onMouseLeave={() => setHelpOpen(false)}
+                onFocus={openHelp}
+                onBlur={() => setHelpOpen(false)}
+                onClick={openHelp}
               >
                 ?
               </button>
-              <span className={styles.formulaHelpTooltip} role="tooltip">
-                Paste or type pure LaTeX body. Whole-input $...$, $$...$$, \(...\), and \[...\] are accepted and saved as body text.
-              </span>
+              <FloatingOverlayLayer open={active && helpOpen && Boolean(helpAnchor)} placement="free">
+                <span
+                  id={helpTooltipId}
+                  className={styles.formulaHelpTooltipFloating}
+                  role="tooltip"
+                  style={{
+                    left: helpAnchor?.x ?? 0,
+                    top: helpAnchor?.y ?? 0,
+                  }}
+                >
+                  Paste or type pure LaTeX body. Whole-input $...$, $$...$$, \(...\), and \[...\] are accepted and saved as body text.
+                </span>
+              </FloatingOverlayLayer>
             </span>
           </span>
           <textarea
