@@ -98,8 +98,8 @@ connectingRelationFuture
 - `+ Insert` / Advanced Insert 属于 viewport floating action，已经迁入 `FloatingOverlayLayer` free placement；它不参与 PageFrame / block measurement。
 - Source jump panel 属于 viewport overlay stack，已经迁入 `FloatingOverlayLayer`；它展示 source snapshot，不应撑开 document shell。
 - overlay portal shell 不吞掉页面点击，只有实际面板可交互。
-- slash menu 出现在 caret 附近；
-- block control bar 靠近对象但不遮挡正文；
+- slash menu 属于 viewport overlay，第一版通过 `FloatingOverlayLayer` free placement 和 caret viewport anchor 出现在当前输入附近；
+- block control bar 属于 viewport overlay，第一版通过 `FloatingOverlayLayer` free placement 和 selected block viewport anchor 靠近对象但不参与正文排版；
 - preview panel 覆盖时不和 selected toolbar 混乱；
 - debug overlay 可显隐 block type / AI / export status。
 - control bar 不参与 block measurement；

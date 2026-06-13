@@ -1,5 +1,30 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Slash Menu And Block Control Overlay Portal Seed
+
+```text
+status: technical validation passed, browser smoke pending
+scope: L9 Floating Overlay Layer
+client build: passed
+browser smoke: not run in this checkpoint
+```
+
+Completed:
+
+- Moved `SlashMenuLayer` into `FloatingOverlayLayer` free placement.
+- Slash command anchor now uses viewport/caret coordinates instead of block-list-relative coordinates.
+- Moved `BlockControlBarLayer` into `FloatingOverlayLayer` free placement.
+- Added a selected-block viewport anchor seed through `getBlockControlAnchor`.
+- `BlockEditorLayer` now measures the active block DOM rect for toolbar placement instead of letting the toolbar live in block flow.
+- The toolbar keeps existing button behavior for move, export visibility, AI visibility, save, and trash.
+- The portal shell remains pointer-events isolated; only the toolbar body is interactive.
+
+Still intentionally out of scope:
+
+- Formula help tooltip remains block-local.
+- No full overlay collision / flip service yet.
+- Browser visual smoke and Henry manual retest are still required.
+
 ## V2.BN.8.1 Insert And Source Overlay Portal Seed
 
 ```text

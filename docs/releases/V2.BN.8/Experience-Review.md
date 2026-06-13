@@ -1,5 +1,27 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Slash Menu And Block Control Overlay Portal Experience Note
+
+```text
+Slash menu and the selected block control bar now behave like viewport tools instead of block content.
+```
+
+体验判断：
+
+- 在较靠下的 block 中输入 `/` 时，slash menu 应该跟随当前输入行附近，而不是漂到页面上方或被 writing surface 局部容器裁切。
+- 选中 block 后，移动 / AI / export / save / trash 工具条应该浮在 viewport overlay 层，而不是占用或撑开 block 本体。
+- 这一步的目标是减少两个紧贴 block 时工具条被上方 block 遮挡、或与正文内容混层的问题。
+- 工具条仍然跟随 active block 的屏幕位置；页面滚动、窗口 resize、block move / resize 后会重新计算 anchor。
+- 这一步不改变按钮含义，也不改变 block content truth / layout truth。
+
+仍需人工观察：
+
+- 在页面下方 block 输入 `/for` 时，slash menu 是否贴近 caret；
+- 选中靠右、靠下、靠近其它 block 的 block 时，control bar 是否仍可点；
+- 点击 Move 后拖动是否仍然保持原来的手感；
+- 打开 Preview / Info / More actions 时，control bar 是否被更高层面板正确覆盖；
+- 窄屏或 sidebar 收起后，control bar 是否仍落在可见区域内。
+
 ## V2.BN.8.1 Insert And Source Overlay Portal Experience Note
 
 ```text

@@ -45,8 +45,8 @@ date: 2026-06-12
 ## L9 Floating Overlay Checkpoint
 
 ```text
-status: portal seed expanded, pending Henry visual retest
-patch: V2.BN.8.1 Floating Overlay Portal Seed + Insert/Source Overlay Portal Seed
+status: portal seed expanded again, pending Henry visual retest
+patch: V2.BN.8.1 Floating Overlay Portal Seed + Insert/Source Overlay Portal Seed + Slash Menu Portal Seed + Block Control Overlay Portal Seed
 ```
 
 已完成：
@@ -56,13 +56,14 @@ patch: V2.BN.8.1 Floating Overlay Portal Seed + Insert/Source Overlay Portal See
 - `+ Insert` / Advanced Insert 已从 document shell 中拆出，进入 `NoteFloatingPanelLayer`；
 - `+ Insert` / Advanced Insert 使用 `FloatingOverlayLayer` 的 free placement，不再作为 canvas content；
 - Source jump panel 已进入 `FloatingOverlayLayer` viewport overlay stack；
+- Slash menu 已进入 `FloatingOverlayLayer` free placement，并使用 viewport/caret anchor seed；
+- Block control bar 已进入 `FloatingOverlayLayer` free placement，并使用 selected block viewport anchor seed；
 - portal shell 不吞掉页面点击，只有实际面板可交互。
 
 仍未完成：
 
-- slash menu 尚未迁入 portal；
-- block control bar 尚未迁入 viewport overlay anchor；
 - formula help tooltip 尚未迁入同一 overlay 层；
+- full caret/world anchor service、collision / flip / viewport clamp service 尚未完成；
 - 需要 Henry 手动复测 Preview 是否覆盖 selected block toolbar，而不是混层。
 
 ## Open Issue Checklist
@@ -81,7 +82,7 @@ patch: V2.BN.8.1 Floating Overlay Portal Seed + Insert/Source Overlay Portal See
 
 ```text
 status: patch applied, pending Henry visual retest
-patch: V2.BN.8.1 Slash Menu Caret Anchor
+patch: V2.BN.8.1 Slash Menu Caret Anchor + Slash Menu Portal Anchor Seed
 ```
 
 #### Henry 初步观察
@@ -96,7 +97,7 @@ patch: V2.BN.8.1 Slash Menu Caret Anchor
 
 - 旧 `getSlashMenuAnchor` 仍按输入框整体 rect 计算，没有追踪 caret rect；
 - 页面 scroll、block absolute placement、PageFrame offset、engine seed data attributes 之间还没有统一；
-- 未来应该归入 Canvas Engine 的 floating overlay layer，而不是继续散落在 `NoteDetail.tsx` 中。
+- 该菜单已经归入 Canvas Engine 的 `FloatingOverlayLayer` free placement；后续剩余风险是 pan/zoom 后的 full world/screen anchor service。
 
 #### 待补信息
 
@@ -106,6 +107,7 @@ patch: V2.BN.8.1 Slash Menu Caret Anchor
 - [ ] 判断是否与浏览器 scroll position 有关。
 - [x] 已将 anchor service 改成 textarea/input caret-first 计算。
 - [x] 已让 slash command controller 把当前 caret index 传入 overlay anchor。
+- [x] 已将 slash menu 迁入 `FloatingOverlayLayer` free placement。
 - [ ] Henry 手动复测：下方 block 中输入 `/for` 时菜单应贴近当前输入行。
 
 ### 2. Formula block LaTeX input 规则不符合用户直觉

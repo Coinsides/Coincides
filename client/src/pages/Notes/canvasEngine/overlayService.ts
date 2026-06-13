@@ -104,3 +104,25 @@ export function getSlashMenuAnchor(
 
   return { x, y: Math.max(viewportPadding, y) };
 }
+
+export function getBlockControlAnchor(element: HTMLElement | null | undefined): SlashMenuAnchor | null {
+  if (!element) return null;
+
+  const rect = element.getBoundingClientRect();
+  const viewportPadding = 16;
+  const toolbarWidthEstimate = 220;
+  const toolbarHeightEstimate = 34;
+  const offset = 8;
+  const rightSideX = rect.right + offset;
+  const leftSideX = rect.left;
+  const rawX = rightSideX + toolbarWidthEstimate > window.innerWidth - viewportPadding
+    ? leftSideX
+    : rightSideX;
+  const maxX = Math.max(viewportPadding, window.innerWidth - toolbarWidthEstimate - viewportPadding);
+  const maxY = Math.max(viewportPadding, window.innerHeight - toolbarHeightEstimate - viewportPadding);
+
+  return {
+    x: clamp(rawX, viewportPadding, maxX),
+    y: clamp(rect.top, viewportPadding, maxY),
+  };
+}

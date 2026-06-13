@@ -835,6 +835,12 @@
   transform: translateX(4px);
 }
 
+.blockToolbarFloating {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
 .blockActive .blockToolbar {
   z-index: 42;
 }

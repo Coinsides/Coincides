@@ -1,6 +1,8 @@
 import {
   useEffect,
+  useLayoutEffect,
   useRef,
+  useState,
   type KeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
@@ -14,6 +16,7 @@ import {
 import {
   resizeTextareaToContent,
 } from '../measurementService';
+import { getBlockControlAnchor } from '../overlayService';
 import {
   getBoundaryKind,
   getEffectiveAIVisibility,
@@ -98,8 +101,10 @@ export function BlockEditorLayer({
   sourceJumpBusy,
   onViewSource,
 }: BlockEditorLayerProps) {
+  const articleRef = useRef<HTMLElement | null>(null);
   const blockContentRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const [blockControlAnchor, setBlockControlAnchor] = useState<{ x: number; y: number } | null>(null);
   const boundary = getBoundaryKind(layout);
   const exportRole = getEffectiveExportRole(layout);
   const aiVisibility = getEffectiveAIVisibility(layout);
@@ -136,8 +141,36 @@ export function BlockEditorLayer({
     }, 0);
   }, [autoFocus]);
 
+  useLayoutEffect(() => {
+    if (!active) {
+      setBlockControlAnchor(null);
+      return undefined;
+    }
+
+    const updateAnchor = () => {
+      setBlockControlAnchor(getBlockControlAnchor(articleRef.current));
+    };
+
+    updateAnchor();
+    window.addEventListener('resize', updateAnchor);
+    window.addEventListener('scroll', updateAnchor, true);
+
+    return () => {
+      window.removeEventListener('resize', updateAnchor);
+      window.removeEventListener('scroll', updateAnchor, true);
+    };
+  }, [
+    active,
+    layout.x,
+    layout.y,
+    layout.width,
+    layout.height,
+    pageOffsetX,
+  ]);
+
   return (
     <article
+      ref={articleRef}
       className={`${styles.block} ${styles.blockBox} ${presentationKind === 'code' ? styles.codeBlockBox : ''} ${layoutMode ? styles.blockBoxLayoutMode : ''} ${active ? styles.blockActive : ''} ${boundary !== 'inside' ? styles.blockScratch : ''}`}
       style={{
         left: layout.x + pageOffsetX,
@@ -157,8 +190,10 @@ export function BlockEditorLayer({
         showExportStatusBadge={showExportStatusBadge}
       />
       <BlockControlBarLayer
+        anchor={blockControlAnchor}
         exportRole={exportRole}
         aiVisibility={aiVisibility}
+        open={active}
         saving={saving}
         onBeginMove={onBeginMove}
         onToggleExportRole={onToggleExportRole}

@@ -1,5 +1,16 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Slash Menu And Block Control Overlay Portal Seed
+
+- `SlashMenuLayer` 现在通过 `FloatingOverlayLayer` free placement 渲染，菜单坐标从 block-list-relative seed 改成 viewport/caret anchor seed。
+- `BlockControlBarLayer` 现在通过 `FloatingOverlayLayer` free placement 渲染，只在 active block 上显示。
+- `BlockEditorLayer` 为当前 active block 计算 viewport anchor，使 control bar 不再作为 block DOM flow / measurement 的一部分。
+- `overlayService.ts` 新增 `getBlockControlAnchor`，先用 selected block 的 viewport rect 做第一版锚点计算。
+- `NoteDetail.module.css` 新增 `blockToolbarFloating`，让 portal 内 control bar 可交互且不依赖 `.blockActive .blockToolbar` 局部层级。
+- 本轮不改变 control bar 的按钮能力；Move、AI visibility、export status、save、trash 仍沿用既有回调。
+- formula help tooltip 和完整 overlay collision / flip service 仍留给后续 L9 work。
+- client build passed。
+
 ## Changed - V2.BN.8.1 Insert And Source Overlay Portal Seed
 
 - 新增 `canvasEngine/layers/NoteFloatingPanelLayer.tsx`，把 Insert floating action / Advanced Insert panel / Source jump panel 从 `NoteChromeLayer.tsx` 中拆出。
