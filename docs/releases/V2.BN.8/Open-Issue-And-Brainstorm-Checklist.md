@@ -20,6 +20,19 @@ Stage: V2.BN.8 engine seed manual smoke
 Status: 初步人工测试中
 ```
 
+## Runtime Block Editing Controller Seed
+
+patch: V2.BN.8.1 Runtime Block Editing Controller Seed
+status: code applied, non-browser verification pending
+
+- [x] Add `useRuntimeBlockEditingController.ts`.
+- [x] Keep Definition / Formula field truth unchanged.
+- [x] Keep measured height reflow behavior unchanged.
+- [x] Remove direct root controller calls to `useBlockFieldDraftController()` and `useMeasuredBlockReflowController()`.
+- [ ] Run non-browser checks.
+- [ ] Henry manual visual retest: Definition / Formula field editing and expansion should not regress.
+- [ ] Browser Harness retest deferred until the full replacement pass is done.
+
 已确认：
 
 - [x] DevTools 可以读到 `data-canvas-engine-version` 等 engine seed data attributes。

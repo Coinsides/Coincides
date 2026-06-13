@@ -1,5 +1,20 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Runtime Block Editing Controller Experience Note
+
+```text
+Structured field draft update and measured height reflow now share a small block editing controller boundary.
+```
+
+体验判断：
+- 这一步不应该改变用户可见行为；Definition 字段编辑、Formula 展开、文本重排和 measured height 推开下方 block 的体验应该保持原样。
+- 工程价值是把“字段草稿更新”和“测量高度回流”收进一个 block editing controller，减少 runtime root 对底层 hook 的直接感知。
+- Browser Harness 暂时不跑；等全部替换工作结束后再统一补真实浏览器验证。
+
+仍需人工观察：
+- Henry 后续复测 Definition / Formula 字段编辑、Formula input 展开、structured block active reflow 没有退化。
+- 如果后续出现字段保存错位、Definition / Formula 展开穿模、或 resize 后下方 block 推开异常，优先检查 `hooks/useRuntimeBlockEditingController.ts` 的参数边界。
+
 ## V2.BN.8.1 Runtime Frame Model Controller Experience Note
 
 ```text

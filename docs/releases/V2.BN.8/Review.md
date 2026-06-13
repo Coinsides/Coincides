@@ -1,5 +1,33 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Runtime Block Editing Controller Seed
+
+```text
+scope: L6 structured field draft / L7 measured reflow / L12 runtime root compression
+status: applied
+browser smoke: deferred by Henry until all replacement work is complete
+```
+
+### What Changed
+
+- Added `client/src/pages/Notes/canvasEngine/hooks/useRuntimeBlockEditingController.ts`.
+- The new controller composes:
+  - `useBlockFieldDraftController()`;
+  - `useMeasuredBlockReflowController()`.
+- `useNoteCanvasRuntimeController()` now consumes `updateBlockFieldDraft` and `handleMeasuredBlockHeight` from the new controller.
+- `useNoteCanvasRuntimeController()` no longer imports or calls the two lower-level block editing hooks directly.
+
+### Review Notes
+
+- This checkpoint is a boundary extraction only.
+- Definition / Formula field truth is unchanged.
+- Measured height reflow, collision resolution, movement suppression, and active structured block expansion behavior are unchanged.
+- Browser Harness is intentionally deferred until the replacement pass is complete.
+
+### Verification
+
+- Non-browser verification is pending for this checkpoint.
+
 ## V2.BN.8.1 Runtime Frame Model Controller Seed
 
 ```text

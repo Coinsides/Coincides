@@ -1,7 +1,6 @@
 import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUIStore } from '@/stores/uiStore';
-import { useBlockFieldDraftController } from './useBlockFieldDraftController';
 import { useBlockPlacementInteractions } from './useBlockPlacementInteractions';
 import { useBlockSelectionController } from './useBlockSelectionController';
 import { useCanvasSurfacePointerController } from './useCanvasSurfacePointerController';
@@ -9,11 +8,11 @@ import { useDraftBlockController } from './useDraftBlockController';
 import { useFloatingOverlayController } from './useFloatingOverlayController';
 import { useLayoutDraftController } from './useLayoutDraftController';
 import { useLayoutInteractionController } from './useLayoutInteractionController';
-import { useMeasuredBlockReflowController } from './useMeasuredBlockReflowController';
 import { useNoteCanvasDataAdapter } from './useNoteCanvasDataAdapter';
 import { useNoteCanvasLayerProps } from './useNoteCanvasLayerProps';
 import { useNoteCanvasRuntime } from './useNoteCanvasRuntime';
 import { useNoteLoadResetController } from './useNoteLoadResetController';
+import { useRuntimeBlockEditingController } from './useRuntimeBlockEditingController';
 import { useRuntimeBlockHistoryController } from './useRuntimeBlockHistoryController';
 import { useRuntimeFrameModelController } from './useRuntimeFrameModelController';
 import { useRuntimeInteractionController } from './useRuntimeInteractionController';
@@ -227,16 +226,16 @@ export function useNoteCanvasRuntimeController() {
     visibleBlocks,
   });
 
-  const { updateBlockFieldDraft } = useBlockFieldDraftController({
-    setBlockFieldDrafts,
-    setBlockTextDrafts,
-  });
-
-  const { handleMeasuredBlockHeight } = useMeasuredBlockReflowController({
+  const {
+    handleMeasuredBlockHeight,
+    updateBlockFieldDraft,
+  } = useRuntimeBlockEditingController({
     applyMeasuredBlockHeightDraft,
     blockLayouts,
     movingBlockIdRef,
     orderedBlocks: visibleBlocks,
+    setBlockFieldDrafts,
+    setBlockTextDrafts,
     suppressMeasuredReflowUntilRef,
     surfacePolicy,
   });

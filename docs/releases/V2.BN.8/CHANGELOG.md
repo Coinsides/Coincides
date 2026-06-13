@@ -1,5 +1,11 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Runtime Block Editing Controller Seed
+
+- 新增 `hooks/useRuntimeBlockEditingController.ts`，把 structured field draft update 和 measured block height reflow 组合进一个 L6/L7 block editing boundary。
+- `useNoteCanvasRuntimeController()` 不再直接调用 `useBlockFieldDraftController()` 或 `useMeasuredBlockReflowController()`。
+- 本轮不改变 Definition / Formula 字段 truth、不改变 measured height reflow、不改变 active structured block 展开推开下方 block 的行为，只继续压缩 runtime root 的 block editing composition。
+
 ## Changed - V2.BN.8.1 Runtime Frame Model Controller Seed
 
 - 新增 `hooks/useRuntimeFrameModelController.ts`，把 PageFrame height、primary PageFrame、Canvas runtime model、relation endpoint reserve 和 export preview model 的组合放进 L4 frame model boundary。
