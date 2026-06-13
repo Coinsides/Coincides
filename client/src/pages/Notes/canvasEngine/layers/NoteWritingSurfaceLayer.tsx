@@ -21,6 +21,7 @@ import type {
 import type {
   BlockBoxLayout,
 } from '../runtimeLayout';
+import type { NoteCanvasRuntimeModel } from '../types';
 import { BlockEditorLayer } from './BlockEditorLayer';
 import { SlashMenuLayer } from './SlashMenuLayer';
 import styles from '../../NoteDetail.module.css';
@@ -41,13 +42,7 @@ export interface NoteWritingSurfaceLayerProps {
   focusBlockId: string | null;
   interactionState: RuntimeInteractionState;
   layoutMode: boolean;
-  noteCanvasRuntime: {
-    version: string;
-    route: string;
-    visibleBlockIds: string[];
-    primaryPageFrame: { id: string } | null;
-    world: { width: number };
-  };
+  noteCanvasRuntime: NoteCanvasRuntimeModel;
   pageContentHeight: number;
   pageOffsetX: number;
   primaryPageFrameWidth: number;
@@ -160,10 +155,11 @@ export function NoteWritingSurfaceLayer({
         data-canvas-interaction-target={interactionState.target}
         data-canvas-interaction-block={interactionState.blockId || ''}
         style={{
-          minHeight: pageContentHeight,
+          minHeight: surfaceMode === 'canvas' ? noteCanvasRuntime.world.height : pageContentHeight,
           '--formal-page-offset-x': `${pageOffsetX}px`,
           '--formal-page-width': `${primaryPageFrameWidth}px`,
           '--canvas-world-width': `${noteCanvasRuntime.world.width}px`,
+          '--canvas-world-height': `${noteCanvasRuntime.world.height}px`,
         } as CSSProperties}
         onMouseDown={onBlockListMouseDown}
         onDoubleClick={onPageSpaceDoubleClick}

@@ -28,7 +28,7 @@ export const DEFAULT_PRIMARY_PAGE_FRAME: PageFrameModel = {
   height: 580,
 };
 
-export const CANVAS_PRIMARY_PAGE_OFFSET_X = 640;
+export const CANVAS_PRIMARY_PAGE_OFFSET_X = 96;
 
 export function createPrimaryPageFrame(options: Partial<PageFrameModel> = {}): PageFrameModel {
   return {

@@ -1,5 +1,43 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Canvas Shell And PageFrame Boundary Patch
+
+```text
+status: technical validation passed
+client build: passed
+browser smoke: passed
+manual visual acceptance: pending Henry retest
+```
+
+已完成部分：
+
+- `NoteCanvasRuntime` 根据当前 surface mode 给根节点增加 Canvas shell class。
+- Canvas mode 下根节点固定为 viewport 高度并关闭全局页面滚动。
+- `documentShellCanvas` 改为填满 runtime root，不再手写 `100vw - 320px` 宽度估算。
+- `writingSurfaceCanvas` 去掉外层 card/bubble 边框和阴影，只保留 grid workspace。
+- `blockListCanvas` 的高度改用 CanvasWorld height；formal PageFrame boundary 继续使用 PageFrame 内容高度。
+- PageFrame 初始 X offset 调整到 96px，保证进入 Canvas mode 时主 PageFrame 横向完整可见。
+- `+ Insert` floating action 在 Canvas mode 下固定在右侧中部。
+- `NoteWritingSurfaceLayerProps.noteCanvasRuntime` 改为正式 `NoteCanvasRuntimeModel` 类型，避免 layer props 把 world 类型写窄。
+
+已验证：
+
+- client build passed。
+- `git diff --check` passed。
+- browser smoke passed：
+  - Canvas mode `bodyCanScroll = false`；
+  - `shellOverflowY = hidden`；
+  - `surfaceOverflowY = auto`；
+  - formal PageFrame boundary 横向完整位于 writing surface 内；
+  - `rootCanvasWorldHeight = 2600px`；
+  - console error 为空。
+
+仍需人工观察：
+
+- Henry 在真实宽屏/收起 sidebar 两种状态下确认 canvas 是否填满剩余区域；
+- 在 Canvas mode 中滚动较长 workspace 时，确认只滚动 canvas workspace；
+- 手动拖动 PageFrame 内最底部 block 向下时，确认 PageFrame 是否按内容自然延伸。
+
 ## V2.BN.8.1 Slash Menu Caret Anchor Patch
 
 ```text

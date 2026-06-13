@@ -14,8 +14,10 @@ export default function NoteCanvasRuntime() {
     );
   }
 
+  const surfaceMode = layerProps.documentLayerProps.surfaceMode;
+
   return (
-    <div className={styles.page}>
+    <div className={`${styles.page} ${surfaceMode === 'canvas' ? styles.pageCanvas : ''}`}>
       <NoteChromeLayer {...layerProps.chromeProps} />
 
       <NoteRuntimeDocumentLayer {...layerProps.documentLayerProps} />

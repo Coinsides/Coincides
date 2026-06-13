@@ -1,5 +1,15 @@
 # CHANGELOG - V2.BN.8
 
+## Fixed - V2.BN.8.1 Canvas Shell And PageFrame Boundary
+
+- Canvas mode root 现在增加 `pageCanvas` shell，top bar 以下交给 runtime document shell；Canvas mode 不再依赖全局页面滚动。
+- `documentShellCanvas` 改为 flex viewport fill，不再使用 `calc(100vw - 320px)` 估算宽度，sidebar 展开/收起时由主内容区自然决定可用宽度。
+- `writingSurfaceCanvas` 去掉外层 page/card 边框和阴影，只保留 canvas grid 与 formal PageFrame 自身边界。
+- Canvas block list 在 Canvas mode 使用 `noteCanvasRuntime.world.height` 作为 workspace 高度，同时 formal PageFrame boundary 继续使用 `pageContentHeight`，避免把 PageFrame 撑成 2600px 的巨大空白。
+- Canvas mode 的 `+ Insert` 入口改为 viewport floating action，放在右侧中部，并限制展开面板最大高度。
+- `CANVAS_PRIMARY_PAGE_OFFSET_X` 从 640 调整为 96，让 Canvas mode 初始视野中能完整看到主 PageFrame，而不是只露出页面右侧。
+- client build passed；browser smoke passed：Canvas mode `bodyCanScroll=false`、`surfaceOverflowY=auto`、formal PageFrame 横向完整可见、console error 为空。
+
 ## Fixed - V2.BN.8.1 Slash Menu Caret Anchor
 
 - `getSlashMenuAnchor()` 现在优先用 textarea / input 的 caret rect 计算菜单位置，不再只用整个输入框的边界。

@@ -3,6 +3,14 @@
   animation: fadeIn var(--transition-normal) ease forwards;
 }
 
+.pageCanvas {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
+}
+
 .loading {
   color: var(--text-muted);
   font-size: 15px;
@@ -56,6 +64,15 @@
   background: var(--bg-gradient);
 }
 
+.pageCanvas .chromeWrap {
+  position: relative;
+  top: auto;
+  flex: 0 0 auto;
+  padding: 8px 20px 6px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--bg-primary);
+}
+
 .noteChrome,
 .chromeCollapsed {
   width: min(1250px, 100%);
@@ -73,6 +90,12 @@
   justify-content: flex-start;
 }
 
+.pageCanvas .noteChrome,
+.pageCanvas .chromeCollapsed {
+  width: 100%;
+  max-width: none;
+}
+
 .noteChrome .backBtn,
 .chromeCollapsed .backBtn {
   margin-bottom: 0;
@@ -87,9 +110,14 @@
 }
 
 .documentShellCanvas {
-  width: calc(100vw - 320px);
+  flex: 1 1 auto;
+  width: 100%;
   max-width: none;
-  min-height: calc(100vh - 112px);
+  height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
 }
 
 .header {
@@ -540,6 +568,13 @@
   gap: 8px;
 }
 
+.pageCanvas .pageToolRail {
+  top: 50%;
+  right: 16px;
+  z-index: 60;
+  transform: translateY(-50%);
+}
+
 .pageToolBtn {
   display: inline-flex;
   align-items: center;
@@ -572,6 +607,14 @@
   border-radius: var(--radius-lg);
   background: var(--bg-primary);
   box-shadow: var(--glass-shadow-lg);
+}
+
+.pageCanvas .insertPanel {
+  top: 50%;
+  right: 16px;
+  max-height: calc(100vh - 84px);
+  overflow: auto;
+  transform: translateY(-50%);
 }
 
 .primaryBtn {
@@ -608,9 +651,10 @@
 .writingSurfaceCanvas {
   align-items: flex-start;
   justify-content: flex-start;
-  height: calc(100vh - 112px);
-  min-height: calc(100vh - 112px);
+  height: 100%;
+  min-height: 0;
   padding: 0;
+  border: 0;
   overflow: auto;
   background:
     radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--border-default) 45%, transparent) 1px, transparent 0),
@@ -630,6 +674,7 @@
     );
   background-color: color-mix(in srgb, var(--bg-primary) 90%, var(--bg-secondary));
   background-size: 24px 24px, 24px 24px, 24px 24px;
+  box-shadow: none;
 }
 
 .blockList {
@@ -644,6 +689,7 @@
 .blockListCanvas {
   width: var(--canvas-world-width, 4096px);
   min-width: var(--canvas-world-width, 4096px);
+  min-height: var(--canvas-world-height, 2600px);
 }
 
 .formalPageBoundary {
@@ -651,7 +697,6 @@
   inset: 0 auto auto var(--formal-page-offset-x, 0px);
   z-index: 1;
   width: var(--formal-page-width, 760px);
-  min-height: 100%;
   border: 1px solid var(--border-default);
   border-radius: 2px;
   background: var(--bg-primary);

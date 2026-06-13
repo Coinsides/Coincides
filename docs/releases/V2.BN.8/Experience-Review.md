@@ -1,5 +1,26 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Canvas Shell And PageFrame Boundary Experience Note
+
+```text
+Canvas mode now reads as a workspace, not a page card; pending Henry visual retest
+```
+
+体验判断：
+
+- Canvas mode 应该像工作区，而不是“页面外面又套了一层气泡卡片”。
+- 本补丁后，Canvas mode 的 top bar 是唯一固定上层，下面的区域交给 canvas workspace。
+- 正式 PageFrame 仍然存在：用户能看见一个可导出 formal page 被放在更大的 workspace 中。
+- Workspace 的滚动现在归 writing surface 自己处理，避免外层页面 scroll 和内部 canvas scroll 同时出现。
+- `+ Insert` 保持为 viewport 浮层入口，不会被 canvas 内容滚动带走。
+
+仍需人工观察：
+
+- 视觉上是否已经接近“无限画布里的正式页面”；
+- PageFrame 左侧 96px workspace 留白是否合适，还是需要继续缩小/放大；
+- 右侧 `+ Insert` 是否遮挡内容，未来是否迁入 bottom/side toolbar；
+- Page mode 是否也应该同步采用更紧凑 top bar。
+
 ## V2.BN.8.1 Slash Menu Caret Anchor Experience Note
 
 ```text

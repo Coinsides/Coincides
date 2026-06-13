@@ -64,10 +64,12 @@ NoteCanvas
 PageFrame
   NoteCanvas 内最多一个主正式页面区域。
   是 export/layout boundary，不拥有 content truth。
+  height 由 PageFrame 内正式内容底部和页面底部留白决定。
 
 Workspace
   PageFrame 外区域。
   第一版可不建实体表，但 placement 必须允许 object 在 PageFrame 外存在。
+  height/width 属于 CanvasWorld runtime 范围，不得反向撑大 PageFrame。
 
 NoteBlock
   内容 truth。
@@ -126,6 +128,26 @@ render_forced_reason
 - selected / editing / dragging / resizing 的对象必须强制渲染；
 - viewport 外对象可以不进入重交互层；
 - overlay/debug state 不写入 content truth。
+
+## PageFrame / CanvasWorld 尺寸边界
+
+V2.BN.8.1 起，PageFrame height 和 CanvasWorld height 必须分开：
+
+```text
+PageFrame height
+  = max(base page height, bottom-most formal page block bottom + bottom padding)
+
+CanvasWorld height
+  = workspace 可滚动/可浏览区域
+```
+
+规则：
+
+- Canvas mode 的 block list 可以使用 CanvasWorld height 形成工作区；
+- formal PageFrame boundary 只能使用 PageFrame height；
+- 进入 Canvas mode 不应把 PageFrame 撑成完整 workspace 高度；
+- 如果用户在 PageFrame 内向下移动最底部 block，PageFrame 可以随内容自然延伸；
+- 如果用户要把 block 放到 PageFrame 下方 workspace，第一版应先通过 x 方向脱离 PageFrame，再进入 workspace 区域。
 
 ## Clean Reset 规则
 

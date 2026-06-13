@@ -345,7 +345,7 @@ CodeBlock 应该拥有和普通 TextBlock 明显不同的视觉语言，参考 C
 
 ### 7. Canvas mode shell 需要铺满工作区，避免气泡边界和双滚动条
 
-- [ ] `ISSUE-007` Canvas mode 当前仍像被装在一个页面气泡/容器里，边界和滚动行为不符合真正 canvas 工作区。
+- [x] `ISSUE-007` Canvas mode 当前仍像被装在一个页面气泡/容器里，边界和滚动行为不符合真正 canvas 工作区。
 
 #### Henry 初步观察
 
@@ -417,15 +417,15 @@ Canvas mode 下不应该有全局页面 scroll。只保留 canvas workspace 自�
 
 #### 待补信息
 
-- [ ] 确认 sidebar 展开/收起时 canvas 是否都能填满剩余区域。
-- [ ] 确认 Page mode 是否也同步使用紧凑 top bar。
-- [ ] 确认 Canvas mode 下是否需要彻底隐藏 documentShell 的边框/阴影。
-- [ ] 确认 Insert floating action 是右侧居中，还是未来进入 bottom/side toolbar。
+- [x] 确认 sidebar 展开/收起时 canvas 是否都能填满剩余区域。当前实现不再使用 `100vw - 320px`，改由 runtime page flex shell 填满主内容区。
+- [ ] 确认 Page mode 是否也同步使用紧凑 top bar。当前只在 Canvas mode 固定紧凑 top bar。
+- [x] 确认 Canvas mode 下是否需要彻底隐藏 documentShell 的边框/阴影。当前 Canvas mode 去掉 writing surface 边框和阴影，只保留 PageFrame 自身边界。
+- [x] 确认 Insert floating action 是右侧居中，还是未来进入 bottom/side toolbar。当前作为 viewport floating action 放在右侧中部；未来可迁入 bottom/side toolbar。
 - [ ] 确认 canvas 内部滚轮目前是 scroll，不是 pan；未来是否改为 space-drag / wheel pan。
 
 ### 8. Canvas mode 中 PageFrame 高度过度延伸
 
-- [ ] `ISSUE-008` Page mode 正常，但切换到 Canvas mode 后，PageFrame 下方出现过大的空白区域。
+- [x] `ISSUE-008` Page mode 正常，但切换到 Canvas mode 后，PageFrame 下方出现过大的空白区域。
 
 #### Henry 初步观察
 
@@ -459,14 +459,14 @@ PageFrame height = max(基础页面高度, 最底部 block bottom + 页面底部
 
 #### 待补信息
 
-- [ ] 确认当前过度空白来自 `CANVAS_WORKSPACE_HEIGHT` 还是 `pageContentHeight` 计算。
-- [ ] 确认 PageFrame height 和 CanvasWorld height 是否被混用。
-- [ ] 确认 PageFrame 底部留白默认值。
-- [ ] 确认 block 在 PageFrame 内下移时，PageFrame 是否自动延伸。
+- [x] 确认当前过度空白来自 `CANVAS_WORKSPACE_HEIGHT` 还是 `pageContentHeight` 计算。当前已拆分：Canvas world 高度只驱动 workspace，PageFrame 边界仍用 `pageContentHeight`。
+- [x] 确认 PageFrame height 和 CanvasWorld height 是否被混用。当前 block list 在 Canvas mode 使用 world height，formal PageFrame boundary 使用 page content height。
+- [x] 确认 PageFrame 底部留白默认值。当前仍由 `PAGE_FRAME_BOTTOM_PADDING = 96` 驱动。
+- [ ] 确认 block 在 PageFrame 内下移时，PageFrame 是否自动延伸。需要 Henry 后续手测拖动场景。
 
 ### 9. Canvas mode 必须保留 PageFrame 边界和页面留白
 
-- [ ] `ISSUE-009` 从 Page mode 切到 Canvas mode 后，外层 PageFrame 边界/页面留白感消失。
+- [x] `ISSUE-009` 从 Page mode 切到 Canvas mode 后，外层 PageFrame 边界/页面留白感消失。
 
 #### Henry 初步观察
 
@@ -497,8 +497,8 @@ Canvas mode 不是删除 PageFrame，而是把 PageFrame 放进更大的 workspa
 
 #### 待补信息
 
-- [ ] 确认 Page mode 和 Canvas mode 是否使用同一套 PageFrame visual token。
-- [ ] 确认 PageFrame 边框在深色主题下的可见性。
+- [x] 确认 Page mode 和 Canvas mode 是否使用同一套 PageFrame visual token。当前 Canvas mode 的 formal PageFrame 继续使用 `var(--border-default)` / `var(--bg-primary)`。
+- [x] 确认 PageFrame 边框在深色主题下的可见性。Browser smoke 中 formal PageFrame boundary 可见且横向完整进入视野。
 - [ ] 确认 PageFrame 内边距是否进入 layout truth。
 - [ ] 确认 block x/y 是相对 PageFrame content area，还是相对 PageFrame outer boundary。
 
@@ -671,10 +671,10 @@ D &\subset \mathbb{R}^2,\quad
 - [ ] Patch H: 调整 snap alignment on/off 对新建 draft block 落点的影响。
 - [ ] Patch I: CodeBlock badge 改为 `CODE`，并建立独立代码视觉样式。
 - [ ] Patch J: 设计 CodeBlock 行级选择 / 复制 gutter。
-- [ ] Patch K: Canvas mode shell 铺满工作区，去掉外层气泡边界和全局 scroll。
-- [ ] Patch L: 统一紧凑 top bar 高度。
-- [ ] Patch M: 调整 `+ Insert` floating action 到右侧中部 viewport 层。
-- [ ] Patch N: 修 PageFrame height 在 Canvas mode 里过度延伸的问题。
-- [ ] Patch O: Canvas mode 保留 PageFrame 边界、背景和内容留白。
+- [x] Patch K: Canvas mode shell 铺满工作区，去掉外层气泡边界和全局 scroll。
+- [x] Patch L: 统一紧凑 top bar 高度。
+- [x] Patch M: 调整 `+ Insert` floating action 到右侧中部 viewport 层。
+- [x] Patch N: 修 PageFrame height 在 Canvas mode 里过度延伸的问题。
+- [x] Patch O: Canvas mode 保留 PageFrame 边界、背景和内容留白。
 - [ ] Patch P: 定义 PageFrame content inset / ruler 控件的第一版契约。
 - [ ] Patch Q: 将 slash menu / formula preview / inline math conversion / structured block measurement / draft block placement / code block visual language / canvas shell layout / PageFrame ruler 经验同步到 `Canvas-Engine-Interaction-Contract.md`。
