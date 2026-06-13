@@ -1,5 +1,39 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Runtime Block Operations Controller Seed
+
+```text
+scope: L6 block editing / L7 measurement reflow / L8 natural writing and placement interaction / L11 block history / L12 runtime root compression
+status: applied
+browser smoke: deferred by Henry until all replacement work is complete
+```
+
+### What Changed
+
+- Added `client/src/pages/Notes/canvasEngine/hooks/useRuntimeBlockOperationsController.ts`.
+- The new controller composes:
+  - `useRuntimeBlockHistoryController()`;
+  - `useRuntimeNaturalWritingController()`;
+  - `useRuntimeBlockEditingController()`;
+  - `useRuntimePlacementInteractionController()`.
+- `useNoteCanvasRuntimeController()` no longer imports or calls those four block-operation controllers directly.
+- The runtime root still passes the same data and callbacks to `useNoteCanvasLayerProps()`, but receives them from one block operations boundary.
+
+### Review Notes
+
+- This checkpoint is a boundary extraction only.
+- Create / trash / undo-redo, draft persistence, slash command behavior, structured field draft updates, measured height reflow, move / resize, snap, and elastic avoidance are unchanged.
+- The useful ownership change is that block operations now have one composition entry before entering the runtime root, which makes later L6/L7/L8/L11 work easier to audit.
+- Browser Harness is intentionally deferred until the full replacement pass is complete.
+
+### Verification
+
+- `npm run build:client` passed.
+- `npm run smoke:canvas-engine-performance` passed.
+- `server` `npm run build` passed.
+- `git diff --check` passed.
+- Changed-file secret scan passed.
+
 ## V2.BN.8.1 Runtime Document Data Controller Seed
 
 ```text

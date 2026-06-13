@@ -1,5 +1,20 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Runtime Block Operations Controller Experience Note
+
+```text
+Block creation, slash writing, structured field editing, measured reflow, move/resize, and block lifecycle history now share one block operations controller boundary.
+```
+
+体验判断：
+- 这一步不应该改变用户可见行为；双击创建、`/` 命令、Ctrl+Enter、Definition / Formula 字段编辑、Formula 展开、move / resize、snap、elastic avoidance、trash / undo-redo 都应该保持原样。
+- 工程价值是把“用户对 block 做动作”的几条路径收进一个 controller，runtime root 不再分别感知 history / natural writing / block editing / placement interaction 四套 hook。
+- Browser Harness 暂时不跑；等全部替换工作结束后再统一补真实浏览器验证。
+
+仍需人工观察：
+- Henry 后续复测 draft 创建、slash menu、Definition / Formula 编辑、长文本测量回流、move / resize、trash / undo-redo 时，应确认体验没有回退。
+- 如果后续出现 block 创建后无法撤回、slash menu 异常、字段保存错位、Formula 展开穿模、resize 后高度异常或 move history 不对，优先检查 `hooks/useRuntimeBlockOperationsController.ts` 与它组合的四个子 controller。
+
 ## V2.BN.8.1 Runtime Document Data Controller Experience Note
 
 ```text

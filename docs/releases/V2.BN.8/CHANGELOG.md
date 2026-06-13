@@ -1,5 +1,11 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Runtime Block Operations Controller Seed
+
+- 新增 `hooks/useRuntimeBlockOperationsController.ts`，把 block lifecycle history、natural writing、structured field editing、measured reflow、move / resize placement interaction 组合进一个 L6/L7/L8/L11 block operations boundary。
+- `useNoteCanvasRuntimeController()` 不再直接调用 `useRuntimeBlockHistoryController()`、`useRuntimeNaturalWritingController()`、`useRuntimeBlockEditingController()` 或 `useRuntimePlacementInteractionController()`。
+- 本轮不改变 create / trash / undo-redo、slash command、draft persistence、Definition / Formula field draft、measured height reflow、move / resize、snap 或 elastic avoidance 行为，只继续压缩 runtime root 对 block operation 细节的直接感知。
+
 ## Changed - V2.BN.8.1 Runtime Document Data Controller Seed
 
 - 新增 `hooks/useRuntimeDocumentDataController.ts`，把 layout draft state、note load reset、note data adapter 和 note-level source stats 组合进一个 L2/L5/L6 document data boundary。

@@ -2,13 +2,10 @@ import { useNavigate } from 'react-router-dom';
 import { useUIStore } from '@/stores/uiStore';
 import { useNoteCanvasLayerProps } from './useNoteCanvasLayerProps';
 import { useNoteCanvasRuntime } from './useNoteCanvasRuntime';
-import { useRuntimeBlockEditingController } from './useRuntimeBlockEditingController';
-import { useRuntimeBlockHistoryController } from './useRuntimeBlockHistoryController';
+import { useRuntimeBlockOperationsController } from './useRuntimeBlockOperationsController';
 import { useRuntimeDocumentDataController } from './useRuntimeDocumentDataController';
 import { useRuntimeFrameModelController } from './useRuntimeFrameModelController';
 import { useRuntimeLayoutModelController } from './useRuntimeLayoutModelController';
-import { useRuntimeNaturalWritingController } from './useRuntimeNaturalWritingController';
-import { useRuntimePlacementInteractionController } from './useRuntimePlacementInteractionController';
 import { useRuntimeSurfaceStateController } from './useRuntimeSurfaceStateController';
 
 export function useNoteCanvasRuntimeController() {
@@ -125,18 +122,6 @@ export function useNoteCanvasRuntimeController() {
   });
 
   const {
-    handleTrashBlock,
-    pushCreatedBlockHistory,
-    pushLayoutHistory,
-  } = useRuntimeBlockHistoryController({
-    applyLayoutDrafts: mergeLayoutDrafts,
-    blocks,
-    persistLayoutSnapshot,
-    restoreBlockForHistory: restoreBlock,
-    trashBlock,
-  });
-
-  const {
     activateDraft,
     clearSlashTarget,
     creatingDraft,
@@ -150,16 +135,24 @@ export function useNoteCanvasRuntimeController() {
     handleBlockTextChange,
     handleDraftChange,
     handleDraftKeyDown,
+    handleTrashBlock,
     handlePageSpaceDoubleClick,
     handleSelectSlashCommand,
     handleSurfacePointerDown,
+    handleMeasuredBlockHeight,
     persistDraft,
     resizeDraftFromTextarea,
     slashCommands,
     slashTarget,
-  } = useRuntimeNaturalWritingController({
+    updateBlockFieldDraft,
+    beginMoveBlock,
+    beginResizeBlock,
+  } = useRuntimeBlockOperationsController({
     addToast,
+    applyLayoutDrafts: mergeLayoutDrafts,
+    applyMeasuredBlockHeightDraft,
     applyTemplateToBlock,
+    blockLayouts,
     blockListRef,
     blocks,
     blockTextDrafts,
@@ -169,18 +162,28 @@ export function useNoteCanvasRuntimeController() {
     defaultDraftLayout,
     defaultTextTemplate,
     insertTemplateOptions,
+    movingBlockIdRef,
     note,
-    onDraftPersisted: pushCreatedBlockHistory,
+    orderedBlocks: visibleBlocks,
     pageOffsetX,
+    persistChangedBlockLayouts,
+    persistLayoutSnapshot,
+    restoreBlockForHistory: restoreBlock,
     saveBlock,
+    setBlockFieldDrafts,
     setBlockTextDrafts,
     setActiveBlockId,
     setFocusBlockId,
     setInteractionState,
+    setLayoutDrafts,
+    setLayoutMode,
     setSelectedBlockId,
+    setSnapGuide,
     snapEnabled,
+    suppressMeasuredReflowUntilRef,
     surfacePolicy,
     templateOptions,
+    trashBlock,
   });
 
   const {
@@ -196,37 +199,6 @@ export function useNoteCanvasRuntimeController() {
     pageOffsetX,
     surfaceMode,
     visibleBlocks,
-  });
-
-  const {
-    handleMeasuredBlockHeight,
-    updateBlockFieldDraft,
-  } = useRuntimeBlockEditingController({
-    applyMeasuredBlockHeightDraft,
-    blockLayouts,
-    movingBlockIdRef,
-    orderedBlocks: visibleBlocks,
-    setBlockFieldDrafts,
-    setBlockTextDrafts,
-    suppressMeasuredReflowUntilRef,
-    surfacePolicy,
-  });
-
-  const { beginMoveBlock, beginResizeBlock } = useRuntimePlacementInteractionController({
-    blockLayouts,
-    contentWidth,
-    movingBlockIdRef,
-    orderedBlocks: visibleBlocks,
-    persistChangedBlockLayouts,
-    pushLayoutHistory,
-    setInteractionState,
-    setLayoutDrafts,
-    setLayoutMode,
-    setSelectedBlockId,
-    setSnapGuide,
-    snapEnabled,
-    suppressMeasuredReflowUntilRef,
-    surfacePolicy,
   });
 
   const layerProps = useNoteCanvasLayerProps({

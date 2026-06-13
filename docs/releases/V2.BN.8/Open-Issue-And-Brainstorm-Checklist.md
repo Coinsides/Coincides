@@ -20,6 +20,21 @@ Stage: V2.BN.8 engine seed manual smoke
 Status: 初步人工测试中
 ```
 
+## Runtime Block Operations Controller Seed
+
+patch: V2.BN.8.1 Runtime Block Operations Controller Seed
+status: code applied, full non-browser verification passed
+
+- [x] Add `useRuntimeBlockOperationsController.ts`.
+- [x] Keep block lifecycle history behavior unchanged.
+- [x] Keep draft creation and slash command behavior unchanged.
+- [x] Keep structured field draft updates and measured reflow behavior unchanged.
+- [x] Keep move / resize placement interaction behavior unchanged.
+- [x] Remove direct root controller imports of `useRuntimeBlockHistoryController()`, `useRuntimeNaturalWritingController()`, `useRuntimeBlockEditingController()`, and `useRuntimePlacementInteractionController()`.
+- [x] Run full non-browser checks.
+- [ ] Henry manual visual retest: create/trash/undo-redo, slash menu, Definition / Formula editing, move / resize, snap, and elastic avoidance should not regress.
+- [ ] Browser Harness retest deferred until the full replacement pass is done.
+
 ## Runtime Document Data Controller Seed
 
 patch: V2.BN.8.1 Runtime Document Data Controller Seed
