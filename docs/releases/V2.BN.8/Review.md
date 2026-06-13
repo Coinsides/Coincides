@@ -1,5 +1,33 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Runtime Frame Model Controller Seed
+
+```text
+scope: L4 PageFrame / workspace model composition / L12 runtime root compression
+status: applied
+browser smoke: deferred by Henry until all replacement work is complete
+```
+
+### What Changed
+
+- Added `client/src/pages/Notes/canvasEngine/hooks/useRuntimeFrameModelController.ts`.
+- Moved the direct `useNoteCanvasFrameModel()` call out of `useNoteCanvasRuntimeController()`.
+- The new controller returns the existing frame/runtime model outputs:
+  - `exportPreview`;
+  - `noteCanvasRuntime`;
+  - `pageContentHeight`;
+  - `primaryPageFrame`.
+
+### Review Judgment
+
+This is a narrow but useful L4 boundary. PageFrame height, formal frame creation, Canvas runtime model composition, export preview, and relation endpoint reserve are still implemented by the existing model hook, but the root controller no longer directly owns the frame-model call. That makes the future PageFrame / workspace replacement surface easier to find and review.
+
+### Residual Risk
+
+- Browser smoke is intentionally deferred per Henry instruction.
+- This is still a controller wrapper, not a rewritten PageFrame engine.
+- Multi-frame productization, pan/zoom-aware frame transforms, and PageFrame ruler controls remain out of scope for V2.BN.8.1.
+
 ## V2.BN.8.1 Runtime Layout Model Controller Seed
 
 ```text

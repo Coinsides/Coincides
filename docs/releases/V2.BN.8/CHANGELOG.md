@@ -1,5 +1,11 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Runtime Frame Model Controller Seed
+
+- 新增 `hooks/useRuntimeFrameModelController.ts`，把 PageFrame height、primary PageFrame、Canvas runtime model、relation endpoint reserve 和 export preview model 的组合放进 L4 frame model boundary。
+- `useNoteCanvasRuntimeController()` 不再直接调用 `useNoteCanvasFrameModel()`。
+- 本轮不改变 PageFrame 计算、workspace policy、export preview 内容、relation endpoint reserve 或用户可见布局，只继续压缩 runtime root 的 frame/model composition。
+
 ## Changed - V2.BN.8.1 Runtime Layout Model Controller Seed
 
 - 新增 `hooks/useRuntimeLayoutModelController.ts`，把 content width、visible blocks、resolved block layouts、default draft layout 和 layout persistence callbacks 组合进一个 L3-L5 controller boundary。

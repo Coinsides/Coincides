@@ -12,10 +12,10 @@ import { useLayoutInteractionController } from './useLayoutInteractionController
 import { useMeasuredBlockReflowController } from './useMeasuredBlockReflowController';
 import { useNoteCanvasDataAdapter } from './useNoteCanvasDataAdapter';
 import { useNoteCanvasLayerProps } from './useNoteCanvasLayerProps';
-import { useNoteCanvasFrameModel } from './useNoteCanvasLayoutModel';
 import { useNoteCanvasRuntime } from './useNoteCanvasRuntime';
 import { useNoteLoadResetController } from './useNoteLoadResetController';
 import { useRuntimeBlockHistoryController } from './useRuntimeBlockHistoryController';
+import { useRuntimeFrameModelController } from './useRuntimeFrameModelController';
 import { useRuntimeInteractionController } from './useRuntimeInteractionController';
 import { useRuntimeLayoutRefsController } from './useRuntimeLayoutRefsController';
 import { useRuntimeLayoutModelController } from './useRuntimeLayoutModelController';
@@ -217,7 +217,7 @@ export function useNoteCanvasRuntimeController() {
     noteCanvasRuntime,
     pageContentHeight,
     primaryPageFrame,
-  } = useNoteCanvasFrameModel({
+  } = useRuntimeFrameModelController({
     blockLayouts,
     defaultDraftLayout,
     draftActive,

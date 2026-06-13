@@ -70,6 +70,24 @@ patch: V2.BN.8.1 Runtime Layout Model Controller Seed
 - [ ] Henry 手动复测：Page / Canvas 切换后 block 宽度、位置、workspace visibility 与上一轮保持一致。
 - [ ] Browser Harness 真实渲染 smoke 仍按 Henry 要求等全部替换完成后统一补跑。
 
+## L4 Runtime Frame Model Checkpoint
+
+```text
+status: frame model controller seed applied, pending Henry visual retest
+patch: V2.BN.8.1 Runtime Frame Model Controller Seed
+```
+
+已完成：
+
+- [x] `useRuntimeFrameModelController()` 已接管 PageFrame height、primary PageFrame、Canvas runtime model、relation endpoint reserve 和 export preview model 的组合入口。
+- [x] `useNoteCanvasRuntimeController()` 不再直接调用 `useNoteCanvasFrameModel()`。
+- [x] 本轮不改变 PageFrame height 计算、workspace policy、export preview 内容或用户可见布局。
+
+仍需复测：
+
+- [ ] Henry 手动复测：Canvas mode 下 formal PageFrame 边界和 Page mode 下页面高度没有退化。
+- [ ] Browser Harness 真实渲染 smoke 仍按 Henry 要求等全部替换完成后统一补跑。
+
 ## L9 Floating Overlay Checkpoint
 
 ```text

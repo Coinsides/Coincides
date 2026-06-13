@@ -1,5 +1,22 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Runtime Frame Model Controller Experience Note
+
+```text
+PageFrame, Canvas runtime model, relation endpoint reserve, and export preview composition now have a small frame model controller boundary.
+```
+
+体验判断：
+
+- 这一步不应该改变用户可见行为；PageFrame 高度、Canvas mode 中的 formal frame、export preview 统计和 relation endpoint reserve seed 都应保持原样。
+- 工程价值是把 L4 PageFrame / workspace model 的入口从 root controller 中标出来，后续如果要继续做 frame 高度、ruler、workspace 或 pan/zoom，就知道从这个边界进入。
+- Browser Harness 暂时不跑；等全部替换工作结束后再统一补真实浏览器验证。
+
+仍需人工观察：
+
+- Henry 后续复测 Canvas mode 下 PageFrame 边界、Page mode 下高度延展、Preview 统计、以及 relation endpoint reserve 没有可见退化。
+- 如果后续出现 PageFrame 高度过高、Canvas mode 丢 formal frame、export preview 数字不对，优先检查 `hooks/useRuntimeFrameModelController.ts` 与 `hooks/useNoteCanvasLayoutModel.ts`。
+
 ## V2.BN.8.1 Runtime Layout Model Controller Experience Note
 
 ```text
