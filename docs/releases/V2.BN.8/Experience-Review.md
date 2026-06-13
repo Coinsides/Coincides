@@ -3,28 +3,26 @@
 ## V2.BN.8.1 Final Browser Harness Experience Gate
 
 ```text
-status: blocked before visual inspection
+status: browser smoke passed; Henry manual pass pending
 date: 2026-06-13
 ```
 
-- Browser Harness could not connect to Chrome because the CDP websocket handshake timed out.
-- No final browser screenshot, click-through, or runtime visual evidence was collected in this attempt.
-- Experience acceptance remains pending until Browser Harness connects and Henry confirms the resulting interaction pass.
+- Browser Harness reached the active note page and verified the basic runtime path.
+- Page mode -> Canvas mode -> Page mode passed after the measured-height loop fix.
+- Preview open/close and Layout click passed without frontend errors.
+- Experience acceptance remains pending until Henry confirms the resulting interaction pass.
 
 ## V2.BN.8.1 Final Browser Harness Retry - 2026-06-13
 
 ```text
-status: blocked before product interaction
-reason: Chrome remote debugging authorization / CDP websocket handshake timeout
+status: superseded by later passed Browser Harness smoke
+reason: earlier Chrome remote debugging authorization / CDP websocket handshake timeout
 ```
 
-Browser Harness reached the same authorization blocker during the final smoke retry. No product interaction was tested in this attempt, so no visual or UX pass can be claimed.
+Browser Harness reached the same authorization blocker during an earlier final smoke retry. This is now historical evidence only; a later Browser Harness smoke connected, found one Page -> Canvas white-screen issue, and passed after the fix.
 
-Experience acceptance remains pending until:
+Experience acceptance now remains pending until:
 
-- Chrome remote debugging is allowed by Henry;
-- Browser Harness can connect;
-- final smoke protocol is executed;
 - Henry manually confirms passed or passed with follow-up polish.
 
 ## V2.BN.8.1 Runtime Presentation Controller Experience Note
@@ -370,8 +368,8 @@ NoteDetail is no longer the user-facing runtime body; the note page now enters C
 仍需人工观察：
 
 - Henry 重新打开 note 后，原有写作、创建 block、移动、resize、preview、Page/Canvas 切换是否没有明显退化。
-- Browser Harness 在 Chrome remote debugging 授权后需要补跑；当前不能把 browser smoke 记为 passed。
-- 性能 seed 仍需用 50 blocks、200 blocks、长段落、formula-heavy note、page + workspace mixed note 复测。
+- Browser Harness 已补跑并通过基础 runtime smoke；最终体验判断仍以 Henry manual pass 为准。
+- 性能 seed 已进入 `npm run verify:v2-bn8-runtime`；真实手感仍需 Henry 复测。
 
 ## V2.BN.8.1 PageFrame Content Inset Experience Note
 
@@ -571,7 +569,7 @@ L3-L5 layout model hook: implemented, not browser-smoked
 ## V2.BN.8.1 Current Runtime Experience Snapshot
 
 ```text
-NoteDetail shell achieved; Canvas Engine runtime root still needs browser smoke
+NoteDetail shell achieved; Canvas Engine runtime root browser smoke passed; Henry manual pass pending
 ```
 
 体验判断：
@@ -920,9 +918,9 @@ status: deferred by Henry
 scope: final V2.BN.8.1 experience gate
 ```
 
-Henry 已明确要求：暂时不要用 Browser Harness 做中途测试，等全部做完后再一起用 Browser Harness 做最终体验验证。
+Henry 之前明确要求：暂时不要用 Browser Harness 做中途测试，等全部做完后再一起用 Browser Harness 做最终体验验证。后续 Browser Harness 已重新开放并完成最终基础 smoke。
 
-因此本文当前只记录代码和体验风险判断，不声称 Browser smoke passed。后续最终体验验证仍需要覆盖：
+因此本文当前可以记录 Browser smoke passed，但最终体验通过仍需要 Henry 覆盖：
 
 - note 页面真实打开；
 - Page / Canvas mode 切换；

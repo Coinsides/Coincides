@@ -1,31 +1,49 @@
 # V2.BN.8 Review
 
-## V2.BN.8.1 Final Browser Harness Attempt
+## V2.BN.8.1 Final Browser Harness Smoke
 
 ```text
 scope: final Browser Harness smoke gate
-status: blocked by Chrome remote debugging authorization
+status: passed
 date: 2026-06-13
+target: http://localhost:5173/#/notes/85f33834-3d27-4b5d-b86e-92837e83ae27
+Henry manual pass: pending
 ```
 
 ### Evidence
 
-- `browser-harness` from PATH failed before page inspection.
-- The local project-installed `browser-harness.exe` failed with the same CDP websocket handshake timeout.
-- Both failures reported the same required user action: open `chrome://inspect/#remote-debugging`, enable "Allow remote debugging for this browser instance", then click Allow in the Chrome popup.
+- Browser Harness reached the active note page.
+- Runtime smoke attributes were present:
+  - `data-canvas-engine-version=V2.BN.8-self-owned-minimal-hybrid-0`;
+  - `data-canvas-engine-route=self_owned_minimal_hybrid`;
+  - `data-canvas-surface-mode=page`.
+- Page mode -> Canvas mode -> Page mode round trip passed.
+- Preview open/close passed.
+- Layout button click did not trigger frontend errors.
+- Frontend error listener stayed empty after the Page/Canvas switch fix.
 
 ### Result
 
-- Browser Harness smoke is not passed.
-- No browser interaction evidence was collected in this attempt.
-- `V2.BN.8.1` remains open until Browser Harness can connect and Henry manually confirms the experience passed.
+- Browser Harness smoke is passed.
+- The first Browser Harness pass exposed a Page -> Canvas white-screen caused by repeated measured-height writes; `useBlockMeasurement` now suppresses duplicate height reports.
+- `V2.BN.8.1` remains open only because Henry manual visual / interaction pass is still required.
+
+## V2.BN.8.1 Superseded Browser Harness Authorization Attempt
+
+```text
+scope: earlier final Browser Harness smoke attempt
+status: superseded by later passed Browser Harness smoke on 2026-06-13
+```
+
+Earlier Browser Harness attempts were blocked by Chrome remote debugging authorization / CDP websocket handshake timeout. That blocker is no longer current evidence for this branch.
 
 ## V2.BN.8.1 Runtime Root Closure Assessment
 
 ```text
 scope: L2 runtime root / L12 NoteDetail decommission
 status: code replacement path is effectively closed; final acceptance still pending
-browser smoke: deferred by Henry until all replacement work is complete
+browser smoke: passed
+Henry manual pass: pending
 ```
 
 ### Assessment
@@ -33,8 +51,8 @@ browser smoke: deferred by Henry until all replacement work is complete
 - `NoteDetail.tsx` is already a route/provider shell.
 - `NoteCanvasRuntime.tsx` is already the Note page runtime host.
 - `useNoteCanvasRuntimeController()` now composes the surface state, document data, layout model, block operations, and presentation boundary controllers.
-- Further splitting the runtime root before browser smoke would likely add indirection without reducing meaningful risk.
-- The next acceptance gate should be final Browser Harness smoke plus Henry manual pass, not another root-compression refactor.
+- Further splitting the runtime root before Henry manual closure would likely add indirection without reducing meaningful risk.
+- The next acceptance gate is Henry manual pass, not another root-compression refactor.
 
 ## V2.BN.8.1 Runtime Presentation Controller Seed
 
@@ -605,7 +623,7 @@ status: code decommission achieved, acceptance incomplete
 scope: L12 NoteDetail decommission / runtime replacement evidence
 branch: codex/v2-bn-canvas-engine
 current commit: ab25d5f
-browser smoke: blocked by Chrome remote debugging authorization
+browser smoke: superseded; later Browser Harness smoke passed on 2026-06-13
 Henry manual pass: still required
 ```
 
@@ -621,7 +639,7 @@ Interpretation:
 
 - Earlier sections that say `NoteDetail.tsx` is still the old runtime body are historical startup snapshots from before the replacement work.
 - The current risk has shifted from "old NoteDetail still owns runtime" to "Canvas Engine owns runtime, but its controller/layer/service boundaries still need acceptance hardening."
-- `V2.BN.8.1` is therefore not complete yet: browser smoke, performance seed, and Henry manual `passed` are still required before closing the stage.
+- `V2.BN.8.1` is therefore not complete yet: Browser Harness and performance seed have since passed, but Henry manual `passed` is still required before closing the stage.
 
 ## V2.BN.8.1 PageFrame Content Inset Seed
 
@@ -1873,7 +1891,7 @@ browser harness: intentionally deferred until all replacement work is ready for 
 Henry manual pass: still required
 ```
 
-本轮只刷新非浏览器证据，不运行 Browser Harness。
+本轮只刷新非浏览器证据，不运行 Browser Harness。后续最终 Browser Harness smoke 已补跑并通过。
 
 已通过：
 
@@ -1892,7 +1910,6 @@ Henry manual pass: still required
 
 未完成项保持不变：
 
-- 最终 Browser Harness smoke；
 - Henry 手动视觉/交互验收；
 - `Open-Issue-And-Brainstorm-Checklist.md` 中被保留为后续 polish / patch backlog 的项目。
 
@@ -1907,7 +1924,7 @@ Henry manual pass: still required
 - L0-L12 的代码替换证据已经逐层记录；
 - L1 local test data reset 没有在本轮执行，因为这是破坏性操作，应在 Henry 确认后或最终测试被旧数据污染时再做；
 - `NoteDetail.tsx` shell、Canvas Engine runtime root、runtime controller composition boundary、非浏览器 gates 均已有证据；
-- Browser Harness smoke 和 Henry manual pass 仍是最终硬门槛；
+- Browser Harness smoke 后续已通过；Henry manual pass 仍是最终硬门槛；
 - 未勾选的 formula / inline math / structured block / code block / ruler 等条目被归入后续 `V2.BN.8.x` polish backlog，不再混同为当前 runtime replacement 的硬阻塞。
 
 ## V2.BN.8.1 Final Smoke Protocol - 2026-06-13
@@ -1966,7 +1983,7 @@ branch: codex/v2-bn-canvas-engine
 worktree: clean before and after recheck
 ```
 
-本轮不运行 Browser Harness。Henry 已明确要求先不要用 Browser Harness 做中途测试，等全部做完后再统一补跑。
+本轮当时不运行 Browser Harness。后续最终 Browser Harness smoke 已统一补跑并通过。
 
 重新验证通过：
 
@@ -1977,7 +1994,7 @@ worktree: clean before and after recheck
 - `NoteDetail.tsx` 仍然只是 route/provider shell；
 - 旧 runtime 符号没有回流到 `NoteDetail.tsx`。
 
-本轮没有新增产品代码改动。`V2.BN.8.1` 仍不能关闭，因为最终 Browser Harness smoke 和 Henry manual pass 仍是硬门槛。
+本轮没有新增产品代码改动。后续 Browser Harness smoke 已通过；`V2.BN.8.1` 仍不能关闭，因为 Henry manual pass 仍是硬门槛。
 
 ## V2.BN.8.1 Runtime Boundary Check Script - 2026-06-13
 
@@ -2012,7 +2029,7 @@ browser harness: not used
 - `npm run build`；
 - `npm run smoke:canvas-engine-performance`。
 
-该脚本只证明源码边界，没有证明真实浏览器交互体验。最终 Browser Harness smoke 和 Henry manual pass 仍然必须执行。
+该脚本只证明源码边界，没有证明真实浏览器交互体验。Browser Harness smoke 后续已执行；Henry manual pass 仍然必须执行。
 
 2026-06-13 refresh：该脚本已从 18 项检查扩展到 26 项检查，新增覆盖 L3/L4/L5/L7/L10/L11 的服务边界。
 
@@ -2040,7 +2057,7 @@ npm run verify:v2-bn8-runtime
 
 该命令用于最终 Browser Harness 前的非浏览器 gate，避免遗漏 runtime boundary、client build、server build 或 performance seed 中任一项。
 
-本命令已通过。它不替代最终 Browser Harness smoke，也不替代 Henry manual pass。
+本命令已通过。它不替代 Browser Harness smoke，也不替代 Henry manual pass；后续 Browser Harness smoke 已补跑并通过。
 
 ## V2.BN.8.1 Diff Hygiene In Aggregator - 2026-06-13
 
@@ -2092,7 +2109,7 @@ npm run verify:v2-bn8-runtime
 - `git diff --check`；
 - changed-file secret scan。
 
-该命令已通过。它仍不替代最终 Browser Harness smoke 和 Henry manual pass。
+该命令已通过。它仍不替代 Browser Harness smoke 和 Henry manual pass；后续 Browser Harness smoke 已补跑并通过。
 
 ## V2.BN.8.1 Canvas Engine Model Contract Check - 2026-06-13
 
@@ -2111,7 +2128,7 @@ browser harness: not used
 
 该检查直接执行 Canvas Engine service 函数，验证 Page mode / Canvas mode visibility、PageFrame height、workspace placement、relation endpoint reserve、measurement reflow、elastic avoidance policy、Ctrl+Z / Ctrl+Y intent 等基础规则。
 
-随后 `npm run verify:v2-bn8-runtime` 已纳入该检查。它不替代 Browser Harness，也不替代 Henry manual pass。
+随后 `npm run verify:v2-bn8-runtime` 已纳入该检查。它不替代 Browser Harness，也不替代 Henry manual pass；后续 Browser Harness smoke 已补跑并通过。
 
 ## V2.BN.8.1 Shared Type Runtime Import Build Fix - 2026-06-13
 
@@ -2129,7 +2146,7 @@ browser harness: not used
 - `DailyBrief` 不再把 `EnergyLevel` 作为运行时 enum 导入；
 - `CourseDetail`、`BlockEditorLayer`、`templateOptions` 不再 default import `@shared/types`。
 
-修补后 `npm run verify:v2-bn8-runtime` passed。该结果仍不替代最终 Browser Harness smoke 和 Henry manual pass。
+修补后 `npm run verify:v2-bn8-runtime` passed。该结果仍不替代 Browser Harness smoke 和 Henry manual pass；后续 Browser Harness smoke 已补跑并通过。
 
 ## V2.BN.8.1 Browser Harness Smoke - 2026-06-13
 

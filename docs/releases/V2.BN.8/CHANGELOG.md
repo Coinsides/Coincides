@@ -1,5 +1,11 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Browser Harness Status Sync
+
+- `Review.md` / `Experience-Review.md` 同步最新 Browser Harness 结果：最终基础 smoke 已通过，早先 Chrome remote debugging blocker 只保留为 superseded historical attempt。
+- `V2.BN.8.1-Runtime-Replacement-Plan.md`、`V2.BN.8.1-Layer-Acceptance-Audit.md`、`V2.BN.8.1-Final-Smoke-Protocol.md` 同步为 Browser Harness passed / Henry manual pass pending。
+- `V2.BN.8.1` 仍不能关闭，唯一剩余硬门槛是 Henry manual visual / interaction pass。
+
 ## Changed - V2.BN.8.1 Non-Browser Verification Refresh
 
 - 刷新 `V2.BN.8.1` 非浏览器验收证据：
@@ -8,11 +14,11 @@
   - `server/npm run build` passed；
   - `git diff --check` passed；
   - changed-file secret scan 无新增文件可扫。
-- `Review.md` 明确记录：Browser Harness 暂按 Henry 指示延后到全部工程完成后统一跑。
+- `Review.md` 后续已更新：Browser Harness 暂缓是历史状态，最终基础 smoke 已补跑并通过。
 - `Open-Issue-And-Brainstorm-Checklist.md` 明确区分 `V2.BN.8.1` runtime replacement 硬门槛与后续 `V2.BN.8.x` polish backlog。
 - 新增 `V2.BN.8.1-Layer-Acceptance-Audit.md`，逐层记录 L0-L12 当前证据、剩余硬门槛和后续 polish backlog。
 - 新增 `V2.BN.8.1-Final-Smoke-Protocol.md`，固定最终 Browser Harness / Henry manual pass 的执行范围与记录格式。
-- 记录最终 Browser Harness retry 仍被 Chrome remote debugging authorization / CDP websocket handshake timeout 阻塞；本小版本仍不能关闭。
+- 早先最终 Browser Harness retry 曾被 Chrome remote debugging authorization / CDP websocket handshake timeout 阻塞；该阻塞后续已被通过的 Browser Harness smoke 取代。本小版本仍需 Henry manual pass 才能关闭。
 
 ## Changed - V2.BN.8.1 Runtime Presentation Controller Seed
 
