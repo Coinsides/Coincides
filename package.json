@@ -16,8 +16,9 @@
     "build": "cd server && npm run build",
     "build:client": "cd client && npm run build",
     "check:canvas-runtime-boundary": "cd client && npm run check:canvas-runtime-boundary",
+    "check:changed-file-secrets": "node scripts/changedFileSecretScan.mjs",
     "smoke:canvas-engine-performance": "cd client && npm run smoke:canvas-engine-performance",
-    "verify:v2-bn8-runtime": "npm run check:canvas-runtime-boundary && npm run build:client && npm run build && npm run smoke:canvas-engine-performance && git diff --check",
+    "verify:v2-bn8-runtime": "npm run check:canvas-runtime-boundary && npm run build:client && npm run build && npm run smoke:canvas-engine-performance && git diff --check && npm run check:changed-file-secrets",
     "start": "cd server && npm run start",
     "install:all": "cd server && npm install && cd ../client && npm install",
     "setup": "npm run install:all"

@@ -2055,3 +2055,36 @@ browser harness: not used
 - diff whitespace / conflict-marker hygiene。
 
 changed-file secret scan 仍保留为单独人工/脚本检查，因为它依赖当前 changed-file 列表，不适合隐藏在 build 聚合命令里。
+
+## V2.BN.8.1 Changed-File Secret Scan Script - 2026-06-13
+
+```text
+status: passed
+command: npm run check:changed-file-secrets
+browser harness: not used
+```
+
+新增 root 级 changed-file secret scan：
+
+```text
+npm run check:changed-file-secrets
+```
+
+它只扫描当前 changed / staged / untracked files，并跳过二进制或超大文件，避免把整个仓库历史资料扫成噪声。
+
+随后已将该检查纳入：
+
+```text
+npm run verify:v2-bn8-runtime
+```
+
+因此最终 Browser Harness 前的非浏览器 gate 现在覆盖：
+
+- Canvas runtime boundary；
+- client build；
+- server build；
+- Canvas Engine performance seed；
+- `git diff --check`；
+- changed-file secret scan。
+
+该命令已通过。它仍不替代最终 Browser Harness smoke 和 Henry manual pass。

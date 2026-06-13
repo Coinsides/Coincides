@@ -675,3 +675,13 @@
 - `V2.BN.8.1-Final-Smoke-Protocol.md` 同步更新：diff hygiene 已纳入非浏览器聚合 gate。
 - changed-file secret scan 仍作为独立检查保留。
 - `npm run verify:v2-bn8-runtime` passed。
+
+## Added - V2.BN.8.1 Changed-File Secret Scan
+
+- 新增 `scripts/changedFileSecretScan.mjs`。
+- 新增 root script：`npm run check:changed-file-secrets`。
+- 该脚本扫描当前 changed / staged / untracked files，跳过二进制和超大文件。
+- `npm run verify:v2-bn8-runtime` 现在包含 changed-file secret scan。
+- `V2.BN.8.1-Final-Smoke-Protocol.md` 同步更新：changed-file secret scan 已纳入非浏览器聚合 gate。
+- `npm run check:changed-file-secrets` passed。
+- `npm run verify:v2-bn8-runtime` passed。
