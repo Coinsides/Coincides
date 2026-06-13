@@ -1,5 +1,21 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Runtime Root Closure Assessment
+
+```text
+scope: L2 runtime root / L12 NoteDetail decommission
+status: code replacement path is effectively closed; final acceptance still pending
+browser smoke: deferred by Henry until all replacement work is complete
+```
+
+### Assessment
+
+- `NoteDetail.tsx` is already a route/provider shell.
+- `NoteCanvasRuntime.tsx` is already the Note page runtime host.
+- `useNoteCanvasRuntimeController()` now composes the surface state, document data, layout model, block operations, and presentation boundary controllers.
+- Further splitting the runtime root before browser smoke would likely add indirection without reducing meaningful risk.
+- The next acceptance gate should be final Browser Harness smoke plus Henry manual pass, not another root-compression refactor.
+
 ## V2.BN.8.1 Runtime Presentation Controller Seed
 
 ```text

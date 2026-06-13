@@ -20,6 +20,18 @@ Stage: V2.BN.8 engine seed manual smoke
 Status: 初步人工测试中
 ```
 
+## Runtime Root Closure Assessment
+
+patch: V2.BN.8.1 Runtime Root Closure Assessment
+status: code replacement path effectively closed; final browser/manual acceptance pending
+
+- [x] Confirm `NoteDetail.tsx` is a route/provider shell.
+- [x] Confirm `NoteCanvasRuntime.tsx` is the Note page runtime host.
+- [x] Confirm `useNoteCanvasRuntimeController()` now composes controller boundaries instead of owning direct runtime internals.
+- [x] Record that further root-compression before browser smoke is not currently worth the indirection cost.
+- [ ] Final Browser Harness smoke after all replacement work is done.
+- [ ] Henry manual visual/interaction pass.
+
 ## Runtime Presentation Controller Seed
 
 patch: V2.BN.8.1 Runtime Presentation Controller Seed
