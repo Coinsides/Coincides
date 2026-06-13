@@ -1923,3 +1923,36 @@ Henry manual pass: still required
 - 明确 local test data reset 不是默认动作，必须由 Henry 决定或由旧数据污染触发；
 - 明确哪些 polish backlog 不阻塞 `V2.BN.8.1`；
 - 明确只有 Browser Harness smoke 和 Henry manual pass 都完成后，才能关闭本目标。
+
+## V2.BN.8.1 Final Browser Harness Retry - 2026-06-13
+
+```text
+status: blocked
+branch: codex/v2-bn-canvas-engine
+client port: 5173 listening
+server port: 3001 listening
+worktree: clean before retry
+command: browser-harness page_info()
+```
+
+结果：
+
+- Browser Harness 仍无法完成 CDP websocket handshake；
+- 错误指向 Chrome remote debugging authorization；
+- 浏览器真实 smoke 未执行；
+- Henry manual pass 仍未开始；
+- 因此 `V2.BN.8.1` 不能标记 complete。
+
+关键错误：
+
+```text
+fatal: CDP WS handshake failed: timed out during opening handshake -- click Allow in Chrome if prompted, then retry
+```
+
+下一步需要 Henry 在 Chrome 中打开：
+
+```text
+chrome://inspect/#remote-debugging
+```
+
+勾选 `Allow remote debugging for this browser instance`，并在弹窗中点击 `Allow`。之后再按 `V2.BN.8.1-Final-Smoke-Protocol.md` 重跑最终 Browser Harness smoke。

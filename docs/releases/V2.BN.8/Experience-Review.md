@@ -11,6 +11,22 @@ date: 2026-06-13
 - No final browser screenshot, click-through, or runtime visual evidence was collected in this attempt.
 - Experience acceptance remains pending until Browser Harness connects and Henry confirms the resulting interaction pass.
 
+## V2.BN.8.1 Final Browser Harness Retry - 2026-06-13
+
+```text
+status: blocked before product interaction
+reason: Chrome remote debugging authorization / CDP websocket handshake timeout
+```
+
+Browser Harness reached the same authorization blocker during the final smoke retry. No product interaction was tested in this attempt, so no visual or UX pass can be claimed.
+
+Experience acceptance remains pending until:
+
+- Chrome remote debugging is allowed by Henry;
+- Browser Harness can connect;
+- final smoke protocol is executed;
+- Henry manually confirms passed or passed with follow-up polish.
+
 ## V2.BN.8.1 Runtime Presentation Controller Experience Note
 
 ```text

@@ -1022,3 +1022,18 @@ Henry manual pass: pending
 - [ ] Browser Harness smoke executed by protocol.
 - [ ] Henry manual pass recorded by protocol.
 - [ ] Failure/pass result synced back to Review / Experience Review / CHANGELOG.
+
+## Final Browser Harness Retry - 2026-06-13
+
+```text
+status: blocked
+reason: Chrome remote debugging authorization / CDP websocket handshake timeout
+```
+
+- [x] Confirmed branch was clean and synced before retry.
+- [x] Confirmed client `5173` and server `3001` were listening before retry.
+- [x] Retried `browser-harness` `page_info()`.
+- [x] Recorded failure in Review and Experience Review.
+- [ ] Henry allows Chrome remote debugging.
+- [ ] Browser Harness final smoke re-run after authorization.
+- [ ] Henry manual pass.

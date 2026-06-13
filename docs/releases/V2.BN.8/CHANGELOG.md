@@ -12,6 +12,7 @@
 - `Open-Issue-And-Brainstorm-Checklist.md` 明确区分 `V2.BN.8.1` runtime replacement 硬门槛与后续 `V2.BN.8.x` polish backlog。
 - 新增 `V2.BN.8.1-Layer-Acceptance-Audit.md`，逐层记录 L0-L12 当前证据、剩余硬门槛和后续 polish backlog。
 - 新增 `V2.BN.8.1-Final-Smoke-Protocol.md`，固定最终 Browser Harness / Henry manual pass 的执行范围与记录格式。
+- 记录最终 Browser Harness retry 仍被 Chrome remote debugging authorization / CDP websocket handshake timeout 阻塞；本小版本仍不能关闭。
 
 ## Changed - V2.BN.8.1 Runtime Presentation Controller Seed
 
