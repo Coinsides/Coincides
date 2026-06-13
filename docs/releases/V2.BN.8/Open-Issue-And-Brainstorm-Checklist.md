@@ -20,6 +20,22 @@ Stage: V2.BN.8 engine seed manual smoke
 Status: 初步人工测试中
 ```
 
+## Runtime Surface State Controller Seed
+
+patch: V2.BN.8.1 Runtime Surface State Controller Seed
+status: code applied, full non-browser verification passed
+
+- [x] Add `useRuntimeSurfaceStateController.ts`.
+- [x] Keep interaction state behavior unchanged.
+- [x] Keep layout mode and snap behavior unchanged.
+- [x] Keep overlay panel toggles and chrome collapse behavior unchanged.
+- [x] Keep block selection / focus / clear-selection behavior unchanged.
+- [x] Keep Page / Canvas mode transition cleanup behavior unchanged.
+- [x] Remove direct root controller imports of `useRuntimeInteractionController()`, `useRuntimeLayoutRefsController()`, `useLayoutInteractionController()`, `useFloatingOverlayController()`, `useBlockSelectionController()`, and `useSurfaceModeController()`.
+- [x] Run full non-browser checks.
+- [ ] Henry manual visual retest: Page / Canvas switch, overlay toggles, block selection clearing, Layout mode, and snap toggle should not regress.
+- [ ] Browser Harness retest deferred until the full replacement pass is done.
+
 ## Runtime Natural Writing Controller Seed
 
 patch: V2.BN.8.1 Runtime Natural Writing Controller Seed

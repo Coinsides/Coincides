@@ -1,5 +1,11 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Runtime Surface State Controller Seed
+
+- 新增 `hooks/useRuntimeSurfaceStateController.ts`，把 interaction state、layout/snap mode、floating overlay、block selection、surface mode 和 layout refs 组合进一个 L8/L9/L10 surface state boundary。
+- `useNoteCanvasRuntimeController()` 不再直接调用 `useRuntimeInteractionController()`、`useRuntimeLayoutRefsController()`、`useLayoutInteractionController()`、`useFloatingOverlayController()`、`useBlockSelectionController()` 或 `useSurfaceModeController()`。
+- 本轮不改变 Page / Canvas 切换、preview / insert / more / info overlay、block 选中、layout mode、snap on/off 或 measured reflow suppression 行为，只继续压缩 runtime root 的 surface state composition。
+
 ## Changed - V2.BN.8.1 Runtime Natural Writing Controller Seed
 
 - 新增 `hooks/useRuntimeNaturalWritingController.ts`，把 draft block lifecycle、slash command controller 和 blank surface pointer creation/selection clearing 组合进一个 L8/L9/L10 natural writing boundary。

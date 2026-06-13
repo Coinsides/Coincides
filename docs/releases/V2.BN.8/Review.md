@@ -1,5 +1,41 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Runtime Surface State Controller Seed
+
+```text
+scope: L8 interaction state / L9 overlay state / L10 surface mode / L12 runtime root compression
+status: applied
+browser smoke: deferred by Henry until all replacement work is complete
+```
+
+### What Changed
+
+- Added `client/src/pages/Notes/canvasEngine/hooks/useRuntimeSurfaceStateController.ts`.
+- The new controller composes:
+  - `useRuntimeInteractionController()`;
+  - `useRuntimeLayoutRefsController()`;
+  - `useLayoutInteractionController()`;
+  - `useFloatingOverlayController()`;
+  - `useBlockSelectionController()`;
+  - `useSurfaceModeController()`.
+- `useNoteCanvasRuntimeController()` no longer imports or calls those six lower-level surface / overlay / selection / mode hooks directly.
+- The root controller still receives the same state and callbacks, but now through one surface state boundary.
+
+### Review Notes
+
+- This checkpoint is a boundary extraction only.
+- Page / Canvas switching, layout mode, snap on/off, block selection, preview / insert / more / info overlays, chrome collapse, and measured reflow suppression are unchanged.
+- This boundary is intentionally broad because these states are already interdependent: mode switching closes overlays, clears snap guide, clears selection, and selection suppresses transient measurement reflow.
+- Browser Harness is intentionally deferred until the full replacement pass is complete.
+
+### Verification
+
+- `npm run build:client` passed.
+- `npm run smoke:canvas-engine-performance` passed.
+- `server` `npm run build` passed.
+- `git diff --check` passed.
+- Changed-file secret scan passed.
+
 ## V2.BN.8.1 Runtime Natural Writing Controller Seed
 
 ```text

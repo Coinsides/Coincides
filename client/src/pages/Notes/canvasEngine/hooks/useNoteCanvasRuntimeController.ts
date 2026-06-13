@@ -1,9 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { useUIStore } from '@/stores/uiStore';
-import { useBlockSelectionController } from './useBlockSelectionController';
-import { useFloatingOverlayController } from './useFloatingOverlayController';
 import { useLayoutDraftController } from './useLayoutDraftController';
-import { useLayoutInteractionController } from './useLayoutInteractionController';
 import { useNoteCanvasDataAdapter } from './useNoteCanvasDataAdapter';
 import { useNoteCanvasLayerProps } from './useNoteCanvasLayerProps';
 import { useNoteCanvasRuntime } from './useNoteCanvasRuntime';
@@ -12,36 +9,60 @@ import { useRuntimeBlockEditingController } from './useRuntimeBlockEditingContro
 import { useRuntimeBlockHistoryController } from './useRuntimeBlockHistoryController';
 import { useRuntimeDocumentStatsController } from './useRuntimeDocumentStatsController';
 import { useRuntimeFrameModelController } from './useRuntimeFrameModelController';
-import { useRuntimeInteractionController } from './useRuntimeInteractionController';
-import { useRuntimeLayoutRefsController } from './useRuntimeLayoutRefsController';
 import { useRuntimeLayoutModelController } from './useRuntimeLayoutModelController';
 import { useRuntimeNaturalWritingController } from './useRuntimeNaturalWritingController';
 import { useRuntimePlacementInteractionController } from './useRuntimePlacementInteractionController';
-import { useSurfaceModeController } from './useSurfaceModeController';
+import { useRuntimeSurfaceStateController } from './useRuntimeSurfaceStateController';
 
 export function useNoteCanvasRuntimeController() {
   const { noteId } = useNoteCanvasRuntime();
   const navigate = useNavigate();
   const addToast = useUIStore((s) => s.addToast);
   const {
-    interactionState,
-    setInteractionState,
-  } = useRuntimeInteractionController();
-  const {
+    activeBlockId,
     blockListRef,
-    movingBlockIdRef,
-    suppressMeasuredReflowForSelection,
-    suppressMeasuredReflowUntilRef,
-  } = useRuntimeLayoutRefsController();
-  const {
+    chromeCollapsed,
+    clearBlockSelection,
+    closeOverlay,
+    collapseChrome,
+    expandChrome,
+    focusBlockId,
+    interactionState,
     layoutMode,
+    markBlockFocused,
+    markBlockSelected,
+    movingBlockIdRef,
+    pageOffsetX,
+    selectedBlockId,
+    setActiveBlockId,
+    setFocusBlockId,
+    setInteractionState,
     setLayoutMode,
+    setSelectedBlockId,
     setSnapGuide,
     snapEnabled,
     snapGuide,
+    showAdvancedInsert,
+    showExportPreview,
+    showMoreActions,
+    showNoteInfo,
+    showPreviewAIVisibility,
+    showPreviewBlockTypes,
+    showPreviewExportStatus,
+    suppressMeasuredReflowUntilRef,
+    surfaceMode,
+    surfacePolicy,
+    toggleAdvancedInsert,
+    toggleExportPreview,
     toggleLayoutMode,
+    toggleMoreActions,
+    toggleNoteInfo,
+    togglePreviewAIVisibility,
+    togglePreviewBlockTypes,
+    togglePreviewExportStatus,
     toggleSnapEnabled,
-  } = useLayoutInteractionController();
+    toggleSurfaceMode,
+  } = useRuntimeSurfaceStateController();
   const {
     applyMeasuredBlockHeightDraft,
     clearLayoutDraftForBlock,
@@ -51,54 +72,6 @@ export function useNoteCanvasRuntimeController() {
     setLayoutDraftForBlock,
     setLayoutDrafts,
   } = useLayoutDraftController();
-
-  const {
-    chromeCollapsed,
-    closeOverlay,
-    collapseChrome,
-    expandChrome,
-    showAdvancedInsert,
-    showExportPreview,
-    showMoreActions,
-    showNoteInfo,
-    showPreviewAIVisibility,
-    showPreviewBlockTypes,
-    showPreviewExportStatus,
-    toggleAdvancedInsert,
-    toggleExportPreview,
-    toggleMoreActions,
-    toggleNoteInfo,
-    togglePreviewAIVisibility,
-    togglePreviewBlockTypes,
-    togglePreviewExportStatus,
-  } = useFloatingOverlayController({ setInteractionState });
-
-  const {
-    activeBlockId,
-    clearBlockSelection,
-    focusBlockId,
-    markBlockFocused,
-    markBlockSelected,
-    selectedBlockId,
-    setActiveBlockId,
-    setFocusBlockId,
-    setSelectedBlockId,
-  } = useBlockSelectionController({
-    onBeforeBlockFocus: suppressMeasuredReflowForSelection,
-    onBeforeBlockSelect: suppressMeasuredReflowForSelection,
-    setInteractionState,
-  });
-
-  const {
-    pageOffsetX,
-    surfaceMode,
-    surfacePolicy,
-    toggleSurfaceMode,
-  } = useSurfaceModeController({
-    clearBlockSelection,
-    closeOverlay,
-    setSnapGuide,
-  });
 
   const { handleNoteLoaded } = useNoteLoadResetController({
     clearBlockSelection,

@@ -1,5 +1,21 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Runtime Surface State Controller Experience Note
+
+```text
+Interaction state, overlay state, block selection, layout/snap state, layout refs, and Page/Canvas mode now share a surface state controller boundary.
+```
+
+体验判断：
+- 这一步不应该改变用户可见行为；Page / Canvas 切换、Preview / Insert / More / Info 面板、block 选中/取消选中、Layout mode、snap on/off 和 chrome collapse 都应该保持原样。
+- 工程价值是把“页面表层状态”的互相关联逻辑收进一个 controller，root 不再分别感知 selection / overlay / mode / snap / refs 的底层 hook。
+- Browser Harness 暂时不跑；等全部替换工作结束后再统一补真实浏览器验证。
+
+仍需人工观察：
+- Henry 后续复测 Page / Canvas 切换时 overlay、selection、snap guide 是否仍会按预期清理。
+- 后续复测 Preview 面板开关、Insert 面板、More actions、Info、Layout mode 和 snap toggle 没有退化。
+- 如果后续出现“切模式后还残留选中/overlay/snap guide”或“点击空白无法取消选中”，优先检查 `hooks/useRuntimeSurfaceStateController.ts` 与其组合的 selection / overlay / surface mode 子 controller。
+
 ## V2.BN.8.1 Runtime Natural Writing Controller Experience Note
 
 ```text
