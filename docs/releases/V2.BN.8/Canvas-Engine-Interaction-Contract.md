@@ -93,6 +93,9 @@ connectingRelationFuture
 
 ### Overlay
 
+- 所有主浮层最终都应进入 `FloatingOverlayLayer` 或同级 viewport overlay stack，而不是挂在 block / chrome / page DOM 流里。
+- `FloatingOverlayLayer` 第一版已经承载 Note info、More actions、Export preview；这些面板应高于 selected block toolbar。
+- overlay portal shell 不吞掉页面点击，只有实际面板可交互。
 - slash menu 出现在 caret 附近；
 - block control bar 靠近对象但不遮挡正文；
 - preview panel 覆盖时不和 selected toolbar 混乱；

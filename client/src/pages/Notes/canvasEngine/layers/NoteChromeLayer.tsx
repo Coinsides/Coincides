@@ -17,6 +17,7 @@ import type {
   SourceJumpTarget,
 } from '../runtimeDataTypes';
 import { ExportPreviewLayer } from './ExportPreviewLayer';
+import { FloatingOverlayLayer } from './FloatingOverlayLayer';
 import styles from '../../NoteDetail.module.css';
 
 export interface SurfacePolicyView {
@@ -218,85 +219,87 @@ export function NoteChromeLayer({
             </button>
           </div>
 
-          {showNoteInfo && (
-            <div className={styles.infoPopover}>
-              <div className={styles.popoverHeader}>
-                <div>
-                  <div className={styles.popoverEyebrow}>Note info</div>
-                  <strong>{note.title || 'Untitled note'}</strong>
+          <FloatingOverlayLayer open={showNoteInfo || showMoreActions || showExportPreview}>
+            {showNoteInfo && (
+              <div className={`${styles.infoPopover} ${styles.floatingPanelPopover}`}>
+                <div className={styles.popoverHeader}>
+                  <div>
+                    <div className={styles.popoverEyebrow}>Note info</div>
+                    <strong>{note.title || 'Untitled note'}</strong>
+                  </div>
+                  <button className={styles.iconBtn} onClick={onCloseOverlay} title="Close">
+                    <X size={15} />
+                  </button>
                 </div>
-                <button className={styles.iconBtn} onClick={onCloseOverlay} title="Close">
-                  <X size={15} />
-                </button>
+                <dl className={styles.infoGrid}>
+                  <div>
+                    <dt>Mode</dt>
+                    <dd>{surfaceMode === 'page' ? 'Page' : 'Canvas'}</dd>
+                  </div>
+                  <div>
+                    <dt>Blocks</dt>
+                    <dd>{sortedBlockCount}</dd>
+                  </div>
+                  <div>
+                    <dt>Sources</dt>
+                    <dd>{sourceReferenceCount}</dd>
+                  </div>
+                  <div>
+                    <dt>Status</dt>
+                    <dd>{note.status}</dd>
+                  </div>
+                </dl>
+                <p className={styles.popoverNote}>
+                  Full source, relation, export, and history details will move into the Better Notebook inspector.
+                </p>
               </div>
-              <dl className={styles.infoGrid}>
-                <div>
-                  <dt>Mode</dt>
-                  <dd>{surfaceMode === 'page' ? 'Page' : 'Canvas'}</dd>
-                </div>
-                <div>
-                  <dt>Blocks</dt>
-                  <dd>{sortedBlockCount}</dd>
-                </div>
-                <div>
-                  <dt>Sources</dt>
-                  <dd>{sourceReferenceCount}</dd>
-                </div>
-                <div>
-                  <dt>Status</dt>
-                  <dd>{note.status}</dd>
-                </div>
-              </dl>
-              <p className={styles.popoverNote}>
-                Full source, relation, export, and history details will move into the Better Notebook inspector.
-              </p>
-            </div>
-          )}
+            )}
 
-          {showMoreActions && (
-            <div className={`${styles.infoPopover} ${styles.actionsPopover}`}>
-              <div className={styles.popoverHeader}>
-                <div>
-                  <div className={styles.popoverEyebrow}>Note actions</div>
-                  <strong>More</strong>
+            {showMoreActions && (
+              <div className={`${styles.infoPopover} ${styles.actionsPopover} ${styles.floatingPanelPopover}`}>
+                <div className={styles.popoverHeader}>
+                  <div>
+                    <div className={styles.popoverEyebrow}>Note actions</div>
+                    <strong>More</strong>
+                  </div>
+                  <button className={styles.iconBtn} onClick={onCloseOverlay} title="Close">
+                    <X size={15} />
+                  </button>
                 </div>
-                <button className={styles.iconBtn} onClick={onCloseOverlay} title="Close">
-                  <X size={15} />
+                <button
+                  className={styles.moreAction}
+                  onClick={onToggleSnapEnabled}
+                >
+                  <LayoutDashboard size={15} />
+                  <span>Snap alignment</span>
+                  <small>
+                    {snapEnabled
+                      ? 'On: moving and resizing can align to page and neighbor edges.'
+                      : 'Off: moving and resizing use free placement.'}
+                  </small>
+                  <span className={`${styles.togglePill} ${snapEnabled ? styles.togglePillOn : styles.togglePillOff}`}>
+                    {snapEnabled ? 'On' : 'Off'}
+                  </span>
                 </button>
+                <p className={styles.popoverNote}>
+                  Page settings, history, export, and inspector actions will live here as they become real.
+                </p>
               </div>
-              <button
-                className={styles.moreAction}
-                onClick={onToggleSnapEnabled}
-              >
-                <LayoutDashboard size={15} />
-                <span>Snap alignment</span>
-                <small>
-                  {snapEnabled
-                    ? 'On: moving and resizing can align to page and neighbor edges.'
-                    : 'Off: moving and resizing use free placement.'}
-                </small>
-                <span className={`${styles.togglePill} ${snapEnabled ? styles.togglePillOn : styles.togglePillOff}`}>
-                  {snapEnabled ? 'On' : 'Off'}
-                </span>
-              </button>
-              <p className={styles.popoverNote}>
-                Page settings, history, export, and inspector actions will live here as they become real.
-              </p>
-            </div>
-          )}
+            )}
 
-          {showExportPreview && (
-            <ExportPreviewLayer
-              preview={exportPreview}
-              showBlockTypes={showPreviewBlockTypes}
-              showAIVisibility={showPreviewAIVisibility}
-              showExportStatus={showPreviewExportStatus}
-              onToggleBlockTypes={onTogglePreviewBlockTypes}
-              onToggleAIVisibility={onTogglePreviewAIVisibility}
-              onToggleExportStatus={onTogglePreviewExportStatus}
-              onClose={onCloseOverlay}
-            />
-          )}
+            {showExportPreview && (
+              <ExportPreviewLayer
+                preview={exportPreview}
+                showBlockTypes={showPreviewBlockTypes}
+                showAIVisibility={showPreviewAIVisibility}
+                showExportStatus={showPreviewExportStatus}
+                onToggleBlockTypes={onTogglePreviewBlockTypes}
+                onToggleAIVisibility={onTogglePreviewAIVisibility}
+                onToggleExportStatus={onTogglePreviewExportStatus}
+                onClose={onCloseOverlay}
+              />
+            )}
+          </FloatingOverlayLayer>
         </div>
       )}
     </div>

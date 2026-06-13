@@ -1,5 +1,14 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Floating Overlay Portal Seed
+
+- 新增 `canvasEngine/layers/FloatingOverlayLayer.tsx`，作为第一版 viewport-level overlay portal / z-index stack。
+- `NoteChromeLayer` 中的 Note info、More actions、Export preview 面板迁入 `FloatingOverlayLayer`，不再依赖 `noteChrome` 局部 absolute stacking context。
+- `ExportPreviewLayer` 增加 floating panel class，使 preview 面板在 portal 中使用统一层级和尺寸规则。
+- `NoteDetail.module.css` 新增 `floatingOverlayPortal` / `floatingOverlayStack` / `floatingPanelPopover`，让 floating panels 覆盖 block toolbar，而不吞掉页面其它点击。
+- `Canvas-Engine-Interaction-Contract.md` 同步 overlay portal 规则：主浮层进入 viewport overlay stack，portal shell 不吞掉页面点击。
+- 本轮不迁移 slash menu、insert panel、source jump、block control bar 或 formula help tooltip；这些仍是后续 L9 work。
+
 ## Changed - V2.BN.8.1 L12 Decommission Evidence Audit
 
 - `V2.BN.8.1-Runtime-Replacement-Plan.md` 更新当前状态：`NoteDetail.tsx` 已经不是旧 runtime 主体，而是 `noteId` route shell + `NoteCanvasRuntimeProvider` + `NoteCanvasRuntime`。

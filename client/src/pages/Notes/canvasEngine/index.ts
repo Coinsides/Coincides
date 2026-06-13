@@ -23,6 +23,7 @@ export * from './hooks/useSlashCommandController';
 export * from './hooks/useSurfaceModeController';
 export * from './layers/BlockControlBarLayer';
 export * from './layers/ExportPreviewLayer';
+export * from './layers/FloatingOverlayLayer';
 export * from './layers/NoteChromeLayer';
 export * from './layers/NoteWritingSurfaceLayer';
 export * from './layers/SlashMenuLayer';

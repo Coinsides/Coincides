@@ -42,6 +42,26 @@ date: 2026-06-12
 - 本清单中较早提到“旧 NoteDetail 仍承担 runtime 主体”的条目保留为历史问题来源，当前已被 L12 decommission audit 覆盖；
 - `V2.BN.8.1` 仍未完成，因为 browser smoke、performance seed、Henry manual passed 仍是硬验收。
 
+## L9 Floating Overlay Checkpoint
+
+```text
+status: portal seed applied, pending Henry visual retest
+patch: V2.BN.8.1 Floating Overlay Portal Seed
+```
+
+已完成：
+
+- Note info / More actions / Export preview 进入 `FloatingOverlayLayer` viewport portal；
+- Preview panel 不再依赖 `noteChrome` 局部 absolute stacking context；
+- portal shell 不吞掉页面点击，只有实际面板可交互。
+
+仍未完成：
+
+- slash menu 尚未迁入 portal；
+- block control bar 尚未迁入 viewport overlay anchor；
+- insert panel / source jump / formula help tooltip 尚未迁入同一 overlay 层；
+- 需要 Henry 手动复测 Preview 是否覆盖 selected block toolbar，而不是混层。
+
 ## Open Issue Checklist
 
 ### L5 Runtime Placement Record Checkpoint
@@ -714,3 +734,4 @@ D &\subset \mathbb{R}^2,\quad
 - [x] Patch P: 定义 PageFrame content inset / ruler 控件的第一版契约。
 - [ ] Patch Q: 将 slash menu / formula preview / inline math conversion / structured block measurement / draft block placement / code block visual language / canvas shell layout / PageFrame ruler 经验同步到 `Canvas-Engine-Interaction-Contract.md`。
   - [x] 已同步 FormulaBlock input sanitizer / help seed / inline formula boundary。
+  - [x] 已同步 FloatingOverlayLayer portal seed / preview-info-more actions stacking boundary。

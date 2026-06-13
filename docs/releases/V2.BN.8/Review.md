@@ -1,5 +1,36 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Floating Overlay Portal Seed
+
+```text
+status: technical validation passed, browser smoke pending
+scope: L9 Floating Overlay Layer
+client build: passed
+server build: passed
+browser smoke: not run in this checkpoint
+```
+
+Completed:
+
+- Added `client/src/pages/Notes/canvasEngine/layers/FloatingOverlayLayer.tsx`.
+- Moved Note info, More actions, and Export preview panels into a shared viewport-level portal stack.
+- Export preview now uses the same floating panel positioning class as the other chrome panels.
+- The new overlay portal uses pointer-events isolation: the portal shell does not swallow the page, while the actual panels remain interactive.
+- `canvasEngine/index.ts` now exports `FloatingOverlayLayer` for later L9 expansion.
+
+Still intentionally out of scope:
+
+- Slash menu remains in the writing surface layer.
+- Insert panel and source jump panel remain in `NoteFloatingPanelLayer`.
+- Block control bar remains block-local rather than viewport anchored.
+- Formula help tooltip remains block-local.
+- No overlay collision/flip service yet.
+
+Review note:
+
+- This patch addresses the first z-index / stacking-context boundary: preview/info/action panels no longer depend on `noteChrome` local absolute positioning.
+- It does not close L9. L9 still needs a real overlay anchor service for block toolbars, source picker, relation picker, slash command, and formula help.
+
 ## V2.BN.8.1 L12 Decommission Evidence Audit
 
 ```text

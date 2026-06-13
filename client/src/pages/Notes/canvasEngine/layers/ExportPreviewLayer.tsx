@@ -66,7 +66,7 @@ export function ExportPreviewLayer({
   onClose,
 }: ExportPreviewLayerProps) {
   return (
-    <div className={`${styles.infoPopover} ${styles.exportPopover}`}>
+    <div className={`${styles.infoPopover} ${styles.exportPopover} ${styles.floatingPanelPopover}`}>
       <div className={styles.popoverHeader}>
         <div>
           <div className={styles.popoverEyebrow}>Export preview</div>

@@ -1,5 +1,25 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Floating Overlay Portal Experience Note
+
+```text
+Preview, info, and more-actions panels now live above the note runtime instead of inside the chrome layout.
+```
+
+体验判断：
+
+- 打开 Preview 后，面板应该更像一个真正的工具浮层，而不是和当前选中的 block toolbar 混在同一个局部层级里。
+- Note info / More actions / Preview 的位置会统一到 viewport 右上侧；这比跟随 `noteChrome` 内部 absolute 定位更接近后续 inspector / overlay service 的方向。
+- 用户点击面板外的页面内容时，portal 外壳不会吞掉整页点击；只有面板本体可交互。
+- 这一步不应该改变 Page/Canvas mode、block 内容、placement truth、preview overlay toggle 状态或导出统计。
+
+仍需人工观察：
+
+- 打开 Preview 时，面板是否覆盖在 selected block toolbar 之上；
+- 打开 More actions 后，Snap alignment 是否仍能切换；
+- 打开 Note info 后，面板是否仍展示当前 note 信息；
+- 窄屏下右上浮层是否保持可读，不溢出视口。
+
 ## V2.BN.8.1 L12 Runtime Ownership Experience Note
 
 ```text

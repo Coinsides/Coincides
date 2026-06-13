@@ -187,6 +187,33 @@
   box-shadow: var(--glass-shadow-lg);
 }
 
+.floatingOverlayPortal {
+  position: fixed;
+  inset: 0;
+  z-index: 140;
+  pointer-events: none;
+}
+
+.floatingOverlayStack {
+  position: absolute;
+  top: 60px;
+  right: 24px;
+  display: grid;
+  width: min(430px, calc(100vw - 48px));
+  max-height: calc(100vh - 76px);
+  pointer-events: none;
+}
+
+.floatingPanelPopover {
+  position: static;
+  top: auto;
+  right: auto;
+  z-index: auto;
+  width: 100%;
+  max-height: inherit;
+  pointer-events: auto;
+}
+
 .actionsPopover {
   width: min(310px, calc(100vw - 48px));
 }
