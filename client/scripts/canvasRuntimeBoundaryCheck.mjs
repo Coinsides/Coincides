@@ -98,6 +98,89 @@ assertContainsNone('Runtime root does not import lower-level controllers directl
   './useSurfaceModeController',
 ]);
 
+const runtimeTypes = readProjectFile('src/pages/Notes/canvasEngine/types.ts');
+assertContainsAll('Runtime model exposes viewport placement and reserve contracts', runtimeTypes, [
+  'export interface CanvasViewport',
+  'zoom: number',
+  'export interface BlockPlacementModel',
+  'rotation?: number',
+  'export interface CanvasObjectReserve',
+  'export interface RelationEndpointReserve',
+  'relationEndpointReserve: RelationEndpointReserve[]',
+]);
+
+const engineModel = readProjectFile('src/pages/Notes/canvasEngine/engineModel.ts');
+assertContainsAll('Engine model builds viewport world and runtime model seed', engineModel, [
+  'NOTE_CANVAS_ENGINE_VERSION',
+  'DEFAULT_CANVAS_WORLD',
+  'createPrimaryPageFrame',
+  'createViewport',
+  'buildNoteCanvasRuntimeModel',
+  'getVisibleBlockIds',
+]);
+
+const viewportService = readProjectFile('src/pages/Notes/canvasEngine/viewportService.ts');
+assertContainsAll('Viewport service owns runtime viewport and world seed', viewportService, [
+  'getPrimaryPageOffsetX',
+  'createRuntimeViewport',
+  'createRuntimeWorld',
+  'zoom: 1',
+  'DEFAULT_CANVAS_WORLD',
+]);
+
+const pageFrameService = readProjectFile('src/pages/Notes/canvasEngine/pageFrameService.ts');
+assertContainsAll('PageFrame service owns formal frame sizing boundary', pageFrameService, [
+  'createDefaultDraftLayout',
+  'calculatePageFrameHeight',
+  'createRuntimePageFrame',
+  'DEFAULT_PAGE_FRAME_CONTENT_INSET',
+  'PAGE_FRAME_BOTTOM_PADDING',
+]);
+
+const placementService = readProjectFile('src/pages/Notes/canvasEngine/placementService.ts');
+assertContainsAll('Placement service owns layout seed write and runtime placement records', placementService, [
+  'readStoredLayout',
+  'normalizeBlockLayout',
+  'buildRuntimeBlockPlacement',
+  'buildRelationEndpointReserveForPlacement',
+  'buildLayoutPayload',
+  'writeLayoutOverride',
+  'rotation: layout.rotation || 0',
+  'visibilityState',
+]);
+
+const measurementService = readProjectFile('src/pages/Notes/canvasEngine/measurementService.ts');
+assertContainsAll('Measurement service owns measured height and reflow boundary', measurementService, [
+  'measureBlockContentHeight',
+  'estimateBlockHeight',
+  'applyMeasuredBlockLayoutToLayouts',
+  'applyMeasuredBlockHeightToLayouts',
+  'reflowLayoutsAfterHeightChange',
+  'resolveStackedLayoutCollisions',
+]);
+
+const modePolicyService = readProjectFile('src/pages/Notes/canvasEngine/modePolicyService.ts');
+assertContainsAll('Mode policy service owns page canvas visibility and blank draft policy', modePolicyService, [
+  'createSurfaceModePolicy',
+  'createSurfaceModeTransitionPolicy',
+  'getVisibleBlocksForSurface',
+  'shouldResolvePageCollisions',
+  'shouldUseElasticAvoidance',
+  'createBlankDraftLayout',
+  'showWorkspaceBlocks',
+  'useGlobalPageScroll',
+]);
+
+const historyService = readProjectFile('src/pages/Notes/canvasEngine/historyService.ts');
+assertContainsAll('History service owns runtime undo redo keyboard intent contract', historyService, [
+  'export type RuntimeHistoryEntry',
+  'RuntimeHistoryKeyboardIntent',
+  'isEditableDomTarget',
+  'getRuntimeHistoryKeyboardIntent',
+  "'undo'",
+  "'redo'",
+]);
+
 [
   'src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.tsx',
   'src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx',

@@ -2000,6 +2000,8 @@ browser harness: not used
 - `NoteCanvasRuntime.tsx` 仍然只是 runtime host；
 - `NoteCanvasRuntime.tsx` 不重新持有 block layer、slash menu、preview layer、ResizeObserver、pointer listener 等实现细节；
 - `useNoteCanvasRuntimeController()` 只组合一级 runtime controllers；
+- runtime type contract 暴露 viewport、placement、canvas object reserve、relation endpoint reserve；
+- engine model / viewport service / PageFrame service / placement service / measurement service / mode policy service / history service 的核心入口存在；
 - 必要 runtime layer / block projection 文件存在；
 - writing surface 暴露 Browser smoke 所需的 `data-canvas-*` debug attributes。
 
@@ -2011,6 +2013,8 @@ browser harness: not used
 - `npm run smoke:canvas-engine-performance`。
 
 该脚本只证明源码边界，没有证明真实浏览器交互体验。最终 Browser Harness smoke 和 Henry manual pass 仍然必须执行。
+
+2026-06-13 refresh：该脚本已从 18 项检查扩展到 26 项检查，新增覆盖 L3/L4/L5/L7/L10/L11 的服务边界。
 
 ## V2.BN.8.1 Non-Browser Gate Aggregator - 2026-06-13
 

@@ -685,3 +685,10 @@
 - `V2.BN.8.1-Final-Smoke-Protocol.md` 同步更新：changed-file secret scan 已纳入非浏览器聚合 gate。
 - `npm run check:changed-file-secrets` passed。
 - `npm run verify:v2-bn8-runtime` passed。
+
+## Changed - V2.BN.8.1 Runtime Boundary Check Coverage
+
+- `client/scripts/canvasRuntimeBoundaryCheck.mjs` 从 18 项检查扩展到 26 项检查。
+- 新增覆盖 runtime type contract、engine model、viewport service、PageFrame service、placement service、measurement service、mode policy service、history service。
+- 这使 L3/L4/L5/L7/L10/L11 的结构性证据也进入 `npm run verify:v2-bn8-runtime`。
+- `npm run check:canvas-runtime-boundary` passed。
