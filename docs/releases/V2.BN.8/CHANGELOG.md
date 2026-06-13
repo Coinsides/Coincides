@@ -650,3 +650,14 @@
 - 重新通过 `git diff --check`。
 - 确认 `NoteDetail.tsx` 仍然只是 route/provider shell。
 - 确认旧 runtime 符号没有回流到 `NoteDetail.tsx`。
+
+## Added - V2.BN.8.1 Runtime Boundary Check
+
+- 新增 `client/scripts/canvasRuntimeBoundaryCheck.mjs`。
+- 新增 root script：`npm run check:canvas-runtime-boundary`。
+- 新增 client script：`npm run check:canvas-runtime-boundary`。
+- 该检查固定 `NoteDetail.tsx` shell boundary、`NoteCanvasRuntime.tsx` host boundary、runtime root controller composition、必要 layer/projection 文件和 Browser smoke debug attributes。
+- `npm run check:canvas-runtime-boundary` passed。
+- `npm run build:client` passed。
+- `npm run build` passed。
+- `npm run smoke:canvas-engine-performance` passed。

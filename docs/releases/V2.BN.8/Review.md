@@ -1978,3 +1978,36 @@ worktree: clean before and after recheck
 - 旧 runtime 符号没有回流到 `NoteDetail.tsx`。
 
 本轮没有新增产品代码改动。`V2.BN.8.1` 仍不能关闭，因为最终 Browser Harness smoke 和 Henry manual pass 仍是硬门槛。
+
+## V2.BN.8.1 Runtime Boundary Check Script - 2026-06-13
+
+```text
+status: passed
+command: npm run check:canvas-runtime-boundary
+browser harness: not used
+```
+
+新增可重复运行的非浏览器边界检查：
+
+- root script：`npm run check:canvas-runtime-boundary`；
+- client script：`npm run check:canvas-runtime-boundary`；
+- checker file：`client/scripts/canvasRuntimeBoundaryCheck.mjs`。
+
+它验证：
+
+- `NoteDetail.tsx` 仍然只导入 route/runtime shell 必需内容；
+- `NoteDetail.tsx` 不包含旧 runtime 符号；
+- `NoteCanvasRuntime.tsx` 仍然只是 runtime host；
+- `NoteCanvasRuntime.tsx` 不重新持有 block layer、slash menu、preview layer、ResizeObserver、pointer listener 等实现细节；
+- `useNoteCanvasRuntimeController()` 只组合一级 runtime controllers；
+- 必要 runtime layer / block projection 文件存在；
+- writing surface 暴露 Browser smoke 所需的 `data-canvas-*` debug attributes。
+
+本轮重新验证通过：
+
+- `npm run check:canvas-runtime-boundary`；
+- `npm run build:client`；
+- `npm run build`；
+- `npm run smoke:canvas-engine-performance`。
+
+该脚本只证明源码边界，没有证明真实浏览器交互体验。最终 Browser Harness smoke 和 Henry manual pass 仍然必须执行。
