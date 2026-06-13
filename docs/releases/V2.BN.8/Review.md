@@ -1,5 +1,35 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Slash Menu Caret Anchor Patch
+
+```text
+status: technical validation passed
+client build: passed
+browser smoke: runtime reload passed
+manual anchor smoke: pending Henry retest
+```
+
+已完成部分：
+
+- `getSlashMenuAnchor()` 从 element boundary anchor 升级为 caret-first anchor。
+- 对 textarea / input，anchor service 会创建临时 mirror，按当前 caret index 计算当前输入点的 client rect。
+- `useSlashCommandController()` 现在把 caret index 传给 `getSlashMenuAnchor()`。
+- 菜单仍挂在 `blockList` 定位上下文内，x/y 仍会相对 `blockList` clamp。
+- 本轮不改变 slash command 内容、disabled 状态、template lookup、draft persist 或 block convert 行为。
+
+已验证：
+
+- client build passed。
+- browser runtime reload smoke passed：
+  - `data-canvas-engine-version = V2.BN.8-self-owned-minimal-hybrid-0`；
+  - `data-canvas-engine-route = self_owned_minimal_hybrid`；
+  - textarea count = 2；
+  - console error 为空。
+
+验证限制：
+
+- 当前 Browser 输入 API 因虚拟剪贴板限制无法稳定执行 `/for` 输入交互，所以菜单实际贴近 caret 的体验仍需 Henry 手动复测。
+
 ## V2.BN.8.1 Definition Field Truth And Active Reflow Patch
 
 ```text

@@ -111,7 +111,7 @@ export function useSlashCommandController({
       target,
       blockId,
       trigger,
-      anchor: getSlashMenuAnchor(anchorElement || null, blockListRef.current),
+      anchor: getSlashMenuAnchor(anchorElement || null, blockListRef.current, caret),
     } : null);
     setInteractionState(trigger
       ? openingMenuInteraction('slashMenu', blockId)

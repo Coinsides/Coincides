@@ -32,6 +32,11 @@ Status: 初步人工测试中
 
 - [ ] `ISSUE-001` 自由创建下方 block 后，输入 `/` 时 slash command menu 没有出现在当前输入窗口附近。
 
+```text
+status: patch applied, pending Henry visual retest
+patch: V2.BN.8.1 Slash Menu Caret Anchor
+```
+
 #### Henry 初步观察
 
 在较靠下的新 block 中输入 slash command 时，菜单漂到页面上方/远离当前 block 的区域，视觉上会让用户误以为命令菜单属于上面的内容。
@@ -42,7 +47,7 @@ Status: 初步人工测试中
 
 可能原因：
 
-- 旧 `getSlashMenuAnchor` 仍按 `blockListRef` 的局部坐标计算；
+- 旧 `getSlashMenuAnchor` 仍按输入框整体 rect 计算，没有追踪 caret rect；
 - 页面 scroll、block absolute placement、PageFrame offset、engine seed data attributes 之间还没有统一；
 - 未来应该归入 Canvas Engine 的 floating overlay layer，而不是继续散落在 `NoteDetail.tsx` 中。
 
@@ -52,6 +57,9 @@ Status: 初步人工测试中
 - [ ] 记录是在 draft block 还是已有 block 中触发。
 - [ ] 记录菜单实际位置和期望位置。
 - [ ] 判断是否与浏览器 scroll position 有关。
+- [x] 已将 anchor service 改成 textarea/input caret-first 计算。
+- [x] 已让 slash command controller 把当前 caret index 传入 overlay anchor。
+- [ ] Henry 手动复测：下方 block 中输入 `/for` 时菜单应贴近当前输入行。
 
 ### 2. Formula block LaTeX input 规则不符合用户直觉
 
@@ -653,7 +661,7 @@ D &\subset \mathbb{R}^2,\quad
 
 暂时不执行，等 Henry 测试差不多后统一整理。
 
-- [ ] Patch A: 修复 slash command menu anchor。
+- [x] Patch A: 修复 slash command menu anchor。
 - [ ] Patch B: 重写 Formula block preview input contract。
 - [ ] Patch C: 增加 formula paste sanitizer。
 - [ ] Patch D: 增加 FormulaBlock help tooltip。

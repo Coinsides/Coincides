@@ -1,5 +1,13 @@
 # CHANGELOG - V2.BN.8
 
+## Fixed - V2.BN.8.1 Slash Menu Caret Anchor
+
+- `getSlashMenuAnchor()` 现在优先用 textarea / input 的 caret rect 计算菜单位置，不再只用整个输入框的边界。
+- `useSlashCommandController()` 将当前 caret index 传入 overlay anchor service。
+- 对多行 textarea、长文本 block、页面滚动后的 block，slash menu 应跟随当前输入行附近，而不是漂到 block 顶部或页面上方。
+- 本轮不改变 slash command filtering、template conversion、draft persistence 或 command menu content。
+- client build passed；browser runtime smoke passed；由于当前 Browser 输入 API 受虚拟剪贴板限制，caret 位置的完整交互仍需 Henry 手动复测。
+
 ## Fixed - V2.BN.8.1 Definition Field Truth And Active Reflow
 
 - `DefinitionBlock` 现在把已存在的 `field_values` / `structured_fields` 视为字段 truth。

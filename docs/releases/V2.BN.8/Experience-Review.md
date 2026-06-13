@@ -1,5 +1,24 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Slash Menu Caret Anchor Experience Note
+
+```text
+Slash menu anchor now targets caret; pending Henry visual retest
+```
+
+体验判断：
+
+- Slash menu 应该跟随“用户正在输入的位置”，而不是跟随整个 textarea 的顶部或底部。
+- 对长 paragraph、靠下的新 block、多行 code/formula 输入来说，菜单漂到页面上方会严重破坏用户对当前操作对象的判断。
+- 本补丁把 anchor 计算推进到 caret 级别：用户在某一行输入 `/`，菜单应贴近这一行附近。
+
+仍需人工观察：
+
+- 在较靠下的新 draft block 输入 `/for`，菜单是否出现在当前输入框附近；
+- 在长 paragraph 的中下部输入 `/`，菜单是否跟随当前行；
+- 在页面滚动后输入 `/`，菜单是否仍正确；
+- 在接近 viewport 底部时，菜单是否合理翻到上方，而不是漂到页面顶部。
+
 ## V2.BN.8.1 Definition Field Truth And Active Reflow Experience Note
 
 ```text
