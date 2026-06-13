@@ -66,8 +66,8 @@ patch: V2.BN.8.1 Slash Menu Caret Anchor
 - [ ] `ISSUE-002` Formula block 目前对 `$...$`、`$$...$$`、多行 LaTeX 的处理不够直觉。
 
 ```text
-status: partially fixed
-patch: V2.BN.8.1 Formula Preview Display Body
+status: patch applied, pending Henry retest
+patch: V2.BN.8.1 Formula Preview Display Body + Formula Input Sanitizer And Help Seed
 ```
 
 #### Henry 初步观察
@@ -104,6 +104,7 @@ Formula block 应该把 `latex_input` 当作独立公式对象处理：
 - 系统默认用 display mode 渲染；
 - 用户可以继续使用 `$...$` 或 `$$...$$`，但系统必须给清楚提示；
 - 如果用户粘贴了 `$...$` 或 `$$...$$`，系统可以做宽容清洗或兼容，而不是失败。
+- 当前 patch 已覆盖 whole-input `$...$`、`$$...$$`、`\(...\)`、`\[...\]` 的读取/粘贴/保存归一化。
 
 FormulaBlock UI 需要一个轻量帮助入口：
 
@@ -146,11 +147,14 @@ FormulaBlock UI 需要一个轻量帮助入口：
 - [ ] 确认 `cases` / `matrix` / `array` 等常见环境是否可渲染。
 - [ ] 确认 formula block 是否应该默认居中显示。
 - [ ] 确认 formula block 的 LaTeX input 展开/折叠行为。
-- [ ] 确认保存后再次打开是否保留纯 LaTeX body。
+- [x] 确认保存路径会把完整包裹公式归一为纯 LaTeX body。
+- [ ] Henry 手动复测：保存后再次打开是否保留纯 LaTeX body。
 - [ ] 确认正文 inline math span 的数据结构归属：TextBlock rich text schema 还是临时 markdown-like parser。
 - [ ] 确认 `Convert to formula` 第一版是只支持 `$...$` / `$$...$$`，还是支持普通数学表达的弱识别。
 - [ ] 确认右键菜单和 floating toolbar 是否共用同一套 command registry。
 - [ ] 确认 undo 是走 text operation history，还是走 block-level operation history。
+- [x] 已新增 FormulaBlock `?` help seed。
+- [x] 已新增 FormulaBlock paste sanitizer。
 
 ### 3. Definition block field draft 初始化错误
 
@@ -663,8 +667,8 @@ D &\subset \mathbb{R}^2,\quad
 
 - [x] Patch A: 修复 slash command menu anchor。
 - [ ] Patch B: 重写 Formula block preview input contract。
-- [ ] Patch C: 增加 formula paste sanitizer。
-- [ ] Patch D: 增加 FormulaBlock help tooltip。
+- [x] Patch C: 增加 formula paste sanitizer。
+- [x] Patch D: 增加 FormulaBlock help tooltip。
 - [ ] Patch E: 设计正文选区 `Convert to formula` 右键菜单入口。
 - [ ] Patch F: 修复 DefinitionBlock field draft 初始化和 Tab focus 行为。
 - [ ] Patch G: 修复 active structured block measurement / reflow 穿模。
@@ -678,3 +682,4 @@ D &\subset \mathbb{R}^2,\quad
 - [x] Patch O: Canvas mode 保留 PageFrame 边界、背景和内容留白。
 - [ ] Patch P: 定义 PageFrame content inset / ruler 控件的第一版契约。
 - [ ] Patch Q: 将 slash menu / formula preview / inline math conversion / structured block measurement / draft block placement / code block visual language / canvas shell layout / PageFrame ruler 经验同步到 `Canvas-Engine-Interaction-Contract.md`。
+  - [x] 已同步 FormulaBlock input sanitizer / help seed / inline formula boundary。

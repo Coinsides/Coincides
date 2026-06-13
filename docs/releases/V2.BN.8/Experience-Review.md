@@ -1,5 +1,25 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Formula Input Sanitizer And Help Experience Note
+
+```text
+FormulaBlock now treats LaTeX input as formula body; pending Henry paste/hover retest
+```
+
+体验判断：
+
+- FormulaBlock 应该让用户直接输入“公式本体”，而不是逼用户判断要不要自己包 `$` 或 `$$`。
+- 本补丁后，用户粘贴带 `$...$`、`$$...$$`、`\(...\)`、`\[...\]` 的完整公式时，系统会自动去掉外层包裹并保留 body。
+- `?` help seed 是当前阶段的轻量说明入口，避免用户不知道 FormulaBlock 的输入约定。
+- 正文里的小公式不是本轮目标；它需要后续通过选区右键 / floating toolbar 的 `Convert to formula` 进入 inline math 或公式片段。
+
+仍需人工观察：
+
+- 带 delimiter 的简单公式粘贴后，输入区是否变成纯 body；
+- Green theorem 这类多行公式粘贴后，预览是否符合用户预期；
+- help tooltip 在窄 block、靠近页面右侧、靠近 viewport 底部时是否仍可读；
+- 是否需要把 help tooltip 尽快迁入 FloatingOverlayLayer，而不是长期留在 block-local tooltip。
+
 ## V2.BN.8.1 Canvas Shell And PageFrame Boundary Experience Note
 
 ```text

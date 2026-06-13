@@ -1,5 +1,33 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Formula Input Sanitizer And Help Seed
+
+```text
+status: technical validation passed
+client build: passed
+manual formula paste smoke: pending Henry retest
+```
+
+已完成部分：
+
+- 新增 `normalizeFormulaLatexInput()`，把独立 FormulaBlock 的 whole-input delimiter 清洗成纯 LaTeX body。
+- `formulaFieldsFromBlock()` 读取旧字段时会宽容清洗 `$...$` / `$$...$$` / `\(...\)` / `\[...\]`。
+- `contentForFormula()` 保存时也会清洗 `latex_input`，让 field truth 保持为公式 body，而不是 display/inline wrapper。
+- `FormulaBlockProjection` 增加 paste sanitizer：用户粘贴完整包裹公式时，插入进 textarea 的就是 body。
+- Formula input 失焦保存前会再次归一化，降低旧 wrapper 被保存回字段 truth 的风险。
+- active Formula editor 增加 `?` help seed，先作为 block-local tooltip，后续可迁入统一 FloatingOverlayLayer。
+
+已验证：
+
+- client build passed。
+
+仍需验收：
+
+- Henry 粘贴 `$a^2+b^2=c^2$`，输入区应保存为 `a^2+b^2=c^2`，预览正常渲染。
+- Henry 粘贴 `$$...$$` 多行公式，输入区应保存为 body，预览按 display mode 渲染。
+- hover `?` 时说明不应被 block 裁切或遮挡到不可读。
+- 正文 inline math 暂未实现，仍归入后续 TextBlock rich text / context menu 设计。
+
 ## V2.BN.8.1 Canvas Shell And PageFrame Boundary Patch
 
 ```text

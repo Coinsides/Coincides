@@ -106,7 +106,9 @@ export function formulaFieldsFromBlock(
   const effectiveFields = draftFields || fields;
   const bodyFallback = draftText !== undefined ? draftText : stringValue(block.content_json?.body) || block.plain_text || '';
   return {
-    latex_input: draftFields ? stringValue(effectiveFields.latex_input) : firstString(effectiveFields.latex_input, bodyFallback),
+    latex_input: draftFields
+      ? stringValue(effectiveFields.latex_input)
+      : normalizeFormulaLatexInput(firstString(effectiveFields.latex_input, bodyFallback)),
     formula_name: stringValue(effectiveFields.formula_name),
     explanation: stringValue(effectiveFields.explanation),
   };
@@ -132,6 +134,25 @@ export function formulaPreviewText(latexInput: string): string {
   }
   if (trimmed.includes('$')) return trimmed;
   return `$$\n${trimmed}\n$$`;
+}
+
+export function normalizeFormulaLatexInput(latexInput: string): string {
+  const trimmed = latexInput.trim();
+  if (!trimmed) return '';
+  const wrappedPairs = [
+    ['$$', '$$'],
+    ['\\[', '\\]'],
+    ['\\(', '\\)'],
+    ['$', '$'],
+  ] as const;
+
+  for (const [open, close] of wrappedPairs) {
+    if (!trimmed.startsWith(open) || !trimmed.endsWith(close)) continue;
+    const body = trimmed.slice(open.length, trimmed.length - close.length).trim();
+    return body;
+  }
+
+  return trimmed;
 }
 
 function contentForDefinition(
@@ -163,10 +184,10 @@ function contentForFormula(
   previous: Record<string, unknown> = {},
   fieldValuesOverride?: FieldValueRecord,
 ): Record<string, unknown> {
-  const latex = text.trim();
+  const latex = normalizeFormulaLatexInput(text);
   const previousFields = readFieldValues(previous);
   const fieldValues = {
-    latex_input: fieldValuesOverride ? stringValue(fieldValuesOverride.latex_input) : latex,
+    latex_input: fieldValuesOverride ? normalizeFormulaLatexInput(stringValue(fieldValuesOverride.latex_input)) : latex,
     formula_name: stringValue(fieldValuesOverride?.formula_name) || stringValue(previousFields.formula_name),
     explanation: stringValue(fieldValuesOverride?.explanation) || stringValue(previousFields.explanation),
   };

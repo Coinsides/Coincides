@@ -1,5 +1,14 @@
 # CHANGELOG - V2.BN.8
 
+## Fixed - V2.BN.8.1 Formula Input Sanitizer And Help Seed
+
+- `FormulaBlock` 的 `latex_input` 现在在读取旧内容、保存新内容时都会归一成纯 LaTeX body。
+- Whole-input `$...$`、`$$...$$`、`\(...\)`、`\[...\]` 会被接受，但保存时去掉外层 delimiter，避免用户猜格式后污染 field truth。
+- Formula input 增加 paste sanitizer：用户粘贴完整包裹公式时，会把插入内容清洗为 body，再进入预览和保存路径。
+- Formula active editor 增加轻量 `?` help 入口，说明纯 body 与常见 delimiter 的处理规则。
+- 本轮只处理独立 FormulaBlock；正文 TextBlock 内的 inline formula 仍保留为后续选区右键 `Convert to formula` 能力。
+- client build passed。
+
 ## Fixed - V2.BN.8.1 Canvas Shell And PageFrame Boundary
 
 - Canvas mode root 现在增加 `pageCanvas` shell，top bar 以下交给 runtime document shell；Canvas mode 不再依赖全局页面滚动。
