@@ -35,6 +35,7 @@ export interface UseDraftBlockControllerOptions {
   defaultDraftLayout: BlockBoxLayout;
   defaultTextTemplate: TemplateOption;
   note: Note | null;
+  onDraftPersisted?: (block: NoteBlock) => void;
   saveBlock: (
     block: NoteBlock,
     text: string,
@@ -51,6 +52,7 @@ export function useDraftBlockController({
   defaultDraftLayout,
   defaultTextTemplate,
   note,
+  onDraftPersisted,
   saveBlock,
   setActiveBlockId,
   setFocusBlockId,
@@ -128,22 +130,34 @@ export function useDraftBlockController({
         silent: true,
       });
       if (!created) return;
+      let persistedBlock = created;
 
       const latestText = draftTextRef.current.trimEnd();
       if (latestText.trim() && latestText !== textToCreate) {
-        await saveBlock(created, latestText, { silent: true });
+        const saved = await saveBlock(created, latestText, { silent: true });
+        if (saved) persistedBlock = saved;
       }
 
       setDraftText('');
       draftTextRef.current = '';
       setDraftActive(false);
       setDraftLayout(null);
-      setFocusBlockId(created.id);
+      setFocusBlockId(persistedBlock.id);
+      onDraftPersisted?.(persistedBlock);
     } finally {
       creatingDraftRef.current = false;
       setCreatingDraft(false);
     }
-  }, [note, defaultTextTemplate, draftLayout, defaultDraftLayout, createBlock, saveBlock, setFocusBlockId]);
+  }, [
+    note,
+    defaultTextTemplate,
+    draftLayout,
+    defaultDraftLayout,
+    createBlock,
+    saveBlock,
+    setFocusBlockId,
+    onDraftPersisted,
+  ]);
 
   const resizeDraftFromTextarea = useCallback((textarea: HTMLTextAreaElement) => {
     resizeTextareaToContent(textarea);

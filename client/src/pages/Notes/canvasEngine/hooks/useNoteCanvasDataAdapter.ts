@@ -430,7 +430,10 @@ export function useNoteCanvasDataAdapter({
     return null;
   }, [createBlock, insertTemplateOptions, newBlockText, newTemplateId]);
 
-  const trashBlock = useCallback(async (blockId: string) => {
+  const trashBlock = useCallback(async (
+    blockId: string,
+    options: { silent?: boolean } = {},
+  ): Promise<boolean> => {
     try {
       await api.delete(`/note-blocks/${blockId}`);
       setBlocks((current) => current.filter((block) => block.id !== blockId));
@@ -444,10 +447,45 @@ export function useNoteCanvasDataAdapter({
         delete next[blockId];
         return next;
       });
-      addToast('success', 'Block moved to trash');
+      if (!options.silent) addToast('success', 'Block moved to trash');
+      return true;
     } catch (err) {
       console.error('Failed to trash block:', err);
-      addToast('error', 'Failed to trash block');
+      if (!options.silent) addToast('error', 'Failed to trash block');
+      return false;
+    }
+  }, [addToast]);
+
+  const restoreBlock = useCallback(async (
+    block: NoteBlock,
+    options: { silent?: boolean } = {},
+  ): Promise<NoteBlock | null> => {
+    try {
+      const res = await api.put(`/note-blocks/${block.id}`, { status: 'active' });
+      const restored = hydrateClientBlock({
+        ...block,
+        ...res.data,
+        source_references: block.source_references,
+      });
+      setBlocks((current) => (
+        [...current.filter((item) => item.id !== restored.id), restored]
+          .sort((a, b) => a.order_index - b.order_index)
+      ));
+      setBlockTextDrafts((current) => ({
+        ...current,
+        [restored.id]: textFromContent(restored).trimEnd(),
+      }));
+      setBlockFieldDrafts((current) => {
+        const next = { ...current };
+        delete next[restored.id];
+        return next;
+      });
+      if (!options.silent) addToast('success', 'Block restored');
+      return restored;
+    } catch (err) {
+      console.error('Failed to restore block:', err);
+      if (!options.silent) addToast('error', 'Failed to restore block');
+      return null;
     }
   }, [addToast]);
 
@@ -520,6 +558,7 @@ export function useNoteCanvasDataAdapter({
     toggleBlockAIVisibility,
     addBlock,
     trashBlock,
+    restoreBlock,
     moveBlock,
     handleViewSource,
   };

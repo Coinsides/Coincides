@@ -1,5 +1,19 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Runtime History Boundary Seed
+
+- `usePlacementHistory` 升级为第一版 runtime history boundary，不再只保存 placement move / resize snapshot。
+- Runtime history 当前支持三类可撤回动作：
+  - `layout`: move / resize 的 before / after layout snapshot；
+  - `createdBlock`: draft 持久化创建出的 block lifecycle seed。
+  - `trashedBlock`: toolbar 删除 block 后可通过 soft-restore 撤回，也可通过 redo 再次 trash。
+- Draft block 持久化成功后会登记 `createdBlock` history entry。
+- `Ctrl+Z` 在非输入框焦点下可以撤回最近创建的 block：通过现有 note block soft-delete 路径把 block 标记为 `trashed`。
+- `Ctrl+Y` / `Ctrl+Shift+Z` 可以恢复刚撤回的 created block：通过现有 `PUT /api/note-blocks/:id` status update 把 block 恢复为 `active`。
+- `useNoteCanvasDataAdapter` 新增 `restoreBlock()`，并让 `trashBlock()` 支持 silent history 调用。
+- 本轮仍不实现 cross-note undo、source/relation mutation undo、完整历史版本 UI、inline formula conversion undo。
+- client build passed；server build passed。
+
 ## Changed - V2.BN.8.1 Runtime Placement Record Seed
 
 - L5 placement service now owns a first-version runtime placement record builder.

@@ -1,5 +1,28 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Runtime History Boundary Experience Note
+
+```text
+Created-block and toolbar-delete undo now use real soft-delete/restore, not visual-only frontend tricks.
+```
+
+体验判断：
+
+- 用户在空白处创建并保存一个新 block 后，应该能用常见的 `Ctrl+Z` 撤回这个创建动作。
+- 这次撤回不是把 block 临时藏起来，而是走 note block 的软删除状态；因此刷新/后续恢复路径更接近真实产品行为。
+- `Ctrl+Y` 或 `Ctrl+Shift+Z` 应该能把刚撤回的 created block 恢复回来。
+- 用户通过 block toolbar 删除一个 block 后，离开输入框按 `Ctrl+Z` 应该能把它恢复回来；再按 `Ctrl+Y` 应该能再次把它移入 trash。
+- 当前快捷键仍会避开 textarea / input 内部焦点，避免用户正在写字时把文本编辑的 undo 抢走。
+- 这仍然只是第一版 runtime history：move / resize / created block / toolbar-deleted block 已进入同一条历史栈，convert block、inline formula、source/relation 操作还不能算完成。
+
+仍需人工观察：
+
+- 新建 block 后点击页面空白处，让焦点离开输入框，再按 `Ctrl+Z`，block 是否消失。
+- 随后按 `Ctrl+Y` 或 `Ctrl+Shift+Z`，block 是否恢复到原位置。
+- 用 toolbar 删除一个已有 block 后，`Ctrl+Z` / `Ctrl+Y` 是否能稳定恢复和再次删除。
+- move / resize 后的撤回重做是否仍然稳定。
+- 在 textarea 内按 `Ctrl+Z` 是否仍优先撤回文本输入，而不是撤回 block 创建。
+
 ## V2.BN.8.1 Runtime Placement Record Experience Note
 
 ```text

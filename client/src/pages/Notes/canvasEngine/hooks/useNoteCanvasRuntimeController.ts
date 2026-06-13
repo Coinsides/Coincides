@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUIStore } from '@/stores/uiStore';
 import { useBlockFieldDraftController } from './useBlockFieldDraftController';
@@ -26,6 +26,7 @@ import { useRuntimeLayoutRefsController } from './useRuntimeLayoutRefsController
 import { useSlashCommandController } from './useSlashCommandController';
 import { useSurfaceModeController } from './useSurfaceModeController';
 import { estimateBlockHeightForText } from '../measurementService';
+import type { NoteBlock } from '../runtimeDataTypes';
 
 export function useNoteCanvasRuntimeController() {
   const { noteId } = useNoteCanvasRuntime();
@@ -147,6 +148,7 @@ export function useNoteCanvasRuntimeController() {
     toggleBlockAIVisibility,
     addBlock,
     trashBlock,
+    restoreBlock,
     handleViewSource,
   } = useNoteCanvasDataAdapter({
     noteId,
@@ -177,6 +179,7 @@ export function useNoteCanvasRuntimeController() {
     surfaceMode,
     surfacePolicy,
   });
+  const pushCreatedBlockHistoryRef = useRef<((block: NoteBlock) => void) | null>(null);
 
   const {
     activateDraft,
@@ -195,6 +198,7 @@ export function useNoteCanvasRuntimeController() {
     defaultDraftLayout,
     defaultTextTemplate,
     note,
+    onDraftPersisted: (block) => pushCreatedBlockHistoryRef.current?.(block),
     saveBlock,
     setActiveBlockId,
     setFocusBlockId,
@@ -240,10 +244,23 @@ export function useNoteCanvasRuntimeController() {
     surfacePolicy,
   });
 
-  const { pushLayoutHistory } = usePlacementHistory({
+  const {
+    pushCreatedBlockHistory,
+    pushLayoutHistory,
+    pushTrashedBlockHistory,
+  } = usePlacementHistory({
     applyLayoutDrafts: mergeLayoutDrafts,
     persistLayoutSnapshot,
+    restoreBlockForHistory: restoreBlock,
+    trashBlockForHistory: trashBlock,
   });
+  pushCreatedBlockHistoryRef.current = pushCreatedBlockHistory;
+
+  const handleTrashBlock = useCallback(async (blockId: string) => {
+    const block = blocks.find((item) => item.id === blockId);
+    const removed = await trashBlock(blockId);
+    if (removed && block) pushTrashedBlockHistory(block);
+  }, [blocks, pushTrashedBlockHistory, trashBlock]);
 
   const { beginMoveBlock, beginResizeBlock } = useBlockPlacementInteractions({
     blockLayouts,
@@ -397,7 +414,7 @@ export function useNoteCanvasRuntimeController() {
     onTogglePreviewExportStatus: togglePreviewExportStatus,
     onToggleSnapEnabled: toggleSnapEnabled,
     onToggleSurfaceMode: toggleSurfaceMode,
-    onTrashBlock: trashBlock,
+    onTrashBlock: handleTrashBlock,
     onViewSource: handleViewSource,
     onWritingSurfaceFocusBlock: markBlockFocused,
   });

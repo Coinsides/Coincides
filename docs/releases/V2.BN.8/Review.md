@@ -1,5 +1,44 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Runtime History Boundary Seed
+
+```text
+status: technical validation passed
+scope: L11 state persistence and undo boundary seed
+client build: passed
+server build: passed
+git diff check: passed
+changed-file secret scan: false positives only
+browser smoke: blocked by Chrome remote debugging authorization
+```
+
+Completed:
+
+- `usePlacementHistory` now owns one runtime history stack rather than separate placement-only stacks.
+- Existing move / resize undo remains supported through `layout` history entries.
+- Draft block creation now registers a `createdBlock` history entry after the block is persisted.
+- Undoing a created block uses the existing soft-delete route and removes the block from local state.
+- Redoing a created block uses the existing note-block update route with `status: active` and restores the block into local state.
+- Toolbar block delete now registers a `trashedBlock` history entry after the soft-delete succeeds.
+- Undoing a toolbar-deleted block uses the same restore route; redoing it soft-deletes the block again.
+- `useNoteCanvasDataAdapter` now exposes `restoreBlock()` and lets history call `trashBlock()` silently.
+
+Still intentionally out of scope:
+
+- No cross-note undo.
+- No source/reference/relation mutation undo.
+- No long-term history or version timeline UI.
+- No inline formula conversion undo.
+- No full trash management UI or long-term deleted-object browser beyond this created/trashed block undo-redo seed.
+
+Verification:
+
+- client build passed.
+- server build passed.
+- `git diff --check` passed with line-ending warnings only.
+- changed-file secret scan only matched documentation text that mentions secret scan status.
+- Browser Harness smoke could not complete because Chrome remote debugging authorization timed out; Henry can re-run after clicking Allow if prompted.
+
 ## V2.BN.8.1 Runtime Placement Record Seed
 
 ```text
