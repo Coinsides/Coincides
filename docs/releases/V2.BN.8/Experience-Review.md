@@ -648,11 +648,12 @@ browser: deferred by Henry until the replacement pass is complete
 - 后续 canvas pan / zoom 后，floating UI 应该仍然贴近它所服务的 block / field / caret / canvas object；
 - 当前 patch 先提供 normalized anchor record 和 world rect 到 viewport rect 的转换，不改变用户可见行为；
 - 这让后续 overlay 调整可以从“这个浮层锚在哪里”出发，而不是继续在每个组件里各自硬算 DOM 位置。
+- 当前 slash menu、block control bar、Formula help tooltip 已经通过 normalized anchor record 进入 placement helper。
 
 保留风险：
 
-- 当前 slash menu、block control bar、Formula help tooltip 仍主要使用现有 DOM rect fallback；
-- 还没有完整迁移到 world/caret anchor records；
+- 当前 anchor record 的来源仍主要是 DOM rect fallback；
+- 还没有完整迁移到真正的 world/caret anchor records；
 - 完整 pan / zoom、virtualization、relation endpoint overlay 仍需要后续实现与 Browser smoke。
 
 ## 同步规则

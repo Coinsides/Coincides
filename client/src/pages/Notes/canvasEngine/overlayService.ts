@@ -207,8 +207,8 @@ export function getSlashMenuAnchor(
   const viewportPadding = 16;
   const menuWidth = Math.min(SLASH_MENU_WIDTH, Math.max(0, window.innerWidth - (viewportPadding * 2)));
 
-  return placeOverlayInViewport({
-    anchorRect,
+  return placeAnchoredOverlay({
+    anchor: createViewportOverlayAnchor(anchorRect),
     overlayWidth: menuWidth,
     overlayHeight: SLASH_MENU_HEIGHT_ESTIMATE,
     offset: SLASH_MENU_OFFSET,
@@ -222,8 +222,8 @@ export function getBlockControlAnchor(element: HTMLElement | null | undefined): 
 
   const rect = element.getBoundingClientRect();
 
-  return placeOverlayInViewport({
-    anchorRect: rect,
+  return placeAnchoredOverlay({
+    anchor: createViewportOverlayAnchor(rect),
     overlayWidth: 220,
     overlayHeight: 34,
     preferredSide: 'right',
@@ -235,8 +235,8 @@ export function getTooltipAnchor(element: HTMLElement | null | undefined): Slash
 
   const rect = element.getBoundingClientRect();
 
-  return placeOverlayInViewport({
-    anchorRect: rect,
+  return placeAnchoredOverlay({
+    anchor: createViewportOverlayAnchor(rect),
     overlayWidth: 320,
     overlayHeight: 82,
     preferredSide: 'below',

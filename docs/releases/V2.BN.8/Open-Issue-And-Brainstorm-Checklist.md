@@ -61,11 +61,12 @@ patch: V2.BN.8.1 Floating Overlay Portal Seed + Insert/Source Overlay Portal See
 - Formula help tooltip 已进入 `FloatingOverlayLayer` free placement，并使用 help-button viewport anchor seed；
 - Slash menu / Block control bar / Formula help tooltip 已共用第一版 viewport placement helper seed；
 - `overlayService` 已有 normalized viewport anchor record、world rect 到 viewport rect 的转换 seed 和 `placeAnchoredOverlay()`；
+- Slash menu / Block control bar / Formula help tooltip 三个现有调用点已迁到 normalized anchor record path；
 - portal shell 不吞掉页面点击，只有实际面板可交互。
 
 仍未完成：
 
-- individual overlay callers 尚未全面迁移到 world/caret anchor record；
+- 现有 anchor record 仍主要由 DOM rect fallback 生成，尚未全面迁到真正 world/caret anchor；
 - full caret/world anchor service、完整 collision / flip / viewport clamp service 尚未完成；
 - 需要 Henry 手动复测 Preview 是否覆盖 selected block toolbar，而不是混层。
 

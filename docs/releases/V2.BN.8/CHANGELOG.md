@@ -1,5 +1,12 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Overlay Callers Anchor Record Migration
+
+- `getSlashMenuAnchor()`、`getBlockControlAnchor()` 和 `getTooltipAnchor()` 现在先创建 `ViewportOverlayAnchor`，再通过 `placeAnchoredOverlay()` 进入 shared placement helper。
+- 这让当前三个真实 overlay 调用点开始使用 normalized anchor record，而不是各自直接把 DOM rect 塞进 placement helper。
+- 本轮不改变用户可见 placement 行为；DOM rect 仍是当前 fallback 来源，后续再逐步替换为真正的 world/caret anchor。
+- 这一步关闭 “individual overlay callers 尚未全面迁移到 anchor record” 的第一版技术缺口，但不关闭完整 caret/world anchor service。
+
 ## Changed - V2.BN.8.1 World Overlay Anchor Seed
 
 - `overlayService.ts` 新增 `ViewportOverlayAnchor`、`createViewportOverlayAnchor()`、`worldRectToViewportRect()`、`createWorldOverlayAnchor()` 和 `placeAnchoredOverlay()`。

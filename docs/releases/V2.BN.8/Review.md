@@ -1357,12 +1357,13 @@ browser smoke: deferred by Henry until all replacement work is complete
 - `overlayService.ts` 新增 normalized viewport anchor record；
 - `overlayService.ts` 新增 world rect 到 viewport rect 的转换 seed；
 - `placeAnchoredOverlay()` 可以从 anchor record 进入 shared viewport placement helper；
+- `getSlashMenuAnchor()`、`getBlockControlAnchor()`、`getTooltipAnchor()` 已迁入 normalized anchor record 调用路径；
 - 该 seed 复用 `geometry.ts` 中已有的 `worldToScreen()`，没有引入第二套坐标数学。
 
 工程判断：
 
 - 这是 L9 的底层接缝，不改变现有 overlay 视觉行为；
-- 当前 slash menu、block control bar、Formula help tooltip 仍可继续使用 DOM rect fallback；
+- 当前 slash menu、block control bar、Formula help tooltip 的 anchor record 仍可由 DOM rect fallback 生成；
 - 后续 pan/zoom、virtualization、relation endpoint、canvas object overlay 应逐步迁移到 anchor record，而不是在组件内硬算位置。
 
 仍需验收：
