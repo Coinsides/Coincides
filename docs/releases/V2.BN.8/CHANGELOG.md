@@ -10,6 +10,7 @@
   - changed-file secret scan 无新增文件可扫。
 - `Review.md` 明确记录：Browser Harness 暂按 Henry 指示延后到全部工程完成后统一跑。
 - `Open-Issue-And-Brainstorm-Checklist.md` 明确区分 `V2.BN.8.1` runtime replacement 硬门槛与后续 `V2.BN.8.x` polish backlog。
+- 新增 `V2.BN.8.1-Layer-Acceptance-Audit.md`，逐层记录 L0-L12 当前证据、剩余硬门槛和后续 polish backlog。
 
 ## Changed - V2.BN.8.1 Runtime Presentation Controller Seed
 

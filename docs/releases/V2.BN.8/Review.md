@@ -1895,3 +1895,17 @@ Henry manual pass: still required
 - 最终 Browser Harness smoke；
 - Henry 手动视觉/交互验收；
 - `Open-Issue-And-Brainstorm-Checklist.md` 中被保留为后续 polish / patch backlog 的项目。
+
+## V2.BN.8.1 Layer Acceptance Audit - 2026-06-13
+
+新增逐层审计文档：
+
+- `docs/releases/V2.BN.8/V2.BN.8.1-Layer-Acceptance-Audit.md`
+
+审计结论：
+
+- L0-L12 的代码替换证据已经逐层记录；
+- L1 local test data reset 没有在本轮执行，因为这是破坏性操作，应在 Henry 确认后或最终测试被旧数据污染时再做；
+- `NoteDetail.tsx` shell、Canvas Engine runtime root、runtime controller composition boundary、非浏览器 gates 均已有证据；
+- Browser Harness smoke 和 Henry manual pass 仍是最终硬门槛；
+- 未勾选的 formula / inline math / structured block / code block / ruler 等条目被归入后续 `V2.BN.8.x` polish backlog，不再混同为当前 runtime replacement 的硬阻塞。
