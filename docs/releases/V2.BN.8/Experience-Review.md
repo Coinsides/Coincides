@@ -636,6 +636,25 @@ status: partial technical validation passed
 - 浏览器内编辑、保存、reload 后的 FormulaBlock 体验还需要单独 smoke；
 - hover help tooltip 已进入 viewport overlay seed；更完整的公式输入说明和正文 inline formula conversion 仍未做。
 
+## V2.BN.8.1 World Overlay Anchor Seed Experience Note
+
+```text
+status: technical seed only
+browser: deferred by Henry until the replacement pass is complete
+```
+
+体验意图：
+
+- 后续 canvas pan / zoom 后，floating UI 应该仍然贴近它所服务的 block / field / caret / canvas object；
+- 当前 patch 先提供 normalized anchor record 和 world rect 到 viewport rect 的转换，不改变用户可见行为；
+- 这让后续 overlay 调整可以从“这个浮层锚在哪里”出发，而不是继续在每个组件里各自硬算 DOM 位置。
+
+保留风险：
+
+- 当前 slash menu、block control bar、Formula help tooltip 仍主要使用现有 DOM rect fallback；
+- 还没有完整迁移到 world/caret anchor records；
+- 完整 pan / zoom、virtualization、relation endpoint overlay 仍需要后续实现与 Browser smoke。
+
 ## 同步规则
 
 - 每次视觉/交互 patch 后更新本文。

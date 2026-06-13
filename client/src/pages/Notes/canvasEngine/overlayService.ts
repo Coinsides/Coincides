@@ -4,13 +4,14 @@ import {
   SLASH_MENU_WIDTH,
   type SlashMenuAnchor,
 } from './runtimeLayout';
-import { clamp } from './geometry';
+import { clamp, worldToScreen } from './geometry';
+import type { CanvasRect, CanvasViewport } from './types';
 
 type ClientRectLike = Pick<DOMRect, 'left' | 'right' | 'top' | 'bottom'>;
-type OverlaySide = 'below' | 'right';
-type OverlayAlign = 'start' | 'end';
+export type OverlaySide = 'below' | 'right';
+export type OverlayAlign = 'start' | 'end';
 
-interface ViewportOverlayPlacementOptions {
+export interface ViewportOverlayPlacementOptions {
   anchorRect: ClientRectLike;
   overlayWidth: number;
   overlayHeight: number;
@@ -18,6 +19,21 @@ interface ViewportOverlayPlacementOptions {
   viewportPadding?: number;
   preferredSide?: OverlaySide;
   align?: OverlayAlign;
+}
+
+export interface AnchoredOverlayPlacementOptions extends Omit<ViewportOverlayPlacementOptions, 'anchorRect'> {
+  anchor: ViewportOverlayAnchor;
+}
+
+export interface ViewportOverlayAnchor {
+  kind: 'viewport_rect';
+  rect: ClientRectLike;
+}
+
+export interface WorldOverlayAnchorOptions {
+  worldRect: CanvasRect;
+  viewport: CanvasViewport;
+  viewportElementRect: ClientRectLike;
 }
 
 const MIRROR_STYLE_PROPERTIES = [
@@ -41,6 +57,46 @@ const MIRROR_STYLE_PROPERTIES = [
   'textAlign',
   'textTransform',
 ] as const;
+
+export function createViewportOverlayAnchor(anchorRect: ClientRectLike): ViewportOverlayAnchor {
+  return {
+    kind: 'viewport_rect',
+    rect: anchorRect,
+  };
+}
+
+export function worldRectToViewportRect({
+  worldRect,
+  viewport,
+  viewportElementRect,
+}: WorldOverlayAnchorOptions): ClientRectLike {
+  const topLeft = worldToScreen({ x: worldRect.x, y: worldRect.y }, viewport);
+  const bottomRight = worldToScreen({
+    x: worldRect.x + worldRect.width,
+    y: worldRect.y + worldRect.height,
+  }, viewport);
+
+  return {
+    left: viewportElementRect.left + topLeft.x,
+    right: viewportElementRect.left + bottomRight.x,
+    top: viewportElementRect.top + topLeft.y,
+    bottom: viewportElementRect.top + bottomRight.y,
+  };
+}
+
+export function createWorldOverlayAnchor(options: WorldOverlayAnchorOptions): ViewportOverlayAnchor {
+  return createViewportOverlayAnchor(worldRectToViewportRect(options));
+}
+
+export function placeAnchoredOverlay({
+  anchor,
+  ...placement
+}: AnchoredOverlayPlacementOptions): SlashMenuAnchor {
+  return placeOverlayInViewport({
+    ...placement,
+    anchorRect: anchor.rect,
+  });
+}
 
 export function placeOverlayInViewport({
   anchorRect,

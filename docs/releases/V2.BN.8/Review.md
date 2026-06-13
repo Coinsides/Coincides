@@ -1344,6 +1344,33 @@ client build: passed
 - create block / delete empty draft / convert block type 的 undo 仍未进入 L11；
 - placement history 仍通过 runtime callback 持久化，后续可以进一步迁入 placement writer boundary。
 
+## V2.BN.8.1 World Overlay Anchor Seed
+
+```text
+status: in progress
+scope: L9 Floating Overlay Layer
+browser smoke: deferred by Henry until all replacement work is complete
+```
+
+已完成部分：
+
+- `overlayService.ts` 新增 normalized viewport anchor record；
+- `overlayService.ts` 新增 world rect 到 viewport rect 的转换 seed；
+- `placeAnchoredOverlay()` 可以从 anchor record 进入 shared viewport placement helper；
+- 该 seed 复用 `geometry.ts` 中已有的 `worldToScreen()`，没有引入第二套坐标数学。
+
+工程判断：
+
+- 这是 L9 的底层接缝，不改变现有 overlay 视觉行为；
+- 当前 slash menu、block control bar、Formula help tooltip 仍可继续使用 DOM rect fallback；
+- 后续 pan/zoom、virtualization、relation endpoint、canvas object overlay 应逐步迁移到 anchor record，而不是在组件内硬算位置。
+
+仍需验收：
+
+- 需要后续 Browser smoke 验证 pan/zoom seed 后 overlay 是否跟随对象；
+- 需要后续决定 caret anchor 是否也进入 world/caret anchor record，而不是只用 textarea mirror rect；
+- 需要继续完成完整 collision / flip / clamp service。
+
 ## Henry Must Decide
 
 - 是否确认第一版主路线为 self-owned minimal hybrid NoteCanvas Engine；

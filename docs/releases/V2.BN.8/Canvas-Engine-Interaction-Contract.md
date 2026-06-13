@@ -101,6 +101,7 @@ connectingRelationFuture
 - slash menu 属于 viewport overlay，第一版通过 `FloatingOverlayLayer` free placement 和 caret viewport anchor 出现在当前输入附近；
 - block control bar 属于 viewport overlay，第一版通过 `FloatingOverlayLayer` free placement 和 selected block viewport anchor 靠近对象但不参与正文排版；
 - slash menu、block control bar、Formula help tooltip 第一版共用 shared viewport placement helper；该 helper 只负责 viewport padding、基础 clamp 和简单翻转，不替代未来 world/screen anchor service；
+- overlay anchor 必须逐步收敛到 normalized anchor record：DOM rect 可以作为当前 fallback，但 PageFrame / block / canvas object / relation endpoint 应能通过 world rect + viewport 转成 viewport rect 后再进入 floating placement；
 - preview panel 覆盖时不和 selected toolbar 混乱；
 - debug overlay 可显隐 block type / AI / export status。
 - control bar 不参与 block measurement；

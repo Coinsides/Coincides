@@ -1,5 +1,13 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 World Overlay Anchor Seed
+
+- `overlayService.ts` 新增 `ViewportOverlayAnchor`、`createViewportOverlayAnchor()`、`worldRectToViewportRect()`、`createWorldOverlayAnchor()` 和 `placeAnchoredOverlay()`。
+- 这一步把 L9 的 overlay anchor 从“直接拿 DOM rect 摆位置”推进到“可以表达 viewport anchor，并能从 Canvas world rect 转成 browser viewport rect”。
+- 当前只是 world/screen anchor seed，不改变现有 slash menu、block control bar、Formula help tooltip 的用户可见行为。
+- 后续 pan/zoom、virtualization、canvas object、relation endpoint 等功能可以复用这套 anchor record，而不是各自硬算浮层位置。
+- 这仍不是完整 overlay collision / flip / viewport clamp engine，也不是最终 cursor/caret world anchoring。
+
 ## Changed - V2.BN.8.1 Shared Overlay Placement Helper Seed
 
 - `overlayService.ts` 新增 `placeOverlayInViewport()`，作为第一版 shared viewport overlay placement helper。
