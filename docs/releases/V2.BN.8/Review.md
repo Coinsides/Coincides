@@ -1,5 +1,31 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 L7/L12 Runtime Refs And Load Reset Controller Seed
+
+```text
+status: in progress
+client build: passed
+server build: passed
+browser smoke: not run
+```
+
+已完成部分：
+
+- 新增 `hooks/useRuntimeLayoutRefsController.ts`。
+- `blockListRef`、`movingBlockIdRef`、`suppressMeasuredReflowUntilRef` 已从 `NoteCanvasRuntime.tsx` 迁出。
+- selection 前临时 suppress measured reflow 的 callback 已从 `NoteCanvasRuntime.tsx` 迁出。
+- 新增 `hooks/useNoteLoadResetController.ts`。
+- note loaded 后的 `resetLayoutDrafts()` / `clearBlockSelection()` orchestration 已从 `NoteCanvasRuntime.tsx` 迁出。
+- `NoteCanvasRuntime.tsx` 当前约 439 行，不再直接导入 `useRef` / `LAYOUT_MEASURE_SUPPRESSION_MS`。
+
+仍需验收：
+
+- note 切换或 reload 后 selection 是否仍清空；
+- note load 后 layout drafts 是否仍 reset；
+- block focus / select 前 measured-height reflow suppression 是否仍阻止误推开；
+- moving block measured reflow suppression 是否仍能避开拖拽中的 block；
+- diff check、secret scan 已通过；浏览器 smoke 尚未执行。
+
 ## V2.BN.8.1 L6/L9 Runtime Document Layer Composition Seed
 
 ```text

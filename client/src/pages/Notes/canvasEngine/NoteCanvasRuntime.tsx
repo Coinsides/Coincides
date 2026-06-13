@@ -1,8 +1,4 @@
-import {
-  useCallback,
-  useMemo,
-  useRef,
-} from 'react';
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUIStore } from '@/stores/uiStore';
 import { useBlockFieldDraftController } from './hooks/useBlockFieldDraftController';
@@ -15,6 +11,7 @@ import { useFloatingOverlayController } from './hooks/useFloatingOverlayControll
 import { useLayoutDraftController } from './hooks/useLayoutDraftController';
 import { useLayoutInteractionController } from './hooks/useLayoutInteractionController';
 import { useNoteCanvasDataAdapter } from './hooks/useNoteCanvasDataAdapter';
+import { useNoteLoadResetController } from './hooks/useNoteLoadResetController';
 import { useNoteCanvasRuntime } from './hooks/useNoteCanvasRuntime';
 import {
   useNoteCanvasFrameModel,
@@ -24,6 +21,7 @@ import { useLayoutPersistenceController } from './hooks/useLayoutPersistenceCont
 import { useMeasuredBlockReflowController } from './hooks/useMeasuredBlockReflowController';
 import { usePlacementHistory } from './hooks/usePlacementHistory';
 import { useRuntimeInteractionController } from './hooks/useRuntimeInteractionController';
+import { useRuntimeLayoutRefsController } from './hooks/useRuntimeLayoutRefsController';
 import { useSlashCommandController } from './hooks/useSlashCommandController';
 import { useSurfaceModeController } from './hooks/useSurfaceModeController';
 import {
@@ -31,9 +29,6 @@ import {
 } from './layers/NoteChromeLayer';
 import { NoteRuntimeDocumentLayer } from './layers/NoteRuntimeDocumentLayer';
 import { estimateBlockHeightForText } from './measurementService';
-import {
-  LAYOUT_MEASURE_SUPPRESSION_MS,
-} from './runtimeLayout';
 import styles from '../NoteDetail.module.css';
 
 export default function NoteCanvasRuntime() {
@@ -44,9 +39,12 @@ export default function NoteCanvasRuntime() {
     interactionState,
     setInteractionState,
   } = useRuntimeInteractionController();
-  const blockListRef = useRef<HTMLDivElement | null>(null);
-  const movingBlockIdRef = useRef<string | null>(null);
-  const suppressMeasuredReflowUntilRef = useRef(0);
+  const {
+    blockListRef,
+    movingBlockIdRef,
+    suppressMeasuredReflowForSelection,
+    suppressMeasuredReflowUntilRef,
+  } = useRuntimeLayoutRefsController();
   const {
     layoutMode,
     setLayoutMode,
@@ -87,10 +85,6 @@ export default function NoteCanvasRuntime() {
     togglePreviewExportStatus,
   } = useFloatingOverlayController({ setInteractionState });
 
-  const suppressMeasuredReflowForSelection = useCallback(() => {
-    suppressMeasuredReflowUntilRef.current = Date.now() + LAYOUT_MEASURE_SUPPRESSION_MS;
-  }, []);
-
   const {
     activeBlockId,
     clearBlockSelection,
@@ -118,10 +112,10 @@ export default function NoteCanvasRuntime() {
     setSnapGuide,
   });
 
-  const handleNoteLoaded = useCallback(() => {
-    resetLayoutDrafts();
-    clearBlockSelection();
-  }, [clearBlockSelection, resetLayoutDrafts]);
+  const { handleNoteLoaded } = useNoteLoadResetController({
+    clearBlockSelection,
+    resetLayoutDrafts,
+  });
 
   const {
     note,

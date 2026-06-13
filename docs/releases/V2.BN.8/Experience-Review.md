@@ -1,5 +1,17 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 L7/L12 Runtime Refs And Load Reset Controller Experience Note
+
+```text
+runtime refs and note-load reset moved out of root; not browser-smoked
+```
+
+体验风险：
+
+- 本次迁移理论上不改变用户可见行为，只改变 block list ref、moving block ref、measured reflow suppression ref 和 note-load reset callback 的归属。
+- 如果后续出现选中 block 时高度测量误推开、拖拽中的 block 被 measured reflow 影响、切换 note 后旧 selection 残留、或 note reload 后旧 layout draft 残留，应优先检查 `hooks/useRuntimeLayoutRefsController.ts` 和 `hooks/useNoteLoadResetController.ts`。
+- 这一步是 L7 measurement / reflow service 与 L12 decommission 的小切口：root 不再直接持有 measurement suppression hack，但仍负责把这些 refs 传给 placement / reflow / width / surface hooks。
+
 ## V2.BN.8.1 L6/L9 Runtime Document Layer Composition Experience Note
 
 ```text

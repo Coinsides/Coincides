@@ -1,5 +1,13 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 L7/L12 Runtime Refs And Load Reset Controller Seed
+
+- 新增 `hooks/useRuntimeLayoutRefsController.ts`，将 `blockListRef`、`movingBlockIdRef`、measured reflow suppression ref 和 selection 前的 measured reflow suppression callback 从 `NoteCanvasRuntime.tsx` 迁出。
+- 新增 `hooks/useNoteLoadResetController.ts`，将 note loaded 后的 layout draft reset / block selection clear orchestration 从 `NoteCanvasRuntime.tsx` 迁出。
+- `NoteCanvasRuntime.tsx` 不再直接导入 `useRef` 或 `LAYOUT_MEASURE_SUPPRESSION_MS`，measurement suppression hack 已有明确 controller 边界。
+- 本轮不改变 block measurement、formula active reflow exception、move / resize session、note load data adapter、selection clearing 或 layout draft truth。
+- L7/L12 runtime refs and load reset controller seed 迁出后 client build / server build passed。
+
 ## Changed - V2.BN.8.1 L6/L9 Runtime Document Layer Composition Seed
 
 - 新增 `layers/NoteRuntimeDocumentLayer.tsx`。
