@@ -1,5 +1,22 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Runtime Layout Model Controller Experience Note
+
+```text
+Viewport width, visible blocks, resolved layouts, and layout persistence are now grouped under a runtime layout model controller.
+```
+
+体验判断：
+
+- 这一步不应该改变用户可见行为；Page mode / Canvas mode 的 block 位置、宽度、默认 draft 落点和保存行为都应保持原样。
+- 工程价值是把“可用宽度如何变成可见 block 和 layout model”从 root controller 中收紧到 L3-L5 边界。
+- Browser Harness 暂时不跑；等全部替换工作结束后再统一补真实浏览器验证。
+
+仍需人工观察：
+
+- Henry 后续复测 Page / Canvas 切换、resize、move、long paragraph reflow、workspace block visibility 时，应重点确认没有因为 controller 抽离造成位置漂移。
+- 如果后续出现 PageFrame 宽度异常、Canvas mode 下 block 被硬夹回 page、或 layout 保存后 reload 位置不一致，应优先检查 `hooks/useRuntimeLayoutModelController.ts` 与 `hooks/useNoteCanvasLayoutModel.ts`。
+
 ## V2.BN.8.1 Runtime Block History Controller Experience Note
 
 ```text

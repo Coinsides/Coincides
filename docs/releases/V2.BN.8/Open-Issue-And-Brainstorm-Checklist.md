@@ -52,6 +52,24 @@ date: 2026-06-13
 - [x] 覆盖 page + workspace mixed note；
 - [ ] Browser Harness 真实渲染性能 smoke 待完整替换阶段结束后统一补跑。
 
+## L3-L5 Runtime Layout Model Checkpoint
+
+```text
+status: layout model controller seed applied, pending Henry visual retest
+patch: V2.BN.8.1 Runtime Layout Model Controller Seed
+```
+
+已完成：
+
+- [x] `useRuntimeLayoutModelController()` 已接管 content width、visible blocks、resolved block layouts、default draft layout 和 layout persistence callbacks 的组合。
+- [x] `useNoteCanvasRuntimeController()` 不再直接调用 `useCanvasContentWidth()`、`useNoteCanvasResolvedLayoutModel()` 或 `useLayoutPersistenceController()`。
+- [x] 本轮不改变 layout truth、placement persistence payload、Page / Canvas mode policy 或用户可见布局。
+
+仍需复测：
+
+- [ ] Henry 手动复测：Page / Canvas 切换后 block 宽度、位置、workspace visibility 与上一轮保持一致。
+- [ ] Browser Harness 真实渲染 smoke 仍按 Henry 要求等全部替换完成后统一补跑。
+
 ## L9 Floating Overlay Checkpoint
 
 ```text

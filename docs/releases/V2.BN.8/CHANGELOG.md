@@ -1,5 +1,11 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Runtime Layout Model Controller Seed
+
+- 新增 `hooks/useRuntimeLayoutModelController.ts`，把 content width、visible blocks、resolved block layouts、default draft layout 和 layout persistence callbacks 组合进一个 L3-L5 controller boundary。
+- `useNoteCanvasRuntimeController()` 不再直接调用 `useCanvasContentWidth()`、`useNoteCanvasResolvedLayoutModel()` 或 `useLayoutPersistenceController()`。
+- 本轮不改变 placement 计算、Page / Canvas mode policy、layout draft truth、layout persistence payload 或用户可见行为，只继续压缩 runtime root 的 layout/model composition。
+
 ## Changed - V2.BN.8.1 Runtime Block History Controller Seed
 
 - 新增 `hooks/useRuntimeBlockHistoryController.ts`，把 `usePlacementHistory()` 与 block trash history glue 从 `useNoteCanvasRuntimeController()` 中迁出。

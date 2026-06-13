@@ -4,25 +4,21 @@ import { useUIStore } from '@/stores/uiStore';
 import { useBlockFieldDraftController } from './useBlockFieldDraftController';
 import { useBlockPlacementInteractions } from './useBlockPlacementInteractions';
 import { useBlockSelectionController } from './useBlockSelectionController';
-import { useCanvasContentWidth } from './useCanvasContentWidth';
 import { useCanvasSurfacePointerController } from './useCanvasSurfacePointerController';
 import { useDraftBlockController } from './useDraftBlockController';
 import { useFloatingOverlayController } from './useFloatingOverlayController';
 import { useLayoutDraftController } from './useLayoutDraftController';
 import { useLayoutInteractionController } from './useLayoutInteractionController';
-import { useLayoutPersistenceController } from './useLayoutPersistenceController';
 import { useMeasuredBlockReflowController } from './useMeasuredBlockReflowController';
 import { useNoteCanvasDataAdapter } from './useNoteCanvasDataAdapter';
 import { useNoteCanvasLayerProps } from './useNoteCanvasLayerProps';
-import {
-  useNoteCanvasFrameModel,
-  useNoteCanvasResolvedLayoutModel,
-} from './useNoteCanvasLayoutModel';
+import { useNoteCanvasFrameModel } from './useNoteCanvasLayoutModel';
 import { useNoteCanvasRuntime } from './useNoteCanvasRuntime';
 import { useNoteLoadResetController } from './useNoteLoadResetController';
+import { useRuntimeBlockHistoryController } from './useRuntimeBlockHistoryController';
 import { useRuntimeInteractionController } from './useRuntimeInteractionController';
 import { useRuntimeLayoutRefsController } from './useRuntimeLayoutRefsController';
-import { useRuntimeBlockHistoryController } from './useRuntimeBlockHistoryController';
+import { useRuntimeLayoutModelController } from './useRuntimeLayoutModelController';
 import { useSlashCommandController } from './useSlashCommandController';
 import { useSurfaceModeController } from './useSurfaceModeController';
 import { estimateBlockHeightForText } from '../measurementService';
@@ -161,31 +157,22 @@ export function useNoteCanvasRuntimeController() {
     [sortedBlocks],
   );
 
-  const contentWidth = useCanvasContentWidth({
-    containerRef: blockListRef,
-    pageOffsetX,
-    surfaceMode,
-  });
-
   const {
     blockLayouts,
-    defaultDraftLayout,
-    visibleBlocks,
-  } = useNoteCanvasResolvedLayoutModel({
     contentWidth,
+    defaultDraftLayout,
+    persistChangedBlockLayouts,
+    persistLayoutSnapshot,
+    visibleBlocks,
+  } = useRuntimeLayoutModelController({
+    blocks,
+    blockListRef,
     layoutDrafts,
+    pageOffsetX,
+    persistBlockLayout,
     sortedBlocks,
     surfaceMode,
     surfacePolicy,
-  });
-
-  const {
-    persistChangedBlockLayouts,
-    persistLayoutSnapshot,
-  } = useLayoutPersistenceController({
-    blocks,
-    blockLayouts,
-    persistBlockLayout,
   });
 
   const {

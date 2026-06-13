@@ -1,5 +1,38 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Runtime Layout Model Controller Seed
+
+```text
+scope: L3 viewport width / L5 placement model composition / L12 runtime root compression
+status: applied
+browser smoke: deferred by Henry until all replacement work is complete
+```
+
+### What Changed
+
+- Added `client/src/pages/Notes/canvasEngine/hooks/useRuntimeLayoutModelController.ts`.
+- Moved the following direct calls out of `useNoteCanvasRuntimeController()`:
+  - `useCanvasContentWidth()`;
+  - `useNoteCanvasResolvedLayoutModel()`;
+  - `useLayoutPersistenceController()`.
+- The new controller returns:
+  - `contentWidth`;
+  - `visibleBlocks`;
+  - `blockLayouts`;
+  - `defaultDraftLayout`;
+  - `persistChangedBlockLayouts`;
+  - `persistLayoutSnapshot`.
+
+### Review Judgment
+
+This is aligned with the L3-L5 replacement target. The runtime root still orchestrates higher-level dependencies, but it no longer has to know how viewport width becomes resolved block layouts or how layout snapshots become persistence callbacks. This keeps placement truth inside the Canvas Engine boundary instead of letting it sprawl back into the root controller.
+
+### Residual Risk
+
+- Browser smoke is intentionally deferred per Henry instruction.
+- The hook is still a composition wrapper over existing services; it does not yet introduce full pan/zoom viewport ownership or a final placement writer contract.
+- The frame model still runs after draft state because it needs `draftActive` / `draftLayout`; that remains a later composition boundary if we want to shrink the root further.
+
 ## V2.BN.8.1 Runtime Block History Controller Seed
 
 ```text
