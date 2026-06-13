@@ -1,5 +1,14 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 L6/L9 Runtime Document Layer Composition Seed
+
+- 新增 `layers/NoteRuntimeDocumentLayer.tsx`。
+- 将 document shell、template warning、Insert / source jump floating panel 和 writing surface 的组合挂载从 `NoteCanvasRuntime.tsx` 迁入 Canvas Engine layer。
+- `NoteChromeLayer.tsx` 导出 `NoteFloatingPanelLayerProps`，`NoteWritingSurfaceLayer.tsx` 导出 `NoteWritingSurfaceLayerProps`，让 document layer 以明确 props contract 组合下层 UI。
+- `NoteCanvasRuntime.tsx` 继续作为 controller / layer props composition root，但不再直接持有 document shell DOM。
+- 本轮不改变 Page / Canvas mode、floating panel 内容、writing surface 行为、slash menu、block projection、measurement 或 persistence API。
+- L6/L9 runtime document layer composition seed 迁出后 client build / server build passed。
+
 ## Changed - V2.BN.8.1 L6/L7/L11 Runtime Decision Controller Seed
 
 - 新增 `hooks/useBlockFieldDraftController.ts`，将 structured field draft -> text draft derivation 从 `NoteCanvasRuntime.tsx` 迁出。

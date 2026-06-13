@@ -1,5 +1,29 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 L6/L9 Runtime Document Layer Composition Seed
+
+```text
+status: in progress
+client build: passed
+server build: passed
+browser smoke: not run
+```
+
+已完成部分：
+
+- 新增 `layers/NoteRuntimeDocumentLayer.tsx`。
+- `documentShell` / `documentShellCanvas` 的 DOM 壳层已从 `NoteCanvasRuntime.tsx` 迁出。
+- `templateWarning`、`NoteFloatingPanelLayer`、`NoteWritingSurfaceLayer` 的组合挂载已迁入 document layer。
+- `NoteFloatingPanelLayerProps` 和 `NoteWritingSurfaceLayerProps` 现在作为显式 props contract 导出，方便后续继续拆分 overlay / writing surface。
+- `NoteCanvasRuntime.tsx` 当前约 442 行，继续保留 controller orchestration 和 props composition；它不再直接拥有 document shell DOM。
+
+仍需验收：
+
+- Insert floating panel 打开/关闭、添加 block、source jump panel close 是否仍正常；
+- writing surface 里的 block projection、draft、slash menu、snap guide 是否仍正常；
+- Page / Canvas mode 下 document shell class 是否仍正确；
+- diff check、secret scan 已通过；浏览器 smoke 尚未执行。
+
 ## V2.BN.8.1 L6/L7/L11 Runtime Decision Controller Seed
 
 ```text
@@ -18,7 +42,7 @@ server build: passed
   - changed layout 是否需要落盘的判断；
   - undo / redo layout snapshot 的 persistence callback；
   - measured block height 是否允许推开后续 block 的 reflow decision。
-- `NoteCanvasRuntime.tsx` 当前约 447 行，继续保留 runtime controller / layer composition 角色。
+- `NoteCanvasRuntime.tsx` 当前约 447 行，继续保留 runtime controller / layer composition 角色。后续 document layer composition checkpoint 已继续把 document shell DOM 迁出。
 
 仍需验收：
 

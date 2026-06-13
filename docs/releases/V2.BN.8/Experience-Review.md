@@ -1,5 +1,17 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 L6/L9 Runtime Document Layer Composition Experience Note
+
+```text
+document shell composition moved out of root; not browser-smoked
+```
+
+体验风险：
+
+- 本次迁移理论上不改变用户可见行为，只改变 document shell、template warning、floating panel 与 writing surface 的组合归属。
+- 如果后续出现 Page / Canvas mode 外壳样式异常、Insert panel 不显示、source jump panel 无法关闭、writing surface 消失、或空白点击取消选中失效，应优先检查 `layers/NoteRuntimeDocumentLayer.tsx` 和 `NoteCanvasRuntime.tsx` 传入的 props 边界。
+- 这一步让 `NoteCanvasRuntime.tsx` 不再直接拥有 document shell DOM，但 root 仍然负责 controller wiring 和 props composition；下一步仍需要继续压缩 props composition 或把更完整的 runtime shell contract 下沉。
+
 ## V2.BN.8.1 L6/L7/L11 Runtime Decision Controller Experience Note
 
 ```text
@@ -60,8 +72,8 @@ L9 note chrome / floating panel layer: implemented, not browser-smoked
 
 - 本次迁移理论上不改变顶部工具栏、note info、more actions、preview、insert panel 或 source jump panel 的视觉与交互，只改变这些 shell / floating panel JSX 的归属。
 - 如果后续出现标题保存失效、Page/Canvas 切换按钮状态不更新、Preview 面板无法打开、overlay toggles 丢失、Insert 添加 block 后不能 focus、或 Source jump 面板无法关闭，应优先检查 `layers/NoteChromeLayer.tsx` 的 props 边界。
-- 这一步仍没有完成完整 overlay portal，也没有把 `documentShell` / `writingSurface` / `BlockEditorLayer` 从 runtime root 中迁出；它只是 L9 的 chrome/panel layer seed。
-- `NoteCanvasRuntime.tsx` 现在更接近 runtime composition root，但仍然持有 block layout resolution、page frame composition、block projection map、draft textarea 和 slash menu layer wiring。
+- 这一步当时尚未完成完整 overlay portal；后续 runtime document layer checkpoint 已将 `documentShell` 组合迁出 root。
+- `NoteCanvasRuntime.tsx` 现在更接近 runtime composition root，但仍然持有 controller wiring、props composition、block layout inputs 和 runtime model inputs。
 
 ## V2.BN.8.1 L5/L7 Layout Draft Controller Experience Note
 

@@ -25,7 +25,7 @@ import { BlockEditorLayer } from './BlockEditorLayer';
 import { SlashMenuLayer } from './SlashMenuLayer';
 import styles from '../../NoteDetail.module.css';
 
-interface NoteWritingSurfaceLayerProps {
+export interface NoteWritingSurfaceLayerProps {
   activeBlockId: string | null;
   anchorsBySourceRef: Record<string, SourceAnchor>;
   blockFieldDrafts: Record<string, FieldValueRecord>;

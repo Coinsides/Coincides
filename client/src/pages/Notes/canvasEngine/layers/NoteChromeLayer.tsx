@@ -70,7 +70,7 @@ interface NoteChromeLayerProps {
   onToggleSurfaceMode: () => void;
 }
 
-interface NoteFloatingPanelLayerProps {
+export interface NoteFloatingPanelLayerProps {
   insertTemplateGroups: InsertTemplateGroup[];
   newBlockText: string;
   newTemplateId: string;

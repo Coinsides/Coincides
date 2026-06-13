@@ -28,9 +28,8 @@ import { useSlashCommandController } from './hooks/useSlashCommandController';
 import { useSurfaceModeController } from './hooks/useSurfaceModeController';
 import {
   NoteChromeLayer,
-  NoteFloatingPanelLayer,
 } from './layers/NoteChromeLayer';
-import { NoteWritingSurfaceLayer } from './layers/NoteWritingSurfaceLayer';
+import { NoteRuntimeDocumentLayer } from './layers/NoteRuntimeDocumentLayer';
 import { estimateBlockHeightForText } from './measurementService';
 import {
   LAYOUT_MEASURE_SUPPRESSION_MS,
@@ -362,86 +361,82 @@ export default function NoteCanvasRuntime() {
         onToggleSurfaceMode={toggleSurfaceMode}
       />
 
-      <div
-        className={`${styles.documentShell} ${surfaceMode === 'canvas' ? styles.documentShellCanvas : ''}`}
-        onMouseDown={handleSurfacePointerDown}
-      >
-        {templateWarning && <div className={styles.templateWarning}>{templateWarning}</div>}
-
-        <NoteFloatingPanelLayer
-          insertTemplateGroups={insertTemplateGroups}
-          newBlockText={newBlockText}
-          newTemplateId={newTemplateId}
-          showAdvancedInsert={showAdvancedInsert}
-          sourceJumpTarget={sourceJumpTarget}
-          onAddBlock={addBlock}
-          onCloseOverlay={closeOverlay}
-          onCloseSourceJump={() => setSourceJumpTarget(null)}
-          onFocusBlock={setFocusBlockId}
-          onNewBlockTextChange={setNewBlockText}
-          onNewTemplateChange={setNewTemplateId}
-          onToggleAdvancedInsert={toggleAdvancedInsert}
-        />
-
-        <NoteWritingSurfaceLayer
-          activeBlockId={activeBlockId}
-          anchorsBySourceRef={anchorsBySourceRef}
-          blockFieldDrafts={blockFieldDrafts}
-          blockLayouts={blockLayouts}
-          blockListRef={blockListRef}
-          blockTextDrafts={blockTextDrafts}
-          creatingDraft={creatingDraft}
-          defaultDraftLayout={defaultDraftLayout}
-          draftActive={draftActive}
-          draftLayout={draftLayout}
-          draftRef={draftRef}
-          draftText={draftText}
-          focusBlockId={focusBlockId}
-          interactionState={interactionState}
-          layoutMode={layoutMode}
-          noteCanvasRuntime={noteCanvasRuntime}
-          pageContentHeight={pageContentHeight}
-          pageOffsetX={pageOffsetX}
-          primaryPageFrameWidth={primaryPageFrame.width}
-          savingBlockId={savingBlockId}
-          selectedBlockId={selectedBlockId}
-          showPreviewAIVisibility={showPreviewAIVisibility}
-          showPreviewBlockTypes={showPreviewBlockTypes}
-          showPreviewExportStatus={showPreviewExportStatus}
-          slashCommands={slashCommands}
-          slashTarget={slashTarget}
-          snapGuide={snapGuide}
-          sortedBlockCount={sortedBlocks.length}
-          sourceJumpBusy={sourceJumpBusy}
-          surfaceMode={surfaceMode}
-          surfacePolicyMode={surfacePolicy.mode}
-          visibleBlocks={visibleBlocks}
-          onActivateDraft={activateDraft}
-          onBeginMoveBlock={beginMoveBlock}
-          onBeginResizeBlock={beginResizeBlock}
-          onBlockKeyDown={handleBlockKeyDown}
-          onBlockListMouseDown={handleBlockListMouseDown}
-          onBlockTextChange={handleBlockTextChange}
-          onClearSlashTarget={clearSlashTarget}
-          onDiscardDraft={discardDraft}
-          onDraftChange={handleDraftChange}
-          onDraftKeyDown={handleDraftKeyDown}
-          onFieldDraftChange={updateBlockFieldDraft}
-          onFocusBlock={markBlockFocused}
-          onMeasuredBlockHeight={handleMeasuredBlockHeight}
-          onPageSpaceDoubleClick={handlePageSpaceDoubleClick}
-          onPersistDraft={persistDraft}
-          onResizeDraftFromTextarea={resizeDraftFromTextarea}
-          onSaveBlock={saveBlock}
-          onSelectBlock={markBlockSelected}
-          onSelectSlashCommand={handleSelectSlashCommand}
-          onToggleAIVisibility={toggleBlockAIVisibility}
-          onToggleExportRole={toggleBlockExportRole}
-          onTrashBlock={trashBlock}
-          onViewSource={handleViewSource}
-        />
-
-      </div>
+      <NoteRuntimeDocumentLayer
+        surfaceMode={surfaceMode}
+        templateWarning={templateWarning}
+        onSurfacePointerDown={handleSurfacePointerDown}
+        floatingPanelProps={{
+          insertTemplateGroups,
+          newBlockText,
+          newTemplateId,
+          showAdvancedInsert,
+          sourceJumpTarget,
+          onAddBlock: addBlock,
+          onCloseOverlay: closeOverlay,
+          onCloseSourceJump: () => setSourceJumpTarget(null),
+          onFocusBlock: setFocusBlockId,
+          onNewBlockTextChange: setNewBlockText,
+          onNewTemplateChange: setNewTemplateId,
+          onToggleAdvancedInsert: toggleAdvancedInsert,
+        }}
+        writingSurfaceProps={{
+          activeBlockId,
+          anchorsBySourceRef,
+          blockFieldDrafts,
+          blockLayouts,
+          blockListRef,
+          blockTextDrafts,
+          creatingDraft,
+          defaultDraftLayout,
+          draftActive,
+          draftLayout,
+          draftRef,
+          draftText,
+          focusBlockId,
+          interactionState,
+          layoutMode,
+          noteCanvasRuntime,
+          pageContentHeight,
+          pageOffsetX,
+          primaryPageFrameWidth: primaryPageFrame.width,
+          savingBlockId,
+          selectedBlockId,
+          showPreviewAIVisibility,
+          showPreviewBlockTypes,
+          showPreviewExportStatus,
+          slashCommands,
+          slashTarget,
+          snapGuide,
+          sortedBlockCount: sortedBlocks.length,
+          sourceJumpBusy,
+          surfaceMode,
+          surfacePolicyMode: surfacePolicy.mode,
+          visibleBlocks,
+          onActivateDraft: activateDraft,
+          onBeginMoveBlock: beginMoveBlock,
+          onBeginResizeBlock: beginResizeBlock,
+          onBlockKeyDown: handleBlockKeyDown,
+          onBlockListMouseDown: handleBlockListMouseDown,
+          onBlockTextChange: handleBlockTextChange,
+          onClearSlashTarget: clearSlashTarget,
+          onDiscardDraft: discardDraft,
+          onDraftChange: handleDraftChange,
+          onDraftKeyDown: handleDraftKeyDown,
+          onFieldDraftChange: updateBlockFieldDraft,
+          onFocusBlock: markBlockFocused,
+          onMeasuredBlockHeight: handleMeasuredBlockHeight,
+          onPageSpaceDoubleClick: handlePageSpaceDoubleClick,
+          onPersistDraft: persistDraft,
+          onResizeDraftFromTextarea: resizeDraftFromTextarea,
+          onSaveBlock: saveBlock,
+          onSelectBlock: markBlockSelected,
+          onSelectSlashCommand: handleSelectSlashCommand,
+          onToggleAIVisibility: toggleBlockAIVisibility,
+          onToggleExportRole: toggleBlockExportRole,
+          onTrashBlock: trashBlock,
+          onViewSource: handleViewSource,
+        }}
+      />
     </div>
   );
 }
