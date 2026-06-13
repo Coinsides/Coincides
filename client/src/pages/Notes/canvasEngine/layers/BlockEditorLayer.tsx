@@ -27,6 +27,7 @@ import type {
 import { DefinitionBlockProjection } from '../blocks/DefinitionBlockProjection';
 import { FormulaBlockProjection } from '../blocks/FormulaBlockProjection';
 import { TextBlockProjection } from '../blocks/TextBlockProjection';
+import { CodeBlockProjection } from '../blocks/CodeBlockProjection';
 import { useBlockMeasurement } from '../hooks/useBlockMeasurement';
 import { BlockControlBarLayer } from './BlockControlBarLayer';
 import { BlockResizeHandleLayer } from './BlockResizeHandleLayer';
@@ -109,7 +110,9 @@ export function BlockEditorLayer({
   const formulaFields = presentationKind === 'formula'
     ? formulaFieldsFromBlock(block, fieldDraft ? text : undefined, fieldDraft)
     : null;
-  const blockTypeLabel = getNoteBlockTemplateLabel(block.metadata, block.block_type);
+  const blockTypeLabel = presentationKind === 'code'
+    ? 'CODE'
+    : getNoteBlockTemplateLabel(block.metadata, block.block_type);
   const showContextualTypeBadge = active || showBlockTypeBadge;
 
   useBlockMeasurement({
@@ -135,7 +138,7 @@ export function BlockEditorLayer({
 
   return (
     <article
-      className={`${styles.block} ${styles.blockBox} ${layoutMode ? styles.blockBoxLayoutMode : ''} ${active ? styles.blockActive : ''} ${boundary !== 'inside' ? styles.blockScratch : ''}`}
+      className={`${styles.block} ${styles.blockBox} ${presentationKind === 'code' ? styles.codeBlockBox : ''} ${layoutMode ? styles.blockBoxLayoutMode : ''} ${active ? styles.blockActive : ''} ${boundary !== 'inside' ? styles.blockScratch : ''}`}
       style={{
         left: layout.x + pageOffsetX,
         top: layout.y,
@@ -185,6 +188,15 @@ export function BlockEditorLayer({
             onFocused={onFocused}
             onTextChange={onTextChange}
             onFieldDraftChange={onFieldDraftChange}
+            onSave={onSave}
+            onKeyDown={onKeyDown}
+          />
+        ) : presentationKind === 'code' ? (
+          <CodeBlockProjection
+            text={text}
+            textareaRef={textareaRef}
+            onFocused={onFocused}
+            onTextChange={onTextChange}
             onSave={onSave}
             onKeyDown={onKeyDown}
           />

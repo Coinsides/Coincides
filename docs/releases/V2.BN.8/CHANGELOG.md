@@ -329,11 +329,20 @@
 - 新增 `blocks/DefinitionBlockProjection.tsx`。
 - 新增 `blocks/FormulaBlockProjection.tsx`。
 - 新增 `blocks/TextBlockProjection.tsx`。
+- 新增 `blocks/CodeBlockProjection.tsx`，让 code snippet 不再走普通 Text projection。
 - 新增 `layers/BlockResizeHandleLayer.tsx`。
 - `BlockEditorLayer.tsx` 不再内联 Definition / Formula / Text 的具体 JSX projection。
+- `BlockEditorLayer.tsx` 现在把 code snippet 分流到 `CodeBlockProjection`，badge 显示为 `CODE`。
 - `BlockEditorLayer.tsx` 不再内联 resize handle。
 - `BlockEditorLayer.tsx` 继续保留 block shell 和 control/source/status/content sublayer composition，后续再迁入 shell boundary / selected overlay anchor。
 - L6 block projection sublayers 抽离后 client build passed。
+
+## Fixed - V2.BN.8.1 CodeBlock Projection Seed
+
+- Code block 增加独立 projection、代码背景、monospace 输入区域和轻量行号 gutter。
+- Code block type badge 从较长的 `CODE SNIPPET` 收敛为 `CODE`。
+- 本补丁只完成代码块视觉区分；行级复制 / gutter 多行选择仍保留为后续 polish。
+- client build passed。
 
 ## Changed - V2.BN.8.1 L8/L10 Seeds
 

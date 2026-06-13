@@ -264,6 +264,11 @@ snap alignment off:
 
 - [ ] `ISSUE-006` CodeBlock 当前看起来太像普通 TextBlock，缺少代码区域的视觉区分和复制辅助。
 
+```text
+status: partially fixed
+patch: V2.BN.8.1 CodeBlock Projection Seed
+```
+
 #### Henry 初步观察
 
 当前 CodeBlock：
@@ -303,7 +308,8 @@ CodeBlock 应该拥有和普通 TextBlock 明显不同的视觉语言，参考 C
 
 #### 待补信息
 
-- [ ] 确认是否第一版只做视觉区分，不做行级复制。
+- [x] 确认是否第一版只做视觉区分，不做行级复制。
+- [x] 第一版已实现独立 code projection、`CODE` badge、代码背景、monospace 输入区和轻量行号 gutter。
 - [ ] 确认是否需要语言标签，例如 `PowerShell` / `Python` / `TypeScript`。
 - [ ] 确认是否需要整块复制按钮。
 - [ ] 确认行级选择是否会和普通文本选择冲突。

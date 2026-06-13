@@ -321,6 +321,7 @@ L11 placement history seed: implemented, not browser-smoked
 - 如果后续出现 Definition / Formula 展开穿模、resize 后下方 block 推开异常，应优先检查 `measurementService.ts`、`hooks/useBlockMeasurement.ts` 和后续 measurement registry。
 - 如果后续出现 Definition / Formula 内容保存、plain text、preview 文本不一致，应优先检查 `blockContentService.ts`、`blocks/DefinitionBlockProjection.tsx` 和 `blocks/FormulaBlockProjection.tsx`。
 - 如果后续出现 paragraph / heading / code / quote textarea 输入异常，应优先检查 `blocks/TextBlockProjection.tsx`。
+- 如果后续只出现 Code block 视觉、badge、行号 gutter 或代码输入异常，应优先检查 `blocks/CodeBlockProjection.tsx` 和 `layers/BlockEditorLayer.tsx` 的 code 分流。
 - 如果后续出现 resize handle 异常，应优先检查 `layers/BlockResizeHandleLayer.tsx`。
 - 如果后续出现 block shell 视觉/操作异常，应优先检查 `layers/BlockEditorLayer.tsx`。
 - 如果后续只出现 block type、AI visibility、export status、Page boundary badges 异常，应优先检查 `layers/BlockStatusBadgeLayer.tsx`。
@@ -335,6 +336,28 @@ L11 placement history seed: implemented, not browser-smoked
 - 如果后续出现 Page / Canvas 切换、workspace block 可见性、双击空白落点或弹性避让规则不符合预期，应优先检查 `modePolicyService.ts`。
 - 如果后续出现 Ctrl+Z / Ctrl+Y 对 move / resize 的撤回重做异常，应优先检查 `hooks/usePlacementHistory.ts` 和传入它的 layout draft / persistence callbacks。
 - 本轮有一个有意的体验变化：Page mode 且 snap alignment 开启时，双击空白创建 draft 会进入自然写作流；snap 关闭或 Canvas mode 下才使用双击位置。
+- 本轮有一个有意的视觉变化：Code block 不再完全继承普通 TextBlock 的视觉语言，改为 `CODE` badge、独立代码背景、monospace 输入区域和轻量行号 gutter。行级复制 / gutter 多行选择仍是后续 polish。
+
+## V2.BN.8.1 CodeBlock Projection Smoke
+
+```text
+status: partial smoke passed
+browser: in-app browser
+```
+
+体验观察：
+
+- reload 后 note 仍正常进入 Canvas Engine runtime；
+- code block 可以显示独立 projection；
+- 选中 code block 后显示 `CODE` badge；
+- Preview 面板仍能打开；
+- 本轮未观察到 console error。
+
+保留风险：
+
+- 本轮只验证 CodeBlock projection 和 preview sanity；
+- 还没有完整验证 formula expand、definition edit、move / resize / undo、Page / Canvas mode；
+- Henry 手动确认前不能把 V2.BN.8.1 体验验收标记为 passed。
 
 ## 同步规则
 

@@ -1020,10 +1020,46 @@
   line-height: 1.35;
 }
 
+.codeBlockBox {
+  border-color: color-mix(in srgb, var(--border-subtle) 72%, var(--text-muted));
+  background: color-mix(in srgb, var(--bg-elevated) 70%, #000 30%);
+}
+
+.codeBlockProjection {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 12px;
+  box-sizing: border-box;
+  min-height: 35px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--border-subtle) 76%, var(--text-muted));
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg-primary) 56%, #000 44%);
+}
+
+.codeLineGutter {
+  display: grid;
+  align-content: start;
+  gap: 0;
+  padding-top: 1px;
+  border-right: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.55;
+  text-align: right;
+  user-select: none;
+}
+
+.codeLineGutter span {
+  padding-right: 10px;
+}
+
 .codeTextArea {
   font-family: ui-monospace, SFMono-Regular, Consolas, 'Liberation Mono', Menlo, monospace;
   font-size: 14px;
   line-height: 1.55;
+  color: color-mix(in srgb, var(--text-primary) 94%, #a8c7ff);
 }
 
 .quoteTextArea {

@@ -36,6 +36,32 @@ browser smoke: not run
 - controller hook 是否需要继续按 L3-L11 分区拆小，避免长期形成新的大 hook；
 - diff check、secret scan 尚待本 checkpoint 最终执行；浏览器 smoke 尚未执行。
 
+## V2.BN.8.1 CodeBlock Projection Smoke
+
+```text
+status: partial smoke passed
+client build: passed
+server build: passed
+browser smoke: passed for code projection / preview sanity
+```
+
+已验证：
+
+- smoke note reload 后仍挂在 Canvas Engine runtime：
+  - `data-canvas-engine-version = V2.BN.8-self-owned-minimal-hybrid-0`；
+  - `data-canvas-engine-route = self_owned_minimal_hybrid`。
+- 页面仍能显示 Page / Preview / Layout / Insert 入口。
+- Code snippet 现在渲染为 `CodeBlockProjection`，不再只走普通 text projection。
+- 选中 code block 后可见 `CODE` badge。
+- Preview 面板仍可打开，并显示 export preview / overlay controls。
+- 本轮浏览器 smoke 未观察到 console error。
+
+仍需验收：
+
+- Code block 行级复制 / gutter 多行选择尚未实现；
+- Definition 字段内容、Formula input、Page / Canvas mode、move / resize / undo 等完整 L12 体验仍需单独 smoke；
+- Henry 手动确认之前，V2.BN.8.1 不能标记 passed。
+
 ## V2.BN.8.1 L7/L12 Runtime Refs And Load Reset Controller Seed
 
 ```text
@@ -760,14 +786,17 @@ client build: passed
 - 新增 `layers/BlockStatusBadgeLayer.tsx`，把 block type / AI / export / boundary badges 从 `BlockEditorLayer` 内联 JSX 中迁出。
 - 新增 `blocks/DefinitionBlockProjection.tsx`，把 Definition structured field editor / read projection 从 `BlockEditorLayer` 中迁出。
 - 新增 `blocks/FormulaBlockProjection.tsx`，把 Formula preview / LaTeX input projection 从 `BlockEditorLayer` 中迁出。
-- 新增 `blocks/TextBlockProjection.tsx`，把 paragraph / heading / code / quote textarea projection 从 `BlockEditorLayer` 中迁出。
+- 新增 `blocks/TextBlockProjection.tsx`，把 paragraph / heading / quote textarea projection 从 `BlockEditorLayer` 中迁出。
+- 新增 `blocks/CodeBlockProjection.tsx`，把 code snippet 从普通 text projection 中分离出来。
 - 新增 `layers/BlockResizeHandleLayer.tsx`，把 resize handle 从 `BlockEditorLayer` 中迁出。
+- Code block badge 已收敛为 `CODE`，并拥有独立代码背景、monospace 输入区和轻量行号 gutter。
 
 仍需验收：
 
 - `BlockEditorLayer` 内部仍包含 block shell 和 projection composition；
 - 下一轮可以继续把 block shell / selected overlay anchor 边界拆出；
 - 需要 browser smoke 验证 definition / formula / code / source badge 的表现没有回归。
+- Code block 的行级复制 / 多行选择暂未实现，仍按后续 polish 处理。
 
 ### L9 - Overlay Layer Seed
 
