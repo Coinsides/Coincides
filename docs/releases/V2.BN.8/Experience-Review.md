@@ -1,5 +1,18 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 L6/L9 Writing Surface Layer Experience Note
+
+```text
+L6/L9 writing surface layer: implemented, not browser-smoked
+```
+
+体验风险：
+
+- 本次迁移理论上不改变 block 编辑、draft 输入、slash menu、snap guide、PageFrame boundary 或 empty prompt 的视觉和行为，只改变 writing surface DOM projection 的归属。
+- 如果后续出现 block 点选后不进入编辑、Definition / Formula 字段草稿不同步、长文本测量后不推开下方 block、slash menu anchor 错位、draft blur 不保存、或 empty prompt 错误出现，应优先检查 `layers/NoteWritingSurfaceLayer.tsx` 与 `NoteCanvasRuntime.tsx` 传入的回调边界。
+- `NoteWritingSurfaceLayer` 仍然通过 props 接收 layout / measurement / placement / slash / draft 决策；它不是新的 truth owner，只是 Canvas Engine 的 DOM projection surface。
+- 这一步让 `NoteCanvasRuntime.tsx` 更接近 runtime composition root，但 `blockLayouts` resolution、field draft text derivation、measured-height reflow decision 和 placement persistence 仍在 runtime root 中，后续仍需要继续分层。
+
 ## V2.BN.8.1 L9 Note Chrome And Floating Panel Layer Experience Note
 
 ```text

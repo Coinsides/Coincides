@@ -2,12 +2,8 @@ import {
   useCallback,
   useMemo,
   useRef,
-  type CSSProperties,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  CornerDownLeft,
-} from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 import {
   buildNoteCanvasRuntimeModel,
@@ -32,12 +28,11 @@ import { usePlacementHistory } from './hooks/usePlacementHistory';
 import { useRuntimeInteractionController } from './hooks/useRuntimeInteractionController';
 import { useSlashCommandController } from './hooks/useSlashCommandController';
 import { useSurfaceModeController } from './hooks/useSurfaceModeController';
-import { BlockEditorLayer } from './layers/BlockEditorLayer';
 import {
   NoteChromeLayer,
   NoteFloatingPanelLayer,
 } from './layers/NoteChromeLayer';
-import { SlashMenuLayer } from './layers/SlashMenuLayer';
+import { NoteWritingSurfaceLayer } from './layers/NoteWritingSurfaceLayer';
 import { estimateTextBlockHeight } from './measurementService';
 import {
   getVisibleBlocksForSurface,
@@ -489,150 +484,83 @@ export default function NoteCanvasRuntime() {
           onToggleAdvancedInsert={toggleAdvancedInsert}
         />
 
-        <section className={`${styles.writingSurface} ${surfaceMode === 'canvas' ? styles.writingSurfaceCanvas : styles.writingSurfacePage}`}>
-          <div
-            ref={blockListRef}
-            className={`${styles.blockList} ${surfaceMode === 'canvas' ? styles.blockListCanvas : styles.blockListPage} ${layoutMode ? styles.layoutMode : ''}`}
-            data-canvas-engine-version={noteCanvasRuntime.version}
-            data-canvas-engine-route={noteCanvasRuntime.route}
-            data-canvas-visible-blocks={noteCanvasRuntime.visibleBlockIds.length}
-            data-canvas-page-frame={noteCanvasRuntime.primaryPageFrame?.id || 'none'}
-            data-canvas-surface-mode={surfacePolicy.mode}
-            data-canvas-interaction-mode={interactionState.mode}
-            data-canvas-interaction-target={interactionState.target}
-            data-canvas-interaction-block={interactionState.blockId || ''}
-            style={{
-              minHeight: pageContentHeight,
-              '--formal-page-offset-x': `${pageOffsetX}px`,
-              '--formal-page-width': `${primaryPageFrame.width}px`,
-              '--canvas-world-width': `${noteCanvasRuntime.world.width}px`,
-            } as CSSProperties}
-            onMouseDown={handleBlockListMouseDown}
-            onDoubleClick={handlePageSpaceDoubleClick}
-          >
-            {surfaceMode === 'canvas' && (
-              <>
-                <div className={styles.formalPageBoundary} style={{ minHeight: pageContentHeight }} />
-                <div className={styles.scratchWorkspaceLabel}>Scratch workspace</div>
-              </>
-            )}
-            {snapGuide?.x !== undefined && (
-              <div className={styles.snapGuideVertical} style={{ left: snapGuide.x + pageOffsetX }} />
-            )}
-            {snapGuide?.y !== undefined && (
-              <div className={styles.snapGuideHorizontal} style={{ top: snapGuide.y }} />
-            )}
-            {visibleBlocks.map((block) => {
-              const text = blockTextDrafts[block.id] ?? textFromContent(block);
-              const isActive = activeBlockId === block.id || focusBlockId === block.id || selectedBlockId === block.id;
-              const layout = blockLayouts[block.id];
-              return (
-                  <BlockEditorLayer
-                  key={block.id}
-                  block={block}
-                  text={text}
-                  layout={layout}
-                  fieldDraft={blockFieldDrafts[block.id]}
-                  layoutMode={layoutMode}
-                  saving={savingBlockId === block.id}
-                  active={isActive}
-                  autoFocus={focusBlockId === block.id}
-                  onFocused={() => markBlockFocused(block.id)}
-                  onTextChange={(value, caret, anchorElement) => handleBlockTextChange(block.id, value, caret, anchorElement)}
-                  onFieldDraftChange={(fieldValues) => {
-                    setBlockFieldDrafts((current) => ({ ...current, [block.id]: fieldValues }));
-                    const nextText = presentationKindForBlock(block) === 'definition'
-                      ? combinedDefinitionText(stringValue(fieldValues.concept_name), stringValue(fieldValues.description))
-                      : presentationKindForBlock(block) === 'formula'
-                        ? stringValue(fieldValues.latex_input)
-                        : text;
-                    setBlockTextDrafts((current) => ({ ...current, [block.id]: nextText }));
-                  }}
-                  onSave={(silent, fieldValues) => saveBlock(block, text, { silent, fieldValues })}
-                  onTrash={() => trashBlock(block.id)}
-                  onSelect={() => markBlockSelected(block.id)}
-                  onBeginMove={(event) => beginMoveBlock(event, block, layout)}
-                  onBeginResize={(event) => beginResizeBlock(event, block, text, layout)}
-                  onToggleExportRole={() => toggleBlockExportRole(block, layout)}
-                  onToggleAIVisibility={() => toggleBlockAIVisibility(block, layout)}
-                  showBlockTypeBadge={showPreviewBlockTypes}
-                  showAIStatusBadge={showPreviewAIVisibility}
-                  showExportStatusBadge={showPreviewExportStatus}
-                  onKeyDown={(event) => handleBlockKeyDown(block, text, event)}
-                  onMeasuredHeight={(height) => {
-                    const allowActiveFormulaReflow = isActive && presentationKindForBlock(block) === 'formula';
-                    if (movingBlockIdRef.current) return;
-                    if (!allowActiveFormulaReflow && Date.now() < suppressMeasuredReflowUntilRef.current) return;
-                    applyMeasuredBlockHeightDraft({
-                      baseLayouts: blockLayouts,
-                      blockId: block.id,
-                      fallbackLayout: layout,
-                      measuredHeight: height,
-                      orderedBlockIds: visibleBlocks.map((item) => item.id),
-                      resolveCollisions: shouldResolvePageCollisions(surfacePolicy),
-                    });
-                  }}
-                  pageOffsetX={pageOffsetX}
-                  anchorsBySourceRef={anchorsBySourceRef}
-                  sourceJumpBusy={sourceJumpBusy}
-                  onViewSource={handleViewSource}
-                />
-              );
-            })}
-
-            {draftActive && (
-              <div
-                className={`${styles.block} ${styles.blockBox} ${styles.draftBlock}`}
-                style={{
-                  left: (draftLayout || defaultDraftLayout).x + pageOffsetX,
-                  top: (draftLayout || defaultDraftLayout).y,
-                  width: (draftLayout || defaultDraftLayout).width,
-                  height: (draftLayout || defaultDraftLayout).height,
-                }}
-              >
-                <textarea
-                  ref={draftRef}
-                  className={styles.pageTextArea}
-                  value={draftText}
-                  onChange={(event) => {
-                    resizeDraftFromTextarea(event.currentTarget);
-                    handleDraftChange(event.currentTarget.value, event.currentTarget.selectionStart, event.currentTarget);
-                  }}
-                  onBlur={() => {
-                    if (slashTarget?.target === 'draft') return;
-                    if (draftText.trim()) {
-                      void persistDraft(draftText);
-                    } else {
-                      discardDraft();
-                      clearSlashTarget();
-                    }
-                  }}
-                  onKeyDown={handleDraftKeyDown}
-                  placeholder={creatingDraft ? 'Saving block...' : 'Start writing, or type / for blocks'}
-                  rows={1}
-                />
-                <div className={styles.draftHint}>
-                  <CornerDownLeft size={13} />
-                  Enter for a new line, Ctrl+Enter for the next block.
-                </div>
-              </div>
-            )}
-
-            {slashTarget && (
-              <SlashMenuLayer
-                commands={slashCommands}
-                onSelect={handleSelectSlashCommand}
-                anchor={slashTarget.anchor}
-              />
-            )}
-
-            {!draftActive && sortedBlocks.length === 0 && (
-              <button className={styles.emptyPagePrompt} onDoubleClick={() => activateDraft(defaultDraftLayout)}>
-                Double-click to start writing
-              </button>
-            )}
-          </div>
-        </section>
+        <NoteWritingSurfaceLayer
+          activeBlockId={activeBlockId}
+          anchorsBySourceRef={anchorsBySourceRef}
+          blockFieldDrafts={blockFieldDrafts}
+          blockLayouts={blockLayouts}
+          blockListRef={blockListRef}
+          blockTextDrafts={blockTextDrafts}
+          creatingDraft={creatingDraft}
+          defaultDraftLayout={defaultDraftLayout}
+          draftActive={draftActive}
+          draftLayout={draftLayout}
+          draftRef={draftRef}
+          draftText={draftText}
+          focusBlockId={focusBlockId}
+          interactionState={interactionState}
+          layoutMode={layoutMode}
+          noteCanvasRuntime={noteCanvasRuntime}
+          pageContentHeight={pageContentHeight}
+          pageOffsetX={pageOffsetX}
+          primaryPageFrameWidth={primaryPageFrame.width}
+          savingBlockId={savingBlockId}
+          selectedBlockId={selectedBlockId}
+          showPreviewAIVisibility={showPreviewAIVisibility}
+          showPreviewBlockTypes={showPreviewBlockTypes}
+          showPreviewExportStatus={showPreviewExportStatus}
+          slashCommands={slashCommands}
+          slashTarget={slashTarget}
+          snapGuide={snapGuide}
+          sortedBlockCount={sortedBlocks.length}
+          sourceJumpBusy={sourceJumpBusy}
+          surfaceMode={surfaceMode}
+          surfacePolicyMode={surfacePolicy.mode}
+          visibleBlocks={visibleBlocks}
+          onActivateDraft={activateDraft}
+          onBeginMoveBlock={beginMoveBlock}
+          onBeginResizeBlock={beginResizeBlock}
+          onBlockKeyDown={handleBlockKeyDown}
+          onBlockListMouseDown={handleBlockListMouseDown}
+          onBlockTextChange={handleBlockTextChange}
+          onClearSlashTarget={clearSlashTarget}
+          onDiscardDraft={discardDraft}
+          onDraftChange={handleDraftChange}
+          onDraftKeyDown={handleDraftKeyDown}
+          onFieldDraftChange={(block, text, fieldValues) => {
+            setBlockFieldDrafts((current) => ({ ...current, [block.id]: fieldValues }));
+            const nextText = presentationKindForBlock(block) === 'definition'
+              ? combinedDefinitionText(stringValue(fieldValues.concept_name), stringValue(fieldValues.description))
+              : presentationKindForBlock(block) === 'formula'
+                ? stringValue(fieldValues.latex_input)
+                : text;
+            setBlockTextDrafts((current) => ({ ...current, [block.id]: nextText }));
+          }}
+          onFocusBlock={markBlockFocused}
+          onMeasuredBlockHeight={(block, layout, isActive, height) => {
+            const allowActiveFormulaReflow = isActive && presentationKindForBlock(block) === 'formula';
+            if (movingBlockIdRef.current) return;
+            if (!allowActiveFormulaReflow && Date.now() < suppressMeasuredReflowUntilRef.current) return;
+            applyMeasuredBlockHeightDraft({
+              baseLayouts: blockLayouts,
+              blockId: block.id,
+              fallbackLayout: layout,
+              measuredHeight: height,
+              orderedBlockIds: visibleBlocks.map((item) => item.id),
+              resolveCollisions: shouldResolvePageCollisions(surfacePolicy),
+            });
+          }}
+          onPageSpaceDoubleClick={handlePageSpaceDoubleClick}
+          onPersistDraft={persistDraft}
+          onResizeDraftFromTextarea={resizeDraftFromTextarea}
+          onSaveBlock={saveBlock}
+          onSelectBlock={markBlockSelected}
+          onSelectSlashCommand={handleSelectSlashCommand}
+          onToggleAIVisibility={toggleBlockAIVisibility}
+          onToggleExportRole={toggleBlockExportRole}
+          onTrashBlock={trashBlock}
+          onViewSource={handleViewSource}
+        />
 
       </div>
     </div>

@@ -1,5 +1,14 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 L6/L9 Writing Surface Layer Seed
+
+- 新增 `layers/NoteWritingSurfaceLayer.tsx`。
+- 将 writing surface shell、block list data attributes、PageFrame boundary seed、scratch workspace label、snap guide rendering、visible block projection map、draft textarea、slash menu 和 empty prompt 从 `NoteCanvasRuntime.tsx` 迁入 Canvas Engine layer。
+- `NoteCanvasRuntime.tsx` 继续持有 layout resolution、measurement reflow decision、field draft text derivation、draft persistence、slash command controller 和 placement callbacks，只把它们作为 props 注入 writing surface layer。
+- `BlockEditorLayer` 与 `SlashMenuLayer` 不改变内部行为；本轮只改变它们被挂载的位置。
+- 本轮属于 L6 block projection layer 与 L9 overlay layer 的交界 seed，不改变 block content truth、field value 写入、draft blur 保存、slash command 选择、snap guide 坐标或 empty prompt 文案。
+- L6/L9 writing surface layer seed 迁出后 client build / server build passed。
+
 ## Changed - V2.BN.8.1 L9 Note Chrome And Floating Panel Layer Seed
 
 - 新增 `layers/NoteChromeLayer.tsx`。

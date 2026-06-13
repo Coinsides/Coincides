@@ -1,5 +1,46 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 L6/L9 Writing Surface Layer Seed
+
+```text
+status: in progress
+client build: passed
+server build: passed
+```
+
+已完成部分：
+
+- 新增 `layers/NoteWritingSurfaceLayer.tsx`。
+- writing surface 的 DOM 壳层已从 `NoteCanvasRuntime.tsx` 迁出：
+  - `writingSurface` / `blockList` shell；
+  - Canvas debug data attributes；
+  - PageFrame boundary seed；
+  - Scratch workspace label；
+  - snap guide rendering；
+  - `visibleBlocks.map(...)` 的 block projection 挂载；
+  - draft textarea；
+  - slash menu；
+  - empty page prompt。
+- `BlockEditorLayer` 和 `SlashMenuLayer` 现在由 `NoteWritingSurfaceLayer` 挂载。
+- `NoteCanvasRuntime.tsx` 继续保留：
+  - `blockLayouts` 计算；
+  - field draft -> text draft derivation；
+  - measured height -> layout draft reflow decision；
+  - placement / resize / draft / slash controller callbacks；
+  - runtime model composition。
+- `NoteCanvasRuntime.tsx` 从约 640 行降到约 568 行。
+
+仍需验收：
+
+- server build；
+- block focus / select / toolbar 是否仍正常；
+- block text change / field draft change / save 是否仍正常；
+- measured height reflow 是否仍推开后续 block；
+- draft blur 保存 / 空 draft 消失是否仍正常；
+- slash menu anchor 和 command select 是否仍正常；
+- empty prompt 是否仍只在空 note 出现；
+- 浏览器 smoke 尚未执行。
+
 ## V2.BN.8.1 L9 Note Chrome And Floating Panel Layer Seed
 
 ```text
