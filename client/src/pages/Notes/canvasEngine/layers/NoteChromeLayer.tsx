@@ -19,7 +19,7 @@ import type {
 import { ExportPreviewLayer } from './ExportPreviewLayer';
 import styles from '../../NoteDetail.module.css';
 
-interface SurfacePolicyView {
+export interface SurfacePolicyView {
   label: string;
   nextModeLabel: string;
 }
@@ -35,7 +35,7 @@ interface InsertTemplateGroup {
   templates: InsertTemplateOption[];
 }
 
-interface NoteChromeLayerProps {
+export interface NoteChromeLayerProps {
   chromeCollapsed: boolean;
   exportPreview: ExportPreviewModel;
   layoutMode: boolean;

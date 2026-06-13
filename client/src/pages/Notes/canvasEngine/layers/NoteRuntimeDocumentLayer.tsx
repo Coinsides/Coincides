@@ -9,7 +9,7 @@ import {
 } from './NoteWritingSurfaceLayer';
 import styles from '../../NoteDetail.module.css';
 
-interface NoteRuntimeDocumentLayerProps {
+export interface NoteRuntimeDocumentLayerProps {
   floatingPanelProps: NoteFloatingPanelLayerProps;
   onSurfacePointerDown: (event: ReactPointerEvent<HTMLDivElement>) => void;
   surfaceMode: 'page' | 'canvas';

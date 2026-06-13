@@ -10,6 +10,7 @@ import { useDraftBlockController } from './hooks/useDraftBlockController';
 import { useFloatingOverlayController } from './hooks/useFloatingOverlayController';
 import { useLayoutDraftController } from './hooks/useLayoutDraftController';
 import { useLayoutInteractionController } from './hooks/useLayoutInteractionController';
+import { useNoteCanvasLayerProps } from './hooks/useNoteCanvasLayerProps';
 import { useNoteCanvasDataAdapter } from './hooks/useNoteCanvasDataAdapter';
 import { useNoteLoadResetController } from './hooks/useNoteLoadResetController';
 import { useNoteCanvasRuntime } from './hooks/useNoteCanvasRuntime';
@@ -310,7 +311,104 @@ export default function NoteCanvasRuntime() {
     surfacePolicy,
   });
 
-  if (loading || !note) {
+  const layerProps = useNoteCanvasLayerProps({
+    activeBlockId,
+    addToast,
+    anchorsBySourceRef,
+    blockFieldDrafts,
+    blockLayouts,
+    blockListRef,
+    blockTextDrafts,
+    chromeCollapsed,
+    creatingDraft,
+    defaultDraftLayout,
+    draftActive,
+    draftLayout,
+    draftRef,
+    draftText,
+    exportPreview,
+    focusBlockId,
+    insertTemplateGroups,
+    interactionState,
+    layoutMode,
+    navigate,
+    newBlockText,
+    newTemplateId,
+    note,
+    noteCanvasRuntime,
+    pageContentHeight,
+    pageOffsetX,
+    primaryPageFrameWidth: primaryPageFrame.width,
+    savingBlockId,
+    selectedBlockId,
+    setSourceJumpTarget,
+    showAdvancedInsert,
+    showExportPreview,
+    showMoreActions,
+    showNoteInfo,
+    showPreviewAIVisibility,
+    showPreviewBlockTypes,
+    showPreviewExportStatus,
+    slashCommands,
+    slashTarget,
+    snapEnabled,
+    snapGuide,
+    sortedBlockCount: sortedBlocks.length,
+    sourceJumpBusy,
+    sourceJumpTarget,
+    sourceReferenceCount,
+    surfaceMode,
+    surfacePolicy,
+    surfacePolicyMode: surfacePolicy.mode,
+    templateWarning,
+    titleDraft,
+    visibleBlocks,
+    onActivateDraft: activateDraft,
+    onAddBlock: addBlock,
+    onBeginMoveBlock: beginMoveBlock,
+    onBeginResizeBlock: beginResizeBlock,
+    onBlockKeyDown: handleBlockKeyDown,
+    onBlockListMouseDown: handleBlockListMouseDown,
+    onBlockTextChange: handleBlockTextChange,
+    onClearSlashTarget: clearSlashTarget,
+    onCloseOverlay: closeOverlay,
+    onCollapseChrome: collapseChrome,
+    onDiscardDraft: discardDraft,
+    onDraftChange: handleDraftChange,
+    onDraftKeyDown: handleDraftKeyDown,
+    onExpandChrome: expandChrome,
+    onFieldDraftChange: updateBlockFieldDraft,
+    onFloatingPanelFocusBlock: setFocusBlockId,
+    onMeasuredBlockHeight: handleMeasuredBlockHeight,
+    onNewBlockTextChange: setNewBlockText,
+    onNewTemplateChange: setNewTemplateId,
+    onPageSpaceDoubleClick: handlePageSpaceDoubleClick,
+    onPersistDraft: persistDraft,
+    onResizeDraftFromTextarea: resizeDraftFromTextarea,
+    onSaveBlock: saveBlock,
+    onSaveTitle: saveTitle,
+    onSelectBlock: markBlockSelected,
+    onSelectSlashCommand: handleSelectSlashCommand,
+    onSurfacePointerDown: handleSurfacePointerDown,
+    onTitleDraftChange: setTitleDraft,
+    onToggleAdvancedInsert: toggleAdvancedInsert,
+    onToggleAIVisibility: toggleBlockAIVisibility,
+    onToggleExportPreview: toggleExportPreview,
+    onToggleExportRole: toggleBlockExportRole,
+    onToggleLayoutMode: toggleLayoutMode,
+    onToggleMoreActions: toggleMoreActions,
+    onToggleNoteInfo: toggleNoteInfo,
+    onTogglePreviewAIVisibility: togglePreviewAIVisibility,
+    onTogglePreviewBlockTypes: togglePreviewBlockTypes,
+    onTogglePreviewExportStatus: togglePreviewExportStatus,
+    onToggleSnapEnabled: toggleSnapEnabled,
+    onToggleSurfaceMode: toggleSurfaceMode,
+    onTrashBlock: trashBlock,
+    onViewSource: handleViewSource,
+    onWritingSurfaceFocusBlock: markBlockFocused,
+  });
+
+  if (loading || !note || !layerProps) {
     return (
       <div className={styles.page}>
         <div className={styles.loading}>Loading...</div>
@@ -320,117 +418,9 @@ export default function NoteCanvasRuntime() {
 
   return (
     <div className={styles.page}>
-      <NoteChromeLayer
-        chromeCollapsed={chromeCollapsed}
-        exportPreview={exportPreview}
-        layoutMode={layoutMode}
-        note={note}
-        showExportPreview={showExportPreview}
-        showMoreActions={showMoreActions}
-        showNoteInfo={showNoteInfo}
-        showPreviewAIVisibility={showPreviewAIVisibility}
-        showPreviewBlockTypes={showPreviewBlockTypes}
-        showPreviewExportStatus={showPreviewExportStatus}
-        snapEnabled={snapEnabled}
-        sortedBlockCount={sortedBlocks.length}
-        sourceReferenceCount={sourceReferenceCount}
-        surfaceMode={surfaceMode}
-        surfacePolicy={surfacePolicy}
-        titleDraft={titleDraft}
-        onAddFavorite={() => addToast('info', 'Favorites will become persistent in a later Better Notebook patch')}
-        onBackProject={() => navigate(`/projects/${note.course_id}`)}
-        onCloseOverlay={closeOverlay}
-        onCollapseChrome={collapseChrome}
-        onExpandChrome={expandChrome}
-        onSaveTitle={saveTitle}
-        onTitleDraftChange={setTitleDraft}
-        onToggleExportPreview={toggleExportPreview}
-        onToggleLayoutMode={toggleLayoutMode}
-        onToggleMoreActions={toggleMoreActions}
-        onToggleNoteInfo={toggleNoteInfo}
-        onTogglePreviewAIVisibility={togglePreviewAIVisibility}
-        onTogglePreviewBlockTypes={togglePreviewBlockTypes}
-        onTogglePreviewExportStatus={togglePreviewExportStatus}
-        onToggleSnapEnabled={toggleSnapEnabled}
-        onToggleSurfaceMode={toggleSurfaceMode}
-      />
+      <NoteChromeLayer {...layerProps.chromeProps} />
 
-      <NoteRuntimeDocumentLayer
-        surfaceMode={surfaceMode}
-        templateWarning={templateWarning}
-        onSurfacePointerDown={handleSurfacePointerDown}
-        floatingPanelProps={{
-          insertTemplateGroups,
-          newBlockText,
-          newTemplateId,
-          showAdvancedInsert,
-          sourceJumpTarget,
-          onAddBlock: addBlock,
-          onCloseOverlay: closeOverlay,
-          onCloseSourceJump: () => setSourceJumpTarget(null),
-          onFocusBlock: setFocusBlockId,
-          onNewBlockTextChange: setNewBlockText,
-          onNewTemplateChange: setNewTemplateId,
-          onToggleAdvancedInsert: toggleAdvancedInsert,
-        }}
-        writingSurfaceProps={{
-          activeBlockId,
-          anchorsBySourceRef,
-          blockFieldDrafts,
-          blockLayouts,
-          blockListRef,
-          blockTextDrafts,
-          creatingDraft,
-          defaultDraftLayout,
-          draftActive,
-          draftLayout,
-          draftRef,
-          draftText,
-          focusBlockId,
-          interactionState,
-          layoutMode,
-          noteCanvasRuntime,
-          pageContentHeight,
-          pageOffsetX,
-          primaryPageFrameWidth: primaryPageFrame.width,
-          savingBlockId,
-          selectedBlockId,
-          showPreviewAIVisibility,
-          showPreviewBlockTypes,
-          showPreviewExportStatus,
-          slashCommands,
-          slashTarget,
-          snapGuide,
-          sortedBlockCount: sortedBlocks.length,
-          sourceJumpBusy,
-          surfaceMode,
-          surfacePolicyMode: surfacePolicy.mode,
-          visibleBlocks,
-          onActivateDraft: activateDraft,
-          onBeginMoveBlock: beginMoveBlock,
-          onBeginResizeBlock: beginResizeBlock,
-          onBlockKeyDown: handleBlockKeyDown,
-          onBlockListMouseDown: handleBlockListMouseDown,
-          onBlockTextChange: handleBlockTextChange,
-          onClearSlashTarget: clearSlashTarget,
-          onDiscardDraft: discardDraft,
-          onDraftChange: handleDraftChange,
-          onDraftKeyDown: handleDraftKeyDown,
-          onFieldDraftChange: updateBlockFieldDraft,
-          onFocusBlock: markBlockFocused,
-          onMeasuredBlockHeight: handleMeasuredBlockHeight,
-          onPageSpaceDoubleClick: handlePageSpaceDoubleClick,
-          onPersistDraft: persistDraft,
-          onResizeDraftFromTextarea: resizeDraftFromTextarea,
-          onSaveBlock: saveBlock,
-          onSelectBlock: markBlockSelected,
-          onSelectSlashCommand: handleSelectSlashCommand,
-          onToggleAIVisibility: toggleBlockAIVisibility,
-          onToggleExportRole: toggleBlockExportRole,
-          onTrashBlock: trashBlock,
-          onViewSource: handleViewSource,
-        }}
-      />
+      <NoteRuntimeDocumentLayer {...layerProps.documentLayerProps} />
     </div>
   );
 }
