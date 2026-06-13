@@ -1,5 +1,12 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Runtime Presentation Controller Seed
+
+- 新增 `hooks/useRuntimePresentationController.ts`，把 PageFrame / Canvas runtime model composition 与 `NoteChromeLayer` / `NoteRuntimeDocumentLayer` props composition 收进一个 L4/L9/L12 presentation boundary。
+- `useNoteCanvasRuntimeController()` 不再直接调用 `useRuntimeFrameModelController()` 或 `useNoteCanvasLayerProps()`。
+- `useNoteCanvasLayerPropsInput` 现在作为导出类型供 presentation controller 复用，避免重复手写 layer props contract。
+- 本轮不改变 PageFrame height、export preview、chrome props、writing surface props、floating panel props 或任何用户可见行为。
+
 ## Changed - V2.BN.8.1 Runtime Layer Props Side Effect Boundary Seed
 
 - `useNoteCanvasLayerProps()` 现在自己读取 route navigation 和 favorite toast callback，不再要求 `useNoteCanvasRuntimeController()` 传入 `navigate` 或 favorite `addToast`。

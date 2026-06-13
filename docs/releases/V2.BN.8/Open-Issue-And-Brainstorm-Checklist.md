@@ -20,6 +20,19 @@ Stage: V2.BN.8 engine seed manual smoke
 Status: 初步人工测试中
 ```
 
+## Runtime Presentation Controller Seed
+
+patch: V2.BN.8.1 Runtime Presentation Controller Seed
+status: code applied, full non-browser verification passed
+
+- [x] Add `useRuntimePresentationController.ts`.
+- [x] Compose frame model and layer props inside presentation boundary.
+- [x] Export and reuse `UseNoteCanvasLayerPropsInput`.
+- [x] Remove direct root controller imports of `useRuntimeFrameModelController()` and `useNoteCanvasLayerProps()`.
+- [x] Run full non-browser checks.
+- [ ] Henry manual visual retest: PageFrame height, Preview, chrome controls, floating panels, and writing surface should not regress.
+- [ ] Browser Harness retest deferred until the full replacement pass is done.
+
 ## Runtime Layer Props Side Effect Boundary Seed
 
 patch: V2.BN.8.1 Runtime Layer Props Side Effect Boundary Seed

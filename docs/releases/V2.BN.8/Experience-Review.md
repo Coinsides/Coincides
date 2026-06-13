@@ -1,5 +1,20 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Runtime Presentation Controller Experience Note
+
+```text
+Frame model output now becomes chrome/document layer props inside one presentation controller boundary.
+```
+
+体验判断：
+- 这一步不应该改变用户可见行为；PageFrame 高度、Canvas runtime model、Preview 统计、顶部 chrome、Insert / Source floating panel、writing surface 都应该保持原样。
+- 工程价值是把“运行时模型如何变成页面层 props”从 runtime root 收进 presentation controller，后续检查显示层入口时更集中。
+- Browser Harness 暂时不跑；等全部替换工作结束后再统一补真实浏览器验证。
+
+仍需人工观察：
+- Henry 后续复测 Page / Canvas 切换、Preview、顶部按钮、writing surface、Insert panel 时，应确认显示和交互没有退化。
+- 如果后续出现 PageFrame 高度异常、Preview 数字不对、顶部按钮不响应、writing surface 丢 props，优先检查 `hooks/useRuntimePresentationController.ts` 与 `hooks/useNoteCanvasLayerProps.ts`。
+
 ## V2.BN.8.1 Runtime Layer Props Side Effect Boundary Experience Note
 
 ```text

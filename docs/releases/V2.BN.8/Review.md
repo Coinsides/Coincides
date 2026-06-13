@@ -1,5 +1,37 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Runtime Presentation Controller Seed
+
+```text
+scope: L4 frame model / L9 layer props / L12 runtime root compression
+status: applied
+browser smoke: deferred by Henry until all replacement work is complete
+```
+
+### What Changed
+
+- Added `client/src/pages/Notes/canvasEngine/hooks/useRuntimePresentationController.ts`.
+- The new controller composes:
+  - `useRuntimeFrameModelController()`;
+  - `useNoteCanvasLayerProps()`.
+- `useNoteCanvasRuntimeController()` no longer imports or calls those two presentation-facing hooks directly.
+- `UseNoteCanvasLayerPropsInput` is now exported so the presentation controller can reuse the existing layer props contract instead of duplicating it.
+
+### Review Notes
+
+- This checkpoint is a boundary extraction only.
+- PageFrame height, Canvas runtime model, export preview model, chrome props, writing surface props, floating panel props, and all user-visible controls are unchanged.
+- The useful ownership change is that frame model output is now converted into layer props inside a presentation boundary, not inside the runtime root.
+- Browser Harness is intentionally deferred until the full replacement pass is complete.
+
+### Verification
+
+- `npm run build:client` passed.
+- `npm run smoke:canvas-engine-performance` passed.
+- `server` `npm run build` passed.
+- `git diff --check` passed.
+- Changed-file secret scan passed.
+
 ## V2.BN.8.1 Runtime Layer Props Side Effect Boundary Seed
 
 ```text

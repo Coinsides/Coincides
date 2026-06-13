@@ -1,9 +1,8 @@
-import { useNoteCanvasLayerProps } from './useNoteCanvasLayerProps';
 import { useNoteCanvasRuntime } from './useNoteCanvasRuntime';
 import { useRuntimeBlockOperationsController } from './useRuntimeBlockOperationsController';
 import { useRuntimeDocumentDataController } from './useRuntimeDocumentDataController';
-import { useRuntimeFrameModelController } from './useRuntimeFrameModelController';
 import { useRuntimeLayoutModelController } from './useRuntimeLayoutModelController';
+import { useRuntimePresentationController } from './useRuntimePresentationController';
 import { useRuntimeSurfaceStateController } from './useRuntimeSurfaceStateController';
 
 export function useNoteCanvasRuntimeController() {
@@ -181,22 +180,7 @@ export function useNoteCanvasRuntimeController() {
     trashBlock,
   });
 
-  const {
-    exportPreview,
-    noteCanvasRuntime,
-    pageContentHeight,
-    primaryPageFrame,
-  } = useRuntimeFrameModelController({
-    blockLayouts,
-    defaultDraftLayout,
-    draftActive,
-    draftLayout,
-    pageOffsetX,
-    surfaceMode,
-    visibleBlocks,
-  });
-
-  const layerProps = useNoteCanvasLayerProps({
+  const { layerProps } = useRuntimePresentationController({
     activeBlockId,
     anchorsBySourceRef,
     blockFieldDrafts,
@@ -210,7 +194,6 @@ export function useNoteCanvasRuntimeController() {
     draftLayout,
     draftRef,
     draftText,
-    exportPreview,
     focusBlockId,
     insertTemplateGroups,
     interactionState,
@@ -218,11 +201,7 @@ export function useNoteCanvasRuntimeController() {
     newBlockText,
     newTemplateId,
     note,
-    noteCanvasRuntime,
-    pageContentHeight,
     pageOffsetX,
-    primaryPageFrameX: primaryPageFrame.x,
-    primaryPageFrameWidth: primaryPageFrame.width,
     savingBlockId,
     selectedBlockId,
     setSourceJumpTarget,

@@ -16,7 +16,7 @@ import type {
   SourceJumpTarget,
 } from '../runtimeDataTypes';
 
-type UseNoteCanvasLayerPropsInput =
+export type UseNoteCanvasLayerPropsInput =
   Omit<NoteChromeLayerProps, 'note' | 'onAddFavorite' | 'onBackProject'>
   & Omit<NoteFloatingPanelLayerProps, 'onCloseSourceJump' | 'onFocusBlock'>
   & Omit<NoteWritingSurfaceLayerProps, 'onFocusBlock'>
