@@ -668,3 +668,10 @@
 - 该命令聚合 Canvas runtime boundary check、client build、server build 和 Canvas Engine performance seed。
 - 更新 `V2.BN.8.1-Final-Smoke-Protocol.md`，把最终 Browser Harness 前置非浏览器检查收束到该命令。
 - `npm run verify:v2-bn8-runtime` passed。
+
+## Changed - V2.BN.8.1 Runtime Verification Aggregator
+
+- `npm run verify:v2-bn8-runtime` 现在包含 `git diff --check`。
+- `V2.BN.8.1-Final-Smoke-Protocol.md` 同步更新：diff hygiene 已纳入非浏览器聚合 gate。
+- changed-file secret scan 仍作为独立检查保留。
+- `npm run verify:v2-bn8-runtime` passed。

@@ -2031,8 +2031,27 @@ npm run verify:v2-bn8-runtime
 - `npm run check:canvas-runtime-boundary`；
 - `npm run build:client`；
 - `npm run build`；
-- `npm run smoke:canvas-engine-performance`。
+- `npm run smoke:canvas-engine-performance`；
+- `git diff --check`。
 
 该命令用于最终 Browser Harness 前的非浏览器 gate，避免遗漏 runtime boundary、client build、server build 或 performance seed 中任一项。
 
 本命令已通过。它不替代最终 Browser Harness smoke，也不替代 Henry manual pass。
+
+## V2.BN.8.1 Diff Hygiene In Aggregator - 2026-06-13
+
+```text
+status: passed
+command: npm run verify:v2-bn8-runtime
+browser harness: not used
+```
+
+`npm run verify:v2-bn8-runtime` 现在也包含 `git diff --check`，因此最终 Browser Harness 前的非浏览器 gate 会同时覆盖：
+
+- Canvas runtime boundary；
+- client build；
+- server build；
+- Canvas Engine performance seed；
+- diff whitespace / conflict-marker hygiene。
+
+changed-file secret scan 仍保留为单独人工/脚本检查，因为它依赖当前 changed-file 列表，不适合隐藏在 build 聚合命令里。
