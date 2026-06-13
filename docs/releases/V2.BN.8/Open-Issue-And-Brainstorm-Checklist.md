@@ -28,6 +28,14 @@ Status: 初步人工测试中
 
 ## Open Issue Checklist
 
+### L5 Runtime Placement Record Checkpoint
+
+- [x] `CHECKPOINT-L5-PLACEMENT-RECORD` Canvas runtime placement now has a formal builder in `placementService`.
+- [x] Runtime placement records include identity fields, frame membership seed, boundary role, z-index seed, snap state, visibility state, and rotation seed.
+- [x] Relation endpoint reserve is now generated from runtime placements as a future connector anchor seed.
+- [ ] Henry manual visual retest: no visible regression should appear from this checkpoint.
+- [ ] Future promotion review: decide when the runtime placement record becomes a stable docs/contracts or database-facing contract.
+
 ### 1. Slash command menu anchor 错位
 
 - [ ] `ISSUE-001` 自由创建下方 block 后，输入 `/` 时 slash command menu 没有出现在当前输入窗口附近。

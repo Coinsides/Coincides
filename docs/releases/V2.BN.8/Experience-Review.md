@@ -1,5 +1,18 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Runtime Placement Record Experience Note
+
+```text
+This patch is mostly invisible; it makes Canvas placement facts inspectable and future-ready.
+```
+
+Experience judgment:
+
+- Users should not see a visual regression from this patch.
+- The value is that Canvas Engine now knows more than a block rectangle: it knows which object is placed, whether it belongs to the formal PageFrame or workspace, what its boundary role is, and where future relation endpoints may attach.
+- This prepares later Page/Canvas mode rules, relation connector UI, z-order control, and workspace filtering without making those features user-visible yet.
+- If any visual change appears, it should be treated as a regression because this patch is a runtime contract step.
+
 ## V2.BN.8.1 Formula Input Sanitizer And Help Experience Note
 
 ```text

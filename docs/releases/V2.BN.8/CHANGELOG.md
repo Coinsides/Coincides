@@ -1,5 +1,13 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Runtime Placement Record Seed
+
+- L5 placement service now owns a first-version runtime placement record builder.
+- Runtime placements now include `placementId`, `objectId`, `objectKind`, `canvasId`, optional `frameId`, `boundaryRole`, `zIndex`, `snapState`, and `visibilityState`.
+- The runtime now reserves left/right relation endpoint anchors for every block placement without enabling relation runtime.
+- `useNoteCanvasLayoutModel` now asks `placementService` to build Canvas runtime placements instead of assembling them inline.
+- No database migration, API change, multi-frame productization, or relation runtime behavior is included in this patch.
+
 ## Fixed - V2.BN.8.1 Formula Input Sanitizer And Help Seed
 
 - `FormulaBlock` 的 `latex_input` 现在在读取旧内容、保存新内容时都会归一成纯 LaTeX body。

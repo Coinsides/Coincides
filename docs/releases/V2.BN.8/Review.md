@@ -1,5 +1,47 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Runtime Placement Record Seed
+
+```text
+status: technical validation passed
+scope: L5 placement service contract hardening
+client build: passed
+server build: passed
+browser smoke: blocked by Chrome remote debugging authorization
+```
+
+Completed:
+
+- Added `buildRuntimeBlockPlacement()` in `placementService`.
+- Added `buildRelationEndpointReserveForPlacement()` as a relation endpoint reserve seed only.
+- Extended `BlockPlacementModel` from a visual rect into a runtime placement record:
+  - `placementId`
+  - `objectId`
+  - `objectKind`
+  - `canvasId`
+  - optional `frameId`
+  - `boundaryRole`
+  - `zIndex`
+  - `snapState`
+  - `visibilityState`
+- Updated `useNoteCanvasLayoutModel()` so Canvas runtime placement construction is no longer hand-assembled inside the hook.
+
+Still intentionally out of scope:
+
+- No database migration.
+- No API change.
+- No multi-frame runtime.
+- No relation runtime.
+- No visible connector UI.
+
+Verification:
+
+- client build passed.
+- server build passed.
+- `git diff --check` passed.
+- changed-file secret scan passed.
+- Browser Harness smoke could not complete because Chrome remote debugging authorization timed out; Henry can re-run after clicking Allow if prompted.
+
 ## V2.BN.8.1 Formula Input Sanitizer And Help Seed
 
 ```text

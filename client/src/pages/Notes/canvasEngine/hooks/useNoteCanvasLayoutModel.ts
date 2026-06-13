@@ -12,8 +12,9 @@ import {
   createRuntimePageFrame,
 } from '../pageFrameService';
 import {
+  buildRelationEndpointReserveForPlacement,
   buildDefaultBlockLayouts,
-  getBoundaryKind,
+  buildRuntimeBlockPlacement,
   normalizeBlockLayout,
 } from '../placementService';
 import {
@@ -21,7 +22,7 @@ import {
   type SurfaceMode,
 } from '../runtimeLayout';
 import type { NoteBlock } from '../runtimeDataTypes';
-import type { BlockPlacementModel } from '../types';
+import type { BlockPlacementModel, RelationEndpointReserve } from '../types';
 import {
   createRuntimeViewport,
   createRuntimeWorld,
@@ -110,21 +111,24 @@ export function useNoteCanvasFrameModel({
   );
 
   const canvasBlockPlacements = useMemo<BlockPlacementModel[]>(
-    () => visibleBlocks.flatMap((block) => {
+    () => visibleBlocks.flatMap((block, index) => {
       const layout = blockLayouts[block.id];
       if (!layout) return [];
-      const boundary = getBoundaryKind(layout);
-      return [{
-        blockId: block.id,
-        x: layout.x + pageOffsetX,
-        y: layout.y,
-        width: layout.width,
-        height: layout.height,
-        rotation: layout.rotation || 0,
-        surface: boundary === 'inside' ? 'formal_page' : 'canvas_workspace',
-      }];
+      return [buildRuntimeBlockPlacement({
+        block,
+        canvasId: 'primary-note-canvas',
+        layout,
+        pageOffsetX,
+        pageFrame: primaryPageFrame,
+        zIndex: index,
+      })];
     }),
-    [blockLayouts, pageOffsetX, visibleBlocks],
+    [blockLayouts, pageOffsetX, primaryPageFrame, visibleBlocks],
+  );
+
+  const relationEndpointReserve = useMemo<RelationEndpointReserve[]>(
+    () => canvasBlockPlacements.flatMap(buildRelationEndpointReserveForPlacement),
+    [canvasBlockPlacements],
   );
 
   const noteCanvasRuntime = useMemo(() => {
@@ -136,8 +140,9 @@ export function useNoteCanvasFrameModel({
       primaryPageFrame,
       viewport,
       blockPlacements: canvasBlockPlacements,
+      relationEndpointReserve,
     });
-  }, [canvasBlockPlacements, pageContentHeight, primaryPageFrame, surfaceMode]);
+  }, [canvasBlockPlacements, pageContentHeight, primaryPageFrame, relationEndpointReserve, surfaceMode]);
 
   const exportPreview = useMemo(() => {
     return buildExportPreviewModel(visibleBlocks, blockLayouts);

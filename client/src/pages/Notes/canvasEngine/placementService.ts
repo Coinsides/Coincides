@@ -14,9 +14,16 @@ import {
   type SnapGuide,
   type SurfaceMode,
 } from './runtimeLayout';
+import type {
+  BlockPlacementModel,
+  CanvasBoundaryKind,
+  PageFrameModel,
+  RelationEndpointReserve,
+} from './types';
 
 export interface PlacementSeedBlock {
   id: string;
+  placement_id?: string;
   display_overrides_json?: Record<string, unknown> | null;
 }
 
@@ -120,6 +127,75 @@ export function getBoundaryKind(layout: Pick<BlockBoxLayout, 'x' | 'width'>): Bo
   if (layout.x >= DEFAULT_PAGE_CONTENT_WIDTH) return 'outside';
   if (layout.x + layout.width <= DEFAULT_PAGE_CONTENT_WIDTH) return 'inside';
   return 'crossing';
+}
+
+function toCanvasBoundaryKind(boundary: BoundaryKind): CanvasBoundaryKind {
+  return boundary;
+}
+
+export function buildRuntimeBlockPlacement({
+  block,
+  canvasId,
+  layout,
+  pageOffsetX,
+  pageFrame,
+  zIndex,
+}: {
+  block: PlacementSeedBlock;
+  canvasId: string;
+  layout: BlockBoxLayout;
+  pageOffsetX: number;
+  pageFrame: PageFrameModel | null;
+  zIndex: number;
+}): BlockPlacementModel {
+  const boundary = toCanvasBoundaryKind(getBoundaryKind(layout));
+  const surface = boundary === 'inside' ? 'formal_page' : 'canvas_workspace';
+  const visibilityState = layout.export_role === 'scratch'
+    ? 'scratch'
+    : layout.ai_visibility === 'hidden'
+      ? 'ai_hidden'
+      : layout.export_role === 'excluded'
+        ? 'export_hidden'
+        : 'normal';
+
+  return {
+    blockId: block.id,
+    placementId: block.placement_id || `placement:${block.id}`,
+    objectId: block.id,
+    objectKind: 'note_block',
+    canvasId,
+    frameId: boundary === 'inside' ? pageFrame?.id : undefined,
+    x: layout.x + pageOffsetX,
+    y: layout.y,
+    width: layout.width,
+    height: layout.height,
+    rotation: layout.rotation || 0,
+    surface,
+    boundaryRole: boundary,
+    zIndex,
+    snapState: 'free',
+    visibilityState,
+  };
+}
+
+export function buildRelationEndpointReserveForPlacement(placement: BlockPlacementModel): RelationEndpointReserve[] {
+  const centerY = placement.y + placement.height / 2;
+  return [
+    {
+      id: `${placement.placementId}:relation-port:left`,
+      ownerId: placement.objectId,
+      ownerKind: 'note_block',
+      anchor: { x: placement.x, y: centerY },
+      normal: { x: -1, y: 0 },
+    },
+    {
+      id: `${placement.placementId}:relation-port:right`,
+      ownerId: placement.objectId,
+      ownerKind: 'note_block',
+      anchor: { x: placement.x + placement.width, y: centerY },
+      normal: { x: 1, y: 0 },
+    },
+  ];
 }
 
 export function buildLayoutPayload(layout: BlockBoxLayout): Record<string, unknown> {

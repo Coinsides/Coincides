@@ -90,6 +90,41 @@ RelationEndpoint
 
 ## Placement 最小候选字段
 
+V2.BN.8.1 runtime seed:
+
+```text
+RuntimeBlockPlacement
+  placementId
+  objectId
+  objectKind = note_block
+  canvasId
+  frameId optional
+  x
+  y
+  width
+  height
+  rotation
+  surface = formal_page | canvas_workspace
+  boundaryRole = inside | crossing | outside
+  zIndex
+  snapState
+  visibilityState
+```
+
+`RuntimeBlockPlacement` 是 Canvas Engine 当前运行时记录。它可以比旧 `better_notebook_layout` payload 更丰富，但在数据合同 promotion 之前，不能假装它已经是最终数据库 schema。
+
+Relation endpoint reserve:
+
+```text
+RelationEndpointReserve
+  ownerId = NoteBlock id
+  ownerKind = note_block
+  anchor
+  normal
+```
+
+V2.BN.8.1 里它只代表 placement/runtime 预留点，不创建 `ObjectRelation`，不创建 connector UI，也不改变 relation truth。
+
 ```text
 placement_id
 object_id

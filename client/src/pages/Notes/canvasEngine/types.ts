@@ -32,7 +32,16 @@ export interface CanvasWorldModel extends CanvasSize {
 
 export interface BlockPlacementModel extends CanvasRect {
   blockId: string;
-  surface?: CanvasSurface;
+  placementId: string;
+  objectId: string;
+  objectKind: 'note_block';
+  canvasId: string;
+  frameId?: string;
+  surface: CanvasSurface;
+  boundaryRole: CanvasBoundaryKind;
+  zIndex: number;
+  snapState?: 'snapped' | 'free';
+  visibilityState?: 'normal' | 'scratch' | 'ai_hidden' | 'export_hidden';
   rotation?: number;
 }
 
