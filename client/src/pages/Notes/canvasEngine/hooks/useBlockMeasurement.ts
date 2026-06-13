@@ -1,5 +1,6 @@
 import {
   useLayoutEffect,
+  useRef,
   type RefObject,
 } from 'react';
 import {
@@ -25,15 +26,24 @@ export function useBlockMeasurement({
   active,
   onMeasuredHeight,
 }: UseBlockMeasurementOptions) {
+  const lastMeasuredHeightRef = useRef<number | null>(null);
+
   useLayoutEffect(() => {
     resizeTextareaToContent(textareaRef.current);
+    const reportMeasuredHeight = (height: number) => {
+      const lastMeasuredHeight = lastMeasuredHeightRef.current;
+      if (lastMeasuredHeight !== null && Math.abs(height - lastMeasuredHeight) <= 1) return;
+      lastMeasuredHeightRef.current = height;
+      onMeasuredHeight(height);
+    };
+
     const element = blockContentRef.current;
     if (!element) {
-      onMeasuredHeight(DEFAULT_BLOCK_HEIGHT);
+      reportMeasuredHeight(DEFAULT_BLOCK_HEIGHT);
       return undefined;
     }
 
-    const measure = () => onMeasuredHeight(measureBlockContentHeight(element));
+    const measure = () => reportMeasuredHeight(measureBlockContentHeight(element));
     measure();
     const frameId = window.requestAnimationFrame(measure);
 

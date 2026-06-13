@@ -6,7 +6,7 @@ import {
   type KeyboardEvent,
   type PointerEvent as ReactPointerEvent,
 } from 'react';
-import sharedTypes from '@shared/types';
+import { getNoteBlockTemplateLabel } from '@shared/types';
 import {
   definitionFieldsFromBlock,
   formulaFieldsFromBlock,
@@ -37,10 +37,6 @@ import { BlockResizeHandleLayer } from './BlockResizeHandleLayer';
 import { BlockSourceReferenceLayer } from './BlockSourceReferenceLayer';
 import { BlockStatusBadgeLayer } from './BlockStatusBadgeLayer';
 import styles from '../../NoteDetail.module.css';
-
-const {
-  getNoteBlockTemplateLabel,
-} = sharedTypes;
 
 interface BlockEditorLayerProps {
   block: NoteBlock;

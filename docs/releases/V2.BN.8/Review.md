@@ -2085,6 +2085,7 @@ npm run verify:v2-bn8-runtime
 因此最终 Browser Harness 前的非浏览器 gate 现在覆盖：
 
 - Canvas runtime boundary；
+- Canvas Engine model contract；
 - client build；
 - server build；
 - Canvas Engine performance seed；
@@ -2092,3 +2093,73 @@ npm run verify:v2-bn8-runtime
 - changed-file secret scan。
 
 该命令已通过。它仍不替代最终 Browser Harness smoke 和 Henry manual pass。
+
+## V2.BN.8.1 Canvas Engine Model Contract Check - 2026-06-13
+
+```text
+status: passed
+command: npm run smoke:canvas-engine-model-contract
+browser harness: not used
+```
+
+新增纯逻辑模型合同 smoke：
+
+- viewport and world seed；
+- PageFrame and workspace policy；
+- placement and runtime model；
+- measurement mode and history。
+
+该检查直接执行 Canvas Engine service 函数，验证 Page mode / Canvas mode visibility、PageFrame height、workspace placement、relation endpoint reserve、measurement reflow、elastic avoidance policy、Ctrl+Z / Ctrl+Y intent 等基础规则。
+
+随后 `npm run verify:v2-bn8-runtime` 已纳入该检查。它不替代 Browser Harness，也不替代 Henry manual pass。
+
+## V2.BN.8.1 Shared Type Runtime Import Build Fix - 2026-06-13
+
+```text
+status: passed
+command: npm run verify:v2-bn8-runtime
+browser harness: not used
+```
+
+聚合验证首次复跑时，client production build 暴露 `@shared/types` runtime import 解析问题：Vite 会优先看到本地生成的 `shared/types/index.js`，导致 enum / default export 在 Rollup 阶段不可用。
+
+修补内容：
+
+- `client/vite.config.ts` 为 `@shared/types` 添加精确 TS 源别名；
+- `DailyBrief` 不再把 `EnergyLevel` 作为运行时 enum 导入；
+- `CourseDetail`、`BlockEditorLayer`、`templateOptions` 不再 default import `@shared/types`。
+
+修补后 `npm run verify:v2-bn8-runtime` passed。该结果仍不替代最终 Browser Harness smoke 和 Henry manual pass。
+
+## V2.BN.8.1 Browser Harness Smoke - 2026-06-13
+
+```text
+status: passed
+tool: Browser Harness
+target: http://localhost:5173/#/notes/85f33834-3d27-4b5d-b86e-92837e83ae27
+henry manual pass: pending
+```
+
+Browser Harness 覆盖：
+
+- Project 页进入 existing note；
+- Note 页 runtime smoke attributes 存在：
+  - `data-canvas-engine-version=V2.BN.8-self-owned-minimal-hybrid-0`；
+  - `data-canvas-engine-route=self_owned_minimal_hybrid`；
+  - `data-canvas-surface-mode=page`；
+- Page mode -> Canvas mode -> Page mode 往返；
+- Preview 打开/关闭；
+- Layout 按钮点击不触发前端异常。
+
+本次 Browser Harness 首次发现 Page -> Canvas 切换会触发白屏。错误监听捕获：
+
+```text
+Maximum update depth exceeded
+useBlockMeasurement -> useMeasuredBlockReflowController -> useLayoutDraftController
+```
+
+修复方式：`useBlockMeasurement` 记录上一次上报的 measured height；高度没有实质变化时，不再重复触发 `onMeasuredHeight`，避免 layout draft 写入循环。
+
+修复后重新执行 Browser Harness smoke，错误监听为空，Page/Canvas 往返通过。
+
+该 smoke 证明浏览器内基础 runtime 路径可用；最终阶段通过仍需要 Henry manual pass。

@@ -9,12 +9,10 @@ import { useCourseStore } from '@/stores/courseStore';
 import { useUIStore } from '@/stores/uiStore';
 import DocumentManager from '@/components/DocumentManager/DocumentManager';
 import api from '@/services/api';
+import { getNoteBlockTemplateLabel } from '@shared/types';
 import type { Course, Goal, SourceMaterial, MaterialSegment } from '@shared/types';
-import sharedTypes from '@shared/types';
 import LearningCanvasSurface from './LearningCanvasSurface';
 import styles from './CourseDetail.module.css';
-
-const { getNoteBlockTemplateLabel } = sharedTypes;
 
 type ReconciliationGroupDecision = 'accepted_evidence_set' | 'kept_separate' | 'deferred' | 'excluded' | 'mark_conflict';
 

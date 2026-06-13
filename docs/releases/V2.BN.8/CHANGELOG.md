@@ -692,3 +692,26 @@
 - 新增覆盖 runtime type contract、engine model、viewport service、PageFrame service、placement service、measurement service、mode policy service、history service。
 - 这使 L3/L4/L5/L7/L10/L11 的结构性证据也进入 `npm run verify:v2-bn8-runtime`。
 - `npm run check:canvas-runtime-boundary` passed。
+
+## Added - V2.BN.8.1 Canvas Engine Model Contract Check
+
+- 新增 `client/scripts/canvasEngineModelContractCheck.ts`。
+- 新增 `client/scripts/tsconfig.canvas-model-contract.json`。
+- 新增 root/client script：`npm run smoke:canvas-engine-model-contract`。
+- 该检查覆盖 viewport/world seed、PageFrame/workspace policy、placement/runtime model、measurement/mode/history 规则。
+- `npm run verify:v2-bn8-runtime` 现在包含 Canvas Engine model contract check。
+- `npm run smoke:canvas-engine-model-contract` passed。
+
+## Fixed - V2.BN.8.1 Shared Type Runtime Import Build Stability
+
+- `client/vite.config.ts` 明确把 `@shared/types` 解析到 `shared/types/index.ts`，避免生产构建误解析到本地生成的 CommonJS `index.js`。
+- 移除前端对 `@shared/types` 的 default runtime import，改用命名导入或 type-only 导入。
+- `DailyBrief` 的 `EnergyLevel` 运行时值改为本地字符串常量，避免把共享 enum 当成浏览器运行时依赖。
+- 该修补来自 `npm run verify:v2-bn8-runtime` 暴露的 build failure；修补后聚合验证 passed。
+
+## Fixed - V2.BN.8.1 Browser Harness Page Canvas Switch Crash
+
+- Browser Harness final smoke 发现 Note 页从 Page mode 切到 Canvas mode 时会白屏。
+- 抓到的异常是 `Maximum update depth exceeded`，调用链为 `useBlockMeasurement -> useMeasuredBlockReflowController -> useLayoutDraftController`。
+- `useBlockMeasurement` 增加 measured-height 去抖保护；同一 block 的高度没有实质变化时不再反复上报 layout draft。
+- 修补后 Browser Harness 验证 Page -> Canvas -> Page 往返通过，Preview 打开/关闭通过，Layout 点击无异常。

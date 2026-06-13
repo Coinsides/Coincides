@@ -1,11 +1,9 @@
-import sharedTypes from '@shared/types';
-import api from './api';
-
-const {
+import {
   legacyBlockTypeForTemplate,
   listNoteBlockTemplates,
   mergeNoteBlockTemplateMetadata,
-} = sharedTypes;
+} from '@shared/types';
+import api from './api';
 
 export interface RuntimeTemplateDefinition {
   id: string;

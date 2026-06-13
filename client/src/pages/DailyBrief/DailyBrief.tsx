@@ -7,14 +7,13 @@ import { useDailyBriefStore } from '@/stores/dailyBriefStore';
 import { useCourseStore } from '@/stores/courseStore';
 import { useUIStore } from '@/stores/uiStore';
 import api from '@/services/api';
-import { EnergyLevel } from '@shared/types';
-import type { Task, TimeBlock } from '@shared/types';
+import type { EnergyLevel, Task, TimeBlock } from '@shared/types';
 import styles from './DailyBrief.module.css';
 
 const energyOptions: { value: EnergyLevel; label: string; icon: typeof Zap }[] = [
-  { value: EnergyLevel.Energized, label: 'Energized', icon: Zap },
-  { value: EnergyLevel.Normal, label: 'Normal', icon: Battery },
-  { value: EnergyLevel.Tired, label: 'Tired', icon: BatteryLow },
+  { value: 'energized' as EnergyLevel, label: 'Energized', icon: Zap },
+  { value: 'normal' as EnergyLevel, label: 'Normal', icon: Battery },
+  { value: 'tired' as EnergyLevel, label: 'Tired', icon: BatteryLow },
 ];
 
 const priorityConfig = {

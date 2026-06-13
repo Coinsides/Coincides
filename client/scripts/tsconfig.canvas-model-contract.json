@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "baseUrl": "../src",
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM"],
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "outDir": "../../.codex-tmp/canvas-engine-contract",
+    "paths": {
+      "@/*": ["*"],
+      "@shared/*": ["../../shared/*"]
+    },
+    "rootDir": "../..",
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2022"
+  },
+  "files": [
+    "./canvasEngineModelContractCheck.ts",
+    "../src/pages/Notes/canvasEngine/blockContentService.ts",
+    "../src/pages/Notes/canvasEngine/engineModel.ts",
+    "../src/pages/Notes/canvasEngine/geometry.ts",
+    "../src/pages/Notes/canvasEngine/historyService.ts",
+    "../src/pages/Notes/canvasEngine/measurementService.ts",
+    "../src/pages/Notes/canvasEngine/modePolicyService.ts",
+    "../src/pages/Notes/canvasEngine/pageFrameService.ts",
+    "../src/pages/Notes/canvasEngine/placementService.ts",
+    "../src/pages/Notes/canvasEngine/runtimeDataTypes.ts",
+    "../src/pages/Notes/canvasEngine/runtimeLayout.ts",
+    "../src/pages/Notes/canvasEngine/types.ts",
+    "../src/pages/Notes/canvasEngine/viewportService.ts"
+  ]
+}
