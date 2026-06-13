@@ -1,5 +1,11 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Runtime Document Stats Controller Seed
+
+- 新增 `hooks/useRuntimeDocumentStatsController.ts`，把 note-level source reference count 从 runtime root 中迁出。
+- `useNoteCanvasRuntimeController()` 不再直接使用 `useMemo()` 计算 `sourceReferenceCount`，而是消费 document stats controller 的输出。
+- 本轮不改变 source reference truth、Note chrome 展示、Preview 统计或 Source Library 行为，只继续压缩 runtime root 的 document stats composition。
+
 ## Changed - V2.BN.8.1 Runtime Block Editing Controller Seed
 
 - 新增 `hooks/useRuntimeBlockEditingController.ts`，把 structured field draft update 和 measured block height reflow 组合进一个 L6/L7 block editing boundary。

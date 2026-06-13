@@ -20,6 +20,18 @@ Stage: V2.BN.8 engine seed manual smoke
 Status: 初步人工测试中
 ```
 
+## Runtime Document Stats Controller Seed
+
+patch: V2.BN.8.1 Runtime Document Stats Controller Seed
+status: code applied, non-browser verification pending
+
+- [x] Add `useRuntimeDocumentStatsController.ts`.
+- [x] Move `sourceReferenceCount` calculation out of `useNoteCanvasRuntimeController()`.
+- [x] Keep source reference truth and chrome/preview consumers unchanged.
+- [ ] Run non-browser checks.
+- [ ] Henry manual visual retest: Note chrome / Preview source stats should not regress.
+- [ ] Browser Harness retest deferred until the full replacement pass is done.
+
 ## Runtime Block Editing Controller Seed
 
 patch: V2.BN.8.1 Runtime Block Editing Controller Seed

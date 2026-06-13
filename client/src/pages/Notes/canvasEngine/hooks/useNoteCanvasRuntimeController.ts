@@ -1,4 +1,3 @@
-import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUIStore } from '@/stores/uiStore';
 import { useBlockPlacementInteractions } from './useBlockPlacementInteractions';
@@ -14,6 +13,7 @@ import { useNoteCanvasRuntime } from './useNoteCanvasRuntime';
 import { useNoteLoadResetController } from './useNoteLoadResetController';
 import { useRuntimeBlockEditingController } from './useRuntimeBlockEditingController';
 import { useRuntimeBlockHistoryController } from './useRuntimeBlockHistoryController';
+import { useRuntimeDocumentStatsController } from './useRuntimeDocumentStatsController';
 import { useRuntimeFrameModelController } from './useRuntimeFrameModelController';
 import { useRuntimeInteractionController } from './useRuntimeInteractionController';
 import { useRuntimeLayoutRefsController } from './useRuntimeLayoutRefsController';
@@ -151,10 +151,7 @@ export function useNoteCanvasRuntimeController() {
     setLayoutDraftForBlock,
   });
 
-  const sourceReferenceCount = useMemo(
-    () => sortedBlocks.reduce((total, block) => total + block.source_references.length, 0),
-    [sortedBlocks],
-  );
+  const { sourceReferenceCount } = useRuntimeDocumentStatsController({ sortedBlocks });
 
   const {
     blockLayouts,

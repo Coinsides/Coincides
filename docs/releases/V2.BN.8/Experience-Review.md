@@ -1,5 +1,20 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Runtime Document Stats Controller Experience Note
+
+```text
+Note-level source reference statistics now have a small document stats controller boundary.
+```
+
+体验判断：
+- 这一步不应该改变用户可见行为；顶部 chrome、preview 统计和 source reference 数字应该保持原样。
+- 工程价值是把 note-level stats 从 runtime root 中迁出，避免 root 继续承担小型 view-model 计算。
+- Browser Harness 暂时不跑；等全部替换工作结束后再统一补真实浏览器验证。
+
+仍需人工观察：
+- Henry 后续复测 Note chrome / Preview 中 source reference 数量没有异常。
+- 如果后续出现 source 统计数字错误，应优先检查 `hooks/useRuntimeDocumentStatsController.ts` 与传入的 `sortedBlocks`。
+
 ## V2.BN.8.1 Runtime Block Editing Controller Experience Note
 
 ```text

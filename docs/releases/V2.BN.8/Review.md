@@ -1,5 +1,30 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Runtime Document Stats Controller Seed
+
+```text
+scope: L6/L9 note chrome stats / L12 runtime root compression
+status: applied
+browser smoke: deferred by Henry until all replacement work is complete
+```
+
+### What Changed
+
+- Added `client/src/pages/Notes/canvasEngine/hooks/useRuntimeDocumentStatsController.ts`.
+- Moved `sourceReferenceCount` calculation out of `useNoteCanvasRuntimeController()`.
+- `useNoteCanvasRuntimeController()` no longer imports `useMemo` for local note-level stats.
+
+### Review Notes
+
+- This checkpoint is a view-model/statistics boundary extraction only.
+- Source reference truth and source reference rendering are unchanged.
+- Note chrome still receives the same `sourceReferenceCount` value.
+- Browser Harness is intentionally deferred until the full replacement pass is complete.
+
+### Verification
+
+- Non-browser verification is pending for this checkpoint.
+
 ## V2.BN.8.1 Runtime Block Editing Controller Seed
 
 ```text
