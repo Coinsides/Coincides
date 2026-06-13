@@ -20,6 +20,21 @@ Stage: V2.BN.8 engine seed manual smoke
 Status: 初步人工测试中
 ```
 
+## Final Browser Harness Attempt
+
+patch: V2.BN.8.1 Final Browser Harness Attempt
+status: blocked by Chrome remote debugging authorization
+date: 2026-06-13
+
+- [x] Confirm frontend dev server is listening on `5173`.
+- [x] Confirm backend dev server is listening on `3001`.
+- [x] Attempt Browser Harness through PATH `browser-harness`.
+- [x] Attempt Browser Harness through local project-installed executable.
+- [x] Record that both attempts failed before page inspection with CDP websocket handshake timeout.
+- [ ] Henry opens `chrome://inspect/#remote-debugging`, enables remote debugging for this browser instance, and clicks Allow in Chrome.
+- [ ] Re-run final Browser Harness smoke after authorization.
+- [ ] Henry manual visual/interaction pass.
+
 ## Runtime Root Closure Assessment
 
 patch: V2.BN.8.1 Runtime Root Closure Assessment

@@ -1,5 +1,25 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Final Browser Harness Attempt
+
+```text
+scope: final Browser Harness smoke gate
+status: blocked by Chrome remote debugging authorization
+date: 2026-06-13
+```
+
+### Evidence
+
+- `browser-harness` from PATH failed before page inspection.
+- The local project-installed `browser-harness.exe` failed with the same CDP websocket handshake timeout.
+- Both failures reported the same required user action: open `chrome://inspect/#remote-debugging`, enable "Allow remote debugging for this browser instance", then click Allow in the Chrome popup.
+
+### Result
+
+- Browser Harness smoke is not passed.
+- No browser interaction evidence was collected in this attempt.
+- `V2.BN.8.1` remains open until Browser Harness can connect and Henry manually confirms the experience passed.
+
 ## V2.BN.8.1 Runtime Root Closure Assessment
 
 ```text

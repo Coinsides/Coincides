@@ -1,5 +1,16 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Final Browser Harness Experience Gate
+
+```text
+status: blocked before visual inspection
+date: 2026-06-13
+```
+
+- Browser Harness could not connect to Chrome because the CDP websocket handshake timed out.
+- No final browser screenshot, click-through, or runtime visual evidence was collected in this attempt.
+- Experience acceptance remains pending until Browser Harness connects and Henry confirms the resulting interaction pass.
+
 ## V2.BN.8.1 Runtime Presentation Controller Experience Note
 
 ```text
