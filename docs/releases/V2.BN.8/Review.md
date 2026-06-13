@@ -208,8 +208,12 @@ browser smoke: deferred by Henry until all replacement work is complete
 
 ### Verification
 
-- `npm run build:client` passed as an early type/build check.
-- Full non-browser checkpoint verification is still pending.
+- Covered by the later consolidated non-browser verification pass:
+  - `npm run build:client` passed.
+  - `npm run smoke:canvas-engine-performance` passed.
+  - `server` `npm run build` passed.
+  - `git diff --check` passed.
+  - Changed-file secret scan passed.
 
 ## V2.BN.8.1 Runtime Placement Interaction Controller Seed
 
@@ -236,7 +240,12 @@ browser smoke: deferred by Henry until all replacement work is complete
 
 ### Verification
 
-- Non-browser verification is pending for this checkpoint.
+- Covered by the later consolidated non-browser verification pass:
+  - `npm run build:client` passed.
+  - `npm run smoke:canvas-engine-performance` passed.
+  - `server` `npm run build` passed.
+  - `git diff --check` passed.
+  - Changed-file secret scan passed.
 
 ## V2.BN.8.1 Runtime Document Stats Controller Seed
 
@@ -261,7 +270,12 @@ browser smoke: deferred by Henry until all replacement work is complete
 
 ### Verification
 
-- Non-browser verification is pending for this checkpoint.
+- Covered by the later consolidated non-browser verification pass:
+  - `npm run build:client` passed.
+  - `npm run smoke:canvas-engine-performance` passed.
+  - `server` `npm run build` passed.
+  - `git diff --check` passed.
+  - Changed-file secret scan passed.
 
 ## V2.BN.8.1 Runtime Block Editing Controller Seed
 
@@ -289,7 +303,12 @@ browser smoke: deferred by Henry until all replacement work is complete
 
 ### Verification
 
-- Non-browser verification is pending for this checkpoint.
+- Covered by the later consolidated non-browser verification pass:
+  - `npm run build:client` passed.
+  - `npm run smoke:canvas-engine-performance` passed.
+  - `server` `npm run build` passed.
+  - `git diff --check` passed.
+  - Changed-file secret scan passed.
 
 ## V2.BN.8.1 Runtime Frame Model Controller Seed
 
