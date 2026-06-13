@@ -1271,6 +1271,7 @@
   background: var(--bg-primary);
   box-shadow: var(--glass-shadow-lg);
   overflow: auto;
+  pointer-events: auto;
 }
 
 .slashEmpty {

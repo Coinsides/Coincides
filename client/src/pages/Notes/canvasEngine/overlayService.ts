@@ -93,14 +93,14 @@ export function getSlashMenuAnchor(
 
   const elementRect = element.getBoundingClientRect();
   const anchorRect = getTextInputCaretRect(element, caret) || elementRect;
-  const containerRect = container.getBoundingClientRect();
-  const menuWidth = Math.min(SLASH_MENU_WIDTH, Math.max(0, containerRect.width));
-  const maxX = Math.max(0, containerRect.width - menuWidth);
-  const x = clamp(anchorRect.left - containerRect.left, 0, maxX);
-  const belowY = anchorRect.bottom - containerRect.top + SLASH_MENU_OFFSET;
-  const aboveY = anchorRect.top - containerRect.top - SLASH_MENU_HEIGHT_ESTIMATE - SLASH_MENU_OFFSET;
+  const viewportPadding = 16;
+  const menuWidth = Math.min(SLASH_MENU_WIDTH, Math.max(0, window.innerWidth - (viewportPadding * 2)));
+  const maxX = Math.max(viewportPadding, window.innerWidth - menuWidth - viewportPadding);
+  const x = clamp(anchorRect.left, viewportPadding, maxX);
+  const belowY = anchorRect.bottom + SLASH_MENU_OFFSET;
+  const aboveY = anchorRect.top - SLASH_MENU_HEIGHT_ESTIMATE - SLASH_MENU_OFFSET;
   const wouldOverflowViewport = anchorRect.bottom + SLASH_MENU_OFFSET + SLASH_MENU_HEIGHT_ESTIMATE > window.innerHeight;
   const y = wouldOverflowViewport && aboveY > 0 ? aboveY : belowY;
 
-  return { x, y: Math.max(0, y) };
+  return { x, y: Math.max(viewportPadding, y) };
 }
