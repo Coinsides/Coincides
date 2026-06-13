@@ -5,11 +5,7 @@ import {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUIStore } from '@/stores/uiStore';
-import {
-  combinedDefinitionText,
-  presentationKindForBlock,
-  stringValue,
-} from './blockContentService';
+import { useBlockFieldDraftController } from './hooks/useBlockFieldDraftController';
 import { useCanvasContentWidth } from './hooks/useCanvasContentWidth';
 import { useBlockPlacementInteractions } from './hooks/useBlockPlacementInteractions';
 import { useBlockSelectionController } from './hooks/useBlockSelectionController';
@@ -24,6 +20,8 @@ import {
   useNoteCanvasFrameModel,
   useNoteCanvasResolvedLayoutModel,
 } from './hooks/useNoteCanvasLayoutModel';
+import { useLayoutPersistenceController } from './hooks/useLayoutPersistenceController';
+import { useMeasuredBlockReflowController } from './hooks/useMeasuredBlockReflowController';
 import { usePlacementHistory } from './hooks/usePlacementHistory';
 import { useRuntimeInteractionController } from './hooks/useRuntimeInteractionController';
 import { useSlashCommandController } from './hooks/useSlashCommandController';
@@ -35,14 +33,7 @@ import {
 import { NoteWritingSurfaceLayer } from './layers/NoteWritingSurfaceLayer';
 import { estimateBlockHeightForText } from './measurementService';
 import {
-  shouldResolvePageCollisions,
-} from './modePolicyService';
-import {
-  layoutsEqual,
-} from './placementService';
-import {
   LAYOUT_MEASURE_SUPPRESSION_MS,
-  type BlockBoxLayout,
 } from './runtimeLayout';
 import styles from '../NoteDetail.module.css';
 
@@ -238,23 +229,28 @@ export default function NoteCanvasRuntime() {
     visibleBlocks,
   });
 
-  const persistChangedBlockLayouts = useCallback((nextLayouts: Record<string, BlockBoxLayout>) => {
-    Object.entries(nextLayouts).forEach(([blockId, nextLayout]) => {
-      const previousLayout = blockLayouts[blockId];
-      if (previousLayout && layoutsEqual(previousLayout, nextLayout)) return;
-      const targetBlock = blocks.find((item) => item.id === blockId);
-      if (!targetBlock) return;
-      void persistBlockLayout(targetBlock, nextLayout);
-    });
-  }, [blocks, blockLayouts, persistBlockLayout]);
+  const {
+    persistChangedBlockLayouts,
+    persistLayoutSnapshot,
+  } = useLayoutPersistenceController({
+    blocks,
+    blockLayouts,
+    persistBlockLayout,
+  });
 
-  const persistLayoutSnapshot = useCallback((layouts: Record<string, BlockBoxLayout>) => {
-    Object.entries(layouts).forEach(([blockId, layout]) => {
-      const targetBlock = blocks.find((item) => item.id === blockId);
-      if (!targetBlock) return;
-      void persistBlockLayout(targetBlock, layout);
-    });
-  }, [blocks, persistBlockLayout]);
+  const { updateBlockFieldDraft } = useBlockFieldDraftController({
+    setBlockFieldDrafts,
+    setBlockTextDrafts,
+  });
+
+  const { handleMeasuredBlockHeight } = useMeasuredBlockReflowController({
+    applyMeasuredBlockHeightDraft,
+    blockLayouts,
+    movingBlockIdRef,
+    orderedBlocks: visibleBlocks,
+    suppressMeasuredReflowUntilRef,
+    surfacePolicy,
+  });
 
   const { pushLayoutHistory } = usePlacementHistory({
     applyLayoutDrafts: mergeLayoutDrafts,
@@ -430,29 +426,9 @@ export default function NoteCanvasRuntime() {
           onDiscardDraft={discardDraft}
           onDraftChange={handleDraftChange}
           onDraftKeyDown={handleDraftKeyDown}
-          onFieldDraftChange={(block, text, fieldValues) => {
-            setBlockFieldDrafts((current) => ({ ...current, [block.id]: fieldValues }));
-            const nextText = presentationKindForBlock(block) === 'definition'
-              ? combinedDefinitionText(stringValue(fieldValues.concept_name), stringValue(fieldValues.description))
-              : presentationKindForBlock(block) === 'formula'
-                ? stringValue(fieldValues.latex_input)
-                : text;
-            setBlockTextDrafts((current) => ({ ...current, [block.id]: nextText }));
-          }}
+          onFieldDraftChange={updateBlockFieldDraft}
           onFocusBlock={markBlockFocused}
-          onMeasuredBlockHeight={(block, layout, isActive, height) => {
-            const allowActiveFormulaReflow = isActive && presentationKindForBlock(block) === 'formula';
-            if (movingBlockIdRef.current) return;
-            if (!allowActiveFormulaReflow && Date.now() < suppressMeasuredReflowUntilRef.current) return;
-            applyMeasuredBlockHeightDraft({
-              baseLayouts: blockLayouts,
-              blockId: block.id,
-              fallbackLayout: layout,
-              measuredHeight: height,
-              orderedBlockIds: visibleBlocks.map((item) => item.id),
-              resolveCollisions: shouldResolvePageCollisions(surfacePolicy),
-            });
-          }}
+          onMeasuredBlockHeight={handleMeasuredBlockHeight}
           onPageSpaceDoubleClick={handlePageSpaceDoubleClick}
           onPersistDraft={persistDraft}
           onResizeDraftFromTextarea={resizeDraftFromTextarea}

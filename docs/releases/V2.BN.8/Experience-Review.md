@@ -1,5 +1,17 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 L6/L7/L11 Runtime Decision Controller Experience Note
+
+```text
+field derivation / layout persistence / measured reflow decision moved out of root; not browser-smoked
+```
+
+体验风险：
+
+- 本次迁移理论上不改变用户可见行为，只改变 field draft、layout persistence、measured reflow 这些 decision callback 的归属。
+- 如果后续出现 Definition 字段互相覆盖、Formula 输入不更新预览文本、move / resize 不落盘、Ctrl+Z / Ctrl+Y 不能保持布局、或 Formula input 展开后不推开下方 block，应优先检查新增的三个 hook。
+- `NoteCanvasRuntime.tsx` 仍然负责把这些 handler 传给 writing surface 和 placement interaction controller；完整 L12 decommission 仍需要继续压缩 root 的 controller composition。
+
 ## V2.BN.8.1 L3-L5 Layout Model Hook Experience Note
 
 ```text
@@ -10,7 +22,7 @@ L3-L5 layout model hook: implemented, not browser-smoked
 
 - 本次迁移理论上不改变用户可见行为，只改变 layout/model composition 的归属。
 - 如果后续出现 Page mode workspace block 泄漏、Canvas mode workspace block 消失、PageFrame 高度异常、Preview 统计错误、或 slash/draft 默认落点异常，应优先检查 `hooks/useNoteCanvasLayoutModel.ts`。
-- `NoteCanvasRuntime.tsx` 现在更接近 runtime composition root，但仍保留 placement persistence callback、field draft text derivation、measured height reflow decision 和 controller wiring；这些仍是后续 L6-L12 的继续瘦身点。
+- `NoteCanvasRuntime.tsx` 现在更接近 runtime composition root；placement persistence callback、field draft text derivation、measured height reflow decision 已继续迁入 hooks，后续重点转向 controller / layer wiring 瘦身。
 - 浏览器 smoke 需要重点看 Page / Canvas 切换、Preview 面板统计、双击空白创建 draft、长文本粘贴后 PageFrame 高度、以及 workspace block 不污染 Page mode。
 
 ## V2.BN.8.1 Current Runtime Experience Snapshot
@@ -22,7 +34,7 @@ NoteDetail shell achieved; Canvas Engine runtime root still needs browser smoke
 体验判断：
 
 - 从代码结构看，用户进入 note 页面时已经通过 `NoteCanvasRuntimeProvider` 进入 Canvas Engine runtime root；`NoteDetail.tsx` 不再是体验主体。
-- 当前风险不再是“旧 NoteDetail 页面继续承载核心体验”，而是“新的 `NoteCanvasRuntime.tsx` composition root 仍聚合了较多 layout / measurement / persistence decision”。
+- 当前风险不再是“旧 NoteDetail 页面继续承载核心体验”，而是“新的 `NoteCanvasRuntime.tsx` composition root 仍聚合了较多 controller / layer wiring”。
 - 后续体验验收不能只看页面是否能打开；必须逐项验证自然写作、block 选中、field editing、formula 展开、slash menu、resize/reflow、Page/Canvas 切换、preview overlay 与 source jump。
 
 ## V2.BN.8.1 L6/L9 Writing Surface Layer Experience Note

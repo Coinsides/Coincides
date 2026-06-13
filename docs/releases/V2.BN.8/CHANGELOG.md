@@ -1,5 +1,14 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 L6/L7/L11 Runtime Decision Controller Seed
+
+- 新增 `hooks/useBlockFieldDraftController.ts`，将 structured field draft -> text draft derivation 从 `NoteCanvasRuntime.tsx` 迁出。
+- 新增 `hooks/useLayoutPersistenceController.ts`，将 changed layout diff 判断、layout snapshot persistence callback 从 `NoteCanvasRuntime.tsx` 迁出。
+- 新增 `hooks/useMeasuredBlockReflowController.ts`，将 measured block height -> layout draft reflow decision 从 `NoteCanvasRuntime.tsx` 迁出。
+- `NoteCanvasRuntime.tsx` 继续作为 controller / layer composition root，但不再直接知道 Definition / Formula 字段如何拼接文本，不再直接判断 layout 是否 changed，也不再内联 measured height reflow policy。
+- 本轮不改变 field value truth、block save API、layout payload、undo/redo history、measurement tolerance、collision resolution 或 formula active reflow 例外规则。
+- L6/L7/L11 runtime decision controller seed 迁出后 client build / server build passed。
+
 ## Changed - V2.BN.8.1 L3-L5 Layout Model Hook Seed
 
 - 新增 `hooks/useNoteCanvasLayoutModel.ts`。

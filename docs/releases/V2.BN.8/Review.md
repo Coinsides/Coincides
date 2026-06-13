@@ -1,5 +1,34 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 L6/L7/L11 Runtime Decision Controller Seed
+
+```text
+status: in progress
+client build: passed
+server build: passed
+```
+
+已完成部分：
+
+- 新增 `hooks/useBlockFieldDraftController.ts`。
+- 新增 `hooks/useLayoutPersistenceController.ts`。
+- 新增 `hooks/useMeasuredBlockReflowController.ts`。
+- `NoteCanvasRuntime.tsx` 不再内联：
+  - Definition / Formula field draft 到 text draft 的派生；
+  - changed layout 是否需要落盘的判断；
+  - undo / redo layout snapshot 的 persistence callback；
+  - measured block height 是否允许推开后续 block 的 reflow decision。
+- `NoteCanvasRuntime.tsx` 当前约 447 行，继续保留 runtime controller / layer composition 角色。
+
+仍需验收：
+
+- Definition concept / description field draft 是否仍正确同步 text draft；
+- Formula latex field draft 是否仍正确同步 text draft；
+- move / resize 后 layout persistence 是否仍能跳过 unchanged layout；
+- Ctrl+Z / Ctrl+Y placement history 是否仍会 persist snapshot；
+- measured height reflow 是否仍避开 moving block，且 active formula 仍允许 reflow；
+- 浏览器 smoke 尚未执行。
+
 ## V2.BN.8.1 L3-L5 Layout Model Hook Seed
 
 ```text
@@ -45,17 +74,15 @@ runtime replacement: partially achieved
 - `client/src/pages/Notes/NoteDetail.tsx` 当前只负责读取 `noteId` route param，并通过 `NoteCanvasRuntimeProvider` 渲染 `NoteCanvasRuntime`。
 - 旧的 `NoteDetail.tsx` 大型 runtime 主体已经清退；当前剩余替换工作集中在 `canvasEngine/NoteCanvasRuntime.tsx` 内部继续分层。
 - `NoteCanvasRuntime.tsx` 当前仍保留：
-  - `blockLayouts` resolved layout 计算；
-  - PageFrame / runtime model composition；
-  - field draft -> text draft derivation；
-  - measured height -> layout draft reflow decision；
-  - placement persistence callback boundary；
-  - controller / layer composition。
+  - runtime controller / layer composition；
+  - note data adapter orchestration；
+  - block list、moving block、measured reflow suppression refs；
+  - controller-to-layer handler wiring。
 - 因此当前状态不是“NoteDetail 仍是旧 runtime”，而是“Canvas Engine 已成为 note 页面 runtime root，但 runtime root 内部仍需继续瘦身和验收”。
 
 下一步验收重点：
 
-- 继续减少 `NoteCanvasRuntime.tsx` 对 layout / measurement / persistence decision 的直接持有；
+- 继续减少 `NoteCanvasRuntime.tsx` 对 controller / layer wiring 的直接持有；
 - 对 Page / Canvas mode、block edit、draft、slash、resize/reflow、preview overlay 做浏览器 smoke；
 - 完成 L12 acceptance 后再判断 `V2.BN.8.1` 是否可以关闭。
 
