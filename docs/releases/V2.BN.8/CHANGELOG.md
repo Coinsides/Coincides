@@ -1,5 +1,15 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Insert And Source Overlay Portal Seed
+
+- 新增 `canvasEngine/layers/NoteFloatingPanelLayer.tsx`，把 Insert floating action / Advanced Insert panel / Source jump panel 从 `NoteChromeLayer.tsx` 中拆出。
+- `FloatingOverlayLayer` 增加 `free` placement，用来承载 viewport-fixed controls，而不是强制所有浮层进入右上角 stack。
+- `+ Insert` / Advanced Insert 现在通过 `FloatingOverlayLayer` free placement 渲染，继续保持 viewport floating action，不参与 PageFrame / block measurement。
+- Source jump panel 迁入 `FloatingOverlayLayer` viewport overlay stack，不再作为 document shell 内部内容撑开页面。
+- `NoteRuntimeDocumentLayer` 改为消费独立的 `NoteFloatingPanelLayer`，`NoteChromeLayer` 回到只负责 note top chrome / info / actions / preview。
+- 本轮仍不迁移 slash menu、block control bar、formula help tooltip；这些继续保留为后续 L9 overlay anchor work。
+- client build passed。
+
 ## Changed - V2.BN.8.1 Floating Overlay Portal Seed
 
 - 新增 `canvasEngine/layers/FloatingOverlayLayer.tsx`，作为第一版 viewport-level overlay portal / z-index stack。

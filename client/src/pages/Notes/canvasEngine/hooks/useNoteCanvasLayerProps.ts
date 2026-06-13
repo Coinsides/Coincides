@@ -7,8 +7,8 @@ import type { NavigateFunction } from 'react-router-dom';
 import type { Toast } from '@/stores/uiStore';
 import type {
   NoteChromeLayerProps,
-  NoteFloatingPanelLayerProps,
 } from '../layers/NoteChromeLayer';
+import type { NoteFloatingPanelLayerProps } from '../layers/NoteFloatingPanelLayer';
 import type { NoteRuntimeDocumentLayerProps } from '../layers/NoteRuntimeDocumentLayer';
 import type { NoteWritingSurfaceLayerProps } from '../layers/NoteWritingSurfaceLayer';
 import type {
@@ -92,6 +92,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     newTemplateId: input.newTemplateId,
     showAdvancedInsert: input.showAdvancedInsert,
     sourceJumpTarget: input.sourceJumpTarget,
+    surfaceMode: input.surfaceMode,
     onAddBlock: input.onAddBlock,
     onCloseOverlay: input.onCloseOverlay,
     onCloseSourceJump: handleCloseSourceJump,

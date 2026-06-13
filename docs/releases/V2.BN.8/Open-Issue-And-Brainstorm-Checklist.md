@@ -45,21 +45,24 @@ date: 2026-06-12
 ## L9 Floating Overlay Checkpoint
 
 ```text
-status: portal seed applied, pending Henry visual retest
-patch: V2.BN.8.1 Floating Overlay Portal Seed
+status: portal seed expanded, pending Henry visual retest
+patch: V2.BN.8.1 Floating Overlay Portal Seed + Insert/Source Overlay Portal Seed
 ```
 
 已完成：
 
 - Note info / More actions / Export preview 进入 `FloatingOverlayLayer` viewport portal；
 - Preview panel 不再依赖 `noteChrome` 局部 absolute stacking context；
+- `+ Insert` / Advanced Insert 已从 document shell 中拆出，进入 `NoteFloatingPanelLayer`；
+- `+ Insert` / Advanced Insert 使用 `FloatingOverlayLayer` 的 free placement，不再作为 canvas content；
+- Source jump panel 已进入 `FloatingOverlayLayer` viewport overlay stack；
 - portal shell 不吞掉页面点击，只有实际面板可交互。
 
 仍未完成：
 
 - slash menu 尚未迁入 portal；
 - block control bar 尚未迁入 viewport overlay anchor；
-- insert panel / source jump / formula help tooltip 尚未迁入同一 overlay 层；
+- formula help tooltip 尚未迁入同一 overlay 层；
 - 需要 Henry 手动复测 Preview 是否覆盖 selected block toolbar，而不是混层。
 
 ## Open Issue Checklist

@@ -95,6 +95,8 @@ connectingRelationFuture
 
 - 所有主浮层最终都应进入 `FloatingOverlayLayer` 或同级 viewport overlay stack，而不是挂在 block / chrome / page DOM 流里。
 - `FloatingOverlayLayer` 第一版已经承载 Note info、More actions、Export preview；这些面板应高于 selected block toolbar。
+- `+ Insert` / Advanced Insert 属于 viewport floating action，已经迁入 `FloatingOverlayLayer` free placement；它不参与 PageFrame / block measurement。
+- Source jump panel 属于 viewport overlay stack，已经迁入 `FloatingOverlayLayer`；它展示 source snapshot，不应撑开 document shell。
 - overlay portal shell 不吞掉页面点击，只有实际面板可交互。
 - slash menu 出现在 caret 附近；
 - block control bar 靠近对象但不遮挡正文；

@@ -595,7 +595,8 @@
   gap: 8px;
 }
 
-.pageCanvas .pageToolRail {
+.pageCanvas .pageToolRail,
+.pageToolRailCanvas {
   top: 50%;
   right: 16px;
   z-index: 60;
@@ -636,7 +637,8 @@
   box-shadow: var(--glass-shadow-lg);
 }
 
-.pageCanvas .insertPanel {
+.pageCanvas .insertPanel,
+.insertPanelCanvas {
   top: 50%;
   right: 16px;
   max-height: calc(100vh - 84px);

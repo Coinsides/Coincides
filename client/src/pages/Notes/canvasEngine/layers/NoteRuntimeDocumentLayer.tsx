@@ -2,7 +2,7 @@ import type { PointerEvent as ReactPointerEvent } from 'react';
 import {
   NoteFloatingPanelLayer,
   type NoteFloatingPanelLayerProps,
-} from './NoteChromeLayer';
+} from './NoteFloatingPanelLayer';
 import {
   NoteWritingSurfaceLayer,
   type NoteWritingSurfaceLayerProps,

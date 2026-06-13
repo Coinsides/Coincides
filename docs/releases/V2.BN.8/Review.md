@@ -1,5 +1,30 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Insert And Source Overlay Portal Seed
+
+```text
+status: technical validation passed, browser smoke pending
+scope: L9 Floating Overlay Layer
+client build: passed
+browser smoke: not run in this checkpoint
+```
+
+Completed:
+
+- Added `client/src/pages/Notes/canvasEngine/layers/NoteFloatingPanelLayer.tsx`.
+- Moved Insert floating action, Advanced Insert panel, and Source jump panel out of `NoteChromeLayer.tsx`.
+- Extended `FloatingOverlayLayer` with `free` placement for viewport-fixed controls.
+- Kept Note info, More actions, Export preview in the top-right overlay stack.
+- Moved Source jump into the viewport overlay stack.
+- `NoteRuntimeDocumentLayer` now composes the floating panel layer from its own module.
+
+Still intentionally out of scope:
+
+- Slash menu remains writing-surface anchored.
+- Block control bar remains block-local.
+- Formula help tooltip remains block-local.
+- No overlay collision / flip / viewport clamp service yet.
+
 ## V2.BN.8.1 Floating Overlay Portal Seed
 
 ```text

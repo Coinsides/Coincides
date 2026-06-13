@@ -25,6 +25,7 @@ export * from './layers/BlockControlBarLayer';
 export * from './layers/ExportPreviewLayer';
 export * from './layers/FloatingOverlayLayer';
 export * from './layers/NoteChromeLayer';
+export * from './layers/NoteFloatingPanelLayer';
 export * from './layers/NoteWritingSurfaceLayer';
 export * from './layers/SlashMenuLayer';
 export * from './layers/BlockEditorLayer';

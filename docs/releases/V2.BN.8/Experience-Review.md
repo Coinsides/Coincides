@@ -1,5 +1,25 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Insert And Source Overlay Portal Experience Note
+
+```text
+Insert and Source jump now behave more like viewport tools than document content.
+```
+
+体验判断：
+
+- `+ Insert` 仍然是右侧的 viewport floating action，但现在它不再挂在 document shell 里面，后续 PageFrame / workspace 替换时不应该被正文布局带走。
+- Advanced Insert panel 使用 free overlay placement，位置仍由它自己的 fixed 样式控制；这保留了当前手感，也避免它进入右上角 preview/info stack。
+- Source jump panel 进入右上角 overlay stack 后，应更像临时查看 source snapshot 的工具面板，而不是页面内容的一部分。
+- 这一步不应改变 block 写作、Page/Canvas 切换、source jump 内容、Advanced Insert 表单内容。
+
+仍需人工观察：
+
+- 打开 Advanced Insert 时，按钮和面板是否仍在预期位置；
+- 打开 Source jump 时，面板是否在 viewport overlay 中显示，且不会撑开 page/canvas；
+- Preview / More / Info / Source jump 同时触发时，是否存在互相遮挡或需要互斥关闭的体验问题；
+- 窄屏下 Insert panel 是否仍可读、可关闭。
+
 ## V2.BN.8.1 Floating Overlay Portal Experience Note
 
 ```text
