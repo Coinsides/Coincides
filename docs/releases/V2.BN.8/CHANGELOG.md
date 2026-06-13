@@ -1,5 +1,12 @@
 # CHANGELOG - V2.BN.8
 
+## Added - V2.BN.8.1 Canvas Engine Performance Seed
+
+- 新增 `npm run smoke:canvas-engine-performance`，作为不依赖浏览器的 Canvas Engine 纯逻辑性能 seed。
+- 覆盖 50 blocks、200 blocks、long paragraph、formula-heavy、page + workspace mixed note 五个场景。
+- 该 seed 调用 `placementService` / `engineModel` 的生产纯函数，验证 placement、reflow、snap、runtime model、relation endpoint reserve 和 layout history diff 的基础路径。
+- 本 seed 不替代 Browser Harness 或 Henry 手动体验验收；它只证明核心布局模型在非 DOM 场景下没有明显算法退化。
+
 ## Changed - V2.BN.8.1 Runtime History Keyboard Intent Service Seed
 
 - 新增 `historyService.ts`，集中定义 `RuntimeHistoryEntry`、`RuntimeHistoryKeyboardIntent` 和 `getRuntimeHistoryKeyboardIntent()`。

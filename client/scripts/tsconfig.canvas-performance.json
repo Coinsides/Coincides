@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "baseUrl": "../src",
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "lib": ["ES2022", "DOM"],
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "outDir": "../../.codex-tmp/canvas-engine-performance",
+    "paths": {
+      "@/*": ["*"]
+    },
+    "rootDir": "..",
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2022"
+  },
+  "files": [
+    "./canvasEnginePerformanceSeed.ts",
+    "../src/pages/Notes/canvasEngine/engineModel.ts",
+    "../src/pages/Notes/canvasEngine/geometry.ts",
+    "../src/pages/Notes/canvasEngine/placementService.ts",
+    "../src/pages/Notes/canvasEngine/runtimeDataTypes.ts",
+    "../src/pages/Notes/canvasEngine/runtimeLayout.ts",
+    "../src/pages/Notes/canvasEngine/types.ts"
+  ]
+}

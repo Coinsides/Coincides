@@ -1,5 +1,22 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Canvas Engine Performance Seed Experience Note
+
+```text
+Canvas Engine now has a repeatable non-browser performance seed for pure layout/runtime model paths.
+```
+
+体验判断：
+
+- 这个 seed 不会打开页面，也不证明真实滚动、overlay、输入或浏览器渲染不卡。
+- 它证明的是：在 50 / 200 blocks、长段落、公式密集、page + workspace 混合这些基础规模下，placement / reflow / snap / relation endpoint reserve / runtime model 纯逻辑路径可以稳定跑通。
+- 对体验工作的意义是：后续如果视觉上出现卡顿，我们可以更快区分是 DOM 渲染、React 组合、CSS/overlay 层级，还是底层 layout model 本身退化。
+
+仍需人工观察：
+
+- Browser Harness 统一补跑时，需要额外验证真实 50 / 200 blocks 的滚动、选中、拖动、resize 和 overlay 跟随。
+- Henry 手动确认之前，不能把这个 seed 当作 V2.BN.8.1 体验通过。
+
 ## V2.BN.8.1 Shared Overlay Placement Helper Experience Note
 
 ```text

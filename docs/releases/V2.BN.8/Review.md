@@ -1,5 +1,35 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Canvas Engine Performance Seed
+
+```text
+status: technical validation passed, browser smoke deferred
+scope: L12 performance seed
+command: npm run smoke:canvas-engine-performance
+result: passed
+browser smoke: deferred until the full replacement pass, per Henry instruction
+```
+
+Completed:
+
+- Added `client/scripts/canvasEnginePerformanceSeed.ts`.
+- Added `client/scripts/tsconfig.canvas-performance.json`.
+- Added root/client `smoke:canvas-engine-performance` scripts.
+- Covered five non-browser runtime model scenarios:
+  - `50 blocks smoke`;
+  - `200 blocks smoke`;
+  - `long paragraph block`;
+  - `formula-heavy note`;
+  - `page + workspace mixed note`.
+- The seed exercises production pure functions for placement, collision resolution, height-change reflow, snap, runtime model assembly, relation endpoint reserve, and layout history diff.
+- Latest run passed with a total reported seed time of `7.83ms`.
+
+Still intentionally out of scope:
+
+- This is not DOM render performance.
+- This is not Browser Harness smoke.
+- This is not Henry manual experience acceptance.
+
 ## V2.BN.8.1 Shared Overlay Placement Helper Seed
 
 ```text

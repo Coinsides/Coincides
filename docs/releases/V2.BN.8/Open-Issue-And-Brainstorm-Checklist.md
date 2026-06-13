@@ -30,7 +30,7 @@ Status: 初步人工测试中
 
 ```text
 status: L12 code decommission achieved, acceptance incomplete
-date: 2026-06-12
+date: 2026-06-13
 ```
 
 当前判断：
@@ -40,7 +40,17 @@ date: 2026-06-12
 - 后续 patch 不应继续把旧 `NoteDetail.tsx` 当作主要修补对象；
 - 新问题优先落到 Canvas Engine 的 layer / hook / service 边界中处理；
 - 本清单中较早提到“旧 NoteDetail 仍承担 runtime 主体”的条目保留为历史问题来源，当前已被 L12 decommission audit 覆盖；
-- `V2.BN.8.1` 仍未完成，因为 browser smoke、performance seed、Henry manual passed 仍是硬验收。
+- `V2.BN.8.1` 仍未完成，因为 browser smoke 和 Henry manual passed 仍是硬验收；performance seed 已有非浏览器 CLI 证据。
+
+性能 seed 当前证据：
+
+- [x] `npm run smoke:canvas-engine-performance` passed；
+- [x] 覆盖 50 blocks；
+- [x] 覆盖 200 blocks；
+- [x] 覆盖 long paragraph；
+- [x] 覆盖 formula-heavy note；
+- [x] 覆盖 page + workspace mixed note；
+- [ ] Browser Harness 真实渲染性能 smoke 待完整替换阶段结束后统一补跑。
 
 ## L9 Floating Overlay Checkpoint
 
