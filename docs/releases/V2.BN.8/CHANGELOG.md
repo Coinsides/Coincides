@@ -1,5 +1,14 @@
 # CHANGELOG - V2.BN.8
 
+## Fixed - V2.BN.8.1 Definition Field Truth And Active Reflow
+
+- `DefinitionBlock` 现在把已存在的 `field_values` / `structured_fields` 视为字段 truth。
+- 当 Definition 已经有 structured fields 时，`description` 不再从 `body` / `plain_text` fallback 反推，避免只填写 `concept_name` 后把概念名复制进 description。
+- `DefinitionBlockProjection` 在 blur 保存时使用最新字段草稿，避免 Tab / blur 时保存上一帧字段。
+- block measurement 在 layout effect 内增加一帧复测，降低 textarea resize / structured field 展开后一拍测量不足的风险。
+- active structured block reflow 从仅允许 Formula 扩展为 Definition + Formula，Definition 编辑展开时可以推开下方 block。
+- client build passed；浏览器手测仍需 Henry 验收。
+
 ## Changed - V2.BN.8.1 L2/L12 Runtime Controller Composition Hook Seed
 
 - 新增 `hooks/useNoteCanvasRuntimeController.ts`。

@@ -2,6 +2,7 @@ import type {
   KeyboardEvent,
   Ref,
 } from 'react';
+import { useRef } from 'react';
 import {
   combinedDefinitionText,
   type FieldValueRecord,
@@ -35,11 +36,15 @@ export function DefinitionBlockProjection({
   onSave,
   onKeyDown,
 }: DefinitionBlockProjectionProps) {
+  const latestFieldsRef = useRef(fields);
+  latestFieldsRef.current = fields;
+
   const updateDraft = (
     patch: Partial<typeof fields>,
     anchorElement?: HTMLElement | null,
   ) => {
     const nextFields = { ...fields, ...patch };
+    latestFieldsRef.current = nextFields;
     const nextText = combinedDefinitionText(nextFields.concept_name, nextFields.description);
     onTextChange(nextText, nextText.length, anchorElement);
     onFieldDraftChange(nextFields);
@@ -56,7 +61,7 @@ export function DefinitionBlockProjection({
               value={fields.concept_name}
               onFocus={onFocused}
               onChange={(event) => updateDraft({ concept_name: event.currentTarget.value }, event.currentTarget)}
-              onBlur={() => onSave(true, fields)}
+              onBlur={() => onSave(true, latestFieldsRef.current)}
               placeholder="Concept name"
             />
           </label>
@@ -71,7 +76,7 @@ export function DefinitionBlockProjection({
                 resizeTextareaToContent(event.currentTarget);
                 updateDraft({ description: event.currentTarget.value }, event.currentTarget);
               }}
-              onBlur={() => onSave(true, fields)}
+              onBlur={() => onSave(true, latestFieldsRef.current)}
               onKeyDown={onKeyDown}
               placeholder="Write the definition..."
               rows={1}

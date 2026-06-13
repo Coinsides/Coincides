@@ -148,6 +148,11 @@ FormulaBlock UI 需要一个轻量帮助入口：
 
 - [ ] `ISSUE-003` 手动创建 DefinitionBlock 后，先输入 `concept name`，再按 Tab 切换到 `description`，description 会自动复制 concept name。
 
+```text
+status: patch applied, pending Henry retest
+patch: V2.BN.8.1 Definition Field Truth And Active Reflow
+```
+
 #### Henry 初步观察
 
 操作流程：
@@ -184,11 +189,18 @@ FormulaBlock UI 需要一个轻量帮助入口：
 
 - [ ] 确认该问题只发生在新建 DefinitionBlock，还是 paragraph convert 后也发生。
 - [ ] 确认保存后刷新页面是否仍复制。
-- [ ] 检查 `definitionFieldsFromBlock` / `combinedDefinitionText` / fieldDraft 同步路径。
+- [x] 检查 `definitionFieldsFromBlock` / `combinedDefinitionText` / fieldDraft 同步路径。
+- [x] 已修复 stored field values 被 `body` / `plain_text` fallback 反推 description 的问题。
+- [x] 已修复 blur 保存可能拿到上一帧 fields 的风险。
 
 ### 4. Active DefinitionBlock 展开后与下方 block 穿模
 
 - [ ] `ISSUE-004` 下方存在 block 时，选中/展开 DefinitionBlock 会与下方 block overlap。
+
+```text
+status: patch applied, pending Henry retest
+patch: V2.BN.8.1 Definition Field Truth And Active Reflow
+```
 
 #### Henry 初步观察
 
@@ -214,10 +226,12 @@ FormulaBlock UI 需要一个轻量帮助入口：
 
 #### 待补信息
 
-- [ ] 确认 DefinitionBlock 和 FormulaBlock 是否共用同一个穿模根因。
+- [x] 确认 DefinitionBlock 和 FormulaBlock 是否共用同一个穿模根因。
 - [ ] 确认 layout mode on/off 是否影响复现。
 - [ ] 确认 snap on/off 是否影响复现。
 - [ ] 确认穿模是否只发生于 active 状态。
+- [x] 已修复 active Definition 被 measured reflow suppression 拦住的问题。
+- [x] 已给 block measurement 增加下一帧复测，降低 active structured fields 展开后一拍测量不足的风险。
 
 ### 5. 新建 draft block 的落点需要区分自然写作和自由排版
 

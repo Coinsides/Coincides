@@ -1,5 +1,23 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 Definition Field Truth And Active Reflow Experience Note
+
+```text
+Definition fields and active structured reflow patched; pending Henry retest
+```
+
+体验判断：
+
+- DefinitionBlock 的 `concept_name` 和 `description` 必须像两个独立输入框，而不是一个 text fallback 的两种读法。
+- 本补丁后，用户按 Tab 从 Concept name 进入 Description 时，Description 应该保持空白，直到用户主动输入。
+- DefinitionBlock 进入 active editing 后会参与 measured-height reflow；在 Page mode 下，它应该像普通长文本一样把下方 block 推开。
+
+仍需人工观察：
+
+- 快速输入 concept name 后立刻 Tab，是否仍会出现旧字段闪回；
+- active Definition 下方紧贴 Formula / Code / Paragraph 时是否都能避让；
+- 保存并刷新后，field values 是否仍按用户填写的两个字段显示。
+
 ## V2.BN.8.1 L2/L12 Runtime Controller Composition Experience Note
 
 ```text

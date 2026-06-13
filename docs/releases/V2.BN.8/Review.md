@@ -1,5 +1,32 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 Definition Field Truth And Active Reflow Patch
+
+```text
+status: technical validation passed
+client build: passed
+browser smoke: lightweight runtime smoke passed
+```
+
+已完成部分：
+
+- `definitionFieldsFromBlock()` 现在在检测到 stored structured fields 时停止使用 `body` / `plain_text` 作为 description fallback。
+- 这让 `concept_name` 与 `description` 回到独立 field value：只填 `CS:GO` 不会再把 `CS:GO` 自动写进 description。
+- `DefinitionBlockProjection` 的 blur 保存改为读取最新字段 ref，降低 Tab 切换输入框时保存旧字段的风险。
+- `useMeasuredBlockReflowController()` 允许 active Definition 和 active Formula 一样触发 measured-height reflow。
+- `useBlockMeasurement()` 增加 requestAnimationFrame 复测，覆盖 structured field 切换/textarea resize 后的下一帧高度。
+- Browser smoke 确认当前 note 仍挂在 Canvas Engine runtime：
+  - `data-canvas-engine-version = V2.BN.8-self-owned-minimal-hybrid-0`；
+  - `data-canvas-engine-route = self_owned_minimal_hybrid`；
+  - 当前页面存在 4 个 article；
+  - console error 为空。
+
+仍需验收：
+
+- Henry 重新测试：新建 DefinitionBlock，输入 Concept name 后按 Tab，Description 应保持空白。
+- Henry 重新测试：DefinitionBlock active 展开时，下方 block 应被稳定推开，不再穿模。
+- 需要继续观察 paragraph -> Definition 转换路径是否仍符合“全文进 description，concept name 留空”的产品约定。
+
 ## V2.BN.8.1 L2/L12 Runtime Controller Composition Hook Seed
 
 ```text

@@ -37,6 +37,12 @@ export function readFieldValues(content: Record<string, unknown>, metadata?: Rec
   return {};
 }
 
+function hasStoredFieldValues(content: Record<string, unknown>, metadata?: Record<string, unknown>): boolean {
+  return isRecord(content.field_values)
+    || isRecord(content.structured_fields)
+    || isRecord(metadata?.structured_fields);
+}
+
 function templateKeyForBlock(block: BlockContentInput): string {
   return firstString(
     block.metadata?.template_key,
@@ -76,6 +82,12 @@ export function definitionFieldsFromBlock(
   }
   const fields = readFieldValues(block.content_json, block.metadata);
   const bodyFallback = stringValue(block.content_json?.body) || block.plain_text || '';
+  if (hasStoredFieldValues(block.content_json, block.metadata)) {
+    return {
+      concept_name: stringValue(fields.concept_name),
+      description: draftText !== undefined ? draftText : stringValue(fields.description),
+    };
+  }
   const parsed = definitionFieldsFromText(bodyFallback);
   return {
     concept_name: stringValue(fields.concept_name),

@@ -35,10 +35,16 @@ export function useBlockMeasurement({
 
     const measure = () => onMeasuredHeight(measureBlockContentHeight(element));
     measure();
+    const frameId = window.requestAnimationFrame(measure);
 
-    if (typeof ResizeObserver === 'undefined') return undefined;
+    if (typeof ResizeObserver === 'undefined') {
+      return () => window.cancelAnimationFrame(frameId);
+    }
     const observer = new ResizeObserver(measure);
     observer.observe(element);
-    return () => observer.disconnect();
+    return () => {
+      window.cancelAnimationFrame(frameId);
+      observer.disconnect();
+    };
   }, [active, blockContentRef, onMeasuredHeight, text, textareaRef, width]);
 }
