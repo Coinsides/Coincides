@@ -110,8 +110,16 @@ export function combinedDefinitionText(conceptName: string, description: string)
 export function formulaPreviewText(latexInput: string): string {
   const trimmed = latexInput.trim();
   if (!trimmed) return '';
+  if (trimmed.startsWith('$$') && trimmed.endsWith('$$')) return trimmed;
+  if (trimmed.startsWith('$') && trimmed.endsWith('$')) {
+    const body = trimmed.slice(1, -1).trim();
+    if (body.includes('\n') || body.startsWith('\\begin')) {
+      return `$$\n${body}\n$$`;
+    }
+    return `$${body}$`;
+  }
   if (trimmed.includes('$')) return trimmed;
-  return `$${trimmed}$`;
+  return `$$\n${trimmed}\n$$`;
 }
 
 function contentForDefinition(

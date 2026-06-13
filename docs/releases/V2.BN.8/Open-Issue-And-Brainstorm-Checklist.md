@@ -57,6 +57,11 @@ Status: 初步人工测试中
 
 - [ ] `ISSUE-002` Formula block 目前对 `$...$`、`$$...$$`、多行 LaTeX 的处理不够直觉。
 
+```text
+status: partially fixed
+patch: V2.BN.8.1 Formula Preview Display Body
+```
+
 #### Henry 初步观察
 
 用户直接复制 Green theorem 的 LaTeX 输入后，预览没有正确渲染。尤其是多行 `$...$` 会直接显示原文。
@@ -129,7 +134,8 @@ FormulaBlock UI 需要一个轻量帮助入口：
 
 #### 待补信息
 
-- [ ] 确认 `aligned` / `cases` / `matrix` / `array` 等常见环境是否可渲染。
+- [x] 确认 `aligned` 环境在 display mode 下可渲染。
+- [ ] 确认 `cases` / `matrix` / `array` 等常见环境是否可渲染。
 - [ ] 确认 formula block 是否应该默认居中显示。
 - [ ] 确认 formula block 的 LaTeX input 展开/折叠行为。
 - [ ] 确认保存后再次打开是否保留纯 LaTeX body。

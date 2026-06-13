@@ -344,6 +344,14 @@
 - 本补丁只完成代码块视觉区分；行级复制 / gutter 多行选择仍保留为后续 polish。
 - client build passed。
 
+## Fixed - V2.BN.8.1 Formula Preview Display Body
+
+- Formula block 的裸 `latex_input` 现在默认按 display math 渲染，不再被强行包成单行 inline `$...$`。
+- 用户输入已经包裹好的 `$$...$$` 时保持原样。
+- 用户输入单 `$...$` 时仍保持 inline；如果单 `$...$` 内是多行或 `\begin...` 环境，会自动升级为 display math。
+- Green theorem / `aligned` body 已用 KaTeX display mode 验证可渲染。
+- client build passed。
+
 ## Changed - V2.BN.8.1 L8/L10 Seeds
 
 - 新增 `interactionController.ts`，建立 Canvas Engine 第一版 interaction state boundary：

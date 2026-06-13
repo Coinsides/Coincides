@@ -62,6 +62,26 @@ browser smoke: passed for code projection / preview sanity
 - Definition 字段内容、Formula input、Page / Canvas mode、move / resize / undo 等完整 L12 体验仍需单独 smoke；
 - Henry 手动确认之前，V2.BN.8.1 不能标记 passed。
 
+## V2.BN.8.1 Formula Preview Display Body Patch
+
+```text
+status: partial technical validation passed
+client build: passed
+```
+
+已完成部分：
+
+- `formulaPreviewText()` 现在把裸 `latex_input` 作为独立公式 body 处理，默认输出 `$$...$$` display math。
+- 已包裹 `$$...$$` 的输入保持不变。
+- 单 `$...$` 输入保持 inline；如果内部是多行或 `\begin...` 环境，升级为 display math。
+- 使用 Green theorem / `aligned` body 直接调用 KaTeX display mode 验证可渲染。
+
+仍需验收：
+
+- 浏览器里编辑 FormulaBlock 并保存后，确认 reload 后仍保留纯 LaTeX body；
+- `cases` / `matrix` / `array` 等常见环境仍需补测；
+- Formula help tooltip 和完整输入说明还未进入统一 overlay layer。
+
 ## V2.BN.8.1 L7/L12 Runtime Refs And Load Reset Controller Seed
 
 ```text

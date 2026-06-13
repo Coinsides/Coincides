@@ -359,6 +359,25 @@ browser: in-app browser
 - 还没有完整验证 formula expand、definition edit、move / resize / undo、Page / Canvas mode；
 - Henry 手动确认前不能把 V2.BN.8.1 体验验收标记为 passed。
 
+## V2.BN.8.1 Formula Preview Display Body Patch
+
+```text
+status: partial technical validation passed
+```
+
+体验意图：
+
+- FormulaBlock 里的 `latex_input` 应该更像“公式本体”，而不是要求用户自己判断要不要包 `$`；
+- 裸 LaTeX body 默认按 display formula 渲染；
+- 已输入 `$...$` / `$$...$$` 的用户习惯仍尽量兼容；
+- 多行或 `\begin...` 环境自动走 display math，避免 Green theorem 这类公式直接显示原文。
+
+保留风险：
+
+- 这次只做技术规则和 KaTeX display validation；
+- 浏览器内编辑、保存、reload 后的 FormulaBlock 体验还需要单独 smoke；
+- hover help tooltip 和公式输入说明仍未做。
+
 ## 同步规则
 
 - 每次视觉/交互 patch 后更新本文。
