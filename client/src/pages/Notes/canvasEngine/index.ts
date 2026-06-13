@@ -16,6 +16,7 @@ export * from './hooks/useFloatingOverlayController';
 export * from './hooks/useLayoutDraftController';
 export * from './hooks/useLayoutInteractionController';
 export * from './hooks/useNoteCanvasDataAdapter';
+export * from './hooks/useNoteCanvasRuntimeController';
 export * from './hooks/usePlacementHistory';
 export * from './hooks/useRuntimeInteractionController';
 export * from './hooks/useSlashCommandController';

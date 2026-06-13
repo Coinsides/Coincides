@@ -1,5 +1,41 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 L2/L12 Runtime Controller Composition Hook Seed
+
+```text
+status: in progress
+client build: passed
+server build: passed
+browser smoke: not run
+```
+
+已完成部分：
+
+- 新增 `hooks/useNoteCanvasRuntimeController.ts`。
+- `NoteCanvasRuntime.tsx` 中的 controller graph orchestration 已迁入 runtime controller hook：
+  - data adapter；
+  - block selection；
+  - draft block；
+  - layout draft；
+  - layout interaction；
+  - surface mode；
+  - floating overlay；
+  - block placement interaction；
+  - slash command；
+  - measurement / reflow；
+  - layer props composition。
+- `NoteCanvasRuntime.tsx` 当前约 24 行，只负责 loading shell、`NoteChromeLayer` 和 `NoteRuntimeDocumentLayer` 渲染。
+- `canvasEngine/index.ts` 已导出 `useNoteCanvasRuntimeController`。
+- 本轮属于 L2 runtime root 与 L12 decommission 的收口 seed：Canvas Engine runtime root 仍存在，但 root render 文件不再直接持有 controller wiring。
+
+仍需验收：
+
+- 打开 note 后是否仍正常进入 Canvas Engine runtime；
+- Page / Canvas、Preview、Layout、Info、More、Insert 是否仍正常；
+- block 创建 / 编辑 / slash / move / resize / formula expand / definition edit 是否仍正常；
+- controller hook 是否需要继续按 L3-L11 分区拆小，避免长期形成新的大 hook；
+- diff check、secret scan 尚待本 checkpoint 最终执行；浏览器 smoke 尚未执行。
+
 ## V2.BN.8.1 L7/L12 Runtime Refs And Load Reset Controller Seed
 
 ```text

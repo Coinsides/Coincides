@@ -1,5 +1,18 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 L2/L12 Runtime Controller Composition Experience Note
+
+```text
+runtime controller wiring moved out of render shell; not browser-smoked
+```
+
+体验风险：
+
+- 本次迁移理论上不改变用户可见行为，只改变 Canvas Engine runtime 的 controller wiring 归属。
+- 如果后续出现整个 note 页面空白、loading 不退出、顶部工具栏缺失、writing surface 消失、Insert / Preview / Layout / Page 按钮失效、或 block interaction 全面失灵，应优先检查 `hooks/useNoteCanvasRuntimeController.ts` 和 `hooks/useNoteCanvasLayerProps.ts`。
+- 这一步让 `NoteCanvasRuntime.tsx` 变成真正的薄 render shell；但 `useNoteCanvasRuntimeController.ts` 现在集中承载 controller graph，后续还需要按 L3-L11 的服务边界继续拆小和做浏览器 smoke。
+- 体验 smoke 重点不是视觉是否变化，而是确认重构后所有既有入口仍可工作：打开 note、创建 block、slash menu、structured block、move / resize、preview overlay、Page / Canvas 切换。
+
 ## V2.BN.8.1 L7/L12 Runtime Refs And Load Reset Controller Experience Note
 
 ```text

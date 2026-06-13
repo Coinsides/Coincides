@@ -1,5 +1,14 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 L2/L12 Runtime Controller Composition Hook Seed
+
+- 新增 `hooks/useNoteCanvasRuntimeController.ts`。
+- 将 `NoteCanvasRuntime.tsx` 中的数据加载、selection、layout draft、surface mode、floating overlay、placement interaction、slash command、measurement/reflow、layer props composition 的 controller wiring 迁入 runtime controller hook。
+- `NoteCanvasRuntime.tsx` 现在只负责 loading shell 和 `NoteChromeLayer` / `NoteRuntimeDocumentLayer` 渲染，文件约 24 行，不再直接组合 controller graph。
+- `canvasEngine/index.ts` 导出 `useNoteCanvasRuntimeController`，作为后续 L12 decommission / runtime acceptance 的明确入口。
+- 本轮不改变 Note 页面可见行为、block content truth、layout payload、Page / Canvas mode、slash command、preview overlay、move / resize、undo / redo 或 persistence API。
+- L2/L12 runtime controller composition hook seed 迁出后 client build / server build passed。
+
 ## Changed - V2.BN.8.1 L7/L12 Runtime Refs And Load Reset Controller Seed
 
 - 新增 `hooks/useRuntimeLayoutRefsController.ts`，将 `blockListRef`、`movingBlockIdRef`、measured reflow suppression ref 和 selection 前的 measured reflow suppression callback 从 `NoteCanvasRuntime.tsx` 迁出。
