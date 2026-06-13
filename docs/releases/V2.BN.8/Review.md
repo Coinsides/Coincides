@@ -2011,3 +2011,28 @@ browser harness: not used
 - `npm run smoke:canvas-engine-performance`。
 
 该脚本只证明源码边界，没有证明真实浏览器交互体验。最终 Browser Harness smoke 和 Henry manual pass 仍然必须执行。
+
+## V2.BN.8.1 Non-Browser Gate Aggregator - 2026-06-13
+
+```text
+status: passed
+command: npm run verify:v2-bn8-runtime
+browser harness: not used
+```
+
+新增 root 级聚合验收命令：
+
+```text
+npm run verify:v2-bn8-runtime
+```
+
+它按顺序执行：
+
+- `npm run check:canvas-runtime-boundary`；
+- `npm run build:client`；
+- `npm run build`；
+- `npm run smoke:canvas-engine-performance`。
+
+该命令用于最终 Browser Harness 前的非浏览器 gate，避免遗漏 runtime boundary、client build、server build 或 performance seed 中任一项。
+
+本命令已通过。它不替代最终 Browser Harness smoke，也不替代 Henry manual pass。

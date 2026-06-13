@@ -661,3 +661,10 @@
 - `npm run build:client` passed。
 - `npm run build` passed。
 - `npm run smoke:canvas-engine-performance` passed。
+
+## Added - V2.BN.8.1 Non-Browser Gate Aggregator
+
+- 新增 root script：`npm run verify:v2-bn8-runtime`。
+- 该命令聚合 Canvas runtime boundary check、client build、server build 和 Canvas Engine performance seed。
+- 更新 `V2.BN.8.1-Final-Smoke-Protocol.md`，把最终 Browser Harness 前置非浏览器检查收束到该命令。
+- `npm run verify:v2-bn8-runtime` passed。
