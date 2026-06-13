@@ -104,7 +104,7 @@ export function useNoteCanvasFrameModel({
 
   const primaryPageFrame = useMemo(
     () => createRuntimePageFrame({
-      x: pageOffsetX,
+      contentX: pageOffsetX,
       height: pageContentHeight,
     }),
     [pageContentHeight, pageOffsetX],

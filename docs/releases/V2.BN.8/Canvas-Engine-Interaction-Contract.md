@@ -121,6 +121,8 @@ connectingRelationFuture
 - Canvas mode 不是删除 PageFrame，而是把 PageFrame 放入更大的 workspace；必须保留 PageFrame boundary、background 和默认书写留白感。
 - Canvas mode 的外层 document shell 不应呈现为 card/bubble；正式 page 的边界只由 PageFrame 自己表达。
 - Canvas mode 初始视野应能完整看到主 PageFrame；左侧 workspace 留白是轻量 scratch reserve，不应把正式页面推到视野外。
+- PageFrame outer boundary 和 content area 是两个概念。第一版 block 仍贴着 content area 书写；Canvas mode 的 PageFrame 边界应显示 content inset 留白，不能把 block 贴到页面外框上。
+- Ruler / page margin control 后续只调整 PageFrame content inset，不直接改写 NoteBlock content truth。
 
 ## 同步规则
 

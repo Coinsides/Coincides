@@ -1,5 +1,40 @@
 # V2.BN.8 Review
 
+## V2.BN.8.1 PageFrame Content Inset Seed
+
+```text
+status: technical validation passed
+scope: L4 PageFrame and Workspace / ISSUE-010 content inset seed
+client build: passed
+server build: passed
+git diff check: passed
+changed-file secret scan: false positives only
+browser smoke: blocked by Chrome remote debugging authorization
+```
+
+Completed:
+
+- `PageFrameModel` now carries `contentInset`.
+- Default PageFrame runtime geometry separates outer frame width from formal content width.
+- Existing block placement coordinates remain content-area-relative for this seed.
+- Canvas mode formal PageFrame boundary now renders from the outer frame coordinate rather than the content origin.
+- State, architecture, interaction, open issue, and changelog docs were updated.
+
+Still intentionally out of scope:
+
+- No draggable ruler UI.
+- No page style inspector.
+- No persisted database field or migration.
+- No automatic reflow policy for future ruler changes.
+
+Verification:
+
+- client build passed.
+- server build passed.
+- `git diff --check` passed with line-ending warnings only.
+- changed-file secret scan only matched documentation text such as `secret scan` / `visual token`.
+- Browser Harness smoke could not complete because Chrome remote debugging authorization timed out; Henry visual retest is still needed.
+
 ## V2.BN.8.1 Runtime History Boundary Seed
 
 ```text

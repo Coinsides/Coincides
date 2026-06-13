@@ -120,6 +120,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     noteCanvasRuntime: input.noteCanvasRuntime,
     pageContentHeight: input.pageContentHeight,
     pageOffsetX: input.pageOffsetX,
+    primaryPageFrameX: input.primaryPageFrameX,
     primaryPageFrameWidth: input.primaryPageFrameWidth,
     savingBlockId: input.savingBlockId,
     selectedBlockId: input.selectedBlockId,

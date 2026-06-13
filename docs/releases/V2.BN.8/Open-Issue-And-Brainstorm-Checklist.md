@@ -518,6 +518,11 @@ Canvas mode 不是删除 PageFrame，而是把 PageFrame 放进更大的 workspa
 
 - [ ] `ISSUE-010` PageFrame 需要一个用于调整内容左右边界的标尺 / ruler 控件。
 
+```text
+status: contract seed applied, pending Henry visual retest
+patch: V2.BN.8.1 PageFrame Content Inset Seed
+```
+
 #### Henry 初步观察
 
 当前左右留白不太符合普通用户对文档页面的心智。Word 的页面标尺是一个很好的参考：
@@ -564,7 +569,9 @@ block 默认应该位于 content area 内，而不是直接贴 PageFrame 外边�
 - [ ] 确认 ruler 是否只在 Page mode 显示，还是 Canvas mode 选中 PageFrame 时也显示。
 - [ ] 确认已有 block 自动扩展的条件。
 - [ ] 确认自由排版 block 是否脱离 ruler 管理。
-- [ ] 确认 content inset 是否属于 PageFrame layout truth。
+- [x] 确认 content inset 是否属于 PageFrame layout truth。当前已进入 `PageFrameModel.contentInset` runtime seed。
+- [x] 第一版 Canvas mode PageFrame boundary 已使用 outer frame；block 仍按 content area origin 布局，避免现有坐标大迁移。
+- [ ] Henry 手动复测：Canvas mode 下 PageFrame 外框是否能表现出左右书写留白，而不是 block 贴边。
 
 ## Brainstorm
 
@@ -688,6 +695,6 @@ D &\subset \mathbb{R}^2,\quad
 - [x] Patch M: 调整 `+ Insert` floating action 到右侧中部 viewport 层。
 - [x] Patch N: 修 PageFrame height 在 Canvas mode 里过度延伸的问题。
 - [x] Patch O: Canvas mode 保留 PageFrame 边界、背景和内容留白。
-- [ ] Patch P: 定义 PageFrame content inset / ruler 控件的第一版契约。
+- [x] Patch P: 定义 PageFrame content inset / ruler 控件的第一版契约。
 - [ ] Patch Q: 将 slash menu / formula preview / inline math conversion / structured block measurement / draft block placement / code block visual language / canvas shell layout / PageFrame ruler 经验同步到 `Canvas-Engine-Interaction-Contract.md`。
   - [x] 已同步 FormulaBlock input sanitizer / help seed / inline formula boundary。

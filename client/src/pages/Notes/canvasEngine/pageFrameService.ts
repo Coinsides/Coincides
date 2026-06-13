@@ -3,6 +3,7 @@ import {
   DEFAULT_BLOCK_GAP,
   DEFAULT_BLOCK_HEIGHT,
   DEFAULT_PAGE_CONTENT_WIDTH,
+  DEFAULT_PAGE_FRAME_CONTENT_INSET,
   DEFAULT_PAGE_FRAME_HEIGHT,
   PAGE_FRAME_BOTTOM_PADDING,
   type BlockBoxLayout,
@@ -50,16 +51,19 @@ export function calculatePageFrameHeight({
 }
 
 export function createRuntimePageFrame({
-  x,
+  contentX,
   height,
 }: {
-  x: number;
+  contentX: number;
   height: number;
 }): PageFrameModel {
   return createPrimaryPageFrame({
-    x,
+    x: contentX - DEFAULT_PAGE_FRAME_CONTENT_INSET.left,
     y: 0,
-    width: DEFAULT_PAGE_CONTENT_WIDTH,
+    width: DEFAULT_PAGE_CONTENT_WIDTH
+      + DEFAULT_PAGE_FRAME_CONTENT_INSET.left
+      + DEFAULT_PAGE_FRAME_CONTENT_INSET.right,
     height,
+    contentInset: DEFAULT_PAGE_FRAME_CONTENT_INSET,
   });
 }

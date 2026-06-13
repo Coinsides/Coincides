@@ -45,6 +45,7 @@ export interface NoteWritingSurfaceLayerProps {
   noteCanvasRuntime: NoteCanvasRuntimeModel;
   pageContentHeight: number;
   pageOffsetX: number;
+  primaryPageFrameX: number;
   primaryPageFrameWidth: number;
   savingBlockId: string | null;
   selectedBlockId: string | null;
@@ -103,6 +104,7 @@ export function NoteWritingSurfaceLayer({
   noteCanvasRuntime,
   pageContentHeight,
   pageOffsetX,
+  primaryPageFrameX,
   primaryPageFrameWidth,
   savingBlockId,
   selectedBlockId,
@@ -154,9 +156,11 @@ export function NoteWritingSurfaceLayer({
         data-canvas-interaction-mode={interactionState.mode}
         data-canvas-interaction-target={interactionState.target}
         data-canvas-interaction-block={interactionState.blockId || ''}
+        data-page-frame-inset-left={noteCanvasRuntime.primaryPageFrame?.contentInset.left || 0}
+        data-page-frame-inset-right={noteCanvasRuntime.primaryPageFrame?.contentInset.right || 0}
         style={{
           minHeight: surfaceMode === 'canvas' ? noteCanvasRuntime.world.height : pageContentHeight,
-          '--formal-page-offset-x': `${pageOffsetX}px`,
+          '--formal-page-offset-x': `${primaryPageFrameX}px`,
           '--formal-page-width': `${primaryPageFrameWidth}px`,
           '--canvas-world-width': `${noteCanvasRuntime.world.width}px`,
           '--canvas-world-height': `${noteCanvasRuntime.world.height}px`,

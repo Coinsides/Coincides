@@ -16,6 +16,13 @@ export interface CanvasSize {
 
 export interface CanvasRect extends CanvasPoint, CanvasSize {}
 
+export interface CanvasInset {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+}
+
 export interface CanvasViewport extends CanvasPoint, CanvasSize {
   zoom: number;
 }
@@ -24,6 +31,7 @@ export interface PageFrameModel extends CanvasRect {
   id: string;
   role: 'primary_page_frame';
   exportable: boolean;
+  contentInset: CanvasInset;
 }
 
 export interface CanvasWorldModel extends CanvasSize {

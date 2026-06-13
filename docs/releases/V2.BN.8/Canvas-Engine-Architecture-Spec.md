@@ -119,10 +119,13 @@ PageFrame 是 formal page boundary。
 必须承载：
 
 - page geometry；
+- content inset / content area geometry；
 - export boundary；
 - AI/export/source visibility boundary seed；
 - inside/outside classification；
 - future page size / custom frame。
+
+PageFrame 的 outer rect 和 content area 不能混用。NoteBlock 的第一版 placement 坐标仍相对 content area；PageFrame outer boundary 用 content inset 往外扩展，给未来 ruler / page margin / export boundary 留出稳定口径。
 
 ### FrameOutsideWorkspace
 

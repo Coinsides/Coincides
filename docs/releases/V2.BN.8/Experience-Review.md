@@ -1,5 +1,24 @@
 # V2.BN.8 Experience Review
 
+## V2.BN.8.1 PageFrame Content Inset Experience Note
+
+```text
+PageFrame now has an outer paper boundary distinct from the writing content area.
+```
+
+体验判断：
+
+- Canvas mode 里，正式 PageFrame 不应该再把正文起点当作页面外边界。
+- block 仍然应该出现在用户熟悉的位置；变化应该主要体现为 PageFrame 外框向左右扩出书写留白。
+- 这一步不是完整标尺功能，只是给后续 ruler / page margin / content width 调节打地基。
+- 如果用户看到 block 明显横向漂移，应该视为回归；如果只是页面外框更像一张纸，这是预期变化。
+
+仍需人工观察：
+
+- Canvas mode 下主 PageFrame 的外边界是否比 block 内容区更宽。
+- Page mode 下原本写作体验是否没有明显退化。
+- 切换 Page/Canvas mode 后，workspace block 是否仍不被硬夹回 PageFrame。
+
 ## V2.BN.8.1 Runtime History Boundary Experience Note
 
 ```text

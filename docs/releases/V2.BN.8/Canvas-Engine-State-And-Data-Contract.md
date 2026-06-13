@@ -65,6 +65,7 @@ PageFrame
   NoteCanvas 内最多一个主正式页面区域。
   是 export/layout boundary，不拥有 content truth。
   height 由 PageFrame 内正式内容底部和页面底部留白决定。
+  拥有 contentInset，用来区分页面外框和正式书写内容区域。
 
 Workspace
   PageFrame 外区域。
@@ -112,6 +113,41 @@ RuntimeBlockPlacement
 ```
 
 `RuntimeBlockPlacement` 是 Canvas Engine 当前运行时记录。它可以比旧 `better_notebook_layout` payload 更丰富，但在数据合同 promotion 之前，不能假装它已经是最终数据库 schema。
+
+## PageFrame Content Inset Seed
+
+V2.BN.8.1 起，PageFrame 运行时模型先预留第一版 content inset：
+
+```text
+PageFrame outer rect
+  x / y / width / height
+
+PageFrame contentInset
+  top
+  right
+  bottom
+  left
+
+PageFrame content area
+  x = outer.x + contentInset.left
+  y = outer.y + contentInset.top
+  width = outer.width - left - right
+  height = outer.height - top - bottom
+```
+
+当前 block placement 的 `x/y` 仍然按 PageFrame content area 的局部坐标理解；Canvas mode 渲染时再把 content origin 映射到 world coordinate。这样可以先保持现有 block 坐标稳定，同时让后续 ruler / page margin / content width 调节有正式数据入口。
+
+第一版默认值：
+
+```text
+content width: 760
+left inset: 72
+right inset: 72
+top inset: 0
+bottom inset: 96
+```
+
+`top inset` 暂时为 0，是为了避免当前 block y 坐标体系发生大范围视觉迁移；未来真正做 ruler / page style panel 时，再决定 top margin 是否进入 content area truth。
 
 Relation endpoint reserve:
 

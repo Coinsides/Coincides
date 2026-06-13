@@ -349,6 +349,7 @@ export function useNoteCanvasRuntimeController() {
     noteCanvasRuntime,
     pageContentHeight,
     pageOffsetX,
+    primaryPageFrameX: primaryPageFrame.x,
     primaryPageFrameWidth: primaryPageFrame.width,
     savingBlockId,
     selectedBlockId,

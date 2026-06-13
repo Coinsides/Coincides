@@ -1,5 +1,13 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 PageFrame Content Inset Seed
+
+- `PageFrameModel` 新增 `contentInset`，用来区分 formal page outer boundary 和正式书写 content area。
+- 默认 PageFrame 现在由 `760px` content width 加左右 `72px` inset 组成；block placement 坐标仍保持为 content area 坐标，避免现有测试布局大迁移。
+- Canvas mode 的 formal PageFrame boundary 现在使用 outer frame 起点和宽度渲染，不再把正文起点当作页面外框起点。
+- Writing surface 增加 `data-page-frame-inset-left/right` debug attributes，便于后续 Browser/DevTools 验证。
+- 本轮不实现完整 Word-like ruler UI，也不改变 Page mode 的自然文档滚动与 block content truth。
+
 ## Changed - V2.BN.8.1 Runtime History Boundary Seed
 
 - `usePlacementHistory` 升级为第一版 runtime history boundary，不再只保存 placement move / resize snapshot。
