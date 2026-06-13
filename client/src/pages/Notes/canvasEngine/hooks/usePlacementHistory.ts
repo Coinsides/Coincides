@@ -1,15 +1,11 @@
 import { useCallback, useEffect, useRef } from 'react';
+import {
+  getRuntimeHistoryKeyboardIntent,
+  type RuntimeHistoryEntry,
+} from '../historyService';
 import { buildLayoutHistoryEntry } from '../placementService';
-import type {
-  BlockBoxLayout,
-  LayoutHistoryEntry,
-} from '../runtimeLayout';
+import type { BlockBoxLayout } from '../runtimeLayout';
 import type { NoteBlock } from '../runtimeDataTypes';
-
-type RuntimeHistoryEntry =
-  | { type: 'layout'; entry: LayoutHistoryEntry }
-  | { type: 'createdBlock'; block: NoteBlock }
-  | { type: 'trashedBlock'; block: NoteBlock };
 
 export interface UsePlacementHistoryOptions {
   applyLayoutDrafts: (layouts: Record<string, BlockBoxLayout>) => void;
@@ -17,11 +13,6 @@ export interface UsePlacementHistoryOptions {
   restoreBlockForHistory?: (block: NoteBlock, options?: { silent?: boolean }) => Promise<NoteBlock | null>;
   target?: Window | null;
   trashBlockForHistory?: (blockId: string, options?: { silent?: boolean }) => Promise<boolean>;
-}
-
-function isEditableDomTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
-  return Boolean(target.closest('input, textarea, select, [contenteditable="true"]'));
 }
 
 export function usePlacementHistory({
@@ -155,15 +146,14 @@ export function usePlacementHistory({
     if (!target) return undefined;
 
     const handleRuntimeHistoryKeys = (event: KeyboardEvent) => {
-      if (!(event.ctrlKey || event.metaKey) || isEditableDomTarget(event.target)) return;
-      const key = event.key.toLowerCase();
-      if (key === 'z' && !event.shiftKey) {
+      const intent = getRuntimeHistoryKeyboardIntent(event);
+      if (intent === 'undo') {
         if (undoStackRef.current.length === 0) return;
         event.preventDefault();
         void undoRuntimeHistory();
         return;
       }
-      if (key === 'y' || (key === 'z' && event.shiftKey)) {
+      if (intent === 'redo') {
         if (redoStackRef.current.length === 0) return;
         event.preventDefault();
         void redoRuntimeHistory();

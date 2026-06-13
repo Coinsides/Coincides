@@ -1,5 +1,12 @@
 # CHANGELOG - V2.BN.8
 
+## Changed - V2.BN.8.1 Runtime History Keyboard Intent Service Seed
+
+- 新增 `historyService.ts`，集中定义 `RuntimeHistoryEntry`、`RuntimeHistoryKeyboardIntent` 和 `getRuntimeHistoryKeyboardIntent()`。
+- Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z 的按键意图判断从 `usePlacementHistory()` 中迁出，进入纯 history service。
+- `usePlacementHistory()` 继续持有 undo / redo stacks 和真实数据 mutation callbacks，但不再自行解释快捷键语义。
+- 本轮不改变 move / resize / create / trash 的 undo-redo 行为，也不实现 source / relation / inline formula undo。
+
 ## Changed - V2.BN.8.1 Surface Mode Transition Policy Seed
 
 - `modePolicyService.ts` 新增 `SurfaceModeTransitionPolicy` 和 `createSurfaceModeTransitionPolicy()`。

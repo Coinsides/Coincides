@@ -81,6 +81,7 @@ connectingRelationFuture
 - 独立 FormulaBlock 的 `latex_input` 是公式 body。用户可以粘贴 `$...$`、`$$...$$`、`\(...\)`、`\[...\]`，但保存层应归一成 body，不把外层 delimiter 当作 field truth。
 - 独立 FormulaBlock 需要轻量帮助入口解释输入约定；当前 `?` tooltip 已进入 `FloatingOverlayLayer` free placement，不参与 block measurement 或 block-local clipping。
 - 正文 TextBlock / Definition 描述中的 inline formula 不自动拆成 FormulaBlock；后续通过选区右键或 floating toolbar 的 `Convert to formula` 显式转换，并必须支持撤回。
+- `Ctrl+Z` / `Ctrl+Y` / `Ctrl+Shift+Z` 在输入框、textarea、contenteditable 内归文本编辑器自己处理；只有焦点不在可编辑 DOM 内时，才解释为 runtime history 的 undo / redo 意图。
 
 ### 选择与布局
 

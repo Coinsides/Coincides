@@ -1328,8 +1328,10 @@ client build: passed
 已完成部分：
 
 - 新增 `hooks/usePlacementHistory.ts`；
+- 新增 `historyService.ts`；
 - `NoteCanvasRuntime.tsx` 不再直接持有 placement undo / redo refs；
 - `NoteCanvasRuntime.tsx` 不再直接注册 Ctrl+Z / Ctrl+Y keyboard listener；
+- Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z 的按键意图判断已迁入 `getRuntimeHistoryKeyboardIntent()`；
 - `usePlacementHistory` 现在集中负责：
   - move / resize 前后 layout snapshot 生成；
   - undo stack；

@@ -89,6 +89,28 @@ patch: V2.BN.8.1 Surface Mode Controller Seed + Surface Mode Transition Policy S
 - viewport scroll ownership policy beyond current shell seed 尚未完成；
 - 需要 Henry 手动复测模式切换后是否还会残留 overlay、snap guide 或 selected block。
 
+## L11 Runtime History Checkpoint
+
+```text
+status: keyboard intent service seed expanded, pending Henry visual retest
+patch: V2.BN.8.1 Runtime History Boundary Seed + Runtime History Keyboard Intent Service Seed
+```
+
+已完成：
+
+- move / resize undo-redo 已进入 `usePlacementHistory()`；
+- created block / trashed block 已通过 soft-delete / restore 进入 runtime history seed；
+- Ctrl+Z / Ctrl+Y / Ctrl+Shift+Z 的按键意图判断已迁入 `historyService.ts`；
+- `usePlacementHistory()` 继续负责 stack 与实际 mutation callback。
+
+仍未完成：
+
+- empty draft undo 尚未完成；
+- convert block type undo 尚未完成；
+- inline formula conversion undo 尚未完成；
+- source / relation mutation undo 尚未完成；
+- 需要 Henry 手动复测快捷键触发条件，尤其是输入框内部不应抢走用户输入撤回。
+
 ## Open Issue Checklist
 
 ### L5 Runtime Placement Record Checkpoint
