@@ -11,7 +11,7 @@
 
 Coincides is a refined information-processing notebook. It helps humans and AI turn selected materials into readable, editable, source-aware notes and reports.
 
-Coincides is not a raw file vault, generic RAG database, AI tutor, whiteboard toy, or Notion/AFFiNE clone. It is the place where selected information is refined into a human-readable surface: structured blocks, free layout, source grounding, relation awareness, and report-like presentation.
+Coincides is not a raw file vault, generic RAG database, AI tutor, whiteboard toy, or Notion/AFFiNE clone. It is the place where selected information is refined into a human-readable surface: natural TextFlow, user-confirmed annotations, free layout, source grounding, relation awareness, and report-like presentation.
 
 The product should support both:
 
@@ -39,6 +39,19 @@ selected sources / materials
   -> future AI-readable workspace
 ```
 
+The 2026-06-20 Better Notebook reflection tightens this into a staged product ladder:
+
+```text
+1. quiet natural writing
+2. visual marking with labels
+3. collecting fragments into ContentGroups
+4. refining one ContentGroup with Petals
+5. organizing ContentGroups through GroupFolders and Gallery
+6. later relation and AI-reading workflows
+```
+
+The important product boundary is that `Label` is only a visible/reusable mark. `ContentGroup` is the serious content package. `Petal` is the local structure inside a package. `GroupFolder` is the resource-management path and future relation-view scope. This avoids forcing users to predefine global schemas while still giving AI and later relation systems a stable object model to read.
+
 ---
 
 ## 3. Target Users
@@ -60,21 +73,37 @@ User-facing language should prefer `Project` as the main container. A project ma
 
 ### Better Notebook Surface
 
-Coincides must feel like a mature notebook/report product, not an engineering panel. A blank note should invite writing. The user should be able to click and write before understanding `NoteBlock`, `CanvasNode`, `SourceScope`, or relation metadata.
+Coincides must feel like a mature notebook/report product, not an engineering panel. A blank note should invite writing. The user should be able to click and write before understanding `TextUnit`, `NoteBlock`, `CanvasNode`, `SourceScope`, or relation metadata.
 
-The writing surface should support both free blocks and structured blocks. `paragraph` / `text` blocks are freeform. First-version structured defaults should stay narrow: `definition` and `formula` are the primary structured knowledge blocks, while theorem/proof/example/exercise-style variants should come through Template Studio or later domain packages instead of crowding the default menu. Users may create structured blocks directly with slash commands, or write freely first and convert an existing block into a structured block later.
+The writing surface should be text-first and annotation-aware. `TextBlock` is the default natural writing container. Inside it, `TextUnit` represents writing units such as paragraph, heading, list item, todo item, toggle item, quote line, or child explanation. `InlineStructure` represents local special render or interaction anchors such as inline formula, inline code, inline source marker, or inline link. `TextUnitGroup` is now only a legacy range-helper seed and should either be rewritten into `ContentGroup` workflows or removed from normal product UX. Durable labels belong to `AnnotationTruth`; organization and browsing paths belong to `GroupFolder`; serious content packages belong to `ContentGroup`; local parts inside a content package belong to `Petal`; accepted/rejected identity belongs on the ContentGroup itself or in later `ReadingInterpretation` review, not in a second object.
 
-Slash commands must support two behaviors:
+Independent NoteBlocks remain important, but their role becomes narrower and clearer. They are used for layout, special rendering, media, code regions, large display formulas, tables, sticky notes, source snapshots, images, video, 3D preview, and other object-level behavior. Heading/list/quote should not be treated as knowledge block families by default; they are writing roles inside TextFlow.
+
+Slash commands must support multiple context-aware behaviors, but V2.BN.8.3 no longer treats `/definition` as a live independent block creator:
 
 ```text
-Empty block + /definition
-  -> create DefinitionBlock
+Empty block + /formula
+  -> create display FormulaBlock
 
-Non-empty paragraph + /definition
-  -> convert current block to DefinitionBlock with user confirmation
+Non-empty paragraph + /formula
+  -> conservatively move the current text into latex_input
+
+Selected text / TextUnit + future label action
+  -> create or propose AnnotationTruth marker
 ```
 
-First-version conversion should be conservative and predictable, not clever. Paragraph-to-definition should move the full paragraph into `description` and leave `concept_name` blank. Paragraph-to-formula should move the full paragraph into `latex_input`. The first version should not infer field meaning from colons, dollar signs, regular expressions, or brittle scripts. Smarter conversion belongs to a later AI-assisted workflow. Users should edit field values in the note surface. Adding, removing, or renaming fields belongs to Template Studio.
+First-version conversion should be conservative and predictable, not clever. Text-to-formula-block should move the full text into `latex_input`. Definition-like meaning should be marked as annotation, not inferred from colons, dollar signs, regular expressions, or brittle scripts. Smarter conversion belongs to a later AI-assisted workflow where proposals are reviewable. Users should edit visible content in the note surface. Defining annotation workflows, visual styles, projection rules, and block shells belongs to the later Structure Studio / editor productization phase.
+
+Slash commands must become a context-aware writing command palette. The same command may create a block, convert the current TextUnit or block, insert a structure, or operate on a selection. The first version must distinguish:
+
+```text
+create_block
+convert_block
+insert_structure
+inline_action
+```
+
+The system may later add side palettes, context menus, selection toolbars, or inspectors so the slash menu does not become a menu hell.
 
 Navigation, evidence, and semantic relation must remain separate:
 
@@ -124,7 +153,7 @@ Coincides should also distinguish evidence, interpretation, and reasoning state.
 
 ### Content And Layout Separation
 
-`NoteBlock` is content truth. `BlockBox`, `CanvasNode`, or placement state is layout truth. Moving, resizing, aligning, and arranging blocks must not rewrite the underlying content or evidence.
+TextFlow and special object payloads are content truth. `ContentRange` is location truth. `AnnotationTruth` is label / marker truth. `GroupFolder` is organization/path truth for ContentGroup browsing and local relation-view boundaries. `ContentGroup` carries serious package truth through member references and identity/status fields, and `Petal` carries local part membership inside a ContentGroup. There is no separate accepted-content truth table. `NoteBlock` is the canvas/page object that carries or presents content. `BlockBox`, `CanvasNode`, or placement state is layout truth. Moving, resizing, aligning, and arranging blocks must not rewrite the underlying TextFlow, annotations, GroupFolders, ContentGroups, Petals, special object payload, source chain, or evidence.
 
 ### Formal And Thinking Layers
 
@@ -157,7 +186,8 @@ The active product direction is the Better Notebook Productization Track:
 source-grounded
 page-first
 canvas-backed
-block-based
+text-first
+annotation-aware
 relation-aware
 exportable
 AI-readable later
@@ -171,6 +201,9 @@ The immediate priority is not full AI note assembly. The priority is a human-usa
 - freeform NoteBlock boxes and layout mode;
 - page/canvas/export boundaries;
 - quiet visual language and controls;
+- TextFlow seed: TextBlock, TextUnit, InlineStructure, and legacy TextUnitGroup range helper under review;
+- Annotation and content packaging seed: AnnotationTruth marker layer, ContentRange boundary, GroupFolder organization boundary, ContentGroup / Petal direction, ContentGroup identity/status boundary, ReadingInterpretation proposal boundary;
+- context-aware slash command foundation;
 - stable data contract;
 - source attachment UX;
 - relation definition and relation inspection;

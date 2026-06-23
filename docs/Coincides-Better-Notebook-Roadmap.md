@@ -8,6 +8,45 @@
 
 ---
 
+## 2026-06-22 Active Roadmap Correction
+
+Better Notebook is now explicitly `TextFlow-first / ContentGroup-aware`.
+
+The V2.BN.8.6.x lane from 8.6.23 onward is the ContentGroup Editor maturity lane, not miscellaneous polish:
+
+```text
+8.6.23-8.6.26
+  command-surface reality, unified draggable items, and GroupFolder resource-manager foundation
+
+8.6.27-8.6.30
+  Groups Rail v2, Petal v1, Page/Canvas drop-to-block, and safe TextFlow copy-insert
+
+8.6.31+
+  OpenDesign visual parity, Gallery / Rail / Single Editor experience cleanup, and handoff closure
+```
+
+Before later relation-heavy work, the first-version ContentGroup Editor should be coherent enough for real use: the user can collect fragments, organize groups in folders, refine a group into Petals, and keep the original note text traceable and undamaged.
+
+`V2.BN.8.7` is reassigned from the earlier CanvasObject / media / drawing seed to a dedicated `ContentGroup System Maturity` version.
+
+The earlier CanvasObject seed is deferred to `V2.BN.8.8+` or the next Canvas track. This keeps Canvas from becoming a second confused entry point before ContentGroup can answer its core product questions:
+
+```text
+What am I?
+Where am I organized?
+What are my members?
+Where did I come from?
+Am I synced with the source?
+What happens when I am referenced, duplicated, forked, or materialized?
+```
+
+The new 8.7 target is:
+
+```text
+ContentGroup System 1.0:
+make ContentGroup stable, understandable, reusable, and ready to be referenced by future Canvas projections.
+```
+
 ## 1. 路线图职责
 
 这份路线图是 v2.0-v2.5.6 工程地基路线图关闭之后的新主动方向。
@@ -283,7 +322,15 @@ AI note assembly、Source Reconstruction、OCR/VLM import、GraphRAG、external 
 - `docs/contracts/Link-Source-Relation-Boundary-Contract.md`
   - 定义 Link、SourceReference、ObjectRelation 三分法，并预留 CandidateRelation / relation budget 边界。
 - `docs/contracts/Template-Category-Contract.md`
-  - 定义 TemplateDefinition、template variant、category/domain membership、Template Studio Productization、field schema 与 render/layout 的边界。
+  - 定义 TemplateDefinition、template variant、category/domain membership、未来 Structure Studio productization、field schema 与 render/layout 的边界。
+- `docs/contracts/TextFlow-Contract.md`
+  - 定义 TextBlock、TextUnit、TextUnitGroup、InlineStructure、writing_role、range anchor 与 TextFlow 内部编辑边界；它不承载最终语义标签真相。
+- `docs/contracts/Annotation-Contract.md`
+  - 定义 AnnotationTruth、AnnotationRange、child annotation、visual style、ReadingInterpretation、AnnotationProposal、relation endpoint reserve；它不预设全局 canonical role / slot schema。
+- `docs/contracts/Notebook-Object-Inventory-Contract.md`
+  - 定义 Better Notebook 的对象总览和根分工：Project、Note、NoteCanvas、PageFrame、Block、TextFlow、TextUnit、TextUnitGroup、InlineStructure、ContentRange、AnnotationTruth、GroupFolder、ContentGroup、ContentGroup identity/status、ContentGroup Gallery / derived views、ReadingInterpretation、Relation 的边界。
+- `docs/contracts/ContentGroup-GroupFolder-Contract.md`
+  - 定义 GroupFolder 与 ContentGroup 的边界：Folder 管组织、路径、浏览边界和局部 relation view scope；ContentGroup 管严肃内容包、成员引用、Petal 和身份审查状态。
 - `docs/contracts/Editor-State-Rebuild-Contract.md`
   - 定义 editor state、operation/undo 边界、rebuild 行为和 adapter rebuild 限制。
 
@@ -411,9 +458,9 @@ Phase A5 - Block Visual Language And Control Layer
 Gate     - PI-048 Contract Intake
 Phase A6 - Better Notebook Data Contract
 Phase A7 - Runtime Autopsy, Branch Closure, And Canvas Engine Gate
-Phase A8 - Canvas Engine Foundation
-Phase A8.x - Canvas Engine Reliability And UX Polish Buffer
-Phase A9 - Template Studio Productization And Block Template Categories
+Phase A8 - Canvas Engine And TextFlow Foundation
+Phase A8.x - Canvas / TextFlow Reliability And UX Polish Buffer
+Phase A9 - Structure Studio And Editor Productization
 Phase A9a - Source Library And Provenance Foundation
 Phase A9a.1 - Source Operations And Degraded Chain UX
 Phase A9b - Relation Definition Runtime And Model Maturity
@@ -492,7 +539,7 @@ Settings
 - Note-first workspace area。
 - Project detail 必须先展示 note list / note dashboard，而不是直接把用户送进某一个 Canvas Document。
 - 打开 note 之后，Canvas Document / page editor 才成为主 workspace。
-- Template Studio / Package Studio 进入 advanced tool area。
+- Structure Studio / Package Studio 进入 advanced tool area。
 - source、board、proposal、debug surface 退出日常写作主路径。
 - Canvas Document 成为主 note surface，而不是 Course Detail 里的右侧面板或嵌套 dashboard card。
 - 第一轮 shell 不应该继续强化紫色 glassmorphism / 透明卡片风格。视觉基线 reset 拆成 `V2.BN.1.1`，紧跟 `V2.BN.1` 执行。
@@ -689,7 +736,7 @@ formal page area 内的对象默认可导出。formal page area 外的对象默�
 - Definition / Formula 的字段化体验是本版本的 structured block seed：它们要证明“字段化内容 + 自由排版”这条路可用。
 - Field Layout 在本版本只做固定视觉样板和边界确认，不做成熟字段布局编辑器。
 - Category Membership 在本版本只定规则：Default、Math、User Defined；不做重型分类管理。
-- theorem、proof、example、exercise、answer、table、image/diagram 暂不作为第一版默认 structured preset；它们可以保留为兼容 template、Template Studio 高级入口或后续用户自建 template variant。
+- theorem、proof、example、exercise、answer、table、image/diagram 暂不作为第一版默认 structured preset；它们可以保留为兼容 template、Structure Studio 高级入口或后续用户自建 template variant。
 - callout 不作为 Better Notebook 默认 block 或推荐用户自建方向；如果旧 runtime 数据包含 callout/warning template，只保留兼容读取。
 - structured field display：definition/formula 等第一版 structured block 能显示字段，而不是只能显示一整段文本。
 - field box / field layout controls：本阶段先提供固定样板和轻量呈现，不把字段位置、字体、边框、显示样式的成熟编辑做进本版本。
@@ -704,7 +751,7 @@ formal page area 内的对象默认可导出。formal page area 外的对象默�
 
 `V2.BN.5` 的默认 block 入口不等于系统全部 `TemplateDefinition` 能力。
 
-第一版日常 slash / insert 只展示少量默认 block，避免把用户第一次写作体验变成模板库浏览器。更细的学科模板，例如 `formula.math`、`formula.engineering`、`definition.chemistry`、`definition.biology`、theorem/proof/example/exercise 变体，应进入 `V2.BN.9 Template Studio Productization`。
+第一版日常 slash / insert 只展示少量默认 block，避免把用户第一次写作体验变成模板库浏览器。更细的学科模板，例如 `formula.math`、`formula.engineering`、`definition.chemistry`、`definition.biology`、theorem/proof/example/exercise 变体，不应继续压在 block type taxonomy 上；它们应进入后续 A9 Structure Studio / Annotation Studio，通过 annotation workflow、AI reading proposal、annotation style、block shell 和 special object block 共同表达。固定知识角色、固定角色字段、固定语义类别不再作为长期主线。
 
 ### 三个周边契约的阶段归属
 
@@ -716,12 +763,12 @@ Field Values:
 Field Layout:
   V2.BN.5 只做固定视觉样板。
   V2.BN.6 定义 layout truth / override 边界。
-  V2.BN.9 进入 Template Studio 默认 layout 编辑。
+  A9 进入 Structure Studio / appearance editor 默认 layout 编辑。
 
 Category Membership:
   V2.BN.5 只定 Default / Math / User Defined 规则。
   V2.BN.6 定义 category membership 数据边界。
-  V2.BN.9 在 Template Studio 中产品化。
+  A9 在 Structure Studio 中产品化。
 ```
 
 ### 不做
@@ -855,7 +902,7 @@ CanvasPresetConversionProposal (future)
 - Existing note / agent briefing / reasoning trace 不会被默认当作未加工 source 总结掉。
 - Link 只表示 navigation，不自动创建 SourceReference 或 ObjectRelation。
 - Graph/local graph/AI/export 可以读取 structured fields，例如 concept_name、description、latex_input。
-- Slash / insert / Template Studio 可以按 category 展示 template variant，但 canonical truth 仍由 `TemplateDefinition` 与字段契约承载。
+- Slash / insert / Structure Studio 可以按 category 展示 template variant，但长期语义 truth 应由 AnnotationTruth contract 承载；`TemplateDefinition`、TextFlow contract 与字段契约只保留结构、渲染、编辑和兼容职责。
 - `docs/contracts/Block-Contract.md`、`Source-Reconstruction-Contract-Intake.md`、`Canvas-Page-Surface-Contract.md`、`Source-Provenance-Contract.md`、`Link-Source-Relation-Boundary-Contract.md`、`Template-Category-Contract.md`、`Editor-State-Rebuild-Contract.md` 至少有第一版可执行草案，且不与 Product / UX Inventory / Roadmap 冲突。
 
 ---
@@ -893,7 +940,7 @@ Runtime autopsy / branch closure:
   已经完成一部分风险探索，但缺少系统沉淀、branch 收口、Canvas Engine 需求草案和调研缺口报告。
 
 Mature canvas-backed notebook:
-  仍然需要后续 Canvas Engine Foundation 才能成立。
+  仍然需要后续 Canvas Engine And TextFlow Foundation 才能成立。
 ```
 
 这一阶段要避免两个误区：
@@ -907,7 +954,7 @@ Mature canvas-backed notebook:
 
 - 不做完整 Canvas Engine；
 - 不做真正 infinite canvas pan/zoom；
-- 不做 Template Studio 产品化；
+- 不做 Structure Studio 产品化；
 - 不做 Source Library；
 - 不做 Relation runtime；
 - 不做 AI note assembly；
@@ -918,18 +965,20 @@ Mature canvas-backed notebook:
 
 - 明确当前 branch 作为 experiment / fallback / reference 的定位。
 - 明确哪些体验规则要继承到 Canvas Engine，哪些实现方式不能继承。
-- 明确第八阶段 Canvas Engine Foundation 的最低能力。
+- 明确第八阶段 Canvas Engine And TextFlow Foundation 的最低能力。
 - 明确哪些 Canvas Engine 问题已有调研可用，哪些必须补调研。
 - 如果保留 AFFiNE / BlockSuite 作为备选，必须写清楚 fallback trigger。
-- 后续 Canvas Engine、Template Studio、Source、Relation 不依赖悬空的 editor optimism。
+- 后续 Canvas Engine、Structure Studio、Source、Relation 不依赖悬空的 editor optimism。
 
 ---
 
-## 15. Phase A8 - Canvas Engine Foundation
+## 15. Phase A8 - Canvas Engine And TextFlow Foundation
 
 ### 目标
 
 在 editor runtime 路线确认后，正式把 Coincides 的 document surface 从“有限 page-like surface”推进为真正 canvas-backed note：一个 Note 拥有统一 NoteCanvas，PageFrame 是 Canvas 内可导出的固定区域，FrameOutsideWorkspace 是 PageFrame 外的自由工作区。
+
+同时，V2.BN.8 必须把内容层从 `NoteBlock-only` 推进到 `TextFlow-aware` 和 `Annotation-aware`。Canvas 解决“对象放在哪里”；TextFlow 解决“自然文字如何被写”；AnnotationTruth 解决“被确认的意义是什么”。如果没有 TextBlock、TextUnit、InlineStructure、TextUnitGroup range helper 和 AnnotationTruth 的第一版地基，后续 source、relation、AI projection、Structure Studio 都会继续被迫粗暴连接整块 NoteBlock。
 
 V2.BN.8 正式调研后的第一版推荐路线是：
 
@@ -943,6 +992,20 @@ Self-owned Minimal Hybrid NoteCanvas Engine
   visible render window
   PageFrame + Workspace unified coordinate model
   CanvasObject / RelationEndpoint placeholders
+```
+
+TextFlow 的第一版推荐路线是：
+
+```text
+TextFlow Seed
+  TextBlock as default natural writing container
+  TextUnit as internal semantic writing unit
+  InlineStructure placeholder
+  TextUnitGroup placeholder / projection seed
+  AnnotationTruth / ReadingInterpretation boundary
+  TextUnitGroup as annotation range helper
+  AddressableContentEndpoint boundary
+  fresh TextBlock -> one paragraph TextUnit initialization
 ```
 
 这里的 `Hybrid` 是经过 DOM / SVG / HTML Canvas / WebGL / hybrid / existing engine 比较后的结论，不是默认假设。tldraw、Excalidraw、React Flow、Konva、Fabric.js、PixiJS、BlockSuite / AFFiNE Edgeless 都作为参考或未来局部 adapter，不作为 V2.BN.8 第一版主 runtime。
@@ -969,13 +1032,13 @@ Self-owned Minimal Hybrid NoteCanvas Engine
 
 ### V2.BN.8.x 打磨空间
 
-V2.BN.8 不应该被设计成“一次性做完 Canvas Engine”的单版本。Canvas Engine 是 Better Notebook 后续所有高级能力的地基，必须预留 `V2.BN.8.1`、`V2.BN.8.2`、`V2.BN.8.3` 等小版本空间，用来反复打磨新建的 Canvas 画布。
+V2.BN.8 不应该被设计成“一次性做完 Canvas Engine”的单版本。Canvas Engine 和 TextFlow 是 Better Notebook 后续所有高级能力的双地基，必须预留 `V2.BN.8.1`、`V2.BN.8.2`、`V2.BN.8.3` 等小版本空间，用来反复打磨新建的 Canvas 画布和 text-first 写作层。
 
 这些小版本的目标不是堆新功能，而是让 Canvas Engine 达到两个标准：
 
 ```text
 1. 工程可靠
-   坐标、viewport、selection、measurement、resize、overlay、rebuild、fallback 都稳定。
+   坐标、viewport、selection、measurement、resize、overlay、TextFlow initialization / projection、rebuild、fallback 都稳定。
 
 2. 用户体验可靠
    至少接近 V2.BN.1-V2.BN.5 已经磨合出的自然写作、block control、preview overlay、page/canvas boundary、structured field editing 等稳定体验；
@@ -984,86 +1047,118 @@ V2.BN.8 不应该被设计成“一次性做完 Canvas Engine”的单版本。C
 
 建议预留方向：
 
-- `V2.BN.8.1` Engine Shell：建立 NoteCanvasRuntime、CanvasViewport、CanvasWorld、PageFrame、BlockLayer、OverlayLayer。
-- `V2.BN.8.2` Canvas Writing And Measurement：把 natural writing、slash command、block control bar、resize/reflow、formula input、popover 定位迁到 canvas-native runtime。
-- `V2.BN.8.3` Canvas Overlay And Interaction Polish：打磨 preview overlay、AI/export/source badges、selection、snap、control bar、empty block cleanup。
-- `V2.BN.8.4` Canvas Scale And Benchmark：验证 50/200/1000 blocks、formula-heavy、workspace outside frame、visible render window。
-- `V2.BN.8.5` CanvasObject And Relation Endpoint Reserve：只稳定 CanvasObject / endpoint / SVG relation layer 预留，不做完整 drawing 或 relation runtime。
-- `V2.BN.8.x` 视实际测试追加：只要 Canvas Engine 没达到工程可靠和用户体验可靠，就不要急着进入 Template Studio、Source Library 或 Relation runtime。
+- `V2.BN.8.1` Runtime Replacement / Engine Shell：旧 NoteDetail runtime 逐层接管，建立 NoteCanvasRuntime、CanvasViewport、CanvasWorld、PageFrame、BlockLayer、OverlayLayer。
+- `V2.BN.8.2` Canvas Shell And Viewport Transform：稳定 PageFrame、workspace、pan/zoom seed、overlay anchor、single-scroll / viewport ownership、PageFrame 外对象持久化。
+- `V2.BN.8.3` TextFlow Seed And Slash Command Foundation：建立 TextBlock / TextUnit / InlineStructure / TextUnitGroup 的代码与合同种子，重写 slash command 为 context-aware writing command palette；同时收束 DefinitionBlock 等旧 block-first 入口。V2.BN.8.5 后的正式口径是：Definition 是 annotation label / ReadingInterpretation proposal，不是默认独立 block family，也不是固定知识角色 schema。Status：2026-06-15 已通过 Henry manual pass 收口。
+- `V2.BN.8.4` TextUnit Editor Seed：Enter/Backspace/Tab、TextUnit gutter、heading/list/quote/todo/toggle writing role、paste-to-TextFlow parser first pass、TextBlock / TextUnit split-merge seed、undo boundary；同时把 `Heading` 从 active independent block family 下沉为 TextUnit writing role，并明确 `Code` 只做边界收束：inline code / code_line 进入 TextFlow，multi-line / copyable / language-aware CodeBlock 继续保留为 independent block。
+- `V2.BN.8.5` Selection And AnnotationTruth Seed：建立选区模型、第一版 `AnnotationTruth` 数据真相、文本高亮 / 标注渲染、右键 / selection toolbar 标注入口、annotation inspector seed、annotation contract 实现同步；inline formula / inline code / inline link 降级为特殊渲染与稳定锚点能力，不再作为语义主线。
+- `V2.BN.8.6` Annotation Editor And ReadingInterpretation Seed：支持多范围 annotation、子标注、annotation 编辑 / 删除 / 可见性、AI-readable annotation projection、`ReadingInterpretation` / annotation proposal seed；`TextUnitGroup` 退为 annotation range helper / stable range package，不再作为默认 `knowledge_role` 容器。
+- `V2.BN.8.6.1` Selection Draft Engine：插入式地基小版本，把浏览器原生 selection 降级为输入信号，建立 Coincides-owned `SelectionDraft` truth、临时选区高亮、Ctrl / Command 追加选区、selection toolbar 逃逸规则，并把 child label 入口改为 parent annotation 内部二次选区触发。
+- `V2.BN.8.6.6` TextUnitGroup And AnnotationSet Editor Foundation：把 TextUnitGroup 做成可创建 / 可重命名 / 可取消的写作层 row group；把 AnnotationSet 做成可创建 / 可编辑 / 可排序 / 可投影的 label organization seed。2026-06-18 之后的新口径是：AnnotationSet 属于过渡 seed，后续应被拆入 ContentGroup、GroupFolder / ContentGroup Gallery、CompositeEndpoint / RelationEndpoint，而不是继续作为主知识对象模型扩张。
+- `V2.BN.8.7` ContentGroup System Maturity：把 ContentGroup / Member / Petal / GroupFolder / Gallery / Rail / Single Editor 收束成稳定、可理解、可复用的知识包系统；明确 Member 与 source 的分离、Reference / Duplicate / Fork / Materialize 语言，以及未来 Canvas projection 的前置边界。2026-06-22 调整：视觉套壳降为次重点，8.7 优先拆出 ContentGroup / GroupFolder / ContentGroupMember / ContentGroupPetal 四个独立实体小版本，具体 plan 另写。
+- `V2.BN.8.7.1` ContentGroup Entity Cutover Foundation：把 ContentGroup 从 note metadata 数组项提升为独立实体 / 表；保留 workspace / project / note scope、identity / status、topic / role / summary、created_from / version 等基础字段；详细计划见 `docs/releases/V2.BN.8/V2.BN.8.7.1-ContentGroup-Entity-Cutover-Foundation-Plan.md`。
+- `V2.BN.8.7.2` GroupFolder Entity And Placement Cutover：把 GroupFolder 从 note metadata 中拆出，建立 workspace / project / note scope 的资源管理器实体，并预留 ContentGroupFolderPlacement / membership 关系；本小版本只登记版本槽位，具体 plan 另写。
+- `V2.BN.8.7.3` ContentGroupMember Entity Cutover：把 ContentGroupMember 从 ContentGroup 内嵌数组拆成 group-owned 子实体 / 表；稳定 `member_id`、`group_id`、`order_index`、`kind`、`current_content`、preview / source status / metadata，继续保持 Member != SourceRange；删除 Member 使用 hard delete，并同步清理依赖它的 Petal / fragment 结构；详细计划见 `docs/releases/V2.BN.8/V2.BN.8.7.3-ContentGroupMember-Entity-Cutover-Plan.md`。
+- `V2.BN.8.7.4` ContentGroupPetal And Fragment Entity Cutover：把 `ContentGroupFragment` / `ContentGroupPetal` 从 ContentGroup 内嵌结构拆成 group-owned 子实体 / 表；稳定 `fragment_id`、`petal_id`、`group_id`、name / role / order / summary / status，并用 Petal-Fragment assignment 表达内部结构；详细计划见 `docs/releases/V2.BN.8/V2.BN.8.7.4-ContentGroupPetal-And-Fragment-Entity-Cutover-Plan.md`。
+- `V2.BN.8.7.5` ContentGroup Gallery OpenDesign Shell Parity：在实体化的 ContentGroup / GroupFolder / Member / Petal 基础上，把 Gallery 收束成真正的资源管理器界面；优先对齐 folder tree、top search/actions、Folder / Topic / Role views、card role tab、topic signal、source note、status chip、empty/loading/error、current folder target 状态条；不引入 Graph scope runtime、CanvasObject projection、Reference / Duplicate / Fork / Materialize UI。
+- `V2.BN.8.7.6` Groups Rail OpenDesign Shell Parity：把 note 右侧 Rail 收束成轻量 collect 面板；加强 folder path、selected-content drop zone、compact group row、role/topic/status signal、expanded group 的 Open editor / drop affordance；保持 Rail 不变成完整 Gallery，Folder / Topic / Role / All tabs 是否进入 Rail 需要单独产品判断。
+- `V2.BN.8.7.7` ContentGroup Cross-Surface Integration Closure：收口 Gallery 与 Rail 的状态保留和视觉语言一致性；保证 `note_id` / `folder_id` / `group_id` 跳转上下文、返回路径、create/drop/move/delete/empty state 的手动体验可解释；Single Editor 只做作为跳转终点的轻量一致性检查，不做 Canvas/workbench 重写。
+- `V2.BN.8.7.8` Single Editor Refine Shell And Logic Foundation：把 Single ContentGroup Editor 收束成非 Canvas 的 refine surface；对齐 OpenDesign 的 topbar、summary、member/material、Petal dock、source/status drawer 心智，但不实现真正 workbench / CanvasObject / projection。
+- `V2.BN.8.7.9` ContentGroup System Closure Gate：作为 8.7 的收口验收小版本，盘点 ContentGroup / GroupFolder / Member / Petal / Fragment 实体化、Rail / Gallery / Single Editor 三层体验、source/member 边界和 reuse 语义底座；只修 closure gate 暴露出的明确缺陷，不再扩张功能，并把 CanvasObject projection、Materialize UI、SourceArtifact / SourceAnchor、Relation / GraphRAG 明确顺延到 8.8+。
+- `V2.BN.8.8+` CanvasObject, Media Annotation, Drawing Tool, And Image Insert Seed：在 8.7 ContentGroup maturity closure 完成后，顺延此前的 CanvasObject seed，接入最小画笔、shape、image block / image object、region selection reserve，并让图片区域、CanvasObject、media region 能成为 annotation range；不做完整设计软件、完整媒体系统或多 frame 产品化。
+- `V2.BN.8.9+` Canvas Reliability / Scale / Export Reserve Closure：验证 50/200/1000 blocks、formula-heavy、workspace outside frame、visible render window / virtualization reserve、PageFrame export boundary、CanvasObject / endpoint reserve。
+- `V2.BN.8.x` 视实际测试追加：只要 Canvas Engine 和 TextFlow 没达到工程可靠和用户体验可靠，就不要急着进入 Structure Studio、Source Library 或 Relation runtime。
 
 ### 不做
 
-- 不做 Template Studio；
+- 不做 Structure Studio 产品化；
 - 不做 source/relation 的完整 UI；
 - 不做 AI note assembly；
 - 不做 canvas preset 之间的直接 destructive switch；
 - 不做 AI repagination proposal，只保留未来接口。
+- 不做完整 drawing design app、多 frame 产品化、完整 media editor 或完整 PDF/export engine；CanvasObject / media / drawing seed 已顺延到 V2.BN.8.8+，并且必须排在 V2.BN.8.7 ContentGroup 数据实体独立与 Gallery/Rail shell closure 之后；V2.BN.8.7 的视觉套壳服务于 ContentGroup maturity，不提前进入 CanvasObject projection。
 
 ### 验收
 
 - NoteCanvas / PageFrame / FrameOutsideWorkspace 的 runtime 行为可解释。
 - Page mode 只显示 PageFrame 的正式区域，Canvas mode 能显示 PageFrame 外 workspace。
 - frame-outside blocks 不会在切换回 page mode 时污染正式 PageFrame。
+- TextBlock / TextUnit / TextUnitGroup / InlineStructure 的第一版边界可解释，并且新建普通文本能从一开始进入 TextFlow 路径。
+- `AnnotationTruth` / `GroupFolder` / `ContentGroup` / `ReadingInterpretation` 的边界可解释：TextFlow 是内容根，ContentRange 是定位根，AnnotationTruth 是标记根，GroupFolder 是组织路径和局部视图边界，ContentGroup 是严肃内容包，ContentGroup identity/status 是审查状态，ReadingInterpretation 是 AI 解释层，Block 是空间根。
+- Roadmap 明确 annotation contract 是 V2.BN.8.5 的正式产物，避免继续把语义责任压在固定知识角色、固定语义类别或角色字段 schema 上。
 - 后续 source、relation、local graph 可以基于稳定 xywh 和 viewport 模型工作。
+- 后续 source、relation、AI projection 可以基于 ContentRange / GroupFolder / ContentGroup / accepted ContentGroup identity 边界读取 NoteBlock 以下的对象，而不是只能连接整个 NoteBlock。
 - Canvas Engine branch 有明确 clean reset / fallback 决策记录。
 - Roadmap 明确预留 V2.BN.8.x 打磨空间，不把 Canvas Engine 当作一版完成的功能。
 
 ---
 
-## 16. Phase A9 - Template Studio Productization And Block Template Categories
+## 16. Phase A9 - Structure Studio And Editor Productization
 
 ### 目标
 
-把 v2.5.1 的工程版 Template Studio 升级成 Better Notebook 的用户能力：用户可以创建、复制、分类、编辑、预览并使用自己的 block/template variant。
+把 V2.BN.8 建立的 Canvas Engine、TextFlow 与 AnnotationTruth 地基产品化成一套 editor / structure studio：用户、开发者和未来 Mr.Zero 可以管理 annotation workflow、AI reading proposal、可见标注样式、block shell、appearance 和 editor behavior。
 
-如果只有默认排版和默认 block，Coincides 更像一张更好的 paper surface。Template Studio Productization 让用户能够建立自己的知识表达系统，才真正进入 Better Notebook。
+早期的 `Template Studio` 概念偏向 block template。TextFlow / AnnotationTruth 之后，知识表达的核心不再是“做更多 block type”，也不是预设无限多的 canonical knowledge role，而是让自然文本可以被标注、解释、连接，并在用户确认后逐步结构化。A9 的职责因此升级为 Structure Studio / Annotation Studio：它既保留 block shell / special object block 的定义能力，也重点支持 annotation UI、annotation style、AI proposal review、projection/debug view，以及必要时的 project-local annotation pattern。
 
 ### 前置条件
 
 - `V2.BN.5` 已完成默认 block visual language 和基础 insert/slash 体验。
 - `V2.BN.6` 已定义 primitive family、template variant、category membership、FieldSchema、FieldValue、FieldLayout / RenderTemplate 的边界。
 - `V2.BN.7` 已完成 runtime autopsy、branch closure 和 Canvas Engine gate。
-- `V2.BN.8` 已启动或完成 Canvas Engine Foundation，至少证明 Template Studio 产出的 block/template variant 能进入可靠的 canvas-native runtime。
+- `V2.BN.8` 已启动或完成 Canvas Engine And TextFlow Foundation，至少证明 TextBlock / TextUnit / AnnotationTruth / ReadingInterpretation seed 能进入可靠的 canvas-native runtime；TextUnitGroup 和 InlineStructure 作为 annotation range helper / special rendering anchor 保留。
 - v2.5.x `TemplateDefinition` runtime 和工程版 Template Studio 可以作为地基复用。
 
 ### 新工作
 
-- Block Template Studio 的用户入口，放在 advanced tool area，不污染日常写作。
-- 创建 user-owned template variant。
-- 从 system/default template copy 成用户草稿。
-- 编辑 template label、description、summary_for_agent、category membership。
-- 编辑字段 schema 的安全子集，例如字段 key、label、kind、required、默认值。
-- 编辑默认 field layout / render template 的安全子集，例如字段位置、宽度、基础字体、边框、显示/隐藏。
+- Structure Studio 的用户入口，放在 advanced tool area，不污染日常写作。
+- 定义 annotation workflow：选择范围、命名标签、设置样式、编辑子标注、确认/拒绝 AI proposal。
+- 定义 `AnnotationTruth` 的可编辑安全子集，例如 raw_label、ranges、child annotations、visual style、created_by / status。
+- 定义 `ReadingInterpretation` 的 review/debug 视图，例如 topic segmentation、local role reading、annotation proposal、confidence、rationale。
+- 定义 InlineStructure 的特殊渲染边界，例如 inline_formula、inline_code、inline_source_marker、inline_link；不把它作为固定 semantic kind 分类器。
+- 定义 `TextUnitGroup` 作为 annotation range helper / stable range package 的使用边界，而不是默认 knowledge role 容器。
+- 定义 AI readable projection：哪些 TextUnit / InlineStructure / annotation range / child annotation 会被投影成 AI 可读上下文；projection 是解释层，不反写成全局固定 schema。
+- 定义 block shell / appearance 的安全子集，例如边框、背景、标题区、sticky note 外观、code block 外观。
+- 定义 canvas / PageFrame / workspace 的默认外观 seed，例如背景、grid、PageFrame style、workspace theme。
+- 保留特殊对象 block 的定义能力，例如 code、image、video、table、3D preview、source snapshot，但不把普通知识结构重新塞回 block template。
 - 定义并管理 category membership：Default、Math、User Defined。
 - 不在第一版预置 Physics、Chemistry、Biology、History、Engineering、Research 等 category；这些应由用户后续通过 User Defined 建立，或由未来 domain/package 机制提供。
 - 同一个 template variant 可以加入多个 category。
-- Slash / insert menu 能按 category 展示 template variant。
-- Template Studio 里能预览 reading / editing / debug / proposal 状态。
-- Template Studio 里能区分 primitive family、template variant 和 category，不让用户误以为它们是同一层 type。
+- Slash / insert / selection toolbar / inspector 能按 category 和上下文展示 command、annotation action、special render anchor、special object block。
+- Structure Studio 里能预览 reading / editing / debug / proposal 状态。
+- Structure Studio 里能区分 writing_role、AnnotationTruth、ReadingInterpretation、InlineStructure special render anchor、block shell、special object block 和 category，不让用户误以为它们是同一层 type。
 
 ### 第一版默认策略
 
 ```text
-Primitive family:
-  text / heading / definition / formula / code / source_quote / sticky
+TextFlow definitions:
+  writing_role:
+    paragraph / heading / quote / bullet_item / numbered_item / todo_item / toggle_item
 
-Default visible template variants:
-  text.paragraph
-  text.heading
-  definition.basic
-  formula.basic or formula.math.basic
-  code.snippet
-  source.quote
-  sticky.note
+Annotation definitions:
+  AnnotationTruth:
+    raw_label / ranges / child_annotations / visual_style / created_by / status
 
-Deferred user/system variants:
-  theorem.*
-  proof.*
-  example.*
-  exercise.*
-  answer.*
-  table.*
-  image.*
+  ReadingInterpretation:
+    topic segmentation / local role reading / annotation proposal / confidence / rationale
+
+Special render anchors:
+  inline_formula / inline_code / inline_source_marker / inline_link
+
+Special object blocks:
+  formula_display
+  code
+  image
+  table
+  source_snapshot
+  sticky_note
+
+Block shell / appearance:
+  plain text block shell
+  sticky note shell
+  code block shell
+  media block shell
+  source snapshot shell
 
 Compatibility/internal only:
   concept.*
@@ -1079,17 +1174,18 @@ Compatibility/internal only:
 - 不做 marketplace；
 - 不做 package import/export 重新设计；
 - 不做 AI 自动判断并创建 template；
-- 不做普通 note 编辑中的 schema 级修改。
+- 不做普通 note 编辑中的全局 schema / canonical role / fixed slot 级修改。
 
 ### 验收
 
-- 用户可以创建自己的 template variant。
-- 用户可以把一个 template variant 加入多个 category。
-- Slash / insert 不再平铺所有 runtime template，而是按高频、最近使用、category 和搜索组织。
-- `formula` 与 `definition` 是第一版可正式使用的 structured block。
-- theorem/proof/example/exercise 可以作为后续 template variant 出现，但不强行成为第一版默认 preset。
-- 用户能理解 family、variant、category 的区别。
-- Template Studio 的产物能回到普通 note 中被创建、预览和编辑字段值。
+- 用户可以定义或复制自己的 annotation workflow / annotation style / proposal review view。
+- 用户可以编辑 annotation 的 child annotation / visibility / projection 安全子集，并理解它不是全局固定 slot schema。
+- 用户可以定义 block shell / special object block 的外观安全子集。
+- Slash / insert / selection toolbar 不再平铺所有 runtime template，而是按高频、最近使用、category、上下文和搜索组织。
+- `formula` 可以同时存在为 inline special render anchor / display block；`definition` 不再强行成为默认 block type，而应通过 annotation label / AI reading proposal / user highlight 表达。
+- theorem/proof/example/exercise 可以作为 annotation label、AI reading proposal 或 future special projection 出现，但不强行成为第一版默认 block preset。
+- 用户能理解 writing_role、AnnotationTruth、ReadingInterpretation、InlineStructure special render anchor、block shell、special object block、category 的区别。
+- Structure Studio 的产物能回到普通 note 中被创建、预览、编辑值、投影给 AI，并被后续 relation/source 阶段读取。
 
 ---
 
@@ -1264,7 +1360,7 @@ Relation 是 NoteBlock 之间真正产生结构联系的地方。Block 本身相
 - 入口可来自 selected toolbar、right-click menu，未来可探索拖到 Graph Peek hot zone。
 - 以 selected block 为中心生成局部图谱。
 - 默认只显示有限范围：1-hop、当前页或相邻页、当前 relation group / layer。
-- 支持筛选 relation type、relation group、direction、page range、depth。
+- 支持筛选 relation type、relation group、direction、page range、GroupFolder path / graph scope。
 - 图谱节点使用轻量卡片：type、短标题、relation count、source badge、formal/scratch 状态。
 - 图谱里的 cluster / supernode 只是视图压缩，不合并真实 NoteBlock 或 ObjectRelation。
 - 研究并记录 graph coarsening、community detection、graph summarization、supernode folding 的适用边界。
@@ -1283,7 +1379,7 @@ Relation 是 NoteBlock 之间真正产生结构联系的地方。Block 本身相
 
 - 用户可以围绕一个 block 打开局部图谱。
 - 默认图谱不会因为跨页或关系过多而视觉爆炸。
-- 用户可以按 relation group/type/page range/depth 缩小图谱。
+- 用户可以按 relation group/type/page range/GroupFolder path / graph scope 缩小图谱。
 - 密集区域可以被折叠为可展开的 cluster / supernode。
 - supernode folding 明确只是 view projection，不改变 Coincides truth。
 
@@ -1491,10 +1587,10 @@ V2.BN.7:
   Runtime autopsy, branch closure, and Canvas Engine gate.
 
 V2.BN.8:
-  Canvas Engine foundation.
+  Canvas Engine and TextFlow foundation.
 
 V2.BN.9:
-  Template Studio productization and block template categories.
+  Structure Studio and editor productization.
 
 V2.BN.10:
   Source library and provenance foundation.

@@ -125,3 +125,25 @@ User confirmed relation
 V2.BN.6 只定义边界。
 
 RelationType / RelationGroup / RelationPack / lifecycle / relation inspector / local graph / supernode folding 属于 V2.BN.11+ 及后续 relation 阶段。
+## 7. 2026-06-18 GroupFolder Boundary Addendum
+
+`GroupFolder` is organization and view scope, not relation truth.
+
+```text
+GroupFolder
+  where ContentGroups are organized
+  what Gallery scope is open
+  what local relation graph boundary is active
+
+ObjectRelation
+  durable semantic relation truth
+```
+
+Opening a relation graph from a GroupFolder should only set the current view boundary. It must not create, delete, or rewrite ObjectRelation records by itself.
+
+Rules:
+
+- GroupFolder containment is not `supports`, `derives_to`, `example_of`, or any other semantic relation.
+- Moving or copying a GroupFolder changes organization only.
+- Temporary AI projection folders may collect references for one view, but they do not become relation truth unless the user explicitly confirms relations later.
+- SourceReference remains provenance/evidence; Link remains navigation; ObjectRelation remains semantic truth.

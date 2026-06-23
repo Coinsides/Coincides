@@ -37,6 +37,39 @@ Notebook and report are treated as related forms:
 
 The long-term purpose is to become a high-density, high-precision information service center for human-AI collaboration. Humans should be able to read and understand the refined output. External AI agents should also be able to call, inspect, and reuse the organized results through controlled interfaces.
 
+## 2026-06-20 Better Notebook Doctrine
+
+The current Better Notebook direction is `TextFlow-first / ContentGroup-aware`, not block-first and not annotation-first.
+
+The stable product stack is:
+
+```text
+Raw Source
+  original evidence truth
+
+TextFlow
+  Coincides-owned content truth for natural writing
+
+Label / AnnotationTruth
+  visual marker and reusable range package
+
+ContentGroup
+  serious content package assembled from ranges, labels, blocks, media regions, source regions, or other traceable members
+
+Petal
+  local role inside one ContentGroup
+
+GroupFolder
+  resource manager, browsing path, and future relation-view boundary for ContentGroups
+
+Relation
+  later logical relationship between accepted/refined content packages or their local parts
+```
+
+This keeps the user experience natural. In normal writing mode, the user should see a note, not an engineering structure. In organizing mode, the user should feel like they are collecting useful fragments into named boxes. In deep editing mode, a single ContentGroup can be refined into Petals without moving or damaging the original text.
+
+Labels remain useful, but they are not the final knowledge object. A label is a visible mark and a convenient way to package one or more ranges. A ContentGroup is the stronger organizing object. Petals describe the local structure inside a ContentGroup. GroupFolders decide where ContentGroups live and what scope a Gallery or future local graph should browse.
+
 ## Core Product Commitments
 
 User-facing language should prefer `Project` as the main container name. A project may be a course, a research package, a report workspace, a case file, or another focused collection of material. Internal implementation names such as `course_id` may remain as engineering details, but the product surface should not force every workflow to feel like school coursework.
@@ -44,6 +77,8 @@ User-facing language should prefer `Project` as the main container name. A proje
 Coincides should separate the formal document layer from the thinking layer. The formal layer is what becomes a note, report, export, or shareable reading surface. The thinking layer includes sticky notes, remarks, scratch work, temporary reasoning, and page-outside canvas objects. These objects may still be useful to the user and AI, but they should not silently pollute the formal document structure or default export.
 
 The clean product model is canvas-backed rather than three separate surfaces. A Note owns an underlying infinite canvas/workspace. A Page is a fixed exportable frame inside that canvas, with a realistic page size such as A4 only describing the frame, not the whole canvas. Scratch / Workspace content is the area outside the Page frame on the same canvas, not a third independent document type.
+
+Coincides is text-first, annotation-aware, and canvas-capable. The default writing path should let the user write naturally inside TextBlocks. TextFlow quietly keeps the writing organized into TextUnits, writing roles, inline render anchors, and range helpers. AnnotationTruth records durable labels after the user or an accepted AI proposal marks a range. Canvas organizes where visual objects live. GroupFolder organizes where serious content packages are browsed, collected, and used as local graph boundaries. ContentGroups explain which pieces deserve serious AI/user interpretation, and accepted status lives on the ContentGroup itself rather than in a second object.
 
 User-authored blocks do not need to start with source references. A user may create an original thought, summary, side note, or explanation first, then later attach one source, multiple sources, a page, a range, or a more precise anchor. Source grounding should be easy to add, inspect, and revise without making manual writing feel bureaucratic.
 
@@ -129,9 +164,45 @@ The product should make dense information easier for humans to read, understand,
 
 Source references, relations, templates, concepts, operation history, and debug metadata are important, but they should not dominate the reading surface. They should appear through badges, hover states, selected-object controls, inspectors, local graph views, search, export preview, and debug mode.
 
-Free writing and structured knowledge objects should coexist. A user can write a normal paragraph first, then later convert it into a structured Definition, Formula, Theorem, Proof, Example, Exercise, or other template-backed NoteBlock. Structured fields make the system readable to graph views, AI, export, and search, while field layout and visual style remain user-adjustable.
+Free writing and structured meaning should coexist, but the system should not force every meaningful piece to become a separate block or every mark to become a serious content package. A user may write a long natural TextBlock first. Later, parts of that writing can be located as ContentRanges, marked with lightweight labels, packaged into ContentGroups, organized through GroupFolders, accepted or rejected through ContentGroup identity/status, connected to sources, or used as future relation endpoints without breaking the paragraph apart. Independent NoteBlocks should be used when the user needs spatial layout, media, special rendering, large display formulas, code regions, tables, sticky notes, source snapshots, or other object-level behavior.
 
-First-version structured conversion should stay conservative. Converting a paragraph into a Formula should place the current text into `latex_input`; converting a paragraph into a Definition should place the current text into `description` and leave `concept_name` empty. Coincides should not use brittle punctuation rules, such as colon splitting, to pretend it understands semantic fields. AI-assisted semantic conversion belongs later as a reviewable proposal, not as silent deterministic rewriting.
+First-version structured conversion should stay conservative. Converting text into a FormulaBlock should place the current text into `latex_input`. Definition-like meaning should be created through annotation workflow and should preserve the selected text instead of pretending the system knows `concept_name` or `description` unless the user or a later AI proposal confirms it. Coincides should not use brittle punctuation rules, such as colon splitting, to pretend it understands semantic fields. AI-assisted semantic conversion belongs later as a reviewable proposal, not as silent deterministic rewriting.
+
+The preferred long-term content stack is:
+
+```text
+TextBlock
+  Natural writing container.
+
+TextUnit
+  Internal semantic writing unit: paragraph, heading, list item, quote line, todo item, toggle item.
+
+InlineStructure
+  Special render / interaction anchor inside TextFlow: inline formula, inline code, inline link, inline source marker.
+
+TextUnitGroup
+  Writing-layer range helper for grouped TextUnits.
+
+AnnotationTruth
+  Durable label / marker over text, block, media, source, or canvas ranges.
+
+ContentRange
+  Stable location inside TextFlow, source, or future canvas/media objects.
+
+GroupFolder
+  Organization path and browsing boundary for ContentGroups. Project and Note can own system root GroupFolders, while user/AI folders can collect groups across notes or projects without moving source truth.
+
+ContentGroup
+  Serious content package made from one or more ranges; candidate for AI/user interpretation.
+
+ContentGroup accepted identity
+  Accepted / reviewed state of a ContentGroup. This is not a separate object or table.
+
+ContentGroup Gallery / derived group views
+  User-facing folder/gallery view over ContentGroups, plus derived lists such as all definitions, all examples, all doubts, or all source-backed claims.
+```
+
+Block template work should therefore narrow into two clearer roles: special object blocks and block shells. FormulaBlock, CodeBlock, ImageBlock, TableBlock, StickyNote, SourceSnapshotBlock, video or 3D preview blocks still matter because they provide display, media, interaction, and spatial behavior. They should not be mistaken for the only way to represent knowledge structure. Definition, theorem, example, claim, evidence, step, and similar ideas should normally become annotation labels or AI reading proposals, not default block families.
 
 Navigation, evidence, and semantic meaning are separate concerns:
 
@@ -145,7 +216,7 @@ A clickable internal link only means "go there." It does not automatically mean 
 
 ### 4. Content And Layout Are Separate
 
-`NoteBlock` is content truth. `BlockBox` or surface placement is layout truth. Moving, resizing, aligning, and arranging blocks should not rewrite the underlying content or evidence.
+TextFlow is content truth. ContentRange is location truth. AnnotationTruth is label / marker truth. GroupFolder is organization/path truth for ContentGroup browsing and local relation-view boundaries. ContentGroup carries the serious package / interpretation path, including its accepted/rejected identity state. Source references and special object payloads remain separate evidence and media truth. `NoteBlock` is the canvas/page object that carries or presents content. `BlockBox`, `CanvasNode`, or placement state is layout truth. Moving, resizing, aligning, and arranging objects should not rewrite the underlying TextFlow, annotations, GroupFolders, ContentGroups, special object payload, evidence, or source chain.
 
 ### 5. Source Grounding Must Stay Inspectable
 

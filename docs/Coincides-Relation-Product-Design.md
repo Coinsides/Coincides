@@ -1,5 +1,29 @@
 # Coincides Relation Product Design
 
+## 2026-06-22 ContentGroup Endpoint Doctrine
+
+Relation is no longer planned around block-first endpoints.
+
+The current endpoint direction is:
+
+```text
+ContentGroup
+  preferred coarse endpoint candidate
+
+Petal
+  preferred local/fine endpoint candidate under a parent ContentGroup
+
+ContentRange
+  evidence and trace anchor
+
+GroupFolder
+  relation-view scope / browsing boundary, not relation truth
+```
+
+A relation should be a recorded judgment or reasoning artifact between meaningful packages or local parts, not a permanent visible line on the ordinary writing surface. The normal note should remain readable; relation views can project the graph when the user asks for it.
+
+The 8.6.30 copy-insert boundary matters for relation work: destructive text movement and true reorder must wait until range rebase can update labels, ContentGroup members, Petal fragments, and future endpoints safely.
+
 **Created**: 2026-06-06
 **Status**: Living Draft
 **Scope**: Relation product model, interaction model, relation type design, relation group design, and future GraphRAG bridge
@@ -97,6 +121,77 @@ ObjectRelation:
 ```
 
 正文 link 可以和 ObjectRelation 共存，但不能自动创建 semantic relation。用户写“见 Green Theorem 证明笔记”并加一个 link，只说明可以跳转过去；如果它还代表前置阅读、推导关系或证据支持，需要单独创建或确认 ObjectRelation / SourceReference。
+
+---
+
+## 1.3 TextFlow / Addressable Content Endpoint 边界
+
+早期 relation 设计默认把 `NoteBlock` 当作主要 endpoint。TextFlow 模型进入 V2.BN.8.3 后，这个假设需要升级。
+
+长期方向：
+
+```text
+Relation endpoint = AddressableContentEndpoint
+```
+
+候选对象包括：
+
+```text
+Note
+PageFrame
+NoteBlock
+TextUnit
+InlineStructuredObject
+AnchoredSpan
+ContentRange
+ContentGroup
+Petal
+ContentGroup identity/status
+SourceArtifact / SourceSnapshotObject
+CanvasObject / Region future
+```
+
+2026-06-18 之后的模型同步：
+
+```text
+TextFlow
+  content root
+
+ContentRange
+  location root
+
+AnnotationTruth
+  visible durable label / marker, not the only semantic endpoint
+
+ContentGroup
+  serious package of member references; preferred future endpoint candidate
+
+Petal
+  local part inside a ContentGroup; may support fine-grained relation explanation, but normally belongs under its parent ContentGroup
+
+Accepted ContentGroup identity
+  accepted / reviewed state of a ContentGroup; not a separate object or table
+
+2026-06-18 correction:
+  The separate accepted-content object concept is retired in the active Better Notebook model.
+  A reviewed object remains a ContentGroup; acceptance is represented by the ContentGroup's own identity/status.
+  GroupFolder / ContentGroup Gallery should be treated as organization and derived browsing/query views over ContentGroups, not relation truth tables.
+
+CompositeEndpoint
+  relation-side grouped premise / conclusion when multiple objects act together
+```
+
+因此，后续 relation endpoint 的优先方向应从 `AnnotationTruth / AnnotationSet` 调整为 `ContentGroup / accepted ContentGroup identity / CompositeEndpoint`。`GroupFolder` 可以提供 relation view boundary / graph scope，但它本身不是 relation endpoint truth。`AnnotationTruth` 仍然可以作为轻量输入信号、用户标记、fallback endpoint 或 ContentGroup 的组成来源，但不应该继续承担全部 content-package truth。
+
+`AnnotationSet` 在 V2.BN.8.6.6 中已经作为可运行 seed 存在，但由于产品尚未投产，后续不需要为它保留兼容 adapter。可用部分应迁移到 `ContentGroup`、`Petal`、`GroupFolder / ContentGroup Gallery` 或 relation-side `CompositeEndpoint`，而不是把它继续扩展为主线关系节点模型。
+
+`TextUnitGroup` 也不应继续作为 relation 端点方向。它是 ContentGroup 概念的前身和启发物；若实现可复用，应重写为 ContentGroup workflow，否则应从主线 UX 删除。
+
+这不表示每一行、每一句、每个 span 都自动成为图节点。只有被用户、模板、AI proposal、source reference、relation 行为或 export/AI-context 行为明确提升的内容，才获得稳定 addressable identity。
+
+V2.BN.8.3 只负责确立这个边界和最小 TextFlow seed，不实现 relation endpoint runtime。Relation runtime、relation lifecycle、relation inspector、relation layer、local graph 和 graph sidecar 仍由后续 relation phases 管理。
+
+这样做的意义是：未来 relation 可以连接真正的信息颗粒，例如一个 ContentGroup 中的 definition body、一个 Petal 中的 theorem condition、一个 inline formula、一个 source-backed claim，而不是只能粗暴连接整个 NoteBlock。
 
 ---
 
@@ -521,7 +616,7 @@ Local Relation Graph 是 relation 的第一类消费视图：用户围绕一个 
 ```text
 selected NoteBlock
   -> local relation graph
-  -> filter relation group / type / direction / page range / depth
+  -> filter relation group / type / direction / page range / GroupFolder path / graph scope
   -> inspect connected blocks
   -> jump back to original page placement
 ```
@@ -555,7 +650,7 @@ Local graph 默认必须保守，避免视觉爆炸：
 - relation group；
 - relation type；
 - direction: upstream / downstream / bidirectional / all；
-- depth: 1-hop / 2-hop / custom；
+- graph scope: 1-hop / 2-hop / custom / current GroupFolder boundary；
 - formal only / include scratch；
 - visible only / include hidden semantic relations。
 
@@ -1072,7 +1167,7 @@ GraphRAG 映射需要解决的问题：
 - hidden ObjectRelation 是否参与 PDF 导出；
 - page 外 scratch block 的 relation 是否默认不导出，但允许 AI 读取；
 - relation mode 的默认筛选规则；
-- Local Relation Graph 第一版的默认 page range / depth / max node threshold；
+- Local Relation Graph 第一版的默认 page range / GroupFolder path / graph scope / max node threshold；
 - Graph Peek hot zone 是否进入第一版，还是先用 toolbar / right-click 入口；
 - Supernode folding 第一版是否只用规则折叠，还是引入 Louvain / Leiden 调研 spike；
 - GraphRAG bridge 应该在 Better Notebook 成熟后做，还是作为 relation proposal 的早期调研。

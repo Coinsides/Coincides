@@ -128,3 +128,28 @@ cache
 ```
 
 它不能绕开用户确认流程覆盖 Coincides Core truth。
+## 6. 2026-06-18 GroupFolder / Gallery Rebuild Addendum
+
+Persistent GroupFolder state is organization truth, not transient editor state.
+
+Must persist:
+
+- user-created GroupFolder;
+- system Project / Note root GroupFolder;
+- saved AI projection GroupFolder;
+- ContentGroup placement in a GroupFolder;
+- folder title, parent folder, order, origin, and status.
+
+Can be transient:
+
+- open / collapsed Gallery panel state;
+- selected folder row;
+- drag ghost while moving a group into a folder;
+- temporary AI projection before the user saves it.
+
+Rebuild rules:
+
+- Missing system Project / Note root folders may be rebuilt from Project / Note ownership.
+- Temporary AI projection folders may be discarded when not saved.
+- Folder path can derive browsing depth and relation-view scope.
+- Rebuilding folder previews must not rewrite ContentGroup member references, source provenance, or ObjectRelation truth.

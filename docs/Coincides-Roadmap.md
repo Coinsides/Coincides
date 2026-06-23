@@ -150,7 +150,7 @@ Practical consequences:
 - Objects are truth. Relations are meaning. Views are ways of seeing and operating. Exports are outputs. Packages are portable workspaces.
 - Coincides is not an AFFiNE clone, a tldraw wrapper, a Notion clone, a JSON Canvas file editor, a generic graph visualizer, or a plain AI tutor / chat RAG app.
 - Coincides is a source-grounded information workspace where learning/content objects, evidence, reviewed relations, canvas projections, view presets, and AI proposals remain reconstructable, inspectable, and portable.
-- NoteBlock remains the v2.x primary knowledge object; future v3.x may promote `KnowledgeObject`, `Concept`, `Formula`, `EvidenceSet`, or other graph-native nodes after v2.x evidence is clearer.
+- NoteBlock remains the v2.x primary authored content object; future graph-native work should promote traceable content packages and relation endpoints only after v2.x evidence is clearer.
 - CanvasNode is projection. CanvasEdge is visual connector. ObjectRelation is semantic / AI-readable relation. RelationLayer is relation purpose/view layer. EditorNode is adapter-level editor state. Proposal is reviewed mutation.
 - CanvasEdge can degrade; ObjectRelation must not silently disappear; CanvasEdge -> ObjectRelation binding can break; package import must report recovery state.
 - v2.x remains SQLite-first but graph-ready. Each relevant version should preserve future graph node/edge candidates, provenance, projection-vs-truth boundaries, and package/export implications for v3.x graph-native planning.
@@ -857,7 +857,7 @@ Graph-native evidence collection rule:
 
 Questions that must be answered before graph-native migration:
 
-- Is `NoteBlock` the graph node, or does `KnowledgeObject` become the graph node?
+- Is `NoteBlock` the graph node, or does a traceable ContentGroup / endpoint model become the graph node?
 - Is `SourceAnchor` a node, edge property, or provenance object?
 - Is `EvidenceSet` a node, relation bundle, or both?
 - Is `CanvasNode` part of the knowledge graph or only projection?

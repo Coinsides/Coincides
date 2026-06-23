@@ -163,3 +163,25 @@ Source chain 是 provenance graph。
 ObjectRelation 是 semantic graph。
 
 GraphRAG 可以读取 source provenance 作为 evidence input，但不能把 source chain 自动当作用户确认的 semantic relation。
+## 8. 2026-06-18 GroupFolder / ContentGroup Provenance Addendum
+
+`GroupFolder` placement is not provenance.
+
+```text
+GroupFolder
+  organization / browsing / Gallery scope
+
+ContentGroupMember
+  traceable reference to ContentRange / AnnotationTruth / Block / source region / future media region
+
+SourceReference
+  evidence / provenance truth
+```
+
+Rules:
+
+- Moving a ContentGroup between GroupFolders must not rewrite its source chain.
+- Copying a GroupFolder copies organization references, not original source material.
+- Temporary AI projection folders are working views; they do not become source roots.
+- ContentGroup preview text is display cache only; the original source/member references remain authoritative.
+- A future source reconstruction flow may create ContentGroups, but source provenance stays attached to member references, not folder position.
