@@ -295,7 +295,7 @@ function assertEditableTemplate(template: TemplateDefinition): void {
 }
 
 function sourceBehaviorForTemplate(template: NoteBlockTemplateDefinition): Record<string, unknown> {
-  const policy = template.template_id === 'source.quote'
+  const policy = template.system_type === 'source_quote'
     ? 'required'
     : template.source_reference_allowed
       ? 'recommended'

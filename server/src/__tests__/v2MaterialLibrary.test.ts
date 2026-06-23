@@ -810,7 +810,7 @@ test('organized note proposal uses deterministic fallback without an AI key', as
     assert.equal(proposal.data.warnings.some((warning: string) => warning.includes('AI generation was not used')), true);
     assert.equal(proposal.data.blocks.length > 0, true);
     assert.equal(proposal.data.blocks.every((block: any) => block.metadata?.taxonomy_version === 'v2.5.0'), true);
-    assert.equal(proposal.data.blocks.some((block: any) => block.metadata?.template_id === 'text.heading'), true);
+    assert.equal(proposal.data.blocks.some((block: any) => block.metadata?.template_id === 'text.paragraph'), true);
     assert.equal(proposal.data.blocks.some((block: any) => block.metadata?.template_id === 'text.paragraph'), true);
     assert.equal(proposal.data.blocks[0].source_references.length > 0, true);
     assert.equal(proposal.data.blocks[0].source_references[0].document_id, documentId);
@@ -827,8 +827,8 @@ test('organized note proposal uses deterministic fallback without an AI key', as
 test('legacy NoteBlock types map to template-aware taxonomy metadata', () => {
   assert.deepEqual(inferNoteBlockTemplateMetadata('definition'), {
     system_type: 'text',
-    learning_role: 'definition',
-    template_id: 'definition.basic',
+    learning_role: 'note',
+    template_id: 'text.paragraph',
     taxonomy_version: 'v2.1.1',
   });
   assert.deepEqual(inferNoteBlockTemplateMetadata('formula'), {
@@ -853,10 +853,10 @@ test('v2.5 template runtime seeds system templates idempotently', async () => {
     const secondSeed = seedSystemTemplateDefinitions(db, userId);
     const templates = listTemplateDefinitions(db, userId, {});
 
-    assert.equal(firstSeed.length >= 13, true);
+    assert.equal(firstSeed.length, 3);
     assert.equal(secondSeed.length, firstSeed.length);
     assert.equal(templates.length, firstSeed.length);
-    assert.equal(templates.some((template) => template.template_key === 'definition.basic'), true);
+    assert.equal(templates.some((template) => template.template_key === 'text.paragraph'), true);
     assert.equal(templates.every((template) => template.version === '1.0.0'), true);
     assert.equal(templates.every((template) => template.origin === 'system_seed'), true);
     assert.equal(templates.every((template) => template.scope_type === 'global'), true);
@@ -868,14 +868,14 @@ test('runtime template metadata resolves explicit and legacy NoteBlock inputs', 
     const { userId } = seedUserCourse(db);
 
     const explicit = mergeRuntimeNoteBlockTemplateMetadata(db, userId, {
-      template_id: 'definition.basic',
+      template_id: 'text.paragraph',
       custom_key: 'preserved',
     }, 'definition');
     const inferred = mergeRuntimeNoteBlockTemplateMetadata(db, userId, {}, 'formula');
 
     assert.equal(explicit.metadata.custom_key, 'preserved');
-    assert.equal(explicit.metadata.template_id, 'definition.basic');
-    assert.equal(explicit.metadata.template_key, 'definition.basic');
+    assert.equal(explicit.metadata.template_id, 'text.paragraph');
+    assert.equal(explicit.metadata.template_key, 'text.paragraph');
     assert.equal(explicit.metadata.template_version, '1.0.0');
     assert.equal(explicit.metadata.template_resolution_status, 'runtime_resolved');
     assert.equal(explicit.metadata.taxonomy_version, 'v2.5.0');
@@ -897,7 +897,7 @@ test('template compatibility report classifies runtime, legacy, and missing temp
   await withDb((db) => {
     const { userId, courseId } = seedUserCourse(db);
     seedSystemTemplateDefinitions(db, userId);
-    const definitionTemplate = listTemplateDefinitions(db, userId, { template_key: 'definition.basic' })[0];
+    const definitionTemplate = listTemplateDefinitions(db, userId, { template_key: 'text.paragraph' })[0];
 
     db.prepare(`
       INSERT INTO note_blocks (
@@ -905,7 +905,7 @@ test('template compatibility report classifies runtime, legacy, and missing temp
       ) VALUES (?, ?, ?, ?, '{}', ?, ?, datetime('now'), datetime('now'))
     `).run(uuidv4(), userId, courseId, 'definition', 'Runtime block', JSON.stringify({
       template_definition_id: definitionTemplate.id,
-      template_key: 'definition.basic',
+      template_key: 'text.paragraph',
       template_version: '1.0.0',
     }));
     db.prepare(`
@@ -936,7 +936,7 @@ test('v2.5.1 template editor copies system templates into user drafts', async ()
   await withDb((db) => {
     const { userId } = seedUserCourse(db);
     seedSystemTemplateDefinitions(db, userId);
-    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'definition.basic' })[0];
+    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'text.paragraph' })[0];
 
     const draft = copyTemplateDefinition(db, userId, systemTemplate.id, {
       template_key: 'definition.custom',
@@ -953,7 +953,7 @@ test('v2.5.1 template editor copies system templates into user drafts', async ()
     assert.deepEqual(draft.source_behavior, systemTemplate.source_behavior);
     assert.equal(draft.metadata.copied_from_template_definition_id, systemTemplate.id);
 
-    const original = listTemplateDefinitions(db, userId, { template_key: 'definition.basic' })[0];
+    const original = listTemplateDefinitions(db, userId, { template_key: 'text.paragraph' })[0];
     assert.equal(original.origin, 'system_seed');
     assert.equal(original.is_system, true);
     assert.equal(original.status, 'active');
@@ -964,7 +964,7 @@ test('v2.5.1 template editor rejects direct system template updates', async () =
   await withDb((db) => {
     const { userId } = seedUserCourse(db);
     seedSystemTemplateDefinitions(db, userId);
-    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'definition.basic' })[0];
+    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'text.paragraph' })[0];
 
     assert.throws(() => updateTemplateDefinition(db, userId, systemTemplate.id, {
       label: 'Edited system definition',
@@ -1012,7 +1012,7 @@ test('v2.5.1 active templates with usage reject structural edits but allow safe 
   await withDb((db) => {
     const { userId, courseId } = seedUserCourse(db);
     seedSystemTemplateDefinitions(db, userId);
-    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'definition.basic' })[0];
+    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'text.paragraph' })[0];
     const draft = copyTemplateDefinition(db, userId, systemTemplate.id, {
       template_key: 'definition.used',
       label: 'Used Definition',
@@ -1051,7 +1051,7 @@ test('v2.5.1 archive rejects templates with usage while deprecate remains resolv
   await withDb((db) => {
     const { userId, courseId } = seedUserCourse(db);
     seedSystemTemplateDefinitions(db, userId);
-    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'definition.basic' })[0];
+    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'text.paragraph' })[0];
     const draft = copyTemplateDefinition(db, userId, systemTemplate.id, {
       template_key: 'definition.deprecated-user',
       label: 'Deprecated User Definition',
@@ -1087,7 +1087,7 @@ test('v2.5.1 template usage counts runtime, key-version, and legacy template ref
   await withDb((db) => {
     const { userId, courseId } = seedUserCourse(db);
     seedSystemTemplateDefinitions(db, userId);
-    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'definition.basic' })[0];
+    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'text.paragraph' })[0];
     const draft = copyTemplateDefinition(db, userId, systemTemplate.id, {
       template_key: 'definition.usage',
       label: 'Usage Definition',
@@ -1121,7 +1121,7 @@ test('v2.5.1 canvas block insertion accepts runtime user templates', async () =>
   await withDb((db) => {
     const { userId, courseId } = seedUserCourse(db);
     seedSystemTemplateDefinitions(db, userId);
-    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'definition.basic' })[0];
+    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'text.paragraph' })[0];
     const userTemplate = activateTemplateDefinition(db, userId, copyTemplateDefinition(db, userId, systemTemplate.id, {
       template_key: 'definition.canvas-user',
       label: 'Canvas User Definition',
@@ -1181,7 +1181,7 @@ test('applying an organized note proposal creates a note with blocks, placements
     assert.equal(blocks.every((block) => block.source_kind === 'proposal'), true);
     assert.equal(blocks.every((block) => block.operation_batch_id === result.operation_batch_id), true);
     assert.equal(blocks.every((block) => JSON.parse(block.metadata).taxonomy_version === 'v2.5.0'), true);
-    assert.equal(blocks.some((block) => JSON.parse(block.metadata).template_id === 'text.heading'), true);
+    assert.equal(blocks.some((block) => JSON.parse(block.metadata).template_id === 'text.paragraph'), true);
 
     const placements = db.prepare('SELECT order_index FROM note_block_placements WHERE note_id = ? ORDER BY order_index ASC')
       .all(result.note_id) as Array<{ order_index: number }>;
@@ -1304,7 +1304,7 @@ test('material reconciliation proposal includes learning role and template hints
     const definitionGroup = proposal.data.candidate_groups.find((group: any) => group.title.includes('Definition of Limit'));
     assert.ok(definitionGroup);
     assert.equal(definitionGroup.learning_role_candidates[0].learning_role, 'definition');
-    assert.equal(definitionGroup.template_candidates[0].template_id, 'definition.basic');
+    assert.equal(definitionGroup.template_candidates[0].template_id, 'text.paragraph');
     assert.equal(definitionGroup.role_confidence > 0.7, true);
     assert.deepEqual(definitionGroup.role_warnings, []);
   });
@@ -2121,7 +2121,7 @@ test('learning canvas block insertion creates template-aware NoteBlock and Canva
     const canvas = createLearningCanvas(db, userId, { course_id: courseId, title: 'Template canvas' }) as any;
 
     const result = createCanvasNoteBlock(db, userId, canvas.id, {
-      template_id: 'definition.basic',
+      template_id: 'text.paragraph',
       title: 'Derivative definition',
       plain_text: 'A derivative is the instantaneous rate of change.',
       content_json: { body: 'A derivative is the instantaneous rate of change.' },
@@ -2135,12 +2135,12 @@ test('learning canvas block insertion creates template-aware NoteBlock and Canva
     assert.equal(result.note.metadata.purpose, 'canvas_backing_note');
     assert.equal(result.note.metadata.canvas_id, canvas.id);
 
-    assert.equal(result.block.block_type, 'definition');
+    assert.equal(result.block.block_type, 'paragraph');
     assert.equal(result.block.title, 'Derivative definition');
     assert.equal(result.block.plain_text, 'A derivative is the instantaneous rate of change.');
-    assert.equal(result.block.metadata.template_id, 'definition.basic');
+    assert.equal(result.block.metadata.template_id, 'text.paragraph');
     assert.equal(result.block.metadata.system_type, 'text');
-    assert.equal(result.block.metadata.learning_role, 'definition');
+    assert.equal(result.block.metadata.learning_role, 'note');
     assert.equal(result.block.metadata.taxonomy_version, 'v2.5.0');
 
     const placement = db.prepare('SELECT * FROM note_block_placements WHERE note_id = ? AND block_id = ?')
@@ -2167,7 +2167,7 @@ test('learning canvas block insertion reuses backing note for repeated inserts',
     const canvas = createLearningCanvas(db, userId, { course_id: courseId, title: 'Repeated insert canvas' }) as any;
 
     const first = createCanvasNoteBlock(db, userId, canvas.id, {
-      template_id: 'example.general',
+      template_id: 'text.paragraph',
       plain_text: 'First example',
       content_json: { body: 'First example' },
     }) as any;
@@ -2344,12 +2344,12 @@ test('canvas edges support incomplete and visual states without semantic relatio
     const { userId, courseId } = seedUserCourse(db);
     const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
     const first = createCanvasNoteBlock(db, userId, canvas.id, {
-      template_id: 'definition.basic',
+      template_id: 'text.paragraph',
       plain_text: 'A limit is the value a function approaches.',
       content_json: { body: 'A limit is the value a function approaches.' },
     }) as any;
     const second = createCanvasNoteBlock(db, userId, canvas.id, {
-      template_id: 'example.general',
+      template_id: 'text.paragraph',
       plain_text: 'Example: lim x->0 sin(x)/x = 1.',
       content_json: { body: 'Example: lim x->0 sin(x)/x = 1.' },
       x: 420,
@@ -2394,7 +2394,7 @@ test('canvas visual edge can bind and unbind an ObjectRelation safely', async ()
     const { userId, courseId } = seedUserCourse(db);
     const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
     const source = createCanvasNoteBlock(db, userId, canvas.id, {
-      template_id: 'definition.basic',
+      template_id: 'text.paragraph',
       plain_text: 'Green theorem relates circulation to double integrals.',
       content_json: { body: 'Green theorem relates circulation to double integrals.' },
     }) as any;
@@ -2442,12 +2442,12 @@ test('canvas edge archive and restore only change projection edge status', async
     const { userId, courseId } = seedUserCourse(db);
     const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
     const source = createCanvasNoteBlock(db, userId, canvas.id, {
-      template_id: 'definition.basic',
+      template_id: 'text.paragraph',
       plain_text: 'Source block',
       content_json: { body: 'Source block' },
     }) as any;
     const target = createCanvasNoteBlock(db, userId, canvas.id, {
-      template_id: 'example.general',
+      template_id: 'text.paragraph',
       plain_text: 'Target block',
       content_json: { body: 'Target block' },
       x: 420,
@@ -2503,12 +2503,12 @@ test('canvas command context resolves selected node and selected edge scopes', a
     const { userId, courseId } = seedUserCourse(db);
     const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
     const source = createCanvasNoteBlock(db, userId, canvas.id, {
-      template_id: 'definition.basic',
+      template_id: 'text.paragraph',
       plain_text: 'Definition content',
       content_json: { body: 'Definition content' },
     }) as any;
     const target = createCanvasNoteBlock(db, userId, canvas.id, {
-      template_id: 'example.general',
+      template_id: 'text.paragraph',
       plain_text: 'Example content',
       content_json: { body: 'Example content' },
       x: 420,
@@ -2557,7 +2557,7 @@ test('canvas command context rejects invalid selected objects without mutation',
     const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
     const otherCanvas = createLearningCanvas(db, userId, { course_id: courseId, title: 'Other canvas' }) as any;
     const otherNode = createCanvasNoteBlock(db, userId, otherCanvas.id, {
-      template_id: 'definition.basic',
+      template_id: 'text.paragraph',
       plain_text: 'Other node',
       content_json: { body: 'Other node' },
     }) as any;
@@ -2696,7 +2696,7 @@ test('v2.5.2 applying composition proposal creates new blocks, canvas records, a
     const metadata = JSON.parse(createdBlock.metadata);
     assert.equal(metadata.composition_template_id, composition.id);
     assert.equal(metadata.composition_instance_id, result.composition_instance_id);
-    assert.equal(metadata.template_key, 'theorem.basic');
+    assert.equal(metadata.template_key, 'text.paragraph');
     assert.equal((db.prepare('SELECT COUNT(*) AS count FROM object_relations').get() as any).count, beforeRelations);
   });
 });

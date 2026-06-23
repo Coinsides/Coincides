@@ -142,15 +142,15 @@ function roleSourceText(group: Pick<ReconciliationCandidateGroup, 'title' | 'evi
 }
 
 const ROLE_TEMPLATE_BY_ROLE: Record<string, string> = {
-  definition: 'definition.basic',
-  theorem: 'theorem.basic',
-  proof: 'proof.basic',
+  definition: 'text.paragraph',
+  theorem: 'text.paragraph',
+  proof: 'text.paragraph',
   formula: 'formula.math',
-  example: 'example.general',
-  exercise: 'exercise.general',
-  answer: 'answer.general',
-  warning: 'warning.callout',
-  concept: 'concept.basic',
+  example: 'text.paragraph',
+  exercise: 'text.paragraph',
+  answer: 'text.paragraph',
+  warning: 'text.paragraph',
+  concept: 'text.paragraph',
   note: 'text.paragraph',
 };
 

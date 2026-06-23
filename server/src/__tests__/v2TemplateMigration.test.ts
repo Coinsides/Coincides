@@ -49,19 +49,19 @@ function getSystemTemplate(db: Awaited<ReturnType<typeof initDb>>, userId: strin
 
 function createActiveTargetTemplate(db: Awaited<ReturnType<typeof initDb>>, userId: string) {
   const target = createUserTemplateDefinition(db, userId, {
-    template_key: 'definition.engineering',
-    label: 'Engineering Definition',
-    description: 'Definition adapted for engineering notes.',
+    template_key: 'text.engineering',
+    label: 'Engineering Text',
+    description: 'Text adapted for engineering notes.',
     system_type: 'text',
-    learning_role: 'definition',
-    legacy_block_type: 'definition',
-    field_schema: [{ key: 'body', label: 'Definition', kind: 'textarea', required: true }],
+    learning_role: 'note',
+    legacy_block_type: 'paragraph',
+    field_schema: [{ key: 'body', label: 'Body', kind: 'textarea', required: true }],
     default_content: { body: '' },
-    render_hints: { reading: { display: 'definition' } },
+    render_hints: { reading: { display: 'paragraph' } },
     source_behavior: { source_reference_policy: 'recommended' },
     relation_behavior: { relation_preset: 'learning_logic' },
     proposal_behavior: { proposal_preset: 'migration_requires_proposal' },
-    summary_for_agent: 'Use for engineering definitions.',
+    summary_for_agent: 'Use for engineering text notes.',
   });
   return activateTemplateDefinition(db, userId, target.id);
 }
@@ -93,7 +93,7 @@ function insertTemplateBackedBlock(
     userId,
     courseId,
     template.legacy_block_type,
-    'Definition block',
+    'Text block',
     JSON.stringify({ body: 'A limit describes approached behavior.' }),
     'A limit describes approached behavior.',
     JSON.stringify(metadata),
@@ -117,7 +117,7 @@ test('v2.5.4 migration creates template migration tables', async () => {
 test('creating a template migration proposal reports impact without mutating blocks', async () => {
   await withDb((db) => {
     const { userId, courseId } = seedUserCourse(db);
-    const source = getSystemTemplate(db, userId, 'definition.basic');
+    const source = getSystemTemplate(db, userId, 'text.paragraph');
     const target = createActiveTargetTemplate(db, userId);
     const blockId = insertTemplateBackedBlock(db, userId, courseId, source);
     const before = db.prepare('SELECT block_type, metadata FROM note_blocks WHERE id = ?').get(blockId) as any;
@@ -144,7 +144,7 @@ test('creating a template migration proposal reports impact without mutating blo
 test('alias mapping apply creates mapping and records without mutating NoteBlocks', async () => {
   await withDb((db) => {
     const { userId, courseId } = seedUserCourse(db);
-    const source = getSystemTemplate(db, userId, 'definition.basic');
+    const source = getSystemTemplate(db, userId, 'text.paragraph');
     const target = createActiveTargetTemplate(db, userId);
     const blockId = insertTemplateBackedBlock(db, userId, courseId, source);
     const before = db.prepare('SELECT block_type, metadata FROM note_blocks WHERE id = ?').get(blockId) as any;
@@ -170,7 +170,7 @@ test('alias mapping apply creates mapping and records without mutating NoteBlock
 test('soft migration updates template metadata and preserves created-with history', async () => {
   await withDb((db) => {
     const { userId, courseId } = seedUserCourse(db);
-    const source = getSystemTemplate(db, userId, 'definition.basic');
+    const source = getSystemTemplate(db, userId, 'text.paragraph');
     const target = createActiveTargetTemplate(db, userId);
     const blockId = insertTemplateBackedBlock(db, userId, courseId, source);
     const proposal = createTemplateMigrationProposal(db, userId, {
@@ -186,12 +186,12 @@ test('soft migration updates template metadata and preserves created-with histor
     const metadata = JSON.parse(block.metadata);
 
     assert.equal(result.blocks_mutated_count, 1);
-    assert.equal(block.block_type, 'definition');
+    assert.equal(block.block_type, 'paragraph');
     assert.equal(JSON.parse(block.content_json).body, 'A limit describes approached behavior.');
     assert.equal(metadata.template_definition_id, target.id);
-    assert.equal(metadata.template_key, 'definition.engineering');
+    assert.equal(metadata.template_key, 'text.engineering');
     assert.equal(metadata.created_with_template_definition_id, source.id);
-    assert.equal(metadata.created_with_template_key, 'definition.basic');
+    assert.equal(metadata.created_with_template_key, 'text.paragraph');
     assert.equal(Array.isArray(metadata.template_migration_history), true);
     assert.equal(metadata.template_migration_history[0].mode, 'soft_migration');
   });
@@ -200,13 +200,13 @@ test('soft migration updates template metadata and preserves created-with histor
 test('blocked hard cascade fails without partial writes', async () => {
   await withDb((db) => {
     const { userId, courseId } = seedUserCourse(db);
-    const source = getSystemTemplate(db, userId, 'definition.basic');
+    const source = getSystemTemplate(db, userId, 'text.paragraph');
     const target = createUserTemplateDefinition(db, userId, {
-      template_key: 'definition.empty',
-      label: 'Empty Definition',
+      template_key: 'text.empty',
+      label: 'Empty Text',
       system_type: 'text',
-      learning_role: 'definition',
-      legacy_block_type: 'definition',
+      learning_role: 'note',
+      legacy_block_type: 'paragraph',
       field_schema: [{ key: 'summary', label: 'Summary', kind: 'textarea', required: true }],
       default_content: {},
     });
@@ -234,13 +234,13 @@ test('blocked hard cascade fails without partial writes', async () => {
 test('active template structural edit still requires migration proposal', async () => {
   await withDb((db) => {
     const { userId, courseId } = seedUserCourse(db);
-    const source = getSystemTemplate(db, userId, 'definition.basic');
+    const source = getSystemTemplate(db, userId, 'text.paragraph');
     const target = createActiveTargetTemplate(db, userId);
     insertTemplateBackedBlock(db, userId, courseId, target);
 
     assert.throws(() => updateTemplateDefinition(db, userId, target.id, {
       field_schema: [
-        { key: 'body', label: 'Definition', kind: 'textarea', required: true },
+        { key: 'body', label: 'Body', kind: 'textarea', required: true },
         { key: 'scope', label: 'Scope', kind: 'text', required: false },
       ],
     }), /proposal_required/);

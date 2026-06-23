@@ -312,9 +312,9 @@ async function tryGenerateAiBlocks(
     const systemPrompt = [
       'You create factual, source-aware study note proposals.',
       'Return only JSON. Do not diagnose the learner. Do not claim complete course understanding.',
-      'Prefer these template_id values: text.heading, text.paragraph, concept.basic, definition.basic, theorem.basic, proof.basic, formula.math, example.general, exercise.general, answer.general, source.quote, warning.callout, code.snippet.',
+      'Prefer these template_id values: text.paragraph, formula.math, code.snippet.',
       'Use legacy block_type values only for compatibility: heading, paragraph, definition, theorem, proof, formula, example, exercise, answer, sidenote.',
-      'JSON shape: {"blocks":[{"block_type":"definition","template_id":"definition.basic","learning_role":"definition","title":"...","content_json":{"body":"..."},"plain_text":"...","confidence":0.7,"warnings":[]}]}',
+      'JSON shape: {"blocks":[{"block_type":"paragraph","template_id":"text.paragraph","learning_role":"note","title":"...","content_json":{"body":"..."},"plain_text":"...","confidence":0.7,"warnings":[]}]}',
     ].join('\n');
     let text = '';
     for await (const chunk of provider.chat(
