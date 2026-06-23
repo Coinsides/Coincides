@@ -53,6 +53,8 @@ import domainBlockSetRoutes from './routes/domainBlockSets.js';
 import packageExportRoutes from './routes/packageExports.js';
 import packageImportRoutes from './routes/packageImports.js';
 import domainRefinementRoutes from './routes/domainRefinements.js';
+import contentGroupRoutes from './routes/contentGroups.js';
+import groupFolderRoutes from './routes/groupFolders.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 
@@ -119,6 +121,8 @@ app.use('/api/domain-block-sets', authMiddleware, domainBlockSetRoutes);
 app.use('/api/package-exports', authMiddleware, packageExportRoutes);
 app.use('/api/package-imports', authMiddleware, packageImportRoutes);
 app.use('/api/domain-refinements', authMiddleware, domainRefinementRoutes);
+app.use('/api/content-groups', authMiddleware, contentGroupRoutes);
+app.use('/api/group-folders', authMiddleware, groupFolderRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

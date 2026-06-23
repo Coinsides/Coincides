@@ -1011,6 +1011,196 @@ CREATE TABLE IF NOT EXISTS canvas_viewport_states (
 CREATE INDEX IF NOT EXISTS idx_canvas_viewport_states_canvas ON canvas_viewport_states(canvas_id, user_id);
 
 -- ============================================================
+-- 30.1 V2.BN.8.7.1 ContentGroup Root Entity
+-- ============================================================
+CREATE TABLE IF NOT EXISTS content_groups (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  course_id TEXT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  note_id TEXT REFERENCES notes(id) ON DELETE SET NULL,
+  canvas_id TEXT,
+  primary_folder_id TEXT,
+  parent_group_id TEXT REFERENCES content_groups(id) ON DELETE SET NULL,
+  title TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'active',
+  created_by TEXT NOT NULL DEFAULT 'human',
+
+  identity_status TEXT NOT NULL DEFAULT 'none',
+  identity_role TEXT,
+  identity_topic TEXT,
+  identity_summary TEXT,
+  identity_created_by TEXT NOT NULL DEFAULT 'human',
+  identity_reviewed_by TEXT,
+  identity_confidence REAL,
+  identity_updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  identity_accepted_at DATETIME,
+  identity_metadata TEXT NOT NULL DEFAULT '{}',
+
+  placements_json TEXT NOT NULL DEFAULT '[]',
+  members_json TEXT NOT NULL DEFAULT '[]',
+  fragments_json TEXT NOT NULL DEFAULT '[]',
+  petals_json TEXT NOT NULL DEFAULT '[]',
+  view_state_json TEXT NOT NULL DEFAULT '{}',
+  metadata TEXT NOT NULL DEFAULT '{}',
+
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_content_groups_course_note_status
+  ON content_groups(user_id, course_id, note_id, status);
+CREATE INDEX IF NOT EXISTS idx_content_groups_course_updated
+  ON content_groups(user_id, course_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_content_groups_identity
+  ON content_groups(user_id, course_id, identity_status, status);
+CREATE INDEX IF NOT EXISTS idx_content_groups_primary_folder
+  ON content_groups(user_id, course_id, primary_folder_id, status);
+CREATE INDEX IF NOT EXISTS idx_content_groups_parent
+  ON content_groups(parent_group_id);
+
+CREATE TABLE IF NOT EXISTS content_group_members (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  content_group_id TEXT NOT NULL REFERENCES content_groups(id) ON DELETE CASCADE,
+  course_id TEXT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  note_id TEXT REFERENCES notes(id) ON DELETE SET NULL,
+
+  kind TEXT NOT NULL,
+  target_id TEXT,
+  label TEXT,
+
+  current_content TEXT,
+  preview_text TEXT,
+
+  content_range_json TEXT,
+  source_ref_json TEXT,
+  source_sync_status TEXT NOT NULL DEFAULT 'fresh',
+
+  order_index INTEGER NOT NULL DEFAULT 0,
+  metadata TEXT NOT NULL DEFAULT '{}',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_content_group_members_group_order
+  ON content_group_members(user_id, content_group_id, order_index);
+CREATE INDEX IF NOT EXISTS idx_content_group_members_course_note
+  ON content_group_members(user_id, course_id, note_id);
+CREATE INDEX IF NOT EXISTS idx_content_group_members_target
+  ON content_group_members(user_id, kind, target_id);
+CREATE INDEX IF NOT EXISTS idx_content_group_members_source_status
+  ON content_group_members(user_id, source_sync_status);
+
+CREATE TABLE IF NOT EXISTS content_group_fragments (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  content_group_id TEXT NOT NULL REFERENCES content_groups(id) ON DELETE CASCADE,
+  course_id TEXT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  note_id TEXT REFERENCES notes(id) ON DELETE SET NULL,
+  source_member_id TEXT NOT NULL REFERENCES content_group_members(id) ON DELETE CASCADE,
+  content_range_json TEXT,
+  label TEXT,
+  preview_text TEXT,
+  status TEXT NOT NULL DEFAULT 'active',
+  order_index INTEGER NOT NULL DEFAULT 0,
+  metadata TEXT NOT NULL DEFAULT '{}',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_content_group_fragments_group_order
+  ON content_group_fragments(user_id, content_group_id, order_index);
+CREATE INDEX IF NOT EXISTS idx_content_group_fragments_source_member
+  ON content_group_fragments(user_id, source_member_id);
+CREATE INDEX IF NOT EXISTS idx_content_group_fragments_course_note
+  ON content_group_fragments(user_id, course_id, note_id);
+
+CREATE TABLE IF NOT EXISTS content_group_petals (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  content_group_id TEXT NOT NULL REFERENCES content_groups(id) ON DELETE CASCADE,
+  course_id TEXT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+  note_id TEXT REFERENCES notes(id) ON DELETE SET NULL,
+  label TEXT NOT NULL,
+  role TEXT,
+  summary TEXT,
+  status TEXT NOT NULL DEFAULT 'active',
+  order_index INTEGER NOT NULL DEFAULT 0,
+  members_json TEXT NOT NULL DEFAULT '[]',
+  metadata TEXT NOT NULL DEFAULT '{}',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_content_group_petals_group_order
+  ON content_group_petals(user_id, content_group_id, order_index);
+CREATE INDEX IF NOT EXISTS idx_content_group_petals_course_note
+  ON content_group_petals(user_id, course_id, note_id);
+
+CREATE TABLE IF NOT EXISTS content_group_petal_fragments (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  content_group_id TEXT NOT NULL REFERENCES content_groups(id) ON DELETE CASCADE,
+  petal_id TEXT NOT NULL REFERENCES content_group_petals(id) ON DELETE CASCADE,
+  fragment_id TEXT NOT NULL REFERENCES content_group_fragments(id) ON DELETE CASCADE,
+  order_index INTEGER NOT NULL DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(user_id, petal_id, fragment_id)
+);
+CREATE INDEX IF NOT EXISTS idx_content_group_petal_fragments_petal_order
+  ON content_group_petal_fragments(user_id, petal_id, order_index);
+CREATE INDEX IF NOT EXISTS idx_content_group_petal_fragments_fragment
+  ON content_group_petal_fragments(user_id, fragment_id);
+
+CREATE TABLE IF NOT EXISTS group_folders (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  course_id TEXT REFERENCES courses(id) ON DELETE CASCADE,
+  note_id TEXT REFERENCES notes(id) ON DELETE CASCADE,
+  parent_folder_id TEXT REFERENCES group_folders(id) ON DELETE SET NULL,
+
+  scope_kind TEXT NOT NULL DEFAULT 'note',
+  scope_project_id TEXT,
+  scope_note_id TEXT,
+  scope_label TEXT,
+
+  title TEXT NOT NULL,
+  origin TEXT NOT NULL DEFAULT 'user',
+  system_root INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'active',
+  order_index INTEGER NOT NULL DEFAULT 0,
+  metadata TEXT NOT NULL DEFAULT '{}',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_group_folders_user_scope
+  ON group_folders(user_id, scope_kind, scope_project_id, scope_note_id, status);
+CREATE INDEX IF NOT EXISTS idx_group_folders_course_note
+  ON group_folders(user_id, course_id, note_id, status);
+CREATE INDEX IF NOT EXISTS idx_group_folders_parent
+  ON group_folders(user_id, parent_folder_id, status);
+CREATE INDEX IF NOT EXISTS idx_group_folders_order
+  ON group_folders(user_id, parent_folder_id, order_index, title);
+
+CREATE TABLE IF NOT EXISTS content_group_folder_placements (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  content_group_id TEXT NOT NULL REFERENCES content_groups(id) ON DELETE CASCADE,
+  folder_id TEXT NOT NULL REFERENCES group_folders(id) ON DELETE CASCADE,
+  placement_role TEXT NOT NULL DEFAULT 'primary',
+  status TEXT NOT NULL DEFAULT 'active',
+  order_index INTEGER NOT NULL DEFAULT 0,
+  added_by TEXT NOT NULL DEFAULT 'human',
+  added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  metadata TEXT NOT NULL DEFAULT '{}'
+);
+CREATE INDEX IF NOT EXISTS idx_cg_folder_placements_folder
+  ON content_group_folder_placements(user_id, folder_id, status, order_index);
+CREATE INDEX IF NOT EXISTS idx_cg_folder_placements_group
+  ON content_group_folder_placements(user_id, content_group_id, status);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_cg_folder_placements_one_primary
+  ON content_group_folder_placements(user_id, content_group_id)
+  WHERE placement_role = 'primary' AND status = 'active';
+
+-- ============================================================
 -- 31. v2.5.0 Template Definition Runtime
 -- ============================================================
 CREATE TABLE IF NOT EXISTS template_definitions (

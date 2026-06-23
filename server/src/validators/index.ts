@@ -413,6 +413,91 @@ export const updateNoteSchema = z.object({
   status: v2StatusSchema.optional(),
 });
 
+const contentGroupRuntimeIdSchema = z.string().min(1).max(180);
+
+const contentGroupIdentitySchema = z.object({
+  status: z.enum(['none', 'draft', 'accepted', 'rejected', 'archived']).optional(),
+  role: z.string().max(160).nullable().optional(),
+  topic: z.string().max(240).nullable().optional(),
+  summary: z.string().max(4000).nullable().optional(),
+  created_by: z.enum(['human', 'ai', 'system']).optional(),
+  reviewed_by: z.enum(['human', 'ai', 'system']).nullable().optional(),
+  confidence: z.number().min(0).max(1).nullable().optional(),
+  updated_at: z.string().max(80).optional(),
+  accepted_at: z.string().max(80).nullable().optional(),
+  metadata: jsonObjectSchema.optional(),
+});
+
+export const upsertContentGroupSchema = z.object({
+  id: contentGroupRuntimeIdSchema.optional(),
+  course_id: z.string().uuid('Invalid course ID').optional(),
+  project_id: z.string().uuid('Invalid project ID').optional(),
+  note_id: z.string().uuid('Invalid note ID').nullable().optional(),
+  canvas_id: contentGroupRuntimeIdSchema.nullable().optional(),
+  folder_id: contentGroupRuntimeIdSchema.nullable().optional(),
+  parent_group_id: contentGroupRuntimeIdSchema.nullable().optional(),
+  title: z.string().min(1).max(300),
+  status: z.enum(['active', 'hidden', 'deleted']).optional(),
+  created_by: z.enum(['human', 'ai_proposal', 'importer']).optional(),
+  identity: contentGroupIdentitySchema.optional(),
+  placements: z.array(jsonObjectSchema).optional(),
+  members: z.array(jsonObjectSchema).optional(),
+  fragments: z.array(jsonObjectSchema).optional(),
+  petals: z.array(jsonObjectSchema).optional(),
+  view_state: jsonObjectSchema.optional(),
+  metadata: jsonObjectSchema.optional(),
+  created_at: z.string().max(80).optional(),
+  updated_at: z.string().max(80).optional(),
+}).refine((value) => value.course_id || value.project_id || value.note_id, {
+  message: 'course_id, project_id, or note_id is required',
+  path: ['course_id'],
+});
+
+export const replaceNoteContentGroupsSchema = z.object({
+  groups: z.array(upsertContentGroupSchema).max(500),
+});
+
+export const importNoteMetadataContentGroupsSchema = z.object({
+  note_id: z.string().uuid('Invalid note ID'),
+  groups: z.array(upsertContentGroupSchema).max(500),
+});
+
+export const groupFolderScopeSchema = z.object({
+  kind: z.enum(['workspace', 'project', 'note', 'custom', 'temporary']).optional(),
+  project_id: z.string().uuid('Invalid project ID').nullable().optional(),
+  note_id: z.string().uuid('Invalid note ID').nullable().optional(),
+  label: z.string().max(160).nullable().optional(),
+});
+
+export const upsertGroupFolderSchema = z.object({
+  id: contentGroupRuntimeIdSchema.optional(),
+  title: z.string().trim().min(1).max(160),
+  parent_folder_id: contentGroupRuntimeIdSchema.nullable().optional(),
+  scope: groupFolderScopeSchema.optional(),
+  origin: z.enum(['human', 'system', 'ai_proposal', 'user', 'ai']).optional(),
+  system_root: z.boolean().optional(),
+  status: z.enum(['active', 'temporary', 'archived', 'deleted']).optional(),
+  order_index: z.number().int().optional(),
+  metadata: jsonObjectSchema.optional(),
+});
+
+export const replaceNoteGroupFoldersSchema = z.object({
+  folders: z.array(upsertGroupFolderSchema).max(500),
+});
+
+export const importNoteGroupFoldersSchema = z.object({
+  note_id: z.string().uuid('Invalid note ID'),
+  folders: z.array(upsertGroupFolderSchema).max(500),
+});
+
+export const updateContentGroupFolderPlacementSchema = z.object({
+  folder_id: contentGroupRuntimeIdSchema.nullable(),
+  placement_role: z.enum(['primary', 'reference', 'temporary']).optional(),
+  order_index: z.number().int().optional(),
+  added_by: z.enum(['human', 'ai_proposal', 'ai', 'system', 'importer']).optional(),
+  metadata: jsonObjectSchema.optional(),
+});
+
 const sourceReferenceSchema = z.object({
   document_id: z.string().uuid().optional(),
   document_chunk_id: z.string().uuid().optional(),
