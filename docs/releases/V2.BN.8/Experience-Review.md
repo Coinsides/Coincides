@@ -3,8 +3,23 @@
 ## 2026-06-23 V2.BN.8.7.9 ContentGroup System Closure Gate Experience Note
 
 ```text
-status: planned closure gate
+status: completed closure gate
 surface: ContentGroup System across Rail / Gallery / Single Editor
+```
+
+Closure browser pass result:
+
+- Rail still behaves as a collect surface: lightweight right rail, current folder context, compact group list, selected-content drop zone, and direct `Open editor`.
+- Gallery behaves as an organize surface: folder navigation, search, Folder / Topic / Role views, folder creation, group move-to-folder, delete guard, and empty-folder delete are all understandable.
+- Single Editor behaves as a refine surface: source-package member display, Petal dock, member-to-Petal assignment, Petal reorder, and source drawer all reinforce "refine the package, do not rewrite the source note."
+- Reuse language is present as service vocabulary, but no mature reuse UI is forced before CanvasObject exists.
+- Narrow Single Editor is usable. Narrow Gallery renders but still has layout pressure from the folder rail and card area; this is 8.8+ polish, not a ContentGroup data/model blocker.
+
+Experience judgment:
+
+```text
+ContentGroup System now has enough product shape to close V2.BN.8.7.
+It is not visually final, but it no longer teaches the wrong mental model.
 ```
 
 8.7.9 的体验目标不是继续扩张 ContentGroup，而是确认它作为第二支柱已经稳定到可以把注意力切向第三支柱 Canvas。

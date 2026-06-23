@@ -1,46 +1,72 @@
 # V2.BN.8 Review
 
-## 2026-06-23 V2.BN.8.7.9 ContentGroup System Closure Gate Review Plan
+## 2026-06-23 V2.BN.8.7.9 ContentGroup System Closure Gate Review
 
 ```text
-status: planned
+status: completed
 scope: final ContentGroup System maturity closure before CanvasObject work
 ```
 
-V2.BN.8.7.9 is added as the closure gate for the ContentGroup System lane.
+V2.BN.8.7.9 closes the ContentGroup System lane.
 
-The review question is:
+The review question was:
 
 ```text
 Is ContentGroup System 1.0 mature enough to stop expanding in 8.7 and hand the next major product pillar to Canvas?
 ```
 
-The expected review output is not a claim that every ContentGroup-adjacent idea is finished. The expected output is a clear split:
+Answer:
 
-- Stable enough to close:
-  - ContentGroup root entity.
-  - GroupFolder and folder placement entity.
-  - ContentGroupMember entity and group-local content truth.
-  - ContentGroupPetal / Fragment entity and internal structure boundary.
-  - Rail = collect, Gallery = organize, Single Editor = refine.
-- Accepted carry-forward:
-  - CanvasObject projection / ContentGroup usage object.
-  - Reference / Duplicate / Fork / Materialize UI.
-  - SourceArtifact / SourceAnchor full system.
-  - Relation runtime / GraphRAG.
-  - AI-created Petals and advanced AI organization flows.
-- Must not be smuggled into 8.7.9:
-  - destructive source mutation;
-  - true reorder;
-  - offset rebase;
-  - full Single Editor freeform workbench;
-  - broad Canvas implementation.
+```text
+Yes. ContentGroup System is mature enough to stop expanding in 8.7 and enter CanvasObject work in 8.8.
+```
 
-The guiding judgment is:
+Stable enough to close:
+
+- ContentGroup root entity.
+- GroupFolder and folder placement entity.
+- ContentGroupMember entity and group-local content truth.
+- ContentGroupPetal / Fragment entity and internal structure boundary.
+- Rail = collect, Gallery = organize, Single Editor = refine.
+- Gallery search / view switching / folder move-delete basics.
+- Single Editor Petal creation, assignment, and reorder.
+- Rail direct `Open editor`.
+- Reuse vocabulary and service boundary.
+
+Accepted carry-forward:
+
+- CanvasObject projection / ContentGroup usage object.
+- Reference / Duplicate / Fork / Materialize UI.
+- SourceArtifact / SourceAnchor full system.
+- Relation runtime / GraphRAG.
+- AI-created Petals and advanced AI organization flows.
+- richer mobile/narrow Gallery polish.
+- bundle/code-splitting cleanup for existing Vite warnings.
+
+Must not be smuggled back into 8.7:
+
+- destructive source mutation;
+- true source-text reorder;
+- offset rebase;
+- full Single Editor freeform workbench;
+- broad Canvas implementation.
+
+Guiding judgment:
 
 ```text
 Reuse vocabulary is ready, but reuse experience depends on CanvasObject.
 ```
+
+Verification:
+
+- `npm run check:canvas-runtime-boundary` passed 35 checks.
+- `npm run smoke:canvas-engine-model-contract` passed 21 groups.
+- `npm run check:group-gallery-shell` passed 5 checks.
+- `npm run check:groups-rail-shell` passed.
+- `npm run check:single-editor-shell` passed.
+- `npm run build:client` passed with existing Vite warnings.
+- `git diff --check` passed.
+- `npm run check:changed-file-secrets` passed.
 
 ## 2026-06-22 Current Review State
 

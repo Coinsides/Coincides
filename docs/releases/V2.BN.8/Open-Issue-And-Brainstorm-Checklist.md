@@ -26,18 +26,27 @@ Rule:
 
 ## 2026-06-23 V2.BN.8.7.9 ContentGroup System Closure Gate
 
-status: planned closure gate before CanvasObject work
+status: completed closure gate before CanvasObject work
 date: 2026-06-23
 
 - [x] Add `V2.BN.8.7.9-ContentGroup-System-Closure-Gate-Plan.md`.
-- [ ] Audit ContentGroup / GroupFolder / Member / Petal / Fragment active truth after entity cutovers.
-- [ ] Browser-smoke Petal reorder with at least two Petals.
-- [ ] Browser-smoke member-to-Petal assignment after the Single Editor shell refactor.
-- [ ] Browser-smoke Rail direct `Open editor`.
-- [ ] Browser-smoke richer Gallery folder move/delete with at least two folders and a non-empty group.
-- [ ] Run Gallery and Single Editor narrow/mobile viewport check.
-- [ ] Write `V2.BN.8.7.9-ContentGroup-System-Closure-Gate-Report.md`.
-- [ ] Decide whether V2.BN.8.7 can close and V2.BN.8.8+ can start CanvasObject work.
+- [x] Audit ContentGroup / GroupFolder / Member / Petal / Fragment active truth after entity cutovers.
+- [x] Browser-smoke Petal reorder with at least two Petals.
+- [x] Browser-smoke member-to-Petal assignment after the Single Editor shell refactor.
+- [x] Browser-smoke Rail direct `Open editor`.
+- [x] Browser-smoke richer Gallery folder move/delete with at least two folders and a non-empty group.
+- [x] Run Gallery and Single Editor narrow/mobile viewport check.
+- [x] Write `V2.BN.8.7.9-ContentGroup-System-Closure-Gate-Report.md`.
+- [x] Decide whether V2.BN.8.7 can close and V2.BN.8.8+ can start CanvasObject work.
+
+Closure result:
+
+- [x] V2.BN.8.7 can close as the ContentGroup System maturity lane.
+- [x] V2.BN.8.8+ can start CanvasObject / projection work from a stabilized ContentGroup foundation.
+- [ ] Carry forward richer mobile/narrow Gallery polish to 8.8+.
+- [ ] Carry forward ContentGroupProjection / usage records to CanvasObject work.
+- [ ] Carry forward Reference / Duplicate / Fork / Materialize UI to Canvas interaction design.
+- [ ] Carry forward SourceArtifact / SourceAnchor full system to a dedicated source architecture pass.
 
 Closure principle:
 

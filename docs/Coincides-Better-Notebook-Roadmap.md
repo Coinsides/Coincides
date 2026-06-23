@@ -47,6 +47,39 @@ ContentGroup System 1.0:
 make ContentGroup stable, understandable, reusable, and ready to be referenced by future Canvas projections.
 ```
 
+## 2026-06-23 V2.BN.8.7 Closure Result
+
+V2.BN.8.7 is closed as the `ContentGroup System Maturity` lane.
+
+The accepted foundation is:
+
+```text
+Rail = collect
+Gallery = organize
+Single Editor = refine
+```
+
+The data foundation is now stable enough for the next pillar:
+
+```text
+ContentGroup        = root content package entity
+GroupFolder         = organization truth
+ContentGroupMember  = group-local content truth
+ContentGroupPetal   = internal group structure
+Fragment assignment = internal Petal/material structure
+```
+
+The V2.BN.8.8+ lane should now start the CanvasObject / projection track. Canvas should consume ContentGroup as a stable object, create usage/projection records for canvas placement, and keep materialization explicit. Canvas must not reinterpret member content as source truth or silently move source text.
+
+Accepted carry-forward items:
+
+- CanvasObject projection and placement records.
+- Reference / Duplicate / Fork / Materialize UI.
+- SourceArtifact / SourceAnchor full migration.
+- relation runtime / GraphRAG.
+- AI-created Petals.
+- richer mobile polish for Gallery.
+
 ## 1. 路线图职责
 
 这份路线图是 v2.0-v2.5.6 工程地基路线图关闭之后的新主动方向。

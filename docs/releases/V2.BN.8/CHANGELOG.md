@@ -1,5 +1,16 @@
 # CHANGELOG - V2.BN.8
 
+# Verified - 2026-06-23 V2.BN.8.7.9 ContentGroup System Closure Gate
+
+- Added `V2.BN.8.7.9-ContentGroup-System-Closure-Gate-Report.md`.
+- Captured Gallery / Rail / Single Editor closure screenshots under `docs/releases/V2.BN.8/assets/8.7.9-contentgroup-closure/`.
+- Confirmed normal ContentGroup / GroupFolder / Member / Petal / Fragment truth is entity-backed, while note metadata remains legacy import/fallback only.
+- Browser-smoked Gallery search, Folder / Topic / Role views, folder creation, non-empty folder delete guard, empty folder delete, and moving a non-empty group into a folder.
+- Browser-smoked Single Editor Petal creation, member-to-Petal assignment, Petal reorder with two Petals, source drawer context, and Rail direct `Open editor`.
+- Ran narrow/mobile checks for Gallery and Single Editor; Single Editor is usable, while Gallery mobile layout remains accepted 8.8+ polish.
+- Verified reuse vocabulary remains service-level only: Reference / Duplicate / Fork / Materialize / Open original. Materialize still plans with `moves_source = false`.
+- Reconfirmed V2.BN.8.8+ starts CanvasObject / projection work; 8.7 does not implement SourceArtifact migration, CanvasObject projection, relation runtime, GraphRAG, destructive source mutation, true reorder, or offset rebase.
+
 # Verified - 2026-06-23 V2.BN.8.7.9.0 Main Group Verification
 
 - Added `V2.BN.8.7.9.0-Main-Group-Verification-Report.md`.
