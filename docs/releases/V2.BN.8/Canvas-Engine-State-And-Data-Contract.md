@@ -54,6 +54,64 @@ adapter/index state
   GraphRAG / OCR / VLM / external editor projections
 ```
 
+## V2.BN.8.6.1 SelectionDraft State Contract
+
+V2.BN.8.6.1 起，文字选区不再把 browser-native selection 当作 truth。
+
+```text
+SelectionDraft
+  draftId
+  ranges[]
+  mode = replace | additive
+  anchorRect
+  createdFrom
+  parentAnnotationId optional
+  createdAt
+  updatedAt
+```
+
+规则：
+- `SelectionDraft` 是 runtime/editor state，不是 NoteBlock content truth；
+- browser-native selection 只提供 pointer / offset / focus 输入信号；
+- `SelectionDraft.ranges` 才是 selection toolbar、annotation commit、same-range label、child label 的临时选择真相；
+- 成功提交为 `AnnotationTruth` 后，`SelectionDraft` 必须清空；
+- 空白点击、Esc、toolbar close 或 mode transition 必须清空 `SelectionDraft`；
+- `SelectionDraft` 可以预留 cross-block range，但 V2.BN.8.6.1 只产品化同一 TextBlock 内的单段、多段、跨 TextUnit 选择；
+- `parentAnnotationId` 只表示“当前 draft 正在 parent annotation 内创建 child label”，不改变 parent annotation truth。
+
+## V2.BN.8.2 Viewport Transform Contract
+
+V2.BN.8.2 起，Canvas Engine 明确拥有第一版 viewport transform。它解决的是“用户现在从哪个视角看这个 world”，不是 NoteBlock 的内容真相，也不是 block 的 canonical placement 真相。
+
+```text
+CanvasViewport
+  x
+  y
+  width
+  height
+  zoom
+  minZoom
+  maxZoom
+```
+
+规则：
+
+- `x/y` 表示当前 viewport 在 world coordinate 中的左上角位置；
+- `width/height` 表示当前可视区域尺寸；
+- `zoom` 表示 canvas 内容缩放，不等于浏览器页面缩放；
+- `minZoom/maxZoom` 是交互保护边界，不属于内容 truth；
+- `world -> viewport` 与 `viewport -> world` 转换必须通过统一 helper 完成；
+- 双击创建、拖拽、resize、selection、slash menu anchor、block toolbar anchor 都必须基于同一套转换；
+- viewport state 第一版是 runtime state，可重建、可 reset，不进入 NoteBlock content truth；
+- viewport state 是否进入 undo/history 仍保持开放，不能和 content undo 混在一起。
+
+第一版可接受的持久化边界：
+
+- NoteBlock 内容保存时，不保存 viewport；
+- block placement 保存时，只保存 world/layout 事实；
+- 刷新或重新进入 note 时，viewport 可以按初始化策略重建；
+- 后续如果要保存“用户离开时的视角”，必须作为独立 view preference / runtime resume state 处理。
+
 ## 第一版核心对象口径
 
 ```text
@@ -88,6 +146,30 @@ RelationEndpoint
   未来 relation/connector 锚点 placeholder。
   不等于 ObjectRelation truth。
 ```
+
+## Overlay Anchor Contract
+
+V2.BN.8.2 起，浮层不应各自用零散 DOM positioning 判断位置，而应通过统一 anchor 记录表达“这个浮层跟随谁”。
+
+```text
+OverlayAnchor
+  source = caret | block | fixed_viewport | formula_help | source_picker | relation_endpoint
+  ownerId optional
+  rect
+  placementPreference
+```
+
+规则：
+
+- `caret` 用于 slash menu / slash manual；
+- `block` 用于 block toolbar、block type badge、局部提示；
+- `fixed_viewport` 用于 Preview panel 这类固定视口浮层；
+- `formula_help` 第一版只代表公式帮助入口使用同一套 overlay path，不扩展公式产品功能；
+- `source_picker` 第一版只预留 source picker anchor path，不做 Source Library / picker 产品化；
+- `relation_endpoint` 第一版只预留未来 relation endpoint anchor path，不创建 relation runtime；
+- overlay anchor 可以由 world rect 投影到 viewport rect，也可以直接是 viewport rect；
+- Preview panel 必须高于 block toolbar / selected block chrome，避免图层混乱；
+- overlay state 不写入 content truth，不应改变 placement truth。
 
 ## Placement 最小候选字段
 

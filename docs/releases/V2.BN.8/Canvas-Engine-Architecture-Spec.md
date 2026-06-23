@@ -93,6 +93,7 @@ NoteCanvasRuntimeProvider
 `BlockLayer` 负责可编辑 NoteBlock 投影。
 `SvgOverlayLayer` 负责 selection outline、future connector、endpoint marker。
 `FloatingOverlayLayer` 负责 toolbar、slash menu、preview panel、inspector popover。
+Floating overlay 不直接依赖任意 DOM flow 位置作为长期 truth。第一版 normalized anchor record 至少记录 `caret`、`block`、`fixed_viewport`、`formula_help`、`source_picker`、`relation_endpoint` 等来源，并允许 future world rect / relation endpoint 通过 viewport transform 进入 viewport placement。
 
 ## 核心对象
 

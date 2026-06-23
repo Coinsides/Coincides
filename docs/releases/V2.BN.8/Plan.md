@@ -1,18 +1,43 @@
-# V2.BN.8 Plan - Canvas Engine Foundation
+# V2.BN.8 Plan - Canvas Engine And TextFlow Foundation
 
-> **For agentic workers:** V2.BN.8 是 Canvas Engine clean branch 的地基版本，不是完整无限画布产品版。执行本计划前，必须先阅读 V2.BN.6 / V2.BN.7 产物，尤其是 truth-layer contract、runtime autopsy、branch closure、Canvas Engine requirement 和 research gap。不要把本阶段扩展成 Template Studio、Source Library、Relation Runtime、GraphRAG adapter 或完整 AFFiNE/BlockSuite integration。
+## 2026-06-22 Continuation Lane
+
+The active V2.BN.8 continuation is the ContentGroup Editor maturity lane.
+
+Current order:
+
+```text
+8.6.27
+  Groups Rail v2 as lightweight collection surface
+
+8.6.28
+  Single ContentGroup Editor Petal v1
+
+8.6.29
+  Draft Range / Label drop to Page / Canvas copied TextBlock
+
+8.6.30
+  Draft Range / Label copy-insert into TextFlow, with destructive move deferred
+
+8.6.31
+  ContentGroup OpenDesign visual parity and interaction cleanup
+```
+
+After this lane, documentation closure should re-check Product, PRD, Roadmap, ContentGroup/GroupFolder Contract, Petal Contract, TextFlow Contract, Notebook Object Inventory, Relation Product Design, and Open Issue.
+
+> **For agentic workers:** V2.BN.8 是 Canvas Engine clean branch 和 TextFlow seed 的地基版本，不是完整无限画布产品版，也不是完整富文本/结构化编辑器产品版。执行本计划前，必须先阅读 V2.BN.6 / V2.BN.7 产物，尤其是 truth-layer contract、runtime autopsy、branch closure、Canvas Engine requirement 和 research gap。不要把本阶段扩展成 Structure Studio、Source Library、Relation Runtime、GraphRAG adapter 或完整 AFFiNE/BlockSuite integration。
 
 ## Summary
 
-V2.BN.8 的目标是把 Better Notebook 从当前 `NoteDetail.tsx` 里的 page-like / canvas-like prototype，推进到真正的 canvas-native runtime 地基。
+V2.BN.8 的目标是把 Better Notebook 从当前 `NoteDetail.tsx` 里的 page-like / canvas-like prototype，推进到真正的 canvas-native runtime 地基，并把文字内容从粗粒度 NoteBlock-only 推进到 TextBlock / TextUnit / InlineStructure 的第一版地基。2026-06-18 之后的新口径是：TextFlow 是内容根，AnnotationTruth 是标记层，ContentRange 是定位根，ContentGroup / Petal / ContentGroup identity/status 承担后续严肃内容包、内容包内部组成和解释状态方向。`TextUnitGroup` 只保留为已实现的历史 seed / ContentGroup 前身，后续应改造或移除。
 
 核心判断：
 
 ```text
 当前 branch = experiment / fallback / reference
-V2.BN.8 = clean branch Canvas Engine Foundation
-V2.BN.8.x = Canvas Engine reliability and UX polish buffer
-V2.BN.9 = Template Studio Productization
+V2.BN.8 = clean branch Canvas Engine And TextFlow Foundation
+V2.BN.8.x = Canvas / TextFlow reliability and UX polish buffer
+V2.BN.9 = Structure Studio And Editor Productization
 ```
 
 V2.BN.8 不追求一次性做完完整无限画布。它只负责证明：
@@ -22,6 +47,7 @@ NoteCanvas 可以成立
 PageFrame 可以成立
 PageFrame 外 workspace 可以成立
 placement / selection / measurement / overlay / viewport 可以稳定协作
+TextFlow 可以在代码层被识别、投影和安全 fallback
 旧 runtime 的自然写作经验可以被迁移，而不是被丢掉
 ```
 
@@ -39,13 +65,16 @@ V2.BN.7
   -> Canvas Engine requirement / gap / route decision
 
 V2.BN.8
-  Canvas Engine Foundation
+  Canvas Engine And TextFlow Foundation
   -> clean branch
   -> NoteCanvas / PageFrame / workspace
   -> coordinate / viewport / placement / measurement / selection / overlay
+  -> TextBlock / TextUnit / InlineStructure seed
+  -> AnnotationTruth marker seed
+  -> ContentRange / GroupFolder / ContentGroup / Petal / ContentGroup identity/status direction
 
 V2.BN.8.x
-  Canvas Engine Reliability And UX Polish Buffer
+  Canvas / TextFlow Reliability And UX Polish Buffer
   -> 反复打磨直到工程可靠和体验可靠
 ```
 
@@ -70,10 +99,12 @@ V2.BN.8 开始前必须阅读：
 - `docs/internal/V2.BN.7-Canvas-Engine-Route-Decision-Draft.md`
 - `docs/contracts/Block-Contract.md`
 - `docs/contracts/Canvas-Page-Surface-Contract.md`
+- `docs/contracts/ContentGroup-GroupFolder-Contract.md`
 - `docs/contracts/Editor-State-Rebuild-Contract.md`
 - `docs/contracts/Link-Source-Relation-Boundary-Contract.md`
 - `docs/contracts/Source-Provenance-Contract.md`
 - `docs/contracts/Template-Category-Contract.md`
+- `docs/contracts/TextFlow-Contract.md`
 - `docs/brainstorm/BetterNoteBook Research/R7-editor-runtime-route-decision.md`
 - `docs/brainstorm/BetterNoteBook Research/R9-performance-scale-and-rebuild-benchmark.md`
 - `docs/brainstorm/产品完善/PI-046 Research/R10-affine-edgeless-canvas-adaptation-feasibility.md`
@@ -171,7 +202,7 @@ Canvas Engine 只拥有 runtime / projection / interaction，不拥有 canonical
 
 ### 3. 先做 engine，不急着做上层功能
 
-V2.BN.8 不做 Template Studio、Source Library、Relation Runtime。原因不是这些不重要，而是它们都依赖稳定 Canvas Engine。
+V2.BN.8 不做 Structure Studio、Source Library、Relation Runtime。原因不是这些不重要，而是它们都依赖稳定 Canvas Engine 和 TextFlow seed。
 
 ### 4. 保留当前 branch 作为 fallback
 
@@ -189,7 +220,7 @@ V2.BN.8 的优先级分为四层：
 ```text
 R0: 开工准备和 clean branch gate
 P0: Engine survival layer
-P1: Writing and block interaction layer
+P1: TextFlow, writing, and block interaction layer
 P2: Reliability, scale, and overlay layer
 P3: Frame/export/relation reserve layer
 ```
@@ -352,7 +383,7 @@ connector_ports future
 
 - 不做完整 relation path；
 - 不做完整 multi-frame export；
-- 不做 Template Studio；
+- 不做 Structure Studio；
 - 不做 source picker；
 - 不做 GraphRAG。
 
@@ -366,13 +397,13 @@ connector_ports future
 - viewport 能 pan/zoom；
 - 旧 prototype 的核心写作数据可以用测试 seed 重建。
 
-## P1 - Writing And Block Interaction Layer
+## P1 - TextFlow, Writing, And Block Interaction Layer
 
-第二优先级：恢复旧 runtime 已经磨出的写作手感。
+第二优先级：恢复旧 runtime 已经磨出的写作手感，并把写作真相层从 NoteBlock-only 推进到 TextFlow-aware。
 
 ### 目标
 
-让 Canvas Engine 不是只有技术骨架，而是恢复 V2.BN.1-V2.BN.5 已经证明有价值的写作体验。
+让 Canvas Engine 不是只有技术骨架，而是恢复 V2.BN.1-V2.BN.5 已经证明有价值的写作体验。同时建立第一版 `TextBlock -> TextUnit -> InlineStructure` 的代码种子，并在 V2.BN.8.5 起建立 `AnnotationTruth` 标记层。2026-06-18 之后，后续 AI、source、relation 和 Structure Studio 应转向读取 ContentRange / GroupFolder / ContentGroup / Petal / ContentGroup identity/status，而不是只能读取整个 NoteBlock 或把所有意义压到 annotation 上。已实现的 `TextUnitGroup` 只作为 ContentGroup 前身 / 历史 seed 保留，后续要么改造为 ContentGroup workflow，要么移出普通 UX。
 
 ### 必须完成
 
@@ -397,6 +428,19 @@ connector_ports future
 - 空 block 中 slash 创建；
 - 非空 block 的 convert 只做保守转换，不做机械语义猜测。
 
+#### 2.5 TextFlow Seed
+
+需要实现：
+
+- `TextBlockContentV1` 类型种子；
+- `TextUnit` 类型种子；
+- `InlineStructure` 类型种子；
+- `TextUnitGroup` legacy range helper 类型种子 under review；
+- fresh TextBlock -> one paragraph TextUnit 初始化路径；
+- TextFlow projection / debug helper；
+- malformed / unsupported TextFlow 的安全 fallback；
+- 不做完整 TextUnit tree editor，不继续扩展 TextUnitGroup visual editor；后续优先设计 ContentGroup / Petal editor。
+
 #### 3. Block Control Bar
 
 需要实现：
@@ -415,12 +459,14 @@ connector_ports future
 - formula 的 `latex_input`；
 - formula preview；
 - field value 是 content truth；
-- field layout 暂时只做固定视觉样板，不进入完整 Template Studio。
+- field layout 暂时只做固定视觉样板，不进入完整 Structure Studio。
 
 ### P1 验收
 
 - 用户能自然创建 text block；
-- 用户能用 slash 创建 formula / definition；
+- 新建普通文本可以从一开始进入 TextUnit 路径；
+- TextFlow projection/debug helper 可以读取 TextUnit，并可读取 legacy TextUnitGroup seed 作为过渡；
+- 用户能用 slash 创建 formula；definition 入口只保留为 future annotation command，不创建独立 DefinitionBlock；
 - formula 能显示 preview；
 - definition 能编辑字段；
 - control bar 不打断阅读；
@@ -574,10 +620,14 @@ workspace outside PageFrame blocks
 - [x] 建立 measurement / auto-height seed；
 - [ ] 完成 P0 browser smoke。
 
-### P1: Writing And Block Interaction
+### P1: TextFlow, Writing, And Block Interaction
 
 - [ ] 实现 natural writing entry；
 - [ ] 实现 empty block cleanup；
+- [ ] 实现 TextFlow type seed；
+- [ ] 实现 fresh TextBlock -> one paragraph TextUnit 初始化路径；
+- [ ] 实现 TextFlow projection/debug helper；
+- [ ] 将已实现的 TextUnitGroup seed 评估为 ContentGroup workflow 前身：可改造则改造，不可改造则移出普通 UX；
 - [ ] 实现 slash command near caret；
 - [ ] 实现 default / math / userDefined command groups；
 - [ ] 实现 definition field editing；
@@ -712,7 +762,7 @@ PageFrame 外 workspace 是否自然？
 
 V2.BN.8 不做：
 
-- Template Studio Productization；
+- Structure Studio Productization；
 - Source Library；
 - Relation Runtime；
 - GraphRAG adapter；
@@ -731,14 +781,14 @@ V2.BN.8 不做：
 - `docs/releases/V2.BN.8/Plan.md` 存在，中文可读。
 - `docs/releases/V2.BN.8/` 专用文档区存在。
 - `Workflow.md` 明确 V2.BN.8 / V2.BN.8.x 的 debug workflow。
-- Plan 明确 V2.BN.8 是 Canvas Engine Foundation，不是完整 infinite canvas 产品。
+- Plan 明确 V2.BN.8 是 Canvas Engine And TextFlow Foundation，不是完整 infinite canvas 产品，也不是完整 Structure Studio 产品。
 - Plan 明确 R0 clean branch gate。
 - Plan 引用 V2.BN.6 / V2.BN.7 产物作为前置输入。
 - Plan 按 R0 / P0 / P1 / P2 / P3 拆分优先级。
 - Plan 明确第一优先级包括 NoteCanvas、PageFrame、workspace、placement、selection、measurement、viewport、overlay。
 - Plan 明确 V2.BN.8.x 是可靠性和体验打磨空间。
 - Plan 明确当前 branch 是 fallback/reference。
-- Plan 明确不做 Template Studio / Source Library / Relation Runtime / GraphRAG adapter。
+- Plan 明确不做 Structure Studio / Source Library / Relation Runtime / GraphRAG adapter。
 - Plan 明确 V2.BN.8 收口时必须执行 document promotion / merge review。
 - Plan 给出工程测试、browser smoke 和 experience review 方向。
 
@@ -748,8 +798,380 @@ V2.BN.8 不做：
 - 当前 branch 保留为 fallback/reference，不删除。
 - V2.BN.8 默认 self-owned Canvas Engine，但 AFFiNE / BlockSuite 继续作为参考和 fallback。
 - 如果 V2.BN.8 无法达到工程可靠和体验可靠，应进入 V2.BN.8.x 继续打磨，而不是急着进入 V2.BN.9。
+
 ## V2.BN.8.1 Runtime Replacement Addendum
 
 `V2.BN.8.1-Runtime-Replacement-Plan.md` 是本阶段第一个小版本的执行蓝图。它把原本分散在 `NoteDetail.tsx` 中的旧 runtime 职责拆成 12 层，并要求在 `V2.BN.8.1` 内完成 Canvas Engine 对这些职责的逐层接管。后续 `V2.BN.8.x` 小版本主要负责打磨、补丁、性能验证和体验优化。
 
 该小版本允许在本地开发环境中清空测试账号和测试数据，但必须先停止 server、备份 `server/coincides.db*`，再执行 reset。
+
+## V2.BN.8.x Subversion Layout Addendum
+
+V2.BN.8.3 之后，TextFlow / editor / canvas work 不再塞回单个 patch。第八阶段本地小版本暂按以下职责分流：
+
+```text
+V2.BN.8.3
+  TextFlow Seed And Slash Command Foundation
+  Block retreat / Definition entry-point retirement
+  Status: closed on 2026-06-15 after Henry manual pass
+
+V2.BN.8.4
+  TextUnit Editor Seed
+  Plan: docs/releases/V2.BN.8/V2.BN.8.4-TextUnit-Editor-Seed-Plan.md
+  TextUnit gutter
+  Enter / Backspace / Tab
+  heading / quote / bullet / numbered / todo / toggle writing roles
+  paste-to-TextFlow parser first pass
+  split / merge seed
+  heading active block retreat
+  code / source quote conservative boundary
+
+V2.BN.8.5
+  Selection And AnnotationTruth Seed
+  Plan: docs/releases/V2.BN.8/V2.BN.8.5-Selection-And-AnnotationTruth-Seed-Plan.md
+  selection model
+  first AnnotationTruth truth
+  text highlight / annotation render
+  right-click / selection toolbar annotation entry
+  annotation inspector seed
+  Annotation contract draft
+  inline formula / inline code / inline link as special render anchors
+
+V2.BN.8.6
+  Annotation Editor And ReadingInterpretation Seed
+  Plan: docs/releases/V2.BN.8/V2.BN.8.6-Annotation-Editor-And-ReadingInterpretation-Seed-Plan.md
+  multi-range annotation
+  child annotation
+  annotation edit / delete / visibility
+  AI-readable annotation projection
+  ReadingInterpretation / annotation proposal seed
+  TextUnitGroup as annotation range helper / stable range package
+  relation endpoint reserve
+
+V2.BN.8.6.1
+  Selection Draft Engine
+  Plan: docs/releases/V2.BN.8/V2.BN.8.6.1-Selection-Draft-Engine-Plan.md
+  Coincides-owned SelectionDraft truth
+  browser selection as input signal only
+  temporary draft highlight
+  Ctrl / Command additive selection ranges
+  normal selection -> additive draft upgrade
+  lightweight escapable selection toolbar
+  parent annotation internal reselection -> child label entry
+
+V2.BN.8.6.2
+  Annotation Hierarchy And Range Source Contract
+  Plan: docs/releases/V2.BN.8/V2.BN.8.6.2-Annotation-Hierarchy-And-Range-Source-Contract-Plan.md
+  parent_annotation_id as child label hierarchy truth
+  root-only Annotation Stack cards
+  child labels rendered inside parent context
+  parent hide/delete prevents child ghosts
+  range source editing reserve and conservative rebase helper
+
+V2.BN.8.6.3
+  Source-Backed Annotation Range Editing
+  Plan: docs/releases/V2.BN.8/V2.BN.8.6.3-Source-Backed-Annotation-Range-Editing-Plan.md
+  range preview edit writes back to TextFlow source
+  TextUnit source edit refreshes annotation range cache
+  parent/child annotation hierarchy preserved through range rebase
+  label input remains separate from range source editing
+
+V2.BN.8.6.4
+  Annotation Display And Inspector Polish
+  Plan: docs/releases/V2.BN.8/V2.BN.8.6.4-Annotation-Display-And-Inspector-Polish-Plan.md
+  Preview-level label overlay show/hide toggle
+  Annotation Stack visual hierarchy cleanup
+  text-near label badge and local multi-label cluster
+  SelectionDraft toolbar wording and escape polish
+
+V2.BN.8.6.6
+  TextUnitGroup And AnnotationSet Editor Foundation
+  Plan: docs/releases/V2.BN.8/V2.BN.8.6.6-TextUnitGroup-And-AnnotationSet-Editor-Foundation-Plan.md
+  TextUnitGroup as writing-layer row group helper
+  AnnotationSet as transitional editable label organization seed
+  reading projection for grouped labels
+  ContentGroup / GroupFolder / ContentGroup Gallery / CompositeEndpoint migration question
+  CompositeEndpoint reserve without relation runtime
+
+V2.BN.8.6.7
+  ContentGroup Rebuild And Legacy Retreat
+  Plan: docs/releases/V2.BN.8/V2.BN.8.6.7-ContentGroup-Rebuild-And-Legacy-Retreat-Plan.md
+  ContentGroup / Petal runtime and inspector seed
+  AnnotationSet / TextUnitGroup demoted in product truth
+  accepted ContentGroup identity remains a ContentGroup status, not direct user input or a separate object
+
+V2.BN.8.6.8
+  Legacy Data Cleanup And Test Reset
+  Plan: docs/releases/V2.BN.8/V2.BN.8.6.8-Legacy-Data-Cleanup-And-Test-Reset-Plan.md
+  retire AnnotationSet and TextUnitGroup prototype paths
+  remove old structured block templates and DefinitionBlockProjection
+  hide or remove Advanced Insert
+  back up then reset all prototype account data
+
+V2.BN.8.6.9
+  ContentGroup Hardening And Integrity Gate
+  Plan: docs/releases/V2.BN.8/V2.BN.8.6.9-ContentGroup-Hardening-And-Integrity-Gate-Plan.md
+  make ContentGroup and Petal member references traceable
+  refresh preview cache from source instead of treating previews as truth
+  classify member integrity as valid/stale/orphaned/unsupported
+  keep accepted-identity UI and GroupFolder / Gallery out of this version
+
+V2.BN.8.6.10
+  ContentGroup Identity Seed
+  Plan: docs/releases/V2.BN.8/V2.BN.8.6.10-ContentGroup-Identity-Seed-Plan.md
+  replace interpretation wording with ContentGroup identity
+  treat accepted identity as ContentGroup's own accepted/reviewed status
+  keep separate accepted-content objects out of user-facing object management
+  downgrade accepted identity back to draft when members or Petals change
+
+V2.BN.8.6.11
+  GroupFolder And ContentGroup Gallery Direction Draft
+  Plan: docs/releases/V2.BN.8/V2.BN.8.6.11-ContentGroupIndex-Seed-Plan.md
+  establish GroupFolder as the organization/path layer for ContentGroups
+  derive ContentGroup depth from GroupFolder path instead of a primary group field
+  define right rail / Gallery / detail editor surfaces
+  keep list/index behavior as derived Gallery/query views, not a truth table
+
+V2.BN.8.7
+  ContentGroup System Maturity
+  Plan: docs/releases/V2.BN.8/V2.BN.8.7-ContentGroup-System-Maturity-Plan.md
+  Rail / Gallery / Single Editor role cleanup
+  Member != Source boundary hardening
+  GroupFolder / Gallery resource-manager maturity
+  Reference / Duplicate / Fork / Materialize language
+
+V2.BN.8.8+
+  CanvasObject, Media Annotation, Drawing Tool, And Image Insert Seed
+  Plan: docs/releases/V2.BN.8/V2.BN.8.7-CanvasObject-Media-Annotation-Drawing-Image-Seed-Plan.md
+  Deferred from the original 8.7 slot; file name is historical until the plan is reissued.
+  minimal pen / shape / image insert
+  CanvasObject layer reserve
+  region selection reserve
+  image region / CanvasObject / media region as annotation range
+
+V2.BN.8.9+
+  Canvas Reliability / Scale / Export Reserve Closure
+  50 / 200 / 1000 block smoke
+  formula-heavy smoke
+  visible render window / virtualization reserve
+  PageFrame export boundary
+  CanvasObject / relation endpoint reserve
+```
+
+## V2.BN.8.6.1 Selection Draft Engine Entry
+
+`V2.BN.8.6.1-Selection-Draft-Engine-Plan.md` 是插入在 V2.BN.8.6 与 V2.BN.8.7 之间的执行计划。
+
+它把浏览器原生 selection 降级为 pointer / offset 输入信号，不再让浏览器 selection 成为 annotation 或 child label 的 truth。Coincides 自己维护 `SelectionDraft`，并让临时高亮、toolbar、annotation commit、same-range label、child label 都读取同一个 draft。
+
+V2.BN.8.6.1 的成熟边界是：普通选区替换 draft，Ctrl / Command 追加 draft，多范围 draft 可见，误选可通过空白点击、Esc 或 toolbar close 清除；child label 入口必须来自已有 parent annotation 内部的二次选区，而不是泛化的 Inspector 输入框。
+
+V2.BN.8.6.1 不做完整跨 block 选择 UI、完整富文本 editor、CanvasObject / media selection、Relation endpoint editor 或 AI 子标注。它只把 selection / annotation 的底座补稳，让后续 CanvasObject / media annotation 不再依赖浏览器 selection 副作用。
+
+## V2.BN.8.6.2 Annotation Hierarchy And Range Source Contract Entry
+
+`V2.BN.8.6.2-Annotation-Hierarchy-And-Range-Source-Contract-Plan.md` 是插入在 V2.BN.8.6.1 与 V2.BN.8.7 之间的数据契约修补小版本。
+
+它把 child label 从“看起来缩进的 UI 行”提升为明确的 annotation hierarchy：`AnnotationTruth.parent_annotation_id` 是子标签归属真相，Annotation Stack 只把 root annotation 渲染成顶层卡片，child label 必须在 parent card 内部显示和管理。旧的 parent-side `child_annotation_ids` 只作为兼容/cache 读取，不再是唯一真相。
+
+V2.BN.8.6.2 同时补上 range source editing 的地基：range preview 不是 detached copy；未来编辑 range 文本必须回写原始 TextFlow source，并通过保守 rebase 规则移动、失效或提示受影响 annotation range。实际 range preview 文本直接编辑默认留到 V2.BN.8.6.3。
+
+## V2.BN.8.6.3 Source-Backed Annotation Range Editing Entry
+
+`V2.BN.8.6.3-Source-Backed-Annotation-Range-Editing-Plan.md` 是插入在 V2.BN.8.6.2 与 V2.BN.8.7 之间的数据一致性小版本。
+
+它把 8.6.2 中只写成 contract 的 range source editing 做成第一版可运行闭环：Annotation Stack 的 range preview 可以编辑，但编辑必须回写原始 TextFlow source；用户直接编辑 TextUnit 原文时，相关 annotation range 的 offset 与 `range_text_cache` 也必须同步刷新。`range_text_cache` 只能是 cache，不再允许成为 detached copy。
+
+V2.BN.8.6.3 的范围很窄：不做 Annotation Stack 视觉重设计，不做 label display/hide 总开关，不做 label badge 局部聚合，也不做跨 block range edit。剩余 annotation 视觉和 selection polish 默认进入 V2.BN.8.6.4。
+
+Implementation status: completed as `V2.BN.8.6.3-Source-Backed-Annotation-Range-Editing-Patch-Note.md`. The first same-TextUnit source-backed loop is implemented and covered by model contract smoke.
+
+## V2.BN.8.6.4 Annotation Display And Inspector Polish Entry
+
+`V2.BN.8.6.4-Annotation-Display-And-Inspector-Polish-Plan.md` 是插入在 V2.BN.8.6.3 与 V2.BN.8.7 之间的 annotation 显示和管理体验小版本。
+
+它不改变 AnnotationTruth / AnnotationRange 的核心数据真相，而是在现有语义地基上补齐用户每天会感受到的显示层：Preview 里增加 label overlay 总开关，正文 label badge 从 block 右上角移动到文字附近，同一局部多个 label 聚合成一个 badge，Annotation Stack 扁平化成更清楚的管理面板，SelectionDraft toolbar 去掉内部 `Draft` 语言并补齐 Esc、关闭、空白点击的逃逸行为。
+
+V2.BN.8.6.4 的边界同样要压住：不做完整 custom selection engine，不做 per-label visibility filter，不做完整 label style editor，不做 CanvasObject / media annotation，也不做 Relation endpoint UI。第一版受控 label color token 色板可以作为显示 polish 的一部分。它的验收标准是 annotation display 不再干扰自然写作，并且 Henry manual visual pass 能接受。
+
+V2.BN.8.6.4 是视觉/交互 polish 小版本，因此执行前必须使用 `impeccable` 做 product UI gate。实现者需要先确认 Coincides 的产品 UI register、现有 token / component vocabulary、Annotation Stack 信息层级、badge 位置和 selection toolbar 逃逸行为，再开始改 CSS 或组件。`taste skill` 可以在 Henry 点名时作为补充审美 critique，但默认不替代 `impeccable`。
+
+Implementation status: completed as `V2.BN.8.6.4-Annotation-Display-And-Inspector-Polish-Patch-Note.md`. The first label overlay toggle, local label cluster, Annotation Stack flattening, and toolbar wording pass are implemented and covered by model contract smoke.
+
+## V2.BN.8.6.6 TextUnitGroup And AnnotationSet Editor Foundation Entry
+
+`V2.BN.8.6.6-TextUnitGroup-And-AnnotationSet-Editor-Foundation-Plan.md` is the inserted foundation version after command surfaces and before CanvasObject work.
+
+Its original goal was to make TextUnitGroup and AnnotationSet usable without confusing their layers:
+
+```text
+TextUnitGroup
+  writing-layer row group helper
+  no semantic truth
+
+AnnotationSet
+  group of AnnotationTruth records
+  AI-readable organization seed
+  future CompositeEndpoint reserve
+```
+
+This version does not implement relation runtime, CanvasObject, media annotations, A9 Annotation Studio, cross-note sets, or visible set badges in the main text surface. It only gives the current note a stable way to group rows and group labels before later ContentGroup maturity and CanvasObject work.
+
+2026-06-18 model sync:
+
+```text
+TextFlow = content root
+ContentRange = location root
+AnnotationTruth = durable label / marker
+ContentGroup = serious content package
+GroupFolder = organization/path and relation-view boundary for ContentGroups
+Petal = local part inside ContentGroup
+ContentGroup identity/status = draft / accepted / rejected / archived review state on the ContentGroup itself
+ContentGroup Gallery / derived group views = folder-scoped browsing and dynamic list views over ContentGroups
+AnnotationSet = V2.BN.8.6.6 transitional seed, not the long-term primary content package
+TextUnitGroup = legacy seed / ContentGroup predecessor, not a long-term product object
+```
+
+Future work should migrate useful TextUnitGroup / AnnotationSet behavior into ContentGroup / Petal / GroupFolder / ContentGroup Gallery, or remove the old surfaces from normal UX. Compatibility adapters are not required because there is no production user dataset.
+
+Implementation status: completed as `V2.BN.8.6.6-TextUnitGroup-And-AnnotationSet-Editor-Foundation-Patch-Note.md`. The model contract smoke and client build passed; Henry manual visual test remains the closing gate.
+
+## V2.BN.8.6.7 ContentGroup Rebuild And Legacy Retreat Entry
+
+`V2.BN.8.6.7-ContentGroup-Rebuild-And-Legacy-Retreat-Plan.md` is inserted after V2.BN.8.6.6 and before the V2.BN.8.7 ContentGroup System maturity pass.
+
+It exists because the model documents have moved past the 8.6.6 implementation:
+
+```text
+TextUnitGroup
+  legacy seed / ContentGroup predecessor
+
+AnnotationSet
+  removable seed / not a compatibility obligation
+
+ChildLabel
+  superseded by Petal
+
+AnnotationTruth
+  label / marker layer
+
+ContentGroup
+  serious content package with traceable members
+
+Petal
+  local part inside ContentGroup, also with traceable members
+```
+
+The version is organized into four work blocks:
+
+- New Build: implement ContentGroup / ContentGroupMember / Petal foundations.
+- Refactor / Reuse: migrate useful AnnotationSet / TextUnitGroup mechanics into ContentGroup where they help.
+- Delete / Retreat: hide, remove, or stop expanding TextUnitGroup, AnnotationSet, and ChildLabel as product destinations.
+- Downgrade / Reposition: keep AnnotationTruth, InlineStructure, TextUnit, and Block useful but narrower.
+
+This version does not implement relation runtime, GroupFolder / Gallery product UI, Structure Studio, source reconstruction, or CanvasObject work. It stops at a minimal ContentGroup / Petal runtime and inspector seed ready for Henry manual test.
+
+## V2.BN.8.6.8 Legacy Data Cleanup And Test Reset Entry
+
+`V2.BN.8.6.8-Legacy-Data-Cleanup-And-Test-Reset-Plan.md` is inserted after V2.BN.8.6.7 and before the V2.BN.8.7 ContentGroup System maturity pass.
+
+It exists because V2.BN.8.6.7 introduced the current ContentGroup / Petal direction, while several older prototype paths still remain in code:
+
+```text
+AnnotationSet
+  remove from active runtime
+
+TextUnitGroup
+  retire last because it touches TextFlow editing
+
+DefinitionBlockProjection and old structured block templates
+  remove from active creation / render paths
+
+Advanced Insert
+  hide first, then remove
+
+prototype account data
+  back up, then reset because all current accounts are test accounts
+```
+
+This version is intentionally more conservative than a one-shot delete. It requires rollback checkpoints before each destructive phase, handles one legacy block at a time, backs up SQLite/uploads before clearing data, and finishes with full automated plus manual verification. Its acceptance gate is not only that the app builds, but that a fresh account can create a project, note, paragraph text, formula/code blocks, annotation labels, ContentGroups, and Petals without any retired model path reappearing.
+
+## V2.BN.8.6.9 ContentGroup Hardening And Integrity Gate Entry
+
+`V2.BN.8.6.9-ContentGroup-Hardening-And-Integrity-Gate-Plan.md` is inserted after V2.BN.8.6.8 and before ContentGroup identity work.
+
+It exists because after cleanup, ContentGroup must become reliable before it can carry identity or index behavior. This version hardens the content package layer:
+
+```text
+ContentGroup member reference
+  must stay traceable to source content
+
+Petal member reference
+  must stay traceable inside the group
+
+preview_text
+  cache only, never second truth
+
+integrity state
+  valid / stale / orphaned / unsupported
+```
+
+V2.BN.8.6.9 deliberately does not implement accepted-identity UI, GroupFolder / Gallery, relation runtime, AI proposal workflow, cross-project groups, source reconstruction, CanvasObject members, or a full visual redesign. Its job is to make ContentGroup safe enough that later semantic layers can trust it.
+
+## V2.BN.8.6.10 ContentGroup Identity Seed Entry
+
+`V2.BN.8.6.10-ContentGroup-Identity-Seed-Plan.md` is inserted after ContentGroup hardening and before GroupFolder / Gallery work.
+
+It replaces the older `interpretation` wording with a simpler identity state machine:
+
+```text
+ContentGroup
+  user-facing content package
+
+ContentGroup.identity.status = draft
+  former interpretation / possible understanding
+
+ContentGroup.identity.status = accepted
+  accepted / reviewed state on the ContentGroup itself
+```
+
+The important product rule is that there is no separate object users must manage after acceptance. A ContentGroup remains a ContentGroup when its identity is accepted. If members or Petals change after acceptance, identity must fall back to draft because the accepted meaning may no longer match the package.
+
+## V2.BN.8.6.11 GroupFolder And ContentGroup Gallery Direction Draft Entry
+
+`V2.BN.8.6.11-ContentGroupIndex-Seed-Plan.md` is inserted after ContentGroup identity and before CanvasObject work. Despite the historical filename, the product concept is now `GroupFolder / ContentGroup Gallery`.
+
+This file is currently a direction draft. It replaces the narrow accepted-only ContentGroupIndex framing with an organization layer: GroupFolder gives ContentGroup a path, Gallery scope, AI reading context, and relation-view boundary.
+
+The current draft rule is:
+
+```text
+GroupFolder = organization/path/relation-view boundary
+ContentGroup = serious content package
+ContentGroup identity/status = review state on the group
+ContentGroup Gallery / derived views = browsing/query surface over folders and groups
+```
+
+Important changes:
+
+- ContentGroup should not own primary `depth`; derived depth comes from its GroupFolder path.
+- Project and Note can own lifecycle-bound system root GroupFolders.
+- User-created and AI-created folders can collect ContentGroups across notes/projects without moving source truth.
+- Relation views can be opened from a GroupFolder boundary without creating fake relation facts.
+- List/index behavior remains a derived Gallery/query view, not a new truth table.
+
+## V2.BN.8.7 ContentGroup System Maturity Entry
+
+`V2.BN.8.7-ContentGroup-System-Maturity-Plan.md` 是第八阶段第七个小版本的执行计划。
+
+它的目标是把当前 ContentGroup / Member / Petal / GroupFolder / Gallery / Rail / Single Editor 收束成 `ContentGroup System 1.0`：稳定、可理解、可复用，并且能被未来 Canvas projection 引用。
+
+V2.BN.8.7 明确不做 CanvasObject / media / drawing seed、cross-note CanvasObject reuse、完整数据库迁移、GraphRAG、relation runtime 或完整 source reconstruction。它只负责让 ContentGroup 能回答自己是谁、在哪里被组织、members 是什么、来自哪里、是否与 source 同步，以及 Reference / Duplicate / Fork / Materialize 分别意味着什么。
+
+## V2.BN.8.8+ CanvasObject, Media Annotation, Drawing Tool, And Image Insert Seed Deferred Entry
+
+`V2.BN.8.7-CanvasObject-Media-Annotation-Drawing-Image-Seed-Plan.md` 保留为后续 CanvasObject seed 的历史草案，但不再是 active V2.BN.8.7 入口。
+
+该工作顺延到 V2.BN.8.8+ 或后续 Canvas track。恢复执行前，应重新发行或重编号该计划，并确认 ContentGroup System maturity 已经给 Canvas projection 提供稳定对象边界。
+
+This split is a working layout, not a hard cap. If TextFlow or Canvas reliability needs more polish, V2.BN.8 may add more subversions before entering V2.BN.9 Structure Studio And Editor Productization.

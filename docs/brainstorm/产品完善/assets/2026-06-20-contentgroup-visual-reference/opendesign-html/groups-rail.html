@@ -1,0 +1,1077 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Groups Rail - Coincides</title>
+  <style>
+    :root {
+      --bg: oklch(13.5% 0.012 255);
+      --note: oklch(16% 0.012 255);
+      --rail: oklch(17.5% 0.013 255);
+      --panel: oklch(20% 0.014 255);
+      --panel-2: oklch(23% 0.015 255);
+      --surface: oklch(25.5% 0.016 255);
+      --fg: oklch(91% 0.012 255);
+      --muted: oklch(67% 0.014 255);
+      --subtle: oklch(50% 0.014 255);
+      --border: oklch(31% 0.014 255);
+      --border-soft: oklch(26.5% 0.014 255);
+      --accent: oklch(67% 0.14 210);
+      --accent-soft: color-mix(in oklch, var(--accent) 18%, transparent);
+      --power: oklch(72% 0.13 205);
+      --convergence: oklch(73% 0.13 145);
+      --economics: oklch(75% 0.13 82);
+      --practice: oklch(70% 0.12 292);
+      --warn: oklch(72% 0.13 48);
+      --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      --font-mono: "SF Mono", "JetBrains Mono", ui-monospace, Menlo, monospace;
+      --r-xs: 3px;
+      --r-sm: 4px;
+      --r-md: 6px;
+      --rail-width: 360px;
+    }
+
+    * { box-sizing: border-box; }
+    html { min-width: 1120px; background: var(--bg); }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      overflow: hidden;
+      color: var(--fg);
+      background: var(--bg);
+      font-family: var(--font-body);
+      font-size: 13px;
+      line-height: 1.42;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
+    button { cursor: default; }
+    h1, h2 { margin: 0; letter-spacing: 0; }
+
+    .page {
+      min-height: 100dvh;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) var(--rail-width);
+      background: var(--bg);
+    }
+
+    .note-context {
+      position: relative;
+      min-width: 0;
+      display: grid;
+      grid-template-rows: 48px 1fr;
+      background: var(--note);
+      opacity: .62;
+      filter: saturate(.72);
+    }
+
+    .note-context::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(90deg, transparent 64%, color-mix(in oklch, var(--bg) 46%, transparent));
+    }
+
+    .note-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--border-soft);
+      color: var(--muted);
+      background: color-mix(in oklch, var(--bg) 36%, transparent);
+    }
+
+    .note-mark {
+      width: 22px;
+      height: 22px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--fg);
+      background: var(--panel);
+    }
+
+    .note-tabs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--subtle);
+      font-size: 12px;
+    }
+
+    .note-tab.active { color: var(--fg); }
+
+    .note-body {
+      position: relative;
+      padding: 46px 64px 80px;
+      max-width: 900px;
+    }
+
+    .note-path {
+      margin: 0 0 18px;
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .note-title {
+      margin: 0 0 22px;
+      font-size: 28px;
+      font-weight: 650;
+      color: var(--fg);
+    }
+
+    .note-body p {
+      max-width: 76ch;
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.68;
+    }
+
+    .range-highlight {
+      color: var(--fg);
+      background: color-mix(in oklch, var(--power) 18%, transparent);
+      box-shadow: 0 0 0 1px color-mix(in oklch, var(--power) 38%, transparent);
+      border-radius: 2px;
+      padding: 1px 2px;
+    }
+
+    .range-highlight.secondary {
+      background: color-mix(in oklch, var(--convergence) 14%, transparent);
+      box-shadow: 0 0 0 1px color-mix(in oklch, var(--convergence) 34%, transparent);
+    }
+
+    .selection-strip {
+      position: absolute;
+      left: 64px;
+      bottom: 48px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 30px;
+      padding: 0 10px;
+      color: var(--fg);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      background: color-mix(in oklch, var(--panel) 88%, transparent);
+      box-shadow: 0 12px 28px color-mix(in oklch, black 24%, transparent);
+      font-size: 12px;
+    }
+
+    .drag-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .rail {
+      min-height: 100dvh;
+      display: grid;
+      grid-template-rows: auto auto auto auto 1fr auto;
+      border-left: 1px solid var(--border);
+      background: var(--rail);
+      box-shadow: -18px 0 44px color-mix(in oklch, black 25%, transparent);
+    }
+
+    .rail-head {
+      height: 44px;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      align-items: center;
+      gap: 6px;
+      padding: 0 10px 0 14px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .rail-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .rail-title h1 {
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    .active-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .icon-btn {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      border: 1px solid transparent;
+      border-radius: var(--r-sm);
+      background: transparent;
+    }
+
+    .icon-btn:hover,
+    .icon-btn.active {
+      color: var(--fg);
+      border-color: var(--border);
+      background: var(--panel);
+    }
+
+    .folder-bar {
+      position: relative;
+      display: grid;
+      gap: 7px;
+      padding: 8px 10px 8px 14px;
+      border-bottom: 1px solid var(--border-soft);
+      background: color-mix(in oklch, var(--panel) 20%, transparent);
+    }
+
+    .folder-toggle {
+      width: 100%;
+      min-height: 34px;
+      display: grid;
+      grid-template-columns: 16px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 9px;
+      padding: 0 8px;
+      color: var(--muted);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--r-sm);
+      background: var(--panel);
+      font-size: 12px;
+      text-align: left;
+    }
+
+    .folder-toggle:hover,
+    .folder-toggle[aria-expanded="true"] {
+      color: var(--fg);
+      border-color: var(--border);
+      background: var(--panel-2);
+    }
+
+    .path-text {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .folder-chevron {
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      transition: transform .12s ease;
+    }
+
+    .folder-toggle[aria-expanded="true"] .folder-chevron {
+      transform: rotate(90deg);
+    }
+
+    .folder-menu {
+      display: none;
+      position: absolute;
+      z-index: 20;
+      left: 10px;
+      right: 10px;
+      top: calc(100% - 4px);
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      background: color-mix(in oklch, var(--rail) 94%, black);
+      box-shadow: 0 18px 40px color-mix(in oklch, black 32%, transparent);
+    }
+
+    .folder-menu.open {
+      display: grid;
+      gap: 7px;
+    }
+
+    .folder-search {
+      width: 100%;
+      height: 29px;
+      color: var(--fg);
+      background: var(--panel);
+      border: 1px solid var(--border-soft);
+      border-radius: var(--r-sm);
+      outline: none;
+      padding: 0 8px;
+      font-size: 12px;
+    }
+
+    .folder-search::placeholder { color: var(--subtle); }
+    .folder-search:focus {
+      border-color: color-mix(in oklch, var(--accent) 70%, var(--border));
+      box-shadow: 0 0 0 2px var(--accent-soft);
+    }
+
+    .folder-listbox {
+      display: grid;
+      gap: 1px;
+      max-height: 246px;
+      overflow: auto;
+      padding: 1px;
+    }
+
+    .folder-tree-row {
+      height: 28px;
+      min-width: 0;
+      display: grid;
+      grid-template-columns: 13px 14px minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 6px;
+      padding: 0 7px 0 calc(7px + var(--level, 0) * 14px);
+      color: var(--muted);
+      border: 1px solid transparent;
+      border-radius: var(--r-sm);
+      background: transparent;
+      text-align: left;
+    }
+
+    .folder-tree-row:hover,
+    .folder-tree-row.selected {
+      color: var(--fg);
+      border-color: var(--border-soft);
+      background: var(--panel);
+    }
+
+    .folder-tree-row.selected {
+      box-shadow: inset 2px 0 0 var(--accent);
+    }
+
+    .tree-caret {
+      display: grid;
+      place-items: center;
+      width: 13px;
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 10px;
+    }
+
+    .folder-tree-row[aria-expanded="true"] .tree-caret {
+      transform: rotate(90deg);
+    }
+
+    .tree-meta {
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 10px;
+    }
+
+    .folder-icon {
+      width: 14px;
+      height: 11px;
+      position: relative;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      background: color-mix(in oklch, var(--surface) 82%, transparent);
+    }
+
+    .folder-icon::before {
+      content: "";
+      position: absolute;
+      left: 1px;
+      top: -4px;
+      width: 8px;
+      height: 5px;
+      border: 1px solid var(--border);
+      border-bottom: 0;
+      border-radius: 2px 2px 0 0;
+      background: color-mix(in oklch, var(--surface) 82%, transparent);
+    }
+
+    .folder-name,
+    .group-name {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .tool-row {
+      display: grid;
+      grid-template-columns: auto auto auto 1fr;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 10px 8px 14px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .tool-row .spacer {
+      justify-self: end;
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 10px;
+    }
+
+    .search-wrap {
+      display: none;
+      padding: 8px 10px 8px 14px;
+      border-bottom: 1px solid var(--border-soft);
+      background: color-mix(in oklch, var(--panel) 32%, transparent);
+    }
+
+    .search-wrap.open { display: block; }
+
+    .search-input {
+      width: 100%;
+      height: 30px;
+      color: var(--fg);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      outline: none;
+      padding: 0 9px;
+      font-size: 12px;
+    }
+
+    .search-input::placeholder { color: var(--subtle); }
+    .search-input:focus {
+      border-color: color-mix(in oklch, var(--accent) 76%, var(--border));
+      box-shadow: 0 0 0 2px var(--accent-soft);
+    }
+
+    .view-row {
+      padding: 8px 10px 8px 14px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .segmented {
+      height: 28px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      overflow: hidden;
+      background: var(--panel);
+    }
+
+    .segmented button {
+      color: var(--muted);
+      border: 0;
+      border-right: 1px solid var(--border-soft);
+      background: transparent;
+      font-size: 11px;
+    }
+
+    .segmented button:last-child { border-right: 0; }
+    .segmented button.active {
+      color: var(--fg);
+      background: var(--panel-2);
+    }
+
+    .rail-scroll {
+      min-height: 0;
+      overflow: auto;
+      padding: 8px 8px 12px;
+    }
+
+    .section-label {
+      height: 24px;
+      display: flex;
+      align-items: center;
+      padding: 0 6px;
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .group-list {
+      display: grid;
+      gap: 2px;
+      margin-bottom: 10px;
+    }
+
+    .draft-box {
+      display: none;
+      margin: 0 0 10px;
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      background: var(--panel);
+    }
+
+    .draft-box.open { display: grid; gap: 7px; }
+
+    .draft-line {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 26px;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .draft-input {
+      height: 28px;
+      min-width: 0;
+      color: var(--fg);
+      background: var(--rail);
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      outline: none;
+      padding: 0 8px;
+      font-size: 12px;
+    }
+
+    .draft-confirm {
+      height: 26px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      color: var(--fg);
+      background: var(--panel-2);
+    }
+
+    .draft-meta {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .group-unit {
+      border: 1px solid transparent;
+      border-radius: var(--r-sm);
+    }
+
+    .group-row {
+      min-height: 34px;
+      display: grid;
+      grid-template-columns: 4px minmax(0, 1fr) auto auto 14px;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+      padding: 0 7px 0 5px;
+      color: var(--muted);
+      border: 1px solid transparent;
+      border-radius: var(--r-sm);
+      background: transparent;
+      text-align: left;
+    }
+
+    .group-row:hover,
+    .group-unit.open > .group-row {
+      color: var(--fg);
+      border-color: var(--border-soft);
+      background: var(--panel);
+    }
+
+    .topic-strip {
+      width: 4px;
+      align-self: stretch;
+      margin: 6px 0;
+      border-radius: 99px;
+      background: var(--power);
+    }
+
+    .topic-strip.convergence { background: var(--convergence); }
+    .topic-strip.economics { background: var(--economics); }
+    .topic-strip.practice { background: var(--practice); }
+
+    .role-badge,
+    .identity-chip,
+    .topic-chip {
+      height: 19px;
+      display: inline-flex;
+      align-items: center;
+      padding: 0 6px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-xs);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .role-badge {
+      color: var(--fg);
+      background: var(--surface);
+    }
+
+    .identity-chip {
+      color: var(--subtle);
+      background: transparent;
+    }
+
+    .identity-chip.accepted {
+      color: color-mix(in oklch, var(--convergence) 80%, white);
+      border-color: color-mix(in oklch, var(--convergence) 36%, var(--border));
+      background: color-mix(in oklch, var(--convergence) 10%, transparent);
+    }
+
+    .identity-chip.draft {
+      color: color-mix(in oklch, var(--warn) 80%, white);
+      border-color: color-mix(in oklch, var(--warn) 36%, var(--border));
+      background: color-mix(in oklch, var(--warn) 10%, transparent);
+    }
+
+    .topic-chip {
+      color: color-mix(in oklch, var(--power) 82%, white);
+      border-color: color-mix(in oklch, var(--power) 38%, var(--border));
+      background: color-mix(in oklch, var(--power) 12%, transparent);
+    }
+
+    .chevron {
+      color: var(--subtle);
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .expanded-area {
+      display: none;
+      margin: 2px 0 6px 17px;
+      padding: 8px;
+      border: 1px solid var(--border-soft);
+      border-radius: var(--r-sm);
+      background: color-mix(in oklch, var(--panel) 55%, transparent);
+    }
+
+    .group-unit.open .expanded-area { display: grid; gap: 7px; }
+
+    .drop-zone {
+      min-height: 34px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      border: 1px dashed color-mix(in oklch, var(--accent) 42%, var(--border));
+      border-radius: var(--r-sm);
+      background: var(--accent-soft);
+      font-size: 12px;
+    }
+
+    .expanded-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--subtle);
+      font-size: 11px;
+    }
+
+    .open-editor {
+      color: var(--fg);
+      border-bottom: 1px solid color-mix(in oklch, var(--accent) 52%, transparent);
+    }
+
+    .source-indicator {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .rail-foot {
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 0 10px 0 14px;
+      border-top: 1px solid var(--border-soft);
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      background: var(--rail);
+    }
+
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="note-context" data-od-id="background-note" aria-label="当前笔记背景">
+      <div class="note-top">
+        <span class="note-mark">CN</span>
+        <div class="note-tabs">
+          <span class="note-tab active">Power Series note</span>
+          <span>/</span>
+          <span>Chapter 1</span>
+        </div>
+      </div>
+      <article class="note-body">
+        <p class="note-path">AMATH 231 / Week 1 notes / Power Series note</p>
+        <h2 class="note-title">Power Series</h2>
+        <p>
+          A power series is an infinite series of the form
+          <span class="range-highlight">Σ a_n(x-c)^n</span>. It behaves like an infinite polynomial centered at c.
+        </p>
+        <p>
+          The main task is to determine where the series converges. The
+          <span class="range-highlight secondary">radius of convergence</span>
+          describes the interval around the center where the expression is valid.
+        </p>
+        <p>
+          Selected note fragments can be dragged into the Groups Rail. The note remains the source of truth; the group only organizes references.
+        </p>
+        <div class="selection-strip" aria-hidden="true">
+          <span class="drag-dot"></span>
+          <span>已选择文本，可拖入 Groups Rail</span>
+        </div>
+      </article>
+    </section>
+
+    <section class="rail" data-od-id="groups-rail" aria-label="Groups Rail">
+      <header class="rail-head">
+        <div class="rail-title">
+          <span class="active-dot"></span>
+          <h1>Groups</h1>
+        </div>
+        <a class="icon-btn" href="group-gallery.html" title="打开 Group Gallery" aria-label="打开 Group Gallery">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 4.5h10M3 8h10M3 11.5h6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </a>
+        <button class="icon-btn" type="button" title="关闭" aria-label="关闭">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </button>
+      </header>
+
+      <div class="folder-bar" data-od-id="current-folder-path">
+        <button class="folder-toggle" id="folderToggle" type="button" aria-expanded="false" aria-controls="folderMenu">
+          <span class="folder-icon"></span>
+          <span class="path-text">AMATH 231 / Power Series note / Chapter 1</span>
+          <span class="folder-chevron">›</span>
+        </button>
+        <div class="folder-menu" id="folderMenu" data-od-id="folder-list">
+          <input class="folder-search" id="folderSearch" type="search" placeholder="搜索文件夹..." aria-label="搜索文件夹" />
+          <div class="folder-listbox" role="tree" aria-label="选择 folder">
+            <button class="folder-tree-row" type="button" role="treeitem" aria-expanded="true" data-folder-search="workspace groups root" data-folder="Workspace" data-path="Workspace" data-tree-id="workspace" style="--level: 0">
+              <span class="tree-caret">›</span>
+              <span class="folder-icon"></span>
+              <span class="folder-name">Workspace</span>
+              <span class="tree-meta">root</span>
+            </button>
+            <button class="folder-tree-row" type="button" role="treeitem" aria-expanded="true" data-folder-search="groups workspace group folders" data-folder="Groups" data-path="Workspace / Groups" data-tree-id="groups" data-parent="workspace" style="--level: 1">
+              <span class="tree-caret">›</span>
+              <span class="folder-icon"></span>
+              <span class="folder-name">Groups</span>
+              <span class="tree-meta">scope</span>
+            </button>
+            <button class="folder-tree-row" type="button" role="treeitem" data-folder-search="cross-note review workspace saved review" data-folder="Cross-note review" data-path="Workspace / Groups / Cross-note review" data-parent="groups" style="--level: 2">
+              <span class="tree-caret"></span>
+              <span class="folder-icon"></span>
+              <span class="folder-name">Cross-note review</span>
+              <span class="tree-meta">custom</span>
+            </button>
+            <button class="folder-tree-row" type="button" role="treeitem" data-folder-search="saved graph scopes workspace graph" data-folder="Saved graph scopes" data-path="Workspace / Groups / Saved graph scopes" data-parent="groups" style="--level: 2">
+              <span class="tree-caret"></span>
+              <span class="folder-icon"></span>
+              <span class="folder-name">Saved graph scopes</span>
+              <span class="tree-meta">custom</span>
+            </button>
+            <button class="folder-tree-row" type="button" role="treeitem" aria-expanded="true" data-folder-search="project folders amath 231 project" data-folder="Project folders" data-path="Workspace / Groups / Project folders" data-tree-id="projects" data-parent="groups" style="--level: 2">
+              <span class="tree-caret">›</span>
+              <span class="folder-icon"></span>
+              <span class="folder-name">Project folders</span>
+              <span class="tree-meta">project</span>
+            </button>
+            <button class="folder-tree-row" type="button" role="treeitem" aria-expanded="true" data-folder-search="amath 231 project power series calculus" data-folder="AMATH 231" data-path="Workspace / Groups / Project folders / AMATH 231" data-tree-id="amath" data-parent="projects" style="--level: 3">
+              <span class="tree-caret">›</span>
+              <span class="folder-icon"></span>
+              <span class="folder-name">AMATH 231</span>
+              <span class="tree-meta">project</span>
+            </button>
+            <button class="folder-tree-row" type="button" role="treeitem" data-folder-search="week 1 notes amath 231 project" data-folder="Week 1 notes" data-path="Workspace / Groups / Project folders / AMATH 231 / Week 1 notes" data-parent="amath" style="--level: 4">
+              <span class="tree-caret"></span>
+              <span class="folder-icon"></span>
+              <span class="folder-name">Week 1 notes</span>
+              <span class="tree-meta">folder</span>
+            </button>
+            <button class="folder-tree-row" type="button" role="treeitem" data-folder-search="textbook chapters amath 231 project" data-folder="Textbook chapters" data-path="Workspace / Groups / Project folders / AMATH 231 / Textbook chapters" data-parent="amath" style="--level: 4">
+              <span class="tree-caret"></span>
+              <span class="folder-icon"></span>
+              <span class="folder-name">Textbook chapters</span>
+              <span class="tree-meta">folder</span>
+            </button>
+            <button class="folder-tree-row" type="button" role="treeitem" aria-expanded="true" data-folder-search="power series note amath 231 note folder" data-folder="Power Series note" data-path="AMATH 231 / Power Series note" data-tree-id="power-note" data-parent="amath" style="--level: 4">
+              <span class="tree-caret">›</span>
+              <span class="folder-icon"></span>
+              <span class="folder-name">Power Series note</span>
+              <span class="tree-meta">note</span>
+            </button>
+            <button class="folder-tree-row selected" type="button" role="treeitem" aria-expanded="true" aria-selected="true" data-folder-search="chapter 1 folder amath 231 power series note" data-folder="Chapter 1" data-path="AMATH 231 / Power Series note / Chapter 1" data-tree-id="chapter-1" data-parent="power-note" style="--level: 5">
+              <span class="tree-caret">›</span>
+              <span class="folder-icon"></span>
+              <span class="folder-name">Chapter 1</span>
+              <span class="tree-meta">current</span>
+            </button>
+            <button class="folder-tree-row" type="button" role="treeitem" data-folder-search="definitions folder amath 231 power series note chapter 1" data-folder="Definitions" data-path="AMATH 231 / Power Series note / Chapter 1 / Definitions" data-parent="chapter-1" style="--level: 6">
+              <span class="tree-caret"></span>
+              <span class="folder-icon"></span>
+              <span class="folder-name">Definitions</span>
+              <span class="tree-meta">folder</span>
+            </button>
+            <button class="folder-tree-row" type="button" role="treeitem" data-folder-search="examples folder amath 231 power series note chapter 1" data-folder="Examples" data-path="AMATH 231 / Power Series note / Chapter 1 / Examples" data-parent="chapter-1" style="--level: 6">
+              <span class="tree-caret"></span>
+              <span class="folder-icon"></span>
+              <span class="folder-name">Examples</span>
+              <span class="tree-meta">folder</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-row" data-od-id="rail-tool-row">
+        <button class="icon-btn" id="newGroupBtn" type="button" title="New group" aria-label="New group">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+        <button class="icon-btn" id="searchBtn" type="button" title="Search" aria-label="Search">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4" stroke="currentColor" stroke-width="1.4"/><path d="M10.5 10.5L13 13" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </button>
+        <button class="icon-btn" type="button" title="Filter / View" aria-label="Filter / View">
+          <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 4h10M5 8h6M7 12h2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </button>
+        <span class="spacer" id="folderStatus">Chapter 1</span>
+      </div>
+
+      <div class="search-wrap" id="searchWrap" data-od-id="rail-search-state">
+        <input class="search-input" id="railSearch" type="search" placeholder="Search folders or groups..." aria-label="Search folders or groups" />
+      </div>
+
+      <div class="view-row" data-od-id="rail-view-mode">
+        <div class="segmented" role="tablist" aria-label="浏览视图">
+          <button class="active" type="button" data-view="folder">Folder</button>
+          <button type="button" data-view="topic">Topic</button>
+          <button type="button" data-view="role">Role</button>
+          <button type="button" data-view="all">All</button>
+        </div>
+      </div>
+
+      <div class="rail-scroll">
+        <div class="draft-box" id="draftBox" data-od-id="new-group-draft">
+          <div class="draft-line">
+            <input class="draft-input" type="text" value="" placeholder="New content group" aria-label="New content group" />
+            <button class="draft-confirm" type="button" title="保存草稿" aria-label="保存草稿">✓</button>
+          </div>
+          <div class="draft-meta">
+            <span class="role-badge">definition</span>
+            <span class="topic-chip">Power Series</span>
+          </div>
+          <div class="drop-zone">Drop selected content here</div>
+        </div>
+
+        <div class="section-label">Content groups</div>
+        <div class="group-list" data-od-id="content-group-list">
+          <div class="group-unit open" data-search="definition of power series definition power series accepted folder topic role">
+            <button class="group-row" type="button" aria-expanded="true">
+              <span class="topic-strip"></span>
+              <span class="group-name">Definition of Power Series</span>
+              <span class="role-badge">definition</span>
+              <span class="identity-chip accepted">accepted</span>
+              <span class="chevron">⌄</span>
+            </button>
+            <div class="expanded-area">
+              <div class="drop-zone">Drop selected content here</div>
+              <div class="expanded-actions">
+                <a class="open-editor" href="single-contentgroup-editor.html">Open editor</a>
+                <span class="source-indicator">Power Series note</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="group-unit" data-search="radius of convergence theorem convergence draft folder topic role">
+            <button class="group-row" type="button" aria-expanded="false">
+              <span class="topic-strip convergence"></span>
+              <span class="group-name">Radius of Convergence</span>
+              <span class="role-badge">theorem</span>
+              <span class="identity-chip draft">draft</span>
+              <span class="chevron">›</span>
+            </button>
+            <div class="expanded-area">
+              <div class="drop-zone">Drop selected content here</div>
+              <div class="expanded-actions">
+                <a class="open-editor" href="single-contentgroup-editor.html">Open editor</a>
+                <span class="source-indicator">outside-note source</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="group-unit" data-search="demand and price concept economics accepted all topic role">
+            <button class="group-row" type="button" aria-expanded="false">
+              <span class="topic-strip economics"></span>
+              <span class="group-name">Demand and Price</span>
+              <span class="role-badge">concept</span>
+              <span class="identity-chip accepted">accepted</span>
+              <span class="chevron">›</span>
+            </button>
+            <div class="expanded-area">
+              <div class="drop-zone">Drop selected content here</div>
+              <div class="expanded-actions">
+                <a class="open-editor" href="single-contentgroup-editor.html">Open editor</a>
+                <span class="source-indicator">AMATH adjacent</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="group-unit" data-search="series expansion practice taylor series draft all role">
+            <button class="group-row" type="button" aria-expanded="false">
+              <span class="topic-strip practice"></span>
+              <span class="group-name">Series Expansion Practice</span>
+              <span class="role-badge">practice</span>
+              <span class="identity-chip draft">draft</span>
+              <span class="chevron">›</span>
+            </button>
+            <div class="expanded-area">
+              <div class="drop-zone">Drop selected content here</div>
+              <div class="expanded-actions">
+                <a class="open-editor" href="single-contentgroup-editor.html">Open editor</a>
+                <span class="source-indicator">Chapter 1</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="rail-foot" data-od-id="rail-status">
+        <span>4 groups</span>
+        <span>selected content ready</span>
+      </footer>
+    </section>
+  </div>
+
+  <script>
+    const searchBtn = document.getElementById('searchBtn');
+    const searchWrap = document.getElementById('searchWrap');
+    const railSearch = document.getElementById('railSearch');
+    const newGroupBtn = document.getElementById('newGroupBtn');
+    const draftBox = document.getElementById('draftBox');
+    const rows = Array.from(document.querySelectorAll('[data-search]'));
+    const groupUnits = Array.from(document.querySelectorAll('.group-unit'));
+    const viewButtons = Array.from(document.querySelectorAll('[data-view]'));
+    const folderToggle = document.getElementById('folderToggle');
+    const folderMenu = document.getElementById('folderMenu');
+    const folderSearch = document.getElementById('folderSearch');
+    const folderRows = Array.from(document.querySelectorAll('.folder-tree-row'));
+    const folderStatus = document.getElementById('folderStatus');
+    const pathText = document.querySelector('.path-text');
+
+    searchBtn.addEventListener('click', () => {
+      const open = !searchWrap.classList.contains('open');
+      searchWrap.classList.toggle('open', open);
+      searchBtn.classList.toggle('active', open);
+      if (open) railSearch.focus();
+    });
+
+    newGroupBtn.addEventListener('click', () => {
+      const open = !draftBox.classList.contains('open');
+      draftBox.classList.toggle('open', open);
+      newGroupBtn.classList.toggle('active', open);
+      if (open) draftBox.querySelector('input').focus();
+    });
+
+    railSearch.addEventListener('input', () => {
+      const query = railSearch.value.trim().toLowerCase();
+      rows.forEach((row) => {
+        const match = !query || row.dataset.search.includes(query);
+        row.hidden = !match;
+      });
+    });
+
+    folderToggle.addEventListener('click', () => {
+      const open = !folderMenu.classList.contains('open');
+      folderMenu.classList.toggle('open', open);
+      folderToggle.setAttribute('aria-expanded', String(open));
+      if (open) {
+        folderSearch.value = '';
+        syncFolderTree();
+        folderSearch.focus();
+      }
+    });
+
+    function isAncestorExpanded(row) {
+      let parentId = row.dataset.parent;
+      while (parentId) {
+        const parent = folderRows.find((item) => item.dataset.treeId === parentId);
+        if (!parent || parent.getAttribute('aria-expanded') === 'false') return false;
+        parentId = parent.dataset.parent;
+      }
+      return true;
+    }
+
+    function syncFolderTree() {
+      const query = folderSearch.value.trim().toLowerCase();
+      folderRows.forEach((row) => {
+        const matchesSearch = !query || row.dataset.folderSearch.includes(query);
+        row.hidden = query ? !matchesSearch : !isAncestorExpanded(row);
+      });
+    }
+
+    folderSearch.addEventListener('input', () => {
+      syncFolderTree();
+    });
+
+    folderRows.forEach((row) => {
+      row.addEventListener('click', () => {
+        const isBranch = row.hasAttribute('aria-expanded');
+        if (isBranch && !folderSearch.value.trim()) {
+          const nextOpen = row.getAttribute('aria-expanded') !== 'true';
+          row.setAttribute('aria-expanded', String(nextOpen));
+          syncFolderTree();
+        }
+        folderRows.forEach((item) => {
+          item.classList.remove('selected');
+          item.setAttribute('aria-selected', 'false');
+        });
+        row.classList.add('selected');
+        row.setAttribute('aria-selected', 'true');
+        folderStatus.textContent = row.dataset.folder;
+        pathText.textContent = row.dataset.path;
+        if (!isBranch || folderSearch.value.trim()) {
+          folderMenu.classList.remove('open');
+          folderToggle.setAttribute('aria-expanded', 'false');
+        }
+      });
+    });
+
+    document.addEventListener('click', (event) => {
+      if (!folderMenu.contains(event.target) && !folderToggle.contains(event.target)) {
+        folderMenu.classList.remove('open');
+        folderToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    groupUnits.forEach((unit) => {
+      const button = unit.querySelector('.group-row');
+      const chevron = unit.querySelector('.chevron');
+      button.addEventListener('click', () => {
+        const open = !unit.classList.contains('open');
+        groupUnits.forEach((item) => {
+          item.classList.remove('open');
+          item.querySelector('.group-row').setAttribute('aria-expanded', 'false');
+          item.querySelector('.chevron').textContent = '›';
+        });
+        unit.classList.toggle('open', open);
+        button.setAttribute('aria-expanded', String(open));
+        chevron.textContent = open ? '⌄' : '›';
+      });
+    });
+
+    viewButtons.forEach((button) => {
+      button.addEventListener('click', () => {
+        viewButtons.forEach((item) => item.classList.remove('active'));
+        button.classList.add('active');
+        const view = button.dataset.view;
+        groupUnits.forEach((unit) => {
+          const text = unit.dataset.search;
+          const show =
+            view === 'all' ||
+            view === 'folder' ||
+            (view === 'topic' && (text.includes('power series') || text.includes('convergence') || text.includes('economics'))) ||
+            (view === 'role' && (text.includes('definition') || text.includes('theorem') || text.includes('concept') || text.includes('practice')));
+          unit.hidden = !show;
+        });
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,5 +1,468 @@
 # V2.BN.8 Review
 
+## 2026-06-23 V2.BN.8.7.9 ContentGroup System Closure Gate Review Plan
+
+```text
+status: planned
+scope: final ContentGroup System maturity closure before CanvasObject work
+```
+
+V2.BN.8.7.9 is added as the closure gate for the ContentGroup System lane.
+
+The review question is:
+
+```text
+Is ContentGroup System 1.0 mature enough to stop expanding in 8.7 and hand the next major product pillar to Canvas?
+```
+
+The expected review output is not a claim that every ContentGroup-adjacent idea is finished. The expected output is a clear split:
+
+- Stable enough to close:
+  - ContentGroup root entity.
+  - GroupFolder and folder placement entity.
+  - ContentGroupMember entity and group-local content truth.
+  - ContentGroupPetal / Fragment entity and internal structure boundary.
+  - Rail = collect, Gallery = organize, Single Editor = refine.
+- Accepted carry-forward:
+  - CanvasObject projection / ContentGroup usage object.
+  - Reference / Duplicate / Fork / Materialize UI.
+  - SourceArtifact / SourceAnchor full system.
+  - Relation runtime / GraphRAG.
+  - AI-created Petals and advanced AI organization flows.
+- Must not be smuggled into 8.7.9:
+  - destructive source mutation;
+  - true reorder;
+  - offset rebase;
+  - full Single Editor freeform workbench;
+  - broad Canvas implementation.
+
+The guiding judgment is:
+
+```text
+Reuse vocabulary is ready, but reuse experience depends on CanvasObject.
+```
+
+## 2026-06-22 Current Review State
+
+Current reviewed direction:
+
+- ContentGroup / GroupFolder / Petal are the active foundation for serious content organization.
+- Label remains useful as a visual marker and reusable range package, but is not the final content package object.
+- V2.BN.8.6.29 and V2.BN.8.6.30 passed first browser smoke for copy-first drag/drop paths after the known label-default bug was fixed.
+- `definition` must not be the default Label name; unnamed labels should stay neutral or be numbered by context later.
+- The biggest deferred risk is destructive move / reorder because it requires safe offset rebase across labels, ContentGroup members, Petal fragments, and future relation endpoints.
+
+Current next experience target:
+
+- V2.BN.8.6.31 should localize the approved OpenDesign shell more faithfully and make Groups Rail / Group Gallery / Single Group Editor visually understandable before further relation work.
+
+## 2026-06-22 V2.BN.8.7.1 ContentGroup Entity Cutover Foundation
+
+```text
+status: engineering pass complete; browser/manual product gate not run in this pass
+scope: ContentGroup root entity, API, frontend repository cutover, legacy metadata import fallback
+```
+
+Completed:
+
+- Added independent backend `content_groups` storage.
+- Added `/api/content-groups` list/get/upsert/replace-by-note/import-from-note-metadata routes.
+- Preserved current runtime id compatibility; frontend `content-group-*` ids are valid entity ids.
+- Added a frontend ContentGroup repository boundary.
+- Cut Note Canvas adapter, Gallery, and Single Editor save paths away from writing ContentGroup arrays into note metadata.
+- Kept note metadata groups as legacy import/fallback only.
+- Kept GroupFolder metadata temporary; folder saves now strip the old ContentGroup metadata key.
+
+Not completed in 8.7.1:
+
+- `ContentGroupMember` is not an independent table yet.
+- `ContentGroupPetal` / fragments are not independent tables yet.
+- `GroupFolder` is not an independent table yet.
+- No SourceArtifact / SourceAnchor migration.
+- No CanvasObject projection/reuse work.
+- No destructive source mutation, true reorder, relation runtime, or GraphRAG.
+
+Verification:
+
+- `npm run smoke:canvas-engine-model-contract`
+- `npm run check:canvas-runtime-boundary`
+- `npm run build:client`
+- `npm run test:v2` from `server`
+- `npm run build` from `server`
+
+## 2026-06-22 V2.BN.8.7 Sub-plan A First Engineering Pass
+
+```text
+status: partial implementation pass; browser/manual visual gate still pending
+scope: three-surface role contract and Rail intake cleanup
+```
+
+Completed:
+
+- Added a shared ContentGroup surface role service so Rail / Gallery / Single Editor read from one stable role vocabulary.
+- Added model-contract coverage for `Rail = Collect`, `Gallery = Organize`, and `Single Editor = Refine`.
+- Added machine-readable surface markers to all three UI surfaces through `data-content-group-surface` and `data-content-group-role`.
+- Reduced one Rail confusion point: the new-group intake/drop area no longer stays large when there is no active candidate selection.
+
+Remaining risk:
+
+- This is not yet full OpenDesign visual parity.
+- Gallery still has guide-aside remnants.
+- Single Editor still uses form-like identity fields.
+- Browser screenshots and Henry manual review are still required before closing the visual parity track.
+
+## 2026-06-22 V2.BN.8.7 Sub-plan B First Engineering Pass
+
+```text
+status: implementation pass complete; browser/manual source-state UI still pending
+scope: ContentGroupMember / Source boundary
+```
+
+Completed:
+
+- Added first-version `ContentGroupMemberSourceRefV1` and `ContentGroupMemberSourceSyncStatus`.
+- Extended `ContentGroupMemberV1` with `current_content`, `source_ref`, and `source_sync_status`.
+- Added source-ref normalization and source snapshot hashing inside `contentGroupService`.
+- Added explicit compare / refresh helpers:
+  - `compareContentGroupMemberWithSource` updates source sync state only.
+  - `refreshContentGroupMemberFromSource` explicitly updates member content from source.
+- Updated Gallery / Single Editor / Rail display helpers to prefer `current_content` over `preview_text`.
+- Added model-contract coverage proving `preview_text` does not override member truth.
+
+Deferred:
+
+- Apply-member-back-to-source remains a documented boundary, not an automatic operation.
+- Full SourceAnchor / SourceArtifact table migration remains deferred.
+- UI status treatment for changed / missing / detached source needs the later stability-state pass.
+
+## 2026-06-22 V2.BN.8.7 Sub-plan C First Engineering Pass
+
+```text
+status: service-boundary pass complete; full Gallery manager polish still pending
+scope: GroupFolder / Gallery resource-manager maturity
+```
+
+Completed:
+
+- Added `activeGroupFolders` so normal Gallery/Rail browsing has one service-owned definition of active folders.
+- Updated `groupFolderChildren` to exclude archived folders by default while allowing management checks to include them.
+- Kept folder delete guard aware of archived children and active ContentGroups.
+- Added model-contract coverage proving moving a ContentGroup between folders preserves member content and source snapshot.
+- Updated Gallery data helper to use the service-owned active folder filter.
+
+Deferred:
+
+- Full archived-folder recovery UI.
+- Batch folder actions.
+- Full folder manager inside Rail.
+- Multi-placement semantics.
+
+## 2026-06-22 V2.BN.8.7 Sub-plan D First Engineering Pass
+
+```text
+status: pure service boundary complete; broad UI exposure deferred
+scope: Reference / Duplicate / Fork / Materialize / Open original
+```
+
+Completed:
+
+- Added `contentGroupReuseService.ts`.
+- Defined stable `ContentGroupReuseMode` vocabulary:
+  `reference`, `duplicate`, `fork`, `materialize`, `open_original`.
+- Added reference and open-original descriptors.
+- Added duplicate and fork helpers that create new ContentGroup identities.
+- Added fork lineage metadata.
+- Added materialize plan generation with `moves_source = false` and `one member = one block`.
+- Added model-contract coverage for all five modes.
+
+Deferred:
+
+- No direct TextFlow mutation from materialize.
+- No CanvasObject projection / usage object.
+- No relation runtime.
+- No broad UI menu until the operations have final product placement.
+
+## V2.BN.8.6.10 ContentGroup Identity Review
+
+```text
+status: passed non-browser verification
+browser harness: pending
+manual validation: pending
+```
+
+This patch keeps ContentGroup as the user-facing object and replaces the old `interpretation` wording with `identity`. Accepted identity is a ContentGroup state; no separate user-managed accepted-content table or panel is introduced.
+
+Validated:
+
+- `npm run smoke:canvas-engine-model-contract`
+- `npm run check:canvas-runtime-boundary`
+- `npm run smoke:canvas-engine-performance`
+- `npm run build:client`
+- `npm run build`
+- `npm run check:changed-file-secrets`
+- `git diff --check`
+- `npm run verify:v2-bn8-runtime`
+- `npm run test:v2` from `server`
+
+Manual checks:
+
+- create a ContentGroup;
+- set Role / Topic / Summary;
+- accept identity and reload;
+- add a new member or Petal and confirm accepted identity drops back to draft;
+- rename the ContentGroup title and confirm accepted identity remains accepted.
+
+## V2.BN.8.6.9 ContentGroup Hardening Review
+
+```text
+status: passed non-browser verification
+browser harness: not used yet
+manual validation: pending
+```
+
+This patch keeps ContentGroup as a content package, not a second accepted-content object. It adds integrity states and source-backed preview refresh so `preview_text` stays a cache rather than becoming detached truth.
+
+Validated:
+
+- `npm run smoke:canvas-engine-model-contract`
+- `npm run build:client`
+
+Remaining manual checks:
+
+- create a ContentGroup from selection;
+- add selected content to a group and a Petal;
+- remove a group member and Petal member;
+- refresh a group;
+- confirm stale/source-missing states are readable but quiet.
+
+## V2.BN.8.6.6 TextUnitGroup And AnnotationSet Editor Foundation
+
+```text
+scope: TextUnitGroup row grouping / AnnotationSet organizer / set projection
+status: implementation complete; ready for Henry manual test
+date: 2026-06-17
+```
+
+### What Changed
+
+- TextUnitGroup now has first-version editor operations: create from selected rows, rename, resolve grouped text, and ungroup / soft-delete without deleting text.
+- TextUnitGroup stays on the writing layer. New writes keep `knowledge_role: null`.
+- The writing surface now shows a quiet row-group rail for grouped TextUnits.
+- AnnotationSet now has first-version editor operations: create, rename, update description, update kind, update color, add/remove/reorder members, replace members, and soft delete.
+- Annotation Organizer provides the first management surface for label sets, separate from child-label editing inside Annotation Stack.
+- Reading projection now prints AnnotationSet label, kind, ordered member labels, range previews, and child summaries.
+
+### Verification
+
+- `npm run smoke:canvas-engine-model-contract` passed.
+- `npm run build:client` passed.
+- Client build still emits existing Vite warnings about dynamic import chunking and bundle size; no TypeScript or build error remains.
+
+### Handoff
+
+- Henry manual test should verify row-group affordance, persistence after refresh, organizer clarity, member reorder, and set kind persistence.
+- After the 2026-06-22 roadmap correction, V2.BN.8.7 should start the ContentGroup System maturity pass rather than CanvasObject / media / drawing seed.
+- The later CanvasObject seed should not reopen AnnotationSet fundamentals unless CanvasObject annotation exposes a direct blocker.
+
+## V2.BN.8.6.2 Annotation Hierarchy / SelectionDraft Closure
+
+```text
+scope: annotation hierarchy truth / child-label containment / range-source reserve / TextUnit immediate editing recovery
+status: closed; Henry manual pass recorded
+date: 2026-06-16
+```
+
+### What Closed
+
+- `AnnotationTruth.parent_annotation_id` is now the hierarchy truth for child labels.
+- Annotation Stack now treats root annotations as top-level cards and keeps child labels inside their parent context.
+- The range-source editing contract exists as a foundation, while direct range-preview text editing remains deferred.
+- The TextUnit immediate-editing regression found after the hierarchy patch has been fixed: newly created TextUnits are editable immediately, ordinary textarea clicks place the caret natively, and delayed block autofocus no longer overrides the caret after switching between blocks.
+
+### Verification
+
+- Non-browser verification passed for the final closing state:
+  - `npm run smoke:canvas-engine-model-contract`
+  - `npm run build`
+  - `git diff --check`
+  - `npm run check:changed-file-secrets`
+- Henry manual pass is recorded. V2.BN.8.6.2 is closed.
+
+### Handoff
+
+- V2.BN.8.7 now starts from `V2.BN.8.7-ContentGroup-System-Maturity-Plan.md`.
+- The historical CanvasObject seed plan is deferred to V2.BN.8.8+ or the next Canvas track.
+- The next versions should not reopen annotation hierarchy or SelectionDraft unless ContentGroup maturity or later CanvasObject annotation exposes a direct blocker.
+- Deferred polish remains outside this closure: Annotation Stack visual redesign, global label visibility controls, editable range-preview text, and richer annotation display filtering.
+
+## V2.BN.8.6.1 Selection Draft Engine
+
+```text
+scope: SelectionDraft truth / temporary selection highlight / additive selection / escapable toolbar / child label entry
+status: closed through V2.BN.8.6.2 closure; retained here as historical intent
+date: 2026-06-16
+```
+
+### Review Intent
+
+- Confirm browser-native selection is no longer treated as annotation truth.
+- Confirm `SelectionDraft` becomes the single temporary selection object consumed by annotation creation, same-range labels, and child labels.
+- Confirm child label entry moves from generic Inspector input into parent annotation internal reselection.
+- Confirm later CanvasObject / media annotation does not start until SelectionDraft is stable enough for Henry manual testing and V2.BN.8.7 ContentGroup System maturity has provided stable object boundaries.
+
+## V2.BN.8.6 Annotation Editor And ReadingInterpretation Seed
+
+```text
+scope: annotation stack / multi-range / block-level annotation / child labels / ReadingInterpretation seed
+status: engineering implementation complete; non-browser verification passed; Henry manual testing found annotation stack blocker
+date: 2026-06-16
+```
+
+### What Changed
+
+- Annotation rendering now supports exact partial spans, overlap-aware segments, and stacked labels.
+- Annotation editor helpers now support same-range labels, multi-range annotation creation, child annotation links, and AnnotationSet seed operations.
+- Annotation Inspector now treats selected annotations as a stack instead of a single isolated record.
+- Text selection, row/context annotation entry, and block-level annotation entry route to AnnotationTruth rather than creating new block families.
+- ReadingInterpretation / AnnotationProposal helpers exist as proposal/debug seeds, not as a live AI agent.
+- Note metadata persistence now has separate seeds for AnnotationTruth, AnnotationSet, ReadingInterpretation, and AnnotationProposal records.
+
+### Current Gate
+
+- Non-browser verification passed before handoff:
+  - `npm run smoke:canvas-engine-model-contract`
+  - `npm run build:client`
+  - `git diff --check`
+  - `npm run check:changed-file-secrets`
+- Browser Harness is not required for this pass unless Henry asks for it.
+- Henry manual visual pass has started and found a blocking Annotation Stack editing failure. V2.BN.8.6 is not accepted until this is patched and retested.
+
+### Henry Manual Test Notes
+
+- Passed so far: overlapping annotation creation/render before inspector editing, and whole-block annotation creation.
+- Blocked: rename, same-range label, child label, and likely all Annotation Stack text-edit operations can make the page visually explode / black-screen until refresh.
+- Not fully testable yet: multi-range annotation, because the app does not yet provide Word-style discontiguous selection such as Ctrl + drag across separate text ranges.
+- Child annotation remains blocked by the same Annotation Stack editing failure, so it should not be judged independently yet.
+
+## V2.BN.8.3 TextFlow Seed And Slash Command Foundation
+
+```text
+scope: TextFlow type seed / fresh TextBlock initialization / projection helper / slash command metadata
+status: closed; implementation smoke passed; Browser Use experience smoke recorded; Henry manual pass recorded
+date: 2026-06-15
+```
+
+### What Changed
+
+- TextFlow runtime types now live in `client/src/pages/Notes/canvasEngine/runtimeDataTypes.ts`.
+- The first projection seed lives in `client/src/pages/Notes/canvasEngine/textFlowService.ts`.
+- Non-structured text-like block creation and editing now attach `text_flow: TextBlockContentV1` through `client/src/pages/Notes/canvasEngine/blockContentService.ts`.
+- Text-like block read paths now prefer valid TextFlow projection before `body` / `plain_text` cache. In this seed, `body` remains a rendering/cache fallback rather than the long-term content truth.
+- Formula blocks remain field-payload structured blocks. Existing Definition runtime compatibility remains, but Definition is no longer an active default independent block creation path.
+- Slash command metadata lives in `client/src/pages/Notes/noteSlashCommands.ts` and now distinguishes `create_block`, `convert_block`, `insert_structure`, and `inline_action`.
+- Disabled future commands are explicit seeds, not hidden implementation claims: bullet list, numbered list, todo list, toggle list, inline formula, and divider are reserved for later TextUnit / inline structure passes.
+- Advanced Insert remains a floating utility panel, but the viewport-level `Insert` button is now interactive again after restoring pointer-events on the free floating panel children.
+- The Advanced Insert picker now presents the `code.snippet` template as `Code`, matching the block badge and user-facing label.
+
+### Implementation Location
+
+```text
+TextFlow type boundary:
+  client/src/pages/Notes/canvasEngine/runtimeDataTypes.ts
+
+TextFlow projection seed:
+  client/src/pages/Notes/canvasEngine/textFlowService.ts
+
+Fresh TextBlock initialization / edit rebuild:
+  client/src/pages/Notes/canvasEngine/blockContentService.ts
+
+Slash command registry:
+  client/src/pages/Notes/noteSlashCommands.ts
+
+Slash command disabled-reason execution path:
+  client/src/pages/Notes/canvasEngine/hooks/useSlashCommandController.ts
+
+Model contract smoke:
+  client/scripts/canvasEngineModelContractCheck.ts
+```
+
+### Review Notes
+
+- No legacy adapter is implemented. This is intentional: current local accounts are prototype/test data, so V2.BN.8.3 should not preserve old test block payloads at the cost of a permanent adapter layer.
+- The projection seed is not the final AI projection engine. It only proves that the system can read below NoteBlock granularity and expose TextUnit / TextUnitGroup / InlineStructuredObject as future addressable objects.
+- The current seed still stores `body` beside TextFlow for UI safety and fallback, but valid TextFlow now wins when rebuilding text. Mature TextFlow should make this boundary stricter over time.
+- TextUnitGroup addressable projection now resolves child TextUnit text recursively instead of exposing only child ids. This keeps the seed useful for future AI-readable projection, search, source, and relation work.
+- V2.BN.8.3 is still a seed. It does not implement TextUnit editor behavior, inline formula conversion, role slot mapping, relation endpoint runtime, structured source snapshot, or AI automatic recognition.
+
+### Verification
+
+- `npm run smoke:canvas-engine-model-contract` passed and now includes `TextFlow seed`, TextFlow-before-body read priority, plus `slash command foundation`.
+- `npm run build:client` passed.
+- Browser Use reached the current note route in the in-app browser with only React Router future-flag warnings in console.
+- Browser Use verified the `/for` slash menu opens near the active text block, shows `Formula` as the active candidate, shows disabled `Inline Formula` with an explanation, and moves active state with ArrowDown / ArrowUp.
+- Browser Use did not press Enter to commit a new test block in the active smoke note; the Enter commit path is verified in `useSlashCommandController.ts`, where Enter selects the active slash command.
+- Browser Use exposed and rechecked the floating Advanced Insert panel bug: `Insert` now opens the panel, and the picker displays `Code` instead of `Code Snippet`.
+- Henry manual writing-feel pass is recorded; V2.BN.8.3 is closed with follow-up TextUnit/editor work routed to V2.BN.8.4+.
+
+## V2.BN.8.2 Canvas Shell And Viewport Transform Patch
+
+```text
+scope: Canvas shell / viewport transform / slash keyboard navigation / mature notebook baseline audit
+status: implementation smoke passed; Browser Use experience smoke recorded; Henry manual pass pending
+date: 2026-06-13
+```
+
+### What Changed
+
+- `CanvasViewport` now carries explicit viewport state in the runtime model, including x/y, width/height, zoom and zoom bounds.
+- `viewportService` now owns the first-version viewport policy:
+  - Canvas mode starts with top/left workspace headroom instead of feeling locked to the upper-left corner.
+  - Pan, scroll, zoom and viewport-point-to-world-point conversion are centralized.
+  - Viewport state clamps against world bounds with extra workspace headroom.
+- `useViewportTransformController` now owns canvas viewport state and exposes pan / scroll / zoom / viewport-size callbacks.
+- Canvas mode now renders the world layer through CSS transform and locks the writing surface to a single viewport instead of relying on nested scrollbars.
+- Double-click block creation and block move/resize now compensate for canvas zoom.
+- Canvas zoom now has a keyboard seed: Ctrl/Command + `+` zooms in, Ctrl/Command + `-` zooms out, and Ctrl/Command + `0` resets the viewport.
+- Slash command menu now supports ArrowUp / ArrowDown and Enter selection, with an active item visual state.
+- Overlay anchors now carry explicit source labels (`caret`, `block`, `fixed_viewport`, `formula_help`, `source_picker`, `relation_endpoint`) so slash menu, block toolbar, formula help and future relation/source overlays can share one normalized placement path.
+- Added `V2.BN.8.2-Mature-Notebook-Baseline-Audit.md` to record the mature notebook baseline and explicitly keep Canvas as an assistant to notebook quality in this phase.
+
+### Production Issues Found And Fixed
+
+- Adding overlay anchor model coverage first exposed a Node smoke-test shim issue: the model contract script needed a minimal `window.innerWidth / innerHeight` shim without pretending to be a full browser `Window`. The shim was corrected and the model contract smoke passed.
+- Browser Use exposed an empty-draft cleanup issue in Canvas mode: double-clicking blank workspace created an empty draft, but clicking blank canvas did not reliably dismiss it because the textarea blur path was not triggered by non-focusable canvas space. `NoteWritingSurfaceLayer` now discards an empty draft on blank block-list mouse down and clears the slash target at the same time.
+
+### Verification
+
+- 2026-06-14 continuation verification: `npm run verify:v2-bn8-runtime` passed on the current worktree. This covered runtime boundary, canvas model contract, client build, server build, performance seed, `git diff --check`, and changed-file secret scan.
+- `npm run smoke:canvas-engine-model-contract` passed, including the new `overlay anchor model` group.
+- `npm run build:client` passed.
+- `npm run verify:v2-bn8-runtime` passed.
+- Browser Use reached `http://localhost:5173/#/notes/7d4c127b-a338-460a-8fca-6b6519ff8641`.
+- Browser Use confirmed Canvas mode starts with viewport headroom: `x=-180`, `y=-64`, `zoom=1.000`.
+- Browser Use confirmed Canvas mode keeps document height equal to viewport height during pan / zoom smoke, avoiding a page-level scroll fight.
+- Browser Use confirmed wheel pan changes canvas viewport coordinates without changing document scroll size.
+- Browser Use confirmed keyboard zoom:
+  - Ctrl + `=` changed zoom to `1.120`;
+  - Ctrl + `-` changed zoom to `0.986`;
+  - Ctrl + `0` reset viewport to `x=-180`, `y=-64`, `zoom=1.000`.
+- Browser Use confirmed slash menu appears near the active draft for `/for`, marks Formula as the active candidate, supports ArrowDown / ArrowUp, and commits Formula with Enter.
+- Browser Use confirmed the committed Formula remains a `blockScratch` workspace block after reload: Page mode showed 4 formal blocks, Canvas mode showed 6 blocks with 2 workspace blocks.
+- Browser Use confirmed empty draft cleanup after blank-canvas click: draft count returned to `0` and focus returned to `BODY`.
+- Browser Use confirmed double-click block creation after pan lands near the clicked world position.
+- Browser Use confirmed block toolbar follows the selected workspace block after pan and keyboard zoom.
+- Browser Use confirmed Preview panel overlays selected block content cleanly through a hit-test over the panel area.
+
+### Still Needs Henry Manual Pass
+
+- Known current bug found by Henry manual observation: selected block control bar can detach from the selected block after canvas scroll / pan. Browser Use covered a narrower pan / keyboard zoom path, but this manual scroll path still needs a patch. The root cause is that the control bar still uses a viewport portal anchor derived from a DOM rect instead of continuously following the selected block's world rect through the viewport transform.
+- Confirm Page mode still reads and scrolls naturally.
+- Confirm Canvas mode feels like one effective viewport and no nested-scroll fight.
+- Confirm pan / zoom feels natural with real mouse / trackpad input.
+- Confirm slash menu ArrowUp / ArrowDown / Enter feels correct in normal writing, not only in Browser Use state checks.
+- Confirm workspace block placement still restores correctly after reload in Henry's own smoke note.
+- Confirm Ctrl/Command + wheel zoom with a real mouse / trackpad; Browser Use covered keyboard zoom but not modifier-wheel feel.
+
 ## V2.BN.8.1 Final Browser Harness Smoke
 
 ```text
@@ -2186,3 +2649,84 @@ useBlockMeasurement -> useMeasuredBlockReflowController -> useLayoutDraftControl
 修复后重新执行 Browser Harness smoke，错误监听为空，Page/Canvas 往返通过。
 
 该 smoke 证明浏览器内基础 runtime 路径可用；最终阶段通过仍需要 Henry manual pass。
+# V2.BN.8.6.3 / V2.BN.8.6.4 Closure Review
+
+- V2.BN.8.6.3 closes the source-backed range preview gap: Annotation Stack range preview edits write back to TextFlow source, and direct TextUnit edits refresh annotation range cache.
+- V2.BN.8.6.4 closes the first annotation display polish pass: Preview owns label overlay visibility, text-backed labels cluster near TextUnits, block-level badges are fallback only, and Annotation Stack is flatter with collapsed metadata.
+- Verification passed: `npm run smoke:canvas-engine-model-contract` and `npm run build`.
+- Remaining manual risk is visual: Henry should confirm local badge position, overlay toggle feel, Annotation Stack scan comfort, and whether the first product-polish pass is acceptable before moving to the next subversion.
+
+## V2.BN.8.7 ContentGroup System Maturity - E Petal Refinement First Pass
+
+```text
+status: technical pass completed
+scope: Petal local order / Single Editor drag reorder / source boundary preservation
+browser harness: deferred to G gate
+```
+
+本轮把 Petal 的成熟边界收紧到一个更可执行的状态：
+
+- `moveContentGroupPetal` 成为纯 ContentGroup refinement service。
+- Petal 顺序现在可以在 Single ContentGroup Editor 内通过拖动手柄调整。
+- 模型契约明确验证：Petal reorder 只改变 local structure order，不改写 `ContentGroupMember.current_content`，不改写 `source_ref.snapshot_text`，不丢失 fragment，也不生成 source-text Label / projection。
+- Petal 仍然是 ContentGroup 内部结构；它不属于正文 Label，不进入 CanvasObject，也不建立 relation runtime。
+
+已通过：
+
+- `npm run smoke:canvas-engine-model-contract`
+- `npm run build:client`
+
+剩余风险：
+
+- Petal 拖动体验还未进入浏览器手动验收。
+- Petal 空状态、drop target 反馈、键盘排序入口仍可继续打磨。
+
+## V2.BN.8.7 ContentGroup System Maturity - F Stability State First Pass
+
+```text
+status: technical pass completed
+scope: derived stability summary / three-surface status hints / safe Accept disabled reason
+browser harness: deferred to G gate
+```
+
+本轮补上 `ContentGroupStabilitySummary`：
+
+- 覆盖 deleted group、empty group、empty Petal、changed source、missing source、deleted source note context、archived folder context、accepted-with-stale、materialize target unavailable。
+- `ContentGroupIndexEntry` 现在携带 stability summary，`has_integrity_issue` 不再只是看旧 metadata。
+- Rail / Gallery / Single Editor 都显示一个轻量状态摘要，不把三个界面改成完整 inspector。
+- Single Editor 的 `Accept` 在空 group、deleted group、source/member 有风险时会禁用，并给出 title reason。
+
+已通过：
+
+- `npm run smoke:canvas-engine-model-contract`
+- `npm run build:client`
+
+剩余风险：
+
+- source note availability 和 materialize target availability 目前只有 helper/context 边界，尚未接入真实数据库级解析。
+- 浏览器里状态提示的可读性仍需 G 阶段截图和手动体验确认。
+
+## V2.BN.8.7 ContentGroup System Maturity - G Browser And Manual Gate First Pass
+
+```text
+status: first browser gate passed with limited smoke data
+scope: Rail collect / Gallery organize / Single Editor refine / empty stability / empty Petal
+browser: in-app browser
+```
+
+本轮用本地 dev app 跑了一条真实路径：注册临时本地账号、创建 `BN87 Smoke Project`、创建空笔记、从 Note Rail 创建 `BN87 Empty Stability Group`、进入 Group Gallery、打开 Single ContentGroup Editor、创建一个 Petal 并保存 draft。
+
+确认结果：
+
+- Rail 显示 `Groups · Collect`，无 active selection 时是安静空状态，空 group 显示 `Empty group / 0 members`。
+- Gallery 显示 `Content groups · Organize`，当前 folder 的 group card 能显示 members、petals 和 `Empty group` 状态。
+- Single Editor 显示 `Single ContentGroup Editor · Refine`，Identity 为 `none / Empty group`，`Accept` 对空 group 禁用。
+- Petal 在 Single Editor 的 `Local roles` 区域内创建，仍是 ContentGroup 内部结构，没有投射到 source text。
+- 保存 draft 后 Identity 更新为 `draft / Empty group`，控制台没有新增 app error，只看到既有 React Router v7 future-flag warnings。
+
+本轮没有强行覆盖：
+
+- Petal 多项拖拽 reorder 的真实浏览器手感，因为 smoke group 只有一个 Petal。
+- GroupFolder move/delete 的复杂资源管理场景，因为需要更丰富的 folder seed。
+- stale/missing source、materialize target unavailable 的 UI 全量状态，因为当前没有真实 source resolver / materialize UI。
+- mobile viewport。

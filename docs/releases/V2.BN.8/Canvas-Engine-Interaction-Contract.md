@@ -61,6 +61,25 @@ connectingRelationFuture
 
 同一时刻只能有一个主交互状态。`editingText` 时不能触发 canvas pan；`draggingBlock` 时不能触发 text selection；`previewing` 面板应高于 selected toolbar。
 
+## V2.BN.8.6.1 SelectionDraft Interaction Contract
+
+V2.BN.8.6.1 起，选区交互必须由 Coincides 自己接管。浏览器原生 selection 只能作为捕获输入，不能作为用户已经选中了什么的最终事实。
+
+第一版成熟规则：
+
+- 普通拖选文本：替换当前 `SelectionDraft`；
+- Ctrl / Command + 拖选：向当前 `SelectionDraft` 追加一个 range；
+- 用户先普通拖选 A，再按 Ctrl / Command 拖选 B：A 必须升级为 draft 的第一段，B 追加为第二段；
+- draft range 必须有 Coincides 自己渲染的临时高亮，不能只依赖浏览器蓝色 selection；
+- toolbar 出现时必须轻量、临时、可逃离；
+- 点击 toolbar close、按 Esc、点击页面/画布空白处，必须清掉 draft；
+- 点击 toolbar 本身不能误触发 block drag、block selection、canvas pan 或 TextUnit gutter 行为；
+- annotation / same-range label / child label 都从 `SelectionDraft` 提交，不直接读 browser selection；
+- child label 的交互入口是：选中已有 parent annotation，然后在 parent annotation 内部再次选择子范围，toolbar 才显示 child label action；
+- 如果 selection 不在 parent annotation 内，toolbar 不显示 child label action。
+
+V2.BN.8.6.1 不要求完整跨 block selection UI，但数据和交互代码不能把未来跨 block 选区堵死。
+
 ## 第一版交互
 
 ### 创建
@@ -103,6 +122,7 @@ connectingRelationFuture
 - block control bar 属于 viewport overlay，第一版通过 `FloatingOverlayLayer` free placement 和 selected block viewport anchor 靠近对象但不参与正文排版；
 - slash menu、block control bar、Formula help tooltip 第一版共用 shared viewport placement helper；该 helper 只负责 viewport padding、基础 clamp 和简单翻转，不替代未来 world/screen anchor service；
 - overlay anchor 必须逐步收敛到 normalized anchor record：DOM rect 可以作为当前 fallback，但 PageFrame / block / canvas object / relation endpoint 应能通过 world rect + viewport 转成 viewport rect 后再进入 floating placement；
+- normalized anchor record 必须记录 anchor source，例如 `caret`、`block`、`fixed_viewport`、`formula_help`、`source_picker`、`relation_endpoint`，避免未来 Source picker / Relation endpoint 接入时重新发明一套定位语义；
 - preview panel 覆盖时不和 selected toolbar 混乱；
 - debug overlay 可显隐 block type / AI / export status。
 - control bar 不参与 block measurement；
@@ -139,3 +159,16 @@ connectingRelationFuture
 - 交互改变依赖 architecture 时，同步 `Canvas-Engine-Architecture-Spec.md`。
 - 交互改变 state/data 时，同步 `Canvas-Engine-State-And-Data-Contract.md`。
 - 用户体验达不到旧 runtime 时，记录到 `Review.md` 和 `Canvas-Engine-Fallback-Strategy.md`。
+# V2.BN.8.6.4 Annotation Display Interaction Contract
+
+V2.BN.8.6.4 adds a display boundary for annotation labels:
+
+- Preview owns label overlay visibility. This is display state, not AnnotationTruth state.
+- Turning label overlay off hides highlights, text-unit label badges, block fallback badges, and annotation overlay artifacts.
+- Turning label overlay off must not delete, hide, rename, or mutate AnnotationTruth.
+- Annotation Stack owns label inspection and management.
+- Selection toolbar owns temporary selection / annotation draft actions.
+- Text-backed label badges should anchor near the relevant TextUnit / local text context.
+- Block-level annotation badges are fallback only for `target_kind === "block"`.
+- Multi-label local clusters should open Annotation Stack with all labels in that cluster.
+- Metadata in Annotation Stack should stay collapsed by default so range previews and child labels remain the main working surface.

@@ -1,5 +1,485 @@
 # CHANGELOG - V2.BN.8
 
+# Verified - 2026-06-23 V2.BN.8.7.9.0 Main Group Verification
+
+- Added `V2.BN.8.7.9.0-Main-Group-Verification-Report.md`.
+- Verified backend ContentGroup entity cutover with `server npm run test:v2`, `server npm run build`, and `git diff --check -- server shared`; 129 server tests passed.
+- Verified frontend ContentGroup surfaces with Gallery / Rail / Single Editor shell contract checks, model-contract smoke, client build, and client diff check.
+- Verified broader editor foundation through Canvas runtime boundary check, model-contract smoke, client build, and client diff check.
+- Verified docs/contracts/design evidence with `git diff --check -- PRODUCT.md docs` and `npm run check:changed-file-secrets`; secret scan passed across 263 changed files.
+- Deleted ignored build outputs `client/dist` and `server/dist` again after verification regenerated them.
+- No staging, commit, reset, broad cleanup, source migration, or line-ending normalization was performed.
+
+# Added - 2026-06-23 V2.BN.8.7.9.0 Commit Boundary Plan
+
+- Added `V2.BN.8.7.9.0-Commit-Boundary-Plan.md`.
+- Split the dirty workspace into five recommended commit boundaries: backend ContentGroup entity cutover, frontend ContentGroup surfaces, editor foundation / TextFlow / Annotation / Canvas runtime work, server material/template/domain foundation, and docs/contracts/release/design evidence.
+- Marked `.codex-tmp/` and `tmp/` as local ignored evidence / backup folders that should stay out of commits.
+- Confirmed no staging or commit was performed during boundary planning.
+
+# Changed - 2026-06-23 V2.BN.8.7.9.0 Workspace Commitability Cleanup
+
+- Added `V2.BN.8.7.9.0-Workspace-Commitability-Cleanup-Patch-Note.md`.
+- Added `V2.BN.8.7.9.0-Workspace-Commitability-Cleanup-Report.md`.
+- Classified the dirty workspace into backend ContentGroup entity cutover, frontend ContentGroup surfaces, broader Better Notebook foundation work, and docs / contracts / design evidence.
+- Deleted ignored generated build output directories `client/dist` and `server/dist` after verifying both resolved inside the workspace.
+- Kept `tmp` and `.codex-tmp` because they contain backup / visual evidence and do not block Git commitability.
+- No staging, commit, reset, broad clean, source migration, code rewrite, or line-ending normalization was performed.
+
+# Added - 2026-06-23 V2.BN.8.7.9 ContentGroup System Closure Gate
+
+- Added `V2.BN.8.7.9-ContentGroup-System-Closure-Gate-Plan.md`.
+- Added V2.BN.8.7.9 to the Better Notebook roadmap as the final ContentGroup System closure gate before CanvasObject work.
+- Added an Open Issues closure checklist for entity truth audit, remaining browser/manual smokes, and the final closure report.
+- Clarified that mature ContentGroup reuse UI depends on CanvasObject / projection, so Reference / Duplicate / Fork / Materialize UI remains a V2.BN.8.8+ handoff rather than a forced 8.7 feature.
+- Kept V2.BN.8.7.9 scoped to verification, small defect fixes, and release closure; no new SourceArtifact migration, CanvasObject projection, relation runtime, GraphRAG, destructive source mutation, true reorder, or offset rebase is introduced.
+
+# Added - 2026-06-22 V2.BN.8.7.8 Single Editor Refine Shell And Logic Foundation
+
+- Added `V2.BN.8.7.8-Single-Editor-Refine-Shell-And-Logic-Foundation-Plan.md`.
+- Added `V2.BN.8.7.8-Single-Editor-Refine-Shell-And-Logic-Foundation-Patch-Note.md`.
+- Added `singleContentGroupEditorShellModel.ts` as the Single Editor display-model layer for title, status, topic, role, summary, source note, folder path, member count, Petal count, and stability state.
+- Added `check:single-editor-shell` to protect the non-canvas `Single Editor = refine` shell.
+- Added a missing root `check:group-gallery-shell` script so Gallery / Rail / Single Editor shell checks can all run from the workspace root.
+- Rebuilt Single Editor into a scoped refine shell with compact topbar, expandable summary bar, material shelf, Petal dock, and source drawer.
+- Preserved existing Single Editor behavior: draft save, accept/reject/archive, member drop intake, member deletion, Petal create/rename/delete/reorder, fragment assignment, and return-to-source navigation.
+- Browser-smoked the OpenDesign target and current Single Editor implementation at 1920 x 900 and recorded screenshots under `.codex-tmp`.
+- Kept true workbench / CanvasObject / projection / Materialize / source mutation out of 8.7.8.
+
+# Added - 2026-06-22 V2.BN.8.7.6 Groups Rail OpenDesign Shell Parity
+
+- Added `V2.BN.8.7.6-Groups-Rail-OpenDesign-Shell-Parity-Plan.md`.
+- Added `V2.BN.8.7.6-Groups-Rail-OpenDesign-Shell-Parity-Patch-Note.md`.
+- Added `contentGroupRailShellModel.ts` as the Rail display-model layer for group row display, folder path, topic color, selection label, and member preview.
+- Added `check:groups-rail-shell` to keep the Rail aligned with the collect-surface role and OpenDesign rail anatomy.
+- Rebuilt Groups Rail as a right-side 360px collect panel with header, folder path bar, tool row, search row, local Folder / Topic / Role / All tabs, compact group rows, expanded drop area, and bottom status bar.
+- Preserved current Rail workflows: create group, add current item, drag/drop member intake, open Gallery, open Single Editor, folder placement move, and soft delete.
+- Browser-smoked Rail open, search filtering, Role tab switch, expanded `Open editor`, and Header open Gallery routing.
+- Compared the implementation against the user-owned OpenDesign `groups-rail.html` prototype and documented fixed, kept, deferred, and rejected differences.
+
+# Added - 2026-06-22 V2.BN.8.7.5 ContentGroup Gallery OpenDesign Shell Parity
+
+- Added `V2.BN.8.7.5-ContentGroup-Gallery-OpenDesign-Shell-Parity-Plan.md`.
+- Added `V2.BN.8.7.5-ContentGroup-Gallery-OpenDesign-Shell-Parity-Patch-Note.md`.
+- Added `groupGalleryShellModel.ts` as the Gallery display-model layer for role/topic/source/status/member/Petal card facts.
+- Added `check:group-gallery-shell` to prevent the Gallery shell from losing its OpenDesign resource-manager anchors.
+- Rebuilt Group Gallery as a two-column resource-manager shell with folder tree, top search/actions, Folder/Topic/Role view tabs, current-folder breadcrumb, card grid, and bottom status bar.
+- Updated Gallery cards with role tabs, topic signals, source note labels, status chips, member/Petal facts, and compact card actions.
+- Preserved `note_id`, `folder_id`, `mode`, and `query` across Gallery browsing and Single Editor entry.
+- Browser-smoked Gallery creation, folder create/delete, Topic view, search URL state, card-to-editor, and card-to-source-note flows.
+- Compared the implementation against the user-owned OpenDesign `group-gallery.html` prototype and documented kept/fixed/deferred/rejected differences.
+
+# Added - 2026-06-22 V2.BN.8.7.4.1 Workspace Closure Before OpenDesign Shell
+
+- Added `V2.BN.8.7.4.1-Workspace-Closure-Before-OpenDesign-Shell-Patch-Note.md`.
+- Inventoried the current dirty local workspace before starting OpenDesign shell parity work.
+- Classified current local files into V2.BN.8.7 baseline, earlier V2.BN.8 foundation, later Henry decision items, and generated / temporary files.
+- Confirmed that no obvious generated / temporary files are currently visible in Git status.
+- Updated `v2GroupFolders` test coverage so folder placement checks `content_group_members` as active member truth instead of stale `content_groups.members_json`.
+- Kept the cleanup as a documentation and classification patch only: no reset, clean, delete, stage, commit, CanvasObject work, or OpenDesign shell implementation.
+
+# Changed - 2026-06-22 V2.BN.8.7.4 ContentGroupPetal And Fragment Entity Cutover
+
+- Added `V2.BN.8.7.4-ContentGroupPetal-And-Fragment-Entity-Cutover-Plan.md`.
+- Added `V2.BN.8.7.4-ContentGroupPetal-And-Fragment-Entity-Cutover-Patch-Note.md`.
+- Defined the planned `content_group_fragments`, `content_group_petals`, and `content_group_petal_fragments` cutover.
+- Added migration `034_v2_content_group_petals` and base schema definitions for the three Petal / Fragment tables.
+- Moved active Fragment / Petal persistence out of `content_groups.fragments_json` / `content_groups.petals_json`.
+- Hydrated entity rows back into `ContentGroupV1.fragments[]` and `ContentGroupV1.petals[]`.
+- Cut `upsertContentGroup` over to entity-backed Fragment / Petal writes while clearing legacy JSON fields.
+- Locked Petal / Fragment hard-delete semantics without source mutation.
+- Added entity-backed cascade pruning when a `ContentGroupMember` is hard-deleted.
+- Changed client Petal deletion to hard DTO removal while preserving the old function name as a compatibility wrapper.
+- Kept `ContentGroupV1.fragments[]` and `ContentGroupV1.petals[]` as the client boundary.
+- Confirmed that Single Editor visual redesign remains outside 8.7.4.
+
+# Added - 2026-06-22 V2.BN.8.7.3 ContentGroupMember Entity Cutover Plan
+
+- Added `V2.BN.8.7.3-ContentGroupMember-Entity-Cutover-Plan.md`.
+- Added `V2.BN.8.7.3-ContentGroupMember-Entity-Cutover-Patch-Note.md`.
+- Clarified that `ContentGroupMember` is a group-owned child entity, not a standalone product surface.
+- Locked the 8.7.3 deletion rule: member deletion is hard delete, and dependent embedded Petals / fragments are pruned in the same write.
+- Kept `ContentGroupV1.members[]` as the API shape while moving active persistence to `content_group_members`.
+
+# Added - 2026-06-22 V2.BN.8.7.2 GroupFolder Entity And Placement Cutover Plan
+
+- Added `V2.BN.8.7.2-GroupFolder-Entity-And-Placement-Cutover-Plan.md`.
+- Reprioritized 8.7.2 as the `GroupFolder` / folder placement entity cutover.
+- Moved `ContentGroupMember` and `ContentGroupPetal` entity cutovers to later 8.7.x versions.
+- Clarified that `GroupFolder` owns organization truth and `content_group_folder_placements` owns group-folder membership, while source/member/petal truth remains unchanged.
+
+# Changed - 2026-06-22 V2.BN.8.7.1 ContentGroup Entity Cutover Foundation
+
+- Added the backend `content_groups` root table and mounted `/api/content-groups`.
+- Added server-side ContentGroup service functions for list/get/upsert/replace-by-note/import-from-note-metadata.
+- Added validator coverage that accepts existing runtime ids such as `content-group-*` instead of forcing UUID ids for frontend-created groups.
+- Added frontend `contentGroupRepository.ts` so Rail / Gallery / Single Editor can load and save ContentGroups through entity APIs.
+- Kept legacy note metadata groups as one-time import/fallback input only when a note has no entity-backed groups.
+- Added folder-only metadata writing that strips legacy `canvas_engine_content_groups_v1` instead of continuing to write ContentGroups into note metadata.
+- Updated Canvas adapter and Group Gallery data paths so ContentGroup saves no longer update note metadata arrays.
+- Added model-contract coverage for entity-first merge behavior and legacy metadata stripping.
+- Verified with model contract, runtime boundary check, client build, server v2 tests, and server build.
+
+# Added - 2026-06-22 V2.BN.8.7 ContentGroup Reuse Service Boundary
+
+- Added `contentGroupReuseService.ts`.
+- Defined `ContentGroupReuseMode` as `reference`, `duplicate`, `fork`, `materialize`, and `open_original`.
+- Added pure descriptor helpers for reference and open-original actions.
+- Added duplicate and fork helpers that create new ContentGroup identities in a target context.
+- Added fork lineage metadata.
+- Added materialize plan generation with `moves_source = false` and one planned block per member.
+- Added model-contract coverage for the reuse vocabulary and safe materialize plan behavior.
+
+# Changed - 2026-06-22 V2.BN.8.7 GroupFolder Resource Manager First Pass
+
+- Added `activeGroupFolders` as the service-owned active folder filter.
+- Extended `groupFolderChildren` with an `includeArchived` management option while keeping default children active-only.
+- Kept folder delete guards aware of archived children and active ContentGroups.
+- Updated Gallery data helpers to use the service-owned active folder filter.
+- Added model-contract coverage proving ContentGroup folder moves preserve member `current_content` and source snapshots.
+- Documented that GroupFolder movement is organization only and does not move source truth.
+
+# Changed - 2026-06-22 V2.BN.8.7 ContentGroup Member Source Boundary First Pass
+
+- Added `ContentGroupMemberSourceSyncStatus` and `ContentGroupMemberSourceRefV1` to the runtime data contract.
+- Extended `ContentGroupMemberV1` with `current_content`, `source_ref`, and `source_sync_status`.
+- Added source-ref normalization and snapshot hashing in `contentGroupService.ts`.
+- Added `compareContentGroupMemberWithSource` and `refreshContentGroupMemberFromSource` so compare and refresh are separate actions.
+- Updated member display helpers to prefer `current_content` and keep `preview_text` as display cache.
+- Added model-contract coverage for member/source divergence, changed source, missing source, and explicit refresh.
+- Updated ContentGroup / GroupFolder and Notebook Object Inventory contracts with the first member/source boundary.
+
+# Changed - 2026-06-22 V2.BN.8.7 ContentGroup Surface Role Contract First Pass
+
+- Added `contentGroupSurfaceRoleService.ts` to stabilize the three ContentGroup surface roles: Rail = Collect, Gallery = Organize, Single Editor = Refine.
+- Extended `canvasEngineModelContractCheck.ts` with a `ContentGroup surface roles` smoke group so these labels and verbs cannot drift silently.
+- Added surface/role data markers to Groups Rail, Group Gallery, and Single ContentGroup Editor.
+- Routed visible surface labels through the shared role contract.
+- Reduced one Rail visual-noise issue by hiding the new-group intake/drop target when there is no active candidate selection.
+- Added `V2.BN.8.6.31-ContentGroup-OpenDesign-Visual-Parity-Patch-Note.md` to track OpenDesign parity progress and remaining visual gaps.
+
+# Changed - 2026-06-22 V2.BN.8.7 ContentGroup System Maturity Reassignment
+
+- Reassigned `V2.BN.8.7` from CanvasObject / media / drawing seed to `ContentGroup System Maturity`.
+- Added `V2.BN.8.7-ContentGroup-System-Maturity-Plan.md` as the active 8.7 planning target.
+- Added `V2.BN.8.7-ContentGroup-System-Maturity-Master-Plan.md` as the execution-control plan for sub-plan sequencing, verification loops, and 8.6 deferred-scope triage.
+- Deferred the earlier CanvasObject / media / drawing seed to `V2.BN.8.8+` or the next Canvas track, with the historical plan retained as a deferred draft.
+- Shifted Canvas reliability / scale / export reserve to `V2.BN.8.9+`.
+- Synced Roadmap, V2.BN.8 README, Plan, and Open Issues with the new sequencing.
+
+# Changed - 2026-06-22 ContentGroup Doctrine Docs Sync
+
+- Synced Product, PRD, Roadmap, Relation Product Design, TextFlow Contract, Petal Contract, ContentGroup / GroupFolder Contract, and Notebook Object Inventory with the 2026-06-20 Better Notebook ContentGroup reflection.
+- Reaffirmed that TextFlow is content truth, Label is a visible marker / reusable range package, ContentGroup is the serious content package, Petal is the local group-internal role layer, and GroupFolder is the resource manager / Gallery scope.
+- Recorded the V2.BN.8.6.27-8.6.30 editor foundation lane and kept destructive move / reorder deferred until range offset rebase is safe.
+- Prepared the release docs for a handoff document that can reference current synced contracts instead of stale brainstorming notes.
+
+# Changed - V2.BN.8.6.13-8.6.22 ContentGroup Gallery And Editor
+
+- Added shared ContentGroup metadata helpers for groups, folders, annotations, reading interpretations, and proposals.
+- Added GroupFolder as the ContentGroup organization/path layer, with ContentGroup depth derived from folder path.
+- Added ContentGroup / GroupFolder graph integrity checks to the canvas model contract smoke.
+- Added a reusable ContentGroup drag payload service for Draft Range, Label, and future block/object intake.
+- Added draggable Draft Range and Label badge sources, plus Groups Rail drop intake for creating or appending ContentGroup members.
+- Added the full-page `Group Gallery` route and left navigation entry.
+- Added Gallery folder/topic/role browsing, note/folder context routing, folder creation, inline folder rename, group creation, and source-note jump links.
+- Added Single ContentGroup Editor v1 for title/topic/role/summary editing, identity save/accept/reject, member previews, and Petal create/rename/archive.
+- Added `V2.BN.8.6.13-8.6.22-ContentGroup-Gallery-And-Editor-Maturity-Review.md` as the manual-test handoff and maturity gate.
+- Verified with model contract smoke and client build; remaining visual and command-surface polish is explicitly deferred.
+
+# Changed - V2.BN.8.6.10 ContentGroup Identity Seed
+
+- Replaced active ContentGroup `interpretation` usage with `identity`.
+- Added identity statuses: `none`, `draft`, `accepted`, `rejected`, and `archived`.
+- Treated `identity.status = accepted` as a ContentGroup state without adding a separate user-facing accepted-content object.
+- Added accepted-to-draft invalidation when ContentGroup members or Petals change; title rename keeps accepted identity.
+- Added reading projection for accepted identities (`knowledge_objects`) and draft identities (`draft_knowledge_candidates`).
+- Model contract smoke now covers stale interpretation normalization, identity transitions, invalidation, and reading projection.
+
+# Changed - V2.BN.8.6.9 ContentGroup Hardening And Integrity Gate
+
+- Added ContentGroup member integrity metadata: `valid`, `stale`, `orphaned`, and `unsupported`.
+- Added source-backed preview refresh helpers for ContentGroup and Petal members.
+- Added ContentGroup integrity audit helpers so broken member references become visible instead of silently trusting stale preview text.
+- ContentGroup Panel now shows compact stale/source-missing/unsupported member states and can refresh preview caches from source.
+- Model contract smoke now covers ContentGroup integrity marking, source-backed preview refresh, orphan detection, and Petal-member audit behavior.
+- Verified with `npm run smoke:canvas-engine-model-contract` and `npm run build:client`.
+
+# Changed - V2.BN.8.6.6 TextFlow-First / ContentGroup Model Sync
+
+- Synced V2.BN.8 docs after the 2026-06-18 model realignment: TextFlow is the content root, ContentRange is the location root, AnnotationTruth is the durable label / marker layer, and ContentGroup becomes the serious content-package direction.
+- Marked AnnotationSet as a transitional V2.BN.8.6.6 seed instead of the long-term primary content-package model.
+- Updated Product, PRD, TextFlow Contract, Annotation Contract, Notebook Object Inventory Contract, Command Surface Contract, Better Notebook Roadmap, Relation Product Design, Plan, and Open Issue handoff language.
+
+# Changed - V2.BN.8.6.6 TextUnitGroup And AnnotationSet Editor Foundation Patch
+
+- Added the first editable TextUnitGroup row-group workflow: row handle selection, group creation, quiet group rail, rename, and ungroup / soft delete.
+- Kept TextUnitGroup as writing-layer infrastructure; new groups write `knowledge_role: null` and do not become semantic truth.
+- Upgraded AnnotationSet with label, description, kind, color token, member order, normalization, persistence, and editor service helpers.
+- Added Annotation Organizer panel for creating, editing, reordering, and deleting label sets without deleting the underlying AnnotationTruth records.
+- Added context-menu entries for opening the label organizer and creating sets from labels.
+- Upgraded reading projection so AnnotationSet output includes set kind, ordered member labels, range previews, and child summaries.
+- Extended model contract smoke coverage for TextUnitGroup and AnnotationSet behavior.
+- Verification passed: `npm run smoke:canvas-engine-model-contract` and `npm run build:client`.
+
+# Changed - V2.BN.8.6.5 Context Menu Foundation Patch
+
+- Added `docs/contracts/Command-Surface-Contract.md` to define active, reserved, deferred, and removed command surfaces.
+- Added `commandSurfaceService.ts` and `ContextMenuLayer.tsx` as the first shared command menu foundation.
+- Added text selection, annotation range preview, annotation highlight, and TextUnit handle context menu seeds.
+- Renamed user-facing annotation action language to `Label` while keeping `AnnotationTruth` internal.
+- Reserved Canvas blank, CanvasObject, Label Comment, mini toolbar, relation endpoint, source attach, and unsafe text mutation commands for later versions.
+- Reduced the old floating annotation toolbar so single-range text selection is less intrusive.
+
+# Changed - V2.BN.8.6.4 Annotation Display And Inspector Polish Patch
+
+- Implemented `annotationDisplayService.ts` for label overlay visibility, visible annotation filtering, text-unit badge clusters, and block-level badge fallback.
+- Added Preview-level label overlay toggle and threaded the state through the canvas runtime, chrome, writing surface, block editor, text projection, and annotation overlay.
+- Moved text-backed label display away from whole-block corner piles and into local TextUnit clusters with `label +N` behavior.
+- Flattened Annotation Stack hierarchy so metadata stays collapsed and ranges / children remain the main working area.
+- Removed internal `Draft` wording from the selection toolbar display path.
+- Applied the `impeccable` product UI gate for this visual polish pass.
+- Added model contract smoke coverage for annotation display behavior.
+
+# Changed - V2.BN.8.6.3 Source-Backed Annotation Range Editing Patch
+
+- Implemented source-backed range preview editing: range preview edits now write back to original TextUnit / TextFlow source.
+- Added range rebase helpers for same-TextUnit source edits and annotation preview edits.
+- Kept `range_text_cache` as cache only, refreshed from source after supported edits.
+- Preserved annotation hierarchy while marking ambiguous overlapping ranges for review.
+- Added model contract smoke coverage for source-backed annotation range editing.
+
+## Added - V2.BN.8.6.4 Annotation Display And Inspector Polish Plan
+
+- Added `V2.BN.8.6.4-Annotation-Display-And-Inspector-Polish-Plan.md` as a narrow annotation display and inspector polish subversion before V2.BN.8.7.
+- V2.BN.8.6.4 receives the visual/experience tails deferred from V2.BN.8.6.3: label overlay show/hide toggle, Annotation Stack hierarchy cleanup, text-near label badge, local multi-label clusters, and SelectionDraft toolbar polish.
+- Marked V2.BN.8.6.4 as an explicit `impeccable`-gated product UI polish version. `taste skill` can be used as supplemental critique when Henry asks for it, but product UI constraints remain primary.
+- Updated `README.md`, `Plan.md`, and `Open-Issue-And-Brainstorm-Checklist.md` so V2.BN.8.6.4 is treated as an explicit execution step rather than a loose future polish bucket.
+
+## Added - V2.BN.8.6.3 Source-Backed Annotation Range Editing Plan
+
+- Added `V2.BN.8.6.3-Source-Backed-Annotation-Range-Editing-Plan.md` as a narrow data-consistency subversion before V2.BN.8.7.
+- V2.BN.8.6.3 is scoped to two-way sync between Annotation Stack range preview and TextFlow source: range preview edits write back to original TextUnit text, and normal TextUnit edits refresh annotation range cache.
+- Explicitly separated annotation label edits from range source edits: label rename changes `raw_label`; it must not change original text or range preview source.
+- Routed annotation visual tails to V2.BN.8.6.4: label visibility toggle, Annotation Stack redesign, local badge anchoring, multi-label cluster behavior, and mature selection polish.
+
+## Closed - V2.BN.8.6.2 Annotation Hierarchy / SelectionDraft Closure
+
+- Recorded Henry manual acceptance for V2.BN.8.6.2 on 2026-06-16 Toronto time.
+- Closed the final TextUnit immediate-editing regression found during manual retest: a freshly created TextUnit is editable immediately, normal textarea clicks own caret placement, and delayed block autofocus no longer pulls the caret back to the wrong TextUnit after switching blocks.
+- Confirmed the Annotation Stack hierarchy behavior is acceptable for this seed: child labels remain subordinate to parent annotations, and range-source direct editing stays deferred to a later 8.6.x / editor polish pass.
+- Verification for the closing patch passed: `npm run smoke:canvas-engine-model-contract`, `npm run build`, `git diff --check`, and `npm run check:changed-file-secrets`.
+- Handoff is now open for V2.BN.8.7 CanvasObject, Media Annotation, Drawing Tool, And Image Insert Seed.
+
+## Changed - V2.BN.8.6.2 Annotation Hierarchy And Range Source Contract
+
+- Added `parent_annotation_id` to `AnnotationTruthV1`, making child label ownership a data truth rather than a UI-only inference.
+- Added annotation hierarchy helpers for root lookup, parent lookup, child lookup, inspector root resolution, hierarchy normalization, and visible hierarchy filtering.
+- Updated child-label creation so children write both parent-side compatibility links and child-side parent truth.
+- Updated Annotation Stack rendering so child labels remain inside parent annotation cards and can be focused without becoming sibling top-level cards.
+- Added a same-TextUnit range rebase service seed for future source-backed range preview editing.
+- Synced Annotation, TextFlow, and Notebook Object Inventory contracts with the hierarchy and range-source rules.
+
+## Added - V2.BN.8.6.1 Selection Draft Engine Plan
+
+- Added `V2.BN.8.6.1-Selection-Draft-Engine-Plan.md` as an inserted foundation subversion between V2.BN.8.6 and V2.BN.8.7.
+- Added `V2.BN.8.6.1-Selection-Draft-Engine-Patch-Note.md`.
+- Defined `SelectionDraft` as Coincides-owned runtime/editor selection truth; browser-native selection is now only an input signal for pointer / offset capture.
+- Folded the unfinished child-label entry cleanup into V2.BN.8.6.1: child labels should be created by selecting a subrange inside an active parent annotation, not primarily through a generic Inspector text field.
+- Synced `SelectionDraft` and the child-label interaction boundary into `Annotation-Contract.md`, `Notebook-Object-Inventory-Contract.md`, README, Plan, Open Issue, and roadmap.
+- Marked V2.BN.8.7 CanvasObject / media annotation work as dependent on a stable SelectionDraft foundation.
+
+## Fixed - V2.BN.8.6 Annotation Stack Editing And Additive Range Selection Hotfix
+
+- Fixed the concrete Annotation Inspector input crash by reading input values before React functional state updates; this covers rename, same-range labels, and child-label inputs.
+- Isolated Annotation Inspector / Stack pointer, click, double-click, and keyboard events so stack text editing does not leak into the canvas or block interaction layers.
+- Added Ctrl / Command + mouse selection as a first additive annotation range-draft interaction.
+- Added temporary inline highlights for uncommitted additive draft ranges, so Ctrl / Command selected ranges are no longer invisible.
+- Prevented modifier-key release from clearing the just-added additive range draft.
+- Kept Ctrl / Command additive selection sessions alive through textarea `select` events, so regular selection handling no longer wipes the draft before the temporary highlight can render.
+- Blank page clicks and normal non-additive selections now clear mistaken additive draft ranges before the next annotation is committed.
+- Added range identity / merge helpers so multi-range drafts deduplicate repeated selected spans before commit.
+- Expanded the canvas model contract smoke to cover range identity and multi-range draft deduplication.
+- Verification passed: `npm run smoke:canvas-engine-model-contract` and `npm run build:client`.
+
+## Changed - V2.BN.8.6 Annotation Editor And ReadingInterpretation Seed Implementation
+
+- Added `V2.BN.8.6-Annotation-Editor-And-ReadingInterpretation-Seed-Patch-Note.md`.
+- Added overlap-aware annotation rendering, exact partial-span highlights, annotation stack summaries, block-level annotation entry, context annotation entry, and multi-range annotation draft controls.
+- Added same-range label, child annotation, AnnotationSet, ReadingInterpretation, AnnotationProposal, and AI-readable projection service seeds.
+- Annotation Inspector now supports stacked selected annotations and first-version edit/hide/show/delete/child-label actions.
+- Note metadata persistence now includes seeds for AnnotationTruth, AnnotationSet, ReadingInterpretation, and AnnotationProposal records.
+- Henry manual visual testing remains pending; do not treat this subversion as accepted until manual pass is recorded.
+
+## Added - V2.BN.8.7 CanvasObject, Media Annotation, Drawing Tool, And Image Insert Seed Plan
+
+- Added `V2.BN.8.7-CanvasObject-Media-Annotation-Drawing-Image-Seed-Plan.md` as the seventh V2.BN.8 subversion execution plan.
+- V2.BN.8.7 is scoped as the first usable CanvasObject seed: minimal pen, rectangle shape, image insert, region selection, CanvasObject rendering/persistence, and CanvasObject/media-region annotation range support.
+- The plan incorporates the V2.BN.8 Open Issue handoff items for CanvasObject, drawing/writing tool first, image insert, region reserve, and media annotation, while keeping mature infinite canvas, virtualization, relation overlay, multi-frame, presentation mode, and full export out of scope.
+- Expanded the 8.7 plan and Open Issue handoff with explicit triage for deferred Project surface redesign, source snapshot fidelity, TextFlow assembly/editor work, complete media system, complete drawing app, and relation/graph work.
+- Added 8.6-to-8.7 handoff preconditions and a deferred Open Issue routing section so CanvasObject work does not reopen annotation editor, TextFlow assembly, export, relation, source, or Project surface redesign scopes.
+- README and V2.BN.8 Plan now point to the 8.7 plan.
+
+## Added - V2.BN.8.6 Annotation Editor And ReadingInterpretation Seed Plan
+
+- Added `V2.BN.8.6-Annotation-Editor-And-ReadingInterpretation-Seed-Plan.md` as the sixth V2.BN.8 subversion execution plan.
+- V2.BN.8.6 is scoped as the first usable annotation editor seed: multiple labels on the same range, overlapping ranges, annotation stack badges, block-level annotation, multi-TextUnit / multi-range annotation, upgraded inspector behavior, and context entry points from selection / gutter / block toolbar.
+- The plan incorporates the V2.BN.8 Open Issue 8.6 handoff items and makes `ReadingInterpretation` / `AnnotationProposal` a proposal layer instead of a truth-writing AI agent.
+- The plan explicitly excludes full AI agent work, Relation runtime, SourceReference attach, media annotation, drawing tools, Structure Studio, global canonical role taxonomy, and fixed role slot schema.
+- README and V2.BN.8 Plan now point to the 8.6 plan.
+
+## Fixed - V2.BN.8.5 Partial Span Highlight Visibility
+
+- Added first-version partial annotation highlight segments so exact text-span ranges are visibly marked without painting the whole TextUnit.
+- Layered the visible highlight behind TextUnit textareas, preserving normal editing while making local annotations such as a selected suffix or a single word visible.
+- Kept multi-label overlap blending, robust range rebasing, and richer span editing deferred to V2.BN.8.6.
+
+## Fixed - V2.BN.8.5 Selection Range Expansion
+
+- Tightened AnnotationTruth range creation so partial TextUnit selections keep only the selected substring in `range_text_cache`.
+- Prevented collapsed selections from falling back to the whole TextUnit text cache.
+- Adjusted TextBlock annotation rendering so full-row background only appears when an annotation range covers the whole TextUnit.
+- Recorded multi-label, overlapping annotation, block-level annotation, and precise span rendering as V2.BN.8.6 handoff items in `Open-Issue-And-Brainstorm-Checklist.md`.
+
+## Changed - V2.BN.8.5 Selection And AnnotationTruth Seed Implementation
+
+- Added `V2.BN.8.5-Selection-And-AnnotationTruth-Seed-Patch-Note.md`.
+- Added the first AnnotationTruth runtime/model seed, including annotation ranges, annotation sets, and proposal helpers.
+- Added TextUnit selection capture and a compact selection toolbar for creating user-confirmed annotation labels.
+- Added a low-noise annotation display seed and Annotation Inspector seed for rename, soft delete, status, marker, and range preview.
+- Stored first-version annotation truth records on note metadata under `canvas_engine_annotations_v1`.
+- Routed `/definition` to `annotation_action` metadata instead of independent DefinitionBlock creation.
+- Verification passed so far: `npm run smoke:canvas-engine-model-contract` and `npm run build:client`.
+- Browser Harness is intentionally skipped for this pass; Henry manual testing remains the final gate.
+
+## Added - V2.BN.8.5 Selection And AnnotationTruth Seed Plan
+
+- Added `V2.BN.8.5-Selection-And-AnnotationTruth-Seed-Plan.md` as the fifth V2.BN.8 subversion execution plan.
+- V2.BN.8.5 is scoped as the first selection and annotation truth seed: text selection capture, `AnnotationTruth` runtime/service, subtle annotation render, selection toolbar / right-click entry, annotation inspector seed, and `AnnotationProposal` / `ReadingInterpretation` seed.
+- Historical wording: the plan kept TextFlow as the writing substrate and AnnotationTruth as the semantic substrate. This is superseded by the 2026-06-18 TextFlow-first / ContentGroup model sync, where AnnotationTruth is the durable label / marker layer.
+- `/definition` is routed toward selection -> AnnotationTruth workflow rather than independent DefinitionBlock creation.
+- README and V2.BN.8 Plan now point to the 8.5 plan.
+
+## Changed - V2.BN.8.4 Annotation-First Wording Sync
+
+- Historical wording: updated `V2.BN.8.4-TextUnit-Editor-Seed-Plan.md` to replace older TextFlow-as-semantics wording with the then-current annotation-first model. This is superseded by the 2026-06-18 TextFlow-first / ContentGroup model sync.
+- Definition now routes to future `AnnotationTruth.raw_label` and `ReadingInterpretation` proposal language instead of TextUnitGroup knowledge-role or role-slot language.
+- InlineStructure is described as special rendering / stable anchor, not final semantic truth.
+
+## Fixed - V2.BN.8.4 TextUnit Role Preservation And Reflow
+
+- Fixed a TextUnit editor failure where Enter, slash writing-role conversion, or tail empty-line edits could temporarily desync plain text from `text_flow.units` and flatten list/toggle/todo roles back to paragraph.
+- TextFlow alignment now preserves existing TextUnit identity and writing roles by line, only creating new units for newly added lines.
+- Enter after toggle now exits to a normal paragraph row; Enter after todo now creates another unchecked todo row.
+- Active paragraph/text measurement reflow now pushes following blocks down instead of letting a growing TextBlock overlap them.
+- Browser Harness verified paragraph Enter, toggle Enter, `/todo`, todo Enter, and downstream block reflow; `npm run smoke:canvas-engine-model-contract` and client `npm run build` passed.
+
+## Fixed - V2.BN.8.4 TextUnit Manual Test Follow-up
+
+- Fixed first-layer TextUnit editor issues found during Henry's manual test.
+- TextUnit `Enter` splitting now synchronously publishes the new TextFlow and focuses the new line before the next typed character.
+- Plain TextUnit rows now use the full writing width instead of shrinking into the marker column.
+- Numbered list display now starts from `1.` inside a continuous same-level numbered-list run instead of using the global TextUnit index.
+- Todo TextUnits now render a real checkbox backed by `metadata.checked`.
+- Toggle TextUnits now render a real collapse / expand marker backed by `metadata.collapsed`.
+- Model contract now covers tail split, numbered ordinals, marker display, and todo metadata updates.
+- Verification passed: `npm run smoke:canvas-engine-model-contract` and `npm run build:client`.
+
+## Changed - V2.BN.8.4 TextUnit Editor Seed Implementation
+
+- Added `V2.BN.8.4-TextUnit-Editor-Seed-Patch-Note.md`.
+- Added first-version TextUnit editor service for split, merge, writing role, indent, paste parser, and TextFlow split / merge seed.
+- TextBlock editing now renders TextUnits as quiet line-level editors instead of one flat textarea.
+- TextUnit gutter seed now supports insert-below and writing role changes without becoming a new block control bar.
+- Slash writing role commands now route `/heading`, `/quote`, `/bullet`, `/numbered`, `/todo`, and `/toggle` through TextUnit writing roles.
+- `/definition` remains retired from active independent block creation; `/code` remains an independent CodeBlock command.
+- Verification passed: `npm run smoke:canvas-engine-model-contract` and `npm run build:client`.
+
+## Added - V2.BN.8.4 TextUnit Editor Seed Plan
+
+- Added `V2.BN.8.4-TextUnit-Editor-Seed-Plan.md` as the fourth V2.BN.8 subversion execution plan.
+- V2.BN.8.4 is scoped as the first TextUnit editor seed: Enter / Backspace / Tab, TextUnit gutter, writing roles, paste-to-TextFlow parser, and split / merge seed.
+- The plan records the next block-retreat decision: `Heading` should no longer be an active independent block family; it becomes a TextUnit writing role.
+- The plan keeps CodeBlock conservative: inline code / code line can move into TextFlow, but multiline / copyable / language-aware code regions remain independent CodeBlocks.
+- README, V2.BN.8 plan, and Better Notebook roadmap now point to the 8.4 plan.
+
+## Changed - V2.BN.8.3 Block Retreat And Definition Retirement
+
+- Added `V2.BN.8.3-Block-Retreat-And-Definition-Retirement-Patch-Note.md` to record Henry-approved scope for the 8.3 patch.
+- V2.BN.8.3 now treats `Definition` as a future AnnotationTruth label / ReadingInterpretation proposal direction, not as a default independent block family.
+- Slash command registry no longer lets `/definition` create an independent DefinitionBlock; it remains only as a disabled future TextFlow role-marking command.
+- Advanced Insert no longer includes `definition.basic` in the active default insert templates.
+- Open Issue now separates the immediate 8.3 patch bucket from the V2.BN.8.x handoff buckets.
+- Roadmap / V2.BN.8 plan / README now route TextUnit editor, TextUnit gutter, paste parser, split/merge, annotation actions, AnnotationTruth editor, ReadingInterpretation proposal seed, drawing tools, image insert, scale and export reserve into later V2.BN.8.x subversions.
+- Verification passed: `npm run smoke:canvas-engine-model-contract`, `npm run build:client`, `git diff --check`, and `npm run check:changed-file-secrets`.
+- Henry manual pass recorded; V2.BN.8.3 is closed.
+
+## Added - V2.BN.8.3 TextFlow Seed And Slash Command Foundation
+
+- Added first-version `TextBlockContentV1` runtime types: `TextUnit`, `TextUnitGroup`, legacy-named `InlineStructuredObject` runtime records, `TextFlowProjection`, and addressable projection objects. Product-facing docs now call this layer `InlineStructure`.
+- Added `textFlowService.ts` as the TextFlow projection seed. It initializes fresh TextBlocks as one paragraph TextUnit, reads valid TextFlow payloads, falls back softly for malformed development data, and exposes TextUnit / TextUnitGroup / legacy inline-structure projection records.
+- Non-structured text-like blocks now attach fresh TextFlow when created or edited. Definition and Formula blocks keep their field payloads as their current content truth.
+- Text-like block read paths now prefer valid TextFlow projection before `body` / `plain_text` cache, so the seed behaves like content truth instead of an attached label.
+- Slash commands now carry explicit command metadata: `create_block`, `convert_block`, `insert_structure`, and `inline_action`, plus object-kind metadata. Future list / inline formula / divider commands are visible as disabled reserved items rather than pretending to be implemented.
+- `canvasEngineModelContractCheck` now covers the TextFlow seed, TextFlow-before-body read priority, and slash command foundation. The check uses local command/template fixtures instead of loading the runtime template service.
+- This implementation intentionally does not add a legacy adapter. Existing local prototype accounts and test data are not product data; new TextBlocks should enter the fresh TextFlow path directly.
+- TextUnitGroup addressable projection now resolves child TextUnit text recursively instead of exposing only child ids, keeping the projection seed AI/read/search/relation useful.
+- Browser Use smoke was recorded for `/for`: the slash menu anchors near the active text block, `Formula` is active, disabled `Inline Formula` explains its future scope, and ArrowDown / ArrowUp move active selection.
+- Fixed the viewport-level Advanced Insert entry by restoring pointer-events on floating tool rail / insert panel children.
+- Advanced Insert now labels the `code.snippet` template as `Code`, matching the `CODE` block badge and avoiding the older `Code Snippet` wording.
+
+## Changed - V2.BN.8 Canvas And TextFlow Roadmap Sync
+
+- V2.BN.8 总目标从单纯 Canvas Engine Foundation 扩展为 Canvas Engine And TextFlow Foundation。
+- V2.BN.8.3 明确为 TextFlow Seed And Slash Command Foundation：需要落下 `TextBlock` / `TextUnit` / `InlineStructure` / `TextUnitGroup` 的代码和合同种子，不只是产品定义文档。
+- V2.BN.8.x 后续小版本重新排布为 TextUnit editor、selection / annotation truth、annotation editor / ReadingInterpretation、CanvasObject / drawing tool / image insert seed 等渐进地基。
+- A9 从原先偏 block template 的设想升级为 Structure Studio And Editor Productization，负责 annotation workflow、AI reading proposal、annotation style、block shell、appearance 和 editor behavior。
+- 新增 `docs/contracts/TextFlow-Contract.md`，并同步 PRODUCT、PRD、Block Contract、Relation Product 和 V2.BN.8 文档入口。
+
+## Changed - V2.BN.8.2 Canvas Shell And Viewport Transform Patch
+
+- Runtime model now exposes `viewport`, so the UI can reason about current Canvas viewport state instead of only using viewport as an internal visibility filter.
+- Added first-version viewport transform helpers for canvas initial headroom, pan, scroll, zoom, and viewport-to-world coordinate conversion.
+- Added `useViewportTransformController` to own Canvas viewport state under the surface state boundary.
+- Canvas mode now uses a transformed world layer inside a single viewport surface instead of depending on nested native scroll areas.
+- Canvas mode supports:
+  - Space / middle-button drag panning;
+  - wheel / trackpad panning;
+  - Ctrl/Command + wheel zooming;
+  - Ctrl/Command + `+` / `-` / `0` keyboard zoom in / zoom out / reset.
+- Double-click block creation and block move/resize now compensate for Canvas zoom.
+- Slash menu now supports keyboard selection with ArrowUp / ArrowDown and Enter.
+- Overlay anchor records now preserve explicit source labels (`caret`, `block`, `fixed_viewport`, `formula_help`, `source_picker`, `relation_endpoint`) and the model contract covers world rect -> viewport rect conversion.
+- Empty Canvas drafts now disappear when the user clicks blank canvas space instead of leaving a stray focused draft behind.
+- Added `V2.BN.8.2-Mature-Notebook-Baseline-Audit.md` to record the mature notebook baseline and avoid letting Canvas work displace core note quality.
+- Verification passed:
+  - `npm run smoke:canvas-engine-model-contract`;
+  - `npm run build:client`;
+  - `npm run verify:v2-bn8-runtime`;
+  - Browser Use smoke for Canvas mode viewport headroom, wheel pan, keyboard zoom, Page/Canvas round trip, slash keyboard commit, workspace block reload persistence, empty draft cleanup, toolbar follow, and Preview overlay hit-test.
+
+## Added - V2.BN.8.2 Canvas Shell And Viewport Transform Plan
+
+- 新增 `V2.BN.8.2-Canvas-Shell-And-Viewport-Transform-Plan.md`，锁定下一小版本范围：
+  - Priority 1：Canvas Shell 打磨稳定；
+  - Priority 2：Pan / Zoom / Viewport Transform；
+  - Priority 3：Overlay / Anchor 统一，并补入 slash menu 键盘上下选择与 Enter 确认；
+  - Priority 4：成熟笔记 baseline audit。
+- 明确本小版本排除 Relation、Graph DB、GraphRAG、Agent、Template Studio、完整 drawing tool、多 frame 产品化、presentation mode 和完整导入导出系统。
+- `README.md` 已加入 V2.BN.8.2 计划入口。
+
+## Changed - V2.BN.8.1 Canvas Runtime Workspace / Snap / Scroll Patch
+
+- 修复 Canvas mode 下 workspace block 重新进入 note 后被还原进 PageFrame 的问题：workspace layout 在 Canvas mode 还原时使用 canvas workspace 宽度，不再被 page content width 夹回正式页面区域。
+- `normalizeBlockLayout()` 现在会保留已存储的 measured height，避免 Definition / Formula / Code 等 structured block 在刷新或重新测量前使用过矮的估算高度，降低偶发穿模和 snap 失效风险。
+- block 拖动现在按 surface mode 使用不同的 X 轴边界：Page mode 使用 page content width，Canvas mode 使用 workspace width。
+- snap alignment 开启时，拖动候选布局会进入 stacked collision resolution，避免 snap on 但 block 仍互相重叠的状态。
+- Canvas mode 进入时会给 app main scroll 加 runtime lock，让外层页面不再和 canvas surface 同时滚动；Canvas surface 自己保留水平/垂直滚动。
+- `canvasEngineModelContractCheck` 新增 workspace restore 与 snap-on collision 回归断言。
+- 验证通过：
+  - `npm run verify:v2-bn8-runtime`
+  - Browser Harness 当前 note smoke：Page mode 无错误覆盖；切换 Canvas mode 后 body runtime lock 生效、main overflow 为 hidden、content padding 为 0、canvas surface 负责 X/Y 滚动。
+
 ## Changed - V2.BN.8.1 Browser Harness Status Sync
 
 - `Review.md` / `Experience-Review.md` 同步最新 Browser Harness 结果：最终基础 smoke 已通过，早先 Chrome remote debugging blocker 只保留为 superseded historical attempt。
@@ -714,6 +1194,32 @@
 - 移除前端对 `@shared/types` 的 default runtime import，改用命名导入或 type-only 导入。
 - `DailyBrief` 的 `EnergyLevel` 运行时值改为本地字符串常量，避免把共享 enum 当成浏览器运行时依赖。
 - 该修补来自 `npm run verify:v2-bn8-runtime` 暴露的 build failure；修补后聚合验证 passed。
+
+## Changed - V2.BN.8.7 ContentGroup Petal Refinement
+
+- 新增 `moveContentGroupPetal`，把 Petal reorder 固定为 ContentGroup 内部 refine 行为。
+- Single ContentGroup Editor 的 Petal 卡片新增拖动手柄，可在编辑器内调整 Petal 顺序。
+- Canvas Engine model contract 新增 `ContentGroup Petal refinement boundary` 检查，覆盖 local order、member truth、source snapshot、fragment ownership、source-text projection non-goal。
+- 更新 `docs/contracts/Petal-Contract.md`，明确 Petal reorder 不移动 source truth，不创建 Label / CanvasObject / relation runtime。
+- 验证通过：`npm run smoke:canvas-engine-model-contract`、`npm run build:client`。
+
+## Changed - V2.BN.8.7 ContentGroup Stability Summary
+
+- 新增 `ContentGroupStabilitySummary`，用于派生 ContentGroup edge state，而不是创建新的 truth table。
+- 覆盖 empty group、empty Petal、stale / missing source、deleted source note context、archived folder context、accepted-with-stale、materialize target unavailable。
+- `ContentGroupIndexEntry` 新增 stability summary，并把 member source issue 纳入 `has_integrity_issue`。
+- Rail、Gallery、Single ContentGroup Editor 现在展示轻量状态摘要。
+- Single ContentGroup Editor 的 `Accept` 会在空 group、deleted group、source/member 风险状态下禁用并提供原因。
+- 验证通过：`npm run smoke:canvas-engine-model-contract`、`npm run build:client`。
+
+## Verified - V2.BN.8.7 ContentGroup Browser Gate First Pass
+
+- 本地 dev app 通过 in-app browser 跑通：创建项目、创建笔记、Rail 创建空 ContentGroup、Gallery 打开组织视图、Single Editor 打开 refine 视图、创建 Petal、保存 draft。
+- Rail / Gallery / Single Editor 分别显示 `Collect` / `Organize` / `Refine` 表面语义。
+- 空 ContentGroup 的 stability label 在三层界面可见，Single Editor 对空 group 禁用 `Accept`。
+- Petal 创建保持在 Single Editor 的 `Local roles` 区域，没有 source-text Label 投射或 CanvasObject 行为。
+- 控制台未观察到新增 app error；仅存在 React Router v7 future-flag warnings。
+- 截图已保存到 `C:\Users\70208\AppData\Local\Temp\bn87-contentgroup-gate\`。
 
 ## Fixed - V2.BN.8.1 Browser Harness Page Canvas Switch Crash
 

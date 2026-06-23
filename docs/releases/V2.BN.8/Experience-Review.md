@@ -1,5 +1,399 @@
 # V2.BN.8 Experience Review
 
+## 2026-06-23 V2.BN.8.7.9 ContentGroup System Closure Gate Experience Note
+
+```text
+status: planned closure gate
+surface: ContentGroup System across Rail / Gallery / Single Editor
+```
+
+8.7.9 的体验目标不是继续扩张 ContentGroup，而是确认它作为第二支柱已经稳定到可以把注意力切向第三支柱 Canvas。
+
+当前产品判断：
+
+```text
+TextFlow
+  第一支柱，自然写作和内容 truth。
+
+ContentGroup
+  第二支柱，严肃内容包、成员整理、Petal 内部结构和 folder 资源管理。
+
+Canvas
+  第三支柱，空间媒介、对象投影、跨笔记复用和未来 relation/GraphRAG 的可视承载层。
+```
+
+ContentGroup reuse 现在有语言和 service 底座，但不应该在没有 CanvasObject 的情况下强行产品化：
+
+```text
+Reference / Duplicate / Fork / Materialize / Open original
+```
+
+这些语义真正自然的使用媒介是 CanvasObject / projection。没有 CanvasObject，用户只能在 Rail / Gallery / Editor 之间硬塞 reuse 操作，体验会变形。因此 8.7.9 接受一个清晰结论：
+
+```text
+Reuse vocabulary is ready.
+Reuse experience waits for Canvas.
+```
+
+8.7.9 的体验验收重点：
+
+- Rail 是否仍然像 collect，而不是小型 Gallery。
+- Gallery 是否像 organize，而不是普通卡片列表。
+- Single Editor 是否像 refine，而不是未完成的 Canvas workbench。
+- Member / source 边界是否能被用户理解。
+- Petal 是否始终作为 ContentGroup 内部结构出现，而不是变成 source text 上的 Label。
+- folder movement 是否表现为组织位置变化，而不是 source truth 移动。
+
+如果这些成立，ContentGroup System 可以带着明确的 carry-forward 清单进入 V2.BN.8.8+ CanvasObject 工作。
+
+## 2026-06-22 V2.BN.8.7.8 Single Editor Refine Shell Experience Note
+
+```text
+status: first scoped pass complete
+surface: Single ContentGroup Editor
+```
+
+8.7.8 把 Single Editor 的可见心智从“表单 + 卡片堆”推进成更明确的 refinement surface：
+
+```text
+topbar
+  group identity, role, topic, save/open actions
+
+summary bar
+  compact summary preview with explicit expansion
+
+material shelf
+  ContentGroupMember as group-local material/source package
+
+Petal dock
+  ContentGroup internal structure, not source-text Label
+
+source drawer
+  source note and folder context, without source mutation
+```
+
+体验判断：
+
+- 当前版本已经比旧的 Single Editor 更像一个“正在整理这个 ContentGroup”的页面。
+- `Members` 被改写成 `Materials / source packages`，更贴近 ContentGroupMember 与 source range 分离后的心智。
+- Petal 仍然只在 parent ContentGroup 上下文里出现，没有投射回 source text，也没有变成 Label。
+- Source drawer 明确说明：这里 refine package，不移动或改写原笔记。
+
+保留风险：
+
+- 这不是最终 OpenDesign workbench parity；自由工作台、material free placement、CanvasObject projection 仍然是 8.8+。
+- Petal reorder 仍需要至少两个 Petal 的 browser/manual 手感验证。
+- material shelf 仍然偏 list-like；如果要更接近 OpenDesign 的 material cards，需要在不做真正 Canvas 的前提下再单独取舍。
+
+## 2026-06-22 ContentGroup Experience State
+
+The current experience model has three surfaces:
+
+```text
+Groups Rail
+  quick collection in the current scope
+
+Group Gallery
+  full-page resource manager and folder/topic/role browsing surface
+
+Single ContentGroup Editor
+  focused refinement surface for one group and its Petals
+```
+
+The intended feel is not a stacked bubble panel. The ContentGroup system should feel closer to a calm resource manager plus a focused workbench. Buttons should not all float on the surface. Common actions can stay visible; richer actions should move into right-click menus, drag/drop, or dedicated editor surfaces.
+
+The next visual pass should preserve the user's reading surface, avoid shrinking text with permanent gutters, and avoid Petal / Label overlap. Petal should appear with parent ContentGroup context, not as a naked standalone text label.
+
+## 2026-06-22 V2.BN.8.7.1 ContentGroup Entity Cutover Experience Note
+
+```text
+status: engineering/data foundation completed; visual experience mostly unchanged
+```
+
+This pass is intentionally not a visual shell replacement. The user-facing surfaces stay the same:
+
+```text
+Rail = collect
+Gallery = organize
+Single Editor = refine
+```
+
+The experience value is underneath the UI:
+
+- ContentGroups are no longer stored as a note metadata array in normal save paths.
+- A ContentGroup can now be treated as its own managed object before later Canvas projection / cross-note reuse work.
+- Old metadata groups can still be imported when opening existing prototype notes, so the current local test data does not become instantly invisible.
+- Folder organization remains temporary metadata, which is acceptable for this cut because GroupFolder independence is its own later small version.
+
+Experience risks left open:
+
+- There was no browser/manual pass for this data cut.
+- If an existing prototype note has stale legacy metadata and failed import, folder saves may remove the old group metadata key after the new entity path is active.
+- Gallery and Single Editor visual parity remain separate work; this pass only makes their data foundation less fragile.
+
+## 2026-06-22 V2.BN.8.7 Sub-plan A Experience Note
+
+```text
+status: first pass complete for role vocabulary; visual parity still partial
+```
+
+The three surfaces now carry the same stable product words in code and UI markers:
+
+```text
+Groups Rail = Collect
+Group Gallery = Organize
+Single ContentGroup Editor = Refine
+```
+
+The practical effect is small but important: future UI work can target one surface role at a time instead of letting Rail, Gallery, and Editor drift into three overlapping control panels.
+
+Experience observations:
+
+- Rail is slightly calmer because the large new-group intake area is hidden when there is no active candidate selection.
+- Gallery is clearer at the title/role level, but still needs a stronger resource-manager pass.
+- Single Editor is clearer at the title/role level, but still needs stronger workbench treatment for identity, members, and Petals.
+- The next pass should remove explanatory Gallery chrome and make Single Editor less like a form without moving source text or adding CanvasObject behavior.
+
+## 2026-06-22 V2.BN.8.7 Sub-plan B Experience Note
+
+```text
+status: model boundary implemented; visual status language still needs a later pass
+```
+
+The important user-facing meaning is now stable:
+
+```text
+Member = what this ContentGroup currently says.
+Source = where it came from.
+Preview = a display cache.
+```
+
+This protects the natural-writing model. A user can refine a ContentGroup member without silently changing the original note, and source edits can be detected without silently overwriting the organized member.
+
+Experience implications for the next UI pass:
+
+- Changed source should feel like "your source moved since this member was last refreshed", not like data corruption.
+- Missing source should preserve the member's local content and show a clear degraded source state.
+- Refresh from source should be a visible action, not an automatic side effect.
+- Apply member back to source should require explicit confirmation and probably a diff/impact preview later.
+
+## 2026-06-22 V2.BN.8.7 Sub-plan C Experience Note
+
+```text
+status: resource-manager service boundary tightened
+```
+
+The Gallery direction is now safer: moving a group between folders is organization only. It does not imply source text moved, copied, or rewritten.
+
+Experience implications:
+
+- Default browsing should show active folders.
+- Archived folders should not pollute the everyday tree, but they still count as retained organization state for safety checks.
+- Deleting a folder with child folders or groups remains blocked.
+- Rail should continue to link into Gallery for organization instead of becoming a full folder manager.
+
+## 2026-06-22 V2.BN.8.7 Sub-plan D Experience Note
+
+```text
+status: reuse words stabilized in service layer
+```
+
+The product words now have a safer implementation boundary:
+
+```text
+Reference = point to original.
+Duplicate = copy into current context.
+Fork = copy with lineage for local editing.
+Materialize = plan visible blocks without moving source.
+Open original = return to source context.
+```
+
+The main experience decision is restraint: these words exist in code, but broad UI exposure should wait until Henry can decide where each action belongs. Materialize especially should feel like a deliberate "write this into the note" operation, not a drag side effect.
+
+## V2.BN.8.6.6 TextUnitGroup And AnnotationSet Editor Foundation Experience Note
+
+```text
+status: implementation complete; Henry manual pass pending
+date: 2026-06-17
+```
+
+### Experience Intent
+
+- Grouping several TextUnit rows should feel like a light writing helper, not a semantic label.
+- Annotation Organizer should feel like a label-set manager, not a second child-label stack.
+- The user should be able to make a small collection / sequence / all-of set without thinking about relation runtime.
+- Main text should remain calm; this version intentionally does not add visible AnnotationSet badges to the writing surface.
+
+### What To Watch Manually
+
+- Row grouping should not steal normal text caret behavior.
+- The group rail should be visible enough to find but quiet enough not to compete with annotation highlights.
+- Opening the organizer from Annotation Stack or label context should preserve selected labels.
+- Changing set label, kind, color, description, and member order should persist after refresh.
+- Removing a member or deleting a set must not delete the original label.
+
+## V2.BN.8.6.2 Annotation Hierarchy / SelectionDraft Experience Closure
+
+```text
+status: closed; Henry manual pass recorded
+date: 2026-06-16
+```
+
+### Experience Outcome
+
+- Child labels now read as subordinate details inside a parent annotation instead of independent sibling labels.
+- SelectionDraft / annotation editing is stable enough to support later CanvasObject and media annotation work, but the next active version now routes through ContentGroup System maturity first.
+- The final writing regression from this pass has been closed: users can create a TextUnit, click back into it, place the caret at the end or middle of existing text, and continue typing without the caret jumping to another unit.
+
+### Accepted Seed Boundary
+
+- This version is accepted as a foundation seed, not as the final annotation UI.
+- Annotation Stack can remain visually rough for now; its redesign belongs to a later visual polish pass.
+- Label visibility mode, global label hide/show, smarter badge placement, and editable range-preview text are deliberately deferred.
+
+### Next Experience Target
+
+- V2.BN.8.7 should make ContentGroup feel coherent enough for real use: collect from TextFlow, organize in Gallery / GroupFolder, refine in Single Editor, and understand what happens when a group is referenced, duplicated, forked, or materialized.
+- The richer CanvasObject workspace target is deferred to V2.BN.8.8+ or the next Canvas track.
+
+## V2.BN.8.6.1 Selection Draft Engine Experience Note
+
+```text
+status: closed through V2.BN.8.6.2 closure; retained here as historical intent
+date: 2026-06-16
+```
+
+### Experience Intent
+
+- Selecting text should feel visible and owned by Coincides, not like fragile browser highlight state.
+- A mistaken draft should be easy to escape: blank click, Esc, or close should clear it.
+- Ctrl / Command additive selection should feel intentional and inspectable before commit.
+- Child labels should feel like “mark a smaller thing inside an existing mark,” not like typing into a detached Inspector form.
+- The selection toolbar should stay light and temporary; it should not become a permanent panel or block editing surface.
+
+## V2.BN.8.6 Annotation Editor And ReadingInterpretation Experience Note
+
+```text
+status: engineering implementation complete; non-browser verification passed; Henry manual testing found annotation stack blocker
+date: 2026-06-16
+```
+
+### Experience Intent
+
+- A user should be able to mark the same text with several labels without losing older marks.
+- Overlapping annotations should feel like layered reading marks, not broken highlights.
+- Block-level annotation should be explicit and separate from accidental text selection.
+- Multi-range annotation should be available as an advanced path, but ordinary single-range labeling should stay lightweight.
+- ReadingInterpretation / AnnotationProposal should feel like future proposal infrastructure, not a fake AI feature.
+
+### What To Watch Manually
+
+- Mark the same word twice with different labels and confirm both remain inspectable.
+- Mark a phrase that overlaps an existing label and confirm the text remains readable.
+- Mark a partial TextUnit and confirm the highlight does not expand to the whole block.
+- Use the block toolbar annotation entry and confirm it labels the whole block intentionally.
+- Add several ranges to one draft and commit them as one annotation.
+- Use Inspector actions for rename, hide/show, soft-delete, same-range label, and child label.
+
+### Current Gate
+
+- Non-browser verification passed first: model contract smoke, client build, diff check, and changed-file secret scan.
+- Henry manual visual pass is active and currently blocked by Annotation Stack editing instability.
+
+### Henry Manual Result So Far
+
+- Overlapping labels are basically understandable before editing the stack.
+- Whole-block annotation passed the first manual check.
+- Annotation Stack editing is the main broken experience: rename, add same-range label, child label input, and similar text-edit paths can collapse the page into a black-screen state until refresh.
+- Multi-range annotation needs a separate UX entry for discontiguous selection. It cannot be fairly tested while only continuous browser selection exists.
+- Child annotation needs retest after the Annotation Stack editing bug is fixed.
+
+## V2.BN.8.3 TextFlow And Slash Command Foundation Experience Note
+
+```text
+status: closed; non-browser implementation smoke passed; Browser Use smoke recorded; Henry manual pass recorded
+date: 2026-06-15
+```
+
+### Experience Intent
+
+- Ordinary writing should still feel like writing, not like filling a database form.
+- TextFlow should be mostly invisible to the user in V2.BN.8.3. The visible experience change is slash command clarity, not a new heavy editor.
+- Slash commands should begin separating create block, convert block, insert structure, and inline action without turning the menu into a finished Structure Studio.
+- Future commands should be honest. If a command is reserved for TextUnit editor or inline structure work, it should be disabled with an explanation rather than partially working.
+
+### What To Watch Manually
+
+- New paragraph/text blocks should still save and render like normal writing blocks.
+- Heading and quote commands should behave as writing-role conversions from the user's perspective.
+- Formula should continue to work as a structured/special block. Existing Definition compatibility should not crash, but active Definition creation is retired in favor of future TextFlow role marking.
+- Reserved slash commands should be understandable when selected, and should not silently mutate content.
+- Browser Use should check that the slash menu still opens near the active draft/block and that disabled command feedback remains readable.
+
+### Current Gate
+
+- Non-browser model and client build checks have passed.
+- Browser Use experience smoke has been recorded for this exact 8.3 implementation pass.
+- Henry manual pass is recorded; V2.BN.8.3 is closed.
+
+### Browser Use Result
+
+- The current note route loaded in the in-app browser without app errors; console output only showed React Router future-flag warnings.
+- Typing `/for` in a text block opened the slash menu near the active writing area.
+- The slash menu showed `Formula` as the active Math command and `Inline Formula` as a disabled future command with explanatory copy.
+- ArrowDown and ArrowUp moved the active slash command state without mouse input.
+- Browser Use did not commit Enter in the active smoke note to avoid creating extra test content; the Enter selection path is code-verified in `useSlashCommandController.ts`.
+- The viewport-level `Insert` button now opens Advanced Insert after restoring pointer-events to the free floating tool rail and insert panel.
+- Advanced Insert now displays the `code.snippet` template as `Code`, keeping the picker aligned with the block badge and product language.
+
+## V2.BN.8.2 Canvas Shell And Viewport Transform Experience Note
+
+```text
+status: Browser Use smoke recorded; Henry manual pass pending
+date: 2026-06-13
+```
+
+### Experience Intent
+
+- Canvas mode should feel like a workspace viewport, not a page trapped inside another page.
+- PageFrame should remain visible and recognizable as the export/readable region.
+- Scratch Workspace should feel available around the PageFrame instead of only to the right or below.
+- Pan and zoom should belong to the canvas, not to the browser page.
+- Slash command selection should support keyboard flow: type `/for`, press arrows, press Enter.
+
+### Human Observation Targets
+
+- Page mode should still feel like a normal note.
+- Canvas mode should not show two competing scroll areas.
+- Space-drag or middle-drag should pan the canvas.
+- Ctrl/Command + wheel should zoom the canvas around the cursor.
+- The slash menu active item should be visually obvious.
+- Preview and toolbar overlays should still sit above block content.
+
+### Browser Use Result
+
+- Canvas mode loaded inside the current in-app browser note route.
+- Canvas mode initial viewport no longer begins at a hard upper-left lock. Browser Use observed `x=-180`, `y=-64`, `zoom=1.000`.
+- The app document stayed at the viewport height during Canvas mode pan / zoom smoke, so the shell no longer behaved like two competing vertical scroll containers in this check.
+- Wheel pan moved the canvas viewport without growing the page.
+- Browser Use could not reliably send a modifier wheel event, so this patch adds a lightweight keyboard zoom path:
+  - Ctrl/Command + `+` zoom in;
+  - Ctrl/Command + `-` zoom out;
+  - Ctrl/Command + `0` reset viewport.
+- Browser Use verified the keyboard path changes canvas zoom and resets without resizing the app chrome.
+- Slash menu active-state smoke passed for `/for`: Formula appears near the active draft, becomes the active candidate, ArrowDown / ArrowUp keeps selection under keyboard control, and Enter commits a Formula block without mouse input.
+- Browser Use confirmed the committed Formula block stays in Scratch Workspace after reload. Page mode still showed only formal PageFrame blocks; Canvas mode restored the workspace blocks as scratch blocks.
+- Browser Use confirmed an empty Canvas draft now disappears when the user clicks blank canvas space.
+- Browser Use confirmed Preview behaves as a viewport overlay: hit-testing over the selected block area returned Preview panel content instead of the underlying block.
+- Browser Use confirmed toolbar placement tracks the selected workspace block after pan and keyboard zoom. The current visual strategy still places the toolbar to the block's left side; this is acceptable for V2.BN.8.2 and can be revisited as design polish.
+
+### Remaining Human Feel Checks
+
+- Space-drag or middle-drag pan should feel natural with a real mouse / trackpad.
+- Ctrl/Command + wheel zoom should still be checked manually because Browser Use modifier-wheel did not exercise that route.
+- Slash menu ArrowUp / ArrowDown / Enter should still be tested in a disposable block by Henry because Browser Use only proves the programmatic path and not the feel.
+- Workspace block persistence after refresh/reopen still needs Henry's ordinary visual pass in the real smoke note.
+
 ## V2.BN.8.1 Final Browser Harness Experience Gate
 
 ```text
@@ -931,3 +1325,74 @@ Henry 之前明确要求：暂时不要用 Browser Harness 做中途测试，等
 - undo/redo；
 - reload 后 layout 保持；
 - Henry manual pass。
+# V2.BN.8.6.3 / V2.BN.8.6.4 Experience Note
+
+- Range preview now behaves as a source-backed editor seed instead of a detached text copy. The expected user experience is that changing preview text also changes the original note text.
+- Annotation display now has a first global label overlay switch in Preview. It should feel like a view filter, not a destructive label action.
+- Local annotation badges now prefer the relevant TextUnit context instead of piling all labels on the block corner.
+- Annotation Stack is still not final visual design, but the working hierarchy is calmer: label, ranges, children, details, actions.
+- Henry manual visual pass should focus on whether labels help without disturbing natural writing.
+
+## V2.BN.8.7 ContentGroup Petal Refinement Experience Note
+
+```text
+status: implemented seed, pending browser/manual experience gate
+surface: Single ContentGroup Editor
+```
+
+体验意图：
+
+- Single Editor 承担 `refine`，所以 Petal 排序放在这里，而不是 Rail 或 Gallery。
+- Petal 标题输入框旁新增拖动手柄；拖动 Petal 到另一个 Petal 上方时，调整的是 ContentGroup 内部结构顺序。
+- 这个操作不改变原文，不把 Petal 画到 source text 上，也不创建 CanvasObject。
+- 用户心智应该是“我在整理这个内容包内部的局部角色”，而不是“我在移动原文”。
+
+待 G 阶段浏览器 / 手动检查：
+
+- 拖动手柄是否足够可发现。
+- 拖动时目标反馈是否够清楚。
+- 标题输入、删除按钮、拖动手柄是否互相干扰。
+- 是否需要补键盘上移 / 下移入口来照顾非鼠标操作。
+
+## V2.BN.8.7 ContentGroup Stability Experience Note
+
+```text
+status: implemented seed, pending browser/manual experience gate
+surface: Rail / Gallery / Single ContentGroup Editor
+```
+
+体验意图：
+
+- 用户不用打开深层调试器，也能看见一个 group 是 Ready、Empty、Source changed、Source missing、Accepted but stale 等状态。
+- Rail 只给收集过程一个轻提示，避免抢走写作注意力。
+- Gallery 在卡片底部显示状态，帮助用户扫描资源管理器。
+- Single Editor 把状态放在 Identity 区，Accept 会在明显不安全时禁用。
+
+待 G 阶段浏览器 / 手动检查：
+
+- 状态文字是否能被 Henry 一眼看懂。
+- Ready / Empty / Source changed / Source missing 的区别是否足够清楚。
+- Accept 禁用是否太严格，尤其是 empty group 和 stale member 的产品预期。
+- 是否需要后续把 source note availability 接入真实 source resolver。
+
+## V2.BN.8.7 ContentGroup Browser Gate Experience Note
+
+```text
+status: first browser experience pass completed
+surface: Rail / Gallery / Single ContentGroup Editor
+```
+
+体验观察：
+
+- 三个界面现在有比较明确的心智分工：Rail 是 `Collect`，Gallery 是 `Organize`，Single Editor 是 `Refine`。
+- 空 group 的状态提示能贯穿三层界面：Rail 显示 `Empty group / 0 members`，Gallery card 显示 `Empty group`，Single Editor Identity 显示 `none / Empty group`。
+- Single Editor 对空 group 禁用 `Accept` 是合理的第一版安全策略；它把“还没有可确认内容”的状态显性化，而不是让用户误以为已经整理完成。
+- Petal 创建后留在 `Local roles` 区域，用户心智更接近“整理内容包内部结构”，而不是“给原文贴新的 Label”。
+- 当前 Gallery 的资源管理器语言比之前更稳：Folder tree 负责组织位置，没有暗示会移动 source truth。
+
+剩余体验风险：
+
+- Petal reorder 需要至少两个 Petal 的浏览器手感验证，并决定是否补键盘上移/下移入口。
+- `Ready / Source changed / Source missing` 仍缺少真实数据状态下的视觉对比。
+- Folder move/delete 的资源管理器行为需要单独种 richer data 后验收。
+- mobile viewport 未跑；宽屏下可用不代表移动端扫描体验已经成立。

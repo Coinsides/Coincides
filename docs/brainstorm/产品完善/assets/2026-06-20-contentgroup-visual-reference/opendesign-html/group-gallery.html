@@ -1,0 +1,1507 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Group Gallery - Coincides</title>
+  <style>
+    :root {
+      --bg: oklch(14% 0.01 255);
+      --rail: oklch(17% 0.012 255);
+      --panel: oklch(19% 0.012 255);
+      --panel-2: oklch(22% 0.014 255);
+      --surface: oklch(24% 0.014 255);
+      --fg: oklch(91% 0.012 255);
+      --muted: oklch(66% 0.014 255);
+      --subtle: oklch(49% 0.014 255);
+      --border: oklch(31% 0.014 255);
+      --border-soft: oklch(27% 0.014 255);
+      --accent: oklch(67% 0.14 210);
+      --accent-soft: color-mix(in oklch, var(--accent) 18%, transparent);
+      --green: oklch(69% 0.13 152);
+      --amber: oklch(76% 0.14 82);
+      --violet: oklch(68% 0.12 292);
+      --rose: oklch(68% 0.14 22);
+      --blue: oklch(68% 0.14 240);
+      --font-ui: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      --font-mono: "SF Mono", "JetBrains Mono", ui-monospace, Menlo, monospace;
+      --r-sm: 4px;
+      --r-md: 6px;
+      --r-lg: 8px;
+      --nav: 248px;
+      --tree: 292px;
+    }
+
+    * { box-sizing: border-box; }
+    html { min-width: 1180px; background: var(--bg); }
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      color: var(--fg);
+      background: var(--bg);
+      font-family: var(--font-ui);
+      font-size: 13px;
+      line-height: 1.45;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
+    button { cursor: default; }
+
+    .app {
+      min-height: 100dvh;
+      display: grid;
+      grid-template-columns: 1fr;
+      background: var(--bg);
+    }
+
+    .app-nav {
+      border-right: 1px solid var(--border);
+      background: var(--rail);
+      display: none;
+      flex-direction: column;
+      min-height: 100dvh;
+    }
+
+    .workspace {
+      height: 56px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 14px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .mark {
+      width: 24px;
+      height: 24px;
+      border-radius: var(--r-sm);
+      display: grid;
+      place-items: center;
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      color: var(--fg);
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    .workspace strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0;
+    }
+
+    .workspace span {
+      display: block;
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      margin-top: 1px;
+    }
+
+    .nav-section {
+      padding: 10px 8px 4px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .nav-label {
+      padding: 7px 8px 5px;
+      color: var(--subtle);
+      font-size: 10px;
+      font-family: var(--font-mono);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .nav-item {
+      height: 32px;
+      display: grid;
+      grid-template-columns: 18px 1fr auto;
+      align-items: center;
+      gap: 8px;
+      padding: 0 8px;
+      border-radius: var(--r-md);
+      color: var(--muted);
+    }
+
+    .nav-item.active {
+      color: var(--fg);
+      background: var(--panel-2);
+      box-shadow: inset 3px 0 0 var(--accent);
+    }
+
+    .nav-item:hover { background: var(--panel); color: var(--fg); }
+    .nav-glyph {
+      width: 14px;
+      height: 14px;
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      background: color-mix(in oklch, var(--fg) 4%, transparent);
+    }
+
+    .nav-count {
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .main {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: 64px 1fr 28px;
+      min-height: 100dvh;
+      background: var(--bg);
+    }
+
+    .page-top {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 24px;
+      padding: 0 18px 0 22px;
+      border-bottom: 1px solid var(--border);
+      background: color-mix(in oklch, var(--bg) 82%, var(--panel));
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.2;
+      letter-spacing: 0;
+      font-weight: 650;
+    }
+
+    .subtitle {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12.5px;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .search {
+      width: 288px;
+      height: 32px;
+      color: var(--fg);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 0 10px 0 30px;
+      outline: none;
+      background-image:
+        radial-gradient(circle at 12px 13px, transparent 4px, var(--subtle) 4.5px, var(--subtle) 5.5px, transparent 6px),
+        linear-gradient(45deg, transparent 14px, var(--subtle) 14px, var(--subtle) 15px, transparent 15px);
+      background-size: 22px 22px, 22px 22px;
+      background-repeat: no-repeat;
+      background-position: 6px 4px, 6px 4px;
+    }
+
+    .search::placeholder { color: var(--subtle); }
+    .search:focus {
+      border-color: color-mix(in oklch, var(--accent) 80%, var(--border));
+      box-shadow: 0 0 0 2px var(--accent-soft);
+    }
+
+    .btn {
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 0 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      color: var(--fg);
+      background: var(--panel);
+      font-weight: 520;
+      white-space: nowrap;
+    }
+
+    .btn.primary {
+      border-color: color-mix(in oklch, var(--accent) 64%, var(--border));
+      background: color-mix(in oklch, var(--accent) 18%, var(--panel));
+    }
+
+    .btn:hover { background: var(--panel-2); }
+    .btn.primary:hover { background: color-mix(in oklch, var(--accent) 24%, var(--panel)); }
+    .btn:active { transform: translateY(1px); }
+
+    .btn.back {
+      min-width: 58px;
+      color: var(--muted);
+      background: transparent;
+    }
+
+    .btn.back:hover {
+      color: var(--fg);
+      background: var(--panel);
+    }
+
+    .content {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: var(--tree) 1fr;
+    }
+
+    .folder-pane {
+      min-width: 0;
+      border-right: 1px solid var(--border);
+      background: var(--rail);
+      display: grid;
+      grid-template-rows: 44px 1fr;
+    }
+
+    .pane-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px 0 14px;
+      border-bottom: 1px solid var(--border-soft);
+    }
+
+    .pane-head strong {
+      font-size: 12px;
+      font-weight: 650;
+      letter-spacing: .01em;
+    }
+
+    .muted-action {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border: 1px solid transparent;
+      border-radius: var(--r-sm);
+      color: var(--muted);
+      background: transparent;
+    }
+
+    .muted-action:hover {
+      color: var(--fg);
+      background: var(--panel-2);
+      border-color: var(--border);
+    }
+
+    .tree {
+      padding: 8px 6px 14px;
+      overflow: hidden;
+    }
+
+    .tree-group { margin: 4px 0 10px; }
+    .tree-title {
+      display: flex;
+      align-items: center;
+      height: 24px;
+      padding: 0 8px;
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .folder-row {
+      height: 30px;
+      display: grid;
+      grid-template-columns: 16px 16px 1fr auto;
+      align-items: center;
+      gap: 6px;
+      padding: 0 8px;
+      border-radius: var(--r-md);
+      color: var(--muted);
+    }
+
+    .folder-row:hover { background: var(--panel); color: var(--fg); }
+    .folder-row.selected {
+      color: var(--fg);
+      background: var(--panel-2);
+      box-shadow: inset 2px 0 0 var(--accent);
+    }
+
+    .twisty {
+      color: var(--subtle);
+      font-size: 10px;
+      font-family: var(--font-mono);
+    }
+
+    .folder-glyph {
+      width: 14px;
+      height: 11px;
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      position: relative;
+      background: color-mix(in oklch, var(--fg) 3%, transparent);
+    }
+
+    .folder-glyph::before {
+      content: "";
+      position: absolute;
+      width: 7px;
+      height: 3px;
+      left: 1px;
+      top: -4px;
+      border: 1px solid var(--border);
+      border-bottom: 0;
+      border-radius: 2px 2px 0 0;
+      background: color-mix(in oklch, var(--fg) 3%, transparent);
+    }
+
+    .folder-row .name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 12.5px;
+    }
+
+    .folder-row .meta {
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .indent-1 { padding-left: 22px; }
+    .indent-2 { padding-left: 38px; }
+    .indent-3 { padding-left: 54px; }
+
+    .browser {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: 44px 42px 1fr;
+      background: var(--bg);
+    }
+
+    .viewbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--border-soft);
+      background: var(--panel);
+    }
+
+    .switcher {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      padding: 2px;
+      background: var(--rail);
+    }
+
+    .switcher button {
+      height: 26px;
+      border: 0;
+      border-radius: var(--r-sm);
+      padding: 0 10px;
+      color: var(--muted);
+      background: transparent;
+      font-size: 12px;
+    }
+
+    .switcher button.active {
+      color: var(--fg);
+      background: var(--panel-2);
+    }
+
+    .view-hint {
+      color: var(--subtle);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+    }
+
+    .hint-piece {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .topic-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 99px;
+      background: var(--topic, var(--accent));
+      box-shadow: 0 0 0 1px color-mix(in oklch, var(--topic, var(--accent)) 42%, var(--border));
+    }
+
+    .breadcrumb {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--border-soft);
+      background: color-mix(in oklch, var(--panel) 72%, var(--bg));
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .breadcrumb strong {
+      color: var(--fg);
+      font-weight: 550;
+    }
+
+    .crumb-sep {
+      color: var(--subtle);
+      font-family: var(--font-mono);
+    }
+
+    .gallery-body {
+      min-height: 0;
+      padding: 14px 16px 16px;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 12px;
+    }
+
+    .scope-strip {
+      min-height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
+      border: 1px solid var(--border-soft);
+      border-radius: var(--r-md);
+      background: color-mix(in oklch, var(--panel) 58%, transparent);
+    }
+
+    .scope-strip span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .scope-strip strong { color: var(--fg); font-weight: 550; }
+
+    .compact-tabs {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .compact-tabs b {
+      color: var(--fg);
+      font-weight: 500;
+    }
+
+    .tile-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(198px, 1fr));
+      grid-auto-rows: 156px;
+      gap: 14px 10px;
+      align-content: start;
+      padding-top: 22px;
+    }
+
+    .tile-grid.is-grouped {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 18px 12px;
+      padding-top: 8px;
+    }
+
+    .group-column {
+      flex: 1 1 236px;
+      min-width: 222px;
+      max-width: 288px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+      gap: 10px;
+      border-left: 1px solid color-mix(in oklch, var(--border) 86%, var(--fg));
+      padding-left: 10px;
+    }
+
+    .group-column-header {
+      height: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--fg);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .01em;
+    }
+
+    .group-column-title {
+      min-width: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .group-column-count {
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 500;
+    }
+
+    .group-column-body {
+      display: grid;
+      grid-auto-rows: 148px;
+      gap: 24px;
+    }
+
+    .tile-grid.is-grouped .group-tile {
+      width: 100%;
+    }
+
+    .group-tile {
+      position: relative;
+      min-width: 0;
+      height: 148px;
+      border: 1px solid var(--border);
+      border-radius: var(--r-md);
+      background: var(--panel);
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      padding: 14px 10px 10px;
+      overflow: visible;
+    }
+
+    .group-tile::before {
+      content: "";
+      position: absolute;
+      inset: 12px auto 12px -1px;
+      width: 4px;
+      border-radius: 0 2px 2px 0;
+      background: var(--topic, var(--accent));
+    }
+
+    .group-tile::after {
+      content: "";
+      position: absolute;
+      top: -1px;
+      left: 0;
+      right: 76px;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .group-tile:hover {
+      border-color: color-mix(in oklch, var(--accent) 48%, var(--border));
+      background: var(--panel-2);
+    }
+
+    .group-tile:hover::after {
+      background: color-mix(in oklch, var(--accent) 48%, var(--border));
+    }
+
+    .folder-role-tab {
+      position: absolute;
+      top: -22px;
+      right: -1px;
+      min-width: 78px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 9px;
+      border: 1px solid var(--border);
+      border-bottom: 0;
+      border-radius: var(--r-md) var(--r-md) 0 0;
+      color: var(--fg);
+      background: color-mix(in oklch, var(--panel) 92%, var(--topic, var(--accent)));
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .02em;
+      text-transform: lowercase;
+      z-index: 2;
+    }
+
+    .group-tile:hover .folder-role-tab {
+      border-color: color-mix(in oklch, var(--accent) 48%, var(--border));
+      background: color-mix(in oklch, var(--panel-2) 88%, var(--topic, var(--accent)));
+    }
+
+    .tile-top {
+      min-width: 0;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: start;
+    }
+
+    .tile-title {
+      margin: 0;
+      min-width: 0;
+      color: var(--fg);
+      font-size: 13px;
+      line-height: 1.25;
+      font-weight: 650;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding-left: 4px;
+    }
+
+    .info {
+      width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+      border-radius: 99px;
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 10px;
+    }
+
+    .summary {
+      margin: 8px 0 0 4px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.42;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .tile-bottom {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: end;
+      padding-left: 4px;
+    }
+
+    .source {
+      min-width: 0;
+      color: var(--subtle);
+      font-size: 11.5px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .chips {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .role {
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--border);
+      border-radius: var(--r-sm);
+      padding: 0 6px;
+      color: var(--fg);
+      background: color-mix(in oklch, var(--fg) 4%, transparent);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .02em;
+    }
+
+    .identity {
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      border-radius: var(--r-sm);
+      padding: 0 6px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .02em;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: transparent;
+    }
+
+    .identity.accepted {
+      color: var(--green);
+      border-color: color-mix(in oklch, var(--green) 34%, var(--border));
+      background: color-mix(in oklch, var(--green) 8%, transparent);
+    }
+
+    .identity.draft {
+      color: var(--amber);
+      border-color: color-mix(in oklch, var(--amber) 30%, var(--border));
+      background: color-mix(in oklch, var(--amber) 7%, transparent);
+    }
+
+    .topic-path {
+      height: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 11px;
+      min-width: 0;
+    }
+
+    .topic-path span:last-child {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .grouping-preview {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      min-height: 58px;
+    }
+
+    .preview-row {
+      border: 1px solid var(--border-soft);
+      border-radius: var(--r-md);
+      background: color-mix(in oklch, var(--panel) 58%, transparent);
+      padding: 8px 10px;
+      display: grid;
+      gap: 5px;
+    }
+
+    .preview-row .label {
+      color: var(--subtle);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .topic-stack, .role-stack {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .topic-line {
+      height: 6px;
+      width: 42px;
+      border-radius: 99px;
+      background: var(--topic, var(--accent));
+      opacity: .9;
+    }
+
+    .statusbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 28px;
+      padding: 0 10px;
+      border-top: 1px solid var(--border);
+      color: var(--subtle);
+      background: var(--rail);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+
+    .statusbar strong {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    @media (max-width: 1360px) {
+      .tile-grid { grid-template-columns: repeat(3, minmax(198px, 1fr)); }
+      .search { width: 232px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="app-nav" aria-label="Application navigation">
+      <div class="workspace">
+        <span class="mark">C</span>
+        <div>
+          <strong>Coincides</strong>
+          <span>Better Notebook</span>
+        </div>
+      </div>
+
+      <nav class="nav-section" aria-label="Main navigation">
+        <div class="nav-label">Workspace</div>
+        <a class="nav-item" href="#">
+          <span class="nav-glyph"></span>
+          <span>Notes</span>
+          <span class="nav-count">18</span>
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-glyph"></span>
+          <span>Canvas</span>
+          <span class="nav-count">4</span>
+        </a>
+        <a class="nav-item active" href="#" aria-current="page">
+          <span class="nav-glyph"></span>
+          <span>Group Gallery</span>
+          <span class="nav-count">32</span>
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-glyph"></span>
+          <span>Graph Scopes</span>
+          <span class="nav-count">7</span>
+        </a>
+      </nav>
+
+      <nav class="nav-section" aria-label="Project navigation">
+        <div class="nav-label">Projects</div>
+        <a class="nav-item" href="#">
+          <span class="nav-glyph"></span>
+          <span>AMATH 231</span>
+          <span class="nav-count">open</span>
+        </a>
+        <a class="nav-item" href="#">
+          <span class="nav-glyph"></span>
+          <span>Microeconomics</span>
+          <span class="nav-count">12</span>
+        </a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="page-top">
+        <div>
+          <h1>Group Gallery</h1>
+          <div class="subtitle">Organize content groups across workspace, projects, notes, and custom scopes.</div>
+        </div>
+        <div class="top-actions" aria-label="Gallery actions">
+          <input class="search" type="search" placeholder="Search folders and groups" aria-label="Search folders and groups" />
+          <button class="btn">New folder</button>
+          <button class="btn primary">New group</button>
+          <a class="btn back" href="index.html" aria-label="返回上一层">返回</a>
+        </div>
+      </header>
+
+      <section class="content" data-od-id="group-gallery-page" aria-label="Group Gallery browser">
+        <aside class="folder-pane" aria-label="Group Folder tree">
+          <div class="pane-head">
+            <strong>Folders</strong>
+            <button class="muted-action" aria-label="Folder options">...</button>
+          </div>
+
+          <div class="tree">
+            <div class="tree-group">
+              <div class="tree-title">Workspace</div>
+              <div class="folder-row">
+                <span class="twisty">v</span>
+                <span class="folder-glyph"></span>
+                <span class="name">Workspace</span>
+                <span class="meta">32</span>
+              </div>
+              <div class="folder-row indent-1">
+                <span class="twisty">v</span>
+                <span class="folder-glyph"></span>
+                <span class="name">Groups</span>
+                <span class="meta">32</span>
+              </div>
+              <div class="folder-row indent-2">
+                <span class="twisty"></span>
+                <span class="folder-glyph"></span>
+                <span class="name">Cross-project review</span>
+                <span class="meta">3</span>
+              </div>
+              <div class="folder-row indent-2">
+                <span class="twisty"></span>
+                <span class="folder-glyph"></span>
+                <span class="name">Saved graph scopes</span>
+                <span class="meta">5</span>
+              </div>
+              <div class="folder-row indent-2">
+                <span class="twisty">v</span>
+                <span class="folder-glyph"></span>
+                <span class="name">Project folders</span>
+                <span class="meta">24</span>
+              </div>
+              <div class="folder-row indent-3 selected">
+                <span class="twisty">v</span>
+                <span class="folder-glyph"></span>
+                <span class="name">AMATH 231</span>
+                <span class="meta">11</span>
+              </div>
+              <div class="folder-row" style="padding-left: 70px;">
+                <span class="twisty">v</span>
+                <span class="folder-glyph"></span>
+                <span class="name">Power Series note</span>
+                <span class="meta">6</span>
+              </div>
+              <div class="folder-row selected" style="padding-left: 86px;">
+                <span class="twisty">v</span>
+                <span class="folder-glyph"></span>
+                <span class="name">Chapter 1</span>
+                <span class="meta">4</span>
+              </div>
+              <div class="folder-row" style="padding-left: 102px;">
+                <span class="twisty"></span>
+                <span class="folder-glyph"></span>
+                <span class="name">Definitions</span>
+                <span class="meta">2</span>
+              </div>
+              <div class="folder-row" style="padding-left: 102px;">
+                <span class="twisty"></span>
+                <span class="folder-glyph"></span>
+                <span class="name">Examples</span>
+                <span class="meta">2</span>
+              </div>
+              <div class="folder-row" style="padding-left: 70px;">
+                <span class="twisty"></span>
+                <span class="folder-glyph"></span>
+                <span class="name">Week 1 notes</span>
+                <span class="meta">4</span>
+              </div>
+              <div class="folder-row" style="padding-left: 70px;">
+                <span class="twisty"></span>
+                <span class="folder-glyph"></span>
+                <span class="name">Textbook chapters</span>
+                <span class="meta">7</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+
+        <section class="browser" data-od-id="content-group-browser" aria-label="Content Group browser">
+          <style>
+            [data-od-id="content-group-browser"] .tile-grid.is-grouped {
+              display: grid;
+              grid-template-columns: 1fr;
+              grid-auto-rows: auto;
+              gap: 12px;
+              padding-top: 8px;
+            }
+
+            [data-od-id="content-group-browser"] .group-row {
+              border: 1px solid var(--border);
+              background: var(--panel);
+              border-radius: 7px;
+              overflow: hidden;
+            }
+
+            [data-od-id="content-group-browser"] .group-row-toggle {
+              width: 100%;
+              min-height: 34px;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 12px;
+              border: 0;
+              border-bottom: 1px solid var(--border);
+              background: color-mix(in oklch, var(--panel-2) 72%, var(--panel));
+              color: var(--fg);
+              padding: 0 10px;
+              font: inherit;
+              cursor: pointer;
+            }
+
+            [data-od-id="content-group-browser"] .group-row-toggle:hover {
+              background: color-mix(in oklch, var(--panel-2) 84%, var(--fg));
+            }
+
+            [data-od-id="content-group-browser"] .group-row-title {
+              min-width: 0;
+              display: inline-flex;
+              align-items: center;
+              gap: 8px;
+              font-size: 12px;
+              font-weight: 600;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+
+            [data-od-id="content-group-browser"] .group-row-meta {
+              display: inline-flex;
+              align-items: center;
+              gap: 10px;
+              color: var(--subtle);
+              font-family: var(--font-mono);
+              font-size: 10px;
+              white-space: nowrap;
+            }
+
+            [data-od-id="content-group-browser"] .toggle-caret {
+              color: var(--muted);
+              font-family: var(--font-mono);
+              font-size: 11px;
+            }
+
+            [data-od-id="content-group-browser"] .group-row-body {
+              display: grid;
+              grid-template-columns: repeat(auto-fill, minmax(198px, 1fr));
+              grid-auto-rows: 148px;
+              gap: 24px 10px;
+              padding: 20px 10px 12px;
+            }
+
+            [data-od-id="content-group-browser"] .group-row.is-collapsed .group-row-toggle {
+              border-bottom-color: transparent;
+            }
+
+            [data-od-id="content-group-browser"] .group-row.is-collapsed .group-row-body {
+              display: none;
+            }
+
+            [data-od-id="content-group-browser"] .tile-grid.is-grouped .group-tile {
+              width: 100%;
+            }
+          </style>
+          <div class="viewbar">
+            <div class="switcher" aria-label="View switcher" data-gallery-filter>
+              <button class="active" type="button" data-view="folder" aria-pressed="true">Folder view</button>
+              <button type="button" data-view="topic" aria-pressed="false">Topic view</button>
+              <button type="button" data-view="role" aria-pressed="false">Role view</button>
+            </div>
+            <div class="view-hint" id="viewFilterHint">
+              <span class="hint-piece"><span class="topic-dot" style="--topic: var(--blue)"></span> Topic color signal</span>
+              <span class="hint-piece"><span class="role">role/type</span> functional role badge</span>
+            </div>
+            <script>
+              (() => {
+                const viewConfigs = {
+                  folder: {
+                    label: 'Folder view',
+                    description: 'shows all groups stored in the selected folder. Clicking a group opens the Single Group Editor in a separate page.',
+                    hint: 'All current-folder groups',
+                    target: 'current folder target',
+                    filter: () => true,
+                    sort: (a, b) => Number(a.dataset.originalIndex) - Number(b.dataset.originalIndex)
+                  },
+                  topic: {
+                    label: 'Topic view',
+                    description: 'filters to the Power Series topic cluster and orders groups by topic color.',
+                    hint: 'Power Series / Convergence / Taylor Series',
+                    target: 'topic-filtered result',
+                    filter: (tile) => ['Power Series', 'Convergence', 'Taylor Series'].includes(readTopic(tile)),
+                    sort: (a, b) => readTopic(a).localeCompare(readTopic(b)) || readTitle(a).localeCompare(readTitle(b))
+                  },
+                  role: {
+                    label: 'Role view',
+                    description: 'filters to definition, theorem, and practice groups, then orders by role tab.',
+                    hint: 'definition / theorem / practice',
+                    target: 'role-filtered result',
+                    filter: (tile) => ['definition', 'theorem', 'practice'].includes(readRole(tile)),
+                    sort: (a, b) => {
+                      const order = { definition: 1, theorem: 2, practice: 3 };
+                      return (order[readRole(a)] || 9) - (order[readRole(b)] || 9) || readTitle(a).localeCompare(readTitle(b));
+                    }
+                  }
+                };
+
+                const groupOrders = {
+                  topic: ['Power Series', 'Convergence', 'Taylor Series', 'Economics', 'Consumer Choice'],
+                  role: ['definition', 'theorem', 'concept', 'practice', 'example']
+                };
+
+                function readTitle(tile) {
+                  return tile.querySelector('.tile-title')?.textContent.trim() || '';
+                }
+
+                function readRole(tile) {
+                  return tile.querySelector('.folder-role-tab')?.textContent.trim() || '';
+                }
+
+                function readTopic(tile) {
+                  const topic = tile.querySelector('.topic-path span:last-child');
+                  return topic?.textContent.trim() || '';
+                }
+
+                function initGalleryFilter() {
+                  const switcher = document.querySelector('[data-gallery-filter]');
+                  const grid = document.querySelector('.tile-grid');
+                  if (!switcher || !grid) return;
+
+                  const buttons = Array.from(switcher.querySelectorAll('[data-view]'));
+                  const tiles = Array.from(grid.querySelectorAll('.group-tile'));
+                  tiles.forEach((tile, index) => {
+                    tile.dataset.originalIndex = String(index);
+                  });
+
+                  const scopeText = document.querySelector('.scope-strip > span:first-child');
+                  const statusText = document.querySelector('.statusbar > span:last-child');
+                  const hint = document.getElementById('viewFilterHint');
+
+                  function buildToggleGroup(label, groupedTiles, view) {
+                    const row = document.createElement('section');
+                    row.className = 'group-row';
+                    row.setAttribute('aria-label', `${label} group`);
+
+                    const toggle = document.createElement('button');
+                    toggle.className = 'group-row-toggle';
+                    toggle.type = 'button';
+                    toggle.setAttribute('aria-expanded', 'true');
+
+                    const title = document.createElement('span');
+                    title.className = 'group-row-title';
+
+                    if (view === 'topic') {
+                      const topicDot = groupedTiles[0]?.querySelector('.topic-dot')?.cloneNode(true);
+                      if (topicDot) title.appendChild(topicDot);
+                    }
+
+                    const labelNode = document.createElement('span');
+                    labelNode.textContent = label;
+                    title.appendChild(labelNode);
+
+                    const meta = document.createElement('span');
+                    meta.className = 'group-row-meta';
+
+                    const count = document.createElement('span');
+                    count.textContent = `${groupedTiles.length} groups`;
+
+                    const caret = document.createElement('span');
+                    caret.className = 'toggle-caret';
+                    caret.textContent = 'collapse';
+                    meta.append(count, caret);
+
+                    const body = document.createElement('div');
+                    body.className = 'group-row-body';
+                    groupedTiles.forEach((tile) => {
+                      tile.hidden = false;
+                      body.appendChild(tile);
+                    });
+
+                    toggle.append(title, meta);
+                    toggle.addEventListener('click', () => {
+                      const collapsed = row.classList.toggle('is-collapsed');
+                      toggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+                      caret.textContent = collapsed ? 'expand' : 'collapse';
+                    });
+
+                    row.append(toggle, body);
+                    return row;
+                  }
+
+                  function renderFolderView(orderedTiles) {
+                    grid.classList.remove('is-grouped');
+                    grid.replaceChildren();
+                    orderedTiles.forEach((tile) => {
+                      tile.hidden = false;
+                      grid.appendChild(tile);
+                    });
+                  }
+
+                  function renderGroupedView(view, orderedTiles) {
+                    const keyReader = view === 'topic' ? readTopic : readRole;
+                    const order = groupOrders[view] || [];
+                    const buckets = new Map();
+
+                    orderedTiles.forEach((tile) => {
+                      const key = keyReader(tile);
+                      if (!buckets.has(key)) buckets.set(key, []);
+                      buckets.get(key).push(tile);
+                    });
+
+                    const labels = Array.from(buckets.keys()).sort((a, b) => {
+                      const aIndex = order.indexOf(a);
+                      const bIndex = order.indexOf(b);
+                      const aRank = aIndex === -1 ? 99 : aIndex;
+                      const bRank = bIndex === -1 ? 99 : bIndex;
+                      return aRank - bRank || a.localeCompare(b);
+                    });
+
+                    grid.classList.add('is-grouped');
+                    grid.replaceChildren();
+                    labels.forEach((label) => {
+                      grid.appendChild(buildToggleGroup(label, buckets.get(label), view));
+                    });
+                  }
+
+                  function applyView(view) {
+                    const config = viewConfigs[view] || viewConfigs.folder;
+                    buttons.forEach((button) => {
+                      const active = button.dataset.view === view;
+                      button.classList.toggle('active', active);
+                      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+                    });
+
+                    const orderedTiles = [...tiles].sort(config.sort);
+                    let visibleCount = 0;
+                    const visibleTiles = orderedTiles.filter((tile) => {
+                      const visible = config.filter(tile);
+                      tile.hidden = !visible;
+                      if (visible) visibleCount += 1;
+                      return visible;
+                    });
+
+                    if (view === 'topic' || view === 'role') {
+                      renderGroupedView(view, visibleTiles);
+                    } else {
+                      renderFolderView(visibleTiles);
+                    }
+
+                    if (scopeText) {
+                      scopeText.innerHTML = `<strong>${config.label}</strong> ${config.description}`;
+                    }
+                    if (statusText) {
+                      statusText.textContent = `${config.label} - ${visibleCount} visible groups - ${config.target}`;
+                    }
+                    if (hint) {
+                      hint.innerHTML = `<span class="hint-piece">${config.hint}</span><span class="hint-piece">${visibleCount} visible</span>`;
+                    }
+                  }
+
+                  switcher.addEventListener('click', (event) => {
+                    const button = event.target.closest('[data-view]');
+                    if (!button) return;
+                    applyView(button.dataset.view);
+                  });
+
+                  applyView('folder');
+                }
+
+                if (document.readyState === 'loading') {
+                  document.addEventListener('DOMContentLoaded', initGalleryFilter);
+                } else {
+                  initGalleryFilter();
+                }
+              })();
+            </script>
+          </div>
+
+          <div class="breadcrumb" aria-label="Current folder path">
+            <span>Workspace</span>
+            <span class="crumb-sep">/</span>
+            <span>AMATH 231</span>
+            <span class="crumb-sep">/</span>
+            <span>Power Series note</span>
+            <span class="crumb-sep">/</span>
+            <strong>Chapter 1</strong>
+          </div>
+
+          <div class="gallery-body">
+            <div class="tile-grid" aria-label="Content Groups">
+              <article class="group-tile" style="--topic: var(--blue)">
+                <span class="folder-role-tab">definition</span>
+                <div class="tile-top">
+                  <h2 class="tile-title">Definition of Power Series</h2>
+                  <span class="info" aria-label="Technical details available">i</span>
+                </div>
+                <p class="summary">A power series is a function represented as an infinite polynomial centered at a point.</p>
+                <div class="tile-bottom">
+                  <div>
+                    <div class="topic-path"><span class="topic-dot" style="--topic: var(--blue)"></span><span>Power Series</span></div>
+                  </div>
+                  <div class="chips">
+                    <span class="identity accepted">accepted</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="group-tile" style="--topic: var(--green)">
+                <span class="folder-role-tab">theorem</span>
+                <div class="tile-top">
+                  <h2 class="tile-title">Radius of Convergence</h2>
+                  <span class="info" aria-label="Technical details available">i</span>
+                </div>
+                <p class="summary">Describes where a power series converges and how the interval is determined.</p>
+                <div class="tile-bottom">
+                  <div>
+                    <div class="topic-path"><span class="topic-dot" style="--topic: var(--green)"></span><span>Convergence</span></div>
+                    <div class="source">From Power Series note</div>
+                  </div>
+                  <div class="chips">
+                    <span class="identity draft">draft</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="group-tile" style="--topic: var(--rose)">
+                <span class="folder-role-tab">concept</span>
+                <div class="tile-top">
+                  <h2 class="tile-title">Demand and Price</h2>
+                  <span class="info" aria-label="Technical details available">i</span>
+                </div>
+                <p class="summary">A compact explanation of how price affects demand, with examples and source snippets.</p>
+                <div class="tile-bottom">
+                  <div>
+                    <div class="topic-path"><span class="topic-dot" style="--topic: var(--rose)"></span><span>Economics</span></div>
+                    <div class="source">From Microeconomics note</div>
+                  </div>
+                  <div class="chips">
+                    <span class="identity accepted">accepted</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="group-tile" style="--topic: var(--violet)">
+                <span class="folder-role-tab">practice</span>
+                <div class="tile-top">
+                  <h2 class="tile-title">Practice: Series Expansion</h2>
+                  <span class="info" aria-label="Technical details available">i</span>
+                </div>
+                <p class="summary">A practice set connected to definitions and theorem groups.</p>
+                <div class="tile-bottom">
+                  <div>
+                    <div class="topic-path"><span class="topic-dot" style="--topic: var(--violet)"></span><span>Taylor Series</span></div>
+                    <div class="source">From Chapter 1 exercises</div>
+                  </div>
+                  <div class="chips">
+                    <span class="identity draft">draft</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="group-tile" style="--topic: var(--amber)">
+                <span class="folder-role-tab">definition</span>
+                <div class="tile-top">
+                  <h2 class="tile-title">Income Effect</h2>
+                  <span class="info" aria-label="Technical details available">i</span>
+                </div>
+                <p class="summary">Explains how purchasing power changes a buyer's choices when income or prices shift.</p>
+                <div class="tile-bottom">
+                  <div>
+                    <div class="topic-path"><span class="topic-dot" style="--topic: var(--amber)"></span><span>Consumer Choice</span></div>
+                    <div class="source">From Demand and Price</div>
+                  </div>
+                  <div class="chips">
+                    <span class="identity accepted">accepted</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="group-tile" style="--topic: var(--green)">
+                <span class="folder-role-tab">example</span>
+                <div class="tile-top">
+                  <h2 class="tile-title">Interval Endpoint Check</h2>
+                  <span class="info" aria-label="Technical details available">i</span>
+                </div>
+                <p class="summary">Shows how each endpoint is tested after the radius of convergence is found.</p>
+                <div class="tile-bottom">
+                  <div>
+                    <div class="topic-path"><span class="topic-dot" style="--topic: var(--green)"></span><span>Convergence</span></div>
+                    <div class="source">From Week 1 notes</div>
+                  </div>
+                  <div class="chips">
+                    <span class="identity draft">draft</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="group-tile" style="--topic: var(--violet)">
+                <span class="folder-role-tab">theorem</span>
+                <div class="tile-top">
+                  <h2 class="tile-title">Taylor Polynomial Remainder</h2>
+                  <span class="info" aria-label="Technical details available">i</span>
+                </div>
+                <p class="summary">Connects finite Taylor approximations with the error term used to control accuracy.</p>
+                <div class="tile-bottom">
+                  <div>
+                    <div class="topic-path"><span class="topic-dot" style="--topic: var(--violet)"></span><span>Taylor Series</span></div>
+                    <div class="source">From Textbook chapters</div>
+                  </div>
+                  <div class="chips">
+                    <span class="identity accepted">accepted</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="group-tile" style="--topic: var(--blue)">
+                <span class="folder-role-tab">concept</span>
+                <div class="tile-top">
+                  <h2 class="tile-title">Center of Expansion</h2>
+                  <span class="info" aria-label="Technical details available">i</span>
+                </div>
+                <p class="summary">Collects notes about shifting a power series from zero to an arbitrary center.</p>
+                <div class="tile-bottom">
+                  <div>
+                    <div class="topic-path"><span class="topic-dot" style="--topic: var(--blue)"></span><span>Power Series</span></div>
+                    <div class="source">From Power Series note</div>
+                  </div>
+                  <div class="chips">
+                    <span class="identity archived">archived</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="group-tile" style="--topic: var(--rose)">
+                <span class="folder-role-tab">example</span>
+                <div class="tile-top">
+                  <h2 class="tile-title">Price Elasticity Sketch</h2>
+                  <span class="info" aria-label="Technical details available">i</span>
+                </div>
+                <p class="summary">Uses a short demand curve example to compare steep and shallow price responses.</p>
+                <div class="tile-bottom">
+                  <div>
+                    <div class="topic-path"><span class="topic-dot" style="--topic: var(--rose)"></span><span>Economics</span></div>
+                    <div class="source">From Microeconomics note</div>
+                  </div>
+                  <div class="chips">
+                    <span class="identity accepted">accepted</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="group-tile" style="--topic: var(--amber)">
+                <span class="folder-role-tab">practice</span>
+                <div class="tile-top">
+                  <h2 class="tile-title">Budget Line Shift</h2>
+                  <span class="info" aria-label="Technical details available">i</span>
+                </div>
+                <p class="summary">Practice prompts for reading how a price change rotates the consumer budget line.</p>
+                <div class="tile-bottom">
+                  <div>
+                    <div class="topic-path"><span class="topic-dot" style="--topic: var(--amber)"></span><span>Consumer Choice</span></div>
+                    <div class="source">From Demand and Price</div>
+                  </div>
+                  <div class="chips">
+                    <span class="identity draft">draft</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="group-tile" style="--topic: var(--green)">
+                <span class="folder-role-tab">definition</span>
+                <div class="tile-top">
+                  <h2 class="tile-title">Absolute Convergence</h2>
+                  <span class="info" aria-label="Technical details available">i</span>
+                </div>
+                <p class="summary">Defines convergence of the absolute-value series and why it implies convergence.</p>
+                <div class="tile-bottom">
+                  <div>
+                    <div class="topic-path"><span class="topic-dot" style="--topic: var(--green)"></span><span>Convergence</span></div>
+                    <div class="source">From Chapter 1</div>
+                  </div>
+                  <div class="chips">
+                    <span class="identity rejected">rejected</span>
+                  </div>
+                </div>
+              </article>
+
+              <article class="group-tile" style="--topic: var(--blue)">
+                <span class="folder-role-tab">practice</span>
+                <div class="tile-top">
+                  <h2 class="tile-title">Rewrite as Power Series</h2>
+                  <span class="info" aria-label="Technical details available">i</span>
+                </div>
+                <p class="summary">Practice items for turning rational functions into geometric-series forms.</p>
+                <div class="tile-bottom">
+                  <div>
+                    <div class="topic-path"><span class="topic-dot" style="--topic: var(--blue)"></span><span>Power Series</span></div>
+                    <div class="source">From Chapter 1 exercises</div>
+                  </div>
+                  <div class="chips">
+                    <span class="identity draft">draft</span>
+                  </div>
+                </div>
+              </article>
+            </div>
+
+          </div>
+        </section>
+      </section>
+
+      <footer class="statusbar">
+        <span><strong>Chapter 1</strong> selected. New group will be created in current folder.</span>
+        <span>Folder view - 12 visible groups - current folder target</span>
+      </footer>
+    </main>
+  </div>
+</body>
+</html>
