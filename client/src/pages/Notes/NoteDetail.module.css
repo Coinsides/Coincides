@@ -194,6 +194,11 @@
   pointer-events: none;
 }
 
+.blockToolbarPortal {
+  clip-path: inset(90px 0 0 0);
+  z-index: 70;
+}
+
 .floatingOverlayStack {
   position: absolute;
   top: 60px;
@@ -377,7 +382,7 @@
 
 .previewOverlayControls {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
   margin-top: 12px;
   padding: 10px;
@@ -593,6 +598,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  pointer-events: auto;
 }
 
 .pageCanvas .pageToolRail,
@@ -624,6 +630,10 @@
   color: var(--text-primary);
 }
 
+body[data-coincides-annotation-panel-open="true"] .pageToolRail {
+  display: none;
+}
+
 .insertPanel {
   position: fixed;
   top: 140px;
@@ -635,6 +645,7 @@
   border-radius: var(--radius-lg);
   background: var(--bg-primary);
   box-shadow: var(--glass-shadow-lg);
+  pointer-events: auto;
 }
 
 .pageCanvas .insertPanel,
@@ -684,7 +695,7 @@
   min-height: 0;
   padding: 0;
   border: 0;
-  overflow: auto;
+  overflow: hidden;
   background:
     radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--border-default) 45%, transparent) 1px, transparent 0),
     repeating-linear-gradient(
@@ -704,6 +715,17 @@
   background-color: color-mix(in srgb, var(--bg-primary) 90%, var(--bg-secondary));
   background-size: 24px 24px, 24px 24px, 24px 24px;
   box-shadow: none;
+  cursor: default;
+  touch-action: none;
+}
+
+.canvasPanReady {
+  cursor: grab;
+}
+
+.canvasPanning {
+  cursor: grabbing;
+  user-select: none;
 }
 
 .blockList {
@@ -719,6 +741,7 @@
   width: var(--canvas-world-width, 4096px);
   min-width: var(--canvas-world-width, 4096px);
   min-height: var(--canvas-world-height, 2600px);
+  will-change: transform;
 }
 
 .formalPageBoundary {
@@ -948,6 +971,1720 @@
   line-height: 1.62;
   overflow: hidden;
   resize: none;
+}
+
+.textUnitEditor {
+  display: grid;
+  gap: 0;
+}
+
+.textUnitRow {
+  position: relative;
+  display: grid;
+  grid-template-columns: 58px minmax(0, 1fr);
+  gap: 4px;
+  align-items: start;
+  margin-left: calc(var(--text-unit-indent, 0) * 24px);
+  min-height: 28px;
+}
+
+.textUnitRow:hover .textUnitGutter,
+.textUnitRow:focus-within .textUnitGutter {
+  opacity: 1;
+}
+
+.textUnitHeadingRow {
+  margin-top: 3px;
+  margin-bottom: 2px;
+}
+
+.textUnitRowWithAnnotationBadge {
+  margin-top: 14px;
+}
+
+.textUnitGutter {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 27px;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.textUnitGutterButton,
+.textUnitRoleSelect {
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+}
+
+.textUnitGutterButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 24px;
+  padding: 0;
+}
+
+.textUnitGutterButton:hover,
+.textUnitRoleSelect:hover,
+.textUnitRoleSelect:focus {
+  border-color: var(--border-default);
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.textUnitGutterButtonSelected {
+  border-color: color-mix(in srgb, var(--accent-primary) 70%, var(--border-default));
+  background: color-mix(in srgb, var(--accent-primary-bg) 66%, transparent);
+  color: var(--text-primary);
+}
+
+.textUnitRoleSelect {
+  width: 8px;
+  height: 24px;
+  padding: 0;
+  font-size: 0;
+  cursor: pointer;
+}
+
+.textUnitLine {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  min-width: 0;
+}
+
+.textUnitRowSelected {
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--accent-primary-bg) 24%, transparent);
+}
+
+.textUnitAnnotated {
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--accent-primary-bg) 34%, transparent);
+}
+
+.textUnitAnnotationSelected {
+  outline: 1px solid color-mix(in srgb, var(--accent-primary) 72%, transparent);
+  outline-offset: 2px;
+}
+
+.textUnitAnnotationBadge {
+  position: absolute;
+  left: var(--annotation-badge-left, 0);
+  top: var(--annotation-badge-top, -13px);
+  max-width: min(220px, calc(100% - var(--annotation-badge-left, 0px) - 8px));
+  padding: 1px 6px;
+  border: 1px solid color-mix(in srgb, var(--annotation-badge-accent, var(--accent-primary)) 72%, var(--border-default));
+  border-radius: 999px;
+  background: var(--annotation-badge-bg, color-mix(in srgb, var(--bg-primary) 86%, var(--accent-primary-bg)));
+  color: var(--annotation-badge-text, var(--text-secondary));
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+  z-index: 3;
+}
+
+.textUnitAnnotationBadgeSelected {
+  border-color: var(--annotation-badge-accent, var(--accent-primary));
+  background: color-mix(in srgb, var(--annotation-badge-bg, var(--accent-primary-bg)) 82%, var(--bg-primary));
+  color: var(--text-primary);
+}
+
+.textUnitAnnotationBadge:hover,
+.textUnitAnnotationBadge:focus-visible {
+  border-color: var(--annotation-badge-accent, var(--accent-primary));
+  color: var(--text-primary);
+  outline: none;
+}
+
+.textUnitChildAnnotationBadge {
+  position: absolute;
+  left: var(--annotation-badge-left, 0);
+  top: var(--annotation-badge-top, -13px);
+  z-index: 4;
+  max-width: min(170px, calc(100% - var(--annotation-badge-left, 0px) - 8px));
+  padding: 1px 5px;
+  border: 1px solid color-mix(in srgb, var(--annotation-badge-accent, #2dd4bf) 74%, var(--border-default));
+  border-radius: 999px;
+  background: var(--annotation-badge-bg, color-mix(in srgb, var(--bg-primary) 78%, #0f766e));
+  color: var(--annotation-badge-text, var(--text-primary));
+  font-size: 8px;
+  font-weight: 850;
+  letter-spacing: 0;
+  line-height: 1.1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.textUnitChildAnnotationBadgeSelected {
+  border-color: var(--annotation-badge-accent, var(--accent-primary));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--annotation-badge-accent, var(--accent-primary)) 58%, transparent);
+}
+
+.textUnitChildAnnotationBadge:hover,
+.textUnitChildAnnotationBadge:focus-visible {
+  border-color: var(--annotation-badge-accent, var(--accent-primary));
+  color: var(--text-primary);
+  outline: none;
+}
+
+.textUnitMarker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 22px;
+  height: 27px;
+  padding-right: 7px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1;
+  text-align: right;
+  user-select: none;
+}
+
+.textUnitMarkerButton,
+.textUnitTodoCheckbox {
+  align-self: center;
+  justify-self: end;
+  width: 22px;
+  height: 22px;
+  margin: 1px 7px 0 0;
+  color: var(--text-muted);
+}
+
+.textUnitMarkerButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  cursor: pointer;
+}
+
+.textUnitMarkerButton:hover,
+.textUnitMarkerButton:focus-visible {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.textUnitTodoCheckbox {
+  accent-color: var(--border-focus);
+  cursor: pointer;
+}
+
+.textUnitTextAreaWrap {
+  position: relative;
+  grid-column: 1 / -1;
+  min-width: 0;
+}
+
+.textUnitTextAreaWrapWithMarker {
+  grid-column: 2;
+}
+
+.textUnitTextArea {
+  position: relative;
+  z-index: 1;
+  min-width: 0;
+}
+
+.textUnitAnnotationTextLayer {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  border-color: transparent;
+  background: transparent;
+  color: transparent !important;
+  pointer-events: none;
+  resize: none;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.textUnitAnnotationSpan {
+  position: relative;
+  border-radius: 4px;
+  background: var(--annotation-parent-bg, color-mix(in srgb, var(--accent-primary-bg) 70%, transparent));
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.textUnitAnnotationSpanSelected {
+  background: color-mix(in srgb, var(--annotation-parent-accent, var(--accent-primary)) 30%, var(--annotation-parent-bg, var(--accent-primary-bg)));
+}
+
+.textUnitAnnotationSpanDraft {
+  outline: 1px dashed color-mix(in srgb, var(--accent-primary) 78%, white 12%);
+  outline-offset: 1px;
+  background: color-mix(in srgb, var(--accent-primary) 44%, var(--accent-primary-bg));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent-primary) 18%, transparent);
+}
+
+.textUnitAnnotationSpanStacked {
+  background:
+    linear-gradient(
+      180deg,
+      var(--annotation-parent-bg, color-mix(in srgb, var(--accent-primary-bg) 74%, transparent)) 0%,
+      var(--annotation-parent-bg, color-mix(in srgb, var(--accent-primary-bg) 74%, transparent)) 76%,
+      color-mix(in srgb, var(--annotation-parent-accent, var(--accent-primary)) 58%, transparent) 76%,
+      color-mix(in srgb, var(--annotation-parent-accent, var(--accent-primary)) 58%, transparent) 100%
+    );
+}
+
+.textUnitAnnotationSpanChild {
+  background:
+    linear-gradient(
+      180deg,
+      var(--annotation-parent-bg, color-mix(in srgb, var(--accent-primary-bg) 70%, transparent)) 0%,
+      var(--annotation-parent-bg, color-mix(in srgb, var(--accent-primary-bg) 70%, transparent)) 74%,
+      color-mix(in srgb, var(--annotation-child-accent, #2dd4bf) 68%, transparent) 74%,
+      color-mix(in srgb, var(--annotation-child-accent, #2dd4bf) 68%, transparent) 100%
+    );
+}
+
+.textUnitAnnotationSpanChild::after {
+  display: none;
+}
+
+.textUnitDraftRange {
+  position: relative;
+  z-index: 12;
+  background: color-mix(in srgb, var(--accent-primary-bg) 18%, transparent);
+}
+
+.textUnitDraftRangeBadge {
+  position: absolute;
+  left: var(--draft-range-badge-left, 0);
+  top: var(--draft-range-badge-top, -28px);
+  z-index: 32;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--accent-primary);
+  cursor: grab;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  transform: translate(-5px, -2px);
+}
+
+.textUnitDraftRangeBadge::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 1px;
+  height: 11px;
+  background: color-mix(in srgb, var(--accent-primary) 72%, var(--border-default));
+  transform: translateX(-50%);
+}
+
+.textUnitDraftRangeBadgeIcon {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 74%, var(--border-default));
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--bg-primary) 82%, var(--accent-primary-bg));
+  box-shadow: 0 6px 18px color-mix(in srgb, #000 18%, transparent);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.textUnitDraftRangeBadge:hover,
+.textUnitDraftRangeBadge:focus-visible {
+  color: var(--text-primary);
+  outline: none;
+}
+
+.textUnitDraftRangeBadge:hover .textUnitDraftRangeBadgeIcon,
+.textUnitDraftRangeBadge:focus-visible .textUnitDraftRangeBadgeIcon {
+  border-color: var(--accent-primary);
+  background: color-mix(in srgb, var(--bg-primary) 66%, var(--accent-primary-bg));
+}
+
+.textUnitDraftRangeBadge:active {
+  cursor: grabbing;
+}
+
+.textUnitDraftRangeBadgeIcon svg {
+  pointer-events: none;
+}
+
+.blockAnnotationBadge {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 4;
+  max-width: min(180px, calc(100% - 18px));
+  padding: 3px 8px;
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 62%, var(--border-default));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-primary) 86%, var(--accent-primary-bg));
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.blockAnnotationBadge:hover,
+.blockAnnotationBadge:focus-visible {
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.selectionToolbar {
+  position: fixed;
+  z-index: 155;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: calc(100vw - 24px);
+  padding: 7px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  box-shadow: var(--glass-shadow-lg);
+}
+
+.selectionToolbarInput {
+  width: 132px;
+  min-width: 0;
+  padding: 6px 8px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.selectionToolbarInput:focus {
+  border-color: var(--accent-primary);
+  outline: none;
+}
+
+.selectionToolbarButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.selectionToolbarButton:hover:not(:disabled),
+.selectionToolbarButton:focus-visible {
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.selectionToolbarButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
+}
+
+.selectionToolbarStatus {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 6px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 760;
+  white-space: nowrap;
+}
+
+.annotationContextMenu {
+  position: fixed;
+  z-index: 160;
+  display: grid;
+  gap: 7px;
+  width: 248px;
+  padding: 10px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  box-shadow: var(--glass-shadow-lg);
+}
+
+.annotationContextInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 8px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.annotationContextInput:focus {
+  border-color: var(--accent-primary);
+  outline: none;
+}
+
+.annotationContextMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 760;
+  text-align: left;
+}
+
+.annotationContextMenuItem:hover:not(:disabled),
+.annotationContextMenuItem:focus-visible {
+  border-color: var(--border-default);
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.annotationContextMenuItem:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.inlineNamePrompt {
+  position: fixed;
+  z-index: 180;
+  display: grid;
+  gap: 8px;
+  width: 264px;
+  padding: 10px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--bg-primary) 96%, black);
+  box-shadow: var(--glass-shadow-lg);
+}
+
+.inlineNamePromptTitle {
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.inlineNamePromptInput {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 9px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 720;
+}
+
+.inlineNamePromptInput:focus {
+  border-color: var(--accent-primary);
+  outline: none;
+}
+
+.inlineNamePromptActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+.contextMenu {
+  position: fixed;
+  z-index: 170;
+  display: grid;
+  gap: 3px;
+  width: 252px;
+  max-height: min(420px, calc(100vh - 20px));
+  overflow: visible;
+  padding: 6px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--bg-primary) 96%, black);
+  box-shadow: var(--glass-shadow-lg);
+}
+
+.contextMenuTitle {
+  padding: 5px 7px 4px;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.contextMenuItem {
+  position: relative;
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  min-height: 30px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 720;
+  text-align: left;
+}
+
+.contextMenuItem span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contextMenuItem:hover:not(:disabled),
+.contextMenuItem:focus-visible {
+  border-color: var(--border-subtle);
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.contextMenuItem:disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+.contextMenuIconPlaceholder {
+  width: 15px;
+  height: 15px;
+}
+
+.contextMenuChevron,
+.contextMenuCheck {
+  justify-self: end;
+  color: var(--text-muted);
+}
+
+.contextMenuSeparator {
+  height: 1px;
+  margin: 4px 3px;
+  background: var(--border-subtle);
+}
+
+.contextMenuSubmenuWrap {
+  position: relative;
+}
+
+.contextSubmenu {
+  position: absolute;
+  top: -6px;
+  left: calc(100% + 6px);
+  z-index: 171;
+  display: grid;
+  gap: 3px;
+  width: 230px;
+  max-height: min(420px, calc(100vh - 20px));
+  overflow: auto;
+  padding: 6px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--bg-primary) 96%, black);
+  box-shadow: var(--glass-shadow-lg);
+}
+
+.annotationOverlayLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.annotationInspector {
+  position: fixed;
+  top: 76px;
+  right: 18px;
+  z-index: 150;
+  display: grid;
+  gap: 10px;
+  width: min(324px, calc(100vw - 36px));
+  max-height: calc(100vh - 96px);
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-primary);
+  box-shadow: var(--glass-shadow-lg);
+}
+
+.annotationOrganizer {
+  position: fixed;
+  top: 76px;
+  right: 18px;
+  z-index: 151;
+  display: grid;
+  gap: 10px;
+  width: min(372px, calc(100vw - 36px));
+  max-height: calc(100vh - 96px);
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-primary);
+  box-shadow: var(--glass-shadow-lg);
+}
+
+.annotationInspectorHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.annotationStackList {
+  display: grid;
+  gap: 8px;
+}
+
+.annotationOrganizerSection,
+.annotationOrganizerSetBody {
+  display: grid;
+  gap: 8px;
+}
+
+.annotationOrganizerSectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.annotationOrganizerEmpty {
+  margin: 0;
+  padding: 10px;
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.annotationOrganizerChip {
+  justify-self: start;
+  max-width: 100%;
+  padding: 5px 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--bg-secondary) 58%, transparent);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.annotationOrganizerChip:hover,
+.annotationOrganizerChip:focus-visible {
+  border-color: var(--border-default);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.annotationOrganizerChipSelected {
+  border-color: color-mix(in srgb, var(--accent-primary) 72%, var(--border-default));
+  background: color-mix(in srgb, var(--accent-primary-bg) 54%, transparent);
+  color: var(--text-primary);
+}
+
+.annotationOrganizerSetList,
+.annotationOrganizerLooseList {
+  display: grid;
+  gap: 8px;
+}
+
+.annotationOrganizerCreateRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 6px;
+  align-items: center;
+}
+
+.annotationOrganizerSetCard {
+  border: 1px solid color-mix(in srgb, var(--annotation-set-accent, var(--border-default)) 36%, var(--border-subtle));
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--annotation-set-bg, var(--bg-secondary)) 24%, transparent);
+}
+
+.annotationOrganizerSetSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 9px;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  text-align: left;
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.annotationOrganizerSetSummary span:last-child {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.annotationOrganizerSetBody {
+  padding: 0 9px 9px;
+}
+
+.annotationOrganizerSelect {
+  width: 100%;
+  padding: 7px 8px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
+.annotationOrganizerMembers {
+  display: grid;
+  gap: 6px;
+}
+
+.annotationOrganizerMemberRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  gap: 5px;
+  align-items: center;
+}
+
+.annotationOrganizerMemberText {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 6px 7px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg-secondary) 44%, transparent);
+  color: var(--text-primary);
+  text-align: left;
+}
+
+.annotationOrganizerMemberText span {
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.annotationOrganizerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.contentGroupLauncher {
+  position: fixed;
+  top: 50%;
+  right: 16px;
+  z-index: 84;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--bg-primary) 94%, transparent);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 760;
+  box-shadow: var(--glass-shadow-sm);
+  transform: translateY(-50%);
+}
+
+.contentGroupLauncher:hover,
+.contentGroupLauncher:focus-visible,
+.contentGroupLauncherActive {
+  border-color: var(--border-focus);
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.contentGroupPanel {
+  position: fixed;
+  top: 76px;
+  right: 18px;
+  z-index: 152;
+  display: grid;
+  gap: 12px;
+  width: min(420px, calc(100vw - 36px));
+  max-height: calc(100vh - 96px);
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--bg-primary) 99%, transparent);
+  box-shadow: var(--glass-shadow-lg);
+}
+
+.contentGroupExplorer {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  min-height: 0;
+}
+
+.contentGroupFolderPane,
+.contentGroupGalleryPane {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.contentGroupFolderPane {
+  padding-right: 10px;
+  border-right: 1px solid var(--border-muted);
+}
+
+.contentGroupFolderList {
+  display: grid;
+  gap: 2px;
+}
+
+.contentGroupFolderRow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  min-height: 28px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 690;
+  text-align: left;
+}
+
+.contentGroupFolderRow span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contentGroupFolderRow:hover,
+.contentGroupFolderRowActive {
+  border-color: var(--border-default);
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.contentGroupFolderCreate {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px;
+  align-items: center;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-muted);
+}
+
+.contentGroupFolderLine {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--border-muted);
+  border-radius: 4px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 680;
+}
+
+.contentGroupFolderLine span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contentGroupHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: start;
+}
+
+.contentGroupHeader > div {
+  display: grid;
+  gap: 2px;
+}
+
+.contentGroupHeader strong {
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 820;
+}
+
+.contentGroupHeader span {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 680;
+}
+
+.contentGroupGhostButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.contentGroupGhostButton:hover,
+.contentGroupGhostButton:focus-visible {
+  border-color: var(--border-default);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.contentGroupCreateStrip {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 7px;
+  align-items: center;
+}
+
+.contentGroupPrimaryButton,
+.contentGroupActionRow .secondaryBtn,
+.contentGroupSectionHeader .secondaryBtn {
+  min-height: 32px;
+}
+
+.contentGroupPrimaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: 100%;
+  padding: 0 10px;
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 48%, var(--border-default));
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--accent-primary-bg) 42%, transparent);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 780;
+}
+
+.contentGroupInput,
+.contentGroupTitleInput,
+.contentGroupTextArea {
+  width: 100%;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
+.contentGroupInput {
+  min-height: 32px;
+  padding: 0 9px;
+}
+
+.contentGroupTitleInput {
+  min-height: 36px;
+  padding: 0 10px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.contentGroupTextArea {
+  min-height: 72px;
+  resize: vertical;
+  padding: 8px 9px;
+  line-height: 1.45;
+}
+
+.contentGroupInput:focus,
+.contentGroupTitleInput:focus,
+.contentGroupTextArea:focus {
+  border-color: var(--border-focus);
+  outline: none;
+}
+
+.contentGroupDropZone {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg-secondary) 30%, transparent);
+}
+
+.contentGroupDropZone:hover,
+.contentGroupRow:hover {
+  border-color: color-mix(in srgb, var(--accent-primary) 46%, var(--border-default));
+}
+
+.contentGroupDropZone span {
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 760;
+}
+
+.contentGroupDropZone small {
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.contentGroupList,
+.contentGroupMemberList,
+.contentGroupPetalList,
+.contentGroupDetail {
+  display: grid;
+  gap: 8px;
+}
+
+.contentGroupRow {
+  border-top: 1px solid var(--border-subtle);
+}
+
+.contentGroupRowActive {
+  border-color: color-mix(in srgb, var(--accent-primary) 48%, var(--border-default));
+  background: color-mix(in srgb, var(--accent-primary-bg) 18%, transparent);
+}
+
+.contentGroupSummary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 7px;
+  align-items: center;
+  width: 100%;
+  min-height: 38px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  text-align: left;
+}
+
+.contentGroupSummary span {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 760;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contentGroupSummary small {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.contentGroupChevronOpen {
+  transform: rotate(180deg);
+}
+
+.contentGroupRowBody {
+  display: grid;
+  gap: 8px;
+  padding: 0 0 10px 21px;
+}
+
+.contentGroupActionRow,
+.contentGroupSectionHeader,
+.contentGroupPetalHeader {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.contentGroupSectionHeader {
+  justify-content: space-between;
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 820;
+  text-transform: uppercase;
+}
+
+.contentGroupMemberRow,
+.contentGroupPetalMember,
+.contentGroupMemberPreview {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  padding: 7px 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.contentGroupMemberRow {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.contentGroupMemberRowWarning {
+  border-color: rgba(245, 158, 11, 0.42);
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.contentGroupMemberRow span,
+.contentGroupPetalMember span,
+.contentGroupMemberPreview span {
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 780;
+  text-transform: uppercase;
+}
+
+.contentGroupStatusPill {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(245, 158, 11, 0.42);
+  color: rgba(253, 230, 138, 0.95);
+  font-size: 9px;
+  font-weight: 820;
+  text-transform: uppercase;
+}
+
+.contentGroupMemberRow p,
+.contentGroupPetalMember p,
+.contentGroupMemberPreview p {
+  overflow: hidden;
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 12px;
+  line-height: 1.45;
+  text-overflow: ellipsis;
+}
+
+.contentGroupMemberPreview p {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.contentGroupPetal {
+  display: grid;
+  gap: 7px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.contentGroupPetalHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+}
+
+.contentGroupPetalMember {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.contentGroupPetalMember span,
+.contentGroupPetalMember p {
+  grid-column: 1;
+}
+
+.contentGroupPetalMember .iconBtn {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+}
+
+.contentGroupFieldGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 7px;
+}
+
+.contentGroupIdentityRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  padding: 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--bg-secondary) 30%, transparent);
+}
+
+.contentGroupIdentityRow span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-right: auto;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 780;
+}
+
+.contentGroupIdentityRow small,
+.contentGroupIdentityRow strong {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 7px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 820;
+  text-transform: uppercase;
+}
+
+.contentGroupIdentityRow strong {
+  border-color: color-mix(in srgb, var(--accent-primary) 56%, var(--border-subtle));
+  color: var(--text-primary);
+}
+
+.contentGroupEmpty,
+.contentGroupMore {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.contentGroupMore {
+  font-weight: 740;
+}
+
+.annotationStackCard {
+  display: grid;
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--bg-secondary) 38%, transparent);
+}
+
+.annotationStackSummary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 34px;
+  padding: 0 9px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--annotation-summary-bg, var(--accent-primary-bg)) 42%, transparent),
+      transparent 62%
+    ),
+    transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 720;
+  text-align: left;
+}
+
+.annotationStackSummary::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--annotation-summary-accent, var(--accent-primary));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--annotation-summary-accent, var(--accent-primary)) 22%, transparent);
+}
+
+.annotationStackSummary:hover,
+.annotationStackSummary:focus-visible {
+  border-color: var(--border-default);
+  color: var(--text-primary);
+  outline: none;
+}
+
+.annotationCardHeader,
+.annotationChildHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.annotationLabelEditRow {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  gap: 8px;
+}
+
+.annotationColorDot {
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  background: var(--annotation-summary-accent, var(--accent-primary));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--annotation-summary-accent, var(--accent-primary)) 24%, transparent);
+}
+
+.annotationLabelInput {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 7px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 760;
+}
+
+.annotationLabelInput:hover {
+  border-color: var(--border-subtle);
+  background: color-mix(in srgb, var(--bg-primary) 42%, transparent);
+}
+
+.annotationLabelInput:focus {
+  border-color: var(--accent-primary);
+  outline: none;
+  background: var(--bg-primary);
+}
+
+.annotationInspectorIconActions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.annotationInspectorIconActions .iconBtn {
+  width: 29px;
+  height: 29px;
+  min-height: 29px;
+  padding: 0;
+}
+
+.annotationInspectorField {
+  display: grid;
+  gap: 6px;
+  padding: 10px 10px 0;
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.annotationInspectorField input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 9px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 650;
+  text-transform: none;
+}
+
+.annotationInspectorField input:focus {
+  border-color: var(--accent-primary);
+  outline: none;
+}
+
+.annotationColorPalette {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  padding: 0 0 1px 17px;
+}
+
+.annotationColorPalette div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 5px;
+}
+
+.annotationColorSwatch {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--annotation-swatch-accent, var(--accent-primary)) 72%, var(--border-default));
+  border-radius: 999px;
+  background:
+    linear-gradient(
+      135deg,
+      var(--annotation-swatch-accent, var(--accent-primary)) 0%,
+      var(--annotation-swatch-accent, var(--accent-primary)) 42%,
+      var(--annotation-swatch-bg, var(--accent-primary-bg)) 42%,
+      var(--annotation-swatch-bg, var(--accent-primary-bg)) 100%
+    );
+  cursor: pointer;
+}
+
+.annotationColorSwatch:hover,
+.annotationColorSwatch:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--annotation-swatch-accent, var(--accent-primary)) 58%, transparent);
+  outline-offset: 2px;
+}
+
+.annotationColorSwatchSelected {
+  box-shadow:
+    0 0 0 2px var(--bg-primary),
+    0 0 0 4px color-mix(in srgb, var(--annotation-swatch-accent, var(--accent-primary)) 72%, transparent);
+}
+
+.annotationInspectorDetails {
+  display: grid;
+  gap: 7px;
+  padding: 2px 0 0;
+}
+
+.annotationInspectorDetails summary {
+  cursor: pointer;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.annotationInspectorDetails summary:hover,
+.annotationInspectorDetails summary:focus-visible {
+  color: var(--text-primary);
+  outline: none;
+}
+
+.annotationInspectorMeta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+}
+
+.annotationInspectorMeta div {
+  padding: 6px 7px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: transparent;
+}
+
+.annotationInspectorMeta dt {
+  margin: 0 0 3px;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.annotationInspectorMeta dd {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.annotationRangeList {
+  display: grid;
+  gap: 5px;
+  padding: 0;
+}
+
+.annotationRangeRow {
+  display: grid;
+  gap: 6px;
+}
+
+.annotationRangePreview {
+  width: 100%;
+  min-height: 30px;
+  box-sizing: border-box;
+  padding: 6px 7px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg-primary) 46%, transparent);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.45;
+  resize: vertical;
+  user-select: text;
+}
+
+.annotationRangePreview:hover {
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+
+.annotationChildDraft {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 7px;
+  padding: 7px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--accent-primary) 10%, var(--bg-secondary));
+}
+
+.annotationChildDraft span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 650;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.annotationChildrenList {
+  display: grid;
+  gap: 6px;
+  padding: 0;
+}
+
+.annotationSectionTitle {
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.annotationEmptyNote {
+  padding: 8px;
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.annotationChildCard {
+  display: grid;
+  gap: 7px;
+  padding: 7px 8px 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: color-mix(in srgb, var(--bg-primary) 42%, transparent);
+}
+
+.annotationChildCardFocused {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--accent-primary) 38%, transparent);
+}
+
+.annotationChildHeader {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.annotationChildHeader .annotationLabelEditRow {
+  gap: 7px;
+}
+
+.annotationChildHeader .annotationLabelInput {
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.annotationChildHeader .annotationInspectorIconActions .iconBtn {
+  width: 26px;
+  height: 26px;
+  min-height: 26px;
+}
+
+.annotationInspectorInlineForm {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 7px;
+}
+
+.annotationInspectorInlineForm input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 7px 8px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.annotationInspectorInlineForm input:focus {
+  border-color: var(--accent-primary);
+  outline: none;
+}
+
+.annotationInspectorActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 0 10px 10px;
+}
+
+.annotationDeleteButton {
+  justify-self: start;
 }
 
 .resizeHandleRight {
@@ -1309,6 +3046,11 @@
   background: var(--bg-hover);
 }
 
+.slashItemActive:not(:disabled) {
+  background: var(--accent-primary-bg);
+  outline: 1px solid color-mix(in srgb, var(--accent-primary) 72%, transparent);
+}
+
 .slashItem:disabled {
   cursor: not-allowed;
   opacity: 0.5;
@@ -1493,6 +3235,619 @@
     left: 0;
     right: auto;
     width: 100%;
+  }
+
+  .contentGroupPanel {
+    width: min(420px, calc(100vw - 24px));
+  }
+
+  .contentGroupExplorer {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .contentGroupFolderPane {
+    padding-right: 0;
+    padding-bottom: 10px;
+    border-right: 0;
+    border-bottom: 1px solid var(--border-muted);
+  }
+}
+
+/* V2.BN.8.7.6 Groups Rail OpenDesign shell */
+.contentGroupPanel {
+  --rail-bg: #090d12;
+  --rail-bg-soft: #0d1319;
+  --rail-bg-raised: #111820;
+  --rail-border: #27313c;
+  --rail-border-soft: #1b252f;
+  --rail-text: #edf7ff;
+  --rail-muted: #7f8c9a;
+  --rail-dim: #536170;
+  --rail-cyan: #22d3ee;
+  --rail-topic-color: #22d3ee;
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 152;
+  display: grid;
+  grid-template-rows: 44px auto auto auto auto minmax(0, 1fr) 32px;
+  gap: 0;
+  width: 360px;
+  max-width: min(360px, 100vw);
+  height: 100vh;
+  max-height: none;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  border-left: 1px solid var(--rail-border);
+  border-radius: 0;
+  background: var(--rail-bg);
+  box-shadow: -16px 0 38px rgba(0, 0, 0, 0.32);
+  color: var(--rail-text);
+}
+
+.contentGroupPanel .iconBtn {
+  width: 27px;
+  height: 27px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--rail-muted);
+}
+
+.contentGroupPanel .iconBtn:hover,
+.contentGroupPanel .iconBtn:focus-visible,
+.contentGroupPanel .iconBtn[aria-pressed='true'] {
+  border-color: var(--rail-border);
+  background: var(--rail-bg-raised);
+  color: var(--rail-text);
+  outline: none;
+}
+
+.contentGroupPanel .iconBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.34;
+}
+
+.contentGroupHeader {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 11px 0 14px;
+  border-bottom: 1px solid var(--rail-border-soft);
+  background: #080c11;
+}
+
+.contentGroupHeaderTitle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.contentGroupHeader > .contentGroupHeaderTitle {
+  display: inline-flex;
+}
+
+.contentGroupActiveDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--rail-cyan);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--rail-cyan) 18%, transparent);
+}
+
+.contentGroupHeader strong {
+  color: var(--rail-text);
+  font-size: 14px;
+  font-weight: 840;
+  line-height: 1;
+}
+
+.contentGroupActionRow,
+.contentGroupExpandedActions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.contentGroupHeader > .contentGroupActionRow {
+  display: flex;
+  grid-auto-flow: column;
+  justify-content: end;
+}
+
+.contentGroupFolderBar {
+  position: relative;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--rail-border-soft);
+  background: var(--rail-bg);
+}
+
+.contentGroupFolderLine {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 32px;
+  padding: 0 9px;
+  border: 1px solid var(--rail-border-soft);
+  border-radius: 4px;
+  background: var(--rail-bg-soft);
+  color: var(--rail-muted);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 720;
+  text-align: left;
+}
+
+.contentGroupFolderLine span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contentGroupFolderLine:hover,
+.contentGroupFolderLine:focus-visible {
+  border-color: var(--rail-border);
+  color: var(--rail-text);
+  outline: none;
+}
+
+.contentGroupFolderLine[aria-expanded='true'] .contentGroupFolderChevron {
+  transform: rotate(90deg);
+}
+
+.contentGroupFolderChevron,
+.contentGroupChevronOpen {
+  transition: transform var(--transition-fast);
+}
+
+.contentGroupFolderMenu {
+  position: absolute;
+  top: calc(100% - 5px);
+  left: 14px;
+  right: 14px;
+  z-index: 2;
+  display: grid;
+  gap: 3px;
+  padding: 7px;
+  border: 1px solid var(--rail-border);
+  border-radius: 5px;
+  background: #0b1117;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.32);
+}
+
+.contentGroupFolderRow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  min-height: 28px;
+  padding: 0 7px;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--rail-muted);
+  font-size: 11px;
+  font-weight: 720;
+  text-align: left;
+}
+
+.contentGroupFolderRow span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contentGroupFolderRow:hover,
+.contentGroupFolderRow:focus-visible {
+  border-color: var(--rail-border-soft);
+  background: var(--rail-bg-raised);
+  color: var(--rail-text);
+  outline: none;
+}
+
+.contentGroupToolRow {
+  display: grid;
+  grid-template-columns: 28px 28px 28px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  min-height: 42px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--rail-border-soft);
+  background: var(--rail-bg);
+}
+
+.contentGroupToolScope {
+  min-width: 0;
+  color: var(--rail-dim);
+  font-size: 10px;
+  font-weight: 760;
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contentGroupSearchRow {
+  display: grid;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--rail-border-soft);
+  background: var(--rail-bg);
+}
+
+.contentGroupSearchRow[data-collapsed='true'] {
+  display: none;
+}
+
+.contentGroupSearchRow input {
+  width: 100%;
+  min-height: 31px;
+  padding: 0 9px;
+  border: 1px solid var(--rail-border);
+  border-radius: 4px;
+  background: #070b10;
+  color: var(--rail-text);
+  font-size: 12px;
+  font-weight: 680;
+}
+
+.contentGroupSearchRow input:focus {
+  border-color: var(--rail-cyan);
+  outline: none;
+}
+
+.contentGroupViewTabs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 8px 14px;
+  border: 1px solid var(--rail-border);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #0b1117;
+}
+
+.contentGroupViewTabs button {
+  min-width: 0;
+  min-height: 30px;
+  border: 0;
+  border-right: 1px solid var(--rail-border-soft);
+  background: transparent;
+  color: var(--rail-muted);
+  font-size: 11px;
+  font-weight: 760;
+}
+
+.contentGroupViewTabs button:last-child {
+  border-right: 0;
+}
+
+.contentGroupViewTabs button:hover,
+.contentGroupViewTabs button:focus-visible,
+.contentGroupViewTabActive {
+  background: var(--rail-bg-raised) !important;
+  color: var(--rail-text) !important;
+  outline: none;
+}
+
+.contentGroupRailScroll {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 14px 12px;
+  scrollbar-width: thin;
+}
+
+.contentGroupDraftBox {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 28px 28px;
+  gap: 7px;
+  align-items: center;
+  padding: 8px;
+  border: 1px solid var(--rail-border-soft);
+  border-radius: 5px;
+  background: var(--rail-bg-soft);
+}
+
+.contentGroupInput {
+  min-width: 0;
+  min-height: 30px;
+  padding: 0 9px;
+  border: 1px solid var(--rail-border);
+  border-radius: 4px;
+  background: #070b10;
+  color: var(--rail-text);
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.contentGroupInput:focus {
+  border-color: var(--rail-cyan);
+  outline: none;
+}
+
+.contentGroupDropZone {
+  display: grid;
+  gap: 5px;
+  min-height: 34px;
+  padding: 9px 10px;
+  border: 1px dashed color-mix(in srgb, var(--rail-cyan) 48%, var(--rail-border));
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--rail-cyan) 10%, transparent);
+}
+
+.contentGroupDropZone:hover,
+.contentGroupDropZone:focus-within {
+  border-color: var(--rail-cyan);
+  background: color-mix(in srgb, var(--rail-cyan) 14%, transparent);
+}
+
+.contentGroupDropZone span {
+  color: color-mix(in srgb, var(--rail-text) 92%, var(--rail-cyan));
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.contentGroupDropZone small {
+  color: var(--rail-muted);
+  font-size: 11px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.contentGroupSectionLabel {
+  margin-top: 2px;
+  color: var(--rail-dim);
+  font-size: 10px;
+  font-weight: 820;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.contentGroupList {
+  display: grid;
+  gap: 2px;
+}
+
+.contentGroupUnit {
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  background: transparent;
+}
+
+.contentGroupUnit:hover,
+.contentGroupRowActive {
+  border-color: var(--rail-border-soft);
+  background: color-mix(in srgb, var(--rail-bg-raised) 54%, transparent);
+}
+
+.contentGroupRow {
+  display: grid;
+  grid-template-columns: 4px minmax(0, 1fr) auto auto 16px;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 7px 0 0;
+  border: 0;
+  background: transparent;
+  color: var(--rail-text);
+  cursor: pointer;
+  text-align: left;
+}
+
+.contentGroupRow:focus-visible {
+  outline: 1px solid var(--rail-cyan);
+  outline-offset: -1px;
+}
+
+.contentGroupTopicStrip {
+  align-self: center;
+  width: 4px;
+  height: 20px;
+  border-radius: 0 2px 2px 0;
+  background: var(--rail-topic-color);
+}
+
+.contentGroupName {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--rail-text);
+  font-size: 11px;
+  font-weight: 780;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contentGroupRoleBadge,
+.contentGroupStatusChip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  height: 18px;
+  max-width: 72px;
+  padding: 0 5px;
+  border: 1px solid var(--rail-border);
+  border-radius: 3px;
+  background: var(--rail-bg-raised);
+  color: var(--rail-text);
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  font-size: 8px;
+  font-weight: 800;
+  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: lowercase;
+  white-space: nowrap;
+}
+
+.contentGroupRoleBadge {
+  border-color: color-mix(in srgb, var(--rail-topic-color) 40%, var(--rail-border));
+}
+
+.contentGroupStatusChip {
+  color: #facc15;
+}
+
+.contentGroupStatusChip[data-status-kind='accepted'] {
+  border-color: color-mix(in srgb, #34d399 48%, var(--rail-border));
+  color: #34d399;
+}
+
+.contentGroupStatusChip[data-status-kind='rejected'] {
+  border-color: color-mix(in srgb, #fb7185 48%, var(--rail-border));
+  color: #fb7185;
+}
+
+.contentGroupStatusChip[data-status-kind='archived'] {
+  color: var(--rail-muted);
+}
+
+.contentGroupChevronOpen {
+  transform: rotate(90deg);
+}
+
+.contentGroupExpandedArea {
+  display: grid;
+  gap: 7px;
+  padding: 0 8px 8px 12px;
+  border-top: 1px solid var(--rail-border-soft);
+}
+
+.contentGroupExpandedArea .contentGroupDropZone {
+  min-height: 32px;
+  margin-top: 5px;
+  padding: 0 10px;
+  place-content: center;
+  text-align: center;
+}
+
+.contentGroupExpandedArea .contentGroupDropZone small {
+  display: none;
+}
+
+.contentGroupExpandedActions {
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.contentGroupExpandedActions .iconBtn {
+  width: 22px;
+  height: 22px;
+}
+
+.contentGroupOpenEditor {
+  min-height: 22px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: color-mix(in srgb, var(--rail-cyan) 84%, var(--rail-text));
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.contentGroupOpenEditor:hover,
+.contentGroupOpenEditor:focus-visible {
+  color: var(--rail-text);
+  outline: none;
+}
+
+.contentGroupSourceIndicator {
+  min-width: 0;
+  margin-left: auto;
+  color: var(--rail-dim);
+  font-size: 10px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.contentGroupExpandedArea .contentGroupActionRow {
+  flex-wrap: wrap;
+  padding-top: 1px;
+}
+
+.contentGroupExpandedArea .secondaryBtn {
+  min-height: 26px;
+  padding: 0 8px;
+  border-radius: 4px;
+  font-size: 11px;
+}
+
+.contentGroupMemberList {
+  display: grid;
+  gap: 6px;
+}
+
+.contentGroupMemberPreview {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+  padding: 5px 0 0;
+  border-top: 1px solid var(--rail-border-soft);
+}
+
+.contentGroupMemberPreview span {
+  color: var(--rail-dim);
+  font-size: 9px;
+  font-weight: 840;
+  text-transform: uppercase;
+}
+
+.contentGroupMemberPreview p {
+  display: -webkit-box;
+  overflow: hidden;
+  margin: 0;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: var(--rail-muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.contentGroupEmpty,
+.contentGroupMore {
+  margin: 0;
+  color: var(--rail-dim);
+  font-size: 11px;
+  font-weight: 680;
+}
+
+.contentGroupMore {
+  font-weight: 780;
+}
+
+.contentGroupStatusBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 32px;
+  padding: 0 13px;
+  border-top: 1px solid var(--rail-border-soft);
+  background: #080c11;
+  color: var(--rail-dim);
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  font-size: 10px;
+  font-weight: 720;
+}
+
+@media (max-width: 720px) {
+  .contentGroupPanel {
+    width: min(360px, 100vw);
   }
 }
 

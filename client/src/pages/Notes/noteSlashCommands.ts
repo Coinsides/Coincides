@@ -1,13 +1,29 @@
 import type { TemplateOption } from '@/services/templateOptions';
+import type { TextUnitWritingRole } from './canvasEngine/runtimeDataTypes';
 
 export type SlashCommandGroup = 'default' | 'math' | 'userDefined';
+export type SlashCommandKind = 'create_block' | 'convert_block' | 'insert_structure' | 'inline_action' | 'annotation_action';
+export type SlashCommandObjectKind =
+  | 'text_block'
+  | 'structured_block'
+  | 'writing_role'
+  | 'inline_structure'
+  | 'annotation'
+  | 'navigation'
+  | 'future';
 
 export interface NoteSlashCommand {
   id: string;
   label: string;
   group: SlashCommandGroup;
   description: string;
-  templateKey: string;
+  templateKey?: string;
+  commandKind: SlashCommandKind;
+  objectKind: SlashCommandObjectKind;
+  writingRole?: TextUnitWritingRole;
+  annotationAction?: 'create_annotation';
+  annotationLabel?: string;
+  requiresSelection?: boolean;
   keywords: string[];
   disabledReason?: string;
 }
@@ -25,6 +41,9 @@ export const NOTE_SLASH_COMMANDS: NoteSlashCommand[] = [
     group: 'default',
     description: 'Plain paragraph block.',
     templateKey: 'text.paragraph',
+    commandKind: 'create_block',
+    objectKind: 'text_block',
+    writingRole: 'paragraph',
     keywords: ['paragraph', 'text', 'body'],
   },
   {
@@ -32,23 +51,71 @@ export const NOTE_SLASH_COMMANDS: NoteSlashCommand[] = [
     label: 'Heading',
     group: 'default',
     description: 'Section heading.',
-    templateKey: 'text.heading',
+    commandKind: 'convert_block',
+    objectKind: 'writing_role',
+    writingRole: 'heading',
     keywords: ['title', 'section', 'h1', 'h2'],
+  },
+  {
+    id: 'bullet-list',
+    label: 'Bullet List',
+    group: 'default',
+    description: 'Future TextUnit bullet writing role.',
+    commandKind: 'insert_structure',
+    objectKind: 'writing_role',
+    writingRole: 'bullet_item',
+    keywords: ['bullet', 'list', 'ul'],
+  },
+  {
+    id: 'numbered-list',
+    label: 'Numbered List',
+    group: 'default',
+    description: 'Future TextUnit numbered writing role.',
+    commandKind: 'insert_structure',
+    objectKind: 'writing_role',
+    writingRole: 'numbered_item',
+    keywords: ['numbered', 'ordered', 'list', 'ol'],
+  },
+  {
+    id: 'todo-list',
+    label: 'Todo List',
+    group: 'default',
+    description: 'Future TextUnit todo writing role.',
+    commandKind: 'insert_structure',
+    objectKind: 'writing_role',
+    writingRole: 'todo_item',
+    keywords: ['todo', 'task', 'check'],
+  },
+  {
+    id: 'toggle-list',
+    label: 'Toggle List',
+    group: 'default',
+    description: 'Future TextUnit toggle writing role.',
+    commandKind: 'insert_structure',
+    objectKind: 'writing_role',
+    writingRole: 'toggle_item',
+    keywords: ['toggle', 'collapse', 'disclosure'],
   },
   {
     id: 'source-quote',
     label: 'Source Quote',
     group: 'default',
     description: 'Quoted or source-like text.',
-    templateKey: 'source.quote',
+    commandKind: 'convert_block',
+    objectKind: 'writing_role',
+    writingRole: 'quote',
     keywords: ['source', 'excerpt', 'citation'],
   },
   {
     id: 'definition',
     label: 'Definition',
     group: 'default',
-    description: 'Structured definition seed.',
-    templateKey: 'definition.basic',
+    description: 'Mark selected text as a definition annotation.',
+    commandKind: 'annotation_action',
+    objectKind: 'annotation',
+    annotationAction: 'create_annotation',
+    annotationLabel: 'definition',
+    requiresSelection: true,
     keywords: ['define', 'concept', 'meaning'],
   },
   {
@@ -57,15 +124,40 @@ export const NOTE_SLASH_COMMANDS: NoteSlashCommand[] = [
     group: 'math',
     description: 'LaTeX formula block.',
     templateKey: 'formula.math',
+    commandKind: 'create_block',
+    objectKind: 'structured_block',
     keywords: ['math', 'latex', 'equation'],
+  },
+  {
+    id: 'inline-formula',
+    label: 'Inline Formula',
+    group: 'math',
+    description: 'Future selected-text inline formula action.',
+    commandKind: 'inline_action',
+    objectKind: 'inline_structure',
+    keywords: ['inline', 'math', 'latex', 'equation'],
+    disabledReason: 'Inline formula is reserved for the inline structure pass.',
   },
   {
     id: 'code',
     label: 'Code',
     group: 'default',
-    description: 'Code snippet block.',
+    description: 'Code block.',
     templateKey: 'code.snippet',
+    commandKind: 'create_block',
+    objectKind: 'structured_block',
+    writingRole: 'code_line',
     keywords: ['snippet', 'programming'],
+  },
+  {
+    id: 'divider',
+    label: 'Divider',
+    group: 'default',
+    description: 'Future lightweight divider structure.',
+    commandKind: 'insert_structure',
+    objectKind: 'future',
+    keywords: ['line', 'separator', 'break'],
+    disabledReason: 'Divider is reserved for the TextUnit/editor polish pass.',
   },
 ];
 
@@ -102,6 +194,7 @@ export function findTemplateForCommand(
   command: NoteSlashCommand,
   templateOptions: TemplateOption[],
 ): TemplateOption | null {
+  if (!command.templateKey) return null;
   return templateOptions.find((template) => template.template_key === command.templateKey)
     || templateOptions.find((template) => template.template_id === command.templateKey)
     || null;

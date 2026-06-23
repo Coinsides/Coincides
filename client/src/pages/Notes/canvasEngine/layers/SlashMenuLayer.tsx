@@ -7,12 +7,14 @@ import { FloatingOverlayLayer } from './FloatingOverlayLayer';
 import styles from '../../NoteDetail.module.css';
 
 interface SlashMenuLayerProps {
+  activeCommandId: string | null;
   commands: NoteSlashCommand[];
   onSelect: (command: NoteSlashCommand) => void;
   anchor: SlashMenuAnchor | null;
 }
 
 export function SlashMenuLayer({
+  activeCommandId,
   commands,
   onSelect,
   anchor,
@@ -39,7 +41,7 @@ export function SlashMenuLayer({
               {grouped[group].map((command) => (
                 <button
                   key={command.id}
-                  className={styles.slashItem}
+                  className={`${styles.slashItem} ${activeCommandId === command.id ? styles.slashItemActive : ''}`}
                   onMouseDown={(event) => {
                     event.preventDefault();
                     onSelect(command);

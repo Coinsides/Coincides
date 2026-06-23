@@ -42,12 +42,13 @@ export function useMeasuredBlockReflowController({
     measuredHeight: number,
   ) => {
     const presentationKind = presentationKindForBlock(block);
-    const allowActiveStructuredReflow = isActive && (
+    const allowActiveContentReflow = isActive && (
       presentationKind === 'formula'
-      || presentationKind === 'definition'
+      || presentationKind === 'paragraph'
+      || presentationKind === 'code'
     );
     if (movingBlockIdRef.current) return;
-    if (!allowActiveStructuredReflow && Date.now() < suppressMeasuredReflowUntilRef.current) return;
+    if (!allowActiveContentReflow && Date.now() < suppressMeasuredReflowUntilRef.current) return;
     applyMeasuredBlockHeightDraft({
       baseLayouts: blockLayouts,
       blockId: block.id,

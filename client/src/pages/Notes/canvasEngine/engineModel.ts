@@ -40,6 +40,8 @@ export const DEFAULT_PRIMARY_PAGE_FRAME: PageFrameModel = {
 };
 
 export const CANVAS_PRIMARY_PAGE_OFFSET_X = 96;
+export const CANVAS_VIEWPORT_MIN_ZOOM = 0.45;
+export const CANVAS_VIEWPORT_MAX_ZOOM = 2.4;
 
 export function createPrimaryPageFrame(options: Partial<PageFrameModel> = {}): PageFrameModel {
   return {
@@ -59,6 +61,8 @@ export function createViewport(options: Partial<CanvasViewport> = {}): CanvasVie
     width: 1280,
     height: 720,
     zoom: 1,
+    minZoom: CANVAS_VIEWPORT_MIN_ZOOM,
+    maxZoom: CANVAS_VIEWPORT_MAX_ZOOM,
     ...options,
   };
 }
@@ -85,6 +89,7 @@ export function buildNoteCanvasRuntimeModel({
     route: 'self_owned_minimal_hybrid',
     mode,
     world,
+    viewport,
     primaryPageFrame,
     blockPlacements,
     visibleBlockIds: getVisibleBlockIds(blockPlacements, viewport),

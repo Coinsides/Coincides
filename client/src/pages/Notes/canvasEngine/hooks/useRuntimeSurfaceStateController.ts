@@ -1,9 +1,11 @@
+import { useCallback } from 'react';
 import { useBlockSelectionController } from './useBlockSelectionController';
 import { useFloatingOverlayController } from './useFloatingOverlayController';
 import { useLayoutInteractionController } from './useLayoutInteractionController';
 import { useRuntimeInteractionController } from './useRuntimeInteractionController';
 import { useRuntimeLayoutRefsController } from './useRuntimeLayoutRefsController';
 import { useSurfaceModeController } from './useSurfaceModeController';
+import { useViewportTransformController } from './useViewportTransformController';
 
 export function useRuntimeSurfaceStateController() {
   const {
@@ -19,12 +21,15 @@ export function useRuntimeSurfaceStateController() {
   } = useRuntimeLayoutRefsController();
 
   const {
+    beginTemporaryLayoutMode,
+    clearTemporaryLayoutMode,
+    disableLayoutMode,
+    enablePersistentLayoutMode,
     layoutMode,
-    setLayoutMode,
+    layoutModeKind,
     setSnapGuide,
     snapEnabled,
     snapGuide,
-    toggleLayoutMode,
     toggleSnapEnabled,
   } = useLayoutInteractionController();
 
@@ -33,25 +38,32 @@ export function useRuntimeSurfaceStateController() {
     closeOverlay,
     collapseChrome,
     expandChrome,
-    showAdvancedInsert,
     showExportPreview,
+    showLayoutPanel,
     showMoreActions,
     showNoteInfo,
     showPreviewAIVisibility,
     showPreviewBlockTypes,
     showPreviewExportStatus,
-    toggleAdvancedInsert,
+    showPreviewLabelOverlay,
+    openLayoutPanel,
     toggleExportPreview,
     toggleMoreActions,
     toggleNoteInfo,
     togglePreviewAIVisibility,
     togglePreviewBlockTypes,
     togglePreviewExportStatus,
+    togglePreviewLabelOverlay,
   } = useFloatingOverlayController({ setInteractionState });
+
+  const handleBeforeBlockInteraction = useCallback(() => {
+    suppressMeasuredReflowForSelection();
+    clearTemporaryLayoutMode();
+  }, [clearTemporaryLayoutMode, suppressMeasuredReflowForSelection]);
 
   const {
     activeBlockId,
-    clearBlockSelection,
+    clearBlockSelection: clearBlockSelectionBase,
     focusBlockId,
     markBlockFocused,
     markBlockSelected,
@@ -60,10 +72,30 @@ export function useRuntimeSurfaceStateController() {
     setFocusBlockId,
     setSelectedBlockId,
   } = useBlockSelectionController({
-    onBeforeBlockFocus: suppressMeasuredReflowForSelection,
-    onBeforeBlockSelect: suppressMeasuredReflowForSelection,
+    onBeforeBlockFocus: handleBeforeBlockInteraction,
+    onBeforeBlockSelect: handleBeforeBlockInteraction,
     setInteractionState,
   });
+
+  const clearBlockSelection = useCallback(() => {
+    clearTemporaryLayoutMode();
+    clearBlockSelectionBase();
+  }, [clearBlockSelectionBase, clearTemporaryLayoutMode]);
+
+  const togglePersistentLayoutMode = useCallback(() => {
+    if (layoutModeKind === 'persistent') {
+      disableLayoutMode();
+      closeOverlay();
+      return;
+    }
+
+    enablePersistentLayoutMode();
+  }, [
+    closeOverlay,
+    disableLayoutMode,
+    enablePersistentLayoutMode,
+    layoutModeKind,
+  ]);
 
   const {
     pageOffsetX,
@@ -76,49 +108,68 @@ export function useRuntimeSurfaceStateController() {
     setSnapGuide,
   });
 
+  const {
+    panViewportBy,
+    resetViewport,
+    scrollViewportBy,
+    setViewportSize,
+    viewportTransform,
+    zoomViewportAt,
+  } = useViewportTransformController({ surfaceMode });
+
   return {
     activeBlockId,
     blockListRef,
     chromeCollapsed,
+    clearTemporaryLayoutMode,
     clearBlockSelection,
     closeOverlay,
     collapseChrome,
     expandChrome,
     focusBlockId,
     interactionState,
+    layoutModeKind,
     layoutMode,
+    beginTemporaryLayoutMode,
     markBlockFocused,
     markBlockSelected,
     movingBlockIdRef,
+    openLayoutPanel,
     pageOffsetX,
+    panViewportBy,
+    resetViewport,
     selectedBlockId,
+    scrollViewportBy,
     setActiveBlockId,
     setFocusBlockId,
     setInteractionState,
-    setLayoutMode,
     setSelectedBlockId,
     setSnapGuide,
-    showAdvancedInsert,
+    setViewportSize,
     showExportPreview,
+    showLayoutPanel,
     showMoreActions,
     showNoteInfo,
     showPreviewAIVisibility,
     showPreviewBlockTypes,
     showPreviewExportStatus,
+    showPreviewLabelOverlay,
     snapEnabled,
     snapGuide,
     suppressMeasuredReflowUntilRef,
     surfaceMode,
     surfacePolicy,
-    toggleAdvancedInsert,
     toggleExportPreview,
-    toggleLayoutMode,
+    toggleLayoutMode: togglePersistentLayoutMode,
     toggleMoreActions,
     toggleNoteInfo,
     togglePreviewAIVisibility,
     togglePreviewBlockTypes,
     togglePreviewExportStatus,
+    togglePreviewLabelOverlay,
     toggleSnapEnabled,
     toggleSurfaceMode,
+    viewportTransform,
+    zoomViewportAt,
   };
 }

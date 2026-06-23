@@ -9,6 +9,7 @@ export type SurfaceMode = 'page' | 'canvas';
 export type BoundaryKind = 'inside' | 'outside' | 'crossing';
 export type ExportRole = 'included' | 'excluded' | 'scratch';
 export type AIVisibility = 'visible' | 'hidden';
+export type LayoutWidthMode = 'auto' | 'manual';
 
 export interface BlockBoxLayout {
   x: number;
@@ -19,6 +20,7 @@ export interface BlockBoxLayout {
   export_role?: ExportRole;
   ai_visibility?: AIVisibility;
   surface?: 'formal_page' | 'canvas_workspace';
+  width_mode?: LayoutWidthMode;
 }
 
 export interface SnapGuide {

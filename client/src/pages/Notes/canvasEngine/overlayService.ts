@@ -10,6 +10,13 @@ import type { CanvasRect, CanvasViewport } from './types';
 type ClientRectLike = Pick<DOMRect, 'left' | 'right' | 'top' | 'bottom'>;
 export type OverlaySide = 'below' | 'right';
 export type OverlayAlign = 'start' | 'end';
+export type OverlayAnchorSource =
+  | 'caret'
+  | 'block'
+  | 'fixed_viewport'
+  | 'formula_help'
+  | 'source_picker'
+  | 'relation_endpoint';
 
 export interface ViewportOverlayPlacementOptions {
   anchorRect: ClientRectLike;
@@ -25,15 +32,28 @@ export interface AnchoredOverlayPlacementOptions extends Omit<ViewportOverlayPla
   anchor: ViewportOverlayAnchor;
 }
 
+export interface SelectionToolbarPlacementOptions {
+  anchorRect: ClientRectLike;
+  toolbarWidth?: number;
+  toolbarHeight?: number;
+  offset?: number;
+  viewportPadding?: number;
+  topChromeHeight?: number;
+}
+
 export interface ViewportOverlayAnchor {
   kind: 'viewport_rect';
+  source: OverlayAnchorSource;
   rect: ClientRectLike;
+  ownerId?: string;
 }
 
 export interface WorldOverlayAnchorOptions {
   worldRect: CanvasRect;
   viewport: CanvasViewport;
   viewportElementRect: ClientRectLike;
+  source: OverlayAnchorSource;
+  ownerId?: string;
 }
 
 const MIRROR_STYLE_PROPERTIES = [
@@ -58,10 +78,16 @@ const MIRROR_STYLE_PROPERTIES = [
   'textTransform',
 ] as const;
 
-export function createViewportOverlayAnchor(anchorRect: ClientRectLike): ViewportOverlayAnchor {
+export function createViewportOverlayAnchor(
+  anchorRect: ClientRectLike,
+  source: OverlayAnchorSource = 'fixed_viewport',
+  ownerId?: string,
+): ViewportOverlayAnchor {
   return {
     kind: 'viewport_rect',
+    source,
     rect: anchorRect,
+    ownerId,
   };
 }
 
@@ -85,7 +111,11 @@ export function worldRectToViewportRect({
 }
 
 export function createWorldOverlayAnchor(options: WorldOverlayAnchorOptions): ViewportOverlayAnchor {
-  return createViewportOverlayAnchor(worldRectToViewportRect(options));
+  return createViewportOverlayAnchor(
+    worldRectToViewportRect(options),
+    options.source,
+    options.ownerId,
+  );
 }
 
 export function placeAnchoredOverlay({
@@ -138,6 +168,28 @@ export function placeOverlayInViewport({
   return {
     x: clamp(alignedX, viewportPadding, maxX),
     y: clamp(rawY, viewportPadding, maxY),
+  };
+}
+
+export function placeSelectionToolbar({
+  anchorRect,
+  toolbarWidth = 360,
+  toolbarHeight = 42,
+  offset = 8,
+  viewportPadding = 12,
+  topChromeHeight = 56,
+}: SelectionToolbarPlacementOptions): SlashMenuAnchor {
+  const safeTop = Math.max(viewportPadding, topChromeHeight + viewportPadding);
+  const maxX = Math.max(viewportPadding, window.innerWidth - toolbarWidth - viewportPadding);
+  const maxY = Math.max(safeTop, window.innerHeight - toolbarHeight - viewportPadding);
+  const aboveY = anchorRect.top - toolbarHeight - offset;
+  const belowY = anchorRect.bottom + offset;
+  const canOpenAbove = aboveY >= safeTop;
+  const rawY = canOpenAbove ? aboveY : belowY;
+
+  return {
+    x: clamp(anchorRect.left, viewportPadding, maxX),
+    y: clamp(rawY, safeTop, maxY),
   };
 }
 
@@ -208,7 +260,7 @@ export function getSlashMenuAnchor(
   const menuWidth = Math.min(SLASH_MENU_WIDTH, Math.max(0, window.innerWidth - (viewportPadding * 2)));
 
   return placeAnchoredOverlay({
-    anchor: createViewportOverlayAnchor(anchorRect),
+    anchor: createViewportOverlayAnchor(anchorRect, 'caret'),
     overlayWidth: menuWidth,
     overlayHeight: SLASH_MENU_HEIGHT_ESTIMATE,
     offset: SLASH_MENU_OFFSET,
@@ -220,14 +272,21 @@ export function getSlashMenuAnchor(
 export function getBlockControlAnchor(element: HTMLElement | null | undefined): SlashMenuAnchor | null {
   if (!element) return null;
 
-  const rect = element.getBoundingClientRect();
+  return getBlockControlAnchorFromRect(element.getBoundingClientRect());
+}
 
-  return placeAnchoredOverlay({
-    anchor: createViewportOverlayAnchor(rect),
-    overlayWidth: 220,
-    overlayHeight: 34,
-    preferredSide: 'right',
-  });
+export function getBlockControlAnchorFromRect(rect: ClientRectLike): SlashMenuAnchor {
+  const overlayWidth = 220;
+  const offset = 8;
+  const rightX = rect.right + offset;
+  const leftX = rect.left - overlayWidth - offset;
+  const canOpenRight = rightX + overlayWidth <= window.innerWidth - offset;
+  const canOpenLeft = leftX >= offset;
+
+  return {
+    x: canOpenRight || !canOpenLeft ? rightX : leftX,
+    y: rect.top,
+  };
 }
 
 export function getTooltipAnchor(element: HTMLElement | null | undefined): SlashMenuAnchor | null {
@@ -236,7 +295,7 @@ export function getTooltipAnchor(element: HTMLElement | null | undefined): Slash
   const rect = element.getBoundingClientRect();
 
   return placeAnchoredOverlay({
-    anchor: createViewportOverlayAnchor(rect),
+    anchor: createViewportOverlayAnchor(rect, 'formula_help'),
     overlayWidth: 320,
     overlayHeight: 82,
     preferredSide: 'below',

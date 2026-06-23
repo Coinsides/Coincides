@@ -1,6 +1,5 @@
 import { useCallback, type Dispatch, type SetStateAction } from 'react';
 import {
-  combinedDefinitionText,
   presentationKindForBlock,
   stringValue,
   type FieldValueRecord,
@@ -14,12 +13,6 @@ export interface UseBlockFieldDraftControllerOptions {
 
 function textForFieldDraft(block: NoteBlock, fallbackText: string, fieldValues: FieldValueRecord): string {
   const presentationKind = presentationKindForBlock(block);
-  if (presentationKind === 'definition') {
-    return combinedDefinitionText(
-      stringValue(fieldValues.concept_name),
-      stringValue(fieldValues.description),
-    );
-  }
   if (presentationKind === 'formula') {
     return stringValue(fieldValues.latex_input);
   }

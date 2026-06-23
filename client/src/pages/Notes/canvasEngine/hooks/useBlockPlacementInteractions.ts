@@ -21,10 +21,12 @@ import {
   type SurfaceModePolicy,
 } from '../modePolicyService';
 import {
+  CANVAS_WORKSPACE_WIDTH,
   LAYOUT_MEASURE_SUPPRESSION_MS,
   type BlockBoxLayout,
   type SnapGuide,
 } from '../runtimeLayout';
+import type { CanvasViewport } from '../types';
 
 interface PlacementInteractionBlock {
   id: string;
@@ -41,14 +43,16 @@ export interface UseBlockPlacementInteractionsOptions<TBlock extends PlacementIn
     before: Record<string, BlockBoxLayout>,
     after: Record<string, BlockBoxLayout>,
   ) => void;
+  beginTemporaryLayoutMode: () => void;
+  clearTemporaryLayoutMode: () => void;
   setInteractionState: (state: RuntimeInteractionState) => void;
   setLayoutDrafts: Dispatch<SetStateAction<Record<string, BlockBoxLayout>>>;
-  setLayoutMode: (value: boolean) => void;
   setSelectedBlockId: (blockId: string) => void;
   setSnapGuide: (guide: SnapGuide | null) => void;
   snapEnabled: boolean;
   suppressMeasuredReflowUntilRef: MutableRefObject<number>;
   surfacePolicy: SurfaceModePolicy;
+  viewportTransform: CanvasViewport;
 }
 
 export function useBlockPlacementInteractions<TBlock extends PlacementInteractionBlock>({
@@ -59,14 +63,16 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
   orderedBlocks,
   persistChangedBlockLayouts,
   pushLayoutHistory,
+  beginTemporaryLayoutMode,
+  clearTemporaryLayoutMode,
   setInteractionState,
   setLayoutDrafts,
-  setLayoutMode,
   setSelectedBlockId,
   setSnapGuide,
   snapEnabled,
   suppressMeasuredReflowUntilRef,
   surfacePolicy,
+  viewportTransform,
 }: UseBlockPlacementInteractionsOptions<TBlock>) {
   const orderedBlockIds = useMemo(
     () => orderedBlocks.map((item) => item.id),
@@ -82,7 +88,7 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
     event.stopPropagation();
     setSelectedBlockId(block.id);
     setInteractionState(draggingBlockInteraction(block.id));
-    setLayoutMode(true);
+    beginTemporaryLayoutMode();
     const startClientX = event.clientX;
     const startClientY = event.clientY;
     const startLayouts = { ...blockLayouts };
@@ -91,8 +97,9 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
 
     const handlePointerMove = (moveEvent: PointerEvent) => {
       setLayoutDrafts(() => {
-        const deltaX = moveEvent.clientX - startClientX;
-        const deltaY = moveEvent.clientY - startClientY;
+        const zoom = surfacePolicy.isCanvasMode ? viewportTransform.zoom : 1;
+        const deltaX = (moveEvent.clientX - startClientX) / zoom;
+        const deltaY = (moveEvent.clientY - startClientY) / zoom;
         const result = calculateDraggedBlockLayouts({
           blockId: block.id,
           startLayouts,
@@ -100,8 +107,10 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
           deltaX,
           deltaY,
           contentWidth,
+          dragBoundsWidth: surfacePolicy.isCanvasMode ? CANVAS_WORKSPACE_WIDTH : contentWidth,
           snapEnabled,
           orderedBlockIds,
+          resolveCollisions: shouldResolvePageCollisions(surfacePolicy) || snapEnabled,
           useElasticAvoidance: shouldUseElasticAvoidance({
             policy: surfacePolicy,
             snapEnabled,
@@ -120,6 +129,7 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
         suppressMeasuredReflowUntilRef.current = Date.now() + LAYOUT_MEASURE_SUPPRESSION_MS;
         movingBlockIdRef.current = null;
         setSnapGuide(null);
+        clearTemporaryLayoutMode();
         setInteractionState(selectedBlockInteraction(block.id));
         pushLayoutHistory(startLayouts, latestLayouts);
         persistChangedBlockLayouts(latestLayouts);
@@ -132,14 +142,16 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
     orderedBlockIds,
     persistChangedBlockLayouts,
     pushLayoutHistory,
+    beginTemporaryLayoutMode,
+    clearTemporaryLayoutMode,
     setInteractionState,
     setLayoutDrafts,
-    setLayoutMode,
     setSelectedBlockId,
     setSnapGuide,
     snapEnabled,
     suppressMeasuredReflowUntilRef,
     surfacePolicy,
+    viewportTransform,
   ]);
 
   const beginResizeBlock = useCallback((
@@ -152,13 +164,14 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
     event.stopPropagation();
     setSelectedBlockId(block.id);
     setInteractionState(resizingBlockInteraction(block.id));
-    setLayoutMode(true);
+    beginTemporaryLayoutMode();
     const startClientX = event.clientX;
     let latestLayouts: Record<string, BlockBoxLayout> = blockLayouts;
     const startLayouts = { ...blockLayouts };
 
     const handlePointerMove = (moveEvent: PointerEvent) => {
-      const deltaX = moveEvent.clientX - startClientX;
+      const zoom = surfacePolicy.isCanvasMode ? viewportTransform.zoom : 1;
+      const deltaX = (moveEvent.clientX - startClientX) / zoom;
       setLayoutDrafts((current) => {
         const result = calculateResizedBlockLayouts({
           blockId: block.id,
@@ -182,6 +195,7 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
       onMove: handlePointerMove,
       onEnd: () => {
         setSnapGuide(null);
+        clearTemporaryLayoutMode();
         setInteractionState(selectedBlockInteraction(block.id));
         pushLayoutHistory(startLayouts, latestLayouts);
         persistChangedBlockLayouts(latestLayouts);
@@ -194,13 +208,15 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
     orderedBlockIds,
     persistChangedBlockLayouts,
     pushLayoutHistory,
+    beginTemporaryLayoutMode,
+    clearTemporaryLayoutMode,
     setInteractionState,
     setLayoutDrafts,
-    setLayoutMode,
     setSelectedBlockId,
     setSnapGuide,
     snapEnabled,
     surfacePolicy,
+    viewportTransform,
   ]);
 
   return {

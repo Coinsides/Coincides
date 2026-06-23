@@ -4,8 +4,10 @@ import {
 } from 'react';
 import type { SnapGuide } from '../runtimeLayout';
 
+export type LayoutModeKind = 'off' | 'persistent' | 'temporary';
+
 export function useLayoutInteractionController() {
-  const [layoutMode, setLayoutMode] = useState(false);
+  const [layoutModeKind, setLayoutModeKind] = useState<LayoutModeKind>('off');
   const [snapGuide, setSnapGuide] = useState<SnapGuide | null>(null);
   const [snapEnabled, setSnapEnabled] = useState(true);
 
@@ -13,9 +15,24 @@ export function useLayoutInteractionController() {
     setSnapGuide(null);
   }, []);
 
-  const toggleLayoutMode = useCallback(() => {
+  const disableLayoutMode = useCallback(() => {
     clearSnapGuide();
-    setLayoutMode((value) => !value);
+    setLayoutModeKind('off');
+  }, [clearSnapGuide]);
+
+  const enablePersistentLayoutMode = useCallback(() => {
+    clearSnapGuide();
+    setLayoutModeKind('persistent');
+  }, [clearSnapGuide]);
+
+  const beginTemporaryLayoutMode = useCallback(() => {
+    clearSnapGuide();
+    setLayoutModeKind((current) => (current === 'persistent' ? current : 'temporary'));
+  }, [clearSnapGuide]);
+
+  const clearTemporaryLayoutMode = useCallback(() => {
+    clearSnapGuide();
+    setLayoutModeKind((current) => (current === 'temporary' ? 'off' : current));
   }, [clearSnapGuide]);
 
   const toggleSnapEnabled = useCallback(() => {
@@ -24,13 +41,16 @@ export function useLayoutInteractionController() {
   }, [clearSnapGuide]);
 
   return {
+    beginTemporaryLayoutMode,
     clearSnapGuide,
-    layoutMode,
-    setLayoutMode,
+    clearTemporaryLayoutMode,
+    disableLayoutMode,
+    enablePersistentLayoutMode,
+    layoutMode: layoutModeKind !== 'off',
+    layoutModeKind,
     setSnapGuide,
     snapEnabled,
     snapGuide,
-    toggleLayoutMode,
     toggleSnapEnabled,
   };
 }

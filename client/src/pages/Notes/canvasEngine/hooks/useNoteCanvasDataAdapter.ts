@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '@/services/api';
 import {
@@ -10,6 +10,7 @@ import {
 import { useUIStore } from '@/stores/uiStore';
 import {
   contentForEditedBlock,
+  contentForEditedTextFlowBlock,
   contentForTemplate,
   plainTextForBlockContent,
   presentationKindForBlock,
@@ -30,11 +31,44 @@ import type {
 } from '../runtimeLayout';
 import { NOTE_LAYOUT_KEY } from '../runtimeLayout';
 import type {
+  AnnotationProposalV1,
+  AnnotationTruthV1,
+  ContentGroupV1,
+  GroupFolderV1,
   Note,
   NoteBlock,
+  ReadingInterpretationV1,
   SourceAnchor,
   SourceJumpTarget,
+  TextBlockContentV1,
 } from '../runtimeDataTypes';
+import {
+  getTextFlowContent,
+  projectTextFlowContent,
+  TEXT_FLOW_CONTENT_KEY,
+} from '../textFlowService';
+import {
+  normalizeAnnotationHierarchy,
+} from '../annotationEditorService';
+import {
+  normalizeContentGroup,
+} from '../contentGroupService';
+import {
+  NOTE_ANNOTATIONS_METADATA_KEY,
+  NOTE_ANNOTATION_PROPOSALS_METADATA_KEY,
+  NOTE_READING_INTERPRETATIONS_METADATA_KEY,
+} from '../contentGroupMetadataService';
+import {
+  loadContentGroupsForNote,
+  saveContentGroupsForNote,
+} from '../contentGroupRepository';
+import {
+  loadGroupFoldersForNote,
+  saveGroupFoldersForNote,
+} from '../groupFolderRepository';
+import {
+  normalizeGroupFolders,
+} from '../groupFolderService';
 
 type TemplateCategoryKey = 'default' | 'math' | 'userDefined';
 
@@ -59,9 +93,6 @@ const INSERT_TEMPLATE_CATEGORIES: Array<{ key: TemplateCategoryKey; label: strin
 
 const DEFAULT_INSERT_TEMPLATE_KEYS = [
   'text.paragraph',
-  'text.heading',
-  'source.quote',
-  'definition.basic',
   'code.snippet',
 ];
 
@@ -85,11 +116,19 @@ function pickTemplatesByKey(options: TemplateOption[], templateKeys: string[]): 
     .filter((template): template is TemplateOption => Boolean(template));
 }
 
+function templateWithInsertLabel(template: TemplateOption): TemplateOption {
+  if (template.template_key !== 'code.snippet') return template;
+  return {
+    ...template,
+    label: 'Code',
+  };
+}
+
 export function buildInsertTemplateGroups(options: TemplateOption[]): InsertTemplateGroup[] {
   const groups = {
-    default: pickTemplatesByKey(options, DEFAULT_INSERT_TEMPLATE_KEYS),
-    math: pickTemplatesByKey(options, MATH_INSERT_TEMPLATE_KEYS),
-    userDefined: options.filter(isUserDefinedTemplate),
+    default: pickTemplatesByKey(options, DEFAULT_INSERT_TEMPLATE_KEYS).map(templateWithInsertLabel),
+    math: pickTemplatesByKey(options, MATH_INSERT_TEMPLATE_KEYS).map(templateWithInsertLabel),
+    userDefined: options.filter(isUserDefinedTemplate).map(templateWithInsertLabel),
   };
 
   return INSERT_TEMPLATE_CATEGORIES
@@ -114,12 +153,52 @@ function hydrateClientBlock(raw: any): NoteBlock {
   };
 }
 
-function presentationKindForTemplate(template: TemplateOption, sourceQuote = false): BlockPresentationKind {
-  if (template.learning_role === 'definition') return 'definition';
+function annotationTruthsFromMetadata(metadata: Record<string, unknown> | undefined): AnnotationTruthV1[] {
+  const annotations = metadata?.[NOTE_ANNOTATIONS_METADATA_KEY];
+  if (!Array.isArray(annotations)) return [];
+  const parsed = annotations.filter((item): item is AnnotationTruthV1 => (
+    Boolean(item)
+    && typeof item === 'object'
+    && typeof (item as AnnotationTruthV1).id === 'string'
+    && typeof (item as AnnotationTruthV1).raw_label === 'string'
+    && Array.isArray((item as AnnotationTruthV1).ranges)
+  )).map((annotation) => ({
+    ...annotation,
+    parent_annotation_id: annotation.parent_annotation_id || null,
+    child_annotation_ids: Array.isArray(annotation.child_annotation_ids)
+      ? annotation.child_annotation_ids
+      : [],
+  }));
+  return normalizeAnnotationHierarchy({ annotations: parsed }).annotations;
+}
+
+function readingInterpretationsFromMetadata(metadata: Record<string, unknown> | undefined): ReadingInterpretationV1[] {
+  const interpretations = metadata?.[NOTE_READING_INTERPRETATIONS_METADATA_KEY];
+  if (!Array.isArray(interpretations)) return [];
+  return interpretations.filter((item): item is ReadingInterpretationV1 => (
+    Boolean(item)
+    && typeof item === 'object'
+    && typeof (item as ReadingInterpretationV1).id === 'string'
+    && typeof (item as ReadingInterpretationV1).summary === 'string'
+    && Array.isArray((item as ReadingInterpretationV1).proposed_annotation_ids)
+  ));
+}
+
+function annotationProposalsFromMetadata(metadata: Record<string, unknown> | undefined): AnnotationProposalV1[] {
+  const proposals = metadata?.[NOTE_ANNOTATION_PROPOSALS_METADATA_KEY];
+  if (!Array.isArray(proposals)) return [];
+  return proposals.filter((item): item is AnnotationProposalV1 => (
+    Boolean(item)
+    && typeof item === 'object'
+    && typeof (item as AnnotationProposalV1).id === 'string'
+    && typeof (item as AnnotationProposalV1).proposed_label === 'string'
+    && Array.isArray((item as AnnotationProposalV1).proposed_ranges)
+  ));
+}
+
+function presentationKindForTemplate(template: TemplateOption, _sourceQuote = false): BlockPresentationKind {
   if (template.learning_role === 'formula') return 'formula';
-  if (template.template_key === 'text.heading') return 'heading';
   if (template.template_key === 'code.snippet') return 'code';
-  if (sourceQuote && template.template_key === 'source.quote') return 'sourceQuote';
   return 'paragraph';
 }
 
@@ -136,16 +215,27 @@ export function useNoteCanvasDataAdapter({
   const [blocks, setBlocks] = useState<NoteBlock[]>([]);
   const [loading, setLoading] = useState(true);
   const [titleDraft, setTitleDraft] = useState('');
-  const [newTemplateId, setNewTemplateId] = useState('text.paragraph');
   const [templateOptions, setTemplateOptions] = useState<TemplateOption[]>(STATIC_TEMPLATE_OPTIONS);
   const [templateWarning, setTemplateWarning] = useState<string | null>(null);
-  const [newBlockText, setNewBlockText] = useState('');
   const [savingBlockId, setSavingBlockId] = useState<string | null>(null);
   const [anchorsBySourceRef, setAnchorsBySourceRef] = useState<Record<string, SourceAnchor>>({});
   const [sourceJumpTarget, setSourceJumpTarget] = useState<SourceJumpTarget | null>(null);
   const [sourceJumpBusy, setSourceJumpBusy] = useState<string | null>(null);
+  const [annotationTruths, setAnnotationTruths] = useState<AnnotationTruthV1[]>([]);
+  const [contentGroups, setContentGroups] = useState<ContentGroupV1[]>([]);
+  const [groupFolders, setGroupFolders] = useState<GroupFolderV1[]>([]);
+  const [readingInterpretations, setReadingInterpretations] = useState<ReadingInterpretationV1[]>([]);
+  const [annotationProposals, setAnnotationProposals] = useState<AnnotationProposalV1[]>([]);
   const [blockTextDrafts, setBlockTextDrafts] = useState<Record<string, string>>({});
+  const [blockTextFlowDrafts, setBlockTextFlowDrafts] = useState<Record<string, TextBlockContentV1>>({});
   const [blockFieldDrafts, setBlockFieldDrafts] = useState<Record<string, FieldValueRecord>>({});
+  const noteRef = useRef<Note | null>(null);
+  const annotationSaveGenerationRef = useRef(0);
+  const contentGroupSaveGenerationRef = useRef(0);
+
+  useEffect(() => {
+    noteRef.current = note;
+  }, [note]);
 
   const sortedBlocks = useMemo(
     () => [...blocks].sort((a, b) => a.order_index - b.order_index),
@@ -178,10 +268,21 @@ export function useNoteCanvasDataAdapter({
         api.get(`/notes/${noteId}`),
         api.get(`/notes/${noteId}/blocks`),
       ]);
-      setNote(noteRes.data);
+      const hydratedNote = noteRes.data as Note;
+      const [savedContentGroups, savedGroupFolders] = await Promise.all([
+        loadContentGroupsForNote({ note: hydratedNote }),
+        loadGroupFoldersForNote({ note: hydratedNote }),
+      ]);
+      setNote(hydratedNote);
       setTitleDraft(noteRes.data.title);
+      setAnnotationTruths(annotationTruthsFromMetadata(hydratedNote.metadata));
+      setContentGroups(savedContentGroups);
+      setGroupFolders(savedGroupFolders);
+      setReadingInterpretations(readingInterpretationsFromMetadata(hydratedNote.metadata));
+      setAnnotationProposals(annotationProposalsFromMetadata(hydratedNote.metadata));
       setBlocks((blocksRes.data as any[]).map(hydrateClientBlock));
       setBlockTextDrafts({});
+      setBlockTextFlowDrafts({});
       setBlockFieldDrafts({});
       onNoteLoaded();
     } catch (err) {
@@ -198,25 +299,11 @@ export function useNoteCanvasDataAdapter({
   }, [fetchNote]);
 
   useEffect(() => {
-    if (insertTemplateOptions.length === 0) return;
-    if (insertTemplateOptions.some((template) => template.template_id === newTemplateId)) return;
-    setNewTemplateId(insertTemplateOptions[0].template_id);
-  }, [insertTemplateOptions, newTemplateId]);
-
-  useEffect(() => {
     let cancelled = false;
     loadRuntimeTemplateOptions().then(({ options, warning }) => {
       if (cancelled) return;
-      const groups = buildInsertTemplateGroups(options);
       setTemplateOptions(options);
       setTemplateWarning(warning);
-      setNewTemplateId((current) => (
-        groups
-          .flatMap((group) => group.templates)
-          .some((template) => template.template_id === current)
-          ? current
-          : groups[0]?.templates[0]?.template_id || 'text.paragraph'
-      ));
     });
     return () => { cancelled = true; };
   }, []);
@@ -259,6 +346,135 @@ export function useNoteCanvasDataAdapter({
     }
   }, [note, titleDraft, addToast]);
 
+  const saveAnnotationTruths = useCallback(async (nextAnnotations: AnnotationTruthV1[]) => {
+    const currentNote = noteRef.current || note;
+    if (!currentNote) return;
+    const nextMetadata = {
+      ...(currentNote.metadata || {}),
+      [NOTE_ANNOTATIONS_METADATA_KEY]: nextAnnotations,
+    };
+    const saveGeneration = annotationSaveGenerationRef.current + 1;
+    annotationSaveGenerationRef.current = saveGeneration;
+    const optimisticNote = {
+      ...currentNote,
+      metadata: nextMetadata,
+    };
+    noteRef.current = optimisticNote;
+    setAnnotationTruths(nextAnnotations);
+    setNote(optimisticNote);
+    try {
+      const res = await api.put(`/notes/${currentNote.id}`, { metadata: nextMetadata });
+      const updated = res.data as Note;
+      if (annotationSaveGenerationRef.current !== saveGeneration) return;
+      const savedAnnotations = annotationTruthsFromMetadata(updated.metadata);
+      const committedNote = savedAnnotations.length > 0 || nextAnnotations.length === 0
+        ? updated
+        : { ...updated, metadata: nextMetadata };
+      noteRef.current = committedNote;
+      setNote(committedNote);
+      setAnnotationTruths(savedAnnotations.length > 0 ? savedAnnotations : nextAnnotations);
+    } catch (err) {
+      console.error('Failed to save annotations:', err);
+      addToast('error', 'Failed to save annotation');
+      if (annotationSaveGenerationRef.current !== saveGeneration) return;
+      noteRef.current = currentNote;
+      setNote(currentNote);
+      setAnnotationTruths(annotationTruthsFromMetadata(currentNote.metadata));
+    }
+  }, [addToast, note]);
+
+  const saveContentGroups = useCallback(async (nextGroups: ContentGroupV1[]) => {
+    const currentNote = noteRef.current || note;
+    if (!currentNote) return;
+    const previousGroups = contentGroups;
+    const normalizedGroups = nextGroups.map(normalizeContentGroup);
+    const saveGeneration = contentGroupSaveGenerationRef.current + 1;
+    contentGroupSaveGenerationRef.current = saveGeneration;
+    setContentGroups(normalizedGroups);
+    try {
+      const savedGroups = await saveContentGroupsForNote({
+        noteId: currentNote.id,
+        groups: normalizedGroups,
+      });
+      if (contentGroupSaveGenerationRef.current !== saveGeneration) return;
+      setContentGroups(savedGroups);
+    } catch (err) {
+      console.error('Failed to save content groups:', err);
+      addToast('error', 'Failed to save content group');
+      if (contentGroupSaveGenerationRef.current !== saveGeneration) return;
+      setContentGroups(previousGroups);
+    }
+  }, [addToast, contentGroups, note]);
+
+  const saveGroupFolders = useCallback(async (nextFolders: GroupFolderV1[]) => {
+    const currentNote = noteRef.current || note;
+    if (!currentNote) return;
+    const previousFolders = groupFolders;
+    const normalizedFolders = normalizeGroupFolders(nextFolders);
+    const saveGeneration = contentGroupSaveGenerationRef.current + 1;
+    contentGroupSaveGenerationRef.current = saveGeneration;
+    setGroupFolders(normalizedFolders);
+    try {
+      const savedFolders = await saveGroupFoldersForNote({
+        noteId: currentNote.id,
+        folders: normalizedFolders,
+      });
+      if (contentGroupSaveGenerationRef.current !== saveGeneration) return;
+      setGroupFolders(savedFolders);
+    } catch (err) {
+      console.error('Failed to save group folders:', err);
+      addToast('error', 'Failed to save group folders');
+      if (contentGroupSaveGenerationRef.current !== saveGeneration) return;
+      try {
+        const savedFolders = await loadGroupFoldersForNote({
+          note: currentNote,
+          importLegacy: false,
+        });
+        setGroupFolders(savedFolders);
+      } catch {
+        setGroupFolders(previousFolders);
+      }
+    }
+  }, [addToast, groupFolders, note]);
+
+  const saveReadingInterpretations = useCallback(async (nextInterpretations: ReadingInterpretationV1[]) => {
+    if (!note) return;
+    const nextMetadata = {
+      ...(note.metadata || {}),
+      [NOTE_READING_INTERPRETATIONS_METADATA_KEY]: nextInterpretations,
+    };
+    setReadingInterpretations(nextInterpretations);
+    try {
+      const res = await api.put(`/notes/${note.id}`, { metadata: nextMetadata });
+      const updated = res.data as Note;
+      setNote(updated);
+      setReadingInterpretations(readingInterpretationsFromMetadata(updated.metadata));
+    } catch (err) {
+      console.error('Failed to save reading interpretations:', err);
+      addToast('error', 'Failed to save reading interpretation');
+      setReadingInterpretations(readingInterpretationsFromMetadata(note.metadata));
+    }
+  }, [addToast, note]);
+
+  const saveAnnotationProposals = useCallback(async (nextProposals: AnnotationProposalV1[]) => {
+    if (!note) return;
+    const nextMetadata = {
+      ...(note.metadata || {}),
+      [NOTE_ANNOTATION_PROPOSALS_METADATA_KEY]: nextProposals,
+    };
+    setAnnotationProposals(nextProposals);
+    try {
+      const res = await api.put(`/notes/${note.id}`, { metadata: nextMetadata });
+      const updated = res.data as Note;
+      setNote(updated);
+      setAnnotationProposals(annotationProposalsFromMetadata(updated.metadata));
+    } catch (err) {
+      console.error('Failed to save annotation proposals:', err);
+      addToast('error', 'Failed to save annotation proposal');
+      setAnnotationProposals(annotationProposalsFromMetadata(note.metadata));
+    }
+  }, [addToast, note]);
+
   const createBlock = useCallback(async (
     template: TemplateOption,
     text: string,
@@ -290,8 +506,12 @@ export function useNoteCanvasDataAdapter({
           : undefined,
       });
       const created = hydrateClientBlock(res.data);
+      const createdTextFlow = getTextFlowContent(nextContent);
       setBlocks((current) => [...current, created].sort((a, b) => a.order_index - b.order_index));
       setBlockTextDrafts((current) => ({ ...current, [created.id]: text.trimEnd() }));
+      if (createdTextFlow) {
+        setBlockTextFlowDrafts((current) => ({ ...current, [created.id]: createdTextFlow }));
+      }
       if (!options.silent) addToast('success', 'Block added');
       return created;
     } catch (err) {
@@ -304,15 +524,23 @@ export function useNoteCanvasDataAdapter({
   const saveBlock = useCallback(async (
     block: NoteBlock,
     text: string,
-    options: { silent?: boolean; fieldValues?: FieldValueRecord } = {},
+    options: { silent?: boolean; fieldValues?: FieldValueRecord; textFlow?: TextBlockContentV1 } = {},
   ): Promise<NoteBlock | null> => {
-    const nextText = text.trimEnd();
+    const textFlowDraft = options.textFlow || blockTextFlowDrafts[block.id];
+    const projectedTextFlow = textFlowDraft
+      ? projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: textFlowDraft }, text).plain_text
+      : null;
+    const nextText = textFlowDraft
+      ? (projectedTextFlow ?? text)
+      : text.trimEnd();
     const previousText = textFromContent(block).trimEnd();
     const fieldValues = options.fieldValues || blockFieldDrafts[block.id];
-    if (nextText === previousText && !fieldValues) return block;
+    if (nextText === previousText && !fieldValues && !textFlowDraft) return block;
     setSavingBlockId(block.id);
     try {
-      const nextContent = contentForEditedBlock(block, nextText, fieldValues);
+      const nextContent = textFlowDraft
+        ? contentForEditedTextFlowBlock(block, textFlowDraft)
+        : contentForEditedBlock(block, nextText, fieldValues);
       const kind = presentationKindForBlock(block);
       const res = await api.put(`/note-blocks/${block.id}`, {
         content_json: nextContent,
@@ -321,6 +549,9 @@ export function useNoteCanvasDataAdapter({
       const updated = hydrateClientBlock({ ...block, ...res.data, source_references: block.source_references });
       setBlocks((current) => current.map((item) => item.id === block.id ? updated : item));
       setBlockTextDrafts((current) => ({ ...current, [block.id]: nextText }));
+      if (textFlowDraft) {
+        setBlockTextFlowDrafts((current) => ({ ...current, [block.id]: textFlowDraft }));
+      }
       setBlockFieldDrafts((current) => {
         const next = { ...current };
         delete next[block.id];
@@ -335,7 +566,7 @@ export function useNoteCanvasDataAdapter({
     } finally {
       setSavingBlockId(null);
     }
-  }, [addToast, blockFieldDrafts]);
+  }, [addToast, blockFieldDrafts, blockTextFlowDrafts]);
 
   const applyTemplateToBlock = useCallback(async (
     block: NoteBlock,
@@ -418,18 +649,6 @@ export function useNoteCanvasDataAdapter({
     void updateBlockPolicy(block, layout, { ai_visibility: nextVisibility });
   }, [updateBlockPolicy]);
 
-  const addBlock = useCallback(async (): Promise<NoteBlock | null> => {
-    if (!newBlockText.trim()) return null;
-    const selectedTemplate = insertTemplateOptions.find((template) => template.template_id === newTemplateId) || insertTemplateOptions[0];
-    if (!selectedTemplate) return null;
-    const created = await createBlock(selectedTemplate, newBlockText.trim());
-    if (created) {
-      setNewBlockText('');
-      return created;
-    }
-    return null;
-  }, [createBlock, insertTemplateOptions, newBlockText, newTemplateId]);
-
   const trashBlock = useCallback(async (
     blockId: string,
     options: { silent?: boolean } = {},
@@ -438,6 +657,11 @@ export function useNoteCanvasDataAdapter({
       await api.delete(`/note-blocks/${blockId}`);
       setBlocks((current) => current.filter((block) => block.id !== blockId));
       setBlockTextDrafts((current) => {
+        const next = { ...current };
+        delete next[blockId];
+        return next;
+      });
+      setBlockTextFlowDrafts((current) => {
         const next = { ...current };
         delete next[blockId];
         return next;
@@ -475,6 +699,11 @@ export function useNoteCanvasDataAdapter({
         ...current,
         [restored.id]: textFromContent(restored).trimEnd(),
       }));
+      setBlockTextFlowDrafts((current) => {
+        const next = { ...current };
+        delete next[restored.id];
+        return next;
+      });
       setBlockFieldDrafts((current) => {
         const next = { ...current };
         delete next[restored.id];
@@ -531,32 +760,38 @@ export function useNoteCanvasDataAdapter({
     loading,
     titleDraft,
     setTitleDraft,
-    newTemplateId,
-    setNewTemplateId,
     templateWarning,
-    newBlockText,
-    setNewBlockText,
     savingBlockId,
+    annotationTruths,
+    contentGroups,
+    groupFolders,
     anchorsBySourceRef,
     sourceJumpTarget,
     setSourceJumpTarget,
     sourceJumpBusy,
+    readingInterpretations,
+    annotationProposals,
     blockTextDrafts,
     setBlockTextDrafts,
+    blockTextFlowDrafts,
+    setBlockTextFlowDrafts,
     blockFieldDrafts,
     setBlockFieldDrafts,
     templateOptions,
     defaultTextTemplate,
-    insertTemplateGroups,
     insertTemplateOptions,
     saveTitle,
+    saveAnnotationTruths,
+    saveContentGroups,
+    saveGroupFolders,
+    saveReadingInterpretations,
+    saveAnnotationProposals,
     createBlock,
     saveBlock,
     applyTemplateToBlock,
     persistBlockLayout,
     toggleBlockExportRole,
     toggleBlockAIVisibility,
-    addBlock,
     trashBlock,
     restoreBlock,
     moveBlock,

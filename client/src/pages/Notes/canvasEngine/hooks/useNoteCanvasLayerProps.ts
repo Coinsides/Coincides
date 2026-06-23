@@ -13,18 +13,21 @@ import type { NoteRuntimeDocumentLayerProps } from '../layers/NoteRuntimeDocumen
 import type { NoteWritingSurfaceLayerProps } from '../layers/NoteWritingSurfaceLayer';
 import type {
   Note,
+  GroupFolderV1,
   SourceJumpTarget,
 } from '../runtimeDataTypes';
 
 export type UseNoteCanvasLayerPropsInput =
   Omit<NoteChromeLayerProps, 'note' | 'onAddFavorite' | 'onBackProject'>
   & Omit<NoteFloatingPanelLayerProps, 'onCloseSourceJump' | 'onFocusBlock'>
-  & Omit<NoteWritingSurfaceLayerProps, 'onFocusBlock'>
+  & Omit<NoteWritingSurfaceLayerProps, 'onFocusBlock' | 'noteId' | 'projectId'>
   & Pick<NoteRuntimeDocumentLayerProps, 'onSurfacePointerDown' | 'templateWarning'>
   & {
     note: Note | null;
     onFloatingPanelFocusBlock: NoteFloatingPanelLayerProps['onFocusBlock'];
     onWritingSurfaceFocusBlock: NoteWritingSurfaceLayerProps['onFocusBlock'];
+    groupFolders: GroupFolderV1[];
+    onSaveGroupFolders: NoteWritingSurfaceLayerProps['onSaveGroupFolders'];
     setSourceJumpTarget: Dispatch<SetStateAction<SourceJumpTarget | null>>;
   };
 
@@ -55,13 +58,16 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     chromeCollapsed: input.chromeCollapsed,
     exportPreview: input.exportPreview,
     layoutMode: input.layoutMode,
+    layoutModeKind: input.layoutModeKind,
     note: input.note,
     showExportPreview: input.showExportPreview,
+    showLayoutPanel: input.showLayoutPanel,
     showMoreActions: input.showMoreActions,
     showNoteInfo: input.showNoteInfo,
     showPreviewAIVisibility: input.showPreviewAIVisibility,
     showPreviewBlockTypes: input.showPreviewBlockTypes,
     showPreviewExportStatus: input.showPreviewExportStatus,
+    showPreviewLabelOverlay: input.showPreviewLabelOverlay,
     snapEnabled: input.snapEnabled,
     sortedBlockCount: input.sortedBlockCount,
     sourceReferenceCount: input.sourceReferenceCount,
@@ -79,36 +85,33 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     onToggleLayoutMode: input.onToggleLayoutMode,
     onToggleMoreActions: input.onToggleMoreActions,
     onToggleNoteInfo: input.onToggleNoteInfo,
+    onOpenLayoutPanel: input.onOpenLayoutPanel,
     onTogglePreviewAIVisibility: input.onTogglePreviewAIVisibility,
     onTogglePreviewBlockTypes: input.onTogglePreviewBlockTypes,
     onTogglePreviewExportStatus: input.onTogglePreviewExportStatus,
+    onTogglePreviewLabelOverlay: input.onTogglePreviewLabelOverlay,
     onToggleSnapEnabled: input.onToggleSnapEnabled,
     onToggleSurfaceMode: input.onToggleSurfaceMode,
   };
 
   const floatingPanelProps: NoteFloatingPanelLayerProps = {
-    insertTemplateGroups: input.insertTemplateGroups,
-    newBlockText: input.newBlockText,
-    newTemplateId: input.newTemplateId,
-    showAdvancedInsert: input.showAdvancedInsert,
     sourceJumpTarget: input.sourceJumpTarget,
-    surfaceMode: input.surfaceMode,
-    onAddBlock: input.onAddBlock,
-    onCloseOverlay: input.onCloseOverlay,
     onCloseSourceJump: handleCloseSourceJump,
     onFocusBlock: input.onFloatingPanelFocusBlock,
-    onNewBlockTextChange: input.onNewBlockTextChange,
-    onNewTemplateChange: input.onNewTemplateChange,
-    onToggleAdvancedInsert: input.onToggleAdvancedInsert,
   };
 
   const writingSurfaceProps: NoteWritingSurfaceLayerProps = {
     activeBlockId: input.activeBlockId,
+    activeSlashCommandId: input.activeSlashCommandId,
     anchorsBySourceRef: input.anchorsBySourceRef,
+    annotationTruths: input.annotationTruths,
+    contentGroups: input.contentGroups,
+    groupFolders: input.groupFolders,
     blockFieldDrafts: input.blockFieldDrafts,
     blockLayouts: input.blockLayouts,
     blockListRef: input.blockListRef,
     blockTextDrafts: input.blockTextDrafts,
+    blockTextFlowDrafts: input.blockTextFlowDrafts,
     creatingDraft: input.creatingDraft,
     defaultDraftLayout: input.defaultDraftLayout,
     draftActive: input.draftActive,
@@ -119,6 +122,8 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     interactionState: input.interactionState,
     layoutMode: input.layoutMode,
     noteCanvasRuntime: input.noteCanvasRuntime,
+    noteId: input.note.id,
+    projectId: input.note.course_id,
     pageContentHeight: input.pageContentHeight,
     pageOffsetX: input.pageOffsetX,
     primaryPageFrameX: input.primaryPageFrameX,
@@ -128,6 +133,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     showPreviewAIVisibility: input.showPreviewAIVisibility,
     showPreviewBlockTypes: input.showPreviewBlockTypes,
     showPreviewExportStatus: input.showPreviewExportStatus,
+    showPreviewLabelOverlay: input.showPreviewLabelOverlay,
     slashCommands: input.slashCommands,
     slashTarget: input.slashTarget,
     snapGuide: input.snapGuide,
@@ -135,13 +141,18 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     sourceJumpBusy: input.sourceJumpBusy,
     surfaceMode: input.surfaceMode,
     surfacePolicyMode: input.surfacePolicyMode,
+    viewportTransform: input.viewportTransform,
     visibleBlocks: input.visibleBlocks,
+    onSaveAnnotationTruths: input.onSaveAnnotationTruths,
+    onSaveContentGroups: input.onSaveContentGroups,
+    onSaveGroupFolders: input.onSaveGroupFolders,
     onActivateDraft: input.onActivateDraft,
     onBeginMoveBlock: input.onBeginMoveBlock,
     onBeginResizeBlock: input.onBeginResizeBlock,
     onBlockKeyDown: input.onBlockKeyDown,
     onBlockListMouseDown: input.onBlockListMouseDown,
     onBlockTextChange: input.onBlockTextChange,
+    onBlockTextFlowChange: input.onBlockTextFlowChange,
     onClearSlashTarget: input.onClearSlashTarget,
     onDiscardDraft: input.onDiscardDraft,
     onDraftChange: input.onDraftChange,
@@ -150,15 +161,20 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     onFocusBlock: input.onWritingSurfaceFocusBlock,
     onMeasuredBlockHeight: input.onMeasuredBlockHeight,
     onPageSpaceDoubleClick: input.onPageSpaceDoubleClick,
+    onPanViewportBy: input.onPanViewportBy,
     onPersistDraft: input.onPersistDraft,
     onResizeDraftFromTextarea: input.onResizeDraftFromTextarea,
+    onResetViewport: input.onResetViewport,
     onSaveBlock: input.onSaveBlock,
+    onScrollViewportBy: input.onScrollViewportBy,
     onSelectBlock: input.onSelectBlock,
     onSelectSlashCommand: input.onSelectSlashCommand,
     onToggleAIVisibility: input.onToggleAIVisibility,
     onToggleExportRole: input.onToggleExportRole,
     onTrashBlock: input.onTrashBlock,
+    onViewportSizeChange: input.onViewportSizeChange,
     onViewSource: input.onViewSource,
+    onZoomViewportAt: input.onZoomViewportAt,
   };
 
   return {

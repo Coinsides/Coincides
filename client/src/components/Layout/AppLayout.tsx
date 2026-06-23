@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Outlet, NavLink, useNavigate } from 'react-router-dom';
+import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home,
   BookOpen,
@@ -13,6 +13,7 @@ import {
   LibraryBig,
   Star,
   Clock3,
+  Boxes,
 } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 import { useCourseStore } from '@/stores/courseStore';
@@ -26,10 +27,12 @@ const navItems = [
   { to: '/projects', icon: BookOpen, labelKey: 'nav.projects' },
   { to: '/sources', icon: LibraryBig, labelKey: 'nav.sources' },
   { to: '/templates', icon: LayoutTemplate, labelKey: 'nav.templates' },
+  { to: '/group-gallery', icon: Boxes, label: 'Group Gallery' },
   { to: '/settings', icon: Settings, labelKey: 'nav.settings' },
 ];
 
 export default function AppLayout() {
+  const location = useLocation();
   const sidebarOpen = useUIStore((s) => s.sidebarOpen);
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
   const openModal = useUIStore((s) => s.openModal);
@@ -45,6 +48,7 @@ export default function AppLayout() {
   const { t, i18n } = useTranslation();
   const favoriteProjects = courses.slice(0, 3);
   const recentProjects = [...courses].slice(-4).reverse();
+  const contentGroupWorkspace = location.pathname.startsWith('/group-gallery');
 
   useEffect(() => {
     loadUser();
@@ -93,9 +97,10 @@ export default function AppLayout() {
   const showOnboarding = user && !user.onboarding_completed;
 
   return (
-    <div className={styles.layout}>
+    <div className={`${styles.layout} ${contentGroupWorkspace ? styles.contentGroupWorkspace : ''}`}>
       {showOnboarding && <Onboarding />}
       {/* Sidebar */}
+      {!contentGroupWorkspace && (
       <aside className={`${styles.sidebar} ${!sidebarOpen ? styles.collapsed : ''}`}>
         <div className={styles.sidebarHeader}>
           {sidebarOpen && (
@@ -112,7 +117,7 @@ export default function AppLayout() {
         </div>
 
         <nav className={styles.nav}>
-          {navItems.map(({ to, icon: Icon, labelKey }) => (
+          {navItems.map(({ to, icon: Icon, labelKey, label }) => (
             <NavLink
               key={to}
               to={to}
@@ -122,7 +127,7 @@ export default function AppLayout() {
               }
             >
               <Icon size={18} />
-              {sidebarOpen && <span className={styles.navLabel}>{t(labelKey)}</span>}
+              {sidebarOpen && <span className={styles.navLabel}>{label ?? (labelKey ? t(labelKey) : '')}</span>}
             </NavLink>
           ))}
 
@@ -192,10 +197,17 @@ export default function AppLayout() {
           )}
         </nav>
       </aside>
+      )}
 
       {/* Main content */}
-      <main className={styles.main}>
-        <div className={styles.content}>
+      <main
+        className={`${styles.main} ${contentGroupWorkspace ? styles.immersiveMain : ''}`}
+        data-app-main-scroll="true"
+      >
+        <div
+          className={`${styles.content} ${contentGroupWorkspace ? styles.immersiveContent : ''}`}
+          data-app-content-shell="true"
+        >
           <Outlet />
         </div>
       </main>

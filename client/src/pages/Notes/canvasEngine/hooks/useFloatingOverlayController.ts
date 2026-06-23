@@ -9,7 +9,7 @@ import {
   type RuntimeInteractionState,
 } from '../interactionController';
 
-export type FloatingOverlayPanel = 'insert' | 'noteInfo' | 'moreActions' | 'preview';
+export type FloatingOverlayPanel = 'layout' | 'noteInfo' | 'moreActions' | 'preview';
 
 export interface UseFloatingOverlayControllerOptions {
   setInteractionState: (state: RuntimeInteractionState) => void;
@@ -23,6 +23,7 @@ export function useFloatingOverlayController({
   const [showPreviewBlockTypes, setShowPreviewBlockTypes] = useState(false);
   const [showPreviewAIVisibility, setShowPreviewAIVisibility] = useState(false);
   const [showPreviewExportStatus, setShowPreviewExportStatus] = useState(false);
+  const [showPreviewLabelOverlay, setShowPreviewLabelOverlay] = useState(true);
 
   const setOverlay = useCallback((panel: FloatingOverlayPanel | null) => {
     setActiveOverlay(panel);
@@ -64,19 +65,21 @@ export function useFloatingOverlayController({
     closeOverlay,
     collapseChrome,
     expandChrome,
-    showAdvancedInsert: activeOverlay === 'insert',
     showExportPreview: activeOverlay === 'preview',
+    showLayoutPanel: activeOverlay === 'layout',
     showMoreActions: activeOverlay === 'moreActions',
     showNoteInfo: activeOverlay === 'noteInfo',
     showPreviewAIVisibility,
     showPreviewBlockTypes,
     showPreviewExportStatus,
-    toggleAdvancedInsert: () => toggleOverlay('insert'),
+    showPreviewLabelOverlay,
+    openLayoutPanel: () => setOverlay('layout'),
     toggleExportPreview: () => toggleOverlay('preview'),
     toggleMoreActions: () => toggleOverlay('moreActions'),
     toggleNoteInfo: () => toggleOverlay('noteInfo'),
     togglePreviewAIVisibility: () => setShowPreviewAIVisibility((value) => !value),
     togglePreviewBlockTypes: () => setShowPreviewBlockTypes((value) => !value),
     togglePreviewExportStatus: () => setShowPreviewExportStatus((value) => !value),
+    togglePreviewLabelOverlay: () => setShowPreviewLabelOverlay((value) => !value),
   };
 }

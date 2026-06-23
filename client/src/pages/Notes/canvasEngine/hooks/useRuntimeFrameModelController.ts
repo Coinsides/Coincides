@@ -1,6 +1,7 @@
 import { useNoteCanvasFrameModel } from './useNoteCanvasLayoutModel';
 import type { NoteBlock } from '../runtimeDataTypes';
 import type { BlockBoxLayout, SurfaceMode } from '../runtimeLayout';
+import type { CanvasViewport } from '../types';
 
 export interface UseRuntimeFrameModelControllerOptions {
   blockLayouts: Record<string, BlockBoxLayout>;
@@ -9,6 +10,7 @@ export interface UseRuntimeFrameModelControllerOptions {
   draftLayout: BlockBoxLayout | null;
   pageOffsetX: number;
   surfaceMode: SurfaceMode;
+  viewportTransform: CanvasViewport;
   visibleBlocks: NoteBlock[];
 }
 
@@ -19,6 +21,7 @@ export function useRuntimeFrameModelController({
   draftLayout,
   pageOffsetX,
   surfaceMode,
+  viewportTransform,
   visibleBlocks,
 }: UseRuntimeFrameModelControllerOptions) {
   return useNoteCanvasFrameModel({
@@ -28,6 +31,7 @@ export function useRuntimeFrameModelController({
     draftLayout,
     pageOffsetX,
     surfaceMode,
+    viewportTransform,
     visibleBlocks,
   });
 }

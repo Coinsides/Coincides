@@ -25,6 +25,8 @@ export interface CanvasInset {
 
 export interface CanvasViewport extends CanvasPoint, CanvasSize {
   zoom: number;
+  minZoom?: number;
+  maxZoom?: number;
 }
 
 export interface PageFrameModel extends CanvasRect {
@@ -72,6 +74,7 @@ export interface NoteCanvasRuntimeModel {
   route: 'self_owned_minimal_hybrid';
   mode: NoteCanvasMode;
   world: CanvasWorldModel;
+  viewport: CanvasViewport;
   primaryPageFrame: PageFrameModel | null;
   blockPlacements: BlockPlacementModel[];
   visibleBlockIds: string[];

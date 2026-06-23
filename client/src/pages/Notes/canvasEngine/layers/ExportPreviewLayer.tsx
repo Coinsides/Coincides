@@ -5,6 +5,7 @@ import {
   FileText,
   FileX,
   LayoutDashboard,
+  Tag,
   X,
 } from 'lucide-react';
 import {
@@ -21,9 +22,11 @@ interface ExportPreviewLayerProps {
   showBlockTypes: boolean;
   showAIVisibility: boolean;
   showExportStatus: boolean;
+  showLabelOverlay: boolean;
   onToggleBlockTypes: () => void;
   onToggleAIVisibility: () => void;
   onToggleExportStatus: () => void;
+  onToggleLabelOverlay: () => void;
   onClose: () => void;
 }
 
@@ -60,9 +63,11 @@ export function ExportPreviewLayer({
   showBlockTypes,
   showAIVisibility,
   showExportStatus,
+  showLabelOverlay,
   onToggleBlockTypes,
   onToggleAIVisibility,
   onToggleExportStatus,
+  onToggleLabelOverlay,
   onClose,
 }: ExportPreviewLayerProps) {
   return (
@@ -156,6 +161,25 @@ export function ExportPreviewLayer({
             <CircleHelp size={13} />
           </span>
         </div>
+        <div className={styles.previewOverlayControl}>
+          <button
+            type="button"
+            className={`${styles.previewOverlayToggle} ${showLabelOverlay ? styles.previewOverlayToggleOn : styles.previewOverlayToggleOff}`}
+            onClick={onToggleLabelOverlay}
+            aria-label="Toggle label overlay"
+            aria-pressed={showLabelOverlay}
+            title={showLabelOverlay ? 'Hide label overlay' : 'Show label overlay'}
+          >
+            <Tag size={20} />
+          </button>
+          <span
+            className={styles.previewOverlayHelp}
+            data-tip="Show or hide annotation labels and highlights while writing."
+            aria-label="Label overlay help"
+          >
+            <CircleHelp size={13} />
+          </span>
+        </div>
       </div>
       {(preview.crossing > 0 || preview.outside > 0) && (
         <div className={styles.exportWarning}>
@@ -186,7 +210,7 @@ export function ExportPreviewLayer({
         />
       </div>
       <p className={styles.popoverNote}>
-        This is a boundary preview seed, not the final PDF export engine.
+        Preview owns export boundary, AI visibility, export status, block type, and label overlays. It is not the final PDF export engine.
       </p>
     </div>
   );

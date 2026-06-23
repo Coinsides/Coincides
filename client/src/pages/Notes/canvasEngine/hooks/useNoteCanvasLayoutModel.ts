@@ -16,13 +16,18 @@ import {
   buildDefaultBlockLayouts,
   buildRuntimeBlockPlacement,
   normalizeBlockLayout,
+  normalizeResolvedBlockLayout,
 } from '../placementService';
 import {
   type BlockBoxLayout,
   type SurfaceMode,
 } from '../runtimeLayout';
 import type { NoteBlock } from '../runtimeDataTypes';
-import type { BlockPlacementModel, RelationEndpointReserve } from '../types';
+import type {
+  BlockPlacementModel,
+  CanvasViewport,
+  RelationEndpointReserve,
+} from '../types';
 import {
   createRuntimeViewport,
   createRuntimeWorld,
@@ -43,6 +48,7 @@ export interface UseNoteCanvasFrameModelOptions {
   draftLayout: BlockBoxLayout | null;
   pageOffsetX: number;
   surfaceMode: SurfaceMode;
+  viewportTransform: CanvasViewport;
   visibleBlocks: NoteBlock[];
 }
 
@@ -62,9 +68,16 @@ export function useNoteCanvasResolvedLayoutModel({
     const defaults = buildDefaultBlockLayouts(visibleBlocks, contentWidth, estimateBlockHeight);
     return visibleBlocks.reduce<Record<string, BlockBoxLayout>>((acc, block) => {
       const draft = layoutDrafts[block.id];
-      acc[block.id] = draft || normalizeBlockLayout({
+      const resolved = draft || normalizeBlockLayout({
         block,
         fallback: defaults[block.id],
+        contentWidth,
+        surfaceMode,
+        estimateHeight: estimateBlockHeight,
+      });
+      acc[block.id] = normalizeResolvedBlockLayout({
+        block,
+        layout: resolved,
         contentWidth,
         surfaceMode,
         estimateHeight: estimateBlockHeight,
@@ -91,6 +104,7 @@ export function useNoteCanvasFrameModel({
   draftLayout,
   pageOffsetX,
   surfaceMode,
+  viewportTransform,
   visibleBlocks,
 }: UseNoteCanvasFrameModelOptions) {
   const pageContentHeight = useMemo(() => {
@@ -132,7 +146,7 @@ export function useNoteCanvasFrameModel({
   );
 
   const noteCanvasRuntime = useMemo(() => {
-    const viewport = createRuntimeViewport(surfaceMode, pageContentHeight);
+    const viewport = createRuntimeViewport(surfaceMode, pageContentHeight, viewportTransform);
 
     return buildNoteCanvasRuntimeModel({
       mode: surfaceMode,
@@ -142,7 +156,7 @@ export function useNoteCanvasFrameModel({
       blockPlacements: canvasBlockPlacements,
       relationEndpointReserve,
     });
-  }, [canvasBlockPlacements, pageContentHeight, primaryPageFrame, relationEndpointReserve, surfaceMode]);
+  }, [canvasBlockPlacements, pageContentHeight, primaryPageFrame, relationEndpointReserve, surfaceMode, viewportTransform]);
 
   const exportPreview = useMemo(() => {
     return buildExportPreviewModel(visibleBlocks, blockLayouts);

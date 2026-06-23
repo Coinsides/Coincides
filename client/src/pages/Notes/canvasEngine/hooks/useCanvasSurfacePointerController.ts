@@ -7,6 +7,7 @@ import {
   type SurfaceModePolicy,
 } from '../modePolicyService';
 import type { BlockBoxLayout } from '../runtimeLayout';
+import type { CanvasViewport } from '../types';
 
 export interface UseCanvasSurfacePointerControllerOptions {
   activateDraft: (layout?: BlockBoxLayout) => void;
@@ -16,6 +17,7 @@ export interface UseCanvasSurfacePointerControllerOptions {
   pageOffsetX: number;
   snapEnabled: boolean;
   surfacePolicy: SurfaceModePolicy;
+  viewportTransform: CanvasViewport;
 }
 
 export function useCanvasSurfacePointerController({
@@ -26,6 +28,7 @@ export function useCanvasSurfacePointerController({
   pageOffsetX,
   snapEnabled,
   surfacePolicy,
+  viewportTransform,
 }: UseCanvasSurfacePointerControllerOptions) {
   const handleSurfacePointerDown = useCallback((event: MouseEvent<HTMLElement>) => {
     const target = event.target as HTMLElement;
@@ -41,8 +44,11 @@ export function useCanvasSurfacePointerController({
   const handlePageSpaceDoubleClick = useCallback((event: MouseEvent<HTMLDivElement>) => {
     if (event.target !== event.currentTarget) return;
     const rect = event.currentTarget.getBoundingClientRect();
-    const rawX = event.clientX - rect.left - pageOffsetX;
-    const rawY = event.clientY - rect.top;
+    const zoom = surfacePolicy.isCanvasMode ? viewportTransform.zoom : 1;
+    const worldX = (event.clientX - rect.left) / zoom;
+    const worldY = (event.clientY - rect.top) / zoom;
+    const rawX = worldX - pageOffsetX;
+    const rawY = worldY;
     activateDraft(createBlankDraftLayout({
       policy: surfacePolicy,
       snapEnabled,
@@ -58,6 +64,7 @@ export function useCanvasSurfacePointerController({
     pageOffsetX,
     snapEnabled,
     surfacePolicy,
+    viewportTransform,
   ]);
 
   return {

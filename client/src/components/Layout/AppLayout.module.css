@@ -4,6 +4,10 @@
   overflow: hidden;
 }
 
+.contentGroupWorkspace {
+  background: oklch(14% 0.01 255);
+}
+
 /* --- Sidebar --- */
 .sidebar {
   width: var(--sidebar-width);
@@ -218,4 +222,15 @@
   padding: 28px;
   position: relative;
   z-index: 1;
+}
+
+.immersiveMain {
+  overflow: hidden;
+  background: oklch(14% 0.01 255);
+}
+
+.immersiveContent {
+  height: 100%;
+  min-height: 0;
+  padding: 0;
 }

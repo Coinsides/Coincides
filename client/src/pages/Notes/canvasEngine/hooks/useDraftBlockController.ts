@@ -18,7 +18,12 @@ import {
 } from '../measurementService';
 import type { BlockBoxLayout } from '../runtimeLayout';
 import { DEFAULT_BLOCK_HEIGHT } from '../runtimeLayout';
-import type { Note, NoteBlock } from '../runtimeDataTypes';
+import type { Note, NoteBlock, TextBlockContentV1 } from '../runtimeDataTypes';
+import {
+  createEmptyTextBlockContentV1,
+  projectTextFlowContent,
+  TEXT_FLOW_CONTENT_KEY,
+} from '../textFlowService';
 
 export interface UseDraftBlockControllerOptions {
   createBlock: (
@@ -39,7 +44,7 @@ export interface UseDraftBlockControllerOptions {
   saveBlock: (
     block: NoteBlock,
     text: string,
-    options?: { silent?: boolean },
+    options?: { silent?: boolean; textFlow?: TextBlockContentV1 },
   ) => Promise<NoteBlock | null>;
   setActiveBlockId: Dispatch<SetStateAction<string | null>>;
   setFocusBlockId: Dispatch<SetStateAction<string | null>>;
@@ -105,35 +110,84 @@ export function useDraftBlockController({
   }, []);
 
   const activateDraft = useCallback((layout?: BlockBoxLayout) => {
-    setDraftLayout(layout || defaultDraftLayout);
-    setDraftActive(true);
-    setDraftFocusNonce((value) => value + 1);
+    const nextLayout = layout || defaultDraftLayout;
     setActiveBlockId(null);
     setSelectedBlockId(null);
     setInteractionState(editingTextInteraction());
-  }, [defaultDraftLayout, setActiveBlockId, setInteractionState, setSelectedBlockId]);
+
+    if (!note || !defaultTextTemplate || creatingDraftRef.current) {
+      setDraftLayout(nextLayout);
+      setDraftActive(true);
+      setDraftFocusNonce((value) => value + 1);
+      return;
+    }
+
+    creatingDraftRef.current = true;
+    setCreatingDraft(true);
+    setDraftText('');
+    draftTextRef.current = '';
+    setDraftActive(false);
+    setDraftLayout(null);
+
+    const textFlow = createEmptyTextBlockContentV1('paragraph');
+    void createBlock(defaultTextTemplate, '', {
+      contentJson: {
+        body: '',
+        [TEXT_FLOW_CONTENT_KEY]: textFlow,
+      },
+      layout: nextLayout,
+      silent: true,
+    }).then((created) => {
+      if (!created) return;
+      setFocusBlockId(created.id);
+      onDraftPersisted?.(created);
+    }).finally(() => {
+      creatingDraftRef.current = false;
+      setCreatingDraft(false);
+    });
+  }, [
+    createBlock,
+    defaultDraftLayout,
+    defaultTextTemplate,
+    note,
+    onDraftPersisted,
+    setActiveBlockId,
+    setFocusBlockId,
+    setInteractionState,
+    setSelectedBlockId,
+  ]);
 
   const persistDraft = useCallback(async (
     initialText?: string,
     explicitTemplate?: TemplateOption,
+    options: { textFlow?: TextBlockContentV1; layout?: BlockBoxLayout } = {},
   ) => {
     if (!note || creatingDraftRef.current) return;
     const template = explicitTemplate || defaultTextTemplate;
-    const textToCreate = (initialText ?? draftTextRef.current).trimEnd();
+    const projectedTextFlow = options.textFlow
+      ? projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: options.textFlow }, initialText ?? draftTextRef.current).plain_text
+      : null;
+    const textToCreate = (projectedTextFlow ?? initialText ?? draftTextRef.current).trimEnd();
     if (!template || (!textToCreate.trim() && !explicitTemplate)) return;
 
     creatingDraftRef.current = true;
     setCreatingDraft(true);
     try {
       const created = await createBlock(template, textToCreate, {
-        layout: draftLayout || defaultDraftLayout,
+        contentJson: options.textFlow
+          ? {
+            body: textToCreate,
+            [TEXT_FLOW_CONTENT_KEY]: options.textFlow,
+          }
+          : undefined,
+        layout: options.layout || draftLayout || defaultDraftLayout,
         silent: true,
       });
       if (!created) return;
       let persistedBlock = created;
 
       const latestText = draftTextRef.current.trimEnd();
-      if (latestText.trim() && latestText !== textToCreate) {
+      if (!options.textFlow && latestText.trim() && latestText !== textToCreate) {
         const saved = await saveBlock(created, latestText, { silent: true });
         if (saved) persistedBlock = saved;
       }

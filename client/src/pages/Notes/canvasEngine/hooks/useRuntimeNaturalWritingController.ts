@@ -43,6 +43,7 @@ export function useRuntimeNaturalWritingController(options: UseRuntimeNaturalWri
   } = useDraftBlockController(options);
 
   const {
+    activeSlashCommandId,
     clearSlashTarget,
     handleBlockKeyDown,
     handleBlockTextChange,
@@ -91,5 +92,6 @@ export function useRuntimeNaturalWritingController(options: UseRuntimeNaturalWri
     resizeDraftFromTextarea,
     slashCommands,
     slashTarget,
+    activeSlashCommandId,
   };
 }

@@ -1,5 +1,5 @@
 export * from './blockContentService';
-export * from './blocks/DefinitionBlockProjection';
+export * from './commandSurfaceService';
 export * from './blocks/FormulaBlockProjection';
 export * from './blocks/TextBlockProjection';
 export * from './engineModel';
@@ -22,6 +22,7 @@ export * from './hooks/useRuntimeInteractionController';
 export * from './hooks/useSlashCommandController';
 export * from './hooks/useSurfaceModeController';
 export * from './layers/BlockControlBarLayer';
+export * from './layers/ContextMenuLayer';
 export * from './layers/ExportPreviewLayer';
 export * from './layers/FloatingOverlayLayer';
 export * from './layers/NoteChromeLayer';

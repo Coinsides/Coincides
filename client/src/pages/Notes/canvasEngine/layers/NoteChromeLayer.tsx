@@ -10,6 +10,7 @@ import {
   Star,
   X,
 } from 'lucide-react';
+import { useCallback, useEffect, useRef } from 'react';
 import type { ExportPreviewModel } from '../exportPreviewService';
 import type { Note } from '../runtimeDataTypes';
 import { ExportPreviewLayer } from './ExportPreviewLayer';
@@ -25,13 +26,16 @@ export interface NoteChromeLayerProps {
   chromeCollapsed: boolean;
   exportPreview: ExportPreviewModel;
   layoutMode: boolean;
+  layoutModeKind: 'off' | 'persistent' | 'temporary';
   note: Note;
   showExportPreview: boolean;
+  showLayoutPanel: boolean;
   showMoreActions: boolean;
   showNoteInfo: boolean;
   showPreviewAIVisibility: boolean;
   showPreviewBlockTypes: boolean;
   showPreviewExportStatus: boolean;
+  showPreviewLabelOverlay: boolean;
   snapEnabled: boolean;
   sortedBlockCount: number;
   sourceReferenceCount: number;
@@ -49,9 +53,11 @@ export interface NoteChromeLayerProps {
   onToggleLayoutMode: () => void;
   onToggleMoreActions: () => void;
   onToggleNoteInfo: () => void;
+  onOpenLayoutPanel: () => void;
   onTogglePreviewAIVisibility: () => void;
   onTogglePreviewBlockTypes: () => void;
   onTogglePreviewExportStatus: () => void;
+  onTogglePreviewLabelOverlay: () => void;
   onToggleSnapEnabled: () => void;
   onToggleSurfaceMode: () => void;
 }
@@ -60,13 +66,16 @@ export function NoteChromeLayer({
   chromeCollapsed,
   exportPreview,
   layoutMode,
+  layoutModeKind,
   note,
   showExportPreview,
+  showLayoutPanel,
   showMoreActions,
   showNoteInfo,
   showPreviewAIVisibility,
   showPreviewBlockTypes,
   showPreviewExportStatus,
+  showPreviewLabelOverlay,
   snapEnabled,
   sortedBlockCount,
   sourceReferenceCount,
@@ -84,14 +93,39 @@ export function NoteChromeLayer({
   onToggleLayoutMode,
   onToggleMoreActions,
   onToggleNoteInfo,
+  onOpenLayoutPanel,
   onTogglePreviewAIVisibility,
   onTogglePreviewBlockTypes,
   onTogglePreviewExportStatus,
+  onTogglePreviewLabelOverlay,
   onToggleSnapEnabled,
   onToggleSurfaceMode,
 }: NoteChromeLayerProps) {
+  const layoutHoverTimerRef = useRef<number | null>(null);
+
+  const clearLayoutHoverTimer = useCallback(() => {
+    if (layoutHoverTimerRef.current === null) return;
+    window.clearTimeout(layoutHoverTimerRef.current);
+    layoutHoverTimerRef.current = null;
+  }, []);
+
+  const handleLayoutHoverStart = useCallback(() => {
+    clearLayoutHoverTimer();
+    layoutHoverTimerRef.current = window.setTimeout(() => {
+      onOpenLayoutPanel();
+      layoutHoverTimerRef.current = null;
+    }, 260);
+  }, [clearLayoutHoverTimer, onOpenLayoutPanel]);
+
+  const handleLayoutClick = useCallback(() => {
+    clearLayoutHoverTimer();
+    onToggleLayoutMode();
+  }, [clearLayoutHoverTimer, onToggleLayoutMode]);
+
+  useEffect(() => clearLayoutHoverTimer, [clearLayoutHoverTimer]);
+
   return (
-    <div className={styles.chromeWrap}>
+    <div className={styles.chromeWrap} data-note-chrome="true">
       {chromeCollapsed ? (
         <div className={styles.chromeCollapsed}>
           <button className={styles.backBtn} onClick={onBackProject}>
@@ -148,7 +182,11 @@ export function NoteChromeLayer({
             </button>
             <button
               className={`${styles.modePill} ${layoutMode ? styles.modePillActive : ''}`}
-              onClick={onToggleLayoutMode}
+              onClick={handleLayoutClick}
+              onMouseEnter={handleLayoutHoverStart}
+              onMouseLeave={clearLayoutHoverTimer}
+              onFocus={handleLayoutHoverStart}
+              onBlur={clearLayoutHoverTimer}
               title="Toggle layout mode"
               aria-pressed={layoutMode}
             >
@@ -189,7 +227,7 @@ export function NoteChromeLayer({
             </button>
           </div>
 
-          <FloatingOverlayLayer open={showNoteInfo || showMoreActions || showExportPreview}>
+          <FloatingOverlayLayer open={showNoteInfo || showLayoutPanel || showMoreActions || showExportPreview}>
             {showNoteInfo && (
               <div className={`${styles.infoPopover} ${styles.floatingPanelPopover}`}>
                 <div className={styles.popoverHeader}>
@@ -220,17 +258,17 @@ export function NoteChromeLayer({
                   </div>
                 </dl>
                 <p className={styles.popoverNote}>
-                  Full source, relation, export, and history details will move into the Better Notebook inspector.
+                  Note info is a summary. Export and AI overlays live in Preview; layout controls live in Layout.
                 </p>
               </div>
             )}
 
-            {showMoreActions && (
+            {showLayoutPanel && (
               <div className={`${styles.infoPopover} ${styles.actionsPopover} ${styles.floatingPanelPopover}`}>
                 <div className={styles.popoverHeader}>
                   <div>
-                    <div className={styles.popoverEyebrow}>Note actions</div>
-                    <strong>More</strong>
+                    <div className={styles.popoverEyebrow}>Layout controls</div>
+                    <strong>{layoutModeKind === 'persistent' ? 'Persistent layout' : 'Layout'}</strong>
                   </div>
                   <button className={styles.iconBtn} onClick={onCloseOverlay} title="Close">
                     <X size={15} />
@@ -252,7 +290,29 @@ export function NoteChromeLayer({
                   </span>
                 </button>
                 <p className={styles.popoverNote}>
-                  Page settings, history, export, and inspector actions will live here as they become real.
+                  Persistent Layout stays on until you close it. Block move handles use temporary Layout for one operation.
+                </p>
+              </div>
+            )}
+
+            {showMoreActions && (
+              <div className={`${styles.infoPopover} ${styles.actionsPopover} ${styles.floatingPanelPopover}`}>
+                <div className={styles.popoverHeader}>
+                  <div>
+                    <div className={styles.popoverEyebrow}>Note actions</div>
+                    <strong>More</strong>
+                  </div>
+                  <button className={styles.iconBtn} onClick={onCloseOverlay} title="Close">
+                    <X size={15} />
+                  </button>
+                </div>
+                <div className={styles.moreAction} aria-disabled="true">
+                  <MoreHorizontal size={15} />
+                  <span>Note-level actions</span>
+                  <small>History, duplicate, archive, import, export, and delete controls will live here.</small>
+                </div>
+                <p className={styles.popoverNote}>
+                  Layout controls have moved into the Layout panel.
                 </p>
               </div>
             )}
@@ -263,9 +323,11 @@ export function NoteChromeLayer({
                 showBlockTypes={showPreviewBlockTypes}
                 showAIVisibility={showPreviewAIVisibility}
                 showExportStatus={showPreviewExportStatus}
+                showLabelOverlay={showPreviewLabelOverlay}
                 onToggleBlockTypes={onTogglePreviewBlockTypes}
                 onToggleAIVisibility={onTogglePreviewAIVisibility}
                 onToggleExportStatus={onTogglePreviewExportStatus}
+                onToggleLabelOverlay={onTogglePreviewLabelOverlay}
                 onClose={onCloseOverlay}
               />
             )}

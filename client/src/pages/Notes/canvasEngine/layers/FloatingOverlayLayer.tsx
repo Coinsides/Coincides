@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import styles from '../../NoteDetail.module.css';
 
@@ -6,17 +6,25 @@ interface FloatingOverlayLayerProps {
   children: ReactNode;
   open: boolean;
   placement?: 'topRight' | 'free';
+  portalClassName?: string;
+  portalStyle?: CSSProperties;
 }
 
 export function FloatingOverlayLayer({
   children,
   open,
   placement = 'topRight',
+  portalClassName,
+  portalStyle,
 }: FloatingOverlayLayerProps) {
   if (!open || typeof document === 'undefined') return null;
 
   return createPortal(
-    <div className={styles.floatingOverlayPortal} data-canvas-layer="floating-overlay">
+    <div
+      className={[styles.floatingOverlayPortal, portalClassName].filter(Boolean).join(' ')}
+      data-canvas-layer="floating-overlay"
+      style={portalStyle}
+    >
       {placement === 'free' ? (
         children
       ) : (

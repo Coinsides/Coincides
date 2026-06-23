@@ -1,5 +1,6 @@
 import {
   DEFAULT_BLOCK_GAP,
+  CANVAS_WORKSPACE_WIDTH,
   DEFAULT_PAGE_CONTENT_WIDTH,
   MIN_BLOCK_HEIGHT,
   MIN_BLOCK_WIDTH,
@@ -10,6 +11,7 @@ import {
   type BlockBoxLayout,
   type BoundaryKind,
   type ExportRole,
+  type LayoutWidthMode,
   type LayoutHistoryEntry,
   type SnapGuide,
   type SurfaceMode,
@@ -47,6 +49,10 @@ function isStoredLayoutSurface(value: unknown): value is NonNullable<BlockBoxLay
   return value === 'formal_page' || value === 'canvas_workspace';
 }
 
+function isLayoutWidthMode(value: unknown): value is LayoutWidthMode {
+  return value === 'auto' || value === 'manual';
+}
+
 export function readStoredLayout(block: PlacementSeedBlock): Partial<BlockBoxLayout> | null {
   const layout = block.display_overrides_json?.[NOTE_LAYOUT_KEY];
   if (!isRecord(layout)) return null;
@@ -56,6 +62,7 @@ export function readStoredLayout(block: PlacementSeedBlock): Partial<BlockBoxLay
     export_role: isExportRole(layout.export_role) ? layout.export_role : undefined,
     ai_visibility: isAIVisibility(layout.ai_visibility) ? layout.ai_visibility : undefined,
     surface: isStoredLayoutSurface(layout.surface) ? layout.surface : undefined,
+    width_mode: isLayoutWidthMode(layout.width_mode) ? layout.width_mode : undefined,
   };
 }
 
@@ -82,19 +89,27 @@ export function normalizeBlockLayout<TBlock extends PlacementSeedBlock>({
 }): BlockBoxLayout {
   const stored = readStoredLayout(block);
   const useStoredPlacement = !(surfaceMode === 'page' && stored?.surface === 'canvas_workspace');
+  const isWorkspaceLayout = surfaceMode === 'canvas' && stored?.surface === 'canvas_workspace';
+  const maxPlacementWidth = isWorkspaceLayout
+    ? CANVAS_WORKSPACE_WIDTH
+    : contentWidth;
+  const shouldUseStoredWidth = useStoredPlacement
+    && typeof stored?.width === 'number'
+    && (isWorkspaceLayout || stored.width_mode === 'manual');
   const width = clamp(
-    useStoredPlacement && typeof stored?.width === 'number' ? stored.width : fallback.width,
+    shouldUseStoredWidth ? stored.width as number : fallback.width,
     MIN_BLOCK_WIDTH,
-    Math.max(MIN_BLOCK_WIDTH, contentWidth),
+    Math.max(MIN_BLOCK_WIDTH, maxPlacementWidth),
   );
   const x = clamp(
     useStoredPlacement && typeof stored?.x === 'number' ? stored.x : fallback.x,
     0,
-    Math.max(0, contentWidth - width),
+    Math.max(0, maxPlacementWidth - width),
   );
   const y = Math.max(0, useStoredPlacement && typeof stored?.y === 'number' ? stored.y : fallback.y);
   const naturalHeight = estimateHeight(block, width);
-  const height = Math.max(MIN_BLOCK_HEIGHT, naturalHeight);
+  const storedHeight = useStoredPlacement && typeof stored?.height === 'number' ? stored.height : 0;
+  const height = Math.max(MIN_BLOCK_HEIGHT, naturalHeight, storedHeight);
 
   return {
     x,
@@ -105,6 +120,45 @@ export function normalizeBlockLayout<TBlock extends PlacementSeedBlock>({
     export_role: stored?.export_role,
     ai_visibility: stored?.ai_visibility,
     surface: useStoredPlacement ? stored?.surface : undefined,
+    width_mode: useStoredPlacement && stored?.width_mode === 'manual' ? 'manual' : undefined,
+  };
+}
+
+export function normalizeResolvedBlockLayout<TBlock extends PlacementSeedBlock>({
+  block,
+  layout,
+  contentWidth,
+  surfaceMode,
+  estimateHeight,
+}: {
+  block: TBlock;
+  layout: BlockBoxLayout;
+  contentWidth: number;
+  surfaceMode: SurfaceMode;
+  estimateHeight: (block: TBlock, width: number) => number;
+}): BlockBoxLayout {
+  const isWorkspaceLayout = surfaceMode === 'canvas' && layout.surface === 'canvas_workspace';
+  const maxPlacementWidth = isWorkspaceLayout
+    ? CANVAS_WORKSPACE_WIDTH
+    : contentWidth;
+  const width = clamp(
+    isWorkspaceLayout || layout.width_mode === 'manual'
+      ? layout.width
+      : Math.min(DEFAULT_PAGE_CONTENT_WIDTH, contentWidth),
+    MIN_BLOCK_WIDTH,
+    Math.max(MIN_BLOCK_WIDTH, maxPlacementWidth),
+  );
+  const x = clamp(layout.x, 0, Math.max(0, maxPlacementWidth - width));
+  const y = Math.max(0, layout.y);
+  const naturalHeight = estimateHeight(block, width);
+
+  return {
+    ...layout,
+    x,
+    y,
+    width,
+    height: Math.max(MIN_BLOCK_HEIGHT, naturalHeight, layout.height),
+    width_mode: layout.width_mode === 'manual' ? 'manual' : undefined,
   };
 }
 
@@ -210,6 +264,7 @@ export function buildLayoutPayload(layout: BlockBoxLayout): Record<string, unkno
   if (typeof layout.rotation === 'number' && layout.rotation !== 0) payload.rotation = layout.rotation;
   if (layout.export_role) payload.export_role = layout.export_role;
   if (layout.ai_visibility) payload.ai_visibility = layout.ai_visibility;
+  if (layout.width_mode === 'manual') payload.width_mode = 'manual';
   return payload;
 }
 
@@ -228,7 +283,8 @@ export function layoutsEqual(a: BlockBoxLayout, b: BlockBoxLayout): boolean {
     && Math.round((a.rotation || 0) * 1000) === Math.round((b.rotation || 0) * 1000)
     && a.export_role === b.export_role
     && a.ai_visibility === b.ai_visibility
-    && a.surface === b.surface;
+    && a.surface === b.surface
+    && a.width_mode === b.width_mode;
 }
 
 export function buildLayoutHistoryEntry(

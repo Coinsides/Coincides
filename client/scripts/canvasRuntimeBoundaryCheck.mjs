@@ -181,6 +181,63 @@ assertContainsAll('History service owns runtime undo redo keyboard intent contra
   "'redo'",
 ]);
 
+const noteCanvasDataAdapter = readProjectFile('src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts');
+assertContainsAll('Note canvas adapter uses entity GroupFolder repository', noteCanvasDataAdapter, [
+  'loadGroupFoldersForNote',
+  'saveGroupFoldersForNote',
+  '../groupFolderRepository',
+]);
+assertContainsNone('Note canvas adapter does not write GroupFolder metadata', noteCanvasDataAdapter, [
+  'writeGroupFolderMetadata',
+  'NOTE_GROUP_FOLDERS_METADATA_KEY',
+]);
+
+const groupGalleryData = readProjectFile('src/pages/GroupGallery/groupGalleryData.ts');
+assertContainsAll('Group Gallery uses entity GroupFolder repository', groupGalleryData, [
+  'loadGroupFoldersForNote',
+  'saveGroupFoldersForNote',
+  '@/pages/Notes/canvasEngine/groupFolderRepository',
+]);
+const groupGalleryPage = readProjectFile('src/pages/GroupGallery/GroupGallery.tsx');
+assertContainsAll('Group Gallery moves groups through placement route', groupGalleryPage, [
+  'moveContentGroupFolderPlacement',
+  '@/pages/Notes/canvasEngine/groupFolderRepository',
+]);
+assertContainsNone('Group Gallery does not write GroupFolder metadata', groupGalleryData, [
+  'writeGroupFolderMetadata',
+  'NOTE_GROUP_FOLDERS_METADATA_KEY',
+]);
+
+const groupFolderRepository = readProjectFile('src/pages/Notes/canvasEngine/groupFolderRepository.ts');
+assertContainsAll('GroupFolder repository strips legacy metadata after successful import', groupFolderRepository, [
+  'stripLegacyGroupFolderMetadata',
+  '/group-folders/import-note-metadata',
+  "api.put<Note>(`/notes/${note.id}`",
+]);
+
+const contentGroupRepository = readProjectFile('src/pages/Notes/canvasEngine/contentGroupRepository.ts');
+assertContainsAll('ContentGroup repository saves entity groups with hydrated members', contentGroupRepository, [
+  'saveContentGroupsForNote',
+  'groups: input.groups.map(normalizeContentGroup)',
+  '/content-groups/by-note/',
+]);
+assertContainsNone('ContentGroup repository does not write note metadata for members', contentGroupRepository, [
+  'writeContentGroupMetadata',
+  'canvas_engine_content_groups_v1',
+]);
+[
+  ['ContentGroup repository does not know Petal/Fragment DB fields', contentGroupRepository],
+  ['ContentGroup service does not know Petal/Fragment DB fields', readProjectFile('src/pages/Notes/canvasEngine/contentGroupService.ts')],
+].forEach(([name, text]) => {
+  assertContainsNone(name, text, [
+    'fragments_json',
+    'petals_json',
+    'content_group_fragments',
+    'content_group_petals',
+    'content_group_petal_fragments',
+  ]);
+});
+
 [
   'src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.tsx',
   'src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx',
@@ -190,7 +247,6 @@ assertContainsAll('History service owns runtime undo redo keyboard intent contra
   'src/pages/Notes/canvasEngine/layers/SlashMenuLayer.tsx',
   'src/pages/Notes/canvasEngine/layers/ExportPreviewLayer.tsx',
   'src/pages/Notes/canvasEngine/blocks/TextBlockProjection.tsx',
-  'src/pages/Notes/canvasEngine/blocks/DefinitionBlockProjection.tsx',
   'src/pages/Notes/canvasEngine/blocks/FormulaBlockProjection.tsx',
   'src/pages/Notes/canvasEngine/blocks/CodeBlockProjection.tsx',
 ].forEach((path) => {

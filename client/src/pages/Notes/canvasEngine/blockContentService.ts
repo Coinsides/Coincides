@@ -1,8 +1,18 @@
 import type { TemplateOption } from '@/services/templateOptions';
+import type {
+  TextBlockContentV1,
+  TextUnitWritingRole,
+} from './runtimeDataTypes';
+import {
+  attachFreshTextFlow,
+  getTextFlowContent,
+  projectTextFlowContent,
+  TEXT_FLOW_CONTENT_KEY,
+} from './textFlowService';
 
 export type FieldValueRecord = Record<string, unknown>;
 
-export type BlockPresentationKind = 'definition' | 'formula' | 'heading' | 'code' | 'sourceQuote' | 'paragraph';
+export type BlockPresentationKind = 'formula' | 'code' | 'paragraph';
 
 export interface BlockContentInput {
   block_type: string;
@@ -37,12 +47,6 @@ export function readFieldValues(content: Record<string, unknown>, metadata?: Rec
   return {};
 }
 
-function hasStoredFieldValues(content: Record<string, unknown>, metadata?: Record<string, unknown>): boolean {
-  return isRecord(content.field_values)
-    || isRecord(content.structured_fields)
-    || isRecord(metadata?.structured_fields);
-}
-
 function templateKeyForBlock(block: BlockContentInput): string {
   return firstString(
     block.metadata?.template_key,
@@ -53,48 +57,9 @@ function templateKeyForBlock(block: BlockContentInput): string {
 
 export function presentationKindForBlock(block: BlockContentInput): BlockPresentationKind {
   const templateKey = templateKeyForBlock(block);
-  if (block.block_type === 'definition' || templateKey.includes('definition')) return 'definition';
   if (block.block_type === 'formula' || templateKey.includes('formula')) return 'formula';
-  if (block.block_type === 'heading' || templateKey.includes('heading')) return 'heading';
   if (templateKey.includes('code') || stringValue(block.content_json?.language)) return 'code';
-  if (templateKey.includes('source.quote') || templateKey.includes('quote')) return 'sourceQuote';
   return 'paragraph';
-}
-
-export function definitionFieldsFromText(text: string): { concept_name: string; description: string } {
-  const trimmed = text.trim();
-  return {
-    concept_name: '',
-    description: trimmed,
-  };
-}
-
-export function definitionFieldsFromBlock(
-  block: BlockContentInput,
-  draftText?: string,
-  draftFields?: FieldValueRecord,
-): { concept_name: string; description: string } {
-  if (draftFields) {
-    return {
-      concept_name: stringValue(draftFields.concept_name),
-      description: stringValue(draftFields.description),
-    };
-  }
-  const fields = readFieldValues(block.content_json, block.metadata);
-  const bodyFallback = stringValue(block.content_json?.body) || block.plain_text || '';
-  if (hasStoredFieldValues(block.content_json, block.metadata)) {
-    return {
-      concept_name: stringValue(fields.concept_name),
-      description: draftText !== undefined ? draftText : stringValue(fields.description),
-    };
-  }
-  const parsed = definitionFieldsFromText(bodyFallback);
-  return {
-    concept_name: stringValue(fields.concept_name),
-    description: draftText !== undefined
-      ? draftText
-      : firstString(fields.description, parsed.description, bodyFallback),
-  };
 }
 
 export function formulaFieldsFromBlock(
@@ -112,13 +77,6 @@ export function formulaFieldsFromBlock(
     formula_name: stringValue(effectiveFields.formula_name),
     explanation: stringValue(effectiveFields.explanation),
   };
-}
-
-export function combinedDefinitionText(conceptName: string, description: string): string {
-  const name = conceptName.trim();
-  const body = description.trim();
-  if (name && body) return `${name}: ${body}`;
-  return name || body;
 }
 
 export function formulaPreviewText(latexInput: string): string {
@@ -155,28 +113,17 @@ export function normalizeFormulaLatexInput(latexInput: string): string {
   return trimmed;
 }
 
-function contentForDefinition(
-  text: string,
-  previous: Record<string, unknown> = {},
-  fieldValuesOverride?: FieldValueRecord,
+function writingRoleForKind(kind: BlockPresentationKind): TextUnitWritingRole {
+  if (kind === 'code') return 'code_line';
+  return 'paragraph';
+}
+
+function contentWithTextFlow(
+  content: Record<string, unknown>,
+  body: string,
+  kind: BlockPresentationKind,
 ): Record<string, unknown> {
-  const fields = fieldValuesOverride
-    ? {
-      concept_name: stringValue(fieldValuesOverride.concept_name),
-      description: stringValue(fieldValuesOverride.description),
-    }
-    : definitionFieldsFromText(text);
-  const body = combinedDefinitionText(fields.concept_name, fields.description);
-  const fieldValues = {
-    concept_name: fields.concept_name,
-    description: fields.description,
-  };
-  return {
-    ...previous,
-    body,
-    field_values: fieldValues,
-    structured_fields: fieldValues,
-  };
+  return attachFreshTextFlow(content, body, writingRoleForKind(kind));
 }
 
 function contentForFormula(
@@ -202,42 +149,46 @@ function contentForFormula(
   };
 }
 
+function textFlowPlainText(content: Record<string, unknown>, fallback = ''): string | null {
+  if (!getTextFlowContent(content)) return null;
+  return projectTextFlowContent(content, fallback).plain_text;
+}
+
 export function plainTextForBlockContent(kind: BlockPresentationKind, content: Record<string, unknown>, fallback: string): string {
   const fields = readFieldValues(content);
-  if (kind === 'definition') {
-    return combinedDefinitionText(stringValue(fields.concept_name), stringValue(fields.description));
-  }
   if (kind === 'formula') {
     return stringValue(fields.latex_input) || stringValue(content.body) || fallback;
   }
-  return stringValue(content.body) || fallback;
+  const textFlowText = textFlowPlainText(content, fallback);
+  if (textFlowText !== null) return textFlowText;
+  const body = stringValue(content.body);
+  if (body) return body;
+  return projectTextFlowContent(content, fallback).plain_text || fallback;
 }
 
 export function textFromContent(block: BlockContentInput): string {
   const kind = presentationKindForBlock(block);
-  if (kind === 'definition') {
-    const fields = definitionFieldsFromBlock(block);
-    return combinedDefinitionText(fields.concept_name, fields.description);
-  }
   if (kind === 'formula') {
     return formulaFieldsFromBlock(block).latex_input;
   }
+  const textFlowText = textFlowPlainText(block.content_json, block.plain_text || '');
+  if (textFlowText !== null) return textFlowText;
   const body = block.content_json?.body;
   if (typeof body === 'string') return body;
+  const projected = projectTextFlowContent(block.content_json, block.plain_text || '');
+  if (projected.plain_text) return projected.plain_text;
   return block.plain_text || '';
 }
 
 export function contentForTemplate(template: TemplateOption, body: string): Record<string, unknown> {
-  if (template.template_key === 'definition.basic' || template.learning_role === 'definition') {
-    return contentForDefinition(body, template.default_content || {});
-  }
   if (template.template_key === 'formula.math' || template.learning_role === 'formula') {
     return contentForFormula(body, template.default_content || {});
   }
-  return {
+  const kind = template.template_key === 'code.snippet' ? 'code' : 'paragraph';
+  return contentWithTextFlow({
     ...(template.default_content || {}),
     body,
-  };
+  }, body, kind);
 }
 
 export function contentForEditedBlock(
@@ -246,7 +197,18 @@ export function contentForEditedBlock(
   fieldValuesOverride?: FieldValueRecord,
 ): Record<string, unknown> {
   const kind = presentationKindForBlock(block);
-  if (kind === 'definition') return contentForDefinition(body, block.content_json, fieldValuesOverride);
   if (kind === 'formula') return contentForFormula(body, block.content_json, fieldValuesOverride);
-  return { ...block.content_json, body };
+  return contentWithTextFlow({ ...block.content_json, body }, body, kind);
+}
+
+export function contentForEditedTextFlowBlock(
+  block: BlockContentInput,
+  textFlow: TextBlockContentV1,
+): Record<string, unknown> {
+  const projection = projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: textFlow }, block.plain_text || '');
+  return {
+    ...block.content_json,
+    body: projection.plain_text,
+    [TEXT_FLOW_CONTENT_KEY]: textFlow,
+  };
 }

@@ -28,7 +28,7 @@ export interface RuntimeInteractionState {
   mode: RuntimeInteractionMode;
   target: RuntimeInteractionTarget;
   blockId?: string;
-  panel?: 'slashMenu' | 'preview' | 'noteInfo' | 'moreActions' | 'insert';
+  panel?: 'slashMenu' | 'preview' | 'layout' | 'noteInfo' | 'moreActions' | 'insert';
 }
 
 export function idleInteraction(): RuntimeInteractionState {
@@ -108,8 +108,10 @@ export interface CalculateDraggedBlockLayoutsInput {
   deltaX: number;
   deltaY: number;
   contentWidth: number;
+  dragBoundsWidth?: number;
   snapEnabled: boolean;
   orderedBlockIds: string[];
+  resolveCollisions: boolean;
   useElasticAvoidance: boolean;
 }
 
@@ -125,21 +127,24 @@ export function calculateDraggedBlockLayouts({
   deltaX,
   deltaY,
   contentWidth,
+  dragBoundsWidth,
   snapEnabled,
   orderedBlockIds,
+  resolveCollisions,
   useElasticAvoidance,
 }: CalculateDraggedBlockLayoutsInput): DraggedBlockLayoutResult {
   const currentLayout = startLayouts[blockId] || initialLayout;
+  const maxDragWidth = dragBoundsWidth || contentWidth;
   const rawLayout = {
     ...currentLayout,
-    x: clamp(currentLayout.x + deltaX, 0, Math.max(0, contentWidth - currentLayout.width)),
+    x: clamp(currentLayout.x + deltaX, 0, Math.max(0, maxDragWidth - currentLayout.width)),
     y: Math.max(0, currentLayout.y + deltaY),
   };
   const snapped = snapEnabled
     ? applyMoveSnap(rawLayout, blockId, startLayouts, contentWidth)
     : { layout: rawLayout, guide: null };
   const candidateLayouts = { ...startLayouts, [blockId]: snapped.layout };
-  const layouts = useElasticAvoidance
+  const layouts = resolveCollisions || useElasticAvoidance
     ? resolveStackedLayoutCollisions(candidateLayouts, orderedBlockIds)
     : candidateLayouts;
 
@@ -202,6 +207,7 @@ export function calculateResizedBlockLayouts({
     ...initialLayout,
     width: nextWidth,
     height: estimateHeight(nextWidth),
+    width_mode: 'manual' as const,
   };
 
   return {
