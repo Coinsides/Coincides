@@ -8,6 +8,9 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "check:canvas-runtime-boundary": "node scripts/canvasRuntimeBoundaryCheck.mjs",
+    "check:group-gallery-shell": "node scripts/groupGalleryShellContractCheck.mjs",
+    "check:single-editor-shell": "node scripts/singleEditorShellContractCheck.mjs",
+    "check:groups-rail-shell": "node scripts/groupsRailShellContractCheck.mjs",
     "smoke:canvas-engine-model-contract": "tsc -p scripts/tsconfig.canvas-model-contract.json && node ../.codex-tmp/canvas-engine-contract/client/scripts/canvasEngineModelContractCheck.js",
     "smoke:canvas-engine-performance": "tsc -p scripts/tsconfig.canvas-performance.json && node ../.codex-tmp/canvas-engine-performance/scripts/canvasEnginePerformanceSeed.js"
   },
