@@ -2,6 +2,9 @@ import {
   textFromContent,
 } from './blockContentService';
 import type {
+  PageSliceSnapshotV1,
+} from './types';
+import type {
   AnnotationRangeV1,
   AnnotationTruthV1,
   ContentGroupCreatedBy,
@@ -26,6 +29,9 @@ import {
 import {
   groupFolderDerivedDepth,
 } from './groupFolderService';
+import {
+  annotationRangeIsRenderable,
+} from './annotationDisplayService';
 import type {
   ContentGroupDragPayload,
 } from './contentGroupDragService';
@@ -74,6 +80,7 @@ function normalizeMemberKind(kind: unknown): ContentGroupMemberKind {
     kind === 'annotation'
     || kind === 'block'
     || kind === 'content_group'
+    || kind === 'page_slice'
     || kind === 'canvas_object'
     || kind === 'table_region'
     || kind === 'image_region'
@@ -93,12 +100,14 @@ function cloneMetadata(metadata: unknown): Record<string, unknown> {
 }
 
 function rangePreview(range: AnnotationRangeV1 | null | undefined): string | null {
+  if (range && !annotationRangeIsRenderable(range)) return null;
   return cleanOptionalText(range?.range_text_cache);
 }
 
 function annotationPreview(annotation: AnnotationTruthV1): string | null {
   return cleanOptionalText(
     annotation.ranges
+      .filter(annotationRangeIsRenderable)
       .map((range) => range.range_text_cache?.trim())
       .filter((text): text is string => Boolean(text))
       .join(' | '),
@@ -303,6 +312,7 @@ function createContentGroupMemberSourceRef(input: {
     metadata: {
       member_kind: input.kind,
       target_id: targetId,
+      ...(input.metadata || {}),
     },
   };
 }
@@ -341,6 +351,7 @@ export function contentGroupMemberIdentityKey(member: ContentGroupMemberV1): str
   if (member.kind === 'annotation') return `annotation|${member.target_id || ''}`;
   if (member.kind === 'block') return `block|${member.target_id || ''}`;
   if (member.kind === 'content_group') return `content_group|${member.target_id || ''}`;
+  if (member.kind === 'page_slice') return `page_slice|${member.target_id || ''}`;
   if (member.kind === 'canvas_object') return `canvas_object|${member.target_id || ''}`;
   if (member.kind === 'table_region') return `table_region|${member.target_id || ''}`;
   if (member.kind === 'image_region') return `image_region|${member.target_id || ''}`;
@@ -406,6 +417,7 @@ export function createContentGroupMemberFromAnnotation(
   orderIndex = 0,
 ): ContentGroupMemberV1 {
   const previewText = annotationPreview(annotation);
+  const activeRanges = annotation.ranges.filter(annotationRangeIsRenderable);
   return {
     id: createRuntimeId('content-member'),
     kind: 'annotation',
@@ -416,14 +428,14 @@ export function createContentGroupMemberFromAnnotation(
     source_ref: createContentGroupMemberSourceRef({
       kind: 'annotation',
       targetId: annotation.id,
-      range: annotation.ranges[0] || null,
+      range: activeRanges[0] || null,
       snapshotText: previewText,
     }),
     source_sync_status: 'fresh',
     preview_text: previewText,
     order_index: orderIndex,
     metadata: {
-      source_ranges: annotation.ranges.map(cloneRange),
+      source_ranges: activeRanges.map(cloneRange),
     },
   };
 }
@@ -518,7 +530,7 @@ export function createContentGroupMembersFromDragPayload(
     const annotation = (options.annotations || []).find((item) => item.id === payload.annotation_id);
     if (annotation) return [createContentGroupMemberFromAnnotation(annotation, 0)];
     if (payload.ranges?.length) {
-      return payload.ranges.map((range, index) => {
+      return payload.ranges.filter(annotationRangeIsRenderable).map((range, index) => {
         const previewText = cleanOptionalText(payload.text_preview) || rangePreview(range);
         const metadata = {
           annotation_id: payload.annotation_id,
@@ -580,6 +592,44 @@ export function createContentGroupMemberFromContentGroup(
     preview_text: previewText,
     order_index: orderIndex,
     metadata: {},
+  };
+}
+
+export function createContentGroupMemberFromPageSliceSnapshot(
+  snapshot: PageSliceSnapshotV1,
+  orderIndex = 0,
+): ContentGroupMemberV1 {
+  const previewText = cleanOptionalText(snapshot.snapshotText) || snapshot.label;
+  const metadata = {
+    source_note_id: snapshot.noteId,
+    page_slice_snapshot_id: snapshot.id,
+    page_stack_id: snapshot.pageStackId,
+    page_frame_id: snapshot.pageFrameId,
+    page_index: snapshot.pageIndex,
+    page_total: snapshot.pageTotal,
+    page_label: snapshot.label,
+    block_ids: snapshot.blockIds,
+    snapshot_hash: snapshot.snapshotHash,
+    captured_at: snapshot.capturedAt,
+    open_original: { ...snapshot.openOriginal },
+  };
+  return {
+    id: createRuntimeId('content-member'),
+    kind: 'page_slice',
+    target_id: snapshot.id,
+    content_range: null,
+    label: snapshot.label,
+    current_content: previewText,
+    source_ref: createContentGroupMemberSourceRef({
+      kind: 'page_slice',
+      targetId: snapshot.id,
+      snapshotText: previewText,
+      metadata,
+    }),
+    source_sync_status: 'fresh',
+    preview_text: previewText,
+    order_index: orderIndex,
+    metadata,
   };
 }
 

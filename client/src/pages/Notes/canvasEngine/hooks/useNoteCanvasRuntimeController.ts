@@ -1,9 +1,15 @@
+import { useCallback } from 'react';
 import { useNoteCanvasRuntime } from './useNoteCanvasRuntime';
 import { useRuntimeBlockOperationsController } from './useRuntimeBlockOperationsController';
 import { useRuntimeDocumentDataController } from './useRuntimeDocumentDataController';
 import { useRuntimeLayoutModelController } from './useRuntimeLayoutModelController';
 import { useRuntimePresentationController } from './useRuntimePresentationController';
 import { useRuntimeSurfaceStateController } from './useRuntimeSurfaceStateController';
+import { tableObjectSavePayload } from '../tableObjectService';
+import type {
+  StructuredCanvasObject,
+  TableStructuredPayload,
+} from '../types';
 
 export function useNoteCanvasRuntimeController() {
   const { noteId } = useNoteCanvasRuntime();
@@ -18,6 +24,7 @@ export function useNoteCanvasRuntimeController() {
     collapseChrome,
     expandChrome,
     focusBlockId,
+    focusViewportOnRect,
     interactionState,
     layoutMode,
     layoutModeKind,
@@ -80,6 +87,14 @@ export function useNoteCanvasRuntimeController() {
     annotationTruths,
     contentGroups,
     groupFolders,
+    pageFrameCollection,
+    persistedCanvasObjects,
+    persistedCanvasPlacements,
+    persistedContentMounts,
+    persistedVisualConnectors,
+    persistedImageObjects,
+    persistedStructuredObjects,
+    documentTypographyProfile,
     blockTextDrafts,
     setBlockTextDrafts,
     blockTextFlowDrafts,
@@ -92,6 +107,10 @@ export function useNoteCanvasRuntimeController() {
     saveAnnotationTruths,
     saveContentGroups,
     saveGroupFolders,
+    savePageFrameCollection,
+    persistCanvasObject,
+    deleteCanvasObject,
+    saveDocumentTypographyProfile,
     createBlock,
     saveBlock,
     applyTemplateToBlock,
@@ -99,7 +118,9 @@ export function useNoteCanvasRuntimeController() {
     toggleBlockExportRole,
     toggleBlockAIVisibility,
     trashBlock,
+    forgetBlockLocally,
     restoreBlock,
+    restoreBlockById,
     handleViewSource,
     layoutDrafts,
     mergeLayoutDrafts,
@@ -109,6 +130,29 @@ export function useNoteCanvasRuntimeController() {
     clearBlockSelection,
     noteId,
   });
+
+  const persistStructuredObjectForHistory = useCallback(async (
+    objectId: string,
+    payload: TableStructuredPayload,
+  ): Promise<boolean> => {
+    const canvasObject = persistedCanvasObjects.find((item) => item.objectId === objectId);
+    const placement = persistedCanvasPlacements.find((item) => item.objectId === objectId);
+    const structuredObject = persistedStructuredObjects.find((item) => item.objectId === objectId);
+    if (!canvasObject || !placement || !structuredObject) return false;
+    const nextStructuredObject: StructuredCanvasObject = {
+      ...structuredObject,
+      rowCount: payload.rows.length,
+      columnCount: payload.columns.length,
+      payload,
+    };
+    return persistCanvasObject({
+      canvasObject,
+      placement,
+      contentMounts: [],
+      structuredObject: nextStructuredObject,
+      payload: tableObjectSavePayload(canvasObject, placement, nextStructuredObject),
+    });
+  }, [persistCanvasObject, persistedCanvasObjects, persistedCanvasPlacements, persistedStructuredObjects]);
 
   const {
     blockLayouts,
@@ -120,6 +164,7 @@ export function useNoteCanvasRuntimeController() {
   } = useRuntimeLayoutModelController({
     blocks,
     blockListRef,
+    documentTypographyProfile,
     layoutDrafts,
     pageOffsetX,
     persistBlockLayout,
@@ -149,6 +194,7 @@ export function useNoteCanvasRuntimeController() {
     handleSurfacePointerDown,
     handleMeasuredBlockHeight,
     persistDraft,
+    pushStructuredMutationHistory,
     resizeDraftFromTextarea,
     slashCommands,
     slashTarget,
@@ -169,16 +215,22 @@ export function useNoteCanvasRuntimeController() {
     createBlock,
     defaultDraftLayout,
     defaultTextTemplate,
+    documentTypographyProfile,
     insertTemplateOptions,
     movingBlockIdRef,
     note,
     orderedBlocks: visibleBlocks,
     pageOffsetX,
+    pageFrameCollection,
+    selectedPageFrameId: pageFrameCollection?.selectedFrameId || pageFrameCollection?.primaryFrameId || null,
     viewportTransform,
     persistChangedBlockLayouts,
     persistLayoutSnapshot,
     restoreBlockForHistory: restoreBlock,
     saveBlock,
+    persistStructuredObjectForHistory,
+    onFocusPageFrame: (pageFrame) => focusViewportOnRect(pageFrame),
+    onSavePageFrameCollection: savePageFrameCollection,
     setBlockFieldDrafts,
     setBlockTextDrafts,
     setBlockTextFlowDrafts,
@@ -201,6 +253,7 @@ export function useNoteCanvasRuntimeController() {
     activeBlockId,
     activeSlashCommandId,
     anchorsBySourceRef,
+    allBlocks: sortedBlocks,
     blockFieldDrafts,
     blockLayouts,
     blockListRef,
@@ -209,6 +262,8 @@ export function useNoteCanvasRuntimeController() {
     chromeCollapsed,
     creatingDraft,
     defaultDraftLayout,
+    defaultTextTemplate,
+    documentTypographyProfile,
     draftActive,
     draftLayout,
     draftRef,
@@ -219,6 +274,14 @@ export function useNoteCanvasRuntimeController() {
     layoutModeKind,
     note,
     pageOffsetX,
+    pageFrameCollection,
+    persistedCanvasObjects,
+    persistedCanvasPlacements,
+    persistedContentMounts,
+    persistedVisualConnectors,
+    persistedImageObjects,
+    persistedStructuredObjects,
+    contentLookupBlocks: sortedBlocks,
     savingBlockId,
     selectedBlockId,
     setSourceJumpTarget,
@@ -248,6 +311,7 @@ export function useNoteCanvasRuntimeController() {
     titleDraft,
     viewportTransform,
     visibleBlocks,
+    onCreateBlock: createBlock,
     onActivateDraft: activateDraft,
     onBeginMoveBlock: beginMoveBlock,
     onBeginResizeBlock: beginResizeBlock,
@@ -255,6 +319,7 @@ export function useNoteCanvasRuntimeController() {
     onBlockListMouseDown: handleBlockListMouseDown,
     onBlockTextChange: handleBlockTextChange,
     onBlockTextFlowChange: setBlockTextFlowDrafts,
+    onApplyBlockLayoutDrafts: mergeLayoutDrafts,
     onClearSlashTarget: clearSlashTarget,
     onCloseOverlay: closeOverlay,
     onCollapseChrome: collapseChrome,
@@ -263,10 +328,12 @@ export function useNoteCanvasRuntimeController() {
     onDraftKeyDown: handleDraftKeyDown,
     onExpandChrome: expandChrome,
     onFieldDraftChange: updateBlockFieldDraft,
+    onFocusPageFrame: (pageFrame, world) => focusViewportOnRect(pageFrame, world),
     onFloatingPanelFocusBlock: setFocusBlockId,
     onMeasuredBlockHeight: handleMeasuredBlockHeight,
     onPageSpaceDoubleClick: handlePageSpaceDoubleClick,
     onPersistDraft: (text, options) => persistDraft(text, undefined, options),
+    onPersistChangedBlockLayouts: persistChangedBlockLayouts,
     onResizeDraftFromTextarea: resizeDraftFromTextarea,
     onResetViewport: resetViewport,
     onSaveBlock: saveBlock,
@@ -274,6 +341,11 @@ export function useNoteCanvasRuntimeController() {
     onSaveAnnotationTruths: saveAnnotationTruths,
     onSaveContentGroups: saveContentGroups,
     onSaveGroupFolders: saveGroupFolders,
+    onSavePageFrameCollection: savePageFrameCollection,
+    onPersistCanvasObject: persistCanvasObject,
+    onPushStructuredMutationHistory: pushStructuredMutationHistory,
+    onDeleteCanvasObject: deleteCanvasObject,
+    onSaveDocumentTypographyProfile: saveDocumentTypographyProfile,
     onSelectBlock: markBlockSelected,
     onSelectSlashCommand: handleSelectSlashCommand,
     onSurfacePointerDown: handleSurfacePointerDown,
@@ -292,6 +364,8 @@ export function useNoteCanvasRuntimeController() {
     onToggleSnapEnabled: toggleSnapEnabled,
     onToggleSurfaceMode: toggleSurfaceMode,
     onTrashBlock: handleTrashBlock,
+    onForgetBlockLocally: forgetBlockLocally,
+    onRestoreBlockById: restoreBlockById,
     onPanViewportBy: panViewportBy,
     onScrollViewportBy: scrollViewportBy,
     onViewportSizeChange: setViewportSize,

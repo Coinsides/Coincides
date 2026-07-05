@@ -19,17 +19,14 @@ import {
   type FieldValueRecord,
 } from '../blockContentService';
 import {
-  buildLayoutPayload,
   getEffectiveAIVisibility,
   getEffectiveExportRole,
-  writeLayoutOverride,
 } from '../placementService';
 import type {
   AIVisibility,
   BlockBoxLayout,
   ExportRole,
 } from '../runtimeLayout';
-import { NOTE_LAYOUT_KEY } from '../runtimeLayout';
 import type {
   AnnotationProposalV1,
   AnnotationTruthV1,
@@ -48,16 +45,30 @@ import {
   TEXT_FLOW_CONTENT_KEY,
 } from '../textFlowService';
 import {
-  normalizeAnnotationHierarchy,
-} from '../annotationEditorService';
-import {
   normalizeContentGroup,
 } from '../contentGroupService';
 import {
-  NOTE_ANNOTATIONS_METADATA_KEY,
   NOTE_ANNOTATION_PROPOSALS_METADATA_KEY,
   NOTE_READING_INTERPRETATIONS_METADATA_KEY,
 } from '../contentGroupMetadataService';
+import {
+  annotationTruthsFromMetadata,
+  loadAnnotationTruthsForNote,
+  saveAnnotationTruthsForNote,
+  stripLegacyAnnotationMetadata,
+} from '../annotationTruthRepository';
+import {
+  applyCanvasLayoutsToBlocks,
+  deleteGenericCanvasObjectForNote,
+  loadCanvasPersistenceForNote,
+  saveGenericCanvasObjectForNote,
+  saveBlockCanvasPlacementForNote,
+  savePageFrameCollectionForNote,
+  stripLegacyPageFrameMetadata,
+} from '../canvasObjectRepository';
+import {
+  normalizeCanvasPersistencePayload,
+} from '../canvasPersistenceNormalizer';
 import {
   loadContentGroupsForNote,
   saveContentGroupsForNote,
@@ -69,6 +80,24 @@ import {
 import {
   normalizeGroupFolders,
 } from '../groupFolderService';
+import {
+  normalizePageFrameCollection,
+} from '../pageFrameCollectionService';
+import {
+  createDefaultDocumentTypographyProfile,
+  typographyProfileFromMetadata,
+  writeTypographyProfileMetadata,
+} from '../typographyProfileService';
+import type {
+  CanvasObject,
+  CanvasPlacement,
+  ContentMount,
+  DocumentTypographyProfile,
+  ImageCanvasObject,
+  PageFrameCollectionModel,
+  StructuredCanvasObject,
+  VisualConnector,
+} from '../types';
 
 type TemplateCategoryKey = 'default' | 'math' | 'userDefined';
 
@@ -83,6 +112,16 @@ export interface UseNoteCanvasDataAdapterOptions {
   onNoteLoaded: () => void;
   clearLayoutDraftForBlock: (blockId: string) => void;
   setLayoutDraftForBlock: (blockId: string, layout: BlockBoxLayout) => void;
+}
+
+export interface PersistCanvasObjectInput {
+  canvasObject: CanvasObject;
+  placement: CanvasPlacement;
+  contentMounts?: ContentMount[];
+  visualConnector?: VisualConnector | null;
+  imageObject?: ImageCanvasObject | null;
+  structuredObject?: StructuredCanvasObject | null;
+  payload: Record<string, unknown>;
 }
 
 const INSERT_TEMPLATE_CATEGORIES: Array<{ key: TemplateCategoryKey; label: string }> = [
@@ -146,30 +185,14 @@ function hydrateClientBlock(raw: any): NoteBlock {
     display_overrides_json: raw?.display_overrides_json && typeof raw.display_overrides_json === 'object'
       ? raw.display_overrides_json
       : {},
+    canvas_layout: raw?.canvas_layout && typeof raw.canvas_layout === 'object'
+      ? raw.canvas_layout
+      : null,
     metadata: raw?.metadata && typeof raw.metadata === 'object' ? raw.metadata : {},
     source_references: Array.isArray(raw?.source_references)
       ? raw.source_references.filter((ref: unknown) => ref !== null)
       : [],
   };
-}
-
-function annotationTruthsFromMetadata(metadata: Record<string, unknown> | undefined): AnnotationTruthV1[] {
-  const annotations = metadata?.[NOTE_ANNOTATIONS_METADATA_KEY];
-  if (!Array.isArray(annotations)) return [];
-  const parsed = annotations.filter((item): item is AnnotationTruthV1 => (
-    Boolean(item)
-    && typeof item === 'object'
-    && typeof (item as AnnotationTruthV1).id === 'string'
-    && typeof (item as AnnotationTruthV1).raw_label === 'string'
-    && Array.isArray((item as AnnotationTruthV1).ranges)
-  )).map((annotation) => ({
-    ...annotation,
-    parent_annotation_id: annotation.parent_annotation_id || null,
-    child_annotation_ids: Array.isArray(annotation.child_annotation_ids)
-      ? annotation.child_annotation_ids
-      : [],
-  }));
-  return normalizeAnnotationHierarchy({ annotations: parsed }).annotations;
 }
 
 function readingInterpretationsFromMetadata(metadata: Record<string, unknown> | undefined): ReadingInterpretationV1[] {
@@ -194,6 +217,65 @@ function annotationProposalsFromMetadata(metadata: Record<string, unknown> | und
     && typeof (item as AnnotationProposalV1).proposed_label === 'string'
     && Array.isArray((item as AnnotationProposalV1).proposed_ranges)
   ));
+}
+
+function metadataChanged(
+  before: Record<string, unknown> | undefined,
+  after: Record<string, unknown>,
+): boolean {
+  return JSON.stringify(before || {}) !== JSON.stringify(after);
+}
+
+function upsertCanvasObject(items: CanvasObject[], item: CanvasObject): CanvasObject[] {
+  const exists = items.some((candidate) => candidate.objectId === item.objectId);
+  return exists
+    ? items.map((candidate) => candidate.objectId === item.objectId ? item : candidate)
+    : [...items, item];
+}
+
+function upsertCanvasPlacement(items: CanvasPlacement[], item: CanvasPlacement): CanvasPlacement[] {
+  const exists = items.some((candidate) => candidate.placementId === item.placementId);
+  return exists
+    ? items.map((candidate) => candidate.placementId === item.placementId ? item : candidate)
+    : [...items, item];
+}
+
+function replaceContentMountsForObject(
+  items: ContentMount[],
+  objectId: string,
+  nextMounts: ContentMount[],
+): ContentMount[] {
+  return [
+    ...items.filter((item) => item.objectId !== objectId),
+    ...nextMounts,
+  ];
+}
+
+function upsertVisualConnector(items: VisualConnector[], item: VisualConnector): VisualConnector[] {
+  const exists = items.some((candidate) => candidate.connectorId === item.connectorId);
+  return exists
+    ? items.map((candidate) => candidate.connectorId === item.connectorId ? item : candidate)
+    : [...items, item];
+}
+
+function upsertImageObject(items: ImageCanvasObject[], item: ImageCanvasObject): ImageCanvasObject[] {
+  const exists = items.some((candidate) => candidate.objectId === item.objectId);
+  return exists
+    ? items.map((candidate) => candidate.objectId === item.objectId ? item : candidate)
+    : [...items, item];
+}
+
+function upsertStructuredObject(items: StructuredCanvasObject[], item: StructuredCanvasObject): StructuredCanvasObject[] {
+  const exists = items.some((candidate) => candidate.objectId === item.objectId);
+  return exists
+    ? items.map((candidate) => candidate.objectId === item.objectId ? item : candidate)
+    : [...items, item];
+}
+
+function recordFromUnknown(value: unknown): Record<string, unknown> {
+  return Boolean(value && typeof value === 'object' && !Array.isArray(value))
+    ? value as Record<string, unknown>
+    : {};
 }
 
 function presentationKindForTemplate(template: TemplateOption, _sourceQuote = false): BlockPresentationKind {
@@ -224,6 +306,16 @@ export function useNoteCanvasDataAdapter({
   const [annotationTruths, setAnnotationTruths] = useState<AnnotationTruthV1[]>([]);
   const [contentGroups, setContentGroups] = useState<ContentGroupV1[]>([]);
   const [groupFolders, setGroupFolders] = useState<GroupFolderV1[]>([]);
+  const [pageFrameCollection, setPageFrameCollection] = useState<PageFrameCollectionModel | null>(null);
+  const [persistedCanvasObjects, setPersistedCanvasObjects] = useState<CanvasObject[]>([]);
+  const [persistedCanvasPlacements, setPersistedCanvasPlacements] = useState<CanvasPlacement[]>([]);
+  const [persistedContentMounts, setPersistedContentMounts] = useState<ContentMount[]>([]);
+  const [persistedVisualConnectors, setPersistedVisualConnectors] = useState<VisualConnector[]>([]);
+  const [persistedImageObjects, setPersistedImageObjects] = useState<ImageCanvasObject[]>([]);
+  const [persistedStructuredObjects, setPersistedStructuredObjects] = useState<StructuredCanvasObject[]>([]);
+  const [documentTypographyProfile, setDocumentTypographyProfile] = useState<DocumentTypographyProfile>(
+    createDefaultDocumentTypographyProfile(),
+  );
   const [readingInterpretations, setReadingInterpretations] = useState<ReadingInterpretationV1[]>([]);
   const [annotationProposals, setAnnotationProposals] = useState<AnnotationProposalV1[]>([]);
   const [blockTextDrafts, setBlockTextDrafts] = useState<Record<string, string>>({});
@@ -232,6 +324,8 @@ export function useNoteCanvasDataAdapter({
   const noteRef = useRef<Note | null>(null);
   const annotationSaveGenerationRef = useRef(0);
   const contentGroupSaveGenerationRef = useRef(0);
+  const pageFrameSaveGenerationRef = useRef(0);
+  const typographyProfileSaveGenerationRef = useRef(0);
 
   useEffect(() => {
     noteRef.current = note;
@@ -269,18 +363,40 @@ export function useNoteCanvasDataAdapter({
         api.get(`/notes/${noteId}/blocks`),
       ]);
       const hydratedNote = noteRes.data as Note;
-      const [savedContentGroups, savedGroupFolders] = await Promise.all([
+      const [savedContentGroups, savedGroupFolders, canvasPersistence, savedAnnotationTruths] = await Promise.all([
         loadContentGroupsForNote({ note: hydratedNote }),
         loadGroupFoldersForNote({ note: hydratedNote }),
+        loadCanvasPersistenceForNote({ note: hydratedNote }),
+        loadAnnotationTruthsForNote({ note: hydratedNote }),
       ]);
-      setNote(hydratedNote);
+      const hydratedBlocks = applyCanvasLayoutsToBlocks(
+        (blocksRes.data as any[]).map(hydrateClientBlock),
+        canvasPersistence.blockLayouts,
+      );
+      const cleanMetadata = stripLegacyAnnotationMetadata(stripLegacyPageFrameMetadata(hydratedNote.metadata));
+      let persistedNote = hydratedNote;
+      if (metadataChanged(hydratedNote.metadata, cleanMetadata)) {
+        const stripResponse = await api.put<Note>(`/notes/${hydratedNote.id}`, { metadata: cleanMetadata });
+        persistedNote = stripResponse.data || { ...hydratedNote, metadata: cleanMetadata };
+      }
+      const noteForState: Note = { ...persistedNote, metadata: cleanMetadata };
+      noteRef.current = noteForState;
+      setNote(noteForState);
       setTitleDraft(noteRes.data.title);
-      setAnnotationTruths(annotationTruthsFromMetadata(hydratedNote.metadata));
+      setAnnotationTruths(savedAnnotationTruths);
       setContentGroups(savedContentGroups);
       setGroupFolders(savedGroupFolders);
+      setPageFrameCollection(canvasPersistence.pageFrameCollection);
+      setPersistedCanvasObjects(canvasPersistence.canvasObjects);
+      setPersistedCanvasPlacements(canvasPersistence.canvasPlacements);
+      setPersistedContentMounts(canvasPersistence.contentMounts);
+      setPersistedVisualConnectors(canvasPersistence.visualConnectors);
+      setPersistedImageObjects(canvasPersistence.imageObjects);
+      setPersistedStructuredObjects(canvasPersistence.structuredObjects);
+      setDocumentTypographyProfile(typographyProfileFromMetadata(hydratedNote.metadata));
       setReadingInterpretations(readingInterpretationsFromMetadata(hydratedNote.metadata));
       setAnnotationProposals(annotationProposalsFromMetadata(hydratedNote.metadata));
-      setBlocks((blocksRes.data as any[]).map(hydrateClientBlock));
+      setBlocks(hydratedBlocks);
       setBlockTextDrafts({});
       setBlockTextFlowDrafts({});
       setBlockFieldDrafts({});
@@ -349,39 +465,25 @@ export function useNoteCanvasDataAdapter({
   const saveAnnotationTruths = useCallback(async (nextAnnotations: AnnotationTruthV1[]) => {
     const currentNote = noteRef.current || note;
     if (!currentNote) return;
-    const nextMetadata = {
-      ...(currentNote.metadata || {}),
-      [NOTE_ANNOTATIONS_METADATA_KEY]: nextAnnotations,
-    };
+    const previousAnnotations = annotationTruths;
     const saveGeneration = annotationSaveGenerationRef.current + 1;
     annotationSaveGenerationRef.current = saveGeneration;
-    const optimisticNote = {
-      ...currentNote,
-      metadata: nextMetadata,
-    };
-    noteRef.current = optimisticNote;
     setAnnotationTruths(nextAnnotations);
-    setNote(optimisticNote);
     try {
-      const res = await api.put(`/notes/${currentNote.id}`, { metadata: nextMetadata });
-      const updated = res.data as Note;
       if (annotationSaveGenerationRef.current !== saveGeneration) return;
-      const savedAnnotations = annotationTruthsFromMetadata(updated.metadata);
-      const committedNote = savedAnnotations.length > 0 || nextAnnotations.length === 0
-        ? updated
-        : { ...updated, metadata: nextMetadata };
-      noteRef.current = committedNote;
-      setNote(committedNote);
-      setAnnotationTruths(savedAnnotations.length > 0 ? savedAnnotations : nextAnnotations);
+      const savedAnnotations = await saveAnnotationTruthsForNote({
+        noteId: currentNote.id,
+        annotations: nextAnnotations,
+      });
+      if (annotationSaveGenerationRef.current !== saveGeneration) return;
+      setAnnotationTruths(savedAnnotations);
     } catch (err) {
       console.error('Failed to save annotations:', err);
       addToast('error', 'Failed to save annotation');
       if (annotationSaveGenerationRef.current !== saveGeneration) return;
-      noteRef.current = currentNote;
-      setNote(currentNote);
-      setAnnotationTruths(annotationTruthsFromMetadata(currentNote.metadata));
+      setAnnotationTruths(previousAnnotations);
     }
-  }, [addToast, note]);
+  }, [addToast, annotationTruths, note]);
 
   const saveContentGroups = useCallback(async (nextGroups: ContentGroupV1[]) => {
     const currentNote = noteRef.current || note;
@@ -436,6 +538,62 @@ export function useNoteCanvasDataAdapter({
       }
     }
   }, [addToast, groupFolders, note]);
+
+  const savePageFrameCollection = useCallback(async (nextCollection: PageFrameCollectionModel) => {
+    const currentNote = noteRef.current || note;
+    if (!currentNote) return;
+    const previousCollection = pageFrameCollection;
+    const normalizedCollection = normalizePageFrameCollection(nextCollection);
+    const saveGeneration = pageFrameSaveGenerationRef.current + 1;
+    pageFrameSaveGenerationRef.current = saveGeneration;
+    setPageFrameCollection(normalizedCollection);
+    try {
+      const savedCollection = await savePageFrameCollectionForNote({
+        noteId: currentNote.id,
+        collection: normalizedCollection,
+      });
+      if (pageFrameSaveGenerationRef.current !== saveGeneration) return;
+      setPageFrameCollection(savedCollection);
+    } catch (err) {
+      console.error('Failed to save page frames:', err);
+      addToast('error', 'Failed to save page frames');
+      if (pageFrameSaveGenerationRef.current !== saveGeneration) return;
+      setPageFrameCollection(previousCollection);
+    }
+  }, [addToast, note, pageFrameCollection]);
+
+  const saveDocumentTypographyProfile = useCallback(async (nextProfile: DocumentTypographyProfile) => {
+    const currentNote = noteRef.current || note;
+    if (!currentNote) return;
+    const previousProfile = documentTypographyProfile;
+    const nextMetadata = writeTypographyProfileMetadata(currentNote.metadata, nextProfile);
+    const normalizedProfile = typographyProfileFromMetadata(nextMetadata);
+    const saveGeneration = typographyProfileSaveGenerationRef.current + 1;
+    typographyProfileSaveGenerationRef.current = saveGeneration;
+    const optimisticNote = {
+      ...currentNote,
+      metadata: nextMetadata,
+    };
+    noteRef.current = optimisticNote;
+    setNote(optimisticNote);
+    setDocumentTypographyProfile(normalizedProfile);
+    try {
+      const res = await api.put(`/notes/${currentNote.id}`, { metadata: nextMetadata });
+      const updated = res.data as Note;
+      if (typographyProfileSaveGenerationRef.current !== saveGeneration) return;
+      const savedProfile = typographyProfileFromMetadata(updated.metadata);
+      noteRef.current = updated;
+      setNote(updated);
+      setDocumentTypographyProfile(savedProfile);
+    } catch (err) {
+      console.error('Failed to save document typography:', err);
+      addToast('error', 'Failed to save typography');
+      if (typographyProfileSaveGenerationRef.current !== saveGeneration) return;
+      noteRef.current = currentNote;
+      setNote(currentNote);
+      setDocumentTypographyProfile(previousProfile);
+    }
+  }, [addToast, documentTypographyProfile, note]);
 
   const saveReadingInterpretations = useCallback(async (nextInterpretations: ReadingInterpretationV1[]) => {
     if (!note) return;
@@ -501,11 +659,16 @@ export function useNoteCanvasDataAdapter({
         content_json: nextContent,
         plain_text: plainTextForBlockContent(nextKind, nextContent, body),
         metadata,
-        display_overrides_json: options.layout
-          ? { [NOTE_LAYOUT_KEY]: buildLayoutPayload(options.layout) }
-          : undefined,
       });
-      const created = hydrateClientBlock(res.data);
+      let created = hydrateClientBlock(res.data);
+      if (options.layout) {
+        const savedLayout = await saveBlockCanvasPlacementForNote({
+          noteId: note.id,
+          block: created,
+          layout: options.layout,
+        });
+        created = { ...created, canvas_layout: savedLayout.layout };
+      }
       const createdTextFlow = getTextFlowContent(nextContent);
       setBlocks((current) => [...current, created].sort((a, b) => a.order_index - b.order_index));
       setBlockTextDrafts((current) => ({ ...current, [created.id]: text.trimEnd() }));
@@ -610,14 +773,15 @@ export function useNoteCanvasDataAdapter({
 
   const persistBlockLayout = useCallback(async (block: NoteBlock, layout: BlockBoxLayout) => {
     if (!note) return;
-    const displayOverrides = writeLayoutOverride(block, layout);
     try {
-      await api.put(`/notes/${note.id}/block-placements/${block.placement_id}`, {
-        display_overrides_json: displayOverrides,
+      const savedLayout = await saveBlockCanvasPlacementForNote({
+        noteId: note.id,
+        block,
+        layout,
       });
       setBlocks((current) => current.map((item) => (
         item.id === block.id
-          ? { ...item, display_overrides_json: displayOverrides }
+          ? { ...item, canvas_layout: savedLayout.layout }
           : item
       )));
       clearLayoutDraftForBlock(block.id);
@@ -680,6 +844,61 @@ export function useNoteCanvasDataAdapter({
     }
   }, [addToast]);
 
+  const forgetBlockLocally = useCallback((blockId: string): void => {
+    setBlocks((current) => current.filter((block) => block.id !== blockId));
+    setBlockTextDrafts((current) => {
+      const next = { ...current };
+      delete next[blockId];
+      return next;
+    });
+    setBlockTextFlowDrafts((current) => {
+      const next = { ...current };
+      delete next[blockId];
+      return next;
+    });
+    setBlockFieldDrafts((current) => {
+      const next = { ...current };
+      delete next[blockId];
+      return next;
+    });
+  }, []);
+
+  const restoreBlockById = useCallback(async (
+    blockId: string,
+    options: { silent?: boolean; metadataPatch?: Record<string, unknown> } = {},
+  ): Promise<NoteBlock | null> => {
+    try {
+      const payload: { status: 'active'; metadata?: Record<string, unknown> } = { status: 'active' };
+      if (options.metadataPatch) payload.metadata = options.metadataPatch;
+      const res = await api.put(`/note-blocks/${blockId}`, payload);
+      const restored = hydrateClientBlock(res.data);
+      setBlocks((current) => (
+        [...current.filter((item) => item.id !== restored.id), restored]
+          .sort((a, b) => a.order_index - b.order_index)
+      ));
+      setBlockTextDrafts((current) => ({
+        ...current,
+        [restored.id]: textFromContent(restored).trimEnd(),
+      }));
+      setBlockTextFlowDrafts((current) => {
+        const next = { ...current };
+        delete next[restored.id];
+        return next;
+      });
+      setBlockFieldDrafts((current) => {
+        const next = { ...current };
+        delete next[restored.id];
+        return next;
+      });
+      if (!options.silent) addToast('success', 'Block restored');
+      return restored;
+    } catch (err) {
+      console.error('Failed to restore block:', err);
+      if (!options.silent) addToast('error', 'Failed to restore block');
+      return null;
+    }
+  }, [addToast]);
+
   const restoreBlock = useCallback(async (
     block: NoteBlock,
     options: { silent?: boolean } = {},
@@ -717,6 +936,161 @@ export function useNoteCanvasDataAdapter({
       return null;
     }
   }, [addToast]);
+
+  const persistCanvasObject = useCallback(async ({
+    canvasObject,
+    placement,
+    contentMounts = [],
+    visualConnector = null,
+    imageObject = null,
+    structuredObject = null,
+    payload,
+  }: PersistCanvasObjectInput): Promise<boolean> => {
+    const currentNote = noteRef.current || note;
+    if (!currentNote) return false;
+    const previousObjects = persistedCanvasObjects;
+    const previousPlacements = persistedCanvasPlacements;
+    const previousMounts = persistedContentMounts;
+    const previousConnectors = persistedVisualConnectors;
+    const previousImages = persistedImageObjects;
+    const previousStructured = persistedStructuredObjects;
+    setPersistedCanvasObjects((current) => upsertCanvasObject(current, canvasObject));
+    setPersistedCanvasPlacements((current) => upsertCanvasPlacement(current, placement));
+    setPersistedContentMounts((current) => replaceContentMountsForObject(
+      current,
+      canvasObject.objectId,
+      contentMounts,
+    ));
+    if (visualConnector) {
+      setPersistedVisualConnectors((current) => upsertVisualConnector(current, visualConnector));
+    }
+    if (imageObject) {
+      setPersistedImageObjects((current) => upsertImageObject(current, imageObject));
+    }
+    if (structuredObject) {
+      setPersistedStructuredObjects((current) => upsertStructuredObject(current, structuredObject));
+    }
+    try {
+      const saved = await saveGenericCanvasObjectForNote({
+        noteId: currentNote.id,
+        objectId: canvasObject.objectId,
+        payload,
+      });
+      const savedRecord = recordFromUnknown(saved);
+      const savedPlacement = savedRecord.placement ? [savedRecord.placement] : [];
+      const savedVisualConnector = savedRecord.visualConnector ? [savedRecord.visualConnector] : [];
+      const savedImageObject = savedRecord.imageObject ? [savedRecord.imageObject] : [];
+      const savedStructuredObject = savedRecord.structuredObject ? [savedRecord.structuredObject] : [];
+      const normalized = normalizeCanvasPersistencePayload({
+        canvasObjects: savedRecord.canvasObject ? [savedRecord.canvasObject] : [],
+        canvasPlacements: Array.isArray(savedRecord.placements) ? savedRecord.placements : savedPlacement,
+        contentMounts: Array.isArray(savedRecord.contentMounts) ? savedRecord.contentMounts : [],
+        visualConnectors: Array.isArray(savedRecord.visualConnectors)
+          ? savedRecord.visualConnectors
+          : savedVisualConnector,
+        imageObjects: Array.isArray(savedRecord.imageObjects)
+          ? savedRecord.imageObjects
+          : savedImageObject,
+        structuredObjects: Array.isArray(savedRecord.structuredObjects)
+          ? savedRecord.structuredObjects
+          : savedStructuredObject,
+      });
+      const nextObject = normalized.canvasObjects[0] || canvasObject;
+      const nextPlacement = normalized.canvasPlacements[0] || placement;
+      const nextVisualConnector = normalized.visualConnectors[0] || visualConnector;
+      const nextImageObject = normalized.imageObjects[0] || imageObject;
+      const nextStructuredObject = normalized.structuredObjects[0] || structuredObject;
+      setPersistedCanvasObjects((current) => upsertCanvasObject(current, nextObject));
+      setPersistedCanvasPlacements((current) => upsertCanvasPlacement(current, nextPlacement));
+      setPersistedContentMounts((current) => replaceContentMountsForObject(
+        current,
+        nextObject.objectId,
+        normalized.contentMounts,
+      ));
+      if (nextVisualConnector) {
+        setPersistedVisualConnectors((current) => upsertVisualConnector(current, nextVisualConnector));
+      }
+      if (nextImageObject) {
+        setPersistedImageObjects((current) => upsertImageObject(current, nextImageObject));
+      }
+      if (nextStructuredObject) {
+        setPersistedStructuredObjects((current) => upsertStructuredObject(current, nextStructuredObject));
+      }
+      return true;
+    } catch (err) {
+      console.error('Failed to save CanvasObject:', err);
+      addToast('error', 'Failed to save canvas object');
+      setPersistedCanvasObjects(previousObjects);
+      setPersistedCanvasPlacements(previousPlacements);
+      setPersistedContentMounts(previousMounts);
+      setPersistedVisualConnectors(previousConnectors);
+      setPersistedImageObjects(previousImages);
+      setPersistedStructuredObjects(previousStructured);
+      return false;
+    }
+  }, [
+    addToast,
+    note,
+    persistedCanvasObjects,
+    persistedCanvasPlacements,
+    persistedContentMounts,
+    persistedImageObjects,
+    persistedStructuredObjects,
+    persistedVisualConnectors,
+  ]);
+
+  const deleteCanvasObject = useCallback(async (objectId: string): Promise<boolean> => {
+    const currentNote = noteRef.current || note;
+    if (!currentNote) return false;
+    const previousObjects = persistedCanvasObjects;
+    const previousPlacements = persistedCanvasPlacements;
+    const previousMounts = persistedContentMounts;
+    const previousConnectors = persistedVisualConnectors;
+    const previousImages = persistedImageObjects;
+    const previousStructured = persistedStructuredObjects;
+    const removedObjectIds = new Set([
+      objectId,
+      ...persistedVisualConnectors
+        .filter((connector) => (
+          connector.objectId === objectId
+          || connector.startObjectId === objectId
+          || connector.endObjectId === objectId
+        ))
+        .map((connector) => connector.objectId),
+    ]);
+    setPersistedCanvasObjects((current) => current.filter((item) => !removedObjectIds.has(item.objectId)));
+    setPersistedCanvasPlacements((current) => current.filter((item) => !removedObjectIds.has(item.objectId)));
+    setPersistedContentMounts((current) => current.filter((item) => !removedObjectIds.has(item.objectId)));
+    setPersistedVisualConnectors((current) => current.filter((item) => !removedObjectIds.has(item.objectId)));
+    setPersistedImageObjects((current) => current.filter((item) => !removedObjectIds.has(item.objectId)));
+    setPersistedStructuredObjects((current) => current.filter((item) => !removedObjectIds.has(item.objectId)));
+    try {
+      await deleteGenericCanvasObjectForNote({
+        noteId: currentNote.id,
+        objectId,
+      });
+      return true;
+    } catch (err) {
+      console.error('Failed to delete CanvasObject:', err);
+      addToast('error', 'Failed to delete canvas object');
+      setPersistedCanvasObjects(previousObjects);
+      setPersistedCanvasPlacements(previousPlacements);
+      setPersistedContentMounts(previousMounts);
+      setPersistedVisualConnectors(previousConnectors);
+      setPersistedImageObjects(previousImages);
+      setPersistedStructuredObjects(previousStructured);
+      return false;
+    }
+  }, [
+    addToast,
+    note,
+    persistedCanvasObjects,
+    persistedCanvasPlacements,
+    persistedContentMounts,
+    persistedImageObjects,
+    persistedStructuredObjects,
+    persistedVisualConnectors,
+  ]);
 
   const moveBlock = useCallback(async (placementId: string, direction: -1 | 1) => {
     if (!note) return;
@@ -765,6 +1139,14 @@ export function useNoteCanvasDataAdapter({
     annotationTruths,
     contentGroups,
     groupFolders,
+    pageFrameCollection,
+    persistedCanvasObjects,
+    persistedCanvasPlacements,
+    persistedContentMounts,
+    persistedVisualConnectors,
+    persistedImageObjects,
+    persistedStructuredObjects,
+    documentTypographyProfile,
     anchorsBySourceRef,
     sourceJumpTarget,
     setSourceJumpTarget,
@@ -784,6 +1166,10 @@ export function useNoteCanvasDataAdapter({
     saveAnnotationTruths,
     saveContentGroups,
     saveGroupFolders,
+    savePageFrameCollection,
+    persistCanvasObject,
+    deleteCanvasObject,
+    saveDocumentTypographyProfile,
     saveReadingInterpretations,
     saveAnnotationProposals,
     createBlock,
@@ -793,7 +1179,9 @@ export function useNoteCanvasDataAdapter({
     toggleBlockExportRole,
     toggleBlockAIVisibility,
     trashBlock,
+    forgetBlockLocally,
     restoreBlock,
+    restoreBlockById,
     moveBlock,
     handleViewSource,
   };

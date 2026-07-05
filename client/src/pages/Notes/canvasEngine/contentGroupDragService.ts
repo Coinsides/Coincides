@@ -1,6 +1,9 @@
 import type {
   AnnotationRangeV1,
 } from './runtimeDataTypes';
+import {
+  annotationRangeIsRenderable,
+} from './annotationDisplayService';
 
 export const CONTENT_GROUP_DRAG_MIME = 'application/x-coincides-content-item';
 
@@ -101,6 +104,7 @@ export function plainTextFromContentGroupDragPayload(payload: ContentGroupDragPa
 
   if (payload.kind === 'label') {
     const rangeText = payload.ranges
+      ?.filter(annotationRangeIsRenderable)
       ?.map((range) => cleanDragText(range.range_text_cache))
       .filter((text): text is string => Boolean(text))
       .join('\n');

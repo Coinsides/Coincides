@@ -1,5 +1,438 @@
 # CHANGELOG - V2.BN.8
 
+# Verified - 2026-06-30 V2.BN.8.11.11 Structured Object Family Closure Gate
+
+- Added `V2.BN.8.11.11-Structured-Object-Family-Closure-Gate-Plan.md`.
+- Added `V2.BN.8.11.11-Structured-Object-Family-Closure-Report.md`.
+- Skipped / deferred `V2.BN.8.11.10 First Structured Family Gate` by Henry decision.
+- Closed V2.BN.8.11 on the engineering side as the ordinary / structured CanvasObject family lane.
+- Confirmed shape, sticky note, visual connector, image, table, and object inspector all ride the CanvasObject foundation.
+- Confirmed ContentGroup projection and reuse move to V2.BN.8.12.
+- Verified `npm run verify:v2-bn8-runtime` and `cd server; npm run test:v2`.
+
+# Added - 2026-06-30 V2.BN.8.11.9 Object Inspector / Context Actions
+
+- Added `V2.BN.8.11.9-Object-Inspector-And-Context-Actions-Patch-Note.md`.
+- Added a derived Object Inspector for ordinary CanvasObjects.
+- Added shared context-action availability so inspector actions and right-click menu actions do not drift.
+- Added safe duplicate paths for pure shape, image, and table objects.
+- Kept sticky / block-backed shape duplicate disabled until copy semantics are designed.
+- Added object-level export visibility toggle and note-block open-original action.
+- Verified model contract, runtime boundary, client build, full runtime gate, and browser smoke for table + sticky inspector flows.
+
+# Added - 2026-06-29 V2.BN.8.11.7 Image / Asset-Backed CanvasObject
+
+- Added `V2.BN.8.11.7-Image-Asset-Backed-Object-Patch-Note.md`.
+- Added durable canvas image asset storage with `canvas_assets` and `image_object_extensions`.
+- Added authenticated canvas image upload, metadata, and blob routes.
+- Added `kind='image'`, `backing='asset'`, `objectClass='media'` persistence through the generic CanvasObject pipeline.
+- Added client image upload, creation, render, movement, resize, delete, caption, alt text, and fit controls.
+- Added AI-readable image refs without exposing local filesystem paths or inventing OCR text.
+- Verified runtime boundary, model contract, client build, server canvas persistence tests, full `verify:v2-bn8-runtime`, and browser smoke.
+
+# Changed - 2026-06-28 V2.BN.8.11 / V2.BN.8.12 Route Swap
+
+- Swapped the active route so `V2.BN.8.11` is now `Structured Object Family` and `V2.BN.8.12` is now `ContentGroup Projection And Reuse`.
+- Added `V2.BN.8.11-Structured-Object-Family-Plan.md`.
+- Added `V2.BN.8.12-ContentGroup-Projection-And-Reuse-Plan.md`.
+- Marked `V2.BN.8.11-Object-Projection-And-Reuse-Plan.md` as superseded by the 2026-06-28 routing decision.
+- Kept completed `V2.BN.8.11.1 Canvas Persistence Cutover Gate` in place as shared infrastructure for ordinary objects and later ContentGroup projection.
+
+# Added - 2026-06-27 V2.BN.8.11.1 Canvas Persistence Cutover Gate
+
+- Added `V2.BN.8.11.1-Canvas-Persistence-Cutover-Gate-Patch-Note.md`.
+- Added durable Canvas persistence tables: `canvas_objects`, `canvas_placements`, `content_mounts`, `page_frame_extensions`, and `canvas_page_collections`.
+- Added durable AnnotationTruth persistence tables: `annotation_truths` and `annotation_ranges`.
+- Added server services/routes for Canvas persistence and AnnotationTruth persistence.
+- Added client repositories for PageFrame collection, block layout, and AnnotationTruth cutover.
+- Rewired the active Note editor so PageFrame collection, block layout, and AnnotationTruth no longer write to the old metadata / override seeds.
+- Updated New Note creation so PageFrame seed is saved as entity persistence after note creation.
+- Added server tests covering table creation, PageFrame persistence, block layout persistence with legacy override stripping, and AnnotationTruth/range persistence.
+- Updated runtime boundary checks to fail if the active adapter returns to PageFrame metadata writes, block layout legacy writes, or AnnotationTruth metadata writes.
+- Verified server v2 test suite, runtime boundary, model contract, client build, and server build.
+
+# Verified - 2026-06-27 V2.BN.8.10.6 Typography Maturity Closure Gate
+
+- Added `V2.BN.8.10.6-Typography-Maturity-Closure-Report.md`.
+- Closed V2.BN.8.10 on the engineering side as TextFlow Typography Maturity.
+- Confirmed typography now has one note-level profile shared by visible writing text, PageFrame runtime extensions, measurement estimates, Export Preview metadata, AI-readable layout, More -> Typography controls, and the selection mini toolbar.
+- Kept Word-like auto-pagination, selected-range rich styling, global top bar/ribbon, real PDF/export, per-block typography, and CanvasObject DB migration deferred.
+- Routed Canvas persistence cutover to `V2.BN.8.11.1 Canvas Persistence Cutover Gate`.
+- Verified `npm run verify:v2-bn8-runtime` successfully: runtime boundary, model contract, client build, server build, performance smoke, diff whitespace, and changed-file secret scan passed.
+
+# Added - 2026-06-27 V2.BN.8.10.5 Selection Typography Mini Toolbar
+
+- Added `V2.BN.8.10.5-Selection-Typography-Mini-Toolbar-Plan.md`.
+- Added `V2.BN.8.10.5-Selection-Typography-Mini-Toolbar-Patch-Note.md`.
+- Added `SelectionTypographyToolbarLayer.tsx` for single TextFlow selections.
+- Reused the note-level `DocumentTypographyProfile` as the only typography truth.
+- Wired the Writing Surface to pass and save the existing document typography profile.
+- Added mini toolbar controls for font family, font size, line height, paragraph spacing, reset, and close.
+- Kept More -> Typography as the stable fallback settings route.
+- Kept top bar/ribbon, selected-range rich styling, per-block typography, automatic pagination, export execution, and CanvasObject DB migration deferred.
+- Verified model contract, runtime boundary, client build, diff whitespace, and changed-file secret scan.
+
+# Added - 2026-06-27 V2.BN.8.10.4 Typography Measurement And PageFrame Sync
+
+- Added `V2.BN.8.10.4-Typography-Measurement-And-PageFrame-Sync-Plan.md`.
+- Added `V2.BN.8.10.4-Typography-Measurement-And-PageFrame-Sync-Patch-Note.md`.
+- Added `typographyMeasurementService.ts` as a pure typography-aware measurement boundary.
+- Made text block height estimates read the active note-level `DocumentTypographyProfile`.
+- Routed PageStack draft continuation through typography-aware draft-fit estimation.
+- Kept cross-page Block fragments geometry-derived while sharing PageFrame content rect semantics.
+- Added PageFrame typography and estimated line capacity metadata to Export Preview.
+- Exposed active PageFrame typography in AI-readable layout refs.
+- Kept Word-like automatic pagination, line-level splitting, PageSlice extraction UI, real export/PDF execution, per-block typography, and CanvasObject database migration deferred.
+- Verified model contract, runtime boundary, performance seed, client build, diff whitespace, and changed-file secret scan.
+
+# Verified - 2026-06-27 V2.BN.8.9.18 PageStack / PageSlice Closeout Gate
+
+- Added `V2.BN.8.9.18-PageStack-PageSlice-Closeout-Gate-Plan.md`.
+- Added `V2.BN.8.9.18-PageStack-PageSlice-Closeout-Report.md`.
+- Closed the expanded 8.9 PageFrame / PageStack notebook maturity lane in documentation pending Henry's holistic manual test pass.
+- Reconfirmed the page-system vocabulary: `PageFrame = physical page slice`, `PageStack = user-facing continuous page unit`, `PageSlice = whole-page snapshot/reference descriptor`.
+- Recorded that V2.BN.8.10 is now TextFlow Typography Maturity, while ContentGroup projection was deferred to V2.BN.8.11 at that time. This route is superseded by the 2026-06-28 swap: ordinary / structured objects are V2.BN.8.11 and ContentGroup projection is V2.BN.8.12.
+- Updated Open Issues so cross-page Block fragments and PageSlice snapshot/reference v1 are no longer listed as fully missing.
+- Kept PageSlice extraction UI, page-internal range selection, split confirmation, measured automatic pagination, final CanvasObject DB cutover, and real export/PDF execution deferred.
+- Verified model contract, runtime boundary, performance seed, client build, server build, diff whitespace, and changed-file secret scan.
+
+# Added - 2026-06-27 V2.BN.8.9.17 PageSlice Snapshot And Reference v1
+
+- Added `V2.BN.8.9.17-PageSlice-Snapshot-And-Reference-v1-Plan.md`.
+- Added `V2.BN.8.9.17-PageSlice-Snapshot-And-Reference-v1-Patch-Note.md`.
+- Added `PageSliceSnapshotV1`, `PageSliceReferenceDescriptor`, and `PageSliceOpenOriginalTarget`.
+- Added `pageSliceService.ts` for whole-page PageSlice snapshot/reference derivation.
+- Added `createPageSliceSnapshot(...)` and `createPageSliceReferenceDescriptor(...)`.
+- Added `page_slice` as a ContentGroup member kind in client and server normalization.
+- Added `createContentGroupMemberFromPageSliceSnapshot(...)` for snapshot-first whole-page ContentGroup member candidates.
+- Preserved caller-provided `source_ref.metadata` when building ContentGroup member source refs.
+- Added model-contract and runtime-boundary coverage for PageSlice source identity, open-original semantics, ContentGroup member metadata, and server member kind preservation.
+- Kept PageSlice UI, page preview render, page-internal range selection, automatic pagination, and ContentGroup PageSlice action surfaces deferred.
+
+# Added - 2026-06-27 V2.BN.8.9.16 Cross-page Block Fragment v1
+
+- Added `V2.BN.8.9.16-Cross-page-Block-Fragment-v1-Plan.md`.
+- Added `V2.BN.8.9.16-Cross-page-Block-Fragment-v1-Patch-Note.md`.
+- Added `pageStackBlockFragmentService.ts` as the pure model boundary for cross-page Block fragment projection.
+- Added `derivePageStackBlockFragments(...)` for PageStack-local geometry fragment derivation.
+- Added runtime `blockFragmentProjections` so Canvas runtime, AI-readable snapshot, and UI consume one projection truth.
+- Added `pageStackBlockFragments` to AI-readable Block nodes.
+- Added Block shell DOM markers and subtle continuation chrome for cross-page fragments.
+- Kept TextFlow truth, logical NoteBlock identity, PageSlice snapshot/reference, and real automatic pagination deferred.
+
+# Added - 2026-06-27 V2.BN.8.9.15 PageStack Content Flow v1
+
+- Added `V2.BN.8.9.15-PageStack-Content-Flow-v1-Plan.md`.
+- Added `V2.BN.8.9.15-PageStack-Content-Flow-v1-Patch-Note.md`.
+- Added `pageStackContentFlowService.ts` as the pure model boundary for PageStack continuation plans.
+- Added `resolvePageStackContentFlowPlan(...)` for stay-current-page, move-to-existing-next-page, and append-next-page decisions.
+- Routed default natural writing through PageStack content flow so overflow continuation can target the next PageFrame in the same PageStack.
+- Kept explicit Canvas double-click placement free and did not turn it into automatic PageStack pagination.
+- Added model-contract coverage for PageStack content flow v1.
+- Kept cross-page Block fragments, PageSlice snapshot/reference/member semantics, and full Word-like automatic pagination deferred.
+
+# Added - 2026-06-27 V2.BN.8.9.14 Layout Panel And PageStack Navigator
+
+- Added `V2.BN.8.9.14-Layout-Panel-And-PageStack-Navigator-Plan.md`.
+- Added `V2.BN.8.9.14-Layout-Panel-And-PageStack-Navigator-Patch-Note.md`.
+- Settled the user-facing page unit as `PageStack`; `PageFrame` remains the internal physical page slice.
+- Updated PageFrame collection metadata to `V2.BN.8.9.14`.
+- Added PageStack coverage normalization so legacy/uncovered PageFrames become single-page PageStacks.
+- Changed detach semantics so a detached page becomes a new single-page PageStack instead of a visible independent PageFrame.
+- Added `splitPageStackAtFrame(...)` and wired merge-with-previous through the runtime presentation controller.
+- Updated Toolbar, blank Canvas command menu, and Layout panel vocabulary from visible `New PageFrame` to `New PageStack`.
+- Removed the visible `Independent PageFrames` section from the Layout panel.
+- Added Layout panel controls for add page below, split stack here, duplicate to new stack, set primary, detach to new stack, delete page, collapse/expand stack, and merge with previous stack.
+- Added model-contract and runtime-boundary coverage for PageStack coverage, split, merge, detach-to-new-stack, and visible PageStack vocabulary.
+- Kept automatic pagination, PageSlice extraction/snapshot/reference, cross-page Block fragments, TextFlow typography controls, full context-menu polish, and generic CanvasObject persistence deferred.
+
+# Added - 2026-06-27 V2.BN.8.9.13 Continuous PageStack v1
+
+- Added `V2.BN.8.9.13-Continuous-PageStack-v1-Patch-Note.md`.
+- Added `PageStackModel` and extended `PageFrameCollectionModel` with explicit stack metadata.
+- Added `pageStackCollectionService.ts` for PageStack normalization, creation, add-page-below, detach, merge, collapse/expand, and stack-local numbering.
+- Updated PageFrame metadata persistence to `V2.BN.8.9.13` while preserving old multi-PageFrame metadata as independent PageFrames when no `pageStacks` exist.
+- Updated new A4/PageFrame seed and Project Detail New Note creation so formal writing notes start with one explicit primary PageStack.
+- Enabled New PageStack, Add page below, Detach from PageStack, and Collapse/Expand PageStack command paths.
+- Added runtime PageStack context to PageFrame extensions, Canvas DOM markers, Canvas AI-readable snapshot, Export Preview metadata, and Layout panel grouping.
+- Added model-contract, runtime-boundary, and browser-smoke coverage for PageStack continuity semantics and UI/read-model exposure.
+- Kept measured auto-pagination, PageSlice extraction/snapshot/reference, cross-page Block continuation markers, Layout panel polish, full infinite Canvas, TextFlow typography controls, and durable generic CanvasObject DB cutover deferred.
+
+# Added - 2026-06-27 V2.BN.8.9.12.1 PageFrame Layout Affiliation And Zoom Control
+
+- Added `V2.BN.8.9.12.1-PageFrame-Layout-Affiliation-And-Zoom-Control-Patch-Note.md`.
+- Added `layoutAffiliationService.ts` as a sparse geometry-derived layout-container boundary.
+- Added `LayoutAffiliation` with `page_frame` / `workspace` container kinds and `fully_contained` / `crossing` / `floating` relations.
+- Added PageFrame move cohort derivation so fully-contained Blocks can move with a moved PageFrame without introducing hard PageFrame ownership.
+- Routed PageFrame move through block layout draft application and changed-layout persistence.
+- Added a visible Canvas zoom control for browser/manual testing: zoom out, slider, zoom in, and reset percent.
+- Added model-contract and runtime-boundary coverage for layout affiliation, PageFrame move cohort behavior, move wiring, and zoom-control DOM markers.
+- Kept Continuous PageStack, PageSlice extraction, cross-page Block fragments, generic CanvasObject DB cutover, and full object context-menu system deferred.
+
+# Added - 2026-06-27 V2.BN.8.9.11 PageFrame Numbering Scope Guard
+
+- Added `V2.BN.8.9.11-PageFrame-Numbering-Scope-Guard-Plan.md`.
+- Added `V2.BN.8.9.11-PageFrame-Numbering-Scope-Guard-Patch-Note.md`.
+- Added a model-contract check proving that a note-level `PageFrameCollection` does not imply `PageStack` numbering.
+- Updated runtime PageFrame extension construction so independent PageFrames no longer receive collection-global `index / total` page-number chrome.
+- Added runtime-boundary checks to keep `runtimePageFrames.length` out of independent PageFrame numbering.
+- Kept `createDefaultPageFrameSlots(...)` capable of explicit page-index / total formatting for the future PageStack / Continuous PageFrame pass.
+- Kept Continuous PageFrame, PageSlice operations, PageFrame move/resize, and durable generic CanvasObject persistence out of this scoped guard patch.
+
+# Added - 2026-06-27 V2.BN.8.9.10 Canvas World Auto-Expand And PageFrame Focus
+
+- Added `V2.BN.8.9.10-Canvas-World-Auto-Expand-And-PageFrame-Focus-Plan.md`.
+- Added `V2.BN.8.9.10-Canvas-World-Auto-Expand-And-PageFrame-Focus-Patch-Note.md`.
+- Added dynamic finite Canvas world derivation so Canvas Mode bounds include current PageFrames, block placements, and reserve objects.
+- Added `CANVAS_WORLD_PADDING` and `focusViewportOnWorldRect(...)` in `viewportService.ts`.
+- Updated runtime world construction in `useNoteCanvasLayoutModel.ts` so newly inserted PageFrames can extend the reachable Canvas.
+- Updated viewport operations so pan, scroll, zoom, resize, and focus can clamp against the current runtime world.
+- Routed PageFrame create / insert / duplicate / set-primary / select actions through PageFrame focus.
+- Made Layout panel PageFrame rows clickable and keyboard-focusable as jump targets.
+- Added Canvas world width/height DOM smoke markers.
+- Added model-contract and runtime-boundary coverage for dynamic Canvas world and PageFrame focus.
+- Kept full infinite/chunked Canvas, Continuous PageStack, PageSlice operations, PageFrame move/resize, and durable generic CanvasObject DB cutover out of this scoped patch.
+
+# Added - 2026-06-27 V2.BN.8.9.9 PageFrame Command Surface And Creation
+
+- Added `V2.BN.8.9.9-PageFrame-Command-Surface-And-Creation-Patch-Note.md`.
+- Added `canvas_blank` and `page_frame_shell` command surfaces in `commandSurfaceService.ts`.
+- Added PageFrame command action ids for create, duplicate, set-primary, and delete.
+- Added `buildCanvasBlankMenu()` and `buildPageFrameShellMenu(...)`.
+- Added a compact toolbar PageFrame creation button in `NoteChromeLayer`.
+- Routed PageFrame creation through existing `pageFrameCollectionService` persistence from `useRuntimePresentationController`.
+- Added Canvas Mode right-click handling for blank Canvas creation and PageFrame shell operations in `NoteWritingSurfaceLayer`.
+- Added model-contract and runtime-boundary coverage for the PageFrame command surface.
+- Kept Continuous PageStack, PageSlice extraction, full context-menu system, TextFlow typography controls, ContentGroup projection, and durable generic CanvasObject DB cutover out of this scoped patch.
+
+# Verified - 2026-06-26 V2.BN.8.9.8 PageFrame Maturity Closure Gate
+
+- Added `V2.BN.8.9.8-PageFrame-Maturity-Closeout-Report.md`.
+- Closed V2.BN.8.9 as the PageFrame maturity lane after 8.9.1 through 8.9.7.
+- Reconfirmed PageFrame as the first mature special CanvasObject: formal-page object, TextFlow-backed content, geometry-derived affiliation, AI-readable layout metadata, and PageFrame-aware Export Preview.
+- Browser-smoked Page Mode primary focus, Canvas Mode multi-PageFrame view, insert/set-primary/refresh persistence, ruler/margin guide visibility, block snap-wall alignment, block drag outside PageFrame geometry, and Export Preview workspace-only classification.
+- Verified that multi-PageFrame persistence remains transitional under `canvas_engine_page_frames_v1`; final generic CanvasObject / CanvasPlacement database cutover remains later.
+- Recorded that the old 8.10 ContentGroup projection route had been superseded: 8.10 became TextFlow Typography Maturity and ContentGroup projection was deferred to 8.11. This historical route is superseded again by the 2026-06-28 swap: ContentGroup projection is now V2.BN.8.12.
+- Carried forward Layout panel click/hover affordance polish, real export/PDF execution, rich PageFrame slot/template editing, TextFlow typography controls, and final durable CanvasObject DB migration.
+
+# Added - 2026-06-26 V2.BN.8.9.7 Crossing Object Export Policy
+
+- Added `V2.BN.8.9.7-Crossing-Object-Export-Policy-Patch-Note.md`.
+- Added crossing export policy contracts and `DEFAULT_PAGE_FRAME_CROSSING_EXPORT_POLICY = include_if_center_inside`.
+- Added `resolvePageFrameCrossingExportDecision` as the geometry-layer interpretation helper for PageFrame crossing objects.
+- Supported policy seeds: `exclude_workspace`, `include_if_center_inside`, `include_if_intersects`, `clip_to_page_frame`, and `manual`.
+- Extended Export Preview rows with `exportPolicy` and exposed `crossingExportPolicy` on the preview model.
+- Updated Export Preview included/excluded counts so crossing/workspace-only rows are counted through policy interpretation.
+- Updated Export Preview UI to show active crossing policy and per-row policy decision.
+- Added model-contract and runtime-boundary coverage for crossing export policy behavior.
+- Kept actual PDF/export engine, rendered clipping, manual decision UI, persisted policy picker, ContentGroup projection, Relation runtime, and Agent write path out of this scoped patch.
+
+# Added - 2026-06-26 V2.BN.8.9.6 PageFrame-aware Export Preview
+
+- Added `V2.BN.8.9.6-PageFrame-Aware-Export-Preview-Patch-Note.md`.
+- Extended `exportPreviewService.ts` so Export Preview can distinguish PageFrame groups, crossing objects, and workspace-only objects.
+- Added `PageFrameExportPreview` and `BuildExportPreviewModelOptions`.
+- Fed runtime `pageFrames`, `blockPlacements`, and `primaryPageFrameId` into Export Preview from `useNoteCanvasLayoutModel.ts`.
+- Updated Export Preview UI to render PageFrame groups first, then crossing-boundary and workspace-only groups.
+- Used geometry-derived PageFrame affiliation for preview classification instead of hard PageFrame ownership on blocks.
+- Added model-contract and runtime-boundary coverage for PageFrame-aware Export Preview service, layout-model wiring, UI markers, and styles.
+- Updated `V2.BN.8.9-PageFrame-Maturity-Plan.md` and `V2.BN.8.8-Canvas-Engine-Implementation-Checklist.md`.
+- Kept actual PDF/export engine, crossing-object export policy, clipping, manual export decisions, ContentGroup projection, Relation runtime, and Agent write path out of this scoped patch.
+
+# Added - 2026-06-26 V2.BN.8.9.5 PageFrame Template / Background / Style
+
+- Added `V2.BN.8.9.5-PageFrame-Template-Background-And-Style-Patch-Note.md`.
+- Added `pageFrameTemplateService.ts` as the PageFrame template/background/style service boundary.
+- Added `PageFrameTemplateId`, `PageFrameBackgroundStyle`, and `PageFrameTemplate` contracts.
+- Extended `PageFrameModel`, `PageFrameExtension`, and Canvas AI-readable PageFrame nodes with template and background style metadata.
+- Added four first template seeds: A4 portrait, Letter portrait, Screen note, and Custom.
+- Added template application coverage that proves PageFrame templates update layout/style state without mutating TextFlow content.
+- Rendered PageFrame background/border/shadow tokens through stable CSS variables and DOM smoke markers.
+- Added model-contract and runtime-boundary coverage for template service, AI Tree style output, DOM markers, and CSS variables.
+- Updated `V2.BN.8.9-PageFrame-Maturity-Plan.md` and `V2.BN.8.8-Canvas-Engine-Implementation-Checklist.md`.
+- Kept template picker UI, rich template library, export preview refinement, crossing-object policy, ContentGroup projection, Relation runtime, and Agent write path out of this scoped patch.
+
+# Added - 2026-06-26 V2.BN.8.9.4 Header / Footer / Page Number Slots
+
+- Added `V2.BN.8.9.4-Header-Footer-And-Page-Number-Slots-Patch-Note.md`.
+- Added `pageFrameSlotService.ts` as the PageFrame-owned slot boundary for header, footer, and generated page number.
+- Added `PageFrameSlot` / `PageFrameSlots` contracts and attached `slots` to `PageFrameExtension`.
+- Updated runtime PageFrame extension assembly so every PageFrame gets quiet slot chrome and generated page-number state.
+- Updated Canvas AI-readable PageFrame nodes so `pageFrameRef` exposes slot enablement and `pageFrameSlots` exposes slot details.
+- Rendered conservative header/footer/page-number slot markers in `NoteWritingSurfaceLayer.tsx`.
+- Added model-contract and runtime-boundary coverage for slot service, AI Tree slot output, DOM markers, and CSS.
+- Updated `V2.BN.8.9-PageFrame-Maturity-Plan.md` and `V2.BN.8.8-Canvas-Engine-Implementation-Checklist.md`.
+- Kept rich header/footer editing, PageFrame templates/backgrounds, export refinement, crossing-object policy, ContentGroup projection, Relation runtime, and Agent write path out of this scoped patch.
+
+# Added - 2026-06-26 V2.BN.8.9.3.1 PageFrame Print Scale / Document Typography Baseline
+
+- Added `V2.BN.8.9.3.1-PageFrame-Print-Scale-And-Document-Typography-Baseline-Patch-Note.md`.
+- Added `pageFramePrintScaleService.ts` as the service boundary for PageFrame print scale and default document typography.
+- Added `PageFrameModel.pageSize`, `DocumentTypographyProfile`, `PageFramePrintProfile`, and `PageFrameExtension.documentTypography`.
+- Updated default PageFrame geometry to use an A4 logical paper ratio while preserving the current writing content width.
+- Normalized legacy test PageFrames without explicit page size to the active A4 baseline.
+- Updated Canvas AI-readable PageFrame nodes so `pageFrameRef` includes page size and typography baseline.
+- Updated writing-surface DOM smoke markers and CSS variables for document font size and line height.
+- Updated text height estimation to follow document typography metrics.
+- Updated `V2.BN.8.9-PageFrame-Maturity-Plan.md` and `V2.BN.8.8-Canvas-Engine-Implementation-Checklist.md`.
+- Kept full TextFlow typography controls, header/footer/page number slots, PageFrame template/background system, export refinement, ContentGroup projection, Relation runtime, and Agent write path out of this scoped patch.
+
+# Added - 2026-06-26 V2.BN.8.9.3 Ruler / Margin Guides / Snap Wall
+
+- Added `V2.BN.8.9.3-Ruler-Margin-Guides-And-Snap-Wall-Patch-Note.md`.
+- Added `pageFrameGuideService.ts` for PageFrame top ruler, left/right margin guides, center guide, and snap-wall calculation.
+- Added PageFrame guide and snap-wall model-contract coverage.
+- Added runtime-boundary coverage for PageFrame guide service, move snapping through guide semantics, Canvas draft free placement, and visible guide DOM markers.
+- Rendered subtle PageFrame ruler/margin guide markers in the writing surface.
+- Limited center guide visibility to Layout Mode or active drag/resize gestures.
+- Updated move snapping so PageFrame left margin, right margin, and center line use edge-aware snap semantics rather than only left-edge placement targets.
+- Updated Canvas draft placement so snap can help near PageFrame content guides while still allowing free workspace placement.
+- Updated `V2.BN.8.9-PageFrame-Maturity-Plan.md` and `V2.BN.8.8-Canvas-Engine-Implementation-Checklist.md`.
+- Kept PageFrame resize/reorder, export crossing policy, header/footer/page number slots, template/background styling, ContentGroup projection, Relation runtime, and generic CanvasObject database migration out of this scoped patch.
+
+# Added - 2026-06-26 V2.BN.8.9.2.1 PageFrame Object Contract And Affiliation Decision
+
+- Added `V2.BN.8.9.2.1-PageFrame-Object-Contract-And-Affiliation-Decision-Patch-Note.md`.
+- Added `pageFrameAffiliationService.ts` as the service boundary for geometry-derived Block/PageFrame affiliation.
+- Locked PageFrame as a special CanvasObject direction: generic object/placement geometry plus PageFrame-specific extension semantics.
+- Locked Block/PageFrame relation as geometry-derived affiliation, not hard ownership.
+- Added `inside` / `crossing` / `workspace_only` affiliation states for later export/readability policy.
+- Added model-contract coverage for PageFrame object / placement / extension derivation and no-ownership affiliation.
+- Added runtime-boundary coverage to protect the affiliation service and reject hard PageFrame ownership fields on runtime types.
+- Updated `V2.BN.8.9-PageFrame-Maturity-Plan.md`, `V2.BN.8.8-Canvas-Engine-Implementation-Checklist.md`, and `Open-Issue-And-Brainstorm-Checklist.md`.
+- Kept generic CanvasObject database migration, `block.page_frame_id`, export policy implementation, crossing-object UX, ruler/snap-wall behavior, ContentGroup projection, Relation runtime, and Agent write path out of this scoped patch.
+
+# Added - 2026-06-26 V2.BN.8.9.2 Multi-PageFrame Management
+
+- Added `V2.BN.8.9.2-Multi-PageFrame-Management-Patch-Note.md`.
+- Added `pageFrameCollectionService.ts` as the first PageFrame collection management boundary.
+- Added `PageFrameCollectionModel` and `pageFrames: PageFrameModel[]` to the Canvas runtime model while keeping `primaryPageFrame` for existing callers.
+- Added insert / duplicate / set-primary / select / delete helpers for PageFrame collections.
+- Rendered multiple PageFrame boundaries in Canvas Mode, with primary and secondary visual states.
+- Added compact Layout panel controls for insert page, duplicate page, set primary, and delete page.
+- Added transitional PageFrame collection persistence under `canvas_engine_page_frames_v1` in note metadata.
+- Updated AI Tree PageFrame role derivation so secondary PageFrames are reported as secondary.
+- Added model-contract and runtime-boundary coverage for PageFrame collection service, multi-frame rendering, and Layout panel controls.
+- Browser-smoked Canvas/Layout: inserted a second PageFrame, set it as primary, refreshed the note, and confirmed Page 1 remains secondary while Page 2 remains primary.
+- Updated `V2.BN.8.9-PageFrame-Maturity-Plan.md` and `V2.BN.8.8-Canvas-Engine-Implementation-Checklist.md`.
+- Kept generic CanvasObject DB migration, PageFrame drag/resize/reorder, ruler/snap wall, header/footer/page number, template system, export refinement, ContentGroup projection, Relation runtime, and Agent write path out of this scoped patch.
+
+# Added - 2026-06-26 V2.BN.8.9.1 PageFrame Visible Contract And Primary Focus
+
+- Added `V2.BN.8.9.1-PageFrame-Visible-Contract-And-Primary-Focus-Patch-Note.md`.
+- Extended `CanvasAIReadableNode` so PageFrame nodes expose `contentBbox` and `pageFrameRef`.
+- Updated `canvasAiTreeService.ts` and `engineModel.ts` so PageFrame AI Tree metadata is derived from `PageFrameExtension` and `primaryPageFrameId`.
+- Wired Page Mode runtime viewport through `createPageModeFocusViewport`, making primary PageFrame focus explicit instead of implicit.
+- Added stable PageFrame DOM smoke markers to `NoteWritingSurfaceLayer.tsx`.
+- Added model-contract and runtime-boundary coverage for PageFrame content bbox, primary/exportable metadata, DOM markers, and Page Mode focus wiring.
+- Updated `V2.BN.8.8-Canvas-Engine-Implementation-Checklist.md` and marked 8.9.1 steps complete in the 8.9 plan.
+- Kept multi PageFrame persistence, ruler/snap wall, header/footer/page number, templates, export refinement, ContentGroup projection, Relation runtime, and Agent write path out of this scoped patch.
+
+# Added - 2026-06-26 V2.BN.8.9 PageFrame Maturity Plan
+
+- Added `V2.BN.8.9-PageFrame-Maturity-Plan.md` as the formal 8.9 implementation plan after Canvas Engine Foundation.
+- Split PageFrame Maturity into 8 small versions: visible contract / primary focus, multi PageFrame management, ruler / margin guides / snap wall, header/footer/page number, template/background/style, export preview, crossing object policy, and closure gate.
+- Locked 8.9 scope so it does not absorb complete CanvasObject DB migration, ContentGroup projection, Relation runtime, Agent write, Object Family work, or complete infinite canvas.
+- Added a PageFrame data-boundary warning: 8.9.2 must decide whether multi PageFrame persistence uses PageFrame-specific note metadata seed or a small durable cutover before shipping visible multi-frame UI.
+- Updated `README.md` and `Plan.md` with the new active 8.9 plan entry.
+
+# Verified - 2026-06-25 V2.BN.8.8.8 Canvas Engine Foundation Closeout
+
+- Added `V2.BN.8.8.8-Canvas-Engine-Foundation-Closeout-Report.md`.
+- Closed V2.BN.8.8 as Canvas Engine Foundation rather than a full Canvas product release.
+- Summarized completed foundation work across data contracts, runtime kernel, PageFrame v1, block projection, shape / visual connector seeds, command dispatcher seed, and Canvas AI Tree v1.
+- Browser-smoked the local app: Projects entry, correct NoteDetail route, Page / Canvas mode switch, Layout mode, Preview mode, and block move through the `Move block` floating handle.
+- Documented the route distinction between normal note detail `#/notes/:noteId` and project Canvas Document shell `#/projects/:courseId/notes/:canvasId`.
+- Updated `V2.BN.8.8-Canvas-Engine-Implementation-Checklist.md` so CE-024 is `partial`: visible Page/Canvas/Layout/Preview/block move passed, while shape/connector remain service-level until visible tools exist.
+- Reconfirmed that 8.8 does not implement durable CanvasObject DB migration, complete infinite canvas, visible shape/connector tools, ContentGroup projection, Relation View, Agent write path, OCR/raw ink understanding, or GraphRAG.
+
+# Added - 2026-06-25 V2.BN.8.8.7 Canvas AI Tree v1 Hardening
+
+- Added `V2.BN.8.8.7-Canvas-AI-Tree-v1-Hardening-Patch-Note.md`.
+- Added `canvasAiTreeService.ts` as the dedicated read-model service for derived Canvas AI-readable layout snapshots.
+- Extended `CanvasAIReadableNode` with selected context, PageFrame child reading order, and visual connector references.
+- Updated `engineModel.ts` so runtime snapshot derivation goes through the AI Tree service.
+- Added model-contract coverage for PageFrame container nodes, block-backed text, workspace shape nodes, visual connector nodes, selected context, and connector endpoint semantics.
+- Updated runtime boundary checks to protect the AI Tree service and new node fields.
+- Updated `V2.BN.8.8-Canvas-Engine-Implementation-Checklist.md` with CE-005 / CE-031 progress.
+- Kept OCR, image layout understanding, overlap/occlusion scoring, Agent write path, durable AI snapshot storage, Relation runtime, and ContentGroup projection out of this scoped patch.
+
+# Added - 2026-06-25 V2.BN.8.8.6 Canvas Command History Seed
+
+- Added `V2.BN.8.8.6-Canvas-Command-History-Seed-Patch-Note.md`.
+- Added `canvasCommandService.ts` as the first command dispatcher boundary for Canvas runtime writes.
+- Added command helpers for create CanvasObject, resize CanvasObject, update VisualStyle, and delete CanvasObject.
+- Added `applyCanvasCommandToRuntime` so commands return a next runtime model plus `CanvasDelta`.
+- Covered create / move / resize / style / delete command behavior in the model contract check.
+- Updated runtime boundary checks to protect the command service.
+- Updated `V2.BN.8.8-Canvas-Engine-Implementation-Checklist.md` with CE-023 progress.
+- Kept visible toolbar wiring, full undo / redo UI, persisted command log, collaboration transport, Agent proposal execution UI, and durable CanvasObject DB migration out of this scoped patch.
+
+# Added - 2026-06-25 V2.BN.8.8.5 Shape And Visual Connector Foundation
+
+- Added `V2.BN.8.8.5-Shape-And-Visual-Connector-Foundation-Patch-Note.md`.
+- Added `shapeProjectionService.ts` as the first service boundary for pure shape, block-backed shape, and visual connector seeds.
+- Added `createPureShapeProjection` for CanvasObject / Placement / VisualStyle creation without NoteBlock or ContentMount.
+- Added `fillShapeWithParagraphBlock` so shape text is represented as paragraph TextFlow content through a NoteBlock and ContentMount.
+- Added `clearBlockBackedShapeText` so clearing shape text demotes the object back to pure shape and reports hard-delete targets.
+- Added `createVisualConnectorProjection` so ordinary arrows are `visual_only` CanvasObjects and do not create KnowledgeRelation.
+- Updated model and runtime-boundary checks to protect the shape / connector service layer.
+- Updated `V2.BN.8.8-Canvas-Engine-Implementation-Checklist.md` with CE-020 / CE-021 / CE-022 progress.
+- Kept visible shape UI, arrow drawing UI, connector binding interaction, Relation runtime, ContentGroup Mode, Agent write path, and durable CanvasObject DB migration out of this scoped patch.
+
+# Added - 2026-06-25 V2.BN.8.8.4 Block Projection v1 Foundation
+
+- Added `V2.BN.8.8.4-Block-Projection-v1-Foundation-Patch-Note.md`.
+- Added `blockProjectionService.ts` as the first service boundary for TextFlow-backed paragraph block projection.
+- Added `createParagraphBlockProjection` to create a paragraph `NoteBlock`, TextFlow content, stored layout metadata, CanvasObject, Placement, ContentMount, and optional VisualStyle together.
+- Added placement-only move / resize helpers so Block Projection can change layout without mutating TextFlow content.
+- Added `restoreBlockProjectionLayout` so refresh can recover PageFrame and workspace block placement from stored layout metadata.
+- Updated model and runtime-boundary checks to protect Block Projection v1.
+- Updated `V2.BN.8.8-Canvas-Engine-Implementation-Checklist.md` with CE-018 / CE-019 / CE-029 / CE-030 progress.
+- Kept visible block creation UI rewrite, drag/resize command migration, durable CanvasObject DB migration, block-backed shape promotion, ContentGroup projection, Relation runtime, Agent write path, and GraphRAG out of this scoped patch.
+
+# Added - 2026-06-25 V2.BN.8.8.3 PageFrame v1 Foundation
+
+- Added `V2.BN.8.8.3-PageFrame-v1-Foundation-Patch-Note.md`.
+- Added `V2.BN.8.8-Canvas-Engine-Implementation-Checklist.md` as the Canvas Engine engineering progress ledger.
+- Updated `V2.BN.8.8-Canvas-Engine-Foundation-Plan.md` so every 8.8+ Canvas small version must update the implementation checklist before final handoff.
+- Added PageFrame outer/content rect service boundaries through `getPageFrameOuterRect` and `getPageFrameContentRect`.
+- Added primary PageFrame resolution and delete-primary fallback seed.
+- Added Page Mode focus viewport seed for primary PageFrame content rect.
+- Updated Canvas AI-readable snapshot so PageFrame can appear as a container node for formal-page child objects.
+- Updated model and runtime-boundary checks to protect PageFrame v1 service functions.
+- Kept visible PageFrame UI, multi-frame persistence, ruler/snap-wall interaction, template/export refinement, CanvasObject DB migration, ContentGroup projection, Relation runtime, Agent write path, and GraphRAG out of this scoped patch.
+
+# Added - 2026-06-25 V2.BN.8.8.2 Canvas Runtime Kernel Seed
+
+- Added `V2.BN.8.8.2-Canvas-Runtime-Kernel-Seed-Patch-Note.md`.
+- Added `canvasRuntimeKernelService.ts` as the first pure Canvas runtime kernel service.
+- Added scene indexing for Canvas placements through `CanvasPlacementIndex` and `CanvasSceneRuntime`.
+- Added pan/zoom-safe hit-test seed by converting viewport points back into world coordinates.
+- Added CanvasObject-centered selection seed with primary-object resolution.
+- Added move command / delta seed so placement changes can later flow through command history and Agent proposal paths.
+- Added `worldPointToViewportPoint` to complete the current viewport/world coordinate boundary.
+- Updated model and runtime-boundary checks to protect the runtime kernel seed.
+- Kept visible canvas UI rewrite, drag/resize command migration, PageFrame v1 behavior, shape UI, visual connector drawing, ContentGroup projection, Relation runtime, Agent write path, durable CanvasObject migration, and complete infinite canvas out of this scoped patch.
+
+# Added - 2026-06-25 V2.BN.8.8.1 Canvas Data Contract Foundation
+
+- Added `V2.BN.8.8.1-Canvas-Data-Contract-Foundation-Patch-Note.md`.
+- Added first formal Canvas data contracts for `NoteCanvas`, `CanvasObject`, `CanvasPlacement`, `ContentMount`, `PageFrameExtension`, `VisualStyle`, `VisualConnector`, `CanvasAIReadableSnapshot`, `CanvasCommand`, and `CanvasDelta`.
+- Reframed existing `BlockPlacementModel` as a compatibility bridge over the new generic `CanvasPlacement` contract.
+- Derived current PageFrame and paragraph block placements into runtime-level CanvasObject / Placement / ContentMount records without changing visible editor behavior.
+- Added a derived `CanvasAIReadableSnapshot` seed so Canvas can begin as AI-readable layout rather than visual-only placement metadata.
+- Updated model and runtime-boundary checks to protect the new contract fields.
+- Kept PageFrame interaction, shape UI, visual connector UI, ContentGroup projection, Relation runtime, Agent write path, durable CanvasObject DB migration, and complete infinite canvas out of this scoped patch.
+
+# Added - 2026-06-25 V2.BN.8.8 Canvas Engine Foundation Plan
+
+- Added `V2.BN.8.8-Canvas-Engine-Foundation-Engineering-Decision-Matrices.md` with Data Lifecycle, Performance/Rendering, Migration/Cleanup, Validation/Acceptance, and Open Decision/Risk matrices.
+- Added `V2.BN.8.8-Canvas-Engine-Foundation-Plan.md` as the active 8.8 Canvas entry after ContentGroup System maturity.
+- Updated `docs/Coincides-Better-Notebook-Roadmap.md` so Canvas Engine is treated as a multi-version pillar: 8.8 foundation, 8.9 PageFrame maturity, 8.10 object projection/reuse, 8.11 structured object family, 8.12+ Relation View, and 9.x Agent/GraphRAG.
+- Updated `README.md` and `Plan.md` so the old `V2.BN.8.7-CanvasObject-Media-Annotation-Drawing-Image-Seed-Plan.md` is historical reference only, not the active 8.8 entrance.
+- Reconfirmed that 8.8 uses a finite expandable world and does not implement complete infinite canvas, ContentGroup projection, Relation runtime, Agent write, GraphRAG, or Raw Ink understanding.
+
 # Verified - 2026-06-23 V2.BN.8.7.9 ContentGroup System Closure Gate
 
 - Added `V2.BN.8.7.9-ContentGroup-System-Closure-Gate-Report.md`.
@@ -1238,3 +1671,39 @@
 - 抓到的异常是 `Maximum update depth exceeded`，调用链为 `useBlockMeasurement -> useMeasuredBlockReflowController -> useLayoutDraftController`。
 - `useBlockMeasurement` 增加 measured-height 去抖保护；同一 block 的高度没有实质变化时不再反复上报 layout draft。
 - 修补后 Browser Harness 验证 Page -> Canvas -> Page 往返通过，Preview 打开/关闭通过，Layout 点击无异常。
+## Changed - V2.BN.8.9.12 PageFrame Operable Object
+
+- PageFrameCollection 新增 `updatePageFrameInCollection`、`movePageFrameInCollection`、`resizePageFrameInCollection`，把 PageFrame 的位置与尺寸变更收束到 PageFrame 数据边界内。
+- Runtime presentation controller 新增 PageFrame move/resize 接线；写作层可接收 `selectedPageFrameId`、`onMovePageFrame`、`onResizePageFrame`。
+- Canvas + Layout Mode 下，PageFrame 现在可以被选中、拖动、右下角缩放，并暴露 `data-page-frame-selected` 与 `data-page-frame-resize-handle` smoke markers。
+- 移动 PageFrame 只改变 PageFrame geometry，不移动 block；block 与 PageFrame 的关系继续通过几何关系派生，不引入 PageFrame 对 block 的硬 ownership。
+- Browser Harness 验证：PageFrame 拖动后位置按鼠标位移保存；缩放后尺寸从约 `407x575` 变为 `457x600`，选中态与 resize handle 保持可见。
+- 验证通过：`npm run check:canvas-runtime-boundary`、`npm run smoke:canvas-engine-model-contract`、`npm run build:client`、`git diff --check`。
+## Changed - V2.BN.8.11.5 Object-Style Preset And Sticky Note
+
+- 新增 object-style preset v1：`shape.default` / `shape.sticky_note`，暂存于 `canvas_objects.metadata.object_style`。
+- Sticky note 现在是 `shape + note_block backing + paragraph TextFlow truth`，不是新的 `block_type`。
+- `shapeSavePayload()` 保留并规范化 style metadata，移动/缩放/保存不再丢失 sticky presentation。
+- AI-readable layout 节点新增 `presentationRef`，presentation 与 `contentRef` 分离。
+- Canvas/PageFrame context menu 新增 `Sticky note` 创建入口；block-backed shape 可在 default/sticky presentation 间切换。
+- 后端 validator 拒绝 pure shape 携带 sticky preset。
+- 验证通过：`npm run verify:v2-bn8-runtime`；`cd server; node --import tsx --test src/__tests__/v2CanvasPersistenceCutover.test.ts`。
+
+## Changed - V2.BN.8.11.6 Visual Connector Persistence And Endpoint Model
+
+- 新增 `visual_connector_extensions`，把 `visual_connector` 从 runtime seed 推进为可持久化的 visual-only CanvasObject。
+- `saveCanvasObject` 新增 `visual_connector` kind handler，并拒绝 semantic relation / content-backed connector payload。
+- persistence hydrate / runtime model / AI-readable tree 现在能读回 visual connector，并暴露 endpoint kind、anchor、world points 与 `relationKind = visual_only`。
+- Shape 右键菜单新增最小连接流程：从一个 shape 开始连接，在另一个 shape 上完成连接。
+- 新增 `VisualConnectorLayer`，用 SVG layer 渲染最小直线箭头；connector 本体支持右键删除。
+- 删除 endpoint object 时，服务端和客户端都会移除引用它的 visual connector，避免孤儿线。
+- 验证通过：`npm run smoke:canvas-engine-model-contract`、`npm run check:canvas-runtime-boundary`、`npm run build:client`、server canvas persistence test、`git diff --check`、`npm run check:changed-file-secrets`。
+
+## Changed - V2.BN.8.11.8 Table Structured Object Model
+
+- 新增 `structured_object_extensions`，把 table 推进成 durable structured-backed CanvasObject。
+- `saveCanvasObject` 新增 `table` kind handler，表格继续走 `canvas_objects` / `canvas_placements` 通用管线，结构化行列进入 typed sidecar。
+- AI-readable tree 新增 `structuredRef`，可以读取 table 的 `rowCount`、`columnCount`、rows、columns 和 cell matrix。
+- 新增 `tableObjectService.ts` 和 `TableObjectLayer.tsx`，支持默认 3 x 3 表格、单元格文本编辑、添加行、添加列、删除行、删除列。
+- Table object 的单元格文本仍是 structured payload，不创建 paragraph block，不进入 TextFlow truth。
+- 验证通过：`npm run verify:v2-bn8-runtime`、server canvas persistence test、browser smoke。

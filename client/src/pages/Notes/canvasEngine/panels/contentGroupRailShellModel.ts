@@ -1,5 +1,6 @@
 import { summarizeContentGroupStability } from '../contentGroupService';
 import { groupFolderPath } from '../groupFolderService';
+import { annotationRangeIsRenderable } from '../annotationDisplayService';
 import type {
   AnnotationTruthV1,
   ContentGroupIdentityStatus,
@@ -82,6 +83,7 @@ export function railMemberPreview(
     const annotation = annotationById.get(member.target_id);
     if (annotation) {
       const rangePreview = annotation.ranges
+        .filter(annotationRangeIsRenderable)
         .map((range) => range.range_text_cache?.trim())
         .filter((text): text is string => Boolean(text))
         .join(' | ');

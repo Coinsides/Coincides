@@ -8,7 +8,7 @@ import {
   PAGE_FRAME_BOTTOM_PADDING,
   type BlockBoxLayout,
 } from './runtimeLayout';
-import type { PageFrameModel } from './types';
+import type { CanvasRect, CanvasViewport, PageFrameModel } from './types';
 
 function isInsidePrimaryPageFrame(layout: Pick<BlockBoxLayout, 'x' | 'width'>): boolean {
   return layout.x < DEFAULT_PAGE_CONTENT_WIDTH && layout.x + layout.width > 0;
@@ -66,4 +66,74 @@ export function createRuntimePageFrame({
     height,
     contentInset: DEFAULT_PAGE_FRAME_CONTENT_INSET,
   });
+}
+
+export function getPageFrameOuterRect(pageFrame: PageFrameModel): CanvasRect {
+  return {
+    x: pageFrame.x,
+    y: pageFrame.y,
+    width: pageFrame.width,
+    height: pageFrame.height,
+  };
+}
+
+export function getPageFrameContentRect(pageFrame: PageFrameModel): CanvasRect {
+  return {
+    x: pageFrame.x + pageFrame.contentInset.left,
+    y: pageFrame.y + pageFrame.contentInset.top,
+    width: Math.max(0, pageFrame.width - pageFrame.contentInset.left - pageFrame.contentInset.right),
+    height: Math.max(0, pageFrame.height - pageFrame.contentInset.top - pageFrame.contentInset.bottom),
+  };
+}
+
+export function resolvePrimaryPageFrame({
+  pageFrames,
+  requestedPrimaryFrameId,
+}: {
+  pageFrames: PageFrameModel[];
+  requestedPrimaryFrameId?: string | null;
+}): PageFrameModel | null {
+  if (pageFrames.length === 0) return null;
+  if (requestedPrimaryFrameId) {
+    const requested = pageFrames.find((pageFrame) => pageFrame.id === requestedPrimaryFrameId);
+    if (requested) return requested;
+  }
+  if (pageFrames.length === 1) return pageFrames[0];
+  return pageFrames[0];
+}
+
+export function resolvePrimaryPageFrameAfterDelete({
+  pageFrames,
+  currentPrimaryFrameId,
+  deletedFrameId,
+}: {
+  pageFrames: PageFrameModel[];
+  currentPrimaryFrameId?: string | null;
+  deletedFrameId: string;
+}): PageFrameModel | null {
+  const remaining = pageFrames.filter((pageFrame) => pageFrame.id !== deletedFrameId);
+  if (remaining.length === 0) return null;
+  if (currentPrimaryFrameId && currentPrimaryFrameId !== deletedFrameId) {
+    const current = remaining.find((pageFrame) => pageFrame.id === currentPrimaryFrameId);
+    if (current) return current;
+  }
+  return remaining[0];
+}
+
+export function createPageModeFocusViewport({
+  pageFrame,
+  viewport,
+}: {
+  pageFrame: PageFrameModel;
+  viewport: CanvasViewport;
+}): CanvasViewport {
+  const contentRect = getPageFrameContentRect(pageFrame);
+  return {
+    ...viewport,
+    x: contentRect.x,
+    y: contentRect.y,
+    width: contentRect.width,
+    height: Math.min(viewport.height, contentRect.height),
+    zoom: 1,
+  };
 }

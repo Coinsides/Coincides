@@ -14,6 +14,7 @@ import {
 import { mergeRuntimeNoteBlockTemplateMetadata } from '../services/templateDefinitions.js';
 
 const router = Router();
+const LEGACY_NOTE_LAYOUT_KEY = 'better_notebook_layout';
 
 function stringifyJson(value: unknown, fallback: unknown): string {
   return JSON.stringify(value ?? fallback);
@@ -26,6 +27,12 @@ function parseJson<T>(value: string | null | undefined, fallback: T): T {
   } catch {
     return fallback;
   }
+}
+
+function stripLegacyLayoutOverride(value: Record<string, unknown> | undefined): Record<string, unknown> {
+  const next = { ...(value || {}) };
+  delete next[LEGACY_NOTE_LAYOUT_KEY];
+  return next;
 }
 
 function getOwnedCourse(courseId: string, userId: string): { id: string } {
@@ -296,7 +303,7 @@ router.post('/:id/blocks', (req: AuthRequest, res: Response) => {
           id, note_id, block_id, order_index, display_overrides_json, created_at, updated_at
         )
         VALUES (?, ?, ?, ?, ?, ?, ?)
-      `).run(placementId, note.id, id, nextOrder, stringifyJson(data.display_overrides_json, {}), now, now);
+      `).run(placementId, note.id, id, nextOrder, stringifyJson(stripLegacyLayoutOverride(data.display_overrides_json), {}), now, now);
 
       for (const ref of data.source_references || []) {
         if (ref.document_id) {
@@ -376,14 +383,14 @@ router.put('/:id/block-placements/:placementId', (req: AuthRequest, res: Respons
       UPDATE note_block_placements
       SET display_overrides_json = ?, updated_at = ?
       WHERE id = ? AND note_id = ?
-    `).run(stringifyJson(data.display_overrides_json, {}), now, placementId, note.id);
+    `).run(stringifyJson(stripLegacyLayoutOverride(data.display_overrides_json), {}), now, placementId, note.id);
 
     db.prepare('UPDATE notes SET updated_at = ? WHERE id = ?').run(now, note.id);
 
     res.json({
       id: placementId,
       block_id: placement.block_id,
-      display_overrides_json: data.display_overrides_json,
+      display_overrides_json: stripLegacyLayoutOverride(data.display_overrides_json),
       updated_at: now,
     });
   } catch (err) {

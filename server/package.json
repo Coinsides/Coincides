@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "node --import jiti/register src/index.ts",
     "dev:tsx": "tsx watch src/index.ts",
-    "test:v2": "node --import tsx --test src/__tests__/v2NoteFoundation.test.ts src/__tests__/v2MaterialLibrary.test.ts src/__tests__/v2DomainPackages.test.ts src/__tests__/v2TemplateMigration.test.ts src/__tests__/v2PackagePortability.test.ts src/__tests__/v2DomainRefinement.test.ts src/__tests__/v2ContentGroups.test.ts src/__tests__/v2GroupFolders.test.ts",
+    "test:v2": "node --import tsx --test src/__tests__/v2NoteFoundation.test.ts src/__tests__/v2MaterialLibrary.test.ts src/__tests__/v2DomainPackages.test.ts src/__tests__/v2TemplateMigration.test.ts src/__tests__/v2PackagePortability.test.ts src/__tests__/v2DomainRefinement.test.ts src/__tests__/v2ContentGroups.test.ts src/__tests__/v2GroupFolders.test.ts src/__tests__/v2CanvasPersistenceCutover.test.ts",
     "build": "tsc",
     "start": "node dist/index.js"
   },

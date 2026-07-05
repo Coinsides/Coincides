@@ -5,7 +5,7 @@ import {
   DEFAULT_CANVAS_WORLD,
   createViewport,
 } from './engineModel';
-import { clamp } from './geometry';
+import { clamp, worldToScreen } from './geometry';
 import {
   CANVAS_WORKSPACE_HEIGHT,
   CANVAS_WORKSPACE_WIDTH,
@@ -13,12 +13,17 @@ import {
   type SurfaceMode,
 } from './runtimeLayout';
 import type {
+  BlockPlacementModel,
   CanvasPoint,
+  CanvasObjectReserve,
+  CanvasRect,
   CanvasViewport,
   CanvasWorldModel,
+  PageFrameModel,
 } from './types';
 
 const CANVAS_VIEWPORT_HEADROOM = 360;
+export const CANVAS_WORLD_PADDING = 800;
 const INITIAL_CANVAS_VIEWPORT_X = -180;
 const INITIAL_CANVAS_VIEWPORT_Y = -64;
 
@@ -55,14 +60,77 @@ export function createRuntimeViewport(
   });
 }
 
-export function createRuntimeWorld(surfaceMode: SurfaceMode, pageFrameHeight: number): CanvasWorldModel {
-  if (surfaceMode === 'canvas') return DEFAULT_CANVAS_WORLD;
+function rectRight(rect: CanvasRect): number {
+  return rect.x + rect.width;
+}
+
+function rectBottom(rect: CanvasRect): number {
+  return rect.y + rect.height;
+}
+
+export function createRuntimeWorld(
+  surfaceMode: SurfaceMode,
+  pageFrameHeight: number,
+  options: {
+    pageFrames?: PageFrameModel[];
+    blockPlacements?: BlockPlacementModel[];
+    canvasObjectReserve?: CanvasObjectReserve[];
+  } = {},
+): CanvasWorldModel {
+  if (surfaceMode === 'canvas') {
+    const contentRects: CanvasRect[] = [
+      ...(options.pageFrames || []),
+      ...(options.blockPlacements || []),
+      ...(options.canvasObjectReserve || []),
+    ];
+    const maxRight = contentRects.reduce((value, rect) => Math.max(value, rectRight(rect)), DEFAULT_CANVAS_WORLD.width);
+    const maxBottom = contentRects.reduce((value, rect) => Math.max(value, rectBottom(rect)), DEFAULT_CANVAS_WORLD.height);
+
+    return {
+      origin: DEFAULT_CANVAS_WORLD.origin,
+      width: Math.max(DEFAULT_CANVAS_WORLD.width, Math.ceil(maxRight + CANVAS_WORLD_PADDING)),
+      height: Math.max(DEFAULT_CANVAS_WORLD.height, Math.ceil(maxBottom + CANVAS_WORLD_PADDING)),
+    };
+  }
 
   return {
     origin: { x: 0, y: 0 },
     width: DEFAULT_PAGE_CONTENT_WIDTH,
     height: pageFrameHeight,
   };
+}
+
+export function focusViewportOnWorldRect({
+  viewport,
+  world = DEFAULT_CANVAS_WORLD,
+  rect,
+  padding = 120,
+}: {
+  viewport: CanvasViewport;
+  world?: CanvasWorldModel;
+  rect: CanvasRect;
+  padding?: number;
+}): CanvasViewport {
+  const zoom = clamp(
+    viewport.zoom,
+    viewport.minZoom ?? CANVAS_VIEWPORT_MIN_ZOOM,
+    viewport.maxZoom ?? CANVAS_VIEWPORT_MAX_ZOOM,
+  );
+  const visibleWidth = viewport.width / zoom;
+  const visibleHeight = viewport.height / zoom;
+  const targetX = rect.width + padding * 2 >= visibleWidth
+    ? rect.x - padding
+    : rect.x + rect.width / 2 - visibleWidth / 2;
+  const targetY = rect.height + padding * 2 >= visibleHeight
+    ? rect.y - padding
+    : rect.y + rect.height / 2 - visibleHeight / 2;
+
+  return clampViewportToWorld({
+    ...viewport,
+    zoom,
+    x: targetX,
+    y: targetY,
+  }, world);
 }
 
 export function clampViewportToWorld(
@@ -150,4 +218,11 @@ export function viewportPointToWorldPoint(
     x: viewport.x + point.x / viewport.zoom,
     y: viewport.y + point.y / viewport.zoom,
   };
+}
+
+export function worldPointToViewportPoint(
+  point: CanvasPoint,
+  viewport: CanvasViewport,
+): CanvasPoint {
+  return worldToScreen(point, viewport);
 }

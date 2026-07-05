@@ -6,7 +6,9 @@ export type CommandSurfaceKind =
   | 'annotation_highlight'
   | 'annotation_badge'
   | 'text_unit_handle'
-  | 'block_shell';
+  | 'block_shell'
+  | 'canvas_blank'
+  | 'page_frame_shell';
 
 export type CommandItemKind = 'item' | 'submenu' | 'separator';
 
@@ -42,7 +44,39 @@ export type CommandActionId =
   | 'label_block'
   | 'toggle_block_export'
   | 'toggle_block_ai_visibility'
-  | 'trash_block';
+  | 'trash_block'
+  | 'create_page_frame'
+  | 'create_page_stack'
+  | 'create_shape_rectangle'
+  | 'create_shape_ellipse'
+  | 'create_sticky_note'
+  | 'create_image_object'
+  | 'create_table_object'
+  | 'add_shape_text'
+  | 'edit_shape_text'
+  | 'remove_shape_text'
+  | 'set_shape_style_default'
+  | 'set_shape_style_sticky'
+  | 'inspect_canvas_object'
+  | 'open_original'
+  | 'duplicate_canvas_object'
+  | 'toggle_export_visibility'
+  | 'start_visual_connector_from_object'
+  | 'finish_visual_connector_to_object'
+  | 'edit_image_caption'
+  | 'edit_image_alt_text'
+  | 'toggle_image_fit'
+  | 'add_table_row_below'
+  | 'add_table_column_right'
+  | 'delete_table_row'
+  | 'delete_table_column'
+  | 'delete_canvas_object'
+  | 'add_page_below'
+  | 'detach_page_from_stack'
+  | 'toggle_page_stack_collapse'
+  | 'duplicate_page_frame'
+  | 'set_primary_page_frame'
+  | 'delete_page_frame';
 
 export interface CommandMenuItem {
   id: string;
@@ -65,6 +99,63 @@ export interface CommandSurfaceMenu {
   };
   title?: string;
   items: CommandMenuItem[];
+}
+
+export interface ObjectContextActionAvailability {
+  openOriginal?: {
+    enabled: boolean;
+    disabledReason?: string;
+  };
+  duplicate?: {
+    enabled: boolean;
+    disabledReason?: string;
+  };
+  exportVisibility?: {
+    label?: string;
+    enabled: boolean;
+    disabledReason?: string;
+  };
+}
+
+function buildObjectContextActionItems(
+  objectActions?: ObjectContextActionAvailability,
+): CommandMenuItem[] {
+  return [
+    {
+      id: 'inspect-canvas-object',
+      kind: 'item',
+      label: 'Inspect object',
+      actionId: 'inspect_canvas_object',
+      iconName: 'info',
+    },
+    {
+      id: 'open-original',
+      kind: 'item',
+      label: 'Open original',
+      actionId: 'open_original',
+      iconName: 'external-link',
+      disabled: objectActions?.openOriginal ? !objectActions.openOriginal.enabled : true,
+      disabledReason: objectActions?.openOriginal?.disabledReason || 'Only note-block-backed objects have an original block.',
+    },
+    {
+      id: 'duplicate-canvas-object',
+      kind: 'item',
+      label: 'Duplicate object',
+      actionId: 'duplicate_canvas_object',
+      iconName: 'copy',
+      disabled: objectActions?.duplicate ? !objectActions.duplicate.enabled : true,
+      disabledReason: objectActions?.duplicate?.disabledReason || 'This object kind is not safely duplicable yet.',
+    },
+    {
+      id: 'toggle-export-visibility',
+      kind: 'item',
+      label: objectActions?.exportVisibility?.label || 'Toggle export visibility',
+      actionId: 'toggle_export_visibility',
+      iconName: 'eye-off',
+      disabled: objectActions?.exportVisibility ? !objectActions.exportVisibility.enabled : true,
+      disabledReason: objectActions?.exportVisibility?.disabledReason || 'Missing placement.',
+    },
+  ];
 }
 
 export const WRITING_ROLE_BY_COMMAND: Partial<Record<CommandActionId, TextUnitWritingRole>> = {
@@ -285,5 +376,380 @@ export function buildBlockShellMenu(): CommandMenuItem[] {
     },
     { id: 'separator-block-danger', kind: 'separator' },
     { id: 'trash-block', kind: 'item', label: 'Move to trash', actionId: 'trash_block', iconName: 'trash' },
+  ];
+}
+
+export function buildCanvasBlankMenu(): CommandMenuItem[] {
+  return [
+    {
+      id: 'create-page-stack',
+      kind: 'item',
+      label: 'New PageStack',
+      actionId: 'create_page_stack',
+      iconName: 'files',
+    },
+    { id: 'separator-canvas-shapes', kind: 'separator' },
+    {
+      id: 'create-shape-rectangle',
+      kind: 'item',
+      label: 'Rectangle',
+      actionId: 'create_shape_rectangle',
+      iconName: 'square',
+    },
+    {
+      id: 'create-shape-ellipse',
+      kind: 'item',
+      label: 'Ellipse',
+      actionId: 'create_shape_ellipse',
+      iconName: 'circle',
+    },
+    {
+      id: 'create-image-object',
+      kind: 'item',
+      label: 'Image',
+      actionId: 'create_image_object',
+      iconName: 'image',
+    },
+    {
+      id: 'create-table-object',
+      kind: 'item',
+      label: 'Table',
+      actionId: 'create_table_object',
+      iconName: 'table',
+    },
+    {
+      id: 'create-sticky-note',
+      kind: 'item',
+      label: 'Sticky note',
+      actionId: 'create_sticky_note',
+      iconName: 'sticky-note',
+    },
+  ];
+}
+
+export function buildTableObjectShellMenu({
+  connectorDraftState = 'none',
+  rowCount = 1,
+  columnCount = 1,
+  objectActions,
+}: {
+  connectorDraftState?: 'none' | 'same_object' | 'ready';
+  rowCount?: number;
+  columnCount?: number;
+  objectActions?: ObjectContextActionAvailability;
+} = {}): CommandMenuItem[] {
+  return [
+    ...buildObjectContextActionItems(objectActions),
+    { id: 'separator-table-edit', kind: 'separator' },
+    {
+      id: 'add-table-row-below',
+      kind: 'item',
+      label: 'Add row below',
+      actionId: 'add_table_row_below',
+      iconName: 'table',
+    },
+    {
+      id: 'add-table-column-right',
+      kind: 'item',
+      label: 'Add column right',
+      actionId: 'add_table_column_right',
+      iconName: 'table',
+    },
+    {
+      id: 'delete-table-row',
+      kind: 'item',
+      label: 'Delete row',
+      actionId: 'delete_table_row',
+      iconName: 'trash',
+      disabled: rowCount <= 1,
+      disabledReason: 'A table needs at least one row.',
+    },
+    {
+      id: 'delete-table-column',
+      kind: 'item',
+      label: 'Delete column',
+      actionId: 'delete_table_column',
+      iconName: 'trash',
+      disabled: columnCount <= 1,
+      disabledReason: 'A table needs at least one column.',
+    },
+    { id: 'separator-table-connector', kind: 'separator' },
+    connectorDraftState === 'ready'
+      ? {
+        id: 'finish-visual-connector-to-table',
+        kind: 'item',
+        label: 'Connect to this object',
+        actionId: 'finish_visual_connector_to_object',
+        iconName: 'arrow-right',
+      }
+      : {
+        id: 'start-visual-connector-from-table',
+        kind: 'item',
+        label: connectorDraftState === 'same_object' ? 'Connector start selected' : 'Start visual connector',
+        actionId: 'start_visual_connector_from_object',
+        iconName: 'arrow-right',
+        disabled: connectorDraftState === 'same_object',
+        disabledReason: 'Pick another object as the endpoint.',
+      },
+    { id: 'separator-table-delete', kind: 'separator' },
+    {
+      id: 'delete-canvas-object',
+      kind: 'item',
+      label: 'Delete object',
+      actionId: 'delete_canvas_object',
+      iconName: 'trash',
+    },
+  ];
+}
+
+export function buildImageObjectShellMenu({
+  fit = 'contain',
+  connectorDraftState = 'none',
+  objectActions,
+}: {
+  fit?: 'contain' | 'cover';
+  connectorDraftState?: 'none' | 'same_object' | 'ready';
+  objectActions?: ObjectContextActionAvailability;
+} = {}): CommandMenuItem[] {
+  return [
+    ...buildObjectContextActionItems(objectActions),
+    { id: 'separator-image-edit', kind: 'separator' },
+    {
+      id: 'edit-image-caption',
+      kind: 'item',
+      label: 'Edit caption',
+      actionId: 'edit_image_caption',
+      iconName: 'type',
+    },
+    {
+      id: 'edit-image-alt-text',
+      kind: 'item',
+      label: 'Edit alt text',
+      actionId: 'edit_image_alt_text',
+      iconName: 'image',
+    },
+    {
+      id: 'toggle-image-fit',
+      kind: 'item',
+      label: fit === 'cover' ? 'Fit: contain' : 'Fit: cover',
+      actionId: 'toggle_image_fit',
+      iconName: 'maximize',
+    },
+    { id: 'separator-image-connector', kind: 'separator' },
+    connectorDraftState === 'ready'
+      ? {
+        id: 'finish-visual-connector-to-image',
+        kind: 'item',
+        label: 'Connect to this object',
+        actionId: 'finish_visual_connector_to_object',
+        iconName: 'arrow-right',
+      }
+      : {
+        id: 'start-visual-connector-from-image',
+        kind: 'item',
+        label: connectorDraftState === 'same_object' ? 'Connector start selected' : 'Start visual connector',
+        actionId: 'start_visual_connector_from_object',
+        iconName: 'arrow-right',
+        disabled: connectorDraftState === 'same_object',
+        disabledReason: 'Pick another object as the endpoint.',
+      },
+    { id: 'separator-image-delete', kind: 'separator' },
+    {
+      id: 'delete-canvas-object',
+      kind: 'item',
+      label: 'Delete object',
+      actionId: 'delete_canvas_object',
+      iconName: 'trash',
+    },
+  ];
+}
+
+export function buildCanvasObjectShellMenu({
+  blockBacked = false,
+  sticky = false,
+  connectorDraftState = 'none',
+  objectActions,
+}: {
+  blockBacked?: boolean;
+  sticky?: boolean;
+  connectorDraftState?: 'none' | 'same_object' | 'ready';
+  objectActions?: ObjectContextActionAvailability;
+} = {}): CommandMenuItem[] {
+  return [
+    ...buildObjectContextActionItems(objectActions),
+    { id: 'separator-canvas-object-text', kind: 'separator' },
+    blockBacked
+      ? {
+        id: 'edit-shape-text',
+        kind: 'item',
+        label: 'Edit text',
+        actionId: 'edit_shape_text',
+        iconName: 'type',
+      }
+      : {
+        id: 'add-shape-text',
+        kind: 'item',
+        label: 'Add text',
+        actionId: 'add_shape_text',
+        iconName: 'type',
+      },
+    ...(blockBacked ? [{
+      id: sticky ? 'set-shape-style-default' : 'set-shape-style-sticky',
+      kind: 'item' as const,
+      label: sticky ? 'Use plain shape style' : 'Use sticky note style',
+      actionId: sticky ? 'set_shape_style_default' as const : 'set_shape_style_sticky' as const,
+      iconName: sticky ? 'square' : 'sticky-note',
+    }] : []),
+    ...(blockBacked ? [{
+      id: 'remove-shape-text',
+      kind: 'item' as const,
+      label: 'Remove text',
+      actionId: 'remove_shape_text' as const,
+      iconName: 'eraser',
+    }] : []),
+    { id: 'separator-canvas-object-connector', kind: 'separator' },
+    connectorDraftState === 'ready'
+      ? {
+        id: 'finish-visual-connector-to-object',
+        kind: 'item',
+        label: 'Connect to this object',
+        actionId: 'finish_visual_connector_to_object',
+        iconName: 'arrow-right',
+      }
+      : {
+        id: 'start-visual-connector-from-object',
+        kind: 'item',
+        label: connectorDraftState === 'same_object' ? 'Connector start selected' : 'Start visual connector',
+        actionId: 'start_visual_connector_from_object',
+        iconName: 'arrow-right',
+        disabled: connectorDraftState === 'same_object',
+        disabledReason: 'Pick another object as the endpoint.',
+      },
+    { id: 'separator-canvas-object-delete', kind: 'separator' },
+    {
+      id: 'delete-canvas-object',
+      kind: 'item',
+      label: 'Delete object',
+      actionId: 'delete_canvas_object',
+      iconName: 'trash',
+    },
+  ];
+}
+
+export function buildVisualConnectorShellMenu({
+  objectActions,
+}: {
+  objectActions?: ObjectContextActionAvailability;
+} = {}): CommandMenuItem[] {
+  return [
+    ...buildObjectContextActionItems(objectActions),
+    { id: 'separator-visual-connector-delete', kind: 'separator' },
+    {
+      id: 'delete-visual-connector',
+      kind: 'item',
+      label: 'Delete connector',
+      actionId: 'delete_canvas_object',
+      iconName: 'trash',
+    },
+  ];
+}
+
+export function buildPageFrameShellMenu({
+  primary,
+  inPageStack,
+  stackCollapsed,
+}: {
+  primary: boolean;
+  inPageStack: boolean;
+  stackCollapsed: boolean;
+}): CommandMenuItem[] {
+  return [
+    {
+      id: 'add-page-below',
+      kind: 'item',
+      label: 'Add page below',
+      actionId: 'add_page_below',
+      iconName: 'file-plus-2',
+    },
+    {
+      id: 'detach-page-from-stack',
+      kind: 'item',
+      label: 'Detach from PageStack',
+      actionId: 'detach_page_from_stack',
+      iconName: 'unlink',
+      disabled: !inPageStack,
+      disabledReason: inPageStack ? undefined : 'This page is not attached to a multi-page PageStack.',
+    },
+    {
+      id: 'toggle-page-stack-collapse',
+      kind: 'item',
+      label: stackCollapsed ? 'Expand PageStack' : 'Collapse PageStack',
+      actionId: 'toggle_page_stack_collapse',
+      iconName: stackCollapsed ? 'chevrons-down-up' : 'chevrons-up-down',
+      disabled: !inPageStack,
+      disabledReason: inPageStack ? undefined : 'This page is not attached to a multi-page PageStack.',
+    },
+    { id: 'separator-page-frame-shapes', kind: 'separator' },
+    {
+      id: 'create-shape-rectangle',
+      kind: 'item',
+      label: 'Rectangle',
+      actionId: 'create_shape_rectangle',
+      iconName: 'square',
+    },
+    {
+      id: 'create-shape-ellipse',
+      kind: 'item',
+      label: 'Ellipse',
+      actionId: 'create_shape_ellipse',
+      iconName: 'circle',
+    },
+    {
+      id: 'create-image-object',
+      kind: 'item',
+      label: 'Image',
+      actionId: 'create_image_object',
+      iconName: 'image',
+    },
+    {
+      id: 'create-table-object',
+      kind: 'item',
+      label: 'Table',
+      actionId: 'create_table_object',
+      iconName: 'table',
+    },
+    {
+      id: 'create-sticky-note',
+      kind: 'item',
+      label: 'Sticky note',
+      actionId: 'create_sticky_note',
+      iconName: 'sticky-note',
+    },
+    { id: 'separator-page-stack', kind: 'separator' },
+    {
+      id: 'duplicate-page-frame',
+      kind: 'item',
+      label: 'Duplicate page',
+      actionId: 'duplicate_page_frame',
+      iconName: 'copy',
+    },
+    {
+      id: 'set-primary-page-frame',
+      kind: 'item',
+      label: 'Set as primary',
+      actionId: 'set_primary_page_frame',
+      iconName: 'check',
+      disabled: primary,
+      disabledReason: primary ? 'This PageFrame is already primary.' : undefined,
+      checked: primary,
+    },
+    { id: 'separator-page-frame-danger', kind: 'separator' },
+    {
+      id: 'delete-page-frame',
+      kind: 'item',
+      label: 'Delete page',
+      actionId: 'delete_page_frame',
+      iconName: 'trash',
+    },
   ];
 }

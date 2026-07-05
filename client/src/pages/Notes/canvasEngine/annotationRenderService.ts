@@ -7,6 +7,7 @@ import {
 } from './selectionRangeService';
 import {
   DEFAULT_ANNOTATION_DISPLAY_STATE,
+  annotationRangeIsRenderable,
   visibleAnnotationsForDisplay,
   type AnnotationDisplayStateV1,
 } from './annotationDisplayService';
@@ -48,6 +49,7 @@ function rangeTargetsTextUnit(range: AnnotationRangeV1, input: {
   blockId: string;
   textUnitId: string;
 }): boolean {
+  if (!annotationRangeIsRenderable(range)) return false;
   return range.block_id === input.blockId
     && range.text_unit_id === input.textUnitId
     && (range.target_kind === 'text_span' || range.target_kind === 'text_unit');
@@ -62,10 +64,16 @@ function intervalForRange(input: {
     return { start: 0, end: input.textLength };
   }
   if (input.range.target_kind !== 'text_span') return null;
+  if (
+    typeof input.range.start_offset !== 'number'
+    || typeof input.range.end_offset !== 'number'
+  ) {
+    return null;
+  }
 
   const normalized = normalizeSelectionOffsets({
-    startOffset: input.range.start_offset ?? 0,
-    endOffset: input.range.end_offset ?? input.range.start_offset ?? 0,
+    startOffset: input.range.start_offset,
+    endOffset: input.range.end_offset,
     textLength: input.textLength,
   });
   if (normalized.startOffset === normalized.endOffset) return null;
@@ -186,7 +194,11 @@ export function summarizeAnnotationsForBlock(input: {
     ...(input.selectedAnnotationId ? [input.selectedAnnotationId] : []),
   ]);
   const annotations = activeAnnotations(input.annotations, input.displayState).filter((annotation) => (
-    annotation.ranges.some((range) => range.target_kind === 'block' && range.block_id === input.blockId)
+    annotation.ranges.some((range) => (
+      annotationRangeIsRenderable(range)
+      && range.target_kind === 'block'
+      && range.block_id === input.blockId
+    ))
   ));
   const selected = annotations.find((annotation) => selectedIds.has(annotation.id)) || null;
   const primary = selected || annotations[annotations.length - 1] || null;

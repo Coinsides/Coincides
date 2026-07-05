@@ -1,10 +1,35 @@
 # Coincides Better Notebook 路线图
 
-**更新日期**: 2026-06-06
+**更新日期**: 2026-07-01（2026-06-06 首版；2026-07-01 大整理·非破坏：只重排+标注，未删任何历史）
 **路线图状态**: ACTIVE / 产品化路线图
 **前置路线图**: `docs/Coincides-Roadmap.md`，已关闭的 v2.0-v2.5.6 工程地基路线图
 **工作标题**: Better Notebook Productization Track
 **核心决定**: 从语义工程地基，转向成熟的人类可读写笔记表面
+
+---
+
+> ## 🧭 阅读指南（2026-07-01 大整理后）
+> 本文件按累积追加长起来，已 1900+ 行、多套版本 scheme 并存。为免误读，先看这份分层：
+> - **当前权威计划** = 下方「📍 当前权威 map」+ 详版 `§2026-07-01 BN 后半程`（承接 `§2026-06-29 零部件总图`）。
+> - **决定史**（追加式，最新为准） = 顶部各 dated 段（`2026-06-22` → `2026-07-01`）。
+> - **长青参考**（不随版本过时） = `§1 职责`、`§2 北极星`、`§3 产品原则`、`§4 学习参考`、`§5 调研/契约索引`。
+> - **⚠️ 历史·勿作现行依据** = `§6 主阶段路线` 直到文末 `§26`（= 2026-06-06 原始 **Phase 0 / A1–A9e / F / G** 计划 + 原始版本拆分 + 原始最终决定）。**实际工程走的是 `V2.BN.8.x` 线（8.6 ContentGroup → 8.7 → 8.8 Canvas → 8.9 PageFrame → 8.10 Typography → 8.11 对象家族，已落），不是那套 Phase-letter 序列。** §6 顶部有历史横幅。
+
+## 📍 当前权威 map（2026-07-01）
+
+**Better Notebook = 不靠核心 Agent 就能独立运转、人类可靠、agent-ready 的知识底座。** Agent 是之后单独接入的操作者，不在 BN 版本线内。**完工判据 = 用户可靠 = Henry 可靠**（Henry 放下 Notion 就用它 = 真实旅程无死路）。
+
+```text
+V2.BN.8   Canvas Engine ......... 收口中（8.11 对象家族已闭）
+V2.BN.9   Source（地板）......... 上传+基础解析（非-Agent）+ 原件不可变 + 薄绑定；保真重建 ≠ 生成式转写
+V2.BN.10  Relation ............... 把已有 object_relations 接到 BN 底座 + 端点收窄到 ContentGroup/花瓣（非绿地：接续+迁移+收范围）
+V2.BN.11+ 打磨 .................. 工程可靠 → 用户可靠；ContentGroup 完整集成落此（枢纽最后焊）
+（新时代）Agent 接入 ........... Source 天花板 + ContentGroup AI 操作 + GraphRAG sidecar（ARCHITECTURE.md §5.4 已定）
+```
+
+- **收口工作流**：关 V8 → 烧挖坑册（填工程正确性坑）→ 清工作区 → commit → 再进 V9+；此后每个小版本做完即 commit。
+- **锁定决定**：Agent 移出 BN · ContentGroup 推迟到打磨 · Relation 端点→ContentGroup/花瓣 · GraphRAG = 可重建 sidecar（不重推，见 `ARCHITECTURE.md §5.4`）。
+- 详见下方 `§2026-07-01` 与 `§2026-06-29`；GraphRAG / Source-adapter 形态见 `ARCHITECTURE.md §5.3 / §5.4 / §Source Reconstruction Adapter`。
 
 ---
 
@@ -29,7 +54,7 @@ Before later relation-heavy work, the first-version ContentGroup Editor should b
 
 `V2.BN.8.7` is reassigned from the earlier CanvasObject / media / drawing seed to a dedicated `ContentGroup System Maturity` version.
 
-The earlier CanvasObject seed is deferred to `V2.BN.8.8+` or the next Canvas track. This keeps Canvas from becoming a second confused entry point before ContentGroup can answer its core product questions:
+The earlier CanvasObject seed is deferred out of `V2.BN.8.7`. As of the 2026-06-25 correction below, the next active entry is `V2.BN.8.8 Canvas Engine Foundation`, not the old media/drawing seed. This keeps Canvas from becoming a second confused entry point before ContentGroup can answer its core product questions:
 
 ```text
 What am I?
@@ -69,7 +94,7 @@ ContentGroupPetal   = internal group structure
 Fragment assignment = internal Petal/material structure
 ```
 
-The V2.BN.8.8+ lane should now start the CanvasObject / projection track. Canvas should consume ContentGroup as a stable object, create usage/projection records for canvas placement, and keep materialization explicit. Canvas must not reinterpret member content as source truth or silently move source text.
+The next Canvas lane should now start from `V2.BN.8.8 Canvas Engine Foundation`. Canvas should eventually consume ContentGroup as a stable object, create usage/projection records for canvas placement, and keep materialization explicit. Canvas must not reinterpret member content as source truth or silently move source text.
 
 Accepted carry-forward items:
 
@@ -79,6 +104,222 @@ Accepted carry-forward items:
 - relation runtime / GraphRAG.
 - AI-created Petals.
 - richer mobile polish for Gallery.
+
+## 2026-06-25 Canvas Engine Roadmap Correction
+
+Canvas Engine is now treated as a multi-version pillar, not a single `V2.BN.8.8` feature box.
+
+The active next step is:
+
+```text
+V2.BN.8.8 Canvas Engine Foundation:
+  establish CanvasObject / CanvasPlacement / ContentMount,
+  PageFrame v1,
+  paragraph block projection,
+  finite expandable world,
+  visual connector seed,
+  CanvasCommand / CanvasDelta seed,
+  and Canvas AI Tree read-only snapshot.
+```
+
+This version deliberately does not try to finish the full Canvas ecosystem. The continuing Canvas lane is:
+
+```text
+V2.BN.8.8
+  Canvas Engine Foundation.
+
+V2.BN.8.9
+  PageFrame / PageStack notebook maturity:
+  readable surface, multi PageFrame, primary focus,
+  ruler/margin/snap, header/footer/page number,
+  template/background/style, export preview, crossing object policy,
+  PageFrame command surface, user creation/move/configure,
+  Continuous PageStack v1,
+  Layout panel / PageStack navigator,
+  PageStack content flow / auto page continuation,
+  cross-page Block fragment projection,
+  and PageSlice snapshot/reference.
+
+V2.BN.8.10
+  TextFlow Typography Maturity:
+  font family / font size / line height / paragraph spacing,
+  document typography profile,
+  PageFrame pagination measurement,
+  export/AI-readable layout typography alignment,
+  and a selection-time mini typography toolbar before the later global top bar.
+
+V2.BN.8.11
+  Structured object family:
+  Canvas persistence cutover gate first,
+  ordinary CanvasObject projection / usage boundary,
+  visible shape / connector tools,
+  image / table object seed,
+  diagram / mind map / chart / math graph selection gate,
+  first structured family v1.
+
+V2.BN.8.12
+  ContentGroup projection and reuse:
+  ContentGroup tile / folder projection,
+  Reference / Duplicate / Fork / Materialize / Open original,
+  Petal projection reserve,
+  selected only after ordinary CanvasObjects feel stable.
+
+V2.BN.8.13+
+  ContentGroup Mode / Relation View:
+  RelationProposal and ContentGroup/Petal endpoint visualization.
+
+V2.BN.9.x
+  Agent / GraphRAG integration.
+```
+
+8.8 must keep the finite expandable canvas route. Full infinite canvas, chunk/tile virtualization, Raw Ink understanding, complete Agent write, full Relation runtime, and GraphRAG remain later work.
+
+The 8.9+ Canvas lane is intentionally elastic. If PageFrame, CanvasObject projection, or ContentGroup projection exposes foundation issues, later subversions should move back rather than forcing a thin feature through. The goal is to keep Canvas as a reliable basic surface, not to rush into object-family spectacle.
+
+2026-06-27 correction: `V2.BN.8.9` cannot close at explicit PageStack v1. A PageFrame that can be created and moved is still closer to Better Paper than Better Notebook. Before entering `V2.BN.8.10`, PageStack must gain a visible navigator, content continuation, cross-page block fragments, and PageSlice snapshot/reference semantics.
+
+2026-06-27 deferred-item routing after V2.BN.8.9.18:
+
+- Word-like auto-pagination belongs after `V2.BN.8.10 TextFlow Typography Maturity`, because font metrics, line height, paragraph spacing, and content measurement must exist first.
+- Final durable `CanvasObject / CanvasPlacement` database cutover belongs in the `V2.BN.8.11 Structured object family` lane, not in the PageFrame-only lane.
+- 2026-06-28 correction: ContentGroup projection is a special CanvasObject problem and is now moved to `V2.BN.8.12 ContentGroup Projection And Reuse`. V2.BN.8.11 should first make ordinary objects, shape/connector, image/table, and at least one structured family feel usable.
+- Visible PageSlice extraction UI and broader reuse UI should wait until after `V2.BN.8.12 ContentGroup Projection And Reuse`, because PageSlice needs to know what kinds of objects can live on a page and how ContentGroup projections consume them before extraction and preview UI is finalized. After 8.12, decide whether PageSlice / reuse UI needs a dedicated subversion.
+- Real PDF execution and full Coincides project-package export should become a dedicated export/package lane. The project package format must wait for SourceArtifact / SourceAnchor / source-chain maturity because it needs to reconstruct the whole knowledge workspace, not just render PageFrames.
+- The full context-menu / component-menu system is cross-cutting UI infrastructure and should be designed after object families are clearer.
+
+2026-06-27 V2.BN.8.10 closure result:
+
+- `V2.BN.8.10` is closed on the engineering side as TextFlow Typography Maturity.
+- Typography now has one note-level profile shared by visible writing text, PageFrame runtime, measurement estimates, Export Preview, AI-readable layout, More -> Typography controls, and the selection mini toolbar.
+- The measurement path is still estimate-based; CJK/document precision and true Word-like automatic pagination remain follow-up work.
+- The next active infrastructure step is `V2.BN.8.11.1 Canvas Persistence Cutover Gate`, then object projection and reuse.
+
+## 2026-06-29 Main-Line Consolidation（零部件高度的总图）
+
+来源：2026-06-28 主线捋定会议（`docs/brainstorm/产品完善/会议记录/2026-06-28-Better-Notebook-ContentGroup-Relation-Philosophy-And-Source-Ingestion-Meeting-Notes.md` §十）。本节是**高于版本号的零部件视角**，用来定整体顺序；不取代上面的版本道，而是给它一个总框。
+
+### 真零部件（承重件）
+
+```text
+行动者 + 进出口:  人类表面 / Agent / 入(OCR重建) / 出(忠实导出)
+时间维:           痕迹(版本流 + 奇点 + 源可溯重讲)  —— 横切所有真相
+五真相(基底):     Relation / Source / Canvas(拱心石) / ContentGroup / TextFlow
+容器:             一个无墙空间 + 出身 + 包含(GroupFolder 式收纳，非绑定)
+```
+
+其余（Concept、Structure Studio、模板）是某件的**天花板加高**，不是新承重件。
+
+### 两条总原则
+
+```text
+顺序是依赖拓扑逼出来的，不是品味:
+  每个真相站在它依赖的真相之上；Agent 站在"完整 + AI 可读"的基底背后(原则 3.5)。
+
+地板 vs 天花板:
+  按依赖序把每件做到"地板"(够撑住上一层)，天花板随用加高。
+  "至少要做哪些" = 每件的地板，不是每件的完全成熟。
+  例: 8.12 做完 canvas 没"完"，但到地板了，够往下走。
+```
+
+### 两个时代
+
+```text
+时代一 — 把基底建满到地板(= 成熟 Better Notebook = 知识库):
+  TextFlow(已) -> ContentGroup(已) -> Canvas 收口(8.12)
+    -> 拆墙(容器) -> Source 溯源地基 -> Relation
+  ★ 基底完整 + AI 可读 = Agent 闸门
+
+时代二 — Agent 站到基底背后(= 思维义肢毕业):
+  Agent(读基底/带 diff 提议/源可溯) + 痕迹/时间轴 + 重 Source 重建(OCR) + 忠实导出
+```
+
+### 对版本道的两处更新
+
+1. **拆墙插队 = 8.11 之后、8.12 之前。** Phase A1 早就写过 "Course 应逐渐变成 project type" 但从未执行（`course_id NOT NULL` 至今铺满）。今确认它是 **8.12 的前置**：8.12 的 Reference / Duplicate / Fork / Materialize 复用动词，结构上需要"无墙"（ContentGroup 能出现在出身 course 之外）。且数据全是测试数据、拆墙无迁移成本，宜趁早。模型见 `PRODUCT.md` 「One Knowledge Space; Project Is A Lens, Not An Owner」（出身 / 绑定 / 包含 三分）。
+
+2. **Source 与 Agent 的关系定死。** Source 劈两段，且本路线图已编码：**溯源地基（Phase A9a：库 + 锚，人可手动引用）靠前；重文档重建（OCR/VLM→笔记）= Phase G，与 "AI Note Assembly" 同一 Phase**。"Source 和 Agent 分不开"只对**重活那半**成立。PI-048 双闸门（Contract Intake 早定形状 / Full Research 晚建管线）即此纪律。
+
+### 怎么在没有可靠 Agent 时建"人机件"
+
+```text
+人机件 = 底座(真相模型，人现在能建能用、AI 可读) + 操作者(用它的 AI，Agent 时代)
+  判据: 底座有独立"人用"价值吗? 有就建(Relation/Source/痕迹底座)；
+        纯操作者(RAG/自动蒸馏/笔记组装)推迟。
+  Relation ≠ 图 ≠ GraphRAG: Relation=人手动真相(现在)；图=遍历视图；
+        GraphRAG=Agent 时代可重建 sidecar(PI-049: Coincides 拥有真相，索引可重建)。
+  安心: 建底座 = 给"可靠 Agent"打地基；底座质量 = Agent 可靠度上限。
+```
+
+详见 `PRODUCT.md` 「Build The Substrate For Both Human And Agent; Defer The Operator」。
+
+---
+
+## 2026-07-01 BN 后半程：版本切分 · 决定 · 工作流（承接 06-29 零部件总图）
+
+> 承接 06-29 零部件总图 + 2026-06-30~07-01 与 Claude 的战略对齐。把"零部件视角"落成**具体版本切分 + 本轮敲定的决定 + 新工作流**。GraphRAG / Source-adapter 的**形态**决定不在此重述——已在 `ARCHITECTURE.md` §5.3/§5.4 与 §Source Reconstruction Adapter 定死，本节只引用、不重推。
+
+### 一、硬边界：Agent 移出 BN
+Better Notebook = 一个**不靠核心 Agent 就能独立运转、人类可靠、agent-ready 的知识底座**。Agent 是之后单独接入的操作者，**不在 BN 版本线内**（BN 只保留极少量非-Agent 的摄入基础设施，如 OCR 式上传解析）。
+- **收益**：BN 有独立"完工态"——一个 Henry 放下 Notion 就用它的笔记本；Agent 变 upside 不是 dependency，把最大风险移出关键路径。
+- **铁律依据**：不可靠底座上做不出可靠 Agent；"Agent 能编辑=人能编辑"要求先稳人类底座，Agent 接进来才继承一个可信底座。
+- **责任提醒**：Agent 移出 ≠ agent-readiness 移出。BN 全程必须建成 agent-ready——AI 可读层干净（那两颗 HIGH：双源 / 隐藏块泄漏）、数据机器可写（已实测：note-block API 建笔记忠实渲染）、Source/Relation 一等真相。
+
+### 二、完工判据：用户可靠 = Henry 可靠
+BN 不做"给所有人的更好 Notion"，做"让 Henry 不再离开的笔记本"。**DoD = Henry 平常够用、不伸手开别的软件 = 真实旅程无死路。**
+- **功能三桶**：🟢 Henry 现在会用 → 打磨做；🟡 未来没准用 + 不难做（如 Notion 式外部 DB 连接监控）→ 明确停车、将来轻松加；⚪ Henry 永远不用 → 不做。
+- **护栏**：功能可为 Henry 特化，但**真相层（五真相 + 分真相）保持通用**——将来若泛化，换的是功能、不是地基。
+
+### 三、版本切分（还剩哪几块硬骨头）
+```text
+V2.BN.8   Canvas Engine ........................ 收口中（8.11 对象家族已闭；见 8.11.11 收口报告）
+V2.BN.9   Source（地板）........................ 上传 + 基础解析（pdf-parse/mammoth，非-Agent）+ 原件不可变（复用 canvas_assets blob 模式）+ 薄绑定/引用；
+                                                 形态见 ARCHITECTURE.md §Source Reconstruction Adapter：
+                                                 保真重建（Reconstruction）≠ 生成式转写（Note generation），是"两段"不是"二选一"
+V2.BN.10  Relation（收编 + 收范围，非绿地）...... 真活 = 把已有 object_relations 真相接到 BN 底座（canvas_objects）+
+                                                 端点范围收窄到 ContentGroup / 花瓣(Petal)（本轮敲定）；
+                                                 先做数据层真相、可视化推后；不做 GraphRAG（sidecar 属 Agent 时代）
+V2.BN.11+ 打磨：工程可靠 → 用户可靠 ............. 烧 🅱 用户友好化 + 真实旅程无死路；
+                                                 ContentGroup 完整集成落此（枢纽最后焊——此时 Source/Relation/Canvas 都稳了）
+── BN 完工态：user-reliable、可发布、Henry 自用 ──
+（新时代）Agent 接入 ........................... Source 天花板（智能重建/重述）+ ContentGroup 的 AI 操作 +
+                                                 GraphRAG / 图 sidecar（adapter，ARCHITECTURE.md §5.4 已定）+ relation 推断
+```
+> 编号是 Henry 的口径（"第 9/10 个版本"）；老草稿 `V2.BN.8.12 ContentGroup Projection And Reuse` 被本节**重排取代**——ContentGroup 完整集成不再是紧接 8.11 的下一步，而是移到 Source + Relation 之后的打磨阶段。
+
+### 四、本轮敲定的决定（锁定）
+1. **ContentGroup 完整集成推迟到 V11+ 打磨**（枢纽最后焊，避免焊在还在动的桩上 = "疯狂反攻的返工漩涡"）。ContentGroup-as-canvas-object 的**薄投影**可先在。
+2. **Relation 端点范围收窄到 ContentGroup + 花瓣(Petal)**——纠正现状：`object_relations` 现允许任意 canvas node 端点（note_block/source_scope/source_anchor/evidence_set…，learningCanvases.ts:39-45）。
+3. **两套 substrate 对账**：老 `learning_canvases`/`canvas_nodes` 的 relation 真相（此前只是试水小模型）→ 接进 BN 的 `canvas_objects`/`placements` 底座。这是 **V10 的真难点（接续 + 迁移 + 收范围，非从零建）**。
+4. **GraphRAG / 图 DB**：SQLite 是真相（个人规模 ~1000 relations、稀疏，差数量级才轮到图 DB）；图 DB = 可从 SQLite 重建的 **sidecar via adapter**，属 Agent 时代。**已在 ARCHITECTURE.md §5.4 定死，本轮只确认**。"反 GraphRAG"是旧速记的糙标签，精确表述以 §5.4 为准（可发现候选 / 当 query-index 层，但不定义真相）。
+5. **Source 形态**：原件不可变（冷证据）+ 可重建投影；保真重建 ≠ 生成式转写；Source **地板不需 Agent**（pdf-parse/mammoth 已装、documents/anchors 表已在）。
+
+### 五、新工作流（工作区卫生）
+- **收口顺序**：关 V8 → **烧挖坑册（填坑）** → 清工作区 → commit 到 GitHub → 再进 V9+。
+- 此后**每个小版本做完即 commit**，不让工作区攒乱。填坑本身也按工作单元逐个/逐批 commit——与"填坑"不冲突，反而让每个 fix 可追溯、可回滚。
+- **"填坑"范围澄清**：= 烧 **挖坑册（`analysis/canvas-object-review-issue-register.md`）的工程正确性**（4 颗 HIGH + 数据丢失 + AI 层 + 真 MED）；**🅱 用户友好化（`analysis/project-to-note-experience-review.md`）仍推迟**，不在这轮 commit 前的填坑范围内。
+
+---
+
+The V2.BN.8.8+ Canvas lane should use the 2026-06-25 Canvas research and design set as its decision basis:
+
+```text
+docs/brainstorm/产品完善/canvasresearch/Research_3_Canvas_design/
+```
+
+Required reference documents for 8.8 and later Canvas planning:
+
+- `2026-06-25-12-Canvas-Engine-Capability-Inventory-List.md`
+- `2026-06-25-13-Entity-Responsibility-Inventory.md`
+- `2026-06-25-14-Interaction-Workflow-Inventory.md`
+- `2026-06-25-15-AI-Agent-Operation-Inventory.md`
+- `2026-06-25-16-Version-Cut-Canvas-Maturity-Roadmap-Matrix.md`
+- `2026-06-25-17-Coincides-Canvas-Minimal-Self-Owned-Engine-Design-v0.md`
+- `2026-06-25-18-PageFrame-Refinement-Design-v0.md`
+- `2026-06-25-19-Object-TextFlow-ContentGroup-Projection-Fusion-Design-v0.md`
+- `2026-06-25-20-Canvas-Engine-Route-And-V2.BN.8.8-Plus-Candidate-Plan.md`
+- `2026-06-25-Phase-3-Coincides-Canvas-Final-Research-And-Design-Summary.md`
+
+These files are not optional background notes. They are the research basis for the 8.8 foundation plan and for the later PageFrame, object projection, structured object, Relation View, Agent, and GraphRAG lanes. If a later plan changes CanvasObject, PageFrame, Canvas AI Tree, visual connector, object projection, or Canvas/ContentGroup boundaries, it should first reconcile the change against this research set.
 
 ## 1. 路线图职责
 
@@ -472,6 +713,13 @@ PI-048 Full Research:
 - `docs/brainstorm/V2.5Research/r13-v2.5-graph-native-migration-evidence.md`
 
 当复用 `TemplateDefinition`、`CompositionTemplate`、`DomainBlockSet`、`PackageManifest` 或 package migration 时，必须读这些材料。
+
+---
+
+> # ⚠️ 以下 §6 – §26 = 历史（2026-06-06 原始计划，已被 V2.BN.8.x 线取代）
+> 原始 **Phase 0 / A1–A9e / F / G** 序列 + 原始版本拆分（§25）+ 原始最终决定（§26）。**保留为存档，勿作现行依据。**
+> 现行计划见文件顶部「📍 当前权威 map」+ `§2026-07-01` / `§2026-06-29`。实际工程走的是 **V2.BN.8.x**（8.6 ContentGroup → 8.7 → 8.8 Canvas → 8.9 PageFrame → 8.10 Typography → 8.11 对象家族，已落），**不是**这套 Phase-letter 序列。
+> （`§1–§5` 的职责/北极星/原则/参考/契约索引仍**长青**，不在本历史范围内。此横幅下每个 Phase 的**产品意图与用户场景**仍可作灵感/参考，但**版本序列、编号、"下一步"判断一律以顶部当前 map 为准**。）
 
 ---
 
@@ -1098,9 +1346,56 @@ V2.BN.8 不应该被设计成“一次性做完 Canvas Engine”的单版本。C
 - `V2.BN.8.7.7` ContentGroup Cross-Surface Integration Closure：收口 Gallery 与 Rail 的状态保留和视觉语言一致性；保证 `note_id` / `folder_id` / `group_id` 跳转上下文、返回路径、create/drop/move/delete/empty state 的手动体验可解释；Single Editor 只做作为跳转终点的轻量一致性检查，不做 Canvas/workbench 重写。
 - `V2.BN.8.7.8` Single Editor Refine Shell And Logic Foundation：把 Single ContentGroup Editor 收束成非 Canvas 的 refine surface；对齐 OpenDesign 的 topbar、summary、member/material、Petal dock、source/status drawer 心智，但不实现真正 workbench / CanvasObject / projection。
 - `V2.BN.8.7.9` ContentGroup System Closure Gate：作为 8.7 的收口验收小版本，盘点 ContentGroup / GroupFolder / Member / Petal / Fragment 实体化、Rail / Gallery / Single Editor 三层体验、source/member 边界和 reuse 语义底座；只修 closure gate 暴露出的明确缺陷，不再扩张功能，并把 CanvasObject projection、Materialize UI、SourceArtifact / SourceAnchor、Relation / GraphRAG 明确顺延到 8.8+。
-- `V2.BN.8.8+` CanvasObject, Media Annotation, Drawing Tool, And Image Insert Seed：在 8.7 ContentGroup maturity closure 完成后，顺延此前的 CanvasObject seed，接入最小画笔、shape、image block / image object、region selection reserve，并让图片区域、CanvasObject、media region 能成为 annotation range；不做完整设计软件、完整媒体系统或多 frame 产品化。
-- `V2.BN.8.9+` Canvas Reliability / Scale / Export Reserve Closure：验证 50/200/1000 blocks、formula-heavy、workspace outside frame、visible render window / virtualization reserve、PageFrame export boundary、CanvasObject / endpoint reserve。
-- `V2.BN.8.x` 视实际测试追加：只要 Canvas Engine 和 TextFlow 没达到工程可靠和用户体验可靠，就不要急着进入 Structure Studio、Source Library 或 Relation runtime。
+- `V2.BN.8.8` Canvas Engine Foundation：在 8.7 ContentGroup maturity closure 完成后，正式建立 CanvasObject / CanvasPlacement / ContentMount、PageFrame v1、paragraph block projection、finite expandable world、shape / block-backed shape seed、visual connector seed、CanvasCommand / CanvasDelta seed 和 Canvas AI Tree read-only snapshot；详细计划见 `docs/releases/V2.BN.8/V2.BN.8.8-Canvas-Engine-Foundation-Plan.md`。
+- `V2.BN.8.9` PageFrame / PageStack Notebook Maturity：8.9.1-8.9.8 解决工程成熟；8.9.9-8.9.14 已完成可创建、可操作、可移动、可配置、显式 PageStack 和 Layout panel navigator；8.9.15-8.9.18 把它从 Better Paper 推到 Better Notebook 的最低门槛。目标是让 PageFrame / PageStack 成为用户能自然创建、移动、配置、分页、续写、抽离、引用和理解的页面系统。
+  - Product naming correction：用户面对和管理的是 `PageStack`。`PageStack` 可以只有一个 `PageFrame`，也可以有多个 `PageFrame`；不再把 standalone PageFrame 作为用户心智里的顶层对象。`PageFrame` 是 PageStack 内部的一页。
+  - `V2.BN.8.9.1` PageFrame Visible Contract And Primary Focus：补 PageFrame readable DOM / test / AI Tree 标记、primary PageFrame 入口、Page Mode 聚焦。
+  - `V2.BN.8.9.2` Multi-PageFrame Management：插入、删除、复制、选择、导航、多 frame 兜底。
+  - `V2.BN.8.9.3` Ruler / Margin Guides / Snap Wall：标尺、margin / content inset 可视化、snap to margin。
+  - `V2.BN.8.9.4` Header / Footer / Page Number：PageFrame 专属页眉、页脚、页码组件。
+  - `V2.BN.8.9.5` PageFrame Template / Background / Style：尺寸模板、背景、样式、template seed。
+  - `V2.BN.8.9.6` Export Preview：导出预览与 PageFrame 导出边界可视化。
+  - `V2.BN.8.9.7` Crossing Object Export Policy：跨 PageFrame 边界对象的导出 / 归属策略。
+  - `V2.BN.8.9.8` PageFrame Maturity Closure Gate：浏览器 smoke、manual pass、报告与后续 Open Issues。
+  - `V2.BN.8.9.9` PageFrame Command Surface And Creation：建立最小 Context Menu / Command Surface seed；空白 Canvas 和 toolbar 能新建 PageStack；默认新建的是 single-page PageStack，PageFrame 作为 PageStack 内部页面获得最基础对象操作入口。
+  - `V2.BN.8.9.10` Canvas World Auto-Expand And PageFrame Focus：让 Canvas world 随 PageFrame / block / reserve object 有限扩展，并让新建 / 选中 PageFrame 能成为 viewport focus target。
+  - `V2.BN.8.9.11` PageFrame Numbering Scope Guard：阻止 single-page PageStack 从 `PageFrameCollection` 派生 `1 / N` 这类伪 multi-page 编号；页码属于 PageStack display policy，不属于单页本身身份。
+  - `V2.BN.8.9.12` PageFrame Operable Object：选择、移动、resize、基础配置、复制、删除、设为 primary。
+  - `V2.BN.8.9.13` Continuous PageStack v1：统一 fixed / continuous 心智；A4 note 默认连续写作；Canvas Mode 对长 PageStack 提供折叠 / 预览入口。
+  - `V2.BN.8.9.14` Layout Panel And PageStack Navigator：已完成。Layout panel 成为可见、可用的 PageStack 管理入口；支持 single-page PageStack 和 multi-page PageStack，提供 stack row、page row、jump、add page below、collapse/expand、split、merge、detach to new stack、selected/primary 状态，不再主要依赖右键菜单。
+  - `V2.BN.8.9.15` PageStack Content Flow v1：已完成。让默认自然写作能够读取 PageStack continuation plan；超过当前 PageFrame 内容区时，可在同一 PageStack 中移动到已有下一页或追加下一页；不做完整 Word-like 自动分页。
+  - `V2.BN.8.9.16` Cross-page Block Fragment v1：已完成。一个逻辑 paragraph block 可以获得跨 PageFrame 的视觉 fragment projection；数据真相仍是一个 block，runtime / AI-readable snapshot / Block shell DOM marker 读取同一份 projection；只有用户确认 split 时才 materialize 成多个 block。
+  - `V2.BN.8.9.17` PageSlice Snapshot And Reference v1：已完成。先支持整页 PageSlice 作为 snapshot/reference/ContentGroup member candidate；记录来源 PageStack、PageFrame/page index、snapshot metadata 和 open-original 语义；页面内部细范围、可视化抽离入口和页面预览渲染 later。
+  - `V2.BN.8.9.18` PageStack / PageSlice Closeout Gate：已完成工程收口文档与验证计划；Henry 的整体手动测试仍作为收口后的人工门。如果手测暴露基础 PageStack blocker，则插入 8.9.x 补丁；否则进入 8.10。
+- `V2.BN.8.10` TextFlow Typography Maturity：下一条 active engineering lane。把字体、字号、行距、段距和 document typography profile 做成可配置、可测量、可被 PageFrame / export / AI-readable layout 共用的排版真相。
+  - `V2.BN.8.10.1` Typography Data Contract And Profile：定义 document typography profile、默认样式、持久化边界和 TextFlow / PageFrame 读取方式。
+  - `V2.BN.8.10.2` Font Family / Font Size Controls：用户可配置字体和字号，且不破坏 TextFlow 内容真相。
+  - `V2.BN.8.10.3` Line Height / Paragraph Spacing Controls：用户可配置行距、段距，并同步影响测量、分页和导出预览。
+  - `V2.BN.8.10.4` Typography Measurement And Pagination Sync：PageFrame pagination、block measurement、AI-readable layout、Export Preview 读同一份 typography profile。
+  - `V2.BN.8.10.5` Selection Typography Mini Toolbar v1：在文本选区存在时提供最小浮动排版入口，先复用 note-level typography profile；不做 top bar、不做 rich text span、不做选区级样式真相。
+  - `V2.BN.8.10.6` Typography Maturity Closure Gate：已完成工程收口；验证字体字号、行距段距、PageFrame 分页、导出预览、选区浮动入口和 AI-readable layout 的一致性，并把 Canvas persistence cutover 路由到 8.11.1。
+- `V2.BN.8.11` Structured Object Family：先补 Canvas persistence cutover，然后用普通 CanvasObject、shape/connector、image/table 和一类谨慎选择的结构化对象打磨对象生命周期；ContentGroup 暂时不进入本版主体。
+  - `V2.BN.8.11.1` Canvas Persistence Cutover Gate：把 `canvas_engine_page_frames_v1`、`better_notebook_layout`、`canvas_engine_annotations_v1` 三颗承重 seed 发芽为 `CanvasObject / CanvasPlacement / ContentMount / PageFrameExtension / AnnotationTruth` durable tables。
+  - `V2.BN.8.11.1.2` Kind-General CanvasObject Pipeline：把 route / validator / service / runtime / AI-tree 的写读路径从 page-frame/block 两个特例推进到 kind-general 派发。
+  - `V2.BN.8.11.1.3` CanvasObject Pipeline Hardening：收掉 block mount fan-out、kind flip、generic delete、级联清理等 cutover 隐患。
+  - `V2.BN.8.11.3` Shape CanvasObject First Real Kind：发布 pure shape 的新建、选择、移动、缩放、删除、读回和 AI-readable layout，证明普通对象管线可用。
+  - `V2.BN.8.11.4` Block-Backed CanvasObject Path：建立 shape-带字的 durable 路径，CanvasObject 挂 paragraph block，TextFlow 保持内容真相，sticky 之前先打稳这条路。
+  - `V2.BN.8.11.5` Object-Style Preset And Sticky Note：解耦 block type 与 object-style；sticky note 是 paragraph block 的视觉 preset，不是新内容类型。
+  - `V2.BN.8.11.6` Visual Connector Persistence And Endpoint Model：让普通视觉线持久化并可连接 CanvasObject；仍保持 visual-only，不进入 Relation runtime。
+  - `V2.BN.8.11.7` Image Asset-Backed Object：补 asset 存储和图片对象展示、移动、缩放、caption / alt-text。
+  - `V2.BN.8.11.8` Table Structured Object Seed：做轻量行列 / 单元格文本 / 基础增删行列，并让 AI-tree 能读取结构化单元格。
+  - `V2.BN.8.11.9` Object Inspector And Context Actions Seed：给普通对象最小 inspector / context actions，不抢完整 top bar 或全局组件菜单。
+  - `V2.BN.8.11.10` First Structured Family Gate（skipped / deferred）：按 Henry 2026-06-30 决定，本项不阻塞 8.11 收口；diagram / mind map / chart / math graph 等复杂结构化家族以后按证据单开。
+  - `V2.BN.8.11.11` Structured Object Family Closure Gate：已完成工程收口；体验、性能、AI-readable、导出预览和 8.12 readiness 通过自动验证，Henry 手动整体体验验收仍可继续补。
+- `V2.BN.8.12` ContentGroup Projection And Reuse：ContentGroup 是特殊 CanvasObject，等普通对象通路稳定后再做 tile/folder projection、reuse verbs 和 Petal reserve。
+  - `V2.BN.8.12.1` ContentGroup Projection Boundary：定义 ContentGroup original / projection / usage / canvas context。
+  - `V2.BN.8.12.2` ContentGroup Tile Projection：ContentGroup 作为画布 tile / folder / object 放入 Canvas，可打开、折叠、定位原始 group。
+  - `V2.BN.8.12.3` ContentGroup Reuse Actions：Reference / Duplicate / Fork / Materialize / Open original 的可见操作与安全边界。
+  - `V2.BN.8.12.4` Petal Projection Reserve：只在 ContentGroup projection 成熟后预留 Petal projection / endpoint，不提前做 Relation runtime。
+  - `V2.BN.8.12.5` ContentGroup Projection And Reuse Closure Gate：验证特殊对象投影、reuse verbs、source/member 边界和 Relation View readiness。
+- `V2.BN.8.13+` ContentGroup Mode / Relation View：RelationProposal、ContentGroup/Petal endpoint 可视化、KnowledgeRelation 显化；普通 Canvas visual arrow 仍然不自动成为 Relation。
+- `V2.BN.9.x` Agent / GraphRAG Integration：Agent 读 Canvas AI Tree、产出 Proposal，经用户确认后转 CanvasCommand / RelationProposal / GraphRAG 写入。
+- `V2.BN.8.x` 视实际测试追加：只要 Canvas Engine、PageFrame、TextFlow Typography 和 ContentGroup projection 没达到工程可靠和用户体验可靠，就不要急着进入 Structure Studio、Source Library 或 Relation runtime。
 
 ### 不做
 
@@ -1109,7 +1404,7 @@ V2.BN.8 不应该被设计成“一次性做完 Canvas Engine”的单版本。C
 - 不做 AI note assembly；
 - 不做 canvas preset 之间的直接 destructive switch；
 - 不做 AI repagination proposal，只保留未来接口。
-- 不做完整 drawing design app、多 frame 产品化、完整 media editor 或完整 PDF/export engine；CanvasObject / media / drawing seed 已顺延到 V2.BN.8.8+，并且必须排在 V2.BN.8.7 ContentGroup 数据实体独立与 Gallery/Rail shell closure 之后；V2.BN.8.7 的视觉套壳服务于 ContentGroup maturity，不提前进入 CanvasObject projection。
+- 不做完整 drawing design app、多 frame 产品化、完整 media editor 或完整 PDF/export engine；这些能力已拆入 8.9+ 后续 Canvas lane。V2.BN.8.8 只做 Canvas Engine Foundation，并且必须排在 V2.BN.8.7 ContentGroup 数据实体独立与 Gallery/Rail shell closure 之后；V2.BN.8.7 的视觉套壳服务于 ContentGroup maturity，不提前进入 CanvasObject projection。
 
 ### 验收
 

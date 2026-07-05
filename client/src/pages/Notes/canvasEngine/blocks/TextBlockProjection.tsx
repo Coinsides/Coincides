@@ -39,6 +39,7 @@ import {
   annotationColorForToken,
 } from '../annotationColorService';
 import {
+  annotationRangeIsRenderable,
   visibleAnnotationsForDisplay,
 } from '../annotationDisplayService';
 import {
@@ -244,6 +245,7 @@ function rangeContainsTextOffset(range: AnnotationRangeV1, input: {
   offset: number;
   textLength: number;
 }): boolean {
+  if (!annotationRangeIsRenderable(range)) return false;
   if (
     range.block_id !== input.blockId
     || range.text_unit_id !== input.textUnitId
@@ -267,7 +269,8 @@ function annotationRangesForTextUnit(input: {
   textUnitId: string;
 }): AnnotationRangeV1[] {
   return input.annotation.ranges.filter((range) => (
-    range.block_id === input.blockId
+    annotationRangeIsRenderable(range)
+    && range.block_id === input.blockId
     && range.text_unit_id === input.textUnitId
     && (range.target_kind === 'text_span' || range.target_kind === 'text_unit')
   ));
@@ -275,6 +278,7 @@ function annotationRangesForTextUnit(input: {
 
 function previewFromRanges(ranges: AnnotationRangeV1[]): string {
   return ranges
+    .filter(annotationRangeIsRenderable)
     .map((range) => range.range_text_cache?.trim())
     .filter((text): text is string => Boolean(text))
     .join(' | ');
@@ -955,14 +959,15 @@ export function TextBlockProjection({
         const marker = textUnitMarkerForDisplay(editableFlow.units, index);
         const hasMarker = marker.length > 0;
         const unitAnnotations = activeAnnotations.filter((annotation) => (
-          annotation.ranges.some((range) => (
-            range.block_id === blockId
-            && range.text_unit_id === unit.id
-            && (range.target_kind === 'text_span' || range.target_kind === 'text_unit')
-          ))
+          annotationRangesForTextUnit({
+            annotation,
+            blockId,
+            textUnitId: unit.id,
+          }).length > 0
         ));
         const draftAnnotation: AnnotationTruthV1 | null = draftAnnotationRanges.some((range) => (
-          range.block_id === blockId
+          annotationRangeIsRenderable(range)
+          && range.block_id === blockId
           && range.text_unit_id === unit.id
           && (range.target_kind === 'text_span' || range.target_kind === 'text_unit')
         )) ? {
@@ -1008,12 +1013,20 @@ export function TextBlockProjection({
         });
         const hasInlineHighlights = highlightSegments.some((segment) => segment.annotationIds.length > 0);
         const hasFullUnitAnnotation = unitAnnotations.some((annotation) => (
-          annotation.ranges.some((range) => range.target_kind === 'text_unit' && range.block_id === blockId && range.text_unit_id === unit.id)
+          annotationRangesForTextUnit({
+            annotation,
+            blockId,
+            textUnitId: unit.id,
+          }).some((range) => range.target_kind === 'text_unit')
         ));
         const hasSelectedFullUnitAnnotation = selectedAnnotationIds.some((id) => (
           unitAnnotations.some((annotation) => (
             annotation.id === id
-            && annotation.ranges.some((range) => range.target_kind === 'text_unit' && range.block_id === blockId && range.text_unit_id === unit.id)
+            && annotationRangesForTextUnit({
+              annotation,
+              blockId,
+              textUnitId: unit.id,
+            }).some((range) => range.target_kind === 'text_unit')
           ))
         ));
         const roleTextClassNames = [

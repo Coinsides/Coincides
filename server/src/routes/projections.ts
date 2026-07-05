@@ -61,6 +61,7 @@ function buildSnapshotFromNote(noteId: string, userId: string, courseId: string)
     FROM note_block_placements nbp
     JOIN note_blocks nb ON nb.id = nbp.block_id
     WHERE nbp.note_id = ? AND nb.user_id = ? AND nb.status = 'active'
+      AND COALESCE(json_extract(nb.metadata, '$.render_scope'), '') != 'canvas_object_backing'
     ORDER BY nbp.order_index ASC
   `).all(noteId, userId) as any[];
 
@@ -79,6 +80,8 @@ function buildSnapshotFromNote(noteId: string, userId: string, courseId: string)
     versions: Object.fromEntries(blocks.map((block) => [block.id, block.updated_at])),
   };
 }
+
+export const __testBuildSnapshotFromNote = buildSnapshotFromNote;
 
 // GET /api/projections?course_id=...&type=organized_note
 router.get('/', (req: AuthRequest, res: Response) => {

@@ -1,5 +1,581 @@
 # V2.BN.8 Experience Review
 
+## 2026-06-30 V2.BN.8.11.11 Structured Object Family Closure Experience Note
+
+```text
+status: engineering closure completed; Henry holistic manual pass still useful
+surface: Canvas Mode / ordinary object family / 8.12 readiness
+```
+
+Experience judgment:
+
+```text
+The canvas now has enough ordinary object behavior to stop proving the base object family and move to the special ContentGroup projection problem.
+```
+
+What improved:
+
+- Canvas is no longer only PageFrame plus TextFlow projection.
+- Users can work with basic visual objects, sticky notes, visual connectors, images, tables, and object inspection.
+- The system now has a clearer mental separation between ordinary objects and special knowledge objects.
+- 8.12 can focus on ContentGroup projection / reuse instead of inventing canvas persistence at the same time.
+
+Remaining rough edges:
+
+- The UI language is still early; object menus, toolbar, and inspector design will need a later coherence pass.
+- Table is a structured object seed, not a spreadsheet engine.
+- Image is an asset-backed object seed, not a media editor.
+- Visual connector is deliberately not a relation editor.
+- PageFrame and ContentGroup still need special treatment.
+
+Next experience lane:
+
+```text
+V2.BN.8.12 ContentGroup Projection And Reuse.
+```
+
+## 2026-06-30 V2.BN.8.11.9 Object Inspector / Context Actions Experience Note
+
+```text
+status: browser smoke completed; Henry hands-on pass still useful
+surface: Canvas Mode / selected object / context menu
+```
+
+Experience judgment:
+
+```text
+Canvas objects are no longer silent objects. A selected object can now explain what it is and which actions are safe.
+```
+
+What improved:
+
+- Selecting an ordinary object opens a compact inspector instead of leaving the user to infer object state visually.
+- Table objects expose structured identity and AI-readable status through the inspector.
+- Sticky notes reveal their true status as block-backed shapes, not a separate hidden content type.
+- Right-click actions and inspector actions now follow the same enabled/disabled rules.
+- Duplicate is intentionally conservative: safe objects can copy; block-backed objects explain why they cannot yet.
+
+Remaining rough edges:
+
+- Inspector styling is first-pass and should later merge into a larger object-management language.
+- PageFrame still needs its own special inspector or layout panel path.
+- ContentGroup projection and reuse verbs remain later work.
+
+Next experience lane:
+
+```text
+V2.BN.8.11 can either close the ordinary object family or continue into a carefully chosen first structured family. ContentGroup projection should remain V2.BN.8.12.
+```
+
+## 2026-06-29 V2.BN.8.11.7 Image / Asset-Backed CanvasObject Experience Note
+
+```text
+status: browser smoke completed; Henry hands-on pass still useful
+surface: Canvas Mode / image object / asset-backed media
+```
+
+Experience judgment:
+
+```text
+The canvas now has a real media object, not only text-backed or shape-backed objects.
+```
+
+What improved:
+
+- Users can create an image object from the Canvas/PageFrame context menu with a file picker.
+- The image appears as an independent CanvasObject and can move/resize with the same placement layer.
+- Caption and alt text exist as readable metadata, not hidden TextFlow content.
+- Refresh no longer loses the image object; the backend returns it through canvas persistence.
+
+Remaining rough edges:
+
+- The UI is deliberately first-pass and not a media editor.
+- The object inspector is still missing, so asset identity and AI-readable state are not yet visible to users.
+- Asset library, crop/annotation, Source integration, ContentGroup reuse, and export packaging remain deferred.
+
+Next experience lane:
+
+```text
+V2.BN.8.11.8 can move to table as the first structured data-heavy object; image has proven the asset-backed lane.
+```
+
+## 2026-06-27 V2.BN.8.11.1 Canvas Persistence Cutover Gate Experience Note
+
+```text
+status: infrastructure completed; manual feel pass should focus on regression
+surface: note opening / PageFrame persistence / block movement / annotation persistence
+```
+
+Experience judgment:
+
+```text
+This version should feel almost invisible.
+That is the point: Canvas persistence should stop being a fragile hidden seed before projection/reuse becomes visible.
+```
+
+What improved:
+
+- New notes no longer begin life by storing PageFrame truth in note metadata.
+- PageFrame collection edits now have a durable entity home.
+- Block layout edits now have a durable CanvasPlacement home.
+- AnnotationTruth now has its own root table and child range table.
+- Opening an old seeded note can import the old PageFrame/Annotation seed once and then strip the old key.
+
+Remaining rough edges:
+
+- This does not add a new visible projection/reuse UI.
+- Shape/connector projection seed helpers are still not promoted into the new persistence boundary.
+- Manual smoke should check for regressions: create note, move PageFrame, create/move blocks, toggle block export/AI policy, create annotation.
+
+Next experience lane:
+
+```text
+V2.BN.8.11 can now continue toward ordinary / structured CanvasObjects on top of durable persistence. ContentGroup projection moves to V2.BN.8.12 because it is a special object with reuse and write-back semantics.
+```
+
+## 2026-06-27 V2.BN.8.10.6 Typography Maturity Closure Experience Note
+
+```text
+status: engineering closure completed; manual feel check still recommended
+surface: document typography / writing surface / PageFrame interpretation
+```
+
+Experience judgment:
+
+```text
+Typography now feels like part of the note's document state, not a hidden constant.
+```
+
+What improved:
+
+- Users have a visible More -> Typography route for font family, font size, line height, and paragraph spacing.
+- Users also have a first-pass floating typography shortcut when selecting TextFlow text.
+- PageFrame interpretation, Export Preview, and AI-readable layout now share the same typography facts.
+- Canvas zoom is kept separate from document font size.
+
+Remaining rough edges:
+
+- The controls are intentionally plain.
+- The mini toolbar needs Henry's hands-on feel test because native selection and focus behavior can be subtle.
+- The measurement model is good enough as a shared baseline but not yet a precision document layout engine.
+- True Word-like automatic pagination should wait for a dedicated follow-up.
+
+Next experience lane:
+
+```text
+V2.BN.8.11.1 should cleanly cut over Canvas persistence before visible projection/reuse expands.
+```
+
+## 2026-06-27 V2.BN.8.10.5 Selection Typography Mini Toolbar Experience Note
+
+```text
+status: automated validation completed; manual smoke recommended before closure
+surface: TextFlow selection / floating typography shortcut
+```
+
+Experience judgment:
+
+```text
+Typography no longer only lives behind More.
+It now has a small writing-time entrance without becoming a full Word toolbar.
+```
+
+What improved:
+
+- A user selecting text can discover typography controls in the writing context.
+- The toolbar edits the existing note-level typography profile, so it does not create a second style truth.
+- The scope is labeled as document typography, reducing the chance that users mistake it for selected-character formatting.
+- The existing More -> Typography route remains available as the stable fallback.
+
+Remaining rough edges:
+
+- The toolbar is intentionally plain and first-pass.
+- It does not support bold, italic, underline, color, highlight, or selected-text spans.
+- It still needs Henry's hands-on manual test because real selection, focus, and right-click behavior can feel different from static contract checks.
+- A future top bar should wait until Canvas, object projection, and ContentGroup projection settle.
+
+Next experience lane:
+
+```text
+V2.BN.8.10.6 has now closed Typography Maturity on the engineering side; Henry's holistic manual feel pass remains useful.
+```
+
+## 2026-06-27 V2.BN.8.10.4 Typography Measurement And PageFrame Sync Experience Note
+
+```text
+status: automated validation completed; manual smoke pending
+surface: Typography controls / PageFrame interpretation / Export Preview
+```
+
+Experience judgment:
+
+```text
+Typography is no longer only a visual preference.
+It is becoming part of how the page system understands writing space.
+```
+
+What improved:
+
+- Changing typography now has a shared measurement path instead of only changing visible CSS.
+- PageStack continuation decisions can account for the active line height and paragraph spacing.
+- Export Preview can show PageFrame typography and estimated line capacity, which makes the preview easier to audit.
+- AI-readable layout now has the same typography facts that the visible page interpretation uses.
+
+Remaining rough edges:
+
+- This still does not feel like Word-style automatic pagination.
+- A long paragraph crossing pages is still represented by geometry/fragment projection, not true split editing.
+- Export Preview is still a diagnostic preview, not final PDF/export output.
+- Browser Harness read-only smoke confirmed visible PageFrame and Export Preview typography markers.
+- Typography-changing and bottom-of-page draft continuation remain better suited to Henry's hands-on manual pass because they mutate note content.
+
+## 2026-06-27 V2.BN.8.9.18 PageStack / PageSlice Closeout Gate Experience Note
+
+```text
+status: closeout gate in progress
+surface: PageStack / PageSlice / page-system readiness
+```
+
+Experience judgment:
+
+```text
+The page system is now testable as a notebook surface.
+It is not visually final, but it has stopped being only a paper-shaped placeholder.
+```
+
+What improved across 8.9:
+
+- PageStack is now the thing the user manages.
+- PageFrame is mostly internalized as the physical page slice.
+- The Layout panel can expose PageStacks and page rows.
+- PageStack has visible operations: add page, split, merge, detach, collapse, select, and primary state.
+- Natural writing has a first PageStack-aware continuation decision.
+- A long Block can visually continue across pages without splitting its TextFlow truth.
+- A whole page can now become a PageSlice snapshot/reference object in the model.
+
+Remaining experience rough edges:
+
+- Henry still needs to run the full holistic manual test.
+- PageSlice cannot yet be created from a visible page action.
+- PageSlice does not yet have a thumbnail or page preview card.
+- Cross-page Block split confirmation is not built.
+- PageStack content flow is not a polished Word-like pagination system.
+- Typography controls are the next major missing layer.
+
+Next experience lane:
+
+```text
+V2.BN.8.10 should make TextFlow typography measurable and configurable.
+2026-06-28 correction: V2.BN.8.11 should first stabilize ordinary / structured CanvasObjects; ContentGroup projection should wait until V2.BN.8.12.
+```
+
+## 2026-06-27 V2.BN.8.9.17 PageSlice Snapshot And Reference v1 Experience Note
+
+```text
+status: completed model/service first pass
+surface: PageStack / ContentGroup member candidate / future reuse actions
+```
+
+Experience judgment:
+
+```text
+A page can now become a reusable thing in the model.
+It is not only a visual sheet on the Canvas anymore.
+```
+
+What improved:
+
+- A PageFrame inside a PageStack can be captured as a whole-page PageSlice snapshot.
+- The snapshot keeps a clear open-original route back to the source PageStack/PageFrame.
+- PageSlice can become a `page_slice` ContentGroup member candidate without pretending to be source text.
+- Whole-page reuse now has a stable data boundary for later UI, export, ContentGroup projection, and AI-readable workflows.
+
+Remaining rough edges:
+
+- Users cannot yet click a page and create a PageSlice from the UI.
+- There is no page preview card, page thumbnail, or PDF render.
+- Page-internal range selection is still later.
+- A PageSlice cannot yet be visibly dropped into a ContentGroup from the surface.
+- Full browser/manual smoke is limited because this patch is mostly service-level.
+
+## 2026-06-27 V2.BN.8.9.16 Cross-page Block Fragment v1 Experience Note
+
+```text
+status: completed fragment projection first pass
+surface: PageStack / Block shell / AI-readable layout
+```
+
+Experience judgment:
+
+```text
+A long Block can now be recognized as one thing continuing across pages.
+It is still one Block, not two hidden pieces.
+```
+
+What improved:
+
+- A Block that geometrically spans more than one PageFrame content area in the same PageStack now gets a continuation marker.
+- The visual marker is light enough not to turn writing into a debugging surface.
+- Browser/manual checks have stable DOM markers for cross-page fragments.
+- AI-readable layout can read fragment metadata directly from the Block node.
+- The implementation keeps the text editor untouched, so TextFlow remains the content truth.
+
+Remaining rough edges:
+
+- This is still not true automatic pagination.
+- The marker is geometry-level, not line-level.
+- Users cannot yet extract a PageSlice as a snapshot/reference/ContentGroup member.
+- There is no explicit user-confirmed split flow yet.
+- Export behavior for a cross-page Block remains a later pass.
+
+## 2026-06-27 V2.BN.8.9.15 PageStack Content Flow v1 Experience Note
+
+```text
+status: completed first content-flow pass
+surface: Natural writing / PageStack continuation
+```
+
+Experience judgment:
+
+```text
+PageStack is no longer only a visible page group.
+It can now guide where the next writing step belongs.
+```
+
+What improved:
+
+- Natural writing has a PageStack-aware continuation decision.
+- If the next default draft would start beyond the current PageFrame content area, the system can move continuation to the next page in the same PageStack.
+- If the user is on the last page of a PageStack, the system can append the next page for continuation.
+- Explicit Canvas placement remains spatial and intentional; double-clicking a canvas point still means "put the object here."
+
+Remaining rough edges:
+
+- This is still not automatic pagination.
+- A long paragraph block is not visually fragmented across pages yet.
+- PageSlice extraction and whole-page snapshot/reference semantics are still absent.
+- Browser/manual testing remains awkward until cross-page Block fragments and stronger PageStack navigation land.
+
+## 2026-06-27 V2.BN.8.9.14 Layout Panel And PageStack Navigator Experience Note
+
+```text
+status: completed navigator pass
+surface: Toolbar / blank Canvas command menu / Layout panel
+```
+
+Experience judgment:
+
+```text
+PageStack is now the thing the user manages.
+PageFrame is the thing the engine uses to render pages.
+```
+
+What improved:
+
+- The top toolbar creates `New PageStack` instead of exposing a standalone `New PageFrame`.
+- The blank Canvas menu exposes `New PageStack` as the visible creation command.
+- Layout panel groups pages as single-page or multi-page PageStacks.
+- Layout panel no longer asks the user to reason about `Independent PageFrames`.
+- A detached page remains a real user-facing page unit because it becomes a new single-page PageStack.
+- Users can split a multi-page stack from a later page and merge a stack back into the previous one.
+- Duplicate page now reads as a new stack-style operation instead of accidentally extending continuity.
+
+Remaining rough edges:
+
+- This is not automatic pagination.
+- This does not yet solve extracting one PageSlice as a reference/snapshot/member.
+- Very long PageStacks still need a better navigator than a compact floating panel.
+- TextFlow typography and real document metrics still need their own maturity pass.
+- Full right-click menu design remains a separate UX system.
+
+## 2026-06-27 V2.BN.8.9.13 Continuous PageStack v1 Experience Note
+
+```text
+status: completed continuity seed
+surface: Canvas Mode / Layout panel / PageFrame command surface
+```
+
+Experience judgment:
+
+```text
+Continuity is now something the user can create, inspect, collapse, and detach.
+It is no longer implied by nearby PageFrames.
+```
+
+What improved:
+
+- A formal writing note can start as a one-page PageStack rather than a bare PageFrame collection.
+- The Project Detail New Note path now creates that one-page PageStack directly, so fresh notes are not stack-neutral by accident.
+- Adding a page below a stacked PageFrame now means "extend this document-like continuity."
+- Creating a separate PageFrame remains independent unless the user explicitly creates or joins a stack.
+- Collapsing a stack is a Canvas organization action only; it does not delete content or hide it from machine-readable layout.
+- Layout panel can distinguish PageStack groups from independent PageFrames.
+- Stack-local page labels make `1 / 2`, `2 / 2` meaningful again because they are scoped inside a real PageStack.
+
+Remaining rough edges:
+
+- This is not measured auto-pagination.
+- This does not yet split one long Block across pages with continuation markers.
+- This does not yet let the user extract a PageSlice as a snapshot/reference object.
+- This does not yet provide polished PageStack navigation for very large stacks.
+- The Layout panel stack grouping exists in the implementation, but its visible entry / discoverability still needs polish.
+- Typography controls still need their own maturity pass before page metrics can feel Word-like.
+
+## 2026-06-27 V2.BN.8.9.12.1 PageFrame Layout Affiliation And Zoom Control Experience Note
+
+```text
+status: completed usability patch
+surface: Canvas Mode / PageFrame move / viewport zoom
+```
+
+Experience judgment:
+
+```text
+A PageFrame can move like an object without pretending to own every Block forever.
+```
+
+What improved:
+
+- Moving a PageFrame now carries fully-contained Blocks with it.
+- Blocks that cross the PageFrame boundary remain explicit edge cases instead of being moved silently.
+- The interaction still preserves the larger doctrine: Block/PageFrame relation is geometry-derived, not ownership.
+- Canvas Mode now has a visible zoom control, so browser testing and manual exploration have a stable recovery handle when the viewport feels wrong.
+
+Remaining rough edges:
+
+- The PageFrame move preview still previews the PageFrame shell first; richer live child-object preview can wait.
+- This is not the final LayoutContainer persistence model.
+- Continuous PageStack still needs its own model and controls.
+- Cross-page Block continuation remains a later design problem.
+
+## 2026-06-27 V2.BN.8.9.11 PageFrame Numbering Scope Guard Experience Note
+
+```text
+status: completed semantics guard
+surface: PageFrame chrome / generated page number
+```
+
+Experience judgment:
+
+```text
+Adding another PageFrame should not silently tell the user they created page 2 of a document.
+```
+
+What improved:
+
+- Independent PageFrames no longer look like a single continuous PageStack merely because they share a note collection.
+- Page-number chrome remains available, but it is no longer misleading about continuity.
+- The future Continuous PageFrame experience now has a cleaner starting point: continuity must be created explicitly.
+
+Remaining rough edges:
+
+- This does not create PageStack.
+- This does not solve PageSlice extraction or splitting.
+- This does not add the final PageFrame navigator.
+- This does not decide how stack-local page numbering should be edited or displayed.
+
+## 2026-06-27 V2.BN.8.9.10 Canvas World Auto-Expand Experience Note
+
+```text
+status: completed visibility patch
+surface: Canvas Mode / PageFrame creation / Layout panel
+```
+
+Experience judgment:
+
+```text
+Creating a PageFrame should not feel like throwing an object outside the world.
+```
+
+What improved:
+
+- The Canvas world can now grow around actual PageFrames and block placements.
+- A newly created PageFrame can become the viewport focus target instead of being silently placed beyond reach.
+- Layout panel PageFrame rows can be used as navigation targets.
+- The current implementation now better matches the product direction of "finite Canvas first, infinite/chunked Canvas later."
+
+Remaining rough edges:
+
+- This is not yet an infinite Canvas.
+- If the user creates PageFrames from Page Mode, the broader product decision around whether to stay in Page Mode or switch/show Canvas focus still needs refinement.
+- The Layout panel is now more useful, but it is still not a mature PageFrame navigator.
+- PageFrame move/resize/configure interactions remain later work.
+
+## 2026-06-27 V2.BN.8.9.9 PageFrame Command Surface Experience Note
+
+```text
+status: completed entry-point patch
+surface: PageFrame toolbar and Canvas Mode context menu
+```
+
+Experience judgment:
+
+```text
+PageFrame is easier to touch as an object now.
+```
+
+What improved:
+
+- Users no longer need to discover the Layout panel before they can create another PageFrame.
+- Toolbar creation gives a direct, low-friction entry.
+- Canvas Mode blank-space right-click now feels like the beginning of an object command surface.
+- PageFrame shell right-click exposes duplicate / set primary / delete in the same command vocabulary.
+
+Remaining rough edges:
+
+- This is not yet a full right-click system.
+- PageStack is only reserved as a disabled command.
+- PageFrame move / resize / configure interactions still need later refinement.
+- The toolbar entry is useful, but future toolbar grouping should be reconsidered after the broader object tool surface exists.
+
+## 2026-06-26 V2.BN.8.9.8 PageFrame Maturity Closure Experience Note
+
+```text
+status: completed closure gate
+surface: PageFrame across Page Mode / Canvas Mode / Layout Mode / Export Preview
+```
+
+Experience judgment:
+
+```text
+PageFrame now feels like a formal page system, not just a decorative rectangle.
+```
+
+What now works as product experience:
+
+- Opening a note can focus the primary PageFrame in Page Mode.
+- Canvas Mode makes multiple PageFrames spatially visible.
+- Layout panel can insert PageFrames and switch the primary PageFrame.
+- The primary PageFrame survives refresh through the transitional metadata seed.
+- Ruler/margin guides give the user alignment handles without hard-clipping free movement.
+- The snap wall behaves like a soft alignment wall: a block dragged near the left content margin snapped to `frame.x + inset`.
+- A block can leave the PageFrame and live in workspace space.
+- Export Preview explains the difference between PageFrame content, crossing-boundary content, and workspace-only content.
+
+The key mental model is stable:
+
+```text
+PageFrame = formal page / export frame.
+Block = independent TextFlow-backed content object.
+Affiliation = geometry-derived.
+Ownership = not PageFrame-owned.
+```
+
+Remaining experience rough edges:
+
+- The `Layout` button currently toggles Layout Mode on click, while the Layout panel opens through hover/focus. This works, but the mental model is too subtle.
+- Export Preview is an explanation surface, not a final export engine. It does not yet clip crossing objects or render PDF output.
+- Header/footer/page-number and templates are present as quiet PageFrame components, not rich authoring tools.
+- TextFlow typography controls are not yet exposed, so the A4/document baseline is a foundation rather than a full Word-like document editor.
+
+Closure judgment:
+
+```text
+The PageFrame experience is coherent enough to stop expanding in 8.9.
+That earlier judgment is superseded by the expanded PageStack/PageSlice lane.
+The next meaningful experience step is now TextFlow Typography Maturity in 8.10.
+```
+
 ## 2026-06-23 V2.BN.8.7.9 ContentGroup System Closure Gate Experience Note
 
 ```text
@@ -1411,3 +1987,56 @@ surface: Rail / Gallery / Single ContentGroup Editor
 - `Ready / Source changed / Source missing` 仍缺少真实数据状态下的视觉对比。
 - Folder move/delete 的资源管理器行为需要单独种 richer data 后验收。
 - mobile viewport 未跑；宽屏下可用不代表移动端扫描体验已经成立。
+## V2.BN.8.9.12 PageFrame Operable Object Experience Note
+
+```text
+status: first operable-object experience pass completed
+surface: Note Canvas Mode + Layout Mode
+```
+
+体验意图：
+
+- PageFrame 不再只是纸张背景；在 Canvas + Layout Mode 下，它是可以被选中、移动、缩放的 PageFrame object。
+- 普通写作状态仍尽量保持安静，避免 PageFrame 抢走正文 block 的编辑手感。
+- 拖动 PageFrame 只改变页面边界自己的位置，不把页面里的 block 当成 owned children 一起搬走。
+- 选中态和右下角 resize handle 只作为第一版操作反馈，后续仍需要和 toolbar / context menu / lock 体系一起打磨。
+
+Browser Harness 观察：
+
+- 切到 Canvas + Layout 后，PageFrame 暴露 `data-page-frame-selected`；选中 frame 会显示 resize handle。
+- 拖动 primary PageFrame 后，屏幕位置从约 `(690,208)` 到 `(750,243)`，符合 60/35 的拖动位移。
+- 缩放 primary PageFrame 后，尺寸从约 `407x575` 到 `457x600`，选中态和 handle 保持。
+- 首轮测试发现 pointer down 时不应触发 select+focus，否则拖动前视口会跳动；该问题已修。
+
+待 Henry 手动确认：
+
+- Layout Mode 下拖动 PageFrame 的手感是否足够自然。
+- 右下角 resize handle 是否容易发现、是否太像 block resize。
+- PageFrame 被移动后，Page Mode / Canvas Mode 的心理预期是否还清楚。
+- 是否需要在 8.9.15 closeout 前补一个更明确的 PageFrame toolbar 操作入口。
+## V2.BN.8.11.5 Experience Note - Sticky Note v1
+
+- 用户现在可以从 Canvas / PageFrame 右键菜单创建 Sticky note。
+- Sticky note 可以直接承载 paragraph text，用户心智上像便签，底层仍是 TextFlow-backed content。
+- 已有 block-backed shape 可以切换成 sticky presentation，也可以重置回 plain shape presentation。
+- `Remove text` 后对象会退回 pure default shape，避免留下没有内容 truth 的 sticky 壳。
+- 当前体验仍偏工程 v1：没有样式面板、没有 top bar、没有便签模板库；视觉可用但不是最终审美。
+
+## V2.BN.8.11.6 Experience Note - Visual Connector v1
+
+- 用户现在可以在两个 shape 之间建立一条 visual-only 连接线。
+- 操作入口暂时放在 shape 右键菜单：先在第一个 shape 上选择开始连接，再在第二个 shape 上完成连接。
+- 连接线以 SVG 箭头显示在画布上，表示空间布局中的视觉关联，不表示知识图谱关系。
+- 连接线本体可以右键删除；删除被连接的 shape 时，相关连接线也会一起消失。
+- Browser smoke 已确认：右键菜单创建出的 connector 可以刷新后读回；删除 endpoint 后不会留下孤儿线。
+- 当前体验重点是验证“kind-general 管线 + endpoint 模型 + 持久化回放”，不是最终 diagram editor。
+- 后续如果进入 diagram family，再考虑拖拽式连线、锚点选择、折线/曲线、自动避让和更成熟的操作反馈。
+
+## V2.BN.8.11.8 Experience Note - Table v1
+
+- 用户现在可以在 Canvas 上看到 durable table object，而不是一次性的前端临时表格。
+- 单元格支持双击进入编辑，Enter 保存，Esc 取消；这是最小可用的表格编辑心智。
+- 表格右键菜单支持添加下方行、添加右侧列、删除当前行、删除当前列。
+- Browser smoke 确认：把首个单元格改为 `Power Series` 后，添加行、添加列、删除行、删除列，刷新后仍保持 3 x 3 和原单元格文本。
+- 当前体验仍偏工程 v1：没有完整 object inspector，没有统一组件菜单，也不是 spreadsheet editor。
+- 空白画布全局创建对象菜单仍未成型；后续 8.11.9 需要把 kind / backing / placement / structured readout 和 context actions 做得更可见。

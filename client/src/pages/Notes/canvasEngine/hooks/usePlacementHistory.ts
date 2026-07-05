@@ -1,15 +1,19 @@
 import { useCallback, useEffect, useRef } from 'react';
 import {
+  applyRuntimeHistoryRedo,
+  applyRuntimeHistoryUndo,
   getRuntimeHistoryKeyboardIntent,
   type RuntimeHistoryEntry,
 } from '../historyService';
 import { buildLayoutHistoryEntry } from '../placementService';
 import type { BlockBoxLayout } from '../runtimeLayout';
 import type { NoteBlock } from '../runtimeDataTypes';
+import type { TableStructuredPayload } from '../types';
 
 export interface UsePlacementHistoryOptions {
   applyLayoutDrafts: (layouts: Record<string, BlockBoxLayout>) => void;
   persistLayoutSnapshot: (layouts: Record<string, BlockBoxLayout>) => void;
+  persistStructuredObject?: (objectId: string, payload: TableStructuredPayload) => Promise<boolean> | boolean;
   restoreBlockForHistory?: (block: NoteBlock, options?: { silent?: boolean }) => Promise<NoteBlock | null>;
   target?: Window | null;
   trashBlockForHistory?: (blockId: string, options?: { silent?: boolean }) => Promise<boolean>;
@@ -18,6 +22,7 @@ export interface UsePlacementHistoryOptions {
 export function usePlacementHistory({
   applyLayoutDrafts,
   persistLayoutSnapshot,
+  persistStructuredObject,
   restoreBlockForHistory,
   target = typeof window !== 'undefined' ? window : null,
   trashBlockForHistory,
@@ -50,6 +55,19 @@ export function usePlacementHistory({
     pushHistoryEntry({ type: 'trashedBlock', block });
   }, [pushHistoryEntry]);
 
+  const pushStructuredMutationHistory = useCallback((
+    objectId: string,
+    before: TableStructuredPayload,
+    after: TableStructuredPayload,
+  ) => {
+    pushHistoryEntry({
+      type: 'structuredMutation',
+      objectId,
+      before,
+      after,
+    });
+  }, [pushHistoryEntry]);
+
   const undoRuntimeHistory = useCallback(async () => {
     if (historyBusyRef.current) return false;
     const entry = undoStackRef.current.pop();
@@ -57,44 +75,23 @@ export function usePlacementHistory({
 
     historyBusyRef.current = true;
     try {
-      if (entry.type === 'layout') {
-        redoStackRef.current.push(entry);
-        applyLayoutDrafts(entry.entry.before);
-        persistLayoutSnapshot(entry.entry.before);
-        return true;
-      }
-
-      if (entry.type === 'createdBlock') {
-        if (!trashBlockForHistory) {
-          undoStackRef.current.push(entry);
-          return false;
-        }
-
-        const removed = await trashBlockForHistory(entry.block.id, { silent: true });
-        if (!removed) {
-          undoStackRef.current.push(entry);
-          return false;
-        }
-        redoStackRef.current.push(entry);
-        return true;
-      }
-
-      if (!restoreBlockForHistory) {
+      const redoEntry = await applyRuntimeHistoryUndo(entry, {
+        applyLayoutDrafts,
+        persistLayoutSnapshot,
+        persistStructuredObject,
+        restoreBlockForHistory,
+        trashBlockForHistory,
+      });
+      if (!redoEntry) {
         undoStackRef.current.push(entry);
         return false;
       }
-
-      const restored = await restoreBlockForHistory(entry.block, { silent: true });
-      if (!restored) {
-        undoStackRef.current.push(entry);
-        return false;
-      }
-      redoStackRef.current.push({ type: 'trashedBlock', block: restored });
+      redoStackRef.current.push(redoEntry);
       return true;
     } finally {
       historyBusyRef.current = false;
     }
-  }, [applyLayoutDrafts, persistLayoutSnapshot, restoreBlockForHistory, trashBlockForHistory]);
+  }, [applyLayoutDrafts, persistLayoutSnapshot, persistStructuredObject, restoreBlockForHistory, trashBlockForHistory]);
 
   const redoRuntimeHistory = useCallback(async () => {
     if (historyBusyRef.current) return false;
@@ -103,44 +100,23 @@ export function usePlacementHistory({
 
     historyBusyRef.current = true;
     try {
-      if (entry.type === 'layout') {
-        undoStackRef.current.push(entry);
-        applyLayoutDrafts(entry.entry.after);
-        persistLayoutSnapshot(entry.entry.after);
-        return true;
-      }
-
-      if (entry.type === 'createdBlock') {
-        if (!restoreBlockForHistory) {
-          redoStackRef.current.push(entry);
-          return false;
-        }
-
-        const restored = await restoreBlockForHistory(entry.block, { silent: true });
-        if (!restored) {
-          redoStackRef.current.push(entry);
-          return false;
-        }
-        undoStackRef.current.push({ type: 'createdBlock', block: restored });
-        return true;
-      }
-
-      if (!trashBlockForHistory) {
+      const undoEntry = await applyRuntimeHistoryRedo(entry, {
+        applyLayoutDrafts,
+        persistLayoutSnapshot,
+        persistStructuredObject,
+        restoreBlockForHistory,
+        trashBlockForHistory,
+      });
+      if (!undoEntry) {
         redoStackRef.current.push(entry);
         return false;
       }
-
-      const removed = await trashBlockForHistory(entry.block.id, { silent: true });
-      if (!removed) {
-        redoStackRef.current.push(entry);
-        return false;
-      }
-      undoStackRef.current.push(entry);
+      undoStackRef.current.push(undoEntry);
       return true;
     } finally {
       historyBusyRef.current = false;
     }
-  }, [applyLayoutDrafts, persistLayoutSnapshot, restoreBlockForHistory, trashBlockForHistory]);
+  }, [applyLayoutDrafts, persistLayoutSnapshot, persistStructuredObject, restoreBlockForHistory, trashBlockForHistory]);
 
   useEffect(() => {
     if (!target) return undefined;
@@ -167,6 +143,7 @@ export function usePlacementHistory({
   return {
     pushCreatedBlockHistory,
     pushLayoutHistory,
+    pushStructuredMutationHistory,
     pushTrashedBlockHistory,
     undoRuntimeHistory,
     redoRuntimeHistory,

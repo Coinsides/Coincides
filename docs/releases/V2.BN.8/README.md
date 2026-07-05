@@ -6,7 +6,7 @@ V2.BN.8 is currently in the ContentGroup Editor maturity lane.
 
 Read the current state in this order:
 
-1. `docs/brainstorm/产品完善/2026-06-20-Better-Notebook-ContentGroup-Reflection-Meeting-Notes.md`
+1. `docs/brainstorm/产品完善/会议记录/2026-06-20-Better-Notebook-ContentGroup-Reflection-Meeting-Notes.md`
 2. `docs/contracts/ContentGroup-GroupFolder-Contract.md`
 3. `docs/contracts/Petal-Contract.md`
 4. `docs/contracts/TextFlow-Contract.md`
@@ -25,6 +25,32 @@ Relation = later logical layer
 ```
 
 V2.BN.8.6.29 / 8.6.30 currently use copy-first drag/drop. True destructive move / reorder remains deferred until offset rebase is safe.
+
+## 2026-06-25 Canvas Foundation Replan
+
+V2.BN.8.7 has closed as the `ContentGroup System Maturity` lane.
+
+The active next version is now:
+
+```text
+V2.BN.8.8 Canvas Engine Foundation
+```
+
+8.8 is not a complete infinite canvas product. It establishes the next pillar's foundation:
+
+- CanvasObject / CanvasPlacement / ContentMount.
+- PageFrame v1.
+- paragraph block projection.
+- finite expandable world.
+- shape / block-backed shape seed.
+- visual connector seed.
+- CanvasCommand / CanvasDelta seed.
+- Canvas AI Tree read-only snapshot.
+
+Read before implementation:
+
+1. `V2.BN.8.8-Canvas-Engine-Foundation-Engineering-Decision-Matrices.md`
+2. `V2.BN.8.8-Canvas-Engine-Foundation-Plan.md`
 
 本文件夹是 `V2.BN.8 Canvas Engine And TextFlow Foundation` 的局部密集文档区。
 
@@ -60,7 +86,10 @@ V2.BN.8.6.29 / 8.6.30 currently use copy-first drag/drop. True destructive move 
 | `V2.BN.8.6.4-Annotation-Display-And-Inspector-Polish-Patch-Note.md` | V2.BN.8.6.4 补丁记录：Preview label overlay 总开关、local label cluster、Annotation Stack 扁平化、toolbar 文案收束、第一版 label color token 色板已实现。 | 仍不做 per-label visibility / full style editor / complete selection engine rewrite。 | 已通过 `impeccable` product UI gate、model contract smoke 和 client build。 |
 | `V2.BN.8.7-ContentGroup-System-Maturity-Plan.md` | V2.BN.8.7 小版本计划：ContentGroup System maturity，收束 Rail / Gallery / Single Editor，明确 Member/source 边界、GroupFolder/Gallery 资源管理器心智，以及 Reference / Duplicate / Fork / Materialize 语言。 | 不做 CanvasObject / media / drawing seed、cross-note CanvasObject reuse、完整数据库迁移、GraphRAG 或 relation runtime。 | 执行时同步 Roadmap、ContentGroup / GroupFolder contract、Object Inventory、Review、Experience Review、CHANGELOG。 |
 | `V2.BN.8.7-ContentGroup-System-Maturity-Master-Plan.md` | V2.BN.8.7 总控执行计划：把 8.6 剩余项和 8.7 maturity 标准拆成 sub-plans，并定义每个 sub-plan 的 audit / implementation / verification / review 小循环。 | 不替代每个 sub-plan 的实际 patch note 和 implementation evidence。 | 作为 8.7 实施顺序和质量门槛的首要入口。 |
-| `V2.BN.8.7-CanvasObject-Media-Annotation-Drawing-Image-Seed-Plan.md` | 历史 8.7 CanvasObject seed 草案，现已顺延到 V2.BN.8.8+ 或后续 Canvas track。 | 不再作为 active V2.BN.8.7 入口。 | 恢复执行前应重编号或重发计划，并同步 Canvas State/Data、Interaction Contract、Annotation Contract、Object Inventory。 |
+| `V2.BN.8.8-Canvas-Engine-Foundation-Engineering-Decision-Matrices.md` | 8.8 开工前的五张工程决策表：Data Lifecycle、Performance/Rendering、Migration/Cleanup、Validation/Acceptance、Open Decision/Risk。 | 不替代正式 implementation plan。 | 作为 `V2.BN.8.8-Canvas-Engine-Foundation-Plan.md` 的前置决策包。 |
+| `V2.BN.8.8-Canvas-Engine-Foundation-Plan.md` | 8.8 正式计划：CanvasObject / Placement / Mount、PageFrame v1、Block Projection、Shape/Connector、Command/History、Canvas AI Tree、Experience Gate。 | 不做完整 infinite canvas、ContentGroup projection、Relation runtime、Agent write 或 GraphRAG。 | 执行时同步 Roadmap、Canvas architecture/state/interaction contracts、Review、Experience Review、CHANGELOG。 |
+| `V2.BN.8.9-PageFrame-Maturity-Plan.md` | 8.9 正式计划：PageFrame / PageStack notebook maturity；覆盖 visible contract、multi PageFrame、ruler / margin guides、header/footer/page number、template/background/style、export preview、crossing object policy、command surface、operable object、Continuous PageStack、Layout panel navigator、content flow、cross-page block fragments、PageSlice snapshot/reference 和 closeout gate。 | 不做完整 CanvasObject DB migration、ContentGroup projection、Relation runtime、Agent write、Object Family 或完整 infinite canvas。 | 执行时同步 Canvas checklist、Review、Experience Review、CHANGELOG、Open Issues，并在 8.9 内确认 PageStack / PageSlice 是否达到 Better Notebook 最低门槛。 |
+| `V2.BN.8.7-CanvasObject-Media-Annotation-Drawing-Image-Seed-Plan.md` | 历史 8.7 CanvasObject seed 草案，现已被 8.8 Canvas Engine Foundation plan 取代。 | 不再作为 active 入口。 | 仅作为历史参考；恢复其中任意内容前必须先经过 8.8 data contract / runtime boundary。 |
 
 ## 可能 Promotion 到全局的文档
 
@@ -154,8 +183,12 @@ V2.BN.8.5 明确不做完整 AI、Relation runtime、SourceReference attach、St
 - `V2.BN.8.6.10` ContentGroup Identity Seed：把旧 interpretation 口径改成 `ContentGroup.identity`，并把 accepted identity 定义为 ContentGroup 自己的 accepted / reviewed 状态，不再定义第二套对象。
 - `V2.BN.8.6.11` GroupFolder And ContentGroup Gallery Direction Draft：保留历史 plan 文件名，但方向已经从 accepted-only index 转为 GroupFolder / Gallery；Folder 管组织、路径、视图边界和局部 relation graph scope。
 - `V2.BN.8.7` ContentGroup System Maturity：Rail / Gallery / Single Editor 职责收束，Member/source 边界、GroupFolder/Gallery resource-manager 心智、Reference / Duplicate / Fork / Materialize 语言稳定。
-- `V2.BN.8.8+` CanvasObject, Media Annotation, Drawing Tool, And Image Insert Seed：顺延此前 8.7 CanvasObject seed，最小画笔、shape、image insert、CanvasObject layer、region selection reserve，并让图片区域、CanvasObject、media region 能成为 annotation range。
-- `V2.BN.8.9+` Canvas Reliability / Scale / Export Reserve Closure：大 note、formula-heavy、workspace outside frame、visible render window、export boundary 和 endpoint reserve。
+- `V2.BN.8.8` Canvas Engine Foundation：CanvasObject / CanvasPlacement / ContentMount、PageFrame v1、paragraph block projection、finite expandable world、shape / block-backed shape、visual connector、CanvasCommand / CanvasDelta、Canvas AI Tree read-only snapshot。
+- `V2.BN.8.9` PageFrame / PageStack Notebook Maturity：多 PageFrame、标尺 / margin guides、页眉页脚、页码、PageFrame template、export preview、PageStack navigator、content flow、cross-page block fragments、PageSlice snapshot/reference。
+- `V2.BN.8.10` TextFlow Typography Maturity：字体、字号、行距、段距、document typography profile、PageFrame pagination measurement、export / AI-readable layout typography alignment。
+- `V2.BN.8.11` Structured Object Family：先做 Canvas persistence cutover，再用普通 CanvasObject、shape / connector、image / table 和第一类结构化对象打磨对象生命周期。
+- `V2.BN.8.12` ContentGroup Projection And Reuse：ContentGroup 作为特殊 CanvasObject 后置处理，覆盖 tile/folder projection、Reference / Duplicate / Fork / Materialize / Open original、Petal reserve。
+- `V2.BN.8.13+` ContentGroup Mode / Relation View / Agent lane：RelationProposal、ContentGroup/Petal endpoint visualization、Agent / GraphRAG 按成熟度后置。
 ## V2.BN.8.6 Annotation Editor And ReadingInterpretation Seed Entry
 
 `V2.BN.8.6-Annotation-Editor-And-ReadingInterpretation-Seed-Plan.md` 是第八阶段第六个小版本的执行计划。
@@ -200,11 +233,22 @@ V2.BN.8.6.4 明确不做完整自定义 selection engine 重写、per-label visi
 
 V2.BN.8.7 明确不做 CanvasObject / media / drawing seed、cross-note CanvasObject reuse、完整数据库迁移、GraphRAG、relation runtime 或完整 source reconstruction。它只负责让 ContentGroup 能回答自己是谁、在哪里被组织、members 是什么、来自哪里、是否与 source 同步，以及 Reference / Duplicate / Fork / Materialize 分别意味着什么。
 
-## V2.BN.8.8+ CanvasObject, Media Annotation, Drawing Tool, And Image Insert Seed Deferred Entry
+## V2.BN.8.8 Canvas Engine Foundation Entry
 
-`V2.BN.8.7-CanvasObject-Media-Annotation-Drawing-Image-Seed-Plan.md` 保留为后续 CanvasObject seed 的历史草案，但不再是 active V2.BN.8.7 入口。
+`V2.BN.8.8-Canvas-Engine-Foundation-Plan.md` 是 8.7 ContentGroup System Maturity 之后的正式 Canvas 入口。
 
-该工作顺延到 V2.BN.8.8+ 或后续 Canvas track。恢复执行前，应重新发行或重编号该计划，并确认 ContentGroup System maturity 已经给 Canvas projection 提供稳定对象边界。
+该计划取代旧的 `V2.BN.8.7-CanvasObject-Media-Annotation-Drawing-Image-Seed-Plan.md` 作为 active 入口。旧 plan 只保留为历史草案；8.8 不再从“media / drawing / image seed”切入，而是先建立 CanvasObject / CanvasPlacement / ContentMount、PageFrame v1、Block Projection、finite expandable world、VisualConnector、CanvasCommand 和 Canvas AI Tree。
+
+8.8 完成后，后续 Canvas track 预计按以下方向展开：
+
+```text
+8.9  PageFrame / PageStack notebook maturity
+8.10 TextFlow typography maturity
+8.11 Structured object family, starting with Canvas persistence cutover
+8.12 ContentGroup projection and reuse
+8.13+ ContentGroup Mode / Relation View
+9.x  Agent / GraphRAG integration
+```
 ## V2.BN.8.6.7 / V2.BN.8.6.8 ContentGroup And Cleanup Entries
 
 `V2.BN.8.6.7-ContentGroup-Rebuild-And-Legacy-Retreat-Plan.md` records the ContentGroup / Petal rebuild that made `ContentGroup` the serious content package and demoted `AnnotationSet` / `TextUnitGroup` from long-term product truth.

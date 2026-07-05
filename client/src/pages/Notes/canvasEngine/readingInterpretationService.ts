@@ -17,6 +17,9 @@ import {
 import {
   normalizeContentGroup,
 } from './contentGroupService';
+import {
+  annotationRangeIsRenderable,
+} from './annotationDisplayService';
 
 function createRuntimeId(prefix: string): string {
   const random = Math.random().toString(36).slice(2, 9);
@@ -106,6 +109,7 @@ function rangePreview(range: AnnotationRangeV1): string {
 
 function annotationPreview(annotation: AnnotationTruthV1): string {
   return annotation.ranges
+    .filter(annotationRangeIsRenderable)
     .map(rangePreview)
     .filter(Boolean)
     .join(' | ');
@@ -137,7 +141,7 @@ export function projectAnnotationsForReading(input: {
     lines.push(`Annotation: ${annotation.raw_label}`);
     lines.push(`Status: ${annotation.status}`);
     lines.push('Ranges:');
-    for (const range of annotation.ranges) {
+    for (const range of annotation.ranges.filter(annotationRangeIsRenderable)) {
       lines.push(`- ${rangePreview(range)}`);
     }
     const children = getChildAnnotations({

@@ -16,6 +16,9 @@ import {
   type SnapGuide,
   type SurfaceMode,
 } from './runtimeLayout';
+import {
+  snapRectToPageFrameGuides,
+} from './pageFrameGuideService';
 import type {
   BlockPlacementModel,
   CanvasBoundaryKind,
@@ -26,6 +29,7 @@ import type {
 export interface PlacementSeedBlock {
   id: string;
   placement_id?: string;
+  canvas_layout?: Record<string, unknown> | null;
   display_overrides_json?: Record<string, unknown> | null;
 }
 
@@ -35,6 +39,24 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
+}
+
+function localContentPageFrame(contentWidth: number): PageFrameModel {
+  return {
+    id: 'local-content-page-frame',
+    role: 'primary_page_frame',
+    exportable: true,
+    x: 0,
+    y: 0,
+    width: contentWidth,
+    height: 0,
+    contentInset: {
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+    },
+  };
 }
 
 function isExportRole(value: unknown): value is ExportRole {
@@ -54,7 +76,9 @@ function isLayoutWidthMode(value: unknown): value is LayoutWidthMode {
 }
 
 export function readStoredLayout(block: PlacementSeedBlock): Partial<BlockBoxLayout> | null {
-  const layout = block.display_overrides_json?.[NOTE_LAYOUT_KEY];
+  const layout = isRecord(block.canvas_layout)
+    ? block.canvas_layout
+    : block.display_overrides_json?.[NOTE_LAYOUT_KEY];
   if (!isRecord(layout)) return null;
   return {
     ...layout,
@@ -232,6 +256,32 @@ export function buildRuntimeBlockPlacement({
   };
 }
 
+export function projectPageFrameLocalLayoutToCanvasLayout({
+  layout,
+  pageFrame,
+  pageOffsetX,
+}: {
+  layout: BlockBoxLayout;
+  pageFrame: PageFrameModel | null | undefined;
+  pageOffsetX: number;
+}): BlockBoxLayout {
+  if (!pageFrame || layout.surface === 'canvas_workspace') return layout;
+
+  const localOffsetX = pageFrame.x + pageFrame.contentInset.left - pageOffsetX;
+  const localOffsetY = pageFrame.y + pageFrame.contentInset.top;
+  if (localOffsetX === 0 && localOffsetY === 0) return {
+    ...layout,
+    surface: layout.surface || 'formal_page',
+  };
+
+  return {
+    ...layout,
+    x: layout.x + localOffsetX,
+    y: layout.y + localOffsetY,
+    surface: 'formal_page',
+  };
+}
+
 export function buildRelationEndpointReserveForPlacement(placement: BlockPlacementModel): RelationEndpointReserve[] {
   const centerY = placement.y + placement.height / 2;
   return [
@@ -390,9 +440,20 @@ export function applyMoveSnap(
   const otherLayouts = Object.entries(layouts)
     .filter(([id]) => id !== blockId)
     .map(([, item]) => item);
-  const xTargets = [0, contentWidth - layout.width, ...otherLayouts.flatMap((item) => [item.x, item.x + item.width])];
+  const pageFrameSnap = snapRectToPageFrameGuides({
+    rect: {
+      x: layout.x,
+      y: layout.y,
+      width: layout.width,
+      height: layout.height,
+    },
+    pageFrame: localContentPageFrame(contentWidth),
+  });
+  const xTargets = otherLayouts.flatMap((item) => [item.x, item.x + item.width]);
   const yTargets = [0, ...otherLayouts.flatMap((item) => [item.y, item.y + item.height])];
-  const snappedX = snapToTargets(layout.x, xTargets);
+  const snappedX = pageFrameSnap.snappedAxes.x
+    ? { value: pageFrameSnap.rect.x, snapped: pageFrameSnap.guide?.x }
+    : snapToTargets(layout.x, xTargets);
   const snappedY = snapToTargets(layout.y, yTargets);
   const next = { ...layout, x: snappedX.value, y: snappedY.value };
   const guide = snappedX.snapped !== undefined || snappedY.snapped !== undefined

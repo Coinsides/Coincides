@@ -152,6 +152,7 @@ function normalizeMemberKind(value: unknown): string {
     'annotation',
     'block',
     'content_group',
+    'page_slice',
     'canvas_object',
     'table_region',
     'image_region',

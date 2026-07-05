@@ -30,6 +30,7 @@ export function useRuntimeBlockOperationsController(
     handleTrashBlock,
     pushCreatedBlockHistory,
     pushLayoutHistory,
+    pushStructuredMutationHistory,
   } = useRuntimeBlockHistoryController(options);
 
   const naturalWriting = useRuntimeNaturalWritingController({
@@ -47,6 +48,7 @@ export function useRuntimeBlockOperationsController(
 
   return {
     handleTrashBlock,
+    pushStructuredMutationHistory,
     ...naturalWriting,
     ...blockEditing,
     ...placementInteraction,

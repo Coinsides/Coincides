@@ -55,6 +55,9 @@ import packageImportRoutes from './routes/packageImports.js';
 import domainRefinementRoutes from './routes/domainRefinements.js';
 import contentGroupRoutes from './routes/contentGroups.js';
 import groupFolderRoutes from './routes/groupFolders.js';
+import canvasObjectRoutes from './routes/canvasObjects.js';
+import canvasAssetRoutes from './routes/canvasAssets.js';
+import annotationTruthRoutes from './routes/annotationTruths.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 
@@ -123,6 +126,9 @@ app.use('/api/package-imports', authMiddleware, packageImportRoutes);
 app.use('/api/domain-refinements', authMiddleware, domainRefinementRoutes);
 app.use('/api/content-groups', authMiddleware, contentGroupRoutes);
 app.use('/api/group-folders', authMiddleware, groupFolderRoutes);
+app.use('/api/canvas-objects', authMiddleware, canvasObjectRoutes);
+app.use('/api/canvas-assets', authMiddleware, canvasAssetRoutes);
+app.use('/api/annotation-truths', authMiddleware, annotationTruthRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

@@ -109,6 +109,7 @@ export function useRuntimeSurfaceStateController() {
   });
 
   const {
+    focusViewportOnRect,
     panViewportBy,
     resetViewport,
     scrollViewportBy,
@@ -127,6 +128,7 @@ export function useRuntimeSurfaceStateController() {
     collapseChrome,
     expandChrome,
     focusBlockId,
+    focusViewportOnRect,
     interactionState,
     layoutModeKind,
     layoutMode,

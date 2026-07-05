@@ -940,19 +940,56 @@ V2.BN.8.7
   GroupFolder / Gallery resource-manager maturity
   Reference / Duplicate / Fork / Materialize language
 
-V2.BN.8.8+
-  CanvasObject, Media Annotation, Drawing Tool, And Image Insert Seed
-  Plan: docs/releases/V2.BN.8/V2.BN.8.7-CanvasObject-Media-Annotation-Drawing-Image-Seed-Plan.md
-  Deferred from the original 8.7 slot; file name is historical until the plan is reissued.
-  minimal pen / shape / image insert
-  CanvasObject layer reserve
-  region selection reserve
-  image region / CanvasObject / media region as annotation range
+V2.BN.8.8
+  Canvas Engine Foundation
+  Plan: docs/releases/V2.BN.8/V2.BN.8.8-Canvas-Engine-Foundation-Plan.md
+  Decision matrices: docs/releases/V2.BN.8/V2.BN.8.8-Canvas-Engine-Foundation-Engineering-Decision-Matrices.md
+  CanvasObject / CanvasPlacement / ContentMount
+  PageFrame v1
+  paragraph block projection
+  finite expandable world
+  shape / block-backed shape seed
+  visual connector seed
+  CanvasCommand / CanvasDelta seed
+  Canvas AI Tree read-only snapshot
 
-V2.BN.8.9+
-  Canvas Reliability / Scale / Export Reserve Closure
-  50 / 200 / 1000 block smoke
-  formula-heavy smoke
+V2.BN.8.9
+  PageFrame / PageStack Notebook Maturity
+  Plan: docs/releases/V2.BN.8/V2.BN.8.9-PageFrame-Maturity-Plan.md
+  visible PageFrame contract and primary focus
+  multi PageFrame
+  ruler / margin guides
+  header / footer / page number
+  PageFrame template / background / style
+  export preview
+  crossing object export policy
+  Continuous PageStack
+  Layout panel / PageStack navigator
+  PageStack content flow
+  cross-page Block fragments
+  PageSlice snapshot/reference
+
+V2.BN.8.10
+  TextFlow Typography Maturity
+  font family / font size / line height / paragraph spacing
+  document typography profile
+  PageFrame pagination measurement
+  selection-time mini typography toolbar
+  export/AI-readable layout typography alignment
+
+V2.BN.8.11
+  Structured Object Family
+  ordinary CanvasObject usage boundary
+  visible shape / connector tools
+  image / table maturity
+  first selected structured family
+
+V2.BN.8.12+
+  ContentGroup Projection And Reuse
+  ContentGroup tile / folder projection
+  Reference / Duplicate / Fork / Materialize / Open original
+  ContentGroup Mode / Relation View after ContentGroup projection is stable
+  Agent / GraphRAG after Canvas AI Tree and proposal-command boundary are proven
   visible render window / virtualization reserve
   PageFrame export boundary
   CanvasObject / relation endpoint reserve
@@ -1168,10 +1205,25 @@ Important changes:
 
 V2.BN.8.7 明确不做 CanvasObject / media / drawing seed、cross-note CanvasObject reuse、完整数据库迁移、GraphRAG、relation runtime 或完整 source reconstruction。它只负责让 ContentGroup 能回答自己是谁、在哪里被组织、members 是什么、来自哪里、是否与 source 同步，以及 Reference / Duplicate / Fork / Materialize 分别意味着什么。
 
-## V2.BN.8.8+ CanvasObject, Media Annotation, Drawing Tool, And Image Insert Seed Deferred Entry
+## V2.BN.8.8 Canvas Engine Foundation Entry
 
-`V2.BN.8.7-CanvasObject-Media-Annotation-Drawing-Image-Seed-Plan.md` 保留为后续 CanvasObject seed 的历史草案，但不再是 active V2.BN.8.7 入口。
+`V2.BN.8.8-Canvas-Engine-Foundation-Plan.md` 是 8.7 ContentGroup System Maturity 之后的正式 Canvas 入口。
 
-该工作顺延到 V2.BN.8.8+ 或后续 Canvas track。恢复执行前，应重新发行或重编号该计划，并确认 ContentGroup System maturity 已经给 Canvas projection 提供稳定对象边界。
+它不再从旧的 media / drawing / image seed 切入，而是先建立 CanvasObject / CanvasPlacement / ContentMount、PageFrame v1、paragraph block projection、finite expandable world、visual connector seed、CanvasCommand / CanvasDelta seed 和 Canvas AI Tree read-only snapshot。
+
+`V2.BN.8.7-CanvasObject-Media-Annotation-Drawing-Image-Seed-Plan.md` 保留为历史草案。恢复其中任意能力前，必须先经过 8.8 data contract、runtime boundary 和 command/snapshot 设计。
+
+后续 Canvas lane 不压进一个版本：
+
+```text
+8.9   PageFrame / PageStack notebook maturity.
+8.10  TextFlow typography maturity.
+8.11  Structured object family, starting with Canvas persistence cutover.
+8.12  ContentGroup projection and reuse.
+8.13+ ContentGroup Mode / Relation View.
+9.x   Agent / GraphRAG integration.
+```
+
+8.11 must begin with a persistence cutover gate before ordinary object family work expands. The three load-bearing seeds are `canvas_engine_page_frames_v1`, placement-level `better_notebook_layout`, and `canvas_engine_annotations_v1`. They should move into durable CanvasObject / CanvasPlacement / ContentMount / PageFrameExtension / AnnotationTruth tables before visible object tools expand. As of the 2026-06-28 correction, ContentGroup projection and reuse move to V2.BN.8.12 because ContentGroup is a special CanvasObject with source/member and write-back semantics.
 
 This split is a working layout, not a hard cap. If TextFlow or Canvas reliability needs more polish, V2.BN.8 may add more subversions before entering V2.BN.9 Structure Studio And Editor Productization.

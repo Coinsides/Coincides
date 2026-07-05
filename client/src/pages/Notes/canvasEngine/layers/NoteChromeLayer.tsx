@@ -1,18 +1,34 @@
 import {
   ArrowLeft,
+  CheckCircle2,
+  Copy,
   Eye,
   FileText,
+  FilePlus2,
   Info,
   LayoutDashboard,
   MoreHorizontal,
   PanelTopClose,
   PanelTopOpen,
   Star,
+  Trash2,
   X,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef } from 'react';
+import type { ChangeEvent } from 'react';
 import type { ExportPreviewModel } from '../exportPreviewService';
 import type { Note } from '../runtimeDataTypes';
+import type {
+  DocumentTypographyProfile,
+  PageFrameCollectionModel,
+  PageFrameModel,
+} from '../types';
+import {
+  DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE,
+  DOCUMENT_FONT_FAMILY_OPTIONS,
+  DOCUMENT_TYPOGRAPHY_LIMITS,
+  patchDocumentTypographyProfile,
+} from '../typographyProfileService';
 import { ExportPreviewLayer } from './ExportPreviewLayer';
 import { FloatingOverlayLayer } from './FloatingOverlayLayer';
 import styles from '../../NoteDetail.module.css';
@@ -28,6 +44,10 @@ export interface NoteChromeLayerProps {
   layoutMode: boolean;
   layoutModeKind: 'off' | 'persistent' | 'temporary';
   note: Note;
+  pageFrameCollection: PageFrameCollectionModel;
+  pageFrames: PageFrameModel[];
+  primaryPageFrameId: string | null;
+  selectedPageFrameId: string | null;
   showExportPreview: boolean;
   showLayoutPanel: boolean;
   showMoreActions: boolean;
@@ -42,18 +62,32 @@ export interface NoteChromeLayerProps {
   surfaceMode: 'page' | 'canvas';
   surfacePolicy: SurfacePolicyView;
   titleDraft: string;
+  documentTypographyProfile: DocumentTypographyProfile;
   onAddFavorite: () => void;
   onBackProject: () => void;
   onCloseOverlay: () => void;
   onCollapseChrome: () => void;
+  onAddPageBelow: (frameId: string) => void;
+  onCreatePageFrame: () => void;
+  onCreatePageStack: () => void;
+  onDetachPageFromStack: (frameId: string) => void;
   onExpandChrome: () => void;
   onSaveTitle: () => void | Promise<void>;
+  onSaveDocumentTypographyProfile: (profile: DocumentTypographyProfile) => void | Promise<void>;
   onTitleDraftChange: (value: string) => void;
   onToggleExportPreview: () => void;
   onToggleLayoutMode: () => void;
   onToggleMoreActions: () => void;
   onToggleNoteInfo: () => void;
   onOpenLayoutPanel: () => void;
+  onDeletePageFrame: (frameId: string) => void;
+  onDuplicatePageFrame: (frameId: string) => void;
+  onInsertPageFrame: (afterFrameId: string) => void;
+  onMergePageStackWithPrevious: (stackId: string) => void;
+  onSelectPageFrame: (frameId: string) => void;
+  onSetPrimaryPageFrame: (frameId: string) => void;
+  onSplitPageStackAtFrame: (frameId: string) => void;
+  onTogglePageStackCollapse: (frameId: string) => void;
   onTogglePreviewAIVisibility: () => void;
   onTogglePreviewBlockTypes: () => void;
   onTogglePreviewExportStatus: () => void;
@@ -68,6 +102,10 @@ export function NoteChromeLayer({
   layoutMode,
   layoutModeKind,
   note,
+  pageFrameCollection,
+  pageFrames,
+  primaryPageFrameId,
+  selectedPageFrameId,
   showExportPreview,
   showLayoutPanel,
   showMoreActions,
@@ -82,18 +120,30 @@ export function NoteChromeLayer({
   surfaceMode,
   surfacePolicy,
   titleDraft,
+  documentTypographyProfile,
   onAddFavorite,
   onBackProject,
   onCloseOverlay,
   onCollapseChrome,
+  onAddPageBelow,
+  onCreatePageStack,
+  onDetachPageFromStack,
   onExpandChrome,
   onSaveTitle,
+  onSaveDocumentTypographyProfile,
   onTitleDraftChange,
   onToggleExportPreview,
   onToggleLayoutMode,
   onToggleMoreActions,
   onToggleNoteInfo,
   onOpenLayoutPanel,
+  onDeletePageFrame,
+  onDuplicatePageFrame,
+  onMergePageStackWithPrevious,
+  onSelectPageFrame,
+  onSetPrimaryPageFrame,
+  onSplitPageStackAtFrame,
+  onTogglePageStackCollapse,
   onTogglePreviewAIVisibility,
   onTogglePreviewBlockTypes,
   onTogglePreviewExportStatus,
@@ -122,7 +172,157 @@ export function NoteChromeLayer({
     onToggleLayoutMode();
   }, [clearLayoutHoverTimer, onToggleLayoutMode]);
 
+  const handleTypographyFontFamilyChange = useCallback((event: ChangeEvent<HTMLSelectElement>) => {
+    const nextProfile = patchDocumentTypographyProfile(documentTypographyProfile, {
+      fontFamily: event.target.value,
+    });
+    void onSaveDocumentTypographyProfile(nextProfile);
+  }, [documentTypographyProfile, onSaveDocumentTypographyProfile]);
+
+  const handleTypographyFontSizeChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    const nextProfile = patchDocumentTypographyProfile(documentTypographyProfile, {
+      fontSizePx: Number(event.target.value),
+    });
+    void onSaveDocumentTypographyProfile(nextProfile);
+  }, [documentTypographyProfile, onSaveDocumentTypographyProfile]);
+
+  const handleTypographyLineHeightChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    const nextProfile = patchDocumentTypographyProfile(documentTypographyProfile, {
+      lineHeightPx: Number(event.target.value),
+    });
+    void onSaveDocumentTypographyProfile(nextProfile);
+  }, [documentTypographyProfile, onSaveDocumentTypographyProfile]);
+
+  const handleTypographyParagraphSpacingChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    const nextProfile = patchDocumentTypographyProfile(documentTypographyProfile, {
+      paragraphSpacingPx: Number(event.target.value),
+    });
+    void onSaveDocumentTypographyProfile(nextProfile);
+  }, [documentTypographyProfile, onSaveDocumentTypographyProfile]);
+
+  const handleResetTypographyProfile = useCallback(() => {
+    void onSaveDocumentTypographyProfile(DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE);
+  }, [onSaveDocumentTypographyProfile]);
+
   useEffect(() => clearLayoutHoverTimer, [clearLayoutHoverTimer]);
+
+  const pageFrameById = new Map(pageFrames.map((pageFrame) => [pageFrame.id, pageFrame]));
+  const minimumLineHeightPx = Math.max(
+    documentTypographyProfile.fontSizePx + 2,
+    DOCUMENT_TYPOGRAPHY_LIMITS.minLineHeightPx,
+  );
+  const pageStackRows = (pageFrameCollection.pageStacks || []).map((stack) => ({
+    stack,
+    frames: stack.frameIds
+      .map((frameId) => pageFrameById.get(frameId))
+      .filter((frame): frame is PageFrameModel => Boolean(frame)),
+  }));
+
+  const renderPageFramePanelRow = ({
+    pageFrame,
+    label,
+    meta,
+    canDetachToNewStack,
+    canSplitFromHere,
+  }: {
+    pageFrame: PageFrameModel;
+    label: string;
+    meta: string;
+    canDetachToNewStack: boolean;
+    canSplitFromHere: boolean;
+  }) => {
+    const primary = pageFrame.id === primaryPageFrameId;
+    return (
+      <div
+        key={pageFrame.id}
+        className={`${styles.pageFramePanelRow} ${primary ? styles.pageFramePanelRowPrimary : ''}`}
+        data-page-frame-row={pageFrame.id}
+        onClick={() => onSelectPageFrame(pageFrame.id)}
+        onKeyDown={(event) => {
+          if (event.key !== 'Enter' && event.key !== ' ') return;
+          event.preventDefault();
+          onSelectPageFrame(pageFrame.id);
+        }}
+        role="button"
+        tabIndex={0}
+      >
+        <FileText size={15} />
+        <span>{label}</span>
+        <small>{meta}</small>
+        <div className={styles.pageFramePanelActions}>
+          <button
+            className={styles.iconBtn}
+            onClick={(event) => {
+              event.stopPropagation();
+              onAddPageBelow(pageFrame.id);
+            }}
+            title="Add page below"
+            aria-label={`Add page below ${label}`}
+          >
+            <FilePlus2 size={14} />
+          </button>
+          <button
+            className={styles.iconBtn}
+            onClick={(event) => {
+              event.stopPropagation();
+              onSplitPageStackAtFrame(pageFrame.id);
+            }}
+            title="Split stack here"
+            aria-label={`Split stack at ${label}`}
+            disabled={!canSplitFromHere}
+          >
+            <PanelTopOpen size={14} />
+          </button>
+          <button
+            className={styles.iconBtn}
+            onClick={(event) => {
+              event.stopPropagation();
+              onDuplicatePageFrame(pageFrame.id);
+            }}
+            title="Duplicate to new stack"
+            aria-label={`Duplicate ${label} to new stack`}
+          >
+            <Copy size={14} />
+          </button>
+          <button
+            className={styles.iconBtn}
+            onClick={(event) => {
+              event.stopPropagation();
+              onSetPrimaryPageFrame(pageFrame.id);
+            }}
+            title="Set primary"
+            aria-label={`Set ${label} as primary`}
+            disabled={primary}
+          >
+            <CheckCircle2 size={14} />
+          </button>
+          <button
+            className={styles.iconBtn}
+            onClick={(event) => {
+              event.stopPropagation();
+              onDetachPageFromStack(pageFrame.id);
+            }}
+            title="Detach to new stack"
+            aria-label={`Detach ${label} to new PageStack`}
+            disabled={!canDetachToNewStack}
+          >
+            <X size={14} />
+          </button>
+          <button
+            className={styles.iconBtn}
+            onClick={(event) => {
+              event.stopPropagation();
+              onDeletePageFrame(pageFrame.id);
+            }}
+            title="Delete page"
+            aria-label={`Delete ${label}`}
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className={styles.chromeWrap} data-note-chrome="true">
@@ -192,6 +392,15 @@ export function NoteChromeLayer({
             >
               <LayoutDashboard size={15} />
               Layout
+            </button>
+            <button
+              className={styles.iconBtn}
+              onClick={onCreatePageStack}
+              title="New PageStack"
+              aria-label="New PageStack"
+              data-page-stack-create-toolbar="true"
+            >
+              <FilePlus2 size={16} />
             </button>
             <button
               className={styles.iconBtn}
@@ -289,6 +498,81 @@ export function NoteChromeLayer({
                     {snapEnabled ? 'On' : 'Off'}
                   </span>
                 </button>
+                <div className={styles.pageFramePanel} data-page-frame-panel="true">
+                  <button
+                    type="button"
+                    className={styles.moreAction}
+                    data-page-stack-create-toolbar="true"
+                    onClick={onCreatePageStack}
+                  >
+                    <FilePlus2 size={15} />
+                    <span>New PageStack</span>
+                    <small>Create a continuous page unit with its own local numbering.</small>
+                  </button>
+                  {selectedPageFrameId && (
+                    <button
+                      type="button"
+                      className={styles.moreAction}
+                      onClick={() => onAddPageBelow(selectedPageFrameId)}
+                    >
+                      <FilePlus2 size={15} />
+                      <span>Add page below selected</span>
+                      <small>Adds a new page to the selected stack, or wraps the selected page first.</small>
+                    </button>
+                  )}
+                  {pageStackRows.map(({ stack, frames }, stackIndex) => {
+                    const pageCount = frames.length;
+                    return (
+                    <div key={stack.id} className={styles.pageFramePanelStackGroup}>
+                      <div
+                        className={styles.pageFramePanelStackRow}
+                        data-page-stack-panel-row={stack.id}
+                      >
+                        <FileText size={15} />
+                        <span>{stack.displayName}</span>
+                        <small>{pageCount === 1 ? 'Single-page stack' : `${pageCount}-page stack`}</small>
+                        <button
+                          className={styles.iconBtn}
+                          onClick={() => onMergePageStackWithPrevious(stack.id)}
+                          title="Merge with previous PageStack"
+                          aria-label="Merge with previous PageStack"
+                          disabled={stackIndex === 0}
+                        >
+                          <Copy size={14} />
+                        </button>
+                        <button
+                          className={styles.iconBtn}
+                          onClick={() => {
+                            const frameId = stack.primaryFrameId || stack.frameIds[0];
+                            if (frameId) onTogglePageStackCollapse(frameId);
+                          }}
+                          title={stack.collapsed ? 'Expand PageStack' : 'Collapse PageStack'}
+                          aria-label={stack.collapsed ? 'Expand PageStack' : 'Collapse PageStack'}
+                        >
+                          {stack.collapsed ? <PanelTopOpen size={14} /> : <PanelTopClose size={14} />}
+                        </button>
+                      </div>
+                      {frames.map((pageFrame, index) => (
+                        <div
+                          key={`${stack.id}:${pageFrame.id}`}
+                          className={styles.pageFramePanelChildRow}
+                          data-page-stack-panel-frame={pageFrame.id}
+                        >
+                          {renderPageFramePanelRow({
+                            pageFrame,
+                            label: `Page ${index + stack.numbering.startAt}`,
+                            meta: pageFrame.id === primaryPageFrameId
+                              ? 'Primary'
+                              : (pageCount === 1 ? 'Single-page stack' : 'Stack page'),
+                            canDetachToNewStack: pageCount > 1,
+                            canSplitFromHere: pageCount > 1 && index > 0,
+                          })}
+                        </div>
+                      ))}
+                    </div>
+                    );
+                  })}
+                </div>
                 <p className={styles.popoverNote}>
                   Persistent Layout stays on until you close it. Block move handles use temporary Layout for one operation.
                 </p>
@@ -310,6 +594,75 @@ export function NoteChromeLayer({
                   <MoreHorizontal size={15} />
                   <span>Note-level actions</span>
                   <small>History, duplicate, archive, import, export, and delete controls will live here.</small>
+                </div>
+                <div
+                  className={styles.typographyControls}
+                  data-typography-controls="document"
+                >
+                  <div className={styles.typographyControlHeader}>
+                    <span>Typography</span>
+                    <button
+                      type="button"
+                      className={styles.typographyResetButton}
+                      onClick={handleResetTypographyProfile}
+                    >
+                      Reset
+                    </button>
+                  </div>
+                  <label className={styles.typographyControlRow}>
+                    <span>Font</span>
+                    <select
+                      className={styles.typographySelect}
+                      value={documentTypographyProfile.fontFamily}
+                      onChange={handleTypographyFontFamilyChange}
+                      data-typography-font-family="true"
+                    >
+                      {DOCUMENT_FONT_FAMILY_OPTIONS.map((option) => (
+                        <option key={option.id} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className={styles.typographyControlRow}>
+                    <span>Size</span>
+                    <input
+                      className={styles.typographyNumberInput}
+                      type="number"
+                      min={DOCUMENT_TYPOGRAPHY_LIMITS.minFontSizePx}
+                      max={DOCUMENT_TYPOGRAPHY_LIMITS.maxFontSizePx}
+                      step={1}
+                      value={documentTypographyProfile.fontSizePx}
+                      onChange={handleTypographyFontSizeChange}
+                      data-typography-font-size="true"
+                    />
+                  </label>
+                  <label className={styles.typographyControlRow}>
+                    <span>Line</span>
+                    <input
+                      className={styles.typographyNumberInput}
+                      type="number"
+                      min={minimumLineHeightPx}
+                      max={DOCUMENT_TYPOGRAPHY_LIMITS.maxLineHeightPx}
+                      step={1}
+                      value={documentTypographyProfile.lineHeightPx}
+                      onChange={handleTypographyLineHeightChange}
+                      data-typography-line-height="true"
+                    />
+                  </label>
+                  <label className={styles.typographyControlRow}>
+                    <span>Spacing</span>
+                    <input
+                      className={styles.typographyNumberInput}
+                      type="number"
+                      min={DOCUMENT_TYPOGRAPHY_LIMITS.minParagraphSpacingPx}
+                      max={DOCUMENT_TYPOGRAPHY_LIMITS.maxParagraphSpacingPx}
+                      step={1}
+                      value={documentTypographyProfile.paragraphSpacingPx}
+                      onChange={handleTypographyParagraphSpacingChange}
+                      data-typography-paragraph-spacing="true"
+                    />
+                  </label>
                 </div>
                 <p className={styles.popoverNote}>
                   Layout controls have moved into the Layout panel.

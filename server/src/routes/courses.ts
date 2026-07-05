@@ -3,6 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
+import { releaseCourseCanvasAssets } from '../services/canvasAssets.js';
 import { createCourseSchema, updateCourseSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
 
@@ -154,14 +155,18 @@ router.get('/:id/summary', (req: AuthRequest, res: Response) => {
 // DELETE /api/courses/:id
 router.delete('/:id', (req: AuthRequest, res: Response) => {
   const db = getDb();
+  const courseId = String(req.params.id);
 
-  const existing = db.prepare('SELECT id FROM courses WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!);
+  const existing = db.prepare('SELECT id FROM courses WHERE id = ? AND user_id = ?').get(courseId, req.userId!);
   if (!existing) {
     throw new AppError(404, 'Course not found');
   }
 
-  // CASCADE handles related data deletion via FK constraints
-  db.prepare('DELETE FROM courses WHERE id = ?').run(req.params.id);
+  db.transaction(() => {
+    releaseCourseCanvasAssets(db, req.userId!, courseId);
+    // CASCADE handles related data deletion via FK constraints after asset teardown.
+    db.prepare('DELETE FROM courses WHERE id = ?').run(courseId);
+  })();
 
   res.json({ message: 'Course deleted' });
 });

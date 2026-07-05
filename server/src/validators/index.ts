@@ -542,6 +542,389 @@ export const updateNoteBlockPlacementSchema = z.object({
   display_overrides_json: jsonObjectSchema,
 });
 
+const canvasRuntimeIdSchema = z.string().min(1).max(220);
+const canvasSurfaceSchema = z.enum(['formal_page', 'canvas_workspace']);
+const canvasBoundaryRoleSchema = z.enum(['inside', 'outside', 'crossing']);
+const canvasVisibilityStateSchema = z.enum(['normal', 'scratch', 'ai_hidden', 'export_hidden']);
+const canvasRenderVisibilitySchema = z.enum(['visible', 'hidden', 'collapsed']);
+
+const canvasPlacementCoreSchema = z.object({
+  placement_id: canvasRuntimeIdSchema.optional(),
+  x: z.number().finite(),
+  y: z.number().finite(),
+  width: z.number().finite().min(0),
+  height: z.number().finite().min(0),
+  rotation: z.number().finite().optional(),
+  frame_id: canvasRuntimeIdSchema.nullable().optional(),
+  surface: canvasSurfaceSchema.optional(),
+  boundary_role: canvasBoundaryRoleSchema.optional(),
+  z_index: z.number().int().optional(),
+  visibility_state: canvasVisibilityStateSchema.optional(),
+  render_visibility: canvasRenderVisibilitySchema.optional(),
+  export_role: z.enum(['included', 'excluded', 'scratch']).optional(),
+  ai_visibility: z.enum(['visible', 'hidden']).optional(),
+  width_mode: z.enum(['auto', 'manual']).optional(),
+}).passthrough();
+
+const canvasObjectMetadataSchema = jsonObjectSchema.optional();
+const canvasObjectSourceSchema = jsonObjectSchema.optional();
+
+const saveParagraphBlockProjectionObjectSchema = z.object({
+  kind: z.literal('paragraph_block_projection'),
+  placement: canvasPlacementCoreSchema,
+  extension: z.object({
+    block_id: canvasRuntimeIdSchema,
+  }),
+  mount: z.object({
+    mount_id: canvasRuntimeIdSchema.optional(),
+    target_id: canvasRuntimeIdSchema.optional(),
+    projection_mode: z.enum(['owned', 'reference', 'duplicate', 'fork', 'materialized']).optional(),
+    sync_policy: z.enum(['manual', 'read_through', 'snapshot']).optional(),
+  }).optional(),
+  metadata: canvasObjectMetadataSchema,
+  source: canvasObjectSourceSchema,
+});
+
+const saveTestProbeObjectSchema = z.object({
+  kind: z.literal('__test_probe'),
+  placement: canvasPlacementCoreSchema,
+  metadata: canvasObjectMetadataSchema,
+  source: canvasObjectSourceSchema,
+});
+
+const shapeContentMountSchema = z.object({
+  mount_id: canvasRuntimeIdSchema.optional(),
+  target_id: canvasRuntimeIdSchema.optional(),
+  projection_mode: z.literal('owned').optional(),
+  sync_policy: z.literal('manual').optional(),
+});
+
+const canvasObjectStyleMetadataSchema = z.object({
+  preset_id: z.enum(['shape.default', 'shape.sticky_note']),
+  family: z.literal('shape').optional(),
+  variant: z.enum(['default', 'yellow']).optional(),
+  text_inset: z.number().min(0).max(32).optional(),
+}).passthrough();
+
+const saveShapeObjectSchema = z.object({
+  kind: z.literal('shape'),
+  backing: z.enum(['none', 'note_block']).optional(),
+  object_class: z.enum(['pure', 'block_backed']).optional(),
+  placement: canvasPlacementCoreSchema,
+  metadata: z.object({
+    shape_type: z.enum(['rectangle', 'ellipse']),
+    object_style: canvasObjectStyleMetadataSchema.optional(),
+  }).passthrough(),
+  extension: z.object({
+    block_id: canvasRuntimeIdSchema,
+  }).optional(),
+  mount: shapeContentMountSchema.optional(),
+  source: canvasObjectSourceSchema,
+}).superRefine((value, ctx) => {
+  const backing = value.backing || 'none';
+  const objectClass = value.object_class || 'pure';
+  const stylePreset = value.metadata.object_style?.preset_id;
+  if (backing === 'none') {
+    if (stylePreset === 'shape.sticky_note') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['metadata', 'object_style'],
+        message: 'Sticky note style requires a note_block-backed shape',
+      });
+    }
+    if (objectClass !== 'pure') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['object_class'],
+        message: 'Pure shape must use object_class="pure"',
+      });
+    }
+    if (value.extension || value.mount) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['extension'],
+        message: 'Pure shape cannot include note_block backing payload',
+      });
+    }
+    return;
+  }
+  if (objectClass !== 'block_backed') {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['object_class'],
+      message: 'note_block-backed shape must use object_class="block_backed"',
+    });
+  }
+  if (!value.extension?.block_id) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['extension', 'block_id'],
+      message: 'block-backed shape requires extension.block_id',
+    });
+  }
+  if (value.mount?.target_id && value.extension?.block_id && value.mount.target_id !== value.extension.block_id) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['mount', 'target_id'],
+      message: 'shape mount target_id must match extension.block_id',
+    });
+  }
+  if (stylePreset === 'shape.sticky_note' && value.metadata.shape_type !== 'rectangle') {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['metadata', 'shape_type'],
+      message: 'Sticky note style currently requires rectangle shape_type',
+    });
+  }
+});
+
+const visualConnectorAnchorSchema = z.enum(['auto', 'center', 'north', 'east', 'south', 'west']);
+const visualConnectorObjectEndpointSchema = z.object({
+  kind: z.literal('object'),
+  object_id: canvasRuntimeIdSchema.optional(),
+  objectId: canvasRuntimeIdSchema.optional(),
+  anchor: visualConnectorAnchorSchema.optional(),
+}).passthrough().superRefine((value, ctx) => {
+  if (!value.object_id && !value.objectId) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['object_id'],
+      message: 'object endpoint requires object_id',
+    });
+  }
+});
+const visualConnectorPointEndpointSchema = z.object({
+  kind: z.literal('point'),
+  x: z.number().finite(),
+  y: z.number().finite(),
+}).passthrough();
+const visualConnectorEndpointSchema = z.union([
+  visualConnectorObjectEndpointSchema,
+  visualConnectorPointEndpointSchema,
+]);
+
+const visualConnectorExtensionSchema = z.object({
+  start: visualConnectorEndpointSchema,
+  end: visualConnectorEndpointSchema,
+  line_style: z.enum(['solid', 'dashed', 'dotted']).optional(),
+  lineStyle: z.enum(['solid', 'dashed', 'dotted']).optional(),
+  stroke: z.string().trim().min(1).max(64).optional(),
+  stroke_width: z.number().finite().min(0.5).max(16).optional(),
+  strokeWidth: z.number().finite().min(0.5).max(16).optional(),
+  start_marker: z.enum(['none', 'arrow']).optional(),
+  startMarker: z.enum(['none', 'arrow']).optional(),
+  end_marker: z.enum(['none', 'arrow']).optional(),
+  endMarker: z.enum(['none', 'arrow']).optional(),
+  relation_kind: z.literal('visual_only').optional(),
+  relationKind: z.literal('visual_only').optional(),
+  metadata: canvasObjectMetadataSchema,
+}).passthrough();
+
+const saveVisualConnectorObjectSchema = z.object({
+  kind: z.literal('visual_connector'),
+  backing: z.literal('none').optional(),
+  object_class: z.literal('pure').optional(),
+  placement: canvasPlacementCoreSchema,
+  metadata: canvasObjectMetadataSchema,
+  extension: visualConnectorExtensionSchema,
+  source: canvasObjectSourceSchema,
+  mount: z.never().optional(),
+  contentMount: z.never().optional(),
+}).superRefine((value, ctx) => {
+  if (value.backing && value.backing !== 'none') {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['backing'],
+      message: 'Visual connector must use backing="none"',
+    });
+  }
+  if (value.object_class && value.object_class !== 'pure') {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['object_class'],
+      message: 'Visual connector must use object_class="pure"',
+    });
+  }
+  if (value.mount || value.contentMount) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['mount'],
+      message: 'Visual connector cannot include content mounts',
+    });
+  }
+});
+
+const saveImageObjectSchema = z.object({
+  kind: z.literal('image'),
+  backing: z.literal('asset'),
+  object_class: z.literal('media'),
+  placement: canvasPlacementCoreSchema,
+  metadata: canvasObjectMetadataSchema,
+  extension: z.object({
+    asset_id: canvasRuntimeIdSchema.optional(),
+    assetId: canvasRuntimeIdSchema.optional(),
+    fit: z.enum(['contain', 'cover']).optional(),
+    caption: z.string().max(2000).nullable().optional(),
+    alt_text: z.string().max(4000).nullable().optional(),
+    altText: z.string().max(4000).nullable().optional(),
+    natural_width: z.number().int().min(0).optional(),
+    naturalWidth: z.number().int().min(0).optional(),
+    natural_height: z.number().int().min(0).optional(),
+    naturalHeight: z.number().int().min(0).optional(),
+    metadata: canvasObjectMetadataSchema,
+  }).passthrough(),
+  source: canvasObjectSourceSchema,
+  mount: z.never().optional(),
+  contentMount: z.never().optional(),
+}).superRefine((value, ctx) => {
+  if (!value.extension.asset_id && !value.extension.assetId) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['extension', 'asset_id'],
+      message: 'Image CanvasObject requires extension.asset_id',
+    });
+  }
+  if (value.mount || value.contentMount) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['mount'],
+      message: 'Image CanvasObject cannot include content mounts',
+    });
+  }
+});
+
+const tableRowSchema = z.object({
+  rowId: canvasRuntimeIdSchema,
+  index: z.number().int().min(0),
+  height: z.number().finite().positive().optional(),
+}).passthrough();
+
+const tableColumnSchema = z.object({
+  columnId: canvasRuntimeIdSchema,
+  index: z.number().int().min(0),
+  width: z.number().finite().positive().optional(),
+  label: z.string().max(200).optional(),
+}).passthrough();
+
+const tableCellSchema = z.object({
+  cellId: canvasRuntimeIdSchema,
+  rowId: canvasRuntimeIdSchema,
+  columnId: canvasRuntimeIdSchema,
+  rowIndex: z.number().int().min(0),
+  columnIndex: z.number().int().min(0),
+  text: z.string().max(2000),
+  valueType: z.literal('text'),
+}).passthrough();
+
+function validateContinuousIndexes(
+  values: Array<{ index: number }>,
+  path: Array<string | number>,
+  ctx: z.RefinementCtx,
+) {
+  const indexes = [...values.map((value) => value.index)].sort((a, b) => a - b);
+  for (let index = 0; index < indexes.length; index += 1) {
+    if (indexes[index] !== index) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path,
+        message: 'Table row and column indexes must be continuous from 0',
+      });
+      return;
+    }
+  }
+}
+
+const tableStructuredExtensionSchema = z.object({
+  structured_kind: z.literal('table').optional(),
+  structuredKind: z.literal('table').optional(),
+  schema_version: z.literal('table.v1').optional(),
+  schemaVersion: z.literal('table.v1').optional(),
+  rows: z.array(tableRowSchema).min(1).max(50),
+  columns: z.array(tableColumnSchema).min(1).max(20),
+  cells: z.array(tableCellSchema).min(1).max(1000),
+  metadata: canvasObjectMetadataSchema,
+}).passthrough().superRefine((value, ctx) => {
+  validateContinuousIndexes(value.rows, ['rows'], ctx);
+  validateContinuousIndexes(value.columns, ['columns'], ctx);
+  if (value.cells.length !== value.rows.length * value.columns.length) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['cells'],
+      message: 'Table cells must cover every row and column pair exactly once',
+    });
+  }
+  const rowIds = new Set(value.rows.map((row) => row.rowId));
+  const columnIds = new Set(value.columns.map((column) => column.columnId));
+  const seenPairs = new Set<string>();
+  for (const [index, cell] of value.cells.entries()) {
+    if (!rowIds.has(cell.rowId)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['cells', index, 'rowId'],
+        message: 'Table cell rowId must reference an existing row',
+      });
+    }
+    if (!columnIds.has(cell.columnId)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['cells', index, 'columnId'],
+        message: 'Table cell columnId must reference an existing column',
+      });
+    }
+    const key = `${cell.rowId}:${cell.columnId}`;
+    if (seenPairs.has(key)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['cells', index],
+        message: 'Table cells cannot duplicate a row and column pair',
+      });
+    }
+    seenPairs.add(key);
+  }
+});
+
+const saveTableObjectSchema = z.object({
+  kind: z.literal('table'),
+  backing: z.literal('structured_object'),
+  object_class: z.literal('structured'),
+  placement: canvasPlacementCoreSchema,
+  metadata: canvasObjectMetadataSchema,
+  extension: tableStructuredExtensionSchema,
+  source: canvasObjectSourceSchema,
+  mount: z.never().optional(),
+  contentMount: z.never().optional(),
+}).superRefine((value, ctx) => {
+  if (value.mount || value.contentMount) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['mount'],
+      message: 'Table CanvasObject cannot include content mounts',
+    });
+  }
+});
+
+export const savePageFrameCollectionSchema = z.object({
+  collection: jsonObjectSchema,
+});
+
+export const saveCanvasBlockPlacementSchema = z.object({
+  block_id: canvasRuntimeIdSchema,
+  layout: canvasPlacementCoreSchema,
+});
+
+export const saveCanvasObjectSchema = z.union([
+  saveParagraphBlockProjectionObjectSchema,
+  saveShapeObjectSchema,
+  saveVisualConnectorObjectSchema,
+  saveImageObjectSchema,
+  saveTableObjectSchema,
+  saveTestProbeObjectSchema,
+]);
+
+export const replaceNoteAnnotationTruthsSchema = z.object({
+  annotations: z.array(jsonObjectSchema).max(1000),
+});
+
 export const createProjectionSchema = z.object({
   course_id: z.string().uuid('Invalid course ID'),
   type: z.enum(['organized_note']),

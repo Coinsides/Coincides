@@ -2,6 +2,7 @@ import {
   annotationVisibleInHierarchy,
 } from './annotationHierarchyService';
 import type {
+  AnnotationRangeV1,
   AnnotationTruthV1,
 } from './runtimeDataTypes';
 
@@ -38,6 +39,26 @@ export function visibleAnnotationsForDisplay(input: {
 
 function unique(values: string[]): string[] {
   return Array.from(new Set(values));
+}
+
+function annotationRangeMetadata(range: AnnotationRangeV1): Record<string, unknown> {
+  const metadata = (range as AnnotationRangeV1 & { metadata?: unknown }).metadata;
+  return metadata && typeof metadata === 'object' && !Array.isArray(metadata)
+    ? metadata as Record<string, unknown>
+    : {};
+}
+
+export function annotationRangeIsPending(range: AnnotationRangeV1): boolean {
+  const metadata = annotationRangeMetadata(range);
+  return metadata.anchor_status === 'pending' || metadata.anchor_status === 'invalid';
+}
+
+export function annotationRangeIsRenderable(range: AnnotationRangeV1): boolean {
+  if (annotationRangeIsPending(range)) return false;
+  if (range.target_kind === 'text_span') {
+    return typeof range.start_offset === 'number' && typeof range.end_offset === 'number';
+  }
+  return true;
 }
 
 function selectedFirst(input: {
@@ -97,7 +118,8 @@ export function buildTextUnitAnnotationCluster(input: {
   const annotations = visibleAnnotations.filter((annotation) => (
     !isChildAnnotation(annotation, visibleAnnotations)
     && annotation.ranges.some((range) => (
-      range.block_id === input.blockId
+      annotationRangeIsRenderable(range)
+      && range.block_id === input.blockId
       && range.text_unit_id === input.textUnitId
       && (range.target_kind === 'text_span' || range.target_kind === 'text_unit')
     ))
@@ -121,7 +143,8 @@ export function buildBlockAnnotationCluster(input: {
     annotations: input.annotations,
     displayState: input.displayState,
   }).filter((annotation) => annotation.ranges.some((range) => (
-    range.block_id === input.blockId
+    annotationRangeIsRenderable(range)
+    && range.block_id === input.blockId
     && range.target_kind === 'block'
   )));
   return clusterFromAnnotations({

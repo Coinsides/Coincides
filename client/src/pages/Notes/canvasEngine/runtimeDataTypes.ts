@@ -117,6 +117,7 @@ export type ContentGroupMemberKind =
   | 'annotation'
   | 'block'
   | 'content_group'
+  | 'page_slice'
   | 'canvas_object'
   | 'table_region'
   | 'image_region'
@@ -146,6 +147,7 @@ export interface AnnotationRangeV1 {
   start_offset?: number;
   end_offset?: number;
   range_text_cache?: string;
+  metadata?: Record<string, unknown>;
 }
 
 export interface AnnotationTruthV1 {
@@ -356,6 +358,7 @@ export interface NoteBlock {
   id: string;
   placement_id: string;
   display_overrides_json: Record<string, unknown>;
+  canvas_layout?: Record<string, unknown> | null;
   block_type: string;
   title: string | null;
   content_json: Record<string, unknown>;

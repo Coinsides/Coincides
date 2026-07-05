@@ -7,11 +7,14 @@ import { DEFAULT_CANVAS_WORLD } from '../engineModel';
 import type { SurfaceMode } from '../runtimeLayout';
 import type {
   CanvasPoint,
+  CanvasRect,
   CanvasViewport,
+  CanvasWorldModel,
 } from '../types';
 import {
   clampViewportToWorld,
   createRuntimeViewport,
+  focusViewportOnWorldRect,
   panViewportByViewportDelta,
   scrollViewportByViewportDelta,
   zoomViewportAtViewportPoint,
@@ -19,10 +22,12 @@ import {
 
 export interface UseViewportTransformControllerOptions {
   surfaceMode: SurfaceMode;
+  world?: CanvasWorldModel;
 }
 
 export function useViewportTransformController({
   surfaceMode,
+  world,
 }: UseViewportTransformControllerOptions) {
   const [viewportTransform, setViewportTransform] = useState<CanvasViewport>(() => (
     createRuntimeViewport(surfaceMode, 720)
@@ -35,36 +40,46 @@ export function useViewportTransformController({
     }));
   }, [surfaceMode]);
 
-  const setViewportSize = useCallback((width: number, height: number) => {
+  const setViewportSize = useCallback((width: number, height: number, runtimeWorld?: CanvasWorldModel) => {
     setViewportTransform((current) => clampViewportToWorld({
       ...current,
       width: Math.max(1, Math.round(width)),
       height: Math.max(1, Math.round(height)),
-    }, DEFAULT_CANVAS_WORLD));
-  }, []);
+    }, runtimeWorld || world || DEFAULT_CANVAS_WORLD));
+  }, [world]);
 
-  const panViewportBy = useCallback((delta: CanvasPoint) => {
+  const panViewportBy = useCallback((delta: CanvasPoint, runtimeWorld?: CanvasWorldModel) => {
     setViewportTransform((current) => (
-      panViewportByViewportDelta(current, delta, DEFAULT_CANVAS_WORLD)
+      panViewportByViewportDelta(current, delta, runtimeWorld || world || DEFAULT_CANVAS_WORLD)
     ));
-  }, []);
+  }, [world]);
 
-  const scrollViewportBy = useCallback((delta: CanvasPoint) => {
+  const scrollViewportBy = useCallback((delta: CanvasPoint, runtimeWorld?: CanvasWorldModel) => {
     setViewportTransform((current) => (
-      scrollViewportByViewportDelta(current, delta, DEFAULT_CANVAS_WORLD)
+      scrollViewportByViewportDelta(current, delta, runtimeWorld || world || DEFAULT_CANVAS_WORLD)
     ));
-  }, []);
+  }, [world]);
 
-  const zoomViewportAt = useCallback((point: CanvasPoint, nextZoom: number) => {
+  const zoomViewportAt = useCallback((point: CanvasPoint, nextZoom: number, runtimeWorld?: CanvasWorldModel) => {
     setViewportTransform((current) => (
       zoomViewportAtViewportPoint({
         viewport: current,
         point,
         nextZoom,
-        world: DEFAULT_CANVAS_WORLD,
+        world: runtimeWorld || world || DEFAULT_CANVAS_WORLD,
       })
     ));
-  }, []);
+  }, [world]);
+
+  const focusViewportOnRect = useCallback((rect: CanvasRect, runtimeWorld?: CanvasWorldModel) => {
+    setViewportTransform((current) => (
+      focusViewportOnWorldRect({
+        viewport: current,
+        world: runtimeWorld || world || DEFAULT_CANVAS_WORLD,
+        rect,
+      })
+    ));
+  }, [world]);
 
   const resetViewport = useCallback(() => {
     setViewportTransform((current) => createRuntimeViewport(surfaceMode, current.height, {
@@ -74,6 +89,7 @@ export function useViewportTransformController({
   }, [surfaceMode]);
 
   return {
+    focusViewportOnRect,
     panViewportBy,
     resetViewport,
     scrollViewportBy,

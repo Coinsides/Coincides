@@ -1,5 +1,6 @@
 import { getPrimaryPageOffsetX } from './viewportService';
 import {
+  CANVAS_WORKSPACE_WIDTH,
   DEFAULT_BLOCK_HEIGHT,
   DEFAULT_PAGE_CONTENT_WIDTH,
   ELASTIC_AVOIDANCE_ACTIVATION_DISTANCE,
@@ -11,6 +12,13 @@ import {
   isCanvasWorkspaceBlock,
   type PlacementSeedBlock,
 } from './placementService';
+import {
+  snapRectToPageFrameGuides,
+} from './pageFrameGuideService';
+import {
+  isCanvasObjectBackingBlock,
+} from './shapeTextMountService';
+import type { PageFrameModel } from './types';
 
 export interface SurfaceModePolicy {
   mode: SurfaceMode;
@@ -57,14 +65,15 @@ export function createSurfaceModeTransitionPolicy(surfaceMode: SurfaceMode): Sur
   };
 }
 
-export function getVisibleBlocksForSurface<TBlock extends PlacementSeedBlock>(
+export function getVisibleBlocksForSurface<TBlock extends PlacementSeedBlock & { metadata?: Record<string, unknown> }>(
   blocks: TBlock[],
   policy: SurfaceModePolicy,
   contentWidth: number,
 ): TBlock[] {
+  const renderableBlocks = blocks.filter((block) => !isCanvasObjectBackingBlock(block));
   return policy.showWorkspaceBlocks
-    ? blocks
-    : blocks.filter((block) => !isCanvasWorkspaceBlock(block, contentWidth));
+    ? renderableBlocks
+    : renderableBlocks.filter((block) => !isCanvasWorkspaceBlock(block, contentWidth));
 }
 
 export function shouldResolvePageCollisions(policy: SurfaceModePolicy): boolean {
@@ -102,9 +111,38 @@ export function createBlankDraftLayout({
 }): BlockBoxLayout {
   if (snapEnabled && policy.isPageMode) return defaultDraftLayout;
 
-  const availableWidth = Math.max(MIN_BLOCK_WIDTH, contentWidth - rawX);
+  const maxPlacementWidth = policy.isCanvasMode ? CANVAS_WORKSPACE_WIDTH : contentWidth;
+  const clampedRawX = Math.min(Math.max(rawX, 0), Math.max(0, maxPlacementWidth - MIN_BLOCK_WIDTH));
+  const availableWidth = Math.max(MIN_BLOCK_WIDTH, maxPlacementWidth - clampedRawX);
   const width = Math.min(DEFAULT_PAGE_CONTENT_WIDTH, availableWidth);
-  const x = Math.min(Math.max(rawX, 0), Math.max(0, contentWidth - width));
+  const x = Math.min(clampedRawX, Math.max(0, maxPlacementWidth - width));
   const y = Math.max(0, rawY);
-  return { x, y, width, height: DEFAULT_BLOCK_HEIGHT };
+  const rawLayout = { x, y, width, height: DEFAULT_BLOCK_HEIGHT };
+
+  if (!snapEnabled || !policy.isCanvasMode) return rawLayout;
+
+  const contentPageFrame: PageFrameModel = {
+    id: 'local-content-page-frame',
+    role: 'primary_page_frame',
+    exportable: true,
+    x: 0,
+    y: 0,
+    width: contentWidth,
+    height: 0,
+    contentInset: {
+      top: 0,
+      right: 0,
+      bottom: 0,
+      left: 0,
+    },
+  };
+  const snapped = snapRectToPageFrameGuides({
+    rect: rawLayout,
+    pageFrame: contentPageFrame,
+  });
+
+  return {
+    ...rawLayout,
+    x: Math.min(Math.max(snapped.rect.x, 0), Math.max(0, maxPlacementWidth - width)),
+  };
 }

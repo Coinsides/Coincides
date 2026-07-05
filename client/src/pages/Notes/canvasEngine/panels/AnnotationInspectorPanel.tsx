@@ -25,6 +25,9 @@ import {
   annotationColorForToken,
 } from '../annotationColorService';
 import {
+  annotationRangeIsRenderable,
+} from '../annotationDisplayService';
+import {
   buildAnnotationRangePreviewMenu,
   type CommandActionId,
   type CommandSurfaceMenu,
@@ -290,8 +293,14 @@ export function AnnotationInspectorPanel({
       {annotation.ranges.map((range, index) => {
         const preview = rangePreview(range);
         const draftValue = rangeDrafts[range.id] ?? preview;
+        const rangeRenderable = annotationRangeIsRenderable(range);
         return (
           <div key={`${annotation.id}-${range.id || index}`} className={styles.annotationRangeRow}>
+            {!rangeRenderable && (
+              <span className={styles.annotationRangeNeedsReview}>
+                Needs review
+              </span>
+            )}
             {isEditableTextRange(range) ? (
               <textarea
                 className={styles.annotationRangePreview}

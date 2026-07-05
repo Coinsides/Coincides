@@ -1,5 +1,303 @@
 # V2.BN.8 Open Issue And Brainstorm Checklist
 
+## 2026-06-27 V2.BN.8.10.6 Typography Closure Routing
+
+status: TextFlow typography maturity engineering closure completed; remaining work routed by dependency
+
+### Completed In V2.BN.8.10
+
+- [x] Add note-level `DocumentTypographyProfile`.
+- [x] Persist typography under `text_flow_typography_profile_v1`.
+- [x] Add font family and font size controls.
+- [x] Add line-height and paragraph-spacing controls.
+- [x] Apply document typography CSS variables to visible writing text.
+- [x] Make measurement estimates read the active profile.
+- [x] Expose typography in PageFrame runtime extensions.
+- [x] Expose typography in Export Preview metadata.
+- [x] Expose typography in AI-readable PageFrame refs.
+- [x] Add selection-time mini typography toolbar v1.
+
+### Route To Typography / Pagination Hardening
+
+- [ ] Replace or supplement the current estimate-based character-width model with a more reliable CJK/document measurement strategy before true Word-like automatic pagination.
+- [ ] Implement measured Word-like automatic pagination.
+- [ ] Design user-confirmed cross-page Block split materialization.
+
+Reason:
+
+- 8.10 made typography measurable and shared, but it did not promise precise browser/Word-equivalent pagination.
+- Chinese/CJK measurement can be materially different from the first estimate baseline.
+
+### Route To Later Editing UI
+
+- [ ] Design global top bar / ribbon after Canvas function groups settle.
+- [ ] Design selected-range rich styling as an explicit TextFlow inline-style layer.
+- [ ] Decide whether per-block, PageFrame-specific, or role-specific typography is needed.
+
+### Completed In V2.BN.8.11.1 Canvas Persistence Cutover Gate
+
+- [x] Move active PageFrame / PageStack persistence out of `canvas_engine_page_frames_v1`.
+- [x] Move active per-block layout persistence out of placement-level `better_notebook_layout`.
+- [x] Move active AnnotationTruth persistence out of `canvas_engine_annotations_v1`.
+- [x] Make durable `CanvasObject / CanvasPlacement / ContentMount / PageFrameExtension / AnnotationTruth` truth available before ordinary object family work and later ContentGroup projection expand.
+
+Carry-forward note:
+
+- Shape / connector projection seed helpers still use legacy layout helper internally. They are dormant seed helpers, not the active Note editor persistence path.
+- ContentGroup as CanvasObject projection and reuse UI now moves to the later V2.BN.8.12 lane. V2.BN.8.11 should use ordinary objects first.
+
+## 2026-06-27 V2.BN.8.9.18 Deferred Item Routing
+
+status: PageStack / PageSlice engineering closeout completed; deferred items routed by dependency and version lane
+
+This section classifies the real leftovers from V2.BN.8.9 so later agents do not treat every deferred item as an immediate patch.
+
+### Route To V2.BN.8.10 TextFlow Typography Maturity
+
+- [x] Build TextFlow typography controls and data boundary: font family, font size, line height, paragraph spacing, document typography profile.
+- [x] Make typography measurable and shared by TextFlow, PageFrame pagination, Export Preview, and AI-readable layout.
+- [ ] Implement measured Word-like auto-pagination only after the typography and measurement baseline is stable.
+
+Reason:
+
+- Auto-pagination depends on font metrics, line height, paragraph spacing, content width, and PageFrame content rect.
+- Doing auto-pagination before typography would create a brittle fake page engine that must be rewritten.
+- V2.BN.8.10.4 completed the shared measurement baseline; the remaining work is real automatic pagination and split/materialization behavior.
+
+### Route To V2.BN.8.11 Structured / Ordinary CanvasObject Family
+
+- [x] Move PageFrame and block placement into durable generic CanvasObject / CanvasPlacement database truth.
+- [ ] Define ordinary CanvasObject projection / usage boundary before ContentGroup projection.
+- [ ] Add visible shape / connector tools without turning visual arrows into Relation.
+- [ ] Add image / table maturity seed.
+- [ ] Choose the first structured object family from diagram / mind map / chart / math graph.
+
+Reason:
+
+- Final CanvasObject / CanvasPlacement database migration happened in `V2.BN.8.11.1 Canvas Persistence Cutover Gate`.
+- Ordinary objects should prove the object lifecycle before ContentGroup brings in special reuse and write-back semantics.
+
+### Route To V2.BN.8.12 ContentGroup Projection And Reuse
+
+- [ ] Add ContentGroup as a CanvasObject projection, with Reference / Duplicate / Fork / Materialize / Open original semantics.
+- [ ] Decide how ContentGroup tile/folder projection opens, collapses, and points back to the original group.
+- [ ] Decide how PageSlice member cards / previews are shown when ContentGroup projection becomes visible.
+- [ ] Reserve Petal projection only with parent ContentGroup context.
+
+Reason:
+
+- ContentGroup is a special CanvasObject, not a good first ordinary-object test case.
+- It carries source/member boundaries, reuse verbs, possible cross-note/project use, and write-back vs copy/fork decisions.
+
+### Route To Post-V2.BN.8.12 PageSlice / Reuse UI Work
+
+- [ ] Revisit visible PageSlice extraction UI after `V2.BN.8.12 ContentGroup Projection And Reuse`.
+- [ ] Revisit PageSlice member card / thumbnail / preview after `V2.BN.8.12 ContentGroup Projection And Reuse`.
+- [ ] Revisit page-internal PageSlice range selection after `V2.BN.8.12 ContentGroup Projection And Reuse`.
+- [ ] Revisit broader reuse UI after `V2.BN.8.12 ContentGroup Projection And Reuse`, then decide whether it needs a dedicated subversion.
+- [ ] Design user-confirmed cross-page Block split materialization after measured pagination exists.
+
+Reason:
+
+- PageSlice is already a snapshot/reference semantic boundary, but it should not get a premature UI while future CanvasObjects on the page still affect what an extracted page contains.
+- PageSlice / reuse UI should wait until PageStack, ordinary CanvasObject work, image/table maturity, first Structured Object Family pass, and ContentGroup projection have clarified what can live on a page.
+
+### Route To Dedicated Export / Package Lane
+
+- [ ] Keep real PDF execution out of the immediate PageStack lane unless manual testing reveals a narrow blocker.
+- [ ] Design full export as a dedicated later version, not a side patch.
+- [ ] Treat PDF export as the smaller rendering outlet.
+- [ ] Treat Coincides project-package export as the larger problem: it must preserve Note, TextFlow, PageStack, CanvasObjects, ContentGroups, Sources, assets, references, snapshots, and future graph data.
+- [ ] Do not design the project package format until SourceArtifact / SourceAnchor / source chain architecture is mature.
+
+Reason:
+
+- PDF can be rendered from PageFrame contents once layout is stable.
+- A Coincides project package is a source-aware workspace reconstruction format; it depends on the future source system and cannot be solved by the PageFrame lane alone.
+
+### Route To Cross-cutting Command Surface Work
+
+- [ ] Design the full context-menu / component-menu system across blank Canvas, PageStack/PageFrame, Block, shape, connector, ContentGroup projection, structured object, and future PageSlice.
+- [ ] Decide how toolbar, context menu, slash command, floating toolbar, and AI proposal commands divide responsibility.
+
+Reason:
+
+- The current right-click behavior is a narrow PageFrame command-surface seed.
+- The mature menu system is broad UI infrastructure and should be designed after object families are clearer.
+
+## 2026-06-27 V2.BN.8.9.18 PageStack / PageSlice Closeout Follow-up
+
+status: PageStack / PageSlice closeout in progress; holistic manual test pending
+
+- [x] Complete explicit Continuous PageStack v1.
+- [x] Complete visible Layout panel / PageStack navigator v1.
+- [x] Complete PageStack content flow v1.
+- [x] Complete cross-page Block fragment projection v1.
+- [x] Complete whole-page PageSlice snapshot/reference v1.
+- [x] Add `page_slice` ContentGroup member candidate semantics.
+- [ ] Run Henry's holistic manual test pass across PageStack creation, movement, continuation, split/merge/detach, and PageSlice expectations.
+- [ ] Add visible PageSlice extraction action if manual testing proves it blocks basic notebook use.
+- [ ] Design PageSlice page-internal range selection.
+- [ ] Design user-confirmed cross-page Block split materialization.
+- [ ] Implement measured auto-pagination after TextFlow Typography Maturity.
+- [ ] Keep final generic CanvasObject / CanvasPlacement database cutover deferred until the object model is stable enough.
+
+Notes:
+
+- `PageStack` is the user-facing page unit.
+- `PageFrame` is the physical page slice and formal-page object.
+- `PageSlice` is snapshot/reference semantics for a whole page, not a second page truth.
+- V2.BN.8.10 is TextFlow Typography Maturity; ordinary object family work is now V2.BN.8.11; ContentGroup projection is now V2.BN.8.12.
+
+## 2026-06-27 V2.BN.8.9.13 Continuous PageStack v1 Follow-up
+
+status: explicit PageStack continuity v1 completed; PageSlice snapshot/reference v1 completed in 8.9.17; extraction UI, split behavior, and measured pagination deferred
+
+- [x] Add explicit `PageStackModel` and PageFrame collection metadata fields.
+- [x] Preserve legacy multi-PageFrame metadata as independent PageFrames when no `pageStacks` exist.
+- [x] Seed new A4/PageFrame notes with one explicit primary PageStack.
+- [x] Seed Project Detail `New Note` with PageFrameCollection metadata instead of relying on runtime fallback.
+- [x] Add stack-local numbering and PageStack runtime / AI-readable / Export Preview context.
+- [x] Add New PageStack / Add page below / Detach / Collapse / Expand v1 command paths.
+- [x] Add PageSlice snapshot/reference semantics for whole-page reuse.
+- [x] Add cross-page Block continuation markers.
+- [ ] Design PageSlice extraction UI, page-internal ranges, and split behavior.
+- [ ] Design cross-page Block split confirmation.
+- [ ] Design user-editable PageStack numbering controls and mature PageStack navigator controls.
+- [ ] Polish Layout panel visible entry / stack grouping discoverability.
+- [ ] Implement measured auto-pagination after TextFlow Typography Maturity.
+
+Notes:
+
+- `PageStack` is layout continuity truth, not TextFlow truth and not Block ownership.
+- Independent PageFrames stay independent unless a user command explicitly creates stack continuity.
+- Collapse is a Canvas organization state only; AI-readable layout and export preview still retain stack metadata.
+
+## 2026-06-27 V2.BN.8.9.12.1 PageFrame Layout Affiliation Follow-up
+
+status: sparse layout affiliation patch completed; final container model deferred
+
+- [x] Add sparse `LayoutAffiliation` helper boundary for PageFrame layout containers.
+- [x] Move fully-contained Blocks with PageFrame move transactions.
+- [x] Keep crossing Blocks out of automatic PageFrame move.
+- [x] Add visible Canvas zoom control for browser/manual testing.
+- [ ] Decide final persisted `LayoutContainer` / `LayoutAffiliation` model after PageStack and broader object families are clearer.
+- [ ] Decide whether PageFrame move should show live child-object preview during drag, or whether commit-time movement is enough.
+- [x] Add cross-page Block continuation markers.
+- [ ] Design cross-page Block split confirmation.
+- [ ] Keep final generic CanvasObject / CanvasPlacement database cutover deferred.
+
+Notes:
+
+- This patch intentionally keeps Block/PageFrame relation geometry-derived.
+- `LayoutAffiliation` is a transaction helper, not hard ownership.
+- PageFrame is the first special LayoutContainer; plain shapes should not become containers unless they actually mount content.
+
+## 2026-06-27 V2.BN.8.9.11 PageFrame Numbering Scope Guard Follow-up
+
+status: stack-neutral numbering guard completed; PageStack v1 implemented in V2.BN.8.9.13
+
+- [x] Stop independent PageFrames from deriving `1 / N`, `2 / N` page-number chrome from the whole `PageFrameCollection`.
+- [x] Add model-contract coverage that `PageFrameCollection` does not imply PageStack numbering.
+- [x] Add runtime-boundary coverage that prevents direct collection-global page-number total usage.
+- [x] Design and implement explicit PageStack / Continuous PageFrame data model v1.
+- [x] Implement stack-local page numbering v1.
+- [ ] Design user-editable stack numbering controls.
+- [x] Add whole-page PageSlice snapshot/reference behavior.
+- [ ] Design PageSlice extraction UI, page-internal ranges, and split behavior.
+
+Notes:
+
+- `PageFrameCollection` is the Canvas-level object collection.
+- `PageStack / Continuous PageFrame` is now the explicit continuity model.
+- A newly created independent PageFrame should not automatically become page 2 of a previous PageFrame unless the user explicitly attaches or merges it into a stack.
+
+## 2026-06-27 V2.BN.8.9.10 Canvas World Auto-Expand Follow-up
+
+status: expandable finite Canvas completed; complete infinite Canvas deferred
+
+- [x] Derive Canvas Mode world bounds from PageFrames, block placements, and reserved Canvas objects.
+- [x] Add PageFrame focus helper for create / insert / duplicate / set-primary / select flows.
+- [x] Make Layout panel PageFrame rows usable as jump targets.
+- [x] Add DOM smoke markers for Canvas world width and height.
+- [ ] Decide the final complete infinite/chunked Canvas architecture.
+- [ ] Decide Page Mode behavior after creating a non-primary PageFrame: stay in Page Mode with notice, switch to Canvas Mode, or offer a focused action.
+- [x] Implement explicit PageStack scope and stack-local numbering v1 in V2.BN.8.9.13.
+- [ ] Design a mature PageFrame navigator for large PageFrame collections.
+- [ ] Implement PageFrame move / resize / configuration interactions.
+- [ ] Move PageFrame and block placement into durable generic CanvasObject / CanvasPlacement database truth.
+
+Notes:
+
+- V2.BN.8.9.10 makes the Canvas finite-but-expandable, not infinite.
+- This patch solves the immediate "new PageFrame is outside the fixed world" usability problem.
+- Full infinite/chunked Canvas remains a later architecture pass after core PageFrame object behavior is more usable.
+- V2.BN.8.9.11 removed collection-global page-number chrome for independent PageFrames; V2.BN.8.9.13 added explicit PageStack-local page labels.
+
+## 2026-06-27 V2.BN.8.9.9 PageFrame Command Surface Follow-up
+
+status: PageFrame creation entry completed; broader command system deferred
+
+- [x] Add toolbar PageFrame creation entry.
+- [x] Add Canvas Mode blank-space context menu creation entry.
+- [x] Add PageFrame shell command vocabulary for duplicate / set primary / delete.
+- [x] Implement Continuous PageStack v1 creation / add page below / detach / collapse command paths.
+- [x] Add whole-page PageSlice snapshot/reference behavior.
+- [ ] Design PageSlice extraction UI, page-internal ranges, and split behavior.
+- [ ] Design the full object context-menu system across blank Canvas, PageFrame, Block, shape, connector, ContentGroup projection, and future structured objects.
+- [ ] Decide final toolbar grouping for PageFrame creation after object tools are broader than PageFrame only.
+- [ ] Move PageFrame and block placement to durable generic CanvasObject / CanvasPlacement database truth.
+
+Notes:
+
+- `create_page_stack` was intentionally reserved in V2.BN.8.9.9 and enabled in V2.BN.8.9.13.
+- The current right-click behavior is a narrow PageFrame command-surface seed, not the final context-menu system.
+- PageFrame creation still uses transitional PageFrame collection metadata persistence.
+
+## 2026-06-26 V2.BN.8.9.8 PageFrame Closure Follow-up
+
+status: PageFrame maturity lane closed; carry-forward items recorded
+date: 2026-06-26
+
+- [x] Close V2.BN.8.9 as the PageFrame maturity lane.
+- [x] Browser-smoke Page Mode primary focus, Canvas Mode multi-frame view, primary persistence, ruler/guides, snap wall, outside drag, and Export Preview workspace-only classification.
+- [x] Confirm the later ContentGroup projection lane can start from current CanvasObject / CanvasPlacement semantics after ordinary object work.
+- [x] Supersede the old V2.BN.8.10 ContentGroup projection route: V2.BN.8.10 is TextFlow Typography Maturity; V2.BN.8.11 is ordinary / structured object family; ContentGroup projection moves to V2.BN.8.12.
+- [ ] Improve Layout control affordance: separate or clarify "toggle Layout Mode" vs "open Layout panel".
+- [x] Implement final durable CanvasObject / CanvasPlacement database cutover for PageFrame and block placement.
+- [ ] Add real export/PDF execution, rendered clipping, and manual crossing-object decision UI.
+- [ ] Add rich PageFrame header/footer/template editing after projection foundations are stable.
+- [ ] Add dedicated TextFlow typography controls for font, size, line height, and document style.
+
+Reason:
+
+- 8.9 now gives PageFrame a coherent formal-page role, AI-readable layout metadata, geometry-derived affiliation, and export preview explanation.
+- Multi-PageFrame persistence is still a PageFrame-specific metadata transition, not final Canvas database truth.
+- Layout panel usability is acceptable for development but should become clearer before the PageFrame surface is treated as polished.
+
+## 2026-06-26 V2.BN.8.9.2 Multi-PageFrame Follow-up
+
+status: scoped PageFrame collection pass complete; final CanvasObject persistence remains deferred
+date: 2026-06-26
+
+- [x] Establish PageFrame collection service boundary.
+- [x] Add transitional note metadata persistence under `canvas_engine_page_frames_v1`.
+- [x] Render multiple PageFrames in Canvas Mode.
+- [x] Add minimal Layout panel controls for insert / duplicate / set primary / delete.
+- [x] Browser-refresh smoke: confirm inserted PageFrames and primary selection survive real reload.
+- [x] Decide the later durable truth for PageFrame: PageFrame should enter generic CanvasObject / CanvasPlacement as a special PageFrame object.
+- [x] Decide how blocks become associated with a specific PageFrame: geometry-derived affiliation, not PageFrame ownership.
+- [ ] Implement the final durable CanvasObject / CanvasPlacement database cutover for PageFrame.
+- [x] Use geometry-derived affiliation in export preview and crossing-object policy.
+
+Reason:
+
+- 8.9.2 deliberately chose a PageFrame-specific metadata seed so visible multi-frame work can continue without forcing the full CanvasObject database migration too early.
+- This metadata seed should not be treated as the final CanvasObject truth.
+- 8.9.2.1 locks the architecture direction: PageFrame is a special CanvasObject; Block/PageFrame relation is derived from geometry.
+- PageFrame export grouping and crossing-object policy were implemented in 8.9.6 / 8.9.7.
+- Real export execution, clipping, and durable CanvasObject persistence still belong to later passes.
+
 ## 2026-06-23 V2.BN.8.7.9.0 Workspace Commitability Cleanup
 
 status: first cleanup pass complete
@@ -288,7 +586,7 @@ When 8.6.28-8.6.30 are complete, run a focused docs sync pass and update:
 
 Reference notes for the later sync:
 
-- Use `docs/brainstorm/产品完善/2026-06-20-Better-Notebook-ContentGroup-Reflection-Meeting-Notes.md` as the main meeting reference.
+- Use `docs/brainstorm/产品完善/会议记录/2026-06-20-Better-Notebook-ContentGroup-Reflection-Meeting-Notes.md` as the main meeting reference.
 - Preserve the current implementation order: finish 8.6.28 / 8.6.29 / 8.6.30 first, then sync documents.
 - Treat this as contract promotion, not broad rewriting: promote settled product decisions from brainstorm into formal docs, but avoid inventing new scope during the sync pass.
 
@@ -3670,3 +3968,10 @@ owner: V2.BN.8.7 continuation or Henry manual pass
 - [ ] Browser-test GroupFolder move/delete behavior with richer folder data.
 - [ ] Browser-test reuse UI once Reference / Duplicate / Fork / Materialize actions are exposed.
 - [ ] Run mobile viewport check for Gallery and Single Editor.
+## Deferred After V2.BN.8.11.5 - Object Style
+
+- [ ] 设计 object-style inspector：选择对象后编辑 preset / fill / stroke / text inset / border radius。
+- [ ] 设计 top bar / ribbon 的 object-style 入口；暂不在 8.11.5 做。
+- [ ] 用户自定义样式库成熟后，再评估是否需要独立 `canvas_object_styles` 表。
+- [ ] Sticky note 视觉模板库暂缓；当前只有 `shape.sticky_note` v1 preset。
+- [ ] Browser smoke 需要继续人工确认：create sticky、输入、reload、move/resize、reset style、remove text。

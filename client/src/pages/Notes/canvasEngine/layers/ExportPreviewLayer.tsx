@@ -14,6 +14,7 @@ import {
   exportRoleLabel,
   type ExportPreviewModel,
   type ExportPreviewRow,
+  type PageFrameExportPreview,
 } from '../exportPreviewService';
 import styles from '../../NoteDetail.module.css';
 
@@ -34,13 +35,15 @@ function ExportPreviewGroup({
   label,
   rows,
   meta,
+  dataAttributes = {},
 }: {
   label: string;
   rows: ExportPreviewRow[];
   meta: (row: ExportPreviewRow) => string;
+  dataAttributes?: Record<string, string>;
 }) {
   return (
-    <details className={styles.exportPreviewGroup}>
+    <details className={styles.exportPreviewGroup} {...dataAttributes}>
       <summary>
         <span>{label}</span>
         <strong>{rows.length}</strong>
@@ -58,6 +61,67 @@ function ExportPreviewGroup({
     </details>
   );
 }
+
+function pageFrameExportPreviewLabel(pageFrame: PageFrameExportPreview, index: number): string {
+  const role = pageFrame.role === 'primary_page_frame' ? 'Primary PageFrame' : 'Secondary PageFrame';
+  const pageSize = pageFrame.pageSize || 'Custom';
+  return `${role} ${index + 1} / ${pageSize}`;
+}
+
+function exportPolicyLabel(row: ExportPreviewRow): string {
+  if (!row.exportPolicy) return row.boundary;
+  if (row.exportPolicy.decision === 'manual_required') return 'manual decision';
+  return `${row.exportPolicy.policy} -> ${row.exportPolicy.decision}`;
+}
+
+function ExportPreviewPageFrameGroup({
+  pageFrame,
+  index,
+}: {
+  pageFrame: PageFrameExportPreview;
+  index: number;
+}) {
+  return (
+    <details
+      className={`${styles.exportPreviewGroup} ${styles.exportPreviewPageFrameGroup}`}
+      data-export-preview-page-frame={pageFrame.pageFrameId}
+      data-export-preview-page-frame-role={pageFrame.role}
+      open={index === 0}
+    >
+      <summary>
+        <span>{pageFrameExportPreviewLabel(pageFrame, index)}</span>
+        <strong>{pageFrame.rows.length}</strong>
+      </summary>
+      <div className={styles.exportPreviewPageFrameMeta}>
+        <span>{pageFrame.includedRows.length} export</span>
+        <span>{pageFrame.excludedRows.length} excluded</span>
+        <span>{pageFrame.aiHiddenRows.length} AI hidden</span>
+        <span>{pageFrame.exportable ? 'exportable' : 'not exportable'}</span>
+      </div>
+      <div
+        className={styles.exportPreviewPageFrameTypography}
+        data-export-preview-typography={pageFrame.documentTypography.profileId}
+        data-export-preview-line-capacity={pageFrame.estimatedLineCapacity}
+      >
+        <span>{pageFrame.documentTypography.fontSizePx}px</span>
+        <span>{pageFrame.documentTypography.lineHeightPx}px line</span>
+        <span>{pageFrame.documentTypography.paragraphSpacingPx}px gap</span>
+        <span>{pageFrame.estimatedLineCapacity} lines</span>
+      </div>
+      <div className={styles.exportPreviewList}>
+        {pageFrame.rows.length === 0 ? (
+          <div className={styles.exportPreviewEmpty}>No inside blocks in this PageFrame.</div>
+        ) : pageFrame.rows.map((row) => (
+          <div key={`${pageFrame.pageFrameId}-${row.block.id}`} className={styles.exportPreviewRow}>
+            <span>{exportPreviewRowLabel(row)}</span>
+            <small>{exportRoleLabel(row.exportRole)} / {aiVisibilityLabel(row.aiVisibility)}</small>
+          </div>
+        ))}
+      </div>
+    </details>
+  );
+}
+
 export function ExportPreviewLayer({
   preview,
   showBlockTypes,
@@ -182,12 +246,38 @@ export function ExportPreviewLayer({
         </div>
       </div>
       {(preview.crossing > 0 || preview.outside > 0) && (
-        <div className={styles.exportWarning}>
+        <div
+          className={styles.exportWarning}
+          data-export-preview-crossing-policy={preview.crossingExportPolicy}
+        >
           {preview.crossing > 0 && <p>{preview.crossing} block crosses the formal page boundary.</p>}
           {preview.outside > 0 && <p>{preview.outside} block is in the scratch workspace.</p>}
+          {preview.crossing > 0 && <p>Crossing policy: {preview.crossingExportPolicy}.</p>}
         </div>
       )}
       <div className={styles.exportPreviewGroups}>
+        {preview.pageFrames.map((pageFrame, index) => (
+          <ExportPreviewPageFrameGroup
+            key={pageFrame.pageFrameId}
+            pageFrame={pageFrame}
+            index={index}
+          />
+        ))}
+        <ExportPreviewGroup
+          label="Crossing PageFrame boundary"
+          rows={preview.crossingObjects}
+          meta={(row) => `${exportRoleLabel(row.exportRole)} / ${aiVisibilityLabel(row.aiVisibility)} / ${exportPolicyLabel(row)}`}
+          dataAttributes={{
+            'data-export-preview-crossing': 'true',
+            'data-export-preview-crossing-policy': preview.crossingExportPolicy,
+          }}
+        />
+        <ExportPreviewGroup
+          label="Workspace only"
+          rows={preview.workspaceOnlyObjects}
+          meta={(row) => `${exportRoleLabel(row.exportRole)} / ${aiVisibilityLabel(row.aiVisibility)} / ${exportPolicyLabel(row)}`}
+          dataAttributes={{ 'data-export-preview-workspace-only': 'true' }}
+        />
         <ExportPreviewGroup
           label="Included in export"
           rows={preview.includedRows}

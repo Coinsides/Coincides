@@ -102,21 +102,179 @@ const runtimeTypes = readProjectFile('src/pages/Notes/canvasEngine/types.ts');
 assertContainsAll('Runtime model exposes viewport placement and reserve contracts', runtimeTypes, [
   'export interface CanvasViewport',
   'zoom: number',
+  'export type PageFrameCrossingExportPolicy',
+  'export interface PageFrameCrossingExportDecision',
+  'clip_to_page_frame',
+  'manual_required',
+  'export interface DocumentTypographyProfile',
+  'export interface PageFramePrintProfile',
+  'export type PageFrameTemplateId',
+  'export interface PageFrameBackgroundStyle',
+  'export interface PageFrameTemplate',
+  'export interface PageFrameSlot',
+  'export interface PageFrameSlots',
+  'export interface NoteCanvas',
+  'export interface CanvasObject',
+  'export interface CanvasPlacement',
+  'export interface ContentMount',
+  'export interface PageFrameExtension',
+  'templateId: PageFrameTemplateId',
+  'background: PageFrameBackgroundStyle',
+  'defaultTypographyToken',
+  'documentTypography: DocumentTypographyProfile',
+  'slots?: PageFrameSlots',
+  'export interface VisualConnector',
+  'export interface CanvasAIReadableSnapshot',
+  'export interface CanvasCommand',
+  'export interface CanvasDelta',
   'export interface BlockPlacementModel',
+  'selected?: boolean',
+  'readingOrder?: number',
+  'contentBbox?: CanvasRect',
+  'pageFrameRef?:',
+  'pageFrameStyle?:',
+  'pageFrameSlots?: PageFrameSlots',
+  'primary: boolean',
+  'connectorRef?:',
+  'imageRef?:',
+  'structuredRef?:',
   'rotation?: number',
+  'export interface StructuredCanvasObject',
+  'export interface TableStructuredPayload',
   'export interface CanvasObjectReserve',
   'export interface RelationEndpointReserve',
+  'canvasObjects: CanvasObject[]',
+  'canvasPlacements: CanvasPlacement[]',
+  'contentMounts: ContentMount[]',
+  'pageFrameExtensions: PageFrameExtension[]',
+  'visualConnectors: VisualConnector[]',
+  'imageObjects: ImageCanvasObject[]',
+  'structuredObjects: StructuredCanvasObject[]',
+  'canvasAIReadableSnapshot: CanvasAIReadableSnapshot',
   'relationEndpointReserve: RelationEndpointReserve[]',
+  'export interface PageFrameCollectionModel',
+  'pageFrames: PageFrameModel[]',
+  'primaryFrameId: string | null',
+]);
+assertContainsAll('Runtime model exposes PageStack continuity context', runtimeTypes, [
+  'export interface PageStackModel',
+  'pageStacks: PageStackModel[]',
+  'pageStackId',
+  'pageStackPageIndex',
+  'pageStackPageTotal',
+  'pageStackNumberLabel',
+]);
+assertContainsAll('Runtime model exposes cross-page Block fragment projections', runtimeTypes, [
+  'export interface PageStackBlockFragmentProjection',
+  'export interface PageStackBlockFragmentRef',
+  'blockFragmentProjections: PageStackBlockFragmentProjection[]',
+  'pageStackBlockFragments?: PageStackBlockFragmentRef[]',
+  "export type PageStackBlockFragmentRole",
+]);
+assertContainsAll('Runtime model exposes PageSlice snapshot and reference contracts', runtimeTypes, [
+  'export interface PageSliceSnapshotV1',
+  'export interface PageSliceReferenceDescriptor',
+  'export interface PageSliceOpenOriginalTarget',
+  "kind: 'page_slice_snapshot'",
+  "source: 'page_stack_page'",
+  'openOriginal: PageSliceOpenOriginalTarget',
 ]);
 
 const engineModel = readProjectFile('src/pages/Notes/canvasEngine/engineModel.ts');
 assertContainsAll('Engine model builds viewport world and runtime model seed', engineModel, [
   'NOTE_CANVAS_ENGINE_VERSION',
   'DEFAULT_CANVAS_WORLD',
+  'createPageFramePrintProfile',
+  'createPageFrameTemplate',
+  'resolvePageFrameTemplate',
+  'normalizePageFramePrintBaseline',
   'createPrimaryPageFrame',
   'createViewport',
   'buildNoteCanvasRuntimeModel',
   'getVisibleBlockIds',
+  'createCanvasAIReadableSnapshot',
+  'genericStructuredObjects',
+  'structuredObjects',
+  'pageFrameExtensions',
+  'primaryPageFrameId',
+]);
+assertContainsAll('Engine model keeps independent PageFrame numbering stack-neutral', engineModel, [
+  'pageStackContext: PageStackContext | null = null',
+  'totalPages: pageStackContext?.total || 1',
+]);
+assertContainsAll('Engine model derives PageFrame extension from PageStack context', engineModel, [
+  'pageStacks = []',
+  'resolvePageStackContext',
+  'pageStackNumberLabel',
+]);
+assertContainsAll('Engine model derives cross-page Block fragments once for runtime consumers', engineModel, [
+  'derivePageStackBlockFragments',
+  'blockFragmentProjections',
+  'blockPlacements.flatMap',
+]);
+assertContainsNone('Engine model does not use PageFrameCollection total as page-number total', engineModel, [
+  'buildPageFrameExtension(pageFrame, index, runtimePageFrames.length)',
+  'buildPageFrameExtension(pageFrame,index,runtimePageFrames.length)',
+]);
+assertContainsAll('Engine model threads document typography into PageFrame extensions', engineModel, [
+  'documentTypography = createDefaultDocumentTypographyProfile()',
+  'activeDocumentTypography',
+  'buildPageFrameExtension(',
+  'documentTypography: normalizeDocumentTypographyProfile(documentTypography)',
+]);
+assertContainsNone('Engine model does not couple document typography to viewport zoom', engineModel, [
+  'fontSizePx: viewport.zoom',
+  'lineHeightPx: viewport.zoom',
+  'averageCharWidthPx: viewport.zoom',
+]);
+
+const canvasAiTreeService = readProjectFile('src/pages/Notes/canvasEngine/canvasAiTreeService.ts');
+assertContainsAll('Canvas AI tree service owns AI-readable layout snapshot derivation', canvasAiTreeService, [
+  'export function createCanvasAIReadableSnapshot',
+  'textByContentTargetId',
+  'selectedObjectIds',
+  'pageFrameExtensions',
+  'primaryPageFrameId',
+  'contentBbox',
+  'pageFrameRef',
+  'pageFrameStyle',
+  'pageFrameSlots',
+  'templateId',
+  'defaultTypographyToken',
+  'headerFooterEnabled',
+  'pageNumberEnabled',
+  'readingOrderCompare',
+  'connectorRef',
+  'relationKind: connector.relationKind',
+  'imageObjects',
+  'imageRef',
+  'assetId: imageObject.assetId',
+  'structuredObjects',
+  'structuredRef',
+  'structuredObject.payload',
+  'frameNode.children',
+  'readingOrder',
+]);
+assertContainsAll('Canvas AI tree exposes PageStack continuity context', canvasAiTreeService, [
+  "kind: 'page_stack'",
+  "kind: 'page_frame_reference'",
+  'pageStacks',
+  'pageCount',
+  'collapsed',
+]);
+assertContainsAll('Canvas AI tree exposes cross-page Block fragment metadata', canvasAiTreeService, [
+  'blockFragmentProjections',
+  'blockFragmentsByObjectId',
+  'pageStackBlockFragments',
+  'toBlockFragmentRefs',
+]);
+assertContainsAll('Canvas AI tree exposes PageFrame document typography for AI-readable layout', canvasAiTreeService, [
+  'createDocumentTypographyRef',
+  'pageFrameRef',
+  'documentTypography: createDocumentTypographyRef',
+  'fontSizePx',
+  'lineHeightPx',
+  'paragraphSpacingPx',
 ]);
 
 const viewportService = readProjectFile('src/pages/Notes/canvasEngine/viewportService.ts');
@@ -124,8 +282,129 @@ assertContainsAll('Viewport service owns runtime viewport and world seed', viewp
   'getPrimaryPageOffsetX',
   'createRuntimeViewport',
   'createRuntimeWorld',
+  'CANVAS_WORLD_PADDING',
+  'focusViewportOnWorldRect',
+  'pageFrames?: PageFrameModel[]',
+  'viewportPointToWorldPoint',
+  'worldPointToViewportPoint',
   'zoom: 1',
   'DEFAULT_CANVAS_WORLD',
+]);
+
+const viewportTransformController = readProjectFile('src/pages/Notes/canvasEngine/hooks/useViewportTransformController.ts');
+assertContainsAll('Viewport transform controller clamps and focuses against dynamic runtime world', viewportTransformController, [
+  'world?: CanvasWorldModel',
+  'focusViewportOnRect',
+  'focusViewportOnWorldRect',
+  'world || DEFAULT_CANVAS_WORLD',
+]);
+
+const runtimeKernelService = readProjectFile('src/pages/Notes/canvasEngine/canvasRuntimeKernelService.ts');
+assertContainsAll('Runtime kernel owns scene index hit test selection and command delta seed', runtimeKernelService, [
+  'export interface CanvasPlacementIndex',
+  'export interface CanvasSceneRuntime',
+  'export function buildCanvasPlacementIndex',
+  'export function buildCanvasSceneRuntime',
+  'export function hitTestCanvasScene',
+  'export function selectCanvasObjects',
+  'export function createMoveCanvasObjectCommand',
+  'export function createCanvasDeltaForCommand',
+  "'canvas_placement'",
+]);
+
+const canvasCommandService = readProjectFile('src/pages/Notes/canvasEngine/canvasCommandService.ts');
+assertContainsAll('Canvas command service owns create move resize style delete dispatcher seed', canvasCommandService, [
+  'export function createCanvasObjectCommand',
+  'export function createResizeCanvasObjectCommand',
+  'export function createUpdateVisualStyleCommand',
+  'export function createDeleteCanvasObjectCommand',
+  'export function applyCanvasCommandToRuntime',
+  "'create_canvas_object'",
+  "'move_canvas_object'",
+  "'resize_canvas_object'",
+  "'update_visual_style'",
+  "'delete_canvas_object'",
+  "'canvas_placement'",
+  "'visual_connector'",
+]);
+
+const blockProjectionService = readProjectFile('src/pages/Notes/canvasEngine/blockProjectionService.ts');
+assertContainsAll('Block projection service owns TextFlow-backed CanvasObject projection seed', blockProjectionService, [
+  'export function createParagraphBlockProjection',
+  'createTextBlockContentV1',
+  'TEXT_FLOW_CONTENT_KEY',
+  'buildRuntimeBlockPlacement',
+  'writeLayoutOverride',
+  'paragraph_block_projection',
+  'export function moveBlockProjectionPlacement',
+  'export function resizeBlockProjectionPlacement',
+  'export function restoreBlockProjectionLayout',
+]);
+
+const shapeProjectionService = readProjectFile('src/pages/Notes/canvasEngine/shapeProjectionService.ts');
+assertContainsAll('Shape projection service owns pure shape block-backed shape and visual connector seeds', shapeProjectionService, [
+  'export function createPureShapeProjection',
+  'export function fillShapeWithParagraphBlock',
+  'export function clearBlockBackedShapeText',
+  'export function createVisualConnectorProjection',
+  'createTextBlockContentV1',
+  'TEXT_FLOW_CONTENT_KEY',
+  "'visual_only'",
+  "'block_backed'",
+  "'shape'",
+  "'visual_connector'",
+]);
+
+const visualConnectorService = readProjectFile('src/pages/Notes/canvasEngine/visualConnectorService.ts');
+assertContainsAll('Visual connector service owns endpoint resolution and persistence payload boundary', visualConnectorService, [
+  'export function pointForPlacementAnchor',
+  'export function resolveVisualConnectorWithPlacements',
+  'export function placementForVisualConnector',
+  'export function visualConnectorSavePayload',
+  "relation_kind: 'visual_only'",
+  "kind: 'visual_connector'",
+  "object_class: 'pure'",
+]);
+
+const imageObjectService = readProjectFile('src/pages/Notes/canvasEngine/imageObjectService.ts');
+const tableObjectService = readProjectFile('src/pages/Notes/canvasEngine/tableObjectService.ts');
+const canvasAssetRepository = readProjectFile('src/pages/Notes/canvasEngine/canvasAssetRepository.ts');
+assertContainsAll('Image object service owns asset-backed CanvasObject projection boundary', imageObjectService, [
+  'export function createImageObjectProjection',
+  'export function imageObjectSavePayload',
+  "kind: 'image'",
+  "backing: 'asset'",
+  "objectClass: 'media'",
+  'contentMount: null',
+  'asset_id: imageObject.assetId',
+  'alt_text: imageObject.altText',
+]);
+assertContainsAll('Canvas asset repository owns image upload boundary', canvasAssetRepository, [
+  'export async function uploadCanvasImageAsset',
+  'export async function loadCanvasImageAssetBlobUrl',
+  "form.append('note_id'",
+  "api.post('/canvas-assets/images'",
+  "api.get(`/canvas-assets/${assetId}/blob`",
+  "responseType: 'blob'",
+  'normalizeCanvasImageAsset',
+  'blobUrl',
+]);
+assertContainsAll('Table object service owns structured CanvasObject projection boundary', tableObjectService, [
+  'export function createTableObjectProjection',
+  'export function tableObjectSavePayload',
+  'export function createDefaultTablePayload',
+  'export function updateTableCellText',
+  'export function addTableRowBelow',
+  'export function addTableColumnRight',
+  'export function deleteTableRow',
+  'export function deleteTableColumn',
+  "kind: 'table'",
+  "backing: 'structured_object'",
+  "objectClass: 'structured'",
+  'contentMount: null',
+  'schema_version: structuredObject.schemaVersion',
+  'rows: structuredObject.payload.rows',
+  'cells: structuredObject.payload.cells',
 ]);
 
 const pageFrameService = readProjectFile('src/pages/Notes/canvasEngine/pageFrameService.ts');
@@ -133,8 +412,287 @@ assertContainsAll('PageFrame service owns formal frame sizing boundary', pageFra
   'createDefaultDraftLayout',
   'calculatePageFrameHeight',
   'createRuntimePageFrame',
+  'getPageFrameOuterRect',
+  'getPageFrameContentRect',
+  'resolvePrimaryPageFrame',
+  'resolvePrimaryPageFrameAfterDelete',
+  'createPageModeFocusViewport',
   'DEFAULT_PAGE_FRAME_CONTENT_INSET',
   'PAGE_FRAME_BOTTOM_PADDING',
+]);
+
+const pageFrameCollectionService = readProjectFile('src/pages/Notes/canvasEngine/pageFrameCollectionService.ts');
+assertContainsAll('PageFrame collection service owns multi-frame management boundary', pageFrameCollectionService, [
+  'NOTE_PAGE_FRAME_COLLECTION_METADATA_KEY',
+  'createPageFrameCollectionSeed',
+  'normalizePageFrameCollection',
+  'insertPageFrameAfter',
+  'duplicatePageFrame',
+  'setPrimaryPageFrame',
+  'deletePageFrameFromCollection',
+  'updatePageFrameInCollection',
+  'movePageFrameInCollection',
+  'resizePageFrameInCollection',
+  'pageFrameCollectionFromMetadata',
+  'writePageFrameCollectionMetadata',
+]);
+assertContainsAll('PageFrame collection persists explicit PageStack coverage metadata', pageFrameCollectionService, [
+  'PAGE_FRAME_COLLECTION_VERSION',
+  'V2.BN.8.9.14',
+  'pageStacks',
+  'primaryStackId',
+  'selectedStackId',
+  'normalizePageStacksWithFrameCoverage',
+]);
+
+const courseDetail = readProjectFile('src/pages/Courses/CourseDetail.tsx');
+assertContainsAll('Course detail New Note seeds explicit PageStack entity persistence', courseDetail, [
+  'createPageFrameCollectionSeed',
+  'savePageFrameCollectionForNote',
+  'collection: createPageFrameCollectionSeed()',
+]);
+
+const pageStackCollectionService = readProjectFile('src/pages/Notes/canvasEngine/pageStackCollectionService.ts');
+assertContainsAll('PageStack service owns continuous PageFrame relation boundary', pageStackCollectionService, [
+  'export function normalizePageStacks',
+  'export function createPageStackFromFrame',
+  'export function createPageStackForFrame',
+  'export function appendPageFrameToStack',
+  'export function detachPageFrameFromStack',
+  'export function splitPageStackAtFrame',
+  'export function mergePageStacks',
+  'export function resolvePageStackContext',
+  'export function setPageStackCollapsed',
+]);
+
+const pageStackContentFlowService = readProjectFile('src/pages/Notes/canvasEngine/pageStackContentFlowService.ts');
+assertContainsAll('PageStack content flow service owns default writing continuation boundary', pageStackContentFlowService, [
+  'export type PageStackContentFlowPlan',
+  'export function resolvePageStackContentFlowPlan',
+  'documentTypography?: DocumentTypographyProfile',
+  'draftText?: string',
+  'estimateTypographyTextBlockHeight',
+  "kind: 'stay_on_current_page'",
+  "kind: 'move_to_existing_next_page'",
+  "kind: 'append_next_page'",
+  'appendPageFrameToStack',
+  'resolvePageStackContext',
+]);
+
+const pageStackBlockFragmentService = readProjectFile('src/pages/Notes/canvasEngine/pageStackBlockFragmentService.ts');
+assertContainsAll('PageStack Block fragment service owns cross-page fragment projection boundary', pageStackBlockFragmentService, [
+  'export function derivePageStackBlockFragments',
+  'PageStackBlockFragmentProjection',
+  'intersectRects',
+  'fragmentRole',
+  'resolvePageStackContext',
+  'getPageFrameContentRect',
+  'candidatesByStack.size !== 1',
+]);
+
+const pageSliceService = readProjectFile('src/pages/Notes/canvasEngine/pageSliceService.ts');
+assertContainsAll('PageSlice service owns whole-page snapshot and reference boundary', pageSliceService, [
+  'export function createPageSliceSnapshot',
+  'export function createPageSliceReferenceDescriptor',
+  'PageSliceSnapshotV1',
+  'PageSliceReferenceDescriptor',
+  'resolvePageStackContext',
+  'pageSliceSnapshotHash',
+  'openOriginal',
+]);
+
+const layoutAffiliationService = readProjectFile('src/pages/Notes/canvasEngine/layoutAffiliationService.ts');
+assertContainsAll('Layout affiliation service owns sparse PageFrame move cohort', layoutAffiliationService, [
+  'export interface LayoutAffiliation',
+  'deriveLayoutAffiliationsForPageFrame',
+  'derivePageFrameMoveCohort',
+  'movePageFrameAffiliatedBlockLayouts',
+  "relation: 'fully_contained'",
+]);
+
+const runtimePresentationController = readProjectFile('src/pages/Notes/canvasEngine/hooks/useRuntimePresentationController.ts');
+assertContainsAll('Runtime presentation controller can create a PageFrame from an empty collection', runtimePresentationController, [
+  'createPageFrameCollectionSeed',
+  'if (!afterFrameId)',
+  'seedCollection',
+]);
+assertContainsAll('Runtime presentation controller routes PageFrame object geometry updates', runtimePresentationController, [
+  'movePageFrameInCollection',
+  'resizePageFrameInCollection',
+  'handleMovePageFrame',
+  'handleResizePageFrame',
+  'handleCreatePageStack',
+  'handleAddPageBelow',
+  'handleDetachPageFromStack',
+  'handleSplitPageStackAtFrame',
+  'handleMergePageStackWithPrevious',
+  'handleTogglePageStackCollapse',
+  'onMovePageFrame',
+  'onResizePageFrame',
+  'movePageFrameAffiliatedBlockLayouts',
+  'onPersistChangedBlockLayouts',
+  'onApplyBlockLayoutDrafts',
+]);
+
+const pageFrameAffiliationService = readProjectFile('src/pages/Notes/canvasEngine/pageFrameAffiliationService.ts');
+assertContainsAll('PageFrame affiliation service owns geometry-derived no-ownership boundary', pageFrameAffiliationService, [
+  'PAGE_FRAME_AFFILIATION_MODE',
+  'geometry_derived_no_ownership',
+  'PageFrameAffiliation',
+  'classifyPlacementAgainstPageFrame',
+  'derivePlacementPageFrameAffiliation',
+  "ownership: 'none'",
+  "'inside'",
+  "'crossing'",
+  "'workspace_only'",
+]);
+
+const geometryService = readProjectFile('src/pages/Notes/canvasEngine/geometry.ts');
+assertContainsAll('Geometry service owns PageFrame crossing export policy interpretation', geometryService, [
+  'DEFAULT_PAGE_FRAME_CROSSING_EXPORT_POLICY',
+  'resolvePageFrameCrossingExportDecision',
+  'getPageFrameContentGeometryRect',
+  'intersectRects',
+  'include_if_center_inside',
+  'include_if_intersects',
+  'clip_to_page_frame',
+  'manual_required',
+]);
+
+const pageFrameGuideService = readProjectFile('src/pages/Notes/canvasEngine/pageFrameGuideService.ts');
+assertContainsAll('PageFrame guide service owns ruler margin guide and snap wall boundary', pageFrameGuideService, [
+  'createPageFrameGuides',
+  'snapRectToPageFrameGuides',
+  'shouldShowPageFrameGuides',
+  "'left_margin'",
+  "'right_margin'",
+  "'center_line'",
+  "'top_ruler'",
+  "snapState: 'snapped'",
+  "snapState: 'free'",
+]);
+
+const pageFramePrintScaleService = readProjectFile('src/pages/Notes/canvasEngine/pageFramePrintScaleService.ts');
+const typographyProfileService = readProjectFile('src/pages/Notes/canvasEngine/typographyProfileService.ts');
+const typographyMeasurementService = readProjectFile('src/pages/Notes/canvasEngine/typographyMeasurementService.ts');
+assertContainsAll('Typography profile service owns note-level typography truth', typographyProfileService, [
+  'NOTE_TYPOGRAPHY_PROFILE_METADATA_KEY',
+  'text_flow_typography_profile_v1',
+  'DocumentTypographyMetadataV1',
+  'DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE',
+  'DOCUMENT_FONT_FAMILY_OPTIONS',
+  'DOCUMENT_TYPOGRAPHY_LIMITS',
+  'normalizeDocumentTypographyProfile',
+  'patchDocumentTypographyProfile',
+  'typographyProfileFromMetadata',
+  'writeTypographyProfileMetadata',
+  'documentTypographyToCssVars',
+]);
+assertContainsAll('PageFrame print scale service owns page size and typography compatibility exports', pageFramePrintScaleService, [
+  'DEFAULT_PAGE_FRAME_PAGE_SIZE',
+  'createPageFramePrintProfile',
+  'createDefaultDocumentTypographyProfile',
+  'normalizePageFramePrintBaseline',
+  'documentTypographyToCssVars',
+  'A4',
+]);
+assertContainsNone('PageFrame print scale service does not inline document typography truth', pageFramePrintScaleService, [
+  'DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE: DocumentTypographyProfile = {',
+]);
+assertContainsAll('Typography measurement service owns pure estimate helpers', typographyMeasurementService, [
+  'export interface TypographyMeasurementInput',
+  'export interface TypographyTextBlockMeasurement',
+  'export function estimateTypographyTextBlockHeight',
+  'export function estimatePageFrameLineCapacity',
+  'normalizeDocumentTypographyProfile',
+  'averageCharWidthPx',
+  'paragraphSpacingPx',
+]);
+assertContainsNone('Typography measurement service does not use DOM layout reads', typographyMeasurementService, [
+  'getBoundingClientRect',
+  'scrollHeight',
+  'ResizeObserver',
+  'document.',
+  'window.',
+]);
+
+const pageFrameSlotService = readProjectFile('src/pages/Notes/canvasEngine/pageFrameSlotService.ts');
+assertContainsAll('PageFrame slot service owns header footer and generated page number boundary', pageFrameSlotService, [
+  'createDefaultPageFrameSlots',
+  'resolvePageFrameSlotRects',
+  'formatPageNumber',
+  'summarizePageFrameSlotsForAI',
+  "'header'",
+  "'footer'",
+  "'page_number'",
+  "'generated'",
+  "'empty'",
+]);
+
+const pageFrameTemplateService = readProjectFile('src/pages/Notes/canvasEngine/pageFrameTemplateService.ts');
+assertContainsAll('PageFrame template service owns template background and style boundary', pageFrameTemplateService, [
+  'DEFAULT_PAGE_FRAME_TEMPLATE_ID',
+  'PAGE_FRAME_TEMPLATE_PRESETS',
+  'createPageFrameTemplate',
+  'resolvePageFrameTemplate',
+  'applyPageFrameTemplate',
+  'pageFrameTemplateToCssVars',
+  "'a4_portrait'",
+  "'letter_portrait'",
+  "'screen_note'",
+  "'custom'",
+  "'--page-frame-background'",
+  "'--page-frame-border-color'",
+]);
+
+const exportPreviewService = readProjectFile('src/pages/Notes/canvasEngine/exportPreviewService.ts');
+assertContainsAll('Export preview service owns PageFrame-aware preview model', exportPreviewService, [
+  'export interface PageFrameExportPreview',
+  'export interface ExportPreviewTypography',
+  'documentTypography: ExportPreviewTypography',
+  'estimatedLineCapacity',
+  'pageFrames: PageFrameExportPreview[]',
+  'crossingExportPolicy: PageFrameCrossingExportPolicy',
+  'crossingObjects: ExportPreviewRow[]',
+  'workspaceOnlyObjects: ExportPreviewRow[]',
+  'exportPolicy?: PageFrameCrossingExportDecision',
+  'resolvePageFrameCrossingExportDecision',
+  'isRowIncludedInExport',
+  'derivePlacementPageFrameAffiliation',
+  'BuildExportPreviewModelOptions',
+  'blockPlacements?: BlockPlacementModel[]',
+  'primaryPageFrameId?: string | null',
+  'documentTypography?: DocumentTypographyProfile',
+  'crossingExportPolicy?: PageFrameCrossingExportPolicy',
+]);
+assertContainsNone('Runtime types do not define hard PageFrame ownership for blocks', runtimeTypes, [
+  'page_frame_id',
+  'pageFrameOwnerId',
+  'ownerPageFrameId',
+  'ownedPageFrameId',
+]);
+
+const noteCanvasLayoutModel = readProjectFile('src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayoutModel.ts');
+assertContainsAll('Note canvas layout model focuses Page Mode on primary PageFrame', noteCanvasLayoutModel, [
+  'createPageModeFocusViewport',
+  "surfaceMode === 'page'",
+  'pageFrame: primaryPageFrame',
+  'viewport: seedViewport',
+  'runtimePageFrameCollection',
+  'pageFrames: runtimePageFrameCollection.pageFrames',
+]);
+assertContainsAll('Note canvas layout model derives Canvas world from runtime content', noteCanvasLayoutModel, [
+  'createRuntimeWorld(surfaceMode, pageContentHeight, {',
+  'pageFrames: runtimePageFrameCollection.pageFrames',
+  'blockPlacements: canvasBlockPlacements',
+  'canvasObjectReserve: []',
+]);
+assertContainsAll('Note canvas layout model feeds runtime PageFrame context into Export Preview', noteCanvasLayoutModel, [
+  'buildExportPreviewModel(visibleBlocks, blockLayouts, {',
+  'pageFrames: noteCanvasRuntime.pageFrames',
+  'blockPlacements: noteCanvasRuntime.blockPlacements',
+  'primaryPageFrameId: noteCanvasRuntime.primaryPageFrame?.id || null',
+  'documentTypography: documentTypographyProfile',
 ]);
 
 const placementService = readProjectFile('src/pages/Notes/canvasEngine/placementService.ts');
@@ -145,14 +703,22 @@ assertContainsAll('Placement service owns layout seed write and runtime placemen
   'buildRelationEndpointReserveForPlacement',
   'buildLayoutPayload',
   'writeLayoutOverride',
+  'canvas_layout',
   'rotation: layout.rotation || 0',
   'visibilityState',
+]);
+assertContainsAll('Placement service routes move snapping through PageFrame guide service', placementService, [
+  'snapRectToPageFrameGuides',
+  'applyMoveSnap',
+  'localContentPageFrame',
 ]);
 
 const measurementService = readProjectFile('src/pages/Notes/canvasEngine/measurementService.ts');
 assertContainsAll('Measurement service owns measured height and reflow boundary', measurementService, [
   'measureBlockContentHeight',
   'estimateBlockHeight',
+  'estimateTypographyTextBlockHeight',
+  'typography?: DocumentTypographyProfile',
   'applyMeasuredBlockLayoutToLayouts',
   'applyMeasuredBlockHeightToLayouts',
   'reflowLayoutsAfterHeightChange',
@@ -170,6 +736,12 @@ assertContainsAll('Mode policy service owns page canvas visibility and blank dra
   'showWorkspaceBlocks',
   'useGlobalPageScroll',
 ]);
+assertContainsAll('Mode policy keeps Canvas draft placement free while allowing PageFrame guide snapping', modePolicyService, [
+  'CANVAS_WORKSPACE_WIDTH',
+  'snapRectToPageFrameGuides',
+  'policy.isCanvasMode',
+  'snapEnabled && policy.isPageMode',
+]);
 
 const historyService = readProjectFile('src/pages/Notes/canvasEngine/historyService.ts');
 assertContainsAll('History service owns runtime undo redo keyboard intent contract', historyService, [
@@ -181,15 +753,95 @@ assertContainsAll('History service owns runtime undo redo keyboard intent contra
   "'redo'",
 ]);
 
+const commandSurfaceService = readProjectFile('src/pages/Notes/canvasEngine/commandSurfaceService.ts');
+assertContainsAll('Command surface service exposes PageFrame and blank Canvas menus', commandSurfaceService, [
+  "'canvas_blank'",
+  "'page_frame_shell'",
+  "'create_page_frame'",
+  "'create_page_stack'",
+  "'create_shape_rectangle'",
+  "'create_shape_ellipse'",
+  "'start_visual_connector_from_object'",
+  "'finish_visual_connector_to_object'",
+  "'delete_canvas_object'",
+  "'inspect_canvas_object'",
+  "'open_original'",
+  "'duplicate_canvas_object'",
+  "'toggle_export_visibility'",
+  "'add_page_below'",
+  "'detach_page_from_stack'",
+  "'toggle_page_stack_collapse'",
+  "'duplicate_page_frame'",
+  'buildCanvasBlankMenu',
+  'buildCanvasObjectShellMenu',
+  'buildImageObjectShellMenu',
+  'buildTableObjectShellMenu',
+  'buildVisualConnectorShellMenu',
+  'buildPageFrameShellMenu',
+]);
+
+const objectInspectorService = readProjectFile('src/pages/Notes/canvasEngine/objectInspectorService.ts');
+assertContainsAll('Object inspector service centralizes ordinary CanvasObject safe actions', objectInspectorService, [
+  'createCanvasObjectInspectorModel',
+  'createCanvasObjectInspectorActions',
+  'createCanvasObjectDuplicateDraft',
+  'toggleCanvasPlacementExportVisibility',
+  "'open_original'",
+  "'duplicate_canvas_object'",
+  "'toggle_export_visibility'",
+  "'delete_canvas_object'",
+  "object.kind === 'shape' && object.backing === 'none'",
+  "object.kind === 'image'",
+  "object.kind === 'table'",
+  "object.kind === 'visual_connector'",
+]);
+
 const noteCanvasDataAdapter = readProjectFile('src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts');
 assertContainsAll('Note canvas adapter uses entity GroupFolder repository', noteCanvasDataAdapter, [
   'loadGroupFoldersForNote',
   'saveGroupFoldersForNote',
   '../groupFolderRepository',
 ]);
+assertContainsAll('Note canvas adapter persists Canvas entities through repository cutover', noteCanvasDataAdapter, [
+  'loadCanvasPersistenceForNote',
+  'persistedCanvasObjects',
+  'persistedCanvasPlacements',
+  'persistedContentMounts',
+  'persistedVisualConnectors',
+  'savePageFrameCollectionForNote',
+  'saveBlockCanvasPlacementForNote',
+  'saveGenericCanvasObjectForNote',
+  'deleteGenericCanvasObjectForNote',
+  'loadAnnotationTruthsForNote',
+  'saveAnnotationTruthsForNote',
+  'persistCanvasObject',
+  'deleteCanvasObject',
+  'savePageFrameCollection',
+  'setPageFrameCollection',
+]);
+assertContainsNone('Note canvas adapter no longer writes PageFrame or block layout legacy seeds', noteCanvasDataAdapter, [
+  'writePageFrameCollectionMetadata',
+  'writeLayoutOverride',
+  'NOTE_LAYOUT_KEY',
+  '[NOTE_ANNOTATIONS_METADATA_KEY]: nextAnnotations',
+]);
+assertContainsAll('Note canvas adapter persists document typography metadata', noteCanvasDataAdapter, [
+  'typographyProfileFromMetadata',
+  'writeTypographyProfileMetadata',
+  'documentTypographyProfile',
+  'saveDocumentTypographyProfile',
+]);
 assertContainsNone('Note canvas adapter does not write GroupFolder metadata', noteCanvasDataAdapter, [
   'writeGroupFolderMetadata',
   'NOTE_GROUP_FOLDERS_METADATA_KEY',
+]);
+const textFlowService = readProjectFile('src/pages/Notes/canvasEngine/textFlowService.ts');
+assertContainsNone('TextFlow service does not own document typography profile', textFlowService, [
+  'text_flow_typography_profile_v1',
+  'fontSizePx',
+  'lineHeightPx',
+  'paragraphSpacingPx',
+  'averageCharWidthPx',
 ]);
 
 const groupGalleryData = readProjectFile('src/pages/GroupGallery/groupGalleryData.ts');
@@ -225,9 +877,28 @@ assertContainsNone('ContentGroup repository does not write note metadata for mem
   'writeContentGroupMetadata',
   'canvas_engine_content_groups_v1',
 ]);
+const runtimeDataTypes = readProjectFile('src/pages/Notes/canvasEngine/runtimeDataTypes.ts');
+const contentGroupService = readProjectFile('src/pages/Notes/canvasEngine/contentGroupService.ts');
+const serverContentGroupService = readProjectFile('../server/src/services/contentGroups.ts');
+assertContainsAll('ContentGroup member contract supports PageSlice snapshots', runtimeDataTypes, [
+  "'page_slice'",
+  'ContentGroupMemberKind',
+]);
+assertContainsAll('ContentGroup service creates PageSlice snapshot members', contentGroupService, [
+  'createContentGroupMemberFromPageSliceSnapshot',
+  "kind: 'page_slice'",
+  'page_slice_snapshot_id',
+  'page_stack_id',
+  'page_frame_id',
+  'open_original',
+]);
+assertContainsAll('Server ContentGroup service preserves page_slice member kind', serverContentGroupService, [
+  "'page_slice'",
+  'normalizeMemberKind',
+]);
 [
   ['ContentGroup repository does not know Petal/Fragment DB fields', contentGroupRepository],
-  ['ContentGroup service does not know Petal/Fragment DB fields', readProjectFile('src/pages/Notes/canvasEngine/contentGroupService.ts')],
+  ['ContentGroup service does not know Petal/Fragment DB fields', contentGroupService],
 ].forEach(([name, text]) => {
   assertContainsNone(name, text, [
     'fragments_json',
@@ -242,10 +913,32 @@ assertContainsNone('ContentGroup repository does not write note metadata for mem
   'src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.tsx',
   'src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx',
   'src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx',
+  'src/pages/Notes/canvasEngine/layers/ShapeObjectLayer.tsx',
+  'src/pages/Notes/canvasEngine/layers/ImageObjectLayer.tsx',
+  'src/pages/Notes/canvasEngine/layers/VisualConnectorLayer.tsx',
   'src/pages/Notes/canvasEngine/layers/BlockEditorLayer.tsx',
   'src/pages/Notes/canvasEngine/layers/FloatingOverlayLayer.tsx',
   'src/pages/Notes/canvasEngine/layers/SlashMenuLayer.tsx',
   'src/pages/Notes/canvasEngine/layers/ExportPreviewLayer.tsx',
+  'src/pages/Notes/canvasEngine/canvasAiTreeService.ts',
+  'src/pages/Notes/canvasEngine/canvasCommandService.ts',
+  'src/pages/Notes/canvasEngine/blockProjectionService.ts',
+  'src/pages/Notes/canvasEngine/shapeProjectionService.ts',
+  'src/pages/Notes/canvasEngine/imageObjectService.ts',
+  'src/pages/Notes/canvasEngine/tableObjectService.ts',
+  'src/pages/Notes/canvasEngine/objectInspectorService.ts',
+  'src/pages/Notes/canvasEngine/canvasAssetRepository.ts',
+  'src/pages/Notes/canvasEngine/visualConnectorService.ts',
+  'src/pages/Notes/canvasEngine/canvasRuntimeKernelService.ts',
+  'src/pages/Notes/canvasEngine/pageFrameAffiliationService.ts',
+  'src/pages/Notes/canvasEngine/pageFrameCollectionService.ts',
+  'src/pages/Notes/canvasEngine/pageStackCollectionService.ts',
+  'src/pages/Notes/canvasEngine/pageStackContentFlowService.ts',
+  'src/pages/Notes/canvasEngine/pageStackBlockFragmentService.ts',
+  'src/pages/Notes/canvasEngine/pageSliceService.ts',
+  'src/pages/Notes/canvasEngine/pageFrameGuideService.ts',
+  'src/pages/Notes/canvasEngine/pageFrameSlotService.ts',
+  'src/pages/Notes/canvasEngine/pageFrameTemplateService.ts',
   'src/pages/Notes/canvasEngine/blocks/TextBlockProjection.tsx',
   'src/pages/Notes/canvasEngine/blocks/FormulaBlockProjection.tsx',
   'src/pages/Notes/canvasEngine/blocks/CodeBlockProjection.tsx',
@@ -254,15 +947,410 @@ assertContainsNone('ContentGroup repository does not write note metadata for mem
 });
 
 const writingSurfaceLayer = readProjectFile('src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx');
+const shapeObjectLayer = readProjectFile('src/pages/Notes/canvasEngine/layers/ShapeObjectLayer.tsx');
+const imageObjectLayer = readProjectFile('src/pages/Notes/canvasEngine/layers/ImageObjectLayer.tsx');
+const tableObjectLayer = readProjectFile('src/pages/Notes/canvasEngine/layers/TableObjectLayer.tsx');
+const visualConnectorLayer = readProjectFile('src/pages/Notes/canvasEngine/layers/VisualConnectorLayer.tsx');
+const objectInspectorLayer = readProjectFile('src/pages/Notes/canvasEngine/layers/ObjectInspectorLayer.tsx');
+const selectionTypographyToolbarLayer = readProjectFile('src/pages/Notes/canvasEngine/layers/SelectionTypographyToolbarLayer.tsx');
+const noteCanvasLayerProps = readProjectFile('src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts');
 assertContainsAll('Writing surface exposes runtime smoke attributes', writingSurfaceLayer, [
   'data-canvas-engine-version',
   'data-canvas-engine-route',
   'data-canvas-visible-blocks',
+  'data-canvas-world-width',
+  'data-canvas-world-height',
   'data-canvas-page-frame',
+  'data-canvas-object-id',
+  'data-page-frame-id',
+  'data-page-frame-role',
+  'data-page-frame-primary',
+  'data-page-frame-exportable',
   'data-canvas-surface-mode',
   'data-canvas-interaction-mode',
   'data-canvas-interaction-target',
   'data-canvas-interaction-block',
+]);
+assertContainsAll('Writing surface renders PageFrame ruler and margin guide markers', writingSurfaceLayer, [
+  'createPageFrameGuides',
+  'shouldShowPageFrameGuides',
+  'data-page-frame-guide="top-ruler"',
+  'data-page-frame-guide="left-margin"',
+  'data-page-frame-guide="right-margin"',
+  'data-page-frame-guide="center-line"',
+]);
+assertContainsAll('Writing surface exposes PageFrame print scale and document typography markers', writingSurfaceLayer, [
+  'documentTypographyToCssVars',
+  'data-page-frame-page-size',
+  'data-document-typography-profile',
+  'data-document-font-size',
+  'data-document-line-height',
+  'documentTypographyStyle',
+]);
+assertContainsAll('Writing surface exposes PageFrame template background and style markers', writingSurfaceLayer, [
+  'pageFrameTemplateToCssVars',
+  'primaryPageFrameTemplateStyle',
+  'data-page-frame-template',
+  'data-page-frame-background',
+  'pageFrameTemplateStyle',
+]);
+assertContainsAll('Writing surface renders PageFrame slot markers', writingSurfaceLayer, [
+  'pageFrameSlotEntries',
+  'data-page-frame-slot',
+  'data-page-frame-slot-frame',
+  'data-page-frame-slot-source',
+  'pageFrameHeaderSlot',
+  'pageFrameFooterSlot',
+  'pageFramePageNumberSlot',
+]);
+assertContainsAll('Writing surface renders PageFrame collection in Canvas Mode', writingSurfaceLayer, [
+  'noteCanvasRuntime.pageFrames.map',
+  'data-page-frame-index',
+  'formalPageBoundaryPrimary',
+  'formalPageBoundarySecondary',
+]);
+assertContainsAll('Writing surface routes PageFrame command surface actions', writingSurfaceLayer, [
+  'buildCanvasBlankMenu',
+  'buildPageFrameShellMenu',
+  'canvasBlankContextMenu',
+  'pageFrameContextMenu',
+  'handleBlankSurfaceContextMenu',
+  'onCreatePageFrame',
+  'onCreatePageStack',
+  'onAddPageBelow',
+  'onDetachPageFromStack',
+  'onTogglePageStackCollapse',
+]);
+assertContainsAll('Writing surface renders and persists generic shape CanvasObjects', writingSurfaceLayer, [
+  'ShapeObjectLayer',
+  'createPureShapeProjection',
+  'shapePlacements',
+  'shapeSavePayload',
+  'onPersistCanvasObject',
+  'onDeleteCanvasObject',
+  'handleShapePointerDown',
+  'handleShapeResizePointerDown',
+  'buildCanvasObjectShellMenu',
+]);
+assertContainsAll('Writing surface renders and persists visual connector CanvasObjects', writingSurfaceLayer, [
+  'VisualConnectorLayer',
+  'createVisualConnectorProjection',
+  'visualConnectorSavePayload',
+  'visualConnectorDraft',
+  'start_visual_connector_from_object',
+  'finish_visual_connector_to_object',
+  'noteCanvasRuntime.visualConnectors',
+]);
+assertContainsAll('Writing surface renders and persists image CanvasObjects', writingSurfaceLayer, [
+  'ImageObjectLayer',
+  'createImageObjectProjection',
+  'uploadCanvasImageAsset',
+  'imageObjectSavePayload',
+  'imagePlacements',
+  'imageObjectById',
+  'buildImageObjectShellMenu',
+  'edit_image_caption',
+  'edit_image_alt_text',
+  'toggle_image_fit',
+]);
+assertContainsAll('Writing surface renders and persists structured table CanvasObjects', writingSurfaceLayer, [
+  'TableObjectLayer',
+  'createTableObjectProjection',
+  'tableObjectSavePayload',
+  'persistTableMutationPayload',
+  'onPushStructuredMutationHistory(objectId, before, after)',
+  'confirmDeleteNonEmptyTablePart',
+  'tableRowHasText',
+  'tableColumnHasText',
+  'create_table_object',
+  'tablePlacements',
+  'structuredObjectById',
+  'buildTableObjectShellMenu',
+]);
+assertContainsAll('Writing surface commits pending table cell draft before opening table menu', writingSurfaceLayer, [
+  'pendingEdit: PendingTableCellEdit | null = null',
+  'await handleTableCellTextCommit(pendingEdit.selection, pendingEdit.text)',
+  'setTableContextMenu({',
+]);
+assertContainsAll('Writing surface wires Object Inspector and safe object actions', writingSurfaceLayer, [
+  'ObjectInspectorLayer',
+  'selectedCanvasObjectInspectorModel',
+  'flattenCanvasAIReadableNodes',
+  'createCanvasObjectInspectorModel',
+  'createCanvasObjectInspectorActions',
+  'createCanvasObjectDuplicateDraft',
+  'toggleCanvasPlacementExportVisibility',
+  'objectContextActionsForObject',
+  'handleCanvasObjectContextAction',
+  'deleteCanvasObjectWithBacking',
+  'persistCanvasObjectDuplicateDraft',
+  'inspect_canvas_object',
+  'open_original',
+  'duplicate_canvas_object',
+  'toggle_export_visibility',
+]);
+assertContainsAll('Object Inspector layer exposes inspectable object metadata and action markers', objectInspectorLayer, [
+  'data-canvas-object-inspector="true"',
+  'data-canvas-object-inspector-action',
+  'model.actions.map',
+  'model.bbox',
+  'model.exportVisible',
+  'model.aiReadable',
+  'model.contentRef',
+  'model.connectorRef',
+  'model.imageRef',
+  'model.structuredRef',
+]);
+assertContainsAll('Shape object layer renders pure shape CanvasObject markers', shapeObjectLayer, [
+  'data-canvas-shape="true"',
+  'data-canvas-shape-object="true"',
+  'data-canvas-object-kind="shape"',
+  'data-canvas-shape-type',
+  'data-canvas-shape-resize-handle="true"',
+  'canvasShapeObject',
+  'canvasShapeRectangle',
+  'canvasShapeEllipse',
+]);
+assertContainsAll('Image object layer renders asset-backed media CanvasObject markers', imageObjectLayer, [
+  'loadCanvasImageAssetBlobUrl',
+  'data-canvas-image="true"',
+  'data-canvas-object-kind="image"',
+  'data-canvas-object-backing="asset"',
+  'data-canvas-image-fit',
+  'data-canvas-image-media-loaded',
+  'canvasImageObject',
+  'canvasImageMedia',
+  'canvasImageResizeHandle',
+]);
+assertContainsAll('Table object layer renders structured table CanvasObject markers', tableObjectLayer, [
+  'data-canvas-table="true"',
+  'data-canvas-structured-object="table"',
+  'data-canvas-object-kind="table"',
+  'data-canvas-object-backing="structured_object"',
+  'data-canvas-table-schema',
+  'data-canvas-table-cell',
+  'canvasTableCellEditor',
+  'canvasTableObject',
+  'canvasTableGrid',
+  'canvasTableResizeHandle',
+]);
+assertContainsAll('Table object layer gives Escape cancel authority over blur autosave', tableObjectLayer, [
+  'cancelledEditRef',
+  "event.key === 'Escape'",
+  'cancelledEditRef.current = true',
+  'if (cancelledEditRef.current)',
+  'onBlur={commitEditingCell}',
+]);
+assertContainsAll('Table object layer forwards pending cell edit into context menu flow', tableObjectLayer, [
+  'export type PendingTableCellEdit',
+  'pendingEdit()',
+  'onTableContextMenu(event, canvasObject, selection, pendingEdit())',
+]);
+assertContainsAll('Visual connector layer renders pure visual-only connector markers', visualConnectorLayer, [
+  'data-canvas-visual-connector="true"',
+  'data-canvas-object-kind="visual_connector"',
+  'canvasVisualConnector',
+  'canvasVisualConnectorLine',
+  'markerEnd',
+]);
+assertContainsAll('Writing surface exposes PageFrame operable object controls', writingSurfaceLayer, [
+  'selectedPageFrameId',
+  'onMovePageFrame',
+  'onResizePageFrame',
+  'data-page-frame-selected',
+  'data-page-frame-resize-handle',
+]);
+assertContainsAll('Writing surface exposes PageStack identity and collapsed-tail markers', writingSurfaceLayer, [
+  'data-page-stack-id',
+  'data-page-stack-page-index',
+  'data-page-stack-page-total',
+  'data-page-stack-collapsed',
+  'data-page-stack-tail',
+  'data-page-stack-number-label',
+]);
+assertContainsAll('Writing surface passes cross-page Block fragments to Block shells', writingSurfaceLayer, [
+  'blockFragmentsByBlockId',
+  'noteCanvasRuntime.blockFragmentProjections',
+  'blockFragments={blockFragmentsByBlockId.get(block.id)}',
+]);
+assertContainsAll('Writing surface exposes Canvas zoom control for browser testing', writingSurfaceLayer, [
+  'data-canvas-zoom-control="true"',
+  'data-canvas-zoom-slider="true"',
+  'data-canvas-zoom-reset="true"',
+  'viewportTransform.zoom',
+]);
+assertContainsAll('Writing surface renders selection typography toolbar from TextFlow selection draft', writingSurfaceLayer, [
+  'SelectionTypographyToolbarLayer',
+  'documentTypographyProfile',
+  'onSaveDocumentTypographyProfile',
+  'draftRangeCount === 1',
+  '!annotationContextMenu',
+]);
+assertContainsAll('Layer props pass document typography into writing surface', noteCanvasLayerProps, [
+  'documentTypographyProfile: input.documentTypographyProfile',
+  'onSaveDocumentTypographyProfile: input.onSaveDocumentTypographyProfile',
+]);
+assertContainsAll('Layer props pass generic CanvasObject persistence into writing surface', noteCanvasLayerProps, [
+  'onPersistCanvasObject: input.onPersistCanvasObject',
+  'onDeleteCanvasObject: input.onDeleteCanvasObject',
+]);
+assertContainsAll('Selection typography toolbar edits note-level typography profile', selectionTypographyToolbarLayer, [
+  'data-selection-typography-toolbar',
+  'data-selection-typography-scope',
+  'Document typography',
+  'DOCUMENT_FONT_FAMILY_OPTIONS',
+  'DOCUMENT_TYPOGRAPHY_LIMITS',
+  'DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE',
+  'patchDocumentTypographyProfile',
+  'placeSelectionToolbar',
+  'onMouseDown',
+  'preventDefault',
+]);
+assertContainsNone('Selection typography toolbar does not create rich text span truth', selectionTypographyToolbarLayer, [
+  'text_span_style',
+  'richTextSpan',
+  'inlineStyle',
+  'fontWeight',
+  'fontStyle',
+  'textDecoration',
+]);
+
+const blockEditorLayer = readProjectFile('src/pages/Notes/canvasEngine/layers/BlockEditorLayer.tsx');
+assertContainsAll('Block editor shell exposes cross-page fragment markers', blockEditorLayer, [
+  'blockFragments',
+  'data-cross-page-block-fragment',
+  'data-cross-page-fragment-count',
+  'data-cross-page-fragment-role',
+  'data-cross-page-continuation-marker',
+  'blockCrossPageFragment',
+  'blockFragmentContinuationBadge',
+]);
+
+const noteDetailStyles = readProjectFile('src/pages/Notes/NoteDetail.module.css');
+assertContainsAll('Note detail styles apply document typography variables to writing text areas', noteDetailStyles, [
+  '--document-font-family',
+  '--document-font-size',
+  '--document-line-height',
+  '--document-paragraph-spacing',
+  '.pageTextArea',
+  '.definitionDescription',
+]);
+assertContainsAll('Note detail styles render selection typography mini toolbar', noteDetailStyles, [
+  '.selectionTypographyToolbar',
+  '.selectionTypographyScope',
+  '.selectionTypographySelect',
+  '.selectionTypographyNumber',
+  '.selectionTypographyButton',
+]);
+assertContainsAll('Note detail styles apply PageFrame template background variables', noteDetailStyles, [
+  '--page-frame-background',
+  '--page-frame-border-color',
+  '--page-frame-shadow',
+  '.formalPageBoundary',
+]);
+assertContainsAll('Note detail styles render PageFrame slots as quiet page chrome', noteDetailStyles, [
+  '.pageFrameSlot',
+  '.pageFrameHeaderSlot',
+  '.pageFrameFooterSlot',
+  '.pageFramePageNumberSlot',
+]);
+assertContainsAll('Note detail styles render cross-page Block fragment markers', noteDetailStyles, [
+  '.blockCrossPageFragment',
+  '.blockFragmentContinuationBadge',
+]);
+assertContainsAll('Note detail styles render PageFrame-aware Export Preview groups', noteDetailStyles, [
+  '.exportPreviewPageFrameGroup',
+  '.exportPreviewPageFrameMeta',
+  '.exportPreviewPageFrameTypography',
+]);
+assertContainsAll('Note detail styles render PageStack shell controls', noteDetailStyles, [
+  '.pageStackNumberBadge',
+  '.pageStackCollapsedTail',
+  '.pageFramePanelStackRow',
+  '.pageFramePanelChildRow',
+  '.pageFramePanelSectionLabel',
+]);
+assertContainsAll('Note detail styles render basic shape CanvasObjects', noteDetailStyles, [
+  '.canvasShapeObject',
+  '.canvasShapeRectangle',
+  '.canvasShapeEllipse',
+  '.canvasShapeSelected',
+  '.canvasShapeResizeHandle',
+]);
+assertContainsAll('Note detail styles render asset-backed image CanvasObjects', noteDetailStyles, [
+  '.canvasImageObject',
+  '.canvasImageOperable',
+  '.canvasImageSelected',
+  '.canvasImageMedia',
+  '.canvasImageCaption',
+  '.canvasImageResizeHandle',
+]);
+assertContainsAll('Note detail styles render structured table CanvasObjects', noteDetailStyles, [
+  '.canvasTableObject',
+  '.canvasTableSelected',
+  '.canvasTableHeader',
+  '.canvasTableGrid',
+  '.canvasTableResizeHandle',
+]);
+assertContainsAll('Note detail styles render Object Inspector panel', noteDetailStyles, [
+  '.canvasObjectInspector',
+  '.canvasObjectInspectorHeader',
+  '.canvasObjectInspectorGrid',
+  '.canvasObjectInspectorBadge',
+  '.canvasObjectInspectorActions',
+  '.canvasObjectInspectorAction',
+]);
+
+const exportPreviewLayer = readProjectFile('src/pages/Notes/canvasEngine/layers/ExportPreviewLayer.tsx');
+assertContainsAll('Export Preview layer renders PageFrame groups and workspace warnings', exportPreviewLayer, [
+  'ExportPreviewPageFrameGroup',
+  'exportPolicyLabel',
+  'data-export-preview-page-frame',
+  'data-export-preview-page-frame-role',
+  'data-export-preview-typography',
+  'data-export-preview-line-capacity',
+  'data-export-preview-crossing',
+  'data-export-preview-crossing-policy',
+  'data-export-preview-workspace-only',
+  'preview.pageFrames.map',
+  'preview.crossingObjects',
+  'preview.workspaceOnlyObjects',
+]);
+assertContainsAll('Export preview exposes PageStack grouping metadata', exportPreviewService, [
+  'pageStacks:',
+  'pageFrameIds:',
+  'collapsedInCanvas',
+]);
+
+const noteChromeLayer = readProjectFile('src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx');
+assertContainsAll('Chrome More panel exposes document typography controls', noteChromeLayer, [
+  'documentTypographyProfile',
+  'onSaveDocumentTypographyProfile',
+  'DOCUMENT_FONT_FAMILY_OPTIONS',
+  'patchDocumentTypographyProfile',
+  'data-typography-controls',
+  'data-typography-font-family',
+  'data-typography-font-size',
+  'data-typography-line-height',
+  'data-typography-paragraph-spacing',
+]);
+assertContainsAll('Chrome Layout panel exposes PageStack navigator controls', noteChromeLayer, [
+  'pageFramePanel',
+  'data-page-frame-panel',
+  'data-page-frame-row',
+  'data-page-stack-panel-row',
+  'data-page-stack-panel-frame',
+  'data-page-stack-create-toolbar',
+  'onSelectPageFrame',
+  'event.stopPropagation()',
+  'onCreatePageStack',
+  'onAddPageBelow',
+  'onTogglePageStackCollapse',
+  'onSplitPageStackAtFrame',
+  'onMergePageStackWithPrevious',
+  'onDuplicatePageFrame',
+  'onSetPrimaryPageFrame',
+  'onDeletePageFrame',
 ]);
 
 console.table(checks.map(({ name, pass }) => ({ check: name, status: pass ? 'passed' : 'failed' })));

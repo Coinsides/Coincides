@@ -11,6 +11,12 @@ import DocumentManager from '@/components/DocumentManager/DocumentManager';
 import api from '@/services/api';
 import { getNoteBlockTemplateLabel } from '@shared/types';
 import type { Course, Goal, SourceMaterial, MaterialSegment } from '@shared/types';
+import {
+  createPageFrameCollectionSeed,
+} from '../Notes/canvasEngine/pageFrameCollectionService';
+import {
+  savePageFrameCollectionForNote,
+} from '../Notes/canvasEngine/canvasObjectRepository';
 import LearningCanvasSurface from './LearningCanvasSurface';
 import styles from './CourseDetail.module.css';
 
@@ -691,6 +697,10 @@ export default function CourseDetailPage() {
       const res = await api.post('/notes', {
         course_id: courseId,
         title: 'Untitled note',
+      });
+      await savePageFrameCollectionForNote({
+        noteId: res.data.id,
+        collection: createPageFrameCollectionSeed(),
       });
       addToast('success', 'Note created');
       navigate(`/notes/${res.data.id}`);

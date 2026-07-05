@@ -1,5 +1,687 @@
 # V2.BN.8 Review
 
+## 2026-06-30 V2.BN.8.11.11 Structured Object Family Closure Gate Review
+
+```text
+status: engineering closure completed; Henry holistic manual pass still useful
+scope: V2.BN.8.11 ordinary / structured CanvasObject family
+```
+
+V2.BN.8.11 can close on the engineering side.
+
+Stable enough:
+
+- The CanvasObject pipeline is kind-general enough for the next special projection lane.
+- Shape, sticky note, visual connector, image, table, and Object Inspector are all present and covered by runtime/model checks.
+- Visual connector remains visual-only and does not become Relation.
+- Table proves AI-readable layout can carry structured object payloads.
+- ContentGroup projection is now a clearer 8.12 task, not blocked by missing ordinary-object infrastructure.
+
+Accepted carry-forward:
+
+- First complex structured family was skipped/deferred from 8.11.10.
+- PageFrame inspector, full component menu, real export, block-backed duplicate semantics, Source import/parsing, Relation runtime, and GraphRAG remain later work.
+
+Verification:
+
+- `npm run verify:v2-bn8-runtime` passed.
+- `cd server; npm run test:v2` passed 158 tests.
+
+## 2026-06-30 V2.BN.8.11.9 Object Inspector / Context Actions Review
+
+```text
+status: automated validation and browser smoke completed
+scope: first unified object inspection and safe action boundary
+```
+
+This patch gives ordinary CanvasObjects a readable control surface without turning the inspector into a new truth layer.
+
+Stable enough:
+
+- Inspector reads existing runtime state: CanvasObject, CanvasPlacement, ContentMount, typed extensions, and AI tree nodes.
+- Context menu object actions reuse the inspector action-availability model.
+- Pure shape, image, and table duplicate paths are explicit and safe for v1.
+- Sticky note / block-backed shape duplicate stays disabled because TextFlow copy semantics need a separate decision.
+- Export visibility toggles placement state instead of creating a new object truth.
+
+Accepted carry-forward:
+
+- PageFrame inspector stays out of this version.
+- ContentGroup reference / duplicate / fork / materialize remain V2.BN.8.12 territory.
+- Inspector visual design is functional first-pass, not the final object-management UX.
+
+Verification:
+
+- `npm run smoke:canvas-engine-model-contract` passed.
+- `npm run check:canvas-runtime-boundary` passed.
+- `npm run build:client` passed with existing Vite warnings.
+- `npm run verify:v2-bn8-runtime` passed.
+- Browser smoke passed for table inspector, table duplicate/delete, export visibility toggle, table context menu parity, sticky inspector, sticky disabled duplicate, and sticky delete.
+
+## 2026-06-29 V2.BN.8.11.7 Image / Asset-Backed CanvasObject Review
+
+```text
+status: automated validation and browser smoke completed
+scope: first asset-backed CanvasObject kind
+```
+
+This patch proves the generic CanvasObject pipeline can carry a non-text, asset-backed media object without turning it into TextFlow truth or Source truth.
+
+Stable enough:
+
+- Image object identity and placement live in `canvas_objects` / `canvas_placements`.
+- Image-specific metadata lives in `image_object_extensions`.
+- File metadata and storage key live in `canvas_assets`; client never receives an absolute local path.
+- Image objects hydrate into runtime and AI-readable layout as media objects, not paragraph block projections.
+- Browser smoke confirmed refresh/readback and authenticated blob rendering.
+
+Accepted carry-forward:
+
+- Asset garbage collection and asset library are not done.
+- Crop, annotation, OCR, Source parsing, ContentGroup image reuse, and export packaging remain later work.
+- The UI is intentionally minimal and should later be absorbed into object inspector / toolbar work.
+
+Verification:
+
+- `npm run check:canvas-runtime-boundary` passed 146 checks.
+- `npm run smoke:canvas-engine-model-contract` passed 53 groups.
+- `npm run build:client` passed with existing Vite warnings.
+- `cd server; node --import tsx --test src/__tests__/v2CanvasPersistenceCutover.test.ts` passed 27 tests.
+- `npm run verify:v2-bn8-runtime` passed.
+- Browser smoke passed: image object created through UI, persisted, reloaded, and rendered in Canvas Mode through authenticated `blob:` URL with `contentMounts = 0`.
+
+## 2026-06-27 V2.BN.8.11.1 Canvas Persistence Cutover Gate Review
+
+```text
+status: automated validation completed; CloudCode / Henry review welcome
+scope: active Canvas persistence cutover before ordinary / structured CanvasObject family work
+```
+
+This patch moves the three load-bearing Canvas seeds out of their old temporary homes:
+
+- PageFrame / PageStack collection no longer lives as active truth under `note.metadata.canvas_engine_page_frames_v1`.
+- Block geometry/policy no longer writes as active truth under `note_block_placements.display_overrides_json.better_notebook_layout`.
+- AnnotationTruth no longer lives as active truth under `note.metadata.canvas_engine_annotations_v1`.
+
+Stable enough:
+
+- Durable tables now exist for `CanvasObject`, `CanvasPlacement`, `ContentMount`, `PageFrameExtension`, collection headers, `AnnotationTruth`, and `AnnotationRange`.
+- Active Note editor load/save paths go through `canvasObjectRepository.ts` and `annotationTruthRepository.ts`.
+- New notes seed PageFrame collection through the entity repository after note creation.
+- The old block-placement route strips `better_notebook_layout`, so stale callers cannot easily resurrect the legacy layout seed.
+- Frontend note state strips legacy PageFrame/Annotation metadata after import to avoid re-saving stale keys through unrelated metadata updates.
+
+Accepted carry-forward:
+
+- Shape / connector projection seed helpers still reference `writeLayoutOverride`; they are dormant seed helpers, not the active Note editor persistence path.
+- `pageFrameCollectionService.ts` still keeps legacy parser/writer helpers for import and historical seed compatibility.
+- ContentGroup projection, CanvasObject reuse UI, PageSlice extraction UI, and relation runtime remain later work. As of the 2026-06-28 route swap, ordinary / structured objects are V2.BN.8.11 and ContentGroup projection moves to V2.BN.8.12.
+
+Verification:
+
+- `npm run build` passed.
+- `npm run build:client` passed with existing Vite warnings.
+- `npm run check:canvas-runtime-boundary` passed 128 checks.
+- `npm run smoke:canvas-engine-model-contract` passed 52 groups.
+- `cd server; node --import tsx --test src/__tests__/v2CanvasPersistenceCutover.test.ts` passed 4 tests.
+- `cd server; npm run test:v2` passed 133 tests.
+
+## 2026-06-27 V2.BN.8.10.6 Typography Maturity Closure Gate Review
+
+```text
+status: engineering closure completed; Henry holistic manual pass still useful
+scope: TextFlow typography maturity closure
+```
+
+This closes the 8.10 lane as a shared typography baseline. Typography now has one note-level profile that visible TextFlow presentation, PageFrame runtime extensions, measurement estimates, Export Preview, AI-readable layout, More -> Typography, and the selection mini toolbar can all read.
+
+Stable enough:
+
+- `DocumentTypographyProfile` is the document typography truth for this version.
+- Typography changes do not rewrite TextFlow unit content.
+- Measurement is now typography-aware and shared across PageFrame-related interpretation paths.
+- Export Preview and AI-readable layout expose the active typography profile.
+- The selection mini toolbar edits the same note-level profile rather than creating selected-text style truth.
+
+Accepted carry-forward:
+
+- The measurement path is still estimate-based, not a final Word-like layout engine.
+- CJK/Chinese font measurement needs later hardening before true automatic pagination.
+- Word-like automatic pagination, split materialization, top bar/ribbon, selected-range rich styling, per-block typography, real PDF/export, and CanvasObject DB migration remain later.
+- The next route is `V2.BN.8.11.1 Canvas Persistence Cutover Gate`, then object projection/reuse.
+
+Verification:
+
+- `npm run verify:v2-bn8-runtime` passed.
+- Runtime boundary passed 127 checks.
+- Model contract passed 52 groups.
+- Client build passed with existing Vite warnings.
+- Server build passed.
+- Performance smoke passed in 11.34ms.
+- `git diff --check` passed with LF/CRLF normalization warnings only.
+- Changed-file secret scan passed, 190 changed files scanned.
+
+## 2026-06-27 V2.BN.8.10.5 Selection Typography Mini Toolbar Review
+
+```text
+status: automated validation completed; manual smoke recommended before closure
+scope: selection-time document typography shortcut
+```
+
+This patch makes typography easier to reach during writing. A single TextFlow selection can now show a floating mini toolbar that edits the same note-level `DocumentTypographyProfile` used by More -> Typography, visible text, measurement, Export Preview, and AI-readable layout.
+
+Stable enough:
+
+- `SelectionTypographyToolbarLayer.tsx` is a sibling of the existing Label/Annotation selection toolbar, not a mutation of it.
+- The toolbar only patches note-level typography.
+- The Writing Surface now receives `documentTypographyProfile` and `onSaveDocumentTypographyProfile`.
+- The toolbar is hidden when the text selection context menu route is active.
+- Runtime boundary checks explicitly reject accidental rich-text span truth in this layer.
+
+Accepted carry-forward:
+
+- This is not a top bar or ribbon.
+- This is not selected-range rich styling.
+- Bold, italic, underline, per-block typography, and PageFrame-specific typography remain later.
+- Manual browser smoke should still check real selection behavior because native selection and focus interactions are subtle.
+
+Verification:
+
+- `npm run smoke:canvas-engine-model-contract` passed 52 groups.
+- `npm run check:canvas-runtime-boundary` passed 127 checks.
+- `npm run build:client` passed with existing Vite dynamic import / chunk-size warnings.
+- `git diff --check` passed with LF/CRLF normalization warnings only.
+- `npm run check:changed-file-secrets` passed.
+
+## 2026-06-27 V2.BN.8.10.4 Typography Measurement And PageFrame Sync Review
+
+```text
+status: automated validation completed; manual smoke pending
+scope: typography-aware layout measurement, PageStack fit, Export Preview, AI-readable PageFrame refs
+```
+
+This patch turns the 8.10 typography profile from a visible style setting into a shared measurement input. The note-level profile now feeds text block height estimates, PageStack draft-fit decisions, Export Preview PageFrame metadata, and AI-readable PageFrame refs.
+
+Stable enough:
+
+- `typographyMeasurementService.ts` owns pure estimate helpers and avoids DOM layout reads.
+- `measurementService.ts` no longer owns fixed text-height math for normal text block estimates.
+- PageStack content flow can use active font size, line height, average character width, and paragraph spacing when deciding whether a draft fits.
+- Export Preview can explain which typography profile a PageFrame group is interpreted with.
+- AI-readable PageFrame refs expose active typography values rather than relying on hidden defaults.
+
+Accepted carry-forward:
+
+- This is still estimate-based measurement, not final Word-like pagination.
+- Long Blocks are not split into line or paragraph fragments.
+- PageFrame still does not own Blocks.
+- PageSlice extraction UI, real export/PDF execution, per-block typography, and CanvasObject persistence remain later.
+
+Verification:
+
+- `npm run smoke:canvas-engine-model-contract` passed 51 groups.
+- `npm run check:canvas-runtime-boundary` passed 122 checks.
+- `npm run smoke:canvas-engine-performance` passed in 11.39ms.
+- `npm run build:client` passed with existing Vite dynamic import / chunk-size warnings.
+- `git diff --check` passed with LF/CRLF normalization warnings only.
+- `npm run check:changed-file-secrets` passed, 181 changed files scanned.
+- Browser Harness read-only smoke opened `test note 1`, confirmed document typography markers `15 / 22`, opened Export Preview, and confirmed PageFrame typography marker `default-document` with line capacity `56`.
+
+## 2026-06-27 V2.BN.8.9.18 PageStack / PageSlice Closeout Gate Review
+
+```text
+status: automated closeout gate completed; Henry manual test pending
+scope: expanded PageFrame / PageStack notebook maturity closure
+```
+
+This closeout records the PageStack/PageSlice lane as mature enough for Henry's holistic manual test pass and for V2.BN.8.10 TextFlow Typography Maturity to start if no basic PageStack blocker appears.
+
+Stable enough:
+
+- `PageFrame` is the physical page slice / formal page object.
+- `PageStack` is the user-facing continuous page unit.
+- `PageSlice` is the whole-page snapshot/reference descriptor.
+- PageStack can be created, extended, split, merged, detached, collapsed, selected, and marked primary through current runtime surfaces.
+- PageStack-aware content flow, cross-page Block fragment projection, and PageSlice snapshot/reference v1 now exist as service/model boundaries.
+- AI-readable layout can read PageFrame/PageStack/cross-page fragment metadata.
+
+Accepted carry-forward:
+
+- Henry's full manual test pass is still pending.
+- PageSlice extraction UI remains later.
+- Page-internal PageSlice range selection remains later.
+- Cross-page Block split confirmation remains later.
+- Measured automatic pagination belongs to V2.BN.8.10 Typography.
+- As of the 2026-06-28 route swap, ordinary / structured object work is V2.BN.8.11 and ContentGroup projection is V2.BN.8.12.
+- Final generic CanvasObject / CanvasPlacement DB cutover was completed in V2.BN.8.11.1 for PageFrame / block placement / AnnotationTruth persistence.
+
+Verification:
+
+- `npm run smoke:canvas-engine-model-contract` passed 45 groups.
+- `npm run check:canvas-runtime-boundary` passed 112 checks.
+- `npm run smoke:canvas-engine-performance` passed in 11.20ms.
+- `npm run build:client` passed with existing Vite warnings.
+- `npm run build` passed server TypeScript build.
+- `git diff --check` passed with LF/CRLF normalization warnings only.
+- `npm run check:changed-file-secrets` passed, 135 changed files scanned.
+
+## 2026-06-27 V2.BN.8.9.17 PageSlice Snapshot And Reference v1 Review
+
+```text
+status: completed model/service first pass
+scope: whole-page PageSlice snapshot/reference and ContentGroup member candidate
+```
+
+This patch gives PageStack a conservative whole-page reuse boundary. A PageFrame inside a PageStack can now produce a PageSlice snapshot, a reference descriptor, and a `page_slice` ContentGroup member candidate.
+
+Stable enough:
+
+- `pageSliceService.ts` owns PageSlice snapshot/reference derivation.
+- PageSlice records source note, PageStack, PageFrame, page index, page total, outer bbox, content bbox, block ids, snapshot text, snapshot hash, and open-original target.
+- `createContentGroupMemberFromPageSliceSnapshot(...)` creates a snapshot-first ContentGroup member candidate.
+- Client and server ContentGroup member normalization preserve `page_slice`.
+- ContentGroup `source_ref.metadata` now preserves caller-provided metadata, which is required for PageSlice provenance.
+- Runtime boundary checks now protect PageSlice types, service, ContentGroup factory, and server member kind preservation.
+
+Accepted carry-forward:
+
+- This is not a PageSlice extraction UI.
+- This is not page preview/PDF rendering.
+- This is not page-internal range selection.
+- This is not automatic pagination.
+- This does not yet expose a visible ContentGroup action for adding a PageSlice.
+
+Verification:
+
+- `npm run smoke:canvas-engine-model-contract` passed 45 groups.
+- `npm run check:canvas-runtime-boundary` passed 112 checks.
+- `npm run build:client` passed with existing Vite warnings.
+- `git diff --check` passed with LF/CRLF normalization warnings only.
+- `npm run check:changed-file-secrets` passed.
+
+## 2026-06-27 V2.BN.8.9.16 Cross-page Block Fragment v1 Review
+
+```text
+status: completed model/runtime/UI first pass
+scope: geometry-derived cross-page Block fragment projection
+```
+
+This patch gives PageStack a visible and AI-readable way to explain a Block that crosses page boundaries. The logical Block and TextFlow remain one source of truth; fragment projection is derived from geometry and PageStack context.
+
+Stable enough:
+
+- `derivePageStackBlockFragments(...)` owns cross-page fragment projection.
+- Runtime exposes `blockFragmentProjections`.
+- Canvas AI-readable Block nodes expose `pageStackBlockFragments`.
+- Block shells expose stable DOM markers for browser/manual checks.
+- The UI shows a subtle continuation marker when one logical Block has fragments across more than one PageFrame content area.
+- The service avoids a runtime circular dependency by staying on minimal geometry and PageStack context.
+
+Accepted carry-forward:
+
+- This is not line-level pagination.
+- This does not split one logical Block into multiple NoteBlocks.
+- This does not implement PageSlice snapshot/reference/member semantics.
+- This does not implement export/PDF clipping for cross-page Blocks.
+- Typography-aware pagination still belongs to the later TextFlow typography maturity lane.
+
+Verification:
+
+- `npm run smoke:canvas-engine-model-contract` passed 44 groups.
+- `npm run check:canvas-runtime-boundary` passed 106 checks.
+- `npm run build:client` passed with existing Vite warnings.
+- `git diff --check` passed with LF/CRLF normalization warnings only.
+- `npm run check:changed-file-secrets` passed.
+- Browser read-only smoke opened `test note 1` and confirmed Canvas runtime load. No live cross-page marker was exercised because the note had no blocks.
+
+## 2026-06-27 V2.BN.8.9.15 PageStack Content Flow v1 Review
+
+```text
+status: completed model/runtime first pass
+scope: default natural writing continuation inside PageStack
+```
+
+This patch gives PageStack a first content-flow spine. The engine can now ask a small model service whether a default draft should stay on the current PageFrame, move to an existing next PageFrame, or append the next PageFrame in the same PageStack.
+
+Stable enough:
+
+- `resolvePageStackContentFlowPlan(...)` owns the PageStack continuation decision.
+- The service is pure from the runtime perspective: it returns a plan and does not directly persist note metadata.
+- Default natural writing now consumes the plan.
+- Existing next PageFrame can become the continuation target.
+- Stack-tail overflow can append the next PageFrame and continue writing there.
+- Explicit Canvas point creation still respects the user-chosen point.
+- Model contract coverage now protects PageStack content flow v1.
+
+Accepted carry-forward:
+
+- This is not full automatic pagination.
+- This does not split one logical Block across pages.
+- This does not create PageSlice snapshot/reference/member objects.
+- This does not make PageFrame the durable owner of Blocks.
+- Real page metrics still depend on the future TextFlow typography maturity pass.
+
+Verification:
+
+- `npm run smoke:canvas-engine-model-contract` passed 43 groups.
+- `npm run check:canvas-runtime-boundary` passed 98 checks.
+- `npm run build:client` passed with existing Vite warnings.
+- `git diff --check` passed with LF/CRLF normalization warnings only.
+- `npm run check:changed-file-secrets` passed.
+- Browser smoke opened `test note 1`, confirmed the note surface still loads, created/saved a temporary text block, and deleted that temporary block afterward. Full visual overflow continuation remains a follow-up once 8.9.16 cross-page Block fragments exist.
+
+## 2026-06-27 V2.BN.8.9.14 Layout Panel And PageStack Navigator Review
+
+```text
+status: completed
+scope: PageStack user-facing navigator and PageFrame internalization
+```
+
+This patch closes the naming gap left by 8.9.13: users should not have to choose between "independent PageFrame" and "PageStack." A one-page document is now simply a one-page PageStack.
+
+Stable enough:
+
+- `PageStack` is the user-facing page/document unit.
+- `PageFrame` remains the internal physical page slice for geometry, rendering, export, and AI-readable layout.
+- PageFrame collection normalization now repairs uncovered PageFrames into single-page PageStacks.
+- Detaching a page creates a new single-page PageStack instead of leaving a visible orphan.
+- Splitting a PageStack at a non-first page creates two PageStacks.
+- Merging with previous PageStack is wired through the runtime controller.
+- Toolbar and blank Canvas command vocabulary now expose `New PageStack`, not visible `New PageFrame`.
+- Layout panel no longer has an `Independent PageFrames` section.
+- Model contract and runtime boundary checks protect the PageStack coverage and visible vocabulary.
+
+Accepted carry-forward:
+
+- Automatic pagination.
+- PageSlice extraction / reference / snapshot.
+- Cross-page Block continuation markers.
+- PageStack navigator for very large documents, including page jump and outline.
+- TextFlow typography controls and real font-metric pagination.
+- Complete context-menu system.
+- Durable generic CanvasObject / CanvasPlacement persistence.
+
+Guiding judgment:
+
+```text
+The user manages PageStacks.
+The engine renders PageFrames.
+```
+
+Verification:
+
+- `npm run smoke:canvas-engine-model-contract` passed 42 groups.
+- `npm run check:canvas-runtime-boundary` passed 96 checks.
+- `npm run build:client` passed with existing Vite warnings.
+- `git diff --check` passed with LF/CRLF normalization warnings only.
+- `npm run check:changed-file-secrets` passed.
+- Browser smoke passed for visible `New PageStack`, Layout panel single-page PageStacks, add-page-below, split, merge, and cleanup of the temporary smoke-created page.
+
+## 2026-06-27 V2.BN.8.9.13 Continuous PageStack v1 Review
+
+```text
+status: completed
+scope: explicit PageFrame continuity model and first PageStack commands
+```
+
+This patch turns PageStack from a deferred product idea into an explicit runtime and persistence concept.
+
+Stable enough:
+
+- `PageStackModel` now represents continuity among ordered PageFrames.
+- New A4/PageFrame note seeds start with one explicit primary PageStack.
+- Project Detail `New Note` now writes that seed metadata up front instead of relying on a runtime fallback.
+- Legacy multi-PageFrame metadata without `pageStacks` stays independent instead of being silently interpreted as one continuous stack.
+- Runtime PageFrame extensions now expose stack identity, local page index, stack page count, collapsed state, and local number label.
+- Canvas AI-readable layout now includes PageStack container nodes and PageFrame reference children.
+- Export Preview now carries PageStack grouping metadata without pretending to run final export.
+- Layout panel and Canvas DOM now expose enough PageStack markers for browser/manual testing.
+- Command paths exist for New PageStack, Add page below, Detach from PageStack, and Collapse/Expand PageStack.
+
+Accepted carry-forward:
+
+- Measured auto-pagination.
+- PageSlice extraction, split, snapshot, and reference behavior.
+- Cross-page Block continuation markers.
+- User-editable stack numbering and richer PageStack navigator controls.
+- Layout panel discoverability / visible stack grouping polish.
+- TextFlow typography maturity and pagination based on real font metrics.
+- Durable generic CanvasObject / CanvasPlacement database cutover.
+
+Guiding judgment:
+
+```text
+PageFrame is a physical page slice.
+PageStack is the continuity relation.
+PageSlice is still a later extraction/reference problem.
+```
+
+Verification:
+
+- `npm run smoke:canvas-engine-model-contract` passed 41 groups.
+- `npm run check:canvas-runtime-boundary` passed 96 checks.
+- `npm run build:client` passed with existing Vite warnings.
+- Browser smoke passed for fresh New Note stack seed, add-page-below, collapse/expand, detach, and refresh persistence.
+
+## 2026-06-27 V2.BN.8.9.12.1 PageFrame Layout Affiliation And Zoom Control Review
+
+```text
+status: completed
+scope: PageFrame move cohort and Canvas zoom usability patch
+```
+
+This patch fixes a concrete manual-testing gap after PageFrame became movable: moving a PageFrame should not leave fully-contained Blocks visually behind, but the system still must not introduce hard PageFrame ownership.
+
+Stable enough:
+
+- `layoutAffiliationService.ts` now owns the sparse geometry-derived layout-container helper boundary.
+- PageFrame can derive a move cohort from fully-contained Blocks.
+- Crossing Blocks and workspace Blocks are excluded from automatic PageFrame move.
+- PageFrame move transactions apply block layout drafts and persist changed block layouts.
+- Canvas Mode now has a visible zoom control for browser/manual recovery from awkward viewport states.
+- Runtime-boundary coverage protects both the move wiring and the zoom-control DOM markers.
+
+Accepted carry-forward:
+
+- Continuous PageStack / PageSlice behavior.
+- Cross-page Block fragment rendering and continuation markers.
+- Full object context-menu system.
+- Durable generic CanvasObject / CanvasPlacement database cutover.
+- Final LayoutContainer / LayoutAffiliation persistence model.
+
+Guiding judgment:
+
+```text
+Affiliation can move with geometry.
+Ownership still belongs elsewhere.
+```
+
+Verification:
+
+- `npm run smoke:canvas-engine-model-contract` passed 40 groups.
+- `npm run check:canvas-runtime-boundary` passed 86 checks.
+- `npm run build:client` passed with existing Vite warnings.
+
+## 2026-06-27 V2.BN.8.9.11 PageFrame Numbering Scope Guard Review
+
+```text
+status: completed
+scope: PageFrameCollection / PageStack numbering boundary
+```
+
+This patch fixes a product semantics problem before it turns into user-facing doctrine.
+
+Stable enough:
+
+- `PageFrameCollection` remains a Canvas-level collection of PageFrame objects.
+- Independent PageFrames no longer display collection-global `1 / N`, `2 / N` page-number chrome.
+- The page-number slot service still supports explicit index/total formatting for a future explicit PageStack scope.
+- Model-contract coverage proves that collection membership does not imply PageStack numbering.
+- Runtime-boundary coverage prevents reintroducing the direct `runtimePageFrames.length` numbering path.
+
+Accepted carry-forward:
+
+- Continuous PageFrame / PageStack data model.
+- PageSlice extraction, split, merge, collapse, and reference behavior.
+- PageFrame move/resize/configuration interactions.
+- Mature PageFrame navigator for large PageFrame collections.
+
+Guiding judgment:
+
+```text
+Collection is not continuity.
+Continuity needs an explicit PageStack.
+```
+
+Verification:
+
+- `npm run smoke:canvas-engine-model-contract` passed 38 groups.
+- `npm run check:canvas-runtime-boundary` passed 82 checks.
+
+## 2026-06-27 V2.BN.8.9.10 Canvas World Auto-Expand And PageFrame Focus Review
+
+```text
+status: completed
+scope: expandable finite Canvas world and PageFrame focus
+```
+
+This patch fixes the immediate usability problem discovered after PageFrame creation became reachable: newly created PageFrames could be inserted outside the old fixed Canvas world and feel lost.
+
+Stable enough:
+
+- Canvas Mode world bounds are derived from real runtime content.
+- PageFrames, block placements, and reserved Canvas objects can extend the finite world.
+- Viewport pan / scroll / zoom / resize can clamp against the current runtime world.
+- Created / inserted / duplicated / selected PageFrames become focus targets.
+- Layout panel rows now act as jump targets for PageFrames.
+- Browser smoke has stable world width/height markers to inspect.
+
+Accepted carry-forward:
+
+- Full infinite/chunked Canvas.
+- Continuous PageStack and PageSlice operations.
+- PageFrame move/resize/configuration maturity.
+- Final generic CanvasObject / CanvasPlacement database truth.
+- TextFlow typography controls.
+- ContentGroup projection and usage objects.
+
+Guiding judgment:
+
+```text
+The Canvas is still finite, but it is no longer fixed.
+That is the right intermediate state before full infinite Canvas design.
+```
+
+Verification:
+
+- `npm run smoke:canvas-engine-model-contract` passed 37 groups.
+- `npm run check:canvas-runtime-boundary` passed 80 checks.
+- `npm run build:client` passed with existing Vite warnings.
+- Browser smoke confirmed zero-PageFrame creation fallback, second/third PageFrame focus, dynamic world height growth, Layout row jump, and refresh persistence.
+
+## 2026-06-27 V2.BN.8.9.9 PageFrame Command Surface And Creation Review
+
+```text
+status: completed
+scope: PageFrame creation and first command-surface entry
+```
+
+This patch makes PageFrame creation reachable without forcing the user through the Layout panel.
+
+Stable enough:
+
+- PageFrame command vocabulary now includes blank Canvas and PageFrame shell surfaces.
+- Toolbar has a compact create-PageFrame entry.
+- Canvas Mode blank-space context menu can create a PageFrame.
+- Canvas Mode PageFrame shell menu can duplicate, set primary, and delete through existing collection persistence.
+- `create_page_stack` is visible as a reserved disabled command, not silently implemented early.
+
+Accepted carry-forward:
+
+- Continuous PageStack / PageSlice behavior.
+- Full context-menu system for every object family.
+- PageFrame move/resize/configuration maturity.
+- TextFlow typography controls.
+- ContentGroup projection and usage objects.
+- Durable generic CanvasObject / CanvasPlacement database cutover.
+
+Verification:
+
+- `npm run smoke:canvas-engine-model-contract` passed 36 groups.
+- `npm run check:canvas-runtime-boundary` passed 77 checks.
+- `npm run build:client` passed with existing Vite warnings.
+- `git diff --check` passed with existing Windows line-ending warnings.
+- Browser smoke confirmed toolbar creation, blank Canvas context-menu creation, disabled PageStack command, block/text right-click isolation, and refresh persistence.
+
+## 2026-06-26 V2.BN.8.9.8 PageFrame Maturity Closure Gate Review
+
+```text
+status: completed
+scope: PageFrame maturity closure before the expanded PageStack/PageSlice lane
+```
+
+V2.BN.8.9 closes the PageFrame maturity lane.
+
+Supersession note:
+
+```text
+This was the 8.9.8 judgment before the 8.9 lane expanded into PageStack / PageSlice notebook maturity.
+Current route after 2026-06-28: 8.10 TextFlow Typography Maturity, 8.11 Structured Object Family, 8.12 ContentGroup Projection And Reuse.
+```
+
+The review question was:
+
+```text
+Is PageFrame mature enough to serve as the first special CanvasObject before the next Canvas maturity lane starts?
+```
+
+Answer:
+
+```text
+Yes. PageFrame was mature enough to continue into the later PageStack/PageSlice maturity lane.
+```
+
+Stable enough to close:
+
+- PageFrame visible DOM contract and primary Page Mode focus.
+- Multi-PageFrame runtime collection and transitional persistence.
+- PageFrame as special CanvasObject direction.
+- Block/PageFrame relation as geometry-derived affiliation, not ownership.
+- Ruler / margin guide / snap-wall behavior.
+- A4/document typography baseline.
+- Header/footer/page-number slots as PageFrame-owned components.
+- Template/background/style tokens.
+- PageFrame-aware Export Preview.
+- Crossing object export policy interpretation.
+- Browser/manual smoke for primary focus, multi-frame persistence, snap wall, outside drag, and Export Preview workspace classification.
+
+Accepted carry-forward:
+
+- Final durable CanvasObject / CanvasPlacement database cutover.
+- Clearer Layout panel click/hover affordance.
+- Real PDF/export engine, clipping, and manual crossing decisions.
+- Rich PageFrame slot/template editing.
+- Dedicated TextFlow typography controls.
+- Structured object family in 8.11.
+- ContentGroup projection / usage objects in 8.12.
+- Relation View, Agent write path, and GraphRAG.
+
+Guiding judgment:
+
+```text
+PageFrame can now carry formal-page meaning.
+It is not the final Canvas database truth yet.
+```
+
+Verification:
+
+- `npm run check:canvas-runtime-boundary` passed 75 checks.
+- `npm run smoke:canvas-engine-model-contract` passed 35 groups.
+- `npm run smoke:canvas-engine-performance` passed in 11.94ms.
+- `npm run build:client` passed with existing Vite warnings.
+- `git diff --check` passed.
+- `npm run check:changed-file-secrets` passed.
+
 ## 2026-06-23 V2.BN.8.7.9 ContentGroup System Closure Gate Review
 
 ```text
@@ -2756,3 +3438,85 @@ browser: in-app browser
 - GroupFolder move/delete 的复杂资源管理场景，因为需要更丰富的 folder seed。
 - stale/missing source、materialize target unavailable 的 UI 全量状态，因为当前没有真实 source resolver / materialize UI。
 - mobile viewport。
+## V2.BN.8.9.12 PageFrame Operable Object Review
+
+```text
+status: technical pass completed
+scope: PageFrame selection / move / resize / geometry persistence
+browser harness: passed for move and resize first pass
+```
+
+本轮把 PageFrame 从“可见页面边界”推进到“可操作 CanvasObject seed”：
+
+- PageFrame geometry 现在有独立服务函数负责更新、移动、缩放，并被模型契约覆盖。
+- Runtime presentation controller 把 PageFrame move/resize 接到 PageFrameCollection 持久化路径。
+- Writing Surface 在 Canvas + Layout Mode 下显示 PageFrame 选中态，并提供右下角 resize handle。
+- PageFrame 移动不移动 block；这保持了“Block 不被 PageFrame 拥有，关系由几何推导”的 8.9 规则。
+- Browser Harness 首次发现“点击 PageFrame 时复用 select+focus 会导致拖动前视口跳动”，已改为拖动/缩放提交时通过 geometry update 选中，不在 pointer down 时聚焦。
+
+已通过：
+
+- `npm run check:canvas-runtime-boundary`
+- `npm run smoke:canvas-engine-model-contract`
+- `npm run build:client`
+- `git diff --check`
+- Browser Harness：Canvas + Layout 下 PageFrame 拖动、缩放、选中态、resize handle first pass。
+
+剩余风险：
+
+- 目前只做了 PageFrame shell 的移动/缩放；PageStack、PageSlice、跨页 block integrity 仍属于后续 8.9.13/8.9.14。
+- PageFrame 样式配置、锁定、右键菜单完整体系、toolbar 入口还没有进入本轮。
+- 测试数据中已有多个 PageFrame 位置重叠，后续做 Continuous PageStack 时需要重新整理 stack/独立 frame 的视觉关系。
+## V2.BN.8.11.5 Object-Style Preset And Sticky Note
+
+- Sticky note 的边界已经收住：它是 block-backed shape 的 object-style preset，不是新的内容类型。
+- 内容真相仍由 paragraph block / TextFlow 承担；CanvasObject 只承担 identity、geometry、mount 与 presentation metadata。
+- `shapeSavePayload()` 已经不再吞掉 metadata，style 可以随 move/resize/save round-trip。
+- AI tree 可以读取 `presentationRef`，但正文仍从 `contentRef` 读取，presentation 没有污染内容 truth。
+- 剩余风险：视觉只是 v1；尚未有 style inspector / top bar / 自定义样式库；browser smoke 仍需人工体验确认。
+
+## V2.BN.8.11.6 Visual Connector Persistence And Endpoint Model
+
+```text
+status: technical pass completed
+scope: visual-only connector persistence / endpoint model / runtime readback
+```
+
+本轮把连接线从“画布 seed 概念”推进成真正的普通 CanvasObject：
+
+- `visual_connector` 已经走通服务端 kind handler、typed extension、读取回放、runtime 解析和 AI-tree 输出。
+- endpoint 明确绑定 CanvasObject，而不是绑定 ContentGroup / Petal / Relation endpoint；这保证它只是视觉布局关系。
+- `relationKind` 被限制为 `visual_only`，并在 validator / service / AI-tree 中保持同一语义。
+- 删除 endpoint object 时会同步清理相关 connector，避免后续布局读取时出现孤儿连接线。
+- 这说明 8.11 的 kind-general 管线已经能承载第二种 pure object family，不再只是 shape 的特例。
+- Browser smoke 已覆盖：API seed 渲染、刷新读回、删除 endpoint 清理、右键菜单真实创建 connector、再次刷新读回。
+- Smoke 过程中修复了客户端默认 `lineStyle` 与服务端 validator 不一致的问题；v1 使用 `solid/dashed/dotted` 表达线条样式，不提前引入 straight/elbow/curve routing。
+
+剩余风险：
+
+- 交互还是 v1：右键开始、右键完成，暂时没有拖拽连线手柄和 hover endpoint。
+- 当前只做直线箭头，没有折线、曲线、避让、锚点编辑器。
+- 连接线没有 label / 描述 / 权重；这是刻意保留的边界，避免污染后续 Relation 体系。
+- Browser smoke 还需要 Henry 人工确认“右键连接”的操作是否能接受，后续可以换成更自然的拖拽手感。
+
+## V2.BN.8.11.8 Table Structured Object Model
+
+```text
+status: technical pass completed
+scope: structured-backed table CanvasObject / table.v1 payload / AI-readable structuredRef
+```
+
+本轮把表格从“未来对象候选”推进成真正的 structured-backed CanvasObject：
+
+- `table` 已经走通 server kind handler、typed sidecar、runtime hydrate、Canvas 渲染和 AI-tree 输出。
+- 表格数据不是一条扁平 `text`，而是 row / column / cell matrix；AI-readable layout 可以寻址到第几行第几列。
+- 单元格文本保存在 table payload 内，不挂 paragraph block，也不污染 TextFlow。
+- 客户端支持双击编辑单元格、Enter 保存、Esc 取消，并支持基础添加 / 删除行列。
+- Browser smoke 已确认：编辑 `Power Series`、添加行、添加列、删除行、删除列、刷新后读回均通过。
+
+剩余风险：
+
+- 表格入口仍是 v1，完整 object inspector / 全局组件菜单还没做。
+- 这不是 spreadsheet engine；公式、排序、筛选、复杂合并、大表性能都不在本轮。
+- 未来 Excel / Word / PDF / 图片表导入需要复用同一 table payload，但导入链路尚未开始。
+- 表格与 ContentGroup、PageSlice、export、工程包的关系仍需后续版本设计。

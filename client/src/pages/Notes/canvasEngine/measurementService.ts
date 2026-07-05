@@ -1,22 +1,29 @@
 import {
-  BLOCK_HORIZONTAL_CHROME,
   BLOCK_VERTICAL_CHROME,
   DEFAULT_BLOCK_HEIGHT,
   MIN_BLOCK_HEIGHT,
-  TEXT_AVERAGE_CHAR_WIDTH,
-  TEXT_LINE_HEIGHT,
   type BlockBoxLayout,
 } from './runtimeLayout';
 import {
   reflowLayoutsAfterHeightChange,
   resolveStackedLayoutCollisions,
 } from './placementService';
+import {
+  estimateTypographyTextBlockHeight,
+} from './typographyMeasurementService';
+import {
+  DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE,
+} from './typographyProfileService';
 import { textFromContent } from './blockContentService';
 import type { NoteBlock } from './runtimeDataTypes';
+import type {
+  DocumentTypographyProfile,
+} from './types';
 
 export interface TextBlockHeightEstimate {
   text: string;
   width: number;
+  typography?: DocumentTypographyProfile;
   title?: string | null;
   showPreview?: boolean;
   sourceReferenceCount?: number;
@@ -51,21 +58,19 @@ export function measureBlockContentHeight(element: HTMLElement | null): number {
 export function estimateTextBlockHeight({
   text,
   width,
+  typography = DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE,
   title,
   showPreview = false,
   sourceReferenceCount = 0,
 }: TextBlockHeightEstimate): number {
-  const titleRows = title ? 1 : 0;
-  const textWidth = Math.max(80, width - BLOCK_HORIZONTAL_CHROME);
-  const charsPerLine = Math.max(12, Math.floor(textWidth / TEXT_AVERAGE_CHAR_WIDTH));
-  const wrappedRows = text
-    .split('\n')
-    .reduce((total, line) => total + Math.max(1, Math.ceil(line.length / charsPerLine)), 0);
-  const rows = Math.max(1, wrappedRows) + titleRows;
-  const previewExtra = showPreview ? 72 : 0;
-  const sourceExtra = sourceReferenceCount > 0 ? 34 : 0;
-
-  return Math.max(MIN_BLOCK_HEIGHT, BLOCK_VERTICAL_CHROME + rows * TEXT_LINE_HEIGHT + previewExtra + sourceExtra);
+  return estimateTypographyTextBlockHeight({
+    text,
+    width,
+    typography,
+    title,
+    showPreview,
+    sourceReferenceCount,
+  }).heightPx;
 }
 
 export function isFormulaLikeBlock(block: NoteBlock): boolean {
@@ -82,18 +87,28 @@ export function shouldShowFormulaPreview(block: NoteBlock, text: string): boolea
   return isFormulaLikeBlock(block) && text.trim().length > 0;
 }
 
-export function estimateBlockHeightForText(block: NoteBlock, text: string, width: number): number {
+export function estimateBlockHeightForText(
+  block: NoteBlock,
+  text: string,
+  width: number,
+  typography?: DocumentTypographyProfile,
+): number {
   return estimateTextBlockHeight({
     text,
     width,
+    typography,
     title: block.title,
     showPreview: shouldShowFormulaPreview(block, text),
     sourceReferenceCount: block.source_references?.length || 0,
   });
 }
 
-export function estimateBlockHeight(block: NoteBlock, width: number): number {
-  return estimateBlockHeightForText(block, textFromContent(block), width);
+export function estimateBlockHeight(
+  block: NoteBlock,
+  width: number,
+  typography?: DocumentTypographyProfile,
+): number {
+  return estimateBlockHeightForText(block, textFromContent(block), width, typography);
 }
 
 export function applyMeasuredBlockLayoutToLayouts({

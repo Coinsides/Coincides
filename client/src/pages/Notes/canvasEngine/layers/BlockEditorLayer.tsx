@@ -28,6 +28,9 @@ import type {
   SourceAnchor,
   TextBlockContentV1,
 } from '../runtimeDataTypes';
+import type {
+  PageStackBlockFragmentProjection,
+} from '../types';
 import type { CapturedSelectionRange } from '../selectionRangeService';
 import {
   getTextFlowContent,
@@ -56,6 +59,7 @@ interface BlockEditorLayerProps {
   draftAnnotationRanges?: AnnotationRangeV1[];
   selectedAnnotationIds: string[];
   layout: BlockBoxLayout;
+  blockFragments?: PageStackBlockFragmentProjection[];
   blockControlAnchor: { x: number; y: number } | null;
   fieldDraft?: FieldValueRecord;
   layoutMode: boolean;
@@ -105,6 +109,7 @@ export function BlockEditorLayer({
   draftAnnotationRanges,
   selectedAnnotationIds,
   layout,
+  blockFragments = [],
   blockControlAnchor,
   fieldDraft,
   layoutMode,
@@ -146,6 +151,16 @@ export function BlockEditorLayer({
   const exportRole = getEffectiveExportRole(layout);
   const aiVisibility = getEffectiveAIVisibility(layout);
   const presentationKind = presentationKindForBlock(block);
+  const fragmentTotal = blockFragments[0]?.fragmentTotal || blockFragments.length;
+  const crossPageFragment = fragmentTotal > 1;
+  const fragmentRoles = blockFragments.map((fragment) => fragment.role).join(',');
+  const fragmentRole = blockFragments.find((fragment) => fragment.role !== 'single')?.role || blockFragments[0]?.role || 'single';
+  const fragmentContinuesFromPrevious = blockFragments.some((fragment) => fragment.clippedTop);
+  const fragmentContinuesToNext = blockFragments.some((fragment) => fragment.clippedBottom);
+  const fragmentContinuationLabel = [
+    fragmentContinuesFromPrevious ? '上接' : null,
+    fragmentContinuesToNext ? '下续' : null,
+  ].filter(Boolean).join(' / ');
   const textFlow = textFlowDraft || getTextFlowContent(block.content_json);
   const formulaFields = presentationKind === 'formula'
     ? formulaFieldsFromBlock(block, fieldDraft ? text : undefined, fieldDraft)
@@ -250,7 +265,11 @@ export function BlockEditorLayer({
   return (
     <article
       data-note-block-shell="true"
-      className={`${styles.block} ${styles.blockBox} ${presentationKind === 'code' ? styles.codeBlockBox : ''} ${layoutMode ? styles.blockBoxLayoutMode : ''} ${active ? styles.blockActive : ''} ${boundary !== 'inside' ? styles.blockScratch : ''}`}
+      data-cross-page-block-fragment={crossPageFragment ? 'true' : undefined}
+      data-cross-page-fragment-count={crossPageFragment ? fragmentTotal : undefined}
+      data-cross-page-fragment-role={crossPageFragment ? fragmentRole : undefined}
+      data-cross-page-fragment-roles={crossPageFragment ? fragmentRoles : undefined}
+      className={`${styles.block} ${styles.blockBox} ${presentationKind === 'code' ? styles.codeBlockBox : ''} ${layoutMode ? styles.blockBoxLayoutMode : ''} ${active ? styles.blockActive : ''} ${boundary !== 'inside' ? styles.blockScratch : ''} ${crossPageFragment ? styles.blockCrossPageFragment : ''}`}
       style={{
         left: layout.x + pageOffsetX,
         top: layout.y,
@@ -283,6 +302,14 @@ export function BlockEditorLayer({
         onBlockItemDragStart={handleBlockItemDragStart}
         onTrash={onTrash}
       />
+      {crossPageFragment && fragmentContinuationLabel && (
+        <div
+          className={styles.blockFragmentContinuationBadge}
+          data-cross-page-continuation-marker="true"
+        >
+          {fragmentContinuationLabel}
+        </div>
+      )}
       {blockAnnotationCluster && (
         <button
           type="button"

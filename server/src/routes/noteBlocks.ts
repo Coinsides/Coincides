@@ -5,6 +5,10 @@ import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { updateNoteBlockSchema } from '../validators/index.js';
 import { mergeRuntimeNoteBlockTemplateMetadata } from '../services/templateDefinitions.js';
+import {
+  assertNoteBlockStatusChangeAllowed,
+  restoreNoteBlockForCanvasLifecycle,
+} from '../services/canvasObjects.js';
 
 const router = Router();
 
@@ -51,6 +55,22 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     const blockId = req.params.id as string;
     const currentBlock = getOwnedBlock(blockId, req.userId!);
     const data = updateNoteBlockSchema.parse(req.body);
+    if (data.status && data.status !== 'active') {
+      assertNoteBlockStatusChangeAllowed(getDb(), req.userId!, blockId, data.status);
+    }
+    if (
+      data.status === 'active'
+      && data.block_type === undefined
+      && data.title === undefined
+      && data.content_json === undefined
+      && data.plain_text === undefined
+      && data.metadata === undefined
+    ) {
+      restoreNoteBlockForCanvasLifecycle(getDb(), req.userId!, blockId);
+      const restored = getDb().prepare('SELECT * FROM note_blocks WHERE id = ? AND user_id = ?').get(blockId, req.userId!);
+      res.json(hydrateBlock(restored));
+      return;
+    }
     const fields: string[] = [];
     const values: unknown[] = [];
 
@@ -107,6 +127,7 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
 router.delete('/:id', (req: AuthRequest, res: Response) => {
   const blockId = req.params.id as string;
   getOwnedBlock(blockId, req.userId!);
+  assertNoteBlockStatusChangeAllowed(getDb(), req.userId!, blockId, 'trashed');
   const now = new Date().toISOString();
   getDb()
     .prepare("UPDATE note_blocks SET status = 'trashed', trashed_at = ?, updated_at = ? WHERE id = ? AND user_id = ?")

@@ -94,6 +94,12 @@ function rangeText(range: AnnotationRangeV1, nextText: string): string | undefin
   return range.range_text_cache;
 }
 
+function rangeMetadata(value: unknown): Record<string, unknown> {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? { ...(value as Record<string, unknown>) }
+    : {};
+}
+
 export function rebaseTextUnitAnnotationRanges(input: {
   textUnitId: string;
   oldText: string;
@@ -177,7 +183,18 @@ export function rebaseTextUnitAnnotationRanges(input: {
     warnings.push(`Range ${range.id} overlaps edited text and needs review.`);
     return {
       ...range,
-      range_text_cache: rangeText(range, input.oldText),
+      start_offset: undefined,
+      end_offset: undefined,
+      range_text_cache: range.range_text_cache,
+      metadata: {
+        ...rangeMetadata(range.metadata),
+        pre_edit_offsets: {
+          text_unit_id: input.textUnitId,
+          start_offset: start,
+          end_offset: end,
+          range_text_cache: range.range_text_cache ?? rangeText(range, input.oldText),
+        },
+      },
     };
   });
 

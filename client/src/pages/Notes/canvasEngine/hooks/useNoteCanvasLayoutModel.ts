@@ -9,8 +9,12 @@ import {
 import {
   calculatePageFrameHeight,
   createDefaultDraftLayout,
+  createPageModeFocusViewport,
   createRuntimePageFrame,
 } from '../pageFrameService';
+import {
+  normalizePageFrameCollection,
+} from '../pageFrameCollectionService';
 import {
   buildRelationEndpointReserveForPlacement,
   buildDefaultBlockLayouts,
@@ -19,14 +23,25 @@ import {
   normalizeResolvedBlockLayout,
 } from '../placementService';
 import {
+  buildTextByContentTargetId,
+} from '../shapeTextMountService';
+import {
   type BlockBoxLayout,
   type SurfaceMode,
 } from '../runtimeLayout';
 import type { NoteBlock } from '../runtimeDataTypes';
 import type {
   BlockPlacementModel,
+  CanvasObject,
+  CanvasPlacement,
   CanvasViewport,
+  ContentMount,
+  DocumentTypographyProfile,
+  ImageCanvasObject,
+  PageFrameCollectionModel,
   RelationEndpointReserve,
+  StructuredCanvasObject,
+  VisualConnector,
 } from '../types';
 import {
   createRuntimeViewport,
@@ -35,6 +50,7 @@ import {
 
 export interface UseNoteCanvasResolvedLayoutModelOptions {
   contentWidth: number;
+  documentTypographyProfile: DocumentTypographyProfile;
   layoutDrafts: Record<string, BlockBoxLayout>;
   sortedBlocks: NoteBlock[];
   surfaceMode: SurfaceMode;
@@ -44,8 +60,17 @@ export interface UseNoteCanvasResolvedLayoutModelOptions {
 export interface UseNoteCanvasFrameModelOptions {
   blockLayouts: Record<string, BlockBoxLayout>;
   defaultDraftLayout: BlockBoxLayout;
+  documentTypographyProfile: DocumentTypographyProfile;
   draftActive: boolean;
   draftLayout: BlockBoxLayout | null;
+  pageFrameCollection: PageFrameCollectionModel | null;
+  persistedCanvasObjects: CanvasObject[];
+  persistedCanvasPlacements: CanvasPlacement[];
+  persistedContentMounts: ContentMount[];
+  persistedVisualConnectors: VisualConnector[];
+  persistedImageObjects: ImageCanvasObject[];
+  persistedStructuredObjects: StructuredCanvasObject[];
+  contentLookupBlocks?: NoteBlock[];
   pageOffsetX: number;
   surfaceMode: SurfaceMode;
   viewportTransform: CanvasViewport;
@@ -54,18 +79,24 @@ export interface UseNoteCanvasFrameModelOptions {
 
 export function useNoteCanvasResolvedLayoutModel({
   contentWidth,
+  documentTypographyProfile,
   layoutDrafts,
   sortedBlocks,
   surfaceMode,
   surfacePolicy,
 }: UseNoteCanvasResolvedLayoutModelOptions) {
+  const estimateBlockHeightWithTypography = useMemo(
+    () => (block: NoteBlock, width: number) => estimateBlockHeight(block, width, documentTypographyProfile),
+    [documentTypographyProfile],
+  );
+
   const visibleBlocks = useMemo(
     () => getVisibleBlocksForSurface(sortedBlocks, surfacePolicy, contentWidth),
     [contentWidth, sortedBlocks, surfacePolicy],
   );
 
   const blockLayouts = useMemo(() => {
-    const defaults = buildDefaultBlockLayouts(visibleBlocks, contentWidth, estimateBlockHeight);
+    const defaults = buildDefaultBlockLayouts(visibleBlocks, contentWidth, estimateBlockHeightWithTypography);
     return visibleBlocks.reduce<Record<string, BlockBoxLayout>>((acc, block) => {
       const draft = layoutDrafts[block.id];
       const resolved = draft || normalizeBlockLayout({
@@ -73,18 +104,18 @@ export function useNoteCanvasResolvedLayoutModel({
         fallback: defaults[block.id],
         contentWidth,
         surfaceMode,
-        estimateHeight: estimateBlockHeight,
+        estimateHeight: estimateBlockHeightWithTypography,
       });
       acc[block.id] = normalizeResolvedBlockLayout({
         block,
         layout: resolved,
         contentWidth,
         surfaceMode,
-        estimateHeight: estimateBlockHeight,
+        estimateHeight: estimateBlockHeightWithTypography,
       });
       return acc;
     }, {});
-  }, [contentWidth, layoutDrafts, surfaceMode, visibleBlocks]);
+  }, [contentWidth, estimateBlockHeightWithTypography, layoutDrafts, surfaceMode, visibleBlocks]);
 
   const defaultDraftLayout = useMemo(() => {
     return createDefaultDraftLayout(blockLayouts, contentWidth);
@@ -100,8 +131,17 @@ export function useNoteCanvasResolvedLayoutModel({
 export function useNoteCanvasFrameModel({
   blockLayouts,
   defaultDraftLayout,
+  documentTypographyProfile,
   draftActive,
   draftLayout,
+  pageFrameCollection,
+  persistedCanvasObjects,
+  persistedCanvasPlacements,
+  persistedContentMounts,
+  persistedVisualConnectors,
+  persistedImageObjects,
+  persistedStructuredObjects,
+  contentLookupBlocks,
   pageOffsetX,
   surfaceMode,
   viewportTransform,
@@ -116,13 +156,26 @@ export function useNoteCanvasFrameModel({
     });
   }, [blockLayouts, draftActive, draftLayout, defaultDraftLayout]);
 
-  const primaryPageFrame = useMemo(
+  const primaryPageFrameSeed = useMemo(
     () => createRuntimePageFrame({
       contentX: pageOffsetX,
       height: pageContentHeight,
     }),
     [pageContentHeight, pageOffsetX],
   );
+
+  const runtimePageFrameCollection = useMemo(
+    () => normalizePageFrameCollection(pageFrameCollection, {
+      fallbackPageFrame: primaryPageFrameSeed,
+    }),
+    [pageFrameCollection, primaryPageFrameSeed],
+  );
+
+  const primaryPageFrame = useMemo(() => (
+    runtimePageFrameCollection.pageFrames.find((frame) => frame.id === runtimePageFrameCollection.primaryFrameId)
+    || runtimePageFrameCollection.pageFrames[0]
+    || null
+  ), [runtimePageFrameCollection]);
 
   const canvasBlockPlacements = useMemo<BlockPlacementModel[]>(
     () => visibleBlocks.flatMap((block, index) => {
@@ -146,21 +199,64 @@ export function useNoteCanvasFrameModel({
   );
 
   const noteCanvasRuntime = useMemo(() => {
-    const viewport = createRuntimeViewport(surfaceMode, pageContentHeight, viewportTransform);
+    const seedViewport = createRuntimeViewport(surfaceMode, pageContentHeight, viewportTransform);
+    const viewport = surfaceMode === 'page' && primaryPageFrame
+      ? createPageModeFocusViewport({
+        pageFrame: primaryPageFrame,
+        viewport: seedViewport,
+      })
+      : seedViewport;
 
     return buildNoteCanvasRuntimeModel({
       mode: surfaceMode,
-      world: createRuntimeWorld(surfaceMode, pageContentHeight),
+      world: createRuntimeWorld(surfaceMode, pageContentHeight, {
+        pageFrames: runtimePageFrameCollection.pageFrames,
+        blockPlacements: canvasBlockPlacements,
+        canvasObjectReserve: [],
+      }),
       primaryPageFrame,
+      pageFrames: runtimePageFrameCollection.pageFrames,
+      pageStacks: runtimePageFrameCollection.pageStacks,
       viewport,
       blockPlacements: canvasBlockPlacements,
+      documentTypography: documentTypographyProfile,
       relationEndpointReserve,
+      genericCanvasObjects: persistedCanvasObjects,
+      genericCanvasPlacements: persistedCanvasPlacements,
+      genericContentMounts: persistedContentMounts,
+      genericVisualConnectors: persistedVisualConnectors,
+      genericImageObjects: persistedImageObjects,
+      genericStructuredObjects: persistedStructuredObjects,
+      textByContentTargetId: buildTextByContentTargetId(contentLookupBlocks || visibleBlocks),
     });
-  }, [canvasBlockPlacements, pageContentHeight, primaryPageFrame, relationEndpointReserve, surfaceMode, viewportTransform]);
+  }, [
+    canvasBlockPlacements,
+    contentLookupBlocks,
+    documentTypographyProfile,
+    pageContentHeight,
+    primaryPageFrame,
+    persistedCanvasObjects,
+    persistedCanvasPlacements,
+    persistedContentMounts,
+    persistedImageObjects,
+    persistedStructuredObjects,
+    persistedVisualConnectors,
+    relationEndpointReserve,
+    runtimePageFrameCollection.pageFrames,
+    runtimePageFrameCollection.pageStacks,
+    surfaceMode,
+    viewportTransform,
+  ]);
 
   const exportPreview = useMemo(() => {
-    return buildExportPreviewModel(visibleBlocks, blockLayouts);
-  }, [visibleBlocks, blockLayouts]);
+    return buildExportPreviewModel(visibleBlocks, blockLayouts, {
+      pageFrames: noteCanvasRuntime.pageFrames,
+      pageStacks: noteCanvasRuntime.pageStacks,
+      blockPlacements: noteCanvasRuntime.blockPlacements,
+      primaryPageFrameId: noteCanvasRuntime.primaryPageFrame?.id || null,
+      documentTypography: documentTypographyProfile,
+    });
+  }, [visibleBlocks, blockLayouts, documentTypographyProfile, noteCanvasRuntime]);
 
   return {
     canvasBlockPlacements,
@@ -168,5 +264,6 @@ export function useNoteCanvasFrameModel({
     noteCanvasRuntime,
     pageContentHeight,
     primaryPageFrame,
+    runtimePageFrameCollection,
   };
 }
