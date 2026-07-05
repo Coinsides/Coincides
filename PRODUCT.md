@@ -272,6 +272,48 @@ Block identity and block operations should be separated:
 
 The same container should be able to support learning, research, report writing, source comparison, and other information-processing workflows. The product may still use course-like defaults when the project is clearly educational, but the interface should not make non-course work feel like a misuse of the app.
 
+## 2026-06-29 Design Grammar And Telos Sharpening
+
+These principles were settled in the 2026-06-28 main-line session (recorded in `docs/brainstorm/产品完善/会议记录/2026-06-28-Better-Notebook-ContentGroup-Relation-Philosophy-And-Source-Ingestion-Meeting-Notes.md` §十). They sharpen, not replace, the doctrine and principles above.
+
+### State Carries Purpose; The Relative Is Never Welded To The Absolute
+
+The single structural law under all of Coincides' separation-of-truths: a property that is relative to a context or purpose must live with that context, and must never be fused onto a thing's intrinsic identity. Welding the relative onto the absolute breaks reuse, leaks meaning across contexts, and lets the relative usurp the absolute.
+
+Consequences:
+
+- An object's intrinsic identity carries no purpose-specific role, judgment, or state. All purpose-judgments live with the frame: the placement, the purpose-context, or the view.
+- Prefer purpose-relative fitness-states (usable / unusable for a given purpose — a scoped state machine that states fit, not worth) over absolute attitude-laden verdicts (good / bad, or accepted / rejected used as a judgment). A thing has no good or bad until it is inside a frame; under a purpose there is necessarily a reference, a standard, and a contrast, and the product needs them, but they must stay scoped to that purpose.
+- Keep two views un-mixed: a process view (frame-free, non-judging, faithfully preserved — the user's thinking and detours are all material) and a purpose view (framed, stateful, allocating finite attention).
+
+This sharpens Principle 4 and underlies the project-scope and relation rules below.
+
+### One Knowledge Space; Project Is A Lens, Not An Owner
+
+A user's knowledge lives in one personal space. A `Project` (course, research package, report workspace) is a lens, membership, or view over that space, not an exclusive owner of what is created inside it. Three relationships must stay separate:
+
+- Origin — where a thing came from (this ContentGroup was distilled from that note; this object was first created on that note). An immutable provenance fact, always kept.
+- Containment — where a thing is filed or viewed (folders, projects, lenses), the way a GroupFolder holds a ContentGroup. Non-exclusive: a thing can be filed in many places at once, and deleting a container must not delete the thing.
+- Binding — exclusive ownership that traps a thing in one container. This is the shape to avoid. A required project-scope owner (such as `course_id` as a mandatory owner column) is an instance of welding a relative lens onto an absolute identity.
+
+Knowledge, relations, and sources are therefore not trapped in the project where they first appeared. The same understanding can be seen through many projects without duplication; a relation can connect ideas first met in different projects; a source belongs to no single project. "Local" / "project" is a view scope, not a storage boundary. This sharpens the `Project` naming commitment, the cross-project Source Library in Principle 5, and Principle 11.
+
+### Telos: A Prosthetic For Thinking, Not Only A Notebook
+
+Coincides' north star is to become a prosthetic for thinking: a place that preserves not only what a user concluded but the trace of how they came to think it, across long stretches of time, so the user can externalize and revisit their own reasoning and be at peace with forgetting the rest.
+
+This is reached in stages. Today, and at the usable line, Coincides is a knowledge base — content, structure, layout, source. It graduates into a thinking-prosthetic when a trace layer lands. The trace is not a keystroke log; it is the sparse set of turns and singularities in a user's thinking, kept as a thin first-class anchor (a user-marked turn, an explicit "this understanding supersedes that one") plus a derived, source-grounded re-narration reconstructed on demand from kept evidence. The trace's full design is deliberately deferred to the Agent era; what matters now is to cheaply keep the raw record (what was done, the version stream) so the trace can be distilled later rather than reconstructed from nothing. The mechanism here is direction, not a frozen contract.
+
+### Relations Connect Meaning-Bearing Nodes, And The Graph Is Grown By Use
+
+A relation endpoint must be a node that can bear meaning: a `ContentGroup` or a `Petal`, not a raw block and not a raw `ContentRange`. A raw range is content; to participate in the graph of understanding it must first be promoted into a ContentGroup member. The act of promoting a range into a ContentGroup, and then connecting ContentGroups, is itself the "use" that grows the graph.
+
+The graph is grown by purposeful use, not pre-computed. Coincides does not try to measure infinite knowledge with a finite, eager index. It owns the truth — the relations the user and AI deliberately make — and any retrieval index (embeddings, GraphRAG) is a rebuildable sidecar built on top of that truth, never the truth itself, and never a prerequisite for creating relations. This sharpens and corrects the "Relations are semantic structures" principle: where the surface elsewhere loosely says blocks can have relationships, the durable endpoints are ContentGroup and Petal.
+
+### Build The Substrate For Both Human And Agent; Defer The Operator
+
+Every human-AI-shared capability splits into a substrate (the truth model — a human can create and use it manually, and it is AI-readable) and an operator (the AI that grows, proposes, or retrieves over it). Build the substrate while the human is already a valid first consumer; defer the operator to the Agent era. A reliable Agent is impossible on a messy substrate and achievable on a clean, separated, source-grounded one, so building the substrate well is the most direct path to a reliable Agent. Relation, Source provenance, and the trace record each have a human-usable substrate worth building now; their AI operators (auto-organization, distillation, retrieval) wait for the Agent. This extends Principle 7 and Principle 9.
+
 ## Accessibility & Inclusion
 
 Coincides should aim for a calm, readable, keyboard-friendly product interface.

@@ -1,5 +1,15 @@
 # Coincides Documentation
 
+> **状态 (Status)**: superseded(待重写为现状层入口)
+> **层 (Layer)**: 现状 / Current-State(过时)
+> **日期 (Updated)**: 2026-05-19
+> **权威 (Authoritative)**: 否 / No
+>
+> ⚠️ **本 README 已过时**(停留在 2026-05-19、`feat/v2.0-noteblock` 分支、旧 roadmap)。
+> 文档体系已改为五层结构,详见 [`agent-ops/DOCUMENTATION-SYSTEM.md`](agent-ops/DOCUMENTATION-SYSTEM.md)。
+> Agent 协同入口与决策记录见 [`agent-ops/`](agent-ops/)。本文件的正式重写将在"现状层"建立时进行(文档收口第 2 步)。
+> 在此之前,下方链接仅供参考,**不保证有效或权威**。
+
 **Updated**: 2026-05-19  
 **Current development branch**: `feat/v2.0-noteblock`
 

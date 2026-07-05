@@ -1,3 +1,10 @@
+> **状态 (Status)**: superseded
+> **层 (Layer)**: 契约 / Contract
+> **日期 (Updated)**: 2026-06-12
+> **权威 (Authoritative)**: 否
+> **取代 (Supersedes)**: —
+> **被取代 (Superseded by)**: [ADR-0001](../agent-ops/decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md) 及 2026-06-25 canvas 设计集 (docs/brainstorm/产品完善/canvasresearch/Research_3_Canvas_design/)
+
 # Canvas / Page / Surface Contract
 
 **状态**：V2.BN.6 合同

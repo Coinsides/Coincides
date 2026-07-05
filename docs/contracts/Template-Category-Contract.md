@@ -1,3 +1,10 @@
+> **状态 (Status)**: deferred
+> **层 (Layer)**: 契约 / Contract
+> **日期 (Updated)**: 2026-06-12
+> **权威 (Authoritative)**: 否
+> **取代 (Supersedes)**: —
+> **被取代 (Superseded by)**: —
+
 # Template / Category Contract
 
 **状态**：V2.BN.6 合同

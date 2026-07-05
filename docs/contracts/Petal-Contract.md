@@ -1,3 +1,10 @@
+> **状态 (Status)**: active
+> **层 (Layer)**: 契约 / Contract
+> **日期 (Updated)**: 2026-06-23
+> **权威 (Authoritative)**: 是
+> **取代 (Supersedes)**: —
+> **被取代 (Superseded by)**: —
+
 # Petal Contract
 
 **Status**: V2.BN.8.7.4 entity boundary contract

@@ -172,7 +172,8 @@
 
 ### PI-012: User Notes / Remarks As Sticky Notes
 
-- **Status**: Open
+- **Status**: Superseded (re-anchored)
+- **Status Update (2026-06-27)**: 「是 NoteBlock / CanvasShape / UserAnnotation？」之争已被当前对象族化解：它是 **PageFrame 外 scratch 区的一个 CanvasObject**（见 PI-051），内容为 TextFlow。
 - **Idea**:
   - User remarks can be represented visually as sticky notes attached around the main canvas/page.
 - **Possible Visual Forms**:
@@ -253,7 +254,8 @@
 
 ### PI-016: Existing NoteBlocks Need A Natural "Bring To Canvas" Flow
 
-- **Status**: Open
+- **Status**: Superseded (re-anchored)
+- **Status Update (2026-06-27)**: block 投影心智早于 ContentGroup 投影；复用现为 **ContentGroup projection（V2.BN.8.11：Reference / Duplicate / Fork / Materialize）**，非 NoteBlock 拖拽。
 - **Problem**:
   - Users should be able to take an existing NoteBlock and place it onto a canvas naturally.
 - **Current Implementation Reality**:
@@ -267,7 +269,8 @@
 
 ### PI-017: NoteBlock Visual Rendering On Canvas Is Too Raw
 
-- **Status**: Open
+- **Status**: Superseded (re-anchored)
+- **Status Update (2026-06-27)**: block-first 时代产物：内容真相现为 **TextFlow**，非 database-row block 卡片；「清理 block 卡片外壳」框架不再对应当前渲染模型。
 - **Problem**:
   - Current canvas blocks look like large engineering cards with type labels and raw text.
   - This is useful for debugging but poor for real note reading.
@@ -331,7 +334,8 @@
 
 ### PI-020: Users Need A Manual Way To Link Existing Blocks To Sources
 
-- **Status**: Open
+- **Status**: Superseded (re-anchored)
+- **Status Update (2026-06-27)**: 溯源现由 **ContentGroup member + 未来 SourceArtifact / SourceAnchor 链**承载，非 per-block `note_block_sources` UI；block 级「事后挂源」是 pre-ContentGroup 框架。
 - **Problem**:
   - Users may create a source-free text block first, then later realize it was inspired by or supported by an existing source.
   - Users need a natural way to connect an already-created NoteBlock to a source/resource after the fact.
@@ -384,7 +388,8 @@
 
 ### PI-021: Canvas-First Must Still Feel Like A Notion-Class Writing Surface
 
-- **Status**: Open
+- **Status**: Superseded (re-anchored)
+- **Status Update (2026-06-27)**: 有效内核「写作必须自然」现由 **TextFlow + Canvas Engine** 承载；原 locked_page / open_canvas 双文档模式框架已过时，被 PageFrame / PageStack 模型取代。
 - **Problem**:
   - Coincides has chosen a canvas-first direction, but normal writing should not feel like manually placing database cards on a board.
   - Users expect a blank note to support Notion-like typing, block creation, selection, and lightweight structure.
@@ -423,7 +428,8 @@
 
 ### PI-022: Canvas Document Editing Needs Collision-Aware Text Insertion
 
-- **Status**: Open
+- **Status**: Superseded (re-anchored)
+- **Status Update (2026-06-27)**: 预设了 freeform-block-on-canvas 写作面；当前 **TextFlow 为内容真相 + PageFrame 分页为布局路径**，lane-collision 插入在解一个当前架构不会产生的问题。
 - **Problem**:
   - In a canvas-first document surface, users may have images, sticky notes, source cards, frames, or other blocks near the place where they want to write.
   - If double-clicking the canvas always creates text at the global left edge, the new text may appear behind or on top of an existing object.
@@ -1538,7 +1544,8 @@
 
 ### PI-046: AFFiNE / BlockSuite Adoption Research Must Start With Coincides Architecture Inventory
 
-- **Status**: Open
+- **Status**: Superseded（实现路线依据被 ADR-0001 取代；历史研究依据仍有效）
+- **Status Update (2026-06-27)**: 作为**实现路线依据**被 ADR-0001（`docs/agent-ops/decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md`）取代 —— Coincides 选择自研最小混合 canvas 引擎，不采用 BlockSuite / AFFiNE。PI-046 作为**历史研究依据仍有效**，非「错了」，与 ADR-0001 口径一致。
 - **Problem**:
   - Coincides needs to reconsider whether building a complete note editor and canvas experience from scratch is the right path.
   - AFFiNE / BlockSuite may provide a mature document editor, block editor, and edgeless canvas foundation.

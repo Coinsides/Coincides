@@ -1,3 +1,10 @@
+> **状态 (Status)**: draft
+> **层 (Layer)**: 契约 / Contract
+> **日期 (Updated)**: 2026-06-23
+> **权威 (Authoritative)**: 否
+> **取代 (Supersedes)**: —
+> **被取代 (Superseded by)**: —
+
 # Command Surface Contract
 
 Status: V2.BN.8.6.5 seed contract, updated after TextFlow-first / ContentGroup realignment
