@@ -394,10 +394,10 @@ Validation:
 
 | CR | 级别 | 类型 | 位置 | 描述 | 状态 |
 |----|------|------|------|------|------|
-| **CR-8.11.16-01** | 🟡 MED | pit（**CONFIRMED 当前泄漏**） | routes/courses.ts:164 + migration 041:11-12 vs 35-36 | **删课程 = image 资产孤儿（当前泄漏，非未来 gap）。** `DELETE FROM courses` 是 live、auth-guarded 硬删靠 FK 级联。`image_object_extensions.course_id/note_id` 是 **CASCADE**(扩展行随删)，但 `canvas_assets.course_id/origin_note_id` 只 **SET NULL** → canvas_assets 行 + 磁盘 blob **永久孤儿**(扩展行没了 → 再无引用可 GC)；`cleanupOnDelete` **只在 deleteCanvasObject 跑、FK 级联不触发**(foreign_keys=ON)。**⚠ 这打脸我写的 handoff**(2026-07-02-8.11-image-asset-lifecycle-burndown 只 grep notes 软删 + 缺失 user 路由，漏了 courses 级联，错判成"未来 gap 非当前泄漏")；patch note 的 deferred「no note/user bulk teardown」亦未点名 courses、未标 active。**非红线**(是资源泄漏/磁盘膨胀，非"心爱之物消失"——课程连同内容是用户主动删的，只是清理不全)。修：course 删路径接一个复用 `releaseAssetReference` 的 refcount 资产 teardown（先删 self-ext 再 release、跑在 cascade 之前、user-scoped 守跨 course 共享）。**修复 handoff 已写**：`docs/agent-ops/handoffs/2026-07-03-8.11-course-asset-teardown.md`（draft，含 -02/-03/-04 顺带小修，待 Henry 翻牌 ready）。 | ☐ |
-| CR-8.11.16-02 | 🟢 LOW | pit/seam（PLAUSIBLE） | canvasObjects.ts:1187-1196 | **原地换 asset 静默漏旧引用（潜伏 under-release）。** `upsertImageObjectExtension` ON CONFLICT(object_id) DO UPDATE SET asset_id 若同一 object 被重存成不同 asset_id，旧 asset_id 被覆盖而**不调 release** → 旧 asset+blob 孤儿(若无他引)。今**无 live client flow 触发**(client 每次上传新 objectId)。修：将来若加"原地替换图"必须走 release；今补注释锁死"每图新 objectId"假设。 | ☐ |
-| CR-8.11.16-03 | 🟢 LOW | test-hygiene（CONFIRMED） | server/src/__tests__/v2CanvasPersistenceCutover.test.ts | **承重红线测试文件 untracked。** `git status` 报 `??`、`git ls-files --error-unmatch` 失败，但已挂进 `test:v2`(server/package.json)。本地 173/173 绿，但 fresh checkout / CI clone **没有此文件** → GC 红线覆盖不随代码走。8.11 收口 commit 前必须 `git add`。 | ☐ |
-| CR-8.11.16-04 | 🟢 LOW | test-hygiene（PLAUSIBLE） | v2CanvasPersistenceCutover.test.ts:27 + 共享 blob 目录 | **测试路径不镜像生产 env-aware 解析 + 共享盘目录状态敏感。** 测试硬编 `CANVAS_ASSET_DIR=join(cwd,'uploads','canvas-assets')`，生产读 `process.env.CANVAS_ASSET_DIR || join(...)`；若该 env 被设，正控会静默解耦(seed 与 unlink 打不同目录、existsSync=false 空跑通过)。且共享盘目录 + existsSync 使 image 测试对顺序/残留敏感(back-to-back 整档跑观测到一次瞬时 'fail 2'，隔离跑稳定)。修：测试读同一 env-aware 解析(或 setup 里 delete 该 env) + per-test 临时目录/beforeEach 清盘。 | ☐ |
+| **CR-8.11.16-01** | 🟡 MED | pit（**CONFIRMED 当前泄漏**） | routes/courses.ts:164 + migration 041:11-12 vs 35-36 | **删课程 = image 资产孤儿（当前泄漏，非未来 gap）。** `DELETE FROM courses` 是 live、auth-guarded 硬删靠 FK 级联。`image_object_extensions.course_id/note_id` 是 **CASCADE**(扩展行随删)，但 `canvas_assets.course_id/origin_note_id` 只 **SET NULL** → canvas_assets 行 + 磁盘 blob **永久孤儿**(扩展行没了 → 再无引用可 GC)；`cleanupOnDelete` **只在 deleteCanvasObject 跑、FK 级联不触发**(foreign_keys=ON)。**⚠ 这打脸我写的 handoff**(2026-07-02-8.11-image-asset-lifecycle-burndown 只 grep notes 软删 + 缺失 user 路由，漏了 courses 级联，错判成"未来 gap 非当前泄漏")；patch note 的 deferred「no note/user bulk teardown」亦未点名 courses、未标 active。**非红线**(是资源泄漏/磁盘膨胀，非"心爱之物消失"——课程连同内容是用户主动删的，只是清理不全)。修：course 删路径接一个复用 `releaseAssetReference` 的 refcount 资产 teardown（先删 self-ext 再 release、跑在 cascade 之前、user-scoped 守跨 course 共享）。**修复 handoff 已写**：`docs/agent-ops/handoffs/2026-07-03-8.11-course-asset-teardown.md`（draft，含 -02/-03/-04 顺带小修，待 Henry 翻牌 ready）。 | ☑ 8.11.17; closeout 454f7c9 |
+| CR-8.11.16-02 | 🟢 LOW | pit/seam（PLAUSIBLE） | canvasObjects.ts:1187-1196 | **原地换 asset 静默漏旧引用（潜伏 under-release）。** `upsertImageObjectExtension` ON CONFLICT(object_id) DO UPDATE SET asset_id 若同一 object 被重存成不同 asset_id，旧 asset_id 被覆盖而**不调 release** → 旧 asset+blob 孤儿(若无他引)。今**无 live client flow 触发**(client 每次上传新 objectId)。修：将来若加"原地替换图"必须走 release；今补注释锁死"每图新 objectId"假设。 | ☑ 8.11.17; closeout 454f7c9 |
+| CR-8.11.16-03 | 🟢 LOW | test-hygiene（CONFIRMED） | server/src/__tests__/v2CanvasPersistenceCutover.test.ts | **承重红线测试文件 untracked。** `git status` 报 `??`、`git ls-files --error-unmatch` 失败，但已挂进 `test:v2`(server/package.json)。本地 173/173 绿，但 fresh checkout / CI clone **没有此文件** → GC 红线覆盖不随代码走。8.11 收口 commit 前必须 `git add`。 | ☑ closeout 454f7c9 tracked |
+| CR-8.11.16-04 | 🟢 LOW | test-hygiene（PLAUSIBLE） | v2CanvasPersistenceCutover.test.ts:27 + 共享 blob 目录 | **测试路径不镜像生产 env-aware 解析 + 共享盘目录状态敏感。** 测试硬编 `CANVAS_ASSET_DIR=join(cwd,'uploads','canvas-assets')`，生产读 `process.env.CANVAS_ASSET_DIR || join(...)`；若该 env 被设，正控会静默解耦(seed 与 unlink 打不同目录、existsSync=false 空跑通过)。且共享盘目录 + existsSync 使 image 测试对顺序/残留敏感(back-to-back 整档跑观测到一次瞬时 'fail 2'，隔离跑稳定)。修：测试读同一 env-aware 解析(或 setup 里 delete 该 env) + per-test 临时目录/beforeEach 清盘。 | ☑ 8.11.17; closeout 454f7c9 |
 
 ## Codex Follow-up Result - V2.BN.8.11.17 Course Asset Teardown (2026-07-03)
 
@@ -421,3 +421,21 @@ Validation:
 - `npm run verify:v2-bn8-runtime` passed, including runtime boundary, model contract, client/server build, performance smoke, `git diff --check`, and changed-file secret scan.
 
 > **对抗清白项(CONFIRMED 安全)**：over-release 无(唯一 caller 传对 excludeObjectId、无 asset-delete/replace 路由)；path-traversal 无(storage_key 全服务端生成 `userId/uuid.ext`、扩展名白名单)；txn 安全(unlink 在 DB 事务外、best-effort、绝不回滚删除)；CR-8.11.7-02(零引用上传孤儿)确认**明确挂账 deferred**、unlink 原语已就位。第二删路径 `savePageFrameCollection:1722` 只删 page_frame(非 asset-backed)、主删路径清 connector/annotation/CG-member 引用 —— 均对图片资产无泄漏。
+
+## Codex Closeout Result - V2.BN.8.11 (2026-07-05)
+
+Closeout commit: `454f7c9` (`feat: land v2 bn canvas engine through 8.11`).
+
+Clean-build evidence:
+
+- Cleared `.codex-tmp/canvas-engine-contract` and `.codex-tmp/canvas-engine-performance` before the final verification run.
+- `server/src/__tests__/v2CanvasPersistenceCutover.test.ts` is now tracked in the closeout commit.
+- No untracked files remain under `client/` or `server/` after staging the closeout source/test set.
+
+Validation:
+
+- `cd server; npm run test:v2` passed: 176 / 176.
+- `npm run smoke:canvas-engine-model-contract` passed: 57 groups.
+- `npm run check:canvas-runtime-boundary` passed: 159 checks.
+- `cd server; node --import tsx --test src/__tests__/v2CanvasPersistenceCutover.test.ts` passed: 47 / 47.
+- `npm run verify:v2-bn8-runtime` passed, including runtime boundary, model contract, client/server build, performance smoke, `git diff --check`, and changed-file secret scan.
