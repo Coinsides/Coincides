@@ -119,3 +119,4 @@ Codex completed this as `V2.BN.9.1`.
 - **顺带三件核实**：saveGalleryRecord 只在显式传 purposes 才 PUT（groupGalleryData.ts:151-155，写放大消）；迁移约束断言 + 客户端契约断言已进 suite（181→183、57→58 的增量对得上）。
 - **残留一条 LOW（记档不阻断）**：`replaceNotePurposes([])` 空 payload 分支——ensure 会以确定性 id 重建默认目的，但该 id 未加入 survivingPurposeIds → 隐藏边作废。**今日客户端不可达**（gallery/adapter 全量往返永非空），语义上"PUT []=显式清空"亦可辩护；若未来出现空 payload 调用方，把 ensure 重建的 id 计入 surviving 即可。
 - **流程提醒**：V2.BN.9 + 9.1 尚未 commit（tip 仍 c641c0d、33 脏路径）——按新工作流"每个小版本做完即 commit"，**复核已过，请 Codex 落 commit 封版**。
+- **封版回执（2026-07-05，Claude 落 commit，Henry 授权）**：代码 `72712de`（feat: land v2 bn 9 purpose foundation）+ 文档 `7531499`；干净构建三套复跑全绿（清 `.codex-tmp` 后 test:v2 **183/183** / model-contract **58** / boundary **159**）；工作树净。**V2.BN.9 正式封版。**
