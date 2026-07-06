@@ -161,3 +161,12 @@ item（member，标量：type+topic，内在、坐标无关）
 - **工具已选**：PaddleOCR-VL 1.6 主（本地开源中文榜一）+ MinerU 2.5 备，Mistral 只当可选逃生口；
 - **目的层（U1/U2）仍第一、仍不被 Source 挡**；Source 契约接缝紧跟其后。
 - **详见** `docs/agent-ops/analysis/source-reconstruction-design-and-tooling.md`（现状实锤 + 三层契约字段 + 工具对照 + 置信度纠错 UX 原则 + 修订先后）。
+
+### 6.6 U4 词表池设计细化（topic/type 标签治理 · 2026-07-05）
+**问题**：topic/type 若各 CG 自由生成，两个本该同标签的 CG 会因 hallucination 漂成不同字符串 → 按主题分组/检索失效。**解 = 共享词表池（U4），非预设目录。**
+- **标签 = 共享实体，不是自由文本**：`content_groups.topic/type` 存**指向词表实体的引用（id）**，非复制字符串 → 同实体即同标签、漂移物理上不可能。
+- **池 grow-by-use，起点空**（不预设分类目录 —— 那会洗成平均值）。
+- **防漂机制 = 先搜池 → 优先复用 → 建时向量模糊匹配 → 松归并（人点头）**：挂标签前用 embedding 语义搜池，命中近似即复用；漏进的近似重复由归并闸机会性提示合并。**向量 = 池上可重建索引，标签实体才是真相**（接 GraphRAG-as-sidecar）。
+- **平铺多标签、不强制层级**：一 CG 可挂多个 topic；层级作为标签间可选关系长出来，不必填。
+- **scope = 用户全局（跨项目，接 U5 拆墙）**；**仅 topic/type 走这个稳定池**（内在轴）；**role 不走**（per-目的、住 (member,目的) 边上）。
+- **落点**：新表 `topic_labels` / `type_labels`（或统一 `vocab_labels` + facet）+ CG 侧改存 label_id + 向量索引（sidecar）+ 归并 proposal。属 U4，依赖 U1/U2。详见会议记录 §七.11。

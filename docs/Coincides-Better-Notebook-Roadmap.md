@@ -1,6 +1,6 @@
 # Coincides Better Notebook 路线图
 
-**更新日期**: 2026-07-01（2026-06-06 首版；2026-07-01 大整理·非破坏：只重排+标注，未删任何历史）
+**更新日期**: 2026-07-05（2026-06-06 首版；2026-07-01 大整理·非破坏；2026-07-05 目的插入 V9、Source/Relation/打磨顺延）
 **路线图状态**: ACTIVE / 产品化路线图
 **前置路线图**: `docs/Coincides-Roadmap.md`，已关闭的 v2.0-v2.5.6 工程地基路线图
 **工作标题**: Better Notebook Productization Track
@@ -10,26 +10,32 @@
 
 > ## 🧭 阅读指南（2026-07-01 大整理后）
 > 本文件按累积追加长起来，已 1900+ 行、多套版本 scheme 并存。为免误读，先看这份分层：
-> - **当前权威计划** = 下方「📍 当前权威 map」+ 详版 `§2026-07-01 BN 后半程`（承接 `§2026-06-29 零部件总图`）。
-> - **决定史**（追加式，最新为准） = 顶部各 dated 段（`2026-06-22` → `2026-07-01`）。
+> - **当前权威计划** = 下方「📍 当前权威 map」+ `§2026-07-05 目的插入`（版本序最新）+ 详版 `§2026-07-01 BN 后半程`（承接 `§2026-06-29 零部件总图`）。
+> - **决定史**（追加式，最新为准） = 顶部各 dated 段（`2026-06-22` → `2026-07-05`）。
 > - **长青参考**（不随版本过时） = `§1 职责`、`§2 北极星`、`§3 产品原则`、`§4 学习参考`、`§5 调研/契约索引`。
 > - **⚠️ 历史·勿作现行依据** = `§6 主阶段路线` 直到文末 `§26`（= 2026-06-06 原始 **Phase 0 / A1–A9e / F / G** 计划 + 原始版本拆分 + 原始最终决定）。**实际工程走的是 `V2.BN.8.x` 线（8.6 ContentGroup → 8.7 → 8.8 Canvas → 8.9 PageFrame → 8.10 Typography → 8.11 对象家族，已落），不是那套 Phase-letter 序列。** §6 顶部有历史横幅。
 
-## 📍 当前权威 map（2026-07-01）
+## 📍 当前权威 map（2026-07-05 更新：目的插为 V9，Source/Relation/打磨顺延）
 
 **Better Notebook = 不靠核心 Agent 就能独立运转、人类可靠、agent-ready 的知识底座。** Agent 是之后单独接入的操作者，不在 BN 版本线内。**完工判据 = 用户可靠 = Henry 可靠**（Henry 放下 Notion 就用它 = 真实旅程无死路）。
 
 ```text
-V2.BN.8   Canvas Engine ......... 收口中（8.11 对象家族已闭）
-V2.BN.9   Source（地板）......... 上传+基础解析（非-Agent）+ 原件不可变 + 薄绑定；保真重建 ≠ 生成式转写
-V2.BN.10  Relation ............... 把已有 object_relations 接到 BN 底座 + 端点收窄到 ContentGroup/花瓣（非绿地：接续+迁移+收范围）
-V2.BN.11+ 打磨 .................. 工程可靠 → 用户可靠；ContentGroup 完整集成落此（枢纽最后焊）
+V2.BN.8   Canvas Engine ......... ✅ 已收口封版（8.11 对象家族 + 高危 burndown 全清；commit 454f7c9）
+V2.BN.9   目的 Purpose Foundation  purposes 节点 + (成员,目的) 边（role/fitness/序住边上）+ CG 补 type 轴 +
+                                   identity_role 冻结退役 + 每笔记默认目的；修相对不焊红线；不依赖 Source
+                                   → plan: docs/releases/V2.BN.9-plan.md
+V2.BN.10  Source（地板）......... 上传+基础解析（非-Agent）+ 原件不可变 + 薄绑定；保真重建 ≠ 生成式转写；
+                                   契约接缝（source_artifact/block + SourceParser 可换后端）
+                                   → 设计: docs/agent-ops/analysis/source-reconstruction-design-and-tooling.md
+V2.BN.11  Relation ............... 把已有 object_relations 接到 BN 底座 + 端点收窄到 ContentGroup/花瓣（非绿地：接续+迁移+收范围）；
+                                   前置红利：V9 已把 role 上边——"进了目的的向量才够格当端点"
+V2.BN.12+ 打磨 .................. 工程可靠 → 用户可靠；ContentGroup 完整集成落此（枢纽最后焊）
 （新时代）Agent 接入 ........... Source 天花板 + ContentGroup AI 操作 + GraphRAG sidecar（ARCHITECTURE.md §5.4 已定）
 ```
 
-- **收口工作流**：关 V8 → 烧挖坑册（填工程正确性坑）→ 清工作区 → commit → 再进 V9+；此后每个小版本做完即 commit。
-- **锁定决定**：Agent 移出 BN · ContentGroup 推迟到打磨 · Relation 端点→ContentGroup/花瓣 · GraphRAG = 可重建 sidecar（不重推，见 `ARCHITECTURE.md §5.4`）。
-- 详见下方 `§2026-07-01` 与 `§2026-06-29`；GraphRAG / Source-adapter 形态见 `ARCHITECTURE.md §5.3 / §5.4 / §Source Reconstruction Adapter`。
+- **收口工作流**：✅ V8 一轮已走完（关 V8 → 烧挖坑册 → 清工作区 → commit `454f7c9`/`c641c0d`）；此后每个小版本做完即 commit。
+- **锁定决定**：Agent 移出 BN · ContentGroup 推迟到打磨 · Relation 端点→ContentGroup/花瓣 · GraphRAG = 可重建 sidecar（不重推，见 `ARCHITECTURE.md §5.4`）· **目的层插为 V9、Source/Relation/打磨顺延（§2026-07-05）**。
+- 详见下方 `§2026-07-05`、`§2026-07-01` 与 `§2026-06-29`；GraphRAG / Source-adapter 形态见 `ARCHITECTURE.md §5.3 / §5.4 / §Source Reconstruction Adapter`。
 
 ---
 
@@ -300,7 +306,20 @@ V2.BN.11+ 打磨：工程可靠 → 用户可靠 ............. 烧 🅱 用户�
 
 ---
 
-The V2.BN.8.8+ Canvas lane should use the 2026-06-25 Canvas research and design set as its decision basis:
+## 2026-07-05 目的（Purpose）插入 V2.BN.9，Source / Relation / 打磨 顺延
+
+> Henry × Claude（2026-07-02 → 07-05 脑暴收敛 + 实现设计 + 对抗核查后拍板）。本节更新顶部权威 map；§2026-07-01 的版本切分被**顺延一位**，其余决定（Agent 移出 BN、完工判据、Relation 收编范围、GraphRAG sidecar）**全部不变**。
+
+### 决定
+1. **新插 V2.BN.9 = 目的 Purpose Foundation**：`purposes`（目的节点：意图/范围/简介）+ `purpose_members`（(成员,目的) 边，**role/fitness/order 住边上**）+ ContentGroup 补 `identity_type` 轴、`identity_role` 冻结退役（**修 06-28 §九C 旗标的"角色焊死在 CG 节点"相对不焊违例**）+ 每笔记懒建默认目的。**Plan**: `docs/releases/V2.BN.9-plan.md`；**实现设计（技术权威）**: `docs/agent-ops/analysis/purpose-frame-implementation-design.md`（v1，经 4 维对抗核查修正）。
+2. **原 V9 Source → V2.BN.10**，范围补充：除原"上传+基础解析+原件不可变"外，明确**契约接缝先行**（`source_artifact`/`source_artifact_block` + `SourceParser` 可换后端；今天的糙解析注册为 degenerate `native` 后端；锚从 chunk 改指 block）。设计已备：`docs/agent-ops/analysis/source-reconstruction-design-and-tooling.md`（含 PaddleOCR-VL 主/MinerU 备选型 + 置信度纠错 UX 原则；真 OCR/VLM 管线仍属天花板/后续，地板不含）。
+3. **原 V10 Relation → V2.BN.11**、**原 V11+ 打磨 → V2.BN.12+**。内容不变。
+4. **为什么目的在 Source 前**（依据 `analysis/purpose-frame-build-decomposition.md` 的 blast-radius map）：① 目的层完全不依赖 Source（在既有 in-note 成员上就能落）；② 顺手修 role 焊死红线；③ 它是"组织已有内容"与"从源生成笔记"两条流程共同的地基，Source 只供料给后者——地基先于供料；④ 便宜（schema+refactor，无 GPU/工具依赖），先验证组织模型再浇昂贵的 Source 管线；⑤ 给 V11 Relation 供前置（role 上边 → "进了目的的向量才够格当端点"）。
+5. **模型来源**（研究层）：会议记录 `2026-07-02-...-Meeting-Notes.md` §七.6–七.11（三轴 type/topic/role、圈≠draft、组织=镜片/正文=提交、舞台旋钮、词表池）；07-04 Source 会议记录（三层契约、可插拔=开源扩展点、手绘图=②全截③按目的取舍）。
+
+### 工程纪律（本次新增沉淀）
+- **版本 plan 的技术细节以实现设计文档为权威**（plan 不复述 SQL/行号），plan 负责边界/验收/用户流程。
+- 重大 schema/模型改动进 spec 前必须过**对抗核查 vs 真实代码**（本次 4 维核查抓出 2 BLOCKER：传输先例误记、软删清边红线陷阱——都在动工前修掉）。
 
 ```text
 docs/brainstorm/产品完善/canvasresearch/Research_3_Canvas_design/
