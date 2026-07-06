@@ -1114,6 +1114,7 @@ export function createContentGroup(input: {
 export function createEmptyContentGroupIdentity(timestamp = nowIso()): ContentGroupIdentityV1 {
   return {
     status: 'none',
+    type: null,
     role: null,
     topic: null,
     summary: null,
@@ -1136,10 +1137,12 @@ function normalizeContentGroupIdentity(group: ContentGroupNormalizationInput): C
     : oldInterpretation
       ? 'draft'
       : 'none';
+  const identityType = cleanOptionalText(existing?.type ?? existing?.role ?? oldInterpretation?.role);
 
   return {
     status,
-    role: cleanOptionalText(existing?.role ?? oldInterpretation?.role),
+    type: identityType,
+    role: identityType,
     topic: cleanOptionalText(existing?.topic ?? oldInterpretation?.topic),
     summary: cleanOptionalText(existing?.summary ?? oldInterpretation?.brief),
     created_by: normalizeIdentityCreatedBy(existing?.created_by),
@@ -1347,18 +1350,21 @@ export function renameContentGroup(input: {
 
 export function updateContentGroupIdentityDraft(input: {
   group: ContentGroupV1;
+  type?: string | null;
   role?: string | null;
   topic?: string | null;
   summary?: string | null;
   createdBy?: ContentGroupIdentityCreatedBy;
 }): ContentGroupV1 {
   const group = normalizeContentGroup(input.group);
+  const identityType = cleanOptionalText(input.type ?? input.role ?? group.identity.type ?? group.identity.role);
   return {
     ...group,
     identity: {
       ...group.identity,
       status: 'draft',
-      role: cleanOptionalText(input.role ?? group.identity.role),
+      type: identityType,
+      role: identityType,
       topic: cleanOptionalText(input.topic ?? group.identity.topic),
       summary: cleanOptionalText(input.summary ?? group.identity.summary),
       created_by: input.createdBy || group.identity.created_by || 'human',

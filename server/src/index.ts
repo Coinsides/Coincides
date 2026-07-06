@@ -58,6 +58,7 @@ import groupFolderRoutes from './routes/groupFolders.js';
 import canvasObjectRoutes from './routes/canvasObjects.js';
 import canvasAssetRoutes from './routes/canvasAssets.js';
 import annotationTruthRoutes from './routes/annotationTruths.js';
+import purposeRoutes from './routes/purposes.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 
@@ -129,6 +130,7 @@ app.use('/api/group-folders', authMiddleware, groupFolderRoutes);
 app.use('/api/canvas-objects', authMiddleware, canvasObjectRoutes);
 app.use('/api/canvas-assets', authMiddleware, canvasAssetRoutes);
 app.use('/api/annotation-truths', authMiddleware, annotationTruthRoutes);
+app.use('/api/purposes', authMiddleware, purposeRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

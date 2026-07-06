@@ -340,6 +340,11 @@ import {
   buildContentGroupRelationCandidates,
 } from '../src/pages/Notes/canvasEngine/contentGroupRelationProjectionService';
 import {
+  normalizePurposeFrames,
+  purposeRoleForContentGroup,
+  upsertDefaultPurposeRoleForContentGroup,
+} from '../src/pages/Notes/canvasEngine/purposeService';
+import {
   CONTENT_GROUP_REUSE_MODES,
   createContentGroupMaterializePlan,
   createContentGroupOpenOriginalDescriptor,
@@ -355,6 +360,9 @@ import {
 import {
   applyContentGroupEditorDraft,
 } from '../src/pages/GroupGallery/singleContentGroupEditorService';
+import {
+  normalizeGalleryMode,
+} from '../src/pages/GroupGallery/groupGalleryModeService';
 import {
   activeGroupFolders,
   canDeleteGroupFolder,
@@ -4620,6 +4628,7 @@ function testAnnotationTruthSeed(): void {
     },
   });
   assertEqual(staleInterpretationContentGroup.identity.status, 'draft', 'stale ContentGroup interpretation normalizes into draft identity');
+  assertEqual(staleInterpretationContentGroup.identity.type, 'definition', 'stale ContentGroup interpretation role normalizes into identity type');
   assertEqual(staleInterpretationContentGroup.identity.summary, 'Legacy local interpretation', 'stale ContentGroup interpretation brief normalizes into identity summary');
   const orphanedMember = markContentGroupMemberIntegrity(rangeMember, 'orphaned', 'missing range');
   assertEqual(orphanedMember.id, rangeMember.id, 'ContentGroup integrity marking preserves member identity');
@@ -4646,12 +4655,13 @@ function testAnnotationTruthSeed(): void {
   assertEqual(renamedContentGroup.title, 'Renamed knowledge bundle', 'ContentGroup can rename');
   const draftIdentityGroup = updateContentGroupIdentityDraft({
     group: renamedContentGroup,
-    role: 'definition',
+    type: 'definition',
     topic: 'Power Series',
     summary: 'A proposed identity for review.',
   });
   assertEqual(draftIdentityGroup.identity.status, 'draft', 'ContentGroup identity can be drafted');
-  assertEqual(draftIdentityGroup.identity.role, 'definition', 'ContentGroup identity stores role');
+  assertEqual(draftIdentityGroup.identity.type, 'definition', 'ContentGroup identity stores type');
+  assertEqual(draftIdentityGroup.identity.role, 'definition', 'ContentGroup identity mirrors type into transitional role');
   const acceptedIdentityGroup = acceptContentGroupIdentity(draftIdentityGroup);
   assertEqual(acceptedIdentityGroup.identity.status, 'accepted', 'draft ContentGroup identity can be accepted');
   assert(Boolean(acceptedIdentityGroup.identity.accepted_at), 'accepted ContentGroup identity records accepted timestamp');
@@ -4982,7 +4992,7 @@ function testContentGroupAndGroupFolderContract(): void {
       ...group,
       members: [markContentGroupMemberIntegrity(group.members[0], 'orphaned', 'range removed')],
     },
-    role: 'definition',
+    type: 'definition',
     topic: 'Power Series',
   }));
   const acceptedIssues = validateContentGroupGraph({ groups: [acceptedWithStaleMember], folders });
@@ -5021,6 +5031,59 @@ function testContentGroupSurfaceRoles(): void {
   assert(
     CONTENT_GROUP_SURFACE_ROLES.gallery.boundary.includes('source'),
     'Gallery boundary documents that organization does not move source truth',
+  );
+}
+
+function testPurposeFrameContract(): void {
+  assertEqual(normalizeGalleryMode('role'), 'type', 'legacy role Gallery mode maps to type view');
+  assertEqual(normalizeGalleryMode('topic'), 'topic', 'Gallery topic mode remains stable');
+  assertEqual(normalizeGalleryMode(null), 'folder', 'Gallery unknown mode falls back to folder view');
+
+  const group = updateContentGroupIdentityDraft({
+    group: createContentGroup({
+      projectId: 'project-purpose',
+      noteId: 'note-purpose',
+      canvasId: 'canvas-purpose',
+      title: 'Purpose group',
+      members: [],
+    }),
+    type: 'definition',
+    topic: 'Power Series',
+  });
+  const purposes = normalizePurposeFrames([{
+    id: 'purpose-contract-default',
+    project_id: 'project-purpose',
+    course_id: 'project-purpose',
+    note_id: 'note-purpose',
+    title: 'Default purpose',
+    status: 'active',
+    is_note_default: true,
+    created_by: 'human',
+    members: [],
+    metadata: {},
+    created_at: '2026-07-05T00:00:00.000Z',
+    updated_at: '2026-07-05T00:00:00.000Z',
+  }]);
+  const rolePurposes = upsertDefaultPurposeRoleForContentGroup({
+    purposes,
+    groupId: group.id,
+    role: 'exam_review',
+  });
+
+  assertEqual(group.identity.type, 'definition', 'ContentGroup identity type stays on group identity');
+  assertEqual(purposeRoleForContentGroup(rolePurposes, group.id), 'exam_review', 'purpose role lives on Purpose member edge');
+  assertEqual(
+    buildContentGroupRelationCandidates([group], rolePurposes)[0]?.role,
+    'exam_review',
+    'ContentGroup relation candidates read role from Purpose edge',
+  );
+  assertEqual(
+    projectContentGroupsForReading({
+      contentGroups: [group],
+      purposes: rolePurposes,
+    }).draft_knowledge_candidates[0]?.role,
+    'exam_review',
+    'AI-readable ContentGroup projection reads role from Purpose edge',
   );
 }
 
@@ -5333,7 +5396,7 @@ function testContentGroupPetalRefinementBoundary(): void {
     draft: {
       title: 'Saved editor draft',
       topic: 'Editor topic',
-      role: 'definition',
+      type: 'definition',
       summary: 'Identity draft should not overwrite local Petal labels.',
     },
     petalLabelDrafts: {
@@ -5342,6 +5405,7 @@ function testContentGroupPetalRefinementBoundary(): void {
   });
   assertEqual(editorSavedGroup.title, 'Saved editor draft', 'Single Editor draft save updates group title');
   assertEqual(editorSavedGroup.identity.topic, 'Editor topic', 'Single Editor draft save updates identity topic');
+  assertEqual(editorSavedGroup.identity.type, 'definition', 'Single Editor draft save updates identity type');
   assertEqual(editorSavedGroup.petals[0].label, 'Practice saved locally', 'Single Editor draft save preserves current Petal label draft');
   assertEqual(editorSavedGroup.petals[0].fragment_ids?.length, 1, 'Single Editor draft save preserves Petal fragment references');
 }
@@ -5386,7 +5450,7 @@ function testContentGroupStabilitySummary(): void {
       ...baseGroup,
       members: [changedMember],
     },
-    role: 'definition',
+    type: 'definition',
     topic: 'Power Series',
   }));
   const staleSummary = summarizeContentGroupStability({ group: acceptedWithStaleMember });
@@ -5942,6 +6006,7 @@ const checks: Array<readonly [string, () => void | Promise<void>]> = [
   ['AnnotationTruth seed', testAnnotationTruthSeed],
   ['ContentGroup and GroupFolder contract', testContentGroupAndGroupFolderContract],
   ['ContentGroup surface roles', testContentGroupSurfaceRoles],
+  ['PurposeFrame contract', testPurposeFrameContract],
   ['ContentGroup entity cutover boundary', testContentGroupEntityCutoverBoundary],
   ['GroupFolder entity cutover boundary', testGroupFolderEntityCutoverBoundary],
   ['ContentGroup member source boundary', testContentGroupMemberSourceBoundary],

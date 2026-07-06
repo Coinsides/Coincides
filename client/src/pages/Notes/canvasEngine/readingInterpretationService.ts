@@ -3,6 +3,7 @@ import type {
   AnnotationRangeV1,
   AnnotationTruthV1,
   ContentGroupV1,
+  PurposeFrameV1,
   ReadingInterpretationCreatedBy,
   ReadingInterpretationV1,
 } from './runtimeDataTypes';
@@ -17,6 +18,9 @@ import {
 import {
   normalizeContentGroup,
 } from './contentGroupService';
+import {
+  purposeRoleForContentGroup,
+} from './purposeService';
 import {
   annotationRangeIsRenderable,
 } from './annotationDisplayService';
@@ -163,6 +167,7 @@ export function projectAnnotationsForReading(input: {
 
 export interface ContentGroupReadingIdentityProjection {
   content_group_id: string;
+  type: string | null;
   role: string | null;
   topic: string | null;
   summary: string | null;
@@ -174,10 +179,14 @@ export interface ContentGroupReadingProjection {
   draft_knowledge_candidates: ContentGroupReadingIdentityProjection[];
 }
 
-function projectContentGroupIdentity(group: ContentGroupV1): ContentGroupReadingIdentityProjection {
+function projectContentGroupIdentity(
+  group: ContentGroupV1,
+  purposes: PurposeFrameV1[],
+): ContentGroupReadingIdentityProjection {
   return {
     content_group_id: group.id,
-    role: group.identity.role || null,
+    type: group.identity.type || group.identity.role || null,
+    role: purposeRoleForContentGroup(purposes, group.id),
     topic: group.identity.topic || null,
     summary: group.identity.summary || null,
     source: 'content_group_identity',
@@ -186,6 +195,7 @@ function projectContentGroupIdentity(group: ContentGroupV1): ContentGroupReading
 
 export function projectContentGroupsForReading(input: {
   contentGroups: ContentGroupV1[];
+  purposes?: PurposeFrameV1[];
 }): ContentGroupReadingProjection {
   const activeGroups = input.contentGroups
     .map(normalizeContentGroup)
@@ -194,9 +204,9 @@ export function projectContentGroupsForReading(input: {
   return {
     knowledge_objects: activeGroups
       .filter((group) => group.identity.status === 'accepted')
-      .map(projectContentGroupIdentity),
+      .map((group) => projectContentGroupIdentity(group, input.purposes || [])),
     draft_knowledge_candidates: activeGroups
       .filter((group) => group.identity.status === 'draft')
-      .map(projectContentGroupIdentity),
+      .map((group) => projectContentGroupIdentity(group, input.purposes || [])),
   };
 }

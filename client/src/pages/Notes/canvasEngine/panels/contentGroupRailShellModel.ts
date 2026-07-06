@@ -21,7 +21,7 @@ const RAIL_TOPIC_COLORS = [
 
 export interface RailGroupRowView {
   title: string;
-  roleLabel: string;
+  typeLabel: string;
   topicLabel: string;
   statusLabel: ContentGroupIdentityStatus | 'draft';
   stabilityReason: string;
@@ -64,7 +64,7 @@ export function buildRailGroupRowView(input: {
   const status = group.identity.status === 'none' ? 'draft' : group.identity.status;
   return {
     title: cleanRailLabel(group.title, 'Untitled group'),
-    roleLabel: cleanRailLabel(group.identity.role, 'no role'),
+    typeLabel: cleanRailLabel(group.identity.type || group.identity.role, 'no type'),
     topicLabel: cleanRailLabel(group.identity.topic, 'No topic'),
     statusLabel: status,
     stabilityReason: stability.reason,
@@ -103,7 +103,7 @@ export function railGroupMatchesQuery(input: {
   const haystack = [
     input.row.title,
     input.row.topicLabel,
-    input.row.roleLabel,
+    input.row.typeLabel,
     input.row.statusLabel,
     input.group.identity.summary,
   ]

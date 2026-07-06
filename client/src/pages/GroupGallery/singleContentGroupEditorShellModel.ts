@@ -20,7 +20,7 @@ export interface SingleEditorShellView {
   statusLabel: ContentGroupIdentityStatus | 'draft';
   statusKind: ContentGroupIdentityStatus | 'draft';
   topicLabel: string;
-  roleLabel: string;
+  typeLabel: string;
   summaryPreview: string;
   sourceNoteTitle: string;
   folderPath: string;
@@ -63,7 +63,7 @@ export function buildSingleEditorShellView(input: {
     statusLabel: statusKind,
     statusKind,
     topicLabel: cleanLabel(input.group.identity.topic, 'No topic'),
-    roleLabel: cleanLabel(input.group.identity.role, 'No role'),
+    typeLabel: cleanLabel(input.group.identity.type || input.group.identity.role, 'No type'),
     summaryPreview: cleanLabel(input.group.identity.summary, 'No summary yet.'),
     sourceNoteTitle: cleanLabel(input.note.title, 'Untitled note'),
     folderPath: folderPathText(input.folders, folderId),

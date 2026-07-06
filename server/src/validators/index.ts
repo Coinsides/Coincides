@@ -417,6 +417,7 @@ const contentGroupRuntimeIdSchema = z.string().min(1).max(180);
 
 const contentGroupIdentitySchema = z.object({
   status: z.enum(['none', 'draft', 'accepted', 'rejected', 'archived']).optional(),
+  type: z.string().max(160).nullable().optional(),
   role: z.string().max(160).nullable().optional(),
   topic: z.string().max(240).nullable().optional(),
   summary: z.string().max(4000).nullable().optional(),
@@ -455,6 +456,40 @@ export const upsertContentGroupSchema = z.object({
 
 export const replaceNoteContentGroupsSchema = z.object({
   groups: z.array(upsertContentGroupSchema).max(500),
+});
+
+const purposeMemberSchema = z.object({
+  id: contentGroupRuntimeIdSchema.optional(),
+  purpose_id: contentGroupRuntimeIdSchema.optional(),
+  member_kind: z.enum(['content_group']).optional(),
+  member_id: contentGroupRuntimeIdSchema,
+  role: z.string().max(160).nullable().optional(),
+  fitness: z.string().max(160).optional(),
+  order_index: z.number().int().optional(),
+  metadata: jsonObjectSchema.optional(),
+  created_at: z.string().max(80).optional(),
+  updated_at: z.string().max(80).optional(),
+});
+
+const purposeSchema = z.object({
+  id: contentGroupRuntimeIdSchema.optional(),
+  course_id: z.string().uuid('Invalid course ID').nullable().optional(),
+  project_id: z.string().uuid('Invalid project ID').nullable().optional(),
+  note_id: z.string().uuid('Invalid note ID').nullable().optional(),
+  title: z.string().min(1).max(300),
+  intent: z.string().max(4000).nullable().optional(),
+  scope_note: z.string().max(4000).nullable().optional(),
+  status: z.enum(['active', 'archived']).optional(),
+  is_note_default: z.boolean().optional(),
+  created_by: z.enum(['human', 'ai', 'system', 'ai_proposal', 'importer']).optional(),
+  members: z.array(purposeMemberSchema).max(500).optional(),
+  metadata: jsonObjectSchema.optional(),
+  created_at: z.string().max(80).optional(),
+  updated_at: z.string().max(80).optional(),
+});
+
+export const replaceNotePurposesSchema = z.object({
+  purposes: z.array(purposeSchema).max(100),
 });
 
 export const importNoteMetadataContentGroupsSchema = z.object({

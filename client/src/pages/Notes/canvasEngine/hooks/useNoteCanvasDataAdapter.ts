@@ -34,6 +34,7 @@ import type {
   GroupFolderV1,
   Note,
   NoteBlock,
+  PurposeFrameV1,
   ReadingInterpretationV1,
   SourceAnchor,
   SourceJumpTarget,
@@ -77,6 +78,10 @@ import {
   loadGroupFoldersForNote,
   saveGroupFoldersForNote,
 } from '../groupFolderRepository';
+import {
+  loadPurposeFramesForNote,
+  savePurposeFramesForNote,
+} from '../purposeRepository';
 import {
   normalizeGroupFolders,
 } from '../groupFolderService';
@@ -306,6 +311,7 @@ export function useNoteCanvasDataAdapter({
   const [annotationTruths, setAnnotationTruths] = useState<AnnotationTruthV1[]>([]);
   const [contentGroups, setContentGroups] = useState<ContentGroupV1[]>([]);
   const [groupFolders, setGroupFolders] = useState<GroupFolderV1[]>([]);
+  const [purposeFrames, setPurposeFrames] = useState<PurposeFrameV1[]>([]);
   const [pageFrameCollection, setPageFrameCollection] = useState<PageFrameCollectionModel | null>(null);
   const [persistedCanvasObjects, setPersistedCanvasObjects] = useState<CanvasObject[]>([]);
   const [persistedCanvasPlacements, setPersistedCanvasPlacements] = useState<CanvasPlacement[]>([]);
@@ -324,6 +330,7 @@ export function useNoteCanvasDataAdapter({
   const noteRef = useRef<Note | null>(null);
   const annotationSaveGenerationRef = useRef(0);
   const contentGroupSaveGenerationRef = useRef(0);
+  const purposeFrameSaveGenerationRef = useRef(0);
   const pageFrameSaveGenerationRef = useRef(0);
   const typographyProfileSaveGenerationRef = useRef(0);
 
@@ -363,11 +370,12 @@ export function useNoteCanvasDataAdapter({
         api.get(`/notes/${noteId}/blocks`),
       ]);
       const hydratedNote = noteRes.data as Note;
-      const [savedContentGroups, savedGroupFolders, canvasPersistence, savedAnnotationTruths] = await Promise.all([
-        loadContentGroupsForNote({ note: hydratedNote }),
+      const savedContentGroups = await loadContentGroupsForNote({ note: hydratedNote });
+      const [savedGroupFolders, canvasPersistence, savedAnnotationTruths, savedPurposeFrames] = await Promise.all([
         loadGroupFoldersForNote({ note: hydratedNote }),
         loadCanvasPersistenceForNote({ note: hydratedNote }),
         loadAnnotationTruthsForNote({ note: hydratedNote }),
+        loadPurposeFramesForNote({ note: hydratedNote }),
       ]);
       const hydratedBlocks = applyCanvasLayoutsToBlocks(
         (blocksRes.data as any[]).map(hydrateClientBlock),
@@ -386,6 +394,7 @@ export function useNoteCanvasDataAdapter({
       setAnnotationTruths(savedAnnotationTruths);
       setContentGroups(savedContentGroups);
       setGroupFolders(savedGroupFolders);
+      setPurposeFrames(savedPurposeFrames);
       setPageFrameCollection(canvasPersistence.pageFrameCollection);
       setPersistedCanvasObjects(canvasPersistence.canvasObjects);
       setPersistedCanvasPlacements(canvasPersistence.canvasPlacements);
@@ -538,6 +547,28 @@ export function useNoteCanvasDataAdapter({
       }
     }
   }, [addToast, groupFolders, note]);
+
+  const savePurposeFrames = useCallback(async (nextPurposes: PurposeFrameV1[]) => {
+    const currentNote = noteRef.current || note;
+    if (!currentNote) return;
+    const previousPurposes = purposeFrames;
+    const saveGeneration = purposeFrameSaveGenerationRef.current + 1;
+    purposeFrameSaveGenerationRef.current = saveGeneration;
+    setPurposeFrames(nextPurposes);
+    try {
+      const savedPurposes = await savePurposeFramesForNote({
+        noteId: currentNote.id,
+        purposes: nextPurposes,
+      });
+      if (purposeFrameSaveGenerationRef.current !== saveGeneration) return;
+      setPurposeFrames(savedPurposes);
+    } catch (err) {
+      console.error('Failed to save purposes:', err);
+      addToast('error', 'Failed to save purpose');
+      if (purposeFrameSaveGenerationRef.current !== saveGeneration) return;
+      setPurposeFrames(previousPurposes);
+    }
+  }, [addToast, note, purposeFrames]);
 
   const savePageFrameCollection = useCallback(async (nextCollection: PageFrameCollectionModel) => {
     const currentNote = noteRef.current || note;
@@ -1139,6 +1170,7 @@ export function useNoteCanvasDataAdapter({
     annotationTruths,
     contentGroups,
     groupFolders,
+    purposeFrames,
     pageFrameCollection,
     persistedCanvasObjects,
     persistedCanvasPlacements,
@@ -1166,6 +1198,7 @@ export function useNoteCanvasDataAdapter({
     saveAnnotationTruths,
     saveContentGroups,
     saveGroupFolders,
+    savePurposeFrames,
     savePageFrameCollection,
     persistCanvasObject,
     deleteCanvasObject,

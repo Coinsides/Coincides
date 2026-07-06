@@ -48,6 +48,9 @@ import {
   type GroupRef,
 } from './groupGalleryData';
 import {
+  normalizeGalleryMode,
+} from './groupGalleryModeService';
+import {
   buildGalleryGroupCardView,
   galleryModeLabel,
 } from './groupGalleryShellModel';
@@ -62,7 +65,7 @@ const gallerySurfaceRole = CONTENT_GROUP_SURFACE_ROLES.gallery;
 const galleryModeTabs: Array<{ value: GalleryMode; label: string }> = [
   { value: 'folder', label: 'Folder view' },
   { value: 'topic', label: 'Topic view' },
-  { value: 'role', label: 'Role view' },
+  { value: 'type', label: 'Type view' },
 ];
 
 function topicColor(topic: string | null | undefined): string {
@@ -109,10 +112,6 @@ function recordsForFolderScope(
   return fallbackRecord ? [fallbackRecord] : [];
 }
 
-function safeGalleryMode(value: string | null): GalleryMode {
-  return value === 'topic' || value === 'role' ? value : 'folder';
-}
-
 function countGroupsInFolder(records: GalleryRecord[], folderId: string): number {
   return records.reduce((count, record) => (
     count + activeGroups(record.groups).filter((group) => groupFolderId(group) === folderId).length
@@ -144,14 +143,14 @@ export default function GroupGalleryPage() {
   const [records, setRecords] = useState<GalleryRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<GalleryMode>(safeGalleryMode(searchParams.get('mode')));
+  const [mode, setMode] = useState<GalleryMode>(normalizeGalleryMode(searchParams.get('mode')));
   const [query, setQuery] = useState(searchParams.get('query') || '');
   const [selectedFolderKey, setSelectedFolderKey] = useState<string | null>(null);
   const [folderTitleDraft, setFolderTitleDraft] = useState('');
   const [dropTargetKey, setDropTargetKey] = useState<string | null>(null);
 
   useEffect(() => {
-    const nextMode = safeGalleryMode(searchParams.get('mode'));
+    const nextMode = normalizeGalleryMode(searchParams.get('mode'));
     const nextQuery = searchParams.get('query') || '';
     setMode((current) => (current === nextMode ? current : nextMode));
     setQuery((current) => (current === nextQuery ? current : nextQuery));
@@ -236,7 +235,7 @@ export default function GroupGalleryPage() {
     return allGroups.filter(({ record, group }) => [
       group.title,
       group.identity.topic || '',
-      group.identity.role || '',
+      group.identity.type || group.identity.role || '',
       group.identity.summary || '',
       record.note.title || '',
       folderPathText(record.folders, groupFolderId(group)),
@@ -253,8 +252,10 @@ export default function GroupGalleryPage() {
     }
     const map = new Map<string, GroupRef[]>();
     visibleGroups.forEach((entry) => {
-      const value = mode === 'topic' ? entry.group.identity.topic : entry.group.identity.role;
-      const key = cleanLabel(value, mode === 'topic' ? 'No topic' : 'No role');
+      const value = mode === 'topic'
+        ? entry.group.identity.topic
+        : entry.group.identity.type || entry.group.identity.role;
+      const key = cleanLabel(value, mode === 'topic' ? 'No topic' : 'No type');
       map.set(key, [...(map.get(key) || []), entry]);
     });
     return Array.from(map.entries())
@@ -667,7 +668,7 @@ export default function GroupGalleryPage() {
                         onDragLeave={() => setDropTargetKey((current) => (current === key ? null : current))}
                         onDrop={(event) => void handleDropOnGroupCard(event, record, group)}
                       >
-                        <span className={styles.cardRoleTab}>{card.roleLabel}</span>
+                        <span className={styles.cardRoleTab}>{card.typeLabel}</span>
                         <button
                           type="button"
                           className={styles.cardInfoButton}

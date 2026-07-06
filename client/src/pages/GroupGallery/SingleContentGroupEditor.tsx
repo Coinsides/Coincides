@@ -35,6 +35,10 @@ import {
 import {
   CONTENT_GROUP_SURFACE_ROLES,
 } from '@/pages/Notes/canvasEngine/contentGroupSurfaceRoleService';
+import {
+  purposeRoleForContentGroup,
+  upsertDefaultPurposeRoleForContentGroup,
+} from '@/pages/Notes/canvasEngine/purposeService';
 import type {
   AnnotationRangeV1,
   ContentGroupFragmentV1,
@@ -139,9 +143,10 @@ export default function SingleContentGroupEditorPage() {
   const [draft, setDraft] = useState<ContentGroupEditorDraft>({
     title: '',
     topic: '',
-    role: '',
+    type: '',
     summary: '',
   });
+  const [purposeRoleDraft, setPurposeRoleDraft] = useState('');
   const [petalLabelDrafts, setPetalLabelDrafts] = useState<Record<string, string>>({});
   const [draggingPetalId, setDraggingPetalId] = useState<string | null>(null);
   const [summaryOpen, setSummaryOpen] = useState(false);
@@ -176,9 +181,10 @@ export default function SingleContentGroupEditorPage() {
     setDraft({
       title: selected.group.title,
       topic: selected.group.identity.topic || '',
-      role: selected.group.identity.role || '',
+      type: selected.group.identity.type || selected.group.identity.role || '',
       summary: selected.group.identity.summary || '',
     });
+    setPurposeRoleDraft(purposeRoleForContentGroup(selected.record.purposes, selected.group.id) || '');
     setPetalLabelDrafts(Object.fromEntries(
       selected.group.petals.map((petal) => [petal.id, petal.label]),
     ));
@@ -191,6 +197,17 @@ export default function SingleContentGroupEditorPage() {
       record.folders,
     );
     setRecords((current) => replaceRecord(current, nextRecord));
+    return nextRecord;
+  }, []);
+
+  const persistPurposes = useCallback(async (record: GalleryRecord, nextPurposes: GalleryRecord['purposes']) => {
+    const nextRecord = await saveGalleryRecord(
+      record,
+      record.groups,
+      record.folders,
+      nextPurposes,
+    );
+    setRecords((current) => replaceRecord(current, nextRecord));
   }, []);
 
   const handleSaveDraft = async () => {
@@ -200,7 +217,13 @@ export default function SingleContentGroupEditorPage() {
       draft,
       petalLabelDrafts,
     });
-    await persistGroup(selected.record, nextGroup);
+    const savedRecord = await persistGroup(selected.record, nextGroup);
+    const nextPurposes = upsertDefaultPurposeRoleForContentGroup({
+      purposes: savedRecord.purposes,
+      groupId: selected.group.id,
+      role: purposeRoleDraft,
+    });
+    await persistPurposes(savedRecord, nextPurposes);
   };
 
   const membersFromDragEvent = (event: DragEvent<HTMLElement>) => {
@@ -342,13 +365,22 @@ export default function SingleContentGroupEditorPage() {
             </span>
             <input
               className={styles.singleEditorChipInput}
-              value={draft.role}
-              aria-label="Content group role"
+              value={draft.type}
+              aria-label="Content group type"
               onChange={(event) => {
                 const { value } = event.currentTarget;
-                setDraft((current) => ({ ...current, role: value }));
+                setDraft((current) => ({ ...current, type: value }));
               }}
-              placeholder="role"
+              placeholder="type"
+            />
+            <input
+              className={styles.singleEditorChipInput}
+              value={purposeRoleDraft}
+              aria-label="Default purpose role"
+              onChange={(event) => {
+                setPurposeRoleDraft(event.currentTarget.value);
+              }}
+              placeholder="purpose role"
             />
             <input
               className={styles.singleEditorChipInput}
@@ -665,7 +697,7 @@ export default function SingleContentGroupEditorPage() {
             <div className={styles.singleEditorSourceFacts}>
               <span>{shellView?.folderPath}</span>
               <span>{shellView?.stabilityLabel}</span>
-              <span>{shellView?.roleLabel}</span>
+              <span>{shellView?.typeLabel}</span>
               <span>{shellView?.topicLabel}</span>
             </div>
             <Link to={`/notes/${selected.record.note.id}`}>

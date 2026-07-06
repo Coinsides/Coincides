@@ -9,6 +9,10 @@ import {
   saveGroupFoldersForNote,
 } from '@/pages/Notes/canvasEngine/groupFolderRepository';
 import {
+  loadPurposeFramesForNote,
+  savePurposeFramesForNote,
+} from '@/pages/Notes/canvasEngine/purposeRepository';
+import {
   activeGroupFolders,
   groupFolderPath,
 } from '@/pages/Notes/canvasEngine/groupFolderService';
@@ -19,15 +23,17 @@ import type {
   ContentGroupV1,
   GroupFolderV1,
   Note,
+  PurposeFrameV1,
 } from '@/pages/Notes/canvasEngine/runtimeDataTypes';
 
-export type GalleryMode = 'folder' | 'topic' | 'role';
+export type GalleryMode = 'folder' | 'topic' | 'type';
 
 export interface GalleryRecord {
   project: Course;
   note: Note;
   folders: GroupFolderV1[];
   groups: ContentGroupV1[];
+  purposes: PurposeFrameV1[];
 }
 
 export interface GroupRef {
@@ -109,15 +115,17 @@ export async function loadGroupGalleryRecords(): Promise<GalleryRecord[]> {
     projects.map(async (project) => {
       const noteResponse = await api.get<Note[]>(`/notes?course_id=${project.id}`);
       return Promise.all((noteResponse.data || []).map(async (note) => {
-        const [folders, groups] = await Promise.all([
+        const groups = await loadContentGroupsForNote({ note });
+        const [folders, purposes] = await Promise.all([
           loadGroupFoldersForNote({ note }),
-          loadContentGroupsForNote({ note }),
+          loadPurposeFramesForNote({ note }),
         ]);
         return {
           project,
           note,
           folders,
           groups,
+          purposes,
         };
       }));
     }),
@@ -129,8 +137,9 @@ export async function saveGalleryRecord(
   record: GalleryRecord,
   groups: ContentGroupV1[],
   folders: GroupFolderV1[],
+  purposes?: PurposeFrameV1[],
 ): Promise<GalleryRecord> {
-  const [savedGroups, savedFolders] = await Promise.all([
+  const [savedGroups, savedFolders, savedPurposes] = await Promise.all([
     saveContentGroupsForNote({
       noteId: record.note.id,
       groups,
@@ -139,11 +148,18 @@ export async function saveGalleryRecord(
       noteId: record.note.id,
       folders,
     }),
+    purposes === undefined
+      ? Promise.resolve(record.purposes)
+      : savePurposeFramesForNote({
+        noteId: record.note.id,
+        purposes,
+      }),
   ]);
   return {
     ...record,
     folders: savedFolders,
     groups: savedGroups,
+    purposes: savedPurposes,
   };
 }
 

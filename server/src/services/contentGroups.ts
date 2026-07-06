@@ -26,6 +26,7 @@ interface ContentGroupRow {
   status: string;
   created_by: string;
   identity_status: string;
+  identity_type: string | null;
   identity_role: string | null;
   identity_topic: string | null;
   identity_summary: string | null;
@@ -321,6 +322,7 @@ function hydrateContentGroup(
     : parseJson<any[]>(row.petals_json, []);
   const primaryPlacement = placements.find((placement) => placement?.placement_role === 'primary') || placements[0];
   const folderId = optionalText(primaryPlacement?.folder_id) || row.primary_folder_id || null;
+  const identityType = row.identity_type || row.identity_role || null;
 
   return {
     id: row.id,
@@ -341,7 +343,8 @@ function hydrateContentGroup(
     petals,
     identity: {
       status: normalizeIdentityStatus(row.identity_status),
-      role: row.identity_role || null,
+      type: identityType,
+      role: identityType,
       topic: row.identity_topic || null,
       summary: row.identity_summary || null,
       created_by: normalizeIdentityCreatedBy(row.identity_created_by),
@@ -362,6 +365,7 @@ function contentGroupDbValues(userId: string, input: Record<string, any>, note?:
   const now = new Date().toISOString();
   const courseId = courseIdForInput(input, note);
   const identity = input.identity && typeof input.identity === 'object' ? input.identity : {};
+  const identityType = optionalText(identity.type) ?? optionalText(identity.role);
   const placements = Array.isArray(input.placements) ? input.placements : [];
   const folderId = optionalText(input.folder_id) || optionalText(placements[0]?.folder_id);
 
@@ -377,7 +381,7 @@ function contentGroupDbValues(userId: string, input: Record<string, any>, note?:
     status: normalizeStatus(input.status),
     created_by: normalizeCreatedBy(input.created_by),
     identity_status: normalizeIdentityStatus(identity.status),
-    identity_role: optionalText(identity.role),
+    identity_type: identityType,
     identity_topic: optionalText(identity.topic),
     identity_summary: optionalText(identity.summary),
     identity_created_by: normalizeIdentityCreatedBy(identity.created_by),
@@ -844,7 +848,7 @@ export function upsertContentGroup(db: Database.Database, userId: string, input:
       INSERT INTO content_groups (
         id, user_id, course_id, note_id, canvas_id, primary_folder_id, parent_group_id,
         title, status, created_by,
-        identity_status, identity_role, identity_topic, identity_summary,
+        identity_status, identity_type, identity_topic, identity_summary,
         identity_created_by, identity_reviewed_by, identity_confidence,
         identity_updated_at, identity_accepted_at, identity_metadata,
         placements_json, members_json, fragments_json, petals_json,
@@ -853,7 +857,7 @@ export function upsertContentGroup(db: Database.Database, userId: string, input:
       VALUES (
         @id, @user_id, @course_id, @note_id, @canvas_id, @primary_folder_id, @parent_group_id,
         @title, @status, @created_by,
-        @identity_status, @identity_role, @identity_topic, @identity_summary,
+        @identity_status, @identity_type, @identity_topic, @identity_summary,
         @identity_created_by, @identity_reviewed_by, @identity_confidence,
         @identity_updated_at, @identity_accepted_at, @identity_metadata,
         @placements_json, @members_json, @fragments_json, @petals_json,
@@ -868,7 +872,7 @@ export function upsertContentGroup(db: Database.Database, userId: string, input:
         title = excluded.title,
         status = excluded.status,
         identity_status = excluded.identity_status,
-        identity_role = excluded.identity_role,
+        identity_type = excluded.identity_type,
         identity_topic = excluded.identity_topic,
         identity_summary = excluded.identity_summary,
         identity_created_by = excluded.identity_created_by,

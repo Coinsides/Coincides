@@ -64,12 +64,12 @@ import styles from '../../NoteDetail.module.css';
 const railSurfaceRole = CONTENT_GROUP_SURFACE_ROLES.rail;
 const sourceNoteTitle = 'Current note';
 
-type RailViewMode = 'folder' | 'topic' | 'role' | 'all';
+type RailViewMode = 'folder' | 'topic' | 'type' | 'all';
 
 const railViewTabs: { id: RailViewMode; label: string }[] = [
   { id: 'folder', label: 'Folder' },
   { id: 'topic', label: 'Topic' },
-  { id: 'role', label: 'Role' },
+  { id: 'type', label: 'Type' },
   { id: 'all', label: 'All' },
 ];
 
@@ -102,9 +102,12 @@ function sortGroupsForRailView(groups: ContentGroupV1[], viewMode: RailViewMode)
       || collator.compare(left.title, right.title)
     ));
   }
-  if (viewMode === 'role') {
+  if (viewMode === 'type') {
     return sorted.sort((left, right) => (
-      collator.compare(cleanRailLabel(left.identity.role, 'no role'), cleanRailLabel(right.identity.role, 'no role'))
+      collator.compare(
+        cleanRailLabel(left.identity.type || left.identity.role, 'no type'),
+        cleanRailLabel(right.identity.type || right.identity.role, 'no type'),
+      )
       || collator.compare(left.title, right.title)
     ));
   }
@@ -490,7 +493,7 @@ export function ContentGroupPanel({
                 >
                   <span className={styles.contentGroupTopicStrip} />
                   <span className={styles.contentGroupName}>{row.title}</span>
-                  <span className={styles.contentGroupRoleBadge}>{row.roleLabel}</span>
+                  <span className={styles.contentGroupRoleBadge}>{row.typeLabel}</span>
                   <span className={styles.contentGroupStatusChip} data-status-kind={row.statusLabel}>
                     {row.statusLabel}
                   </span>

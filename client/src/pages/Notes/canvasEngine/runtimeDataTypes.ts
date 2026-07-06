@@ -230,6 +230,7 @@ export type ContentGroupIdentityCreatedBy = 'human' | 'ai' | 'system';
 
 export interface ContentGroupIdentityV1 {
   status: ContentGroupIdentityStatus;
+  type?: string | null;
   role?: string | null;
   topic?: string | null;
   summary?: string | null;
@@ -266,6 +267,40 @@ export interface ContentGroupV1 {
   identity: ContentGroupIdentityV1;
   view_state?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
+}
+
+export type PurposeStatus = 'active' | 'archived';
+export type PurposeCreatedBy = 'human' | 'ai' | 'system' | 'ai_proposal' | 'importer';
+export type PurposeMemberKind = 'content_group';
+
+export interface PurposeMemberV1 {
+  id: string;
+  purpose_id: string;
+  member_kind: PurposeMemberKind;
+  member_id: string;
+  role?: string | null;
+  fitness: string;
+  order_index: number;
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PurposeFrameV1 {
+  id: string;
+  project_id: string;
+  course_id?: string | null;
+  note_id?: string | null;
+  title: string;
+  intent?: string | null;
+  scope_note?: string | null;
+  status: PurposeStatus;
+  is_note_default: boolean;
+  created_by: PurposeCreatedBy;
+  members: PurposeMemberV1[];
+  metadata?: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface GroupFolderScopeV1 {

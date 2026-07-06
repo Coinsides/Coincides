@@ -10,7 +10,7 @@ import type {
 export interface ContentGroupEditorDraft {
   title: string;
   topic: string;
-  role: string;
+  type: string;
   summary: string;
 }
 
@@ -39,7 +39,7 @@ export function applyContentGroupEditorDraft(input: {
   return updateContentGroupIdentityDraft({
     group: nextGroup,
     topic: input.draft.topic,
-    role: input.draft.role,
+    type: input.draft.type,
     summary: input.draft.summary,
   });
 }

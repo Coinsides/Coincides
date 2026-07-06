@@ -12,13 +12,13 @@ import {
   groupPreview,
 } from './groupGalleryData';
 
-export type GalleryShellMode = 'folder' | 'topic' | 'role';
+export type GalleryShellMode = 'folder' | 'topic' | 'type';
 
 export interface GalleryGroupCardView {
   title: string;
   preview: string;
   topicLabel: string;
-  roleLabel: string;
+  typeLabel: string;
   sourceLabel: string;
   folderPath: string;
   memberCountLabel: string;
@@ -31,7 +31,7 @@ export interface GalleryGroupCardView {
 export function galleryModeLabel(mode: GalleryShellMode): string {
   if (mode === 'folder') return 'Folder view';
   if (mode === 'topic') return 'Topic view';
-  return 'Role view';
+  return 'Type view';
 }
 
 export function buildGalleryGroupCardView(params: {
@@ -54,7 +54,7 @@ export function buildGalleryGroupCardView(params: {
     title: group.title,
     preview: groupPreview(group),
     topicLabel: cleanLabel(group.identity.topic, 'No topic'),
-    roleLabel: cleanLabel(group.identity.role, 'No role'),
+    typeLabel: cleanLabel(group.identity.type || group.identity.role, 'No type'),
     sourceLabel: cleanLabel(sourceNoteTitle, 'Untitled note'),
     folderPath: folderPathText(folders, folderId),
     memberCountLabel: `${group.members.length} members`,

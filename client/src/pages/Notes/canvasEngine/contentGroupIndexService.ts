@@ -16,7 +16,7 @@ export interface ContentGroupIndexEntry {
   folder_id: string | null;
   folder_path: string[];
   topic: string | null;
-  role: string | null;
+  type: string | null;
   identity_status: ContentGroupV1['identity']['status'];
   member_count: number;
   petal_count: number;
@@ -47,7 +47,7 @@ export function buildContentGroupIndex(input: {
         folder_id: folderId,
         folder_path: folderPath,
         topic: group.identity.topic || null,
-        role: group.identity.role || null,
+        type: group.identity.type || group.identity.role || null,
         identity_status: group.identity.status,
         member_count: group.members.length,
         petal_count: group.petals.filter((petal) => petal.status !== 'deleted').length,
@@ -71,21 +71,21 @@ export function filterContentGroupIndex(input: {
   entries: ContentGroupIndexEntry[];
   query?: string;
   folderId?: string | null;
-  role?: string | null;
+  type?: string | null;
   topic?: string | null;
 }): ContentGroupIndexEntry[] {
   const query = (input.query || '').trim().toLowerCase();
-  const role = (input.role || '').trim().toLowerCase();
+  const type = (input.type || '').trim().toLowerCase();
   const topic = (input.topic || '').trim().toLowerCase();
   return input.entries.filter((entry) => {
     if (input.folderId && entry.folder_id !== input.folderId) return false;
-    if (role && (entry.role || '').toLowerCase() !== role) return false;
+    if (type && (entry.type || '').toLowerCase() !== type) return false;
     if (topic && !(entry.topic || '').toLowerCase().includes(topic)) return false;
     if (!query) return true;
     return [
       entry.group.title,
       entry.topic || '',
-      entry.role || '',
+      entry.type || '',
       entry.folder_path.join(' / '),
       entry.group.identity.summary || '',
     ].join(' ').toLowerCase().includes(query);

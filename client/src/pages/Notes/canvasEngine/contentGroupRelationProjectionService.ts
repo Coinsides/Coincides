@@ -2,10 +2,14 @@ import type {
   ContentGroupMemberV1,
   ContentGroupPetalV1,
   ContentGroupV1,
+  PurposeFrameV1,
 } from './runtimeDataTypes';
 import {
   normalizeContentGroup,
 } from './contentGroupService';
+import {
+  purposeRoleForContentGroup,
+} from './purposeService';
 
 export type ContentGroupRelationEndpointKind = 'group' | 'petal' | 'member';
 
@@ -35,6 +39,7 @@ function memberCandidate(input: {
   group: ContentGroupV1;
   member: ContentGroupMemberV1;
   petal?: ContentGroupPetalV1;
+  role: string | null;
 }): ContentGroupRelationEndpointCandidate {
   return {
     id: input.petal
@@ -45,7 +50,7 @@ function memberCandidate(input: {
     petal_id: input.petal?.id,
     member_id: input.member.id,
     label: input.member.label || input.group.title,
-    role: input.group.identity.role || null,
+    role: input.role,
     topic: input.group.identity.topic || null,
     preview_text: memberPreview(input.member),
     accepted: input.group.identity.status === 'accepted',
@@ -57,17 +62,21 @@ function memberCandidate(input: {
   };
 }
 
-export function buildContentGroupRelationCandidates(groups: ContentGroupV1[]): ContentGroupRelationEndpointCandidate[] {
+export function buildContentGroupRelationCandidates(
+  groups: ContentGroupV1[],
+  purposes: PurposeFrameV1[] = [],
+): ContentGroupRelationEndpointCandidate[] {
   return groups
     .map(normalizeContentGroup)
     .filter((group) => group.status !== 'deleted')
     .flatMap((group) => {
+      const purposeRole = purposeRoleForContentGroup(purposes, group.id);
       const groupCandidate: ContentGroupRelationEndpointCandidate = {
         id: `group:${group.id}`,
         kind: 'group',
         group_id: group.id,
         label: group.title,
-        role: group.identity.role || null,
+        role: purposeRole,
         topic: group.identity.topic || null,
         preview_text: group.identity.summary || group.members.map(memberPreview).filter(Boolean).slice(0, 2).join(' | '),
         accepted: group.identity.status === 'accepted',
@@ -84,7 +93,7 @@ export function buildContentGroupRelationCandidates(groups: ContentGroupV1[]): C
           group_id: group.id,
           petal_id: petal.id,
           label: petal.label,
-          role: group.identity.role || null,
+          role: purposeRole,
           topic: group.identity.topic || null,
           preview_text: petal.members.map(memberPreview).filter(Boolean).slice(0, 2).join(' | '),
           accepted: group.identity.status === 'accepted',
@@ -94,8 +103,13 @@ export function buildContentGroupRelationCandidates(groups: ContentGroupV1[]): C
           },
         }));
       const memberCandidates = [
-        ...group.members.map((member) => memberCandidate({ group, member })),
-        ...group.petals.flatMap((petal) => petal.members.map((member) => memberCandidate({ group, petal, member }))),
+        ...group.members.map((member) => memberCandidate({ group, member, role: purposeRole })),
+        ...group.petals.flatMap((petal) => petal.members.map((member) => memberCandidate({
+          group,
+          petal,
+          member,
+          role: purposeRole,
+        }))),
       ];
       return [groupCandidate, ...petalCandidates, ...memberCandidates];
     });
