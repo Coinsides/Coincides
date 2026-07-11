@@ -662,9 +662,9 @@ function getOrCreateCanvasBackingNote(
   db.prepare(`
     INSERT INTO notes (
       id, user_id, course_id, title, description, source_kind, page_format,
-      metadata, operation_batch_id, created_at, updated_at
+      note_class, metadata, operation_batch_id, created_at, updated_at
     )
-    VALUES (?, ?, ?, ?, ?, 'proposal', 'canvas_backing', ?, ?, datetime('now'), datetime('now'))
+    VALUES (?, ?, ?, ?, ?, 'proposal', 'canvas_backing', 'system', ?, ?, datetime('now'), datetime('now'))
   `).run(
     id,
     userId,

@@ -2691,6 +2691,14 @@ test('v2.5.2 applying composition proposal creates new blocks, canvas records, a
     assert.equal(slots.every((slot) => slot.status === 'filled'), true);
     assert.equal(slots.every((slot) => Boolean(slot.note_block_id) && Boolean(slot.canvas_node_id)), true);
 
+    const backingNote = db.prepare(`
+      SELECT n.note_class
+      FROM notes n
+      JOIN note_block_placements p ON p.note_id = n.id
+      WHERE p.block_id = ?
+    `).get(slots[0].note_block_id) as any;
+    assert.equal(backingNote.note_class, 'system');
+
     const createdBlock = db.prepare('SELECT metadata FROM note_blocks WHERE id = ?')
       .get(slots[0].note_block_id) as any;
     const metadata = JSON.parse(createdBlock.metadata);

@@ -208,6 +208,34 @@ test('ContentGroup hydrates members from content_group_members before legacy mem
   });
 });
 
+test('ContentGroup preserves stale source sync status through hydrate and save roundtrip', async () => {
+  await withDb((db) => {
+    const { userId, courseId, noteId } = seedUserCourseNote(db);
+    const group = upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Stale source group', {
+      id: 'content-group-stale-roundtrip',
+      members: [{
+        id: 'content-group-stale-member',
+        kind: 'canvas_object',
+        target_id: null,
+        current_content: 'Detached canvas object snapshot.',
+        preview_text: 'Detached canvas object snapshot.',
+        source_sync_status: 'stale',
+      }],
+    }));
+
+    assert.equal(group.members[0]?.source_sync_status, 'stale');
+    const saved = upsertContentGroup(db, userId, groupInput(courseId, noteId, group.title, {
+      id: group.id,
+      members: group.members,
+    }));
+    assert.equal(saved.members[0]?.source_sync_status, 'stale');
+
+    const row = db.prepare('SELECT source_sync_status FROM content_group_members WHERE id = ?')
+      .get('content-group-stale-member') as { source_sync_status: string };
+    assert.equal(row.source_sync_status, 'stale');
+  });
+});
+
 test('ContentGroup hydrates fragments and petals from entity tables before legacy JSON', async () => {
   await withDb((db) => {
     const { userId, courseId, noteId } = seedUserCourseNote(db);

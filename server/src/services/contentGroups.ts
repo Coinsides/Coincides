@@ -169,6 +169,7 @@ function normalizeSourceSyncStatus(value: unknown): string {
     || value === 'missing'
     || value === 'detached'
     || value === 'unsupported'
+    || value === 'stale'
   ) {
     return value;
   }

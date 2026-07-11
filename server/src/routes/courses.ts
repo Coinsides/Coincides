@@ -4,6 +4,7 @@ import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { releaseCourseCanvasAssets } from '../services/canvasAssets.js';
+import { assertCourseCanDelete, assertCourseCanRename } from '../services/systemCourses.js';
 import { createCourseSchema, updateCourseSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
 
@@ -59,6 +60,10 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     const existing = db.prepare('SELECT * FROM courses WHERE id = ? AND user_id = ?').get(req.params.id, req.userId!) as any;
     if (!existing) {
       throw new AppError(404, 'Course not found');
+    }
+
+    if (data.name !== undefined) {
+      assertCourseCanRename(existing, data.name);
     }
 
     const fields: string[] = [];
@@ -157,10 +162,13 @@ router.delete('/:id', (req: AuthRequest, res: Response) => {
   const db = getDb();
   const courseId = String(req.params.id);
 
-  const existing = db.prepare('SELECT id FROM courses WHERE id = ? AND user_id = ?').get(courseId, req.userId!);
+  const existing = db.prepare('SELECT * FROM courses WHERE id = ? AND user_id = ?')
+    .get(courseId, req.userId!) as any;
   if (!existing) {
     throw new AppError(404, 'Course not found');
   }
+
+  assertCourseCanDelete(existing);
 
   db.transaction(() => {
     releaseCourseCanvasAssets(db, req.userId!, courseId);
