@@ -14,6 +14,7 @@ import {
   saveCanvasBlockPlacementSchema,
   savePageFrameCollectionSchema,
 } from '../validators/index.js';
+import { assertSourceProjectionNoteContentWriteAllowed } from '../services/sourceProjectionPolicy.js';
 
 const router = Router();
 
@@ -31,6 +32,9 @@ router.get('/by-note/:noteId', (req: AuthRequest, res: Response) => {
 
 router.put('/by-note/:noteId/page-frame-collection', (req: AuthRequest, res: Response) => {
   try {
+    assertSourceProjectionNoteContentWriteAllowed(
+      getDb(), req.userId!, String(req.params.noteId), 'update_page_frame_collection',
+    );
     const data = savePageFrameCollectionSchema.parse(req.body);
     res.json(savePageFrameCollection(
       getDb(),
@@ -46,6 +50,9 @@ router.put('/by-note/:noteId/page-frame-collection', (req: AuthRequest, res: Res
 
 router.put('/by-note/:noteId/block-placements/:placementId', (req: AuthRequest, res: Response) => {
   try {
+    assertSourceProjectionNoteContentWriteAllowed(
+      getDb(), req.userId!, String(req.params.noteId), 'update_canvas_block_placement',
+    );
     const data = saveCanvasBlockPlacementSchema.parse(req.body);
     res.json(saveBlockCanvasPlacement(
       getDb(),
@@ -62,6 +69,9 @@ router.put('/by-note/:noteId/block-placements/:placementId', (req: AuthRequest, 
 
 router.put('/by-note/:noteId/objects/:objectId', (req: AuthRequest, res: Response) => {
   try {
+    assertSourceProjectionNoteContentWriteAllowed(
+      getDb(), req.userId!, String(req.params.noteId), 'update_canvas_object',
+    );
     const data = saveCanvasObjectSchema.parse(req.body);
     res.json(saveCanvasObject(
       getDb(),
@@ -77,6 +87,9 @@ router.put('/by-note/:noteId/objects/:objectId', (req: AuthRequest, res: Respons
 });
 
 router.delete('/by-note/:noteId/objects/:objectId', (req: AuthRequest, res: Response) => {
+  assertSourceProjectionNoteContentWriteAllowed(
+    getDb(), req.userId!, String(req.params.noteId), 'delete_canvas_object',
+  );
   res.json(deleteCanvasObject(
     getDb(),
     req.userId!,

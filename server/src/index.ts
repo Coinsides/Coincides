@@ -61,6 +61,10 @@ import annotationTruthRoutes from './routes/annotationTruths.js';
 import purposeRoutes from './routes/purposes.js';
 import sourceRoutes from './routes/sources.js';
 import { sweepSourceStorage } from './services/sourceFileIntake.js';
+import {
+  resumeReceivedSourceMaterializations,
+  sweepSourceMaterializations,
+} from './services/sourceMaterialization.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 
@@ -72,6 +76,14 @@ const database = await initDb();
 const sourceSweep = sweepSourceStorage(database);
 if (sourceSweep.removed_temp_orphans || sourceSweep.recovered_staging || sourceSweep.removed_stale_staging) {
   console.log('Source storage startup sweep:', sourceSweep);
+}
+const materializationSweep = sweepSourceMaterializations(database);
+if (materializationSweep.interrupted_runs_failed || materializationSweep.orphan_projection_assets_removed) {
+  console.log('Source materialization startup sweep:', materializationSweep);
+}
+const resumedMaterializations = resumeReceivedSourceMaterializations(database);
+if (resumedMaterializations) {
+  console.log(`Scheduled ${resumedMaterializations} received Source materialization(s) after startup.`);
 }
 
 const app = express();

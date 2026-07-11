@@ -1,6 +1,7 @@
 import type Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 import { AppError } from '../middleware/errorHandler.js';
+import { legacyScannerBlockPredicate } from './sourceProjectionPolicy.js';
 import {
   getNoteBlockTemplate,
   inferNoteBlockTemplateMetadata,
@@ -694,7 +695,7 @@ export function getTemplateUsage(db: Database.Database, userId: string, template
   const rows = db.prepare(`
     SELECT metadata
     FROM note_blocks
-    WHERE user_id = ?
+    WHERE user_id = ? AND ${legacyScannerBlockPredicate()}
   `).all(userId) as Array<{ metadata: string | null }>;
 
   let runtimeReferenceCount = 0;
@@ -1012,7 +1013,7 @@ export function getTemplateCompatibilityReport(
 ): TemplateCompatibilityReport {
   seedSystemTemplateDefinitions(db, userId);
   const params: unknown[] = [userId];
-  let where = 'user_id = ?';
+  let where = `user_id = ? AND ${legacyScannerBlockPredicate()}`;
   if (filters.course_id) {
     where += ' AND course_id = ?';
     params.push(filters.course_id);

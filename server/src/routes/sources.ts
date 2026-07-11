@@ -14,6 +14,7 @@ import {
   precheckSourceHash,
   type SourceOriginEntryKind,
 } from '../services/sourceFileIntake.js';
+import { scheduleSourceMaterialization } from '../services/sourceMaterialization.js';
 
 const router = Router();
 
@@ -111,6 +112,22 @@ router.get('/', (req: AuthRequest, res: Response, next: NextFunction) => {
     next(error);
   }
 });
+
+function scheduleMaterialization(req: AuthRequest, res: Response, next: NextFunction): void {
+  try {
+    const result = scheduleSourceMaterialization(
+      getDb(),
+      req.userId!,
+      String(req.params.sourceId),
+    );
+    res.status(result.claimed ? 202 : 200).json(result);
+  } catch (error) {
+    next(error);
+  }
+}
+
+router.post('/:sourceId/materialize', scheduleMaterialization);
+router.post('/:sourceId/retry', scheduleMaterialization);
 
 router.get('/:sourceId', (req: AuthRequest, res: Response, next: NextFunction) => {
   try {

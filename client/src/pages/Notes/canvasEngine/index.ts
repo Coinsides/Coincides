@@ -20,6 +20,7 @@ export * from './hooks/useFloatingOverlayController';
 export * from './hooks/useLayoutDraftController';
 export * from './hooks/useLayoutInteractionController';
 export * from './hooks/useNoteCanvasDataAdapter';
+export * from './sourceProjectionPolicy';
 export * from './hooks/useNoteCanvasRuntimeController';
 export * from './hooks/usePlacementHistory';
 export * from './hooks/useRuntimeInteractionController';

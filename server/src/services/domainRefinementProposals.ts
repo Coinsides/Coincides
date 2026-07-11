@@ -1,6 +1,7 @@
 import type Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 import { AppError } from '../middleware/errorHandler.js';
+import { legacyScannerBlockPredicate } from './sourceProjectionPolicy.js';
 import {
   getDomainBlockSet,
   type DomainBlockSet,
@@ -232,7 +233,7 @@ function findAffectedNoteBlocks(
   courseId?: string,
 ) {
   const params: unknown[] = [userId];
-  let where = "user_id = ? AND status != 'trashed'";
+  let where = `user_id = ? AND status != 'trashed' AND ${legacyScannerBlockPredicate()}`;
   if (courseId) {
     where += ' AND course_id = ?';
     params.push(courseId);
@@ -829,7 +830,15 @@ function applyObjectReclassifications(
     let beforeSnapshot: Record<string, unknown> = {};
     let afterSnapshot: Record<string, unknown> = {};
     if (item.target_type === 'note_block') {
-      const row = db.prepare('SELECT course_id, metadata FROM note_blocks WHERE id = ? AND user_id = ?').get(item.target_id, userId) as any;
+      const row = db.prepare(`
+        SELECT course_id, metadata
+        FROM note_blocks
+        WHERE id = ? AND user_id = ? AND ${legacyScannerBlockPredicate()}
+      `).get(item.target_id, userId) as any;
+      if (!row) throw new AppError(409, 'Source projection blocks cannot be reclassified', {
+        code: 'source_projection_read_only',
+        operation: 'reclassify_note_block',
+      });
       beforeSnapshot = parseJson(row.metadata, {});
       afterSnapshot = metadataForNoteBlockClassification(beforeSnapshot, source, target, proposalId, recordId, mode, action);
       db.prepare(`

@@ -1,6 +1,7 @@
 import type Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 import { AppError } from '../middleware/errorHandler.js';
+import { legacyScannerBlockPredicate } from './sourceProjectionPolicy.js';
 import {
   getTemplateDefinition,
   legacyBlockTypeForRuntimeTemplate,
@@ -130,7 +131,7 @@ function findAffectedBlocks(
   courseId?: string,
 ): NoteBlockRow[] {
   const params: unknown[] = [userId];
-  let where = "user_id = ? AND status != 'trashed'";
+  let where = `user_id = ? AND status != 'trashed' AND ${legacyScannerBlockPredicate()}`;
   if (courseId) {
     where += ' AND course_id = ?';
     params.push(courseId);

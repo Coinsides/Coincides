@@ -17,6 +17,7 @@ import {
   ensureSourceProjectPlacement,
   findSourceRecordByContentHash,
 } from './sourceRecords.js';
+import { isSourceArtifactErrorRetryable } from './sourceMaterializationErrors.js';
 import { ensureHomeCourse } from './systemCourses.js';
 
 export const SOURCE_UPLOAD_MAX_BYTES = 50 * 1024 * 1024;
@@ -529,6 +530,8 @@ export function getSourceRecordDetail(
       projection_note_id: row.projection_note_id,
       error_code: row.error_code,
       error_message: row.error_message,
+      retryable: row.materialization_status === 'failed'
+        && isSourceArtifactErrorRetryable(row.error_code),
       started_at: row.started_at,
       completed_at: row.completed_at,
     },
@@ -581,6 +584,66 @@ export function getSourceBlob(
     mime_type: row.mime_type,
     filename: row.original_filename,
     byte_size: Number(row.byte_size),
+  };
+}
+
+export interface SourceMaterializationFile {
+  source_record_id: string;
+  source_file_id: string;
+  materialization_id: string;
+  user_id: string;
+  course_id: string;
+  display_name: string;
+  original_filename: string;
+  mime_type: string;
+  byte_size: number;
+  content_hash: string;
+  parser_key: string;
+  parser_version: string;
+  storage_key: string;
+  file_path: string;
+}
+
+export function getSourceMaterializationFile(
+  db: Database.Database,
+  userId: string,
+  sourceRecordId: string,
+  options: Pick<SourceStorageOptions, 'rootDir'> = {},
+): SourceMaterializationFile {
+  const row = getInternalSourceRow(db, userId, sourceRecordId);
+  if (row.storage_state !== 'ready') {
+    throw sourceError(409, 'blob_not_ready', 'Source original is not ready for materialization');
+  }
+  const filePath = resolveStorageKey(row.storage_key, options.rootDir);
+  if (!existsSync(filePath)) {
+    throw sourceError(404, 'blob_missing', 'Source original blob is missing');
+  }
+  const placement = db.prepare(`
+    SELECT spp.course_id
+    FROM source_project_placements spp
+    JOIN courses c ON c.id = spp.course_id AND c.user_id = spp.user_id
+    WHERE spp.source_record_id = ? AND spp.user_id = ?
+    ORDER BY spp.created_at ASC, spp.id ASC
+    LIMIT 1
+  `).get(sourceRecordId, userId) as { course_id: string } | undefined;
+  if (!placement) {
+    throw sourceError(409, 'source_without_placement', 'Source has no Project placement for its projection');
+  }
+  return {
+    source_record_id: row.id,
+    source_file_id: row.source_file_id,
+    materialization_id: row.materialization_id,
+    user_id: row.user_id,
+    course_id: placement.course_id,
+    display_name: row.display_name,
+    original_filename: row.original_filename,
+    mime_type: row.mime_type,
+    byte_size: Number(row.byte_size),
+    content_hash: row.content_hash,
+    parser_key: row.parser_key,
+    parser_version: row.parser_version,
+    storage_key: row.storage_key,
+    file_path: filePath,
   };
 }
 

@@ -1,6 +1,7 @@
 import type Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 import { AppError } from '../middleware/errorHandler.js';
+import { legacyScannerBlockPredicate } from './sourceProjectionPolicy.js';
 
 type SourceAnchorTargetType = 'note_block' | 'note_block_source' | 'evidence_set' | 'evidence_item' | 'proposal';
 
@@ -208,7 +209,11 @@ function insertOrReuseAnchor(
 }
 
 function noteBlockSourceCandidates(db: Database.Database, userId: string, input: GenerateSourceAnchorsInput): AnchorCandidate[] {
-  const conditions = ['nb.user_id = ?', 'nb.course_id = ?'];
+  const conditions = [
+    'nb.user_id = ?',
+    'nb.course_id = ?',
+    legacyScannerBlockPredicate('nb'),
+  ];
   const params: unknown[] = [userId, input.course_id];
   if (input.target_type === 'note_block' && input.target_id) {
     conditions.push('nb.id = ?');

@@ -88,6 +88,7 @@ import {
 import {
   normalizePageFrameCollection,
 } from '../pageFrameCollectionService';
+import { sourceProjectionPolicyForNote } from '../sourceProjectionPolicy';
 import {
   createDefaultDocumentTypographyProfile,
   typographyProfileFromMetadata,
@@ -338,6 +339,17 @@ export function useNoteCanvasDataAdapter({
     noteRef.current = note;
   }, [note]);
 
+  const sourceProjectionPolicy = useMemo(
+    () => sourceProjectionPolicyForNote(note),
+    [note],
+  );
+
+  const allowSourceContentMutation = useCallback(() => {
+    if (!sourceProjectionPolicy.contentReadOnly) return true;
+    addToast('info', 'Source projection content is read-only');
+    return false;
+  }, [addToast, sourceProjectionPolicy.contentReadOnly]);
+
   const sortedBlocks = useMemo(
     () => [...blocks].sort((a, b) => a.order_index - b.order_index),
     [blocks],
@@ -460,6 +472,7 @@ export function useNoteCanvasDataAdapter({
   const saveTitle = useCallback(async () => {
     const nextTitle = titleDraft.trim();
     if (!note || !nextTitle || nextTitle === note.title) return;
+    if (!allowSourceContentMutation()) return;
     try {
       const res = await api.put(`/notes/${note.id}`, { title: nextTitle });
       setNote(res.data);
@@ -469,7 +482,7 @@ export function useNoteCanvasDataAdapter({
       console.error('Failed to rename note:', err);
       addToast('error', 'Failed to rename note');
     }
-  }, [note, titleDraft, addToast]);
+  }, [note, titleDraft, addToast, allowSourceContentMutation]);
 
   const saveAnnotationTruths = useCallback(async (nextAnnotations: AnnotationTruthV1[]) => {
     const currentNote = noteRef.current || note;
@@ -573,6 +586,7 @@ export function useNoteCanvasDataAdapter({
   const savePageFrameCollection = useCallback(async (nextCollection: PageFrameCollectionModel) => {
     const currentNote = noteRef.current || note;
     if (!currentNote) return;
+    if (!allowSourceContentMutation()) return;
     const previousCollection = pageFrameCollection;
     const normalizedCollection = normalizePageFrameCollection(nextCollection);
     const saveGeneration = pageFrameSaveGenerationRef.current + 1;
@@ -591,7 +605,7 @@ export function useNoteCanvasDataAdapter({
       if (pageFrameSaveGenerationRef.current !== saveGeneration) return;
       setPageFrameCollection(previousCollection);
     }
-  }, [addToast, note, pageFrameCollection]);
+  }, [addToast, allowSourceContentMutation, note, pageFrameCollection]);
 
   const saveDocumentTypographyProfile = useCallback(async (nextProfile: DocumentTypographyProfile) => {
     const currentNote = noteRef.current || note;
@@ -676,6 +690,7 @@ export function useNoteCanvasDataAdapter({
     } = {},
   ): Promise<NoteBlock | null> => {
     if (!note) return null;
+    if (!allowSourceContentMutation()) return null;
     const body = text.trimEnd();
     try {
       const metadata = {
@@ -713,13 +728,14 @@ export function useNoteCanvasDataAdapter({
       addToast('error', 'Failed to create block');
       return null;
     }
-  }, [note, addToast]);
+  }, [note, addToast, allowSourceContentMutation]);
 
   const saveBlock = useCallback(async (
     block: NoteBlock,
     text: string,
     options: { silent?: boolean; fieldValues?: FieldValueRecord; textFlow?: TextBlockContentV1 } = {},
   ): Promise<NoteBlock | null> => {
+    if (!allowSourceContentMutation()) return null;
     const textFlowDraft = options.textFlow || blockTextFlowDrafts[block.id];
     const projectedTextFlow = textFlowDraft
       ? projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: textFlowDraft }, text).plain_text
@@ -760,7 +776,7 @@ export function useNoteCanvasDataAdapter({
     } finally {
       setSavingBlockId(null);
     }
-  }, [addToast, blockFieldDrafts, blockTextFlowDrafts]);
+  }, [addToast, allowSourceContentMutation, blockFieldDrafts, blockTextFlowDrafts]);
 
   const applyTemplateToBlock = useCallback(async (
     block: NoteBlock,
@@ -772,6 +788,7 @@ export function useNoteCanvasDataAdapter({
       metadataPatch?: Record<string, unknown>;
     } = {},
   ) => {
+    if (!allowSourceContentMutation()) return null;
     const nextText = text.trimEnd();
     setSavingBlockId(block.id);
     try {
@@ -800,10 +817,11 @@ export function useNoteCanvasDataAdapter({
     } finally {
       setSavingBlockId(null);
     }
-  }, [addToast]);
+  }, [addToast, allowSourceContentMutation]);
 
   const persistBlockLayout = useCallback(async (block: NoteBlock, layout: BlockBoxLayout) => {
     if (!note) return;
+    if (!allowSourceContentMutation()) return;
     try {
       const savedLayout = await saveBlockCanvasPlacementForNote({
         noteId: note.id,
@@ -820,7 +838,7 @@ export function useNoteCanvasDataAdapter({
       console.error('Failed to save block layout:', err);
       addToast('error', 'Failed to save block layout');
     }
-  }, [note, addToast, clearLayoutDraftForBlock]);
+  }, [note, addToast, allowSourceContentMutation, clearLayoutDraftForBlock]);
 
   const updateBlockPolicy = useCallback(async (
     block: NoteBlock,
@@ -848,6 +866,7 @@ export function useNoteCanvasDataAdapter({
     blockId: string,
     options: { silent?: boolean } = {},
   ): Promise<boolean> => {
+    if (!allowSourceContentMutation()) return false;
     try {
       await api.delete(`/note-blocks/${blockId}`);
       setBlocks((current) => current.filter((block) => block.id !== blockId));
@@ -873,7 +892,7 @@ export function useNoteCanvasDataAdapter({
       if (!options.silent) addToast('error', 'Failed to trash block');
       return false;
     }
-  }, [addToast]);
+  }, [addToast, allowSourceContentMutation]);
 
   const forgetBlockLocally = useCallback((blockId: string): void => {
     setBlocks((current) => current.filter((block) => block.id !== blockId));
@@ -898,6 +917,7 @@ export function useNoteCanvasDataAdapter({
     blockId: string,
     options: { silent?: boolean; metadataPatch?: Record<string, unknown> } = {},
   ): Promise<NoteBlock | null> => {
+    if (!allowSourceContentMutation()) return null;
     try {
       const payload: { status: 'active'; metadata?: Record<string, unknown> } = { status: 'active' };
       if (options.metadataPatch) payload.metadata = options.metadataPatch;
@@ -928,12 +948,13 @@ export function useNoteCanvasDataAdapter({
       if (!options.silent) addToast('error', 'Failed to restore block');
       return null;
     }
-  }, [addToast]);
+  }, [addToast, allowSourceContentMutation]);
 
   const restoreBlock = useCallback(async (
     block: NoteBlock,
     options: { silent?: boolean } = {},
   ): Promise<NoteBlock | null> => {
+    if (!allowSourceContentMutation()) return null;
     try {
       const res = await api.put(`/note-blocks/${block.id}`, { status: 'active' });
       const restored = hydrateClientBlock({
@@ -966,7 +987,7 @@ export function useNoteCanvasDataAdapter({
       if (!options.silent) addToast('error', 'Failed to restore block');
       return null;
     }
-  }, [addToast]);
+  }, [addToast, allowSourceContentMutation]);
 
   const persistCanvasObject = useCallback(async ({
     canvasObject,
@@ -979,6 +1000,7 @@ export function useNoteCanvasDataAdapter({
   }: PersistCanvasObjectInput): Promise<boolean> => {
     const currentNote = noteRef.current || note;
     if (!currentNote) return false;
+    if (!allowSourceContentMutation()) return false;
     const previousObjects = persistedCanvasObjects;
     const previousPlacements = persistedCanvasPlacements;
     const previousMounts = persistedContentMounts;
@@ -1061,6 +1083,7 @@ export function useNoteCanvasDataAdapter({
     }
   }, [
     addToast,
+    allowSourceContentMutation,
     note,
     persistedCanvasObjects,
     persistedCanvasPlacements,
@@ -1073,6 +1096,7 @@ export function useNoteCanvasDataAdapter({
   const deleteCanvasObject = useCallback(async (objectId: string): Promise<boolean> => {
     const currentNote = noteRef.current || note;
     if (!currentNote) return false;
+    if (!allowSourceContentMutation()) return false;
     const previousObjects = persistedCanvasObjects;
     const previousPlacements = persistedCanvasPlacements;
     const previousMounts = persistedContentMounts;
@@ -1114,6 +1138,7 @@ export function useNoteCanvasDataAdapter({
     }
   }, [
     addToast,
+    allowSourceContentMutation,
     note,
     persistedCanvasObjects,
     persistedCanvasPlacements,
@@ -1125,6 +1150,7 @@ export function useNoteCanvasDataAdapter({
 
   const moveBlock = useCallback(async (placementId: string, direction: -1 | 1) => {
     if (!note) return;
+    if (!allowSourceContentMutation()) return;
     const current = sortedBlocks.findIndex((block) => block.placement_id === placementId);
     const target = current + direction;
     if (current < 0 || target < 0 || target >= sortedBlocks.length) return;
@@ -1143,7 +1169,7 @@ export function useNoteCanvasDataAdapter({
       console.error('Failed to reorder blocks:', err);
       addToast('error', 'Failed to reorder blocks');
     }
-  }, [note, sortedBlocks, addToast]);
+  }, [note, sortedBlocks, addToast, allowSourceContentMutation]);
 
   const handleViewSource = useCallback(async (anchorId: string) => {
     setSourceJumpBusy(anchorId);
@@ -1160,6 +1186,7 @@ export function useNoteCanvasDataAdapter({
 
   return {
     note,
+    sourceProjectionPolicy,
     blocks,
     sortedBlocks,
     loading,

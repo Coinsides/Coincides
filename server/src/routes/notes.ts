@@ -12,6 +12,10 @@ import {
   updateNoteSchema,
 } from '../validators/index.js';
 import { mergeRuntimeNoteBlockTemplateMetadata } from '../services/templateDefinitions.js';
+import {
+  assertSourceProjectionNoteContentWriteAllowed,
+  assertSourceProjectionNoteUpdateAllowed,
+} from '../services/sourceProjectionPolicy.js';
 
 const router = Router();
 const LEGACY_NOTE_LAYOUT_KEY = 'better_notebook_layout';
@@ -43,10 +47,10 @@ function getOwnedCourse(courseId: string, userId: string): { id: string } {
   return course;
 }
 
-function getOwnedNote(noteId: string, userId: string): { id: string; course_id: string } {
+function getOwnedNote(noteId: string, userId: string): { id: string; course_id: string; note_class: string } {
   const note = getDb()
-    .prepare('SELECT id, course_id FROM notes WHERE id = ? AND user_id = ?')
-    .get(noteId, userId) as { id: string; course_id: string } | undefined;
+    .prepare('SELECT id, course_id, note_class FROM notes WHERE id = ? AND user_id = ?')
+    .get(noteId, userId) as { id: string; course_id: string; note_class: string } | undefined;
   if (!note) throw new AppError(404, 'Note not found');
   return note;
 }
@@ -156,6 +160,7 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     const noteId = req.params.id as string;
     getOwnedNote(noteId, req.userId!);
     const data = updateNoteSchema.parse(req.body);
+    assertSourceProjectionNoteUpdateAllowed(getDb(), req.userId!, noteId, data);
     const fields: string[] = [];
     const values: unknown[] = [];
 
@@ -193,6 +198,7 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
 router.delete('/:id', (req: AuthRequest, res: Response) => {
   const noteId = req.params.id as string;
   getOwnedNote(noteId, req.userId!);
+  assertSourceProjectionNoteContentWriteAllowed(getDb(), req.userId!, noteId, 'delete_note');
   const now = new Date().toISOString();
   getDb()
     .prepare("UPDATE notes SET status = 'trashed', trashed_at = ?, updated_at = ? WHERE id = ? AND user_id = ?")
@@ -267,6 +273,7 @@ router.post('/:id/blocks', (req: AuthRequest, res: Response) => {
   try {
     const noteId = req.params.id as string;
     const note = getOwnedNote(noteId, req.userId!);
+    assertSourceProjectionNoteContentWriteAllowed(getDb(), req.userId!, noteId, 'create_note_block');
     const data = createNoteBlockSchema.parse(req.body);
     const db = getDb();
     const id = uuidv4();
@@ -407,6 +414,7 @@ router.put('/:id/blocks/reorder', (req: AuthRequest, res: Response) => {
   try {
     const noteId = req.params.id as string;
     const note = getOwnedNote(noteId, req.userId!);
+    assertSourceProjectionNoteContentWriteAllowed(getDb(), req.userId!, noteId, 'reorder_note_blocks');
     const data = reorderNoteBlocksSchema.parse(req.body);
     const db = getDb();
     const now = new Date().toISOString();

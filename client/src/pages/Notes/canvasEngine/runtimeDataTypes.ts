@@ -4,6 +4,8 @@ export interface Note {
   title: string;
   description: string | null;
   status: string;
+  note_class?: 'user' | 'source_projection' | 'system' | string;
+  source_kind?: 'manual' | 'source_projection' | 'system' | string;
   metadata?: Record<string, unknown>;
 }
 
@@ -400,5 +402,6 @@ export interface NoteBlock {
   plain_text: string | null;
   metadata: Record<string, unknown>;
   order_index: number;
+  source_kind?: 'manual' | 'source_projection' | 'system' | string;
   source_references: SourceReference[];
 }

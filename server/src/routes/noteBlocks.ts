@@ -9,6 +9,7 @@ import {
   assertNoteBlockStatusChangeAllowed,
   restoreNoteBlockForCanvasLifecycle,
 } from '../services/canvasObjects.js';
+import { assertSourceProjectionBlockContentWriteAllowed } from '../services/sourceProjectionPolicy.js';
 
 const router = Router();
 
@@ -25,10 +26,10 @@ function parseJson<T>(value: string | null | undefined, fallback: T): T {
   }
 }
 
-function getOwnedBlock(blockId: string, userId: string): { id: string; course_id: string; block_type: string; metadata: string } {
+function getOwnedBlock(blockId: string, userId: string): { id: string; course_id: string; block_type: string; metadata: string; source_kind: string } {
   const block = getDb()
-    .prepare('SELECT id, course_id, block_type, metadata FROM note_blocks WHERE id = ? AND user_id = ?')
-    .get(blockId, userId) as { id: string; course_id: string; block_type: string; metadata: string } | undefined;
+    .prepare('SELECT id, course_id, block_type, metadata, source_kind FROM note_blocks WHERE id = ? AND user_id = ?')
+    .get(blockId, userId) as { id: string; course_id: string; block_type: string; metadata: string; source_kind: string } | undefined;
   if (!block) throw new AppError(404, 'Note block not found');
   return block;
 }
@@ -54,6 +55,7 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
   try {
     const blockId = req.params.id as string;
     const currentBlock = getOwnedBlock(blockId, req.userId!);
+    assertSourceProjectionBlockContentWriteAllowed(getDb(), req.userId!, blockId, 'update_note_block');
     const data = updateNoteBlockSchema.parse(req.body);
     if (data.status && data.status !== 'active') {
       assertNoteBlockStatusChangeAllowed(getDb(), req.userId!, blockId, data.status);
@@ -127,6 +129,7 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
 router.delete('/:id', (req: AuthRequest, res: Response) => {
   const blockId = req.params.id as string;
   getOwnedBlock(blockId, req.userId!);
+  assertSourceProjectionBlockContentWriteAllowed(getDb(), req.userId!, blockId, 'delete_note_block');
   assertNoteBlockStatusChangeAllowed(getDb(), req.userId!, blockId, 'trashed');
   const now = new Date().toISOString();
   getDb()
