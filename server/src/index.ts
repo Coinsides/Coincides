@@ -59,6 +59,8 @@ import canvasObjectRoutes from './routes/canvasObjects.js';
 import canvasAssetRoutes from './routes/canvasAssets.js';
 import annotationTruthRoutes from './routes/annotationTruths.js';
 import purposeRoutes from './routes/purposes.js';
+import sourceRoutes from './routes/sources.js';
+import { sweepSourceStorage } from './services/sourceFileIntake.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 
@@ -66,7 +68,11 @@ const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 validateConfig();
 
 // Initialize database (async — runs migrations)
-await initDb();
+const database = await initDb();
+const sourceSweep = sweepSourceStorage(database);
+if (sourceSweep.removed_temp_orphans || sourceSweep.recovered_staging || sourceSweep.removed_stale_staging) {
+  console.log('Source storage startup sweep:', sourceSweep);
+}
 
 const app = express();
 
@@ -131,6 +137,7 @@ app.use('/api/canvas-objects', authMiddleware, canvasObjectRoutes);
 app.use('/api/canvas-assets', authMiddleware, canvasAssetRoutes);
 app.use('/api/annotation-truths', authMiddleware, annotationTruthRoutes);
 app.use('/api/purposes', authMiddleware, purposeRoutes);
+app.use('/api/sources', authMiddleware, sourceRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

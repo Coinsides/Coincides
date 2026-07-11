@@ -64,6 +64,7 @@ interface CreateSourceIdentityFloorInput {
   origin_entry_kind?: OriginEntryKind;
   metadata?: Record<string, unknown>;
   file: {
+    id?: string;
     original_filename: string;
     storage_key: string;
     storage_state?: StorageState;
@@ -168,7 +169,7 @@ export function createSourceIdentityFloor(
 ) {
   const course = ownedCourse(db, userId, input.course_id);
   const sourceRecordId = uuidv4();
-  const sourceFileId = uuidv4();
+  const sourceFileId = input.file.id || uuidv4();
   const materializationId = uuidv4();
   const placementId = uuidv4();
   const uploadedAt = input.file.uploaded_at || new Date().toISOString();
