@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(Agent 入口)
-> **日期 (Updated)**: 2026-06-27
+> **日期 (Updated)**: 2026-07-11
 > **权威 (Authoritative)**: 是(作为"该看哪里"的路由);具体事实以各来源为准
 > **取代 (Supersedes)**: —
 > **被取代 (Superseded by)**: —
@@ -29,17 +29,19 @@
 
 - **主线分支**:`codex/v2-bn-canvas-engine`(即 "Better Notebook" 线)。这是进度最快、且真正的主线。
 - **版本号体系**:`V2.BN.x`。旧的 `v2.0–v2.5.6` 已是**已关闭的工程地基路线图**(`Coincides-Roadmap.md`),其部分产品哲学(如 block-first)已过时。
-- **当前前沿**:`V2.BN.8.11 Structured Object Family`(自研 canvas 引擎;shape / sticky / visual connector / image 已落地,下一步 table)。
+- **当前前沿**:`V2.BN.10.2 File Intake And Storage Lifecycle`。V2.BN.8 Canvas Engine 已封版，V2.BN.9 Purpose Foundation 已完成，V2.BN.10.1 Source Identity And Placement Floor 已于 2026-07-11 工程收口。
 - 路线图:`docs/Coincides-Better-Notebook-Roadmap.md`。
 
 ## 4. 四大支柱与当前状态(摘要;**权威细节见 `current-state/`**)
 
 依赖顺序严格,后者未到位前不动:
 
-1. **TextFlow** —— 内容真相。核心可用;Typography(字体/字号/行距)未定,未冻结。
-2. **ContentGroup** —— 知识结构真相。核心实体层(ContentGroup / GroupFolder / Member / Petal / Fragment)已稳定到可支撑投影工作(8.7 成果);projection / reuse UI / Source 集成仍 `deferred`。
-3. **Canvas Engine** —— 空间/布局真相。**进行中**,自研最小混合引擎(见 ADR-0001)。
+1. **TextFlow** —— 内容真相。核心可用，Typography 基线已在 V2.BN.8.10 落地；完整契约仍未冻结。
+2. **ContentGroup** —— 知识结构真相。核心实体层(ContentGroup / GroupFolder / Member / Petal / Fragment)已稳定；projection / reuse UI / Source 完整集成顺延到 Source 与 Relation 地基之后。
+3. **Canvas Engine** —— 空间/布局真相。V2.BN.8 自研最小混合引擎与普通对象家族已工程封版(见 ADR-0001)，后续成熟度工作按路线图继续。
 4. **Agent + Graph Database** —— **未开始**,前三支柱稳定前不碰。
+
+当前横切地基：**Source**。V2.BN.10.1 已建立四层身份脊柱与 Home / receipt 接缝；文件 intake、解析、投影、删除补偿和 UI 均尚未完成，以 V2.BN.10 后续纵切为准。
 
 ## 5. 当前生效的决策 (active ADR)
 

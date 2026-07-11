@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-07-05
+> **日期 (Updated)**: 2026-07-11
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/brainstorm`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 147 份文档。
+共 150 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -159,3 +159,6 @@
 | [产品完善/会议记录/2026-06-28-Better-Notebook-ContentGroup-Relation-Philosophy-And-Source-Ingestion-Meeting-Notes.md](产品完善/会议记录/2026-06-28-Better-Notebook-ContentGroup-Relation-Philosophy-And-Source-Ingestion-Meeting-Notes.md) | 2026-06-28 Better Notebook：ContentGroup / Relation 哲学深化 + 文… | `archived` | 2026-06-28 | — |
 | [产品完善/会议记录/2026-07-02-Better-Notebook-Annotation-Hierarchy-Deprecation-And-AI-Note-Assembly-Meeting-Notes.md](产品完善/会议记录/2026-07-02-Better-Notebook-Annotation-Hierarchy-Deprecation-And-AI-Note-Assembly-Meeting-Notes.md) | 2026-07-02 Better Notebook：annotation 父子层级去留 + AI 笔记装配管线（锚定… | `archived` | 2026-07-02 | — |
 | [产品完善/会议记录/2026-07-04-Better-Notebook-Source-Reconstruction-Current-State-And-Pluggable-Design-Meeting-Notes.md](产品完善/会议记录/2026-07-04-Better-Notebook-Source-Reconstruction-Current-State-And-Pluggable-Design-Meeting-Notes.md) | 2026-07-04 Better Notebook：Source 重建 —— 现状 + 三层契约 + 可插拔设计（面… | `draft` | 2026-07-04 | — |
+| [产品完善/会议记录/2026-07-05-Better-Notebook-V9-Sequencing-And-Source-Definition-Meeting-Notes.md](产品完善/会议记录/2026-07-05-Better-Notebook-V9-Sequencing-And-Source-Definition-Meeting-Notes.md) | 2026-07-05 Better Notebook：V9 封版后的排序决定 + Source 该怎么定义（会议记录） | `draft` | 2026-07-05 | — |
+| [产品完善/会议记录/2026-07-10-Better-Notebook-Source-Floor-Thinking-Extension-And-V10-Design-Review-Meeting-Notes.md](产品完善/会议记录/2026-07-10-Better-Notebook-Source-Floor-Thinking-Extension-And-V10-Design-Review-Meeting-Notes.md) | 2026-07-10 Better Notebook：Source Floor、思考延伸与 V10 设计审视（会议记录） | `draft` | 2026-07-10 | — |
+| [产品完善/会议记录/2026-07-11-Better-Notebook-Post-V10-Arc-Operation-Flows-And-Manual-System-Meeting-Notes.md](产品完善/会议记录/2026-07-11-Better-Notebook-Post-V10-Arc-Operation-Flows-And-Manual-System-Meeting-Notes.md) | 2026-07-11 Better Notebook：V10 后弧线、操作流与说明书体系（会议记录） | `draft` | 2026-07-11 | — |
