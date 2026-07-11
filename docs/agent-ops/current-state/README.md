@@ -15,11 +15,11 @@ Read before any non-trivial work, together with `PRODUCT.md`, `../DOCUMENTATION-
 
 ## 1. Main line & version
 
-> **2026-07-11 authoritative override:** V2.BN.8 Canvas Engine is closed, V2.BN.9 Purpose Foundation is complete, and V2.BN.10 Source is active. V2.BN.10.1 Source Identity And Placement Floor is engineering-complete; the next active subversion is **V2.BN.10.2 File Intake And Storage Lifecycle**. Older lines in this file that route directly from 8.11 to ContentGroup projection are stale.
+> **2026-07-11 authoritative override:** V2.BN.8 Canvas Engine is closed, V2.BN.9 Purpose Foundation is complete, and V2.BN.10 Source is active. V2.BN.10.1 Source Identity Floor and V2.BN.10.2 File Intake Lifecycle are engineering-complete; the next active subversion is **V2.BN.10.3 Parser And Atomic Materialization**. Older lines in this file that route directly from 8.11 to ContentGroup projection are stale.
 
 - **Main-line branch**: `codex/v2-bn-canvas-engine` ("Better Notebook" line). Fastest-moving and the real main line — not a side branch, not "finish-then-merge-back".
 - **Version system**: `V2.BN.x`. The old `v2.0–v2.5.6` line is a **closed engineering-foundation roadmap** (`docs/Coincides-Roadmap.md`); some of its product philosophy is outdated (notably **block-first**, now replaced by **TextFlow-first / ContentGroup-aware**).
-- **Current frontier**: `V2.BN.10.2 File Intake And Storage Lifecycle`（10.1 已建立 Source identity / file / materialization / Project placement 四层地板；尚未开放上传、解析、投影或 Source UI）。
+- **Current frontier**: `V2.BN.10.3 Parser And Atomic Materialization`（10.1 已建立四层 Source 地板；10.2 已闭合文件 intake、受管 blob、去重与故障补偿；尚未执行解析、SourceArtifact 或原子投影）。
 - Roadmap: `docs/Coincides-Better-Notebook-Roadmap.md`.
 
 ## 2. Tech snapshot
@@ -64,7 +64,8 @@ Strict dependency order. **Do not work on a later pillar before the earlier ones
 ### Cross-cutting foundation — Source
 - **V2.BN.10.1 complete (2026-07-11)**: migration 045 adds `source_records / source_files / source_materializations / source_project_placements`; Source identity is global, Project is a placement lens, and Origin is a retained receipt.
 - **Identity seams complete**: per-user hash uniqueness, placement uniqueness, one-run v1 rule, Home system course identity, `notes.note_class`, receipt columns, canvas-backing system classification, and `stale` status roundtrip coverage.
-- **Not yet built**: file intake/copy-in, parser execution, atomic projection publication, SourceProjection guards/UI, Course-delete migration policy, Source hard-delete compensation, and legacy Documents migration.
+- **V2.BN.10.2 complete (2026-07-11)**: managed multipart temp intake, format/magic validation, server-authoritative SHA-256, staging-to-ready blob commit, hash deduplication with cross-Project placement, safe list/detail/blob endpoints, typed missing-blob diagnostics, and startup reconciliation sweep.
+- **Not yet built**: parser execution, SourceArtifact, atomic projection publication, SourceProjection guards/UI, Course-delete migration policy, Source hard-delete compensation, and legacy Documents migration.
 
 ### Pillar 4 — Agent + Graph Database
 - **Not started** on the v2/BN line. The embedding pipeline is intentionally disconnected; relation runtime / GraphRAG are not yet timely.
@@ -72,7 +73,7 @@ Strict dependency order. **Do not work on a later pillar before the earlier ones
 
 ## 4. Watch list (known open items, not necessarily defects)
 
-- **Source lifecycle** — 10.1 is only the identity floor; file/DB crash compensation and materialization atomicity are the next load-bearing gates.
+- **Source lifecycle** — 10.2 closes file/DB crash compensation; parser claim/retry, SourceArtifact truth and atomic materialization publication are the next load-bearing gates.
 - **TextFlow Typography** — baseline exists, but rich inline style truth and measured pagination remain unfrozen.
 - **Contract layer** — most `docs/contracts/` files are `draft` / `deferred`; do not treat them as authoritative until marked `frozen`.
 - **UI-mode growth** (Page / Canvas / ContentGroup / Gallery / Rail / Editor) — growing but currently controlled.
