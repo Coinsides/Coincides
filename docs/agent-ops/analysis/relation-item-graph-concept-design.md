@@ -121,7 +121,7 @@ CREATE TABLE relation_assessments (        -- AI 署名判定(人判永不代签
 ## 5. 遗产处置(核查活性盘点后的定案)
 
 - **v2.4.4 三表全 DEAD(实证:live DB 各 0 行,learning_canvases 也 0)**:object_relations(唯一写者=legacy Courses 学习画布页)/canvas_edges(同;**BN 画布的视觉线不在它上面**——现役视觉线=canvas_objects kind='visual_connector'+extensions〔040〕,v0 的"保留视觉真相"预案作废)/relation_layers(僵尸:READ 路径自动播种 5 个默认层——**只删表不下架端点会复活或崩页**)。**清场 = 下架 legacy 学习画布代码(路由+页面区块+服务)+ 落三表** —— 需 Henry 确认 legacy Courses 学习画布页(/projects 下)可整体下架(判断点 c)。
-- **★花瓣退役 = 专项代码手术,非清数据(核查 HIGH)**:活写入环仍在——BN 画布每次存 CG 都 delete+reinsert 花瓣行(useNoteCanvasDataAdapter:519→contentGroups.ts:902)、petals_json 双写(:888)、SingleContentGroupEditor 花瓣改名 UI 在路由上(App.tsx:101)。**手术顺序**:client 模型剥离(contentGroupService 花瓣 CRUD ~1479-1758)→ server 路径摘除(replaceContentGroupFragmentsAndPetals/prune)→ 046 落表。只删数据会被下一次 CG 保存原样重写。
+- **★花瓣退役 = 专项代码手术,非清数据(核查 HIGH)**:活写入环仍在——BN 画布每次存 CG 都 delete+reinsert 花瓣行(useNoteCanvasDataAdapter:519→contentGroups.ts:902)、petals_json 双写(:888)、SingleContentGroupEditor 花瓣改名 UI 在路由上(App.tsx:101)。**手术顺序**:client 模型剥离(contentGroupService 花瓣 CRUD ~1479-1758)→ server 路径摘除(replaceContentGroupFragmentsAndPetals/prune)→ 047 落表。只删数据会被下一次 CG 保存原样重写。
 - **顺手清尸**:contentGroupRelationProjectionService.ts(零消费者,dead code)。
 - **词汇表**:item_anchors ≠ source_anchors(后者=V10 已冻结的 legacy,V11 不碰)。
 - **生命周期注册表对表(与 10.5 的顺序依赖)**:V10 §4.5 的注册表尚未建成(10.5 交付)——V11 落地时注册:items=preserve(origin SET NULL);item_snapshots/item_anchors/relations/relation_assessments=user-scoped 无 course 列。谁后落地谁负责补登记。
