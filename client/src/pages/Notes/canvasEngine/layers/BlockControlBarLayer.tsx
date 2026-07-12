@@ -28,6 +28,7 @@ interface BlockControlBarLayerProps {
   aiVisibility: AIVisibility;
   open: boolean;
   saving: boolean;
+  contentReadOnly: boolean;
   onBeginMove: (event: ReactPointerEvent<HTMLElement>) => void;
   onToggleExportRole: () => void;
   onToggleAIVisibility: () => void;
@@ -43,6 +44,7 @@ export function BlockControlBarLayer({
   aiVisibility,
   open,
   saving,
+  contentReadOnly,
   onBeginMove,
   onToggleExportRole,
   onToggleAIVisibility,
@@ -89,6 +91,7 @@ export function BlockControlBarLayer({
           <button
             className={`${styles.iconBtn} ${styles.dragHandle}`}
             onPointerDown={onBeginMove}
+            disabled={contentReadOnly}
             title="Move block"
             aria-label="Move block"
           >
@@ -113,7 +116,7 @@ export function BlockControlBarLayer({
           <button
             className={styles.iconBtn}
             onClick={onSaveBlock}
-            disabled={saving}
+            disabled={saving || contentReadOnly}
             title="Save block"
           >
             <Save size={16} />
@@ -131,6 +134,7 @@ export function BlockControlBarLayer({
           <button
             className={`${styles.iconBtn} ${styles.dangerBtn}`}
             onClick={onTrash}
+            disabled={contentReadOnly}
             title="Move to trash"
           >
             <Trash2 size={16} />

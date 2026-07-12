@@ -254,7 +254,7 @@ function assertTempPath(tempPath: string, rootDir?: string): string {
   return resolvedTemp;
 }
 
-function resolveStorageKey(storageKey: string, rootDir?: string): string {
+export function resolveSourceStorageKey(storageKey: string, rootDir?: string): string {
   const root = getSourceBlobRoot(rootDir);
   const filePath = resolve(root, storageKey);
   if (!storageKey || isAbsolute(storageKey) || !isWithin(root, filePath) || filePath === root) {
@@ -480,8 +480,13 @@ export function getSourceRecordDetail(
 ) {
   const row = getInternalSourceRow(db, userId, sourceRecordId);
   const definition = definitionForStoredRow(row);
-  const blobPath = resolveStorageKey(row.storage_key, options.rootDir);
+  const blobPath = resolveSourceStorageKey(row.storage_key, options.rootDir);
   const blobAvailable = row.storage_state === 'ready' && existsSync(blobPath);
+  const projectionAvailable = Boolean(row.projection_note_id && db.prepare(`
+    SELECT 1
+    FROM notes
+    WHERE id = ? AND user_id = ? AND note_class = 'source_projection'
+  `).get(row.projection_note_id, userId));
   const placements = db.prepare(`
     SELECT spp.id, spp.course_id, c.name AS course_name, spp.created_at
     FROM source_project_placements spp
@@ -528,6 +533,7 @@ export function getSourceRecordDetail(
       status: row.materialization_status,
       attempt_count: Number(row.attempt_count),
       projection_note_id: row.projection_note_id,
+      projection_available: projectionAvailable,
       error_code: row.error_code,
       error_message: row.error_message,
       retryable: row.materialization_status === 'failed'
@@ -575,7 +581,7 @@ export function getSourceBlob(
   if (row.storage_state !== 'ready') {
     throw sourceError(409, 'blob_not_ready', 'Source original is not ready yet');
   }
-  const filePath = resolveStorageKey(row.storage_key, options.rootDir);
+  const filePath = resolveSourceStorageKey(row.storage_key, options.rootDir);
   if (!existsSync(filePath)) {
     throw sourceError(404, 'blob_missing', 'Source original blob is missing');
   }
@@ -614,7 +620,7 @@ export function getSourceMaterializationFile(
   if (row.storage_state !== 'ready') {
     throw sourceError(409, 'blob_not_ready', 'Source original is not ready for materialization');
   }
-  const filePath = resolveStorageKey(row.storage_key, options.rootDir);
+  const filePath = resolveSourceStorageKey(row.storage_key, options.rootDir);
   if (!existsSync(filePath)) {
     throw sourceError(404, 'blob_missing', 'Source original blob is missing');
   }
@@ -691,7 +697,7 @@ function finalizeDuplicate(
   inspected: InspectedSourceTempFile,
   options: SourceStorageOptions,
 ) {
-  const finalPath = resolveStorageKey(duplicate.storage_key, options.rootDir);
+  const finalPath = resolveSourceStorageKey(duplicate.storage_key, options.rootDir);
   const now = options.now || new Date();
   if (duplicate.storage_state === 'staging') {
     if (existsSync(finalPath)) {
@@ -765,7 +771,7 @@ export async function intakeSourceTempFile(
 
   const sourceFileId = uuidv4();
   const storageKey = `${userId}/${sourceFileId}${inspected.extension}`;
-  const finalPath = resolveStorageKey(storageKey, options.rootDir);
+  const finalPath = resolveSourceStorageKey(storageKey, options.rootDir);
   mkdirSync(dirname(finalPath), { recursive: true });
 
   let sourceRecordId: string | null = null;
@@ -902,7 +908,7 @@ export function sweepSourceStorage(
   }>;
 
   for (const row of stagingRows) {
-    const finalPath = resolveStorageKey(row.storage_key, options.rootDir);
+    const finalPath = resolveSourceStorageKey(row.storage_key, options.rootDir);
     if (existsSync(finalPath)) {
       db.prepare(`
         UPDATE source_files SET storage_state = 'ready'

@@ -312,6 +312,11 @@ test('text materialization atomically publishes one read-only projection and is 
     });
     assert.equal(first.status, 'materialized');
     assert.ok(first.projection_note_id);
+    assert.equal(
+      getSourceRecordDetail(db, userId, uploaded.source.id, { rootDir: sourceRootDir })
+        .materialization.projection_available,
+      true,
+    );
 
     const note = db.prepare('SELECT note_class, source_kind FROM notes WHERE id = ?')
       .get(first.projection_note_id) as any;

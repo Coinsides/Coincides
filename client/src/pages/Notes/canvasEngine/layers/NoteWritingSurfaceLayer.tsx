@@ -212,6 +212,7 @@ import styles from '../../NoteDetail.module.css';
 
 export interface NoteWritingSurfaceLayerProps {
   activeBlockId: string | null;
+  contentReadOnly: boolean;
   activeSlashCommandId: string | null;
   allBlocks: NoteBlock[];
   anchorsBySourceRef: Record<string, SourceAnchor>;
@@ -471,6 +472,7 @@ function readImageFileDimensions(file: File): Promise<{ width: number; height: n
 
 export function NoteWritingSurfaceLayer({
   activeBlockId,
+  contentReadOnly,
   activeSlashCommandId,
   allBlocks,
   anchorsBySourceRef,
@@ -1061,6 +1063,7 @@ export function NoteWritingSurfaceLayer({
     event: ReactPointerEvent<HTMLDivElement>,
     pageFrame: PageFrameModel,
   ) => {
+    if (contentReadOnly) return;
     if (surfaceMode !== 'canvas' || event.button !== 0) return;
     if ((event.target as HTMLElement).closest('[data-page-frame-resize-handle="true"]')) return;
     setCanvasBlankContextMenu(null);
@@ -1097,6 +1100,7 @@ export function NoteWritingSurfaceLayer({
     event: ReactPointerEvent<HTMLDivElement>,
     pageFrame: PageFrameModel,
   ) => {
+    if (contentReadOnly) return;
     if (surfaceMode !== 'canvas' || event.button !== 0 || !layoutMode) return;
     event.preventDefault();
     event.stopPropagation();
@@ -2402,7 +2406,7 @@ export function NoteWritingSurfaceLayer({
     items: buildAnnotationHighlightMenu(),
   } : null;
 
-  const blockShellMenu: CommandSurfaceMenu | null = blockContextMenu ? {
+  const blockShellMenu: CommandSurfaceMenu | null = blockContextMenu && !contentReadOnly ? {
     id: `block-shell-menu-${blockContextMenu.blockId}`,
     kind: 'block_shell',
     point: blockContextMenu.point,
@@ -2410,7 +2414,7 @@ export function NoteWritingSurfaceLayer({
     items: buildBlockShellMenu(),
   } : null;
 
-  const canvasBlankMenu: CommandSurfaceMenu | null = canvasBlankContextMenu ? {
+  const canvasBlankMenu: CommandSurfaceMenu | null = canvasBlankContextMenu && !contentReadOnly ? {
     id: 'canvas-blank-context-menu',
     kind: 'canvas_blank',
     point: canvasBlankContextMenu.point,
@@ -2421,7 +2425,7 @@ export function NoteWritingSurfaceLayer({
   const pageFrameShellMenuExtension = pageFrameContextMenu
     ? pageFrameExtensionByFrameId.get(pageFrameContextMenu.frameId)
     : null;
-  const pageFrameShellMenu: CommandSurfaceMenu | null = pageFrameContextMenu ? {
+  const pageFrameShellMenu: CommandSurfaceMenu | null = pageFrameContextMenu && !contentReadOnly ? {
     id: `page-frame-shell-menu-${pageFrameContextMenu.frameId}`,
     kind: 'page_frame_shell',
     point: pageFrameContextMenu.point,
@@ -2436,7 +2440,7 @@ export function NoteWritingSurfaceLayer({
   const shapeShellMenuCanvasObject = shapeContextMenu
     ? canvasObjectById.get(shapeContextMenu.objectId)
     : null;
-  const shapeShellMenu: CommandSurfaceMenu | null = shapeContextMenu ? {
+  const shapeShellMenu: CommandSurfaceMenu | null = shapeContextMenu && !contentReadOnly ? {
     id: `canvas-object-shell-menu-${shapeContextMenu.objectId}`,
     kind: 'canvas_blank',
     point: shapeContextMenu.point,
@@ -2455,7 +2459,7 @@ export function NoteWritingSurfaceLayer({
   const imageShellMenuImageObject = imageContextMenu
     ? imageObjectById.get(imageContextMenu.objectId)
     : null;
-  const imageShellMenu: CommandSurfaceMenu | null = imageContextMenu ? {
+  const imageShellMenu: CommandSurfaceMenu | null = imageContextMenu && !contentReadOnly ? {
     id: `image-object-shell-menu-${imageContextMenu.objectId}`,
     kind: 'canvas_blank',
     point: imageContextMenu.point,
@@ -2470,7 +2474,7 @@ export function NoteWritingSurfaceLayer({
       : 'ready',
     }),
   } : null;
-  const tableShellMenu: CommandSurfaceMenu | null = tableContextMenu ? {
+  const tableShellMenu: CommandSurfaceMenu | null = tableContextMenu && !contentReadOnly ? {
     id: `table-object-shell-menu-${tableContextMenu.objectId}`,
     kind: 'canvas_blank',
     point: tableContextMenu.point,
@@ -2486,7 +2490,7 @@ export function NoteWritingSurfaceLayer({
           : 'ready',
     }),
   } : null;
-  const visualConnectorShellMenu: CommandSurfaceMenu | null = visualConnectorContextMenu ? {
+  const visualConnectorShellMenu: CommandSurfaceMenu | null = visualConnectorContextMenu && !contentReadOnly ? {
     id: `visual-connector-shell-menu-${visualConnectorContextMenu.objectId}`,
     kind: 'canvas_blank',
     point: visualConnectorContextMenu.point,
@@ -2543,6 +2547,7 @@ export function NoteWritingSurfaceLayer({
   };
 
   const handleBlankSurfaceContextMenu = (event: ReactMouseEvent<HTMLDivElement>) => {
+    if (contentReadOnly) return;
     if (surfaceMode !== 'canvas') return;
     if (isBlockedContextMenuTarget(event.target)) return;
     event.preventDefault();
@@ -3168,7 +3173,8 @@ export function NoteWritingSurfaceLayer({
       />
       <div
         ref={blockListRef}
-        className={`${styles.blockList} ${surfaceMode === 'canvas' ? styles.blockListCanvas : styles.blockListPage} ${layoutMode ? styles.layoutMode : ''}`}
+        className={`${styles.blockList} ${surfaceMode === 'canvas' ? styles.blockListCanvas : styles.blockListPage} ${layoutMode && !contentReadOnly ? styles.layoutMode : ''}`}
+        data-source-content-read-only={contentReadOnly ? 'true' : 'false'}
         data-canvas-engine-version={noteCanvasRuntime.version}
         data-canvas-engine-route={noteCanvasRuntime.route}
         data-canvas-visible-blocks={noteCanvasRuntime.visibleBlockIds.length}
@@ -3205,11 +3211,11 @@ export function NoteWritingSurfaceLayer({
           '--canvas-world-width': `${noteCanvasRuntime.world.width}px`,
           '--canvas-world-height': `${noteCanvasRuntime.world.height}px`,
         } as CSSProperties & Record<string, string | number>}
-        onMouseDown={handleBlockListMouseDownForDraft}
-        onContextMenu={handleBlankSurfaceContextMenu}
-        onDoubleClick={onPageSpaceDoubleClick}
-        onDragOver={handleBlankSurfaceDragOver}
-        onDrop={handleBlankSurfaceDrop}
+        onMouseDown={contentReadOnly ? undefined : handleBlockListMouseDownForDraft}
+        onContextMenu={contentReadOnly ? undefined : handleBlankSurfaceContextMenu}
+        onDoubleClick={contentReadOnly ? undefined : onPageSpaceDoubleClick}
+        onDragOver={contentReadOnly ? undefined : handleBlankSurfaceDragOver}
+        onDrop={contentReadOnly ? undefined : handleBlankSurfaceDrop}
       >
         {surfaceMode === 'canvas' && (
           <>
@@ -3245,6 +3251,7 @@ export function NoteWritingSurfaceLayer({
                     data-page-stack-page-total={pageStackPageTotal}
                     data-page-stack-collapsed="true"
                     onClick={() => onTogglePageStackCollapse(pageFrame.id)}
+                    disabled={contentReadOnly}
                     style={{
                       left: pageFrame.x,
                       top: pageFrame.y,
@@ -3258,7 +3265,7 @@ export function NoteWritingSurfaceLayer({
               return (
                 <div
                   key={pageFrame.id}
-                  className={`${styles.formalPageBoundary} ${primary ? styles.formalPageBoundaryPrimary : styles.formalPageBoundarySecondary} ${layoutMode ? styles.formalPageBoundaryOperable : ''} ${selected ? styles.formalPageBoundarySelected : ''}`}
+                  className={`${styles.formalPageBoundary} ${primary ? styles.formalPageBoundaryPrimary : styles.formalPageBoundarySecondary} ${layoutMode && !contentReadOnly ? styles.formalPageBoundaryOperable : ''} ${selected ? styles.formalPageBoundarySelected : ''}`}
                   data-canvas-object-id={pageFrame.id}
                   data-page-frame-id={pageFrame.id}
                   data-page-frame-role={pageFrame.role}
@@ -3293,7 +3300,7 @@ export function NoteWritingSurfaceLayer({
                       {extension.pageStackNumberLabel}
                     </span>
                   )}
-                  {selected && layoutMode && (
+                  {selected && layoutMode && !contentReadOnly && (
                     <div
                       className={styles.pageFrameResizeHandle}
                       data-page-frame-resize-handle="true"
@@ -3422,6 +3429,7 @@ export function NoteWritingSurfaceLayer({
             placementByObjectId={placementByObjectId}
             canvasObjectById={canvasObjectById}
             selectedObjectId={selectedCanvasObjectId}
+            readOnly={contentReadOnly}
             onConnectorContextMenu={(event, canvasObject) => {
               event.preventDefault();
               event.stopPropagation();
@@ -3447,6 +3455,7 @@ export function NoteWritingSurfaceLayer({
             selectedObjectId={selectedCanvasObjectId}
             interactionPreview={shapeInteractionPreview}
             layoutMode={layoutMode}
+            readOnly={contentReadOnly}
             onImagePointerDown={handleShapePointerDown}
             onImageResizePointerDown={handleShapeResizePointerDown}
             onImagePointerMove={handleShapePointerMove}
@@ -3478,6 +3487,7 @@ export function NoteWritingSurfaceLayer({
             selectedObjectId={selectedCanvasObjectId}
             interactionPreview={shapeInteractionPreview}
             layoutMode={layoutMode}
+            readOnly={contentReadOnly}
             selectedCell={selectedTableCell}
             editingCell={editingTableCell}
             onTablePointerDown={handleShapePointerDown}
@@ -3531,6 +3541,7 @@ export function NoteWritingSurfaceLayer({
             selectedObjectId={selectedCanvasObjectId}
             interactionPreview={shapeInteractionPreview}
             layoutMode={layoutMode}
+            readOnly={contentReadOnly}
             onShapePointerDown={handleShapePointerDown}
             onShapeResizePointerDown={handleShapeResizePointerDown}
             onShapePointerMove={handleShapePointerMove}
@@ -3583,6 +3594,7 @@ export function NoteWritingSurfaceLayer({
             <BlockEditorLayer
               key={block.id}
               block={block}
+              contentReadOnly={contentReadOnly}
               text={text}
               layout={layout}
               blockFragments={blockFragmentsByBlockId.get(block.id)}
@@ -3592,7 +3604,7 @@ export function NoteWritingSurfaceLayer({
               draftAnnotationRanges={draftAnnotationRanges}
               selectedAnnotationIds={selectedAnnotationIds}
               fieldDraft={blockFieldDrafts[block.id]}
-              layoutMode={layoutMode}
+              layoutMode={layoutMode && !contentReadOnly}
               saving={savingBlockId === block.id}
               active={isActive}
               autoFocus={focusBlockId === block.id}
@@ -3651,7 +3663,7 @@ export function NoteWritingSurfaceLayer({
           );
         })}
 
-        {draftActive && (
+        {draftActive && !contentReadOnly && (
           <div
             className={`${styles.block} ${styles.blockBox} ${styles.draftBlock}`}
             style={{
@@ -3698,7 +3710,7 @@ export function NoteWritingSurfaceLayer({
           />
         )}
 
-        {!draftActive && sortedBlockCount === 0 && (
+        {!contentReadOnly && !draftActive && sortedBlockCount === 0 && (
           <button className={styles.emptyPagePrompt} onDoubleClick={() => onActivateDraft(defaultDraftLayout)}>
             Double-click to start writing
           </button>
@@ -3777,7 +3789,7 @@ export function NoteWritingSurfaceLayer({
         onCancelDraft={clearDraft}
       />
       <SelectionTypographyToolbarLayer
-        selection={selectionDraft && latestDraftRange && draftRangeCount === 1 && !annotationContextMenu ? {
+        selection={!contentReadOnly && selectionDraft && latestDraftRange && draftRangeCount === 1 && !annotationContextMenu ? {
           range: latestDraftRange,
           anchorRect: selectionDraft.anchorRect,
         } : null}
@@ -3786,7 +3798,7 @@ export function NoteWritingSurfaceLayer({
         onClose={clearDraft}
       />
       <ObjectInspectorLayer
-        model={surfaceMode === 'canvas' ? selectedCanvasObjectInspectorModel : null}
+        model={surfaceMode === 'canvas' && !contentReadOnly ? selectedCanvasObjectInspectorModel : null}
         onClose={() => setSelectedCanvasObjectId(null)}
         onAction={(actionId) => {
           void handleCanvasObjectContextAction(actionId);

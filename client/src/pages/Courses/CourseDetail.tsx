@@ -1,13 +1,12 @@
 ﻿import { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import {
-  ArrowLeft, Edit2, Trash2, Plus, Target, Layers, FileText, Upload,
+  ArrowLeft, Edit2, Trash2, Plus, Target, Layers, FileText,
   CheckCircle2, Circle, Pause, RotateCcw, BookOpen, Sparkles, MapIcon, GitBranch,
   AlertTriangle, Eye, X, RefreshCw, LayoutDashboard, Maximize2, Minimize2,
 } from 'lucide-react';
 import { useCourseStore } from '@/stores/courseStore';
 import { useUIStore } from '@/stores/uiStore';
-import DocumentManager from '@/components/DocumentManager/DocumentManager';
 import api from '@/services/api';
 import { getNoteBlockTemplateLabel } from '@shared/types';
 import type { Course, Goal, SourceMaterial, MaterialSegment } from '@shared/types';
@@ -18,6 +17,8 @@ import {
   savePageFrameCollectionForNote,
 } from '../Notes/canvasEngine/canvasObjectRepository';
 import LearningCanvasSurface from './LearningCanvasSurface';
+import { ProjectSourcesPanel } from '../Sources/ProjectSourcesPanel';
+import { ProjectDeleteDialog } from './ProjectDeleteDialog';
 import styles from './CourseDetail.module.css';
 
 type ReconciliationGroupDecision = 'accepted_evidence_set' | 'kept_separate' | 'deferred' | 'excluded' | 'mark_conflict';
@@ -413,7 +414,7 @@ function formatRoleLabel(value: string | undefined): string {
 export default function CourseDetailPage() {
   const { courseId, canvasId } = useParams<{ courseId: string; canvasId?: string }>();
   const navigate = useNavigate();
-  const modal = useUIStore((s) => s.modal);
+  const location = useLocation();
   const openModal = useUIStore((s) => s.openModal);
   const addToast = useUIStore((s) => s.addToast);
   const deleteCourse = useCourseStore((s) => s.deleteCourse);
@@ -617,6 +618,14 @@ export default function CourseDetailPage() {
   }, [fetchSummary]);
 
   useEffect(() => {
+    if (!data || new URLSearchParams(location.search).get('focus') !== 'sources') return;
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById('project-sources')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [data, location.search]);
+
+  useEffect(() => {
     fetchMaterials();
   }, [fetchMaterials]);
 
@@ -680,14 +689,14 @@ export default function CourseDetailPage() {
     ? { source_scope_ids: activeSourceScopeIds }
     : {};
 
-  const handleDelete = async () => {
+  const handleDelete = async (action: 'delete_projection' | 'move_to_home') => {
     if (!courseId) return;
     try {
-      await deleteCourse(courseId);
-      addToast('success', 'Course deleted');
+      await deleteCourse(courseId, action);
+      addToast('success', 'Project deleted');
       navigate('/courses');
-    } catch {
-      addToast('error', 'Failed to delete course');
+    } catch (error) {
+      throw error;
     }
   };
 
@@ -1571,22 +1580,12 @@ export default function CourseDetailPage() {
   );
 
   const deleteConfirmation = confirmDelete && (
-    <div className={styles.confirmOverlay} onClick={() => setConfirmDelete(false)}>
-      <div className={styles.confirmDialog} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.confirmTitle}>Delete Project</div>
-        <div className={styles.confirmText}>
-          Are you sure you want to delete "{course.name}"? This still uses the existing course deletion behavior and will remove associated goals, tasks, decks, cards, and documents. This action cannot be undone.
-        </div>
-        <div className={styles.confirmActions}>
-          <button className={styles.confirmCancelBtn} onClick={() => setConfirmDelete(false)}>
-            Cancel
-          </button>
-          <button className={styles.confirmDeleteBtn} onClick={handleDelete}>
-            Delete
-          </button>
-        </div>
-      </div>
-    </div>
+    <ProjectDeleteDialog
+      projectId={course.id}
+      projectName={course.name}
+      onCancel={() => setConfirmDelete(false)}
+      onConfirm={handleDelete}
+    />
   );
 
   if (canvasId) {
@@ -2431,46 +2430,7 @@ export default function CourseDetailPage() {
         )}
       </div>
 
-      {/* Documents Section */}
-      <div className={styles.section}>
-        <div className={styles.sectionHeader}>
-          <div className={styles.sectionTitle}>
-            <FileText size={18} />
-            <span>Documents</span>
-            <span className={styles.sectionCount}>{documents.length}</span>
-          </div>
-          <div style={{ display: 'flex', gap: '6px' }}>
-            <button
-              className={styles.sectionAddBtn}
-              onClick={() => openModal('document-manager', { courseId: course.id, courseName: course.name })}
-            >
-              <Upload size={14} />
-              Upload / Manage
-            </button>
-          </div>
-        </div>
-        {documents.length === 0 ? (
-          <div className={styles.empty}>No documents yet</div>
-        ) : (
-          <div className={styles.docList}>
-            {documents.map((doc) => (
-              <div key={doc.id} className={styles.docItem}>
-                <FileText size={15} className={styles.docIcon} />
-                <span className={styles.docName}>{doc.filename}</span>
-                {doc.page_count && (
-                  <span className={styles.docPages}>{doc.page_count} pages</span>
-                )}
-                <span className={`${styles.docStatus} ${styles[`parse_${doc.parse_status}`]}`}>
-                  {doc.parse_status}
-                </span>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Document Manager Modal */}
-      {modal?.type === 'document-manager' && <DocumentManager />}
+      <ProjectSourcesPanel projectId={course.id} legacyDocuments={documents} />
 
       {/* Delete Confirmation */}
       {deleteConfirmation}

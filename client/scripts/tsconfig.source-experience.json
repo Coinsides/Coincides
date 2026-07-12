@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "baseUrl": "../src",
+    "esModuleInterop": true,
+    "lib": ["ES2022", "DOM"],
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "outDir": "../../.codex-tmp/source-experience",
+    "paths": {
+      "@/*": ["*"],
+      "@shared/*": ["../../shared/*"]
+    },
+    "rootDir": "../..",
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2022"
+  },
+  "files": [
+    "./sourceExperienceModelContractCheck.ts",
+    "../src/pages/Sources/sourceExperienceModel.ts"
+  ]
+}

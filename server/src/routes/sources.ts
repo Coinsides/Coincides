@@ -15,6 +15,10 @@ import {
   type SourceOriginEntryKind,
 } from '../services/sourceFileIntake.js';
 import { scheduleSourceMaterialization } from '../services/sourceMaterialization.js';
+import {
+  deleteSourceWithCompensation,
+  getSourceDeletionImpact,
+} from '../services/sourceLifecycle.js';
 
 const router = Router();
 
@@ -128,6 +132,22 @@ function scheduleMaterialization(req: AuthRequest, res: Response, next: NextFunc
 
 router.post('/:sourceId/materialize', scheduleMaterialization);
 router.post('/:sourceId/retry', scheduleMaterialization);
+
+router.get('/:sourceId/delete-impact', (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    res.json(getSourceDeletionImpact(getDb(), req.userId!, String(req.params.sourceId)));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete('/:sourceId', (req: AuthRequest, res: Response, next: NextFunction) => {
+  try {
+    res.json(deleteSourceWithCompensation(getDb(), req.userId!, String(req.params.sourceId)));
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.get('/:sourceId', (req: AuthRequest, res: Response, next: NextFunction) => {
   try {

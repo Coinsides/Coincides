@@ -13,6 +13,7 @@ interface VisualConnectorLayerProps {
   placementByObjectId: Map<string, CanvasPlacement>;
   canvasObjectById: Map<string, CanvasObject>;
   selectedObjectId: string | null;
+  readOnly: boolean;
   onConnectorContextMenu: (
     event: ReactMouseEvent<SVGLineElement>,
     canvasObject: CanvasObject,
@@ -28,6 +29,7 @@ export function VisualConnectorLayer({
   placementByObjectId,
   canvasObjectById,
   selectedObjectId,
+  readOnly,
   onConnectorContextMenu,
 }: VisualConnectorLayerProps) {
   return (
@@ -81,7 +83,9 @@ export function VisualConnectorLayer({
               stroke={stroke}
               strokeWidth={strokeWidth}
               markerEnd={connector.endMarker === 'none' ? undefined : `url(#${markerId})`}
-              onContextMenu={(event) => onConnectorContextMenu(event, canvasObject)}
+              onContextMenu={readOnly
+                ? (event) => event.preventDefault()
+                : (event) => onConnectorContextMenu(event, canvasObject)}
             />
           </svg>
         );

@@ -73,6 +73,7 @@ import styles from '../../NoteDetail.module.css';
 
 interface TextBlockProjectionProps {
   blockId: string;
+  readOnly: boolean;
   text: string;
   textFlow: TextBlockContentV1 | null;
   presentationKind: BlockPresentationKind;
@@ -449,6 +450,7 @@ function badgeAnchorStateEqual(
 
 export function TextBlockProjection({
   blockId,
+  readOnly,
   text,
   textFlow,
   presentationKind,
@@ -944,7 +946,7 @@ export function TextBlockProjection({
     window.setTimeout(() => onSave(true, undefined, nextFlow), 0);
   };
 
-  const textUnitMenu: CommandSurfaceMenu | null = textUnitContextMenu ? {
+  const textUnitMenu: CommandSurfaceMenu | null = textUnitContextMenu && !readOnly ? {
     id: `text-unit-menu-${textUnitContextMenu.unitId}`,
     kind: 'text_unit_handle',
     point: textUnitContextMenu.point,
@@ -1152,8 +1154,11 @@ export function TextBlockProjection({
                     ...roleTextClassNames,
                   ].filter(Boolean).join(' ')}
                   value={unit.text}
+                  readOnly={readOnly}
                   onFocus={onFocused}
-                  onChange={(event) => handleUnitTextChange(unit, event.currentTarget.value, event.currentTarget.selectionStart, event.currentTarget)}
+                  onChange={readOnly
+                    ? undefined
+                    : (event) => handleUnitTextChange(unit, event.currentTarget.value, event.currentTarget.selectionStart, event.currentTarget)}
                   onSelect={(event) => handleTextUnitSelection(unit, event.currentTarget, {
                     preserveDraft: additiveSelectionSessionRef.current,
                   })}
@@ -1161,11 +1166,11 @@ export function TextBlockProjection({
                   onMouseUp={(event) => handleUnitMouseUp(unit, event)}
                   onKeyUp={(event) => handleUnitKeyUp(unit, event)}
                   onContextMenu={(event) => handleTextUnitContextMenu(unit, event)}
-                  onBlur={() => onSave(true, undefined, latestFlowRef.current || editableFlow)}
-                  onKeyDown={(event) => handleUnitKeyDown(unit, event)}
-                  onPaste={(event) => handleUnitPaste(unit, event)}
-                  onDragOver={handleUnitDragOver}
-                  onDrop={(event) => handleUnitDrop(unit, event)}
+                  onBlur={readOnly ? undefined : () => onSave(true, undefined, latestFlowRef.current || editableFlow)}
+                  onKeyDown={readOnly ? undefined : (event) => handleUnitKeyDown(unit, event)}
+                  onPaste={readOnly ? undefined : (event) => handleUnitPaste(unit, event)}
+                  onDragOver={readOnly ? undefined : handleUnitDragOver}
+                  onDrop={readOnly ? undefined : (event) => handleUnitDrop(unit, event)}
                   data-block-id={blockId}
                   data-text-flow-id={textFlowId}
                   data-text-unit-id={unit.id}

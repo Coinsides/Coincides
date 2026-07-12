@@ -1,6 +1,7 @@
 import type Database from 'better-sqlite3';
 import { AppError } from '../middleware/errorHandler.js';
-import { releaseAssetReference } from './canvasAssets.js';
+import { finalizeCanvasAssetCleanup, releaseAssetReference } from './canvasAssets.js';
+import type { ManagedFileTask } from './managedFileCleanup.js';
 
 interface OwnedNote {
   id: string;
@@ -224,7 +225,7 @@ interface CanvasKindHandler {
     userId: string,
     note: OwnedNote,
     objectId: string,
-  ) => void;
+  ) => ManagedFileTask[] | void;
 }
 
 function parseJson<T>(value: string | null | undefined, fallback: T): T {
@@ -1355,7 +1356,8 @@ const KIND_HANDLERS: Record<string, CanvasKindHandler> = {
         DELETE FROM image_object_extensions
         WHERE object_id = ? AND user_id = ? AND note_id = ?
       `).run(objectId, userId, note.id);
-      releaseAssetReference(db, userId, imageExtension.asset_id, objectId);
+      const decision = releaseAssetReference(db, userId, imageExtension.asset_id, objectId);
+      return decision.cleanup_task ? [decision.cleanup_task] : [];
     },
   },
   table: {
@@ -1925,7 +1927,8 @@ export function deleteCanvasObject(
     throw new AppError(400, 'PageFrame objects must be deleted through page-frame-collection');
   }
 
-  return db.transaction(() => {
+  const cleanupTasks: ManagedFileTask[] = [];
+  const result = db.transaction(() => {
     const referencingConnectors = db.prepare(`
       SELECT object_id
       FROM visual_connector_extensions
@@ -1950,7 +1953,8 @@ export function deleteCanvasObject(
       `).run(connector.object_id, userId, note.id);
     }
     const handler = KIND_HANDLERS[object.kind];
-    handler?.cleanupOnDelete?.(db, userId, note, objectId);
+    const handlerCleanup = handler?.cleanupOnDelete?.(db, userId, note, objectId);
+    if (handlerCleanup) cleanupTasks.push(...handlerCleanup);
     db.prepare(`
       UPDATE annotation_ranges
       SET canvas_object_id = NULL
@@ -1973,6 +1977,8 @@ export function deleteCanvasObject(
       deleted: deleted.changes > 0,
     };
   })();
+  finalizeCanvasAssetCleanup(db, cleanupTasks);
+  return result;
 }
 
 export function saveBlockCanvasPlacement(

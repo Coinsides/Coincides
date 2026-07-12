@@ -9,9 +9,11 @@ interface CourseState {
   fetchCourses: () => Promise<void>;
   createCourse: (data: CreateCourseRequest) => Promise<Course>;
   updateCourse: (id: string, data: UpdateCourseRequest) => Promise<Course>;
-  deleteCourse: (id: string) => Promise<void>;
+  deleteCourse: (id: string, action?: ProjectProjectionAction) => Promise<void>;
   setSelectedCourseFilter: (id: string | null) => void;
 }
+
+export type ProjectProjectionAction = 'delete_projection' | 'move_to_home';
 
 export const useCourseStore = create<CourseState>((set, get) => ({
   courses: [],
@@ -41,8 +43,10 @@ export const useCourseStore = create<CourseState>((set, get) => ({
     return data;
   },
 
-  deleteCourse: async (id) => {
-    await api.delete(`/courses/${id}`);
+  deleteCourse: async (id, action) => {
+    await api.delete(`/courses/${id}`, {
+      data: action ? { source_projection_action: action } : {},
+    });
     set({ courses: get().courses.filter((c) => c.id !== id) });
   },
 

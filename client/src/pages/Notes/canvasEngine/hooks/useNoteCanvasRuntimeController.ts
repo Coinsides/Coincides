@@ -72,6 +72,7 @@ export function useNoteCanvasRuntimeController() {
   const {
     applyMeasuredBlockHeightDraft,
     note,
+    sourceProjectionPolicy,
     blocks,
     sortedBlocks,
     loading,
@@ -304,6 +305,7 @@ export function useNoteCanvasRuntimeController() {
     contentGroups,
     groupFolders,
     sourceReferenceCount,
+    contentReadOnly: sourceProjectionPolicy.contentReadOnly,
     surfaceMode,
     surfacePolicy,
     surfacePolicyMode: surfacePolicy.mode,

@@ -56,6 +56,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
 
   const chromeProps: NoteChromeLayerProps = {
     chromeCollapsed: input.chromeCollapsed,
+    contentReadOnly: input.contentReadOnly,
     exportPreview: input.exportPreview,
     layoutMode: input.layoutMode,
     layoutModeKind: input.layoutModeKind,
@@ -120,6 +121,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
 
   const writingSurfaceProps: NoteWritingSurfaceLayerProps = {
     activeBlockId: input.activeBlockId,
+    contentReadOnly: input.contentReadOnly,
     activeSlashCommandId: input.activeSlashCommandId,
     allBlocks: input.allBlocks,
     anchorsBySourceRef: input.anchorsBySourceRef,

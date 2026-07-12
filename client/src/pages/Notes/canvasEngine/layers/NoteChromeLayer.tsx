@@ -7,6 +7,7 @@ import {
   FilePlus2,
   Info,
   LayoutDashboard,
+  LockKeyhole,
   MoreHorizontal,
   PanelTopClose,
   PanelTopOpen,
@@ -40,6 +41,7 @@ export interface SurfacePolicyView {
 
 export interface NoteChromeLayerProps {
   chromeCollapsed: boolean;
+  contentReadOnly: boolean;
   exportPreview: ExportPreviewModel;
   layoutMode: boolean;
   layoutModeKind: 'off' | 'persistent' | 'temporary';
@@ -98,6 +100,7 @@ export interface NoteChromeLayerProps {
 
 export function NoteChromeLayer({
   chromeCollapsed,
+  contentReadOnly,
   exportPreview,
   layoutMode,
   layoutModeKind,
@@ -160,17 +163,19 @@ export function NoteChromeLayer({
   }, []);
 
   const handleLayoutHoverStart = useCallback(() => {
+    if (contentReadOnly) return;
     clearLayoutHoverTimer();
     layoutHoverTimerRef.current = window.setTimeout(() => {
       onOpenLayoutPanel();
       layoutHoverTimerRef.current = null;
     }, 260);
-  }, [clearLayoutHoverTimer, onOpenLayoutPanel]);
+  }, [clearLayoutHoverTimer, contentReadOnly, onOpenLayoutPanel]);
 
   const handleLayoutClick = useCallback(() => {
+    if (contentReadOnly) return;
     clearLayoutHoverTimer();
     onToggleLayoutMode();
-  }, [clearLayoutHoverTimer, onToggleLayoutMode]);
+  }, [clearLayoutHoverTimer, contentReadOnly, onToggleLayoutMode]);
 
   const handleTypographyFontFamilyChange = useCallback((event: ChangeEvent<HTMLSelectElement>) => {
     const nextProfile = patchDocumentTypographyProfile(documentTypographyProfile, {
@@ -237,14 +242,15 @@ export function NoteChromeLayer({
         key={pageFrame.id}
         className={`${styles.pageFramePanelRow} ${primary ? styles.pageFramePanelRowPrimary : ''}`}
         data-page-frame-row={pageFrame.id}
-        onClick={() => onSelectPageFrame(pageFrame.id)}
+        onClick={contentReadOnly ? undefined : () => onSelectPageFrame(pageFrame.id)}
         onKeyDown={(event) => {
+          if (contentReadOnly) return;
           if (event.key !== 'Enter' && event.key !== ' ') return;
           event.preventDefault();
           onSelectPageFrame(pageFrame.id);
         }}
-        role="button"
-        tabIndex={0}
+        role={contentReadOnly ? undefined : 'button'}
+        tabIndex={contentReadOnly ? -1 : 0}
       >
         <FileText size={15} />
         <span>{label}</span>
@@ -258,6 +264,7 @@ export function NoteChromeLayer({
             }}
             title="Add page below"
             aria-label={`Add page below ${label}`}
+            disabled={contentReadOnly}
           >
             <FilePlus2 size={14} />
           </button>
@@ -269,7 +276,7 @@ export function NoteChromeLayer({
             }}
             title="Split stack here"
             aria-label={`Split stack at ${label}`}
-            disabled={!canSplitFromHere}
+            disabled={contentReadOnly || !canSplitFromHere}
           >
             <PanelTopOpen size={14} />
           </button>
@@ -281,6 +288,7 @@ export function NoteChromeLayer({
             }}
             title="Duplicate to new stack"
             aria-label={`Duplicate ${label} to new stack`}
+            disabled={contentReadOnly}
           >
             <Copy size={14} />
           </button>
@@ -292,7 +300,7 @@ export function NoteChromeLayer({
             }}
             title="Set primary"
             aria-label={`Set ${label} as primary`}
-            disabled={primary}
+            disabled={contentReadOnly || primary}
           >
             <CheckCircle2 size={14} />
           </button>
@@ -304,7 +312,7 @@ export function NoteChromeLayer({
             }}
             title="Detach to new stack"
             aria-label={`Detach ${label} to new PageStack`}
-            disabled={!canDetachToNewStack}
+            disabled={contentReadOnly || !canDetachToNewStack}
           >
             <X size={14} />
           </button>
@@ -316,6 +324,7 @@ export function NoteChromeLayer({
             }}
             title="Delete page"
             aria-label={`Delete ${label}`}
+            disabled={contentReadOnly}
           >
             <Trash2 size={14} />
           </button>
@@ -332,6 +341,12 @@ export function NoteChromeLayer({
             <ArrowLeft size={18} />
             Project
           </button>
+          {contentReadOnly && (
+            <span className={styles.sourceProjectionLock} title="Source content locked; interpretation and organization remain editable">
+              <LockKeyhole size={13} />
+              Source locked
+            </span>
+          )}
           <button
             className={styles.iconBtn}
             onClick={onExpandChrome}
@@ -351,15 +366,25 @@ export function NoteChromeLayer({
           <input
             className={styles.titleInput}
             value={titleDraft}
+            readOnly={contentReadOnly}
+            data-source-content-read-only={contentReadOnly ? 'true' : 'false'}
             onChange={(event) => onTitleDraftChange(event.target.value)}
-            onBlur={onSaveTitle}
+            onBlur={contentReadOnly ? undefined : onSaveTitle}
             onKeyDown={(event) => {
+              if (contentReadOnly) return;
               if (event.key !== 'Enter') return;
               event.preventDefault();
               void onSaveTitle();
             }}
             aria-label="Note title"
           />
+
+          {contentReadOnly && (
+            <span className={styles.sourceProjectionLock} title="Source content locked; interpretation and organization remain editable">
+              <LockKeyhole size={13} />
+              Source locked
+            </span>
+          )}
 
           <div className={styles.chromeActions}>
             <button
@@ -389,6 +414,7 @@ export function NoteChromeLayer({
               onBlur={clearLayoutHoverTimer}
               title="Toggle layout mode"
               aria-pressed={layoutMode}
+              disabled={contentReadOnly}
             >
               <LayoutDashboard size={15} />
               Layout
@@ -399,6 +425,7 @@ export function NoteChromeLayer({
               title="New PageStack"
               aria-label="New PageStack"
               data-page-stack-create-toolbar="true"
+              disabled={contentReadOnly}
             >
               <FilePlus2 size={16} />
             </button>
@@ -486,6 +513,7 @@ export function NoteChromeLayer({
                 <button
                   className={styles.moreAction}
                   onClick={onToggleSnapEnabled}
+                  disabled={contentReadOnly}
                 >
                   <LayoutDashboard size={15} />
                   <span>Snap alignment</span>
@@ -504,6 +532,7 @@ export function NoteChromeLayer({
                     className={styles.moreAction}
                     data-page-stack-create-toolbar="true"
                     onClick={onCreatePageStack}
+                    disabled={contentReadOnly}
                   >
                     <FilePlus2 size={15} />
                     <span>New PageStack</span>
@@ -514,6 +543,7 @@ export function NoteChromeLayer({
                       type="button"
                       className={styles.moreAction}
                       onClick={() => onAddPageBelow(selectedPageFrameId)}
+                      disabled={contentReadOnly}
                     >
                       <FilePlus2 size={15} />
                       <span>Add page below selected</span>
@@ -536,7 +566,7 @@ export function NoteChromeLayer({
                           onClick={() => onMergePageStackWithPrevious(stack.id)}
                           title="Merge with previous PageStack"
                           aria-label="Merge with previous PageStack"
-                          disabled={stackIndex === 0}
+                          disabled={contentReadOnly || stackIndex === 0}
                         >
                           <Copy size={14} />
                         </button>
@@ -548,6 +578,7 @@ export function NoteChromeLayer({
                           }}
                           title={stack.collapsed ? 'Expand PageStack' : 'Collapse PageStack'}
                           aria-label={stack.collapsed ? 'Expand PageStack' : 'Collapse PageStack'}
+                          disabled={contentReadOnly}
                         >
                           {stack.collapsed ? <PanelTopOpen size={14} /> : <PanelTopClose size={14} />}
                         </button>
@@ -605,6 +636,7 @@ export function NoteChromeLayer({
                       type="button"
                       className={styles.typographyResetButton}
                       onClick={handleResetTypographyProfile}
+                      disabled={contentReadOnly}
                     >
                       Reset
                     </button>
@@ -615,6 +647,7 @@ export function NoteChromeLayer({
                       className={styles.typographySelect}
                       value={documentTypographyProfile.fontFamily}
                       onChange={handleTypographyFontFamilyChange}
+                      disabled={contentReadOnly}
                       data-typography-font-family="true"
                     >
                       {DOCUMENT_FONT_FAMILY_OPTIONS.map((option) => (
@@ -634,6 +667,7 @@ export function NoteChromeLayer({
                       step={1}
                       value={documentTypographyProfile.fontSizePx}
                       onChange={handleTypographyFontSizeChange}
+                      disabled={contentReadOnly}
                       data-typography-font-size="true"
                     />
                   </label>
@@ -647,6 +681,7 @@ export function NoteChromeLayer({
                       step={1}
                       value={documentTypographyProfile.lineHeightPx}
                       onChange={handleTypographyLineHeightChange}
+                      disabled={contentReadOnly}
                       data-typography-line-height="true"
                     />
                   </label>
@@ -660,6 +695,7 @@ export function NoteChromeLayer({
                       step={1}
                       value={documentTypographyProfile.paragraphSpacingPx}
                       onChange={handleTypographyParagraphSpacingChange}
+                      disabled={contentReadOnly}
                       data-typography-paragraph-spacing="true"
                     />
                   </label>

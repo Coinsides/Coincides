@@ -11,6 +11,7 @@
     "check:group-gallery-shell": "node scripts/groupGalleryShellContractCheck.mjs",
     "check:single-editor-shell": "node scripts/singleEditorShellContractCheck.mjs",
     "check:groups-rail-shell": "node scripts/groupsRailShellContractCheck.mjs",
+    "check:source-experience": "node scripts/sourceExperienceContractCheck.mjs && tsc -p scripts/tsconfig.source-experience.json && node ../.codex-tmp/source-experience/client/scripts/sourceExperienceModelContractCheck.js",
     "smoke:canvas-engine-model-contract": "tsc -p scripts/tsconfig.canvas-model-contract.json && node ../.codex-tmp/canvas-engine-contract/client/scripts/canvasEngineModelContractCheck.js",
     "smoke:canvas-engine-performance": "tsc -p scripts/tsconfig.canvas-performance.json && node ../.codex-tmp/canvas-engine-performance/scripts/canvasEnginePerformanceSeed.js"
   },

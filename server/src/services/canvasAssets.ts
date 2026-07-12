@@ -1,10 +1,15 @@
 import type Database from 'better-sqlite3';
 import { createHash } from 'node:crypto';
-import { mkdirSync, writeFileSync, existsSync, unlinkSync } from 'node:fs';
+import { mkdirSync, writeFileSync, existsSync } from 'node:fs';
 import { createReadStream } from 'node:fs';
 import { basename, join } from 'node:path';
 import { v4 as uuidv4 } from 'uuid';
 import { AppError } from '../middleware/errorHandler.js';
+import {
+  settleManagedFileTask,
+  type ManagedFileCleanupOptions,
+  type ManagedFileTask,
+} from './managedFileCleanup.js';
 
 const CANVAS_ASSET_DIR = process.env.CANVAS_ASSET_DIR || join(process.cwd(), 'uploads', 'canvas-assets');
 
@@ -193,7 +198,7 @@ export function releaseAssetReference(
     WHERE id = ? AND user_id = ?
   `).get(assetId, userId) as AssetReleaseRow | undefined;
   if (!asset) {
-    return { asset_id: assetId, released: false, remaining_references: 0 };
+    return { asset_id: assetId, released: false, remaining_references: 0, cleanup_task: null };
   }
   // Asset references are intentionally counted by user, not by note. A duplicated
   // image can reuse one blob across notes; note-scoped cleanup would delete too early.
@@ -206,22 +211,25 @@ export function releaseAssetReference(
   `).get(userId, assetId, excludeObjectId) as { count: number };
 
   if (remaining.count > 0) {
-    return { asset_id: assetId, released: false, remaining_references: remaining.count };
+    return { asset_id: assetId, released: false, remaining_references: remaining.count, cleanup_task: null };
   }
 
   const deleted = db.prepare('DELETE FROM canvas_assets WHERE id = ? AND user_id = ?')
     .run(assetId, userId);
-  if (deleted.changes > 0) {
-    try {
-      unlinkSync(join(CANVAS_ASSET_DIR, asset.storage_key));
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-        console.warn('Failed to unlink canvas asset blob', { assetId, error });
+  const cleanupTask: ManagedFileTask | null = deleted.changes > 0
+    ? {
+        user_id: userId,
+        storage_domain: 'canvas_asset',
+        operation: 'delete',
+        source_storage_key: asset.storage_key,
       }
-    }
-  }
-
-  return { asset_id: assetId, released: deleted.changes > 0, remaining_references: 0 };
+    : null;
+  return {
+    asset_id: assetId,
+    released: deleted.changes > 0,
+    remaining_references: 0,
+    cleanup_task: cleanupTask,
+  };
 }
 
 export function releaseCourseCanvasAssets(
@@ -238,20 +246,51 @@ export function releaseCourseCanvasAssets(
   `).all(userId, courseId) as AssetReferenceRow[];
 
   let released = 0;
+  const cleanupTasks: ManagedFileTask[] = [];
   for (const row of rows) {
-    // This must run before DELETE FROM courses, in the same transaction.
-    // Delete the self extension first; otherwise asset_id ON DELETE RESTRICT
-    // can block releaseAssetReference from deleting the final asset row.
+    // The DB decision stays inside the caller's transaction. Physical cleanup is
+    // returned as a task and may run only after that transaction commits.
     db.prepare(`
       DELETE FROM image_object_extensions
       WHERE object_id = ?
         AND user_id = ?
         AND course_id = ?
     `).run(row.object_id, userId, courseId);
-    if (releaseAssetReference(db, userId, row.asset_id, row.object_id).released) {
+    const decision = releaseAssetReference(db, userId, row.asset_id, row.object_id);
+    if (decision.released) {
       released += 1;
+      if (decision.cleanup_task) cleanupTasks.push(decision.cleanup_task);
     }
   }
 
-  return { course_id: courseId, checked_references: rows.length, released };
+  return { course_id: courseId, checked_references: rows.length, released, cleanup_tasks: cleanupTasks };
+}
+
+export function releaseNoteCanvasAssets(
+  db: Database.Database,
+  userId: string,
+  noteId: string,
+) {
+  const rows = db.prepare(`
+    SELECT object_id, asset_id
+    FROM image_object_extensions
+    WHERE user_id = ? AND note_id = ?
+    ORDER BY asset_id ASC, object_id ASC
+  `).all(userId, noteId) as AssetReferenceRow[];
+  const cleanupTasks: ManagedFileTask[] = [];
+  for (const row of rows) {
+    db.prepare('DELETE FROM image_object_extensions WHERE object_id = ? AND user_id = ? AND note_id = ?')
+      .run(row.object_id, userId, noteId);
+    const decision = releaseAssetReference(db, userId, row.asset_id, row.object_id);
+    if (decision.cleanup_task) cleanupTasks.push(decision.cleanup_task);
+  }
+  return cleanupTasks;
+}
+
+export function finalizeCanvasAssetCleanup(
+  db: Database.Database,
+  cleanupTasks: ManagedFileTask[],
+  options: ManagedFileCleanupOptions = {},
+) {
+  return cleanupTasks.map((task) => settleManagedFileTask(db, task, options));
 }

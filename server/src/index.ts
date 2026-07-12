@@ -65,6 +65,7 @@ import {
   resumeReceivedSourceMaterializations,
   sweepSourceMaterializations,
 } from './services/sourceMaterialization.js';
+import { drainManagedFileCleanupJobs } from './services/managedFileCleanup.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 
@@ -73,6 +74,10 @@ validateConfig();
 
 // Initialize database (async — runs migrations)
 const database = await initDb();
+const cleanupSweep = drainManagedFileCleanupJobs(database);
+if (cleanupSweep.completed || cleanupSweep.pending) {
+  console.log('Managed file cleanup startup sweep:', cleanupSweep);
+}
 const sourceSweep = sweepSourceStorage(database);
 if (sourceSweep.removed_temp_orphans || sourceSweep.recovered_staging || sourceSweep.removed_stale_staging) {
   console.log('Source storage startup sweep:', sourceSweep);

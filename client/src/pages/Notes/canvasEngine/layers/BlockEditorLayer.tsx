@@ -53,6 +53,7 @@ import styles from '../../NoteDetail.module.css';
 
 interface BlockEditorLayerProps {
   block: NoteBlock;
+  contentReadOnly: boolean;
   text: string;
   textFlowDraft?: TextBlockContentV1;
   annotations: AnnotationTruthV1[];
@@ -103,6 +104,7 @@ function shouldKeepNativeFocusTarget(target: EventTarget | null): boolean {
 
 export function BlockEditorLayer({
   block,
+  contentReadOnly,
   text,
   textFlowDraft,
   annotations,
@@ -196,7 +198,7 @@ export function BlockEditorLayer({
   });
 
   useEffect(() => {
-    if (!autoFocus) return;
+    if (!autoFocus || contentReadOnly) return;
     window.setTimeout(() => {
       const activeElement = document.activeElement;
       if (activeElement instanceof HTMLElement && blockContentRef.current?.contains(activeElement)) {
@@ -212,7 +214,7 @@ export function BlockEditorLayer({
       textarea.selectionEnd = textarea.value.length;
       resizeTextareaToContent(textarea);
     }, 0);
-  }, [autoFocus]);
+  }, [autoFocus, contentReadOnly]);
 
   const focusNearestTextArea = (clientY: number) => {
     const textareas = Array.from(
@@ -246,6 +248,7 @@ export function BlockEditorLayer({
   };
 
   const handleBlockContextMenu = (event: ReactMouseEvent<HTMLElement>) => {
+    if (contentReadOnly) return;
     if (event.defaultPrevented) return;
     const target = event.target;
     if (target instanceof Element) {
@@ -294,6 +297,7 @@ export function BlockEditorLayer({
         aiVisibility={aiVisibility}
         open={active}
         saving={saving}
+        contentReadOnly={contentReadOnly}
         onBeginMove={onBeginMove}
         onToggleExportRole={onToggleExportRole}
         onToggleAIVisibility={onToggleAIVisibility}
@@ -337,6 +341,7 @@ export function BlockEditorLayer({
         {presentationKind === 'formula' && formulaFields ? (
           <FormulaBlockProjection
             active={active}
+            readOnly={contentReadOnly}
             fields={formulaFields}
             textareaRef={textareaRef}
             onFocused={onFocused}
@@ -348,6 +353,7 @@ export function BlockEditorLayer({
         ) : presentationKind === 'code' ? (
           <CodeBlockProjection
             text={text}
+            readOnly={contentReadOnly}
             textareaRef={textareaRef}
             onFocused={onFocused}
             onTextChange={onTextChange}
@@ -357,6 +363,7 @@ export function BlockEditorLayer({
         ) : (
           <TextBlockProjection
             blockId={block.id}
+            readOnly={contentReadOnly}
             text={text}
             textFlow={textFlow}
             presentationKind={presentationKind}
@@ -386,7 +393,7 @@ export function BlockEditorLayer({
         />
       </div>
 
-      <BlockResizeHandleLayer onBeginResize={onBeginResize} />
+      {!contentReadOnly && <BlockResizeHandleLayer onBeginResize={onBeginResize} />}
     </article>
   );
 }

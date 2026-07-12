@@ -33,6 +33,7 @@ type ShapeObjectLayerProps = {
   selectedObjectId: string | null;
   interactionPreview: ShapeInteractionPreview;
   layoutMode: boolean;
+  readOnly: boolean;
   onShapePointerDown: (
     event: ReactPointerEvent<HTMLDivElement>,
     canvasObject: CanvasObject,
@@ -72,6 +73,7 @@ export function ShapeObjectLayer({
   selectedObjectId,
   interactionPreview,
   layoutMode,
+  readOnly,
   onShapePointerDown,
   onShapeResizePointerDown,
   onShapePointerMove,
@@ -104,7 +106,7 @@ export function ShapeObjectLayer({
         return (
           <div
             key={canvasObject.objectId}
-            className={`${styles.canvasShapeObject} ${styles[resolvedStyle.cssClassName]} ${shapeType === 'ellipse' ? styles.canvasShapeEllipse : styles.canvasShapeRectangle} ${selected ? styles.canvasShapeSelected : ''} ${layoutMode ? styles.canvasShapeOperable : ''}`}
+            className={`${styles.canvasShapeObject} ${styles[resolvedStyle.cssClassName]} ${shapeType === 'ellipse' ? styles.canvasShapeEllipse : styles.canvasShapeRectangle} ${selected ? styles.canvasShapeSelected : ''} ${layoutMode && !readOnly ? styles.canvasShapeOperable : ''}`}
             data-canvas-shape="true"
             data-canvas-shape-object="true"
             data-canvas-object-id={canvasObject.objectId}
@@ -115,11 +117,12 @@ export function ShapeObjectLayer({
             data-canvas-shape-has-text={textBinding ? 'true' : 'false'}
             data-canvas-shape-type={shapeType}
             data-canvas-shape-selected={selected ? 'true' : 'false'}
-            onPointerDown={(event) => onShapePointerDown(event, canvasObject, placement)}
-            onPointerMove={onShapePointerMove}
-            onPointerUp={onShapePointerEnd}
-            onPointerCancel={onShapePointerEnd}
-            onContextMenu={(event) => onShapeContextMenu(event, canvasObject)}
+            data-source-content-read-only={readOnly ? 'true' : 'false'}
+            onPointerDown={readOnly ? undefined : (event) => onShapePointerDown(event, canvasObject, placement)}
+            onPointerMove={readOnly ? undefined : onShapePointerMove}
+            onPointerUp={readOnly ? undefined : onShapePointerEnd}
+            onPointerCancel={readOnly ? undefined : onShapePointerEnd}
+            onContextMenu={readOnly ? (event) => event.preventDefault() : (event) => onShapeContextMenu(event, canvasObject)}
             style={{
               ...styleVars,
               left: preview?.x ?? placement.x,
@@ -137,13 +140,14 @@ export function ShapeObjectLayer({
                 aria-label="Shape text"
                 value={textBinding.text}
                 disabled={textBinding.saving}
+                readOnly={readOnly}
                 onPointerDown={(event) => event.stopPropagation()}
                 onPointerMove={(event) => event.stopPropagation()}
                 onPointerUp={(event) => event.stopPropagation()}
                 onMouseDown={(event) => event.stopPropagation()}
                 onContextMenu={(event) => event.stopPropagation()}
                 onFocus={() => onShapeTextFocus(textBinding.block.id)}
-                onChange={(event) => {
+                onChange={readOnly ? undefined : (event) => {
                   onShapeTextChange(
                     textBinding.block,
                     event.currentTarget.value,
@@ -151,10 +155,10 @@ export function ShapeObjectLayer({
                     event.currentTarget,
                   );
                 }}
-                onBlur={(event) => {
+                onBlur={readOnly ? undefined : (event) => {
                   void onShapeTextSave(canvasObject.objectId, textBinding.block, event.currentTarget.value);
                 }}
-                onKeyDown={(event) => {
+                onKeyDown={readOnly ? undefined : (event) => {
                   event.stopPropagation();
                   if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
                     event.preventDefault();
@@ -164,7 +168,7 @@ export function ShapeObjectLayer({
                 }}
               />
             )}
-            {selected && layoutMode && (
+            {selected && layoutMode && !readOnly && (
               <div
                 className={styles.canvasShapeResizeHandle}
                 data-canvas-shape-resize-handle="true"

@@ -23,6 +23,7 @@ type ImageObjectLayerProps = {
   selectedObjectId: string | null;
   interactionPreview: ShapeInteractionPreview;
   layoutMode: boolean;
+  readOnly: boolean;
   onImagePointerDown: (
     event: ReactPointerEvent<HTMLDivElement>,
     canvasObject: CanvasObject,
@@ -93,6 +94,7 @@ export function ImageObjectLayer({
   selectedObjectId,
   interactionPreview,
   layoutMode,
+  readOnly,
   onImagePointerDown,
   onImageResizePointerDown,
   onImagePointerMove,
@@ -110,7 +112,7 @@ export function ImageObjectLayer({
         return (
           <div
             key={canvasObject.objectId}
-            className={`${styles.canvasImageObject} ${selected ? styles.canvasImageSelected : ''} ${layoutMode ? styles.canvasImageOperable : ''}`}
+            className={`${styles.canvasImageObject} ${selected ? styles.canvasImageSelected : ''} ${layoutMode && !readOnly ? styles.canvasImageOperable : ''}`}
             data-canvas-image="true"
             data-canvas-image-object="true"
             data-canvas-object-id={canvasObject.objectId}
@@ -119,11 +121,12 @@ export function ImageObjectLayer({
             data-canvas-object-presentation="image"
             data-canvas-image-fit={imageObject.fit}
             data-canvas-image-selected={selected ? 'true' : 'false'}
-            onPointerDown={(event) => onImagePointerDown(event, canvasObject, placement)}
-            onPointerMove={onImagePointerMove}
-            onPointerUp={onImagePointerEnd}
-            onPointerCancel={onImagePointerEnd}
-            onContextMenu={(event) => onImageContextMenu(event, canvasObject)}
+            data-source-content-read-only={readOnly ? 'true' : 'false'}
+            onPointerDown={readOnly ? undefined : (event) => onImagePointerDown(event, canvasObject, placement)}
+            onPointerMove={readOnly ? undefined : onImagePointerMove}
+            onPointerUp={readOnly ? undefined : onImagePointerEnd}
+            onPointerCancel={readOnly ? undefined : onImagePointerEnd}
+            onContextMenu={readOnly ? (event) => event.preventDefault() : (event) => onImageContextMenu(event, canvasObject)}
             style={{
               left: preview?.x ?? placement.x,
               top: preview?.y ?? placement.y,
@@ -139,7 +142,7 @@ export function ImageObjectLayer({
                 {imageObject.caption}
               </div>
             )}
-            {selected && layoutMode && (
+            {selected && layoutMode && !readOnly && (
               <div
                 className={styles.canvasImageResizeHandle}
                 data-canvas-image-resize-handle="true"

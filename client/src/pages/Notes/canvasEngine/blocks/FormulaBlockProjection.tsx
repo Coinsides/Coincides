@@ -22,6 +22,7 @@ import styles from '../../NoteDetail.module.css';
 
 interface FormulaBlockProjectionProps {
   active: boolean;
+  readOnly: boolean;
   fields: {
     latex_input: string;
     formula_name: string;
@@ -37,6 +38,7 @@ interface FormulaBlockProjectionProps {
 
 export function FormulaBlockProjection({
   active,
+  readOnly,
   fields,
   textareaRef,
   onFocused,
@@ -127,7 +129,7 @@ export function FormulaBlockProjection({
           <span className={styles.emptyStructuredField}>Empty formula</span>
         )}
       </div>
-      {active && (
+      {active && !readOnly && (
         <label className={styles.fieldLabel}>
           <span className={styles.formulaInputHeader}>
             LaTeX input

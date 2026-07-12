@@ -157,7 +157,7 @@ test('database constraints enforce per-user hash, placement, and v1 materializat
   });
 });
 
-test('materialization state constraint keeps projection pointer equivalent to materialized status', async () => {
+test('materialization state constraint permits a missing projection only after materialization', async () => {
   await withDb((db) => {
     const { userId, courseId } = seedUserCourse(db);
     const created = createSourceIdentityFloor(db, userId, sourceInput(courseId, 'state'));
@@ -167,7 +167,7 @@ test('materialization state constraint keeps projection pointer equivalent to ma
       VALUES (?, ?, ?, 'Projection', '{}')
     `).run(noteId, userId, courseId);
 
-    assert.throws(() => db.prepare(`
+    assert.doesNotThrow(() => db.prepare(`
       UPDATE source_materializations
       SET status='materialized', projection_note_id=NULL
       WHERE id=?

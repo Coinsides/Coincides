@@ -28,6 +28,7 @@ type TableObjectLayerProps = {
   selectedObjectId: string | null;
   interactionPreview: ShapeInteractionPreview;
   layoutMode: boolean;
+  readOnly: boolean;
   onTablePointerDown: (
     event: ReactPointerEvent<HTMLDivElement>,
     canvasObject: CanvasObject,
@@ -77,6 +78,7 @@ export function TableObjectLayer({
   selectedObjectId,
   interactionPreview,
   layoutMode,
+  readOnly,
   onTablePointerDown,
   onTableResizePointerDown,
   onTablePointerMove,
@@ -145,7 +147,7 @@ export function TableObjectLayer({
         return (
           <div
             key={canvasObject.objectId}
-            className={`${styles.canvasTableObject} ${selected ? styles.canvasTableSelected : ''} ${layoutMode ? styles.canvasTableOperable : ''}`}
+            className={`${styles.canvasTableObject} ${selected ? styles.canvasTableSelected : ''} ${layoutMode && !readOnly ? styles.canvasTableOperable : ''}`}
             data-canvas-table="true"
             data-canvas-table-object="true"
             data-canvas-structured-object="table"
@@ -157,11 +159,14 @@ export function TableObjectLayer({
             data-canvas-table-rows={structuredObject.rowCount}
             data-canvas-table-columns={structuredObject.columnCount}
             data-canvas-table-selected={selected ? 'true' : 'false'}
-            onPointerDown={(event) => onTablePointerDown(event, canvasObject, placement)}
-            onPointerMove={onTablePointerMove}
-            onPointerUp={onTablePointerEnd}
-            onPointerCancel={onTablePointerEnd}
-            onContextMenu={(event) => onTableContextMenu(event, canvasObject, null, pendingEdit())}
+            data-source-content-read-only={readOnly ? 'true' : 'false'}
+            onPointerDown={readOnly ? undefined : (event) => onTablePointerDown(event, canvasObject, placement)}
+            onPointerMove={readOnly ? undefined : onTablePointerMove}
+            onPointerUp={readOnly ? undefined : onTablePointerEnd}
+            onPointerCancel={readOnly ? undefined : onTablePointerEnd}
+            onContextMenu={readOnly
+              ? (event) => event.preventDefault()
+              : (event) => onTableContextMenu(event, canvasObject, null, pendingEdit())}
             style={{
               left: preview?.x ?? placement.x,
               top: preview?.y ?? placement.y,
@@ -224,13 +229,13 @@ export function TableObjectLayer({
                               onSelectCell(selection);
                             }}
                             onDoubleClick={(event) => {
-                              if (!selection) return;
+                              if (!selection || readOnly) return;
                               event.preventDefault();
                               event.stopPropagation();
                               onStartCellEdit(selection);
                             }}
                             onContextMenu={(event) => {
-                              if (!selection) return;
+                              if (!selection || readOnly) return;
                               event.preventDefault();
                               event.stopPropagation();
                               onSelectCell(selection);
@@ -258,7 +263,7 @@ export function TableObjectLayer({
                 </tbody>
               </table>
             </div>
-            {selected && layoutMode && (
+            {selected && layoutMode && !readOnly && (
               <div
                 className={styles.canvasTableResizeHandle}
                 data-canvas-table-resize-handle="true"

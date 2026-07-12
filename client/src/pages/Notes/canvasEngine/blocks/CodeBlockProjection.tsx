@@ -7,6 +7,7 @@ import styles from '../../NoteDetail.module.css';
 
 interface CodeBlockProjectionProps {
   text: string;
+  readOnly: boolean;
   textareaRef: Ref<HTMLTextAreaElement>;
   onFocused: () => void;
   onTextChange: (value: string, caret: number, anchorElement?: HTMLElement | null) => void;
@@ -20,6 +21,7 @@ function lineCountFor(text: string): number {
 
 export function CodeBlockProjection({
   text,
+  readOnly,
   textareaRef,
   onFocused,
   onTextChange,
@@ -39,13 +41,14 @@ export function CodeBlockProjection({
         ref={textareaRef}
         className={`${styles.pageTextArea} ${styles.codeTextArea}`}
         value={text}
+        readOnly={readOnly}
         onFocus={onFocused}
         onChange={(event) => {
           resizeTextareaToContent(event.currentTarget);
           onTextChange(event.currentTarget.value, event.currentTarget.selectionStart, event.currentTarget);
         }}
-        onBlur={() => onSave(true)}
-        onKeyDown={onKeyDown}
+        onBlur={readOnly ? undefined : () => onSave(true)}
+        onKeyDown={readOnly ? undefined : onKeyDown}
         spellCheck={false}
         rows={1}
       />

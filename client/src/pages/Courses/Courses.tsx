@@ -4,8 +4,8 @@ import { Plus, Edit2, Trash2, Tags, FileText } from 'lucide-react';
 import { useCourseStore } from '@/stores/courseStore';
 import { useUIStore } from '@/stores/uiStore';
 import TagGroupManager from '@/components/TagGroupManager/TagGroupManager';
-import DocumentManager from '@/components/DocumentManager/DocumentManager';
 import type { Course } from '@shared/types';
+import { ProjectDeleteDialog } from './ProjectDeleteDialog';
 import styles from './Courses.module.css';
 
 export default function CoursesPage() {
@@ -18,15 +18,15 @@ export default function CoursesPage() {
   const navigate = useNavigate();
   const [confirmDelete, setConfirmDelete] = useState<Course | null>(null);
 
-  const handleDelete = async () => {
+  const handleDelete = async (action: 'delete_projection' | 'move_to_home') => {
     if (!confirmDelete) return;
     try {
-      await deleteCourse(confirmDelete.id);
+      await deleteCourse(confirmDelete.id, action);
       addToast('success', 'Project deleted');
       setConfirmDelete(null);
     } catch (err) {
       console.error('Failed to delete project:', err);
-      addToast('error', 'Failed to delete project');
+      throw err;
     }
   };
 
@@ -64,7 +64,10 @@ export default function CoursesPage() {
               <div className={styles.cardActions}>
                 <button
                   className={styles.filesBtn}
-                  onClick={(e) => { e.stopPropagation(); openModal('document-manager', { courseId: course.id, courseName: course.name }); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigate(`/projects/${course.id}?focus=sources`);
+                  }}
                 >
                   <FileText size={12} />
                   Sources
@@ -110,31 +113,18 @@ export default function CoursesPage() {
         </div>
       )}
 
-      {/* Delete confirmation */}
       {confirmDelete && (
-        <div className={styles.confirmOverlay} onClick={() => setConfirmDelete(null)}>
-          <div className={styles.confirmDialog} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.confirmTitle}>Delete Project</div>
-            <div className={styles.confirmText}>
-              Are you sure you want to delete "{confirmDelete.name}"? This still uses the existing course deletion behavior and will remove associated tasks, goals, and data. This action cannot be undone.
-            </div>
-            <div className={styles.confirmActions}>
-              <button className={styles.confirmCancelBtn} onClick={() => setConfirmDelete(null)}>
-                Cancel
-              </button>
-              <button className={styles.confirmDeleteBtn} onClick={handleDelete}>
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
+        <ProjectDeleteDialog
+          projectId={confirmDelete.id}
+          projectName={confirmDelete.name}
+          onCancel={() => setConfirmDelete(null)}
+          onConfirm={handleDelete}
+        />
       )}
 
       {/* Tag Group Manager modal */}
       {modal?.type === 'tag-group-manager' && <TagGroupManager />}
 
-      {/* Document Manager modal */}
-      {modal?.type === 'document-manager' && <DocumentManager />}
     </div>
   );
 }

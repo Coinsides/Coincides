@@ -3,12 +3,18 @@ import { v4 as uuidv4 } from 'uuid';
 import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
-import { releaseCourseCanvasAssets } from '../services/canvasAssets.js';
-import { assertCourseCanDelete, assertCourseCanRename } from '../services/systemCourses.js';
+import {
+  deleteProjectWithSourcePolicy,
+  getProjectDeletionImpact,
+} from '../services/courseLifecycle.js';
+import { assertCourseCanRename } from '../services/systemCourses.js';
 import { createCourseSchema, updateCourseSchema } from '../validators/index.js';
-import { ZodError } from 'zod';
+import { z, ZodError } from 'zod';
 
 const router = Router();
+const deleteProjectSchema = z.object({
+  source_projection_action: z.enum(['delete_projection', 'move_to_home']).optional(),
+});
 
 // GET /api/courses
 router.get('/', (req: AuthRequest, res: Response) => {
@@ -157,26 +163,29 @@ router.get('/:id/summary', (req: AuthRequest, res: Response) => {
   });
 });
 
+// GET /api/courses/:id/delete-impact
+router.get('/:id/delete-impact', (req: AuthRequest, res: Response) => {
+  res.json(getProjectDeletionImpact(getDb(), req.userId!, String(req.params.id)));
+});
+
 // DELETE /api/courses/:id
 router.delete('/:id', (req: AuthRequest, res: Response) => {
-  const db = getDb();
-  const courseId = String(req.params.id);
-
-  const existing = db.prepare('SELECT * FROM courses WHERE id = ? AND user_id = ?')
-    .get(courseId, req.userId!) as any;
-  if (!existing) {
-    throw new AppError(404, 'Course not found');
+  try {
+    const input = deleteProjectSchema.parse(req.body || {});
+    const result = deleteProjectWithSourcePolicy(
+      getDb(),
+      req.userId!,
+      String(req.params.id),
+      input.source_projection_action,
+    );
+    res.json({ message: 'Project deleted', ...result });
+  } catch (error) {
+    if (error instanceof ZodError) {
+      res.status(400).json({ error: 'Validation error', details: error.errors });
+      return;
+    }
+    throw error;
   }
-
-  assertCourseCanDelete(existing);
-
-  db.transaction(() => {
-    releaseCourseCanvasAssets(db, req.userId!, courseId);
-    // CASCADE handles related data deletion via FK constraints after asset teardown.
-    db.prepare('DELETE FROM courses WHERE id = ?').run(courseId);
-  })();
-
-  res.json({ message: 'Course deleted' });
 });
 
 export default router;
