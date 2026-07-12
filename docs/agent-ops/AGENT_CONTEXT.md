@@ -29,7 +29,7 @@
 
 - **主线分支**:`codex/v2-bn-canvas-engine`(即 "Better Notebook" 线)。这是进度最快、且真正的主线。
 - **版本号体系**:`V2.BN.x`。旧的 `v2.0–v2.5.6` 已是**已关闭的工程地基路线图**(`Coincides-Roadmap.md`),其部分产品哲学(如 block-first)已过时。
-- **当前前沿**:`V2.BN.10.4 Source Library And Project Experience`。V2.BN.8 Canvas Engine 已封版，V2.BN.9 Purpose Foundation 已完成，V2.BN.10.1–10.3 Source identity、file lifecycle 与 atomic materialization 已于 2026-07-11 工程收口。
+- **当前前沿**:`V2.BN.10.4 + 10.5` Source 联合浏览器 / 对抗收口门。V2.BN.8 Canvas Engine 已封版，V2.BN.9 Purpose Foundation 已完成，V2.BN.10.1–10.5 均已工程实现并通过自动化门；联合浏览器回执尚未返回，因此 V2.BN.10 仍不能标记为 fully closed。
 - 路线图:`docs/Coincides-Better-Notebook-Roadmap.md`。
 
 ## 4. 四大支柱与当前状态(摘要;**权威细节见 `current-state/`**)
@@ -41,7 +41,7 @@
 3. **Canvas Engine** —— 空间/布局真相。V2.BN.8 自研最小混合引擎与普通对象家族已工程封版(见 ADR-0001)，后续成熟度工作按路线图继续。
 4. **Agent + Graph Database** —— **未开始**,前三支柱稳定前不碰。
 
-当前横切地基：**Source**。V2.BN.10.1 已建立四层身份脊柱与 Home / receipt 接缝，10.2 已完成真实文件 intake 与存储补偿，10.3 已完成 transient SourceArtifact、parser claim/retry、原子 SourceProjection 发布、写守卫与 legacy scanner 隔离；Source Library / Project experience、删除补偿与后续生命周期仍以 V2.BN.10 纵切为准。
+当前横切地基：**Source**。V2.BN.10.1 已建立四层身份脊柱与 Home / receipt 接缝，10.2 已完成真实文件 intake 与存储补偿，10.3 已完成 transient SourceArtifact、parser claim/retry、原子 SourceProjection 发布、写守卫与 legacy scanner 隔离；10.4 已实现共享 Source Library / Project Sources、状态感知打开、认证原件双开与显式 SourceProjection 锁；10.5 已完成 Project 动态删除、move-to-Home、Source quarantine hard delete、receipt 降级、文件清理重试与 lifecycle registry。当前只剩 10.4 + 10.5 联合浏览器真实旅程未签收。
 
 ## 5. 当前生效的决策 (active ADR)
 

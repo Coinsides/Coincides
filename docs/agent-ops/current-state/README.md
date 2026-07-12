@@ -15,11 +15,11 @@ Read before any non-trivial work, together with `PRODUCT.md`, `../DOCUMENTATION-
 
 ## 1. Main line & version
 
-> **2026-07-11 authoritative override:** V2.BN.8 Canvas Engine is closed, V2.BN.9 Purpose Foundation is complete, and V2.BN.10 Source is active. V2.BN.10.1–10.3 identity, file lifecycle, parser and atomic materialization are engineering-complete; the next active subversion is **V2.BN.10.4 Source Library And Project Experience**. Older lines in this file that route directly from 8.11 to ContentGroup projection are stale.
+> **2026-07-11 authoritative override:** V2.BN.8 Canvas Engine is closed, V2.BN.9 Purpose Foundation is complete, and the V2.BN.10 Source Floor is engineering-complete. V2.BN.10.1–10.5 are implemented and pass automated engineering gates; the combined V2.BN.10.4 + 10.5 third-party browser journey remains pending, so V2.BN.10 is not yet fully closed. Older lines that route directly from 8.11 to ContentGroup projection are stale.
 
 - **Main-line branch**: `codex/v2-bn-canvas-engine` ("Better Notebook" line). Fastest-moving and the real main line — not a side branch, not "finish-then-merge-back".
 - **Version system**: `V2.BN.x`. The old `v2.0–v2.5.6` line is a **closed engineering-foundation roadmap** (`docs/Coincides-Roadmap.md`); some of its product philosophy is outdated (notably **block-first**, now replaced by **TextFlow-first / ContentGroup-aware**).
-- **Current frontier**: `V2.BN.10.4 Source Library And Project Experience`（10.1–10.3 已闭合 Source identity、文件收存、transient SourceArtifact、parser claim/retry、原子投影与写边界；下一步把真实状态接入用户体验）。
+- **Current frontier**: combined `V2.BN.10.4 + 10.5` Source experience / lifecycle browser closure gate（工程实现已完成；在 handoff 返回结论前不伪写成 V2.BN.10 fully closed）。
 - Roadmap: `docs/Coincides-Better-Notebook-Roadmap.md`.
 
 ## 2. Tech snapshot
@@ -66,7 +66,9 @@ Strict dependency order. **Do not work on a later pillar before the earlier ones
 - **Identity seams complete**: per-user hash uniqueness, placement uniqueness, one-run v1 rule, Home system course identity, `notes.note_class`, receipt columns, canvas-backing system classification, and `stale` status roundtrip coverage.
 - **V2.BN.10.2 complete (2026-07-11)**: managed multipart temp intake, format/magic validation, server-authoritative SHA-256, staging-to-ready blob commit, hash deduplication with cross-Project placement, safe list/detail/blob endpoints, typed missing-blob diagnostics, and startup reconciliation sweep.
 - **V2.BN.10.3 complete (2026-07-11)**: versioned transient `source-artifact.v1`; PDF/DOCX/TXT/Markdown/image parser registry and resource/error gates; conditional claim/retry and startup recovery; atomic text/image SourceProjection publication; server write guards, client read-only policy seam, and legacy scanner exclusion.
-- **Not yet built**: Source Library / Project Sources experience, complete SourceProjection controls/status UX, Course-delete migration policy, Source hard-delete compensation, and legacy Documents migration.
+- **V2.BN.10.4 engineering-complete (2026-07-11; browser gate pending)**: real Source Library and Project Sources share one DTO/status/open/upload path; client hash precheck and automatic materialize trigger; active-only visibility-aware polling; authenticated original preview/download; search/type/status filters; cross-Project dedup placement visibility; legacy Documents intake retired; SourceProjection title/text/layout/object controls visibly locked while Annotation/ContentGroup/Purpose seams remain.
+- **V2.BN.10.5 engineering-complete (2026-07-11; combined browser gate pending)**: Project deletion now has an impact query, server-derived dynamic default and explicit delete-projection / move-to-Home branches; Source hard delete uses same-volume quarantine, DB compensation and durable managed-file cleanup retry; receipt FKs degrade with `SET NULL` while excerpt/locator/mode survive; course-scoped tables are covered by a machine-checked lifecycle registry; Source and Project deletion dialogs expose these consequences before mutation.
+- **Not yet built**: legacy Documents / SourceAnchor / SourceSnapshot migration, Source replacement/rebuild/publication, and a user-facing cleanup-job operations surface. Deleting a Source with an active materialization is deliberately blocked rather than cancelling the run. The combined 10.4 + 10.5 browser/adversarial result remains pending in its `to: claude` handoff.
 
 ### Pillar 4 — Agent + Graph Database
 - **Not started** on the v2/BN line. The embedding pipeline is intentionally disconnected; relation runtime / GraphRAG are not yet timely.
@@ -74,7 +76,7 @@ Strict dependency order. **Do not work on a later pillar before the earlier ones
 
 ## 4. Watch list (known open items, not necessarily defects)
 
-- **Source experience** — 10.1–10.3 close identity, file lifecycle and atomic materialization; 10.4 must expose those durable states without creating a second upload/parser/projection truth in the client.
+- **Source closure gate** — 10.4/10.5 expose the durable Source states and deletion lifecycles through shared client models; third-party browser review must still verify real file journeys, authenticated blob opening, cross-Project dedup visibility, SourceProjection lock, Project dynamic delete defaults, move-to-Home preservation, Source hard-delete warnings, and Console/Network cleanliness.
 - **TextFlow Typography** — baseline exists, but rich inline style truth and measured pagination remain unfrozen.
 - **Contract layer** — most `docs/contracts/` files are `draft` / `deferred`; do not treat them as authoritative until marked `frozen`.
 - **UI-mode growth** (Page / Canvas / ContentGroup / Gallery / Rail / Editor) — growing but currently controlled.
