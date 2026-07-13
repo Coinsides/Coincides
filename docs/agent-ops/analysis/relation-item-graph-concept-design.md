@@ -119,7 +119,11 @@ CREATE TABLE relation_assessments (        -- AI 署名判定(人判永不代签
 
 -- 既有表(全部 additive):
 --   purpose_members.member_kind 加 'item' —— ★非一行改动:原子触点包 A(§7)
---   content_group_members 加 item_id REFERENCES items(id) ON DELETE SET NULL —— ★原子触点包 B(§7)
+--   content_group_members 加 item_id REFERENCES items(id) —— ★原子触点包 B(§7)
+--     ⚠️ 勘误(2026-07-13,11.2 复核):原写 ON DELETE SET NULL,与互斥 CHECK 组合成账号级联地雷——
+--     kind='item' 行上 SET NULL 一触发必违 CHECK,而账号级联时 items/members 处理顺序 SQLite 不保证,
+--     顺序不利则整个 DELETE FROM users 炸。改 **NO ACTION(无子句)**:直接删卡同样被拒(语句末检查,
+--     与 relations 端点 FK 同哲学),账号级联则顺序无关安全(语句末时 member 行已随 user_id 级联死亡)。
 --     + CHECK ((kind='item' AND item_id IS NOT NULL AND target_id IS NULL) OR (kind!='item' AND item_id IS NULL))
 --       (复核 M2:该表今零 CHECK、kind 写读双路静默强转——DB 层背书互斥,防双重知识身份。
 --        SQLite 加 CHECK=整表重建;**包 C 花瓣手术先行**使重建更便宜——034 花瓣表 FK 指向本表)
