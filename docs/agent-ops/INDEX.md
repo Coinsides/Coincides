@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 49 份文档。
+共 52 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -60,4 +60,7 @@
 | [handoffs/2026-07-12-v2bn11-concept-design-third-party-review.md](handoffs/2026-07-12-v2bn11-concept-design-third-party-review.md) | V2.BN.11 概念设计 · 第三者审读 | `(缺状态头)` | — | — |
 | [handoffs/2026-07-12-v2bn11-plan-commission.md](handoffs/2026-07-12-v2bn11-plan-commission.md) | V2.BN.11 Plan 委托单 | `(缺状态头)` | — | — |
 | [handoffs/2026-07-13-v2bn11-doctrine-sync-report.md](handoffs/2026-07-13-v2bn11-doctrine-sync-report.md) | V2.BN.11 开工前信息同步：plan 审阅结论 + gate 7 教义同步完成 | `(缺状态头)` | — | — |
+| [handoffs/2026-07-13-v2bn11-go-decision-and-11-1-authorization.md](handoffs/2026-07-13-v2bn11-go-decision-and-11-1-authorization.md) | V2.BN.11 Go 决定与 V2.BN.11.1 开工授权 | `(缺状态头)` | — | — |
+| [handoffs/2026-07-13-v2bn11.2-fix-r1-r2.md](handoffs/2026-07-13-v2bn11.2-fix-r1-r2.md) | V2.BN.11.2 修正单：R1 账号级联地雷 + R2 回滚断言补强 | `(缺状态头)` | — | — |
+| [handoffs/2026-07-13-v2bn11.2-kickoff-carry-list.md](handoffs/2026-07-13-v2bn11.2-kickoff-carry-list.md) | V2.BN.11.2 开工携带单（Migration 047 And ContentGroup Item Member… | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
