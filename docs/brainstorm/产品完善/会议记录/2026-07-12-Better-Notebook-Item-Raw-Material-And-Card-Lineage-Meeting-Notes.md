@@ -535,6 +535,8 @@ Henry 对个人记忆与 Agent 上下文采取相同态度：当一段交流正�
 
 Henry 当晚拍定概念设计 §6 全部五点（a 全局无墙 / b 种子词表九类 / c 遗产清场+legacy 学习画布页下架 / d 池宿主=CG 区 / e inspector 列表级）——Codex 第三者建议与 Claude 复核意见一致。设计文档 §6 已盖章（commit `ab97c01`）。**f–k 六项仍待拍**（见 handoff Result §R5；其中 h 已获本卷 §十六 的新实用理由）。
 
+> 追记：f–k 六项亦已于当日拍定（Henry："其实之前就已经判断好了，只是忘了告诉你"）——f 后继指针 / g 锚=使用收据+认领痕迹 / h 出处列且明确不做 applicability / i 单活边 / j 池 v1 人工流优先 / k 分歧登记簿立档（`docs/agent-ops/analysis/dissent-register.md`）。修正已折入概念设计 **v1.1**，§6 全清，进入 plan 阶段。
+
 ## 十五、Project=原目的：墙倒定律（候选）
 
 Henry 提出：Project 本身就是一份更宏大、更模糊、用户自己常难总结的**目的**——它为后续笔记的目的建环境。

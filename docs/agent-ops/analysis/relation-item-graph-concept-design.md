@@ -1,4 +1,4 @@
-> **状态 (Status)**: **v1**（2026-07-11;v0 经 3 维对抗核查 wplywx5yb 修正回填〔1 BLOCKER+6 HIGH 全收编〕;待 Henry 拍 §6 判断点 → 喂 V2.BN.11 plan〔Codex 撰写〕）
+> **状态 (Status)**: **v1.1**（2026-07-12;v0 经 3 维对抗核查 wplywx5yb 修正回填〔1 BLOCKER+6 HIGH 全收编〕→ v1;v1 经 Codex 第三者审读 + Claude 复核〔handoff `2026-07-12-v2bn11-codex-design-reflection-third-party-review.md` Result〕修正折入 → **v1.1**;**§6 判断点 a–k 全部拍定,可进 plan**〔Codex 撰写〕）
 > **层 (Layer)**: 现状 / Current-State（Agent 分析 · 概念设计,V2.BN.11 模型权威）
 > **模型来源**: Relation 会议记录 2026-07-11（§一~§二十,Henry 全部拍板）+ 老设计文档 + 07-10 稀疏教义;**核查台账**: 旧表活性盘点/V9-V10 接缝/schema 健全性,行号全实证
 > **实测免责横幅**: 数据模型层=硬结论;交互行为层=假设(标 ⚠️实测 者一律待模拟用户实测校准)
@@ -31,6 +31,7 @@
 ```
 - 卡=member 形状:**本体(可编辑作品)**+type/topic(固有标量)+N 锚;"用原句"=N=1 退化;
 - 收集≠成卡;原料=可重建派生物(不受心爱红线辖);铸卡=快铸/融铸(模式:直引/转述/蒸馏);
+- **锚=使用收据,非 canonical fragment**(判断点 g:canonical 事实归 Source Floor;同料多卡=多行锚,"同料"身份读时由 (source, target, range) 派生,不建 m2m);
 - **卡只退役不硬删**;合并=新卡承锚+旧卡退役;卡与卡永不融合只捆绑;
 - 端点=卡,句号;关系三真相(身份对/判断收据/关系本体);
 - 方向二分:内在方向住边,情景方向住圈边 order(现算);对称关系无向(等价/类比/对比/伴生=跨域主力);
@@ -48,6 +49,8 @@ CREATE TABLE items (
   plain_text TEXT NOT NULL,               -- ★快照/hash/收据一律按 plain_text 算(格式抖动不假漂移)
   item_type TEXT, topic TEXT,             -- 固有标量(自由文本;U4 池后置)
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','retired')),  -- ★退役不硬删
+  retired_into_item_id TEXT REFERENCES items(id) ON DELETE SET NULL,  -- ★后继指针(判断点 f):合并/取代指接棒卡;
+                                           --   拆分不塞单列(拆分=铸新卡+锚转移+退役,血统由共同锚读时派生)
   origin_course_id TEXT REFERENCES courses(id) ON DELETE SET NULL,
   origin_note_id TEXT REFERENCES notes(id) ON DELETE SET NULL,
   created_by TEXT NOT NULL DEFAULT 'user',
@@ -58,10 +61,11 @@ CREATE TABLE item_snapshots (              -- 快照去重(收据全文;未来�
   id, item_id REFERENCES items ON DELETE CASCADE, user_id,
   content TEXT NOT NULL,                   -- = plain_text at snapshot time
   content_hash TEXT NOT NULL, created_at,
-  UNIQUE(item_id, content_hash)            -- 重申未变=复用行(ON CONFLICT DO NOTHING+SELECT)
+  UNIQUE(item_id, content_hash),           -- 重申未变=复用行(ON CONFLICT DO NOTHING+SELECT)
+  UNIQUE(item_id, id)                      -- ★复合 FK 靶(供 relations 快照∈端点卡约束;id 已 PK,近零成本)
 );
 
-CREATE TABLE item_anchors (                -- 锚集+原料池(一表两态,§十五拍定"两种住法非新实体")
+CREATE TABLE item_anchors (                -- 锚集+原料池(一表两态,§十五拍定"两种住法非新实体";锚=使用收据〔判断点 g〕)
   id, user_id,
   item_id TEXT REFERENCES items(id) ON DELETE CASCADE,      -- NULL=原料(躺池);认领=UPDATE 移入(非复制)
   pool_scope_kind TEXT, pool_scope_id TEXT,                 -- 原料躺哪个池(判断点 d)
@@ -73,9 +77,11 @@ CREATE TABLE item_anchors (                -- 锚集+原料池(一表两态,§�
   reference_mode TEXT NOT NULL DEFAULT 'quote',
   source_record_id TEXT,                   -- 终端规则:锚定时从 note_block_sources 抄冻(copy-on-anchor,永不同步)
   collected_for TEXT,                      -- ★账本:为哪个任务/目的收的(§十七 出身分级退场依据)
+  claimed_at TEXT, claimed_by TEXT,        -- ★认领痕迹(判断点 g):候选→承重是生命周期跃迁,不从 updated_at 猜;AI 认领留署名
   metadata TEXT NOT NULL DEFAULT '{}', created_by, created_at, updated_at,  -- ★updated_at=多久没动
-  CHECK ((item_id IS NOT NULL AND pool_scope_kind IS NULL)
-      OR (item_id IS NULL AND pool_scope_kind IS NOT NULL))  -- ★两态互斥
+  CHECK ((item_id IS NOT NULL AND pool_scope_kind IS NULL AND pool_scope_id IS NULL)
+      OR (item_id IS NULL AND pool_scope_kind IS NOT NULL AND pool_scope_id IS NOT NULL))
+      -- ★两态互斥(复核补强:池态必须知道躺在哪个池,认领态不残留池坐标)
 );
 
 CREATE TABLE relations (
@@ -87,14 +93,23 @@ CREATE TABLE relations (
   from_snapshot_id TEXT NOT NULL REFERENCES item_snapshots(id),  -- ★判断收据;RESTRICT 语义:快照 GC 永不孤儿化收据
   to_snapshot_id   TEXT NOT NULL REFERENCES item_snapshots(id),
   note TEXT, created_by,
+  origin_purpose_id TEXT REFERENCES purposes(id) ON DELETE SET NULL,
+                                           -- ★纯出处收据(判断点 h):记判断发生的情景,AI 批次铸卡时代=批次把手;
+                                           --   **永不参与过滤语义(明确不做 applicability——情景不焊回身份)**
   status TEXT NOT NULL DEFAULT 'active',   -- 'active'|'revoked'(撤销留痕,稀疏教义)
   created_at, updated_at,
   affirmed_at TEXT NOT NULL,               -- ★NOT NULL,insert 时=created_at(创建即首次人判)
   CHECK (from_item_id != to_item_id),                                  -- ★禁自环
-  CHECK (directionality = 'directed' OR from_item_id < to_item_id)     -- ★无向边规范化存序(服务层换序)
+  CHECK (directionality = 'directed' OR from_item_id < to_item_id),    -- ★无向边规范化存序(服务层换序)
+  FOREIGN KEY (from_item_id, from_snapshot_id) REFERENCES item_snapshots(item_id, id),
+  FOREIGN KEY (to_item_id,   to_snapshot_id)   REFERENCES item_snapshots(item_id, id)
+      -- ★快照∈端点卡复合 FK(复核 M1):一条约束灭掉"收据指向别家卡的快照"=伪造判断收据(宪法级)。
+      --   注意:库内首例复合 FK(全库现状零复合 FK 已实证)——迁移必须带行为断言测试;
+      --   跨用户完整性仍走库内既有惯例(服务层 WHERE user_id 全程 scoping),不为纵深发明第二套习语
 );
 CREATE UNIQUE INDEX idx_relations_active
-  ON relations(from_item_id, to_item_id, relation_type) WHERE status = 'active';  -- ★部分唯一:撤销后可重建
+  ON relations(from_item_id, to_item_id, relation_type) WHERE status = 'active';
+  -- ★部分唯一:撤销后可重建(判断点 i 拍定:同对同型同一时刻一条活判断;异议走撤销重立+note,历史在收据)
 
 CREATE TABLE relation_assessments (        -- AI 署名判定(人判永不代签)
   id, relation_id REFERENCES relations ON DELETE CASCADE, user_id,   -- ★user_id 补上(全库惯例)
@@ -105,6 +120,9 @@ CREATE TABLE relation_assessments (        -- AI 署名判定(人判永不代签
 -- 既有表(全部 additive):
 --   purpose_members.member_kind 加 'item' —— ★非一行改动:原子触点包 A(§7)
 --   content_group_members 加 item_id REFERENCES items(id) ON DELETE SET NULL —— ★原子触点包 B(§7)
+--     + CHECK ((kind='item' AND item_id IS NOT NULL AND target_id IS NULL) OR (kind!='item' AND item_id IS NULL))
+--       (复核 M2:该表今零 CHECK、kind 写读双路静默强转——DB 层背书互斥,防双重知识身份。
+--        SQLite 加 CHECK=整表重建;**包 C 花瓣手术先行**使重建更便宜——034 花瓣表 FK 指向本表)
 ```
 
 **派生工单**:待体检边 = `endpoint.updated_at > max(relation.affirmed_at, 最新 assessment.created_at)`(affirmed_at NOT NULL 保证无 NULL 陷阱)。
@@ -114,9 +132,16 @@ CREATE TABLE relation_assessments (        -- AI 署名判定(人判永不代签
 
 改动触发(本体保存防抖)+阅读触发(读取时就地体检);空闲消化器 11.x 后置;判定=本地小模型/embedding(4060);原料纪律=协议非结构(AI 契约内建"有用才收"/人乱是权利/账本常开/AI 剩料自理署名/人堆策展提示);具名动词预留:重新盘点(re-inventory)。
 
+**地板边界三桩(复核钉定,判定模型可后移、以下三样不可)**:
+1. `relation_assessments` 表随 047 落(现在建近零成本,后补要重建);
+2. **机械新鲜度随 V11 read model 落**——快照 hash vs 当前 plain_text 比对,零模型零打扰;不落则关系静默腐烂,违 §0 交付 2;
+3. 认领入口的**存在性**属地板(见 §4)。
+
+**重申协议(plan 级)**:重申=单事务(两端快照 upsert〔UNIQUE(item_id,content_hash) 复用〕+双指针+affirmed_at)。assessment 不加失效旗——派生工单公式天然让新 affirmed_at 盖过旧判定。体检优先级 ∝ **使用度×漂移嫌疑**(常用×不忠实=唯一值得大声的象限;07-12 附录卷 §八同构)。
+
 ## 4. 交互层假设(⚠️实测)
 
-认领入口(划选快铸/池选融铸)⚠️;inspector 关系列表 ⚠️;新鲜度就地显示无全局红点 ⚠️;微观射线(内容渲染/主线支线读时排/侧栏浮层)⚠️;原料区形态与策展措辞 ⚠️。V11 只落 inspector 级列表。
+认领入口(划选快铸/池选融铸)——**存在性属地板(没有任何铸卡入口=V11 交付一批没人能放数据的表),形态⚠️实测**;inspector 关系列表 ⚠️;新鲜度就地显示无全局红点 ⚠️;微观射线(内容渲染/主线支线读时排/侧栏浮层)⚠️;原料区形态与策展措辞 ⚠️。V11 只落 inspector 级列表。
 
 ## 5. 遗产处置(核查活性盘点后的定案)
 
@@ -129,13 +154,19 @@ CREATE TABLE relation_assessments (        -- AI 署名判定(人判永不代签
 
 ## 6. 判断点(Henry 拍)
 
-> **拍板记录**:a–e 五点 Henry 于 2026-07-12 全部拍定支持(Codex 第三者建议与 Claude 复核意见一致)。本轮新增判断点 f–k 见 handoff `2026-07-12-v2bn11-codex-design-reflection-third-party-review.md` Result §R5,待拍。
+> **拍板记录**:a–e 五点 Henry 于 2026-07-12 拍定支持(Codex 第三者建议与 Claude 复核意见一致);f–k 六项(源自 Codex 第三者审读 + Claude 复核,handoff `2026-07-12-v2bn11-codex-design-reflection-third-party-review.md` Result §R5)同日拍定。**§6 全清,修正已折入本稿 v1.1,可进 plan。**
 
 - **a. 卡与关系全局无墙** ✅拍定 2026-07-12(source_records 先例逐字适用,核查证实无 course-JOIN 面会漏;唯一用户可见变化=删 course 不再抹知识,plan 写明)。
 - **b. 类型词表** ✅拍定 2026-07-12:种子九类+对称性内建(derives_to/depends_on/supports/contradicts/example_of 有向;equivalent_to/analogous_to/contrasts_with/companion_of 无向)+自由扩展留缝。
 - **c. 遗产清场范围** ✅拍定 2026-07-12:三表落表 + **legacy Courses 学习画布页整体下架**(数据 0 行,代码活着)——请确认该页可下架。
 - **d. 原料池宿主** ✅拍定 2026-07-12:CG 区起步(pool_scope_kind='content_group')。
 - **e. 读取面深度** ✅拍定 2026-07-12:inspector 列表级,图形零。
+- **f. 后继指针** ✅拍定 2026-07-12:items.retired_into_item_id(合并/取代=单后继;拆分不塞单列,血统由共同锚读时派生)。
+- **g. 锚=使用收据** ✅拍定 2026-07-12:非 canonical fragment;同料多卡=多行锚,不建 m2m;认领加 claimed_at/claimed_by。
+- **h. 关系出处列** ✅拍定 2026-07-12:加 origin_purpose_id 纯收据;**明确不做 applicability**(情景不焊回身份)。
+- **i. 单活边** ✅拍定 2026-07-12:同对同型同一时刻一条活判断;异议走撤销重立+note。
+- **j. 池 v1 人工流优先** ✅拍定 2026-07-12:成熟 Agent 出现前不开 AI 批量自动收料。
+- **k. 分歧登记簿** ✅拍定 2026-07-12(流程项):已立档 `docs/agent-ops/analysis/dissent-register.md`。
 
 ## 7. 原子触点包(给 plan 的施工纪律——核查三 HIGH 的直接产物)
 
