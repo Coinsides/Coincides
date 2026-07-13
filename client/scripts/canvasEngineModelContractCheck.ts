@@ -287,6 +287,7 @@ import {
   createContentGroupMemberFromAnnotation,
   createContentGroupMemberFromPageSliceSnapshot,
   createContentGroupMemberFromRange,
+  contentGroupMemberIdentityKey,
   markContentGroupMemberIntegrity,
   moveContentGroupToFolder,
   normalizeContentGroup,
@@ -5127,6 +5128,33 @@ function testContentGroupMemberSourceBoundary(): void {
   const missing = compareContentGroupMemberWithSource(refreshed, missingResolver, '2026-06-22T00:02:00.000Z');
   assertEqual(missing.source_sync_status, 'missing', 'compare-with-source marks missing source');
   assertEqual(missing.current_content, 'Power series updated', 'missing source keeps member truth intact');
+
+  const itemMember = normalizeContentGroupMember({
+    id: 'item-member-boundary',
+    kind: 'item',
+    item_id: 'item-boundary',
+    target_id: 'legacy-target-must-not-survive',
+    preview_text: 'Durable Item preview',
+    order_index: 0,
+    metadata: { receipt: 'kept' },
+  });
+  assertEqual(itemMember.kind, 'item', 'Item membership kind survives client normalization');
+  assertEqual(itemMember.item_id, 'item-boundary', 'Item membership identity survives client normalization');
+  assertEqual(itemMember.target_id, null, 'Item membership never reuses the legacy target_id coordinate');
+  assertEqual(itemMember.metadata?.receipt, 'kept', 'Item membership metadata survives client normalization');
+  assertEqual(contentGroupMemberIdentityKey(itemMember), 'item|item-boundary', 'Item membership dedupes by durable Item identity');
+
+  const malformedItemMember = normalizeContentGroupMember({
+    id: 'missing-item-member-boundary',
+    kind: 'item',
+    item_id: null,
+    target_id: null,
+    preview_text: 'Cached Item preview',
+    order_index: 1,
+  });
+  assertEqual(malformedItemMember.kind, 'item', 'missing Item edge is not coerced to content_range');
+  assertEqual(malformedItemMember.source_sync_status, 'missing', 'missing Item edge is exposed as missing');
+  assertEqual(malformedItemMember.metadata?.integrity_status, 'orphaned', 'missing Item edge is exposed as orphaned');
 }
 
 function testContentGroupReuseBoundary(): void {

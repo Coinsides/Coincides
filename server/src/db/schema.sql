@@ -908,76 +908,6 @@ CREATE INDEX IF NOT EXISTS idx_canvas_nodes_scope ON canvas_nodes(source_scope_i
 CREATE INDEX IF NOT EXISTS idx_canvas_nodes_anchor ON canvas_nodes(source_anchor_id);
 CREATE INDEX IF NOT EXISTS idx_canvas_nodes_board_node ON canvas_nodes(source_board_node_id);
 
-CREATE TABLE IF NOT EXISTS canvas_edges (
-  id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  course_id TEXT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
-  canvas_id TEXT NOT NULL REFERENCES learning_canvases(id) ON DELETE CASCADE,
-  source_node_id TEXT NOT NULL REFERENCES canvas_nodes(id) ON DELETE CASCADE,
-  source_port TEXT NOT NULL DEFAULT 'right',
-  target_node_id TEXT REFERENCES canvas_nodes(id) ON DELETE SET NULL,
-  target_port TEXT,
-  loose_target_x REAL,
-  loose_target_y REAL,
-  object_relation_id TEXT REFERENCES object_relations(id) ON DELETE SET NULL,
-  relation_layer_id TEXT REFERENCES relation_layers(id) ON DELETE SET NULL,
-  relation_kind TEXT,
-  label TEXT,
-  connection_state TEXT NOT NULL DEFAULT 'visual_only',
-  style_key TEXT NOT NULL DEFAULT 'default',
-  status TEXT NOT NULL DEFAULT 'active',
-  metadata TEXT NOT NULL DEFAULT '{}',
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-CREATE INDEX IF NOT EXISTS idx_canvas_edges_canvas_status ON canvas_edges(canvas_id, status);
-CREATE INDEX IF NOT EXISTS idx_canvas_edges_nodes ON canvas_edges(source_node_id, target_node_id);
--- v2.4.4 relation/layer indexes are created by migration 024.
--- Keeping them out of schema.sql lets existing pre-v2.4.4 databases run migrations
--- before indexes reference newly-added columns.
-
-CREATE TABLE IF NOT EXISTS relation_layers (
-  id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  course_id TEXT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
-  canvas_id TEXT REFERENCES learning_canvases(id) ON DELETE CASCADE,
-  title TEXT NOT NULL,
-  layer_kind TEXT NOT NULL,
-  visibility TEXT NOT NULL DEFAULT 'visible',
-  status TEXT NOT NULL DEFAULT 'active',
-  order_index INTEGER NOT NULL DEFAULT 0,
-  metadata TEXT NOT NULL DEFAULT '{}',
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(user_id, course_id, canvas_id, layer_kind)
-);
-CREATE INDEX IF NOT EXISTS idx_relation_layers_course_canvas ON relation_layers(user_id, course_id, canvas_id, status, order_index);
-
-CREATE TABLE IF NOT EXISTS object_relations (
-  id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  course_id TEXT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
-  source_type TEXT NOT NULL,
-  source_id TEXT NOT NULL,
-  target_type TEXT NOT NULL,
-  target_id TEXT NOT NULL,
-  relation_type TEXT NOT NULL,
-  status TEXT NOT NULL DEFAULT 'accepted',
-  visibility TEXT NOT NULL DEFAULT 'visible',
-  confidence REAL,
-  source_canvas_edge_id TEXT,
-  relation_layer_id TEXT REFERENCES relation_layers(id) ON DELETE SET NULL,
-  created_by TEXT NOT NULL DEFAULT 'user',
-  label TEXT,
-  metadata TEXT NOT NULL DEFAULT '{}',
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-CREATE INDEX IF NOT EXISTS idx_object_relations_course_status ON object_relations(user_id, course_id, status);
-CREATE INDEX IF NOT EXISTS idx_object_relations_source ON object_relations(user_id, course_id, source_type, source_id);
-CREATE INDEX IF NOT EXISTS idx_object_relations_target ON object_relations(user_id, course_id, target_type, target_id);
-CREATE INDEX IF NOT EXISTS idx_object_relations_canvas_edge ON object_relations(source_canvas_edge_id);
-
 CREATE TABLE IF NOT EXISTS canvas_frames (
   id TEXT PRIMARY KEY,
   user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -1009,6 +939,131 @@ CREATE TABLE IF NOT EXISTS canvas_viewport_states (
   UNIQUE(user_id, canvas_id)
 );
 CREATE INDEX IF NOT EXISTS idx_canvas_viewport_states_canvas ON canvas_viewport_states(canvas_id, user_id);
+
+-- ============================================================
+-- 30. V2.BN.11 Item Identity And Relation Truth Floor
+-- ============================================================
+CREATE TABLE IF NOT EXISTS items (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  body_json TEXT NOT NULL DEFAULT '{}',
+  plain_text TEXT NOT NULL,
+  item_type TEXT,
+  topic TEXT,
+  status TEXT NOT NULL DEFAULT 'active'
+    CHECK (status IN ('active', 'retired')),
+  retired_into_item_id TEXT REFERENCES items(id) ON DELETE SET NULL,
+  origin_course_id TEXT REFERENCES courses(id) ON DELETE SET NULL,
+  origin_note_id TEXT REFERENCES notes(id) ON DELETE SET NULL,
+  created_by TEXT NOT NULL DEFAULT 'user',
+  metadata TEXT NOT NULL DEFAULT '{}',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_items_user_status_updated
+  ON items(user_id, status, updated_at);
+CREATE INDEX IF NOT EXISTS idx_items_origin_course
+  ON items(user_id, origin_course_id);
+CREATE INDEX IF NOT EXISTS idx_items_origin_note
+  ON items(user_id, origin_note_id);
+CREATE INDEX IF NOT EXISTS idx_items_retired_into
+  ON items(retired_into_item_id);
+
+CREATE TABLE IF NOT EXISTS item_snapshots (
+  id TEXT PRIMARY KEY,
+  item_id TEXT NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  content_hash TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(item_id, content_hash),
+  UNIQUE(item_id, id)
+);
+CREATE INDEX IF NOT EXISTS idx_item_snapshots_user_item_created
+  ON item_snapshots(user_id, item_id, created_at);
+
+CREATE TABLE IF NOT EXISTS item_anchors (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  item_id TEXT REFERENCES items(id) ON DELETE CASCADE,
+  pool_scope_kind TEXT,
+  pool_scope_id TEXT,
+  target_kind TEXT NOT NULL,
+  target_id TEXT NOT NULL,
+  range_json TEXT,
+  excerpt TEXT NOT NULL,
+  reference_mode TEXT NOT NULL DEFAULT 'quote',
+  source_record_id TEXT REFERENCES source_records(id) ON DELETE SET NULL,
+  collected_for TEXT,
+  claimed_at TEXT,
+  claimed_by TEXT,
+  metadata TEXT NOT NULL DEFAULT '{}',
+  created_by TEXT NOT NULL DEFAULT 'user',
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  CHECK (
+    (item_id IS NOT NULL AND pool_scope_kind IS NULL AND pool_scope_id IS NULL)
+    OR
+    (item_id IS NULL AND pool_scope_kind IS NOT NULL AND pool_scope_id IS NOT NULL)
+  )
+);
+CREATE INDEX IF NOT EXISTS idx_item_anchors_user_item
+  ON item_anchors(user_id, item_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_item_anchors_pool
+  ON item_anchors(user_id, pool_scope_kind, pool_scope_id, updated_at);
+CREATE INDEX IF NOT EXISTS idx_item_anchors_target
+  ON item_anchors(user_id, target_kind, target_id);
+CREATE INDEX IF NOT EXISTS idx_item_anchors_source_record
+  ON item_anchors(source_record_id);
+
+CREATE TABLE IF NOT EXISTS relations (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  from_item_id TEXT NOT NULL REFERENCES items(id),
+  to_item_id TEXT NOT NULL REFERENCES items(id),
+  relation_type TEXT NOT NULL,
+  directionality TEXT NOT NULL DEFAULT 'directed'
+    CHECK (directionality IN ('directed', 'undirected')),
+  from_snapshot_id TEXT NOT NULL REFERENCES item_snapshots(id),
+  to_snapshot_id TEXT NOT NULL REFERENCES item_snapshots(id),
+  note TEXT,
+  created_by TEXT NOT NULL DEFAULT 'user',
+  origin_purpose_id TEXT REFERENCES purposes(id) ON DELETE SET NULL,
+  status TEXT NOT NULL DEFAULT 'active'
+    CHECK (status IN ('active', 'revoked')),
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  affirmed_at TEXT NOT NULL,
+  CHECK (from_item_id != to_item_id),
+  CHECK (directionality = 'directed' OR from_item_id < to_item_id),
+  FOREIGN KEY (from_item_id, from_snapshot_id)
+    REFERENCES item_snapshots(item_id, id),
+  FOREIGN KEY (to_item_id, to_snapshot_id)
+    REFERENCES item_snapshots(item_id, id)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_relations_active
+  ON relations(from_item_id, to_item_id, relation_type)
+  WHERE status = 'active';
+CREATE INDEX IF NOT EXISTS idx_relations_user_from_status
+  ON relations(user_id, from_item_id, status, updated_at);
+CREATE INDEX IF NOT EXISTS idx_relations_user_to_status
+  ON relations(user_id, to_item_id, status, updated_at);
+CREATE INDEX IF NOT EXISTS idx_relations_origin_purpose
+  ON relations(origin_purpose_id);
+
+CREATE TABLE IF NOT EXISTS relation_assessments (
+  id TEXT PRIMARY KEY,
+  relation_id TEXT NOT NULL REFERENCES relations(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  verdict TEXT NOT NULL
+    CHECK (verdict IN ('still_holds', 'questionable')),
+  model_key TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+CREATE INDEX IF NOT EXISTS idx_relation_assessments_relation_created
+  ON relation_assessments(relation_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_relation_assessments_user_created
+  ON relation_assessments(user_id, created_at);
 
 -- ============================================================
 -- 30.1 V2.BN.8.7.1 ContentGroup Root Entity
@@ -1066,6 +1121,7 @@ CREATE TABLE IF NOT EXISTS content_group_members (
 
   kind TEXT NOT NULL,
   target_id TEXT,
+  item_id TEXT REFERENCES items(id),
   label TEXT,
 
   current_content TEXT,
@@ -1078,7 +1134,12 @@ CREATE TABLE IF NOT EXISTS content_group_members (
   order_index INTEGER NOT NULL DEFAULT 0,
   metadata TEXT NOT NULL DEFAULT '{}',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  CHECK (
+    (kind = 'item' AND item_id IS NOT NULL AND target_id IS NULL)
+    OR
+    (kind != 'item' AND item_id IS NULL)
+  )
 );
 CREATE INDEX IF NOT EXISTS idx_content_group_members_group_order
   ON content_group_members(user_id, content_group_id, order_index);
@@ -1086,68 +1147,10 @@ CREATE INDEX IF NOT EXISTS idx_content_group_members_course_note
   ON content_group_members(user_id, course_id, note_id);
 CREATE INDEX IF NOT EXISTS idx_content_group_members_target
   ON content_group_members(user_id, kind, target_id);
+CREATE INDEX IF NOT EXISTS idx_content_group_members_item
+  ON content_group_members(user_id, item_id);
 CREATE INDEX IF NOT EXISTS idx_content_group_members_source_status
   ON content_group_members(user_id, source_sync_status);
-
-CREATE TABLE IF NOT EXISTS content_group_fragments (
-  id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  content_group_id TEXT NOT NULL REFERENCES content_groups(id) ON DELETE CASCADE,
-  course_id TEXT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
-  note_id TEXT REFERENCES notes(id) ON DELETE SET NULL,
-  source_member_id TEXT NOT NULL REFERENCES content_group_members(id) ON DELETE CASCADE,
-  content_range_json TEXT,
-  label TEXT,
-  preview_text TEXT,
-  status TEXT NOT NULL DEFAULT 'active',
-  order_index INTEGER NOT NULL DEFAULT 0,
-  metadata TEXT NOT NULL DEFAULT '{}',
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-CREATE INDEX IF NOT EXISTS idx_content_group_fragments_group_order
-  ON content_group_fragments(user_id, content_group_id, order_index);
-CREATE INDEX IF NOT EXISTS idx_content_group_fragments_source_member
-  ON content_group_fragments(user_id, source_member_id);
-CREATE INDEX IF NOT EXISTS idx_content_group_fragments_course_note
-  ON content_group_fragments(user_id, course_id, note_id);
-
-CREATE TABLE IF NOT EXISTS content_group_petals (
-  id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  content_group_id TEXT NOT NULL REFERENCES content_groups(id) ON DELETE CASCADE,
-  course_id TEXT NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
-  note_id TEXT REFERENCES notes(id) ON DELETE SET NULL,
-  label TEXT NOT NULL,
-  role TEXT,
-  summary TEXT,
-  status TEXT NOT NULL DEFAULT 'active',
-  order_index INTEGER NOT NULL DEFAULT 0,
-  members_json TEXT NOT NULL DEFAULT '[]',
-  metadata TEXT NOT NULL DEFAULT '{}',
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-CREATE INDEX IF NOT EXISTS idx_content_group_petals_group_order
-  ON content_group_petals(user_id, content_group_id, order_index);
-CREATE INDEX IF NOT EXISTS idx_content_group_petals_course_note
-  ON content_group_petals(user_id, course_id, note_id);
-
-CREATE TABLE IF NOT EXISTS content_group_petal_fragments (
-  id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  content_group_id TEXT NOT NULL REFERENCES content_groups(id) ON DELETE CASCADE,
-  petal_id TEXT NOT NULL REFERENCES content_group_petals(id) ON DELETE CASCADE,
-  fragment_id TEXT NOT NULL REFERENCES content_group_fragments(id) ON DELETE CASCADE,
-  order_index INTEGER NOT NULL DEFAULT 0,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(user_id, petal_id, fragment_id)
-);
-CREATE INDEX IF NOT EXISTS idx_content_group_petal_fragments_petal_order
-  ON content_group_petal_fragments(user_id, petal_id, order_index);
-CREATE INDEX IF NOT EXISTS idx_content_group_petal_fragments_fragment
-  ON content_group_petal_fragments(user_id, fragment_id);
 
 CREATE TABLE IF NOT EXISTS group_folders (
   id TEXT PRIMARY KEY,

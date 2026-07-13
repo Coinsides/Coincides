@@ -33,24 +33,16 @@ import {
 } from '../services/sourceBoards.js';
 import {
   archiveCanvasNode,
-  archiveCanvasEdge,
-  bindCanvasEdgeRelation,
-  createCanvasEdge,
   archiveLearningCanvas,
   createCanvasNoteBlock,
   createCanvasNode,
-  getCanvasCommandContext,
   createLearningCanvas,
   getCanvasNodeJumpTarget,
-  getLearningCanvasDetail,
-  listObjectRelations,
-  listRelationLayers,
+  listCanvasNodes,
   listLearningCanvases,
   restoreCanvasNode,
-  restoreCanvasEdge,
   restoreLearningCanvas,
   seedCanvasFromSourceBoard,
-  unbindCanvasEdgeRelation,
   updateCanvasNode,
   updateCanvasViewport,
 } from '../services/learningCanvases.js';
@@ -204,7 +196,7 @@ test('v2.3.3 source board migration creates additive board tables', async () => 
   });
 });
 
-test('v2.4.0 learning canvas migration creates additive canvas tables', async () => {
+test('post-047 learning canvas projection tables remain while legacy edges are retired', async () => {
   await withDb((db) => {
     const tableNames = db
       .prepare("SELECT name FROM sqlite_master WHERE type = 'table'")
@@ -214,43 +206,31 @@ test('v2.4.0 learning canvas migration creates additive canvas tables', async ()
     for (const tableName of [
       'learning_canvases',
       'canvas_nodes',
-      'canvas_edges',
       'canvas_frames',
       'canvas_viewport_states',
     ]) {
       assert.equal(tableNames.includes(tableName), true, `${tableName} should exist`);
     }
+    assert.equal(tableNames.includes('canvas_edges'), false);
   });
 });
 
-test('v2.4.4 relation migration creates edge relation and layer structures', async () => {
+test('post-047 item and relation floor replaces legacy relation structures', async () => {
   await withDb((db) => {
     const tableNames = db
       .prepare("SELECT name FROM sqlite_master WHERE type = 'table'")
       .all()
       .map((row: any) => row.name);
 
-    assert.equal(tableNames.includes('canvas_edges'), true);
-    assert.equal(tableNames.includes('object_relations'), true);
-    assert.equal(tableNames.includes('relation_layers'), true);
-
-    const edgeColumns = db.prepare('PRAGMA table_info(canvas_edges)').all().map((row: any) => row.name);
-    for (const columnName of [
-      'source_port',
-      'target_port',
-      'loose_target_x',
-      'loose_target_y',
-      'object_relation_id',
-      'relation_layer_id',
-      'connection_state',
-      'style_key',
-    ]) {
-      assert.equal(edgeColumns.includes(columnName), true, `${columnName} should exist`);
+    for (const tableName of ['canvas_edges', 'object_relations', 'relation_layers']) {
+      assert.equal(tableNames.includes(tableName), false, `${tableName} should be retired`);
     }
+    assert.equal(tableNames.includes('items'), true);
+    assert.equal(tableNames.includes('relations'), true);
   });
 });
 
-test('v2.4.4 startup upgrades an existing pre-relation canvas_edges table', async () => {
+test('post-047 startup retires an existing pre-relation canvas_edges table', async () => {
   const dir = mkdtempSync(join(tmpdir(), 'coincides-v244-old-edge-'));
   const dbPath = join(dir, 'test.db');
 
@@ -275,17 +255,10 @@ test('v2.4.4 startup upgrades an existing pre-relation canvas_edges table', asyn
     oldDb.close();
 
     const db = await initDb(dbPath);
-    const columns = db.prepare('PRAGMA table_info(canvas_edges)').all() as Array<{ name: string; notnull: number }>;
-    const columnNames = columns.map((column) => column.name);
-    assert.ok(columnNames.includes('object_relation_id'));
-    assert.ok(columnNames.includes('relation_layer_id'));
-    assert.equal(columns.find((column) => column.name === 'target_node_id')?.notnull, 0);
-
-    const indexes = db.prepare("SELECT name FROM sqlite_master WHERE type = 'index' AND tbl_name = 'canvas_edges'")
-      .all()
-      .map((row: any) => row.name);
-    assert.ok(indexes.includes('idx_canvas_edges_relation'));
-    assert.ok(indexes.includes('idx_canvas_edges_layer'));
+    const edgeTable = db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'canvas_edges'").get();
+    const migration = db.prepare("SELECT id FROM db_migrations WHERE id = '047_v2_item_relation_floor'").get();
+    assert.equal(edgeTable, undefined);
+    assert.ok(migration);
   } finally {
     closeDb();
     rmSync(dir, { recursive: true, force: true });
@@ -1937,9 +1910,7 @@ test('learning canvas nodes reference targets without mutating source board node
     assert.equal(node.height, 180);
     assert.deepEqual(db.prepare('SELECT * FROM source_board_nodes WHERE id = ?').get(boardNode.id), beforeBoardNode);
 
-    const detail = getLearningCanvasDetail(db, userId, canvas.id) as any;
-    assert.equal(detail.canvas.id, canvas.id);
-    assert.equal(detail.nodes.length, 1);
+    assert.equal((listCanvasNodes(db, userId, canvas.id, { status: 'active' }) as any[]).length, 1);
 
     const jump = getCanvasNodeJumpTarget(db, userId, node.id) as any;
     assert.equal(jump.node.id, node.id);
@@ -1994,9 +1965,9 @@ test('learning canvas node layout updates persist only projection layout', async
     assert.equal(updated.height, 220);
     assert.deepEqual(db.prepare('SELECT * FROM source_board_nodes WHERE id = ?').get(boardNode.id), beforeBoardNode);
 
-    const detail = getLearningCanvasDetail(db, userId, canvas.id) as any;
-    assert.equal(detail.nodes[0].x, 144);
-    assert.equal(detail.nodes[0].y, 288);
+    const persistedNode = (listCanvasNodes(db, userId, canvas.id, { status: 'active' }) as any[])[0];
+    assert.equal(persistedNode.x, 144);
+    assert.equal(persistedNode.y, 288);
   });
 });
 
@@ -2032,16 +2003,15 @@ test('learning canvas seeding from source boards is idempotent and skips archive
 
     assert.equal(firstSeed.nodes_created_count, 1);
     assert.equal(secondSeed.nodes_created_count, 0);
-    assert.equal((getLearningCanvasDetail(db, userId, canvas.id) as any).nodes.length, 1);
+    assert.equal((listCanvasNodes(db, userId, canvas.id, { status: 'active' }) as any[]).length, 1);
 
-    const seededNode = (getLearningCanvasDetail(db, userId, canvas.id) as any).nodes[0];
+    const seededNode = (listCanvasNodes(db, userId, canvas.id, { status: 'active' }) as any[])[0];
     archiveCanvasNode(db, userId, seededNode.id);
     const restoredSeed = seedCanvasFromSourceBoard(db, userId, canvas.id, board.id) as any;
-    const restoredDetail = getLearningCanvasDetail(db, userId, canvas.id) as any;
     assert.equal(restoredSeed.nodes_created_count, 0);
     assert.equal(restoredSeed.nodes_restored_count, 1);
-    assert.equal(restoredDetail.nodes.length, 1);
-    assert.equal(restoredDetail.archived_nodes.length, 0);
+    assert.equal((listCanvasNodes(db, userId, canvas.id, { status: 'active' }) as any[]).length, 1);
+    assert.equal((listCanvasNodes(db, userId, canvas.id, { status: 'archived' }) as any[]).length, 0);
 
     archiveSourceBoard(db, userId, board.id);
     assert.throws(() => seedCanvasFromSourceBoard(db, userId, canvas.id, board.id), /Source board is archived/);
@@ -2075,9 +2045,8 @@ test('re-adding an archived canvas node restores the existing projection instead
     }) as any;
 
     archiveCanvasNode(db, userId, node.id);
-    const archivedDetail = getLearningCanvasDetail(db, userId, canvas.id) as any;
-    assert.equal(archivedDetail.nodes.length, 0);
-    assert.equal(archivedDetail.archived_nodes.length, 1);
+    assert.equal((listCanvasNodes(db, userId, canvas.id, { status: 'active' }) as any[]).length, 0);
+    assert.equal((listCanvasNodes(db, userId, canvas.id, { status: 'archived' }) as any[]).length, 1);
 
     const restored = createCanvasNode(db, userId, canvas.id, {
       node_type: 'source_board_node',
@@ -2090,7 +2059,7 @@ test('re-adding an archived canvas node restores the existing projection instead
     assert.equal(restored.status, 'active');
     assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes WHERE canvas_id = ? AND target_id = ?')
       .get(canvas.id, boardNode.id) as any).count, 1);
-    assert.equal((getLearningCanvasDetail(db, userId, canvas.id) as any).nodes.length, 1);
+    assert.equal((listCanvasNodes(db, userId, canvas.id, { status: 'active' }) as any[]).length, 1);
   });
 });
 
@@ -2156,8 +2125,8 @@ test('learning canvas block insertion creates template-aware NoteBlock and Canva
     assert.equal(result.canvas_node.width, 340);
     assert.equal(result.canvas_node.height, 180);
 
-    const detail = getLearningCanvasDetail(db, userId, canvas.id) as any;
-    assert.equal(detail.nodes.some((node: any) => node.id === result.canvas_node.id), true);
+    const nodes = listCanvasNodes(db, userId, canvas.id, { status: 'active' }) as any[];
+    assert.equal(nodes.some((node: any) => node.id === result.canvas_node.id), true);
   });
 });
 
@@ -2319,270 +2288,6 @@ test('canvas layout proposal rejects empty and cross-course inputs without parti
   });
 });
 
-test('canvas relation layers seed defaults idempotently per canvas', async () => {
-  await withDb((db) => {
-    const { userId, courseId } = seedUserCourse(db);
-    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
-
-    const first = listRelationLayers(db, userId, { course_id: courseId, canvas_id: canvas.id }) as any[];
-    const second = listRelationLayers(db, userId, { course_id: courseId, canvas_id: canvas.id }) as any[];
-
-    assert.deepEqual(first.map((layer) => layer.layer_kind), [
-      'visual',
-      'learning_logic',
-      'source_evidence',
-      'ai_suggested',
-      'ai_hidden',
-    ]);
-    assert.deepEqual(second.map((layer) => layer.id), first.map((layer) => layer.id));
-    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM relation_layers WHERE canvas_id = ?').get(canvas.id) as any).count, 5);
-  });
-});
-
-test('canvas edges support incomplete and visual states without semantic relation rows', async () => {
-  await withDb((db) => {
-    const { userId, courseId } = seedUserCourse(db);
-    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
-    const first = createCanvasNoteBlock(db, userId, canvas.id, {
-      template_id: 'text.paragraph',
-      plain_text: 'A limit is the value a function approaches.',
-      content_json: { body: 'A limit is the value a function approaches.' },
-    }) as any;
-    const second = createCanvasNoteBlock(db, userId, canvas.id, {
-      template_id: 'text.paragraph',
-      plain_text: 'Example: lim x->0 sin(x)/x = 1.',
-      content_json: { body: 'Example: lim x->0 sin(x)/x = 1.' },
-      x: 420,
-    }) as any;
-
-    const incomplete = createCanvasEdge(db, userId, canvas.id, {
-      source_node_id: first.canvas_node.id,
-      source_port: 'right',
-      loose_target_x: 620,
-      loose_target_y: 140,
-      label: 'unfinished thought',
-    }) as any;
-
-    assert.equal(incomplete.connection_state, 'incomplete');
-    assert.equal(incomplete.target_node_id, null);
-    assert.equal(incomplete.loose_target_x, 620);
-    assert.throws(() => bindCanvasEdgeRelation(db, userId, incomplete.id, {
-      relation_type: 'read_before',
-    } as any), /Incomplete canvas edges cannot bind semantic relations/);
-
-    const visual = createCanvasEdge(db, userId, canvas.id, {
-      source_node_id: first.canvas_node.id,
-      source_port: 'right',
-      target_node_id: second.canvas_node.id,
-      target_port: 'left',
-      label: 'read before',
-    }) as any;
-
-    assert.equal(visual.connection_state, 'visual_only');
-    assert.equal(visual.object_relation_id, null);
-    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM object_relations').get() as any).count, 0);
-
-    const detail = getLearningCanvasDetail(db, userId, canvas.id) as any;
-    assert.equal(detail.edges.length, 2);
-    assert.equal(detail.edges.some((edge: any) => edge.id === incomplete.id), true);
-    assert.equal(detail.edges.some((edge: any) => edge.id === visual.id), true);
-  });
-});
-
-test('canvas visual edge can bind and unbind an ObjectRelation safely', async () => {
-  await withDb((db) => {
-    const { userId, courseId } = seedUserCourse(db);
-    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
-    const source = createCanvasNoteBlock(db, userId, canvas.id, {
-      template_id: 'text.paragraph',
-      plain_text: 'Green theorem relates circulation to double integrals.',
-      content_json: { body: 'Green theorem relates circulation to double integrals.' },
-    }) as any;
-    const target = createCanvasNoteBlock(db, userId, canvas.id, {
-      template_id: 'formula.math',
-      plain_text: '\\oint_C P dx + Q dy = \\iint_D (Q_x - P_y)dA',
-      content_json: { body: '\\oint_C P dx + Q dy = \\iint_D (Q_x - P_y)dA' },
-      x: 420,
-    }) as any;
-    const edge = createCanvasEdge(db, userId, canvas.id, {
-      source_node_id: source.canvas_node.id,
-      source_port: 'right',
-      target_node_id: target.canvas_node.id,
-      target_port: 'left',
-    }) as any;
-    const layer = (listRelationLayers(db, userId, { course_id: courseId, canvas_id: canvas.id }) as any[])
-      .find((item) => item.layer_kind === 'learning_logic');
-
-    const bound = bindCanvasEdgeRelation(db, userId, edge.id, {
-      relation_type: 'uses_formula',
-      relation_layer_id: layer.id,
-      label: 'uses this formula',
-    }) as any;
-
-    assert.equal(bound.edge.connection_state, 'relation_backed');
-    assert.equal(bound.edge.object_relation_id, bound.relation.id);
-    assert.equal(bound.relation.source_type, 'note_block');
-    assert.equal(bound.relation.source_id, source.block.id);
-    assert.equal(bound.relation.target_type, 'note_block');
-    assert.equal(bound.relation.target_id, target.block.id);
-    assert.equal(bound.relation.relation_type, 'uses_formula');
-    assert.equal(bound.relation.relation_layer_id, layer.id);
-    assert.equal((listObjectRelations(db, userId, { course_id: courseId, canvas_id: canvas.id }) as any[]).length, 1);
-
-    const unbound = unbindCanvasEdgeRelation(db, userId, edge.id) as any;
-    assert.equal(unbound.edge.connection_state, 'visual_only');
-    assert.equal(unbound.edge.object_relation_id, null);
-    const relationRow = db.prepare('SELECT * FROM object_relations WHERE id = ?').get(bound.relation.id) as any;
-    assert.equal(relationRow.status, 'detached');
-  });
-});
-
-test('canvas edge archive and restore only change projection edge status', async () => {
-  await withDb((db) => {
-    const { userId, courseId } = seedUserCourse(db);
-    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
-    const source = createCanvasNoteBlock(db, userId, canvas.id, {
-      template_id: 'text.paragraph',
-      plain_text: 'Source block',
-      content_json: { body: 'Source block' },
-    }) as any;
-    const target = createCanvasNoteBlock(db, userId, canvas.id, {
-      template_id: 'text.paragraph',
-      plain_text: 'Target block',
-      content_json: { body: 'Target block' },
-      x: 420,
-    }) as any;
-    const beforeSourceBlock = db.prepare('SELECT * FROM note_blocks WHERE id = ?').get(source.block.id);
-    const edge = createCanvasEdge(db, userId, canvas.id, {
-      source_node_id: source.canvas_node.id,
-      source_port: 'bottom',
-      target_node_id: target.canvas_node.id,
-      target_port: 'top',
-    }) as any;
-
-    const archived = archiveCanvasEdge(db, userId, edge.id) as any;
-    assert.equal(archived.status, 'archived');
-    assert.equal((getLearningCanvasDetail(db, userId, canvas.id) as any).edges.length, 0);
-
-    const restored = restoreCanvasEdge(db, userId, edge.id) as any;
-    assert.equal(restored.status, 'active');
-    assert.equal((getLearningCanvasDetail(db, userId, canvas.id) as any).edges.length, 1);
-    assert.deepEqual(db.prepare('SELECT * FROM note_blocks WHERE id = ?').get(source.block.id), beforeSourceBlock);
-  });
-});
-
-test('canvas command context exposes global commands without selection and stays read-only', async () => {
-  await withDb((db) => {
-    const { userId, courseId } = seedUserCourse(db);
-    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
-    const beforeOperationBatches = db.prepare('SELECT COUNT(*) AS count FROM operation_batches').get() as any;
-    const beforeCanvasNodes = db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes').get() as any;
-    const beforeEdges = db.prepare('SELECT COUNT(*) AS count FROM canvas_edges').get() as any;
-
-    const context = getCanvasCommandContext(db, userId, canvas.id, { selected_type: 'none' }) as any;
-
-    assert.equal(context.version, 'v2.4.5');
-    assert.equal(context.canvas_id, canvas.id);
-    assert.equal(context.course_id, courseId);
-    assert.equal(context.selected_scope.kind, 'none');
-    assert.deepEqual(context.tool_modes, ['select', 'connect', 'insert_block']);
-    assert.equal(context.ai_command_context.proposal_first, true);
-    assert.equal(context.ai_command_context.selected_object_count, 0);
-    assert.equal(commandById(context, 'canvas.zoom_in').enabled, true);
-    assert.equal(commandById(context, 'canvas.plan_layout').proposal_required, true);
-    assert.equal(commandById(context, 'canvas.open_selected_target').enabled, false);
-    assert.equal(commandById(context, 'canvas.open_selected_target').disabled_reason, 'No canvas object selected');
-    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM operation_batches').get() as any).count, beforeOperationBatches.count);
-    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes').get() as any).count, beforeCanvasNodes.count);
-    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_edges').get() as any).count, beforeEdges.count);
-  });
-});
-
-test('canvas command context resolves selected node and selected edge scopes', async () => {
-  await withDb((db) => {
-    const { userId, courseId } = seedUserCourse(db);
-    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
-    const source = createCanvasNoteBlock(db, userId, canvas.id, {
-      template_id: 'text.paragraph',
-      plain_text: 'Definition content',
-      content_json: { body: 'Definition content' },
-    }) as any;
-    const target = createCanvasNoteBlock(db, userId, canvas.id, {
-      template_id: 'text.paragraph',
-      plain_text: 'Example content',
-      content_json: { body: 'Example content' },
-      x: 420,
-    }) as any;
-    const edge = createCanvasEdge(db, userId, canvas.id, {
-      source_node_id: source.canvas_node.id,
-      source_port: 'right',
-      target_node_id: target.canvas_node.id,
-      target_port: 'left',
-    }) as any;
-    const bound = bindCanvasEdgeRelation(db, userId, edge.id, {
-      relation_type: 'read_before',
-      label: 'Read before',
-    }) as any;
-
-    const nodeContext = getCanvasCommandContext(db, userId, canvas.id, {
-      selected_type: 'canvas_node',
-      selected_id: source.canvas_node.id,
-    }) as any;
-    assert.equal(nodeContext.selected_scope.kind, 'canvas_node');
-    assert.equal(nodeContext.selected_scope.canvas_node_id, source.canvas_node.id);
-    assert.equal(nodeContext.selected_scope.target_type, 'note_block');
-    assert.equal(nodeContext.selected_scope.target_id, source.block.id);
-    assert.equal(nodeContext.ai_command_context.selected_object_count, 1);
-    assert.equal(commandById(nodeContext, 'canvas.open_selected_target').enabled, true);
-    assert.equal(commandById(nodeContext, 'canvas.archive_selected_node').enabled, true);
-    assert.equal(commandById(nodeContext, 'canvas.archive_selected_edge').enabled, false);
-
-    const edgeContext = getCanvasCommandContext(db, userId, canvas.id, {
-      selected_type: 'canvas_edge',
-      selected_id: edge.id,
-    }) as any;
-    assert.equal(edgeContext.selected_scope.kind, 'canvas_edge');
-    assert.equal(edgeContext.selected_scope.canvas_edge_id, edge.id);
-    assert.equal(edgeContext.selected_scope.connection_state, 'relation_backed');
-    assert.equal(edgeContext.selected_scope.object_relation_id, bound.relation.id);
-    assert.equal(commandById(edgeContext, 'canvas.bind_selected_edge_relation').enabled, true);
-    assert.equal(commandById(edgeContext, 'canvas.unbind_selected_edge_relation').enabled, true);
-    assert.equal(commandById(edgeContext, 'canvas.archive_selected_edge').enabled, true);
-  });
-});
-
-test('canvas command context rejects invalid selected objects without mutation', async () => {
-  await withDb((db) => {
-    const { userId, courseId } = seedUserCourse(db);
-    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
-    const otherCanvas = createLearningCanvas(db, userId, { course_id: courseId, title: 'Other canvas' }) as any;
-    const otherNode = createCanvasNoteBlock(db, userId, otherCanvas.id, {
-      template_id: 'text.paragraph',
-      plain_text: 'Other node',
-      content_json: { body: 'Other node' },
-    }) as any;
-    const beforeRows = {
-      operations: (db.prepare('SELECT COUNT(*) AS count FROM operation_batches').get() as any).count,
-      nodes: (db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes').get() as any).count,
-      edges: (db.prepare('SELECT COUNT(*) AS count FROM canvas_edges').get() as any).count,
-    };
-
-    assert.throws(() => getCanvasCommandContext(db, userId, canvas.id, {
-      selected_type: 'canvas_node',
-      selected_id: otherNode.canvas_node.id,
-    }), /Canvas node belongs to a different canvas/);
-
-    assert.throws(() => getCanvasCommandContext(db, userId, canvas.id, {
-      selected_type: 'canvas_edge',
-      selected_id: uuidv4(),
-    }), /Canvas edge not found/);
-
-    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM operation_batches').get() as any).count, beforeRows.operations);
-    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes').get() as any).count, beforeRows.nodes);
-    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_edges').get() as any).count, beforeRows.edges);
-  });
-});
-
 test('v2.5.2 migration creates composition template tables', async () => {
   await withDb((db) => {
     const tableNames = db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'")
@@ -2670,7 +2375,8 @@ test('v2.5.2 applying composition proposal creates new blocks, canvas records, a
     }) as any;
     const proposalRow = db.prepare('SELECT * FROM proposals WHERE id = ? AND user_id = ?')
       .get(proposal.id, userId) as any;
-    const beforeRelations = (db.prepare('SELECT COUNT(*) AS count FROM object_relations').get() as any).count;
+    const retiredRelationTable = db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'object_relations'").get();
+    assert.equal(retiredRelationTable, undefined);
 
     const result = applyCompositionTemplateProposal(db, userId, proposalRow) as any;
 
@@ -2705,7 +2411,6 @@ test('v2.5.2 applying composition proposal creates new blocks, canvas records, a
     assert.equal(metadata.composition_template_id, composition.id);
     assert.equal(metadata.composition_instance_id, result.composition_instance_id);
     assert.equal(metadata.template_key, 'text.paragraph');
-    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM object_relations').get() as any).count, beforeRelations);
   });
 });
 
@@ -2736,9 +2441,3 @@ test('v2.5.2 partial composition proposal records skipped slots and discard is n
     assert.equal((db.prepare('SELECT COUNT(*) AS count FROM composition_instances').get() as any).count, 0);
   });
 });
-
-function commandById(context: any, commandId: string) {
-  const command = context.available_commands.find((item: any) => item.command_id === commandId);
-  assert.ok(command, `missing command ${commandId}`);
-  return command;
-}

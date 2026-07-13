@@ -83,6 +83,7 @@ function normalizeMemberKind(kind: unknown): ContentGroupMemberKind {
     || kind === 'table_region'
     || kind === 'image_region'
     || kind === 'future_object'
+    || kind === 'item'
   ) return kind;
   return 'content_range';
 }
@@ -335,6 +336,7 @@ type ContentGroupNormalizationInput = Partial<Omit<ContentGroupV1, 'identity'>> 
 };
 
 export function contentGroupMemberIdentityKey(member: ContentGroupMemberV1): string {
+  if (member.kind === 'item') return `item|${member.item_id || member.id}`;
   if (member.kind === 'annotation') return `annotation|${member.target_id || ''}`;
   if (member.kind === 'block') return `block|${member.target_id || ''}`;
   if (member.kind === 'content_group') return `content_group|${member.target_id || ''}`;
@@ -622,6 +624,8 @@ export function createContentGroupMemberFromPageSliceSnapshot(
 
 export function normalizeContentGroupMember(member: ContentGroupMemberV1): ContentGroupMemberV1 {
   const kind = normalizeMemberKind(member.kind);
+  const itemId = kind === 'item' ? cleanOptionalText(member.item_id) : null;
+  const missingItem = kind === 'item' && !itemId;
   const range = member.content_range && typeof member.content_range === 'object'
     ? cloneRange(member.content_range)
     : null;
@@ -629,20 +633,23 @@ export function normalizeContentGroupMember(member: ContentGroupMemberV1): Conte
   const metadata = cloneMetadata(member.metadata);
   const currentContent = cleanOptionalText(member.current_content) || preview;
   const sourceRef = normalizeContentGroupMemberSourceRef(member.source_ref)
-    || createContentGroupMemberSourceRef({
+    || (kind === 'item' ? null : createContentGroupMemberSourceRef({
       kind,
       targetId: typeof member.target_id === 'string' ? member.target_id : null,
       range: kind === 'content_range' ? range : null,
       snapshotText: currentContent || preview,
       metadata,
-    });
-  const sourceStatus = normalizeSourceSyncStatus(
-    member.source_sync_status || sourceRef?.status || (sourceRef ? 'fresh' : 'detached'),
-  );
+    }));
+  const sourceStatus = missingItem
+    ? 'missing'
+    : normalizeSourceSyncStatus(
+      member.source_sync_status || sourceRef?.status || (kind === 'item' ? 'fresh' : sourceRef ? 'fresh' : 'detached'),
+    );
   return {
     id: typeof member.id === 'string' && member.id ? member.id : createRuntimeId('content-member'),
     kind,
-    target_id: typeof member.target_id === 'string' ? member.target_id : null,
+    target_id: kind === 'item' ? null : typeof member.target_id === 'string' ? member.target_id : null,
+    item_id: itemId,
     content_range: kind === 'content_range' ? range : null,
     label: cleanOptionalText(member.label),
     current_content: currentContent,
@@ -650,7 +657,13 @@ export function normalizeContentGroupMember(member: ContentGroupMemberV1): Conte
     source_sync_status: sourceStatus,
     preview_text: preview,
     order_index: Number.isFinite(member.order_index) ? member.order_index : 0,
-    metadata,
+    metadata: missingItem
+      ? {
+          ...metadata,
+          integrity_status: 'orphaned',
+          integrity_reason: 'missing_item_reference',
+        }
+      : metadata,
   };
 }
 

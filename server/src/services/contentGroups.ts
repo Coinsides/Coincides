@@ -52,6 +52,7 @@ interface ContentGroupMemberRow {
   note_id: string | null;
   kind: string;
   target_id: string | null;
+  item_id: string | null;
   label: string | null;
   current_content: string | null;
   preview_text: string | null;
@@ -116,6 +117,7 @@ function normalizeMemberKind(value: unknown): string {
     'table_region',
     'image_region',
     'future_object',
+    'item',
   ]);
   return typeof value === 'string' && allowed.has(value) ? value : 'content_range';
 }
@@ -151,18 +153,29 @@ function courseIdForInput(input: Record<string, unknown>, note?: { course_id: st
 }
 
 function hydrateContentGroupMember(row: ContentGroupMemberRow) {
+  const kind = normalizeMemberKind(row.kind);
+  const itemId = kind === 'item' ? row.item_id || null : null;
+  const missingItem = kind === 'item' && !itemId;
+  const metadata = parseJson<Record<string, unknown>>(row.metadata, {});
   return {
     id: row.id,
-    kind: normalizeMemberKind(row.kind),
-    target_id: row.target_id || null,
+    kind,
+    target_id: kind === 'item' ? null : row.target_id || null,
+    item_id: itemId,
     content_range: parseJson<Record<string, unknown> | null>(row.content_range_json, null),
     label: row.label || null,
     current_content: row.current_content ?? null,
     source_ref: parseJson<Record<string, unknown> | null>(row.source_ref_json, null),
-    source_sync_status: normalizeSourceSyncStatus(row.source_sync_status),
+    source_sync_status: missingItem ? 'missing' : normalizeSourceSyncStatus(row.source_sync_status),
     preview_text: row.preview_text ?? null,
     order_index: Number(row.order_index || 0),
-    metadata: parseJson<Record<string, unknown>>(row.metadata, {}),
+    metadata: missingItem
+      ? {
+          ...metadata,
+          integrity_status: 'orphaned',
+          integrity_reason: 'missing_item_reference',
+        }
+      : metadata,
   };
 }
 
@@ -278,14 +291,16 @@ function contentGroupMemberDbValues(input: {
 }) {
   const member = input.member && typeof input.member === 'object' ? input.member : {};
   const sourceRef = member.source_ref && typeof member.source_ref === 'object' ? member.source_ref : null;
+  const kind = normalizeMemberKind(member.kind);
   return {
     id: cleanText(member.id, `content-group-member-${uuidv4()}`),
     user_id: input.userId,
     content_group_id: input.groupId,
     course_id: input.courseId,
     note_id: input.noteId,
-    kind: normalizeMemberKind(member.kind),
-    target_id: optionalText(member.target_id),
+    kind,
+    target_id: kind === 'item' ? null : optionalText(member.target_id),
+    item_id: kind === 'item' ? optionalText(member.item_id) : null,
     label: optionalText(member.label),
     current_content: typeof member.current_content === 'string' ? member.current_content : null,
     preview_text: typeof member.preview_text === 'string' ? member.preview_text : null,
@@ -314,13 +329,13 @@ function replaceContentGroupMembers(
   const upsertMember = db.prepare(`
     INSERT INTO content_group_members (
       id, user_id, content_group_id, course_id, note_id,
-      kind, target_id, label, current_content, preview_text,
+      kind, target_id, item_id, label, current_content, preview_text,
       content_range_json, source_ref_json, source_sync_status,
       order_index, metadata, updated_at
     )
     VALUES (
       @id, @user_id, @content_group_id, @course_id, @note_id,
-      @kind, @target_id, @label, @current_content, @preview_text,
+      @kind, @target_id, @item_id, @label, @current_content, @preview_text,
       @content_range_json, @source_ref_json, @source_sync_status,
       @order_index, @metadata, datetime('now')
     )
@@ -329,6 +344,7 @@ function replaceContentGroupMembers(
       note_id = excluded.note_id,
       kind = excluded.kind,
       target_id = excluded.target_id,
+      item_id = excluded.item_id,
       label = excluded.label,
       current_content = excluded.current_content,
       preview_text = excluded.preview_text,

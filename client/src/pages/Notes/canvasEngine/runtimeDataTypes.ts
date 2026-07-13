@@ -123,7 +123,8 @@ export type ContentGroupMemberKind =
   | 'canvas_object'
   | 'table_region'
   | 'image_region'
-  | 'future_object';
+  | 'future_object'
+  | 'item';
 export type ContentGroupMemberIntegrityStatus = 'valid' | 'stale' | 'orphaned' | 'unsupported';
 export type ContentGroupMemberSourceSyncStatus =
   | 'fresh'
@@ -187,6 +188,7 @@ export interface ContentGroupMemberV1 {
   id: string;
   kind: ContentGroupMemberKind;
   target_id?: string | null;
+  item_id?: string | null;
   content_range?: AnnotationRangeV1 | null;
   label?: string | null;
   current_content?: string | null;

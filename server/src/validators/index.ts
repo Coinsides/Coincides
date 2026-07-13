@@ -429,6 +429,57 @@ const contentGroupIdentitySchema = z.object({
   metadata: jsonObjectSchema.optional(),
 });
 
+const contentGroupMemberKindSchema = z.enum([
+  'content_range',
+  'annotation',
+  'block',
+  'content_group',
+  'page_slice',
+  'canvas_object',
+  'table_region',
+  'image_region',
+  'future_object',
+  'item',
+]);
+
+export const contentGroupMemberSchema = z.object({
+  id: contentGroupRuntimeIdSchema.optional(),
+  kind: contentGroupMemberKindSchema.optional(),
+  target_id: contentGroupRuntimeIdSchema.nullable().optional(),
+  item_id: contentGroupRuntimeIdSchema.nullable().optional(),
+  label: z.string().max(1000).nullable().optional(),
+  current_content: z.string().nullable().optional(),
+  preview_text: z.string().nullable().optional(),
+  content_range: jsonObjectSchema.nullable().optional(),
+  source_ref: jsonObjectSchema.nullable().optional(),
+  source_sync_status: z.enum(['fresh', 'changed', 'missing', 'detached', 'unsupported', 'stale']).optional(),
+  order_index: z.number().int().optional(),
+  metadata: jsonObjectSchema.optional(),
+}).passthrough().superRefine((member, context) => {
+  if (member.kind === 'item') {
+    if (!member.item_id) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Item members require item_id',
+        path: ['item_id'],
+      });
+    }
+    if (member.target_id) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Item members cannot use target_id',
+        path: ['target_id'],
+      });
+    }
+  } else if (member.item_id) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Non-Item members cannot use item_id',
+      path: ['item_id'],
+    });
+  }
+});
+
 export const upsertContentGroupSchema = z.object({
   id: contentGroupRuntimeIdSchema.optional(),
   course_id: z.string().uuid('Invalid course ID').optional(),
@@ -442,7 +493,7 @@ export const upsertContentGroupSchema = z.object({
   created_by: z.enum(['human', 'ai_proposal', 'importer']).optional(),
   identity: contentGroupIdentitySchema.optional(),
   placements: z.array(jsonObjectSchema).optional(),
-  members: z.array(jsonObjectSchema).optional(),
+  members: z.array(contentGroupMemberSchema).optional(),
   view_state: jsonObjectSchema.optional(),
   metadata: jsonObjectSchema.optional(),
   created_at: z.string().max(80).optional(),

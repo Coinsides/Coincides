@@ -254,8 +254,6 @@ function moveProjectionToHome(
   updateByIds(db, 'note_blocks', 'id', blockIds, homeCourseId);
   updateByIds(db, 'content_groups', 'id', groupIds, homeCourseId);
   updateByIds(db, 'content_group_members', 'content_group_id', groupIds, homeCourseId);
-  updateByIds(db, 'content_group_fragments', 'content_group_id', groupIds, homeCourseId);
-  updateByIds(db, 'content_group_petals', 'content_group_id', groupIds, homeCourseId);
   updateByIds(db, 'operation_batches', 'id', [...operationBatchIds], homeCourseId);
   db.prepare('UPDATE notes SET course_id = ?, updated_at = datetime(\'now\') WHERE id = ? AND user_id = ?')
     .run(homeCourseId, noteId, userId);
