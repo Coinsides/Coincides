@@ -5,6 +5,8 @@
 > **取代 (Supersedes)**: —
 > **被取代 (Superseded by)**: —
 
+> **教义更替公告 (2026-07-13 · V2.BN.11)**: Relation 唯一 durable endpoint 已拍定为 **Item（独立知识卡）**。本契约中"Relation endpoint candidates = accepted/active ContentGroups 及其 members/Petals"的口径（含 §10 Relation Boundary）**已被取代**;Petal 相关条款随花瓣退役日落（V2.BN.11.1 代码手术 + 047 落表,见 `Petal-Contract.md` 日落公告）。ContentGroup 的新定位 = **Item 的捆绑/组织方式**;`content_group_members` 将增 `kind='item'` + `item_id` 成员类（原子触点包 B,client+server 同版）。其余条款（Folder 组织/路径/浏览边界、成员引用、身份审查状态）继续有效。权威:`docs/agent-ops/analysis/relation-item-graph-concept-design.md`（v1.1）。
+
 # ContentGroup / GroupFolder Contract
 
 **Status**: V2.BN.8.7.4 entity boundary contract

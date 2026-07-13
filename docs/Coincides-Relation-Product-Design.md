@@ -1,3 +1,9 @@
+> **状态 (Status)**: superseded-in-part（2026-07-13）
+> **层 (Layer)**: 研究 / Research（曾为 Active Product Reference）
+> **被取代 (Superseded by)**: `docs/agent-ops/analysis/relation-item-graph-concept-design.md`（v1.1,V2.BN.11 模型权威）+ `docs/releases/V2.BN.11-plan.md`
+> **作废范围**: ①下方"2026-06-22 ContentGroup Endpoint Doctrine"（端点=ContentGroup/Petal → 已更替为**端点=Item/卡**）;②§1.3 端点候选口径;③§2.1 起基于 `object_relations / canvas_edges / relation_layers` 旧三表的全部 schema 设计（三表数据实证全死,migration 047 落表）。
+> **保留价值**: 线/边/关系的产品哲学、RelationType 思想、交互与 GraphRAG sidecar 边界思考,作为研究遗产保留;引用时须以 V11 概念设计为准核对。
+
 # Coincides Relation Product Design
 
 ## 2026-06-22 ContentGroup Endpoint Doctrine

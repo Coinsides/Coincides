@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 48 份文档。
+共 49 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -35,9 +35,9 @@
 | [claude-log/2026-07-02.md](claude-log/2026-07-02.md) | Claude 行动日志 — 2026-07-02 | `active` | 2026-07-02 | — |
 | [claude-log/2026-07-03.md](claude-log/2026-07-03.md) | Claude 行动日志 — 2026-07-03 | `active` | 2026-07-03 | — |
 | [claude-log/2026-07-04.md](claude-log/2026-07-04.md) | Claude 行动日志 — 2026-07-04 | `active` | 2026-07-04 | — |
-| [claude-log/2026-07-05.md](claude-log/2026-07-05.md) | Claude 行动日志 — 2026-07-05（含 07-09/07-11/07-12 追记） | `active` | 2026-07-05 | — |
+| [claude-log/2026-07-05.md](claude-log/2026-07-05.md) | Claude 行动日志 — 2026-07-05（含 07-09/07-11/07-12/07-13 追记） | `active` | 2026-07-05 | — |
 | [claude-log/README.md](claude-log/README.md) | claude-log —— Claude 行动日志（Henry 的监督轨迹） | `active` | 2026-06-27 | — |
-| [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-07-11 | — |
+| [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-07-13 | — |
 | [decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md](decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md) | ADR-0001: 自研最小混合 Canvas 引擎路线 (Self-owned Minimal Hybrid Can… | `active` | 2026-06-27 | — |
 | [decisions/README.md](decisions/README.md) | 决策层 / Architecture Decision Records (ADR) | `active` | 2026-06-27 | — |
 | [handoffs/2026-06-27-canvas-persistence-cutover.md](handoffs/2026-06-27-canvas-persistence-cutover.md) | Spec：三颗承重持久化种子的 DB 发芽（V2.BN.8.11 收口前的最后实质工作） | `(缺状态头)` | — | — |
@@ -59,4 +59,5 @@
 | [handoffs/2026-07-12-v2bn11-codex-design-reflection-third-party-review.md](handoffs/2026-07-12-v2bn11-codex-design-reflection-third-party-review.md) | V2.BN.11 Codex 设计复述与协作方法 · 第三者复核 | `(缺状态头)` | — | — |
 | [handoffs/2026-07-12-v2bn11-concept-design-third-party-review.md](handoffs/2026-07-12-v2bn11-concept-design-third-party-review.md) | V2.BN.11 概念设计 · 第三者审读 | `(缺状态头)` | — | — |
 | [handoffs/2026-07-12-v2bn11-plan-commission.md](handoffs/2026-07-12-v2bn11-plan-commission.md) | V2.BN.11 Plan 委托单 | `(缺状态头)` | — | — |
+| [handoffs/2026-07-13-v2bn11-doctrine-sync-report.md](handoffs/2026-07-13-v2bn11-doctrine-sync-report.md) | V2.BN.11 开工前信息同步：plan 审阅结论 + gate 7 教义同步完成 | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |

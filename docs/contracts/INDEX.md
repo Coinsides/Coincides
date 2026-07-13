@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-06-27
+> **日期 (Updated)**: 2026-07-13
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/contracts`
@@ -20,7 +20,7 @@
 | [Editor-State-Rebuild-Contract.md](Editor-State-Rebuild-Contract.md) | Editor State / Rebuild / Undo Contract | `deferred` | 2026-06-23 | — |
 | [Link-Source-Relation-Boundary-Contract.md](Link-Source-Relation-Boundary-Contract.md) | Link / SourceReference / ObjectRelation Boundary Contract | `deferred` | 2026-06-23 | — |
 | [Notebook-Object-Inventory-Contract.md](Notebook-Object-Inventory-Contract.md) | Notebook Object Inventory Contract | `active` | 2026-06-23 | — |
-| [Petal-Contract.md](Petal-Contract.md) | Petal Contract | `active` | 2026-06-23 | — |
+| [Petal-Contract.md](Petal-Contract.md) | Petal Contract | `active` | 2026-07-13 | ⚠️ —（V2.BN.11.1 落地后整体转 superseded） |
 | [Source-Provenance-Contract.md](Source-Provenance-Contract.md) | Source / Provenance Contract | `deferred` | 2026-06-23 | — |
 | [Source-Reconstruction-Contract-Intake.md](Source-Reconstruction-Contract-Intake.md) | Source Reconstruction Contract Intake | `deferred` | 2026-06-12 | — |
 | [Template-Category-Contract.md](Template-Category-Contract.md) | Template / Category Contract | `deferred` | 2026-06-12 | — |

@@ -27,17 +27,27 @@ V2.BN.9   目的 Purpose Foundation  purposes 节点 + (成员,目的) 边（rol
 V2.BN.10  Source（地板）......... 上传+基础解析（非-Agent）+ 原件不可变 + 薄绑定；保真重建 ≠ 生成式转写；
                                    契约接缝（source_artifact/block + SourceParser 可换后端）
                                    → 设计: docs/agent-ops/analysis/source-reconstruction-design-and-tooling.md
-V2.BN.11  Relation ............... 把已有 object_relations 接到 BN 底座 + 端点收窄到 ContentGroup/花瓣（非绿地：接续+迁移+收范围）；
-                                   前置红利：V9 已把 role 上边——"进了目的的向量才够格当端点"
+V2.BN.11  Item + Relation 真相 ... 绿地新建（2026-07-13 更替,取代旧"接 object_relations+端点=CG/花瓣"口径）：
+                                   items/item_snapshots/item_anchors/relations/relation_assessments（migration 047）+
+                                   端点=Item（卡）+ 判断收据 + 机械新鲜度 + 花瓣退役 + 旧三表落表（数据实证全死）
+                                   → 设计: docs/agent-ops/analysis/relation-item-graph-concept-design.md（v1.1,a–k 全拍）
+                                   → plan: docs/releases/V2.BN.11-plan.md（七纵切,Claude 审阅 PASS）
 V2.BN.12+ 打磨 .................. 工程可靠 → 用户可靠；ContentGroup 完整集成落此（枢纽最后焊）
 （新时代）Agent 接入 ........... Source 天花板 + ContentGroup AI 操作 + GraphRAG sidecar（ARCHITECTURE.md §5.4 已定）
 ```
 
 - **收口工作流**：✅ V8 一轮已走完（关 V8 → 烧挖坑册 → 清工作区 → commit `454f7c9`/`c641c0d`）；此后每个小版本做完即 commit。
-- **锁定决定**：Agent 移出 BN · ContentGroup 推迟到打磨 · Relation 端点→ContentGroup/花瓣 · GraphRAG = 可重建 sidecar（不重推，见 `ARCHITECTURE.md §5.4`）· **目的层插为 V9、Source/Relation/打磨顺延（§2026-07-05）**。
+- **锁定决定**：Agent 移出 BN · ContentGroup 推迟到打磨 · **Relation 端点→Item/卡（2026-07-12 拍定,取代旧"ContentGroup/花瓣"口径,见 §2026-07-13）** · GraphRAG = 可重建 sidecar（不重推，见 `ARCHITECTURE.md §5.4`）· **目的层插为 V9、Source/Relation/打磨顺延（§2026-07-05）**。
 - 详见下方 `§2026-07-05`、`§2026-07-01` 与 `§2026-06-29`；GraphRAG / Source-adapter 形态见 `ARCHITECTURE.md §5.3 / §5.4 / §Source Reconstruction Adapter`。
 
 ---
+
+## 2026-07-13 V2.BN.11 端点教义更替：Relation 端点 = Item（卡）
+
+- **拍定链**：2026-07-11 Relation 卷（§一~§二十一）→ 概念设计 v1.1（判断点 a–k 全拍,2026-07-12）→ V2.BN.11-plan（七纵切,Claude 对抗审阅 PASS,2026-07-13）。Relation 的唯一 durable endpoint = **Item（独立知识卡:本体+type/topic+N 锚收据）**,不再是 ContentGroup/花瓣。ContentGroup 回归纯捆（Item 的组织方式）;**花瓣退役**（V2.BN.11.1 代码手术停写 + 047 删三张支持表）。
+- **旧三表处置更正**：`object_relations / canvas_edges / relation_layers` 经活性盘点**数据全死（live DB 各 0 行）**——V11 不再是"接续+迁移+收范围",而是**绿地新建** + 旧表落表 + legacy Courses 学习画布页整体下架。2026-06-25/07-01 各节的"收编 object_relations"预案作废;BN 现役视觉线（`canvas_objects kind='visual_connector'`）与 Relation 是两套真相,不受影响。
+- **新增拍点**（设计 §6 f–k）：卡退役后继指针 / 锚=使用收据+认领痕迹 / relations.origin_purpose_id 纯出处不做 applicability / 单活边 / 池 v1 人工流优先 / 分歧登记簿立档。
+- **权威**：概念设计 `docs/agent-ops/analysis/relation-item-graph-concept-design.md`（v1.1）> 本节 > 一切旧 dated 段。老 `docs/Coincides-Relation-Product-Design.md` 已标 **superseded-in-part**（端点教义与旧三表 schema 部分作废,关系哲学/交互思考保留为研究遗产）。
 
 ## 2026-06-22 Active Roadmap Correction
 
@@ -282,6 +292,7 @@ V2.BN.9   Source（地板）........................ 上传 + 基础解析（pdf
                                                  形态见 ARCHITECTURE.md §Source Reconstruction Adapter：
                                                  保真重建（Reconstruction）≠ 生成式转写（Note generation），是"两段"不是"二选一"
 V2.BN.10  Relation（收编 + 收范围，非绿地）...... 真活 = 把已有 object_relations 真相接到 BN 底座（canvas_objects）+
+                                                 ⚠️ 2026-07-13 作废：旧三表实证 0 行,改绿地新建、端点=Item,见 §2026-07-13
                                                  端点范围收窄到 ContentGroup / 花瓣(Petal)（本轮敲定）；
                                                  先做数据层真相、可视化推后；不做 GraphRAG（sidecar 属 Agent 时代）
 V2.BN.11+ 打磨：工程可靠 → 用户可靠 ............. 烧 🅱 用户友好化 + 真实旅程无死路；
@@ -294,7 +305,7 @@ V2.BN.11+ 打磨：工程可靠 → 用户可靠 ............. 烧 🅱 用户�
 
 ### 四、本轮敲定的决定（锁定）
 1. **ContentGroup 完整集成推迟到 V11+ 打磨**（枢纽最后焊，避免焊在还在动的桩上 = "疯狂反攻的返工漩涡"）。ContentGroup-as-canvas-object 的**薄投影**可先在。
-2. **Relation 端点范围收窄到 ContentGroup + 花瓣(Petal)**——纠正现状：`object_relations` 现允许任意 canvas node 端点（note_block/source_scope/source_anchor/evidence_set…，learningCanvases.ts:39-45）。
+2. **Relation 端点范围收窄到 ContentGroup + 花瓣(Petal)**——纠正现状：`object_relations` 现允许任意 canvas node 端点（note_block/source_scope/source_anchor/evidence_set…，learningCanvases.ts:39-45）。**⚠️ 2026-07-13 更替：端点再收窄为 Item（卡）,本条口径作废,见 §2026-07-13。**
 3. **两套 substrate 对账**：老 `learning_canvases`/`canvas_nodes` 的 relation 真相（此前只是试水小模型）→ 接进 BN 的 `canvas_objects`/`placements` 底座。这是 **V10 的真难点（接续 + 迁移 + 收范围，非从零建）**。
 4. **GraphRAG / 图 DB**：SQLite 是真相（个人规模 ~1000 relations、稀疏，差数量级才轮到图 DB）；图 DB = 可从 SQLite 重建的 **sidecar via adapter**，属 Agent 时代。**已在 ARCHITECTURE.md §5.4 定死，本轮只确认**。"反 GraphRAG"是旧速记的糙标签，精确表述以 §5.4 为准（可发现候选 / 当 query-index 层，但不定义真相）。
 5. **Source 形态**：原件不可变（冷证据）+ 可重建投影；保真重建 ≠ 生成式转写；Source **地板不需 Agent**（pdf-parse/mammoth 已装、documents/anchors 表已在）。
@@ -313,7 +324,7 @@ V2.BN.11+ 打磨：工程可靠 → 用户可靠 ............. 烧 🅱 用户�
 ### 决定
 1. **新插 V2.BN.9 = 目的 Purpose Foundation**：`purposes`（目的节点：意图/范围/简介）+ `purpose_members`（(成员,目的) 边，**role/fitness/order 住边上**）+ ContentGroup 补 `identity_type` 轴、`identity_role` 冻结退役（**修 06-28 §九C 旗标的"角色焊死在 CG 节点"相对不焊违例**）+ 每笔记懒建默认目的。**Plan**: `docs/releases/V2.BN.9-plan.md`；**实现设计（技术权威）**: `docs/agent-ops/analysis/purpose-frame-implementation-design.md`（v1，经 4 维对抗核查修正）。
 2. **原 V9 Source → V2.BN.10**，范围补充：除原"上传+基础解析+原件不可变"外，明确**契约接缝先行**（`source_artifact`/`source_artifact_block` + `SourceParser` 可换后端；今天的糙解析注册为 degenerate `native` 后端；锚从 chunk 改指 block）。设计已备：`docs/agent-ops/analysis/source-reconstruction-design-and-tooling.md`（含 PaddleOCR-VL 主/MinerU 备选型 + 置信度纠错 UX 原则；真 OCR/VLM 管线仍属天花板/后续，地板不含）。
-3. **原 V10 Relation → V2.BN.11**、**原 V11+ 打磨 → V2.BN.12+**。内容不变。
+3. **原 V10 Relation → V2.BN.11**、**原 V11+ 打磨 → V2.BN.12+**。内容不变。**（⚠️ 2026-07-13：V11 内容已更替——端点=Item、绿地新建、花瓣退役,见 §2026-07-13,"内容不变"不再成立。）**
 4. **为什么目的在 Source 前**（依据 `analysis/purpose-frame-build-decomposition.md` 的 blast-radius map）：① 目的层完全不依赖 Source（在既有 in-note 成员上就能落）；② 顺手修 role 焊死红线；③ 它是"组织已有内容"与"从源生成笔记"两条流程共同的地基，Source 只供料给后者——地基先于供料；④ 便宜（schema+refactor，无 GPU/工具依赖），先验证组织模型再浇昂贵的 Source 管线；⑤ 给 V11 Relation 供前置（role 上边 → "进了目的的向量才够格当端点"）。
 5. **模型来源**（研究层）：会议记录 `2026-07-02-...-Meeting-Notes.md` §七.6–七.11（三轴 type/topic/role、圈≠draft、组织=镜片/正文=提交、舞台旋钮、词表池）；07-04 Source 会议记录（三层契约、可插拔=开源扩展点、手绘图=②全截③按目的取舍）。
 
@@ -576,7 +587,7 @@ AI note assembly、Source Reconstruction、OCR/VLM import、GraphRAG、external 
 - `PRODUCT.md`
   - 定义 Coincides 的产品定位、用户、信息处理中台边界、source grounding、正式层 / thinking layer、AI 协作原则。
 - `docs/Coincides-Relation-Product-Design.md`
-  - 定义 CanvasConnector、ObjectRelation、RelationType、RelationGroup、ConnectionPoint、Relation Lifecycle、GraphRAG sidecar 边界。
+  - 定义 CanvasConnector、ObjectRelation、RelationType、RelationGroup、ConnectionPoint、Relation Lifecycle、GraphRAG sidecar 边界。**（2026-07-13：已标 superseded-in-part——端点教义与旧三表 schema 被 V2.BN.11 概念设计 v1.1 取代,余下作研究遗产。）**
 - `docs/brainstorm/BetterNoteBook Research/Better-Notebook-UX-Inventory-and-Interaction-Contract.md`
   - 定义 Better Notebook 的对象 inventory、操作入口、状态、快捷键、危险操作、toolbar / context menu / inspector 分层、layout mode、relation mode 和第一版交互契约。
 - `docs/internal/Better-Notebook-Phase-Plan-Template.md`
@@ -623,7 +634,7 @@ AI note assembly、Source Reconstruction、OCR/VLM import、GraphRAG、external 
 - `docs/contracts/Notebook-Object-Inventory-Contract.md`
   - 定义 Better Notebook 的对象总览和根分工：Project、Note、NoteCanvas、PageFrame、Block、TextFlow、TextUnit、TextUnitGroup、InlineStructure、ContentRange、AnnotationTruth、GroupFolder、ContentGroup、ContentGroup identity/status、ContentGroup Gallery / derived views、ReadingInterpretation、Relation 的边界。
 - `docs/contracts/ContentGroup-GroupFolder-Contract.md`
-  - 定义 GroupFolder 与 ContentGroup 的边界：Folder 管组织、路径、浏览边界和局部 relation view scope；ContentGroup 管严肃内容包、成员引用、Petal 和身份审查状态。
+  - 定义 GroupFolder 与 ContentGroup 的边界：Folder 管组织、路径、浏览边界和局部 relation view scope；ContentGroup 管严肃内容包、成员引用、Petal 和身份审查状态。**（2026-07-13：relation-boundary 条款与 Petal 条款见该契约顶部教义更替公告——端点=Item,花瓣日落。）**
 - `docs/contracts/Editor-State-Rebuild-Contract.md`
   - 定义 editor state、operation/undo 边界、rebuild 行为和 adapter rebuild 限制。
 

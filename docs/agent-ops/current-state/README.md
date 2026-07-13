@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State
-> **日期 (Updated)**: 2026-07-11
+> **日期 (Updated)**: 2026-07-13
 > **权威 (Authoritative)**: 是 / Yes
 > **取代 (Supersedes)**: —
 > **被取代 (Superseded by)**: —
@@ -48,6 +48,7 @@ Strict dependency order. **Do not work on a later pillar before the earlier ones
 
 ### Pillar 2 — ContentGroup
 - **Stable (V2.BN.8.7 result)**: core entity layer `ContentGroup / GroupFolder / Member / Petal / Fragment` (frontend + backend tables + `/api/content-groups`); three surfaces — **Rail = collect**, **Gallery = organize**, **Single Editor = refine**. Stable enough to support projection work.
+- **V2.BN.11 拍定（2026-07-13 记）**: **Petal / Fragment 精修层退役** — `V2.BN.11.1` 代码手术停止产生新数据（client 模型/CRUD/Single Editor 花瓣入口 → server hydrate/replace/prune）,migration 047 删除三张支持表（034 全家:fragments / petals / petal_fragments）。ContentGroup 的新定位 = **Item（独立知识卡）的捆绑/组织方式**;`content_group_members` 增 `item_id` 成员类（原子包 B）、`purpose_members` 增 `member_kind='item'`（原子包 A）。权威:概念设计 v1.1 + `docs/releases/V2.BN.11-plan.md`。
 - **Still growing**: the set of item kinds that can be added to a group is still increasing.
 - **Deferred**: projection onto canvas; reuse UI (reference / duplicate / fork / materialize); full Source integration. Current routing places these after Source and Relation foundations rather than immediately after V2.BN.8.
 
@@ -72,6 +73,7 @@ Strict dependency order. **Do not work on a later pillar before the earlier ones
 
 ### Pillar 4 — Agent + Graph Database
 - **Not started** on the v2/BN line. The embedding pipeline is intentionally disconnected; relation runtime / GraphRAG are not yet timely.
+- **但注意（2026-07-13）**: **V2.BN.11 Item + Relation 真相层已进入施工线**（概念设计 v1.1 判断点 a–k 全拍;plan 七纵切已审 PASS）——端点=Item、判断收据（快照对）、机械新鲜度读时派生。这是**知识真相层**,不是本柱的图谱运行时/GraphRAG（后者仍属 Agent 时代,sidecar 教义不变）。
 - Do **not** build toward this pillar until pillars 1–3 are stable.
 
 ## 4. Watch list (known open items, not necessarily defects)

@@ -5,6 +5,8 @@
 > **取代 (Supersedes)**: —
 > **被取代 (Superseded by)**: —
 
+> **教义更替公告 (2026-07-13 · V2.BN.11)**: §22 Relation / ObjectRelation 所述"future endpoints 偏好 ContentGroup / accepted ContentGroup identity / CompositeEndpoint / NoteBlock / SourceRegion"**已被取代:唯一 durable endpoint = Item（卡）**;legacy `object_relations / canvas_edges / relation_layers` 经活性盘点数据全死,047 落表,legacy Courses 学习画布页整体下架。§17.1 Petal 机制随花瓣退役日落（V2.BN.11.1,见 `Petal-Contract.md`）。对象清单新增:**Item / ItemAnchor（一表两态:原料池+锚集,使用收据）/ ItemSnapshot（判断收据）/ Relation（种子九类,单活边）/ RelationAssessment（AI 署名判定）**——权威:`docs/agent-ops/analysis/relation-item-graph-concept-design.md`（v1.1）。其余对象边界继续有效。
+
 # Notebook Object Inventory Contract
 
 **Status**: V2.BN.8 object model alignment
