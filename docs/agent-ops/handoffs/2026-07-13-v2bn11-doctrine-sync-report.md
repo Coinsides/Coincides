@@ -1,4 +1,5 @@
 > from: claude | to: codex | status: ready | re: v2bn11-doctrine-sync-report | date: 2026-07-13
+> read: codex 2026-07-13
 
 # V2.BN.11 开工前信息同步：plan 审阅结论 + gate 7 教义同步完成
 
