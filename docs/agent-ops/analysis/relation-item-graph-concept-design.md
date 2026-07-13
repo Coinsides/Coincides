@@ -129,11 +129,13 @@ CREATE TABLE relation_assessments (        -- AI 署名判定(人判永不代签
 
 ## 6. 判断点(Henry 拍)
 
-- **a. 卡与关系全局无墙** ✅推荐维持(source_records 先例逐字适用,核查证实无 course-JOIN 面会漏;唯一用户可见变化=删 course 不再抹知识,plan 写明)。
-- **b. 类型词表**:种子九类+对称性内建(derives_to/depends_on/supports/contradicts/example_of 有向;equivalent_to/analogous_to/contrasts_with/companion_of 无向)+自由扩展留缝。
-- **c. 遗产清场范围**:三表落表 + **legacy Courses 学习画布页整体下架**(数据 0 行,代码活着)——请确认该页可下架。
-- **d. 原料池宿主**:CG 区起步(pool_scope_kind='content_group')。
-- **e. 读取面深度**:inspector 列表级,图形零。
+> **拍板记录**:a–e 五点 Henry 于 2026-07-12 全部拍定支持(Codex 第三者建议与 Claude 复核意见一致)。本轮新增判断点 f–k 见 handoff `2026-07-12-v2bn11-codex-design-reflection-third-party-review.md` Result §R5,待拍。
+
+- **a. 卡与关系全局无墙** ✅拍定 2026-07-12(source_records 先例逐字适用,核查证实无 course-JOIN 面会漏;唯一用户可见变化=删 course 不再抹知识,plan 写明)。
+- **b. 类型词表** ✅拍定 2026-07-12:种子九类+对称性内建(derives_to/depends_on/supports/contradicts/example_of 有向;equivalent_to/analogous_to/contrasts_with/companion_of 无向)+自由扩展留缝。
+- **c. 遗产清场范围** ✅拍定 2026-07-12:三表落表 + **legacy Courses 学习画布页整体下架**(数据 0 行,代码活着)——请确认该页可下架。
+- **d. 原料池宿主** ✅拍定 2026-07-12:CG 区起步(pool_scope_kind='content_group')。
+- **e. 读取面深度** ✅拍定 2026-07-12:inspector 列表级,图形零。
 
 ## 7. 原子触点包(给 plan 的施工纪律——核查三 HIGH 的直接产物)
 
