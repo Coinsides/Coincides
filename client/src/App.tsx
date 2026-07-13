@@ -89,10 +89,8 @@ export default function App() {
           <Route path="calendar" element={<CalendarPage />} />
           <Route path="goals" element={<GoalsPage />} />
           <Route path="projects" element={<CoursesPage />} />
-          <Route path="projects/:courseId/notes/:canvasId" element={<CourseDetailPage />} />
           <Route path="projects/:courseId" element={<CourseDetailPage />} />
           <Route path="courses" element={<CoursesPage />} />
-          <Route path="courses/:courseId/notes/:canvasId" element={<CourseDetailPage />} />
           <Route path="courses/:courseId" element={<CourseDetailPage />} />
           <Route path="notes/:noteId" element={<NoteDetailPage />} />
           <Route path="sources" element={<SourceLibraryPage />} />

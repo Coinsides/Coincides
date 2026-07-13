@@ -443,8 +443,6 @@ export const upsertContentGroupSchema = z.object({
   identity: contentGroupIdentitySchema.optional(),
   placements: z.array(jsonObjectSchema).optional(),
   members: z.array(jsonObjectSchema).optional(),
-  fragments: z.array(jsonObjectSchema).optional(),
-  petals: z.array(jsonObjectSchema).optional(),
   view_state: jsonObjectSchema.optional(),
   metadata: jsonObjectSchema.optional(),
   created_at: z.string().max(80).optional(),

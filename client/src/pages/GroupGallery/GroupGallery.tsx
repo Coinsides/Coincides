@@ -672,7 +672,7 @@ export default function GroupGalleryPage() {
                         <button
                           type="button"
                           className={styles.cardInfoButton}
-                          title={`${card.memberCountLabel}; ${card.petalCountLabel}; ${card.folderPath}`}
+                          title={`${card.memberCountLabel}; ${card.folderPath}`}
                           aria-label={`Open source note for ${card.title}`}
                           onClick={() => navigate(`/notes/${record.note.id}`)}
                         >

@@ -8,6 +8,7 @@ import { initDb, closeDb } from '../db/init.js';
 import contentGroupMemberMigration from '../db/migrations/033_v2_content_group_members.js';
 import contentGroupPetalMigration from '../db/migrations/034_v2_content_group_petals.js';
 import {
+  deleteContentGroupMember,
   getContentGroup,
   listContentGroups,
   replaceNoteContentGroups,
@@ -91,8 +92,6 @@ function groupInput(courseId: string, noteId: string, title: string, extra: Reco
     status: 'active',
     created_by: 'human',
     members: [],
-    fragments: [],
-    petals: [],
     placements: [],
     identity: {
       status: 'none',
@@ -111,6 +110,121 @@ function groupInput(courseId: string, noteId: string, title: string, extra: Reco
     ...extra,
   };
 }
+
+test('ContentGroup freezes legacy Petal tables without hydrating or rewriting them', async () => {
+  await withDb((db) => {
+    const { userId, courseId, noteId } = seedUserCourseNote(db);
+    const group = upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Frozen legacy package', {
+      id: 'content-group-frozen-petal-test',
+      members: [{
+        id: 'member-frozen-a',
+        kind: 'content_range',
+        current_content: 'Frozen member content',
+        preview_text: 'Frozen member content',
+        order_index: 0,
+      }],
+    }));
+
+    db.prepare(`
+      INSERT INTO content_group_fragments (
+        id, user_id, content_group_id, course_id, note_id,
+        source_member_id, content_range_json, label, preview_text,
+        status, order_index, metadata
+      ) VALUES (?, ?, ?, ?, ?, ?, NULL, ?, ?, 'active', 0, '{}')
+    `).run('frozen-fragment', userId, group.id, courseId, noteId, 'member-frozen-a', 'Frozen fragment', 'Frozen fragment');
+    db.prepare(`
+      INSERT INTO content_group_petals (
+        id, user_id, content_group_id, course_id, note_id,
+        label, role, summary, status, order_index, members_json, metadata
+      ) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, 'active', 0, '[]', '{}')
+    `).run('frozen-petal', userId, group.id, courseId, noteId, 'Frozen petal');
+    db.prepare(`
+      INSERT INTO content_group_petal_fragments (
+        id, user_id, content_group_id, petal_id, fragment_id, order_index
+      ) VALUES (?, ?, ?, ?, ?, 0)
+    `).run('frozen-assignment', userId, group.id, 'frozen-petal', 'frozen-fragment');
+    db.prepare(`
+      UPDATE content_groups
+      SET fragments_json = ?, petals_json = ?
+      WHERE id = ?
+    `).run('[{"id":"embedded-fragment"}]', '[{"id":"embedded-petal"}]', group.id);
+
+    const before = {
+      fragments: db.prepare('SELECT * FROM content_group_fragments WHERE content_group_id = ? ORDER BY id').all(group.id),
+      petals: db.prepare('SELECT * FROM content_group_petals WHERE content_group_id = ? ORDER BY id').all(group.id),
+      assignments: db.prepare('SELECT * FROM content_group_petal_fragments WHERE content_group_id = ? ORDER BY id').all(group.id),
+      embedded: db.prepare('SELECT fragments_json, petals_json FROM content_groups WHERE id = ?').get(group.id),
+    };
+
+    const hydrated = getContentGroup(db, userId, group.id) as Record<string, unknown>;
+    assert.equal('fragments' in hydrated, false);
+    assert.equal('petals' in hydrated, false);
+
+    upsertContentGroup(db, userId, groupInput(courseId, noteId, group.title, {
+      id: group.id,
+      members: group.members,
+      fragments: [{ id: 'must-not-write' }],
+      petals: [{ id: 'must-not-write' }],
+    }));
+
+    assert.deepEqual(
+      db.prepare('SELECT * FROM content_group_fragments WHERE content_group_id = ? ORDER BY id').all(group.id),
+      before.fragments,
+    );
+    assert.deepEqual(
+      db.prepare('SELECT * FROM content_group_petals WHERE content_group_id = ? ORDER BY id').all(group.id),
+      before.petals,
+    );
+    assert.deepEqual(
+      db.prepare('SELECT * FROM content_group_petal_fragments WHERE content_group_id = ? ORDER BY id').all(group.id),
+      before.assignments,
+    );
+    assert.deepEqual(
+      db.prepare('SELECT fragments_json, petals_json FROM content_groups WHERE id = ?').get(group.id),
+      before.embedded,
+    );
+  });
+});
+
+test('ContentGroup member delete leaves unrelated frozen Petal rows untouched', async () => {
+  await withDb((db) => {
+    const { userId, courseId, noteId } = seedUserCourseNote(db);
+    const group = upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Frozen delete group', {
+      id: 'content-group-frozen-delete-test',
+      members: [
+        { id: 'member-delete-a', kind: 'block', target_id: 'block-a', preview_text: 'A', order_index: 0 },
+        { id: 'member-keep-b', kind: 'block', target_id: 'block-b', preview_text: 'B', order_index: 1 },
+      ],
+    }));
+
+    db.prepare(`
+      INSERT INTO content_group_petals (
+        id, user_id, content_group_id, course_id, note_id,
+        label, role, summary, status, order_index, members_json, metadata
+      ) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, 'active', 0, '[]', '{}')
+    `).run('frozen-delete-petal', userId, group.id, courseId, noteId, 'Frozen row');
+    db.prepare('UPDATE content_groups SET petals_json = ? WHERE id = ?')
+      .run('[{"id":"frozen-embedded-petal"}]', group.id);
+
+    const beforePetal = db.prepare('SELECT * FROM content_group_petals WHERE id = ?')
+      .get('frozen-delete-petal');
+    const beforeEmbedded = db.prepare('SELECT petals_json FROM content_groups WHERE id = ?')
+      .get(group.id);
+
+    const updated = deleteContentGroupMember(db, userId, group.id, 'member-delete-a');
+
+    assert.deepEqual(updated.members.map((member: any) => member.id), ['member-keep-b']);
+    assert.equal(db.prepare('SELECT id FROM content_group_members WHERE id = ?').get('member-delete-a'), undefined);
+    assert.deepEqual(
+      db.prepare('SELECT * FROM content_group_petals WHERE id = ?').get('frozen-delete-petal'),
+      beforePetal,
+    );
+    assert.deepEqual(
+      db.prepare('SELECT petals_json FROM content_groups WHERE id = ?').get(group.id),
+      beforeEmbedded,
+    );
+  });
+});
 
 test('ContentGroup service upserts and lists groups without note metadata', async () => {
   await withDb((db) => {
@@ -233,115 +347,6 @@ test('ContentGroup preserves stale source sync status through hydrate and save r
     const row = db.prepare('SELECT source_sync_status FROM content_group_members WHERE id = ?')
       .get('content-group-stale-member') as { source_sync_status: string };
     assert.equal(row.source_sync_status, 'stale');
-  });
-});
-
-test('ContentGroup hydrates fragments and petals from entity tables before legacy JSON', async () => {
-  await withDb((db) => {
-    const { userId, courseId, noteId } = seedUserCourseNote(db);
-    const group = upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Petal hydrate group', {
-      id: 'content-group-petal-hydrate',
-      members: [{
-        id: 'member-hydrate-a',
-        kind: 'content_range',
-        label: 'Member A',
-        current_content: 'Current member text',
-        preview_text: 'Current member text',
-        order_index: 0,
-      }],
-    }));
-
-    db.prepare(`
-      UPDATE content_groups
-      SET fragments_json = ?, petals_json = ?
-      WHERE id = ?
-    `).run(
-      JSON.stringify([{
-        id: 'legacy-fragment',
-        source_member_id: 'member-hydrate-a',
-        content_range: null,
-        label: 'Legacy fragment',
-        preview_text: 'Legacy fragment text',
-        order_index: 0,
-        status: 'active',
-      }]),
-      JSON.stringify([{
-        id: 'legacy-petal',
-        label: 'Legacy Petal',
-        members: [],
-        fragment_ids: ['legacy-fragment'],
-        order_index: 0,
-        status: 'active',
-      }]),
-      group.id,
-    );
-
-    db.prepare(`
-      INSERT INTO content_group_fragments (
-        id, user_id, content_group_id, course_id, note_id,
-        source_member_id, content_range_json, label, preview_text,
-        status, order_index, metadata
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      'entity-fragment',
-      userId,
-      group.id,
-      courseId,
-      noteId,
-      'member-hydrate-a',
-      null,
-      'Entity fragment',
-      'Entity fragment text',
-      'active',
-      0,
-      JSON.stringify({ marker: 'entity' }),
-    );
-
-    db.prepare(`
-      INSERT INTO content_group_petals (
-        id, user_id, content_group_id, course_id, note_id,
-        label, role, summary, status, order_index, members_json, metadata
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
-      'entity-petal',
-      userId,
-      group.id,
-      courseId,
-      noteId,
-      'Entity Petal',
-      'concept',
-      'Entity summary',
-      'active',
-      0,
-      '[]',
-      '{}',
-    );
-
-    db.prepare(`
-      INSERT INTO content_group_petal_fragments (
-        id, user_id, content_group_id, petal_id, fragment_id, order_index
-      )
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(
-      'entity-petal::entity-fragment',
-      userId,
-      group.id,
-      'entity-petal',
-      'entity-fragment',
-      0,
-    );
-
-    const hydrated = getContentGroup(db, userId, group.id);
-
-    assert.equal(hydrated.fragments.length, 1);
-    assert.equal(hydrated.fragments[0].id, 'entity-fragment');
-    assert.equal(hydrated.petals.length, 1);
-    assert.equal(hydrated.petals[0].id, 'entity-petal');
-    assert.deepEqual(hydrated.petals[0].fragment_ids, ['entity-fragment']);
-    assert.equal(hydrated.petals[0].metadata.role, 'concept');
-    assert.equal(hydrated.petals[0].metadata.summary, 'Entity summary');
   });
 });
 
@@ -588,83 +593,6 @@ test('ContentGroup upsert writes member rows, clears legacy members_json, and re
   });
 });
 
-test('ContentGroup upsert writes fragments and petals to entity tables and clears legacy JSON', async () => {
-  await withDb((db) => {
-    const { userId, courseId, noteId } = seedUserCourseNote(db);
-    const group = upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Petal write package', {
-      id: 'content-group-petal-write-test',
-      members: [{
-        id: 'member-write-a',
-        kind: 'content_range',
-        label: 'Member A',
-        current_content: 'Alpha',
-        preview_text: 'Alpha',
-        order_index: 0,
-      }],
-      fragments: [{
-        id: 'fragment-write-a',
-        source_member_id: 'member-write-a',
-        content_range: null,
-        label: 'Fragment A',
-        preview_text: 'Alpha',
-        order_index: 0,
-        status: 'active',
-        metadata: { local: true },
-      }],
-      petals: [{
-        id: 'petal-write-a',
-        label: 'Definition',
-        members: [],
-        fragment_ids: ['fragment-write-a'],
-        order_index: 0,
-        status: 'active',
-        metadata: { role: 'definition', summary: 'Definition piece' },
-      }],
-    }));
-
-    assert.equal(group.fragments.length, 1);
-    assert.equal(group.fragments[0].id, 'fragment-write-a');
-    assert.equal(group.petals.length, 1);
-    assert.deepEqual(group.petals[0].fragment_ids, ['fragment-write-a']);
-
-    const fragmentRows = db.prepare(`
-      SELECT id, source_member_id, label
-      FROM content_group_fragments
-      WHERE content_group_id = ?
-    `).all(group.id);
-    const petalRows = db.prepare(`
-      SELECT id, label, role, summary
-      FROM content_group_petals
-      WHERE content_group_id = ?
-    `).all(group.id);
-    const assignmentRows = db.prepare(`
-      SELECT petal_id, fragment_id
-      FROM content_group_petal_fragments
-      WHERE content_group_id = ?
-    `).all(group.id);
-    const raw = db.prepare('SELECT fragments_json, petals_json FROM content_groups WHERE id = ?')
-      .get(group.id) as { fragments_json: string; petals_json: string };
-
-    assert.deepEqual(fragmentRows, [{
-      id: 'fragment-write-a',
-      source_member_id: 'member-write-a',
-      label: 'Fragment A',
-    }]);
-    assert.deepEqual(petalRows, [{
-      id: 'petal-write-a',
-      label: 'Definition',
-      role: 'definition',
-      summary: 'Definition piece',
-    }]);
-    assert.deepEqual(assignmentRows, [{
-      petal_id: 'petal-write-a',
-      fragment_id: 'fragment-write-a',
-    }]);
-    assert.equal(raw.fragments_json, '[]');
-    assert.equal(raw.petals_json, '[]');
-  });
-});
-
 test('replaceNoteContentGroups writes hydrated members through member entity rows', async () => {
   await withDb((db) => {
     const { userId, courseId, noteId } = seedUserCourseNote(db);
@@ -691,225 +619,6 @@ test('replaceNoteContentGroups writes hydrated members through member entity row
       WHERE content_group_id = ?
     `).get('content-group-member-batch-test') as { id: string; order_index: number } | undefined;
     assert.deepEqual(row, { id: 'member-batch', order_index: 0 });
-  });
-});
-
-test('ContentGroup member hard delete prunes dependent fragments and petals', async () => {
-  await withDb((db) => {
-    const { userId, courseId, noteId } = seedUserCourseNote(db);
-    upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Petal cascade package', {
-      id: 'content-group-member-cascade-test',
-      members: [
-        { id: 'member-a', kind: 'block', current_content: 'A', preview_text: 'A', order_index: 0 },
-        { id: 'member-b', kind: 'block', current_content: 'B', preview_text: 'B', order_index: 1 },
-        { id: 'member-c', kind: 'block', current_content: 'C', preview_text: 'C', order_index: 2 },
-      ],
-      fragments: [{
-        id: 'fragment-a',
-        source_member_id: 'member-a',
-        preview_text: 'A fragment',
-        order_index: 0,
-        status: 'active',
-      }, {
-        id: 'fragment-b',
-        source_member_id: 'member-b',
-        preview_text: 'B fragment',
-        order_index: 1,
-        status: 'active',
-      }],
-      petals: [{
-        id: 'petal-a',
-        label: 'Dependent by fragment',
-        members: [],
-        fragment_ids: ['fragment-a'],
-        order_index: 0,
-        status: 'active',
-      }, {
-        id: 'petal-b',
-        label: 'Independent petal',
-        members: [],
-        fragment_ids: ['fragment-b'],
-        order_index: 1,
-        status: 'active',
-      }, {
-        id: 'petal-c',
-        label: 'Dependent by embedded member',
-        members: [{ id: 'member-a', kind: 'block', current_content: 'A', preview_text: 'A', order_index: 0 }],
-        fragment_ids: [],
-        order_index: 2,
-        status: 'active',
-      }],
-    }));
-
-    const updated = upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Petal cascade package', {
-      id: 'content-group-member-cascade-test',
-      members: [
-        { id: 'member-b', kind: 'block', current_content: 'B', preview_text: 'B', order_index: 0 },
-        { id: 'member-c', kind: 'block', current_content: 'C', preview_text: 'C', order_index: 1 },
-      ],
-      fragments: [{
-        id: 'fragment-a',
-        source_member_id: 'member-a',
-        preview_text: 'A fragment',
-        order_index: 0,
-        status: 'active',
-      }, {
-        id: 'fragment-b',
-        source_member_id: 'member-b',
-        preview_text: 'B fragment',
-        order_index: 1,
-        status: 'active',
-      }],
-      petals: [{
-        id: 'petal-a',
-        label: 'Dependent by fragment',
-        members: [],
-        fragment_ids: ['fragment-a'],
-        order_index: 0,
-        status: 'active',
-      }, {
-        id: 'petal-b',
-        label: 'Independent petal',
-        members: [],
-        fragment_ids: ['fragment-b'],
-        order_index: 1,
-        status: 'active',
-      }, {
-        id: 'petal-c',
-        label: 'Dependent by embedded member',
-        members: [{ id: 'member-a', kind: 'block', current_content: 'A', preview_text: 'A', order_index: 0 }],
-        fragment_ids: [],
-        order_index: 2,
-        status: 'active',
-      }],
-    }));
-
-    assert.deepEqual(updated.members.map((member: any) => member.id), ['member-b', 'member-c']);
-    assert.deepEqual(updated.fragments.map((fragment: any) => ({
-      id: fragment.id,
-      order_index: fragment.order_index,
-    })), [{ id: 'fragment-b', order_index: 0 }]);
-    assert.deepEqual(updated.petals.map((petal: any) => ({
-      id: petal.id,
-      fragment_ids: petal.fragment_ids,
-      order_index: petal.order_index,
-    })), [{ id: 'petal-b', fragment_ids: ['fragment-b'], order_index: 0 }]);
-  });
-});
-
-test('ContentGroup member delete service hard deletes one member and prunes dependencies', async () => {
-  const { deleteContentGroupMember } = await import('../services/contentGroups.js') as any;
-  assert.equal(typeof deleteContentGroupMember, 'function');
-
-  await withDb((db) => {
-    const { userId, courseId, noteId } = seedUserCourseNote(db);
-    const group = upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Delete one member', {
-      id: 'content-group-delete-member-route-test',
-      members: [
-        { id: 'member-a', kind: 'block', current_content: 'A', preview_text: 'A', order_index: 0 },
-        { id: 'member-b', kind: 'block', current_content: 'B', preview_text: 'B', order_index: 1 },
-      ],
-      fragments: [{
-        id: 'fragment-a',
-        source_member_id: 'member-a',
-        preview_text: 'A fragment',
-        order_index: 0,
-        status: 'active',
-      }],
-      petals: [{
-        id: 'petal-a',
-        label: 'Dependent petal',
-        members: [],
-        fragment_ids: ['fragment-a'],
-        order_index: 0,
-        status: 'active',
-      }],
-    }));
-
-    const updated = deleteContentGroupMember(db, userId, group.id, 'member-a');
-
-    assert.deepEqual(updated.members.map((member: any) => member.id), ['member-b']);
-    assert.deepEqual(updated.fragments.map((fragment: any) => fragment.id), []);
-    assert.deepEqual(updated.petals.map((petal: any) => petal.id), []);
-    const deleted = db.prepare('SELECT id FROM content_group_members WHERE id = ?')
-      .get('member-a');
-    assert.equal(deleted, undefined);
-  });
-});
-
-test('deleteContentGroupMember hard-prunes entity-backed fragments and dependent petals', async () => {
-  const { deleteContentGroupMember } = await import('../services/contentGroups.js') as any;
-
-  await withDb((db) => {
-    const { userId, courseId, noteId } = seedUserCourseNote(db);
-    const group = upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Entity delete cascade', {
-      id: 'content-group-petal-member-delete',
-      members: [
-        { id: 'member-delete-a', kind: 'content_range', current_content: 'Delete me', preview_text: 'Delete me', order_index: 0 },
-        { id: 'member-keep-b', kind: 'content_range', current_content: 'Keep me', preview_text: 'Keep me', order_index: 1 },
-      ],
-      fragments: [{
-        id: 'fragment-delete-a',
-        source_member_id: 'member-delete-a',
-        content_range: null,
-        label: 'Delete fragment',
-        preview_text: 'Delete me',
-        order_index: 0,
-        status: 'active',
-      }, {
-        id: 'fragment-keep-b',
-        source_member_id: 'member-keep-b',
-        content_range: null,
-        label: 'Keep fragment',
-        preview_text: 'Keep me',
-        order_index: 1,
-        status: 'active',
-      }],
-      petals: [{
-        id: 'petal-delete-a',
-        label: 'Delete Petal',
-        members: [],
-        fragment_ids: ['fragment-delete-a'],
-        order_index: 0,
-        status: 'active',
-      }, {
-        id: 'petal-keep-b',
-        label: 'Keep Petal',
-        members: [],
-        fragment_ids: ['fragment-keep-b'],
-        order_index: 1,
-        status: 'active',
-      }],
-    }));
-
-    const updated = deleteContentGroupMember(db, userId, group.id, 'member-delete-a');
-
-    assert.deepEqual(updated.members.map((member: any) => member.id), ['member-keep-b']);
-    assert.deepEqual(updated.fragments.map((fragment: any) => fragment.id), ['fragment-keep-b']);
-    assert.deepEqual(updated.petals.map((petal: any) => petal.id), ['petal-keep-b']);
-
-    const deletedFragments = db.prepare(`
-      SELECT id
-      FROM content_group_fragments
-      WHERE id = 'fragment-delete-a'
-    `).all();
-    const deletedPetals = db.prepare(`
-      SELECT id
-      FROM content_group_petals
-      WHERE id = 'petal-delete-a'
-    `).all();
-    const keptAssignments = db.prepare(`
-      SELECT petal_id, fragment_id
-      FROM content_group_petal_fragments
-      WHERE content_group_id = ?
-    `).all(group.id);
-
-    assert.equal(deletedFragments.length, 0);
-    assert.equal(deletedPetals.length, 0);
-    assert.deepEqual(keptAssignments, [{
-      petal_id: 'petal-keep-b',
-      fragment_id: 'fragment-keep-b',
-    }]);
   });
 });
 
@@ -954,8 +663,6 @@ test('ContentGroup validator accepts runtime ids and note-derived course ownersh
     note_id: uuidv4(),
     title: 'Runtime id group',
     members: [],
-    fragments: [],
-    petals: [],
     placements: [],
     metadata: {},
   });

@@ -95,17 +95,6 @@ function copyGroupForContext(input: {
   });
   return {
     ...nextGroup,
-    fragments: (group.fragments || []).map((fragment) => ({
-      ...fragment,
-      content_range: fragment.content_range ? { ...fragment.content_range } : null,
-      metadata: fragment.metadata ? { ...fragment.metadata } : {},
-    })),
-    petals: group.petals.map((petal) => ({
-      ...petal,
-      members: petal.members.map(normalizeContentGroupMember),
-      fragment_ids: [...(petal.fragment_ids || [])],
-      metadata: petal.metadata ? { ...petal.metadata } : {},
-    })),
     identity: {
       ...group.identity,
       metadata: group.identity.metadata ? { ...group.identity.metadata } : {},

@@ -259,8 +259,7 @@ export type CanvasObjectBacking =
   | 'note_block'
   | 'asset'
   | 'structured_object'
-  | 'content_group'
-  | 'petal';
+  | 'content_group';
 
 export type CanvasObjectClass =
   | 'pure'
@@ -289,8 +288,7 @@ export type CanvasMountTargetKind =
   | 'note_block'
   | 'asset'
   | 'structured_object'
-  | 'content_group'
-  | 'petal';
+  | 'content_group';
 
 export type CanvasProjectionMode =
   | 'owned'

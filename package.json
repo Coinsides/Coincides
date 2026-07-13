@@ -19,6 +19,7 @@
     "check:group-gallery-shell": "cd client && npm run check:group-gallery-shell",
     "check:single-editor-shell": "cd client && npm run check:single-editor-shell",
     "check:groups-rail-shell": "cd client && npm run check:groups-rail-shell",
+    "check:v2-bn11-legacy-shutdown": "cd client && npm run check:v2-bn11-legacy-shutdown",
     "check:source-experience": "cd client && npm run check:source-experience",
     "check:changed-file-secrets": "node scripts/changedFileSecretScan.mjs",
     "fixtures:source-smoke": "cd server && node scripts/generateSourceSmokeFixtures.mjs",

@@ -6,8 +6,6 @@ import { AppError } from '../middleware/errorHandler.js';
 import {
   createMaterialMapProposalSchema,
   createMaterialReconciliationProposalSchema,
-  createCanvasLayoutProposalSchema,
-  createCompositionTemplateProposalSchema,
   createDomainRefinementProposalSchema,
   createTemplateMigrationProposalSchema,
   createOrganizedNoteProposalSchema,
@@ -17,8 +15,6 @@ import { normalizeCardContent } from '../agent/tools/normalizeContent.js';
 import { applyMaterialMapProposal, createMaterialMapProposal } from '../services/materialMapProposals.js';
 import { applyMaterialReconciliationProposal, createMaterialReconciliationProposal } from '../services/materialReconciliationProposals.js';
 import { applyOrganizedNoteProposal, createOrganizedNoteProposal } from '../services/organizedNoteProposals.js';
-import { applyCanvasLayoutProposal, createCanvasLayoutProposal } from '../services/canvasLayoutProposals.js';
-import { applyCompositionTemplateProposal, createCompositionTemplateProposal } from '../services/compositionTemplates.js';
 import { applyDomainRefinementProposal, createDomainRefinementProposal } from '../services/domainRefinementProposals.js';
 import { applyTemplateMigrationProposal, createTemplateMigrationProposal } from '../services/templateMigrationProposals.js';
 import { ZodError } from 'zod';
@@ -118,34 +114,6 @@ router.post('/material-reconciliation', (req: AuthRequest, res: Response) => {
   }
 });
 
-router.post('/canvas-layout', (req: AuthRequest, res: Response) => {
-  try {
-    const body = createCanvasLayoutProposalSchema.parse(req.body);
-    const proposal = createCanvasLayoutProposal(getDb(), req.userId!, body);
-    res.status(201).json(proposal);
-  } catch (err) {
-    if (err instanceof ZodError) {
-      res.status(400).json({ error: 'Validation error', details: err.errors });
-      return;
-    }
-    throw err;
-  }
-});
-
-router.post('/composition-template', (req: AuthRequest, res: Response) => {
-  try {
-    const body = createCompositionTemplateProposalSchema.parse(req.body);
-    const proposal = createCompositionTemplateProposal(getDb(), req.userId!, body);
-    res.status(201).json(proposal);
-  } catch (err) {
-    if (err instanceof ZodError) {
-      res.status(400).json({ error: 'Validation error', details: err.errors });
-      return;
-    }
-    throw err;
-  }
-});
-
 router.post('/template-migration', (req: AuthRequest, res: Response) => {
   try {
     const body = createTemplateMigrationProposalSchema.parse(req.body);
@@ -192,6 +160,9 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
   ).get(req.params.id, req.userId!) as ProposalRow | undefined;
 
   if (!proposal) throw new AppError(404, 'Proposal not found or already resolved');
+  if (proposal.type === 'canvas_layout' || proposal.type === 'composition_template') {
+    throw new AppError(410, 'Legacy Learning Canvas proposals can no longer be applied');
+  }
 
   const data = JSON.parse(proposal.data) as { items?: Array<Record<string, unknown>>; deck_id?: string };
   const now = new Date().toISOString();
@@ -209,14 +180,6 @@ router.post('/:id/apply', (req: AuthRequest, res: Response) => {
       }
       case 'material_reconciliation': {
         applyResult = applyMaterialReconciliationProposal(db, req.userId!, proposal, req.body);
-        break;
-      }
-      case 'canvas_layout': {
-        applyResult = applyCanvasLayoutProposal(db, req.userId!, proposal);
-        break;
-      }
-      case 'composition_template': {
-        applyResult = applyCompositionTemplateProposal(db, req.userId!, proposal);
         break;
       }
       case 'template_migration': {

@@ -46,17 +46,16 @@ assertContainsAll('Gallery exposes resource manager shell anchors', page, [
   'New group',
   'Folder view',
   'Topic view',
-  'Role view',
+  'Type view',
   'Current folder',
 ]);
 
 assertContainsAll('Gallery card exposes OpenDesign anatomy', page + model, [
-  'roleLabel',
+  'typeLabel',
   'topicLabel',
   'sourceLabel',
   'statusLabel',
   'memberCountLabel',
-  'petalCountLabel',
 ]);
 
 assertContainsAll('Gallery shell CSS has dedicated card/folder/status language', css, [
@@ -75,6 +74,8 @@ assertContainsNone('Gallery shell does not implement deferred systems', page + m
   'materialize',
   'forkContentGroup',
   'duplicateContentGroup',
+  'petalCountLabel',
+  'ContentGroupPetalV1',
 ]);
 
 console.log(`group gallery shell contract passed (${checks.length} checks)`);

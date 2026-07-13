@@ -35,7 +35,7 @@ export const CONTENT_GROUP_SURFACE_ROLES: Record<ContentGroupSurfaceId, ContentG
     label: 'Refine',
     verb: 'refine',
     title: 'Single ContentGroup Editor',
-    description: 'Refine one ContentGroup through members, Petals, identity, summary, and source state.',
+    description: 'Refine one ContentGroup through members, identity, summary, and source state.',
     boundary: 'Refinement edits group-local structure unless the user explicitly applies an action back to source.',
   },
 };

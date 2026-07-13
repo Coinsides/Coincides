@@ -890,15 +890,15 @@
   grid-template-columns: minmax(420px, 1fr) 330px;
   grid-template-rows: auto minmax(360px, 1fr) auto;
   grid-template-areas:
-    "identity petals"
-    "materials petals"
+    "identity context"
+    "materials context"
     "source source";
   gap: 12px;
 }
 
 .singleEditorIdentityPanel,
 .singleEditorMaterialShelf,
-.singleEditorPetalDock,
+.singleEditorContextPanel,
 .singleEditorSourceDrawer {
   border: 1px solid var(--border-default);
   background: color-mix(in srgb, var(--bg-primary) 94%, #111827 6%);
@@ -920,13 +920,44 @@
   padding: 12px;
 }
 
-.singleEditorPetalDock {
-  grid-area: petals;
+.singleEditorContextPanel {
+  grid-area: context;
   display: grid;
   gap: 12px;
   align-content: start;
   padding: 12px;
   background: color-mix(in srgb, var(--bg-secondary) 76%, #020617 24%);
+}
+
+.singleEditorFactsList {
+  display: grid;
+  gap: 0;
+  margin: 0;
+}
+
+.singleEditorFactsList > div {
+  display: grid;
+  grid-template-columns: 84px minmax(0, 1fr);
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--border-muted);
+}
+
+.singleEditorFactsList dt,
+.singleEditorFactsList dd {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.singleEditorFactsList dt {
+  color: var(--text-muted);
+}
+
+.singleEditorFactsList dd {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--text-secondary);
 }
 
 .singleEditorSourceDrawer {
@@ -1257,7 +1288,7 @@
     grid-template-areas:
       "identity"
       "materials"
-      "petals"
+      "context"
       "source";
   }
 

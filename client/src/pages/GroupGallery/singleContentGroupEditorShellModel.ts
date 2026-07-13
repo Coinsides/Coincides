@@ -25,7 +25,6 @@ export interface SingleEditorShellView {
   sourceNoteTitle: string;
   folderPath: string;
   memberCountLabel: string;
-  petalCountLabel: string;
   stabilityLabel: string;
   stabilityReason: string;
   canAccept: boolean;
@@ -54,7 +53,6 @@ export function buildSingleEditorShellView(input: {
     group: input.group,
     folder: input.folder,
   });
-  const activePetals = input.group.petals.filter((petal) => petal.status !== 'deleted');
   const statusKind = input.group.identity.status === 'none' ? 'draft' : input.group.identity.status;
   const folderId = singleEditorGroupFolderId(input.group);
 
@@ -68,7 +66,6 @@ export function buildSingleEditorShellView(input: {
     sourceNoteTitle: cleanLabel(input.note.title, 'Untitled note'),
     folderPath: folderPathText(input.folders, folderId),
     memberCountLabel: `${input.group.members.length} members`,
-    petalCountLabel: `${activePetals.length} petals`,
     stabilityLabel: stability.label,
     stabilityReason: stability.reason,
     canAccept: !stability.accept_disabled_reason,

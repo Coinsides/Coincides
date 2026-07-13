@@ -11,13 +11,11 @@ import type {
   ContentGroupIdentityCreatedBy,
   ContentGroupIdentityStatus,
   ContentGroupIdentityV1,
-  ContentGroupFragmentV1,
   ContentGroupMemberKind,
   ContentGroupMemberIntegrityStatus,
   ContentGroupMemberSourceRefV1,
   ContentGroupMemberSourceSyncStatus,
   ContentGroupMemberV1,
-  ContentGroupPetalV1,
   ContentGroupStatus,
   ContentGroupV1,
   GroupFolderV1,
@@ -120,7 +118,6 @@ function blockPreview(block: NoteBlock): string | null {
 
 export interface ContentGroupIntegrityIssue {
   group_id: string;
-  petal_id?: string;
   member_id: string;
   status: ContentGroupMemberIntegrityStatus;
   reason: string;
@@ -128,12 +125,10 @@ export interface ContentGroupIntegrityIssue {
 
 export interface ContentGroupGraphIntegrityIssue {
   group_id: string;
-  petal_id?: string;
   member_id?: string;
   status:
     | 'missing_folder'
     | 'missing_member_source'
-    | 'petal_member_not_in_group'
     | 'accepted_group_has_issue';
   reason: string;
 }
@@ -148,7 +143,6 @@ export type ContentGroupStabilityState =
   | 'stable'
   | 'deleted_group'
   | 'empty_group'
-  | 'empty_petal'
   | 'stale_member_source'
   | 'orphaned_member'
   | 'deleted_source_note'
@@ -165,7 +159,6 @@ export interface ContentGroupStabilitySummary {
   reason: string;
   severity: ContentGroupStabilitySeverity;
   member_issue_count: number;
-  empty_petal_count: number;
   can_materialize: boolean;
   materialize_disabled_reason: string | null;
   accept_disabled_reason: string | null;
@@ -180,7 +173,6 @@ const STABILITY_PRIORITY: ContentGroupStabilityState[] = [
   'materialize_target_unavailable',
   'archived_folder',
   'empty_group',
-  'empty_petal',
   'stable',
 ];
 
@@ -198,11 +190,6 @@ const STABILITY_LABELS: Record<ContentGroupStabilityState, { label: string; reas
   empty_group: {
     label: 'Empty group',
     reason: 'This ContentGroup has no members yet.',
-    severity: 'muted',
-  },
-  empty_petal: {
-    label: 'Empty petal',
-    reason: 'One or more Petals have no fragments or local members yet.',
     severity: 'muted',
   },
   stale_member_source: {
@@ -667,64 +654,6 @@ export function normalizeContentGroupMember(member: ContentGroupMemberV1): Conte
   };
 }
 
-export function createContentGroupFragment(input: {
-  sourceMemberId: string;
-  contentRange?: AnnotationRangeV1 | null;
-  label?: string | null;
-  previewText?: string | null;
-  orderIndex?: number;
-}): ContentGroupFragmentV1 {
-  const timestamp = nowIso();
-  return {
-    id: createRuntimeId('content-fragment'),
-    source_member_id: input.sourceMemberId,
-    content_range: input.contentRange ? cloneRange(input.contentRange) : null,
-    label: cleanOptionalText(input.label),
-    preview_text: cleanOptionalText(input.previewText) || rangePreview(input.contentRange || null),
-    order_index: Number.isFinite(input.orderIndex) ? input.orderIndex || 0 : 0,
-    status: 'active',
-    created_at: timestamp,
-    updated_at: timestamp,
-    metadata: {},
-  };
-}
-
-export function createContentGroupFragmentFromMember(input: {
-  member: ContentGroupMemberV1;
-  contentRange?: AnnotationRangeV1 | null;
-  label?: string | null;
-  previewText?: string | null;
-  orderIndex?: number;
-}): ContentGroupFragmentV1 {
-  const normalizedMember = normalizeContentGroupMember(input.member);
-  return createContentGroupFragment({
-    sourceMemberId: normalizedMember.id,
-    contentRange: input.contentRange || normalizedMember.content_range || null,
-    label: input.label || normalizedMember.label || null,
-    previewText: input.previewText || normalizedMember.preview_text || null,
-    orderIndex: input.orderIndex,
-  });
-}
-
-export function normalizeContentGroupFragment(fragment: Partial<ContentGroupFragmentV1>): ContentGroupFragmentV1 {
-  const createdAt = fragment.created_at || nowIso();
-  const range = fragment.content_range && typeof fragment.content_range === 'object'
-    ? cloneRange(fragment.content_range)
-    : null;
-  return {
-    id: typeof fragment.id === 'string' && fragment.id ? fragment.id : createRuntimeId('content-fragment'),
-    source_member_id: typeof fragment.source_member_id === 'string' ? fragment.source_member_id : '',
-    content_range: range,
-    label: cleanOptionalText(fragment.label),
-    preview_text: cleanOptionalText(fragment.preview_text) || rangePreview(range),
-    order_index: Number.isFinite(fragment.order_index) ? fragment.order_index || 0 : 0,
-    status: normalizeStatus(fragment.status),
-    created_at: createdAt,
-    updated_at: fragment.updated_at || createdAt,
-    metadata: cloneMetadata(fragment.metadata),
-  };
-}
-
 export function markContentGroupMemberIntegrity(
   member: ContentGroupMemberV1,
   status: ContentGroupMemberIntegrityStatus,
@@ -914,16 +843,12 @@ export function refreshContentGroupPreviews(
 ): ContentGroupV1 {
   const normalized = normalizeContentGroup(group);
   const members = normalized.members.map((member) => refreshContentGroupMemberPreview(member, resolver));
-  const petals = normalized.petals.map((petal) => ({
-    ...petal,
-    members: petal.members.map((member) => refreshContentGroupMemberPreview(member, resolver)),
-  }));
-  const hasIssue = [...members, ...petals.flatMap((petal) => petal.members)]
-    .some((member) => member.metadata?.integrity_status && member.metadata.integrity_status !== 'valid');
+  const hasIssue = members.some((member) => (
+    member.metadata?.integrity_status && member.metadata.integrity_status !== 'valid'
+  ));
   const nextGroup = {
     ...normalized,
     members,
-    petals,
     updated_at: nowIso(),
   };
   return hasIssue ? downgradeAcceptedContentGroupIdentity(nextGroup, 'member preview refresh found unresolved content') : nextGroup;
@@ -938,10 +863,6 @@ export function auditContentGroupIntegrity(
 } {
   const normalized = normalizeContentGroup(group);
   const members = normalized.members.map((member) => auditContentGroupMemberIntegrity(member, resolver));
-  const petals = normalized.petals.map((petal) => ({
-    ...petal,
-    members: petal.members.map((member) => auditContentGroupMemberIntegrity(member, resolver)),
-  }));
   const issues: ContentGroupIntegrityIssue[] = [];
 
   members.forEach((member) => {
@@ -954,25 +875,10 @@ export function auditContentGroupIntegrity(
       reason: String(member.metadata?.integrity_reason || status),
     });
   });
-  petals.forEach((petal) => {
-    petal.members.forEach((member) => {
-      const status = member.metadata?.integrity_status;
-      if (!status || status === 'valid') return;
-      issues.push({
-        group_id: normalized.id,
-        petal_id: petal.id,
-        member_id: member.id,
-        status,
-        reason: String(member.metadata?.integrity_reason || status),
-      });
-    });
-  });
-
   return {
     group: {
       ...normalized,
       members,
-      petals,
     },
     issues,
   };
@@ -1033,40 +939,6 @@ export function createContentGroupPreviewResolver(input: {
   };
 }
 
-export function createContentGroupPetal(input: {
-  label?: string;
-  members?: ContentGroupMemberV1[];
-  fragmentIds?: string[];
-  orderIndex?: number;
-}): ContentGroupPetalV1 {
-  const timestamp = nowIso();
-  return {
-    id: createRuntimeId('content-petal'),
-    label: cleanTitle(input.label || 'New part'),
-    members: uniqueMembers((input.members || []).map(normalizeContentGroupMember)),
-    fragment_ids: Array.isArray(input.fragmentIds) ? input.fragmentIds.filter(Boolean) : [],
-    order_index: input.orderIndex ?? 0,
-    status: 'active',
-    created_at: timestamp,
-    updated_at: timestamp,
-    metadata: {},
-  };
-}
-
-export function normalizeContentGroupPetal(petal: ContentGroupPetalV1): ContentGroupPetalV1 {
-  return {
-    id: typeof petal.id === 'string' && petal.id ? petal.id : createRuntimeId('content-petal'),
-    label: cleanTitle(petal.label || 'New part'),
-    members: uniqueMembers(Array.isArray(petal.members) ? petal.members.map(normalizeContentGroupMember) : []),
-    fragment_ids: Array.isArray(petal.fragment_ids) ? petal.fragment_ids.filter(Boolean) : [],
-    order_index: Number.isFinite(petal.order_index) ? petal.order_index : 0,
-    status: normalizeStatus(petal.status),
-    created_at: petal.created_at || nowIso(),
-    updated_at: petal.updated_at || petal.created_at || nowIso(),
-    metadata: cloneMetadata(petal.metadata),
-  };
-}
-
 export function createContentGroup(input: {
   projectId: string;
   noteId: string;
@@ -1103,8 +975,6 @@ export function createContentGroup(input: {
     created_at: timestamp,
     updated_at: timestamp,
     members: uniqueMembers((input.members || []).map(normalizeContentGroupMember)),
-    fragments: [],
-    petals: [],
     identity: createEmptyContentGroupIdentity(timestamp),
     view_state: {},
     metadata: {},
@@ -1217,14 +1087,6 @@ export function normalizeContentGroup(group: ContentGroupNormalizationInput): Co
     created_at: createdAt,
     updated_at: group.updated_at || createdAt,
     members: uniqueMembers(Array.isArray(group.members) ? group.members.map(normalizeContentGroupMember) : []),
-    fragments: (Array.isArray(group.fragments) ? group.fragments : [])
-      .map(normalizeContentGroupFragment)
-      .sort((a, b) => a.order_index - b.order_index)
-      .map((fragment, index) => ({ ...fragment, order_index: index })),
-    petals: (Array.isArray(group.petals) ? group.petals : [])
-      .map(normalizeContentGroupPetal)
-      .sort((a, b) => a.order_index - b.order_index)
-      .map((petal, index) => ({ ...petal, order_index: index })),
     identity: normalizeContentGroupIdentity(group),
     view_state: cloneMetadata(group.view_state),
     metadata: cloneMetadata(group.metadata),
@@ -1238,11 +1100,7 @@ export function summarizeContentGroupStability(input: {
   materializeTargetAvailable?: boolean;
 }): ContentGroupStabilitySummary {
   const group = normalizeContentGroup(input.group);
-  const activePetals = group.petals.filter((petal) => petal.status !== 'deleted');
-  const allMembers = [
-    ...group.members,
-    ...activePetals.flatMap((petal) => petal.members),
-  ];
+  const allMembers = group.members;
   const memberHasChangedSource = (member: ContentGroupMemberV1) => (
     member.source_sync_status === 'changed'
     || member.metadata?.integrity_status === 'stale'
@@ -1255,14 +1113,10 @@ export function summarizeContentGroupStability(input: {
   );
   const changedMemberCount = allMembers.filter(memberHasChangedSource).length;
   const missingMemberCount = allMembers.filter(memberHasMissingSource).length;
-  const emptyPetalCount = activePetals
-    .filter((petal) => petal.members.length === 0 && (petal.fragment_ids || []).length === 0)
-    .length;
 
   const states = new Set<ContentGroupStabilityState>();
   if (group.status === 'deleted') states.add('deleted_group');
   if (group.members.length === 0) states.add('empty_group');
-  if (emptyPetalCount > 0) states.add('empty_petal');
   if (changedMemberCount > 0) states.add('stale_member_source');
   if (missingMemberCount > 0) states.add('orphaned_member');
   if (input.sourceNoteAvailable === false) states.add('deleted_source_note');
@@ -1315,7 +1169,6 @@ export function summarizeContentGroupStability(input: {
     reason: descriptor.reason,
     severity: descriptor.severity,
     member_issue_count: memberIssueCount,
-    empty_petal_count: emptyPetalCount,
     can_materialize: canMaterialize,
     materialize_disabled_reason: materializeDisabledReason,
     accept_disabled_reason: acceptDisabledReason,
@@ -1466,134 +1319,16 @@ export function moveContentGroupToFolder(input: {
   };
 }
 
-export function addContentGroupFragment(input: {
-  group: ContentGroupV1;
-  sourceMemberId: string;
-  contentRange?: AnnotationRangeV1 | null;
-  label?: string | null;
-  previewText?: string | null;
-}): ContentGroupV1 {
-  const normalized = normalizeContentGroup(input.group);
-  return invalidateAcceptedIdentity({
-    ...normalized,
-    fragments: [
-      ...(normalized.fragments || []),
-      createContentGroupFragment({
-        sourceMemberId: input.sourceMemberId,
-        contentRange: input.contentRange,
-        label: input.label,
-        previewText: input.previewText,
-        orderIndex: normalized.fragments?.length || 0,
-      }),
-    ],
-    updated_at: nowIso(),
-  });
-}
-
-export function addMemberFragmentToPetal(input: {
-  group: ContentGroupV1;
-  petalId: string;
-  memberId: string;
-  contentRange?: AnnotationRangeV1 | null;
-  label?: string | null;
-  previewText?: string | null;
-}): ContentGroupV1 {
-  const normalized = normalizeContentGroup(input.group);
-  const sourceMember = normalized.members.find((member) => member.id === input.memberId);
-  if (!sourceMember) return normalized;
-
-  const timestamp = nowIso();
-  const fragment = createContentGroupFragmentFromMember({
-    member: sourceMember,
-    contentRange: input.contentRange,
-    label: input.label,
-    previewText: input.previewText,
-    orderIndex: normalized.fragments?.length || 0,
-  });
-
-  return invalidateAcceptedIdentity({
-    ...normalized,
-    fragments: [...(normalized.fragments || []), fragment],
-    petals: normalized.petals.map((petal) => (
-      petal.id === input.petalId
-        ? {
-          ...petal,
-          fragment_ids: Array.from(new Set([...(petal.fragment_ids || []), fragment.id])),
-          updated_at: timestamp,
-        }
-        : petal
-    )),
-    updated_at: timestamp,
-  });
-}
-
-export function assignFragmentsToPetal(input: {
-  group: ContentGroupV1;
-  petalId: string;
-  fragmentIds: string[];
-}): ContentGroupV1 {
-  const normalized = normalizeContentGroup(input.group);
-  const fragmentIds = input.fragmentIds.filter(Boolean);
-  return invalidateAcceptedIdentity({
-    ...normalized,
-    petals: normalized.petals.map((petal) => (
-      petal.id === input.petalId
-        ? {
-          ...petal,
-          fragment_ids: Array.from(new Set([...(petal.fragment_ids || []), ...fragmentIds])),
-          updated_at: nowIso(),
-        }
-        : petal
-    )),
-    updated_at: nowIso(),
-  });
-}
-
-function pruneContentGroupStructuresForRemovedMembers(
-  group: ContentGroupV1,
-  removedMemberIds: Set<string>,
-): Pick<ContentGroupV1, 'fragments' | 'petals'> {
-  const removedFragmentIds = new Set<string>();
-  const fragments = (group.fragments || [])
-    .filter((fragment) => {
-      const remove = removedMemberIds.has(fragment.source_member_id);
-      if (remove) removedFragmentIds.add(fragment.id);
-      return !remove;
-    })
-    .map((fragment, index) => ({ ...fragment, order_index: index }));
-
-  const petals = (group.petals || [])
-    .filter((petal) => {
-      const hasRemovedMember = petal.members.some((member) => removedMemberIds.has(member.id));
-      const hasRemovedFragment = (petal.fragment_ids || [])
-        .some((fragmentId) => removedFragmentIds.has(fragmentId));
-      return !hasRemovedMember && !hasRemovedFragment;
-    })
-    .map((petal, index) => ({
-      ...petal,
-      fragment_ids: (petal.fragment_ids || [])
-        .filter((fragmentId) => !removedFragmentIds.has(fragmentId)),
-      order_index: index,
-      updated_at: nowIso(),
-    }));
-
-  return { fragments, petals };
-}
-
 export function removeContentGroupMember(
   group: ContentGroupV1,
   memberId: string,
 ): ContentGroupV1 {
   const normalized = normalizeContentGroup(group);
-  const removedMemberIds = new Set([memberId]);
-  const pruned = pruneContentGroupStructuresForRemovedMembers(normalized, removedMemberIds);
   return invalidateAcceptedIdentity({
     ...normalized,
     members: normalized.members
       .filter((member) => member.id !== memberId)
       .map((member, index) => ({ ...member, order_index: index })),
-    fragments: pruned.fragments,
-    petals: pruned.petals,
     updated_at: nowIso(),
   });
 }
@@ -1604,169 +1339,6 @@ export function softDeleteContentGroup(group: ContentGroupV1): ContentGroupV1 {
     status: 'deleted',
     updated_at: nowIso(),
   };
-}
-
-export function addPetalToContentGroup(
-  group: ContentGroupV1,
-  label = 'New part',
-): ContentGroupV1 {
-  const normalized = normalizeContentGroup(group);
-  return invalidateAcceptedIdentity({
-    ...normalized,
-    petals: [
-      ...normalized.petals,
-      createContentGroupPetal({
-        label,
-        orderIndex: normalized.petals.length,
-      }),
-    ],
-    updated_at: nowIso(),
-  });
-}
-
-export function moveContentGroupPetal(input: {
-  group: ContentGroupV1;
-  petalId: string;
-  targetPetalId: string;
-}): ContentGroupV1 {
-  const normalized = normalizeContentGroup(input.group);
-  if (!input.petalId || !input.targetPetalId || input.petalId === input.targetPetalId) {
-    return normalized;
-  }
-
-  const movablePetals = normalized.petals.filter((petal) => petal.status !== 'deleted');
-  const movingPetal = movablePetals.find((petal) => petal.id === input.petalId);
-  if (!movingPetal || !movablePetals.some((petal) => petal.id === input.targetPetalId)) {
-    return normalized;
-  }
-
-  const remainingPetals = movablePetals.filter((petal) => petal.id !== input.petalId);
-  const targetIndex = remainingPetals.findIndex((petal) => petal.id === input.targetPetalId);
-  if (targetIndex < 0) return normalized;
-
-  const timestamp = nowIso();
-  const reorderedPetals = [...remainingPetals];
-  reorderedPetals.splice(targetIndex, 0, movingPetal);
-  const deletedPetals = normalized.petals.filter((petal) => petal.status === 'deleted');
-
-  return invalidateAcceptedIdentity({
-    ...normalized,
-    petals: [
-      ...reorderedPetals.map((petal, index) => ({
-        ...petal,
-        order_index: index,
-        updated_at: timestamp,
-      })),
-      ...deletedPetals.map((petal, index) => ({
-        ...petal,
-        order_index: reorderedPetals.length + index,
-      })),
-    ],
-    updated_at: timestamp,
-  });
-}
-
-export function renameContentGroupPetal(input: {
-  group: ContentGroupV1;
-  petalId: string;
-  label: string;
-}): ContentGroupV1 {
-  const normalized = normalizeContentGroup(input.group);
-  return invalidateAcceptedIdentity({
-    ...normalized,
-    petals: normalized.petals.map((petal) => (
-      petal.id === input.petalId
-        ? { ...petal, label: cleanTitle(input.label), updated_at: nowIso() }
-        : petal
-    )),
-    updated_at: nowIso(),
-  });
-}
-
-export function addMembersToPetal(input: {
-  group: ContentGroupV1;
-  petalId: string;
-  members: ContentGroupMemberV1[];
-}): ContentGroupV1 {
-  const normalized = normalizeContentGroup(input.group);
-  return invalidateAcceptedIdentity({
-    ...normalized,
-    petals: normalized.petals.map((petal) => (
-      petal.id === input.petalId
-        ? {
-          ...petal,
-          members: uniqueMembers([...petal.members, ...input.members.map(normalizeContentGroupMember)]),
-          updated_at: nowIso(),
-        }
-        : petal
-    )),
-    updated_at: nowIso(),
-  });
-}
-
-export function removeContentGroupPetalMember(input: {
-  group: ContentGroupV1;
-  petalId: string;
-  memberId: string;
-}): ContentGroupV1 {
-  const normalized = normalizeContentGroup(input.group);
-  return invalidateAcceptedIdentity({
-    ...normalized,
-    petals: normalized.petals.map((petal) => (
-      petal.id === input.petalId
-        ? {
-          ...petal,
-          members: petal.members
-            .filter((member) => member.id !== input.memberId)
-            .map((member, index) => ({ ...member, order_index: index })),
-          updated_at: nowIso(),
-        }
-        : petal
-    )),
-    updated_at: nowIso(),
-  });
-}
-
-export function removeContentGroupPetalFragment(input: {
-  group: ContentGroupV1;
-  petalId: string;
-  fragmentId: string;
-}): ContentGroupV1 {
-  const normalized = normalizeContentGroup(input.group);
-  return invalidateAcceptedIdentity({
-    ...normalized,
-    petals: normalized.petals.map((petal) => (
-      petal.id === input.petalId
-        ? {
-          ...petal,
-          fragment_ids: (petal.fragment_ids || []).filter((fragmentId) => fragmentId !== input.fragmentId),
-          updated_at: nowIso(),
-        }
-        : petal
-    )),
-    updated_at: nowIso(),
-  });
-}
-
-export function removeContentGroupPetal(input: {
-  group: ContentGroupV1;
-  petalId: string;
-}): ContentGroupV1 {
-  const normalized = normalizeContentGroup(input.group);
-  return invalidateAcceptedIdentity({
-    ...normalized,
-    petals: normalized.petals
-      .filter((petal) => petal.id !== input.petalId)
-      .map((petal, index) => ({ ...petal, order_index: index })),
-    updated_at: nowIso(),
-  });
-}
-
-export function softDeleteContentGroupPetal(input: {
-  group: ContentGroupV1;
-  petalId: string;
-}): ContentGroupV1 {
-  return removeContentGroupPetal(input);
 }
 
 export function validateContentGroupGraph(input: {
@@ -1789,11 +1361,7 @@ export function validateContentGroupGraph(input: {
       });
     }
 
-    const groupMemberIds = new Set(group.members.map((member) => member.id));
-    const allMembers = [
-      ...group.members,
-      ...group.petals.flatMap((petal) => petal.members),
-    ];
+    const allMembers = group.members;
     allMembers.forEach((member) => {
       const hasSource = Boolean(member.target_id || member.content_range);
       if (!hasSource) {
@@ -1804,23 +1372,6 @@ export function validateContentGroupGraph(input: {
           reason: 'content group member must keep a traceable source pointer',
         });
       }
-    });
-
-    group.petals.forEach((petal) => {
-      petal.members.forEach((member) => {
-        if (groupMemberIds.has(member.id)) return;
-        const sameSourceInGroup = group.members.some((groupMember) => (
-          contentGroupMemberIdentityKey(groupMember) === contentGroupMemberIdentityKey(member)
-        ));
-        if (sameSourceInGroup) return;
-        issues.push({
-          group_id: group.id,
-          petal_id: petal.id,
-          member_id: member.id,
-          status: 'petal_member_not_in_group',
-          reason: 'petal member source is not present in the parent content group',
-        });
-      });
     });
 
     const hasMemberIssue = allMembers.some((member) => (

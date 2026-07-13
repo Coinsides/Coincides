@@ -280,34 +280,24 @@ import {
 import {
   acceptContentGroupIdentity,
   addMembersToContentGroup,
-  addMembersToPetal,
-  addMemberFragmentToPetal,
-  addContentGroupFragment,
-  addPetalToContentGroup,
   archiveContentGroupIdentity,
-  assignFragmentsToPetal,
   auditContentGroupIntegrity,
   compareContentGroupMemberWithSource,
   createContentGroup,
-  createContentGroupFragmentFromMember,
   createContentGroupMemberFromAnnotation,
   createContentGroupMemberFromPageSliceSnapshot,
   createContentGroupMemberFromRange,
   markContentGroupMemberIntegrity,
   moveContentGroupToFolder,
-  moveContentGroupPetal,
   normalizeContentGroup,
   normalizeContentGroupMember,
   normalizeContentGroupsWithFolders,
   refreshContentGroupMemberPreview,
   refreshContentGroupMemberFromSource,
   refreshContentGroupPreviews,
-  removeContentGroupPetal,
   removeContentGroupMember,
-  removeContentGroupPetalFragment,
   rejectContentGroupIdentity,
   renameContentGroup,
-  renameContentGroupPetal,
   softDeleteContentGroup,
   summarizeContentGroupStability,
   updateContentGroupIdentityDraft,
@@ -336,9 +326,6 @@ import {
 import {
   plainTextFromContentGroupDragPayload,
 } from '../src/pages/Notes/canvasEngine/contentGroupDragService';
-import {
-  buildContentGroupRelationCandidates,
-} from '../src/pages/Notes/canvasEngine/contentGroupRelationProjectionService';
 import {
   normalizePurposeFrames,
   purposeRoleForContentGroup,
@@ -4687,124 +4674,31 @@ function testAnnotationTruthSeed(): void {
     canvasId: 'canvas-a',
     title: 'Cascade group',
     members: [
-      { id: 'member-a', kind: 'block', current_content: 'A', preview_text: 'A', order_index: 0 },
-      { id: 'member-b', kind: 'block', current_content: 'B', preview_text: 'B', order_index: 1 },
+      { id: 'member-a', kind: 'block', target_id: 'block-a', current_content: 'A', preview_text: 'A', order_index: 0 },
+      { id: 'member-b', kind: 'block', target_id: 'block-b', current_content: 'B', preview_text: 'B', order_index: 1 },
     ],
   });
-  const cascadeWithPetal = normalizeContentGroup({
-    ...cascadeGroup,
-    fragments: [{
-      id: 'fragment-a',
-      source_member_id: 'member-a',
-      content_range: null,
-      preview_text: 'A fragment',
-      order_index: 0,
-      status: 'active',
-      created_at: cascadeGroup.created_at,
-      updated_at: cascadeGroup.updated_at,
-    }, {
-      id: 'fragment-b',
-      source_member_id: 'member-b',
-      content_range: null,
-      preview_text: 'B fragment',
-      order_index: 1,
-      status: 'active',
-      created_at: cascadeGroup.created_at,
-      updated_at: cascadeGroup.updated_at,
-    }],
-    petals: [{
-      id: 'petal-a',
-      label: 'Dependent',
-      members: [],
-      fragment_ids: ['fragment-a'],
-      order_index: 0,
-      status: 'active',
-      created_at: cascadeGroup.created_at,
-      updated_at: cascadeGroup.updated_at,
-    }, {
-      id: 'petal-b',
-      label: 'Independent',
-      members: [],
-      fragment_ids: ['fragment-b'],
-      order_index: 1,
-      status: 'active',
-      created_at: cascadeGroup.created_at,
-      updated_at: cascadeGroup.updated_at,
-    }],
-  });
-  const afterHardDelete = removeContentGroupMember(cascadeWithPetal, 'member-a');
-  assertEqual((afterHardDelete.fragments || []).length, 1, 'member hard delete removes dependent fragments');
-  assertEqual((afterHardDelete.fragments || [])[0]?.id, 'fragment-b', 'member hard delete keeps independent fragments');
-  assertEqual(afterHardDelete.petals.length, 1, 'member hard delete removes dependent petals');
-  assertEqual(afterHardDelete.petals[0].id, 'petal-b', 'member hard delete keeps independent petals');
-  assertEqual(afterHardDelete.petals[0].order_index, 0, 'member hard delete reindexes remaining petals');
+  const afterHardDelete = removeContentGroupMember(cascadeGroup, 'member-a');
+  assertEqual(afterHardDelete.members.length, 1, 'member hard delete removes only the selected member');
+  assertEqual(afterHardDelete.members[0].id, 'member-b', 'member hard delete preserves the remaining member');
+  assertEqual(afterHardDelete.members[0].order_index, 0, 'member hard delete reindexes remaining members');
   const restoredContentGroup = addMembersToContentGroup(trimmedContentGroup, [rangeMember]);
   assertEqual(restoredContentGroup.members.length, 2, 'ContentGroup can add a member back');
-  const groupWithPetal = addPetalToContentGroup(restoredContentGroup, 'Statement');
-  assertEqual(groupWithPetal.petals.length, 1, 'ContentGroup can create a petal');
-  const fragmentFromMember = createContentGroupFragmentFromMember({
-    member: groupWithPetal.members[0],
-    contentRange: overlappingDefinitionRange,
-    label: 'concept name',
-  });
-  assertEqual(fragmentFromMember.source_member_id, groupWithPetal.members[0].id, 'ContentGroup fragment keeps source member id');
-  const petalWithHelperFragment = addMemberFragmentToPetal({
-    group: groupWithPetal,
-    petalId: groupWithPetal.petals[0].id,
-    memberId: groupWithPetal.members[0].id,
-    contentRange: overlappingDefinitionRange,
-    label: 'concept name',
-  });
-  assertEqual(petalWithHelperFragment.fragments?.length, 1, 'ContentGroup can create a member fragment for a Petal');
-  assertEqual(petalWithHelperFragment.petals[0].fragment_ids?.length, 1, 'ContentGroup Petal stores fragment references');
-  const petalAfterFragmentRemove = removeContentGroupPetalFragment({
-    group: petalWithHelperFragment,
-    petalId: petalWithHelperFragment.petals[0].id,
-    fragmentId: petalWithHelperFragment.fragments?.[0]?.id || '',
-  });
-  assertEqual(petalAfterFragmentRemove.members.length, groupWithPetal.members.length, 'Removing a Petal fragment keeps top-level members');
-  assertEqual(petalAfterFragmentRemove.petals[0].fragment_ids?.length || 0, 0, 'Removing a Petal fragment only clears the Petal reference');
-  const renamedPetalGroup = renameContentGroupPetal({
-    group: groupWithPetal,
-    petalId: groupWithPetal.petals[0].id,
-    label: 'Condition',
-  });
-  assertEqual(renamedPetalGroup.petals[0].label, 'Condition', 'ContentGroup petal can rename');
-  const petalWithMember = addMembersToPetal({
-    group: renamedPetalGroup,
-    petalId: renamedPetalGroup.petals[0].id,
-    members: [annotationMember],
-  });
-  assertEqual(petalWithMember.petals[0].members.length, 1, 'ContentGroup petal can hold members');
-  const groupWithFragment = addContentGroupFragment({
-    group: petalWithMember,
-    sourceMemberId: petalWithMember.members[0].id,
-    contentRange: overlappingDefinitionRange,
-    label: 'concept name',
-  });
-  assertEqual(groupWithFragment.fragments?.length, 1, 'ContentGroup can split a member into a fragment');
-  const petalWithFragment = assignFragmentsToPetal({
-    group: groupWithFragment,
-    petalId: groupWithFragment.petals[0].id,
-    fragmentIds: [groupWithFragment.fragments?.[0]?.id || ''],
-  });
-  assertEqual(petalWithFragment.petals[0].fragment_ids?.length, 1, 'ContentGroup petal can reference fragments');
-  assertEqual(normalizeContentGroup(petalWithMember).members.length, 2, 'ContentGroup normalization preserves members');
-  const refreshedContentGroup = refreshContentGroupPreviews(petalWithMember, {
+  assertEqual(normalizeContentGroup(restoredContentGroup).members.length, 2, 'ContentGroup normalization preserves members');
+  const refreshedContentGroup = refreshContentGroupPreviews(restoredContentGroup, {
     resolveAnnotationPreview: () => 'annotation source preview',
     resolveBlockPreview: () => null,
     resolveRangePreview: () => 'range source preview',
   });
-  assertEqual(refreshedContentGroup.members[0].metadata?.integrity_status, 'valid', 'ContentGroup preview refresh resolves top-level members');
-  assertEqual(refreshedContentGroup.petals[0].members[0].preview_text, 'annotation source preview', 'ContentGroup preview refresh resolves Petal members');
+  assert(refreshedContentGroup.members.every((member) => member.metadata?.integrity_status === 'valid'), 'ContentGroup preview refresh resolves all members');
   const auditedContentGroup = auditContentGroupIntegrity(refreshedContentGroup, {
     resolveAnnotationPreview: () => null,
     resolveBlockPreview: () => null,
     resolveRangePreview: () => 'range source preview',
   });
-  assertEqual(auditedContentGroup.issues.length, 2, 'ContentGroup integrity audit reports broken top-level and Petal member references');
+  assertEqual(auditedContentGroup.issues.length, 1, 'ContentGroup integrity audit reports a broken member reference once');
   assertEqual(auditedContentGroup.issues[0].status, 'orphaned', 'ContentGroup integrity audit classifies missing source');
-  assertEqual(softDeleteContentGroup(petalWithMember).status, 'deleted', 'ContentGroup can soft delete');
+  assertEqual(softDeleteContentGroup(restoredContentGroup).status, 'deleted', 'ContentGroup can soft delete');
 
   const interpretation = createReadingInterpretation({
     noteId: 'note-test',
@@ -4851,10 +4745,6 @@ function testAnnotationTruthSeed(): void {
   });
   assert(groupIndex.some((entry) => entry.folder_path.includes('Power Series')), 'ContentGroup index records folder path');
   assertEqual(filterContentGroupIndex({ entries: groupIndex, folderId: sectionFolder.id }).length, 3, 'ContentGroup index can filter by selected folder');
-  const relationCandidates = buildContentGroupRelationCandidates([acceptedIdentityGroup, draftIdentityGroup]);
-  assert(relationCandidates.some((candidate) => candidate.kind === 'group' && candidate.accepted), 'accepted ContentGroup projects as relation candidate');
-  assert(relationCandidates.some((candidate) => candidate.kind === 'member'), 'ContentGroup members project as relation candidate leaves');
-
   const definition = NOTE_SLASH_COMMANDS.find((command) => command.id === 'definition');
   assert(definition, '/definition command exists');
   assertEqual(definition.commandKind, 'annotation_action', '/definition is an annotation action');
@@ -4976,17 +4866,6 @@ function testContentGroupAndGroupFolderContract(): void {
   });
   assert(missingFolderIssues.some((issue) => issue.status === 'missing_folder'), 'ContentGroup graph validation catches missing folder placement');
 
-  const groupWithPetal = addPetalToContentGroup(group, 'Condition');
-  const petalWithForeignMember = {
-    ...groupWithPetal,
-    petals: [{
-      ...groupWithPetal.petals[0],
-      members: [createContentGroupMemberFromRange(theoremRange)],
-    }],
-  };
-  const petalIssues = validateContentGroupGraph({ groups: [petalWithForeignMember], folders });
-  assert(petalIssues.some((issue) => issue.status === 'petal_member_not_in_group'), 'ContentGroup graph validation catches petal member outside parent group');
-
   const acceptedWithStaleMember = acceptContentGroupIdentity(updateContentGroupIdentityDraft({
     group: {
       ...group,
@@ -5072,11 +4951,6 @@ function testPurposeFrameContract(): void {
 
   assertEqual(group.identity.type, 'definition', 'ContentGroup identity type stays on group identity');
   assertEqual(purposeRoleForContentGroup(rolePurposes, group.id), 'exam_review', 'purpose role lives on Purpose member edge');
-  assertEqual(
-    buildContentGroupRelationCandidates([group], rolePurposes)[0]?.role,
-    'exam_review',
-    'ContentGroup relation candidates read role from Purpose edge',
-  );
   assertEqual(
     projectContentGroupsForReading({
       contentGroups: [group],
@@ -5338,76 +5212,38 @@ function testContentGroupReuseBoundary(): void {
   assertEqual(openOriginal.note_id, group.note_id, 'open-original descriptor keeps source note');
 }
 
-function testContentGroupPetalRefinementBoundary(): void {
+function testContentGroupEditorDraftBoundary(): void {
   const sourceRange = createTextSpanAnnotationRange({
-    blockId: 'block-petal-source',
-    textFlowId: 'flow-petal-source',
-    textUnitId: 'unit-petal-source',
+    blockId: 'block-editor-source',
+    textFlowId: 'flow-editor-source',
+    textUnitId: 'unit-editor-source',
     startOffset: 0,
-    endOffset: 18,
-    text: 'Petal source truth',
+    endOffset: 19,
+    text: 'Editor source truth',
   });
   const member = createContentGroupMemberFromRange(sourceRange);
-  const group = addPetalToContentGroup(
-    addPetalToContentGroup(
-      addPetalToContentGroup(createContentGroup({
-        projectId: 'project-petal',
-        noteId: 'note-petal',
-        canvasId: 'canvas-petal',
-        title: 'Petal refinement group',
-        members: [member],
-      }), 'Definition'),
-      'Example',
-    ),
-    'Practice',
-  );
-  const groupWithFragment = addMemberFragmentToPetal({
-    group,
-    petalId: group.petals[2].id,
-    memberId: member.id,
-    contentRange: sourceRange,
-    label: 'practice slice',
+  const group = createContentGroup({
+    projectId: 'project-editor',
+    noteId: 'note-editor',
+    canvasId: 'canvas-editor',
+    title: 'Editor group',
+    members: [member],
   });
-  const movedGroup = moveContentGroupPetal({
-    group: groupWithFragment,
-    petalId: groupWithFragment.petals[2].id,
-    targetPetalId: groupWithFragment.petals[0].id,
-  });
-  assertEqual(movedGroup.petals.map((petal) => petal.label).join(' > '), 'Practice > Definition > Example', 'Petal reorder changes local structure order');
-  assertEqual(movedGroup.petals.map((petal) => petal.order_index).join(','), '0,1,2', 'Petal reorder reindexes active petals');
-  assertEqual(movedGroup.members[0].current_content, member.current_content, 'Petal reorder preserves member-local content truth');
-  assertEqual(movedGroup.members[0].source_ref?.snapshot_text, member.source_ref?.snapshot_text, 'Petal reorder preserves source anchor snapshot');
-  assertEqual(movedGroup.fragments?.length, 1, 'Petal reorder preserves group fragments');
-  assertEqual(movedGroup.petals[0].fragment_ids?.length, 1, 'Petal reorder moves fragment ownership with the Petal');
-  assertEqual(movedGroup.metadata?.source_projection, undefined, 'Petal reorder does not create a source-text label projection');
-
-  const afterPetalRemove = removeContentGroupPetal({
-    group: movedGroup,
-    petalId: movedGroup.petals[0].id,
-  });
-  assertEqual(afterPetalRemove.petals.length, 2, 'Petal delete is hard DTO removal');
-  assertEqual(afterPetalRemove.members.length, 1, 'Petal delete preserves top-level members');
-  assertEqual(afterPetalRemove.members[0].current_content, member.current_content, 'Petal delete preserves member-local content truth');
-  assertEqual(afterPetalRemove.fragments?.length, 1, 'Petal delete does not delete group fragments directly');
-  assertEqual(afterPetalRemove.petals.map((petal) => petal.order_index).join(','), '0,1', 'Petal delete reindexes remaining petals');
-
   const editorSavedGroup = applyContentGroupEditorDraft({
-    group: movedGroup,
+    group,
     draft: {
       title: 'Saved editor draft',
       topic: 'Editor topic',
       type: 'definition',
-      summary: 'Identity draft should not overwrite local Petal labels.',
-    },
-    petalLabelDrafts: {
-      [movedGroup.petals[0].id]: 'Practice saved locally',
+      summary: 'Identity draft keeps member source truth intact.',
     },
   });
   assertEqual(editorSavedGroup.title, 'Saved editor draft', 'Single Editor draft save updates group title');
   assertEqual(editorSavedGroup.identity.topic, 'Editor topic', 'Single Editor draft save updates identity topic');
   assertEqual(editorSavedGroup.identity.type, 'definition', 'Single Editor draft save updates identity type');
-  assertEqual(editorSavedGroup.petals[0].label, 'Practice saved locally', 'Single Editor draft save preserves current Petal label draft');
-  assertEqual(editorSavedGroup.petals[0].fragment_ids?.length, 1, 'Single Editor draft save preserves Petal fragment references');
+  assertEqual(editorSavedGroup.identity.summary, 'Identity draft keeps member source truth intact.', 'Single Editor draft save updates identity summary');
+  assertEqual(editorSavedGroup.members.length, 1, 'Single Editor draft save preserves members');
+  assertEqual(editorSavedGroup.members[0].source_ref?.snapshot_text, member.source_ref?.snapshot_text, 'Single Editor draft save preserves member source snapshot');
 }
 
 function testContentGroupStabilitySummary(): void {
@@ -5466,11 +5302,6 @@ function testContentGroupStabilitySummary(): void {
   });
   assert(orphanSummary.states.includes('orphaned_member'), 'stability summary catches orphaned members');
   assertEqual(orphanSummary.can_materialize, false, 'orphaned member blocks materialize');
-
-  const emptyPetalSummary = summarizeContentGroupStability({
-    group: addPetalToContentGroup(baseGroup, 'Empty role'),
-  });
-  assert(emptyPetalSummary.states.includes('empty_petal'), 'stability summary catches empty petals');
 
   const deletedSourceSummary = summarizeContentGroupStability({
     group: baseGroup,
@@ -6011,7 +5842,7 @@ const checks: Array<readonly [string, () => void | Promise<void>]> = [
   ['GroupFolder entity cutover boundary', testGroupFolderEntityCutoverBoundary],
   ['ContentGroup member source boundary', testContentGroupMemberSourceBoundary],
   ['ContentGroup reuse boundary', testContentGroupReuseBoundary],
-  ['ContentGroup Petal refinement boundary', testContentGroupPetalRefinementBoundary],
+  ['ContentGroup editor draft boundary', testContentGroupEditorDraftBoundary],
   ['ContentGroup stability summary', testContentGroupStabilitySummary],
   ['SelectionDraft engine', testSelectionDraftEngine],
   ['Range rebase service', testRangeRebaseService],

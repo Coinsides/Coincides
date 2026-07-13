@@ -202,31 +202,6 @@ export interface ContentGroupMemberV1 {
   };
 }
 
-export interface ContentGroupFragmentV1 {
-  id: string;
-  source_member_id: string;
-  content_range: AnnotationRangeV1 | null;
-  label?: string | null;
-  preview_text?: string | null;
-  order_index: number;
-  status: ContentGroupStatus;
-  created_at: string;
-  updated_at: string;
-  metadata?: Record<string, unknown>;
-}
-
-export interface ContentGroupPetalV1 {
-  id: string;
-  label: string;
-  members: ContentGroupMemberV1[];
-  fragment_ids?: string[];
-  order_index: number;
-  status: ContentGroupStatus;
-  created_at: string;
-  updated_at: string;
-  metadata?: Record<string, unknown>;
-}
-
 export type ContentGroupIdentityStatus = 'none' | 'draft' | 'accepted' | 'rejected' | 'archived';
 export type ContentGroupIdentityCreatedBy = 'human' | 'ai' | 'system';
 
@@ -264,8 +239,6 @@ export interface ContentGroupV1 {
   created_at: string;
   updated_at: string;
   members: ContentGroupMemberV1[];
-  fragments?: ContentGroupFragmentV1[];
-  petals: ContentGroupPetalV1[];
   identity: ContentGroupIdentityV1;
   view_state?: Record<string, unknown>;
   metadata?: Record<string, unknown>;

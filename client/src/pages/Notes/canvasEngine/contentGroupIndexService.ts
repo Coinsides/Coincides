@@ -19,7 +19,6 @@ export interface ContentGroupIndexEntry {
   type: string | null;
   identity_status: ContentGroupV1['identity']['status'];
   member_count: number;
-  petal_count: number;
   has_integrity_issue: boolean;
   stability: ContentGroupStabilitySummary;
 }
@@ -37,10 +36,6 @@ export function buildContentGroupIndex(input: {
       const folderId = group.folder_id || group.placements?.[0]?.folder_id || null;
       const folder = input.folders.find((item) => item.id === folderId) || null;
       const folderPath = groupFolderPath(input.folders, folderId).map((folder) => folder.title);
-      const allMembers = [
-        ...group.members,
-        ...group.petals.flatMap((petal) => petal.members),
-      ];
       const stability = summarizeContentGroupStability({ group, folder });
       return {
         group,
@@ -50,8 +45,7 @@ export function buildContentGroupIndex(input: {
         type: group.identity.type || group.identity.role || null,
         identity_status: group.identity.status,
         member_count: group.members.length,
-        petal_count: group.petals.filter((petal) => petal.status !== 'deleted').length,
-        has_integrity_issue: allMembers.some((member) => (
+        has_integrity_issue: group.members.some((member) => (
           member.metadata?.integrity_status
           && member.metadata.integrity_status !== 'valid'
         )) || stability.member_issue_count > 0,

@@ -22,7 +22,6 @@ export interface GalleryGroupCardView {
   sourceLabel: string;
   folderPath: string;
   memberCountLabel: string;
-  petalCountLabel: string;
   statusLabel: string;
   statusKind: ContentGroupIdentityStatus;
   statusReason: string;
@@ -48,7 +47,6 @@ export function buildGalleryGroupCardView(params: {
   } = params;
   const folder = folders.find((item) => item.id === folderId) || null;
   const stability = summarizeContentGroupStability({ group, folder });
-  const activePetals = group.petals.filter((petal) => petal.status !== 'deleted').length;
   const statusKind = group.identity.status === 'none' ? 'draft' : group.identity.status;
   return {
     title: group.title,
@@ -58,7 +56,6 @@ export function buildGalleryGroupCardView(params: {
     sourceLabel: cleanLabel(sourceNoteTitle, 'Untitled note'),
     folderPath: folderPathText(folders, folderId),
     memberCountLabel: `${group.members.length} members`,
-    petalCountLabel: `${activePetals} petals`,
     statusLabel: statusKind,
     statusKind,
     statusReason: stability.reason,

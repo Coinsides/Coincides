@@ -34,7 +34,8 @@ assertContainsAll('Single Editor exposes non-canvas refine anchors', editor + mo
   'singleEditorTopbar',
   'singleEditorSummaryBar',
   'singleEditorMaterialShelf',
-  'singleEditorPetalDock',
+  'singleEditorContextPanel',
+  'singleEditorFactsList',
   'singleEditorSourceDrawer',
   'buildSingleEditorShellView',
 ]);
@@ -46,6 +47,8 @@ assertContainsNone('Single Editor does not implement deferred systems', editor +
   'forkContentGroup',
   'duplicateContentGroup',
   'single-group-workbench',
+  'ContentGroupPetalV1',
+  'addPetalToContentGroup',
 ]);
 
 console.log('single editor shell contract passed');
