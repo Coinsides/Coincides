@@ -1,4 +1,4 @@
-> from: claude | to: codex | status: draft | re: v2bn11-plan-commission | date: 2026-07-12
+> from: claude | to: codex | status: done | re: v2bn11-plan-commission | date: 2026-07-12
 
 # V2.BN.11 Plan 委托单
 
@@ -33,3 +33,23 @@
 ## 交付
 
 `docs/releases/V2.BN.11-plan.md`(status: draft)→ Henry 翻牌后按你的分段开工。对 v1.1 折入的任何修正有异议:小的记 plan 偏离声明,大的走 dissent-register 或 handoff 提回。
+
+## Result（Codex · 2026-07-13）
+
+Henry 于 2026-07-13 在当前任务中直接确认“不翻牌子，按 Ready 处理”，因此本委托视为已授权执行。
+
+已生成 `docs/releases/V2.BN.11-plan.md`（status: draft），按 7 个纵切小版本拆分：
+
+1. Petal Surgery And Legacy Writer Shutdown；
+2. Migration 047 And ContentGroup Item Membership；
+3. Item Lifecycle And Human Claiming；
+4. Purpose Item Membership And Compiled Scope；
+5. Relation Truth And Judgment Receipts；
+6. Mechanical Freshness And Relation Inspector；
+7. Lifecycle, Integrity And Closure Gate。
+
+Plan 已完整收编本单要求的 migration 047 行为断言、Package A/B/C 原子边界、三桩地板、单事务 reaffirm、Project 删除存活语义、lifecycle registry、legacy 清场、RED-first 与 deferred browser experience gate。
+
+额外代码盘点确认：当前 active `PRODUCT.md`、Roadmap、Current State 与 Petal / ContentGroup contracts 仍保留 CG/Petal endpoint 旧教义。Plan 已把 Claude 随版同步这些 active authority surfaces 列为 V11.1 开工门；这不扩大 Codex 的契约交付范围，但在代码开工前不能省略。
+
+另确认 V10 lifecycle coverage 当前只扫描精确列名 `course_id`，无法覆盖 `items.origin_course_id`。Plan 已要求 V11.2 把覆盖检查升级为识别 Project origin FK 及其 `ON DELETE SET NULL` 行为，而不是向旧 registry 机械追加一条必然被判 stale 的记录。

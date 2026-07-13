@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-07-11
+> **日期 (Updated)**: 2026-07-13
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/brainstorm`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 150 份文档。
+共 153 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -162,3 +162,6 @@
 | [产品完善/会议记录/2026-07-05-Better-Notebook-V9-Sequencing-And-Source-Definition-Meeting-Notes.md](产品完善/会议记录/2026-07-05-Better-Notebook-V9-Sequencing-And-Source-Definition-Meeting-Notes.md) | 2026-07-05 Better Notebook：V9 封版后的排序决定 + Source 该怎么定义（会议记录） | `draft` | 2026-07-05 | — |
 | [产品完善/会议记录/2026-07-10-Better-Notebook-Source-Floor-Thinking-Extension-And-V10-Design-Review-Meeting-Notes.md](产品完善/会议记录/2026-07-10-Better-Notebook-Source-Floor-Thinking-Extension-And-V10-Design-Review-Meeting-Notes.md) | 2026-07-10 Better Notebook：Source Floor、思考延伸与 V10 设计审视（会议记录） | `draft` | 2026-07-10 | — |
 | [产品完善/会议记录/2026-07-11-Better-Notebook-Post-V10-Arc-Operation-Flows-And-Manual-System-Meeting-Notes.md](产品完善/会议记录/2026-07-11-Better-Notebook-Post-V10-Arc-Operation-Flows-And-Manual-System-Meeting-Notes.md) | 2026-07-11 Better Notebook：V10 后弧线、操作流与说明书体系（会议记录） | `draft` | 2026-07-11 | — |
+| [产品完善/会议记录/2026-07-11-Better-Notebook-Relation-Definition-And-Graph-Scale-Meeting-Notes.md](产品完善/会议记录/2026-07-11-Better-Notebook-Relation-Definition-And-Graph-Scale-Meeting-Notes.md) | 2026-07-11 Better Notebook：Relation 定义与图谱尺度（会议记录） | `draft` | 2026-07-11 | — |
+| [产品完善/会议记录/2026-07-12-AI-Era-Learning-Method-Appendix-Meeting-Notes.md](产品完善/会议记录/2026-07-12-AI-Era-Learning-Method-Appendix-Meeting-Notes.md) | 2026-07-12 附录：AI 时代与 AI 并行学习的方法 | `draft` | 2026-07-12 | — |
+| [产品完善/会议记录/2026-07-12-Better-Notebook-Item-Raw-Material-And-Card-Lineage-Meeting-Notes.md](产品完善/会议记录/2026-07-12-Better-Notebook-Item-Raw-Material-And-Card-Lineage-Meeting-Notes.md) | 2026-07-12 Better Notebook：Item 原料模型与知识卡片思想回环 | `draft` | 2026-07-12 | — |
