@@ -1147,8 +1147,6 @@ CREATE INDEX IF NOT EXISTS idx_content_group_members_course_note
   ON content_group_members(user_id, course_id, note_id);
 CREATE INDEX IF NOT EXISTS idx_content_group_members_target
   ON content_group_members(user_id, kind, target_id);
-CREATE INDEX IF NOT EXISTS idx_content_group_members_item
-  ON content_group_members(user_id, item_id);
 CREATE INDEX IF NOT EXISTS idx_content_group_members_source_status
   ON content_group_members(user_id, source_sync_status);
 

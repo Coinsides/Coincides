@@ -246,6 +246,63 @@ export interface ContentGroupV1 {
   metadata?: Record<string, unknown>;
 }
 
+export type ItemStatus = 'active' | 'retired';
+export type ItemAnchorTargetKind =
+  | 'block'
+  | 'content_range'
+  | 'canvas_object'
+  | 'table_region'
+  | 'image_region';
+
+export interface ItemSnapshotV1 {
+  id: string;
+  item_id: string;
+  user_id: string;
+  content: string;
+  content_hash: string;
+  created_at: string;
+}
+
+export interface ItemAnchorV1 {
+  id: string;
+  user_id: string;
+  item_id: string | null;
+  pool_scope_kind: string | null;
+  pool_scope_id: string | null;
+  target_kind: ItemAnchorTargetKind;
+  target_id: string;
+  range_json: Record<string, unknown> | null;
+  excerpt: string;
+  reference_mode: string;
+  source_record_id: string | null;
+  collected_for: string | null;
+  claimed_at: string | null;
+  claimed_by: string | null;
+  metadata: Record<string, unknown>;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ItemV1 {
+  id: string;
+  user_id: string;
+  body_json: Record<string, unknown>;
+  plain_text: string;
+  item_type: string | null;
+  topic: string | null;
+  status: ItemStatus;
+  retired_into_item_id: string | null;
+  origin_course_id: string | null;
+  origin_note_id: string | null;
+  created_by: string;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+  current_snapshot: ItemSnapshotV1;
+  anchors: ItemAnchorV1[];
+}
+
 export type PurposeStatus = 'active' | 'archived';
 export type PurposeCreatedBy = 'human' | 'ai' | 'system' | 'ai_proposal' | 'importer';
 export type PurposeMemberKind = 'content_group';

@@ -507,9 +507,9 @@ export function useNoteCanvasDataAdapter({
     }
   }, [addToast, annotationTruths, note]);
 
-  const saveContentGroups = useCallback(async (nextGroups: ContentGroupV1[]) => {
+  const saveContentGroups = useCallback(async (nextGroups: ContentGroupV1[]): Promise<boolean> => {
     const currentNote = noteRef.current || note;
-    if (!currentNote) return;
+    if (!currentNote) return false;
     const previousGroups = contentGroups;
     const normalizedGroups = nextGroups.map(normalizeContentGroup);
     const saveGeneration = contentGroupSaveGenerationRef.current + 1;
@@ -520,13 +520,17 @@ export function useNoteCanvasDataAdapter({
         noteId: currentNote.id,
         groups: normalizedGroups,
       });
-      if (contentGroupSaveGenerationRef.current !== saveGeneration) return;
-      setContentGroups(savedGroups);
+      if (contentGroupSaveGenerationRef.current === saveGeneration) {
+        setContentGroups(savedGroups);
+      }
+      return true;
     } catch (err) {
       console.error('Failed to save content groups:', err);
       addToast('error', 'Failed to save content group');
-      if (contentGroupSaveGenerationRef.current !== saveGeneration) return;
-      setContentGroups(previousGroups);
+      if (contentGroupSaveGenerationRef.current === saveGeneration) {
+        setContentGroups(previousGroups);
+      }
+      return false;
     }
   }, [addToast, contentGroups, note]);
 

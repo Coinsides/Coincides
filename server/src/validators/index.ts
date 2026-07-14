@@ -485,7 +485,9 @@ export const upsertContentGroupSchema = z.object({
   course_id: z.string().uuid('Invalid course ID').optional(),
   project_id: z.string().uuid('Invalid project ID').optional(),
   note_id: z.string().uuid('Invalid note ID').nullable().optional(),
-  canvas_id: contentGroupRuntimeIdSchema.nullable().optional(),
+  // Hydrated note-scoped groups use an empty string when no canvas identity exists.
+  // Accept the service's own read shape so GET -> PUT remains a valid round trip.
+  canvas_id: z.union([contentGroupRuntimeIdSchema, z.literal('')]).nullable().optional(),
   folder_id: contentGroupRuntimeIdSchema.nullable().optional(),
   parent_group_id: contentGroupRuntimeIdSchema.nullable().optional(),
   title: z.string().min(1).max(300),
@@ -505,6 +507,94 @@ export const upsertContentGroupSchema = z.object({
 
 export const replaceNoteContentGroupsSchema = z.object({
   groups: z.array(upsertContentGroupSchema).max(500),
+});
+
+const itemCreatedBySchema = z.enum(['human', 'user', 'ai', 'ai_proposal', 'importer', 'system']);
+const itemPlainTextSchema = z.string().max(200000);
+
+function requireItemBody(
+  value: { body_json?: Record<string, unknown>; plain_text?: string },
+  context: z.RefinementCtx,
+) {
+  const bodyText = typeof value.body_json?.body === 'string' ? value.body_json.body.trim() : '';
+  if (!value.plain_text?.trim() && !bodyText && !value.body_json?.text_flow) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'plain_text or body_json content is required',
+      path: ['plain_text'],
+    });
+  }
+}
+
+export const createItemSchema = z.object({
+  body_json: jsonObjectSchema.optional(),
+  plain_text: itemPlainTextSchema.optional(),
+  item_type: z.string().max(160).nullable().optional(),
+  topic: z.string().max(240).nullable().optional(),
+  origin_course_id: z.string().uuid('Invalid origin project ID').nullable().optional(),
+  origin_note_id: z.string().uuid('Invalid origin note ID').nullable().optional(),
+  created_by: itemCreatedBySchema.optional(),
+  metadata: jsonObjectSchema.optional(),
+}).strict().superRefine(requireItemBody);
+
+export const updateItemSchema = z.object({
+  body_json: jsonObjectSchema.optional(),
+  plain_text: itemPlainTextSchema.optional(),
+  item_type: z.string().max(160).nullable().optional(),
+  topic: z.string().max(240).nullable().optional(),
+  metadata: jsonObjectSchema.optional(),
+}).strict().refine((value) => Object.keys(value).length > 0, {
+  message: 'At least one Item field is required',
+});
+
+export const retireItemSchema = z.object({
+  successor_item_id: contentGroupRuntimeIdSchema.nullable().optional(),
+}).strict();
+
+const itemAnchorTargetKindSchema = z.enum([
+  'block',
+  'content_range',
+  'canvas_object',
+  'table_region',
+  'image_region',
+]);
+
+export const collectItemAnchorSchema = z.object({
+  pool_scope_kind: z.literal('content_group'),
+  pool_scope_id: contentGroupRuntimeIdSchema,
+  target_kind: itemAnchorTargetKindSchema,
+  target_id: contentGroupRuntimeIdSchema,
+  range_json: jsonObjectSchema.nullable().optional(),
+  excerpt: z.string().min(1).max(200000),
+  reference_mode: z.string().min(1).max(80).optional(),
+  source_record_id: contentGroupRuntimeIdSchema.nullable().optional(),
+  collected_for: z.string().max(1000).nullable().optional(),
+  metadata: jsonObjectSchema.optional(),
+  created_by: itemCreatedBySchema.optional(),
+}).strict();
+
+export const castItemSchema = z.object({
+  anchor_ids: z.array(contentGroupRuntimeIdSchema).min(1).max(50),
+  body_json: jsonObjectSchema.optional(),
+  plain_text: itemPlainTextSchema.optional(),
+  item_type: z.string().max(160).nullable().optional(),
+  topic: z.string().max(240).nullable().optional(),
+  origin_course_id: z.string().uuid('Invalid origin project ID').nullable().optional(),
+  origin_note_id: z.string().uuid('Invalid origin note ID').nullable().optional(),
+  created_by: itemCreatedBySchema.optional(),
+  claimed_by: z.string().min(1).max(160).optional(),
+  metadata: jsonObjectSchema.optional(),
+}).strict().superRefine(requireItemBody);
+
+export const itemPoolQuerySchema = z.object({
+  pool_scope_kind: z.literal('content_group'),
+  pool_scope_id: contentGroupRuntimeIdSchema,
+});
+
+export const itemListQuerySchema = z.object({
+  status: z.enum(['active', 'retired', 'all']).optional(),
+  origin_course_id: contentGroupRuntimeIdSchema.optional(),
+  origin_note_id: contentGroupRuntimeIdSchema.optional(),
 });
 
 const purposeMemberSchema = z.object({

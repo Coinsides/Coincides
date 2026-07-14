@@ -4823,6 +4823,228 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   font-weight: 780;
 }
 
+.itemWorkbench {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  padding-top: 7px;
+  border-top: 1px solid var(--rail-border-soft);
+}
+
+.itemWorkbenchHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 20px;
+  color: var(--rail-text);
+  font-size: 10px;
+  font-weight: 820;
+  text-transform: uppercase;
+}
+
+.itemWorkbenchHeader > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.itemWorkbenchHeader small {
+  color: var(--rail-dim);
+  font-size: 9px;
+  font-weight: 720;
+  text-transform: none;
+}
+
+.itemMaterialList,
+.itemMemberList,
+.itemReceiptList {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.itemMaterialRow {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) 24px;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 34px;
+  padding: 4px 0;
+  border-top: 1px solid var(--rail-border-soft);
+}
+
+.itemMaterialRow input[type='checkbox'] {
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  accent-color: var(--rail-cyan);
+}
+
+.itemMaterialRow > span {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.itemMaterialRow strong,
+.itemMemberRow strong,
+.itemReceiptList strong {
+  color: var(--rail-text);
+  font-size: 9px;
+  font-weight: 820;
+  text-transform: uppercase;
+}
+
+.itemMaterialRow small,
+.itemMemberRow span,
+.itemReceiptList span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--rail-muted);
+  font-size: 10px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemCastForm,
+.itemInspector {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding-top: 6px;
+  border-top: 1px solid var(--rail-border-soft);
+}
+
+.itemCastForm textarea,
+.itemInspector textarea,
+.itemFieldRow input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--rail-border);
+  border-radius: 4px;
+  background: #070b10;
+  color: var(--rail-text);
+  font: inherit;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.itemCastForm textarea,
+.itemInspector textarea {
+  resize: vertical;
+  min-height: 72px;
+  max-height: 220px;
+  padding: 7px 8px;
+}
+
+.itemFieldRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.itemFieldRow input {
+  min-height: 28px;
+  padding: 0 7px;
+}
+
+.itemCastForm textarea:focus,
+.itemInspector textarea:focus,
+.itemFieldRow input:focus {
+  border-color: var(--rail-cyan);
+  outline: none;
+}
+
+.itemMemberRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 24px;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 4px 0;
+  border-top: 1px solid var(--rail-border-soft);
+}
+
+.itemMemberRow > button:first-child {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.itemMemberRow > button:first-child:hover span,
+.itemMemberRow > button:first-child:focus-visible span {
+  color: var(--rail-text);
+}
+
+.itemMemberRow > button:first-child:focus-visible {
+  outline: 1px solid var(--rail-cyan);
+  outline-offset: 2px;
+}
+
+.itemMemberRow small,
+.itemReceiptList small {
+  color: var(--rail-dim);
+  font-size: 9px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.itemReceiptSummary {
+  display: grid;
+  gap: 3px;
+  color: var(--rail-dim);
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+  font-size: 9px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.itemReceiptList p {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  margin: 0;
+  padding: 5px 0;
+  border-top: 1px solid var(--rail-border-soft);
+}
+
+.itemRecoveryRow {
+  display: grid;
+  gap: 6px;
+  padding: 6px 0;
+  border-top: 1px solid color-mix(in srgb, #facc15 42%, var(--rail-border));
+  color: #facc15;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.itemQuietText,
+.itemErrorText {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+.itemQuietText {
+  color: var(--rail-dim);
+}
+
+.itemErrorText {
+  color: #fb7185;
+}
+
 .contentGroupStatusBar {
   display: flex;
   align-items: center;

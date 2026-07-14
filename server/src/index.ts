@@ -55,6 +55,7 @@ import canvasAssetRoutes from './routes/canvasAssets.js';
 import annotationTruthRoutes from './routes/annotationTruths.js';
 import purposeRoutes from './routes/purposes.js';
 import sourceRoutes from './routes/sources.js';
+import itemRoutes from './routes/items.js';
 import { sweepSourceStorage } from './services/sourceFileIntake.js';
 import {
   resumeReceivedSourceMaterializations,
@@ -145,6 +146,7 @@ app.use('/api/canvas-assets', authMiddleware, canvasAssetRoutes);
 app.use('/api/annotation-truths', authMiddleware, annotationTruthRoutes);
 app.use('/api/purposes', authMiddleware, purposeRoutes);
 app.use('/api/sources', authMiddleware, sourceRoutes);
+app.use('/api/items', authMiddleware, itemRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => {

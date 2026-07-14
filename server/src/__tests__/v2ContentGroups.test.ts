@@ -458,6 +458,7 @@ test('ContentGroup validator accepts runtime ids and note-derived course ownersh
   const parsed = upsertContentGroupSchema.parse({
     id: 'content-group-legacy-id',
     note_id: uuidv4(),
+    canvas_id: '',
     title: 'Runtime id group',
     members: [],
     placements: [],
@@ -465,5 +466,6 @@ test('ContentGroup validator accepts runtime ids and note-derived course ownersh
   });
 
   assert.equal(parsed.id, 'content-group-legacy-id');
+  assert.equal(parsed.canvas_id, '');
   assert.equal(parsed.title, 'Runtime id group');
 });

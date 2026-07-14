@@ -215,6 +215,11 @@ export default {
     rebuildContentGroupMembers(db);
 
     db.exec(`
+      CREATE INDEX IF NOT EXISTS idx_content_group_members_item
+        ON content_group_members(user_id, item_id);
+    `);
+
+    db.exec(`
       DROP TABLE IF EXISTS canvas_edges;
       DROP TABLE IF EXISTS object_relations;
       DROP TABLE IF EXISTS relation_layers;

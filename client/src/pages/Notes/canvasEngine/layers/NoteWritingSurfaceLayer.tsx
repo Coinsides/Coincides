@@ -285,7 +285,7 @@ export interface NoteWritingSurfaceLayerProps {
   ) => void;
   onDeleteCanvasObject: (objectId: string) => Promise<boolean>;
   onSaveAnnotationTruths: (annotations: AnnotationTruthV1[]) => Promise<void>;
-  onSaveContentGroups: (groups: ContentGroupV1[]) => Promise<void>;
+  onSaveContentGroups: (groups: ContentGroupV1[]) => Promise<boolean | void>;
   onSaveDocumentTypographyProfile: (profile: DocumentTypographyProfile) => void | Promise<void>;
   onSaveGroupFolders: (folders: GroupFolderV1[]) => Promise<void>;
   onActivateDraft: (layout?: BlockBoxLayout) => void;

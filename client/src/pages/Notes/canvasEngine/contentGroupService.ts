@@ -584,6 +584,26 @@ export function createContentGroupMemberFromContentGroup(
   };
 }
 
+export function createContentGroupMemberFromItem(
+  itemId: string,
+  orderIndex = 0,
+): ContentGroupMemberV1 {
+  return {
+    id: createRuntimeId('content-member'),
+    kind: 'item',
+    target_id: null,
+    item_id: itemId,
+    content_range: null,
+    label: null,
+    current_content: null,
+    source_ref: null,
+    source_sync_status: 'fresh',
+    preview_text: null,
+    order_index: orderIndex,
+    metadata: {},
+  };
+}
+
 export function createContentGroupMemberFromPageSliceSnapshot(
   snapshot: PageSliceSnapshotV1,
   orderIndex = 0,
