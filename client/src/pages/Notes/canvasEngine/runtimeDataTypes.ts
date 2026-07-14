@@ -303,6 +303,65 @@ export interface ItemV1 {
   anchors: ItemAnchorV1[];
 }
 
+export type RelationDirectionality = 'directed' | 'undirected';
+export type RelationStatus = 'active' | 'revoked';
+export type RelationSeedTypeId =
+  | 'derives_to'
+  | 'depends_on'
+  | 'supports'
+  | 'contradicts'
+  | 'example_of'
+  | 'equivalent_to'
+  | 'analogous_to'
+  | 'contrasts_with'
+  | 'companion_of';
+
+export interface RelationTypeDefinitionV1 {
+  id: RelationSeedTypeId;
+  directionality: RelationDirectionality;
+}
+
+export interface RelationEndpointItemV1 {
+  id: string;
+  plain_text: string;
+  item_type: string | null;
+  topic: string | null;
+  status: ItemStatus;
+  retired_into_item_id: string | null;
+  updated_at: string;
+}
+
+export interface RelationV1 {
+  id: string;
+  user_id: string;
+  from_item_id: string;
+  to_item_id: string;
+  relation_type: string;
+  directionality: RelationDirectionality;
+  from_snapshot_id: string;
+  to_snapshot_id: string;
+  note: string | null;
+  created_by: string;
+  origin_purpose_id: string | null;
+  status: RelationStatus;
+  created_at: string;
+  updated_at: string;
+  affirmed_at: string;
+  from_snapshot: ItemSnapshotV1;
+  to_snapshot: ItemSnapshotV1;
+  from_item: RelationEndpointItemV1;
+  to_item: RelationEndpointItemV1;
+}
+
+export interface RelationAssessmentV1 {
+  id: string;
+  relation_id: string;
+  user_id: string;
+  verdict: 'still_holds' | 'questionable';
+  model_key: string;
+  created_at: string;
+}
+
 export type PurposeStatus = 'active' | 'archived';
 export type PurposeCreatedBy = 'human' | 'ai' | 'system' | 'ai_proposal' | 'importer';
 export type PurposeMemberKind = 'content_group' | 'item';

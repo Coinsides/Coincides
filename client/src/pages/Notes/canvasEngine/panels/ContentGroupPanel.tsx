@@ -296,6 +296,7 @@ export function ContentGroupPanel({
   const [unlinkedItem, setUnlinkedItem] = useState<ItemV1 | null>(null);
   const [itemBusy, setItemBusy] = useState(false);
   const [itemError, setItemError] = useState<string | null>(null);
+  const [groupActionError, setGroupActionError] = useState<string | null>(null);
   const expandedGroup = useMemo(
     () => activeGroups.find((group) => group.id === expandedGroupId) || null,
     [activeGroups, expandedGroupId],
@@ -389,6 +390,15 @@ export function ContentGroupPanel({
       contentGroups.map((group) => group.id === nextGroup.id ? nextGroup : group),
     );
     if (saved === false) throw new Error('Failed to save content group');
+  };
+
+  const handleReplaceGroupAction = async (nextGroup: ContentGroupV1) => {
+    setGroupActionError(null);
+    try {
+      await replaceGroup(nextGroup);
+    } catch (error) {
+      setGroupActionError(itemErrorMessage(error));
+    }
   };
 
   const refreshPool = async (groupId: string) => {
@@ -955,7 +965,7 @@ export function ContentGroupPanel({
                       <button
                         type="button"
                         className={styles.iconBtn}
-                        onClick={() => void replaceGroup(softDeleteContentGroup(group))}
+                        onClick={() => void handleReplaceGroupAction(softDeleteContentGroup(group))}
                         aria-label="Delete content group"
                       >
                         <Trash2 size={13} />
@@ -979,13 +989,15 @@ export function ContentGroupPanel({
                         <button
                           type="button"
                           className={styles.secondaryBtn}
-                          onClick={() => void replaceGroup(moveContentGroupToFolder({ group, folderId: selectedFolderId }))}
+                          onClick={() => void handleReplaceGroupAction(moveContentGroupToFolder({ group, folderId: selectedFolderId }))}
                         >
                           Move here
                         </button>
                         ) : null}
                       </div>
                     ) : null}
+
+                    {groupActionError ? <p className={styles.itemErrorText}>{groupActionError}</p> : null}
 
                     {itemWorkbenchGroupId === group.id ? (
                     <section className={styles.itemWorkbench} aria-label={`Item workbench for ${group.title}`}>

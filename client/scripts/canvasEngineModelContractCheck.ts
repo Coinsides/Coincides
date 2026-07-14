@@ -337,6 +337,12 @@ import {
   upsertDefaultPurposeRoleForContentGroup,
 } from '../src/pages/Notes/canvasEngine/purposeService';
 import {
+  normalizeRelation,
+  normalizeRelations,
+  normalizeRelationTypeDefinitions,
+  relationOtherEndpoint,
+} from '../src/pages/Notes/canvasEngine/relationService';
+import {
   CONTENT_GROUP_REUSE_MODES,
   createContentGroupMaterializePlan,
   createContentGroupOpenOriginalDescriptor,
@@ -5083,6 +5089,94 @@ function testPurposeFrameContract(): void {
   );
 }
 
+function testRelationTruthContract(): void {
+  const definitions = normalizeRelationTypeDefinitions([
+    { id: 'supports', directionality: 'directed' },
+    { id: 'equivalent_to', directionality: 'undirected' },
+    { id: 'supports', directionality: 'undirected' },
+    { id: 'custom_relation', directionality: 'directed' },
+  ]);
+  assertJsonEqual(definitions, [
+    { id: 'supports', directionality: 'directed' },
+    { id: 'equivalent_to', directionality: 'undirected' },
+  ], 'Relation type registry keeps server-owned seed definitions and removes duplicates');
+
+  const payload = {
+    id: 'relation-a',
+    user_id: 'user-a',
+    from_item_id: 'item-a',
+    to_item_id: 'item-b',
+    relation_type: 'equivalent_to',
+    directionality: 'undirected',
+    from_snapshot_id: 'snapshot-a',
+    to_snapshot_id: 'snapshot-b',
+    note: 'Same structure under this purpose.',
+    created_by: 'human',
+    origin_purpose_id: 'purpose-a',
+    status: 'revoked',
+    created_at: '2026-07-13T01:00:00.000Z',
+    updated_at: '2026-07-13T02:00:00.000Z',
+    affirmed_at: '2026-07-13T01:30:00.000Z',
+    from_snapshot: {
+      id: 'snapshot-a',
+      item_id: 'item-a',
+      user_id: 'user-a',
+      content: 'First judgment receipt',
+      content_hash: 'hash-a',
+      created_at: '2026-07-13T01:00:00.000Z',
+    },
+    to_snapshot: {
+      id: 'snapshot-b',
+      item_id: 'item-b',
+      user_id: 'user-a',
+      content: 'Second judgment receipt',
+      content_hash: 'hash-b',
+      created_at: '2026-07-13T01:00:00.000Z',
+    },
+    from_item: {
+      id: 'item-a',
+      plain_text: 'Current first Item',
+      item_type: 'definition',
+      topic: 'Power series',
+      status: 'active',
+      retired_into_item_id: null,
+      updated_at: '2026-07-13T02:00:00.000Z',
+    },
+    to_item: {
+      id: 'item-b',
+      plain_text: 'Current second Item',
+      item_type: null,
+      topic: null,
+      status: 'retired',
+      retired_into_item_id: 'item-c',
+      updated_at: '2026-07-13T02:00:00.000Z',
+    },
+  };
+  const relation = normalizeRelation(payload);
+  assert(relation, 'Relation normalizer accepts a complete truth payload');
+  assertEqual(relation.directionality, 'undirected', 'Relation normalizer preserves server directionality');
+  assertEqual(relation.status, 'revoked', 'Relation normalizer preserves lifecycle status');
+  assertEqual(relation.origin_purpose_id, 'purpose-a', 'Relation normalizer preserves origin receipt');
+  assertEqual(relation.from_snapshot.content, 'First judgment receipt', 'Relation keeps the first judgment receipt');
+  assertEqual(relation.to_snapshot.content, 'Second judgment receipt', 'Relation keeps the second judgment receipt');
+  assertEqual(relation.to_item.status, 'retired', 'Relation endpoint projection preserves current Item status');
+  assertEqual(relationOtherEndpoint(relation, 'item-a')?.id, 'item-b', 'Relation resolves the opposite Item endpoint');
+  assertEqual(relationOtherEndpoint(relation, 'outside-item'), null, 'Relation rejects an unrelated endpoint lookup');
+
+  const malformed = { ...payload, to_snapshot: null };
+  assertEqual(normalizeRelation(malformed), null, 'Relation normalizer rejects a missing judgment receipt');
+  const crossWiredReceipt = {
+    ...payload,
+    to_snapshot: { ...payload.to_snapshot, item_id: 'item-a' },
+  };
+  assertEqual(normalizeRelation(crossWiredReceipt), null, 'Relation normalizer rejects a receipt wired to the wrong Item');
+  assertEqual(
+    normalizeRelations([payload, malformed, crossWiredReceipt]).length,
+    1,
+    'Relation list normalization filters malformed and cross-wired rows',
+  );
+}
+
 function testContentGroupEntityCutoverBoundary(): void {
   const entityGroup = createContentGroup({
     projectId: 'project-a',
@@ -5987,6 +6081,7 @@ const checks: Array<readonly [string, () => void | Promise<void>]> = [
   ['ContentGroup and GroupFolder contract', testContentGroupAndGroupFolderContract],
   ['ContentGroup surface roles', testContentGroupSurfaceRoles],
   ['PurposeFrame contract', testPurposeFrameContract],
+  ['Relation truth and judgment receipts', testRelationTruthContract],
   ['ContentGroup entity cutover boundary', testContentGroupEntityCutoverBoundary],
   ['GroupFolder entity cutover boundary', testGroupFolderEntityCutoverBoundary],
   ['ContentGroup member source boundary', testContentGroupMemberSourceBoundary],

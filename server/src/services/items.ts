@@ -75,7 +75,7 @@ interface ItemRow {
   updated_at: string;
 }
 
-interface ItemSnapshotRow {
+export interface ItemSnapshotRow {
   id: string;
   item_id: string;
   user_id: string;
@@ -236,6 +236,15 @@ function getOwnedItemRow(db: Database.Database, userId: string, itemId: string):
     .get(itemId, userId) as ItemRow | undefined;
   if (!row) throw new AppError(404, 'Item not found');
   return row;
+}
+
+export function ensureCurrentItemSnapshot(
+  db: Database.Database,
+  userId: string,
+  itemId: string,
+): ItemSnapshotRow {
+  const row = getOwnedItemRow(db, userId, itemId);
+  return ensureSnapshot(db, userId, itemId, row.plain_text);
 }
 
 function assertItemRowInvariant(row: ItemRow): void {

@@ -377,6 +377,11 @@ test('V2.BN.11.4 Package A validates and roundtrips direct Item members without 
     const rawFirst = db.prepare('SELECT COUNT(*) AS count FROM purpose_members WHERE member_id = ?')
       .get(first.id) as { count: number };
     assert.equal(rawFirst.count, 0, 'omitting an active direct Item intentionally removes its edge');
+
+    replaceNotePurposes(db, userId, noteId, reordered);
+    const rawFirstAfterSecondCycle = db.prepare('SELECT COUNT(*) AS count FROM purpose_members WHERE member_id = ?')
+      .get(first.id) as { count: number };
+    assert.equal(rawFirstAfterSecondCycle.count, 0, 'a second replacement cycle does not resurrect an omitted active Item edge');
   });
 });
 
@@ -481,6 +486,12 @@ test('V2.BN.11.4 stale pre-retirement payload cannot kill or rewrite a newly hid
       fitness: 'high',
       order_index: 3,
     });
+    const count = db.prepare(`
+      SELECT COUNT(*) AS count
+      FROM purpose_members
+      WHERE purpose_id = ? AND member_kind = 'item' AND member_id = ?
+    `).get('purpose-stale-client', item.id) as { count: number };
+    assert.equal(count.count, 1, 'stale replacement cannot duplicate a newly hidden Item edge');
   });
 });
 

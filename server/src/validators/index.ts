@@ -636,6 +636,43 @@ export const purposeItemSearchQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(200).optional(),
 }).strict();
 
+export const relationTypeSchema = z.enum([
+  'derives_to',
+  'depends_on',
+  'supports',
+  'contradicts',
+  'example_of',
+  'equivalent_to',
+  'analogous_to',
+  'contrasts_with',
+  'companion_of',
+]);
+
+export const createRelationSchema = z.object({
+  from_item_id: contentGroupRuntimeIdSchema,
+  to_item_id: contentGroupRuntimeIdSchema,
+  relation_type: relationTypeSchema,
+  note: z.string().max(4000).nullable().optional(),
+  created_by: itemCreatedBySchema.optional(),
+  origin_purpose_id: contentGroupRuntimeIdSchema.nullable().optional(),
+}).strict();
+
+export const listRelationsQuerySchema = z.object({
+  item_id: contentGroupRuntimeIdSchema.optional(),
+  purpose_id: contentGroupRuntimeIdSchema.optional(),
+  status: z.enum(['active', 'revoked', 'all']).optional(),
+}).strict().superRefine((value, context) => {
+  if (Boolean(value.item_id) === Boolean(value.purpose_id)) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Exactly one of item_id or purpose_id is required',
+      path: ['item_id'],
+    });
+  }
+});
+
+export const relationCommandSchema = z.object({}).strict();
+
 export const importNoteMetadataContentGroupsSchema = z.object({
   note_id: z.string().uuid('Invalid note ID'),
   groups: z.array(upsertContentGroupSchema).max(500),
