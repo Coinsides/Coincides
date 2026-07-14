@@ -5,6 +5,8 @@
 > **取代 (Supersedes)**: —
 > **被取代 (Superseded by)**: —
 
+> **教义更替公告 (2026-07-14 · V2.BN.11 随版)**: 本契约的**三分法原则存活并已在 schema 层兑现**,但词汇整体更替——`ObjectRelation`（旧表,047 已落）→ **`relations`**（端点=Item/卡,关系三真相:身份对+判断收据〔双端 Snapshot〕+关系本体;九类种子词表;单活边;无向规范序;`origin_purpose_id` 纯出处永不过滤）。三分法的现役对应:Link=navigation（未变）/ SourceReference=出处收据（V10 `note_block_sources` + V11 `item_anchors`,copy-on-anchor）/ semantic relation=`relations`。§3"用户确认才建关系"已兑现（Relation 只由人工命令创建,RelationProposal=future seam）;§4"truth≠render"已兑现（visual_connector 与 Relation 两套真相,机器强制;render budget 归磨合期）;§5 CandidateRelation 归 Agent 时代。**权威=概念设计 v1.1**,本文作为三分法思想出处保留。
+
 # Link / SourceReference / ObjectRelation Boundary Contract
 
 **状态**：V2.BN.6 合同

@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-07-13
+> **日期 (Updated)**: 2026-07-14
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,11 +8,11 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 52 份文档。
+共 57 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
-| [AGENT_CONTEXT.md](AGENT_CONTEXT.md) | AGENT_CONTEXT —— Agent 开工入口 | `active` | 2026-07-11 | — |
+| [AGENT_CONTEXT.md](AGENT_CONTEXT.md) | AGENT_CONTEXT —— Agent 开工入口 | `active` | 2026-07-14 | — |
 | [DOCUMENTATION-SYSTEM.md](DOCUMENTATION-SYSTEM.md) | Coincides 文档体系 (Documentation System) | `active` | 2026-06-27 | — |
 | [HENRY-PREFERENCES.md](HENRY-PREFERENCES.md) | Henry 的协作偏好 | `active` | 2026-06-27 | — |
 | [README.md](README.md) | agent-ops —— Agent 协同中枢 | `active` | 2026-06-27 | — |
@@ -35,9 +35,9 @@
 | [claude-log/2026-07-02.md](claude-log/2026-07-02.md) | Claude 行动日志 — 2026-07-02 | `active` | 2026-07-02 | — |
 | [claude-log/2026-07-03.md](claude-log/2026-07-03.md) | Claude 行动日志 — 2026-07-03 | `active` | 2026-07-03 | — |
 | [claude-log/2026-07-04.md](claude-log/2026-07-04.md) | Claude 行动日志 — 2026-07-04 | `active` | 2026-07-04 | — |
-| [claude-log/2026-07-05.md](claude-log/2026-07-05.md) | Claude 行动日志 — 2026-07-05（含 07-09/07-11/07-12/07-13 追记） | `active` | 2026-07-05 | — |
+| [claude-log/2026-07-05.md](claude-log/2026-07-05.md) | Claude 行动日志 — 2026-07-05（含 07-09/07-11/07-12/07-13/07-14 追记） | `active` | 2026-07-05 | — |
 | [claude-log/README.md](claude-log/README.md) | claude-log —— Claude 行动日志（Henry 的监督轨迹） | `active` | 2026-06-27 | — |
-| [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-07-13 | — |
+| [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-07-14 | — |
 | [decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md](decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md) | ADR-0001: 自研最小混合 Canvas 引擎路线 (Self-owned Minimal Hybrid Can… | `active` | 2026-06-27 | — |
 | [decisions/README.md](decisions/README.md) | 决策层 / Architecture Decision Records (ADR) | `active` | 2026-06-27 | — |
 | [handoffs/2026-06-27-canvas-persistence-cutover.md](handoffs/2026-06-27-canvas-persistence-cutover.md) | Spec：三颗承重持久化种子的 DB 发芽（V2.BN.8.11 收口前的最后实质工作） | `(缺状态头)` | — | — |
@@ -63,4 +63,9 @@
 | [handoffs/2026-07-13-v2bn11-go-decision-and-11-1-authorization.md](handoffs/2026-07-13-v2bn11-go-decision-and-11-1-authorization.md) | V2.BN.11 Go 决定与 V2.BN.11.1 开工授权 | `(缺状态头)` | — | — |
 | [handoffs/2026-07-13-v2bn11.2-fix-r1-r2.md](handoffs/2026-07-13-v2bn11.2-fix-r1-r2.md) | V2.BN.11.2 修正单：R1 账号级联地雷 + R2 回滚断言补强 | `(缺状态头)` | — | — |
 | [handoffs/2026-07-13-v2bn11.2-kickoff-carry-list.md](handoffs/2026-07-13-v2bn11.2-kickoff-carry-list.md) | V2.BN.11.2 开工携带单（Migration 047 And ContentGroup Item Member… | `(缺状态头)` | — | — |
+| [handoffs/2026-07-13-v2bn11.3-fix-r1-r4.md](handoffs/2026-07-13-v2bn11.3-fix-r1-r4.md) | V2.BN.11.3 修正单：R1 净库索引缺失 + R2 successor-active + R3 文档更替 + … | `(缺状态头)` | — | — |
+| [handoffs/2026-07-13-v2bn11.4-third-party-review.md](handoffs/2026-07-13-v2bn11.4-third-party-review.md) | V2.BN.11.4 Purpose Item Membership And Compiled Scope · 第三方… | `(缺状态头)` | — | — |
+| [handoffs/2026-07-13-v2bn11.5-third-party-review.md](handoffs/2026-07-13-v2bn11.5-third-party-review.md) | V2.BN.11.5 Relation Truth And Judgment Receipts · 第三方复验 | `(缺状态头)` | — | — |
+| [handoffs/2026-07-14-v2bn11.6-third-party-review.md](handoffs/2026-07-14-v2bn11.6-third-party-review.md) | V2.BN.11.6 Mechanical Freshness And Relation Inspector · 第三… | `(缺状态头)` | — | — |
+| [handoffs/2026-07-14-v2bn11.7-closure-third-party-review.md](handoffs/2026-07-14-v2bn11.7-closure-third-party-review.md) | V2.BN.11.7 Lifecycle, Integrity And Closure Gate · 第三方复验 | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |

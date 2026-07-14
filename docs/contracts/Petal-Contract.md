@@ -1,9 +1,9 @@
-> **状态 (Status)**: active（⚠️ 日落中,见下方公告）
-> **层 (Layer)**: 契约 / Contract
-> **日期 (Updated)**: 2026-07-13
-> **权威 (Authoritative)**: 是（仅至 V2.BN.11.1 落地）
+> **状态 (Status)**: superseded
+> **层 (Layer)**: 契约 / Contract（历史）
+> **日期 (Updated)**: 2026-07-14
+> **权威 (Authoritative)**: 否
 > **取代 (Supersedes)**: —
-> **被取代 (Superseded by)**: —（V2.BN.11.1 落地后整体转 superseded）
+> **被取代 (Superseded by)**: `docs/agent-ops/analysis/relation-item-graph-concept-design.md`（v1.1,Item 教义）——花瓣机制已于 V2.BN.11.1 停写、047 落表、V2.BN.11.7 物理清场,代码中不复存在
 
 > **日落公告 (Sunset · 2026-07-13)**: V2.BN.11 已拍定**花瓣退役**（2026-07-11 Relation 卷 §二十;概念设计 v1.1 §5）。本契约描述的机制在 `V2.BN.11.1` 停止产生新数据（代码手术:client 模型/CRUD/Single Editor 入口 → server hydrate/replace/prune）,migration 047 删除三张支持表。**§4 "Petal 可投影为细粒度 relation endpoint 候选"已被取代:Relation 唯一 durable endpoint = Item（卡）**,权威见 `docs/agent-ops/analysis/relation-item-graph-concept-design.md`（v1.1）。在 11.1 落地前,本契约对仍在运行的旧代码依然是准确描述。
 

@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-07-13
+> **日期 (Updated)**: 2026-07-14
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/brainstorm`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 153 份文档。
+共 154 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -165,3 +165,4 @@
 | [产品完善/会议记录/2026-07-11-Better-Notebook-Relation-Definition-And-Graph-Scale-Meeting-Notes.md](产品完善/会议记录/2026-07-11-Better-Notebook-Relation-Definition-And-Graph-Scale-Meeting-Notes.md) | 2026-07-11 Better Notebook：Relation 定义与图谱尺度（会议记录） | `draft` | 2026-07-11 | — |
 | [产品完善/会议记录/2026-07-12-AI-Era-Learning-Method-Appendix-Meeting-Notes.md](产品完善/会议记录/2026-07-12-AI-Era-Learning-Method-Appendix-Meeting-Notes.md) | 2026-07-12 附录：AI 时代与 AI 并行学习的方法 | `draft` | 2026-07-12 | — |
 | [产品完善/会议记录/2026-07-12-Better-Notebook-Item-Raw-Material-And-Card-Lineage-Meeting-Notes.md](产品完善/会议记录/2026-07-12-Better-Notebook-Item-Raw-Material-And-Card-Lineage-Meeting-Notes.md) | 2026-07-12 Better Notebook：Item 原料模型与知识卡片思想回环 | `draft` | 2026-07-12 | — |
+| [产品完善/会议记录/2026-07-14-Better-Notebook-V12-Break-In-Survey-And-Roles-Meeting-Notes.md](产品完善/会议记录/2026-07-14-Better-Notebook-V12-Break-In-Survey-And-Roles-Meeting-Notes.md) | 2026-07-14 Better Notebook：V12 磨合期的调研先行与角色分工 | `draft` | 2026-07-14 | — |
