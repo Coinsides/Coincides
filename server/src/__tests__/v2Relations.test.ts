@@ -6,7 +6,7 @@ import { tmpdir } from 'node:os';
 import { v4 as uuidv4 } from 'uuid';
 import { closeDb, initDb } from '../db/init.js';
 import relationRoutes from '../routes/relations.js';
-import { createItem, retireItem, updateItem } from '../services/items.js';
+import { createItem, listItems, retireItem, updateItem } from '../services/items.js';
 import {
   RELATION_TYPE_DEFINITIONS,
   createRelation,
@@ -19,6 +19,7 @@ import {
 } from '../services/relations.js';
 import {
   createRelationSchema,
+  itemListQuerySchema,
   listRelationsQuerySchema,
   relationCommandSchema,
 } from '../validators/index.js';
@@ -187,6 +188,22 @@ test('create normalizes undirected Relations, preserves directed direction, and 
     assert.equal(forward.from_item_id, first.id);
     assert.equal(reverse.from_item_id, second.id);
 
+    let directedConflict: any = null;
+    try {
+      createRelation(db, ownerId, {
+        from_item_id: first.id,
+        to_item_id: second.id,
+        relation_type: 'supports',
+      });
+    } catch (error) {
+      directedConflict = error;
+    }
+    assert.equal(directedConflict?.statusCode, 409);
+    assert.deepEqual(directedConflict?.details, {
+      code: 'active_relation_exists',
+      relation_id: forward.id,
+    });
+
     assert.throws(() => createRelation(db, ownerId, {
       from_item_id: first.id,
       to_item_id: first.id,
@@ -210,6 +227,91 @@ test('create normalizes undirected Relations, preserves directed direction, and 
       to_item_id: retired.id,
       relation_type: 'supports',
     }), /active Item/i);
+  });
+});
+
+test('mechanical freshness is derived from endpoint hashes and ignores formatting-only changes', async () => {
+  await withDb((db) => {
+    const userId = seedUser(db, 'Freshness user');
+    const first = createItem(db, userId, { plain_text: 'Stable first endpoint' });
+    const second = createItem(db, userId, { plain_text: 'Stable second endpoint' });
+    const relation = createRelation(db, userId, {
+      from_item_id: first.id,
+      to_item_id: second.id,
+      relation_type: 'depends_on',
+    });
+
+    assert.equal(relation.freshness, 'fresh');
+    assert.equal(relation.from_changed, false);
+    assert.equal(relation.to_changed, false);
+
+    updateItem(db, userId, first.id, { plain_text: 'Changed first endpoint' });
+    assert.equal(getRelation(db, userId, relation.id).freshness, 'from_changed');
+
+    updateItem(db, userId, first.id, { plain_text: 'Stable first endpoint' });
+    updateItem(db, userId, second.id, { plain_text: 'Changed second endpoint' });
+    assert.equal(getRelation(db, userId, relation.id).freshness, 'to_changed');
+
+    updateItem(db, userId, first.id, { plain_text: 'Changed first endpoint again' });
+    const bothChanged = getRelation(db, userId, relation.id);
+    assert.equal(bothChanged.freshness, 'both_changed');
+    assert.equal(bothChanged.from_changed, true);
+    assert.equal(bothChanged.to_changed, true);
+
+    const reaffirmed = reaffirmRelation(db, userId, relation.id);
+    assert.equal(reaffirmed.freshness, 'fresh');
+
+    const currentFirst = createItem(db, userId, { plain_text: 'Formatting-stable endpoint' });
+    const formatPeer = createItem(db, userId, { plain_text: 'Formatting peer' });
+    const formattingRelation = createRelation(db, userId, {
+      from_item_id: currentFirst.id,
+      to_item_id: formatPeer.id,
+      relation_type: 'supports',
+    });
+    updateItem(db, userId, currentFirst.id, {
+      body_json: {
+        ...currentFirst.body_json,
+        presentation: { emphasis: true },
+      },
+      plain_text: currentFirst.plain_text,
+    });
+    assert.equal(getRelation(db, userId, formattingRelation.id).freshness, 'fresh');
+  });
+});
+
+test('latest assessment is a checkpoint only and Item search stays user-scoped', async () => {
+  await withDb((db) => {
+    const userId = seedUser(db, 'Checkpoint user');
+    const intruderId = seedUser(db, 'Checkpoint intruder');
+    const first = createItem(db, userId, {
+      plain_text: 'Lebesgue dominated convergence theorem',
+      item_type: 'theorem',
+      topic: 'measure theory',
+    });
+    const second = createItem(db, userId, { plain_text: 'Almost everywhere convergence' });
+    createItem(db, intruderId, { plain_text: 'Lebesgue private intruder item' });
+    const relation = createRelation(db, userId, {
+      from_item_id: first.id,
+      to_item_id: second.id,
+      relation_type: 'supports',
+    });
+    updateItem(db, userId, first.id, { plain_text: 'Changed after judgment' });
+    db.prepare(`
+      INSERT INTO relation_assessments (
+        id, relation_id, user_id, verdict, model_key, created_at
+      ) VALUES ('freshness-checkpoint', ?, ?, 'still_holds', 'manual-fixture', '2099-01-01T00:00:00.000Z')
+    `).run(relation.id, userId);
+
+    const read = getRelation(db, userId, relation.id);
+    assert.equal(read.freshness, 'from_changed');
+    assert.equal(read.latest_assessment?.id, 'freshness-checkpoint');
+    assert.equal(read.inspection_checkpoint_at, '2099-01-01T00:00:00.000Z');
+
+    assert.equal(itemListQuerySchema.safeParse({ status: 'active', q: 'Changed', limit: 20 }).success, true);
+    const results = listItems(db, userId, { status: 'active', q: 'Changed', limit: 20 });
+    assert.deepEqual(results.map((item) => item.id), [first.id]);
+    assert.equal(listItems(db, userId, { status: 'active', q: 'measure theory', limit: 20 }).length, 1);
+    assert.equal(listItems(db, userId, { status: 'active', q: 'private intruder', limit: 20 }).length, 0);
   });
 });
 

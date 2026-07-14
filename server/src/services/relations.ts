@@ -1,11 +1,12 @@
 import type Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 import { AppError } from '../middleware/errorHandler.js';
-import { ensureCurrentItemSnapshot } from './items.js';
+import { ensureCurrentItemSnapshot, itemContentHash } from './items.js';
 import { getPurposeCompiledScope } from './purposes.js';
 
 export type RelationDirectionality = 'directed' | 'undirected';
 export type RelationStatus = 'active' | 'revoked';
+export type RelationFreshness = 'fresh' | 'from_changed' | 'to_changed' | 'both_changed';
 export type RelationAssessmentVerdict = 'still_holds' | 'questionable';
 export type RelationReaffirmFaultPoint =
   | 'after_from_snapshot'
@@ -99,6 +100,10 @@ interface RelationRow {
   to_item_retired_into: string | null;
   to_item_updated_at: string;
   visible_origin_purpose_id: string | null;
+  latest_assessment_id: string | null;
+  latest_assessment_verdict: RelationAssessmentVerdict | null;
+  latest_assessment_model_key: string | null;
+  latest_assessment_created_at: string | null;
 }
 
 interface RelationIdentityRow {
@@ -144,7 +149,11 @@ const RELATION_SELECT = `
     ti.retired_into_item_id AS to_item_retired_into,
     ti.updated_at AS to_item_updated_at,
     CASE WHEN op.user_id = r.user_id THEN r.origin_purpose_id ELSE NULL END
-      AS visible_origin_purpose_id
+      AS visible_origin_purpose_id,
+    la.id AS latest_assessment_id,
+    la.verdict AS latest_assessment_verdict,
+    la.model_key AS latest_assessment_model_key,
+    la.created_at AS latest_assessment_created_at
   FROM relations r
   JOIN item_snapshots fs
     ON fs.id = r.from_snapshot_id
@@ -161,6 +170,15 @@ const RELATION_SELECT = `
     ON ti.id = r.to_item_id
    AND ti.user_id = r.user_id
   LEFT JOIN purposes op ON op.id = r.origin_purpose_id
+  LEFT JOIN relation_assessments la
+    ON la.id = (
+      SELECT candidate.id
+      FROM relation_assessments candidate
+      WHERE candidate.relation_id = r.id
+        AND candidate.user_id = r.user_id
+      ORDER BY candidate.created_at DESC, candidate.id ASC
+      LIMIT 1
+    )
 `;
 
 function optionalText(value: unknown): string | null {
@@ -220,7 +238,34 @@ function normalizeEndpoints(
   return { fromItemId, toItemId };
 }
 
+export function deriveRelationFreshness(input: {
+  from_item_plain_text: string;
+  to_item_plain_text: string;
+  from_snapshot_content_hash: string;
+  to_snapshot_content_hash: string;
+}): {
+  freshness: RelationFreshness;
+  fromChanged: boolean;
+  toChanged: boolean;
+} {
+  const fromChanged = itemContentHash(input.from_item_plain_text) !== input.from_snapshot_content_hash;
+  const toChanged = itemContentHash(input.to_item_plain_text) !== input.to_snapshot_content_hash;
+  const freshness: RelationFreshness = fromChanged && toChanged
+    ? 'both_changed'
+    : fromChanged
+      ? 'from_changed'
+      : toChanged
+        ? 'to_changed'
+        : 'fresh';
+  return { freshness, fromChanged, toChanged };
+}
+
+function inspectionCheckpointAt(affirmedAt: string, assessmentAt: string | null): string {
+  return assessmentAt && assessmentAt > affirmedAt ? assessmentAt : affirmedAt;
+}
+
 function hydrateRelation(row: RelationRow) {
+  const freshness = deriveRelationFreshness(row);
   return {
     id: row.id,
     user_id: row.user_id,
@@ -237,6 +282,21 @@ function hydrateRelation(row: RelationRow) {
     created_at: row.created_at,
     updated_at: row.updated_at,
     affirmed_at: row.affirmed_at,
+    freshness: freshness.freshness,
+    from_changed: freshness.fromChanged,
+    to_changed: freshness.toChanged,
+    inspection_checkpoint_at: inspectionCheckpointAt(
+      row.affirmed_at,
+      row.latest_assessment_created_at,
+    ),
+    latest_assessment: row.latest_assessment_id ? {
+      id: row.latest_assessment_id,
+      relation_id: row.id,
+      user_id: row.user_id,
+      verdict: row.latest_assessment_verdict,
+      model_key: row.latest_assessment_model_key,
+      created_at: row.latest_assessment_created_at,
+    } : null,
     from_snapshot: {
       id: row.from_snapshot_id,
       item_id: row.from_snapshot_item_id,

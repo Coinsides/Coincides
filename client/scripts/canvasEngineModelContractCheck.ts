@@ -343,6 +343,9 @@ import {
   relationOtherEndpoint,
 } from '../src/pages/Notes/canvasEngine/relationService';
 import {
+  buildRelationInspectorRows,
+} from '../src/pages/Notes/canvasEngine/relationInspectorService';
+import {
   CONTENT_GROUP_REUSE_MODES,
   createContentGroupMaterializePlan,
   createContentGroupOpenOriginalDescriptor,
@@ -5117,6 +5120,18 @@ function testRelationTruthContract(): void {
     created_at: '2026-07-13T01:00:00.000Z',
     updated_at: '2026-07-13T02:00:00.000Z',
     affirmed_at: '2026-07-13T01:30:00.000Z',
+    freshness: 'both_changed',
+    from_changed: true,
+    to_changed: true,
+    inspection_checkpoint_at: '2026-07-13T01:45:00.000Z',
+    latest_assessment: {
+      id: 'assessment-a',
+      relation_id: 'relation-a',
+      user_id: 'user-a',
+      verdict: 'questionable',
+      model_key: 'fixture-model',
+      created_at: '2026-07-13T01:45:00.000Z',
+    },
     from_snapshot: {
       id: 'snapshot-a',
       item_id: 'item-a',
@@ -5160,6 +5175,8 @@ function testRelationTruthContract(): void {
   assertEqual(relation.from_snapshot.content, 'First judgment receipt', 'Relation keeps the first judgment receipt');
   assertEqual(relation.to_snapshot.content, 'Second judgment receipt', 'Relation keeps the second judgment receipt');
   assertEqual(relation.to_item.status, 'retired', 'Relation endpoint projection preserves current Item status');
+  assertEqual(relation.freshness, 'both_changed', 'Relation normalizer preserves mechanical freshness');
+  assertEqual(relation.latest_assessment?.id, 'assessment-a', 'Relation normalizer preserves the latest checkpoint only');
   assertEqual(relationOtherEndpoint(relation, 'item-a')?.id, 'item-b', 'Relation resolves the opposite Item endpoint');
   assertEqual(relationOtherEndpoint(relation, 'outside-item'), null, 'Relation rejects an unrelated endpoint lookup');
 
@@ -5175,6 +5192,87 @@ function testRelationTruthContract(): void {
     1,
     'Relation list normalization filters malformed and cross-wired rows',
   );
+}
+
+function testRelationInspectorContract(): void {
+  const relation = normalizeRelation({
+    id: 'relation-inspector',
+    user_id: 'user-a',
+    from_item_id: 'item-a',
+    to_item_id: 'item-b',
+    relation_type: 'supports',
+    directionality: 'directed',
+    from_snapshot_id: 'snapshot-a',
+    to_snapshot_id: 'snapshot-b',
+    note: 'The first Item supports the second.',
+    created_by: 'human',
+    origin_purpose_id: null,
+    status: 'active',
+    created_at: '2026-07-14T01:00:00.000Z',
+    updated_at: '2026-07-14T02:00:00.000Z',
+    affirmed_at: '2026-07-14T01:30:00.000Z',
+    freshness: 'from_changed',
+    from_changed: true,
+    to_changed: false,
+    inspection_checkpoint_at: '2026-07-14T01:30:00.000Z',
+    latest_assessment: null,
+    from_snapshot: {
+      id: 'snapshot-a',
+      item_id: 'item-a',
+      user_id: 'user-a',
+      content: 'Earlier first Item',
+      content_hash: 'hash-a',
+      created_at: '2026-07-14T01:00:00.000Z',
+    },
+    to_snapshot: {
+      id: 'snapshot-b',
+      item_id: 'item-b',
+      user_id: 'user-a',
+      content: 'Second Item',
+      content_hash: 'hash-b',
+      created_at: '2026-07-14T01:00:00.000Z',
+    },
+    from_item: {
+      id: 'item-a',
+      plain_text: 'Current first Item',
+      item_type: 'claim',
+      topic: 'Measure theory',
+      status: 'active',
+      retired_into_item_id: null,
+      updated_at: '2026-07-14T02:00:00.000Z',
+    },
+    to_item: {
+      id: 'item-b',
+      plain_text: 'Second Item',
+      item_type: 'theorem',
+      topic: 'Measure theory',
+      status: 'active',
+      retired_into_item_id: null,
+      updated_at: '2026-07-14T01:00:00.000Z',
+    },
+  });
+  assert(relation, 'Relation Inspector fixture normalizes');
+
+  const outgoing = buildRelationInspectorRows([relation], 'item-a');
+  assertEqual(outgoing.length, 1, 'Inspector includes a Relation attached to the current Item');
+  assertEqual(outgoing[0]?.direction, 'outgoing', 'Inspector explains directed relation from current Item');
+  assertEqual(outgoing[0]?.other_item.id, 'item-b', 'Inspector exposes the opposite endpoint');
+  assertEqual(outgoing[0]?.freshness_label, 'This Item changed', 'Inspector translates freshness into current-Item language');
+  assertEqual(outgoing[0]?.can_reaffirm, true, 'Active endpoints allow reaffirm');
+  assertEqual('from_snapshot' in outgoing[0]!, false, 'Inspector row does not expose Snapshot bodies');
+
+  const incoming = buildRelationInspectorRows([relation], 'item-b');
+  assertEqual(incoming[0]?.direction, 'incoming', 'Inspector explains directed relation into current Item');
+  assertEqual(incoming[0]?.freshness_label, 'Other Item changed', 'Relative freshness flips with the Inspector viewpoint');
+
+  const retiredPeer = {
+    ...relation,
+    to_item: { ...relation.to_item, status: 'retired' as const },
+  };
+  const retiredRow = buildRelationInspectorRows([retiredPeer], 'item-a')[0]!;
+  assertEqual(retiredRow.can_reaffirm, false, 'A retired endpoint disables reaffirm');
+  assertEqual(retiredRow.can_revoke, true, 'An active Relation with retired endpoint remains revocable');
+  assertEqual(buildRelationInspectorRows([relation], 'outside-item').length, 0, 'Unrelated Relation stays out of the Inspector');
 }
 
 function testContentGroupEntityCutoverBoundary(): void {
@@ -6082,6 +6180,7 @@ const checks: Array<readonly [string, () => void | Promise<void>]> = [
   ['ContentGroup surface roles', testContentGroupSurfaceRoles],
   ['PurposeFrame contract', testPurposeFrameContract],
   ['Relation truth and judgment receipts', testRelationTruthContract],
+  ['Relation mechanical freshness and Inspector', testRelationInspectorContract],
   ['ContentGroup entity cutover boundary', testContentGroupEntityCutoverBoundary],
   ['GroupFolder entity cutover boundary', testGroupFolderEntityCutoverBoundary],
   ['ContentGroup member source boundary', testContentGroupMemberSourceBoundary],

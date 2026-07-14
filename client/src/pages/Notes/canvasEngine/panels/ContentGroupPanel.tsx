@@ -1,18 +1,23 @@
 import {
   Archive,
+  ArrowLeft,
   ArrowDown,
+  ArrowRight,
   ArrowUp,
   Check,
   ChevronRight,
   ExternalLink,
   Folder,
   Layers3,
+  Link2,
   Menu,
   Plus,
   Save,
   Search,
   SlidersHorizontal,
+  RefreshCw,
   Trash2,
+  Unlink,
   X,
 } from 'lucide-react';
 import {
@@ -58,9 +63,20 @@ import {
   loadItem,
   loadPoolItemAnchors,
   retireItem,
+  searchItems,
   updateItem,
   type CollectItemAnchorInput,
 } from '../itemRepository';
+import {
+  createRelation,
+  loadRelations,
+  loadRelationTypes,
+  reaffirmRelation,
+  revokeRelation,
+} from '../relationRepository';
+import {
+  buildRelationInspectorRows,
+} from '../relationInspectorService';
 import {
   activePurposeFrames,
   movePurposeMember,
@@ -77,6 +93,9 @@ import type {
   ItemV1,
   NoteBlock,
   PurposeFrameV1,
+  RelationSeedTypeId,
+  RelationTypeDefinitionV1,
+  RelationV1,
 } from '../runtimeDataTypes';
 import {
   buildRailGroupRowView,
@@ -91,6 +110,7 @@ const railSurfaceRole = CONTENT_GROUP_SURFACE_ROLES.rail;
 const sourceNoteTitle = 'Current note';
 
 type RailViewMode = 'folder' | 'topic' | 'type' | 'all';
+type RelationDraftDirection = 'outgoing' | 'incoming';
 
 const railViewTabs: { id: RailViewMode; label: string }[] = [
   { id: 'folder', label: 'Folder' },
@@ -296,10 +316,30 @@ export function ContentGroupPanel({
   const [unlinkedItem, setUnlinkedItem] = useState<ItemV1 | null>(null);
   const [itemBusy, setItemBusy] = useState(false);
   const [itemError, setItemError] = useState<string | null>(null);
+  const [itemRelations, setItemRelations] = useState<RelationV1[]>([]);
+  const [relationTypes, setRelationTypes] = useState<RelationTypeDefinitionV1[]>([]);
+  const [relationBusy, setRelationBusy] = useState(false);
+  const [relationError, setRelationError] = useState<string | null>(null);
+  const [relationCreateOpen, setRelationCreateOpen] = useState(false);
+  const [relationQuery, setRelationQuery] = useState('');
+  const [relationCandidates, setRelationCandidates] = useState<ItemV1[]>([]);
+  const [relationTargetId, setRelationTargetId] = useState<string | null>(null);
+  const [relationType, setRelationType] = useState<RelationSeedTypeId>('supports');
+  const [relationDirection, setRelationDirection] = useState<RelationDraftDirection>('outgoing');
+  const [relationNote, setRelationNote] = useState('');
+  const [relationPurposeId, setRelationPurposeId] = useState('');
   const [groupActionError, setGroupActionError] = useState<string | null>(null);
   const expandedGroup = useMemo(
     () => activeGroups.find((group) => group.id === expandedGroupId) || null,
     [activeGroups, expandedGroupId],
+  );
+  const relationRows = useMemo(
+    () => inspectedItemId ? buildRelationInspectorRows(itemRelations, inspectedItemId) : [],
+    [inspectedItemId, itemRelations],
+  );
+  const selectedRelationType = useMemo(
+    () => relationTypes.find((definition) => definition.id === relationType) || null,
+    [relationType, relationTypes],
   );
 
   useEffect(() => {
@@ -315,6 +355,12 @@ export function ContentGroupPanel({
       setInspectedItemId(null);
       setUnlinkedItem(null);
       setItemError(null);
+      setItemRelations([]);
+      setRelationTypes([]);
+      setRelationError(null);
+      setRelationCreateOpen(false);
+      setRelationCandidates([]);
+      setRelationTargetId(null);
       return () => {
         cancelled = true;
       };
@@ -380,6 +426,42 @@ export function ContentGroupPanel({
     });
     setPurposeEdgeDrafts(nextDrafts);
   }, [activePurposes, inspectedItemId]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setRelationCreateOpen(false);
+    setRelationCandidates([]);
+    setRelationTargetId(null);
+    setRelationQuery('');
+    setRelationNote('');
+    setRelationPurposeId('');
+    setRelationError(null);
+    if (!inspectedItemId) {
+      setItemRelations([]);
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    setRelationBusy(true);
+    void Promise.all([
+      loadRelations({ item_id: inspectedItemId }),
+      loadRelationTypes(),
+    ]).then(([relations, definitions]) => {
+      if (cancelled) return;
+      setItemRelations(relations);
+      setRelationTypes(definitions);
+      setRelationError(null);
+    }).catch((error) => {
+      if (!cancelled) setRelationError(itemErrorMessage(error));
+    }).finally(() => {
+      if (!cancelled) setRelationBusy(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [inspectedItemId]);
 
   const stopPanelEvent = (event: SyntheticEvent) => {
     event.stopPropagation();
@@ -526,6 +608,92 @@ export function ContentGroupPanel({
     }
   };
 
+  const refreshItemRelations = async (itemId: string) => {
+    const relations = await loadRelations({ item_id: itemId });
+    setItemRelations(relations);
+    return relations;
+  };
+
+  const handleSearchRelationCandidates = async () => {
+    if (!inspectedItemId) return;
+    setRelationBusy(true);
+    setRelationError(null);
+    try {
+      const items = await searchItems({
+        query: relationQuery,
+        status: 'active',
+        limit: 24,
+      });
+      const candidates = items.filter((item) => item.id !== inspectedItemId);
+      setRelationCandidates(candidates);
+      if (relationTargetId && !candidates.some((item) => item.id === relationTargetId)) {
+        setRelationTargetId(null);
+      }
+    } catch (error) {
+      setRelationError(itemErrorMessage(error));
+    } finally {
+      setRelationBusy(false);
+    }
+  };
+
+  const handleCreateRelation = async () => {
+    if (!inspectedItemId || !relationTargetId || !selectedRelationType) return;
+    const directedIncoming = selectedRelationType.directionality === 'directed'
+      && relationDirection === 'incoming';
+    setRelationBusy(true);
+    setRelationError(null);
+    try {
+      const relation = await createRelation({
+        from_item_id: directedIncoming ? relationTargetId : inspectedItemId,
+        to_item_id: directedIncoming ? inspectedItemId : relationTargetId,
+        relation_type: relationType,
+        note: relationNote.trim() || null,
+        created_by: 'human',
+        origin_purpose_id: relationPurposeId || null,
+      });
+      setItemRelations((current) => [relation, ...current.filter((entry) => entry.id !== relation.id)]);
+      setRelationCreateOpen(false);
+      setRelationCandidates([]);
+      setRelationTargetId(null);
+      setRelationQuery('');
+      setRelationNote('');
+      setRelationPurposeId('');
+      setRelationDirection('outgoing');
+    } catch (error) {
+      setRelationError(itemErrorMessage(error));
+    } finally {
+      setRelationBusy(false);
+    }
+  };
+
+  const handleReaffirmRelation = async (relationId: string) => {
+    setRelationBusy(true);
+    setRelationError(null);
+    try {
+      const relation = await reaffirmRelation(relationId);
+      setItemRelations((current) => current.map((entry) => (
+        entry.id === relation.id ? relation : entry
+      )));
+    } catch (error) {
+      setRelationError(itemErrorMessage(error));
+    } finally {
+      setRelationBusy(false);
+    }
+  };
+
+  const handleRevokeRelation = async (relationId: string) => {
+    setRelationBusy(true);
+    setRelationError(null);
+    try {
+      await revokeRelation(relationId);
+      setItemRelations((current) => current.filter((entry) => entry.id !== relationId));
+    } catch (error) {
+      setRelationError(itemErrorMessage(error));
+    } finally {
+      setRelationBusy(false);
+    }
+  };
+
   const handleSaveItem = async () => {
     if (!inspectedItemId || !itemDraft.plainText.trim()) return;
     setItemBusy(true);
@@ -542,6 +710,11 @@ export function ContentGroupPanel({
         itemType: item.item_type || '',
         topic: item.topic || '',
       });
+      try {
+        await refreshItemRelations(item.id);
+      } catch (error) {
+        setRelationError(itemErrorMessage(error));
+      }
     } catch (error) {
       setItemError(itemErrorMessage(error));
     } finally {
@@ -556,6 +729,11 @@ export function ContentGroupPanel({
     try {
       const item = await retireItem(inspectedItemId);
       setItemById((current) => ({ ...current, [item.id]: item }));
+      try {
+        await refreshItemRelations(item.id);
+      } catch (error) {
+        setRelationError(itemErrorMessage(error));
+      }
     } catch (error) {
       setItemError(itemErrorMessage(error));
     } finally {
@@ -1201,6 +1379,215 @@ export function ContentGroupPanel({
                                 </small>
                               </p>
                             ))}
+                          </div>
+                          <div className={styles.itemRelationInspector}>
+                            <div className={styles.itemWorkbenchHeader}>
+                              <span><Link2 size={12} />Relations</span>
+                              <div className={styles.itemRelationHeaderActions}>
+                                <small>{relationRows.length} active</small>
+                                <button
+                                  type="button"
+                                  className={styles.iconBtn}
+                                  title={relationCreateOpen ? 'Close Relation form' : 'Create Relation'}
+                                  aria-label={relationCreateOpen ? 'Close Relation form' : 'Create Relation'}
+                                  onClick={() => {
+                                    setRelationCreateOpen((open) => !open);
+                                    setRelationError(null);
+                                  }}
+                                  disabled={relationBusy || inspectedItem.status === 'retired'}
+                                >
+                                  {relationCreateOpen ? <X size={12} /> : <Plus size={12} />}
+                                </button>
+                              </div>
+                            </div>
+
+                            {relationCreateOpen ? (
+                              <form
+                                className={styles.itemRelationCreate}
+                                onSubmit={(event) => {
+                                  event.preventDefault();
+                                  void handleCreateRelation();
+                                }}
+                              >
+                                <div className={styles.itemRelationSearchRow}>
+                                  <input
+                                    value={relationQuery}
+                                    onChange={(event) => setRelationQuery(event.currentTarget.value)}
+                                    onKeyDown={(event) => {
+                                      if (event.key === 'Enter') {
+                                        event.preventDefault();
+                                        void handleSearchRelationCandidates();
+                                      }
+                                    }}
+                                    placeholder="Search active Items"
+                                    aria-label="Search Relation endpoint Items"
+                                  />
+                                  <button
+                                    type="button"
+                                    className={styles.iconBtn}
+                                    onClick={() => void handleSearchRelationCandidates()}
+                                    disabled={relationBusy}
+                                    title="Search Items"
+                                    aria-label="Search Items"
+                                  >
+                                    <Search size={12} />
+                                  </button>
+                                </div>
+
+                                {relationCandidates.length > 0 ? (
+                                  <div className={styles.itemRelationCandidates} role="listbox" aria-label="Relation endpoint results">
+                                    {relationCandidates.map((candidate) => (
+                                      <button
+                                        key={candidate.id}
+                                        type="button"
+                                        role="option"
+                                        aria-selected={relationTargetId === candidate.id}
+                                        data-selected={relationTargetId === candidate.id ? 'true' : 'false'}
+                                        onClick={() => setRelationTargetId(candidate.id)}
+                                      >
+                                        <strong>{candidate.item_type || 'Item'}</strong>
+                                        <span>{candidate.plain_text}</span>
+                                        <small>{candidate.topic || 'No topic'}</small>
+                                      </button>
+                                    ))}
+                                  </div>
+                                ) : null}
+
+                                <div className={styles.itemRelationFields}>
+                                  <select
+                                    value={relationType}
+                                    onChange={(event) => setRelationType(event.currentTarget.value as RelationSeedTypeId)}
+                                    aria-label="Relation type"
+                                  >
+                                    {relationTypes.map((definition) => (
+                                      <option key={definition.id} value={definition.id}>
+                                        {definition.id.replace(/_/g, ' ')}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  <select
+                                    value={relationPurposeId}
+                                    onChange={(event) => setRelationPurposeId(event.currentTarget.value)}
+                                    aria-label="Relation Purpose receipt"
+                                  >
+                                    <option value="">No Purpose receipt</option>
+                                    {activePurposes.map((purpose) => (
+                                      <option key={purpose.id} value={purpose.id}>{purpose.title}</option>
+                                    ))}
+                                  </select>
+                                </div>
+
+                                {selectedRelationType?.directionality === 'directed' ? (
+                                  <div className={styles.itemRelationDirection} aria-label="Relation direction">
+                                    <button
+                                      type="button"
+                                      data-active={relationDirection === 'outgoing' ? 'true' : 'false'}
+                                      aria-pressed={relationDirection === 'outgoing'}
+                                      onClick={() => setRelationDirection('outgoing')}
+                                    >
+                                      <ArrowRight size={12} />
+                                      This Item points out
+                                    </button>
+                                    <button
+                                      type="button"
+                                      data-active={relationDirection === 'incoming' ? 'true' : 'false'}
+                                      aria-pressed={relationDirection === 'incoming'}
+                                      onClick={() => setRelationDirection('incoming')}
+                                    >
+                                      <ArrowLeft size={12} />
+                                      This Item receives
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <p className={styles.itemQuietText}>Undirected pair</p>
+                                )}
+
+                                <textarea
+                                  value={relationNote}
+                                  onChange={(event) => setRelationNote(event.currentTarget.value)}
+                                  placeholder="Optional judgment note"
+                                  aria-label="Relation judgment note"
+                                  rows={2}
+                                />
+                                <div className={styles.contentGroupActionRow}>
+                                  <button
+                                    type="submit"
+                                    className={styles.secondaryBtn}
+                                    disabled={relationBusy || !relationTargetId || !selectedRelationType}
+                                  >
+                                    <Link2 size={13} />
+                                    Create Relation
+                                  </button>
+                                </div>
+                              </form>
+                            ) : null}
+
+                            {relationBusy && relationRows.length === 0 ? (
+                              <p className={styles.itemQuietText}>Loading Relations...</p>
+                            ) : relationRows.length > 0 ? (
+                              <div className={styles.itemRelationList}>
+                                {relationRows.map((row) => (
+                                  <section
+                                    key={row.id}
+                                    className={styles.itemRelationRow}
+                                    data-freshness={row.freshness}
+                                  >
+                                    <div className={styles.itemRelationIdentity}>
+                                      <span className={styles.itemRelationDirectionIcon} aria-hidden="true">
+                                        {row.direction === 'outgoing'
+                                          ? <ArrowRight size={12} />
+                                          : row.direction === 'incoming'
+                                            ? <ArrowLeft size={12} />
+                                            : <Link2 size={12} />}
+                                      </span>
+                                      <strong>{row.type_label}</strong>
+                                      <span className={styles.itemRelationFreshness}>{row.freshness_label}</span>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      className={styles.itemRelationEndpoint}
+                                      onClick={() => void handleInspectItem(row.other_item.id)}
+                                      disabled={relationBusy}
+                                      title="Inspect related Item"
+                                    >
+                                      <span>{row.other_item.plain_text}</span>
+                                      <small>
+                                        {row.direction_label}
+                                        {' / '}
+                                        {row.other_item.item_type || 'Item'}
+                                        {row.endpoint_retired ? ' / retired endpoint' : ''}
+                                      </small>
+                                    </button>
+                                    {row.note ? <p>{row.note}</p> : null}
+                                    <div className={styles.itemRelationActions}>
+                                      <button
+                                        type="button"
+                                        className={styles.iconBtn}
+                                        onClick={() => void handleReaffirmRelation(row.id)}
+                                        disabled={relationBusy || !row.can_reaffirm}
+                                        title={row.can_reaffirm ? 'Reaffirm with current Item text' : 'Retired endpoints cannot be reaffirmed'}
+                                        aria-label="Reaffirm Relation"
+                                      >
+                                        <RefreshCw size={12} />
+                                      </button>
+                                      <button
+                                        type="button"
+                                        className={styles.iconBtn}
+                                        onClick={() => void handleRevokeRelation(row.id)}
+                                        disabled={relationBusy || !row.can_revoke}
+                                        title="Revoke Relation"
+                                        aria-label="Revoke Relation"
+                                      >
+                                        <Unlink size={12} />
+                                      </button>
+                                    </div>
+                                  </section>
+                                ))}
+                              </div>
+                            ) : (
+                              <p className={styles.itemQuietText}>No active Relations.</p>
+                            )}
+                            {relationError ? <p className={styles.itemErrorText}>{relationError}</p> : null}
                           </div>
                           <div className={styles.itemPurposeMembership}>
                             <div className={styles.itemWorkbenchHeader}>

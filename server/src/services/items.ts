@@ -191,7 +191,7 @@ function normalizeItemBody(
   return { bodyJson: freshTextFlowBody(itemId, plainText), plainText };
 }
 
-function contentHash(plainText: string): string {
+export function itemContentHash(plainText: string): string {
   return `sha256:${createHash('sha256').update(plainText).digest('hex')}`;
 }
 
@@ -201,7 +201,7 @@ function ensureSnapshot(
   itemId: string,
   plainText: string,
 ): ItemSnapshotRow {
-  const hash = contentHash(plainText);
+  const hash = itemContentHash(plainText);
   db.prepare(`
     INSERT OR IGNORE INTO item_snapshots (
       id, item_id, user_id, content, content_hash, created_at
@@ -226,7 +226,7 @@ function getCurrentSnapshot(
     SELECT * FROM item_snapshots
     WHERE item_id = ? AND user_id = ? AND content_hash = ?
     LIMIT 1
-  `).get(itemId, userId, contentHash(plainText)) as ItemSnapshotRow | undefined;
+  `).get(itemId, userId, itemContentHash(plainText)) as ItemSnapshotRow | undefined;
   if (!row) throw new AppError(500, 'Item current Snapshot is missing');
   return row;
 }
@@ -355,7 +355,13 @@ export function getItem(db: Database.Database, userId: string, itemId: string) {
 export function listItems(
   db: Database.Database,
   userId: string,
-  input: { status?: ItemStatus | 'all'; origin_course_id?: string; origin_note_id?: string } = {},
+  input: {
+    status?: ItemStatus | 'all';
+    origin_course_id?: string;
+    origin_note_id?: string;
+    q?: string;
+    limit?: number;
+  } = {},
 ) {
   const conditions = ['user_id = ?'];
   const params: unknown[] = [userId];
@@ -371,10 +377,25 @@ export function listItems(
     conditions.push('origin_note_id = ?');
     params.push(input.origin_note_id);
   }
+  const query = optionalText(input.q);
+  if (query) {
+    const pattern = `%${query.replace(/[\\%_]/g, '\\$&')}%`;
+    conditions.push(`(
+      plain_text LIKE ? ESCAPE '\\' COLLATE NOCASE
+      OR COALESCE(item_type, '') LIKE ? ESCAPE '\\' COLLATE NOCASE
+      OR COALESCE(topic, '') LIKE ? ESCAPE '\\' COLLATE NOCASE
+    )`);
+    params.push(pattern, pattern, pattern);
+  }
+  const limit = Number.isInteger(input.limit)
+    ? Math.min(200, Math.max(1, Number(input.limit)))
+    : null;
+  if (limit !== null) params.push(limit);
   const rows = db.prepare(`
     SELECT * FROM items
     WHERE ${conditions.join(' AND ')}
     ORDER BY updated_at DESC, created_at DESC, id ASC
+    ${limit !== null ? 'LIMIT ?' : ''}
   `).all(...params) as ItemRow[];
   return rows.map((row) => hydrateItem(db, row, false));
 }

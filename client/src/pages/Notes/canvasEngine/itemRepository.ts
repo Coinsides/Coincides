@@ -38,9 +38,26 @@ export interface UpdateItemInput {
   metadata?: Record<string, unknown>;
 }
 
+export interface SearchItemsInput {
+  query?: string;
+  status?: 'active' | 'retired' | 'all';
+  limit?: number;
+}
+
 export async function loadItem(itemId: string): Promise<ItemV1> {
   const response = await api.get<ItemV1>(`/items/${itemId}`);
   return response.data;
+}
+
+export async function searchItems(input: SearchItemsInput = {}): Promise<ItemV1[]> {
+  const response = await api.get<ItemV1[]>('/items', {
+    params: {
+      status: input.status || 'active',
+      ...(input.query?.trim() ? { q: input.query.trim() } : {}),
+      ...(Number.isFinite(input.limit) ? { limit: input.limit } : {}),
+    },
+  });
+  return Array.isArray(response.data) ? response.data : [];
 }
 
 export async function loadPoolItemAnchors(groupId: string): Promise<ItemAnchorV1[]> {

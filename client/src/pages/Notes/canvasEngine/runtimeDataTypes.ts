@@ -305,6 +305,7 @@ export interface ItemV1 {
 
 export type RelationDirectionality = 'directed' | 'undirected';
 export type RelationStatus = 'active' | 'revoked';
+export type RelationFreshness = 'fresh' | 'from_changed' | 'to_changed' | 'both_changed';
 export type RelationSeedTypeId =
   | 'derives_to'
   | 'depends_on'
@@ -347,6 +348,11 @@ export interface RelationV1 {
   created_at: string;
   updated_at: string;
   affirmed_at: string;
+  freshness: RelationFreshness;
+  from_changed: boolean;
+  to_changed: boolean;
+  inspection_checkpoint_at: string;
+  latest_assessment: RelationAssessmentV1 | null;
   from_snapshot: ItemSnapshotV1;
   to_snapshot: ItemSnapshotV1;
   from_item: RelationEndpointItemV1;

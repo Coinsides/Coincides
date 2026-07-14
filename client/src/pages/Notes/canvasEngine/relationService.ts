@@ -1,7 +1,9 @@
 import type {
   ItemSnapshotV1,
   RelationDirectionality,
+  RelationFreshness,
   RelationEndpointItemV1,
+  RelationAssessmentV1,
   RelationSeedTypeId,
   RelationStatus,
   RelationTypeDefinitionV1,
@@ -40,6 +42,38 @@ function directionalityValue(value: unknown): RelationDirectionality {
 
 function relationStatusValue(value: unknown): RelationStatus {
   return value === 'revoked' ? 'revoked' : 'active';
+}
+
+function freshnessValue(value: unknown): RelationFreshness | null {
+  if (
+    value === 'fresh'
+    || value === 'from_changed'
+    || value === 'to_changed'
+    || value === 'both_changed'
+  ) return value;
+  return null;
+}
+
+function normalizeAssessment(value: unknown): RelationAssessmentV1 | null {
+  if (value === null || value === undefined) return null;
+  const assessment = recordValue(value);
+  if (!assessment) return null;
+  const verdict = assessment.verdict;
+  if (verdict !== 'still_holds' && verdict !== 'questionable') return null;
+  const id = textValue(assessment.id);
+  const relationId = textValue(assessment.relation_id);
+  const userId = textValue(assessment.user_id);
+  const modelKey = textValue(assessment.model_key);
+  const createdAt = textValue(assessment.created_at);
+  if (!id || !relationId || !userId || !modelKey || !createdAt) return null;
+  return {
+    id,
+    relation_id: relationId,
+    user_id: userId,
+    verdict,
+    model_key: modelKey,
+    created_at: createdAt,
+  };
 }
 
 function normalizeSnapshot(value: unknown, fallbackItemId: string): ItemSnapshotV1 | null {
@@ -114,10 +148,37 @@ export function normalizeRelation(input: unknown): RelationV1 | null {
   const fromSnapshotId = textValue(relation.from_snapshot_id, fromSnapshot.id);
   const toSnapshotId = textValue(relation.to_snapshot_id, toSnapshot.id);
   if (fromSnapshotId !== fromSnapshot.id || toSnapshotId !== toSnapshot.id) return null;
+  const freshness = freshnessValue(relation.freshness);
+  const fromChanged = relation.from_changed;
+  const toChanged = relation.to_changed;
+  const checkpointAt = textValue(relation.inspection_checkpoint_at);
+  if (
+    !freshness
+    || typeof fromChanged !== 'boolean'
+    || typeof toChanged !== 'boolean'
+    || !checkpointAt
+  ) return null;
+  const expectedFreshness: RelationFreshness = fromChanged && toChanged
+    ? 'both_changed'
+    : fromChanged
+      ? 'from_changed'
+      : toChanged
+        ? 'to_changed'
+        : 'fresh';
+  if (freshness !== expectedFreshness) return null;
+  const latestAssessment = normalizeAssessment(relation.latest_assessment);
+  if (relation.latest_assessment !== null && relation.latest_assessment !== undefined && !latestAssessment) {
+    return null;
+  }
+  const userId = textValue(relation.user_id);
+  if (
+    latestAssessment
+    && (latestAssessment.relation_id !== id || latestAssessment.user_id !== userId)
+  ) return null;
 
   return {
     id,
-    user_id: textValue(relation.user_id),
+    user_id: userId,
     from_item_id: fromItemId,
     to_item_id: toItemId,
     relation_type: textValue(relation.relation_type),
@@ -131,6 +192,11 @@ export function normalizeRelation(input: unknown): RelationV1 | null {
     created_at: textValue(relation.created_at),
     updated_at: textValue(relation.updated_at),
     affirmed_at: textValue(relation.affirmed_at),
+    freshness,
+    from_changed: fromChanged,
+    to_changed: toChanged,
+    inspection_checkpoint_at: checkpointAt,
+    latest_assessment: latestAssessment,
     from_snapshot: fromSnapshot,
     to_snapshot: toSnapshot,
     from_item: fromItem,

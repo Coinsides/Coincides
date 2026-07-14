@@ -595,6 +595,8 @@ export const itemListQuerySchema = z.object({
   status: z.enum(['active', 'retired', 'all']).optional(),
   origin_course_id: contentGroupRuntimeIdSchema.optional(),
   origin_note_id: contentGroupRuntimeIdSchema.optional(),
+  q: z.string().max(240).optional(),
+  limit: z.coerce.number().int().min(1).max(200).optional(),
 }).strict();
 
 const purposeMemberSchema = z.object({
