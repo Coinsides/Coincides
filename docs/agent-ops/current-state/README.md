@@ -15,11 +15,11 @@ Read before any non-trivial work, together with `PRODUCT.md`, `../DOCUMENTATION-
 
 ## 1. Main line & version
 
-> **2026-07-11 authoritative override:** V2.BN.8 Canvas Engine is closed, V2.BN.9 Purpose Foundation is complete, and the V2.BN.10 Source Floor is engineering-complete. V2.BN.10.1–10.5 are implemented and pass automated engineering gates; the combined V2.BN.10.4 + 10.5 third-party browser journey remains pending, so V2.BN.10 is not yet fully closed. Older lines that route directly from 8.11 to ContentGroup projection are stale.
+> **2026-07-13 authoritative override:** V2.BN.8 Canvas Engine is closed, V2.BN.9 Purpose Foundation is complete, V2.BN.10 Source Floor is engineering-complete, and V2.BN.11 is the active construction line. V2.BN.11.1–11.3.1 are engineering-complete; V2.BN.11.3 established the first usable Item lifecycle / human-claiming vertical slice and V2.BN.11.3.1 closed its R1-R4 conditional-PASS fixes. Independent re-review is pending before V2.BN.11.4 begins.
 
 - **Main-line branch**: `codex/v2-bn-canvas-engine` ("Better Notebook" line). Fastest-moving and the real main line — not a side branch, not "finish-then-merge-back".
 - **Version system**: `V2.BN.x`. The old `v2.0–v2.5.6` line is a **closed engineering-foundation roadmap** (`docs/Coincides-Roadmap.md`); some of its product philosophy is outdated (notably **block-first**, now replaced by **TextFlow-first / ContentGroup-aware**).
-- **Current frontier**: combined `V2.BN.10.4 + 10.5` Source experience / lifecycle browser closure gate（工程实现已完成；在 handoff 返回结论前不伪写成 V2.BN.10 fully closed）。
+- **Current frontier**: `V2.BN.11.3.1` engineering-complete and awaiting independent re-review; after that gate, the next implementation slice is `V2.BN.11.4` Purpose Item Membership And Compiled Scope.
 - Roadmap: `docs/Coincides-Better-Notebook-Roadmap.md`.
 
 ## 2. Tech snapshot
@@ -47,8 +47,9 @@ Strict dependency order. **Do not work on a later pillar before the earlier ones
 - **Typography baseline complete (V2.BN.8.10)**: font family, size, line height, paragraph spacing, shared measurement estimates, and a selection mini-toolbar exist. Rich selected-range styling, measured Word-like pagination, and a frozen TextFlow contract remain later.
 
 ### Pillar 2 — ContentGroup
-- **Stable (V2.BN.8.7 result)**: core entity layer `ContentGroup / GroupFolder / Member / Petal / Fragment` (frontend + backend tables + `/api/content-groups`); three surfaces — **Rail = collect**, **Gallery = organize**, **Single Editor = refine**. Stable enough to support projection work.
+- **Historical V2.BN.8.7 baseline (superseded in V2.BN.11.1)**: the entity layer once included `ContentGroup / GroupFolder / Member / Petal / Fragment` and the three surfaces **Rail = collect**, **Gallery = organize**, **Single Editor = refine**. Petal / Fragment are no longer current entities; the next line is authoritative for the active model.
 - **V2.BN.11 拍定（2026-07-13 记）**: **Petal / Fragment 精修层退役** — `V2.BN.11.1` 代码手术停止产生新数据（client 模型/CRUD/Single Editor 花瓣入口 → server hydrate/replace/prune）,migration 047 删除三张支持表（034 全家:fragments / petals / petal_fragments）。ContentGroup 的新定位 = **Item（独立知识卡）的捆绑/组织方式**;`content_group_members` 增 `item_id` 成员类（原子包 B）、`purpose_members` 增 `member_kind='item'`（原子包 A）。权威:概念设计 v1.1 + `docs/releases/V2.BN.11-plan.md`。
+- **V2.BN.11.3 + 11.3.1 engineering-complete（2026-07-13）**: Item CRUD / retire / active-successor、Snapshot、ContentGroup-scoped Anchor pool、单 Anchor 快铸与多 Anchor 融铸已经形成首条可用纵切；Rail 提供最小人工入口，Package B 只挂 Item identity，不复制 Item 正文。fresh / legacy 数据库的 Item member 索引形状一致，相同正文重存复用 Snapshot；真实浏览器旅程和 224 条 server V2 测试已通过，第三方复验尚未签收。
 - **Still growing**: the set of item kinds that can be added to a group is still increasing.
 - **Deferred**: projection onto canvas; reuse UI (reference / duplicate / fork / materialize); full Source integration. Current routing places these after Source and Relation foundations rather than immediately after V2.BN.8.
 

@@ -29,7 +29,7 @@
 
 - **主线分支**:`codex/v2-bn-canvas-engine`(即 "Better Notebook" 线)。这是进度最快、且真正的主线。
 - **版本号体系**:`V2.BN.x`。旧的 `v2.0–v2.5.6` 已是**已关闭的工程地基路线图**(`Coincides-Roadmap.md`),其部分产品哲学(如 block-first)已过时。
-- **当前前沿**:`V2.BN.10.4 + 10.5` Source 联合浏览器 / 对抗收口门。V2.BN.8 Canvas Engine 已封版，V2.BN.9 Purpose Foundation 已完成，V2.BN.10.1–10.5 均已工程实现并通过自动化门；联合浏览器回执尚未返回，因此 V2.BN.10 仍不能标记为 fully closed。
+- **当前前沿**:`V2.BN.11.3.1` Item Lifecycle review fixes 已工程完成、待第三方复验；复验通过后的下一施工片是 `V2.BN.11.4` Purpose Item Membership And Compiled Scope。V2.BN.8 Canvas Engine 已封版，V2.BN.9 Purpose Foundation 已完成，V2.BN.10 Source Floor 已工程完成。
 - 路线图:`docs/Coincides-Better-Notebook-Roadmap.md`。
 
 ## 4. 四大支柱与当前状态(摘要;**权威细节见 `current-state/`**)
@@ -37,11 +37,11 @@
 依赖顺序严格,后者未到位前不动:
 
 1. **TextFlow** —— 内容真相。核心可用，Typography 基线已在 V2.BN.8.10 落地；完整契约仍未冻结。
-2. **ContentGroup** —— 知识结构真相。核心实体层(ContentGroup / GroupFolder / Member / Petal / Fragment)已稳定；projection / reuse UI / Source 完整集成顺延到 Source 与 Relation 地基之后。
+2. **ContentGroup / Item** —— Item 是独立知识真相，ContentGroup 是 Item 的捆绑 / 组织方式；Petal / Fragment 精修层已在 V2.BN.11.1 退役。V2.BN.11.3 已落地 Item 生命周期、Snapshot、Anchor pool、人工铸卡与 Package B 最小入口。
 3. **Canvas Engine** —— 空间/布局真相。V2.BN.8 自研最小混合引擎与普通对象家族已工程封版(见 ADR-0001)，后续成熟度工作按路线图继续。
 4. **Agent + Graph Database** —— **未开始**,前三支柱稳定前不碰。
 
-当前横切地基：**Source**。V2.BN.10.1 已建立四层身份脊柱与 Home / receipt 接缝，10.2 已完成真实文件 intake 与存储补偿，10.3 已完成 transient SourceArtifact、parser claim/retry、原子 SourceProjection 发布、写守卫与 legacy scanner 隔离；10.4 已实现共享 Source Library / Project Sources、状态感知打开、认证原件双开与显式 SourceProjection 锁；10.5 已完成 Project 动态删除、move-to-Home、Source quarantine hard delete、receipt 降级、文件清理重试与 lifecycle registry。当前只剩 10.4 + 10.5 联合浏览器真实旅程未签收。
+当前横切地基：**Item + Relation truth**。V2.BN.11.1 已退役 Petal / Fragment 与 legacy Relation writers，11.2 + 11.2.1 已落地 migration 047 与 Package B，11.3 已完成首条人工认领 Item 纵切；下一步是 11.4 Purpose Item membership 与 compiled scope。V2.BN.10 Source Floor 的联合第三方体验签收仍是独立待办，不应倒退当前施工前线。
 
 ## 5. 当前生效的决策 (active ADR)
 
