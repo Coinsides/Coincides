@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State
-> **日期 (Updated)**: 2026-07-13
+> **日期 (Updated)**: 2026-07-14
 > **权威 (Authoritative)**: 是 / Yes
 > **取代 (Supersedes)**: —
 > **被取代 (Superseded by)**: —
@@ -15,11 +15,11 @@ Read before any non-trivial work, together with `PRODUCT.md`, `../DOCUMENTATION-
 
 ## 1. Main line & version
 
-> **2026-07-13 authoritative override:** V2.BN.8 Canvas Engine is closed, V2.BN.9 Purpose Foundation is complete, V2.BN.10 Source Floor is engineering-complete, and V2.BN.11 is the active construction line. V2.BN.11.1–11.4 are complete and have passed independent re-review. V2.BN.11.5 has engineering-completed Item-only Relation commands, dual-Snapshot judgment receipts, and no-graph read APIs; independent review is pending before V2.BN.11.6 begins.
+> **2026-07-14 authoritative override:** V2.BN.8 Canvas Engine is closed, V2.BN.9 Purpose Foundation is complete, V2.BN.10 Source Floor is engineering-complete, and V2.BN.11 is the active construction line. V2.BN.11.1–11.5 are complete and have passed independent re-review. V2.BN.11.6 has engineering-completed read-time mechanical freshness, latest-assessment checkpoints, user-global active Item search, and the Item Inspector Relation maintenance surface; independent review is pending before V2.BN.11.7 begins.
 
 - **Main-line branch**: `codex/v2-bn-canvas-engine` ("Better Notebook" line). Fastest-moving and the real main line — not a side branch, not "finish-then-merge-back".
 - **Version system**: `V2.BN.x`. The old `v2.0–v2.5.6` line is a **closed engineering-foundation roadmap** (`docs/Coincides-Roadmap.md`); some of its product philosophy is outdated (notably **block-first**, now replaced by **TextFlow-first / ContentGroup-aware**).
-- **Current frontier**: `V2.BN.11.5` engineering-complete and awaiting independent review; after that gate, the next implementation slice is `V2.BN.11.6` Mechanical Freshness And Relation Inspector.
+- **Current frontier**: `V2.BN.11.6` engineering-complete and awaiting independent review; `V2.BN.11.7` is blocked until that gate returns PASS.
 - Roadmap: `docs/Coincides-Better-Notebook-Roadmap.md`.
 
 ## 2. Tech snapshot
@@ -51,7 +51,8 @@ Strict dependency order. **Do not work on a later pillar before the earlier ones
 - **V2.BN.11 拍定（2026-07-13 记）**: **Petal / Fragment 精修层退役** — `V2.BN.11.1` 代码手术停止产生新数据（client 模型/CRUD/Single Editor 花瓣入口 → server hydrate/replace/prune）,migration 047 删除三张支持表（034 全家:fragments / petals / petal_fragments）。ContentGroup 的新定位 = **Item（独立知识卡）的捆绑/组织方式**;`content_group_members` 增 `item_id` 成员类（原子包 B）、`purpose_members` 增 `member_kind='item'`（原子包 A）。权威:概念设计 v1.1 + `docs/releases/V2.BN.11-plan.md`。
 - **V2.BN.11.3 + 11.3.1 complete and independently re-reviewed（2026-07-13）**: Item CRUD / retire / active-successor、Snapshot、ContentGroup-scoped Anchor pool、单 Anchor 快铸与多 Anchor 融铸已经形成首条可用纵切；Rail 提供最小人工入口，Package B 只挂 Item identity，不复制 Item 正文。fresh / legacy 数据库的 Item member 索引形状一致，相同正文重存复用 Snapshot；真实浏览器旅程和 review-fix gates 已通过。
 - **V2.BN.11.4 complete + independent PASS（2026-07-13）**: `purpose_members` 的直接成员支持 `content_group | item`；Item edge 可增删、排序并保存 role / fitness。deleted / missing ContentGroup 与 retired / missing Item 使用统一 hidden-edge recovery，stale pre-retirement payload 不会误删或改写历史边。Purpose compiled scope 在读时汇总 direct 与 ContentGroup-derived active Item，按身份去重、保留来源路径且不反写；Purpose-bounded Item search 已为后续 Relation Inspector 留出入口。
-- **V2.BN.11.5 engineering-complete（2026-07-13; independent review pending）**: 九个 seed Relation type 的 directionality 由 server registry 拥有；Relation create/get/list/revoke/reaffirm、Item/Purpose-scope 无图读取、双 Snapshot 判断收据与 assessment 历史读取兼容已经落地。新边只接受同用户 active Item，无向边规范序、单 active、self-loop 与 receipt 归属由 service + DB 共同背书；`origin_purpose_id` 只作出处收据。235 条 server V2 测试、59 组 model contract、总 runtime gate 与隔离 HTTP smoke 已通过。机械新鲜度与 Inspector 属于 11.6。
+- **V2.BN.11.5 complete + independent PASS（2026-07-14）**: 九个 seed Relation type 的 directionality 由 server registry 拥有；Relation create/get/list/revoke/reaffirm、Item/Purpose-scope 无图读取、双 Snapshot 判断收据与 assessment 历史读取兼容已经落地。新边只接受同用户 active Item，无向边规范序、单 active、self-loop 与 receipt 归属由 service + DB 共同背书；`origin_purpose_id` 只作出处收据。第三方唯一 LOW（directed 同向重复 409 缺专项断言）已随 11.6 补齐。
+- **V2.BN.11.6 engineering-complete（2026-07-14; independent review pending）**: Relation 四态 `fresh / from_changed / to_changed / both_changed` 只比较当前 Item canonical `plain_text` hash 与判断 Snapshot hash，在每次读取时派生；latest assessment 只贡献 checkpoint，不覆盖 hash 事实。用户级 active Item 搜索与 Item Inspector active Relation 列表、directed 相对方向、create/reaffirm/revoke 已接通；retired endpoint 可读可撤销但不可重申。无 freshness/sync 持久列、后台 sweep、队列、Snapshot/diff/history 面板或图谱 UI。237 条 server V2 测试、60 组 model contract、总 runtime gate 与隔离浏览器 smoke 已通过。
 - **Still growing**: the set of item kinds that can be added to a group is still increasing.
 - **Deferred**: projection onto canvas; reuse UI (reference / duplicate / fork / materialize); full Source integration. Current routing places these after Source and Relation foundations rather than immediately after V2.BN.8.
 
@@ -83,7 +84,7 @@ Strict dependency order. **Do not work on a later pillar before the earlier ones
 ## 4. Watch list (known open items, not necessarily defects)
 
 - **Source closure gate** — 10.4/10.5 expose the durable Source states and deletion lifecycles through shared client models; third-party browser review must still verify real file journeys, authenticated blob opening, cross-Project dedup visibility, SourceProjection lock, Project dynamic delete defaults, move-to-Home preservation, Source hard-delete warnings, and Console/Network cleanliness.
-- **V2.BN.11.5 independent review gate** — verify seed directionality, undirected canonical order, one-active history, endpoint/receipt ownership, four-point reaffirm rollback, Purpose-scope endpoint presence, origin receipt non-applicability, assessment no-invalidation compatibility, and API surface before starting V2.BN.11.6.
+- **V2.BN.11.6 independent review gate** — verify four-state hash derivation, formatting-only stability, latest-assessment checkpoint non-authority, reaffirm-to-fresh, user-scoped global Item search, retired-endpoint action rules, active-only Inspector behavior, and the absence of sync columns, freshness pumps, queues, or graph UI before starting V2.BN.11.7.
 - **TextFlow Typography** — baseline exists, but rich inline style truth and measured pagination remain unfrozen.
 - **Contract layer** — most `docs/contracts/` files are `draft` / `deferred`; do not treat them as authoritative until marked `frozen`.
 - **UI-mode growth** (Page / Canvas / ContentGroup / Gallery / Rail / Editor) — growing but currently controlled.
