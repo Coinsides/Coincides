@@ -565,9 +565,9 @@ export function useNoteCanvasDataAdapter({
     }
   }, [addToast, groupFolders, note]);
 
-  const savePurposeFrames = useCallback(async (nextPurposes: PurposeFrameV1[]) => {
+  const savePurposeFrames = useCallback(async (nextPurposes: PurposeFrameV1[]): Promise<boolean> => {
     const currentNote = noteRef.current || note;
-    if (!currentNote) return;
+    if (!currentNote) return false;
     const previousPurposes = purposeFrames;
     const saveGeneration = purposeFrameSaveGenerationRef.current + 1;
     purposeFrameSaveGenerationRef.current = saveGeneration;
@@ -577,13 +577,16 @@ export function useNoteCanvasDataAdapter({
         noteId: currentNote.id,
         purposes: nextPurposes,
       });
-      if (purposeFrameSaveGenerationRef.current !== saveGeneration) return;
+      if (purposeFrameSaveGenerationRef.current !== saveGeneration) return true;
       setPurposeFrames(savedPurposes);
+      return true;
     } catch (err) {
       console.error('Failed to save purposes:', err);
       addToast('error', 'Failed to save purpose');
-      if (purposeFrameSaveGenerationRef.current !== saveGeneration) return;
-      setPurposeFrames(previousPurposes);
+      if (purposeFrameSaveGenerationRef.current === saveGeneration) {
+        setPurposeFrames(previousPurposes);
+      }
+      return false;
     }
   }, [addToast, note, purposeFrames]);
 

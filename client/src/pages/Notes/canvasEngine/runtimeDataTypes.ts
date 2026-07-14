@@ -305,7 +305,7 @@ export interface ItemV1 {
 
 export type PurposeStatus = 'active' | 'archived';
 export type PurposeCreatedBy = 'human' | 'ai' | 'system' | 'ai_proposal' | 'importer';
-export type PurposeMemberKind = 'content_group';
+export type PurposeMemberKind = 'content_group' | 'item';
 
 export interface PurposeMemberV1 {
   id: string;
@@ -335,6 +335,53 @@ export interface PurposeFrameV1 {
   metadata?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
+}
+
+export type PurposeCompiledMembershipKind = 'direct' | 'derived' | 'direct_and_derived';
+
+export interface PurposeCompiledItemPathV1 {
+  kind: 'direct' | 'content_group';
+  purpose_member_id: string;
+  role: string | null;
+  fitness: string;
+  order_index: number;
+  content_group_id: string | null;
+  content_group_title: string | null;
+  content_group_member_id: string | null;
+  content_group_order_index: number | null;
+}
+
+export interface PurposeScopedItemV1 {
+  id: string;
+  body_json: Record<string, unknown>;
+  plain_text: string;
+  item_type: string | null;
+  topic: string | null;
+  status: ItemStatus;
+  retired_into_item_id: string | null;
+  origin_course_id: string | null;
+  origin_note_id: string | null;
+  created_by: string;
+  metadata: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PurposeCompiledItemV1 {
+  item: PurposeScopedItemV1;
+  direct: boolean;
+  derived: boolean;
+  membership_kind: PurposeCompiledMembershipKind;
+  paths: PurposeCompiledItemPathV1[];
+}
+
+export interface PurposeCompiledScopeV1 {
+  purpose_id: string;
+  note_id: string | null;
+  project_id: string | null;
+  query?: string;
+  items: PurposeCompiledItemV1[];
+  total: number;
 }
 
 export interface GroupFolderScopeV1 {

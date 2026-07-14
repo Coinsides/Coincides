@@ -589,18 +589,18 @@ export const castItemSchema = z.object({
 export const itemPoolQuerySchema = z.object({
   pool_scope_kind: z.literal('content_group'),
   pool_scope_id: contentGroupRuntimeIdSchema,
-});
+}).strict();
 
 export const itemListQuerySchema = z.object({
   status: z.enum(['active', 'retired', 'all']).optional(),
   origin_course_id: contentGroupRuntimeIdSchema.optional(),
   origin_note_id: contentGroupRuntimeIdSchema.optional(),
-});
+}).strict();
 
 const purposeMemberSchema = z.object({
   id: contentGroupRuntimeIdSchema.optional(),
   purpose_id: contentGroupRuntimeIdSchema.optional(),
-  member_kind: z.enum(['content_group']).optional(),
+  member_kind: z.enum(['content_group', 'item']).optional(),
   member_id: contentGroupRuntimeIdSchema,
   role: z.string().max(160).nullable().optional(),
   fitness: z.string().max(160).optional(),
@@ -629,7 +629,12 @@ const purposeSchema = z.object({
 
 export const replaceNotePurposesSchema = z.object({
   purposes: z.array(purposeSchema).max(100),
-});
+}).strict();
+
+export const purposeItemSearchQuerySchema = z.object({
+  q: z.string().max(240).optional(),
+  limit: z.coerce.number().int().min(1).max(200).optional(),
+}).strict();
 
 export const importNoteMetadataContentGroupsSchema = z.object({
   note_id: z.string().uuid('Invalid note ID'),

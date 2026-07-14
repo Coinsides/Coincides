@@ -31,6 +31,7 @@ import type {
   AnnotationTruthV1,
   ContentGroupV1,
   GroupFolderV1,
+  PurposeFrameV1,
   SourceAnchor,
   NoteBlock,
   TextBlockContentV1,
@@ -219,6 +220,7 @@ export interface NoteWritingSurfaceLayerProps {
   annotationTruths: AnnotationTruthV1[];
   contentGroups: ContentGroupV1[];
   groupFolders: GroupFolderV1[];
+  purposeFrames: PurposeFrameV1[];
   blockFieldDrafts: Record<string, FieldValueRecord>;
   blockLayouts: Record<string, BlockBoxLayout>;
   blockListRef: RefObject<HTMLDivElement>;
@@ -288,6 +290,7 @@ export interface NoteWritingSurfaceLayerProps {
   onSaveContentGroups: (groups: ContentGroupV1[]) => Promise<boolean | void>;
   onSaveDocumentTypographyProfile: (profile: DocumentTypographyProfile) => void | Promise<void>;
   onSaveGroupFolders: (folders: GroupFolderV1[]) => Promise<void>;
+  onSavePurposeFrames: (purposes: PurposeFrameV1[]) => Promise<boolean | void>;
   onActivateDraft: (layout?: BlockBoxLayout) => void;
   onBeginMoveBlock: (event: ReactPointerEvent<HTMLElement>, block: NoteBlock, layout: BlockBoxLayout) => void;
   onBeginResizeBlock: (event: ReactPointerEvent<HTMLElement>, block: NoteBlock, text: string, layout: BlockBoxLayout) => void;
@@ -479,6 +482,7 @@ export function NoteWritingSurfaceLayer({
   annotationTruths,
   contentGroups,
   groupFolders,
+  purposeFrames,
   blockFieldDrafts,
   blockLayouts,
   blockListRef,
@@ -526,6 +530,7 @@ export function NoteWritingSurfaceLayer({
   onSaveContentGroups,
   onSaveDocumentTypographyProfile,
   onSaveGroupFolders,
+  onSavePurposeFrames,
   onActivateDraft,
   onBeginMoveBlock,
   onBeginResizeBlock,
@@ -3897,6 +3902,7 @@ export function NoteWritingSurfaceLayer({
           annotations={annotationTruths}
           contentGroups={contentGroups}
           groupFolders={groupFolders}
+          purposeFrames={purposeFrames}
           blocks={visibleBlocks}
           selectedAnnotationIds={selectedAnnotationIds}
           draftRanges={draftAnnotationRanges}
@@ -3907,6 +3913,7 @@ export function NoteWritingSurfaceLayer({
           onClose={() => setContentGroupPanelOpen(false)}
           onSaveContentGroups={onSaveContentGroups}
           onSaveGroupFolders={onSaveGroupFolders}
+          onSavePurposeFrames={onSavePurposeFrames}
         />
       )}
     </section>

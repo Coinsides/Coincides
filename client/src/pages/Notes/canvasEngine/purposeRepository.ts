@@ -1,9 +1,11 @@
 import api from '@/services/api';
 import {
+  normalizePurposeCompiledScope,
   normalizePurposeFrames,
 } from './purposeService';
 import type {
   Note,
+  PurposeCompiledScopeV1,
   PurposeFrameV1,
 } from './runtimeDataTypes';
 
@@ -31,4 +33,18 @@ export async function savePurposeFramesForNote(input: {
     purposes: normalized,
   });
   return responsePurposes(response.data);
+}
+
+export async function loadPurposeCompiledScope(input: {
+  purposeId: string;
+  query?: string;
+  limit?: number;
+}): Promise<PurposeCompiledScopeV1> {
+  const response = await api.get(`/purposes/${input.purposeId}/compiled-scope`, {
+    params: {
+      ...(input.query?.trim() ? { q: input.query.trim() } : {}),
+      ...(Number.isFinite(input.limit) ? { limit: input.limit } : {}),
+    },
+  });
+  return normalizePurposeCompiledScope(response.data || {});
 }

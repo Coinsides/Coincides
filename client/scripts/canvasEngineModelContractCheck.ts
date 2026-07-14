@@ -328,8 +328,12 @@ import {
   plainTextFromContentGroupDragPayload,
 } from '../src/pages/Notes/canvasEngine/contentGroupDragService';
 import {
+  movePurposeMember,
+  normalizePurposeCompiledScope,
   normalizePurposeFrames,
+  removePurposeItemMember,
   purposeRoleForContentGroup,
+  upsertPurposeItemMember,
   upsertDefaultPurposeRoleForContentGroup,
 } from '../src/pages/Notes/canvasEngine/purposeService';
 import {
@@ -4959,6 +4963,123 @@ function testPurposeFrameContract(): void {
     }).draft_knowledge_candidates[0]?.role,
     'exam_review',
     'AI-readable ContentGroup projection reads role from Purpose edge',
+  );
+
+  const itemPurpose = normalizePurposeFrames([{
+    ...purposes[0],
+    members: [{
+      id: 'purpose-contract-item-edge',
+      purpose_id: purposes[0]!.id,
+      member_kind: 'item',
+      member_id: 'item-purpose-contract',
+      role: 'direct_evidence',
+      fitness: 'high',
+      order_index: 0,
+      metadata: {},
+      created_at: '2026-07-13T00:00:00.000Z',
+      updated_at: '2026-07-13T00:00:00.000Z',
+    }],
+  }]);
+  assertEqual(
+    itemPurpose[0]?.members[0]?.member_kind,
+    'item',
+    'Purpose client normalizer preserves Item membership kind',
+  );
+
+  const withSecondItem = upsertPurposeItemMember({
+    purpose: itemPurpose[0]!,
+    itemId: 'item-purpose-contract-2',
+    role: 'exam_example',
+    fitness: 'medium',
+  });
+  const updatedFirstItem = upsertPurposeItemMember({
+    purpose: withSecondItem,
+    itemId: 'item-purpose-contract',
+    role: 'core_definition',
+    fitness: 'essential',
+  });
+  assertEqual(updatedFirstItem.members.length, 2, 'Purpose Item upsert does not duplicate existing Item edges');
+  assertEqual(updatedFirstItem.members[0]?.role, 'core_definition', 'Purpose Item role updates on the direct edge');
+  assertEqual(updatedFirstItem.members[0]?.fitness, 'essential', 'Purpose Item fitness updates on the direct edge');
+
+  const moved = movePurposeMember({
+    purpose: updatedFirstItem,
+    memberId: 'item-purpose-contract-2',
+    direction: 'up',
+  });
+  assertEqual(moved.members[0]?.member_id, 'item-purpose-contract-2', 'Purpose member reorder updates edge order');
+  assertEqual(moved.members[0]?.order_index, 0, 'Purpose member reorder normalizes first order index');
+  assertEqual(moved.members[1]?.order_index, 1, 'Purpose member reorder normalizes second order index');
+
+  const removed = removePurposeItemMember({
+    purpose: moved,
+    itemId: 'item-purpose-contract',
+  });
+  assertEqual(removed.members.length, 1, 'Purpose Item removal deletes only the selected direct edge');
+  assertEqual(removed.members[0]?.member_id, 'item-purpose-contract-2', 'Purpose Item removal preserves other members');
+
+  const compiled = normalizePurposeCompiledScope({
+    purpose_id: purposes[0]!.id,
+    note_id: 'note-purpose',
+    project_id: 'project-purpose',
+    items: [{
+      item: {
+        id: 'item-purpose-contract',
+        body_json: { type: 'text', text: 'Compiled Item' },
+        plain_text: 'Compiled Item',
+        item_type: 'definition',
+        topic: 'Power Series',
+        status: 'active',
+        retired_into_item_id: null,
+        origin_course_id: 'project-purpose',
+        origin_note_id: 'note-purpose',
+        created_by: 'human',
+        metadata: {},
+        created_at: '2026-07-13T00:00:00.000Z',
+        updated_at: '2026-07-13T00:00:00.000Z',
+      },
+      direct: true,
+      derived: true,
+      membership_kind: 'direct',
+      paths: [{
+        kind: 'direct',
+        purpose_member_id: 'purpose-contract-item-edge',
+        role: 'core_definition',
+        fitness: 'essential',
+        order_index: 0,
+        content_group_id: null,
+        content_group_title: null,
+        content_group_member_id: null,
+        content_group_order_index: null,
+      }],
+    }, {
+      item: {
+        id: 'item-purpose-retired',
+        body_json: {},
+        plain_text: 'Retired Item',
+        item_type: null,
+        topic: null,
+        status: 'retired',
+        retired_into_item_id: null,
+        origin_course_id: null,
+        origin_note_id: null,
+        created_by: 'human',
+        metadata: {},
+        created_at: '2026-07-13T00:00:00.000Z',
+        updated_at: '2026-07-13T00:00:00.000Z',
+      },
+      direct: true,
+      derived: false,
+      membership_kind: 'direct',
+      paths: [],
+    }],
+    total: 2,
+  });
+  assertEqual(compiled.items.length, 1, 'Purpose compiled client scope excludes retired Items defensively');
+  assertEqual(
+    compiled.items[0]?.membership_kind,
+    'direct_and_derived',
+    'Purpose compiled membership kind follows direct and derived path facts',
   );
 }
 

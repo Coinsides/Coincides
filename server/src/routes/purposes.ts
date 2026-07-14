@@ -2,8 +2,16 @@ import { Router, Response } from 'express';
 import { ZodError } from 'zod';
 import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
-import { listNotePurposes, replaceNotePurposes } from '../services/purposes.js';
-import { replaceNotePurposesSchema } from '../validators/index.js';
+import {
+  getPurposeCompiledScope,
+  listNotePurposes,
+  replaceNotePurposes,
+  searchPurposeItems,
+} from '../services/purposes.js';
+import {
+  purposeItemSearchQuerySchema,
+  replaceNotePurposesSchema,
+} from '../validators/index.js';
 
 const router = Router();
 
@@ -32,6 +40,23 @@ router.put('/by-note/:noteId', (req: AuthRequest, res: Response) => {
         data.purposes,
       ),
     });
+  } catch (err) {
+    if (handleValidationError(err, res)) return;
+    throw err;
+  }
+});
+
+router.get('/:purposeId/compiled-scope', (req: AuthRequest, res: Response) => {
+  try {
+    const query = purposeItemSearchQuerySchema.parse(req.query);
+    const purposeId = String(req.params.purposeId);
+    const scope = query.q || query.limit
+      ? searchPurposeItems(getDb(), req.userId!, purposeId, {
+          query: query.q,
+          limit: query.limit,
+        })
+      : getPurposeCompiledScope(getDb(), req.userId!, purposeId);
+    res.json(scope);
   } catch (err) {
     if (handleValidationError(err, res)) return;
     throw err;

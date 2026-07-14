@@ -11,9 +11,16 @@ import {
   upsertContentGroup,
 } from '../services/contentGroups.js';
 import {
+  getPurposeCompiledScope,
   listNotePurposes,
   replaceNotePurposes,
+  searchPurposeItems,
 } from '../services/purposes.js';
+import {
+  createItem,
+  retireItem,
+} from '../services/items.js';
+import { replaceNotePurposesSchema } from '../validators/index.js';
 
 async function withDb(run: (db: Awaited<ReturnType<typeof initDb>>) => void | Promise<void>) {
   const dir = mkdtempSync(join(tmpdir(), 'coincides-purposes-'));
@@ -301,5 +308,303 @@ test('deleting a purpose does not delete its ContentGroup, and note trash/restor
     assert.equal(listNotePurposes(db, userId, noteId).length, 1);
     db.prepare("UPDATE notes SET status = 'active' WHERE id = ?").run(noteId);
     assert.equal(listNotePurposes(db, userId, noteId).length, 1);
+  });
+});
+
+test('V2.BN.11.4 Package A validates and roundtrips direct Item members without washing their kind', async () => {
+  await withDb((db) => {
+    const { userId, courseId, noteId } = seedUserCourseNote(db);
+    const first = createItem(db, userId, {
+      plain_text: 'The radius of convergence bounds the interval of convergence.',
+      item_type: 'definition',
+      topic: 'Power series',
+      origin_course_id: courseId,
+      origin_note_id: noteId,
+    });
+    const second = createItem(db, userId, {
+      plain_text: 'Check both endpoints after applying the ratio test.',
+      item_type: 'procedure',
+      topic: 'Endpoint checks',
+      origin_course_id: courseId,
+      origin_note_id: noteId,
+    });
+
+    const payload = replaceNotePurposesSchema.parse({
+      purposes: [{
+        id: 'purpose-package-a',
+        title: 'Exam review',
+        is_note_default: true,
+        members: [{
+          id: 'purpose-item-first',
+          member_kind: 'item',
+          member_id: first.id,
+          role: 'core_definition',
+          fitness: 'high',
+          order_index: 4,
+        }, {
+          id: 'purpose-item-second',
+          member_kind: 'item',
+          member_id: second.id,
+          role: 'checklist',
+          fitness: 'medium',
+          order_index: 8,
+        }],
+      }],
+    });
+    const replaced = replaceNotePurposes(db, userId, noteId, payload.purposes);
+
+    assert.deepEqual(
+      replaced[0]?.members.map((member: any) => [member.member_kind, member.member_id, member.role, member.fitness]),
+      [
+        ['item', first.id, 'core_definition', 'high'],
+        ['item', second.id, 'checklist', 'medium'],
+      ],
+    );
+
+    const reordered = replaceNotePurposes(db, userId, noteId, [{
+      ...replaced[0],
+      members: [{
+        ...replaced[0]!.members[1],
+        role: 'exam_action',
+        fitness: 'essential',
+        order_index: 0,
+      }],
+    }]);
+    assert.deepEqual(
+      reordered[0]?.members.map((member: any) => [member.member_id, member.role, member.fitness, member.order_index]),
+      [[second.id, 'exam_action', 'essential', 0]],
+    );
+    const rawFirst = db.prepare('SELECT COUNT(*) AS count FROM purpose_members WHERE member_id = ?')
+      .get(first.id) as { count: number };
+    assert.equal(rawFirst.count, 0, 'omitting an active direct Item intentionally removes its edge');
+  });
+});
+
+test('V2.BN.11.4 full replacement preserves filtered retired and missing Item edges', async () => {
+  await withDb((db) => {
+    const { userId, courseId, noteId } = seedUserCourseNote(db);
+    const retired = createItem(db, userId, {
+      plain_text: 'A historical Item that should remain recoverable.',
+      origin_course_id: courseId,
+      origin_note_id: noteId,
+    });
+    replaceNotePurposes(db, userId, noteId, [{
+      id: 'purpose-hidden-items',
+      title: 'Hidden Item recovery',
+      is_note_default: true,
+      members: [{
+        id: 'purpose-member-retired-item',
+        member_kind: 'item',
+        member_id: retired.id,
+        role: 'historical_evidence',
+        fitness: 'medium',
+        order_index: 7,
+      }],
+    }]);
+    retireItem(db, userId, retired.id, {});
+    db.prepare(`
+      INSERT INTO purpose_members (
+        id, user_id, purpose_id, member_kind, member_id,
+        role, fitness, order_index, metadata, created_at, updated_at
+      ) VALUES (?, ?, ?, 'item', ?, ?, ?, ?, '{}', datetime('now'), datetime('now'))
+    `).run(
+      'purpose-member-missing-item',
+      userId,
+      'purpose-hidden-items',
+      'item-that-no-longer-exists',
+      'lost_evidence',
+      'unknown',
+      11,
+    );
+
+    const filtered = listNotePurposes(db, userId, noteId);
+    assert.equal(filtered[0]?.members.length, 0);
+    replaceNotePurposes(db, userId, noteId, filtered);
+
+    const recovered = db.prepare(`
+      SELECT id, member_id, role, fitness, order_index
+      FROM purpose_members
+      WHERE purpose_id = ? AND member_kind = 'item'
+      ORDER BY order_index ASC
+    `).all('purpose-hidden-items') as Array<Record<string, unknown>>;
+    assert.deepEqual(recovered, [{
+      id: 'purpose-member-retired-item',
+      member_id: retired.id,
+      role: 'historical_evidence',
+      fitness: 'medium',
+      order_index: 7,
+    }, {
+      id: 'purpose-member-missing-item',
+      member_id: 'item-that-no-longer-exists',
+      role: 'lost_evidence',
+      fitness: 'unknown',
+      order_index: 11,
+    }]);
+  });
+});
+
+test('V2.BN.11.4 stale pre-retirement payload cannot kill or rewrite a newly hidden Item edge', async () => {
+  await withDb((db) => {
+    const { userId, courseId, noteId } = seedUserCourseNote(db);
+    const item = createItem(db, userId, {
+      plain_text: 'This Item is about to become historical.',
+      origin_course_id: courseId,
+      origin_note_id: noteId,
+    });
+    const stalePayload = replaceNotePurposes(db, userId, noteId, [{
+      id: 'purpose-stale-client',
+      title: 'Stale client contract',
+      is_note_default: true,
+      members: [{
+        id: 'purpose-stale-item-edge',
+        member_kind: 'item',
+        member_id: item.id,
+        role: 'original_role',
+        fitness: 'high',
+        order_index: 3,
+      }],
+    }]);
+    retireItem(db, userId, item.id, {});
+
+    stalePayload[0]!.members[0]!.role = 'stale_client_rewrite';
+    stalePayload[0]!.members[0]!.fitness = 'low';
+    replaceNotePurposes(db, userId, noteId, stalePayload);
+
+    const raw = db.prepare(`
+      SELECT id, role, fitness, order_index
+      FROM purpose_members
+      WHERE purpose_id = ? AND member_kind = 'item' AND member_id = ?
+    `).get('purpose-stale-client', item.id) as Record<string, unknown>;
+    assert.deepEqual(raw, {
+      id: 'purpose-stale-item-edge',
+      role: 'original_role',
+      fitness: 'high',
+      order_index: 3,
+    });
+  });
+});
+
+test('V2.BN.11.4 rejects new retired and cross-user direct Item memberships', async () => {
+  await withDb((db) => {
+    const firstOwner = seedUserCourseNote(db);
+    const secondOwner = seedUserCourseNote(db);
+    const retired = createItem(db, firstOwner.userId, {
+      plain_text: 'Retired before Purpose membership.',
+      origin_course_id: firstOwner.courseId,
+      origin_note_id: firstOwner.noteId,
+    });
+    const foreign = createItem(db, secondOwner.userId, {
+      plain_text: 'Owned by a different user.',
+      origin_course_id: secondOwner.courseId,
+      origin_note_id: secondOwner.noteId,
+    });
+    retireItem(db, firstOwner.userId, retired.id, {});
+
+    for (const itemId of [retired.id, foreign.id]) {
+      assert.throws(() => replaceNotePurposes(db, firstOwner.userId, firstOwner.noteId, [{
+        id: `purpose-reject-${itemId}`,
+        title: 'Rejected Item edge',
+        is_note_default: true,
+        members: [{ member_kind: 'item', member_id: itemId }],
+      }]));
+    }
+  });
+});
+
+test('V2.BN.11.4 compiled scope de-dupes direct and derived Items, explains paths, and never persists derivation', async () => {
+  await withDb((db) => {
+    const { userId, courseId, noteId } = seedUserCourseNote(db);
+    const shared = createItem(db, userId, {
+      plain_text: 'A power series is centered at a chosen expansion point.',
+      item_type: 'definition',
+      topic: 'Power series',
+      origin_course_id: courseId,
+      origin_note_id: noteId,
+    });
+    const derivedOnly = createItem(db, userId, {
+      plain_text: 'The ratio test yields the radius before endpoint checks.',
+      item_type: 'procedure',
+      topic: 'Convergence',
+      origin_course_id: courseId,
+      origin_note_id: noteId,
+    });
+    const firstGroup = upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Definitions', {
+      id: 'purpose-compiled-group-a',
+      members: [{ id: 'group-a-shared', kind: 'item', item_id: shared.id }],
+    }));
+    const secondGroup = upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Procedures', {
+      id: 'purpose-compiled-group-b',
+      members: [
+        { id: 'group-b-shared', kind: 'item', item_id: shared.id },
+        { id: 'group-b-derived', kind: 'item', item_id: derivedOnly.id },
+      ],
+    }));
+    replaceNotePurposes(db, userId, noteId, [{
+      id: 'purpose-compiled-scope',
+      title: 'Final review',
+      is_note_default: true,
+      members: [{
+        id: 'purpose-direct-shared',
+        member_kind: 'item',
+        member_id: shared.id,
+        role: 'anchor',
+        fitness: 'high',
+      }, {
+        id: 'purpose-group-a',
+        member_kind: 'content_group',
+        member_id: firstGroup.id,
+        role: 'definitions',
+        fitness: 'high',
+      }, {
+        id: 'purpose-group-b',
+        member_kind: 'content_group',
+        member_id: secondGroup.id,
+        role: 'procedures',
+        fitness: 'medium',
+      }],
+    }]);
+    const persistedBefore = db.prepare('SELECT COUNT(*) AS count FROM purpose_members WHERE purpose_id = ?')
+      .get('purpose-compiled-scope') as { count: number };
+
+    const scope = getPurposeCompiledScope(db, userId, 'purpose-compiled-scope');
+    assert.equal(scope.items.length, 2);
+    const sharedProjection = scope.items.find((entry: any) => entry.item.id === shared.id);
+    const derivedProjection = scope.items.find((entry: any) => entry.item.id === derivedOnly.id);
+    assert.equal(sharedProjection?.membership_kind, 'direct_and_derived');
+    assert.equal(sharedProjection?.direct, true);
+    assert.equal(sharedProjection?.derived, true);
+    assert.deepEqual(
+      sharedProjection?.paths.map((path: any) => [path.kind, path.content_group_id || null]),
+      [['direct', null], ['content_group', firstGroup.id], ['content_group', secondGroup.id]],
+    );
+    assert.equal(derivedProjection?.membership_kind, 'derived');
+    assert.deepEqual(derivedProjection?.paths.map((path: any) => path.content_group_id), [secondGroup.id]);
+
+    const search = searchPurposeItems(db, userId, 'purpose-compiled-scope', {
+      query: 'ratio convergence',
+      limit: 10,
+    });
+    assert.deepEqual(search.items.map((entry: any) => entry.item.id), [derivedOnly.id]);
+    const persistedAfterRead = db.prepare('SELECT COUNT(*) AS count FROM purpose_members WHERE purpose_id = ?')
+      .get('purpose-compiled-scope') as { count: number };
+    assert.equal(persistedAfterRead.count, persistedBefore.count);
+    assert.equal(persistedAfterRead.count, 3, 'derived Item paths never become purpose_members rows');
+
+    upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Procedures', {
+      id: secondGroup.id,
+      members: [{ id: 'group-b-shared', kind: 'item', item_id: shared.id }],
+    }));
+    const afterGroupChange = getPurposeCompiledScope(db, userId, 'purpose-compiled-scope');
+    assert.deepEqual(afterGroupChange.items.map((entry: any) => entry.item.id), [shared.id]);
+
+    retireItem(db, userId, shared.id, {});
+    const afterRetire = getPurposeCompiledScope(db, userId, 'purpose-compiled-scope');
+    assert.equal(afterRetire.items.length, 0);
+    const rawDirectEdge = db.prepare(`
+      SELECT COUNT(*) AS count
+      FROM purpose_members
+      WHERE purpose_id = ? AND member_kind = 'item' AND member_id = ?
+    `).get('purpose-compiled-scope', shared.id) as { count: number };
+    assert.equal(rawDirectEdge.count, 1);
   });
 });
