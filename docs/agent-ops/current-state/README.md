@@ -15,11 +15,11 @@ Read before any non-trivial work, together with `PRODUCT.md`, `../DOCUMENTATION-
 
 ## 1. Main line & version
 
-> **2026-07-13 authoritative override:** V2.BN.8 Canvas Engine is closed, V2.BN.9 Purpose Foundation is complete, V2.BN.10 Source Floor is engineering-complete, and V2.BN.11 is the active construction line. V2.BN.11.1–11.3.1 are complete and have passed independent re-review. V2.BN.11.4 has engineering-completed Purpose direct Item membership, an active-only compiled scope, and Purpose-bounded Item search; independent review is pending before V2.BN.11.5 begins.
+> **2026-07-13 authoritative override:** V2.BN.8 Canvas Engine is closed, V2.BN.9 Purpose Foundation is complete, V2.BN.10 Source Floor is engineering-complete, and V2.BN.11 is the active construction line. V2.BN.11.1–11.4 are complete and have passed independent re-review. V2.BN.11.5 has engineering-completed Item-only Relation commands, dual-Snapshot judgment receipts, and no-graph read APIs; independent review is pending before V2.BN.11.6 begins.
 
 - **Main-line branch**: `codex/v2-bn-canvas-engine` ("Better Notebook" line). Fastest-moving and the real main line — not a side branch, not "finish-then-merge-back".
 - **Version system**: `V2.BN.x`. The old `v2.0–v2.5.6` line is a **closed engineering-foundation roadmap** (`docs/Coincides-Roadmap.md`); some of its product philosophy is outdated (notably **block-first**, now replaced by **TextFlow-first / ContentGroup-aware**).
-- **Current frontier**: `V2.BN.11.4` engineering-complete and awaiting independent review; after that gate, the next implementation slice is `V2.BN.11.5` Relation Truth And Judgment Receipts.
+- **Current frontier**: `V2.BN.11.5` engineering-complete and awaiting independent review; after that gate, the next implementation slice is `V2.BN.11.6` Mechanical Freshness And Relation Inspector.
 - Roadmap: `docs/Coincides-Better-Notebook-Roadmap.md`.
 
 ## 2. Tech snapshot
@@ -50,7 +50,8 @@ Strict dependency order. **Do not work on a later pillar before the earlier ones
 - **Historical V2.BN.8.7 baseline (superseded in V2.BN.11.1)**: the entity layer once included `ContentGroup / GroupFolder / Member / Petal / Fragment` and the three surfaces **Rail = collect**, **Gallery = organize**, **Single Editor = refine**. Petal / Fragment are no longer current entities; the next line is authoritative for the active model.
 - **V2.BN.11 拍定（2026-07-13 记）**: **Petal / Fragment 精修层退役** — `V2.BN.11.1` 代码手术停止产生新数据（client 模型/CRUD/Single Editor 花瓣入口 → server hydrate/replace/prune）,migration 047 删除三张支持表（034 全家:fragments / petals / petal_fragments）。ContentGroup 的新定位 = **Item（独立知识卡）的捆绑/组织方式**;`content_group_members` 增 `item_id` 成员类（原子包 B）、`purpose_members` 增 `member_kind='item'`（原子包 A）。权威:概念设计 v1.1 + `docs/releases/V2.BN.11-plan.md`。
 - **V2.BN.11.3 + 11.3.1 complete and independently re-reviewed（2026-07-13）**: Item CRUD / retire / active-successor、Snapshot、ContentGroup-scoped Anchor pool、单 Anchor 快铸与多 Anchor 融铸已经形成首条可用纵切；Rail 提供最小人工入口，Package B 只挂 Item identity，不复制 Item 正文。fresh / legacy 数据库的 Item member 索引形状一致，相同正文重存复用 Snapshot；真实浏览器旅程和 review-fix gates 已通过。
-- **V2.BN.11.4 engineering-complete（2026-07-13; independent review pending）**: `purpose_members` 的直接成员支持 `content_group | item`；Item edge 可增删、排序并保存 role / fitness。deleted / missing ContentGroup 与 retired / missing Item 使用统一 hidden-edge recovery，stale pre-retirement payload 不会误删或改写历史边。Purpose compiled scope 在读时汇总 direct 与 ContentGroup-derived active Item，按身份去重、保留来源路径且不反写；Purpose-bounded Item search 已为后续 Relation Inspector 留出入口。Item Inspector 的最小 membership 浏览器旅程与 229 条 server V2 测试已通过。
+- **V2.BN.11.4 complete + independent PASS（2026-07-13）**: `purpose_members` 的直接成员支持 `content_group | item`；Item edge 可增删、排序并保存 role / fitness。deleted / missing ContentGroup 与 retired / missing Item 使用统一 hidden-edge recovery，stale pre-retirement payload 不会误删或改写历史边。Purpose compiled scope 在读时汇总 direct 与 ContentGroup-derived active Item，按身份去重、保留来源路径且不反写；Purpose-bounded Item search 已为后续 Relation Inspector 留出入口。
+- **V2.BN.11.5 engineering-complete（2026-07-13; independent review pending）**: 九个 seed Relation type 的 directionality 由 server registry 拥有；Relation create/get/list/revoke/reaffirm、Item/Purpose-scope 无图读取、双 Snapshot 判断收据与 assessment 历史读取兼容已经落地。新边只接受同用户 active Item，无向边规范序、单 active、self-loop 与 receipt 归属由 service + DB 共同背书；`origin_purpose_id` 只作出处收据。235 条 server V2 测试、59 组 model contract、总 runtime gate 与隔离 HTTP smoke 已通过。机械新鲜度与 Inspector 属于 11.6。
 - **Still growing**: the set of item kinds that can be added to a group is still increasing.
 - **Deferred**: projection onto canvas; reuse UI (reference / duplicate / fork / materialize); full Source integration. Current routing places these after Source and Relation foundations rather than immediately after V2.BN.8.
 
@@ -76,13 +77,13 @@ Strict dependency order. **Do not work on a later pillar before the earlier ones
 ### Pillar 4 — Agent + Graph Database
 - **Not started** on the v2/BN line. The embedding pipeline is intentionally disconnected; relation runtime / GraphRAG are not yet timely.
 - **但注意（2026-07-13）**: **V2.BN.11 Item + Relation 真相层已进入施工线**（概念设计 v1.1 判断点 a–k 全拍;plan 七纵切已审 PASS）——端点=Item、判断收据（快照对）、机械新鲜度读时派生。这是**知识真相层**,不是本柱的图谱运行时/GraphRAG（后者仍属 Agent 时代,sidecar 教义不变）。
-- **V2.BN.11.4 读模型边界**: Purpose compiled scope 只是一份 Purpose-bounded Item 候选集与来源解释，不是 Relation runtime、Graph layout 或 GraphRAG 索引；派生结果不持久化。
+- **V2.BN.11.5 Relation 边界**: Purpose compiled scope 只是一份 Purpose-bounded Item 候选集；Relation list 要求双端都在该圈内，但 origin Purpose 不构成 applicability truth。当前只有 SQLite Relation 真相与无图读取 API，不是 Relation runtime、Graph layout 或 GraphRAG 索引。
 - Do **not** build toward this pillar until pillars 1–3 are stable.
 
 ## 4. Watch list (known open items, not necessarily defects)
 
 - **Source closure gate** — 10.4/10.5 expose the durable Source states and deletion lifecycles through shared client models; third-party browser review must still verify real file journeys, authenticated blob opening, cross-Project dedup visibility, SourceProjection lock, Project dynamic delete defaults, move-to-Home preservation, Source hard-delete warnings, and Console/Network cleanliness.
-- **V2.BN.11.4 independent review gate** — verify `content_group | item` member roundtrip, hidden retired Item recovery, stale payload protection, compiled-scope de-duplication and source paths, derived zero-persistence, cross-user rejection, and Item Inspector save / rollback behavior before starting V2.BN.11.5.
+- **V2.BN.11.5 independent review gate** — verify seed directionality, undirected canonical order, one-active history, endpoint/receipt ownership, four-point reaffirm rollback, Purpose-scope endpoint presence, origin receipt non-applicability, assessment no-invalidation compatibility, and API surface before starting V2.BN.11.6.
 - **TextFlow Typography** — baseline exists, but rich inline style truth and measured pagination remain unfrozen.
 - **Contract layer** — most `docs/contracts/` files are `draft` / `deferred`; do not treat them as authoritative until marked `frozen`.
 - **UI-mode growth** (Page / Canvas / ContentGroup / Gallery / Rail / Editor) — growing but currently controlled.
