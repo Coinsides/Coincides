@@ -310,23 +310,24 @@ function sourceBehaviorForTemplate(template: NoteBlockTemplateDefinition): Recor
 
 function relationBehaviorForTemplate(template: NoteBlockTemplateDefinition): Record<string, unknown> {
   const roleRelations: Record<string, string[]> = {
-    definition: ['uses_definition'],
-    formula: ['uses_formula', 'derives_to'],
-    example: ['example_of', 'supports'],
-    exercise: ['answers', 'read_before'],
-    answer: ['answers'],
-    source: ['source_supports', 'supports'],
+    definition: ['depends_on', 'equivalent_to'],
+    formula: ['derives_to', 'depends_on'],
+    example: ['supports', 'analogous_to'],
+    exercise: ['depends_on'],
+    answer: ['supports'],
+    source: ['supports'],
     proof: ['supports', 'derives_to'],
-    theorem: ['uses_definition', 'uses_formula', 'read_before'],
-    concept: ['supports', 'read_before'],
-    warning: ['read_before'],
-    note: ['read_before', 'supports'],
+    theorem: ['depends_on', 'supports'],
+    concept: ['analogous_to', 'equivalent_to'],
+    warning: ['contradicts', 'depends_on'],
+    note: ['supports', 'analogous_to'],
   };
   return {
-    can_be_relation_source: true,
-    can_be_relation_target: true,
-    allowed_relation_types: roleRelations[template.learning_role] || ['supports'],
-    relation_truth_owner: 'object_relations',
+    can_be_relation_source: false,
+    can_be_relation_target: false,
+    relation_endpoint_requires_item: true,
+    suggested_item_relation_types: roleRelations[template.learning_role] || ['supports'],
+    relation_truth_owner: 'items/relations',
   };
 }
 

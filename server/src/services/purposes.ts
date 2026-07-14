@@ -345,6 +345,38 @@ export function replaceNotePurposes(
 
   return db.transaction(() => {
     const now = new Date().toISOString();
+    const existingPurposes = db.prepare(`
+      SELECT *
+      FROM purposes
+      WHERE user_id = ? AND note_id = ?
+    `).all(userId, note.id) as PurposeRow[];
+    const existingPurposeById = new Map(existingPurposes.map((purpose) => [purpose.id, purpose]));
+    const seenPurposeIds = new Set<string>();
+    const normalizedPurposes = purposes.map((purpose, purposeIndex) => {
+      const purposeId = cleanText(purpose.id, `purpose-${uuidv4()}`);
+      if (seenPurposeIds.has(purposeId)) {
+        throw new AppError(400, 'Duplicate Purpose id in replacement payload');
+      }
+      seenPurposeIds.add(purposeId);
+
+      const claimedIdentity = db.prepare(`
+        SELECT user_id, note_id
+        FROM purposes
+        WHERE id = ?
+      `).get(purposeId) as { user_id: string; note_id: string | null } | undefined;
+      if (
+        claimedIdentity
+        && (claimedIdentity.user_id !== userId || claimedIdentity.note_id !== note.id)
+      ) {
+        throw new AppError(409, 'Purpose id already belongs to another owner or Note');
+      }
+
+      return {
+        input: purpose,
+        purposeId,
+        isDefault: purpose.is_note_default === true || (defaultCount === 0 && purposeIndex === 0),
+      };
+    });
     const hiddenEdges = db.prepare(`
       SELECT pm.*
       FROM purpose_members pm
@@ -369,34 +401,71 @@ export function replaceNotePurposes(
     const hiddenEdgeKeys = new Set(hiddenEdges.map((edge) => (
       `${edge.purpose_id}:${edge.member_kind}:${edge.member_id}`
     )));
-    const survivingPurposeIds = new Set<string>();
+    const hiddenEdgesByPurpose = new Map<string, PurposeMemberRow[]>();
+    for (const edge of hiddenEdges) {
+      const purposeEdges = hiddenEdgesByPurpose.get(edge.purpose_id) || [];
+      purposeEdges.push(edge);
+      hiddenEdgesByPurpose.set(edge.purpose_id, purposeEdges);
+    }
 
-    db.prepare('DELETE FROM purposes WHERE user_id = ? AND note_id = ?').run(userId, note.id);
+    // Release the partial unique index before assigning the replacement default.
+    db.prepare(`
+      UPDATE purposes
+      SET is_note_default = 0
+      WHERE user_id = ? AND note_id = ? AND is_note_default = 1
+    `).run(userId, note.id);
 
-    purposes.forEach((purpose, purposeIndex) => {
-      const purposeId = cleanText(purpose.id, `purpose-${uuidv4()}`);
-      survivingPurposeIds.add(purposeId);
-      db.prepare(`
-        INSERT INTO purposes (
-          id, user_id, course_id, note_id, title, intent, scope_note,
-          status, is_note_default, created_by, metadata, created_at, updated_at
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        purposeId,
-        userId,
-        note.course_id,
-        note.id,
-        cleanText(purpose.title, 'Untitled purpose'),
-        optionalText(purpose.intent),
-        optionalText(purpose.scope_note),
-        normalizeStatus(purpose.status),
-        purpose.is_note_default === true ? 1 : 0,
-        normalizeCreatedBy(purpose.created_by),
-        stringifyJson(purpose.metadata, {}),
-        typeof purpose.created_at === 'string' ? purpose.created_at : now,
-        typeof purpose.updated_at === 'string' ? purpose.updated_at : now,
-      );
+    for (const normalized of normalizedPurposes) {
+      const { input: purpose, purposeId, isDefault } = normalized;
+      const existingPurpose = existingPurposeById.get(purposeId);
+      const updatedAt = typeof purpose.updated_at === 'string' ? purpose.updated_at : now;
+      if (existingPurpose) {
+        db.prepare(`
+          UPDATE purposes
+          SET course_id = ?, note_id = ?, title = ?, intent = ?, scope_note = ?,
+              status = ?, is_note_default = ?, created_by = ?, metadata = ?, updated_at = ?
+          WHERE id = ? AND user_id = ? AND note_id = ?
+        `).run(
+          note.course_id,
+          note.id,
+          cleanText(purpose.title, 'Untitled purpose'),
+          optionalText(purpose.intent),
+          optionalText(purpose.scope_note),
+          normalizeStatus(purpose.status),
+          isDefault ? 1 : 0,
+          normalizeCreatedBy(purpose.created_by),
+          stringifyJson(purpose.metadata, {}),
+          updatedAt,
+          purposeId,
+          userId,
+          note.id,
+        );
+      } else {
+        db.prepare(`
+          INSERT INTO purposes (
+            id, user_id, course_id, note_id, title, intent, scope_note,
+            status, is_note_default, created_by, metadata, created_at, updated_at
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          purposeId,
+          userId,
+          note.course_id,
+          note.id,
+          cleanText(purpose.title, 'Untitled purpose'),
+          optionalText(purpose.intent),
+          optionalText(purpose.scope_note),
+          normalizeStatus(purpose.status),
+          isDefault ? 1 : 0,
+          normalizeCreatedBy(purpose.created_by),
+          stringifyJson(purpose.metadata, {}),
+          typeof purpose.created_at === 'string' ? purpose.created_at : now,
+          updatedAt,
+        );
+      }
+
+      db.prepare('DELETE FROM purpose_members WHERE user_id = ? AND purpose_id = ?')
+        .run(userId, purposeId);
 
       const seen = new Set<string>();
       const members = Array.isArray(purpose.members) ? purpose.members : [];
@@ -410,37 +479,37 @@ export function replaceNotePurposes(
         insertPurposeMember(db, userId, purposeId, member, memberIndex, now);
       });
 
-      if (purpose.is_note_default !== true && defaultCount === 0 && purposeIndex === 0) {
-        db.prepare('UPDATE purposes SET is_note_default = 1, updated_at = ? WHERE id = ? AND user_id = ?')
-          .run(now, purposeId, userId);
+      for (const edge of hiddenEdgesByPurpose.get(purposeId) || []) {
+        db.prepare(`
+          INSERT OR IGNORE INTO purpose_members (
+            id, user_id, purpose_id, member_kind, member_id,
+            role, fitness, order_index, metadata, created_at, updated_at
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          edge.id,
+          userId,
+          edge.purpose_id,
+          edge.member_kind,
+          edge.member_id,
+          edge.role,
+          edge.fitness,
+          edge.order_index,
+          edge.metadata,
+          edge.created_at,
+          now,
+        );
       }
-    });
+    }
+
+    for (const existingPurpose of existingPurposes) {
+      if (seenPurposeIds.has(existingPurpose.id)) continue;
+      db.prepare('DELETE FROM purposes WHERE id = ? AND user_id = ? AND note_id = ?')
+        .run(existingPurpose.id, userId, note.id);
+    }
 
     if (purposes.length === 0) {
       ensureNoteDefaultPurposeWithinTransaction(db, userId, note);
-    }
-
-    for (const edge of hiddenEdges) {
-      if (!survivingPurposeIds.has(edge.purpose_id)) continue;
-      db.prepare(`
-        INSERT OR IGNORE INTO purpose_members (
-          id, user_id, purpose_id, member_kind, member_id,
-          role, fitness, order_index, metadata, created_at, updated_at
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        edge.id,
-        userId,
-        edge.purpose_id,
-        edge.member_kind,
-        edge.member_id,
-        edge.role,
-        edge.fitness,
-        edge.order_index,
-        edge.metadata,
-        edge.created_at,
-        now,
-      );
     }
 
     db.prepare('UPDATE notes SET updated_at = ? WHERE id = ? AND user_id = ?')

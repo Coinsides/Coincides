@@ -71,6 +71,41 @@ assertAbsent('server legacy Learning Canvas route mounts', serverIndex, [
   "app.use('/api/object-relations'",
 ]);
 
+for (const legacyRoute of [
+  '../server/src/routes/learningCanvases.ts',
+  '../server/src/routes/canvasNodes.ts',
+  '../server/src/routes/canvasEdges.ts',
+  '../server/src/routes/relationLayers.ts',
+  '../server/src/routes/objectRelations.ts',
+]) {
+  if (existsSync(resolve(root, legacyRoute))) {
+    throw new Error(`legacy Learning Canvas route still exists: ${legacyRoute}`);
+  }
+}
+
+const learningCanvasService = read('../server/src/services/learningCanvases.ts');
+assertAbsent('active learning canvas service retired Relation branches', learningCanvasService, [
+  'canvas_edges',
+  'relation_layers',
+  'object_relations',
+  'getCanvasCommandContext',
+  'getLearningCanvasDetail',
+  'listCanvasEdges',
+  'listRelationLayers',
+  'listObjectRelations',
+  'bindCanvasEdgeRelation',
+  'unbindCanvasEdgeRelation',
+]);
+
+const activeRelationMetadata = [
+  '../server/src/services/templateDefinitions.ts',
+  '../server/src/services/templateMigrationProposals.ts',
+].map(read).join('\n');
+assertAbsent('active server Relation metadata', activeRelationMetadata, [
+  'object_relations',
+  'ObjectRelations',
+]);
+
 const proposalRoutes = read('../server/src/routes/proposals.ts');
 assertAbsent('legacy Learning Canvas proposal writers', proposalRoutes, [
   "router.post('/canvas-layout'",

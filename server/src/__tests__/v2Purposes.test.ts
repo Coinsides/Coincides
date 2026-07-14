@@ -18,8 +18,13 @@ import {
 } from '../services/purposes.js';
 import {
   createItem,
+  getItem,
   retireItem,
 } from '../services/items.js';
+import {
+  createRelation,
+  getRelation,
+} from '../services/relations.js';
 import { replaceNotePurposesSchema } from '../validators/index.js';
 
 async function withDb(run: (db: Awaited<ReturnType<typeof initDb>>) => void | Promise<void>) {
@@ -199,6 +204,122 @@ test('replaceNotePurposes roundtrips purpose members and de-dupes duplicate cont
     assert.equal(replaced[0]?.members[0]?.role, 'definition');
     assert.equal(replaced[0]?.members[0]?.fitness, 'high');
     assert.deepEqual(replaced[0]?.metadata, { source: 'test' });
+  });
+});
+
+test('V2.BN.11.7 replacing a surviving Purpose preserves Relation origin receipt identity', async () => {
+  await withDb((db) => {
+    const { userId, noteId } = seedUserCourseNote(db);
+    const first = createItem(db, userId, { plain_text: 'Purpose receipt first endpoint' });
+    const second = createItem(db, userId, { plain_text: 'Purpose receipt second endpoint' });
+    const purposeId = 'purpose-stable-relation-receipt';
+
+    replaceNotePurposes(db, userId, noteId, [{
+      id: purposeId,
+      title: 'Original purpose title',
+      is_note_default: true,
+      members: [],
+    }]);
+    const relation = createRelation(db, userId, {
+      from_item_id: first.id,
+      to_item_id: second.id,
+      relation_type: 'supports',
+      origin_purpose_id: purposeId,
+    });
+    assert.equal(relation.origin_purpose_id, purposeId);
+
+    replaceNotePurposes(db, userId, noteId, [{
+      id: purposeId,
+      title: 'Renamed without replacing identity',
+      is_note_default: true,
+      members: [],
+    }]);
+
+    assert.equal(getRelation(db, userId, relation.id).origin_purpose_id, purposeId);
+  });
+});
+
+test('V2.BN.11.7 omitting a Purpose deletes organization edges and honestly degrades Relation origin', async () => {
+  await withDb((db) => {
+    const { userId, noteId } = seedUserCourseNote(db);
+    const first = createItem(db, userId, { plain_text: 'Purpose deletion first endpoint' });
+    const second = createItem(db, userId, { plain_text: 'Purpose deletion second endpoint' });
+    const removedPurposeId = 'purpose-removed-from-replacement';
+
+    replaceNotePurposes(db, userId, noteId, [{
+      id: removedPurposeId,
+      title: 'Purpose that will be removed',
+      is_note_default: true,
+      members: [{
+        id: 'purpose-member-that-will-be-removed',
+        member_kind: 'item',
+        member_id: first.id,
+      }],
+    }]);
+    const relation = createRelation(db, userId, {
+      from_item_id: first.id,
+      to_item_id: second.id,
+      relation_type: 'supports',
+      origin_purpose_id: removedPurposeId,
+    });
+
+    replaceNotePurposes(db, userId, noteId, [{
+      id: 'purpose-surviving-replacement',
+      title: 'Surviving purpose',
+      is_note_default: true,
+      members: [],
+    }]);
+
+    assert.equal(db.prepare('SELECT id FROM purposes WHERE id = ?').get(removedPurposeId), undefined);
+    assert.equal(
+      db.prepare('SELECT id FROM purpose_members WHERE purpose_id = ?').get(removedPurposeId),
+      undefined,
+    );
+    assert.equal(getItem(db, userId, first.id).id, first.id);
+    assert.equal(getItem(db, userId, second.id).id, second.id);
+    assert.equal(getRelation(db, userId, relation.id).origin_purpose_id, null);
+  });
+});
+
+test('V2.BN.11.7 Purpose replacement cannot claim an id from another Note or user', async () => {
+  await withDb((db) => {
+    const owner = seedUserCourseNote(db);
+    const otherNoteId = uuidv4();
+    db.prepare('INSERT INTO notes (id, user_id, course_id, title, metadata) VALUES (?, ?, ?, ?, ?)')
+      .run(otherNoteId, owner.userId, owner.courseId, 'Other owner note', '{}');
+    replaceNotePurposes(db, owner.userId, otherNoteId, [{
+      id: 'purpose-owned-by-other-note',
+      title: 'Other note purpose',
+      is_note_default: true,
+      members: [],
+    }]);
+
+    assert.throws(
+      () => replaceNotePurposes(db, owner.userId, owner.noteId, [{
+        id: 'purpose-owned-by-other-note',
+        title: 'Attempted same-user Note claim',
+        is_note_default: true,
+        members: [],
+      }]),
+      /another owner or Note/i,
+    );
+
+    const foreign = seedUserCourseNote(db);
+    replaceNotePurposes(db, foreign.userId, foreign.noteId, [{
+      id: 'purpose-owned-by-other-user',
+      title: 'Foreign purpose',
+      is_note_default: true,
+      members: [],
+    }]);
+    assert.throws(
+      () => replaceNotePurposes(db, owner.userId, owner.noteId, [{
+        id: 'purpose-owned-by-other-user',
+        title: 'Attempted cross-user claim',
+        is_note_default: true,
+        members: [],
+      }]),
+      /another owner or Note/i,
+    );
   });
 });
 

@@ -327,8 +327,8 @@ export function createTemplateMigrationProposal(
       existing_blocks: affectedBlocks.length,
     },
     relation_impact: {
-      object_relations_modified: 0,
-      note: 'Template migration does not create or rewrite ObjectRelations in v2.5.4.',
+      relations_modified: 0,
+      note: 'Template migration does not create or rewrite Item Relations in V2.BN.11.',
     },
     render_impact: {
       legacy_block_type_before: source.legacy_block_type,
