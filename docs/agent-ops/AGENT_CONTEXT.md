@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(Agent 入口)
-> **日期 (Updated)**: 2026-07-11
+> **日期 (Updated)**: 2026-07-13
 > **权威 (Authoritative)**: 是(作为"该看哪里"的路由);具体事实以各来源为准
 > **取代 (Supersedes)**: —
 > **被取代 (Superseded by)**: —
@@ -29,7 +29,7 @@
 
 - **主线分支**:`codex/v2-bn-canvas-engine`(即 "Better Notebook" 线)。这是进度最快、且真正的主线。
 - **版本号体系**:`V2.BN.x`。旧的 `v2.0–v2.5.6` 已是**已关闭的工程地基路线图**(`Coincides-Roadmap.md`),其部分产品哲学(如 block-first)已过时。
-- **当前前沿**:`V2.BN.11.3.1` Item Lifecycle review fixes 已工程完成、待第三方复验；复验通过后的下一施工片是 `V2.BN.11.4` Purpose Item Membership And Compiled Scope。V2.BN.8 Canvas Engine 已封版，V2.BN.9 Purpose Foundation 已完成，V2.BN.10 Source Floor 已工程完成。
+- **当前前沿**:`V2.BN.11.3.1` 已通过第三方复验；`V2.BN.11.4` Purpose Item Membership And Compiled Scope 已工程完成、待第三方复验。复验通过后的下一施工片是 `V2.BN.11.5` Relation Truth And Judgment Receipts。V2.BN.8 Canvas Engine 已封版，V2.BN.9 Purpose Foundation 已完成，V2.BN.10 Source Floor 已工程完成。
 - 路线图:`docs/Coincides-Better-Notebook-Roadmap.md`。
 
 ## 4. 四大支柱与当前状态(摘要;**权威细节见 `current-state/`**)
@@ -37,11 +37,11 @@
 依赖顺序严格,后者未到位前不动:
 
 1. **TextFlow** —— 内容真相。核心可用，Typography 基线已在 V2.BN.8.10 落地；完整契约仍未冻结。
-2. **ContentGroup / Item** —— Item 是独立知识真相，ContentGroup 是 Item 的捆绑 / 组织方式；Petal / Fragment 精修层已在 V2.BN.11.1 退役。V2.BN.11.3 已落地 Item 生命周期、Snapshot、Anchor pool、人工铸卡与 Package B 最小入口。
+2. **ContentGroup / Item** —— Item 是独立知识真相，ContentGroup 是 Item 的捆绑 / 组织方式；Petal / Fragment 精修层已在 V2.BN.11.1 退役。V2.BN.11.3 已落地 Item 生命周期、Snapshot、Anchor pool、人工铸卡与 Package B 最小入口；V2.BN.11.4 已把 Item 接入 Purpose direct membership，并建立 active-only、来源可解释且不反写的 compiled scope。
 3. **Canvas Engine** —— 空间/布局真相。V2.BN.8 自研最小混合引擎与普通对象家族已工程封版(见 ADR-0001)，后续成熟度工作按路线图继续。
 4. **Agent + Graph Database** —— **未开始**,前三支柱稳定前不碰。
 
-当前横切地基：**Item + Relation truth**。V2.BN.11.1 已退役 Petal / Fragment 与 legacy Relation writers，11.2 + 11.2.1 已落地 migration 047 与 Package B，11.3 已完成首条人工认领 Item 纵切；下一步是 11.4 Purpose Item membership 与 compiled scope。V2.BN.10 Source Floor 的联合第三方体验签收仍是独立待办，不应倒退当前施工前线。
+当前横切地基：**Item + Relation truth**。V2.BN.11.1 已退役 Petal / Fragment 与 legacy Relation writers，11.2 + 11.2.1 已落地 migration 047 与 Package B，11.3 + 11.3.1 已完成首条人工认领 Item 纵切并通过第三方复验；11.4 已完成 Purpose Item membership、compiled scope 与 Purpose-bounded Item search，正等待第三方复验。通过后进入 11.5 Relation truth，而不是提前建设图谱运行时。V2.BN.10 Source Floor 的联合第三方体验签收仍是独立待办，不应倒退当前施工前线。
 
 ## 5. 当前生效的决策 (active ADR)
 
