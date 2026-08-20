@@ -20,13 +20,27 @@ import { fileURLToPath } from 'node:url';
 const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 // 目标文档层目录(相对 repo root)。每个目录会生成一个 INDEX.md。
+// 条目可以是字符串(递归扫描),或 { dir, recursive: false }(只扫本层,不下钻)。
+// 2026-08-19 扩容:补入 docs 根级 + internal / workflow / continuity —— 此前这四处
+// 不受"看状态头再信"纪律覆盖(29 份文档无状态头、不进任何 INDEX)。
+// `docs` 必须非递归:它下面挂着 brainstorm(164)/releases(450),递归会生成 733 行的巨表。
 const TARGET_DIRS = [
+  { dir: 'docs', recursive: false },
   'docs/agent-ops',
   'docs/agent-ops/decisions',
   'docs/agent-ops/current-state',
   'docs/contracts',
   'docs/brainstorm',
+  'docs/internal',
+  'docs/workflow',
+  'docs/continuity',
 ];
+
+// 把 TARGET_DIRS 条目归一为 { dir, recursive }。
+function normalizeTarget(entry) {
+  if (typeof entry === 'string') return { dir: entry, recursive: true };
+  return { dir: entry.dir, recursive: entry.recursive !== false };
+}
 
 const KNOWN_STATUSES = ['draft', 'active', 'frozen', 'deferred', 'superseded', 'archived'];
 const SKIP_FILES = new Set(['INDEX.md']);
@@ -83,13 +97,14 @@ function parseDoc(absPath) {
 
 // ---- 扫描目录(递归)-----------------------------------------------------
 
-function listMarkdown(dirAbs) {
+function listMarkdown(dirAbs, recursive = true) {
   const out = [];
   for (const name of readdirSync(dirAbs)) {
     const abs = join(dirAbs, name);
     const st = statSync(abs);
-    if (st.isDirectory()) out.push(...listMarkdown(abs));
-    else if (name.endsWith('.md') && !SKIP_FILES.has(name)) out.push(abs);
+    if (st.isDirectory()) {
+      if (recursive) out.push(...listMarkdown(abs, true));
+    } else if (name.endsWith('.md') && !SKIP_FILES.has(name)) out.push(abs);
   }
   return out;
 }
@@ -101,9 +116,9 @@ function shorten(s, n = 60) {
   return s.length > n ? s.slice(0, n - 1) + '…' : s;
 }
 
-function buildIndex(dirRel) {
+function buildIndex(dirRel, recursive = true) {
   const dirAbs = join(REPO_ROOT, dirRel);
-  const files = listMarkdown(dirAbs).sort();
+  const files = listMarkdown(dirAbs, recursive).sort();
   const rows = files.map((abs) => {
     const d = parseDoc(abs);
     const rel = relative(dirAbs, abs).split(sep).join('/');
@@ -124,7 +139,7 @@ function buildIndex(dirRel) {
     '⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**',
     '修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。',
     '',
-    `共 ${files.length} 份文档。`,
+    `共 ${files.length} 份文档${recursive ? '' : '(仅本层,不含子目录)'}。`,
     '',
     '| 文件 | 标题 | 状态 | 更新 | 被取代 |',
     '|------|------|------|------|--------|',
@@ -139,13 +154,14 @@ const checkOnly = process.argv.includes('--check');
 let stale = 0;
 let written = 0;
 
-for (const dirRel of TARGET_DIRS) {
+for (const entry of TARGET_DIRS) {
+  const { dir: dirRel, recursive } = normalizeTarget(entry);
   const dirAbs = join(REPO_ROOT, dirRel);
   if (!existsSync(dirAbs)) {
     console.warn(`skip (不存在): ${dirRel}`);
     continue;
   }
-  const content = buildIndex(dirRel);
+  const content = buildIndex(dirRel, recursive);
   const indexPath = join(dirAbs, 'INDEX.md');
   const current = existsSync(indexPath) ? readFileSync(indexPath, 'utf8') : '';
   // 比较时忽略"日期"行,避免每天都判为过期。

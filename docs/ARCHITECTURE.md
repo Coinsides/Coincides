@@ -1,3 +1,12 @@
+> **状态 (Status)**: draft
+> **层 (Layer)**: 宪法 / Constitution（架构边界；**正文已知脱节**）
+> **日期 (Updated)**: 2026-06-06
+> **权威 (Authoritative)**: 否（2026-08-19 降级；冲突处以 `agent-ops/current-state/` 与方向宪章为准）
+
+> **⚠️ 脱节公告 (2026-08-19)**：本文成于 2026-06-06。已确认失效点：①§4 / §5 通篇沿用 `ObjectRelation` 词汇 —— 旧三表 `object_relations / canvas_edges / relation_layers` 已由 migration 047 落表，**Relation 的唯一 durable endpoint = `Item`**；②§5 Source Reconstruction Adapter 的"入库即重建"前提已被更替为**三层梯子 + 解析按需**（宪章 §3）；③缺「MCP 工具面 / 末端执行器」边界章节，而该边界是 V2.BN.12 必修①。
+>
+> 注意：方向宪章 §2 / §10 仍引用本文 §5.4 的 GraphRAG sidecar 结论 —— **该结论有效，其周边词汇已过时**。盘点见 `docs/agent-ops/analysis/2026-08-20-doc-triage-assessment.md`（冲突 C5 / C6 / C8）。重划待批次二。
+
 # Coincides Architecture
 
 **Updated**: 2026-06-06

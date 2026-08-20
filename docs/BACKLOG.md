@@ -1,3 +1,8 @@
+> **状态 (Status)**: archived
+> **层 (Layer)**: 历史 / History（v1.x backlog 归档 + v2 想法停车场）
+> **日期 (Updated)**: 2026-05-16
+> **权威 (Authoritative)**: 否（文件自述非当前执行追踪器）
+
 # Coincides Backlog
 
 **Status updated**: 2026-05-16  

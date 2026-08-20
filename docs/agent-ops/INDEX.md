@@ -8,11 +8,11 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 73 份文档。
+共 74 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
-| [AGENT_CONTEXT.md](AGENT_CONTEXT.md) | AGENT_CONTEXT —— Agent 开工入口 | `active` | 2026-07-14 | — |
+| [AGENT_CONTEXT.md](AGENT_CONTEXT.md) | AGENT_CONTEXT —— Agent 开工入口 | `active` | 2026-08-19 | — |
 | [DOCUMENTATION-SYSTEM.md](DOCUMENTATION-SYSTEM.md) | Coincides 文档体系 (Documentation System) | `active` | 2026-06-27 | — |
 | [HENRY-PREFERENCES.md](HENRY-PREFERENCES.md) | Henry 的协作偏好 | `active` | 2026-06-27 | — |
 | [README.md](README.md) | agent-ops —— Agent 协同中枢 | `active` | 2026-06-27 | — |
@@ -22,6 +22,7 @@
 | [analysis/2026-07-18-v12-ux-tooling-survey.md](analysis/2026-07-18-v12-ux-tooling-survey.md) | V12 体验侧工具栈调研（2026-07-18) | `active` | 2026-07-18 | — |
 | [analysis/2026-08-07-cloud-server-survey.md](analysis/2026-08-07-cloud-server-survey.md) | 云服务器选型调研(2026-08-07) | `active` | 2026-08-07 | — |
 | [analysis/2026-08-08-econ-note-rebuild-experience-report.md](analysis/2026-08-08-econ-note-rebuild-experience-report.md) | 对照实验:同一份 ECON 讲稿,网页版 vs 应用手搓版(2026-08-08) | `active` | 2026-08-08 | — |
+| [analysis/2026-08-20-doc-triage-assessment.md](analysis/2026-08-20-doc-triage-assessment.md) | 文档分诊评估表 —— 全库对照新宪章 | `active` | 2026-08-19（文件名沿用委托编号 2026-08-20） | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
@@ -51,7 +52,7 @@
 | [claude-log/2026-08-19.md](claude-log/2026-08-19.md) | Claude 行动日志 — 2026-08-19 | `active` | 2026-08-19 | — |
 | [claude-log/README.md](claude-log/README.md) | claude-log —— Claude 行动日志（Henry 的监督轨迹） | `active` | 2026-06-27 | — |
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
-| [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-07-14 | — |
+| [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-19 | — |
 | [decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md](decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md) | ADR-0001: 自研最小混合 Canvas 引擎路线 (Self-owned Minimal Hybrid Can… | `active` | 2026-06-27 | — |
 | [decisions/README.md](decisions/README.md) | 决策层 / Architecture Decision Records (ADR) | `active` | 2026-06-27 | — |
 | [handoffs/2026-06-27-canvas-persistence-cutover.md](handoffs/2026-06-27-canvas-persistence-cutover.md) | Spec：三颗承重持久化种子的 DB 发芽（V2.BN.8.11 收口前的最后实质工作） | `(缺状态头)` | — | — |

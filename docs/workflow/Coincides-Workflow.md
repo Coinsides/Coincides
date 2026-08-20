@@ -1,3 +1,10 @@
+> **状态 (Status)**: superseded
+> **层 (Layer)**: 历史 / History（v2.x 工作流）
+> **日期 (Updated)**: 2026-06-07
+> **权威 (Authoritative)**: 否
+
+> **⚠️ 失效公告 (2026-08-19)**：本文所述工作分支 `feat/v2.0-noteblock` **已不存在**（当前为 `fable/v2-bn12-exoskeleton`），角色分工也早于 Codex builder / Codex reviewer / Claude 三线结构。现行开工路由见 repo 根 `AGENTS.md`（Codex）与 `CLAUDE.md`（Claude），现行真相见 `docs/agent-ops/current-state/`。
+
 # Coincides Workflow
 
 **Updated**: 2026-06-07

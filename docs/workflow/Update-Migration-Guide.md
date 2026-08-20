@@ -1,3 +1,8 @@
+> **状态 (Status)**: archived
+> **层 (Layer)**: 历史 / History（v1 → v2 数据迁移指南）
+> **日期 (Updated)**: 2026-05-16
+> **权威 (Authoritative)**: 否（作用域为 v1 Card/Deck → v2 NoteBlock，已完成）
+
 # Coincides Migration Guide
 
 **Updated**: 2026-05-16  

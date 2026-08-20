@@ -1,3 +1,8 @@
+> **状态 (Status)**: archived
+> **层 (Layer)**: 历史 / History（v1.0 交付记录）
+> **日期 (Updated)**: 2026-05-16
+> **权威 (Authoritative)**: 否（文件自述非当前执行入口）
+
 # Coincides Delivery Plan
 
 **Original scope**: v1.0 delivery record  

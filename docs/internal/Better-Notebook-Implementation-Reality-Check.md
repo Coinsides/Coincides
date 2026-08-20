@@ -1,3 +1,8 @@
+> **状态 (Status)**: archived
+> **层 (Layer)**: 历史 / History（2026-06-06 代码能力盘点）
+> **日期 (Updated)**: 2026-06-06
+> **权威 (Authoritative)**: 否（已被 `agent-ops/current-state/` 取代）
+
 # Better Notebook Implementation Reality Check
 
 **Updated**: 2026-06-06

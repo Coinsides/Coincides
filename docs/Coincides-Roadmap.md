@@ -1,3 +1,8 @@
+> **状态 (Status)**: archived
+> **层 (Layer)**: 历史 / History（已关闭的 v2.0–v2.5.6 工程地基路线图）
+> **日期 (Updated)**: 2026-06-05
+> **权威 (Authoritative)**: 否（文件自述 CLOSED）
+
 # Coincides Roadmap v2.0-v2.5.6 (Closed Foundation Roadmap)
 
 **Updated**: 2026-06-05

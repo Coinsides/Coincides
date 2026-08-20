@@ -1,3 +1,8 @@
+> **状态 (Status)**: superseded
+> **层 (Layer)**: 研究 / Research（v2.x 笔记系统早期草案）
+> **日期 (Updated)**: 2026-05
+> **权威 (Authoritative)**: 否（文件自述 early draft / 未定稿；已被 Better Notebook 线整体取代）
+
 # Coincides v2.x Note System Draft
 
 > Status: Early draft / 初步规划，讨论中，未定稿

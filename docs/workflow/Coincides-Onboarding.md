@@ -1,3 +1,10 @@
+> **状态 (Status)**: superseded
+> **层 (Layer)**: 历史 / History（Codex onboarding，v2.0 时代）
+> **日期 (Updated)**: 2026-05-16
+> **权威 (Authoritative)**: 否
+
+> **⚠️ 失效公告 (2026-08-19)**：停在 v2.0 NoteBlock Foundation 与 `feat/v2.0-noteblock` 分支。现行 Codex 开工入口 = repo 根 `AGENTS.md`。
+
 # Coincides Codex Onboarding
 
 **Updated**: 2026-05-16  

@@ -1,3 +1,8 @@
+> **状态 (Status)**: archived
+> **层 (Layer)**: 历史 / History（项目级结转登记册）
+> **日期 (Updated)**: 2026-05-23
+> **权威 (Authoritative)**: 否（作用域 v1–v2.x，已关闭）
+
 # Coincides General Continuity Register
 
 **Created**: 2026-05-21

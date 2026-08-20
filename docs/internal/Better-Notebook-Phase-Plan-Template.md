@@ -1,3 +1,10 @@
+> **状态 (Status)**: active
+> **层 (Layer)**: 内部 / Internal（V2.BN.x plan 模板）
+> **日期 (Updated)**: 2026-06-06
+> **权威 (Authoritative)**: 是（作为 plan 模板）
+
+> **📌 待并入 (2026-08-19)**：本模板尚未纳入 2026-07-15 会议卷 §十 的两条新纪律 —— 每个 12.x plan 需加 **触及面申报**（声明碰/不碰哪几层地板）与 **旅程分数验收**。更新待批次二。
+
 # Better Notebook Phase Plan Template
 
 **Updated**: 2026-06-06

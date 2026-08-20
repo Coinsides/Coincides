@@ -1,3 +1,10 @@
+> **状态 (Status)**: draft
+> **层 (Layer)**: 内部 / Internal（agent 施工手册；**正文已知脱节**）
+> **日期 (Updated)**: 2026-05（v2.5.0 scaffold）（状态头补于 2026-08-19 文档分诊止血批次）
+> **权威 (Authoritative)**: 否（2026-08-19 降级）
+
+> **⚠️ 脱节公告 (2026-08-19)**：本手册成于 v2.5.0，其 proposal-first 与 `ObjectRelation` 口径已与 V11 后的真相层不符。**更重要的是它的继任者已在路上**：V2.BN.12 必修① 要把操作暴露为 **MCP 工具面 + 守卫 + 收据**（末端执行器），这份手册是那件事的文档前身。在新工具面契约落地前，本文不作为施工依据。盘点见 `docs/agent-ops/analysis/2026-08-20-doc-triage-assessment.md`。
+
 # Coincides Agent Operating Manual
 
 **Status**: scaffold created in v2.5.0

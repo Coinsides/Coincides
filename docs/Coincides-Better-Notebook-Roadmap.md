@@ -1,3 +1,14 @@
+> **状态 (Status)**: active
+> **层 (Layer)**: 路线图 / Roadmap（**当前权威 map 已部分失效**）
+> **日期 (Updated)**: 2026-07-05
+> **权威 (Authoritative)**: 部分（V12 段已作废，见下）
+
+> **⚠️ V12 定义作废公告 (2026-08-19)**：本文 §📍当前权威 map 中的「**V2.BN.12+ 打磨** …… 工程可靠 → 用户可靠；ContentGroup 完整集成落此」**已被取代**。
+>
+> 现行定义：**V2.BN.12 =「外骨骼与地板」**（agent 进来之前必须存在的东西），必修五件 + 随行三线 + 明确不带清单 —— 权威见 `docs/agent-ops/analysis/unified-direction-concept-design.md` §13（拍板记录 待拍-8）与 `docs/agent-ops/current-state/README.md §1`。
+>
+> 本文其余部分：§1–§5 长青参考仍有效；§6–§26 早有"⚠️ 历史·勿作现行依据"内部横幅。按 待拍-12，本文将走**分家式重建**（原件整体冻结 + 新建精简 ACTIVE 路线图），草案待出。盘点见 `docs/agent-ops/analysis/2026-08-20-doc-triage-assessment.md`（冲突 C9）。
+
 # Coincides Better Notebook 路线图
 
 **更新日期**: 2026-07-05（2026-06-06 首版；2026-07-01 大整理·非破坏；2026-07-05 目的插入 V9、Source/Relation/打磨顺延）

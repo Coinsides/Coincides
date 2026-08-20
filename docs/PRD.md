@@ -1,3 +1,18 @@
+> **状态 (Status)**: draft
+> **层 (Layer)**: 宪法 / Constitution(产品需求;**正文已知脱节,待重划**)
+> **日期 (Updated)**: 2026-06-06
+> **权威 (Authoritative)**: 否(2026-08-19 降级;冲突处以方向宪章与 `agent-ops/current-state/` 为准)
+> **被取代 (Superseded by)**: 部分段落见下方脱节公告
+
+> **⚠️ 脱节公告 (2026-08-19 · 文档分诊结论)**
+>
+> 本文正文成于 2026-06-06,**早于 V2.BN.9 Purpose / V2.BN.10 Source / V2.BN.11 Item+Relation 三层真相落地,也早于 2026-08-19 的方向转向**。已确认的失效点:
+>
+> 1. **§2 产品阶梯第 4 步「refining one ContentGroup with **Petals**」已作废** —— Petal 精修层已于 `V2.BN.11.1` 停写、migration 047 落表、`V2.BN.11.7` 物理清场,**代码中不复存在**。Relation 的唯一 durable endpoint = **Item(独立知识卡)**。权威:`docs/agent-ops/analysis/relation-item-graph-concept-design.md`(v1.1)。
+> 2. **§1 定位「refined information-processing notebook」已被更替** —— 现行定位见 `docs/agent-ops/analysis/unified-direction-concept-design.md`(v1 权威)§0/§1:**学习主力工具**;本体论 = 长着投影的收据数据库。
+>
+> **本文暂不作为施工依据。** 现行真相以 `docs/agent-ops/current-state/` 为准,现行方向以上述宪章为准。全量脱节盘点见 `docs/agent-ops/analysis/2026-08-20-doc-triage-assessment.md`(冲突 C1 / C4)。重划待批次二。
+
 # Coincides PRD
 
 **Updated**: 2026-06-06

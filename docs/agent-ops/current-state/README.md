@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State
-> **日期 (Updated)**: 2026-07-14
+> **日期 (Updated)**: 2026-08-19
 > **权威 (Authoritative)**: 是 / Yes
 > **取代 (Supersedes)**: —
 > **被取代 (Superseded by)**: —
@@ -15,12 +15,26 @@ Read before any non-trivial work, together with `PRODUCT.md`, `../DOCUMENTATION-
 
 ## 1. Main line & version
 
-> **2026-07-14 authoritative override:** V2.BN.8 Canvas Engine is closed, V2.BN.9 Purpose Foundation is complete, V2.BN.10 Source Floor is engineering-complete, and **V2.BN.11 Item + Relation truth floor is engineering-complete**: all seven sub-versions (11.1–11.7) passed independent third-party re-review, and the 26-item Closure Gate returned PASS on 2026-07-14 (handoff `2026-07-14-v2bn11.7-closure-third-party-review.md`). The five truths — TextFlow / ContentGroup / Canvas / Source / Relation — are all landed. The concentrated browser experience gate is deferred to the V12 break-in phase by explicit decision.
+> **⭐ 2026-08-19 authoritative override — V12 direction turn.**
+> The V12 scope defined on 2026-07-14/07-15 (break-in polish of the old surface) is **superseded**. `docs/agent-ops/analysis/unified-direction-concept-design.md` was raised to **v1 authority** on 2026-08-19 by sovereign-delegation rulings (12 items adjudicated; ruling table at the end of that file; authorization receipt in `../claude-log/2026-08-19.md` entries 1–2; Henry retains full override).
+>
+> **V2.BN.12 is now「外骨骼与地板」/ "Exoskeleton and Floor"** — *what must exist before the agent arrives* — not "polish" (ruling 待拍-8).
+>
+> - **必修五件 (five required)**: ① **MCP 工具面** — expose operations as tools + guards + receipts (the 末端执行器 made real for the first time); ② **流式装配面 + 地板组件** — a one-dimensional component stream as the default writing surface; ③ **选区收据系统** — every gesture normalized to `{object IDs, text range, geometry, moment}`; ④ **层0/层1 + 抽取矩阵** — original-viewing and anchors, parse-on-demand, **层0 schema and the narrow-waist contract are frozen in this version** (层2 VLM belongs to the Agent era); ⑤ **token 预设 v0 + root-cause 并案修理** (fix only what lives on).
+> - **随行三线 (three parallel lines)**: ingestion receipts; data isolation & backup discipline; AI-readable tree aligned to DOM.
+> - **明确不带 (explicitly out of scope)**: knowledge graph, Relation consumption surface + assessment executor, order-spec detailing, 产房 sandbox, intent router, AI grading, homing projection, 墙 register.
+> - **真相层一寸不动**: this is surface re-division plus an exoskeleton, **not a sixth truth layer**. Charter §4: 「革新=搬家非拆迁,真相层零移动」.
+> - **Canvas 减负 (ruling 待拍-1)**: keep writing-adjacency / assembly / selection-anchoring / scatter-and-rearrange; release infinite polish, Figma-grade freedom, and showmanship. This is a **scope contraction, not a reversal of ADR-0001**.
+> - **page frame 退役 (ruling 待拍-2)**: Note becomes the only document unit; page frame demotes from content container to **export viewfinder**. ⚠️ **During V12 the page-frame machinery is NOT physically removed** — the new stream surface routes around it; physical teardown is a separate project.
 
-- **Main-line branch**: `codex/v2-bn-canvas-engine` ("Better Notebook" line). Fastest-moving and the real main line — not a side branch, not "finish-then-merge-back".
+> **2026-07-14 authoritative override (still valid as to the truth floor):** V2.BN.8 Canvas Engine is closed, V2.BN.9 Purpose Foundation is complete, V2.BN.10 Source Floor is engineering-complete, and **V2.BN.11 Item + Relation truth floor is engineering-complete**: all seven sub-versions (11.1–11.7) passed independent third-party re-review, and the 26-item Closure Gate returned PASS on 2026-07-14 (handoff `2026-07-14-v2bn11.7-closure-third-party-review.md`). The five truths — TextFlow / ContentGroup / Canvas / Source / Relation — are all landed. The concentrated browser experience gate is deferred, not waived.
+
+- **Current working branch**: `fable/v2-bn12-exoskeleton` (created 2026-08-19; the V12 construction line).
+- **Historical main line**: `codex/v2-bn-canvas-engine` (the V8–V11 "Better Notebook" line).
 - **Version system**: `V2.BN.x`. The old `v2.0–v2.5.6` line is a **closed engineering-foundation roadmap** (`docs/Coincides-Roadmap.md`); some of its product philosophy is outdated (notably **block-first**, now replaced by **TextFlow-first / ContentGroup-aware**).
-- **Current frontier**: **V2.BN.11 closed (engineering).** Next is the V12 break-in phase — survey-first (real-material user journeys, interaction reports, docs 体检), then version work; see `docs/brainstorm/产品完善/会议记录/2026-07-14-Better-Notebook-V12-Break-In-Survey-And-Roles-Meeting-Notes.md`. 集中体验门 deferred, not waived.
+- **Current frontier**: **V2.BN.12「外骨骼与地板」in progress.** First work order = `2026-08-19-v2bn12-01-editing-rootcause-investigation.md` (four 🅰 defects investigated as one case — diagnose before prescribing; required item ⑤).
 - Roadmap: `docs/Coincides-Better-Notebook-Roadmap.md`.
+  > ⚠️ That file still says 「V2.BN.12+ 打磨」at `:35`, which **contradicts the definition above**. This file and the charter win. Roadmap rebuild (freeze the original, create a lean ACTIVE roadmap) is commissioned under ruling 待拍-12; draft pending.
 
 ## 2. Tech snapshot
 
@@ -41,6 +55,14 @@ Strict dependency order. **Do not work on a later pillar before the earlier ones
 | 2 | **ContentGroup** | Knowledge-structure truth | **Core entity layer stable; full integration deferred** |
 | 3 | **Canvas Engine** | Spatial / layout truth | **V2.BN.8 engineering-closed; later maturity remains** |
 | 4 | **Agent + Graph Database** | — | **Not started** |
+
+> **2026-08-19 — what V12 does to each pillar.** V12 adds no truth layer. It re-divides the surface and builds the exoskeleton (tool face + guards + receipts) on top of the five landed truths.
+>
+> - **Pillar 1 TextFlow** — **most affected.** V12 required items ② (stream assembly surface + floor components) and ⑤ (root-cause repair) both sit on this kernel; the charter states the new surface rides *the same TextFlow kernel* (§4), so the 2026-08-08 four 🅰 defects (focus / dead-end / pollution / visible-vs-editable mismatch) must be diagnosed at the kernel, not patched per surface — 「噪声随面死,机件随面活,只修活的」. `contracts/TextFlow-Contract.md` is still `draft` and is the single contract most in need of freezing this version.
+> - **Pillar 2 ContentGroup / Item** — unchanged in V12. Relation consumption surface and the assessment executor are on the **explicitly-out-of-scope** list; the floor sleeps at zero cost.
+> - **Pillar 3 Canvas Engine** — scope **contracts** per ruling 待拍-1 (see §1). ADR-0001 stays `active`; the self-owned engine route is not reversed. page_frame machinery is not physically removed this version (ruling 待拍-2).
+> - **Pillar 4 Agent + Graph** — still not started; the knowledge graph is on V12's out-of-scope list. V12's job is to build the **substrate the agent will plug into** (the MCP tool face), not the agent.
+> - **New in V12, not a pillar**: 层0/层1 Source ladder + extraction matrix (required item ④). The **层0 schema and narrow-waist contract get frozen this version**; 层2 (VLM parsing) belongs to the Agent era. This activates the currently-`deferred` `contracts/Source-Provenance-Contract.md`.
 
 ### Pillar 1 — TextFlow
 - **Built**: custom text editing (textarea + overlay, *not* contenteditable); `TextUnit` model (paragraph / heading / quote / list / todo / toggle / code-line); inline structures (inline formula / code / link / source marker); split / merge / indent / role-change; annotation create + render.
@@ -84,6 +106,8 @@ Strict dependency order. **Do not work on a later pillar before the earlier ones
 
 ## 4. Watch list (known open items, not necessarily defects)
 
+- **⭐ 文档脱节 / documentation drift (2026-08-19, highest-priority open item)** — a full-repo triage (`../analysis/2026-08-20-doc-triage-assessment.md`) found that **the new charter's vocabulary had zero penetration into the normative layer**: none of 「外骨骼 / MCP / 末端执行器 / 组件语言 / 订货方 / 收据数据库 / 流式装配」appeared in `PRODUCT.md`, `ARCHITECTURE.md`, `DATA_MODEL.md`, `PRD.md`, `contracts/**`, this folder, or the roadmap. This override plus the `AGENT_CONTEXT.md` update is the **first-aid batch**; constitutional re-division (`PRODUCT.md`) and four rebuilds (roadmap / inventory contract / source-reconstruction intake / repo README) are commissioned but **not yet done**. Until they land, treat the files listed in `AGENT_CONTEXT.md §7` as known-stale.
+- **2026-08-08 four 🅰 editing defects** — focus / dead-end / pollution / visible-vs-editable mismatch. Root-cause investigation is V12's first work order; they live in the shared editing machinery, so they are **not** fixed by the new surface alone.
 - **Source closure gate** — 10.4/10.5 expose the durable Source states and deletion lifecycles through shared client models; third-party browser review must still verify real file journeys, authenticated blob opening, cross-Project dedup visibility, SourceProjection lock, Project dynamic delete defaults, move-to-Home preservation, Source hard-delete warnings, and Console/Network cleanliness.
 - **V2.BN.11 concentrated experience gate (deferred)** — engineering closure passed 2026-07-14; the combined browser/UX acceptance for Purpose / Relation / Item journeys moves into the V12 break-in phase alongside the 10.4/10.5 Source browser gate.
 - **TextFlow Typography** — baseline exists, but rich inline style truth and measured pagination remain unfrozen.

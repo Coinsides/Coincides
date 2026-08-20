@@ -1,3 +1,10 @@
+> **状态 (Status)**: draft
+> **层 (Layer)**: 宪法 / Constitution（概念数据模型；**正文已知脱节**）
+> **日期 (Updated)**: 2026-06-06
+> **权威 (Authoritative)**: 否（2026-08-19 降级）
+
+> **⚠️ 脱节公告 (2026-08-19)**：本文成于 2026-06-06，**早于 V2.BN.9 Purpose / V2.BN.10 Source / V2.BN.11 Item + Relation 三层真相全部落地**，落后三个版本。现行数据真相以 `docs/agent-ops/current-state/README.md §3` 与各 migration 为准。盘点见 `docs/agent-ops/analysis/2026-08-20-doc-triage-assessment.md`。重划待批次二。
+
 # Coincides Data Model
 
 **Updated**: 2026-06-06
