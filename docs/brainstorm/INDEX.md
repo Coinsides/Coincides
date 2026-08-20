@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-07-14
+> **日期 (Updated)**: 2026-08-18
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/brainstorm`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 154 份文档。
+共 163 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -166,3 +166,12 @@
 | [产品完善/会议记录/2026-07-12-AI-Era-Learning-Method-Appendix-Meeting-Notes.md](产品完善/会议记录/2026-07-12-AI-Era-Learning-Method-Appendix-Meeting-Notes.md) | 2026-07-12 附录：AI 时代与 AI 并行学习的方法 | `draft` | 2026-07-12 | — |
 | [产品完善/会议记录/2026-07-12-Better-Notebook-Item-Raw-Material-And-Card-Lineage-Meeting-Notes.md](产品完善/会议记录/2026-07-12-Better-Notebook-Item-Raw-Material-And-Card-Lineage-Meeting-Notes.md) | 2026-07-12 Better Notebook：Item 原料模型与知识卡片思想回环 | `draft` | 2026-07-12 | — |
 | [产品完善/会议记录/2026-07-14-Better-Notebook-V12-Break-In-Survey-And-Roles-Meeting-Notes.md](产品完善/会议记录/2026-07-14-Better-Notebook-V12-Break-In-Survey-And-Roles-Meeting-Notes.md) | 2026-07-14 Better Notebook：V12 磨合期的调研先行与角色分工 | `draft` | 2026-07-14 | — |
+| [产品完善/会议记录/2026-07-15-Better-Notebook-V12-Doc-Triage-And-Experience-Review-Design-Meeting-Notes.md](产品完善/会议记录/2026-07-15-Better-Notebook-V12-Doc-Triage-And-Experience-Review-Design-Meeting-Notes.md) | 2026-07-15 Better Notebook：文档分诊、更新手册与体验审查设计 | `draft` | 2026-07-15 | — |
+| [产品完善/会议记录/2026-07-20-Better-Notebook-Tooling-Freeze-And-Source-Format-Provenance-Meeting-Notes.md](产品完善/会议记录/2026-07-20-Better-Notebook-Tooling-Freeze-And-Source-Format-Provenance-Meeting-Notes.md) | 2026-07-20 Better Notebook：工具采购冻结与原始文档格式对溯源的影响 | `draft` | 2026-07-20 | — |
+| [产品完善/会议记录/2026-07-24-Better-Notebook-Decision-Replay-And-Trace-Restraint-Meeting-Notes.md](产品完善/会议记录/2026-07-24-Better-Notebook-Decision-Replay-And-Trace-Restraint-Meeting-Notes.md) | 2026-07-24 Better Notebook:决策台账、复盘视图与痕迹的克制 | `draft` | 2026-07-24 | — |
+| [产品完善/会议记录/2026-08-04-Better-Notebook-Handwritten-Note-Specimen-And-Purpose-Projection-Meeting-Notes.md](产品完善/会议记录/2026-08-04-Better-Notebook-Handwritten-Note-Specimen-And-Purpose-Projection-Meeting-Notes.md) | 2026-08-04 Better Notebook：手写笔记标本、AI 笔记的职能倒置、与 Purpose 作为投影… | `draft` | 2026-08-04 | — |
+| [产品完善/会议记录/2026-08-08-Better-Notebook-Note-Rebuild-Friction-Log-Meeting-Notes.md](产品完善/会议记录/2026-08-08-Better-Notebook-Note-Rebuild-Friction-Log-Meeting-Notes.md) | 2026-08-08 Better Notebook:对照实验全程摩擦记录(应用内重建 ECON 讲稿) | `draft` | 2026-08-08 | — |
+| [产品完善/会议记录/2026-08-11-Better-Notebook-COMM-101-Study-Action-Observation-Log.md](产品完善/会议记录/2026-08-11-Better-Notebook-COMM-101-Study-Action-Observation-Log.md) | COMM 101 期末复习：学习动作观察流水账 | `draft` | 2026-08-11 | — |
+| [产品完善/会议记录/2026-08-11-Better-Notebook-Floating-Reference-Toolbar-Design-Discussion.md](产品完善/会议记录/2026-08-11-Better-Notebook-Floating-Reference-Toolbar-Design-Discussion.md) | Better Notebook：悬浮参照工具栏设计讨论 | `draft` | 2026-08-11 | — |
+| [产品完善/会议记录/2026-08-16-Better-Notebook-Study-Artifact-Component-Language-Meeting-Notes.md](产品完善/会议记录/2026-08-16-Better-Notebook-Study-Artifact-Component-Language-Meeting-Notes.md) | 2026-08-16 Better Notebook:复习件组件语言 v0(从 artifact 画廊显影) | `draft` | 2026-08-16 | — |
+| [产品完善/会议记录/2026-08-18-Better-Notebook-Make-Or-Buy-Boundary-And-Orchestrator-Meeting-Notes.md](产品完善/会议记录/2026-08-18-Better-Notebook-Make-Or-Buy-Boundary-And-Orchestrator-Meeting-Notes.md) | 2026-08-18 Better Notebook:make-or-buy 边界、导出双口味、与意图路由器 | `draft` | 2026-08-18 | — |
