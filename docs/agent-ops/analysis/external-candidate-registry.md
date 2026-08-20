@@ -77,6 +77,22 @@
 
 **⚠️ a11y 诚实注**:任何原语只修角色/焦点/键盘/aria 状态;**"按钮无名"是署名纪律,库不救**——配 eslint-plugin-jsx-a11y 强制。
 
+## 三之三、MCP 工具面协议栈（2026-08-20 回填，必修① 前置调研）
+
+> **登记缘由**：此前本册只有「**别人的** MCP server」条目（playwright-mcp / chrome-devtools-mcp / shadcn registry / Open Design stdio server）；**MCP 协议本体、TS SDK、guard-consent 模式从未登记**。V2.BN.12 必修① 首次需要它，故按协议「查过即登记」立此节。
+> **调研盘全文**：`2026-08-20-mcp-tool-face-survey.md` §2。
+> ⚠️ **事实来源**：2026-08-20 外部检索，**非训练知识**（知识截止早于 2026-07-28 修订版）。已由 Fable 独立上网复核，与官方 changelog 一致。
+
+| 候选 | 现状（2026-08-20 核） | 判定 | 用途 / 注 |
+|---|---|---|---|
+| **MCP 协议本体** | **2026-07-28 修订版**（自发布以来最大一次）：**无状态核心**（移除协议级 session 与 `Mcp-Session-Id`，list 端点不再随连接变化）· ⭐ **MRTR 工具级 elicitation（SEP-2322）**：server 返 `resultType:"input_required"` + 待答请求，client 带 `inputResponses` 重试原调用 · 缓存 `ttlMs`/`cacheScope`（SEP-2549）· MCP Apps（server 渲染 UI）/ Tasks（长任务）扩展 · **正式弃用策略** | ✅ **采纳为工具面协议** | 无状态核心与我们「后端保持服务形态」天然契合，工具面可直接架在现有 Express 上，**不必为 MCP 引入会话层**；**MRTR 是宪章 §8 三档放行里「需确认」档的协议原生落点**（最难自造的那档已是协议一级公民）；弃用策略与待拍-4「格式即承诺」同构 |
+| **`@modelcontextprotocol/sdk`（官方 TS SDK）** | `StreamableHTTPServerTransport` 可架于 Express 之后 | ✅ 采纳候选 | 与既有 Node + Express + TS 后端同栈，无新语言/运行时 |
+| **MCP 授权模式** | `/.well-known/oauth-protected-resource`（RFC 9728）· bearer + RFC 8707 resource indicators · **每个 tool handler 内部检 `authInfo.scopes`** · Origin/`allowedOrigins` 保护（自建 transport 时 **Host header 校验须自实现**） | 🔍 **形态参考，非成套采纳** | 我们是本机/私有云单用户，OAuth 全套未必需要；**但「每个 handler 内检 scope」的形制值得照搬** —— 它把守卫放在最靠近操作的地方，与「工具 + 守卫 + 收据」同构 |
+| **外部守卫教义** | **「工具输入来自 LLM，不是直接来自用户 —— 一律当不可信」**；通用清单：校验 · 认证 · 限流 · 超时 · 允许清单 · 审计日志 | ✅ **采纳为守卫层前提** | ⭐ **它改变了红线的读法**：「同门同钥」保证**权限对等**，**不保证输入可信度对等** —— 人点按钮的输入过 UI 约束，LLM 调工具的输入是模型生成的字符串。与宪章 §6「外来导入 JS 永不执行 / 请求出身不同待遇不同」是同一纪律的两次出现 |
+
+**来源**：[2026-07-28 规范](https://blog.modelcontextprotocol.io/posts/2026-07-28/) · [changelog](https://modelcontextprotocol.io/specification/2026-07-28/changelog) · [TS SDK](https://github.com/modelcontextprotocol/typescript-sdk) · [Authorization 教程](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/authorization) · [Server Guide V2](https://ts.sdk.modelcontextprotocol.io/v2/documents/Documents.Server_Guide.html)
+
+
 ## 四、待办
 
 - [x] OpenDesign/OpenCode 已回填(2026-08-18);
@@ -85,4 +101,5 @@
 - [ ] 研读 shadcn registry 格式(案例库分发先行艺术);
 - [x] OpenClaw 许可已证 MIT(2026-08-19,直读 LICENSE);
 - [ ] Agent 版评估期:OpenClaw 架构实查(gateway 形态/skill 体系/MCP 客户端能力);研读 Open Design 的 design-system 包格式(订单规格先行艺术);
+- [x] **MCP 协议栈已回填(2026-08-20,必修① 前置;Fable 独立复核)**;
 - [ ] 新候选出现时:先查本册,未登记才调研。

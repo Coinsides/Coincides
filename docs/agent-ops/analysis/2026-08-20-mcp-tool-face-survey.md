@@ -180,7 +180,58 @@ course_id TEXT REFERENCES courses(id) ON DELETE CASCADE
 需确认    → MCP MRTR：resultType input_required      ← 协议原生
 ```
 
-> **⚠️ 但我未核实这条管线的现役程度**（`Coincides-Agent-Operating-Manual` 已在文档分诊里判「必须更正」，其 proposal-first 口径可能已与 V11 后真相层脱节）。**是否复用、复用到什么程度 → 设计稿拍，且须先做活性盘点。**
+### 3.4 ⭐ 活性盘点结果（2026-08-20 补做，D-6 前置）—— **它从未运过一行**
+
+按 5-4 顺序（路由挂载 → 服务层 → **数据活性**）逐步取证：
+
+| 步 | 结果 |
+|---|---|
+| **① 路由挂载** | ✅ 活。`index.ts:26,38,50` import；`:118,130,142` 挂 `/api/proposals`、`/api/reconciliation`、`/api/domain-refinements`，均带 `authMiddleware` |
+| **② 服务层读写** | ✅ 活。**六个** v2 服务写 `proposals`：`canvasLayoutProposals` · `organizedNoteProposals` · `materialMapProposals` · `templateMigrationProposals` · `domainRefinementProposals` · `materialReconciliationProposals` |
+| **③ 客户端消费方** | ✅ 有。`pages/Courses/CourseDetail.tsx` · `pages/Templates/TemplateStudio.tsx` · `stores/proposalStore.ts` |
+| **④ 数据活性** | ❌ **`proposals` 表 0 行** |
+
+> **取证方式**：把 live DB 字节复制到 scratchpad，**只查副本**（`readonly:true` + `PRAGMA query_only=ON`）。查前查后对 live 的 `db/-wal/-shm` 三件做 SHA-256 + 大小 + mtime 比对，**完全一致**（`2c47907f…` / WAL `0` / SHM `fd4c9fda…`，与 03 链五轮 reviewer 记录相同）。副本及其 sidecar 查完即删。
+
+#### 三条结论
+
+**1. 这条管线「代码活、数据死」。** 它被路由、被服务写、有客户端 store —— 但**从未流入过一行**。
+> 这正是我在 `Source-Ladder-Contract §9.1` 立的那条纪律的兑现：**路由活 ≠ 有真实数据流入**。若只做前三步，本盘会得出「管线现役、可复用」的相反结论。
+
+**2. 它的类型词表分裂，且 BN 线从未接入。**
+
+```text
+共享 ProposalType enum（shared/types）：study_plan · batch_cards · schedule_adjustment   ← 全是 v1
+表里实际出现的 type 字面量（v2 服务）：material_map · source_board_node · source_scope
+                                    note_block · template_migration · canvas_layout
+                                    organized_note · domain_refinement                  ← 8 个不在 enum 里
+```
+
+`proposals.type` 是自由 `TEXT`，所以两套词汇共存于一张表，**只有 v1 那套进了类型系统**。
+
+**BN 线服务对 `proposals` 的引用数：`items` 0 · `relations` 0 · `purposes` 0 · `contentGroups` 0 · `noteBlockLifecycle` 0 · `sourceLifecycle` 0。**
+即：**V8–V11 建的整个五真相层，从未使用过这条管线。**
+
+**3. 它焊在 v1 agent 的会话模型上**：`proposals.conversation_id REFERENCES agent_conversations(id)` —— 它本是 **Mr. Zero 的**提案机制，而宪章 §10 已声明取代 Mr. Zero。
+
+#### 对 D-6 的直接影响（结论仍归设计稿）
+
+**「复用现有 proposal 管线作为出候选档」这个说法的前提不成立** —— 那不是**复用一条在跑的管线**，而是**激活一条从未跑过的管线**，且它：
+
+- 焊在将被取代的 v1 agent 会话上；
+- course-scoped（`FROM courses` 遍布六个服务）；
+- 类型词表一半在类型系统外；
+- 在工具面真正要操作的那层真相上**零先例**。
+
+**风险画像与「复用成熟机制」完全不同。** → **设计稿拍**（我不代拍），但建议把 D-6 的问法从「是否复用」改为「**是否值得激活，还是另建**」。
+
+#### 顺带印证 §3.1
+
+`operation_batches` 现有 **101 行，`source_type` 全为 `'manual'`**，最近一条 `2026-08-20 03:07:58`（工单 03 施工）。
+
+**收据轴不仅存在，而且干净** —— 它至今只有过一个取值。**工具面会是第一个非 manual 来源**，不需要与任何历史遗留取值共存。
+
+
 
 ---
 
@@ -237,7 +288,7 @@ course_id TEXT REFERENCES courses(id) ON DELETE CASCADE
 ## 5. 本盘的自我限制（诚实声明）
 
 1. **§1.2 的 4 条零引用路由，我没有下「死」的结论。** 今天我刚在 `source_anchors` 上因「从缺席推断」栽过一次（`claude-log` 条目 17 / `Source-Ladder-Contract §9.1`）。零引用只是一个信号，判活性须走「路由挂载 → 服务层 → 数据活性」三步。
-2. **§3.3 的 proposal 管线现役程度未核。** 该管线的文档（Agent Operating Manual）已被分诊判为「必须更正」，我不拿一份已知脱节的文档当活性证据。
+2. ~~**§3.3 的 proposal 管线现役程度未核。**~~ ✅ **已于 2026-08-20 补做，见 §3.4** —— 结果是「代码活、数据死」（`proposals` 表 0 行），BN 线零接入。**若当时只做前三步就下结论，会得出完全相反的答案。**
 3. **§3.2 的 CASCADE 语义我未查 015 migration 原意**，因此只提问不判断。
 4. **MCP 相关事实来自 2026-08-20 的外部检索**，非我的训练知识（我的知识截止早于 2026-07-28 修订版）。**建议回填登记册**，按协议「查过即登记、永不重查」。
 5. **本盘不含任何工具清单。** Fable 要的是设计稿的输入，工具清单是设计稿的产物。
