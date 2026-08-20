@@ -7,6 +7,7 @@ import { AppError } from '../middleware/errorHandler.js';
 import {
   createNoteBlockSchema,
   createNoteSchema,
+  discardClientNoteBlockCreateSchema,
   reorderNoteBlocksSchema,
   updateNoteBlockPlacementSchema,
   updateNoteSchema,
@@ -16,6 +17,10 @@ import {
   assertSourceProjectionNoteContentWriteAllowed,
   assertSourceProjectionNoteUpdateAllowed,
 } from '../services/sourceProjectionPolicy.js';
+import {
+  createClientNoteBlock,
+  discardClientNoteBlockCreate,
+} from '../services/noteBlockLifecycle.js';
 
 const router = Router();
 const LEGACY_NOTE_LAYOUT_KEY = 'better_notebook_layout';
@@ -276,6 +281,28 @@ router.post('/:id/blocks', (req: AuthRequest, res: Response) => {
     assertSourceProjectionNoteContentWriteAllowed(getDb(), req.userId!, noteId, 'create_note_block');
     const data = createNoteBlockSchema.parse(req.body);
     const db = getDb();
+    if (data.client_create_key) {
+      const result = createClientNoteBlock(db, req.userId!, noteId, note.course_id, {
+        ...data,
+        client_create_key: data.client_create_key,
+      });
+      if (result.status === 'canceled') {
+        res.status(409).json({
+          status: 'canceled',
+          client_create_key: result.client_create_key,
+        });
+        return;
+      }
+      res.status(result.created ? 201 : 200).json({
+        ...hydrateBlock(result.block),
+        client_create_receipt: {
+          client_create_key: data.client_create_key,
+          status: 'applied',
+          reused: !result.created,
+        },
+      });
+      return;
+    }
     const id = uuidv4();
     const placementId = uuidv4();
     const now = new Date().toISOString();
@@ -400,6 +427,34 @@ router.put('/:id/block-placements/:placementId', (req: AuthRequest, res: Respons
       display_overrides_json: stripLegacyLayoutOverride(data.display_overrides_json),
       updated_at: now,
     });
+  } catch (err) {
+    if (err instanceof ZodError) {
+      res.status(400).json({ error: 'Validation error', details: err.errors });
+      return;
+    }
+    throw err;
+  }
+});
+
+// POST /api/notes/:id/blocks/discard-client-create
+router.post('/:id/blocks/discard-client-create', (req: AuthRequest, res: Response) => {
+  try {
+    const noteId = req.params.id as string;
+    const note = getOwnedNote(noteId, req.userId!);
+    assertSourceProjectionNoteContentWriteAllowed(
+      getDb(),
+      req.userId!,
+      noteId,
+      'discard_client_note_block_create',
+    );
+    const data = discardClientNoteBlockCreateSchema.parse(req.body);
+    res.json(discardClientNoteBlockCreate(
+      getDb(),
+      req.userId!,
+      noteId,
+      note.course_id,
+      data.client_create_key,
+    ));
   } catch (err) {
     if (err instanceof ZodError) {
       res.status(400).json({ error: 'Validation error', details: err.errors });

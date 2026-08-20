@@ -4,6 +4,7 @@ import {
 import type {
   AnnotationRangeV1,
 } from './runtimeDataTypes';
+import { textFocusReceiptsEqual, type TextOwnerReconciliation } from './textFocusReceipt';
 
 export type CapturedSelectionRange = {
   blockId: string;
@@ -13,6 +14,20 @@ export type CapturedSelectionRange = {
   endOffset: number;
   text: string;
 };
+
+export function reconcileCapturedSelectionTextOwner(
+  selection: CapturedSelectionRange,
+  reconciliation: TextOwnerReconciliation,
+): CapturedSelectionRange {
+  return textFocusReceiptsEqual(selection, reconciliation.from)
+    ? {
+      ...selection,
+      blockId: reconciliation.to.blockId,
+      textFlowId: reconciliation.to.textFlowId,
+      textUnitId: reconciliation.to.textUnitId,
+    }
+    : selection;
+}
 
 export type TextUnitAnnotationHighlightRange = {
   range: AnnotationRangeV1;

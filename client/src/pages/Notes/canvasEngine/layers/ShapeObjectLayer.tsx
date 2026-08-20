@@ -3,12 +3,18 @@ import type {
   PointerEvent as ReactPointerEvent,
   CSSProperties,
 } from 'react';
+import { useEffect, useRef } from 'react';
 import type { NoteBlock } from '../runtimeDataTypes';
 import type {
   CanvasObject,
   CanvasPlacement,
 } from '../types';
 import { resolveCanvasObjectStyle } from '../objectStyleService';
+import { getTextFlowContent, textFlowIdForBlock } from '../textFlowService';
+import {
+  textFocusReceiptsEqual,
+  type TextFocusReceipt,
+} from '../textFocusReceipt';
 import styles from '../../NoteDetail.module.css';
 
 type ShapeType = 'rectangle' | 'ellipse';
@@ -29,6 +35,7 @@ type ShapeObjectLayerProps = {
     text: string;
     saving: boolean;
     active: boolean;
+    autoFocus: boolean;
   }>;
   selectedObjectId: string | null;
   interactionPreview: ShapeInteractionPreview;
@@ -50,7 +57,8 @@ type ShapeObjectLayerProps = {
     event: ReactMouseEvent<HTMLDivElement>,
     canvasObject: CanvasObject,
   ) => void;
-  onShapeTextFocus: (blockId: string) => void;
+  onShapeTextFocus: (receipt: TextFocusReceipt) => void;
+  onShapeTextBlur: (receipt: TextFocusReceipt) => void;
   onShapeTextChange: (
     block: NoteBlock,
     value: string,
@@ -80,9 +88,19 @@ export function ShapeObjectLayer({
   onShapePointerEnd,
   onShapeContextMenu,
   onShapeTextFocus,
+  onShapeTextBlur,
   onShapeTextChange,
   onShapeTextSave,
 }: ShapeObjectLayerProps) {
+  const focusedReceiptRef = useRef<TextFocusReceipt | null>(null);
+  const onShapeTextBlurRef = useRef(onShapeTextBlur);
+  onShapeTextBlurRef.current = onShapeTextBlur;
+
+  useEffect(() => () => {
+    const receipt = focusedReceiptRef.current;
+    if (receipt) onShapeTextBlurRef.current(receipt);
+  }, []);
+
   return (
     <>
       {placements.map((placement) => {
@@ -90,6 +108,12 @@ export function ShapeObjectLayer({
         if (!canvasObject) return null;
         const shapeType = shapeTypeFromCanvasObject(canvasObject);
         const textBinding = shapeTextBindingByObjectId.get(canvasObject.objectId) || null;
+        const textBindingFlow = textBinding ? getTextFlowContent(textBinding.block.content_json) : null;
+        const textBindingFocusReceipt = textBinding ? {
+          blockId: textBinding.block.id,
+          textFlowId: textFlowIdForBlock(textBinding.block.id),
+          textUnitId: textBindingFlow?.units[0]?.id || 'tu-1',
+        } satisfies TextFocusReceipt : null;
         const selected = selectedObjectId === canvasObject.objectId;
         const resolvedStyle = resolveCanvasObjectStyle(canvasObject);
         const preview = interactionPreview?.objectId === canvasObject.objectId
@@ -135,6 +159,12 @@ export function ShapeObjectLayer({
           >
             {textBinding && (
               <textarea
+                ref={(textarea) => {
+                  if (!textarea || !textBinding.autoFocus) return;
+                  textarea.focus({ preventScroll: true });
+                  const caret = textarea.value.length;
+                  textarea.setSelectionRange(caret, caret);
+                }}
                 className={`${styles.canvasShapeTextArea} ${textBinding.active ? styles.canvasShapeTextAreaActive : ''}`}
                 data-canvas-shape-text="true"
                 aria-label="Shape text"
@@ -146,7 +176,11 @@ export function ShapeObjectLayer({
                 onPointerUp={(event) => event.stopPropagation()}
                 onMouseDown={(event) => event.stopPropagation()}
                 onContextMenu={(event) => event.stopPropagation()}
-                onFocus={() => onShapeTextFocus(textBinding.block.id)}
+                onFocus={() => {
+                  if (!textBindingFocusReceipt) return;
+                  focusedReceiptRef.current = textBindingFocusReceipt;
+                  onShapeTextFocus(textBindingFocusReceipt);
+                }}
                 onChange={readOnly ? undefined : (event) => {
                   onShapeTextChange(
                     textBinding.block,
@@ -155,8 +189,16 @@ export function ShapeObjectLayer({
                     event.currentTarget,
                   );
                 }}
-                onBlur={readOnly ? undefined : (event) => {
-                  void onShapeTextSave(canvasObject.objectId, textBinding.block, event.currentTarget.value);
+                onBlur={(event) => {
+                  if (textBindingFocusReceipt) {
+                    if (textFocusReceiptsEqual(focusedReceiptRef.current, textBindingFocusReceipt)) {
+                      focusedReceiptRef.current = null;
+                    }
+                    onShapeTextBlur(textBindingFocusReceipt);
+                  }
+                  if (!readOnly) {
+                    void onShapeTextSave(canvasObject.objectId, textBinding.block, event.currentTarget.value);
+                  }
                 }}
                 onKeyDown={readOnly ? undefined : (event) => {
                   event.stopPropagation();
@@ -166,6 +208,9 @@ export function ShapeObjectLayer({
                     event.currentTarget.blur();
                   }
                 }}
+                data-block-id={textBindingFocusReceipt?.blockId}
+                data-text-flow-id={textBindingFocusReceipt?.textFlowId}
+                data-text-unit-id={textBindingFocusReceipt?.textUnitId}
               />
             )}
             {selected && layoutMode && !readOnly && (

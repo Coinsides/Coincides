@@ -1388,8 +1388,8 @@ function testPageFrameLayoutAffiliationAndMoveCohort(): void {
   });
   assertEqual(
     projectedLayout.x,
-    pageFrame.x,
-    'Page Mode-created block layout stores the PageFrame canvas x offset',
+    pageFrame.x + pageFrame.contentInset.left,
+    'Page Mode-created block layout stores the explicit Canvas-world content x',
   );
   assertEqual(
     projectedLayout.y,

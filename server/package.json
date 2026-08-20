@@ -9,7 +9,9 @@
   "scripts": {
     "dev": "node --import jiti/register src/index.ts",
     "dev:tsx": "tsx watch src/index.ts",
-    "test:v2": "node --import tsx --test src/__tests__/v2NoteFoundation.test.ts src/__tests__/v2MaterialLibrary.test.ts src/__tests__/v2DomainPackages.test.ts src/__tests__/v2TemplateMigration.test.ts src/__tests__/v2PackagePortability.test.ts src/__tests__/v2DomainRefinement.test.ts src/__tests__/v2ContentGroups.test.ts src/__tests__/v2GroupFolders.test.ts src/__tests__/v2CanvasPersistenceCutover.test.ts src/__tests__/v2Purposes.test.ts src/__tests__/v2SourceIdentityFloor.test.ts src/__tests__/v2SourceFileIntake.test.ts src/__tests__/v2SourceMaterialization.test.ts src/__tests__/v2SourceLifecycleClosure.test.ts src/__tests__/v2ItemRelationFloor.test.ts src/__tests__/v2Items.test.ts src/__tests__/v2Relations.test.ts src/__tests__/v2RelationLifecycleClosure.test.ts",
+    "migrate:v2-bn12-lifecycle": "node --import tsx scripts/v2Bn12LifecycleMigration.ts",
+    "test:v2-bn12-migration": "node --import tsx --test scripts/v2Bn12LifecycleMigration.test.ts",
+    "test:v2": "node --import tsx --test src/__tests__/v2NoteFoundation.test.ts src/__tests__/v2NoteBlockLifecycle.test.ts src/__tests__/v2MaterialLibrary.test.ts src/__tests__/v2DomainPackages.test.ts src/__tests__/v2TemplateMigration.test.ts src/__tests__/v2PackagePortability.test.ts src/__tests__/v2DomainRefinement.test.ts src/__tests__/v2ContentGroups.test.ts src/__tests__/v2GroupFolders.test.ts src/__tests__/v2CanvasPersistenceCutover.test.ts src/__tests__/v2Purposes.test.ts src/__tests__/v2SourceIdentityFloor.test.ts src/__tests__/v2SourceFileIntake.test.ts src/__tests__/v2SourceMaterialization.test.ts src/__tests__/v2SourceLifecycleClosure.test.ts src/__tests__/v2ItemRelationFloor.test.ts src/__tests__/v2Items.test.ts src/__tests__/v2Relations.test.ts src/__tests__/v2RelationLifecycleClosure.test.ts",
     "build": "tsc",
     "start": "node dist/index.js"
   },

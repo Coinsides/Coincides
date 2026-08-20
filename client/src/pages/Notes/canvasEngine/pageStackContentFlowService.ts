@@ -65,11 +65,41 @@ function createDraftLayoutAtFrameStart(
   blockWorldOffsetX: number,
 ): BlockBoxLayout {
   const contentRect = getPageFrameContentRect(pageFrame);
+  const {
+    coordinate_space: _coordinateSpace,
+    surface_authority: _surfaceAuthority,
+    ...runtimeLayout
+  } = draftLayout;
   return {
-    ...draftLayout,
+    ...runtimeLayout,
     x: contentRect.x - blockWorldOffsetX,
     y: contentRect.y,
     width: Math.min(draftLayout.width, contentRect.width || draftLayout.width),
+    surface: 'formal_page',
+    frame_id: pageFrame.id,
+    boundary_role: 'inside',
+  };
+}
+
+function bindDraftLayoutToFrame(
+  pageFrame: PageFrameModel,
+  draftLayout: BlockBoxLayout,
+): BlockBoxLayout {
+  const contentRect = getPageFrameContentRect(pageFrame);
+  return {
+    ...draftLayout,
+    surface: 'formal_page',
+    coordinate_space: 'page_frame_local',
+    frame_id: pageFrame.id,
+    boundary_role: 'inside',
+    surface_authority: {
+      coordinateSpace: 'page_frame_local',
+      pageBoundary: {
+        left: 0,
+        right: contentRect.width,
+        frameId: pageFrame.id,
+      },
+    },
   };
 }
 
@@ -118,7 +148,7 @@ export function resolvePageStackContentFlowPlan({
     return {
       kind: 'stay_on_current_page',
       targetFrameId: currentFrame.id,
-      targetLayout: draftLayout,
+      targetLayout: bindDraftLayoutToFrame(currentFrame, draftLayout),
     };
   }
 

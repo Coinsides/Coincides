@@ -10,10 +10,12 @@ import {
   appendSelectionDraftRange,
   createSelectionDraftRangeFromCapturedSelection,
   replaceSelectionDraft,
+  reconcileSelectionDraftTextOwner,
   selectionDraftRangesToAnnotationRanges,
   type SelectionDraftV1,
 } from '../selectionDraftService';
 import type { AnnotationTruthV1 } from '../runtimeDataTypes';
+import type { TextOwnerReconciliation } from '../textFocusReceipt';
 
 export function useSelectionDraftController() {
   const [selectionDraft, setSelectionDraft] = useState<SelectionDraftV1 | null>(null);
@@ -52,6 +54,10 @@ export function useSelectionDraftController() {
     window.getSelection()?.removeAllRanges();
   }, []);
 
+  const reconcileTextOwner = useCallback((reconciliation: TextOwnerReconciliation) => {
+    setSelectionDraft((current) => reconcileSelectionDraftTextOwner(current, reconciliation));
+  }, []);
+
   const activateDraft = useCallback(() => {
     setSelectionDraft((current) => (current ? activateSelectionDraft(current) : current));
     window.getSelection()?.removeAllRanges();
@@ -80,6 +86,7 @@ export function useSelectionDraftController() {
     latestDraftRange,
     setSelectionDraft,
     replaceDraft,
+    reconcileTextOwner,
     appendDraftRange,
     activateDraft,
     clearDraft,

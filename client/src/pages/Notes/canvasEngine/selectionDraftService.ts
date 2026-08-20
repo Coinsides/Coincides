@@ -7,6 +7,8 @@ import type {
   AnnotationRangeV1,
   AnnotationTruthV1,
 } from './runtimeDataTypes';
+import { reconcileCapturedSelectionTextOwner } from './selectionRangeService';
+import type { TextOwnerReconciliation } from './textFocusReceipt';
 
 export type SelectionDraftMode = 'replace' | 'additive';
 export type SelectionDraftPhase = 'capturing' | 'draft' | 'active';
@@ -24,6 +26,23 @@ export interface SelectionDraftV1 {
   parentAnnotationId?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export function reconcileSelectionDraftTextOwner(
+  draft: SelectionDraftV1 | null,
+  reconciliation: TextOwnerReconciliation,
+): SelectionDraftV1 | null {
+  if (!draft) return null;
+  let changed = false;
+  const ranges = draft.ranges.map((range) => {
+    const reconciled = reconcileCapturedSelectionTextOwner(range, reconciliation);
+    if (reconciled === range) return range;
+    changed = true;
+    return { ...range, ...reconciled };
+  });
+  return changed
+    ? { ...draft, ranges, updatedAt: nowIso() }
+    : draft;
 }
 
 function nowIso(): string {

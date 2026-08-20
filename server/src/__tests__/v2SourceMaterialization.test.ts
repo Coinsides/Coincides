@@ -340,6 +340,24 @@ test('text materialization atomically publishes one read-only projection and is 
       .get(first.projection_note_id) as any).count, 2);
     assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_objects WHERE note_id = ?')
       .get(first.projection_note_id) as any).count >= 3, true);
+    const blockPlacements = db.prepare(`
+      SELECT cp.x, cp.surface, cp.boundary_role, cp.frame_id, cp.metadata
+      FROM canvas_placements cp
+      JOIN canvas_objects co ON co.id = cp.object_id
+      WHERE cp.note_id = ? AND co.kind = 'paragraph_block_projection'
+      ORDER BY cp.id
+    `).all(first.projection_note_id) as any[];
+    assert.equal(blockPlacements.length, 2);
+    assert.equal(blockPlacements.every((placement) => placement.x === 152), true);
+    assert.equal(blockPlacements.every((placement) => placement.surface === 'formal_page'), true);
+    assert.equal(blockPlacements.every((placement) => placement.boundary_role === 'inside'), true);
+    assert.equal(blockPlacements.every((placement) => typeof placement.frame_id === 'string'), true);
+    assert.equal(blockPlacements.every((placement) => {
+      const metadata = JSON.parse(placement.metadata);
+      return metadata.placement_kind === 'source_block'
+        && Object.prototype.hasOwnProperty.call(metadata, 'source_page_index')
+        && metadata.layout_policy?.coordinate_space === 'canvas_world';
+    }), true);
 
     const second = await materializeSourceNow(db, userId, uploaded.source.id, {
       sourceRootDir,

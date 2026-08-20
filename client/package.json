@@ -16,7 +16,7 @@
     "check:v2-bn11-relation-freshness": "node scripts/v2Bn11RelationFreshnessContractCheck.mjs",
     "check:source-experience": "node scripts/sourceExperienceContractCheck.mjs && tsc -p scripts/tsconfig.source-experience.json && node ../.codex-tmp/source-experience/client/scripts/sourceExperienceModelContractCheck.js",
     "smoke:canvas-engine-model-contract": "tsc -p scripts/tsconfig.canvas-model-contract.json && node ../.codex-tmp/canvas-engine-contract/client/scripts/canvasEngineModelContractCheck.js",
-    "smoke:canvas-engine-performance": "tsc -p scripts/tsconfig.canvas-performance.json && node ../.codex-tmp/canvas-engine-performance/scripts/canvasEnginePerformanceSeed.js"
+    "smoke:canvas-engine-performance": "tsc -p scripts/tsconfig.canvas-performance.json && node ../.codex-tmp/canvas-engine-performance/client/scripts/canvasEnginePerformanceSeed.js"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

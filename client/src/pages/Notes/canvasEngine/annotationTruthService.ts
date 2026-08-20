@@ -5,6 +5,7 @@ import type {
   AnnotationRangeV1,
   AnnotationTruthV1,
 } from './runtimeDataTypes';
+import { textFocusReceiptsEqual, type TextOwnerReconciliation } from './textFocusReceipt';
 
 const DEFAULT_LABEL = 'Untitled label';
 const DEFAULT_COLOR_TOKEN = 'annotation-yellow';
@@ -22,6 +23,36 @@ function nowIso(): string {
 function cleanLabel(label: string): string {
   const trimmed = label.trim();
   return trimmed || DEFAULT_LABEL;
+}
+
+export function reconcileAnnotationTruthTextOwner(
+  annotations: AnnotationTruthV1[],
+  reconciliation: TextOwnerReconciliation,
+): AnnotationTruthV1[] {
+  const updatedAt = nowIso();
+  let changed = false;
+  const next = annotations.map((annotation) => {
+    let annotationChanged = false;
+    const ranges = annotation.ranges.map((range) => {
+      if (!textFocusReceiptsEqual({
+        blockId: range.block_id || '',
+        textFlowId: range.text_flow_id || '',
+        textUnitId: range.text_unit_id || '',
+      }, reconciliation.from)) {
+        return range;
+      }
+      changed = true;
+      annotationChanged = true;
+      return {
+        ...range,
+        block_id: reconciliation.to.blockId,
+        text_flow_id: reconciliation.to.textFlowId,
+        text_unit_id: reconciliation.to.textUnitId,
+      };
+    });
+    return annotationChanged ? { ...annotation, ranges, updated_at: updatedAt } : annotation;
+  });
+  return changed ? next : annotations;
 }
 
 function normalizeOffsets(startOffset: number, endOffset: number): {

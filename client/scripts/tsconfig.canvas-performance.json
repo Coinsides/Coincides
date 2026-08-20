@@ -6,11 +6,13 @@
     "lib": ["ES2022", "DOM"],
     "module": "CommonJS",
     "moduleResolution": "Node",
+    "noEmitOnError": true,
     "outDir": "../../.codex-tmp/canvas-engine-performance",
     "paths": {
-      "@/*": ["*"]
+      "@/*": ["*"],
+      "@shared/*": ["../../shared/*"]
     },
-    "rootDir": "..",
+    "rootDir": "../..",
     "skipLibCheck": true,
     "strict": true,
     "target": "ES2022"

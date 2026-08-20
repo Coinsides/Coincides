@@ -20,12 +20,13 @@ import type {
 export type UseNoteCanvasLayerPropsInput =
   Omit<NoteChromeLayerProps, 'note' | 'onAddFavorite' | 'onBackProject'>
   & Omit<NoteFloatingPanelLayerProps, 'onCloseSourceJump' | 'onFocusBlock'>
-  & Omit<NoteWritingSurfaceLayerProps, 'onFocusBlock' | 'noteId' | 'projectId'>
+  & Omit<NoteWritingSurfaceLayerProps, 'onFocusBlock' | 'onRequestFocusBlock' | 'noteId' | 'projectId'>
   & Pick<NoteRuntimeDocumentLayerProps, 'onSurfacePointerDown' | 'templateWarning'>
   & {
     note: Note | null;
     onFloatingPanelFocusBlock: NoteFloatingPanelLayerProps['onFocusBlock'];
     onWritingSurfaceFocusBlock: NoteWritingSurfaceLayerProps['onFocusBlock'];
+    onWritingSurfaceRequestBlockFocus: NoteWritingSurfaceLayerProps['onRequestFocusBlock'];
     groupFolders: GroupFolderV1[];
     onSaveGroupFolders: NoteWritingSurfaceLayerProps['onSaveGroupFolders'];
     setSourceJumpTarget: Dispatch<SetStateAction<SourceJumpTarget | null>>;
@@ -139,10 +140,14 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     defaultTextTemplate: input.defaultTextTemplate,
     documentTypographyProfile: input.documentTypographyProfile,
     draftActive: input.draftActive,
+    draftFocusReceipt: input.draftFocusReceipt,
     draftLayout: input.draftLayout,
+    draftOwnerReconciliation: input.draftOwnerReconciliation,
+    draftPhase: input.draftPhase,
     draftRef: input.draftRef,
     draftText: input.draftText,
     focusBlockId: input.focusBlockId,
+    focusedTextOwner: input.focusedTextOwner,
     interactionState: input.interactionState,
     layoutMode: input.layoutMode,
     noteCanvasRuntime: input.noteCanvasRuntime,
@@ -150,6 +155,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     projectId: input.note.course_id,
     pageContentHeight: input.pageContentHeight,
     pageOffsetX: input.pageOffsetX,
+    placementPending: input.placementPending,
     primaryPageFrameX: input.primaryPageFrameX,
     primaryPageFrameWidth: input.primaryPageFrameWidth,
     savingBlockId: input.savingBlockId,
@@ -190,9 +196,12 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     onAddPageBelow: input.onAddPageBelow,
     onDiscardDraft: input.onDiscardDraft,
     onDraftChange: input.onDraftChange,
+    onDraftFocusReceipt: input.onDraftFocusReceipt,
     onDraftKeyDown: input.onDraftKeyDown,
     onFieldDraftChange: input.onFieldDraftChange,
     onFocusBlock: input.onWritingSurfaceFocusBlock,
+    onReleaseTextFocus: input.onReleaseTextFocus,
+    onRequestFocusBlock: input.onWritingSurfaceRequestBlockFocus,
     onMeasuredBlockHeight: input.onMeasuredBlockHeight,
     onPageSpaceDoubleClick: input.onPageSpaceDoubleClick,
     onPanViewportBy: input.onPanViewportBy,

@@ -543,6 +543,9 @@ export function publishSourceProjection(
           JSON.stringify({
             placement_kind: 'source_block',
             source_page_index: block.artifact.page_index,
+            layout_policy: {
+              coordinate_space: 'canvas_world',
+            },
           }),
           now,
           now,

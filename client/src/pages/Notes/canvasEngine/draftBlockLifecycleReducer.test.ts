@@ -4,12 +4,14 @@ import { describe, expect, it } from 'vitest';
 import type { BlockBoxLayout } from './runtimeLayout';
 import {
   INITIAL_DRAFT_BLOCK_LIFECYCLE_STATE,
-  shouldMountLocalDraft,
+  hasMeaningfulDraftContent,
+  shouldCreateDurableDraftFromInput,
   shouldShowEmptyPagePrompt,
   transitionCreatingDraft,
   transitionDraftActive,
   transitionDraftFocusNonce,
   transitionDraftLayout,
+  transitionDraftPhase,
   transitionDraftText,
   type DraftBlockLifecycleAction,
   type DraftBlockLifecycleState,
@@ -22,6 +24,7 @@ function applyDraftBlockLifecycleTransition(
   action: DraftBlockLifecycleAction,
 ): DraftBlockLifecycleState {
   return {
+    phase: transitionDraftPhase(current.phase, action),
     draftActive: transitionDraftActive(current.draftActive, action),
     draftText: transitionDraftText(current.draftText, action),
     creatingDraft: transitionCreatingDraft(current.creatingDraft, action),
@@ -39,6 +42,7 @@ describe('draft block lifecycle transition calculations', () => {
     const second = applyDraftBlockLifecycleTransition(first, { type: 'activate_local', layout });
 
     expect(first).toEqual({
+      phase: 'ephemeral-mounted',
       draftActive: true,
       draftText: '',
       creatingDraft: false,
@@ -46,6 +50,25 @@ describe('draft block lifecycle transition calculations', () => {
       draftLayout: layout,
     });
     expect(second.draftFocusNonce).toBe(2);
+  });
+
+  it('records mount, focus, meaningful input, and durable reconciliation in order', () => {
+    const mounted = applyDraftBlockLifecycleTransition(
+      INITIAL_DRAFT_BLOCK_LIFECYCLE_STATE,
+      { type: 'activate_local', layout },
+    );
+    const focused = applyDraftBlockLifecycleTransition(mounted, { type: 'focus_received' });
+    const dirty = applyDraftBlockLifecycleTransition(focused, { type: 'meaningful_input' });
+    const reconciled = applyDraftBlockLifecycleTransition(dirty, { type: 'persisted_reconciled' });
+    const finished = applyDraftBlockLifecycleTransition(reconciled, { type: 'persist_succeeded' });
+
+    expect([mounted.phase, focused.phase, dirty.phase, reconciled.phase, finished.phase]).toEqual([
+      'ephemeral-mounted',
+      'focused',
+      'dirty',
+      'persisted/reconciled',
+      'idle',
+    ]);
   });
 
   it('preserves current text and creating status when local activation wins the guard', () => {
@@ -63,7 +86,7 @@ describe('draft block lifecycle transition calculations', () => {
     });
   });
 
-  it('keeps empty-block creation and meaningful draft persistence as distinct transitions', () => {
+  it('keeps meaningful persistence mounted until durable focus handoff', () => {
     const editing = {
       ...INITIAL_DRAFT_BLOCK_LIFECYCLE_STATE,
       draftActive: true,
@@ -71,12 +94,6 @@ describe('draft block lifecycle transition calculations', () => {
       draftLayout: layout,
     };
 
-    expect(applyDraftBlockLifecycleTransition(editing, { type: 'begin_empty_block_create' })).toMatchObject({
-      creatingDraft: true,
-      draftActive: false,
-      draftText: '',
-      draftLayout: null,
-    });
     expect(applyDraftBlockLifecycleTransition(editing, { type: 'begin_draft_persist' })).toMatchObject({
       creatingDraft: true,
       draftActive: true,
@@ -88,7 +105,7 @@ describe('draft block lifecycle transition calculations', () => {
   it('does not let an async finally erase a local draft reopened while creation was pending', () => {
     const pending = applyDraftBlockLifecycleTransition(
       INITIAL_DRAFT_BLOCK_LIFECYCLE_STATE,
-      { type: 'begin_empty_block_create' },
+      { type: 'begin_draft_persist' },
     );
     const reopened = applyDraftBlockLifecycleTransition(pending, { type: 'activate_local', layout });
     const typed = applyDraftBlockLifecycleTransition(reopened, { type: 'set_text', value: 'new local text' });
@@ -116,7 +133,7 @@ describe('draft block lifecycle transition calculations', () => {
 
     expect(succeeded).toMatchObject({ creatingDraft: true, draftActive: false, draftText: '', draftLayout: null });
     expect(applyDraftBlockLifecycleTransition(succeeded, { type: 'create_finished' }).creatingDraft).toBe(false);
-    expect(discarded.creatingDraft).toBe(true);
+    expect(discarded.creatingDraft).toBe(false);
     expect(reset.creatingDraft).toBe(false);
   });
 
@@ -137,41 +154,56 @@ describe('draft block lifecycle transition calculations', () => {
     })).toBe(current.draftLayout);
   });
 
-  it('mirrors the current local-versus-empty-block activation guard', () => {
-    expect(shouldMountLocalDraft({ hasNote: false, hasDefaultTextTemplate: true, creatingDraft: false })).toBe(true);
-    expect(shouldMountLocalDraft({ hasNote: true, hasDefaultTextTemplate: false, creatingDraft: false })).toBe(true);
-    expect(shouldMountLocalDraft({ hasNote: true, hasDefaultTextTemplate: true, creatingDraft: true })).toBe(true);
-    expect(shouldMountLocalDraft({ hasNote: true, hasDefaultTextTemplate: true, creatingDraft: false })).toBe(false);
+  it('creates on any meaningful input and leaves only whitespace ephemeral', () => {
+    expect(hasMeaningfulDraftContent('  sentinel  ')).toBe(true);
+    expect(hasMeaningfulDraftContent(' \n ')).toBe(false);
+    expect(shouldCreateDurableDraftFromInput('s')).toBe(true);
+    expect(shouldCreateDurableDraftFromInput(' /heading')).toBe(true);
+    expect(shouldCreateDurableDraftFromInput('   ')).toBe(false);
   });
 });
 
-describe('empty Page prompt current raw-count gate', () => {
-  it('shows only for writable, inactive Pages with zero raw sorted blocks', () => {
-    expect(shouldShowEmptyPagePrompt({ contentReadOnly: false, draftActive: false, sortedBlockCount: 0 })).toBe(true);
-    expect(shouldShowEmptyPagePrompt({ contentReadOnly: true, draftActive: false, sortedBlockCount: 0 })).toBe(false);
-    expect(shouldShowEmptyPagePrompt({ contentReadOnly: false, draftActive: true, sortedBlockCount: 0 })).toBe(false);
-    expect(shouldShowEmptyPagePrompt({ contentReadOnly: false, draftActive: false, sortedBlockCount: 1 })).toBe(false);
+describe('empty Page prompt meaningful-content gate', () => {
+  it('shows only for writable Pages without meaningful content or a pending editor', () => {
+    expect(shouldShowEmptyPagePrompt({
+      contentReadOnly: false,
+      hasMeaningfulRenderableContent: false,
+      hasPendingEditor: false,
+    })).toBe(true);
+    expect(shouldShowEmptyPagePrompt({
+      contentReadOnly: true,
+      hasMeaningfulRenderableContent: false,
+      hasPendingEditor: false,
+    })).toBe(false);
+    expect(shouldShowEmptyPagePrompt({
+      contentReadOnly: false,
+      hasMeaningfulRenderableContent: false,
+      hasPendingEditor: true,
+    })).toBe(false);
+    expect(shouldShowEmptyPagePrompt({
+      contentReadOnly: false,
+      hasMeaningfulRenderableContent: true,
+      hasPendingEditor: false,
+    })).toBe(false);
   });
 
-  it('still shows while ready-path creation is pending and hides for one invisible ghost', () => {
+  it('stays hidden while persistence is pending and ignores an empty raw ghost', () => {
     const pendingCreation = applyDraftBlockLifecycleTransition(
       INITIAL_DRAFT_BLOCK_LIFECYCLE_STATE,
-      { type: 'begin_empty_block_create' },
+      { type: 'begin_draft_persist' },
     );
 
     expect(pendingCreation).toMatchObject({ creatingDraft: true, draftActive: false });
     expect(shouldShowEmptyPagePrompt({
       contentReadOnly: false,
-      draftActive: pendingCreation.draftActive,
-      sortedBlockCount: 0,
-    })).toBe(true);
+      hasMeaningfulRenderableContent: false,
+      hasPendingEditor: pendingCreation.creatingDraft,
+    })).toBe(false);
 
-    const pageVisibleBlockCount = 0;
-    expect(pageVisibleBlockCount).toBe(0);
     expect(shouldShowEmptyPagePrompt({
       contentReadOnly: false,
-      draftActive: false,
-      sortedBlockCount: 1,
-    })).toBe(false);
+      hasMeaningfulRenderableContent: false,
+      hasPendingEditor: false,
+    })).toBe(true);
   });
 });

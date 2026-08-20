@@ -549,6 +549,37 @@ test('Block CanvasObject identity stays per placement when the same block is reu
   });
 });
 
+test('Block placement round-trips the coordinate and Page boundary receipt', async () => {
+  await withDb((db) => {
+    const ids = seedUserCourseNote(db);
+    const { blockId, placementId } = seedBlockPlacement(db, ids);
+
+    const saved = saveBlockCanvasPlacement(db, ids.userId, ids.noteId, placementId, {
+      block_id: blockId,
+      layout: {
+        x: 900,
+        y: 30,
+        width: 80,
+        height: 110,
+        surface: 'canvas_workspace',
+        boundary_role: 'crossing',
+        frame_id: 'page-frame-receipt',
+        coordinate_space: 'canvas_world',
+      },
+    });
+
+    assert.equal(saved.layout.surface, 'canvas_workspace');
+    assert.equal(saved.layout.boundary_role, 'crossing');
+    assert.equal(saved.layout.frame_id, 'page-frame-receipt');
+    assert.equal(saved.layout.coordinate_space, 'canvas_world');
+
+    const persistence = getNoteCanvasPersistence(db, ids.userId, ids.noteId);
+    assert.equal(persistence.blockLayouts[0]?.layout.boundary_role, 'crossing');
+    assert.equal(persistence.blockLayouts[0]?.layout.frame_id, 'page-frame-receipt');
+    assert.equal(persistence.blockLayouts[0]?.layout.coordinate_space, 'canvas_world');
+  });
+});
+
 test('Image CanvasObject saves as asset-backed media without becoming text content truth', async () => {
   await withDb((db) => {
     const ids = seedUserCourseNote(db);

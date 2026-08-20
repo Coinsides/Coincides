@@ -1,4 +1,9 @@
 import {
+  classifyCanvasSurfaceAuthority,
+  type CanvasSurfaceAuthorityDecision,
+  type CanvasSurfacePageBoundary,
+} from '../../../../../shared/types/canvasSurfaceAuthority';
+import {
   DEFAULT_BLOCK_GAP,
   CANVAS_WORKSPACE_WIDTH,
   DEFAULT_PAGE_CONTENT_WIDTH,
@@ -10,6 +15,7 @@ import {
   type AIVisibility,
   type BlockBoxLayout,
   type BoundaryKind,
+  type CanvasWorldBlockBoxLayout,
   type ExportRole,
   type LayoutWidthMode,
   type LayoutHistoryEntry,
@@ -71,6 +77,14 @@ function isStoredLayoutSurface(value: unknown): value is NonNullable<BlockBoxLay
   return value === 'formal_page' || value === 'canvas_workspace';
 }
 
+function isStoredCoordinateSpace(value: unknown): value is NonNullable<BlockBoxLayout['coordinate_space']> {
+  return value === 'page_frame_local' || value === 'canvas_world';
+}
+
+function isStoredBoundaryRole(value: unknown): value is NonNullable<BlockBoxLayout['boundary_role']> {
+  return value === 'inside' || value === 'crossing' || value === 'outside';
+}
+
 function isLayoutWidthMode(value: unknown): value is LayoutWidthMode {
   return value === 'auto' || value === 'manual';
 }
@@ -87,15 +101,214 @@ export function readStoredLayout(block: PlacementSeedBlock): Partial<BlockBoxLay
     ai_visibility: isAIVisibility(layout.ai_visibility) ? layout.ai_visibility : undefined,
     surface: isStoredLayoutSurface(layout.surface) ? layout.surface : undefined,
     width_mode: isLayoutWidthMode(layout.width_mode) ? layout.width_mode : undefined,
+    coordinate_space: isStoredCoordinateSpace(layout.coordinate_space) ? layout.coordinate_space : undefined,
+    frame_id: typeof layout.frame_id === 'string' && layout.frame_id.trim() ? layout.frame_id : undefined,
+    boundary_role: isStoredBoundaryRole(layout.boundary_role) ? layout.boundary_role : undefined,
+  };
+}
+
+type SurfaceClassifiableLayout = Pick<BlockBoxLayout, 'x' | 'width'>
+  & Partial<Pick<BlockBoxLayout, 'surface' | 'coordinate_space' | 'frame_id' | 'surface_authority'>>;
+
+function pageBoundaryForFrame(pageFrame: PageFrameModel): CanvasSurfacePageBoundary {
+  return {
+    left: pageFrame.x + pageFrame.contentInset.left,
+    right: pageFrame.x + pageFrame.width - pageFrame.contentInset.right,
+    frameId: pageFrame.id,
+  };
+}
+
+export function classifyBlockSurfaceAuthority(
+  layout: SurfaceClassifiableLayout,
+  options: {
+    pageFrame?: PageFrameModel | null;
+    pageLocalWidth?: number;
+  } = {},
+): CanvasSurfaceAuthorityDecision {
+  const pageLocalWidth = options.pageLocalWidth ?? DEFAULT_PAGE_CONTENT_WIDTH;
+  const internalAuthority = layout.surface_authority;
+  if (internalAuthority?.pageBoundary) {
+    return classifyCanvasSurfaceAuthority({
+      coordinateSpace: internalAuthority.coordinateSpace,
+      box: layout,
+      pageBoundary: internalAuthority.pageBoundary,
+      pageLocalWidth: internalAuthority.pageBoundary.right - internalAuthority.pageBoundary.left,
+      explicitSurface: layout.surface,
+    });
+  }
+
+  if (layout.coordinate_space === 'canvas_world') {
+    return classifyCanvasSurfaceAuthority({
+      coordinateSpace: 'canvas_world',
+      box: layout,
+      pageBoundary: options.pageFrame ? pageBoundaryForFrame(options.pageFrame) : undefined,
+      explicitSurface: layout.surface,
+    });
+  }
+
+  if (!layout.coordinate_space && layout.surface) {
+    return classifyCanvasSurfaceAuthority({
+      coordinateSpace: 'canvas_world',
+      box: layout,
+      explicitSurface: layout.surface,
+    });
+  }
+
+  return classifyCanvasSurfaceAuthority({
+    coordinateSpace: 'page_frame_local',
+    box: layout,
+    pageBoundary: {
+      left: 0,
+      right: pageLocalWidth,
+      frameId: layout.frame_id || options.pageFrame?.id || null,
+    },
+    pageLocalWidth,
+    explicitSurface: layout.surface,
+  });
+}
+
+function layoutSurface(value: unknown): BlockBoxLayout['surface'] | undefined {
+  return isStoredLayoutSurface(value) ? value : undefined;
+}
+
+function layoutCoordinateSpace(value: unknown): BlockBoxLayout['coordinate_space'] | undefined {
+  return isStoredCoordinateSpace(value) ? value : undefined;
+}
+
+function layoutFrameId(value: unknown): string | undefined {
+  return typeof value === 'string' && value.trim() ? value : undefined;
+}
+
+function applyAuthorityDecisionToHydratedLayout(
+  layout: Record<string, unknown>,
+  decision: CanvasSurfaceAuthorityDecision,
+): Record<string, unknown> {
+  const next: Record<string, unknown> = {
+    ...layout,
+    surface: decision.surface,
+    boundary_role: decision.boundaryRole,
+  };
+  if (decision.frameId) next.frame_id = decision.frameId;
+  else delete next.frame_id;
+  return next;
+}
+
+/**
+ * Hydration is an explicit coordinate conversion boundary. Legacy layouts
+ * without a coordinate-space receipt keep their explicit surface; migration
+ * is responsible for tagging rows before geometry may override that value.
+ */
+export function reconcileHydratedBlockLayoutSurfaceAuthority(
+  layout: Record<string, unknown>,
+  pageFrames: PageFrameModel[],
+): Record<string, unknown> {
+  const x = typeof layout.x === 'number' ? layout.x : Number.NaN;
+  const width = typeof layout.width === 'number' ? layout.width : Number.NaN;
+  if (!Number.isFinite(x) || !Number.isFinite(width)) return layout;
+
+  const explicitSurface = layoutSurface(layout.surface);
+  const coordinateSpace = layoutCoordinateSpace(layout.coordinate_space);
+  if (!coordinateSpace && explicitSurface) return layout;
+
+  const requestedFrameId = layoutFrameId(layout.frame_id);
+  const requestedFrame = requestedFrameId
+    ? pageFrames.find((frame) => frame.id === requestedFrameId)
+    : undefined;
+  const orderedFrames = requestedFrame
+    ? [requestedFrame, ...pageFrames.filter((frame) => frame.id !== requestedFrame.id)]
+    : pageFrames;
+
+  if (coordinateSpace === 'canvas_world') {
+    const classified = orderedFrames.map((pageFrame) => ({
+      pageFrame,
+      pageBoundary: pageBoundaryForFrame(pageFrame),
+      decision: classifyCanvasSurfaceAuthority({
+        coordinateSpace: 'canvas_world',
+        box: { x, width },
+        pageBoundary: pageBoundaryForFrame(pageFrame),
+        explicitSurface,
+      }),
+    }));
+    const insideMatch = classified.find((item) => item.decision.boundaryRole === 'inside');
+    const crossingMatch = classified.find((item) => item.decision.boundaryRole === 'crossing');
+    const worldContext = insideMatch || crossingMatch || classified[0];
+    const decision = insideMatch?.decision || crossingMatch?.decision || classifyCanvasSurfaceAuthority({
+      coordinateSpace: 'canvas_world',
+      box: { x, width },
+      pageBoundary: worldContext?.pageBoundary,
+      explicitSurface,
+    });
+    const reconciled = applyAuthorityDecisionToHydratedLayout(layout, decision);
+    if (!insideMatch) {
+      return {
+        ...reconciled,
+        coordinate_space: 'canvas_world',
+        surface_authority: worldContext
+          ? {
+            coordinateSpace: 'canvas_world',
+            pageBoundary: worldContext.pageBoundary,
+          }
+          : layout.surface_authority,
+      };
+    }
+    const next: Record<string, unknown> = {
+      ...reconciled,
+      x: x - insideMatch.pageBoundary.left,
+      coordinate_space: 'page_frame_local',
+      surface_authority: {
+        coordinateSpace: 'page_frame_local',
+        pageBoundary: {
+          left: 0,
+          right: insideMatch.pageBoundary.right - insideMatch.pageBoundary.left,
+          frameId: insideMatch.pageFrame.id,
+        },
+      },
+    };
+    return next;
+  }
+
+  const pageFrame = requestedFrame || orderedFrames[0];
+  const pageLocalWidth = pageFrame
+    ? Math.max(0, pageFrame.width - pageFrame.contentInset.left - pageFrame.contentInset.right)
+    : DEFAULT_PAGE_CONTENT_WIDTH;
+  const decision = classifyCanvasSurfaceAuthority({
+    coordinateSpace: 'page_frame_local',
+    box: { x, width },
+    pageBoundary: {
+      left: 0,
+      right: pageLocalWidth,
+      frameId: pageFrame?.id || requestedFrameId || null,
+    },
+    pageLocalWidth,
+    explicitSurface,
+  });
+  return {
+    ...applyAuthorityDecisionToHydratedLayout(layout, decision),
+    coordinate_space: 'page_frame_local',
+    surface_authority: pageFrame
+      ? {
+        coordinateSpace: 'page_frame_local',
+        pageBoundary: {
+          left: 0,
+          right: pageLocalWidth,
+          frameId: pageFrame.id,
+        },
+      }
+      : layout.surface_authority,
   };
 }
 
 export function isCanvasWorkspaceBlock(block: PlacementSeedBlock, contentWidth: number): boolean {
   const stored = readStoredLayout(block);
-  if (stored?.surface === 'canvas_workspace') return true;
-  if (stored?.surface === 'formal_page') return false;
-
-  return typeof stored?.x === 'number' && stored.x >= contentWidth;
+  if (!stored) return false;
+  if ((typeof stored.x !== 'number' || typeof stored.width !== 'number') && !stored.surface) return false;
+  return classifyBlockSurfaceAuthority({
+    ...stored,
+    x: typeof stored.x === 'number' ? stored.x : Number.NaN,
+    width: typeof stored.width === 'number' ? stored.width : Number.NaN,
+  }, {
+    pageLocalWidth: contentWidth,
+  }).surface === 'canvas_workspace';
 }
 
 export function normalizeBlockLayout<TBlock extends PlacementSeedBlock>({
@@ -120,17 +333,19 @@ export function normalizeBlockLayout<TBlock extends PlacementSeedBlock>({
   const shouldUseStoredWidth = useStoredPlacement
     && typeof stored?.width === 'number'
     && (isWorkspaceLayout || stored.width_mode === 'manual');
+  const preserveWorldCoordinates = useStoredPlacement
+    && stored?.coordinate_space === 'canvas_world';
   const width = clamp(
     shouldUseStoredWidth ? stored.width as number : fallback.width,
     MIN_BLOCK_WIDTH,
     Math.max(MIN_BLOCK_WIDTH, maxPlacementWidth),
   );
-  const x = clamp(
-    useStoredPlacement && typeof stored?.x === 'number' ? stored.x : fallback.x,
-    0,
-    Math.max(0, maxPlacementWidth - width),
-  );
-  const y = Math.max(0, useStoredPlacement && typeof stored?.y === 'number' ? stored.y : fallback.y);
+  const requestedX = useStoredPlacement && typeof stored?.x === 'number' ? stored.x : fallback.x;
+  const x = preserveWorldCoordinates
+    ? requestedX
+    : clamp(requestedX, 0, Math.max(0, maxPlacementWidth - width));
+  const requestedY = useStoredPlacement && typeof stored?.y === 'number' ? stored.y : fallback.y;
+  const y = preserveWorldCoordinates ? requestedY : Math.max(0, requestedY);
   const naturalHeight = estimateHeight(block, width);
   const storedHeight = useStoredPlacement && typeof stored?.height === 'number' ? stored.height : 0;
   const height = Math.max(MIN_BLOCK_HEIGHT, naturalHeight, storedHeight);
@@ -145,6 +360,13 @@ export function normalizeBlockLayout<TBlock extends PlacementSeedBlock>({
     ai_visibility: stored?.ai_visibility,
     surface: useStoredPlacement ? stored?.surface : undefined,
     width_mode: useStoredPlacement && stored?.width_mode === 'manual' ? 'manual' : undefined,
+    coordinate_space: useStoredPlacement
+      ? stored?.coordinate_space
+        || (stored?.surface === 'canvas_workspace' ? undefined : 'page_frame_local')
+      : undefined,
+    frame_id: useStoredPlacement ? stored?.frame_id : undefined,
+    boundary_role: useStoredPlacement ? stored?.boundary_role : undefined,
+    surface_authority: useStoredPlacement ? stored?.surface_authority : undefined,
   };
 }
 
@@ -172,8 +394,11 @@ export function normalizeResolvedBlockLayout<TBlock extends PlacementSeedBlock>(
     MIN_BLOCK_WIDTH,
     Math.max(MIN_BLOCK_WIDTH, maxPlacementWidth),
   );
-  const x = clamp(layout.x, 0, Math.max(0, maxPlacementWidth - width));
-  const y = Math.max(0, layout.y);
+  const preserveWorldCoordinates = layout.coordinate_space === 'canvas_world';
+  const x = preserveWorldCoordinates
+    ? layout.x
+    : clamp(layout.x, 0, Math.max(0, maxPlacementWidth - width));
+  const y = preserveWorldCoordinates ? layout.y : Math.max(0, layout.y);
   const naturalHeight = estimateHeight(block, width);
 
   return {
@@ -183,6 +408,8 @@ export function normalizeResolvedBlockLayout<TBlock extends PlacementSeedBlock>(
     width,
     height: Math.max(MIN_BLOCK_HEIGHT, naturalHeight, layout.height),
     width_mode: layout.width_mode === 'manual' ? 'manual' : undefined,
+    coordinate_space: layout.coordinate_space
+      || (layout.surface === 'canvas_workspace' ? undefined : 'page_frame_local'),
   };
 }
 
@@ -195,16 +422,22 @@ export function buildDefaultBlockLayouts<TBlock extends { id: string }>(
   const width = Math.min(DEFAULT_PAGE_CONTENT_WIDTH, contentWidth);
   return blocks.reduce<Record<string, BlockBoxLayout>>((acc, block) => {
     const height = estimateHeight(block, width);
-    acc[block.id] = { x: 0, y: cursorY, width, height };
+    acc[block.id] = {
+      x: 0,
+      y: cursorY,
+      width,
+      height,
+      coordinate_space: 'page_frame_local',
+    };
     cursorY += height + DEFAULT_BLOCK_GAP;
     return acc;
   }, {});
 }
 
-export function getBoundaryKind(layout: Pick<BlockBoxLayout, 'x' | 'width'>): BoundaryKind {
-  if (layout.x >= DEFAULT_PAGE_CONTENT_WIDTH) return 'outside';
-  if (layout.x + layout.width <= DEFAULT_PAGE_CONTENT_WIDTH) return 'inside';
-  return 'crossing';
+export function getBoundaryKind(layout: SurfaceClassifiableLayout): BoundaryKind {
+  return classifyBlockSurfaceAuthority(layout, {
+    pageLocalWidth: DEFAULT_PAGE_CONTENT_WIDTH,
+  }).boundaryRole;
 }
 
 function toCanvasBoundaryKind(boundary: BoundaryKind): CanvasBoundaryKind {
@@ -226,8 +459,12 @@ export function buildRuntimeBlockPlacement({
   pageFrame: PageFrameModel | null;
   zIndex: number;
 }): BlockPlacementModel {
-  const boundary = toCanvasBoundaryKind(getBoundaryKind(layout));
-  const surface = boundary === 'inside' ? 'formal_page' : 'canvas_workspace';
+  const authority = classifyBlockSurfaceAuthority(layout, {
+    pageFrame,
+    pageLocalWidth: DEFAULT_PAGE_CONTENT_WIDTH,
+  });
+  const boundary = toCanvasBoundaryKind(authority.boundaryRole);
+  const isCanvasWorldLayout = layout.coordinate_space === 'canvas_world';
   const visibilityState = layout.export_role === 'scratch'
     ? 'scratch'
     : layout.ai_visibility === 'hidden'
@@ -242,13 +479,13 @@ export function buildRuntimeBlockPlacement({
     objectId: block.id,
     objectKind: 'note_block',
     canvasId,
-    frameId: boundary === 'inside' ? pageFrame?.id : undefined,
-    x: layout.x + pageOffsetX,
+    frameId: authority.frameId || (boundary === 'inside' ? pageFrame?.id : undefined),
+    x: isCanvasWorldLayout ? layout.x : layout.x + pageOffsetX,
     y: layout.y,
     width: layout.width,
     height: layout.height,
     rotation: layout.rotation || 0,
-    surface,
+    surface: authority.surface,
     boundaryRole: boundary,
     zIndex,
     snapState: 'free',
@@ -267,19 +504,22 @@ export function projectPageFrameLocalLayoutToCanvasLayout({
 }): BlockBoxLayout {
   if (!pageFrame || layout.surface === 'canvas_workspace') return layout;
 
-  const localOffsetX = pageFrame.x + pageFrame.contentInset.left - pageOffsetX;
+  const pageBoundary = pageBoundaryForFrame(pageFrame);
+  const localOffsetX = pageBoundary.left;
   const localOffsetY = pageFrame.y + pageFrame.contentInset.top;
-  if (localOffsetX === 0 && localOffsetY === 0) return {
-    ...layout,
-    surface: layout.surface || 'formal_page',
-  };
-
+  void pageOffsetX;
   return {
     ...layout,
     x: layout.x + localOffsetX,
     y: layout.y + localOffsetY,
     surface: 'formal_page',
-  };
+    coordinate_space: 'canvas_world',
+    frame_id: pageFrame.id,
+    surface_authority: {
+      coordinateSpace: 'canvas_world',
+      pageBoundary,
+    },
+  } satisfies CanvasWorldBlockBoxLayout;
 }
 
 export function buildRelationEndpointReserveForPlacement(placement: BlockPlacementModel): RelationEndpointReserve[] {
@@ -303,14 +543,28 @@ export function buildRelationEndpointReserveForPlacement(placement: BlockPlaceme
 }
 
 export function buildLayoutPayload(layout: BlockBoxLayout): Record<string, unknown> {
-  const payload: Record<string, unknown> = {
+  const roundedLayout: BlockBoxLayout = {
+    ...layout,
     x: Math.round(layout.x),
     y: Math.round(layout.y),
     width: Math.round(layout.width),
     height: Math.round(layout.height),
-    surface: getBoundaryKind(layout) === 'inside' ? 'formal_page' : 'canvas_workspace',
+  };
+  const authority = classifyBlockSurfaceAuthority(roundedLayout, {
+    pageLocalWidth: DEFAULT_PAGE_CONTENT_WIDTH,
+  });
+  const payload: Record<string, unknown> = {
+    x: roundedLayout.x,
+    y: roundedLayout.y,
+    width: roundedLayout.width,
+    height: roundedLayout.height,
+    surface: authority.surface,
+    boundary_role: authority.boundaryRole,
     version: 'V2.BN.8',
   };
+  if (layout.coordinate_space) payload.coordinate_space = layout.coordinate_space;
+  else if (!layout.surface) payload.coordinate_space = 'page_frame_local';
+  if (authority.frameId) payload.frame_id = authority.frameId;
   if (typeof layout.rotation === 'number' && layout.rotation !== 0) payload.rotation = layout.rotation;
   if (layout.export_role) payload.export_role = layout.export_role;
   if (layout.ai_visibility) payload.ai_visibility = layout.ai_visibility;
@@ -360,12 +614,16 @@ export function buildLayoutHistoryEntry(
 
 export function getEffectiveExportRole(layout: BlockBoxLayout): ExportRole {
   if (layout.export_role) return layout.export_role;
-  return getBoundaryKind(layout) === 'outside' ? 'scratch' : 'included';
+  return classifyBlockSurfaceAuthority(layout, {
+    pageLocalWidth: DEFAULT_PAGE_CONTENT_WIDTH,
+  }).boundaryRole === 'outside' ? 'scratch' : 'included';
 }
 
 export function getEffectiveAIVisibility(layout: BlockBoxLayout): AIVisibility {
   if (layout.ai_visibility) return layout.ai_visibility;
-  return getBoundaryKind(layout) === 'outside' ? 'hidden' : 'visible';
+  return classifyBlockSurfaceAuthority(layout, {
+    pageLocalWidth: DEFAULT_PAGE_CONTENT_WIDTH,
+  }).boundaryRole === 'outside' ? 'hidden' : 'visible';
 }
 
 function hasHorizontalOverlap(a: BlockBoxLayout, b: BlockBoxLayout): boolean {

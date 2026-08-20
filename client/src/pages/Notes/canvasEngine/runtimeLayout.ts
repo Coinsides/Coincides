@@ -3,12 +3,22 @@ import {
   DEFAULT_PAGE_FRAME_PAGE_SIZE,
   PAGE_FRAME_PRINT_PRESETS,
 } from './pageFramePrintScaleService';
+import type {
+  CanvasSurfaceBoundaryRole,
+  CanvasSurfaceCoordinateSpace,
+  CanvasSurfacePageBoundary,
+} from '../../../../../shared/types/canvasSurfaceAuthority';
 
 export type SurfaceMode = 'page' | 'canvas';
 export type BoundaryKind = 'inside' | 'outside' | 'crossing';
 export type ExportRole = 'included' | 'excluded' | 'scratch';
 export type AIVisibility = 'visible' | 'hidden';
 export type LayoutWidthMode = 'auto' | 'manual';
+
+export interface BlockLayoutSurfaceAuthorityContext {
+  coordinateSpace: CanvasSurfaceCoordinateSpace;
+  pageBoundary?: CanvasSurfacePageBoundary;
+}
 
 export interface BlockBoxLayout {
   x: number;
@@ -20,7 +30,23 @@ export interface BlockBoxLayout {
   ai_visibility?: AIVisibility;
   surface?: 'formal_page' | 'canvas_workspace';
   width_mode?: LayoutWidthMode;
+  coordinate_space?: CanvasSurfaceCoordinateSpace;
+  frame_id?: string;
+  boundary_role?: CanvasSurfaceBoundaryRole;
+  surface_authority?: BlockLayoutSurfaceAuthorityContext;
 }
+
+export type PageFrameLocalBlockBoxLayout = BlockBoxLayout & {
+  coordinate_space: 'page_frame_local';
+};
+
+export type CanvasWorldBlockBoxLayout = BlockBoxLayout & {
+  coordinate_space: 'canvas_world';
+  surface_authority: BlockLayoutSurfaceAuthorityContext & {
+    coordinateSpace: 'canvas_world';
+    pageBoundary: CanvasSurfacePageBoundary;
+  };
+};
 
 export interface SnapGuide {
   x?: number;

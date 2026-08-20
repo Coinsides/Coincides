@@ -1,6 +1,7 @@
 import api from '@/services/api';
 import {
   buildLayoutPayload,
+  reconcileHydratedBlockLayoutSurfaceAuthority,
 } from './placementService';
 import {
   NOTE_PAGE_FRAME_COLLECTION_METADATA_KEY,
@@ -32,9 +33,16 @@ export function stripLegacyPageFrameMetadata(metadata: Record<string, unknown> |
 export function applyCanvasLayoutsToBlocks(
   blocks: NoteBlock[],
   blockLayouts: CanvasBlockLayoutRecord[],
+  options: {
+    pageFrameCollection?: PageFrameCollectionModel | null;
+  } = {},
 ): NoteBlock[] {
   if (blockLayouts.length === 0) return blocks;
-  const layoutsByBlockId = new Map(blockLayouts.map((item) => [item.block_id, item.layout]));
+  const pageFrames = options.pageFrameCollection?.pageFrames || [];
+  const layoutsByBlockId = new Map(blockLayouts.map((item) => [
+    item.block_id,
+    reconcileHydratedBlockLayoutSurfaceAuthority(item.layout, pageFrames),
+  ]));
   return blocks.map((block) => {
     const layout = layoutsByBlockId.get(block.id);
     return layout ? { ...block, canvas_layout: layout } : block;
@@ -79,6 +87,7 @@ export async function saveBlockCanvasPlacementForNote(input: {
   noteId: string;
   block: Pick<NoteBlock, 'id' | 'placement_id'>;
   layout: BlockBoxLayout;
+  pageFrameCollection?: PageFrameCollectionModel | null;
 }): Promise<CanvasBlockLayoutRecord> {
   const response = await api.put<CanvasBlockLayoutRecord>(
     `/canvas-objects/by-note/${input.noteId}/block-placements/${input.block.placement_id}`,
@@ -87,7 +96,13 @@ export async function saveBlockCanvasPlacementForNote(input: {
       layout: buildLayoutPayload(input.layout),
     },
   );
-  return response.data;
+  return {
+    ...response.data,
+    layout: reconcileHydratedBlockLayoutSurfaceAuthority(
+      response.data.layout,
+      input.pageFrameCollection?.pageFrames || [],
+    ),
+  };
 }
 
 export async function saveGenericCanvasObjectForNote(input: {

@@ -1,7 +1,4 @@
-import {
-  CornerDownLeft,
-  Boxes,
-} from 'lucide-react';
+import { Boxes } from 'lucide-react';
 import type { TemplateOption } from '@/services/templateOptions';
 import {
   useEffect,
@@ -25,8 +22,11 @@ import {
   textFromContent,
   type FieldValueRecord,
 } from '../blockContentService';
-import { shouldShowEmptyPagePrompt } from '../draftBlockLifecycleReducer';
 import type { RuntimeInteractionState } from '../interactionController';
+import {
+  hasLegitimatePendingWritingEditor,
+  hasMeaningfulWritingSurfaceContent,
+} from '../writingEntryVisibility';
 import type { SlashTarget } from '../hooks/useSlashCommandController';
 import type {
   AnnotationTruthV1,
@@ -45,6 +45,7 @@ import {
   restoreAnnotationTruth,
   softDeleteAnnotationTruth,
   updateAnnotationColorToken,
+  reconcileAnnotationTruthTextOwner,
 } from '../annotationTruthService';
 import {
   getChildAnnotations,
@@ -54,7 +55,10 @@ import {
   applySourceBackedAnnotationRangeEdit,
   rebaseAnnotationsForTextUnitEdit,
 } from '../rangeRebaseService';
-import type { CapturedSelectionRange } from '../selectionRangeService';
+import {
+  reconcileCapturedSelectionTextOwner,
+  type CapturedSelectionRange,
+} from '../selectionRangeService';
 import { useSelectionDraftController } from '../hooks/useSelectionDraftController';
 import {
   selectionDraftContainsCapturedSelection,
@@ -197,6 +201,7 @@ import {
 } from './AnnotationContextMenuLayer';
 import { AnnotationOverlayLayer } from './AnnotationOverlayLayer';
 import { BlockEditorLayer } from './BlockEditorLayer';
+import { DraftWritingEntryLayer } from './DraftWritingEntryLayer';
 import { ContextMenuLayer } from './ContextMenuLayer';
 import { InlineNamePromptLayer } from './InlineNamePromptLayer';
 import { ObjectInspectorLayer } from './ObjectInspectorLayer';
@@ -211,6 +216,11 @@ import {
 } from './TableObjectLayer';
 import { VisualConnectorLayer } from './VisualConnectorLayer';
 import styles from '../../NoteDetail.module.css';
+import type { DraftBlockLifecyclePhase } from '../draftBlockLifecycleReducer';
+import {
+  type TextFocusReceipt,
+  type TextOwnerReconciliation,
+} from '../textFocusReceipt';
 
 export interface NoteWritingSurfaceLayerProps {
   activeBlockId: string | null;
@@ -232,10 +242,14 @@ export interface NoteWritingSurfaceLayerProps {
   defaultTextTemplate: TemplateOption;
   documentTypographyProfile: DocumentTypographyProfile;
   draftActive: boolean;
+  draftFocusReceipt: TextFocusReceipt;
   draftLayout: BlockBoxLayout | null;
+  draftOwnerReconciliation: TextOwnerReconciliation | null;
+  draftPhase: DraftBlockLifecyclePhase;
   draftRef: RefObject<HTMLTextAreaElement>;
   draftText: string;
   focusBlockId: string | null;
+  focusedTextOwner: TextFocusReceipt | null;
   interactionState: RuntimeInteractionState;
   layoutMode: boolean;
   noteCanvasRuntime: NoteCanvasRuntimeModel;
@@ -243,6 +257,7 @@ export interface NoteWritingSurfaceLayerProps {
   projectId: string;
   pageContentHeight: number;
   pageOffsetX: number;
+  placementPending: boolean;
   primaryPageFrameX: number;
   primaryPageFrameWidth: number;
   savingBlockId: string | null;
@@ -311,7 +326,10 @@ export interface NoteWritingSurfaceLayerProps {
   onDraftChange: (value: string, caret: number, anchorElement?: HTMLElement | null) => void;
   onDraftKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
   onFieldDraftChange: (block: NoteBlock, text: string, fieldValues: FieldValueRecord) => void;
-  onFocusBlock: (blockId: string) => void;
+  onDraftFocusReceipt: (receipt: TextFocusReceipt) => void;
+  onFocusBlock: (receipt: TextFocusReceipt) => void;
+  onReleaseTextFocus: (receipt: TextFocusReceipt) => void;
+  onRequestFocusBlock: (blockId: string) => void;
   onMeasuredBlockHeight: (block: NoteBlock, layout: BlockBoxLayout, isActive: boolean, height: number) => void;
   onPageSpaceDoubleClick: (event: ReactPointerEvent<HTMLDivElement>) => void;
   onPanViewportBy: (delta: CanvasPoint, world?: CanvasWorldModel) => void;
@@ -494,10 +512,14 @@ export function NoteWritingSurfaceLayer({
   defaultTextTemplate,
   documentTypographyProfile,
   draftActive,
+  draftFocusReceipt,
   draftLayout,
+  draftOwnerReconciliation,
+  draftPhase,
   draftRef,
   draftText,
   focusBlockId,
+  focusedTextOwner,
   interactionState,
   layoutMode,
   noteCanvasRuntime,
@@ -505,6 +527,7 @@ export function NoteWritingSurfaceLayer({
   projectId,
   pageContentHeight,
   pageOffsetX,
+  placementPending,
   primaryPageFrameX,
   primaryPageFrameWidth,
   savingBlockId,
@@ -549,9 +572,12 @@ export function NoteWritingSurfaceLayer({
   onMovePageFrame,
   onDiscardDraft,
   onDraftChange,
+  onDraftFocusReceipt,
   onDraftKeyDown,
   onFieldDraftChange,
   onFocusBlock,
+  onReleaseTextFocus,
+  onRequestFocusBlock,
   onMeasuredBlockHeight,
   onPageSpaceDoubleClick,
   onPanViewportBy,
@@ -776,6 +802,7 @@ export function NoteWritingSurfaceLayer({
       text: string;
       saving: boolean;
       active: boolean;
+      autoFocus: boolean;
     }>();
     shapePlacements.forEach((placement) => {
       const canvasObject = canvasObjectById.get(placement.objectId);
@@ -791,6 +818,7 @@ export function NoteWritingSurfaceLayer({
         text: blockTextDrafts[block.id] ?? textFromContent(block),
         saving: savingBlockId === block.id,
         active: activeBlockId === block.id || focusBlockId === block.id || selectedBlockId === block.id,
+        autoFocus: focusBlockId === block.id,
       });
     });
     return next;
@@ -857,7 +885,36 @@ export function NoteWritingSurfaceLayer({
     appendDraftRange,
     activateDraft,
     clearDraft,
+    reconcileTextOwner,
   } = useSelectionDraftController();
+  useEffect(() => {
+    if (!draftOwnerReconciliation) return;
+    reconcileTextOwner(draftOwnerReconciliation);
+    setAnnotationContextMenu((current) => current
+      ? {
+        ...current,
+        selection: {
+          ...current.selection,
+          range: reconcileCapturedSelectionTextOwner(
+            current.selection.range,
+            draftOwnerReconciliation,
+          ),
+        },
+      }
+      : current);
+    const reconciledAnnotations = reconcileAnnotationTruthTextOwner(
+      annotationTruths,
+      draftOwnerReconciliation,
+    );
+    if (reconciledAnnotations !== annotationTruths) {
+      void onSaveAnnotationTruths(reconciledAnnotations);
+    }
+  }, [
+    annotationTruths,
+    draftOwnerReconciliation,
+    onSaveAnnotationTruths,
+    reconcileTextOwner,
+  ]);
   const suggestedLabelName = useMemo(
     () => nextNeutralLabelName(annotationTruths),
     [annotationTruths],
@@ -868,10 +925,39 @@ export function NoteWritingSurfaceLayer({
     if (!block) return null;
     return blockTextFlowDrafts[blockId] || getTextFlowContent(block.content_json);
   };
-
   const plainTextFromTextFlow = (textFlow: TextBlockContentV1): string => (
     textFlow.units.map((unit) => unit.text).join('\n')
   );
+  const hasMeaningfulRenderableContent = useMemo(() => hasMeaningfulWritingSurfaceContent({
+    allBlocks,
+    annotationTruths,
+    blockTextDrafts,
+    canvasObjects: noteCanvasRuntime.canvasObjects,
+    canvasPlacements: noteCanvasRuntime.canvasPlacements,
+    contentMounts: noteCanvasRuntime.contentMounts,
+    imageObjects: noteCanvasRuntime.imageObjects,
+    surfaceMode,
+    structuredObjects: noteCanvasRuntime.structuredObjects,
+    visibleBlocks,
+  }), [
+    allBlocks,
+    annotationTruths,
+    blockTextDrafts,
+    noteCanvasRuntime.canvasObjects,
+    noteCanvasRuntime.canvasPlacements,
+    noteCanvasRuntime.contentMounts,
+    noteCanvasRuntime.imageObjects,
+    noteCanvasRuntime.structuredObjects,
+    surfaceMode,
+    visibleBlocks,
+  ]);
+  const hasPendingDurableEditor = hasLegitimatePendingWritingEditor({
+    creatingDraft,
+    draftActive,
+    focusedTextOwner,
+    interactionState,
+    placementPending,
+  });
 
   useEffect(() => {
     if (!surfaceRef.current || surfaceMode !== 'canvas') return undefined;
@@ -1523,7 +1609,7 @@ export function NoteWritingSurfaceLayer({
     }
 
     setSelectedCanvasObjectId(objectId);
-    onFocusBlock(createdBlock.id);
+    onRequestFocusBlock(createdBlock.id);
   };
 
   const createVisualConnectorBetweenObjects = async (
@@ -1590,7 +1676,7 @@ export function NoteWritingSurfaceLayer({
     const existingBlock = findBackingBlockForShape(objectId, noteCanvasRuntime.contentMounts, allBlocks);
     if (existingBlock) {
       setSelectedCanvasObjectId(objectId);
-      onFocusBlock(existingBlock.id);
+      onRequestFocusBlock(existingBlock.id);
       return;
     }
 
@@ -1634,7 +1720,7 @@ export function NoteWritingSurfaceLayer({
     }
 
     setSelectedCanvasObjectId(objectId);
-    onFocusBlock(backingBlock.id);
+    onRequestFocusBlock(backingBlock.id);
   };
 
   const applyShapeStylePreset = async (
@@ -1672,7 +1758,7 @@ export function NoteWritingSurfaceLayer({
     const backingBlock = findBackingBlockForShape(objectId, noteCanvasRuntime.contentMounts, allBlocks);
     if (!backingBlock) return;
     setSelectedCanvasObjectId(objectId);
-    onFocusBlock(backingBlock.id);
+    onRequestFocusBlock(backingBlock.id);
   };
 
   const demoteShapeText = async (objectId: string): Promise<void> => {
@@ -2768,7 +2854,7 @@ export function NoteWritingSurfaceLayer({
       if (contentMount?.targetKind === 'note_block' && contentMount.targetId) {
         setSelectedCanvasObjectId(objectId);
         onSelectBlock(contentMount.targetId);
-        onFocusBlock(contentMount.targetId);
+        onRequestFocusBlock(contentMount.targetId);
       }
       clearCanvasObjectContextMenus();
       return;
@@ -3569,7 +3655,8 @@ export function NoteWritingSurfaceLayer({
               });
               setSelectedCanvasObjectId(canvasObject.objectId);
             }}
-            onShapeTextFocus={(blockId) => onFocusBlock(blockId)}
+            onShapeTextFocus={onFocusBlock}
+            onShapeTextBlur={onReleaseTextFocus}
             onShapeTextChange={(block, value, caret, anchorElement) => {
               handlePlainTextBackedBlockChange(block, value, caret, anchorElement);
             }}
@@ -3614,7 +3701,17 @@ export function NoteWritingSurfaceLayer({
               saving={savingBlockId === block.id}
               active={isActive}
               autoFocus={focusBlockId === block.id}
-              onFocused={() => onFocusBlock(block.id)}
+              autoFocusReceipt={draftOwnerReconciliation?.to.blockId === block.id
+                ? draftOwnerReconciliation.to
+                : null}
+              autoFocusSelection={draftOwnerReconciliation?.to.blockId === block.id
+                ? {
+                  start: draftOwnerReconciliation.selectionStart,
+                  end: draftOwnerReconciliation.selectionEnd,
+                }
+                : null}
+              onFocused={onFocusBlock}
+              onFocusReleased={onReleaseTextFocus}
               onAnnotationSelect={(annotationId) => setSelectedAnnotationIds([annotationId])}
               onAnnotationContextMenu={handleAnnotationContextMenu}
               onAnnotationStackSelect={setSelectedAnnotationIds}
@@ -3669,43 +3766,30 @@ export function NoteWritingSurfaceLayer({
           );
         })}
 
-        {draftActive && !contentReadOnly && (
-          <div
-            className={`${styles.block} ${styles.blockBox} ${styles.draftBlock}`}
-            style={{
-              left: (draftLayout || defaultDraftLayout).x + pageOffsetX,
-              top: (draftLayout || defaultDraftLayout).y,
-              width: (draftLayout || defaultDraftLayout).width,
-              height: (draftLayout || defaultDraftLayout).height,
-            }}
-          >
-            <textarea
-              ref={draftRef}
-              className={styles.pageTextArea}
-              value={draftText}
-              onChange={(event) => {
-                onResizeDraftFromTextarea(event.currentTarget);
-                onDraftChange(event.currentTarget.value, event.currentTarget.selectionStart, event.currentTarget);
-              }}
-              onBlur={() => {
-                if (slashTarget?.target === 'draft') return;
-                if (draftText.trim()) {
-                  void onPersistDraft(draftText);
-                } else {
-                  onDiscardDraft();
-                  onClearSlashTarget();
-                }
-              }}
-              onKeyDown={onDraftKeyDown}
-              placeholder={creatingDraft ? 'Saving block...' : 'Start writing, or type / for blocks'}
-              rows={1}
-            />
-            <div className={styles.draftHint}>
-              <CornerDownLeft size={13} />
-              Enter for a new line, Ctrl+Enter for the next block.
-            </div>
-          </div>
-        )}
+        <DraftWritingEntryLayer
+          contentReadOnly={contentReadOnly}
+          creating={creatingDraft}
+          draftActive={draftActive}
+          focusReceipt={draftFocusReceipt}
+          hasMeaningfulRenderableContent={hasMeaningfulRenderableContent}
+          hasPendingDurableEditor={hasPendingDurableEditor}
+          layout={draftLayout || defaultDraftLayout}
+          pageOffsetX={pageOffsetX}
+          phase={draftPhase}
+          placementPending={placementPending}
+          slashTargetActive={slashTarget?.target === 'draft'}
+          textareaRef={draftRef}
+          text={draftText}
+          onActivate={onActivateDraft}
+          onChange={onDraftChange}
+          onClearSlashTarget={onClearSlashTarget}
+          onDiscard={onDiscardDraft}
+          onFocused={onDraftFocusReceipt}
+          onFocusReleased={onReleaseTextFocus}
+          onKeyDown={onDraftKeyDown}
+          onPersist={(text) => onPersistDraft(text)}
+          onResize={onResizeDraftFromTextarea}
+        />
 
         {slashTarget && (
           <SlashMenuLayer
@@ -3716,11 +3800,6 @@ export function NoteWritingSurfaceLayer({
           />
         )}
 
-        {shouldShowEmptyPagePrompt({ contentReadOnly, draftActive, sortedBlockCount }) && (
-          <button className={styles.emptyPagePrompt} onDoubleClick={() => onActivateDraft(defaultDraftLayout)}>
-            Double-click to start writing
-          </button>
-        )}
       </div>
       {surfaceMode === 'canvas' && (
         <div

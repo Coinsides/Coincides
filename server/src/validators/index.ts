@@ -731,6 +731,7 @@ const sourceReferenceSchema = z.object({
 );
 
 export const createNoteBlockSchema = z.object({
+  client_create_key: z.string().trim().min(1).max(220).optional(),
   block_type: noteBlockTypeSchema,
   title: z.string().max(300).optional(),
   content_json: jsonObjectSchema.optional().default({}),
@@ -739,6 +740,10 @@ export const createNoteBlockSchema = z.object({
   display_overrides_json: jsonObjectSchema.optional(),
   source_references: z.array(sourceReferenceSchema).max(20).optional(),
 });
+
+export const discardClientNoteBlockCreateSchema = z.object({
+  client_create_key: z.string().trim().min(1).max(220),
+}).strict();
 
 export const updateNoteBlockSchema = z.object({
   block_type: noteBlockTypeSchema.optional(),

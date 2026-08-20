@@ -10,6 +10,7 @@ import {
   type BlockBoxLayout,
   type SnapGuide,
 } from './runtimeLayout';
+import type { TextFocusReceipt } from './textFocusReceipt';
 
 export type RuntimeInteractionMode =
   | 'idle'
@@ -28,6 +29,8 @@ export interface RuntimeInteractionState {
   mode: RuntimeInteractionMode;
   target: RuntimeInteractionTarget;
   blockId?: string;
+  textFlowId?: string;
+  textUnitId?: string;
   panel?: 'slashMenu' | 'preview' | 'layout' | 'noteInfo' | 'moreActions' | 'insert';
 }
 
@@ -43,8 +46,17 @@ export function selectedBlockInteraction(blockId: string): RuntimeInteractionSta
   return { mode: 'selectedBlock', target: 'block', blockId };
 }
 
-export function editingTextInteraction(blockId?: string): RuntimeInteractionState {
-  return { mode: 'editingText', target: blockId ? 'block' : 'draft', blockId };
+export function editingTextInteraction(
+  receipt: TextFocusReceipt,
+  target: Extract<RuntimeInteractionTarget, 'block' | 'draft'>,
+): RuntimeInteractionState {
+  return {
+    mode: 'editingText',
+    target,
+    blockId: receipt.blockId,
+    textFlowId: receipt.textFlowId,
+    textUnitId: receipt.textUnitId,
+  };
 }
 
 export function draggingBlockInteraction(blockId: string): RuntimeInteractionState {
@@ -62,8 +74,17 @@ export function panningCanvasInteraction(): RuntimeInteractionState {
 export function openingMenuInteraction(
   panel: NonNullable<RuntimeInteractionState['panel']>,
   blockId?: string,
+  receipt?: TextFocusReceipt | null,
+  target?: RuntimeInteractionTarget,
 ): RuntimeInteractionState {
-  return { mode: 'openingMenu', target: blockId ? 'block' : 'noteChrome', blockId, panel };
+  return {
+    mode: 'openingMenu',
+    target: target || (blockId ? 'block' : 'noteChrome'),
+    blockId: blockId || receipt?.blockId,
+    textFlowId: receipt?.textFlowId,
+    textUnitId: receipt?.textUnitId,
+    panel,
+  };
 }
 
 export function previewingInteraction(): RuntimeInteractionState {

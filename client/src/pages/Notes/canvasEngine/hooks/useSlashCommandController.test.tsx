@@ -2,6 +2,7 @@ import { act, renderHook } from '@testing-library/react';
 import { createRef, type SetStateAction } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import type { NoteBlock, TextBlockContentV1 } from '../runtimeDataTypes';
+import { textFocusReceiptForBlock } from '../textFocusReceipt';
 import {
   useSlashCommandController,
   type UseSlashCommandControllerOptions,
@@ -43,6 +44,7 @@ function renderSubject(saveBlock: UseSlashCommandControllerOptions['saveBlock'])
     blockTextFlowDrafts,
     draftText: '',
     draftTextRef: { current: '' },
+    focusedTextOwner: textFocusReceiptForBlock(block.id),
     insertTemplateOptions: [],
     persistDraft: vi.fn(async () => undefined),
     saveBlock,

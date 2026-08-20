@@ -301,7 +301,14 @@ function layoutFromPlacement(row: CanvasPlacementRow): Record<string, unknown> {
     width: Math.round(Number(row.width || 0)),
     height: Math.round(Number(row.height || 0)),
     surface: row.surface === 'canvas_workspace' ? 'canvas_workspace' : 'formal_page',
+    boundary_role: row.boundary_role === 'crossing' || row.boundary_role === 'outside'
+      ? row.boundary_role
+      : 'inside',
   };
+  if (row.frame_id) layout.frame_id = row.frame_id;
+  if (policy.coordinate_space === 'page_frame_local' || policy.coordinate_space === 'canvas_world') {
+    layout.coordinate_space = policy.coordinate_space;
+  }
   if (Number(row.rotation || 0) !== 0) layout.rotation = Number(row.rotation || 0);
   if (typeof policy.export_role === 'string') layout.export_role = policy.export_role;
   if (typeof policy.ai_visibility === 'string') layout.ai_visibility = policy.ai_visibility;
@@ -457,6 +464,16 @@ function normalizePlacementForWrite(
   } = {},
 ) {
   const surface = placement.surface === 'formal_page' ? 'formal_page' : 'canvas_workspace';
+  const boundaryRole = placement.boundary_role === 'inside'
+    || placement.boundary_role === 'crossing'
+    || placement.boundary_role === 'outside'
+    ? placement.boundary_role
+    : null;
+  const effectiveSurface = defaults.surface || surface;
+  const coordinateSpace = placement.coordinate_space === 'page_frame_local'
+    || placement.coordinate_space === 'canvas_world'
+    ? placement.coordinate_space
+    : null;
   return {
     id: placementId,
     object_id: objectId,
@@ -467,8 +484,10 @@ function normalizePlacementForWrite(
     height: numeric(placement.height, 0),
     rotation: numeric(placement.rotation, 0),
     frame_id: optionalText(placement.frame_id),
-    surface: defaults.surface || surface,
-    boundary_role: defaults.boundaryRole || (surface === 'formal_page' ? 'inside' : 'outside'),
+    surface: effectiveSurface,
+    boundary_role: defaults.boundaryRole
+      || boundaryRole
+      || (effectiveSurface === 'formal_page' ? 'inside' : 'outside'),
     z_index: integer(placement.z_index, 0),
     snap_state_json: stringifyJson(defaults.snapState || { state: surface === 'formal_page' ? 'snapped' : 'free' }, {}),
     visibility_state: optionalText(placement.visibility_state)
@@ -480,6 +499,7 @@ function normalizePlacementForWrite(
         export_role: optionalText(placement.export_role),
         ai_visibility: optionalText(placement.ai_visibility),
         width_mode: optionalText(placement.width_mode),
+        coordinate_space: coordinateSpace,
       },
     }, {}),
   };

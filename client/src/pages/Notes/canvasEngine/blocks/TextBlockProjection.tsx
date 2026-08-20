@@ -70,6 +70,7 @@ import {
   writeContentGroupDragPayload,
 } from '../contentGroupDragService';
 import styles from '../../NoteDetail.module.css';
+import type { TextFocusReceipt } from '../textFocusReceipt';
 
 interface TextBlockProjectionProps {
   blockId: string;
@@ -83,7 +84,7 @@ interface TextBlockProjectionProps {
   showLabelOverlay: boolean;
   layoutMode?: boolean;
   textareaRef: Ref<HTMLTextAreaElement>;
-  onFocused: () => void;
+  onFocused: (receipt: TextFocusReceipt) => void;
   onAnnotationSelect: (annotationId: string) => void;
   onAnnotationContextMenu: (annotationId: string, point: { x: number; y: number }) => void;
   onTextUnitSelection: (selection: CapturedSelectionRange, anchorRect: DOMRect, options?: { additive?: boolean; preserveDraft?: boolean; hitTestOnly?: boolean }) => void;
@@ -1155,7 +1156,11 @@ export function TextBlockProjection({
                   ].filter(Boolean).join(' ')}
                   value={unit.text}
                   readOnly={readOnly}
-                  onFocus={onFocused}
+                  onFocus={() => onFocused({
+                    blockId,
+                    textFlowId,
+                    textUnitId: unit.id,
+                  })}
                   onChange={readOnly
                     ? undefined
                     : (event) => handleUnitTextChange(unit, event.currentTarget.value, event.currentTarget.selectionStart, event.currentTarget)}

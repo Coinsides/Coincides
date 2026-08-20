@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useLayoutEffect,
   useRef,
   type KeyboardEvent,
   type DragEvent as ReactDragEvent,
@@ -34,7 +35,9 @@ import type {
 import type { CapturedSelectionRange } from '../selectionRangeService';
 import {
   getTextFlowContent,
+  textFlowIdForBlock,
 } from '../textFlowService';
+import type { TextFocusReceipt } from '../textFocusReceipt';
 import {
   buildBlockAnnotationCluster,
 } from '../annotationDisplayService';
@@ -68,7 +71,10 @@ interface BlockEditorLayerProps {
   saving: boolean;
   active: boolean;
   autoFocus: boolean;
-  onFocused: () => void;
+  autoFocusReceipt?: TextFocusReceipt | null;
+  autoFocusSelection?: { start: number; end: number } | null;
+  onFocused: (receipt: TextFocusReceipt) => void;
+  onFocusReleased: (receipt: TextFocusReceipt) => void;
   onAnnotationSelect: (annotationId: string) => void;
   onAnnotationContextMenu: (annotationId: string, point: { x: number; y: number }) => void;
   onAnnotationStackSelect: (annotationIds: string[]) => void;
@@ -119,7 +125,10 @@ export function BlockEditorLayer({
   saving,
   active,
   autoFocus,
+  autoFocusReceipt,
+  autoFocusSelection,
   onFocused,
+  onFocusReleased,
   onAnnotationSelect,
   onAnnotationContextMenu,
   onAnnotationStackSelect,
@@ -149,6 +158,9 @@ export function BlockEditorLayer({
 }: BlockEditorLayerProps) {
   const blockContentRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const focusedReceiptRef = useRef<TextFocusReceipt | null>(null);
+  const onFocusReleasedRef = useRef(onFocusReleased);
+  onFocusReleasedRef.current = onFocusReleased;
   const boundary = getBoundaryKind(layout);
   const exportRole = getEffectiveExportRole(layout);
   const aiVisibility = getEffectiveAIVisibility(layout);
@@ -164,6 +176,11 @@ export function BlockEditorLayer({
     fragmentContinuesToNext ? '下续' : null,
   ].filter(Boolean).join(' / ');
   const textFlow = textFlowDraft || getTextFlowContent(block.content_json);
+  const fallbackFocusReceipt: TextFocusReceipt = {
+    blockId: block.id,
+    textFlowId: textFlowIdForBlock(block.id),
+    textUnitId: textFlow?.units[0]?.id || 'tu-1',
+  };
   const formulaFields = presentationKind === 'formula'
     ? formulaFieldsFromBlock(block, fieldDraft ? text : undefined, fieldDraft)
     : null;
@@ -177,6 +194,16 @@ export function BlockEditorLayer({
     blockId: block.id,
     selectedAnnotationIds,
   });
+
+  const handleFocused = (receipt: TextFocusReceipt) => {
+    focusedReceiptRef.current = receipt;
+    onFocused(receipt);
+  };
+
+  useEffect(() => () => {
+    const receipt = focusedReceiptRef.current;
+    if (receipt) onFocusReleasedRef.current(receipt);
+  }, []);
 
   const handleBlockItemDragStart = (event: ReactDragEvent<HTMLButtonElement>) => {
     event.stopPropagation();
@@ -197,24 +224,29 @@ export function BlockEditorLayer({
     onMeasuredHeight,
   });
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!autoFocus || contentReadOnly) return;
-    window.setTimeout(() => {
-      const activeElement = document.activeElement;
-      if (activeElement instanceof HTMLElement && blockContentRef.current?.contains(activeElement)) {
-        if (activeElement instanceof HTMLTextAreaElement) {
-          resizeTextareaToContent(activeElement);
-        }
-        return;
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLElement && blockContentRef.current?.contains(activeElement)) {
+      if (activeElement instanceof HTMLTextAreaElement) {
+        resizeTextareaToContent(activeElement);
       }
-      const textarea = textareaRef.current;
-      if (!textarea) return;
-      textarea.focus();
-      textarea.selectionStart = textarea.value.length;
-      textarea.selectionEnd = textarea.value.length;
-      resizeTextareaToContent(textarea);
-    }, 0);
-  }, [autoFocus, contentReadOnly]);
+      return;
+    }
+    const textareas = Array.from(
+      blockContentRef.current?.querySelectorAll<HTMLTextAreaElement>('textarea') || [],
+    );
+    const textarea = autoFocusReceipt
+      ? textareas.find((candidate) => candidate.dataset.textUnitId === autoFocusReceipt.textUnitId)
+        || textareaRef.current
+      : textareaRef.current;
+    if (!textarea) return;
+    textarea.focus({ preventScroll: true });
+    const start = Math.max(0, Math.min(textarea.value.length, autoFocusSelection?.start ?? textarea.value.length));
+    const end = Math.max(start, Math.min(textarea.value.length, autoFocusSelection?.end ?? start));
+    textarea.setSelectionRange(start, end);
+    resizeTextareaToContent(textarea);
+  }, [autoFocus, autoFocusReceipt, autoFocusSelection, contentReadOnly]);
 
   const focusNearestTextArea = (clientY: number) => {
     const textareas = Array.from(
@@ -337,14 +369,22 @@ export function BlockEditorLayer({
         </button>
       )}
 
-      <div ref={blockContentRef}>
+      <div
+        ref={blockContentRef}
+        onBlurCapture={() => {
+          const receipt = focusedReceiptRef.current;
+          if (!receipt) return;
+          focusedReceiptRef.current = null;
+          onFocusReleased(receipt);
+        }}
+      >
         {presentationKind === 'formula' && formulaFields ? (
           <FormulaBlockProjection
             active={active}
             readOnly={contentReadOnly}
             fields={formulaFields}
             textareaRef={textareaRef}
-            onFocused={onFocused}
+            onFocused={() => handleFocused(fallbackFocusReceipt)}
             onTextChange={onTextChange}
             onFieldDraftChange={onFieldDraftChange}
             onSave={onSave}
@@ -355,7 +395,7 @@ export function BlockEditorLayer({
             text={text}
             readOnly={contentReadOnly}
             textareaRef={textareaRef}
-            onFocused={onFocused}
+            onFocused={() => handleFocused(fallbackFocusReceipt)}
             onTextChange={onTextChange}
             onSave={onSave}
             onKeyDown={onKeyDown}
@@ -373,7 +413,7 @@ export function BlockEditorLayer({
             showLabelOverlay={showLabelOverlay}
             layoutMode={layoutMode}
             textareaRef={textareaRef}
-            onFocused={onFocused}
+            onFocused={handleFocused}
               onAnnotationSelect={onAnnotationSelect}
               onAnnotationContextMenu={onAnnotationContextMenu}
               onTextUnitSelection={onTextUnitSelection}

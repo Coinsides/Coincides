@@ -1,6 +1,7 @@
 import type { BlockBoxLayout } from './runtimeLayout';
 
 export interface DraftBlockLifecycleState {
+  phase: DraftBlockLifecyclePhase;
   draftActive: boolean;
   draftText: string;
   creatingDraft: boolean;
@@ -8,12 +9,21 @@ export interface DraftBlockLifecycleState {
   draftLayout: BlockBoxLayout | null;
 }
 
+export type DraftBlockLifecyclePhase =
+  | 'idle'
+  | 'ephemeral-mounted'
+  | 'focused'
+  | 'dirty'
+  | 'persisted/reconciled';
+
 type StateUpdate<T> = T | ((current: T) => T);
 
 export type DraftBlockLifecycleAction =
   | { type: 'activate_local'; layout: BlockBoxLayout }
-  | { type: 'begin_empty_block_create' }
+  | { type: 'focus_received' }
+  | { type: 'meaningful_input' }
   | { type: 'begin_draft_persist' }
+  | { type: 'persisted_reconciled' }
   | { type: 'persist_succeeded' }
   | { type: 'create_finished' }
   | { type: 'discard' }
@@ -22,12 +32,35 @@ export type DraftBlockLifecycleAction =
   | { type: 'set_layout'; value: StateUpdate<BlockBoxLayout | null> };
 
 export const INITIAL_DRAFT_BLOCK_LIFECYCLE_STATE: DraftBlockLifecycleState = {
+  phase: 'idle',
   draftActive: false,
   draftText: '',
   creatingDraft: false,
   draftFocusNonce: 0,
   draftLayout: null,
 };
+
+export function transitionDraftPhase(
+  current: DraftBlockLifecyclePhase,
+  action: DraftBlockLifecycleAction,
+): DraftBlockLifecyclePhase {
+  switch (action.type) {
+    case 'activate_local':
+      return current === 'idle' ? 'ephemeral-mounted' : current;
+    case 'focus_received':
+      return current === 'ephemeral-mounted' ? 'focused' : current;
+    case 'meaningful_input':
+      return current === 'persisted/reconciled' ? current : 'dirty';
+    case 'persisted_reconciled':
+      return 'persisted/reconciled';
+    case 'persist_succeeded':
+    case 'discard':
+    case 'reset':
+      return 'idle';
+    default:
+      return current;
+  }
+}
 
 function applyStateUpdate<T>(current: T, update: StateUpdate<T>): T {
   return typeof update === 'function'
@@ -42,7 +75,6 @@ export function transitionDraftActive(
   switch (action.type) {
     case 'activate_local':
       return true;
-    case 'begin_empty_block_create':
     case 'persist_succeeded':
     case 'discard':
     case 'reset':
@@ -57,7 +89,6 @@ export function transitionDraftText(
   action: DraftBlockLifecycleAction,
 ): string {
   switch (action.type) {
-    case 'begin_empty_block_create':
     case 'persist_succeeded':
     case 'discard':
     case 'reset':
@@ -74,10 +105,10 @@ export function transitionCreatingDraft(
   action: DraftBlockLifecycleAction,
 ): boolean {
   switch (action.type) {
-    case 'begin_empty_block_create':
     case 'begin_draft_persist':
       return true;
     case 'create_finished':
+    case 'discard':
     case 'reset':
       return false;
     default:
@@ -99,7 +130,6 @@ export function transitionDraftLayout(
   switch (action.type) {
     case 'activate_local':
       return action.layout;
-    case 'begin_empty_block_create':
     case 'persist_succeeded':
     case 'discard':
     case 'reset':
@@ -111,26 +141,22 @@ export function transitionDraftLayout(
   }
 }
 
-export function shouldMountLocalDraft({
-  hasNote,
-  hasDefaultTextTemplate,
-  creatingDraft,
-}: {
-  hasNote: boolean;
-  hasDefaultTextTemplate: boolean;
-  creatingDraft: boolean;
-}): boolean {
-  return !hasNote || !hasDefaultTextTemplate || creatingDraft;
-}
-
 export function shouldShowEmptyPagePrompt({
   contentReadOnly,
-  draftActive,
-  sortedBlockCount,
+  hasMeaningfulRenderableContent,
+  hasPendingEditor,
 }: {
   contentReadOnly: boolean;
-  draftActive: boolean;
-  sortedBlockCount: number;
+  hasMeaningfulRenderableContent: boolean;
+  hasPendingEditor: boolean;
 }): boolean {
-  return !contentReadOnly && !draftActive && sortedBlockCount === 0;
+  return !contentReadOnly && !hasMeaningfulRenderableContent && !hasPendingEditor;
+}
+
+export function hasMeaningfulDraftContent(value: string): boolean {
+  return value.trim().length > 0;
+}
+
+export function shouldCreateDurableDraftFromInput(value: string): boolean {
+  return hasMeaningfulDraftContent(value);
 }

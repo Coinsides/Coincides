@@ -34,6 +34,7 @@ import {
 import {
   setTextUnitWritingRole,
 } from '../textUnitEditorService';
+import type { TextFocusReceipt } from '../textFocusReceipt';
 import {
   INITIAL_SLASH_COMMAND_STATE,
   applySlashExitToText,
@@ -58,6 +59,7 @@ export interface UseSlashCommandControllerOptions {
   blockTextFlowDrafts: Record<string, TextBlockContentV1>;
   draftText: string;
   draftTextRef: MutableRefObject<string>;
+  focusedTextOwner: TextFocusReceipt | null;
   insertTemplateOptions: TemplateOption[];
   persistDraft: (
     initialText?: string,
@@ -87,6 +89,7 @@ export function useSlashCommandController({
   blockTextFlowDrafts,
   draftText,
   draftTextRef,
+  focusedTextOwner,
   insertTemplateOptions,
   persistDraft,
   saveBlock,
@@ -152,12 +155,14 @@ export function useSlashCommandController({
       type: 'sync_target',
       target: nextTarget,
     }));
+    const receipt = focusedTextOwner && (
+      target === 'draft' || focusedTextOwner.blockId === blockId
+    ) ? focusedTextOwner : null;
+    if (!receipt) return;
     setInteractionState(nextTarget
-      ? openingMenuInteraction('slashMenu', blockId)
-      : target === 'block'
-        ? editingTextInteraction(blockId)
-        : editingTextInteraction());
-  }, [blockListRef, setInteractionState]);
+      ? openingMenuInteraction('slashMenu', blockId, receipt, target)
+      : editingTextInteraction(receipt, target));
+  }, [blockListRef, focusedTextOwner, setInteractionState]);
 
   const handleDraftChange = useCallback((
     value: string,

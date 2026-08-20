@@ -1,5 +1,6 @@
 import type { TemplateOption } from '@/services/templateOptions';
 import type {
+  NoteBlock,
   TextBlockContentV1,
   TextUnitWritingRole,
 } from './runtimeDataTypes';
@@ -178,6 +179,18 @@ export function textFromContent(block: BlockContentInput): string {
   const projected = projectTextFlowContent(block.content_json, block.plain_text || '');
   if (projected.plain_text) return projected.plain_text;
   return block.plain_text || '';
+}
+
+export function hasMeaningfulRenderableBlockContent(block: NoteBlock): boolean {
+  if (block.title?.trim()) return true;
+  if (textFromContent(block).trim() || block.plain_text?.trim()) return true;
+  if (block.source_references.length > 0) return true;
+  const fields = readFieldValues(block.content_json, block.metadata);
+  if (Object.values(fields).some((value) => typeof value === 'string' && value.trim().length > 0)) {
+    return true;
+  }
+  const textFlow = getTextFlowContent(block.content_json);
+  return Boolean(textFlow?.inline_structures.length);
 }
 
 export function contentForTemplate(template: TemplateOption, body: string): Record<string, unknown> {
