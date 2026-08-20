@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 14 份文档。
+共 15 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -19,6 +19,7 @@
 | [ContentGroup-GroupFolder-Contract.md](ContentGroup-GroupFolder-Contract.md) | ContentGroup / GroupFolder Contract | `active` | 2026-06-23 | — |
 | [Editor-State-Rebuild-Contract.md](Editor-State-Rebuild-Contract.md) | Editor State / Rebuild / Undo Contract | `deferred` | 2026-06-23 | — |
 | [Link-Source-Relation-Boundary-Contract.md](Link-Source-Relation-Boundary-Contract.md) | Link / SourceReference / ObjectRelation Boundary Contract | `deferred` | 2026-06-23 | — |
+| [Notebook-Object-Boundary-Contract.md](Notebook-Object-Boundary-Contract.md) | Notebook 对象边界契约 | `draft` | 2026-08-20 | — |
 | [Notebook-Object-Inventory-Contract.md](Notebook-Object-Inventory-Contract.md) | Notebook Object Inventory Contract | `active` | 2026-06-23 | — |
 | [Petal-Contract.md](Petal-Contract.md) | Petal Contract | `superseded` | 2026-07-14 | ⚠️ `docs/agent-ops/analysis/relation-item-graph-concept-design… |
 | [Source-Ladder-Contract.md](Source-Ladder-Contract.md) | Source 三层梯子与锚契约 | `active` | 2026-08-20 | — |
