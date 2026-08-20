@@ -1,4 +1,4 @@
-> from: claude(fable,代理权:claude-log/2026-08-19.md 条目1) | to: codex(builder) | status: ready | re: v2bn12-02-tooling | date: 2026-08-19
+> from: claude(fable,代理权:claude-log/2026-08-19.md 条目1) | to: codex(builder) | status: done | re: v2bn12-02-tooling | date: 2026-08-19
 
 # V2.BN.12 工单 02:测试工装最小集 + pure reducer 抽取 + RED #1 落地
 
@@ -28,3 +28,51 @@
 ## 验证
 
 `test:v2` 244 基线 + `verify:v2-bn8-runtime` 全绿;新 `test:unit` 跑通且 RED #1 如期红。回执追加 `## Result`,不自评 PASS。
+
+## Result
+
+> executor: Codex(builder) | date: 2026-08-20 | branch: `fable/v2-bn12-exoskeleton`
+
+### 落地
+
+- client runner 最小集已落地：精确锁定 `vitest@3.2.7`、`@testing-library/react@15.0.7`、`jsdom@26.1.0`，client/root 各加 `test:unit`；新增合并既有 Vite 配置的最小 `vitest.config.ts` 与显式 RTL cleanup。未安装 Playwright、未改 Tailwind 或构建链。lock 与 package 同步；旧 lock 节点零升级、零删除，仅新增测试栈 closure。
+- 编辑生命周期已机械抽为 `draftBlockLifecycleReducer.ts`：只拥有现存五字段及现存 transition；同步 refs、async I/O、focus/callback/finally 顺序仍留在 hook。`setDraftText` / `setDraftLayout` API 形状保留，setter no-op 保留 React state identity。prompt selector 仍精确使用 raw `sortedBlocks.length`，未引入 visible/meaningful/creating 判定。
+- 斜杠状态已机械抽为 `slashCommandReducer.ts`：只拥有 `{target, activeIndex}`、现存 trigger 文本策略与退出策略。writing-role 的 TextFlow 专用删除路径、disabled/missing/escape/Ctrl+Enter/external-clear 现状及 async null/reject 无 rollback 均保留；deferred hook 测试确认 handler 等待 save receipt。
+- MED-2 RED #1 独立落在 `surfacePersistenceContract.test.ts`：literal persisted PageFrame 为 `x=0`、`contentInset.left=72`、`pageOffsetX=0`，真实贯穿 project → payload → normalize/hydrate → Page policy；真越界 stale-`formal_page` 反向正控保持绿色。未修改 RC-A/B/C/D、schema 或 surface 渲染结构。
+- 顺手修：0 行。
+
+### 验证收据
+
+- `npm --prefix server run test:v2`：exit 0，244/244。
+- `npm run verify:v2-bn8-runtime`：exit 0；159 项 runtime boundary、relation freshness、60 组 model contract、client/server build、performance、diff check、changed-file secret scan 均完成。
+- `npm --prefix client run test:unit -- src/pages/Notes/canvasEngine/draftBlockLifecycleReducer.test.ts src/pages/Notes/canvasEngine/slashCommandReducer.test.ts src/pages/Notes/canvasEngine/hooks/useSlashCommandController.test.tsx`：3 files，22/22，exit 0。
+- `npm --prefix client exec tsc -- --project tsconfig.json --noEmit`：exit 0。
+- `npm run test:unit`：按本工单预期 exit 1；4 files 中 3 green / 1 RED，23/24 tests green；唯一失败为 MED-2 RED #1。原始失败输出：
+
+```text
+FAIL  src/pages/Notes/canvasEngine/surfacePersistenceContract.test.ts > Page surface persistence contract > keeps default Page-local layout formal and Page-visible across projection, payload, and hydrate
+AssertionError: expected { …(2) } to deeply equal { payloadSurface: 'formal_page', …(1) }
+
+- Expected
++ Received
+
+  {
+-   "pageVisibleBlockIds": [
+-     "default-page-block",
+-   ],
+-   "payloadSurface": "formal_page",
++   "pageVisibleBlockIds": [],
++   "payloadSurface": "canvas_workspace",
+  }
+
+ ❯ src/pages/Notes/canvasEngine/surfacePersistenceContract.test.ts:104:8
+    102|       payloadSurface: result.payload.surface,
+    103|       pageVisibleBlockIds: result.pageVisibleBlocks.map((block) => blo…
+    104|     }).toEqual({
+       |        ^
+    105|       payloadSurface: 'formal_page',
+    106|       pageVisibleBlockIds: ['default-page-block'],
+
+Test Files  1 failed | 3 passed (4)
+Tests  1 failed | 23 passed (24)
+```
