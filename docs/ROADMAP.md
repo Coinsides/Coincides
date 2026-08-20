@@ -86,11 +86,10 @@
 |---|---|---|
 | 01 | 编辑机件 root-cause 并案侦查（必修⑤ 的诊断段） | ✅ 闭环（builder 交付 → reviewer PASS/4 MED → 二级复盘） |
 | 02 | 工装单：测试 runner 最小集 + pure reducer，RED 前置 | 进行中（02-1 修正单在跑） |
-| 03 | RC-B surface 修理（坐标与 surface authority） | 待发 |
-| 04 | RC-A 生命周期状态机 | 待发 |
+| 03 | **合批**：RC-A 生命周期状态机 ＋ RC-B surface authority ＋ 存量迁移（原拆 03/04，因下述合取约束并单，2026-08-20 Fable 拍定） | ready，02.1 闭环后开工 |
 | 05 | SlashSession（RC-D） | 待发 |
 
-> ⚠️ **03/04 的拆单约束（来自工单 01 二级复盘）**：症状「Page 死胡同」是 **RC-A.5 × RC-B.3 的合取** —— ghost 计入 prompt 计数（入口消失）＋ ghost 被 Page 策略过滤（内容不显示）。只修一边都能让**新** note 不复现，但各自留下**存量 legacy note 的半死状态**。两条须同批，或显式声明存量迁移路径。
+> ⚠️ **合取约束（来自工单 01 二级复盘，03 合批的依据）**：症状「Page 死胡同」是 **RC-A.5 × RC-B.3 的合取** —— ghost 计入 prompt 计数（入口消失）＋ ghost 被 Page 策略过滤（内容不显示）。只修一边都能让**新** note 不复现，但各自留下**存量 legacy note 的半死状态**。两条须同批，或显式声明存量迁移路径。工单 03 以「同批 ＋ 存量迁移」双保险落实：`agent-ops/handoffs/2026-08-20-v2bn12-03-lifecycle-and-surface-authority.md`。
 
 ### 3.6 V12 尾声
 
