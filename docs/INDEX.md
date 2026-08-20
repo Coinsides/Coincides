@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 10 份文档(仅本层,不含子目录)。
+共 11 份文档(仅本层,不含子目录)。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -21,4 +21,5 @@
 | [DELIVERY_PLAN.md](DELIVERY_PLAN.md) | Coincides Delivery Plan | `archived` | 2026-05-16 | — |
 | [PRD.md](PRD.md) | Coincides PRD | `draft` | 2026-06-06 | ⚠️ 部分段落见下方脱节公告 |
 | [README.md](README.md) | Coincides Documentation | `superseded` | 2026-05-19 | ⚠️ [`agent-ops/AGENT_CONTEXT.md`](agent-ops/AGENT_CONTEXT.md) … |
+| [ROADMAP.md](ROADMAP.md) | Coincides 路线图（现行） | `draft` | 2026-08-20 | — |
 | [v2-note-system-draft.md](v2-note-system-draft.md) | Coincides v2.x Note System Draft | `superseded` | 2026-05 | — |

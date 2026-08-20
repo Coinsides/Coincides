@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 74 份文档。
+共 78 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -50,6 +50,7 @@
 | [claude-log/2026-08-16.md](claude-log/2026-08-16.md) | Claude 行动日志 — 2026-08-16 | `active` | 2026-08-16 | — |
 | [claude-log/2026-08-18.md](claude-log/2026-08-18.md) | Claude 行动日志 — 2026-08-18 | `active` | 2026-08-18 | — |
 | [claude-log/2026-08-19.md](claude-log/2026-08-19.md) | Claude 行动日志 — 2026-08-19 | `active` | 2026-08-19 | — |
+| [claude-log/2026-08-20.md](claude-log/2026-08-20.md) | Claude 工作日志 — 2026-08-20 | `(缺状态头)` | — | — |
 | [claude-log/README.md](claude-log/README.md) | claude-log —— Claude 行动日志（Henry 的监督轨迹） | `active` | 2026-06-27 | — |
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-19 | — |
@@ -85,4 +86,7 @@
 | [handoffs/2026-07-14-v2bn11.7-closure-third-party-review.md](handoffs/2026-07-14-v2bn11.7-closure-third-party-review.md) | V2.BN.11.7 Lifecycle, Integrity And Closure Gate · 第三方复验 | `(缺状态头)` | — | — |
 | [handoffs/2026-07-18-v12-ux-tooling-stack.md](handoffs/2026-07-18-v12-ux-tooling-stack.md) | V12 体验侧工具栈 · 分类清单与安装单 | `(缺状态头)` | — | — |
 | [handoffs/2026-08-19-v2bn12-01-editing-rootcause-investigation.md](handoffs/2026-08-19-v2bn12-01-editing-rootcause-investigation.md) | V2.BN.12 首单:编辑机件焦点/坐标 root-cause 并案侦查 | `(缺状态头)` | — | — |
+| [handoffs/2026-08-19-v2bn12-02-tooling-and-pure-reducers.md](handoffs/2026-08-19-v2bn12-02-tooling-and-pure-reducers.md) | V2.BN.12 工单 02:测试工装最小集 + pure reducer 抽取 + RED #1 落地 | `(缺状态头)` | — | — |
+| [handoffs/2026-08-20-v2bn12-02-1-fix-med1.md](handoffs/2026-08-20-v2bn12-02-1-fix-med1.md) | V2.BN.12 修正单 02.1:MED-1(调度语义)+ LOW-2(收据 cwd) | `(缺状态头)` | — | — |
+| [handoffs/2026-08-20-v2bn12-03-lifecycle-and-surface-authority.md](handoffs/2026-08-20-v2bn12-03-lifecycle-and-surface-authority.md) | V2.BN.12 工单 03(原拆 03/04,合取裁定并批):编辑 lifecycle 状态机 + surface … | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
