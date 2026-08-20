@@ -1,8 +1,8 @@
-> **状态 (Status)**: draft
-> **层 (Layer)**: 路线图 / Roadmap（**草案，待 Fable 抽检放行后转 `active`**）
+> **状态 (Status)**: active
+> **层 (Layer)**: 路线图 / Roadmap
 > **日期 (Updated)**: 2026-08-20
-> **权威 (Authoritative)**: 否（转正前不作为施工依据；现行版本定义仍以 `agent-ops/current-state/README.md §1` 为准）
-> **取代 (Supersedes)**: `docs/Coincides-Better-Notebook-Roadmap.md`（**转正时**该件整体冻结为历史路线图）
+> **权威 (Authoritative)**: 是（版本方向与排期；具体事实以 `agent-ops/current-state/` 为准，方向理由以宪章为准）
+> **取代 (Supersedes)**: [`docs/Coincides-Better-Notebook-Roadmap.md`](Coincides-Better-Notebook-Roadmap.md)（已于 2026-08-20 整体冻结）
 > **被取代 (Superseded by)**: —
 
 # Coincides 路线图（现行）
@@ -12,8 +12,8 @@
 | 文件 | 作用域 | 状态 |
 |---|---|---|
 | `docs/Coincides-Roadmap.md` | v2.0–v2.5.6 工程地基 | `archived`（已关闭） |
-| `docs/Coincides-Better-Notebook-Roadmap.md` | V2.BN.8–11 Better Notebook 线 | **转正时冻结**（决定史仍在其中，见 §6） |
-| **本文件** | V2.BN.12 起 | ACTIVE |
+| `docs/Coincides-Better-Notebook-Roadmap.md` | V2.BN.8–11 Better Notebook 线 | `archived`（2026-08-20 冻结；决定史仍在其中，见 §6） |
+| **本文件** | V2.BN.12 起 | **ACTIVE** |
 
 **本文件的纪律：薄。** 它只承载「现在要建什么、按什么顺序、完工算什么」。理由与推导过程住宪章，事实真相住 current-state，历史决定住冻结件 —— 本文件只指过去。前一份路线图长到 1996 行、三套版本 scheme 并存，正是因为它什么都往身上装；**本文件的存在意义之一就是不重蹈它**。
 
@@ -190,9 +190,12 @@
 
 ---
 
-## 附：转正时的执行清单（草案状态下不执行）
+## 附：转正记录（2026-08-20，已执行）
 
-1. 本文件状态头改 `active`、权威改「是」。
-2. `docs/Coincides-Better-Notebook-Roadmap.md` 顶部横幅升级为**整体冻结公告**，状态改 `archived`，`被取代` 指向本文件（其 §📍 当前权威 map 与 §📍 以下所有版本段落随之失效，决定史保留为历史）。
-3. 更新指向旧路线图的引用：`AGENT_CONTEXT.md §3`、`current-state/README.md §1`、`PRODUCT.md`（批次二一并处理）、`docs/PRD.md` 头部。
-4. 重跑 `node scripts/docs-index.mjs`。
+Fable 抽检放行（三裁：§4 判定表准 / `ROADMAP.md` 命名准 / 旧件参考材料不搬正文准）后全量执行：
+
+1. ✅ 本文件状态头转 `active`、权威转「是」。
+2. ✅ `Coincides-Better-Notebook-Roadmap.md` 整体冻结（`archived`，顶部换整体冻结公告，`被取代` 指向本文件）。冻结公告一并更正了该件自封的「长青参考」标签。
+3. ✅ 更新指向旧路线图的引用：`AGENT_CONTEXT.md §3 / §7`、`current-state/README.md §1`、`docs/PRD.md` 头部。
+   - ⏳ `PRODUCT.md` 的引用按原计划留**批次二**（宪法层重划）一并处理。
+4. ✅ 重跑 `node scripts/docs-index.mjs`。

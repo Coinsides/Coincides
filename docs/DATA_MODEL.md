@@ -381,5 +381,5 @@ Before each `V2.BN.x` implementation, consult:
 
 - `docs/internal/Better-Notebook-Phase-Plan-Template.md`
 - `docs/internal/Better-Notebook-Implementation-Reality-Check.md`
-- `docs/Coincides-Better-Notebook-Roadmap.md`
+- `docs/ROADMAP.md`（现行路线图；旧 `docs/Coincides-Better-Notebook-Roadmap.md` 已于 2026-08-20 整体冻结）
 - `docs/Coincides-Relation-Product-Design.md`

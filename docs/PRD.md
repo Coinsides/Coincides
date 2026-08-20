@@ -17,7 +17,7 @@
 
 **Updated**: 2026-06-06
 **Status**: Active product requirements for the Better Notebook track
-**Active roadmap**: `docs/Coincides-Better-Notebook-Roadmap.md`
+**Active roadmap**: `docs/ROADMAP.md` （2026-08-20 起；旧 `docs/Coincides-Better-Notebook-Roadmap.md` 已整体冻结）
 **Historical roadmap**: `docs/Coincides-Roadmap.md`
 
 ---

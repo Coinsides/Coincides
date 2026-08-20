@@ -1,15 +1,37 @@
-> **状态 (Status)**: active
-> **层 (Layer)**: 路线图 / Roadmap（**当前权威 map 已部分失效**）
-> **日期 (Updated)**: 2026-07-05
-> **权威 (Authoritative)**: 部分（V12 段已作废，见下）
+> **状态 (Status)**: archived
+> **层 (Layer)**: 历史 / History（已关闭的 V2.BN.8–11 Better Notebook 路线图）
+> **日期 (Updated)**: 2026-08-20（冻结）
+> **权威 (Authoritative)**: 否
+> **被取代 (Superseded by)**: [`docs/ROADMAP.md`](ROADMAP.md)
 
-> **⚠️ V12 定义作废公告 (2026-08-19)**：本文 §📍当前权威 map 中的「**V2.BN.12+ 打磨** …… 工程可靠 → 用户可靠；ContentGroup 完整集成落此」**已被取代**。
+> # ⛔ 整体冻结公告（2026-08-20）
 >
-> 现行定义：**V2.BN.12 =「外骨骼与地板」**（agent 进来之前必须存在的东西），必修五件 + 随行三线 + 明确不带清单 —— 权威见 `docs/agent-ops/analysis/unified-direction-concept-design.md` §13（拍板记录 待拍-8）与 `docs/agent-ops/current-state/README.md §1`。
+> **本文件已整体冻结为历史路线图，不再是任何工作的依据。现行路线图 = [`docs/ROADMAP.md`](ROADMAP.md)。**
 >
-> 本文其余部分：§1–§5 长青参考仍有效；§6–§26 早有"⚠️ 历史·勿作现行依据"内部横幅。按 待拍-12，本文将走**分家式重建**（原件整体冻结 + 新建精简 ACTIVE 路线图），草案待出。盘点见 `docs/agent-ops/analysis/2026-08-20-doc-triage-assessment.md`（冲突 C9）。
+> 冻结依据：宪章拍板记录 **待拍-12**（`agent-ops/analysis/unified-direction-concept-design.md`）；分家形制经 Fable 抽检放行（`claude-log/2026-08-20.md`）。
+>
+> ## 为什么是冻结而不是更正
+>
+> 本文件累积追加长到 **1996 行、三套版本 scheme 并存**，其自身的阅读指南已在 2026-07-01 承认这一点。在这样一份文件里插入第四套 scheme，是复制它得病的原因。故按分家式重建：**决定史就地冻结在此，现行计划另立精简件。**
+>
+> ## ⚠️ 特别更正：本文件的「长青参考」标签不可信
+>
+> 本文件 §🧭 阅读指南声称「**§1–§5 长青参考（不随版本过时）**」。**该声明经逐节核对为假**：
+>
+> - **§2 产品北极星**（`:395`）把定位写作 `page-first, canvas-backed, **block-based**`。而 `block-first` 早在 **2026-06-20** 就被 `TextFlow-first / ContentGroup-aware` 取代（`PRODUCT.md` 06-20 教义原文：*"not block-first and not annotation-first"*）。**这一节被「长青」标签保护着错了两个月** —— 正因为标签宣称它不会过时，无人再复核它。
+> - **§3.3「Page-first, Canvas-backed」**（`:1011`）整节已被拍板 待拍-1 / 待拍-2 与宪章 §4「表面重划」取代。
+>
+> 经筛过的逐节判定（哪几节真的还活着、凭什么）见 [`docs/ROADMAP.md` §4](ROADMAP.md)。
+>
+> **教训**：「长青」不是可以自我声明的属性。
+>
+> ## 本文件仍有的价值
+>
+> **决定史**（下方各 dated 段：`2026-06-22` → `2026-07-13`）—— 它们是 V8–V11 时代决定的出生证，索引见 [`docs/ROADMAP.md` §6](ROADMAP.md)。**历史就地冻结，不回头修改，也不修复其失效的内部引用。**
+>
+> ⚠️ `§6`–`§26`（原始 Phase 0 / A1–A9e / F / G 计划）**从未被实际工程采用** —— 实际走的是 `V2.BN.8.x` 线。
 
-# Coincides Better Notebook 路线图
+# Coincides Better Notebook 路线图（已冻结）
 
 **更新日期**: 2026-07-05（2026-06-06 首版；2026-07-01 大整理·非破坏；2026-07-05 目的插入 V9、Source/Relation/打磨顺延）
 **路线图状态**: ACTIVE / 产品化路线图

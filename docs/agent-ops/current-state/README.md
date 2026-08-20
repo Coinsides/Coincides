@@ -33,8 +33,8 @@ Read before any non-trivial work, together with `PRODUCT.md`, `../DOCUMENTATION-
 - **Historical main line**: `codex/v2-bn-canvas-engine` (the V8–V11 "Better Notebook" line).
 - **Version system**: `V2.BN.x`. The old `v2.0–v2.5.6` line is a **closed engineering-foundation roadmap** (`docs/Coincides-Roadmap.md`); some of its product philosophy is outdated (notably **block-first**, now replaced by **TextFlow-first / ContentGroup-aware**).
 - **Current frontier**: **V2.BN.12「外骨骼与地板」in progress.** First work order = `2026-08-19-v2bn12-01-editing-rootcause-investigation.md` (four 🅰 defects investigated as one case — diagnose before prescribing; required item ⑤).
-- Roadmap: `docs/Coincides-Better-Notebook-Roadmap.md`.
-  > ⚠️ That file still says 「V2.BN.12+ 打磨」at `:35`, which **contradicts the definition above**. This file and the charter win. Roadmap rebuild (freeze the original, create a lean ACTIVE roadmap) is commissioned under ruling 待拍-12; draft pending.
+- Roadmap: **`docs/ROADMAP.md`** — the sole ACTIVE roadmap since 2026-08-20.
+  > The former `docs/Coincides-Better-Notebook-Roadmap.md` was **archived in full** on 2026-08-20 under ruling 待拍-12. It retains the V8–V11 decision history and nothing else; do not work from it.
 
 ## 2. Tech snapshot
 

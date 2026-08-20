@@ -46,8 +46,8 @@
   - **必修五件**:①MCP 工具面(操作暴露为工具+守卫+收据,末端执行器首次实体化)②流式装配面+地板组件 ③选区收据系统 ④层0/层1+抽取矩阵(锚格式原生;**层0 schema 与窄腰契约本版定死**,层2 VLM 归 Agent 版)⑤token 预设 v0 + root-cause 并案修理(只修活的)。
   - **随行三线**:摄入收据埋线 / 数据隔离与备份纪律 / AI-readable tree 对齐 DOM。
   - **明确不带(勿自行扩范围)**:知识图谱、Relation 消费面+评估执行器、订单规格细做、产房沙盒、意图路由器、阅卷、homing projection、墙 register。
-- **路线图**:`docs/Coincides-Better-Notebook-Roadmap.md`。
-  > ⚠️ 该文件 `:35` 仍写「V2.BN.12+ 打磨」,**与上方 V12 定义直接矛盾,以本文件与宪章为准**。路线图重建(分家式:原件冻结 + 新建精简 ACTIVE 件)已按 待拍-12 立项,草案待出。
+- **路线图**:**`docs/ROADMAP.md`**(2026-08-20 起唯一 ACTIVE 路线图)。
+  > 旧件 `docs/Coincides-Better-Notebook-Roadmap.md` 已于 2026-08-20 按 待拍-12 **整体冻结**(`archived`),只保留 V8–V11 决定史,不作为任何工作依据。
 
 ## 4. 四大支柱与当前状态(摘要;**权威细节见 `current-state/`**)
 
@@ -89,7 +89,7 @@
 
 | 文件 | 已知脱节 |
 |---|---|
-| `docs/Coincides-Better-Notebook-Roadmap.md` | `:35`「V12=打磨」已作废(待拍-8) |
+| ~~`docs/Coincides-Better-Notebook-Roadmap.md`~~ | ✅ **已处置**:2026-08-20 整体冻结,现行路线图改为 `docs/ROADMAP.md` |
 | `PRODUCT.md` | 定位 / 表面模型(canvas-backed 两模式)/ Source 入库即重建 三处冲突 |
 | `docs/PRD.md` | §2 产品阶梯仍把已物理清场的 `Petal` 列为现役第 4 步 |
 | `docs/ARCHITECTURE.md`、`docs/DATA_MODEL.md` | 停在 2026-06-06,词汇仍为 `ObjectRelation`(旧三表 047 已落),早于 Purpose/Source/Item 三层真相 |
