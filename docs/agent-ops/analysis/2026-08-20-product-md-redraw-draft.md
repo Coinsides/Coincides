@@ -1,7 +1,8 @@
-> **状态 (Status)**: draft
-> **层 (Layer)**: 分析 / Analysis（宪法层重划提案 · **待 Henry 本人终审**）
+> **状态 (Status)**: superseded
+> **层 (Layer)**: 分析 / Analysis（宪法层重划提案 · **已终审并执行**）
+> **被取代 (Superseded by)**: [`PRODUCT.md`](../../../PRODUCT.md)（2026-08-20 CH-1…CH-7 全部执行完毕）
 > **日期 (Updated)**: 2026-08-20
-> **权威 (Authoritative)**: 否 —— **在 Henry 亲自翻牌前，本文与 `PRODUCT.md` 均不因本提案而改变效力**
+> **权威 (Authoritative)**: 否（提案本身）；**§5 四问已由 Henry 本人于 2026-08-20 亲自裁定，见 §5 裁定栏**
 > **委托**: 批次二（分诊表 §4）。流程：Opus 起草 → Fable 过目 → **Henry 终审**。Fable 与 Opus 均不代拍此件。
 
 # `PRODUCT.md` 宪法层重划提案
@@ -56,24 +57,30 @@
 
 ---
 
-### CH-2 — 定位替换（C1）
+### CH-2 — 定位（C1）⚠️ **已按 Henry 裁定改写**
+
+> **Henry 裁定（Q1）：保留更宽的定位。** 学习是首个战场但不是天花板；定位仍写「信息处理」，学习作为**当前主攻方向**写在下一层。避免过早把产品钉死在学生场景。
+>
+> **这条推翻了 Fable 代拍的宪章 §1 定位句（「定位:学习主力工具」）在宪法层的适用**，下游影响见 §5.1。
 
 - **位置**：`PRODUCT.md:22`（`## Product Purpose` 首句）
 - **现文**：
 
 > Coincides is a refined information-processing notebook. Its job is to help humans and AI turn selected materials into readable, editable, source-aware notes and reports.
 
-- **拟改**：
+- **拟改**（首句**保留**，其后追加本体论与阶段焦点两段）：
 
-> Coincides is a **primary tool for learning**: a place where any ordinary study document can be brought in and studied *against*. Underneath, it is a **receipts database that grows projections** — the five truths are the tables, the receipts (anchors, birth certificates, judgment snapshots) are foreign keys with honest degradation, and the reading surface, canvas, HTML export, and vault are four views of the same rows.
+> Coincides is a refined information-processing notebook. Its job is to help humans and AI turn selected materials into readable, editable, source-aware notes and reports.
 >
-> The contrast that names it: **a highlight made in a browser dies inside that file; a selection made here lives on as a receipt.** Obsidian is a note app on top of a filesystem; Coincides is a learning system on top of a database.
+> **Structurally, it is a receipts database that grows projections.** The five truths are the tables; the receipts — anchors, birth certificates, judgment snapshots — are foreign keys with honest degradation; and the reading surface, the canvas, an HTML export, and a vault export are four views of the same rows. The contrast that names it: **a highlight made in a browser dies inside that file; a selection made here lives on as a receipt.** Obsidian is a note app on top of a filesystem; Coincides is a learning system on top of a database.
+>
+> **The current stage focuses on learning.** Study material is the first battlefield — the place where the product must become good enough that its author stops reaching for anything else. That is a focus, not a ceiling: research, report assembly, and long-horizon material organization stay within the north star, they are simply not what this stage optimizes for.
 
-- **依据**：宪章 §0（存在理由）+ §1（本体论与定位），08-18 卷 §四 / §十二。拍板记录见宪章文末。
-- **可逆性**：**低** —— 这是产品自我定义。改了它，下游一切（路线图、契约、组件语言）都跟着转向。
-- **置信度**：**中**。方向已由 Fable 代拍，但**把它写进宪法是另一回事**。→ 见 §5 问题 Q1。
+- **依据**：宪章 §1（本体论部分）+ **Henry 2026-08-20 亲裁（范围部分）**。
+- **可逆性**：中（本体论段与阶段焦点段各自可独立删改）。
+- **置信度**：**高**（裁定后）。
 
----
+> 📌 **我按裁定做的拆分**：Henry 反对的是**范围收窄**（「学习主力工具」把产品钉死在学生场景），不是**本体论**（「长着投影的收据数据库」讲的是架构不是受众）。故保留后者、降级前者为阶段焦点。**若这个拆分读错了他的意思，改起来只是删一段。**
 
 ### CH-3 — 表面模型（C2）
 
@@ -112,10 +119,13 @@
 
 > **作用域（2026-08-19）**：本原则约束的是**画布面**，不再是默认书写面。默认面是流式装配面，其版面由排版预设与编译器给出 —— **好格式是默认给的，不是调出来的**。
 
-- **⚠️ 但 `Elastic Avoidance` 那三段我不提改法，交 Henry** —— 理由见 §5 问题 Q2。
+- **`Elastic Avoidance` 三段（`:243–254`）：按 Henry 裁定（Q2）随 Page 模式一起退役。** 拟处置：整体移出正文，改为一行历史注记 ——
+  > 📜 `Elastic Avoidance`（块间弹性避让，开发中偶然发现并保留的书写手感）随 Page 模式退役于 2026-08-20。原条款见本文件 git 史。
+  **⚠️ 与我的倾向相反**（我倾向留着等流式装配面成型再判），Henry 亲裁退役，照办。
 - **依据**：待拍-1（canvas 减负）。
 - **可逆性**：高。
-- **置信度**：**中高**。作用域收缩我有把握；**弹性避让的存废我没有** —— 我的分诊表 C3 曾把整节判为「与待拍-1 冲突」，**复核后我认为那句话过头了**：待拍-1 释放的是「无尽打磨 / Figma 级 / 炫技」，弹性避让是个轻量书写辅助，**不属于那三类中的任何一类**。真正影响它的是 待拍-2 —— 它自称「belongs to Page mode」，而 Page 模式正在退役。
+- **置信度**：**高**（裁定后）。
+  > 留档：我的分诊表 C3 曾把整节判为「与待拍-1 冲突」，起草时我复核认为**那句过头了** —— 待拍-1 释放的三类不覆盖弹性避让，真正影响它的是待拍-2（宿主 Page 模式退役）。**这个纠正仍然成立**：它是随宿主退役，不是因「炫技」被释放。裁定结果相同，但理由不同，记录要准。
 
 ---
 
@@ -242,7 +252,7 @@ artifact 与 design 工具的页是**终点**（孤儿成品）；
 
 | 段落 | 为什么不动 |
 |---|---|
-| `## Users`（:7–18） | 用户画像未被任何拍板触及。→ 但见 §5 问题 Q4 |
+| `## Users`（:7–18） | ✅ **Henry 裁定（Q4）：保留四类，但加一句边界。** 拟加于该节末：<br>「Learning is what this stage optimizes for. The other uses stay in scope but are not separately designed for yet.」 |
 | `## Brand Personality`（:123） | 安静 / 可靠 / 清晰 / 严肃而不冷 —— 与新方向无冲突 |
 | `## Anti-references`（:137） | 逐条核过，与宪章零冲突。「not a raw Obsidian replacement」与宪章「Obsidian 是文件系统上的笔记应用，我们是数据库上的学习系统」是同一意思的两种说法 |
 | 设计原则 1–7、9–11 | 逐条核过。原则 5（出处可查）、7（AI 协作不接管）、9（工程可靠先于打磨）被新方向**加强**而非削弱 |
@@ -251,47 +261,39 @@ artifact 与 design 工具的页是**终点**（孤儿成品）；
 
 ---
 
-## 5. 给 Henry 的问题（**这四条我不代拍**）
+## 5. Henry 亲裁结果（2026-08-20）
 
-### Q1 — 定位句本身（对应 CH-2）
+| # | 问题 | **Henry 裁定** | 与我的倾向 |
+|---|---|---|---|
+| **Q1** | 定位是否收窄为「学习主力工具」 | ❌ **保留更宽的定位**。学习是首个战场但不是天花板；定位仍写「信息处理」，学习作为当前主攻方向写在下一层。**避免过早把产品钉死在学生场景。** | 我未表态（此题我明确不代拍） |
+| **Q2** | `Elastic Avoidance` 存废 | ✅ **随 Page 模式一起退役** | **与我倾向相反**（我倾向留着等流面成型再判）。他的发现，他定，照办 |
+| **Q3** | 新增章蒸馏浓度 | ✅ **就这个厚度**（约 60 行） | 与我倾向一致 |
+| **Q4** | `## Users` 是否收窄 | ✅ **保留四类，但加一句边界** | 与我倾向一致（我倾向不动，他补了边界句，更好） |
 
-方向已由 Fable 代拍，但**把「学习主力工具 / 长着投影的收据数据库」写进宪法是另一回事**。
+> 另：**LICENSE 问题 Henry 已自行处置** —— 补了 `LICENSE`（MIT）并在 `README.md` 写下「为一个人设计，无条件公开给全世界」。我在 README 草案 §2 挂的那条悬空事项闭环。
 
-- 拍板依据是 2026 夏期末季的实测：你对自建应用**零使用**，被自己用 Claude artifact 搓的 18 件复习件完胜。
-- **问**：这个定位你本人认吗？特别是「学习主力工具」—— 它把产品从「信息处理笔记本」收窄到了「学习」。**收窄是刻意的还是过度的？**
+### 5.1 ⚠️ Q1 的下游影响（**须报 Fable**）
 
-### Q2 — `Elastic Avoidance` 的存废（对应 CH-4）
+Henry 的 Q1 裁定**推翻了 Fable 代拍的宪章 §1 定位句在宪法层的适用**。这是授权字据里「Henry 保留全量推翻权」的第一次实际行使，需要下游对齐：
 
-`PRODUCT.md` 里写它「began as an accidental behavior noticed during development」—— 这是一处带感情的记录。
+| 位置 | 现状 | 建议处置 |
+|---|---|---|
+| `analysis/unified-direction-concept-design.md` §1 | 「**定位:学习主力工具**——任意常见学习文档扔进来」 | **加 rider**：范围部分经 Henry 2026-08-20 亲裁降级为**阶段焦点**，非产品定位。**本体论部分（收据数据库）不受影响。** ⚠️ 该文件是 Fable 的产出且带拍板记录表，**由 Fable 自行加注**，我不代改 |
+| `docs/ROADMAP.md` §4 判定表 | 「现行定位＝**学习主力工具**」 | 随之改为「北极星＝信息处理中台；当前阶段焦点＝学习」 |
+| `README.md` 开篇 | 「一个把学习材料变成可追溯知识的笔记系统」 | **不必改** —— 门面页讲的是当前阶段能做什么，与阶段焦点一致，不构成定位声明 |
 
-- **我的分诊表 C3 曾把原则 8 整节判为「与待拍-1 冲突」，我现在认为那句话过头了。** 待拍-1 释放的是「无尽打磨 / Figma 级 / 炫技」，弹性避让是个轻量书写辅助，不属于其中任何一类。
-- 真正影响它的是 **待拍-2**：它自称「belongs to **Page mode** and layout editing」，而 Page 模式正在从内容容器退役。
-- **问**：三选一 —— ①随 Page 模式一起退役；②迁到画布面继续活；③留在原地，等流式装配面做出来再看它还有没有位置。**我倾向 ③**（不急着杀一个没在碍事的东西），但这是你的发现，你定。
-
-### Q3 — 新增章节的蒸馏浓度（对应 CH-6）
-
-§3 那一节约 60 行，是从宪章 13 节里蒸出来的。
-
-- **问**：这个浓度合适吗？还是宪法层应该更薄（只留三层不绑架 + 能力/编排分离 + 选区收据，其余全部指向宪章）？
-- **我的倾向**：现在这个浓度。理由是宪法层的读者是 agent，agent 每次开工读 `PRODUCT.md` —— 只给指针会导致「读了但没读到」。但我承认这与我给 ROADMAP 立的「薄」纪律有张力。
-
-### Q4 — `## Users` 是否要收窄（对应 §4）
-
-现文列了四类用户：学生 / 自学者 / **研究者与建造者** / 想要深度人机协作的人。
-
-- 新定位是「学习主力工具」。**「研究者与建造者收集大量报告文档网页代码然后转成可读笔记」这一类，还在射程内吗？**
-- 我**没有动它**，因为没有任何拍板触及它。但定位收窄后它可能变成一处不一致。
-- **问**：留、收窄、还是明确写「现阶段只服务学习，研究场景是溢出效应不是目标」？
-
----
+> 📌 **我做的拆分**：Henry 反对的是**范围收窄**（把产品钉死在学生场景），不是**本体论**（收据数据库讲架构不讲受众）。故 CH-2 保留后者、把前者降级为阶段焦点。**若这个拆分读错了他的意思，删掉那一段即可。**
 
 ## 6. 执行清单（Henry 逐条翻牌后）
 
-1. 按认下的 CH-n 逐条改 `PRODUCT.md`（每条独立，可只做其中几条）。
-2. `AGENT_CONTEXT.md §1` 中 `PRODUCT.md` 的冲突警示随之更新或撤除；`§7` 已知脱节表中该行改「已处置」。
-3. `docs/PRD.md` 的定位段随 CH-2 同步（其脱节公告已挂，可在此一并处置）。
-4. `npm run docs:index`。
-5. 本提案状态头转 `superseded`，`被取代` 指向 `PRODUCT.md`。
+0. **前置**：§5.1 的下游对齐 —— 宪章 rider 由 **Fable** 加注；`ROADMAP.md` §4 定位句由我随本批次改。
+1. ✅ CH-1…CH-7 全部执行（CH-2/CH-4 按裁定改写后执行）。`PRODUCT.md` 97 增 13 删，**06-29 设计语法与 telos 全节零改动**（已机械核对）。
+2. ✅ `AGENT_CONTEXT.md §1` 冲突警示已换为完成说明（含 Henry 推翻代拍那条）；`§7` 该行改「已处置」。
+3. ⏳ `docs/PRD.md` 定位段随 CH-2 同步 —— **未做**：PRD 整体仍 `draft` 且有多处其他脱节，单改定位段会造成局部新旧混杂。建议随其自身重划一并处理。
+   ✅ `docs/ROADMAP.md` §4 判定表的定位句已按 §5.1 更新。
+4. ✅ `npm run docs:index`。
+5. ✅ 本提案转 `superseded`。
+6. ⏳ **宪章 §1 的 rider 由 Fable 加注**（§5.1）—— 那是 Fable 的产出且带拍板记录表，我不代改。
 
 ---
 

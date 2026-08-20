@@ -1,3 +1,10 @@
+> **状态 (Status)**: active
+> **层 (Layer)**: 宪法 / Constitution
+> **日期 (Updated)**: 2026-08-20
+> **权威 (Authoritative)**: 是
+> **取代 (Supersedes)**: —
+> **被取代 (Superseded by)**: —
+
 # Product
 
 ## Register
@@ -17,9 +24,15 @@ Primary users include:
 
 The first real user is Henry. The product should be optimized for serious self-use before it tries to become broadly marketable.
 
+> **Stage boundary (2026-08-20)**: learning is what this stage optimizes for. The other uses above stay in scope, but are not separately designed for yet.
+
 ## Product Purpose
 
 Coincides is a refined information-processing notebook. Its job is to help humans and AI turn selected materials into readable, editable, source-aware notes and reports.
+
+**Structurally, it is a receipts database that grows projections.** The five truths are the tables; the receipts — anchors, birth certificates, judgment snapshots — are foreign keys with honest degradation; and the reading surface, the canvas, an HTML export, and a vault export are four views of the same rows. The contrast that names it: **a highlight made in a browser dies inside that file; a selection made here lives on as a receipt.** Obsidian is a note app on top of a filesystem; Coincides is a learning system on top of a database.
+
+**The current stage focuses on learning.** Study material is the first battlefield — the place where the product must become good enough that its author stops reaching for anything else. That is a focus, not a ceiling: research, report assembly, and long-horizon material organization stay within the north star; they are simply not what this stage optimizes for. *(Scope adjudicated by Henry, 2026-08-20.)*
 
 The product exists because AI can produce and process more information than a human can comfortably read in a chat window. A long conversation, a stack of research reports, a textbook chapter, or a group of source files can quickly become too much for linear reading. Coincides gives that information a better human surface: structured blocks, free layout, source grounding, relation awareness, and report-like presentation.
 
@@ -38,6 +51,8 @@ Notebook and report are treated as related forms:
 The long-term purpose is to become a high-density, high-precision information service center for human-AI collaboration. Humans should be able to read and understand the refined output. External AI agents should also be able to call, inspect, and reuse the organized results through controlled interfaces.
 
 ## 2026-06-20 Better Notebook Doctrine
+
+> 📜 **历史教义（2026-06-20）**。其确立的 `TextFlow-first / ContentGroup-aware`（取代 block-first）**至今有效**；其中 `Petal` 已于 V2.BN.11 退役（节内已有 07-13 补丁）。表面模型部分见上方「Current surface model」。**保留原文作为思想沿革。**
 
 The current Better Notebook direction is `TextFlow-first / ContentGroup-aware`, not block-first and not annotation-first.
 
@@ -78,6 +93,8 @@ User-facing language should prefer `Project` as the main container name. A proje
 
 Coincides should separate the formal document layer from the thinking layer. The formal layer is what becomes a note, report, export, or shareable reading surface. The thinking layer includes sticky notes, remarks, scratch work, temporary reasoning, and page-outside canvas objects. These objects may still be useful to the user and AI, but they should not silently pollute the formal document structure or default export.
 
+> ⚠️ **2026-08-19 更替**：以下两段描述的「canvas-backed + Page-first / Canvas-first 两模式」已被表面重划取代（拍板记录 待拍-1 / 待拍-2）。**保留原文作为思想沿革，不作为现行依据** —— 现行表述见本节末。
+
 The clean product model is canvas-backed rather than three separate surfaces. A Note owns an underlying infinite canvas/workspace. A Page is a fixed exportable frame inside that canvas, with a realistic page size such as A4 only describing the frame, not the whole canvas. Scratch / Workspace content is the area outside the Page frame on the same canvas, not a third independent document type.
 
 Coincides is text-first, annotation-aware, and canvas-capable. The default writing path should let the user write naturally inside TextBlocks. TextFlow quietly keeps the writing organized into TextUnits, writing roles, inline render anchors, and range helpers. AnnotationTruth records durable labels after the user or an accepted AI proposal marks a range. Canvas organizes where visual objects live. GroupFolder organizes where serious content packages are browsed, collected, and used as local graph boundaries. ContentGroups explain which pieces deserve serious AI/user interpretation, and accepted status lives on the ContentGroup itself rather than in a second object.
@@ -86,9 +103,19 @@ User-authored blocks do not need to start with source references. A user may cre
 
 Canvas behavior should support two broad modes. A Page-first note gives the user a stable Page frame for writing, export, sharing, and formal reading while still keeping an outside-canvas workspace for scratch thinking. A Canvas-first note lets the user start directly from the open infinite workspace for non-linear understanding, presentation, relation exploration, and large spatial layouts. AI-generated formal notes should respect the selected Page frame unless the user asks for exploratory canvas work.
 
+**Current surface model (2026-08-19).** **Note is the only document unit.** The default writing surface is a **stream assembly surface** — a one-dimensional component stream where layout is handled by the flow, not placed by hand; good formatting is what the defaults give you, not what you tune your way into. The canvas is kept for what it is genuinely good at: **arranging** (spatial organization, walls, whole-view) and **circling** (selection, anchoring, red-pen marking on originals). The page frame retires from being a content container into being an **export viewfinder**; A4 and pagination become export concerns, not writing concerns.
+
+⚠️ Retiring the page frame is a **direction, not a demolition**: during V2.BN.12 the page-frame machinery is not physically removed — the new surface routes around it.
+
 Relations are semantic structures, not merely visible lines. A line may be useful at close range, especially inside one page or local graph view, but the durable value is that blocks can have inspectable, queryable, filterable relationships. Relations should support local graph exploration, AI reading, and user correction without requiring every relation to appear as a permanent visual edge.
 
-Source reconstruction is part of the product identity. Before source material becomes useful note content, Coincides should detect source type, recover meaningful regions, preserve page labels and provenance, and distinguish text, formulas, tables, diagrams, handwriting, code, and decorative page elements where possible. Chunking should come after source reconstruction planning, not before it.
+Source handling is part of the product identity, and it works as a **three-rung ladder**:
+
+- **Rung 0 — view the original.** Hash and blob; zero-cost entry. No parsing, no extraction, no understanding. The original is cold evidence and never changes.
+- **Rung 1 — original plus anchors.** ⭐ **A region anchor requires no parsing.** You can circle an area on an untouched original and ask about it. Anchor coordinates are **format-native**: page + bbox for PDF, element path + offset for DOCX, cell address for XLSX. An anchor carries geometry and an excerpt, never semantics.
+- **Rung 2 — cited source.** Narrow-waist parsing into a typed component stream with reading order and source coordinates. **Parsing happens on demand, not on intake** — the cost is paid at first use, not at the door.
+
+Reconstruction is never note generation, and parse output is always a **derivative, never truth**: it can be re-run, discarded, or produced by a different backend. Chunking comes after reconstruction planning, not before it. Contract: `docs/contracts/Source-Ladder-Contract.md`.
 
 Raw source should mean any external material that has entered Coincides but has not yet become Coincides-owned internal truth. It does not mean the material is low-quality. Coincides should distinguish at least:
 
@@ -236,21 +263,13 @@ The core product loop is organizing material into readable notes and reports. An
 
 AI may help organize material, deduplicate knowledge, suggest layout, build relations, and refine notes. But important structural changes should remain reviewable, recoverable, and understandable.
 
-### 8. Free Layout Should Still Feel Orderly
+### 8. Free Layout On The Canvas Should Still Feel Orderly
 
-Coincides should support left text and right image, formulas beside explanations, notes beside proofs, scratch work outside the formal page, and other spatial layouts. But freedom should come with alignment guides, snapping, export boundaries, and clear interaction states.
+> **Scope (2026-08-19)**: this principle governs the **canvas surface**, not the default writing surface. The default surface is the stream assembly surface, whose layout comes from typographic presets and the compiler — good formatting is given by defaults, not tuned into existence.
 
-Coincides may also preserve useful interaction discoveries when they improve the feel of writing. One example is `Elastic Avoidance`: a light page-layout assist where one block can gently push another block away while the user is arranging objects. This began as an accidental behavior noticed during development, but it matches the desired notebook feel: flexible, tactile, and less brittle than simple overlap.
+On the canvas, Coincides should support left text and right image, formulas beside explanations, notes beside proofs, scratch work outside the formal page, and other spatial layouts. But freedom should come with alignment guides, snapping, export boundaries, and clear interaction states.
 
-Elastic Avoidance should remain bounded:
-
-- it belongs to Page mode and layout editing, not every surface;
-- it should only appear when snap alignment is off or when the user is doing free placement;
-- its first implementation should stay conservative and vertical-only until boundary behavior is mature;
-- it must not rewrite NoteBlock content;
-- it is not permission for Page-mode overlap; if a block cannot be pushed within page bounds, it should stop rather than overlap;
-- it must not prevent intentional overlap in open canvas / edgeless workspace;
-- it should feel like gentle assistance, not the system fighting the user.
+> 📜 **Retired 2026-08-20**: `Elastic Avoidance` — a light page-layout assist where one block gently pushed another aside during arrangement. It began as an accidental behavior noticed during development and was kept for its writing feel. It was scoped to **Page mode**, and it retires together with Page mode as a content container. Adjudicated by Henry. Original clauses remain in this file's git history.
 
 ### 9. Engineering Reliability Comes Before Polish
 
@@ -317,6 +336,71 @@ The graph is grown by purposeful use, not pre-computed. Coincides does not try t
 ### Build The Substrate For Both Human And Agent; Defer The Operator
 
 Every human-AI-shared capability splits into a substrate (the truth model — a human can create and use it manually, and it is AI-readable) and an operator (the AI that grows, proposes, or retrieves over it). Build the substrate while the human is already a valid first consumer; defer the operator to the Agent era. A reliable Agent is impossible on a messy substrate and achievable on a clean, separated, source-grounded one, so building the substrate well is the most direct path to a reliable Agent. Relation, Source provenance, and the trace record each have a human-usable substrate worth building now; their AI operators (auto-organization, distillation, retrieval) wait for the Agent. This extends Principle 7 and Principle 9.
+
+## 2026-08-19 统一方向教义
+
+上游：`docs/agent-ops/analysis/unified-direction-concept-design.md`（v1 权威，12 条拍板记录附其文末）。
+
+本节不取代 06-20 与 06-29 两节 —— 它们是这一节的思想上游。本节增补的是「智能进来之后，这个产品是什么形状」。
+
+### 三句钉语
+
+智能会贬值，真相不会。智能是租的，手是自己的。
+手为什么长这个形状 —— 那个「为什么」，就是核。
+
+### 三层不绑架
+
+大脑（模型）全租，前沿一档，provider 缝可换。
+穿戴者（harness）可换可多：管家、工程、产房各有其一。
+外骨骼（应用）**唯一不换**：真相层 + 末端执行器 + 守卫 + 收据。
+
+两条纪律：**穿戴者只许点菜不许下厨**；**外骨骼不为任何穿戴者整容** —— 改锥形状由螺丝决定。
+
+### 能力归应用，编排归用户
+
+每项能力都暴露为工具面（MCP），带守卫与收据。编排层归用户，应用不被任何 LLM 或 harness 绑架。
+
+这是红线「Agent 能做的，人类必须 100% 能做」在架构上的兑现方式：**同一道门，同一把钥匙。**
+
+### 零模型荣誉榜
+
+客观判分、机械新鲜度、沉降、选区捕捉、锚定位、compiled scope —— 全机械，零 token。
+
+**设计健康度的另一半，是有多少事情不需要模型。**
+
+### 选区收据
+
+一切手势（多选 / 框选 / 文字选区 / 红笔圈 / 文字指代）在客户端解析成对象身份，归一为 `{对象 IDs, 文字范围, 几何, 时刻}`。
+
+**选区收据 ＝ 还没保存的锚** —— 锚系统的前半生。零 OCR：不需要用眼睛认自己亲手画的东西。
+
+### 组件语言与成长路径
+
+组件不是预先设计齐的，是**长出来的**：产房现搓 → 案例库留存并积使用收据 → **凭使用收据晋升转正**，获完整真相层待遇。与字段晋升、沉降同律。
+
+⭐ **内容与壳分离**：数据（带源锚）走真相层，交互壳走沙盒 —— **转正只升级壳，内容从未流浪。**
+
+### 投影与导出
+
+**真相存对象，投影出 HTML。** 应用内打开的是本人，导出的是照片 —— 编辑视图与导出成品共用同一套组件渲染与 token（所见即将得）。
+
+**格式即承诺**：分享出去的导出格式是永久对外契约，版本化，永远向后可读。
+
+**使用 ≠ 修改**：应用外的折叠、勾选、做题都是使用，不需要回家机制。
+
+### 学习闭环（产品的理论层）
+
+双层结构：理解层与骨架层，折叠决定的是提取还是编码。
+
+**教学装置不可删** ——「AI 笔记 ＝ 缩短」是错方向。写入一比特，读取全分辨率。
+
+credence 逐块、属于用户，且与 provenance 正交。
+
+### 我们是在补哪一半
+
+artifact 与 design 工具的页是**终点**（孤儿成品）；我们的页是**投影**（背后有真相层）。
+
+不是重做它们，是补上它们没有的那一半。
 
 ## Accessibility & Inclusion
 

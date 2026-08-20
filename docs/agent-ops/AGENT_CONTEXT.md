@@ -23,7 +23,8 @@
 ## 1. 开工前必读(只读这四样)
 
 1. **宪法层**:`PRODUCT.md`(产品定位、铁律)、`DOCUMENTATION-SYSTEM.md`(文档体系与协作规矩)
-   > ⚠️ `PRODUCT.md` 正文停在 2026-06-20 / 06-29 教义,与本次转向有已确认冲突(定位 / 表面模型 / Source 解析时序)。**冲突处以宪章为准**;重划待批次二,盘点见分诊表 §3 C1/C2/C3/C5/C8。
+   > ✅ `PRODUCT.md` 已于 **2026-08-20 完成宪法层重划**(Henry 本人终审):补状态头、定位增补本体论与阶段焦点、表面模型更替、Source 三层梯子、新增「2026-08-19 统一方向教义」章。**06-20 与 06-29 两节原文保留为思想沿革**(挂历史横幅)。
+   > ⚠️ **Henry 亲裁一处推翻代拍**:定位**保留更宽口径**(信息处理中台),宪章 §1「学习主力工具」的**范围部分降级为阶段焦点**;本体论部分不受影响。
 2. **方向宪章**:`analysis/unified-direction-concept-design.md`(v1 权威,含 12 条拍板记录)
 3. **决策层**:`decisions/` 中 `状态 = active` 的 ADR
 4. **现状层**:`current-state/`(权威现状,Agent 主要读这里);本文件为快速入口
@@ -90,7 +91,7 @@
 | 文件 | 已知脱节 |
 |---|---|
 | ~~`docs/Coincides-Better-Notebook-Roadmap.md`~~ | ✅ **已处置**:2026-08-20 整体冻结,现行路线图改为 `docs/ROADMAP.md` |
-| `PRODUCT.md` | 定位 / 表面模型(canvas-backed 两模式)/ Source 入库即重建 三处冲突 |
+| ~~`PRODUCT.md`~~ | ✅ **已处置**:2026-08-20 宪法层重划完成(Henry 终审) |
 | `docs/PRD.md` | §2 产品阶梯仍把已物理清场的 `Petal` 列为现役第 4 步 |
 | `docs/ARCHITECTURE.md`、`docs/DATA_MODEL.md` | 停在 2026-06-06,词汇仍为 `ObjectRelation`(旧三表 047 已落),早于 Purpose/Source/Item 三层真相 |
 | ~~`docs/contracts/Notebook-Object-Inventory-Contract.md`~~ | ✅ **已处置**:2026-08-20 整体冻结,现行契约改为 `contracts/Notebook-Object-Boundary-Contract.md` |
