@@ -1,8 +1,8 @@
-> **状态 (Status)**: draft
-> **层 (Layer)**: 契约 / Contract（**草案，待 Fable 抽检放行；V2.BN.12 必修④ 要求本版定死后转 `frozen`**）
+> **状态 (Status)**: active
+> **层 (Layer)**: 契约 / Contract
 > **日期 (Updated)**: 2026-08-20
-> **权威 (Authoritative)**: 否（转正前不作为施工依据）
-> **取代 (Supersedes)**: `docs/contracts/Source-Reconstruction-Contract-Intake.md`（转正时整体冻结）
+> **权威 (Authoritative)**: 是（形状与不变式）；⚠️ **尚未 `frozen`** —— 冻结是 **V2.BN.12 收口门**，须待 G-1/G-2 落码后执行（见 D-4）
+> **取代 (Supersedes)**: [`Source-Reconstruction-Contract-Intake.md`](Source-Reconstruction-Contract-Intake.md)（2026-08-20 整体冻结）
 > **上游**: 方向宪章 `agent-ops/analysis/unified-direction-concept-design.md` §3（三层梯子）· `agent-ops/analysis/external-candidate-registry.md`（抽取矩阵，已核验）· 07-20 会议卷（多记坐标 / 窄腰 / 双 register）
 
 # Source 三层梯子与锚契约
@@ -197,6 +197,21 @@ V2.BN.10.3 已落地 `source-artifact.v1` 瞬态格式 + PDF/DOCX/TXT/Markdown/�
 
 **层2 产物住矿场。** 用户可在其上圈选、锚定、铸卡，但**不可原地自由编辑**。要改，就铸成 Item 进花园。
 
+
+### 6.1 Condensed Raw Source 处理原则（原文搬运自旧件 §5，D-3 裁定）
+
+Condensed raw source 是 raw source 的子类。它可能是：手写笔记 · 已整理 lecture note · AI briefing · 用户 draft report · 导出的 Notion / Word / PDF note。
+
+处理原则：
+
+- 优先 preserve layout、顺序、图文相邻关系和手写/图像证据；
+- **不默认 aggressive summarization**；
+- 不默认删除重复内容；
+- **不把人类已经整理过的信息当成未加工 textbook**；
+- reconstruction 后仍要保留 source provenance。
+
+> **为什么搬运**：这是全旧件唯一与宪章 §11 学习闭环**直接同源**的一节 ——「AI 笔记＝缩短」是错方向、教学装置不可删。留在冻结件里会被遗忘。
+
 ---
 
 ## 7. 红线
@@ -235,7 +250,62 @@ V2.BN.10.3 已落地 `source-artifact.v1` 瞬态格式 + PDF/DOCX/TXT/Markdown/�
 | G-5 | `source-artifact.v1` 是否满足 N-2 源坐标 | **待核**（§5.2） |
 | G-6 | 格式能力矩阵未落库 | L0-b |
 
-> **G-7（记档，不在本契约处置）**：`source_anchors` 表（migration 020）在 `server/src` 中**无任何非-migration 读写方** —— 与 V11 清掉的 `object_relations / canvas_edges / relation_layers` 同类，是 v2 时代建了但 BN 线从未采用的死表。建议按同一先例走「活性盘点 → 落表」。**不在本单决定**，因为物理拆除属自限清单里的不可回滚动作。
+### 9.1 一则错因记录：本文件初版把 G-7 写成了「死表」
+
+**错的不是结论，是取证方法。** 初版用的命令是：
+
+```bash
+grep -rn "source_anchors" server/src --include=*.ts | grep -v "test" | head -5
+```
+
+`migration 020` 恰好产出 **5 行**匹配，`head -5` 于是**把全部活证据截掉了**；我又给这段输出预先贴了「(空=死表)」的标签，然后把自己截断出来的空白读成了「不存在的证据」。
+
+**教训（建议进 reviewer 角色卡与本仓通用取证纪律）**：
+
+1. **对「是否存在 / 是否为死」这类存在性问题，`head -N` 是错误工具** —— 它只可能制造假阴性，永远不可能制造假阳性。存在性查询要么不截断，要么用 `wc -l` / `-c` 计数。
+2. **不要给尚未看到的输出预贴标签。** 「(空=死表)」写在命令里，等于先给结论、再让输出去符合它。
+3. **判定一张表是否活，正确顺序是：路由挂载（`index.ts` 的 routes import）→ 服务层读写 → 裸表名 grep。** 裸表名 grep 是最后一步，不是第一步。
+
+**这是同一类错误的第三次出现**：工单 01 我批评 builder「把未复现讲成已漂移」是从缺席推断因果；02.1 二级复盘我初判差点写「03 会漏跑 test:unit」、查证后自我校准；这一次**我真的犯了并且发了出去**，由 Fable 抽检拦下。前两次是识别与自查，这次是实犯 —— **说明"知道这类错误"不等于"防得住它"，必须靠机械纪律（上面三条），不能靠警觉。**
+
+### G-7 — 现役但原始的锚机制 `source_anchors`（**必须在 G-1/G-2 施工单里显式处置**）
+
+> ⚠️ **本条曾被本文件初版写错**（初版称其为"死表"）。经 Fable 抽检证伪、我复核确认。错因与教训见 §9.1。
+
+**`source_anchors`（migration 020）是活的**，且被路由触达、有测试覆盖：
+
+| 证据 | 位置 |
+|---|---|
+| HTTP 路由挂载 | `server/src/index.ts:39` → `routes/sourceAnchors.js` |
+| 服务层读写 | `services/sourceAnchors.ts` INSERT `:180`、SELECT `:113,:206,:390`、UPDATE `:424` |
+| 兄弟服务消费 | `learningCanvases.ts:420`、`sourceBoards.ts:215`、`sourceScopes.ts:98` |
+| 生命周期注册 | `courseLifecyclePolicies.ts:66` |
+| 测试覆盖 | `v2MaterialLibrary.test.ts`、`v2SourceMaterialization.test.ts` |
+
+**它的形状（migration 020，已核）**：
+
+```text
+page_start / page_end          页码区间
+text_start_offset / text_end_offset   字符偏移
+anchor_kind = 'note_block_source' | 'evidence_item'
+（无 bbox，无任何几何字段）
+course_id NOT NULL REFERENCES courses(id)
+上游：source_snapshots / documents / document_chunks / source_materials / source_fragments
+```
+
+**三条判定**：
+
+1. **它无法表达区域锚。** 只有页码与字符偏移，**没有任何几何字段** —— 「在第 7 页框一个矩形」在现役 schema 里写不出来。故 §4 的核心结论不变，但理由要精确：不是"没有源侧锚"，而是**现役源侧锚是页级/偏移级的，表达不了层1 要的区域**。
+2. **它绑在 legacy 血统上。** `course_id NOT NULL`（与 `PRODUCT.md` 06-29「Project 是镜片不是所有者」相抵）；上游是 `documents / source_snapshots`，而 `current-state §3 Source` 记载 V2.BN.10.4 已「legacy Documents intake retired」。`courseLifecyclePolicies.ts:66` 自己把它标为 `'Legacy Project source seed'`。
+   > ⚠️ **未核**：现役写入路径当前实际还被哪些用户旅程触发（路由活 ≠ 有真实新数据流入）。**施工单须先做数据活性盘点**，不得据本条推断。
+3. **它与 BN.10 的 `source_records` 血统是两套。** §3.1 的层0 契约建立在 `source_records/files/materializations/placements`（migration 045）之上；`source_anchors` 指向的是 045 之前的一套。**两条血统的关系必须显式处置，不得让新 schema 绕开它落地。**
+
+**处置要求（Fable 2026-08-20 裁定）**：G-1/G-2 的施工单**必须带 `source_anchors` 的盘点与处置路径** —— 二选一并写明：
+
+- **取代 + 迁移**：现役锚映射进统一锚模型，旧路由下线，数据迁移带收据；或
+- **共存 + 划界**：明确各自管辖范围与不重叠证明，并说明为何不统一。
+
+**不许第三条路（绕过它落新 schema）** —— 那会造出第三套并行锚机制。物理拆除仍属不可回滚动作，本契约不决定。
 
 ---
 
@@ -243,16 +313,24 @@ V2.BN.10.3 已落地 `source-artifact.v1` 瞬态格式 + PDF/DOCX/TXT/Markdown/�
 
 | # | 问题 | 我的倾向 |
 |---|---|---|
-| **D-1** | 源侧 anchor 是扩 `item_anchors` 的 `target_kind`，还是**另立** `source_anchors_v2` 表？ | **扩现表**。锚是同一概念的不同目标；分表会让「一个 Item 同时锚到笔记和原件」变成跨表查询，且 `item_anchors` 的 pool/claim 机制正好复用 |
+| **D-1** | 源侧 anchor 落在哪里？**这不是绿地选择，是有现任者的三方格局**：现役 `source_anchors`（页级/偏移级，见 G-7）× `item_anchors`（笔记侧五类）× §4 提案（四类源侧区域锚） | ✅ **已裁（Fable 2026-08-20）**：**扩 `item_anchors` 统一锚概念**（锚是同一概念的不同目标；分表会让「一个 Item 同时锚到笔记和原件」变成跨表查询，且 pool/claim 机制正好复用）。**但施工单必须带现役 `source_anchors` 的盘点与处置路径，不许绕过它落新 schema**（见 G-7） |
 | **D-2** | 层1 锚的**图像裁切**是即时生成还是持久化？ | **即时生成 + 可选缓存**。裁切是从原件 + 坐标可重算的派生物（L-3），持久化它等于给不可变原件做冗余副本 |
 | **D-3** | 旧件 §5 Condensed Raw Source 处理原则是否原文搬进本契约？ | **搬**。它是全旧件里唯一与新宪章 §11 学习闭环直接同源的一节，留在冻结件里会被遗忘 |
-| **D-4** | 本契约转 `frozen` 的时机 | 建议 **G-1/G-2 施工落地后**再冻。契约先于实现冻结，会冻出一个没被代码验证过的形状 |
+| **D-4** | 本契约转 `frozen` 的时机 | ✅ **已裁（Fable 2026-08-20）**：准 `active` 不立即 `frozen`（契约先于实现冻结会冻出未被代码验证的形状）。**但附 rider —— 冻结是 V2.BN.12 收口门**：必修④「本版定死」＝形状落码 + 冻结**都在本版完成**；G-1/G-2 落地后**必须冻**，不冻则必修④ 不算完 |
 
 ---
 
-## 附：转正执行清单（草案期不执行）
+## 附：转正记录（2026-08-20，已执行）
 
-1. 本文件状态头转 `draft → active`（**非 `frozen`**，见 D-4）。
-2. `Source-Reconstruction-Contract-Intake.md` 顶部加冻结公告、状态转 `archived`、`被取代` 指向本文件；按 D-3 裁定决定是否先搬 §5 原文。
-3. `contracts/INDEX.md` 由脚本重生成（`node scripts/docs-index.mjs`）。
-4. 若 Fable 认可 §4，则本契约的 G-1/G-2 应成为 **V2.BN.12 必修④ 的施工单交付物**。
+Fable 抽检：**主体准，G-7 证伪后修正放行**。
+
+1. ✅ 本文件状态头转 `active`（**非 `frozen`**，见 D-4）。
+2. ✅ **G-7 改写** —— 初版称其为「死表」系事实错误，已按证据改写为「现役但原始（页级/偏移级，无几何）」并附完整证据表；错因与教训见 §9.1。
+3. ✅ **D-1 / D-4 记入 Fable 裁定**。
+4. ✅ `Source-Reconstruction-Contract-Intake.md` 整体冻结（`archived`，`被取代` 指向本文件），并按 D-3 把其 §5 Condensed Raw Source 处理原则原文搬入本契约 §6.1。
+5. ✅ `contracts/INDEX.md` 由脚本重生成。
+
+### ⏳ 尚未完成（V2.BN.12 收口门）
+
+- **本契约必须在 G-1/G-2 落码后转 `frozen`** —— 必修④「本版定死」＝形状落码 + 冻结**都在本版完成**，不冻则必修④ 不算完（Fable rider）。
+- G-1/G-2 **＋现役 `source_anchors` 的盘点与处置路径**成为必修④ 施工单交付物，排单在工单 03 收口后。

@@ -1,11 +1,28 @@
-> **状态 (Status)**: deferred
-> **层 (Layer)**: 契约 / Contract
-> **日期 (Updated)**: 2026-06-12
+> **状态 (Status)**: archived
+> **层 (Layer)**: 历史 / History（已冻结的 V2.BN.6 契约输入）
+> **日期 (Updated)**: 2026-08-20（冻结）
 > **权威 (Authoritative)**: 否
-> **取代 (Supersedes)**: —
-> **被取代 (Superseded by)**: —
+> **被取代 (Superseded by)**: [`Source-Ladder-Contract.md`](Source-Ladder-Contract.md)
 
-# Source Reconstruction Contract Intake
+> # ⛔ 整体冻结公告（2026-08-20）
+>
+> **本文件已整体冻结，不作为任何工作的依据。现行契约 = [`Source-Ladder-Contract.md`](Source-Ladder-Contract.md)。**
+>
+> ## 为什么是冻结而不是更正
+>
+> 本文件的**前提被整个换掉了**。它把「解析」放在「锚」的**上游**（type detection → SourceRegion → NoteBlockCandidate → proposal），而方向宪章 §3 的三层梯子明言 **层1 区域锚不需解析**——「划个红圈就能问 AI」。这不是措辞差异，是**管线拓扑反转**。
+>
+> 更根本的：本文件 §2 的 `SourceRegion` **一张表同时装几何（page/bbox）与语义（kind/text/latex/confidence）**——那正是「锚必须等解析」这条依赖的物化根源。新契约把它拆成层1 锚（几何，格式原生）与层2 组件流（语义）。
+>
+> 其余失效点：`NoteBlockCandidate` 端点已改为 **Item**（V2.BN.11 教义更替）；统一 `bbox` 坐标模型已改为**格式原生多坐标系**（PDF=页+bbox / DOCX=元素路径+偏移 / XLSX=单元格地址 / PPTX=slide+EMU，07-20 拍定）；§4 中 AFFiNE/BlockSuite 一行随 ADR-0001 自研引擎失效。
+>
+> ## 本文件仍有的价值
+>
+> **逐节判定见新契约 §8**（存活 5 / 拆分 1 / 被取代 2 / 部分 1）。其中 **§5 Condensed Raw Source 处理原则已按裁定原文搬入新契约 §6.1** ——「不默认 aggressive summarization」「不把人类已整理过的信息当未加工 textbook」与宪章 §11 学习闭环直接同源，不留在冻结件里等着被遗忘。
+>
+> §6 的 PI-048 待答问题多数已由 `agent-ops/analysis/external-candidate-registry.md`（抽取矩阵）回答；剩「手写 STEM 如何评估」「公式/表格保真」仍开放，归 Agent 版层2 VLM。
+
+# Source Reconstruction Contract Intake（已冻结）
 
 **状态**：V2.BN.6 合同输入
 **用途**：从 PI-048 提取会影响 Better Notebook 数据契约的最低要求。本文不是 OCR/VLM 调研报告，也不是工具选型结论。
