@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 83 份文档。
+共 87 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -23,6 +23,7 @@
 | [analysis/2026-08-07-cloud-server-survey.md](analysis/2026-08-07-cloud-server-survey.md) | 云服务器选型调研(2026-08-07) | `active` | 2026-08-07 | — |
 | [analysis/2026-08-08-econ-note-rebuild-experience-report.md](analysis/2026-08-08-econ-note-rebuild-experience-report.md) | 对照实验:同一份 ECON 讲稿,网页版 vs 应用手搓版(2026-08-08) | `active` | 2026-08-08 | — |
 | [analysis/2026-08-20-doc-triage-assessment.md](analysis/2026-08-20-doc-triage-assessment.md) | 文档分诊评估表 —— 全库对照新宪章 | `active` | 2026-08-19（文件名沿用委托编号 2026-08-20） | — |
+| [analysis/2026-08-20-mcp-tool-face-survey.md](analysis/2026-08-20-mcp-tool-face-survey.md) | MCP 工具面前置调研盘 | `draft` | 2026-08-20 | — |
 | [analysis/2026-08-20-product-md-redraw-draft.md](analysis/2026-08-20-product-md-redraw-draft.md) | `PRODUCT.md` 宪法层重划提案 | `superseded` | 2026-08-20 | ⚠️ [`PRODUCT.md`](../../../PRODUCT.md)（2026-08-20 CH-1…CH-7 全部… |
 | [analysis/2026-08-20-repo-readme-draft.md](analysis/2026-08-20-repo-readme-draft.md) | repo 根 README 重建草案 | `superseded` | 2026-08-20 | ⚠️ [`README.md`](../../../README.md)（2026-08-20 抽检放行后整体替换完成） |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
@@ -93,5 +94,8 @@
 | [handoffs/2026-08-20-v2bn12-02-1-fix-med1.md](handoffs/2026-08-20-v2bn12-02-1-fix-med1.md) | V2.BN.12 修正单 02.1:MED-1(调度语义)+ LOW-2(收据 cwd) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-20-v2bn12-03-1-fix.md](handoffs/2026-08-20-v2bn12-03-1-fix.md) | V2.BN.12 修正单 03.1:工单 03 复核 FAIL 五缺陷修理 | `(缺状态头)` | — | — |
 | [handoffs/2026-08-20-v2bn12-03-2-fix.md](handoffs/2026-08-20-v2bn12-03-2-fix.md) | V2.BN.12 修正单 03.2:re-review 残余两 MED 修理 | `(缺状态头)` | — | — |
+| [handoffs/2026-08-20-v2bn12-03-3-fix.md](handoffs/2026-08-20-v2bn12-03-3-fix.md) | V2.BN.12 修正单 03.3:恢复收据子系统两 MED(半径=draftBlockPersistence) | `(缺状态头)` | — | — |
+| [handoffs/2026-08-20-v2bn12-03-4-fix.md](handoffs/2026-08-20-v2bn12-03-4-fix.md) | V2.BN.12 修正单 03.4:恢复收据 geometry↔role 一致性(单轴) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-20-v2bn12-03-lifecycle-and-surface-authority.md](handoffs/2026-08-20-v2bn12-03-lifecycle-and-surface-authority.md) | V2.BN.12 工单 03(原拆 03/04,合取裁定并批):编辑 lifecycle 状态机 + surface … | `(缺状态头)` | — | — |
+| [handoffs/2026-08-20-v2bn12-05-slash-session.md](handoffs/2026-08-20-v2bn12-05-slash-session.md) | V2.BN.12 工单 05:SlashSession 事务(RC-D)+ 两笔测试债顺手清偿 | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
