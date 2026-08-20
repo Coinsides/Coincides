@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-07-14
+> **日期 (Updated)**: 2026-08-20
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/contracts`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 13 份文档。
+共 14 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -21,6 +21,7 @@
 | [Link-Source-Relation-Boundary-Contract.md](Link-Source-Relation-Boundary-Contract.md) | Link / SourceReference / ObjectRelation Boundary Contract | `deferred` | 2026-06-23 | — |
 | [Notebook-Object-Inventory-Contract.md](Notebook-Object-Inventory-Contract.md) | Notebook Object Inventory Contract | `active` | 2026-06-23 | — |
 | [Petal-Contract.md](Petal-Contract.md) | Petal Contract | `superseded` | 2026-07-14 | ⚠️ `docs/agent-ops/analysis/relation-item-graph-concept-design… |
+| [Source-Ladder-Contract.md](Source-Ladder-Contract.md) | Source 三层梯子与锚契约 | `draft` | 2026-08-20 | — |
 | [Source-Provenance-Contract.md](Source-Provenance-Contract.md) | Source / Provenance Contract | `deferred` | 2026-06-23 | — |
 | [Source-Reconstruction-Contract-Intake.md](Source-Reconstruction-Contract-Intake.md) | Source Reconstruction Contract Intake | `deferred` | 2026-06-12 | — |
 | [Template-Category-Contract.md](Template-Category-Contract.md) | Template / Category Contract | `deferred` | 2026-06-12 | — |
