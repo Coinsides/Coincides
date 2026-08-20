@@ -12,10 +12,8 @@ import {
 import type { TemplateOption } from '@/services/templateOptions';
 import type { Toast } from '@/stores/uiStore';
 import {
-  detectSlashTrigger,
   filterSlashCommands,
   findTemplateForCommand,
-  removeSlashTrigger,
   type NoteSlashCommand,
   type SlashTrigger,
 } from '../../noteSlashCommands';
@@ -26,7 +24,6 @@ import {
   type RuntimeInteractionState,
 } from '../interactionController';
 import { getSlashMenuAnchor } from '../overlayService';
-import type { SlashMenuAnchor } from '../runtimeLayout';
 import type { NoteBlock, TextBlockContentV1, TextUnitWritingRole } from '../runtimeDataTypes';
 import {
   createTextBlockContentV1,
@@ -37,18 +34,16 @@ import {
 import {
   setTextUnitWritingRole,
 } from '../textUnitEditorService';
+import {
+  INITIAL_SLASH_COMMAND_STATE,
+  applySlashExitToText,
+  deriveSlashTargetIdentity,
+  transitionSlashCommandIndex,
+  transitionSlashTarget,
+  type SlashTarget,
+} from '../slashCommandReducer';
 
-function clampSlashCommandIndex(index: number, length: number): number {
-  if (length <= 0) return 0;
-  return Math.max(0, Math.min(index, length - 1));
-}
-
-export type SlashTarget = {
-  target: 'draft' | 'block';
-  blockId?: string;
-  trigger: SlashTrigger;
-  anchor: SlashMenuAnchor | null;
-};
+export type { SlashTarget } from '../slashCommandReducer';
 
 export interface UseSlashCommandControllerOptions {
   addToast: (type: Toast['type'], message: string) => void;
@@ -103,8 +98,12 @@ export function useSlashCommandController({
   templateOptions,
   activateDraft,
 }: UseSlashCommandControllerOptions) {
-  const [slashTarget, setSlashTarget] = useState<SlashTarget | null>(null);
-  const [activeSlashCommandIndex, setActiveSlashCommandIndex] = useState(0);
+  const [slashTarget, setSlashTarget] = useState<SlashTarget | null>(
+    INITIAL_SLASH_COMMAND_STATE.target,
+  );
+  const [activeSlashCommandIndex, setActiveSlashCommandIndex] = useState(
+    INITIAL_SLASH_COMMAND_STATE.activeIndex,
+  );
 
   const slashCommands = useMemo(() => (
     slashTarget
@@ -120,15 +119,21 @@ export function useSlashCommandController({
   ), [slashTarget, insertTemplateOptions]);
 
   const clearSlashTarget = useCallback(() => {
-    setSlashTarget(null);
+    setSlashTarget((current) => transitionSlashTarget(current, {
+      type: 'exit',
+      reason: 'external_clear',
+    }));
   }, []);
 
   useEffect(() => {
-    setActiveSlashCommandIndex(0);
+    setActiveSlashCommandIndex((current) => transitionSlashCommandIndex(current, { type: 'reset_index' }));
   }, [slashTarget?.target, slashTarget?.blockId, slashTarget?.trigger.query]);
 
   useEffect(() => {
-    setActiveSlashCommandIndex((current) => clampSlashCommandIndex(current, slashCommands.length));
+    setActiveSlashCommandIndex((current) => transitionSlashCommandIndex(current, {
+      type: 'clamp_index',
+      commandCount: slashCommands.length,
+    }));
   }, [slashCommands.length]);
 
   const updateSlashTarget = useCallback((
@@ -138,14 +143,16 @@ export function useSlashCommandController({
     blockId?: string,
     anchorElement?: HTMLElement | null,
   ) => {
-    const trigger = detectSlashTrigger(text, caret);
-    setSlashTarget(trigger ? {
-      target,
-      blockId,
-      trigger,
+    const identity = deriveSlashTargetIdentity({ target, text, caret, blockId });
+    const nextTarget: SlashTarget | null = identity ? {
+      ...identity,
       anchor: getSlashMenuAnchor(anchorElement || null, blockListRef.current, caret),
-    } : null);
-    setInteractionState(trigger
+    } : null;
+    setSlashTarget((current) => transitionSlashTarget(current, {
+      type: 'sync_target',
+      target: nextTarget,
+    }));
+    setInteractionState(nextTarget
       ? openingMenuInteraction('slashMenu', blockId)
       : target === 'block'
         ? editingTextInteraction(blockId)
@@ -206,14 +213,18 @@ export function useSlashCommandController({
 
     if (command.objectKind === 'writing_role' && command.writingRole) {
       if (slashTarget.target === 'draft') {
-        const cleanedText = removeSlashTrigger(draftTextRef.current, slashTarget.trigger);
+        const cleanedText = applySlashExitToText({
+          text: draftTextRef.current,
+          target: slashTarget,
+          reason: 'commit',
+        });
         const textFlow = setTextUnitWritingRole(
           createTextBlockContentV1(cleanedText, 'paragraph'),
           'tu-1',
           command.writingRole,
         );
         const projected = projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: textFlow }, cleanedText).plain_text;
-        setSlashTarget(null);
+        setSlashTarget((current) => transitionSlashTarget(current, { type: 'exit', reason: 'commit' }));
         setDraftText(projected);
         draftTextRef.current = projected;
         await persistDraft(projected, undefined, { textFlow });
@@ -229,7 +240,7 @@ export function useSlashCommandController({
         || createTextBlockContentV1(currentText, 'paragraph');
       const nextFlow = applyWritingRoleToFlow(baseFlow, slashTarget.trigger, command.writingRole);
       const projected = projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: nextFlow }, currentText).plain_text;
-      setSlashTarget(null);
+      setSlashTarget((current) => transitionSlashTarget(current, { type: 'exit', reason: 'commit' }));
       setBlockTextDrafts((current) => ({ ...current, [block.id]: projected }));
       setBlockTextFlowDrafts((current) => ({ ...current, [block.id]: nextFlow }));
       const updated = await saveBlock(block, projected, { silent: true, textFlow: nextFlow });
@@ -239,7 +250,10 @@ export function useSlashCommandController({
 
     if (command.commandKind === 'annotation_action') {
       addToast('info', 'Select text first, then use Label.');
-      setSlashTarget(null);
+      setSlashTarget((current) => transitionSlashTarget(current, {
+        type: 'exit',
+        reason: 'annotation_action',
+      }));
       return;
     }
 
@@ -250,8 +264,12 @@ export function useSlashCommandController({
     }
 
     if (slashTarget.target === 'draft') {
-      const cleanedText = removeSlashTrigger(draftTextRef.current, slashTarget.trigger);
-      setSlashTarget(null);
+      const cleanedText = applySlashExitToText({
+        text: draftTextRef.current,
+        target: slashTarget,
+        reason: 'commit',
+      });
+      setSlashTarget((current) => transitionSlashTarget(current, { type: 'exit', reason: 'commit' }));
       setDraftText(cleanedText);
       draftTextRef.current = cleanedText;
       await persistDraft(cleanedText, template);
@@ -263,8 +281,8 @@ export function useSlashCommandController({
     if (!block) return;
 
     const currentText = blockTextDrafts[block.id] ?? textFromContent(block);
-    const cleanedText = removeSlashTrigger(currentText, slashTarget.trigger);
-    setSlashTarget(null);
+    const cleanedText = applySlashExitToText({ text: currentText, target: slashTarget, reason: 'commit' });
+    setSlashTarget((current) => transitionSlashTarget(current, { type: 'exit', reason: 'commit' }));
     setBlockTextDrafts((current) => ({ ...current, [block.id]: cleanedText }));
 
     const updated = await applyTemplateToBlock(block, template, cleanedText);
@@ -288,10 +306,11 @@ export function useSlashCommandController({
   ]);
 
   const moveActiveSlashCommand = useCallback((direction: 1 | -1) => {
-    setActiveSlashCommandIndex((current) => {
-      if (slashCommands.length === 0) return 0;
-      return (current + direction + slashCommands.length) % slashCommands.length;
-    });
+    setActiveSlashCommandIndex((current) => transitionSlashCommandIndex(current, {
+      type: 'move_index',
+      direction,
+      commandCount: slashCommands.length,
+    }));
   }, [slashCommands.length]);
 
   const handleSlashMenuKeyDown = useCallback((
@@ -333,13 +352,13 @@ export function useSlashCommandController({
 
     if (event.key === 'Escape' && slashTarget?.target === 'draft') {
       event.preventDefault();
-      setSlashTarget(null);
+      setSlashTarget((current) => transitionSlashTarget(current, { type: 'exit', reason: 'escape' }));
       return;
     }
 
     if (event.key === 'Enter' && event.ctrlKey) {
       event.preventDefault();
-      setSlashTarget(null);
+      setSlashTarget((current) => transitionSlashTarget(current, { type: 'exit', reason: 'ctrl_enter' }));
       void persistDraft(draftText);
     }
   }, [draftText, handleSlashMenuKeyDown, persistDraft, slashTarget]);
@@ -354,14 +373,14 @@ export function useSlashCommandController({
     if (event.key === 'Escape') {
       if (slashTarget?.target === 'block') {
         event.preventDefault();
-        setSlashTarget(null);
+        setSlashTarget((current) => transitionSlashTarget(current, { type: 'exit', reason: 'escape' }));
       }
       return;
     }
 
     if (event.key === 'Enter' && event.ctrlKey) {
       event.preventDefault();
-      setSlashTarget(null);
+      setSlashTarget((current) => transitionSlashTarget(current, { type: 'exit', reason: 'ctrl_enter' }));
       void saveBlock(block, text, { silent: true }).then(() => activateDraft());
     }
   }, [activateDraft, handleSlashMenuKeyDown, saveBlock, slashTarget]);

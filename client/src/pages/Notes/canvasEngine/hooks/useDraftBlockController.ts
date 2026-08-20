@@ -24,6 +24,15 @@ import {
   projectTextFlowContent,
   TEXT_FLOW_CONTENT_KEY,
 } from '../textFlowService';
+import {
+  INITIAL_DRAFT_BLOCK_LIFECYCLE_STATE,
+  shouldMountLocalDraft,
+  transitionCreatingDraft,
+  transitionDraftActive,
+  transitionDraftFocusNonce,
+  transitionDraftLayout,
+  transitionDraftText,
+} from '../draftBlockLifecycleReducer';
 
 export interface UseDraftBlockControllerOptions {
   createBlock: (
@@ -64,14 +73,24 @@ export function useDraftBlockController({
   setInteractionState,
   setSelectedBlockId,
 }: UseDraftBlockControllerOptions) {
-  const [draftActive, setDraftActive] = useState(false);
-  const [draftText, setDraftText] = useState('');
-  const [creatingDraft, setCreatingDraft] = useState(false);
-  const [draftFocusNonce, setDraftFocusNonce] = useState(0);
-  const [draftLayout, setDraftLayout] = useState<BlockBoxLayout | null>(null);
+  const [draftActive, setDraftActive] = useState(INITIAL_DRAFT_BLOCK_LIFECYCLE_STATE.draftActive);
+  const [draftText, setDraftTextState] = useState(INITIAL_DRAFT_BLOCK_LIFECYCLE_STATE.draftText);
+  const [creatingDraft, setCreatingDraft] = useState(INITIAL_DRAFT_BLOCK_LIFECYCLE_STATE.creatingDraft);
+  const [draftFocusNonce, setDraftFocusNonce] = useState(
+    INITIAL_DRAFT_BLOCK_LIFECYCLE_STATE.draftFocusNonce,
+  );
+  const [draftLayout, setDraftLayoutState] = useState<BlockBoxLayout | null>(
+    INITIAL_DRAFT_BLOCK_LIFECYCLE_STATE.draftLayout,
+  );
   const draftRef = useRef<HTMLTextAreaElement | null>(null);
   const draftTextRef = useRef('');
   const creatingDraftRef = useRef(false);
+  const setDraftText = useCallback<Dispatch<SetStateAction<string>>>((value) => {
+    setDraftTextState((current) => transitionDraftText(current, { type: 'set_text', value }));
+  }, []);
+  const setDraftLayout = useCallback<Dispatch<SetStateAction<BlockBoxLayout | null>>>((value) => {
+    setDraftLayoutState((current) => transitionDraftLayout(current, { type: 'set_layout', value }));
+  }, []);
 
   useEffect(() => {
     if (!draftActive) return;
@@ -93,19 +112,19 @@ export function useDraftBlockController({
   }, [draftText, draftActive]);
 
   const discardDraft = useCallback(() => {
-    setDraftText('');
+    setDraftTextState((current) => transitionDraftText(current, { type: 'discard' }));
     draftTextRef.current = '';
-    setDraftActive(false);
-    setDraftLayout(null);
+    setDraftActive((current) => transitionDraftActive(current, { type: 'discard' }));
+    setDraftLayoutState((current) => transitionDraftLayout(current, { type: 'discard' }));
     setInteractionState(idleInteraction());
   }, [setInteractionState]);
 
   const resetDraft = useCallback(() => {
-    setDraftText('');
+    setDraftTextState((current) => transitionDraftText(current, { type: 'reset' }));
     draftTextRef.current = '';
-    setDraftActive(false);
-    setDraftLayout(null);
-    setCreatingDraft(false);
+    setDraftActive((current) => transitionDraftActive(current, { type: 'reset' }));
+    setDraftLayoutState((current) => transitionDraftLayout(current, { type: 'reset' }));
+    setCreatingDraft((current) => transitionCreatingDraft(current, { type: 'reset' }));
     creatingDraftRef.current = false;
   }, []);
 
@@ -115,19 +134,24 @@ export function useDraftBlockController({
     setSelectedBlockId(null);
     setInteractionState(editingTextInteraction());
 
-    if (!note || !defaultTextTemplate || creatingDraftRef.current) {
-      setDraftLayout(nextLayout);
-      setDraftActive(true);
-      setDraftFocusNonce((value) => value + 1);
+    if (shouldMountLocalDraft({
+      hasNote: Boolean(note),
+      hasDefaultTextTemplate: Boolean(defaultTextTemplate),
+      creatingDraft: creatingDraftRef.current,
+    })) {
+      const transition = { type: 'activate_local', layout: nextLayout } as const;
+      setDraftLayoutState((current) => transitionDraftLayout(current, transition));
+      setDraftActive((current) => transitionDraftActive(current, transition));
+      setDraftFocusNonce((current) => transitionDraftFocusNonce(current, transition));
       return;
     }
 
     creatingDraftRef.current = true;
-    setCreatingDraft(true);
-    setDraftText('');
+    setCreatingDraft((current) => transitionCreatingDraft(current, { type: 'begin_empty_block_create' }));
+    setDraftTextState((current) => transitionDraftText(current, { type: 'begin_empty_block_create' }));
     draftTextRef.current = '';
-    setDraftActive(false);
-    setDraftLayout(null);
+    setDraftActive((current) => transitionDraftActive(current, { type: 'begin_empty_block_create' }));
+    setDraftLayoutState((current) => transitionDraftLayout(current, { type: 'begin_empty_block_create' }));
 
     const textFlow = createEmptyTextBlockContentV1('paragraph');
     void createBlock(defaultTextTemplate, '', {
@@ -143,7 +167,7 @@ export function useDraftBlockController({
       onDraftPersisted?.(created);
     }).finally(() => {
       creatingDraftRef.current = false;
-      setCreatingDraft(false);
+      setCreatingDraft((current) => transitionCreatingDraft(current, { type: 'create_finished' }));
     });
   }, [
     createBlock,
@@ -171,7 +195,7 @@ export function useDraftBlockController({
     if (!template || (!textToCreate.trim() && !explicitTemplate)) return;
 
     creatingDraftRef.current = true;
-    setCreatingDraft(true);
+    setCreatingDraft((current) => transitionCreatingDraft(current, { type: 'begin_draft_persist' }));
     try {
       const created = await createBlock(template, textToCreate, {
         contentJson: options.textFlow
@@ -192,15 +216,15 @@ export function useDraftBlockController({
         if (saved) persistedBlock = saved;
       }
 
-      setDraftText('');
+      setDraftTextState((current) => transitionDraftText(current, { type: 'persist_succeeded' }));
       draftTextRef.current = '';
-      setDraftActive(false);
-      setDraftLayout(null);
+      setDraftActive((current) => transitionDraftActive(current, { type: 'persist_succeeded' }));
+      setDraftLayoutState((current) => transitionDraftLayout(current, { type: 'persist_succeeded' }));
       setFocusBlockId(persistedBlock.id);
       onDraftPersisted?.(persistedBlock);
     } finally {
       creatingDraftRef.current = false;
-      setCreatingDraft(false);
+      setCreatingDraft((current) => transitionCreatingDraft(current, { type: 'create_finished' }));
     }
   }, [
     note,
@@ -216,9 +240,7 @@ export function useDraftBlockController({
   const resizeDraftFromTextarea = useCallback((textarea: HTMLTextAreaElement) => {
     resizeTextareaToContent(textarea);
     const nextHeight = Math.max(DEFAULT_BLOCK_HEIGHT, textarea.scrollHeight + 34);
-    setDraftLayout((current) => (
-      current ? { ...current, height: nextHeight } : current
-    ));
+    setDraftLayout((current) => (current ? { ...current, height: nextHeight } : current));
   }, []);
 
   return {

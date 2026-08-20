@@ -25,6 +25,7 @@ import {
   textFromContent,
   type FieldValueRecord,
 } from '../blockContentService';
+import { shouldShowEmptyPagePrompt } from '../draftBlockLifecycleReducer';
 import type { RuntimeInteractionState } from '../interactionController';
 import type { SlashTarget } from '../hooks/useSlashCommandController';
 import type {
@@ -3715,7 +3716,7 @@ export function NoteWritingSurfaceLayer({
           />
         )}
 
-        {!contentReadOnly && !draftActive && sortedBlockCount === 0 && (
+        {shouldShowEmptyPagePrompt({ contentReadOnly, draftActive, sortedBlockCount }) && (
           <button className={styles.emptyPagePrompt} onDoubleClick={() => onActivateDraft(defaultDraftLayout)}>
             Double-click to start writing
           </button>

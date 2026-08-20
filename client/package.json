@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
+    "test:unit": "vitest run",
     "check:canvas-runtime-boundary": "node scripts/canvasRuntimeBoundaryCheck.mjs",
     "check:group-gallery-shell": "node scripts/groupGalleryShellContractCheck.mjs",
     "check:single-editor-shell": "node scripts/singleEditorShellContractCheck.mjs",
@@ -34,10 +35,13 @@
     "zustand": "^4.5.0"
   },
   "devDependencies": {
+    "@testing-library/react": "15.0.7",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.0",
+    "jsdom": "26.1.0",
     "typescript": "^5.5.0",
-    "vite": "^5.3.0"
+    "vite": "^5.3.0",
+    "vitest": "3.2.7"
   }
 }
