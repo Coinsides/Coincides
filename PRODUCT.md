@@ -24,8 +24,6 @@ Primary users include:
 
 The first real user is Henry. The product should be optimized for serious self-use before it tries to become broadly marketable.
 
-> **Note on scope (2026-08-20)**: learning is the **leading scenario** — the material the author knows best, used to draft and to judge. It is not a narrowing of who the product is for. All four groups above remain in range.
-
 ## Product Purpose
 
 Coincides is a refined information-processing notebook. Its job is to help humans and AI turn selected materials into readable, editable, source-aware notes and reports.
