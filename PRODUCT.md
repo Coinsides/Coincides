@@ -24,15 +24,17 @@ Primary users include:
 
 The first real user is Henry. The product should be optimized for serious self-use before it tries to become broadly marketable.
 
-> **Stage boundary (2026-08-20)**: learning is what this stage optimizes for. The other uses above stay in scope, but are not separately designed for yet.
+> **Note on scope (2026-08-20)**: learning is the **leading scenario** — the material the author knows best, used to draft and to judge. It is not a narrowing of who the product is for. All four groups above remain in range.
 
 ## Product Purpose
 
 Coincides is a refined information-processing notebook. Its job is to help humans and AI turn selected materials into readable, editable, source-aware notes and reports.
 
-**Structurally, it is a receipts database that grows projections.** The five truths are the tables; the receipts — anchors, birth certificates, judgment snapshots — are foreign keys with honest degradation; and the reading surface, the canvas, an HTML export, and a vault export are four views of the same rows. The contrast that names it: **a highlight made in a browser dies inside that file; a selection made here lives on as a receipt.** Obsidian is a note app on top of a filesystem; Coincides is a learning system on top of a database.
+**Structurally, it is a receipts database that grows projections.** The five truths are the tables; the receipts — anchors, birth certificates, judgment snapshots — are foreign keys with honest degradation; and the reading surface, the canvas, an HTML export, and a vault export are four views of the same rows. The contrast that names it: **a highlight made in a browser dies inside that file; a selection made here lives on as a receipt.** Obsidian is a note app on top of a filesystem; Coincides is a refining system on top of a database.
 
-**The current stage focuses on learning.** Study material is the first battlefield — the place where the product must become good enough that its author stops reaching for anything else. That is a focus, not a ceiling: research, report assembly, and long-horizon material organization stay within the north star; they are simply not what this stage optimizes for. *(Scope adjudicated by Henry, 2026-08-20.)*
+**What it serves is a life, not a subject.** Coincides is built for the whole of its author's ordinary working life — study is part of that life, not the boundary of it. Research, report assembly, and long-horizon material organization are the same act on different material.
+
+**Learning is the leading scenario, not a narrowing of identity.** It is the material its author knows best, so it is where initial designs get drafted and where acceptance gets judged. Choosing a proving ground is not the same as choosing a smaller product. *(Shape and scope adjudicated personally by Henry, 2026-08-20.)*
 
 The product exists because AI can produce and process more information than a human can comfortably read in a chat window. A long conversation, a stack of research reports, a textbook chapter, or a group of source files can quickly become too much for linear reading. Coincides gives that information a better human surface: structured blocks, free layout, source grounding, relation awareness, and report-like presentation.
 
