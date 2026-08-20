@@ -19,8 +19,8 @@
 | [ContentGroup-GroupFolder-Contract.md](ContentGroup-GroupFolder-Contract.md) | ContentGroup / GroupFolder Contract | `active` | 2026-06-23 | — |
 | [Editor-State-Rebuild-Contract.md](Editor-State-Rebuild-Contract.md) | Editor State / Rebuild / Undo Contract | `deferred` | 2026-06-23 | — |
 | [Link-Source-Relation-Boundary-Contract.md](Link-Source-Relation-Boundary-Contract.md) | Link / SourceReference / ObjectRelation Boundary Contract | `deferred` | 2026-06-23 | — |
-| [Notebook-Object-Boundary-Contract.md](Notebook-Object-Boundary-Contract.md) | Notebook 对象边界契约 | `draft` | 2026-08-20 | — |
-| [Notebook-Object-Inventory-Contract.md](Notebook-Object-Inventory-Contract.md) | Notebook Object Inventory Contract | `active` | 2026-06-23 | — |
+| [Notebook-Object-Boundary-Contract.md](Notebook-Object-Boundary-Contract.md) | Notebook 对象边界契约 | `active` | 2026-08-20 | — |
+| [Notebook-Object-Inventory-Contract.md](Notebook-Object-Inventory-Contract.md) | Notebook Object Inventory Contract（已冻结） | `(缺状态头)` | — | — |
 | [Petal-Contract.md](Petal-Contract.md) | Petal Contract | `superseded` | 2026-07-14 | ⚠️ `docs/agent-ops/analysis/relation-item-graph-concept-design… |
 | [Source-Ladder-Contract.md](Source-Ladder-Contract.md) | Source 三层梯子与锚契约 | `active` | 2026-08-20 | — |
 | [Source-Provenance-Contract.md](Source-Provenance-Contract.md) | Source / Provenance Contract | `deferred` | 2026-06-23 | — |

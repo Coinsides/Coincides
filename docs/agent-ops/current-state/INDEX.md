@@ -8,8 +8,9 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 1 份文档。
+共 2 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
 | [README.md](README.md) | Coincides — Current State | `active` | 2026-08-19 | — |
+| [tech-debt.md](tech-debt.md) | 技术债登记 | `active` | 2026-08-20 | — |

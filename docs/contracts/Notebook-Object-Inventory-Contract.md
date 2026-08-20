@@ -1,13 +1,28 @@
-> **状态 (Status)**: active
-> **层 (Layer)**: 契约 / Contract
-> **日期 (Updated)**: 2026-06-23
-> **权威 (Authoritative)**: 是
-> **取代 (Supersedes)**: —
-> **被取代 (Superseded by)**: —
-
 > **教义更替公告 (2026-07-13 · V2.BN.11)**: §22 Relation / ObjectRelation 所述"future endpoints 偏好 ContentGroup / accepted ContentGroup identity / CompositeEndpoint / NoteBlock / SourceRegion"**已被取代:唯一 durable endpoint = Item（卡）**;legacy `object_relations / canvas_edges / relation_layers` 经活性盘点数据全死,047 落表,legacy Courses 学习画布页整体下架。§17.1 Petal 机制随花瓣退役日落（V2.BN.11.1,见 `Petal-Contract.md`）。对象清单新增:**Item / ItemAnchor（一表两态:原料池+锚集,使用收据）/ ItemSnapshot（判断收据）/ Relation（种子九类,单活边）/ RelationAssessment（AI 署名判定）**——权威:`docs/agent-ops/analysis/relation-item-graph-concept-design.md`（v1.1）。其余对象边界继续有效。
 
-# Notebook Object Inventory Contract
+> **状态 (Status)**: archived
+> **层 (Layer)**: 历史 / History（已冻结的 V2.BN.8 对象清单）
+> **日期 (Updated)**: 2026-08-20（冻结）
+> **权威 (Authoritative)**: 否
+> **被取代 (Superseded by)**: [`Notebook-Object-Boundary-Contract.md`](Notebook-Object-Boundary-Contract.md)
+
+> # ⛔ 整体冻结公告（2026-08-20）
+>
+> **本文件已整体冻结，不作为任何工作的依据。现行契约 = [`Notebook-Object-Boundary-Contract.md`](Notebook-Object-Boundary-Contract.md)。**
+>
+> ## 为什么是冻结而不是更正
+>
+> 本文件是 **859 行手写事实面**。2026-06-23 成文（V2.BN.8 时代），07-13 打过一层教义横幅，08-19 打第二层 —— **而正文始终停在 V8**。2026-07-15 会议卷 §二 Henry 亲自点名它时的判词是：**「横幅补丁救不了正文脱节」**。
+>
+> 根因不是没人维护，是**形制本身**：手写事实面的半衰期约等于**下一次 migration**。新契约因此只装**边界与意图**，事实面（表 / 路由 / kind / 操作）改由 `scripts/docs-inventory.mjs` **从代码生成**（07-15 §三.1 生成层：能派生的不手写）。文件名也从 **Inventory** 改为 **Boundary** —— 让名字本身挡住复发。
+>
+> **征候留档**：本文件有**两个 §22**（Relation 与 Source 重号）。手写事实面失控的直接证据。
+>
+> ## 逐节判定
+>
+> 见新契约 §5（被取代 6 / 部分 6 / 存活 2）。其中 **§14 SelectionDraft 不仅存活还被升级** —— 宪章 §8 把它升格为「选区收据 ＝ 还没保存的锚」，是 V2.BN.12 必修③。**§23 User-Facing Translation 判存活但未搬运**，留待随 V12 组件语言重做时从本件取用。
+
+# Notebook Object Inventory Contract（已冻结）
 
 **Status**: V2.BN.8 object model alignment
 

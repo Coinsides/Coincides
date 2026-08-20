@@ -93,7 +93,7 @@
 | `PRODUCT.md` | 定位 / 表面模型(canvas-backed 两模式)/ Source 入库即重建 三处冲突 |
 | `docs/PRD.md` | §2 产品阶梯仍把已物理清场的 `Petal` 列为现役第 4 步 |
 | `docs/ARCHITECTURE.md`、`docs/DATA_MODEL.md` | 停在 2026-06-06,词汇仍为 `ObjectRelation`(旧三表 047 已落),早于 Purpose/Source/Item 三层真相 |
-| `docs/contracts/Notebook-Object-Inventory-Contract.md` | V8 时代正文,根模型仍以 PageFrame 为内容容器、以 Petal 为根 |
+| ~~`docs/contracts/Notebook-Object-Inventory-Contract.md`~~ | ✅ **已处置**:2026-08-20 整体冻结,现行契约改为 `contracts/Notebook-Object-Boundary-Contract.md` |
 | `README.md`(repo 根) | 停在 v1.7.3 / Mr. Zero(宪章 §10 已声明取代) |
 | `docs/workflow/**` | 分支写 `feat/v2.0-noteblock`,指向不存在的工作线 |
 

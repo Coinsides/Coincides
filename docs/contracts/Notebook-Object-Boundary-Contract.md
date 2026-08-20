@@ -1,8 +1,8 @@
-> **状态 (Status)**: draft
-> **层 (Layer)**: 契约 / Contract（**草案，待 Fable 抽检放行后转 `active`**）
+> **状态 (Status)**: active
+> **层 (Layer)**: 契约 / Contract
 > **日期 (Updated)**: 2026-08-20
-> **权威 (Authoritative)**: 否（转正前不作为施工依据）
-> **取代 (Supersedes)**: `docs/contracts/Notebook-Object-Inventory-Contract.md`（转正时整体冻结）
+> **权威 (Authoritative)**: 是（对象边界与不变式）；⚠️ **尚未 `frozen`** —— 冻结门 = 生成器落地 + 首份生成物入库（见 §6）
+> **取代 (Supersedes)**: [`Notebook-Object-Inventory-Contract.md`](Notebook-Object-Inventory-Contract.md)（2026-08-20 整体冻结）
 > **上游**: `PRODUCT.md` 06-29 设计语法 · 方向宪章 §4（表面重划）· `agent-ops/analysis/relation-item-graph-concept-design.md` v1.1（Item 教义）· 2026-07-15 会议卷 §三.1（生成层）
 
 # Notebook 对象边界契约
@@ -106,11 +106,11 @@ Binding     排他归属    —— ⚠️ 要避免的形状
 
 | 事实面 | 权威来源 | 当前规模 |
 |---|---|---|
-| 数据表清单与外键关系 | `server/src/db/schema.sql` + `migrations/` | 76 张表 |
-| HTTP 路由清单 | `server/src/index.ts` 的 routes import | 48 个路由模块 |
-| canvas object kinds | `server/src/services/canvasObjects.ts` 的 `KIND_HANDLERS`（`:1258`） | 随注册增长 |
-| npm scripts / 验证门 | `package.json` | — |
-| 契约测试与 check 脚本覆盖面 | `package.json` 的 `check:*` / `smoke:*` | — |
+| 数据表清单 | `server/src/db/schema.sql` + `migrations/` | **活表 98 张** |
+| HTTP 路由模块 | `server/src/index.ts` 的 routes import | 48 |
+| canvas object kinds | `server/src/services/canvasObjects.ts` 的 `KIND_HANDLERS` | 6 |
+| 验证门构成 | `package.json` 的 `verify:v2-bn8-runtime` | 7 步 |
+| 门外的 check / smoke / test 脚本 | `package.json` | 6 |
 
 **生成物的规矩**：
 
@@ -118,7 +118,17 @@ Binding     排他归属    —— ⚠️ 要避免的形状
 2. 状态头 `层 = 生成 / Generated`，`权威 = 是（事实面）`；
 3. **生成物过期 = 脚本没跑，不是文档写错了** —— 这正是它优于手写的地方。
 
-> ⚠️ **本契约不假装这件事已经做了。** 生成器**尚不存在**，见 §6。
+**生成器**：`scripts/docs-inventory.mjs` → `docs/generated/object-inventory.md`（`npm run docs:inventory`；`npm run docs:check` 检查过期）。它**只读**，不碰 `client/`、不碰数据库、不联网。
+
+### 4.1 生成器首轮机器验证的三条结果
+
+上线第一次运行就纠正/发现了三件手写清单看不见的事：
+
+1. **「76 张表」是错的口径 —— 活表实为 98 张。** 已核 `server/src/db/init.ts:33,156`：**先应用 `schema.sql`，再跑 migrations**。故活表 ＝ `schema.sql` 声明 ∪ migrations 建表 − migrations 落表。`schema.sql` 单独的 76 只是基线，其中 56 张晚期表被回填、22 张没有。**任何"数一下 `schema.sql`"得出的数字都是错的** —— 本契约初稿正是这么错的。
+2. **6 个 check / smoke / test 脚本不在任何验证门内**：`check:group-gallery-shell` · `check:groups-rail-shell` · `check:single-editor-shell` · `check:source-experience` · `check:v2-bn11-legacy-shutdown` · `test:unit`。**不在门内 ≠ 错误**（可能刻意），但「没有门跑的护栏等于没有护栏」，逐个应有明确归属。此前只有 `test:unit` 一条被登记为 TD-2 —— **机器把它从 1 条扩到 6 条**。
+3. **`__test_probe` 是一个无守卫的生产 kind**：注册在 `KIND_HANDLERS`（`canvasObjects.ts:1373`）**且** validator 以 `z.literal('__test_probe')` 放行（`validators/index.ts:807`），**无任何环境守卫** —— 端到端可达。性质 LOW（`backing:'none'`、`objectClass:'pure'`，存不下扩展数据，且 `__` 命名空间隔离），但它是生产表面上的一道测试接缝。
+
+> **这三条正是 §4 存在的理由。** 前两条手写清单永远发现不了；第三条要有人恰好去数注册表才看得见。
 
 ---
 
@@ -159,10 +169,16 @@ Binding     排他归属    —— ⚠️ 要避免的形状
 
 ---
 
-## 附：转正执行清单（草案期不执行）
+## 附：转正记录（2026-08-20，已执行）
 
-1. 本文件状态头转 `active`（**非 `frozen`**，见 §6）。
-2. `Notebook-Object-Inventory-Contract.md` 顶部加整体冻结公告、状态转 `archived`、`被取代` 指向本文件。
-3. 更新指向旧件的引用（至少：`contracts/INDEX.md` 自动重生成；`AGENT_CONTEXT.md §7` 已知脱节表中该行改为「已处置」）。
-4. 重跑 `node scripts/docs-index.mjs`。
-5. 按 §6 立生成器工单，排单由 Fable 决定。
+Fable 抽检放行。抽检收据：48 路由模块 ✅ · `KIND_HANDLERS` 精确在 `canvasObjects.ts:1258` ✅ · 旧件双 §22 ✅ · 859 行 ✅ · §2/§3 逐条对过 V11 教义零冲突。
+
+1. ✅ 本文件转 `active`（**非 `frozen`**，见 §6）。
+2. ✅ `Notebook-Object-Inventory-Contract.md` 整体冻结（`archived`，`被取代` 指向本文件）。
+3. ✅ `AGENT_CONTEXT.md §7` 已知脱节表中该行改为「已处置」。
+4. ✅ `contracts/INDEX.md` 重生成。
+5. ✅ **生成器已授权并落地**：`scripts/docs-inventory.mjs` → `docs/generated/object-inventory.md`。
+
+### ⏳ 冻结门（V2.BN.12 收口清单）
+
+本契约转 `frozen` 的条件 = **生成器落地 + 首份生成物入库**（机器验证过形状才冻）。与 `Source-Ladder-Contract.md` 的 rider 同构。
