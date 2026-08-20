@@ -224,3 +224,40 @@ PASS 的依据是：RC-A/B/C/D 的当前主机制链均能由代码、只读 SQL
 ### 7. 最终边界
 
 RC-A/B/C/D **当前机制链 PASS**；历史原样症状的完整因果、后续 RED/UX 契约与跨 block 编辑语义 **未获本 Review 放行**。本 reviewer 不授权施工、合并或 checkpoint；由 Fable 根据以上 MED 抽检、收窄并决定是否发后续实现单。
+
+## Review-2
+
+> 二级复盘：Claude(Opus 5,工程并行会话) | 日期：2026-08-19 | 分支：`fable/v2-bn12-exoskeleton`
+>
+> 复盘对象 = **复核的质量**，不重查代码。但 reviewer 的关键反证我逐条自验，不代入信任。
+
+### 判定：复核质量 **高**。0 误收窄 / 1 处漏合取 / 1 条分级建议 / 1 个收据缺口。首轮 reviewer 成色够，流水线可用。
+
+### 1. 抽验 reviewer 的三处反证 —— 全部成立
+
+- **MED-2 的 `x=-72` 是真刀。** 自验：`pageFrameService.ts:53-68` 的 `createRuntimePageFrame` 计算 `x = contentX - inset.left`，而 Page 模式下 `viewportService.ts:30-32` 的 `getPrimaryPageOffsetX` 返回 `0` → fallback frame `x=-72`；DB 实测 persisted entity frame 为 `x=0`。**同一输入在两种 fixture 下分类相反**，因此一个照字面写的 RED #1 会在修复前就绿。这不是文字瑕疵，是测试规格的致命缺陷 —— 全篇最有价值的一条。
+- **MED-1 的时间证据成立。** 自验三份关键 surface 文件最后提交：`useSlashCommandController.ts` = 2026-06-23、`NoteWritingSurfaceLayer.tsx` = 2026-07-13、`TextBlockProjection.tsx` = 2026-07-12，**全部早于 08-08**。
+- **且 reviewer 的措辞纪律正确**：它没有反向断言"代码没变所以历史记录有误"，只判"差异原因未定"。证据不足时拒绝向任一方向下结论 —— 这是对的。
+
+### 2. 误收窄：无。漏收窄：一处 —— **RC-A.5 × RC-B.3 的合取被逐条核对切开了**
+
+RC-A.5 判 VERIFIED 无误。但逐条表格的结构让 reviewer 漏掉了两条之间的耦合。自验：`useNoteCanvasDataAdapter.ts:353-356` 的 `sortedBlocks` 是**全量排序、无 meaningful/visibility 过滤**；prompt 门是 `NoteWritingSurfaceLayer.tsx:3718` 的 `sortedBlockCount === 0`；而 Page 渲染走 `modePolicyService.ts:41-77` 过滤掉 `canvas_workspace`。
+
+**所以症状 2 的死胡同不是单一缺陷，是两个缺陷的合取**：ghost 计入 prompt 计数（**入口消失**）＋ ghost 被 Page 策略过滤（**内容不显示**）。
+
+**对拆单的直接后果**：只修 RC-A（lifecycle 不再产生 ghost）或只修 RC-B（坐标不再误分类），都能让**新** note 不再复现 —— 但各自都留下**存量 legacy note 的死胡同**：前者仍无入口，后者仍无内容。两条必须同批，或显式声明存量数据迁移路径，否则会做出"新数据好了、老笔记还死着"的半修。
+
+### 3. MED 分级：三条恰当，一条建议改标签
+
+- **MED-2 / MED-3 恰当** —— 工程性，拆单时收窄即可。
+- **MED-4 分级偏低（建议标注性质，非改数字）。** 工程半径确实是 MED，但**性质是治理违规**：未拍板的产品语义（跨 block Backspace）经由"测试规格"这条侧门进入了必过项。本仓拍板制度存在的理由正是拦这个。reviewer 判对了也建议移出，但归在 MED 会让它读起来像"待收窄的技术项"。Fable 已裁定采纳并存待决清单 —— 处置正确，只是**建议在待决清单里标为「边界违规」而非「技术缺陷」**，以免将来被当成可协商项。
+- **MED-1 恰当，但它的价值被低估了。** 真正要拦的不是措辞，是 **builder 的认识论错误**：把"未复现"讲成"已漂移"，是从缺席推断因果。这类错误若不拦，会在后续单里变成"这个问题已经自己好了"的免修理由。
+
+### 4. 两处纪律的评语
+
+- **拒绝冒充 live 复现：满分，但留了个洞。** 服务已停即不把 builder 的 DOM 时序冒充成自己的收据 —— 完全正确，正是「别信叙述者，信机械收据」。**但 `.claude/launch.json` 在仓里，重启双服务是它能做的。** 诚实地留洞 ≠ 补洞：正确处置是重启取真收据，**或显式声明"live 复演本次不在复核范围"**。它做了前半没做后半，结果是 RC-A/RC-D 的时序类结论至今只有 builder 单方收据。**建议给 reviewer 角色卡加一条：能取的收据不取，须写明为什么不取。**
+- **并发工作树归因：满分，且这条是替我挡的。** 复核期间我正在同一分支写文档批次并把 HEAD 推到 `7b093b2`。一个不小心的 reviewer 会把 `docs/PRD.md`、`AGENT_CONTEXT.md`、`scripts/docs-index.mjs` 记到 builder 头上判"未申报改动"。它做了首次快照、明确区分、并声明自己未编辑这些文件。多线并发下这是必需纪律，**它自发做了**。
+
+### 5. 给拆单的一条提醒（Fable 已定 02 先行）
+
+reviewer §6 表把 RED #1 判为「可直接落现有 runner」—— **前提是先按 MED-2 换 fixture**。**02 工装单若照抄"#1 可直接执行"而不带 MED-2 的 fixture 修正，会造出一个假绿测试**。建议把 MED-2 的修正（persisted entity fixture + "拖出 Page 必须仍重分类"反向正控）**写进 02 单的验收条件**，不留给测试作者自行理解。
