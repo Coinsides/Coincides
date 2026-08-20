@@ -33,6 +33,10 @@
   2. **ghost 清理**:删除可证明的 provisional ghost——`plain_text` 空/缺 **且** 无 source ref、无 annotation、无有意义 history 的 active block 及其 placement;不满足全部条件的一律不动。
 - 脚本先输出 **dry-run 清单收据**(逐条:block id、判定依据),再执行,两份输出都进回执。迁移后 reload:症状 2 的存量 note Page 侧恢复可见,入口 prompt 恢复。
 
+### D6 — test:unit 接入常驻验证门(2026-08-20 增补,依据 02.1 二级复盘漏合取发现)
+
+- RED #1 转绿后,`test:unit` 必须接入常驻门(并入 `verify:v2-bn8-runtime` 链或与其并列的强制门,repo 根一条命令可跑)。理由:02 建的 parity/契约测试是防止将来重构再换状态基座的回归护栏,**没有门跑的护栏等于没有护栏**。这是交付物不是验证项——不接线不算完工。
+
 ### D5 — 测试转绿与新增
 
 - **RED #1 转绿**(02 埋的 `surfacePersistenceContract.test.ts`)——只许通过 D2 实修转绿,禁止改断言。
