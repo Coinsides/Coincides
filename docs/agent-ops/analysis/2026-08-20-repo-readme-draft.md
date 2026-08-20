@@ -1,7 +1,8 @@
-> **状态 (Status)**: draft
-> **层 (Layer)**: 分析 / Analysis（重建草案 · 待 Fable 抽检放行后替换 `README.md`）
+> **状态 (Status)**: superseded
+> **层 (Layer)**: 分析 / Analysis（重建草案 · **已执行**）
 > **日期 (Updated)**: 2026-08-20
 > **权威 (Authoritative)**: 否
+> **被取代 (Superseded by)**: [`README.md`](../../../README.md)（2026-08-20 抽检放行后整体替换完成）
 > **委托**: 重建四件之二（Fable 排序：BN 路线图 → **README** → Source-Reconstruction-Intake → Inventory-Contract）
 
 # repo 根 README 重建草案
@@ -227,9 +228,12 @@ Coincides/
 
 ---
 
-## 5. 转正执行清单（放行后执行）
+## 5. 转正记录（2026-08-20，已执行）
 
-1. 以本草案 §3 全文替换 `README.md`。
-2. 按 Henry 对 §2 的裁定填「许可」节（补 LICENSE / 改私有 / 摘徽章三选一）。
-3. 本草案状态头改 `superseded`，`被取代` 指向 `README.md`。
-4. 重跑 `node scripts/docs-index.mjs`。
+Fable 抽检放行（中文正文准 / 删三条 v1 铁律准 / LICENSE 转 Henry 裁准），并逐项亲核了 §3 的事实面（`setup` / `dev:server` / `dev:client` / `verify:v2-bn8-runtime` 均在 `package.json`；React 18.3 / Vite 5.3 / Zustand 4.5 / Express 4.21 / better-sqlite3 11.7 / Node 22 / sqlite-vec 休眠，全部属实）。
+
+1. ✅ 以本草案 §3 全文替换 `README.md`。
+2. ✅ **修正后执行**：抽检指出「许可」节原本只有 HTML 注释，GitHub 渲染成一个空标题节、像页面截断。已加可见占位「许可待定。」。
+3. ⏳ 「许可」节的最终内容待 Henry 裁（本草案 §2 三选一）。**过渡期处置**：整页替换后 MIT 徽章自然消失＝止血；**`package.json:7` 的 `license` 字段一个字不动**，等 Henry —— 摘徽章是停止对外声称，改字段是替所有者做许可决定，两件事性质不同。
+4. ✅ 本草案状态头转 `superseded`，`被取代` 指向 `README.md`。
+5. ✅ 重跑 `node scripts/docs-index.mjs`。

@@ -1,77 +1,90 @@
 # Coincides
 
-**AI-Powered Learning Operating System**
+**一个把学习材料变成可追溯知识的笔记系统。**
 
-Coincides helps students organize their entire semester through intelligent study planning. An AI agent named **Mr. Zero** analyzes your lecture notes, generates study plans, creates knowledge cards, and manages your schedule — all through natural conversation.
+你把课本、讲义、扫描件、网页扔进来，在里面读、圈、写。你圈的每一处都留下**收据** —— 一条能走回原件的路径。笔记不是孤立的文本，是这些收据之上长出来的结构。
 
-Built around the **Minimum Working Flow** philosophy: maintain learning continuity through a small daily minimum, not cramming.
-
-![Version](https://img.shields.io/badge/version-1.7.3-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
-![Node](https://img.shields.io/badge/node-22.x-brightgreen)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178c6)
+> **对照**：在浏览器里划的重点，死在那个原件里；在这里划的重点，活成一条收据。
+> Obsidian 是文件系统上的笔记应用；Coincides 是数据库上的学习系统。
 
 ---
 
-## Features
+## 状态
 
-### 📅 Calendar & Tasks
-Daily tasks with **Must / Recommended / Optional** priorities. Week view with Time Block visualization. Drag-and-drop task ordering. Recurring task groups with progress tracking.
+**重度开发中，尚未适合他人使用。**
 
-### 🎯 Goal Manager
-Hierarchical goals with deadlines. Define prerequisite chains (A → B → C) and let AI schedule tasks in dependency order. Exam mode for focused prep periods.
-
-### 📚 Knowledge Cards
-Flashcards with LaTeX rendering (KaTeX), multiple templates (Definition, Theorem, Formula, Q&A), tagging system with tag groups, and **FSRS spaced repetition** for optimal review scheduling.
-
-### 🤖 Agent (Mr. Zero)
-Chat-based AI assistant for everything: analyze documents, create study plans, generate flashcards, reschedule tasks. All AI changes go through a **Proposal → Review → Apply** flow — the system suggests, you decide.
-
-### ⏰ Time Blocks
-Define your weekly study/sleep schedule with reusable templates. AI automatically respects your available time when scheduling. Supports template sets, single-day overrides, and midnight-crossing blocks.
-
-### 📊 Statistics
-Streaks, completion rates, heatmaps, weekly/monthly trends, per-course breakdowns. Passive tracking only — no monitoring, no guilt.
-
-### 📝 Daily Brief
-Today's tasks at a glance, review cards due, recurring task alerts, energy level tracking, exam mode highlights.
-
-### 📄 Document Management
-Upload PDFs, DOCX, XLSX, images. Dual-channel parsing (text extraction + OCR fallback via Claude Vision). Semantic search + full-text search across all your materials.
+- 当前版本线：`V2.BN.12`（代号「外骨骼与地板」）
+- 真实用户数：1（作者本人）。产品先服务于严肃自用，再谈通用性。
+- 无云端、无遥测，全部数据在本机 SQLite。
 
 ---
 
-## Tech Stack
+## 它是怎么想的
 
-| Layer | Technology |
-|-------|-----------|
-| Frontend | React 18 + TypeScript + Vite 5 |
-| State | Zustand |
-| UI | Custom components + Lucide icons |
-| Backend | Node.js 22 + Express 4 + TypeScript |
-| Database | SQLite (better-sqlite3), WAL mode |
-| AI Agent | Anthropic Claude (Sonnet 4) |
-| Embeddings | Voyage AI (voyage-4, 1024-dim) |
-| Vector Search | sqlite-vec |
-| Full-Text Search | SQLite FTS5 |
-| Spaced Repetition | ts-fsrs (FSRS algorithm) |
-| Math Rendering | KaTeX |
-| i18n | i18next (English + 中文) |
+四条贯穿整个代码库的设计约束：
+
+### 1. 真相分离
+
+内容、位置、标记、出处、语义关系是**五种独立的真相**，各自有权威存储，互不覆写。
+移动一个对象只改布局，不动它的文字；删掉一个容器不删掉里面的知识。
+
+### 2. 出处是收据，不是附件
+
+一段内容"凭什么这么说"必须可追问。源文件不可变，锚点记录到页码与坐标，判断留快照。
+链接（导航）、出处（证据）、关系（语义）三者永不混为一谈。
+
+### 3. 人先能用，agent 才接得上
+
+> Agent 能做的，人类必须 100% 能做。同门同钥，没有后门。
+
+每种能力都拆成**基座**（人类可手工创建和使用的真相模型）与**操作者**（替你生长它的 AI）。基座先建，操作者后接 —— 不可靠的地基上做不出可靠的 agent。
+
+### 4. 一个知识空间
+
+Project 是**镜片**不是**所有者**。同一份理解可以被多个项目看见而不必复制；一个来源不属于任何单一项目。
 
 ---
 
-## Getting Started
+## 现在能做什么
 
-### Prerequisites
+| 能力 | 状态 |
+|---|---|
+| 自然书写（TextFlow：段落 / 标题 / 列表 / 引用 / 待办 / 折叠 / 代码行，行内公式与代码） | 可用 |
+| 无限画布 + 页面取景框，自由摆放、对象家族（形状 / 便签 / 连接线 / 表格） | 可用 |
+| 材料入库：PDF / DOCX / TXT / Markdown / 图片，去重、原件不可变、跨项目复用 | 可用 |
+| 圈选铸卡：把材料里的一段铸成 **Item**（独立知识卡，带回溯锚点） | 可用 |
+| ContentGroup：把 Item 捆成知识包 | 可用 |
+| Purpose：给知识包与 Item 一个情境角色与作用域 | 可用 |
+| Relation：Item 之间的语义关系，带判断快照与**机械新鲜度**（端点改了会自己变灰） | 可用 |
+| 双语界面（English / 中文） | 可用 |
 
-- **Node.js 22.x** (LTS) — [nodejs.org](https://nodejs.org)
-- **npm 9+** (comes with Node.js)
-- **Anthropic API Key** — [console.anthropic.com](https://console.anthropic.com)
-- **Voyage AI API Key** (optional, enables semantic search) — [dash.voyageai.com](https://dash.voyageai.com)
+**刻意休眠**：向量检索管线（Voyage AI + sqlite-vec）已接好但断开 —— 它属于 agent 时代，地基稳之前不通电。
 
-> **Note:** Node 25 has known ESM compatibility issues on Windows. Use Node 22 LTS.
+**尚未建**：MCP 工具面、流式装配面、导出投影（单文件 HTML / 工程包）、知识图谱运行时。
 
-### 1. Clone & Install
+---
+
+## 技术栈
+
+| 层 | 技术 |
+|---|---|
+| 前端 | React 18 · TypeScript · Vite 5 · Zustand |
+| 后端 | Node.js 22 · Express 4 · TypeScript |
+| 数据库 | SQLite（better-sqlite3，WAL） |
+| 检索 | SQLite FTS5 ·（休眠）Voyage AI + sqlite-vec |
+| 数学 | KaTeX |
+| i18n | i18next |
+
+---
+
+## 本地运行
+
+### 前置
+
+- **Node.js 22.x LTS** —— Node 25 在 Windows 上有已知 ESM 兼容问题
+- npm 9+
+
+### 装 & 跑
 
 ```bash
 git clone https://github.com/Coinsides/Coincides.git
@@ -79,125 +92,75 @@ cd Coincides
 npm run setup
 ```
 
-### 2. Configure Environment
+后端（终端 1）：
 
-Create `.env` in the **project root**:
+```bash
+npm run dev:server
+```
+
+前端（终端 2）：
+
+```bash
+npm run dev:client
+```
+
+打开 http://localhost:5173 → 注册账号 → 新建 Project → 传材料 → 新建 Note 开始写。
+
+### 环境变量
+
+在项目根建 `.env`：
 
 ```env
-# Required — AI agent (Mr. Zero)
-ANTHROPIC_API_KEY=sk-ant-api03-xxxxx
-
-# Optional — semantic search & document RAG
+# 可选 —— 启用语义检索（当前管线休眠，不填不影响使用）
 VOYAGE_API_KEY=pa-xxxxx
 ```
 
-> You can also configure API keys in the app's Settings page after first launch.
+### 验证门
 
-### 3. Start the App
-
-**Terminal 1 — Backend:**
+改完代码跑这个（构建 + 契约测试 + 性能 + 密钥扫描）：
 
 ```bash
-cd Coincides
-node --import jiti/register server/src/index.ts
+npm run verify:v2-bn8-runtime
 ```
-
-**Terminal 2 — Frontend:**
-
-```bash
-cd Coincides/client
-npm run dev
-```
-
-### 4. Open & Register
-
-Go to **http://localhost:5173** → Register an account → Start using.
-
-Everything runs locally on your machine. No cloud, no telemetry.
-
-### 5. First Time Setup
-
-1. **Create a course** — e.g. "Linear Algebra"
-2. **Upload materials** — Drop your lecture PDFs or notes
-3. **Set your schedule** — Define study time blocks (optional)
-4. **Talk to Mr. Zero** — Ask the AI to build a study plan. It creates a Proposal for you to review and approve.
 
 ---
 
-## Project Structure
+## 目录
 
 ```
 Coincides/
-├── client/              # React frontend
-│   ├── src/
-│   │   ├── components/  # Reusable UI components
-│   │   ├── pages/       # Route pages (Calendar, DailyBrief, etc.)
-│   │   ├── stores/      # Zustand state stores
-│   │   └── locales/     # i18n translations (en/zh)
-├── server/              # Express backend
-│   ├── src/
-│   │   ├── agent/       # AI agent (system prompt, tools, scheduling)
-│   │   ├── db/          # Database schema & migrations
-│   │   ├── embedding/   # Voyage AI vector search
-│   │   ├── routes/      # REST API endpoints
-│   │   └── services/    # Document parsing, file processing
-├── shared/              # Shared TypeScript types
-│   └── types/
-└── docs/                # Project documentation
-    ├── PRD.md           # Product Requirements
-    ├── ARCHITECTURE.md  # Technical Architecture
-    ├── DATA_MODEL.md    # Database Schema
-    ├── Coincides-Roadmap.md
-    └── releases/        # Version changelogs
+├── client/src/pages/Notes/canvasEngine/   # 自研画布引擎（对象 / 布局 / 投影 / 交互）
+├── client/src/pages/Notes/               # 笔记、ContentGroup、Purpose、Source 界面
+├── server/src/routes/                    # REST API
+├── server/src/db/                        # schema 与 migrations
+├── shared/types/                         # 前后端共享类型
+└── docs/                                 # 项目文档（见下）
 ```
 
 ---
 
-## Design Principles
+## 文档
 
-Three rules that **cannot** be broken:
+**从这里进**：
 
-1. **Never decide for the user** — AI only breaks down, suggests, and executes
-2. **Never monitor the user** — No time tracking, no energy judgment, no unsolicited content
-3. **Never create frustration** — No locked schedules, no failure reviews, zero penalty for skipping
+| 文件 | 作用 |
+|---|---|
+| [`docs/agent-ops/AGENT_CONTEXT.md`](docs/agent-ops/AGENT_CONTEXT.md) | Agent 开工第一站：必读清单、禁止事项、版本线、**已知脱节文件表** |
+| [`docs/agent-ops/current-state/`](docs/agent-ops/current-state/) | 权威现状 —— 此刻真相以此为准 |
+| [`docs/ROADMAP.md`](docs/ROADMAP.md) | 现行路线图 |
+| [`PRODUCT.md`](PRODUCT.md) | 产品定位与设计原则 |
+| [`docs/agent-ops/DOCUMENTATION-SYSTEM.md`](docs/agent-ops/DOCUMENTATION-SYSTEM.md) | 文档体系规矩 |
 
----
-
-## Version History
-
-| Version | Highlights |
-|---------|-----------|
-| **v1.7.3** | Time Block template system, auto-apply schedules, midnight-crossing blocks |
-| v1.7 | Time Blocks, weekly schedule, AI scheduling integration |
-| v1.6 | Tag groups, card sections, drag-and-drop reordering |
-| v1.5 | Document management, dual-channel parsing, semantic search |
-| v1.4 | Knowledge cards, FSRS spaced repetition, LaTeX rendering |
-| v1.3 | Goal dependencies, recurring tasks, Proposal system |
-| v1.2 | AI Agent (Mr. Zero), tool-calling architecture |
-| v1.1 | Course management, task system, daily brief |
-| v1.0 | Initial release |
-
-> **Coming in v1.8:** Cloud deployment (PostgreSQL + online access + PWA offline support)
+**规矩**：看任何文档先看顶部状态头。`superseded` / `draft` / `archived` 的不作为依据。`docs/brainstorm/**`（研究）与 `docs/releases/**`（历史）是时间点快照，不是当前真相。
 
 ---
 
-## Documentation
+## 开发方式
 
-All project docs live in [`/docs`](docs/):
-
-- [PRD.md](docs/PRD.md) — Product Requirements
-- [ARCHITECTURE.md](docs/ARCHITECTURE.md) — Technical Architecture
-- [DATA_MODEL.md](docs/DATA_MODEL.md) — Database Schema
-- [Coincides-Roadmap.md](docs/Coincides-Roadmap.md) — Development Roadmap
+本项目由一名开发者与多个 AI agent 协作构建（Claude 负责架构 / 规格 / 复核，Codex 负责施工，另有专职复核 thread）。协作协议、角色分工与决策记录都在 [`docs/agent-ops/`](docs/agent-ops/) 里公开可查 —— 包括 AI 做过的每一次判断和它的理由。
 
 ---
 
-## Contributing
+## 许可
 
-This project is in active development. Issues and pull requests are welcome.
-
----
-
-## License
-
-MIT
+许可待定。

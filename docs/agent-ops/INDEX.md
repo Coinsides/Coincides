@@ -23,7 +23,7 @@
 | [analysis/2026-08-07-cloud-server-survey.md](analysis/2026-08-07-cloud-server-survey.md) | 云服务器选型调研(2026-08-07) | `active` | 2026-08-07 | — |
 | [analysis/2026-08-08-econ-note-rebuild-experience-report.md](analysis/2026-08-08-econ-note-rebuild-experience-report.md) | 对照实验:同一份 ECON 讲稿,网页版 vs 应用手搓版(2026-08-08) | `active` | 2026-08-08 | — |
 | [analysis/2026-08-20-doc-triage-assessment.md](analysis/2026-08-20-doc-triage-assessment.md) | 文档分诊评估表 —— 全库对照新宪章 | `active` | 2026-08-19（文件名沿用委托编号 2026-08-20） | — |
-| [analysis/2026-08-20-repo-readme-draft.md](analysis/2026-08-20-repo-readme-draft.md) | repo 根 README 重建草案 | `draft` | 2026-08-20 | — |
+| [analysis/2026-08-20-repo-readme-draft.md](analysis/2026-08-20-repo-readme-draft.md) | repo 根 README 重建草案 | `superseded` | 2026-08-20 | ⚠️ [`README.md`](../../../README.md)（2026-08-20 抽检放行后整体替换完成） |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
