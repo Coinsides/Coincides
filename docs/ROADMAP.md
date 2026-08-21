@@ -89,6 +89,10 @@
 | 03 | **合批**：RC-A 生命周期状态机 ＋ RC-B surface authority ＋ 存量迁移（原拆 03/04，因下述合取约束并单，2026-08-20 Fable 拍定） | ✅ 闭环（五轮修理-复核收敛 03→03.4，全链二级复盘，checkpoint `b2a006b`；RED #1 已转绿） |
 | 05 | SlashSession（RC-D）＋ TD-3/TD-5 清偿 | ✅ 闭环（九轮修理-复核含两次设计介入，checkpoint `ad301c6`） |
 
+| 12.2a-1 | 工具注册表类型＋「无后门」机械门脚本（纯工装） | ready（Codex 周额刷新后开工；Spark 实测单） |
+| 12.2a-2 | 收据轴 `'mcp'/'proposed'`＋消费方不变式守卫 | ready（排 a-1 后） |
+| 12.2a-3 | MCP transport 骨架＋`resolve_selection` | 方案短笺阶段（裁定方两问后放行） |
+
 > ⚠️ **合取约束（来自工单 01 二级复盘，03 合批的依据）**：症状「Page 死胡同」是 **RC-A.5 × RC-B.3 的合取** —— ghost 计入 prompt 计数（入口消失）＋ ghost 被 Page 策略过滤（内容不显示）。只修一边都能让**新** note 不复现，但各自留下**存量 legacy note 的半死状态**。两条须同批，或显式声明存量迁移路径。工单 03 以「同批 ＋ 存量迁移」双保险落实：`agent-ops/handoffs/2026-08-20-v2bn12-03-lifecycle-and-surface-authority.md`。
 
 ### 3.5.1 子版本记录
