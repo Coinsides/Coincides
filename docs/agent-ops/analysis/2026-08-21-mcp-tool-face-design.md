@@ -25,18 +25,29 @@
 
 ## 2. 两个地基决定(先于清单)
 
-### 2.1 对象指代语汇(ObjectRef / SelectionReceipt)
+### 2.1 对象指代语汇(继承既有,不造第三套)——Q3 已核
+
+客户端已有选区语汇(`canvasEngine/selectionRangeService.ts` / `selectionDraftService.ts`):
 
 ```text
-ObjectRef        = { kind: <注册表 kind 或真相对象类型>, id: <runtime id> }
-SelectionReceipt = { refs: ObjectRef[], text_range?: {ref, start, end},
-                     geometry?: {frame_id?, rect, unit}, at: ISO-time }
-SourceAnchorRef  = Source-Ladder §4 的 typed anchor(page_region|element_range|cell_range|slide_region)
+CapturedSelectionRange = { blockId, textFlowId, textUnitId, startOffset, endOffset, text }
+SelectionDraftV1       = { id, phase, mode, ranges: CapturedSelectionRange[]+id, anchorRect, parentAnnotationId?, createdAt, updatedAt }
 ```
 
-- 工具入参**只接受** ObjectRef / SelectionReceipt / SourceAnchorRef 指代对象,不接受自由文本「第三段」「那个表格」——**解析是意图路由器(Agent 版)的活,不是工具面的活**。
-- 工具返回值中的对象一律以 ObjectRef 给出;涉及源件位置的以 SourceAnchorRef 给出。
-- 这套语汇即必修③ 选区收据系统的**持久化形状**;③ 不另造。
+**工具面的指代语汇=它的持久化投影**,不另立:
+
+```text
+ObjectRef        = { kind, id }                      ← kind 来自注册表/真相对象类型(text_unit/block/item/group/purpose/relation/source/canvas_object…)
+SelectionReceipt = { refs: ObjectRef[],               ← 由 ranges 的 owner 三元组 (blockId,textFlowId,textUnitId) 派生
+                     text_ranges: CapturedSelectionRange[],   ← 原样继承(含 text 摘录=Source-Ladder A-4 的摘录副本)
+                     geometry?: { frame_id?, rect: anchorRect, unit: 'px'|'pdf_pt' },
+                     at: createdAt }
+SourceAnchorRef  = Source-Ladder §4 typed anchor
+```
+
+- owner 三元组与 03/05 链的 focus receipt、item_anchors 的 `block`/`content_range` 目标天然同构——**一套三元组贯穿选区→锚→工具入参**。
+- 工具入参**只接受** ObjectRef / SelectionReceipt / SourceAnchorRef,不接受自由文本指代(解析是意图路由器的活,Agent 版)。
+- 这套语汇即必修③ 选区收据系统的持久化形状;③ 的工作=把 SelectionDraftV1 投影为 SelectionReceipt 并落收据,不另造。
 
 ### 2.2 收据形状(复用既有轴,零新表)
 
@@ -97,6 +108,7 @@ ToolRegistryEntry = {
 
 - MCP **2026-07-28** 修订;`@modelcontextprotocol/sdk` `StreamableHTTPServerTransport` 架在既有 Express 之后(无状态核心,与「后端保持服务形态」同构);MRTR 承载 `confirm` 档;缓存 `ttlMs/cacheScope` 用于 list/read 类工具(零模型荣誉榜同向)。
 - 会话/编排不在工具面:harness(Claude Code/Codex/OpenCode/管家)自带编排;工具面对所有穿戴者一视同仁(不整容)。
+- **Q4 已核——MRTR 支持度与降级路径**:MRTR(`input_required`+`inputResponses`)为 2026-07-28 规范一级公民,Anthropic 宣布在 Claude 产品线推开;Codex CLI 侧支持度未证实。**降级规则(拍)**:harness 不支持 `input_required` 时,`confirm` 档**降为 `propose`**(写候选收据,人在应用内 apply)——fail-closed、可观察、走同一条候选路径,不静默执行也不静默丢弃。
 - 单用户本机/私有云:bearer 复用应用 JWT;多穿戴者并发细则在停车场。
 
 ## 8. 工具清单 v0(只定「形状类别」,逐步长)
