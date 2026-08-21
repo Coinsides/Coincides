@@ -121,7 +121,7 @@ ToolRegistryEntry = {
 ## 6. 「出候选」档(D-6)——另建,不激活旧 proposal 管线
 
 - 依据调研盘 §3.4:旧 proposals 管线从未运过一行、词表分裂、五真相零接入、焊在 Mr. Zero 会话上。**不激活**。
-- V12 的「出候选」=**候选收据**:`operation_batches` 以 `status='proposed'` 落地,携完整 intended payload;人在既有对象的审阅入口(最小:一个「待处理候选」列表)选择 apply(→`applied`,执行同一工具路径)或 discard(→`reverted`)。产房/案例库那套候选生态归 Agent 版(§6 三级)。
+- V12 的「出候选」=**候选收据**:`operation_batches` 以 `status='proposed'` 落地,携完整 intended payload。**呈现位置(Henry 2026-08-21 拍:方案 C)**:候选的「家」=独立**待处理候选队列**(安静、可攒批、真相所在;12.2 S6 建最小列表,含「跳到现场」);受影响段落**页边一粒极淡标记点**(无文字无按钮,打开即队列中该条)——**边注点随 12.4 流式装配面落地**(页边届时才存在)。人在队列选择 apply(→`applied`,执行同一工具路径)或 discard(→`reverted`)。产房/案例库那套候选生态归 Agent 版(§6 三级)。
 - 旧 `proposals` 表/服务 → **deprecation candidate**(与 annotation 层级同类:pre-pivot 遗物),物理清场随 v1 清场专项;**新候选审阅入口(12.2d)须与旧 `ProposalList.tsx` 面的退场同单落地**(Review-1:不让两套候选面并存)。
 
 ## 7. 协议栈与部署形态

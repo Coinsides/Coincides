@@ -19,7 +19,7 @@
 | S3 | MCP transport 骨架 + `ping` + `resolve_selection`(能力协商:无 `input_required` 宣告则 confirm→propose) | 5.6(架构面,**先短笺**) | 12.2a-3(短笺请求已写) | 短笺阶段 —— ⚠️ **被 S1 HIGH-2 阻塞**:reviewer 明言「S3 前先由 Fable 拍定唯一 schema 权威」 |
 | S4 | 读面:五真相 `list_*/get_*` 由注册表派生 + 缓存头 | Spark | 待拆 | — |
 | S5 | 写面:一条 immediate(内容/知识)+ Relation `propose` + 一条 `confirm`(MRTR 端到端或降级) | 5.6 | 待拆 | — |
-| S6 | 候选审阅入口(Apply/Discard 最小列表)**与旧 `ProposalList.tsx` 退场同单** | Spark | 待拆 | — |
+| S6 | 候选审阅入口=**独立待处理队列**(Apply/Discard 最小列表+跳到现场;Henry 拍方案 C,页边标记点留 12.4)**与旧 `ProposalList.tsx` 退场同单** | Spark | 待拆 | — |
 | S7 | 收口:旅程分数(每 public 工具走 human_entry)、生成工具清单进 `docs/generated/`、契约/current-state 同步、铸版 12.2 | Fable | — | — |
 
 ### 1.1 调度决定记录(Opus)
