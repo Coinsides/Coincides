@@ -51,7 +51,9 @@ metadata    = { tool, tier, harness, input_digest, human_entry, consent?: {mrtr_
 
 - **D-4 拍**:取值 `'mcp'`(不按工具名分裂取值;工具名进 metadata)。理由:该轴表达「来源类别」,工具名是实例。
 - 可撤销=既有 `status/reverted_at` 机制;「大动作全收据可撤销」由此兑现,不造新机制。
-- **D-7**:`course_id ON DELETE CASCADE` 对收据审计层的影响——**设计稿倾向 SET NULL**(收据=审计层,对齐 I-2「删容器不删内容」),但**不在此拍死**:列为 12.2 施工前置调查项(查 015 原意+live 依赖),由施工单定。工具面收据在 course 语义缺席时写 `course_id=NULL` 天然不受 CASCADE 影响。
+- **D-7 拍(015 原意已核,2026-08-21)**:015 的层次是刻意的——`operation_batches.course_id` 对 course **CASCADE**,而 `notes/note_blocks.operation_batch_id` 对 batch **SET NULL**:批次=课程级簿记随课程生死,内容行不随批次死。**V12 不改 schema**,工具面收据沿用同一生命周期;「收据是否属 I-2 的内容」张力记入 TD-6 专项统一处理。
+- **词汇轴先例(已核)**:代码中 `source_type` 已写过 `'proposal'`(旧提案 apply 路径 `canvasLayoutProposals.ts:456` 等),数据层从未出现——`'mcp'` 为第三个编码取值,轴扩展有先例。
+- **§10 Q1 初步信号(抽样非全扫,按 5-4 只记信号)**:抽样 40 行服务代码未见以 `operation_batches.status='applied'` 过滤的读方;12.2a 须全量 `git grep` 落实后才能据此动 `'proposed'`。
 
 ## 3. 注册表与「无后门」机械门(D-8 采纳)
 
