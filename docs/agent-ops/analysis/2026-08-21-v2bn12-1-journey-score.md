@@ -130,3 +130,12 @@
 4. **P-3 入设计稿**:工具面描述「这块是什么」须暴露**单元级 `writing_role`**,不以块级 `template_key/block_type` 冒充内容类型——否则 agent 与人在同一道门读出两种东西。
 5. **方法天花板记档**:合成 KeyboardEvent 不触发原生默认动作——`Backspace/Home` 类手感与 <200ms 竞态本轮无证据;J2「无丢字」只在工具延迟下成立。属评分方法边界,12.4 的旅程验收须换真实输入通道(browser-harness CDP 真键入或人手实走)。
 6. 调度:12.1.1 由 Opus 拆单(诊断含机关定位,建议 5.6),S1a/S1b 照发;12.1.1 与 12.2 并行不冲突(存量渲染面 vs 工具面)。
+
+### 5.1 增补裁定(2026-08-21,12.1.1 回执 BLOCKED 后)
+
+- **§5.2 的「强指向 `order_index`」已被 builder 证伪**(同 layout 改 order 6→0 仍 `pageVisible=[]`,过滤器不读该字段)。真因链:`useSurfaceModeController.ts:19` 初始 surface 固定 `page` → `modePolicyService.ts:68-76` Page 模式过滤 `isCanvasWorkspaceBlock` → 标本两块经 `placementService.ts:301-311` 判为 `canvas_workspace`(`boundary_role=crossing`/`canvas_world`)→ `NoteWritingSurfaceLayer.tsx:3673-3679` 只渲染 `visibleBlocks` ⇒ 0 textarea。**不是数据坏了,是初始面选错了**:这篇笔记的内容住在画布上,而入口默认开 Page。
+- **A 修法裁定(采 builder 候选,加四条约束)**:hydration 完成后若 `page-visible=0 && canvas-visible>0`,该 note 本次挂载的初始 surface 选 Canvas。①**正门内做**:改 `useSurfaceModeController` 的初始选择,不新增存储/标志/真相源;可见性判定**复用** `modePolicyService` 的同一谓词,不另写分类;②**只在挂载决定一次**,用户随后手动切换不被覆盖,后续编辑不重触发;若已存在持久化的 per-note surface 偏好,启发式只在无偏好时生效;③**过渡桥**:随 12.4 流面成默认 / Page 模式退役一并拆除(tech-debt TD-7 记退役触发器);④RED-first:以标本形状(active 块全为 `canvas_world`/`crossing`)作 fixture,修前 0 textarea 修后可见;**数据一字不动**(A-4;`surfaceAuthorityContract.test.ts:197-263` 保护的空间真相不许靠重分类绕过)。
+  - 平行机关问:否——初始面选择的正门就是该 controller,这是让正门读数据,不是另造门。基线保证问:否——不制造基线没有的保证,只是默认值策略。
+- **§5.3 口径更正**:「零消费点」错——`sourceMaterialization.ts:87-90` 按 `created_at DESC, id DESC` 取最近 batch(多行 SQL,单行 grep 必漏);当前该 source_type 0 行、各 source_type 内部同质,故**已被消费但未误动;任一 source_type 一旦混格式即静默取错**。B-1 扩到第 4 个写入点 `sourceProjectionMaterializer.ts:289-308`(Opus 调度内已定,采)。
+- **收据表时间戳约定(收据基底规则,入设计稿 §2.2 不变量)**:每个时间戳列**恰有一种盖章权威**——`created_at` = DB 默认(应用层永不显式传,含 S2 工具收据);`applied_at` / `reverted_at` = 应用层 ISO 8601 Z(单一 helper)。同列混格式=缺陷。据此 `learningCanvases.ts:298-300` 的 `datetime('now')` 写 `applied_at` 是约定违例(今日 0 行显现),**并入 12.1.2 作 B-5**(一行改动 + 该路径回归断言格式),触及面显式加该文件。
+- §5.6 更正:12.1.1 与 S1a **串行**(共享工作树,Opus 纠正,采);12.1.2 打头,S1a 随后。
