@@ -7,7 +7,7 @@ import { useRuntimeLayoutRefsController } from './useRuntimeLayoutRefsController
 import { useSurfaceModeController } from './useSurfaceModeController';
 import { useViewportTransformController } from './useViewportTransformController';
 
-export function useRuntimeSurfaceStateController() {
+export function useRuntimeSurfaceStateController({ noteId }: { noteId?: string }) {
   const {
     interactionState,
     setInteractionState,
@@ -102,10 +102,12 @@ export function useRuntimeSurfaceStateController() {
 
   const {
     pageOffsetX,
+    resolveInitialSurfaceMode,
     surfaceMode,
     surfacePolicy,
     toggleSurfaceMode,
   } = useSurfaceModeController({
+    noteId,
     clearBlockSelection,
     closeOverlay,
     setSnapGuide,
@@ -146,6 +148,7 @@ export function useRuntimeSurfaceStateController() {
     pageOffsetX,
     panViewportBy,
     resetViewport,
+    resolveInitialSurfaceMode,
     selectedBlockId,
     scrollViewportBy,
     setActiveBlockId,

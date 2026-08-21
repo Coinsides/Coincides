@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useLayoutEffect } from 'react';
 import { useNoteCanvasRuntime } from './useNoteCanvasRuntime';
 import { useRuntimeBlockOperationsController } from './useRuntimeBlockOperationsController';
 import { useRuntimeDocumentDataController } from './useRuntimeDocumentDataController';
@@ -35,6 +35,7 @@ export function useNoteCanvasRuntimeController() {
     markDraftFocused,
     markBlockSelected,
     releaseTextFocus,
+    resolveInitialSurfaceMode,
     movingBlockIdRef,
     openLayoutPanel,
     pageOffsetX,
@@ -73,7 +74,7 @@ export function useNoteCanvasRuntimeController() {
     toggleSurfaceMode,
     viewportTransform,
     zoomViewportAt,
-  } = useRuntimeSurfaceStateController();
+  } = useRuntimeSurfaceStateController({ noteId });
   const {
     applyMeasuredBlockHeightDraft,
     note,
@@ -188,6 +189,15 @@ export function useNoteCanvasRuntimeController() {
     surfaceMode,
     surfacePolicy,
   });
+
+  useLayoutEffect(() => {
+    resolveInitialSurfaceMode({
+      blocks: sortedBlocks,
+      contentWidth,
+      loadedNoteId: note?.id,
+      loading,
+    });
+  }, [contentWidth, loading, note?.id, resolveInitialSurfaceMode, sortedBlocks]);
 
   const applyBlockTextFlowEdit = useBlockTextFlowEditController({
     annotationTruths,
