@@ -64,7 +64,7 @@ metadata    = { tool, tier, harness, input_digest, human_entry, consent?: {mrtr_
 - 可撤销=既有 `status/reverted_at` 机制;「大动作全收据可撤销」由此兑现,不造新机制。
 - **D-7 拍(015 原意已核,2026-08-21)**:015 的层次是刻意的——`operation_batches.course_id` 对 course **CASCADE**,而 `notes/note_blocks.operation_batch_id` 对 batch **SET NULL**:批次=课程级簿记随课程生死,内容行不随批次死。**V12 不改 schema**,工具面收据沿用同一生命周期;「收据是否属 I-2 的内容」张力记入 TD-6 专项统一处理。
 - **词汇轴先例(已核)**:代码中 `source_type` 已写过 `'proposal'`(旧提案 apply 路径 `canvasLayoutProposals.ts:456` 等),数据层从未出现——`'mcp'` 为第三个编码取值,轴扩展有先例。
-- **§10 Q1 初步信号(抽样非全扫,按 5-4 只记信号)**:抽样 40 行服务代码未见以 `operation_batches.status='applied'` 过滤的读方;12.2a 须全量 `git grep` 落实后才能据此动 `'proposed'`。
+- **§10 Q1 已闭(全量 `git grep`,非抽样)**:server/src 非测试 37 处引用,**零读方按 `status` 过滤**——读方一律按 `id` 或 `source_type+source_id` 取;`source_type` 已有编码值 `manual`/`proposal`/`source_materialization`,`'mcp'` 为第四个,工具面永远写 `'mcp'` 故与按 source_type 取数的读方零碰撞。`'proposed'` 状态值可安全引入。
 
 ## 3. 注册表与「无后门」机械门(D-8 采纳)
 
@@ -137,12 +137,16 @@ ToolRegistryEntry = {
 
 每单按 Spark 排单口径(一单一交付物/设计拍死/RED 当靶);方案短笺必问两项(平行机关/基线保证)在 12.2a 前执行。
 
-## 10. 交给 Opus 首读的挑刺点(不是设计判断,是请它证伪)
+## 10. 挑刺点状态(Fable 自核四条,Opus 首读请转向整体)
 
-1. `status='proposed'` 是否与既有 `operation_batches` 消费方(16 个服务)的任何假设冲突(如把非 applied 当异常)?
-2. 机械门对「client_call_site」的校验在 client 打包后是否仍可机械取证(源码级 grep 足够吗)?
-3. 指代语汇是否与 `item_anchors` 既有 `target_kind` 五种笔记侧目标天然对齐(避免第三套指代)?
-4. MRTR 在 Claude Code / Codex 两个 harness 的当前支持度(若 harness 不支持 input_required,confirm 档的降级路径是什么)?
+| # | 问题 | 状态 |
+|---|---|---|
+| Q1 | `status='proposed'` 与既有消费方冲突? | **已闭**:全量 grep 零 status 读方(见 §2.2) |
+| Q2 | 机械门对 `client_call_site` 的机械取证可行? | **已闭**:生成器刻意不碰 client/;机械门作**独立脚本**做源码级扫描(与调研盘 44/48 同手段),不扩生成器边界;扫源码故与打包无关 |
+| Q3 | 指代语汇与既有 target_kind 对齐? | **已闭**:继承 `CapturedSelectionRange`/`SelectionDraftV1`,owner 三元组贯穿(见 §2.1) |
+| Q4 | MRTR 两 harness 支持度? | **已闭(含降级)**:Claude 产品线推开,Codex 未证;confirm→propose 降级(见 §7) |
+
+**Opus 首读请证伪整体**:①本稿是否违反我自立的两问(平行机关——候选收据是否算在 operation_batches 之外另造机关?我的答案是「不是,它是同一表的新状态值」,请证伪;基线保证——工具面是否试图提供后端不提供的保证?);②12.2a-d 切割是否有隐藏的跨单依赖;③任何「申报宽于实现」的措辞(本稿尚无实现,但裁定表述是否宽于证据)。
 
 ## 11. 与 Henry 相关的决定(代拍,可翻)
 
