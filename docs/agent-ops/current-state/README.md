@@ -32,7 +32,7 @@ Read before any non-trivial work, together with `PRODUCT.md`, `../DOCUMENTATION-
 - **Current working branch**: `fable/v2-bn12-exoskeleton` (created 2026-08-19; the V12 construction line).
 - **Historical main line**: `codex/v2-bn-canvas-engine` (the V8–V11 "Better Notebook" line).
 - **Version system**: `V2.BN.x`. The old `v2.0–v2.5.6` line is a **closed engineering-foundation roadmap** (`docs/Coincides-Roadmap.md`); some of its product philosophy is outdated (notably **block-first**, now replaced by **TextFlow-first / ContentGroup-aware**).
-- **Current frontier**: **V2.BN.12「外骨骼与地板」in progress.** First work order = `2026-08-19-v2bn12-01-editing-rootcause-investigation.md` (four 🅰 defects investigated as one case — diagnose before prescribing; required item ⑤).
+- **Current frontier**: **V2.BN.12「外骨骼与地板」in progress; sub-version V2.BN.12.1「编辑基座」closed 2026-08-20.** Orders 01–05 (root-cause investigation → test tooling → lifecycle/surface-authority/legacy-migration → SlashSession) landed via checkpoints `41e6d1b` / `b2a006b` / `ad301c6`. All four 08-08 symptoms root-fixed; 21 legacy ghosts migrated; unit gate 24→198 tests, wired into `verify:v2-bn8-runtime`. 旅程分数验收 for 12.1 = pending follow-up (browser-harness UX walk), scheduled before 12.2 construction. Known claim boundary: concurrent same-note re-hydration OCC not claimed (TD-6). Next: 必修① MCP tool-face design (Fable) → 12.2.
 - Roadmap: **`docs/ROADMAP.md`** — the sole ACTIVE roadmap since 2026-08-20.
   > The former `docs/Coincides-Better-Notebook-Roadmap.md` was **archived in full** on 2026-08-20 under ruling 待拍-12. It retains the V8–V11 decision history and nothing else; do not work from it.
 

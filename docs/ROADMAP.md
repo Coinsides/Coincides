@@ -87,9 +87,13 @@
 | 01 | 编辑机件 root-cause 并案侦查（必修⑤ 的诊断段） | ✅ 闭环（builder 交付 → reviewer PASS/4 MED → 二级复盘） |
 | 02 | 工装单：测试 runner 最小集 + pure reducer，RED 前置 | ✅ 闭环（含 02.1 修正轮，checkpoint `41e6d1b`） |
 | 03 | **合批**：RC-A 生命周期状态机 ＋ RC-B surface authority ＋ 存量迁移（原拆 03/04，因下述合取约束并单，2026-08-20 Fable 拍定） | ✅ 闭环（五轮修理-复核收敛 03→03.4，全链二级复盘，checkpoint `b2a006b`；RED #1 已转绿） |
-| 05 | SlashSession（RC-D） | 待发 |
+| 05 | SlashSession（RC-D）＋ TD-3/TD-5 清偿 | ✅ 闭环（九轮修理-复核含两次设计介入，checkpoint `ad301c6`） |
 
 > ⚠️ **合取约束（来自工单 01 二级复盘，03 合批的依据）**：症状「Page 死胡同」是 **RC-A.5 × RC-B.3 的合取** —— ghost 计入 prompt 计数（入口消失）＋ ghost 被 Page 策略过滤（内容不显示）。只修一边都能让**新** note 不复现，但各自留下**存量 legacy note 的半死状态**。两条须同批，或显式声明存量迁移路径。工单 03 以「同批 ＋ 存量迁移」双保险落实：`agent-ops/handoffs/2026-08-20-v2bn12-03-lifecycle-and-surface-authority.md`。
+
+### 3.5.1 子版本记录
+
+**V2.BN.12.1「编辑基座」已铸（2026-08-20）**＝工单 01–05 全链（checkpoints `41e6d1b` / `b2a006b` / `ad301c6`）。四症状根治、存量迁移完成、test:unit 198 项入常驻门。⚠️ 12.1 的**旅程分数验收为补验项**（browser-harness 真实旅程打分），排在 12.2 施工前执行——7.2 纪律自 12.1 起补齐。
 
 ### 3.6 V12 尾声
 
