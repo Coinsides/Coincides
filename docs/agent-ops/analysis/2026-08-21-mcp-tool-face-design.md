@@ -144,6 +144,9 @@ ToolRegistryEntry = {
 | 大动作 | package export/import、批量删除 | confirm | MRTR |
 | 不暴露 | auth/settings/embedding/agent 旧面/v1 线/`__`/test | — | 守卫面本身不是工具 |
 
+> **P-3(12.1 旅程实走输入,2026-08-21)**:读面描述内容类型时暴露**单元级 `writing_role`**(heading/paragraph…),不得以块级 `template_key`/`block_type` 冒充「这块是什么」——块级与单元级分属两层(角色与语境同住,唯一结构律),混用会让 agent 与人在同一道门读出两种东西。
+> **S2 追加规则(P-2)**:工具面收据**不显式传 `created_at`**,走 DB 默认,保证与存量同格式(时序=收据命根)。
+
 **首发只实装:指代解析 + 读面 + 一两条写·内容(证明 tier 三档与收据链)**;其余由使用长出来(§6 成长律)。
 
 ## 9. 切割为施工单(12.2)
