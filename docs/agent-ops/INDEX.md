@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 94 份文档。
+共 99 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -17,6 +17,7 @@
 | [HENRY-PREFERENCES.md](HENRY-PREFERENCES.md) | Henry 的协作偏好 | `active` | 2026-06-27 | — |
 | [README.md](README.md) | agent-ops —— Agent 协同中枢 | `active` | 2026-06-27 | — |
 | [SESSION-HANDOFF-2026-06-27.md](SESSION-HANDOFF-2026-06-27.md) | 会话交接 — 2026-06-27(Cowork → Claude Code) | `active` | 2026-06-27 | — |
+| [adjudication-discipline.md](adjudication-discipline.md) | 裁定方纪律(Fable 自律卡) | `active` | 2026-08-20 | — |
 | [analysis/2026-06-29-better-notebook-maturity-definition.md](analysis/2026-06-29-better-notebook-maturity-definition.md) | Better Notebook「成熟」的定义（未来目标，可测） | `active` | 2026-06-29 | — |
 | [analysis/2026-06-29-review-8.11.3-and-8.11.4.md](analysis/2026-06-29-review-8.11.3-and-8.11.4.md) | 审查结论：V2.BN.8.11.3（shape）+ V2.BN.8.11.4（block-backed shape） | `active` | 2026-06-29 | — |
 | [analysis/2026-07-18-v12-ux-tooling-survey.md](analysis/2026-07-18-v12-ux-tooling-survey.md) | V12 体验侧工具栈调研（2026-07-18) | `active` | 2026-07-18 | — |
@@ -26,6 +27,9 @@
 | [analysis/2026-08-20-mcp-tool-face-survey.md](analysis/2026-08-20-mcp-tool-face-survey.md) | MCP 工具面前置调研盘 | `draft` | 2026-08-20 | — |
 | [analysis/2026-08-20-product-md-redraw-draft.md](analysis/2026-08-20-product-md-redraw-draft.md) | `PRODUCT.md` 宪法层重划提案 | `superseded` | 2026-08-20 | ⚠️ [`PRODUCT.md`](../../../PRODUCT.md)（2026-08-20 CH-1…CH-7 全部… |
 | [analysis/2026-08-20-repo-readme-draft.md](analysis/2026-08-20-repo-readme-draft.md) | repo 根 README 重建草案 | `superseded` | 2026-08-20 | ⚠️ [`README.md`](../../../README.md)（2026-08-20 抽检放行后整体替换完成） |
+| [analysis/2026-08-21-builder-lineage-redundancy-survey.md](analysis/2026-08-21-builder-lineage-redundancy-survey.md) | builder 血统冗余调研 | `draft` | 2026-08-21 | — |
+| [analysis/2026-08-21-mcp-tool-face-design.md](analysis/2026-08-21-mcp-tool-face-design.md) | 必修① MCP 工具面设计稿 v0 ——「末端执行器第一次实体化」 | `draft` | 2026-08-21 | — |
+| [analysis/2026-08-21-v2bn12-1-journey-score.md](analysis/2026-08-21-v2bn12-1-journey-score.md) | V2.BN.12.1「编辑基座」旅程分数验收 | `draft` | 2026-08-21 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
@@ -54,6 +58,7 @@
 | [claude-log/2026-08-18.md](claude-log/2026-08-18.md) | Claude 行动日志 — 2026-08-18 | `active` | 2026-08-18 | — |
 | [claude-log/2026-08-19.md](claude-log/2026-08-19.md) | Claude 行动日志 — 2026-08-19 | `active` | 2026-08-19 | — |
 | [claude-log/2026-08-20.md](claude-log/2026-08-20.md) | Claude 工作日志 — 2026-08-20 | `active` | 2026-08-20 | — |
+| [claude-log/2026-08-21.md](claude-log/2026-08-21.md) | Claude 工作日志 — 2026-08-21 | `active` | 2026-08-21 | — |
 | [claude-log/README.md](claude-log/README.md) | claude-log —— Claude 行动日志（Henry 的监督轨迹） | `active` | 2026-06-27 | — |
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-19 | — |

@@ -93,6 +93,23 @@
 **来源**：[2026-07-28 规范](https://blog.modelcontextprotocol.io/posts/2026-07-28/) · [changelog](https://modelcontextprotocol.io/specification/2026-07-28/changelog) · [TS SDK](https://github.com/modelcontextprotocol/typescript-sdk) · [Authorization 教程](https://modelcontextprotocol.io/docs/2026-07-28/tutorials/security/authorization) · [Server Guide V2](https://ts.sdk.modelcontextprotocol.io/v2/documents/Documents.Server_Guide.html)
 
 
+## 三之四、模型血统冗余（2026-08-21 回填；调研全文 `2026-08-21-builder-lineage-redundancy-survey.md`）
+
+> **缘由**：Codex 周额一天用掉 75%（昨日 34 场 / 1,627 万 tokens），Henry 要备胎。
+> **价格与实耗**由 Fable 亲查，见 `claude-log/2026-08-21.md` 条目 2；本节只登能力/接入/订阅关系。
+
+| 候选 | 现状（2026-08-21 核） | 判定 | 用途 / 注 |
+|---|---|---|---|
+| **GPT-5.3-Codex-Spark** | **延迟优先服务档**（跑在 Cerebras WSE-3），**128K 上下文**、**纯文本**、**研究预览**；**无 API，仅 Pro 套餐经 Codex 可用** | ⚠️ **备胎资格存疑，须实测** | ⛔ **官方称「独立 rate limit 不计入标准额度」，但实现不符**：`openai/codex` **#19868**（主额度 0% 时 Spark 100% 仍被挡）**closed as not planned**；#20122 并入其中；#33216 称 Spark 计量器成功使用后仍显 100%。**⇒「5.6 用完再切 Spark」在文档记载上不成立**。适合面：机械级修正轮 / 小单；**不适合大单与复核岗**（128K 装不下通读全链） |
+| **Grok 4.6（复核岗）** | SuperGrok **不含 API 额度**，xAI API 需另开 `console.x.ai` 按 token 计费（**二手一致，非官方原文**） | 🔍 **复核岗备胎候选** | 异血统在复核岗是**独立性**不是分叉；⚠️ 接 Codex 需网关（见下），工具调用可靠性**未核到当前代次** |
+| **Gemini 3 Pro（复核岗）** | **官方原文**：Google AI 计划的开发者福利**只在 AI Studio 网页界面内**生效，「直接使用 Gemini API（API key / 外部应用）**单独计费与管理**」⇒ **订阅不含 API 额度** | 🔍 **复核岗备胎候选** | 同上；两家**并列未分先后** —— 决定性变量是工具调用可靠性，未核前排序等于猜 |
+| **Codex CLI 自定义 provider（接入形制）** | CLI **硬编码假设**对端说 **OpenAI Responses API**；直连 Anthropic/Google 端点 → **401 或畸形 function-call 块**；通行解法是**架 AI 网关**翻译请求体与 tool-call JSON。⚠️ **自定义 provider 会移除正常 Codex/OpenAI 模型目录 ——「看起来像扩展点，行为上是完全覆盖」** | ⚠️ **有真实门槛** | ⇒ 「builder 用 5.6 / 复核用 Grok」同装并存**需配置隔离**，形制未核。网关本身经手 API key 与全部代码上下文，**属供应链信任面**，采纳前须单独评估 |
+
+**⭐ 一条反直觉结论（值得记进选型直觉）**：对**备胎**用途，「套餐内更省心」是错的 —— 套餐内的 Spark **会用完且与主力共用同一道配额闸**（失效时刻与主力重合，这是备胎最不该有的性质）；**API 按量不会用完，只会花钱**。**备胎的价值不在便宜，在于不与主力共享失效模式。**
+
+**⚠️ 已知不覆盖**：builder 岗的**故障类风险**（账号锁 / CLI 版本死锁 / 区域不可达）目前**无覆盖** —— Spark 同门共用全部这些绳子，第三方线按裁定只用于复核岗。这不是反对该裁定（代码风格一致性是真约束），而是**该记成已知缺口而非留白**。先例：2026-08-19 builder 首启失败（账号档位与 CLI 版本耦合成死锁）。
+
+
 ## 四、待办
 
 - [x] OpenDesign/OpenCode 已回填(2026-08-18);
@@ -102,4 +119,7 @@
 - [x] OpenClaw 许可已证 MIT(2026-08-19,直读 LICENSE);
 - [ ] Agent 版评估期:OpenClaw 架构实查(gateway 形态/skill 体系/MCP 客户端能力);研读 Open Design 的 design-system 包格式(订单规格先行艺术);
 - [x] **MCP 协议栈已回填(2026-08-20,必修① 前置;Fable 独立复核)**;
+- [x] **模型血统冗余已回填(2026-08-21)**;
+- [ ] **Spark 配额闸实测**(建议在周额未到 100% 时验:`/status` 两表是否独立走数 + 小单实跑);
+- [ ] **Grok/Gemini 当前代次的 Codex 工具调用可靠性实测**(未核前不排序);
 - [ ] 新候选出现时:先查本册,未登记才调研。
