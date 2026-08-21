@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { TemplateOption } from '@/services/templateOptions';
 import { createPrimaryPageFrame } from '../engineModel';
 import type { BlockBoxLayout } from '../runtimeLayout';
-import type { Note, NoteBlock } from '../runtimeDataTypes';
+import type { Note, NoteBlock, TextBlockContentV1 } from '../runtimeDataTypes';
 import {
   finalizeDraftRecoveryReceipt,
   forgetDraftRecoveryReceipt,
@@ -19,6 +19,7 @@ import {
   useDraftBlockController,
   type UseDraftBlockControllerOptions,
 } from './useDraftBlockController';
+import type { BlockSaveOutcome } from './useNoteCanvasDataAdapter';
 import {
   createPageFrameDraftSessionAuthority,
   findPageFrameForLayout,
@@ -47,6 +48,27 @@ const defaultTextTemplate: TemplateOption = {
   isRuntime: false,
 };
 
+function savedBlockOutcome(block: NoteBlock): BlockSaveOutcome {
+  return {
+    status: 'saved',
+    block,
+    recoveryReceipt: null,
+    reconciliation: 'response',
+  };
+}
+
+function rejectedBlockOutcome(): BlockSaveOutcome {
+  return {
+    status: 'rejected',
+    block: null,
+    recoveryReceipt: null,
+    reconciliation: 'not_attempted',
+    durableState: 'not_checked',
+    reason: 'request_failed',
+    staleEpoch: false,
+  };
+}
+
 function makeOptions(): UseDraftBlockControllerOptions {
   return {
     createBlock: vi.fn(async () => null),
@@ -56,7 +78,7 @@ function makeOptions(): UseDraftBlockControllerOptions {
     finalizeDraftBlock: vi.fn(async () => true),
     note: null,
     onDraftFocusReceipt: vi.fn(),
-    saveBlock: vi.fn(async () => null),
+    saveBlock: vi.fn(async () => rejectedBlockOutcome()),
     saveDraftBlockPlacement: vi.fn(async (block) => block),
     setActiveBlockId: vi.fn(),
     setFocusBlockId: vi.fn(),
@@ -198,13 +220,67 @@ describe('useDraftBlockController native useState parity', () => {
     expect(native.result.current.value).toBe('one');
   });
 
+  it('builds reconciliation from a non-echo canonical create response', async () => {
+    const text = 'alpha /hea';
+    const canonicalTextUnitId = 'canonical-server-tu';
+    const canonicalFlowSeed = createTextBlockContentV1(text, 'paragraph');
+    const canonicalFlow: TextBlockContentV1 = {
+      ...canonicalFlowSeed,
+      units: canonicalFlowSeed.units.map((unit, index) => ({
+        ...unit,
+        id: index === 0 ? canonicalTextUnitId : unit.id,
+      })),
+    };
+    const canonicalBlock: NoteBlock = {
+      ...createdBlock(text),
+      id: 'canonical-block-1',
+      placement_id: 'canonical-placement-1',
+      content_json: {
+        body: text,
+        [TEXT_FLOW_CONTENT_KEY]: canonicalFlow,
+      },
+    };
+    let requestedTextUnitId: string | null = null;
+    const createBlock = vi.fn<UseDraftBlockControllerOptions['createBlock']>(
+      async (_template, _text, options) => {
+        const requestedFlow = options.contentJson?.[TEXT_FLOW_CONTENT_KEY] as TextBlockContentV1 | undefined;
+        requestedTextUnitId = requestedFlow?.units[0]?.id || null;
+        return draftCreateResult(canonicalBlock, options.clientCreateKey);
+      },
+    );
+    const onDraftPersisted = vi.fn();
+    const setFocusBlockId = vi.fn();
+    const subject = renderHook(() => useDraftBlockController({
+      ...makeOptions(),
+      createBlock,
+      note,
+      onDraftPersisted,
+      setFocusBlockId,
+    }));
+
+    act(() => {
+      subject.result.current.activateDraft();
+      subject.result.current.setDraftText(text);
+    });
+    await act(async () => {
+      await subject.result.current.persistDraft(text);
+    });
+
+    expect(requestedTextUnitId).not.toBe(canonicalTextUnitId);
+    expect(subject.result.current.draftOwnerReconciliation?.to).toEqual(
+      textFocusReceiptForBlock(canonicalBlock.id, canonicalTextUnitId),
+    );
+    expect(setFocusBlockId).toHaveBeenCalledWith(canonicalBlock.id);
+    expect(onDraftPersisted).toHaveBeenCalledWith(canonicalBlock);
+  });
+
   it('retries autosave against the existing durable identity after a save failure', async () => {
     const createReceipt = deferred<DraftBlockCreateResult | null>();
     const createBlock = vi.fn(() => createReceipt.promise);
     const block = createdBlock('a');
     const saveBlock = vi.fn<UseDraftBlockControllerOptions['saveBlock']>()
-      .mockResolvedValueOnce(null)
-      .mockResolvedValueOnce(block);
+      .mockResolvedValueOnce(rejectedBlockOutcome())
+      .mockResolvedValueOnce(savedBlockOutcome(block));
     const setFocusBlockId = vi.fn();
     const onDraftPersisted = vi.fn();
     const subject = renderHook(() => useDraftBlockController({
@@ -311,7 +387,7 @@ describe('useDraftBlockController native useState parity', () => {
       ));
     const saveBlock = vi.fn<UseDraftBlockControllerOptions['saveBlock']>(async (block, text) => {
       durableText = text;
-      return createdBlock(text || block.plain_text || '');
+      return savedBlockOutcome(createdBlock(text || block.plain_text || ''));
     });
     const subject = renderHook(() => useDraftBlockController({
       ...makeOptions(),

@@ -48,6 +48,7 @@ import { FormulaBlockProjection } from '../blocks/FormulaBlockProjection';
 import { TextBlockProjection } from '../blocks/TextBlockProjection';
 import { CodeBlockProjection } from '../blocks/CodeBlockProjection';
 import { useBlockMeasurement } from '../hooks/useBlockMeasurement';
+import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import { BlockControlBarLayer } from './BlockControlBarLayer';
 import { BlockResizeHandleLayer } from './BlockResizeHandleLayer';
 import { BlockSourceReferenceLayer } from './BlockSourceReferenceLayer';
@@ -84,7 +85,11 @@ interface BlockEditorLayerProps {
   onTextChange: (value: string, caret: number, anchorElement?: HTMLElement | null) => void;
   onTextFlowChange: (textFlow: TextBlockContentV1) => void;
   onFieldDraftChange: (fieldValues: FieldValueRecord) => void;
-  onSave: (silent?: boolean, fieldValues?: FieldValueRecord, textFlow?: TextBlockContentV1) => void;
+  onSave: (
+    silent?: boolean,
+    fieldValues?: FieldValueRecord,
+    textFlow?: TextBlockContentV1,
+  ) => Promise<BlockSaveOutcome>;
   onTrash: () => void;
   onSelect: () => void;
   onBeginMove: (event: ReactPointerEvent<HTMLElement>) => void;

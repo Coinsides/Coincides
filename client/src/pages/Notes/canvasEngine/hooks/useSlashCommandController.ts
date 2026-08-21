@@ -1,7 +1,9 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
+  useRef,
   useState,
   type Dispatch,
   type KeyboardEvent,
@@ -17,7 +19,7 @@ import {
   type NoteSlashCommand,
   type SlashTrigger,
 } from '../../noteSlashCommands';
-import { textFromContent } from '../blockContentService';
+import { textFromContent, type FieldValueRecord } from '../blockContentService';
 import {
   editingTextInteraction,
   openingMenuInteraction,
@@ -34,17 +36,47 @@ import {
 import {
   setTextUnitWritingRole,
 } from '../textUnitEditorService';
-import type { TextFocusReceipt } from '../textFocusReceipt';
+import {
+  textFocusReceiptsEqual,
+  type TextFocusReceipt,
+  type TextOwnerReconciliation,
+} from '../textFocusReceipt';
 import {
   INITIAL_SLASH_COMMAND_STATE,
   applySlashExitToText,
   deriveSlashTargetIdentity,
+  planSlashSessionRollback,
+  reconcileSlashOwner,
+  slashExitPolicy,
   transitionSlashCommandIndex,
+  transitionSlashSession,
   transitionSlashTarget,
+  type SlashExitReason,
+  type SlashSession,
+  type SlashSessionAction,
   type SlashTarget,
 } from '../slashCommandReducer';
+import type { RollbackBlockSlashSession } from './useSlashBlockRollbackController';
+import type { BlockSaveOutcome } from './useNoteCanvasDataAdapter';
 
 export type { SlashTarget } from '../slashCommandReducer';
+
+function textareaHasOwnerIdentity(element: HTMLTextAreaElement): boolean {
+  return Boolean(
+    element.dataset.blockId
+    || element.dataset.textFlowId
+    || element.dataset.textUnitId,
+  );
+}
+
+function textareaMatchesOwner(
+  element: HTMLTextAreaElement,
+  owner: TextFocusReceipt,
+): boolean {
+  return element.dataset.blockId === owner.blockId
+    && element.dataset.textFlowId === owner.textFlowId
+    && element.dataset.textUnitId === owner.textUnitId;
+}
 
 export interface UseSlashCommandControllerOptions {
   addToast: (type: Toast['type'], message: string) => void;
@@ -59,6 +91,7 @@ export interface UseSlashCommandControllerOptions {
   blockTextFlowDrafts: Record<string, TextBlockContentV1>;
   draftText: string;
   draftTextRef: MutableRefObject<string>;
+  draftOwnerReconciliation?: TextOwnerReconciliation | null;
   focusedTextOwner: TextFocusReceipt | null;
   insertTemplateOptions: TemplateOption[];
   persistDraft: (
@@ -66,11 +99,12 @@ export interface UseSlashCommandControllerOptions {
     explicitTemplate?: TemplateOption,
     options?: { textFlow?: TextBlockContentV1 },
   ) => Promise<void>;
+  rollbackBlockSlashSession: RollbackBlockSlashSession;
   saveBlock: (
     block: NoteBlock,
     text: string,
-    options?: { silent?: boolean; textFlow?: TextBlockContentV1 },
-  ) => Promise<NoteBlock | null>;
+    options?: { silent?: boolean; fieldValues?: FieldValueRecord; textFlow?: TextBlockContentV1 },
+  ) => Promise<BlockSaveOutcome>;
   setBlockTextDrafts: Dispatch<SetStateAction<Record<string, string>>>;
   setBlockTextFlowDrafts: Dispatch<SetStateAction<Record<string, TextBlockContentV1>>>;
   setDraftText: Dispatch<SetStateAction<string>>;
@@ -89,9 +123,11 @@ export function useSlashCommandController({
   blockTextFlowDrafts,
   draftText,
   draftTextRef,
+  draftOwnerReconciliation = null,
   focusedTextOwner,
   insertTemplateOptions,
   persistDraft,
+  rollbackBlockSlashSession,
   saveBlock,
   setBlockTextDrafts,
   setBlockTextFlowDrafts,
@@ -107,6 +143,21 @@ export function useSlashCommandController({
   const [activeSlashCommandIndex, setActiveSlashCommandIndex] = useState(
     INITIAL_SLASH_COMMAND_STATE.activeIndex,
   );
+  const [slashSession, setSlashSession] = useState<SlashSession | null>(null);
+  const slashSessionRef = useRef<SlashSession | null>(slashSession);
+  const slashOwnerElementRef = useRef<HTMLTextAreaElement | null>(null);
+  const focusedTextOwnerRef = useRef(focusedTextOwner);
+  const blockTextDraftsRef = useRef(blockTextDrafts);
+  focusedTextOwnerRef.current = focusedTextOwner;
+  blockTextDraftsRef.current = blockTextDrafts;
+
+  const dispatchSlashSession = useCallback((action: SlashSessionAction) => {
+    setSlashSession((current) => {
+      const next = transitionSlashSession(current, action);
+      slashSessionRef.current = next;
+      return next;
+    });
+  }, []);
 
   const slashCommands = useMemo(() => (
     slashTarget
@@ -121,13 +172,6 @@ export function useSlashCommandController({
       : []
   ), [slashTarget, insertTemplateOptions]);
 
-  const clearSlashTarget = useCallback(() => {
-    setSlashTarget((current) => transitionSlashTarget(current, {
-      type: 'exit',
-      reason: 'external_clear',
-    }));
-  }, []);
-
   useEffect(() => {
     setActiveSlashCommandIndex((current) => transitionSlashCommandIndex(current, { type: 'reset_index' }));
   }, [slashTarget?.target, slashTarget?.blockId, slashTarget?.trigger.query]);
@@ -138,6 +182,115 @@ export function useSlashCommandController({
       commandCount: slashCommands.length,
     }));
   }, [slashCommands.length]);
+
+  useLayoutEffect(() => {
+    if (!draftOwnerReconciliation) return;
+    const reconciled = reconcileSlashOwner(
+      { target: slashTarget, session: slashSession },
+      draftOwnerReconciliation,
+    );
+    if (reconciled.target === slashTarget && reconciled.session === slashSession) return;
+    slashSessionRef.current = reconciled.session;
+    slashOwnerElementRef.current = null;
+    setSlashTarget(reconciled.target);
+    setSlashSession(reconciled.session);
+    setInteractionState(openingMenuInteraction(
+      'slashMenu',
+      draftOwnerReconciliation.to.blockId,
+      draftOwnerReconciliation.to,
+      'block',
+    ));
+  }, [draftOwnerReconciliation, setInteractionState, slashSession, slashTarget]);
+
+  const restoreSlashOwnerFocus = useCallback((
+    owner: TextFocusReceipt,
+    caret: number,
+    preferredElement: HTMLTextAreaElement | null,
+  ) => {
+    const findOwnerElement = (): HTMLTextAreaElement | null => {
+      if (
+        preferredElement?.isConnected
+        && (
+          !textareaHasOwnerIdentity(preferredElement)
+          || textareaMatchesOwner(preferredElement, owner)
+        )
+      ) {
+        return preferredElement;
+      }
+      return [...(blockListRef.current?.querySelectorAll<HTMLTextAreaElement>('textarea') || [])]
+        .find((element) => textareaMatchesOwner(element, owner)) || null;
+    };
+    const restore = () => {
+      if (!textFocusReceiptsEqual(focusedTextOwnerRef.current, owner)) return;
+      const textarea = findOwnerElement();
+      if (!textarea) return;
+      const nextCaret = Math.max(0, Math.min(caret, textarea.value.length));
+      textarea.focus({ preventScroll: true });
+      textarea.setSelectionRange(nextCaret, nextCaret);
+    };
+
+    restore();
+    queueMicrotask(restore);
+  }, [blockListRef]);
+
+  const exitSlashSession = useCallback((
+    reason: SlashExitReason,
+    currentTextOverride?: string,
+  ): boolean => {
+    const session = slashSessionRef.current;
+    const currentText = session?.target === 'draft'
+      ? draftTextRef.current
+      : currentTextOverride ?? '';
+    const policy = slashExitPolicy(reason);
+    const rollback = session?.target === 'block' && policy.rollbackTrigger
+      ? rollbackBlockSlashSession({
+        session,
+        getCurrentOwner: () => focusedTextOwnerRef.current,
+        getCurrentText: () => blockTextDraftsRef.current[session.owner.blockId],
+        reason,
+        fallbackText: currentTextOverride,
+      })
+      : planSlashSessionRollback({
+        session,
+        currentOwner: focusedTextOwnerRef.current,
+        text: currentText,
+        reason,
+      });
+    const ownerElement = slashOwnerElementRef.current;
+
+    setSlashTarget((current) => transitionSlashTarget(current, { type: 'exit', reason }));
+    dispatchSlashSession({ type: 'exit', reason });
+    slashOwnerElementRef.current = null;
+    if (policy.rollbackTrigger && session) {
+      const currentOwner = focusedTextOwnerRef.current;
+      if (currentOwner && textFocusReceiptsEqual(currentOwner, session.owner)) {
+        setInteractionState(editingTextInteraction(currentOwner, session.target));
+      }
+    }
+    if (!rollback.applied || !rollback.focus || !session) return false;
+
+    if (session.target === 'draft') {
+      setDraftText(rollback.text);
+    }
+    restoreSlashOwnerFocus(rollback.focus.owner, rollback.focus.caret, ownerElement);
+    return true;
+  }, [
+    dispatchSlashSession,
+    draftTextRef,
+    restoreSlashOwnerFocus,
+    rollbackBlockSlashSession,
+    setDraftText,
+    setInteractionState,
+  ]);
+
+  const clearSlashTarget = useCallback(() => {
+    setSlashTarget((current) => transitionSlashTarget(current, {
+      type: 'exit',
+      reason: 'external_clear',
+    }));
+    dispatchSlashSession({ type: 'exit', reason: 'external_clear' });
+    slashOwnerElementRef.current = null;
+  }, [dispatchSlashSession]);
 
   const updateSlashTarget = useCallback((
     target: SlashTarget['target'],
@@ -151,18 +304,54 @@ export function useSlashCommandController({
       ...identity,
       anchor: getSlashMenuAnchor(anchorElement || null, blockListRef.current, caret),
     } : null;
+    const ownerTextarea = anchorElement instanceof HTMLTextAreaElement
+      ? anchorElement
+      : null;
+    const draftOwnerMatchesElement = Boolean(
+      ownerTextarea
+      && focusedTextOwner
+      && textareaMatchesOwner(ownerTextarea, focusedTextOwner),
+    );
+    const blockOwnerMatchesElement = Boolean(
+      focusedTextOwner
+      && focusedTextOwner.blockId === blockId
+      && (
+        !ownerTextarea
+        || !textareaHasOwnerIdentity(ownerTextarea)
+        || textareaMatchesOwner(ownerTextarea, focusedTextOwner)
+      ),
+    );
+    const receipt = focusedTextOwner && (
+      target === 'draft'
+        ? draftOwnerMatchesElement
+        : blockOwnerMatchesElement
+    ) ? focusedTextOwner : null;
+    const authorizedTarget = identity && !receipt ? null : nextTarget;
     setSlashTarget((current) => transitionSlashTarget(current, {
       type: 'sync_target',
-      target: nextTarget,
+      target: authorizedTarget,
     }));
-    const receipt = focusedTextOwner && (
-      target === 'draft' || focusedTextOwner.blockId === blockId
-    ) ? focusedTextOwner : null;
+    const originalSlice = identity
+      ? text.slice(identity.trigger.start, identity.trigger.end)
+      : '';
+    const rollbackCaret = ownerTextarea
+      ? Math.max(0, ownerTextarea.selectionStart - originalSlice.length)
+      : identity?.trigger.start ?? caret;
+    dispatchSlashSession({
+      type: 'sync_session',
+      target: identity,
+      owner: receipt,
+      text,
+      caret: rollbackCaret,
+    });
+    slashOwnerElementRef.current = identity && receipt
+      ? ownerTextarea
+      : null;
     if (!receipt) return;
-    setInteractionState(nextTarget
+    setInteractionState(authorizedTarget
       ? openingMenuInteraction('slashMenu', blockId, receipt, target)
       : editingTextInteraction(receipt, target));
-  }, [blockListRef, focusedTextOwner, setInteractionState]);
+  }, [blockListRef, dispatchSlashSession, focusedTextOwner, setInteractionState]);
 
   const handleDraftChange = useCallback((
     value: string,
@@ -180,6 +369,10 @@ export function useSlashCommandController({
     caret: number,
     anchorElement?: HTMLElement | null,
   ) => {
+    blockTextDraftsRef.current = {
+      ...blockTextDraftsRef.current,
+      [blockId]: value,
+    };
     setBlockTextDrafts((current) => ({ ...current, [blockId]: value }));
     updateSlashTarget('block', value, caret, blockId, anchorElement);
   }, [setBlockTextDrafts, updateSlashTarget]);
@@ -213,6 +406,7 @@ export function useSlashCommandController({
     if (!slashTarget) return;
     if (command.disabledReason) {
       addToast('info', command.disabledReason);
+      exitSlashSession('disabled');
       return;
     }
 
@@ -229,7 +423,7 @@ export function useSlashCommandController({
           command.writingRole,
         );
         const projected = projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: textFlow }, cleanedText).plain_text;
-        setSlashTarget((current) => transitionSlashTarget(current, { type: 'exit', reason: 'commit' }));
+        exitSlashSession('commit', draftTextRef.current);
         setDraftText(projected);
         draftTextRef.current = projected;
         await persistDraft(projected, undefined, { textFlow });
@@ -238,33 +432,34 @@ export function useSlashCommandController({
 
       const blockId = slashTarget.blockId;
       const block = blockId ? blocks.find((item) => item.id === blockId) : undefined;
-      if (!block) return;
+      if (!block) {
+        exitSlashSession('missing_block');
+        return;
+      }
       const currentText = blockTextDrafts[block.id] ?? textFromContent(block);
       const baseFlow = blockTextFlowDrafts[block.id]
         || getTextFlowContent(block.content_json)
         || createTextBlockContentV1(currentText, 'paragraph');
       const nextFlow = applyWritingRoleToFlow(baseFlow, slashTarget.trigger, command.writingRole);
       const projected = projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: nextFlow }, currentText).plain_text;
-      setSlashTarget((current) => transitionSlashTarget(current, { type: 'exit', reason: 'commit' }));
+      exitSlashSession('commit', currentText);
       setBlockTextDrafts((current) => ({ ...current, [block.id]: projected }));
       setBlockTextFlowDrafts((current) => ({ ...current, [block.id]: nextFlow }));
-      const updated = await saveBlock(block, projected, { silent: true, textFlow: nextFlow });
-      if (updated) setFocusBlockId(block.id);
+      const saveOutcome = await saveBlock(block, projected, { silent: true, textFlow: nextFlow });
+      if (saveOutcome.status === 'saved') setFocusBlockId(block.id);
       return;
     }
 
     if (command.commandKind === 'annotation_action') {
       addToast('info', 'Select text first, then use Label.');
-      setSlashTarget((current) => transitionSlashTarget(current, {
-        type: 'exit',
-        reason: 'annotation_action',
-      }));
+      exitSlashSession('annotation_action');
       return;
     }
 
     const template = findTemplateForCommand(command, templateOptions);
     if (!template) {
       addToast('error', `${command.label} template is not available`);
+      exitSlashSession('missing_template');
       return;
     }
 
@@ -274,7 +469,7 @@ export function useSlashCommandController({
         target: slashTarget,
         reason: 'commit',
       });
-      setSlashTarget((current) => transitionSlashTarget(current, { type: 'exit', reason: 'commit' }));
+      exitSlashSession('commit', draftTextRef.current);
       setDraftText(cleanedText);
       draftTextRef.current = cleanedText;
       await persistDraft(cleanedText, template);
@@ -283,11 +478,14 @@ export function useSlashCommandController({
 
     const blockId = slashTarget.blockId;
     const block = blockId ? blocks.find((item) => item.id === blockId) : undefined;
-    if (!block) return;
+    if (!block) {
+      exitSlashSession('missing_block');
+      return;
+    }
 
     const currentText = blockTextDrafts[block.id] ?? textFromContent(block);
     const cleanedText = applySlashExitToText({ text: currentText, target: slashTarget, reason: 'commit' });
-    setSlashTarget((current) => transitionSlashTarget(current, { type: 'exit', reason: 'commit' }));
+    exitSlashSession('commit', currentText);
     setBlockTextDrafts((current) => ({ ...current, [block.id]: cleanedText }));
 
     const updated = await applyTemplateToBlock(block, template, cleanedText);
@@ -300,6 +498,7 @@ export function useSlashCommandController({
     blockTextDrafts,
     blockTextFlowDrafts,
     draftTextRef,
+    exitSlashSession,
     persistDraft,
     saveBlock,
     setBlockTextDrafts,
@@ -357,16 +556,16 @@ export function useSlashCommandController({
 
     if (event.key === 'Escape' && slashTarget?.target === 'draft') {
       event.preventDefault();
-      setSlashTarget((current) => transitionSlashTarget(current, { type: 'exit', reason: 'escape' }));
+      exitSlashSession('escape', draftTextRef.current);
       return;
     }
 
     if (event.key === 'Enter' && event.ctrlKey) {
       event.preventDefault();
-      setSlashTarget((current) => transitionSlashTarget(current, { type: 'exit', reason: 'ctrl_enter' }));
+      exitSlashSession('ctrl_enter', draftText);
       void persistDraft(draftText);
     }
-  }, [draftText, handleSlashMenuKeyDown, persistDraft, slashTarget]);
+  }, [draftText, draftTextRef, exitSlashSession, handleSlashMenuKeyDown, persistDraft, slashTarget]);
 
   const handleBlockKeyDown = useCallback((
     block: NoteBlock,
@@ -378,17 +577,19 @@ export function useSlashCommandController({
     if (event.key === 'Escape') {
       if (slashTarget?.target === 'block') {
         event.preventDefault();
-        setSlashTarget((current) => transitionSlashTarget(current, { type: 'exit', reason: 'escape' }));
+        exitSlashSession('escape', text);
       }
       return;
     }
 
     if (event.key === 'Enter' && event.ctrlKey) {
       event.preventDefault();
-      setSlashTarget((current) => transitionSlashTarget(current, { type: 'exit', reason: 'ctrl_enter' }));
-      void saveBlock(block, text, { silent: true }).then(() => activateDraft());
+      exitSlashSession('ctrl_enter', text);
+      void saveBlock(block, text, { silent: true }).then((saveOutcome) => {
+        if (saveOutcome.status === 'saved') activateDraft();
+      });
     }
-  }, [activateDraft, handleSlashMenuKeyDown, saveBlock, slashTarget]);
+  }, [activateDraft, exitSlashSession, handleSlashMenuKeyDown, saveBlock, slashTarget]);
 
   return {
     activeSlashCommandId: slashCommands[activeSlashCommandIndex]?.id ?? null,
@@ -399,6 +600,7 @@ export function useSlashCommandController({
     handleDraftKeyDown,
     handleSelectSlashCommand,
     slashCommands,
+    slashSession,
     slashTarget,
   };
 }

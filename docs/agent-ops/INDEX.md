@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-08-20
+> **日期 (Updated)**: 2026-08-21
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 87 份文档。
+共 94 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -97,5 +97,12 @@
 | [handoffs/2026-08-20-v2bn12-03-3-fix.md](handoffs/2026-08-20-v2bn12-03-3-fix.md) | V2.BN.12 修正单 03.3:恢复收据子系统两 MED(半径=draftBlockPersistence) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-20-v2bn12-03-4-fix.md](handoffs/2026-08-20-v2bn12-03-4-fix.md) | V2.BN.12 修正单 03.4:恢复收据 geometry↔role 一致性(单轴) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-20-v2bn12-03-lifecycle-and-surface-authority.md](handoffs/2026-08-20-v2bn12-03-lifecycle-and-surface-authority.md) | V2.BN.12 工单 03(原拆 03/04,合取裁定并批):编辑 lifecycle 状态机 + surface … | `(缺状态头)` | — | — |
+| [handoffs/2026-08-20-v2bn12-05-1-fix.md](handoffs/2026-08-20-v2bn12-05-1-fix.md) | V2.BN.12 修正单 05.1:Slash 事务四缺陷(2H/2M) | `(缺状态头)` | — | — |
+| [handoffs/2026-08-20-v2bn12-05-2-rescope.md](handoffs/2026-08-20-v2bn12-05-2-rescope.md) | V2.BN.12 修正单 05.2:设计收缩——撤除围栏子系统,回滚走正门 | `(缺状态头)` | — | — |
+| [handoffs/2026-08-20-v2bn12-05-3-fix.md](handoffs/2026-08-20-v2bn12-05-3-fix.md) | V2.BN.12 修正单 05.3:三条状态转移窄缝(架构已定,只收缝) | `(缺状态头)` | — | — |
+| [handoffs/2026-08-20-v2bn12-05-4-fix.md](handoffs/2026-08-20-v2bn12-05-4-fix.md) | V2.BN.12 修正单 05.4:两缝一护栏(hydration epoch + durable rollback … | `(缺状态头)` | — | — |
+| [handoffs/2026-08-20-v2bn12-05-5-fix.md](handoffs/2026-08-20-v2bn12-05-5-fix.md) | V2.BN.12 修正单 05.5:block save 跨 hydration 的诚实结局(1H+护栏+回执更正) | `(缺状态头)` | — | — |
+| [handoffs/2026-08-20-v2bn12-05-6-fix.md](handoffs/2026-08-20-v2bn12-05-6-fix.md) | V2.BN.12 修正单 05.6:恢复载体归家 + 副作用重绑(第二次设计介入) | `(缺状态头)` | — | — |
+| [handoffs/2026-08-20-v2bn12-05-7-fix.md](handoffs/2026-08-20-v2bn12-05-7-fix.md) | V2.BN.12 修正单 05.7:恢复 UI 机械缺陷四件(**预告:本链最后一轮修正**) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-20-v2bn12-05-slash-session.md](handoffs/2026-08-20-v2bn12-05-slash-session.md) | V2.BN.12 工单 05:SlashSession 事务(RC-D)+ 两笔测试债顺手清偿 | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |

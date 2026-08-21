@@ -5,6 +5,8 @@ import { useRuntimeDocumentDataController } from './useRuntimeDocumentDataContro
 import { useRuntimeLayoutModelController } from './useRuntimeLayoutModelController';
 import { useRuntimePresentationController } from './useRuntimePresentationController';
 import { useRuntimeSurfaceStateController } from './useRuntimeSurfaceStateController';
+import { useBlockTextFlowEditController } from './useBlockTextFlowEditController';
+import { useSlashBlockRollbackController } from './useSlashBlockRollbackController';
 import { tableObjectSavePayload } from '../tableObjectService';
 import type {
   StructuredCanvasObject,
@@ -84,6 +86,7 @@ export function useNoteCanvasRuntimeController() {
     templateOptions,
     templateWarning,
     savingBlockId,
+    blockEditRecoveryReceipts,
     anchorsBySourceRef,
     sourceJumpTarget,
     setSourceJumpTarget,
@@ -106,6 +109,7 @@ export function useNoteCanvasRuntimeController() {
     setBlockTextFlowDrafts,
     blockFieldDrafts,
     setBlockFieldDrafts,
+    readBlockDraftSnapshot,
     defaultTextTemplate,
     insertTemplateOptions,
     saveTitle,
@@ -122,6 +126,8 @@ export function useNoteCanvasRuntimeController() {
     discardDraftBlock,
     finalizeDraftBlock,
     saveBlock,
+    applyBlockEditRecovery,
+    dismissBlockEditRecovery,
     saveDraftBlockPlacement,
     applyTemplateToBlock,
     persistBlockLayout,
@@ -183,6 +189,20 @@ export function useNoteCanvasRuntimeController() {
     surfacePolicy,
   });
 
+  const applyBlockTextFlowEdit = useBlockTextFlowEditController({
+    annotationTruths,
+    blockTextFlowDrafts,
+    saveAnnotationTruths,
+    setBlockTextFlowDrafts,
+  });
+  const rollbackBlockSlashSession = useSlashBlockRollbackController({
+    applyBlockTextFlowEdit,
+    blocks,
+    readBlockDraftSnapshot,
+    saveBlock,
+    setBlockFieldDrafts,
+    setBlockTextDrafts,
+  });
   const {
     activateDraft,
     activeSlashCommandId,
@@ -247,6 +267,7 @@ export function useNoteCanvasRuntimeController() {
     persistChangedBlockLayouts,
     persistLayoutSnapshot,
     restoreBlockForHistory: restoreBlock,
+    rollbackBlockSlashSession,
     saveBlock,
     saveDraftBlockPlacement,
     persistStructuredObjectForHistory,
@@ -281,6 +302,7 @@ export function useNoteCanvasRuntimeController() {
     anchorsBySourceRef,
     allBlocks: sortedBlocks,
     blockFieldDrafts,
+    blockEditRecoveryReceipts,
     blockLayouts,
     blockListRef,
     blockTextDrafts,
@@ -352,11 +374,14 @@ export function useNoteCanvasRuntimeController() {
     onBlockListMouseDown: handleBlockListMouseDown,
     onBlockTextChange: handleBlockTextChange,
     onBlockTextFlowChange: setBlockTextFlowDrafts,
+    onApplyBlockTextFlowEdit: applyBlockTextFlowEdit,
+    onApplyBlockEditRecovery: applyBlockEditRecovery,
     onApplyBlockLayoutDrafts: mergeLayoutDrafts,
     onClearSlashTarget: clearSlashTarget,
     onCloseOverlay: closeOverlay,
     onCollapseChrome: collapseChrome,
     onDiscardDraft: discardDraft,
+    onDismissBlockEditRecovery: dismissBlockEditRecovery,
     onDraftChange: handleDraftChange,
     onDraftFocusReceipt: handleDraftFocusReceipt,
     onDraftKeyDown: handleDraftKeyDown,

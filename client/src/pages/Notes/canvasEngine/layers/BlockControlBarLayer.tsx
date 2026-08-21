@@ -17,6 +17,7 @@ import type {
   ExportRole,
   SlashMenuAnchor,
 } from '../runtimeLayout';
+import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import { FloatingOverlayLayer } from './FloatingOverlayLayer';
 import styles from '../../NoteDetail.module.css';
 
@@ -32,7 +33,7 @@ interface BlockControlBarLayerProps {
   onBeginMove: (event: ReactPointerEvent<HTMLElement>) => void;
   onToggleExportRole: () => void;
   onToggleAIVisibility: () => void;
-  onSaveBlock: () => void;
+  onSaveBlock: () => Promise<BlockSaveOutcome>;
   onAnnotateBlock: () => void;
   onBlockItemDragStart?: (event: ReactDragEvent<HTMLButtonElement>) => void;
   onTrash: () => void;
@@ -115,7 +116,10 @@ export function BlockControlBarLayer({
           </button>
           <button
             className={styles.iconBtn}
-            onClick={onSaveBlock}
+            onClick={async () => {
+              const outcome = await onSaveBlock();
+              if (outcome.status !== 'saved') return;
+            }}
             disabled={saving || contentReadOnly}
             title="Save block"
           >

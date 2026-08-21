@@ -437,6 +437,7 @@ export function useRuntimeNaturalWritingController(options: UseRuntimeNaturalWri
   } = useSlashCommandController({
     ...options,
     activateDraft: activateDraftWithPageStackFlow,
+    draftOwnerReconciliation,
     draftText,
     draftTextRef,
     persistDraft,

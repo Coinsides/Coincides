@@ -4,12 +4,17 @@ import type { NoteBlock } from './runtimeDataTypes';
 import {
   DRAFT_RECOVERY_STORAGE_KEY_V1,
   DRAFT_RECOVERY_STORAGE_KEY_V2,
+  createBlockEditRecoveryKey,
   finalizeDraftRecoveryReceipt,
+  forgetBlockEditRecoveryReceipt,
   forgetDraftRecoveryReceipt,
+  listBlockEditRecoveryReceipts,
   loadDraftRecoveryQueue,
   listDraftRecoveryReceipts,
+  rememberBlockEditRecoveryReceipt,
   rememberDraftRecoveryReceipt,
   replayDraftRecoveryReceipts,
+  type BlockEditRecoveryReceipt,
   type DraftRecoveryReceipt,
 } from './draftBlockPersistence';
 
@@ -45,6 +50,43 @@ function recoveryReceipt(key = 'draft:note-a:1:key'): DraftRecoveryReceipt {
       boundary_role: 'outside',
     },
     template,
+    queuedAt: '2026-08-20T00:00:00.000Z',
+  };
+}
+
+function blockEditRecoveryReceipt({
+  generation = 1,
+  mountNonce = 'mount-a',
+  operationSequence = 1,
+  text = 'queued edit',
+}: {
+  generation?: number;
+  mountNonce?: string;
+  operationSequence?: number;
+  text?: string;
+} = {}): BlockEditRecoveryReceipt {
+  const noteId = 'note-a';
+  const blockId = 'block-a';
+  return {
+    version: 2,
+    kind: 'block_edit_recovery',
+    recoveryKey: createBlockEditRecoveryKey(
+      noteId,
+      blockId,
+      generation,
+      operationSequence,
+      mountNonce,
+    ),
+    noteId,
+    requestedNoteId: noteId,
+    mountNonce,
+    creationGeneration: generation,
+    operationSequence,
+    blockId,
+    text,
+    plainText: text,
+    contentJson: { body: text },
+    hydrationEpoch: 1,
     queuedAt: '2026-08-20T00:00:00.000Z',
   };
 }
@@ -144,13 +186,19 @@ function contradictoryCrossingReceipt(version: 1 | 2, key: string) {
   };
 }
 
-function canonicalCrossingReceipt(key = 'canonical-crossing'): DraftRecoveryReceipt {
+function canonicalCrossingReceipt(
+  side: 'left' | 'right',
+  key = `canonical-${side}-crossing`,
+): DraftRecoveryReceipt {
+  const crossingGeometry = side === 'left'
+    ? { x: 20, width: 760, left: 72, right: 832 }
+    : { x: 128, width: 540, left: 96, right: 636 };
   return {
     ...recoveryReceipt(key),
     layout: {
-      x: 20,
+      x: crossingGeometry.x,
       y: 40,
-      width: 760,
+      width: crossingGeometry.width,
       height: 72,
       surface: 'canvas_workspace',
       coordinate_space: 'canvas_world',
@@ -159,8 +207,8 @@ function canonicalCrossingReceipt(key = 'canonical-crossing'): DraftRecoveryRece
       surface_authority: {
         coordinateSpace: 'canvas_world',
         pageBoundary: {
-          left: 72,
-          right: 832,
+          left: crossingGeometry.left,
+          right: crossingGeometry.right,
           frameId: 'owner-frame-a',
         },
       },
@@ -306,16 +354,27 @@ describe('draft recovery persistence', () => {
     },
   );
 
-  it('keeps a canonical crossing tuple replayable', () => {
-    const receipt = canonicalCrossingReceipt();
-    const rawBytes = JSON.stringify([receipt]);
-    sessionStorage.setItem(DRAFT_RECOVERY_STORAGE_KEY_V2, rawBytes);
+  // Crossing coverage is symmetric: every left-edge positive control has a right-edge twin.
+  it.each([
+    ['left', 1],
+    ['left', 2],
+    ['right', 1],
+    ['right', 2],
+  ] as const)('keeps a canonical %s crossing raw v%s tuple replayable', (side, version) => {
+    const receipt = canonicalCrossingReceipt(side, `canonical-${side}-v${version}`);
+    const raw = version === 1 ? { ...receipt, version: 1 as const } : receipt;
+    const storageKey = version === 1
+      ? DRAFT_RECOVERY_STORAGE_KEY_V1
+      : DRAFT_RECOVERY_STORAGE_KEY_V2;
+    sessionStorage.setItem(storageKey, JSON.stringify([raw]));
 
     const queue = loadDraftRecoveryQueue();
 
     expect(queue.blocked).toEqual([]);
-    expect(queue.replayable).toEqual([receipt]);
-    expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2)).toBe(rawBytes);
+    expect(queue.replayable).toEqual([{ ...receipt, version: 2 }]);
+    expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V1)).toBeNull();
+    expect(JSON.parse(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2) || '[]'))
+      .toEqual(queue.replayable);
   });
 
   it.each([
@@ -336,7 +395,7 @@ describe('draft recovery persistence', () => {
       },
     }],
   ])('fails closed for %s tuple inconsistency', (_label, layoutPatch) => {
-    const canonical = canonicalCrossingReceipt(`inconsistent-${_label}`);
+    const canonical = canonicalCrossingReceipt('left', `inconsistent-${_label}`);
     const raw = {
       ...canonical,
       layout: { ...canonical.layout, ...layoutPatch },
@@ -550,6 +609,101 @@ describe('draft recovery persistence', () => {
     expect(JSON.parse(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2) || '[]'))
       .toEqual([blockedV2, { ...canonicalV1, version: 2 }]);
     expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V1)).toBeNull();
+  });
+
+  it('stores block edit recovery in the validated v2 queue without entering draft replay', () => {
+    const receipt = blockEditRecoveryReceipt();
+
+    expect(rememberBlockEditRecoveryReceipt(receipt)).toBe(true);
+
+    expect(listBlockEditRecoveryReceipts('note-a')).toEqual([receipt]);
+    expect(loadDraftRecoveryQueue()).toEqual({ replayable: [], blocked: [] });
+    expect(JSON.parse(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2) || '[]'))
+      .toEqual([receipt]);
+  });
+
+  it('routes an explicit block edit hybrid only to edit recovery and never auto-replays it', async () => {
+    const editReceipt = blockEditRecoveryReceipt();
+    const hybridRaw = {
+      ...recoveryReceipt('hybrid-create-key'),
+      ...editReceipt,
+    };
+    const rawBytes = JSON.stringify([hybridRaw]);
+    sessionStorage.setItem(DRAFT_RECOVERY_STORAGE_KEY_V2, rawBytes);
+    const finalize = vi.fn(async () => true);
+    const onRecovered = vi.fn();
+
+    const queue = loadDraftRecoveryQueue();
+    await replayDraftRecoveryReceipts(queue.replayable, finalize, onRecovered);
+    forgetDraftRecoveryReceipt('hybrid-create-key');
+
+    expect(queue).toEqual({ replayable: [], blocked: [] });
+    expect(listBlockEditRecoveryReceipts('note-a')).toEqual([editReceipt]);
+    expect(finalize).not.toHaveBeenCalled();
+    expect(onRecovered).not.toHaveBeenCalled();
+    expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2)).toBe(rawBytes);
+  });
+
+  it('keeps an explicit unknown recovery kind blocked without replaying or rewriting it', async () => {
+    const unknownRaw = {
+      ...recoveryReceipt('unknown-kind-key'),
+      kind: 'future_recovery_kind',
+    };
+    const rawBytes = JSON.stringify([unknownRaw]);
+    sessionStorage.setItem(DRAFT_RECOVERY_STORAGE_KEY_V2, rawBytes);
+    const finalize = vi.fn(async () => true);
+
+    const queue = loadDraftRecoveryQueue();
+    await replayDraftRecoveryReceipts(queue.replayable, finalize, vi.fn());
+    forgetDraftRecoveryReceipt('unknown-kind-key');
+
+    expect(queue.replayable).toEqual([]);
+    expect(queue.blocked).toEqual([expect.objectContaining({
+      clientCreateKey: 'unknown-kind-key',
+      raw: unknownRaw,
+      reason: 'invalid_shape',
+      storageKey: DRAFT_RECOVERY_STORAGE_KEY_V2,
+    })]);
+    expect(listBlockEditRecoveryReceipts()).toEqual([]);
+    expect(finalize).not.toHaveBeenCalled();
+    expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2)).toBe(rawBytes);
+  });
+
+  it('does not let an old exact-key forget remove the newer same-block intent', () => {
+    const oldReceipt = blockEditRecoveryReceipt({
+      generation: 1,
+      operationSequence: 1,
+      text: 'old intent',
+    });
+    const newReceipt = blockEditRecoveryReceipt({
+      generation: 2,
+      operationSequence: 2,
+      text: 'new intent',
+    });
+    expect(rememberBlockEditRecoveryReceipt(oldReceipt)).toBe(true);
+    expect(rememberBlockEditRecoveryReceipt(newReceipt)).toBe(true);
+    const newBytes = sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2);
+
+    expect(forgetBlockEditRecoveryReceipt(oldReceipt.recoveryKey)).toBe(true);
+
+    expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2)).toBe(newBytes);
+    expect(listBlockEditRecoveryReceipts('note-a')).toEqual([newReceipt]);
+    expect(forgetBlockEditRecoveryReceipt(newReceipt.recoveryKey)).toBe(true);
+    expect(listBlockEditRecoveryReceipts('note-a')).toEqual([]);
+  });
+
+  it('preserves an invalid same-key entry when a validated edit receipt is dismissed', () => {
+    const receipt = blockEditRecoveryReceipt();
+    const invalidSameKey = { ...receipt, requestedNoteId: 'other-note' };
+    sessionStorage.setItem(
+      DRAFT_RECOVERY_STORAGE_KEY_V2,
+      JSON.stringify([invalidSameKey, receipt]),
+    );
+
+    expect(forgetBlockEditRecoveryReceipt(receipt.recoveryKey)).toBe(true);
+
+    expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2))
+      .toBe(JSON.stringify([invalidSameKey]));
   });
 
   it('uses one receipt key through create, placement, then latest save', async () => {

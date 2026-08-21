@@ -5,6 +5,7 @@ import type {
 } from 'react';
 import { useEffect, useRef } from 'react';
 import type { NoteBlock } from '../runtimeDataTypes';
+import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import type {
   CanvasObject,
   CanvasPlacement,
@@ -65,7 +66,11 @@ type ShapeObjectLayerProps = {
     caret: number,
     anchorElement?: HTMLElement | null,
   ) => void;
-  onShapeTextSave: (objectId: string, block: NoteBlock, value: string) => void | Promise<void>;
+  onShapeTextSave: (
+    objectId: string,
+    block: NoteBlock,
+    value: string,
+  ) => Promise<BlockSaveOutcome | null>;
 };
 
 function shapeTypeFromCanvasObject(object: CanvasObject | undefined): ShapeType {
@@ -189,7 +194,8 @@ export function ShapeObjectLayer({
                     event.currentTarget,
                   );
                 }}
-                onBlur={(event) => {
+                onBlur={async (event) => {
+                  const value = event.currentTarget.value;
                   if (textBindingFocusReceipt) {
                     if (textFocusReceiptsEqual(focusedReceiptRef.current, textBindingFocusReceipt)) {
                       focusedReceiptRef.current = null;
@@ -197,15 +203,22 @@ export function ShapeObjectLayer({
                     onShapeTextBlur(textBindingFocusReceipt);
                   }
                   if (!readOnly) {
-                    void onShapeTextSave(canvasObject.objectId, textBinding.block, event.currentTarget.value);
+                    const outcome = await onShapeTextSave(canvasObject.objectId, textBinding.block, value);
+                    if (outcome && outcome.status !== 'saved') return;
                   }
                 }}
-                onKeyDown={readOnly ? undefined : (event) => {
+                onKeyDown={readOnly ? undefined : async (event) => {
                   event.stopPropagation();
                   if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
                     event.preventDefault();
-                    void onShapeTextSave(canvasObject.objectId, textBinding.block, event.currentTarget.value);
-                    event.currentTarget.blur();
+                    const textarea = event.currentTarget;
+                    const outcome = await onShapeTextSave(
+                      canvasObject.objectId,
+                      textBinding.block,
+                      textarea.value,
+                    );
+                    if (outcome && outcome.status !== 'saved') return;
+                    textarea.blur();
                   }
                 }}
                 data-block-id={textBindingFocusReceipt?.blockId}

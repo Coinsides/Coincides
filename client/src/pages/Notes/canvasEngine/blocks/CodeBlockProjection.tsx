@@ -3,6 +3,7 @@ import type {
   Ref,
 } from 'react';
 import { resizeTextareaToContent } from '../measurementService';
+import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import styles from '../../NoteDetail.module.css';
 
 interface CodeBlockProjectionProps {
@@ -11,7 +12,7 @@ interface CodeBlockProjectionProps {
   textareaRef: Ref<HTMLTextAreaElement>;
   onFocused: () => void;
   onTextChange: (value: string, caret: number, anchorElement?: HTMLElement | null) => void;
-  onSave: (silent?: boolean) => void;
+  onSave: (silent?: boolean) => Promise<BlockSaveOutcome>;
   onKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
 }
 
@@ -47,7 +48,10 @@ export function CodeBlockProjection({
           resizeTextareaToContent(event.currentTarget);
           onTextChange(event.currentTarget.value, event.currentTarget.selectionStart, event.currentTarget);
         }}
-        onBlur={readOnly ? undefined : () => onSave(true)}
+        onBlur={readOnly ? undefined : async () => {
+          const outcome = await onSave(true);
+          if (outcome.status !== 'saved') return;
+        }}
         onKeyDown={readOnly ? undefined : onKeyDown}
         spellCheck={false}
         rows={1}

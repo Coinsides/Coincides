@@ -3,8 +3,9 @@ import {
   classifyCanvasSurfaceAuthority,
   type CanvasSurfaceAuthority,
 } from '../../../../../shared/types/canvasSurfaceAuthority';
+import type { FieldValueRecord } from './blockContentService';
 import type { BlockBoxLayout } from './runtimeLayout';
-import type { NoteBlock } from './runtimeDataTypes';
+import type { NoteBlock, TextBlockContentV1 } from './runtimeDataTypes';
 
 export interface DraftBlockCreateResult {
   /** Authoritative durable snapshot returned by the create/replay endpoint. */
@@ -23,6 +24,25 @@ export interface DraftRecoveryReceipt {
   layout: BlockBoxLayout;
   template: TemplateOption;
   queuedAt: string;
+}
+
+export interface BlockEditRecoveryReceipt {
+  readonly version: 2;
+  readonly kind: 'block_edit_recovery';
+  readonly recoveryKey: string;
+  readonly noteId: string;
+  readonly requestedNoteId: string;
+  readonly mountNonce: string;
+  readonly creationGeneration: number;
+  readonly operationSequence: number;
+  readonly blockId: string;
+  readonly text: string;
+  readonly plainText: string;
+  readonly contentJson: Record<string, unknown>;
+  readonly textFlow?: TextBlockContentV1;
+  readonly fieldValues?: FieldValueRecord;
+  readonly hydrationEpoch: number;
+  readonly queuedAt: string;
 }
 
 export interface BlockedDraftRecoveryReceipt {
@@ -56,6 +76,77 @@ function recoveryStorage(): Storage | null {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value && typeof value === 'object' && !Array.isArray(value));
+}
+
+function blockEditRecoveryScopeKey(noteId: string, blockId: string): string {
+  return `${noteId}\u0000${blockId}`;
+}
+
+export function createBlockEditRecoveryKey(
+  noteId: string,
+  blockId: string,
+  creationGeneration: number,
+  operationSequence: number,
+  mountNonce: string,
+): string {
+  return `block-edit:${noteId}:${blockId}:${mountNonce}:${creationGeneration}:${operationSequence}`;
+}
+
+function validateBlockEditRecoveryReceipt(raw: unknown): BlockEditRecoveryReceipt | null {
+  if (
+    !isRecord(raw)
+    || raw.version !== 2
+    || raw.kind !== 'block_edit_recovery'
+    || typeof raw.recoveryKey !== 'string'
+    || typeof raw.noteId !== 'string'
+    || !raw.noteId.trim()
+    || typeof raw.requestedNoteId !== 'string'
+    || raw.requestedNoteId !== raw.noteId
+    || typeof raw.mountNonce !== 'string'
+    || !raw.mountNonce.trim()
+    || !Number.isInteger(raw.creationGeneration)
+    || (raw.creationGeneration as number) < 0
+    || !Number.isInteger(raw.operationSequence)
+    || (raw.operationSequence as number) <= 0
+    || typeof raw.blockId !== 'string'
+    || !raw.blockId.trim()
+    || typeof raw.text !== 'string'
+    || typeof raw.plainText !== 'string'
+    || !isRecord(raw.contentJson)
+    || (raw.textFlow !== undefined && !isRecord(raw.textFlow))
+    || (raw.fieldValues !== undefined && !isRecord(raw.fieldValues))
+    || !Number.isInteger(raw.hydrationEpoch)
+    || (raw.hydrationEpoch as number) < 0
+    || typeof raw.queuedAt !== 'string'
+    || !raw.queuedAt
+  ) return null;
+  const creationGeneration = raw.creationGeneration as number;
+  const operationSequence = raw.operationSequence as number;
+  if (raw.recoveryKey !== createBlockEditRecoveryKey(
+    raw.noteId,
+    raw.blockId,
+    creationGeneration,
+    operationSequence,
+    raw.mountNonce,
+  )) return null;
+  return {
+    version: 2,
+    kind: 'block_edit_recovery',
+    recoveryKey: raw.recoveryKey,
+    noteId: raw.noteId,
+    requestedNoteId: raw.requestedNoteId,
+    mountNonce: raw.mountNonce,
+    creationGeneration,
+    operationSequence,
+    blockId: raw.blockId,
+    text: raw.text,
+    plainText: raw.plainText,
+    contentJson: raw.contentJson,
+    textFlow: raw.textFlow as TextBlockContentV1 | undefined,
+    fieldValues: raw.fieldValues as FieldValueRecord | undefined,
+    hydrationEpoch: raw.hydrationEpoch as number,
+    queuedAt: raw.queuedAt,
+  };
 }
 
 function clientCreateKeyFromRaw(value: unknown): string | null {
@@ -168,7 +259,12 @@ function hasValidCanonicalOwner(layout: BlockBoxLayout): boolean {
 function receiptShapeFromRaw(
   raw: unknown,
 ): Omit<DraftRecoveryReceipt, 'version'> | null {
-  if (!isRecord(raw) || !isRecord(raw.layout) || !isRecord(raw.template)) return null;
+  if (
+    !isRecord(raw)
+    || Object.prototype.hasOwnProperty.call(raw, 'kind')
+    || !isRecord(raw.layout)
+    || !isRecord(raw.template)
+  ) return null;
   const layout = raw.layout as unknown as BlockBoxLayout;
   if (
     typeof raw.noteId !== 'string'
@@ -241,6 +337,7 @@ export function loadDraftRecoveryQueue(): DraftRecoveryQueue {
   for (const raw of v2.entries) {
     const receipt = validateV2Receipt(raw);
     if (receipt) replayable.set(receipt.clientCreateKey, receipt);
+    else if (validateBlockEditRecoveryReceipt(raw)) continue;
     else blocked.push({
       clientCreateKey: clientCreateKeyFromRaw(raw),
       raw,
@@ -265,6 +362,8 @@ export function loadDraftRecoveryQueue(): DraftRecoveryQueue {
         migrated.push(receipt);
         replayable.set(receipt.clientCreateKey, receipt);
       }
+    } else if (validateBlockEditRecoveryReceipt(raw)) {
+      retainedLegacy.push(raw);
     } else {
       retainedLegacy.push(raw);
       blocked.push({
@@ -299,6 +398,22 @@ export function listDraftRecoveryReceipts(): DraftRecoveryReceipt[] {
   return loadDraftRecoveryQueue().replayable;
 }
 
+export function listBlockEditRecoveryReceipts(noteId?: string): BlockEditRecoveryReceipt[] {
+  const storage = recoveryStorage();
+  if (!storage) return [];
+  const byScope = new Map<string, BlockEditRecoveryReceipt>();
+  for (const storageKey of [DRAFT_RECOVERY_STORAGE_KEY_V1, DRAFT_RECOVERY_STORAGE_KEY_V2]) {
+    const stored = readStorageEntries(storage, storageKey);
+    if (stored.invalidJson !== null) continue;
+    stored.entries.forEach((raw) => {
+      const receipt = validateBlockEditRecoveryReceipt(raw);
+      if (!receipt) return;
+      byScope.set(blockEditRecoveryScopeKey(receipt.noteId, receipt.blockId), receipt);
+    });
+  }
+  return [...byScope.values()].filter((receipt) => !noteId || receipt.noteId === noteId);
+}
+
 export function rememberDraftRecoveryReceipt(receipt: DraftRecoveryReceipt): void {
   const storage = recoveryStorage();
   if (!storage) return;
@@ -330,6 +445,39 @@ export function rememberDraftRecoveryReceipt(receipt: DraftRecoveryReceipt): voi
   }
 }
 
+export function rememberBlockEditRecoveryReceipt(receipt: BlockEditRecoveryReceipt): boolean {
+  const validated = validateBlockEditRecoveryReceipt(receipt);
+  const storage = recoveryStorage();
+  if (!validated || !storage) return false;
+  const scopeKey = blockEditRecoveryScopeKey(validated.noteId, validated.blockId);
+  const keepUnlessSameBlockEdit = (item: unknown) => {
+    const storedReceipt = validateBlockEditRecoveryReceipt(item);
+    return !storedReceipt
+      || blockEditRecoveryScopeKey(storedReceipt.noteId, storedReceipt.blockId) !== scopeKey;
+  };
+  const storedV2 = readStorageEntries(storage, DRAFT_RECOVERY_STORAGE_KEY_V2);
+  const legacy = readStorageEntries(storage, DRAFT_RECOVERY_STORAGE_KEY_V1);
+  if (storedV2.invalidJson === null) {
+    const v2Persisted = writeStorageEntries(storage, DRAFT_RECOVERY_STORAGE_KEY_V2, [
+      ...storedV2.entries.filter(keepUnlessSameBlockEdit),
+      validated,
+    ]);
+    if (v2Persisted && legacy.invalidJson === null) {
+      writeStorageEntries(
+        storage,
+        DRAFT_RECOVERY_STORAGE_KEY_V1,
+        legacy.entries.filter(keepUnlessSameBlockEdit),
+      );
+    }
+    return v2Persisted;
+  }
+  if (legacy.invalidJson !== null) return false;
+  return writeStorageEntries(storage, DRAFT_RECOVERY_STORAGE_KEY_V1, [
+    ...legacy.entries.filter(keepUnlessSameBlockEdit),
+    validated,
+  ]);
+}
+
 export function forgetDraftRecoveryReceipt(clientCreateKey: string): void {
   const storage = recoveryStorage();
   if (!storage) return;
@@ -345,6 +493,23 @@ export function forgetDraftRecoveryReceipt(clientCreateKey: string): void {
       }),
     );
   }
+}
+
+export function forgetBlockEditRecoveryReceipt(recoveryKey: string): boolean {
+  const storage = recoveryStorage();
+  if (!storage) return false;
+  for (const storageKey of [DRAFT_RECOVERY_STORAGE_KEY_V2, DRAFT_RECOVERY_STORAGE_KEY_V1]) {
+    const stored = readStorageEntries(storage, storageKey);
+    if (stored.invalidJson !== null) continue;
+    writeStorageEntries(
+      storage,
+      storageKey,
+      stored.entries.filter((item) => (
+        validateBlockEditRecoveryReceipt(item)?.recoveryKey !== recoveryKey
+      )),
+    );
+  }
+  return !listBlockEditRecoveryReceipts().some((receipt) => receipt.recoveryKey === recoveryKey);
 }
 
 export async function finalizeDraftRecoveryReceipt(

@@ -201,7 +201,7 @@
 
 ## 3. Canvas object kinds（6）
 
-来源：`server/src/services/canvasObjects.ts` 的 `KIND_HANDLERS`（第 1258 行）。
+来源：`server/src/services/canvasObjects.ts` 的 `KIND_HANDLERS`（第 1278 行）。
 
 > 契约 I-8：**新增 kind ＝ 注册一个三元组，核心零 if-kind。**
 
@@ -220,22 +220,18 @@
 
 - ✅ `build`
 - ✅ `build:client`
+- ✅ `test:unit`
+- ✅ `docs:check`
 - ✅ `check:canvas-runtime-boundary`
+- ✅ `check:group-gallery-shell`
+- ✅ `check:single-editor-shell`
+- ✅ `check:groups-rail-shell`
+- ✅ `check:v2-bn11-legacy-shutdown`
 - ✅ `check:v2-bn11-relation-freshness`
+- ✅ `check:source-experience`
 - ✅ `check:changed-file-secrets`
 - ✅ `smoke:canvas-engine-model-contract`
 - ✅ `smoke:canvas-engine-performance`
-
-**存在但不在该门内的 check / smoke / test 脚本（6）**：
-
-- ⚠️ `check:group-gallery-shell`
-- ⚠️ `check:groups-rail-shell`
-- ⚠️ `check:single-editor-shell`
-- ⚠️ `check:source-experience`
-- ⚠️ `check:v2-bn11-legacy-shutdown`
-- ⚠️ `test:unit`
-
-> 不在门内 ≠ 错误（可能是刻意的），但**没有门跑的护栏等于没有护栏** —— 逐个应有明确归属。
 
 ---
 

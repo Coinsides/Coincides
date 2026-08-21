@@ -30,7 +30,7 @@
     "fixtures:source-smoke": "cd server && node scripts/generateSourceSmokeFixtures.mjs",
     "smoke:canvas-engine-model-contract": "cd client && npm run smoke:canvas-engine-model-contract",
     "smoke:canvas-engine-performance": "cd client && npm run smoke:canvas-engine-performance",
-    "verify:v2-bn8-runtime": "npm run test:unit && npm run check:canvas-runtime-boundary && npm run check:v2-bn11-relation-freshness && npm run smoke:canvas-engine-model-contract && npm run build:client && npm run build && npm run smoke:canvas-engine-performance && git diff --check && npm run check:changed-file-secrets",
+    "verify:v2-bn8-runtime": "npm run test:unit && npm run check:canvas-runtime-boundary && npm run check:group-gallery-shell && npm run check:groups-rail-shell && npm run check:single-editor-shell && npm run check:source-experience && npm run check:v2-bn11-legacy-shutdown && npm run check:v2-bn11-relation-freshness && npm run smoke:canvas-engine-model-contract && npm run build:client && npm run build && npm run smoke:canvas-engine-performance && npm run docs:check && git diff --check && npm run check:changed-file-secrets",
     "start": "cd server && npm run start",
     "install:all": "cd server && npm install && cd ../client && npm install",
     "setup": "npm run install:all"

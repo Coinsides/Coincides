@@ -48,11 +48,13 @@ import {
 import {
   normalizeContentGroup,
 } from '../contentGroupService';
+import { useBlockDraftAuthority } from './useBlockDraftAuthority';
 import {
   NOTE_ANNOTATION_PROPOSALS_METADATA_KEY,
   NOTE_READING_INTERPRETATIONS_METADATA_KEY,
 } from '../contentGroupMetadataService';
 import {
+  annotationTruthsDurablyEqual,
   annotationTruthsFromMetadata,
   loadAnnotationTruthsForNote,
   saveAnnotationTruthsForNote,
@@ -105,13 +107,19 @@ import type {
   VisualConnector,
 } from '../types';
 import {
+  createBlockEditRecoveryKey,
   finalizeDraftRecoveryReceipt,
+  forgetBlockEditRecoveryReceipt,
   forgetDraftRecoveryReceipt,
+  listBlockEditRecoveryReceipts,
   loadDraftRecoveryQueue,
+  rememberBlockEditRecoveryReceipt,
   replayDraftRecoveryReceipts,
+  type BlockEditRecoveryReceipt,
   type DraftBlockCreateResult,
   type DraftRecoveryReceipt,
 } from '../draftBlockPersistence';
+export type { BlockEditRecoveryReceipt } from '../draftBlockPersistence';
 import {
   advanceRouteRequestGeneration,
   routeRequestGenerationMatches,
@@ -141,6 +149,60 @@ export interface PersistCanvasObjectInput {
   structuredObject?: StructuredCanvasObject | null;
   payload: Record<string, unknown>;
 }
+
+type AnnotationSaveRouteReceipt = Readonly<{
+  noteId: string;
+  generation: number;
+  hydrationEpoch: number;
+}>;
+
+type AnnotationSaveRejectPhase =
+  | 'enqueue'
+  | 'publish'
+  | 'publish_response'
+  | 'publish_error'
+  | 'reconciliation_read'
+  | 'repair'
+  | 'repair_response'
+  | 'reconciliation_error'
+  | 'snapshot';
+
+export type BlockSaveDurableState =
+  | 'matches_requested'
+  | 'conflict'
+  | 'missing'
+  | 'read_failed'
+  | 'not_checked';
+
+export type BlockSaveOutcome =
+  | {
+    status: 'saved';
+    block: NoteBlock;
+    recoveryReceipt: null;
+    reconciliation: 'response' | 'not_needed';
+  }
+  | {
+    status: 'stale_epoch';
+    block: NoteBlock | null;
+    recoveryReceipt: BlockEditRecoveryReceipt;
+    reconciliation: 'read_after_outcome' | 'read_failed';
+    durableState: Exclude<BlockSaveDurableState, 'not_checked'>;
+    reason: 'hydration_epoch_advanced' | 'route_receipt_stale' | 'superseded_operation';
+  }
+  | {
+    status: 'rejected';
+    block: NoteBlock | null;
+    recoveryReceipt: BlockEditRecoveryReceipt | null;
+    reconciliation: 'read_after_error' | 'read_failed' | 'not_attempted';
+    durableState: BlockSaveDurableState;
+    reason:
+      | 'mutation_not_allowed'
+      | 'route_receipt_unavailable'
+      | 'recovery_receipt_unavailable'
+      | 'request_failed';
+    error?: unknown;
+    staleEpoch: boolean;
+  };
 
 const INSERT_TEMPLATE_CATEGORIES: Array<{ key: TemplateCategoryKey; label: string }> = [
   { key: 'default', label: 'Default' },
@@ -244,6 +306,26 @@ function metadataChanged(
   return JSON.stringify(before || {}) !== JSON.stringify(after);
 }
 
+function canonicalJsonValue(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonicalJsonValue);
+  if (!value || typeof value !== 'object') return value;
+  return Object.fromEntries(
+    Object.entries(value as Record<string, unknown>)
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, nestedValue]) => [key, canonicalJsonValue(nestedValue)]),
+  );
+}
+
+function blockMatchesIssuedSave(
+  observedBlock: NoteBlock,
+  requestedPlainText: string,
+  requestedContent: Record<string, unknown>,
+): boolean {
+  return observedBlock.plain_text === requestedPlainText
+    && JSON.stringify(canonicalJsonValue(observedBlock.content_json))
+      === JSON.stringify(canonicalJsonValue(requestedContent));
+}
+
 function upsertCanvasObject(items: CanvasObject[], item: CanvasObject): CanvasObject[] {
   const exists = items.some((candidate) => candidate.objectId === item.objectId);
   return exists
@@ -296,6 +378,12 @@ function recordFromUnknown(value: unknown): Record<string, unknown> {
     : {};
 }
 
+function createBlockEditRecoveryMountNonce(): string {
+  return typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
+
 function presentationKindForTemplate(template: TemplateOption, _sourceQuote = false): BlockPresentationKind {
   if (template.learning_role === 'formula') return 'formula';
   if (template.template_key === 'code.snippet') return 'code';
@@ -322,6 +410,7 @@ export function useNoteCanvasDataAdapter({
   const [sourceJumpTarget, setSourceJumpTarget] = useState<SourceJumpTarget | null>(null);
   const [sourceJumpBusy, setSourceJumpBusy] = useState<string | null>(null);
   const [annotationTruths, setAnnotationTruths] = useState<AnnotationTruthV1[]>([]);
+  const [successfulHydrationEpoch, setSuccessfulHydrationEpoch] = useState(0);
   const [contentGroups, setContentGroups] = useState<ContentGroupV1[]>([]);
   const [groupFolders, setGroupFolders] = useState<GroupFolderV1[]>([]);
   const [purposeFrames, setPurposeFrames] = useState<PurposeFrameV1[]>([]);
@@ -337,21 +426,39 @@ export function useNoteCanvasDataAdapter({
   );
   const [readingInterpretations, setReadingInterpretations] = useState<ReadingInterpretationV1[]>([]);
   const [annotationProposals, setAnnotationProposals] = useState<AnnotationProposalV1[]>([]);
-  const [blockTextDrafts, setBlockTextDrafts] = useState<Record<string, string>>({});
-  const [blockTextFlowDrafts, setBlockTextFlowDrafts] = useState<Record<string, TextBlockContentV1>>({});
-  const [blockFieldDrafts, setBlockFieldDrafts] = useState<Record<string, FieldValueRecord>>({});
+  const {
+    blockTextDrafts,
+    blockTextFlowDrafts,
+    blockFieldDrafts,
+    setBlockTextDrafts,
+    setBlockTextFlowDrafts,
+    setBlockFieldDrafts,
+    readBlockDraftSnapshot,
+  } = useBlockDraftAuthority();
   const noteRef = useRef<Note | null>(null);
+  const [blockEditRecoveryMountNonce] = useState(createBlockEditRecoveryMountNonce);
+  const adapterMountActiveRef = useRef(true);
   const routeNoteIdRef = useRef(noteId);
   const routeRequestGenerationRef = useRef(0);
   const routeRequestNoteIdRef = useRef(noteId);
   const noteLoadGenerationRef = useRef(0);
-  const annotationSaveGenerationRef = useRef(0);
+  const successfulHydrationEpochRef = useRef(0);
+  const annotationSaveResponseSequenceRef = useRef(0);
+  const annotationSaveTailsByNoteRef = useRef(new Map<string, Promise<void>>());
   const contentGroupSaveGenerationRef = useRef(0);
   const purposeFrameSaveGenerationRef = useRef(0);
   const pageFrameSaveGenerationRef = useRef(0);
   const typographyProfileSaveGenerationRef = useRef(0);
   const recoveryFailureNotifiedKeysRef = useRef(new Set<string>());
   const replayingRecoveryKeysRef = useRef(new Set<string>());
+  const blockSaveOperationSequenceRef = useRef(0);
+  const latestBlockSaveOperationByBlockRef = useRef(new Map<string, number>());
+  const outstandingBlockSaveOperationsRef = useRef(new Map<number, Readonly<{
+    blockId: string;
+    requestedNoteId: string;
+    creationGeneration: number;
+  }>>());
+  const blockSaveOutcomeVersionRef = useRef(0);
   routeNoteIdRef.current = noteId;
   const nextRouteRequestGeneration = advanceRouteRequestGeneration({
     noteId: routeRequestNoteIdRef.current,
@@ -361,8 +468,43 @@ export function useNoteCanvasDataAdapter({
   routeRequestGenerationRef.current = nextRouteRequestGeneration.generation;
 
   useEffect(() => {
+    adapterMountActiveRef.current = true;
+    return () => {
+      adapterMountActiveRef.current = false;
+    };
+  }, []);
+
+  const hydratedNoteId = note?.id || null;
+  const annotationSaveRouteReceipt = useMemo<AnnotationSaveRouteReceipt | null>(() => {
+    if (!hydratedNoteId || hydratedNoteId !== noteId || successfulHydrationEpoch <= 0) return null;
+    return Object.freeze({
+      noteId: hydratedNoteId,
+      generation: nextRouteRequestGeneration.generation,
+      hydrationEpoch: successfulHydrationEpoch,
+    });
+  }, [hydratedNoteId, nextRouteRequestGeneration.generation, noteId, successfulHydrationEpoch]);
+
+  useEffect(() => {
     noteRef.current = note;
   }, [note]);
+
+  useEffect(() => {
+    const activeRoute = {
+      noteId: routeNoteIdRef.current,
+      generation: routeRequestGenerationRef.current,
+    };
+    const latestVisibleOperation = Array.from(
+      outstandingBlockSaveOperationsRef.current.entries(),
+    ).filter(([, operation]) => routeRequestGenerationMatches(activeRoute, {
+      noteId: operation.requestedNoteId,
+      generation: operation.creationGeneration,
+    })).sort(([left], [right]) => right - left)[0];
+    setSavingBlockId(latestVisibleOperation?.[1].blockId || null);
+  }, [nextRouteRequestGeneration.generation, noteId]);
+
+  const setAnnotationTruthsSnapshot = useCallback((nextAnnotations: AnnotationTruthV1[]) => {
+    setAnnotationTruths(nextAnnotations);
+  }, []);
 
   const sourceProjectionPolicy = useMemo(
     () => sourceProjectionPolicyForNote(note),
@@ -379,6 +521,7 @@ export function useNoteCanvasDataAdapter({
     () => [...blocks].sort((a, b) => a.order_index - b.order_index),
     [blocks],
   );
+  const blockEditRecoveryReceipts = listBlockEditRecoveryReceipts(noteId);
 
   const insertTemplateGroups = useMemo(
     () => buildInsertTemplateGroups(templateOptions),
@@ -435,10 +578,13 @@ export function useNoteCanvasDataAdapter({
         persistedNote = stripResponse.data || { ...hydratedNote, metadata: cleanMetadata };
       }
       const noteForState: Note = { ...persistedNote, metadata: cleanMetadata };
+      const hydrationEpoch = successfulHydrationEpochRef.current + 1;
+      successfulHydrationEpochRef.current = hydrationEpoch;
+      setSuccessfulHydrationEpoch(hydrationEpoch);
       noteRef.current = noteForState;
       setNote(noteForState);
       setTitleDraft(noteRes.data.title);
-      setAnnotationTruths(savedAnnotationTruths);
+      setAnnotationTruthsSnapshot(savedAnnotationTruths);
       setContentGroups(savedContentGroups);
       setGroupFolders(savedGroupFolders);
       setPurposeFrames(savedPurposeFrames);
@@ -453,9 +599,38 @@ export function useNoteCanvasDataAdapter({
       setReadingInterpretations(readingInterpretationsFromMetadata(hydratedNote.metadata));
       setAnnotationProposals(annotationProposalsFromMetadata(hydratedNote.metadata));
       setBlocks(hydratedBlocks);
-      setBlockTextDrafts({});
-      setBlockTextFlowDrafts({});
-      setBlockFieldDrafts({});
+      const activeRouteGeneration = routeRequestGenerationRef.current;
+      const draftSnapshot = readBlockDraftSnapshot();
+      const recoveredTextDrafts: Record<string, string> = {};
+      const recoveredTextFlowDrafts: Record<string, TextBlockContentV1> = {};
+      const recoveredFieldDrafts: Record<string, FieldValueRecord> = {};
+      listBlockEditRecoveryReceipts(requestedNoteId).forEach((receipt) => {
+        if (
+          receipt.mountNonce !== blockEditRecoveryMountNonce
+          || receipt.creationGeneration !== activeRouteGeneration
+        ) {
+          const notificationKey = `block-edit-recovery:${receipt.recoveryKey}`;
+          if (!recoveryFailureNotifiedKeysRef.current.has(notificationKey)) {
+            recoveryFailureNotifiedKeysRef.current.add(notificationKey);
+            addToast('info', 'A previous block edit is queued for recovery');
+          }
+          return;
+        }
+        const blockId = receipt.blockId;
+        recoveredTextDrafts[blockId] = Object.prototype.hasOwnProperty.call(
+          draftSnapshot.textDrafts,
+          blockId,
+        )
+          ? draftSnapshot.textDrafts[blockId]
+          : receipt.text;
+        const latestTextFlow = draftSnapshot.textFlowDrafts[blockId] || receipt.textFlow;
+        if (latestTextFlow) recoveredTextFlowDrafts[blockId] = latestTextFlow;
+        const latestFields = draftSnapshot.fieldDrafts[blockId] || receipt.fieldValues;
+        if (latestFields) recoveredFieldDrafts[blockId] = latestFields;
+      });
+      setBlockTextDrafts(recoveredTextDrafts);
+      setBlockTextFlowDrafts(recoveredTextFlowDrafts);
+      setBlockFieldDrafts(recoveredFieldDrafts);
       onNoteLoaded();
     } catch (err) {
       if (!requestIsCurrent()) return;
@@ -465,7 +640,15 @@ export function useNoteCanvasDataAdapter({
     } finally {
       if (requestIsCurrent()) setLoading(false);
     }
-  }, [noteId, addToast, navigate, onNoteLoaded]);
+  }, [
+    noteId,
+    addToast,
+    blockEditRecoveryMountNonce,
+    navigate,
+    onNoteLoaded,
+    readBlockDraftSnapshot,
+    setAnnotationTruthsSnapshot,
+  ]);
 
   useEffect(() => {
     fetchNote();
@@ -521,27 +704,126 @@ export function useNoteCanvasDataAdapter({
   }, [note, titleDraft, addToast, allowSourceContentMutation]);
 
   const saveAnnotationTruths = useCallback(async (nextAnnotations: AnnotationTruthV1[]) => {
-    const currentNote = noteRef.current || note;
-    if (!currentNote) return;
-    const previousAnnotations = annotationTruths;
-    const saveGeneration = annotationSaveGenerationRef.current + 1;
-    annotationSaveGenerationRef.current = saveGeneration;
-    setAnnotationTruths(nextAnnotations);
-    try {
-      if (annotationSaveGenerationRef.current !== saveGeneration) return;
-      const savedAnnotations = await saveAnnotationTruthsForNote({
-        noteId: currentNote.id,
-        annotations: nextAnnotations,
+    const currentNote = note;
+    const receipt = annotationSaveRouteReceipt;
+    if (!currentNote || !receipt) {
+      console.warn('Rejected stale annotation save receipt:', {
+        noteId: currentNote?.id || null,
+        generation: null,
+        phase: 'enqueue',
+        reason: 'route_receipt_unavailable',
       });
-      if (annotationSaveGenerationRef.current !== saveGeneration) return;
-      setAnnotationTruths(savedAnnotations);
-    } catch (err) {
-      console.error('Failed to save annotations:', err);
-      addToast('error', 'Failed to save annotation');
-      if (annotationSaveGenerationRef.current !== saveGeneration) return;
-      setAnnotationTruths(previousAnnotations);
+      return;
     }
-  }, [addToast, annotationTruths, note]);
+    const requestIsCurrent = () => (
+      routeRequestGenerationMatches(
+        { noteId: routeNoteIdRef.current, generation: routeRequestGenerationRef.current },
+        receipt,
+      )
+      && noteRef.current?.id === receipt.noteId
+      && successfulHydrationEpochRef.current === receipt.hydrationEpoch
+    );
+    const rejectStaleReceipt = (phase: AnnotationSaveRejectPhase): boolean => {
+      if (requestIsCurrent()) return false;
+      console.warn('Rejected stale annotation save receipt:', {
+        noteId: receipt.noteId,
+        generation: receipt.generation,
+        hydrationEpoch: receipt.hydrationEpoch,
+        phase,
+        reason: 'route_receipt_stale',
+        activeNoteId: routeNoteIdRef.current,
+        activeGeneration: routeRequestGenerationRef.current,
+        activeHydrationEpoch: successfulHydrationEpochRef.current,
+      });
+      return true;
+    };
+    if (rejectStaleReceipt('enqueue')) return;
+    const responseSequence = annotationSaveResponseSequenceRef.current + 1;
+    annotationSaveResponseSequenceRef.current = responseSequence;
+    setAnnotationTruthsSnapshot(nextAnnotations);
+
+    const setSnapshotIfCurrent = (annotations: AnnotationTruthV1[]) => {
+      if (rejectStaleReceipt('snapshot')) return;
+      if (annotationSaveResponseSequenceRef.current !== responseSequence) {
+        console.warn('Rejected stale annotation save receipt:', {
+          noteId: receipt.noteId,
+          generation: receipt.generation,
+          hydrationEpoch: receipt.hydrationEpoch,
+          phase: 'snapshot',
+          reason: 'snapshot_superseded',
+          responseSequence,
+          activeResponseSequence: annotationSaveResponseSequenceRef.current,
+        });
+        return;
+      }
+      setAnnotationTruthsSnapshot(annotations);
+    };
+
+    const publish = async () => {
+      if (rejectStaleReceipt('publish')) return;
+      try {
+        const savedAnnotations = await saveAnnotationTruthsForNote({
+          noteId: receipt.noteId,
+          annotations: nextAnnotations,
+        });
+        if (rejectStaleReceipt('publish_response')) return;
+        setSnapshotIfCurrent(savedAnnotations);
+      } catch (err) {
+        if (rejectStaleReceipt('publish_error')) return;
+        console.error(
+          'Failed to save annotations; durable outcome is unknown until reconciliation read:',
+          err,
+        );
+        addToast('error', 'Failed to save annotation');
+
+        try {
+          const observedAnnotations = await loadAnnotationTruthsForNote({
+            note: currentNote,
+            importLegacy: false,
+          });
+          if (rejectStaleReceipt('reconciliation_read')) return;
+          if (annotationTruthsDurablyEqual(observedAnnotations, nextAnnotations)) {
+            setSnapshotIfCurrent(observedAnnotations);
+            return;
+          }
+
+          if (rejectStaleReceipt('repair')) return;
+          const repairedAnnotations = await saveAnnotationTruthsForNote({
+            noteId: receipt.noteId,
+            annotations: nextAnnotations,
+          });
+          if (rejectStaleReceipt('repair_response')) return;
+          setSnapshotIfCurrent(repairedAnnotations);
+        } catch (reconciliationError) {
+          if (rejectStaleReceipt('reconciliation_error')) return;
+          console.error(
+            'Failed to reconcile annotations; durable outcome remains unknown:',
+            reconciliationError,
+          );
+          // The active editor's optimistic snapshot remains authoritative. A
+          // rejected request is not evidence that the server did not commit it.
+          setSnapshotIfCurrent(nextAnnotations);
+        }
+      }
+    };
+
+    const tailKey = receipt.noteId;
+    const previousTail = annotationSaveTailsByNoteRef.current.get(tailKey);
+    // The first operation in a receipt bucket starts synchronously. This is
+    // what lets a valid B intent enter PUT while an unrelated A PUT is held.
+    const queuedPublish = previousTail ? previousTail.then(publish, publish) : publish();
+    const settledTail = queuedPublish.then(
+      () => undefined,
+      () => undefined,
+    );
+    annotationSaveTailsByNoteRef.current.set(tailKey, settledTail);
+    void settledTail.then(() => {
+      if (annotationSaveTailsByNoteRef.current.get(tailKey) === settledTail) {
+        annotationSaveTailsByNoteRef.current.delete(tailKey);
+      }
+    });
+    await queuedPublish;
+  }, [addToast, annotationSaveRouteReceipt, note, setAnnotationTruthsSnapshot]);
 
   const saveContentGroups = useCallback(async (nextGroups: ContentGroupV1[]): Promise<boolean> => {
     const currentNote = noteRef.current || note;
@@ -1044,18 +1326,51 @@ export function useNoteCanvasDataAdapter({
   const saveBlock = useCallback(async (
     block: NoteBlock,
     text: string,
-    options: { silent?: boolean; fieldValues?: FieldValueRecord; textFlow?: TextBlockContentV1 } = {},
-  ): Promise<NoteBlock | null> => {
-    if (!allowSourceContentMutation()) return null;
+    options: {
+      silent?: boolean;
+      fieldValues?: FieldValueRecord;
+      textFlow?: TextBlockContentV1;
+      recoveryKey?: string;
+    } = {},
+  ): Promise<BlockSaveOutcome> => {
+    if (!allowSourceContentMutation()) {
+      return {
+        status: 'rejected',
+        block: null,
+        recoveryReceipt: null,
+        reconciliation: 'not_attempted',
+        durableState: 'not_checked',
+        reason: 'mutation_not_allowed',
+        staleEpoch: false,
+      };
+    }
     const requestedNoteId = noteRef.current?.id || null;
-    if (!requestedNoteId || routeNoteIdRef.current !== requestedNoteId) return null;
+    if (!requestedNoteId || routeNoteIdRef.current !== requestedNoteId) {
+      console.error('Failed to save block: route receipt is unavailable');
+      addToast('error', 'Failed to save block');
+      return {
+        status: 'rejected',
+        block: null,
+        recoveryReceipt: null,
+        reconciliation: 'not_attempted',
+        durableState: 'not_checked',
+        reason: 'route_receipt_unavailable',
+        staleEpoch: false,
+      };
+    }
     const requestGeneration = routeRequestGenerationRef.current;
-    const requestIsCurrent = () => (
-      routeRequestGenerationMatches(
+    const requestHydrationEpoch = successfulHydrationEpochRef.current;
+    const requestRouteIsCurrent = () => (
+      adapterMountActiveRef.current
+      && routeRequestGenerationMatches(
         { noteId: routeNoteIdRef.current, generation: routeRequestGenerationRef.current },
         { noteId: requestedNoteId, generation: requestGeneration },
       )
       && noteRef.current?.id === requestedNoteId
+    );
+    const requestIsCurrent = () => (
+      requestRouteIsCurrent()
+      && successfulHydrationEpochRef.current === requestHydrationEpoch
     );
     const textFlowDraft = options.textFlow || blockTextFlowDrafts[block.id];
     const projectedTextFlow = textFlowDraft
@@ -1066,18 +1381,181 @@ export function useNoteCanvasDataAdapter({
       : text.trimEnd();
     const previousText = textFromContent(block).trimEnd();
     const fieldValues = options.fieldValues || blockFieldDrafts[block.id];
-    if (nextText === previousText && !fieldValues && !textFlowDraft) return block;
+    if (nextText === previousText && !fieldValues && !textFlowDraft) {
+      if (options.recoveryKey) forgetBlockEditRecoveryReceipt(options.recoveryKey);
+      return {
+        status: 'saved',
+        block,
+        recoveryReceipt: null,
+        reconciliation: 'not_needed',
+      };
+    }
+    const kind = presentationKindForBlock(block);
+    const textFlowContent = textFlowDraft
+      ? contentForEditedTextFlowBlock(block, textFlowDraft)
+      : null;
+    const nextContent = textFlowContent
+      ? kind === 'formula' && fieldValues
+        ? contentForEditedBlock({ ...block, content_json: textFlowContent }, nextText, fieldValues)
+        : textFlowContent
+      : contentForEditedBlock(block, nextText, fieldValues);
+    const requestedPlainText = plainTextForBlockContent(kind, nextContent, nextText);
+    const operationSequence = blockSaveOperationSequenceRef.current + 1;
+    blockSaveOperationSequenceRef.current = operationSequence;
+    const recoveryReceipt: BlockEditRecoveryReceipt = Object.freeze({
+      version: 2,
+      kind: 'block_edit_recovery',
+      recoveryKey: createBlockEditRecoveryKey(
+        requestedNoteId,
+        block.id,
+        requestGeneration,
+        operationSequence,
+        blockEditRecoveryMountNonce,
+      ),
+      noteId: requestedNoteId,
+      requestedNoteId,
+      mountNonce: blockEditRecoveryMountNonce,
+      creationGeneration: requestGeneration,
+      operationSequence,
+      blockId: block.id,
+      text: nextText,
+      plainText: requestedPlainText,
+      contentJson: nextContent,
+      textFlow: textFlowDraft,
+      fieldValues,
+      hydrationEpoch: requestHydrationEpoch,
+      queuedAt: new Date().toISOString(),
+    });
+    if (!rememberBlockEditRecoveryReceipt(recoveryReceipt)) {
+      console.error('Failed to save block: recovery receipt is unavailable');
+      addToast('error', 'Failed to preserve the block edit for recovery');
+      return {
+        status: 'rejected',
+        block: null,
+        recoveryReceipt,
+        reconciliation: 'not_attempted',
+        durableState: 'not_checked',
+        reason: 'recovery_receipt_unavailable',
+        staleEpoch: false,
+      };
+    }
+    const operationIsLatest = () => (
+      latestBlockSaveOperationByBlockRef.current.get(block.id) === operationSequence
+    );
+    const hasOtherOutstandingOperationForBlock = () => Array.from(
+      outstandingBlockSaveOperationsRef.current.entries(),
+    ).some(([sequence, operation]) => (
+      sequence !== operationSequence
+      && operation.blockId === block.id
+      && operation.requestedNoteId === requestedNoteId
+    ));
+    const reconcileIssuedSave = async (
+      successKind: 'read_after_outcome' | 'read_after_error',
+    ): Promise<{
+      block: NoteBlock | null;
+      reconciliation: 'read_after_outcome' | 'read_after_error' | 'read_failed';
+      durableState: Exclude<BlockSaveDurableState, 'not_checked'>;
+    }> => {
+      const reconciliationHydrationEpoch = successfulHydrationEpochRef.current;
+      const reconciliationOperationSequence = blockSaveOperationSequenceRef.current;
+      const reconciliationOutcomeVersion = blockSaveOutcomeVersionRef.current;
+      const reconciliationReadIsCurrent = () => (
+        requestRouteIsCurrent()
+        && successfulHydrationEpochRef.current === reconciliationHydrationEpoch
+        && blockSaveOperationSequenceRef.current === reconciliationOperationSequence
+        && blockSaveOutcomeVersionRef.current === reconciliationOutcomeVersion
+      );
+      try {
+        const blocksRes = await api.get(`/notes/${requestedNoteId}/blocks`);
+        const rawBlock = Array.isArray(blocksRes.data)
+          ? blocksRes.data.find((item: { id?: string }) => item?.id === block.id)
+          : null;
+        const observedBlock = rawBlock
+          ? hydrateClientBlock({
+            ...rawBlock,
+            source_references: Array.isArray(rawBlock.source_references)
+              ? rawBlock.source_references
+              : block.source_references,
+          })
+          : null;
+        if (!reconciliationReadIsCurrent()) {
+          return { block: null, reconciliation: 'read_failed', durableState: 'read_failed' };
+        }
+        if (observedBlock && operationIsLatest()) {
+          setBlocks((current) => current.some((item) => item.id === block.id)
+            ? current.map((item) => item.id === block.id ? observedBlock : item)
+            : [...current, observedBlock]);
+        }
+        return {
+          block: observedBlock,
+          reconciliation: successKind,
+          durableState: !observedBlock
+            ? 'missing'
+            : blockMatchesIssuedSave(observedBlock, requestedPlainText, nextContent)
+              ? 'matches_requested'
+              : 'conflict',
+        };
+      } catch (reconciliationError) {
+        console.error('Failed to reconcile block save outcome:', reconciliationError);
+        if (requestRouteIsCurrent()) {
+          addToast('error', 'Block save result could not be reconciled');
+        }
+        return { block: null, reconciliation: 'read_failed', durableState: 'read_failed' };
+      }
+    };
+
+    latestBlockSaveOperationByBlockRef.current.set(block.id, operationSequence);
+    outstandingBlockSaveOperationsRef.current.set(operationSequence, {
+      blockId: block.id,
+      requestedNoteId,
+      creationGeneration: requestGeneration,
+    });
     setSavingBlockId(block.id);
     try {
-      const nextContent = textFlowDraft
-        ? contentForEditedTextFlowBlock(block, textFlowDraft)
-        : contentForEditedBlock(block, nextText, fieldValues);
-      const kind = presentationKindForBlock(block);
       const res = await api.put(`/note-blocks/${block.id}`, {
         content_json: nextContent,
-        plain_text: plainTextForBlockContent(kind, nextContent, nextText),
+        plain_text: requestedPlainText,
       });
-      if (!requestIsCurrent()) return null;
+      blockSaveOutcomeVersionRef.current += 1;
+      if (!requestIsCurrent() || !operationIsLatest()) {
+        const reconciliation = await reconcileIssuedSave('read_after_outcome');
+        if (reconciliation.durableState === 'matches_requested') {
+          forgetBlockEditRecoveryReceipt(recoveryReceipt.recoveryKey);
+          if (options.recoveryKey && options.recoveryKey !== recoveryReceipt.recoveryKey) {
+            forgetBlockEditRecoveryReceipt(options.recoveryKey);
+          }
+        }
+        const reason = !requestRouteIsCurrent()
+          ? 'route_receipt_stale'
+          : successfulHydrationEpochRef.current !== requestHydrationEpoch
+            ? 'hydration_epoch_advanced'
+            : 'superseded_operation';
+        console.warn('Block save completed outside its hydration receipt:', {
+          blockId: block.id,
+          noteId: requestedNoteId,
+          reason,
+          requestHydrationEpoch,
+          activeHydrationEpoch: successfulHydrationEpochRef.current,
+        });
+        if (requestRouteIsCurrent()) {
+          addToast(
+            'info',
+            reconciliation.durableState === 'matches_requested'
+              ? 'Block save crossed a newer state; durable result reconciled'
+              : 'Block save crossed a newer state; pending edit retained',
+          );
+        }
+        return {
+          status: 'stale_epoch',
+          block: reconciliation.block,
+          recoveryReceipt,
+          reconciliation: reconciliation.reconciliation === 'read_after_outcome'
+            ? 'read_after_outcome'
+            : 'read_failed',
+          durableState: reconciliation.durableState,
+          reason,
+        };
+      }
       const updated = hydrateClientBlock({ ...block, ...res.data, source_references: block.source_references });
       setBlocks((current) => current.map((item) => item.id === block.id ? updated : item));
       setBlockTextDrafts((current) => ({ ...current, [block.id]: nextText }));
@@ -1090,16 +1568,131 @@ export function useNoteCanvasDataAdapter({
         return next;
       });
       if (!options.silent) addToast('success', 'Block saved');
-      return updated;
+      if (!hasOtherOutstandingOperationForBlock()) {
+        forgetBlockEditRecoveryReceipt(recoveryReceipt.recoveryKey);
+        if (options.recoveryKey && options.recoveryKey !== recoveryReceipt.recoveryKey) {
+          forgetBlockEditRecoveryReceipt(options.recoveryKey);
+        }
+      }
+      return {
+        status: 'saved',
+        block: updated,
+        recoveryReceipt: null,
+        reconciliation: 'response',
+      };
     } catch (err) {
-      if (!requestIsCurrent()) return null;
+      blockSaveOutcomeVersionRef.current += 1;
       console.error('Failed to save block:', err);
-      addToast('error', 'Failed to save block');
-      return null;
+      if (requestIsCurrent()) addToast('error', 'Failed to save block');
+      const reconciliation = await reconcileIssuedSave('read_after_error');
+      if (
+        reconciliation.durableState === 'matches_requested'
+        && !hasOtherOutstandingOperationForBlock()
+      ) {
+        forgetBlockEditRecoveryReceipt(recoveryReceipt.recoveryKey);
+        if (options.recoveryKey && options.recoveryKey !== recoveryReceipt.recoveryKey) {
+          forgetBlockEditRecoveryReceipt(options.recoveryKey);
+        }
+      }
+      return {
+        status: 'rejected',
+        block: reconciliation.block,
+        recoveryReceipt,
+        reconciliation: reconciliation.reconciliation === 'read_after_error'
+          ? 'read_after_error'
+          : 'read_failed',
+        durableState: reconciliation.durableState,
+        reason: 'request_failed',
+        error: err,
+        staleEpoch: !requestIsCurrent(),
+      };
     } finally {
-      if (requestIsCurrent()) setSavingBlockId(null);
+      outstandingBlockSaveOperationsRef.current.delete(operationSequence);
+      if (requestRouteIsCurrent()) {
+        const activeRoute = {
+          noteId: routeNoteIdRef.current,
+          generation: routeRequestGenerationRef.current,
+        };
+        const latestOutstandingOperation = Array.from(
+          outstandingBlockSaveOperationsRef.current.entries(),
+        ).filter(([, operation]) => routeRequestGenerationMatches(activeRoute, {
+          noteId: operation.requestedNoteId,
+          generation: operation.creationGeneration,
+        })).sort(([left], [right]) => right - left)[0];
+        setSavingBlockId(latestOutstandingOperation?.[1].blockId || null);
+      }
     }
-  }, [addToast, allowSourceContentMutation, blockFieldDrafts, blockTextFlowDrafts]);
+  }, [
+    addToast,
+    allowSourceContentMutation,
+    blockEditRecoveryMountNonce,
+    blockFieldDrafts,
+    blockTextFlowDrafts,
+  ]);
+
+  const applyBlockEditRecovery = useCallback(async (recoveryKey: string): Promise<boolean> => {
+    const activeNoteId = noteRef.current?.id || null;
+    if (!activeNoteId || routeNoteIdRef.current !== activeNoteId) return false;
+    const receipt = listBlockEditRecoveryReceipts(activeNoteId)
+      .find((candidate) => candidate.recoveryKey === recoveryKey);
+    if (!receipt) return false;
+    const block = blocks.find((candidate) => candidate.id === receipt.blockId);
+    if (!block) {
+      addToast('error', 'The block for this recovery receipt is unavailable');
+      return false;
+    }
+    const outcome = await saveBlock(block, receipt.text, {
+      silent: true,
+      fieldValues: receipt.fieldValues,
+      textFlow: receipt.textFlow,
+      recoveryKey: receipt.recoveryKey,
+    });
+    const applied = outcome.status === 'saved'
+      || ('durableState' in outcome && outcome.durableState === 'matches_requested');
+    if (applied && routeNoteIdRef.current === activeNoteId) {
+      addToast('success', 'Recovered block edit applied');
+    }
+    return applied;
+  }, [addToast, blocks, saveBlock]);
+
+  const dismissBlockEditRecovery = useCallback((recoveryKey: string): boolean => {
+    const activeNoteId = noteRef.current?.id || null;
+    if (!activeNoteId || routeNoteIdRef.current !== activeNoteId) return false;
+    const receipt = listBlockEditRecoveryReceipts(activeNoteId)
+      .find((candidate) => candidate.recoveryKey === recoveryKey);
+    if (!receipt || !forgetBlockEditRecoveryReceipt(receipt.recoveryKey)) return false;
+    setBlockTextDrafts((current) => {
+      const next = { ...current };
+      if (next[receipt.blockId] === receipt.text) delete next[receipt.blockId];
+      return next;
+    });
+    setBlockTextFlowDrafts((current) => {
+      const draft = current[receipt.blockId];
+      if (
+        !draft
+        || !receipt.textFlow
+        || JSON.stringify(canonicalJsonValue(draft))
+          !== JSON.stringify(canonicalJsonValue(receipt.textFlow))
+      ) return current;
+      const next = { ...current };
+      delete next[receipt.blockId];
+      return next;
+    });
+    setBlockFieldDrafts((current) => {
+      const draft = current[receipt.blockId];
+      if (
+        !draft
+        || !receipt.fieldValues
+        || JSON.stringify(canonicalJsonValue(draft))
+          !== JSON.stringify(canonicalJsonValue(receipt.fieldValues))
+      ) return current;
+      const next = { ...current };
+      delete next[receipt.blockId];
+      return next;
+    });
+    addToast('info', 'Block edit recovery dismissed');
+    return true;
+  }, [addToast, setBlockFieldDrafts, setBlockTextDrafts, setBlockTextFlowDrafts]);
 
   const applyTemplateToBlock = useCallback(async (
     block: NoteBlock,
@@ -1112,7 +1705,38 @@ export function useNoteCanvasDataAdapter({
     } = {},
   ) => {
     if (!allowSourceContentMutation()) return null;
+    const requestedNoteId = noteRef.current?.id || null;
+    if (!requestedNoteId || routeNoteIdRef.current !== requestedNoteId) {
+      console.error('Failed to convert block: route receipt is unavailable');
+      addToast('error', 'Failed to convert block');
+      return null;
+    }
+    const requestGeneration = routeRequestGenerationRef.current;
+    const requestHydrationEpoch = successfulHydrationEpochRef.current;
+    const requestRouteIsCurrent = () => (
+      adapterMountActiveRef.current
+      && routeRequestGenerationMatches(
+        { noteId: routeNoteIdRef.current, generation: routeRequestGenerationRef.current },
+        { noteId: requestedNoteId, generation: requestGeneration },
+      )
+      && noteRef.current?.id === requestedNoteId
+    );
+    const requestIsCurrent = () => (
+      requestRouteIsCurrent()
+      && successfulHydrationEpochRef.current === requestHydrationEpoch
+    );
     const nextText = text.trimEnd();
+    const recoveryKeysAtCreation = listBlockEditRecoveryReceipts(requestedNoteId)
+      .filter((receipt) => receipt.blockId === block.id)
+      .map((receipt) => receipt.recoveryKey);
+    const operationSequence = blockSaveOperationSequenceRef.current + 1;
+    blockSaveOperationSequenceRef.current = operationSequence;
+    latestBlockSaveOperationByBlockRef.current.set(block.id, operationSequence);
+    outstandingBlockSaveOperationsRef.current.set(operationSequence, {
+      blockId: block.id,
+      requestedNoteId,
+      creationGeneration: requestGeneration,
+    });
     setSavingBlockId(block.id);
     try {
       const metadata = {
@@ -1128,17 +1752,39 @@ export function useNoteCanvasDataAdapter({
         plain_text: plainTextForBlockContent(nextKind, nextContent, nextText),
         metadata,
       });
+      blockSaveOutcomeVersionRef.current += 1;
       const updated = hydrateClientBlock({ ...block, ...res.data, source_references: block.source_references });
+      if (
+        !requestIsCurrent()
+        || latestBlockSaveOperationByBlockRef.current.get(block.id) !== operationSequence
+      ) return null;
       setBlocks((current) => current.map((item) => item.id === block.id ? updated : item));
       setBlockTextDrafts((current) => ({ ...current, [block.id]: nextText }));
+      recoveryKeysAtCreation.forEach((recoveryKey) => {
+        forgetBlockEditRecoveryReceipt(recoveryKey);
+      });
       addToast('success', `Converted to ${template.label}`);
       return updated;
     } catch (err) {
+      blockSaveOutcomeVersionRef.current += 1;
       console.error('Failed to convert block:', err);
-      addToast('error', 'Failed to convert block');
+      if (requestIsCurrent()) addToast('error', 'Failed to convert block');
       return null;
     } finally {
-      setSavingBlockId(null);
+      outstandingBlockSaveOperationsRef.current.delete(operationSequence);
+      if (requestRouteIsCurrent()) {
+        const activeRoute = {
+          noteId: routeNoteIdRef.current,
+          generation: routeRequestGenerationRef.current,
+        };
+        const latestOutstandingOperation = Array.from(
+          outstandingBlockSaveOperationsRef.current.entries(),
+        ).filter(([, operation]) => routeRequestGenerationMatches(activeRoute, {
+          noteId: operation.requestedNoteId,
+          generation: operation.creationGeneration,
+        })).sort(([left], [right]) => right - left)[0];
+        setSavingBlockId(latestOutstandingOperation?.[1].blockId || null);
+      }
     }
   }, [addToast, allowSourceContentMutation]);
 
@@ -1518,6 +2164,7 @@ export function useNoteCanvasDataAdapter({
     setTitleDraft,
     templateWarning,
     savingBlockId,
+    blockEditRecoveryReceipts,
     annotationTruths,
     contentGroups,
     groupFolders,
@@ -1542,6 +2189,7 @@ export function useNoteCanvasDataAdapter({
     setBlockTextFlowDrafts,
     blockFieldDrafts,
     setBlockFieldDrafts,
+    readBlockDraftSnapshot,
     templateOptions,
     defaultTextTemplate,
     insertTemplateOptions,
@@ -1561,6 +2209,8 @@ export function useNoteCanvasDataAdapter({
     discardDraftBlock,
     finalizeDraftBlock,
     saveBlock,
+    applyBlockEditRecovery,
+    dismissBlockEditRecovery,
     saveDraftBlockPlacement,
     applyTemplateToBlock,
     persistBlockLayout,

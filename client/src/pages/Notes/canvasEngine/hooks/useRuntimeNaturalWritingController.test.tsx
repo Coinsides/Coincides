@@ -1,18 +1,25 @@
-import { act, renderHook } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { useState } from 'react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { NOTE_SLASH_COMMANDS } from '../../noteSlashCommands';
 import type { TemplateOption } from '@/services/templateOptions';
 import { loadDraftRecoveryQueue, type DraftBlockCreateResult } from '../draftBlockPersistence';
 import { createPrimaryPageFrame, createViewport } from '../engineModel';
 import { createSurfaceModePolicy } from '../modePolicyService';
 import { getPageFrameContentRect } from '../pageFrameService';
 import type { BlockBoxLayout } from '../runtimeLayout';
-import type { Note, NoteBlock } from '../runtimeDataTypes';
+import type { AnnotationTruthV1, Note, NoteBlock } from '../runtimeDataTypes';
 import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
+import type { TextFocusReceipt } from '../textFocusReceipt';
 import type { PageFrameCollectionModel, PageFrameModel } from '../types';
 import {
   useRuntimeNaturalWritingController,
   type UseRuntimeNaturalWritingControllerOptions,
 } from './useRuntimeNaturalWritingController';
+import { useBlockDraftAuthority } from './useBlockDraftAuthority';
+import { useBlockTextFlowEditController } from './useBlockTextFlowEditController';
+import type { BlockSaveOutcome } from './useNoteCanvasDataAdapter';
+import { useSlashBlockRollbackController } from './useSlashBlockRollbackController';
 
 const defaultTextTemplate: TemplateOption = {
   template_id: 'text',
@@ -52,6 +59,27 @@ function createdBlock(text: string): NoteBlock {
     metadata: {},
     order_index: 0,
     source_references: [],
+  };
+}
+
+function savedBlockOutcome(block: NoteBlock): BlockSaveOutcome {
+  return {
+    status: 'saved',
+    block,
+    recoveryReceipt: null,
+    reconciliation: 'response',
+  };
+}
+
+function rejectedBlockOutcome(): BlockSaveOutcome {
+  return {
+    status: 'rejected',
+    block: null,
+    recoveryReceipt: null,
+    reconciliation: 'not_attempted',
+    durableState: 'not_checked',
+    reason: 'request_failed',
+    staleEpoch: false,
   };
 }
 
@@ -113,7 +141,12 @@ function makeRuntimeOptions(
     note,
     onDraftFocusReceipt: vi.fn(),
     pageOffsetX: 96,
-    saveBlock: vi.fn(async () => null),
+    rollbackBlockSlashSession: ({ fallbackText }) => ({
+      applied: false,
+      text: fallbackText || '',
+      focus: null,
+    }),
+    saveBlock: vi.fn(async () => rejectedBlockOutcome()),
     saveDraftBlockPlacement: vi.fn(async (block) => block),
     setActiveBlockId: vi.fn(),
     setBlockTextDrafts: vi.fn(),
@@ -129,8 +162,376 @@ function makeRuntimeOptions(
   };
 }
 
+function annotationForDurableText(input: {
+  endOffset: number;
+  rangeText: string;
+}): AnnotationTruthV1 {
+  return {
+    id: 'annotation-durable-1',
+    note_id: note.id,
+    canvas_id: 'canvas-1',
+    raw_label: 'durable suffix',
+    ranges: [{
+      id: 'range-durable-1',
+      target_kind: 'text_span',
+      block_id: 'block-1',
+      text_flow_id: 'textflow-block-1',
+      text_unit_id: 'tu-1',
+      start_offset: 6,
+      end_offset: input.endOffset,
+      range_text_cache: input.rangeText,
+    }],
+    parent_annotation_id: null,
+    child_annotation_ids: [],
+    visual_style: { color_token: 'yellow', marker_kind: 'highlight' },
+    created_by: 'human',
+    status: 'active',
+    created_at: '2026-08-20T00:00:00.000Z',
+    updated_at: '2026-08-20T00:00:00.000Z',
+  };
+}
+
+async function renderReconciledSlashRuntime(input: {
+  text: string;
+  caret: number;
+  annotations?: AnnotationTruthV1[];
+}) {
+  const primary = frame('slash-durable-primary', 0, 'primary_page_frame');
+  const durableBlock = createdBlock(input.text);
+  const createBlock = vi.fn<UseRuntimeNaturalWritingControllerOptions['createBlock']>(
+    async (_template, _text, createOptions) => ({
+      block: durableBlock,
+      clientCreateKey: createOptions.clientCreateKey || 'missing-create-key',
+      placementPersisted: true,
+      reused: false,
+    }),
+  );
+  let durableSnapshot = durableBlock;
+  const saveBlock = vi.fn<UseRuntimeNaturalWritingControllerOptions['saveBlock']>(
+    async (block, text, options) => {
+      durableSnapshot = {
+        ...block,
+        content_json: options?.textFlow
+          ? { ...block.content_json, body: text, [TEXT_FLOW_CONTENT_KEY]: options.textFlow }
+          : { ...block.content_json, body: text },
+        plain_text: text,
+      };
+      return savedBlockOutcome(durableSnapshot);
+    },
+  );
+  const annotationSaveCalls: AnnotationTruthV1[][] = [];
+  const setInteractionState = vi.fn();
+  const blockList = document.createElement('div');
+  const draftTextarea = document.createElement('textarea');
+  blockList.append(draftTextarea);
+  document.body.append(blockList);
+  const initialFlow = createTextBlockContentV1(input.text, 'paragraph');
+  const subject = renderHook(
+    ({ focusedTextOwner }: { focusedTextOwner: TextFocusReceipt | null }) => {
+      const [blocks, setBlocks] = useState<NoteBlock[]>([]);
+      const [annotations, setAnnotations] = useState(input.annotations || []);
+      const draftAuthority = useBlockDraftAuthority({
+        textDrafts: { [durableBlock.id]: input.text },
+        textFlowDrafts: { [durableBlock.id]: initialFlow },
+        fieldDrafts: {},
+      });
+      const applyBlockTextFlowEdit = useBlockTextFlowEditController({
+        annotationTruths: annotations,
+        blockTextFlowDrafts: draftAuthority.blockTextFlowDrafts,
+        saveAnnotationTruths: (next) => {
+          annotationSaveCalls.push(next);
+          setAnnotations(next);
+        },
+        setBlockTextFlowDrafts: draftAuthority.setBlockTextFlowDrafts,
+      });
+      const rollbackBlockSlashSession = useSlashBlockRollbackController({
+        applyBlockTextFlowEdit,
+        blocks,
+        readBlockDraftSnapshot: draftAuthority.readBlockDraftSnapshot,
+        saveBlock,
+        setBlockFieldDrafts: draftAuthority.setBlockFieldDrafts,
+        setBlockTextDrafts: draftAuthority.setBlockTextDrafts,
+      });
+      const runtime = useRuntimeNaturalWritingController(makeRuntimeOptions({
+        blockListRef: { current: blockList },
+        blocks,
+        blockTextDrafts: draftAuthority.blockTextDrafts,
+        blockTextFlowDrafts: draftAuthority.blockTextFlowDrafts,
+        createBlock,
+        focusedTextOwner,
+        onDraftPersisted: (persisted) => setBlocks([persisted]),
+        pageFrameCollection: collectionWithFrames([primary]),
+        rollbackBlockSlashSession,
+        saveBlock,
+        selectedPageFrameId: primary.id,
+        setBlockTextDrafts: draftAuthority.setBlockTextDrafts,
+        setBlockTextFlowDrafts: draftAuthority.setBlockTextFlowDrafts,
+        setInteractionState,
+      }));
+      return {
+        ...runtime,
+        annotations,
+        blocks,
+        blockTextDrafts: draftAuthority.blockTextDrafts,
+        blockTextFlowDrafts: draftAuthority.blockTextFlowDrafts,
+        setBlocks,
+      };
+    },
+    { initialProps: { focusedTextOwner: null as TextFocusReceipt | null } },
+  );
+
+  act(() => subject.result.current.activateDraft());
+  const draftOwner = subject.result.current.draftFocusReceipt;
+  subject.rerender({ focusedTextOwner: draftOwner });
+  draftTextarea.value = input.text;
+  draftTextarea.dataset.blockId = draftOwner.blockId;
+  draftTextarea.dataset.textFlowId = draftOwner.textFlowId;
+  draftTextarea.dataset.textUnitId = draftOwner.textUnitId;
+  draftTextarea.setSelectionRange(input.caret, input.caret);
+
+  act(() => {
+    subject.result.current.handleDraftChange(input.text, input.caret, draftTextarea);
+  });
+  await waitFor(() => expect(subject.result.current.draftOwnerReconciliation).toMatchObject({
+    from: draftOwner,
+    to: { blockId: durableBlock.id },
+  }));
+
+  const reconciliation = subject.result.current.draftOwnerReconciliation;
+  if (!reconciliation) throw new Error('durable reconciliation fixture missing');
+  act(() => subject.result.current.handleDurableFocusReceipt(reconciliation.to));
+  subject.rerender({ focusedTextOwner: reconciliation.to });
+  const durableTextarea = document.createElement('textarea');
+  durableTextarea.value = input.text;
+  durableTextarea.dataset.blockId = reconciliation.to.blockId;
+  durableTextarea.dataset.textFlowId = reconciliation.to.textFlowId;
+  durableTextarea.dataset.textUnitId = reconciliation.to.textUnitId;
+  durableTextarea.setSelectionRange(input.caret, input.caret);
+  blockList.append(durableTextarea);
+
+  return {
+    annotationSaveCalls,
+    durableBlock,
+    durableTextarea,
+    readDurableBlock: () => durableSnapshot,
+    reconciliation,
+    saveBlock,
+    setInteractionState,
+    subject,
+  };
+}
+
 describe('useRuntimeNaturalWritingController Page draft authority', () => {
   beforeEach(() => sessionStorage.clear());
+
+  it('corrects a held stale create after draft Slash rollback before durable reconciliation', async () => {
+    const primary = frame('slash-draft-primary', 0, 'primary_page_frame');
+    const createAttempt = deferred<DraftBlockCreateResult | null>();
+    const createBlock = vi.fn<UseRuntimeNaturalWritingControllerOptions['createBlock']>(
+      () => createAttempt.promise,
+    );
+    let durableSnapshot: NoteBlock | null = null;
+    const saveBlock = vi.fn(async (_block: NoteBlock, text: string) => {
+      durableSnapshot = createdBlock(text);
+      return savedBlockOutcome(durableSnapshot);
+    });
+    const onDraftPersisted = vi.fn();
+    const stableOptions = makeRuntimeOptions({
+      createBlock,
+      onDraftPersisted,
+      pageFrameCollection: collectionWithFrames([primary]),
+      saveBlock,
+      selectedPageFrameId: primary.id,
+    });
+    const subject = renderHook(
+      ({ focusedTextOwner }: { focusedTextOwner: TextFocusReceipt | null }) => (
+        useRuntimeNaturalWritingController({
+          ...stableOptions,
+          focusedTextOwner,
+        })
+      ),
+      { initialProps: { focusedTextOwner: null as TextFocusReceipt | null } },
+    );
+
+    act(() => subject.result.current.activateDraft());
+    const draftOwner = subject.result.current.draftFocusReceipt;
+    subject.rerender({ focusedTextOwner: draftOwner });
+
+    const textarea = document.createElement('textarea');
+    textarea.value = 'draft /hea';
+    textarea.dataset.blockId = draftOwner.blockId;
+    textarea.dataset.textFlowId = draftOwner.textFlowId;
+    textarea.dataset.textUnitId = draftOwner.textUnitId;
+    textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+
+    act(() => {
+      subject.result.current.handleDraftChange('draft /hea', textarea.value.length, textarea);
+    });
+
+    expect(subject.result.current.draftText).toBe('draft /hea');
+    expect(subject.result.current.slashTarget).toMatchObject({ target: 'draft' });
+    expect(createBlock).toHaveBeenCalledTimes(1);
+    expect(saveBlock).not.toHaveBeenCalled();
+
+    act(() => {
+      subject.result.current.handleDraftKeyDown({
+        key: 'Escape',
+        shiftKey: false,
+        ctrlKey: false,
+        metaKey: false,
+        defaultPrevented: false,
+        preventDefault() {
+          Object.defineProperty(this, 'defaultPrevented', { value: true, configurable: true });
+        },
+      } as never);
+    });
+
+    expect(subject.result.current.draftText).toBe('draft ');
+    expect(subject.result.current.slashTarget).toBeNull();
+    expect(saveBlock).not.toHaveBeenCalled();
+
+    const staleCreateSnapshot = createdBlock('draft /hea');
+    durableSnapshot = staleCreateSnapshot;
+    const createOptions = createBlock.mock.calls[0]?.[2];
+    expect(createOptions?.clientCreateKey).toEqual(expect.any(String));
+    if (!createOptions?.clientCreateKey) throw new Error('create receipt key was not captured');
+    await act(async () => {
+      createAttempt.resolve({
+        block: staleCreateSnapshot,
+        clientCreateKey: createOptions.clientCreateKey,
+        placementPersisted: true,
+        reused: false,
+      });
+      await createAttempt.promise;
+    });
+
+    await waitFor(() => expect(saveBlock).toHaveBeenCalledTimes(1));
+    expect(saveBlock).toHaveBeenCalledWith(
+      expect.objectContaining({ plain_text: 'draft /hea' }),
+      'draft',
+      expect.objectContaining({
+        silent: true,
+        textFlow: expect.objectContaining({
+          units: [expect.objectContaining({ text: 'draft' })],
+        }),
+      }),
+    );
+    expect(durableSnapshot).toMatchObject({ plain_text: 'draft' });
+    expect(JSON.stringify(durableSnapshot)).not.toContain('/hea');
+    expect(onDraftPersisted).toHaveBeenCalledWith(expect.objectContaining({ plain_text: 'draft' }));
+
+    await waitFor(() => expect(subject.result.current.draftOwnerReconciliation).toMatchObject({
+      from: draftOwner,
+      to: { blockId: staleCreateSnapshot.id },
+    }));
+    const reconciliation = subject.result.current.draftOwnerReconciliation;
+    if (!reconciliation) throw new Error('draft reconciliation fixture missing');
+    act(() => subject.result.current.handleDurableFocusReceipt(reconciliation.to));
+    expect(subject.result.current.draftActive).toBe(false);
+    expect(subject.result.current.draftText).toBe('');
+  });
+
+  it('keeps Escape rollback reachable after draft owner reconciles to a durable block', async () => {
+    const runtime = await renderReconciledSlashRuntime({
+      text: 'draft /hea',
+      caret: 'draft /hea'.length,
+    });
+    let prevented = false;
+    const escapeEvent = {
+      key: 'Escape',
+      shiftKey: false,
+      ctrlKey: false,
+      metaKey: false,
+      defaultPrevented: false,
+      preventDefault() {
+        prevented = true;
+        Object.defineProperty(this, 'defaultPrevented', { value: true, configurable: true });
+      },
+    } as never;
+    act(() => {
+      runtime.subject.result.current.handleBlockKeyDown(
+        runtime.durableBlock,
+        'draft /hea',
+        escapeEvent,
+      );
+    });
+
+    expect(prevented).toBe(true);
+    expect(runtime.subject.result.current.slashTarget).toBeNull();
+    expect(runtime.setInteractionState).toHaveBeenCalledWith(expect.objectContaining({
+      mode: 'openingMenu',
+      target: 'block',
+      blockId: runtime.reconciliation.to.blockId,
+      textFlowId: runtime.reconciliation.to.textFlowId,
+      textUnitId: runtime.reconciliation.to.textUnitId,
+    }));
+    expect(runtime.subject.result.current.blockTextDrafts[runtime.durableBlock.id]).toBe('draft ');
+    expect(
+      runtime.subject.result.current.blockTextFlowDrafts[runtime.durableBlock.id]?.units[0]?.text,
+    ).toBe('draft ');
+    expect(JSON.stringify(runtime.subject.result.current.blockTextFlowDrafts)).not.toContain('/hea');
+    await waitFor(() => expect(runtime.saveBlock).toHaveBeenCalledTimes(1));
+    expect(runtime.saveBlock).toHaveBeenCalledWith(
+      runtime.durableBlock,
+      'draft ',
+      expect.objectContaining({
+        silent: true,
+        textFlow: expect.objectContaining({
+          units: [expect.objectContaining({ text: 'draft ' })],
+        }),
+      }),
+    );
+    expect(runtime.readDurableBlock().plain_text).toBe('draft ');
+    expect(JSON.stringify(runtime.readDurableBlock())).not.toContain('/hea');
+  });
+
+  it.each([
+    ['disabled', 'inline-formula', false],
+    ['annotation', 'definition', false],
+    ['missing template', 'formula', false],
+    ['missing block', 'heading', true],
+  ] as const)(
+    'keeps reconciled %s rollback on the durable TextFlow and annotation inverse',
+    async (_label, commandId, removeBlock) => {
+      const runtime = await renderReconciledSlashRuntime({
+        text: 'draft /heabeta',
+        caret: 'draft /hea'.length,
+        annotations: [annotationForDurableText({ endOffset: 14, rangeText: '/heabeta' })],
+      });
+      const command = NOTE_SLASH_COMMANDS.find((candidate) => candidate.id === commandId);
+      if (!command) throw new Error(`${commandId} Slash command fixture missing`);
+      if (removeBlock) {
+        act(() => runtime.subject.result.current.setBlocks([]));
+      }
+
+      await act(async () => {
+        await runtime.subject.result.current.handleSelectSlashCommand(command);
+      });
+
+      expect(runtime.subject.result.current.slashTarget).toBeNull();
+      expect(runtime.subject.result.current.blockTextDrafts[runtime.durableBlock.id]).toBe('draft beta');
+      expect(
+        runtime.subject.result.current.blockTextFlowDrafts[runtime.durableBlock.id]?.units[0]?.text,
+      ).toBe('draft beta');
+      expect(runtime.subject.result.current.annotations[0]?.ranges[0]).toMatchObject({
+        block_id: runtime.reconciliation.to.blockId,
+        text_flow_id: runtime.reconciliation.to.textFlowId,
+        text_unit_id: runtime.reconciliation.to.textUnitId,
+        start_offset: 6,
+        end_offset: 10,
+        range_text_cache: 'beta',
+      });
+      expect(runtime.annotationSaveCalls).toHaveLength(1);
+      expect(JSON.stringify(runtime.subject.result.current.blockTextFlowDrafts)).not.toContain('/hea');
+      if (removeBlock) {
+        expect(runtime.saveBlock).not.toHaveBeenCalled();
+      } else {
+        await waitFor(() => expect(runtime.saveBlock).toHaveBeenCalledTimes(1));
+        expect(runtime.readDurableBlock().plain_text).toBe('draft beta');
+        expect(JSON.stringify(runtime.readDurableBlock())).not.toContain('/hea');
+      }
+    },
+  );
 
   it('captures visible primary authority despite stale Canvas selection and keeps it across note switch', async () => {
     const primary = frame('visible-primary', 0, 'primary_page_frame');
@@ -305,7 +706,7 @@ describe('useRuntimeNaturalWritingController Page draft authority', () => {
     const frameB = frame('target-frame-b', frameA.height + 80, 'secondary_page_frame');
     const createBlock = vi.fn(async () => null);
     const finalizeDraftBlock = vi.fn(async () => false);
-    const saveBlock = vi.fn(async () => null);
+    const saveBlock = vi.fn(async () => rejectedBlockOutcome());
     const saveDraftBlockPlacement = vi.fn(async (block: NoteBlock) => block);
     const subject = renderHook(() => useRuntimeNaturalWritingController(makeRuntimeOptions({
       createBlock,

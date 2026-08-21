@@ -21,7 +21,14 @@ export type UseNoteCanvasLayerPropsInput =
   Omit<NoteChromeLayerProps, 'note' | 'onAddFavorite' | 'onBackProject'>
   & Omit<NoteFloatingPanelLayerProps, 'onCloseSourceJump' | 'onFocusBlock'>
   & Omit<NoteWritingSurfaceLayerProps, 'onFocusBlock' | 'onRequestFocusBlock' | 'noteId' | 'projectId'>
-  & Pick<NoteRuntimeDocumentLayerProps, 'onSurfacePointerDown' | 'templateWarning'>
+  & Pick<
+    NoteRuntimeDocumentLayerProps,
+    | 'blockEditRecoveryReceipts'
+    | 'onApplyBlockEditRecovery'
+    | 'onDismissBlockEditRecovery'
+    | 'onSurfacePointerDown'
+    | 'templateWarning'
+  >
   & {
     note: Note | null;
     onFloatingPanelFocusBlock: NoteFloatingPanelLayerProps['onFocusBlock'];
@@ -190,6 +197,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     onBlockListMouseDown: input.onBlockListMouseDown,
     onBlockTextChange: input.onBlockTextChange,
     onBlockTextFlowChange: input.onBlockTextFlowChange,
+    onApplyBlockTextFlowEdit: input.onApplyBlockTextFlowEdit,
     onClearSlashTarget: input.onClearSlashTarget,
     onCreatePageFrame: input.onCreatePageFrame,
     onCreatePageStack: input.onCreatePageStack,
@@ -233,7 +241,10 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
   return {
     chromeProps,
     documentLayerProps: {
+      blockEditRecoveryReceipts: input.blockEditRecoveryReceipts,
       floatingPanelProps,
+      onApplyBlockEditRecovery: input.onApplyBlockEditRecovery,
+      onDismissBlockEditRecovery: input.onDismissBlockEditRecovery,
       onSurfacePointerDown: input.onSurfacePointerDown,
       surfaceMode: input.surfaceMode,
       templateWarning: input.templateWarning,

@@ -18,6 +18,7 @@ import {
 import { resizeTextareaToContent } from '../measurementService';
 import { getTooltipAnchor } from '../overlayService';
 import { FloatingOverlayLayer } from '../layers/FloatingOverlayLayer';
+import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import styles from '../../NoteDetail.module.css';
 
 interface FormulaBlockProjectionProps {
@@ -32,7 +33,7 @@ interface FormulaBlockProjectionProps {
   onFocused: () => void;
   onTextChange: (value: string, caret: number, anchorElement?: HTMLElement | null) => void;
   onFieldDraftChange: (fieldValues: FieldValueRecord) => void;
-  onSave: (silent?: boolean, fieldValues?: FieldValueRecord) => void;
+  onSave: (silent?: boolean, fieldValues?: FieldValueRecord) => Promise<BlockSaveOutcome>;
   onKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
 }
 
@@ -89,7 +90,7 @@ export function FormulaBlockProjection({
     onFieldDraftChange(nextFields);
   };
 
-  const saveNormalizedDraft = () => {
+  const saveNormalizedDraft = async () => {
     const normalizedFields = {
       ...latestFieldsRef.current,
       latex_input: normalizeFormulaLatexInput(latestFieldsRef.current.latex_input),
@@ -97,7 +98,8 @@ export function FormulaBlockProjection({
     latestFieldsRef.current = normalizedFields;
     onTextChange(normalizedFields.latex_input, normalizedFields.latex_input.length);
     onFieldDraftChange(normalizedFields);
-    onSave(true, normalizedFields);
+    const outcome = await onSave(true, normalizedFields);
+    if (outcome.status !== 'saved') return;
   };
 
   const handlePaste = (event: ClipboardEvent<HTMLTextAreaElement>) => {

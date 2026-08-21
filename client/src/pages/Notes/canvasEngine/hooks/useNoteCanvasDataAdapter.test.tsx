@@ -2,13 +2,18 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { Note, NoteBlock } from '../runtimeDataTypes';
+import type { AnnotationTruthV1, Note, NoteBlock } from '../runtimeDataTypes';
 import {
   DRAFT_RECOVERY_STORAGE_KEY_V1,
   DRAFT_RECOVERY_STORAGE_KEY_V2,
+  createBlockEditRecoveryKey,
 } from '../draftBlockPersistence';
+import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
 import { useDraftBlockController } from './useDraftBlockController';
-import { useNoteCanvasDataAdapter } from './useNoteCanvasDataAdapter';
+import {
+  useNoteCanvasDataAdapter,
+  type BlockSaveOutcome,
+} from './useNoteCanvasDataAdapter';
 
 const mocks = vi.hoisted(() => ({
   addToast: vi.fn(),
@@ -83,6 +88,63 @@ const recoveryTemplate = {
 };
 
 let canvasPersistenceResponse: Record<string, unknown> = {};
+let durableAnnotationTruths: AnnotationTruthV1[] = [];
+
+function deferred<T>() {
+  let resolve!: (value: T | PromiseLike<T>) => void;
+  let reject!: (reason?: unknown) => void;
+  const promise = new Promise<T>((complete, fail) => {
+    resolve = complete;
+    reject = fail;
+  });
+  return { promise, resolve, reject };
+}
+
+function annotationWithOffsets(
+  noteId: string,
+  start: number,
+  end: number,
+  cache: string,
+): AnnotationTruthV1 {
+  return {
+    id: `annotation-${noteId}`,
+    note_id: noteId,
+    canvas_id: `canvas-${noteId}`,
+    raw_label: 'beta',
+    ranges: [{
+      id: `range-${noteId}`,
+      target_kind: 'text_span',
+      block_id: 'block-1',
+      text_flow_id: 'textflow-block-1',
+      text_unit_id: 'tu-1',
+      start_offset: start,
+      end_offset: end,
+      range_text_cache: cache,
+    }],
+    parent_annotation_id: null,
+    child_annotation_ids: [],
+    visual_style: { color_token: 'yellow', marker_kind: 'highlight' },
+    created_by: 'human',
+    status: 'active',
+    created_at: '2026-08-20T00:00:00.000Z',
+    updated_at: '2026-08-20T00:00:00.000Z',
+  };
+}
+
+function asServerHydratedAnnotations(annotations: AnnotationTruthV1[]): AnnotationTruthV1[] {
+  return annotations.map((annotation) => ({
+    ...annotation,
+    metadata: annotation.metadata || {},
+    ranges: annotation.ranges.map((range) => ({
+      ...range,
+      metadata: {
+        ...(range.metadata || {}),
+        anchor_status: 'pending',
+        anchor_reason: 'block_not_active',
+      },
+    })),
+  }));
+}
 
 function contradictoryCrossingReceipt(version: 1 | 2, key: string) {
   return {
@@ -185,20 +247,25 @@ function serverBlock(text: string, reused: boolean, clientCreateKey = 'retry-key
 
 describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
   let consoleError: ReturnType<typeof vi.spyOn>;
+  let consoleWarn: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     sessionStorage.clear();
     vi.clearAllMocks();
     canvasPersistenceResponse = {};
+    durableAnnotationTruths = [];
     consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     mocks.get.mockImplementation(async (url: string) => {
       if (url === `/notes/${note.id}`) return { data: note };
       if (url === `/notes/${note.id}/blocks`) return { data: [] };
       if (url === `/canvas-objects/by-note/${note.id}`) return { data: canvasPersistenceResponse };
+      if (url === `/annotation-truths/by-note/${note.id}`) {
+        return { data: durableAnnotationTruths };
+      }
       if (
         url === '/content-groups'
         || url === '/group-folders'
-        || url === `/annotation-truths/by-note/${note.id}`
         || url === `/purposes/by-note/${note.id}`
         || url === '/templates'
       ) return { data: [] };
@@ -206,7 +273,1557 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     });
   });
 
-  afterEach(() => consoleError.mockRestore());
+  afterEach(() => {
+    consoleError.mockRestore();
+    consoleWarn.mockRestore();
+  });
+
+  it('reconciles every annotation save after a pre-commit rejection', async () => {
+    const forward = annotationWithOffsets(note.id, 10, 14, 'beta');
+    const inverse = annotationWithOffsets(note.id, 6, 10, 'beta');
+    durableAnnotationTruths = [forward];
+    let annotationPutCount = 0;
+    mocks.put.mockImplementation(async (url: string, payload: { annotations?: AnnotationTruthV1[] }) => {
+      if (url !== `/annotation-truths/by-note/${note.id}`) throw new Error(`Unexpected PUT ${url}`);
+      annotationPutCount += 1;
+      if (annotationPutCount === 1) throw new Error('rejected before commit');
+      durableAnnotationTruths = payload.annotations || [];
+      return { data: durableAnnotationTruths };
+    });
+    const subject = renderHook(
+      () => useNoteCanvasDataAdapter(stableAdapterOptions),
+      { wrapper },
+    );
+    await waitFor(() => expect(subject.result.current.annotationTruths).toEqual([forward]));
+
+    await act(async () => {
+      await subject.result.current.saveAnnotationTruths([inverse]);
+    });
+
+    expect(annotationPutCount).toBe(2);
+    expect(durableAnnotationTruths).toEqual([inverse]);
+    expect(subject.result.current.annotationTruths).toEqual([inverse]);
+    expect(mocks.get.mock.calls.filter(([url]) => (
+      url === `/annotation-truths/by-note/${note.id}`
+    ))).toHaveLength(2);
+    expect(mocks.addToast).toHaveBeenCalledWith('error', 'Failed to save annotation');
+  });
+
+  it('does not duplicate a generic annotation PUT after server commit and response loss', async () => {
+    const forward = annotationWithOffsets(note.id, 10, 14, 'beta');
+    const inverse = annotationWithOffsets(note.id, 6, 10, 'beta');
+    durableAnnotationTruths = [forward];
+    let annotationPutCount = 0;
+    mocks.put.mockImplementation(async (url: string, payload: { annotations?: AnnotationTruthV1[] }) => {
+      if (url !== `/annotation-truths/by-note/${note.id}`) throw new Error(`Unexpected PUT ${url}`);
+      annotationPutCount += 1;
+      durableAnnotationTruths = asServerHydratedAnnotations(payload.annotations || []);
+      throw new Error('response lost after commit');
+    });
+    const subject = renderHook(
+      () => useNoteCanvasDataAdapter(stableAdapterOptions),
+      { wrapper },
+    );
+    await waitFor(() => expect(subject.result.current.annotationTruths).toEqual([forward]));
+
+    await act(async () => {
+      await subject.result.current.saveAnnotationTruths([inverse]);
+    });
+
+    expect(annotationPutCount).toBe(1);
+    expect(durableAnnotationTruths[0]?.ranges[0]).toMatchObject({ start_offset: 6, end_offset: 10 });
+    expect(subject.result.current.annotationTruths[0]?.ranges[0]).toMatchObject({
+      start_offset: 6,
+      end_offset: 10,
+    });
+    expect(mocks.get.mock.calls.filter(([url]) => (
+      url === `/annotation-truths/by-note/${note.id}`
+    ))).toHaveLength(2);
+  });
+
+  it('does not publish or hydrate stale note A annotations after routing to note B', async () => {
+    const noteB: Note = { ...note, id: 'note-2', title: 'Second note' };
+    const initialA = annotationWithOffsets(note.id, 0, 4, 'alpha');
+    const firstA = annotationWithOffsets(note.id, 1, 5, 'lpha');
+    const queuedA = annotationWithOffsets(note.id, 2, 6, 'pha');
+    const staleCallbackA = annotationWithOffsets(note.id, 3, 7, 'ha');
+    const initialB = annotationWithOffsets(noteB.id, 8, 12, 'beta');
+    const heldFirstPut = deferred<{ data: AnnotationTruthV1[] }>();
+    const heldNoteB = deferred<{ data: Note }>();
+    const annotationPutPayloads: Array<{ url: string; annotations: AnnotationTruthV1[] }> = [];
+    const durableByNote = new Map<string, AnnotationTruthV1[]>([
+      [note.id, [initialA]],
+      [noteB.id, [initialB]],
+    ]);
+    mocks.get.mockImplementation(async (url: string) => {
+      if (url === `/notes/${note.id}`) return { data: note };
+      if (url === `/notes/${noteB.id}`) return heldNoteB.promise;
+      if (url === `/notes/${note.id}/blocks` || url === `/notes/${noteB.id}/blocks`) return { data: [] };
+      if (url === `/canvas-objects/by-note/${note.id}` || url === `/canvas-objects/by-note/${noteB.id}`) {
+        return { data: {} };
+      }
+      if (url === `/annotation-truths/by-note/${note.id}`) return { data: durableByNote.get(note.id) };
+      if (url === `/annotation-truths/by-note/${noteB.id}`) return { data: durableByNote.get(noteB.id) };
+      if (
+        url === '/content-groups'
+        || url === '/group-folders'
+        || url === `/purposes/by-note/${note.id}`
+        || url === `/purposes/by-note/${noteB.id}`
+        || url === '/templates'
+      ) return { data: [] };
+      throw new Error(`Unexpected GET ${url}`);
+    });
+    mocks.put.mockImplementation(async (url: string, payload: { annotations?: AnnotationTruthV1[] }) => {
+      const annotations = payload.annotations || [];
+      annotationPutPayloads.push({ url, annotations });
+      if (url !== `/annotation-truths/by-note/${note.id}`) throw new Error(`Unexpected PUT ${url}`);
+      if (annotationPutPayloads.length === 1) return heldFirstPut.promise;
+      durableByNote.set(note.id, annotations);
+      return { data: annotations };
+    });
+    const subject = renderHook(
+      ({ noteId }) => useNoteCanvasDataAdapter({ ...stableAdapterOptions, noteId }),
+      { initialProps: { noteId: note.id }, wrapper },
+    );
+    await waitFor(() => expect(subject.result.current.annotationTruths).toEqual([initialA]));
+    const capturedSaveA = subject.result.current.saveAnnotationTruths;
+
+    let firstSave!: Promise<void>;
+    let queuedSave!: Promise<void>;
+    act(() => {
+      firstSave = capturedSaveA([firstA]);
+      queuedSave = capturedSaveA([queuedA]);
+    });
+    await waitFor(() => expect(annotationPutPayloads).toHaveLength(1));
+
+    subject.rerender({ noteId: noteB.id });
+    await act(async () => {
+      await capturedSaveA([staleCallbackA]);
+    });
+    expect(subject.result.current.annotationTruths).toEqual([queuedA]);
+
+    await act(async () => {
+      heldFirstPut.resolve({ data: asServerHydratedAnnotations([firstA]) });
+      await Promise.all([firstSave, queuedSave]);
+    });
+    expect(annotationPutPayloads).toHaveLength(1);
+    expect(subject.result.current.annotationTruths).toEqual([queuedA]);
+
+    await act(async () => {
+      heldNoteB.resolve({ data: noteB });
+    });
+    await waitFor(() => expect(subject.result.current.note?.id).toBe(noteB.id));
+    expect(subject.result.current.annotationTruths).toEqual([initialB]);
+
+    await act(async () => {
+      await capturedSaveA([]);
+    });
+    expect(subject.result.current.annotationTruths).toEqual([initialB]);
+    expect(annotationPutPayloads).toEqual([{ url: `/annotation-truths/by-note/${note.id}`, annotations: [firstA] }]);
+    expect(consoleWarn).toHaveBeenCalledWith(
+      'Rejected stale annotation save receipt:',
+      expect.objectContaining({
+        noteId: note.id,
+        phase: expect.any(String),
+        reason: 'route_receipt_stale',
+      }),
+    );
+  });
+
+  it('keeps an old A callback bound to its creation receipt across A to B to A', async () => {
+    const noteB: Note = { ...note, id: 'note-2', title: 'Second note' };
+    const initialA = annotationWithOffsets(note.id, 0, 4, 'alpha');
+    const initialB = annotationWithOffsets(noteB.id, 8, 12, 'beta');
+    const newerA = annotationWithOffsets(note.id, 4, 8, 'newer');
+    const staleA = annotationWithOffsets(note.id, 1, 5, 'stale');
+    const rangeBlock = serverBlock('alpha', false, 'range-edit-key');
+    const heldBlockSave = deferred<{ data: NoteBlock }>();
+    let blockPutCount = 0;
+    const durableByNote = new Map<string, AnnotationTruthV1[]>([
+      [note.id, [initialA]],
+      [noteB.id, [initialB]],
+    ]);
+    const annotationPutPayloads: Array<{ url: string; annotations: AnnotationTruthV1[] }> = [];
+    mocks.get.mockImplementation(async (url: string) => {
+      const requestedNote = url === `/notes/${note.id}`
+        ? note
+        : url === `/notes/${noteB.id}`
+          ? noteB
+          : null;
+      if (requestedNote) return { data: requestedNote };
+      if (url === `/notes/${note.id}/blocks` || url === `/notes/${noteB.id}/blocks`) return { data: [] };
+      if (url === `/canvas-objects/by-note/${note.id}` || url === `/canvas-objects/by-note/${noteB.id}`) {
+        return { data: {} };
+      }
+      if (url === `/annotation-truths/by-note/${note.id}`) return { data: durableByNote.get(note.id) };
+      if (url === `/annotation-truths/by-note/${noteB.id}`) return { data: durableByNote.get(noteB.id) };
+      if (
+        url === '/content-groups'
+        || url === '/group-folders'
+        || url === `/purposes/by-note/${note.id}`
+        || url === `/purposes/by-note/${noteB.id}`
+        || url === '/templates'
+      ) return { data: [] };
+      throw new Error(`Unexpected GET ${url}`);
+    });
+    mocks.put.mockImplementation(async (url: string, payload: { annotations?: AnnotationTruthV1[] }) => {
+      if (url === `/note-blocks/${rangeBlock.id}`) {
+        blockPutCount += 1;
+        return heldBlockSave.promise;
+      }
+      const annotations = payload.annotations || [];
+      annotationPutPayloads.push({ url, annotations });
+      const targetNoteId = url === `/annotation-truths/by-note/${note.id}`
+        ? note.id
+        : url === `/annotation-truths/by-note/${noteB.id}`
+          ? noteB.id
+          : null;
+      if (!targetNoteId) throw new Error(`Unexpected PUT ${url}`);
+      durableByNote.set(targetNoteId, annotations);
+      return { data: annotations };
+    });
+    const subject = renderHook(
+      ({ noteId }) => useNoteCanvasDataAdapter({ ...stableAdapterOptions, noteId }),
+      { initialProps: { noteId: note.id }, wrapper },
+    );
+    await waitFor(() => expect(subject.result.current.annotationTruths).toEqual([initialA]));
+    const capturedSaveA = subject.result.current.saveAnnotationTruths;
+    let rangeBlockSave!: Promise<BlockSaveOutcome>;
+    act(() => {
+      rangeBlockSave = subject.result.current.saveBlock(rangeBlock, 'stale body');
+    });
+    await waitFor(() => expect(blockPutCount).toBe(1));
+
+    subject.rerender({ noteId: noteB.id });
+    await waitFor(() => expect(subject.result.current.annotationTruths).toEqual([initialB]));
+
+    durableByNote.set(note.id, [newerA]);
+    subject.rerender({ noteId: note.id });
+    await waitFor(() => expect(subject.result.current.annotationTruths).toEqual([newerA]));
+
+    let blockSaveReceipt!: BlockSaveOutcome;
+    await act(async () => {
+      heldBlockSave.resolve({ data: serverBlock('stale body', false, 'range-edit-key') });
+      blockSaveReceipt = await rangeBlockSave;
+      // The real range-edit carrier now stops on this stale outcome. Replay
+      // the captured callback anyway to keep the creation-bound receipt as a
+      // second, independently tested defense.
+      await capturedSaveA([staleA]);
+    });
+
+    expect(blockSaveReceipt).toMatchObject({
+      status: 'stale_epoch',
+      reason: 'route_receipt_stale',
+      reconciliation: 'read_failed',
+      durableState: 'read_failed',
+      recoveryReceipt: { text: 'stale body' },
+    });
+    expect(mocks.addToast).not.toHaveBeenCalledWith(
+      'info',
+      'A previous-visit block save was reconciled; review current content',
+    );
+    expect(annotationPutPayloads).toEqual([]);
+    expect(durableByNote.get(note.id)).toEqual([newerA]);
+    expect(subject.result.current.annotationTruths).toEqual([newerA]);
+    expect(consoleWarn).toHaveBeenCalledWith(
+      'Rejected stale annotation save receipt:',
+      expect.objectContaining({
+        noteId: note.id,
+        phase: 'enqueue',
+        reason: 'route_receipt_stale',
+      }),
+    );
+  });
+
+  it('keeps a rejected old A edit recoverable after A to B to A', async () => {
+    const noteB: Note = { ...note, id: 'note-2', title: 'Second note' };
+    const durableA = serverBlock('server old', false, 'route-reject-key');
+    const heldSave = deferred<{ data: NoteBlock }>();
+    mocks.get.mockImplementation(async (url: string) => {
+      if (url === `/notes/${note.id}`) return { data: note };
+      if (url === `/notes/${noteB.id}`) return { data: noteB };
+      if (url === `/notes/${note.id}/blocks`) return { data: [durableA] };
+      if (url === `/notes/${noteB.id}/blocks`) return { data: [] };
+      if (url === `/canvas-objects/by-note/${note.id}` || url === `/canvas-objects/by-note/${noteB.id}`) {
+        return { data: {} };
+      }
+      if (url === `/annotation-truths/by-note/${note.id}` || url === `/annotation-truths/by-note/${noteB.id}`) {
+        return { data: [] };
+      }
+      if (
+        url === '/content-groups'
+        || url === '/group-folders'
+        || url === `/purposes/by-note/${note.id}`
+        || url === `/purposes/by-note/${noteB.id}`
+        || url === '/templates'
+      ) return { data: [] };
+      throw new Error(`Unexpected GET ${url}`);
+    });
+    mocks.put.mockImplementation(async (url: string) => {
+      if (url !== `/note-blocks/${durableA.id}`) throw new Error(`Unexpected PUT ${url}`);
+      return heldSave.promise;
+    });
+    const subject = renderHook(
+      ({ noteId }) => useNoteCanvasDataAdapter({ ...stableAdapterOptions, noteId }),
+      { initialProps: { noteId: note.id }, wrapper },
+    );
+    await waitFor(() => expect(subject.result.current.blocks[0]?.plain_text).toBe('server old'));
+    act(() => {
+      subject.result.current.setBlockTextDrafts({ [durableA.id]: 'user edit' });
+    });
+    let saveReceipt!: Promise<BlockSaveOutcome>;
+    act(() => {
+      saveReceipt = subject.result.current.saveBlock(durableA, 'user edit');
+    });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
+
+    subject.rerender({ noteId: noteB.id });
+    await waitFor(() => expect(subject.result.current.note?.id).toBe(noteB.id));
+    subject.rerender({ noteId: note.id });
+    await waitFor(() => expect(subject.result.current.note?.id).toBe(note.id));
+    expect(subject.result.current.blocks[0]?.plain_text).toBe('server old');
+
+    let outcome!: BlockSaveOutcome;
+    await act(async () => {
+      heldSave.reject(new Error('pre-commit reject after returning to A'));
+      outcome = await saveReceipt;
+    });
+    expect(outcome).toMatchObject({
+      status: 'rejected',
+      reason: 'request_failed',
+      reconciliation: 'read_failed',
+      durableState: 'read_failed',
+      staleEpoch: true,
+      recoveryReceipt: {
+        requestedNoteId: note.id,
+        creationGeneration: 0,
+        text: 'user edit',
+      },
+    });
+    const userCanRecoverRejectedEdit = (
+      subject.result.current.blockTextDrafts[durableA.id] === 'user edit'
+      || subject.result.current.blocks.some((item) => (
+        item.id === durableA.id && item.plain_text === 'user edit'
+      ))
+      || (sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2) || '').includes('user edit')
+    );
+    expect(userCanRecoverRejectedEdit).toBe(true);
+    const queuedReceipt = subject.result.current.blockEditRecoveryReceipts[0];
+    expect(queuedReceipt).toMatchObject({
+      requestedNoteId: note.id,
+      creationGeneration: 0,
+      text: 'user edit',
+    });
+    act(() => {
+      subject.result.current.setBlockTextDrafts({ [durableA.id]: 'new visit edit' });
+    });
+    act(() => {
+      expect(subject.result.current.dismissBlockEditRecovery(queuedReceipt.recoveryKey)).toBe(true);
+    });
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
+    expect(subject.result.current.blockTextDrafts[durableA.id]).toBe('new visit edit');
+    expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2) || '').not.toContain('user edit');
+  });
+
+  it('reissues a queued edit only when the user explicitly applies its recovery receipt', async () => {
+    let durableBlock = serverBlock('server old', false, 'explicit-recovery-key');
+    let blockPutCount = 0;
+    mocks.get.mockImplementation(async (url: string) => {
+      if (url === `/notes/${note.id}`) return { data: note };
+      if (url === `/notes/${note.id}/blocks`) return { data: [durableBlock] };
+      if (url === `/canvas-objects/by-note/${note.id}`) return { data: {} };
+      if (url === `/annotation-truths/by-note/${note.id}`) return { data: [] };
+      if (
+        url === '/content-groups'
+        || url === '/group-folders'
+        || url === `/purposes/by-note/${note.id}`
+        || url === '/templates'
+      ) return { data: [] };
+      throw new Error(`Unexpected GET ${url}`);
+    });
+    mocks.put.mockImplementation(async (url: string, payload: Record<string, unknown>) => {
+      if (url !== `/note-blocks/${durableBlock.id}`) throw new Error(`Unexpected PUT ${url}`);
+      blockPutCount += 1;
+      if (blockPutCount === 1) throw new Error('pre-commit rejection');
+      durableBlock = {
+        ...serverBlock(payload.plain_text as string, false, 'explicit-recovery-key'),
+        content_json: payload.content_json as Record<string, unknown>,
+        plain_text: payload.plain_text as string,
+      };
+      return { data: durableBlock };
+    });
+    const subject = renderHook(
+      () => useNoteCanvasDataAdapter(stableAdapterOptions),
+      { wrapper },
+    );
+    await waitFor(() => expect(subject.result.current.blocks[0]?.plain_text).toBe('server old'));
+
+    await act(async () => {
+      await subject.result.current.saveBlock(durableBlock, 'user edit');
+    });
+    const queuedReceipt = subject.result.current.blockEditRecoveryReceipts[0];
+    expect(queuedReceipt).toMatchObject({ text: 'user edit' });
+    expect(blockPutCount).toBe(1);
+
+    let applied = false;
+    await act(async () => {
+      applied = await subject.result.current.applyBlockEditRecovery(queuedReceipt.recoveryKey);
+    });
+
+    expect(applied).toBe(true);
+    expect(blockPutCount).toBe(2);
+    expect(subject.result.current.blocks[0]?.plain_text).toBe('user edit');
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
+  });
+
+  it('keeps a remounted save recoverable when the old mount settles before the new save rejects', async () => {
+    let durableBlock = serverBlock('server old', false, 'remount-recovery-key');
+    const heldOldSave = deferred<{ data: NoteBlock }>();
+    const heldNewSave = deferred<{ data: NoteBlock }>();
+    const newMountHydrated = vi.fn();
+    const recoveryHydrated = vi.fn();
+    let blockPutCount = 0;
+    mocks.get.mockImplementation(async (url: string) => {
+      if (url === `/notes/${note.id}`) return { data: note };
+      if (url === `/notes/${note.id}/blocks`) return { data: [durableBlock] };
+      if (url === `/canvas-objects/by-note/${note.id}`) return { data: {} };
+      if (url === `/annotation-truths/by-note/${note.id}`) return { data: [] };
+      if (
+        url === '/content-groups'
+        || url === '/group-folders'
+        || url === `/purposes/by-note/${note.id}`
+        || url === '/templates'
+      ) return { data: [] };
+      throw new Error(`Unexpected GET ${url}`);
+    });
+    mocks.put.mockImplementation(async (url: string) => {
+      if (url !== `/note-blocks/${durableBlock.id}`) throw new Error(`Unexpected PUT ${url}`);
+      blockPutCount += 1;
+      if (blockPutCount === 1) return heldOldSave.promise;
+      if (blockPutCount === 2) return heldNewSave.promise;
+      throw new Error(`Unexpected block PUT ${blockPutCount}`);
+    });
+
+    const oldMount = renderHook(
+      () => useNoteCanvasDataAdapter(stableAdapterOptions),
+      { wrapper },
+    );
+    await waitFor(() => expect(oldMount.result.current.blocks[0]?.plain_text).toBe('server old'));
+    const oldBlock = oldMount.result.current.blocks[0];
+    let oldSave!: Promise<BlockSaveOutcome>;
+    act(() => {
+      oldSave = oldMount.result.current.saveBlock(oldBlock, 'old mount edit');
+    });
+    await waitFor(() => expect(blockPutCount).toBe(1));
+    const oldRecoveryKey = oldMount.result.current.blockEditRecoveryReceipts[0]?.recoveryKey;
+    expect(oldRecoveryKey).toBeTruthy();
+    oldMount.unmount();
+
+    const newMount = renderHook(
+      ({ onNoteLoaded }) => useNoteCanvasDataAdapter({
+        ...stableAdapterOptions,
+        onNoteLoaded,
+      }),
+      { initialProps: { onNoteLoaded: newMountHydrated }, wrapper },
+    );
+    await waitFor(() => expect(newMountHydrated).toHaveBeenCalled());
+    const newBlock = newMount.result.current.blocks[0];
+    let newSave!: Promise<BlockSaveOutcome>;
+    act(() => {
+      newSave = newMount.result.current.saveBlock(newBlock, 'new mount edit');
+    });
+    await waitFor(() => expect(blockPutCount).toBe(2));
+    await waitFor(() => expect(newMount.result.current.blockEditRecoveryReceipts[0]?.text)
+      .toBe('new mount edit'));
+    const newRecoveryKey = newMount.result.current.blockEditRecoveryReceipts[0]?.recoveryKey;
+    const newReceiptBytes = sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2);
+    expect(newRecoveryKey).toBeTruthy();
+    expect(newRecoveryKey).not.toBe(oldRecoveryKey);
+    expect(newReceiptBytes).toContain('new mount edit');
+    const toastCountBeforeOldSettle = mocks.addToast.mock.calls.length;
+
+    let oldOutcome!: BlockSaveOutcome;
+    await act(async () => {
+      durableBlock = serverBlock('old mount edit', false, 'remount-recovery-key');
+      heldOldSave.resolve({ data: durableBlock });
+      oldOutcome = await oldSave;
+    });
+
+    expect(oldOutcome).toMatchObject({
+      status: 'stale_epoch',
+      reason: 'route_receipt_stale',
+      reconciliation: 'read_failed',
+      durableState: 'read_failed',
+    });
+    expect(mocks.addToast).toHaveBeenCalledTimes(toastCountBeforeOldSettle);
+    expect(newMount.result.current.blocks[0]?.plain_text).toBe('server old');
+    expect(newMount.result.current.savingBlockId).toBe(newBlock.id);
+    expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2)).toBe(newReceiptBytes);
+    expect(newMount.result.current.blockEditRecoveryReceipts).toEqual([
+      expect.objectContaining({ recoveryKey: newRecoveryKey, text: 'new mount edit' }),
+    ]);
+
+    let newOutcome!: BlockSaveOutcome;
+    await act(async () => {
+      heldNewSave.reject(new Error('new mount pre-commit rejection'));
+      newOutcome = await newSave;
+    });
+    expect(newOutcome).toMatchObject({
+      status: 'rejected',
+      reason: 'request_failed',
+      recoveryReceipt: { recoveryKey: newRecoveryKey, text: 'new mount edit' },
+    });
+    expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2)).toContain('new mount edit');
+
+    newMount.rerender({ onNoteLoaded: recoveryHydrated });
+    await waitFor(() => expect(recoveryHydrated).toHaveBeenCalled());
+    expect(newMount.result.current.blockTextDrafts[newBlock.id]).toBe('new mount edit');
+    expect(newMount.result.current.blockEditRecoveryReceipts).toEqual([
+      expect.objectContaining({ recoveryKey: newRecoveryKey, text: 'new mount edit' }),
+    ]);
+    expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2)).toContain('new mount edit');
+  });
+
+  it('keeps an old A settlement out of visible B and preserves its edit for return to A', async () => {
+    const noteB: Note = { ...note, id: 'note-2', title: 'Second note' };
+    const durableA = serverBlock('server old', false, 'route-settle-on-b-key');
+    const heldSave = deferred<{ data: NoteBlock }>();
+    mocks.get.mockImplementation(async (url: string) => {
+      if (url === `/notes/${note.id}`) return { data: note };
+      if (url === `/notes/${noteB.id}`) return { data: noteB };
+      if (url === `/notes/${note.id}/blocks`) return { data: [durableA] };
+      if (url === `/notes/${noteB.id}/blocks`) return { data: [] };
+      if (url === `/canvas-objects/by-note/${note.id}` || url === `/canvas-objects/by-note/${noteB.id}`) {
+        return { data: {} };
+      }
+      if (url === `/annotation-truths/by-note/${note.id}` || url === `/annotation-truths/by-note/${noteB.id}`) {
+        return { data: [] };
+      }
+      if (
+        url === '/content-groups'
+        || url === '/group-folders'
+        || url === `/purposes/by-note/${note.id}`
+        || url === `/purposes/by-note/${noteB.id}`
+        || url === '/templates'
+      ) return { data: [] };
+      throw new Error(`Unexpected GET ${url}`);
+    });
+    mocks.put.mockImplementation(async (url: string) => {
+      if (url !== `/note-blocks/${durableA.id}`) throw new Error(`Unexpected PUT ${url}`);
+      return heldSave.promise;
+    });
+    const subject = renderHook(
+      ({ noteId }) => useNoteCanvasDataAdapter({ ...stableAdapterOptions, noteId }),
+      { initialProps: { noteId: note.id }, wrapper },
+    );
+    await waitFor(() => expect(subject.result.current.blocks[0]?.plain_text).toBe('server old'));
+    act(() => {
+      subject.result.current.setBlockTextDrafts({ [durableA.id]: 'user edit' });
+    });
+    let saveReceipt!: Promise<BlockSaveOutcome>;
+    act(() => {
+      saveReceipt = subject.result.current.saveBlock(durableA, 'user edit');
+    });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
+
+    subject.rerender({ noteId: noteB.id });
+    await waitFor(() => expect(subject.result.current.note?.id).toBe(noteB.id));
+    await waitFor(() => expect(subject.result.current.blocks).toEqual([]));
+    const toastCountBeforeOldASettlement = mocks.addToast.mock.calls.length;
+
+    let outcome!: BlockSaveOutcome;
+    await act(async () => {
+      heldSave.reject(new Error('pre-commit reject while B is visible'));
+      outcome = await saveReceipt;
+    });
+    expect(outcome).toMatchObject({
+      status: 'rejected',
+      reason: 'request_failed',
+      reconciliation: 'read_failed',
+      durableState: 'read_failed',
+      staleEpoch: true,
+      recoveryReceipt: { text: 'user edit' },
+    });
+    const visibleBCrossPolluted = subject.result.current.blocks.some((item) => item.id === durableA.id);
+    expect(subject.result.current.blockTextDrafts[durableA.id]).toBeUndefined();
+    expect(subject.result.current.savingBlockId).toBeNull();
+    expect(mocks.addToast).toHaveBeenCalledTimes(toastCountBeforeOldASettlement);
+
+    subject.rerender({ noteId: note.id });
+    await waitFor(() => expect(subject.result.current.note?.id).toBe(note.id));
+    const userCanRecoverOrWasNotified = (
+      subject.result.current.blockTextDrafts[durableA.id] === 'user edit'
+      || subject.result.current.blocks.some((item) => (
+        item.id === durableA.id && item.plain_text === 'user edit'
+      ))
+      || (sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2) || '').includes('user edit')
+      || mocks.addToast.mock.calls.some(([kind]) => kind === 'error' || kind === 'info')
+    );
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([
+      expect.objectContaining({ requestedNoteId: note.id, text: 'user edit' }),
+    ]);
+    expect({ visibleBCrossPolluted, userCanRecoverOrWasNotified }).toEqual({
+      visibleBCrossPolluted: false,
+      userCanRecoverOrWasNotified: true,
+    });
+  });
+
+  it('rejects old annotation and block receipts after a successful same-note hydration', async () => {
+    const initialA = annotationWithOffsets(note.id, 0, 4, 'alpha');
+    const newerA = annotationWithOffsets(note.id, 4, 8, 'newer');
+    const staleA = annotationWithOffsets(note.id, 1, 5, 'stale');
+    const rangeBlock = serverBlock('alpha', false, 'same-note-range-edit-key');
+    const heldBlockSave = deferred<{ data: NoteBlock }>();
+    const firstHydration = vi.fn();
+    const secondHydration = vi.fn();
+    const annotationPutPayloads: AnnotationTruthV1[][] = [];
+    let blockPutCount = 0;
+    durableAnnotationTruths = [initialA];
+    mocks.put.mockImplementation(async (url: string, payload: { annotations?: AnnotationTruthV1[] }) => {
+      if (url === `/note-blocks/${rangeBlock.id}`) {
+        blockPutCount += 1;
+        return heldBlockSave.promise;
+      }
+      if (url !== `/annotation-truths/by-note/${note.id}`) throw new Error(`Unexpected PUT ${url}`);
+      const annotations = payload.annotations || [];
+      annotationPutPayloads.push(annotations);
+      durableAnnotationTruths = annotations;
+      return { data: annotations };
+    });
+    const subject = renderHook(
+      ({ onNoteLoaded }) => useNoteCanvasDataAdapter({
+        ...stableAdapterOptions,
+        onNoteLoaded,
+      }),
+      { initialProps: { onNoteLoaded: firstHydration }, wrapper },
+    );
+    await waitFor(() => expect(subject.result.current.annotationTruths).toEqual([initialA]));
+    expect(firstHydration).toHaveBeenCalled();
+    const capturedSaveA = subject.result.current.saveAnnotationTruths;
+
+    let heldBlockReceipt!: Promise<BlockSaveOutcome>;
+    act(() => {
+      heldBlockReceipt = subject.result.current.saveBlock(rangeBlock, 'stale body');
+    });
+    await waitFor(() => expect(blockPutCount).toBe(1));
+
+    durableAnnotationTruths = [newerA];
+    subject.rerender({ onNoteLoaded: secondHydration });
+    await waitFor(() => expect(subject.result.current.annotationTruths).toEqual([newerA]));
+    expect(secondHydration).toHaveBeenCalled();
+
+    let blockSaveReceipt!: BlockSaveOutcome;
+    await act(async () => {
+      heldBlockSave.resolve({ data: serverBlock('stale body', false, 'same-note-range-edit-key') });
+      blockSaveReceipt = await heldBlockReceipt;
+      await capturedSaveA([staleA]);
+    });
+
+    expect(annotationPutPayloads).toEqual([]);
+    expect(blockSaveReceipt).toMatchObject({
+      status: 'stale_epoch',
+      reason: 'hydration_epoch_advanced',
+      reconciliation: 'read_after_outcome',
+    });
+    expect(durableAnnotationTruths).toEqual([newerA]);
+    expect(subject.result.current.annotationTruths).toEqual([newerA]);
+    expect(consoleWarn).toHaveBeenCalledWith(
+      'Rejected stale annotation save receipt:',
+      expect.objectContaining({
+        noteId: note.id,
+        phase: 'enqueue',
+        reason: 'route_receipt_stale',
+      }),
+    );
+  });
+
+  it('does not silently lose a legitimate block save crossed by same-note hydration', async () => {
+    const serverFlow = createTextBlockContentV1('server old', 'paragraph');
+    const userFlow = createTextBlockContentV1('user edit', 'paragraph');
+    const userFields = {
+      latex_input: 'user edit',
+      formula_name: 'Recovered formula',
+      explanation: 'Keep this companion field',
+    };
+    let durableBlock: NoteBlock = {
+      ...serverBlock('server old', false, 'legitimate-edit-key'),
+      block_type: 'formula',
+      content_json: {
+        body: 'server old',
+        field_values: {
+          latex_input: 'server old',
+          formula_name: 'Server formula',
+          explanation: 'Server explanation',
+        },
+        [TEXT_FLOW_CONTENT_KEY]: serverFlow,
+      },
+    };
+    let rejectHeldBlockSave!: (reason?: unknown) => void;
+    const heldBlockSave = new Promise<{ data: NoteBlock }>((_resolve, reject) => {
+      rejectHeldBlockSave = reject;
+    });
+    const firstHydration = vi.fn();
+    const secondHydration = vi.fn();
+    mocks.get.mockImplementation(async (url: string) => {
+      if (url === `/notes/${note.id}`) return { data: note };
+      if (url === `/notes/${note.id}/blocks`) return { data: [durableBlock] };
+      if (url === `/canvas-objects/by-note/${note.id}`) return { data: {} };
+      if (url === `/annotation-truths/by-note/${note.id}`) return { data: [] };
+      if (
+        url === '/content-groups'
+        || url === '/group-folders'
+        || url === `/purposes/by-note/${note.id}`
+        || url === '/templates'
+      ) return { data: [] };
+      throw new Error(`Unexpected GET ${url}`);
+    });
+    mocks.put.mockImplementation(async (url: string) => {
+      if (url !== `/note-blocks/${durableBlock.id}`) throw new Error(`Unexpected PUT ${url}`);
+      return heldBlockSave;
+    });
+    const subject = renderHook(
+      ({ onNoteLoaded }) => useNoteCanvasDataAdapter({
+        ...stableAdapterOptions,
+        onNoteLoaded,
+      }),
+      { initialProps: { onNoteLoaded: firstHydration }, wrapper },
+    );
+    await waitFor(() => expect(subject.result.current.blocks[0]?.plain_text).toBe('server old'));
+
+    act(() => {
+      subject.result.current.setBlockTextDrafts({ [durableBlock.id]: 'user edit' });
+      subject.result.current.setBlockTextFlowDrafts({ [durableBlock.id]: userFlow });
+      subject.result.current.setBlockFieldDrafts({ [durableBlock.id]: userFields });
+    });
+    let saveReceipt!: Promise<BlockSaveOutcome>;
+    act(() => {
+      saveReceipt = subject.result.current.saveBlock(durableBlock, 'user edit', {
+        fieldValues: userFields,
+        textFlow: userFlow,
+      });
+    });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledWith(
+      `/note-blocks/${durableBlock.id}`,
+      expect.objectContaining({ plain_text: 'user edit' }),
+    ));
+
+    subject.rerender({ onNoteLoaded: secondHydration });
+    await waitFor(() => expect(secondHydration).toHaveBeenCalled());
+    await waitFor(() => expect(subject.result.current.blockTextDrafts[durableBlock.id]).toBe('user edit'));
+    expect(subject.result.current.blockTextFlowDrafts[durableBlock.id]).toEqual(userFlow);
+    expect(subject.result.current.blockFieldDrafts[durableBlock.id]).toEqual(userFields);
+
+    let outcome!: BlockSaveOutcome;
+    await act(async () => {
+      rejectHeldBlockSave(new Error('pre-commit failure after hydration crossed the save'));
+      outcome = await saveReceipt;
+    });
+
+    const userObservedReject = mocks.addToast.mock.calls.some((call) => (
+      call[0] === 'error' && call[1] === 'Failed to save block'
+    )) || consoleError.mock.calls.some((call) => call[0] === 'Failed to save block:');
+    const durablePreserved = durableBlock.plain_text === 'user edit';
+    const localDraftPreserved = subject.result.current.blockTextDrafts[durableBlock.id] === 'user edit';
+    expect(outcome).toMatchObject({
+      status: 'rejected',
+      reconciliation: 'read_after_error',
+      durableState: 'conflict',
+      reason: 'request_failed',
+      staleEpoch: true,
+      recoveryReceipt: {
+        kind: 'block_edit_recovery',
+        noteId: note.id,
+        blockId: durableBlock.id,
+        text: 'user edit',
+        textFlow: userFlow,
+        fieldValues: userFields,
+      },
+    });
+    expect(subject.result.current.blocks[0]?.plain_text).toBe('server old');
+    expect(subject.result.current.blockTextFlowDrafts[durableBlock.id]).toEqual(userFlow);
+    expect(subject.result.current.blockFieldDrafts[durableBlock.id]).toEqual(userFields);
+    expect(subject.result.current.savingBlockId).toBeNull();
+    expect(userObservedReject).toBe(true);
+    expect(durablePreserved || localDraftPreserved || userObservedReject).toBe(true);
+    expect(mocks.get.mock.calls.filter(([url]) => url === `/notes/${note.id}/blocks`)).toHaveLength(3);
+  });
+
+  it('returns stale_epoch and reconciles a successful held block PUT crossed by hydration', async () => {
+    let durableBlock = serverBlock('server old', false, 'held-success-key');
+    const heldBlockSave = deferred<{ data: NoteBlock }>();
+    const firstHydration = vi.fn();
+    const secondHydration = vi.fn();
+    let issuedBlockPayload: Record<string, unknown> | null = null;
+    mocks.get.mockImplementation(async (url: string) => {
+      if (url === `/notes/${note.id}`) return { data: note };
+      if (url === `/notes/${note.id}/blocks`) return { data: [durableBlock] };
+      if (url === `/canvas-objects/by-note/${note.id}`) return { data: {} };
+      if (url === `/annotation-truths/by-note/${note.id}`) return { data: [] };
+      if (
+        url === '/content-groups'
+        || url === '/group-folders'
+        || url === `/purposes/by-note/${note.id}`
+        || url === '/templates'
+      ) return { data: [] };
+      throw new Error(`Unexpected GET ${url}`);
+    });
+    mocks.put.mockImplementation(async (url: string, payload: Record<string, unknown>) => {
+      if (url !== `/note-blocks/${durableBlock.id}`) throw new Error(`Unexpected PUT ${url}`);
+      issuedBlockPayload = payload;
+      return heldBlockSave.promise;
+    });
+    const subject = renderHook(
+      ({ onNoteLoaded }) => useNoteCanvasDataAdapter({
+        ...stableAdapterOptions,
+        onNoteLoaded,
+      }),
+      { initialProps: { onNoteLoaded: firstHydration }, wrapper },
+    );
+    await waitFor(() => expect(subject.result.current.blocks[0]?.plain_text).toBe('server old'));
+
+    act(() => {
+      subject.result.current.setBlockTextDrafts({ [durableBlock.id]: 'user edit' });
+    });
+    let saveReceipt!: Promise<BlockSaveOutcome>;
+    act(() => {
+      saveReceipt = subject.result.current.saveBlock(durableBlock, 'user edit');
+    });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
+
+    subject.rerender({ onNoteLoaded: secondHydration });
+    await waitFor(() => expect(secondHydration).toHaveBeenCalled());
+    await waitFor(() => expect(subject.result.current.blockTextDrafts[durableBlock.id]).toBe('user edit'));
+
+    expect(issuedBlockPayload).not.toBeNull();
+    const committedPayload = issuedBlockPayload as unknown as Record<string, unknown>;
+    durableBlock = {
+      ...serverBlock('user edit', false, 'held-success-key'),
+      content_json: committedPayload.content_json as Record<string, unknown>,
+      plain_text: committedPayload.plain_text as string,
+    };
+    const responseEcho = serverBlock('response echo', false, 'held-success-key');
+    let outcome!: BlockSaveOutcome;
+    await act(async () => {
+      heldBlockSave.resolve({ data: responseEcho });
+      outcome = await saveReceipt;
+    });
+
+    expect(outcome).toMatchObject({
+      status: 'stale_epoch',
+      block: { id: durableBlock.id, plain_text: 'user edit' },
+      reconciliation: 'read_after_outcome',
+      durableState: 'matches_requested',
+      reason: 'hydration_epoch_advanced',
+      recoveryReceipt: {
+        kind: 'block_edit_recovery',
+        text: 'user edit',
+      },
+    });
+    expect(subject.result.current.blocks[0]?.plain_text).toBe('user edit');
+    expect(subject.result.current.blockTextDrafts[durableBlock.id]).toBe('user edit');
+    expect(subject.result.current.savingBlockId).toBeNull();
+    expect(mocks.addToast).toHaveBeenCalledWith(
+      'info',
+      'Block save crossed a newer state; durable result reconciled',
+    );
+    expect(mocks.get.mock.calls.filter(([url]) => url === `/notes/${note.id}/blocks`)).toHaveLength(3);
+  });
+
+  it('keeps the latest same-block edit and saving token when an older save settles first', async () => {
+    let durableBlock = serverBlock('server old', false, 'operation-order-key');
+    const firstSave = deferred<{ data: NoteBlock }>();
+    const secondSave = deferred<{ data: NoteBlock }>();
+    let blockPutCount = 0;
+    const blockPutPayloads: Record<string, unknown>[] = [];
+    mocks.get.mockImplementation(async (url: string) => {
+      if (url === `/notes/${note.id}`) return { data: note };
+      if (url === `/notes/${note.id}/blocks`) return { data: [durableBlock] };
+      if (url === `/canvas-objects/by-note/${note.id}`) return { data: {} };
+      if (url === `/annotation-truths/by-note/${note.id}`) return { data: [] };
+      if (
+        url === '/content-groups'
+        || url === '/group-folders'
+        || url === `/purposes/by-note/${note.id}`
+        || url === '/templates'
+      ) return { data: [] };
+      throw new Error(`Unexpected GET ${url}`);
+    });
+    mocks.put.mockImplementation(async (url: string, payload: Record<string, unknown>) => {
+      if (url !== `/note-blocks/${durableBlock.id}`) throw new Error(`Unexpected PUT ${url}`);
+      blockPutCount += 1;
+      blockPutPayloads.push(payload);
+      return blockPutCount === 1 ? firstSave.promise : secondSave.promise;
+    });
+    const subject = renderHook(
+      () => useNoteCanvasDataAdapter(stableAdapterOptions),
+      { wrapper },
+    );
+    await waitFor(() => expect(subject.result.current.blocks[0]?.plain_text).toBe('server old'));
+
+    act(() => {
+      subject.result.current.setBlockTextDrafts({ [durableBlock.id]: 'edit one' });
+    });
+    let firstReceipt!: Promise<BlockSaveOutcome>;
+    act(() => {
+      firstReceipt = subject.result.current.saveBlock(durableBlock, 'edit one');
+    });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
+
+    act(() => {
+      subject.result.current.setBlockTextDrafts({ [durableBlock.id]: 'edit two' });
+    });
+    await waitFor(() => expect(subject.result.current.blockTextDrafts[durableBlock.id]).toBe('edit two'));
+    let secondReceipt!: Promise<BlockSaveOutcome>;
+    act(() => {
+      secondReceipt = subject.result.current.saveBlock(durableBlock, 'edit two');
+    });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(2));
+
+    durableBlock = {
+      ...serverBlock('edit one', false, 'operation-order-key'),
+      content_json: blockPutPayloads[0].content_json as Record<string, unknown>,
+      plain_text: blockPutPayloads[0].plain_text as string,
+    };
+    let firstOutcome!: BlockSaveOutcome;
+    await act(async () => {
+      firstSave.resolve({ data: serverBlock('response echo one', false, 'operation-order-key') });
+      firstOutcome = await firstReceipt;
+    });
+    expect(firstOutcome).toMatchObject({
+      status: 'stale_epoch',
+      reason: 'superseded_operation',
+      reconciliation: 'read_after_outcome',
+      durableState: 'matches_requested',
+      block: { plain_text: 'edit one' },
+    });
+    expect(subject.result.current.blockTextDrafts[durableBlock.id]).toBe('edit two');
+    expect(subject.result.current.savingBlockId).toBe(durableBlock.id);
+
+    let secondOutcome!: BlockSaveOutcome;
+    await act(async () => {
+      secondSave.reject(new Error('latest save rejected'));
+      secondOutcome = await secondReceipt;
+    });
+    expect(secondOutcome).toMatchObject({
+      status: 'rejected',
+      reason: 'request_failed',
+      reconciliation: 'read_after_error',
+      durableState: 'conflict',
+      recoveryReceipt: { text: 'edit two' },
+    });
+    expect(subject.result.current.blocks[0]?.plain_text).toBe('edit one');
+    expect(subject.result.current.blockTextDrafts[durableBlock.id]).toBe('edit two');
+    expect(subject.result.current.savingBlockId).toBeNull();
+  });
+
+  it('retains a newer successful edit when an older in-flight PUT later becomes durable', async () => {
+    let durableBlock = serverBlock('server old', false, 'late-old-write-key');
+    const olderSave = deferred<{ data: NoteBlock }>();
+    const blockPutPayloads: Record<string, unknown>[] = [];
+    const firstHydration = vi.fn();
+    const secondHydration = vi.fn();
+    mocks.get.mockImplementation(async (url: string) => {
+      if (url === `/notes/${note.id}`) return { data: note };
+      if (url === `/notes/${note.id}/blocks`) return { data: [durableBlock] };
+      if (url === `/canvas-objects/by-note/${note.id}`) return { data: {} };
+      if (url === `/annotation-truths/by-note/${note.id}`) return { data: [] };
+      if (
+        url === '/content-groups'
+        || url === '/group-folders'
+        || url === `/purposes/by-note/${note.id}`
+        || url === '/templates'
+      ) return { data: [] };
+      throw new Error(`Unexpected GET ${url}`);
+    });
+    mocks.put.mockImplementation(async (url: string, payload: Record<string, unknown>) => {
+      if (url !== `/note-blocks/${durableBlock.id}`) throw new Error(`Unexpected PUT ${url}`);
+      blockPutPayloads.push(payload);
+      if (blockPutPayloads.length === 1) return olderSave.promise;
+      durableBlock = {
+        ...serverBlock('edit two', false, 'late-old-write-key'),
+        content_json: payload.content_json as Record<string, unknown>,
+        plain_text: payload.plain_text as string,
+      };
+      return { data: durableBlock };
+    });
+    const subject = renderHook(
+      ({ onNoteLoaded }) => useNoteCanvasDataAdapter({
+        ...stableAdapterOptions,
+        onNoteLoaded,
+      }),
+      { initialProps: { onNoteLoaded: firstHydration }, wrapper },
+    );
+    await waitFor(() => expect(subject.result.current.blocks[0]?.plain_text).toBe('server old'));
+
+    act(() => {
+      subject.result.current.setBlockTextDrafts({ [durableBlock.id]: 'edit one' });
+    });
+    let olderReceipt!: Promise<BlockSaveOutcome>;
+    act(() => {
+      olderReceipt = subject.result.current.saveBlock(durableBlock, 'edit one');
+    });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
+
+    act(() => {
+      subject.result.current.setBlockTextDrafts({ [durableBlock.id]: 'edit two' });
+    });
+    await waitFor(() => expect(subject.result.current.blockTextDrafts[durableBlock.id]).toBe('edit two'));
+    let newerOutcome!: BlockSaveOutcome;
+    await act(async () => {
+      newerOutcome = await subject.result.current.saveBlock(durableBlock, 'edit two');
+    });
+    expect(newerOutcome).toMatchObject({ status: 'saved', block: { plain_text: 'edit two' } });
+    expect(subject.result.current.blockTextDrafts[durableBlock.id]).toBe('edit two');
+    expect(subject.result.current.savingBlockId).toBe(durableBlock.id);
+
+    const olderPayload = blockPutPayloads[0];
+    durableBlock = {
+      ...serverBlock('edit one', false, 'late-old-write-key'),
+      content_json: olderPayload.content_json as Record<string, unknown>,
+      plain_text: olderPayload.plain_text as string,
+    };
+    let olderOutcome!: BlockSaveOutcome;
+    await act(async () => {
+      olderSave.resolve({ data: serverBlock('older response echo', false, 'late-old-write-key') });
+      olderOutcome = await olderReceipt;
+    });
+    expect(olderOutcome).toMatchObject({
+      status: 'stale_epoch',
+      reason: 'superseded_operation',
+      reconciliation: 'read_after_outcome',
+      durableState: 'matches_requested',
+    });
+    expect(subject.result.current.blockTextDrafts[durableBlock.id]).toBe('edit two');
+    expect(subject.result.current.savingBlockId).toBeNull();
+
+    subject.rerender({ onNoteLoaded: secondHydration });
+    await waitFor(() => expect(secondHydration).toHaveBeenCalled());
+    expect(subject.result.current.blocks[0]?.plain_text).toBe('edit one');
+    expect(subject.result.current.blockTextDrafts[durableBlock.id]).toBe('edit two');
+  });
+
+  it('does not let a held reconciliation read overwrite a newer save outcome', async () => {
+    let durableBlock = serverBlock('server old', false, 'held-read-key');
+    const olderSave = deferred<{ data: NoteBlock }>();
+    const heldReconciliationRead = deferred<{ data: NoteBlock[] }>();
+    const blockPutPayloads: Record<string, unknown>[] = [];
+    const firstHydration = vi.fn();
+    const secondHydration = vi.fn();
+    let blockReadCount = 0;
+    mocks.get.mockImplementation(async (url: string) => {
+      if (url === `/notes/${note.id}`) return { data: note };
+      if (url === `/notes/${note.id}/blocks`) {
+        blockReadCount += 1;
+        if (blockReadCount === 3) return heldReconciliationRead.promise;
+        return { data: [durableBlock] };
+      }
+      if (url === `/canvas-objects/by-note/${note.id}`) return { data: {} };
+      if (url === `/annotation-truths/by-note/${note.id}`) return { data: [] };
+      if (
+        url === '/content-groups'
+        || url === '/group-folders'
+        || url === `/purposes/by-note/${note.id}`
+        || url === '/templates'
+      ) return { data: [] };
+      throw new Error(`Unexpected GET ${url}`);
+    });
+    mocks.put.mockImplementation(async (url: string, payload: Record<string, unknown>) => {
+      if (url !== `/note-blocks/${durableBlock.id}`) throw new Error(`Unexpected PUT ${url}`);
+      blockPutPayloads.push(payload);
+      if (blockPutPayloads.length === 1) return olderSave.promise;
+      durableBlock = {
+        ...serverBlock('edit two', false, 'held-read-key'),
+        content_json: payload.content_json as Record<string, unknown>,
+        plain_text: payload.plain_text as string,
+      };
+      return { data: durableBlock };
+    });
+    const subject = renderHook(
+      ({ onNoteLoaded }) => useNoteCanvasDataAdapter({
+        ...stableAdapterOptions,
+        onNoteLoaded,
+      }),
+      { initialProps: { onNoteLoaded: firstHydration }, wrapper },
+    );
+    await waitFor(() => expect(subject.result.current.blocks[0]?.plain_text).toBe('server old'));
+    const originalBlock = subject.result.current.blocks[0];
+
+    act(() => {
+      subject.result.current.setBlockTextDrafts({ [originalBlock.id]: 'edit one' });
+    });
+    let olderReceipt!: Promise<BlockSaveOutcome>;
+    act(() => {
+      olderReceipt = subject.result.current.saveBlock(originalBlock, 'edit one');
+    });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
+    subject.rerender({ onNoteLoaded: secondHydration });
+    await waitFor(() => expect(secondHydration).toHaveBeenCalled());
+
+    const olderPayload = blockPutPayloads[0];
+    const olderObservedBlock: NoteBlock = {
+      ...serverBlock('edit one', false, 'held-read-key'),
+      content_json: olderPayload.content_json as Record<string, unknown>,
+      plain_text: olderPayload.plain_text as string,
+    };
+    durableBlock = olderObservedBlock as typeof durableBlock;
+    act(() => {
+      olderSave.resolve({ data: serverBlock('older response echo', false, 'held-read-key') });
+    });
+    await waitFor(() => expect(blockReadCount).toBe(3));
+
+    act(() => {
+      subject.result.current.setBlockTextDrafts({ [originalBlock.id]: 'edit two' });
+    });
+    let newerOutcome!: BlockSaveOutcome;
+    await act(async () => {
+      newerOutcome = await subject.result.current.saveBlock(originalBlock, 'edit two');
+    });
+    expect(newerOutcome).toMatchObject({ status: 'saved', block: { plain_text: 'edit two' } });
+    expect(subject.result.current.blocks[0]?.plain_text).toBe('edit two');
+    expect(subject.result.current.blockTextDrafts[originalBlock.id]).toBe('edit two');
+    expect(subject.result.current.savingBlockId).toBe(originalBlock.id);
+
+    let olderOutcome!: BlockSaveOutcome;
+    await act(async () => {
+      heldReconciliationRead.resolve({ data: [olderObservedBlock] });
+      olderOutcome = await olderReceipt;
+    });
+    expect(olderOutcome).toMatchObject({
+      status: 'stale_epoch',
+      reconciliation: 'read_failed',
+      durableState: 'read_failed',
+      block: null,
+    });
+    expect(subject.result.current.blocks[0]?.plain_text).toBe('edit two');
+    expect(subject.result.current.blockTextDrafts[originalBlock.id]).toBe('edit two');
+    expect(subject.result.current.savingBlockId).toBeNull();
+  });
+
+  it('keeps recovery after a held reconciliation read is superseded by newer hydration', async () => {
+    let durableBlock = serverBlock('server old', false, 'held-read-hydration-key');
+    const heldSave = deferred<{ data: NoteBlock }>();
+    const heldReconciliationRead = deferred<{ data: NoteBlock[] }>();
+    const blockPutPayloads: Record<string, unknown>[] = [];
+    const firstHydration = vi.fn();
+    const secondHydration = vi.fn();
+    const thirdHydration = vi.fn();
+    const fourthHydration = vi.fn();
+    let blockReadCount = 0;
+    mocks.get.mockImplementation(async (url: string) => {
+      if (url === `/notes/${note.id}`) return { data: note };
+      if (url === `/notes/${note.id}/blocks`) {
+        blockReadCount += 1;
+        if (blockReadCount === 3) return heldReconciliationRead.promise;
+        return { data: [durableBlock] };
+      }
+      if (url === `/canvas-objects/by-note/${note.id}`) return { data: {} };
+      if (url === `/annotation-truths/by-note/${note.id}`) return { data: [] };
+      if (
+        url === '/content-groups'
+        || url === '/group-folders'
+        || url === `/purposes/by-note/${note.id}`
+        || url === '/templates'
+      ) return { data: [] };
+      throw new Error(`Unexpected GET ${url}`);
+    });
+    mocks.put.mockImplementation(async (url: string, payload: Record<string, unknown>) => {
+      if (url !== `/note-blocks/${durableBlock.id}`) throw new Error(`Unexpected PUT ${url}`);
+      blockPutPayloads.push(payload);
+      return heldSave.promise;
+    });
+    const subject = renderHook(
+      ({ onNoteLoaded }) => useNoteCanvasDataAdapter({
+        ...stableAdapterOptions,
+        onNoteLoaded,
+      }),
+      { initialProps: { onNoteLoaded: firstHydration }, wrapper },
+    );
+    await waitFor(() => expect(subject.result.current.blocks[0]?.plain_text).toBe('server old'));
+    const originalBlock = subject.result.current.blocks[0];
+
+    act(() => {
+      subject.result.current.setBlockTextDrafts({ [originalBlock.id]: 'edit one' });
+    });
+    let saveReceipt!: Promise<BlockSaveOutcome>;
+    act(() => {
+      saveReceipt = subject.result.current.saveBlock(originalBlock, 'edit one');
+    });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
+    subject.rerender({ onNoteLoaded: secondHydration });
+    await waitFor(() => expect(secondHydration).toHaveBeenCalled());
+
+    const committedPayload = blockPutPayloads[0];
+    const staleObservedBlock: NoteBlock = {
+      ...serverBlock('edit one', false, 'held-read-hydration-key'),
+      content_json: committedPayload.content_json as Record<string, unknown>,
+      plain_text: committedPayload.plain_text as string,
+    };
+    durableBlock = staleObservedBlock as typeof durableBlock;
+    act(() => {
+      heldSave.resolve({ data: serverBlock('response echo', false, 'held-read-hydration-key') });
+    });
+    await waitFor(() => expect(blockReadCount).toBe(3));
+
+    durableBlock = serverBlock('server newer', false, 'held-read-hydration-key');
+    subject.rerender({ onNoteLoaded: thirdHydration });
+    await waitFor(() => expect(thirdHydration).toHaveBeenCalled());
+    expect(subject.result.current.blocks[0]?.plain_text).toBe('server newer');
+    expect(subject.result.current.blockTextDrafts[originalBlock.id]).toBe('edit one');
+    const recoveryBytesBeforeStaleRead = sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2);
+    const recoveryKeyBeforeStaleRead = subject.result.current.blockEditRecoveryReceipts[0]?.recoveryKey;
+    expect(recoveryKeyBeforeStaleRead).toBeTruthy();
+
+    let outcome!: BlockSaveOutcome;
+    await act(async () => {
+      heldReconciliationRead.resolve({ data: [staleObservedBlock] });
+      outcome = await saveReceipt;
+    });
+    expect(outcome).toMatchObject({
+      status: 'stale_epoch',
+      reconciliation: 'read_failed',
+      durableState: 'read_failed',
+      block: null,
+    });
+    expect(subject.result.current.blocks[0]?.plain_text).toBe('server newer');
+    expect(subject.result.current.blockTextDrafts[originalBlock.id]).toBe('edit one');
+    expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2)).toBe(recoveryBytesBeforeStaleRead);
+    expect(subject.result.current.blockEditRecoveryReceipts[0]?.recoveryKey)
+      .toBe(recoveryKeyBeforeStaleRead);
+
+    subject.rerender({ onNoteLoaded: fourthHydration });
+    await waitFor(() => expect(fourthHydration).toHaveBeenCalled());
+    expect(subject.result.current.blocks[0]?.plain_text).toBe('server newer');
+    expect(subject.result.current.blockTextDrafts[originalBlock.id]).toBe('edit one');
+  });
+
+  it('retains the pending edit and reports read_failed when stale success cannot be reread', async () => {
+    const durableBlock = serverBlock('server old', false, 'read-failed-key');
+    const heldBlockSave = deferred<{ data: NoteBlock }>();
+    const firstHydration = vi.fn();
+    const secondHydration = vi.fn();
+    let blockReadCount = 0;
+    mocks.get.mockImplementation(async (url: string) => {
+      if (url === `/notes/${note.id}`) return { data: note };
+      if (url === `/notes/${note.id}/blocks`) {
+        blockReadCount += 1;
+        if (blockReadCount <= 2) return { data: [durableBlock] };
+        throw new Error('reconciliation read unavailable');
+      }
+      if (url === `/canvas-objects/by-note/${note.id}`) return { data: {} };
+      if (url === `/annotation-truths/by-note/${note.id}`) return { data: [] };
+      if (
+        url === '/content-groups'
+        || url === '/group-folders'
+        || url === `/purposes/by-note/${note.id}`
+        || url === '/templates'
+      ) return { data: [] };
+      throw new Error(`Unexpected GET ${url}`);
+    });
+    mocks.put.mockImplementation(async (url: string) => {
+      if (url !== `/note-blocks/${durableBlock.id}`) throw new Error(`Unexpected PUT ${url}`);
+      return heldBlockSave.promise;
+    });
+    const subject = renderHook(
+      ({ onNoteLoaded }) => useNoteCanvasDataAdapter({
+        ...stableAdapterOptions,
+        onNoteLoaded,
+      }),
+      { initialProps: { onNoteLoaded: firstHydration }, wrapper },
+    );
+    await waitFor(() => expect(subject.result.current.blocks[0]?.plain_text).toBe('server old'));
+
+    act(() => {
+      subject.result.current.setBlockTextDrafts({ [durableBlock.id]: 'user edit' });
+    });
+    let saveReceipt!: Promise<BlockSaveOutcome>;
+    act(() => {
+      saveReceipt = subject.result.current.saveBlock(durableBlock, 'user edit');
+    });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
+    subject.rerender({ onNoteLoaded: secondHydration });
+    await waitFor(() => expect(secondHydration).toHaveBeenCalled());
+
+    let outcome!: BlockSaveOutcome;
+    await act(async () => {
+      heldBlockSave.resolve({ data: serverBlock('response echo', false, 'read-failed-key') });
+      outcome = await saveReceipt;
+    });
+    expect(outcome).toMatchObject({
+      status: 'stale_epoch',
+      reconciliation: 'read_failed',
+      durableState: 'read_failed',
+      recoveryReceipt: { text: 'user edit' },
+    });
+    expect(subject.result.current.blockTextDrafts[durableBlock.id]).toBe('user edit');
+    expect(subject.result.current.savingBlockId).toBeNull();
+    expect(mocks.addToast).toHaveBeenCalledWith(
+      'error',
+      'Block save result could not be reconciled',
+    );
+  });
+
+  it('keeps sequential annotation saves current within one hydration epoch', async () => {
+    const initialA = annotationWithOffsets(note.id, 0, 4, 'alpha');
+    const firstA = annotationWithOffsets(note.id, 1, 5, 'lpha');
+    const secondA = annotationWithOffsets(note.id, 2, 6, 'pha');
+    const annotationPutPayloads: AnnotationTruthV1[][] = [];
+    durableAnnotationTruths = [initialA];
+    mocks.put.mockImplementation(async (url: string, payload: { annotations?: AnnotationTruthV1[] }) => {
+      if (url !== `/annotation-truths/by-note/${note.id}`) throw new Error(`Unexpected PUT ${url}`);
+      const annotations = payload.annotations || [];
+      annotationPutPayloads.push(annotations);
+      durableAnnotationTruths = annotations;
+      return { data: annotations };
+    });
+    const subject = renderHook(
+      () => useNoteCanvasDataAdapter(stableAdapterOptions),
+      { wrapper },
+    );
+    await waitFor(() => expect(subject.result.current.annotationTruths).toEqual([initialA]));
+    const saveInHydrationEpoch = subject.result.current.saveAnnotationTruths;
+
+    await act(async () => {
+      await saveInHydrationEpoch([firstA]);
+      await saveInHydrationEpoch([secondA]);
+    });
+
+    expect(annotationPutPayloads).toEqual([[firstA], [secondA]]);
+    expect(durableAnnotationTruths).toEqual([secondA]);
+    expect(subject.result.current.annotationTruths).toEqual([secondA]);
+  });
+
+  it('persists rollback TextFlow and Formula companion fields through one block frontdoor PUT', async () => {
+    const previousFlow = createTextBlockContentV1('alpha /heabeta', 'paragraph');
+    const nextFlow = {
+      ...previousFlow,
+      units: previousFlow.units.map((unit) => ({ ...unit, text: 'alpha beta' })),
+    };
+    const formulaBlock: NoteBlock = {
+      ...serverBlock('alpha /heabeta', false, 'formula-rollback-key'),
+      block_type: 'formula',
+      content_json: {
+        body: 'alpha /heabeta',
+        field_values: {
+          latex_input: 'alpha /heabeta',
+          formula_name: 'Euler',
+          explanation: 'Keep me',
+        },
+        [TEXT_FLOW_CONTENT_KEY]: previousFlow,
+      },
+    };
+    let blockPayload: Record<string, unknown> | null = null;
+    mocks.put.mockImplementation(async (url: string, payload: Record<string, unknown>) => {
+      if (url !== `/note-blocks/${formulaBlock.id}`) throw new Error(`Unexpected PUT ${url}`);
+      blockPayload = payload;
+      return {
+        data: {
+          ...formulaBlock,
+          content_json: payload.content_json,
+          plain_text: payload.plain_text,
+        },
+      };
+    });
+    const subject = renderHook(
+      () => useNoteCanvasDataAdapter(stableAdapterOptions),
+      { wrapper },
+    );
+    await waitFor(() => expect(subject.result.current.note?.id).toBe(note.id));
+
+    let receipt!: BlockSaveOutcome;
+    await act(async () => {
+      receipt = await subject.result.current.saveBlock(formulaBlock, 'alpha beta', {
+        silent: true,
+        fieldValues: {
+          latex_input: 'alpha beta',
+          formula_name: 'Euler',
+          explanation: 'Keep me',
+        },
+        textFlow: nextFlow,
+      });
+    });
+
+    expect(blockPayload).toMatchObject({
+      content_json: {
+        body: 'alpha beta',
+        field_values: {
+          latex_input: 'alpha beta',
+          formula_name: 'Euler',
+          explanation: 'Keep me',
+        },
+        [TEXT_FLOW_CONTENT_KEY]: nextFlow,
+      },
+      plain_text: 'alpha beta',
+    });
+    expect(receipt.status).toBe('saved');
+    expect(receipt.block?.content_json).toMatchObject({
+      field_values: { latex_input: 'alpha beta' },
+      [TEXT_FLOW_CONTENT_KEY]: nextFlow,
+    });
+  });
+
+  it('serializes a later A visit behind an in-flight publish from the earlier A visit', async () => {
+    const noteB: Note = { ...note, id: 'note-2', title: 'Second note' };
+    const initialA = annotationWithOffsets(note.id, 0, 4, 'alpha');
+    const heldA = annotationWithOffsets(note.id, 1, 5, 'lpha');
+    const initialB = annotationWithOffsets(noteB.id, 8, 12, 'beta');
+    const newerA = annotationWithOffsets(note.id, 4, 8, 'newer');
+    const finalA = annotationWithOffsets(note.id, 5, 9, 'final');
+    const heldFirstA = deferred<{ data: AnnotationTruthV1[] }>();
+    const durableByNote = new Map<string, AnnotationTruthV1[]>([
+      [note.id, [initialA]],
+      [noteB.id, [initialB]],
+    ]);
+    const annotationPutPayloads: AnnotationTruthV1[][] = [];
+    mocks.get.mockImplementation(async (url: string) => {
+      if (url === `/notes/${note.id}`) return { data: note };
+      if (url === `/notes/${noteB.id}`) return { data: noteB };
+      if (url === `/notes/${note.id}/blocks` || url === `/notes/${noteB.id}/blocks`) return { data: [] };
+      if (url === `/canvas-objects/by-note/${note.id}` || url === `/canvas-objects/by-note/${noteB.id}`) {
+        return { data: {} };
+      }
+      if (url === `/annotation-truths/by-note/${note.id}`) return { data: durableByNote.get(note.id) };
+      if (url === `/annotation-truths/by-note/${noteB.id}`) return { data: durableByNote.get(noteB.id) };
+      if (
+        url === '/content-groups'
+        || url === '/group-folders'
+        || url === `/purposes/by-note/${note.id}`
+        || url === `/purposes/by-note/${noteB.id}`
+        || url === '/templates'
+      ) return { data: [] };
+      throw new Error(`Unexpected GET ${url}`);
+    });
+    mocks.put.mockImplementation(async (url: string, payload: { annotations?: AnnotationTruthV1[] }) => {
+      if (url !== `/annotation-truths/by-note/${note.id}`) throw new Error(`Unexpected PUT ${url}`);
+      const annotations = payload.annotations || [];
+      annotationPutPayloads.push(annotations);
+      if (annotationPutPayloads.length === 1) return heldFirstA.promise;
+      durableByNote.set(note.id, annotations);
+      return { data: annotations };
+    });
+    const subject = renderHook(
+      ({ noteId }) => useNoteCanvasDataAdapter({ ...stableAdapterOptions, noteId }),
+      { initialProps: { noteId: note.id }, wrapper },
+    );
+    await waitFor(() => expect(subject.result.current.annotationTruths).toEqual([initialA]));
+
+    let firstA!: Promise<void>;
+    act(() => {
+      firstA = subject.result.current.saveAnnotationTruths([heldA]);
+    });
+    await waitFor(() => expect(annotationPutPayloads).toEqual([[heldA]]));
+
+    subject.rerender({ noteId: noteB.id });
+    await waitFor(() => expect(subject.result.current.annotationTruths).toEqual([initialB]));
+    durableByNote.set(note.id, [newerA]);
+    subject.rerender({ noteId: note.id });
+    await waitFor(() => expect(subject.result.current.annotationTruths).toEqual([newerA]));
+
+    let secondA!: Promise<void>;
+    act(() => {
+      secondA = subject.result.current.saveAnnotationTruths([finalA]);
+    });
+    expect(annotationPutPayloads).toEqual([[heldA]]);
+    expect(subject.result.current.annotationTruths).toEqual([finalA]);
+
+    durableByNote.set(note.id, [heldA]);
+    await act(async () => {
+      heldFirstA.resolve({ data: asServerHydratedAnnotations([heldA]) });
+      await Promise.all([firstA, secondA]);
+    });
+
+    expect(annotationPutPayloads).toEqual([[heldA], [finalA]]);
+    expect(durableByNote.get(note.id)).toEqual([finalA]);
+    expect(subject.result.current.annotationTruths).toEqual([finalA]);
+  });
+
+  it('starts note B publish at enqueue while note A publish is held', async () => {
+    const noteB: Note = { ...note, id: 'note-2', title: 'Second note' };
+    const initialA = annotationWithOffsets(note.id, 0, 4, 'alpha');
+    const editA = annotationWithOffsets(note.id, 1, 5, 'lpha');
+    const initialB = annotationWithOffsets(noteB.id, 8, 12, 'beta');
+    const editB = annotationWithOffsets(noteB.id, 9, 13, 'eta');
+    const heldA = deferred<{ data: AnnotationTruthV1[] }>();
+    const durableByNote = new Map<string, AnnotationTruthV1[]>([
+      [note.id, [initialA]],
+      [noteB.id, [initialB]],
+    ]);
+    const annotationPutPayloads: Array<{ url: string; annotations: AnnotationTruthV1[] }> = [];
+    mocks.get.mockImplementation(async (url: string) => {
+      const requestedNote = url === `/notes/${note.id}`
+        ? note
+        : url === `/notes/${noteB.id}`
+          ? noteB
+          : null;
+      if (requestedNote) return { data: requestedNote };
+      if (
+        url === `/notes/${note.id}/blocks`
+        || url === `/notes/${noteB.id}/blocks`
+      ) return { data: [] };
+      if (
+        url === `/canvas-objects/by-note/${note.id}`
+        || url === `/canvas-objects/by-note/${noteB.id}`
+      ) return { data: {} };
+      if (url === `/annotation-truths/by-note/${note.id}`) return { data: durableByNote.get(note.id) };
+      if (url === `/annotation-truths/by-note/${noteB.id}`) return { data: durableByNote.get(noteB.id) };
+      if (
+        url === '/content-groups'
+        || url === '/group-folders'
+        || url === `/purposes/by-note/${note.id}`
+        || url === `/purposes/by-note/${noteB.id}`
+        || url === '/templates'
+      ) return { data: [] };
+      throw new Error(`Unexpected GET ${url}`);
+    });
+    mocks.put.mockImplementation(async (url: string, payload: { annotations?: AnnotationTruthV1[] }) => {
+      const annotations = payload.annotations || [];
+      annotationPutPayloads.push({ url, annotations });
+      if (url === `/annotation-truths/by-note/${note.id}`) return heldA.promise;
+      if (url === `/annotation-truths/by-note/${noteB.id}`) {
+        durableByNote.set(noteB.id, annotations);
+        return { data: annotations };
+      }
+      throw new Error(`Unexpected PUT ${url}`);
+    });
+    const subject = renderHook(
+      ({ noteId }) => useNoteCanvasDataAdapter({ ...stableAdapterOptions, noteId }),
+      { initialProps: { noteId: note.id }, wrapper },
+    );
+    await waitFor(() => expect(subject.result.current.annotationTruths).toEqual([initialA]));
+
+    let saveA!: Promise<void>;
+    act(() => {
+      saveA = subject.result.current.saveAnnotationTruths([editA]);
+    });
+    await waitFor(() => expect(annotationPutPayloads).toHaveLength(1));
+
+    subject.rerender({ noteId: noteB.id });
+    await waitFor(() => expect(subject.result.current.annotationTruths).toEqual([initialB]));
+
+    let saveB!: Promise<void>;
+    act(() => {
+      saveB = subject.result.current.saveAnnotationTruths([editB]);
+    });
+    const bStartedAtEnqueue = annotationPutPayloads.some(({ url }) => (
+      url === `/annotation-truths/by-note/${noteB.id}`
+    ));
+
+    subject.rerender({ noteId: note.id });
+    await waitFor(() => expect(subject.result.current.annotationTruths).toEqual([initialA]));
+
+    durableByNote.set(note.id, [editA]);
+    await act(async () => {
+      heldA.resolve({ data: asServerHydratedAnnotations([editA]) });
+      await Promise.all([saveA, saveB]);
+    });
+
+    expect(bStartedAtEnqueue).toBe(true);
+    expect(annotationPutPayloads).toEqual([
+      { url: `/annotation-truths/by-note/${note.id}`, annotations: [editA] },
+      { url: `/annotation-truths/by-note/${noteB.id}`, annotations: [editB] },
+    ]);
+    expect(durableByNote.get(noteB.id)).toEqual([editB]);
+    expect(subject.result.current.annotationTruths).toEqual([initialA]);
+  });
 
   it('passes reused=true through from the authoritative API receipt', async () => {
     mocks.post.mockResolvedValueOnce({ data: serverBlock('ab', true) });
@@ -346,6 +1963,47 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     expect(mocks.put).not.toHaveBeenCalled();
     expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V1))
       .toBe(JSON.stringify([rawV1]));
+  });
+
+  it('does not auto-replay or rewrite an explicit block edit hybrid receipt', async () => {
+    const mountNonce = 'hybrid-edit-mount';
+    const hybridRaw = {
+      version: 2,
+      noteId: note.id,
+      clientCreateKey: 'hybrid-create-key',
+      text: 'hybrid edit',
+      contentJson: { body: 'hybrid edit' },
+      layout: defaultDraftLayout,
+      template: recoveryTemplate,
+      queuedAt: '2026-08-20T00:00:00.000Z',
+      kind: 'block_edit_recovery',
+      recoveryKey: createBlockEditRecoveryKey(note.id, 'block-1', 0, 1, mountNonce),
+      requestedNoteId: note.id,
+      mountNonce,
+      creationGeneration: 0,
+      operationSequence: 1,
+      blockId: 'block-1',
+      plainText: 'hybrid edit',
+      hydrationEpoch: 0,
+    };
+    const rawBytes = JSON.stringify([hybridRaw]);
+    sessionStorage.setItem(DRAFT_RECOVERY_STORAGE_KEY_V2, rawBytes);
+
+    const subject = renderHook(
+      () => useNoteCanvasDataAdapter(stableAdapterOptions),
+      { wrapper },
+    );
+    await waitFor(() => expect(stableAdapterOptions.onNoteLoaded).toHaveBeenCalled());
+
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([
+      expect.objectContaining({
+        recoveryKey: hybridRaw.recoveryKey,
+        text: 'hybrid edit',
+      }),
+    ]);
+    expect(mocks.post).not.toHaveBeenCalled();
+    expect(mocks.put).not.toHaveBeenCalled();
+    expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2)).toBe(rawBytes);
   });
 
   it.each([

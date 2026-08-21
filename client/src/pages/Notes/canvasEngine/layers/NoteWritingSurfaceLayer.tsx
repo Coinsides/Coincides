@@ -53,7 +53,6 @@ import {
 } from '../annotationEditorService';
 import {
   applySourceBackedAnnotationRangeEdit,
-  rebaseAnnotationsForTextUnitEdit,
 } from '../rangeRebaseService';
 import {
   reconcileCapturedSelectionTextOwner,
@@ -69,8 +68,9 @@ import {
   createTextFlowFromDroppedText,
   getTextFlowContent,
   replaceTextUnitText,
-  textFlowIdForBlock,
 } from '../textFlowService';
+import type { ApplyBlockTextFlowEdit } from '../hooks/useBlockTextFlowEditController';
+import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import {
   setTextUnitWritingRole,
 } from '../textUnitEditorService';
@@ -314,6 +314,7 @@ export interface NoteWritingSurfaceLayerProps {
   onBlockListMouseDown: (event: ReactPointerEvent<HTMLDivElement>) => void;
   onBlockTextChange: (blockId: string, value: string, caret: number, anchorElement?: HTMLElement | null) => void;
   onBlockTextFlowChange: Dispatch<SetStateAction<Record<string, TextBlockContentV1>>>;
+  onApplyBlockTextFlowEdit: ApplyBlockTextFlowEdit;
   onClearSlashTarget: () => void;
   onAddPageBelow: (frameId: string) => void;
   onCreatePageFrame: () => void;
@@ -340,7 +341,7 @@ export interface NoteWritingSurfaceLayerProps {
     block: NoteBlock,
     text: string,
     options?: { silent?: boolean; fieldValues?: FieldValueRecord; textFlow?: TextBlockContentV1 },
-  ) => Promise<NoteBlock | null>;
+  ) => Promise<BlockSaveOutcome>;
   onScrollViewportBy: (delta: CanvasPoint, world?: CanvasWorldModel) => void;
   onSelectBlock: (blockId: string) => void;
   onSelectPageFrame: (frameId: string) => void;
@@ -562,6 +563,7 @@ export function NoteWritingSurfaceLayer({
   onBlockListMouseDown,
   onBlockTextChange,
   onBlockTextFlowChange,
+  onApplyBlockTextFlowEdit,
   onClearSlashTarget,
   onAddPageBelow,
   onCreatePageFrame,
@@ -928,6 +930,14 @@ export function NoteWritingSurfaceLayer({
   const plainTextFromTextFlow = (textFlow: TextBlockContentV1): string => (
     textFlow.units.map((unit) => unit.text).join('\n')
   );
+  const saveBlockAndConsumeOutcome = async (
+    block: NoteBlock,
+    text: string,
+    options?: { silent?: boolean; fieldValues?: FieldValueRecord; textFlow?: TextBlockContentV1 },
+  ): Promise<NoteBlock | null> => {
+    const outcome = await onSaveBlock(block, text, options);
+    return outcome.status === 'saved' ? outcome.block : null;
+  };
   const hasMeaningfulRenderableContent = useMemo(() => hasMeaningfulWritingSurfaceContent({
     allBlocks,
     annotationTruths,
@@ -2177,10 +2187,12 @@ export function NoteWritingSurfaceLayer({
       [range.block_id as string]: nextTextFlow,
     }));
     onBlockTextChange(range.block_id, nextPlainText, nextPlainText.length, null);
-    await onSaveBlock(block, nextPlainText, {
+    const savedBlock = await saveBlockAndConsumeOutcome(block, nextPlainText, {
       silent: true,
       textFlow: nextTextFlow,
     });
+    // Do not continue an unconfirmed range edit into a newer hydration.
+    if (!savedBlock || savedBlock.id !== range.block_id) return;
     await onSaveAnnotationTruths(editResult.next_annotations);
   };
 
@@ -2188,31 +2200,7 @@ export function NoteWritingSurfaceLayer({
     block: NoteBlock,
     nextTextFlow: TextBlockContentV1,
   ) => {
-    const previousTextFlow = blockTextFlowDrafts[block.id] || getTextFlowContent(block.content_json);
-    onBlockTextFlowChange((current) => ({
-      ...current,
-      [block.id]: nextTextFlow,
-    }));
-    if (!previousTextFlow) return;
-
-    let nextAnnotations = annotationTruths;
-    previousTextFlow.units.forEach((previousUnit) => {
-      const nextUnit = nextTextFlow.units.find((unit) => unit.id === previousUnit.id);
-      if (!nextUnit || nextUnit.text === previousUnit.text) return;
-      const rebase = rebaseAnnotationsForTextUnitEdit({
-        annotations: nextAnnotations,
-        blockId: block.id,
-        textFlowId: textFlowIdForBlock(block.id),
-        textUnitId: previousUnit.id,
-        oldText: previousUnit.text,
-        newText: nextUnit.text,
-      });
-      nextAnnotations = rebase.next_annotations;
-    });
-
-    if (nextAnnotations !== annotationTruths) {
-      await onSaveAnnotationTruths(nextAnnotations);
-    }
+    await onApplyBlockTextFlowEdit(block, nextTextFlow);
   };
 
   const textFlowWithPlainText = (
@@ -2282,10 +2270,11 @@ export function NoteWritingSurfaceLayer({
       const nextPlainText = plainTextFromTextFlow(nextTextFlow);
       await handleBlockTextFlowChange(block, nextTextFlow);
       onBlockTextChange(block.id, nextPlainText, nextPlainText.length, null);
-      await onSaveBlock(block, nextPlainText, {
+      const savedBlock = await saveBlockAndConsumeOutcome(block, nextPlainText, {
         silent: true,
         textFlow: nextTextFlow,
       });
+      if (!savedBlock) return;
     }
 
     clearDraft();
@@ -2421,7 +2410,10 @@ export function NoteWritingSurfaceLayer({
     const text = blockTextDrafts[block.id] ?? textFromContent(block);
 
     if (actionId === 'save_block') {
-      await onSaveBlock(block, text, { silent: false, textFlow: blockTextFlowDrafts[block.id] });
+      await saveBlockAndConsumeOutcome(block, text, {
+        silent: false,
+        textFlow: blockTextFlowDrafts[block.id],
+      });
       return;
     }
     if (actionId === 'label_block') {
@@ -3660,12 +3652,12 @@ export function NoteWritingSurfaceLayer({
             onShapeTextChange={(block, value, caret, anchorElement) => {
               handlePlainTextBackedBlockChange(block, value, caret, anchorElement);
             }}
-            onShapeTextSave={(objectId, block, value) => {
+            onShapeTextSave={async (objectId, block, value) => {
               if (value.trim().length === 0) {
-                void demoteShapeText(objectId);
-                return;
+                await demoteShapeText(objectId);
+                return null;
               }
-              void onSaveBlock(block, value, {
+              return onSaveBlock(block, value, {
                 silent: true,
                 textFlow: textFlowWithPlainText(block, value),
               });
@@ -3737,7 +3729,7 @@ export function NoteWritingSurfaceLayer({
               }}
               onTextFlowChange={(textFlow) => void handleBlockTextFlowChange(block, textFlow)}
               onFieldDraftChange={(fieldValues) => onFieldDraftChange(block, text, fieldValues)}
-              onSave={(silent, fieldValues, textFlow) => {
+              onSave={async (silent, fieldValues, textFlow) => {
                 const save = blockSaveTextAndFlow(block, text, fieldValues, textFlow);
                 return onSaveBlock(block, save.text, {
                   silent,

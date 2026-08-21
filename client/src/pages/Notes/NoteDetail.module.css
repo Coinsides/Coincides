@@ -897,6 +897,60 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   font-size: 13px;
 }
 
+.blockEditRecoveryQueue {
+  position: relative;
+  z-index: 4;
+  display: grid;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--warning);
+  border-radius: var(--radius-md);
+  background: var(--warning-bg);
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.blockEditRecoveryTitle {
+  font-weight: 600;
+}
+
+.blockEditRecoveryItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.blockEditRecoveryPreview {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.blockEditRecoveryActions {
+  display: flex;
+  flex: none;
+  gap: 6px;
+}
+
+.blockEditRecoveryActions button {
+  padding: 4px 8px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  cursor: pointer;
+  font: inherit;
+}
+
+.blockEditRecoveryActions button:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
 .writingSurface {
   position: relative;
   display: flex;

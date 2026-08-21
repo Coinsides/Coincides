@@ -12,6 +12,7 @@ import {
   type RuntimeInteractionState,
 } from '../interactionController';
 import { resizeTextareaToContent } from '../measurementService';
+import type { FieldValueRecord } from '../blockContentService';
 import type { BlockBoxLayout } from '../runtimeLayout';
 import { DEFAULT_BLOCK_HEIGHT } from '../runtimeLayout';
 import type { Note, NoteBlock, TextBlockContentV1 } from '../runtimeDataTypes';
@@ -47,6 +48,7 @@ import {
   type DraftBlockCreateResult,
   type DraftRecoveryReceipt,
 } from '../draftBlockPersistence';
+import type { BlockSaveOutcome } from './useNoteCanvasDataAdapter';
 
 const identityDraftLayout = (layout: BlockBoxLayout): BlockBoxLayout => layout;
 
@@ -85,8 +87,8 @@ export interface UseDraftBlockControllerOptions {
   saveBlock: (
     block: NoteBlock,
     text: string,
-    options?: { silent?: boolean; textFlow?: TextBlockContentV1 },
-  ) => Promise<NoteBlock | null>;
+    options?: { silent?: boolean; fieldValues?: FieldValueRecord; textFlow?: TextBlockContentV1 },
+  ) => Promise<BlockSaveOutcome>;
   saveDraftBlockPlacement: (
     block: NoteBlock,
     layout: BlockBoxLayout,
@@ -495,14 +497,14 @@ export function useDraftBlockController({
         if (!hasMeaningfulDraftContent(latestText)) break;
         const latestTextFlow = draftTextFlowRef.current
           || (!explicitTemplate ? createTextBlockContentV1(latestText, 'paragraph') : null);
-        const saved = await saveBlock(
+        const saveOutcome = await saveBlock(
           persistedBlock,
           latestText,
           latestTextFlow ? { silent: true, textFlow: latestTextFlow } : { silent: true },
         );
-        if (!saved || !requestIsCurrent()) return;
-        persistedBlock = saved;
-        durableBlockRef.current = saved;
+        if (saveOutcome.status !== 'saved' || !requestIsCurrent()) return;
+        persistedBlock = saveOutcome.block;
+        durableBlockRef.current = saveOutcome.block;
         savedRevision = revisionToSave;
         durableSavedRevisionRef.current = revisionToSave;
       }

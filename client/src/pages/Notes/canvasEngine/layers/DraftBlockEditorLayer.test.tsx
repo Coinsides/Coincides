@@ -10,6 +10,7 @@ import {
   useDraftBlockController,
   type UseDraftBlockControllerOptions,
 } from '../hooks/useDraftBlockController';
+import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import { useBlockSelectionController } from '../hooks/useBlockSelectionController';
 import type { RuntimeInteractionState } from '../interactionController';
 import type { BlockBoxLayout } from '../runtimeLayout';
@@ -47,6 +48,15 @@ const note: Note = {
   metadata: {},
 };
 
+function savedBlockOutcome(block: NoteBlock): BlockSaveOutcome {
+  return {
+    status: 'saved',
+    block,
+    recoveryReceipt: null,
+    reconciliation: 'response',
+  };
+}
+
 function deferred<T>() {
   let resolve!: (value: T) => void;
   const promise = new Promise<T>((next) => {
@@ -80,7 +90,7 @@ function Harness({
     finalizeDraftBlock: defaultFinalizeDraftBlock,
     note,
     onDraftFocusReceipt: selection.markDraftFocused,
-    saveBlock: vi.fn(async (block: NoteBlock) => block),
+    saveBlock: vi.fn(async (block: NoteBlock) => savedBlockOutcome(block)),
     saveDraftBlockPlacement: vi.fn(async (block) => block),
     setActiveBlockId,
     setFocusBlockId,

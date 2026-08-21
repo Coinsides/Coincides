@@ -18,6 +18,7 @@ import {
   type Ref,
 } from 'react';
 import type { BlockPresentationKind } from '../blockContentService';
+import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import { resizeTextareaToContent } from '../measurementService';
 import type {
   AnnotationTruthV1,
@@ -91,7 +92,11 @@ interface TextBlockProjectionProps {
   onTextUnitContextMenu: (selection: CapturedSelectionRange, anchorRect: DOMRect, point: { x: number; y: number }) => void;
   onTextChange: (value: string, caret: number, anchorElement?: HTMLElement | null) => void;
   onTextFlowChange: (textFlow: TextBlockContentV1) => void;
-  onSave: (silent?: boolean, fieldValues?: undefined, textFlow?: TextBlockContentV1) => void;
+  onSave: (
+    silent?: boolean,
+    fieldValues?: undefined,
+    textFlow?: TextBlockContentV1,
+  ) => Promise<BlockSaveOutcome>;
   onKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
 }
 
@@ -944,7 +949,10 @@ export function TextBlockProjection({
       emitFlowChange(nextFlow, targetUnit.id, nextCaret, textarea, { sync: true });
       focusTextUnit(targetUnit.id, nextCaret);
     }
-    window.setTimeout(() => onSave(true, undefined, nextFlow), 0);
+          window.setTimeout(async () => {
+            const outcome = await onSave(true, undefined, nextFlow);
+            if (outcome.status !== 'saved') return;
+          }, 0);
   };
 
   const textUnitMenu: CommandSurfaceMenu | null = textUnitContextMenu && !readOnly ? {
@@ -1171,7 +1179,10 @@ export function TextBlockProjection({
                   onMouseUp={(event) => handleUnitMouseUp(unit, event)}
                   onKeyUp={(event) => handleUnitKeyUp(unit, event)}
                   onContextMenu={(event) => handleTextUnitContextMenu(unit, event)}
-                  onBlur={readOnly ? undefined : () => onSave(true, undefined, latestFlowRef.current || editableFlow)}
+                onBlur={readOnly ? undefined : async () => {
+                  const outcome = await onSave(true, undefined, latestFlowRef.current || editableFlow);
+                  if (outcome.status !== 'saved') return;
+                }}
                   onKeyDown={readOnly ? undefined : (event) => handleUnitKeyDown(unit, event)}
                   onPaste={readOnly ? undefined : (event) => handleUnitPaste(unit, event)}
                   onDragOver={readOnly ? undefined : handleUnitDragOver}
