@@ -1,4 +1,4 @@
-> **状态 (Status)**: draft(Fable 设计稿 v0;待 Opus 首读挑刺 → Fable 拍板 → 转 V2.BN.12.2 施工规格)
+> **状态 (Status)**: draft → **v0.4 Fable 拍板(Opus Review-1 五条全采纳后)**;Henry 可翻;转 V2.BN.12.2 施工规格
 > **层 (Layer)**: 分析 / Analysis(必修① 设计稿)
 > **日期 (Updated)**: 2026-08-21
 > **权威 (Authoritative)**: 否(拍板后其裁定进 current-state 与施工单)
@@ -37,7 +37,7 @@ SelectionDraftV1       = { id, phase, mode, ranges: CapturedSelectionRange[]+id,
 **工具面的指代语汇=它的持久化投影**,不另立:
 
 ```text
-ObjectRef        = { kind, id }                      ← kind 来自注册表/真相对象类型(text_unit/block/item/group/purpose/relation/source/canvas_object…)
+ObjectRef        = { kind, id, canvas_kind? }          ← kind 取**两层复用、无并集**:第一层=item_anchors target_kind 原词(block/content_range/canvas_object/table_region/image_region);第二层=真相对象类型(note/item/content_group/purpose/relation/source/source_anchor);kind=canvas_object 时以 canvas_kind 携 KIND_HANDLERS 子类(shape/table…)。Review-1 ③:原「注册表 kind 或真相对象类型」的「或」=并集出第三套词表,已废
 SelectionReceipt = { refs: ObjectRef[],               ← 由 ranges 的 owner 三元组 (blockId,textFlowId,textUnitId) 派生
                      text_ranges: CapturedSelectionRange[],   ← 原样继承(含 text 摘录=Source-Ladder A-4 的摘录副本)
                      geometry?: { frame_id?, rect: anchorRect, unit: 'px'|'pdf_pt' },
@@ -61,7 +61,9 @@ metadata    = { tool, tier, harness, input_digest, human_entry, consent?: {mrtr_
 ```
 
 - **D-4 拍**:取值 `'mcp'`(不按工具名分裂取值;工具名进 metadata)。理由:该轴表达「来源类别」,工具名是实例。
-- 可撤销=既有 `status/reverted_at` 机制;「大动作全收据可撤销」由此兑现,不造新机制。
+- **可撤销按资源数分档(Review-1 最重一条,基线保证问命中)**:基线无跨资源原子性(TD-6,05 主单 Review :157)。**单资源操作**:可撤销=既有 `status/reverted_at`;**跨资源操作**(同时触及正文+annotation 等):收据记录 `resources[]`,撤销为逐资源 best-effort,结果以 `revert_outcome: complete|partial` **可观察地**写回收据——**TD-6 解决前不承诺原子回滚**,工具描述须标「部分撤销风险」。宁可承诺得窄。
+- **D-4 重写**:`'mcp'` 为「该轴表达来源类别」的**新纪律**;既有编码值中 `client_note_block_create`/`client_note_block_cleanup_conflict`/`source_materialization` 属操作级取值,**与新纪律不符,不追溯改写**(Review-1 ①-b;我上午的取值扫描是不完整清单,同族错,记档)。
+- **声明不变式(Review-1 ①)**:`noteBlockLifecycle` 经 `findOperationBatch(id)` 的路径(:390/:951)把非 applied 当异常且不按 source_type 过滤——当前不撞是命名空间巧合,非声明不变式。**12.2a 必须**:为这些路径加 `source_type` 守卫(或等价),并落 killer:`'mcp'/'proposed'` 批次绝不被非 mcp 消费方解引用。
 - **D-7 拍(015 原意已核,2026-08-21)**:015 的层次是刻意的——`operation_batches.course_id` 对 course **CASCADE**,而 `notes/note_blocks.operation_batch_id` 对 batch **SET NULL**:批次=课程级簿记随课程生死,内容行不随批次死。**V12 不改 schema**,工具面收据沿用同一生命周期;「收据是否属 I-2 的内容」张力记入 TD-6 专项统一处理。
 - **词汇轴先例(已核)**:代码中 `source_type` 已写过 `'proposal'`(旧提案 apply 路径 `canvasLayoutProposals.ts:456` 等),数据层从未出现——`'mcp'` 为第三个编码取值,轴扩展有先例。
 - **§10 Q1 已闭(全量 `git grep`,非抽样)**:server/src 非测试 37 处引用,**零读方按 `status` 过滤**——读方一律按 `id` 或 `source_type+source_id` 取;`source_type` 已有编码值 `manual`/`proposal`/`source_materialization`,`'mcp'` 为第四个,工具面永远写 `'mcp'` 故与按 source_type 取数的读方零碰撞。`'proposed'` 状态值可安全引入。
@@ -79,7 +81,8 @@ ToolRegistryEntry = {
 }
 ```
 
-- **机械门 `check:tool-face-parity`**(接入 verify 链):对每条 `exposure:'public'` 的工具,校验 `human_entry.route` 在 `server/src/index.ts` 挂载链上真实存在、`client_call_site` 在 client 源中真实被调用(与 docs-inventory 同一机械手段,不手写清单)。**校验失败=门红**——「无后门」从纪律变成会红的断言。
+- **机械门 `check:tool-face-parity`**(接入 verify 链):对每条 `exposure:'public'` 的工具,校验 `human_entry.route` 在 `server/src/index.ts` 挂载链上真实存在、`client_call_site` 在 client 源中存在对应调用构造。**校验失败=门红。**
+- **但它是必要非充分(Review-1 ②)**:client 走单一 axios 实例+模板字面量路径,源码 grep 只证「有人构造了这个 URL」,不证「有可达入口」(死代码/feature flag 全能过;「有引用≠活」与「零引用≠死」互为逆命题)。**声明口径**:本门=「无后门」的机械**必要条件**;充分性由 12.2 验收的人类入口旅程验证补(每条 public 工具的 human_entry 须在旅程分数里实际走一次)。
 - **注册≠可暴露**(调研盘 §1.4 一般化):任何由注册表派生的枚举(kind/模板类型/关系类型/purpose role)经 `exposure` 闸;`__` 前缀与 `exposure:'test'` 强制不暴露(TD-4 落位)。
 - 工具清单由注册表生成进 `docs/generated/`(对象边界契约 §4 同律),不手写。
 
@@ -102,13 +105,13 @@ ToolRegistryEntry = {
 
 - 依据调研盘 §3.4:旧 proposals 管线从未运过一行、词表分裂、五真相零接入、焊在 Mr. Zero 会话上。**不激活**。
 - V12 的「出候选」=**候选收据**:`operation_batches` 以 `status='proposed'` 落地,携完整 intended payload;人在既有对象的审阅入口(最小:一个「待处理候选」列表)选择 apply(→`applied`,执行同一工具路径)或 discard(→`reverted`)。产房/案例库那套候选生态归 Agent 版(§6 三级)。
-- 旧 `proposals` 表/服务 → **deprecation candidate**(与 annotation 层级同类:pre-pivot 遗物),物理清场随 v1 清场专项。
+- 旧 `proposals` 表/服务 → **deprecation candidate**(与 annotation 层级同类:pre-pivot 遗物),物理清场随 v1 清场专项;**新候选审阅入口(12.2d)须与旧 `ProposalList.tsx` 面的退场同单落地**(Review-1:不让两套候选面并存)。
 
 ## 7. 协议栈与部署形态
 
 - MCP **2026-07-28** 修订;`@modelcontextprotocol/sdk` `StreamableHTTPServerTransport` 架在既有 Express 之后(无状态核心,与「后端保持服务形态」同构);MRTR 承载 `confirm` 档;缓存 `ttlMs/cacheScope` 用于 list/read 类工具(零模型荣誉榜同向)。
 - 会话/编排不在工具面:harness(Claude Code/Codex/OpenCode/管家)自带编排;工具面对所有穿戴者一视同仁(不整容)。
-- **Q4 已核——MRTR 支持度与降级路径**:MRTR(`input_required`+`inputResponses`)为 2026-07-28 规范一级公民,Anthropic 宣布在 Claude 产品线推开;Codex CLI 侧支持度未证实。**降级规则(拍)**:harness 不支持 `input_required` 时,`confirm` 档**降为 `propose`**(写候选收据,人在应用内 apply)——fail-closed、可观察、走同一条候选路径,不静默执行也不静默丢弃。
+- **Q4 更正(Review-1 ④)**:`elicitation/create`(Claude Code CLI ≥2.1.76 支持,Desktop 不支持)与 MRTR `input_required`(7-28 工具级机制)**不是一回事**;MRTR 在两 harness 的支持度**未证**。且失败模式比「不支持」更糟:Codex 侧文档称客户端未实现 handler 时**会话无限期阻塞**——不是降级是挂死。**规则(拍)**:服务端**只在客户端明确宣告支持**(能力协商/协议版本)时才发 `input_required`;否则 `confirm` **立即**降为 `propose` 并返回候选收据——propose 档由此获得第二个存在理由:**它是 confirm 的安全垫**。
 - 单用户本机/私有云:bearer 复用应用 JWT;多穿戴者并发细则在停车场。
 
 ## 8. 工具清单 v0(只定「形状类别」,逐步长)
@@ -146,7 +149,7 @@ ToolRegistryEntry = {
 | Q3 | 指代语汇与既有 target_kind 对齐? | **已闭**:继承 `CapturedSelectionRange`/`SelectionDraftV1`,owner 三元组贯穿(见 §2.1) |
 | Q4 | MRTR 两 harness 支持度? | **已闭(含降级)**:Claude 产品线推开,Codex 未证;confirm→propose 降级(见 §7) |
 
-**Opus 首读请证伪整体**:①本稿是否违反我自立的两问(平行机关——候选收据是否算在 operation_batches 之外另造机关?我的答案是「不是,它是同一表的新状态值」,请证伪;基线保证——工具面是否试图提供后端不提供的保证?);②12.2a-d 切割是否有隐藏的跨单依赖;③任何「申报宽于实现」的措辞(本稿尚无实现,但裁定表述是否宽于证据)。
+**Opus Review-1(2528b56)已做整体证伪,五条全采纳入 v0.4**:基线保证问命中(可撤销分档)/①不变式声明/①-b D-4 重写/②机械门必要非充分/③ObjectRef 分层无并集/④MRTR 更正与挂死防护。原请求文本保留备考:**Opus 首读请证伪整体**:①本稿是否违反我自立的两问(平行机关——候选收据是否算在 operation_batches 之外另造机关?我的答案是「不是,它是同一表的新状态值」,请证伪;基线保证——工具面是否试图提供后端不提供的保证?);②12.2a-d 切割是否有隐藏的跨单依赖;③任何「申报宽于实现」的措辞(本稿尚无实现,但裁定表述是否宽于证据)。
 
 ## 11. 与 Henry 相关的决定(代拍,可翻)
 
