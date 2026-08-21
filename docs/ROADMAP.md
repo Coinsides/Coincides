@@ -88,7 +88,6 @@
 | 02 | 工装单：测试 runner 最小集 + pure reducer，RED 前置 | ✅ 闭环（含 02.1 修正轮，checkpoint `41e6d1b`） |
 | 03 | **合批**：RC-A 生命周期状态机 ＋ RC-B surface authority ＋ 存量迁移（原拆 03/04，因下述合取约束并单，2026-08-20 Fable 拍定） | ✅ 闭环（五轮修理-复核收敛 03→03.4，全链二级复盘，checkpoint `b2a006b`；RED #1 已转绿） |
 | 05 | SlashSession（RC-D）＋ TD-3/TD-5 清偿 | ✅ 闭环（九轮修理-复核含两次设计介入，checkpoint `ad301c6`） |
-
 | 12.2a-1 | 工具注册表类型＋「无后门」机械门脚本（纯工装） | ready（Codex 周额刷新后开工；Spark 实测单） |
 | 12.2a-2 | 收据轴 `'mcp'/'proposed'`＋消费方不变式守卫 | ready（排 a-1 后） |
 | 12.2a-3 | MCP transport 骨架＋`resolve_selection` | 方案短笺阶段（裁定方两问后放行） |
