@@ -230,6 +230,7 @@
 - ✅ `check:v2-bn11-relation-freshness`
 - ✅ `check:source-experience`
 - ✅ `check:changed-file-secrets`
+- ✅ `check:tool-face-parity`
 - ✅ `smoke:canvas-engine-model-contract`
 - ✅ `smoke:canvas-engine-performance`
 

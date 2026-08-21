@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 105 份文档。
+共 106 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -114,6 +114,7 @@
 | [handoffs/2026-08-21-v2bn12-12-2a1-tool-registry-and-parity-gate.md](handoffs/2026-08-21-v2bn12-12-2a1-tool-registry-and-parity-gate.md) | V2.BN.12.2a-1:工具注册表类型 + 「无后门」机械门脚本(纯工装) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-21-v2bn12-12-2a2-receipt-axis-and-invariant.md](handoffs/2026-08-21-v2bn12-12-2a2-receipt-axis-and-invariant.md) | V2.BN.12.2a-2:收据轴扩展('mcp' / 'proposed')+ 消费方不变式守卫(单交付物) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-21-v2bn12-12-2a3-transport-plan-note.md](handoffs/2026-08-21-v2bn12-12-2a3-transport-plan-note.md) | V2.BN.12.2a-3(方案短笺阶段):MCP transport 骨架 + `resolve_selection` | `(缺状态头)` | — | — |
+| [handoffs/2026-08-21-v2bn121-legacy-block-drop-and-receipt-clock.md](handoffs/2026-08-21-v2bn121-legacy-block-drop-and-receipt-clock.md) | V2.BN.12.1.1:存量丢块机关 + 收据时钟统一(补丁版) | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/v2-bn12-2-mcp-tool-face.md](handoffs/plans/v2-bn12-2-mcp-tool-face.md) | Plan V2.BN.12.2 — MCP 工具面(末端执行器第一次实体化) | `active` | — | — |
 | [operating-workflow.md](operating-workflow.md) | 代理期工作流(v1) | `active` | 2026-08-21 | — |
