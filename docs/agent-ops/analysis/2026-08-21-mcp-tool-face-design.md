@@ -1,4 +1,4 @@
-> **状态 (Status)**: draft → **v0.4 Fable 拍板(Opus Review-1 五条全采纳后)**;Henry 可翻;转 V2.BN.12.2 施工规格
+> **状态 (Status)**: draft → **v0.5 Fable 拍板(v0.4 + S1 复核升级的 schema 权威裁定)**;Henry 可翻;转 V2.BN.12.2 施工规格
 > **层 (Layer)**: 分析 / Analysis(必修① 设计稿)
 > **日期 (Updated)**: 2026-08-21
 > **权威 (Authoritative)**: 否(拍板后其裁定进 current-state 与施工单)
@@ -85,6 +85,23 @@ ToolRegistryEntry = {
 - **但它是必要非充分(Review-1 ②)**:client 走单一 axios 实例+模板字面量路径,源码 grep 只证「有人构造了这个 URL」,不证「有可达入口」(死代码/feature flag 全能过;「有引用≠活」与「零引用≠死」互为逆命题)。**声明口径**:本门=「无后门」的机械**必要条件**;充分性由 12.2 验收的人类入口旅程验证补(每条 public 工具的 human_entry 须在旅程分数里实际走一次)。
 - **注册≠可暴露**(调研盘 §1.4 一般化):任何由注册表派生的枚举(kind/模板类型/关系类型/purpose role)经 `exposure` 闸;`__` 前缀与 `exposure:'test'` 强制不暴露(TD-4 落位)。
 - 工具清单由注册表生成进 `docs/generated/`(对象边界契约 §4 同律),不手写。
+
+### 3.1 schema 权威裁定(2026-08-21,S1 复核 FAIL(方向不成立)升级后拍)
+
+**问题**:`ToolRegistryEntry` 若住 `shared/types`,承载不了 zod(zod 只在 server 声明);S1 实现退化为无语义 `Record<string,unknown>`,parity 脚本用 `new Function` 执行源码片段(无 module 作用域,真实条目 `ReferenceError`),机械门对伪造条目判绿=什么都没证明。
+
+**裁定(唯一权威 + 派生产物,无第二份手写 schema)**:
+1. **注册表住 server**:`server/src/toolFace/registry.ts`(TS 运行时模块),条目的 `input_schema/output_schema` 为**真 zod**,复用 `server/src/validators`;这是**唯一权威**。
+2. **manifest 是派生物,不是目录**:一个生成器(`scripts/` 下,用仓库已有的 `jiti`/`tsx` 正常**模块加载**注册表——禁止 `new Function`/源码截片)把注册表序列化为 `docs/generated/tool-face-manifest.json`:name/truth/tier/exposure/scopes/human_entry + 由 zod 派生的 JSON Schema(zod 自带 `toJSONSchema` 或 `zod-to-json-schema`,二选一申报)。**parity 脚本与文档只消费 manifest**,从不解析源码。manifest 走 docs:check 同款过期检查(生成物过期=脚本没跑)。
+3. `shared/types` 只保留 **manifest 的可序列化类型**(无 zod);client 若需工具描述,读 manifest 类型。
+4. **legacy `toolDefinitions`(v1 agent 血统)=退役线,不是 adapter**;新注册表是唯一目录,manifest 是其派生——不出现第三套目录。legacy 随 v1 清场专项处置,V12 不碰。
+
+**机械门口径随之修正**:
+- 正控必须用**真实存在的 route + 真实 client 调用点**(如 `GET /api/notes` 与其 client 调用),负控须在隔离中证明会红;
+- registry 为空时输出「0 条 public 条目受检,未证明任何 parity」并 exit 0——**不得输出 PASS 字样**(真空判绿=MED);
+- `exposure:'test'` 与 `__` 前缀的拒绝逻辑必须各有一条独立 killer(S1 的条件写成了 `public && test` 永假)。
+
+**对 S1 的处置(交 Opus 调度)**:按本裁定重开 S1(不是修正单,是**方向重置**):删除 `new Function` 路径与 shared 侧伪 schema;注册表落 server;生成器+manifest+parity 三件同单或拆两单由 Opus 定;RED-first 且 mutation 由 reviewer 亲测(三要素)。**S3 解除阻塞条件**=本裁定落地并复核 PASS。
 
 ## 4. 范围裁定(D-1 / D-2 / D-3)
 
