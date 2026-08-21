@@ -14,13 +14,21 @@
 
 | 步 | 内容 | 档位 | 工单 | 状态 |
 |---|---|---|---|---|
-| S1 | 注册表类型+机械门脚本(纯工装) | Spark | 12.2a-1 | builder 回执齐(含补完);**待复核** |
+| S1 | 注册表类型+机械门脚本(纯工装) | Spark | 12.2a-1 | **复核进行中**(5.6,2026-08-21 由 Opus 启动;**不与 S2 合批**,理由见下) |
 | S2 | 收据轴 `'mcp'/'proposed'` + 消费方不变式守卫 + killer | Spark | 12.2a-2(已写) | ready |
 | S3 | MCP transport 骨架 + `ping` + `resolve_selection`(能力协商:无 `input_required` 宣告则 confirm→propose) | 5.6(架构面,**先短笺**) | 12.2a-3(短笺请求已写) | 短笺阶段 |
 | S4 | 读面:五真相 `list_*/get_*` 由注册表派生 + 缓存头 | Spark | 待拆 | — |
 | S5 | 写面:一条 immediate(内容/知识)+ Relation `propose` + 一条 `confirm`(MRTR 端到端或降级) | 5.6 | 待拆 | — |
 | S6 | 候选审阅入口(Apply/Discard 最小列表)**与旧 `ProposalList.tsx` 退场同单** | Spark | 待拆 | — |
 | S7 | 收口:旅程分数(每 public 工具走 human_entry)、生成工具清单进 `docs/generated/`、契约/current-state 同步、铸版 12.2 | Fable | — | — |
+
+### 1.1 调度决定记录(Opus)
+
+| 决定 | 内容 | 理由 |
+|---|---|---|
+| **S1 不与 S2 合批复核** | S1 单独送 5.6 复核 | ①**S2 尚未施工**（工单 ready 但无回执），合批＝S1 干等；②两步**基本独立**（S1=注册表类型+门脚本；S2=`operation_batches` 轴+server 守卫），合批既无「先验基座」之利、也无「缺陷复合」之弊，风险上是平手；③**配额有限且规则为见底即停** —— 先把已有回执的一步落袋比攒批安全；④**S1 是 Spark 实测样本，单独复核给出的测量更干净**（合批会混入不同档位的施工产物）。第 ④ 条是决定性理由。 |
+
+> ⚠️ **一处调度侧的可见性缺口（记档）**：`codex` CLI **无非交互配额查询**（`--help` 无 status/usage/limit）。故「见底即停」我**只能靠 exec 失败反向感知，不能主动监控**。若某次 codex 启动报 usage limit，即为停机信号；在此之前我无法预警「快到了」。**Henry/Fable 的 `/status` 是目前唯一的前瞻视角。**
 
 ## 2. 规则(施工侧必读)
 
