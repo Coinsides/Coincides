@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 99 份文档。
+共 105 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -29,6 +29,7 @@
 | [analysis/2026-08-20-repo-readme-draft.md](analysis/2026-08-20-repo-readme-draft.md) | repo 根 README 重建草案 | `superseded` | 2026-08-20 | ⚠️ [`README.md`](../../../README.md)（2026-08-20 抽检放行后整体替换完成） |
 | [analysis/2026-08-21-builder-lineage-redundancy-survey.md](analysis/2026-08-21-builder-lineage-redundancy-survey.md) | builder 血统冗余调研 | `draft` | 2026-08-21 | — |
 | [analysis/2026-08-21-mcp-tool-face-design.md](analysis/2026-08-21-mcp-tool-face-design.md) | 必修① MCP 工具面设计稿 v0 ——「末端执行器第一次实体化」 | `draft` | 2026-08-21 | — |
+| [analysis/2026-08-21-selection-receipt-design.md](analysis/2026-08-21-selection-receipt-design.md) | 必修③ 选区收据系统设计稿 v0(薄——它是 12.2 §2.1 的持久化,不是新系统) | `draft` | 2026-08-21 | — |
 | [analysis/2026-08-21-v2bn12-1-journey-score.md](analysis/2026-08-21-v2bn12-1-journey-score.md) | V2.BN.12.1「编辑基座」旅程分数验收 | `draft` | 2026-08-21 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
@@ -110,4 +111,9 @@
 | [handoffs/2026-08-20-v2bn12-05-6-fix.md](handoffs/2026-08-20-v2bn12-05-6-fix.md) | V2.BN.12 修正单 05.6:恢复载体归家 + 副作用重绑(第二次设计介入) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-20-v2bn12-05-7-fix.md](handoffs/2026-08-20-v2bn12-05-7-fix.md) | V2.BN.12 修正单 05.7:恢复 UI 机械缺陷四件(**预告:本链最后一轮修正**) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-20-v2bn12-05-slash-session.md](handoffs/2026-08-20-v2bn12-05-slash-session.md) | V2.BN.12 工单 05:SlashSession 事务(RC-D)+ 两笔测试债顺手清偿 | `(缺状态头)` | — | — |
+| [handoffs/2026-08-21-v2bn12-12-2a1-tool-registry-and-parity-gate.md](handoffs/2026-08-21-v2bn12-12-2a1-tool-registry-and-parity-gate.md) | V2.BN.12.2a-1:工具注册表类型 + 「无后门」机械门脚本(纯工装) | `(缺状态头)` | — | — |
+| [handoffs/2026-08-21-v2bn12-12-2a2-receipt-axis-and-invariant.md](handoffs/2026-08-21-v2bn12-12-2a2-receipt-axis-and-invariant.md) | V2.BN.12.2a-2:收据轴扩展('mcp' / 'proposed')+ 消费方不变式守卫(单交付物) | `(缺状态头)` | — | — |
+| [handoffs/2026-08-21-v2bn12-12-2a3-transport-plan-note.md](handoffs/2026-08-21-v2bn12-12-2a3-transport-plan-note.md) | V2.BN.12.2a-3(方案短笺阶段):MCP transport 骨架 + `resolve_selection` | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
+| [handoffs/plans/v2-bn12-2-mcp-tool-face.md](handoffs/plans/v2-bn12-2-mcp-tool-face.md) | Plan V2.BN.12.2 — MCP 工具面(末端执行器第一次实体化) | `active` | — | — |
+| [operating-workflow.md](operating-workflow.md) | 代理期工作流(v1) | `active` | 2026-08-21 | — |

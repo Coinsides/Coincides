@@ -14,9 +14,9 @@
 
 | 步 | 内容 | 档位 | 工单 | 状态 |
 |---|---|---|---|---|
-| S1 | 注册表类型+机械门脚本(纯工装) | Spark | 12.2a-1 | **复核进行中**(5.6,2026-08-21 由 Opus 启动;**不与 S2 合批**,理由见下) |
+| S1 | 注册表类型+机械门脚本(纯工装) | Spark | 12.2a-1 | ⛔ **FAIL(方向不成立)** 0B/2H/4M/0L —— **已升级 Fable,按 plan §2 不发修正单,等设计裁定**(HIGH-2 schema 权威须 Fable 拍) |
 | S2 | 收据轴 `'mcp'/'proposed'` + 消费方不变式守卫 + killer | Spark | 12.2a-2(已写) | ready |
-| S3 | MCP transport 骨架 + `ping` + `resolve_selection`(能力协商:无 `input_required` 宣告则 confirm→propose) | 5.6(架构面,**先短笺**) | 12.2a-3(短笺请求已写) | 短笺阶段 |
+| S3 | MCP transport 骨架 + `ping` + `resolve_selection`(能力协商:无 `input_required` 宣告则 confirm→propose) | 5.6(架构面,**先短笺**) | 12.2a-3(短笺请求已写) | 短笺阶段 —— ⚠️ **被 S1 HIGH-2 阻塞**:reviewer 明言「S3 前先由 Fable 拍定唯一 schema 权威」 |
 | S4 | 读面:五真相 `list_*/get_*` 由注册表派生 + 缓存头 | Spark | 待拆 | — |
 | S5 | 写面:一条 immediate(内容/知识)+ Relation `propose` + 一条 `confirm`(MRTR 端到端或降级) | 5.6 | 待拆 | — |
 | S6 | 候选审阅入口(Apply/Discard 最小列表)**与旧 `ProposalList.tsx` 退场同单** | Spark | 待拆 | — |
