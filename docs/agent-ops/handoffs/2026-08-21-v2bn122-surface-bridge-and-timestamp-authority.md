@@ -119,3 +119,93 @@ migration 回填现存 **2 行** ISO 记录为空格式。幂等;只命中形如
 **回执纪律**:`handoffs/README.md` Builder 侧 1–3 全条款(语言不得宽于实现 / 平行机关申报 / **UTF-8**)+ **M-1 mutation 归复核方**(self-test 只作前置自查)+ **M-2 header 不由你翻**。
 
 **回执须含**:T-1 用什么信号区分「未 hydrate」与「已 hydrate 但零可见」· T-2 如何保证不盖手动切换 · A-2 先红后绿两段输出 · T-1 专项测试输出 · 三篇 note(标本/对照 3927dd5a/今日 5e2072fc)的行为对照 · B.1 四处改动 + 阳性对照后的全量复扫 · B.3 全表分布与时序验证 · B.5 处置 · `reverted_at` 合规确认 · 四门逐条收据 · 触及面实际 diff vs 申报 · 显式范围排除 · **每条阴性断言的阳性对照**。
+
+## Result
+
+> builder: Codex · date: 2026-08-21 · **判定:BLOCKED · needs: claude**
+>
+> header 按 M-2 保持 `ready`。本回执只报告边界审计与基线门禁,不把未接线的候选实现、基线绿测或修复前数据库状态包装成完工。
+
+### 停工结论:两条独立硬闸
+
+本单有两条彼此独立的必需接线都越出「边界(触及面申报)」。按工单「若真因或修法要求越出本申报面:停下」,未写产品代码、测试或 migration。
+
+#### A.T-1 的 hydration authority 与 surface 正门不在允许面内汇合
+
+调用与数据顺序是:
+
+1. `useNoteCanvasRuntimeController.ts:18-76` 先无参调用 `useRuntimeSurfaceStateController()`。
+2. 同文件直到 `:77-148` 才从 `useRuntimeDocumentDataController()` 得到 `note / blocks / sortedBlocks / loading`。
+3. 允许修改的 `useRuntimeSurfaceStateController.ts:103-112` 传给 `useSurfaceModeController` 的只有 `clearBlockSelection / closeOverlay / setSnapGuide`;两个允许文件都没有 note 或 hydration 数据输入。
+4. 真正 hydration authority 在不允许修改的 `useNoteCanvasDataAdapter.ts`:初值 `note=null / blocks=[] / loading=true`(`:402-404`),成功路径递增 epoch(`:581-583`)、写 note 与 hydrated blocks(`:584-601`),最后才 `setLoading(false)`(`:640-641`)。它向上返回 `note / blocks / sortedBlocks / loading`(`:2157-2162`),但不返回 epoch。
+5. 现有 `NoteCanvasRuntimeContext` 的 value 只有 `noteId`(`NoteCanvasRuntimeProvider.tsx:3-18`);`onNoteLoaded → clearBlockSelection` 又是无参回调,拿不到 `blocks`,不能调用要求 `blocks + policy + contentWidth` 的同一 `getVisibleBlocksForSurface` 正门谓词。
+
+**D 阳性校准:**同一静态探针先在两个允许文件命中已知阳性 `clearBlockSelection=10`、`blockListRef=2`,再得到 `noteId / sortedBlocks / loading / successfulHydrationEpoch / hydrated` 各 0;同一 context 探针先命中 `noteId=4`,再得到上述 block/hydration 信号各 0。CodeGraph 调用探针也先命中 root 的两次真实 hook 调用及其顺序,才据此判定允许面内没有数据通道。
+
+若边界加入 `client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts`,可保留现有 hook 顺序并让 surface controller 返回 one-shot resolver;root 在取得 `note / sortedBlocks / loading / contentWidth` 后调用。T-1 的建议信号是 **`!loading && note?.id === noteId`**:
+
+- 首渲染 `loading=true` ⇒ 未 hydrate;
+- 换 note 首帧即使旧 `loading=false`,旧 `note.id !== noteId` ⇒ 未 hydrate;
+- 已 hydrate 的真空 note 则条件为真且 blocks 可为 0。
+
+resolver 再用同一 `getVisibleBlocksForSurface` 分别计算 Page/Canvas 可见性;按 note 分代的 decided ref 与 manual-toggle ref 可守住 C-2/T-2。当前不允许改 root,其余接法都会变成重复 fetch、DOM 推断、module-global 桥或新 context/store,均违反本单边界,故未自行采用。
+
+#### B.B.0 的「单一 helper」要求覆盖 14 个生产文件,当前只授权 3 个
+
+全量 DML 探针覆盖 `server/src/**/*.ts` 的生产代码(排除 tests/migrations),先命中已知阳性 `learningCanvases.ts:298` INSERT、`noteBlockLifecycle.ts:926` reverted INSERT 与 `:1026` reverted UPDATE,再得到:
+
+- `operation_batches` DML 共 18 处:17 INSERT + 1 UPDATE;
+- `applied_at` 16 个写入点:15 个应用侧 ISO,1 个 `learningCanvases.ts:298-300` 的 `datetime('now')`;
+- `reverted_at` 2 个写入点:`noteBlockLifecycle.ts:926-939` INSERT 与 `:1026-1029` UPDATE,二者均使用 `:917` 生成的 ISO `now`。
+
+helper 声明探针先看见 7 个已知本地阳性(3 个 `createOperationBatch`、3 个 `insertOperationBatch`、1 个 `createRecoveryBatch`),再得到 shared/export helper = 0。现有 15 个 ISO `applied_at` 不是经一个 helper,而是散在 14 个生产文件。
+
+除本单允许的 `learningCanvases.ts`、`noteBlockLifecycle.ts`、`sourceProjectionMaterializer.ts` 外,要兑现 B.0 还必须触及 11 个未申报文件(12 个 `applied_at` 写点):
+
+- `server/src/routes/notes.ts`
+- `server/src/routes/projections.ts`
+- `server/src/services/canvasLayoutProposals.ts`
+- `server/src/services/compositionTemplates.ts`
+- `server/src/services/domainRefinementProposals.ts`
+- `server/src/services/materialMapProposals.ts`
+- `server/src/services/materialReconciliationProposals.ts`
+- `server/src/services/organizedNoteProposals.ts`
+- `server/src/services/packagePortability.ts`
+- `server/src/services/reconciliationSafety.ts`
+- `server/src/services/templateMigrationProposals.ts`
+
+而且当前边界把 `noteBlockLifecycle.ts` 与 `sourceProjectionMaterializer.ts` 限为「仅 B.1」,并未授权 B.0 的 applied/reverted helper 接线。只把 `learningCanvases.ts` 一行换成 `new Date().toISOString()`只能消除一个格式违例,不能如实申报「应用侧 ISO,经单一 helper」;按 B.5 明文要求停下。
+
+### 未产生的实现验收件
+
+```text
+A-2 RED: 未产生——在写测试前触发允许面硬闸。
+A-2 GREEN: 未产生——没有生产修复,基线绿测不得冒充 GREEN。
+T-1 专项测试: 未产生——没有把未接入生产的数据参数做成孤立假绿测试。
+三篇 note 修复后对照: 未产生——没有修复后状态。
+B.1 修复后「无第五处」复扫: 未产生——四个已知显式 created_at 写点仍未改。
+B.3 修复后全表分布/时序: 未产生——没有执行 migration。
+```
+
+**D 阳性校准:**写回执前的 `git diff --name-only` 先看见生成器实际改动的 `docs/agent-ops/INDEX.md` 与 `docs/generated/object-inventory.md`;同一探针没有 client/server/test/migration 路径。因此上列「未产生」是实际 diff 边界,不是坏探针造成的阴性。
+
+`created_at` 的 4 个已知显式写点与前序结论一致;本轮 17-INSERT 全量探针全部看见它们,但因停工没有形成「改后四处归零」的阴性断言。`reverted_at` 的两处当前输入均为 ISO;本轮只确认现状,没有把它们冒充为 B.0 helper 收敛完成。
+
+### 四道门收据(docs-first,仅基线)
+
+1. `npm.cmd run docs:check`:首次 exit 1,只报 `docs/agent-ops/INDEX.md` 过期。依工单运行 `npm.cmd run docs:index`(写 1 个 INDEX)与 `npm.cmd run docs:inventory`(刷新 inventory),复跑 `docs:check` → exit 0。
+2. `npm.cmd run verify:v2-bn8-runtime` → exit 0;17 files / 198 unit tests、159 runtime boundary checks、60 model-contract groups、client/server build、performance smoke、docs/diff/secrets 尾门均通过。此为未实现本单时的基线,不代表 A/B 验收。
+3. client `npm.cmd exec tsc -- --noEmit` → exit 0,无输出;server 同命令 → exit 0,无输出。
+4. `npm.cmd run test:unit` → exit 0,17 files / 198 tests passed;现有 suite 没有本单 T-1 测试。
+
+### 实际触及面、平行机关与显式排除
+
+本轮写入只有文档生成器刷新 `docs/agent-ops/INDEX.md`、`docs/generated/object-inventory.md`,以及以 UTF-8 追加本 `## Result`;header 未改。没有新造状态存储、恢复载体、守卫层、事务边界或其他平行机关。
+
+**D 阳性校准:**最终 diff 探针以这 3 个文档文件为已知阳性,再核对 client/server/schema/migration/test 路径为 0;生产实现 diff = 0。未执行 migration 或生产数据库写入命令;未 commit,未 push,未碰 main。
+
+### needs: claude
+
+1. A 至少把 `client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts` 加入允许面,并确认采用 root→one-shot resolver 接线;T-1 可用 `!loading && note?.id === noteId` 区分未 hydrate 与已 hydrate 零可见。
+2. B 明确授权新增一个共享 operation-batch timestamp helper,把上列 11 个生产文件纳入触及面,并把 `noteBlockLifecycle.ts` / `sourceProjectionMaterializer.ts` 从「仅 B.1」扩为允许 B.0 接线。否则应收窄裁定为只修 `learningCanvases` 的格式违例,但不得再声称「单一 helper」。
+3. 边界重划后再实施 A 的 RED→GREEN/T-1/三篇 note 对照与 B 的 migration/全表分布/时序验证;在此之前本单不具备完成条件。
