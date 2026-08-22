@@ -120,7 +120,7 @@
 | [handoffs/2026-08-21-v2bn123-surface-bridge.md](handoffs/2026-08-21-v2bn123-surface-bridge.md) | V2.BN.12.1.3:初始表面过渡桥(边界重划后,**仅 A 段**) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-21-v2bn124-bridge-regression-guards.md](handoffs/2026-08-21-v2bn124-bridge-regression-guards.md) | V2.BN.12.1.4:过渡桥回归护栏(**只写测试,不改产品码**) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-22-v2bn12-2a1b-fix-projection-and-freshness-killers.md](handoffs/2026-08-22-v2bn12-2a1b-fix-projection-and-freshness-killers.md) | V2.BN.12.2a-1b-fix:两条缺失的 killer | `(缺状态头)` | — | — |
-| [handoffs/2026-08-22-v2bn12-2a1b-fix2-production-wiring-killer.md](handoffs/2026-08-22-v2bn12-2a1b-fix2-production-wiring-killer.md) | V2.BN.12.2a-1b-fix2:生产接线 killer(第三次同族漏层) | `(缺状态头)` | — | — |
+| [handoffs/2026-08-22-v2bn12-2a1b-fix2-production-wiring-killer.md](handoffs/2026-08-22-v2bn12-2a1b-fix2-production-wiring-killer.md) | 12.2a-1b-fix2:生产接线 killer —— 生产 CLI 必须调用同一投影函数 | `(缺状态头)` | — | — |
 | [handoffs/2026-08-22-v2bn12-2a1b-tool-registry-and-manifest.md](handoffs/2026-08-22-v2bn12-2a1b-tool-registry-and-manifest.md) | V2.BN.12.2a-1b:工具注册表(server,真 zod)+ manifest 生成器 | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/v2-bn12-2-mcp-tool-face.md](handoffs/plans/v2-bn12-2-mcp-tool-face.md) | Plan V2.BN.12.2 — MCP 工具面(末端执行器第一次实体化) | `active` | — | — |
