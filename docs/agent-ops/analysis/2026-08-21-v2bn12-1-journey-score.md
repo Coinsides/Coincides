@@ -139,3 +139,7 @@
 - **§5.3 口径更正**:「零消费点」错——`sourceMaterialization.ts:87-90` 按 `created_at DESC, id DESC` 取最近 batch(多行 SQL,单行 grep 必漏);当前该 source_type 0 行、各 source_type 内部同质,故**已被消费但未误动;任一 source_type 一旦混格式即静默取错**。B-1 扩到第 4 个写入点 `sourceProjectionMaterializer.ts:289-308`(Opus 调度内已定,采)。
 - **收据表时间戳约定(收据基底规则,入设计稿 §2.2 不变量)**:每个时间戳列**恰有一种盖章权威**——`created_at` = DB 默认(应用层永不显式传,含 S2 工具收据);`applied_at` / `reverted_at` = 应用层 ISO 8601 Z。同列混格式=缺陷。据此 `learningCanvases.ts:298-300` 的 `datetime('now')` 写 `applied_at` 是约定违例(今日 0 行显现),只修这一处 + 该路径回归断言格式。**重裁(12.1.2 BLOCKED 后)**:原文「单一 helper」撤回——我点名了一个不存在的机关(15 个 ISO 写点散在 14 个生产文件,无 helper),兑现它=跨 14 文件重构且贴近 03/05 保护面,买到的是 DRY 不是正确性;约定收窄为**「每列单一格式」**,helper 收敛记 TD-8,种子=12.2a-2 新建的工具收据写入路径**从第一天起走 helper**,存量 14 处随各自下次被触及时顺手归入,不专门开单。
 - §5.6 更正:12.1.1 与 S1a **串行**(共享工作树,Opus 纠正,采);12.1.2 打头,S1a 随后。
+
+### 5.2 12.1 线收口裁定(2026-08-22)
+
+12.1.1 BLOCKED → 12.1.2 BLOCKED → 12.1.3 FAIL(方向成立)→ 12.1.4 FAIL(方向成立)。**止损线触发,停 12.1 线。** 产品修复(过渡桥 `70a2aaa`)经两轮对抗复核证实有效:五处守卫 mutation + X1/X2/X3 + layout/passive 全部先红后绿;live 标本只读校准正确。剩余 finding 全在测试 harness 的 mock 面(HIGH-1)、哨兵取值(MED-1)、类型边界(MED-2)→ 记 **TD-9**,随 TD-7 桥一并退役。**J9 待真实走查**(需登录态,Agent 不得输密码;由 Henry 或持登录态的会话实走),过则打 `v2.bn.12.1.1`。12.1 线资源转 12.2 S1a。

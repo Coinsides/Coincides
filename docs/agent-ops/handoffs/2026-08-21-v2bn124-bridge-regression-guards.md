@@ -189,3 +189,103 @@ Harness 在调用 root hook **之后**注册自己的 `useLayoutEffect`。同一
 - 本 Result 以 `apply_patch` 写入 UTF-8；写后严格 UTF-8 decode 与首行自检见最终补充探针。header 保持原样。
 - 写后探针:`TextDecoder('utf-8',{ fatal:true })` = PASS、BOM = false；首行中文与 `status: ready(...)` 完整可读。
 - 未 commit、未 push、未切换/修改 main；未做浏览器主观验收、生产 DB 写入或历史数据修复；不把 unit/root contract 扩写成真实浏览器视觉签收。
+
+## Review
+
+> reviewer: Codex（洁净室复核） · date: 2026-08-22 · baseline: `49755db19a7ef4069c5d818c167eeec8f58391e0` · incremental parent: `bd9d58903543f0378a3c92afa360fd2e572203cd`
+>
+> **判定: FAIL（方向成立）** · **BLOCKER 0 / HIGH 1 / MED 2 / LOW 0**
+
+### 1. 裁定
+
+X1、X2、X3 删除 root 接线、以及 `useLayoutEffect → useEffect` 四个点名 mutation，均已由 reviewer 在隔离 git worktree 亲测精确变红；还原后全部恢复绿色。故本单选择的三类护栏方向成立，尤其 layout/passive 判据不是 `act()` 冲刷出来的假判据。
+
+FAIL 位于 G-X3 harness 的承重范围仍被写宽：测试虽然挂载了真实 `useNoteCanvasRuntimeController`，也在替身内部调用了真实 `useSurfaceModeController`，却**整体 mock 掉了两者之间的生产 `useRuntimeSurfaceStateController`**。亲测只把该生产正门传入 leaf hook 的 `noteId` 改成 `undefined`，root 专项 **3/3 PASS**、全量 client unit **209/209 PASS**、client tsc exit 0；真实产品 resolver 则会命中 `!noteId` 直接返回，原 P-1 可复发。另一个独立 survivor 是把 root 的 `loadedNoteId: note?.id` 偷换成 `loadedNoteId: noteId`，同样在 root **3/3**、全量 **209/209** 与 tsc 下全绿。
+
+**方向成立**具体指：新增 root-level contract、后置 layout observer 与 X1/X2 fixture/matrix 的设计均有效；失败来自 mock 面和哨兵取值仍没有把完整生产桥与精确输入来源锁住。按本单既定止损线，本判定满足「12.1.4 再 FAIL」条件；是否执行停线仍由 Fable 裁定，reviewer 不翻 header、不代放行。
+
+### 2. 增量范围、隔离与 mutation 三要素
+
+- 按 reviewer charter 5-7 采用增量协议：基线是前单 `2026-08-21-v2bn123-surface-bridge.md ## Review` 已实证的 X1/X2/X3 漏径；本轮只复验三洞是否封住、以及 `49755db^..49755db` 新增的 test harness。未重复前轮已判 C-1/C-2、五个旧 mutation 或 bridge 产品算法。
+- 因共享 `.git/index` 只读，未向共享 `.git/worktrees` 写 metadata；在 repo 内 ignored `.codex-tmp` 建立独立 bare clone，再建立 detached git worktree，HEAD 精确为 `49755db`。依赖在隔离树各自 `npm ci --offline`，无 junction、未复用或删除共享 `node_modules`。
+- 三要素均满足：位点由调度方在本单点名；执行者为本 reviewer；X1/X2/X3 均是前轮亲测存活的旧漏径。每个 RED 都命中目标断言，不是 API 缺失、编译失败或旁路断言。
+- mutation 前共同阳性为两专项 **2 files / 11 tests PASS**。所有 probe 后逐文件 `git restore --source=HEAD`；最终三枚 mutation 生产文件 working/HEAD blob 分别同为 `be060d0…`、`a4660ce…`、`3efe5f8…`，隔离 worktree `git status --porcelain=v2 -uall` 无输出后才移除。
+
+### 3. X1/X2/X3 reviewer 亲测收据
+
+| 靶 | reviewer 施加的点名 mutation | 精确 RED | 还原 GREEN |
+|---|---|---|---|
+| X1 | `pageVisibleBlocks.length === 0` → `>= 0` | `-t "G-X1"` exit **1**；仅 G-X1 红，test `:177`：expected `page`, received `canvas`；7 skipped | exit **0**；1 passed / 7 skipped |
+| X2 | 删除换 note effect 中 `manualToggledRef.current = false` | `-t "G-X2"` exit **1**；manual-reset 条在 test `:211` 精确红：expected `canvas`, received `page`；另一条 A→B→A matrix 仍过 | exit **0**；2 passed / 6 skipped |
+| X3-a | 删除 root resolver destructure、React layout import 与整段生产调用，hook/API 保留 | root 专项 exit **1**；3/3 均在 test `:232` 红：expected calls length 1, got 0 | exit **0**；3/3 passed |
+| X3-b | 只把 root `useLayoutEffect` 改成 `useEffect` | root 专项 exit **1**；3/3 均在 test `:240` 红：首张 observer receipt expected 1, got 0；此前 resolver length/payload 断言已通过 | exit **0**；3/3 passed |
+
+这些是 reviewer 自验的承重收据；builder Result 中的 RED/GREEN 只作装饰性前置自查，不承担本判定。
+
+### 4. Mock 面、layout/passive 与 TS2352 评估
+
+#### Mock 面
+
+- 同一 mock-target 探针先看见本文件 9 个真实 `vi.mock`、以及 `vi.importActual('./useSurfaceModeController')` 阳性，再得到 leaf `useSurfaceModeController` / `modePolicyService` / `placementService` 被直接 mock 的计数为 **0**。因此 exact X3-a 会红，不是测试自己伪造 resolver 算法后的纯自证。
+- 但同一探针同时看见 `vi.mock('./useRuntimeSurfaceStateController')` 计数为 **1**。测试在替身中重建「wrapper → 真实 leaf」，生产 wrapper 的 `noteId` 传递和 resolver return 没有执行；`Proxy` 对未知属性统一回 `noop` 又扩大了静默面。故可承重的准确口径仅是“真实 root effect 调用了测试提供、内部转交真实 leaf 的 resolver”，不能写成“完整生产桥已验”。
+- data/layout 输入没有把 resolver 算法桩掉，但决定**来源身份**的值被折成同值：`blocks === sortedBlocks`、route `noteId === note.id`、`contentWidth === DEFAULT_PAGE_CONTENT_WIDTH`，并且只有 `loading=false`。payload 相等只能证明最终值，不能证明取值来源。
+
+#### Layout/passive 判据
+
+判据真实。hook 注册顺序是：真实 surface reset layout effect → 生产 root resolver effect → harness 后置 layout observer。正常实现中 wrapper 先记 resolver call，再调用真实 resolver，所以 observer 第一张 primitive snapshot 必见 `1`；改为 passive 后，layout observer 先记 `0`，随后 `act()` 才冲 passive resolver 与最终 state。`act()` 能让最终 resolver count/DOM 都正确，却不能倒写第一张收据；实际 X3-b 正是在 `:240` 红，而非前面的最终调用/payload 断言。因此它精确区分本单点名的 layout 与 passive。当前 harness 未启 StrictMode；若未来启用，effect replay 可能令“精确一次”假红，但不会令 passive 假绿，本轮不另计 finding。
+
+#### TS2352 / `unknown` 边界
+
+该边界**确实脱钩**。测试 presentation mock 造的是顶层 `{ layerProps: { surfaceMode } }`，再在 test `:185` 通过 `as unknown as { surfaceMode: string }` 读取；生产 `useNoteCanvasLayerProps` 返回类型实际是 `{ chromeProps, documentLayerProps } | null`，生产消费者读取 `layerProps?.documentLayerProps.surfaceMode`。显式 `unknown` 因而不是单纯消除编译器噪声，而是跨过了真实结构与 nullability。它不妨碍 exact X3-a/X3-b 变红，但会让这条测试在生产 `layerProps` 类型/路径改变时继续编译并运行测试自造形状。
+
+### 5. Findings
+
+#### HIGH-1（技术缺陷 / 回归护栏）· G-X3 mock 掉了生产桥的中间承重点
+
+**复现：**在隔离 worktree 只把 `useRuntimeSurfaceStateController.ts` 调 leaf 时的 `noteId` 改成 `noteId: undefined`，不改 root/test/API。依次运行 root 专项、`npm.cmd run test:unit`、client `npm.cmd exec tsc -- --noEmit`，分别为 **3/3 PASS、19 files / 209 tests PASS、exit 0**。实际 leaf 的 resolver 因 `!noteId` 直接 no-op，canvas-only note 不再自动到 Canvas，原 P-1 同果复发。
+
+**建议修法：**root contract 保留真实 `useRuntimeSurfaceStateController`，改为 mock/spy 它的 leaf 重依赖；或另加一条 wrapper contract，明确保护 `noteId` 入参、真实 `useSurfaceModeController` 调用与 resolver return。删除 permissive `Proxy → noop`，至少让本契约所需字段显式列出。修后必须复跑上述 `noteId: undefined` mutation，要求红在 bridge 调用/结果，而不是无关 mock 缺字段。
+
+#### MED-1（技术缺陷 / 取证）· “精确 payload”断言没有区分四个生产输入来源
+
+**复现：**只把 root effect 的 `loadedNoteId: note?.id` 改成 `loadedNoteId: noteId`；root 专项 **3/3 PASS**、全量 **209/209 PASS**、client tsc exit 0。原因是 test `:202-203` 令 route ID 与 hydrated note ID 完全相同。该错误会把 generation guard 的来源退化成当前 route 自证，旧 hydration payload 可能提前消费新 note 的 one-shot。静态同族还有 `sortedBlocks → blocks`、动态宽度 → 默认常量、`loading → false`，现有 fixture 也无法辨别。
+
+**建议修法：**给 raw/sorted blocks、route/hydrated note ID、动态 content width 设置互异哨兵；补 `loading=true → false` 和 stale note → current note 的 rerender；`ResolverCall` 直接复用生产导出的 `ResolveInitialSurfaceModeInput`。逐项施加来源偷换 mutation，要求 payload 断言精确红。
+
+#### MED-2（认识论错误 / 类型边界）· `unknown` cast 让观察通道与生产 `layerProps` 静默脱钩
+
+**复现：**对照生产 `useNoteCanvasLayerProps.ts:42-45,241-253` 与 `NoteCanvasRuntime.tsx:8-10` 的 nested/null 类型，再看 test `:106-109,185` 的 top-level test-double；client tsc 仍 exit 0，正是双 cast 跳过 TS2352 的结果。生产返回类型或 consumer 路径变化不会机械要求测试替身同步。
+
+**建议修法：**若 presentation 属显式范围排除，就不要借假 `layerProps` 冒充生产可见输出；改用单独、类型化的 surface-state phase receipt。若要检查可见 commit，则 mock 返回真实 nested/null 形状并由生产 `ReturnType` 约束，Harness 走 `documentLayerProps.surfaceMode`，移除双 cast。
+
+### 6. 产品码 diff、触及面与 D 段校准
+
+- `49755db^..49755db` 的阳性 changed-path 为 5 个：两枚测试 + `docs/agent-ops/INDEX.md` + claude-log + 本 handoff；精确 **+442/-3**。同一探针随后过滤 non-test `client/src|server/src|shared` 得 **0**，过滤 server/migration/schema/12.2/v1 得 **0**。`git diff --check` exit 0。
+- 同一 blob 探针的已知阳性是 `useSurfaceModeController.test.tsx` 从 parent `e91d24f…` 变为 commit `befd9cd…`；随后五个点名产品文件 parent=commit=working：`useSurfaceModeController.ts be060d0…`、`useRuntimeSurfaceStateController.ts a4660ce…`、`useNoteCanvasRuntimeController.ts 3efe5f8…`、`modePolicyService.ts a67ce18…`、`placementService.ts 392269b…`。故“产品码 diff=0”不是瞎探针。
+- 共享树 porcelain 仍只对 root controller 显示已预告的 `.M`；其 index/working blob 都是 `3efe5f8…` 且无 numstat/hunk，不报越界。没有发现 03/05 Slash/rollback 产品 hunk、server、DB/schema、12.2 或 v1 改动；阳性对照仍是上述两枚测试与三份文档。
+- Result 的 **4 files,+401/-3** 是 builder 写回时的 pre-commit working-tree 快照，算术成立；当前 commit 后加 claude-log 41 行，故自然口径变为 **5 files,+442/-3**。两者是不同时间点，不记 finding；当前 baseline 已 commit，不能继续把 Result 的“未 commit”当现状。
+
+### 7. 亲跑门禁收据（docs-first）
+
+| 顺序 | 命令 | reviewer 收据 |
+|---:|---|---|
+| 0 | 首次 `npm.cmd run docs:check` | exit **1**；UTC 日期跨到 2026-08-22 后 9 个生成 INDEX 日期过期。按工单运行 `docs:index`（写 9 个 INDEX）+ `docs:inventory`（重写 inventory），再跑 `docs:check` exit **0**；门禁后全部恢复到 HEAD |
+| 1 | `npm.cmd run verify:v2-bn8-runtime` | exit **0**；client **19 files / 209 tests**，runtime boundary **159 checks**，model contract **60 groups**，client/server build、performance、docs/diff/secrets 全过 |
+| 2a | client `npm.cmd exec tsc -- --noEmit` | exit **0**，无诊断 |
+| 2b | server `npm.cmd exec tsc -- --noEmit` | exit **0**，无诊断 |
+| 3 | `npm.cmd run test:unit` | exit **0**；**19 files / 209 tests PASS** |
+
+verify 链中无已撤除的 tool-face parity，依工单说明不报缺失。`docs:check` 首轮红有同探针的过期日期阳性，重生成后同探针绿；不是把阴性建立在空输出上。
+
+### 8. 5-2 跨条合取与后续态扫描
+
+- **跨测试盲缝成立：**direct surface suite 证明 leaf 算法，root suite 证明 root effect，但 root suite mock 掉生产 aggregator；两组各自 VERIFIED 的合取仍不覆盖中间 seam。HIGH-1 mutation 是该复合缺陷的机器收据。
+- **时序合取仍缺一格：**route ID、hydrated note ID 与 `loading=false` 同值/单态，使“generation guard 正确”与“root payload 相等”两个逐条绿结论不能合成“root 取了正确 authority”。MED-1 mutation 是该盲缝收据。
+- X1 mixed fixture、X2 manual reset、A→B→A note-keyed reset 与 X3 layout observer 之间未发现新的互相遮蔽；X2 mutation 时另一条 matrix 仍绿，红由 manual-reset 条自身承载。
+- TD-7 仍是过渡桥。12.4 流面成为默认面时，必须把 root resolver effect、surface one-shot refs/入口与本单 G-X1/X2/X3 过渡测试同批删除；否则常驻测试会反向钉死待退役默认面。除此之外未发现对 12.2、v1、03/05 语义或 server 的新耦合。
+
+### 9. 5-1 完备性、承重/装饰二分与显式范围排除
+
+本复核已取可得的全部承重收据：commit 增量与 blob、四个点名 mutation、两个 mock/input 对抗 mutation、root/static type 审计、docs-first 全门、最终还原/清洁收据。builder 的精确中间数字与自测只作为装饰性来源；判定因果均由 reviewer 复验。
+
+显式排除：未做真实浏览器主观/视觉验收、生产 DB 写入、历史数据修复或 live server 旅程；本单产品 diff=0，且裁定对象是常驻测试的杀伤力，因此不把 unit/phase receipt 扩写成“真实浏览器肉眼无闪帧”。未 commit、未 push、未切换或修改 main、未改 header。隔离 probe 已恢复并移除；共享树本 Review 追加前除已披露的 content-equal `.M` 外无内容 diff，追加后只允许本 handoff 出现真实内容修改。
