@@ -127,7 +127,7 @@ PowerShell 的裸 `npm` 首次被本机 execution policy 在 `npm.ps1` 层拦截
 
 ## Review
 
-> reviewer: Codex reviewer（洁净室复核 thread） | date: 2026-08-22 | baseline: `3fbbe7fa044fc57af422b3c7da02ee0bab92d0ff` | 未改 header / 产品代码 / 常驻测试，未 commit / push / 碰 main
+> reviewer: Codex reviewer（洁净室复核 thread） | date: 2026-08-22 | baseline: `3fbbe7fa044fc57af422b3c7da02ee0bab92d0ff` | 共享树未改 header / 产品代码 / 常驻测试，未 commit / push / 碰 main
 
 ### 判定
 
@@ -153,15 +153,15 @@ PowerShell 的裸 `npm` 首次被本机 execution policy 在 `npm.ps1` 层拦截
 
 ### M1–M7 对抗探针
 
-三要素统一满足：**位点由调度方/设计方在本工单点名；由 reviewer 本人执行；分别瞄准前身已知漏径或本单可疑接线**。除 M7 明列评估非 mutation 外，均在 detached `3fbbe7f` 的隔离 Git checkout 执行；每组后逆补丁还原，并以 Git blob / numstat 复核。
+M1–M4/M6 的验收 mutation 三要素统一满足：**位点由调度方/设计方在本工单点名；由 reviewer 本人执行；分别瞄准前身已知漏径或本单可疑接线**。M5 整体列为**评估非 mutation**（第一阶段红在无关断言，第二阶段又临时调整了未被点名的 test expected），M7 亦为评估非 mutation；二者不拿来冒充 5-5 验收判据。全部诊断均在 detached `3fbbe7f` 的隔离 Git checkout 执行；每组后逆补丁还原，并以 Git blob / numstat 复核。
 
 | # | 拆了什么 | 哪条红 / exit code | 结论 |
 |---|---|---|---|
 | M1 | 新增第二条 `fake_zod_probe`，`input_schema` 写裸 `{ type: 'object' }`，其余字段合法 | `test:tool-face-registry` **exit 0**（该测试只验 `list_notes`）；server `tsc --noEmit` **exit 1**（TS2561）；`check:tool-face-manifest` **exit 1**（`zod-to-json-schema` 读取 `typeName` 时 TypeError） | **符合预期**。真 Zod 同时受 TypeScript 与真实生成路径保护；不能把 registry test 的绿夸成“逐条防伪”，但本项要求的 OR 已由 compiler/generator 承重。 |
 | M2 | 在生成器的 `.map` 前插入 `.filter(entry => entry.exposure === 'public')` | registry 专项 **exit 0**（3/3）；manifest check **exit 0**；docs check **exit 0** | **假绿，形成 HIGH-1**。当前单一 public fixture 使产物字节不变，忠实投影不变量无 killer。 |
-| M3 | 在会被 server 编译的 registry 中加入对已删 `shared/types/toolRegistry.js` 的 type import | server `tsc --noEmit` **exit 1**（TS2307）；registry 专项 **exit 0**（type-only import 被擦除） | **符合预期**。编译消费者的残留引用会红。基线另有一处已申报 defer 的旧 parity 脚本仍指旧文件；它不在任何链路，独立手跑 **exit 1**“未找到 ToolRegistry”，归 12.2a-1c 重写，不是本单新增消费者。 |
+| M3 | 在会被 server 编译的 registry 中加入对已删 `shared/types/toolRegistry.js` 的 type import | server `tsc --noEmit` **exit 1**（TS2307）；registry 专项 **exit 0**（type-only import 被擦除） | **符合预期**。编译消费者的残留引用会红。基线另有一处已申报 defer 的旧 parity 脚本仍指旧文件；它不在 docs:check / verify 或其他自动调用链，仅保留直接 npm script 入口，独立手跑 **exit 1**“未找到 ToolRegistry”，归 12.2a-1c 重写，不是本单新增消费者。 |
 | M4 | 两阶段：① registry 改动但不重生成；② 保持 stale，再把 `actual !== expected` 分支改为恒假 | ① manifest check **exit 1**、registry 专项 **exit 0**；② manifest check **exit 0**、docs check **exit 0**、registry 专项 **exit 0** | ① 证明当前 stale 逻辑在；② 证明其生产接线没有独立负控，形成 **HIGH-2**。 |
-| M5 | 把真实条目的 call-site 改为真实存在但不构造该 URL 的 `client/src/App.tsx#App`。第二阶段同步更新装饰性 expected 并重生成 manifest，以排除无关快照/stale 红 | 只改 registry：registry 专项 **exit 1**（硬编码 human_entry 字面不等），manifest check **exit 1**（stale）；同步 declarative expected/manifest 后：docs check、verify、client/server tsc、unit、registry 专项、manifest check **七门均 exit 0** | **mutation，语义漏径成立但不记本单 finding**。第一阶段两条红都不证明 App 构造 URL；第二阶段证实本单无 URL-construction semantic guard。归属在 design `:84-85/:106` 及本 handoff `:11/:36/:42/:86/:123` 明确落到 12.2a-1c。当前尚无 `*2a-1c*` 实体 handoff，属后续排单状态，不把它倒算成 1b 缺陷。 |
+| M5 | **评估非 mutation**：为诊断先把真实条目的 call-site 改为真实存在但不构造该 URL 的 `client/src/App.tsx#App`；第二阶段同步调整硬编码 expected 并重生成派生 manifest，以排除无关快照/stale 红 | production-only 阶段：registry 专项 **exit 1**（硬编码 human_entry 字面不等），manifest check **exit 1**（stale）；诊断评估阶段同步 declarative expected/manifest 后：docs check、verify、client/server tsc、unit、registry 专项、manifest check **七门均 exit 0** | 第一阶段两条红都不证明 App 构造 URL；第二阶段因临时调整测试 expected，明确**不作为 5-5 mutation 承重**，但足以诊断本单没有 URL-construction semantic guard。归属在 design `:84-85/:106` 及本 handoff `:11/:36/:42/:86/:123` 明确落到 12.2a-1c；当前尚无 `*2a-1c*` 实体 handoff，属后续排单状态，不倒算成 1b 缺陷。 |
 | M6 | 将 input 的 `.strict()` 改为 `.passthrough()` | registry 专项 **exit 1**：`registry.test.ts:40-43` 的 unknown-field 断言期望 false、实际 true；manifest check **exit 1**（stale，非语义承重）；server tsc **exit 0** | **符合预期**。strict 是承重约束，相关测试直接杀中。 |
 | M7 | **评估非 mutation**：反向确认 converter 的生产运行时消费面与 12.2b 规划 | `npm.cmd ls zod zod-to-json-schema tsx typescript --depth=0` **exit 0**；代码消费者仅 generator；`server/src` 对 `zod-to-json-schema` 搜索 **exit 1（0 命中）**；lock 标 `dev: true` | 当前放 `server/devDependencies` **正确且与 12.2b 不冲突**。design `:95/:106` 要求未来 `tools/list` 消费并过滤已生成 manifest，不在请求期转换 Zod。若未来改成请求期派生才须移入 dependencies，且会偏离既定设计。状态转移注意：server 目前只 `tsc src → dist`，12.2b 还须明确生产 artifact 如何携带/定位 `docs/generated` manifest。 |
 
@@ -173,11 +173,14 @@ PowerShell 的裸 `npm` 首次被本机 execution policy 在 `npm.ps1` 层拦截
 
 ### 其余复核点
 
+- **R-1 空表文案（静态分支核验）**：独立全读 `reportResult` 的 zero-public 分支，精确输出“0 条 public 条目”与“未证明任何公开工具链”；同一 `PASS` token probe 先在既有旧 parity 命中，再限定新 generator 为 0。未做零表 mutation，因此不申报分支亲跑。
+- **R-2 legacy 隔离**：新 registry/generator 的仓内业务 imports 只到既有 validators、新 registry 与 manifest type；外部依赖只有 Zod/converter 与 Node builtins。同一 legacy dependency probe 先在现役 `server/src/agent/orchestrator.ts` 命中 `toolDefinitions` import/调用，再限定新两文件的 import/require/call 为 0。registry 内仅有说明性注释，不算依赖。
+- **R-5 单一目录**：`git ls-tree` 的同一 tool-type 路径探针先命中 `shared/types/toolFaceManifest.ts`，旧 `shared/types/toolRegistry.ts` 计数 0；旧 parity 只有直接 npm script entry，自动链 consumer 计数 0，亲跑失败边界如 M3 所述。
 - **当前实现忠实，但没有 killer**：当前 manifest 与 registry 的 1 条 public 条目逐字段一致；这只能证明当前快照正确，不能洗白 M2。
 - **未上主链，符合工单**：root `docs:check` 的脚本值是 `docs-index --check && docs-inventory --check`；root `verify:v2-bn8-runtime` 的同一探针先命中既有 `test:unit` 1 次，再查 `tool-face|manifest|parity` 0 次。handoff README 要求专项门复核 PASS 后才接线，故当前未接不是缺陷。
 - **object inventory 的 1→2 是报告，不是暗门**：`docs-inventory.mjs:113-119` 读取 root `package.json` 并计算 `inGate/notInGate`，`:216-221` 只渲染；同一文件先命中 `readFileSync`/`JSON.parse`，再查 `node:child_process|spawnSync|execFileSync|execSync(` 为 0。`object-inventory.md:238-239` 如实列 manifest + parity 两个门外 root script。它不执行这些门，也不统计 nested `server test:tool-face-registry`。
 - **validator 复用诚实**：`registry.ts:36-56` 真正取用 `createNoteSchema.shape` 的 `course_id/title/description/page_format/metadata` 与 `updateNoteSchema.shape` 的 `status`；全 server 的 response-only Zod 形状探针先命中本 registry，再排除该文件后 0 命中。`id/user_id/source_kind/note_class/operation_batch_id/timestamps` 是为 hydrated row 新写，未发现可复用的既有 response Zod；镜像 DB row 不等于新造第二份 runtime registry。route 里既存的 status 数组是本单前已有，不是本单新增平行机关。
-- **前身错误的限定性复验**：新 generator 同一探针先命中静态 registry import 与 `zodToJsonSchema`，再查 `new Function|source.slice|shared/types/toolRegistry` 为 0。全仓仍有 `scripts/check-tool-face-parity.mjs:8/:111-112` 的旧 path / source slice / `new Function`，但它是明示 defer 且不在链路；本结论只限定新 generator，未声称全仓为 0。
+- **前身错误的限定性复验**：新 generator 同一探针先命中静态 registry import、`TOOL_REGISTRY.map` 与 `zodToJsonSchema`，再查 `new Function|source.slice|shared/types/toolRegistry` 及 `readFileSync(registry)|RegExp|match|exec` 型 registry 源码解析为 0。全仓仍有 `scripts/check-tool-face-parity.mjs:8/:111-112` 的旧 path / source slice / `new Function`，但它是明示 defer 且不在自动链路；本结论只限定新 generator，未声称全仓为 0。
 - **旧 parity 文案边界**：Result 的“仍可独立手跑”只能理解为命令入口仍在；亲跑 exit 1（缺已删 registry），不能理解为仍可通过。该收据不承担本单 PASS/FAIL。
 
 ### 七门亲跑收据（有效隔离 baseline，docs-first）
@@ -199,6 +202,9 @@ PowerShell 的裸 `npm` 首次被本机 execution policy 在 `npm.ps1` 层拦截
 | 阴性断言 | 先让同一探针看见的既有阳性 | 阴性结果；为何不是探针照见自己 |
 |---|---|---|
 | 新 generator 无动态执行/旧 path | 同文件先命中静态 registry import 与 `zodToJsonSchema` | 同文件 `new Function|source.slice|shared/types/toolRegistry` exit 1；另用旧 parity 既有 `new Function` 作全仓阳性。均在 mutation 前的 baseline 取证。 |
+| 新 generator 的 zero-public 文案无 `PASS` | 同一 `PASS` token probe 先在既有旧 parity 命中 | 限定新 generator 后 exit 1；另全读该分支确认“0 条 public”与“未证明”均存在。 |
+| 新 registry/generator 无 legacy `toolDefinitions` 真依赖 | 同一 dependency probe 先在现役 `server/src/agent/orchestrator.ts` 命中 import 与调用 | 限定新两文件的 import/require/call 后 exit 1；registry 的说明性注释未计入依赖。 |
+| 已删旧 shared registry 不再存在 | 同一 `git ls-tree` tool-type 路径探针先命中 `shared/types/toolFaceManifest.ts` | 精确旧路径 `shared/types/toolRegistry.ts` 计数 0；证据取自 baseline tree，不来自 Review 文本。 |
 | server runtime 不消费 converter | repo 探针先命中 generator 与 `server/package.json` | 限定 `server/src/**` 后 exit 1；不是提示词/日志路径。 |
 | 主链不含本单专项门 | 同一 package script 值先命中 `docs-index/docs-inventory` 与 `test:unit` | 再在这两个值查 `tool-face|manifest|parity` 计数 0。 |
 | 没有既有 hydrated response Zod 可复用 | 同一 server 探针先命中 validators 的 create/update 与 registry 的 response-only 字段 | 排除 registry 后 response-only Zod 形状 exit 1。 |
@@ -217,10 +223,11 @@ PowerShell 的裸 `npm` 首次被本机 execution policy 在 `npm.ps1` 层拦截
 
 ### 5-1 收据完备、触及面与显式范围排除
 
-- **基线与隔离**：有效收据来自 `D:\Coinsides\v2.x\Coincides\tmp\codex-review-3fbbe7f-mt4plsnd-cnccnb`，独立 `.git`、detached 精确 `3fbbe7fa...`、`core.autocrlf=false`。所有 mutation 后 `git status --short`、worktree/cached `git diff --numstat`、untracked 均空；registry SHA-256 恢复为 `23D7C083...65A07`，generator 恢复为 `5218B231...3BFA9`；registry/test/generator/manifest 的 HEAD 与 path-filtered worktree blob 四项均逐一相等。还原后 registry 专项与 manifest check 再跑均 exit 0。
+- **基线与隔离**：有效收据来自 `D:\Coinsides\v2.x\Coincides\tmp\codex-review-3fbbe7f-mt4plsnd-cnccnb`，是独立 clone 的 primary Git worktree（因共享 `.git/index` 只读，非 linked worktree），独立 `.git`、detached 精确 `3fbbe7fa...`、`core.autocrlf=false`。所有 mutation/诊断后 `git status --short`、worktree/cached `git diff --numstat`、untracked 均空；registry SHA-256 恢复为 `23D7C083...65A07`，generator 恢复为 `5218B231...3BFA9`；registry/test/generator/manifest 的 HEAD 与 path-filtered worktree blob 四项均逐一相等。还原后 registry 专项与 manifest check 再跑均 exit 0。
 - **无效收据排除**：第一次临时 checkout 因宿主 autocrlf 把文档换行改写，`docs:check` 假红；第二次位于系统 temp 的 checkout 被 sandbox 拒绝 esbuild/Vite 执行。两批输出均未计入门禁或 finding。只有上述 workspace 内 LF checkout 的结果承重。
-- **目标 diff**：`3fbbe7f^..3fbbe7f` 共 13 路径，交付代码/生成物/依赖/删除项与 Result 的实现触及面一致。commit 另含 `docs/agent-ops/claude-log/2026-08-22.md`；内容标题明确标作 `(Opus)S1a 二级复盘`，按 charter 5-4 由内容而非恒定 git author 归因为调度方审查回执，属装饰证据，不当作 builder 未申报 side-fix。当前 HEAD 相对 baseline 的实现文件无变化，仅有后续 claude-log。
+- **目标 diff**：`3fbbe7f^..3fbbe7f` 共 13 路径，交付代码/生成物/依赖/删除项与 Result 的实现触及面一致。commit 另含 `docs/agent-ops/claude-log/2026-08-22.md`；内容标题明确标作 `(Opus)S1a 二级复盘`，按 charter 5-4 由内容而非恒定 git author 归因为调度方审查回执，属装饰证据，不当作 builder 未申报 side-fix。复核取证开始时 HEAD 为 `babad5e`，相对 baseline 的实现文件无变化，仅有后续 claude-log。
+- **并发状态转移（不回写 baseline 判定）**：本 Review 初版落盘后，外部调度方把共享分支推进到 `05f3463`，commit 内容为初版 Review + 新修正单 `2026-08-22-v2bn12-2a1b-fix-projection-and-freshness-killers.md`；reviewer 未执行该 commit/push。该 commit 无产品/实现文件，但新 handoff 尚未进入 `docs/agent-ops/INDEX.md`，故当前共享树末次 `docs:check` **exit 1**（INDEX 仍报 111 份，磁盘已 112 份）。这条是 baseline 七门完成后的外部变化：有效 baseline 与初版 Review 追加后的 `docs:check` 都曾 exit 0；reviewer 不越界替调度方更新 INDEX。
 - **他方证据承重/装饰**：builder/Opus 的七门、R-3 与生成器纯度数字均未直接承重，本 Review 已重跑/重查；它们只作为对方回执保留。版本号、耗时等非判定因果仅作装饰。
-- **共享树边界**：共享树唯一 tracked 写入是本 `## Review`；header 未改，未改产品代码/常驻测试，未 commit / push / 碰 main。已知 controller porcelain `.M` 按上表 blob 与 numstat 排除，不计触及面。
+- **共享树边界**：reviewer 在共享树的唯一文件写入是本 `## Review`；header 未改，未改产品代码/常驻测试，未 commit / push / 碰 main。外部调度方并发新增并提交修正单不归因于 reviewer；当前 reviewer 未提交 diff 仍只在本 Review。已知 controller porcelain `.M` 按上表 blob 与 numstat 排除，不计触及面。
 - **显式未取 live 收据**：未启动服务、未连 DB、未跑浏览器 journey。理由是本单交付面是 registry/Zod/generator/freshness，且明确不含 MCP handler 与旅程充分性；静态 R-3 必要条件已取，live UI 不能回答 M2/M4 的机械杀伤力。该范围排除不表示 UI journey 已通过。
 - **明确不把后续缺口倒算本单**：旧 parity 重写、URL 构造语义 killer、`tools/list` 暴露过滤、MCP transport/receipt、manifest 生产打包均留给 12.2a-1c / 12.2b；其中只有 M2/M4 是本单自身应具备的投影与 freshness 机械保护，故构成本次 FAIL。

@@ -8,7 +8,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import {
   TOOL_REGISTRY,
   type ToolRegistryEntry,
@@ -19,7 +19,8 @@ import type {
 } from '../shared/types/toolFaceManifest.js';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-const OUTPUT_PATH = resolve(REPO_ROOT, 'docs/generated/tool-face-manifest.json');
+const DEFAULT_OUTPUT_PATH = resolve(REPO_ROOT, 'docs/generated/tool-face-manifest.json');
+export const TOOL_FACE_MANIFEST_TEST_OUTPUT_PATH_ENV = 'TOOL_FACE_MANIFEST_TEST_OUTPUT_PATH';
 const serverRequire = createRequire(resolve(REPO_ROOT, 'server/package.json'));
 const { zodToJsonSchema } = serverRequire('zod-to-json-schema') as {
   zodToJsonSchema: (
@@ -37,9 +38,11 @@ function serializeSchema(
   });
 }
 
-export function buildToolFaceManifest(): ToolFaceManifest {
+export function buildToolFaceManifest(
+  entries: readonly ToolRegistryEntry[],
+): ToolFaceManifest {
   const names = new Set<string>();
-  return TOOL_REGISTRY.map((entry) => {
+  return entries.map((entry) => {
     if (names.has(entry.name)) {
       throw new Error(`Duplicate tool registry name: ${entry.name}`);
     }
@@ -59,33 +62,56 @@ export function buildToolFaceManifest(): ToolFaceManifest {
   });
 }
 
-function renderManifest(): string {
-  return `${JSON.stringify(buildToolFaceManifest(), null, 2)}\n`;
+function renderManifest(entries: readonly ToolRegistryEntry[]): string {
+  return `${JSON.stringify(buildToolFaceManifest(entries), null, 2)}\n`;
 }
 
-function reportResult(verb: 'generated' | 'current'): void {
-  const publicCount = TOOL_REGISTRY.filter((entry) => entry.exposure === 'public').length;
+function reportResult(
+  verb: 'generated' | 'current',
+  entries: readonly ToolRegistryEntry[],
+): void {
+  const publicCount = entries.filter((entry) => entry.exposure === 'public').length;
   if (publicCount === 0) {
     console.log(`0 条 public 条目；manifest ${verb === 'generated' ? '已生成' : '未过期'}，但未证明任何公开工具链。`);
     return;
   }
-  console.log(`tool-face manifest ${verb === 'generated' ? '已生成' : '未过期'}：${TOOL_REGISTRY.length} 条条目，其中 ${publicCount} 条 public。`);
+  console.log(`tool-face manifest ${verb === 'generated' ? '已生成' : '未过期'}：${entries.length} 条条目，其中 ${publicCount} 条 public。`);
 }
 
-const expected = renderManifest();
-const checkOnly = process.argv.includes('--check');
+function resolveOutputPath(): string {
+  const testOutputPath = process.env[TOOL_FACE_MANIFEST_TEST_OUTPUT_PATH_ENV];
+  return process.env.NODE_ENV === 'test' && testOutputPath
+    ? resolve(testOutputPath)
+    : DEFAULT_OUTPUT_PATH;
+}
 
-if (checkOnly) {
-  const actual = existsSync(OUTPUT_PATH) ? readFileSync(OUTPUT_PATH, 'utf8') : null;
-  if (actual !== expected) {
-    console.error('过期: docs/generated/tool-face-manifest.json');
-    console.error('请运行: npm run docs:tool-face-manifest');
-    process.exitCode = 1;
+function runCli(): void {
+  const outputPath = resolveOutputPath();
+  const expected = renderManifest(TOOL_REGISTRY);
+  const checkOnly = process.argv.includes('--check');
+
+  if (checkOnly) {
+    const actual = existsSync(outputPath) ? readFileSync(outputPath, 'utf8') : null;
+    if (actual !== expected) {
+      const displayPath = outputPath === DEFAULT_OUTPUT_PATH
+        ? 'docs/generated/tool-face-manifest.json'
+        : outputPath;
+      console.error(`过期: ${displayPath}`);
+      console.error('请运行: npm run docs:tool-face-manifest');
+      process.exitCode = 1;
+    } else {
+      reportResult('current', TOOL_REGISTRY);
+    }
   } else {
-    reportResult('current');
+    mkdirSync(dirname(outputPath), { recursive: true });
+    writeFileSync(outputPath, expected, 'utf8');
+    reportResult('generated', TOOL_REGISTRY);
   }
-} else {
-  mkdirSync(dirname(OUTPUT_PATH), { recursive: true });
-  writeFileSync(OUTPUT_PATH, expected, 'utf8');
-  reportResult('generated');
+}
+
+const invokedUrl = process.argv[1]
+  ? pathToFileURL(resolve(process.argv[1])).href
+  : null;
+if (invokedUrl === import.meta.url) {
+  runCli();
 }
