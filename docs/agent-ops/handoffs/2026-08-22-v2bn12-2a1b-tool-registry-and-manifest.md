@@ -63,3 +63,64 @@
 **M-2 header 不由你翻** —— 完工保持 `ready`,追加 `## Result`,由调度方翻(前身 MED-4)。
 
 **回执须含**:zod→JSON Schema 选型与理由 · R-3 那条真实条目的端到端输出 · 复用了哪些既有 validator(逐个点名)· 前身 `shared/types/toolRegistry.ts` 的处置方式 · 四门逐条收据 · 触及面实际 diff vs 申报 · 显式范围排除。
+
+## Result
+
+> builder: Codex(builder，接续既有断点) | date: 2026-08-22 | header 按 M-2 保持 `ready` | 未 commit / push / 碰 main
+
+### 交付与要求核对
+
+- **唯一权威**：`server/src/toolFace/registry.ts` 是唯一运行时注册表；`input_schema` / `output_schema` 均为真 Zod。`docs/generated/tool-face-manifest.json` 只由该注册表派生，`shared/types/toolFaceManifest.ts` 只含可序列化 manifest 类型，无 Zod、无 registry value。
+- **Zod → JSON Schema 选型**：采用 `zod-to-json-schema@3.25.2`，以 `target: 'jsonSchema7'`、`$refStrategy: 'none'` 生成 Draft-07。理由：server 当前为 Zod 3（实装解析为 `zod@3.25.76`），该库可直接消费现有 Zod 3 schema 并显式固定 Draft-07；`zod-to-json-schema` 新增在 `server/devDependencies`，因为只供 manifest 工装使用。生成器复用既有 `tsx` / `typescript`，二者不是本单新增依赖。`npm.cmd ls zod zod-to-json-schema tsx typescript --depth=0` exit 0。
+- **正常模块加载**：生成器由 `tsx` 执行，静态导入 `../server/src/toolFace/registry.js`；同一探针命中正常 import / `zod-to-json-schema` 2 处，`new Function` 与 legacy import path 0 处。未做源码截片或正则解析 registry。
+- **复用的既有 validator（逐个）**：
+  - `createNoteSchema`：复用 `course_id`，并在输出投影复用 `title`、`description`、`page_format`、`metadata` 的既有字段约束；
+  - `updateNoteSchema`：复用 `status` 枚举约束。
+  - 新写的 response-only 字段（`id` / `user_id` / `source_kind` / `note_class` / `operation_batch_id` / timestamps）用于表达 `GET /api/notes` 的 hydrated DB row；既有两份 schema 是请求体 schema，不承载这些返回字段。它仍住在同一 server 权威条目中，不另造目录或平行 registry。
+- **R-1**：生成器的 0-public 分支输出精确文案「`0 条 public 条目；…但未证明任何公开工具链。`」，源码大写 `PASS` 命中 0；注册表测试同时要求至少一条真实条目，空 registry 会红。本轮将测试从误锁的 `length === 1` 收窄修正为 `length >= 1` + 按 name 查找 `list_notes`，避免未来合法增员被误杀。未做 mutation，也不把 self-test 申报成 mutation 验收。
+- **R-2**：未触碰、未桥接、未从 legacy `server/src/agent/tools/definitions.ts` / `toolDefinitions` 派生。同一依赖探针先命中新 `TOOL_REGISTRY` 8 处，再查 legacy import path 为 0。
+- **R-3（真实非空链路）**：注册表含 1 条真实 public `list_notes`：`GET /api/notes`，人类调用点 `client/src/pages/Courses/CourseDetail.tsx#fetchSummary`，`truth: content`、`tier: immediate`、`scopes: ['notes:read']`。端到端产物中：
+  - input 为 Draft-07 object；`course_id` 是 required UUID；`status` 为 `active | archived | trashed` 且 default=`active`；`additionalProperties: false`；
+  - output 为 Draft-07 array；item 是 strict object，ID 字段保留 UUID format；
+  - `test:tool-face-registry` 证明真实条目、input strict/default 与 hydrated output fixture；`check:tool-face-manifest` 证明当前 Zod → generator → manifest 字节未过期，输出「1 条条目，其中 1 条 public」。
+- **R-4**：**N/A（按设计归属 12.2a-1c / parity）**。生成器不过滤 `exposure`，而是在 manifest 中原样序列化；这是刻意为下游 `exposure:'test'` 与 `__` 前缀两条独立 killer 留靶，不是缺陷，本单未实现或改写它们。
+- **R-5**：
+  - 前身 `shared/types/toolRegistry.ts` 已物理删除（tracked diff `0/35`），不留兼容层；替代物只是一份 manifest transport type；
+  - `scripts/check-tool-face-parity.mjs` 按例外留给 12.2a-1c，未重写，HEAD / worktree blob 均为 `19a2bda095bbaa132c1bd613978ec910d4a53d94`；脚本仍可独立手跑，但遍历 root scripts 后除自身定义外消费者为 0。
+
+### 接线与 D 段阳性对照
+
+- `docs:check` 的同一脚本值探针先命中 `docs-index` + `docs-inventory`，再查 `tool-face` 为 0；实际定义仍只有 `docs-index --check && docs-inventory --check`。
+- `verify:v2-bn8-runtime` 的同一脚本值探针先命中既有 `test:unit`，再查 `tool-face` 为 0；manifest / registry / parity 均未接入主链。
+- `check:tool-face-manifest` 是独立脚本；`docs/generated/object-inventory.md` 如实把它与旧 parity 一并列为「存在但不在该门内」。
+- CRLF 伪改动用同一 blob 探针对照：已知真实改动 `package.json` 的 HEAD / worktree blob 不同；`client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts` 两端均为 `3efe5f820e2077850611b54d4d09482845e89545`。后者未处理、未计入触及面。
+
+### 门禁收据（docs-first）
+
+| 顺序 | 命令 | 结果 |
+|---|---|---|
+| 1 | root `npm.cmd run docs:check` | exit 0；INDEX / inventory 最新 |
+| 2 | root `npm.cmd run verify:v2-bn8-runtime` | exit 0；19 files / 209 unit tests、159 runtime-boundary checks、60 model-contract groups、双端 build、performance、docs 与 secret scan 全绿 |
+| 3a | client `npm.cmd exec -- tsc --noEmit` | exit 0，无输出 |
+| 3b | server `npm.cmd exec -- tsc --noEmit` | exit 0，无输出；测试边界微调后再次运行仍 exit 0 |
+| 4 | root `npm.cmd run test:unit` | exit 0；19 files / 209 tests |
+| 专项 | server `npm.cmd run test:tool-face-registry` | exit 0；3/3；测试边界微调后复跑仍 3/3 |
+| 专项 | root `npm.cmd run check:tool-face-manifest` | exit 0；1 条条目，其中 1 条 public，manifest 未过期 |
+
+PowerShell 的裸 `npm` 首次被本机 execution policy 在 `npm.ps1` 层拦截、门禁未启动；以上承重收据统一使用同一 Node 安装的 `npm.cmd`。这不是 `deny-read ACLs` / helper 执行器故障。
+
+### 实际触及面 vs 申报
+
+- **tracked 实现 / 工装**：`package.json`（独立 generate/check 脚本）、`server/package.json`（专项测试 + devDependency）、`server/package-lock.json`、删除 `shared/types/toolRegistry.ts`。
+- **untracked 新交付物**：`server/src/toolFace/registry.ts`、`server/src/toolFace/registry.test.ts`、`scripts/generate-tool-face-manifest.ts`、`shared/types/toolFaceManifest.ts`、`docs/generated/tool-face-manifest.json`。
+- **生成件副作用**：`docs/agent-ops/INDEX.md` 只新增本 handoff 索引并把 110 改为 111；`docs/generated/object-inventory.md` 只新增独立 `check:tool-face-manifest` 并把门外脚本计数 1 改为 2。两者经 `docs:check` 与生成器期望一致。
+- **回执**：仅向本文件追加本 `## Result`；按用户指示不改 header。
+- **平行机关申报**：无。server registry 是唯一权威，manifest 是派生物；没有新增第二份状态存储、恢复载体、守卫层或事务边界。
+
+### 显式范围排除
+
+- 未把 manifest / registry / parity 接入 `docs:check` 或 `verify:v2-bn8-runtime`；
+- 未重写 `scripts/check-tool-face-parity.mjs`，未实现 12.2a-1c 的两条 killer；
+- 未碰 12.1 client 渲染 / `noteBlockLifecycle`、v1 运行时、legacy `toolDefinitions`、schema / migration；
+- `list_notes` 只描述 note-list 元数据，不返回 TextUnit / block 内容，因此 P-3 的单元级 `writing_role` 本单无适用读 payload；
+- 未建 MCP transport / handler / receipt，未做 reviewer mutation，未 commit / push / 碰 main，未改 header。

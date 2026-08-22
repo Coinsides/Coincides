@@ -1,0 +1,147 @@
+[
+  {
+    "name": "list_notes",
+    "description": "List notes in one Project, optionally filtered by lifecycle status.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "course_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "archived",
+            "trashed"
+          ],
+          "default": "active"
+        }
+      },
+      "required": [
+        "course_id"
+      ],
+      "additionalProperties": false,
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "output_schema": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "course_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 300
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "archived",
+              "trashed"
+            ]
+          },
+          "source_kind": {
+            "type": "string",
+            "minLength": 1
+          },
+          "note_class": {
+            "type": "string",
+            "minLength": 1
+          },
+          "page_format": {
+            "type": "string",
+            "maxLength": 50
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "operation_batch_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "minLength": 1
+          },
+          "updated_at": {
+            "type": "string",
+            "minLength": 1
+          },
+          "trashed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "course_id",
+          "title",
+          "description",
+          "status",
+          "source_kind",
+          "note_class",
+          "page_format",
+          "metadata",
+          "operation_batch_id",
+          "created_at",
+          "updated_at",
+          "trashed_at"
+        ],
+        "additionalProperties": false
+      },
+      "$schema": "http://json-schema.org/draft-07/schema#"
+    },
+    "truth": "content",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "GET /api/notes",
+      "client_call_site": "client/src/pages/Courses/CourseDetail.tsx#fetchSummary"
+    },
+    "exposure": "public",
+    "scopes": [
+      "notes:read"
+    ]
+  }
+]
