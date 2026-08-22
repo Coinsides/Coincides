@@ -16,9 +16,13 @@ import {
   listNotesOutputSchema,
   type ToolRegistryEntry,
 } from '../server/src/toolFace/registry.js';
-import type { ToolFaceJsonSchema } from '../shared/types/toolFaceManifest.js';
+import type {
+  ToolFaceJsonSchema,
+  ToolFaceManifest,
+} from '../shared/types/toolFaceManifest.js';
 import {
   buildToolFaceManifest,
+  renderManifest,
   TOOL_FACE_MANIFEST_TEST_OUTPUT_PATH_ENV,
 } from './generate-tool-face-manifest.js';
 
@@ -131,6 +135,46 @@ test('buildToolFaceManifest faithfully projects every injected entry in original
     assert.equal(actual.exposure, source.exposure);
     assert.deepEqual(actual.scopes, source.scopes);
   });
+});
+
+test('renderManifest delegates production projection to the injected projector', () => {
+  const spyProjection = [
+    {
+      name: 'spy_projection',
+      description: 'Sentinel returned only by the injected projector.',
+      input_schema: { type: 'object' },
+      output_schema: { type: 'object' },
+      truth: 'package',
+      tier: 'confirm',
+      human_entry: {
+        route: 'POST /api/spy-projection',
+        client_call_site: 'client/spy-projection#run',
+      },
+      exposure: 'internal',
+      scopes: ['spy:project'],
+    },
+  ] satisfies ToolFaceManifest;
+  let callCount = 0;
+  let receivedEntries: readonly ToolRegistryEntry[] | undefined;
+  const spyProjector = (entries: readonly ToolRegistryEntry[]): ToolFaceManifest => {
+    callCount += 1;
+    receivedEntries = entries;
+    return spyProjection;
+  };
+
+  const rendered = renderManifest(projectionFixture, spyProjector);
+
+  assert.equal(
+    callCount,
+    1,
+    'renderManifest must call the production projector exactly once',
+  );
+  assert.strictEqual(
+    receivedEntries,
+    projectionFixture,
+    'renderManifest must pass the same entries reference to the projector',
+  );
+  assert.equal(rendered, `${JSON.stringify(spyProjection, null, 2)}\n`);
 });
 
 function runManifestCli(

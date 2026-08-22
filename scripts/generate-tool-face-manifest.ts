@@ -62,8 +62,11 @@ export function buildToolFaceManifest(
   });
 }
 
-function renderManifest(entries: readonly ToolRegistryEntry[]): string {
-  return `${JSON.stringify(buildToolFaceManifest(entries), null, 2)}\n`;
+export function renderManifest(
+  entries: readonly ToolRegistryEntry[],
+  projector: typeof buildToolFaceManifest = buildToolFaceManifest,
+): string {
+  return `${JSON.stringify(projector(entries), null, 2)}\n`;
 }
 
 function reportResult(
