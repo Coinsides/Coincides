@@ -219,3 +219,103 @@ Tests       1 passed | 5 skipped (6)
 未修改 `modePolicyService.ts` 谓词、`placementService.ts` 分类、`useNoteCanvasDataAdapter.ts`、任何 server 代码、migration、`schema.sql`、DB/WAL、12.2 面、v1 线或 03/05 保护面;没有把数据重分类为 `formal_page`,也没有改 `order_index` 或 placement surface。未执行 commit、push或 main 操作;当前分支仍为 `fable/v2-bn12-exoskeleton`。
 
 M-1 的真实浏览器 mutation / 主观体验验收归复核方;builder 未用 self-test 冒充。M-2 已遵守:header 保持原 `ready`。
+
+## Review
+
+> reviewer: Codex（洁净室复核） · date: 2026-08-21 · baseline: `70a2aaad8e5124715485a5a5c54c9e831cc81ba4`
+>
+> **判定: FAIL（方向成立）** · **BLOCKER 0 / HIGH 1 / MED 2 / LOW 1**
+
+### 1. 裁定
+
+实现方向与当前产品代码成立：bridge 复用了现役 surface policy，hydration/note-generation/manual-toggle 三类守卫和 root `useLayoutEffect` 接线静态上均正确；亲跑全门也通过。FAIL 的原因是本轮点名的 **RED 强度验收未过**：点名的五个 guard mutation 都能被测试杀死，但另有三个“API 存在、实现可编译、却写错或未接入生产”的 mutation 仍全绿，其中删除生产 root 接线甚至在 **6/6 专项、204/204 全量 unit 与 client tsc** 下均存活，会原样恢复 P-1。因此 builder 的 `resolveInitialSurfaceMode is not a function` RED 只能证明 API/test 接线存在，不能承重证明行为护栏完备。
+
+“方向成立”具体指：未发现当前 bridge 算法、C-1/C-2 时序或 `useLayoutEffect` 本身的产品缺陷；失败位于常驻回归测试和回执精度，不要求撤销该方向。
+
+### 2. 隔离、基线与还原收据
+
+- 共享树开工阳性为 branch `fable/v2-bn12-exoskeleton`、HEAD `70a2aaa`；`git status --short` 为空。因沙箱不允许向共享 `.git/worktrees` 写 metadata，复核在 repo 内 ignored 临时 bare clone 上建立 detached **git worktree**，checkout 精确为 `70a2aaa`。所有 mutation 只在该 worktree 以 `apply_patch` 施加。
+- mutation 前、全部还原后，专项文件均为 **6/6 PASS，exit 0**。最终 `useSurfaceModeController.ts` working/HEAD blob 同为 `be060d008fad04445ace77fd0bbe70ed61ce1942`，root controller working/HEAD blob 同为 `3efe5f820e2077850611b54d4d09482845e89545`；隔离 worktree `git status --short` 为空后才移除，临时 worktree/bare repo 均已删除。
+- 下表共同的专项命令为 `cd client; npm.cmd exec vitest -- run src/pages/Notes/canvasEngine/hooks/useSurfaceModeController.test.tsx`；定点执行时加对应 `-t`。每次取证后均 `git restore --source=HEAD`，再做下一 mutation。
+
+### 3. 调度方点名五处 mutation
+
+| 位点 | 拆掉什么 | 实际变红测试与精确断言 | exit |
+|---|---|---|---:|
+| M1 | `!loading`，令 hydrated 只看 `loadedNoteId === noteId` | `T-1a` 第二段；test `:106`，`expected canvas, received page`（未 hydrate 时过早消费 one-shot） | 1 |
+| M2 | `loadedNoteId === noteId`，令 hydrated 只看 `!loading` | `keeps Page while the loaded note belongs to the previous route generation`；test `:116`，`expected page, received canvas` | 1 |
+| M3 | resolver 中 `manualToggledRef.current` 守卫 | `T-2`；test `:145`，`expected page, received canvas` | 1 |
+| M4 | resolver 中 `decidedRef.current` 守卫 | 调度建议的 `A-2` 定点执行仍绿（exit 0，因 manual guard 遮蔽）；跑完整 6 条后由 `T-1b` 第二次 resolver 杀死，test `:129`，`expected page, received canvas` | 1（全文件） |
+| M5 | `canvasVisibleBlocks.length > 0` 放宽为 `>= 0` | `T-1b` 首次决定；test `:126`，`expected page, received canvas` | 1 |
+
+五处均被 suite 杀死；M4 的承重断言实际是 T-1b，而不是 A-2 后半。若只跑调度建议的 A-2，它会产生假绿，故报告保留这项映射偏差。
+
+### 4. 反向补洞 mutation（决定本轮 FAIL）
+
+| 位点 | 存在但写错的实现 | 结果 | 产品后果 |
+|---|---|---|---|
+| X1 | 将 `pageVisibleBlocks.length === 0` 错写为永真的 `>= 0`，等价于删掉 Page=0 前提 | 专项 **6/6 PASS，exit 0**；client tsc **exit 0** | 任意 Canvas-visible>0 的 formal/mixed note 也会被自动抢到 Canvas |
+| X2 | 只删换 note 时的 `manualToggledRef.current = false` | 专项 **6/6 PASS，exit 0** | note A 手动切过后，note B 的 canvas-only hydration 永远被旧 manual flag 禁止 |
+| X3 | 删除 `useNoteCanvasRuntimeController.ts` 的 resolver destructure 与 `useLayoutEffect` 生产调用（hook/API 本身保留） | 专项 **6/6 PASS，exit 0**；`npm.cmd run test:unit` **18 files / 204 tests PASS，exit 0**；client tsc **exit 0** | bridge 无生产调用者，原 P-1 原样复发 |
+
+D 段覆盖阴性阳性校准：同一 test-reference 探针先看见 `resolveInitialSurfaceMode` 在专项测试中的已知阳性 **1**（直接手调，test `:73`），再得到 `useNoteCanvasRuntimeController` 测试引用 **0**；同一 fixture 探针先看见 `canvas_workspace/crossing/canvas_world/order_index:6` 四类阳性，再得到 formal/mixed 正例 **0**。因此 X1–X3 的绿不是探针失灵。
+
+### 5. Findings
+
+#### HIGH-1 · 生产 bridge 接线没有回归护栏
+
+**复现：**在隔离 worktree 删除 `useNoteCanvasRuntimeController.ts` 中 resolver 的解构、import 与 layout effect 调用；依次运行专项 6 条、`npm.cmd run test:unit`、client `npm.cmd exec tsc -- --noEmit`，三者分别 exit `0/0/0`。这保留“存在且单测正确”的 API，却让生产桥完全不执行，正面回答了本轮头号问题：现有 6 条不能杀死这一错误。
+
+**建议修法：**增加 root 级 integration/contract test，挂载或受控驱动 `useNoteCanvasRuntimeController`，断言成功 hydration 后生产接线以 `sortedBlocks/contentWidth/note.id/loading` 调用 resolver，并用 canvas-only、mixed/formal、真空三组结果检查首个可见 commit。该测试还应区分 layout effect 与 passive effect，避免未来恢复空 Page 闪帧。hook 直调测试可保留，但不能替代 root 接线测试。
+
+#### MED-1 · `Page-visible === 0` 的左半谓词无正例保护
+
+**复现：**把 `pageVisibleBlocks.length === 0` 改成编译合法且恒真的 `>= 0`；专项 6/6 与 client tsc 均 exit 0。现有非空 fixture 全是 canvas-only，故 suite 没有机会证明“Page 有内容时不得抢面”。Result 自报的 `3927...` 19/19 只作样本指针，不作为本裁定的 mutation 收据。
+
+**建议修法：**新增至少一条 formal-only 或 mixed fixture，明确断言 `Page-visible > 0 && Canvas-visible > 0` 时保持 Page；再复跑本 mutation，要求该条精确变红。
+
+#### MED-2 · note-generation 的 manual reset 名实不符
+
+**复现：**删除 `manualToggledRef.current = false` 后 6/6 仍绿。现有名为 `resets the one-shot and manual guards` 的测试在旧 note 上从未调用 `toggleSurfaceMode`，实际只覆盖 decided reset。
+
+**建议修法：**旧 note 先完成一次决定，再双 toggle 回 Page（确保 manual=true）；rerender 新 note 并 hydrate canvas-only 标本，必须自动到 Canvas。建议同时补 A→B→A 矩阵，锁住 `surfaceState` 的 noteId/Page reset，避免旧 A 的 Canvas state 在回到 A 时重新匹配。
+
+#### LOW-1 · Result 的 exact receipt 不完整
+
+实际 commit 为 **7 files, +442/-8**：3 个生产 hook、1 个新测试、`docs/agent-ops/INDEX.md`、`docs/agent-ops/claude-log/2026-08-21.md` 与本 handoff。Result §6 列表漏了 `claude-log/2026-08-21.md`；该 log 中 `+219/-8` 也不等于全 commit、code+test（`+255/-7`）或三 hook（`+96/-7`）任一自然口径。它是 docs 复盘，不构成产品越界，但不能作为 5-1 精确收据。另，`useNoteCanvasRuntimeController.ts` 本身属于 05 关联文件，故应写成“未改 Slash/rollback 保护 hunk/语义”，不能笼统写“未碰 05 文件”。
+
+### 6. C-1、C-2 与 `useLayoutEffect` 评估
+
+- **C-1 兑现。** `useSurfaceModeController.ts:11,82,87` 直接 import/调用现役 `modePolicyService.getVisibleBlocksForSurface`；既有 layout 路径 `useNoteCanvasLayoutModel.ts:94` 使用同一符号。D 阳性对照为三 hook added-lines 先命中该谓词/bridge refs，随后重复 `.filter`、`isCanvasWorkspaceBlock`、`showWorkspaceBlocks` 为 0；`modePolicyService.ts` 与 `placementService.ts` 在同一 parent→commit diff 探针为 unchanged，而已知阳性 `useSurfaceModeController.ts` 为 changed。
+- **C-2 当前实现未见同帧窗口。** `toggleSurfaceMode` 同步先写 `manualToggledRef=true`，再更新 state/执行 cleanup；浏览器事件不会插入正在执行的 commit layout-effect。换 note 时子 hook 的 reset layout-effect 按注册顺序先于 root resolver effect，且 `loadedNoteId === noteId` 再挡旧 payload。这里的阴性不是空扫：同一源码探针先看见 toggle/reset/root 三个真实写点与调用顺序，再检查其间没有 async boundary。
+- **layout effect 代价可接受。** 首个合法 hydration 至多调用既有可见性谓词两次，即两次 O(n) 扫描，并可能在 paint 前多一次 state render；决定后由 decided/manual guard O(1) 退出，没有同步 persistence、fetch、DOM 查询或新 store。D 阳性对照为 added-lines 先命中 resolver/policy 调用，再扫 `fetch/api/localStorage/querySelector/document/window` 为 0。风险不在当前开销，而在 HIGH-1：现有测试既不保护 root 调用，也不保护 `useLayoutEffect` 不被改回 passive effect。
+
+### 7. 触及面、空间真相与 D 段阴性校准
+
+- parent `fb8f754` → `70a2aaa` 的 changed-path 探针先命中 4 个 hook/test 阳性，随后禁区 `server|migration|schema|modePolicyService|placementService|useNoteCanvasDataAdapter|v1` 命中 **0**；`git diff --check 70a2aaa^ 70a2aaa` exit 0。没有发现申报外产品 diff。
+- fixture added-lines 同一探针先命中 `canvas_workspace/crossing/canvas_world/order_index:6`，再得到新增 `formal_page` **0**。`surfaceAuthorityContract.test.ts:197-263` 对 parent unchanged，且最终 unit 中该文件 **16/16 PASS**，两枚 placement 的 hydrate/normalize/save 仍保护 `canvas_workspace + canvas_world + crossing`。这证明 commit 没靠测试数据重分类过关。
+- live DB 只读校准先看见标本两条 active placement（order 5/6）均为 `canvas_workspace + crossing + canvas_world`，再得到该样本 `formal_page=0`、连接 `total_changes=0`。受控前后 DB/WAL/SHM **size 与 byte SHA 均相同**；但 SQLite readonly 打开仍把 `server/coincides.db-shm` mtime 从 `18:23:52.846Z` 触到 `18:24:09.188Z`。因此本报告只断言未观察到数据 bytes/rows 改写，明确不声称 sidecar metadata 零触碰，也不把它扩写成对 builder 历史上所有 ignored DB 行为的证明。
+- 05 跨条扫描的同一 changed-line 探针先命中 bridge delta **5**，再得到 `applyBlockTextFlowEdit|rollbackBlockSlashSession|useSlashBlockRollbackController|onApply...` delta **0**：确实触及 05 关联 root 文件，但未改 05 Slash/rollback hunk。03 未出现相关 changed path；阳性仍为上述 bridge hunk。
+
+### 8. 5-2 跨条与后续态扫描
+
+- `v2bn121` 的真因链保持：hydration 有块，Page policy 按持久 `canvas_workspace` 排除，`order_index` 不是机关；空间真相不得改成 `formal_page`。`v2bn122` 随后证明 hydration authority 只有到 root 才与 surface resolver 汇合，并因 root 不在当时允许面而正确停工。本单扩面到 root 后采用的正是该汇合点，没有重开 121 已证伪的数据修法，也没有跨回 B 段时钟/server 范围。
+- 当前 bridge 是 TD-7 过渡件；12.4 流面成为默认面时，应把 root resolver effect、hook refs/入口与这组过渡测试同批删除并关闭 TD-7，不能留下第二套默认面决定机关。除此之外未发现对 12.2、v1 或 03/05 语义的新耦合。
+
+### 9. 亲跑门禁收据（docs-first）
+
+| 顺序 | 命令 | 收据 |
+|---:|---|---|
+| 1 | `npm.cmd run docs:check` | exit **0**；`object-inventory.md` latest |
+| 2 | `npm.cmd run verify:v2-bn8-runtime` | exit **0**；client **18 files / 204 tests**、runtime boundary **159 checks**、model contract **60 groups**、client/server build、perf、docs/diff/secrets 全过。链中无已撤除的 tool-face parity，按调度说明不报缺失 |
+| 3 | client `npm.cmd exec tsc -- --noEmit` | exit **0**，无输出 |
+| 4 | server `npm.cmd exec tsc -- --noEmit` | exit **0**，无输出 |
+| 5 | `npm.cmd run test:unit` | exit **0**；**18 files / 204 tests PASS**，含 bridge 6/6、surface authority 16/16 |
+
+复核过程有两项必须披露、但不计 builder finding 的卫生偏差：第一次清理隔离 worktree 时 Windows junction 令 git 一并清空了共享 ignored `client/node_modules`，所以第一次 verify 在 unit 入口以 `'vitest' is not recognized` **exit 1**；随后用 `npm.cmd ci --offline --no-audit --fund=false` 从 cache 恢复，`client/package-lock.json` 前后 SHA256 均为 `7A64FECDDBFE6FFB5251D6242F2E761C0CBA91F1073AD5C86372A1EF219FFE49`，tracked status 为空，之后从 docs-first 全链重跑并取得上表最终收据。第二项是上节已披露的 DB-SHM mtime 触碰。故我不声称“共享树除 Review 外连 ignored cache/sidecar metadata 也绝对零触碰”；只声称 mutation 未污染 tracked 产品/测试/数据内容。
+
+### 10. 5-1 完备性与显式范围排除
+
+本复核承重范围为：commit `70a2aaa` 的 7-file diff、六条专项测试的隔离 mutation、root 接线/策略复用/时序静态审计、四门与 unit 亲跑、121/122/03/05/12.4 跨条扫描。builder 的 API-absent RED 与三-note readonly self-test仅作辅助，不承担 PASS。
+
+未执行真实浏览器主观/视觉验收，也未执行生产 DB 写入或历史数据修复；因此本结论不扩写为“无闪帧的真实浏览器感知已验收”或“所有 ignored 数据文件历史上从未变动”。未 commit、未 push、未切换或修改 main，未改 header。追加本 Review 前共享 tracked tree为 clean；追加后同一 `git status --short` 探针先看见本 handoff 这一已知阳性，再核对产品/常驻测试路径为 0。
