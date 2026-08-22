@@ -216,3 +216,126 @@ stale:   production generate/check fresh exit 0 → 覆写该临时产物为 {"s
 ### 7. 需要 Claude
 
 请由调度方处理或明确授权生成 `docs/agent-ops/INDEX.md`，使其纳入本修正单；之后再按本单顺序从 `docs:check` 重新跑完整门禁。M-1 mutation 最终判定仍归 reviewer；本回执 mutation 仅为 builder 前置自查。header 按 M-2 与用户指令保持 `ready`，未翻牌。
+
+## Review
+
+> reviewer: Codex reviewer（洁净室复核 thread） | date: 2026-08-22 | target: `434c5332f6b62697f6d3ae271a216821b2a2dc13` | mutation checkout: detached `434c533` | 未改 header / 产品代码 / 常驻测试，未 commit / push / 碰 main
+
+### 判定
+
+**FAIL（方向成立）—— BLOCKER 0 / HIGH 1 / MED 0 / LOW 1。**
+
+“方向成立”按 reviewer charter 5-8：精确基线上的生产链确实是 `runCli → renderManifest(TOOL_REGISTRY) → buildToolFaceManifest(entries)`；F1 证明异质 fixture 能直接杀死 exposure 过滤；F2 证明 fresh 阳性先绿、missing 与 stale 会从同一个生产 npm 入口直接红。原 HIGH-2 已封住，原 HIGH-1 的**投影逻辑层**也已封住。
+
+FAIL 来自 HIGH-1 的**生产接线层仍开洞**：F3 只删除生产 CLI 对纯函数的调用、把原投影内联回 `renderManifest`，纯函数和全部测试均保留，结果 `test:tool-face-manifest` 仍 **exit 0（5/5）**，生产 `check:tool-face-manifest` 也 **exit 0**。因此常驻测试尚不能证明生产 CLI 继续共用被 F1 保护的同一投影函数；修正单明令禁止的平行机关可以在不红灯的情况下回来。
+
+### 增量协议声明与基线（5-7）
+
+本轮是**中间轮增量复核**：
+
+- 结论基线：主单 `2026-08-22-v2bn12-2a1b-tool-registry-and-manifest.md` 的 `## Review`（其取证 baseline `3fbbe7fa044fc57af422b3c7da02ee0bab92d0ff`）及 M1–M7 结论；
+- 修正差分：`05f3463b8268334d529bcef433ba44471d003068..434c5332f6b62697f6d3ae271a216821b2a2dc13`；
+- 全扫范围：HIGH-1 / HIGH-2、F1–F5、上述新增差分面、此前因 INDEX 过期未跑的全门；
+- 指纹范围：M1 / M3 / M5 / M6 / M7 只比对不变指纹，不重复原 mutation；M2 / M4 分别由本轮 F1 / F2 取代。
+
+### Findings（MED 及以上）
+
+#### HIGH-1（技术缺陷 / 接线证明缺口）——忠实投影 killer 没有锁住生产 CLI 仍调用同一纯函数
+
+- **现状正确**：`scripts/generate-tool-face-manifest.ts:65-66` 的 `renderManifest` 调用 `buildToolFaceManifest(entries)`，`:88-90` 的 `runCli` 把真实 `TOOL_REGISTRY` 送入 `renderManifest`。
+- **复现**（detached 隔离 checkout）：保留 `buildToolFaceManifest` 与 `scripts/generate-tool-face-manifest.test.ts` 不动，只把 `renderManifest` 中的 `buildToolFaceManifest(entries)` 替换为同字段、同顺序、同 duplicate-name guard 的旧式内联 `entries.map(...)`。随后：
+  - server `npm.cmd run test:tool-face-manifest` → **exit 0，5/5**；
+  - root `npm.cmd run check:tool-face-manifest` → **exit 0，1 条 / 1 public / 未过期**。
+- **为什么是相关假绿**：纯函数测试 `:105-134` 只直接 import/call helper；production spawn 测试 `:174-223` 只验证同一 CLI 的 generate/check 自洽与 missing/stale 比较，不观察 projector 被调用，也不解析产物以识别生产是否绕过 helper。复制实现生成同字节时，两组测试都没有可见差异。
+- **建议修法**：新增一条专门的 production-wiring killer。可用 TypeScript AST/结构契约锁住 `runCli → renderManifest → buildToolFaceManifest`，并拒绝 `buildToolFaceManifest` 外出现第二份九字段 mapper；或把 CLI 编排做成可注入 projector 的单一入口并用 spy 断言生产编排调用它，同时保留真实 npm spawn。只把生产临时产物与 helper 输出做 `deepEqual` 不够——语义相同的复制仍会绿。修后重跑 F3，必须红在“生产未调用同一 projector”的断言。
+
+### LOW
+
+#### LOW-1（收据准确性）——Result 对 fixture exposure 与 F1 删除对象的叙述不符源码
+
+- `scripts/generate-tool-face-manifest.test.ts` 实际是：`public_probe=public`、`internal_probe=public`、`test_probe=test`、`__reserved_probe=internal`（`:46/:60/:74/:88`）。
+- Result §1/§2 写成 `public/internal/test/__public`，并称 F1 删除 `internal/test`。实测 exposure filter 删除的是 `test_probe + __reserved_probe`，所以仍正确命中 cardinality `2 !== 4`，测试杀伤力不受影响；但“`__` 为 public、两类误过滤互不遮蔽”的回执不实。
+- handoff / claude-log 都是追加式历史，不回改原文；以本 Review 的更正为准，后续回执按实码抄取 exposure，不按条目名字推断。
+
+### F1–F5 对抗探针
+
+F1–F3 的 mutation 三要素均满足：位点由调度方点名；由本 reviewer 在 detached `434c533` 隔离 checkout 亲测；分别瞄准主单已经证实的忠实投影漏径、freshness 分支漏径与 12.1 同族“测逻辑≠测接线”漏径。每刀前同一专项门先有 5/5 阳性，刀后均用逆补丁还原并核 blob / numstat。
+
+| # | 拆了什么 | 哪条红 / exit code | 结论 |
+|---|---|---|---|
+| F1 | 在纯函数 `entries.map` 前插入 `.filter(entry => entry.exposure === 'public')`；函数、import、生产链均仍存在 | server `test:tool-face-manifest` **exit 1**；`buildToolFaceManifest faithfully projects...` 在 `test.ts:108` 的 cardinality 直接红：actual `2` / expected `4`；其余 production fresh/missing/stale 子测试仍绿，合计 pass 4 / fail 1 | **通过必红判据**。红因条目被过滤，不是 import / API /函数不存在。实际被删为 `test_probe + __reserved_probe`。还原后 **exit 0，5/5**。 |
+| F2 | 生产比较分支改为 `if (false && actual !== expected)` | server `test:tool-face-manifest` **exit 1**；fresh 子测试先 **ok**；missing 在 `:208`、stale 在 `:220` 均因实际 exit `0`、期望 non-zero 直接红；合计 pass 2 / fail 3 | **通过必红判据**。missing 与 stale 两条都红，且同一生产 npm 入口的 fresh 阳性仍先绿。还原后 **exit 0，5/5**。 |
+| F3 | 仅删除 production `renderManifest` 对 `buildToolFaceManifest` 的调用，内联旧九字段 mapper；纯函数与测试保留 | server `test:tool-face-manifest` **exit 0，5/5**；root `check:tool-face-manifest` **exit 0**；没有任何断言红 | **假绿，形成 HIGH-1**。新测试保护纯函数逻辑，但未保护生产 CLI 必须调用它。 |
+| F4 | 非 mutation：对 test-only output-path seam 做单键 / 双键生产入口探针 | 只设 output-path、`NODE_ENV=production` → canonical check **exit 0**；只设 `NODE_ENV=test`、不设 path → canonical check **exit 0**；两者同时设置并指向 missing temp path → **exit 1** 且报该 temp path 过期 | seam **会在双键显式开启时改变 CLI 输出目标**，这是测试可见性的设计；缺任一键默认生产路径不变。重定向后仍用同一 `renderManifest`、comparator 与读写分支，**不构成平行机关**。操作注记：未来主链不得同时污染这两个专用环境变量。 |
+| F5 | 非 mutation：审计生产入口 spawn 的 executable / argv | `test.ts:140/:148/:150` 使用 `process.env.npm_execpath` + `spawnSync(process.execPath, [npmExecPath, ...])`；同文件 `npm.cmd` 计数 0；正式入口由 server npm script 启动 | **未钉死 Windows**。Linux 的 npm CLI JS 同样由当前 Node 执行；`windowsHide:true` 在非 Windows 无害。未持有 Linux runner，结论为静态跨平台审计。若绕过 npm 直接 `node --test`，`npm_execpath` 可缺失并主动红，这是非正式启动方式限制，不是 Linux-only。 |
+
+### 七门亲跑收据（docs-first）
+
+有效全门收据来自共享工作树的精确 `HEAD=434c5332...`：开跑前后 controller 的 HEAD / index / clean-filtered worktree blob 都是 `3efe5f820e2077850611b54d4d09482845e89545`，全树 `git diff --numstat` 与 untracked 均空。之所以不把全门计在隔离 clone：clone 内 `verify` 的首个 Vitest 在断言运行前被宿主拒绝写 `vitest.config.ts.timestamp-*.mjs`（`EPERM`）；这是一条环境假红，已排除。mutation 与专项门仍全部在隔离 checkout 执行。
+
+| 顺序 | 命令 | reviewer 结果 |
+|---|---|---|
+| 1 | root `npm.cmd run docs:check` | **exit 0**；INDEX / object inventory 最新 |
+| 2 | root `npm.cmd run verify:v2-bn8-runtime` | **exit 0**；19 files / 209 unit、159 runtime-boundary checks、60 model-contract groups、双端 build、performance、docs、diff / secret scan 全过 |
+| 3a | client `npm.cmd exec -- tsc --noEmit` | **exit 0**；无输出 |
+| 3b | server `npm.cmd exec -- tsc --noEmit` | **exit 0**；无输出 |
+| 4 | root `npm.cmd run test:unit` | **exit 0**；19 files / 209 tests |
+| 5 | server `npm.cmd run test:tool-face-registry` | **exit 0**；3/3 |
+| 6 | server `npm.cmd run test:tool-face-manifest` | **exit 0**；5/5（pure projection + production fresh/missing/stale） |
+| 7 | root `npm.cmd run check:tool-face-manifest` | **exit 0**；1 条条目、1 条 public、未过期 |
+
+基线全绿只证明当前快照可运行；F3 的相关假绿证明它不承载“生产必须共用 projector”这一不变量，故不能用本表洗白 HIGH-1。
+
+### 触及面核对（`05f3463..434c533`）
+
+| 路径 | numstat | 核对 |
+|---|---:|---|
+| `scripts/generate-tool-face-manifest.ts` | +48 / -22 | builder 允许面：抽纯函数、direct-execution guard、output-path seam |
+| `scripts/generate-tool-face-manifest.test.ts` | +224 / -0 | builder 允许面：新增专项测试 |
+| `server/package.json` | +1 / -0 | builder 允许面：只加 `test:tool-face-manifest` script |
+| 修正单 handoff | +123 / -0 | 追加 Result；header 未改 |
+| `docs/agent-ops/INDEX.md` | +2 / -1 | 调度方重生成；按本轮明确归因，不计 builder 越界 |
+| `docs/agent-ops/claude-log/2026-08-22.md` | +49 / -0 | 调度方二级复盘收据，不计 builder 越界 |
+| 主单 handoff | +15 / -8 | 调度方对既有 Review 的收据整理，不计 builder 越界 |
+
+`git diff --check 05f3463..434c533` **exit 0**。未触及 registry schema、generated manifest、旧 parity、root package / verify、client / 12.1 / v1、schema / migration / DB；实现触及面与修正单边界一致。
+
+### 未上主链（验证链接线规则）
+
+- root `docs:check` 精确值仍是 `docs-index --check && docs-inventory --check`；同一 token probe 对该值查 `tool-face|manifest|parity` 为 **0**。
+- root `verify:v2-bn8-runtime` 同一 probe 查三词为 **0**。
+- 阳性对照：同一份 root scripts 先命中独立 `docs:tool-face-manifest`、`check:tool-face-manifest`、`check:tool-face-parity`，全 scripts 共命中 6 次，证明 probe 看得见这些词。
+- 因本轮仍 FAIL，专项门继续不接主链是**正确状态**；待修正链 PASS 后才由调度方按 registry → manifest test/check → rewritten parity 的顺序接线。
+
+### M1 / M3 / M5 / M6 / M7 跨条指纹（5-2，未重复原 mutation）
+
+| 原结论 | `05f3463` vs `434c533` 指纹 | 增量判定 |
+|---|---|---|
+| M1 真 Zod / 正常 converter | `registry.ts` blob 同为 `143ad8be...`；generator 的 converter loader、`serializeSchema` 与九字段对象未改语义 | 不受波及；F1 只新增其杀伤力证明 |
+| M3 旧 shared registry 已删 / 旧 parity defer | `shared/types/toolRegistry.ts` 两端都 absent；旧 parity blob 同为 `19a2bda0...`；`server/src` 未改 | 不受波及 |
+| M5 URL 语义门归 1c | `App.tsx=09c83db0...`、`CourseDetail.tsx=cc3af13a...`、generated manifest=`f1fc5014...` 两端相同 | 不受波及；新测试未冒充 URL 可达性 |
+| M6 `.strict()` 承重 | registry 与 `registry.test.ts=a868de36...` 两端相同 | 不受波及 |
+| M7 converter 留 devDependency | server lock blob 同为 `6ab4b234...`；`server/package.json` 只增测试 script，dependencies/devDependencies 不变 | 不受波及。新增 test-only converter consumer；生产 consumer 仍仅 generator，server runtime 仍不消费 |
+
+跨条合取结论：H-2 现在能防 stale/missing，但它只比较“生产自己生成的 expected”。若 F3 允许生产复制 projector，未来在复制体里加入过滤或漏字段，纯函数 F1 仍红不了，而 freshness 会把复制体产出的残缺 manifest 当作 fresh；两门逐条绿仍可合取成错误证明。故 F3 不是形式洁癖，而是 H-1 与 H-2 合取后的承重缺口。
+
+### D 段：承重阴性断言的阳性对照
+
+| 阴性断言 | 同一探针先见的阳性 | 阴性结果；字符串来源 |
+|---|---|---|
+| F1 红不是 import / 函数缺失 | 同一隔离专项门 mutation 前与还原后均 5/5 | mutation 后只 cardinality `2 !== 4` 红，production 三态仍绿；输出来自 Node test assertion，不来自提示/日志 |
+| F2 的 missing/stale 红不是 child 没启动 | 每个负态前 `assertFresh` 用同一 npm child generate+check exit 0；mutation 中 fresh 子测试仍 ok | missing/stale child 都真实 exit 0 并输出“未过期”，随后 non-zero 断言红 |
+| 生产接线没有 killer | mutation 前源码探针先看见 `renderManifest` 中真实 `buildToolFaceManifest(entries)` 调用 | 删除该调用、内联 mapper 后专项门与生产 check 都 exit 0；命中/删除对象来自 production 文件 |
+| 默认生产路径不受单一 seam 键改变 | 双键指向 missing temp path 时同一生产入口 exit 1 并打印该 path | 任一单键时都回 canonical manifest 并 exit 0 |
+| F5 没有 Windows `npm.cmd` 绑定 | 同文件先命中 `npm_execpath`、`process.execPath`、`windowsHide` 共 4 处 | 限定测试文件 `npm.cmd` 计数 0；不是从 Linux 未跑反推，而是由实际 executable/argv 承载 |
+| docs / runtime 主链不含 tool-face 门 | 同一 root scripts probe 先命中三个独立 tool-face/parity script、全量 6 token | 收窄到 `docs:check` 与 `verify` 后均 0 |
+| 旧 shared registry 两端都不存在 | 同一 Git tree probe 先命中现役 `shared/types/toolFaceManifest.ts` | 精确旧路径在 `05f3463` 与 `434c533` 都 `cat-file -e` 失败 |
+| controller porcelain `.M` 不是越界改动 | 全树真实 diff 在本 Review 落盘后能看见本 handoff | controller HEAD / index / clean-filtered worktree blob 三者相同，path-filtered numstat 为空；raw blob 差异只承载 EOL |
+
+### 5-1 收据完备、还原卫生与显式范围排除
+
+- **隔离与还原**：mutation checkout 为独立 Git clone 的 detached `434c533`，`core.autocrlf=false`。F1/F2/F3 每次均用逆补丁恢复；最终 generator HEAD/worktree blob 均为 `80cec2794332a2574e94613ce85de914850dfbce`，测试文件均为 `c5fe9318db3e7847ef624dc4dcd55c7a5cc8781b`；worktree diff exit 0、cached diff exit 0、untracked 0，恢复后专项门 **exit 0，5/5**。
+- **无效收据排除**：隔离 clone 的 Vitest `EPERM` 发生在配置临时文件写入、早于测试收集；没有把它计作门红或 finding。全门改在同 commit、blob 已核的共享基线亲跑。
+- **他方证据承重 / 装饰**：builder Result 的 mutation 数字只作定位指针；F1/F2/F3、七门、边界与主链均由 reviewer 重跑/重查。Result 对 fixture exposure 的错误已降为 LOW 并在此纠正。
+- **显式范围排除**：未启动 server、未连 DB、未跑浏览器 journey；本单只交付 registry 投影生成器与机械测试，没有 MCP handler / UI journey，live 收据回答不了 F1–F3。未持有 Linux runner，F5 只作静态跨平台审计并明示边界。未运行旧 parity mutation、M1/M3/M5/M6/M7 原 mutation，也未检查 12.2b 部署打包——均在本轮 5-7 增量范围外。
+- **共享树边界**：复核期间产品代码与常驻测试零写入；唯一持久写入是以 UTF-8 追加本 `## Review`。header 未改，未 commit / push / 碰 main。controller `.M` 按 blob / numstat 排除，不计触及面。
