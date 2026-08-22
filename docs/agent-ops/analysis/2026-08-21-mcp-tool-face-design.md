@@ -103,6 +103,8 @@ ToolRegistryEntry = {
 
 **对 S1 的处置(交 Opus 调度)**:按本裁定重开 S1(不是修正单,是**方向重置**):删除 `new Function` 路径与 shared 侧伪 schema;注册表落 server;生成器+manifest+parity 三件同单或拆两单由 Opus 定;RED-first 且 mutation 由 reviewer 亲测(三要素)。**S3 解除阻塞条件**=本裁定落地并复核 PASS。
 
+> **§3.1 补注(2026-08-22,S1a 续跑口径,Fable 裁定)**:**manifest = 注册表的忠实投影,不是暴露清单。** 生成器不得按 `exposure` 或 `__` 命名空间过滤(否则 parity 门永远见不到坏条目,门永远不红——S1 第一版的形状)。过滤发生在两个地方且只在这两个地方:①**机械门**(12.2a-1c 的独立 killer:非 public 条目/`__` kind 出现在暴露面即红);②**MCP 列表层**(12.2b:`tools/list` = manifest.filter(exposure==='public') 且剔除 `__` kind,TD-4)。R-4 在注册表/生成器单记 **N/A(刻意不过滤)**,不是缺陷。
+
 ## 4. 范围裁定(D-1 / D-2 / D-3)
 
 - **D-1 v1 线:不暴露,声明「暂缓」**。依据 Henry 08-20 亲裁 v1 人类操作面退役权下放(decks/goals/review/statistics 待清场),**日历豁免且为 Agent 版已知衔接点**——工具面 V12 期不覆盖,Agent 版接日历时按同一注册表加入。红线声明:v1 余线的人类能做 agent 暂不能做=待退役面的自然排除,非后门。
