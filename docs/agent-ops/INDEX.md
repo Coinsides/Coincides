@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-08-21
+> **日期 (Updated)**: 2026-08-22
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 108 份文档。
+共 109 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -117,6 +117,7 @@
 | [handoffs/2026-08-21-v2bn121-legacy-block-drop-and-receipt-clock.md](handoffs/2026-08-21-v2bn121-legacy-block-drop-and-receipt-clock.md) | V2.BN.12.1.1:存量丢块机关 + 收据时钟统一(补丁版) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-21-v2bn122-surface-bridge-and-timestamp-authority.md](handoffs/2026-08-21-v2bn122-surface-bridge-and-timestamp-authority.md) | V2.BN.12.1.2:初始表面过渡桥 + 时间戳盖章权威 | `(缺状态头)` | — | — |
 | [handoffs/2026-08-21-v2bn123-surface-bridge.md](handoffs/2026-08-21-v2bn123-surface-bridge.md) | V2.BN.12.1.3:初始表面过渡桥(边界重划后,**仅 A 段**) | `(缺状态头)` | — | — |
+| [handoffs/2026-08-21-v2bn124-bridge-regression-guards.md](handoffs/2026-08-21-v2bn124-bridge-regression-guards.md) | V2.BN.12.1.4:过渡桥回归护栏(**只写测试,不改产品码**) | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/v2-bn12-2-mcp-tool-face.md](handoffs/plans/v2-bn12-2-mcp-tool-face.md) | Plan V2.BN.12.2 — MCP 工具面(末端执行器第一次实体化) | `active` | — | — |
 | [operating-workflow.md](operating-workflow.md) | 代理期工作流(v1) | `active` | 2026-08-21 | — |
