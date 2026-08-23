@@ -81,6 +81,71 @@ function withTempRouteRepo(run) {
   }
 }
 
+function withTempClientBaseRepo(apiBaseInitializer, run) {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'coincides-tool-face-client-base-'));
+  const clientSrcRoot = join(tempRoot, 'client', 'src');
+  const servicesRoot = join(clientSrcRoot, 'services');
+  try {
+    mkdirSync(servicesRoot, { recursive: true });
+    writeFileSync(
+      join(servicesRoot, 'api.ts'),
+      [
+        "import axios from 'axios';",
+        "const PORT_PLACEHOLDER = 'https://deployed.example';",
+        'const isDeployed = true;',
+        `const API_BASE = ${apiBaseInitializer};`,
+        'const api = axios.create({ baseURL: API_BASE });',
+        'export default api;',
+        '',
+      ].join('\n'),
+      'utf8',
+    );
+    writeFileSync(
+      join(clientSrcRoot, 'probe.ts'),
+      [
+        "import api from './services/api';",
+        'export function probe() {',
+        "  return api.get('/notes');",
+        '}',
+        '',
+      ].join('\n'),
+      'utf8',
+    );
+    return run(tempRoot);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+}
+
+function runClientBaseProbe(apiBaseInitializer) {
+  return withTempClientBaseRepo(apiBaseInitializer, (repoRoot) => (
+    validateClientCallConstruction({
+      repoRoot,
+      method: 'GET',
+      routePath: '/api/notes',
+      callSite: 'client/src/probe.ts#probe',
+    })
+  ));
+}
+
+function assertClientBaseProbeSeesStaticPositive() {
+  const positive = runClientBaseProbe(
+    "isDeployed ? `${PORT_PLACEHOLDER}/api` : '/api'",
+  );
+  assert.equal(positive.ok, true, JSON.stringify(positive, null, 2));
+}
+
+function assertClientBaseProbeRejectsNotFullyStatic(apiBaseInitializer) {
+  let thrown = null;
+  try {
+    runClientBaseProbe(apiBaseInitializer);
+  } catch (error) {
+    thrown = error;
+  }
+  assert.ok(thrown instanceof Error, 'expected base path not fully static rejection');
+  assert.match(thrown.message, /base path not fully static/);
+}
+
 function runProductionCli(manifest) {
   return withTempManifest(manifest, (manifestPath) => spawnSync(
     process.execPath,
@@ -218,13 +283,41 @@ test('G-2 validates method and normalized URL construction inside the declared s
   assert.match(wrongUrlOutput, /client symbol does not construct GET \/api\/health/);
 });
 
-test('G-3 empty manifest is neutral, exits zero, and never prints PASS', () => {
-  const result = runProductionCli([]);
-  assertCliCompleted(result);
-  assert.equal(result.status, 0, cliReceipt(result));
-  const output = `${result.stdout}\n${result.stderr}`;
-  assert.match(output, /0 条 public 条目受检，未证明任何 parity/);
-  assert.doesNotMatch(output, /\[PASS\]/);
+test('G-2 rejects a wholly dynamic API base as not fully static', () => {
+  assertClientBaseProbeSeesStaticPositive();
+  assertClientBaseProbeRejectsNotFullyStatic('import.meta.env.VITE_API_BASE');
+});
+
+test('G-2 rejects a mixed dynamic and literal API base as not fully static', () => {
+  assertClientBaseProbeSeesStaticPositive();
+  assertClientBaseProbeRejectsNotFullyStatic(
+    "isDeployed ? import.meta.env.VITE_API_BASE : '/api'",
+  );
+});
+
+test('G-3 empty and non-empty 0-public manifests are neutral and never print PASS', () => {
+  const passPattern = /PASS/i;
+  const positive = runProductionCli(realManifest);
+  assertCliCompleted(positive);
+  assert.equal(positive.status, 0, cliReceipt(positive));
+  const positiveOutput = `${positive.stdout}\n${positive.stderr}`;
+  assert.match(positiveOutput, passPattern);
+
+  const empty = runProductionCli([]);
+  assertCliCompleted(empty);
+  assert.equal(empty.status, 0, cliReceipt(empty));
+  const emptyOutput = `${empty.stdout}\n${empty.stderr}`;
+  assert.match(emptyOutput, /0 条 public 条目受检，未证明任何 parity/);
+  assert.doesNotMatch(emptyOutput, passPattern);
+
+  const zeroPublic = runProductionCli([
+    cloneEntry({ name: 'zero_public_probe', exposure: 'test' }),
+  ]);
+  assertCliCompleted(zeroPublic);
+  assert.equal(zeroPublic.status, 0, cliReceipt(zeroPublic));
+  const zeroPublicOutput = `${zeroPublic.stdout}\n${zeroPublic.stderr}`;
+  assert.match(zeroPublicOutput, /0 条 public 条目受检，未证明任何 parity/);
+  assert.doesNotMatch(zeroPublicOutput, passPattern);
 });
 
 test('G-5 killer 1: real route and real client construction stay green', () => {

@@ -234,39 +234,57 @@ export function buildServerRouteGraph(repoRoot = REPO_ROOT) {
 
 function evaluateStaticStrings(node, declarations, seen = new Set()) {
   const literal = staticString(node);
-  if (literal != null) return [literal];
+  if (literal != null) return { values: [literal], complete: true };
 
   if (ts.isIdentifier(node)) {
-    if (seen.has(node.text)) return [];
+    if (seen.has(node.text)) return { values: [], complete: false };
     const initializer = declarations.get(node.text);
-    if (!initializer) return [];
+    if (!initializer) return { values: [], complete: false };
     return evaluateStaticStrings(initializer, declarations, new Set([...seen, node.text]));
   }
 
   if (ts.isConditionalExpression(node)) {
-    return [
-      ...evaluateStaticStrings(node.whenTrue, declarations, seen),
-      ...evaluateStaticStrings(node.whenFalse, declarations, seen),
-    ];
+    const whenTrue = evaluateStaticStrings(node.whenTrue, declarations, seen);
+    const whenFalse = evaluateStaticStrings(node.whenFalse, declarations, seen);
+    return {
+      values: [...whenTrue.values, ...whenFalse.values],
+      complete: whenTrue.complete && whenFalse.complete,
+    };
   }
 
   if (ts.isTemplateExpression(node)) {
-    let values = [node.head.text];
+    let result = { values: [node.head.text], complete: true };
     for (const span of node.templateSpans) {
-      const expressionValues = evaluateStaticStrings(span.expression, declarations, seen);
-      if (expressionValues.length === 0) return [];
-      values = values.flatMap((prefix) => expressionValues.map(
-        (expressionValue) => `${prefix}${expressionValue}${span.literal.text}`,
-      ));
+      const expressionResult = evaluateStaticStrings(span.expression, declarations, seen);
+      result = {
+        values: result.values.flatMap((prefix) => expressionResult.values.map(
+          (expressionValue) => `${prefix}${expressionValue}${span.literal.text}`,
+        )),
+        complete: result.complete && expressionResult.complete,
+      };
     }
-    return values;
+    return result;
+  }
+
+  if (
+    ts.isBinaryExpression(node)
+    && node.operatorToken.kind === ts.SyntaxKind.PlusToken
+  ) {
+    const left = evaluateStaticStrings(node.left, declarations, seen);
+    const right = evaluateStaticStrings(node.right, declarations, seen);
+    return {
+      values: left.values.flatMap((leftValue) => right.values.map(
+        (rightValue) => `${leftValue}${rightValue}`,
+      )),
+      complete: left.complete && right.complete,
+    };
   }
 
   if (ts.isParenthesizedExpression(node)) {
     return evaluateStaticStrings(node.expression, declarations, seen);
   }
 
-  return [];
+  return { values: [], complete: false };
 }
 
 function resolveProjectApiBasePath(repoRoot) {
@@ -306,7 +324,11 @@ function resolveProjectApiBasePath(repoRoot) {
     throw new Error(`${CLIENT_API_RELATIVE_PATH} does not declare axios.create({ baseURL })`);
   }
 
-  const values = evaluateStaticStrings(baseExpression, declarations);
+  const evaluation = evaluateStaticStrings(baseExpression, declarations);
+  if (!evaluation.complete) {
+    throw new Error(`${CLIENT_API_RELATIVE_PATH} base path not fully static`);
+  }
+  const { values } = evaluation;
   const pathValues = values.map((value) => {
     if (/^https?:\/\//i.test(value)) return new URL(value).pathname;
     const firstSlash = value.indexOf('/');
