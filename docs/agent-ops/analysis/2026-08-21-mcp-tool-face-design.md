@@ -116,7 +116,7 @@ ToolRegistryEntry = {
 三层,复用优先:
 
 1. **schema 守卫**:复用 `server/src/validators` 的 zod(同门同钥字面兑现),工具侧 `strict()`;未知字段拒收。
-2. **scope 守卫**:每个 handler 内检 `scopes`(照搬 MCP 授权实践「每个 tool handler 内部检查 authInfo.scopes」);本机单用户形态下 bearer=应用既有 JWT,不上 OAuth 全套(调研盘 §2.2 判断)。
+2. **scope 守卫**:每个 handler 内检 `scopes`(照搬 MCP 授权实践「每个 tool handler 内部检查 authInfo.scopes」);本机单用户形态下 bearer=应用既有 JWT,不上 OAuth 全套(调研盘 §2.2 判断)。  **(2026-08-23 消歧:本句为目标态;当前 JWT 只有 `userId`,`scopes` 仅描述、未强制——见 §12 D-f 与 TD-14;强制归鉴权基线专项)**
 3. **意图级守卫**(新增,schema 职责之外)——**阈值规则(Henry 2026-08-21 亲拍)**:**单条删除=immediate**(留收据可撤,与人手点删同门);**批量写/批量删(>1 项)、跨 Project 操作、打包导入导出=confirm**(MRTR `input_required`,不支持时降 propose);`propose` 档写候选收据不直接落真相。
 4. **输入不可信**:自由文本字段长度上限、无执行语义(外来 JS 永不执行 §6)、Origin/Host 校验(自建 transport 须自实现)。
 
