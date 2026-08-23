@@ -48,3 +48,11 @@
 - b-1 的核实结论(哪条门、有无执行器、提取面)先回我点名,再发 b-1 施工单——**不要让 builder 自己选门**。
 - Spark 只适合 b-3 的纯机械子项(如删 `ProposalList.tsx` 与导航项),其余 5.6。
 - 每单写死:零语义提取 / 不在 transport 造机关 / 写 Result 不需确认 / 验不了就停的机械判定 / `.run()` 实参侧禁区。
+
+## 7. 2026-08-23 补记(b-1 后)
+
+- **产品事实**:client 对 `/api/notes/:id` 零调用——用户今天在 UI 里无法把 note 移入回收站或恢复;服务端无恢复路由。按红线,**b-2 拆为 b-2a 人类门(client 移入回收站/恢复 + `POST /api/notes/:id/restore`)→ b-2b Agent 工具 `trash_notes`**。
+- **b-1 5-2 提示采纳**:执行器改为返回 `{ changes }`(b-2b 内做,DELETE/restore 薄壳忽略返回;b-1 golden/killer 复跑);binding 逐 id 调用按 `changes` 归类 affected/missing。
+- **tier 随入参的机关位置**:注册表条目加可选 `threshold: { batch_field: 'note_ids' }`(shared 类型 + 生成器忠实投影 + manifest),`policy.resolveEffectiveTier(entry, envelope, input)` 据此把 `confirm` 在 n==1 时降为 `immediate`——不在各工具 handler 里各写一份、不在 policy 里写工具名表。
+- **confirm 往返**:由 builder 对照 SDK `.d.mts`(`input_required` / `inputResponses` / `requestState` / `ElicitRequestFormParams`)核实形状后实现;拒绝(用户在表单选否)= 不执行、不写收据。
+- **TD-18**:PUT status 分支与执行器不同源,记债;人类恢复改走新 restore 路由(b-2a),PUT 不动。
