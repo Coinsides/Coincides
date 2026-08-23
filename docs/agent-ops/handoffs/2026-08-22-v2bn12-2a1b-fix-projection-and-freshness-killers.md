@@ -1,4 +1,4 @@
-> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: done(经 fix2 收口,2026-08-22 Opus 翻牌;修正单,复核 FAIL(方向成立)0B/2H) | re: v2bn12-2a-1b-fix | date: 2026-08-22
+> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: done(复核 PASS @ rfix2 Review,Fable 放行 log 08-22 #9;经 fix2 收口,2026-08-22 Opus 翻牌;修正单,复核 FAIL(方向成立)0B/2H) | re: v2bn12-2a-1b-fix | date: 2026-08-22
 
 # V2.BN.12.2a-1b-fix:两条缺失的 killer
 

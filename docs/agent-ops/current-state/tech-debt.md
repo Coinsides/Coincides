@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(技术债登记)
-> **日期 (Updated)**: 2026-08-20
+> **日期 (Updated)**: 2026-08-22
 > **权威 (Authoritative)**: 是(债未清则条目不删;清偿须留收据链接)
 
 # 技术债登记
@@ -18,3 +18,4 @@
 | TD-7 | **过渡桥:存量 canvas-only 笔记初始面选 Canvas**(`useSurfaceModeController` 初始选择按 hydration 结果一次性改选;12.1.2 引入) | 12.1 旅程 J9=0:Page 模式过滤掉全为 `canvas_world`/`crossing` 的块 ⇒ 空态;真因在初始面而非数据 | **退役触发器**:12.4 流面成为所有 Note 默认面 / Page 模式退役时**一并拆除**,不得残留 | 未清(桥) |
 | TD-8 | 收据表时间戳写入无共享 helper:`applied_at` ISO 写点 15 处散在 14 个生产文件(`reverted_at` 2 处),约定靠「每列单一格式」维持而非机关保证 | 12.1.2 BLOCKED:裁定措辞「单一 helper」点名了不存在的机关 | 种子=12.2a-2 工具收据新写入路径自带 helper;存量写点随下次触及顺手归入;可选:一条只读 grep 守卫(`datetime('now')` 不得写收据表列)在复核 PASS 后接线 | 未清 |
 | TD-9 | 过渡桥(TD-7)的 root 接线契约测试 mock 掉了中间承重点 `useRuntimeSurfaceStateController`(把 leaf `noteId` 改 `undefined` 仍 209/209 绿);payload 断言四个输入来源同值无法辨别来源偷换;`layerProps` 观察通道双 cast 与生产类型脱钩 | 12.1.4 复核 FAIL(方向成立)HIGH-1/MED-1/MED-2;止损线触发停 12.1 线 | 桥与现有护栏保留(X1/X2/X3 已红绿);补法见该单 Review §5(保留真实 wrapper 改 mock leaf 重依赖 / 互异哨兵 / 类型化 phase receipt);**随 TD-7 一并退役**——12.4 Page 退役时桥与此测试同拆,若 12.4 前再碰该 hook 则顺手补 | 未清(随桥) |
+| TD-10 | **manifest 生成器的「单一 mapper」是约定而非机关**:`renderManifest` 的默认 initializer 与「全仓只有一份九字段 mapper」两者都未被结构锁住。复核 G3 实测——新增同签名 `copyToolFaceManifest` 并把默认值换成它,专项门 6/6 与生产 `check:tool-face-manifest` **均仍绿** | 12.2a-1b-fix2 复核 LOW-1(PASS 0B/0H/0M/1L,Fable 放行 log 08-22 #9);工单把结构 killer 明列为**可选**,故不阻塞放行 | 若要封:用 AST/源码结构契约**同时**锁默认 initializer 与单 mapper,**不得再用「生产字节自洽」当证明**(那正是 G3 绕过的东西)。承接建议:12.2a-1c 触及该文件时评估顺带;或随 12.2b `tools/list` 落地时统一做结构契约 | 未清 |

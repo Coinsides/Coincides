@@ -1,4 +1,4 @@
-> from: claude(fable,上将军直发——Opus 调度会话离线;授权:claude-log/2026-08-19.md 条目1 代理权) | to: codex(builder) | status: done(复核 PASS 0B/0H/0M/1L,2026-08-22 Opus 翻牌;Fable 本人翻牌;设计裁定:log 08-22 #7) | re: v2bn12-2a-1b-fix2 | date: 2026-08-22
+> from: claude(fable,上将军直发——Opus 调度会话离线;授权:claude-log/2026-08-19.md 条目1 代理权) | to: codex(builder) | status: done(复核 PASS @ rfix2 Review,Fable 放行 log 08-22 #9;复核 PASS 0B/0H/0M/1L,2026-08-22 Opus 翻牌;Fable 本人翻牌;设计裁定:log 08-22 #7) | re: v2bn12-2a-1b-fix2 | date: 2026-08-22
 
 # 12.2a-1b-fix2:生产接线 killer —— 生产 CLI 必须调用同一投影函数
 

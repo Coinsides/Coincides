@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-08-22
+> **日期 (Updated)**: 2026-08-23
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -64,7 +64,7 @@
 | [claude-log/README.md](claude-log/README.md) | claude-log —— Claude 行动日志（Henry 的监督轨迹） | `active` | 2026-06-27 | — |
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-19 | — |
-| [current-state/tech-debt.md](current-state/tech-debt.md) | 技术债登记 | `active` | 2026-08-20 | — |
+| [current-state/tech-debt.md](current-state/tech-debt.md) | 技术债登记 | `active` | 2026-08-22 | — |
 | [decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md](decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md) | ADR-0001: 自研最小混合 Canvas 引擎路线 (Self-owned Minimal Hybrid Can… | `active` | 2026-06-27 | — |
 | [decisions/README.md](decisions/README.md) | 决策层 / Architecture Decision Records (ADR) | `active` | 2026-06-27 | — |
 | [handoffs/2026-06-27-canvas-persistence-cutover.md](handoffs/2026-06-27-canvas-persistence-cutover.md) | Spec：三颗承重持久化种子的 DB 发芽（V2.BN.8.11 收口前的最后实质工作） | `(缺状态头)` | — | — |
