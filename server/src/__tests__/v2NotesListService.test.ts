@@ -6,6 +6,7 @@ import { dirname, join, resolve } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
+import ts from 'typescript';
 import { closeDb, initDb } from '../db/init.js';
 import type { AuthRequest } from '../middleware/auth.js';
 import { errorHandler } from '../middleware/errorHandler.js';
@@ -124,12 +125,198 @@ function expectedActiveNotesBytes(): Buffer {
   ]), 'utf8');
 }
 
+function normalizedSourcePath(path: string): string {
+  return resolve(path).replace(/\\/g, '/').toLowerCase();
+}
+
+function isLexicalBindingIdentifier(node: ts.Identifier): boolean {
+  const parent = node.parent;
+  return (
+    (ts.isImportSpecifier(parent) && parent.name === node)
+    || (ts.isImportClause(parent) && parent.name === node)
+    || (ts.isNamespaceImport(parent) && parent.name === node)
+    || (ts.isImportEqualsDeclaration(parent) && parent.name === node)
+    || (ts.isVariableDeclaration(parent) && parent.name === node)
+    || (ts.isBindingElement(parent) && parent.name === node)
+    || (ts.isParameter(parent) && parent.name === node)
+    || (ts.isFunctionDeclaration(parent) && parent.name === node)
+    || (ts.isFunctionExpression(parent) && parent.name === node)
+    || (ts.isClassDeclaration(parent) && parent.name === node)
+    || (ts.isClassExpression(parent) && parent.name === node)
+    || (ts.isEnumDeclaration(parent) && parent.name === node)
+    || (ts.isTypeAliasDeclaration(parent) && parent.name === node)
+    || (ts.isInterfaceDeclaration(parent) && parent.name === node)
+  );
+}
+
+function assertListNotesRouteUsesCanonicalService(): void {
+  const configPath = resolve(REPO_ROOT, 'server/tsconfig.json');
+  const configFile = ts.readConfigFile(configPath, ts.sys.readFile);
+  if (configFile.error) {
+    assert.fail(ts.flattenDiagnosticMessageText(configFile.error.messageText, '\n'));
+  }
+  const parsedConfig = ts.parseJsonConfigFileContent(
+    configFile.config,
+    ts.sys,
+    dirname(configPath),
+    undefined,
+    configPath,
+  );
+  assert.deepEqual(
+    parsedConfig.errors.map((error) => ts.flattenDiagnosticMessageText(error.messageText, '\n')),
+    [],
+    'server tsconfig must parse before checking the route binding',
+  );
+
+  const program = ts.createProgram(parsedConfig.fileNames, parsedConfig.options);
+  const checker = program.getTypeChecker();
+  const routePath = resolve(REPO_ROOT, 'server/src/routes/notes.ts');
+  const canonicalServicePath = resolve(REPO_ROOT, 'server/src/services/notes.ts');
+  const routeSource = program.getSourceFiles().find(
+    (sourceFile) => normalizedSourcePath(sourceFile.fileName) === normalizedSourcePath(routePath),
+  );
+  const canonicalServiceSource = program.getSourceFiles().find(
+    (sourceFile) => normalizedSourcePath(sourceFile.fileName) === normalizedSourcePath(canonicalServicePath),
+  );
+  assert.ok(routeSource, 'routes/notes.ts must be part of the server TypeScript program');
+  assert.ok(canonicalServiceSource, 'services/notes.ts must be part of the server TypeScript program');
+
+  const canonicalModuleSymbol = checker.getSymbolAtLocation(canonicalServiceSource);
+  assert.ok(canonicalModuleSymbol, 'canonical notes service module symbol must resolve');
+  const canonicalExportSymbol = checker
+    .getExportsOfModule(canonicalModuleSymbol)
+    .find((symbol) => symbol.getName() === 'listNotes');
+  assert.ok(canonicalExportSymbol, 'canonical notes service must export listNotes');
+
+  const listNotesImports: Array<{
+    declaration: ts.ImportDeclaration;
+    specifier: ts.ImportSpecifier;
+  }> = [];
+  for (const statement of routeSource.statements) {
+    if (!ts.isImportDeclaration(statement) || !statement.importClause?.namedBindings) continue;
+    if (!ts.isNamedImports(statement.importClause.namedBindings)) continue;
+    for (const specifier of statement.importClause.namedBindings.elements) {
+      const importedName = specifier.propertyName?.text ?? specifier.name.text;
+      if (importedName === 'listNotes') {
+        listNotesImports.push({ declaration: statement, specifier });
+      }
+    }
+  }
+  assert.equal(
+    listNotesImports.length,
+    1,
+    'routes/notes.ts must import the listNotes export exactly once',
+  );
+
+  const [{ declaration: listNotesImport, specifier: listNotesSpecifier }] = listNotesImports;
+  assert.ok(ts.isStringLiteral(listNotesImport.moduleSpecifier), 'listNotes import source must be a string literal');
+  const resolvedImport = ts.resolveModuleName(
+    listNotesImport.moduleSpecifier.text,
+    routePath,
+    parsedConfig.options,
+    ts.sys,
+  ).resolvedModule;
+  assert.ok(resolvedImport, 'listNotes import source must resolve');
+  assert.equal(
+    normalizedSourcePath(resolvedImport.resolvedFileName),
+    normalizedSourcePath(canonicalServicePath),
+    'listNotes import must resolve directly to services/notes.ts',
+  );
+
+  const importedBindingSymbol = checker.getSymbolAtLocation(listNotesSpecifier.name);
+  assert.ok(importedBindingSymbol, 'listNotes import binding symbol must resolve');
+  assert.equal(
+    checker.getAliasedSymbol(importedBindingSymbol),
+    canonicalExportSymbol,
+    'listNotes import binding must alias the canonical service export',
+  );
+
+  const lexicalBindings: ts.Identifier[] = [];
+  const findLexicalBindings = (node: ts.Node): void => {
+    if (ts.isIdentifier(node) && isLexicalBindingIdentifier(node)) {
+      lexicalBindings.push(node);
+    }
+    ts.forEachChild(node, findLexicalBindings);
+  };
+  findLexicalBindings(routeSource);
+  assert.ok(
+    lexicalBindings.includes(listNotesSpecifier.name),
+    'lexical binding probe must see the canonical listNotes import',
+  );
+  const extraListNotesBindings = lexicalBindings.filter(
+    (binding) => binding.text === 'listNotes'
+      && checker.getSymbolAtLocation(binding) !== importedBindingSymbol,
+  );
+  assert.equal(
+    extraListNotesBindings.length,
+    0,
+    'routes/notes.ts must not declare a second listNotes lexical binding',
+  );
+
+  const routerDeclaration = routeSource.statements
+    .filter(ts.isVariableStatement)
+    .flatMap((statement) => [...statement.declarationList.declarations])
+    .find((declaration) => ts.isIdentifier(declaration.name) && declaration.name.text === 'router');
+  assert.ok(routerDeclaration && ts.isIdentifier(routerDeclaration.name), 'top-level router binding must exist');
+  const routerSymbol = checker.getSymbolAtLocation(routerDeclaration.name);
+  assert.ok(routerSymbol, 'top-level router binding symbol must resolve');
+
+  const rootGetHandlers: Array<ts.ArrowFunction | ts.FunctionExpression> = [];
+  const findRootGetHandler = (node: ts.Node): void => {
+    if (
+      ts.isCallExpression(node)
+      && ts.isPropertyAccessExpression(node.expression)
+      && ts.isIdentifier(node.expression.expression)
+      && checker.getSymbolAtLocation(node.expression.expression) === routerSymbol
+      && node.expression.name.text === 'get'
+      && ts.isStringLiteral(node.arguments[0])
+      && node.arguments[0].text === '/'
+    ) {
+      for (const argument of node.arguments.slice(1)) {
+        if (ts.isArrowFunction(argument) || ts.isFunctionExpression(argument)) {
+          rootGetHandlers.push(argument);
+        }
+      }
+    }
+    ts.forEachChild(node, findRootGetHandler);
+  };
+  findRootGetHandler(routeSource);
+  assert.equal(rootGetHandlers.length, 1, 'GET / route callback must exist exactly once');
+
+  const responseCalls: ts.CallExpression[] = [];
+  const handler = rootGetHandlers[0];
+  const responseParameter = handler.parameters[1]?.name;
+  assert.ok(responseParameter && ts.isIdentifier(responseParameter), 'GET / handler response parameter must be an identifier');
+  const responseSymbol = checker.getSymbolAtLocation(responseParameter);
+  assert.ok(responseSymbol, 'GET / handler response binding symbol must resolve');
+  const findResponseCall = (node: ts.Node): void => {
+    if (node !== handler && ts.isFunctionLike(node)) return;
+    if (
+      ts.isCallExpression(node)
+      && ts.isPropertyAccessExpression(node.expression)
+      && ts.isIdentifier(node.expression.expression)
+      && checker.getSymbolAtLocation(node.expression.expression) === responseSymbol
+      && node.expression.name.text === 'json'
+    ) {
+      responseCalls.push(node);
+    }
+    ts.forEachChild(node, findResponseCall);
+  };
+  findResponseCall(handler);
+  assert.equal(responseCalls.length, 1, 'GET / handler must call res.json exactly once');
+
+  const responseValue = responseCalls[0].arguments[0];
+  assert.ok(ts.isCallExpression(responseValue), 'GET / response must come from a service call');
+  assert.ok(ts.isIdentifier(responseValue.expression), 'GET / response service callee must be an imported identifier');
+  assert.equal(
+    checker.getSymbolAtLocation(responseValue.expression),
+    importedBindingSymbol,
+    'GET / response must call the canonical listNotes import binding',
+  );
+}
+
 test('A-1 route and MCP binding both call the same listNotes service export', () => {
-  const routeSource = readFileSync(resolve(REPO_ROOT, 'server/src/routes/notes.ts'), 'utf8');
-  assert.match(routeSource, /import\s+\{[^}]*\blistNotes\b[^}]*\}\s+from\s+'\.\.\/services\/notes\.js';/);
-  const listRoute = routeSource.match(/router\.get\('\/'[\s\S]*?\n\}\);/)?.[0];
-  assert.ok(listRoute, 'GET / route callback must exist');
-  assert.match(listRoute, /res\.json\(listNotes\(\{/);
+  assertListNotesRouteUsesCanonicalService();
 
   const bindingSource = readFileSync(resolve(REPO_ROOT, 'server/src/mcp/bindings.ts'), 'utf8');
   assert.match(bindingSource, /import\s+\{\s*listNotes\s*\}\s+from\s+'\.\.\/services\/notes\.js';/);
