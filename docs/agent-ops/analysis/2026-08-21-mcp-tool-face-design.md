@@ -329,3 +329,20 @@ KIND_HANDLERS（画布对象，6 种）
 1. **MRTR 在两个 harness 的当前支持度** —— 只核到 `elicitation/create` 的支持度，**两者不是一回事**。
 2. **`:390/:951` 的调用方是否真的只拿 client_create receipt 的 batch id** —— 我核了查询无 source_type 过滤，**未逐个追调用方**。故 ① 的结论是「未声明依赖」，不是「一定会撞」。
 3. **`'proposal'` 这个 source_type 取值** —— 本稿称代码中已写过（`canvasLayoutProposals.ts:456`），我的字面量扫描**未命中它**（可能写法不同）。**未核，不否认。**
+
+## 11. 12.2a-3 传输层裁定(2026-08-23,Fable;依据 builder 短笺 `handoffs/2026-08-23-v2bn12-2a3-transport-brief-request.md` §短笺)
+
+**§1 两问(裁定方作答)**:①平行机关——**否**。六项职责(鉴权/入参校验/工具目录/收据/错误模型/会话)全走既有正门;唯一新增是 MCP 协议适配与 Host/Origin transport 门(防 DNS rebinding,属「谁在跟你说话」不是「你是谁」),以及 `name → function` 的 executor binding——后者以「与过滤后 manifest 等集合」killer 防止长成第二目录。②基线保证——**否**。transport 不兜 TD-6(跨资源原子)、TD-8 残余(格式机关)、TD-10(单 mapper 结构锁)。
+
+**设计裁定**:
+- **D-a C-6 改裁:phase 1 的唯一工具 = `list_notes`**(只读、已在注册表、已有 parity 正控)。`ping` **取消**——没有 truth 的工具不进注册表,MCP 协议层自有存活性;`resolve_selection` **推到 12.2b** 随 selection-receipt 设计(权威 zod + service 先落正门)一起做。理由:传输骨架单不应夹带新 schema/handler;用已有的读工具当 live 正控,机关最少。
+- **D-b JSON Schema dialect**:transport **不得改写**;generator 侧改为输出 2020-12 兼容子集并**不再自报 draft-07**(`$refStrategy:'none'` 下无 `definitions`;禁止 tuple-`items`/`dependencies` 等 draft-07 专属构造,加静态 killer),MCP 侧经 SDK `fromJsonSchema()` 接入。作为施工单 S0。
+- **D-c Host/Origin**:采短笺——allowlist 来自启动校验的部署配置;Host 必中;带 Origin 的必中;无 Origin 的 CLI/harness 放行;各自 403 且在 JWT 之前;全局 CORS `*` 不是这道门。killer:合法 Host/Origin + 无 token → 既有 401(证明穿过门);非法 Host / 非法 Origin 各自 403;删任一 guard 只对应 killer 红。
+- **D-d SDK 入口**:采 2026-07-28 现代入口(`createMcpHandler` + `toNodeHandler`,per-request fresh server,`legacy:'reject'`);**精确 API 名由 builder 对照已安装包的 `.d.ts` 与官方文档核实并在回执贴出**,与短笺不符即停手上报——不用 legacy `*StreamableHTTPServerTransport`。`express.json()` 已消费 body → body 作第三参数传入。
+- **D-e C-3 降级**:判定点在 `tools/call` 入口、任何副作用与收据之前;谓词 = 现代请求 **且** 当次 `_meta['io.modelcontextprotocol/clientCapabilities'].elicitation.form`;不猜 clientInfo、不跨请求缓存、不发明 extension key。不支持即 effective tier=`propose`、不执行、写 `proposed` 收据返回。phase 1 无 confirm 工具,此 seam 以策略 + 测试存在。降级原因字段(`requested_tier/degraded_from`)**暂不加**,记设计注记:首个 confirm 工具前另裁。
+- **D-f scopes 未强制**:JWT 只有 `userId`,manifest `scopes` 仅描述——**入 current-state 声明边界 + TD-14**;12.2b 不得把它当权限模型;强制归鉴权基线专项。
+- **D-g 人审入口不存在**:phase 1 无 propose/confirm 工具,不阻塞;**首个 confirm 工具暴露前**须先落普通 Express + client 的人审入口及 `proposed → applied` 接线(候选呈现 = §6 队列为家)。
+- **D-h 生产 artifact 携带 manifest**:采短笺五步**原样写死**——build 先 freshness check → `tsc` 后按字节复制到 `server/dist/tool-face-manifest.json` → loader 只按 `import.meta.url` 相对 dist 定位、缺失即启动失败、**禁止 cwd 回退读 repo docs/**、禁止运行时 import 注册表 → artifact killer(源/复制件 hash 相同;无 repo docs 的最小布局启动;删 copy step 必红)→ **打包件保留 internal/test/`__` 条目**(过滤不得偷跑到 build)。
+- **D-i 错误映射**:采短笺表;不新增错误类型;tool 内 `AppError` 投影为 `CallToolResult{isError:true}`,≥500 脱敏;`input_required` 与降级都不是错误。
+
+**施工单(12.2a-3)结构**:S0 dialect(generator)→ S1 transport 骨架(`/api/mcp`,Host/Origin,auth bridge,per-request server,manifest loader/projector/binding)→ S2 killers(过滤 ×2 / Host/Origin ×2 / binding 等集合 / artifact loader / MRTR 降级策略测试 / 生产接线)→ S3 build copy step。5.6。触及面按短笺 §7;**不得**在 transport 内造 schema/白名单/内存状态。
