@@ -1,4 +1,4 @@
-> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: ready(b-2b-1 与 fix 均已复核 PASS 并 done;2026-08-23 Opus 翻牌) | re: v2bn12-2b-3 | date: 2026-08-23
+> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: done(2026-08-23 复核 FAIL→fix→PASS;Fable 以 `976d3c5` 为有效基线放行,log #33。**Opus 依下沉工作流翻牌,不代表 Henry 逐张批过**) | re: v2bn12-2b-3 | date: 2026-08-23
 
 # V2.BN.12.2b-3:候选审阅队列(人审入口)+ 退役旧 proposals 面
 

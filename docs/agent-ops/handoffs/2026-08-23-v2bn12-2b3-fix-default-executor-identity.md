@@ -1,4 +1,4 @@
-> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: ready(Fable 2026-08-23 裁「机械级,Opus 发只写测试的修正单」;范围按两个符号) | re: v2bn12-2b-3-fix | date: 2026-08-23
+> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: done(2026-08-23 复核 R1–R6 全 PASS;唯一 MED-1 = 调度方提交切分错,已由 `976d3c5` 修复;Fable 放行 log #33。**Opus 依下沉工作流翻牌,不代表 Henry 逐张批过**) | re: v2bn12-2b-3-fix | date: 2026-08-23
 
 # V2.BN.12.2b-3-fix:锁住**生产默认 executor 的身份**(两个符号)
 
