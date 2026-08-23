@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 129 份文档。
+共 131 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -31,6 +31,7 @@
 | [analysis/2026-08-21-mcp-tool-face-design.md](analysis/2026-08-21-mcp-tool-face-design.md) | 必修① MCP 工具面设计稿 v0 ——「末端执行器第一次实体化」 | `draft` | 2026-08-21 | — |
 | [analysis/2026-08-21-selection-receipt-design.md](analysis/2026-08-21-selection-receipt-design.md) | 必修③ 选区收据系统设计稿 v0(薄——它是 12.2 §2.1 的持久化,不是新系统) | `draft` | 2026-08-21 | — |
 | [analysis/2026-08-21-v2bn12-1-journey-score.md](analysis/2026-08-21-v2bn12-1-journey-score.md) | V2.BN.12.1「编辑基座」旅程分数验收 | `active` | 2026-08-21 | — |
+| [analysis/2026-08-23-v2bn12-2b4-journey-sheet.md](analysis/2026-08-23-v2bn12-2b4-journey-sheet.md) | V2.BN.12.2b「首个写工具 + 人审队列」旅程分数走查单 | `draft` | 2026-08-23 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
@@ -129,6 +130,7 @@
 | [handoffs/2026-08-23-v2bn12-2a3-transport-skeleton.md](handoffs/2026-08-23-v2bn12-2a3-transport-skeleton.md) | V2.BN.12.2a-3:MCP transport 骨架(S0→S3 四步) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-23-v2bn12-2b1-canonical-import-assert.md](handoffs/2026-08-23-v2bn12-2b1-canonical-import-assert.md) | V2.BN.12.2b-2b-1-fix:canonical import 断言泛化(**只写测试,产品码零 diff… | `(缺状态头)` | — | — |
 | [handoffs/2026-08-23-v2bn12-2b1-note-lifecycle-executor.md](handoffs/2026-08-23-v2bn12-2b1-note-lifecycle-executor.md) | V2.BN.12.2b-1:note 生命周期执行器提取(零语义)—— 一个执行体,三道门 | `(缺状态头)` | — | — |
+| [handoffs/2026-08-23-v2bn12-2b2-fix-kc12-truncation.md](handoffs/2026-08-23-v2bn12-2b2-fix-kc12-truncation.md) | V2.BN.12.2b-2-fix:K-c12 的断言顺序截断了点名的 revert 后果 | `(缺状态头)` | — | — |
 | [handoffs/2026-08-23-v2bn12-2b2-mrtr.md](handoffs/2026-08-23-v2bn12-2b2-mrtr.md) | V2.BN.12.2b-2:MRTR confirm 往返(input_required)+ HTTP 层 K-5 | `(缺状态头)` | — | — |
 | [handoffs/2026-08-23-v2bn12-2b2a-fix-a1-same-service-killer.md](handoffs/2026-08-23-v2bn12-2b2a-fix-a1-same-service-killer.md) | 12.2b-2a-fix:A-1「route 调用同一 listNotes」killer 补强(只写测试) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-23-v2bn12-2b2a-human-trash-restore-doors.md](handoffs/2026-08-23-v2bn12-2b2a-human-trash-restore-doors.md) | V2.BN.12.2b-2a:人类的回收站门(先于 Agent 工具)—— note 移入回收站 / 恢复 | `(缺状态头)` | — | — |

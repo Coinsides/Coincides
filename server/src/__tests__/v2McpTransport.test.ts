@@ -1042,22 +1042,7 @@ test('K-c12 accepted receipt stores actual resources and the existing revert rou
     const receipt = receiptByCallId(fixture, '121');
     assert.equal(receipt.status, 'applied');
     assert.equal(receipt.metadata.tier, 'immediate');
-    assert.deepEqual(receipt.metadata.resources, [
-      { kind: 'note', id: OLDER_NOTE_ID, outcome: 'trashed' },
-      {
-        kind: 'note',
-        id: NEWEST_NOTE_ID,
-        outcome: 'skipped',
-        reason: 'already_trashed',
-      },
-      { kind: 'note', id: MISSING_NOTE_ID, outcome: 'missing' },
-    ]);
-    assert.equal(
-      receipt.metadata.resources.some((resource: Record<string, unknown>) => (
-        resource.outcome === 'pending'
-      )),
-      false,
-    );
+    const receiptResources = receipt.metadata.resources;
 
     const reverted = await postAuthenticated(
       fixture,
@@ -1080,6 +1065,22 @@ test('K-c12 accepted receipt stores actual resources and the existing revert rou
         { id: OLDER_NOTE_ID, status: 'active' },
         { id: NEWEST_NOTE_ID, status: 'trashed' },
       ],
+    );
+    assert.deepEqual(receiptResources, [
+      { kind: 'note', id: OLDER_NOTE_ID, outcome: 'trashed' },
+      {
+        kind: 'note',
+        id: NEWEST_NOTE_ID,
+        outcome: 'skipped',
+        reason: 'already_trashed',
+      },
+      { kind: 'note', id: MISSING_NOTE_ID, outcome: 'missing' },
+    ]);
+    assert.equal(
+      receiptResources.some((resource: Record<string, unknown>) => (
+        resource.outcome === 'pending'
+      )),
+      false,
     );
   });
 });
