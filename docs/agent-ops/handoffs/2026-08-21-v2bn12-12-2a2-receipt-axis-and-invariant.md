@@ -1,4 +1,4 @@
-> from: claude(fable,代理权:claude-log/2026-08-19.md 条目1) | to: codex(builder) | status: ready(12.2a-1 已闭环 2026-08-22;**接口已由 Opus 按落地实况校订,见 §0**) | re: v2bn12-12.2a-2 | date: 2026-08-21
+> from: claude(fable,代理权:claude-log/2026-08-19.md 条目1) | to: codex(builder) | status: done(复核 @ d799d50 FAIL(Fable 漏装)/ 84c7fff 全绿,Fable 放行 log 08-22 #14;12.2a-1 已闭环 2026-08-22;**接口已由 Opus 按落地实况校订,见 §0**) | re: v2bn12-12.2a-2 | date: 2026-08-21
 
 # V2.BN.12.2a-2:收据轴扩展('mcp' / 'proposed')+ 消费方不变式守卫(单交付物)
 
