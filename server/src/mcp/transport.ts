@@ -2,10 +2,13 @@ import { createHash } from 'node:crypto';
 import {
   createMcpHandler,
   fromJsonSchema,
+  inputRequired,
+  inputResponse,
   McpServer,
   validateHostHeader,
   validateOriginHeader,
   type CallToolResult,
+  type InputRequiredResult,
   type JsonSchemaType,
 } from '@modelcontextprotocol/server';
 import { toNodeHandler } from '@modelcontextprotocol/node';
@@ -32,12 +35,14 @@ import {
 
 const TOOL_METADATA_KEY = 'io.coincides/toolFace';
 const RECEIPT_METADATA_KEY = 'io.coincides/toolFaceReceipt';
+const DECISION_METADATA_KEY = 'io.coincides/toolFaceDecision';
 
 export type ReceiptWriter = (input: WriteToolFaceReceiptInput) => ToolFaceReceipt;
 
 export interface ToolCallDispatchContext {
   callId: string;
   envelope?: Record<string, unknown>;
+  inputResponses?: Record<string, unknown>;
 }
 
 export interface McpRequestHandlerOptions {
@@ -101,6 +106,51 @@ function proposalStructuredContent(
   input: Record<string, unknown>,
 ): CallToolResult['structuredContent'] | undefined {
   return batchIdsFromInput(entry, input) ? { results: [] } : undefined;
+}
+
+type ToolFaceDecision = 'rejected' | 'declined' | 'cancelled';
+
+function confirmationMessage(
+  entry: LoadedToolFaceManifestEntry,
+  input: Record<string, unknown>,
+): string {
+  const batchIds = batchIdsFromInput(entry, input);
+  if (!batchIds) {
+    return `Confirm ${entry.name}; 0 declared resource ids are available for this call.`;
+  }
+  return `Confirm ${entry.name} for ${batchIds.length} affected item(s). IDs: ${batchIds.join(', ')}`;
+}
+
+function confirmationRequired(
+  entry: LoadedToolFaceManifestEntry,
+  input: Record<string, unknown>,
+): InputRequiredResult {
+  return inputRequired({
+    inputRequests: {
+      confirm: inputRequired.elicit({
+        message: confirmationMessage(entry, input),
+        requestedSchema: {
+          type: 'object',
+          properties: { confirm: { type: 'boolean' } },
+          required: ['confirm'],
+        },
+      }),
+    },
+  });
+}
+
+function rejectedResult(decision: ToolFaceDecision): CallToolResult {
+  return {
+    isError: false,
+    content: [{
+      type: 'text',
+      text: 'Tool call cancelled at the user\'s request; no notes were deleted and no business action was executed.',
+    }],
+    structuredContent: { results: [] },
+    _meta: {
+      [DECISION_METADATA_KEY]: { decision },
+    },
+  };
 }
 
 function appliedResources(value: unknown): Array<Record<string, unknown>> {
@@ -167,7 +217,7 @@ export async function dispatchToolCall(
   userId: string,
   context: ToolCallDispatchContext,
   receiptWriter: ReceiptWriter = writeToolFaceReceipt,
-): Promise<CallToolResult> {
+): Promise<CallToolResult | InputRequiredResult> {
   const envelope = context.envelope;
   const effectiveTier = resolveEffectiveTier(entry, envelope, input);
   const receiptBase = {
@@ -189,10 +239,29 @@ export async function dispatchToolCall(
     return proposalResult(receipt, proposalStructuredContent(entry, input));
   }
   if (effectiveTier === 'confirm') {
-    throw new AppError(
-      501,
-      'Confirm-tier tools require an approved elicitation schema and human-review entrypoint',
-    );
+    const response = inputResponse(context.inputResponses, 'confirm');
+    let decision: ToolFaceDecision | undefined;
+
+    if (
+      response.kind === 'elicit'
+      && response.action === 'accept'
+      && response.content?.confirm === false
+    ) {
+      decision = 'rejected';
+    } else if (response.kind === 'elicit' && response.action === 'decline') {
+      decision = 'declined';
+    } else if (response.kind === 'elicit' && response.action === 'cancel') {
+      decision = 'cancelled';
+    }
+
+    if (decision) return rejectedResult(decision);
+    if (
+      response.kind !== 'elicit'
+      || response.action !== 'accept'
+      || response.content?.confirm !== true
+    ) {
+      return confirmationRequired(entry, input);
+    }
   }
 
   const value = await binding(input, { userId });
@@ -242,6 +311,7 @@ function createFreshServer(
             {
               callId: String(context.mcpReq.id),
               envelope: context.mcpReq.envelope as Record<string, unknown> | undefined,
+              inputResponses: context.mcpReq.inputResponses as Record<string, unknown> | undefined,
             },
             receiptWriter,
           );

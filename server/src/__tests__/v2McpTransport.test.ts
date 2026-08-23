@@ -24,6 +24,8 @@ import {
   dispatchToolCall,
 } from '../mcp/transport.js';
 import noteRoutes from '../routes/notes.js';
+import { createToolReceiptsRouter } from '../routes/toolReceipts.js';
+import { trashNoteAsUser } from '../services/notes.js';
 
 const USER_ID = '11111111-1111-4111-8111-111111111111';
 const COURSE_ID = '22222222-2222-4222-8222-222222222222';
@@ -33,6 +35,8 @@ const CLIENT_CAPABILITIES_KEY = 'io.modelcontextprotocol/clientCapabilities';
 const CLIENT_INFO_KEY = 'io.modelcontextprotocol/clientInfo';
 const OLDER_NOTE_ID = '33333333-3333-4333-8333-333333333333';
 const NEWEST_NOTE_ID = '44444444-4444-4444-8444-444444444444';
+const MISSING_NOTE_ID = '99999999-9999-4999-8999-999999999999';
+const DECISION_METADATA_KEY = 'io.coincides/toolFaceDecision';
 
 interface Fixture {
   baseUrl: string;
@@ -114,6 +118,7 @@ async function withMcpHttp(
       }),
     );
     app.use('/api/notes', authMiddleware, noteRoutes);
+    app.use('/api/tool-receipts', authMiddleware, createToolReceiptsRouter());
     app.use(errorHandler);
     server = app.listen();
     await new Promise<void>((resolve) => server!.once('listening', resolve));
@@ -156,11 +161,54 @@ function receiptByCallId(fixture: Fixture, callId: string) {
   return { ...row, metadata: JSON.parse(row.metadata) as Record<string, any> };
 }
 
+function mcpReceiptCount(fixture: Fixture): number {
+  return fixture.db.prepare(`
+    SELECT COUNT(*) AS count FROM operation_batches WHERE source_type = 'mcp'
+  `).pluck().get() as number;
+}
+
+function noteRows(fixture: Fixture, noteIds: string[]): unknown[] {
+  const placeholders = noteIds.map(() => '?').join(', ');
+  return fixture.db.prepare(`
+    SELECT * FROM notes WHERE id IN (${placeholders}) ORDER BY id
+  `).all(...noteIds);
+}
+
+function countingTrashBindings(executorCalls: string[]): ReadonlyMap<string, ToolBinding> {
+  const bindings = new Map(TOOL_BINDINGS);
+  bindings.set('trash_notes', (input, context) => {
+    const { note_ids: noteIds } = input as { note_ids: string[] };
+    return {
+      results: noteIds.map((noteId) => {
+        executorCalls.push(noteId);
+        return {
+          note_id: noteId,
+          ...trashNoteAsUser({ userId: context.userId, noteId }),
+        };
+      }),
+    };
+  });
+  return bindings;
+}
+
+function formCapabilities(): Record<string, unknown> {
+  return { elicitation: { form: {} } };
+}
+
+function trashToolParams(noteIds: string[]): Record<string, unknown> {
+  return { name: 'trash_notes', arguments: { note_ids: noteIds } };
+}
+
 async function mcpPost(
   fixture: Fixture,
   method: 'tools/list' | 'tools/call',
   params: Record<string, unknown>,
-  options: { id?: number; capabilities?: Record<string, unknown>; toolName?: string } = {},
+  options: {
+    id?: number;
+    capabilities?: Record<string, unknown>;
+    toolName?: string;
+    inputResponses?: Record<string, unknown>;
+  } = {},
 ): Promise<{ response: Response; body: any }> {
   const id = options.id ?? 1;
   const response = await fetch(`${fixture.baseUrl}/api/mcp`, {
@@ -179,9 +227,57 @@ async function mcpPost(
       method,
       params: {
         ...params,
+        ...(options.inputResponses && { inputResponses: options.inputResponses }),
         _meta: envelope(options.capabilities),
       },
     }),
+  });
+  return { response, body: await response.json() };
+}
+
+async function firstTrashConfirmRound(
+  fixture: Fixture,
+  id: number,
+  noteIds: string[],
+): Promise<{ response: Response; body: any }> {
+  return mcpPost(
+    fixture,
+    'tools/call',
+    trashToolParams(noteIds),
+    {
+      id,
+      toolName: 'trash_notes',
+      capabilities: formCapabilities(),
+    },
+  );
+}
+
+async function retryTrashConfirmRound(
+  fixture: Fixture,
+  id: number,
+  noteIds: string[],
+  inputResponseValue: Record<string, unknown>,
+): Promise<{ response: Response; body: any }> {
+  return mcpPost(
+    fixture,
+    'tools/call',
+    trashToolParams(noteIds),
+    {
+      id,
+      toolName: 'trash_notes',
+      capabilities: formCapabilities(),
+      inputResponses: { confirm: inputResponseValue },
+    },
+  );
+}
+
+async function postAuthenticated(
+  fixture: Fixture,
+  path: string,
+): Promise<{ response: Response; body: any }> {
+  const response = await fetch(`${fixture.baseUrl}${path}`, {
+    method: 'POST',
+    headers: { authorization: `Bearer ${fixture.token}` },
   });
   return { response, body: await response.json() };
 }
@@ -360,64 +456,55 @@ test('K-4 binding names exactly equal the filtered public manifest names', () =>
   );
 });
 
-test('K-5 confirm without elicitation.form downgrades to an unexecuted proposed receipt', async () => {
-  const confirmEntry = cloneEntry(canonicalManifest()[0], {
-    name: 'confirm_probe',
-    tier: 'confirm',
-  });
-  let executions = 0;
-  const bindings = new Map<string, ToolBinding>([
-    ['confirm_probe', async () => {
-      executions += 1;
-      return [];
-    }],
-  ]);
+test('K-5 real HTTP splits confirm tools between proposal fallback and MRTR input_required', async () => {
+  const executorCalls: string[] = [];
+  const noteIds = [OLDER_NOTE_ID, NEWEST_NOTE_ID];
 
   assert.equal(supportsFormElicitation(envelope()), false);
   assert.equal(supportsFormElicitation(envelope({ elicitation: { form: {} } })), true);
 
-  await withMcpHttp({}, async (fixture) => {
-    const unsupported = await dispatchToolCall(
-      confirmEntry,
-      bindings.get('confirm_probe')!,
-      { course_id: COURSE_ID },
-      USER_ID,
-      { callId: '50', envelope: envelope() },
+  await withMcpHttp({ bindings: countingTrashBindings(executorCalls) }, async (fixture) => {
+    const unsupported = await mcpPost(
+      fixture,
+      'tools/call',
+      trashToolParams(noteIds),
+      { id: 50, toolName: 'trash_notes' },
     );
-    assert.match(unsupported.content[0].type === 'text' ? unsupported.content[0].text : '', /proposal for human review/);
-    assert.equal(executions, 0);
+    assert.equal(unsupported.response.status, 200);
+    assert.equal(unsupported.body.result.resultType, 'complete');
+    assert.match(unsupported.body.result.content[0].text, /proposal for human review/);
+    assert.deepEqual(executorCalls, []);
 
-    const receipt = fixture.db.prepare(`
-      SELECT status, source_id, applied_at, metadata
-      FROM operation_batches
-      WHERE source_type = 'mcp'
-    `).get() as { status: string; source_id: string; applied_at: string | null; metadata: string };
+    const receipt = receiptByCallId(fixture, '50');
     assert.equal(receipt.status, 'proposed');
     assert.equal(receipt.source_id, '50');
     assert.equal(receipt.applied_at, null);
-    assert.deepEqual(JSON.parse(receipt.metadata).resources, []);
-    assert.equal(JSON.parse(receipt.metadata).tier, 'propose');
+    assert.deepEqual(receipt.metadata.resources, noteIds.map((id) => ({
+      kind: 'note',
+      id,
+      outcome: 'pending',
+    })));
+    assert.equal(receipt.metadata.tier, 'propose');
 
-    const capable = await dispatchToolCall(
-      confirmEntry,
-      bindings.get('confirm_probe')!,
-      { course_id: COURSE_ID },
-      USER_ID,
-      { callId: '51', envelope: envelope({ elicitation: { form: {} } }) },
+    const capable = await mcpPost(
+      fixture,
+      'tools/call',
+      trashToolParams(noteIds),
+      {
+        id: 51,
+        toolName: 'trash_notes',
+        capabilities: { elicitation: { form: {} } },
+      },
     );
-    assert.match(capable.content[0].type === 'text' ? capable.content[0].text : '', /proposal for human review/);
-    assert.equal(executions, 0, 'unsupported production confirmation seam must not execute');
-    const finalCount = fixture.db.prepare(`
-      SELECT COUNT(*) AS count FROM operation_batches WHERE source_type = 'mcp'
-    `).get() as { count: number };
-    assert.equal(finalCount.count, 2);
-    const capableReceipt = receiptByCallId(fixture, '51');
-    assert.equal(capableReceipt.status, 'proposed');
-    assert.equal(capableReceipt.applied_at, null);
+    assert.equal(capable.response.status, 200);
+    assert.equal(capable.body.result.resultType, 'input_required');
+    assert.ok(capable.body.result.inputRequests.confirm);
+    assert.deepEqual(executorCalls, [], 'the input_required round must not execute note executors');
+    assert.equal(mcpReceiptCount(fixture), 1, 'the input_required round must not write a receipt');
   });
 });
 
-test('K-b3 threshold policy makes one trash immediate and every larger confirm batch proposed', () => {
+test('K-b3 threshold policy makes one trash immediate and branches larger batches by capability', () => {
   const manifest = canonicalManifest();
   const listEntry = manifest.find(
     (entry: LoadedToolFaceManifestEntry) => entry.name === 'list_notes',
@@ -444,7 +531,7 @@ test('K-b3 threshold policy makes one trash immediate and every larger confirm b
     trashEntry,
     envelope({ elicitation: { form: {} } }),
     { note_ids: [OLDER_NOTE_ID, NEWEST_NOTE_ID] },
-  ), 'propose');
+  ), 'confirm');
   assert.equal(resolveEffectiveTier(
     cloneEntry(trashEntry, { threshold: undefined }),
     envelope(),
@@ -574,20 +661,19 @@ test('K-b0 real HTTP records skipped and missing outcomes without inventing life
       reason: 'read_only_projection',
     }]);
 
-    const missingNoteId = '99999999-9999-4999-8999-999999999999';
     const missing = await mcpPost(
       fixture,
       'tools/call',
-      { name: 'trash_notes', arguments: { note_ids: [missingNoteId] } },
+      { name: 'trash_notes', arguments: { note_ids: [MISSING_NOTE_ID] } },
       { id: 85, toolName: 'trash_notes' },
     );
     assert.equal(missing.response.status, 200);
     assert.deepEqual(missing.body.result.structuredContent, {
-      results: [{ note_id: missingNoteId, outcome: 'missing' }],
+      results: [{ note_id: MISSING_NOTE_ID, outcome: 'missing' }],
     });
     assert.deepEqual(receiptByCallId(fixture, '85').metadata.resources, [{
       kind: 'note',
-      id: missingNoteId,
+      id: MISSING_NOTE_ID,
       outcome: 'missing',
     }]);
   });
@@ -597,11 +683,11 @@ async function assertProposedBatch(
   capabilities: Record<string, unknown>,
   callId: number,
 ): Promise<void> {
-  await withMcpHttp({}, async (fixture) => {
+  const executorCalls: string[] = [];
+  await withMcpHttp({ bindings: countingTrashBindings(executorCalls) }, async (fixture) => {
     const input = { note_ids: [OLDER_NOTE_ID, NEWEST_NOTE_ID] };
-    const before = fixture.db.prepare(
-      'SELECT id, status, trashed_at, updated_at FROM notes WHERE id IN (?, ?) ORDER BY id',
-    ).all(...input.note_ids);
+    const before = noteRows(fixture, input.note_ids);
+    const receiptsBefore = mcpReceiptCount(fixture);
     const { response, body } = await mcpPost(
       fixture,
       'tools/call',
@@ -614,12 +700,9 @@ async function assertProposedBatch(
     assert.equal(body.result.isError, undefined);
     assert.equal(body.result.resultType, 'complete');
     assert.deepEqual(body.result.structuredContent, { results: [] });
-    assert.deepEqual(
-      fixture.db.prepare(
-        'SELECT id, status, trashed_at, updated_at FROM notes WHERE id IN (?, ?) ORDER BY id',
-      ).all(...input.note_ids),
-      before,
-    );
+    assert.deepEqual(noteRows(fixture, input.note_ids), before);
+    assert.deepEqual(executorCalls, [], 'proposal fallback must call zero note executors');
+    assert.equal(mcpReceiptCount(fixture), receiptsBefore + 1);
 
     const receipt = receiptByCallId(fixture, String(callId));
     assert.equal(receipt.status, 'proposed');
@@ -637,14 +720,368 @@ async function assertProposedBatch(
   });
 }
 
-test('K-b1 real HTTP trash_notes n>1 without form capability proposes with zero execution', async () => {
+test('K-b1/K-c1 real HTTP trash_notes n>1 without form capability proposes with zero execution', async () => {
   await assertProposedBatch({}, 81);
 });
 
-test('K-b2 real HTTP trash_notes n>1 with elicitation.form still declaratively proposes', async () => {
-  const capabilities = { elicitation: { form: {} } };
-  assert.equal(supportsFormElicitation(envelope(capabilities)), true);
-  await assertProposedBatch(capabilities, 82);
+test('K-b2/K-c2/K-c9 real HTTP capable first call requests input with zero execution and zero persistence', async () => {
+  const executorCalls: string[] = [];
+  await withMcpHttp({ bindings: countingTrashBindings(executorCalls) }, async (fixture) => {
+    const noteIds = [OLDER_NOTE_ID, NEWEST_NOTE_ID];
+    const notesBefore = noteRows(fixture, noteIds);
+    const operationRowsBefore = fixture.db.prepare(
+      'SELECT * FROM operation_batches ORDER BY id',
+    ).all();
+
+    const call = await firstTrashConfirmRound(fixture, 82, noteIds);
+
+    assert.equal(call.response.status, 200);
+    assert.equal(call.body.error, undefined);
+    assert.equal(call.body.result.resultType, 'input_required');
+    assert.equal(call.body.result.requestState, undefined, 'MRTR must not use requestState');
+    const request = call.body.result.inputRequests.confirm;
+    assert.equal(request.method, 'elicitation/create');
+    assert.deepEqual(request.params.requestedSchema, {
+      type: 'object',
+      properties: { confirm: { type: 'boolean' } },
+      required: ['confirm'],
+    });
+    assert.match(request.params.message, /\b2\b/);
+    assert.match(request.params.message, new RegExp(OLDER_NOTE_ID));
+    assert.match(request.params.message, new RegExp(NEWEST_NOTE_ID));
+    assert.deepEqual(executorCalls, [], 'input_required must call zero note executors');
+    assert.deepEqual(noteRows(fixture, noteIds), notesBefore, 'every note column must stay unchanged');
+    assert.deepEqual(
+      fixture.db.prepare('SELECT * FROM operation_batches ORDER BY id').all(),
+      operationRowsBefore,
+      'input_required must write zero operation rows',
+    );
+  });
+});
+
+test('K-c3 confirm true retries once, calls every executor once, applies, and records actual resources', async () => {
+  const executorCalls: string[] = [];
+  await withMcpHttp({ bindings: countingTrashBindings(executorCalls) }, async (fixture) => {
+    const noteIds = [OLDER_NOTE_ID, NEWEST_NOTE_ID];
+    const first = await firstTrashConfirmRound(fixture, 90, noteIds);
+    assert.equal(first.body.result.resultType, 'input_required');
+    assert.equal(mcpReceiptCount(fixture), 0);
+
+    const accepted = await retryTrashConfirmRound(
+      fixture,
+      91,
+      noteIds,
+      { action: 'accept', content: { confirm: true } },
+    );
+
+    assert.equal(accepted.response.status, 200);
+    assert.equal(accepted.body.result.resultType, 'complete');
+    assert.deepEqual(accepted.body.result.structuredContent, {
+      results: noteIds.map((noteId) => ({ note_id: noteId, outcome: 'trashed' })),
+    });
+    assert.deepEqual(
+      executorCalls,
+      noteIds,
+      'confirm retry must call the real note executor exactly n times',
+    );
+    assert.deepEqual(
+      fixture.db.prepare('SELECT id, status FROM notes ORDER BY id').all(),
+      noteIds.map((id) => ({ id, status: 'trashed' })),
+    );
+    assert.equal(mcpReceiptCount(fixture), 1);
+    const receipt = receiptByCallId(fixture, '91');
+    assert.equal(receipt.status, 'applied');
+    assert.equal(receipt.metadata.tier, 'immediate');
+    assert.deepEqual(receipt.metadata.resources, noteIds.map((id) => ({
+      kind: 'note',
+      id,
+      outcome: 'trashed',
+    })));
+    assert.deepEqual(accepted.body.result._meta['io.coincides/toolFaceReceipt'], {
+      id: receipt.id,
+      status: 'applied',
+    });
+  });
+});
+
+async function assertRejectedConfirmRound(
+  inputResponseValue: Record<string, unknown>,
+  expectedDecision: 'rejected' | 'declined' | 'cancelled',
+  firstCallId: number,
+): Promise<void> {
+  const executorCalls: string[] = [];
+  await withMcpHttp({ bindings: countingTrashBindings(executorCalls) }, async (fixture) => {
+    const noteIds = [OLDER_NOTE_ID, NEWEST_NOTE_ID];
+    const notesBefore = noteRows(fixture, noteIds);
+    const operationRowsBefore = fixture.db.prepare(
+      'SELECT * FROM operation_batches ORDER BY id',
+    ).all();
+    const first = await firstTrashConfirmRound(fixture, firstCallId, noteIds);
+    assert.equal(first.body.result.resultType, 'input_required');
+
+    const rejected = await retryTrashConfirmRound(
+      fixture,
+      firstCallId + 1,
+      noteIds,
+      inputResponseValue,
+    );
+
+    assert.equal(rejected.response.status, 200);
+    assert.equal(rejected.body.result.resultType, 'complete', 'a refusal must not ask again');
+    assert.equal(rejected.body.result.isError, false);
+    assert.deepEqual(rejected.body.result.structuredContent, { results: [] });
+    assert.deepEqual(rejected.body.result._meta[DECISION_METADATA_KEY], {
+      decision: expectedDecision,
+    });
+    assert.equal(
+      rejected.body.result._meta['io.coincides/toolFaceReceipt'],
+      undefined,
+      'a refusal must not invent a receipt id',
+    );
+    assert.deepEqual(
+      Object.keys(rejected.body.result._meta).filter((key) => key.startsWith('io.coincides/')),
+      [DECISION_METADATA_KEY],
+      'decision must be the only Coincides-owned metadata key',
+    );
+    assert.match(rejected.body.result.content[0].text, /not executed|no notes were deleted/i);
+    assert.deepEqual(executorCalls, [], 'a refusal must call zero note executors');
+    assert.deepEqual(noteRows(fixture, noteIds), notesBefore);
+    assert.deepEqual(
+      fixture.db.prepare('SELECT * FROM operation_batches ORDER BY id').all(),
+      operationRowsBefore,
+      'a refusal must write zero operation rows',
+    );
+  });
+}
+
+test('K-c4/K-c10 rejected: confirm false completes with decision metadata, zero execution, and zero rows', async () => {
+  await assertRejectedConfirmRound(
+    { action: 'accept', content: { confirm: false } },
+    'rejected',
+    92,
+  );
+});
+
+test('K-c5/K-c10 declined: decline completes with its own decision, zero execution, and zero rows', async () => {
+  await assertRejectedConfirmRound({ action: 'decline' }, 'declined', 94);
+});
+
+test('K-c5/K-c10 cancelled: cancel completes with its own decision, zero execution, and zero rows', async () => {
+  await assertRejectedConfirmRound({ action: 'cancel' }, 'cancelled', 96);
+});
+
+test('K-c6 disconnecting after input_required leaves the whole database unchanged', async () => {
+  const executorCalls: string[] = [];
+  await withMcpHttp({ bindings: countingTrashBindings(executorCalls) }, async (fixture) => {
+    const noteIds = [OLDER_NOTE_ID, NEWEST_NOTE_ID];
+    const databaseBefore = fixture.db.serialize();
+    const notesBefore = noteRows(fixture, noteIds);
+    const operationRowsBefore = fixture.db.prepare(
+      'SELECT * FROM operation_batches ORDER BY id',
+    ).all();
+
+    const first = await firstTrashConfirmRound(fixture, 98, noteIds);
+    assert.equal(first.body.result.resultType, 'input_required');
+
+    assert.deepEqual(executorCalls, []);
+    assert.deepEqual(noteRows(fixture, noteIds), notesBefore);
+    assert.deepEqual(
+      fixture.db.prepare('SELECT * FROM operation_batches ORDER BY id').all(),
+      operationRowsBefore,
+    );
+    assert.deepEqual(
+      fixture.db.serialize(),
+      databaseBefore,
+      'disconnecting after input_required must leave every database page unchanged',
+    );
+  });
+});
+
+async function assertNonElicitationResponseReasks(
+  inputResponseValue: Record<string, unknown>,
+  firstCallId: number,
+): Promise<void> {
+  const executorCalls: string[] = [];
+  await withMcpHttp({ bindings: countingTrashBindings(executorCalls) }, async (fixture) => {
+    const noteIds = [OLDER_NOTE_ID, NEWEST_NOTE_ID];
+    const retry = await retryTrashConfirmRound(
+      fixture,
+      firstCallId,
+      noteIds,
+      inputResponseValue,
+    );
+    assert.equal(retry.response.status, 200);
+    assert.equal(retry.body.result.resultType, 'input_required');
+    assert.deepEqual(executorCalls, []);
+    assert.equal(mcpReceiptCount(fixture), 0);
+  });
+}
+
+test('confirm treats a sampling response as missing and reissues the form without executing', async () => {
+  await assertNonElicitationResponseReasks({
+    role: 'assistant',
+    content: { type: 'text', text: 'not a confirmation' },
+    model: 'sampling-probe',
+    stopReason: 'endTurn',
+  }, 100);
+});
+
+test('confirm treats a roots response as missing and reissues the form without executing', async () => {
+  await assertNonElicitationResponseReasks({ roots: [] }, 101);
+});
+
+test('K-c11 replaying the same confirmed input records two honest receipts and skips the second trash', async () => {
+  const executorCalls: string[] = [];
+  await withMcpHttp({ bindings: countingTrashBindings(executorCalls) }, async (fixture) => {
+    const noteIds = [OLDER_NOTE_ID, NEWEST_NOTE_ID];
+    const acceptedResponse = { action: 'accept', content: { confirm: true } };
+    const first = await firstTrashConfirmRound(fixture, 110, noteIds);
+    assert.equal(first.body.result.resultType, 'input_required');
+
+    const accepted = await retryTrashConfirmRound(
+      fixture,
+      111,
+      noteIds,
+      acceptedResponse,
+    );
+    assert.deepEqual(accepted.body.result.structuredContent, {
+      results: noteIds.map((noteId) => ({ note_id: noteId, outcome: 'trashed' })),
+    });
+    const afterFirstApply = noteRows(fixture, noteIds);
+
+    const replayed = await retryTrashConfirmRound(
+      fixture,
+      111,
+      noteIds,
+      acceptedResponse,
+    );
+    assert.equal(replayed.body.result.resultType, 'complete');
+    assert.deepEqual(replayed.body.result.structuredContent, {
+      results: noteIds.map((noteId) => ({
+        note_id: noteId,
+        outcome: 'skipped',
+        reason: 'already_trashed',
+      })),
+    });
+    assert.deepEqual(
+      executorCalls,
+      [...noteIds, ...noteIds],
+      'stateless replay must observably call n executors per request',
+    );
+    assert.deepEqual(
+      noteRows(fixture, noteIds),
+      afterFirstApply,
+      'the second guarded execution must not trash or timestamp notes again',
+    );
+    assert.equal(mcpReceiptCount(fixture), 2);
+    const replayRows = fixture.db.prepare(`
+      SELECT id, status, source_id, applied_at, metadata
+      FROM operation_batches
+      WHERE source_type = 'mcp' AND source_id = ?
+      ORDER BY rowid
+    `).all('111') as Array<{
+      id: string;
+      status: string;
+      source_id: string;
+      applied_at: string | null;
+      metadata: string;
+    }>;
+    assert.equal(replayRows.length, 2, 'an exact call-id replay must write two receipts');
+    const [firstRow, replayRow] = replayRows;
+    const firstReceipt = {
+      ...firstRow,
+      metadata: JSON.parse(firstRow.metadata) as Record<string, any>,
+    };
+    const replayReceipt = {
+      ...replayRow,
+      metadata: JSON.parse(replayRow.metadata) as Record<string, any>,
+    };
+    assert.notEqual(firstReceipt.id, replayReceipt.id);
+    assert.equal(firstReceipt.status, 'applied');
+    assert.equal(replayReceipt.status, 'applied');
+    assert.equal(firstReceipt.metadata.tier, 'immediate');
+    assert.equal(replayReceipt.metadata.tier, 'immediate');
+    assert.deepEqual(replayReceipt.metadata.resources, noteIds.map((id) => ({
+      kind: 'note',
+      id,
+      outcome: 'skipped',
+      reason: 'already_trashed',
+    })));
+    assert.deepEqual(accepted.body.result._meta['io.coincides/toolFaceReceipt'], {
+      id: firstReceipt.id,
+      status: 'applied',
+    });
+    assert.deepEqual(replayed.body.result._meta['io.coincides/toolFaceReceipt'], {
+      id: replayReceipt.id,
+      status: 'applied',
+    });
+  });
+});
+
+test('K-c12 accepted receipt stores actual resources and the existing revert route restores notes end to end', async () => {
+  const executorCalls: string[] = [];
+  await withMcpHttp({ bindings: countingTrashBindings(executorCalls) }, async (fixture) => {
+    fixture.db.prepare(`
+      UPDATE notes
+      SET status = 'trashed', trashed_at = ?, updated_at = ?
+      WHERE id = ?
+    `).run('2026-08-23 10:00:00', '2026-08-23 10:00:00', NEWEST_NOTE_ID);
+    const noteIds = [OLDER_NOTE_ID, NEWEST_NOTE_ID, MISSING_NOTE_ID];
+    const first = await firstTrashConfirmRound(fixture, 120, noteIds);
+    assert.equal(first.body.result.resultType, 'input_required');
+    const accepted = await retryTrashConfirmRound(
+      fixture,
+      121,
+      noteIds,
+      { action: 'accept', content: { confirm: true } },
+    );
+    assert.equal(accepted.body.result.resultType, 'complete');
+    assert.deepEqual(executorCalls, noteIds);
+    assert.equal(mcpReceiptCount(fixture), 1);
+
+    const receipt = receiptByCallId(fixture, '121');
+    assert.equal(receipt.status, 'applied');
+    assert.equal(receipt.metadata.tier, 'immediate');
+    assert.deepEqual(receipt.metadata.resources, [
+      { kind: 'note', id: OLDER_NOTE_ID, outcome: 'trashed' },
+      {
+        kind: 'note',
+        id: NEWEST_NOTE_ID,
+        outcome: 'skipped',
+        reason: 'already_trashed',
+      },
+      { kind: 'note', id: MISSING_NOTE_ID, outcome: 'missing' },
+    ]);
+    assert.equal(
+      receipt.metadata.resources.some((resource: Record<string, unknown>) => (
+        resource.outcome === 'pending'
+      )),
+      false,
+    );
+
+    const reverted = await postAuthenticated(
+      fixture,
+      `/api/tool-receipts/${encodeURIComponent(receipt.id)}/revert`,
+    );
+    assert.equal(reverted.response.status, 200);
+    assert.equal(reverted.body.status, 'reverted');
+    assert.equal(reverted.body.metadata.revert_outcome, 'complete');
+    assert.deepEqual(reverted.body.metadata.revert_details, {
+      restored: [OLDER_NOTE_ID],
+      failed: [],
+    });
+    assert.equal(mcpReceiptCount(fixture), 1);
+    const revertedReceipt = receiptByCallId(fixture, '121');
+    assert.equal(revertedReceipt.id, receipt.id);
+    assert.equal(revertedReceipt.status, 'reverted');
+    assert.deepEqual(
+      fixture.db.prepare('SELECT id, status FROM notes ORDER BY id').all(),
+      [
+        { id: OLDER_NOTE_ID, status: 'active' },
+        { id: NEWEST_NOTE_ID, status: 'trashed' },
+      ],
+    );
+  });
 });
 
 test('K-b6 immediate receipt resources preserve every binding result in order', async () => {

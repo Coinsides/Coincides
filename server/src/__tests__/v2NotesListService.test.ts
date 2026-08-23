@@ -644,6 +644,16 @@ test('A-1 route and MCP binding both call the same listNotes service export', ()
   assertCanonicalNamedImport('server/src/services/toolFaceReceiptRevert.ts', 'restoreNoteAsUser', '../services/notes.js');
   assertCanonicalNamedImport('server/src/routes/toolReceipts.ts', 'trashNoteAsUser', '../services/notes.js');
   assertCanonicalNamedImport(
+    'server/src/mcp/transport.ts',
+    'inputRequired',
+    '@modelcontextprotocol/server',
+  );
+  assertCanonicalNamedImport(
+    'server/src/mcp/transport.ts',
+    'inputResponse',
+    '@modelcontextprotocol/server',
+  );
+  assertCanonicalNamedImport(
     'server/src/routes/toolReceipts.ts',
     'revertTrashNotesReceipt',
     '../services/toolFaceReceiptRevert.js',

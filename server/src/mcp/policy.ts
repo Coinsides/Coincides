@@ -39,8 +39,7 @@ export function resolveEffectiveTier(
 
   if (!supportsFormElicitation(envelope)) return 'propose';
 
-  // b-2b-2 接 MRTR 前的声明性降级
-  return 'propose';
+  return 'confirm';
 }
 
 export function requestHarness(envelope: RequestEnvelope): string {
