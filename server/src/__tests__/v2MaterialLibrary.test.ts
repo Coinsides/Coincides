@@ -2084,10 +2084,13 @@ test('learning canvas viewport state is per-user session data', async () => {
   });
 });
 
-test('learning canvas block insertion creates template-aware NoteBlock and CanvasNode projection', async () => {
+test('learning canvas block insertion creates template-aware NoteBlock and CanvasNode projection', async (t) => {
   await withDb((db) => {
     const { userId, courseId } = seedUserCourse(db);
     const canvas = createLearningCanvas(db, userId, { course_id: courseId, title: 'Template canvas' }) as any;
+    const appliedAtSentinel = '2031-02-03T04:05:06.789Z';
+    t.mock.timers.enable({ apis: ['Date'], now: Date.parse(appliedAtSentinel) });
+    const sqliteBefore = (db.prepare('SELECT CURRENT_TIMESTAMP AS value').get() as { value: string }).value;
 
     const result = createCanvasNoteBlock(db, userId, canvas.id, {
       template_id: 'text.paragraph',
@@ -2099,6 +2102,7 @@ test('learning canvas block insertion creates template-aware NoteBlock and Canva
       width: 340,
       height: 180,
     }) as any;
+    const sqliteAfter = (db.prepare('SELECT CURRENT_TIMESTAMP AS value').get() as { value: string }).value;
 
     assert.equal(result.note.course_id, courseId);
     assert.equal(result.note.metadata.purpose, 'canvas_backing_note');
@@ -2115,6 +2119,25 @@ test('learning canvas block insertion creates template-aware NoteBlock and Canva
     const placement = db.prepare('SELECT * FROM note_block_placements WHERE note_id = ? AND block_id = ?')
       .get(result.note.id, result.block.id) as any;
     assert.equal(placement.order_index, 0);
+
+    const batch = db.prepare(`
+      SELECT ob.source_type, ob.status, ob.created_at, ob.applied_at
+      FROM note_blocks nb
+      JOIN operation_batches ob ON ob.id = nb.operation_batch_id
+      WHERE nb.id = ?
+    `).get(result.block.id) as {
+      source_type: string;
+      status: string;
+      created_at: string;
+      applied_at: string;
+    } | undefined;
+    assert.ok(batch);
+    assert.equal(batch.source_type, 'manual');
+    assert.equal(batch.status, 'applied');
+    assert.match(batch.created_at, /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+    assert.ok(batch.created_at >= sqliteBefore && batch.created_at <= sqliteAfter);
+    assert.match(batch.applied_at, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+    assert.equal(batch.applied_at, appliedAtSentinel);
 
     assert.equal(result.canvas_node.node_type, 'note_block');
     assert.equal(result.canvas_node.target_id, result.block.id);

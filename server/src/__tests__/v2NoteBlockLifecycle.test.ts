@@ -10,6 +10,7 @@ import { closeDb, initDb } from '../db/init.js';
 import type { AuthRequest } from '../middleware/auth.js';
 import { errorHandler } from '../middleware/errorHandler.js';
 import noteRoutes from '../routes/notes.js';
+import projectionRoutes from '../routes/projections.js';
 import { clientNoteBlockCreateReceiptId } from '../services/noteBlockLifecycle.js';
 import {
   markToolFaceReceiptApplied,
@@ -60,6 +61,7 @@ async function withHttpDb(run: (fixture: Fixture) => void | Promise<void>): Prom
       next();
     });
     app.use('/api/notes', noteRoutes);
+    app.use('/api/projections', projectionRoutes);
     app.use(errorHandler);
     server = app.listen();
     await new Promise<void>((resolve) => server!.once('listening', resolve));
@@ -98,6 +100,63 @@ function createPayload(clientCreateKey: string, overrides: Record<string, unknow
     ...overrides,
   };
 }
+
+test('manual note block HTTP route persists authoritative operation batch timestamps', async () => {
+  await withHttpDb(async ({ baseUrl, db, noteId }) => {
+    const created = await postJson(baseUrl, `/api/notes/${noteId}/blocks`, {
+      block_type: 'paragraph',
+      content_json: { body: 'Manual route receipt guard' },
+      plain_text: 'Manual route receipt guard',
+    });
+
+    assert.equal(created.response.status, 201);
+    const batch = db.prepare(`
+      SELECT ob.source_type, ob.status, ob.created_at, ob.applied_at
+      FROM note_blocks nb
+      JOIN operation_batches ob ON ob.id = nb.operation_batch_id
+      WHERE nb.id = ?
+    `).get(created.body.id) as {
+      source_type: string;
+      status: string;
+      created_at: string;
+      applied_at: string;
+    } | undefined;
+    assert.ok(batch);
+    assert.equal(batch.source_type, 'manual');
+    assert.equal(batch.status, 'applied');
+    assert.match(batch.created_at, /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+    assert.match(batch.applied_at, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+  });
+});
+
+test('projection HTTP route persists authoritative operation batch timestamps', async () => {
+  await withHttpDb(async ({ baseUrl, courseId, db }) => {
+    const created = await postJson(baseUrl, '/api/projections', {
+      course_id: courseId,
+      type: 'organized_note',
+      title: 'Projection receipt timestamp guard',
+      snapshot_json: {},
+    });
+
+    assert.equal(created.response.status, 201);
+    const batch = db.prepare(`
+      SELECT ob.source_type, ob.status, ob.created_at, ob.applied_at
+      FROM projections projection
+      JOIN operation_batches ob ON ob.id = projection.operation_batch_id
+      WHERE projection.id = ?
+    `).get(created.body.id) as {
+      source_type: string;
+      status: string;
+      created_at: string;
+      applied_at: string;
+    } | undefined;
+    assert.ok(batch);
+    assert.equal(batch.source_type, 'manual');
+    assert.equal(batch.status, 'applied');
+    assert.match(batch.created_at, /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+    assert.match(batch.applied_at, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+  });
+});
 
 test('same client create key replays one durable block even when retry payload changes', async () => {
   await withHttpDb(async ({ baseUrl, db, noteId }) => {
