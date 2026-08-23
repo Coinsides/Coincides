@@ -1,4 +1,4 @@
-> from: claude(fable,上将军代发——Opus 调度会话阻塞;授权:claude-log/2026-08-19.md 条目1 代理权) | to: codex(builder) | status: ready(Fable 本人翻牌;设计:plans/v2-bn12-2b-first-write-tool-and-review-queue.md b-1,Fable 点名 log 08-23 #14) | re: v2bn12-2b-1 | date: 2026-08-23
+> from: claude(fable,上将军代发——Opus 调度会话阻塞;授权:claude-log/2026-08-19.md 条目1 代理权) | to: codex(builder) | status: done(复核 PASS 0/0/0/0 @ r2b1 Review,Fable 放行 log 08-23 #17;Fable 翻牌) | re: v2bn12-2b-1 | date: 2026-08-23
 
 # V2.BN.12.2b-1:note 生命周期执行器提取(零语义)—— 一个执行体,三道门
 
@@ -150,3 +150,74 @@ builder 停手成立:我点名的固定签名 `setNoteLifecycleStatus(status)` �
 - 两条工单声明的 EOL/stat 假阳性仍无内容差分：`useNoteCanvasRuntimeController.ts` 的 index/filtered-worktree blob 同为 `3efe5f82...`，`routes/projections.ts` 同为 `561902a4...`；两者 `git diff --numstat` / `--name-only` 为空。
 - 显式排除：未新增 MCP binding；未改 registry/manifest/transport；未碰 note_blocks、canvasObjects、schema/migration、收据写入、`getOwnedCourse`/`hydrateNote`、PUT handler、`current-state/tech-debt.md` 或 `server/package.json`。
 - 锁只读复核仍为 `work_order=v2bn12-2b-1 resume`、`dispatcher=fable`；未覆盖 owner、未删锁。最终隔离资产叶目录计数为 0。
+
+## Review
+
+复核对象为精确提交 `a9870efc4f61b8e56b9a97fb3f11fcd822b1c552`，修正前基线为其直接父提交 `66afb829...`；共享树当前 HEAD 不作为证据源。已全文阅读 reviewer charter、本文两节 Result 与 `§补裁`、总计划 §1–§3，以及 2a3 第二节 Result 的 S1a 先例。
+
+### 判定与分级
+
+**PASS — BLOCKER 0 / HIGH 0 / MED 0 / LOW 0。** N1–N5 均由复核方在隔离 worktree 亲测命中点名漏径，N6–N7 指纹成立；零语义、触及面与提交完整性均符合合同。放行权仍归 Fable。本次不是 FAIL，故 5-8 的「方向成立/方向不成立」附注不适用。
+
+### N1–N7 对抗复核
+
+N1–N5 每次只施加一个 mutation，均运行 `node --import tsx --test src/__tests__/v2NotesLifecycle.test.ts`，随后立即按 HEAD 还原并确认 diff 为空；全部 mutation 完成后原态再跑为 exit `0`、7/7。
+
+| 位点 | 复核方 mutation / 指纹 | 红绿收据与判定 |
+|---|---|---|
+| N1 | DELETE handler 内联回基线旧 UPDATE，保留 `trashNote` service 与 import，但不调用 service | exit `1`，6 pass / 1 fail；唯一红灯为测试第 223 行的 route 结构/行为断言：DELETE handler 未调用 `trashNote(...)`。HTTP golden 与 service/import 阳性仍绿；不是 import 缺失导致。**PASS** |
+| N2 | `trashNote` 分别取得 `trashedAt` 与严格不同的 `updatedAt`，写入两个不同字符串 | exit `1`，5 pass / 2 fail；DELETE golden 第 206 行与 service 单测第 240 行均在 `trashed_at === updated_at` 处红。两个观察面都覆盖，未抽样。**PASS** |
+| N3 | `trashNote` 去掉 `AND user_id = ?` 及对应 bind 参数 | exit `1`，6 pass / 1 fail；第 257 行跨用户 deep-equal 红，实测 foreign note 被改为 trashed。**PASS** |
+| N4 | `restoreNote` UPDATE 去掉 `trashed_at = NULL` | exit `1`，6 pass / 1 fail；第 251 行红，实际仍为旧值 `2026-08-23 08:02:00`，预期 `null`。**PASS** |
+| N5 | DELETE 响应 message 末尾增加一个 `!` | exit `1`，6 pass / 1 fail；第 200 行 raw `Buffer` 字节断言红（实际 34 bytes、预期 33），结构 killer 仍绿，证明 golden 承重。**PASS** |
+| N6 | 对 `66afb82..a9870ef` 程序化提取 PUT handler 与 `updateNoteSchema` | handler 两端 SHA-256 均为 `6140c7351e061a18a6db23753c98ec3c7bbf146e1c97ddacf88b658387b23c61`；schema 两端 SHA-256 均为 `63efa78c2a188b1d145763354ae7e595442796977cab220ee5d93fe027c590c8`。两段提取内容均相等；validator 整文件 diff 为空，route diff 无 PUT hunk。专项门中的 `{status:'active'}` 与 `{status:'trashed', title}` 两条现行为 golden 均绿。**PASS** |
+| N7 | 分别 diff `server/src/routes/noteBlocks.ts`、`server/src/services/canvasObjects.ts` | 两个 path 的 `66afb82..a9870ef` diff 均为空；同一 name-only 探针先看见阳性 `server/src/routes/notes.ts`，再作阴性判断。**PASS** |
+
+5-10 核对：N2 的 DELETE/service 两个同形观察面、N6 的 handler/schema 两个指纹、N7 的两个文件均逐处验证；没有以一处抽样代替全体。
+
+### 零语义、helper 与触及面
+
+- 逐字核对基线 DELETE：只取一次 `new Date().toISOString()`；SQL 为 `UPDATE notes SET status = 'trashed', trashed_at = ?, updated_at = ? WHERE id = ? AND user_id = ?`；bind 为同一个 `now, now, noteId, userId`；不读取 `changes`、不返回业务对象。目标 `trashNote` 对 SQL、单次取时、WHERE、bind 顺序和 `void` 返回形状完全同形。
+- route 仍按 `getOwnedNote → SourceProjection guard → trashNote → res.json` 执行；除把旧内联 UPDATE 换成 executor 外，校验、错误路径及 raw 响应 `{"message":"Note moved to trash"}` 未变。没有「顺手改进」。
+- `restoreNote` 按补裁新增为单用途 `void` executor：一次取时，写 `status='active'`、`trashed_at=NULL`、`updated_at=?`，并保留 `id AND user_id` 所有权条件；未拿它改写既有 PUT。
+- S1a 的 helper 不搬只复用：`getOwnedCourse`、`hydrateNote` 定义仍在 `routes/notes.ts`，`services/notes.ts` 仅 import；未借本单处理既存 ESM 环。
+- `git diff --numstat 66afb82..a9870ef` 精确为：handoff `54+/0-`、新测试 `312+/0-`、`routes/notes.ts 2+/5-`、`services/notes.ts 19+/0-`，且只有这四个 path；`git diff --check` exit `0`。route 仅 service import 与 DELETE hunk；`server/package.json` 未改。noteBlocks、canvasObjects、registry、manifest、transport、schema/migration、生产数据库均未触及。
+
+### 门禁与提交完整性
+
+所有产品/测试门均在 `$TMPDIR` 下精确 `a9870ef` 的 detached worktree 运行，顺序为 docs-first。Windows `core.autocrlf=true` 会把 commit 中 LF blob smudge 为 CRLF；Vite/Vitest 在该长路径沙箱读取 `client/vitest.config.ts` 时触发既知 `Access is denied`。按 2a3 先例保留原始失败，并以精确 Git blob及等价程序化配置补证，没有把环境红灯写成命令 exit 0。
+
+| 次序 | 门 | 原始 exit / 补证 | 复核结论 |
+|---:|---|---|---|
+| 1 | root `npm run docs:check` | 原 checkout exit `1`（9 个 INDEX，随后 object inventory/manifest 的 CRLF raw-byte 假 stale）；把相关文件恢复为 `a9870ef` Git blob 的精确 LF bytes 后，同一命令 exit `0` | PASS（环境换行排除） |
+| 2 | root `npm run verify:v2-bn8-runtime` | 标准入口 exit `1`，停在 Vitest config loader，`Cannot read directory "../../../../..": Access is denied`，0 assertions；`startVitest` 以同一 jsdom/setup/aliases 的 `configFile:false` 入口 exit `0`（19 files、209/209），等价 Vite build exit `0`（2184 modules），其余 registry/manifest/parity/runtime/boundary/model/build/performance/docs/diff/secrets 子门逐项 exit `0` | PASS（工单允许的长路径程序化补证） |
+| 3 | client `npm exec tsc -- --noEmit` | exit `0` | PASS |
+| 4 | server `npm exec tsc -- --noEmit` | exit `0` | PASS；亦为精确提交树完整性收据 |
+| 5 | root `npm run test:unit` | 标准入口同一 config loader exit `1`、0 assertions；等价程序化入口 exit `0`，19 files、209/209 | PASS（同一环境排除） |
+| 6 | server `npm run test:v2`，独立 `CANVAS_ASSET_DIR` | exit `0`，270/270；资产目录最终条目 `0` | PASS |
+| 7 | server `node --import tsx --test src/__tests__/v2NotesLifecycle.test.ts` | exit `0`，7/7 | PASS |
+
+`server/package.json` 的 `test:v2` 枚举当前不含新 lifecycle 文件，因此第 7 门而非第 6 门承载这组常驻回归；合同本身明确把它列为独立专项门，已亲跑，故不记现单 finding。若后续 CI 只调用 `test:v2`，须把第 7 门纳入其编排，不能把 270/270 误报成包含 lifecycle 7/7。
+
+### 5-2 跨条耦合与下一状态
+
+- 本单两个 executor 返回 `void` 正是 `§补裁` 的零语义合同，不应为 b-2 偷带字段，故不是 b-1 缺陷。但这个返回形状**不足以证明 affected resources**：missing、foreign、already-active/already-trashed 与真实改写都不给调用方 row/changes/前态。b-2 可从已验证输入投影 intended refs，却不得把它们冒充实际 affected resources。
+- 当前 receipt writer 要调用方提供 `resources[]`，而 transport 仍硬编码 `[]`；propose 在 binding 前写收据，immediate 在 binding 后写。b-2 需要执行前可用的 intended-resource/preflight seam，以及 applied 路径的逐项 outcome；只改 binding 返回值不够。
+- REST DELETE 还有 `getOwnedNote` 与 SourceProjection guard，executor 自身只有 owner WHERE 且零命中静默。MCP binding 批量循环单条 executor 时必须复用/共享这条 precondition chain，并先核全量同一 Project；不能以“共用 executor”宣称继承人门策略。
+- 循环批量在第 k 项或 receipt writer 失败时会出现部分业务已写、却无 applied/partial 收据的窗口。b-2 应在全量 preflight、事务边界、逐项 outcome 与 `complete|partial` 收据语义之间作明确裁定，并覆盖 receipt writer 故障。
+- `restoreNote` 对本就 active 的精确现行为：仍执行 UPDATE、保持 active、清空 `trashed_at`，且每次刷新 `updated_at`，返回仍为 `undefined`；missing/foreign 则静默零影响。它只对 lifecycle 值收敛，不对完整行、时间轴或重试幂等。Revert 还须处理“调用前本就 trashed”“Revert 前人手已 active”“同一 Revert 重试”，避免 blind restore 错激活或反复重戳时间。
+- 建议 b-2 常驻复合用例至少覆盖：already-trashed 后 Revert、Revert 前人手 active、missing/foreign 混合 batch、第 k 项/receipt writer 故障、同一 Revert 重试；proposed/applied 的 resources 语义须一致且 status/outcome 真实。
+
+### 5-1 完备、阳性对照与显式范围排除
+
+- 阴性 diff 前，同一探针先看见已知阳性 `routes/notes.ts`；N1 的同一源码探针先看见 DELETE handler 与目标 service 调用，mutation 又保留 import，HTTP golden 仍绿，故红灯确由“route 未调用 service”写入。N5 的 raw-byte 探针先在原响应 7/7 绿，再由单字符 mutation 变红。
+- 共享树两条既知 porcelain `.M` 已追问来源：`useNoteCanvasRuntimeController.ts` 的 index/filtered-worktree blob 同为 `3efe5f820e2077850611b54d4d09482845e89545`，`routes/projections.ts` 同为 `561902a449b50ce254b650de5a337973a8fbc26d`；两者 `git diff --numstat` 均为空。因此字符串来自 Git 换行/stat 归一化，不归因于 b-1、builder 或本次 reviewer。
+- 本 Review 不声称 b-2 MCP binding、confirm/input_required round-trip、proposed/applied receipt、批量/业务 Revert 的 live journey；也未验证 b-3 apply/dismiss 队列、b-4 HTTP K-5、最终 resource record/tool input-output schema。无 b-1 可启动的 live MCP 路径，因此未启动浏览器或生产服务。
+- 计划 §3 的 selection receipts、跨 Project、scopes 强制、多穿戴者，以及 note_blocks/canvasObjects 保持排除；PUT 与 executor 不同源继续按 TD-18 留待 note patch 整体提取，不借 5-2 扩单。
+
+### 隔离树卫生与自清收据
+
+- 共享 `.git/worktrees` 写入被环境拒绝且未创建半成品；随后在 `%TEMP%` 建独立 `--bare --no-hardlinks` clone，并从中建立 gates/mutations 两个真实 detached worktree，HEAD 均为精确 `a9870ef`。三处递归 ReparsePoint 计数均为 `0`，没有 junction/symlink 指向共享 `node_modules`。
+- 两棵树分别尝试 root `npm ci --offline`（因 root 无 `package-lock.json`，exit `1`），并在实际安装根 client/server 各自执行 `npm ci --offline`，均 exit `0`；未借用共享依赖。
+- 每个 mutation 后均还原；mutation 树最终 `git diff --exit-code` exit `0`、status clean、原态 7/7。gate 树删除前 filtered diff exit `0`，仅有上述 `core.autocrlf` stat 标记；隔离资产计数为 `0`。
+- 已删除并复核不存在：`%TEMP%/coincides-review-a9870ef-gates-20260823-01`、`%TEMP%/coincides-review-a9870ef-mutations-20260823-01`、`%TEMP%/coincides-review-a9870ef-repo-20260823-01.git`。未触碰 `.codex-tmp/builder.lock.d`、main、生产数据库；未 commit、未 push。
