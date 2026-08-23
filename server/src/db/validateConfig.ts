@@ -25,6 +25,69 @@ const CONFIG_RULES: ConfigRule[] = [
   },
 ];
 
+const LOCALHOST_HOSTNAMES = ['localhost', '127.0.0.1', '[::1]'] as const;
+
+export interface McpTransportConfig {
+  allowedHostnames: string[];
+  allowedOriginHostnames: string[];
+}
+
+export interface ServerConfig {
+  mcp: McpTransportConfig;
+}
+
+function normalizeHostname(value: string, key: string): string {
+  const hostname = value.trim().toLowerCase();
+  if (!hostname) throw new Error(`${key} contains an empty hostname`);
+  if (/\s|\*|:\/\/|[/@?#]/.test(hostname)) {
+    throw new Error(`${key} must contain hostnames only (no scheme, wildcard, credentials, path, query, or fragment)`);
+  }
+
+  let parsed: URL;
+  try {
+    parsed = new URL(`http://${hostname}`);
+  } catch {
+    throw new Error(`${key} contains an invalid hostname: ${value}`);
+  }
+  if (
+    parsed.hostname !== hostname
+    || parsed.port !== ''
+    || parsed.username !== ''
+    || parsed.password !== ''
+    || parsed.pathname !== '/'
+    || parsed.search !== ''
+    || parsed.hash !== ''
+  ) {
+    throw new Error(`${key} must contain hostname-only values without ports`);
+  }
+  return parsed.hostname;
+}
+
+function parseHostnameAllowlist(key: string, rawValue: string | undefined): string[] {
+  if (rawValue === undefined) return [...LOCALHOST_HOSTNAMES];
+  if (rawValue.trim() === '') throw new Error(`${key} must not be empty`);
+
+  const values = rawValue.split(',').map((value) => normalizeHostname(value, key));
+  const unique = [...new Set(values)];
+  if (unique.length === 0) throw new Error(`${key} must contain at least one hostname`);
+  return unique;
+}
+
+export function readMcpTransportConfig(
+  env: NodeJS.ProcessEnv = process.env,
+): McpTransportConfig {
+  return {
+    allowedHostnames: parseHostnameAllowlist(
+      'MCP_ALLOWED_HOSTNAMES',
+      env.MCP_ALLOWED_HOSTNAMES,
+    ),
+    allowedOriginHostnames: parseHostnameAllowlist(
+      'MCP_ALLOWED_ORIGIN_HOSTNAMES',
+      env.MCP_ALLOWED_ORIGIN_HOSTNAMES,
+    ),
+  };
+}
+
 /**
  * Validate environment configuration at startup.
  * 
@@ -35,7 +98,8 @@ const CONFIG_RULES: ConfigRule[] = [
  * provide them through the Settings page in the app. The .env file
  * is a convenience, not a requirement.
  */
-export function validateConfig(): void {
+export function validateConfig(): ServerConfig {
+  const mcp = readMcpTransportConfig();
   console.log('🔧 Checking configuration...');
 
   const errors: string[] = [];
@@ -72,4 +136,5 @@ export function validateConfig(): void {
   }
 
   console.log('🔧 Configuration OK.\n');
+  return { mcp };
 }

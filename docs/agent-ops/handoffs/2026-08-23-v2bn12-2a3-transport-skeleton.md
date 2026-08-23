@@ -301,3 +301,92 @@
 - 新 binding map 是 manifest-name → 真实 executor 的必要机关，供后续 K-4 校验；没有另造 schema、exposure/reserved 工具白名单，`tools/list` 过滤仍留待 S1/S2 从 manifest 元数据派生。
 - porcelain 仍列出 `client/.../useNoteCanvasRuntimeController.ts` 与 `server/src/routes/projections.ts`，但 `git diff --numstat` 无这两项，属已知 stat/EOL 假阳性；未冒充本单改动。
 - `.codex-tmp/builder.lock.d/owner.json` 只读确认仍属 `order=v2bn12-2a-3 (resume, S1a added), dispatcher=opus`；未取锁、未写/覆盖 owner、未删锁。
+
+## Result — 续跑 2
+
+> Codex builder · 2026-08-23 · **needs: claude**。header 按 M-2 保持 `ready`；本节为 UTF-8 追加回执。未 commit、未 push、未碰 main。
+
+### 总判定与续跑边界
+
+- 本轮从上一节的 SDK 安装断点续跑，**没有重做 S0 / S1a**。指定的两个 SDK 已精确安装，本地 `.d.ts` 硬闸通过；S1、S2、S3 已落地，K-0、K-1～K-4、K-6、K-7 均取得合法先红后绿与最终绿，所有固定门禁 exit `0`。
+- **不作无条件完成申报，仍标 `needs: claude`**：K-5 按 design §12 D-e 做成 production strategy seam 测试，但没有经过真实 `/api/mcp`；此外，已安装 SDK v2 的高层 `registerTool` 错误投影和现有全局 `express.json()` 挂载顺序，与短笺 §5 的三行错误合同不相容。下文逐条列出，未自造 shim 或第二 schema 代偿。
+- 承接上一节的 S0 收据：前态 input/output 各自报 draft-07；后态根 `$schema` 均移除，generator 使用 `jsonSchema2019-09` + `$refStrategy:'none'` 并在 generator 侧守 2020-12 兼容子集。当前 manifest 仍为 1 条忠实投影。S1a 的 REST/binding 共用 `listNotes` 形状也保持不变。
+
+### SDK 安装与 `.d.ts` 硬闸
+
+- 精确命令：`server> npm.cmd install --save-exact @modelcontextprotocol/server@2.0.0 @modelcontextprotocol/node@2.0.0`，exit `0`；npm 输出为 `added 7 packages, audited 213 packages in 2s`，并报告 `10 vulnerabilities (1 low, 5 moderate, 4 high)`。没有执行 `npm audit fix`，没有升级其他既有 direct dependency。
+- `npm ls --depth=0` 实测两个 direct dependency 均为 `2.0.0`。lockfile 的正常新增闭包为 `@modelcontextprotocol/core@2.0.0`、`@hono/node-server@1.19.17`、`hono@4.13.3` 与 SDK 私有 `zod@4.4.3`；`package.json` / `package-lock.json` 已纳入本轮触及面。
+- `@modelcontextprotocol/server/package.json:22-31` 将根入口 types 指到 `dist/index.d.mts`。根入口真实导出 `createMcpHandler`、`fromJsonSchema`、`McpServer`、`validateHostHeader`、`validateOriginHeader`：
+  - `dist/createMcpHandler-CLhGwQTn.d.mts:3808`：`McpServerFactory = (ctx) => McpServer | Server | Promise<...>`，声明与注释明确每个 HTTP request 取得 fresh server；
+  - 同文件 `:3829-3852`：`CreateMcpHandlerOptions` 含 `legacy?: 'stateless' | 'reject'` 与 reporting-only `onerror`；`:3997-4040`：`createMcpHandler(factory, options?): McpHttpHandler`；
+  - `dist/index.d.mts:735-738`：`fromJsonSchema<T>(schema: JsonSchemaType, validator?): StandardSchemaWithJSON` 并由根入口导出；`JsonSchemaType` 为 Draft 2020-12 object form；
+  - `validateHostHeader` / `validateOriginHeader` 也由根入口导出。Node 包自带的 response-writing guard 会写 JSON-RPC 403 body，不合 K-3，故实现使用这两个纯判定函数后自行 `res.status(403).end()`。
+- `@modelcontextprotocol/node/package.json:23-33` 将根入口 types 指到 `dist/index.d.mts`；该文件 `:219-224` 的 `NodeMcpRequestHandler` 真实签名为 `(req, res, parsedBody?)`，`:249` 为 `toNodeHandler(handler, opts?)`，`:273` 根导出。故 body 是**返回的 Node handler 第三参数**，最终接线显式调用 `nodeHandler(req, res, req.body)`，没有把 Express `next` 误当 body。
+- CJS `.d.cts` 分支镜像上述声明。根入口 dynamic-import composition smoke（`McpServer` + `registerTool` + input/output `fromJsonSchema` + `createMcpHandler({legacy:'reject'})` + `toNodeHandler`）exit `0`，两层 handler 均为 function。点名 API 与入口路径全部匹配，未触发“名字不符即停”的硬闸。
+
+### S1：`/api/mcp` transport 骨架
+
+- `validateConfig()` 新增两套 hostname-only 启动正门：`MCP_ALLOWED_HOSTNAMES` / `MCP_ALLOWED_ORIGIN_HOSTNAMES`；未定义时安全默认 `localhost,127.0.0.1,[::1]`，显式空集合、空 token、scheme、port、path、wildcard 均在 listen 前 fatal。配置只验证实际 `Host`，不信任 `X-Forwarded-Host`；无 Origin 的 CLI 请求放行，出现 Origin 时必须命中。
+- 同一 Express app 的真实顺序为：全局 body parser → `/api/mcp` 内 Host/Origin 窄 guard → **既有** `authMiddleware` → per-request closure。非法 Host/Origin 为 403 空体且不进 auth/handler/receipt；合法 Host+Origin、无 token 的阳性对照为既有 401。
+- auth 成功后只把已验证 `req.userId` 捕获到当次 factory 闭包；没有伪造 SDK OAuth `AuthInfo.clientId/scopes`，没有二次验 JWT。每个请求新建 `createMcpHandler`，factory 再新建 `McpServer`，`legacy:'reject'`，请求结束关闭 handler；无共享 handler/session/capability cache，响应无 `Mcp-Session-Id`。
+- `createMcpHandler` 与 `toNodeHandler` 的 reporting-only `onerror` 均接到完整服务端日志；构造、转发、关闭处于单一 try/finally，`forwardedError` 防止 close failure 二次 `next`。
+- runtime loader 只消费 `shared/types/toolFaceManifest.ts` 的 type-only contract 与打包 artifact，不 runtime-import registry。`tools/list` 依次独立过滤 `exposure === 'public'`、`!name.startsWith('__')`；binding map 仅保存 `name -> function`，并在挂载前与过滤后 manifest name 集合做双向 parity。SDK registration 的 input/output 均来自 manifest + `fromJsonSchema`；metadata 只投影 truth/tier/human_entry/scopes，不暴露 exposure。
+- immediate `list_notes` 走上一节的同一个 `listNotes` service；成功后调用既有 receipt writer 写 applied 收据，领域 `AppError` 投影为安全 MCP tool error。`scopes` 仍只描述、不声称强制。
+
+### S2：K-0～K-7 先红后绿收据
+
+所有施刀前后均先跑 server `tsc --noEmit`，exit `0`；红均来自“机关仍存在但判错”，没有 `ReferenceError` / `SyntaxError` / `ERR_MODULE_NOT_FOUND`。每刀随后恢复，最终 transport 9/9、artifact 2/2。
+
+| 项 | 合法 mutation 红 | 恢复后绿与阳性对照 |
+|---|---|---|
+| K-0 | binding 名仍为 `list_notes`，只把执行器改为 `return []`；transport exit `1`、7/8，**仅 K-0 红**；当时 K-1～K-5 全绿且 artifact K-6/K-7 2/2 | 真 DB/JWT/Express/TCP：同 fixture 先 GET REST，再经 MCP `tools/call list_notes`；`structuredContent` 与 REST JSON deep-equal，text JSON 同值，`resultType='complete'`、无 session header、收据 applied |
+| K-1 | exposure 谓词仍在但错改为排除 test，internal sentinel 泄漏；完整 transport 仅 K-1 红 | canonical public `list_notes` 可见为阳性，独立 non-`__` internal sentinel 不可见 |
+| K-2 | reserved 谓词仍在但把 `__` 错写为 `___`；完整 transport 仅 K-2 红 | canonical public `list_notes` 可见为阳性，独立 public `__reserved_probe` 不可见 |
+| K-3 | 两次独立误判：Host allowlist 被放宽时完整 transport 仅 K-3 红；Origin 判定错放攻击 Origin 时 targeted exit `1`，精确为 `401 !== 403` | raw `node:http` 阳性先证合法 Host/Origin+无 token → 401；非法 Host 与非法 Origin 各自 → 403、raw body 0 bytes，mcp receipt count 0；恢复 targeted 1/1 |
+| K-4 | 两次独立误判：忽略 extra 时 targeted 红；忽略 missing 时 targeted exit `1`、`Missing expected exception` | 正确 map 不抛为阳性；extra binding 与 missing `list_notes` 各自抛含精确集合差异；恢复 targeted 1/1 |
+| K-5 | `supportsFormElicitation` 机关仍在但恒 `true`，targeted exit `1`（无能力请求被误判支持） | production `dispatchToolCall` seam：modern + 无 form 写 `status='proposed'`、`applied_at=NULL`、执行计数 0；`elicitation.form:{}` 为支持能力阳性，不会误走 proposal。**仅 strategy-seam PASS，HTTP-entry 保留见下** |
+| K-6 | `build` 中只删 copy step，`tsc` 仍绿；targeted exit `1`，精确为 build 未创建 artifact，不是模块/语法红 | 真 `npm run build` 产生 byte/hash identical artifact；compiled loader 被复制到无 docs/node_modules 的最小 production 布局，从任意 cwd 启动；缺失 ENOENT、破损 JSON 各自启动失败 |
+| K-7 | copy 机关仍在但错加 public/非 `__` 过滤；artifact 全跑为 1/2，K-6 仍绿、仅 K-7 bytes 断言红 | source fixture 同时含 public、internal、test、public `__`；目标 bytes/hash 全等且四类名字全部保留，artifact 2/2 |
+
+补充错误边界正控：预期 `AppError` 走安全 HTTP 200 tool error 且不写 success receipt；raw non-`AppError` 用带私有路径的探针证明服务端日志保留完整错误、客户端只见脱敏 500 文本。
+
+### S3：production manifest 五步
+
+1. `server build` 先执行 `check:tool-face-manifest`；artifact killer 真实 spawn 同一 `npm run build`，不是直接调用 copy helper。
+2. `tsc` 成功后 `scripts/copy-tool-face-manifest.mjs` 以 `copyFileSync` 按字节复制 canonical manifest 到 `server/dist/tool-face-manifest.json`；不解析、不重排、不投影。dev/predev 也只做 freshness + 同一 copy，以保证 source 启动读取同一 dist artifact。
+3. source/compiled loader 均以 `import.meta.url` 固定定位 `server/dist/tool-face-manifest.json`；没有 cwd、repo docs、exists-then-fallback 或 runtime registry 路径。缺件/坏 JSON 直接启动失败。
+4. K-6 比较 source/destination bytes 与 SHA-256，并在任意 cwd、无 repo docs 的最小 production 布局真实 import compiled loader；删 copy step 精确红。
+5. K-7 的打包 source 含 internal/test/public-`__` 靶子，destination 仍 byte-identical 且靶子全在；过滤只发生在运行时 `tools/list`，没有偷跑到 build。
+
+### 固定门禁收据（最终产品文件态）
+
+| 次序 | 门 | 结果 |
+|---:|---|---|
+| 1 | root `npm.cmd run docs:check` | exit `0` |
+| 2 | root `npm.cmd run verify:v2-bn8-runtime` | exit `0`；client unit 209/209、五道 tool-face、client/server production build、manifest copy、性能 smoke、docs、diff check、secret scan 全绿 |
+| 3 | client `npm.cmd exec tsc -- --noEmit` | exit `0` |
+| 4 | server `npm.cmd exec tsc -- --noEmit` | exit `0` |
+| 5 | root `npm.cmd run test:unit` | exit `0`；19 files、209/209 |
+| 6 | server `npm.cmd run test:v2`，Node 启动前注入独立 `CANVAS_ASSET_DIR` | exit `0`；270/270；本轮 **未出现** TD-12 的 5 个 EPERM，隔离目录测试后为空，未触及产品资产目录 |
+| 7 | `test:tool-face-registry` | exit `0`；3/3 |
+| 8 | `test:tool-face-manifest` | exit `0`；9/9 |
+| 9 | `check:tool-face-manifest` | exit `0`；1 条、1 public、fresh |
+| 10 | `test:tool-face-parity` | exit `0`；10/10 |
+| 11 | `check:tool-face-parity` | exit `0`；1 public necessary-condition PASS |
+| 12 | server `test:mcp-transport` | exit `0`；9/9（补证恢复后完整复跑） |
+| 13 | server `test:mcp-artifact` | exit `0`；2/2 |
+
+### 必须上裁的合同冲突
+
+- **K-5 口径保留（不冒充 HTTP killer PASS）**：最终正控直接调用 production `server/src/mcp/transport.ts#dispatchToolCall` seam，真实覆盖 effective-tier 判定、`proposed` 收据写入与 binding 零执行；它未经过 `/api/mcp` / SDK HTTP dispatch。design §12 D-e 同时裁定“phase 1 无 confirm 工具，此 seam 以策略 + 测试存在”，但工单 S2 又要求 HTTP 层 killer 从真实 Express 入口触发。当前 production manifest 只有 immediate `list_notes`；若为 K-5 强造 HTTP confirm fixture，还必须为 proposal `structuredContent` 发明非权威 output contract（SDK 对声明 `outputSchema` 的非 error 结果强制要求 structured content）。本轮未新增 confirm tool/schema/shim，故只申报 **strategy-seam PASS / HTTP-entry NOT SATISFIED**。
+- **SDK 错误表兼容性保留（未局部代偿）**：`@modelcontextprotocol/server@2.0.0` 的 `McpServer.registerTool` runtime 把 input validation、executor、output validation 放在同一 catch 内，除 URL elicitation 外统一投影为 HTTP 200 `CallToolResult{isError:true}`；仅 unknown tool 在该 catch 外保持 `-32602`。因此短笺“input/output schema failure → `-32602`”和“raw 非预期 executor/server failure → `-32603`/HTTP 500”不能由指定高层入口同时兑现。当前实现对 `AppError` 按表投影；对 raw non-`AppError` 选择服务端完整记录、客户端脱敏的 HTTP 200 tool error，避免 SDK 默认回显原始 `error.message`。这两行不申报符合，需上游裁定是否接受 SDK 原生语义或改用另一入口。
+- **malformed JSON 挂载冲突**：现有全局 `express.json()` 先于 route，malformed JSON 会在 SDK/Host guard 前被 body-parser 截获，并由普通 `errorHandler` 映为 REST 500，而不是短笺的 SDK `-32700`/HTTP 400；同样，带 malformed body 的非法 Host 也无法先得到空体 403。短笺又明确要求保留预解析 body 并作 `toNodeHandler` 第三参，本轮未越权改解析边界或手写 JSON-RPC parser/error shim。
+
+### 触及面、硬闸、锁与范围排除
+
+- 本轮 tracked 产品/config 变更：`server/package.json`、`server/package-lock.json`、`server/src/db/validateConfig.ts`、`server/src/index.ts`。新增：`server/src/mcp/{manifest,policy,transport}.ts`、`scripts/copy-tool-face-manifest.mjs`、`server/src/__tests__/v2McpTransport.test.ts`、`server/src/__tests__/v2McpArtifact.test.ts`。文档只在本 handoff 末尾追加本节。与短笺 §7 授权面逐项一致。
+- 上一节已提交/已存在的 S0/S1a 文件没有重做。临时 mutation 涉及 `server/src/mcp/bindings.ts` 的 K-0 no-op，但已逐字恢复；其 worktree blob 与 index blob 均为 `30efaa0e...`。
+- H-1/H-2/H-3 均未越过：transport 不造 schema、不硬编码工具 allowlist、不造 session/capability/pending state；不碰 registry/manifest generator/shared contract/schema/migration/client 产品代码。未代偿 TD-6、TD-8 残余、TD-10、TD-14；未声称 scopes 强制或 confirm 人审入口存在。
+- porcelain 仍列 `client/.../useNoteCanvasRuntimeController.ts`、`server/src/routes/projections.ts`，但两者 worktree blob 分别与 index 的 `3efe5f82...`、`561902a4...` 完全相等，`git diff --numstat` 无记录，属工单点名的 stat/EOL 假阳性；未冒充本轮改动。
+- `.codex-tmp/builder.lock.d/owner.json` 只读看见 `work_order='v2bn12-2a-3 resume S1-S3 (network on)'`、`role='builder'`、`dispatcher='fable'`；未取锁、未写/覆盖 owner、未删锁。
+- 未 commit、未 push、未切换或触碰 main；未运行 audit fix；没有把 SDK 安装授权扩张为其他 package 升级。

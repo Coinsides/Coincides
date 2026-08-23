@@ -8,6 +8,11 @@ import { initDb, closeDb } from './db/init.js';
 import { validateConfig } from './db/validateConfig.js';
 import { authMiddleware } from './middleware/auth.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { loadToolFaceManifest } from './mcp/manifest.js';
+import {
+  createMcpHostOriginGuard,
+  createMcpRequestHandler,
+} from './mcp/transport.js';
 
 import authRoutes from './routes/auth.js';
 import courseRoutes from './routes/courses.js';
@@ -67,7 +72,8 @@ import { drainManagedFileCleanupJobs } from './services/managedFileCleanup.js';
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 
 // Validate configuration before anything else
-validateConfig();
+const serverConfig = validateConfig();
+const toolFaceManifest = loadToolFaceManifest();
 
 // Initialize database (async — runs migrations)
 const database = await initDb();
@@ -100,6 +106,14 @@ app.use(cookieParser());
 
 // Public routes (no auth)
 app.use('/api/auth', authRoutes);
+
+// MCP transport: transport security gate, then the existing Bearer JWT gate.
+app.post(
+  '/api/mcp',
+  createMcpHostOriginGuard(serverConfig.mcp),
+  authMiddleware,
+  createMcpRequestHandler({ manifest: toolFaceManifest }),
+);
 
 // Protected routes
 app.use('/api/courses', authMiddleware, courseRoutes);
