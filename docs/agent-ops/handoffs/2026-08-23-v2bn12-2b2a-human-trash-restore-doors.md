@@ -1,4 +1,4 @@
-> from: claude(fable,上将军代发——Opus 调度会话阻塞;授权:claude-log/2026-08-19.md 条目1 代理权) | to: codex(builder) | status: ready(Fable 本人翻牌;设计:plans/v2-bn12-2b-first-write-tool-and-review-queue.md + 本单「裁定」;log 08-23 #18) | re: v2bn12-2b-2a | date: 2026-08-23
+> from: claude(fable,上将军代发——Opus 调度会话阻塞;授权:claude-log/2026-08-19.md 条目1 代理权) | to: codex(builder) | status: done(复核 FAIL(方向成立)1M @ r2b2a → 修正单 PASS 0/0/0/1L @ r2b2afix Review,Fable 放行 log 08-23 #22;Fable 翻牌) | re: v2bn12-2b-2a | date: 2026-08-23
 
 # V2.BN.12.2b-2a:人类的回收站门(先于 Agent 工具)—— note 移入回收站 / 恢复
 
