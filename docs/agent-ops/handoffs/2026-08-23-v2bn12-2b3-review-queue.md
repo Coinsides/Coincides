@@ -1,9 +1,9 @@
-> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: draft(**待 b-2b-1 复核 PASS 后由调度方翻 ready**) | re: v2bn12-2b-3 | date: 2026-08-23
+> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: ready(b-2b-1 与 fix 均已复核 PASS 并 done;2026-08-23 Opus 翻牌) | re: v2bn12-2b-3 | date: 2026-08-23
 
 # V2.BN.12.2b-3:候选审阅队列(人审入口)+ 退役旧 proposals 面
 
 > ⚠️ header 由 Opus 依调度授权链管理,**不代表 Henry 本人逐张批过**。
-> ⛔ **开工条件**:b-2b-1 复核 PASS。**在此之前不得开工。**
+> ✅ **开工条件已满足**:b-2b-1 主单与 fix 均复核 PASS(Fable 放行 log 08-23 #30),两张已 done。
 
 ## 上游
 

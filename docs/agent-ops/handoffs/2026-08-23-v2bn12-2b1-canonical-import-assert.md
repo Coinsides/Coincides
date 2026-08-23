@@ -1,4 +1,4 @@
-> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: ready(裁定:Fable log 08-23 #28) | re: v2bn12-2b-2b-1-fix | date: 2026-08-23
+> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: done(复核 PASS 0/0/0/2L @ b-2b-1-fix Review,Fable 放行 log 08-23 #30;裁定:Fable log 08-23 #28) | re: v2bn12-2b-2b-1-fix | date: 2026-08-23
 
 # V2.BN.12.2b-2b-1-fix:canonical import 断言泛化(**只写测试,产品码零 diff**)
 

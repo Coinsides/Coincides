@@ -1,4 +1,4 @@
-> from: claude(fable,上将军代发——Opus 调度会话阻塞;授权:claude-log/2026-08-19.md 条目1 代理权) | to: codex(builder) | status: ready(Fable 本人翻牌;设计:plans/v2-bn12-2b-first-write-tool-and-review-queue.md §2 b-2/§3/§7 + design §12;log 08-23 #22) | re: v2bn12-2b-2b-1 | date: 2026-08-23
+> from: claude(fable,上将军代发——Opus 调度会话阻塞;授权:claude-log/2026-08-19.md 条目1 代理权) | to: codex(builder) | status: done(复核 PASS 0/0/0/2L @ b-2b-1-fix Review,Fable 放行 log 08-23 #30;Fable 本人翻牌;设计:plans/v2-bn12-2b-first-write-tool-and-review-queue.md §2 b-2/§3/§7 + design §12;log 08-23 #22) | re: v2bn12-2b-2b-1 | date: 2026-08-23
 
 # V2.BN.12.2b-2b-1:第一个写工具 `trash_notes`(immediate / propose 两档端到端;confirm 本单一律降 propose)
 
