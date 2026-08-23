@@ -17,7 +17,7 @@ import {
   type LoadedToolFaceManifest,
   type LoadedToolFaceManifestEntry,
 } from '../mcp/manifest.js';
-import { supportsFormElicitation } from '../mcp/policy.js';
+import { resolveEffectiveTier, supportsFormElicitation } from '../mcp/policy.js';
 import {
   createMcpHostOriginGuard,
   createMcpRequestHandler,
@@ -31,6 +31,8 @@ const MODERN_PROTOCOL_VERSION = '2026-07-28';
 const PROTOCOL_VERSION_KEY = 'io.modelcontextprotocol/protocolVersion';
 const CLIENT_CAPABILITIES_KEY = 'io.modelcontextprotocol/clientCapabilities';
 const CLIENT_INFO_KEY = 'io.modelcontextprotocol/clientInfo';
+const OLDER_NOTE_ID = '33333333-3333-4333-8333-333333333333';
+const NEWEST_NOTE_ID = '44444444-4444-4444-8444-444444444444';
 
 interface Fixture {
   baseUrl: string;
@@ -87,12 +89,12 @@ async function withMcpHttp(
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, NULL, ?)
     `);
     insertNote.run(
-      '33333333-3333-4333-8333-333333333333', USER_ID, COURSE_ID,
+      OLDER_NOTE_ID, USER_ID, COURSE_ID,
       'Older note', null, 'active', 'manual', 'flow',
       '{"marker":"older"}', '2026-08-23 08:01:00', '2026-08-23 08:02:00', 'user',
     );
     insertNote.run(
-      '44444444-4444-4444-8444-444444444444', USER_ID, COURSE_ID,
+      NEWEST_NOTE_ID, USER_ID, COURSE_ID,
       'Newest note', 'MCP positive control', 'active', 'manual', 'flow',
       '{"marker":"newest"}', '2026-08-23 08:03:00', '2026-08-23 08:04:00', 'user',
     );
@@ -136,6 +138,22 @@ function envelope(clientCapabilities: Record<string, unknown> = {}): Record<stri
     [CLIENT_CAPABILITIES_KEY]: clientCapabilities,
     [CLIENT_INFO_KEY]: { name: 'coincides-mcp-test', version: '1.0.0' },
   };
+}
+
+function receiptByCallId(fixture: Fixture, callId: string) {
+  const row = fixture.db.prepare(`
+    SELECT id, status, source_id, applied_at, metadata
+    FROM operation_batches
+    WHERE source_type = 'mcp' AND source_id = ?
+  `).get(callId) as {
+    id: string;
+    status: string;
+    source_id: string;
+    applied_at: string | null;
+    metadata: string;
+  } | undefined;
+  assert.ok(row, `receipt for MCP call ${callId} must exist`);
+  return { ...row, metadata: JSON.parse(row.metadata) as Record<string, any> };
 }
 
 async function mcpPost(
@@ -380,21 +398,285 @@ test('K-5 confirm without elicitation.form downgrades to an unexecuted proposed 
     assert.deepEqual(JSON.parse(receipt.metadata).resources, []);
     assert.equal(JSON.parse(receipt.metadata).tier, 'propose');
 
-    await assert.rejects(
-      dispatchToolCall(
-        confirmEntry,
-        bindings.get('confirm_probe')!,
-        { course_id: COURSE_ID },
-        USER_ID,
-        { callId: '51', envelope: envelope({ elicitation: { form: {} } }) },
-      ),
-      /approved elicitation schema/,
+    const capable = await dispatchToolCall(
+      confirmEntry,
+      bindings.get('confirm_probe')!,
+      { course_id: COURSE_ID },
+      USER_ID,
+      { callId: '51', envelope: envelope({ elicitation: { form: {} } }) },
     );
+    assert.match(capable.content[0].type === 'text' ? capable.content[0].text : '', /proposal for human review/);
     assert.equal(executions, 0, 'unsupported production confirmation seam must not execute');
     const finalCount = fixture.db.prepare(`
       SELECT COUNT(*) AS count FROM operation_batches WHERE source_type = 'mcp'
     `).get() as { count: number };
-    assert.equal(finalCount.count, 1);
+    assert.equal(finalCount.count, 2);
+    const capableReceipt = receiptByCallId(fixture, '51');
+    assert.equal(capableReceipt.status, 'proposed');
+    assert.equal(capableReceipt.applied_at, null);
+  });
+});
+
+test('K-b3 threshold policy makes one trash immediate and every larger confirm batch proposed', () => {
+  const manifest = canonicalManifest();
+  const listEntry = manifest.find(
+    (entry: LoadedToolFaceManifestEntry) => entry.name === 'list_notes',
+  );
+  const trashEntry = manifest.find(
+    (entry: LoadedToolFaceManifestEntry) => entry.name === 'trash_notes',
+  );
+  assert.ok(listEntry, 'positive control must see list_notes');
+  assert.ok(trashEntry, 'trash_notes must exist in the generated manifest');
+
+  assert.equal(resolveEffectiveTier(listEntry, envelope(), { course_id: COURSE_ID }), 'immediate');
+  assert.equal(resolveEffectiveTier(trashEntry, envelope(), { note_ids: [OLDER_NOTE_ID] }), 'immediate');
+  assert.equal(resolveEffectiveTier(
+    trashEntry,
+    envelope({ elicitation: { form: {} } }),
+    { note_ids: [OLDER_NOTE_ID] },
+  ), 'immediate');
+  assert.equal(resolveEffectiveTier(
+    trashEntry,
+    envelope(),
+    { note_ids: [OLDER_NOTE_ID, NEWEST_NOTE_ID] },
+  ), 'propose');
+  assert.equal(resolveEffectiveTier(
+    trashEntry,
+    envelope({ elicitation: { form: {} } }),
+    { note_ids: [OLDER_NOTE_ID, NEWEST_NOTE_ID] },
+  ), 'propose');
+  assert.equal(resolveEffectiveTier(
+    cloneEntry(trashEntry, { threshold: undefined }),
+    envelope(),
+    { note_ids: [OLDER_NOTE_ID] },
+  ), 'propose', 'a confirm entry without the declared threshold must not become immediate');
+
+  const thresholdProbe = cloneEntry(trashEntry, {
+    name: 'threshold_probe',
+    threshold: { batch_field: 'probe_ids' },
+  });
+  assert.equal(
+    resolveEffectiveTier(thresholdProbe, envelope(), { probe_ids: [OLDER_NOTE_ID] }),
+    'immediate',
+    'policy must read the declared batch field instead of hard-coding note_ids',
+  );
+  assert.equal(
+    resolveEffectiveTier(thresholdProbe, envelope(), { note_ids: [OLDER_NOTE_ID] }),
+    'propose',
+  );
+});
+
+test('K-b0 real HTTP trash_notes n=1 applies the lifecycle action and causal receipt', async () => {
+  await withMcpHttp({}, async (fixture) => {
+    const { response, body } = await mcpPost(
+      fixture,
+      'tools/call',
+      { name: 'trash_notes', arguments: { note_ids: [OLDER_NOTE_ID] } },
+      { id: 80, toolName: 'trash_notes' },
+    );
+
+    assert.equal(response.status, 200);
+    assert.equal(body.error, undefined);
+    assert.equal(body.result.isError, undefined);
+    assert.equal(body.result.resultType, 'complete');
+    assert.deepEqual(body.result.structuredContent, {
+      results: [{ note_id: OLDER_NOTE_ID, outcome: 'trashed' }],
+    });
+    assert.equal(
+      fixture.db.prepare('SELECT status FROM notes WHERE id = ?').pluck().get(OLDER_NOTE_ID),
+      'trashed',
+    );
+
+    const receipt = receiptByCallId(fixture, '80');
+    assert.equal(receipt.status, 'applied');
+    assert.ok(receipt.applied_at);
+    assert.deepEqual(receipt.metadata.resources, [
+      { kind: 'note', id: OLDER_NOTE_ID, outcome: 'trashed' },
+    ]);
+    assert.deepEqual(receipt.metadata.intended_input, { note_ids: [OLDER_NOTE_ID] });
+    assert.deepEqual(body.result._meta['io.coincides/toolFaceReceipt'], {
+      id: receipt.id,
+      status: 'applied',
+    });
+  });
+});
+
+test('K-b0 real HTTP records skipped and missing outcomes without inventing lifecycle effects', async () => {
+  await withMcpHttp({}, async (fixture) => {
+    fixture.db.prepare(`
+      UPDATE notes
+      SET status = 'trashed', trashed_at = ?, updated_at = ?
+      WHERE id = ?
+    `).run('2026-08-23 09:00:00', '2026-08-23 09:00:00', OLDER_NOTE_ID);
+    const alreadyTrashedBefore = fixture.db.prepare(
+      'SELECT status, trashed_at, updated_at FROM notes WHERE id = ?',
+    ).get(OLDER_NOTE_ID);
+
+    const alreadyTrashed = await mcpPost(
+      fixture,
+      'tools/call',
+      { name: 'trash_notes', arguments: { note_ids: [OLDER_NOTE_ID] } },
+      { id: 83, toolName: 'trash_notes' },
+    );
+    assert.equal(alreadyTrashed.response.status, 200);
+    assert.deepEqual(alreadyTrashed.body.result.structuredContent, {
+      results: [{
+        note_id: OLDER_NOTE_ID,
+        outcome: 'skipped',
+        reason: 'already_trashed',
+      }],
+    });
+    assert.deepEqual(
+      fixture.db.prepare(
+        'SELECT status, trashed_at, updated_at FROM notes WHERE id = ?',
+      ).get(OLDER_NOTE_ID),
+      alreadyTrashedBefore,
+    );
+    assert.deepEqual(receiptByCallId(fixture, '83').metadata.resources, [{
+      kind: 'note',
+      id: OLDER_NOTE_ID,
+      outcome: 'skipped',
+      reason: 'already_trashed',
+    }]);
+
+    fixture.db.prepare(`
+      UPDATE notes
+      SET note_class = 'source_projection', source_kind = 'source_projection'
+      WHERE id = ?
+    `).run(NEWEST_NOTE_ID);
+    const sourceProjectionBefore = fixture.db.prepare(
+      'SELECT status, trashed_at, updated_at FROM notes WHERE id = ?',
+    ).get(NEWEST_NOTE_ID);
+    const readOnlyProjection = await mcpPost(
+      fixture,
+      'tools/call',
+      { name: 'trash_notes', arguments: { note_ids: [NEWEST_NOTE_ID] } },
+      { id: 84, toolName: 'trash_notes' },
+    );
+    assert.equal(readOnlyProjection.response.status, 200);
+    assert.deepEqual(readOnlyProjection.body.result.structuredContent, {
+      results: [{
+        note_id: NEWEST_NOTE_ID,
+        outcome: 'skipped',
+        reason: 'read_only_projection',
+      }],
+    });
+    assert.deepEqual(
+      fixture.db.prepare(
+        'SELECT status, trashed_at, updated_at FROM notes WHERE id = ?',
+      ).get(NEWEST_NOTE_ID),
+      sourceProjectionBefore,
+    );
+    assert.deepEqual(receiptByCallId(fixture, '84').metadata.resources, [{
+      kind: 'note',
+      id: NEWEST_NOTE_ID,
+      outcome: 'skipped',
+      reason: 'read_only_projection',
+    }]);
+
+    const missingNoteId = '99999999-9999-4999-8999-999999999999';
+    const missing = await mcpPost(
+      fixture,
+      'tools/call',
+      { name: 'trash_notes', arguments: { note_ids: [missingNoteId] } },
+      { id: 85, toolName: 'trash_notes' },
+    );
+    assert.equal(missing.response.status, 200);
+    assert.deepEqual(missing.body.result.structuredContent, {
+      results: [{ note_id: missingNoteId, outcome: 'missing' }],
+    });
+    assert.deepEqual(receiptByCallId(fixture, '85').metadata.resources, [{
+      kind: 'note',
+      id: missingNoteId,
+      outcome: 'missing',
+    }]);
+  });
+});
+
+async function assertProposedBatch(
+  capabilities: Record<string, unknown>,
+  callId: number,
+): Promise<void> {
+  await withMcpHttp({}, async (fixture) => {
+    const input = { note_ids: [OLDER_NOTE_ID, NEWEST_NOTE_ID] };
+    const before = fixture.db.prepare(
+      'SELECT id, status, trashed_at, updated_at FROM notes WHERE id IN (?, ?) ORDER BY id',
+    ).all(...input.note_ids);
+    const { response, body } = await mcpPost(
+      fixture,
+      'tools/call',
+      { name: 'trash_notes', arguments: input },
+      { id: callId, toolName: 'trash_notes', capabilities },
+    );
+
+    assert.equal(response.status, 200);
+    assert.equal(body.error, undefined);
+    assert.equal(body.result.isError, undefined);
+    assert.equal(body.result.resultType, 'complete');
+    assert.deepEqual(body.result.structuredContent, { results: [] });
+    assert.deepEqual(
+      fixture.db.prepare(
+        'SELECT id, status, trashed_at, updated_at FROM notes WHERE id IN (?, ?) ORDER BY id',
+      ).all(...input.note_ids),
+      before,
+    );
+
+    const receipt = receiptByCallId(fixture, String(callId));
+    assert.equal(receipt.status, 'proposed');
+    assert.equal(receipt.applied_at, null);
+    assert.deepEqual(receipt.metadata.resources, input.note_ids.map((id) => ({
+      kind: 'note',
+      id,
+      outcome: 'pending',
+    })));
+    assert.deepEqual(receipt.metadata.intended_input, input);
+    assert.deepEqual(body.result._meta['io.coincides/toolFaceReceipt'], {
+      id: receipt.id,
+      status: 'proposed',
+    });
+  });
+}
+
+test('K-b1 real HTTP trash_notes n>1 without form capability proposes with zero execution', async () => {
+  await assertProposedBatch({}, 81);
+});
+
+test('K-b2 real HTTP trash_notes n>1 with elicitation.form still declaratively proposes', async () => {
+  const capabilities = { elicitation: { form: {} } };
+  assert.equal(supportsFormElicitation(envelope(capabilities)), true);
+  await assertProposedBatch(capabilities, 82);
+});
+
+test('K-b6 immediate receipt resources preserve every binding result in order', async () => {
+  await withMcpHttp({}, async (fixture) => {
+    const trashEntry = canonicalManifest().find(
+      (entry: LoadedToolFaceManifestEntry) => entry.name === 'trash_notes',
+    );
+    const binding = TOOL_BINDINGS.get('trash_notes');
+    assert.ok(trashEntry);
+    assert.ok(binding);
+    const input = { note_ids: [OLDER_NOTE_ID, NEWEST_NOTE_ID] };
+
+    const result = await dispatchToolCall(
+      cloneEntry(trashEntry, { tier: 'immediate' }),
+      binding,
+      input,
+      USER_ID,
+      { callId: '86', envelope: envelope() },
+    );
+    const structured = result.structuredContent as {
+      results: Array<{ note_id: string; outcome: string; reason?: string }>;
+    };
+    const receipt = receiptByCallId(fixture, '86');
+
+    assert.equal(structured.results.length, 2, 'positive control must execute two binding results');
+    assert.deepEqual(receipt.metadata.resources, structured.results.map((item) => ({
+      kind: 'note',
+      id: item.note_id,
+      outcome: item.outcome,
+      ...(item.reason && { reason: item.reason }),
+    })));
+    assert.deepEqual(receipt.metadata.intended_input, input);
   });
 });
 

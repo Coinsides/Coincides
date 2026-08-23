@@ -1,4 +1,4 @@
-import { listNotes } from '../services/notes.js';
+import { listNotes, trashNoteAsUser } from '../services/notes.js';
 
 export interface ToolBindingContext {
   userId: string;
@@ -18,6 +18,17 @@ const listNotesBinding: ToolBinding = (input, context) => {
   });
 };
 
+const trashNotesBinding: ToolBinding = (input, context) => {
+  const args = input as { note_ids: string[] };
+  return {
+    results: args.note_ids.map((noteId) => ({
+      note_id: noteId,
+      ...trashNoteAsUser({ userId: context.userId, noteId }),
+    })),
+  };
+};
+
 export const TOOL_BINDINGS: ReadonlyMap<string, ToolBinding> = new Map([
   ['list_notes', listNotesBinding],
+  ['trash_notes', trashNotesBinding],
 ]);

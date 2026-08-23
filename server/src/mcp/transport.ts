@@ -22,6 +22,7 @@ import { TOOL_BINDINGS, type ToolBinding } from './bindings.js';
 import {
   assertToolBindingParity,
   type LoadedToolFaceManifest,
+  type LoadedToolFaceManifestEntry,
   publicToolFaceEntries,
 } from './manifest.js';
 import {
@@ -58,14 +59,66 @@ function receiptMetadata(receipt: ToolFaceReceipt): Record<string, unknown> {
   };
 }
 
-function proposalResult(receipt: ToolFaceReceipt): CallToolResult {
-  return {
+function proposalResult(
+  receipt: ToolFaceReceipt,
+  structuredContent?: CallToolResult['structuredContent'],
+): CallToolResult {
+  const result: CallToolResult = {
     content: [{
       type: 'text',
       text: 'Tool call recorded as a proposal for human review; no business action was executed.',
     }],
     _meta: receiptMetadata(receipt),
   };
+  if (structuredContent !== undefined) result.structuredContent = structuredContent;
+  return result;
+}
+
+function batchIdsFromInput(
+  entry: LoadedToolFaceManifestEntry,
+  input: Record<string, unknown>,
+): string[] | null {
+  const batchField = entry.threshold?.batch_field;
+  if (typeof batchField !== 'string') return null;
+  const batchIds = input[batchField];
+  if (!Array.isArray(batchIds) || !batchIds.every((id) => typeof id === 'string')) {
+    return null;
+  }
+  return batchIds;
+}
+
+function proposedResources(
+  entry: LoadedToolFaceManifestEntry,
+  input: Record<string, unknown>,
+): Array<Record<string, unknown>> {
+  const batchIds = batchIdsFromInput(entry, input);
+  if (!batchIds) return [];
+  return batchIds.map((id) => ({ kind: 'note', id, outcome: 'pending' }));
+}
+
+function proposalStructuredContent(
+  entry: LoadedToolFaceManifestEntry,
+  input: Record<string, unknown>,
+): CallToolResult['structuredContent'] | undefined {
+  return batchIdsFromInput(entry, input) ? { results: [] } : undefined;
+}
+
+function appliedResources(value: unknown): Array<Record<string, unknown>> {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) return [];
+  const results = (value as Record<string, unknown>).results;
+  if (!Array.isArray(results)) return [];
+
+  return results.flatMap((item) => {
+    if (item === null || typeof item !== 'object' || Array.isArray(item)) return [];
+    const result = item as Record<string, unknown>;
+    if (typeof result.note_id !== 'string' || typeof result.outcome !== 'string') return [];
+    return [{
+      kind: 'note',
+      id: result.note_id,
+      outcome: result.outcome,
+      ...(typeof result.reason === 'string' && { reason: result.reason }),
+    }];
+  });
 }
 
 function appErrorResult(error: AppError): CallToolResult {
@@ -116,7 +169,7 @@ export async function dispatchToolCall(
   receiptWriter: ReceiptWriter = writeToolFaceReceipt,
 ): Promise<CallToolResult> {
   const envelope = context.envelope;
-  const effectiveTier = resolveEffectiveTier(entry.tier, envelope);
+  const effectiveTier = resolveEffectiveTier(entry, envelope, input);
   const receiptBase = {
     userId,
     callId: context.callId,
@@ -124,11 +177,16 @@ export async function dispatchToolCall(
     harness: requestHarness(envelope),
     inputDigest: digestInput(input),
     humanEntry: entry.human_entry,
-    resources: [],
-  } satisfies Omit<WriteToolFaceReceiptInput, 'tier'>;
+    intendedInput: input,
+  } satisfies Omit<WriteToolFaceReceiptInput, 'tier' | 'resources'>;
 
   if (effectiveTier === 'propose') {
-    return proposalResult(receiptWriter({ ...receiptBase, tier: 'propose' }));
+    const receipt = receiptWriter({
+      ...receiptBase,
+      tier: 'propose',
+      resources: proposedResources(entry, input),
+    });
+    return proposalResult(receipt, proposalStructuredContent(entry, input));
   }
   if (effectiveTier === 'confirm') {
     throw new AppError(
@@ -138,7 +196,11 @@ export async function dispatchToolCall(
   }
 
   const value = await binding(input, { userId });
-  const receipt = receiptWriter({ ...receiptBase, tier: 'immediate' });
+  const receipt = receiptWriter({
+    ...receiptBase,
+    tier: 'immediate',
+    resources: appliedResources(value),
+  });
   return {
     content: [{ type: 'text', text: JSON.stringify(value) ?? 'null' }],
     structuredContent: value as CallToolResult['structuredContent'],

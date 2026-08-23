@@ -319,7 +319,7 @@ test('A-1 route and MCP binding both call the same listNotes service export', ()
   assertListNotesRouteUsesCanonicalService();
 
   const bindingSource = readFileSync(resolve(REPO_ROOT, 'server/src/mcp/bindings.ts'), 'utf8');
-  assert.match(bindingSource, /import\s+\{\s*listNotes\s*\}\s+from\s+'\.\.\/services\/notes\.js';/);
+  assert.match(bindingSource, /import\s+\{[^}]*\blistNotes\b[^}]*\}\s+from\s+'\.\.\/services\/notes\.js';/);
   const listBinding = bindingSource.match(/const listNotesBinding[\s\S]*?\n\};/)?.[0];
   assert.ok(listBinding, 'list_notes binding initializer must exist');
   assert.match(listBinding, /listNotes\(\{/);

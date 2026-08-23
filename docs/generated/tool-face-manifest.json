@@ -141,5 +141,118 @@
     "scopes": [
       "notes:read"
     ]
+  },
+  {
+    "name": "trash_notes",
+    "description": "Move one note to trash immediately, or record a multi-note proposal for human review.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "note_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "minItems": 1,
+          "maxItems": 50
+        }
+      },
+      "required": [
+        "note_ids"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "note_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "outcome": {
+                    "type": "string",
+                    "const": "trashed"
+                  }
+                },
+                "required": [
+                  "note_id",
+                  "outcome"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "note_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "outcome": {
+                    "type": "string",
+                    "const": "missing"
+                  }
+                },
+                "required": [
+                  "note_id",
+                  "outcome"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "note_id": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "outcome": {
+                    "type": "string",
+                    "const": "skipped"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "enum": [
+                      "already_trashed",
+                      "read_only_projection"
+                    ]
+                  }
+                },
+                "required": [
+                  "note_id",
+                  "outcome",
+                  "reason"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "results"
+      ],
+      "additionalProperties": false
+    },
+    "truth": "content",
+    "tier": "confirm",
+    "threshold": {
+      "batch_field": "note_ids"
+    },
+    "human_entry": {
+      "route": "DELETE /api/notes/:id",
+      "client_call_site": "client/src/pages/Courses/CourseDetail.tsx#handleTrashNote"
+    },
+    "exposure": "public",
+    "scopes": [
+      "notes:write"
+    ]
   }
 ]

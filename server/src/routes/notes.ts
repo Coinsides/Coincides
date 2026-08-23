@@ -21,7 +21,11 @@ import {
   createClientNoteBlock,
   discardClientNoteBlockCreate,
 } from '../services/noteBlockLifecycle.js';
-import { listNotes, restoreNote, trashNote } from '../services/notes.js';
+import {
+  listNotes,
+  restoreNoteAsUser,
+  trashNoteAsUser,
+} from '../services/notes.js';
 
 const router = Router();
 const LEGACY_NOTE_LAYOUT_KEY = 'better_notebook_layout';
@@ -53,10 +57,18 @@ export function getOwnedCourse(courseId: string, userId: string): { id: string }
   return course;
 }
 
-function getOwnedNote(noteId: string, userId: string): { id: string; course_id: string; note_class: string } {
+export function getOwnedNote(
+  noteId: string,
+  userId: string,
+): { id: string; course_id: string; note_class: string; status: string } {
   const note = getDb()
-    .prepare('SELECT id, course_id, note_class FROM notes WHERE id = ? AND user_id = ?')
-    .get(noteId, userId) as { id: string; course_id: string; note_class: string } | undefined;
+    .prepare('SELECT id, course_id, note_class, status FROM notes WHERE id = ? AND user_id = ?')
+    .get(noteId, userId) as {
+      id: string;
+      course_id: string;
+      note_class: string;
+      status: string;
+    } | undefined;
   if (!note) throw new AppError(404, 'Note not found');
   return note;
 }
@@ -190,17 +202,22 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
 // DELETE /api/notes/:id
 router.delete('/:id', (req: AuthRequest, res: Response) => {
   const noteId = req.params.id as string;
-  getOwnedNote(noteId, req.userId!);
-  assertSourceProjectionNoteContentWriteAllowed(getDb(), req.userId!, noteId, 'delete_note');
-  trashNote({ userId: req.userId!, noteId });
+  const result = trashNoteAsUser({ userId: req.userId!, noteId });
+  if (result.outcome === 'missing') throw new AppError(404, 'Note not found');
+  if (result.outcome === 'skipped' && result.reason === 'read_only_projection') {
+    throw new AppError(409, 'Source projection content is read-only', {
+      code: 'source_projection_read_only',
+      operation: 'delete_note',
+    });
+  }
   res.json({ message: 'Note moved to trash' });
 });
 
 // POST /api/notes/:id/restore
 router.post('/:id/restore', (req: AuthRequest, res: Response) => {
   const noteId = req.params.id as string;
-  getOwnedNote(noteId, req.userId!);
-  restoreNote({ userId: req.userId!, noteId });
+  const result = restoreNoteAsUser({ userId: req.userId!, noteId });
+  if (result.outcome === 'missing') throw new AppError(404, 'Note not found');
   res.json({ message: 'Note restored' });
 });
 

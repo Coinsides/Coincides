@@ -265,28 +265,59 @@ test('POST /api/notes/:id/restore unmatched behavior matches DELETE for missing 
   });
 });
 
-test('DELETE /api/notes/:id delegates the lifecycle write only through trashNote', () => {
+test('DELETE /api/notes/:id is idempotent for an already trashed note without re-stamping it', async () => {
+  await withNotesHttp(async ({ baseUrl, db }) => {
+    const before = selectNote(db, RESTORE_NOTE_ID);
+    assert.equal(before.status, 'trashed', 'positive control must begin in trash');
+
+    const response = await fetch(`${baseUrl}/api/notes/${RESTORE_NOTE_ID}`, { method: 'DELETE' });
+    const actualBytes = Buffer.from(await response.arrayBuffer());
+
+    assert.equal(response.status, 200);
+    assert.deepEqual(actualBytes, Buffer.from('{"message":"Note moved to trash"}', 'utf8'));
+    assert.deepEqual(selectNote(db, RESTORE_NOTE_ID), before);
+  });
+});
+
+test('POST /api/notes/:id/restore is idempotent for an already active note without re-stamping it', async () => {
+  await withNotesHttp(async ({ baseUrl, db }) => {
+    const before = selectNote(db, DELETE_NOTE_ID);
+    assert.equal(before.status, 'active', 'positive control must begin active');
+
+    const response = await fetch(`${baseUrl}/api/notes/${DELETE_NOTE_ID}/restore`, { method: 'POST' });
+    const actualBytes = Buffer.from(await response.arrayBuffer());
+
+    assert.equal(response.status, 200);
+    assert.deepEqual(actualBytes, Buffer.from('{"message":"Note restored"}', 'utf8'));
+    assert.deepEqual(selectNote(db, DELETE_NOTE_ID), before);
+  });
+});
+
+test('DELETE /api/notes/:id delegates the full lifecycle decision only through trashNoteAsUser', () => {
   const routeSource = readFileSync(resolve(REPO_ROOT, 'server/src/routes/notes.ts'), 'utf8')
     .replace(/\r\n?/g, '\n');
   const start = routeSource.indexOf("router.delete('/:id'");
-  const end = routeSource.indexOf('// GET /api/notes/:id/blocks', start);
+  const end = routeSource.indexOf('// POST /api/notes/:id/restore', start);
   assert.notEqual(start, -1, 'DELETE /:id route must exist');
-  assert.notEqual(end, -1, 'GET /:id/blocks boundary must exist after DELETE');
+  assert.notEqual(end, -1, 'POST /:id/restore boundary must exist after DELETE');
   const deleteRoute = routeSource.slice(start, end);
 
   assert.match(
     routeSource,
-    /import\s+\{[^}]*\btrashNote\b[^}]*\}\s+from\s+'\.\.\/services\/notes\.js';/,
+    /import\s+\{[^}]*\btrashNoteAsUser\b[^}]*\}\s+from\s+'\.\.\/services\/notes\.js';/,
   );
   assert.match(
     deleteRoute,
-    /trashNote\(\{\s*userId:\s*req\.userId!,\s*noteId,?\s*\}\);/,
+    /trashNoteAsUser\(\{\s*userId:\s*req\.userId!,\s*noteId,?\s*\}\)/,
   );
+  assert.doesNotMatch(deleteRoute, /\bgetOwnedNote\s*\(/);
+  assert.doesNotMatch(deleteRoute, /\bassertSourceProjectionNoteContentWriteAllowed\s*\(/);
+  assert.doesNotMatch(deleteRoute, /\btrashNote\s*\(/);
   assert.doesNotMatch(deleteRoute, /UPDATE\s+notes/i);
   assert.doesNotMatch(deleteRoute, /\.prepare\s*\(/);
 });
 
-test('POST /api/notes/:id/restore delegates the lifecycle write only through restoreNote', () => {
+test('POST /api/notes/:id/restore delegates the full lifecycle decision only through restoreNoteAsUser', () => {
   const routeSource = readFileSync(resolve(REPO_ROOT, 'server/src/routes/notes.ts'), 'utf8')
     .replace(/\r\n?/g, '\n');
   const start = routeSource.indexOf("router.post('/:id/restore'");
@@ -297,26 +328,33 @@ test('POST /api/notes/:id/restore delegates the lifecycle write only through res
 
   assert.match(
     routeSource,
-    /import\s+\{[^}]*\brestoreNote\b[^}]*\}\s+from\s+'\.\.\/services\/notes\.js';/,
+    /import\s+\{[^}]*\brestoreNoteAsUser\b[^}]*\}\s+from\s+'\.\.\/services\/notes\.js';/,
   );
   assert.match(
     restoreRoute,
-    /restoreNote\(\{\s*userId:\s*req\.userId!,\s*noteId,?\s*\}\);/,
+    /restoreNoteAsUser\(\{\s*userId:\s*req\.userId!,\s*noteId,?\s*\}\)/,
   );
+  assert.doesNotMatch(restoreRoute, /\bgetOwnedNote\s*\(/);
+  assert.doesNotMatch(restoreRoute, /\brestoreNote\s*\(/);
   assert.doesNotMatch(restoreRoute, /UPDATE\s+notes/i);
   assert.doesNotMatch(restoreRoute, /\.prepare\s*\(/);
 });
 
-test('trashNote preserves the extracted DELETE lifecycle write and void return shape', async () => {
+test('trashNote preserves the extracted DELETE lifecycle write and reports SQLite changes', async () => {
   await withNotesHttp(({ db }) => {
     const result = trashNote({ userId: USER_ID, noteId: DELETE_NOTE_ID });
     const note = selectNote(db, DELETE_NOTE_ID);
 
-    assert.equal(result, undefined);
+    assert.deepEqual(result, { changes: 1 });
     assert.equal(note.status, 'trashed');
     assertIsoTimestamp(note.trashed_at);
     assertIsoTimestamp(note.updated_at);
     assert.equal(note.trashed_at, note.updated_at);
+    assert.deepEqual(
+      trashNote({ userId: USER_ID, noteId: DELETE_NOTE_ID }),
+      { changes: 1 },
+      'the bare SQL still reports a matched write for an already trashed owned row',
+    );
   });
 });
 
@@ -325,14 +363,15 @@ test('restoreNote activates an owned note and both executors leave another user 
     const restoreResult = restoreNote({ userId: USER_ID, noteId: RESTORE_NOTE_ID });
     const restored = selectNote(db, RESTORE_NOTE_ID);
 
-    assert.equal(restoreResult, undefined);
+    assert.deepEqual(restoreResult, { changes: 1 });
     assert.equal(restored.status, 'active');
     assert.equal(restored.trashed_at, null);
     assertIsoTimestamp(restored.updated_at);
 
     const foreignBefore = selectNote(db, OTHER_NOTE_ID);
-    assert.equal(trashNote({ userId: USER_ID, noteId: OTHER_NOTE_ID }), undefined);
-    assert.equal(restoreNote({ userId: USER_ID, noteId: OTHER_NOTE_ID }), undefined);
+    assert.deepEqual(restoreNote({ userId: USER_ID, noteId: RESTORE_NOTE_ID }), { changes: 1 });
+    assert.deepEqual(trashNote({ userId: USER_ID, noteId: OTHER_NOTE_ID }), { changes: 0 });
+    assert.deepEqual(restoreNote({ userId: USER_ID, noteId: OTHER_NOTE_ID }), { changes: 0 });
     assert.deepEqual(selectNote(db, OTHER_NOTE_ID), foreignBefore);
   });
 });

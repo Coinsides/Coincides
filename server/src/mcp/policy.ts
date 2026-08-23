@@ -22,13 +22,25 @@ export function supportsFormElicitation(envelope: RequestEnvelope): boolean {
 }
 
 export function resolveEffectiveTier(
-  requestedTier: LoadedToolFaceManifestEntry['tier'],
+  entry: LoadedToolFaceManifestEntry,
   envelope: RequestEnvelope,
+  input: Record<string, unknown>,
 ): LoadedToolFaceManifestEntry['tier'] {
-  if (requestedTier === 'confirm' && !supportsFormElicitation(envelope)) {
-    return 'propose';
+  if (entry.tier !== 'confirm') return entry.tier;
+
+  const batchField = entry.threshold?.batch_field;
+  if (
+    typeof batchField === 'string'
+    && Array.isArray(input[batchField])
+    && input[batchField].length === 1
+  ) {
+    return 'immediate';
   }
-  return requestedTier;
+
+  if (!supportsFormElicitation(envelope)) return 'propose';
+
+  // b-2b-2 接 MRTR 前的声明性降级
+  return 'propose';
 }
 
 export function requestHarness(envelope: RequestEnvelope): string {

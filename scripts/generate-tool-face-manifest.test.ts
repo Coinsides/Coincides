@@ -144,6 +144,33 @@ test('buildToolFaceManifest faithfully projects every injected entry in original
   });
 });
 
+test('K-b4 threshold is faithfully projected when present and omitted when absent', () => {
+  const thresholdEntry = {
+    ...projectionFixture[2],
+    threshold: { batch_field: 'probe_ids' },
+  } as ToolRegistryEntry & { threshold: { batch_field: string } };
+
+  const [withThreshold, withoutThreshold] = buildToolFaceManifest([
+    thresholdEntry,
+    projectionFixture[0],
+  ]);
+
+  assert.equal(
+    Object.prototype.hasOwnProperty.call(withThreshold, 'threshold'),
+    true,
+    'entries with a threshold must retain the optional own key',
+  );
+  assert.deepEqual(
+    (withThreshold as typeof withThreshold & { threshold?: { batch_field: string } }).threshold,
+    thresholdEntry.threshold,
+  );
+  assert.equal(
+    Object.prototype.hasOwnProperty.call(withoutThreshold, 'threshold'),
+    false,
+    'entries without a threshold must not gain the optional key',
+  );
+});
+
 test('manifest schemas stay inside the 2020-12 compatible subset and omit dialect self-claims', () => {
   const manifest = buildToolFaceManifest(projectionFixture);
   const violations = manifest.flatMap((entry) => [

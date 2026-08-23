@@ -21,6 +21,10 @@ export interface ToolRegistryHumanEntry {
   client_call_site: string;
 }
 
+export interface ToolRegistryThreshold {
+  batch_field: string;
+}
+
 export interface ToolRegistryEntry {
   name: string;
   description: string;
@@ -28,6 +32,7 @@ export interface ToolRegistryEntry {
   output_schema: ZodTypeAny;
   truth: ToolTruth;
   tier: ToolTier;
+  threshold?: ToolRegistryThreshold;
   human_entry: ToolRegistryHumanEntry;
   exposure: ToolExposure;
   scopes: string[];
@@ -62,12 +67,36 @@ const noteOutputSchema = z.object({
 
 export const listNotesOutputSchema = z.array(noteOutputSchema);
 
+export const trashNotesInputSchema = z.object({
+  note_ids: z.array(z.string().uuid()).min(1).max(50),
+}).strict();
+
+const trashNotesResultSchema = z.discriminatedUnion('outcome', [
+  z.object({
+    note_id: z.string().uuid(),
+    outcome: z.literal('trashed'),
+  }).strict(),
+  z.object({
+    note_id: z.string().uuid(),
+    outcome: z.literal('missing'),
+  }).strict(),
+  z.object({
+    note_id: z.string().uuid(),
+    outcome: z.literal('skipped'),
+    reason: z.enum(['already_trashed', 'read_only_projection']),
+  }).strict(),
+]);
+
+export const trashNotesOutputSchema = z.object({
+  results: z.array(trashNotesResultSchema),
+}).strict();
+
 /**
  * The only authoritative V2.BN.12 tool directory. JSON manifests are derived
  * from these runtime entries; legacy v1 toolDefinitions are intentionally not
  * imported or adapted here.
  */
-export const TOOL_REGISTRY = [
+export const TOOL_REGISTRY: ToolRegistryEntry[] = [
   {
     name: 'list_notes',
     description: 'List notes in one Project, optionally filtered by lifecycle status.',
@@ -82,4 +111,19 @@ export const TOOL_REGISTRY = [
     exposure: 'public',
     scopes: ['notes:read'],
   },
-] satisfies ToolRegistryEntry[];
+  {
+    name: 'trash_notes',
+    description: 'Move one note to trash immediately, or record a multi-note proposal for human review.',
+    input_schema: trashNotesInputSchema,
+    output_schema: trashNotesOutputSchema,
+    truth: 'content',
+    tier: 'confirm',
+    threshold: { batch_field: 'note_ids' },
+    human_entry: {
+      route: 'DELETE /api/notes/:id',
+      client_call_site: 'client/src/pages/Courses/CourseDetail.tsx#handleTrashNote',
+    },
+    exposure: 'public',
+    scopes: ['notes:write'],
+  },
+];

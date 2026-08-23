@@ -120,6 +120,7 @@ export function buildToolFaceManifest(
       output_schema: serializeSchema(entry.output_schema),
       truth: entry.truth,
       tier: entry.tier,
+      ...(entry.threshold && { threshold: entry.threshold }),
       human_entry: entry.human_entry,
       exposure: entry.exposure,
       scopes: entry.scopes,

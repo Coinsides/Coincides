@@ -20,6 +20,7 @@ export interface WriteToolFaceReceiptInput {
   inputDigest: string;
   humanEntry: ToolRegistryHumanEntry;
   resources: ToolFaceReceiptResource[];
+  intendedInput?: Record<string, unknown>;
 }
 
 export interface RevertToolFaceReceiptInput {
@@ -34,6 +35,7 @@ export interface ToolFaceReceiptMetadata {
   input_digest: string;
   human_entry: ToolRegistryHumanEntry;
   resources: ToolFaceReceiptResource[];
+  intended_input?: Record<string, unknown>;
   revert_outcome?: ToolFaceRevertOutcome;
   revert_details?: Record<string, unknown>;
 }
@@ -96,7 +98,7 @@ function hydrateReceipt(row: ToolFaceReceiptRow): ToolFaceReceipt {
   };
 }
 
-function readToolFaceReceipt(id: string): ToolFaceReceipt {
+export function readToolFaceReceipt(id: string): ToolFaceReceipt {
   const row = getDb().prepare(`
     SELECT id, user_id, course_id, source_type, source_id, label, status, metadata,
            created_at, applied_at, reverted_at
@@ -131,6 +133,7 @@ export function writeToolFaceReceipt(input: WriteToolFaceReceiptInput): ToolFace
     input_digest: inputDigest,
     human_entry: { ...input.humanEntry },
     resources: input.resources.map((resource) => ({ ...resource })),
+    ...(input.intendedInput && { intended_input: structuredClone(input.intendedInput) }),
   };
 
   assertOwnedCourse(userId, courseId);

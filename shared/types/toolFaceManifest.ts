@@ -27,6 +27,10 @@ export interface ToolFaceManifestHumanEntry {
   client_call_site: string;
 }
 
+export interface ToolFaceManifestThreshold {
+  batch_field: string;
+}
+
 /**
  * Serializable projection of one server-owned tool registry entry.
  * This transport type carries no runtime validator and is not a registry.
@@ -38,6 +42,7 @@ export interface ToolFaceManifestEntry {
   output_schema: ToolFaceJsonSchema;
   truth: ToolFaceTruth;
   tier: ToolFaceTier;
+  threshold?: ToolFaceManifestThreshold;
   human_entry: ToolFaceManifestHumanEntry;
   exposure: ToolFaceExposure;
   scopes: string[];
