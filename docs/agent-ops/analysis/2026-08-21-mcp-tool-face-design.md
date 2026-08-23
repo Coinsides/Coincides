@@ -330,7 +330,7 @@ KIND_HANDLERS（画布对象，6 种）
 2. **`:390/:951` 的调用方是否真的只拿 client_create receipt 的 batch id** —— 我核了查询无 source_type 过滤，**未逐个追调用方**。故 ① 的结论是「未声明依赖」，不是「一定会撞」。
 3. **`'proposal'` 这个 source_type 取值** —— 本稿称代码中已写过（`canvasLayoutProposals.ts:456`），我的字面量扫描**未命中它**（可能写法不同）。**未核，不否认。**
 
-## 11. 12.2a-3 传输层裁定(2026-08-23,Fable;依据 builder 短笺 `handoffs/2026-08-23-v2bn12-2a3-transport-brief-request.md` §短笺)
+## 12. 12.2a-3 传输层裁定(2026-08-23,Fable;依据 builder 短笺 `handoffs/2026-08-23-v2bn12-2a3-transport-brief-request.md` §短笺)
 
 **§1 两问(裁定方作答)**:①平行机关——**否**。六项职责(鉴权/入参校验/工具目录/收据/错误模型/会话)全走既有正门;唯一新增是 MCP 协议适配与 Host/Origin transport 门(防 DNS rebinding,属「谁在跟你说话」不是「你是谁」),以及 `name → function` 的 executor binding——后者以「与过滤后 manifest 等集合」killer 防止长成第二目录。②基线保证——**否**。transport 不兜 TD-6(跨资源原子)、TD-8 残余(格式机关)、TD-10(单 mapper 结构锁)。
 
