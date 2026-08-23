@@ -206,8 +206,8 @@ function recordLegacyPlacementCleanupConflict(
   db.prepare(`
     INSERT INTO operation_batches (
       id, user_id, course_id, source_type, source_id, label, status,
-      metadata, created_at, applied_at
-    ) VALUES (?, ?, ?, ?, ?, ?, 'applied', ?, ?, ?)
+      metadata, applied_at
+    ) VALUES (?, ?, ?, ?, ?, ?, 'applied', ?, ?)
     ON CONFLICT(id) DO NOTHING
   `).run(
     operationBatchId,
@@ -217,7 +217,6 @@ function recordLegacyPlacementCleanupConflict(
     input.createBatchId,
     'Client note block cleanup conflict',
     stringifyJson(cleanupConflict, {}),
-    input.detectedAt,
     input.detectedAt,
   );
   const persistedBatch = db.prepare(`
@@ -471,20 +470,19 @@ export function createClientNoteBlock(
       },
     };
 
-    db.prepare(`
-      INSERT INTO operation_batches (
-        id, user_id, course_id, source_type, source_id, label, status,
-        metadata, created_at, applied_at
-      ) VALUES (?, ?, ?, ?, ?, ?, 'applied', ?, ?, ?)
-    `).run(
-      batchId,
+  db.prepare(`
+    INSERT INTO operation_batches (
+      id, user_id, course_id, source_type, source_id, label, status,
+      metadata, applied_at
+    ) VALUES (?, ?, ?, ?, ?, ?, 'applied', ?, ?)
+  `).run(
+    batchId,
       userId,
       courseId,
       CLIENT_CREATE_SOURCE_TYPE,
       data.client_create_key,
       `Client create ${data.block_type} block`,
       stringifyJson(receipt, {}),
-      now,
       now,
     );
 
@@ -942,20 +940,19 @@ export function discardClientNoteBlockCreate(
         canceled_without_create: true,
         discarded_at: now,
       };
-      db.prepare(`
-        INSERT INTO operation_batches (
-          id, user_id, course_id, source_type, source_id, label, status,
-          metadata, created_at, reverted_at
-        ) VALUES (?, ?, ?, ?, ?, ?, 'reverted', ?, ?, ?)
-      `).run(
-        batchId,
+  db.prepare(`
+    INSERT INTO operation_batches (
+      id, user_id, course_id, source_type, source_id, label, status,
+      metadata, reverted_at
+    ) VALUES (?, ?, ?, ?, ?, ?, 'reverted', ?, ?)
+  `).run(
+    batchId,
         userId,
         courseId,
         CLIENT_CREATE_SOURCE_TYPE,
         clientCreateKey,
         'Cancel client note block create',
         stringifyJson(receipt, {}),
-        now,
         now,
       );
       return { discarded: false, block_id: null, canceled: true };

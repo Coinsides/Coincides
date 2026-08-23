@@ -397,7 +397,10 @@ test('legacy empty cleanup conflict keeps rows and writes one immutable operatio
     assert.equal(firstReceipt.source_id, originalBatch.id);
     assert.equal(firstReceipt.status, 'applied');
     assert.ok(firstReceipt.applied_at);
-    assert.equal(firstReceipt.created_at, firstReceipt.applied_at);
+    // TD-8: created_at now comes from the DB default (SQLite 'YYYY-MM-DD HH:MM:SS'),
+    // applied_at stays application-side ISO. They are no longer the same string.
+    assert.match(firstReceipt.created_at, /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+    assert.match(firstReceipt.applied_at, /^\d{4}-\d{2}-\d{2}T.*Z$/);
     assert.equal(firstReceipt.reverted_at, null);
     assert.deepEqual(JSON.parse(firstReceipt.metadata), {
       schema_version: 'client-note-block-cleanup-conflict.v1',
@@ -407,7 +410,7 @@ test('legacy empty cleanup conflict keeps rows and writes one immutable operatio
       note_id: noteId,
       block_id: created.body.id,
       placement_id: created.body.placement_id,
-      detected_at: firstReceipt.created_at,
+      detected_at: firstReceipt.applied_at,
     });
   });
 });

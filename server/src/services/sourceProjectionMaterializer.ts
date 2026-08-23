@@ -288,9 +288,9 @@ export function publishSourceProjection(
       db.prepare(`
         INSERT INTO operation_batches (
           id, user_id, course_id, source_type, source_id, label, status, metadata,
-          created_at, applied_at
+           applied_at
         )
-        VALUES (?, ?, ?, 'source_materialization', ?, ?, 'applied', ?, ?, ?)
+        VALUES (?, ?, ?, 'source_materialization', ?, ?, 'applied', ?, ?)
       `).run(
         operationBatchId,
         source.user_id,
@@ -304,7 +304,6 @@ export function publishSourceProjection(
           parser_version: source.parser_version,
           artifact_schema_version: artifact.schema_version,
         }),
-        now,
         now,
       );
 

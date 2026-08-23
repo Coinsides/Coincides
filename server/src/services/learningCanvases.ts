@@ -294,10 +294,11 @@ function maxZIndex(db: Database.Database, canvasId: string): number {
 
 function createOperationBatch(db: Database.Database, userId: string, courseId: string, label: string): string {
   const id = uuidv4();
+  const now = new Date().toISOString();
   db.prepare(`
     INSERT INTO operation_batches (id, user_id, course_id, source_type, label, status, applied_at)
-    VALUES (?, ?, ?, 'manual', ?, 'applied', datetime('now'))
-  `).run(id, userId, courseId, label);
+    VALUES (?, ?, ?, 'manual', ?, 'applied', ?)
+  `).run(id, userId, courseId, label, now);
   return id;
 }
 
