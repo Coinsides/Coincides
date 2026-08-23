@@ -1,0 +1,218 @@
+.page {
+  width: 100%;
+  max-width: 1120px;
+  margin: 0 auto;
+  animation: fadeIn var(--transition-normal) ease forwards;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+
+.header h1 {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 24px;
+  line-height: 1.25;
+}
+
+.header p {
+  margin: 5px 0 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.refreshButton,
+.rowActions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 11px;
+  border: 1px solid var(--glass-border);
+  border-radius: 6px;
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.refreshButton:hover:not(:disabled),
+.rowActions button:hover:not(:disabled) {
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+}
+
+.refreshButton:disabled,
+.rowActions button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.queueHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 10px 6px;
+  border-top: 1px solid var(--glass-border);
+  border-bottom: 1px solid var(--glass-border);
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.queueHeader span:first-child {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.errorBanner {
+  margin-top: 10px;
+  padding: 9px 10px;
+  border: 1px solid color-mix(in srgb, #d56774 45%, var(--glass-border));
+  border-radius: 6px;
+  background: color-mix(in srgb, #d56774 8%, transparent);
+  color: #e38a94;
+  font-size: 12px;
+}
+
+.receiptList {
+  min-width: 0;
+}
+
+.receiptRow {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) max-content max-content;
+  align-items: center;
+  gap: 18px;
+  min-height: 70px;
+  padding: 10px 6px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.receiptRow:hover {
+  background: color-mix(in srgb, var(--bg-tertiary) 55%, transparent);
+}
+
+.receiptIdentity {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.toolName {
+  width: fit-content;
+  padding: 2px 6px;
+  border: 1px solid var(--glass-border);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  font-family: var(--font-mono, monospace);
+  font-size: 10px;
+}
+
+.receiptIdentity strong {
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timestamp,
+.resourceCount {
+  color: var(--text-muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.rowActions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rowActions .sceneButton {
+  background: transparent;
+}
+
+.rowActions .dismissButton:hover:not(:disabled) {
+  border-color: color-mix(in srgb, #d56774 60%, var(--glass-border));
+  color: #e38a94;
+}
+
+.rowActions .applyButton {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary-bg);
+  color: var(--accent-primary-hover);
+}
+
+.emptyState {
+  display: flex;
+  min-height: 180px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 7px;
+  border-bottom: 1px solid var(--glass-border);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.emptyState strong {
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.spinning {
+  animation: spin 1.1s linear infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 900px) {
+  .receiptRow {
+    grid-template-columns: minmax(0, 1fr) max-content;
+  }
+
+  .rowActions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 620px) {
+  .header,
+  .queueHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .receiptRow {
+    grid-template-columns: 1fr;
+  }
+
+  .resourceCount {
+    justify-self: start;
+  }
+
+  .rowActions {
+    grid-column: auto;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+}

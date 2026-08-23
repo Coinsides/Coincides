@@ -1,15 +1,11 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { X, Plus, Send, ChevronDown, ClipboardList, MessageSquare, Trash2, ImagePlus } from 'lucide-react';
+import { X, Plus, Send, ChevronDown, Trash2, ImagePlus } from 'lucide-react';
 import { useAgentStore } from '@/stores/agentStore';
-import { useProposalStore } from '@/stores/proposalStore';
 import { useUIStore } from '@/stores/uiStore';
 import { useAuthStore } from '@/stores/authStore';
 import MessageBubble, { StreamingBubble } from './MessageBubble';
 import PreferenceForm from './PreferenceForm';
-import ProposalList from './ProposalList';
 import styles from './AgentPanel.module.css';
-
-type PanelView = 'chat' | 'proposals';
 
 export default function AgentPanel() {
   const agentPanelOpen = useUIStore((s) => s.agentPanelOpen);
@@ -32,11 +28,7 @@ export default function AgentPanel() {
     sendMessage,
   } = useAgentStore();
 
-  const proposals = useProposalStore((s) => s.proposals);
-  const fetchProposals = useProposalStore((s) => s.fetchProposals);
-
   const [input, setInput] = useState('');
-  const [view, setView] = useState<PanelView>('chat');
   const [showConvDropdown, setShowConvDropdown] = useState(false);
   const [pendingImage, setPendingImage] = useState<{ media_type: string; data: string; preview: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -48,7 +40,6 @@ export default function AgentPanel() {
   useEffect(() => {
     if (agentPanelOpen) {
       fetchConversations();
-      fetchProposals();
       // Focus input after panel opens
       setTimeout(() => inputRef.current?.focus(), 300);
     }
@@ -174,29 +165,7 @@ export default function AgentPanel() {
           </div>
         </div>
 
-        {/* View toggle */}
-        <div className={styles.viewTabs}>
-          <button
-            className={`${styles.viewTab} ${view === 'chat' ? styles.activeTab : ''}`}
-            onClick={() => setView('chat')}
-          >
-            <MessageSquare size={13} />
-            Chat
-          </button>
-          <button
-            className={`${styles.viewTab} ${view === 'proposals' ? styles.activeTab : ''}`}
-            onClick={() => setView('proposals')}
-          >
-            <ClipboardList size={13} />
-            Proposals
-            {proposals.length > 0 && (
-              <span className={styles.badge}>{proposals.length}</span>
-            )}
-          </button>
-        </div>
-
-        {view === 'chat' ? (
-          <>
+        <>
             {/* Messages */}
             <div className={styles.messages}>
               {messages.length === 0 && !streaming && (
@@ -219,13 +188,6 @@ export default function AgentPanel() {
               )}
               <div ref={messagesEndRef} />
             </div>
-
-            {/* Proposal banner */}
-            {proposals.length > 0 && (
-              <button className={styles.proposalBanner} onClick={() => setView('proposals')}>
-                📋 {proposals.length} pending proposal{proposals.length > 1 ? 's' : ''}
-              </button>
-            )}
 
             {/* Context hint indicator */}
             {agentContextHint && (
@@ -277,12 +239,7 @@ export default function AgentPanel() {
                 <Send size={16} />
               </button>
             </div>
-          </>
-        ) : (
-          <div className={styles.proposalView}>
-            <ProposalList />
-          </div>
-        )}
+        </>
       </div>
     </>
   );

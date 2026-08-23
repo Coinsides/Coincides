@@ -261,6 +261,82 @@ function assertCanonicalNamedImport(file: string, symbol: string, fromModule: st
   );
 }
 
+function assertToolReceiptApplyTransactionBoundary(): void {
+  const { program } = getServerTypeScriptContext();
+  const filePath = resolve(REPO_ROOT, 'server/src/routes/toolReceipts.ts');
+  const sourceFile = program.getSourceFiles().find(
+    (candidate) => normalizedSourcePath(candidate.fileName) === normalizedSourcePath(filePath),
+  );
+  assert.ok(sourceFile, 'tool receipts route must be part of the server TypeScript program');
+
+  const applyFunction = sourceFile.statements.find((statement): statement is ts.FunctionDeclaration => (
+    ts.isFunctionDeclaration(statement) && statement.name?.text === 'applyTrashNotesReceipt'
+  ));
+  assert.ok(applyFunction?.body, 'applyTrashNotesReceipt must remain a function with a body');
+
+  const applyDeclaration = applyFunction.body.statements
+    .filter(ts.isVariableStatement)
+    .flatMap((statement) => statement.declarationList.declarations)
+    .find((declaration) => ts.isIdentifier(declaration.name) && declaration.name.text === 'apply');
+  assert.ok(
+    applyDeclaration?.initializer
+      && ts.isCallExpression(applyDeclaration.initializer)
+      && ts.isPropertyAccessExpression(applyDeclaration.initializer.expression)
+      && applyDeclaration.initializer.expression.name.text === 'transaction',
+    'apply must be created by getDb().transaction',
+  );
+  const callback = applyDeclaration.initializer.arguments[0];
+  assert.ok(
+    callback && (ts.isArrowFunction(callback) || ts.isFunctionExpression(callback)),
+    'apply transaction must receive a function callback',
+  );
+
+  const positions = new Map<string, number[]>();
+  const watchedCalls = new Set([
+    'readToolFaceReceipt',
+    'assertOwnedProposedTrashReceipt',
+    'trashNoteExecutor',
+    'markToolFaceReceiptApplied',
+  ]);
+  const visitCallback = (node: ts.Node): void => {
+    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && watchedCalls.has(node.expression.text)) {
+      const calls = positions.get(node.expression.text) ?? [];
+      calls.push(node.getStart(sourceFile));
+      positions.set(node.expression.text, calls);
+    }
+    ts.forEachChild(node, visitCallback);
+  };
+  visitCallback(callback);
+
+  for (const callName of watchedCalls) {
+    assert.equal(
+      positions.get(callName)?.length,
+      1,
+      `${callName} must be called exactly once inside the apply transaction callback`,
+    );
+  }
+  assert.ok(
+    positions.get('readToolFaceReceipt')![0]
+      < positions.get('assertOwnedProposedTrashReceipt')![0]
+      && positions.get('assertOwnedProposedTrashReceipt')![0]
+        < positions.get('trashNoteExecutor')![0]
+      && positions.get('trashNoteExecutor')![0]
+        < positions.get('markToolFaceReceiptApplied')![0],
+    'receipt read and proposed/ownership checks must precede execution and marking in one transaction',
+  );
+
+  const returnsImmediate = applyFunction.body.statements.some((statement) => (
+    ts.isReturnStatement(statement)
+      && statement.expression
+      && ts.isCallExpression(statement.expression)
+      && ts.isPropertyAccessExpression(statement.expression.expression)
+      && ts.isIdentifier(statement.expression.expression.expression)
+      && statement.expression.expression.expression.text === 'apply'
+      && statement.expression.expression.name.text === 'immediate'
+  ));
+  assert.ok(returnsImmediate, 'apply transaction must acquire the immediate write lock');
+}
+
 function isLexicalBindingIdentifier(node: ts.Identifier): boolean {
   const parent = node.parent;
   return (
@@ -428,6 +504,55 @@ function assertListNotesRouteUsesCanonicalService(): void {
   );
 }
 
+function clientProductionReferences(identifier: string): string[] {
+  const configPath = resolve(REPO_ROOT, 'client/tsconfig.json');
+  const configFile = ts.readConfigFile(configPath, ts.sys.readFile);
+  if (configFile.error) {
+    assert.fail(ts.flattenDiagnosticMessageText(configFile.error.messageText, '\n'));
+  }
+  const parsedConfig = ts.parseJsonConfigFileContent(
+    configFile.config,
+    ts.sys,
+    dirname(configPath),
+    undefined,
+    configPath,
+  );
+  assert.deepEqual(
+    parsedConfig.errors.map((error) => ts.flattenDiagnosticMessageText(error.messageText, '\n')),
+    [],
+    'client tsconfig must parse before checking retired component references',
+  );
+
+  const clientSourceRoot = `${normalizedSourcePath(resolve(REPO_ROOT, 'client/src'))}/`;
+  const references: string[] = [];
+  for (const sourceFile of ts.createProgram(parsedConfig.fileNames, parsedConfig.options).getSourceFiles()) {
+    const normalizedFile = normalizedSourcePath(sourceFile.fileName);
+    if (!normalizedFile.startsWith(clientSourceRoot) || sourceFile.isDeclarationFile) continue;
+
+    const sourceBasename = sourceFile.fileName.replace(/\\/g, '/').split('/').pop() ?? '';
+    if (sourceBasename === `${identifier}.ts` || sourceBasename === `${identifier}.tsx`) {
+      references.push(`${normalizedFile.slice(clientSourceRoot.length)}:file`);
+    }
+
+    const visit = (node: ts.Node): void => {
+      if (ts.isIdentifier(node) && node.text === identifier) {
+        const { line, character } = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
+        references.push(`${normalizedFile.slice(clientSourceRoot.length)}:${line + 1}:${character + 1}`);
+      }
+      if (ts.isStringLiteralLike(node)) {
+        const specifierBasename = node.text.replace(/\\/g, '/').split('/').pop() ?? '';
+        if (specifierBasename === identifier || specifierBasename.startsWith(`${identifier}.`)) {
+          const { line, character } = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile));
+          references.push(`${normalizedFile.slice(clientSourceRoot.length)}:${line + 1}:${character + 1}:module`);
+        }
+      }
+      ts.forEachChild(node, visit);
+    };
+    visit(sourceFile);
+  }
+  return references.sort();
+}
+
 test('A-1 route and MCP binding both call the same listNotes service export', () => {
   assertListNotesRouteUsesCanonicalService();
   assertCanonicalNamedImport('server/src/routes/notes.ts', 'listNotes', '../services/notes.js');
@@ -435,12 +560,32 @@ test('A-1 route and MCP binding both call the same listNotes service export', ()
   assertCanonicalNamedImport('server/src/routes/notes.ts', 'restoreNoteAsUser', '../services/notes.js');
   assertCanonicalNamedImport('server/src/mcp/bindings.ts', 'listNotes', '../services/notes.js');
   assertCanonicalNamedImport('server/src/mcp/bindings.ts', 'trashNoteAsUser', '../services/notes.js');
-  assertCanonicalNamedImport('server/src/services/toolFaceReceiptRevert.ts', 'restoreNoteAsUser', './notes.js');
+  assertCanonicalNamedImport('server/src/services/toolFaceReceiptRevert.ts', 'restoreNoteAsUser', '../services/notes.js');
+  assertCanonicalNamedImport('server/src/routes/toolReceipts.ts', 'trashNoteAsUser', '../services/notes.js');
+  assertCanonicalNamedImport(
+    'server/src/routes/toolReceipts.ts',
+    'revertTrashNotesReceipt',
+    '../services/toolFaceReceiptRevert.js',
+  );
 
   const bindingSource = readFileSync(resolve(REPO_ROOT, 'server/src/mcp/bindings.ts'), 'utf8');
   const listBinding = bindingSource.match(/const listNotesBinding[\s\S]*?\n\};/)?.[0];
   assert.ok(listBinding, 'list_notes binding initializer must exist');
   assert.match(listBinding, /listNotes\(\{/);
+});
+
+test('H-5 apply rechecks receipt state inside one immediate transaction', () => {
+  assertToolReceiptApplyTransactionBoundary();
+});
+
+test('K-6 retired proposal components have zero production TypeScript references', () => {
+  assert.ok(
+    clientProductionReferences('AgentPanel').length >= 2,
+    'positive control must see the live AgentPanel import and JSX usage',
+  );
+  assert.deepEqual(clientProductionReferences('ProposalList'), []);
+  assert.deepEqual(clientProductionReferences('ProposalWeekEditor'), []);
+  assert.deepEqual(clientProductionReferences('TimePickerInline'), []);
 });
 
 test('A-3 GET /api/notes keeps the pre-extraction response bytes, default status, hydrate mapping, and DESC order', async () => {

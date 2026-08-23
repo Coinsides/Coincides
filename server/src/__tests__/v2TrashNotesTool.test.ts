@@ -6,13 +6,21 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs';
+import type { Server } from 'node:http';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import type Database from 'better-sqlite3';
+import express from 'express';
 import { closeDb, initDb } from '../db/init.js';
+import { authMiddleware, generateToken } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
+import { errorHandler } from '../middleware/errorHandler.js';
+import {
+  createToolReceiptsRouter,
+  type ToolReceiptsRouterOptions,
+} from '../routes/toolReceipts.js';
 import { restoreNoteAsUser, trashNoteAsUser } from '../services/notes.js';
 import { revertTrashNotesReceipt } from '../services/toolFaceReceiptRevert.js';
 import {
@@ -65,12 +73,16 @@ async function withReceiptDb(run: (db: Database.Database) => void | Promise<void
 }
 
 function writeReceipt(input: {
+  userId?: string;
+  courseId?: string | null;
   tool?: string;
   tier?: ToolFaceReceiptTier;
   resources: ToolFaceReceiptResource[];
+  intendedInput?: Record<string, unknown>;
 }) {
   return writeToolFaceReceipt({
-    userId: USER_ID,
+    userId: input.userId ?? USER_ID,
+    courseId: input.courseId,
     callId: `call-${Math.random()}`,
     tool: input.tool ?? 'trash_notes',
     tier: input.tier ?? 'immediate',
@@ -81,7 +93,7 @@ function writeReceipt(input: {
       client_call_site: 'client/src/pages/Courses/CourseDetail.tsx#handleTrashNote',
     },
     resources: input.resources,
-    intendedInput: { note_ids: [NOTE_A, NOTE_B] },
+    intendedInput: input.intendedInput ?? { note_ids: [NOTE_A, NOTE_B] },
   });
 }
 
@@ -103,6 +115,356 @@ function assertAppError(
     return true;
   });
 }
+
+interface ToolReceiptsHttpFixture {
+  baseUrl: string;
+  db: Database.Database;
+  token: string;
+  otherToken: string;
+}
+
+interface JsonResponse {
+  response: Response;
+  body: any;
+}
+
+async function closeServer(server: Server): Promise<void> {
+  await new Promise<void>((resolveClose, reject) => {
+    server.close((error) => error ? reject(error) : resolveClose());
+  });
+}
+
+async function withToolReceiptsHttp(
+  options: ToolReceiptsRouterOptions,
+  run: (fixture: ToolReceiptsHttpFixture) => void | Promise<void>,
+): Promise<void> {
+  await withReceiptDb(async (db) => {
+    const app = express();
+    app.use(express.json());
+    app.use('/api/tool-receipts', authMiddleware, createToolReceiptsRouter(options));
+    app.use(errorHandler);
+    const server = app.listen();
+    try {
+      await new Promise<void>((resolveListen) => server.once('listening', resolveListen));
+      const address = server.address();
+      if (!address || typeof address === 'string') throw new Error('HTTP fixture did not bind a TCP port');
+      await run({
+        baseUrl: `http://127.0.0.1:${address.port}`,
+        db,
+        token: generateToken(USER_ID),
+        otherToken: generateToken(OTHER_USER_ID),
+      });
+    } finally {
+      await closeServer(server);
+    }
+  });
+}
+
+async function requestJson(
+  fixture: ToolReceiptsHttpFixture,
+  path: string,
+  options: { method?: 'GET' | 'POST'; token?: string } = {},
+): Promise<JsonResponse> {
+  const method = options.method ?? 'POST';
+  const response = await fetch(`${fixture.baseUrl}${path}`, {
+    method,
+    headers: {
+      Authorization: `Bearer ${options.token ?? fixture.token}`,
+      ...(method === 'POST' && { 'Content-Type': 'application/json' }),
+    },
+    ...(method === 'POST' && { body: '{}' }),
+  });
+  return { response, body: await response.json() };
+}
+
+function activateNote(
+  db: Database.Database,
+  noteId: string,
+  noteClass: 'user' | 'source_projection' = 'user',
+): void {
+  const result = db.prepare(`
+    UPDATE notes
+    SET status = 'active', trashed_at = NULL, note_class = ?
+    WHERE id = ? AND user_id = ?
+  `).run(noteClass, noteId, USER_ID);
+  assert.equal(result.changes, 1, 'positive control must activate the owned note fixture');
+}
+
+function noteLifecycle(db: Database.Database, noteId: string) {
+  return db.prepare(`
+    SELECT status, trashed_at, updated_at, note_class
+    FROM notes
+    WHERE id = ?
+  `).get(noteId) as {
+    status: string;
+    trashed_at: string | null;
+    updated_at: string;
+    note_class: string;
+  };
+}
+
+test('K-1 real HTTP apply trashes the note and records causal applied resources', async () => {
+  await withToolReceiptsHttp({}, async (fixture) => {
+    activateNote(fixture.db, NOTE_A);
+    const receipt = writeReceipt({
+      tier: 'propose',
+      resources: [{ kind: 'note', id: NOTE_A, outcome: 'pending' }],
+      intendedInput: { note_ids: [NOTE_A] },
+    });
+
+    const { response, body } = await requestJson(
+      fixture,
+      `/api/tool-receipts/${receipt.id}/apply`,
+    );
+
+    assert.equal(response.status, 200);
+    assert.equal(body.receipt.status, 'applied');
+    assert.equal(noteLifecycle(fixture.db, NOTE_A).status, 'trashed');
+    assert.ok(noteLifecycle(fixture.db, NOTE_A).trashed_at);
+    const persisted = readToolFaceReceipt(receipt.id);
+    assert.equal(persisted.status, 'applied');
+    assert.deepEqual(persisted.metadata.resources, [
+      { kind: 'note', id: NOTE_A, outcome: 'trashed' },
+    ]);
+  });
+});
+
+test('K-1b two real HTTP apply requests call the executor exactly once', async () => {
+  let executionCount = 0;
+  await withToolReceiptsHttp({
+    trashNoteExecutor: (target) => {
+      executionCount += 1;
+      return trashNoteAsUser(target);
+    },
+  }, async (fixture) => {
+    activateNote(fixture.db, NOTE_A);
+    const receipt = writeReceipt({
+      tier: 'propose',
+      resources: [{ kind: 'note', id: NOTE_A, outcome: 'pending' }],
+      intendedInput: { note_ids: [NOTE_A] },
+    });
+
+    const attempts = await Promise.all([
+      requestJson(fixture, `/api/tool-receipts/${receipt.id}/apply`),
+      requestJson(fixture, `/api/tool-receipts/${receipt.id}/apply`),
+    ]);
+
+    assert.equal(executionCount, 1, 'the second request must not enter the executor');
+    assert.deepEqual(attempts.map(({ response }) => response.status).sort(), [200, 409]);
+    assert.equal(noteLifecycle(fixture.db, NOTE_A).status, 'trashed');
+    assert.equal(readToolFaceReceipt(receipt.id).status, 'applied');
+  });
+});
+
+test('K-2 HTTP apply preserves the canonical source-projection guard', async () => {
+  let executionCount = 0;
+  await withToolReceiptsHttp({
+    trashNoteExecutor: (target) => {
+      executionCount += 1;
+      return trashNoteAsUser(target);
+    },
+  }, async (fixture) => {
+    activateNote(fixture.db, NOTE_A, 'source_projection');
+    const receipt = writeReceipt({
+      tier: 'propose',
+      resources: [{ kind: 'note', id: NOTE_A, outcome: 'pending' }],
+      intendedInput: { note_ids: [NOTE_A] },
+    });
+
+    const { response } = await requestJson(
+      fixture,
+      `/api/tool-receipts/${receipt.id}/apply`,
+    );
+
+    assert.equal(response.status, 200);
+    assert.equal(executionCount, 1, 'apply must use the canonical executor for projections too');
+    assert.equal(noteLifecycle(fixture.db, NOTE_A).status, 'active');
+    assert.deepEqual(readToolFaceReceipt(receipt.id).metadata.resources, [{
+      kind: 'note',
+      id: NOTE_A,
+      outcome: 'skipped',
+      reason: 'read_only_projection',
+    }]);
+  });
+});
+
+test('K-3 failed HTTP apply leaves the receipt proposed and rolls back local note writes', async () => {
+  await withToolReceiptsHttp({
+    trashNoteExecutor: (target) => {
+      if (target.noteId === NOTE_B) throw new AppError(409, 'forced apply failure');
+      return trashNoteAsUser(target);
+    },
+  }, async (fixture) => {
+    activateNote(fixture.db, NOTE_A);
+    activateNote(fixture.db, NOTE_B);
+    const receipt = writeReceipt({
+      tier: 'propose',
+      resources: [NOTE_A, NOTE_B].map((id) => ({ kind: 'note', id, outcome: 'pending' })),
+      intendedInput: { note_ids: [NOTE_A, NOTE_B] },
+    });
+
+    const { response, body } = await requestJson(
+      fixture,
+      `/api/tool-receipts/${receipt.id}/apply`,
+    );
+
+    assert.equal(response.status, 409);
+    assert.equal(body.error, 'forced apply failure');
+    assert.equal(noteLifecycle(fixture.db, NOTE_A).status, 'active');
+    assert.equal(noteLifecycle(fixture.db, NOTE_B).status, 'active');
+    const persisted = readToolFaceReceipt(receipt.id);
+    assert.equal(persisted.status, 'proposed');
+    assert.equal(persisted.applied_at, null);
+    assert.deepEqual(persisted.metadata.resources, receipt.metadata.resources);
+  });
+});
+
+test('K-4 dismiss changes only the receipt status', async () => {
+  await withToolReceiptsHttp({}, async (fixture) => {
+    activateNote(fixture.db, NOTE_A);
+    const before = noteLifecycle(fixture.db, NOTE_A);
+    const receipt = writeReceipt({
+      tier: 'propose',
+      resources: [{ kind: 'note', id: NOTE_A, outcome: 'pending' }],
+      intendedInput: { note_ids: [NOTE_A] },
+    });
+
+    const { response, body } = await requestJson(
+      fixture,
+      `/api/tool-receipts/${receipt.id}/dismiss`,
+    );
+
+    assert.equal(response.status, 200);
+    assert.equal(body.status, 'dismissed');
+    assert.equal(readToolFaceReceipt(receipt.id).status, 'dismissed');
+    assert.deepEqual(noteLifecycle(fixture.db, NOTE_A), before);
+  });
+});
+
+test('K-5 GET, apply, and dismiss enforce receipt ownership', async () => {
+  await withToolReceiptsHttp({}, async (fixture) => {
+    activateNote(fixture.db, NOTE_A);
+    const ownProposed = writeReceipt({
+      tier: 'propose',
+      resources: [{ kind: 'note', id: NOTE_A, outcome: 'pending' }],
+      intendedInput: { note_ids: [NOTE_A] },
+    });
+    const otherProposed = writeReceipt({
+      userId: OTHER_USER_ID,
+      tier: 'propose',
+      resources: [{ kind: 'note', id: NOTE_B, outcome: 'pending' }],
+      intendedInput: { note_ids: [NOTE_B] },
+    });
+    writeReceipt({
+      resources: [{ kind: 'note', id: NOTE_B, outcome: 'trashed' }],
+      intendedInput: { note_ids: [NOTE_B] },
+    });
+
+    const listed = await requestJson(
+      fixture,
+      '/api/tool-receipts?status=proposed',
+      { method: 'GET' },
+    );
+    assert.equal(listed.response.status, 200);
+    assert.deepEqual(listed.body.receipts.map((item: { id: string }) => item.id), [ownProposed.id]);
+    assert.ok(!listed.body.receipts.some((item: { id: string }) => item.id === otherProposed.id));
+
+    const foreignApply = await requestJson(
+      fixture,
+      `/api/tool-receipts/${ownProposed.id}/apply`,
+      { token: fixture.otherToken },
+    );
+    assert.equal(foreignApply.response.status, 403);
+    assert.equal(readToolFaceReceipt(ownProposed.id).status, 'proposed');
+    assert.equal(noteLifecycle(fixture.db, NOTE_A).status, 'active');
+
+    const foreignDismiss = await requestJson(
+      fixture,
+      `/api/tool-receipts/${ownProposed.id}/dismiss`,
+      { token: fixture.otherToken },
+    );
+    assert.equal(foreignDismiss.response.status, 403);
+    assert.equal(readToolFaceReceipt(ownProposed.id).status, 'proposed');
+  });
+});
+
+test('K-5b real HTTP revert restores the note and marks the receipt reverted', async () => {
+  let executionCount = 0;
+  await withToolReceiptsHttp({
+    revertReceipt: (target) => {
+      executionCount += 1;
+      return revertTrashNotesReceipt(target);
+    },
+  }, async (fixture) => {
+    const receipt = writeReceipt({
+      resources: [{ kind: 'note', id: NOTE_A, outcome: 'trashed' }],
+      intendedInput: { note_ids: [NOTE_A] },
+    });
+
+    const { response, body } = await requestJson(
+      fixture,
+      `/api/tool-receipts/${receipt.id}/revert`,
+    );
+
+    assert.equal(response.status, 200);
+    assert.equal(executionCount, 1, 'the route must call the canonical revert service exactly once');
+    assert.equal(body.status, 'reverted');
+    assert.equal(noteLifecycle(fixture.db, NOTE_A).status, 'active');
+    assert.equal(noteLifecycle(fixture.db, NOTE_A).trashed_at, null);
+    assert.equal(readToolFaceReceipt(receipt.id).status, 'reverted');
+  });
+});
+
+test('K-5b real HTTP revert rejects a foreign receipt independently', async () => {
+  await withToolReceiptsHttp({}, async (fixture) => {
+    const receipt = writeReceipt({
+      resources: [{ kind: 'note', id: NOTE_A, outcome: 'trashed' }],
+    });
+    const { response, body } = await requestJson(
+      fixture,
+      `/api/tool-receipts/${receipt.id}/revert`,
+      { token: fixture.otherToken },
+    );
+    assert.equal(response.status, 403);
+    assert.equal(body.error, 'Tool face receipt is not owned by user');
+    assert.equal(noteStatus(fixture.db, NOTE_A), 'trashed');
+    assert.equal(readToolFaceReceipt(receipt.id).status, 'applied');
+  });
+});
+
+test('K-5b real HTTP revert rejects the wrong tool independently', async () => {
+  await withToolReceiptsHttp({}, async (fixture) => {
+    const receipt = writeReceipt({
+      tool: 'list_notes',
+      resources: [{ kind: 'note', id: NOTE_A, outcome: 'trashed' }],
+    });
+    const { response, body } = await requestJson(
+      fixture,
+      `/api/tool-receipts/${receipt.id}/revert`,
+    );
+    assert.equal(response.status, 409);
+    assert.equal(body.error, 'Tool face receipt is not for trash_notes');
+    assert.equal(noteStatus(fixture.db, NOTE_A), 'trashed');
+    assert.equal(readToolFaceReceipt(receipt.id).status, 'applied');
+  });
+});
+
+test('K-5b real HTTP revert rejects a non-applied receipt independently', async () => {
+  await withToolReceiptsHttp({}, async (fixture) => {
+    const receipt = writeReceipt({
+      tier: 'propose',
+      resources: [{ kind: 'note', id: NOTE_A, outcome: 'pending' }],
+    });
+    const { response, body } = await requestJson(
+      fixture,
+      `/api/tool-receipts/${receipt.id}/revert`,
+    );
+    assert.equal(response.status, 409);
+    assert.equal(body.error, 'Only an applied trash_notes receipt can be reverted');
+    assert.equal(noteStatus(fixture.db, NOTE_A), 'trashed');
+    assert.equal(readToolFaceReceipt(receipt.id).status, 'proposed');
+  });
+});
 
 test('K-b5 trash_notes binding delegates each lifecycle decision to trashNoteAsUser', () => {
   const bindingSource = readFileSync(

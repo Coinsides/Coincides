@@ -171,51 +171,6 @@
   color: var(--text-secondary);
 }
 
-/* View tabs */
-.viewTabs {
-  display: flex;
-  border-bottom: 1px solid var(--glass-border);
-  flex-shrink: 0;
-}
-
-.viewTab {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  padding: 10px 0;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-muted);
-  border-bottom: 2px solid transparent;
-  background: var(--glass-elevated);
-}
-
-.viewTab:hover {
-  color: var(--text-secondary);
-}
-
-.viewTab.activeTab {
-  color: var(--accent-primary);
-  border-bottom-color: var(--accent-primary);
-  background: transparent;
-}
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 6px;
-  font-size: 11px;
-  font-weight: 700;
-  background: var(--accent-primary);
-  color: white;
-  border-radius: 8px;
-}
-
 /* Messages area */
 .messages {
   flex: 1;
@@ -253,22 +208,6 @@
   color: var(--text-muted);
   line-height: 1.5;
   max-width: 280px;
-}
-
-/* Proposal banner */
-.proposalBanner {
-  padding: 10px 19px;
-  background: var(--accent-primary-bg);
-  color: var(--accent-primary);
-  font-size: 13px;
-  font-weight: 500;
-  text-align: center;
-  border-top: 1px solid var(--glass-border);
-  flex-shrink: 0;
-}
-
-.proposalBanner:hover {
-  background: var(--accent-primary-bg-hover);
 }
 
 /* Context hint */
@@ -401,11 +340,4 @@
 .imagePreviewRemove:hover {
   background: var(--glass-hover);
   color: var(--error);
-}
-
-/* Proposals view */
-.proposalView {
-  flex: 1;
-  overflow-y: auto;
-  padding: 19px;
 }

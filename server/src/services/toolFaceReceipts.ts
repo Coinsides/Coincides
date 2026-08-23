@@ -6,7 +6,7 @@ import type { ToolRegistryHumanEntry, ToolTier } from '../toolFace/registry.js';
 const TOOL_FACE_RECEIPT_SOURCE_TYPE = 'mcp';
 
 export type ToolFaceReceiptTier = Extract<ToolTier, 'immediate' | 'propose'>;
-export type ToolFaceReceiptStatus = 'applied' | 'proposed' | 'reverted';
+export type ToolFaceReceiptStatus = 'applied' | 'proposed' | 'dismissed' | 'reverted';
 export type ToolFaceRevertOutcome = 'complete' | 'partial';
 export type ToolFaceReceiptResource = Record<string, unknown>;
 
@@ -26,6 +26,20 @@ export interface WriteToolFaceReceiptInput {
 export interface RevertToolFaceReceiptInput {
   outcome: ToolFaceRevertOutcome;
   details: Record<string, unknown>;
+}
+
+export interface MarkToolFaceReceiptAppliedInput {
+  resources?: ToolFaceReceiptResource[];
+}
+
+export interface DismissToolFaceReceiptInput {
+  userId: string;
+  receiptId: string;
+}
+
+export interface ListToolFaceReceiptsInput {
+  userId: string;
+  status: ToolFaceReceiptStatus;
 }
 
 export interface ToolFaceReceiptMetadata {
@@ -63,7 +77,7 @@ function receiptTimestamp(): string {
   return new Date().toISOString();
 }
 
-function statusForTier(tier: string): Exclude<ToolFaceReceiptStatus, 'reverted'> {
+function statusForTier(tier: string): Extract<ToolFaceReceiptStatus, 'applied' | 'proposed'> {
   if (tier === 'immediate') return 'applied';
   if (tier === 'propose') return 'proposed';
   throw new AppError(400, 'Tool face receipt tier must be immediate or propose');
@@ -107,6 +121,20 @@ export function readToolFaceReceipt(id: string): ToolFaceReceipt {
   `).get(id) as ToolFaceReceiptRow | undefined;
   if (!row) throw new AppError(404, 'Tool face receipt not found');
   return hydrateReceipt(row);
+}
+
+export function listToolFaceReceipts({
+  userId,
+  status,
+}: ListToolFaceReceiptsInput): ToolFaceReceipt[] {
+  const resolvedUserId = requiredText(userId, 'userId');
+  return (getDb().prepare(`
+    SELECT id, user_id, course_id, source_type, source_id, label, status, metadata,
+           created_at, applied_at, reverted_at
+    FROM operation_batches
+    WHERE user_id = ? AND source_type = 'mcp' AND status = ?
+    ORDER BY created_at DESC, id DESC
+  `).all(resolvedUserId, status) as ToolFaceReceiptRow[]).map(hydrateReceipt);
 }
 
 function assertOwnedCourse(userId: string, courseId: string | null): void {
@@ -154,18 +182,53 @@ export function writeToolFaceReceipt(input: WriteToolFaceReceiptInput): ToolFace
   return readToolFaceReceipt(id);
 }
 
-export function markToolFaceReceiptApplied(id: string): ToolFaceReceipt {
+export function markToolFaceReceiptApplied(
+  id: string,
+  input: MarkToolFaceReceiptAppliedInput = {},
+): ToolFaceReceipt {
   const receipt = readToolFaceReceipt(requiredText(id, 'id'));
   if (receipt.status === 'applied') return receipt;
   if (receipt.status !== 'proposed') {
     throw new AppError(409, 'Only a proposed tool face receipt can be applied');
   }
+  const resources = input.resources?.map((resource) => ({ ...resource }));
+  const result = resources
+    ? getDb().prepare(`
+        UPDATE operation_batches
+        SET status = 'applied', metadata = ?, applied_at = ?
+        WHERE id = ? AND source_type = 'mcp' AND status = 'proposed'
+      `).run(
+        JSON.stringify({ ...receipt.metadata, resources }),
+        receiptTimestamp(),
+        receipt.id,
+      )
+    : getDb().prepare(`
+        UPDATE operation_batches
+        SET status = 'applied', applied_at = ?
+        WHERE id = ? AND source_type = 'mcp' AND status = 'proposed'
+      `).run(receiptTimestamp(), receipt.id);
+  if (result.changes !== 1) throw new AppError(409, 'Tool face receipt apply conflict');
+  return readToolFaceReceipt(receipt.id);
+}
+
+export function dismissToolFaceReceipt({
+  userId,
+  receiptId,
+}: DismissToolFaceReceiptInput): ToolFaceReceipt {
+  const resolvedUserId = requiredText(userId, 'userId');
+  const receipt = readToolFaceReceipt(requiredText(receiptId, 'receiptId'));
+  if (receipt.user_id !== resolvedUserId) {
+    throw new AppError(403, 'Tool face receipt is not owned by user');
+  }
+  if (receipt.status !== 'proposed') {
+    throw new AppError(409, 'Only a proposed tool face receipt can be dismissed');
+  }
   const result = getDb().prepare(`
     UPDATE operation_batches
-    SET status = 'applied', applied_at = ?
-    WHERE id = ? AND source_type = 'mcp' AND status = 'proposed'
-  `).run(receiptTimestamp(), receipt.id);
-  if (result.changes !== 1) throw new AppError(409, 'Tool face receipt apply conflict');
+    SET status = 'dismissed'
+    WHERE id = ? AND user_id = ? AND source_type = 'mcp' AND status = 'proposed'
+  `).run(receipt.id, resolvedUserId);
+  if (result.changes !== 1) throw new AppError(409, 'Tool face receipt dismiss conflict');
   return readToolFaceReceipt(receipt.id);
 }
 

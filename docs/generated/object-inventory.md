@@ -144,7 +144,7 @@
 
 ---
 
-## 2. HTTP 路由模块（48）
+## 2. HTTP 路由模块（49）
 
 | 模块 | 挂载路径 |
 |---|---|
@@ -196,6 +196,7 @@
 | `routes/tasks.ts` | `/api/tasks` |
 | `routes/templates.ts` | `/api/templates` |
 | `routes/timeBlocks.ts` | `/api/time-blocks` |
+| `routes/toolReceipts.ts` | `/api/tool-receipts` |
 
 ---
 

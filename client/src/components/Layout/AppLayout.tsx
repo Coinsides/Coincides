@@ -14,6 +14,7 @@ import {
   Star,
   Clock3,
   Boxes,
+  ListChecks,
 } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 import { useCourseStore } from '@/stores/courseStore';
@@ -130,6 +131,18 @@ export default function AppLayout() {
               {sidebarOpen && <span className={styles.navLabel}>{label ?? (labelKey ? t(labelKey) : '')}</span>}
             </NavLink>
           ))}
+
+          {sidebarOpen ? <div className={styles.sectionLabel}><span>辅助</span></div> : null}
+          <NavLink
+            to="/tool-receipts"
+            className={({ isActive }) =>
+              `${styles.navItem} ${isActive ? styles.active : ''}`
+            }
+            title="Tool Receipts"
+          >
+            <ListChecks size={18} />
+            {sidebarOpen ? <span className={styles.navLabel}>Tool Receipts</span> : null}
+          </NavLink>
 
           {sidebarOpen && (
             <>
