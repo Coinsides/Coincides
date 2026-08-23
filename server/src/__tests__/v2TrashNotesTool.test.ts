@@ -288,6 +288,32 @@ test('K-2 HTTP apply preserves the canonical source-projection guard', async () 
   });
 });
 
+test('B-1 default HTTP apply preserves the canonical source-projection guard without injection', async () => {
+  await withToolReceiptsHttp({}, async (fixture) => {
+    activateNote(fixture.db, NOTE_A, 'source_projection');
+    const receipt = writeReceipt({
+      tier: 'propose',
+      resources: [{ kind: 'note', id: NOTE_A, outcome: 'pending' }],
+      intendedInput: { note_ids: [NOTE_A] },
+    });
+
+    const { response, body } = await requestJson(
+      fixture,
+      `/api/tool-receipts/${receipt.id}/apply`,
+    );
+
+    assert.equal(response.status, 200);
+    assert.equal(body.receipt.status, 'applied');
+    assert.equal(noteLifecycle(fixture.db, NOTE_A).status, 'active');
+    assert.deepEqual(readToolFaceReceipt(receipt.id).metadata.resources, [{
+      kind: 'note',
+      id: NOTE_A,
+      outcome: 'skipped',
+      reason: 'read_only_projection',
+    }]);
+  });
+});
+
 test('K-3 failed HTTP apply leaves the receipt proposed and rolls back local note writes', async () => {
   await withToolReceiptsHttp({
     trashNoteExecutor: (target) => {
@@ -408,6 +434,28 @@ test('K-5b real HTTP revert restores the note and marks the receipt reverted', a
 
     assert.equal(response.status, 200);
     assert.equal(executionCount, 1, 'the route must call the canonical revert service exactly once');
+    assert.equal(body.status, 'reverted');
+    assert.equal(noteLifecycle(fixture.db, NOTE_A).status, 'active');
+    assert.equal(noteLifecycle(fixture.db, NOTE_A).trashed_at, null);
+    assert.equal(readToolFaceReceipt(receipt.id).status, 'reverted');
+  });
+});
+
+test('B-2 default HTTP revert restores the note and marks the receipt reverted without injection', async () => {
+  await withToolReceiptsHttp({}, async (fixture) => {
+    const receipt = writeReceipt({
+      resources: [{ kind: 'note', id: NOTE_A, outcome: 'trashed' }],
+      intendedInput: { note_ids: [NOTE_A] },
+    });
+    assert.equal(receipt.status, 'applied');
+    assert.equal(noteLifecycle(fixture.db, NOTE_A).status, 'trashed');
+
+    const { response, body } = await requestJson(
+      fixture,
+      `/api/tool-receipts/${receipt.id}/revert`,
+    );
+
+    assert.equal(response.status, 200);
     assert.equal(body.status, 'reverted');
     assert.equal(noteLifecycle(fixture.db, NOTE_A).status, 'active');
     assert.equal(noteLifecycle(fixture.db, NOTE_A).trashed_at, null);

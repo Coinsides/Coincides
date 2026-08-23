@@ -178,7 +178,17 @@ type MatchingImportBinding =
     identifier: ts.Identifier;
   };
 
-function assertCanonicalNamedImport(file: string, symbol: string, fromModule: string): void {
+interface CanonicalNamedImport {
+  bindingSymbol: ts.Symbol;
+  targetSymbol: ts.Symbol;
+  specifier: ts.ImportSpecifier;
+}
+
+function assertCanonicalNamedImport(
+  file: string,
+  symbol: string,
+  fromModule: string,
+): CanonicalNamedImport {
   const { program, checker, compilerOptions } = getServerTypeScriptContext();
   const filePath = resolve(REPO_ROOT, file);
   const sourceFile = program.getSourceFiles().find(
@@ -231,10 +241,13 @@ function assertCanonicalNamedImport(file: string, symbol: string, fromModule: st
     symbol,
     `${file} must bind the unaliased ${symbol} name`,
   );
+  const bindingSymbol = checker.getSymbolAtLocation(binding.specifier.name);
+  assert.ok(bindingSymbol, `${file} ${symbol} import binding symbol must resolve`);
   assert.ok(
-    checker.getSymbolAtLocation(binding.specifier.name),
-    `${file} ${symbol} import binding symbol must resolve`,
+    (bindingSymbol.flags & ts.SymbolFlags.Alias) !== 0,
+    `${file} ${symbol} import binding must resolve through an alias symbol`,
   );
+  const targetSymbol = checker.getAliasedSymbol(bindingSymbol);
   assert.ok(
     ts.isStringLiteral(binding.declaration.moduleSpecifier),
     `${file} ${symbol} import source must be a string literal`,
@@ -258,6 +271,74 @@ function assertCanonicalNamedImport(file: string, symbol: string, fromModule: st
     normalizedSourcePath(actualImport.resolvedFileName),
     normalizedSourcePath(expectedImport.resolvedFileName),
     `${file} must import ${symbol} directly from ${fromModule}`,
+  );
+
+  return {
+    bindingSymbol,
+    targetSymbol,
+    specifier: binding.specifier,
+  };
+}
+
+function assertToolReceiptsDefaultFallback(
+  variableName: 'trashNoteExecutor' | 'revertReceipt',
+  canonicalSymbolName: 'trashNoteAsUser' | 'revertTrashNotesReceipt',
+  fromModule: string,
+): void {
+  const file = 'server/src/routes/toolReceipts.ts';
+  const { program, checker } = getServerTypeScriptContext();
+  const canonicalImport = assertCanonicalNamedImport(file, canonicalSymbolName, fromModule);
+  const filePath = resolve(REPO_ROOT, file);
+  const sourceFile = program.getSourceFiles().find(
+    (candidate) => normalizedSourcePath(candidate.fileName) === normalizedSourcePath(filePath),
+  );
+  assert.ok(sourceFile, `${file} must be part of the server TypeScript program`);
+
+  const routerFactories = sourceFile.statements.filter((statement): statement is ts.FunctionDeclaration => (
+    ts.isFunctionDeclaration(statement)
+      && statement.name?.text === 'createToolReceiptsRouter'
+      && statement.body !== undefined
+  ));
+  assert.equal(routerFactories.length, 1, 'createToolReceiptsRouter must exist exactly once');
+  const [routerFactory] = routerFactories;
+
+  const declarations = routerFactory.body!.statements
+    .filter(ts.isVariableStatement)
+    .flatMap((statement) => [...statement.declarationList.declarations])
+    .filter((declaration) => ts.isIdentifier(declaration.name) && declaration.name.text === variableName);
+  assert.equal(declarations.length, 1, `${variableName} must be declared exactly once in the router factory`);
+
+  const initializer = declarations[0].initializer;
+  assert.ok(
+    initializer
+      && ts.isBinaryExpression(initializer)
+      && initializer.operatorToken.kind === ts.SyntaxKind.QuestionQuestionToken,
+    `${variableName} must use an options override with a ?? default fallback`,
+  );
+  assert.ok(
+    ts.isIdentifier(initializer.right),
+    `${variableName} default fallback must be an imported identifier`,
+  );
+
+  const fallbackBindingSymbol = checker.getSymbolAtLocation(initializer.right);
+  assert.ok(fallbackBindingSymbol, `${variableName} default fallback symbol must resolve`);
+  assert.ok(
+    (fallbackBindingSymbol.flags & ts.SymbolFlags.Alias) !== 0,
+    `${variableName} default fallback must resolve through the canonical import alias`,
+  );
+  const fallbackTargetSymbol = checker.getAliasedSymbol(fallbackBindingSymbol);
+
+  assert.ok(
+    fallbackBindingSymbol === canonicalImport.bindingSymbol,
+    `${variableName} default fallback must reference the canonical named import binding`,
+  );
+  assert.ok(
+    fallbackBindingSymbol.declarations?.includes(canonicalImport.specifier),
+    `${variableName} default fallback symbol must be declared by the canonical named import`,
+  );
+  assert.ok(
+    fallbackTargetSymbol === canonicalImport.targetSymbol,
+    `${variableName} default fallback must resolve to the canonical exported symbol`,
   );
 }
 
@@ -572,6 +653,22 @@ test('A-1 route and MCP binding both call the same listNotes service export', ()
   const listBinding = bindingSource.match(/const listNotesBinding[\s\S]*?\n\};/)?.[0];
   assert.ok(listBinding, 'list_notes binding initializer must exist');
   assert.match(listBinding, /listNotes\(\{/);
+});
+
+test('I-1 trashNoteExecutor default fallback is the canonical trashNoteAsUser import symbol', () => {
+  assertToolReceiptsDefaultFallback(
+    'trashNoteExecutor',
+    'trashNoteAsUser',
+    '../services/notes.js',
+  );
+});
+
+test('I-2 revertReceipt default fallback is the canonical revertTrashNotesReceipt import symbol', () => {
+  assertToolReceiptsDefaultFallback(
+    'revertReceipt',
+    'revertTrashNotesReceipt',
+    '../services/toolFaceReceiptRevert.js',
+  );
 });
 
 test('H-5 apply rechecks receipt state inside one immediate transaction', () => {
