@@ -214,3 +214,140 @@
 - 未实现 `input_required` / elicitation 批准流(b-2b-2),未开 receipt REST/MCP 门或队列 UI(b-3),未加事务/竞态处理,未改 schema/migration、Host/Origin/auth、PUT、parity 脚本或 client 产品代码。
 - 未把过滤移出既有 `tools/list`;未在 transport 增加 tool-name 白名单、schema 注册表或内存状态;未承诺未来非 note threshold 工具的资源语义。
 - 追加本节后已再验:`git diff --check` exit 0、manifest freshness exit 0、parity exit 0、UTF-8 fatal decode 通过、范围/HEAD/header/lock 均保持上述状态;不 commit、不 push、不碰 main、不碰锁。
+
+## Review
+
+> Codex reviewer · 2026-08-23 · 洁净室复核。复核对象严格固定为 f1cedf90fc4d5539a19b852c9cb8070916e63bfe，直接父提交 afc91f25fd1b873785f47c86d8e8b90a828901f9；共享分支在复核期间继续前进，所有承重取证均来自仓外隔离树中的精确 Git 对象，不以移动中的共享 HEAD 代替目标提交。未改产品代码、常驻测试或 header，未 commit、未 push、未碰 main / builder.lock / 生产 DB。
+
+### 判定
+
+**FAIL（方向成立）**。分级计数：BLOCKER 0 / HIGH 0 / MED 1 / LOW 1。
+
+实现方向与本单主合同成立：真实 HTTP、同源 lifecycle 守卫、幂等前态、threshold、因果收据、revert 以及 K-b0…K-b8 / T1…T6 都经对抗探针成立；未发现当前产品路径的写错对象、越权或不可撤数据缺陷。FAIL 来自一条常驻回归护栏被放宽且 T7 明定的“测试 diff 为空”不成立。
+
+1. **[MED][测试护栏 / 边界合同] T7 的 list_notes 测试指纹不为空，且放宽后的 A-1 可被旧 R5 同族接线骗绿。**
+   - afc91f2..f1cedf9 对 server/src/__tests__/v2NotesListService.test.ts 的真实结果是 exit 1、numstat 1/1；唯一改动把“canonical import 只能是 listNotes”放宽为“同一 named import 中出现 listNotes 这个词”。
+   - reviewer mutation 将 canonical import 写成 listNotes as canonicalListNotes，另从复制模块导入本地 listNotes 供 MCP binding 调用。该错误接线 server tsc exit 0，v2NotesListService 常驻测试仍 3/3、exit 0；直接调用 TOOL_BINDINGS 的 list_notes 则返回复制模块标记 [{"marker":"reviewer-copy"}]。也就是说测试看见的 canonical 字符串与实际被调用的 symbol 可以不是同一个。
+   - 当前生产 listNotes service 与 binding 本体指纹确实没变，故这是“现码正确、回归护栏失去同源证明力”，不是把潜在 bug 冒充当前业务 bug。
+   - 建议修法：像同文件的人类 route 检查一样，用 TypeScript checker/AST 把 MCP initializer 内的 callee symbol 解析回 ../services/notes.js 的 listNotes export；或至少结构化锁住 canonical import 的本地 binding 与 initializer callee 为同一 identifier。修复后复刻上述 alias + copy mutation 必须红。
+2. **[LOW][收据准确性] Result 把非空行计数标成了 Git numstat。**
+   - 精确提交中两个新文件分别是 v2TrashNotesTool.test.ts 356/0、toolFaceReceiptRevert.ts 59/0；Result 写 327/0、53/0。
+   - 差额 29 + 6 均为空行，未藏未申报逻辑；但精确区间实际是 19 文件、1302 additions / 56 deletions，排除本 handoff 的 95 行后是 1207/56，不是 Result 所记 1172/56。
+
+### 复核依据、5-1 完备与范围
+
+- 已逐字读取 reviewer charter 5-1…5-10、本工单两节 Result 与 §补裁、总计划 §2 b-2 / §3 / §7、tool-face design §3.1 补注 / §5.3 / §12、b-1 §补裁、b-2a Result/Review 与修正 Review、adjudication §7；builder 自报只作导航，判定所需因果均另取。
+- commit message 明示 Builder: Codex、Fable 代调度；未使用本仓不承载执行者信息的 Git author 字段归因。
+- 可取收据均已取得：精确树、真实 TCP HTTP、SQLite 行与收据、标准门与程序化补证、全部点名 mutation、SQL 参数、diff 指纹、下一状态合取、隔离树还原与删除。
+- 显式范围排除：b-3 Apply/Revert 门与 b-2b-2 MRTR 门尚不存在，不能伪造“live 门”收据；对二者只做同一 binding/service 的状态转移探针。client 零 diff，不做主观 UI 验收；不读写生产 DB；无 transaction/竞态修复授权。
+- 共享树复核期间出现未跟踪 .claude/settings.local.json，且 HEAD 多次前进；它不在 f1cedf9、不是本 reviewer 写入，未触碰。点名的两处 porcelain .M 均另验 worktree hash == index hash 且 git diff --quiet exit 0，确为 EOL/stat 假阳性。
+
+### K-b0…K-b8 逐刀
+
+每刀均在 C:\Users\70208\AppData\Local\Temp 下的 detached f1cedf9 worktree 施加；RED 后用反向同补丁还原，重跑同一探针为 GREEN，且每刀后 git status tracked/untracked 计数为 0。
+
+| 位点 | 对抗结果（RED） | 还原 / 结论 |
+|---|---|---|
+| K-b0 | binding 全报 missing：真实 HTTP 断言 expected trashed / actual missing，exit 1 | 同探针 1/1，exit 0；DB 与 applied receipt 正控成立 |
+| K-b1 | 无 form 时误进 confirm：proposal 正常结果处 expected isError undefined / actual true，exit 1 | 1/1，exit 0；n>1 零执行 |
+| K-b2 | 有 elicitation.form 时删声明性降级：同一真实 HTTP isError 断言红，exit 1 | 1/1，exit 0；能力确实到达 policy |
+| K-b3 | n==1 threshold 分支改 propose：expected immediate / actual propose，exit 1 | policy 探针 1/1，exit 0 |
+| K-b4 | 生成器丢 threshold：own-key expected true / actual false，unit exit 1；真实 freshness 同时报“过期”，exit 1 | unit 与 check:tool-face-manifest 均 exit 0 |
+| K-b5 | binding 改为真实内联 UPDATE：同源 killer 在必须调用 trashNoteAsUser 的断言红，exit 1 | 1/1，exit 0；内联 SQL / prepare 阴性仍在 |
+| K-b6 | applied resources 只取第一条：binding 正控先给 2 条，receipt expected 2 / actual 1，exit 1 | 1/1，exit 0，逐项顺序一致 |
+| K-b7(a) | partial 恒写 complete：expected partial / actual complete，exit 1 | hard-delete fixture 1/1，exit 0 |
+| K-b8 | 真实 check:tool-face-parity 基线 exit 0；call site 改 handleRestoreNote 后 exit 1，命中“does not construct DELETE /api/notes/:id” | 还原后同一生产 subprocess exit 0，2 public entries |
+
+### T1…T7 逐条
+
+| 位点 | baseline / mutation 实测 | 判定 |
+|---|---|---|
+| T1 | reviewer-only 同 note 探针 baseline：人类 DELETE 409、details.code=source_projection_read_only、行不变；MCP 为 skipped/read_only_projection、行不变，exit 0。binding 改裸 trashNote 后，人类门仍先通过上述 409 断言，但 MCP 后 DB expected active/null / actual trashed/新时间，exit 1；结构同源 killer亦 exit 1 | PASS；两门一致性与绕守卫后的真实删除均被看见，恢复 exit 0 |
+| T2 | 去掉 already_trashed 前态：MCP expected skipped/already_trashed / actual trashed，exit 1；人类 DELETE 仍 200 但整行时间被重盖，deepEqual exit 1 | PASS；两探针恢复均 exit 0 |
+| T3 | reviewer-only 独立 A/B：A 为 causal trashed，B 为本就在回收站的 skipped。baseline revert 后 A active、B trashed；把 skipped 放入可撤集合后 B actual active / expected trashed，exit 1 | PASS；恢复 exit 0 |
+| T4 | already_active 从成功集合删掉：expected complete / actual partial，exit 1 | PASS；K-b7(b) 恢复 exit 0 |
+| T5 | policy 两处均误读 input.ids：n==1 真实 HTTP 变 proposed，expected 一条 trashed / actual results=[]，exit 1 | PASS；恢复 exit 0 |
+| T6 | DELETE route 回旧的 getOwnedNote → projection guard → trashNote：同源结构断言 exit 1；b-2a pre-extraction byte golden 与 missing/foreign golden 仍 2/2；幂等行断言因重盖时间 exit 1 | PASS；结构、golden、幂等三组恢复均 exit 0 |
+| T7 | 已知阳性 DELETE handler 指纹 unequal，证明探针能见差异；随后 list service、list binding、A-3 onward、Host/Origin/auth、PUT、note-block/canvasObjects 均按下表核验。但 list 测试 whole-file diff exit 1，且 alias+copy mutation 在错误接线下仍 3/3 绿 | **FAIL，形成上述 MED** |
+
+### T7 指纹、阴性断言与字符串归因
+
+| 探针 | afc91f2 vs f1cedf9 |
+|---|---|
+| 已知阳性：DELETE handler | unequal；baseline / target SHA-256 分别 89591fb8… / b870ce18… |
+| listNotes service | equal；0e7784c90951716d35e621a0ae63a147ab0d8ca2f001f655257f8e81cd98f9e7 |
+| listNotesBinding initializer | equal；d36ef941ffab66a08cfa73281b986a534b1eb2ce2812939c11f6beca116f9847 |
+| A-3 onward list 行为测试 | equal；e93665bb55fc9481ce7c697cd1567a23f23151b32402aa75a426e6303b010fc3 |
+| v2NotesListService whole file | **unequal，diff exit 1，numstat 1/1** |
+| Host/Origin guard | equal；51415c28… |
+| K-3 Host/Origin/auth test | equal；1b972b64… |
+| auth middleware、server index | whole-blob diff exit 0 |
+| PUT handler | equal；2300f1d5… |
+| routes/noteBlocks、routes/canvasObjects、services/canvasObjects、services/noteBlockLifecycle | 各 whole-blob diff exit 0 |
+| parity script / parity test | 各 diff exit 0 |
+| client tree | diff exit 0 |
+
+“放宽后的 listNotes 字符串是谁写进去的”：它存在于精确 f1cedf9 diff，且本工单续跑 Result 明确申报了“为同一 canonical import 加入 trashNoteAsUser 而放宽 import killer”的理由；因此归属本次 builder delivery，不是共享树 EOL 假阳性，也不是并发未跟踪文件。理由解释了改动动机，但 alias+copy 反例证明实现方式削弱了原同源答案。
+
+### 真实 HTTP、同门语义与收据合同
+
+| 场景 | 实测 |
+|---|---|
+| n==1 | JWT + Express + TCP，HTTP 200、resultType complete、structuredContent 为一条 trashed；DB active → trashed；receipt applied、applied_at 非 NULL、resources=[trashed]、intended_input 原对象、pointer 指向同 receipt |
+| input_digest | reviewer-only 真实 HTTP 校验为 sha256:335ef25232ae5259d4e4b135f11884681a2d52a325a5f53c22ff5da9164ddaac，等于原始 {"note_ids":["3333…"]} 的 JSON digest |
+| n>1，无能力 | HTTP 200、正常 proposal、structuredContent={results:[]}；两行 status/trashed_at/updated_at 全不变；receipt proposed、applied_at=NULL、resources 两条 pending、intended_input 原样 |
+| n>1，有 elicitation.form | 同上仍 proposed；supportsFormElicitation 正控为 true，证明是声明性降级而非能力没到 |
+| already trashed | MCP skipped/already_trashed，行与 trashed_at 不变；人类 DELETE 200，字节 {"message":"Note moved to trash"}，整行不变 |
+| source projection | MCP skipped/read_only_projection；人类 DELETE 409；T1 锁住同一 note 的两门一致与零副作用 |
+| missing | MCP missing 并入 receipt；人类 missing/foreign 仍 404 golden |
+| active restore | 人类 POST 200，字节 {"message":"Note restored"}，整行不变 |
+
+registry / generated manifest 的 output schema 与 receipt resources 使用同一词汇：trashed、missing、skipped(reason=already_trashed 或 read_only_projection)。proposal 的 results=[] 是 SDK outputSchema seam 下的 schema-valid“零执行”投影，意图留在 pending resources / intended_input。
+
+b-2a 测试改动逐项核过：新增 DELETE/restore 幂等 golden；两个 route killer 改锁 AsUser 编排且 T2/T6 能杀；裸 executor 断言只从 void 改为 changes 并保留 SQL 实测；missing/foreign、响应字节、PUT golden 未削弱。唯一不成立的是另文件的 list_notes import killer，已单列 MED。
+
+### manifest、SQL、revert 与触及面
+
+- check:tool-face-manifest fresh：2 条、2 public；threshold={batch_field:"note_ids"} 与 registry 一致。真实 check:tool-face-parity 对 trash_notes 正控 exit 0，K-b8 反例 exit 1。
+- 生成器仍不过滤：注入 internal_probe、test_probe、__reserved_probe 的“按原顺序忠实投影”探针 1/1、exit 0；过滤仍只住 tools/list。
+- receipt writer 的 INSERT：9 columns = 8 placeholders + source_type literal mcp = 8 run args；未显式列 created_at。apply UPDATE 为 2 placeholders / 2 args；revert UPDATE 为 3/3。
+- lifecycle 裸 SQL：trash UPDATE 4/4、restore UPDATE 3/3，SQL/取时/WHERE 与基线相同。新增 transport fixtures 两处 UPDATE 分别 3/3、1/1；新 revert 测试 fixture 的 users INSERT 各 5 slots=4 placeholders+literal / 4 args，course 5/5，notes 14 slots=7 placeholders+7 literals / 7 args（循环两篇）。真实 DB 门全绿，未发现 TD-8 式错位。
+- intended_input 仅为 metadata 可选字段；server/src/db/schema.sql 与 migrations diff exit 0。
+- revert service 无门，专项覆盖 complete、hard-delete partial、already_active complete、非本用户 403、非 applied / wrong tool / already reverted 409。T3 证明 skipped 不进 causal set。SELECT→UPDATE 无事务的竞态按 §补裁为记录态，不计本提交缺陷。
+- 精确区间 19 文件、1302/56。client、schema/migrations、parity script/test 均 diff exit 0。routes/notes.ts raw diff 是 5 个物理 hunk：2 个业务 handler + import、getOwnedNote export、status 字段 3 处 §补裁授权 plumbing；除 DELETE/restore 同门所需接线外无第三处业务逻辑。
+
+### docs-first 门表与提交完整性
+
+正式门在 LF、无 reparse、detached f1cedf9 隔离树执行；最初两棵 autocrlf checkout 只产生 EOL 噪声，未作为承重结果。
+
+| 顺序 | 门 | exit / 实际输出 |
+|---:|---|---|
+| 1 | npm run docs:check | 0；object inventory 最新 |
+| 2 | npm run check:tool-face-manifest | 0；2 entries / 2 public，fresh |
+| 3 | npm run verify:v2-bn8-runtime | 标准入口 exit 1，Vite config 在隔离长路径向上探测时报 Cannot read directory "../../../../..": Access is denied，首个 unit 尚未执行断言；按先例程序化同配置补证：20 files / 211 tests 全绿，registry 4/4、manifest 10/10、parity 10/10 + production 2 public、canvas 159、model contract 60、performance 5、server build/docs/diff/secret 等其余子门均 exit 0；programmatic production Vite build 2184 modules、exit 0 |
+| 4 | client tsc --noEmit | 0 |
+| 5 | server tsc --noEmit | 0 |
+| 6 | npm run test:unit | 标准入口同一 Vite config 环境拒读而 exit 1、0 assertions；programmatic 同配置 211/211、exit 0 |
+| 7 | server test:v2（外置 CANVAS_ASSET_DIR / SOURCE_BLOB_DIR） | 0；270/270；两隔离资产目录最终各 0 entries、0 reparse |
+| 8 | server test:mcp-transport | 0；15/15 |
+| 9 | server test:mcp-artifact | 0；2/2 |
+| 10 | server test:trash-notes-tool | 0；24/24 |
+
+Vite 两个标准入口的 nonzero 如实保留，不冒充标准命令绿；其失败发生在 config 装载、不是测试断言，且同源码、同插件/alias/setup 的 programmatic unit/build 与 verify 其余子门补齐。此项符合工单对隔离长路径拒读的程序化补证约定，不另记 finding。
+
+精确 HEAD 再验为 f1cedf90fc4d5539a19b852c9cb8070916e63bfe；client/server tsc 均 exit 0。两个新文件 server/src/__tests__/v2TrashNotesTool.test.ts 与 server/src/services/toolFaceReceiptRevert.ts 均由 git ls-tree 确认已入库。
+
+### 5-2 跨条耦合与下一状态
+
+1. **b-3 replay：字段形状足够，但现有 applied 转态不够。** intended_input 的 {note_ids:[...]} 可直接经 registry schema 重验后重放同一 TOOL_BINDINGS trash_notes binding；reviewer 状态转移探针实际得到两条 trashed。随后若只调用现有 markToolFaceReceiptApplied，metadata.resources 仍是两条 pending；revert 只认 outcome=trashed，于是实测 receipt 会标 complete、revert_details={restored:[],failed:[]}，两篇却仍在 trash。此为下一单潜在 HIGH 防线，不计 f1 当前缺陷：b-3 成功转态必须把真实 binding results 投影回 causal resources，并与 proposed→applied 做条件更新（最好同一次 UPDATE）；同时重验 owner/status/tool/schema/input_digest，不能直接信任 metadata。
+2. **b-2b-2 MRTR 接点。** policy.ts 继续只做纯分类：无 form → propose，有 form 时下一单才从临时 propose 改 confirm；实际 driver 接点是 transport.ts 的 effectiveTier===confirm 分支。createFreshServer 当前 callback 只下传 envelope，需把 ctx.mcpReq.inputResponses 与 verified requestState 带入：首轮 inputRequired，decline/cancel 零执行零收据，accept 才调同一 binding 并写 applied receipt。
+3. **MRTR 状态完整性。** 本地安装 SDK 2.0.0 声明明确：requestState 回传后是攻击者可控，影响授权/资源/业务时必须 HMAC/AEAD 并配置 requestState.verify；inputResponses 也未经 SDK 业务校验。当前 server/src 对 inputResponses/requestState/inputRequired 命中 0，McpServer 未配置 verify。下一单至少绑定 userId + tool + input_digest + expiry，否则批准可被伪造或跨输入错配；建议按 HIGH 防线验收。
+4. **TD-14 仍描述性。** AuthRequest/JWT 只有 userId；scopes 只投影为 tool metadata。server/src 对 authInfo.scopes / req.scopes 的执行命中 0，故不得把 notes:write 写成已强制授权；这符合本单声明边界，不计缺陷。
+5. accepted b-3/MRTR 之后仍需重新看 binding 成功与 receipt 转态的失败窗口、长队列跨 schema/version 重放，以及本单已记录的 SELECT→UPDATE 竞态。
+
+### 隔离树还原与自清收据
+
+- 正式 gate/tree 与 mutation/tree 均为仓外 $TMPDIR 普通目录，reparse count 0；client/server 各自 npm ci --offline，分别安装 202 / 212 packages，无共享 node_modules junction。
+- reviewer-only T1、T3、digest、5-2 probe 均临时注入、运行后删除；所有 mutation 恢复后精确 HEAD=f1cedf9、tracked/untracked status 0。沙箱拒绝其外部 worktree 使用 apply_patch executable，故源码探针以 Git patch stdin 施加并以同补丁 -R 还原；未用 reset/checkout 或直接写文件。
+- 删除前 LF gate 与 LF mutation 树 status 均为空，隔离 CANVAS/SOURCE 资产目录各 0 entries；4 棵 worktree、bare clone、两个资产目录与临时 patch-tool 空目录均逐一解析为 C:\Users\70208\AppData\Local\Temp 下的精确目标且 reparse 0。
+- 自清后复验 8 个点名路径 Test-Path 全为 false（REMAIN=0）。未删除共享树或生产数据。
