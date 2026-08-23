@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 120 份文档。
+共 121 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -131,4 +131,5 @@
 | [handoffs/2026-08-23-v2bn12-td8-receipt-timestamp-cleanup.md](handoffs/2026-08-23-v2bn12-td8-receipt-timestamp-cleanup.md) | TD-8 清债:收据表时间戳统一(**位点拍死,零裁量**) | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/v2-bn12-2-mcp-tool-face.md](handoffs/plans/v2-bn12-2-mcp-tool-face.md) | Plan V2.BN.12.2 — MCP 工具面(末端执行器第一次实体化) | `active` | — | — |
+| [handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md](handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md) | V2.BN.12.2b:第一个写工具 + 候选审阅队列 + HTTP 层 K-5 | `draft` | 2026-08-23 | — |
 | [operating-workflow.md](operating-workflow.md) | 代理期工作流(v1) | `active` | 2026-08-21 | — |
