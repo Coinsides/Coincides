@@ -249,6 +249,29 @@
   justify-content: flex-end;
 }
 
+.noteStatusToggle {
+  align-items: center;
+  background: var(--bg-elevated);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  display: inline-flex;
+  padding: 2px;
+}
+
+.noteStatusButton {
+  border-radius: calc(var(--radius-md) - 2px);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 9px;
+}
+
+.noteStatusButton:hover,
+.noteStatusButtonActive {
+  background: var(--glass-surface);
+  color: var(--text-primary);
+}
+
 .workspaceGrid {
   display: grid;
   gap: 12px;
@@ -261,9 +284,11 @@
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   display: flex;
-  gap: 12px;
+  gap: 0;
   min-height: 132px;
-  padding: 15px;
+  overflow: hidden;
+  padding: 0;
+  position: relative;
   text-align: left;
   transition: border-color var(--transition-fast), background var(--transition-fast), box-shadow var(--transition-fast);
 }
@@ -277,6 +302,32 @@
 .workspaceCard:disabled {
   cursor: not-allowed;
   opacity: 0.62;
+}
+
+.workspaceCardOpen {
+  align-items: flex-start;
+  display: flex;
+  flex: 1;
+  gap: 12px;
+  min-height: 130px;
+  min-width: 0;
+  padding: 15px 50px 15px 15px;
+  text-align: left;
+}
+
+.workspaceCardAction {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+}
+
+.workspaceCardDangerAction:hover {
+  color: var(--danger);
+}
+
+.workspaceCardAction:disabled {
+  cursor: wait;
+  opacity: 0.55;
 }
 
 .workspaceCardIcon {
@@ -293,6 +344,7 @@
 }
 
 .workspaceCardBody {
+  flex: 1;
   min-width: 0;
 }
 

@@ -119,6 +119,151 @@ interface NoteSummary {
   updated_at: string;
 }
 
+type NoteStatusFilter = 'active' | 'trashed';
+type NoteActionToast = (type: 'success' | 'error', message: string) => void;
+
+interface NoteActionInput {
+  noteId: string;
+  refreshNotes: () => Promise<void>;
+  addToast: NoteActionToast;
+}
+
+export async function handleTrashNote({ noteId, refreshNotes, addToast }: NoteActionInput): Promise<void> {
+  try {
+    await api.delete(`/notes/${noteId}`);
+    await refreshNotes();
+    addToast('success', 'Note moved to trash');
+  } catch (err) {
+    console.error('Failed to move note to trash:', err);
+    addToast('error', 'Failed to move note to trash');
+  }
+}
+
+export async function handleRestoreNote({ noteId, refreshNotes, addToast }: NoteActionInput): Promise<void> {
+  try {
+    await api.post(`/notes/${noteId}/restore`);
+    await refreshNotes();
+    addToast('success', 'Note restored');
+  } catch (err) {
+    console.error('Failed to restore note:', err);
+    addToast('error', 'Failed to restore note');
+  }
+}
+
+interface ProjectNotesSectionProps {
+  notes: NoteSummary[];
+  status: NoteStatusFilter;
+  onStatusChange: (status: NoteStatusFilter) => void;
+  onCreateNote: () => void;
+  onOpenNote: (noteId: string) => void;
+  refreshNotes: () => Promise<void>;
+  addToast: NoteActionToast;
+}
+
+export function ProjectNotesSection({
+  notes,
+  status,
+  onStatusChange,
+  onCreateNote,
+  onOpenNote,
+  refreshNotes,
+  addToast,
+}: ProjectNotesSectionProps) {
+  const [busyNoteId, setBusyNoteId] = useState<string | null>(null);
+
+  const runNoteAction = async (noteId: string) => {
+    setBusyNoteId(noteId);
+    try {
+      const action = status === 'trashed' ? handleRestoreNote : handleTrashNote;
+      await action({ noteId, refreshNotes, addToast });
+    } finally {
+      setBusyNoteId(null);
+    }
+  };
+
+  return (
+    <div className={styles.section}>
+      <div className={styles.sectionHeader}>
+        <div className={styles.sectionTitle}>
+          <BookOpen size={18} />
+          <span>Notes</span>
+          <span className={styles.sectionCount}>{notes.length}</span>
+        </div>
+        <div className={styles.workspaceActions}>
+          <div className={styles.noteStatusToggle} role="group" aria-label="Note status">
+            <button
+              type="button"
+              className={`${styles.noteStatusButton} ${status === 'active' ? styles.noteStatusButtonActive : ''}`}
+              aria-pressed={status === 'active'}
+              onClick={() => onStatusChange('active')}
+            >
+              Notes
+            </button>
+            <button
+              type="button"
+              className={`${styles.noteStatusButton} ${status === 'trashed' ? styles.noteStatusButtonActive : ''}`}
+              aria-pressed={status === 'trashed'}
+              onClick={() => onStatusChange('trashed')}
+            >
+              Trash
+            </button>
+          </div>
+          <button type="button" className={styles.sectionAddBtn} onClick={onCreateNote}>
+            <Plus size={15} />
+            New Note
+          </button>
+        </div>
+      </div>
+
+      {notes.length === 0 ? (
+        <div className={styles.empty}>{status === 'trashed' ? 'Trash is empty.' : 'No notes yet.'}</div>
+      ) : (
+        <div className={styles.workspaceGrid}>
+          {notes.map((note) => {
+            const actionLabel = status === 'trashed'
+              ? `Restore ${note.title}`
+              : `Move ${note.title} to trash`;
+            return (
+              <div key={note.id} className={styles.workspaceCard}>
+                <button
+                  type="button"
+                  className={styles.workspaceCardOpen}
+                  aria-label={`Open note ${note.title}`}
+                  onClick={() => onOpenNote(note.id)}
+                >
+                  <div className={styles.workspaceCardIcon}>
+                    <FileText size={17} />
+                  </div>
+                  <div className={styles.workspaceCardBody}>
+                    <div className={styles.workspaceCardType}>Note</div>
+                    <div className={styles.workspaceCardTitle}>{note.title}</div>
+                    {note.description && (
+                      <div className={styles.workspaceCardDesc}>{note.description}</div>
+                    )}
+                    <div className={styles.workspaceCardMeta}>
+                      <span>Updated {new Date(note.updated_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.iconBtn} ${styles.workspaceCardAction} ${status === 'active' ? styles.workspaceCardDangerAction : ''}`}
+                  aria-label={actionLabel}
+                  title={actionLabel}
+                  disabled={busyNoteId === note.id}
+                  onClick={() => void runNoteAction(note.id)}
+                >
+                  {status === 'trashed' ? <RotateCcw size={13} /> : <Trash2 size={13} />}
+                </button>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface ReconciliationSafetyData {
   active_exclusions: Array<{
     id: string;
@@ -262,6 +407,7 @@ export default function CourseDetailPage() {
 
   const [data, setData] = useState<CourseSummaryData | null>(null);
   const [notes, setNotes] = useState<NoteSummary[]>([]);
+  const [noteStatus, setNoteStatus] = useState<NoteStatusFilter>('active');
   const [materials, setMaterials] = useState<SourceMaterial[]>([]);
   const [segmentsByMaterial, setSegmentsByMaterial] = useState<Record<string, MaterialSegment[]>>({});
   const [activeProposal, setActiveProposal] = useState<ProposalResponse | null>(null);
@@ -286,7 +432,7 @@ export default function CourseDetailPage() {
     try {
       const [summaryRes, notesRes] = await Promise.all([
         api.get(`/courses/${courseId}/summary`),
-        api.get(`/notes?course_id=${courseId}`),
+        api.get(`/notes?course_id=${courseId}&status=${noteStatus}`),
       ]);
       setData(summaryRes.data);
       setNotes(notesRes.data);
@@ -297,7 +443,7 @@ export default function CourseDetailPage() {
     } finally {
       setLoading(false);
     }
-  }, [courseId]);
+  }, [courseId, noteStatus]);
 
   const fetchMaterials = useCallback(async () => {
     if (!courseId) return;
@@ -782,51 +928,16 @@ export default function CourseDetailPage() {
       subGoalCounts.set(g.parent_id, (subGoalCounts.get(g.parent_id) || 0) + 1);
     }
   }
-  const workspaceCount = notes.length;
-
   const workspaceLandingSection = (
-    <div className={styles.section}>
-      <div className={styles.sectionHeader}>
-        <div className={styles.sectionTitle}>
-          <BookOpen size={18} />
-          <span>Notes</span>
-          <span className={styles.sectionCount}>{workspaceCount}</span>
-        </div>
-        <button className={styles.sectionAddBtn} onClick={handleCreateNote}>
-          <Plus size={15} />
-          New Note
-        </button>
-      </div>
-
-      {workspaceCount === 0 ? (
-        <div className={styles.empty}>No notes yet.</div>
-      ) : (
-        <div className={styles.workspaceGrid}>
-          {notes.map((note) => (
-            <button
-              key={note.id}
-              type="button"
-              className={styles.workspaceCard}
-              onClick={() => navigate(`/notes/${note.id}`)}
-            >
-              <div className={styles.workspaceCardIcon}>
-                <FileText size={17} />
-              </div>
-              <div className={styles.workspaceCardBody}>
-                <div className={styles.workspaceCardType}>Note</div>
-                <div className={styles.workspaceCardTitle}>{note.title}</div>
-                {note.description && (
-                  <div className={styles.workspaceCardDesc}>{note.description}</div>
-                )}
-                <div className={styles.workspaceCardMeta}>
-                  <span>Updated {new Date(note.updated_at).toLocaleDateString()}</span>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+    <ProjectNotesSection
+      notes={notes}
+      status={noteStatus}
+      onStatusChange={setNoteStatus}
+      onCreateNote={handleCreateNote}
+      onOpenNote={(noteId) => navigate(`/notes/${noteId}`)}
+      refreshNotes={fetchSummary}
+      addToast={addToast}
+    />
   );
 
   const deleteConfirmation = confirmDelete && (

@@ -23,6 +23,7 @@ const MIXED_NOTE_ID = '55555555-5555-4555-8555-555555555555';
 const OTHER_USER_ID = '66666666-6666-4666-8666-666666666666';
 const OTHER_COURSE_ID = '77777777-7777-4777-8777-777777777777';
 const OTHER_NOTE_ID = '88888888-8888-4888-8888-888888888888';
+const MISSING_NOTE_ID = '99999999-9999-4999-8999-999999999999';
 
 interface NoteRow {
   id: string;
@@ -207,6 +208,63 @@ test('DELETE /api/notes/:id pre-extraction golden keeps response bytes and lifec
   });
 });
 
+test('DELETE /api/notes/:id unmatched golden returns the same 404 for missing and foreign notes', async () => {
+  await withNotesHttp(async ({ baseUrl, db }) => {
+    const foreignBefore = selectNote(db, OTHER_NOTE_ID);
+
+    for (const noteId of [MISSING_NOTE_ID, OTHER_NOTE_ID]) {
+      const response = await fetch(`${baseUrl}/api/notes/${noteId}`, { method: 'DELETE' });
+      const actualBytes = Buffer.from(await response.arrayBuffer());
+
+      assert.equal(response.status, 404);
+      assert.equal(response.headers.get('content-type'), 'application/json; charset=utf-8');
+      assert.deepEqual(actualBytes, Buffer.from('{"error":"Note not found"}', 'utf8'));
+    }
+
+    assert.deepEqual(selectNote(db, OTHER_NOTE_ID), foreignBefore);
+  });
+});
+
+test('POST /api/notes/:id/restore restores through HTTP and clears trashed_at', async () => {
+  await withNotesHttp(async ({ baseUrl, db }) => {
+    const trashResponse = await fetch(`${baseUrl}/api/notes/${DELETE_NOTE_ID}`, { method: 'DELETE' });
+    assert.equal(trashResponse.status, 200);
+    await trashResponse.arrayBuffer();
+    assert.equal(selectNote(db, DELETE_NOTE_ID).status, 'trashed');
+
+    const response = await fetch(`${baseUrl}/api/notes/${DELETE_NOTE_ID}/restore`, { method: 'POST' });
+    const actualBytes = Buffer.from(await response.arrayBuffer());
+
+    assert.equal(response.status, 200);
+    assert.equal(response.headers.get('content-type'), 'application/json; charset=utf-8');
+    assert.deepEqual(actualBytes, Buffer.from('{"message":"Note restored"}', 'utf8'));
+
+    const note = selectNote(db, DELETE_NOTE_ID);
+    assert.equal(note.status, 'active');
+    assert.equal(note.trashed_at, null);
+    assertIsoTimestamp(note.updated_at);
+  });
+});
+
+test('POST /api/notes/:id/restore unmatched behavior matches DELETE for missing and foreign notes', async () => {
+  await withNotesHttp(async ({ baseUrl, db }) => {
+    const foreignBefore = selectNote(db, OTHER_NOTE_ID);
+
+    for (const noteId of [MISSING_NOTE_ID, OTHER_NOTE_ID]) {
+      const deleteResponse = await fetch(`${baseUrl}/api/notes/${noteId}`, { method: 'DELETE' });
+      const deleteBytes = Buffer.from(await deleteResponse.arrayBuffer());
+      const restoreResponse = await fetch(`${baseUrl}/api/notes/${noteId}/restore`, { method: 'POST' });
+      const restoreBytes = Buffer.from(await restoreResponse.arrayBuffer());
+
+      assert.equal(restoreResponse.status, deleteResponse.status);
+      assert.equal(restoreResponse.headers.get('content-type'), deleteResponse.headers.get('content-type'));
+      assert.deepEqual(restoreBytes, deleteBytes);
+    }
+
+    assert.deepEqual(selectNote(db, OTHER_NOTE_ID), foreignBefore);
+  });
+});
+
 test('DELETE /api/notes/:id delegates the lifecycle write only through trashNote', () => {
   const routeSource = readFileSync(resolve(REPO_ROOT, 'server/src/routes/notes.ts'), 'utf8')
     .replace(/\r\n?/g, '\n');
@@ -218,7 +276,7 @@ test('DELETE /api/notes/:id delegates the lifecycle write only through trashNote
 
   assert.match(
     routeSource,
-    /import\s+\{\s*listNotes,\s*trashNote\s*\}\s+from\s+'\.\.\/services\/notes\.js';/,
+    /import\s+\{[^}]*\btrashNote\b[^}]*\}\s+from\s+'\.\.\/services\/notes\.js';/,
   );
   assert.match(
     deleteRoute,
@@ -226,6 +284,27 @@ test('DELETE /api/notes/:id delegates the lifecycle write only through trashNote
   );
   assert.doesNotMatch(deleteRoute, /UPDATE\s+notes/i);
   assert.doesNotMatch(deleteRoute, /\.prepare\s*\(/);
+});
+
+test('POST /api/notes/:id/restore delegates the lifecycle write only through restoreNote', () => {
+  const routeSource = readFileSync(resolve(REPO_ROOT, 'server/src/routes/notes.ts'), 'utf8')
+    .replace(/\r\n?/g, '\n');
+  const start = routeSource.indexOf("router.post('/:id/restore'");
+  const end = routeSource.indexOf('// GET /api/notes/:id/blocks', start);
+  assert.notEqual(start, -1, 'POST /:id/restore route must exist');
+  assert.notEqual(end, -1, 'GET /:id/blocks boundary must exist after restore');
+  const restoreRoute = routeSource.slice(start, end);
+
+  assert.match(
+    routeSource,
+    /import\s+\{[^}]*\brestoreNote\b[^}]*\}\s+from\s+'\.\.\/services\/notes\.js';/,
+  );
+  assert.match(
+    restoreRoute,
+    /restoreNote\(\{\s*userId:\s*req\.userId!,\s*noteId,?\s*\}\);/,
+  );
+  assert.doesNotMatch(restoreRoute, /UPDATE\s+notes/i);
+  assert.doesNotMatch(restoreRoute, /\.prepare\s*\(/);
 });
 
 test('trashNote preserves the extracted DELETE lifecycle write and void return shape', async () => {

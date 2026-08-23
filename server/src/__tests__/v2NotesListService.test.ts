@@ -126,7 +126,7 @@ function expectedActiveNotesBytes(): Buffer {
 
 test('A-1 route and MCP binding both call the same listNotes service export', () => {
   const routeSource = readFileSync(resolve(REPO_ROOT, 'server/src/routes/notes.ts'), 'utf8');
-  assert.match(routeSource, /import\s+\{\s*listNotes\s*\}\s+from\s+'\.\.\/services\/notes\.js';/);
+  assert.match(routeSource, /import\s+\{[^}]*\blistNotes\b[^}]*\}\s+from\s+'\.\.\/services\/notes\.js';/);
   const listRoute = routeSource.match(/router\.get\('\/'[\s\S]*?\n\}\);/)?.[0];
   assert.ok(listRoute, 'GET / route callback must exist');
   assert.match(listRoute, /res\.json\(listNotes\(\{/);

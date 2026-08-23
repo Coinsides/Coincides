@@ -21,7 +21,7 @@ import {
   createClientNoteBlock,
   discardClientNoteBlockCreate,
 } from '../services/noteBlockLifecycle.js';
-import { listNotes, trashNote } from '../services/notes.js';
+import { listNotes, restoreNote, trashNote } from '../services/notes.js';
 
 const router = Router();
 const LEGACY_NOTE_LAYOUT_KEY = 'better_notebook_layout';
@@ -194,6 +194,14 @@ router.delete('/:id', (req: AuthRequest, res: Response) => {
   assertSourceProjectionNoteContentWriteAllowed(getDb(), req.userId!, noteId, 'delete_note');
   trashNote({ userId: req.userId!, noteId });
   res.json({ message: 'Note moved to trash' });
+});
+
+// POST /api/notes/:id/restore
+router.post('/:id/restore', (req: AuthRequest, res: Response) => {
+  const noteId = req.params.id as string;
+  getOwnedNote(noteId, req.userId!);
+  restoreNote({ userId: req.userId!, noteId });
+  res.json({ message: 'Note restored' });
 });
 
 // GET /api/notes/:id/blocks

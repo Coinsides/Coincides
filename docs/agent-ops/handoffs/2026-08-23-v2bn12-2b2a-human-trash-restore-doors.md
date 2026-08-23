@@ -29,3 +29,53 @@
 
 ## 验证与回执
 门禁 docs-first:`docs:check` → `verify:v2-bn8-runtime` → client/server `tsc --noEmit` → `test:unit` → server `test:v2`(隔离资产目录)→ 新测试单跑。逐门 exit 入表。回执 **UTF-8** 追加 `## Result`(不需确认);含先红后绿、`git diff --numstat` 对照边界、client 调用点符号名、显式范围排除;header 保持 `ready`;不 commit、不 push、不碰 main、不碰锁。
+
+## Result
+
+> builder: Codex | date: 2026-08-23 | baseline/head: `bd92e0a6f24b96a7e7a8c531e6f56eaa7c184754` | branch: `fable/v2-bn12-exoskeleton`
+
+### 交付
+
+- 写 restore 前先用生产 `noteRoutes` + `errorHandler` 的真实 Express/TCP 探针锁定 DELETE 未命中现行为：不存在与非本用户 note 均为 HTTP `404`，`content-type: application/json; charset=utf-8`，原始 UTF-8 body 均为 `{"error":"Note not found"}`；两者都在 `getOwnedNote` 短路，foreign row 不变。
+- 新增 `POST /api/notes/:id/restore` 薄壳，执行顺序为 `getOwnedNote(noteId, req.userId!)` → `restoreNote({ userId: req.userId!, noteId })` → `res.json({ message: 'Note restored' })`。因此未命中行为与 DELETE 同形，命中后复用 b-1 executor 恢复为 `active` 并清空 `trashed_at`。
+- Project Notes 增加 Notes/Trash 分段；查询直接使用 `GET /notes?course_id=${courseId}&status=${noteStatus}`。active 卡片提供即时 `Trash2`，trashed 卡片提供即时 `RotateCcw`；成功后刷新并 toast，无确认框、批量能力、新页面/路由、导航项或动画。卡片打开与生命周期动作使用 sibling buttons，避免嵌套按钮。
+- client 调用点（供 b-2b `human_entry.client_call_site`）：`client/src/pages/Courses/CourseDetail.tsx#handleTrashNote`，其函数体内直接构造 `api.delete(\`/notes/${noteId}\`)`。恢复调用点为 `client/src/pages/Courses/CourseDetail.tsx#handleRestoreNote`，函数体内直接构造 `api.post(\`/notes/${noteId}/restore\`)`。runtime parity 门通过。
+- 未新增平行 lifecycle executor：服务端继续唯一复用 `trashNote` / `restoreNote`；client 两个符号仅是人类入口调用点。
+
+### 先红后绿与测试证据
+
+- 前置 DELETE 未命中 golden 单跑：exit `0`；missing/foreign 的 status、header、raw bytes 与 foreign row 不变均命中。
+- restore route killer 在写生产 route 前单跑：exit `1`，唯一失败为 `POST /:id/restore route must exist`；该 killer 要求 route 调用 `restoreNote`，并拒绝 route 内出现 `UPDATE notes` 或 `.prepare(`，所以内联绕过会红。
+- 写入薄壳后 `v2NotesLifecycle.test.ts`：exit `0`，`11/11`；真实 HTTP 正控完成 trash → restore → `status = active` / `trashed_at = NULL`，未命中 parity 与结构 killer 同时为绿。
+- 第一次正式链在最后的 server 合跑出现 `13/14` 假红：旧 A-1 结构断言把 notes service import 硬编码为仅 `{ listNotes }`。只把该断言收窄为“同一 import 含 `listNotes`”，专项恢复为绿，并从 docs 第 1 门重新跑完整最终链；未为测试改生产行为。
+
+### 最终 docs-first 七门
+
+| 门 | 命令（cwd） | exit | 结果 |
+|---|---|---:|---|
+| 1 | `npm.cmd run docs:check`（root） | 0 | docs index / inventory 均最新 |
+| 2 | `npm.cmd run verify:v2-bn8-runtime`（root） | 0 | runtime、build、parity、secret scan 等完整通过 |
+| 3 | `npm.cmd exec tsc -- --noEmit`（client） | 0 | 无类型错误 |
+| 4 | `npm.cmd exec tsc -- --noEmit`（server） | 0 | 无类型错误 |
+| 5 | `npm.cmd run test:unit`（root） | 0 | `20/20` files，`211/211` tests |
+| 6 | `npm.cmd run test:v2`（server，隔离 `CANVAS_ASSET_DIR`） | 0 | `270/270` tests；最终目录 `server/.codex-tmp/v2bn12-2b2a-assets-5f7d27cf194d4bd78574d6eac4ef592e`，结束后 leaf count `0` |
+| 7a | `npm.cmd exec vitest run src/pages/Courses/CourseDetail.test.tsx`（client） | 0 | `2/2`：trash / restore 点击各自锁定 method + URL、刷新与 toast |
+| 7b | `node --import tsx --test src/__tests__/v2NotesLifecycle.test.ts src/__tests__/v2NotesListService.test.ts`（server） | 0 | `14/14` |
+
+### 边界与 numstat
+
+追加本回执前的施工代码/测试 `git diff --numstat`（新文件另计）如下，全部在允许面：
+
+| 文件 | + | - |
+|---|---:|---:|
+| `client/src/pages/Courses/CourseDetail.module.css` | 54 | 2 |
+| `client/src/pages/Courses/CourseDetail.tsx` | 157 | 46 |
+| `client/src/pages/Courses/CourseDetail.test.tsx`（new） | 78 | 0 |
+| `server/src/__tests__/v2NotesLifecycle.test.ts` | 80 | 1 |
+| `server/src/__tests__/v2NotesListService.test.ts` | 1 | 1 |
+| `server/src/routes/notes.ts` | 9 | 1 |
+
+- 显式排除：`server/src/services/notes.ts`（`trashNote` / `restoreNote`）零 diff；PUT handler 由 byte-for-byte killer 保持不变；未碰 registry / manifest / transport / policy、依赖、Notes 画布面、03/05 保护面或 v1 学习规划线。
+- `client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts` 与 `server/src/routes/projections.ts` 仍仅为工单已裁定的 porcelain EOL/stat `.M`；两者 `git diff --quiet` 均 exit `0`，没有内容改动。
+- `git diff --check` exit `0`（仅现有 LF→CRLF 提示）；无 staged diff。独立只读终审无 finding。
+- header 保持 `status: ready`；未 commit、未 push、未切换/触碰 main，`.codex-tmp/builder.lock.d/owner.json` 仅只读核验且 owner 仍为本工单。
