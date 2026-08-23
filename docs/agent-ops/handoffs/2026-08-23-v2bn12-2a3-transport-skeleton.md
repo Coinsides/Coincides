@@ -42,7 +42,50 @@
 
 ---
 
+## S1a:执行器提取(**新增前置步,Fable 补裁 design §12 D-a 补注,log 08-23 #8**)
+
+### 为什么加这一步
+
+**上一轮 builder 正确停手**:`list_notes` 在 registry 里有 zod、有真实 route、有真实 client 调用点 —— **但 server 侧没有任何可被 MCP 调用的函数**。`GET /api/notes` 是匿名 inline handler,校验/ownership/SQL/hydrate 全嵌在 route 内;`server/src/services/` 中 `listNotes` 命中数为 **0**。
+
+> ⚠️ **归属**:这是**发单方(Fable D-a 点名不存在的执行器 + Opus 写单时未查 server 侧可调用性)的错**,不是 builder 的。它列了四条绕法并逐条否掉,**包括「只实现 `tools/list`、binding 放 placeholder」——那会让 K-4 变绿而系统是空的**。**拒绝用假绿换 PASS 是对的。**
+
+> ⭐ **这一步不是为了让本单能跑,而是把红线做实**:「同门同钥」要求人与 agent **走同一个执行体**。REST 的执行体当前不可复用 —— **那本身就是红线尚未兑现之处**。提取一次、两边共用,是补上它。
+
+### 要求
+
+1. 把 `GET /api/notes`(`server/src/routes/notes.ts:93-110`)的逻辑提取为 **`server/src/services/notes.ts`** 的 `listNotes({ userId, courseId?, status? })`。
+2. **route 变薄壳**:只做 HTTP 层的取参与响应,业务逻辑全在 service。
+3. **MCP binding 调同一个 `listNotes`** —— 不是复制一份。
+
+### ⛔ 提取的两个陷阱(**调度方亲验后写死**)
+
+| 陷阱 | 说明 |
+|---|---|
+| **⭐ `getOwnedCourse` / `hydrateNote` 是同文件其他 route 共用的** | 二者分别在 `routes/notes.ts:47-53` 与 `:75-80`,**被该文件多个 route 使用**。**⛔ 不得把它们搬进 service** —— 那会让其他 route 断掉。**让 service 复用它们**(导出或参数注入,由你定,但须在回执申报选择理由)。 |
+| **零语义提取,不是重写** | **逐字等价搬运**:`course_id` 必填校验、`status` 白名单(`active/archived/trashed`)、默认 `active`、ownership 检查、SQL 与排序、`hydrateNote` 映射 —— **一处都不许「顺手改进」**。 |
+
+### ⛔ 必红判据(三条,Fable 点名)
+
+| # | killer | 必红 |
+|---|---|---|
+| **A-1** | **route 与 MCP binding 调同一个 `listNotes`** | **删任一侧的调用 ⇒ 红**(证明两边真的共用,不是各调各的) |
+| **A-2** | **既有 HTTP 正控保持绿** | TD-8 的 G-1 正控等既有测试**不得回归** |
+| **A-3** | **提取前后 REST 响应字节等价** | 提取后同一请求的响应**逐字节相同**(不是「字段都在」) |
+
+> 📌 **调度方亲验**:现有测试中挂载 `app.use('/api/notes', noteRoutes)` 的有 **2 个文件**(`v2NoteBlockLifecycle.test.ts:63`、`v2SourceMaterialization.test.ts:572`)。**A-2 至少须覆盖这两处不回归。**
+
+### ⚠️ 本步的触及面追加(**仅此二处**)
+
+`server/src/routes/notes.ts` 的**该 handler hunk**(+ 为共用而必需的最小导出)· **新建 `server/src/services/notes.ts`** · 相应测试。
+
+**⛔ 仍不得**:改同文件其他 route 的语义 · 改 `getOwnedCourse`/`hydrateNote` 的行为 · 扩到 notes 之外的 route。
+
+---
+
 ## S1:transport 骨架
+
+> 📌 **前提**:S1a 已产出 `listNotes` service;本步的 binding **调它**,不得另写。
 
 **要求**(短笺 §2/§3/§4/§5 已给方案,**照做**):
 
