@@ -346,4 +346,9 @@ KIND_HANDLERS（画布对象，6 种）
 - **D-h 生产 artifact 携带 manifest**:采短笺五步**原样写死**——build 先 freshness check → `tsc` 后按字节复制到 `server/dist/tool-face-manifest.json` → loader 只按 `import.meta.url` 相对 dist 定位、缺失即启动失败、**禁止 cwd 回退读 repo docs/**、禁止运行时 import 注册表 → artifact killer(源/复制件 hash 相同;无 repo docs 的最小布局启动;删 copy step 必红)→ **打包件保留 internal/test/`__` 条目**(过滤不得偷跑到 build)。
 - **D-i 错误映射**:采短笺表;不新增错误类型;tool 内 `AppError` 投影为 `CallToolResult{isError:true}`,≥500 脱敏;`input_required` 与降级都不是错误。
 
+**§12 补裁(2026-08-23,续跑 2 回执三项合同冲突)**:
+- **K-5(C-3 降级)**:phase 1 无 confirm 工具,**seam 级正控(`dispatchToolCall`)即为本单的 K-5 合格形态**;为它强造 HTTP confirm fixture 须发明非权威 output contract = 平行机关,不做。**HTTP 层 K-5 killer 改为「首个 propose/confirm 工具」工单的必做项**(与 D-g 人审入口同单)。
+- **错误映射(D-i 修订)**:以已安装 SDK v2 的真实行为为准——`registerTool` 把 input/output 校验失败与 executor 异常统一投影为 HTTP 200 `CallToolResult{isError:true}`,仅 unknown tool 保持 `-32602`。短笺表中「schema 失败 → -32602」「raw 失败 → -32603/500」两行**作废**;现实现(`AppError` 按表投影;raw 非 `AppError` 服务端全记录、客户端脱敏 isError)**即为合同**。不做本地 shim 对抗 SDK。
+- **malformed JSON**:全局 `express.json()` 先于 route,坏 JSON 被 body-parser 截获并由全局 `errorHandler` 映成 REST **500**——这是既有 REST 缺陷(应为 400),不是 transport 的错;记 **TD-17**:`errorHandler` 对 body-parser 的 `entity.parse.failed`/`SyntaxError(status 400)` 统一映 400(全路由受益),修后 MCP 自动得 400;JSON-RPC `-32700` 体与「坏体 + 非法 Host 先 403」不作 phase 1 要求。本单不改解析边界(越界)。
+
 **施工单(12.2a-3)结构**:S0 dialect(generator)→ S1 transport 骨架(`/api/mcp`,Host/Origin,auth bridge,per-request server,manifest loader/projector/binding)→ S2 killers(过滤 ×2 / Host/Origin ×2 / binding 等集合 / artifact loader / MRTR 降级策略测试 / 生产接线)→ S3 build copy step。5.6。触及面按短笺 §7;**不得**在 transport 内造 schema/白名单/内存状态。
