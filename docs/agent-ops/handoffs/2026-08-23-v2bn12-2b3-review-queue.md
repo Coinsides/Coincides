@@ -85,6 +85,25 @@
 
 **红的性质**:须来自「机关存在但被改坏」,**不得是 `ReferenceError`/`SyntaxError`/`ERR_MODULE_NOT_FOUND`**;HTTP 层 killer 须**从真实 Express 触发**。
 
+### 📌 复核附加刀 C8(**承自 b-2b-1-fix,复核时一并验**)
+
+b-2b-1-fix 的 `assertCanonicalNamedImport` 用**双向 `ts.resolveModuleName` 解析后比 `resolvedFileName`** 判来源(不是字符串相等)。**本单会再碰同一测试文件**(新增两条断言,见下),故**复核请顺带验这一刀**:
+
+> **把 helper 的来源比对换回字符串相等** ⇒ **第 6 条(`toolFaceReceiptRevert.ts` → `restoreNoteAsUser` → `./notes.js`)须红。**
+
+**为什么值得验**:第 6 条的 specifier 是 `./notes.js`,而合同写的是同一文件的另一种写法。**字符串相等会让它假红,解析比对才正确** —— 这一刀反过来证明「解析而非字面」这条语义真的承重,而不是碰巧现在过了。
+
+### 本单须新增的两条 canonical import 断言
+
+b-3 会新建路由并让 apply/revert 走既有执行体 ⇒ **新消费者须同样锁住**:
+
+| # | 文件 | 符号 | 来源 |
+|---|---|---|---|
+| 7 | **新建的 tool-receipts 路由文件** | `trashNoteAsUser` | `../services/notes.js`(按实际相对路径) |
+| 8 | 同上 | `revertTrashNotesReceipt` | `../services/toolFaceReceiptRevert.js`(按实际相对路径) |
+
+⚠️ **用既有的 `assertCanonicalNamedImport`,⛔ 不得另写一套**;来源按**解析后**比对,不得字符串相等。
+
 ---
 
 ## 边界
@@ -114,4 +133,4 @@
 **回执纪律**:README Builder 侧 1–3(含 **UTF-8**)+ **M-1 mutation 归复核方** + **M-2 header 不由你翻**。
 **⭐ 写 `## Result` 是本单交付物之一,不需确认,直接写。**
 
-**回执须含**:K-1…K-6(含 **K-1b**、**K-5b**)**各自**先红后绿两段输出(**K-1 端到端正控须证明 note 真的进了回收站**)· apply 走 `trashNoteAsUser` 的证明 · **两个孤儿(`ProposalWeekEditor` / `TimePickerInline`)各自的处置选择与理由 + 各自的全仓零引用阳性对照** · 退役后 `ProposalList` 零引用的阳性对照 · 门禁逐条收据 · 触及面 diff vs 申报 · 显式范围排除 · **每条阴性断言的阳性对照**。
+**回执须含**:**第 7/8 条 canonical import 断言**(复用既有 helper,不另写)· K-1…K-6(含 **K-1b**、**K-5b**)**各自**先红后绿两段输出(**K-1 端到端正控须证明 note 真的进了回收站**)· apply 走 `trashNoteAsUser` 的证明 · **两个孤儿(`ProposalWeekEditor` / `TimePickerInline`)各自的处置选择与理由 + 各自的全仓零引用阳性对照** · 退役后 `ProposalList` 零引用的阳性对照 · 门禁逐条收据 · 触及面 diff vs 申报 · 显式范围排除 · **每条阴性断言的阳性对照**。
