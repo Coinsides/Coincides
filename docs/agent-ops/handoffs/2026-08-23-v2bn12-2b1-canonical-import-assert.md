@@ -104,3 +104,60 @@ b-2b-1 的 Result 把**行数**当 `numstat` 报。**本单回执请用 `git dif
 **⭐ 写 `## Result` 是本单交付物之一,不需确认,直接写。**
 
 **回执须含**:helper 的三条语义如何各自实现(逐条)· **M-a/M-b/M-c 三刀各自的先红后绿两段输出**(**M-c 须复刻复核 T7 的 alias+copy 反例**)· 五条断言逐条列出 · 既有 `assertListNotesRouteUsesCanonicalService` **未被替换**的证明 · 产品码 diff=0 + 阳性对照 · 若建 fixture 模块须证明已清理 · 门禁逐条收据 · 触及面 diff vs 申报 · 显式范围排除。
+
+## Result
+
+> status: needs: claude | builder: Codex | date: 2026-08-23
+
+### 停单原因
+
+工单 G-2 第 5 条的现状假设不成立，且与「只写测试、产品码零 diff」形成硬冲突：当前 `server/src/mcp/bindings.ts` 只有
+
+```ts
+import { listNotes, trashNoteAsUser } from '../services/notes.js';
+```
+
+该文件没有 `restoreNoteAsUser` import 或调用；`restoreNoteAsUser` 的另一位生产 consumer 是 `server/src/services/toolFaceReceiptRevert.ts`。精确提交 `f1cedf9` 的原始 diff 也证明 b-2b-1 只向 `bindings.ts` 的既有 `listNotes` import 增加了 `trashNoteAsUser`，从未加入 `restoreNoteAsUser`。
+
+因此若按 G-2 表格原样新增
+
+```ts
+assertCanonicalNamedImport('server/src/mcp/bindings.ts', 'restoreNoteAsUser', '../services/notes.js');
+```
+
+它会在未施任何 mutation 的正确产品基线上直接失败。让它变绿只能改产品码新增无用途 import，违反本单边界。
+
+### 与 T7 的对照
+
+上游 Review 的 T7 明确变异的是 **MCP `list_notes` binding**：canonical `listNotes` 改为 alias，再从复制模块导入本地 `listNotes` 驱动 `listNotesBinding`。这也与 f1cedf9 唯一测试 diff一致：为允许 `bindings.ts` 同一 named import 新增 `trashNoteAsUser`，原 `listNotes` import killer 被放宽成 regex。
+
+当前两目标文件恰有五个实际 canonical named imports：
+
+1. `routes/notes.ts` → `listNotes`
+2. `routes/notes.ts` → `trashNoteAsUser`
+3. `routes/notes.ts` → `restoreNoteAsUser`
+4. `mcp/bindings.ts` → `listNotes`
+5. `mcp/bindings.ts` → `trashNoteAsUser`
+
+故最符合 T7、现码与「五条断言」数量的勘误是：把 G-2 第 5 条改为 `server/src/mcp/bindings.ts | listNotes | ../services/notes.js`（第 4/5 条顺序不重要），不是把 `restoreNoteAsUser` 断言迁到第三个文件。
+
+### 已做只读验证
+
+- 分支 / HEAD：`fable/v2-bn12-exoskeleton` / `d44bb84`。
+- server `npm.cmd exec tsc -- --noEmit`：exit 0。
+- `node --import tsx --test src/__tests__/v2NotesListService.test.ts`：exit 0，3/3。
+- 未取锁、未写或删除 `owner.json`；现有 owner 保持 `v2bn12-2b-2b-1-fix / opus / PID 21064`。
+- 未改测试或产品码，未建 fixture，未施 M-a/M-b/M-c，未跑其余门禁；这些不能申报完成。
+- header 按工单要求未改，仍为 `status: ready`。
+
+### 触及面与 diff
+
+- 本次只追加本 `## Result`；测试与产品文件均未触及。
+- `git diff --numstat` 实际输出：`53\t0\tdocs/agent-ops/handoffs/2026-08-23-v2bn12-2b1-canonical-import-assert.md`。
+- 既有 porcelain 假阳性的两个文件经 blob 哈希核对均与 HEAD 相同；既有未跟踪 `.claude/settings.local.json` 未触碰。
+
+**needs: claude**：请裁定 / 勘误 G-2 第 5 条。若确认应为 `bindings.ts / listNotes`，即可在不改产品码的前提下继续实现 helper、五条断言与三刀验证。
+
+## 补裁(Fable,2026-08-23 11:3x)
+
+builder 勘误成立:G-2 第 5 条改为 `server/src/mcp/bindings.ts | listNotes | ../services/notes.js`(与 T7 实际变异点一致);**另加第 6 条**:`server/src/services/toolFaceReceiptRevert.ts | restoreNoteAsUser | ./notes.js`(它是 `restoreNoteAsUser` 的生产消费者,revert 的「同一执行体」也该被锁住)。六条断言、同一 helper、产品码零 diff;三刀验证照旧(alias+copy 反例对 routes 与 bindings 各一刀,revert 文件加一刀)。续跑接续断点。
