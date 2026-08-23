@@ -252,3 +252,131 @@ b-3 会新建路由并让 apply/revert 走既有执行体 ⇒ **新消费者须�
 - `server/src/routes/projections.ts`：HEAD / worktree 均为 `561902a449b50ce254b650de5a337973a8fbc26d`。
 
 两者在 `git diff --numstat` 均无项，不属于本单改动。用户已有的 untracked `.claude/settings.local.json` 未触碰。
+
+## Review
+
+> reviewer: Codex reviewer（洁净室复核） | date: 2026-08-23
+>
+> review baseline: 098ef16ff20495ceed38c31baf3c0ab8e0b4bdfc
+>
+> pre-fix baseline: 57bc061
+>
+> **判定：FAIL（方向成立）**
+>
+> **分级：0 BLOCKER / 1 HIGH / 0 MED / 0 LOW**
+>
+> 这是复核报告，不是放行；放行权仍在 Fable。
+
+### 1. 判定摘要与唯一发现
+
+当前产品实现的方向成立：真实默认代码确实把 human Apply 委托给 canonical trashNoteAsUser，事务顺序、ownership、失败回滚、revert 薄壳、旧 proposals 面的保留边界与三个组件的退役结果均正确。FAIL 来自一处回归护栏不完备，而不是当前生产行为已走错。
+
+#### HIGH-1（技术缺陷 / 认识论错误）：Q2 计数 wrapper 没有锁住生产默认 executor
+
+点名的直接刀成立：把 transaction map 内的 trashNoteExecutor(...) 换成 ownership-scoped inline SQL 后，真实 Express K-2 在 executor count 处以 actual 0 / expected 1 红，source projection 后果也仍受检查。
+
+但按 5-10 继续覆盖同形位点时，发现另一条等价漏径：
+
+1. 保留 canonical trashNoteAsUser import、注入 seam、transaction 内 trashNoteExecutor(...) 调用与全部可编译性；
+2. 新增一个 ownership-scoped inline trash executor；
+3. 只把生产默认绑定从 options.trashNoteExecutor ?? trashNoteAsUser 改为 options.trashNoteExecutor ?? inlineTrashNoteAsUser；
+4. 完整运行 server test:trash-notes-tool。
+
+结果是 **36/36 PASS，exit 0，mutation 存活**。原因是 K-2/Q3 测试传入的计数 wrapper 会取代生产默认分支；A-1 只证明 canonical import 仍存在且来源正确；H-5 只看 transaction callback 内名为 trashNoteExecutor 的调用。因此测试证明的是“注入替身委托 canonical”，不是“生产默认 executor 必为 canonical”，属于 builder 所称 wrapper 的自证漏层。
+
+影响：
+
+- Q2 判 FAIL；H-1 的当前实现事实正确，但回归证明不承重。
+- Q3 的点名刀“去掉 proposed guard”仍会在实际 slot count 2 上红，故该具体判据 PASS；但在 Q2 补牢前，count 1 不能外推为对所有生产旁路的穷尽计数。
+
+建议修法：
+
+- 在既有 TypeScript AST / type-checker 断言中，锁定生产 trashNoteExecutor initializer 的默认 fallback symbol **恰为 canonical named import trashNoteAsUser**，而不只是锁 import 存在。
+- 再加一条不注入 options 的真实 Express source_projection 正控：默认 Apply 必须保持 note active，并写 skipped / read_only_projection。两者一条锁身份、一条锁行为。
+
+### 2. Q1–Q8、Q3b 与 C8 逐条 mutation 收据
+
+所有 HTTP 刀均由真实 Express app + production router + auth middleware + error handler + TCP fetch 触发。所有红均为目标 AssertionError / 业务后果，不是 ReferenceError、SyntaxError 或 ERR_MODULE_NOT_FOUND。每刀独立恢复后再取绿；同形重复位点未抽样。
+
+| 位点 | 判定 | 对抗方亲跑收据与同探针阳性 |
+|---|---|---|
+| **Q1 — K-1 端到端** | PASS | Apply 改 no-op 并伪造 receipt resource 后，receipt status 的 applied 断言先通过，随后 note status 在 v2TrashNotesTool.test.ts:222 以 active !== trashed 红，确实红在 note 后果。阳性：恢复后合法 owned proposed receipt 经真实 HTTP Apply，note 为 trashed、trashed_at 非空、receipt 为 applied。 |
+| **Q2 — H-1 同一执行体** | **FAIL / HIGH-1** | 直接把 transaction 内调用改成 SQL会以 count 0 !== 1 红；但只替换生产默认 fallback 为可编译 inline executor 时完整 36/36 仍绿。阳性：当前 K-2 wrapper 确实委托真实 trashNoteAsUser，source_projection 保持 active 并写 skipped / read_only_projection；这同时证明 wrapper 本身可见，但不足以回答默认分支身份。 |
+| **Q3 — H-5 幂等/并发** | PASS（受 Q2 认识论边界约束） | 去掉 proposed guard 后，两次真实 HTTP 并发使 executor count 2 !== 1，红在实际执行次数。恢复后结果集合为 200 / 409、count 严格 1、note trashed、receipt applied。阳性和 mutation 使用同一真实 HTTP fixture。 |
+| **Q3b — H-5 事务边界** | PASS | 保留 guard、把 receipt read + guard 搬到 transaction() 外后，AST 断言在 v2NotesListService.test.ts:312 以 callback 内 readToolFaceReceipt actual undefined / expected 1 红。恢复后同探针先看见 callback 内 read → guard → executor → mark 各一次，并看见 immediate()。点名刀确被杀死。 |
+| **Q4 — H-3 失败即不动** | PASS | 令第二个 note executor throw，并在错误后错误地于事务外 mark applied：测试先通过两个 note 都 active 的 rollback 断言，再在 receipt actual applied / expected proposed 处红。恢复后 note 与 receipt 均不半状态。阳性：同 fixture 的成功 Apply 会同时写 note 与 applied receipt。 |
+| **Q5 — H-4 只读本用户** | PASS，三路独立 | GET 去 owner filter：列表泄漏 foreign receipt，2 IDs !== owned 1；Apply 放宽 owner：foreign HTTP 200 !== 403；Dismiss 同时放宽 guard 与 owner-conditioned UPDATE：foreign HTTP 200 !== 403。三刀、三请求、三处独立断言，没有合并条件。阳性：owned GET 命中；Q1 owned Apply 成功；既有 K-4 owned Dismiss 变 dismissed 且 note active。 |
+| **Q6 — revert 薄壳** | PASS，三守卫独立 | 路由只调用一次 revertReceipt，未复制守卫。分别放宽服务 ownership / tool / status guard 后，真实 HTTP 各自得到 200 !== 403、200 !== 409、200 !== 409。阳性：先跑 canonical 成功 revert，note active、receipt reverted、service count 1；恢复后三拒绝加成功共 4/4。 |
+| **Q7 — 三个孤儿零引用** | PASS，逐个施刀 | 先由当前已提交 App.tsx:30 import 与 :43 JSX 证明同一 AST probe 能命中仍存活的 AgentPanel，命中不是 reviewer 写入。随后分别恢复 ProposalList、ProposalWeekEditor、TimePickerInline 的可编译文件与 aliased consumer；三刀各自在自己的零引用断言红。全部恢复后各自为 []。 |
+| **Q8 — 第 7 条 trashNoteAsUser import** | PASS，三刀 | alias 红于“must import ... without an alias”；改指可解析的 notesReviewCopy.ts 红于 resolved file identity；保留 canonical 再加第二 binding 红于 matchingBindings 2 !== 1。三刀分别运行、分别恢复；当前 A-1 阳性为合法 named import 且解析到 notes.ts。 |
+| **Q8 — 第 8 条 revertTrashNotesReceipt import** | PASS，三刀 | alias、可解析复制模块 toolFaceReceiptRevertReviewCopy.ts、二次 binding 三刀分别红，红点依次为 no-alias、resolved file identity、exactly-one binding。当前 A-1 阳性为合法 named import 且解析到 toolFaceReceiptRevert.ts。 |
+| **C8 — 来源解析而非字面** | PASS | 把 helper 的 resolvedFileName 比较退回 specifier 字符串比较后，第 6 条准确以 actual ./notes.js / expected ../services/notes.js 红；恢复后两者解析到同一 notes.ts，A-1 通过。 |
+
+补充：builder Result 中 K-4“Dismiss 不执行 note”的 mutation 自报不在本轮调度方点名的 Q1–Q8/C8 三要素矩阵内，本轮没有拿 builder 自报红数承重；只亲跑了其常驻绿（包含在 36/36）并把 mutation 范围显式排除。
+
+### 3. 静态边界、漂移纠正与阳性对照
+
+- 57bc061 是 098ef16 的祖先，区间只有 1 个 commit；57bc061..098ef16 恰为 20 paths，与 Result 的 server / client / docs 分类逐项一致。
+- dismissed 确为 TypeScript vocabulary 扩展。schema.sql 在两基线的 blob 都是 bd1d50ec007af142f08cd9b1f4bc2e599f979335；整个 migrations tree 都是 860b327046f9966695af8ee1a831736141868026，零改动。阴性断言阳性对照：同一 numstat probe 对 toolFaceReceipts.ts 明确见 70 additions / 7 deletions，因此探针不是失明。
+- proposalStore.ts 仍存在且两基线 blob 同为 7d839f2015e3fb9ab96a3f12fa85b654a30d6d79。旧 proposals 表仍在 schema.sql:311，/api/proposals 仍挂载，route 仍读写，另有 7 个 production INSERT writers；“未物理清”不是从裸名缺席推断。
+- services/notes.ts、toolFaceReceiptRevert.ts、routes/proposals.ts 的 blob 在两基线逐字节相同；revert 三守卫仍由服务侧 27–35 行承重。
+- 独立以 TypeScript AST 解析 57bc061 的 ProposalList.tsx，parseDiagnostics=0；TimePickerInline JSX render 确为 **4 处**（189 / 195 / 206 / 212），builder 对工单“3 处”的纠正属实。
+- 常驻 K-6 使用 ts.createProgram、节点类型判断与 ts.forEachChild，扫描 filename / identifier / module specifier，不是单行 regex。当前外部阳性来自已提交 App.tsx 的 AgentPanel import + JSX。
+
+### 4. 5-2 跨条耦合与下一状态扫描
+
+当前 b-3 与下一 b-2b-2（MRTR 往返 + HTTP K-5）没有直接状态冲突，但必须带走以下边界：
+
+1. **Q2 → Q3 耦合**：Q3 的 executor count 只观测注入 slot。Q2 未锁住默认 fallback 时，不能把 count 1 宣称为对所有潜在执行路径的穷尽计数；先补 Q2 身份锁，再把 Q3 提升为全路径结论。
+2. dismissed 是 human review queue 的拒绝终态，不应拿来表示 MRTR decline。下一单的 decline / cancel 仍应是零执行、零 receipt。
+3. b-3 的 immediate transaction 只保护 REST Apply，不保护未来 transport.ts 的 confirm accept。MRTR accept 必须另有防重放 / executor-count killer；执行完成后 receipt writer 失败等 TD-6 窗口仍在。
+4. accepted confirm 必须写真实 actual resources，不能把 pending / proposed resources 原样标 applied，否则 revert 无法按 outcome: trashed 恢复。
+5. ToolFaceReceiptTier 当前仍只有 immediate / propose，statusForTier 不接受 raw confirm。下一单须明确“批准后按 immediate/applied 写入”或另裁 metadata 语义。
+6. 多资源 revert 仍非原子；scopes / TD-14 仍未强制。简单往返成功不得外推为 TD-6 或授权闭环已解决。
+
+### 5. 全门亲跑收据（docs-first）
+
+| 门禁 | reviewer 结果 |
+|---|---|
+| npm.cmd run docs:check | PASS，LF 洁净树 exit 0，object inventory fresh。首个临时 clone 因全局 core.autocrlf 把 generated INDEX 检出为 CRLF而产生字节比较假 stale；未改产品文档，改用同 commit 的 LF 洁净树后通过。 |
+| npm.cmd run verify:v2-bn8-runtime | PASS，exit 0：client 20 files / 211 tests、registry 4、manifest 10、parity 10、runtime boundary 159、model contract 60、双端 build、performance smoke、docs、diff、secret scan 全通过。 |
+| client npm.cmd exec tsc -- --noEmit | PASS，exit 0。 |
+| server npm.cmd exec tsc -- --noEmit | PASS，exit 0。 |
+| npm.cmd run test:unit | PASS，20 files / 211 tests。 |
+| server npm.cmd run test:v2 | PASS，270/270；CANVAS_ASSET_DIR 指向 reviewer OS-temp 实体目录，未改测试或产品语义。 |
+| npm.cmd run test:tool-face-registry | PASS，4/4。 |
+| npm.cmd run test:tool-face-manifest | PASS，10/10。 |
+| npm.cmd run check:tool-face-manifest | PASS，fresh，2 public entries。 |
+| npm.cmd run test:tool-face-parity | PASS，10/10。 |
+| npm.cmd run check:tool-face-parity | PASS；脚本明确写 human reachability NOT VERIFIED，本 Review 不扩大其含义。 |
+| server npm.cmd run test:trash-notes-tool | PASS，36/36。 |
+
+沙箱适配说明：esbuild 从 user temp 的深路径向上枚举时会在 C:/Users/70208 触发 ACL，首轮 verify 在 Vitest 启动前停止，不是测试红。最终收据使用临时 R: DOS 映射只映射 reviewer temp base，并在 finally 中删除；node_modules 是物理副本、不是 junction/symlink。隔离副本的 node_modules/.bin/vitest.cmd 只临时追加 config/root 路径参数，tracked tree 未变；结束后从另一份物理依赖副本恢复，SHA-256 前后均为 F5959CE11885ED044BF1883D9A991D4DB2A4690C255681D2E635991D34B393F1，R: 最终不存在。
+
+### 6. 5-1 完备性与显式范围排除
+
+已取：所有 Q1–Q8/C8 点名 mutation、六个 Q8 同形位点、三路 ownership、三条 revert guard、三孤儿、真实 Express HTTP、全门、对象级 scope diff 与阳性对照。
+
+显式未取 / 不扩大结论：
+
+- 未做浏览器主观 UI 验收；tool-face parity 自身也只证明必要条件，不证明 human reachability。
+- Q3 只覆盖当前单进程 Express + 单 better-sqlite3 connection 的竞争；未模拟多进程 / 多连接部署。
+- b-2b-2 尚未在本 commit 实现，本轮只做下一状态静态耦合扫描，不把它写成已验旅程。
+- 未验证 scopes 强制，因为 TD-14 明确仍是基线缺口；本 Review **不声称已强制授权**。
+- 未代偿或关闭 TD-6、TD-8 残余、TD-10、TD-16。
+- 如上所述，未扩跑非点名 K-4 mutation；其 builder 自报不承重。
+
+### 7. 隔离、锁与共享树卫生
+
+- mutation 与门禁均在仓库外 OS temp 的 local clone + detached worktrees 中进行；HEAD 都是 098ef16；没有在 tmp/、.codex-tmp/ 或其他仓库内路径建临时树。
+- 两棵树的 reparse-point count 均为 0；未建 junction / symlink，未共享 node_modules。门禁树依赖来自物理复制，避免 TD-13 类删除穿透。
+- 每刀恢复后核 key blob；删除前两树 tracked status / numstat 均干净，route blob 为 5fe1c42080d3f6ec775448d396df4b9217295014，等于 HEAD。
+- detached worktrees 已由 git worktree remove --force 删除；随后经绝对路径、OS temp 前缀、仓库不重叠、零 reparse 四重校验删除 reviewer base。最终 BASE_EXISTS_AFTER=False，R_EXISTS=False。
+- 过程偏差（不计入 builder 分级）：第一次离线安装沿仓库既有 npm cache 配置产生 3 个 ignored debug log；reviewer 逐个精确删除并复验不存在，没有清 cache 或共享依赖。此后所有 npm 日志与资产均定向到 OS temp。
+- 未取锁、未写或删 owner.json、未改 header、未 commit、未 push、未碰 main。
+- 共享树已知 stat/EOL 假阳性继续用 blob 判定：useNoteCanvasRuntimeController.ts 为 3efe5f820e2077850611b54d4d09482845e89545；projections.ts 为 561902a449b50ce254b650de5a337973a8fbc26d，均等于 HEAD 且 numstat 无项。
+- 复核期间共享树另有并发文档改动（docs/agent-ops/INDEX.md、claude-log、handoffs/README.md 与新 b-2b-2 handoff）；reviewer 未触碰、未归因。reviewer 唯一保留的共享树写入是本节 UTF-8 Review。
+
+### 8. 裁定建议
+
+不建议在 HIGH-1 修复前放行本单测试合同。修复只需补 production default fallback 的 canonical symbol / 默认行为锁，不要求推翻当前产品实现；因此结论是 **FAIL（方向成立）**，不是方向不成立。
