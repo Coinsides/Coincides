@@ -2,12 +2,13 @@ import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import {
   mkdtempSync,
+  mkdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { join } from 'node:path';
 import test from 'node:test';
 import {
   DEFAULT_MANIFEST_PATH,
@@ -19,13 +20,14 @@ import {
   validateClientCallConstruction,
 } from './check-tool-face-parity.mjs';
 
-const SCRIPT_PATH = resolve(REPO_ROOT, 'scripts', 'check-tool-face-parity.mjs');
+const npmExecPath = process.env.npm_execpath;
 const realManifest = JSON.parse(readFileSync(DEFAULT_MANIFEST_PATH, 'utf8'));
 const realEntry = realManifest.find((entry) => entry.name === 'list_notes');
 const realPublicCount = realManifest.filter((entry) => entry.exposure === 'public').length;
 
 assert.ok(realEntry, 'real manifest must contain list_notes');
 assert.ok(realPublicCount > 0, 'real manifest must contain at least one public entry');
+assert.ok(npmExecPath, 'npm_execpath is required to spawn the production npm entry');
 
 function cloneEntry(overrides = {}) {
   return {
@@ -47,10 +49,42 @@ function withTempManifest(manifest, run) {
   }
 }
 
+function withTempRouteRepo(run) {
+  const tempRoot = mkdtempSync(join(tmpdir(), 'coincides-tool-face-route-'));
+  const routeRoot = join(tempRoot, 'server', 'src', 'routes');
+  try {
+    mkdirSync(routeRoot, { recursive: true });
+    writeFileSync(
+      join(tempRoot, 'server', 'src', 'index.ts'),
+      [
+        "import mountedRouter from './routes/mounted.js';",
+        "app.use('/api/real', mountedRouter);",
+        '',
+      ].join('\n'),
+      'utf8',
+    );
+    writeFileSync(
+      join(routeRoot, 'mounted.ts'),
+      [
+        'const mounted = Router();',
+        "mounted.get('/ok', handler);",
+        'const decoy = Router();',
+        "decoy.get('/not-real', handler);",
+        'export default mounted;',
+        '',
+      ].join('\n'),
+      'utf8',
+    );
+    return run(tempRoot);
+  } finally {
+    rmSync(tempRoot, { recursive: true, force: true });
+  }
+}
+
 function runProductionCli(manifest) {
   return withTempManifest(manifest, (manifestPath) => spawnSync(
     process.execPath,
-    [SCRIPT_PATH],
+    [npmExecPath, 'run', 'check:tool-face-parity'],
     {
       cwd: REPO_ROOT,
       encoding: 'utf8',
@@ -81,6 +115,11 @@ function assertCliCompleted(result) {
 }
 
 test('G-1 builds a method-aware mounted route graph', () => {
+  const positive = runProductionCli(realManifest);
+  assertCliCompleted(positive);
+  assert.equal(positive.status, 0, cliReceipt(positive));
+  assert.match(positive.stdout, /\[PASS\] tool-face necessary-condition gate:/);
+
   const graph = buildServerRouteGraph(REPO_ROOT);
   const listNotesRoute = graph.find((route) => (
     route.method === 'GET' && route.fullPath === '/api/notes'
@@ -92,6 +131,50 @@ test('G-1 builds a method-aware mounted route graph', () => {
     false,
     'method must participate: direct health route is GET, not POST',
   );
+
+  const wrongMethod = runProductionCli([cloneEntry({
+    name: 'wrong_route_method_probe',
+    human_entry: {
+      route: 'POST /api/health',
+      client_call_site: 'client/src/App.tsx#App',
+    },
+    exposure: 'public',
+  })]);
+  assertCliCompleted(wrongMethod);
+  assert.equal(wrongMethod.status, 1, cliReceipt(wrongMethod));
+  assert.match(
+    `${wrongMethod.stdout}\n${wrongMethod.stderr}`,
+    /server route not found: POST \/api\/health/,
+  );
+
+  const wrongFullPath = runProductionCli([cloneEntry({
+    name: 'wrong_route_full_path_probe',
+    human_entry: {
+      route: 'GET /api/health/not-real',
+      client_call_site: 'client/src/App.tsx#App',
+    },
+    exposure: 'public',
+  })]);
+  assertCliCompleted(wrongFullPath);
+  assert.equal(wrongFullPath.status, 1, cliReceipt(wrongFullPath));
+  assert.match(
+    `${wrongFullPath.stdout}\n${wrongFullPath.stderr}`,
+    /server route not found: GET \/api\/health\/not-real/,
+  );
+
+  withTempRouteRepo((repoRoot) => {
+    const fixtureGraph = buildServerRouteGraph(repoRoot);
+    assert.equal(
+      fixtureGraph.some((route) => route.method === 'GET' && route.fullPath === '/api/real/ok'),
+      true,
+      'the default-exported router leaf must compose with its index mount',
+    );
+    assert.equal(
+      fixtureGraph.some((route) => route.fullPath === '/api/real/not-real'),
+      false,
+      'an unexported decoy Router in the same module is not mounted',
+    );
+  });
 });
 
 test('G-2 validates method and normalized URL construction inside the declared symbol', () => {
@@ -119,6 +202,20 @@ test('G-2 validates method and normalized URL construction inside the declared s
   });
   assert.equal(outsideClientSrc.ok, false, JSON.stringify(outsideClientSrc, null, 2));
   assert.match(outsideClientSrc.error, /outside client\/src/);
+
+  const wrongUrl = runProductionCli([cloneEntry({
+    name: 'wrong_client_url_probe',
+    human_entry: {
+      route: 'GET /api/health',
+      client_call_site: 'client/src/pages/Courses/CourseDetail.tsx#fetchSummary',
+    },
+    exposure: 'public',
+  })]);
+  assertCliCompleted(wrongUrl);
+  assert.equal(wrongUrl.status, 1, cliReceipt(wrongUrl));
+  const wrongUrlOutput = `${wrongUrl.stdout}\n${wrongUrl.stderr}`;
+  assert.doesNotMatch(wrongUrlOutput, /server route not found: GET \/api\/health/);
+  assert.match(wrongUrlOutput, /client symbol does not construct GET \/api\/health/);
 });
 
 test('G-3 empty manifest is neutral, exits zero, and never prints PASS', () => {
@@ -165,6 +262,40 @@ test('G-5 killer 2: a test entry leaked into the public projection is rejected i
   assert.match(leaked.errors[0], /non-public entry leaked.*exposure=test/);
   const output = formatParityResult(leaked);
   assert.match(output, /^\[FAIL\]/);
+
+  const rewrittenExposure = evaluateToolFaceParity({
+    manifest: [testEntry],
+    publicSelector(entries) {
+      return entries.map((entry) => ({ ...entry, exposure: 'public' }));
+    },
+  });
+  assert.match(
+    rewrittenExposure.errors.join('\n'),
+    /public projection transformed the manifest entry: test_probe/,
+  );
+  assert.match(
+    rewrittenExposure.errors.join('\n'),
+    /non-public entry leaked.*exposure=test/,
+  );
+  assert.match(formatParityResult(rewrittenExposure), /^\[FAIL\]/);
+
+  const inPlaceTestEntry = cloneEntry({ name: 'test_probe', exposure: 'test' });
+  const mutatedInPlace = evaluateToolFaceParity({
+    manifest: [inPlaceTestEntry],
+    publicSelector(entries) {
+      entries[0].exposure = 'public';
+      return entries;
+    },
+  });
+  assert.match(
+    mutatedInPlace.errors.join('\n'),
+    /public projection transformed the manifest entry: test_probe/,
+  );
+  assert.match(
+    mutatedInPlace.errors.join('\n'),
+    /non-public entry leaked.*exposure=test/,
+  );
+  assert.match(formatParityResult(mutatedInPlace), /^\[FAIL\]/);
   console.log(`KILLER exposure_test_leak\n${output}`);
 });
 

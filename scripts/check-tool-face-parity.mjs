@@ -128,27 +128,18 @@ function routeRecords(method, fullPath, mountedRouterModule, mountPath, leafPath
 
 function collectRouterLeafRoutes(repoRoot, routerModulePath, mountPath) {
   const sourceFile = parseSourceFile(routerModulePath);
-  const routerIdentifiers = new Set();
+  let exportedRouterIdentifier = null;
 
-  walk(sourceFile, (node) => {
+  for (const statement of sourceFile.statements) {
     if (
-      ts.isVariableDeclaration(node)
-      && ts.isIdentifier(node.name)
-      && node.initializer
-      && ts.isCallExpression(node.initializer)
-      && ts.isIdentifier(node.initializer.expression)
-      && node.initializer.expression.text === 'Router'
+      ts.isExportAssignment(statement)
+      && !statement.isExportEquals
+      && ts.isIdentifier(statement.expression)
     ) {
-      routerIdentifiers.add(node.name.text);
+      exportedRouterIdentifier = statement.expression.text;
     }
-    if (
-      ts.isExportAssignment(node)
-      && !node.isExportEquals
-      && ts.isIdentifier(node.expression)
-    ) {
-      routerIdentifiers.add(node.expression.text);
-    }
-  });
+  }
+  if (!exportedRouterIdentifier) return [];
 
   const moduleRelativePath = toPosix(relative(repoRoot, routerModulePath));
   const routes = [];
@@ -161,7 +152,7 @@ function collectRouterLeafRoutes(repoRoot, routerModulePath, mountPath) {
     let leafPath = null;
     const receiver = node.expression.expression;
 
-    if (ts.isIdentifier(receiver) && routerIdentifiers.has(receiver.text)) {
+    if (ts.isIdentifier(receiver) && receiver.text === exportedRouterIdentifier) {
       routerName = receiver.text;
       leafPath = staticString(node.arguments[0]);
     } else if (
@@ -169,7 +160,7 @@ function collectRouterLeafRoutes(repoRoot, routerModulePath, mountPath) {
       && ts.isPropertyAccessExpression(receiver.expression)
       && receiver.expression.name.text === 'route'
       && ts.isIdentifier(receiver.expression.expression)
-      && routerIdentifiers.has(receiver.expression.expression.text)
+      && receiver.expression.expression.text === exportedRouterIdentifier
     ) {
       routerName = receiver.expression.expression.text;
       leafPath = staticString(receiver.arguments[0]);
@@ -496,36 +487,64 @@ export function selectPublicEntries(manifest) {
   return manifest.filter((entry) => entry.exposure === 'public');
 }
 
+function snapshotManifestProvenance(manifest) {
+  return manifest.map((entry) => Object.freeze({
+    entry,
+    name: entry.name,
+    exposure: entry.exposure,
+    serialized: JSON.stringify(entry),
+  }));
+}
+
 /**
  * Independently validates the derived public face. Keeping this separate from
  * selectPublicEntries makes a leaking selector observable instead of letting
  * it define its own truth.
  */
-export function validatePublicProjection(manifest, publicEntries) {
+export function validatePublicProjection(
+  manifest,
+  publicEntries,
+  provenance = snapshotManifestProvenance(manifest),
+) {
   const errors = [];
-  const manifestNames = new Set(manifest.map((entry) => entry.name));
+  const manifestEntriesByName = new Map(provenance.map((record) => [record.name, record]));
+  const manifestEntriesByReference = new Map(provenance.map((record) => [record.entry, record]));
   const selectedCounts = new Map();
 
   for (const entry of publicEntries) {
-    selectedCounts.set(entry.name, (selectedCounts.get(entry.name) || 0) + 1);
-    if (!manifestNames.has(entry.name)) {
+    const referenceRecord = manifestEntriesByReference.get(entry);
+    const record = referenceRecord || manifestEntriesByName.get(entry.name);
+    if (referenceRecord) {
+      selectedCounts.set(referenceRecord, (selectedCounts.get(referenceRecord) || 0) + 1);
+    }
+    if (!record) {
       errors.push(`public projection contains an entry absent from manifest: ${entry.name}`);
+    } else if (!referenceRecord || JSON.stringify(entry) !== record.serialized) {
+      errors.push(`public projection transformed the manifest entry: ${entry.name}`);
     }
-    if (entry.exposure !== 'public') {
-      errors.push(`non-public entry leaked into public projection: ${entry.name} (exposure=${entry.exposure})`);
+    const manifestExposure = record?.exposure;
+    if (entry.exposure !== 'public' || (record && manifestExposure !== 'public')) {
+      errors.push(
+        `non-public entry leaked into public projection: ${entry.name} `
+        + `(exposure=${String(manifestExposure ?? entry.exposure)})`,
+      );
     }
-    if (String(entry.name || '').startsWith('__')) {
-      errors.push(`reserved __ entry entered public projection: ${entry.name}`);
+    const manifestName = record?.name;
+    if (
+      String(entry.name || '').startsWith('__')
+      || (record && String(manifestName || '').startsWith('__'))
+    ) {
+      errors.push(`reserved __ entry entered public projection: ${String(manifestName ?? entry.name)}`);
     }
   }
 
-  for (const entry of manifest) {
-    if (entry.exposure !== 'public') continue;
-    const selectedCount = selectedCounts.get(entry.name) || 0;
+  for (const record of provenance) {
+    if (record.exposure !== 'public') continue;
+    const selectedCount = selectedCounts.get(record) || 0;
     if (selectedCount === 0) {
-      errors.push(`public manifest entry missing from public projection: ${entry.name}`);
+      errors.push(`public manifest entry missing from public projection: ${record.name}`);
     } else if (selectedCount > 1) {
-      errors.push(`public manifest entry projected more than once: ${entry.name}`);
+      errors.push(`public manifest entry projected more than once: ${record.name}`);
     }
   }
   return errors;
@@ -607,12 +626,13 @@ export function evaluateToolFaceParity({
     return { publicCount: 0, errors: manifestErrors, reports: [] };
   }
 
+  const provenance = snapshotManifestProvenance(manifest);
   const publicEntries = publicSelector(manifest);
   if (!Array.isArray(publicEntries)) {
     return { publicCount: 0, errors: ['public selector must return an array'], reports: [] };
   }
 
-  const projectionErrors = projectionValidator(manifest, publicEntries);
+  const projectionErrors = projectionValidator(manifest, publicEntries, provenance);
   if (projectionErrors.length > 0) {
     return {
       publicCount: publicEntries.length,
