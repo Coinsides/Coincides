@@ -31,7 +31,7 @@
 | [analysis/2026-08-21-mcp-tool-face-design.md](analysis/2026-08-21-mcp-tool-face-design.md) | 必修① MCP 工具面设计稿 v0 ——「末端执行器第一次实体化」 | `draft` | 2026-08-21 | — |
 | [analysis/2026-08-21-selection-receipt-design.md](analysis/2026-08-21-selection-receipt-design.md) | 必修③ 选区收据系统设计稿 v0(薄——它是 12.2 §2.1 的持久化,不是新系统) | `draft` | 2026-08-21 | — |
 | [analysis/2026-08-21-v2bn12-1-journey-score.md](analysis/2026-08-21-v2bn12-1-journey-score.md) | V2.BN.12.1「编辑基座」旅程分数验收 | `active` | 2026-08-21 | — |
-| [analysis/2026-08-23-v2bn12-2b4-journey-sheet.md](analysis/2026-08-23-v2bn12-2b4-journey-sheet.md) | V2.BN.12.2b「首个写工具 + 人审队列」旅程分数走查单 | `draft` | 2026-08-23 | — |
+| [analysis/2026-08-23-v2bn12-2b4-journey-sheet.md](analysis/2026-08-23-v2bn12-2b4-journey-sheet.md) | V2.BN.12.2b「首个写工具 + 人审队列」旅程分数走查单 | `active` | 2026-08-23 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
