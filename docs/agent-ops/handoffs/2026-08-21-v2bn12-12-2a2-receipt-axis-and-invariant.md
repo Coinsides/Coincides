@@ -1,6 +1,17 @@
-> from: claude(fable,代理权:claude-log/2026-08-19.md 条目1) | to: codex(builder) | status: ready(开工条件:12.2a-1 闭环后;builder 档位=Spark 实测单,若不可用则 5.6) | re: v2bn12-12.2a-2 | date: 2026-08-21
+> from: claude(fable,代理权:claude-log/2026-08-19.md 条目1) | to: codex(builder) | status: ready(12.2a-1 已闭环 2026-08-22;**接口已由 Opus 按落地实况校订,见 §0**) | re: v2bn12-12.2a-2 | date: 2026-08-21
 
 # V2.BN.12.2a-2:收据轴扩展('mcp' / 'proposed')+ 消费方不变式守卫(单交付物)
+
+## 0. ⚠️ 2026-08-22 接口校订(Opus,发单前核对)
+
+本单写于 2026-08-21,其后 12.2a-1 经历方向重置(1b/1c)。**发单前逐条核对了工单对代码的点名,发现两处脱节,均已在下文校订。核对用阳性对照法**(先证探针能命中 `operation_batch` 17 处,再断言阴性)。
+
+| # | 工单原文 | 实况 | 处置 |
+|---|---|---|---|
+| **D-1** | 守卫挂在「`findOperationBatch(id)` 的路径(:390/:951 一带)」 | ⛔ **`findOperationBatch` 全仓零命中,该函数不存在**;真实读取点是 `server/src/services/noteBlockLifecycle.ts:225` 与 `:262` 的两处 `FROM operation_batches` | **守卫改挂这两处**;**行号仅为路标,施工时以实际 `SELECT ... FROM operation_batches` 语句为准,不得按行号盲改** |
+| **D-2** | 规则「工具收据不传 `created_at`」 | ⚠️ **周围代码尚未遵守**:四个显式写入点原样都在(`noteBlockLifecycle` 三处 + `sourceProjectionMaterializer.ts` 一处)。12.1 的 B 段(时间戳统一)被止损线停掉后**从未执行** | **本单只管自己新写的收据路径不传 `created_at`**(走 DB 默认);**⛔ 不得顺手去修那四处**(不在触及面,且是 TD-8 的存量面)。**回执须明写「本单未修既有四处,故 `created_at` 全表仍为混格式」,不得申报为已统一** |
+
+**另两处已核实无需改**:③ 设计稿现为 **v0.5 + 08-22 补注**(工单引 v0.4),但 §2.2 收据轴部分未被 v0.5 改动(v0.5 改的是 schema 权威与机械门口径);④ server 测试基线数字工单写「262+」,**施工时以实测为准,不照抄该数**。
 
 ## 上游与定位
 
@@ -16,6 +27,22 @@
 ## 边界
 
 schema 零改动(新 status 值属词汇扩展);不碰 routes/transport;不碰 03/05 保护面(仅 noteBlockLifecycle 守卫一处,逐 hunk 申报)。
+
+## ⭐ 12.2a-1 三轮的实证教训(本单直接吃,点名出处非套话)
+
+| # | 教训 | 出处 |
+|---|---|---|
+| 1 | **「API 不存在」的红不承重** —— 红须来自「机关存在但被改坏」 | 12.1.3 复核 FAIL 的直接原因 |
+| 2 | **测了逻辑 ≠ 测了接线** —— 同族已四次:hook 逻辑绿而生产调用者可删;comparator 绿而生产分支可绕;投影纯函数绿而生产对它的调用可换内联复制 | 12.1.3 X3 / 12.2a-1b M4 / fix2 F3 |
+| 3 | **mock 掉正门 = 护栏自证** —— 凡 mock 须申报「mock 了什么、为什么它不承载被测行为」 | 12.1.4 复核 FAIL 落点 |
+
+**对本单的落点**:第 3 项(killer:把 `'mcp'/'proposed'` 批次喂给 noteBlockLifecycle 路径必须被拒)**必须由「守卫存在但被改坏」触发红**,并须有一条能杀死「守卫根本没被调用」。
+
+## D. 探针先过阳性对照(`adjudication §7`,含反面分则)
+
+正面:阴性断言前先让同一探针看见已知阳性。反面:**先确认探针的命中不是来自你自己刚写进去的东西**。
+📌 本环境:`.git/index` 只读 ⇒ porcelain 对 `client/.../useNoteCanvasRuntimeController.ts` 有 stat/EOL 假阳性 `.M`,**不是改动**;判文件是否真改用 blob 哈希或 `git diff --numstat`;管道会遮蔽退出码。
+📌 **提交前若新增 handoff/文档须先跑 `docs:index`**;改 `package.json` 会使 `object-inventory` 合法过期,须 `docs:inventory`。
 
 ## 验证与回执
 
