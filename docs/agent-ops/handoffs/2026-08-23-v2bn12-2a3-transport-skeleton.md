@@ -104,6 +104,8 @@
 6. **Host/Origin 门**:窄 guard,不允许即 **HTTP 403、无 MCP body、无收据**。allowlist 走 `server/src/db/validateConfig.ts` 或现有等价配置正门做启动校验。
 7. **错误映射**:协议/envelope 错误归 SDK;领域失败仍是 `AppError`,在 `tools/call` 中投影为 MCP tool error。**不新增领域错误枚举或 `AppError` 子类。**
 
+> **注(Fable,2026-08-23 11:0x)**:本步由 Opus 于 724c040 补写;但 05:28 的「续跑 2」(Fable 代发,Henry 事后追认开网)已完成同一安装与 S1–S3,并经全链复核 PASS 放行——**S1-0 作废,不再执行**。保留以存档时序。
+
 ### S1-0:依赖安装(**Henry 2026-08-23 亲授开网,仅此一轮**)
 
 > ⚠️ **授权链**:上一轮 builder 在无网沙箱正确停手(在线 `EACCES` / 离线 `ENOTCACHED`)。**开网属扩大 agent 环境权限,同侪不能代授** —— 调度方已向 **Henry 本人请示并获授权**;**Fable 定的约束照用**。
