@@ -1,4 +1,4 @@
-> from: claude(fable,上将军代发——Opus 调度会话 20:54 起离线;授权:claude-log/2026-08-19.md 条目1 代理权) | to: codex(builder) | status: ready(Fable 本人翻牌;上游:1c Review FAIL(方向成立)0B/0H/2M) | re: v2bn12-2a-1c-fix | date: 2026-08-22
+> from: claude(fable,上将军代发——Opus 调度会话 20:54 起离线;授权:claude-log/2026-08-19.md 条目1 代理权) | to: codex(builder) | status: done(复核 PASS 0B/0H/0M/0L @ 1c-fix Review,2026-08-22 Opus 翻牌;Fable 本人翻牌;上游:1c Review FAIL(方向成立)0B/0H/2M) | re: v2bn12-2a-1c-fix | date: 2026-08-22
 
 # 12.2a-1c-fix:机械门两处护栏缺口(baseURL 混合分支 fail-open · P7 裸 PASS 逃逸)
 
