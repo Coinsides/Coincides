@@ -21,6 +21,8 @@
     "docs:tool-face-manifest": "cd server && node --import tsx ../scripts/generate-tool-face-manifest.ts",
     "docs:check": "node scripts/docs-index.mjs --check && node scripts/docs-inventory.mjs --check",
     "check:tool-face-manifest": "npm run docs:tool-face-manifest -- --check",
+    "test:tool-face-registry": "cd server && npm run test:tool-face-registry",
+    "test:tool-face-manifest": "cd server && npm run test:tool-face-manifest",
     "check:canvas-runtime-boundary": "cd client && npm run check:canvas-runtime-boundary",
     "check:group-gallery-shell": "cd client && npm run check:group-gallery-shell",
     "check:single-editor-shell": "cd client && npm run check:single-editor-shell",
@@ -33,7 +35,7 @@
     "fixtures:source-smoke": "cd server && node scripts/generateSourceSmokeFixtures.mjs",
     "smoke:canvas-engine-model-contract": "cd client && npm run smoke:canvas-engine-model-contract",
     "smoke:canvas-engine-performance": "cd client && npm run smoke:canvas-engine-performance",
-    "verify:v2-bn8-runtime": "npm run test:unit && npm run check:canvas-runtime-boundary && npm run check:group-gallery-shell && npm run check:groups-rail-shell && npm run check:single-editor-shell && npm run check:source-experience && npm run check:v2-bn11-legacy-shutdown && npm run check:v2-bn11-relation-freshness && npm run smoke:canvas-engine-model-contract && npm run build:client && npm run build && npm run smoke:canvas-engine-performance && npm run docs:check && git diff --check && npm run check:changed-file-secrets",
+    "verify:v2-bn8-runtime": "npm run test:unit && npm run test:tool-face-registry && npm run test:tool-face-manifest && npm run check:tool-face-manifest && npm run check:canvas-runtime-boundary && npm run check:group-gallery-shell && npm run check:groups-rail-shell && npm run check:single-editor-shell && npm run check:source-experience && npm run check:v2-bn11-legacy-shutdown && npm run check:v2-bn11-relation-freshness && npm run smoke:canvas-engine-model-contract && npm run build:client && npm run build && npm run smoke:canvas-engine-performance && npm run docs:check && git diff --check && npm run check:changed-file-secrets",
     "start": "cd server && npm run start",
     "install:all": "cd server && npm install && cd ../client && npm install",
     "setup": "npm run install:all"

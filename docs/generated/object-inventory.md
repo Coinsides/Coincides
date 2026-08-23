@@ -222,6 +222,9 @@
 - ✅ `build:client`
 - ✅ `test:unit`
 - ✅ `docs:check`
+- ✅ `check:tool-face-manifest`
+- ✅ `test:tool-face-registry`
+- ✅ `test:tool-face-manifest`
 - ✅ `check:canvas-runtime-boundary`
 - ✅ `check:group-gallery-shell`
 - ✅ `check:single-editor-shell`
@@ -233,9 +236,8 @@
 - ✅ `smoke:canvas-engine-model-contract`
 - ✅ `smoke:canvas-engine-performance`
 
-**存在但不在该门内的 check / smoke / test 脚本（2）**：
+**存在但不在该门内的 check / smoke / test 脚本（1）**：
 
-- ⚠️ `check:tool-face-manifest`
 - ⚠️ `check:tool-face-parity`
 
 > 不在门内 ≠ 错误（可能是刻意的），但**没有门跑的护栏等于没有护栏** —— 逐个应有明确归属。

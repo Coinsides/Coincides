@@ -1,4 +1,4 @@
-> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: ready(设计裁定:mcp-tool-face-design v0.5 §3.1,Fable) | re: v2bn12-2a-1b | date: 2026-08-22
+> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: done(复核 PASS,2026-08-22 Opus 翻牌;设计裁定:mcp-tool-face-design v0.5 §3.1,Fable) | re: v2bn12-2a-1b | date: 2026-08-22
 
 # V2.BN.12.2a-1b:工具注册表(server,真 zod)+ manifest 生成器
 
