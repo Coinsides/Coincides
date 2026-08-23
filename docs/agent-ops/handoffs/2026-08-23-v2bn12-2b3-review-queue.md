@@ -24,7 +24,7 @@
 | 4 | ⛔ **`tool-receipts` 路由不存在** —— 全仓零命中。**b-3 须新建**,不是「接上已有的」。 |
 | 5 | **退役面**:`ProposalList.tsx` 住 `client/src/components/AgentPanel/`,**只被 `AgentPanel.tsx` 引用两处**(`:9` import、`:283` 渲染)。 |
 | 6b | ⭐ **`revert` 服务已含全部守卫,路由不存在**:`toolFaceReceiptRevert.ts:23` 起已做 ownership(403)/工具名(409)/状态(409) 三重校验并逐个 `restoreNoteAsUser`。**b-3 只需薄壳。** |
-| 6 | ⭐ **退役的连带**:`ProposalWeekEditor.tsx` **只被 `ProposalList.tsx` 引用**(`:6` import、`:272` 渲染)⇒ **退役 ProposalList 会让它变孤儿**;`proposalStore` 另有 `AgentPanel.tsx` 一个消费者(**不孤儿,不得删**)。 |
+| 6 | ⭐ **退役的连带 —— 两个孤儿,不是一个**(调度方亲验):`ProposalWeekEditor.tsx`(`ProposalList:6` import、`:272` 渲染)**与** `TimePickerInline.tsx`(`ProposalList:5` import、`:189/:195/:206` **三处**渲染)—— **两者均只被 `ProposalList` 引用**,退役后**双双变孤儿**。`proposalStore` 另有 `AgentPanel.tsx` 消费者(**不孤儿,⛔ 不得删**)。 |
 
 ---
 
@@ -45,6 +45,7 @@
 | **H-2** | **不得改 `schema.sql`** —— `dismissed` 是词汇扩展。 |
 | **H-3** | **apply 失败时收据必须不动** —— 不得写半状态、不得部分标 applied。 |
 | **H-4** | **只读本用户** —— 三个路由都须 ownership 校验;不得返回他人收据。 |
+| **H-5** ⭐ | **apply 前须再核收据仍为 `proposed` 且属本用户** —— **幂等/并发:两次 apply 只执行一次**。⛔ 不得只在入口查一次就一路执行到底;状态检查须与执行同一事务边界内(或等价的先占后执行),**不得留「两个请求同时读到 proposed」的窗口**。 |
 
 ---
 
@@ -62,7 +63,8 @@
 
 ### ⭐ S3 的连带处置(**调度方亲验,须显式申报**)
 
-- **`ProposalWeekEditor.tsx` 只被 `ProposalList` 引用 ⇒ 退役后变孤儿。** **请一并处置并在回执申报选择**:随之删除(推荐,连同 `.module.css`)或明确保留并说明理由。**⛔ 不得默默留下孤儿。**
+- **两个孤儿须一并处置并在回执逐个申报**:`ProposalWeekEditor.tsx` 与 **`TimePickerInline.tsx`** —— 二者**均只被 `ProposalList` 引用**,退役后无消费者。**随之删除(推荐,各连同 `.module.css`)或明确保留并说明理由。⛔ 不得默默留下孤儿。**
+- ⚠️ **删前须各自跑一次全仓零引用确认**(阳性对照:先证探针能命中退役前的引用)——**不得按本单列的行号推断**,行号会漂。
 - **`proposalStore` 另有 `AgentPanel.tsx` 消费者 ⇒ 不孤儿,⛔ 不得删。**
 - **旧表/服务标 deprecation candidate,⛔ 不物理清**(随 v1 清场专项,plan §3 裁定 5)。
 
@@ -73,6 +75,7 @@
 | # | killer | 必红判据 |
 |---|---|---|
 | **K-1** ⭐ **端到端正控** | 造一条 `proposed` 收据 → `apply` → **note 真的进回收站** + 收据变 `applied` | 令 apply 走 no-op ⇒ **红**(防「路由通了但什么都没做」) |
+| **K-1b** ⭐ | **两次 apply 只执行一次**:同一 `proposed` 收据连调两次 apply ⇒ **第二次拒绝,且 note 不被重复处理** | 去掉 H-5 的状态复核 ⇒ **红**(须在「实际执行次数」上红,不只在返回码上) |
 | **K-2** | apply **走同一执行体** | 把 apply 改成内联 SQL(绕过 `trashNoteAsUser`)⇒ **红** |
 | **K-3** | apply 失败 ⇒ **收据不动** | 令失败路径顺手标 applied ⇒ 红 |
 | **K-4** | `dismiss` ⇒ status `dismissed`,**note 不受影响** | 令 dismiss 顺手执行 ⇒ 红 |
@@ -111,4 +114,4 @@
 **回执纪律**:README Builder 侧 1–3(含 **UTF-8**)+ **M-1 mutation 归复核方** + **M-2 header 不由你翻**。
 **⭐ 写 `## Result` 是本单交付物之一,不需确认,直接写。**
 
-**回执须含**:K-1…K-6(含 **K-5b**)**各自**先红后绿两段输出(**K-1 端到端正控须证明 note 真的进了回收站**)· apply 走 `trashNoteAsUser` 的证明 · **`ProposalWeekEditor` 处置选择与理由** · 退役后 `ProposalList` 零引用的阳性对照 · 门禁逐条收据 · 触及面 diff vs 申报 · 显式范围排除 · **每条阴性断言的阳性对照**。
+**回执须含**:K-1…K-6(含 **K-1b**、**K-5b**)**各自**先红后绿两段输出(**K-1 端到端正控须证明 note 真的进了回收站**)· apply 走 `trashNoteAsUser` 的证明 · **两个孤儿(`ProposalWeekEditor` / `TimePickerInline`)各自的处置选择与理由 + 各自的全仓零引用阳性对照** · 退役后 `ProposalList` 零引用的阳性对照 · 门禁逐条收据 · 触及面 diff vs 申报 · 显式范围排除 · **每条阴性断言的阳性对照**。
