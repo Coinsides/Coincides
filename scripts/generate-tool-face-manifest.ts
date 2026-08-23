@@ -25,17 +25,82 @@ const serverRequire = createRequire(resolve(REPO_ROOT, 'server/package.json'));
 const { zodToJsonSchema } = serverRequire('zod-to-json-schema') as {
   zodToJsonSchema: (
     schema: ToolRegistryEntry['input_schema'],
-    options: { target: 'jsonSchema7'; $refStrategy: 'none' },
-  ) => ToolFaceJsonSchema;
+    options: { target: 'jsonSchema2019-09'; $refStrategy: 'none' },
+  ) => ToolFaceJsonSchema & { $schema?: string };
 };
+
+function schemaChildren(
+  schema: Record<string, unknown>,
+  key: string,
+): Array<[string, unknown]> {
+  const child = schema[key];
+  if (!child || typeof child !== 'object') return [];
+
+  if (['properties', 'patternProperties', '$defs', 'dependentSchemas'].includes(key)) {
+    return Object.entries(child as Record<string, unknown>);
+  }
+  if (['allOf', 'anyOf', 'oneOf', 'prefixItems'].includes(key) && Array.isArray(child)) {
+    return child.map((value, index) => [String(index), value]);
+  }
+  return [['', child]];
+}
+
+export function find202012SubsetViolations(value: unknown, path = '$'): string[] {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return [];
+
+  const schema = value as Record<string, unknown>;
+  const violations: string[] = [];
+  if ('$schema' in schema) violations.push(`${path}.$schema`);
+  if ('definitions' in schema) violations.push(`${path}.definitions`);
+  if ('dependencies' in schema) violations.push(`${path}.dependencies`);
+  if ('additionalItems' in schema) violations.push(`${path}.additionalItems`);
+  if ('$recursiveRef' in schema) violations.push(`${path}.$recursiveRef`);
+  if ('$recursiveAnchor' in schema) violations.push(`${path}.$recursiveAnchor`);
+  if (Array.isArray(schema.items)) violations.push(`${path}.items (tuple-form items)`);
+  if (typeof schema.exclusiveMinimum === 'boolean') {
+    violations.push(`${path}.exclusiveMinimum (boolean exclusive bound)`);
+  }
+  if (typeof schema.exclusiveMaximum === 'boolean') {
+    violations.push(`${path}.exclusiveMaximum (boolean exclusive bound)`);
+  }
+
+  const singleSchemaKeys = [
+    'additionalProperties',
+    'contains',
+    'contentSchema',
+    'else',
+    'if',
+    'items',
+    'not',
+    'propertyNames',
+    'then',
+    'unevaluatedItems',
+    'unevaluatedProperties',
+  ];
+  const schemaMapKeys = ['properties', 'patternProperties', '$defs', 'dependentSchemas'];
+  const schemaArrayKeys = ['allOf', 'anyOf', 'oneOf', 'prefixItems'];
+  for (const key of [...singleSchemaKeys, ...schemaMapKeys, ...schemaArrayKeys]) {
+    for (const [suffix, child] of schemaChildren(schema, key)) {
+      const childPath = suffix ? `${path}.${key}.${suffix}` : `${path}.${key}`;
+      violations.push(...find202012SubsetViolations(child, childPath));
+    }
+  }
+  return violations;
+}
 
 function serializeSchema(
   schema: ToolRegistryEntry['input_schema'],
 ): ToolFaceJsonSchema {
-  return zodToJsonSchema(schema, {
-    target: 'jsonSchema7',
+  const projected = zodToJsonSchema(schema, {
+    target: 'jsonSchema2019-09',
     $refStrategy: 'none',
   });
+  const { $schema: _dialectDeclaration, ...compatibleSubset } = projected;
+  const violations = find202012SubsetViolations(compatibleSubset);
+  if (violations.length > 0) {
+    throw new Error(`Tool schema is not in the JSON Schema 2020-12 compatible subset: ${violations.join(', ')}`);
+  }
+  return compatibleSubset;
 }
 
 export function buildToolFaceManifest(

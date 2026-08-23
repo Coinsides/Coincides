@@ -22,6 +22,7 @@ import type {
 } from '../shared/types/toolFaceManifest.js';
 import {
   buildToolFaceManifest,
+  find202012SubsetViolations,
   renderManifest,
   TOOL_FACE_MANIFEST_TEST_OUTPUT_PATH_ENV,
 } from './generate-tool-face-manifest.js';
@@ -31,9 +32,10 @@ const serverRequire = createRequire(resolve(REPO_ROOT, 'server/package.json'));
 const { zodToJsonSchema } = serverRequire('zod-to-json-schema') as {
   zodToJsonSchema: (
     schema: ToolRegistryEntry['input_schema'],
-    options: { target: 'jsonSchema7'; $refStrategy: 'none' },
+    options: { target: 'jsonSchema7' | 'jsonSchema2019-09'; $refStrategy: 'none' },
   ) => ToolFaceJsonSchema;
 };
+const { z } = serverRequire('zod') as { z: any };
 
 const projectionFixture = [
   {
@@ -106,6 +108,17 @@ const MANIFEST_FIELD_ORDER = [
   'scopes',
 ];
 
+function schema201909WithoutDeclaration(
+  schema: ToolRegistryEntry['input_schema'],
+): ToolFaceJsonSchema {
+  const projected = zodToJsonSchema(schema, {
+    target: 'jsonSchema2019-09',
+    $refStrategy: 'none',
+  }) as ToolFaceJsonSchema & { $schema?: string };
+  const { $schema: _dialectDeclaration, ...compatibleSubset } = projected;
+  return compatibleSubset;
+}
+
 test('buildToolFaceManifest faithfully projects every injected entry in original order', () => {
   const manifest = buildToolFaceManifest(projectionFixture);
 
@@ -121,20 +134,67 @@ test('buildToolFaceManifest faithfully projects every injected entry in original
     assert.deepEqual(Object.keys(actual), MANIFEST_FIELD_ORDER);
     assert.equal(actual.name, source.name);
     assert.equal(actual.description, source.description);
-    assert.deepEqual(actual.input_schema, zodToJsonSchema(source.input_schema, {
-      target: 'jsonSchema7',
-      $refStrategy: 'none',
-    }));
-    assert.deepEqual(actual.output_schema, zodToJsonSchema(source.output_schema, {
-      target: 'jsonSchema7',
-      $refStrategy: 'none',
-    }));
+    assert.deepEqual(actual.input_schema, schema201909WithoutDeclaration(source.input_schema));
+    assert.deepEqual(actual.output_schema, schema201909WithoutDeclaration(source.output_schema));
     assert.equal(actual.truth, source.truth);
     assert.equal(actual.tier, source.tier);
     assert.deepEqual(actual.human_entry, source.human_entry);
     assert.equal(actual.exposure, source.exposure);
     assert.deepEqual(actual.scopes, source.scopes);
   });
+});
+
+test('manifest schemas stay inside the 2020-12 compatible subset and omit dialect self-claims', () => {
+  const manifest = buildToolFaceManifest(projectionFixture);
+  const violations = manifest.flatMap((entry) => [
+    ...find202012SubsetViolations(entry.input_schema, `${entry.name}.input_schema`),
+    ...find202012SubsetViolations(entry.output_schema, `${entry.name}.output_schema`),
+  ]);
+
+  assert.deepEqual(violations, []);
+});
+
+test('generator rejects draft-07 tuple-form items instead of emitting a false compatible manifest', () => {
+  const tupleEntry = {
+    ...projectionFixture[0],
+    name: 'tuple_probe',
+    input_schema: z.tuple([z.string(), z.number()]),
+  } satisfies ToolRegistryEntry;
+
+  assert.throws(
+    () => buildToolFaceManifest([tupleEntry]),
+    /tuple-form items/,
+  );
+});
+
+test('2020-12 subset guard rejects each incompatible keyword without misreading property names', () => {
+  assert.deepEqual(find202012SubsetViolations({
+    type: 'object',
+    properties: {
+      dependencies: { type: 'string' },
+      additionalItems: { type: 'boolean' },
+    },
+  }), []);
+
+  const incompatibleSchemas: Array<[string, string, Record<string, unknown>]> = [
+    ['$schema declaration', '$schema', { $schema: 'http://json-schema.org/draft-07/schema#' }],
+    ['definitions keyword', 'definitions', { definitions: { probe: { type: 'string' } } }],
+    ['dependencies keyword', 'dependencies', { dependencies: { probe: ['other'] } }],
+    ['additionalItems keyword', 'additionalItems', { additionalItems: false }],
+    ['tuple-form items', 'items', { items: [{ type: 'string' }] }],
+    ['boolean exclusiveMinimum', 'exclusiveMinimum', { minimum: 0, exclusiveMinimum: true }],
+    ['boolean exclusiveMaximum', 'exclusiveMaximum', { maximum: 1, exclusiveMaximum: true }],
+    ['$recursiveRef keyword', '$recursiveRef', { $recursiveRef: '#' }],
+    ['$recursiveAnchor keyword', '$recursiveAnchor', { $recursiveAnchor: true }],
+  ];
+
+  for (const [label, keyword, schema] of incompatibleSchemas) {
+    assert.match(
+      find202012SubsetViolations(schema).join('\n'),
+      new RegExp(keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
+      label,
+    );
+  }
 });
 
 test('renderManifest delegates production projection to the injected projector', () => {

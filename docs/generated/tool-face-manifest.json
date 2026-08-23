@@ -22,8 +22,7 @@
       "required": [
         "course_id"
       ],
-      "additionalProperties": false,
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      "additionalProperties": false
     },
     "output_schema": {
       "type": "array",
@@ -130,8 +129,7 @@
           "trashed_at"
         ],
         "additionalProperties": false
-      },
-      "$schema": "http://json-schema.org/draft-07/schema#"
+      }
     },
     "truth": "content",
     "tier": "immediate",

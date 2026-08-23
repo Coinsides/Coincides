@@ -21,6 +21,7 @@ import {
   createClientNoteBlock,
   discardClientNoteBlockCreate,
 } from '../services/noteBlockLifecycle.js';
+import { listNotes } from '../services/notes.js';
 
 const router = Router();
 const LEGACY_NOTE_LAYOUT_KEY = 'better_notebook_layout';
@@ -44,7 +45,7 @@ function stripLegacyLayoutOverride(value: Record<string, unknown> | undefined): 
   return next;
 }
 
-function getOwnedCourse(courseId: string, userId: string): { id: string } {
+export function getOwnedCourse(courseId: string, userId: string): { id: string } {
   const course = getDb()
     .prepare('SELECT id FROM courses WHERE id = ? AND user_id = ?')
     .get(courseId, userId) as { id: string } | undefined;
@@ -72,7 +73,7 @@ function createOperationBatch(userId: string, courseId: string, label: string): 
   return id;
 }
 
-function hydrateNote(row: any) {
+export function hydrateNote(row: any) {
   return {
     ...row,
     metadata: parseJson(row.metadata, {}),
@@ -92,21 +93,8 @@ function hydrateBlock(row: any) {
 // GET /api/notes?course_id=...
 router.get('/', (req: AuthRequest, res: Response) => {
   const courseId = req.query.course_id as string | undefined;
-  if (!courseId) throw new AppError(400, 'course_id query parameter is required');
-
-  const status = (req.query.status as string | undefined) || 'active';
-  if (!['active', 'archived', 'trashed'].includes(status)) {
-    throw new AppError(400, 'Invalid status');
-  }
-
-  getOwnedCourse(courseId, req.userId!);
-
-  const notes = getDb()
-    .prepare('SELECT * FROM notes WHERE user_id = ? AND course_id = ? AND status = ? ORDER BY updated_at DESC')
-    .all(req.userId!, courseId, status)
-    .map(hydrateNote);
-
-  res.json(notes);
+  const status = req.query.status as string | undefined;
+  res.json(listNotes({ userId: req.userId!, courseId, status }));
 });
 
 // POST /api/notes

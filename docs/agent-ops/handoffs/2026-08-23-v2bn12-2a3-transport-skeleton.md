@@ -245,3 +245,59 @@
 - `git diff --check`:exit `0`。
 - 全树 `git diff --numstat`:仅 `58\t0\tdocs/agent-ops/handoffs/2026-08-23-v2bn12-2a3-transport-skeleton.md`。
 - 产品/S0/package 指定面 `git diff --numstat`:无记录;untracked:无记录。
+
+## Result — 续跑（S0 / S1a 完成，SDK 硬闸停手）
+
+> Codex builder · 2026-08-23 · **needs: claude**。header 按 M-2 保持 `ready`；本节为 UTF-8 追加回执。未 commit、未 push、未碰 main。
+
+### 判定与续跑点
+
+- **S0 已完成，S1a 已完成；整单未完成。** 在进入 S1 时，本环境无法取得工单指定的现代 v2 分包 SDK，本地也没有可供 `.d.ts` 核实的安装件。依硬闸停在 S1 之前；S1、S2、S3 均未施工/未声称通过。
+- 下一轮从 **SDK 安装与本地 `.d.ts` 核实** 续跑，不重做 S0 / S1a。需要调度方预装或缓存 `@modelcontextprotocol/server@2.0.0` 与 `@modelcontextprotocol/node@2.0.0`，或恢复 npm registry 访问；取得安装件后先核实真实导出名和入口路径，任何名字不符仍须停手。
+
+### S0：manifest dialect
+
+- 生成器改用本地 `zod-to-json-schema@3.25.2` 实际支持的 `jsonSchema2019-09` target、`$refStrategy: 'none'`，随后仅移除根 `$schema` 自报；没有把 2019-09 伪报成 2020-12。
+- 生成器侧新增 2020-12 兼容子集守卫：拒绝 `$schema`、`definitions`、`dependencies`、`additionalItems`、tuple-form `items`、boolean exclusive bounds、`$recursiveRef`、`$recursiveAnchor`，并只沿 schema-bearing keyword 递归，不把 `properties` 下同名业务字段误判成 keyword。守卫位于生成器，不在 transport 造 schema。
+- 前态 manifest 的 input/output 各含 `"$schema": "http://json-schema.org/draft-07/schema#"`；后态两处均移除。`docs/generated/tool-face-manifest.json` 仍是 registry 的 1 条忠实投影，没有过滤 non-public 的打包逻辑。
+- 先红：新增 dialect/tuple 探针面对旧生成器时 `test:tool-face-manifest` exit `1`，分别看见 draft-07 自报与 tuple 未拒绝；非 `ReferenceError` / `SyntaxError` / `ERR_MODULE_NOT_FOUND`。归绿：最终 `test:tool-face-manifest` 9/9，`check:tool-face-manifest` exit `0`（1 条、1 public）。
+
+### S1a：`listNotes` 零语义提取
+
+- 新增 `server/src/services/notes.ts#listNotes({ userId, courseId?, status? })`。保留原顺序与语义：先判 `course_id`、`status || 'active'`（含 `?status=` 空值回落）、白名单、ownership、原 SQL/参数、`ORDER BY updated_at DESC`、`.map(hydrateNote)`。
+- `GET /api/notes` 已缩为参数转交与 `res.json(...)`；`server/src/mcp/bindings.ts` 的 `list_notes` binding 调同一个 service，并执行真实查询，不是 placeholder。transport 尚未挂载，未把这个 binding 冒充 K-0/K-4 PASS。
+- **helper 选择：导出复用。** `getOwnedCourse` 与 `hydrateNote` 的定义及其他 route 调用均留在 `routes/notes.ts`，只新增 export；service 直接复用这两个原函数。理由：这是补裁允许的最小零语义改动，不复制 helper、不搬走其他 route 的承重件，也不让 route 与 binding 各自注入不同实现。该选择形成 `routes/notes.ts` ↔ `services/notes.ts` 的静态 ESM 环，但只在调用期读取已声明的函数导出；最终 `tsc` 与真实 HTTP 正控均通过。
+- A-1 最终绿；并做了两次独立合法 mutation：① route 改成 `res.json([])`，A-1 assertion 红而 `tsc` 绿；②恢复 route 后 binding 改成 `return []`，A-1 独立 assertion 红而 `tsc` 绿。两处均已恢复。
+- A-3 在提取前先以真实 Express/TCP、固定行与 raw `Buffer` 建 golden；当时 A-3 绿而 A-1 红。提取后同一字节断言继续绿，覆盖默认 active、DESC、`hydrateNote` metadata 映射；另补 `status=` 与默认响应逐字节相同。最终 S1a 测试 3/3。
+- A-2 两份既有真实 HTTP 正控均完整 exit `0`：`v2NoteBlockLifecycle.test.ts` 与 `v2SourceMaterialization.test.ts`（后者 11/11）。
+
+### SDK `.d.ts` 硬闸与阻断证据
+
+- 在线命令：`server> npm.cmd install --save-exact @modelcontextprotocol/server@2.0.0 @modelcontextprotocol/node@2.0.0`，exit `1`；registry fetch 报 `EACCES`（环境拒绝网络）。
+- 离线命令：同一安装加 `--offline`，exit `1`；`@modelcontextprotocol/node` 报 `ENOTCACHED`。npm cache 与本机可读路径均未找到这两个分包；`server/node_modules/@modelcontextprotocol/{server,node}` 均不存在。
+- 安装尝试没有改动 `server/package.json` / `server/package-lock.json`，也没有留下对应 package 目录。
+- **本轮没有 `.d.ts` 核实输出，且明确不声称已核实。** 官方/远端资料中看到的名字不能替代工单要求的本地安装后证据；因此没有凭印象写 `createMcpHandler` / `toNodeHandler` 集成、没有换旧包、没有自造 shim。
+
+### 未执行项与范围排除
+
+- 未挂 `/api/mcp`，未实现 Host/Origin guard、auth context 搬运、每请求 fresh server/handler、`legacy: 'reject'` 或 MRTR predicate。
+- K-0 与 K-1…K-7 均未施工、未给假绿；K-1/K-2 没有合并，K-7 没有通过打包过滤代偿。S3 五步（尤其无 cwd 回退与保留 non-public）均未施工。
+- 未在 transport 造 schema、未造过滤白名单、未造 session/capability/approval 内存状态；无 migration/schema 改动。
+- `scopes` 仍只是 manifest 描述，**未强制授权**；未代偿 TD-6、TD-8 残余或 TD-10，也未声称 confirm 人审入口已存在。
+
+### 门禁收据（最终文件态）
+
+- `npm.cmd run docs:check`：exit `0`；`git diff --check`：exit `0`。
+- `npm.cmd run verify:v2-bn8-runtime`：exit `0`；其中 client unit 209/209、五道 tool-face 门均绿、client/server production build 均绿、secret scan 绿。
+- client `npm.cmd exec tsc -- --noEmit`：exit `0`；server `npm.cmd run build -- --noEmit`：exit `0`。
+- 新增 S1a 测试：3/3；两份 A-2 指定测试：各 exit `0`。
+- server `npm.cmd run test:v2`：**exit `1`，265/270，必须如实保留为红。** 5 条失败全在未触及的 `v2CanvasPersistenceCutover.test.ts`，均为 `mkdir server/uploads/canvas-assets/<uuid>` 的环境 `EPERM`；隔离单跑其中一条仍同样 `EPERM`。这不是本单断言红，也未尝试在本层修改上传目录/测试来代偿。
+
+### 触及面、锁与并行机关申报
+
+- S0：`scripts/generate-tool-face-manifest.ts`、对应 test、`docs/generated/tool-face-manifest.json`。
+- S1a：`server/src/routes/notes.ts`、新建 `server/src/services/notes.ts`、新建 `server/src/mcp/bindings.ts`、新建 `server/src/__tests__/v2NotesListService.test.ts`。
+- 文档：仅在本 handoff 末尾追加本续跑回执；没有改 header。package/lock、shared types、registry、DB schema/migration、client 产品代码均未触及。
+- 新 binding map 是 manifest-name → 真实 executor 的必要机关，供后续 K-4 校验；没有另造 schema、exposure/reserved 工具白名单，`tools/list` 过滤仍留待 S1/S2 从 manifest 元数据派生。
+- porcelain 仍列出 `client/.../useNoteCanvasRuntimeController.ts` 与 `server/src/routes/projections.ts`，但 `git diff --numstat` 无这两项，属已知 stat/EOL 假阳性；未冒充本单改动。
+- `.codex-tmp/builder.lock.d/owner.json` 只读确认仍属 `order=v2bn12-2a-3 (resume, S1a added), dispatcher=opus`；未取锁、未写/覆盖 owner、未删锁。
