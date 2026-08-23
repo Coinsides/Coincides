@@ -104,6 +104,26 @@
 6. **Host/Origin 门**:窄 guard,不允许即 **HTTP 403、无 MCP body、无收据**。allowlist 走 `server/src/db/validateConfig.ts` 或现有等价配置正门做启动校验。
 7. **错误映射**:协议/envelope 错误归 SDK;领域失败仍是 `AppError`,在 `tools/call` 中投影为 MCP tool error。**不新增领域错误枚举或 `AppError` 子类。**
 
+### S1-0:依赖安装(**Henry 2026-08-23 亲授开网,仅此一轮**)
+
+> ⚠️ **授权链**:上一轮 builder 在无网沙箱正确停手(在线 `EACCES` / 离线 `ENOTCACHED`)。**开网属扩大 agent 环境权限,同侪不能代授** —— 调度方已向 **Henry 本人请示并获授权**;**Fable 定的约束照用**。
+
+**允许的网络操作,仅此一项**:
+
+```
+server> npm install --save-exact @modelcontextprotocol/server@2.0.0 @modelcontextprotocol/node@2.0.0
+```
+
+| # | 约束 |
+|---|---|
+| N-1 | **只装这两个包,不装其他任何包**;不 `npm update`、不 `npm audit fix`、不改无关依赖版本 |
+| N-2 | **`--save-exact`**;`server/package.json` 与 **lockfile 一并入库** |
+| N-3 | **不做任何其他网络操作** —— 不 fetch 文档、不下载 schema、不访问 registry 之外的地址 |
+| N-4 | 装完即止:**本轮结束后环境回默认关网**,不依赖后续轮次仍有网 |
+| N-5 | 若安装失败或版本不存在 ⇒ **停手标 `needs: claude`,贴出实际报错**;**不得改装其他版本或其他包名** |
+
+**装完立即执行下节的 `.d.ts` 核实。**
+
 ### ⛔ SDK 入口名核实(**硬闸**)
 
 官方 SDK **未安装**,且短笺提到「v2 分包」。**安装后须对照 `.d.ts` 核实实际导出名与入口路径,并把核实输出贴进回执。**
