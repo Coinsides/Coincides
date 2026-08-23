@@ -1,4 +1,4 @@
-> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: ready(机械级 —— 纯测试断言顺序,无设计裁量;依 operating-workflow 由调度方直接发单) | re: v2bn12-2b-2-fix | date: 2026-08-23
+> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: done(2026-08-23 增量复核 PASS 0/0/0/0;Fable 放行 log #35。**Opus 依下沉工作流翻牌,不代表 Henry 逐张批过**) | re: v2bn12-2b-2-fix | date: 2026-08-23
 
 # V2.BN.12.2b-2-fix:K-c12 的断言顺序截断了点名的 revert 后果
 

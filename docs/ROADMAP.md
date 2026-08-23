@@ -96,7 +96,20 @@
 | 12.2a-3 传输骨架 | ✅ done 2026-08-23 | 短笺(两问)→ S0 dialect → S1a `listNotes` 执行器提取 → S1 `/api/mcp`(Host/Origin → JWT → per-request server)→ K-0 端到端正控 + K-1…K-7 → S3 打包五步;复核 PASS 0/0/0/1L;SDK v2 精确安装;TD-14/16/17 登记 |
 | — | 发单前接口校订撞出两处脱节：工单点名的 `findOperationBatch` **全仓不存在**（守卫改挂真实 SELECT 处）；「工具收据不传 `created_at`」而**既有四处写入点尚未遵守**（本单只管新路径，存量归 TD-8） | ✅ |
 | — | **TD-8 清债(收据表时间戳统一)** ——Spark 样本单 + 只写测试的 fix 轮 | ✅ 已清（复核 PASS 0/0/0/0；18/18 INSERT 不传 `created_at`、migration 幂等、三条护栏各自可红；`test:v2` 270/270） |
-| 12.2a-3 | MCP transport 骨架＋`resolve_selection` | 方案短笺阶段（裁定方两问后放行） |
+| ~~12.2a-3~~ | ~~MCP transport 骨架＋`resolve_selection`~~ | ⛔ **本行已过期，被上方「12.2a-3 传输骨架 ✅ done」取代**（2026-08-23 Opus 记账时发现同一子版本两行状态相左，保留痕迹不删除） |
+
+#### 12.2b「首个写工具 ＋ 人审队列」（2026-08-23，五张施工单全部复核 PASS 并收口）
+
+| 步 | 内容 | 状态 |
+|---|---|---|
+| 12.2b-1 | 选门＋执行器提取（`trashNoteAsUser`／`restoreNoteAsUser` 落 service，routes 薄壳＋MCP binding 共用） | ✅ 闭环 |
+| 12.2b-2a | **人类门先行**（client 移入回收站／恢复 ＋ `POST /api/notes/:id/restore`）——发单前核出「client 对 `/api/notes/:id` 零调用」，按红线「Agent 能做的人类必须 100% 能做」先补人类侧 | ✅ 闭环 |
+| 12.2b-2b-1 | 写工具 `trash_notes`（`tier` 随入参算：n==1→immediate，n>1→confirm；`threshold.batch_field` 忠实投影） | ✅ 闭环（经 fix 一轮：canonical import 断言由 regex→结构法→**语义解析**，三轮才稳住） |
+| 12.2b-2b-2 | **MRTR confirm 往返**（`input_required` 表单；decline／cancel／confirm:false 三态同路径不同 `decision`，零执行零收据、绝不再问；accept 写真实 actual resources 以保 revert 可用） | ✅ 闭环（经 fix 一轮：K-c12 断言顺序截断了点名的 revert 后果） |
+| 12.2b-3 | 候选审阅队列（`GET`／`apply`／`dismiss` ＋ 最小队列页 ＋ revert 门；同单退役旧 `ProposalList` 面及两个孤儿，共 −1350 行） | ✅ 闭环（经 fix 一轮:**生产默认 executor 身份未锁** —— 注入的计数 wrapper 顶掉了它声称要验的分支） |
+| **12.2b-4** | **旅程实走**（走查单 A 六步＋B 四步已冻结、环境就绪） | ⏸ **待 Henry 本人登录一次**（密码不代输） |
+
+> **12.2b 的账**：5 张主单 ＋ 5 张修正单、复核 10 轮。**FAIL 全部为「方向成立」，且多数是测试强度问题 —— 产品方向零返工。** 四条探针分则（看不见／照见自己／挤掉本体／从未被要求看）、提交四查、机械锁协议均由这两天的具体事故长出并固化。
 
 > ⚠️ **合取约束（来自工单 01 二级复盘，03 合批的依据）**：症状「Page 死胡同」是 **RC-A.5 × RC-B.3 的合取** —— ghost 计入 prompt 计数（入口消失）＋ ghost 被 Page 策略过滤（内容不显示）。只修一边都能让**新** note 不复现，但各自留下**存量 legacy note 的半死状态**。两条须同批，或显式声明存量迁移路径。工单 03 以「同批 ＋ 存量迁移」双保险落实：`agent-ops/handoffs/2026-08-20-v2bn12-03-lifecycle-and-surface-authority.md`。
 
