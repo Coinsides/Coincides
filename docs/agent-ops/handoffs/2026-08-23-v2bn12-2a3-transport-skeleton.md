@@ -124,3 +124,61 @@
 **⭐ 写 `## Result` 是本单交付物之一,不需确认,直接写。**
 
 **回执须含**:**SDK 入口名的 `.d.ts` 核实输出**(硬闸)· S0 前后 manifest dialect 对照 · **七条 killer 各自的先红后绿两段输出**(K-1/K-2 须分别独立,不得合并)· S3 五步逐条证明(尤其第 3、5 步)· 门禁逐条收据 · 触及面 diff vs 短笺 §7 申报 · 显式范围排除 · **每条阴性断言的阳性对照**。
+
+## Result
+
+> Codex builder · 2026-08-23 · **needs: claude**。header 按 M-2 保持 `ready`;本节为 UTF-8 追加回执。未 commit、未 push、未碰 main。
+
+### 判定:开工前假设不成立,已停手
+
+本单要求 `list_notes` 的 executor binding 只能保存 `name -> function`,同时 C-6 明令 transport 不新增 schema/service/handler 逻辑。只读 CodeGraph 核查确认:
+
+- `server/src/routes/notes.ts:93-110` 的 `GET /api/notes` 是匿名 inline Express handler;`course_id/status` 校验、Project ownership、SQL 查询与 hydrate 都嵌在 route 内。
+- 同文件 `getOwnedCourse`(`:47-53`)与 `hydrateNote`(`:75-80`)均为私有函数,没有可供 MCP binding 调用的 executor export。
+- `server/src/toolFace/registry.ts:70-85` 只承载 `list_notes` 的权威 zod 与 manifest metadata,不承载 executor。
+- `client/src/pages/Courses/CourseDetail.tsx#fetchSummary` 只证明真实 REST client call site;它不能充当 server executor。
+- `server/src/services/**` 现状没有可复用的 `listNotes` domain service。
+
+短笺 §7 的本单授权面没有 `server/src/routes/notes.ts` 或 notes domain service。因而在当前授权与 C-6 内不存在健全的 `list_notes` binding:
+
+| 候选绕法 | 不采用的原因 |
+|---|---|
+| 在 `server/src/mcp/**` 重写 ownership/SQL/hydrate | 在 transport 复制业务 handler/service,违反 C-6,形成同类职责的平行机关 |
+| 读取 Express `router.stack` 或伪造 `req/res` 捕获 `res.json` | 依赖 Express 私有结构并自造响应 shim,不是可维护的同门 executor |
+| loopback HTTP 调现有 route | 引入二次网络调用并重新携带/校验 JWT,违反“只搬运已验证 `req.userId`、不二次验 JWT” |
+| 绑定 placeholder/只实现 `tools/list` | binding 名字虽相等,但 `tools/call` 不执行真实能力,会把骨架假装成闭环 |
+
+按 `handoffs/README.md`“spec 假设不符不要猜”及本单越界即停纪律,未选择任何绕法,在产品改动与依赖安装前停止。
+
+### 请求的最小补裁
+
+请 Claude/Fable 二选一明确施工正门:
+
+1. **扩触及面并允许零语义提取(建议)**:`server/src/routes/notes.ts` + `[待建] server/src/services/notes.ts`(或等价既有 domain 目录)+ 对应 REST/MCP 集成测试;把现有 ownership/query/hydrate 逐字等价抽成 `listNotes(db,userId,input)`,REST 与 MCP 共用同一 service。补裁应明确 C-6 禁止的是新增业务语义、第二 schema 与第二 handler,不禁止这次单一正门提取。
+2. **提供已存在、已授权的 executor 正门**:由上游先落可调用函数,本单只绑定它。
+
+若 C-6 连零语义 service 提取也禁止,则当前工单无实现路径。上述补裁不要求放松 H-1/H-2/H-3:schema 仍只来自 manifest,列表过滤仍只依赖 `exposure` 与 `__` 前缀,且不增加任何内存状态。
+
+### 硬闸与未执行项
+
+- **H-1/H-2/H-3 均未越过**:未在 transport 造 schema、工具白名单或内存状态;实际上未创建 transport 文件。
+- **SDK `.d.ts` 硬闸尚未进入**:`server/node_modules/@modelcontextprotocol` 当前为 `ABSENT`;因更早的 executor/授权阻塞,没有安装依赖、没有可诚实粘贴的本地 `.d.ts` 输出,也没有凭官方文档或记忆代替该收据。
+- **S0-S3 与 K-1…K-7 均未施工/未声称通过**;没有留下 dialect、manifest、build copy、loader、Express route、测试或生成件半成品。
+- 未声称 `scopes` 已强制(TD-14),也未代偿 TD-6、TD-8 残余或 TD-10;未声称 confirm 人审入口存在。
+
+### 探针、锁与触及面收据
+
+- 分支:`fable/v2-bn12-exoskeleton`。
+- 锁:`.codex-tmp/builder.lock.d/owner.json` 只读确认属于 `order=v2bn12-2a-3, dispatcher=opus`;未取锁、未写/覆盖 owner、未删锁。
+- `git diff --numstat 84c7fffc3393d181a17157678952b90682ce6c6f^ 84c7fffc3393d181a17157678952b90682ce6c6f -- client server shared ...` 阳性对照命中 `192\t0\tserver/src/services/toolFaceReceipts.ts`,证明同一类 numstat 探针可见产品改动。
+- 写本回执前,`git diff --numstat -- client server shared package*.json scripts/generate-tool-face-manifest.ts docs/generated/tool-face-manifest.json` 无记录;`git ls-files --others --exclude-standard` 无记录。
+- porcelain 所列三条 stat/EOL 假阳性经 HEAD/WORK blob 逐个相等确认:`useNoteCanvasRuntimeController.ts=3efe5f8…`,`notes.ts=2279742…`,`projections.ts=561902a…`;未把它们冒充 clean status或本单改动。
+- **实际触及面**:仅本 handoff 追加 `## Result`;短笺 §7 的产品面、S0 额外授权面、package/lock、schema/migration均未触及。
+
+### 写后核验
+
+- 严格 UTF-8 解码:`PASS`;首行仍含 `status: ready`;`## Result` 恰 1 处。
+- `npm.cmd run docs:check`:exit `0`。
+- `git diff --check`:exit `0`。
+- 全树 `git diff --numstat`:仅 `58\t0\tdocs/agent-ops/handoffs/2026-08-23-v2bn12-2a3-transport-skeleton.md`。
+- 产品/S0/package 指定面 `git diff --numstat`:无记录;untracked:无记录。
