@@ -1,4 +1,4 @@
-> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: done(复核 PASS 0B/0H/0M/0L @ 1c-fix Review,2026-08-22 Opus 翻牌;12.2a-1b 已复核 PASS 并接入主链,manifest 已在;Fable 放行 log 08-22 #9) | re: v2bn12-2a-1c | date: 2026-08-22
+> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: done(复核 PASS @ rfix1c Review,Fable 放行 log 08-22 #11;复核 PASS 0B/0H/0M/0L @ 1c-fix Review,2026-08-22 Opus 翻牌;12.2a-1b 已复核 PASS 并接入主链,manifest 已在;Fable 放行 log 08-22 #9) | re: v2bn12-2a-1c | date: 2026-08-22
 
 # V2.BN.12.2a-1c:机械门重写(只吃 manifest)
 

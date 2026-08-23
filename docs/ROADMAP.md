@@ -88,8 +88,11 @@
 | 02 | 工装单：测试 runner 最小集 + pure reducer，RED 前置 | ✅ 闭环（含 02.1 修正轮，checkpoint `41e6d1b`） |
 | 03 | **合批**：RC-A 生命周期状态机 ＋ RC-B surface authority ＋ 存量迁移（原拆 03/04，因下述合取约束并单，2026-08-20 Fable 拍定） | ✅ 闭环（五轮修理-复核收敛 03→03.4，全链二级复盘，checkpoint `b2a006b`；RED #1 已转绿） |
 | 05 | SlashSession（RC-D）＋ TD-3/TD-5 清偿 | ✅ 闭环（九轮修理-复核含两次设计介入，checkpoint `ad301c6`） |
-| 12.2a-1 | 工具注册表类型＋「无后门」机械门脚本（纯工装） | ready（Codex 周额刷新后开工；Spark 实测单） |
-| 12.2a-2 | 收据轴 `'mcp'/'proposed'`＋消费方不变式守卫 | ready（排 a-1 后） |
+| 12.2a-1 | 工具注册表＋机械门（**第一版 FAIL 方向不成立**：`new Function` 执行源码截片、对伪造 route/call-site 判绿） | ⛔ 方向重置，见下三行 |
+| 12.2a-1b | 注册表落 server（真 zod，复用既有 validator）＋ manifest 生成器（正常模块加载，zod→draft-07） | ✅ 闭环（复核 PASS；经 fix/fix2 两轮补 killer：投影忠实性、freshness、生产接线） |
+| 12.2a-1c | 机械门重写（**只吃 manifest**；AST 组合真实路由图，method 参与比较；三条 killer 独立可触发） | ✅ 闭环（复核 PASS 0/0/0/0；经 fix 一轮补 baseURL fail-closed 与裸 PASS 断言） |
+| — | **门外脚本归零**：`test:tool-face-parity` / `check:tool-face-parity` 已接入 `verify:v2-bn8-runtime`（全链 35s→42s） | ✅ |
+| 12.2a-2 | 收据轴 `'mcp'/'proposed'`＋消费方不变式守卫（规则：工具收据不传 `created_at`） | ready（下一张；发单前须核与 1b/1c 落地接口的一致性） |
 | 12.2a-3 | MCP transport 骨架＋`resolve_selection` | 方案短笺阶段（裁定方两问后放行） |
 
 > ⚠️ **合取约束（来自工单 01 二级复盘，03 合批的依据）**：症状「Page 死胡同」是 **RC-A.5 × RC-B.3 的合取** —— ghost 计入 prompt 计数（入口消失）＋ ghost 被 Page 策略过滤（内容不显示）。只修一边都能让**新** note 不复现，但各自留下**存量 legacy note 的半死状态**。两条须同批，或显式声明存量迁移路径。工单 03 以「同批 ＋ 存量迁移」双保险落实：`agent-ops/handoffs/2026-08-20-v2bn12-03-lifecycle-and-surface-authority.md`。
