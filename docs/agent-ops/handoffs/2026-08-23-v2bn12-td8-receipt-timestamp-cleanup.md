@@ -1,4 +1,4 @@
-> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: ready(Fable 裁定 log 08-22 #14;**Spark 样本单**) | re: v2bn12-td8-cleanup | date: 2026-08-23
+> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: done(复核 PASS 0/0/0/0 @ TD-8-fix Review,2026-08-23 Opus 翻牌;Fable 裁定 log 08-22 #14;**Spark 样本单**) | re: v2bn12-td8-cleanup | date: 2026-08-23
 
 # TD-8 清债:收据表时间戳统一(**位点拍死,零裁量**)
 

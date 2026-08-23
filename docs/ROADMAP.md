@@ -94,6 +94,7 @@
 | — | **门外脚本归零**：`test:tool-face-parity` / `check:tool-face-parity` 已接入 `verify:v2-bn8-runtime`（全链 35s→42s） | ✅ |
 | 12.2a-2 | 收据轴 `'mcp'/'proposed'`＋消费方不变式守卫（`toolFaceReceipts` 写 `source_type='mcp'`；`noteBlockLifecycle` 两条读取路径各挂守卫） | ✅ 闭环（复核有效基线 `84c7fff`：K1–K6 全杀、K7 零触及、server 267/267；**严格基线 `d799d50` 曾判 1 BLOCKER —— 窄 add 漏装 untracked 核心文件**） |
 | — | 发单前接口校订撞出两处脱节：工单点名的 `findOperationBatch` **全仓不存在**（守卫改挂真实 SELECT 处）；「工具收据不传 `created_at`」而**既有四处写入点尚未遵守**（本单只管新路径，存量归 TD-8） | ✅ |
+| — | **TD-8 清债(收据表时间戳统一)** ——Spark 样本单 + 只写测试的 fix 轮 | ✅ 已清（复核 PASS 0/0/0/0；18/18 INSERT 不传 `created_at`、migration 幂等、三条护栏各自可红；`test:v2` 270/270） |
 | 12.2a-3 | MCP transport 骨架＋`resolve_selection` | 方案短笺阶段（裁定方两问后放行） |
 
 > ⚠️ **合取约束（来自工单 01 二级复盘，03 合批的依据）**：症状「Page 死胡同」是 **RC-A.5 × RC-B.3 的合取** —— ghost 计入 prompt 计数（入口消失）＋ ghost 被 Page 策略过滤（内容不显示）。只修一边都能让**新** note 不复现，但各自留下**存量 legacy note 的半死状态**。两条须同批，或显式声明存量迁移路径。工单 03 以「同批 ＋ 存量迁移」双保险落实：`agent-ops/handoffs/2026-08-20-v2bn12-03-lifecycle-and-surface-authority.md`。
