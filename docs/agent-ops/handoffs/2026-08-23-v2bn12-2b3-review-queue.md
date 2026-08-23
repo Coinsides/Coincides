@@ -23,6 +23,7 @@
 | 3 | **`intended_input` 真在收据 metadata 里**:`toolFaceReceipts.ts:38` 类型 + `:136` 写入(`structuredClone`)。**apply 重放它。** |
 | 4 | ⛔ **`tool-receipts` 路由不存在** —— 全仓零命中。**b-3 须新建**,不是「接上已有的」。 |
 | 5 | **退役面**:`ProposalList.tsx` 住 `client/src/components/AgentPanel/`,**只被 `AgentPanel.tsx` 引用两处**(`:9` import、`:283` 渲染)。 |
+| 6b | ⭐ **`revert` 服务已含全部守卫,路由不存在**:`toolFaceReceiptRevert.ts:23` 起已做 ownership(403)/工具名(409)/状态(409) 三重校验并逐个 `restoreNoteAsUser`。**b-3 只需薄壳。** |
 | 6 | ⭐ **退役的连带**:`ProposalWeekEditor.tsx` **只被 `ProposalList.tsx` 引用**(`:6` import、`:272` 渲染)⇒ **退役 ProposalList 会让它变孤儿**;`proposalStore` 另有 `AgentPanel.tsx` 一个消费者(**不孤儿,不得删**)。 |
 
 ---
@@ -34,6 +35,7 @@
 | `GET /api/tool-receipts?status=proposed` | **仅本用户**。返回队列所需字段:收据 id / 工具名 / tier / `resources` / `intended_input` 摘要 / 时间 |
 | `POST /api/tool-receipts/:id/apply` | 用收据 `metadata.intended_input` **重放同一 binding 路径**,逐 id 经 **`trashNoteAsUser`**;成功 ⇒ `markToolFaceReceiptApplied`;**失败 ⇒ 收据不动、返回原因** |
 | `POST /api/tool-receipts/:id/dismiss` | `status` 新值 **`dismissed`** —— **词汇扩展,schema 零改动**(与 `proposed` 同法) |
+| `POST /api/tool-receipts/:id/revert` ⭐ | **薄壳调 `revertTrashNotesReceipt({userId, receiptId})`**。⚠️ **调度方亲验:该服务已自带全部守卫** —— ownership `403`、`metadata.tool !== 'trash_notes'` `409`、`status !== 'applied'` `409`。**⛔ 路由不得重复这些校验,也不得放宽任何一条** |
 
 ### ⛔ S1 的四条硬闸
 
@@ -75,6 +77,7 @@
 | **K-3** | apply 失败 ⇒ **收据不动** | 令失败路径顺手标 applied ⇒ 红 |
 | **K-4** | `dismiss` ⇒ status `dismissed`,**note 不受影响** | 令 dismiss 顺手执行 ⇒ 红 |
 | **K-5** | `GET` **只返回本用户** | 去掉 ownership 过滤 ⇒ 红 |
+| **K-5b** ⭐ | **revert 门端到端**:applied 收据 → `revert` → **note 真的回来了** + 收据 `reverted` | 令 revert 走 no-op ⇒ **红**;另:非本人 / 非 `trash_notes` / 非 `applied` 三种拒绝**各自可触发**(⛔ 不得合并成一个条件 —— 前身 S1 曾把条件写成恒假) |
 | **K-6** | 退役后 **`ProposalList` 全仓零引用** | 留任一引用 ⇒ 红(**阳性对照:先证探针能命中退役前的两处**) |
 
 **红的性质**:须来自「机关存在但被改坏」,**不得是 `ReferenceError`/`SyntaxError`/`ERR_MODULE_NOT_FOUND`**;HTTP 层 killer 须**从真实 Express 触发**。
@@ -83,7 +86,7 @@
 
 ## 边界
 
-**允许**:新建 `server/src/routes/toolReceipts.ts`(或等价)+ `server/src/index.ts` 挂载 · 新建客户端队列页与导航项 · 删除 `ProposalList.tsx`/`.module.css` 及其两处引用 · `ProposalWeekEditor` 的申报处置 · 相应测试。
+**允许**:新建 `server/src/routes/toolReceipts.ts`(或等价,**含 revert 薄壳**)+ `server/src/index.ts` 挂载 · 新建客户端队列页与导航项 · 删除 `ProposalList.tsx`/`.module.css` 及其两处引用 · `ProposalWeekEditor` 的申报处置 · 相应测试。
 
 **⛔ 不得**:改 `schema.sql`/migration · 改 `trashNoteAsUser`/`restoreNoteAsUser`/`revertTrashNotesReceipt` 的语义 · 删 `proposalStore` · 物理清旧 proposals 表/服务 · 碰 12.2a 已闭环面(registry/manifest/parity/transport)· 碰 12.1 线 / v1 其余线 · 做页边标记点 · 做 `resolve_selection`。
 
@@ -108,4 +111,4 @@
 **回执纪律**:README Builder 侧 1–3(含 **UTF-8**)+ **M-1 mutation 归复核方** + **M-2 header 不由你翻**。
 **⭐ 写 `## Result` 是本单交付物之一,不需确认,直接写。**
 
-**回执须含**:K-1…K-6 **各自**先红后绿两段输出(**K-1 端到端正控须证明 note 真的进了回收站**)· apply 走 `trashNoteAsUser` 的证明 · **`ProposalWeekEditor` 处置选择与理由** · 退役后 `ProposalList` 零引用的阳性对照 · 门禁逐条收据 · 触及面 diff vs 申报 · 显式范围排除 · **每条阴性断言的阳性对照**。
+**回执须含**:K-1…K-6(含 **K-5b**)**各自**先红后绿两段输出(**K-1 端到端正控须证明 note 真的进了回收站**)· apply 走 `trashNoteAsUser` 的证明 · **`ProposalWeekEditor` 处置选择与理由** · 退役后 `ProposalList` 零引用的阳性对照 · 门禁逐条收据 · 触及面 diff vs 申报 · 显式范围排除 · **每条阴性断言的阳性对照**。
