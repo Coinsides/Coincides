@@ -8,6 +8,25 @@ export interface ListNotesInput {
   status?: string;
 }
 
+interface NoteLifecycleTarget {
+  userId: string;
+  noteId: string;
+}
+
+export function trashNote({ userId, noteId }: NoteLifecycleTarget): void {
+  const now = new Date().toISOString();
+  getDb()
+    .prepare("UPDATE notes SET status = 'trashed', trashed_at = ?, updated_at = ? WHERE id = ? AND user_id = ?")
+    .run(now, now, noteId, userId);
+}
+
+export function restoreNote({ userId, noteId }: NoteLifecycleTarget): void {
+  const now = new Date().toISOString();
+  getDb()
+    .prepare("UPDATE notes SET status = 'active', trashed_at = NULL, updated_at = ? WHERE id = ? AND user_id = ?")
+    .run(now, noteId, userId);
+}
+
 export function listNotes({
   userId,
   courseId,

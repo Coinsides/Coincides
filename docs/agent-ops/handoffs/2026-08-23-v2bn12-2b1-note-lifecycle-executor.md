@@ -96,3 +96,57 @@ builder 停手成立:我点名的固定签名 `setNoteLifecycleStatus(status)` �
 3. **PUT 一字不动**(含 `archived` 分支与其取时语义)。PUT 的 status 分支与 `trashNote/restoreNote` **不同源**这一事实登记为 **TD-18**(「note patch 执行器未提取;PUT status 分支与生命周期执行器并存」),留待 note patch 整体提取时统一——**本单不得顺手做**。
 4. 测试按原单但范围收窄:①DELETE HTTP 正控 + 提取前 golden(字节等价);②**killer**:DELETE 内联回旧 UPDATE、绕过 `trashNote` → 红;③`trashNote`/`restoreNote` service 单测(真实临时 DB):trash 后 `status/trashed_at/updated_at` 形状与 DELETE 现行为一致(同一时间字符串);restore 后 `status='active'`、`trashed_at IS NULL`;非本用户 noteId 零影响;④PUT 既有行为不变(若无既有 PUT 测试,补一条 `{status:'active'}` 与 `{status:'trashed', title}` 混合 patch 的现行为 golden——**记录现行为,不改它**)。
 5. 边界不变(`services/notes.ts`、`routes/notes.ts` 仅 DELETE handler hunk、新测试、`server/package.json` 脚本)。其余硬闸照旧。**接续断点:门禁已跑的不重跑,按新合同施工后全门再跑一遍。**
+
+## Result — 续跑
+
+> Codex builder · 2026-08-23 · **完成，无 `needs`**。header 按补裁要求保持 `ready`；本节以 UTF-8 追加。未 commit、未 push、未碰 main、未写删 `.codex-tmp/builder.lock.d`。
+
+### 交付结果
+
+- 基线精确核对：分支 `fable/v2-bn12-exoskeleton`，`HEAD = 66afb829b9f8cff4e3ccc1e44268ad78a36ed564`。
+- `server/src/services/notes.ts` 新增两个单用途、`void` 返回的执行器：
+  - `trashNote({ userId, noteId })` 原样承接 DELETE 的 SQL；仍只取一个 `now`，并以同一字符串绑定 `trashed_at` 与 `updated_at`；`status = 'trashed'` 为字面量，`WHERE id = ? AND user_id = ?` 不变，不新增 ownership 查询、`changes` 校验或返回字段。
+  - `restoreNote({ userId, noteId })` 只执行 `status = 'active', trashed_at = NULL, updated_at = ? WHERE id = ? AND user_id = ?`；不新增 REST/MCP 入口。
+- `DELETE /api/notes/:id` 保留 `getOwnedNote → SourceProjection guard → executor → 原响应` 次序，只把内联 UPDATE 换成 `trashNote({ userId: req.userId!, noteId })`；响应字节仍为 `{"message":"Note moved to trash"}`。
+- `PUT /api/notes/:id` handler 一字未动。对基线与最终工作树分别按统一换行计算 handler SHA-256，二者均为 `6140c7351e061a18a6db23753c98ec3c7bbf146e1c97ddacf88b658387b23c61`。
+- 新建 `server/src/__tests__/v2NotesLifecycle.test.ts`（312 行）：真实 Express/TCP + 临时 SQLite，覆盖 DELETE raw bytes/写形、DELETE→`trashNote` 结构 killer、两个 service 的状态/时间/void/跨用户零影响、PUT active 恢复、PUT `{ status:'trashed', title }` 混合 patch，以及 PUT 源码 golden。
+
+### Golden 与 killer 红绿收据
+
+| 阶段 | 命令 | 结果 |
+|---|---|---|
+| 提取前 golden | server `node --import tsx --test src/__tests__/v2NotesLifecycle.test.ts`（仅 DELETE + 两条 PUT + PUT 指纹） | exit `0`，4/4；证明 golden 先在旧内联 DELETE 上成立 |
+| killer 红 | 同命令；加入 DELETE 同源 killer，产品仍为旧内联 UPDATE | exit `1`，4/5；唯一失败为 route 没有 `trashNote` import/call |
+| 提取后 killer 绿 | 同命令；`trashNote` 提取并薄化 DELETE 后 | exit `0`，5/5 |
+| service 覆盖补齐 | 同命令；加入 `trashNote`/`restoreNote` 与跨用户用例后 | exit `0`，7/7 |
+| 最终专项门 | 全门第 7 项再次单跑 | exit `0`，7/7 |
+
+该红灯就是补裁点名的反面形状：DELETE 内联旧 UPDATE、绕过 `trashNote`。最终 killer 先在 route 源码中命中已知存在的 DELETE handler 与 service 调用，再断言 handler 内没有 `UPDATE notes` / `.prepare(`；把调用换回旧 UPDATE（即使保留 import）会红。探针读取的是生产 route，不是测试自身 fixture/文字。
+
+### 平行机关与 TD-18 申报
+
+`restoreNote` 是新增的同类生命周期机关；既有正门不够的原因由补裁明确给出：现 PUT 允许 status 与普通字段在一条动态 UPDATE 中混合提交，复用 status-only executor 会改变 SQL 形状、原子性和取时语义。因此本单按补裁拆成两个单用途 executor，同时让人类恢复继续走原 PUT，不另造 REST 入口；这不是把 PUT 悄悄复制一份。
+
+按 `§补裁`，PUT patch 与两个 lifecycle executor 的并存事实编号为 **TD-18**，现有字据就在该补裁。允许边界重申“不变”且不含 `current-state/tech-debt.md`，所以本续跑没有越界把该编号再抄入登记册；阳性探针先命中登记册 `TD-17`，再确认其中 `TD-18` 当前为 0 行。
+
+### 最终门禁收据（修复后从 docs-first 重新起跑）
+
+| 次序 | 门 | 结果 |
+|---:|---|---|
+| 1 | root `npm.cmd run docs:check` | exit `0` |
+| 2 | root `npm.cmd run verify:v2-bn8-runtime` | exit `0`；含 client 19 files / 209 tests、双 build、manifest/parity/runtime/docs/diff/secrets 全链 |
+| 3 | client `npm.cmd exec tsc -- --noEmit` | exit `0` |
+| 4 | server `npm.cmd exec tsc -- --noEmit` | exit `0` |
+| 5 | root `npm.cmd run test:unit` | exit `0`；19 files，209/209 |
+| 6 | server `npm.cmd run test:v2`，独立 `CANVAS_ASSET_DIR` | exit `0`；270/270；唯一叶目录 `v2-notes-lifecycle-assets-4cc22cd57c524bbeaac0e69bc190a93e` 残留 `0`，核空后仅非递归删除空叶 |
+| 7 | server `node --import tsx --test src/__tests__/v2NotesLifecycle.test.ts` | exit `0`；7/7 |
+
+第一次尝试最终第 2 门时，主链在 server build 发现新测试 helper 的 TypeScript 收窄错误（`TS2769`，`assert.equal(typeof value, 'string')` 不承载 narrowing），exit `1`；只把测试 helper 改为显式 null 失败分支，server `tsc --noEmit` 先验 exit `0`，随后从第 1 门重新跑出上表完整绿链。没有把这次失败写成门禁通过。
+
+### 触及面、边界与阴性收据
+
+- `git show --numstat --format= 66afb82` 阳性对照先看见基线提交的 2 个已知文档差分；回执写入前，tracked 产品 diff 为 `routes/notes.ts 2+/5-`、`services/notes.ts 19+/0-`。`git diff --numstat` 不显示 untracked，故另以 porcelain 明确看见 `?? server/src/__tests__/v2NotesLifecycle.test.ts`（312 行），未漏报新文件。
+- `routes/notes.ts` diff 只有 service import 与 DELETE handler 两个 hunk；`services/notes.ts` 只有两个 executor 与共享输入类型。`server/package.json` 未改（工单已给专项单跑命令，无需新增脚本）。
+- 两条工单声明的 EOL/stat 假阳性仍无内容差分：`useNoteCanvasRuntimeController.ts` 的 index/filtered-worktree blob 同为 `3efe5f82...`，`routes/projections.ts` 同为 `561902a4...`；两者 `git diff --numstat` / `--name-only` 为空。
+- 显式排除：未新增 MCP binding；未改 registry/manifest/transport；未碰 note_blocks、canvasObjects、schema/migration、收据写入、`getOwnedCourse`/`hydrateNote`、PUT handler、`current-state/tech-debt.md` 或 `server/package.json`。
+- 锁只读复核仍为 `work_order=v2bn12-2b-1 resume`、`dispatcher=fable`；未覆盖 owner、未删锁。最终隔离资产叶目录计数为 0。
