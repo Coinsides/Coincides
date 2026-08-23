@@ -27,7 +27,7 @@ b-2b-1 复核判 **FAIL(方向成立)** 0B/0H/**1M**/1L。**产品侧全部成�
 
 ---
 
-## 交付物:一个泛化 helper + 五条断言
+## 交付物:一个泛化 helper + **六条**断言
 
 ### G-1 helper
 
@@ -45,15 +45,27 @@ assertCanonicalNamedImport(file, symbol, fromModule)
 > ⛔ **必须用 AST**(`ts.ImportDeclaration` / `ts.ImportSpecifier` / `propertyName`),**不得用 regex**。
 > 📌 **可复用现有 program/checker 基础设施**(该测试文件已有);**不得另建第二套 AST 工具**。
 
-### G-2 五条断言
+### G-2 六条断言(**已勘误**)
 
-| # | 文件 | 符号 | 来源 |
-|---|---|---|---|
-| 1 | `server/src/routes/notes.ts` | `listNotes` | `../services/notes.js` |
-| 2 | `server/src/routes/notes.ts` | `trashNoteAsUser` | 同上 |
-| 3 | `server/src/routes/notes.ts` | `restoreNoteAsUser` | 同上 |
-| 4 | `server/src/mcp/bindings.ts` | `trashNoteAsUser` | `../services/notes.js` |
-| 5 | `server/src/mcp/bindings.ts` | `restoreNoteAsUser` | 同上 |
+> ## ⚠️ 勘误(2026-08-23,builder 停手后调度方亲验)
+>
+> **原表第 5 条「`mcp/bindings.ts` → `restoreNoteAsUser`」不存在。** `bindings.ts` 的实际 import 只有一行:`import { listNotes, trashNoteAsUser } from '../services/notes.js';`。
+> **⇒ 这是调度方的合同错**:我抄了裁定措辞「bindings.ts 的两个 AsUser」,**没核 `bindings.ts` 到底 import 了什么**。**builder 停手正确** —— 按原表写会在正确基线上直接红,让它变绿只能新增无用途 import,那才是真越界。
+>
+> 📌 **另记一个探针教训**:我第一次核对时用单行 regex,把 `routes/notes.ts` 的三条**误判为「不存在」** —— 该文件用的是**多行 import**。**判 import 存在性不得用单行 regex。**
+
+| # | 文件 | 符号 | 来源 | 形式 |
+|---|---|---|---|---|
+| 1 | `server/src/routes/notes.ts` | `listNotes` | `../services/notes.js` | 多行 import |
+| 2 | `server/src/routes/notes.ts` | `trashNoteAsUser` | 同上 | 多行 import |
+| 3 | `server/src/routes/notes.ts` | `restoreNoteAsUser` | 同上 | 多行 import |
+| 4 | `server/src/mcp/bindings.ts` | `listNotes` | `../services/notes.js` | 单行 import |
+| 5 | `server/src/mcp/bindings.ts` | `trashNoteAsUser` | 同上 | 单行 import |
+| **6 ⭐** | **`server/src/services/toolFaceReceiptRevert.ts`** | **`restoreNoteAsUser`** | **`./notes.js`** | 单行 import |
+
+> ⭐ **第 6 条是调度方追加的**:`restoreNoteAsUser` 的真实第二消费者是 `toolFaceReceiptRevert.ts:2`(builder 停手时指出)。**它比我原写的那条更该守** —— revert 门若被换成复制模块的实现,「撤销走同一执行体」这条就断了,而那正是 b-2b-1 补裁的核心。
+>
+> **⚠️ 注意 helper 的第三参数**:该文件在 `services/` 内,来源是 **`./notes.js`** 而非 `../services/notes.js`。**须按实际 specifier 解析后比对,不得按字符串相等判**。
 
 ⚠️ **route 侧既有的 `assertListNotesRouteUsesCanonicalService` 保留** —— 它验的是**「`res.json` 的实参确实调用了那个 binding symbol」**,与 import 规范性**是两件事**。**⛔ 不得用新 helper 替换它。**
 
@@ -103,7 +115,7 @@ b-2b-1 的 Result 把**行数**当 `numstat` 报。**本单回执请用 `git dif
 **回执纪律**:README Builder 侧 1–3(含 **UTF-8**)+ **M-1 mutation 归复核方** + **M-2 header 不由你翻**。
 **⭐ 写 `## Result` 是本单交付物之一,不需确认,直接写。**
 
-**回执须含**:helper 的三条语义如何各自实现(逐条)· **M-a/M-b/M-c 三刀各自的先红后绿两段输出**(**M-c 须复刻复核 T7 的 alias+copy 反例**)· 五条断言逐条列出 · 既有 `assertListNotesRouteUsesCanonicalService` **未被替换**的证明 · 产品码 diff=0 + 阳性对照 · 若建 fixture 模块须证明已清理 · 门禁逐条收据 · 触及面 diff vs 申报 · 显式范围排除。
+**回执须含**:helper 的三条语义如何各自实现(逐条)· **M-a/M-b/M-c 三刀各自的先红后绿两段输出**(**M-c 须复刻复核 T7 的 alias+copy 反例**)· **六条断言逐条列出**(含勘误后的第 4/5 条与新增第 6 条)· 既有 `assertListNotesRouteUsesCanonicalService` **未被替换**的证明 · 产品码 diff=0 + 阳性对照 · 若建 fixture 模块须证明已清理 · 门禁逐条收据 · 触及面 diff vs 申报 · 显式范围排除。
 
 ## Result
 
