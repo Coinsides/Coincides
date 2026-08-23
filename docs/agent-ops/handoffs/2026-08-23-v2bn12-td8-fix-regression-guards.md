@@ -222,3 +222,114 @@ PowerShell 直接调用 `npm` 会被 execution policy 拦截,故正式收据一�
 显式排除:未改任何产品语义、048 migration 本体或 schema;未碰 client、v1、03/05 Slash/rollback hunk、其他 12.2 面、生产 DB、main;未取锁、未写/删 `owner.json`、未改 header;未 commit、未 push、未 PR/merge。
 
 补充 stat/EOL 收据:mutation 自查触碰过 `routes/notes.ts` 与 `routes/projections.ts` 的工作树时间/EOL 状态,只读 index 下 porcelain 最终将两者显示为 `.M`;但两文件逐个 `git diff --quiet` 均 exit 0、`git diff --numstat` 均为空,且 filtered blob hash 分别与 HEAD 完全相同(`22797422...` / `561902a4...`)。因此这是与题示 client 路径同性质的 stat/EOL 假阳性,不是产品内容改动。
+
+## Review
+
+- **Reviewer**:Codex reviewer(洁净室复核)
+- **日期**:2026-08-23
+- **判定**:**PASS — 0 BLOCKER / 0 HIGH / 0 MEDIUM / 0 LOW**
+- **实现基线**:`32d929e`(`32d929ece5a707031e522cbb14b3a94aa4d33e4a`)
+- **修正前基线**:`e769f97`
+
+### 增量协议与结论
+
+按 reviewer charter 5-7,本轮以 TD-8 主单 `## Review` 的 R1–R7 为已验基线,只重新承重 F-1/F-2/F-3、`e769f97..32d929e` 差分面、全门,以及 5-2 的跨条合取。F-4 是上一轮 LOW 的收据数字/措辞问题,不属于本修正单三条 MEDIUM 的修正目标,本轮未把它包装成重新裁定项。
+
+结论:F-1/F-2/F-3 均已封住。builder `## Result` 只用作位点导航;以下因果判定全部来自 reviewer 在 exact commit 上的静态核对、常驻正控、逐点 mutation 和全门亲跑。
+
+### S1–S5 点名 mutation
+
+所有刀均在 `$TMPDIR` 的独立 detached clone 中施加。每刀先确认 mutant 的 server `tsc --noEmit` exit 0,再看承重测试因正确理由变红,随后用反向 patch 恢复并让同一测试回绿。notes 与 projections 两个同形位点分别施刀,未抽样。
+
+| 位点 | mutation 与承重测试 | RED 收据 | 恢复收据 |
+|---|---|---|---|
+| S1 `server/src/routes/notes.ts:68` | `INSERT ... .run()` 少传末尾 `now`;单跑 notes 真实 Express/临时 DB 正控 | `tsc` exit 0;测试 exit 1;`v2NoteBlockLifecycle.test.ts:112` 红在 HTTP status,actual `500`,expected `201`;`RangeError: Too few parameter values` 被 error middleware 转成 500,进程未崩溃 | 反向 patch 后同一测试 exit 0,1/1 |
+| S2 `server/src/routes/projections.ts:46` | 同形 `.run()` 少传末尾 `now`;单跑 projections 正控 | `tsc` exit 0;测试 exit 1;同文件 `:141` 红在 HTTP status,actual `500`,expected `201`;同为受控 500 | 恢复后 exit 0,1/1 |
+| S3 `server/src/services/learningCanvases.ts:299` | 把 `applied_at` 写回 `datetime('now')`,并少传对应应用时钟实参 | `tsc` exit 0;测试 exit 1;`v2MaterialLibrary.test.ts:2139` 红在 `applied_at` ISO 哨兵格式,actual `2026-08-23 06:45:09` 不匹配 ISO-Z regex;不是无关业务断言 | 恢复后 exit 0,1/1 |
+| S4 `server/src/db/migrations/048_normalize_operation_batch_timestamps.ts` | 删除 `WHERE created_at LIKE '%T%Z'` | `tsc` exit 0;测试 exit 1;`v2OperationBatchTimestampMigration.test.ts:99` 首刀审计计数 actual `105`,expected `2` | 恢复后 exit 0,1/1 |
+| S5 同一 048 位点 | 令谓词在重武装后再次命中两个目标行,保留首刀 2 但破坏幂等 | `tsc` exit 0;测试 exit 1;同文件 `:126` 次刀计数 actual `2`,expected `0` | 恢复后 exit 0,1/1 |
+
+施刀前常驻正控分别为 G-1 `2/2`、G-2 `1/1`、G-3 `1/1`,均 exit 0。G-1 两条测试挂真实 router/error middleware,实际 POST 后联结 `operation_batches`,检查 `source_type`、`status` 及两种时间格式;G-2 同时检查 SQLite 空格格式的 `created_at`/DB 时钟窗口和冻结 ISO-Z 哨兵的 `applied_at`;G-3 从生产 `runMigrations` 入口运行严格 `103 + 2` 夹具,并承重首刀 2、次刀 0、103 行原字节不变及排序反例消失。
+
+全部施刀结束后,四个被改产品文件的 filtered hash 均与 `32d929e` HEAD 相同,`git diff --numstat` 为空、`git diff --quiet` exit 0、`git diff --check` exit 0。隔离 clone 的 porcelain 曾只显示 `routes/notes.ts` `.M`,但其 numstat 为空且 blob hash 相同,判为 clone 内 EOL/stat 假阳性,不冒充内容差分。
+
+### S6 隔离性评估
+
+- **Date 冻结不泄漏**:G-2 没有手写 `try/finally` reset,但 mock 归属于 Node `TestContext` 的 `t.mock`,会在用例结束时自动恢复。Reviewer 在同机 Node `v22.22.1` 做了“冻结后故意失败(TODO)→紧邻 sibling 检查”探针;后一个 sibling 通过且看不到哨兵,总命令 exit 0。目标文件未启用并发用例,完整 `v2MaterialLibrary`/`test:v2` 也通过,故不构成泄漏 finding。
+- **TEMP trigger 只计目标表/列**:触发器是 `AFTER UPDATE OF created_at ON operation_batches`。同一计数探针先由目标表 no-op UPDATE 写入 1 条 audit 阳性,再更新无关表得到 0;因此不会把其他表 UPDATE 混入。G-3 常驻测试也在阴性判断前用目标表 no-op UPDATE 证明 trigger 可见。
+
+### 差分与产品码零改动
+
+`git diff --numstat e769f97..32d929e` 完整输出:
+
+```text
+122  0  docs/agent-ops/handoffs/2026-08-23-v2bn12-td8-fix-regression-guards.md
+2    2  server/package.json
+130  0  server/scripts/v2OperationBatchTimestampMigration.test.ts
+24   1  server/src/__tests__/v2MaterialLibrary.test.ts
+59   0  server/src/__tests__/v2NoteBlockLifecycle.test.ts
+```
+
+第一行是本修正单自身及 builder `## Result` 收据;除该必需工单收据外,代码差分面仅三个测试文件与 `server/package.json` 测试接线。对 `client/src server/src` 排除 `server/src/__tests__/**` 后,同一 numstat 探针输出为空,`git diff --quiet` exit 0,故**产品码 numstat = 0**;`git diff --check` exit 0。没有任何 `server/src` 非 `__tests__` 产品文件进入本轮实现差分。
+
+反面分则的非自写阳性如下:
+
+- 产品零差分前,同一 `git diff --numstat` 探针先在历史 TD-8 实现范围 `ee4edec..81198f1` 的 `learningCanvases.ts` 命中 `3/2`;该阳性来自既有实现 commit,不是 reviewer mutation。
+- reparse 阴性前,同一属性探针先在系统维护的 `C:\Users\70208\AppData\Local\Application Data` 看见 `ReparsePoint`,再对隔离 clone 得到 0;该阳性由系统目录写入。
+- trigger 范围阴性前,同一 audit 计数器先见目标表 UPDATE 产生的 1;字符串/行由已提交测试夹具触发 TEMP trigger 写入,不是 S4/S5 mutation 伪造。
+- 清理阴性前,同一路径探针先确认 clone `exists=True` 且 HEAD 为 `32d929e`,删除后才记 `exists_after=False`。
+
+### docs-first 全门
+
+| 顺序 | 门/命令 | Reviewer 结果 |
+|---:|---|---|
+| 1 | root `npm.cmd run docs:check` | exit 0 |
+| 2a | root `npm.cmd run verify:v2-bn8-runtime`,原始长 `$TMPDIR` 路径 | exit 1;Vite/esbuild 向父路径做 realpath 时 `Access is denied`,发生在测试装载前,记为 setup false-red,不冒充门通过 |
+| 2b | 同一 clone 映射临时盘符后重跑 `verify:v2-bn8-runtime` | exit 0;完整 runtime/tool-face/build/docs/diff/secret 门通过 |
+| 3a | client `.\node_modules\.bin\tsc.cmd --noEmit` | exit 0 |
+| 3b | server `.\node_modules\.bin\tsc.cmd --noEmit` | exit 0 |
+| 4 | root `npm.cmd run test:unit` | exit 0;19 files / 209 tests |
+| 5a | server `npm.cmd run test:v2`,默认资产目录 | exit 0;270/270,约 12.3s;TD-12 所记/本单 builder 复现的 5 个 EPERM 本机本轮未复现 |
+| 5b | server `test:v2`,在进程启动前注入两个独立绝对资产目录 | exit 0;270/270,约 12.6s |
+| 6.1 | root `npm.cmd run test:tool-face-registry` | exit 0;3/3 |
+| 6.2 | root `npm.cmd run test:tool-face-manifest` | exit 0;6/6 |
+| 6.3 | root `npm.cmd run check:tool-face-manifest` | exit 0;1 public entry |
+| 6.4 | root `npm.cmd run test:tool-face-parity` | exit 0;10/10 |
+| 6.5 | root `npm.cmd run check:tool-face-parity` | exit 0;1 public entry |
+| 7 | server `npm.cmd run test:v2-bn12-migration` | exit 0;6/6(既有 5 + 新增 1) |
+| 8 | server `node --import tsx --test scripts/v2OperationBatchTimestampMigration.test.ts` | exit 0;1/1 |
+
+2b 只在可抛弃 clone 的 ignored `client/node_modules/vite/...` 中暂时关闭 native realpath,以绕过沙箱父路径拒绝;文件随后恢复到原 SHA-256 `BFA94186DAFF535FEFDF286088C1588FAD6B02C01EF11CD3B42A6CB3E4C90767`,没有改源码或常驻测试。临时 `subst R:` 在门后删除。5a 是按要求保留的默认目录对照:本轮默认门通过说明 TD-12 环境故障未复现,不推翻其环境债登记;5b 仍以隔离资产目录独立通过。
+
+### 5-2 跨条与 5-10 同形覆盖
+
+主单 R1 旧结论为 16/18。承载 18 个 production INSERT 的 15 个源文件在 `81198f1` 与 `32d929e` 逐 blob 核对为 15/15 SAME,所以旧 16 处指纹未漂移;本轮再以 S1 notes 与 S2 projections 两处各自的正确 RED 补齐剩余 2 处,结论为 **18/18**。这是逐处覆盖,不是从两个同形位点抽样一个。
+
+接线也不是 focused-only:G-1/G-2 所在常驻测试文件已被完整 server `test:v2` 执行;G-3 新脚本同时接入 `test:v2-bn12-migration` 与完整 `test:v2`,并在本轮 270/270 和 6/6 中实际执行。三条 guard 的合取状态与单跑结果一致。
+
+### 5-1 完备性、范围排除与边界
+
+已取证项:charter 全条款、主单 Review R1–R7、修正单全文/Result、exact baseline 与 pre-fix 差分、测试接线、三条常驻正控、S1–S5 全部点名 mutation、S6 两项隔离探针、18/18 指纹/逐点合取、docs-first 全门、默认与隔离资产对照、清理前后路径及共享树阴性。没有用 builder 自测替代 reviewer 因果证据。
+
+显式范围排除:
+
+- R1–R7 中与 F-1/F-2/F-3 和 5-2 无关的既有因果链按增量协议继承,没有无谓重演;F-4 未重裁。
+- 未做 UI/browser/manual journey:本单只写后端/迁移回归测试,产品码为零,UI 路径不承载本轮判定。
+- 未碰生产 DB 或 live deployment:全部 DB 证据来自临时文件/内存夹具,已经走真实 Express、生产 migration runner 与完整测试门;生产资产既不必要也在边界外。
+- 未扩审 v1、未点名的 12.2 产品行为、主观产品验收或发布状态;这些不承载“回归 guard 是否封口”的判定。
+
+Reviewer 未改产品代码、常驻测试、schema、048 本体或 client;未碰 main、handoff header、`.codex-tmp/builder.lock.d` 或生产 DB;未 commit、push、PR/merge。共享树唯一新增内容是 UTF-8 追加本 `## Review`;题示三处既有 porcelain `.M` 在开工前已经存在且 numstat 为空,未被当成 reviewer 改动。
+
+### 5-9 隔离树自清收据
+
+原生 `git worktree add` 因共享 `.git/worktrees` 只读而在创建前 exit 128,未留下 worktree 注册或目标目录;随后按 charter fallback 使用独立 clone:
+
+- 路径:`C:\Users\70208\AppData\Local\Temp\coincides-td8-fix-review-1787467246410-9192eeb0`;
+- detached HEAD:`32d929ece5a707031e522cbb14b3a94aa4d33e4a`;
+- client/server 均执行独立 `npm.cmd ci --offline`;安装前后递归 reparse count 都为 0,未建 junction/symlink,未共享 `node_modules`;
+- 每刀均反向 patch;最终 filtered 内容 diff 为零。临时 Vite dependency shim 恢复原 hash,所有 `subst` 映射已删;
+- 隔离资产目录 `...td8-fix-assets-1787467824106-9a5906` 与 `...td8-fix-source-1787467824106-9a5906` 均先确认空目录后删除,`exists_after=False`;
+- clone 首次递归删除被只读 Git pack 拒绝,当时探针仍为 `exists=True`,未误记完成;仅在复验绝对路径、`$TMPDIR` 前缀及 reparse count 0 后清除该 clone 内只读属性并重试。最终 clone `exists_after=False`,`coincides-td8-fix-review-*` 残留数 0;
+- 共享 client/server `node_modules` 顶层计数删除前后保持 153/183,共享树未被隔离清理触及。
+
+因此隔离树、临时资产和映射均已自清,无 junction,无常驻 mutation 残留。
