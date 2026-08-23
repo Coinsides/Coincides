@@ -1,4 +1,4 @@
-> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: ready(设计裁定:design §11 九项,Fable log 08-23 #7) | re: v2bn12-2a-3 | date: 2026-08-23
+> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: done(复核 PASS 0/0/0/1L @ r2a3 Review,Fable 放行 log 08-23 #12;Fable 代 Opus 翻牌,Opus 会话阻塞) | re: v2bn12-2a-3 | date: 2026-08-23
 
 # V2.BN.12.2a-3:MCP transport 骨架(S0→S3 四步)
 
