@@ -129,6 +129,138 @@ function normalizedSourcePath(path: string): string {
   return resolve(path).replace(/\\/g, '/').toLowerCase();
 }
 
+interface ServerTypeScriptContext {
+  program: ts.Program;
+  checker: ts.TypeChecker;
+  compilerOptions: ts.CompilerOptions;
+}
+
+let serverTypeScriptContext: ServerTypeScriptContext | undefined;
+
+function getServerTypeScriptContext(): ServerTypeScriptContext {
+  if (serverTypeScriptContext) return serverTypeScriptContext;
+
+  const configPath = resolve(REPO_ROOT, 'server/tsconfig.json');
+  const configFile = ts.readConfigFile(configPath, ts.sys.readFile);
+  if (configFile.error) {
+    assert.fail(ts.flattenDiagnosticMessageText(configFile.error.messageText, '\n'));
+  }
+  const parsedConfig = ts.parseJsonConfigFileContent(
+    configFile.config,
+    ts.sys,
+    dirname(configPath),
+    undefined,
+    configPath,
+  );
+  assert.deepEqual(
+    parsedConfig.errors.map((error) => ts.flattenDiagnosticMessageText(error.messageText, '\n')),
+    [],
+    'server tsconfig must parse before checking canonical imports',
+  );
+
+  const program = ts.createProgram(parsedConfig.fileNames, parsedConfig.options);
+  serverTypeScriptContext = {
+    program,
+    checker: program.getTypeChecker(),
+    compilerOptions: parsedConfig.options,
+  };
+  return serverTypeScriptContext;
+}
+
+type MatchingImportBinding =
+  | {
+    kind: 'named';
+    declaration: ts.ImportDeclaration;
+    specifier: ts.ImportSpecifier;
+  }
+  | {
+    kind: 'other';
+    identifier: ts.Identifier;
+  };
+
+function assertCanonicalNamedImport(file: string, symbol: string, fromModule: string): void {
+  const { program, checker, compilerOptions } = getServerTypeScriptContext();
+  const filePath = resolve(REPO_ROOT, file);
+  const sourceFile = program.getSourceFiles().find(
+    (candidate) => normalizedSourcePath(candidate.fileName) === normalizedSourcePath(filePath),
+  );
+  assert.ok(sourceFile, `${file} must be part of the server TypeScript program`);
+
+  const matchingBindings: MatchingImportBinding[] = [];
+  for (const statement of sourceFile.statements) {
+    if (ts.isImportEqualsDeclaration(statement)) {
+      if (statement.name.text === symbol) {
+        matchingBindings.push({ kind: 'other', identifier: statement.name });
+      }
+      continue;
+    }
+    if (!ts.isImportDeclaration(statement) || !statement.importClause) continue;
+
+    if (statement.importClause.name?.text === symbol) {
+      matchingBindings.push({ kind: 'other', identifier: statement.importClause.name });
+    }
+    const { namedBindings } = statement.importClause;
+    if (!namedBindings) continue;
+    if (ts.isNamespaceImport(namedBindings)) {
+      if (namedBindings.name.text === symbol) {
+        matchingBindings.push({ kind: 'other', identifier: namedBindings.name });
+      }
+      continue;
+    }
+    for (const specifier of namedBindings.elements) {
+      const importedName = specifier.propertyName?.text ?? specifier.name.text;
+      if (importedName === symbol || specifier.name.text === symbol) {
+        matchingBindings.push({ kind: 'named', declaration: statement, specifier });
+      }
+    }
+  }
+
+  assert.equal(
+    matchingBindings.length,
+    1,
+    `${file} must have exactly one import binding for ${symbol}`,
+  );
+  const [binding] = matchingBindings;
+  assert.ok(binding.kind === 'named', `${file} must import ${symbol} with a named import`);
+  assert.ok(
+    binding.specifier.propertyName === undefined,
+    `${file} must import ${symbol} without an alias`,
+  );
+  assert.equal(
+    binding.specifier.name.text,
+    symbol,
+    `${file} must bind the unaliased ${symbol} name`,
+  );
+  assert.ok(
+    checker.getSymbolAtLocation(binding.specifier.name),
+    `${file} ${symbol} import binding symbol must resolve`,
+  );
+  assert.ok(
+    ts.isStringLiteral(binding.declaration.moduleSpecifier),
+    `${file} ${symbol} import source must be a string literal`,
+  );
+
+  const actualImport = ts.resolveModuleName(
+    binding.declaration.moduleSpecifier.text,
+    filePath,
+    compilerOptions,
+    ts.sys,
+  ).resolvedModule;
+  const expectedImport = ts.resolveModuleName(
+    fromModule,
+    filePath,
+    compilerOptions,
+    ts.sys,
+  ).resolvedModule;
+  assert.ok(actualImport, `${file} ${symbol} import source must resolve`);
+  assert.ok(expectedImport, `${file} expected source ${fromModule} must resolve`);
+  assert.equal(
+    normalizedSourcePath(actualImport.resolvedFileName),
+    normalizedSourcePath(expectedImport.resolvedFileName),
+    `${file} must import ${symbol} directly from ${fromModule}`,
+  );
+}
+
 function isLexicalBindingIdentifier(node: ts.Identifier): boolean {
   const parent = node.parent;
   return (
@@ -150,26 +282,7 @@ function isLexicalBindingIdentifier(node: ts.Identifier): boolean {
 }
 
 function assertListNotesRouteUsesCanonicalService(): void {
-  const configPath = resolve(REPO_ROOT, 'server/tsconfig.json');
-  const configFile = ts.readConfigFile(configPath, ts.sys.readFile);
-  if (configFile.error) {
-    assert.fail(ts.flattenDiagnosticMessageText(configFile.error.messageText, '\n'));
-  }
-  const parsedConfig = ts.parseJsonConfigFileContent(
-    configFile.config,
-    ts.sys,
-    dirname(configPath),
-    undefined,
-    configPath,
-  );
-  assert.deepEqual(
-    parsedConfig.errors.map((error) => ts.flattenDiagnosticMessageText(error.messageText, '\n')),
-    [],
-    'server tsconfig must parse before checking the route binding',
-  );
-
-  const program = ts.createProgram(parsedConfig.fileNames, parsedConfig.options);
-  const checker = program.getTypeChecker();
+  const { program, checker, compilerOptions } = getServerTypeScriptContext();
   const routePath = resolve(REPO_ROOT, 'server/src/routes/notes.ts');
   const canonicalServicePath = resolve(REPO_ROOT, 'server/src/services/notes.ts');
   const routeSource = program.getSourceFiles().find(
@@ -213,7 +326,7 @@ function assertListNotesRouteUsesCanonicalService(): void {
   const resolvedImport = ts.resolveModuleName(
     listNotesImport.moduleSpecifier.text,
     routePath,
-    parsedConfig.options,
+    compilerOptions,
     ts.sys,
   ).resolvedModule;
   assert.ok(resolvedImport, 'listNotes import source must resolve');
@@ -317,9 +430,14 @@ function assertListNotesRouteUsesCanonicalService(): void {
 
 test('A-1 route and MCP binding both call the same listNotes service export', () => {
   assertListNotesRouteUsesCanonicalService();
+  assertCanonicalNamedImport('server/src/routes/notes.ts', 'listNotes', '../services/notes.js');
+  assertCanonicalNamedImport('server/src/routes/notes.ts', 'trashNoteAsUser', '../services/notes.js');
+  assertCanonicalNamedImport('server/src/routes/notes.ts', 'restoreNoteAsUser', '../services/notes.js');
+  assertCanonicalNamedImport('server/src/mcp/bindings.ts', 'listNotes', '../services/notes.js');
+  assertCanonicalNamedImport('server/src/mcp/bindings.ts', 'trashNoteAsUser', '../services/notes.js');
+  assertCanonicalNamedImport('server/src/services/toolFaceReceiptRevert.ts', 'restoreNoteAsUser', './notes.js');
 
   const bindingSource = readFileSync(resolve(REPO_ROOT, 'server/src/mcp/bindings.ts'), 'utf8');
-  assert.match(bindingSource, /import\s+\{[^}]*\blistNotes\b[^}]*\}\s+from\s+'\.\.\/services\/notes\.js';/);
   const listBinding = bindingSource.match(/const listNotesBinding[\s\S]*?\n\};/)?.[0];
   assert.ok(listBinding, 'list_notes binding initializer must exist');
   assert.match(listBinding, /listNotes\(\{/);

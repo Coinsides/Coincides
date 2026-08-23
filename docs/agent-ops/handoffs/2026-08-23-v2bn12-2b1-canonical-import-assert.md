@@ -173,3 +173,71 @@ assertCanonicalNamedImport('server/src/mcp/bindings.ts', 'restoreNoteAsUser', '.
 ## 补裁(Fable,2026-08-23 11:3x)
 
 builder 勘误成立:G-2 第 5 条改为 `server/src/mcp/bindings.ts | listNotes | ../services/notes.js`(与 T7 实际变异点一致);**另加第 6 条**:`server/src/services/toolFaceReceiptRevert.ts | restoreNoteAsUser | ./notes.js`(它是 `restoreNoteAsUser` 的生产消费者,revert 的「同一执行体」也该被锁住)。六条断言、同一 helper、产品码零 diff;三刀验证照旧(alias+copy 反例对 routes 与 bindings 各一刀,revert 文件加一刀)。续跑接续断点。
+
+## Result
+
+> status: done | builder: Codex | date: 2026-08-23 | continuation: corrected six-assertion resume
+
+### 交付
+
+仅扩充 `server/src/__tests__/v2NotesListService.test.ts`；产品码最终零 diff。新增泛化 helper：
+
+```ts
+assertCanonicalNamedImport(file, symbol, fromModule)
+```
+
+它与既有 `assertListNotesRouteUsesCanonicalService` 共用同一个 lazy `ts.Program` / `ts.TypeChecker` / compiler options；没有第二套 AST。三条合同语义分别由以下机关承担：
+
+1. **未别名**：目标必须是 `ts.ImportSpecifier`，`propertyName === undefined`，且本地 binding `name.text === symbol`。
+2. **唯一绑定**：遍历该 SourceFile 的 import AST；named import 按 imported export 名或本地 binding 名命中，同时把同名 default / namespace / import-equals binding 纳入计数，最终必须恰好一处。同一 import 中的其他名字不受影响。
+3. **来源正确**：实际 module specifier 与 `fromModule` 均通过 `ts.resolveModuleName`（同一 containing file、同一 compiler options）解析，再比较规范化后的 `resolvedFileName`；未做字符串相等判断。因此 `toolFaceReceiptRevert.ts` 的 `./notes.js` 正确解析到同一个 `services/notes.ts`，不会假红。
+
+既有 `assertListNotesRouteUsesCanonicalService` 未被替换或削弱：它原有的 canonical export symbol、route import binding symbol、额外 lexical binding、`GET /` handler、唯一 `res.json` 与实参 callee symbol 检查全部保留；只抽出了 program/checker 初始化供两者共用。原弱 import regex 已删除；`listNotesBinding` 初始化和调用检查仍保留。
+
+### 六条断言
+
+1. `server/src/routes/notes.ts` → `listNotes` → `../services/notes.js`
+2. `server/src/routes/notes.ts` → `trashNoteAsUser` → `../services/notes.js`
+3. `server/src/routes/notes.ts` → `restoreNoteAsUser` → `../services/notes.js`
+4. `server/src/mcp/bindings.ts` → `listNotes` → `../services/notes.js`
+5. `server/src/mcp/bindings.ts` → `trashNoteAsUser` → `../services/notes.js`
+6. `server/src/services/toolFaceReceiptRevert.ts` → `restoreNoteAsUser` → `./notes.js`
+
+其中 routes 的多行 import 由 AST 正常识别；第 6 条按解析结果比较来源。
+
+### 三刀 mutation（builder 前置自测，不冒充 reviewer M-1 终验）
+
+每刀均在新 Node 进程中运行；施刀后先跑 server `npm.cmd exec tsc -- --noEmit`，三次均 exit 0。红均为目标 AssertionError，不含 `ReferenceError` / `SyntaxError` / `ERR_MODULE_NOT_FOUND`；随后用逆补丁恢复并再次得到 server tsc exit 0、目标测试 3/3。
+
+- **M-a / routes / 未别名**：把 `trashNoteAsUser` 改为 `trashNoteAsUser as routeTrashNoteAsUser` 并同步唯一调用点。红：`server/src/routes/notes.ts must import trashNoteAsUser without an alias`；恢复后 3/3。
+- **M-b / bindings / 来源**：临时 `services/notesCopy.ts` re-export `listNotes` / `trashNoteAsUser`，并把 bindings 整条 import 指向 copy。红：`server/src/mcp/bindings.ts must import listNotes directly from ../services/notes.js`，实际解析到 `notesCopy.ts`；恢复后 3/3，fixture 删除。
+- **M-c / revert / 唯一绑定（T7 alias+copy）**：保留 canonical import 但改为 `restoreNoteAsUser as canonicalRestoreNoteAsUser`，另从 `./notesCopy.js` unaliased import 本地 `restoreNoteAsUser` 驱动原调用。红：`must have exactly one import binding for restoreNoteAsUser`，实际 2 / 预期 1；恢复后 3/3，fixture 删除。
+
+M-a 初次红证还暴露了测试错误输出形状：若把带 parent 环的 AST node 直接作为 `assert.equal` actual，Node 会为格式化巨型 AST 高 CPU；现已改为等价的布尔 `assert.ok(propertyName === undefined)`，随后三刀均快速、明确失败。只终止了本轮自行启动的两条悬挂测试子进程，未触碰外部服务。
+
+### 门禁收据
+
+- `npm.cmd run docs:check`：exit 0。
+- `npm.cmd run verify:v2-bn8-runtime`：exit 0（含 client 211/211、registry / manifest / parity、159 项 canvas boundary、60 组 canvas model、双 build、performance、docs、diff check、secret scan）。
+- client `npm.cmd exec tsc -- --noEmit`：exit 0。
+- server `npm.cmd exec tsc -- --noEmit`：exit 0。
+- root `npm.cmd run test:unit`：20 files，211/211，exit 0。
+- server `npm.cmd run test:v2`：默认资产目录首跑复现已登记 TD-12，265/270、5 fail；按 tech-debt 建议注入独立绝对 `CANVAS_ASSET_DIR` / `SOURCE_BLOB_DIR` 后复跑 **270/270、exit 0**，临时目录已删除。该首跑不是本单回归，不以失败口径冒充绿。
+- server `npm.cmd run test:trash-notes-tool`（包含目标文件）：24/24，exit 0；目标文件单跑最终 3/3。
+- 五道 tool-face 门：`test:tool-face-registry` 4/4；`test:tool-face-manifest` 10/10；`check:tool-face-manifest` fresh（2 public）；`test:tool-face-parity` 10/10；`check:tool-face-parity` PASS（2 public）；五条均 exit 0。
+
+### Diff、阳性对照与边界
+
+- 阳性探针：`git diff --quiet -- server/src/__tests__/v2NotesListService.test.ts` 实际 exit 1；该文件 `git diff --numstat` 为 `140\t22\tserver/src/__tests__/v2NotesListService.test.ts`。
+- 四个生产 consumer（routes / bindings / notes service / revert）联合 `git diff --quiet` 实际 exit 0；逐文件 worktree blob 均等于 HEAD。既有 porcelain 假阳性的 `useNoteCanvasRuntimeController.ts` 与 `routes/projections.ts` 也逐文件 blob=HEAD。
+- `server/src/services/notesCopy.ts` 最终不存在；未留下任何 fixture 于 `server/src/`。
+- 未改 schema / migration / 产品码；未新建第二测试文件；未碰 12.2a、12.1 或 v1 线；未 commit、push、PR、merge 或碰 main。
+- 锁未取、未写、未删；`owner.json` 仍为调度方 `v2bn12-2b-2b-1-fix (resume) / opus / PID 11612`。既有未跟踪 `.claude/settings.local.json` 未触碰。
+- header 按本单要求保持 `status: ready`；本次完成态只写在本追加回执中。
+
+最终 `git diff --numstat` 实际输出：
+
+```text
+68	0	docs/agent-ops/handoffs/2026-08-23-v2bn12-2b1-canonical-import-assert.md
+140	22	server/src/__tests__/v2NotesListService.test.ts
+```
