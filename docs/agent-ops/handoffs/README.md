@@ -149,6 +149,20 @@ powershell.exe -NoProfile -Command "(Get-Process -Id <owner-pid> -ErrorAction Si
 
 调度方提交 builder 产物时,**不能只按自己记得的路径 `git add`**:须以回执申报的触及面为清单,再对 `git status --porcelain` 的 **untracked(`??`)** 逐项核对——新建文件不在 modified 列表里。漏装一个新文件=提交树自身不可编译,复核按严格基线只能判 BLOCKER(Fable 于 `d799d50` 漏装 `toolFaceReceipts.ts`,Opus 一分钟后补 `84c7fff`)。宽 add 扫进别人的未提交、窄 add 漏掉自己的新文件——两端都是同一个错:**提交内容没有对照清单。** **规则形状(Opus 补,采)**:保留「只 add 点名文件」的安全性,再加完整性一步——**点名 add 之后必须 `git status --short` 复查:任何 `??` 若属于本单交付物即补 add,若不属于即留在树上并在提交说明里点名。**
 
+#### 补丁:上一条只覆盖了 `??`,**生成件是 ` M`,会漏**(2026-08-23,b-3-fix 复核 MED-1,Opus 自报)
+
+**事故**:Opus 把新 handoff 提进 `1236a19`,却把它**生成的 `INDEX.md` 条目**留在了下一个提交 `976d3c5`。⇒ `1236a19` 这棵树上「文件在、索引没它」,**`docs:check` 与 `verify` 在该基线必红**。复核按指定基线判,记 **MED-1**。**builder 无过,是调度方的提交切分错。**
+
+**为什么上一条挡不住**:上一条只教人查 `??`(untracked)。**`INDEX.md` 是 tracked 的生成件,状态是 ` M`,不在 `??` 里。** 同一个病(提交内容没有对照清单)的另一半。
+
+**⚠️ 真正阴的地方(【理由·Opus 补】)**:**门禁跑在工作树上,提交的却是暂存树 —— 两者可以一绿一红。** 我全程 `docs:check` 都是绿的,因为磁盘上的 `INDEX.md` 早就重新生成好了;红的只有那棵**被我切出去的提交树**。**「我刚跑过门禁,是绿的」不能证明「我这次提交是绿的」。**
+
+**规则**:
+1. **生成件必须与触发它的源改动进同一个提交**(`docs/agent-ops/INDEX.md`、`docs/generated/**`、manifest 等)。改了 handoff / 文档就跑 `docs:index`,并把结果**一起 add**。
+2. 点名 add 后的复查**同时看 `??` 与 ` M`**,尤其是生成件。
+3. ⭐ **把门禁跑在「将要提交的那棵树」上**,而不是工作树。最省事的做法:`git stash -k -u` 后跑门禁,或在**干净的临时 clone / worktree 上 checkout 该 commit 再跑**(复核方本就这么做 —— 所以它看得见我看不见的红)。
+4. 拆多个提交时,**每个提交都要能独立过门** —— 「最后一个提交是绿的」不算数,复核可能按中间任一基线判。
+
 ### 沙箱权限参数:Henry 常设默认允许(2026-08-23 11:2x Henry 亲定,取代下方「逐次授权」条)
 
 Henry 直接对 Fable 说:「这种事情我是默认允许的,不用问我。」——**builder/reviewer 为安装依赖而开沙箱网络(`sandbox_workspace_write.network_access=true`)等沙箱参数,属常设授权,无需逐次请示**;约束不变:只装工单点名的包、`--save-exact`、lockfile 入库、装完即止、每次在回执与 log 留痕。**仍须逐次请示的**:`danger-full-access`、触碰 `CLAUDE.md`/`AGENTS.md`/agent 权限配置文件、花钱、账号级授权、不可回滚动作(§2.1 与代理期自限清单不变)。

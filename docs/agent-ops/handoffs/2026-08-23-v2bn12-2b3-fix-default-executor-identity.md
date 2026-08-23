@@ -187,3 +187,135 @@ Fable 口述形状时写的是「默认换内联 revert ⇒ **四条 K-5b 须红
 - 已知 porcelain 假阳性的 useNoteCanvasRuntimeController.ts 亦以 blob 判真：HEAD = worktree = 3efe5f820e2077850611b54d4d09482845e89545。
 - 显式排除：未改任何产品码、schema / migration、b-2b-2、12.1 或 v1 其余线；未取锁、未写或删除 owner.json；未 commit、push 或切 main。
 - 本文件保持 UTF-8，header 保持 ready，未由 builder 翻转。
+
+## Review
+
+> reviewer: Codex reviewer（洁净室复核） | date: 2026-08-23
+>
+> review baseline: `1236a196f70e7934f07ca8e75f95a867ec53b679`
+>
+> pre-fix baseline: `098ef16ff20495ceed38c31baf3c0ab8e0b4bdfc`
+>
+> **判定：FAIL（方向成立）**
+>
+> **分级：0 BLOCKER / 0 HIGH / 1 MED / 0 LOW**
+>
+> 这是复核报告，不是放行；放行权仍在 Fable。
+
+### 1. 判定摘要与唯一 finding
+
+本修正单的技术目标成立：I-1 / I-2 确实解析 RHS symbol 并追到 canonical import alias target；B-1 / B-2 确实以零注入走生产默认分支；revert 侧忠实内联复制只会打红 I-2，B-2 与四条 K-5b 仍绿；既有六条 canonical-import 断言的杀伤力没有被放宽。产品码也保持零改动。
+
+FAIL 只来自提交边界的一项机械交付缺口，不是产品实现或本轮测试设计仍有 HIGH 漏径。
+
+#### MED-1（交付 / 门禁缺陷）：精确基线漏交生成的 `docs/agent-ops/INDEX.md`
+
+在 `core.autocrlf=false`、detached 到精确 `1236a19` 的洁净物理 clone 中，docs-first 首命令 `npm.cmd run docs:check` exit `1`，唯一报错为：
+
+```text
+过期: docs/agent-ops/INDEX.md
+1 个 INDEX 过期。请运行: node scripts/docs-index.mjs
+```
+
+同一探针的正反对照是：目标 handoff 文件存在，目标路径在该 commit 的 INDEX 中命中 `0` 次；既有 `2026-08-23-v2bn12-2b2b1-trash-notes-tool.md` 在同一 INDEX 中命中 `1` 次。随后亲跑 `verify:v2-bn8-runtime`，unit、五道 tool-face、runtime contracts、双端 build 与 performance smoke 均通过，最终仍在同一个 `docs:check` 处 exit `1`，没有到达尾部 diff / changed-file secret scan。因此 Result 中两条 `docs:check PASS`、`verify ... PASS；完整链运行至 changed-file secret scan` 对精确提交不成立。
+
+复核期间共享分支被他方从 `1236a19` 推进到 docs-only 的 `976d3c5`；该后继 commit 的 INDEX 才补入本 handoff（并同时加入另一份新 handoff）。它证明修法机械且半径小，但不可以倒灌进本次指定基线替其追认 PASS。
+
+建议修法：由有权施工 / 调度的一方把生成后的 `docs/agent-ops/INDEX.md` 与本 handoff 一起纳入新的精确复核基线，再按 docs-first 从头跑完整门禁。Reviewer 未代 builder 生成或提交该文件。按既有分级惯例，此项是阻断提交门禁的机械交付缺口，记 MED；核心生产文件没有缺失、产品行为与点名 killer 均可完整验证，故不升为 BLOCKER / HIGH。
+
+### 2. R1–R3：身份锁、revert 侧与零注入行为锁
+
+所有 mutation 前，先在洁净 `1236a19` 上跑 I-1 / I-2 / B-1 / B-2 / K-2 / 四条 K-5b，`9/9` 绿；完整 `test:trash-notes-tool` 为 `40/40`。每刀均先过 server `tsc --noEmit`，每刀独立逆 patch，还原后再用同一探针取绿。全部红均为目标 `AssertionError`，没有 `ReferenceError`、`SyntaxError` 或 `ERR_MODULE_NOT_FOUND`。
+
+| 位点 | Reviewer 亲刀收据 | 判定 |
+|---|---|---|
+| **R1 / I-1 symbol 身份** | 在 router factory 内加入与 canonical import 同名、行为忠实的局部 `trashNoteAsUser`，保持 RHS 文本不变。I-1 / B-1 / K-1 / K-2 共 4 条为 `3 pass / 1 fail`；唯一红是 I-1：`trashNoteExecutor default fallback must resolve through the canonical import alias`，其余三条仍绿。把 I helper 的 symbol / alias / declaration / target 比较临时退化为 `initializer.right.text === canonicalSymbolName` 后重施同刀，I-1 `1/1` 绿。恢复真实 helper 与产品刀后 I-1 再绿。 | **PASS**；文本会被骗，解析链实际承重。 |
+| **R1 + R2 / I-2 revert 身份** | 在 factory 内加入同名的完整 `revertTrashNotesReceipt` 忠实复制：保留 ownership / tool / status 三守卫，只处理 `note + trashed` causal resources，保留 restore 成功 / already-active 判定，并按 complete / partial 更新 receipt。I-2 / B-2 / 四条 K-5b 共 6 条为 `5 pass / 1 fail`；唯一红是 I-2：`revertReceipt default fallback must resolve through the canonical import alias`。B-2 与成功、foreign、wrong-tool、wrong-status 四条 K-5b 全绿。把 helper 退化成 RHS 文本相等后重施同刀，I-2 `1/1` 绿；恢复后目标集 `6/6` 绿。 | **PASS**；这是 revert 侧第一次由对抗方独立施刀坐实，且复制行为经四条 K-5b 证明忠实。 |
+| **R3 / B-1 默认行为** | B-1 原测试明确调用 `withToolReceiptsHttp({}, …)`。临时加入同名默认 trash 实现，直接调用底层 `trashNote` 并返回 `trashed`，故意丢掉 source-projection 守卫；只跑 B-1 时从真实 Express app、auth、production router、真实 listen + TCP fetch 到达目标断言，`actual = trashed`、`expected = active`。恢复后 B-1 `1/1` 绿，并继续断言 skipped / `read_only_projection` receipt resource。 | **PASS**；B-1 真走默认分支且后果有鉴别力。 |
+| **R3 / B-2 默认 revert** | B-2 同样调用 `withToolReceiptsHttp({}, …)`；请求前锁定 receipt=`applied`、note=`trashed`，请求后锁定 note=`active`、`trashed_at=null`、receipt=`reverted`。R2 忠实复制期间它仍绿。 | **PASS**；不是注入 seam 自证。 |
+
+I helper 的静态链也与实测一致：先在 factory 直接函数体内定位唯一声明，确认 initializer 为 `??` 且 RHS 为 `Identifier`，再依次执行 `checker.getSymbolAtLocation(RHS)` → `SymbolFlags.Alias` → `checker.getAliasedSymbol`，并同时比对 import binding symbol、canonical `ImportSpecifier` declaration 与 alias target symbol。canonical import 来源继续由 `ts.resolveModuleName(...).resolvedFileName` 判同源。
+
+### 3. R4：既有六条 canonical-import 断言未被放宽
+
+`098ef16..1236a19` 的 helper 差分保留了原有 AST import 收集、唯一 binding、named import、禁止 alias、本地名匹配与 resolved-file identity；新增的是返回 binding / target / specifier，以及 `SymbolFlags.Alias` + `getAliasedSymbol`。既有六个调用本身未改：
+
+1. `server/src/routes/notes.ts` 的 `listNotes`；
+2. `server/src/routes/notes.ts` 的 `trashNoteAsUser`；
+3. `server/src/routes/notes.ts` 的 `restoreNoteAsUser`；
+4. `server/src/mcp/bindings.ts` 的 `listNotes`；
+5. `server/src/mcp/bindings.ts` 的 `trashNoteAsUser`；
+6. `server/src/services/toolFaceReceiptRevert.ts` 的 `restoreNoteAsUser`。
+
+六个位点没有抽样。对每一条分别完成以下三刀，均为 `tsc exit 0` 后 A-1 的目标 `AssertionError`，每刀恢复后 A-1 再绿：
+
+| 刀型 | 六个位点逐条结果 |
+|---|---|
+| canonical named import 改 alias | 六条分别红在 `without an alias` / 本地名约束。 |
+| 改为可解析、行为忠实的复制模块 | 六条分别红在 direct resolved source identity；不是模块不存在或编译错误。 |
+| 保留 canonical 来源 binding 但临时给它 alias，再从复制来源增加 unaliased second binding | 六刀均可编译，并分别红在 exactly-one，`actual = 2`、`expected = 1`。 |
+
+另外两类抗假阳性正控也成立：在三个现有 import declaration 中加入无关但合法的 named import，A-1 `1/1` 绿；在三个文件加入 import 形注释与字符串，A-1 `1/1` 绿。说明 collector 没把同 import 增名或文本噪声误判为目标 binding。
+
+**C8** 也仍承重：临时把来源比对从 `resolveModuleName(...).resolvedFileName` 退回 raw specifier 字符串相等，A-1 唯一红在第 6 条，`expected = ../services/notes.js`、`actual = ./notes.js`；恢复后两者解析到同一 `notes.ts` 而全绿。故 builder 为 I-1 / I-2 增强 helper 时没有牺牲原六条断言。
+
+### 4. R5：X-1 / X-2 申报分档如实
+
+Result 没有把行为锁的“仍绿”粉饰成红：
+
+- X-1 明报只有 I-1 红，B-1、K-1、K-2 仍绿，并正确解释忠实复制在行为上等价；reviewer 独立得到同一 `3 绿 / 1 红` 分布。
+- X-2 明报只有 I-2 红，B-2 与四条 K-5b 仍绿；reviewer 独立得到同一 `5 绿 / 1 红` 分布。
+
+这正是本单预定的两档合同：身份锁负责杀死行为忠实的替身，行为锁负责杀死语义缺失的默认实现；不能要求前者的 faithful-copy 刀把后者也打红。
+
+### 5. R6：产品码零改动与基线边界
+
+- `1236a19` 的直接 parent 是 `098ef16`，区间恰为 1 个 commit。
+- `git diff --numstat 098ef16 1236a19 -- server/src/routes server/src/services server/src/mcp` 完全为空；三目录均为非空 tracked 目录，不是真空探针。
+- 区间只有 handoff `189/0`、`v2NotesListService.test.ts` `100/3`、`v2TrashNotesTool.test.ts` `48/0` 三项。
+- `server/src/routes/toolReceipts.ts` 在 `098ef16`、`1236a19` 与归复后的隔离 worktree blob 均为 `5fe1c42080d3f6ec775448d396df4b9217295014`。`services/notes.ts` 与 `services/toolFaceReceiptRevert.ts` 也在前后基线及 worktree 相同。
+- 每轮产品 / 测试刀均已恢复；隔离树最终 `git status --short`、`git diff --numstat`、`git diff --check` 均为空，I 测试文件 blob 与 `HEAD` 同为 `aee349cef1702aac971440d95ff185833c772acf`。
+- 共享分支后继 `976d3c5` 只改 docs；`1236a19..976d3c5` 对 routes / services / mcp 的 numstat 仍为空，点名产品 blobs 未变。本 Review 始终按用户指定的 `1236a19` 判，不把漂移 HEAD 当目标。
+- 共享树 porcelain 的 `useNoteCanvasRuntimeController.ts` 与 `projections.ts` 仍是已知 EOL/stat 假阳性：clean-filter blobs 分别为 `3efe5f820e2077850611b54d4d09482845e89545`、`561902a449b50ce254b650de5a337973a8fbc26d`，等于 HEAD，numstat 无项。
+
+### 6. R7：docs-first 全门亲跑
+
+严格顺序先跑 docs，再跑 verify；两者因 MED-1 红后，仍按工单顺序独立跑完其余门，用来判定失败半径，不把后续绿灯写成总门 PASS。
+
+| 门禁 | Reviewer 结果 |
+|---|---|
+| root `npm.cmd run docs:check` | **FAIL，exit 1**；唯一为 `docs/agent-ops/INDEX.md` 过期，目标 handoff 路径缺席。 |
+| root `npm.cmd run verify:v2-bn8-runtime` | **FAIL，exit 1**；unit 211、registry 4、manifest 10、parity 10、runtime / shell / source / model contracts、client/server build 与 performance smoke 先通过，最终仍在同一 docs freshness 处停止。 |
+| client `npx.cmd tsc --noEmit` | PASS，exit 0。PowerShell execution policy 拒绝 `npx.ps1` 后改走同一安装的 `npx.cmd`，不是编译红。 |
+| server `npx.cmd tsc --noEmit` | PASS，exit 0。 |
+| root `npm.cmd run test:unit` | PASS，20 files / 211 tests。 |
+| server `npm.cmd run test:v2` | PASS，270/270；`CANVAS_ASSET_DIR` 指向 reviewer OS-temp 下独立实体目录，未改测试或产品语义。 |
+| server `npm.cmd run test:trash-notes-tool` | PASS，40/40。 |
+| root `npm.cmd run test:tool-face-registry` | PASS，4/4。 |
+| root `npm.cmd run test:tool-face-manifest` | PASS，10/10。 |
+| root `npm.cmd run check:tool-face-manifest` | PASS，fresh，2 public entries。 |
+| root `npm.cmd run test:tool-face-parity` | PASS，10/10。 |
+| root `npm.cmd run check:tool-face-parity` | PASS；脚本只申报 necessary-condition，明确 `human reachability NOT VERIFIED`，本 Review 不扩大其含义。 |
+
+本 Review 写回后，当前共享后继 `976d3c5` 的 `npm.cmd run docs:check` exit `0`；这只证明后继 INDEX 与 Review 写回相容，不改变精确 `1236a19` 的门禁事实。
+
+Windows 沙箱适配：深层 user-temp 路径会让 esbuild / Vite 向上枚举到无权目录；正式 unit / verify 收据使用临时 `R:` 映射 reviewer temp base，并只在隔离 clone 临时改 runner 的 root / config / fs-allow / setup 路径。没有改任何测试断言或产品语义；两份 path-only 适配随后逆 patch，blob 与 `HEAD` 相等，`R:` 已在 `finally` 删除。
+
+### 7. 合取扫描、范围排除与隔离卫生
+
+1. **身份 × 行为合取成立**：faithful copy 下只有 I 锁红而 B / K 行为锁绿；guardless trash 下 B-1 以真实后果红。两类护栏互补，没有再出现 b-3 的 wrapper 自证漏层。
+2. **trash × revert 对称性成立**：I-2 不只是按 trash 侧结构推断；完整复制 revert 服务后，B-2 与四种 K-5b 结果保持正确，identity drift 才是唯一红因。
+3. **旧 A-1 × 新 I 锁相容**：新 symbol return 没放宽六条旧 source / alias / multiplicity killer；C8 继续证明 resolved-source comparison 承重。
+4. **下一状态边界不扩大**：本单只锁现有两个 default executor；不声称 scopes / TD-14 已强制，不关闭多资源 revert 非原子 TD-6，也不把 tool-face parity 外推为真实 human journey。
+
+Mutation 与门禁均在仓库外 OS temp 的 detached physical clone 中完成，client/server 依赖分别用 offline `npm ci` 安装；没有 junction / symlink，删除前 reparse-point count 为 `0`。所有临时源码 / 测试 / runner 路径改动均已恢复，tracked tree 干净。
+
+过程偏差（不计 builder finding）：第一次尝试把 `subst R:` 与后续命令分成两个进程，映射未跨进程可见，命令误从共享树启动 verify；发现 cwd 不对后在 server build 阶段中断。随后复验共享树 routes / services / mcp numstat 为空，`toolReceipts.ts`、两项已知 EOL 假阳性 clean-filter blobs 均等于 HEAD；未留下 tracked 产品改动，至多刷新 ignored build 输出。
+
+Reviewer temp base 为 `C:\Users\70208\AppData\Local\Temp\coincides-review-1236a19-2942ac42e47f4851b259f04df44fa195`。删除前已确认：位于 OS temp、与 workspace 不重叠、零 reparse、tracked tree 干净；但本环境执行策略拒绝了递归 `Remove-Item`，命令在执行前被拦截，因此该物理 clone 仍需由调度方按此精确路径清理。它不含未还原 mutation，也不连接共享依赖。
+
+未取锁、未读写 `owner.json`、未删锁、未改 header、未 commit / push / 切 main。共享树中既有 `.claude/settings.local.json` untracked 与两项 EOL 假阳性均非 reviewer 产物；本轮唯一保留的共享树写入是本 `## Review`。
+
+### 8. 裁定建议
+
+不建议把精确 `1236a19` 作为全门已绿的交付放行；先补生成 INDEX、形成新的精确基线并从 docs-first 重跑。与此同时，b-3 的 HIGH-1 技术漏径已经被本单正确封住，R1–R6 没有发现新的产品 / 护栏缺陷。因此裁定词是 **FAIL（方向成立）**，不是方向不成立；放行与是否接受后继 docs 修正仍由 Fable 决定。
