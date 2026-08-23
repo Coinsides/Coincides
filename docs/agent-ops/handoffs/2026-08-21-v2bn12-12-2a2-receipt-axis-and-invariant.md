@@ -111,3 +111,82 @@ server 全套(262+新增)/ noteBlockLifecycle 定向 / 双 tsc / verify 链。##
 
 - 本环境 CLI 无法读取 Henry UI 中的 Spark 单前/单后百分比,本次**未取得该两项读数,需 Henry 从 UI 提供**;未编造百分比。
 - `needs: claude/dispatcher`(仅机械锁归属):开工时 `.codex-tmp/builder.lock.d` 已存在;本机 PowerShell 不支持取锁命令所用的 `New-Item -LiteralPath`,mkdir 失败后随后的 owner 写入覆盖了既有 `owner.json`。目录创建时间与本单 agent 启动相邻,但原 owner 字段已无法恢复,所以本 builder 没有删除该锁;请原发单方核对并按锁纪律释放。
+
+## Review (Codex reviewer, 2026-08-22)
+
+### 判定
+
+**FAIL（方向成立）**。复核对象严格锁定为 `d799d50c871c4dd05e7274e56ff2579a93f3424e`，其直接父提交为 `15b3d90f951d9e1444749109bddb92900a1036f7`。本单计数：**1 BLOCKER / 0 HIGH / 0 MED / 0 LOW**；另有 1 项既有 Windows 资产目录 hermeticity TD 候选，不计入本单缺陷。放行权仍归 Fable。
+
+**BLOCKER-1——点名基线漏装核心生产文件，Result 与提交树不一致。** `d799d50` 的测试已经 import `../services/toolFaceReceipts.js`，但该提交的 Git tree 中不存在 `server/src/services/toolFaceReceipts.ts`；该文件到后继 `84c7fffc3393d181a17157678952b90682ce6c6f` 才以 192 行新文件进入历史。因此严格基线不能通过 server tsc、verify、server 全套或定向测试，也没有 K4–K6 的生产 mutation 位点。修法：不要改写 `d799d50`；由调度方明确把包含该文件的修正提交（现有 `84c7fff` 或其后继）定为新的精确复核基线，再做放行复核。后继提交的全门和 mutation 补充实证均成立，故方向成立，但它不能被静默视作 `d799d50` 的一部分。
+
+### 基线与隔离方法
+
+- 根仓 `.git` 对本环境只读，直接 `git worktree add` 被拒；我在 `.codex-tmp/review-12-2a2-repo.git` 建本地 bare clone，再从它创建 `15b3d90`、`d799d50`、`84c7fff` 的真实 detached worktree。mutation 只发生在这些隔离 worktree，未改共享树产品源码或常驻测试。
+- 首轮 worktree 继承 Windows `core.autocrlf`，使按字节校验的 generated docs/manifest 出现假红；随后在该临时 clone 设 `core.autocrlf=false` 并重建 LF worktree。下表的 docs/manifest/verify 结论均取 LF 与 Git blob 一致的 worktree，不把 EOL 假红计为产品失败。
+- `d799d50` 因模块缺失无法让 K1–K6 到达目标断言；K1–K6 另在补齐核心文件的 `84c7fff` 上逐刀实测，只用来回答测试强度与实现方向，**不替代严格基线裁决**。每刀后均还原；最终 `noteBlockLifecycle.ts` blob 为 `20c2804709b81037cc454e7d88f9c1d11d8aeff3`，`toolFaceReceipts.ts` blob 为 `e2ef847ff5c7d653293b375017050f18af89ff4f`，隔离树 `git diff --numstat` 与 `git status --short` 均为空，定向复跑 22/22。
+
+### K1–K7 对抗结果
+
+| 项 | reviewer 实测 | 结论 |
+|---|---|---|
+| K1 守卫放行 `'mcp'` | `84c7fff` 补充树：两条 killer 0/2。client-create 在常驻测试 `:848` 由预期 source-type 409 落到旧的 `Client create receipt identity mismatch`；cleanup 在 `:905` 落到 `Cleanup conflict receipt identity mismatch`。红点均是“本应在读取边界拒绝却继续下沉”，不是编译、fixture 或 API 缺失。 | **杀死**；两条各自红在相关拒绝断言。严格 `d799d50` 会先被缺模块阻断。 |
+| K2 删除两处生产 guard call，helper 保留 | `84c7fff` 补充树：两条 killer 0/2，红点与 K1 相同。 | **杀死**；证明测试保护生产接线，不只保护 helper 字面。严格基线同样先被缺模块阻断。 |
+| K3 只守一条 SELECT | 只删 cleanup 回读后的 guard：client-create 绿、cleanup 在 `:905` 红，1/2；只删 `readBatch()` guard：client-create 在 `:848` 红、cleanup 绿，1/2。 | **两条读取路径各有独立 killer，无缺口。** |
+| K4 工具收据 INSERT 显式传 ISO `created_at` | `84c7fff` 补充树：immediate 测试 0/1，在 `:954` 期望 SQLite 默认 `YYYY-MM-DD HH:MM:SS`，实际为 ISO `2026-08-23T03:46:41.811Z`。 | **杀死；D-2 有常驻护栏，无新增缺口。** `d799d50` 无此 INSERT 位点。 |
+| K5 propose 写成 `'applied'` | `84c7fff` 补充树：propose 测试 0/1，在 `:989` 期望 `proposed`、实际 `applied`。 | **杀死。** `d799d50` 无该生产位点。 |
+| K6 revert 恒写 `complete` | `84c7fff` 补充树：partial 测试 0/1，在 `:1040` 期望 `partial`、实际 `complete`。 | **杀死；partial 可观察受护。** `d799d50` 无该生产位点。 |
+| K7 03/05 指纹与 21/1 | `15b3d90..d799d50` 的 `noteBlockLifecycle.ts` 恰为 21/1；逐 hunk 分类见下节。`client/src/pages/Notes/canvasEngine` numstat 为 0，目标 diff 对 `applyBlockTextFlowEdit` / `rollbackBlockSlashSession` / recovery receipt 相关标识命中 0。 | **保护面未触及；无“其他”越界 hunk。** 但目标提交本身也没有收据 producer。 |
+
+这些 mutation 位点由发单方点名、由 reviewer 在隔离 worktree 亲测，并分别瞄准已知漏径；符合 5-5 三要素。补充树最终还原与复绿，不以未还原 mutant 的偶然结果承重。
+
+### 全门亲跑
+
+| 门 | 严格 `d799d50` | 补充 `84c7fff`（不替代基线） |
+|---|---|---|
+| `npm.cmd run docs:check` | **exit 0** | **exit 0** |
+| `npm.cmd run verify:v2-bn8-runtime` | **exit 1**；前置 unit/registry/manifest/parity/client build 等已绿，server build 在 `v2NoteBlockLifecycle.test.ts:18` 报 TS2307，缺 `../services/toolFaceReceipts.js` | **exit 0**（隔离资产目录） |
+| client `npm.cmd exec -- tsc --noEmit` | **exit 0** | **exit 0** |
+| server `npm.cmd exec -- tsc --noEmit` | **exit 1**；同一 TS2307 | **exit 0** |
+| `npm.cmd run test:unit` | **exit 0，209/209** | **exit 0，209/209** |
+| server `npm.cmd run test:v2`（隔离资产目录） | **exit 1，245/246**；唯一失败文件在装载期 `ERR_MODULE_NOT_FOUND`，该文件内测试未展开 | **exit 0，267/267** |
+| noteBlockLifecycle 定向 | **exit 1，0/1**；装载期 `ERR_MODULE_NOT_FOUND` | **exit 0，22/22** |
+
+另在洁净 `84c7fff` worktree 未设资产隔离变量跑默认 server 全套也是 **exit 0，267/267**。所以 Result 中的绿门数字与后继完整树相符，但不属于点名的 `d799d50` 提交树。
+
+### 触及面与逐 hunk 归类
+
+`git diff --numstat 15b3d90..d799d50` 只有四项：`tech-debt.md` 1/1、本文 Result 64/0、`v2NoteBlockLifecycle.test.ts` 223/0、`noteBlockLifecycle.ts` 21/1；**没有 `toolFaceReceipts.ts`**。
+
+`noteBlockLifecycle.ts` 的 21/1 逐 hunk 为：
+
+1. `recordLegacyPlacementCleanupConflict()` SELECT 后 `+6`：调用 source-type 守卫——**守卫**。
+2. 新增共享私有 `assertNoteBlockLifecycleBatchSource()` `+12`——**守卫**。
+3. `readBatch()` 将直接 `return` 改为局部 `batch`，`+1/-1`——**守卫接线所需 plumbing**。
+4. `readBatch()` SELECT 后 `+2` 调 guard 再 return——**守卫**。
+
+合计：守卫 21/1，收据轴 0/0，其他 0/0。测试文件的两个 hunk是 `+6` import 与 `+217` 测试体；后者恰为 2 条守卫 killer + 3 条收据轴测试，无 03/05 保护面测试改写。核心收据轴生产文件缺席不是“其他 hunk”，而是 BLOCKER-1 的交付缺件。
+
+共享树 `client/.../useNoteCanvasRuntimeController.ts` 的 porcelain `.M` 是题述 EOL/stat 假阳性：目标 diff 的 client numstat 为 0，当前 `git diff --numstat` 也为空，过滤后的 blob 与 HEAD 都是 `3efe5f820e2077850611b54d4d09482845e89545`；未据 `.M` 误判越界。
+
+### D-2、TD-6 与 Windows EPERM
+
+- **D-2：口径正确，目标打包不完整。** 同一结构探针先在 `15b3d90`、`d799d50`、当前 HEAD 各命中 4 个生产 `operation_batches` INSERT 显式列 `created_at`，再扫工作树仍为同 4 个：`noteBlockLifecycle.ts` 三处、`sourceProjectionMaterializer.ts` 一处。阳性来自既有生产源码，不来自本 Review、Result 或测试 fixture。后继 `toolFaceReceipts.ts` 有 1 个 operation-batch INSERT，显式 `created_at` 命中 0；K4 也会把违规写法打红。Result 明写“本单未修既有四处，故全表仍混格式”，没有申报已统一。只是 `d799d50` 自身没有新工具写入文件，不能承载“新路径遵守默认”的交付事实。
+- **TD-6：在工单边界内，不记 LOW。** 虽然“边界”段没有泛列 docs，本工单交付物第 4 项明确点名 `tech-debt.md` 及窄注内容；实际 diff 只把跨资源 revert 的 `complete|partial` 可观察、非原子承诺写回 TD-6，专项仍为“未清”。TD-8 也仍未清，没有被本单冒充解决。
+- **Windows EPERM：确认是既有共享目录环境债，不是本单引入。** 共享树默认 server 全套复现为 exit 1，262/267，5 项均在 `server/uploads/canvas-assets/<uuid>` mkdir 报 EPERM；把 `15b3d90` 的资产变量显式指向同一共享目录也复现 exit 1，257/262、同 5 项；而洁净 `15b3d90` 默认目录为 262/262，洁净 `84c7fff` 默认目录为 267/267，隔离目录也为 267/267。TD 候选修法：测试默认使用每次运行独立的临时资产根并负责自身回收，或修复共享 `server/uploads` 的权限/残留状态；本项不计入本单分级。
+- **机械锁事故只记事实、不判。** Result 所载事实为：mkdir 失败后 owner 写入覆盖，原 owner 不可恢复，builder 未删锁。本复核未读取、修改或删除 `.codex-tmp/builder.lock.d`；清理的只有 reviewer 自建且逐路径验明的 `review-12-2a2-*` worktree/bare clone。
+
+### 5-2 跨条与下一状态扫描
+
+- `sourceMaterialization.ts` 的最近 batch 查询先限定 `source_type='source_materialization' AND source_id=?`，再 `ORDER BY created_at DESC, id DESC LIMIT 1`。新 `'mcp'` 行在排序前已被 source_type 排除，故其 SQLite 默认时间格式不会参与该候选集；收据轴与该排序轴互不干扰。
+- 当前生产代码没有 `toolFaceReceipts` 调用者，引用者只有该测试文件；`15b3d90..d799d50` 也没有 routes/transport/package diff。12.2a-3 仍是“先交方案短笺，不施工”，预告只含 stateless Express transport + `ping` + `resolve_selection`，不实装读/写业务工具。
+- 下一 transport/执行层若按设计写收据，将消费/生成的边界字段是：认证上下文 `userId`、可选 `courseId`，请求 `callId`，registry 的 `tool/name`、有效 `tier`、`human_entry`，调用侧 `harness`、`inputDigest`，handler 的 `resources[]`；收据返回/后续推进会消费 `id`、`status`、`source_type/source_id`、metadata、三类时间戳，以及 revert 的 `outcome/details`。它不应靠 `created_at` 猜 source identity。
+- registry 的 tier 允许 `confirm`，但 receipt writer 只接受 `immediate|propose`。这是 12.2a-3 必须显式处理的状态转移：按客户端 `input_required` 能力先把 confirm 解析为可执行/待确认状态，不支持时立即降为 propose，再调用 receipt writer；不得把 `confirm` 原样喂入，也不得在 writer 内静默降级。此项是下一单接口义务，不倒算成本单缺陷。
+- `tools/list` 属 12.2b：必须消费同一忠实 manifest 的 `name/description/input_schema/output_schema/truth/tier/human_entry/exposure/scopes`，在列表层独立做 `exposure==='public'` 且剔除 `__` kind；不得把过滤搬回 generator，也不得另造目录。
+
+### 5-1 完备性、范围排除与阴性对照
+
+- 已取得用户点名的 K1–K7、两套精确提交树、全门、D-2、TD-6、EPERM、03/05 指纹与 5-2 跨条收据；没有把 builder 自报数字直接当 reviewer 结论。严格基线 K1–K6 因缺模块不能抵达目标断言，已显式标 N/A/阻断，并以 `84c7fff` 补充实证而非偷换基线。
+- Spark UI 单前/单后百分比不在 CLI 可见范围，沿 Result 的明确申报作范围排除；本单没有 live MCP route/transport，故不启动 live MCP/server/browser 来冒充未落地链路的收据。human reachability、JWT/scope enforcement、12.2a-3 transport、12.2b `tools/list` 与真实业务回滚均不是本次 PASS 主张。
+- 阴性探针均先过阳性：同一 D-1 探针在 `15b3d90` 的生产 `server/src` 命中 89 个既有 `operation_batch(es)` 字符串后，`findOperationBatch` 为 0；同一 D-2 结构探针先命中 4 个生产显式时间戳 INSERT 后，才断言工具 INSERT 为 0；同一 target-diff 探针先命中 `noteBlockLifecycle.ts` 21/1 后，才断言 client 保护面、db/routes/transport 与 package numstat 为 0。Git-object 探针先在 `84c7fff` 命中 `toolFaceReceipts.ts`，而在 `15b3d90`/`d799d50` 均不命中；命中者是后继提交写入的生产文件，不是 Result 里的文件名回显或 reviewer 自写文字。
+- 未改产品代码、常驻测试、header 或 main；未 commit、push。所有 reviewer 临时 worktree 已删除，未触碰 builder lock。共享树唯一有意写入是本 `## Review`。
