@@ -105,4 +105,4 @@
 
 ### 提交 builder 产物的完整性核对(2026-08-22 晚,d799d50 漏装一案)
 
-调度方提交 builder 产物时,**不能只按自己记得的路径 `git add`**:须以回执申报的触及面为清单,再对 `git status --porcelain` 的 **untracked(`??`)** 逐项核对——新建文件不在 modified 列表里。漏装一个新文件=提交树自身不可编译,复核按严格基线只能判 BLOCKER(Fable 于 `d799d50` 漏装 `toolFaceReceipts.ts`,Opus 一分钟后补 `84c7fff`)。宽 add 扫进别人的未提交、窄 add 漏掉自己的新文件——两端都是同一个错:**提交内容没有对照清单。**
+调度方提交 builder 产物时,**不能只按自己记得的路径 `git add`**:须以回执申报的触及面为清单,再对 `git status --porcelain` 的 **untracked(`??`)** 逐项核对——新建文件不在 modified 列表里。漏装一个新文件=提交树自身不可编译,复核按严格基线只能判 BLOCKER(Fable 于 `d799d50` 漏装 `toolFaceReceipts.ts`,Opus 一分钟后补 `84c7fff`)。宽 add 扫进别人的未提交、窄 add 漏掉自己的新文件——两端都是同一个错:**提交内容没有对照清单。** **规则形状(Opus 补,采)**:保留「只 add 点名文件」的安全性,再加完整性一步——**点名 add 之后必须 `git status --short` 复查:任何 `??` 若属于本单交付物即补 add,若不属于即留在树上并在提交说明里点名。**
