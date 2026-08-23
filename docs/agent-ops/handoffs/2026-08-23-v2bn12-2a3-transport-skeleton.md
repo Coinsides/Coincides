@@ -390,3 +390,263 @@
 - porcelain 仍列 `client/.../useNoteCanvasRuntimeController.ts`、`server/src/routes/projections.ts`，但两者 worktree blob 分别与 index 的 `3efe5f82...`、`561902a4...` 完全相等，`git diff --numstat` 无记录，属工单点名的 stat/EOL 假阳性；未冒充本轮改动。
 - `.codex-tmp/builder.lock.d/owner.json` 只读看见 `work_order='v2bn12-2a-3 resume S1-S3 (network on)'`、`role='builder'`、`dispatcher='fable'`；未取锁、未写/覆盖 owner、未删锁。
 - 未 commit、未 push、未切换或触碰 main；未运行 audit fix；没有把 SDK 安装授权扩张为其他 package 升级。
+
+## Review
+
+> reviewer: Codex reviewer（洁净室复核 thread）
+> review date: 2026-08-23
+> implementation range: `db49cde..51a0ac2`
+> adjudication baseline: `8af4ee9`（design §12，含 K-5 / SDK 错误投影 / TD-17 三项补裁）
+
+### 判定
+
+**PASS。分级计数：BLOCKER 0 / HIGH 0 / MED 0 / LOW 1。** 放行权仍属 Fable；本结论只作洁净室复核判定。
+
+- **LOW-1（文档歧义，不是实现缺陷）**：`mcp-tool-face-design.md:119` 仍以现在时写「每个 handler 内检 scopes」，但同一权威文档较后的 §12 D-f（`:344`）已明确改裁为「JWT 只有 userId，manifest scopes 仅描述、未强制」。实现、current-state、短笺与三节 Result 都按后者诚实申报；没有代码或本工单文字把 scopes 冒充成已强制。建议后续给旧 §5 句子加 superseded 注，避免 12.2b 误读。
+- 没有发现 MED 及以上缺陷；S0/S1a/K-0…K-7 的点名 mutation 全部在裁定后的合同位点变红，恢复后全绿。
+- 标准 `verify:v2-bn8-runtime` / `test:unit` / `build:client` 在 `$TMPDIR` 长路径上被 Windows sandbox 拒绝 Vite/esbuild **读取配置文件**，原命令均如实记 exit `1`，没有冒充绿。该环境洞以下述同树证据闭合：`configFile:false` 且逐项复刻同一 Vite/Vitest 配置后 unit 19 files / 209 tests 全绿、production bundle 2184 modules 成功；被 verify 链尚未执行到的其余子门逐门均 exit `0`。这是显式环境范围排除，不计产品缺陷。
+
+### 裁定基线与 Result 演进
+
+- 第一节 Result 在起点 `db49cde` 已存在：因没有可复用 executor 而停手，并拒绝 transport 重写、`router.stack`、loopback HTTP、placeholder binding；方向正确。
+- `b19cfd4` 完成 S0/S1a；`51a0ac2` 完成 S1–S3。第三节 Result 当时上裁的三项冲突，已被 `8af4ee9` 全部裁定：K-5 seam 级合格；SDK v2 原生错误投影即合同；malformed JSON REST 500 记 TD-17、不判本单缺陷。
+- 本 Review 只按上述最终裁定判，不把 `Result:续跑 2` 中补裁前的历史保留文字重新判成 FAIL。
+
+### S0 / S1a mutation 逐条收据
+
+所有刀均在 detached `51a0ac25600f5975c7cead2153790243872d81ba` 隔离树执行；每棵树的 client/server 均 `npm ci --offline`，没有共享或 junction `node_modules`。
+
+| 位点 | 拆法 | 红在哪里 | 红 exit | 还原收据 |
+|---|---|---|---:|---|
+| M0a | 将 `find202012SubsetViolations` 的 tuple-items 分支改成 `false && Array.isArray(schema.items)` | `generator rejects draft-07 tuple-form items...` 报 `Missing expected exception`（test line 164）；同一 guard 枚举测试又在 `/tuple-form items/` 报 actual `''`（line 192） | 1 | `git restore` exit 0；精确终态 `test:tool-face-manifest` 9/9、exit 0 |
+| M0b | 在 canonical manifest 的 `input_schema` 写回 `"$schema":"http://json-schema.org/draft-07/schema#"` | production `check:tool-face-manifest` 报 `过期: docs/generated/tool-face-manifest.json` | 1 | restore exit 0；终态 freshness exit 0、仍为 1 条 / 1 public。该刀下 unit 9/9 仍绿是预期：unit 的 production wiring 使用隔离输出；真正守 canonical bytes 的是 production freshness 门 |
+| M1a | route 改成 `res.json([])` | A-1 `res.json(listNotes({` 结构断言不匹配（line 132） | 1 | restore exit 0；A-1 targeted exit 0，最终 S1a 3/3 |
+| M1b | binding 改成 `return []` | A-1 `listNotes({` 结构断言不匹配（line 138） | 1 | restore exit 0；A-1 targeted exit 0，最终 S1a 3/3 |
+| M1c | `status || 'active'` 改成 `status || 'archived'` | A-3 raw byte golden 深比较红，actual Buffer 416 vs expected Buffer 881（line 148） | 1 | restore exit 0；A-3 targeted exit 0；最终 S1a 3/3 |
+
+S1a 终态另证：缺 course_id 400、非法 status 400、他人 course 404、archived 过滤、默认 active、hydrate、DESC 顺序和 raw bytes 均由同一 3-test 文件通过。
+
+#### `routes/notes.ts ↔ services/notes.ts` ESM 环 / TD-16
+
+- 静态环真实存在：route import service；service import route 的 `getOwnedCourse` / `hydrateNote`。
+- 两个 helper 都是 `export function` 声明；service 顶层只定义 `listNotes`，不在模块求值期读取 helper。helper 只在 `listNotes` 被调用时读取。
+- 反向的 `listNotes` 只在 Express callback 或 MCP binding 的调用期读取；`router.get` 注册 callback 时不执行它。server 为 ESM，`index.ts` 在静态模块求值完成后才 listen。
+- 因而当前初始化顺序没有 TDZ / 半初始化读取风险。未来若把任一边改为 top-level eager value/call，环可能转成 TDZ；维持 TD-16 LOW，叶子模块下沉方案正确，本单不改。
+
+### K-0…K-7 mutation（逐条、不抽样）
+
+K 系每刀 mutation 态的 server `tsc --noEmit` 均 exit `0`；红均不是 `ReferenceError`、`SyntaxError` 或 `ERR_MODULE_NOT_FOUND`。
+
+| 位点 | 拆法 | 红断言 / 充分性反证 | 红 exit | 恢复后 |
+|---|---|---|---:|---|
+| K-0 | `list_notes` binding 改 no-op `return []` | 仅 K-0 在 MCP `structuredContent=[]` vs 同一真实 REST 两条 note 深比较红；transport 其余 K-1…K-5 与两条错误投影测试全绿，artifact K-6/K-7 2/2 全绿，即七条充分性反证成立 | transport 1；artifact 0 | transport 9/9、artifact 2/2，均 exit 0 |
+| K-1 | public 谓词改成 `exposure !== 'test'` | K-1 fixture 的 `internal_probe` 被错误纳入，首先由挂载 parity 报 `missing: internal_probe; extra: none`；红是错误 exposure 的直接下游，不是无关异常 | 1 | targeted exit 0 |
+| K-2 | `startsWith('__')` 改成 `startsWith('___')` | K-2 fixture 的 `__reserved_probe` 被错误纳入，首先由 parity 报 `missing: __reserved_probe; extra: none` | 1 | targeted exit 0 |
+| K-3 Host | 将 `if (!host.ok)` 放宽为恒不进分支 | K-3 line 309：非法 Host 实际 401、预期 403 | 1 | targeted exit 0 |
+| K-3 Origin | 将 `if (!origin.ok)` 放宽为恒不进分支 | K-3 line 316：非法 Origin 实际 401、预期 403 | 1 | targeted exit 0 |
+| K-4 extra | parity 条件只看 missing，忽略 extra | K-4 line 332：extra binding 的 `assert.throws` 报 `Missing expected exception` | 1 | targeted exit 0 |
+| K-4 missing | parity 条件只看 extra，忽略 missing | K-4 line 339：missing binding 的 `assert.throws` 报 `Missing expected exception` | 1 | targeted exit 0 |
+| K-5 | `supportsFormElicitation` 恒 `true` | seam 正控 line 358：无 form 请求 actual `true`、expected `false` | 1 | targeted exit 0；按 §12 补裁只验 `dispatchToolCall` seam，不强造 HTTP confirm fixture |
+| K-6 | 从 server `build` 删除 `npm run copy:tool-face-manifest` | K-6 line 69：`build copy step must create the artifact`，actual false；同刀 tsc exit 0 | 1 | K-6 targeted exit 0 |
+| K-7 | copy 仍执行，但解析并过滤为 public 且非 `__`；无过滤发生时保持原 bytes，使 K-6 仍为正控 | K-6 绿；K-7 line 136 byte deep-equal 红，destination 65 bytes vs source 255 bytes | 1 | artifact 2/2、exit 0 |
+
+K-3 的合法 Host/Origin + 无 JWT 正控先得到 401；两刀拆掉对应 guard 后非法请求也落到 401，实证 Host/Origin 空体 403 的次序在 JWT 401 之前。终态非法 Host / Origin 都为 403、body 0 bytes、receipt 0。
+
+### 合同核对（六项）
+
+#### 1. SDK 错误投影：真实 Express + TCP + JWT HTTP 输出
+
+探针以临时真实 DB、Express listener、JWT 和 `/api/mcp` 发 HTTP；不是直接调用 handler 的假正控。
+
+unknown tool：
+
+```text
+HTTP 200
+{"jsonrpc":"2.0","id":801,"error":{"code":-32602,"message":"Tool unknown_probe not found"}}
+```
+
+input validation（`list_notes` 缺 `course_id`）：
+
+```text
+HTTP 200
+{"result":{"content":[{"type":"text","text":"Input validation error: Invalid arguments for tool list_notes: data must have required property 'course_id'"}],"isError":true,"resultType":"complete","_meta":{"io.modelcontextprotocol/serverInfo":{"name":"coincides","version":"1.8.0"}}},"jsonrpc":"2.0","id":802}
+```
+
+executor 抛 `AppError(404, 'Course not found', {code, internal})`：
+
+```text
+HTTP 200
+{"result":{"content":[{"type":"text","text":"{\"error\":\"Course not found\",\"status\":404,\"details\":{\"code\":\"course_not_found\"}}"}],"isError":true,"resultType":"complete","_meta":{"io.modelcontextprotocol/serverInfo":{"name":"coincides","version":"1.8.0"}}},"jsonrpc":"2.0","id":803}
+```
+
+`internal: must-not-cross-the-boundary` 未出现在 client body，且无 success receipt。
+
+executor 抛 raw `Error('sensitive sqlite path D:/private/coincides.db')`：
+
+```text
+HTTP 200
+{"result":{"content":[{"type":"text","text":"{\"error\":\"Internal server error\",\"status\":500}"}],"isError":true,"resultType":"complete","_meta":{"io.modelcontextprotocol/serverInfo":{"name":"coincides","version":"1.8.0"}}},"jsonrpc":"2.0","id":804}
+```
+
+同次服务端捕获的实际日志以完整 Error + stack 开头：
+
+```text
+Unexpected MCP tool failure: Error: sensitive sqlite path D:/private/coincides.db
+    at dispatchToolCall (.../server/src/mcp/transport.ts:140:23)
+    at .../server/src/mcp/transport.ts:175:24
+    at McpServer.executeToolHandler (.../@modelcontextprotocol/server/src/server/mcp.ts:333:21)
+```
+
+client body 不含 `sensitive sqlite path` / `private/coincides`；服务端日志含原 message 与调用栈。四项逐一符合 design §12 修订后的 D-i：只有 unknown tool 为 `-32602`，其余为 HTTP 200 `isError:true`；没有本地 shim 对抗 SDK。
+
+#### 2. malformed JSON / TD-17
+
+实际输出：
+
+```text
+HTTP 500
+{"error":"Internal server error"}
+```
+
+服务端同时记录 body-parser `SyntaxError`、`status:400`、`type:'entity.parse.failed'`。这与 §12 补裁和 `tech-debt.md` TD-17 的**记录态**完全一致；不判本单缺陷，也没有越界修 parser/errorHandler。
+
+#### 3. SDK `.d.mts` 导出与签名
+
+逐文件核对 `server/node_modules/@modelcontextprotocol/{server,node}/dist/*.d.mts`，并做 runtime dynamic-import smoke（exit 0）：
+
+| 包 / 声明 | 实际 |
+|---|---|
+| server root | 导出 `createMcpHandler`、`fromJsonSchema`、`McpServer`、`validateHostHeader`、`validateOriginHeader`；runtime 均为 function/class 可用值 |
+| `createMcpHandler` | `(factory: McpServerFactory, options?: CreateMcpHandlerOptions) => McpHttpHandler`；factory 可返回 fresh `McpServer | Server | Promise<...>`；`legacy?: 'stateless' | 'reject'` |
+| `fromJsonSchema` | `<T>(schema: JsonSchemaType, validator?) => StandardSchemaWithJSON<T,T>`；声明明确 Draft 2020-12 object form、排除 boolean schema |
+| Host / Origin | `validateHostHeader(hostHeader, allowedHostnames)`；`validateOriginHeader(originHeader, allowedOriginHostnames)` |
+| node root | `NodeMcpRequestHandler(req,res,parsedBody?) => Promise<void>`；`toNodeHandler(handler, opts?) => NodeMcpRequestHandler` |
+
+与第三节 Result 所列名字、fresh-per-request、`legacy:'reject'` 和 Express parsed body 第三参完全吻合。
+
+#### 4. package / lock 精确差分
+
+- direct dependencies 只新增 `@modelcontextprotocol/node@2.0.0`、`@modelcontextprotocol/server@2.0.0`；无 dependency/devDependency 删除或版本升级。
+- lock added nodes 恰为 7 个：`@hono/node-server@1.19.17`、`@modelcontextprotocol/core@2.0.0`、core 私有 `zod@4.4.3`、node、server、server 私有 `zod@4.4.3`、`hono@4.13.3`；removed 0。
+- 共同 lock node 唯一变化是根 package record 写入两项 direct dependency；既有节点没有升级。
+- `server/package.json` 另有本单授权的 predev/build/check/copy/test scripts；“只含两包及传递依赖”是对依赖图的精确表述，不冒充整个文件只有两行差分。
+
+#### 5. registry / generator / manifest
+
+- `server/src/toolFace/registry.ts` 与 `shared/types/toolFaceManifest.ts` 在整个 `db49cde..51a0ac2` 范围 diff exit 0。
+- `b19cfd4..51a0ac2` 对 generator、generator test、canonical manifest、registry、shared contract 的 diff exit 0；即 S1–S3 未顺手重改 S0。
+- canonical manifest 是 1 个 `list_notes`，1 public；freshness exit 0。它仍是 registry 的未过滤忠实投影；internal/test/`__` 过滤只在 runtime list 机械面，不在 generator/copy。
+
+#### 6. 无第二 schema / 工具白名单 / 跨请求内存状态
+
+阴性结论采用窄口径，不把合法的 schema、allowlist、Map/Set 误报为缺陷：
+
+- schema probe 先在 registry 看见已知阳性的 `z.object/z.array/z.string`，再扫 `server/src/mcp`：没有 transport 第二 schema或 inline schema object；唯一接线是从 manifest entry 取 `input_schema/output_schema` 后调用 SDK `fromJsonSchema`。
+- whitelist probe 先看见已知阳性的 Host/Origin deployment allowlist、授权的 `TOOL_BINDINGS` name→function Map 与 registry `list_notes`，再查同 scope：没有独立 tool-name allowlist，没有 `ping` / `resolve_selection` 偷渡。
+- state probe 先看见 binding Map、parity 局部 Set、当次 envelope 的 capability 读取，再查 `session|pending|cache`：无命中；handler 在 request 闭包创建并于 `finally` close，没有跨请求 capability/session/pending cache。
+- 字符串来源经 blame 追到：transport/config/parity 为 `51a0ac2`，binding 为 `b19cfd4`，registry 名为既有 `3fbbe7fa`；命中后没有把合法合同字符串倒推成越界机关。
+
+### 全门亲跑表（docs-first）
+
+| 次序 | 门 | reviewer 实际结果 |
+|---:|---|---|
+| 1 | root `npm run docs:check` | exit 0 |
+| 2 | root `npm run verify:v2-bn8-runtime` | exit 1；停在第一项 `test:unit` 的 Vite config load：`Cannot read directory ../../../../../..: Access is denied` / cannot resolve `$TMPDIR/.../client/vite.config.ts`；0 assertions executed |
+| 2a | 同树 programmatic Vitest，`config:false` 并复刻 jsdom/setup/三条 alias | exit 0；19 files、209/209 |
+| 2b | 同树 programmatic Vite production build，`configFile:false` 并复刻 base/react/三条 alias | exit 0；2184 modules transformed，bundle 成功 |
+| 2c | verify 未执行到的其余子门逐门补跑 | 全 exit 0：canvas boundary 159 checks、gallery/groups/single-editor/source、BN11 两门、model 60 groups、server build、performance、docs、`git diff --check`、secret scan |
+| 2d | root `npm run build:client` 原入口 | exit 1；`tsc -b` 已完成，仍只红在同一个 Vite config-loader sandbox 错误 |
+| 2e | root `npm run build`（含 production copy step） | exit 0；freshness → tsc → copy，明确输出复制到 `server/dist/tool-face-manifest.json` |
+| 3 | client `tsc --noEmit` | exit 0 |
+| 4 | server `tsc --noEmit` | exit 0；在精确 `51a0ac2` 终态再次复跑仍为 0 |
+| 5 | root `npm run test:unit` 原入口 | exit 1；与第 2 项同一 config-loader sandbox 错误；补证见 2a 的 209/209 |
+| 6 | server `test:v2`，独立 `CANVAS_ASSET_DIR` | exit 0；270/270；隔离资产目录余量 0 |
+| 7 | server `test:v2`，默认路径 | exit 0；270/270；TD-12 本轮未复现 |
+| 8 | server `test:mcp-transport` | exit 0；9/9 |
+| 9 | server `test:mcp-artifact` | exit 0；2/2 |
+| 10 | `test:tool-face-registry` | exit 0；3/3 |
+| 11 | `test:tool-face-manifest` | exit 0；9/9 |
+| 12 | `check:tool-face-manifest` | exit 0；1 条 / 1 public / fresh |
+| 13 | `test:tool-face-parity` | exit 0；10/10 |
+| 14 | `check:tool-face-parity` | exit 0；1 public，necessary-condition PASS |
+
+上述 config-loader 排除只覆盖沙箱对 `$TMPDIR` 祖先目录的读取拒绝，不覆盖测试、转换、bundle 或任何 transport 逻辑；同一报错在 Vitest 与 Vite build 两个入口复现，而绕过 config bundling 后二者都成功，因果边界明确。
+
+### 提交完整性与触及面对照
+
+- 精确树 `51a0ac25600f5975c7cead2153790243872d81ba` 上 server `tsc --noEmit` 最终 exit 0；没有重演上一单 `d799d50` 漏装型缺件。
+- `git diff --shortstat db49cde..51a0ac2`：**20 files changed, 1705 insertions, 38 deletions**。
+
+```text
+4   0 docs/agent-ops/claude-log/2026-08-23.md
+2   1 docs/agent-ops/current-state/tech-debt.md
+145 0 docs/agent-ops/handoffs/2026-08-23-v2bn12-2a3-transport-skeleton.md
+2   4 docs/generated/tool-face-manifest.json
+29  0 scripts/copy-tool-face-manifest.mjs
+69  9 scripts/generate-tool-face-manifest.test.ts
+69  4 scripts/generate-tool-face-manifest.ts
+88  0 server/package-lock.json
+9   1 server/package.json
+145 0 server/src/__tests__/v2McpArtifact.test.ts
+461 0 server/src/__tests__/v2McpTransport.test.ts
+187 0 server/src/__tests__/v2NotesListService.test.ts
+66  1 server/src/db/validateConfig.ts
+15  1 server/src/index.ts
+23  0 server/src/mcp/bindings.ts
+59  0 server/src/mcp/manifest.ts
+44  0 server/src/mcp/policy.ts
+255 0 server/src/mcp/transport.ts
+5  17 server/src/routes/notes.ts
+28  0 server/src/services/notes.ts
+```
+
+逐提交对照：
+
+- `b19cfd4`：S0/S1a，8 条产品/测试路径，与第二节 Result 逐项一致。
+- `6fb0888`：只改 `tech-debt.md`（TD-16/17 调度态）；`8dd0a30`：只改 claude-log。它们是精确范围中比两节 builder 产品触及面多出的调度文档，不是未申报产品改动。
+- `51a0ac2`：S1–S3，11 条产品/config/test 路径，与第三节 Result 逐项一致。
+- 第一节“停手”Result 已在起点 `db49cde`，不属于本 diff。没有发现未申报的产品/config 路径。
+
+共享树点名的两条 porcelain `.M` 经阳性内容探针排除：`useNoteCanvasRuntimeController.ts` worktree/index blob 均 `3efe5f82...`，`projections.ts` 均 `561902a4...`，`git diff --numstat` 对二者为空，确属 EOL/stat 假阳性；未算进本 Review 触及面。
+
+### 5-2 跨条耦合与下一状态
+
+#### 12.2a-2 writer 与本单 proposed
+
+- `transport.ts` 直接 import `writeToolFaceReceipt`，`dispatchToolCall` 默认 writer、production handler 默认值、effective propose 与 immediate 都走同一参数。
+- writer 本体仍是 12.2a-2 commit `84c7fff` 的 `toolFaceReceipts.ts`；`84c7fff..51a0ac2` 对该文件 diff exit 0。`source_type='mcp'` 的 production INSERT 只有这一处；propose 映射 `proposed` 且 `applied_at=NULL`。
+- 阴性 caller probe 先看见 writer 定义/import 阳性，再排除定义和测试查平行 MCP INSERT / production mark/revert caller：无平行 writer，caller probe exit 1。故本单没有另造 pending 机关。
+
+#### 首个 propose/confirm 工具会消费的 seam
+
+- 可直接消费：registry→manifest→artifact；public + `__` 双过滤；binding parity/name→function；per-request auth bridge；`supportsFormElicitation` / effective tier；零执行 proposed receipt；receipt id/status `_meta`；SDK 错误投影。
+- 当前 supported confirm 分支刻意停在 501；首个 confirm 工具必须把它替换成获批 elicitation schema / MRTR `input_required` / 重试 / 接受后执行，并在同单补 HTTP 层 K-5 killer。
+- 在暴露首个 propose/confirm 前，按 D-g 必须同单落普通 Express + client 人审队列及 `proposed → applied` 接线；旧 `/api/proposals` / `ProposalList` 是退役线，不能偷接。
+
+#### 状态转移后才显现的前置风险（不判本单缺陷）
+
+- 当前 receipt 只存 input digest，`resources:[]`，transport 未传 `courseId`，没有完整 intended payload；不足以在人审后校验并执行“同一路径”。
+- `markToolFaceReceiptApplied(id)` 只翻 status/applied_at，不调用 binding；`readToolFaceReceipt(id)` / mark 也没有 user ownership 参数。人审 route 不得裸接，须先裁 payload 保存/摘要校验、ownership、执行与翻状态次序及失败语义。
+- proposal result 当前无 `structuredContent`；首个带 outputSchema 的 propose/confirm 工具须先裁 proposal output contract，不能照搬本 seam 冒充端到端。
+- TD-14 scope enforcement 仍是鉴权基线专项；12.2b 不得把描述性 `scopes` 当权限模型。LOW-1 所列旧 §5 句子应先消歧。
+
+### 5-1 收据完备与显式范围排除
+
+- 能取的 live 收据均已取：两轮真实 `test:v2`、真实 TCP MCP/REST、真实 build/copy、真实 artifact 最小布局、SDK declaration 与 runtime import、lock 结构化差分、逐刀 mutation、恢复后全绿。
+- 显式未取/不在本单：生产 DB、生产常驻服务、外部账号、浏览器主观体验；均非本 transport 骨架判定所需，也未获授权。HTTP 证据使用临时 DB 与临时 listener，测试后删除。
+- 按 §12 补裁显式排除：K-5 HTTP confirm fixture（留首个 propose/confirm 工单）；TD-17 修复；scope enforcement；confirm 人审 UI/apply 接线；proposal output contract；TD-6、TD-8 残余、TD-10、TD-12/14/16/17 的越单代偿。
+- 标准 Vite/Vitest config loader 的 sandbox 红已完整贴错误、复现双入口并用同树等价配置补证；未用 builder 的绿回执替代 reviewer 证据。
+
+### 阴性断言的阳性对照与来源归因
+
+- schema、whitelist、state 三组 probe 都先命中同 scope 的已知阳性，再收窄阴性；没有从“grep 空白”裸推不存在。
+- writer probe 先命中 `writeToolFaceReceipt` 定义/import，再查平行 MCP INSERT/caller；scope probe 先命中 registry scopes→generator→transport `_meta` 投影，再查 `authInfo.scopes|requiredScopes|hasScope|enforce scope`，后者 exit 1。
+- 命中字符串均先问“谁写入”：本单 transport/config 归 `51a0ac2`，binding 归 `b19cfd4`，receipt writer 归 `84c7fff`，registry 名为既有 `3fbbe7fa`；Host/Origin allowlist、binding Map、局部 parity Set 都是授权机关，不被阴性断言误杀。
+
+### 隔离树自清收据
+
+- 主 mutation 根：`C:\Users\70208\AppData\Local\Temp\coincides-review-51a0ac2-20260823`；含 CRLF 诊断树、实际 LF mutation 树及独立 bare admin。两树均 detached 精确 `51a0ac2`；client `npm ci --offline` 各装 202 packages、server 各装 212 packages；全根 reparse point count 0。
+- 终态补绿根：`C:\Users\70208\AppData\Local\Temp\coincides-review-post-51a0ac2-20260823`；detached 精确 `51a0ac2`，client/server offline install exit 0，reparse point count 0。
+- 两根均先确认 worktree clean、路径位于系统 Temp、无 junction/symlink，再用各自 bare repo `git worktree remove --force` 删除 worktree；随后删除 bare admin 与空资产目录。最终两根 `Test-Path=False`。
+- 共享树 `client/node_modules` 前后顶层 count 153、`server/node_modules` 前后 186，均非 reparse point；未安装/卸载共享包。隔离资产目录测试后 count 0 并已删除。
+- 除本节 UTF-8 追加外，没有共享树写入；未改产品代码、常驻测试、header、builder lock 或生产 DB；未 commit、未 push、未碰 main。
