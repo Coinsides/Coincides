@@ -164,7 +164,7 @@ cd server && node -e "const D=require('better-sqlite3'); const db=new D(':memory
 | **R4** | **全表格式分布(非抽样,105 行)** + 一次 `ORDER BY created_at` 时序验证 | **已知反例须消失**:`manual 2026-08-21 17:07:37`(词法 rank 103/时间 rank 104)vs 较早的 `client 2026-08-21T17:05:59.322Z`(词法 104/时间 103) |
 | **R5** ⭐ | **调度方的三处补丁 + 一条断言单独作靶**:①A-2/A-3 补回的 `stringifyJson(receipt,{})` 是否位置与语义正确(对照 HEAD 原版)②改写后的两条格式断言是否**真能杀死回退**(把 `created_at` 改回显式传值须红) | 补丁若有误须红;断言若是装饰须指出 |
 | **R6** | **UTC 前提须贴实跑命令 + 输出**(不接受推断) | 若你的环境跑不通,**如实写「不可取得」并停,不得以语义论证替代** |
-| **R7** | **其他表的 `created_at` 零触及**:`sourceProjectionMaterializer` 除 `:291` 外 7 处、`noteBlockLifecycle` 除三处外全部 | 任一被动过须红 |
+| **R7** | **其他表的 `created_at` 零触及**:`sourceProjectionMaterializer` 与 `noteBlockLifecycle` 中**全部非 `operation_batches` 的含 `created_at` SQL**(⚠️ **不写数字** —— 原写「7 处」是调度方用 `grep -c` 数了**行数而非 SQL 数**,实枚举为 11 个;按数字抽验会漏) | 任一被动过须红 |
 
 **全门亲跑**:`docs:check` → `verify:v2-bn8-runtime` → client/server 双 `tsc` → `test:unit` → server `test:v2` → 五道 tool-face 门。
 
