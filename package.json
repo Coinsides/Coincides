@@ -23,6 +23,7 @@
     "check:tool-face-manifest": "npm run docs:tool-face-manifest -- --check",
     "test:tool-face-registry": "cd server && npm run test:tool-face-registry",
     "test:tool-face-manifest": "cd server && npm run test:tool-face-manifest",
+    "test:tool-face-parity": "node --test scripts/check-tool-face-parity.test.mjs",
     "check:canvas-runtime-boundary": "cd client && npm run check:canvas-runtime-boundary",
     "check:group-gallery-shell": "cd client && npm run check:group-gallery-shell",
     "check:single-editor-shell": "cd client && npm run check:single-editor-shell",

@@ -79,3 +79,69 @@ manifest 里**会**出现 `exposure:'test'` 与 `__` 前缀的条目 —— **�
 门禁 docs-first 顺序;回执纪律 README Builder 1–3(含 **UTF-8**);**M-1 mutation 归复核方**(你的 self-test 只作前置自查)、**M-2 header 不由你翻**。
 
 **回执须含**:G-1..G-5 逐条如何满足(**G-5 三条 killer 各给一段实际输出**)· 路由图构建方式 · manifest 消费方式(证明零源码解析)· 四门逐条收据 · 触及面 diff vs 申报 · 显式范围排除。
+
+## Result
+
+Codex builder 已完成实现与前置自查；依用户指示未改 header，结论与 mutation 放行仍归 reviewer / 调度方。
+
+### 交付与边界
+
+- **重写正门**：`scripts/check-tool-face-parity.mjs` 不再 import 旧 registry、不再截取/执行源码条目，也没有 `new Function`。工具的 `name` / `exposure` / `human_entry.route` / `human_entry.client_call_site` 只从 `docs/generated/tool-face-manifest.json` 读取；server/client AST 只作为核验这些既有声明的证据，不用于发现、补全或生成工具条目。
+- **常驻测试**：新增 `scripts/check-tool-face-parity.test.mjs`，通过同一个 production evaluator 及同一个 CLI 入口覆盖 G-1..G-5、reviewer 的旧假绿形状与 client method 反例；没有另造 parity 判定器。
+- **独立脚本**：`package.json` 新增 `test:tool-face-parity`。`check:tool-face-parity` 仍为 production CLI；两者均未接入 `docs:check` 或 `verify:v2-bn8-runtime`。
+- **生成件副作用**：新增 package script 令 object inventory 合法过期，运行 `docs:inventory` 后，`docs/generated/object-inventory.md` 只把“门外脚本”计数从 1 改为 2，并新增 `test:tool-face-parity` 一行。
+- **manifest 字段充足**：真实正控 `list_notes` 已声明 `GET /api/notes` 与 `client/src/pages/Courses/CourseDetail.tsx#fetchSummary`，无需 `needs: claude`，也未改 registry、generator 或 manifest schema / 产物。
+
+### G-1..G-5
+
+| 判据 | 实现与常驻证据 |
+|---|---|
+| **G-1** | 用 TypeScript AST 读取 `server/src/index.ts` 的 default router import 与 `app.use(mountPath, router)`，再读取对应 router 模块的 `router.METHOD(leafPath)` / `router.route(leafPath).METHOD()`；产出 `{method, fullPath, mountedRouterModule, mountPath, leafPath}`。匹配必须同时满足 method 与规范化后的完整 path，直接 `app.METHOD` route 也入图。测试固定证明 `GET /api/notes` 来自 `server/src/routes/notes.ts`，且不存在伪造的 `POST /api/health`。
+| **G-2** | 用 `path.relative()` 把 call-site 严格锁在 `client/src` 内；AST 精确定位声明的 `file#symbol` 子树，只接受该文件对 canonical `client/src/services/api.ts` 的 default import，并从其 `axios.create({baseURL})` 静态求出 `/api`。仅在 symbol 内收集 `api.METHOD(literal/template)`，比较相同 method 与规范化 URL segment；`App#App`、越界路径及真实 route + 错 client method 均红。
+| **G-3** | 空 manifest 或 0 public 返回 exit 0，但只输出 `[INFO] ... 0 条 public 条目受检，未证明任何 parity ...`，不含 `[PASS]`；CLI 常驻测试直接断言 exit 与文本。
+| **G-4** | 非空成功输出固定为 `[PASS] tool-face necessary-condition gate: N public entries checked; human reachability NOT VERIFIED; journey pending`；失败也保留相同边界陈述与条目数。
+| **G-5** | `selectPublicEntries()` 只派生 `exposure==='public'`；`validatePublicProjection()` 独立复核“不得漏入非 public”与“不得有 `__` 前缀”，两条件不合并。真实 manifest 正控、故障 selector 泄漏 test 条目、public `__` 条目三者各自触发；当前生产 manifest 只有一个 public 条目，因此两条负控使用 manifest-shaped fixture，且都走 production evaluator。
+
+三条 killer 的实际输出（`npm.cmd run test:tool-face-parity`）：
+
+```text
+KILLER real_route_positive
+[PASS] tool-face necessary-condition gate: 1 public entries checked; human reachability NOT VERIFIED; journey pending
+```
+
+```text
+KILLER exposure_test_leak
+[FAIL] tool-face necessary-condition gate: 1 public entries checked; human reachability NOT VERIFIED; journey pending
+- non-public entry leaked into public projection: test_probe (exposure=test)
+```
+
+```text
+KILLER reserved_public
+[FAIL] tool-face necessary-condition gate: 1 public entries checked; human reachability NOT VERIFIED; journey pending
+- reserved __ entry entered public projection: __reserved_probe
+```
+
+test killer 另先证明同一条 `exposure:'test'` 在正常 selector 下得到 0-public neutral，避免把“manifest 忠实包含 test”误写成“manifest 本身应红”。两条负控的红来自已存在 production validator 的具体错误文本，不来自缺函数/导入/语法错误。另有 production CLI 集成测试先跑真实 manifest 绿，再喂 `POST /api/health/not-real` + `client/src/App.tsx#App`，断言 exit 1、同时出现 route/client 两条语义错误并排除 `ReferenceError|SyntaxError|ERR_MODULE_NOT_FOUND`；若 CLI 根本不调用 gate，该测试会假绿并失败。
+
+### 验证收据（docs-first）
+
+| 顺序 | 命令 | 收据 |
+|---|---|---|
+| 1 | root `npm.cmd run docs:check` | 首跑 **exit 1**，唯一原因是新增 package script 令 object inventory 过期；运行 `npm.cmd run docs:inventory` **exit 0** 后复跑 **exit 0** |
+| 2 | root `npm.cmd run verify:v2-bn8-runtime` | **exit 0**；19 files / 209 unit tests、159 runtime-boundary checks、60 model-contract groups、双端 build、performance、docs、diff 与 secret scan 全过；该主链未消费新 parity 门 |
+| 3a | client `npm.cmd exec -- tsc --noEmit` | **exit 0**，无输出 |
+| 3b | server `npm.cmd exec -- tsc --noEmit` | **exit 0**，无输出 |
+| 4 | root `npm.cmd run test:unit` | **exit 0**；19 files / 209 tests |
+| 专项 | root `npm.cmd run test:tool-face-parity` | **exit 0**；8/8，含上述三条 killer 与 production CLI 接线负控 |
+| 专项 | root `npm.cmd run check:tool-face-parity` | **exit 0**；当前真实 manifest 输出 1 public checked 及 human-reachability 边界 |
+| 语法 | `node --check`（gate + test） | 两文件均 **exit 0** |
+
+### 触及面与范围排除
+
+- **允许面内**：重写 `scripts/check-tool-face-parity.mjs`；新增相应常驻测试；`package.json` 新增独立测试脚本。
+- **申报生成件**：`docs/generated/object-inventory.md` 的 2/1 行机械更新如上；未运行/改写 docs index。共享树中本单开工前已有 `docs/agent-ops/current-state/INDEX.md` 2/2 diff，原样保留，不归因于本单。
+- **回执**：只向本 handoff 追加本节；按用户指示不改 header。
+- **旧引用的限定结论**：重写后的 parity 可执行代码及 `scripts` / `client` / `server` / `shared` 实现范围内，对 `shared/types/toolRegistry` 的引用为 0；append-only handoff / claude-log 中仍保留前身路径的历史叙述，未伪称全仓历史文本为 0，也未篡改历史收据。
+- **平行机关申报**：无第二套状态、事务或业务 guard。新增 test 只驱动同一 production evaluator / CLI；测试 seam 仅在 `NODE_ENV=test` 接受临时 manifest 路径，用于证明生产入口确实调用正门。
+- **明确未做**：未改 `server/src/toolFace/registry.ts`、manifest generator / schema / JSON；未触及名实不符的 `internal_probe` fixture；未接 `docs:check` / `verify:v2-bn8-runtime`；未碰 12.1、v1、legacy `toolDefinitions`、schema / migration；未做 reviewer 所属 M-1 mutation；未启动服务、浏览器或声称 human journey 已验证；未 commit、push 或碰 main。
+- **环境假阳性排除**：`client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts` 的 HEAD / index / worktree-filtered blob 均为 `3efe5f820e2077850611b54d4d09482845e89545`，且 `git diff --numstat -- <path>` 为空；未把 porcelain `.M` 计入触及面。
