@@ -24,6 +24,7 @@ import {
 import { restoreNoteAsUser, trashNoteAsUser } from '../services/notes.js';
 import { revertTrashNotesReceipt } from '../services/toolFaceReceiptRevert.js';
 import {
+  listToolFaceReceipts,
   readToolFaceReceipt,
   writeToolFaceReceipt,
   type ToolFaceReceiptResource,
@@ -411,6 +412,97 @@ test('K-5 GET, apply, and dismiss enforce receipt ownership', async () => {
     );
     assert.equal(foreignDismiss.response.status, 403);
     assert.equal(readToolFaceReceipt(ownProposed.id).status, 'proposed');
+  });
+});
+
+test('b-5 K-2/K-5/K-6 real HTTP lists all four owned receipt statuses with the full queue projection', async () => {
+  await withToolReceiptsHttp({}, async (fixture) => {
+    const ownProposed = writeReceipt({
+      tier: 'propose',
+      resources: [{ kind: 'note', id: NOTE_A, outcome: 'pending' }],
+      intendedInput: { note_ids: [NOTE_A] },
+    });
+    const ownApplied = writeReceipt({
+      resources: [{ kind: 'note', id: NOTE_A, outcome: 'trashed' }],
+      intendedInput: { note_ids: [NOTE_A] },
+    });
+    const dismissedSeed = writeReceipt({
+      tier: 'propose',
+      resources: [{ kind: 'note', id: NOTE_B, outcome: 'pending' }],
+      intendedInput: { note_ids: [NOTE_B] },
+    });
+    const dismissed = await requestJson(
+      fixture,
+      `/api/tool-receipts/${dismissedSeed.id}/dismiss`,
+    );
+    assert.equal(dismissed.response.status, 200);
+
+    const revertedSeed = writeReceipt({
+      resources: [],
+      intendedInput: { note_ids: [] },
+    });
+    const ownReverted = revertTrashNotesReceipt({
+      userId: USER_ID,
+      receiptId: revertedSeed.id,
+    });
+    const foreignApplied = writeReceipt({
+      userId: OTHER_USER_ID,
+      resources: [{ kind: 'note', id: NOTE_B, outcome: 'trashed' }],
+      intendedInput: { note_ids: [NOTE_B] },
+    });
+
+    const expectedByStatus = {
+      proposed: [ownProposed.id],
+      applied: [ownApplied.id],
+      reverted: [ownReverted.id],
+      dismissed: [dismissedSeed.id],
+    } as const;
+    const expectedKeys = [
+      'applied_at',
+      'created_at',
+      'id',
+      'intended_input_summary',
+      'resources',
+      'reverted_at',
+      'status',
+      'tier',
+      'tool',
+    ];
+
+    for (const status of ['proposed', 'applied', 'reverted', 'dismissed'] as const) {
+      const listed = await requestJson(
+        fixture,
+        `/api/tool-receipts?status=${status}`,
+        { method: 'GET' },
+      );
+      assert.equal(listed.response.status, 200, `${status} must be an allowed list status`);
+      assert.deepEqual(
+        listed.body.receipts.map((item: { id: string }) => item.id),
+        expectedByStatus[status],
+      );
+      assert.deepEqual(Object.keys(listed.body.receipts[0]).sort(), expectedKeys);
+      assert.equal(listed.body.receipts[0].status, status);
+      assert.equal(typeof listed.body.receipts[0].created_at, 'string');
+    }
+
+    const applied = await requestJson(
+      fixture,
+      '/api/tool-receipts?status=applied',
+      { method: 'GET' },
+    );
+    assert.equal(readToolFaceReceipt(foreignApplied.id).status, 'applied', 'positive control: foreign receipt exists');
+    assert.ok(applied.body.receipts.some((item: { id: string }) => item.id === ownApplied.id));
+    assert.ok(!applied.body.receipts.some((item: { id: string }) => item.id === foreignApplied.id));
+    const serviceApplied = listToolFaceReceipts({ userId: USER_ID, status: 'applied' });
+    assert.ok(serviceApplied.some((item) => item.id === ownApplied.id), 'service positive control: own receipt exists');
+    assert.ok(!serviceApplied.some((item) => item.id === foreignApplied.id));
+
+    const unknown = await requestJson(
+      fixture,
+      '/api/tool-receipts?status=bogus',
+      { method: 'GET' },
+    );
+    assert.equal(unknown.response.status, 400);
   });
 });
 

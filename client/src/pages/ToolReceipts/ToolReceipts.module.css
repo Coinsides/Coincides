@@ -56,6 +56,41 @@
   opacity: 0.45;
 }
 
+.viewTabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.viewTabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 10px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.viewTabs button:hover,
+.viewTabs .activeViewTab {
+  color: var(--text-primary);
+}
+
+.viewTabs .activeViewTab {
+  border-bottom-color: var(--accent-primary);
+}
+
+.viewTabs button span {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
 .queueHeader {
   display: flex;
   align-items: center;
@@ -69,6 +104,17 @@
 }
 
 .queueHeader span:first-child {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.statusCounts {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.statusCounts span {
   color: var(--text-secondary);
   font-weight: 600;
 }
@@ -107,6 +153,12 @@
   gap: 4px;
 }
 
+.receiptLabels {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .toolName {
   width: fit-content;
   padding: 2px 6px;
@@ -115,6 +167,25 @@
   color: var(--text-secondary);
   font-family: var(--font-mono, monospace);
   font-size: 10px;
+}
+
+.statusChip {
+  padding: 2px 6px;
+  border: 1px solid var(--glass-border);
+  border-radius: 999px;
+  color: var(--text-muted);
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.statusApplied {
+  border-color: color-mix(in srgb, var(--accent-primary) 38%, var(--glass-border));
+  color: var(--accent-primary-hover);
+}
+
+.statusReverted,
+.statusDismissed {
+  color: var(--text-secondary);
 }
 
 .receiptIdentity strong {
@@ -152,6 +223,18 @@
   border-color: var(--accent-primary);
   background: var(--accent-primary-bg);
   color: var(--accent-primary-hover);
+}
+
+.rowActions .revertButton {
+  border-color: var(--accent-primary);
+  background: var(--accent-primary-bg);
+  color: var(--accent-primary-hover);
+}
+
+.readOnlyLabel {
+  justify-self: end;
+  color: var(--text-muted);
+  font-size: 11px;
 }
 
 .emptyState {
@@ -207,6 +290,10 @@
   }
 
   .resourceCount {
+    justify-self: start;
+  }
+
+  .readOnlyLabel {
     justify-self: start;
   }
 

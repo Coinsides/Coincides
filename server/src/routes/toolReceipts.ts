@@ -11,6 +11,7 @@ import {
   readToolFaceReceipt,
   type ToolFaceReceipt,
   type ToolFaceReceiptResource,
+  type ToolFaceReceiptStatus,
 } from '../services/toolFaceReceipts.js';
 import { trashNotesInputSchema } from '../toolFace/registry.js';
 
@@ -50,7 +51,17 @@ function queueItem(receipt: ToolFaceReceipt) {
     resources: receipt.metadata.resources,
     intended_input_summary: intendedInputSummary(receipt),
     created_at: receipt.created_at,
+    status: receipt.status,
+    applied_at: receipt.applied_at,
+    reverted_at: receipt.reverted_at,
   };
+}
+
+function isListableReceiptStatus(status: string): status is ToolFaceReceiptStatus {
+  return status === 'proposed'
+    || status === 'applied'
+    || status === 'reverted'
+    || status === 'dismissed';
 }
 
 function applyTrashNotesReceipt(
@@ -95,10 +106,10 @@ export function createToolReceiptsRouter(
 
   router.get('/', (req: AuthRequest, res: Response) => {
     const status = typeof req.query.status === 'string' ? req.query.status : 'proposed';
-    if (status !== 'proposed') {
-      throw new AppError(400, 'Only proposed tool face receipts can be listed');
+    if (!isListableReceiptStatus(status)) {
+      throw new AppError(400, 'Unsupported tool face receipt status');
     }
-    const receipts = listToolFaceReceipts({ userId: req.userId!, status: 'proposed' });
+    const receipts = listToolFaceReceipts({ userId: req.userId!, status });
     res.json({ receipts: receipts.map(queueItem) });
   });
 

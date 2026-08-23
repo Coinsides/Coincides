@@ -6,6 +6,8 @@ export interface ToolReceiptResource {
   outcome?: string;
 }
 
+export type ToolReceiptStatus = 'proposed' | 'applied' | 'reverted' | 'dismissed';
+
 export interface ToolReceiptQueueItem {
   id: string;
   tool: string;
@@ -13,17 +15,24 @@ export interface ToolReceiptQueueItem {
   resources: ToolReceiptResource[];
   intended_input_summary: string;
   created_at: string;
+  status: ToolReceiptStatus;
+  applied_at: string | null;
+  reverted_at: string | null;
 }
 
 interface ToolReceiptListResponse {
   receipts: ToolReceiptQueueItem[];
 }
 
-export async function listProposedToolReceipts(): Promise<ToolReceiptQueueItem[]> {
+export async function listToolReceipts(status: ToolReceiptStatus): Promise<ToolReceiptQueueItem[]> {
   const response = await api.get<ToolReceiptListResponse>('/tool-receipts', {
-    params: { status: 'proposed' },
+    params: { status },
   });
   return response.data.receipts;
+}
+
+export async function listProposedToolReceipts(): Promise<ToolReceiptQueueItem[]> {
+  return listToolReceipts('proposed');
 }
 
 export async function applyToolReceipt(receiptId: string): Promise<void> {
@@ -32,4 +41,8 @@ export async function applyToolReceipt(receiptId: string): Promise<void> {
 
 export async function dismissToolReceipt(receiptId: string): Promise<void> {
   await api.post(`/tool-receipts/${encodeURIComponent(receiptId)}/dismiss`);
+}
+
+export async function revertToolReceipt(receiptId: string): Promise<void> {
+  await api.post(`/tool-receipts/${encodeURIComponent(receiptId)}/revert`);
 }
