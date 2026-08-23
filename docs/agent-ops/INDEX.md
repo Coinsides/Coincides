@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 118 份文档。
+共 119 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -125,6 +125,7 @@
 | [handoffs/2026-08-22-v2bn12-2a1b-tool-registry-and-manifest.md](handoffs/2026-08-22-v2bn12-2a1b-tool-registry-and-manifest.md) | V2.BN.12.2a-1b:工具注册表(server,真 zod)+ manifest 生成器 | `(缺状态头)` | — | — |
 | [handoffs/2026-08-22-v2bn12-2a1c-fix-baseurl-and-pass-token.md](handoffs/2026-08-22-v2bn12-2a1c-fix-baseurl-and-pass-token.md) | 12.2a-1c-fix:机械门两处护栏缺口(baseURL 混合分支 fail-open · P7 裸 PASS 逃… | `(缺状态头)` | — | — |
 | [handoffs/2026-08-22-v2bn12-2a1c-parity-gate-rewrite.md](handoffs/2026-08-22-v2bn12-2a1c-parity-gate-rewrite.md) | V2.BN.12.2a-1c:机械门重写(只吃 manifest) | `(缺状态头)` | — | — |
+| [handoffs/2026-08-23-v2bn12-2a3-transport-brief-request.md](handoffs/2026-08-23-v2bn12-2a3-transport-brief-request.md) | V2.BN.12.2a-3:MCP transport 骨架 —— **方案短笺(先答两问,不写代码)** | `(缺状态头)` | — | — |
 | [handoffs/2026-08-23-v2bn12-td8-fix-regression-guards.md](handoffs/2026-08-23-v2bn12-td8-fix-regression-guards.md) | TD-8-fix:补三条回归护栏(**只写测试,不改产品代码**) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-23-v2bn12-td8-receipt-timestamp-cleanup.md](handoffs/2026-08-23-v2bn12-td8-receipt-timestamp-cleanup.md) | TD-8 清债:收据表时间戳统一(**位点拍死,零裁量**) | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |

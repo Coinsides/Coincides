@@ -1,4 +1,4 @@
-> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: done(复核 PASS 0/0/0/0 @ TD-8-fix Review,2026-08-23 Opus 翻牌;Fable 裁定续打,log 08-23 #3) | re: v2bn12-td8-fix | date: 2026-08-23
+> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: done(复核 PASS @ rtd8fix Review,Fable 放行 log 08-23 #5;复核 PASS 0/0/0/0 @ TD-8-fix Review,2026-08-23 Opus 翻牌;Fable 裁定续打,log 08-23 #3) | re: v2bn12-td8-fix | date: 2026-08-23
 
 # TD-8-fix:补三条回归护栏(**只写测试,不改产品代码**)
 
