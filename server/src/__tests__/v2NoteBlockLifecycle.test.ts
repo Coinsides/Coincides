@@ -10,6 +10,12 @@ import { closeDb, initDb } from '../db/init.js';
 import type { AuthRequest } from '../middleware/auth.js';
 import { errorHandler } from '../middleware/errorHandler.js';
 import noteRoutes from '../routes/notes.js';
+import { clientNoteBlockCreateReceiptId } from '../services/noteBlockLifecycle.js';
+import {
+  markToolFaceReceiptApplied,
+  revertToolFaceReceipt,
+  writeToolFaceReceipt,
+} from '../services/toolFaceReceipts.js';
 
 interface Fixture {
   baseUrl: string;
@@ -823,5 +829,222 @@ test('discard endpoint rejects a generalized block id without a client create ke
       { block_id: uuidv4() },
     );
     assert.equal(discarded.response.status, 400);
+  });
+});
+
+test('client create rejects an mcp proposed batch at the operation-batch read boundary', async () => {
+  await withHttpDb(async ({ baseUrl, courseId, db, noteId, userId }) => {
+    const key = 'mcp-proposed-create-collision';
+    const batchId = clientNoteBlockCreateReceiptId(userId, noteId, key);
+    db.prepare(`
+      INSERT INTO operation_batches (
+        id, user_id, course_id, source_type, source_id, label, status, metadata
+      ) VALUES (?, ?, ?, 'mcp', ?, 'MCP collision probe', 'proposed', ?)
+    `).run(batchId, userId, courseId, key, JSON.stringify({ note_id: noteId }));
+
+    const created = await postJson(baseUrl, `/api/notes/${noteId}/blocks`, createPayload(key));
+
+    assert.equal(created.response.status, 409);
+    assert.equal(created.body.error, 'Operation batch source type is not valid for note block lifecycle');
+    assert.deepEqual(created.body.details, {
+      code: 'note_block_lifecycle_batch_source_mismatch',
+      expected_source_type: 'client_note_block_create',
+      actual_source_type: 'mcp',
+    });
+    assert.equal(
+      (db.prepare('SELECT COUNT(*) AS count FROM note_blocks WHERE operation_batch_id = ?')
+        .get(batchId) as { count: number }).count,
+      0,
+    );
+  });
+});
+
+test('cleanup-conflict receipt read rejects an mcp proposed batch at its read boundary', async () => {
+  await withHttpDb(async ({ baseUrl, db, noteId }) => {
+    const key = 'mcp-proposed-cleanup-conflict-collision';
+    const created = await postJson(baseUrl, `/api/notes/${noteId}/blocks`, createPayload(key));
+    assert.equal(created.response.status, 201);
+
+    const createBatch = db.prepare(`
+      SELECT id
+      FROM operation_batches
+      WHERE source_type = 'client_note_block_create' AND source_id = ?
+    `).get(key) as { id: string };
+    db.prepare(`
+      UPDATE note_blocks
+      SET title = NULL, plain_text = NULL, content_json = '{"body":""}'
+      WHERE id = ?
+    `).run(created.body.id);
+    db.prepare('UPDATE operation_batches SET metadata = ? WHERE id = ?').run(JSON.stringify({
+      note_id: noteId,
+      block_id: created.body.id,
+      placement_id: created.body.placement_id,
+    }), createBatch.id);
+
+    const firstConflict = await postJson(
+      baseUrl,
+      `/api/notes/${noteId}/blocks/discard-client-create`,
+      { client_create_key: key },
+    );
+    assert.equal(firstConflict.response.status, 409);
+    assert.equal(firstConflict.body.details.code, 'client_note_block_cleanup_conflict');
+
+    const conflictBatchId = firstConflict.body.details.operation_batch_id as string;
+    db.prepare(`
+      UPDATE operation_batches
+      SET source_type = 'mcp', status = 'proposed'
+      WHERE id = ?
+    `).run(conflictBatchId);
+
+    const secondConflict = await postJson(
+      baseUrl,
+      `/api/notes/${noteId}/blocks/discard-client-create`,
+      { client_create_key: key },
+    );
+    assert.equal(secondConflict.response.status, 409);
+    assert.equal(secondConflict.body.error, 'Operation batch source type is not valid for note block lifecycle');
+    assert.deepEqual(secondConflict.body.details, {
+      code: 'note_block_lifecycle_batch_source_mismatch',
+      expected_source_type: 'client_note_block_cleanup_conflict',
+      actual_source_type: 'mcp',
+    });
+  });
+});
+
+test('immediate tool call writes an applied mcp receipt using the database created_at default', async () => {
+  await withHttpDb(async ({ courseId, db, userId }) => {
+    const humanEntry = {
+      route: 'POST /api/notes/:noteId/blocks',
+      client_call_site: 'client/src/services/noteService.ts#createNoteBlock',
+    };
+    const resources = [
+      { kind: 'note', id: 'note-immediate' },
+      { kind: 'block', id: 'block-immediate' },
+    ];
+
+    const receipt = writeToolFaceReceipt({
+      userId,
+      courseId,
+      callId: 'call-immediate-1',
+      tool: 'create_note_block',
+      tier: 'immediate',
+      harness: 'test-harness',
+      inputDigest: 'sha256:immediate',
+      humanEntry,
+      resources,
+    });
+    const row = db.prepare(`
+      SELECT source_type, source_id, status, metadata, created_at, applied_at, reverted_at
+      FROM operation_batches
+      WHERE id = ?
+    `).get(receipt.id) as {
+      source_type: string;
+      source_id: string;
+      status: string;
+      metadata: string;
+      created_at: string;
+      applied_at: string | null;
+      reverted_at: string | null;
+    };
+
+    assert.equal(receipt.status, 'applied');
+    assert.equal(row.source_type, 'mcp');
+    assert.equal(row.source_id, 'call-immediate-1');
+    assert.equal(row.status, 'applied');
+    assert.match(row.created_at, /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/);
+    assert.match(row.applied_at || '', /^\d{4}-\d{2}-\d{2}T/);
+    assert.equal(row.reverted_at, null);
+    assert.deepEqual(JSON.parse(row.metadata), {
+      tool: 'create_note_block',
+      tier: 'immediate',
+      harness: 'test-harness',
+      input_digest: 'sha256:immediate',
+      human_entry: humanEntry,
+      resources,
+    });
+  });
+});
+
+test('propose tool call writes proposed then markToolFaceReceiptApplied applies it', async () => {
+  await withHttpDb(async ({ db, userId }) => {
+    const receipt = writeToolFaceReceipt({
+      userId,
+      callId: 'call-propose-1',
+      tool: 'update_note',
+      tier: 'propose',
+      harness: 'test-harness',
+      inputDigest: 'sha256:propose',
+      humanEntry: {
+        route: 'PUT /api/notes/:noteId',
+        client_call_site: 'client/src/services/noteService.ts#updateNote',
+      },
+      resources: [{ kind: 'note', id: 'note-propose' }],
+    });
+    const proposed = db.prepare(`
+      SELECT course_id, status, applied_at
+      FROM operation_batches
+      WHERE id = ?
+    `).get(receipt.id) as { course_id: string | null; status: string; applied_at: string | null };
+
+    assert.equal(receipt.status, 'proposed');
+    assert.deepEqual(proposed, { course_id: null, status: 'proposed', applied_at: null });
+
+    const applied = markToolFaceReceiptApplied(receipt.id);
+    assert.equal(applied.status, 'applied');
+    assert.match(applied.applied_at || '', /^\d{4}-\d{2}-\d{2}T/);
+  });
+});
+
+test('revertToolFaceReceipt records a partial outcome without performing business rollback', async () => {
+  await withHttpDb(async ({ db, userId }) => {
+    const receipt = writeToolFaceReceipt({
+      userId,
+      callId: 'call-partial-revert-1',
+      tool: 'replace_note_content',
+      tier: 'propose',
+      harness: 'test-harness',
+      inputDigest: 'sha256:partial',
+      humanEntry: {
+        route: 'PUT /api/notes/:noteId/content',
+        client_call_site: 'client/src/services/noteService.ts#replaceNoteContent',
+      },
+      resources: [
+        { kind: 'text_flow', id: 'flow-partial' },
+        { kind: 'annotation', id: 'annotation-partial' },
+      ],
+    });
+
+    const reverted = revertToolFaceReceipt(receipt.id, {
+      outcome: 'partial',
+      details: {
+        reverted_resources: ['text_flow:flow-partial'],
+        failed_resources: ['annotation:annotation-partial'],
+      },
+    });
+    const row = db.prepare(`
+      SELECT status, metadata, applied_at, reverted_at
+      FROM operation_batches
+      WHERE id = ?
+    `).get(receipt.id) as {
+      status: string;
+      metadata: string;
+      applied_at: string | null;
+      reverted_at: string | null;
+    };
+    const metadata = JSON.parse(row.metadata);
+
+    assert.equal(reverted.status, 'reverted');
+    assert.equal(row.status, 'reverted');
+    assert.equal(row.applied_at, null);
+    assert.match(row.reverted_at || '', /^\d{4}-\d{2}-\d{2}T/);
+    assert.equal(metadata.revert_outcome, 'partial');
+    assert.deepEqual(metadata.revert_details, {
+      reverted_resources: ['text_flow:flow-partial'],
+      failed_resources: ['annotation:annotation-partial'],
+    });
+    assert.deepEqual(metadata.resources, [
+      { kind: 'text_flow', id: 'flow-partial' },
+      { kind: 'annotation', id: 'annotation-partial' },
+    ]);
   });
 });

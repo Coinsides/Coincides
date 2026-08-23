@@ -225,6 +225,12 @@ function recordLegacyPlacementCleanupConflict(
     FROM operation_batches
     WHERE id = ?
   `).get(operationBatchId) as CleanupConflictBatchRow | undefined;
+  if (persistedBatch) {
+    assertNoteBlockLifecycleBatchSource(
+      persistedBatch,
+      CLIENT_CREATE_CLEANUP_CONFLICT_SOURCE_TYPE,
+    );
+  }
   const persistedMetadata = persistedBatch
     ? parseJson<Partial<ClientCreateCleanupConflictMetadata>>(persistedBatch.metadata, {})
     : null;
@@ -253,15 +259,29 @@ function recordLegacyPlacementCleanupConflict(
   };
 }
 
+function assertNoteBlockLifecycleBatchSource(
+  batch: Pick<OperationBatchRow, 'source_type'>,
+  expectedSourceType: typeof CLIENT_CREATE_SOURCE_TYPE | typeof CLIENT_CREATE_CLEANUP_CONFLICT_SOURCE_TYPE,
+): void {
+  if (batch.source_type === expectedSourceType) return;
+  throw new AppError(409, 'Operation batch source type is not valid for note block lifecycle', {
+    code: 'note_block_lifecycle_batch_source_mismatch',
+    expected_source_type: expectedSourceType,
+    actual_source_type: batch.source_type,
+  });
+}
+
 function readBatch(
   db: Database.Database,
   batchId: string,
 ): OperationBatchRow | undefined {
-  return db.prepare(`
+  const batch = db.prepare(`
     SELECT id, user_id, course_id, source_type, source_id, status, metadata
     FROM operation_batches
     WHERE id = ?
   `).get(batchId) as OperationBatchRow | undefined;
+  if (batch) assertNoteBlockLifecycleBatchSource(batch, CLIENT_CREATE_SOURCE_TYPE);
+  return batch;
 }
 
 function assertOwnedNote(

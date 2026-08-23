@@ -47,3 +47,67 @@ schema 零改动(新 status 值属词汇扩展);不碰 routes/transport;不碰 0
 ## 验证与回执
 
 server 全套(262+新增)/ noteBlockLifecycle 定向 / 双 tsc / verify 链。## Result 追加进本文件,回执措辞不得宽于实现;附 Spark 单前/单后读表。不自评 PASS,不 commit。
+
+## Result (Codex builder, 2026-08-22)
+
+### 落地内容
+
+1. 新增 `server/src/services/toolFaceReceipts.ts`:
+   - `writeToolFaceReceipt(...)` 写入既有 `operation_batches`,固定 `source_type='mcp'`、`source_id=callId`;`immediate -> applied` 且写 `applied_at`,`propose -> proposed` 且 `applied_at=NULL`。
+   - metadata 保存 `tool/tier/harness/input_digest/human_entry/resources`;运行时显式拒绝不属于 `immediate|propose` 的 tier,没有把 `confirm` 静默降成 proposed。
+   - `markToolFaceReceiptApplied(id)` 仅推进 `proposed -> applied`;`revertToolFaceReceipt(id,{outcome,details})` 仅把收据改为 `reverted`,合并写入 `revert_outcome/revert_details` 与 `reverted_at`,不写任何业务表、不执行业务回滚。
+   - 新 INSERT **完全不列 `created_at`**,由 SQLite 默认值生成。
+2. `server/src/services/noteBlockLifecycle.ts` 只在 D-1 校订指出的两条真实读取路径加 fail-closed 守卫,并共用一个私有断言:
+   - hunk 1:`recordLegacyPlacementCleanupConflict()` 的 `SELECT ... FROM operation_batches` 回读后、解析 metadata 前,只接受 `client_note_block_cleanup_conflict`。
+   - hunk 2:`readBatch()` 的 `SELECT ... FROM operation_batches` 回读后、return 前,只接受 `client_note_block_create`。
+   - 错类型统一返回 409 + `details.code='note_block_lifecycle_batch_source_mismatch'`,并给出 expected/actual source type;既有下游 identity 检查原样保留作纵深防御。
+   - 除上述两条读取路径及其共享私有 helper 外,该文件没有其他语义改动;**未改 Slash/rollback 保护 hunk 与语义**。
+3. 在既有 `v2NoteBlockLifecycle.test.ts` 内新增 5 条真实 SQLite/Express 路径测试(2 条守卫 killer + immediate/propose/revert 各 1 条),因此没有新增测试脚本或改 `server/package.json`。
+4. `tech-debt.md` 的 TD-6 仅追加窄注:工具面跨资源撤销以 `revert_outcome: complete|partial` 可观察,不承诺原子回滚,原子性仍待该专项。
+
+### 平行机关申报
+
+`toolFaceReceipts.ts` 是新的工具面 producer/writer,原因是既有 `noteBlockLifecycle` 与 `sourceProjectionMaterializer` writer 都硬编码各自 operation 的 source identity、metadata 与状态机,不能替工具面写 `mcp` 收据。新服务仍复用同一 `operation_batches`、现有 DB 连接与 `AppError`;没有新表、第二份状态存储、路由/transport、业务回滚引擎或新的事务边界。
+
+### 守卫 RED、接线与 mutation 证据
+
+- 开工定向基线:`node --import tsx --test src/__tests__/v2NoteBlockLifecycle.test.ts` -> exit 0,17/17。
+- 先只加入两条 killer、未加守卫时 -> exit 1,19 项中原 17 项绿、2 条新 killer 红;实际退回旧错误 `Client create receipt identity mismatch` / `Cleanup conflict receipt identity mismatch`,红因不是缺 API 或语法。
+- 两条 killer 走真实迁移后临时 SQLite + 真实 notes router/service;既有 auth shim 只注入 `userId`,没有 mock DB、读取函数、守卫、identity 检查或路由承重点。
+- 单刀 mutation 1(守卫谓词临时放行 `mcp`)只跑两条 killer -> exit 1,0/2,两条都退回上述旧 identity mismatch。
+- 单刀 mutation 2(临时删除两处生产 guard call)只跑两条 killer -> exit 1,0/2,两条同样退回旧 identity mismatch;因此测试会杀死“守卫根本没被调用”。
+- 两次 mutation 都立即还原;`noteBlockLifecycle.ts` mutation 前后 blob hash 同为 `20c2804709b81037cc454e7d88f9c1d11d8aeff3`,还原后 killer 2/2 绿,最终定向 22/22。
+
+### `created_at` 口径(D-2)
+
+同一只读解析探针先扫 HEAD 已知阳性,再扫工作树:HEAD 有 4 个 operation-batch INSERT 显式传 `created_at`(`noteBlockLifecycle` 3 处 + `sourceProjectionMaterializer` 1 处),工作树仍是同 4 处;新 `toolFaceReceipts` INSERT 的显式 `created_at` 命中为 0。**本单未修既有四处,故 `created_at` 全表仍为混格式。** 本单只能申报“新工具收据路径遵守 DB 默认”,不能申报系统已统一。
+
+### 验证实录
+
+| 命令/阶段 | 实测结果 |
+|---|---|
+| 开工 `npm.cmd --prefix server run test:v2`(未隔离资产目录) | exit 1,257/262;5 项均为默认 `server/uploads` fixture 清理的 Windows `EPERM`,不是断言失败 |
+| 开工 server 全套(改用工作区隔离 `CANVAS_ASSET_DIR` / `SOURCE_BLOB_DIR`) | exit 0,262/262 |
+| 最终 `node --import tsx --test src/__tests__/v2NoteBlockLifecycle.test.ts` | exit 0,22/22 |
+| 最终 `npm.cmd --prefix server run test:v2`(隔离资产目录) | exit 0,267/267(262 基线 + 5 新增) |
+| `server: npm.cmd exec -- tsc --noEmit` | exit 0 |
+| `client: npm.cmd exec -- tsc --noEmit` | exit 0 |
+| `npm.cmd run verify:v2-bn8-runtime`(隔离资产目录) | exit 0;双 build、既有工具面/Canvas 门、performance seed、docs check 与 changed-file secret scan 均完成 |
+| `npm.cmd run docs:check` | exit 0;Result 写入后复跑仍为 exit 0 |
+| `git diff --check` | exit 0 |
+
+`verify:v2-bn8-runtime` 不包含 server `test:v2`,所以上表两门分别亲跑,没有互相代替。
+
+### D 段与边界核对
+
+- D-1 开工先用同一 `git grep` 探针在未改代码命中既有 `operation_batch` 阳性,再查 `findOperationBatch` 得全仓零命中(exit 1);施工依据是两条实际 SELECT。
+- routes 阴性前,同一 `git grep` 先从 HEAD 命中既有 `router.post` 阳性;`server/src/routes` 对 `toolFaceReceipt` 零命中。schema 阴性前从 HEAD 命中 `schema.sql` 的既有 `operation_batches` 阳性;当前 `server/src/db` diff 为空。
+- 同一 `git diff --name-only` 先在 `HEAD^..HEAD` 命中本单之前已有的 docs 改动,再查当前 `server/src/db`、`server/src/routes`、`server/src/transport` 与三份 `package.json`,输出为空。没有 schema、routes/transport 或 package 改动。
+- porcelain 报告的 `client/.../useNoteCanvasRuntimeController.ts` `.M` 为题述 stat/EOL 假阳性:`git diff --numstat` 为空,HEAD/工作树 blob hash 都是 `3efe5f820e2077850611b54d4d09482845e89545`。
+- 未新增文档、未改文档状态头/H1,故未生成 `docs:index`;未改 package,故未生成 `docs:inventory`。`docs:check` 已同时执行两者的 `--check`。
+- 按用户指令保留本 handoff header 原样;未 commit、未 push、未切换或触碰 main。
+
+### Spark 读表与机械锁说明
+
+- 本环境 CLI 无法读取 Henry UI 中的 Spark 单前/单后百分比,本次**未取得该两项读数,需 Henry 从 UI 提供**;未编造百分比。
+- `needs: claude/dispatcher`(仅机械锁归属):开工时 `.codex-tmp/builder.lock.d` 已存在;本机 PowerShell 不支持取锁命令所用的 `New-Item -LiteralPath`,mkdir 失败后随后的 owner 写入覆盖了既有 `owner.json`。目录创建时间与本单 agent 启动相邻,但原 owner 字段已无法恢复,所以本 builder 没有删除该锁;请原发单方核对并按锁纪律释放。
