@@ -80,3 +80,25 @@
 #### 机械锁加固(2026-08-22 晚,Opus 明知锁在仍覆盖一案后,Fable 判定采纳)
 
 锁是文件,能被看见不能阻止被覆盖——自律挡不住时差也挡不住「查了没停」。改为**原子取锁**:①取锁用 `mkdir .codex-tmp/builder.lock.d`(原子,已存在即失败)再在其中写 `{单号, PID, 发单方, 时间}`;**失败即不得起进程**,把拒绝写进日志;②陈旧锁判据=目录内 PID 已死且 ≥20 分钟,此时才可清;③**锁只由写锁者删,删前核对发单方字段**——守护/监视器不得删别人的锁(Fable 的守护此前亦有「任意 codex 退出即删锁」的同病,同改);④builder/reviewer「结束」判据=**进程消失 + 20 秒落定**,`## Result` 出现不算结束(2b00fe6 中途快照事故)。旧的 `builder.lock` 文件形式废止。
+
+#### 取锁必须是一步(2026-08-22 深夜,12.2a-2 builder 覆盖 owner 一案)
+
+**事故**:12.2a-2 builder 开工时跑取锁流程,`.codex-tmp/builder.lock.d` 已存在(调度方持有),取锁**正确失败**;但**紧随其后的 owner 写入照常执行**,把既有 `owner.json` 覆盖成自己的(`dispatcher: user-direct`),原 owner 字段不可恢复。
+> ⚠️ **该 builder 的后续处置是对的**:它**没有删锁**,并标 `needs: claude/dispatcher` 交回发单方核对。**问题不在它,在流程。**
+> ⚠️ **归因更正**:调度方(Opus)当时据此判为「第三次双发/有第三方」,**判错了** —— 没有第三方,是同一只 builder 的取锁流程。**锁被改写不等于有人抢跑;先读 owner 再下结论。**
+
+**根因**:取锁(`mkdir`)与宣称所有权(写 `owner.json`)是**两步**,失败与否不联动 —— **原子的只有前一步**。另:该 builder 用的是 PowerShell `New-Item -LiteralPath`,在本机 PowerShell 5.1 上不可用,失败原因被淹没。
+
+**规则**:
+
+1. **取锁与写 owner 必须在同一条命令链里,前者失败则整链中止**。Git Bash 推荐:
+   ```bash
+   mkdir .codex-tmp/builder.lock.d 2>/dev/null      && printf '%s
+' '{"order":"...","pid":"...","dispatcher":"...","started":"..."}' > .codex-tmp/builder.lock.d/owner.json      || { echo "⛔ 取锁失败,不得起进程"; cat .codex-tmp/builder.lock.d/owner.json 2>/dev/null; exit 1; }
+   ```
+   PowerShell 侧**不得用 `New-Item -LiteralPath`**(5.1 不支持);用 `New-Item -Path -ItemType Directory -ErrorAction Stop` 并置于 `try/catch`,catch 内**只报错不写 owner**。
+2. **owner.json 一旦存在即不得覆盖**。写入前须 `test -e` 或 `set -o noclobber`;**已存在 = 取锁失败**,按 §③ 处置。
+3. **builder / reviewer 提示词须明写**:「**锁非你所有,取锁失败即停,不得覆盖 owner,不得删锁**」——发单方持锁是常态,被派方本就不该取锁。
+
+> **本条与上一条同源**:凡「靠自觉不去覆盖」的环节迟早会被覆盖。**能原子的就原子,不能原子的就让它整链失败。**
+
