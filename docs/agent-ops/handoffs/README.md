@@ -107,6 +107,10 @@
 
 调度方提交 builder 产物时,**不能只按自己记得的路径 `git add`**:须以回执申报的触及面为清单,再对 `git status --porcelain` 的 **untracked(`??`)** 逐项核对——新建文件不在 modified 列表里。漏装一个新文件=提交树自身不可编译,复核按严格基线只能判 BLOCKER(Fable 于 `d799d50` 漏装 `toolFaceReceipts.ts`,Opus 一分钟后补 `84c7fff`)。宽 add 扫进别人的未提交、窄 add 漏掉自己的新文件——两端都是同一个错:**提交内容没有对照清单。** **规则形状(Opus 补,采)**:保留「只 add 点名文件」的安全性,再加完整性一步——**点名 add 之后必须 `git status --short` 复查:任何 `??` 若属于本单交付物即补 add,若不属于即留在树上并在提交说明里点名。**
 
+### 沙箱权限参数:Henry 常设默认允许(2026-08-23 11:2x Henry 亲定,取代下方「逐次授权」条)
+
+Henry 直接对 Fable 说:「这种事情我是默认允许的,不用问我。」——**builder/reviewer 为安装依赖而开沙箱网络(`sandbox_workspace_write.network_access=true`)等沙箱参数,属常设授权,无需逐次请示**;约束不变:只装工单点名的包、`--save-exact`、lockfile 入库、装完即止、每次在回执与 log 留痕。**仍须逐次请示的**:`danger-full-access`、触碰 `CLAUDE.md`/`AGENTS.md`/agent 权限配置文件、花钱、账号级授权、不可回滚动作(§2.1 与代理期自限清单不变)。
+
 ### 权限类开关须 Henry 逐次授权(2026-08-23 增,沙箱开网一案)
 
 builder/reviewer 的沙箱模式、网络开关(`sandbox_workspace_write.network_access`)、`danger-full-access`、任何扩大 agent 环境权限的 `-c` 配置——**属 `CLAUDE.md §2.1` 的「agent 操作指令 / 权限配置」,同侪会话(含 Fable)不得自行授权,须 Henry 本人逐次点头**。依赖安装本身可归 builder 做,但让 builder 能上网装,是权限变更,不是采购杂活。事故:2026-08-23 05:28 Fable 在不知 Henry 已对 Opus 答「不授权」的情况下开网跑了 12.2a-3 续跑 2(装了两个官方 MCP 包),已自报 Henry 裁决。
