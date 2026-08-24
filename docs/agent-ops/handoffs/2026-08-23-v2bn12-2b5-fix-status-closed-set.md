@@ -214,3 +214,88 @@ TD-14(`scopes` 未强制,**不得声称已强制**)· TD-6(多资源 revert 非�
 - 用同一份开工 manifest 复算：`docs/agent-ops/**` 排除本工单后 `DocsExceptTicketDiffCount = 0`。
 - 严格 UTF-8 解码通过；8024-byte 原工单是写回后文件的精确字节前缀；首次 Result 写回只在末尾新增 7523 bytes，`git diff --no-index --numstat` 为 `88  0`。
 - 写回后 `npm.cmd run docs:check` 与 `git diff --check` 均 PASS；HEAD/暂存区状态仍满足 H-B。
+
+## Review
+
+复核日期：2026-08-23。复核角色：Codex reviewer（洁净室增量复核）。复核基线：`4e6bc647a8f449b42db72deda0815d9ebf3d3476`；前一基线：`b1772f017f398f540092ca998783028f688a565f`。
+
+**判定：PASS。BLOCKER 0 / HIGH 0 / MED 0 / LOW 0。** 未发现需要 builder 返工的缺陷；放行权仍在 Fable。
+
+### ⛔ 本轮范围缩小（路线③；显式）
+
+上一轮复核在准备施加“移除 `user_id` 过滤 / 放宽 revert ownership 守卫”一类 mutation 时，被上游内容过滤器判为 cybersecurity risk 后终止（880 秒 / 26 万 token，`## Review` 未写）。本轮依设计方路线③裁定，**没有施加、没有改写描述后重试、也没有以任何替代方式尝试移除或放宽 ownership、鉴权、权限守卫**；工单 MED-1 原列的两条此类“必红”不在本轮范围，Result 中对应旧刀收据也不作为本轮判定证据。
+
+因此，下面 **R2 是结构复核，非亲刀**；只核测试方向、fixture、断言落点、阳性对照与既有反方向用例保留情况。
+
+### R1 — HIGH-1 闭集：PASS
+
+亲跑新 HIGH-1 用例所走的真实 Express fixture；临时只加日志读取动态 seed id，随后逐 blob 恢复测试文件。该次精确 id 为：
+
+- proposed：`bc5fe37a-f507-4cc1-8ed5-aefe3dddf28a`
+- applied：`954bdfc8-924e-4e67-bfd3-6a05d1ceb3af`
+- reverted：`2d0183b7-ba77-4da0-9f47-2c072420d250`
+- dismissed：`29a0abe9-9b72-489c-bd85-9f6fd2eb418e`
+
+| 输入 | 实测 | 同探针阳性对照（精确 id 列表） |
+|---|---|---|
+| `status=proposed` | 200，`[bc5fe37a-f507-4cc1-8ed5-aefe3dddf28a]` | 本行自身 |
+| `status=applied` | 200，`[954bdfc8-924e-4e67-bfd3-6a05d1ceb3af]` | 本行自身 |
+| `status=reverted` | 200，`[2d0183b7-ba77-4da0-9f47-2c072420d250]` | 本行自身 |
+| `status=dismissed` | 200，`[29a0abe9-9b72-489c-bd85-9f6fd2eb418e]` | 本行自身 |
+| `status=` | 400 | proposed：200，`[bc5fe37a-f507-4cc1-8ed5-aefe3dddf28a]` |
+| `status=bogus` | 400 | proposed：200，`[bc5fe37a-f507-4cc1-8ed5-aefe3dddf28a]` |
+| `status=APPLIED` | 400 | applied：200，`[954bdfc8-924e-4e67-bfd3-6a05d1ceb3af]` |
+| `status=Applied` | 400 | applied：200，`[954bdfc8-924e-4e67-bfd3-6a05d1ceb3af]` |
+| `status=applied&status=reverted` | 400 | applied：200，`[954bdfc8-924e-4e67-bfd3-6a05d1ceb3af]` |
+| `status[]=applied` | 400 | applied：200，`[954bdfc8-924e-4e67-bfd3-6a05d1ceb3af]` |
+| 完全省略参数 | 200，`[bc5fe37a-f507-4cc1-8ed5-aefe3dddf28a]` | 四态显式请求均 200 且各为上列 singleton |
+
+阴性结果还有第二来源：另一套 fresh temp DB / 真实 Express 探针以 applied `ef18274c-8fea-4615-b135-09ee289d51db`、proposed `ff092423-bd3b-4802-b220-ccc732339d71` 为精确阳性 singleton，独立得到相同拒绝结果。额外形状中，同值重复 2/3 次、合法值加空值、`status[value]`、`status[0]`、嵌套对象、空数组元素、空白/plus/tab、全角/零宽/NBSP、双重编码、NUL、畸形百分号、逗号列表、编码后大写、4 KiB 值及保留对象成员均为产品 400；20 KiB 值由 HTTP 层在路由前返回 431。合法等价编码 `%61pplied`、`appli%65d`、`st%61tus=applied` 均为 200 且只返回 applied 精确 id。未发现闭集接受缺口。
+
+刀测均为目标 `AssertionError`，不是装载/语法错误：
+
+- X-1：恢复旧式 `typeof ... === 'string' ? ... : 'proposed'` 后，重复参数与 `status[]` 两项由期望 400 变为实际 200；其余四个非法字符串仍 400。恢复后 focused 1/1 PASS。
+- X-2：令 `isListableReceiptStatus` 恒 `true` 后，空串、`bogus`、`APPLIED`、`Applied` 四项由期望 400 变为实际 200；两项非 string 仍 400。恢复后 focused 1/1 PASS。
+- 两次恢复后 `server/src/routes/toolReceipts.ts` blob 均回到 `685b6a50afa38915633d2ee54e6e00fb3fa5fb8c`，隔离树最终 diff/stage 为空。
+
+### R2 — MED-1 结构复核（非亲刀）：PASS
+
+- 新测试确为 **A token 请求 B receipt**；既有 K-5b 是 B token 请求 A receipt，方向不同。
+- fixture 确实插入 B 的 course、B 自己的 note，并建立 B 的 applied receipt；A revert 前后均以 `SELECT * FROM notes` 读取 B note，断言是整行 `assert.deepEqual(after, before)`，另断 receipt 仍为 `applied`，不是只看 `noteStatus`。
+- 列表探针不是恒空：A 自己四态各有 receipt，逐态严格等于自己的 singleton；B token 还经同一 HTTP list route 精确列出 B 自己的 applied receipt。
+- 既有反方向 K-5b 未删改；其代码块在 `b1772f0` 与 `4e6bc64` 的 SHA-256 同为 `1f5cab1900513cd2f99b4509e612cadda4a2f01c086591cea2f1b1e23b63e05b`。整套 trash-notes HTTP 门 43/43 PASS，作为结构阅读之外的独立运行来源。
+
+### R3 — MED-2 两把客户端刀：PASS
+
+- Dismiss 刀 `await refresh()` → `if (action !== 'dismiss') await refresh()`：K-7 目标断言红为 `expected spy to be called 12 times, but got 8 times`；该断言随后还精确核最后四次 GET 为 proposed/applied/reverted/dismissed。恢复后 2/2 PASS。
+- Jump 刀将 `onClick` 变为空函数：router location probe 目标断言红，期望 pathname `/notes/note-proposal-one`、实际 `/tool-receipts`。恢复后 2/2 PASS。
+- 红刀彼此独立、每刀恢复后再取绿；产品文件最终 blob 与基线相同。
+
+### R4 / R5 — 未打破既有守卫且范围干净：PASS
+
+- `ToolReceipts.tsx` 在两基线的 blob 均为 `e1f0a123c040b821393a23d462aece53a82d7bfb`，diff 为空；Executed 视图到真人 UI Revert 链、对应 API 调用均仍在。
+- `queueItem` 九字段块在两基线的 SHA-256 均为 `139c7678166a3958be7269db4d18b642409d843902880b90a78fe3bc912672d3`；既有第二条客户端 K-4/K-5 测试块哈希亦相同，K-7 原 Apply/Dismiss 语义保留。
+- `git diff --numstat b1772f0..4e6bc64 -- server/src/services server/src/db server/src/mcp server/src/toolFace` 为空；独立的两端 tree-object SHA 也逐目录相同：services `09f26ac8faeae8986322dbbce389f1a3a8a4c941`、db `9d89bb0ab7e9f8eb7ba00e2f482686423e01c8a6`、mcp `b251313d372b46144c1bda7af6a50cc104dfcfaf`、toolFace `63e60c31c1b52a56b044a96212883a5cd42cb7ea`。
+
+### R6 — 门禁：PASS
+
+按 docs-first 顺序亲跑：
+
+- `npm.cmd run docs:check`：PASS（字节保真 `4e6bc64` clone）。
+- `npm.cmd run verify:v2-bn8-runtime`：PASS；含 client 21 files / 213 tests、registry 4/4、manifest 10/10、parity 10/10、runtime/model/perf、双 build、docs/diff/secrets 全过。
+- `npx.cmd tsc --noEmit`：client PASS；server PASS（均为精确基线 clone）。
+- `npm.cmd run test:unit`：21 files / 213/213 PASS。
+- `npm.cmd run test:v2`：270/270 PASS；按 TD-12 使用独立 OS-temp `CANVAS_ASSET_DIR`，结束前确认根与内部均无 ReparsePoint 后删除。
+- `npm.cmd run test:trash-notes-tool`：43/43 PASS。
+- `npm.cmd run test:mcp-transport`：24/24 PASS。
+- 五道 tool-face：registry 4/4 PASS；manifest 10/10 PASS；manifest check PASS（2 entries / 2 public）；parity 10/10 PASS；parity check PASS（2 public）。
+
+环境说明：OS-temp clone 直接启动 Vitest 时，esbuild 在任何测试执行前被环境拒绝读取 `vitest.config.ts`（`Access is denied`），该基础设施启动错误未计作产品红/绿。完整命名 `verify:v2-bn8-runtime` 与独立 `test:unit` 改在主工作树运行；运行前以两种来源确认被测内容等于 `4e6bc64`：相关路径 `git diff --numstat` 为空，且 client tree `5c24616e8e06566a66fb4341759758322afb9a3f`、server tree `d1117dcc93d39c4a99a03c24f1f3c1771a6fda5f` 与基线逐 tree-object 相同，root/client/server package 文件也逐 blob 相同。精确 clone 的 docs、双 tsc 与所有 server 门另行通过。
+
+### 卫生
+
+- 全部 mutation 均在 OS-temp 隔离 clone 中完成并恢复；隔离 clone 最终 tracked/staged diff 均为空。
+- 清理前枚举 junction 为 ReparsePoint、解析目标并确认目标精确匹配 OS-temp clone；目标内部 ReparsePoint 为 0。随后用 `[IO.Directory]::Delete(path, $false)` 非递归解链，再仅对已验证位于 OS temp、内部无 ReparsePoint 的两个 clone 做递归删除。reviewer vitest config、junction、两个 clone 与 TD-12 asset 目录均已不存在；共享 root/client/server `node_modules` 均仍在。
+- 未取锁、未写/删 `owner.json`，未停止或复用调度方 `:3001` / `:5173` 服务。
+- 写 Review 前，`docs/agent-ops/**` 排除本工单的 135 文件 manifest SHA-256 为 `43b44b84f28a1ffd57c7dbbdf3d99323e3735420ed9ff851bd94d5e044b767e0`；本次唯一获准写入目标为本 `## Review`。
+- 写回后严格 UTF-8 解码通过，`## Review` 恰为 1 段；排除本工单后的 135 文件 manifest 复算仍为同一 SHA-256，故冻结目录内没有第二个写入目标。
