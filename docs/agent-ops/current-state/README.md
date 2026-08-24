@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State
-> **日期 (Updated)**: 2026-08-19
+> **日期 (Updated)**: 2026-08-23
 > **权威 (Authoritative)**: 是 / Yes
 > **取代 (Supersedes)**: —
 > **被取代 (Superseded by)**: —
@@ -34,7 +34,7 @@ Read before any non-trivial work, together with `PRODUCT.md`, `../DOCUMENTATION-
 - **Version system**: `V2.BN.x`. The old `v2.0–v2.5.6` line is a **closed engineering-foundation roadmap** (`docs/Coincides-Roadmap.md`); some of its product philosophy is outdated (notably **block-first**, now replaced by **TextFlow-first / ContentGroup-aware**).
 - **Current frontier**: **V2.BN.12「外骨骼与地板」in progress.** V2.BN.12.1「编辑基座」minted 2026-08-20, patch **V2.BN.12.1.1** minted 2026-08-22 (legacy canvas-only notes render; journey 18/18). **12.2a sub-plan closed 2026-08-23**: server zod registry → faithful manifest → parity gate (three independent killers, wired into `verify`) → receipt axis (`mcp`/`proposed`/`revert_outcome` + consumer guard) → **MCP transport skeleton live at `/api/mcp`** (Host/Origin guard → existing JWT → per-request server; `tools/list` filters internal/`__`; `tools/call list_notes` byte-equivalent to REST; production artifact carries the manifest by bytes). TD-8 receipt timestamps cleared.
 
-  **12.2b sub-plan — construction closed 2026-08-23** (5 orders + 5 fixes, 10 review rounds; every FAIL was "direction sound", none required product rework):
+  **12.2b sub-plan — closed & minted 2026-08-23, journey A 12/12 + B 8/8** (construction: 5 orders + 5 fixes, 10 review rounds; every FAIL was "direction sound", none required product rework; post-journey repair: b-5 + b-5-fix, both PASS):
   - **Human doors first**: client trash/restore + `POST /api/notes/:id/restore`. Found before dispatch that the client made **zero calls** to `DELETE /api/notes/:id` — per the red line (*whatever an agent can do, a human must be able to do*), the human side was built first.
   - **`trash_notes` write tool**: `tier` is **computed from the input**, not a static field — `threshold.batch_field` lets `resolveEffectiveTier` drop `confirm` to `immediate` when n==1. The manifest still projects the registry faithfully (registry records the *highest* tier).
   - **MRTR confirm round-trip** (`/api/mcp`, protocol 2026-07-28): n>1 **with** `elicitation.form` ⇒ `input_required` form → retry with `inputResponses.confirm` → execute. **decline / cancel / confirm:false all take one path**: zero execution, **zero receipt**, `isError:false`, `structuredContent {results:[]}`, `_meta['io.coincides/toolFaceDecision'].decision`, and **never re-ask**. Branch selection uses the SDK's `inputResponse()` discriminated view — ⛔ **not** `acceptedContent()`, which collapses "never asked" and "declined" into the same `undefined` and would re-prompt on every refusal.
@@ -46,7 +46,9 @@ Read before any non-trivial work, together with `PRODUCT.md`, `../DOCUMENTATION-
 
   Declared boundaries: `scopes` descriptive only (TD-14, **must not be claimed as enforced**); multi-resource revert **not atomic** (TD-6); MRTR is stateless, so replaying the same confirmed input executes again (second pass yields `skipped`/`already_trashed` from the executor's own guard — **no dedup machinery was built**); TD-9/10/12/16/17 open.
 
-  **Next: 12.2b-4 journey walk** — expectations frozen (lane A six steps + lane B four steps) and environment ready; **the only blocker is one manual login by Henry** (passwords are never entered on his behalf).
+  **12.2b-4 journey walked 2026-08-23** (`analysis/2026-08-23-v2bn12-2b4-journey-sheet.md`): first walk **A 9/12 + B 6/8** — ten green review rounds had all missed **plan-layer defect-1: applied receipts had no human entry** (queue listed only `proposed` ⇒ Revert unreachable in-product). Repaired by **b-5** (queue page **Executed view**: route-layer `status` whitelist opened to `applied|reverted|dismissed` — own-user filter stays in the service SQL untouched; `queueItem` projection extended with `status`/`applied_at`/`reverted_at`; Revert button wired to existing `POST /:id/revert`) + **b-5-fix** (whitelist made a **closed set** — only `undefined` takes the default `proposed`, any provided non-single-string ⇒ 400, seven-input matrix in permanent tests; A→B cross-user guard test with full-row assertions; client Dismiss/Jump assertion knives). Re-walk of the three affected steps: **A 12/12 + B 8/8 — pass line met, segment minted**. Evidence boundaries recorded honestly: ownership-guard mutation not independently applied by the reviewer (upstream content filter kills such content — **TD-19/TD-20**; three other evidence sources stand); re-walk hit-testing evidence comes from the b-5 review's real-browser CDP walk, not the re-walk's `element.click()`.
+
+  **Next: 12.2c** — selection receipts + `resolve_selection` (Fable answers selection design §7's three questions first, then plan); afterwards S4 read face (`list_*`/`get_*`) and 12.2d candidate-surfacing polish, then **12.2 minting**.
 - Roadmap: **`docs/ROADMAP.md`** — the sole ACTIVE roadmap since 2026-08-20.
   > The former `docs/Coincides-Better-Notebook-Roadmap.md` was **archived in full** on 2026-08-20 under ruling 待拍-12. It retains the V8–V11 decision history and nothing else; do not work from it.
 

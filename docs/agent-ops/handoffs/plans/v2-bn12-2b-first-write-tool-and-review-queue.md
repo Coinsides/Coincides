@@ -1,4 +1,4 @@
-> **状态 (Status)**: draft(Fable 设计稿;Opus 拆单前先读)
+> **状态 (Status)**: done(**铸版 2026-08-23,Fable**——五单施工 + b-4 旅程 + b-5/b-5-fix 补单全复核 PASS;旅程合并分 **A 12/12 + B 8/8** 达通过线,重走记录 `analysis/2026-08-23-v2bn12-2b4-journey-sheet.md` §7;铸版记录 log 08-23 #40;未亲刀缺口见 TD-19/TD-20)
 > **层 (Layer)**: 计划 / Plan(12.2b)
 > **日期 (Updated)**: 2026-08-23
 > **权威 (Authoritative)**: 否(拆单依据;裁定以 design v0.5 §12 与本文「裁定」段为准)
