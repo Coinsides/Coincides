@@ -1,5 +1,5 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import ToolReceiptsPage from './ToolReceipts';
 
@@ -42,10 +42,16 @@ function receipt(id: string, status: Status) {
   };
 }
 
+function RouterLocationProbe() {
+  const location = useLocation();
+  return <output aria-label="Router location">{location.pathname}</output>;
+}
+
 function renderPage() {
   return render(
     <MemoryRouter initialEntries={['/tool-receipts']}>
       <ToolReceiptsPage />
+      <RouterLocationProbe />
     </MemoryRouter>,
   );
 }
@@ -86,10 +92,15 @@ describe('ToolReceipts human review and executed views', () => {
     renderPage();
 
     expect(await screen.findByText('proposal-one summary')).toBeTruthy();
+    await waitFor(() => expect(mocks.list).toHaveBeenCalledTimes(4));
     expect(screen.getAllByRole('button', { name: 'Jump to scene' })).toHaveLength(2);
     expect((screen.getAllByRole('button', { name: 'Jump to scene' })[0] as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.click(screen.getAllByRole('button', { name: 'Jump to scene' })[0]);
+    await waitFor(() => expect(screen.getByLabelText('Router location').textContent).toBe('/notes/note-proposal-one'));
+
     fireEvent.click(screen.getAllByRole('button', { name: 'Apply' })[0]);
     await waitFor(() => expect(mocks.apply).toHaveBeenCalledWith('proposal-one'));
+    await waitFor(() => expect(mocks.list).toHaveBeenCalledTimes(8));
 
     await waitFor(() => {
       expect(screen.getAllByRole('button', { name: 'Dismiss' })).toHaveLength(1);
@@ -97,6 +108,13 @@ describe('ToolReceipts human review and executed views', () => {
     });
     fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
     await waitFor(() => expect(mocks.dismiss).toHaveBeenCalledWith('proposal-two'));
+    await waitFor(() => expect(mocks.list).toHaveBeenCalledTimes(12));
+    expect(mocks.list.mock.calls.slice(8, 12).map(([status]) => status)).toEqual([
+      'proposed',
+      'applied',
+      'reverted',
+      'dismissed',
+    ]);
   });
 
   it('K-4/K-5 exposes all four API-backed counts and moves a reverted row into read-only history', async () => {

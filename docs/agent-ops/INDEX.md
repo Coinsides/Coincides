@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-08-23
+> **日期 (Updated)**: 2026-08-24
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 132 份文档。
+共 133 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -138,6 +138,7 @@
 | [handoffs/2026-08-23-v2bn12-2b3-fix-default-executor-identity.md](handoffs/2026-08-23-v2bn12-2b3-fix-default-executor-identity.md) | V2.BN.12.2b-3-fix:锁住**生产默认 executor 的身份**(两个符号) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-23-v2bn12-2b3-review-queue.md](handoffs/2026-08-23-v2bn12-2b3-review-queue.md) | V2.BN.12.2b-3:候选审阅队列(人审入口)+ 退役旧 proposals 面 | `(缺状态头)` | — | — |
 | [handoffs/2026-08-23-v2bn12-2b5-executed-receipts-human-door.md](handoffs/2026-08-23-v2bn12-2b5-executed-receipts-human-door.md) | V2.BN.12.2b-5:已执行收据的**人类入口**(补上 Revert 那扇门) | `(缺状态头)` | — | — |
+| [handoffs/2026-08-23-v2bn12-2b5-fix-status-closed-set.md](handoffs/2026-08-23-v2bn12-2b5-fix-status-closed-set.md) | V2.BN.12.2b-5-fix:status 白名单闭集化 + 两处护栏补齐 | `(缺状态头)` | — | — |
 | [handoffs/2026-08-23-v2bn12-td8-fix-regression-guards.md](handoffs/2026-08-23-v2bn12-td8-fix-regression-guards.md) | TD-8-fix:补三条回归护栏(**只写测试,不改产品代码**) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-23-v2bn12-td8-receipt-timestamp-cleanup.md](handoffs/2026-08-23-v2bn12-td8-receipt-timestamp-cleanup.md) | TD-8 清债:收据表时间戳统一(**位点拍死,零裁量**) | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |

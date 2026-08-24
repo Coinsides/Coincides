@@ -105,8 +105,9 @@ export function createToolReceiptsRouter(
   const revertReceipt = options.revertReceipt ?? revertTrashNotesReceipt;
 
   router.get('/', (req: AuthRequest, res: Response) => {
-    const status = typeof req.query.status === 'string' ? req.query.status : 'proposed';
-    if (!isListableReceiptStatus(status)) {
+    const requestedStatus = req.query.status;
+    const status = requestedStatus === undefined ? 'proposed' : requestedStatus;
+    if (typeof status !== 'string' || !isListableReceiptStatus(status)) {
       throw new AppError(400, 'Unsupported tool face receipt status');
     }
     const receipts = listToolFaceReceipts({ userId: req.userId!, status });

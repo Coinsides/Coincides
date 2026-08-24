@@ -35,8 +35,10 @@ const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..', '
 const USER_ID = '11111111-1111-4111-8111-111111111111';
 const OTHER_USER_ID = '66666666-6666-4666-8666-666666666666';
 const COURSE_ID = '22222222-2222-4222-8222-222222222222';
+const OTHER_COURSE_ID = '77777777-7777-4777-8777-777777777777';
 const NOTE_A = '33333333-3333-4333-8333-333333333333';
 const NOTE_B = '44444444-4444-4444-8444-444444444444';
+const OTHER_NOTE_ID = '88888888-8888-4888-8888-888888888888';
 
 async function withReceiptDb(run: (db: Database.Database) => void | Promise<void>): Promise<void> {
   const tempRoot = mkdtempSync(join(tmpdir(), 'coincides-trash-notes-tool-'));
@@ -503,6 +505,211 @@ test('b-5 K-2/K-5/K-6 real HTTP lists all four owned receipt statuses with the f
       { method: 'GET' },
     );
     assert.equal(unknown.response.status, 400);
+  });
+});
+
+test('b-5-fix HIGH-1 status query is a closed set for scalar values only', async () => {
+  await withToolReceiptsHttp({}, async (fixture) => {
+    const proposed = writeReceipt({
+      tier: 'propose',
+      resources: [{ kind: 'note', id: NOTE_A, outcome: 'pending' }],
+      intendedInput: { note_ids: [NOTE_A] },
+    });
+    const applied = writeReceipt({
+      resources: [{ kind: 'note', id: NOTE_A, outcome: 'trashed' }],
+      intendedInput: { note_ids: [NOTE_A] },
+    });
+    const dismissedSeed = writeReceipt({
+      tier: 'propose',
+      resources: [{ kind: 'note', id: NOTE_B, outcome: 'pending' }],
+      intendedInput: { note_ids: [NOTE_B] },
+    });
+    const dismissed = await requestJson(
+      fixture,
+      `/api/tool-receipts/${dismissedSeed.id}/dismiss`,
+    );
+    assert.equal(dismissed.response.status, 200);
+    const revertedSeed = writeReceipt({ resources: [], intendedInput: { note_ids: [] } });
+    const reverted = revertTrashNotesReceipt({
+      userId: USER_ID,
+      receiptId: revertedSeed.id,
+    });
+    const expectedIdByStatus = {
+      proposed: proposed.id,
+      applied: applied.id,
+      reverted: reverted.id,
+      dismissed: dismissedSeed.id,
+    } as const;
+
+    for (const status of ['proposed', 'applied', 'reverted', 'dismissed'] as const) {
+      const positive = await requestJson(
+        fixture,
+        `/api/tool-receipts?status=${status}`,
+        { method: 'GET' },
+      );
+      assert.equal(positive.response.status, 200, `${status} must remain a legal scalar status`);
+      assert.deepEqual(
+        positive.body.receipts.map((item: { id: string }) => item.id),
+        [expectedIdByStatus[status]],
+      );
+    }
+
+    const omitted = await requestJson(fixture, '/api/tool-receipts', { method: 'GET' });
+    assert.equal(omitted.response.status, 200, 'an omitted status must still default to proposed');
+    assert.deepEqual(
+      omitted.body.receipts.map((item: { id: string }) => item.id),
+      [expectedIdByStatus.proposed],
+    );
+
+    const invalidCases = [
+      { label: 'empty string', query: 'status=', controlStatus: 'proposed' },
+      { label: 'unknown value', query: 'status=bogus', controlStatus: 'proposed' },
+      { label: 'uppercase value', query: 'status=APPLIED', controlStatus: 'applied' },
+      { label: 'mixed-case value', query: 'status=Applied', controlStatus: 'applied' },
+      {
+        label: 'repeated status=a&status=b shape',
+        query: 'status=applied&status=reverted',
+        controlStatus: 'applied',
+      },
+      { label: 'status array shape', query: 'status[]=applied', controlStatus: 'applied' },
+    ] as const;
+    const invalidResults: Array<{ label: string; status: number }> = [];
+
+    for (const invalidCase of invalidCases) {
+      const positive = await requestJson(
+        fixture,
+        `/api/tool-receipts?status=${invalidCase.controlStatus}`,
+        { method: 'GET' },
+      );
+      assert.equal(
+        positive.response.status,
+        200,
+        `${invalidCase.label}: paired legal route control must stay live`,
+      );
+      assert.deepEqual(
+        positive.body.receipts.map((item: { id: string }) => item.id),
+        [expectedIdByStatus[invalidCase.controlStatus]],
+        `${invalidCase.label}: paired legal control must return the expected owned receipt`,
+      );
+
+      const negative = await requestJson(
+        fixture,
+        `/api/tool-receipts?${invalidCase.query}`,
+        { method: 'GET' },
+      );
+      invalidResults.push({ label: invalidCase.label, status: negative.response.status });
+    }
+    assert.deepEqual(
+      invalidResults,
+      invalidCases.map(({ label }) => ({ label, status: 400 })),
+      'every provided invalid scalar or non-scalar status must return 400',
+    );
+  });
+});
+
+test('b-5-fix MED-1 user A cannot list or revert user B receipt in the named direction', async () => {
+  await withToolReceiptsHttp({}, async (fixture) => {
+    fixture.db.prepare(
+      'INSERT INTO courses (id, user_id, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)',
+    ).run(
+      OTHER_COURSE_ID,
+      OTHER_USER_ID,
+      'User B private course',
+      '2026-08-23 09:00:00',
+      '2026-08-23 09:00:00',
+    );
+    fixture.db.prepare(`
+      INSERT INTO notes (
+        id, user_id, course_id, title, description, status, source_kind,
+        page_format, metadata, operation_batch_id, created_at, updated_at,
+        trashed_at, note_class
+      ) VALUES (?, ?, ?, ?, ?, 'trashed', 'manual', 'flow', ?, NULL, ?, ?, ?, 'user')
+    `).run(
+      OTHER_NOTE_ID,
+      OTHER_USER_ID,
+      OTHER_COURSE_ID,
+      'User B private note',
+      'Every persisted field must survive user A revert unchanged',
+      JSON.stringify({ owner: 'B', sentinel: 17 }),
+      '2026-08-23 09:00:00',
+      '2026-08-23 09:01:00',
+      '2026-08-23 09:01:00',
+    );
+
+    const ownProposed = writeReceipt({
+      tier: 'propose',
+      resources: [{ kind: 'note', id: NOTE_A, outcome: 'pending' }],
+      intendedInput: { note_ids: [NOTE_A] },
+    });
+    const ownApplied = writeReceipt({
+      resources: [{ kind: 'note', id: NOTE_A, outcome: 'trashed' }],
+      intendedInput: { note_ids: [NOTE_A] },
+    });
+    const ownDismissedSeed = writeReceipt({
+      tier: 'propose',
+      resources: [{ kind: 'note', id: NOTE_B, outcome: 'pending' }],
+      intendedInput: { note_ids: [NOTE_B] },
+    });
+    const ownDismissed = await requestJson(
+      fixture,
+      `/api/tool-receipts/${ownDismissedSeed.id}/dismiss`,
+    );
+    assert.equal(ownDismissed.response.status, 200);
+    const ownRevertedSeed = writeReceipt({ resources: [], intendedInput: { note_ids: [] } });
+    const ownReverted = revertTrashNotesReceipt({
+      userId: USER_ID,
+      receiptId: ownRevertedSeed.id,
+    });
+    const foreignApplied = writeReceipt({
+      userId: OTHER_USER_ID,
+      courseId: OTHER_COURSE_ID,
+      resources: [{ kind: 'note', id: OTHER_NOTE_ID, outcome: 'trashed' }],
+      intendedInput: { note_ids: [OTHER_NOTE_ID] },
+    });
+    const ownIdByStatus = {
+      proposed: ownProposed.id,
+      applied: ownApplied.id,
+      reverted: ownReverted.id,
+      dismissed: ownDismissedSeed.id,
+    } as const;
+
+    for (const status of ['proposed', 'applied', 'reverted', 'dismissed'] as const) {
+      const listed = await requestJson(
+        fixture,
+        `/api/tool-receipts?status=${status}`,
+        { method: 'GET' },
+      );
+      assert.equal(listed.response.status, 200, `${status}: user A list route must be live`);
+      const listedIds = listed.body.receipts.map((item: { id: string }) => item.id);
+      assert.deepEqual(listedIds, [ownIdByStatus[status]], `${status}: user A own receipt is the positive control`);
+      assert.ok(!listedIds.includes(foreignApplied.id), `${status}: user B receipt must stay hidden from user A`);
+    }
+    const foreignOwnerView = await requestJson(
+      fixture,
+      '/api/tool-receipts?status=applied',
+      { method: 'GET', token: fixture.otherToken },
+    );
+    assert.equal(foreignOwnerView.response.status, 200);
+    assert.deepEqual(
+      foreignOwnerView.body.receipts.map((item: { id: string }) => item.id),
+      [foreignApplied.id],
+      'positive control: user B can list the applied receipt through the same route',
+    );
+    assert.equal(readToolFaceReceipt(foreignApplied.id).user_id, OTHER_USER_ID,
+      'positive control: the foreign applied receipt belongs to user B');
+
+    const before = fixture.db.prepare('SELECT * FROM notes WHERE id = ?').get(OTHER_NOTE_ID);
+    assert.ok(before, 'positive control: user B note exists before user A revert');
+    const foreignRevert = await requestJson(
+      fixture,
+      `/api/tool-receipts/${foreignApplied.id}/revert`,
+    );
+    const after = fixture.db.prepare('SELECT * FROM notes WHERE id = ?').get(OTHER_NOTE_ID);
+
+    assert.deepEqual(after, before, 'user B SELECT * note row must remain byte-for-byte equivalent');
+    assert.equal(foreignRevert.response.status, 403);
+    assert.equal(foreignRevert.body.error, 'Tool face receipt is not owned by user');
+    assert.equal(readToolFaceReceipt(foreignApplied.id).status, 'applied');
   });
 });
 
