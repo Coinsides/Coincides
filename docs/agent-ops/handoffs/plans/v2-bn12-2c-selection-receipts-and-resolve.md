@@ -48,7 +48,7 @@
 
 ## 5. 触及面预估
 
-`shared/types/**`(+1 或并入既有)· client 投影新模块 + 单测(`selectionDraftService.ts` 旁,不改它)· `server/src/toolFace/registry.ts`(+1 条)· `server/src/mcp/bindings.ts`(+1)· 新 resolve service · `docs/generated/tool-face-manifest.json` 重生成 · 常驻测试。**不碰**:schema/migration、`services/items.ts`、selection 既有消费者、transport 骨架 Host/Origin/auth 段、协议文件。
+`shared/types/**`(+1 或并入既有)· client 投影新模块 + 单测(`selectionDraftService.ts` 旁,不改它)· `server/src/toolFace/registry.ts`(+1 条)· `server/src/mcp/bindings.ts`(+1)· 新 resolve service · 新共享解析模块(§3.1 D 外提物)· `docs/generated/tool-face-manifest.json` 重生成 · 常驻测试。`server/src/services/items.ts`:**仅允许 §3.1 D 点名的一个 hunk**(解析约定外提 + import 回接,零语义),其余部位禁区。**不碰**:schema/migration、selection 既有消费者、transport 骨架 Host/Origin/auth 段、协议文件。
 
 ## 6. 给 Opus 的拆单注记
 
