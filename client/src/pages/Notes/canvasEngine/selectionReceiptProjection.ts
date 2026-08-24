@@ -22,7 +22,7 @@ function selectionReceiptTextRange(
     ...selectionReceiptRef(range),
     startOffset: range.startOffset,
     endOffset: range.endOffset,
-    text: range.text,
+    excerpt: range.text.slice(range.startOffset, range.endOffset),
   };
 }
 

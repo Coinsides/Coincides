@@ -179,3 +179,48 @@ Windows 执行策略阻止 `npm.ps1` / `npx.ps1` wrapper，因此最终门禁均
 ### 触及面 vs 申报
 
 本单代码触及严格为 4 处：3 个新增文件（shared type、client projector、colocated test）与 `canvasEngine/index.ts` 的 1 行导出；文档只向本 handoff 的既有 `## Result` 写回。未提交、未取调度方锁。工作树另有调度方/用户既存的 `.claude/settings.local.json`，以及 `useNoteCanvasRuntimeController.ts`、`SelectionToolbarLayer.tsx`、`server/src/routes/projections.ts` 的 stat/EOL porcelain 标记；它们不属于本单，内容 diff/受保护 blob 证据如上。
+
+## Review
+
+> reviewer: Codex reviewer（洁净室复核）
+> review baseline: `c3708b4`（唯一 parent `978cc22`）
+> verdict: **FAIL — 0 BLOCKER / 1 HIGH / 0 MED / 0 LOW**
+> authority: 本节只给复核判定；header 未翻，放行权仍在 Fable。
+
+### Finding
+
+#### HIGH-1（业务正确性）— `text_ranges[].text` 投影的是整个 TextUnit，不是选区 excerpt
+
+工单 S1/K-1 要求 `text_ranges` 携带 `offsets + excerpt`。当前真实数据链为：
+
+1. `TextBlockProjection.tsx:1193` 把整个 `unit.text` 写入 `data-text-unit-text`；
+2. `selectionRangeService.ts:155,165-171` 把该整段文本原样存入 `CapturedSelectionRange.text`，`startOffset/endOffset` 只标出其中的选区；同文件既有 annotation 投影在 `:61-73` 明确执行 `selection.text.slice(startOffset, endOffset)` 才得到范围文本；
+3. 新投影 `selectionReceiptProjection.ts:25` 却直接写 `text: range.text`；
+4. 新 K-1 fixture 在 `selectionReceiptProjection.test.ts:54-56,104-106` 对 `text='alpha beta'`、offsets `2..7` 仍期待完整 `alpha beta`，所以测试与实现一起把错误固化为绿。
+
+独立动态复现：同一输入产出的 `actual="alpha beta"`，按 offsets 应得的 `expectedExcerpt="pha b"`。这会让后续 `resolve_selection` / Agent 收到未被用户选中的相邻文字，收据对手势的陈述失真；属于本单核心字段落位错误，不是 P2 畸形输入扩测。
+
+建议修法：projector 以与既有 annotation 路径相同的 UTF-16 offset 语义写入 `range.text.slice(range.startOffset, range.endOffset)`，并把 K-1 第一段期望改为 `pha b`（保留第二段 `0..5 => gamma` 作为全段对照）。本 reviewer 未代修。
+
+### R1–R8 复核收据
+
+- **R1 / K-2 探针可信与零几何：PASS。**
+  - 基线：专项测试 `5/5` 绿。
+  - 探针失明单刀：在 `geometryKeyPaths()` 入口恒 `return []`；阳性对照以目标 `AssertionError` 红，received `[]`，expected 精确为 `$.payload[0].anchorRect` / `.x` / `.width`；恢复后该例 `1/1` 绿。
+  - 几何泄漏单刀：向 receipt 加 `anchorRect: draft.anchorRect`；零几何断言以目标 `AssertionError` 红，实际命中 `$.anchorRect`、`.x`、`.y`、`.width`、`.height`；恢复后 K-2 阳性+阴性 `2/2` 绿。
+  - 阴性第二来源：K-1 `toStrictEqual` 的完整 runtime shape 与 `SelectionReceiptV1` 封闭字段清单均同意无几何；不是只依赖空探针输出。
+- **R2 / note envelope 与静态纯度：PASS。** 把 `note_id` 写死为 `note-hardcoded-r2-probe` 后，K-1 以目标 `AssertionError` 红（expected `note-explicit-1`）；恢复后 `1/1` 绿。CodeGraph 精确源码与独立 TypeScript AST 枚举共同确认：两个 import 均为 `type-only`，调用只有两个 `map` helper 与 `new Date().toISOString()`；没有 store / context / DOM / `localStorage` / `window` / `document` 读取。
+- **R3 / 不共享引用：PASS。** 令 `text_ranges: draft.ranges` 直接复用数组和 range 对象；K-4 在真实双向 mutation 后以目标 `AssertionError` 红（draft 实收 `receipt-only-text`，应为 `alpha beta`），不是类型或多字段 shape 报错；恢复后 `1/1` 绿。
+- **R4 / 空 ranges：PASS。** 把 `null` 改为空壳 `{ note_id, refs: [], text_ranges: [], at }`；K-3 以目标 `AssertionError` 红（received object，expected `null`）；恢复后 `1/1` 绿。
+- **R5 / 既有面零退化：PASS。** `978cc22..c3708b4` 对 `selectionDraftService` + 8 consumers 的 `git diff --numstat` 为 0；第二来源为 9/9 双端 blob 相同：`aa15fe7b` / `f70e71ed` / `893e8ad1` / `f1ec5c55` / `f812cbe0` / `29de8952` / `967d2209` / `a2febe2c` / `b921271a`。`SelectionToolbarLayer.tsx` 工作树 blob=`HEAD` `29de8952` 且 numstat 0，确认只是 EOL 假阳性。全量 unit 中 `textFocusReceipt.test.ts 2/2`；verify 中 `SelectionDraft engine` 契约组通过（model contract `60/60`）。
+- **R6 / 外层 shape：PASS；K-1 excerpt 语义：FAIL，见 HIGH-1。** `SelectionReceiptV1` 顶层恰为 `{ note_id, refs, text_ranges, at }`，无 geometry / `phase` / `mode`；owner 三元组在 `refs` 与 `text_ranges` 中均保留。外形正确不抵消 `text_ranges[].text` 的错误值。
+- **R7 / 范围：PASS。** `server/**` numstat 为 0，且两端 server tree 均为 `d1117dcc93d39c4a99a03c24f1f3c1771a6fda5f`。`docs/agent-ops/**` 的递归 blob 对比只有本工单一处 delta，排除本工单后 numstat 为 0。实际 commit diff 仅申报的 5 文件、`+309/-0`；未读取或触碰 `server/src/services/items.ts`，未取锁、未写/删 `owner.json`，未干扰任何既有 PID/服务。
+- **R8 / 门禁：PASS（按 docs-first 顺序亲跑）。** `docs:check` 通过；`verify:v2-bn8-runtime` 通过（含 unit `22 files / 218`、新专项 `5/5`、model contract `60/60`、双 build 与其余 runtime 门）；client/server `npx.cmd tsc --noEmit` 均 exit 0；独立 `test:unit` 为 `218/218`；隔离 `CANVAS_ASSET_DIR` 下 `test:v2` 为 `270/270`；五道 tool-face 依次为 registry `4/4`、manifest `10/10`、manifest check 通过（2 entries / 2 public）、parity `10/10`、parity check PASS（2 public）。
+
+### Mutation / 环境卫生
+
+所有单刀都在 OS temp 的独立 clone 上执行；client/server 依赖分别用 `npm ci --offline` 独立安装，没有 junction/symlink 指向共享 `node_modules`。末轮专项测试回到 `5/5`；隔离树 `git diff --numstat` 与 `--raw` 均为 0，projector/test 两个刀口的 clean-filter blob 均与 `c3708b4` 相同。删除前枚举 ReparsePoint 为 0，随后已删除隔离 clone；TD-12 asset 目录同样为 0 个 ReparsePoint、0 个文件后删除。共享 root/client/server `node_modules` 顶层计数删除前后保持 `2 / 153 / 187`。
+
+### 结论
+
+四组点名 mutation 与全部门禁证明护栏主体有效，但 K-1 对 excerpt 的常驻断言因错误 fixture 而“按错误理由通过”。在 HIGH-1 修复并补一条非全段选区的正确期望前，本单判 **FAIL**。

@@ -7,7 +7,7 @@ export interface SelectionReceiptRefV1 {
 export interface SelectionReceiptTextRangeV1 extends SelectionReceiptRefV1 {
   startOffset: number;
   endOffset: number;
-  text: string;
+  excerpt: string;
 }
 
 /**
