@@ -53,6 +53,7 @@ export * from './pageFrameTemplateService';
 export * from './placementService';
 export * from './runtimeDataTypes';
 export * from './runtimeLayout';
+export * from './selectionReceiptProjection';
 export * from './shapeProjectionService';
 export * from './typographyProfileService';
 export * from './viewportService';

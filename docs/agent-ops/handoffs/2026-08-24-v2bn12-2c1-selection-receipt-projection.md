@@ -115,3 +115,67 @@ selectionDraftToReceipt(draft: SelectionDraftV1, envelope: { noteId: string }): 
 **回执须含**:K-1…K-5 **各自**先红后绿两段输出(**K-2 须附阳性对照的输出**)· 类型放置位置与理由 · **8 个既有消费者 + phase 枚举 `git diff --numstat` 为空的证明** · `server/**` 零改动的证明 · 门禁逐条收据 · 触及面 diff vs 申报 · **每条阴性断言的阳性对照** · **若略过了「本单按新档略过」表之外的东西,点名申报**。
 
 ## Result
+
+完成。施工与验收基线为 `399376a`；header 按 M-2 保持 `status: ready`，未由 builder 翻牌。
+
+### 落点与边界
+
+- 新增 `shared/types/selectionReceipt.ts`：定义 `SelectionReceiptV1`、`SelectionReceiptRefV1`、`SelectionReceiptTextRangeV1`。receipt 是将由 client 与后续 server 消费的边界 DTO，因此放在 shared；独立文件也避免把新契约塞进 client 私有类型或扩大既有 shared 聚合面的改动。
+- 新增 `client/src/pages/Notes/canvasEngine/selectionReceiptProjection.ts`：唯一新职责是 `selectionDraftToReceipt(draft, { noteId })`。`noteId` 只取显式 envelope；ranges 按原顺序 1:1 投影；`textFlowId` 原样保留；空 ranges 返回 `null`；`at` 只读当前时钟。
+- 新增同目录 `selectionReceiptProjection.test.ts`：常驻 K-1～K-4，其中 K-2 的递归 key 探针与阳性对照独立成例。
+- `client/src/pages/Notes/canvasEngine/index.ts` 仅新增 projection 的 re-export，作为后续工具入参侧入口。
+- 没有另造与既有 draft service 平行的 draft 状态机：receipt projector 消费 `SelectionDraftV1`，不改变 draft 的产生、phase 或 8 个既有消费路径；receipt 不是第四态。
+
+产物 shape 为 `{ note_id, refs, text_ranges, at }`。`refs` 与 `text_ranges` 都保留 `{ blockId, textFlowId, textUnitId }`；`text_ranges` 另含 offsets 与 excerpt，且不携带 draft range 的运行时 `id`。投影逐字段新建对象和数组，不传播 `anchorRect`、phase、mode 或任何共享引用。
+
+### K-1～K-5 单刀验红 / 恢复绿
+
+- **K-1 投影正确**
+  - 红：临时把 `note_id` 写死为 `note-hardcoded-k1-probe`；定点运行 K-1 得到 `AssertionError`，received 为硬编码值、expected 为显式入参 `note-explicit-1`。
+  - 绿：恢复 `note_id: envelope.noteId` 后，同一命令 `1 passed / 4 skipped`。严格对象等值同时逐字段覆盖 note、两组三元组、offsets、excerpt 与冻结时钟的 `at`。
+- **K-2 零几何**
+  - 红：临时把 `anchorRect: draft.anchorRect` 带入 receipt；同一 K-2 运行中阳性对照先通过，receipt 断言随后以 `AssertionError` 命中 `$.anchorRect`、`.x`、`.y`、`.width`、`.height`。
+  - 绿：恢复后 `2 passed / 3 skipped`；阳性对照与 receipt 零命中同时为绿。探针递归遍历数组/对象的全部 own keys，并归一化大小写及 `-`/`_`/空白。
+- **K-3 空 ranges**
+  - 红：临时返回空壳 receipt；定点运行得到 `AssertionError`（received 为 object，expected 为 `null`）。
+  - 绿：恢复 `return null` 后 `1 passed / 4 skipped`。K-1 的非空输入成功产出 receipt 是对应阳性路径。
+- **K-4 不共享引用**
+  - 红：临时令 `text_ranges: draft.ranges`；双向 mutation 断言得到 `AssertionError`，原 draft 的 text 跟随 receipt 变为 `receipt-only-text`。
+  - 绿：恢复逐字段 map 后 `1 passed / 4 skipped`。测试分别修改 receipt 与 draft 的嵌套字段、offset 和数组长度，另一侧均保持原值。
+- **K-5 既有面零退化**
+  - 红：在基线树定位出的真实消费者 `canvasEngine/layers/SelectionToolbarLayer.tsx` 临时加一行注释；Node `assert/strict` 对 9 个受保护文件的 `git diff --numstat 399376a` 得到 `AssertionError [ERR_ASSERTION]`，actual 为 `1\t0\tclient/src/pages/Notes/canvasEngine/layers/SelectionToolbarLayer.tsx`。
+  - 绿：删除该注释后输出 `K-5 guarded diff empty (selectionDraftService + 8 consumers = 9/9)`；`textFocusReceipt.test.ts` 为 `2/2`，`smoke:canvas-engine-model-contract` 的 `60/60` 组全部通过。
+  - 第二来源：逐文件比较工作树 `git hash-object` 与 `git rev-parse 399376a:<path>`，9/9 相等：`aa15fe7` selectionDraftService、`f70e71e` useSelectionDraftController、`893e8ad` NoteWritingSurfaceLayer、`f1ec5c5` TextBlockProjection、`f812cbe` BlockEditorLayer、`29de895` SelectionToolbarLayer、`967d220` SelectionTypographyToolbarLayer、`a2febe2` AnnotationContextMenuLayer、`b921271` annotationRenderService。
+
+K-5 的接受证据使用上面真实 `canvasEngine/{hooks,blocks,layers}` 路径。一次 disposable inline Node 命令被 PowerShell 引号改写成 `SyntaxError`，已判为无效 harness 输出，未充当验红；有效单刀的红为上述 `AssertionError`，恢复后才取绿。临时 probe 文件已删除。
+
+### 阴性结论的校准与第二来源
+
+- **receipt 不含几何**：同一递归探针对故意嵌入的 `{ anchorRect: { x, width } }` 精确命中三条路径；独立来源是 K-1 的 `toStrictEqual` 完整 shape 与 shared DTO 的封闭字段清单共同同意零几何。
+- **既有 draft 面零 diff**：真实消费者注释是阳性校准；独立来源是 9 个 baseline blob 与工作树 blob 的逐个等值，而不只依赖空 `--numstat`。
+- **`server/**` 零产品改动**：同一 `git diff --numstat 399376a` 对本 handoff 在 Result 前命中 `117\t0`、最终命中 `181\t0`，证明探针可见非空；server 的 baseline tree 与 HEAD tree 均为 `d1117dcc93d39c4a99a03c24f1f3c1771a6fda5f`，且独立的 `git diff --raw HEAD -- server` 与 baseline server `--numstat` 均为空。porcelain 中 `server/src/routes/projections.ts` 的 stat/EOL 标记没有内容差异。
+- **投影两侧不共享引用**：K-4 每个方向都先实际改变被操作一侧，再断言另一侧值与数组长度不变；另由投影源码的两个逐字段 object map 佐证。
+- **表外略过申报：无**。阳性校准是工单表内两项仍明确列为 P2/P3（模糊输入矩阵、多轮自由巡猎）；执行清单与下方逐门收据逐项相符。本单没有把 TD-14、TD-6、TD-19/20、TD-16 宣称为已覆盖。
+
+本单断言只以 shared DTO、client projector、定点测试和 git tree/blob 为依据；没有读取或假设 `server/src/services/items.ts` 的运行行为。锁、`owner.json` 与调度方 dev 服务均未触碰。
+
+### 门禁逐条收据
+
+- `npm.cmd run docs:check`：通过（施工前 docs-first）。
+- `npm.cmd run verify:v2-bn8-runtime`：通过；Vitest `22 files / 218 tests`，client/server build、runtime/source/manifest/parity/docs/secret gates 全绿。仅有既有 dynamic-import 与 chunk-size warning。
+- `client: npx.cmd tsc --noEmit`：通过。
+- `server: npx.cmd tsc --noEmit`：通过。
+- `npm.cmd run test:unit`：`22 files / 218 passed`。
+- `server: npm.cmd run test:v2`：`270 passed / 0 failed`；按 TD-12 使用 OS temp `CANVAS_ASSET_DIR=C:\Users\70208\AppData\Local\Temp\coincides-c1-assets-6ed093f51a06491aa885640ea1bf4287`，未改测试或产品语义。
+- `npm.cmd run test:tool-face-registry`：`4/4 passed`。
+- `npm.cmd run test:tool-face-manifest`：`10/10 passed`。
+- `npm.cmd run check:tool-face-manifest`：通过，artifact 未过期（2 entries / 2 public）。
+- `npm.cmd run test:tool-face-parity`：`10/10 passed`。
+- `npm.cmd run check:tool-face-parity`：通过（2 public entries checked；human reachability 仍按既有门声明未验证）。
+- 写回后 `npm.cmd run docs:index`：通过，9 个 index 均“无变化”，写入 0 个文件；`npm.cmd run docs:check`：通过；`git diff --check`：通过（仅报告既有 LF→CRLF warning，无 whitespace error）。
+
+Windows 执行策略阻止 `npm.ps1` / `npx.ps1` wrapper，因此最终门禁均通过对应 `.cmd` 入口执行；没有以修改测试或产品代码代偿环境问题。
+
+### 触及面 vs 申报
+
+本单代码触及严格为 4 处：3 个新增文件（shared type、client projector、colocated test）与 `canvasEngine/index.ts` 的 1 行导出；文档只向本 handoff 的既有 `## Result` 写回。未提交、未取调度方锁。工作树另有调度方/用户既存的 `.claude/settings.local.json`，以及 `useNoteCanvasRuntimeController.ts`、`SelectionToolbarLayer.tsx`、`server/src/routes/projections.ts` 的 stat/EOL porcelain 标记；它们不属于本单，内容 diff/受保护 blob 证据如上。
