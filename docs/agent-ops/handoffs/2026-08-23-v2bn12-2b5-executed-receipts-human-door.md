@@ -258,3 +258,107 @@ client/src/pages/ToolReceipts/ToolReceipts.test.tsx (new)
 开工前已有且未归属本单的工作树项保持原样：`docs/agent-ops/adjudication-discipline.md`、`.claude/settings.local.json`；`useNoteCanvasRuntimeController.ts` 与 `projections.ts` 的 porcelain 项为已知 EOL/stat 假阳性（`--numstat` 空 / blob 等于 HEAD）。`docs/agent-ops/INDEX.md` 开工前已有改动；本单运行官方 `docs:index` 后报告 0 变化，未覆盖他人内容。
 
 锁 `.codex-tmp/builder.lock.d` 非本会话所有；未取锁、未写 `owner.json`、未删锁。没有 commit / push / PR。header 按 M-2 保持 `ready`，未翻；等待 reviewer 独立 M-1 与调度方判定。
+
+## Review
+
+> reviewer: Codex（洁净室） | reviewed: 2026-08-23 | target: `e06b6a1` | prior baseline: `8731a06` | target parent: `3cd9eb0`
+
+### 判定
+
+**FAIL，不建议放行；产品方向成立。** 本单的人类门在当前产品中确实走通，但目标提交含 **1 BLOCKER（边界/授权）+ 1 HIGH（真实白名单缺陷）+ 2 MED（永久护栏缺口）**；LOW 为 0。放行权仍留 Fable。
+
+### Findings
+
+#### BLOCKER-1 · 边界违规 / 授权链：目标提交夹带权威 Ops Protocol 修改
+
+`e06b6a1` 相对其直接父提交的事实不是阴性推断：
+
+```text
+git diff --numstat 3cd9eb0 e06b6a1 -- docs/agent-ops/adjudication-discipline.md
+6       1       docs/agent-ops/adjudication-discipline.md
+```
+
+该 diff 把「二源分则」及理由写进 `docs/agent-ops/adjudication-discipline.md:67-72`。这份文件头明确为 `active / Ops Protocol / Authoritative`；而本工单边界只允许 route、`client/src/pages/ToolReceipts/` 与相应测试（本文件 `## 边界`），没有允许改裁定协议。`AGENTS.md:45` 又明确规定任何 agent 操作指令修改须 Henry 本人直接指示、同侪不可转授。独立正面归因证据也与 Henry 直示不符：新增条文自署「Fable 裁定入卡，Opus 补」，`claude-log/2026-08-23.md:249` 同样记作「采，Opus 写」；同一日志 `:244` 还明确承认这类配置同侪不能代授权。
+
+`## Result` 把该文件申报为“开工前已有且保持原样”，不能改变目标 commit 实际包含该变更的事实；无论工作树字节最初由谁写入，复核对象 `e06b6a1` 已把它提交进来。建议从 b-5 目标提交移出；若确需制度化，须取得 Henry 对这项全局协议修改的直接指示并另行落单。
+
+#### HIGH-1 · 技术缺陷：数组形 `status` 静默降级为 `proposed`，白名单不是闭集
+
+真实 Express + OS-temp DB 的独立 HTTP 矩阵：
+
+| 输入 | 实际 |
+|---|---:|
+| `proposed` / `applied` / `reverted` / `dismissed` | 各 200 |
+| `status=` / `bogus` / `APPLIED` / `Applied` | 各 400 |
+| `status=applied&status=reverted` | **200** |
+| `status[]=applied` | **200** |
+
+重复参数探针同时放入本人 proposed 与 applied 正控；返回体只含 proposed id，证明不是“错误码写错”，而是请求被真实按 proposed 执行。根因在 `server/src/routes/toolReceipts.ts:108`：任何非 string 都回退为默认 `'proposed'`。现有永久测试只覆盖 `bogus`。
+
+施刀把 `isListableReceiptStatus` 恒置 `true` 后，真实 Express 用例在 `v2TrashNotesTool.test.ts:505` 以目标 `AssertionError: 200 !== 400` 红；恢复后 1/1 绿。建议只让 `undefined` 使用默认 proposed；凡参数已提供但不是单个 string，一律 400，并永久加入空串、大小写、重复参数与 `status[]` 矩阵。
+
+#### MED-1 · 测试护栏：R3 产品当前安全，但永久 K-3 没有验到指定的 B 行逐字段不变
+
+洁净室精确探针当前为绿：造 A/B 两用户、B course、B applied receipt 与 B note；A 的四态 API 列表和直接服务查询都不含 B receipt，且两路都看见 A 自己的 applied 正控。A revert B 得 403；B note 的 `SELECT *` 14 字段 JSON 在前后逐字段/逐字节相同，B 自己的 `GET /api/notes/:id` 响应体也前后相同，receipt 仍为 applied。这里“未出现/未改变”分别有 API ↔ service、DB 全行 ↔ B 自身 API 两个来源同意。
+
+但仓内 `K-5b real HTTP revert rejects a foreign receipt independently` 是反方向（B token 请求 A receipt），并且只断言 `noteStatus(...) === 'trashed'`，没有造 B note、没有比较 notes 全行。当前实现没泄漏，但所要求的回归护栏未固化。建议永久加入工单指定方向 A→B、四态列表阳性/阴性对照，以及 notes 全字段 before/after。
+
+#### MED-2 · 测试护栏：Dismiss 重取与 Jump 语义都可退化而 2/2 客户端测试仍绿
+
+当前产品本身为绿：真实浏览器中 Apply、Dismiss、Revert 后各观察到四次新的 status GET；`receiptsByStatus` 唯一写入点在 `refresh()`，没有本地搬行。另造 fresh proposed 后，从 UI 点击 `Jump to scene`，浏览器从队列页到达预期 `/notes/ccfb4713-…`。
+
+但两把独立刀均存活：
+
+```text
+await refresh() -> if (action !== 'dismiss') await refresh()  => 2/2 pass
+Jump onClick -> () => undefined                               => 2/2 pass
+```
+
+现有 K-7 只查三按钮存在/可用，不点击 Jump、不断言 pathname；Dismiss 只断 API mock 收到 id，不断言再次取数或行消失。建议分别断言 Dismiss 后四态 list 调用数/页面状态，以及在 router location 上断言 Jump 的目标 note。作为对照，Revert 跳过 refresh 的刀已在 `ToolReceipts.test.tsx:119` 以目标 `AssertionError: expected spy 8 times, got 4` 红，恢复后 2/2 绿。
+
+### R1–R8 独立复核
+
+| 位点 | 结论与关键证据 |
+|---|---|
+| **R1** | **PASS。** 隔离 `:3015` real server + real built client、Chrome CDP `:9230`。前置只用 REST 创建两篇 note，再发 MCP proposal；MCP `Response` 只检查 HTTP 成功，**完全没有调用 `.json()` / `.text()`，没有 DB 查询，也没有读取、保存或复用 receipt id**。之后只作可见 UI 点击：登录 → Tool Receipts → Proposed 1 → Apply → Project/Trash 2 → Executed/Applied 1 → Revert → Applied 0 / Reverted 1 / Read only / 无 Revert → Project/Notes 2，两个标题都回来。第二来源是驱动脚本静态审计与浏览器动作/页面轨迹：驱动中没有 receipt 变量或 DB 接口，操作均由页面按钮触发；产品内部当然会用自身行 id 发请求，但 reviewer 没读或供应它。移除 Executed 合并中的 `...receiptsByStatus.applied` 后，用 fresh proposal 重走：UI 仍报 Applied 1，但没有 applied 行/没有 Revert，notes 留在 Trash 2；这是目标产品后果，不是语法/模块错误。恢复 blob 后同链再绿。`receiptIdReadOrUsedAfterSetup: false`。 |
+| **R2** | **FAIL → HIGH-1。** 字符串白名单与恒真刀有牙，但数组输入真实 200 并回退 proposed。 |
+| **R3** | **产品 PASS，永久护栏 MED-1。** 跨用户四态不可列、403、B note 全行不变均由双来源确认；route 仍只调用 `listToolFaceReceipts`。 |
+| **R4** | **PASS。** `queueItem` 九键包含原六键 `id/tool/tier/resources/intended_input_summary/created_at`。六字段逐个独立删除：`id` 在 id 列表断言红，其余五个在 exact-key 断言红；六刀均为 `ERR_ASSERTION / AssertionError`，每刀恢复后最终 1/1 绿。新增三键未破 proposed 页。 |
+| **R5** | **产品 PASS，永久护栏部分 MED-2。** applied→reverted 后离开可操作区、成为 Read only 且无 Revert；Apply/Dismiss/Revert 三次真实动作后均观察到四态重取。令 Revert 后不 refresh，目标调用数断言红；没有本地 setter 搬行。 |
+| **R6** | **产品 PASS，Jump 永久护栏 MED-2。** proposed 页真实保留 Jump / Dismiss / Apply；Apply、Dismiss 与 Jump 均实走。`listProposedToolReceipts()` 仍是 `listToolReceipts('proposed')` 的薄 wrapper；双 tsc 绿。 |
+| **R7** | **PASS。** `8731a06..e06b6a1` 及 `e06b6a1..工作树` 对 `server/src/services/`、`db/`、`mcp/`、`toolFace/` 的 numstat 均为空；第二来源 tree OID 前后相同：services `09f26ac…`、db `9d89bb0…`、mcp `b251313d…`、toolFace `63e60c31…`。`toolFaceReceipts.ts` blob 三方同为 `b535ec1…`，SQL 仍是 `user_id + source_type='mcp' + status`；route/CodeGraph 与调用搜索都只见既有 service 路径、无另开列表旁路。`toolFaceReceiptRevert.ts` blob 三方同为 `74e4d2e…`，owner 403 / wrong-tool 409 / non-applied 409 三守卫及其先后顺序未变。 |
+| **R8** | **PASS。** 见下表。PowerShell policy 拦截 `npm.ps1` 后改用同义 `npm.cmd`；该次环境失败未计产品红。 |
+
+### Mutation 收据与恢复卫生
+
+| 刀 | 红/绿 |
+|---|---|
+| Executed 不合并 applied | 真实 UI 无 Revert、Trash 仍 2；恢复后 UI Revert 与 Notes 2 |
+| status guard 恒真 | `AssertionError: 200 !== 400`；恢复后定向 1/1 |
+| 原六字段逐个删除 | 六刀分别命中 id / exact-key `AssertionError`；每刀独立恢复，最终 1/1 |
+| Revert 不 refresh | `AssertionError: expected spy 8 times, got 4`；恢复后 2/2 |
+| Dismiss 不 refresh | **漏绿 2/2**，记 MED-2；恢复后 2/2 |
+| Jump 变 no-op | **漏绿 2/2**，记 MED-2；恢复后 2/2 |
+
+所有产品刀都在 OS-temp clone `coincides-review-b5-6159db2926194bf3906698fc3a51c8a0` 内执行，client/server 各自 `npm ci --offline`，没有 junction/symlink（reparse point 计数 0）。最终 route / component / API 工作 blob 分别等于 HEAD：`1eac239…` / `e1f0a12…` / `94385dd…`。隔离 server、Chrome 与端口已停；clone、临时 DB/WAL、浏览器 profiles、image fixture 与截图均已永久删除。共享 `:3001/:5173` 未停止或复用；锁未取、`owner.json` 未写、锁未删。
+
+### R8 门禁收据（reviewer 亲跑，docs-first）
+
+| 命令 | 结果 |
+|---|---|
+| `npm.cmd run docs:check` | docs-first 与 Review 落盘后复跑均 exit 0；`docs:index` 写入 0 个 INDEX |
+| `npm.cmd run verify:v2-bn8-runtime` | exit 0；含 213 unit、build/runtime/docs/diff/secret 门 |
+| client / server `npx.cmd tsc --noEmit` | 各 exit 0 |
+| `npm.cmd run test:unit` | 21 files / 213 tests |
+| server `npm.cmd run test:v2` | 270/270；`CANVAS_ASSET_DIR` 仅指向已删 OS temp |
+| server `npm.cmd run test:trash-notes-tool` | 41/41 |
+| server `npm.cmd run test:mcp-transport` | 24/24 |
+| `test:tool-face-registry` | 4/4 |
+| `test:tool-face-manifest` | 10/10 |
+| `check:tool-face-manifest` | fresh；2 public |
+| `test:tool-face-parity` | 10/10 |
+| `check:tool-face-parity` | PASS；2 public |
+
+### 跨条耦合扫描
+
+数组 status 缺陷不会绕过服务层 `user_id`，所以未把 R2 误报成 R3 越权；它仍是独立的白名单/路由语义 HIGH。当前 UI 门、SQL 隔离与 revert 三守卫合取后能完成本单目标；TD-14 scopes 未强制、TD-6 多资源 revert 非原子、TD-12 环境绕行与 TD-16 均保持基线状态，未声称解决。即使先补 HIGH 与两组 MED，BLOCKER-1 的提交边界/直接授权问题仍单独阻止放行。
