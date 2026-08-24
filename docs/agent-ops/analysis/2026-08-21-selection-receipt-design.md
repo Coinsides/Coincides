@@ -11,7 +11,8 @@
 
 ## 1. 不变式(直接继承,v1 修订几何句)
 
-- 形状=12.2 §2.1:`refs` 由 owner 三元组(`blockId/textFlowId/textUnitId`)派生;`text_ranges` 原样继承 `CapturedSelectionRange`(offsets+摘录);`at`;信封带 `note_id`。**不另造字段。**
+- 形状=12.2 §2.1:`refs` 由 owner 三元组(`blockId/textFlowId/textUnitId`)派生;`text_ranges` = offsets 窗口 + **`excerpt = text.slice(startOffset, endOffset)`**;`at`;信封带 `note_id`。
+  **v1.1 订正(2026-08-24,c-1 复核 HIGH 牵出)**:上游 `CapturedSelectionRange.text` 经核实是**整段 unit 文本**、offsets 是其上的窗口——v0 那句「原样继承…含摘录」在现码上两者不可兼得(第五处「没标待核就断言」,v1 修稿时漏网)。裁:**投影时切片**;字段更名 `excerpt` 杜绝「原样继承」误读;不变式 `excerpt.length === endOffset - startOffset` 随收据同行(c-2 zod refine,破则 400)。**不另造字段;不带整段文本**——模糊重定位的原料留给锚时代按需捕获,不预先养肥值类型(形状不跑在能力前面);代价(丢周边上下文)有意接受,drift 语义因此只对选中片段敏感。
 - **几何:v1 拍死不含**。核实证明 `anchorRect` 是手势瞬间相对 viewport 的 CSS px,仅供浮层定位,滚动/缩放/改窗宽即失效——**身份从来不靠它**(三元组+offsets 已是完整身份且 frame-free)。若未来要几何,须新增捕获(单位标签/frame 身份/zoom),`anchorRect` 不作为持久化来源;文档/源件上的圈选几何归源侧(层0/层1,pdf_pt+页号天然),12.5。
 - 选区收据**不含语义**(Source-Ladder A-2 对等):它说「圈了哪里」,不说「圈的是什么」。
 - 零 OCR(宪章 §8);机械、零 token(零模型荣誉榜)。
