@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 136 份文档。
+共 137 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -29,7 +29,7 @@
 | [analysis/2026-08-20-repo-readme-draft.md](analysis/2026-08-20-repo-readme-draft.md) | repo 根 README 重建草案 | `superseded` | 2026-08-20 | ⚠️ [`README.md`](../../../README.md)（2026-08-20 抽检放行后整体替换完成） |
 | [analysis/2026-08-21-builder-lineage-redundancy-survey.md](analysis/2026-08-21-builder-lineage-redundancy-survey.md) | builder 血统冗余调研 | `draft` | 2026-08-21 | — |
 | [analysis/2026-08-21-mcp-tool-face-design.md](analysis/2026-08-21-mcp-tool-face-design.md) | 必修① MCP 工具面设计稿 v0 ——「末端执行器第一次实体化」 | `draft` | 2026-08-21 | — |
-| [analysis/2026-08-21-selection-receipt-design.md](analysis/2026-08-21-selection-receipt-design.md) | 必修③ 选区收据系统设计稿 v0(薄——它是 12.2 §2.1 的持久化,不是新系统) | `draft` | 2026-08-21 | — |
+| [analysis/2026-08-21-selection-receipt-design.md](analysis/2026-08-21-selection-receipt-design.md) | 必修③ 选区收据系统设计稿 v1(薄——它是 12.2 §2.1 的持久化,不是新系统) | `active` | 2026-08-24 | — |
 | [analysis/2026-08-21-v2bn12-1-journey-score.md](analysis/2026-08-21-v2bn12-1-journey-score.md) | V2.BN.12.1「编辑基座」旅程分数验收 | `active` | 2026-08-21 | — |
 | [analysis/2026-08-23-v2bn12-2b4-journey-sheet.md](analysis/2026-08-23-v2bn12-2b4-journey-sheet.md) | V2.BN.12.2b「首个写工具 + 人审队列」旅程分数走查单 | `active` | 2026-08-23 | — |
 | [analysis/2026-08-24-selection-receipt-precheck.md](analysis/2026-08-24-selection-receipt-precheck.md) | 12.2c 前置核实报告:选区收据 §7 三问 | `active` | 2026-08-24 | — |
@@ -147,4 +147,5 @@
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/v2-bn12-2-mcp-tool-face.md](handoffs/plans/v2-bn12-2-mcp-tool-face.md) | Plan V2.BN.12.2 — MCP 工具面(末端执行器第一次实体化) | `active` | — | — |
 | [handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md](handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md) | V2.BN.12.2b:第一个写工具 + 候选审阅队列 + HTTP 层 K-5 | `done(**铸版 2026-08-23,Fable**——五单施工 + b-4 旅程 + b-5/b-5-fix 补单全复核 PASS;旅程合并分 **A 12/12 + B 8/8** 达通过线,重走记录 `analysis/2026-08-23-v2bn12-2b4-journey-sheet.md` §7;铸版记录 log 08-23 #40;未亲刀缺口见 TD-19/TD-20)` | 2026-08-23 | — |
+| [handoffs/plans/v2-bn12-2c-selection-receipts-and-resolve.md](handoffs/plans/v2-bn12-2c-selection-receipts-and-resolve.md) | V2.BN.12.2c:选区收据(值,不是行)+ `resolve_selection`(只读解析) | `draft` | 2026-08-24 | — |
 | [operating-workflow.md](operating-workflow.md) | 代理期工作流(v1) | `active` | 2026-08-21 | — |
