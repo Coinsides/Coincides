@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 139 份文档。
+共 140 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -146,6 +146,7 @@
 | [handoffs/2026-08-23-v2bn12-td8-fix-regression-guards.md](handoffs/2026-08-23-v2bn12-td8-fix-regression-guards.md) | TD-8-fix:补三条回归护栏(**只写测试,不改产品代码**) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-23-v2bn12-td8-receipt-timestamp-cleanup.md](handoffs/2026-08-23-v2bn12-td8-receipt-timestamp-cleanup.md) | TD-8 清债:收据表时间戳统一(**位点拍死,零裁量**) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-24-v2bn12-2c1-selection-receipt-projection.md](handoffs/2026-08-24-v2bn12-2c1-selection-receipt-projection.md) | V2.BN.12.2c-1:选区收据的客户端投影(纯值,零几何) | `(缺状态头)` | — | — |
+| [handoffs/2026-08-24-v2bn12-2c2-resolve-selection-tool.md](handoffs/2026-08-24-v2bn12-2c2-resolve-selection-tool.md) | V2.BN.12.2c-2:`resolve_selection` —— 工具面第一个**只读解析工具** | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/v2-bn12-2-mcp-tool-face.md](handoffs/plans/v2-bn12-2-mcp-tool-face.md) | Plan V2.BN.12.2 — MCP 工具面(末端执行器第一次实体化) | `active` | — | — |
 | [handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md](handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md) | V2.BN.12.2b:第一个写工具 + 候选审阅队列 + HTTP 层 K-5 | `done(**铸版 2026-08-23,Fable**——五单施工 + b-4 旅程 + b-5/b-5-fix 补单全复核 PASS;旅程合并分 **A 12/12 + B 8/8** 达通过线,重走记录 `analysis/2026-08-23-v2bn12-2b4-journey-sheet.md` §7;铸版记录 log 08-23 #40;未亲刀缺口见 TD-19/TD-20)` | 2026-08-23 | — |
