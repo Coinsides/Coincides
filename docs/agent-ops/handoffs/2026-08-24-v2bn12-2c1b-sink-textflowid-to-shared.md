@@ -90,3 +90,47 @@ c-2 撞墙:C 裁定要求 resolve **import 同一个** `textFlowIdForBlock`,而�
 
 门禁 docs-first:`docs:check` → `verify:v2-bn8-runtime` → 双 `tsc --noEmit` → `test:unit` → `test:v2` → 五道 tool-face 门。
 **回执纪律**:README Builder 侧 1–3(含 **UTF-8**)+ **M-2 header 不由你翻**。
+
+## Result
+
+**状态**: `needs: claude`（S1 构建探针未通过；依工单停手，未进入 S2）。
+
+### S1 构建探针
+
+- 探针 import 形式：已配置的 `@shared/*` 形式：
+  ```ts
+  import { classifyCanvasSurfaceAuthority } from '@shared/types/canvasSurfaceAuthority';
+  ```
+- 同文件加入 `void classifyCanvasSurfaceAuthority;`，确保该值引用不会被 import elision 擦除。
+- `cd server && npx.cmd tsc --noEmit`：退出码 `1`。报错原文：
+  ```text
+  src/mcp/manifest.ts(2,48): error TS6305: Output file 'D:/Coinsides/v2.x/Coincides/shared/dist/types/canvasSurfaceAuthority.d.ts' has not been built from source file 'D:/Coinsides/v2.x/Coincides/shared/types/canvasSurfaceAuthority.ts'.
+  ```
+- `cd server && npm.cmd run build`：`check:tool-face-manifest` 通过，随后裸 `tsc` 退出码 `1`。报错原文：
+  ```text
+  > @coincides/server@1.8.0 build
+  > npm run check:tool-face-manifest && tsc && npm run copy:tool-face-manifest
+
+
+  > @coincides/server@1.8.0 check:tool-face-manifest
+  > node --import tsx ../scripts/generate-tool-face-manifest.ts --check
+
+  tool-face manifest 未过期：2 条条目，其中 2 条 public。
+  src/mcp/manifest.ts(2,48): error TS6305: Output file 'D:/Coinsides/v2.x/Coincides/shared/dist/types/canvasSurfaceAuthority.d.ts' has not been built from source file 'D:/Coinsides/v2.x/Coincides/shared/types/canvasSurfaceAuthority.ts'.
+  ```
+- PowerShell 直接解析 `npx` 时先被本机 execution policy 挡在 `npx.ps1` 启动层；该次没有进入 TypeScript，故改用同一 Node 安装的 `npx.cmd` 执行上述探针。
+- 探针已撤净。撤除后 `server/src/mcp/manifest.ts` 工作树 blob 与 `HEAD` blob 均为 `d0a26edbcea3ffc5af0c277785c1092cecdb0d82`，且该文件 `git diff --numstat` 无条目。
+
+本次第一次已使用工单允许的唯一自救形式 `@shared/*`，因此未尝试相对路径，也未改 `rootDir` / `paths` / `references`、构建脚本或打包步骤。S2 的 shared 新文件、客户端定义与五个调用点均未施工；未新增测试或平行机关。
+
+### 构建产物观感（未实测）
+
+若后续构建体系使该运行时跨界可构建，按当前 client 独立打包、server 独立 TypeScript emit 的形状，**倾向会在两套产物中各有一份该函数的编译表示**；因此同源在源码层成立，产物层不应默认理解为同一物理副本。本判断仅为观感，本单没有为此做产物验证；且本次 server 在 emit 前已被 TS6305 挡住。
+
+### 回执与停手验证
+
+- `npm.cmd run docs:index`：通过，写入 `0` 个 INDEX。
+- `npm.cmd run docs:check`：通过。
+- UTF-8 自检：无 replacement character、无 BOM，`## Result` 恰一处；header 仍为调度方原 `status: ready(...)`，未翻动。
+- 工作树 `git diff --numstat` 仅本工单回执文件有条目；`git diff --name-only` 也仅列该回执文件。另有基线既存 untracked `.claude/settings.local.json`，本单未触碰。
+- `verify:v2-bn8-runtime`、完整双 `tsc --noEmit`、`test:unit`、`test:v2` 与五道 tool-face 门未跑：S1 已按合同触发停手，且没有 S2 产品实现可验；不以补跑下游门代偿构建体系阻塞。
