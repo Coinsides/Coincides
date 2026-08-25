@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 142 份文档。
+共 143 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -148,6 +148,7 @@
 | [handoffs/2026-08-23-v2bn12-td8-receipt-timestamp-cleanup.md](handoffs/2026-08-23-v2bn12-td8-receipt-timestamp-cleanup.md) | TD-8 清债:收据表时间戳统一(**位点拍死,零裁量**) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-24-v2bn12-2c1-fix-excerpt-slice.md](handoffs/2026-08-24-v2bn12-2c1-fix-excerpt-slice.md) | V2.BN.12.2c-1-fix:`excerpt` 是切片,不是整段 | `(缺状态头)` | — | — |
 | [handoffs/2026-08-24-v2bn12-2c1-selection-receipt-projection.md](handoffs/2026-08-24-v2bn12-2c1-selection-receipt-projection.md) | V2.BN.12.2c-1:选区收据的客户端投影(纯值,零几何) | `(缺状态头)` | — | — |
+| [handoffs/2026-08-24-v2bn12-2c1b-sink-textflowid-to-shared.md](handoffs/2026-08-24-v2bn12-2c1b-sink-textflowid-to-shared.md) | V2.BN.12.2c-1b:`textFlowIdForBlock` 下沉 `shared/`(纯 import 改… | `(缺状态头)` | — | — |
 | [handoffs/2026-08-24-v2bn12-2c2-resolve-selection-tool.md](handoffs/2026-08-24-v2bn12-2c2-resolve-selection-tool.md) | V2.BN.12.2c-2:`resolve_selection` —— 工具面第一个**只读解析工具** | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/v2-bn12-2-mcp-tool-face.md](handoffs/plans/v2-bn12-2-mcp-tool-face.md) | Plan V2.BN.12.2 — MCP 工具面(末端执行器第一次实体化) | `active` | — | — |
