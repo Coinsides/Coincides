@@ -18,3 +18,6 @@
 - 2026-08-23 · b-5-fix R2 · ownership-guard mutation(拆 `user_id` 过滤验测试会红)未由对抗方亲刀(上游过滤器掐断,裁不绕过)· 挡「跨用户守卫测试是装饰品」· TD-20(现有三源证据清单见该条)
 - 2026-08-23 · 12.2b 旅程 J4/B3 · source-projection「同一执行体」强鉴别零样本未取证(非降档,环境无投影样本)· 挡「投影类资源被硬删」· journey-sheet §「未取证」段
 - 2026-08-24 起 · 常设 · 新写工具不再扩安全输入矩阵(只留最小 ownership 正控一条;后续逐单在此追记具体没写的矩阵)· 挡「新面重蹈 `status[]` 型白名单旁路」· log 08-24 #1
+- 2026-08-24 · 12.2c c-1 · 投影入参模糊矩阵(超长 excerpt / 非法 offsets / 畸形 unicode / ranges 数量上限)未写,只测正常路径 + 空 ranges · 挡「投影对畸形 draft 的容错」· 单 `handoffs/2026-08-24-v2bn12-2c1-selection-receipt-projection.md`
+- 2026-08-24 · 12.2c c-1-fix · 切片边界模糊矩阵(负/超长 offset · UTF-16 代理对与组合字形切分 · RTL)未写 · 挡「切片对畸形或非 BMP 文本的行为」· ⚠️ **builder 已亲验并申报该风险真实存在**:`slice` 按 UTF-16 code unit 切,offsets 落在 surrogate pair 内部会切裂 emoji/grapheme ⇒ **收据里可能存下孤立代理项**;本档不处理 · 单 `...-2c1-fix-excerpt-slice.md` `## Result` §UTF-16
+- 2026-08-24 · 12.2c 常设 · 上一条**会顺流到 c-2**:漂移比对式两侧同法 `slice`,切裂不致误判 `drifted`,但**孤立代理项会进入 JSON 与工具面出参** · 挡「工具面出参含非法 UTF-16 序列」· 补测时与 c-1-fix 那条**并为一题**
