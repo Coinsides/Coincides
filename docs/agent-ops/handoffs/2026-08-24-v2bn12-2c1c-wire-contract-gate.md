@@ -74,3 +74,55 @@ c-1b v3 交付的 `server/src/__tests__/textFlowIdentityContract.test.ts` 是 A1
 
 门禁 docs-first:`docs:check` → `verify:v2-bn8-runtime` → 双 `tsc --noEmit` → `test:unit`(基线 222)→ `test:v2`(**须 274**)→ 五道 tool-face 门。
 **回执纪律**:README Builder 侧 1–3(含 **UTF-8**)+ **M-2 header 不由你翻**。
+
+## Result
+
+**结论**:完成。唯一产品/门禁改动是 `server/package.json` 的 `test:v2` 那一行追加 `src/__tests__/textFlowIdentityContract.test.ts`；未新增 script，未改其它门、`verify:v2-bn8-runtime`、产品码、tsconfig 或测试内容。header 依工单要求未翻。
+
+### K-1：数字证明接线生效
+
+- 接线前实跑完整 `test:v2`：`1..270` / `# tests 270` / `# pass 270` / `# fail 0`。
+- 接线后实跑完整 `test:v2`：命令行明确列出 `src/__tests__/textFlowIdentityContract.test.ts`；四条专项子测试均列出并通过：
+  - `textFlowIdForBlock implementations stay byte-for-byte equal`
+  - `textFlowIdForBlock has one canonical client/shared definition`
+  - `textFlowIdForBlock client call sites all use the canonical shared import`
+  - `textFlowIdForBlock server implementation remains local`
+- 接线后计数：`1..274` / `# tests 274` / `# pass 274` / `# fail 0`。即 **270 → 274**，净增契约专项 4 条。
+
+### K-2：完整门承重 mutation
+
+1. 临时把 `server/src/services/textFlowIdentity.ts` 改为 `` `tf-${blockId}` ``；HEAD blob 为 `97c02b882c320b44d20142408225b971aa654b80`，mutation 工作树 hash 为 `e8897fa6ceb5979bf4b6adc198819761d67c31ce`。
+2. mutation 后先跑 `server` 的 `npx.cmd tsc --noEmit`：exit `0`，证明该 mutation 可编译。
+3. 随后跑的是**完整 `test:v2`**，不是单跑专项文件。命令行包含该专项文件；runner exit `1`，计数 `274`，其中 `273 pass / 1 fail`。唯一失败为：
+   - `textFlowIdForBlock implementations stay byte-for-byte equal`
+   - `actual: 'tf-'`
+   - `expected: 'textflow-'`
+   - `code: 'ERR_ASSERTION'`
+   - `name: 'AssertionError'`
+   - `ReferenceError` / `SyntaxError` / `ERR_MODULE_NOT_FOUND` 命中数均为 `0`。
+4. 反向补丁恢复后双面自证：
+   - 源码面：工作树 blob 与 HEAD blob 同为 `97c02b882c320b44d20142408225b971aa654b80`；该文件 numstat 为空。
+   - 产物面：对 `server/dist/**` 的 PowerShell `Select-String -SimpleMatch` 为 `0` 命中；独立 `findstr /l` 探针 exit `1`（无命中）；现有 `server/dist/services/textFlowIdentity.js` 返回 `` `textflow-${blockId}` ``。
+5. 恢复后再跑完整 `test:v2`：`274/274` 绿；最终门禁序列中的再次复跑同为 `274/274`。
+
+### 完整门禁（docs-first）
+
+- `npm.cmd run docs:check`：exit `0`。
+- `npm.cmd run verify:v2-bn8-runtime`：exit `0`。
+- `client`：`npx.cmd tsc --noEmit` exit `0`。
+- `server`：`npx.cmd tsc --noEmit` exit `0`。
+- `npm.cmd run test:unit`：`22` files，**`222 passed (222)`**。
+- `server` 的 `npm.cmd run test:v2`（`CANVAS_ASSET_DIR` 指向独立 OS temp）：**`274/274`**。
+- 五道 tool-face 门逐道复跑：
+  - `test:tool-face-registry`：exit `0`，`4/4`。
+  - `test:tool-face-manifest`：exit `0`，`10/10`。
+  - `check:tool-face-manifest`：exit `0`，manifest 未过期，`2` 条 public。
+  - `test:tool-face-parity`：exit `0`，`10/10`（输出中的内部 `[FAIL]` 是 killer 负夹具的预期输出，外层测试全绿）。
+  - `check:tool-face-parity`：exit `0`，`2` 条 public entry 通过必要条件门。
+
+### 范围、边界与观感
+
+- 写回 Result 前，tracked numstat 只有 `1\t1\tserver/package.json`；脚本值严格等于 HEAD 原值加一个空格和指定文件名，目标文件名在 `server/package.json` 恰好出现一次。独立只读复核得到同一结论。
+- `server/src/services/textFlowIdentity.ts` 与契约测试本身最终均等于 HEAD；未补挂其它测试，未做全量漏挂扫描。
+- **观感：长期风险。** 显式列表可以是有意的 curated gate，但在没有“新增测试未接门即失败”的发现机关时，新测试默认不运行；本单已证明这种遗漏会静默发生。建议未来作为独立 TD 治理，不在本单扩面。
+- 不声称清偿 **TD-21**：本单只让契约在 tests 世界常驻；dev 与产物世界的 `@shared/*` 解析/全等仍无人守。TD-14、TD-6、TD-19/20、TD-16 亦未触碰或清偿。
