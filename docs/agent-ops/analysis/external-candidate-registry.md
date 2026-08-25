@@ -158,3 +158,11 @@
 - [ ] **Spark 配额闸实测**(建议在周额未到 100% 时验:`/status` 两表是否独立走数 + 小单实跑);
 - [ ] **Grok/Gemini 当前代次的 Codex 工具调用可靠性实测**(未核前不排序);
 - [ ] 新候选出现时:先查本册,未登记才调研。
+
+---
+
+## 2026-08-25 深夜批(Agent 架构会议牵出;详见 `2026-08-25-agent-architecture-meeting.md`)
+
+- **DeepSeek Harness(dsh)**【新登记】:`@deepseek-ai/dsh` · MIT · TypeScript · 2026-08-13 随 V4-Pro 开源 · 内建 MCP 客户端(`mcp__<server>__<name>` 命名,同 Claude Code/Codex 形)· 读 AGENTS.md/CLAUDE.md · CLI+Web UI+Python SDK · 可挂 V4-Pro/Flash 及 OpenAI 兼容/Anthropic 模型 · **形态:点菜型接入我们的门(对模型是宿主)** · 位置:**客工·轻薄廉价原型代表/实验环** · 核验:三方来源(The New Stack/CodePick/atoms.dev,08-25 查)· 结论:**采为代表,12.2 铸版后实验用;同 harness 换模型=干净的变量控制轴**。
+- **open design**【状态更新】:本地优先开源 AI 设计平台 · 2026-05-08 开源 · TS · 84.4k 星 · freemium · 72 套设计系统+31 技能 · **可接驳 ≤15 个编码 agent CLI ⇒ 非穿戴者,是会指挥厨子的设计总厨(meta-harness)** · 位置:**设计岗默认任命**(焊岗不焊人;Claude Design 为替补)· 老太太档托管化记方向账 · 上方待办「研读其 design-system 包格式」维持,产房专项前完成。
+- **代表制定案(会议裁定)**:认证原型不认证厂牌——OpenClaw(助理型)/ OpenCode+Claude Code(工程型)/ dsh(轻薄型);同形新候选只登记不认证;⛔ 门内永不出现 harness 名分支。

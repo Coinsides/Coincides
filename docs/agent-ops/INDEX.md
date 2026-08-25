@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 147 份文档。
+共 149 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -35,6 +35,7 @@
 | [analysis/2026-08-24-c0-resolve-selection-server-paths.md](analysis/2026-08-24-c0-resolve-selection-server-paths.md) | c-0:`resolve_selection` 的 server 侧现实路径 | `active` | 2026-08-24 | — |
 | [analysis/2026-08-24-selection-receipt-precheck.md](analysis/2026-08-24-selection-receipt-precheck.md) | 12.2c 前置核实报告:选区收据 §7 三问 | `active` | 2026-08-24 | — |
 | [analysis/2026-08-24-v2bn12-2c3-journey-sheet.md](analysis/2026-08-24-v2bn12-2c3-journey-sheet.md) | V2.BN.12.2c「选区收据 + 只读解析」旅程分数走查单 | `draft` | 2026-08-24 | — |
+| [analysis/2026-08-25-agent-architecture-meeting.md](analysis/2026-08-25-agent-architecture-meeting.md) | Agent 架构会议记录(Mr. Zero · 客工制度 · harness 代表制) | `active` | 2026-08-25 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
@@ -67,6 +68,7 @@
 | [claude-log/2026-08-22.md](claude-log/2026-08-22.md) | 2026-08-22 · Claude(Fable)工作日志 | `(缺状态头)` | — | — |
 | [claude-log/2026-08-23.md](claude-log/2026-08-23.md) | 2026-08-23 · Claude(Fable)工作日志 | `(缺状态头)` | — | — |
 | [claude-log/2026-08-24.md](claude-log/2026-08-24.md) | Claude 工作日志 · 2026-08-24 | `(缺状态头)` | — | — |
+| [claude-log/2026-08-25.md](claude-log/2026-08-25.md) | Claude 工作日志 · 2026-08-25 | `(缺状态头)` | — | — |
 | [claude-log/README.md](claude-log/README.md) | claude-log —— Claude 行动日志（Henry 的监督轨迹） | `active` | 2026-06-27 | — |
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-23 | — |
