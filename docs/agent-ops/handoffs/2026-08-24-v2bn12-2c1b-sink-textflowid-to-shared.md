@@ -1,4 +1,4 @@
-> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: **ready-on-condition**(⭐ **c-1a 落地后即为第 3 版、可派**;形状仍是 A1′,Fable 2026-08-24 翻案 log #10 `3a66ef3`) | re: v2bn12-2c-1b(第 3 版) | date: 2026-08-24
+> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: **ready**(⭐ **条件已满足** —— c-1a 已落地 `79a8ef3`;形状仍是 A1′,Fable 2026-08-24 翻案 log #10 `3a66ef3`) | re: v2bn12-2c-1b(第 3 版) | date: 2026-08-24
 
 # V2.BN.12.2c-1b(v2):`textFlowIdForBlock` 跨端同源 —— **契约测试锁,不走 import 链**
 
