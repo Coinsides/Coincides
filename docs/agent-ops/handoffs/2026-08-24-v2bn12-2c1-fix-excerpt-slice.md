@@ -182,3 +182,66 @@ c-1 复核判 **FAIL 0B/1H/0M/0L**,唯一 **HIGH-1**:
 - `npm.cmd run docs:check`：通过。
 - `git diff --check`：exit `0`；只有工单已登记的 LF→CRLF warning，无 whitespace error。
 - 工单文件用 strict UTF-8 decoder 复读通过；首行仍为原 `status: ready(...)` header，未翻牌。
+
+## Review
+
+> reviewer: Codex reviewer（洁净室增量复核）
+> review baseline: `4d3ba81` → `602d0a0`（前一施工基线 `c3708b4` 仅作连续 blob 对照）
+> date: 2026-08-24
+
+### 判定
+
+**FAIL（方向成立）— 0 BLOCKER / 1 HIGH / 0 MED / 0 LOW。**
+
+切片实现、`text` → `excerpt` 更名、长度不变式、R2–R7 均成立；唯一 HIGH 是 **R1-② 的反事实鉴别力证明被 K-1' 自己的重复断言污染**。本报告只作复核判定，放行权仍在 Fable。
+
+### HIGH-1 — K-1' 混入 fixture 自证断言，旧 fixture 下“同一投影刀不红”无法成立
+
+**性质：认识论错误 / 回归护栏鉴别力。** 生产实现不是本条缺陷；缺陷在测试职责耦合。
+
+- 当前 K-1' 在 `selectionReceiptProjection.test.ts:125` 先做完整投影等值，在 `:159-161` 再做 `excerpt === whole.slice(start,end)`；这两处足以检出“投影退回整段”。
+- 但 K-1' 又在 `:162` 断言 `excerpt !== whole`。同一 fixture 自证职责已经由 K-2' `:168-176` 单独承担（其中还显式断言 `startOffset > 0`）。
+- 亲刀 1（新 fixture 保持 `whole=0123456789abcdef / 3..9 / excerpt=345678`，只把投影改成 `excerpt: range.text`）：K-1' `1 failed / 8 skipped`，目标 `AssertionError` 在 `:125`；expected `345678`，received `0123456789abcdef`。**这一半正确。**
+- 亲刀 2（按 R1-② 把 fixture 改成 `0..16 / excerpt=whole`，再施完全相同的投影刀）：工单要求 K-1' 不红，实际仍为 `1 failed / 8 skipped`；目标 `AssertionError` 落在 `:162`：`expected '0123456789abcdef' not to be '0123456789abcdef'`。前面的 strict-equal 与 slice 等式已通过，说明投影刀本身确实被整段 fixture 隐掉；红来自混入 K-1' 的 fixture 断言。
+- 因而当前测试能证明“新 fixture 下会红”，却不能按点名验法证明“旧 fixture 对同一投影刀确实无鉴别力”。R1 明定两步缺一不可，故定 HIGH。
+
+**建议修法：**只从 K-1' 移除 `:162` 的 `excerpt !== whole`；该断言保留在 K-2'。随后重跑：partial fixture + 整段投影 ⇒ K-1' 红；`0..len` fixture + 同一投影 ⇒ K-1' 绿；`0..len` fixture ⇒ K-2' 红。无需改生产投影或 shared 类型。
+
+证据口径补注：直接父提交 `4d3ba81` 的第一条 range 字面值其实是 `alpha beta / 2..7`，第二条 `gamma / 0..5` 才是整段。上述 `0..len` 是严格执行本复核单点名的反事实，不冒充对父提交 fixture 的逐字还原；不另行分级。
+
+### R2–R5
+
+- **R2 PASS。** 常驻 fixture 精确为 whole length `16`、offsets `3..9`、excerpt `345678`；K-2' 显式断言 `whole !== excerpt`、`startOffset > 0`（并有 `endOffset < whole.length`）。只把 fixture 改成 `0..16` 后，K-2' 在 `:173` 以目标 `AssertionError` 红；恢复后专项全绿。
+- **R3 PASS。** 投影为 `range.text.slice(range.startOffset, range.endOffset)`；K-3' 对每条 range 断言 `excerpt.length === endOffset - startOffset`。只改成 `slice(startOffset)` 后，在 `:182` 以目标 `AssertionError: expected 13 to be 6` 红；恢复后绿。
+- **R4 PASS。** `SelectionReceiptTextRangeV1` 只有 `excerpt: string`，投影也只发 `excerpt`。同时给 interface 与 runtime 投影加回 `text` 别名后，K-4' 阳性对照先绿，实际收据探针在 `:199` 以目标 `AssertionError` 红并报出 `$.text_ranges[0].text`、`[1].text`；输出为 `1 passed / 1 failed / 7 skipped`。第二来源：CodeGraph blast radius 只列 shared 类型与 projector；Git 源码枚举只见 shared 类型、projector、专项测试，receipt `.text` access 为空，而 `.excerpt` 命中为阳性校准。双 `tsc` 同意。
+- **R5 PASS。** 恢复态专项 `9/9`。K-2 零几何的递归探针阳性对照仍先检出 `anchorRect/x/width`；K-3 空 ranges ⇒ `null`；K-4 双向引用隔离在断言另一侧稳定前，先证明 receipt 侧和 draft 侧 mutation 各自确实发生。
+
+所有有效 killer 红均为点名 `AssertionError`，没有把 `ReferenceError`、`SyntaxError`、`ERR_MODULE_NOT_FOUND` 或启动错误计作证据。
+
+### R6 — 范围
+
+**PASS。** 阴性均有第二来源与阳性校准。
+
+- `git diff --numstat/--raw 4d3ba81 602d0a0 -- server` 均空；两端 `server` tree 均为 `d1117dcc93d39c4a99a03c24f1f3c1771a6fda5f`。点名禁区 `server/src/services/items.ts` 两端 blob 均为 `1d3280afd61f05208caa58634b02e40ce54a3957`。
+- `selectionDraftService.ts`（含 `SelectionDraftV1` / phase）与 8 个既有消费者 combined `--numstat/--raw` 均空，9/9 blob 在 `4d3ba81` 与 `602d0a0` 相同；并与 `c3708b4` 连续一致：`aa15fe7b / f70e71ed / 893e8ad1 / f1ec5c55 / f812cbe0 / 29de8952 / 967d2209 / a2febe2c / b921271a`。
+- 三个已知 EOL 位点没有用 porcelain 判真。clean-filter working blob 与 `602d0a0` commit blob 分别同为：`useNoteCanvasRuntimeController.ts=3efe5f82`、`server/src/routes/projections.ts=561902a4`、`SelectionToolbarLayer.tsx=29de8952`；对应 `--numstat` 为空。
+- 阳性校准：同一基线差分确实命中三个允许源码/测试文件，numstat 为 `99/14`、`1/1`、`1/1`；projector blob 从 `e2482ff…` 变到 `5f8c277…`，探针没有失明。
+
+### R7 — 门禁
+
+按指定顺序亲跑，全部通过：
+
+1. `npm.cmd run docs:check`：exit `0`。
+2. `npm.cmd run verify:v2-bn8-runtime`：exit `0`；含 unit `22 files / 222 tests`、专项 `9/9`、canvas boundary `159`、model contract `60/60`、client/server build 与既有门；仅既有 Vite dynamic-import / chunk-size warning。
+3. client / server `npx.cmd tsc --noEmit`：均 exit `0`。
+4. `npm.cmd run test:unit`：`22 files / 222 passed`。
+5. server `npm.cmd run test:v2`：隔离 `CANVAS_ASSET_DIR` 下 `270 passed / 0 failed`；目录末态 `0` 项、`0` reparse，校验后已删除。
+6. 五道 tool-face 门：registry `4/4`；manifest `10/10`；manifest check `2 entries / 2 public` fresh；parity `10/10`；parity check PASS（仍按门自身措辞：human reachability not verified / journey pending）。
+
+### 隔离树、边界与合取扫描
+
+- Mutation 位于仓外系统临时 clone `C:\Users\70208\AppData\Local\Temp\coincides-review-2c1-ef4ad11f48f943dfacf3873b12566d06`，HEAD `602d0a0`；client/server 依赖各自 `npm ci --offline`，没有 junction/symlink 到共享 `node_modules`。每刀反向恢复并取 `git diff --exit-code=0`；收尾工作区/索引双空、`0` reparse 后已删除该 clone。
+- 临时 clone 中 esbuild 首次因沙箱拒绝读取高层父目录而在测试启动前退出；该输出未计证据。有效定点运行临时隐藏 clone 自身的 Vite/Vitest config，依赖测试文件的 `@vitest-environment node` 与相对 import；每次均在 finally 中恢复 config。生产配置下的专项 `9/9`、unit `222/222` 与总 runtime 门另在共享树亲跑通过。
+- 未取锁、未读写 `owner.json`、未删锁；未查询、终止或干扰 PID 8292；未触碰 `server/src/services/items.ts`。
+- 跨条耦合扫描唯一命中即 HIGH-1：K-1' 与 K-2' 职责重复，使 R1 的阴性反事实被另一条断言劫持。其余合取未见新增缺口：类型更名 + 源码枚举 + 双 tsc 同意零消费者；切片 + 长度不变式同意常规 UTF-16 窗口。emoji / grapheme、畸形 offset、RTL 仍是工单已登记的 P2，不扩；P3 自由巡猎不做。
+- 下一单 `resolve_selection` 若开始消费 receipt，`excerpt` 名称与 shared 类型会提供编译缝；当前零消费者结论不外推为未来保证。除 HIGH-1 外无状态转移后新增问题。
