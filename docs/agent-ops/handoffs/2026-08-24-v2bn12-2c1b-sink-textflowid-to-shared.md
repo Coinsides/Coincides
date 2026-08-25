@@ -147,3 +147,57 @@
 - UTF-8 自检：无 replacement character、无 BOM，`## Result` 恰一处；header 仍为调度方原 `status: ready(...)`，未翻动。
 - 工作树 `git diff --numstat` 仅本工单回执文件有条目；`git diff --name-only` 也仅列该回执文件。另有基线既存 untracked `.claude/settings.local.json`，本单未触碰。
 - `verify:v2-bn8-runtime`、完整双 `tsc --noEmit`、`test:unit`、`test:v2` 与五道 tool-face 门未跑：S1 已按合同触发停手，且没有 S2 产品实现可验；不以补跑下游门代偿构建体系阻塞。
+
+## Result（第 2 版 —— A1′）
+
+**状态**: `needs: claude`（S1 的 `tsx` 静态具名导入拿不到值；依第 2 版工单停手，未进入 S2）。基线与当前 HEAD 均为 `64f5bd680cbea0750a3e947c78b4f7a6e514877e`。
+
+### S1 静态具名 import 微探针
+
+- 临时测试：`server/src/__tests__/__textFlowSharedNamedImportProbe.test.ts`。
+- 探针使用静态具名 import，并断言值为函数：
+  ```ts
+  import { classifyCanvasSurfaceAuthority } from '@shared/types/canvasSurfaceAuthority';
+
+  assert.equal(typeof classifyCanvasSurfaceAuthority, 'function');
+  ```
+- `cd server && node --import tsx --test src/__tests__/__textFlowSharedNamedImportProbe.test.ts`：退出码 `1`。报错原文：
+  ```text
+  SyntaxError: The requested module '@shared/types/canvasSurfaceAuthority' does not provide an export named 'classifyCanvasSurfaceAuthority'
+  ```
+- `cd server && npx.cmd tsc --noEmit` 首跑：退出码 `1`。报错原文：
+  ```text
+  src/__tests__/__textFlowSharedNamedImportProbe.test.ts(4,48): error TS6305: Output file 'D:/Coinsides/v2.x/Coincides/shared/dist/types/canvasSurfaceAuthority.d.ts' has not been built from source file 'D:/Coinsides/v2.x/Coincides/shared/types/canvasSurfaceAuthority.ts'.
+  ```
+- 按 `server/src/mcp/manifest.ts` 顶部既有模式，在该 import 前加入：
+  ```ts
+  // @ts-ignore TS6305 -- shared composite output is not emitted by server --noEmit
+  ```
+  复跑 `cd server && npx.cmd tsc --noEmit`：退出码 `0`。这只解开 TypeScript 门；不改变上面的 `tsx` 运行时具名导入失败。
+
+### 实际模块对象形状与第二来源
+
+把同一临时测试改成静态 namespace import 后，`tsx` 实际打印：
+
+```json
+{"namespaceKeys":["default"],"namespaceTypes":{"default":"object"},"defaultKeys":["__esModule","classifyCanvasSurfaceAuthority"],"defaultTypes":{"__esModule":"boolean","classifyCanvasSurfaceAuthority":"function"}}
+```
+
+第二个独立 Node/tsx 进程用动态 `import()` 复核，得到：
+
+```json
+{"namespaceKeys":["default"],"namedType":"undefined","defaultType":"object","defaultKeys":["__esModule","classifyCanvasSurfaceAuthority"],"nestedNamedType":"function"}
+```
+
+两条来源一致：`tsx` 下模块 namespace 只有 `default`，函数被套在 `default.classifyCanvasSurfaceAuthority`，静态具名 import 不成立。没有尝试把 namespace/default 兼容层作为交付改法；本单允许的交付自救只有 `@ts-ignore TS6305`。
+
+### 探针双面撤净
+
+- **源码面**：临时测试路径已不存在；`server/src/mcp/manifest.ts` 工作树 blob 与 `HEAD` blob 均为 `d0a26edbcea3ffc5af0c277785c1092cecdb0d82`；该测试路径与 `manifest.ts` 的 `git diff --numstat` 均无条目。
+- **产物面**：在 `server/dist/**` 递归检索 `__textFlowSharedNamedImportProbe`、`S1_MODULE_SHAPE`、`classifyCanvasSurfaceAuthority`，结果为零命中（`NO_PROBE_SYMBOL_HITS_IN_SERVER_DIST`）。
+
+### 停手边界与缺口观感
+
+- S2/S3 均未施工：未新建 `shared/types/textFlow.ts`、未移动 client 定义、未回接 5 个调用点、未新建 server 本地实现或常驻契约测试；没有新增平行机关。
+- K-1–K-4、完整门禁与 TD-12 绕行均未进入：S1 已按合同触发终止，不能用后续测试代偿静态具名 import 这一前置条件。
+- 对「契约测试只在 tests/tsx 世界成立，dev(jiti) 与产物(裸 node)不守全等」的观感：若静态具名 import 问题另行解决并让契约门常驻，实际风险约为**低到中、偏低**——标的是稳定的两行模板字面量，正常合入会被契约门拦住；但 dev/startup 没有运行时自检，绕过门禁、手工热修或装配旧产物时仍可能把两份实现不一致地带进运行世界。当前则更直接：工单规定形状的常驻测试本身无法按要求加载 shared 具名值，因此 A1′ 尚不可交付。
