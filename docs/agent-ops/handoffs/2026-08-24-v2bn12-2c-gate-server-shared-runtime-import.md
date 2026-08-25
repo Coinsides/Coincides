@@ -133,3 +133,47 @@
 - **TD-21 未修**:本闸只阻止新的静态产品码跨界,不让 dev/产物世界获得 `@shared/*` 解析能力,不改 shared 构建体系。
 - **成对略过**:未加 client 对称闸——client 走打包器,没有本单对应失败形态;未做点名 killer 外的多轮 refute/自由巡猎——按 P3 停做。
 - 保留且未触碰开工前无关未跟踪文件 `.claude/settings.local.json`;未取/改/删调度方锁,未干扰 `:3001`/`:5173` 或 PID 8292。
+
+## Review
+
+> reviewer: Codex reviewer(洁净室打包复核) | date: 2026-08-25 | baseline chain: `b332559` → `f952331`(c-1d) → `646d485`(闸单,复核 HEAD)
+>
+> 复核口径:只验调度方冻结的 A1–A7 / B1–B7;mutation 由 reviewer 在 `.codex-tmp/` 隔离 clone 亲施,未在共享施工树改产品码;不自由巡猎、不补基线缺口。
+
+### 分级与判定
+
+- **BLOCKER: 0**
+- **HIGH: 0**
+- **MED: 0**
+- **LOW: 0**
+- **判定:PASS(0B / 0H / 0M / 0L)。** 两单的机关均由阳性对照证明有杀伤力,阴性结论也有独立第二来源。放行权仍在 Fable。
+
+### 单位 A:c-1d(契约 AST 枚举面)
+
+- **A1 VERIFIED — 复核原刀重现。** 在隔离 clone 的 `server/src/services/textFlowUnits.ts` 临时加入第三份 `textFlowIdForBlock` 后,server `npx.cmd tsc --noEmit` exit `0`;专项变为 **3/4**,唯一失败是第 2 条定义路径 `AssertionError` / `ERR_ASSERTION`,actual 精确多出 `server/src/services/textFlowUnits.ts`。恢复 blob 后专项回到 4/4。
+- **A2 VERIFIED — 路径而非计数。** 将 `shared/types/textFlow.ts` 临时改成 re-export,把实现移到 `shared/types/textFlowIdentityMutation.ts`;client / server 双 `tsc --noEmit` 均 exit `0`。定义数仍为 **2**,但 actual 把 canonical shared 路径替换为 mutation 路径;专项仍仅红同一条路径 `AssertionError`。恢复后 4/4。断言原文是路径数组 `deepEqual`,不是先数 `count`。
+- **A3 VERIFIED — 三根与 `__tests__` 排除。** 静态实现枚举 `client/src` + `shared` + `server/src`,过滤 declaration、非 TS/TSX、重复路径与所有 `/__tests__/`;server 根由 `ts.sys.readDirectory` 实读。反向刀在 `server/src/__tests__/` 放同名定义,先证 server tsc exit `0`,专项仍 **4/4**。
+- **A4 VERIFIED — 原四判据未放宽。** `f952331` 的代码 diff 未改全等、五调用点或 server-local 断言 body;定义唯一由 shared 单路径加强为两条 canonical 产品路径。c-1b 原 K-1 改 server 拼法后 tsc exit `0`,仅全等断言红(**3/4**);原 K-3 让 `useBlockTextFlowEditController.ts` 本地同拼法重派生后 client tsc exit `0`,定义路径与 named-import 两条均为目标 `AssertionError`(**2/4**)。各刀恢复后均 4/4。
+- **A5 VERIFIED — 范围。** `f952331^ = cb54414`;single-commit raw diff 只有契约测试实现与本单强制 `## Result` 回执。永久实现只改 `server/src/__tests__/textFlowIdentityContract.test.ts`;`client/src`、`shared`、server 产品源、`package.json`、tsconfig、构建脚本均零改动。判真使用 commit raw diff / tree blob,未用 porcelain 承重。
+- **A6 VERIFIED — 双面恢复。** mutation clone 中四个被触源码 blob 均等于 HEAD:`textFlowUnits.ts`=`2658071...`,`shared/types/textFlow.ts`=`97c02b8...`,`textFlowIdentity.ts`=`97c02b8...`,`useBlockTextFlowEditController.ts`=`da7f5e8...`;临时文件与 scoped untracked 均为 0。恢复后的严格 clean clone 完整 build 后,`server/dist/**` 以文件名、`Select-String -SimpleMatch`、`.NET ReadAllText.Contains` 三路查全部 A/B marker,均 **0 命中**。
+- **A7 VERIFIED — 申报项已答。** Result 报同一专项约 `1949ms → 2028ms`(+79ms / +4%),定义枚举子测试约 `1171ms → 1253ms`,并明确单次有噪声、观感不显著。reviewer 当前专项多次墙钟约 1.77–1.98s,未见显著结构锁成本。
+
+### 单位 B:12.2c-gate(`check:server-shared-runtime-import`)
+
+- **B1 VERIFIED — 闸不是装饰品。** alias 运行时 import 样本先证 server tsc exit `0`;闸 exit `1`,输出精确点名 `server/src/__review_gate_probe__/b1_alias_runtime.ts:2:1`。样本撤除后闸恢复 exit `0`。
+- **B2 VERIFIED — 两种写法都拦。** `@shared/types/textFlow` 与 `../../../shared/types/textFlow.js` 分别单独施刀;两刀均先编译 exit `0`,再由闸 exit `1` 且逐一指出对应文件与 specifier。未用其中一刀替另一刀抽样。
+- **B3 VERIFIED — type-only 放行、混合拒绝。** 真实基线 `server/src/mcp/manifest.ts:8` 的 declaration-level `import type` 被实际计为允许项,闸绿。混合子句 `import { type textFlowIdForBlock, textFlowIdForBlock as runtimeTextFlowIdForBlock } ...` 先编译 exit `0`,闸 exit `1` 并点名样本。脚本以 TypeScript AST 遍历 `ImportDeclaration` / `ImportEqualsDeclaration`,只认 declaration-level `isTypeOnly`,不是单行 grep。
+- **B4 VERIFIED — `__tests__` 确实排除。** 在 `server/src/__tests__/` 放运行时 shared import,先证 server tsc exit `0`;闸仍 exit `0`,输出保持 `175 product source files / 1 import-type / 0 violations / __tests__ excluded`。理由注释与实际刀一致。
+- **B5 VERIFIED — 接门与真 0。** 根 `package.json` 新增顶层 script,并只把新闸插在 `check:tool-face-parity` 与 `check:canvas-runtime-boundary` 之间;完整 `verify:v2-bn8-runtime` 实际经过本闸并 exit `0`。独立第二来源直接解析 `646d485` 的 Git blobs(同扩展名、同排除、TS AST)得 **175 文件 / 0 parse failure / 1 pure type-only / 0 violation**;工作树独立重算相同。唯一允许项即 `manifest.ts:8` 的相对 type-only import。因此分母 `175`、允许数 `1`、违规数 `0` 都是真值,不是只看 exit 0。
+- **B6 VERIFIED — 范围与样本撤净。** `646d485^ = f952331`;single-commit raw diff 仅 handoff、生成 inventory、根 `package.json` 与新增 gate script。`client/src`、`server/src`、`shared` 父子 tree hash逐一相同,产品码零改动。全部 B 样本与空探针目录已撤;源码 scoped diff / untracked 为 0;fresh build 的 `server/dist/**` 三路 marker 扫描均 0。
+- **B7 VERIFIED — 射程边界已申报且与实现一致。** Result 明答动态 `import()` 与直接 `require()` CallExpression **可以绕过**;同时说明静态 `import x = require()` 已覆盖、`export ... from` 不在当前射程。脚本 visitor 原文与此口径一致,边界已记账,未冒充全闭合。
+
+### 通用、合取与最终门
+
+- 所有被采信 mutation 都先有相应 `tsc --noEmit` exit `0`;A 的红均为目标 `AssertionError`,B 的红均为闸 exit `1` + 点名文件。没有以 `ReferenceError` / `SyntaxError` / `ERR_MODULE_NOT_FOUND` 或 TS 编译错误冒充红。
+- **阴性结论双源:**现状 0 违规由闸本身 + exact-commit Git-blob AST 独立重算共同支持;产品码零改由 raw diff + 三棵 tree hash 共同支持;产物 marker 0 由文件名 + 两种内容扫描共同支持。
+- **跨单合取:**A 的契约测试必须在 `__tests__` 静态 import shared;B4 亲刀与完整 verify 同时证明 B 不会误拦 A 的锁点。两机关合并后无新冲突。
+- 严格 `646d485` clean clone 最终门: `docs:check` PASS;`verify:v2-bn8-runtime` exit `0`(含 `test:unit` **222/222**、五道 tool-face 门、新闸、双 build);client / server 双 `tsc --noEmit` exit `0`;`test:v2` 以已清理的 OS temp `CANVAS_ASSET_DIR` 运行 **274/274**。
+- 首个 clone 因本机 `core.autocrlf=true` 将 INDEX 的 LF blob 检出为 CRLF,导致 `docs:check` 仅红 9 个 INDEX;逐字节证明只多 CR 后,改用 `core.autocrlf=false` 的 raw-blob clean clone,该门与完整 verify 均绿。该环境红未作为 builder finding。
+- 两棵 review clone 均先核绝对路径位于 `.codex-tmp/` 且全树 ReparsePoint=0,随后已删除;未建立或触碰共享 `node_modules` 链接,未取/改/删调度方锁。
+- **基线缺口未代偿、未声称已清:**TD-21、TD-22、TD-14、TD-19/20、TD-6、TD-16、TD-12。本轮已知勘误表为空;复核未发现单内自相矛盾。
