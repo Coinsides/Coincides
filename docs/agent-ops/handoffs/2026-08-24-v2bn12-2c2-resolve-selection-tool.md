@@ -248,3 +248,53 @@ excerpt === currentUnitText.slice(startOffset, endOffset)
 
 - manifest 生成件是 tracked `M`，不是靠 `??` 判断。`npm.cmd run docs:index`：PASS，写入 0 个 INDEX；Result 后 `docs:check`：PASS；handoff UTF-8 fatal decode：PASS、replacement char=0、`## Result` 恰为 2 个。当前文件以 HEAD 全字节为前缀，且 `git diff -U0` 只在旧文件末尾新增第二段，故第一次 Result 与 header 均未改。
 - `git diff --check`：PASS。对 10 个精确交付路径执行 `git add -- ...` 时，因本环境 `.git` 只读而被 `.git/index.lock: Permission denied` 拒绝，暂存树仍为空；因此交付保留在工作树。未取 builder lock、未写 `owner.json`、未删锁，也未触碰调度方 dev 服务或 PID 8292。
+
+## Review
+
+**Reviewer**：Codex reviewer（洁净室打包复核）
+
+**复核链**：`4d3ba81` → `602d0a0` → `79a8ef3` → `bd42727` → `d4455eb` → `b332559`
+
+**结论**：**FAIL（方向成立，补锁后再复核）**
+
+**分级汇总**：**BLOCKER 0 / HIGH 0 / MED 1 / LOW 1**
+
+复核时实际 HEAD 为 `51fb1fc`；`b332559..51fb1fc` 只改 `docs/agent-ops/claude-log/2026-08-24.md`，本轮产品码、测试与构建配置 blob 未漂移。以下严格按冻结位点单刀取证，不把自由巡猎或已明示停做项扩成 finding。
+
+### 单位一：c-1-fix（`4d3ba81..602d0a0`）
+
+- **BLOCKER/HIGH/MED/LOW：0/0/0/0（既有 HIGH 已关闭）**。
+- 既有 Review 的 HIGH 是 K-1′ 冗余 `.not.toBe(PARTIAL_SELECTION_WHOLE_TEXT)` 会制造假红；Fable 已裁定方向通过并把删除交给 c-2 S0。本轮核得 `b332559` 只删这一条，`selectionReceiptProjection.ts` 产品 blob 不变。
+- Reviewer 亲把投影临时改回整段 `range.text`；client `tsc --noEmit` 先过，K-1′ 随后只在 `expect(receipt).toStrictEqual(...)` 的投影等值断言上红。按 hash 恢复后 K-1′ 绿。因此旧 HIGH 已被 c-2 S0 实质关闭，K-1′ 仍承重。
+
+### 单位二：c-1a + c-1b v3（`602d0a0..bd42727`）
+
+- **BLOCKER 0 / HIGH 0 / MED 1 / LOW 0**。
+- c-1a 前置形状成立：`shared/package.json` 精确为 `{"type":"module"}`；c-1b 自身未再改任何 package/tsconfig。契约测试两侧均为静态具名 import，没有 namespace、`default.x` 或互操作垫片。
+- **MED — R3 的永久锁没有覆盖“全仓定义恰 2”。** 交付现物经 TypeScript AST 全仓枚举确为两处：`shared/types/textFlow.ts` 与 `server/src/services/textFlowIdentity.ts`；但常驻测试只枚举 client+shared，再单独解析指定 server identity 文件。Reviewer 在 `server/src/services/textFlowUnits.ts` 临时加入第三个同名导出：server `tsc --noEmit` 通过、独立 AST 计数由 2 变 3，而契约测试仍 **4/4 绿**。这不满足冻结 R3 的结构锁要求。应让契约测试 AST 枚举全部产品 TS/TSX，并断言定义路径精确只剩上述两处；同一 mutation 必须转红。
+- R1/R5 承重：server 侧拼法改为 `tf-` 后先编译通过，契约专项 **3/4**，红点为两侧身份不等的 `AssertionError`；shared 侧同刀也为目标断言红。R4 五个点名调用点均已改道且其余同条 import 符号未动；把其中一个调用点改成本地同拼法函数后 client tsc 通过，专项 **2/4**，红在 canonical 定义/具名 import 锁。各刀均按 blob 精确恢复，专项回到 4/4。
+- R6–R9 通过：c-1b 范围内无构建配置/selection 改动，`textFlowService.ts` 其余 11 个导出不变，server 产品码无 shared 运行时 import；源码与 `server/dist/**` 的探针符号双面为零；builder 如实申报 tests-only、dev/jiti 与裸 Node 产物无人守全等，未声称 TD-21 已清。
+
+### 单位三：c-1c（`bd42727..d4455eb`）
+
+- **BLOCKER 0 / HIGH 0 / MED 0 / LOW 1**。
+- W1/W2 承重：Reviewer 亲改 server 拼法并先过 server tsc，再跑完整 `test:v2`（不是单跑契约文件），结果 **273/274**；唯一失败是两侧身份不等的目标 `AssertionError`。恢复后 **274/274**。契约文件 AST 恰有 4 条测试，`274−270=4` 自洽。
+- W3/W4 通过：`server/package.json` 只有 `scripts.test:v2` 末尾追加一个契约文件名，无新 script、无 verify 改动、无补挂；`textFlowIdentity.ts` 恢复 blob 等于 HEAD，`server/dist/**` 先以 `textflow-` 正控命中，再由 PowerShell 与 `git grep --no-index` 两路确认 `tf-${blockId}` 零命中。
+- **LOW — W5 的 TD-22 尚未落权威台账。** builder 已诚实回答“长期风险”，调度日志 #12 也明确“立项 TD-22（下次新增测试文件触发）”；但截至复核截面，权威 `docs/agent-ops/current-state/tech-debt.md` 仍无 TD-22。阴性结论由 `Select-String` 与 `git grep` 两路同意，TD-21 命中作阳性对照。应把显式 `test:v2` 列表会静默漏挂新测试的制度性风险及触发器正式落入该台账；本轮因唯一文档写权限只允许追加本 Review，未代写别处。
+- W6 通过：回执明确契约锁只在 tests 世界成立，未声称 dev/产物世界或 TD-21 已解决。
+
+### 单位四：c-2（`d4455eb..b332559`）
+
+- **BLOCKER/HIGH/MED/LOW：0/0/0/0**。
+- P1：Reviewer 亲跑 K-2，先证 A 自己的 ref 为 `found`，再对确实归 B 的 foreign ref 与确实不存在的 ref 做 `JSON.stringify` diff；两者逐字节同为 `missing`。完整 MCP transport 亦为 **35/35**。
+- P2：resolve 是来自 `./textFlowIdentity.js` 的非 type 静态具名 import，无本地重派生、无 shared 运行时 import，identity 两侧 blob 零改动。换成本地同拼法函数的可编译 mutation 先过 server tsc，K-3 随后在“必须 import authoritative server identity”目标断言红；恢复后绿。
+- P3–P6：service 只有按 owner 的 SELECT；K-8 锁 `notes`/`note_blocks` 全字段不变且收据为 `applied` / `immediate` / `resolve_selection`。有效 unit 解析约定经 AST 只在 `textFlowUnits.ts` 一份、恰有 items/resolve 两个消费者；`items.ts` 仅一个 hunk，禁区 `pool_scope_kind` SQL 字面量未动。三态严格使用 `excerpt === unit.text.slice(startOffset,endOffset)`，deleted 为 missing、前文编辑推移如实 drifted，无模糊重定位；单条坏 ref 不炸 sibling，zod 长度 refine 破坏走真实 400。
+- P7/P8：S0 只删点名的一条冗余断言；整段投影 mutation 的目标红已在单位一复证。入参仍是外层 snake_case、内层 camelCase，字段为 `excerpt` 而非 `text`。
+- P9/P10：构建配置、`transport.ts`、收据轴/`statusForTier`、selection 既有消费者与四个 EOL 注意文件均以 blob/`--numstat` 判真未改；第二段 Result 未删改第一段 Result，略过项只含新档允许项。未声称 TD-14、TD-19/20、TD-21、TD-6、TD-16、TD-12 已清，也未声称 ownership mutation 已验。
+
+### 共用门禁、恢复与边界
+
+- 依序亲跑全绿：`docs:check`；`verify:v2-bn8-runtime`；client/server 双 `tsc --noEmit`；`test:unit` **222/222**；`test:v2` **274/274**；五道 tool-face 门（registry **5/5**、manifest **10/10**、freshness **3/3 public**、parity tests **10/10**、production parity **3 public**）；`test:mcp-transport` **35/35**；`test:trash-notes-tool` **43/43**。production parity 只证必要条件，未冒充 human journey。
+- `test:v2` 按 TD-12 把 `CANVAS_ASSET_DIR` 指向经绝对路径校验的 OS temp；目录最终为空、ReparsePoint=0，并已非递归清理。未改测试或产品语义代偿。
+- 六个 mutation 目标均以 filter-aware blob 证实恢复等于 HEAD；最终 `git diff --numstat` 无 mutation 残留，完整门禁复绿。因本环境 `apply_patch` 不允许写 OS-temp clone，定点 mutation 只能在共享工作树逐刀执行；临时 clone 未被修改且已在确认位于 OS temp、ReparsePoint=0 后清理。此为 reviewer 执行边界说明，不计 builder finding。
+- 原文件追加前为 UTF-8、恰有两段 `## Result`；本 Review 只追加于文件末尾。放行权仍由 Fable 持有。
