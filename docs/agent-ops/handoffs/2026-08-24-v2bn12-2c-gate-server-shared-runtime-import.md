@@ -1,4 +1,4 @@
-> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: draft(**待 c-2 复核 PASS 后翻 ready 并派**;Fable 2026-08-24 已裁立闸取 (b)) | re: v2bn12-2c-gate | date: 2026-08-24
+> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: **ready-on-condition**(⭐ Fable 2026-08-24 **已审毕并翻牌,生效条件由她写定**:**c-2 复核 PASS 之时自动 ready、即可派**,调度方照条件执行不再请示。⚠️ **此刻不可派** —— `ready` 在协议里意味「此刻可派」,故此处不写 `ready`) | re: v2bn12-2c-gate | date: 2026-08-24
 
 # V2.BN.12.2c-gate:`check:server-shared-runtime-import` —— 架构不变式的机械化
 

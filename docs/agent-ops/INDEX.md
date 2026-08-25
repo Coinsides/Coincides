@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 144 份文档。
+共 145 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -149,6 +149,7 @@
 | [handoffs/2026-08-24-v2bn12-2c-gate-server-shared-runtime-import.md](handoffs/2026-08-24-v2bn12-2c-gate-server-shared-runtime-import.md) | V2.BN.12.2c-gate:`check:server-shared-runtime-import` —— 架构… | `(缺状态头)` | — | — |
 | [handoffs/2026-08-24-v2bn12-2c1-fix-excerpt-slice.md](handoffs/2026-08-24-v2bn12-2c1-fix-excerpt-slice.md) | V2.BN.12.2c-1-fix:`excerpt` 是切片,不是整段 | `(缺状态头)` | — | — |
 | [handoffs/2026-08-24-v2bn12-2c1-selection-receipt-projection.md](handoffs/2026-08-24-v2bn12-2c1-selection-receipt-projection.md) | V2.BN.12.2c-1:选区收据的客户端投影(纯值,零几何) | `(缺状态头)` | — | — |
+| [handoffs/2026-08-24-v2bn12-2c1a-shared-module-type.md](handoffs/2026-08-24-v2bn12-2c1a-shared-module-type.md) | V2.BN.12.2c-1a:给 `shared/` 加 `package.json` = `{"type":"mod… | `(缺状态头)` | — | — |
 | [handoffs/2026-08-24-v2bn12-2c1b-sink-textflowid-to-shared.md](handoffs/2026-08-24-v2bn12-2c1b-sink-textflowid-to-shared.md) | V2.BN.12.2c-1b(v2):`textFlowIdForBlock` 跨端同源 —— **契约测试锁,不走 … | `(缺状态头)` | — | — |
 | [handoffs/2026-08-24-v2bn12-2c2-resolve-selection-tool.md](handoffs/2026-08-24-v2bn12-2c2-resolve-selection-tool.md) | V2.BN.12.2c-2:`resolve_selection` —— 工具面第一个**只读解析工具** | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
