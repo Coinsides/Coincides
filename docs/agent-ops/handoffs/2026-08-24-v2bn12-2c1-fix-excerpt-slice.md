@@ -183,6 +183,13 @@ c-1 复核判 **FAIL 0B/1H/0M/0L**,唯一 **HIGH-1**:
 - `git diff --check`：exit `0`；只有工单已登记的 LF→CRLF warning，无 whitespace error。
 - 工单文件用 strict UTF-8 decoder 复读通过；首行仍为原 `status: ready(...)` header，未翻牌。
 
+## 【裁定 · Fable 2026-08-24】复核 FAIL 后放行 + R1-② 撤销(log #7 `7d8fba6`)
+
+> ① **判 PASS 放行**(放行 FAIL 单超调度权,由 Fable 拍):生产实现对、门全绿、`602d0a0` 不动;**HIGH-1 实体(`:162` 职责耦合)降级并入 c-2 测试整理批** —— 复核发现的东西**一条没丢,只是重新定级**。
+> ② **⛔ R1-② 撤销。** 理由:**前提为假** —— 旧 fixture 第一条 range 是 `'alpha beta' / 2..7`,`slice(2,7)='pha b' ≠ 'alpha beta'`,**它有鉴别力**;R1-② 要证的「旧 fixture 无鉴别力」不成立。且按 reviewer 修法满足它,只能证明**一个合成的 `0..16` fixture**,那是**拿替身当本体(置换分则同族)**。**留着会诱导后人重复这个错。**
+> ③ c-1 K-1 当初为绿的真因:**预期对象硬编码了 `text: 'alpha beta'`,把错误规格逐字固化** ⇒ 若实现是正确切片,**K-1 会红**。此案已立为纪律卡 **§7 第七分则「规格固化」** 的先例。
+
+
 ## Review
 
 > reviewer: Codex reviewer（洁净室增量复核）

@@ -25,6 +25,16 @@
 
 ---
 
+## S0:并入的测试整理(**来自 c-1-fix HIGH-1 降级,Fable 2026-08-24 裁**)
+
+**一处,只此一处**:`client/src/pages/Notes/canvasEngine/selectionReceiptProjection.test.ts` 的 **K-1'** 里,那条 `expect(...excerpt).not.toBe(PARTIAL_SELECTION_WHOLE_TEXT)` —— **删掉它**。
+
+- **理由**:该 fixture 自证职责**已由 K-2' 单独承担**(K-2' 另有 `startOffset > 0`);留在 K-1' 里造成**职责耦合**,使 K-1' 的红点可能落在 fixture 断言而非投影断言上。
+- ⛔ **只删这一条断言**。**不得**改 K-1' 的其余断言、不得改 fixture 常量、⛔ **不得碰 `selectionReceiptProjection.ts` 产品投影**(它是对的,`602d0a0` 已放行)。
+- **验**:删后 `test:unit` 应为 **222 → 222**(删的是断言不是用例);⭐ **另须证明 K-1' 仍承重** —— 把投影改回整段 ⇒ **K-1' 须红,且红点落在投影等值断言上**(⛔ 不接受红在别处)。
+
+📌 **本项不是本单主线**,与 S1–S3 无耦合;**若它与主线抢时间,先做主线**,把本项留在最后并在 Result 里说明。
+
 ## S1:解析约定**零语义提取**(§3.1 D;S1a 形状,反 TD-15)
 
 把 `services/items.ts` `textFlowProjection` 内「**什么算一个有效 unit**」的解析/过滤约定提为**新共享 server 模块**;`textFlowProjection` 与 resolve service **同源 import**。
@@ -100,7 +110,7 @@ excerpt === currentUnitText.slice(startOffset, endOffset)
 
 ## 边界
 
-**允许**:`server/src/toolFace/registry.ts`(+1 条)· `server/src/mcp/bindings.ts`(+1)· **新** resolve service · **新**共享解析模块 · **`server/src/services/items.ts` 仅 §3.1 D 点名的一个 hunk**(外提 + import 回接,零语义)· manifest 重生成 · 相应测试。
+**允许**:⭐ **`client/src/pages/Notes/canvasEngine/selectionReceiptProjection.test.ts` 仅 S0 点名的那一条断言**(⛔ 该目录其余一切仍是禁区,**尤其同目录的 `selectionReceiptProjection.ts` 产品投影**)· `server/src/toolFace/registry.ts`(+1 条)· `server/src/mcp/bindings.ts`(+1)· **新** resolve service · **新**共享解析模块 · **`server/src/services/items.ts` 仅 §3.1 D 点名的一个 hunk**(外提 + import 回接,零语义)· manifest 重生成 · 相应测试。
 
 **⛔ 不得**:碰 `items.ts` 的**其余部位**(尤其那处把 `pool_scope_kind` 写成 SQL 字面量的 INSERT —— **修理属设计级工程,整体推迟**)· 改 schema/migration · 改收据轴或 `statusForTier` · 碰 transport 骨架的 Host/Origin/auth 段 · 碰 selection 既有消费者 · 碰 c-1 的客户端投影 · 做锚池/晋升/几何/跨 note 选区 · 碰 `docs/agent-ops/`(**唯一例外:向本工单追加 `## Result`**)。
 
