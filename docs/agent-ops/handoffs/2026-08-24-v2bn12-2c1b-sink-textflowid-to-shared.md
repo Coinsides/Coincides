@@ -1,4 +1,4 @@
-> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: ready(Fable 2026-08-24 翻案 A1′,log #10 `3a66ef3`) | re: v2bn12-2c-1b(第 2 版) | date: 2026-08-24
+> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: **ready-on-condition**(⭐ **c-1a 落地后即为第 3 版、可派**;形状仍是 A1′,Fable 2026-08-24 翻案 log #10 `3a66ef3`) | re: v2bn12-2c-1b(第 3 版) | date: 2026-08-24
 
 # V2.BN.12.2c-1b(v2):`textFlowIdForBlock` 跨端同源 —— **契约测试锁,不走 import 链**
 
@@ -23,7 +23,22 @@
 
 ---
 
-## 🔴 S1:**静态具名 import 微探针,先做、单独报**(本单枢纽)
+## ⚠️ 第 3 版的变化:S1 已由 **c-1a** 解决,**不再是探针,是前置检查**
+
+**第 2 版的 S1 探针实测:静态具名 import 在 tsx 下失败** ——
+`SyntaxError: ... does not provide an export named ...`;模块 namespace 只有 `default`,函数套在 `default.x`,**`__esModule` 是 CJS 转译签名**。
+**根因**:`shared/` 无 `package.json` ⇒ 落到根 `package.json`,而根**未声明 `type`** ⇒ shared 的 `.ts` 按 **CommonJS** 解析。
+⇒ **由 c-1a 补 `shared/package.json` = `{"type":"module"}` 解决(Fable 裁 (A),log #11 `1654a1d`)。**
+
+### 🔴 S1(第 3 版):**开工前的前置检查,两步,不通过就停**
+
+1. **确认 `shared/package.json` 存在且含 `"type": "module"`** —— 不存在 ⇒ ⛔ **停手标 `needs: claude`**,⛔ 不得自建(那是 c-1a 的交付物)。
+2. ⭐ **确认静态具名 import 现在真的可用**:临时写一条静态具名 import 断言 `typeof === 'function'` ⇒ **须绿**。
+   ⚠️ **不通过 ⇒ 停手上报,并贴出实际错误原文与模块对象形状** —— **⛔ 不得自行找兼容层(namespace / `default.x` / 互操作垫片)绕过**,那会把 CJS 互操作的怪状固化进契约测试(**规格固化分则**;Fable 已明确不采该方案)。
+
+📌 **第 2 版的 S1 探针段(原文)保留在下方 `## Result(第 2 版)` 里,供对照。**
+
+## ~~S1(第 2 版):静态具名 import 微探针~~(**已由 c-1a 解决,下段留档**)
 
 **问题**:server 的**测试**文件里一条**静态具名** `import { x } from '@shared/...'`,在 **tsx 运行 + tsc 门**下能不能同时过?
 
