@@ -236,6 +236,7 @@
 - ✅ `check:source-experience`
 - ✅ `check:changed-file-secrets`
 - ✅ `check:tool-face-parity`
+- ✅ `check:server-shared-runtime-import`
 - ✅ `smoke:canvas-engine-model-contract`
 - ✅ `smoke:canvas-engine-performance`
 
