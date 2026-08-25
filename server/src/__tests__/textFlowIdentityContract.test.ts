@@ -14,6 +14,7 @@ const SHARED_IMPLEMENTATION = resolve(REPO_ROOT, 'shared/types/textFlow.ts');
 const SERVER_IMPLEMENTATION = resolve(REPO_ROOT, 'server/src/services/textFlowIdentity.ts');
 const CLIENT_SOURCE_ROOT = resolve(REPO_ROOT, 'client/src');
 const SHARED_SOURCE_ROOT = resolve(REPO_ROOT, 'shared');
+const SERVER_SOURCE_ROOT = resolve(REPO_ROOT, 'server/src');
 const CLIENT_CALL_SITES = [
   'client/src/pages/Notes/canvasEngine/blocks/TextBlockProjection.tsx',
   'client/src/pages/Notes/canvasEngine/hooks/useBlockTextFlowEditController.ts',
@@ -103,13 +104,29 @@ function definitionLocations(sourceFiles: readonly ts.SourceFile[]): string[] {
   return locations.sort();
 }
 
-function clientAndSharedProductionSources(program: ts.Program): ts.SourceFile[] {
+function productProductionSources(program: ts.Program): ts.SourceFile[] {
   const clientRoot = `${normalizedPath(CLIENT_SOURCE_ROOT)}/`;
   const sharedRoot = `${normalizedPath(SHARED_SOURCE_ROOT)}/`;
-  return program.getSourceFiles().filter((sourceFile) => {
+  const serverRoot = `${normalizedPath(SERVER_SOURCE_ROOT)}/`;
+  const serverSources = ts.sys.readDirectory(
+    SERVER_SOURCE_ROOT,
+    ['.ts', '.tsx'],
+  )
+    .filter((file) => !normalizedPath(file).includes('/__tests__/'))
+    .map(parseSourceFile);
+  const seenPaths = new Set<string>();
+
+  return [...program.getSourceFiles(), ...serverSources].filter((sourceFile) => {
     if (sourceFile.isDeclarationFile) return false;
     const path = normalizedPath(sourceFile.fileName);
-    return path.startsWith(clientRoot) || path.startsWith(sharedRoot);
+    if (!path.endsWith('.ts') && !path.endsWith('.tsx')) return false;
+    if (path.includes('/__tests__/')) return false;
+    if (!path.startsWith(clientRoot) && !path.startsWith(sharedRoot) && !path.startsWith(serverRoot)) {
+      return false;
+    }
+    if (seenPaths.has(path)) return false;
+    seenPaths.add(path);
+    return true;
   });
 }
 
@@ -193,7 +210,7 @@ function parseSourceFile(file: string): ts.SourceFile {
     readFileSync(file, 'utf8'),
     ts.ScriptTarget.Latest,
     true,
-    ts.ScriptKind.TS,
+    file.toLowerCase().endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS,
   );
 }
 
@@ -212,9 +229,9 @@ test('textFlowIdForBlock implementations stay byte-for-byte equal', () => {
   }
 });
 
-test('textFlowIdForBlock has one canonical client/shared definition', () => {
+test('textFlowIdForBlock has exactly the canonical product definitions', () => {
   const { program } = getClientTypeScriptContext();
-  const sourceFiles = clientAndSharedProductionSources(program);
+  const sourceFiles = productProductionSources(program);
   assert.ok(
     sourceFiles.some((sourceFile) => normalizedPath(sourceFile.fileName) === normalizedPath(SHARED_IMPLEMENTATION)),
     'shared/types/textFlow.ts must be present before enumerating definitions',
@@ -226,10 +243,20 @@ test('textFlowIdForBlock has one canonical client/shared definition', () => {
     )),
     'client textFlowService.ts must be present before enumerating definitions',
   );
+  assert.ok(
+    sourceFiles.some((sourceFile) => (
+      normalizedPath(sourceFile.fileName)
+        === normalizedPath(resolve(REPO_ROOT, 'server/src/services/textFlowUnits.ts'))
+    )),
+    'server textFlowUnits.ts must be present before enumerating definitions',
+  );
   assert.deepEqual(
     definitionLocations(sourceFiles),
-    ['shared/types/textFlow.ts'],
-    'client/shared production source must define textFlowIdForBlock only in shared/types/textFlow.ts',
+    [
+      'server/src/services/textFlowIdentity.ts',
+      'shared/types/textFlow.ts',
+    ],
+    'product TS/TSX sources must define textFlowIdForBlock exactly in the canonical shared and server files',
   );
 });
 
