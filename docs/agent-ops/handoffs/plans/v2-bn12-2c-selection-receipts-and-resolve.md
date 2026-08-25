@@ -20,7 +20,7 @@
 1. **收据是值,不是行**:不建表、不动 `item_anchors` pool、不碰九处 `content_group` 硬编码。`SelectionReceiptV1` 由投影函数按需产出;唯一持久化=作为工具入参随既有收据轴 `metadata.intended_input` 落盘(零新机关)。
 2. **零几何**:身份 = `refs`(owner 三元组)+ `text_ranges`(offsets+excerpt)+ `at` + 信封 `note_id`;`anchorRect` 不入收据。
 3. **receipt 不是 draft 的第四态**:`SelectionDraftPhase` 枚举与 8 个既有消费者一字不动;receipt=导出的不可变快照,改选=重新投影。
-4. **`resolve_selection` 是只读工具**:不写收据(收据轴只记写操作);tier 与收据行为同 `list_notes` 先例;解析按 range 逐条:`found` / `missing` / `text_drifted`(excerpt 与当前文本严格字符串比对,机械)。非本用户的 ref 的拒绝形状(整体 4xx vs 逐条 missing)由 c-0 核实现有查询路后在 c-2 单拍死,**不得两可**。
+4. **`resolve_selection` 是只读工具**(**08-24 晚订正,原文「不写收据」作废**——先例方向引反了:transport 对一切工具无条件写收据,`list_notes` 即写 `applied`/`immediate` 收据且被 K-0 锁死。「只读」的真义=**不改真相层**,不是「不留痕迹」;收据轴是**审计轴**,读操作留审计痕迹恰恰是对的):K-8 = **验合规不验缺席**——①调用后 `notes`/`note_blocks` 逐字段不变(真·只读);②收据形状与 `list_notes` 一致(`applied`/`immediate`/`metadata.tool`)。解析按 range 逐条:`found` / `missing` / `text_drifted`(excerpt 与当前文本严格字符串比对,机械);非本用户 ref 拒绝形状=逐条 `missing`(§3.1 B)。
 5. **锚池/晋升整体推迟**(设计 v1 §3/§4):ownership 验证源重设计 + 静默 SQL 字面量修理是设计级工程,与工具面主线无关;「圈选→锚」「保存为标记」触发不做。
 6. **测试按 P0–P3**:常驻套件 + 先红后绿 + `resolve_selection` 的**最小 ownership 正控一条**(B 用户携 A 的 ref → 按 c-2 拍死的拒绝形状断言);不扩输入矩阵——略过的矩阵由拆单方记台账。
 
@@ -42,13 +42,20 @@
 - **c-0 能力缺口记实**:unit 级存在性验证是全新能力(现有 `verifyAnchorTarget` 只到 block 粒度),c-2 单里不得写「复用既有 unit 校验」之类措辞。
 - **权限面**:归属由 block 行一步解决(`user_id` 同行),unit 层零权限逻辑——c-2 的 ownership 正控一条打在 block 查询上即可(P0–P3 档下的最小正控)。
 
+## 3.2 裁定补记 2(2026-08-24 晚,c-2 首派停手后;builder 报两处允许面内不可达,复验成立)
+
+- **A(textFlowId 同源):裁 A1 下沉 `shared/`**。c-0 报告「全仓 5 产地同一函数」漏了侧位——11 处命中全在 client,server 因 `rootDir` 无法 import ⇒ C 裁定在原允许面内不可达。修法:新增机械小单 **c-1b**:`textFlowIdForBlock` 移入 `shared/`(与 `SelectionReceiptV1` 同理:跨端身份约定住 shared),回接全部 client 调用点(纯 import 改道,零语义),killer=既有测试全绿+行为逐字节不变;c-2 自 shared import,C 裁定原文继续成立。**不采 A2**(行为锁替身份锁=C 裁定自废)、**不采 A3**(字段在没人用=C 裁定点名要防的形状)。
+- **B(只读语义)**:见 §2 裁定 4 订正(同步改,宣布与正文一致)。
+- **复核批次**:c-1b 为机械单,其复核可并入 c-2 复核同一轮(位点分列),省一轮往返——调度方执行。
+- **责任记实**:A 的根=c-0 漏「哪一侧」+ 我 C 裁定点名函数时未核侧位;B 的根=调度方引先例未开先例 + 我计划裁定 4 同句自相矛盾(「不写收据」与「收据行为同 list_notes」并存)。两案并入自律卡「点名机关先核」分则的扩写(存在+方向+侧位)。
+
 ## 4. 不做
 
 不建 selection 表;不动 pool 九处;不做几何;不做跨 note 选区;不做选区历史 UI;不做锚晋升;12.4 手势产出同形收据(形状定于此,面在 12.4 接);客户端「把收据递给 Agent 面板」的 UI 打磨归 12.2d/12.4,c-1 只交导出口。
 
 ## 5. 触及面预估
 
-`shared/types/**`(+1 或并入既有)· client 投影新模块 + 单测(`selectionDraftService.ts` 旁,不改它)· `server/src/toolFace/registry.ts`(+1 条)· `server/src/mcp/bindings.ts`(+1)· 新 resolve service · 新共享解析模块(§3.1 D 外提物)· `docs/generated/tool-face-manifest.json` 重生成 · 常驻测试。`server/src/services/items.ts`:**仅允许 §3.1 D 点名的一个 hunk**(解析约定外提 + import 回接,零语义),其余部位禁区。**不碰**:schema/migration、selection 既有消费者、transport 骨架 Host/Origin/auth 段、协议文件。
+`shared/types/**`(+1 或并入既有)· client 投影新模块 + 单测(`selectionDraftService.ts` 旁,不改它)· **c-1b:`shared/` 新 textFlow 派生模块 + client 全部调用点 import 改道(纯机械,§3.2 A1)** · `server/src/toolFace/registry.ts`(+1 条)· `server/src/mcp/bindings.ts`(+1)· 新 resolve service · 新共享解析模块(§3.1 D 外提物)· `docs/generated/tool-face-manifest.json` 重生成 · 常驻测试。`server/src/services/items.ts`:**仅允许 §3.1 D 点名的一个 hunk**(解析约定外提 + import 回接,零语义),其余部位禁区。**不碰**:schema/migration、selection 既有消费者、transport 骨架 Host/Origin/auth 段、协议文件。
 
 ## 6. 给 Opus 的拆单注记
 
