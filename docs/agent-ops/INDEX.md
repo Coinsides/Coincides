@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 143 份文档。
+共 144 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -146,6 +146,7 @@
 | [handoffs/2026-08-23-v2bn12-2b5-fix-status-closed-set.md](handoffs/2026-08-23-v2bn12-2b5-fix-status-closed-set.md) | V2.BN.12.2b-5-fix:status 白名单闭集化 + 两处护栏补齐 | `(缺状态头)` | — | — |
 | [handoffs/2026-08-23-v2bn12-td8-fix-regression-guards.md](handoffs/2026-08-23-v2bn12-td8-fix-regression-guards.md) | TD-8-fix:补三条回归护栏(**只写测试,不改产品代码**) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-23-v2bn12-td8-receipt-timestamp-cleanup.md](handoffs/2026-08-23-v2bn12-td8-receipt-timestamp-cleanup.md) | TD-8 清债:收据表时间戳统一(**位点拍死,零裁量**) | `(缺状态头)` | — | — |
+| [handoffs/2026-08-24-v2bn12-2c-gate-server-shared-runtime-import.md](handoffs/2026-08-24-v2bn12-2c-gate-server-shared-runtime-import.md) | V2.BN.12.2c-gate:`check:server-shared-runtime-import` —— 架构… | `(缺状态头)` | — | — |
 | [handoffs/2026-08-24-v2bn12-2c1-fix-excerpt-slice.md](handoffs/2026-08-24-v2bn12-2c1-fix-excerpt-slice.md) | V2.BN.12.2c-1-fix:`excerpt` 是切片,不是整段 | `(缺状态头)` | — | — |
 | [handoffs/2026-08-24-v2bn12-2c1-selection-receipt-projection.md](handoffs/2026-08-24-v2bn12-2c1-selection-receipt-projection.md) | V2.BN.12.2c-1:选区收据的客户端投影(纯值,零几何) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-24-v2bn12-2c1b-sink-textflowid-to-shared.md](handoffs/2026-08-24-v2bn12-2c1b-sink-textflowid-to-shared.md) | V2.BN.12.2c-1b(v2):`textFlowIdForBlock` 跨端同源 —— **契约测试锁,不走 … | `(缺状态头)` | — | — |
