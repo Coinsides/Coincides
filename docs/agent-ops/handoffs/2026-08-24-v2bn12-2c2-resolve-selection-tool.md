@@ -51,7 +51,9 @@
 - `server/src/mcp/bindings.ts` **+1**。
 - manifest 重生成(生成件与源同提交)。
 
-⛔ **只读**:**不写收据**(收据轴只记写操作,同 `list_notes`);⛔ 不改 `statusForTier`、不改收据轴。
+⭐ **只读的定义(Fable 2026-08-24 裁,更正前稿)**:**只读 = 不改真相层,不是不留痕迹。** 收据轴是**审计轴** —— 读操作留下审计痕迹**恰恰是对的**。
+⇒ `resolve_selection` **照常写收据**,形状**与 `list_notes` 一致**;⛔ 不改 `statusForTier`、⛔ 不改收据轴、⛔ 不动 `transport.ts`。
+🔴 **更正记实**:本单前稿写「⛔ 只读:不写收据(收据轴只记写操作,**同 `list_notes`**)」—— **该先例被引反了**。实况:`transport.ts` 对**所有**成功执行的工具无条件写收据,且 `v2McpTransport.test.ts` **K-0 已锁死 `list_notes` 写 `applied` 收据**。⇒ 前稿的 K-8 在本单允许面内**不可达**。
 
 ## S3:解析 service(新文件)
 
@@ -66,7 +68,8 @@
 ### ⛔ 三条硬闸
 
 - **H-1(裁定 B)**:⛔ **任何时候不得把 `missing` 细分出 `forbidden` / `not_owned` / `denied` 之类可区分的值** —— 那会**泄露他人对象的存在性**。foreign 与 nonexistent **必须逐字节相同**。
-- **H-2(裁定 C)**:`textFlowId` **保留但不许带着不用**。resolve **必须 import 同一个 `textFlowIdForBlock`** 做一致性校验,⛔ **不得本地重派生**(哪怕字符串拼法一模一样)。
+- **H-2(裁定 C;⭐ 依 c-1b 更新来源)**:`textFlowId` **保留但不许带着不用**。resolve **必须从 `shared/types/textFlow.ts` import 同一个 `textFlowIdForBlock`** 做一致性校验,⛔ **不得本地重派生**(哪怕字符串拼法一模一样)。
+  ⚠️ **前置依赖**:该函数原**只住客户端**(server `rootDir: "./src"` 够不着),**由 c-1b 下沉 `shared/`**。⇒ **c-1b 未落地则本单 H-2 不可施工** —— 若你开工时 `shared/types/textFlow.ts` 不存在,**停手标 `needs: claude`**,⛔ 不得自行下沉、⛔ 不得改 tsconfig。
 - **H-3**:整体 4xx **只用于入参本身坏**(zod 不过);⛔ **不得因某条 ref 解析失败而整单 4xx**。
 
 ### ⭐ 比对式(c-1-fix 后定形,Fable 2026-08-24 ⑤)
@@ -96,12 +99,12 @@ excerpt === currentUnitText.slice(startOffset, endOffset)
 |---|---|---|
 | **K-1** ⭐ **端到端正控** | 真实 `/api/mcp` 调 `resolve_selection`,一条有效 ref ⇒ `found` + 身份齐 | 令 service 恒返回 `missing` ⇒ 红 |
 | **K-2** ⭐⭐ **裁定 B 的守卫** | **令实现把非本人 ref 返回一个可区分的第四类值**(如 `forbidden`)⇒ **须红** | **禁令不配刀就是口号。** 断言须落在「foreign 与 nonexistent 的返回值逐字节相同」上 |
-| **K-3** ⭐⭐ **裁定 C 的守卫**(防「字段在、但没人用它」) | **把 `textFlowIdForBlock` 的 import 换成本地重派生的同名函数**(字符串拼法一致)⇒ **须红** | ⭐ 这是**静默字面量的反向守卫**;断言须锁**符号来源**(同源 import),⛔ 不得只断行为 |
+| **K-3** ⭐⭐ **裁定 C 的守卫**(防「字段在、但没人用它」) | **把 `shared/types/textFlow.ts` 的 import 换成本地重派生的同名函数**(字符串拼法一致)⇒ **须红** | ⭐ 这是**静默字面量的反向守卫**;断言须锁**符号来源**(同源 import),⛔ 不得只断行为 |
 | **K-4** | **deleted unit ⇒ `missing`**(裁定 A) | 令它返回 `text_drifted` ⇒ 红 |
 | **K-5** | **`text_drifted` 只在「位置在、文本变」** | 令 block 不存在时也返回 `text_drifted` ⇒ 红 |
 | **K-6** | **一条坏 ref 不炸整单**(H-3) | 令某条 ref 解析失败时 throw ⇒ 红(须证明**其余 ref 仍返回各自的态**) |
 | **K-7** ⭐ **零语义提取**(§3.1 D / 同 b-1) | ①**既有投影字节等价**:提取前后 `textFlowProjection` 输出逐字节相同;②**提取非复制**:全仓该解析约定**只此一份** | ①令提取改变过滤语义(如放开 `deleted`)⇒ 红;②令 resolve 自带一份副本 ⇒ **须红** |
-| **K-8** | **只读**:调用后 `operation_batches` 行数**不变** | 令它写一笔收据 ⇒ 红 |
+| **K-8** ⭐ **只读 = 不改真相层(验合规,不验缺席)** | ①调用后 **`notes` / `note_blocks` 逐字段不变**;②收据**形状与 `list_notes` 一致**(`status='applied'` / `tier='immediate'` / `metadata.tool='resolve_selection'`) | ①令它顺手改一个 block ⇒ 红;②令收据 `status` 或 `tier` 偏离先例 ⇒ 红 |
 | **K-9** | **ownership 最小正控**(P0–P3 档下的唯一一条) | B 用户携 A 的 ref ⇒ **逐条 `missing`**,且 **A 的 note/block 逐字段不变**;⭐ **阳性对照:A 自己那条要能 `found`**(证明探针不是恒 missing) |
 
 **红的性质**:目标 `AssertionError` 或真实 HTTP 后果,**不得是 `ReferenceError`/`SyntaxError`/`ERR_MODULE_NOT_FOUND`**;HTTP 刀须**从真实 Express 触发**;每刀独立恢复后再取绿。
