@@ -37,7 +37,7 @@
 
 - **A(deleted unit 的归态)**:被标 `deleted` 的 unit = **`missing`**。理由:既有投影约定(`status !== 'deleted'` 过滤)就是「什么存在」的权威;`text_drifted` 只留给「位置还在、文本变了」。不发明第四态。
 - **B(拒绝形状)**:**逐条 `missing`**,foreign 与 nonexistent 折叠不可区分(同 `trashNoteAsUser` 先例);整体 4xx 只用于入参本身坏(zod 不过)。**硬约束原样入 c-2 单:⛔ 任何时候不得把 `missing` 细分出 `forbidden`/`not_owned` 类值——那会泄露他人对象存在性。**
-- **C(textFlowId 去留)**:**保留**(守 12.2 §2.1 已拍语汇 + 与 `annotation_ranges` 同构),但**不许「带着不用」**(那是静默字面量的镜像):resolve 必须用**同一个** `textFlowIdForBlock` 函数(import,不重派生)做一致性校验,不一致 → 该 ref = `missing`(折叠,不泄露、不整单炸)。
+- **C(textFlowId 去留)**:**保留**(守 12.2 §2.1 已拍语汇 + 与 `annotation_ranges` 同构),但**不许「带着不用」**(那是静默字面量的镜像):resolve 做一致性校验,不一致 → 该 ref = `missing`(折叠,不泄露、不整单炸)。(08-24 深夜:校验函数的取法经 §3.2 A1′ 修订——改用 server 侧契约锁定实现,原「必须 import 同一个函数」句让位于 A1′。)
 - **D(解析约定共用)**:**零语义提取**——把 `items.ts` `textFlowProjection` 内「什么算一个有效 unit」的解析/过滤约定提为共享 server 模块,`textFlowProjection` 与 resolve service **同源 import**(S1a 形状:提取共用,不复制;反 TD-15)。killer 同 b-1:既有投影字节等价 / 提取非复制。**§5 边界据此修订**:`server/src/services/items.ts` 允许**仅此一个 hunk**(解析约定外提 + import 回接),其余仍禁区。
 - **c-0 能力缺口记实**:unit 级存在性验证是全新能力(现有 `verifyAnchorTarget` 只到 block 粒度),c-2 单里不得写「复用既有 unit 校验」之类措辞。
 - **权限面**:归属由 block 行一步解决(`user_id` 同行),unit 层零权限逻辑——c-2 的 ownership 正控一条打在 block 查询上即可(P0–P3 档下的最小正控)。
@@ -45,6 +45,7 @@
 ## 3.2 裁定补记 2(2026-08-24 晚,c-2 首派停手后;builder 报两处允许面内不可达,复验成立)
 
 - **A(textFlowId 同源):裁 A1 下沉 `shared/`**。c-0 报告「全仓 5 产地同一函数」漏了侧位——11 处命中全在 client,server 因 `rootDir` 无法 import ⇒ C 裁定在原允许面内不可达。修法:新增机械小单 **c-1b**:`textFlowIdForBlock` 移入 `shared/`(与 `SelectionReceiptV1` 同理:跨端身份约定住 shared),回接全部 client 调用点(纯 import 改道,零语义),killer=既有测试全绿+行为逐字节不变;c-2 自 shared import,C 裁定原文继续成立。**不采 A2**(行为锁替身份锁=C 裁定自废)、**不采 A3**(字段在没人用=C 裁定点名要防的形状)。
+- **A1′(08-24 深夜,依据 b-0 现物翻案;原 A1 保留在上供对照)**:b-0 揭示 A1 真实价格=一次构建体系重设计——①`tsc` 不改写 import 说明符,`@shared/*` 在 dev(jiti)与产物(裸 Node)两个世界 `ERR_MODULE_NOT_FOUND`;②相对路径在产物世界指向不存在的源码路径;③唯一让三个世界一致的是「shared 变真包」(代价最大);④且 **server↔shared 类型只(type-only)是 `manifest.ts` 顶注成文的既有设计决定**(`@ts-ignore TS6305`)。⇒ 翻案为 **A1′**:shared 源码仍是唯一真相,client 半按原样(沉 shared + 调用点回接,打包器读源码不受影响);**server 侧在 §3.1 D 共享解析模块内本地实现同名函数**;**常驻跨界契约测试**锁「server 本地 ≡ shared canon」——tests 世界(tsx)可同时 import 两侧,代表性输入全等 + killer(改 server 侧拼法 ⇒ 契约测试须红);测试内 shared import 按 `manifest.ts` 成文的 `@ts-ignore TS6305` 模式,门仍拒则停手上报。**原则未变(同源优先),变的是同源的执行点**:从 import 链移到常驻契约测试,因为 import 链的价格是构建体系重设计,而本函数是 2 行模板字面量。c-2 的 C 裁定校验改用 server 侧函数(保真由契约测试锁定)。构建体系(通电已声明的 references / shared 变真包)记 TD,触发器=第一个**非平凡**运行时值需要真共享,b-0 报告为届时设计输入。
 - **B(只读语义)**:见 §2 裁定 4 订正(同步改,宣布与正文一致)。
 - **复核批次**:c-1b 为机械单,其复核可并入 c-2 复核同一轮(位点分列),省一轮往返——调度方执行。
 - **责任记实**:A 的根=c-0 漏「哪一侧」+ 我 C 裁定点名函数时未核侧位;B 的根=调度方引先例未开先例 + 我计划裁定 4 同句自相矛盾(「不写收据」与「收据行为同 list_notes」并存)。两案并入自律卡「点名机关先核」分则的扩写(存在+方向+侧位)。
@@ -55,7 +56,7 @@
 
 ## 5. 触及面预估
 
-`shared/types/**`(+1 或并入既有)· client 投影新模块 + 单测(`selectionDraftService.ts` 旁,不改它)· **c-1b:`shared/` 新 textFlow 派生模块 + client 全部调用点 import 改道(纯机械,§3.2 A1)** · `server/src/toolFace/registry.ts`(+1 条)· `server/src/mcp/bindings.ts`(+1)· 新 resolve service · 新共享解析模块(§3.1 D 外提物)· `docs/generated/tool-face-manifest.json` 重生成 · 常驻测试。`server/src/services/items.ts`:**仅允许 §3.1 D 点名的一个 hunk**(解析约定外提 + import 回接,零语义),其余部位禁区。**不碰**:schema/migration、selection 既有消费者、transport 骨架 Host/Origin/auth 段、协议文件。
+`shared/types/**`(+1 或并入既有)· client 投影新模块 + 单测(`selectionDraftService.ts` 旁,不改它)· **c-1b:`shared/` 新 textFlow 派生模块 + client 全部调用点 import 改道 + server 侧本地实现 + 跨界契约测试(§3.2 A1′)** · `server/src/toolFace/registry.ts`(+1 条)· `server/src/mcp/bindings.ts`(+1)· 新 resolve service · 新共享解析模块(§3.1 D 外提物)· `docs/generated/tool-face-manifest.json` 重生成 · 常驻测试。`server/src/services/items.ts`:**仅允许 §3.1 D 点名的一个 hunk**(解析约定外提 + import 回接,零语义),其余部位禁区。**不碰**:schema/migration、selection 既有消费者、transport 骨架 Host/Origin/auth 段、协议文件。
 
 ## 6. 给 Opus 的拆单注记
 
