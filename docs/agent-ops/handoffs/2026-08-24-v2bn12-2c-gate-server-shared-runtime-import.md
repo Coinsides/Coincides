@@ -1,4 +1,5 @@
-> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: **ready-on-condition**(⭐ Fable 2026-08-24 **已审毕并翻牌,生效条件由她写定**:**c-2 复核 PASS 之时自动 ready、即可派**,调度方照条件执行不再请示。⚠️ **此刻不可派** —— `ready` 在协议里意味「此刻可派」,故此处不写 `ready`) | re: v2bn12-2c-gate | date: 2026-08-24
+> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: **ready**(⭐ **条件由 Fable 2026-08-24 判实质满足并翻牌**,log #14 `1f4669a`。⚠️ **记实**:原条件字面是「c-2 复核 PASS」,而打包复核整体判 **FAIL(0B/0H/1M/1L)**;裁定依据 = **c-2 自身位点 0/0/0/0**、MED 归属 c-1b、且 **c-1d 的修面(仅契约测试文件)与本闸触面(`scripts/` + 根 `package.json` + `verify` 链)不冲突**。⇒ **不是字面满足,是实质满足,理由在此备查。** 原 header 保留在下行供对照)
+> ~~status: ready-on-condition~~(⭐ Fable 2026-08-24 **已审毕并翻牌,生效条件由她写定**:**c-2 复核 PASS 之时自动 ready、即可派**,调度方照条件执行不再请示。⚠️ **此刻不可派** —— `ready` 在协议里意味「此刻可派」,故此处不写 `ready`) | re: v2bn12-2c-gate | date: 2026-08-24
 
 # V2.BN.12.2c-gate:`check:server-shared-runtime-import` —— 架构不变式的机械化
 

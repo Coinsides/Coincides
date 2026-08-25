@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 146 份文档。
+共 147 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -152,6 +152,7 @@
 | [handoffs/2026-08-24-v2bn12-2c1a-shared-module-type.md](handoffs/2026-08-24-v2bn12-2c1a-shared-module-type.md) | V2.BN.12.2c-1a:给 `shared/` 加 `package.json` = `{"type":"mod… | `(缺状态头)` | — | — |
 | [handoffs/2026-08-24-v2bn12-2c1b-sink-textflowid-to-shared.md](handoffs/2026-08-24-v2bn12-2c1b-sink-textflowid-to-shared.md) | V2.BN.12.2c-1b(v2):`textFlowIdForBlock` 跨端同源 —— **契约测试锁,不走 … | `(缺状态头)` | — | — |
 | [handoffs/2026-08-24-v2bn12-2c1c-wire-contract-gate.md](handoffs/2026-08-24-v2bn12-2c1c-wire-contract-gate.md) | V2.BN.12.2c-1c:把跨端契约测试**接进门**(一行接线) | `(缺状态头)` | — | — |
+| [handoffs/2026-08-24-v2bn12-2c1d-contract-ast-scope.md](handoffs/2026-08-24-v2bn12-2c1d-contract-ast-scope.md) | V2.BN.12.2c-1d:契约测试的 AST 枚举面扩到**全部产品源**(修 MED-1) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-24-v2bn12-2c2-resolve-selection-tool.md](handoffs/2026-08-24-v2bn12-2c2-resolve-selection-tool.md) | V2.BN.12.2c-2:`resolve_selection` —— 工具面第一个**只读解析工具** | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/v2-bn12-2-mcp-tool-face.md](handoffs/plans/v2-bn12-2-mcp-tool-face.md) | Plan V2.BN.12.2 — MCP 工具面(末端执行器第一次实体化) | `active` | — | — |
