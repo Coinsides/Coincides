@@ -68,8 +68,9 @@
 ### ⛔ 三条硬闸
 
 - **H-1(裁定 B)**:⛔ **任何时候不得把 `missing` 细分出 `forbidden` / `not_owned` / `denied` 之类可区分的值** —— 那会**泄露他人对象的存在性**。foreign 与 nonexistent **必须逐字节相同**。
-- **H-2(裁定 C;⭐ 依 c-1b 更新来源)**:`textFlowId` **保留但不许带着不用**。resolve **必须从 `shared/types/textFlow.ts` import 同一个 `textFlowIdForBlock`** 做一致性校验,⛔ **不得本地重派生**(哪怕字符串拼法一模一样)。
-  ⚠️ **前置依赖**:该函数原**只住客户端**(server `rootDir: "./src"` 够不着),**由 c-1b 下沉 `shared/`**。⇒ **c-1b 未落地则本单 H-2 不可施工** —— 若你开工时 `shared/types/textFlow.ts` 不存在,**停手标 `needs: claude`**,⛔ 不得自行下沉、⛔ 不得改 tsconfig。
+- **H-2(裁定 C;⭐ 依 Fable 2026-08-24 翻案 A1′ 更新来源,log #10 `3a66ef3`)**:`textFlowId` **保留但不许带着不用**。resolve **必须 import `server/src/services/textFlowIdentity.ts` 的 `textFlowIdForBlock`** 做一致性校验,⛔ **不得在 resolve service 内本地重派生**(哪怕字符串拼法一模一样)。
+  🔴 ⛔ **不得 import `shared/types/textFlow.ts` 的运行时值** —— **server 侧运行时跨界不可用,已现物验明**:tsc 不改写 import 说明符,产物 JS 里原样是 `@shared/...`,裸 Node 报 `ERR_MODULE_NOT_FOUND`;dev 的 jiti 同样解析不了(详见 **TD-21** 三世界矩阵)。**⇒ 照 shared 写会在测试世界绿、在 dev 与产物世界炸。**
+  ⚠️ **前置依赖**:`textFlowIdentity.ts` **由 c-1b 创建**;跨端全等由 **c-1b 的常驻契约测试**守(⭐ **同源的执行点在契约测试,不在 import 链**)。⇒ **c-1b 未落地则本单 H-2 不可施工** —— 若开工时该文件不存在,**停手标 `needs: claude`**,⛔ 不得自建、⛔ 不得改 tsconfig、⛔ 不得改从 shared 取。
 - **H-3**:整体 4xx **只用于入参本身坏**(zod 不过);⛔ **不得因某条 ref 解析失败而整单 4xx**。
 
 ### ⭐ 比对式(c-1-fix 后定形,Fable 2026-08-24 ⑤)
@@ -99,7 +100,7 @@ excerpt === currentUnitText.slice(startOffset, endOffset)
 |---|---|---|
 | **K-1** ⭐ **端到端正控** | 真实 `/api/mcp` 调 `resolve_selection`,一条有效 ref ⇒ `found` + 身份齐 | 令 service 恒返回 `missing` ⇒ 红 |
 | **K-2** ⭐⭐ **裁定 B 的守卫** | **令实现把非本人 ref 返回一个可区分的第四类值**(如 `forbidden`)⇒ **须红** | **禁令不配刀就是口号。** 断言须落在「foreign 与 nonexistent 的返回值逐字节相同」上 |
-| **K-3** ⭐⭐ **裁定 C 的守卫**(防「字段在、但没人用它」) | **把 `shared/types/textFlow.ts` 的 import 换成本地重派生的同名函数**(字符串拼法一致)⇒ **须红** | ⭐ 这是**静默字面量的反向守卫**;断言须锁**符号来源**(同源 import),⛔ 不得只断行为 |
+| **K-3** ⭐⭐ **裁定 C 的守卫**(防「字段在、但没人用它」) | **把 `server/src/services/textFlowIdentity.ts` 的 import 换成本地重派生的同名函数**(字符串拼法一致)⇒ **须红** | ⭐ 这是**静默字面量的反向守卫**;断言须锁**符号来源**(同源 import),⛔ 不得只断行为 |
 | **K-4** | **deleted unit ⇒ `missing`**(裁定 A) | 令它返回 `text_drifted` ⇒ 红 |
 | **K-5** | **`text_drifted` 只在「位置在、文本变」** | 令 block 不存在时也返回 `text_drifted` ⇒ 红 |
 | **K-6** | **一条坏 ref 不炸整单**(H-3) | 令某条 ref 解析失败时 throw ⇒ 红(须证明**其余 ref 仍返回各自的态**) |
