@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
 import { request as httpRequest, type Server } from 'node:http';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 import express from 'express';
 import { closeDb, initDb } from '../db/init.js';
 import { readMcpTransportConfig } from '../db/validateConfig.js';
@@ -25,7 +26,14 @@ import {
 } from '../mcp/transport.js';
 import noteRoutes from '../routes/notes.js';
 import { createToolReceiptsRouter } from '../routes/toolReceipts.js';
+import { createItem } from '../services/items.js';
 import { trashNoteAsUser } from '../services/notes.js';
+import {
+  resolveSelection,
+  type ResolveSelectionInput,
+  type SelectionReceiptTextRangeInput,
+} from '../services/selectionResolve.js';
+import { textFlowIdForBlock } from '../services/textFlowIdentity.js';
 
 const USER_ID = '11111111-1111-4111-8111-111111111111';
 const COURSE_ID = '22222222-2222-4222-8222-222222222222';
@@ -37,6 +45,17 @@ const OLDER_NOTE_ID = '33333333-3333-4333-8333-333333333333';
 const NEWEST_NOTE_ID = '44444444-4444-4444-8444-444444444444';
 const MISSING_NOTE_ID = '99999999-9999-4999-8999-999999999999';
 const DECISION_METADATA_KEY = 'io.coincides/toolFaceDecision';
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
+const INTRUDER_USER_ID = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+const INTRUDER_COURSE_ID = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+const INTRUDER_NOTE_ID = 'cccccccc-cccc-4ccc-8ccc-cccccccccccc';
+const OWNER_BLOCK_ID = '55555555-5555-4555-8555-555555555555';
+const MALFORMED_BLOCK_ID = '66666666-6666-4666-8666-666666666666';
+const INTRUDER_BLOCK_ID = '77777777-7777-4777-8777-777777777777';
+const MISSING_BLOCK_ID = '88888888-8888-4888-8888-888888888888';
+const ACTIVE_UNIT_ID = 'owner-unit-active';
+const DELETED_UNIT_ID = 'owner-unit-deleted';
+const ACTIVE_UNIT_TEXT = 'prefix selected suffix';
 
 interface Fixture {
   baseUrl: string;
@@ -48,6 +67,146 @@ interface Fixture {
 interface FixtureOptions {
   manifest?: LoadedToolFaceManifest;
   bindings?: ReadonlyMap<string, ToolBinding>;
+}
+
+function textFlowBody(units: Array<Record<string, unknown>>): string {
+  return JSON.stringify({
+    body: units.map((unit) => unit.text).filter((text) => typeof text === 'string').join('\n'),
+    text_flow: {
+      textflow_version: 'TextBlockContentV1',
+      units,
+      inline_structures: [],
+      metadata: {},
+    },
+  });
+}
+
+function seedResolveSelectionData(fixture: Fixture): { intruderToken: string } {
+  fixture.db.prepare("INSERT INTO users (id, email, password_hash, name, created_at) VALUES (?, ?, 'hash', ?, ?)")
+    .run(INTRUDER_USER_ID, 'selection-intruder@example.com', 'Selection Intruder', '2026-08-24 09:00:00');
+  fixture.db.prepare('INSERT INTO courses (id, user_id, name, created_at, updated_at) VALUES (?, ?, ?, ?, ?)')
+    .run(
+      INTRUDER_COURSE_ID,
+      INTRUDER_USER_ID,
+      'Intruder Project',
+      '2026-08-24 09:00:00',
+      '2026-08-24 09:00:00',
+    );
+  fixture.db.prepare(`
+    INSERT INTO notes (
+      id, user_id, course_id, title, description, status, source_kind,
+      page_format, metadata, operation_batch_id, created_at, updated_at,
+      trashed_at, note_class
+    ) VALUES (?, ?, ?, ?, NULL, 'active', 'manual', 'flow', '{}', NULL, ?, ?, NULL, 'user')
+  `).run(
+    INTRUDER_NOTE_ID,
+    INTRUDER_USER_ID,
+    INTRUDER_COURSE_ID,
+    'Intruder note',
+    '2026-08-24 09:01:00',
+    '2026-08-24 09:01:00',
+  );
+
+  const insertBlock = fixture.db.prepare(`
+    INSERT INTO note_blocks (
+      id, user_id, course_id, block_type, content_json, plain_text, source_kind, metadata
+    ) VALUES (?, ?, ?, 'text', ?, ?, 'manual', '{}')
+  `);
+  insertBlock.run(
+    OWNER_BLOCK_ID,
+    USER_ID,
+    COURSE_ID,
+    textFlowBody([
+      {
+        id: ACTIVE_UNIT_ID,
+        text: ACTIVE_UNIT_TEXT,
+        status: 'active',
+        order_index: 0,
+      },
+      {
+        id: DELETED_UNIT_ID,
+        text: 'gone',
+        status: 'deleted',
+        order_index: 1,
+      },
+    ]),
+    ACTIVE_UNIT_TEXT,
+  );
+  insertBlock.run(
+    MALFORMED_BLOCK_ID,
+    USER_ID,
+    COURSE_ID,
+    '{broken-json',
+    'oops',
+  );
+  insertBlock.run(
+    INTRUDER_BLOCK_ID,
+    INTRUDER_USER_ID,
+    INTRUDER_COURSE_ID,
+    textFlowBody([{
+      id: 'intruder-unit-active',
+      text: 'intruder text',
+      status: 'active',
+      order_index: 0,
+    }]),
+    'intruder text',
+  );
+
+  const insertPlacement = fixture.db.prepare(`
+    INSERT INTO note_block_placements (id, note_id, block_id, order_index)
+    VALUES (?, ?, ?, ?)
+  `);
+  insertPlacement.run('99999999-0000-4000-8000-000000000001', NEWEST_NOTE_ID, OWNER_BLOCK_ID, 0);
+  insertPlacement.run('99999999-0000-4000-8000-000000000002', NEWEST_NOTE_ID, MALFORMED_BLOCK_ID, 1);
+  insertPlacement.run('99999999-0000-4000-8000-000000000003', INTRUDER_NOTE_ID, INTRUDER_BLOCK_ID, 0);
+
+  return { intruderToken: generateToken(INTRUDER_USER_ID) };
+}
+
+function selectionRange(
+  overrides: Partial<SelectionReceiptTextRangeInput> = {},
+): SelectionReceiptTextRangeInput {
+  return {
+    blockId: OWNER_BLOCK_ID,
+    textFlowId: textFlowIdForBlock(OWNER_BLOCK_ID),
+    textUnitId: ACTIVE_UNIT_ID,
+    startOffset: 7,
+    endOffset: 15,
+    excerpt: 'selected',
+    ...overrides,
+  };
+}
+
+function selectionReceipt(
+  ranges: SelectionReceiptTextRangeInput[],
+): ResolveSelectionInput {
+  return {
+    note_id: NEWEST_NOTE_ID,
+    refs: ranges.map(({ blockId, textFlowId, textUnitId }) => ({
+      blockId,
+      textFlowId,
+      textUnitId,
+    })),
+    text_ranges: ranges,
+    at: '2026-08-24T12:02:03.456Z',
+  };
+}
+
+function resolveSelectionParams(input: ResolveSelectionInput): Record<string, unknown> {
+  return { name: 'resolve_selection', arguments: input };
+}
+
+function productionTypeScriptFiles(root: string): string[] {
+  return readdirSync(root, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(root, entry.name);
+    if (entry.isDirectory()) {
+      return entry.name === '__tests__' ? [] : productionTypeScriptFiles(path);
+    }
+    if (!entry.isFile() || !/\.tsx?$/.test(entry.name) || /\.(?:test|spec)\.tsx?$/.test(entry.name)) {
+      return [];
+    }
+    return [path];
+  });
 }
 
 function canonicalManifest(): LoadedToolFaceManifest {
@@ -208,13 +367,14 @@ async function mcpPost(
     capabilities?: Record<string, unknown>;
     toolName?: string;
     inputResponses?: Record<string, unknown>;
+    token?: string;
   } = {},
 ): Promise<{ response: Response; body: any }> {
   const id = options.id ?? 1;
   const response = await fetch(`${fixture.baseUrl}/api/mcp`, {
     method: 'POST',
     headers: {
-      authorization: `Bearer ${fixture.token}`,
+      authorization: `Bearer ${options.token ?? fixture.token}`,
       'content-type': 'application/json',
       'mcp-protocol-version': MODERN_PROTOCOL_VERSION,
       'mcp-method': method,
@@ -1177,5 +1337,435 @@ test('domain AppError is projected as a safe MCP tool error without a success re
       SELECT COUNT(*) AS count FROM operation_batches WHERE source_type = 'mcp'
     `).get() as { count: number };
     assert.equal(receiptCount.count, 0);
+  });
+});
+
+function installTruthWriteAudit(fixture: Fixture): void {
+  fixture.db.exec(`
+    CREATE TEMP TABLE selection_truth_writes (
+      table_name TEXT NOT NULL,
+      operation TEXT NOT NULL
+    );
+    CREATE TEMP TRIGGER selection_notes_insert AFTER INSERT ON notes BEGIN
+      INSERT INTO selection_truth_writes VALUES ('notes', 'insert');
+    END;
+    CREATE TEMP TRIGGER selection_notes_update AFTER UPDATE ON notes BEGIN
+      INSERT INTO selection_truth_writes VALUES ('notes', 'update');
+    END;
+    CREATE TEMP TRIGGER selection_notes_delete AFTER DELETE ON notes BEGIN
+      INSERT INTO selection_truth_writes VALUES ('notes', 'delete');
+    END;
+    CREATE TEMP TRIGGER selection_blocks_insert AFTER INSERT ON note_blocks BEGIN
+      INSERT INTO selection_truth_writes VALUES ('note_blocks', 'insert');
+    END;
+    CREATE TEMP TRIGGER selection_blocks_update AFTER UPDATE ON note_blocks BEGIN
+      INSERT INTO selection_truth_writes VALUES ('note_blocks', 'update');
+    END;
+    CREATE TEMP TRIGGER selection_blocks_delete AFTER DELETE ON note_blocks BEGIN
+      INSERT INTO selection_truth_writes VALUES ('note_blocks', 'delete');
+    END;
+  `);
+  fixture.db.prepare('UPDATE notes SET title = title WHERE id = ?').run(NEWEST_NOTE_ID);
+  fixture.db.prepare('UPDATE note_blocks SET plain_text = plain_text WHERE id = ?').run(OWNER_BLOCK_ID);
+  const positiveControl = fixture.db.prepare(`
+    SELECT table_name, operation FROM selection_truth_writes ORDER BY table_name
+  `).all();
+  assert.deepEqual(positiveControl, [
+    { table_name: 'note_blocks', operation: 'update' },
+    { table_name: 'notes', operation: 'update' },
+  ], 'write-audit triggers must first prove they can observe both truth tables');
+  fixture.db.prepare('DELETE FROM selection_truth_writes').run();
+}
+
+function truthWriteAudit(fixture: Fixture): unknown[] {
+  return fixture.db.prepare(`
+    SELECT table_name, operation FROM selection_truth_writes ORDER BY rowid
+  `).all();
+}
+
+test('c-2 S2 invalid excerpt length reaches the real binding as a safe 400', async () => {
+  await withMcpHttp({}, async (fixture) => {
+    seedResolveSelectionData(fixture);
+    const invalid = selectionReceipt([selectionRange({ excerpt: 'short' })]);
+    const beforeReceipts = mcpReceiptCount(fixture);
+    const { response, body } = await mcpPost(
+      fixture,
+      'tools/call',
+      resolveSelectionParams(invalid),
+      { id: 200, toolName: 'resolve_selection' },
+    );
+
+    assert.equal(response.status, 200);
+    assert.equal(body.result.isError, true);
+    assert.deepEqual(JSON.parse(body.result.content[0].text), {
+      error: 'Invalid selection receipt',
+      status: 400,
+    });
+    assert.equal(mcpReceiptCount(fixture), beforeReceipts);
+    assert.equal(fixture.db.prepare(`
+      SELECT id FROM operation_batches WHERE source_type = 'mcp' AND source_id = '200'
+    `).get(), undefined, 'an input 400 must not create a success receipt');
+  });
+});
+
+test('c-2 K-1 real Express resolves an owned current excerpt as found with its identity', async () => {
+  await withMcpHttp({}, async (fixture) => {
+    seedResolveSelectionData(fixture);
+    const stored = fixture.db.prepare(`
+      SELECT user_id, content_json FROM note_blocks WHERE id = ?
+    `).get(OWNER_BLOCK_ID) as { user_id: string; content_json: string };
+    const storedBody = JSON.parse(stored.content_json) as {
+      text_flow: { units: Array<Record<string, unknown>> };
+    };
+    assert.equal(stored.user_id, USER_ID);
+    assert.ok(storedBody.text_flow.units.some((unit) => (
+      unit.id === ACTIVE_UNIT_ID && unit.text === ACTIVE_UNIT_TEXT && unit.status === 'active'
+    )), 'database fixture must independently contain the active owner unit');
+
+    const { response, body } = await mcpPost(
+      fixture,
+      'tools/call',
+      resolveSelectionParams(selectionReceipt([selectionRange()])),
+      { id: 201, toolName: 'resolve_selection' },
+    );
+
+    assert.equal(response.status, 200);
+    assert.equal(body.error, undefined);
+    assert.equal(body.result.resultType, 'complete');
+    assert.deepEqual(body.result.structuredContent, {
+      results: [{
+        outcome: 'found',
+        blockId: OWNER_BLOCK_ID,
+        textFlowId: textFlowIdForBlock(OWNER_BLOCK_ID),
+        textUnitId: ACTIVE_UNIT_ID,
+      }],
+    });
+  });
+});
+
+test('c-2 K-2 foreign and nonexistent identities are byte-identical missing after an owner hit', async () => {
+  await withMcpHttp({}, (fixture) => {
+    seedResolveSelectionData(fixture);
+    const owner = resolveSelection(USER_ID, selectionReceipt([selectionRange()]));
+    assert.equal(owner.results[0]?.outcome, 'found', 'owner positive control must hit before missing checks');
+
+    const foreignFact = fixture.db.prepare(`
+      SELECT user_id FROM note_blocks WHERE id = ?
+    `).get(INTRUDER_BLOCK_ID) as { user_id: string } | undefined;
+    const absentFact = fixture.db.prepare(`
+      SELECT id FROM note_blocks WHERE id = ?
+    `).get(MISSING_BLOCK_ID);
+    assert.deepEqual(foreignFact, { user_id: INTRUDER_USER_ID });
+    assert.equal(absentFact, undefined);
+
+    const foreign = resolveSelection(USER_ID, selectionReceipt([selectionRange({
+      blockId: INTRUDER_BLOCK_ID,
+      textFlowId: textFlowIdForBlock(INTRUDER_BLOCK_ID),
+      textUnitId: 'intruder-unit-active',
+      startOffset: 0,
+      endOffset: 8,
+      excerpt: 'intruder',
+    })]));
+    const nonexistent = resolveSelection(USER_ID, selectionReceipt([selectionRange({
+      blockId: MISSING_BLOCK_ID,
+      textFlowId: textFlowIdForBlock(MISSING_BLOCK_ID),
+      textUnitId: 'missing-unit',
+      startOffset: 0,
+      endOffset: 4,
+      excerpt: 'none',
+    })]));
+
+    assert.equal(JSON.stringify(foreign), JSON.stringify(nonexistent));
+    assert.deepEqual(foreign, { results: [{ outcome: 'missing' }] });
+  });
+});
+
+test('c-2 K-3 resolve locks the authoritative textFlowIdForBlock symbol source', async () => {
+  const source = readFileSync(
+    resolve(REPO_ROOT, 'server/src/services/selectionResolve.ts'),
+    'utf8',
+  );
+  assert.match(
+    source,
+    /import\s+\{\s*textFlowIdForBlock\s*\}\s+from\s+'\.\/textFlowIdentity\.js';/,
+    'resolve must import the authoritative server identity symbol',
+  );
+  assert.doesNotMatch(
+    source,
+    /(?:function|const)\s+textFlowIdForBlock\b/,
+    'resolve must not locally rederive the identity helper',
+  );
+  assert.doesNotMatch(
+    source,
+    /(?:@shared|shared\/types)\/textFlow/,
+    'resolve must not introduce the known-broken server runtime import boundary',
+  );
+  assert.match(source, /textFlowIdForBlock\(range\.blockId\)/);
+
+  await withMcpHttp({}, (fixture) => {
+    seedResolveSelectionData(fixture);
+    assert.equal(
+      resolveSelection(USER_ID, selectionReceipt([selectionRange()])).results[0]?.outcome,
+      'found',
+    );
+    const mismatched = resolveSelection(USER_ID, selectionReceipt([selectionRange({
+      textFlowId: 'textflow-not-the-block',
+    })]));
+    assert.deepEqual(mismatched, { results: [{ outcome: 'missing' }] });
+  });
+});
+
+test('c-2 K-4 deleted units remain missing beside an active found control', async () => {
+  await withMcpHttp({}, (fixture) => {
+    seedResolveSelectionData(fixture);
+    assert.equal(
+      resolveSelection(USER_ID, selectionReceipt([selectionRange()])).results[0]?.outcome,
+      'found',
+    );
+    const row = fixture.db.prepare('SELECT content_json FROM note_blocks WHERE id = ?')
+      .get(OWNER_BLOCK_ID) as { content_json: string };
+    const body = JSON.parse(row.content_json) as {
+      text_flow: { units: Array<Record<string, unknown>> };
+    };
+    assert.ok(body.text_flow.units.some((unit) => (
+      unit.id === DELETED_UNIT_ID && unit.status === 'deleted'
+    )), 'raw stored TextFlow must independently contain the deleted unit');
+
+    const deleted = resolveSelection(USER_ID, selectionReceipt([selectionRange({
+      textUnitId: DELETED_UNIT_ID,
+      startOffset: 0,
+      endOffset: 4,
+      excerpt: 'GONE',
+    })]));
+    assert.deepEqual(deleted, { results: [{ outcome: 'missing' }] });
+  });
+});
+
+test('c-2 K-5 text_drifted requires an existing owned unit, never an absent block', async () => {
+  await withMcpHttp({}, (fixture) => {
+    seedResolveSelectionData(fixture);
+    assert.equal(
+      resolveSelection(USER_ID, selectionReceipt([selectionRange()])).results[0]?.outcome,
+      'found',
+    );
+    assert.deepEqual(
+      resolveSelection(USER_ID, selectionReceipt([selectionRange({ excerpt: 'SELECTED' })])),
+      {
+        results: [{
+          outcome: 'text_drifted',
+          blockId: OWNER_BLOCK_ID,
+          textFlowId: textFlowIdForBlock(OWNER_BLOCK_ID),
+          textUnitId: ACTIVE_UNIT_ID,
+        }],
+      },
+      'an owned current unit with a mechanically different offset slice must report drift',
+    );
+    assert.equal(fixture.db.prepare('SELECT id FROM note_blocks WHERE id = ?')
+      .get(MISSING_BLOCK_ID), undefined, 'SQL must independently prove the target block is absent');
+
+    const missing = resolveSelection(USER_ID, selectionReceipt([selectionRange({
+      blockId: MISSING_BLOCK_ID,
+      textFlowId: textFlowIdForBlock(MISSING_BLOCK_ID),
+      textUnitId: 'missing-unit',
+      startOffset: 0,
+      endOffset: 4,
+      excerpt: 'none',
+    })]));
+    assert.deepEqual(missing, { results: [{ outcome: 'missing' }] });
+  });
+});
+
+test('c-2 K-6 one malformed range cannot abort a sibling found range', async () => {
+  await withMcpHttp({}, (fixture) => {
+    seedResolveSelectionData(fixture);
+    assert.equal(
+      resolveSelection(USER_ID, selectionReceipt([selectionRange()])).results[0]?.outcome,
+      'found',
+    );
+    const malformedFact = fixture.db.prepare(`
+      SELECT content_json FROM note_blocks WHERE id = ? AND user_id = ?
+    `).get(MALFORMED_BLOCK_ID, USER_ID) as { content_json: string } | undefined;
+    assert.deepEqual(malformedFact, { content_json: '{broken-json' });
+
+    const input = selectionReceipt([
+      selectionRange({
+        blockId: MALFORMED_BLOCK_ID,
+        textFlowId: textFlowIdForBlock(MALFORMED_BLOCK_ID),
+        textUnitId: 'malformed-unit',
+        startOffset: 0,
+        endOffset: 4,
+        excerpt: 'oops',
+      }),
+      selectionRange(),
+    ]);
+    let result: ReturnType<typeof resolveSelection> | undefined;
+    assert.doesNotThrow(() => {
+      result = resolveSelection(USER_ID, input);
+    });
+    assert.deepEqual(result, {
+      results: [
+        { outcome: 'missing' },
+        {
+          outcome: 'found',
+          blockId: OWNER_BLOCK_ID,
+          textFlowId: textFlowIdForBlock(OWNER_BLOCK_ID),
+          textUnitId: ACTIVE_UNIT_ID,
+        },
+      ],
+    });
+  });
+});
+
+test('c-2 K-7a extracted TextFlow projection remains byte-equivalent', async () => {
+  await withMcpHttp({}, (fixture) => {
+    const item = createItem(fixture.db, USER_ID, {
+      body_json: {
+        body: 'ignored projection sentinel',
+        text_flow: {
+          units: [
+            { id: 'later', text: 'beta', status: 'active', order_index: 2 },
+            null,
+            { id: 'deleted', text: 'never', status: 'deleted', order_index: -1 },
+            'not-an-object',
+            { id: 'first', text: 'gamma', status: 'deprecated', order_index: 0 },
+            { id: 'not-text', text: 42, status: 'active', order_index: 0 },
+            { id: 'middle', text: '  alpha', order_index: 1 },
+          ],
+        },
+      },
+    });
+
+    assert.equal(item.plain_text, 'gamma\n  alpha\nbeta');
+    assert.equal(item.body_json.body, 'gamma\n  alpha\nbeta');
+    assert.equal(
+      Buffer.from(item.plain_text, 'utf8').toString('hex'),
+      '67616d6d610a2020616c7068610a62657461',
+    );
+  });
+});
+
+test('c-2 K-7b valid TextFlow unit parsing has one production convention and two consumers', () => {
+  const helperSource = readFileSync(
+    resolve(REPO_ROOT, 'server/src/services/textFlowUnits.ts'),
+    'utf8',
+  );
+  const itemsSource = readFileSync(
+    resolve(REPO_ROOT, 'server/src/services/items.ts'),
+    'utf8',
+  );
+  const resolveSource = readFileSync(
+    resolve(REPO_ROOT, 'server/src/services/selectionResolve.ts'),
+    'utf8',
+  );
+  const predicate = /([A-Za-z_$][\w$]*)\.status\s*!==\s*'deleted'\s*&&\s*typeof\s+\1\.text\s*===\s*'string'/g;
+  const productSources = [
+    resolve(REPO_ROOT, 'client/src'),
+    resolve(REPO_ROOT, 'server/src'),
+    resolve(REPO_ROOT, 'shared'),
+  ].flatMap((root) => productionTypeScriptFiles(root));
+  const predicateCount = productSources
+    .map((path) => readFileSync(path, 'utf8').match(predicate)?.length ?? 0)
+    .reduce((total, count) => total + count, 0);
+
+  assert.equal(predicateCount, 1, 'the valid-unit predicate must have exactly one product-source copy');
+  assert.match(itemsSource, /import \{ validTextFlowUnits \} from '\.\/textFlowUnits\.js';/);
+  assert.match(resolveSource, /import \{ validTextFlowUnits \} from '\.\/textFlowUnits\.js';/);
+  assert.doesNotMatch(itemsSource, /function\s+validTextFlowUnits\b/);
+  assert.doesNotMatch(resolveSource, /function\s+validTextFlowUnits\b/);
+});
+
+test('c-2 K-8 resolve is truth-read-only and writes the normal applied immediate receipt', async () => {
+  await withMcpHttp({}, (fixture) => {
+    seedResolveSelectionData(fixture);
+    const input = selectionReceipt([selectionRange()]);
+    assert.equal(resolveSelection(USER_ID, input).results[0]?.outcome, 'found');
+  });
+
+  await withMcpHttp({}, async (fixture) => {
+    seedResolveSelectionData(fixture);
+    const input = selectionReceipt([selectionRange()]);
+    installTruthWriteAudit(fixture);
+    const notesBefore = fixture.db.prepare('SELECT * FROM notes ORDER BY id').all();
+    const blocksBefore = fixture.db.prepare('SELECT * FROM note_blocks ORDER BY id').all();
+    const receiptsBefore = mcpReceiptCount(fixture);
+
+    const { response, body } = await mcpPost(
+      fixture,
+      'tools/call',
+      resolveSelectionParams(input),
+      { id: 208, toolName: 'resolve_selection' },
+    );
+
+    assert.equal(response.status, 200);
+    assert.deepEqual(fixture.db.prepare('SELECT * FROM notes ORDER BY id').all(), notesBefore);
+    assert.deepEqual(fixture.db.prepare('SELECT * FROM note_blocks ORDER BY id').all(), blocksBefore);
+    assert.deepEqual(truthWriteAudit(fixture), [], 'independent triggers must observe no truth-table writes');
+    assert.equal(mcpReceiptCount(fixture), receiptsBefore + 1);
+    const receipt = receiptByCallId(fixture, '208');
+    assert.equal(receipt.status, 'applied');
+    assert.ok(receipt.applied_at);
+    assert.equal(receipt.metadata.tool, 'resolve_selection');
+    assert.equal(receipt.metadata.tier, 'immediate');
+    assert.deepEqual(receipt.metadata.resources, []);
+    assert.deepEqual(receipt.metadata.intended_input, input);
+    assert.deepEqual(body.result.structuredContent, {
+      results: [{
+        outcome: 'found',
+        blockId: OWNER_BLOCK_ID,
+        textFlowId: textFlowIdForBlock(OWNER_BLOCK_ID),
+        textUnitId: ACTIVE_UNIT_ID,
+      }],
+    });
+  });
+});
+
+test('c-2 K-9 another user gets per-range missing while the owner still gets found', async () => {
+  await withMcpHttp({}, async (fixture) => {
+    const { intruderToken } = seedResolveSelectionData(fixture);
+    const input = selectionReceipt([selectionRange()]);
+    const ownerFact = fixture.db.prepare(`
+      SELECT user_id FROM note_blocks WHERE id = ?
+    `).get(OWNER_BLOCK_ID) as { user_id: string } | undefined;
+    assert.deepEqual(ownerFact, { user_id: USER_ID });
+    installTruthWriteAudit(fixture);
+    const ownerNoteBefore = fixture.db.prepare('SELECT * FROM notes WHERE id = ?')
+      .get(NEWEST_NOTE_ID);
+    const ownerBlockBefore = fixture.db.prepare('SELECT * FROM note_blocks WHERE id = ?')
+      .get(OWNER_BLOCK_ID);
+
+    const ownerCall = await mcpPost(
+      fixture,
+      'tools/call',
+      resolveSelectionParams(input),
+      { id: 209, toolName: 'resolve_selection' },
+    );
+    assert.deepEqual(ownerCall.body.result.structuredContent, {
+      results: [{
+        outcome: 'found',
+        blockId: OWNER_BLOCK_ID,
+        textFlowId: textFlowIdForBlock(OWNER_BLOCK_ID),
+        textUnitId: ACTIVE_UNIT_ID,
+      }],
+    }, 'owner positive control must hit before the foreign-user check');
+
+    const intruderCall = await mcpPost(
+      fixture,
+      'tools/call',
+      resolveSelectionParams(input),
+      { id: 210, toolName: 'resolve_selection', token: intruderToken },
+    );
+    assert.equal(intruderCall.response.status, 200);
+    assert.deepEqual(intruderCall.body.result.structuredContent, {
+      results: [{ outcome: 'missing' }],
+    });
+    assert.deepEqual(
+      fixture.db.prepare('SELECT * FROM notes WHERE id = ?').get(NEWEST_NOTE_ID),
+      ownerNoteBefore,
+    );
+    assert.deepEqual(
+      fixture.db.prepare('SELECT * FROM note_blocks WHERE id = ?').get(OWNER_BLOCK_ID),
+      ownerBlockBefore,
+    );
+    assert.deepEqual(truthWriteAudit(fixture), [], 'independent triggers must observe no owner truth writes');
   });
 });

@@ -153,7 +153,7 @@ excerpt === currentUnitText.slice(startOffset, endOffset)
 **回执纪律**:README Builder 侧 1–3(含 **UTF-8**)+ **M-2 header 不由你翻**。
 **⭐ 写 `## Result` 是本单交付物之一,不需确认,直接写。**
 
-**回执须含**:K-1…K-9 **各自**先红后绿两段输出(**K-2 须证明 foreign 与 nonexistent 返回值逐字节相同**;**K-3 须证明断言锁的是符号来源而非行为**;**K-7 须给字节等价与「全仓只此一份」两项证据**)· `items.ts` 的 diff **仅一个 hunk 且零语义**的证明 · 只读(`operation_batches` 零增)的证明 · 门禁逐条收据 · 触及面 diff vs 申报 · **每条阴性断言的阳性对照** · **若略过了「本单按新档略过」表之外的东西,点名申报**。
+**回执须含**:K-1…K-9 **各自**先红后绿两段输出(**K-2 须证明 foreign 与 nonexistent 返回值逐字节相同**;**K-3 须证明断言锁的是符号来源而非行为**;**K-7 须给字节等价与「全仓只此一份」两项证据**)· `items.ts` 的 diff **仅一个 hunk 且零语义**的证明 · 🔴 ~~只读(`operation_batches` 零增)的证明~~ **【2026-08-24 订正:此句是被推翻的旧判据的残留。**改单时我改了 K-8 表格行与「只读定义」段,**漏了本段** —— builder 发现并按新判据执行,处置正确。**现判据 = 验合规不验缺席**:①`notes`/`note_blocks` 逐字段不变;②收据形状同 `list_notes`(`applied`/`immediate`/`tool` 名)。**】** · 门禁逐条收据 · 触及面 diff vs 申报 · **每条阴性断言的阳性对照** · **若略过了「本单按新档略过」表之外的东西,点名申报**。
 
 ## Result
 
@@ -183,3 +183,68 @@ excerpt === currentUnitText.slice(startOffset, endOffset)
 - `npm.cmd run docs:check`：PASS。
 - handoff UTF-8 fatal decode：PASS，且无 replacement bytes。
 - 本会话对 `.git` 为只读；精确 `git add -- <本工单>` 被 `.git/index.lock: Permission denied` 拒绝，故未能暂存或提交。工作树中的本单真实 diff 为本 `## Result` 追加；三个已知 EOL 假阳性的工作树 blob 均与 `HEAD` 相同，`.claude/settings.local.json` 未触碰。
+
+## Result
+
+### 状态
+
+`done` —— 第二次派工已完成 S0–S3、manifest、常驻测试、逐刀 mutation 与全门。header 依 M-2 保持原值；上方第一次 `## Result` 未删改。本次按 §S2 第 54–56 行、K-8 第 108 行及派工直令的后发裁定执行：**真相层只读，成功调用照常新增审计收据**；第 156 行残留的旧句「`operation_batches` 零增」未采用。
+
+### 实施
+
+- **S1 零语义提取**：新增 `server/src/services/textFlowUnits.ts`，原 `items.ts:textFlowProjection` 的 record 过滤、`status !== 'deleted'`、字符串 text 判定及 `Number(order_index || 0)` 排序只搬不改；`items.ts` 与 `selectionResolve.ts` 同源 import。提取前探针与提取后 K-7a 都得到 `plain_text/body = "gamma\n  alpha\nbeta"`，UTF-8 hex 均为 `67616d6d610a2020616c7068610a62657461`。`git diff -U0 -- items.ts` 只有 **1 个 `@@`**；对 `client/src`、`server/src`、`shared` 全产品 TS/TSX 的变量名无关扫描只命中 helper **1 次**，两消费者的 import 与无本地 helper 断言提供第二来源。
+- **S2 registry/binding/manifest**：只增加 `resolve_selection` 一项和一个 binding；schema 为真 Zod、外层 `note_id/refs/text_ranges/at` + 内层 camelCase、字段为 `excerpt`、各层 `.strict()`，refine 为 `excerpt.length === endOffset - startOffset`；元数据为 `truth='content'`、`tier='immediate'`、`exposure='public'`、`scopes=['notes:read']`。binding 再用同一 schema `safeParse`，因此当前生成链不表达 cross-field refine 时，真实执行仍以安全 MCP tool error `{ status: 400 }` 拒绝且不写成功收据。manifest 已重生成并 fresh：3 条、3 条 public；human entry 的真实 route/callsite parity 通过。
+- **S3 resolve service**：逐 `text_ranges` 顺序解析；先以 `./textFlowIdentity.js` 的权威 `textFlowIdForBlock` 校验，再以 `id + user_id` 参数化 SELECT 取本人 block，复用 S1 helper 找非 deleted unit，最后只做 `excerpt === unit.text.slice(startOffset, endOffset)` 的机械严格比较。`found/text_drifted` 回身份三元组；其余统一且不回显身份的 `{ outcome: 'missing' }`。坏 `content_json` 局部落 `missing`，不 throw 整单。service 只有 SELECT；未改 transport、receipt 轴、`statusForTier`、tsconfig，且无 shared TextFlow 运行时 import。
+- **S0**：只删除 `selectionReceiptProjection.test.ts` K-1′ 中点名的 `.not.toBe(PARTIAL_SELECTION_WHOLE_TEXT)` 一条；产品投影未改。全量 unit 在变更前后均为 222/222。
+
+### 漂移语义钉死
+
+前文编辑导致 offsets 推移时，如实报告 `text_drifted` 是**有意语义，不是缺陷**；本单没有、也不得用滑动窗口、模糊重定位或按 excerpt 全文搜索把选区找回。没有 trim、归一化、相似度、大小写折叠、模型或 OCR。
+
+### Killer：逐刀先红、独立恢复、再绿
+
+以下每刀均只改一个目标机关；红后立即恢复再取绿。所有红点均为目标 `AssertionError`，没有 `ReferenceError`、`SyntaxError` 或 `ERR_MODULE_NOT_FOUND`。
+
+| 刀 | 先红 | 恢复后绿与对照 |
+|---|---|---|
+| **K-1** | service 恒 `missing`；真实 Express `/api/mcp` 用例 exit 1，`deepStrictEqual` AssertionError | exit 0；SQL + 原始 `content_json` 先证 owner active unit 存在，HTTP 返回 `found` 和完整三元组 |
+| **K-2** | foreign 分支临时返回第四态；exit 1，断言显示 actual `{"results":[{"outcome":"forbidden"}]}`，expected `{"results":[{"outcome":"missing"}]}` | exit 0；owner 同 ref 先 `found`，SQL 分别证明 foreign 确实存在/归 B、nonexistent 确实不存在；恢复后两者 `JSON.stringify` **逐字节同为** `{"results":[{"outcome":"missing"}]}` |
+| **K-3** | 移除权威 import，放入拼法相同的本地同名函数；**mutation 状态 server `tsc --noEmit` exit 0**，随后来源 regex `match` AssertionError | exit 0；常驻断言精确锁 `from './textFlowIdentity.js'`、真实 call、无本地定义、无 shared TextFlow runtime import；行为正控另证匹配 flow 可 found、错 flow 为 missing |
+| **K-4** | helper 临时放开 deleted，使存储中的 deleted unit 落 `text_drifted`；`deepStrictEqual` AssertionError | exit 0；active sibling 先 found，原始 TextFlow 独立证明 deleted unit 存在且 status=deleted，恢复后为 missing |
+| **K-5** | block 不存在时临时回 `text_drifted`；`deepStrictEqual` AssertionError | exit 0；owner 先 found，同一 owned unit 以同长度大写 excerpt 正控得到 `text_drifted`；SQL 独立证明目标 block 不存在，恢复后为 missing |
+| **K-6** | malformed JSON 分支临时 throw；exit 1，`doesNotThrow` AssertionError，actual message=`malformed block content` | exit 0；SQL 先证明坏 block 确有 malformed content，valid sibling 先 found；同一 service 调用最终依序 `[missing, found]`，未把本刀表述成 HTTP 证明 |
+| **K-7a** | helper 临时放开 deleted；投影 golden 的 `strictEqual` AssertionError | exit 0；提取前后均为上述 UTF-8 golden bytes；断言落在实际持久化/回读投影，不以「参数传入即生效」代替结果证明 |
+| **K-7b** | resolve 粘贴一份变量名为 `candidate` 的解析副本；mutation 状态 tsc exit 0，全产品源码扫描 actual=2 / expected=1 的 AssertionError | exit 0；恢复为唯一 helper + 两侧 import；变量名无关扫描和无本地 helper/import 检查两路同意 |
+| **K-8a** | resolve 临时 UPDATE 一个 block；第一次被审计的 HTTP 解析即令 `plain_text` 多 `!`，全字段 block `deepStrictEqual` AssertionError | exit 0；独立 fresh fixture 先证 found；审计 fixture 在第一次解析前安装并用 no-op UPDATE 证明 notes/block triggers 可命中，再清空；HTTP 后 `notes`、`note_blocks` 全字段快照相同且 trigger audit 为空 |
+| **K-8b** | registry tier 临时改 `propose` 并重生成 manifest；exit 1，receipt actual=`proposed` / expected=`applied` | exit 0；恢复并重生成后，`operation_batches` **恰增 1**，receipt `status='applied'`、`metadata.tier='immediate'`、`metadata.tool='resolve_selection'`、intended_input 正确。这里验的是正确留痕，不是收据缺席 |
+| **K-9** | service 恒 `missing`；exit 1，先红在「owner positive control must hit」的 `deepStrictEqual` AssertionError | exit 0；真实 Express 中 A 先 found，B 携同一 ref 得逐条 missing；SQL 证明 block 属 A，A note/block 全字段快照不变且独立 trigger audit 为空 |
+
+**S0 mutation**：临时把产品投影改回整段 `range.text`，K-1′ exit 1，明确红在 `expect(receipt).toStrictEqual(...)` 的 projection 等值断言（不是已删除的冗余否定断言）；恢复后 exit 0。用例数仍为 9，仓级 `test:unit` 仍为 **222 → 222**。
+
+### 阴性断言与阳性来源
+
+- invalid excerpt 长度走真实 Express；MCP envelope 内安全状态为 400，同时以 MCP receipt 总数和按 call id 查询两路证明无成功收据。
+- K-2/K-9 都先命中 owner found，且再以数据库归属/存在性事实确认探针不是恒 missing；K-4/K-5/K-6 也分别用原始 JSON、SQL absence、malformed row 加 active found 正控。
+- K-8 对两张真相表同时用逐字段 before/after 与已自证可命中的 TEMP triggers；收据则同时用行数增量和 call-id 行内容。测试没有依赖 `items.ts` 那处 SQL 字面量列的入参会生效。
+
+### 门禁收据（严格 docs-first）
+
+1. `npm.cmd run docs:check`：PASS。
+2. `npm.cmd run verify:v2-bn8-runtime`：PASS，exit 0（其中 unit 222/222、registry/manifest/parity、client/server build、runtime boundary 159 项及其余既有门均绿）。
+3. 双 `tsc --noEmit`：client PASS；server PASS。K-3/K-7b 的可编译 mutation 另有上述 mutation-state PASS。
+4. `npm.cmd run test:unit`：22 files，222/222 PASS。
+5. `server npm.cmd run test:v2`：274/274 PASS；按 TD-12 预先把 `CANVAS_ASSET_DIR` 指向经绝对路径校验的 OS temp，测试后目录为空、ReparsePoint=0，已非递归删除；未改测试/产品代偿。
+6. `server npm.cmd run test:mcp-transport`：35/35 PASS；最终加强后的 c-2 S2 + K-1…K-9 为 11/11。
+7. `server npm.cmd run test:trash-notes-tool`：43/43 PASS。
+8. 五道 tool-face 门依次：registry 5/5 PASS；manifest 10/10 PASS；manifest freshness PASS（3/3 public）；parity tests 10/10 PASS；parity check PASS（3 public）。parity 输出只证明 necessary conditions，未声称 human journey 已验。
+
+### 触及面与降档申报
+
+- 申报面与真实 diff 一致：S0 点名测试一行；`registry.ts`/其测试；`bindings.ts`；新 `selectionResolve.ts`；新共享 `textFlowUnits.ts`；`items.ts` 单 hunk；`v2McpTransport.test.ts`；tracked manifest；以及本工单第二段 Result。没有改 selection 产品投影、transport、receipt 服务、schema/migration、Host/Origin/auth 或其他 agent-ops 文档。
+- 三个已知 EOL 假阳性 `useNoteCanvasRuntimeController.ts`、`server/src/routes/projections.ts`、`SelectionToolbarLayer.tsx` 均以 filter-aware blob hash 证明工作树 **等于 HEAD**，`--numstat` 为空；未用 porcelain 判真。用户既有 `.claude/settings.local.json` 未触碰。
+- 按新档明确略过且**未声称已验**：ownership 输入矩阵（P2）、ownership 守卫 mutation / TD-19/20（P3）、多轮 refute/自由巡猎（P3）。没有额外表外略过。`scopes=['notes:read']` 只是登记，未声称 TD-14 的 scopes 已强制；TD-6、TD-16 也未代偿或宣称关闭。
+
+### 文档与提交完整性
+
+- manifest 生成件是 tracked `M`，不是靠 `??` 判断。`npm.cmd run docs:index`：PASS，写入 0 个 INDEX；Result 后 `docs:check`：PASS；handoff UTF-8 fatal decode：PASS、replacement char=0、`## Result` 恰为 2 个。当前文件以 HEAD 全字节为前缀，且 `git diff -U0` 只在旧文件末尾新增第二段，故第一次 Result 与 header 均未改。
+- `git diff --check`：PASS。对 10 个精确交付路径执行 `git add -- ...` 时，因本环境 `.git` 只读而被 `.git/index.lock: Permission denied` 拒绝，暂存树仍为空；因此交付保留在工作树。未取 builder lock、未写 `owner.json`、未删锁，也未触碰调度方 dev 服务或 PID 8292。

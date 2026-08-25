@@ -91,6 +91,51 @@ export const trashNotesOutputSchema = z.object({
   results: z.array(trashNotesResultSchema),
 }).strict();
 
+const selectionReceiptRefShape = {
+  blockId: z.string().min(1),
+  textFlowId: z.string().min(1),
+  textUnitId: z.string().min(1),
+};
+
+const selectionReceiptRefSchema = z.object(selectionReceiptRefShape).strict();
+
+const selectionReceiptTextRangeSchema = z.object({
+  ...selectionReceiptRefShape,
+  startOffset: z.number().int().nonnegative(),
+  endOffset: z.number().int().nonnegative(),
+  excerpt: z.string(),
+}).strict().refine(
+  (range) => range.excerpt.length === range.endOffset - range.startOffset,
+  { message: 'excerpt length must equal the selected offset window', path: ['excerpt'] },
+);
+
+export const resolveSelectionInputSchema = z.object({
+  note_id: z.string().uuid(),
+  refs: z.array(selectionReceiptRefSchema),
+  text_ranges: z.array(selectionReceiptTextRangeSchema),
+  at: z.string().min(1),
+}).strict();
+
+const resolvedSelectionIdentityShape = {
+  ...selectionReceiptRefShape,
+};
+
+const resolveSelectionResultSchema = z.discriminatedUnion('outcome', [
+  z.object({
+    outcome: z.literal('found'),
+    ...resolvedSelectionIdentityShape,
+  }).strict(),
+  z.object({
+    outcome: z.literal('text_drifted'),
+    ...resolvedSelectionIdentityShape,
+  }).strict(),
+  z.object({ outcome: z.literal('missing') }).strict(),
+]);
+
+export const resolveSelectionOutputSchema = z.object({
+  results: z.array(resolveSelectionResultSchema),
+}).strict();
+
 /**
  * The only authoritative V2.BN.12 tool directory. JSON manifests are derived
  * from these runtime entries; legacy v1 toolDefinitions are intentionally not
@@ -107,6 +152,20 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
     human_entry: {
       route: 'GET /api/notes',
       client_call_site: 'client/src/pages/Courses/CourseDetail.tsx#fetchSummary',
+    },
+    exposure: 'public',
+    scopes: ['notes:read'],
+  },
+  {
+    name: 'resolve_selection',
+    description: 'Resolve a text selection receipt against the current owned TextFlow content.',
+    input_schema: resolveSelectionInputSchema,
+    output_schema: resolveSelectionOutputSchema,
+    truth: 'content',
+    tier: 'immediate',
+    human_entry: {
+      route: 'GET /api/notes/:id/blocks',
+      client_call_site: 'client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts#fetchNote',
     },
     exposure: 'public',
     scopes: ['notes:read'],

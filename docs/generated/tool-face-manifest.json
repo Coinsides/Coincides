@@ -143,6 +143,191 @@
     ]
   },
   {
+    "name": "resolve_selection",
+    "description": "Resolve a text selection receipt against the current owned TextFlow content.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "note_id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "refs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "blockId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "textFlowId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "textUnitId": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "required": [
+              "blockId",
+              "textFlowId",
+              "textUnitId"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "text_ranges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "blockId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "textFlowId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "textUnitId": {
+                "type": "string",
+                "minLength": 1
+              },
+              "startOffset": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "endOffset": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "excerpt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "blockId",
+              "textFlowId",
+              "textUnitId",
+              "startOffset",
+              "endOffset",
+              "excerpt"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "at": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "required": [
+        "note_id",
+        "refs",
+        "text_ranges",
+        "at"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "results": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "outcome": {
+                    "type": "string",
+                    "const": "found"
+                  },
+                  "blockId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "textFlowId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "textUnitId": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "outcome",
+                  "blockId",
+                  "textFlowId",
+                  "textUnitId"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "outcome": {
+                    "type": "string",
+                    "const": "text_drifted"
+                  },
+                  "blockId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "textFlowId": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "textUnitId": {
+                    "type": "string",
+                    "minLength": 1
+                  }
+                },
+                "required": [
+                  "outcome",
+                  "blockId",
+                  "textFlowId",
+                  "textUnitId"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "outcome": {
+                    "type": "string",
+                    "const": "missing"
+                  }
+                },
+                "required": [
+                  "outcome"
+                ],
+                "additionalProperties": false
+              }
+            ]
+          }
+        }
+      },
+      "required": [
+        "results"
+      ],
+      "additionalProperties": false
+    },
+    "truth": "content",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "GET /api/notes/:id/blocks",
+      "client_call_site": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts#fetchNote"
+    },
+    "exposure": "public",
+    "scopes": [
+      "notes:read"
+    ]
+  },
+  {
     "name": "trash_notes",
     "description": "Move one note to trash immediately, or record a multi-note proposal for human review.",
     "input_schema": {

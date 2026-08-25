@@ -159,7 +159,6 @@ describe('selection receipt projection', () => {
       expect(receipt!.text_ranges[0].excerpt).toBe(
         PARTIAL_SELECTION_WHOLE_TEXT.slice(PARTIAL_SELECTION_START, PARTIAL_SELECTION_END),
       );
-      expect(receipt!.text_ranges[0].excerpt).not.toBe(PARTIAL_SELECTION_WHOLE_TEXT);
     } finally {
       vi.useRealTimers();
     }

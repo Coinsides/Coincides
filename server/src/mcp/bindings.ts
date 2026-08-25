@@ -1,4 +1,7 @@
+import { AppError } from '../middleware/errorHandler.js';
 import { listNotes, trashNoteAsUser } from '../services/notes.js';
+import { resolveSelection } from '../services/selectionResolve.js';
+import { resolveSelectionInputSchema } from '../toolFace/registry.js';
 
 export interface ToolBindingContext {
   userId: string;
@@ -18,6 +21,14 @@ const listNotesBinding: ToolBinding = (input, context) => {
   });
 };
 
+const resolveSelectionBinding: ToolBinding = (input, context) => {
+  const parsed = resolveSelectionInputSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new AppError(400, 'Invalid selection receipt', parsed.error.errors);
+  }
+  return resolveSelection(context.userId, parsed.data);
+};
+
 const trashNotesBinding: ToolBinding = (input, context) => {
   const args = input as { note_ids: string[] };
   return {
@@ -30,5 +41,6 @@ const trashNotesBinding: ToolBinding = (input, context) => {
 
 export const TOOL_BINDINGS: ReadonlyMap<string, ToolBinding> = new Map([
   ['list_notes', listNotesBinding],
+  ['resolve_selection', resolveSelectionBinding],
   ['trash_notes', trashNotesBinding],
 ]);

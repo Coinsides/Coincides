@@ -136,14 +136,13 @@ function recordValue(value: unknown): Record<string, unknown> | null {
     : null;
 }
 
-function textFlowProjection(body: Record<string, unknown>): string | null {
-  const textFlow = recordValue(body.text_flow);
-  if (!textFlow || !Array.isArray(textFlow.units)) return null;
-  const units = textFlow.units
-    .map((unit) => recordValue(unit))
-    .filter((unit): unit is Record<string, unknown> => Boolean(unit))
-    .filter((unit) => unit.status !== 'deleted' && typeof unit.text === 'string')
-    .sort((left, right) => Number(left.order_index || 0) - Number(right.order_index || 0));
+import { validTextFlowUnits } from './textFlowUnits.js';
+
+function textFlowProjection(
+  body: Record<string, unknown>,
+): string | null {
+  const units = validTextFlowUnits(body);
+  if (!units) return null;
   return canonicalPlainText(units.map((unit) => String(unit.text)).join('\n'));
 }
 
