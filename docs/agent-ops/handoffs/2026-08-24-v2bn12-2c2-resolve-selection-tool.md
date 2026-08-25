@@ -152,3 +152,30 @@ excerpt === currentUnitText.slice(startOffset, endOffset)
 **回执须含**:K-1…K-9 **各自**先红后绿两段输出(**K-2 须证明 foreign 与 nonexistent 返回值逐字节相同**;**K-3 须证明断言锁的是符号来源而非行为**;**K-7 须给字节等价与「全仓只此一份」两项证据**)· `items.ts` 的 diff **仅一个 hunk 且零语义**的证明 · 只读(`operation_batches` 零增)的证明 · 门禁逐条收据 · 触及面 diff vs 申报 · **每条阴性断言的阳性对照** · **若略过了「本单按新档略过」表之外的东西,点名申报**。
 
 ## Result
+
+### 状态
+
+`needs: claude` —— 开工核验即触发「越界即停」。未实施 S0–S3，未改产品码、测试、manifest、锁或运行中的服务；K-1–K-9 与门禁因此未执行。header 按工单纪律保持不动。
+
+### 阻塞 A：K-8 /「只读不写收据」与基线 transport 逐字冲突
+
+- 基线 `a6cc98d` 的 `server/src/mcp/transport.ts` 中，`dispatchToolCall` 对执行态调用在 binding 返回后无条件调用 `receiptWriter({ tier: 'immediate', ... })`；registry / manifest / binding 均无逐工具免收据 seam。
+- 同基线 `server/src/__tests__/v2McpTransport.test.ts` 的 K-0 真实 Express 正控明确断言 `list_notes` 调用后存在 `operation_batches` applied receipt。故 `list_notes` 在当前基线上不是「零收据」先例。
+- 因而，在不改 transport / 收据轴的允许面内，真实 `/api/mcp` 的 `resolve_selection` 不可能同时满足 K-1 与 K-8（调用完成且 `operation_batches` 行数不变）。可行的产品级解都需要扩大合同：增加显式 receipt policy 并让 transport 遵守，或在 transport 按工具名特判；二者均越出本单边界。binding/service 做「写后删除」既仍发生写入，也违反只读语义，未采用。
+
+### 阻塞 B：H-2 / K-3 的同源符号不在 server 可导入边界内
+
+- CodeGraph 与独立文件扫描一致：`textFlowIdForBlock` 的唯一实现位于 `client/src/pages/Notes/canvasEngine/textFlowService.ts`；`server/src` 与 `shared` 当前没有同源导出。
+- `server/tsconfig.json` 把 `rootDir` 限于 `server/src`，只 project-reference `../shared`。server 直接 import 客户端源码不是可交付的双-tsc / 生产产物路径。
+- 在新 server 模块重写同样的字符串函数正是 H-2 禁止的本地重派生；真正同源需要把 helper 下沉到 `shared`，并改客户端 `textFlowService.ts` 为 import/re-export，但该客户端产品文件不在本单允许面内。
+
+### 需要裁定
+
+请调度方同时补裁：①为只读工具开放哪一种明确的 transport-level 免收据机制与相应允许面；②允许把 `textFlowIdForBlock` 下沉到 `shared` 并回接客户端，或另给一个已经同源、server 可导入的权威符号路径。两项未裁前继续施工必然越界。
+
+### 交付状态
+
+- `npm.cmd run docs:index`：PASS，0 个 INDEX 变化。
+- `npm.cmd run docs:check`：PASS。
+- handoff UTF-8 fatal decode：PASS，且无 replacement bytes。
+- 本会话对 `.git` 为只读；精确 `git add -- <本工单>` 被 `.git/index.lock: Permission denied` 拒绝，故未能暂存或提交。工作树中的本单真实 diff 为本 `## Result` 追加；三个已知 EOL 假阳性的工作树 blob 均与 `HEAD` 相同，`.claude/settings.local.json` 未触碰。
