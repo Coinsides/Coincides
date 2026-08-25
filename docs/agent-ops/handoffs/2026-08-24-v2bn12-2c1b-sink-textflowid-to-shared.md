@@ -1,76 +1,89 @@
-> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: ready(Fable 2026-08-24 裁 A1,log #8 `529a59a`) | re: v2bn12-2c-1b | date: 2026-08-24
+> from: claude(opus,调度权:operating-workflow.md v1) | to: codex(builder) | status: ready(Fable 2026-08-24 翻案 A1′,log #10 `3a66ef3`) | re: v2bn12-2c-1b(第 2 版) | date: 2026-08-24
 
-# V2.BN.12.2c-1b:`textFlowIdForBlock` 下沉 `shared/`(纯 import 改道,零语义)
+# V2.BN.12.2c-1b(v2):`textFlowIdForBlock` 跨端同源 —— **契约测试锁,不走 import 链**
 
 > ⚠️ header 由 Opus 依调度授权链管理,**不代表 Henry 本人逐张批过**。
+> 📌 **第 1 版(A1:server 直接 import shared)已被 Fable 翻案**。翻案依据 = 本单第 1 版的 S1 探针 + b-0 读码报告:**import 链的真实价格是一次构建体系重设计**,而标的只是 2 行模板字面量。**第 1 版的 `## Result` 保留在下方,供对照。**
 
-## 为什么有这一单
+## A1′ 形状
 
-c-2 撞墙:C 裁定要求 resolve **import 同一个** `textFlowIdForBlock`,而该函数**只住客户端**,server `rootDir: "./src"` 够不着。**Fable 裁 A1:下沉 `shared/`** —— 跨端身份约定住 shared,与 `SelectionReceiptV1` 同理。⛔ 不采行为锁替身份锁(C 自废),⛔ 不采本段不校验(正是 C 要防的「字段在没人用」)。
+- **shared 源码仍是唯一真相**;
+- **client 半照原样**:函数沉入 `shared/`,5 个调用点回接(打包器读源码,不受构建体系影响);
+- **server 侧本地实现同名函数**(⛔ 不 import shared 的运行时值);
+- ⭐ **常驻跨界契约测试锁两实现全等** —— 同源的执行点从 **import 链**移到**契约测试**。
 
-## 调度方已亲验的五条实况(**行号会漂,按符号定位**)
+## 调度方 b-0 已亲验的四条实况(**决定了本单的形状,不得绕过**)
 
-| # | 实况 |
-|---|---|
-| 1 | ⭐ **本体零依赖**:`textFlowIdForBlock` 是纯 2 行 `` return `textflow-${blockId}` ``,**不引用同文件任何东西** ⇒ 下沉不拖别的 |
-| 2 | **调用面**:`client/src/pages/Notes/canvasEngine/textFlowService.ts` 定义,**5 个客户端文件**引用(`TextBlockProjection.tsx` / `useBlockTextFlowEditController.ts` / `useSlashBlockRollbackController.ts` / `BlockEditorLayer.tsx` / `ShapeObjectLayer.tsx`);**server 侧零引用** |
-| 3 | ⭐ **shared 已有运行时代码先例**:`classifyCanvasSurfaceAuthority`(`shared/types/canvasSurfaceAuthority.ts`)被客户端**运行时**消费 ⇒ shared 放函数不是新形态 |
-| 4 | 🔴 **但 server 至今只有一处 shared import,且是 `import type`**(`server/src/mcp/manifest.ts:8`,编译时擦除)⇒ **server 运行时值跨界零先例** |
-| 5 | **server 跑法**:`dev`/全部测试走 `jiti`/`tsx`(不 emit)⇒ 运行时解析无碍;**但 `build` 是裸 `tsc`**,`rootDir: "./src"`,**运行时 import 会被 emit** |
+| # | 实况 | 对本单的约束 |
+|---|---|---|
+| 1 | **tsc 不改写 import 说明符**:产物 JS 里原样是 `@shared/types/...`,裸 Node 报 `ERR_MODULE_NOT_FOUND`(**现物已验**) | ⛔ server 产品码不得运行时 import shared |
+| 2 | `server/src/mcp/manifest.ts` 顶部已成文:**「server 的 no-emit 门有意不构建被引用产物」+ `@ts-ignore TS6305`** | 测试内的 shared import **照此既有模式**处理 |
+| 3 | ⭐ **三个世界三种行为**:dev(**jiti**)🔴 解析不了 `@shared/*` · 测试(**tsx**)✅ · 产物(裸 node)🔴 | **测试世界是唯一全绿的世界** ⇒ 契约测试住这里 |
+| 4 | ⚠️ **调度方探针的天花板**:上表 ✅ 只证明**模块解析得到**,**未证明具名导入可用**(动态 `import()` 下值被套在 `default` 里) | ⇒ **S1 必须先补这一格** |
 
 ---
 
-## 🔴 S1:**先做构建探针,再动手**(本单唯一的未知)
+## 🔴 S1:**静态具名 import 微探针,先做、单独报**(本单枢纽)
 
-**问题**:server 用**运行时**(非 `import type`)引用 shared 的函数,能否过 `tsc`?
-⚠️ `rootDir: "./src"` 下,emit 的相对 import 指向 src 之外,**可能触发 TS6059「not under rootDir」**。server tsconfig **已配** `paths: { "@shared/*": ["../shared/*"] }` 与 `references: [{ path: "../shared" }]`,**但从未被运行时值用过**。
+**问题**:server 的**测试**文件里一条**静态具名** `import { x } from '@shared/...'`,在 **tsx 运行 + tsc 门**下能不能同时过?
 
-**做法**:在 server 侧任选一个既有文件加一行运行时 import(可用 `@shared/...` 形式),跑 `cd server && npx tsc --noEmit` 与 `npm run build`,**记录实况后把探针撤掉**。
+**做法**:写一个最小临时测试,静态具名 import `shared` 里任一既有导出并断言 `typeof === 'function'`;跑该测试 + `cd server && npx.cmd tsc --noEmit`。
 
-- ✅ **过了** ⇒ 按 S2 施工,并在 Result 里写明**用的是哪种 import 形式**(`@shared/*` 还是相对路径)。
-- 🔴 **没过** ⇒ ⛔ **停手,标 `needs: claude`**,把**报错原文**写进 Result。
-  ⚠️ **允许的唯一自救**:改用**已配好的 `@shared/*` 形式**再试一次。
-  ⛔ **不得**改 `tsconfig.json` 的 `rootDir`/`paths`/`references`、不得改构建脚本、不得加打包步骤 —— **那是构建体系变更,设计级,不在本单授权内。**
+- ✅ **两边都过** ⇒ 进 S2。
+- 🔴 **tsc 拒** ⇒ 先按实况 2 加 `@ts-ignore TS6305`(**这是允许的自救,有成文先例**)再试一次。
+- 🔴 **仍拒 / 或 tsx 下具名导入拿不到值** ⇒ ⛔ **停手标 `needs: claude`**,贴报错原文与实际拿到的对象形状。
+  ⛔ **不得**改 tsconfig / 构建脚本 / 加打包步骤 / 加路径解析器。
 
-📌 **这一条是本单的估时枢纽**,请优先做、单独报。
+📌 **自救条款分两类(本单起生效)**:**为诊断而试** = 允许多次、鼓励把每种形式的结果都带回;**为交付而改** = 仅限本单明文列出的那一种(`@ts-ignore` 模式)。**⛔ 别把两者混为一谈。**
 
-## S2:下沉(S1 通过后)
+## S2:client 半(S1 通过后)
 
-1. **新建** `shared/types/textFlow.ts`,把 `textFlowIdForBlock` **移**进去(⛔ 移动,不是复制)。
-2. `client/.../textFlowService.ts` **删除该函数定义**。
-3. **回接全部 5 个客户端调用点**,改为从 shared import。
-   ⚠️ 有的文件是**与其它符号写在同一条 import 里**(如 `ShapeObjectLayer.tsx`),需拆分 import 语句 —— **只拆这一个符号,其余原样**。
+1. **新建** `shared/types/textFlow.ts`,把 `textFlowIdForBlock` **移**进去(⛔ 移动不是复制);
+2. `client/src/pages/Notes/canvasEngine/textFlowService.ts` **删除该定义**;
+3. **回接 5 个客户端调用点**:`TextBlockProjection.tsx` / `useBlockTextFlowEditController.ts` / `useSlashBlockRollbackController.ts` / `BlockEditorLayer.tsx` / `ShapeObjectLayer.tsx`。
+   ⚠️ 有的文件把它与其它符号写在**同一条 import** 里 —— **只拆这一个符号,其余原样**。
 4. ⛔ **零语义**:`` `textflow-${blockId}` `` 一个字符不许变。
 
-⛔ **不做**:不动 `textFlowService.ts` 的其它 11 个导出 · 不动 server(本单 server 侧零改动,c-2 才 import) · 不改 tsconfig/构建 · 不碰 selection 相关任何文件。
+## S3:server 半 + 契约测试
 
----
+**新建** `server/src/services/textFlowIdentity.ts`,本地实现同名函数(⛔ 不 import shared 运行时值)。
 
-## K 系 killer(**均为对点名机关的单刀验红;⛔ 单刀、不自由巡猎、不多轮**)
+> ⚠️ **【调度方判断,已标出】** Fable 裁定原文说放进「§3.1 D 共享解析模块」,**但那个模块由 c-2 的 S1 创建,c-2 在本单之后** ⇒ 本单若依赖它会成为循环。**故本单自建 `textFlowIdentity.ts`,由 c-2 直接 import。** 若 Fable 认为应改由 c-2 承担 server 半,**本单可只做 S2 + 把 S3 移出** —— 但那样契约测试也要推迟,**跨端全等在 c-2 落地前将无人守**。⇒ **本单按自建走。**
+
+⭐ **契约测试**(常驻,不是一次性):**静态具名 import** 两侧实现,断言对同一组输入**逐字符全等**(含边界:空串 / 含 `-` / 含中文 / 长 id)。
+
+## K 系 killer(**单刀验红;⛔ 不自由巡猎不多轮**)
 
 | # | killer | 必红判据 |
 |---|---|---|
-| **K-1** ⭐ **零语义** | 派生结果逐字节不变 | 令 shared 版返回 `` `tf-${blockId}` `` ⇒ **须红** |
-| **K-2** ⭐⭐ **是移动不是复制** | 全仓 `textFlowIdForBlock` **定义只此一份** | 令 `textFlowService.ts` 留一份同名副本 ⇒ **须红**;⭐ 断言须锁**定义处数量**(AST/源码枚举),⛔ 不得只断行为 |
-| **K-3** ⭐ **5 个调用点全部改道** | 5 个文件均从 shared 解析到该符号 | 令任一文件仍从 `./textFlowService` 取 ⇒ **须红**(⛔ 若那里已无定义则应是编译错,**编译错不算合格的红**,须改为可断言的形状) |
-| **K-4** | **既有测试全绿不退化** | `test:unit` 与 `test:v2` 数量与结果**与基线一致** |
+| **K-1** ⭐⭐ **契约锁承重** | 两侧实现全等 | **改 server 侧拼法**(如 `` `tf-${blockId}` ``)⇒ **契约测试须红** |
+| **K-2** ⭐ **是移动不是复制** | 全仓 shared 侧定义**只此一份** | 令 `textFlowService.ts` 留一份同名副本 ⇒ **须红**;断言须锁**定义处数量**(源码枚举),⛔ 不得只断行为 |
+| **K-3** ⭐ **5 个调用点全部改道** | 5 个文件均从 shared 取 | ⭐ **mutation = 令任一文件改为本地重派生**(自己定义同名函数,拼法一致)⇒ 源码枚举断言**须红**。<br>⛔ **不得**用「改回从 `./textFlowService` 取」作 mutation —— **那必是编译错,而编译错不算合格的红**(第 1 版此处写歪了,已订正) |
+| **K-4** | 既有测试不退化 | `test:unit` / `test:v2` 数量与结果与基线一致 |
 
-**红的性质**:目标 `AssertionError`,⛔ **不得是 `ReferenceError`/`SyntaxError`/`ERR_MODULE_NOT_FOUND`**;每刀独立恢复后再取绿。
+**红的性质**:目标 `AssertionError`,⛔ 不得是 `ReferenceError`/`SyntaxError`/`ERR_MODULE_NOT_FOUND`;每刀独立恢复后再取绿。
+⭐ **正确的 mutation 必须编译得过**,否则测的是编译器,不是测试。
 
 ## 边界
 
-**允许**:**新** `shared/types/textFlow.ts` · `client/.../textFlowService.ts`(仅删该函数 + 必要 import 整理)· **5 个调用点文件**(仅该符号的 import 改道)· 相应测试 · S1 探针(**用完撤掉**)。
-**⛔ 不得**:改 tsconfig / 构建脚本 · 动 server 任何文件(S1 探针除外,且须撤) · 碰 selection 任何文件 · 碰 `docs/agent-ops/`(唯一例外:向本工单追加 `## Result`)。
+**允许**:**新** `shared/types/textFlow.ts` · **新** `server/src/services/textFlowIdentity.ts` · **新**契约测试 · `client/.../textFlowService.ts`(仅删该函数 + import 整理)· **5 个调用点文件**(仅该符号改道)· S1 临时探针(**用完撤净,见下**)。
+**⛔ 不得**:改 tsconfig / 构建脚本 / 加打包步骤 / 加路径解析器 · server 产品码运行时 import shared · 碰 selection 任何文件 · 碰 `docs/agent-ops/`(唯一例外:向本工单追加 `## Result`)。
 **越界即停,标 `needs: claude`。**
+
+## 🔴 探针撤净:**必须双面自证**(第 1 版的教训)
+
+第 1 版 builder 声称「探针已撤净」并用**源码 blob 等于 HEAD** 作证 —— **源码那半是真的,但 `server/dist/mcp/manifest.js` 里探针还在**。
+**成因**:**TS6305 是报错但仍 emit** ⇒ 失败的构建照样写了产物;自证只覆盖了源码面。
+⇒ ⭐ **本单要求双面自证**:①源码 blob 等于 HEAD;②**产物面** —— `grep` 探针符号在 `server/dist/**` 无命中(或重建产物后复验)。**⛔ 只报源码面 = 未撤净。**
 
 ## 📌 本单按新档(P0–P3)略过的东西(**成对写**)
 
 | 略过了什么 | 本来会挡什么 | 档 |
 |---|---|---|
-| **下沉后的跨端一致性模糊矩阵**(空 blockId / 超长 id / 含特殊字符的 id) | 「派生函数对畸形输入的行为」 | P2 不扩 |
-| **多轮 refute / 自由巡猎** | 「点名 killer 之外的未知漏径」 | P3 停做 |
+| 契约测试的输入模糊矩阵(超长 / 控制字符 / 代理对 id) | 「两实现对畸形 id 的分歧」—— 现只测列举的四类边界 | P2 不扩 |
+| 多轮 refute / 自由巡猎 | 「点名 killer 之外的未知漏径」 | P3 停做 |
 
-⭐ **另请申报(不必测)**:下沉到 shared 后,**server 与 client 的构建产物是否各自持有一份该函数的副本**(打包/emit 层面)?若是,「同源」在源码层成立、在产物层可能不成立 —— **只要你的观感,不要你去验。**
+⭐ **另请申报(不必测)**:契约测试只在 **tests 世界(tsx)** 成立;**dev 与产物世界没有任何东西守这个全等**。你认为这个缺口的实际风险有多大?**只要观感。**
 
 ## ⚠️ 基线缺口:不得代偿
 
@@ -78,20 +91,20 @@ c-2 撞墙:C 裁定要求 resolve **import 同一个** `textFlowIdForBlock`,而�
 
 ## D. 探针 / 锁 / 环境
 
-阴性断言前先过阳性对照;⭐ **凡阴性结论至少要有第二个独立来源同意**。
+阴性断言前先过阳性对照;⭐ 凡阴性结论至少要有第二个独立来源同意。
+📌 **`npx` 在本机会被 PowerShell execution policy 挡在 `npx.ps1` 层 ⇒ 用 `npx.cmd`**(第 1 版实测)。
 ⚠️ **已知 EOL 假阳性三个**:`useNoteCanvasRuntimeController.ts` / `server/src/routes/projections.ts` / `SelectionToolbarLayer.tsx` ⇒ 判真用 blob 哈希或 `--numstat`,⛔ 不用 porcelain。
 📌 提交完整性:改了文档跑 `docs:index` 一起交;生成件是 tracked 的 ` M` 不在 `??` 里;**门禁跑在工作树、提交的是暂存树,可以一绿一红**。
 📌 dev 服务在 `:3001`/`:5173`(调度方所有,⛔ 不要杀)。
 📌 **PID 8292 的 codex.exe 是 Henry 的桌面应用 —— ⛔ 不得杀、不得干扰。**
 锁由发单方(opus)持有 —— ⛔ 不取锁、不写 owner.json、不删锁。
-⭐ 写 `## Result` 是本单交付物之一,不需确认,直接写。
+⭐ 写 `## Result` 是本单交付物之一,不需确认,直接写。**⛔ 不要删除或改写下方第 1 版的 `## Result`,在其后另起一段。**
 
 ## 验证与回执
 
 门禁 docs-first:`docs:check` → `verify:v2-bn8-runtime` → 双 `tsc --noEmit` → `test:unit` → `test:v2` → 五道 tool-face 门。
 **回执纪律**:README Builder 侧 1–3(含 **UTF-8**)+ **M-2 header 不由你翻**。
-
-## Result
+## Result(第 1 版 —— A1,已被翻案;原文保留供对照)
 
 **状态**: `needs: claude`（S1 构建探针未通过；依工单停手，未进入 S2）。
 
