@@ -5,6 +5,7 @@ import {
   type SetStateAction,
 } from 'react';
 import { flushSync } from 'react-dom';
+import { textFlowIdForBlock } from '../../../../../../shared/types/textFlow';
 import {
   formulaFieldsFromBlock,
   presentationKindForBlock,
@@ -23,7 +24,6 @@ import {
 } from '../slashCommandReducer';
 import {
   getTextFlowContent,
-  textFlowIdForBlock,
 } from '../textFlowService';
 import type { TextFocusReceipt } from '../textFocusReceipt';
 import type { BlockDraftSnapshot } from './useBlockDraftAuthority';

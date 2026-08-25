@@ -216,3 +216,64 @@
 - S2/S3 均未施工：未新建 `shared/types/textFlow.ts`、未移动 client 定义、未回接 5 个调用点、未新建 server 本地实现或常驻契约测试；没有新增平行机关。
 - K-1–K-4、完整门禁与 TD-12 绕行均未进入：S1 已按合同触发终止，不能用后续测试代偿静态具名 import 这一前置条件。
 - 对「契约测试只在 tests/tsx 世界成立，dev(jiti) 与产物(裸 node)不守全等」的观感：若静态具名 import 问题另行解决并让契约门常驻，实际风险约为**低到中、偏低**——标的是稳定的两行模板字面量，正常合入会被契约门拦住；但 dev/startup 没有运行时自检，绕过门禁、手工热修或装配旧产物时仍可能把两份实现不一致地带进运行世界。当前则更直接：工单规定形状的常驻测试本身无法按要求加载 shared 具名值，因此 A1′ 尚不可交付。
+
+## Result（第 3 版 —— A1′ 已交付）
+
+**状态**：`done`。基线 `79a8ef3` 是当前 `HEAD=c931963b5a2e128be86a142b86dcb68391553a1c` 的祖先；header 按 M-2 保持 `ready`，未翻动。第 1、2 版两段历史回执原字节保留，本段只追加在其后。
+
+### S1 前置检查与双面撤净
+
+- `shared/package.json` 已由 c-1a 提供，JSON 解析确认 `type === 'module'`；其工作树内容与 `79a8ef3` 一致，本单未创建或修改。
+- 临时测试 `server/src/__tests__/__textFlowSharedNamedImportProbeV3.test.ts` 使用静态具名 import：
+  ```ts
+  import { classifyCanvasSurfaceAuthority } from '@shared/types/canvasSurfaceAuthority';
+  ```
+  并断言 `typeof classifyCanvasSurfaceAuthority === 'function'`。`node --import tsx --test ...` 为 **1/1 PASS**。
+- 探针随后删除。源码面：临时路径在 `HEAD` 与工作树均不存在，`git diff --exit-code HEAD -- <probe>` 为 0。产物面：完整门重建以后，对 `server/dist/**` 先以 `tool-face-manifest` 做阳性对照，再由 PowerShell `Select-String` 与独立 Node 递归遍历复核；探针路径名与测试标题均为零命中。没有使用 namespace、`default.x` 或互操作垫片。
+
+### S2 / S3 实现
+
+- 新建 `shared/types/textFlow.ts`，唯一 client/shared 定义保持原语义：``return `textflow-${blockId}`;``。
+- `client/.../textFlowService.ts` 只删除该函数的四行定义；其余 11 个导出保持不动。
+- 五个调用文件只把 `textFlowIdForBlock` 拆到 `../../../../../../shared/types/textFlow`；原混合 import 中的 `TEXT_FLOW_CONTENT_KEY`、`projectTextFlowContent`、`getTextFlowContent` 等其它符号保持原路径与形状。
+- 新建 `server/src/services/textFlowIdentity.ts`，同名本地实现为同一模板字面量，文件没有任何 import；server 产品代码不运行时 import shared。
+- 新建常驻专项测试 `server/src/__tests__/textFlowIdentityContract.test.ts`。它静态具名 import shared 与 server 两侧，对空串、含 `-`、中文、1024 字符长 id 逐字符严格比较；并使用 TypeScript AST：
+  - 枚举 client/shared production SourceFile，定义位置必须恰为 `shared/types/textFlow.ts`；
+  - 五个调用文件各须有且只有一个未改名的 named import，模块解析须直达 shared 文件，且调用表达式须绑定该 import；
+  - server 本地文件须恰有一个定义且无运行时 import。
+  专项正控最终为 **4/4 PASS**。工单未授权改 `package.json` / 构建脚本，且 K-4 要求 `test:v2` 保持 270/270，因此测试以独立常驻文件直接运行，未越界接线。
+
+**平行机关申报**：server 本地同名实现是 A1′ 明令要求的第二实现，不是自行另造正门。既有 shared 运行时值不能供 server 产品世界使用（TD-21 仍在），故两实现由上述 tests/tsx 契约锁全等；没有新增其它状态、守卫、事务或恢复机关。
+
+### K-1～K-3 单刀结果
+
+每刀均先跑对应 `tsc --noEmit` 证明 mutation 可编译，再只跑专项契约测试；红均为目标 `AssertionError`，不是加载/语法/引用错误。每刀之后用预存工作树 hash 精确恢复并复跑 4/4：
+
+| Killer | 可编译证明 | 目标红 | 恢复证明 |
+|---|---|---|---|
+| K-1：server 改为 ``tf-${blockId}`` | server tsc exit 0 | `AssertionError`: `'tf-' !== 'textflow-'`，3/4 pass | server 文件恢复 hash `97c02b8...`，4/4 |
+| K-2：`textFlowService.ts` 留同名副本 | client tsc exit 0 | AST 定义枚举出现 client + shared 两处，`AssertionError`，3/4 pass | 文件恢复 hash `b9f5da1...`，4/4 |
+| K-3：一个调用点改为本地同拼法函数 | client tsc exit 0 | 定义位置与 named import 数量两个 `AssertionError`，2/4 pass | 文件恢复 hash `da7f5e8...`，4/4 |
+
+没有自由巡猎或多轮 mutation。
+
+### 完整门禁
+
+- `npm.cmd run docs:check`：PASS（docs-first）。
+- `npm.cmd run verify:v2-bn8-runtime`：exit 0；含 client 222/222、双构建、runtime/check/smoke/docs/secrets 全链。
+- `client && npx.cmd tsc --noEmit`：exit 0；`server && npx.cmd tsc --noEmit`：exit 0。
+- `npm.cmd run test:unit`：**222/222 PASS**。
+- `server && npm.cmd run test:v2`：以新建 OS-temp `CANVAS_ASSET_DIR` 运行，**270/270 PASS**；目录最终 0 项/0 byte，并在验证绝对路径仍位于 OS temp 后非递归删除。这里只绕开 TD-12，没有修改测试或产品语义，也不声称清债。
+- 五道 tool-face 独立门：registry **4/4**、manifest **10/10**、manifest freshness PASS（2 public）、parity **10/10**、production parity PASS（2 public）。
+- 专项契约测试：最终 **4/4 PASS**。
+
+### 范围与既有缺口
+
+- 有意义的产品改动严格落在两个新实现文件、一个新契约测试、`textFlowService.ts` 定点删除与五个调用点单符号改道；本工单文件是唯一 docs 改动。未改 package / tsconfig / build / path resolver / selection 文件。
+- 三个已知 EOL 假阳性以 blob 判真：`useNoteCanvasRuntimeController.ts`、`routes/projections.ts`、`SelectionToolbarLayer.tsx` 的工作树 hash 均逐位等于 `HEAD`。既存 untracked `.claude/settings.local.json` 未触碰。
+- 最终产品产物面（排除 `dist/__tests__`）经 PowerShell 与独立 Node 双检，均无 `@shared/types/textFlow`；S1 探针符号在全部 `server/dist/**` 双检零命中。测试产物不构成运行时守卫。
+- TD-21 **未修**：裸 Node 产物对 `@shared/*` 的解析缺口仍在；TD-14、TD-6、TD-19/20、TD-16 均未触碰。未取/写/删调度方锁，未干扰 `:3001`、`:5173` 或 PID 8292。
+
+### tests-only 缺口观感
+
+实际风险观感为 **低到中、偏低，但不是零**：标的是稳定、无状态的两行模板字面量，显式运行常驻契约测试会同时挡行为漂移、client 副本和五处本地重派生；但 dev(jiti) 与裸 Node 产物没有启动期全等自检，而且本单按允许面没有给专项测试新增 npm 接线。绕过专项门、手工热修或装配旧产物时，两份实现仍可能漂移；这正是 TD-21 所记的残余边界，不在本单代偿。

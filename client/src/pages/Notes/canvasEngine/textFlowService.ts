@@ -13,10 +13,6 @@ import type {
 export const TEXT_FLOW_CONTENT_KEY = 'text_flow';
 export const TEXT_FLOW_CONTENT_VERSION = 'TextBlockContentV1';
 
-export function textFlowIdForBlock(blockId: string): string {
-  return `textflow-${blockId}`;
-}
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value && typeof value === 'object' && !Array.isArray(value));
 }

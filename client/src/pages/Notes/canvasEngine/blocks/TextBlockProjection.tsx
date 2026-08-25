@@ -17,6 +17,7 @@ import {
   type MouseEvent,
   type Ref,
 } from 'react';
+import { textFlowIdForBlock } from '../../../../../../shared/types/textFlow';
 import type { BlockPresentationKind } from '../blockContentService';
 import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import { resizeTextareaToContent } from '../measurementService';
@@ -30,7 +31,6 @@ import type {
 import {
   TEXT_FLOW_CONTENT_KEY,
   projectTextFlowContent,
-  textFlowIdForBlock,
 } from '../textFlowService';
 import type { CapturedSelectionRange } from '../selectionRangeService';
 import {

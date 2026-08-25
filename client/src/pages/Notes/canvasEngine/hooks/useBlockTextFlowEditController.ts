@@ -4,6 +4,7 @@ import {
   type Dispatch,
   type SetStateAction,
 } from 'react';
+import { textFlowIdForBlock } from '../../../../../../shared/types/textFlow';
 import { rebaseAnnotationsForTextUnitEdit } from '../rangeRebaseService';
 import type {
   AnnotationTruthV1,
@@ -12,7 +13,6 @@ import type {
 } from '../runtimeDataTypes';
 import {
   getTextFlowContent,
-  textFlowIdForBlock,
 } from '../textFlowService';
 
 export interface ApplyBlockTextFlowEditOptions {

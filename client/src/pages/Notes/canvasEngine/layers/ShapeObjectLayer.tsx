@@ -4,6 +4,7 @@ import type {
   CSSProperties,
 } from 'react';
 import { useEffect, useRef } from 'react';
+import { textFlowIdForBlock } from '../../../../../../shared/types/textFlow';
 import type { NoteBlock } from '../runtimeDataTypes';
 import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import type {
@@ -11,7 +12,7 @@ import type {
   CanvasPlacement,
 } from '../types';
 import { resolveCanvasObjectStyle } from '../objectStyleService';
-import { getTextFlowContent, textFlowIdForBlock } from '../textFlowService';
+import { getTextFlowContent } from '../textFlowService';
 import {
   textFocusReceiptsEqual,
   type TextFocusReceipt,

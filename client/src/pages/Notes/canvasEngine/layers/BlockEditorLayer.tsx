@@ -8,6 +8,7 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from 'react';
 import { getNoteBlockTemplateLabel } from '@shared/types';
+import { textFlowIdForBlock } from '../../../../../../shared/types/textFlow';
 import {
   formulaFieldsFromBlock,
   presentationKindForBlock,
@@ -35,7 +36,6 @@ import type {
 import type { CapturedSelectionRange } from '../selectionRangeService';
 import {
   getTextFlowContent,
-  textFlowIdForBlock,
 } from '../textFlowService';
 import type { TextFocusReceipt } from '../textFocusReceipt';
 import {
