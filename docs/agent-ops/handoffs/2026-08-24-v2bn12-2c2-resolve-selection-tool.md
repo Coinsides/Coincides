@@ -36,6 +36,8 @@
 ## S2:注册表条目 + binding
 
 - 注册表 `server/src/toolFace/registry.ts` **+1 条** `resolve_selection`:真 zod `.strict()`;`truth: 'content'`;**只读 tier 同 `list_notes` 先例**;`exposure: 'public'`。
+  ⭐ **入参 schema 必须逐字对齐 c-1-fix 后的 `SelectionReceiptV1`**:字段名为 **`excerpt`(不是 `text`)**;⛔ **不得「顺手规范化」命名** —— 该类型是**外层 snake_case(`note_id`/`text_ranges`/`at`)+ 内层 camelCase(`blockId`/`textFlowId`/`startOffset`)** 的混合式(接缝的自然产物,内层继承自客户端既有类型)。**改一处大小写就会让客户端与服务端静默不一致。**
+  ⭐ **zod 加 refine**(Fable ⑤③):`excerpt.length === endOffset - startOffset`,**破则 400**(与 H-3「整体 4xx 只给 zod 不过」一致)。
 - `server/src/mcp/bindings.ts` **+1**。
 - manifest 重生成(生成件与源同提交)。
 
@@ -47,8 +49,8 @@
 
 | 态 | 判据 |
 |---|---|
-| **`found`** | block 存在且属本人 · `textFlowId` 与 `textFlowIdForBlock(blockId)` **一致** · unit 存在于 `content_json.text_flow.units[]` 且 **`status !== 'deleted'`** · excerpt 与当前文本**严格字符串相等** |
-| **`text_drifted`** | ⭐ **只留给「位置还在、文本变了」** —— 前三项全过,仅 excerpt 与当前文本不等 |
+| **`found`** | block 存在且属本人 · `textFlowId` 与 `textFlowIdForBlock(blockId)` **一致** · unit 存在于 `content_json.text_flow.units[]` 且 **`status !== 'deleted'`** · ⭐ **`excerpt === currentUnitText.slice(startOffset, endOffset)`**(逐字符,见下「比对式」) |
+| **`text_drifted`** | ⭐ **只留给「位置还在、文本变了」** —— 前三项全过,仅 **`excerpt !== currentUnitText.slice(startOffset, endOffset)`** |
 | **`missing`** | 其余一切:block 不存在 / **block 非本人** / unit 不存在 / **unit `status === 'deleted'`**(裁定 A)/ `textFlowId` 与派生值**不一致**(裁定 C) |
 
 ### ⛔ 三条硬闸
@@ -57,7 +59,24 @@
 - **H-2(裁定 C)**:`textFlowId` **保留但不许带着不用**。resolve **必须 import 同一个 `textFlowIdForBlock`** 做一致性校验,⛔ **不得本地重派生**(哪怕字符串拼法一模一样)。
 - **H-3**:整体 4xx **只用于入参本身坏**(zod 不过);⛔ **不得因某条 ref 解析失败而整单 4xx**。
 
-📌 **excerpt 比对是机械的严格字符串相等** —— ⛔ 不做 trim / 归一化 / 模糊匹配 / 相似度。**零模型、零 OCR。**
+### ⭐ 比对式(c-1-fix 后定形,Fable 2026-08-24 ⑤)
+
+```
+excerpt === currentUnitText.slice(startOffset, endOffset)
+```
+
+- **左边 `excerpt` 是收据里的切片**(c-1-fix 已把它从「整段 unit 文本」改为切片,并更名 `text` → `excerpt`);
+- **右边是当前文本按同样 offsets 取的切片** —— ⛔ **不是整段 unit 文本**。
+
+📌 **机械的严格字符串相等** —— ⛔ 不做 trim / 归一化 / 模糊匹配 / 相似度 / 大小写折叠。**零模型、零 OCR。**
+
+### ⚠️ offsets 被前文编辑推移 ⇒ **如实报 `text_drifted`,这是有意语义不是缺陷**
+
+若用户在选区**之前**插入或删除了文字,offsets 指向的窗口会整体错位,切出来的是**别的字**。
+⇒ 比对不等 ⇒ **报 `text_drifted`,正确**。
+
+⛔ **不得**为此做「滑动窗口找回原文」「模糊重定位」「按 excerpt 全文搜索」之类补偿 —— 那是**锚时代**的能力(设计 v1 §4 / 段计划 §4「不做」)。**本单只如实报告位置与内容是否仍然对得上,不负责把它找回来。**
+📌 **这一句请 builder 在 `## Result` 里复述一遍**,以证明它没有把「报告漂移」误解成「修复漂移」。
 
 ---
 
