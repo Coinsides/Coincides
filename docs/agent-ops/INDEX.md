@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-08-25
+> **日期 (Updated)**: 2026-08-26
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 149 份文档。
+共 150 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -34,8 +34,9 @@
 | [analysis/2026-08-23-v2bn12-2b4-journey-sheet.md](analysis/2026-08-23-v2bn12-2b4-journey-sheet.md) | V2.BN.12.2b「首个写工具 + 人审队列」旅程分数走查单 | `active` | 2026-08-23 | — |
 | [analysis/2026-08-24-c0-resolve-selection-server-paths.md](analysis/2026-08-24-c0-resolve-selection-server-paths.md) | c-0:`resolve_selection` 的 server 侧现实路径 | `active` | 2026-08-24 | — |
 | [analysis/2026-08-24-selection-receipt-precheck.md](analysis/2026-08-24-selection-receipt-precheck.md) | 12.2c 前置核实报告:选区收据 §7 三问 | `active` | 2026-08-24 | — |
-| [analysis/2026-08-24-v2bn12-2c3-journey-sheet.md](analysis/2026-08-24-v2bn12-2c3-journey-sheet.md) | V2.BN.12.2c「选区收据 + 只读解析」旅程分数走查单 | `draft` | 2026-08-24 | — |
+| [analysis/2026-08-24-v2bn12-2c3-journey-sheet.md](analysis/2026-08-24-v2bn12-2c3-journey-sheet.md) | V2.BN.12.2c「选区收据 + 只读解析」旅程分数走查单 | `active` | 2026-08-26 | — |
 | [analysis/2026-08-25-agent-architecture-meeting.md](analysis/2026-08-25-agent-architecture-meeting.md) | Agent 架构会议记录(Mr. Zero · 客工制度 · harness 代表制) | `active` | 2026-08-25 | — |
+| [analysis/2026-08-26-agent-org-charter.md](analysis/2026-08-26-agent-org-charter.md) | Agent 时代组织总纲(收敛稿) | `active` | 2026-08-26 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
