@@ -26,7 +26,8 @@ import {
 } from '../mcp/transport.js';
 import noteRoutes from '../routes/notes.js';
 import { createToolReceiptsRouter } from '../routes/toolReceipts.js';
-import { createItem } from '../services/items.js';
+import { listContentGroups, upsertContentGroup } from '../services/contentGroups.js';
+import { createItem, getItem, listItems } from '../services/items.js';
 import { trashNoteAsUser } from '../services/notes.js';
 import {
   resolveSelection,
@@ -34,6 +35,7 @@ import {
   type SelectionReceiptTextRangeInput,
 } from '../services/selectionResolve.js';
 import { textFlowIdForBlock } from '../services/textFlowIdentity.js';
+import { TOOL_REGISTRY } from '../toolFace/registry.js';
 
 const USER_ID = '11111111-1111-4111-8111-111111111111';
 const COURSE_ID = '22222222-2222-4222-8222-222222222222';
@@ -395,6 +397,32 @@ async function mcpPost(
   return { response, body: await response.json() };
 }
 
+function assertReadToolResult(
+  toolName: 'list_items' | 'get_item' | 'list_content_groups',
+  body: any,
+  expected: unknown,
+): void {
+  assert.equal(body.error, undefined);
+  assert.equal(body.result.resultType, 'complete');
+  const entry = TOOL_REGISTRY.find((candidate) => candidate.name === toolName);
+  assert.ok(entry, `missing registry entry: ${toolName}`);
+
+  const parsed = entry.output_schema.safeParse(body.result.structuredContent);
+  assert.equal(
+    parsed.success,
+    true,
+    parsed.success
+      ? undefined
+      : `${toolName} output_schema rejected structuredContent: ${parsed.error.message}`,
+  );
+  assert.deepEqual(
+    body.result.structuredContent,
+    expected,
+    `${toolName} structuredContent must match the direct service result`,
+  );
+  assert.deepEqual(JSON.parse(body.result.content[0].text), expected);
+}
+
 async function firstTrashConfirmRound(
   fixture: Fixture,
   id: number,
@@ -529,6 +557,125 @@ test('K-0 MCP tools/call list_notes is end-to-end equivalent to the same REST re
     assert.equal(receipt.source_id, '10');
     assert.ok(receipt.applied_at);
     assert.equal(JSON.parse(receipt.metadata).tool, 'list_notes');
+  });
+});
+
+test('S4-1 tools/call list_items validates its output schema and matches the direct service', async () => {
+  await withMcpHttp({}, async (fixture) => {
+    createItem(fixture.db, USER_ID, {
+      plain_text: 'S4-1 list Item sentinel',
+      item_type: 'concept',
+      topic: 'MCP read face',
+      origin_course_id: COURSE_ID,
+      origin_note_id: NEWEST_NOTE_ID,
+      metadata: { source: 'mcp-transport-test', nested: { batch: 'S4-1' } },
+    });
+    const input = {
+      status: 'active' as const,
+      origin_course_id: COURSE_ID,
+      q: 'list Item sentinel',
+      limit: 25,
+    };
+    const expected = listItems(fixture.db, USER_ID, input);
+    assert.equal(expected.length, 1, 'the direct-service positive control must be non-empty');
+
+    const { response, body } = await mcpPost(
+      fixture,
+      'tools/call',
+      { name: 'list_items', arguments: input },
+      { id: 301, toolName: 'list_items' },
+    );
+
+    assert.equal(response.status, 200);
+    assertReadToolResult('list_items', body, expected);
+  });
+});
+
+test('S4-1 tools/call get_item validates its output schema and matches the direct service', async () => {
+  await withMcpHttp({}, async (fixture) => {
+    const item = createItem(fixture.db, USER_ID, {
+      plain_text: 'S4-1 get Item sentinel',
+      item_type: 'claim',
+      topic: 'MCP read face',
+      origin_course_id: COURSE_ID,
+      origin_note_id: NEWEST_NOTE_ID,
+      metadata: { source: 'mcp-transport-test', flags: ['schema', 'oracle'] },
+    });
+    const input = { item_id: item.id };
+    const expected = getItem(fixture.db, USER_ID, input.item_id);
+
+    const { response, body } = await mcpPost(
+      fixture,
+      'tools/call',
+      { name: 'get_item', arguments: input },
+      { id: 302, toolName: 'get_item' },
+    );
+
+    assert.equal(response.status, 200);
+    assertReadToolResult('get_item', body, expected);
+  });
+});
+
+test('S4-1 tools/call list_content_groups validates its output schema and matches the direct service', async () => {
+  await withMcpHttp({}, async (fixture) => {
+    upsertContentGroup(fixture.db, USER_ID, {
+      id: 's4-1-content-group',
+      project_id: COURSE_ID,
+      note_id: NEWEST_NOTE_ID,
+      canvas_id: 's4-1-canvas',
+      title: 'S4-1 ContentGroup sentinel',
+      status: 'active',
+      created_by: 'human',
+      placements: [{
+        folder_id: 's4-1-legacy-folder',
+        order_index: 0,
+        added_at: '2026-08-26T12:00:00.000Z',
+        added_by: 'human',
+      }],
+      members: [{
+        id: 's4-1-content-group-member',
+        kind: 'content_range',
+        target_id: 's4-1-range',
+        content_range: { start: 2, end: 8 },
+        current_content: 'member sentinel',
+        source_ref: { status: 'fresh', locator: { page: 3 } },
+        source_sync_status: 'fresh',
+        preview_text: 'member sentinel',
+        order_index: 0,
+        metadata: { source: 'mcp-transport-test' },
+      }],
+      identity: {
+        status: 'accepted',
+        type: 'concept',
+        topic: 'MCP read face',
+        summary: 'Hydrated ContentGroup schema control',
+        created_by: 'human',
+        reviewed_by: 'human',
+        confidence: 0.95,
+        updated_at: '2026-08-26T12:00:00.000Z',
+        accepted_at: '2026-08-26T12:00:00.000Z',
+        metadata: { source: 'mcp-transport-test' },
+      },
+      view_state: { collapsed: false },
+      metadata: { source: 'mcp-transport-test' },
+    });
+    const input = {
+      course_id: COURSE_ID,
+      note_id: NEWEST_NOTE_ID,
+      status: 'active' as const,
+    };
+    const expected = listContentGroups(fixture.db, USER_ID, input);
+    assert.equal(expected.length, 1, 'the direct-service positive control must be non-empty');
+
+    const { response, body } = await mcpPost(
+      fixture,
+      'tools/call',
+      { name: 'list_content_groups', arguments: input },
+      { id: 303, toolName: 'list_content_groups' },
+    );
+
+    assert.equal(response.status, 200);
+    assertReadToolResult('list_content_groups', body, expected);
   });
 });
 

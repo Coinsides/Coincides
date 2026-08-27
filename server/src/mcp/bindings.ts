@@ -1,4 +1,7 @@
 import { AppError } from '../middleware/errorHandler.js';
+import { getDb } from '../db/init.js';
+import { listContentGroups } from '../services/contentGroups.js';
+import { getItem, listItems } from '../services/items.js';
 import { listNotes, trashNoteAsUser } from '../services/notes.js';
 import { resolveSelection } from '../services/selectionResolve.js';
 import { resolveSelectionInputSchema } from '../toolFace/registry.js';
@@ -21,6 +24,27 @@ const listNotesBinding: ToolBinding = (input, context) => {
   });
 };
 
+const listItemsBinding: ToolBinding = (input, context) => {
+  return listItems(
+    getDb(),
+    context.userId,
+    input as Parameters<typeof listItems>[2],
+  );
+};
+
+const getItemBinding: ToolBinding = (input, context) => {
+  const args = input as { item_id: string };
+  return getItem(getDb(), context.userId, args.item_id);
+};
+
+const listContentGroupsBinding: ToolBinding = (input, context) => {
+  return listContentGroups(
+    getDb(),
+    context.userId,
+    input as Parameters<typeof listContentGroups>[2],
+  );
+};
+
 const resolveSelectionBinding: ToolBinding = (input, context) => {
   const parsed = resolveSelectionInputSchema.safeParse(input);
   if (!parsed.success) {
@@ -41,6 +65,9 @@ const trashNotesBinding: ToolBinding = (input, context) => {
 
 export const TOOL_BINDINGS: ReadonlyMap<string, ToolBinding> = new Map([
   ['list_notes', listNotesBinding],
+  ['list_items', listItemsBinding],
+  ['get_item', getItemBinding],
+  ['list_content_groups', listContentGroupsBinding],
   ['resolve_selection', resolveSelectionBinding],
   ['trash_notes', trashNotesBinding],
 ]);

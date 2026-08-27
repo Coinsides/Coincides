@@ -67,6 +67,215 @@ const noteOutputSchema = z.object({
 
 export const listNotesOutputSchema = z.array(noteOutputSchema);
 
+type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+
+const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() => z.union([
+  z.string(),
+  z.number().finite(),
+  z.boolean(),
+  z.null(),
+  z.array(jsonValueSchema),
+  z.record(jsonValueSchema),
+]));
+
+const jsonObjectSchema: z.ZodType<Record<string, JsonValue>> = z.record(jsonValueSchema);
+
+const itemStatusSchema = z.enum(['active', 'retired']);
+const itemAnchorTargetKindSchema = z.enum([
+  'block',
+  'content_range',
+  'canvas_object',
+  'table_region',
+  'image_region',
+]);
+
+export const listItemsInputSchema = z.object({
+  status: z.enum(['active', 'retired', 'all']).optional(),
+  origin_course_id: z.string().optional(),
+  origin_note_id: z.string().optional(),
+  q: z.string().optional(),
+  limit: z.number().finite().optional(),
+}).strict();
+
+export const getItemInputSchema = z.object({
+  item_id: z.string(),
+}).strict();
+
+const itemSnapshotOutputSchema = z.object({
+  id: z.string(),
+  item_id: z.string(),
+  user_id: z.string(),
+  content: z.string(),
+  content_hash: z.string(),
+  created_at: z.string(),
+}).strict();
+
+const itemAnchorOutputSchema = z.object({
+  id: z.string(),
+  user_id: z.string(),
+  item_id: z.string().nullable(),
+  pool_scope_kind: z.string().nullable(),
+  pool_scope_id: z.string().nullable(),
+  target_kind: itemAnchorTargetKindSchema,
+  target_id: z.string(),
+  range_json: jsonObjectSchema.nullable(),
+  excerpt: z.string(),
+  reference_mode: z.string(),
+  source_record_id: z.string().nullable(),
+  collected_for: z.string().nullable(),
+  claimed_at: z.string().nullable(),
+  claimed_by: z.string().nullable(),
+  metadata: jsonObjectSchema,
+  created_by: z.string(),
+  created_at: z.string(),
+  updated_at: z.string(),
+}).strict();
+
+const itemOutputSchema = z.object({
+  id: z.string(),
+  user_id: z.string(),
+  body_json: jsonObjectSchema,
+  plain_text: z.string(),
+  item_type: z.string().nullable(),
+  topic: z.string().nullable(),
+  status: itemStatusSchema,
+  retired_into_item_id: z.string().nullable(),
+  origin_course_id: z.string().nullable(),
+  origin_note_id: z.string().nullable(),
+  created_by: z.string(),
+  metadata: jsonObjectSchema,
+  created_at: z.string(),
+  updated_at: z.string(),
+  current_snapshot: itemSnapshotOutputSchema,
+  anchors: z.array(itemAnchorOutputSchema),
+}).strict();
+
+const listedItemOutputSchema = itemOutputSchema.extend({
+  anchors: z.array(itemAnchorOutputSchema).length(0),
+});
+
+export const listItemsOutputSchema = z.array(listedItemOutputSchema);
+export const getItemOutputSchema = itemOutputSchema;
+
+const contentGroupStatusSchema = z.enum(['active', 'hidden', 'deleted']);
+const contentGroupCreatedBySchema = z.enum(['human', 'ai_proposal', 'importer']);
+const contentGroupMemberKindSchema = z.enum([
+  'content_range',
+  'annotation',
+  'block',
+  'content_group',
+  'page_slice',
+  'canvas_object',
+  'table_region',
+  'image_region',
+  'future_object',
+  'item',
+]);
+const contentGroupSourceSyncStatusSchema = z.enum([
+  'fresh',
+  'changed',
+  'missing',
+  'detached',
+  'unsupported',
+  'stale',
+]);
+
+export const listContentGroupsInputSchema = z.object({
+  course_id: z.string().optional(),
+  note_id: z.string().optional(),
+  status: z.enum(['active', 'hidden', 'deleted', 'all']).optional(),
+}).strict().superRefine((input, context) => {
+  if (!input.course_id?.trim() && !input.note_id?.trim()) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'course_id or note_id is required',
+      path: ['course_id'],
+    });
+  }
+});
+
+const normalizedContentGroupPlacementOutputSchema = z.object({
+  id: z.string(),
+  content_group_id: z.string(),
+  folder_id: z.string(),
+  placement_role: z.enum(['primary', 'reference', 'temporary']),
+  status: z.literal('active'),
+  order_index: z.number().finite(),
+  added_by: z.enum(['human', 'ai_proposal', 'system', 'importer']),
+  added_at: z.string(),
+  updated_at: z.string(),
+  metadata: jsonObjectSchema,
+}).strict();
+
+const normalizedContentGroupMemberOutputSchema = z.object({
+  id: z.string(),
+  kind: contentGroupMemberKindSchema,
+  target_id: z.string().nullable(),
+  item_id: z.string().nullable(),
+  content_range: jsonObjectSchema.nullable(),
+  label: z.string().nullable(),
+  current_content: z.string().nullable(),
+  source_ref: jsonObjectSchema.nullable(),
+  source_sync_status: contentGroupSourceSyncStatusSchema,
+  preview_text: z.string().nullable(),
+  order_index: z.number().finite(),
+  metadata: jsonObjectSchema,
+}).strict();
+
+// When the normalized child tables have no rows, the service deliberately
+// returns the persisted legacy JSON arrays verbatim. Keep that real branch
+// explicit instead of pretending every historical child has normalized keys.
+const contentGroupPlacementOutputSchema = z.union([
+  normalizedContentGroupPlacementOutputSchema,
+  jsonObjectSchema,
+]);
+const contentGroupMemberOutputSchema = z.union([
+  normalizedContentGroupMemberOutputSchema,
+  jsonObjectSchema,
+]);
+
+const contentGroupIdentityOutputSchema = z.object({
+  status: z.enum(['none', 'draft', 'accepted', 'rejected', 'archived']),
+  type: z.string().nullable(),
+  role: z.string().nullable(),
+  topic: z.string().nullable(),
+  summary: z.string().nullable(),
+  created_by: z.enum(['human', 'ai', 'system']),
+  reviewed_by: z.enum(['human', 'ai', 'system']).nullable(),
+  confidence: z.number().finite().nullable(),
+  updated_at: z.string(),
+  accepted_at: z.string().nullable(),
+  metadata: jsonObjectSchema,
+}).strict();
+
+const contentGroupOutputSchema = z.object({
+  id: z.string(),
+  project_id: z.string(),
+  note_id: z.string(),
+  canvas_id: z.string(),
+  folder_id: z.string().nullable(),
+  parent_group_id: z.string().nullable(),
+  placements: z.array(contentGroupPlacementOutputSchema),
+  depth: z.literal(0),
+  title: z.string(),
+  status: contentGroupStatusSchema,
+  created_by: contentGroupCreatedBySchema,
+  created_at: z.string(),
+  updated_at: z.string(),
+  members: z.array(contentGroupMemberOutputSchema),
+  identity: contentGroupIdentityOutputSchema,
+  view_state: jsonObjectSchema,
+  metadata: jsonObjectSchema,
+}).strict();
+
+export const listContentGroupsOutputSchema = z.array(contentGroupOutputSchema);
+
 export const trashNotesInputSchema = z.object({
   note_ids: z.array(z.string().uuid()).min(1).max(50),
 }).strict();
@@ -155,6 +364,48 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
     },
     exposure: 'public',
     scopes: ['notes:read'],
+  },
+  {
+    name: 'list_items',
+    description: 'List owned Items with optional lifecycle, origin, search, and limit filters.',
+    input_schema: listItemsInputSchema,
+    output_schema: listItemsOutputSchema,
+    truth: 'knowledge',
+    tier: 'immediate',
+    human_entry: {
+      route: 'GET /api/items',
+      client_call_site: 'client/src/pages/Notes/canvasEngine/itemRepository.ts#searchItems',
+    },
+    exposure: 'public',
+    scopes: ['items:read'],
+  },
+  {
+    name: 'get_item',
+    description: 'Read one owned Item with its current Snapshot and claimed Anchor receipts.',
+    input_schema: getItemInputSchema,
+    output_schema: getItemOutputSchema,
+    truth: 'knowledge',
+    tier: 'immediate',
+    human_entry: {
+      route: 'GET /api/items/:itemId',
+      client_call_site: 'client/src/pages/Notes/canvasEngine/itemRepository.ts#loadItem',
+    },
+    exposure: 'public',
+    scopes: ['items:read'],
+  },
+  {
+    name: 'list_content_groups',
+    description: 'List owned ContentGroups in one Project or Note with hydrated organization data.',
+    input_schema: listContentGroupsInputSchema,
+    output_schema: listContentGroupsOutputSchema,
+    truth: 'knowledge',
+    tier: 'immediate',
+    human_entry: {
+      route: 'GET /api/content-groups',
+      client_call_site: 'client/src/pages/Notes/canvasEngine/contentGroupRepository.ts#loadContentGroupsForNote',
+    },
+    exposure: 'public',
+    scopes: ['content_groups:read'],
   },
   {
     name: 'resolve_selection',

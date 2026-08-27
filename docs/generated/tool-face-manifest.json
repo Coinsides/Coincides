@@ -143,6 +143,1360 @@
     ]
   },
   {
+    "name": "list_items",
+    "description": "List owned Items with optional lifecycle, origin, search, and limit filters.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "retired",
+            "all"
+          ]
+        },
+        "origin_course_id": {
+          "type": "string"
+        },
+        "origin_note_id": {
+          "type": "string"
+        },
+        "q": {
+          "type": "string"
+        },
+        "limit": {
+          "type": "number"
+        }
+      },
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "body_json": {
+            "type": "object",
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "array",
+                  "items": {}
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              ]
+            }
+          },
+          "plain_text": {
+            "type": "string"
+          },
+          "item_type": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "topic": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "retired"
+            ]
+          },
+          "retired_into_item_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "origin_course_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "origin_note_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "array",
+                  "items": {}
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              ]
+            }
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "current_snapshot": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "item_id": {
+                "type": "string"
+              },
+              "user_id": {
+                "type": "string"
+              },
+              "content": {
+                "type": "string"
+              },
+              "content_hash": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "item_id",
+              "user_id",
+              "content",
+              "content_hash",
+              "created_at"
+            ],
+            "additionalProperties": false
+          },
+          "anchors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "user_id": {
+                  "type": "string"
+                },
+                "item_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "pool_scope_kind": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "pool_scope_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "target_kind": {
+                  "type": "string",
+                  "enum": [
+                    "block",
+                    "content_range",
+                    "canvas_object",
+                    "table_region",
+                    "image_region"
+                  ]
+                },
+                "target_id": {
+                  "type": "string"
+                },
+                "range_json": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "array",
+                            "items": {}
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {}
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "excerpt": {
+                  "type": "string"
+                },
+                "reference_mode": {
+                  "type": "string"
+                },
+                "source_record_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "collected_for": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "claimed_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "claimed_by": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "metadata": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "array",
+                        "items": {}
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": {}
+                      }
+                    ]
+                  }
+                },
+                "created_by": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                },
+                "updated_at": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "user_id",
+                "item_id",
+                "pool_scope_kind",
+                "pool_scope_id",
+                "target_kind",
+                "target_id",
+                "range_json",
+                "excerpt",
+                "reference_mode",
+                "source_record_id",
+                "collected_for",
+                "claimed_at",
+                "claimed_by",
+                "metadata",
+                "created_by",
+                "created_at",
+                "updated_at"
+              ],
+              "additionalProperties": false
+            },
+            "minItems": 0,
+            "maxItems": 0
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "body_json",
+          "plain_text",
+          "item_type",
+          "topic",
+          "status",
+          "retired_into_item_id",
+          "origin_course_id",
+          "origin_note_id",
+          "created_by",
+          "metadata",
+          "created_at",
+          "updated_at",
+          "current_snapshot",
+          "anchors"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "truth": "knowledge",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "GET /api/items",
+      "client_call_site": "client/src/pages/Notes/canvasEngine/itemRepository.ts#searchItems"
+    },
+    "exposure": "public",
+    "scopes": [
+      "items:read"
+    ]
+  },
+  {
+    "name": "get_item",
+    "description": "Read one owned Item with its current Snapshot and claimed Anchor receipts.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "item_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "item_id"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        },
+        "body_json": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              },
+              {
+                "type": "array",
+                "items": {}
+              },
+              {
+                "type": "object",
+                "additionalProperties": {}
+              }
+            ]
+          }
+        },
+        "plain_text": {
+          "type": "string"
+        },
+        "item_type": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "topic": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "retired"
+          ]
+        },
+        "retired_into_item_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "origin_course_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "origin_note_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "created_by": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "number"
+              },
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              },
+              {
+                "type": "array",
+                "items": {}
+              },
+              {
+                "type": "object",
+                "additionalProperties": {}
+              }
+            ]
+          }
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
+        },
+        "current_snapshot": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "item_id": {
+              "type": "string"
+            },
+            "user_id": {
+              "type": "string"
+            },
+            "content": {
+              "type": "string"
+            },
+            "content_hash": {
+              "type": "string"
+            },
+            "created_at": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "item_id",
+            "user_id",
+            "content",
+            "content_hash",
+            "created_at"
+          ],
+          "additionalProperties": false
+        },
+        "anchors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "user_id": {
+                "type": "string"
+              },
+              "item_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "pool_scope_kind": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "pool_scope_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "target_kind": {
+                "type": "string",
+                "enum": [
+                  "block",
+                  "content_range",
+                  "canvas_object",
+                  "table_region",
+                  "image_region"
+                ]
+              },
+              "target_id": {
+                "type": "string"
+              },
+              "range_json": {
+                "anyOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "array",
+                          "items": {}
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": {}
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "excerpt": {
+                "type": "string"
+              },
+              "reference_mode": {
+                "type": "string"
+              },
+              "source_record_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "collected_for": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "claimed_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "claimed_by": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "array",
+                      "items": {}
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {}
+                    }
+                  ]
+                }
+              },
+              "created_by": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string"
+              },
+              "updated_at": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "user_id",
+              "item_id",
+              "pool_scope_kind",
+              "pool_scope_id",
+              "target_kind",
+              "target_id",
+              "range_json",
+              "excerpt",
+              "reference_mode",
+              "source_record_id",
+              "collected_for",
+              "claimed_at",
+              "claimed_by",
+              "metadata",
+              "created_by",
+              "created_at",
+              "updated_at"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "id",
+        "user_id",
+        "body_json",
+        "plain_text",
+        "item_type",
+        "topic",
+        "status",
+        "retired_into_item_id",
+        "origin_course_id",
+        "origin_note_id",
+        "created_by",
+        "metadata",
+        "created_at",
+        "updated_at",
+        "current_snapshot",
+        "anchors"
+      ],
+      "additionalProperties": false
+    },
+    "truth": "knowledge",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "GET /api/items/:itemId",
+      "client_call_site": "client/src/pages/Notes/canvasEngine/itemRepository.ts#loadItem"
+    },
+    "exposure": "public",
+    "scopes": [
+      "items:read"
+    ]
+  },
+  {
+    "name": "list_content_groups",
+    "description": "List owned ContentGroups in one Project or Note with hydrated organization data.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "course_id": {
+          "type": "string"
+        },
+        "note_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "hidden",
+            "deleted",
+            "all"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "project_id": {
+            "type": "string"
+          },
+          "note_id": {
+            "type": "string"
+          },
+          "canvas_id": {
+            "type": "string"
+          },
+          "folder_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "parent_group_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "placements": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "content_group_id": {
+                      "type": "string"
+                    },
+                    "folder_id": {
+                      "type": "string"
+                    },
+                    "placement_role": {
+                      "type": "string",
+                      "enum": [
+                        "primary",
+                        "reference",
+                        "temporary"
+                      ]
+                    },
+                    "status": {
+                      "type": "string",
+                      "const": "active"
+                    },
+                    "order_index": {
+                      "type": "number"
+                    },
+                    "added_by": {
+                      "type": "string",
+                      "enum": [
+                        "human",
+                        "ai_proposal",
+                        "system",
+                        "importer"
+                      ]
+                    },
+                    "added_at": {
+                      "type": "string"
+                    },
+                    "updated_at": {
+                      "type": "string"
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "array",
+                            "items": {}
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {}
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "content_group_id",
+                    "folder_id",
+                    "placement_role",
+                    "status",
+                    "order_index",
+                    "added_by",
+                    "added_at",
+                    "updated_at",
+                    "metadata"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "array",
+                        "items": {}
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": {}
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "depth": {
+            "type": "number",
+            "const": 0
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "hidden",
+              "deleted"
+            ]
+          },
+          "created_by": {
+            "type": "string",
+            "enum": [
+              "human",
+              "ai_proposal",
+              "importer"
+            ]
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "members": {
+            "type": "array",
+            "items": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "kind": {
+                      "type": "string",
+                      "enum": [
+                        "content_range",
+                        "annotation",
+                        "block",
+                        "content_group",
+                        "page_slice",
+                        "canvas_object",
+                        "table_region",
+                        "image_region",
+                        "future_object",
+                        "item"
+                      ]
+                    },
+                    "target_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "item_id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "content_range": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "boolean"
+                              },
+                              {
+                                "type": "null"
+                              },
+                              {
+                                "type": "array",
+                                "items": {}
+                              },
+                              {
+                                "type": "object",
+                                "additionalProperties": {}
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "label": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "current_content": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "source_ref": {
+                      "anyOf": [
+                        {
+                          "type": "object",
+                          "additionalProperties": {
+                            "anyOf": [
+                              {
+                                "type": "string"
+                              },
+                              {
+                                "type": "number"
+                              },
+                              {
+                                "type": "boolean"
+                              },
+                              {
+                                "type": "null"
+                              },
+                              {
+                                "type": "array",
+                                "items": {}
+                              },
+                              {
+                                "type": "object",
+                                "additionalProperties": {}
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "source_sync_status": {
+                      "type": "string",
+                      "enum": [
+                        "fresh",
+                        "changed",
+                        "missing",
+                        "detached",
+                        "unsupported",
+                        "stale"
+                      ]
+                    },
+                    "preview_text": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "order_index": {
+                      "type": "number"
+                    },
+                    "metadata": {
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "array",
+                            "items": {}
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {}
+                          }
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "kind",
+                    "target_id",
+                    "item_id",
+                    "content_range",
+                    "label",
+                    "current_content",
+                    "source_ref",
+                    "source_sync_status",
+                    "preview_text",
+                    "order_index",
+                    "metadata"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "array",
+                        "items": {}
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": {}
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          "identity": {
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string",
+                "enum": [
+                  "none",
+                  "draft",
+                  "accepted",
+                  "rejected",
+                  "archived"
+                ]
+              },
+              "type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "role": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "topic": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "summary": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "created_by": {
+                "type": "string",
+                "enum": [
+                  "human",
+                  "ai",
+                  "system"
+                ]
+              },
+              "reviewed_by": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "enum": [
+                      "human",
+                      "ai",
+                      "system"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "confidence": {
+                "anyOf": [
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "updated_at": {
+                "type": "string"
+              },
+              "accepted_at": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "array",
+                      "items": {}
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": {}
+                    }
+                  ]
+                }
+              }
+            },
+            "required": [
+              "status",
+              "type",
+              "role",
+              "topic",
+              "summary",
+              "created_by",
+              "reviewed_by",
+              "confidence",
+              "updated_at",
+              "accepted_at",
+              "metadata"
+            ],
+            "additionalProperties": false
+          },
+          "view_state": {
+            "type": "object",
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "array",
+                  "items": {}
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              ]
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "array",
+                  "items": {}
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              ]
+            }
+          }
+        },
+        "required": [
+          "id",
+          "project_id",
+          "note_id",
+          "canvas_id",
+          "folder_id",
+          "parent_group_id",
+          "placements",
+          "depth",
+          "title",
+          "status",
+          "created_by",
+          "created_at",
+          "updated_at",
+          "members",
+          "identity",
+          "view_state",
+          "metadata"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "truth": "knowledge",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "GET /api/content-groups",
+      "client_call_site": "client/src/pages/Notes/canvasEngine/contentGroupRepository.ts#loadContentGroupsForNote"
+    },
+    "exposure": "public",
+    "scopes": [
+      "content_groups:read"
+    ]
+  },
+  {
     "name": "resolve_selection",
     "description": "Resolve a text selection receipt against the current owned TextFlow content.",
     "input_schema": {
