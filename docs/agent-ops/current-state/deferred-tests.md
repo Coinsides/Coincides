@@ -27,3 +27,4 @@
 - 2026-08-26 · S4-2 语义读面 · `listRelations` 过滤组合矩阵、方向/类型全枚举与跨用户矩阵未写（本单只留三条真实 `tools/call` 最小正控，ownership 仍由既有 service 承担）· 挡「Relation 过滤组合/类型表完整性/跨用户读隔离的系统性回归」· 单 `handoffs/2026-08-26-v2bn12-s4-2-read-face-relations.md`
 - 2026-08-27 · S4-3 溯源读面 · jump-target 失效/悬空目标分支、`listSourceAnchors` 过滤组合矩阵与跨 course 越权矩阵未写（本单只留四条真实 `tools/call` 最小正控，ownership 仍由既有 service 承担）· 挡「失效目标诚实降级/Anchor 过滤组合/跨 course 溯源读隔离的系统性回归」· 单 `handoffs/2026-08-26-v2bn12-s4-3-read-face-source.md`
 - 2026-08-27 · note hydration leaf K-3 · 向 `noteHydration.ts` 临时反向 import route 的环检测 mutation 未做（仓库无 madge/同类现成环检测机关，且 ownership 环仍在，发现「任意环」不能鉴别新增边）· 挡「hydrate 叶子重新依赖 route」· 单 `handoffs/2026-08-26-v2bn12-note-hydration-leaf.md`
+- 2026-08-27 · S4-4 内容真相读面 · trashed Note 读取行为、NoteBlocks placement 层级/排序边界与跨用户矩阵未写（本单只留两条真实 `tools/call` 最小正控，ownership 仍由既有 `getOwnedNote` / 查询条件承担）· 挡「生命周期边界、层级排序与跨用户读隔离的系统性回归」· 单 `handoffs/2026-08-27-v2bn12-s4-4-read-face-notes.md`

@@ -28,7 +28,11 @@ import noteRoutes from '../routes/notes.js';
 import { createToolReceiptsRouter } from '../routes/toolReceipts.js';
 import { listContentGroups, upsertContentGroup } from '../services/contentGroups.js';
 import { createItem, getItem, listItems } from '../services/items.js';
-import { trashNoteAsUser } from '../services/notes.js';
+import {
+  getNote,
+  listNoteBlocks,
+  trashNoteAsUser,
+} from '../services/notes.js';
 import {
   createRelation,
   listRelations,
@@ -76,6 +80,11 @@ const S43_SNAPSHOT_ID = 'a4300000-0000-4000-8000-000000000002';
 const S43_PAGE_ID = 'a4300000-0000-4000-8000-000000000003';
 const S43_ANCHOR_ID = 'a4300000-0000-4000-8000-000000000004';
 const S43_SCOPE_ID = 'a4300000-0000-4000-8000-000000000005';
+const S44_BLOCK_WITH_SOURCE_ID = 'a4400000-0000-4000-8000-000000000001';
+const S44_BLOCK_WITHOUT_SOURCE_ID = 'a4400000-0000-4000-8000-000000000002';
+const S44_PLACEMENT_WITH_SOURCE_ID = 'a4400000-0000-4000-8000-000000000003';
+const S44_PLACEMENT_WITHOUT_SOURCE_ID = 'a4400000-0000-4000-8000-000000000004';
+const S44_SOURCE_REFERENCE_ID = 'a4400000-0000-4000-8000-000000000005';
 
 interface Fixture {
   baseUrl: string;
@@ -425,7 +434,9 @@ function assertReadToolResult(
     | 'list_source_scopes'
     | 'get_source_scope_jump_target'
     | 'list_source_anchors'
-    | 'get_source_anchor_jump_target',
+    | 'get_source_anchor_jump_target'
+    | 'get_note'
+    | 'list_note_blocks',
   body: any,
   expected: unknown,
 ): void {
@@ -448,6 +459,73 @@ function assertReadToolResult(
     `${toolName} structuredContent must match the direct service result`,
   );
   assert.deepEqual(JSON.parse(body.result.content[0].text), expected);
+}
+
+function seedS44NoteBlocks(fixture: Fixture): void {
+  const insertBlock = fixture.db.prepare(`
+    INSERT INTO note_blocks (
+      id, user_id, course_id, block_type, title, content_json, plain_text,
+      status, source_kind, metadata, created_at, updated_at
+    ) VALUES (?, ?, ?, 'paragraph', ?, ?, ?, 'active', 'manual', ?, ?, ?)
+  `);
+  insertBlock.run(
+    S44_BLOCK_WITH_SOURCE_ID,
+    USER_ID,
+    COURSE_ID,
+    'S4-4 block with source',
+    JSON.stringify({ body: 'source-backed block', marks: ['strong'] }),
+    'source-backed block',
+    JSON.stringify({ marker: 'S4-4-with-source' }),
+    '2026-08-27 09:01:00',
+    '2026-08-27 09:01:00',
+  );
+  insertBlock.run(
+    S44_BLOCK_WITHOUT_SOURCE_ID,
+    USER_ID,
+    COURSE_ID,
+    'S4-4 block without source',
+    JSON.stringify({ body: 'original block', marks: [] }),
+    'original block',
+    JSON.stringify({ marker: 'S4-4-without-source' }),
+    '2026-08-27 09:02:00',
+    '2026-08-27 09:02:00',
+  );
+
+  const insertPlacement = fixture.db.prepare(`
+    INSERT INTO note_block_placements (
+      id, note_id, block_id, order_index, display_mode, display_overrides_json,
+      created_at, updated_at
+    ) VALUES (?, ?, ?, ?, 'normal', ?, ?, ?)
+  `);
+  insertPlacement.run(
+    S44_PLACEMENT_WITH_SOURCE_ID,
+    NEWEST_NOTE_ID,
+    S44_BLOCK_WITH_SOURCE_ID,
+    0,
+    JSON.stringify({ width: 640, marker: 'S4-4-with-source' }),
+    '2026-08-27 09:03:00',
+    '2026-08-27 09:03:00',
+  );
+  insertPlacement.run(
+    S44_PLACEMENT_WITHOUT_SOURCE_ID,
+    NEWEST_NOTE_ID,
+    S44_BLOCK_WITHOUT_SOURCE_ID,
+    1,
+    JSON.stringify({ width: 720, marker: 'S4-4-without-source' }),
+    '2026-08-27 09:04:00',
+    '2026-08-27 09:04:00',
+  );
+  fixture.db.prepare(`
+    INSERT INTO note_block_sources (
+      id, block_id, source_page_start, source_page_end, source_excerpt,
+      reference_type, confidence, metadata, created_at
+    ) VALUES (?, ?, 7, 8, 'S4-4 source excerpt', 'page', 0.875, ?, ?)
+  `).run(
+    S44_SOURCE_REFERENCE_ID,
+    S44_BLOCK_WITH_SOURCE_ID,
+    JSON.stringify({ marker: 'S4-4-source-reference' }),
+    '2026-08-27 09:05:00',
+  );
 }
 
 function seedS42Relation(fixture: Fixture, marker: string) {
@@ -703,6 +781,69 @@ test('K-0 MCP tools/call list_notes is end-to-end equivalent to the same REST re
     assert.equal(receipt.source_id, '10');
     assert.ok(receipt.applied_at);
     assert.equal(JSON.parse(receipt.metadata).tool, 'list_notes');
+  });
+});
+
+test('S4-4 tools/call get_note validates its output schema and matches the direct service', async () => {
+  await withMcpHttp({}, async (fixture) => {
+    const input = { note_id: NEWEST_NOTE_ID };
+    const expected = getNote({ userId: USER_ID, noteId: input.note_id });
+
+    const restResponse = await fetch(`${fixture.baseUrl}/api/notes/${NEWEST_NOTE_ID}`, {
+      headers: { authorization: `Bearer ${fixture.token}` },
+    });
+    assert.equal(restResponse.status, 200);
+    const restBody = await restResponse.json();
+    assert.equal(
+      restBody?.id,
+      NEWEST_NOTE_ID,
+      'GET /api/notes/:id must return the seeded owned Note through getNote',
+    );
+    assert.deepEqual(restBody, expected);
+
+    const { response, body } = await mcpPost(
+      fixture,
+      'tools/call',
+      { name: 'get_note', arguments: input },
+      { id: 311, toolName: 'get_note' },
+    );
+
+    assert.equal(response.status, 200);
+    assertReadToolResult('get_note', body, expected);
+  });
+});
+
+test('S4-4 tools/call list_note_blocks validates its output schema and matches the direct service', async () => {
+  await withMcpHttp({}, async (fixture) => {
+    seedS44NoteBlocks(fixture);
+    const input = { note_id: NEWEST_NOTE_ID };
+    const expected = listNoteBlocks({ userId: USER_ID, noteId: input.note_id });
+    assert.equal(expected.length, 2, 'the blocks positive control must contain both fixture blocks');
+    assert.equal(
+      expected.find((block: any) => block.id === S44_BLOCK_WITH_SOURCE_ID)?.source_references.length,
+      1,
+      'the blocks positive control must include a populated source_references array',
+    );
+    assert.equal(
+      expected.find((block: any) => block.id === S44_BLOCK_WITH_SOURCE_ID)?.source_references[0]?.metadata,
+      JSON.stringify({ marker: 'S4-4-source-reference' }),
+      'source reference metadata must preserve the service output string shape',
+    );
+    assert.deepEqual(
+      expected.find((block: any) => block.id === S44_BLOCK_WITHOUT_SOURCE_ID)?.source_references,
+      [],
+      'the blocks positive control must include the null-filtered empty source_references branch',
+    );
+
+    const { response, body } = await mcpPost(
+      fixture,
+      'tools/call',
+      { name: 'list_note_blocks', arguments: input },
+      { id: 312, toolName: 'list_note_blocks' },
+    );
+
+    assert.equal(response.status, 200);
+    assertReadToolResult('list_note_blocks', body, expected);
   });
 });
 

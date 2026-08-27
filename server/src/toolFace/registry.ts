@@ -66,6 +66,10 @@ const noteOutputSchema = z.object({
 }).strict();
 
 export const listNotesOutputSchema = z.array(noteOutputSchema);
+export const getNoteInputSchema = z.object({
+  note_id: z.string(),
+}).strict();
+export const getNoteOutputSchema = noteOutputSchema;
 
 type JsonValue =
   | string
@@ -85,6 +89,49 @@ const jsonValueSchema: z.ZodType<JsonValue> = z.lazy(() => z.union([
 ]));
 
 const jsonObjectSchema: z.ZodType<Record<string, JsonValue>> = z.record(jsonValueSchema);
+
+export const listNoteBlocksInputSchema = z.object({
+  note_id: z.string(),
+}).strict();
+
+const noteBlockSourceReferenceOutputSchema = z.object({
+  id: z.string(),
+  document_id: z.string().nullable(),
+  document_chunk_id: z.string().nullable(),
+  source_page_start: z.number().int().nullable(),
+  source_page_end: z.number().int().nullable(),
+  source_excerpt: z.string().nullable(),
+  reference_type: z.string(),
+  confidence: z.number().finite().nullable(),
+  metadata: z.string(),
+}).strict();
+
+const noteBlockOutputSchema = z.object({
+  placement_id: z.string(),
+  note_id: z.string(),
+  block_id: z.string(),
+  parent_placement_id: z.string().nullable(),
+  order_index: z.number().int(),
+  display_mode: z.string(),
+  display_overrides_json: jsonObjectSchema,
+  id: z.string(),
+  user_id: z.string(),
+  course_id: z.string(),
+  block_type: z.string(),
+  title: z.string().nullable(),
+  content_json: jsonObjectSchema,
+  plain_text: z.string().nullable(),
+  status: z.literal('active'),
+  source_kind: z.string(),
+  metadata: jsonObjectSchema,
+  operation_batch_id: z.string().nullable(),
+  created_at: z.string(),
+  updated_at: z.string(),
+  trashed_at: z.string().nullable(),
+  source_references: z.array(noteBlockSourceReferenceOutputSchema),
+}).strict();
+
+export const listNoteBlocksOutputSchema = z.array(noteBlockOutputSchema);
 
 const itemStatusSchema = z.enum(['active', 'retired']);
 const itemAnchorTargetKindSchema = z.enum([
@@ -611,6 +658,34 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
     human_entry: {
       route: 'GET /api/notes',
       client_call_site: 'client/src/pages/Courses/CourseDetail.tsx#fetchSummary',
+    },
+    exposure: 'public',
+    scopes: ['notes:read'],
+  },
+  {
+    name: 'get_note',
+    description: 'Read one owned Note with hydrated metadata.',
+    input_schema: getNoteInputSchema,
+    output_schema: getNoteOutputSchema,
+    truth: 'content',
+    tier: 'immediate',
+    human_entry: {
+      route: 'GET /api/notes/:id',
+      client_call_site: 'client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts#fetchNote',
+    },
+    exposure: 'public',
+    scopes: ['notes:read'],
+  },
+  {
+    name: 'list_note_blocks',
+    description: 'List active NoteBlocks and placements in one owned Note.',
+    input_schema: listNoteBlocksInputSchema,
+    output_schema: listNoteBlocksOutputSchema,
+    truth: 'content',
+    tier: 'immediate',
+    human_entry: {
+      route: 'GET /api/notes/:id/blocks',
+      client_call_site: 'client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts#fetchNote',
     },
     exposure: 'public',
     scopes: ['notes:read'],

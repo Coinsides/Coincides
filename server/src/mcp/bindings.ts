@@ -2,7 +2,12 @@ import { AppError } from '../middleware/errorHandler.js';
 import { getDb } from '../db/init.js';
 import { listContentGroups } from '../services/contentGroups.js';
 import { getItem, listItems } from '../services/items.js';
-import { listNotes, trashNoteAsUser } from '../services/notes.js';
+import {
+  getNote,
+  listNoteBlocks,
+  listNotes,
+  trashNoteAsUser,
+} from '../services/notes.js';
 import { listRelations, listRelationTypes } from '../services/relations.js';
 import { resolveSelection } from '../services/selectionResolve.js';
 import { getSourceAnchorJumpTarget, listSourceAnchors } from '../services/sourceAnchors.js';
@@ -25,6 +30,16 @@ const listNotesBinding: ToolBinding = (input, context) => {
     courseId: args.course_id,
     status: args.status,
   });
+};
+
+const getNoteBinding: ToolBinding = (input, context) => {
+  const args = input as { note_id: string };
+  return getNote({ userId: context.userId, noteId: args.note_id });
+};
+
+const listNoteBlocksBinding: ToolBinding = (input, context) => {
+  const args = input as { note_id: string };
+  return listNoteBlocks({ userId: context.userId, noteId: args.note_id });
 };
 
 const listItemsBinding: ToolBinding = (input, context) => {
@@ -113,6 +128,8 @@ const trashNotesBinding: ToolBinding = (input, context) => {
 
 export const TOOL_BINDINGS: ReadonlyMap<string, ToolBinding> = new Map([
   ['list_notes', listNotesBinding],
+  ['get_note', getNoteBinding],
+  ['list_note_blocks', listNoteBlocksBinding],
   ['list_items', listItemsBinding],
   ['get_item', getItemBinding],
   ['list_content_groups', listContentGroupsBinding],
