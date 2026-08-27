@@ -31,7 +31,6 @@ import { createItem, getItem, listItems } from '../services/items.js';
 import { trashNoteAsUser } from '../services/notes.js';
 import {
   createRelation,
-  getRelation,
   listRelations,
   listRelationTypes,
 } from '../services/relations.js';
@@ -40,6 +39,14 @@ import {
   type ResolveSelectionInput,
   type SelectionReceiptTextRangeInput,
 } from '../services/selectionResolve.js';
+import {
+  getSourceAnchorJumpTarget,
+  listSourceAnchors,
+} from '../services/sourceAnchors.js';
+import {
+  getSourceScopeJumpTarget,
+  listSourceScopes,
+} from '../services/sourceScopes.js';
 import { textFlowIdForBlock } from '../services/textFlowIdentity.js';
 import { TOOL_REGISTRY } from '../toolFace/registry.js';
 
@@ -64,6 +71,11 @@ const MISSING_BLOCK_ID = '88888888-8888-4888-8888-888888888888';
 const ACTIVE_UNIT_ID = 'owner-unit-active';
 const DELETED_UNIT_ID = 'owner-unit-deleted';
 const ACTIVE_UNIT_TEXT = 'prefix selected suffix';
+const S43_DOCUMENT_ID = 'a4300000-0000-4000-8000-000000000001';
+const S43_SNAPSHOT_ID = 'a4300000-0000-4000-8000-000000000002';
+const S43_PAGE_ID = 'a4300000-0000-4000-8000-000000000003';
+const S43_ANCHOR_ID = 'a4300000-0000-4000-8000-000000000004';
+const S43_SCOPE_ID = 'a4300000-0000-4000-8000-000000000005';
 
 interface Fixture {
   baseUrl: string;
@@ -409,8 +421,11 @@ function assertReadToolResult(
     | 'get_item'
     | 'list_content_groups'
     | 'list_relations'
-    | 'get_relation'
-    | 'list_relation_types',
+    | 'list_relation_types'
+    | 'list_source_scopes'
+    | 'get_source_scope_jump_target'
+    | 'list_source_anchors'
+    | 'get_source_anchor_jump_target',
   body: any,
   expected: unknown,
 ): void {
@@ -460,6 +475,98 @@ function seedS42Relation(fixture: Fixture, marker: string) {
     created_by: 'human',
   });
   return { fromItem, toItem, relation };
+}
+
+function seedS43Provenance(fixture: Fixture, marker: string) {
+  fixture.db.prepare(`
+    INSERT INTO documents (
+      id, user_id, course_id, filename, file_path, file_type, parse_status,
+      extracted_text, page_count, document_type, chunk_count, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, 'pdf', 'completed', ?, 1, 'source', 1, ?, ?)
+  `).run(
+    S43_DOCUMENT_ID,
+    USER_ID,
+    COURSE_ID,
+    's4-3-source.pdf',
+    'fixtures/s4-3-source.pdf',
+    `${marker} source text`,
+    '2026-08-27 00:20:00',
+    '2026-08-27 00:20:00',
+  );
+  fixture.db.prepare(`
+    INSERT INTO source_snapshots (
+      id, user_id, course_id, source_material_id, document_id, snapshot_kind,
+      status, title, source_filename, page_count, chunk_count, metadata,
+      created_at, updated_at
+    ) VALUES (?, ?, ?, NULL, ?, 'parsed_pages', 'ready', ?, ?, 1, 1, ?, ?, ?)
+  `).run(
+    S43_SNAPSHOT_ID,
+    USER_ID,
+    COURSE_ID,
+    S43_DOCUMENT_ID,
+    `${marker} snapshot`,
+    's4-3-source.pdf',
+    JSON.stringify({ source: 'mcp-transport-test', marker }),
+    '2026-08-27 00:21:00',
+    '2026-08-27 00:21:00',
+  );
+  fixture.db.prepare(`
+    INSERT INTO source_snapshot_pages (
+      id, user_id, course_id, source_snapshot_id, document_id, page_number,
+      page_label, text_content, chunk_ids, metadata, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, 1, 'p.1', ?, ?, ?, ?, ?)
+  `).run(
+    S43_PAGE_ID,
+    USER_ID,
+    COURSE_ID,
+    S43_SNAPSHOT_ID,
+    S43_DOCUMENT_ID,
+    `${marker} page sentinel`,
+    JSON.stringify(['s4-3-chunk']),
+    JSON.stringify({ source: 'mcp-transport-test', marker, page: 1 }),
+    '2026-08-27 00:22:00',
+    '2026-08-27 00:22:00',
+  );
+  fixture.db.prepare(`
+    INSERT INTO source_anchors (
+      id, user_id, course_id, source_snapshot_id, source_snapshot_page_id,
+      document_id, document_chunk_id, source_material_id, source_fragment_id,
+      material_segment_id, anchor_kind, page_start, page_end,
+      text_start_offset, text_end_offset, status, confidence, metadata,
+      created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, NULL, NULL, 'evidence_item', 1, 1, 0, 12, 'active', 0.98, ?, ?, ?)
+  `).run(
+    S43_ANCHOR_ID,
+    USER_ID,
+    COURSE_ID,
+    S43_SNAPSHOT_ID,
+    S43_PAGE_ID,
+    S43_DOCUMENT_ID,
+    JSON.stringify({ source: 'mcp-transport-test', marker, excerpt: 'page sentinel' }),
+    '2026-08-27 00:23:00',
+    '2026-08-27 00:23:00',
+  );
+  fixture.db.prepare(`
+    INSERT INTO source_scopes (
+      id, user_id, course_id, source_snapshot_id, source_snapshot_page_id,
+      source_anchor_id, source_material_id, source_fragment_id,
+      material_segment_id, document_id, document_chunk_id, scope_kind, label,
+      page_start, page_end, text_start_offset, text_end_offset, status,
+      metadata, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, NULL, NULL, NULL, NULL, ?, NULL, 'page', ?, 1, 1, 0, 12, 'active', ?, ?, ?)
+  `).run(
+    S43_SCOPE_ID,
+    USER_ID,
+    COURSE_ID,
+    S43_SNAPSHOT_ID,
+    S43_PAGE_ID,
+    S43_DOCUMENT_ID,
+    `${marker} scope`,
+    JSON.stringify({ source: 'mcp-transport-test', marker }),
+    '2026-08-27 00:24:00',
+    '2026-08-27 00:24:00',
+  );
+  return { scopeId: S43_SCOPE_ID, anchorId: S43_ANCHOR_ID };
 }
 
 async function firstTrashConfirmRound(
@@ -738,24 +845,6 @@ test('S4-2 tools/call list_relations validates its output schema and matches the
   });
 });
 
-test('S4-2 tools/call get_relation validates its output schema and matches the direct service', async () => {
-  await withMcpHttp({}, async (fixture) => {
-    const { relation } = seedS42Relation(fixture, 'S4-2 get');
-    const input = { relation_id: relation.id };
-    const expected = getRelation(fixture.db, USER_ID, input.relation_id);
-
-    const { response, body } = await mcpPost(
-      fixture,
-      'tools/call',
-      { name: 'get_relation', arguments: input },
-      { id: 305, toolName: 'get_relation' },
-    );
-
-    assert.equal(response.status, 200);
-    assertReadToolResult('get_relation', body, expected);
-  });
-});
-
 test('S4-2 tools/call list_relation_types validates its output schema and matches the direct service', async () => {
   await withMcpHttp({}, async (fixture) => {
     const expected = listRelationTypes();
@@ -770,6 +859,82 @@ test('S4-2 tools/call list_relation_types validates its output schema and matche
 
     assert.equal(response.status, 200);
     assertReadToolResult('list_relation_types', body, expected);
+  });
+});
+
+test('S4-3 tools/call list_source_scopes validates its output schema and matches the direct service', async () => {
+  await withMcpHttp({}, async (fixture) => {
+    const { scopeId } = seedS43Provenance(fixture, 'S4-3 list scopes');
+    const input = { course_id: COURSE_ID, status: 'active' as const };
+    const expected = listSourceScopes(fixture.db, USER_ID, input);
+    assert.equal(expected.length, 1, 'the direct-service positive control must be non-empty');
+    assert.equal(expected[0]?.id, scopeId);
+
+    const { response, body } = await mcpPost(
+      fixture,
+      'tools/call',
+      { name: 'list_source_scopes', arguments: input },
+      { id: 307, toolName: 'list_source_scopes' },
+    );
+
+    assert.equal(response.status, 200);
+    assertReadToolResult('list_source_scopes', body, expected);
+  });
+});
+
+test('S4-3 tools/call get_source_scope_jump_target validates its output schema and matches the direct service', async () => {
+  await withMcpHttp({}, async (fixture) => {
+    const { scopeId } = seedS43Provenance(fixture, 'S4-3 scope jump');
+    const input = { scope_id: scopeId };
+    const expected = getSourceScopeJumpTarget(fixture.db, USER_ID, input.scope_id);
+
+    const { response, body } = await mcpPost(
+      fixture,
+      'tools/call',
+      { name: 'get_source_scope_jump_target', arguments: input },
+      { id: 308, toolName: 'get_source_scope_jump_target' },
+    );
+
+    assert.equal(response.status, 200);
+    assertReadToolResult('get_source_scope_jump_target', body, expected);
+  });
+});
+
+test('S4-3 tools/call list_source_anchors validates its output schema and matches the direct service', async () => {
+  await withMcpHttp({}, async (fixture) => {
+    const { anchorId } = seedS43Provenance(fixture, 'S4-3 list anchors');
+    const input = { course_id: COURSE_ID };
+    const expected = listSourceAnchors(fixture.db, USER_ID, input);
+    assert.equal(expected.length, 1, 'the direct-service positive control must be non-empty');
+    assert.equal(expected[0]?.id, anchorId);
+
+    const { response, body } = await mcpPost(
+      fixture,
+      'tools/call',
+      { name: 'list_source_anchors', arguments: input },
+      { id: 309, toolName: 'list_source_anchors' },
+    );
+
+    assert.equal(response.status, 200);
+    assertReadToolResult('list_source_anchors', body, expected);
+  });
+});
+
+test('S4-3 tools/call get_source_anchor_jump_target validates its output schema and matches the direct service', async () => {
+  await withMcpHttp({}, async (fixture) => {
+    const { anchorId } = seedS43Provenance(fixture, 'S4-3 anchor jump');
+    const input = { anchor_id: anchorId };
+    const expected = getSourceAnchorJumpTarget(fixture.db, USER_ID, input.anchor_id);
+
+    const { response, body } = await mcpPost(
+      fixture,
+      'tools/call',
+      { name: 'get_source_anchor_jump_target', arguments: input },
+      { id: 310, toolName: 'get_source_anchor_jump_target' },
+    );
+
+    assert.equal(response.status, 200);
+    assertReadToolResult('get_source_anchor_jump_target', body, expected);
   });
 });
 

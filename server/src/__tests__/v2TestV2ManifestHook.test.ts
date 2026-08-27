@@ -67,3 +67,19 @@ test('T-1 manifest copy recreates a missing dist target byte-for-byte', () => {
     rmSync(tempRoot, { recursive: true, force: true });
   }
 });
+
+test('T-2 pretest:v2 keeps manifest freshness checking and copying wired', () => {
+  const packageJson = JSON.parse(
+    readFileSync(resolve(SERVER_ROOT, 'package.json'), 'utf8'),
+  ) as { scripts?: Record<string, string> };
+  const hook = packageJson.scripts?.['pretest:v2'] ?? '';
+
+  assert.deepEqual(
+    {
+      check: hook.includes('check:tool-face-manifest'),
+      copy: hook.includes('copy:tool-face-manifest'),
+    },
+    { check: true, copy: true },
+    'pretest:v2 must retain both check:tool-face-manifest and copy:tool-face-manifest',
+  );
+});

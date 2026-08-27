@@ -312,10 +312,6 @@ export const listRelationsInputSchema = z.object({
   }
 });
 
-export const getRelationInputSchema = z.object({
-  relation_id: z.string(),
-}).strict();
-
 export const listRelationTypesInputSchema = z.object({}).strict();
 
 const relationAssessmentOutputSchema = z.object({
@@ -370,8 +366,165 @@ const relationTypeDefinitionOutputSchema = z.object({
 }).strict();
 
 export const listRelationsOutputSchema = z.array(relationOutputSchema);
-export const getRelationOutputSchema = relationOutputSchema;
 export const listRelationTypesOutputSchema = z.array(relationTypeDefinitionOutputSchema);
+
+const sourceScopeKindSchema = z.enum([
+  'page',
+  'page_range',
+  'anchor',
+  'source_material',
+  'material_segment',
+]);
+const sourceScopeStatusSchema = z.enum(['active', 'archived']);
+const sourceAnchorTargetTypeSchema = z.enum([
+  'note_block',
+  'note_block_source',
+  'evidence_set',
+  'evidence_item',
+  'proposal',
+]);
+const nullableSourceOffsetSchema = z.number().int().nullable();
+const nullableSourceTimestampSchema = z.string().nullable();
+
+export const listSourceScopesInputSchema = z.object({
+  course_id: z.string(),
+  status: sourceScopeStatusSchema.optional(),
+}).strict();
+
+export const getSourceScopeJumpTargetInputSchema = z.object({
+  scope_id: z.string(),
+}).strict();
+
+export const listSourceAnchorsInputSchema = z.object({
+  course_id: z.string(),
+  target_type: sourceAnchorTargetTypeSchema.optional(),
+  target_id: z.string().optional(),
+}).strict();
+
+export const getSourceAnchorJumpTargetInputSchema = z.object({
+  anchor_id: z.string(),
+}).strict();
+
+const sourceScopeOutputSchema = z.object({
+  id: z.string(),
+  user_id: z.string(),
+  course_id: z.string(),
+  source_snapshot_id: z.string().nullable(),
+  source_snapshot_page_id: z.string().nullable(),
+  source_anchor_id: z.string().nullable(),
+  source_material_id: z.string().nullable(),
+  source_fragment_id: z.string().nullable(),
+  material_segment_id: z.string().nullable(),
+  document_id: z.string().nullable(),
+  document_chunk_id: z.string().nullable(),
+  scope_kind: sourceScopeKindSchema,
+  label: z.string(),
+  page_start: nullableSourceOffsetSchema,
+  page_end: nullableSourceOffsetSchema,
+  text_start_offset: nullableSourceOffsetSchema,
+  text_end_offset: nullableSourceOffsetSchema,
+  status: sourceScopeStatusSchema,
+  metadata: jsonObjectSchema,
+  created_at: nullableSourceTimestampSchema,
+  updated_at: nullableSourceTimestampSchema,
+}).strict();
+
+const sourceAnchorOutputSchema = z.object({
+  id: z.string(),
+  user_id: z.string(),
+  course_id: z.string(),
+  source_snapshot_id: z.string(),
+  source_snapshot_page_id: z.string().nullable(),
+  document_id: z.string().nullable(),
+  document_chunk_id: z.string().nullable(),
+  source_material_id: z.string().nullable(),
+  source_fragment_id: z.string().nullable(),
+  material_segment_id: z.string().nullable(),
+  anchor_kind: z.string(),
+  page_start: nullableSourceOffsetSchema,
+  page_end: nullableSourceOffsetSchema,
+  text_start_offset: nullableSourceOffsetSchema,
+  text_end_offset: nullableSourceOffsetSchema,
+  status: z.string(),
+  confidence: z.number().finite().nullable(),
+  metadata: jsonObjectSchema,
+  created_at: nullableSourceTimestampSchema,
+  updated_at: nullableSourceTimestampSchema,
+}).strict();
+
+const sourceSnapshotOutputSchema = z.object({
+  id: z.string(),
+  user_id: z.string(),
+  course_id: z.string(),
+  source_material_id: z.string().nullable(),
+  document_id: z.string(),
+  snapshot_kind: z.string(),
+  status: z.string(),
+  title: z.string(),
+  source_filename: z.string(),
+  page_count: z.number().int().nullable(),
+  chunk_count: z.number().int(),
+  metadata: jsonObjectSchema,
+  created_at: nullableSourceTimestampSchema,
+  updated_at: nullableSourceTimestampSchema,
+}).strict();
+
+const sourceSnapshotPageOutputSchema = z.object({
+  id: z.string(),
+  user_id: z.string(),
+  course_id: z.string(),
+  source_snapshot_id: z.string(),
+  document_id: z.string(),
+  page_number: z.number().int(),
+  page_label: z.string().nullable(),
+  text_content: z.string(),
+  chunk_ids: z.string(),
+  metadata: jsonObjectSchema,
+  created_at: nullableSourceTimestampSchema,
+  updated_at: nullableSourceTimestampSchema,
+}).strict();
+
+// The scope service's no-page-in-range fallback returns the selected page row
+// without parsing its persisted metadata string. Keep that existing branch
+// explicit instead of widening the whole jump-target payload.
+const sourceScopeFallbackPageOutputSchema = sourceSnapshotPageOutputSchema.extend({
+  metadata: z.union([jsonObjectSchema, z.string()]),
+}).strict();
+
+const sourceJumpFocusOutputSchema = z.object({
+  page_start: nullableSourceOffsetSchema,
+  page_end: nullableSourceOffsetSchema,
+  text_start_offset: nullableSourceOffsetSchema,
+  text_end_offset: nullableSourceOffsetSchema,
+}).strict();
+
+export const listSourceScopesOutputSchema = z.array(sourceScopeOutputSchema);
+export const listSourceAnchorsOutputSchema = z.array(sourceAnchorOutputSchema);
+export const getSourceAnchorJumpTargetOutputSchema = z.object({
+  anchor: sourceAnchorOutputSchema,
+  snapshot: sourceSnapshotOutputSchema,
+  page: sourceSnapshotPageOutputSchema,
+  focus: sourceJumpFocusOutputSchema,
+  warnings: z.array(z.string()),
+}).strict();
+export const getSourceScopeJumpTargetOutputSchema = z.union([
+  z.object({
+    scope: sourceScopeOutputSchema,
+    anchor: sourceAnchorOutputSchema,
+    snapshot: sourceSnapshotOutputSchema,
+    page: sourceSnapshotPageOutputSchema,
+    focus: sourceJumpFocusOutputSchema,
+    warnings: z.array(z.string()),
+  }).strict(),
+  z.object({
+    scope: sourceScopeOutputSchema,
+    snapshot: sourceSnapshotOutputSchema,
+    page: sourceScopeFallbackPageOutputSchema,
+    pages: z.array(sourceSnapshotPageOutputSchema),
+    focus: sourceJumpFocusOutputSchema,
+    warnings: z.array(z.string()),
+  }).strict(),
+]);
 
 export const trashNotesInputSchema = z.object({
   note_ids: z.array(z.string().uuid()).min(1).max(50),
@@ -519,20 +672,6 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
     scopes: ['relations:read'],
   },
   {
-    name: 'get_relation',
-    description: 'Read one owned semantic Relation with hydrated endpoints and Snapshot receipts.',
-    input_schema: getRelationInputSchema,
-    output_schema: getRelationOutputSchema,
-    truth: 'semantic',
-    tier: 'immediate',
-    human_entry: {
-      route: 'GET /api/relations/:relationId',
-      client_call_site: 'client/src/pages/Notes/canvasEngine/relationRepository.ts#loadRelation',
-    },
-    exposure: 'public',
-    scopes: ['relations:read'],
-  },
-  {
     name: 'list_relation_types',
     description: 'List the static semantic Relation type definitions shared by all users.',
     input_schema: listRelationTypesInputSchema,
@@ -545,6 +684,62 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
     },
     exposure: 'public',
     scopes: ['relations:read'],
+  },
+  {
+    name: 'list_source_scopes',
+    description: 'List existing source scopes in one owned Project, optionally filtered by lifecycle status.',
+    input_schema: listSourceScopesInputSchema,
+    output_schema: listSourceScopesOutputSchema,
+    truth: 'provenance',
+    tier: 'immediate',
+    human_entry: {
+      route: 'GET /api/source-scopes',
+      client_call_site: 'client/src/pages/Courses/CourseDetail.tsx#fetchSourceScopes',
+    },
+    exposure: 'public',
+    scopes: ['sources:read'],
+  },
+  {
+    name: 'get_source_scope_jump_target',
+    description: 'Resolve one owned source scope to its existing snapshot jump target.',
+    input_schema: getSourceScopeJumpTargetInputSchema,
+    output_schema: getSourceScopeJumpTargetOutputSchema,
+    truth: 'provenance',
+    tier: 'immediate',
+    human_entry: {
+      route: 'GET /api/source-scopes/:id/jump-target',
+      client_call_site: 'client/src/pages/Courses/CourseDetail.tsx#handleOpenSourceScope',
+    },
+    exposure: 'public',
+    scopes: ['sources:read'],
+  },
+  {
+    name: 'list_source_anchors',
+    description: 'List existing source anchors in one owned Project, optionally filtered by target.',
+    input_schema: listSourceAnchorsInputSchema,
+    output_schema: listSourceAnchorsOutputSchema,
+    truth: 'provenance',
+    tier: 'immediate',
+    human_entry: {
+      route: 'GET /api/source-anchors',
+      client_call_site: 'client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts#fetchSourceAnchors',
+    },
+    exposure: 'public',
+    scopes: ['sources:read'],
+  },
+  {
+    name: 'get_source_anchor_jump_target',
+    description: 'Resolve one owned source anchor to its existing snapshot page jump target.',
+    input_schema: getSourceAnchorJumpTargetInputSchema,
+    output_schema: getSourceAnchorJumpTargetOutputSchema,
+    truth: 'provenance',
+    tier: 'immediate',
+    human_entry: {
+      route: 'GET /api/source-anchors/:id/jump-target',
+      client_call_site: 'client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts#handleViewSource',
+    },
+    exposure: 'public',
+    scopes: ['sources:read'],
   },
   {
     name: 'resolve_selection',

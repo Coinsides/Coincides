@@ -1848,346 +1848,6 @@
     ]
   },
   {
-    "name": "get_relation",
-    "description": "Read one owned semantic Relation with hydrated endpoints and Snapshot receipts.",
-    "input_schema": {
-      "type": "object",
-      "properties": {
-        "relation_id": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "relation_id"
-      ],
-      "additionalProperties": false
-    },
-    "output_schema": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string"
-        },
-        "user_id": {
-          "type": "string"
-        },
-        "from_item_id": {
-          "type": "string"
-        },
-        "to_item_id": {
-          "type": "string"
-        },
-        "relation_type": {
-          "type": "string"
-        },
-        "directionality": {
-          "type": "string",
-          "enum": [
-            "directed",
-            "undirected"
-          ]
-        },
-        "from_snapshot_id": {
-          "type": "string"
-        },
-        "to_snapshot_id": {
-          "type": "string"
-        },
-        "note": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "created_by": {
-          "type": "string"
-        },
-        "origin_purpose_id": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "status": {
-          "type": "string",
-          "enum": [
-            "active",
-            "revoked"
-          ]
-        },
-        "created_at": {
-          "type": "string"
-        },
-        "updated_at": {
-          "type": "string"
-        },
-        "affirmed_at": {
-          "type": "string"
-        },
-        "freshness": {
-          "type": "string",
-          "enum": [
-            "fresh",
-            "from_changed",
-            "to_changed",
-            "both_changed"
-          ]
-        },
-        "from_changed": {
-          "type": "boolean"
-        },
-        "to_changed": {
-          "type": "boolean"
-        },
-        "inspection_checkpoint_at": {
-          "type": "string"
-        },
-        "latest_assessment": {
-          "anyOf": [
-            {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "string"
-                },
-                "relation_id": {
-                  "type": "string"
-                },
-                "user_id": {
-                  "type": "string"
-                },
-                "verdict": {
-                  "type": "string",
-                  "enum": [
-                    "still_holds",
-                    "questionable"
-                  ]
-                },
-                "model_key": {
-                  "type": "string"
-                },
-                "created_at": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "id",
-                "relation_id",
-                "user_id",
-                "verdict",
-                "model_key",
-                "created_at"
-              ],
-              "additionalProperties": false
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "from_snapshot": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string"
-            },
-            "item_id": {
-              "type": "string"
-            },
-            "user_id": {
-              "type": "string"
-            },
-            "content": {
-              "type": "string"
-            },
-            "content_hash": {
-              "type": "string"
-            },
-            "created_at": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "id",
-            "item_id",
-            "user_id",
-            "content",
-            "content_hash",
-            "created_at"
-          ],
-          "additionalProperties": false
-        },
-        "to_snapshot": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string"
-            },
-            "item_id": {
-              "type": "string"
-            },
-            "user_id": {
-              "type": "string"
-            },
-            "content": {
-              "type": "string"
-            },
-            "content_hash": {
-              "type": "string"
-            },
-            "created_at": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "id",
-            "item_id",
-            "user_id",
-            "content",
-            "content_hash",
-            "created_at"
-          ],
-          "additionalProperties": false
-        },
-        "from_item": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string"
-            },
-            "plain_text": {
-              "type": "string"
-            },
-            "item_type": {
-              "type": [
-                "string",
-                "null"
-              ]
-            },
-            "topic": {
-              "type": [
-                "string",
-                "null"
-              ]
-            },
-            "status": {
-              "type": "string",
-              "enum": [
-                "active",
-                "retired"
-              ]
-            },
-            "retired_into_item_id": {
-              "type": [
-                "string",
-                "null"
-              ]
-            },
-            "updated_at": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "id",
-            "plain_text",
-            "item_type",
-            "topic",
-            "status",
-            "retired_into_item_id",
-            "updated_at"
-          ],
-          "additionalProperties": false
-        },
-        "to_item": {
-          "type": "object",
-          "properties": {
-            "id": {
-              "type": "string"
-            },
-            "plain_text": {
-              "type": "string"
-            },
-            "item_type": {
-              "type": [
-                "string",
-                "null"
-              ]
-            },
-            "topic": {
-              "type": [
-                "string",
-                "null"
-              ]
-            },
-            "status": {
-              "type": "string",
-              "enum": [
-                "active",
-                "retired"
-              ]
-            },
-            "retired_into_item_id": {
-              "type": [
-                "string",
-                "null"
-              ]
-            },
-            "updated_at": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "id",
-            "plain_text",
-            "item_type",
-            "topic",
-            "status",
-            "retired_into_item_id",
-            "updated_at"
-          ],
-          "additionalProperties": false
-        }
-      },
-      "required": [
-        "id",
-        "user_id",
-        "from_item_id",
-        "to_item_id",
-        "relation_type",
-        "directionality",
-        "from_snapshot_id",
-        "to_snapshot_id",
-        "note",
-        "created_by",
-        "origin_purpose_id",
-        "status",
-        "created_at",
-        "updated_at",
-        "affirmed_at",
-        "freshness",
-        "from_changed",
-        "to_changed",
-        "inspection_checkpoint_at",
-        "latest_assessment",
-        "from_snapshot",
-        "to_snapshot",
-        "from_item",
-        "to_item"
-      ],
-      "additionalProperties": false
-    },
-    "truth": "semantic",
-    "tier": "immediate",
-    "human_entry": {
-      "route": "GET /api/relations/:relationId",
-      "client_call_site": "client/src/pages/Notes/canvasEngine/relationRepository.ts#loadRelation"
-    },
-    "exposure": "public",
-    "scopes": [
-      "relations:read"
-    ]
-  },
-  {
     "name": "list_relation_types",
     "description": "List the static semantic Relation type definitions shared by all users.",
     "input_schema": {
@@ -2238,6 +1898,2101 @@
     "exposure": "public",
     "scopes": [
       "relations:read"
+    ]
+  },
+  {
+    "name": "list_source_scopes",
+    "description": "List existing source scopes in one owned Project, optionally filtered by lifecycle status.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "course_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "archived"
+          ]
+        }
+      },
+      "required": [
+        "course_id"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "course_id": {
+            "type": "string"
+          },
+          "source_snapshot_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source_snapshot_page_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source_anchor_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source_material_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source_fragment_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "material_segment_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "document_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "document_chunk_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "scope_kind": {
+            "type": "string",
+            "enum": [
+              "page",
+              "page_range",
+              "anchor",
+              "source_material",
+              "material_segment"
+            ]
+          },
+          "label": {
+            "type": "string"
+          },
+          "page_start": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "page_end": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text_start_offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text_end_offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "archived"
+            ]
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "array",
+                  "items": {}
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              ]
+            }
+          },
+          "created_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "updated_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "course_id",
+          "source_snapshot_id",
+          "source_snapshot_page_id",
+          "source_anchor_id",
+          "source_material_id",
+          "source_fragment_id",
+          "material_segment_id",
+          "document_id",
+          "document_chunk_id",
+          "scope_kind",
+          "label",
+          "page_start",
+          "page_end",
+          "text_start_offset",
+          "text_end_offset",
+          "status",
+          "metadata",
+          "created_at",
+          "updated_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "truth": "provenance",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "GET /api/source-scopes",
+      "client_call_site": "client/src/pages/Courses/CourseDetail.tsx#fetchSourceScopes"
+    },
+    "exposure": "public",
+    "scopes": [
+      "sources:read"
+    ]
+  },
+  {
+    "name": "get_source_scope_jump_target",
+    "description": "Resolve one owned source scope to its existing snapshot jump target.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "scope_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "scope_id"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "scope": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "user_id": {
+                  "type": "string"
+                },
+                "course_id": {
+                  "type": "string"
+                },
+                "source_snapshot_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_snapshot_page_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_anchor_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_material_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_fragment_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "material_segment_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "document_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "document_chunk_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "scope_kind": {
+                  "type": "string",
+                  "enum": [
+                    "page",
+                    "page_range",
+                    "anchor",
+                    "source_material",
+                    "material_segment"
+                  ]
+                },
+                "label": {
+                  "type": "string"
+                },
+                "page_start": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "page_end": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "text_start_offset": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "text_end_offset": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "active",
+                    "archived"
+                  ]
+                },
+                "metadata": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "array",
+                        "items": {}
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": {}
+                      }
+                    ]
+                  }
+                },
+                "created_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "updated_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "user_id",
+                "course_id",
+                "source_snapshot_id",
+                "source_snapshot_page_id",
+                "source_anchor_id",
+                "source_material_id",
+                "source_fragment_id",
+                "material_segment_id",
+                "document_id",
+                "document_chunk_id",
+                "scope_kind",
+                "label",
+                "page_start",
+                "page_end",
+                "text_start_offset",
+                "text_end_offset",
+                "status",
+                "metadata",
+                "created_at",
+                "updated_at"
+              ],
+              "additionalProperties": false
+            },
+            "anchor": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "user_id": {
+                  "type": "string"
+                },
+                "course_id": {
+                  "type": "string"
+                },
+                "source_snapshot_id": {
+                  "type": "string"
+                },
+                "source_snapshot_page_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "document_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "document_chunk_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_material_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_fragment_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "material_segment_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "anchor_kind": {
+                  "type": "string"
+                },
+                "page_start": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "page_end": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "text_start_offset": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "text_end_offset": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "type": "string"
+                },
+                "confidence": {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "metadata": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "array",
+                        "items": {}
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": {}
+                      }
+                    ]
+                  }
+                },
+                "created_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "updated_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "user_id",
+                "course_id",
+                "source_snapshot_id",
+                "source_snapshot_page_id",
+                "document_id",
+                "document_chunk_id",
+                "source_material_id",
+                "source_fragment_id",
+                "material_segment_id",
+                "anchor_kind",
+                "page_start",
+                "page_end",
+                "text_start_offset",
+                "text_end_offset",
+                "status",
+                "confidence",
+                "metadata",
+                "created_at",
+                "updated_at"
+              ],
+              "additionalProperties": false
+            },
+            "snapshot": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "user_id": {
+                  "type": "string"
+                },
+                "course_id": {
+                  "type": "string"
+                },
+                "source_material_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "document_id": {
+                  "type": "string"
+                },
+                "snapshot_kind": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "source_filename": {
+                  "type": "string"
+                },
+                "page_count": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "chunk_count": {
+                  "type": "integer"
+                },
+                "metadata": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "array",
+                        "items": {}
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": {}
+                      }
+                    ]
+                  }
+                },
+                "created_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "updated_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "user_id",
+                "course_id",
+                "source_material_id",
+                "document_id",
+                "snapshot_kind",
+                "status",
+                "title",
+                "source_filename",
+                "page_count",
+                "chunk_count",
+                "metadata",
+                "created_at",
+                "updated_at"
+              ],
+              "additionalProperties": false
+            },
+            "page": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "user_id": {
+                  "type": "string"
+                },
+                "course_id": {
+                  "type": "string"
+                },
+                "source_snapshot_id": {
+                  "type": "string"
+                },
+                "document_id": {
+                  "type": "string"
+                },
+                "page_number": {
+                  "type": "integer"
+                },
+                "page_label": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "text_content": {
+                  "type": "string"
+                },
+                "chunk_ids": {
+                  "type": "string"
+                },
+                "metadata": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "array",
+                        "items": {}
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": {}
+                      }
+                    ]
+                  }
+                },
+                "created_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "updated_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "user_id",
+                "course_id",
+                "source_snapshot_id",
+                "document_id",
+                "page_number",
+                "page_label",
+                "text_content",
+                "chunk_ids",
+                "metadata",
+                "created_at",
+                "updated_at"
+              ],
+              "additionalProperties": false
+            },
+            "focus": {
+              "type": "object",
+              "properties": {
+                "page_start": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "page_end": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "text_start_offset": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "text_end_offset": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "page_start",
+                "page_end",
+                "text_start_offset",
+                "text_end_offset"
+              ],
+              "additionalProperties": false
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "scope",
+            "anchor",
+            "snapshot",
+            "page",
+            "focus",
+            "warnings"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "scope": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "user_id": {
+                  "type": "string"
+                },
+                "course_id": {
+                  "type": "string"
+                },
+                "source_snapshot_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_snapshot_page_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_anchor_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_material_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "source_fragment_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "material_segment_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "document_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "document_chunk_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "scope_kind": {
+                  "type": "string",
+                  "enum": [
+                    "page",
+                    "page_range",
+                    "anchor",
+                    "source_material",
+                    "material_segment"
+                  ]
+                },
+                "label": {
+                  "type": "string"
+                },
+                "page_start": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "page_end": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "text_start_offset": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "text_end_offset": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "active",
+                    "archived"
+                  ]
+                },
+                "metadata": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "array",
+                        "items": {}
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": {}
+                      }
+                    ]
+                  }
+                },
+                "created_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "updated_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "user_id",
+                "course_id",
+                "source_snapshot_id",
+                "source_snapshot_page_id",
+                "source_anchor_id",
+                "source_material_id",
+                "source_fragment_id",
+                "material_segment_id",
+                "document_id",
+                "document_chunk_id",
+                "scope_kind",
+                "label",
+                "page_start",
+                "page_end",
+                "text_start_offset",
+                "text_end_offset",
+                "status",
+                "metadata",
+                "created_at",
+                "updated_at"
+              ],
+              "additionalProperties": false
+            },
+            "snapshot": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "user_id": {
+                  "type": "string"
+                },
+                "course_id": {
+                  "type": "string"
+                },
+                "source_material_id": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "document_id": {
+                  "type": "string"
+                },
+                "snapshot_kind": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "source_filename": {
+                  "type": "string"
+                },
+                "page_count": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "chunk_count": {
+                  "type": "integer"
+                },
+                "metadata": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "number"
+                      },
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      },
+                      {
+                        "type": "array",
+                        "items": {}
+                      },
+                      {
+                        "type": "object",
+                        "additionalProperties": {}
+                      }
+                    ]
+                  }
+                },
+                "created_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "updated_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "user_id",
+                "course_id",
+                "source_material_id",
+                "document_id",
+                "snapshot_kind",
+                "status",
+                "title",
+                "source_filename",
+                "page_count",
+                "chunk_count",
+                "metadata",
+                "created_at",
+                "updated_at"
+              ],
+              "additionalProperties": false
+            },
+            "page": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "user_id": {
+                  "type": "string"
+                },
+                "course_id": {
+                  "type": "string"
+                },
+                "source_snapshot_id": {
+                  "type": "string"
+                },
+                "document_id": {
+                  "type": "string"
+                },
+                "page_number": {
+                  "type": "integer"
+                },
+                "page_label": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "text_content": {
+                  "type": "string"
+                },
+                "chunk_ids": {
+                  "type": "string"
+                },
+                "metadata": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "null"
+                          },
+                          {
+                            "type": "array",
+                            "items": {}
+                          },
+                          {
+                            "type": "object",
+                            "additionalProperties": {}
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "created_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "updated_at": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "user_id",
+                "course_id",
+                "source_snapshot_id",
+                "document_id",
+                "page_number",
+                "page_label",
+                "text_content",
+                "chunk_ids",
+                "metadata",
+                "created_at",
+                "updated_at"
+              ],
+              "additionalProperties": false
+            },
+            "pages": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "type": "string"
+                  },
+                  "course_id": {
+                    "type": "string"
+                  },
+                  "source_snapshot_id": {
+                    "type": "string"
+                  },
+                  "document_id": {
+                    "type": "string"
+                  },
+                  "page_number": {
+                    "type": "integer"
+                  },
+                  "page_label": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "text_content": {
+                    "type": "string"
+                  },
+                  "chunk_ids": {
+                    "type": "string"
+                  },
+                  "metadata": {
+                    "type": "object",
+                    "additionalProperties": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "boolean"
+                        },
+                        {
+                          "type": "null"
+                        },
+                        {
+                          "type": "array",
+                          "items": {}
+                        },
+                        {
+                          "type": "object",
+                          "additionalProperties": {}
+                        }
+                      ]
+                    }
+                  },
+                  "created_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "updated_at": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "user_id",
+                  "course_id",
+                  "source_snapshot_id",
+                  "document_id",
+                  "page_number",
+                  "page_label",
+                  "text_content",
+                  "chunk_ids",
+                  "metadata",
+                  "created_at",
+                  "updated_at"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "focus": {
+              "type": "object",
+              "properties": {
+                "page_start": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "page_end": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "text_start_offset": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "text_end_offset": {
+                  "anyOf": [
+                    {
+                      "type": "integer"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "page_start",
+                "page_end",
+                "text_start_offset",
+                "text_end_offset"
+              ],
+              "additionalProperties": false
+            },
+            "warnings": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": [
+            "scope",
+            "snapshot",
+            "page",
+            "pages",
+            "focus",
+            "warnings"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "truth": "provenance",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "GET /api/source-scopes/:id/jump-target",
+      "client_call_site": "client/src/pages/Courses/CourseDetail.tsx#handleOpenSourceScope"
+    },
+    "exposure": "public",
+    "scopes": [
+      "sources:read"
+    ]
+  },
+  {
+    "name": "list_source_anchors",
+    "description": "List existing source anchors in one owned Project, optionally filtered by target.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "course_id": {
+          "type": "string"
+        },
+        "target_type": {
+          "type": "string",
+          "enum": [
+            "note_block",
+            "note_block_source",
+            "evidence_set",
+            "evidence_item",
+            "proposal"
+          ]
+        },
+        "target_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "course_id"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "course_id": {
+            "type": "string"
+          },
+          "source_snapshot_id": {
+            "type": "string"
+          },
+          "source_snapshot_page_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "document_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "document_chunk_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source_material_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "source_fragment_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "material_segment_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "anchor_kind": {
+            "type": "string"
+          },
+          "page_start": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "page_end": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text_start_offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "text_end_offset": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "array",
+                  "items": {}
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              ]
+            }
+          },
+          "created_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "updated_at": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "course_id",
+          "source_snapshot_id",
+          "source_snapshot_page_id",
+          "document_id",
+          "document_chunk_id",
+          "source_material_id",
+          "source_fragment_id",
+          "material_segment_id",
+          "anchor_kind",
+          "page_start",
+          "page_end",
+          "text_start_offset",
+          "text_end_offset",
+          "status",
+          "confidence",
+          "metadata",
+          "created_at",
+          "updated_at"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "truth": "provenance",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "GET /api/source-anchors",
+      "client_call_site": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts#fetchSourceAnchors"
+    },
+    "exposure": "public",
+    "scopes": [
+      "sources:read"
+    ]
+  },
+  {
+    "name": "get_source_anchor_jump_target",
+    "description": "Resolve one owned source anchor to its existing snapshot page jump target.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "anchor_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "anchor_id"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "anchor": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "user_id": {
+              "type": "string"
+            },
+            "course_id": {
+              "type": "string"
+            },
+            "source_snapshot_id": {
+              "type": "string"
+            },
+            "source_snapshot_page_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "document_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "document_chunk_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "source_material_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "source_fragment_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "material_segment_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "anchor_kind": {
+              "type": "string"
+            },
+            "page_start": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "page_end": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "text_start_offset": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "text_end_offset": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "status": {
+              "type": "string"
+            },
+            "confidence": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "metadata": {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "array",
+                    "items": {}
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              }
+            },
+            "created_at": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "updated_at": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "user_id",
+            "course_id",
+            "source_snapshot_id",
+            "source_snapshot_page_id",
+            "document_id",
+            "document_chunk_id",
+            "source_material_id",
+            "source_fragment_id",
+            "material_segment_id",
+            "anchor_kind",
+            "page_start",
+            "page_end",
+            "text_start_offset",
+            "text_end_offset",
+            "status",
+            "confidence",
+            "metadata",
+            "created_at",
+            "updated_at"
+          ],
+          "additionalProperties": false
+        },
+        "snapshot": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "user_id": {
+              "type": "string"
+            },
+            "course_id": {
+              "type": "string"
+            },
+            "source_material_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "document_id": {
+              "type": "string"
+            },
+            "snapshot_kind": {
+              "type": "string"
+            },
+            "status": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "source_filename": {
+              "type": "string"
+            },
+            "page_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "chunk_count": {
+              "type": "integer"
+            },
+            "metadata": {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "array",
+                    "items": {}
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              }
+            },
+            "created_at": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "updated_at": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "user_id",
+            "course_id",
+            "source_material_id",
+            "document_id",
+            "snapshot_kind",
+            "status",
+            "title",
+            "source_filename",
+            "page_count",
+            "chunk_count",
+            "metadata",
+            "created_at",
+            "updated_at"
+          ],
+          "additionalProperties": false
+        },
+        "page": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "user_id": {
+              "type": "string"
+            },
+            "course_id": {
+              "type": "string"
+            },
+            "source_snapshot_id": {
+              "type": "string"
+            },
+            "document_id": {
+              "type": "string"
+            },
+            "page_number": {
+              "type": "integer"
+            },
+            "page_label": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "text_content": {
+              "type": "string"
+            },
+            "chunk_ids": {
+              "type": "string"
+            },
+            "metadata": {
+              "type": "object",
+              "additionalProperties": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  },
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  },
+                  {
+                    "type": "array",
+                    "items": {}
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                ]
+              }
+            },
+            "created_at": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "updated_at": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "user_id",
+            "course_id",
+            "source_snapshot_id",
+            "document_id",
+            "page_number",
+            "page_label",
+            "text_content",
+            "chunk_ids",
+            "metadata",
+            "created_at",
+            "updated_at"
+          ],
+          "additionalProperties": false
+        },
+        "focus": {
+          "type": "object",
+          "properties": {
+            "page_start": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "page_end": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "text_start_offset": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "text_end_offset": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "page_start",
+            "page_end",
+            "text_start_offset",
+            "text_end_offset"
+          ],
+          "additionalProperties": false
+        },
+        "warnings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "anchor",
+        "snapshot",
+        "page",
+        "focus",
+        "warnings"
+      ],
+      "additionalProperties": false
+    },
+    "truth": "provenance",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "GET /api/source-anchors/:id/jump-target",
+      "client_call_site": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts#handleViewSource"
+    },
+    "exposure": "public",
+    "scopes": [
+      "sources:read"
     ]
   },
   {
