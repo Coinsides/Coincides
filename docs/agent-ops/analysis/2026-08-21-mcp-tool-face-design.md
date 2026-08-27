@@ -129,6 +129,7 @@ ToolRegistryEntry = {
 ## 7. 协议栈与部署形态
 
 - MCP **2026-07-28** 修订;`@modelcontextprotocol/sdk` `StreamableHTTPServerTransport` 架在既有 Express 之后(无状态核心,与「后端保持服务形态」同构);MRTR 承载 `confirm` 档;缓存 `ttlMs/cacheScope` 用于 list/read 类工具(零模型荣誉榜同向)。
+  > ⚠️ **缓存头:推迟,V12 不做**(Fable 裁,2026-08-26)。**发单前现物核实**:`ToolRegistryEntry`(`server/src/toolFace/registry.ts`)九个字段无一与缓存相关,`registry.ts`/`mcp/manifest.ts`/`mcp/policy.ts` 三文件 `ttl|cache` **零命中** ⇒ 它是**新增字段+manifest 渲染+门**的新面,不是读工具的附赠品。裁定依据:**无现役消费者**(没有任何外部 Agent 在做工具结果缓存),按「形状勿跑能力前 + 预留位不留」⇒ S4 全程不碰,**⛔ 连字段都不留**。**触发器 = 出现真实的缓存消费者。** 指针:`handoffs/2026-08-26-v2bn12-s4-1-read-face-knowledge.md` §「本单明确不做」。
 - 会话/编排不在工具面:harness(Claude Code/Codex/OpenCode/管家)自带编排;工具面对所有穿戴者一视同仁(不整容)。
 - **Q4 更正(Review-1 ④)**:`elicitation/create`(Claude Code CLI ≥2.1.76 支持,Desktop 不支持)与 MRTR `input_required`(7-28 工具级机制)**不是一回事**;MRTR 在两 harness 的支持度**未证**。且失败模式比「不支持」更糟:Codex 侧文档称客户端未实现 handler 时**会话无限期阻塞**——不是降级是挂死。**规则(拍)**:服务端**只在客户端明确宣告支持**(能力协商/协议版本)时才发 `input_required`;否则 `confirm` **立即**降为 `propose` 并返回候选收据——propose 档由此获得第二个存在理由:**它是 confirm 的安全垫**。
 - 单用户本机/私有云:bearer 复用应用 JWT;多穿戴者并发细则在停车场。

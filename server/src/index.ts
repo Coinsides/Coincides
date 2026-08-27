@@ -108,6 +108,11 @@ app.use(cookieParser());
 // Public routes (no auth)
 app.use('/api/auth', authRoutes);
 
+if (process.env.NODE_ENV !== 'production' && process.env.COINCIDES_DEV_QUICK_LOGIN === 'enabled') {
+  const { devQuickLoginRouter } = await import('./dev/quickLogin.js');
+  app.use('/api/dev', devQuickLoginRouter);
+}
+
 // MCP transport: transport security gate, then the existing Bearer JWT gate.
 app.post(
   '/api/mcp',

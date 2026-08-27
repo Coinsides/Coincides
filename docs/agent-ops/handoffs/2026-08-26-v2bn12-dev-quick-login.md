@@ -1,4 +1,4 @@
-> from: claude(opus,工程调度会话) | to: codex(builder) | status: ready | re: v2bn12-dev-quick-login | date: 2026-08-26
+> from: claude(opus,工程调度会话) | to: codex(builder) | status: done | re: v2bn12-dev-quick-login | date: 2026-08-26
 
 # V2.BN.12:开发环境快捷登录入口(dev-only)
 
@@ -92,3 +92,130 @@ if (process.env.NODE_ENV !== 'production' && process.env.COINCIDES_DEV_QUICK_LOG
 回执 **UTF-8** 追加 `## Result`(**不需确认**):K-1/K-2/K-3 各一段(K-1/K-2 须贴先红后绿的红点断言原文与行号)· `git diff --numstat` 对照边界 · 显式范围排除 · 并**明写**「生产模式下不可达且有 T-2/T-3 锁死」(⛔ 不写「生产构建不存在该路径」)。
 
 ⏱ 预估 25–35 分钟。
+
+## Result
+
+> builder: codex | date: 2026-08-26 | verdict: DONE
+
+已交付 `POST /api/dev/quick-login`。路由只按 email 读取既有 user，调用唯一的 `generateToken(user.id)`，返回与正常登录一致的 `{ token, user }`；没有创建用户、修改密码或写 users 表。挂载点只有 `server/src/index.ts` 一处，须同时满足非 production 与显式 `COINCIDES_DEV_QUICK_LOGIN=enabled`。模块本身在 production 被直接加载时另行抛错。
+
+**生产模式下不可达且有 T-2/T-3 锁死。**
+
+### K-1 — 显式开关灵魂刀
+
+临时删除挂载条件中的 `process.env.COINCIDES_DEV_QUICK_LOGIN === 'enabled'`，只保留 NODE_ENV 门。T-1、T-2 仍绿，T-3 精确红在状态码断言：
+
+```text
+Expected values to be strictly equal:
+
+200 !== 404
+
+TestContext.<anonymous> (.../server/src/__tests__/v2DevQuickLogin.test.ts:241:12)
+```
+
+专项 exit 1（2 pass / 1 fail）；恢复显式开关后专项 exit 0（3/3）。
+
+### K-2 — production 门
+
+本单同时要求模块顶层 production 保险；若只把外层 NODE_ENV 条件改成恒真，动态 import 会被第二保险中止在 readiness，无法到达工单指定的状态码红点。因此本次临时 mutation 成对旁路外层 NODE_ENV 门与模块顶层保险，仅用于让同一 HTTP 探针抵达路由；T-2 精确红在状态码断言：
+
+```text
+Expected values to be strictly equal:
+
+200 !== 404
+
+TestContext.<anonymous> (.../server/src/__tests__/v2DevQuickLogin.test.ts:228:12)
+```
+
+专项 exit 1（2 pass / 1 fail）；两处正式保险均恢复后专项 exit 0（3/3）。另以 production 直接 import 探针验证模块第二保险，得到 `Dev quick login must not be loaded in production`，探针 exit 0。
+
+### K-3 — 阳性与同形证明
+
+两条件同时满足时，T-1 先让同一真实 `server/src/index.ts` HTTP 探针取得 200，再与 `/api/auth/login` 比较顶层 keys、user keys 与完整 user DTO；另断言 token 为非空字符串、`user.id` 等于 fixture id，并用该 token 成功访问 `/api/auth/me`。同一 T-1 还证明带 `password` 的额外字段被 strict body 以 400 拒绝。最终 T-1/T-2/T-3 为 3/3。
+
+### 门禁（docs-first）
+
+| 顺序 | 门 | exit | 结果 |
+|---:|---|---:|---|
+| 1 | `npm.cmd run docs:check` | 1 | 仅报 `过期: docs/agent-ops/INDEX.md`；新文件使生成索引失配，按现场分工如实记录，未修 INDEX |
+| 2a | client `npx.cmd tsc --noEmit` | 0 | 通过 |
+| 2b | server `npx.cmd tsc --noEmit` | 0 | 通过 |
+| 3 | `npm.cmd run test:unit` | 0 | 222/222 |
+| 4 | server `npm.cmd run test:v2`（独立 OS-temp `CANVAS_ASSET_DIR`） | 0 | 277/277，新增三条已由显式列表接门 |
+| 5 | server `npm.cmd run test:mcp-transport` | 0 | 37/37 |
+| 6 | `node --import tsx --test src/__tests__/textFlowIdentityContract.test.ts` | 0 | 4/4 |
+| 7 | `node --import tsx --test src/__tests__/v2DevQuickLogin.test.ts` | 0 | 3/3 |
+
+补充：`git diff --check` exit 0。测试 server 每次使用隔离的 DB / Source / Canvas / Upload 目录与空 dotenv 文件；未读取本地开发数据库或资产。
+
+### `git diff --numstat` 与边界
+
+| additions | deletions | 文件 | 归属 |
+|---:|---:|---|---|
+| 59 | 0 | `server/src/dev/quickLogin.ts` | 允许，新建 |
+| 245 | 0 | `server/src/__tests__/v2DevQuickLogin.test.ts` | 允许，新建 |
+| 5 | 0 | `server/src/index.ts` | 允许，仅一个条件挂载块 |
+| 1 | 1 | `server/package.json` | 允许，仅 `test:v2` 显式列表加文件名 |
+| 1 | 0 | `docs/agent-ops/current-state/deferred-tests.md` | 允许，仅追加本单降档行 |
+| 82 | 1 | `docs/agent-ops/handoffs/2026-08-26-v2bn12-dev-quick-login.md` | 回执自身 + status 前翻 |
+
+新文件两行 numstat 由 `git diff --no-index --numstat -- NUL <file>` 取得；其余由 `git diff --numstat -- <本单路径>` 取得。
+
+显式范围排除：
+
+- `server/src/routes/auth.ts` 与 `server/src/middleware/auth.ts` 的 filtered git blob 均等于 HEAD；只 import，零字节修改。
+- users 表、migration、`schema.sql`、注册表、binding、transport、manifest、`shared/`、任何 tsconfig 与客户端均未修改；migration/schema diff 数为 0。
+- 四个 EOL 项 `useNoteCanvasRuntimeController.ts`、`SelectionToolbarLayer.tsx`、`routes/projections.ts`、`selectionReceiptProjection.ts` 的 filtered git blob 均等于 HEAD；未把 porcelain `M` 当内容改动。
+- 共享树上其余文档、`.claude/**` 与并行工单内容均未触碰；`docs/agent-ops/INDEX.md` 虽在共享树显示修改，本单没有改它。
+- `.codex-tmp/builder.lock.d` 始终由发单方持有；未取锁、未覆盖 owner、未删锁。未枚举或终止任何 Codex 进程；测试只通过自身 child handle 收束自己启动的 Node server。
+- 未 commit、未 push、未切换或触碰 main。
+
+### 降档台账
+
+已在 `current-state/deferred-tests.md` 追加一行：token 过期行为、并发多次调用、非 fixture 邮箱枚举面未测；对应会挡的过期鉴权退化、并发一致性与账号存在性枚举风险已成对写明。
+
+## Review
+
+> reviewer: claude(opus,工程调度会话) | date: 2026-08-26 | verdict: **PASS 0/0/0/0** | ⚠️ 一处**规格缺陷归发单方**(见 §3)
+
+⚠️ **本单缺一层独立视角**:按 Fable 的病灶隔离裁定,本单**由我拟单、Codex 施工、我复核** —— 拟单者与复核者是同一人。此事实**如实声明**,不由「PASS」掩盖;补偿检验点见 §4。
+
+### 1. 收工判定(两源,按 handoffs README §④)
+
+builder pid `32500` **进程消失**;后台任务 **exit 0**。⛔ 未拿「`## Result` 出现」当结束。
+
+### 2. 位点复核(⭐ 亲手施刀,不吃回执)
+
+| 位点 | 验证方式 | 结果 |
+|---|---|---|
+| 模块本体 | 通读 `server/src/dev/quickLogin.ts` 全文 | zod `.strict()` **只含 `email` 一键**(⇒ 带口令类字段的 body 被 400 拒,回执有正控)· **只 `SELECT` 不写**(users 表零改动,且**未 SELECT `password_hash`**)· 调**既有** `generateToken(user.id)`,未自签 · 模块顶层 production 抛错(第二保险在) |
+| 挂载点 | `grep -c "dev/quickLogin" server/src/index.ts` | **1**;位置 `index.ts:111`,在 `authRoutes` 之后、MCP 之前,`await import()` 动态挂载,与工单给的形状逐字一致 |
+| **K-1 灵魂刀** | ⭐ **复核方亲手施加**:删去挂载条件中的 `COINCIDES_DEV_QUICK_LOGIN === 'enabled'`,只留 NODE_ENV 判断,跑专项 | **T-3 红**于 `v2DevQuickLogin.test.ts:241:12`,`200 !== 404` —— **与回执自述红点逐字相同**;同轮 **T-1/T-2 仍绿**(⇒ T-3 不搭其他条件的便车) |
+| 还原保真 | sha256 对照备份 | `474e0b15ee15fc2758975d35557cd4da0b27a34a6c902dc72bdcd9481377c5ef`,**逐位相同**;还原后专项 **3/3 绿**;树无残留 |
+| 接门(TD-22) | `server/package.json` diff | `test:v2` 显式列表已加 `v2DevQuickLogin.test.ts`;`test:v2` 274 → **277** |
+| 门 1 那格红 | 追因 | **病因是复核方**(builder 开工后我新建了 S4-1 工单与日志条目致 INDEX 失配)。builder **如实记录、未越界洗绿,处置正确**;INDEX 已由我重生成,`docs:check` 现绿 |
+
+### 3. ⚠️ 规格缺陷(归发单方,非 builder):`NODE_ENV` 那一半门不承重
+
+**事实**:全仓**无任何地方设置 `NODE_ENV`** —— `server/package.json` 的 `start` 是裸 `node dist/index.js`;产品码里 `NODE_ENV` 的出现处**只有本单新增的两行**;无 Dockerfile / docker-compose / Procfile / ecosystem 之类注入者。
+⇒ 真实运行中 `NODE_ENV` 为 `undefined`,第一个条件**恒真** ⇒ **实际承重的只有显式开关(默认关)**。
+⇒ 连带:**T-2 测的是本仓现实中不会发生的状态**(由测试自行置位造出),它是真测试,但守的是一扇当前没人会走的门。
+
+**归属**:**工单缺陷,不是施工缺陷**。builder 逐字实现了工单要求。发单方(我)发单前确实 grep 了 `NODE_ENV` 并如实写下「本仓零处使用」,**但把「零命中」读成了「尚未引入的新约定」,而非「无人置位 ⇒ 该条件不承重」**。
+
+**【裁定 · Fable 2026-08-26】不补 start 置位,取「如实改口 + 降格为前哨 + 挂触发器」**(裁定原文要点,⛔ 不得改写为「已修复」):
+1. **真门 = 显式开关(默认关、fail-closed)**。一切措辞从「生产模式下不可达」改为 **「默认不可达 —— 路由仅在显式开关开启时存在;开关不开,门不挂载」**。此句已被 §2 的 K-1 亲刀验红,**承重**。
+2. **`NODE_ENV` 半门留在码里但降格为「前哨」**:不删(免费绊线,将来置位即生效),但**任何描述不得再引它作保证**;T-2 保留。**本轮零代码改动**(⚠️ 连注释也不改 —— 改注释仍是产品码改动,Claude 会话不下场;若要加注释,随下一张触及该文件的单顺带)。
+3. **不采「让 `start` 置位 `production`」** —— 理由不是省事:**本仓此刻不存在「生产模式」这个现实**(无部署、无第二台机器),为一个尚不存在的状态造承重门 = 形状跑在能力前面(同日已在缓存头上杀过同款)。⭐ **另补一条发单方 grep 未覆盖的事实**:`node_modules` 里读 `NODE_ENV` 的**不是零**(Express 自身即读,错误页/缓存行为会变)⇒ 「零命中」只对产品码成立,置位 `production` 的爆炸半径非零,需要一次真部署语境下的检验,而该语境现在没有。
+
+⇒ **记 TD-24**(见 `current-state/tech-debt.md`),触发器 = **首次真实部署**。
+
+### 4. 声明边界(如实记,非缺陷)
+
+- **存在性预言机**:开关开启的开发环境下,该端点对已存在 email 返 200、不存在返 404 ⇒ 可枚举邮箱是否存在。dev-only + 显式开关,**可接受**;按家法**声明优先于默认**,记此。
+- **独立视角缺口的补偿检验点(Fable 裁)**:⛔ 不另派目检轮。由**版本收口走查**承担 —— 届时走查会**真实使用**本入口进入登录态,那是带真实消费者的端到端检验,强于十分钟目检。「同人拟审」的缺口担忧**记档为真**(不能指望每次都由埋坑者自己撞上),**解法是等一个真检验点,不是再加一轮目检**。
+
+### 5. 结论
+
+**PASS 0/0/0/0**。交付物与边界一致(`git diff --numstat` 五个文件全在允许面内,`routes/auth.ts` 与 `middleware/auth.ts` 的 filtered blob 等于 HEAD,零字节修改)。
+**收口措辞以 §3 裁定 1 为准**:**默认不可达 —— 路由仅在显式开关开启时存在。** ⛔ 不写「生产模式下不可达」,⛔ 不写「生产构建不存在该路径」。
