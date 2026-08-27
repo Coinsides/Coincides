@@ -30,3 +30,4 @@
 - 2026-08-27 · S4-4 内容真相读面 · trashed Note 读取行为、NoteBlocks placement 层级/排序边界与跨用户矩阵未写（本单只留两条真实 `tools/call` 最小正控，ownership 仍由既有 `getOwnedNote` / 查询条件承担）· 挡「生命周期边界、层级排序与跨用户读隔离的系统性回归」· 单 `handoffs/2026-08-27-v2bn12-s4-4-read-face-notes.md`
 - 2026-08-27 · TD-12 K-3 · 清理失败分支未写常驻注入测试（本单仅以运行器代码结构论证）· 挡「后续重构让清理异常覆盖子进程原退出码」· 单 `handoffs/2026-08-27-v2bn12-td12-test-asset-isolation.md`
 - 2026-08-27 · TD-17 部分清偿 · (乙)「坏 body + 非法 Host」先 403 未做；MCP 坏 body 仅得 HTTP 400，不产出 JSON-RPC `-32700`（`express.json()` 早于 transport）· 挡「非法 Host 在解析前优先拒绝 / transport 级 JSON-RPC parse-error 信封」· 单 `handoffs/2026-08-27-v2bn12-td17-malformed-body-400.md`
+- 2026-08-27 · dead-code retirement · `/api/proposals` 既有客户端消费旅程、`ContentGroupPanel` 的 `loadRelations` / `loadRelationTypes` 交互矩阵未新增（本单只加两条精确零引用断言并复跑既有门）· 分别挡「近名活提案系统被误伤」与「plural Relation 读取交互被误伤」· 单 `handoffs/2026-08-27-v2bn12-dead-code-retirement.md`
