@@ -1,6 +1,7 @@
 import { getDb } from '../db/init.js';
 import { AppError } from '../middleware/errorHandler.js';
-import { getOwnedCourse, getOwnedNote, hydrateNote } from '../routes/notes.js';
+import { getOwnedCourse, getOwnedNote } from '../routes/notes.js';
+import { hydrateNote } from './noteHydration.js';
 import { assertSourceProjectionNoteContentWriteAllowed } from './sourceProjectionPolicy.js';
 
 export interface ListNotesInput {

@@ -26,21 +26,15 @@ import {
   restoreNoteAsUser,
   trashNoteAsUser,
 } from '../services/notes.js';
+import { hydrateBlock, hydrateNote } from '../services/noteHydration.js';
+
+export { hydrateNote };
 
 const router = Router();
 const LEGACY_NOTE_LAYOUT_KEY = 'better_notebook_layout';
 
 function stringifyJson(value: unknown, fallback: unknown): string {
   return JSON.stringify(value ?? fallback);
-}
-
-function parseJson<T>(value: string | null | undefined, fallback: T): T {
-  if (!value) return fallback;
-  try {
-    return JSON.parse(value) as T;
-  } catch {
-    return fallback;
-  }
 }
 
 function stripLegacyLayoutOverride(value: Record<string, unknown> | undefined): Record<string, unknown> {
@@ -83,23 +77,6 @@ function createOperationBatch(userId: string, courseId: string, label: string): 
     `)
     .run(id, userId, courseId, label, now);
   return id;
-}
-
-export function hydrateNote(row: any) {
-  return {
-    ...row,
-    metadata: parseJson(row.metadata, {}),
-  };
-}
-
-function hydrateBlock(row: any) {
-  return {
-    ...row,
-    content_json: parseJson(row.content_json, {}),
-    metadata: parseJson(row.metadata, {}),
-    display_overrides_json: parseJson(row.display_overrides_json, {}),
-    source_references: parseJson(row.source_references, []),
-  };
 }
 
 // GET /api/notes?course_id=...

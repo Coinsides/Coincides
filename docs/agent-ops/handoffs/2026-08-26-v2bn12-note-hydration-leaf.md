@@ -1,4 +1,4 @@
-> from: claude(opus,工程调度会话) | to: codex(builder) | status: draft(排 S4-3 之后;⚠️ 含一处对裁定的事实更正待 Fable 过目) | re: v2bn12-noteHydration | date: 2026-08-26
+> from: claude(opus,工程调度会话) | to: codex(builder) | status: done | re: v2bn12-noteHydration | date: 2026-08-26
 
 # V2.BN.12:`hydrateNote` / `hydrateBlock` 下沉为叶子模块
 
@@ -82,3 +82,131 @@
 回执 **UTF-8** 追加 `## Result`:K-1 的**字节比对方法与结果**(六端点逐条)· K-2 红点原文与行号 · K-3(或其「无机关可证,未做」)· `parseJson` 的处置说明 · (若发现)`noteBlocks.ts` 那份副本的 token 级异同结论 · `git diff --numstat` 对照边界 · 显式范围排除 · **⛔ 不得声称 TD-16 已清**。
 
 ⏱ 预估 30–45 分钟。
+
+## Result
+
+**结论**：已把 `parseJson`、`hydrateNote`、`hydrateBlock` 零语义下沉到 `server/src/services/noteHydration.ts`，route 保留 `hydrateNote` re-export，`services/notes.ts` 的 hydrate import 已改道叶子。**只拆掉了 hydrate 这一条边；`getOwnedCourse` / `getOwnedNote` 两条 ownership import 仍从 route 进入 service，ownership 两边仍在，TD-16 保持未清，ESM 环仍存在。**
+
+### 实现与边界
+
+- `parseJson` 在提取前的 route 内只有两个 hydrate 消费者；它随体搬入叶子，route 侧零残留、无第二份副本。AST 对 HEAD 原实现与叶子逐函数比较，`parseJson` / `hydrateNote` / `hydrateBlock` 的签名与函数体三项均相等。
+- `server/src/routes/notes.ts` 只增加叶子 import + `hydrateNote` re-export，并删除原三项定义；六个既有调用点不改业务逻辑。
+- `server/src/services/notes.ts` 只拆分 import：`hydrateNote` 从叶子导入，`getOwnedCourse` / `getOwnedNote` 仍从 route 导入。
+- `GET /:id/blocks` 的 `source_references` 去 null 过滤仍原位留在 route 的 hydrate 后处理，未移入叶子、未删除；其 SQL 未动。
+- 叶子对 `routes/**` 的 import 数为 0。
+- `server/src/routes/noteBlocks.ts` 私有 `hydrateBlock` **不是 token 级相同**：去掉新叶子的 `export` modifier 后，叶子 64 tokens、私有副本 40 tokens；首个实质差异是叶子继续处理 `display_overrides_json` / `source_references`，私有副本在 `metadata` 后结束。按禁区要求一个字节未动该文件。
+
+### K-1：六端点原始响应字节等价
+
+方法：在 `.codex-tmp/note-hydration-k1.ts` 用同一确定性 SQLite fixture；在动态 import route 前冻结 `globalThis.Date` 与 `node:crypto.randomUUID`，每相位重建同一 fixture，以 `response.arrayBuffer()` 捕获原始 body bytes，并保存 status、相关 headers、长度、SHA-256、hex 到：
+
+- 提取前：`.codex-tmp/note-hydration-k1-before.json`
+- 提取后：`.codex-tmp/note-hydration-k1-after.json`
+
+两份证物各 14,787 bytes，整文件 SHA-256 均为 `1a18640b84b0b1ea4708805129dbcc06f30f2b834b47ade72b82f2c0a438d8fa`，二进制比较 `True`。POST block 取普通创建分支（原调用点 `:394`）。GET blocks fixture 另显式断言无 source 行经 route 过滤后为 `source_references: []`。
+
+| 端点 | status 前/后 | body bytes 前/后 | body SHA-256（前后相同） | 逐字节 |
+|---|---:|---:|---|---|
+| `GET /api/notes?course_id=…` | 200 / 200 | 471 / 471 | `f9f0b9a358ac0e2cdc7a96e7551399f8f0dc46d4a1c8f3fa989407a0d95742a9` | 相同 |
+| `POST /api/notes` | 201 / 201 | 509 / 509 | `e440bf3eecaa9c2679c02cf677d3ac1ffcbbdb9b24a2314b867a29cb856db060` | 相同 |
+| `GET /api/notes/:id` | 200 / 200 | 469 / 469 | `17238274a10f6f200119bbdcf9d52542df3366eb6de23bf904293ff0de9f7f2b` | 相同 |
+| `PUT /api/notes/:id` | 200 / 200 | 476 / 476 | `9653af7c18c1f972489d0d0102ae1ec900382aaed0bad50b3d7aa5a856de1236` | 相同 |
+| `GET /api/notes/:id/blocks` | 200 / 200 | 792 / 792 | `b025fc87d9eee37c0e590b0873cdb4a43073810b657d95803b227d94e632039e` | 相同 |
+| `POST /api/notes/:id/blocks` | 201 / 201 | 1118 / 1118 | `64c5c51b96118dfb736b8ac9abb0ab4eb9679e3cf2e4e2ddfc3fe4e4c6fddb67` | 相同 |
+
+### K-2：同源锁 mutation
+
+施刀前 server `tsc --noEmit` exit 0；临时去掉叶子 `hydrateNote` 的 `metadata: parseJson(...)` 后，mutation 树再次 `tsc --noEmit` exit 0，排除语法/类型破坏。随后单跑 `node --import tsx --test src/__tests__/v2NotesListService.test.ts`，exit 1，真实红点原文：
+
+```text
+not ok 6 - A-3 GET /api/notes keeps the pre-extraction response bytes, default status, hydrate mapping, and DESC order
+error: Expected values to be strictly deep-equal:
++ Buffer(903) [Uint8Array]
+- Buffer(881) [Uint8Array]
+stack: v2NotesListService.test.ts:705:12
+```
+
+恢复原函数后，server `tsc --noEmit` exit 0；同一专项 exit 0，7/7 通过。
+
+### K-3：叶子性 mutation
+
+**无现成机关可证，未做。** 根 / client / server package 文件中无 madge、dependency-cruiser、dpdm 或同类环检测门；`tsc` 不提供可鉴别的环判定，且 ownership 环本来仍存在，观察到「任意环」不能证明临时 import 新增的那条边。按工单未新建检测工具。缺口已追加到 `docs/agent-ops/current-state/deferred-tests.md`。
+
+### 验证
+
+按 docs-first 顺序执行；`v2TestV2ManifestHook.test.ts` 只经 `npm run test:v2` 启动，未独跑。server 全套设置独立 `CANVAS_ASSET_DIR`。
+
+| 门 | 结果 |
+|---|---|
+| `npm.cmd run docs:check` | exit 0 |
+| client `tsc --noEmit` | exit 0 |
+| server `tsc --noEmit` | exit 0 |
+| `npm.cmd run test:unit` | exit 0；22 files / 222 tests |
+| server `npm.cmd run test:v2`（隔离资产目录） | exit 0；279/279 |
+| server `npm.cmd run test:mcp-transport` | exit 0；46/46 |
+| `npm.cmd run test:tool-face-registry` | exit 0；5/5 |
+| `npm.cmd run test:tool-face-manifest` | exit 0；10/10 |
+| `npm.cmd run check:tool-face-manifest` | exit 0；12 public entries，未过期 |
+| `npm.cmd run test:tool-face-parity` | exit 0；10/10 |
+| `npm.cmd run check:tool-face-parity` | exit 0；12 public entries |
+| `node --import tsx --test src/__tests__/textFlowIdentityContract.test.ts` | exit 0；4/4 |
+| `node --import tsx --test src/__tests__/v2NotesListService.test.ts` | exit 0；7/7 |
+| `git diff --check` | exit 0 |
+| 回执写入后 `docs:check` 复跑 | `POST_RECEIPT_DOCS_EXIT=0` |
+
+`server/dist/tool-face-manifest.json` 未移动，收工核对存在；其 SHA-256 与 `docs/generated/tool-face-manifest.json` 同为 `87b40ac34cf31361f818cd9bcf1a354479fa1829ef4e746f7e4e82a841dc6616`。
+
+### `git diff --numstat` 与范围排除
+
+| 文件 | 最终 numstat / 说明 |
+|---|---|
+| `docs/agent-ops/current-state/deferred-tests.md` | `1 0` |
+| `docs/agent-ops/handoffs/2026-08-26-v2bn12-note-hydration-leaf.md` | `NUMSTAT_HANDOFF_ADD=88 DEL=1` |
+| `server/src/routes/notes.ts` | `3 26` |
+| `server/src/services/notes.ts` | `2 1` |
+| `server/src/services/noteHydration.ts` | untracked 新文件，`git diff --numstat` 不枚举；25 lines |
+
+三个已知 EOL porcelain `M` 经 `git hash-object --filters --path` 复核仍逐个等于 HEAD blob；它们不出现在真实 numstat。`.claude/settings.local.json` 为既有他人未跟踪文件，未碰。
+
+显式未碰：`server/src/routes/noteBlocks.ts`、`server/src/services/annotationTruths.ts`、任何 `getOwnedCourse` / `getOwnedNote` 定义或签名、blocks SQL 与 route 业务逻辑、注册表 / binding / transport / tracked manifest、`shared/`、migration/schema、tsconfig、`server/package.json`、client、`.claude/**`、其他 handoff/analysis 文档。未 commit、未 push、未碰 main；未取/删/改写 `.codex-tmp/builder.lock.d`，未杀任何 Codex 进程。
+
+## Review
+
+> reviewer: claude(opus,工程调度会话) | date: 2026-08-27 | verdict: **PASS 0/0/0/0**
+
+### 1. 收工判定(两条并用)
+
+进程 `35464` **消失** ∧ **交付物出现**(新建 `server/src/services/noteHydration.ts` · `routes/notes.ts` +3/−26 · `services/notes.ts` +2/−1)。
+
+### 2. 位点复核(⭐ 亲手施刀,不吃回执)
+
+| 位点 | 复核方验证 | 结果 |
+|---|---|---|
+| **叶子纯净** | `grep -c "routes/" server/src/services/noteHydration.ts` | **0** —— 且该文件**一个 import 都没有**,是真叶子 |
+| **`parseJson` 随体搬走** | 读文件 | 三个函数(`parseJson` / `hydrateNote` / `hydrateBlock`)都在叶子里,**route 侧零残留**,未产生第二份副本 |
+| ⭐ **去 null 过滤留在 route** | `grep -n "filter" routes/notes.ts` | **`:258`** `hydrated.source_references = hydrated.source_references.filter(...)` —— **仍在 route,未搬进叶子、未删除**,与工单要求一致 |
+| **import 拆分** | 读 `services/notes.ts:1-5` | `hydrateNote` 来自 `./noteHydration.js`;**`getOwnedCourse` / `getOwnedNote` 仍来自 `../routes/notes.js`** ⇒ **环仍在,与申报一致** |
+| ⭐ **K-2 同源锁(复核方亲施)** | 去掉叶子 `hydrateNote` 的 `metadata: parseJson(...)`;⭐ **先跑 `tsc --noEmit` 证 mutation 自身 exit 0** | **红在** `v2NotesListService.test.ts:705`,`A-3 GET /api/notes keeps the pre-extraction response bytes …`,`Buffer(903)` vs `Buffer(881)` —— **两个字节数与回执自述逐字相同**。⇒ 证明 **route 与 service 走的是同一份 hydrate**,不是各自副本 |
+| **还原保真** | sha256 对照 | 叶子与备份**逐位相同**;`v2NotesListService` **7/7**、`test:mcp-transport` **46/46**(复核方自跑) |
+
+### 3. ⭐ 本轮最值钱的三处(记功)
+
+1. **K-1 的取证方法是本项目迄今最强的字节等价**:
+   - 用 `response.arrayBuffer()` 抓**原始 body bytes**(不是 JSON 再序列化);
+   - ⭐ **冻结 `globalThis.Date` 与 `node:crypto.randomUUID`** 使响应确定性可比 —— 否则时间戳/uuid 会让「字节等价」永远失败或需要豁免字段,**豁免字段正是这类比对最容易被掏空的地方**;
+   - 六端点前后两份证物**整文件 SHA-256 相同**(`1a18640b…38d8fa`,各 14,787 B),另附逐端点 status / 长度 / body SHA-256;
+   - **fixture 特意覆盖了「无 source 行 ⇒ `source_references: []`」** —— 即工单点名的那步过滤,没让它落进覆盖盲区。
+2. ⭐ **K-3 它没做,理由比我写的更准**:我在单里允许「无机关可证则如实写未做」,它照做了,**并补了一层我没想到的**——「**ownership 环本来就还在,观察到『任意环』不能证明临时 import 新增的那条边**」。⇒ 即便装了环检测工具,那把刀**在当前状态下也是钝的**。缺口已入 `deferred-tests.md`。
+3. ⭐ **`noteBlocks.ts` 私有副本:实测 token 级不同** —— 叶子 64 tokens vs 私有副本 40 tokens,首个实质差异是**私有副本在 `metadata` 之后就结束了**(不处理 `display_overrides_json` / `source_references`)。
+   ⚠️ **这条追溯验证了把它排除在外的裁定是对的**:若当初顺手合并,**合的是两个行为不同的函数**,而合并动作本身不会立刻报错。⇒ 「**两份副本没验证过逐 token 等价,合并等于赌它们行为一致**」这句从**推断**变成了**实证**。⛔ 该文件一个字节未动。
+
+### 4. 申报诚实性
+
+- **⛔ 未声称 TD-16 已清**:结论段第一句就写明「**只拆掉 hydrate 这一条边;ownership 两边仍在,TD-16 保持未清,ESM 环仍存在**」。
+- 边界零越界:禁区文件(`noteBlocks.ts` / `annotationTruths.ts` / ownership 定义)**全部零 diff**。
+- `v2TestV2ManifestHook.test.ts` **只经 `npm run test:v2` 启动,未独跑** —— 我在提示词里给的那条提醒被照做了。
+
+### 5. 结论
+
+**PASS 0/0/0/0**。**TD-16 剩余面**(`getOwnedCourse` / `getOwnedNote`,随 TD-15 权威签名裁定)按收口批第 8 项改写;⛔ 改写时不得标清。
+⇒ **S4-4 的硬依赖已满足**:`server/src/services/noteHydration.ts` 存在且导出 `hydrateNote` / `hydrateBlock`。
