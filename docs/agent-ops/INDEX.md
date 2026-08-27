@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-08-26
+> **日期 (Updated)**: 2026-08-27
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 150 份文档。
+共 154 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -37,6 +37,7 @@
 | [analysis/2026-08-24-v2bn12-2c3-journey-sheet.md](analysis/2026-08-24-v2bn12-2c3-journey-sheet.md) | V2.BN.12.2c「选区收据 + 只读解析」旅程分数走查单 | `active` | 2026-08-26 | — |
 | [analysis/2026-08-25-agent-architecture-meeting.md](analysis/2026-08-25-agent-architecture-meeting.md) | Agent 架构会议记录(Mr. Zero · 客工制度 · harness 代表制) | `active` | 2026-08-25 | — |
 | [analysis/2026-08-26-agent-org-charter.md](analysis/2026-08-26-agent-org-charter.md) | Agent 时代组织总纲(收敛稿) | `active` | 2026-08-26 | — |
+| [analysis/2026-08-26-model-tier-experiment-design.md](analysis/2026-08-26-model-tier-experiment-design.md) | 模型档位实验矩阵(预注册) | `draft` | 2026-08-26 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
@@ -70,6 +71,7 @@
 | [claude-log/2026-08-23.md](claude-log/2026-08-23.md) | 2026-08-23 · Claude(Fable)工作日志 | `(缺状态头)` | — | — |
 | [claude-log/2026-08-24.md](claude-log/2026-08-24.md) | Claude 工作日志 · 2026-08-24 | `(缺状态头)` | — | — |
 | [claude-log/2026-08-25.md](claude-log/2026-08-25.md) | Claude 工作日志 · 2026-08-25 | `(缺状态头)` | — | — |
+| [claude-log/2026-08-26.md](claude-log/2026-08-26.md) | 2026-08-26 | `(缺状态头)` | — | — |
 | [claude-log/README.md](claude-log/README.md) | claude-log —— Claude 行动日志（Henry 的监督轨迹） | `active` | 2026-06-27 | — |
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-23 | — |
@@ -157,6 +159,8 @@
 | [handoffs/2026-08-24-v2bn12-2c1c-wire-contract-gate.md](handoffs/2026-08-24-v2bn12-2c1c-wire-contract-gate.md) | V2.BN.12.2c-1c:把跨端契约测试**接进门**(一行接线) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-24-v2bn12-2c1d-contract-ast-scope.md](handoffs/2026-08-24-v2bn12-2c1d-contract-ast-scope.md) | V2.BN.12.2c-1d:契约测试的 AST 枚举面扩到**全部产品源**(修 MED-1) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-24-v2bn12-2c2-resolve-selection-tool.md](handoffs/2026-08-24-v2bn12-2c2-resolve-selection-tool.md) | V2.BN.12.2c-2:`resolve_selection` —— 工具面第一个**只读解析工具** | `(缺状态头)` | — | — |
+| [handoffs/2026-08-26-v2bn12-2c4-resolve-status-filter.md](handoffs/2026-08-26-v2bn12-2c4-resolve-status-filter.md) | V2.BN.12.2c-4:`resolve_selection` 只认活着的块(J3 缺陷修复) | `(缺状态头)` | — | — |
+| [handoffs/2026-08-26-v2bn12-dev-quick-login.md](handoffs/2026-08-26-v2bn12-dev-quick-login.md) | V2.BN.12:开发环境快捷登录入口(dev-only) | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/v2-bn12-2-mcp-tool-face.md](handoffs/plans/v2-bn12-2-mcp-tool-face.md) | Plan V2.BN.12.2 — MCP 工具面(末端执行器第一次实体化) | `active` | — | — |
 | [handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md](handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md) | V2.BN.12.2b:第一个写工具 + 候选审阅队列 + HTTP 层 K-5 | `done(**铸版 2026-08-23,Fable**——五单施工 + b-4 旅程 + b-5/b-5-fix 补单全复核 PASS;旅程合并分 **A 12/12 + B 8/8** 达通过线,重走记录 `analysis/2026-08-23-v2bn12-2b4-journey-sheet.md` §7;铸版记录 log 08-23 #40;未亲刀缺口见 TD-19/TD-20)` | 2026-08-23 | — |

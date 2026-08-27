@@ -71,7 +71,7 @@ function resolveTextRange(
   const row = getDb().prepare(`
     SELECT content_json
     FROM note_blocks
-    WHERE id = ? AND user_id = ?
+    WHERE id = ? AND user_id = ? AND status = 'active'
   `).get(range.blockId, userId) as OwnedBlockRow | undefined;
   if (!row) return missingRange();
 

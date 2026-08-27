@@ -1443,6 +1443,106 @@ test('c-2 K-1 real Express resolves an owned current excerpt as found with its i
   });
 });
 
+test('c-4 T-1/K-1/K-3 trashed owned blocks collapse byte-identically with missing blocks', async () => {
+  await withMcpHttp({}, (fixture) => {
+    seedResolveSelectionData(fixture);
+    const input = selectionReceipt([selectionRange()]);
+    const active = resolveSelection(USER_ID, input);
+    assert.equal(
+      active.results[0]?.outcome,
+      'found',
+      'active owned block positive control must hit before the trashed check',
+    );
+
+    const update = fixture.db.prepare(`
+      UPDATE note_blocks
+      SET status = 'trashed'
+      WHERE id = ? AND user_id = ?
+    `).run(OWNER_BLOCK_ID, USER_ID);
+    assert.equal(update.changes, 1);
+    assert.deepEqual(
+      fixture.db.prepare('SELECT user_id, status FROM note_blocks WHERE id = ?')
+        .get(OWNER_BLOCK_ID),
+      { user_id: USER_ID, status: 'trashed' },
+      'fixture must independently prove the owned block is trashed',
+    );
+
+    const trashed = resolveSelection(USER_ID, input);
+    assert.equal(
+      trashed.results[0]?.outcome,
+      'missing',
+      'trashed owned block must resolve as missing',
+    );
+
+    assert.equal(
+      fixture.db.prepare('SELECT id FROM note_blocks WHERE id = ?').get(MISSING_BLOCK_ID),
+      undefined,
+      'SQL must independently prove the comparison block is absent',
+    );
+    const nonexistent = resolveSelection(USER_ID, selectionReceipt([selectionRange({
+      blockId: MISSING_BLOCK_ID,
+      textFlowId: textFlowIdForBlock(MISSING_BLOCK_ID),
+      textUnitId: 'missing-unit',
+      startOffset: 0,
+      endOffset: 4,
+      excerpt: 'none',
+    })]));
+    assert.equal(
+      JSON.stringify(trashed),
+      JSON.stringify(nonexistent),
+      'trashed and nonexistent blocks must remain byte-identical missing results',
+    );
+  });
+});
+
+test('c-4 T-2 active blocks stay found and become text_drifted only after text changes', async () => {
+  await withMcpHttp({}, (fixture) => {
+    seedResolveSelectionData(fixture);
+    const input = selectionReceipt([selectionRange()]);
+    assert.deepEqual(resolveSelection(USER_ID, input), {
+      results: [{
+        outcome: 'found',
+        blockId: OWNER_BLOCK_ID,
+        textFlowId: textFlowIdForBlock(OWNER_BLOCK_ID),
+        textUnitId: ACTIVE_UNIT_ID,
+      }],
+    });
+
+    const changedText = 'prefix replaced suffix';
+    const update = fixture.db.prepare(`
+      UPDATE note_blocks
+      SET content_json = ?, plain_text = ?
+      WHERE id = ? AND user_id = ? AND status = 'active'
+    `).run(
+      textFlowBody([{
+        id: ACTIVE_UNIT_ID,
+        text: changedText,
+        status: 'active',
+        order_index: 0,
+      }]),
+      changedText,
+      OWNER_BLOCK_ID,
+      USER_ID,
+    );
+    assert.equal(update.changes, 1);
+    assert.deepEqual(
+      fixture.db.prepare('SELECT user_id, status, plain_text FROM note_blocks WHERE id = ?')
+        .get(OWNER_BLOCK_ID),
+      { user_id: USER_ID, status: 'active', plain_text: changedText },
+      'fixture must independently prove the same active block text changed',
+    );
+
+    assert.deepEqual(resolveSelection(USER_ID, input), {
+      results: [{
+        outcome: 'text_drifted',
+        blockId: OWNER_BLOCK_ID,
+        textFlowId: textFlowIdForBlock(OWNER_BLOCK_ID),
+        textUnitId: ACTIVE_UNIT_ID,
+      }],
+    });
+  });
+});
+
 test('c-2 K-2 foreign and nonexistent identities are byte-identical missing after an owner hit', async () => {
   await withMcpHttp({}, (fixture) => {
     seedResolveSelectionData(fixture);

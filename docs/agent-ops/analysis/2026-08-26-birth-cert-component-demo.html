@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>出生证组件 Demo</title>
+<style>
+  :root {
+    --app-accent: #4f6ef7;        /* 应用 token:主色(V12 必修⑤ token 预设的替身) */
+    --bg: #f7f7f9; --surface: #ffffff; --ink: #1c1e26; --ink-2: #6b7080;
+    --line: #e3e4ea; --chip: #eef0f6; --ok: #2e9e6b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14151a; --surface: #1e2028; --ink: #e8e9ee; --ink-2: #9aa0b0;
+      --line: #32343e; --chip: #282b35;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px; background: var(--bg); color: var(--ink);
+    font: 15px/1.65 "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+  }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  h2 { font-size: 15px; margin: 0 0 10px; color: var(--ink-2); font-weight: 600; }
+  .sub { color: var(--ink-2); font-size: 13px; margin-bottom: 20px; }
+  .sub code { background: var(--chip); padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+
+  .checklist { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+  .checklist span {
+    background: var(--chip); border: 1px solid var(--line); border-radius: 999px;
+    padding: 3px 12px; font-size: 12.5px; color: var(--ink-2);
+  }
+  .checklist b { color: var(--ok); margin-right: 4px; }
+
+  .layout { display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap; }
+  .stage { flex: 1 1 520px; display: flex; flex-direction: column; gap: 16px; }
+  .aside { flex: 0 1 300px; position: sticky; top: 16px; display: flex; flex-direction: column; gap: 16px; }
+
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+    padding: 16px; cursor: pointer; transition: border-color .15s;
+  }
+  .card.selected { border-color: var(--app-accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--app-accent) 25%, transparent); }
+  .card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .card-title { font-weight: 600; font-size: 14px; }
+  .badges { display: flex; gap: 5px; }
+  .badge { font-size: 11px; background: var(--chip); border-radius: 5px; padding: 1px 7px; color: var(--ink-2); }
+
+  table.sym { border-collapse: collapse; width: 100%; }
+  table.sym td { border-top: 1px solid var(--line); vertical-align: top; }
+  table.sym tr:first-child td { border-top: none; }
+  td.s { font-weight: 700; white-space: nowrap; padding-right: 14px; }
+  td.n { color: var(--ink-2); }
+
+  .quote { border-left: 4px solid; margin: 0; }
+  .quote .src { color: var(--ink-2); font-size: 13px; margin-top: 8px; }
+
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+  .panel h2 { color: var(--ink); }
+  .panel .target { font-size: 12.5px; color: var(--ink-2); margin-bottom: 12px; }
+  .knob { margin-bottom: 14px; }
+  .knob label { display: block; font-size: 12.5px; color: var(--ink-2); margin-bottom: 4px; }
+  .knob input[type=range] { width: 100%; accent-color: var(--app-accent); }
+  .knob .val { font-size: 12px; color: var(--ink-2); float: right; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .seg button {
+    border: none; background: none; padding: 5px 14px; cursor: pointer;
+    font-size: 13px; color: var(--ink-2); font-family: inherit;
+  }
+  .seg button.on { background: var(--app-accent); color: #fff; }
+  .switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; }
+  input[type=color] { border: 1px solid var(--line); border-radius: 6px; width: 44px; height: 28px; padding: 2px; background: var(--surface); cursor: pointer; }
+  .tokchip { font-size: 11px; color: var(--ok); margin-left: 8px; }
+  .untok { font-size: 11px; color: var(--ink-2); margin-left: 8px; background: none; border: none; text-decoration: underline; cursor: pointer; font-family: inherit; }
+
+  .receipts { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .receipts ul { list-style: none; margin: 0; padding: 0; font-size: 12.5px; color: var(--ink-2); }
+  .receipts li { padding: 3px 0; border-top: 1px dashed var(--line); }
+  .receipts li:first-child { border-top: none; }
+  .receipts .empty { font-style: italic; }
+  .receipts b { color: var(--ink); font-weight: 600; }
+
+  details.cert { margin-top: 18px; }
+  details.cert summary { cursor: pointer; font-size: 13px; color: var(--ink-2); }
+  details.cert pre {
+    background: var(--chip); border: 1px solid var(--line); border-radius: 8px;
+    padding: 12px; font-size: 12px; overflow-x: auto; line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<h1>出生证组件 Demo</h1>
+<div class="sub">
+  验证组织总纲 §5 三条裁定 —— 每个组件带一张<b>出生证</b>(<code>旋钮</code> + <code>食谱</code> + <code>落位</code>);
+  应用只写<b>一个</b>通用旋钮面板,零组件私有代码。点选任一实例,右侧面板由其出生证<b>自动生成</b>。
+</div>
+<div class="checklist">
+  <span><b>✓</b> 壳一份,数据各是各的(同一符号表壳 × 数学/财务两份食谱)</span>
+  <span><b>✓</b> 旋钮申报 → 面板自动渲染(两种组件,同一段面板代码)</span>
+  <span><b>✓</b> 落位自我声明(卡片右上角徽章)</span>
+  <span><b>✓</b> 主色默认绑应用 token(必修⑤ 伏笔)</span>
+  <span><b>✓</b> 旋钮转动留收据(页底,成长律的原料)</span>
+</div>
+
+<div class="layout">
+  <div class="stage" id="stage"></div>
+  <div class="aside">
+    <div class="panel">
+      <h2>通用旋钮面板</h2>
+      <div class="target" id="panel-target"></div>
+      <div id="panel-body"></div>
+    </div>
+    <div class="receipts">
+      <h2>旋钮收据(最近 8 条)</h2>
+      <ul id="receipt-list"><li class="empty">还没有人拧过旋钮。</li></ul>
+    </div>
+  </div>
+</div>
+
+<details class="cert">
+  <summary>查看当前选中组件的出生证原文(JSON)</summary>
+  <pre id="cert-json"></pre>
+</details>
+
+<script>
+/* ---------- 出生证:组件唯一的"接口",面板与渲染器之外无任何组件私有约定 ---------- */
+const CERTS = {
+  'symbol-table': {
+    id: 'symbol-table', name: '符号表', version: '0.1',
+    placements: ['钉画布', '插页面流'],
+    knobs: [
+      { key: 'accent',   label: '主色',   type: 'color',  default: '@token:accent' },
+      { key: 'density',  label: '密度',   type: 'enum',   options: ['紧凑', '舒适'], default: '舒适' },
+      { key: 'fontSize', label: '字号',   type: 'number', min: 12, max: 20, step: 1, default: 15, unit: 'px' },
+      { key: 'showNote', label: '备注列', type: 'boolean', default: true },
+    ],
+    recipe: { shape: 'list', fields: [
+      { key: 'symbol', label: '符号' }, { key: 'meaning', label: '含义' },
+      { key: 'note', label: '备注', optional: true } ] },
+  },
+  'quote-card': {
+    id: 'quote-card', name: '引用卡', version: '0.1',
+    placements: ['插页面流', '附着整篇'],
+    knobs: [
+      { key: 'accent',  label: '强调色', type: 'color',  default: '@token:accent' },
+      { key: 'serif',   label: '衬线体', type: 'boolean', default: true },
+      { key: 'align',   label: '对齐',   type: 'enum',   options: ['左', '中'], default: '左' },
+      { key: 'padding', label: '留白',   type: 'number', min: 8, max: 32, step: 2, default: 20, unit: 'px' },
+    ],
+    recipe: { shape: 'record', fields: [
+      { key: 'text', label: '引文' }, { key: 'source', label: '出处' } ] },
+  },
+};
+
+/* ---------- 实例:壳的引用 + 各自的食谱数据 + 各自的旋钮状态 ---------- */
+const INSTANCES = [
+  { id: 'inst-math', cert: 'symbol-table', title: '数学笔记 · 偏导与梯度', data: [
+      { symbol: '∂',  meaning: '偏导数',     note: '对一个变量求导,其余视为常数' },
+      { symbol: '∇',  meaning: '梯度算子',   note: '各偏导组成的向量,指向上升最快方向' },
+      { symbol: 'Σ',  meaning: '求和',       note: '' },
+      { symbol: '≈',  meaning: '约等于',     note: '数值近似' } ] },
+  { id: 'inst-fin', cert: 'symbol-table', title: '财务笔记 · 投资指标', data: [
+      { symbol: 'α',    meaning: '超额收益',       note: '跑赢基准的部分' },
+      { symbol: 'β',    meaning: '系统性风险暴露', note: '随大盘波动的敏感度' },
+      { symbol: '夏普', meaning: '风险调整后收益', note: '(收益 − 无风险) / 波动率' },
+      { symbol: 'MDD',  meaning: '最大回撤',       note: '峰值到谷底的最大跌幅' } ] },
+  { id: 'inst-quote', cert: 'quote-card', title: '读书摘记', data: {
+      text: '本质实际上就是记录,把 Agent 加进来才变成了分类和整理。',
+      source: 'Henry · 2026-08-20 产品三问' } },
+];
+
+const tokenColor = () => getComputedStyle(document.documentElement).getPropertyValue('--app-accent').trim();
+const resolveKnob = v => v === '@token:accent' ? tokenColor() : v;
+
+for (const inst of INSTANCES) {
+  inst.knobState = {};
+  for (const k of CERTS[inst.cert].knobs) inst.knobState[k.key] = k.default;
+}
+
+let selectedId = 'inst-math';
+const receipts = [];
+
+/* ---------- 渲染器:每个壳一个(壳的本体);读实例的食谱数据与旋钮状态 ---------- */
+const RENDERERS = {
+  'symbol-table'(el, inst) {
+    const s = inst.knobState, pad = s.density === '紧凑' ? 4 : 9;
+    const rows = inst.data.map(r => `
+      <tr>
+        <td class="s" style="color:${resolveKnob(s.accent)};padding:${pad}px 14px ${pad}px 0">${r.symbol}</td>
+        <td style="padding:${pad}px 14px ${pad}px 0">${r.meaning}</td>
+        ${s.showNote ? `<td class="n" style="padding:${pad}px 0">${r.note || ''}</td>` : ''}
+      </tr>`).join('');
+    el.innerHTML = `<table class="sym" style="font-size:${s.fontSize}px">${rows}</table>`;
+  },
+  'quote-card'(el, inst) {
+    const s = inst.knobState;
+    el.innerHTML = `
+      <blockquote class="quote" style="
+        border-color:${resolveKnob(s.accent)}; padding:${s.padding}px;
+        font-family:${s.serif ? 'Georgia, 宋体, serif' : 'inherit'};
+        text-align:${s.align === '中' ? 'center' : 'left'}">
+        ${inst.data.text}
+        <div class="src">—— ${inst.data.source}</div>
+      </blockquote>`;
+  },
+};
+
+/* ---------- 舞台 ---------- */
+function renderStage() {
+  const stage = document.getElementById('stage');
+  stage.innerHTML = '';
+  for (const inst of INSTANCES) {
+    const cert = CERTS[inst.cert];
+    const card = document.createElement('div');
+    card.className = 'card' + (inst.id === selectedId ? ' selected' : '');
+    card.innerHTML = `
+      <div class="card-head">
+        <span class="card-title">${inst.title}</span>
+        <span class="badges">
+          <span class="badge">壳:${cert.name}</span>
+          ${cert.placements.map(p => `<span class="badge">${p}</span>`).join('')}
+        </span>
+      </div>
+      <div class="body"></div>`;
+    RENDERERS[inst.cert](card.querySelector('.body'), inst);
+    card.onclick = () => { selectedId = inst.id; renderStage(); renderPanel(); };
+    stage.appendChild(card);
+  }
+  document.getElementById('cert-json').textContent =
+    JSON.stringify(CERTS[INSTANCES.find(i => i.id === selectedId).cert], null, 2);
+}
+
+/* ---------- 通用旋钮面板:只读出生证,零组件私有分支 ---------- */
+function renderPanel() {
+  const inst = INSTANCES.find(i => i.id === selectedId);
+  const cert = CERTS[inst.cert];
+  document.getElementById('panel-target').textContent =
+    `正在调:${inst.title}(壳 ${cert.name} v${cert.version};旋钮状态随实例存,不随壳存)`;
+  const body = document.getElementById('panel-body');
+  body.innerHTML = '';
+
+  for (const k of cert.knobs) {
+    const cur = inst.knobState[k.key];
+    const wrap = document.createElement('div');
+    wrap.className = 'knob';
+    const set = v => {
+      receipts.unshift({ inst: inst.title, knob: k.label, from: String(cur), to: String(v),
+                         t: new Date().toLocaleTimeString() });
+      inst.knobState[k.key] = v;
+      renderStage(); renderPanel(); renderReceipts();
+    };
+
+    if (k.type === 'color') {
+      const bound = cur === '@token:accent';
+      wrap.innerHTML = `<label>${k.label}${bound
+        ? '<span class="tokchip">● 绑定应用 token</span>'
+        : '<button class="untok">还原为 token</button>'}</label>`;
+      const input = document.createElement('input');
+      input.type = 'color'; input.value = resolveKnob(cur);
+      input.oninput = e => set(e.target.value);
+      wrap.appendChild(input);
+      const btn = wrap.querySelector('.untok');
+      if (btn) btn.onclick = e => { e.stopPropagation(); set('@token:accent'); };
+    } else if (k.type === 'enum') {
+      wrap.innerHTML = `<label>${k.label}</label>`;
+      const seg = document.createElement('div'); seg.className = 'seg';
+      for (const opt of k.options) {
+        const b = document.createElement('button');
+        b.textContent = opt; if (opt === cur) b.className = 'on';
+        b.onclick = () => opt !== cur && set(opt);
+        seg.appendChild(b);
+      }
+      wrap.appendChild(seg);
+    } else if (k.type === 'number') {
+      wrap.innerHTML = `<label>${k.label}<span class="val">${cur}${k.unit || ''}</span></label>`;
+      const input = document.createElement('input');
+      input.type = 'range'; input.min = k.min; input.max = k.max; input.step = k.step; input.value = cur;
+      input.oninput = e => set(Number(e.target.value));
+      wrap.appendChild(input);
+    } else if (k.type === 'boolean') {
+      const id = `${inst.id}-${k.key}`;
+      wrap.innerHTML = `
+        <label class="switch" for="${id}">
+          <input type="checkbox" id="${id}" ${cur ? 'checked' : ''}> ${k.label}
+        </label>`;
+      wrap.querySelector('input').onchange = e => set(e.target.checked);
+    }
+    body.appendChild(wrap);
+  }
+}
+
+function renderReceipts() {
+  const ul = document.getElementById('receipt-list');
+  ul.innerHTML = receipts.slice(0, 8).map(r =>
+    `<li>${r.t} · <b>${r.inst}</b> · ${r.knob}:${r.from} → <b>${r.to}</b></li>`).join('')
+    || '<li class="empty">还没有人拧过旋钮。</li>';
+}
+
+renderStage(); renderPanel(); renderReceipts();
+</script>
+</body>
+</html>

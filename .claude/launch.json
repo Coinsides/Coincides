@@ -14,6 +14,12 @@
       "runtimeArgs": ["run", "dev"],
       "cwd": "client",
       "port": 5173
+    },
+    {
+      "name": "docs-static",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8123", "--directory", "docs"],
+      "port": 8123
     }
   ]
 }
