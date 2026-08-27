@@ -37,11 +37,6 @@ export async function loadRelationTypes(): Promise<RelationTypeDefinitionV1[]> {
   return normalizeRelationTypeDefinitions(response.data);
 }
 
-export async function loadRelation(relationId: string): Promise<RelationV1> {
-  const response = await api.get<unknown>(`/relations/${relationId}`);
-  return requireRelation(response.data);
-}
-
 export async function loadRelations(input: ListRelationsInput): Promise<RelationV1[]> {
   const response = await api.get<unknown>('/relations', { params: input });
   return normalizeRelations(response.data);
