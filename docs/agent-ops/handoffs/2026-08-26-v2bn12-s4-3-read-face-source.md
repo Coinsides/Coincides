@@ -63,6 +63,16 @@ S4 读面第三批,只做溯源侧。**形状照 S4-1/S4-2**(挂既有 service,�
 📌 「**过 killer ≠ 有能力**」(12.2a-3 D-a 补注):⛔ 不接受只有注册表/parity 层的断言。
 测试进既有 `server/src/__tests__/v2McpTransport.test.ts`;新建文件**必须同时接进 `server/package.json` 对应 script**(📌 TD-22)。
 
+### 4b. ⭐ 搭车一行断言(Fable 2026-08-26 裁定落点定本单)
+
+在你本单触及的 server 测试面里,**加一条断言守住 TD-26 的钩子**:读 `server/package.json`,断言 `scripts["pretest:v2"]` **同时包含** `check:tool-face-manifest` 与 `copy:tool-face-manifest` 两个命令名。
+
+**为什么要这条**:TD-26 已清,但复核发现**没有任何常驻机关守着「钩子还在」** —— 现有常驻测试只证「copy 能按字节重建缺失目标」,**不检查钩子是否还挂在 `test:v2` 上**;真正证明接线的是那单 K-1 的四步人工验证,**那是一次性验证,不是守卫**。⇒ 病名:「**机关在,但没有守机关的机关**」(与 TD-22 同族)。
+
+- **必红**:把 `pretest:v2` 里的 `check:tool-face-manifest` 那一半临时删掉 ⇒ **该断言必须红**;恢复后绿。(⚠️ 这一刀改的是 `server/package.json`,**改完务必还原**,并以 `git diff` 自核。)
+- ⛔ **只加断言,不改钩子本身**;⛔ 不要顺手给别的脚本加钩子(TD-26 单里已实测 `test:mcp-transport` 不同病)。
+- 断言放哪个文件由你定(可放本单新增的读面测试里,也可放既有 server 测试面),但**必须在常驻门内被跑到**(📌 TD-22)。
+
 ### 5. 台账
 
 `current-state/deferred-tests.md` 追加一行,成对写。已知略过:jump-target 的失效/悬空目标分支、`listSourceAnchors` 的过滤组合矩阵、跨 course 越权矩阵(ownership 由 service 承担,只留最小正控)。
@@ -76,7 +86,7 @@ S4 读面第三批,只做溯源侧。**形状照 S4-1/S4-2**(挂既有 service,�
 
 ## 边界(触及面申报)
 
-**允许**:`server/src/toolFace/registry.ts`(+4 及其 schema)· `server/src/mcp/bindings.ts`(+4)· `docs/generated/tool-face-manifest.json`(**生成**)· `server/src/__tests__/v2McpTransport.test.ts` · `docs/agent-ops/current-state/deferred-tests.md`(+1 行)。
+**允许**:`server/src/toolFace/registry.ts`(+4 及其 schema)· **§4b 那条断言所在的测试文件**· `server/src/mcp/bindings.ts`(+4)· `docs/generated/tool-face-manifest.json`(**生成**)· `server/src/__tests__/v2McpTransport.test.ts` · `docs/agent-ops/current-state/deferred-tests.md`(+1 行)。
 
 **禁区**:`services/sourceScopes.ts` · `services/sourceAnchors.ts`(⛔ 一个字节都不改,只调用)· `services/sourceRecords.ts` / `sourceSnapshots.ts` / `sourceMaterialization*.ts` / `sourceProjection*.ts`(⛔ 本批不碰任何抽取/物化侧)· `routes/**` · `selectionResolve.ts` · `textFlowIdentity.ts` · `projections.ts` · `shared/` · transport 骨架 Host/Origin/auth 段 · 任何 migration/schema · 任何 tsconfig · 客户端全部 · `.claude/**` · 其他 handoff/analysis 文档。
 
@@ -92,6 +102,6 @@ S4 读面第三批,只做溯源侧。**形状照 S4-1/S4-2**(挂既有 service,�
 
 门禁 docs-first:`docs:check` → 双端 `tsc --noEmit` → `test:unit` → server `test:v2`(隔离资产目录)→ `test:mcp-transport` → `test:tool-face-registry` → `test:tool-face-manifest` → `check:tool-face-manifest` → parity 两门 → 契约专项。逐门 exit 入表。
 
-回执 **UTF-8** 追加 `## Result`:K-1/K-2/K-3 各一段(贴红点断言原文与行号)· 四条 `human_entry` 的**你自己复核的现物出处**(文件:行)· `git diff --numstat` 对照边界 · 显式范围排除。
+回执 **UTF-8** 追加 `## Result`:K-1/K-2/K-3 各一段(贴红点断言原文与行号)· **§4b 那条断言的先红后绿**(含删掉 `check` 半边后的红点原文,以及 `server/package.json` 还原自核)· 四条 `human_entry` 的**你自己复核的现物出处**(文件:行)· `git diff --numstat` 对照边界(⚠️ `server/package.json` 最终应为**零 diff** —— §4b 只加断言不改钩子)· 显式范围排除。
 
 ⏱ 预估 40–55 分钟。

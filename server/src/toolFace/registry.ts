@@ -276,6 +276,103 @@ const contentGroupOutputSchema = z.object({
 
 export const listContentGroupsOutputSchema = z.array(contentGroupOutputSchema);
 
+const relationDirectionalitySchema = z.enum(['directed', 'undirected']);
+const relationStatusSchema = z.enum(['active', 'revoked']);
+const relationFreshnessSchema = z.enum([
+  'fresh',
+  'from_changed',
+  'to_changed',
+  'both_changed',
+]);
+const relationTypeIdSchema = z.enum([
+  'derives_to',
+  'depends_on',
+  'supports',
+  'contradicts',
+  'example_of',
+  'equivalent_to',
+  'analogous_to',
+  'contrasts_with',
+  'companion_of',
+]);
+
+export const listRelationsInputSchema = z.object({
+  item_id: z.string().optional(),
+  purpose_id: z.string().optional(),
+  status: z.enum(['active', 'revoked', 'all']).optional(),
+}).strict().superRefine((input, context) => {
+  const hasItem = Boolean(input.item_id?.trim());
+  const hasPurpose = Boolean(input.purpose_id?.trim());
+  if (hasItem === hasPurpose) {
+    context.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Exactly one Relation scope is required',
+      path: ['item_id'],
+    });
+  }
+});
+
+export const getRelationInputSchema = z.object({
+  relation_id: z.string(),
+}).strict();
+
+export const listRelationTypesInputSchema = z.object({}).strict();
+
+const relationAssessmentOutputSchema = z.object({
+  id: z.string(),
+  relation_id: z.string(),
+  user_id: z.string(),
+  verdict: z.enum(['still_holds', 'questionable']),
+  model_key: z.string(),
+  created_at: z.string(),
+}).strict();
+
+const relationEndpointItemOutputSchema = z.object({
+  id: z.string(),
+  plain_text: z.string(),
+  item_type: z.string().nullable(),
+  topic: z.string().nullable(),
+  status: itemStatusSchema,
+  retired_into_item_id: z.string().nullable(),
+  updated_at: z.string(),
+}).strict();
+
+const relationOutputSchema = z.object({
+  id: z.string(),
+  user_id: z.string(),
+  from_item_id: z.string(),
+  to_item_id: z.string(),
+  relation_type: z.string(),
+  directionality: relationDirectionalitySchema,
+  from_snapshot_id: z.string(),
+  to_snapshot_id: z.string(),
+  note: z.string().nullable(),
+  created_by: z.string(),
+  origin_purpose_id: z.string().nullable(),
+  status: relationStatusSchema,
+  created_at: z.string(),
+  updated_at: z.string(),
+  affirmed_at: z.string(),
+  freshness: relationFreshnessSchema,
+  from_changed: z.boolean(),
+  to_changed: z.boolean(),
+  inspection_checkpoint_at: z.string(),
+  latest_assessment: relationAssessmentOutputSchema.nullable(),
+  from_snapshot: itemSnapshotOutputSchema,
+  to_snapshot: itemSnapshotOutputSchema,
+  from_item: relationEndpointItemOutputSchema,
+  to_item: relationEndpointItemOutputSchema,
+}).strict();
+
+const relationTypeDefinitionOutputSchema = z.object({
+  id: relationTypeIdSchema,
+  directionality: relationDirectionalitySchema,
+}).strict();
+
+export const listRelationsOutputSchema = z.array(relationOutputSchema);
+export const getRelationOutputSchema = relationOutputSchema;
+export const listRelationTypesOutputSchema = z.array(relationTypeDefinitionOutputSchema);
+
 export const trashNotesInputSchema = z.object({
   note_ids: z.array(z.string().uuid()).min(1).max(50),
 }).strict();
@@ -406,6 +503,48 @@ export const TOOL_REGISTRY: ToolRegistryEntry[] = [
     },
     exposure: 'public',
     scopes: ['content_groups:read'],
+  },
+  {
+    name: 'list_relations',
+    description: 'List owned semantic Relations in one Item or Purpose scope.',
+    input_schema: listRelationsInputSchema,
+    output_schema: listRelationsOutputSchema,
+    truth: 'semantic',
+    tier: 'immediate',
+    human_entry: {
+      route: 'GET /api/relations',
+      client_call_site: 'client/src/pages/Notes/canvasEngine/relationRepository.ts#loadRelations',
+    },
+    exposure: 'public',
+    scopes: ['relations:read'],
+  },
+  {
+    name: 'get_relation',
+    description: 'Read one owned semantic Relation with hydrated endpoints and Snapshot receipts.',
+    input_schema: getRelationInputSchema,
+    output_schema: getRelationOutputSchema,
+    truth: 'semantic',
+    tier: 'immediate',
+    human_entry: {
+      route: 'GET /api/relations/:relationId',
+      client_call_site: 'client/src/pages/Notes/canvasEngine/relationRepository.ts#loadRelation',
+    },
+    exposure: 'public',
+    scopes: ['relations:read'],
+  },
+  {
+    name: 'list_relation_types',
+    description: 'List the static semantic Relation type definitions shared by all users.',
+    input_schema: listRelationTypesInputSchema,
+    output_schema: listRelationTypesOutputSchema,
+    truth: 'semantic',
+    tier: 'immediate',
+    human_entry: {
+      route: 'GET /api/relations/types',
+      client_call_site: 'client/src/pages/Notes/canvasEngine/relationRepository.ts#loadRelationTypes',
+    },
+    exposure: 'public',
+    scopes: ['relations:read'],
   },
   {
     name: 'resolve_selection',

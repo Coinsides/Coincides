@@ -30,6 +30,12 @@ import { listContentGroups, upsertContentGroup } from '../services/contentGroups
 import { createItem, getItem, listItems } from '../services/items.js';
 import { trashNoteAsUser } from '../services/notes.js';
 import {
+  createRelation,
+  getRelation,
+  listRelations,
+  listRelationTypes,
+} from '../services/relations.js';
+import {
   resolveSelection,
   type ResolveSelectionInput,
   type SelectionReceiptTextRangeInput,
@@ -398,7 +404,13 @@ async function mcpPost(
 }
 
 function assertReadToolResult(
-  toolName: 'list_items' | 'get_item' | 'list_content_groups',
+  toolName:
+    | 'list_items'
+    | 'get_item'
+    | 'list_content_groups'
+    | 'list_relations'
+    | 'get_relation'
+    | 'list_relation_types',
   body: any,
   expected: unknown,
 ): void {
@@ -421,6 +433,33 @@ function assertReadToolResult(
     `${toolName} structuredContent must match the direct service result`,
   );
   assert.deepEqual(JSON.parse(body.result.content[0].text), expected);
+}
+
+function seedS42Relation(fixture: Fixture, marker: string) {
+  const fromItem = createItem(fixture.db, USER_ID, {
+    plain_text: `${marker} from Item`,
+    item_type: 'claim',
+    topic: 'MCP semantic read face',
+    origin_course_id: COURSE_ID,
+    origin_note_id: NEWEST_NOTE_ID,
+    metadata: { source: 'mcp-transport-test', marker },
+  });
+  const toItem = createItem(fixture.db, USER_ID, {
+    plain_text: `${marker} to Item`,
+    item_type: 'evidence',
+    topic: 'MCP semantic read face',
+    origin_course_id: COURSE_ID,
+    origin_note_id: NEWEST_NOTE_ID,
+    metadata: { source: 'mcp-transport-test', marker },
+  });
+  const relation = createRelation(fixture.db, USER_ID, {
+    from_item_id: fromItem.id,
+    to_item_id: toItem.id,
+    relation_type: 'supports',
+    note: `${marker} Relation sentinel`,
+    created_by: 'human',
+  });
+  return { fromItem, toItem, relation };
 }
 
 async function firstTrashConfirmRound(
@@ -676,6 +715,61 @@ test('S4-1 tools/call list_content_groups validates its output schema and matche
 
     assert.equal(response.status, 200);
     assertReadToolResult('list_content_groups', body, expected);
+  });
+});
+
+test('S4-2 tools/call list_relations validates its output schema and matches the direct service', async () => {
+  await withMcpHttp({}, async (fixture) => {
+    const { fromItem, relation } = seedS42Relation(fixture, 'S4-2 list');
+    const input = { item_id: fromItem.id, status: 'active' as const };
+    const expected = listRelations(fixture.db, USER_ID, input);
+    assert.equal(expected.length, 1, 'the direct-service positive control must be non-empty');
+    assert.equal(expected[0]?.id, relation.id);
+
+    const { response, body } = await mcpPost(
+      fixture,
+      'tools/call',
+      { name: 'list_relations', arguments: input },
+      { id: 304, toolName: 'list_relations' },
+    );
+
+    assert.equal(response.status, 200);
+    assertReadToolResult('list_relations', body, expected);
+  });
+});
+
+test('S4-2 tools/call get_relation validates its output schema and matches the direct service', async () => {
+  await withMcpHttp({}, async (fixture) => {
+    const { relation } = seedS42Relation(fixture, 'S4-2 get');
+    const input = { relation_id: relation.id };
+    const expected = getRelation(fixture.db, USER_ID, input.relation_id);
+
+    const { response, body } = await mcpPost(
+      fixture,
+      'tools/call',
+      { name: 'get_relation', arguments: input },
+      { id: 305, toolName: 'get_relation' },
+    );
+
+    assert.equal(response.status, 200);
+    assertReadToolResult('get_relation', body, expected);
+  });
+});
+
+test('S4-2 tools/call list_relation_types validates its output schema and matches the direct service', async () => {
+  await withMcpHttp({}, async (fixture) => {
+    const expected = listRelationTypes();
+    assert.equal(expected.length, 9, 'the static type-table positive control must be non-empty');
+
+    const { response, body } = await mcpPost(
+      fixture,
+      'tools/call',
+      { name: 'list_relation_types', arguments: {} },
+      { id: 306, toolName: 'list_relation_types' },
+    );
+
+    assert.equal(response.status, 200);
+    assertReadToolResult('list_relation_types', body, expected);
   });
 });
 

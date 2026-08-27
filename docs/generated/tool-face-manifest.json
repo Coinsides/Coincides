@@ -1497,6 +1497,750 @@
     ]
   },
   {
+    "name": "list_relations",
+    "description": "List owned semantic Relations in one Item or Purpose scope.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "item_id": {
+          "type": "string"
+        },
+        "purpose_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "revoked",
+            "all"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "string"
+          },
+          "from_item_id": {
+            "type": "string"
+          },
+          "to_item_id": {
+            "type": "string"
+          },
+          "relation_type": {
+            "type": "string"
+          },
+          "directionality": {
+            "type": "string",
+            "enum": [
+              "directed",
+              "undirected"
+            ]
+          },
+          "from_snapshot_id": {
+            "type": "string"
+          },
+          "to_snapshot_id": {
+            "type": "string"
+          },
+          "note": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "created_by": {
+            "type": "string"
+          },
+          "origin_purpose_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "revoked"
+            ]
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "updated_at": {
+            "type": "string"
+          },
+          "affirmed_at": {
+            "type": "string"
+          },
+          "freshness": {
+            "type": "string",
+            "enum": [
+              "fresh",
+              "from_changed",
+              "to_changed",
+              "both_changed"
+            ]
+          },
+          "from_changed": {
+            "type": "boolean"
+          },
+          "to_changed": {
+            "type": "boolean"
+          },
+          "inspection_checkpoint_at": {
+            "type": "string"
+          },
+          "latest_assessment": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "relation_id": {
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "type": "string"
+                  },
+                  "verdict": {
+                    "type": "string",
+                    "enum": [
+                      "still_holds",
+                      "questionable"
+                    ]
+                  },
+                  "model_key": {
+                    "type": "string"
+                  },
+                  "created_at": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "relation_id",
+                  "user_id",
+                  "verdict",
+                  "model_key",
+                  "created_at"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "from_snapshot": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "item_id": {
+                "type": "string"
+              },
+              "user_id": {
+                "type": "string"
+              },
+              "content": {
+                "type": "string"
+              },
+              "content_hash": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "item_id",
+              "user_id",
+              "content",
+              "content_hash",
+              "created_at"
+            ],
+            "additionalProperties": false
+          },
+          "to_snapshot": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "item_id": {
+                "type": "string"
+              },
+              "user_id": {
+                "type": "string"
+              },
+              "content": {
+                "type": "string"
+              },
+              "content_hash": {
+                "type": "string"
+              },
+              "created_at": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "item_id",
+              "user_id",
+              "content",
+              "content_hash",
+              "created_at"
+            ],
+            "additionalProperties": false
+          },
+          "from_item": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "plain_text": {
+                "type": "string"
+              },
+              "item_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "topic": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "active",
+                  "retired"
+                ]
+              },
+              "retired_into_item_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "updated_at": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "plain_text",
+              "item_type",
+              "topic",
+              "status",
+              "retired_into_item_id",
+              "updated_at"
+            ],
+            "additionalProperties": false
+          },
+          "to_item": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "plain_text": {
+                "type": "string"
+              },
+              "item_type": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "topic": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "active",
+                  "retired"
+                ]
+              },
+              "retired_into_item_id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "updated_at": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "plain_text",
+              "item_type",
+              "topic",
+              "status",
+              "retired_into_item_id",
+              "updated_at"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "user_id",
+          "from_item_id",
+          "to_item_id",
+          "relation_type",
+          "directionality",
+          "from_snapshot_id",
+          "to_snapshot_id",
+          "note",
+          "created_by",
+          "origin_purpose_id",
+          "status",
+          "created_at",
+          "updated_at",
+          "affirmed_at",
+          "freshness",
+          "from_changed",
+          "to_changed",
+          "inspection_checkpoint_at",
+          "latest_assessment",
+          "from_snapshot",
+          "to_snapshot",
+          "from_item",
+          "to_item"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "truth": "semantic",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "GET /api/relations",
+      "client_call_site": "client/src/pages/Notes/canvasEngine/relationRepository.ts#loadRelations"
+    },
+    "exposure": "public",
+    "scopes": [
+      "relations:read"
+    ]
+  },
+  {
+    "name": "get_relation",
+    "description": "Read one owned semantic Relation with hydrated endpoints and Snapshot receipts.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "relation_id": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "relation_id"
+      ],
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "user_id": {
+          "type": "string"
+        },
+        "from_item_id": {
+          "type": "string"
+        },
+        "to_item_id": {
+          "type": "string"
+        },
+        "relation_type": {
+          "type": "string"
+        },
+        "directionality": {
+          "type": "string",
+          "enum": [
+            "directed",
+            "undirected"
+          ]
+        },
+        "from_snapshot_id": {
+          "type": "string"
+        },
+        "to_snapshot_id": {
+          "type": "string"
+        },
+        "note": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "created_by": {
+          "type": "string"
+        },
+        "origin_purpose_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "active",
+            "revoked"
+          ]
+        },
+        "created_at": {
+          "type": "string"
+        },
+        "updated_at": {
+          "type": "string"
+        },
+        "affirmed_at": {
+          "type": "string"
+        },
+        "freshness": {
+          "type": "string",
+          "enum": [
+            "fresh",
+            "from_changed",
+            "to_changed",
+            "both_changed"
+          ]
+        },
+        "from_changed": {
+          "type": "boolean"
+        },
+        "to_changed": {
+          "type": "boolean"
+        },
+        "inspection_checkpoint_at": {
+          "type": "string"
+        },
+        "latest_assessment": {
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "relation_id": {
+                  "type": "string"
+                },
+                "user_id": {
+                  "type": "string"
+                },
+                "verdict": {
+                  "type": "string",
+                  "enum": [
+                    "still_holds",
+                    "questionable"
+                  ]
+                },
+                "model_key": {
+                  "type": "string"
+                },
+                "created_at": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "relation_id",
+                "user_id",
+                "verdict",
+                "model_key",
+                "created_at"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "from_snapshot": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "item_id": {
+              "type": "string"
+            },
+            "user_id": {
+              "type": "string"
+            },
+            "content": {
+              "type": "string"
+            },
+            "content_hash": {
+              "type": "string"
+            },
+            "created_at": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "item_id",
+            "user_id",
+            "content",
+            "content_hash",
+            "created_at"
+          ],
+          "additionalProperties": false
+        },
+        "to_snapshot": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "item_id": {
+              "type": "string"
+            },
+            "user_id": {
+              "type": "string"
+            },
+            "content": {
+              "type": "string"
+            },
+            "content_hash": {
+              "type": "string"
+            },
+            "created_at": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "item_id",
+            "user_id",
+            "content",
+            "content_hash",
+            "created_at"
+          ],
+          "additionalProperties": false
+        },
+        "from_item": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "plain_text": {
+              "type": "string"
+            },
+            "item_type": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "topic": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "active",
+                "retired"
+              ]
+            },
+            "retired_into_item_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "updated_at": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "plain_text",
+            "item_type",
+            "topic",
+            "status",
+            "retired_into_item_id",
+            "updated_at"
+          ],
+          "additionalProperties": false
+        },
+        "to_item": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "plain_text": {
+              "type": "string"
+            },
+            "item_type": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "topic": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "active",
+                "retired"
+              ]
+            },
+            "retired_into_item_id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "updated_at": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "id",
+            "plain_text",
+            "item_type",
+            "topic",
+            "status",
+            "retired_into_item_id",
+            "updated_at"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "id",
+        "user_id",
+        "from_item_id",
+        "to_item_id",
+        "relation_type",
+        "directionality",
+        "from_snapshot_id",
+        "to_snapshot_id",
+        "note",
+        "created_by",
+        "origin_purpose_id",
+        "status",
+        "created_at",
+        "updated_at",
+        "affirmed_at",
+        "freshness",
+        "from_changed",
+        "to_changed",
+        "inspection_checkpoint_at",
+        "latest_assessment",
+        "from_snapshot",
+        "to_snapshot",
+        "from_item",
+        "to_item"
+      ],
+      "additionalProperties": false
+    },
+    "truth": "semantic",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "GET /api/relations/:relationId",
+      "client_call_site": "client/src/pages/Notes/canvasEngine/relationRepository.ts#loadRelation"
+    },
+    "exposure": "public",
+    "scopes": [
+      "relations:read"
+    ]
+  },
+  {
+    "name": "list_relation_types",
+    "description": "List the static semantic Relation type definitions shared by all users.",
+    "input_schema": {
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
+    "output_schema": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "enum": [
+              "derives_to",
+              "depends_on",
+              "supports",
+              "contradicts",
+              "example_of",
+              "equivalent_to",
+              "analogous_to",
+              "contrasts_with",
+              "companion_of"
+            ]
+          },
+          "directionality": {
+            "type": "string",
+            "enum": [
+              "directed",
+              "undirected"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "directionality"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "truth": "semantic",
+    "tier": "immediate",
+    "human_entry": {
+      "route": "GET /api/relations/types",
+      "client_call_site": "client/src/pages/Notes/canvasEngine/relationRepository.ts#loadRelationTypes"
+    },
+    "exposure": "public",
+    "scopes": [
+      "relations:read"
+    ]
+  },
+  {
     "name": "resolve_selection",
     "description": "Resolve a text selection receipt against the current owned TextFlow content.",
     "input_schema": {

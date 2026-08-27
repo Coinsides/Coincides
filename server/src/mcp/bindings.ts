@@ -3,6 +3,7 @@ import { getDb } from '../db/init.js';
 import { listContentGroups } from '../services/contentGroups.js';
 import { getItem, listItems } from '../services/items.js';
 import { listNotes, trashNoteAsUser } from '../services/notes.js';
+import { getRelation, listRelations, listRelationTypes } from '../services/relations.js';
 import { resolveSelection } from '../services/selectionResolve.js';
 import { resolveSelectionInputSchema } from '../toolFace/registry.js';
 
@@ -45,6 +46,21 @@ const listContentGroupsBinding: ToolBinding = (input, context) => {
   );
 };
 
+const listRelationsBinding: ToolBinding = (input, context) => {
+  return listRelations(
+    getDb(),
+    context.userId,
+    input as Parameters<typeof listRelations>[2],
+  );
+};
+
+const getRelationBinding: ToolBinding = (input, context) => {
+  const args = input as { relation_id: string };
+  return getRelation(getDb(), context.userId, args.relation_id);
+};
+
+const listRelationTypesBinding: ToolBinding = () => listRelationTypes();
+
 const resolveSelectionBinding: ToolBinding = (input, context) => {
   const parsed = resolveSelectionInputSchema.safeParse(input);
   if (!parsed.success) {
@@ -68,6 +84,9 @@ export const TOOL_BINDINGS: ReadonlyMap<string, ToolBinding> = new Map([
   ['list_items', listItemsBinding],
   ['get_item', getItemBinding],
   ['list_content_groups', listContentGroupsBinding],
+  ['list_relations', listRelationsBinding],
+  ['get_relation', getRelationBinding],
+  ['list_relation_types', listRelationTypesBinding],
   ['resolve_selection', resolveSelectionBinding],
   ['trash_notes', trashNotesBinding],
 ]);

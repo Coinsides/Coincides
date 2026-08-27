@@ -24,3 +24,4 @@
 - 2026-08-26 · 12.2c c-4 · trashed→active 往返、并发改 status、批量 range 混合 active/trashed 组合矩阵未写 · 挡「状态过渡期的解析行为」· 单 `handoffs/2026-08-26-v2bn12-2c4-resolve-status-filter.md`
 - 2026-08-26 · dev quick login · token 过期行为、并发多次调用、非 fixture 邮箱的枚举面未写 · 挡「过期 token 后续鉴权退化、并发快捷登录一致性、账号存在性枚举风险」· 单 `handoffs/2026-08-26-v2bn12-dev-quick-login.md`
 - 2026-08-26 · S4-1 知识读面 · `list_items` 分页/limit 边界矩阵与 `q` 跨正文/type/topic 组合、`list_content_groups` 跨 Project 越权矩阵未写（本单只留三条真实 `tools/call` 最小正控，ownership 仍由既有 service 承担）· 挡「边界归一/组合搜索/跨 Project 读隔离的系统性回归」· 单 `handoffs/2026-08-26-v2bn12-s4-1-read-face-knowledge.md`
+- 2026-08-26 · S4-2 语义读面 · `listRelations` 过滤组合矩阵、方向/类型全枚举与跨用户矩阵未写（本单只留三条真实 `tools/call` 最小正控，ownership 仍由既有 service 承担）· 挡「Relation 过滤组合/类型表完整性/跨用户读隔离的系统性回归」· 单 `handoffs/2026-08-26-v2bn12-s4-2-read-face-relations.md`
