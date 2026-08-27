@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 164 份文档。
+共 165 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -168,6 +168,7 @@
 | [handoffs/2026-08-26-v2bn12-s4-3-read-face-source.md](handoffs/2026-08-26-v2bn12-s4-3-read-face-source.md) | V2.BN.12 S4-3:读面第三批 —— 溯源真相(Source Scope / Source Anchor) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-26-v2bn12-td26-test-v2-manifest-hook.md](handoffs/2026-08-26-v2bn12-td26-test-v2-manifest-hook.md) | TD-26 清债:`test:v2` 补 manifest 副本前置钩子 | `(缺状态头)` | — | — |
 | [handoffs/2026-08-27-v2bn12-dead-code-retirement.md](handoffs/2026-08-27-v2bn12-dead-code-retirement.md) | 收口批:两处死码退役(`proposalStore` + `loadRelation`) | `(缺状态头)` | — | — |
+| [handoffs/2026-08-27-v2bn12-precommit-docs-warn.md](handoffs/2026-08-27-v2bn12-precommit-docs-warn.md) | 收口批:pre-commit 软闸(提交前 `docs:check`,**只警告不阻断**) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-27-v2bn12-s4-4-read-face-notes.md](handoffs/2026-08-27-v2bn12-s4-4-read-face-notes.md) | V2.BN.12 S4-4:读面第四批 —— 内容真相(Note / NoteBlocks) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-27-v2bn12-td12-test-asset-isolation.md](handoffs/2026-08-27-v2bn12-td12-test-asset-isolation.md) | TD-12 清债:server 测试套件默认使用隔离资产目录 | `(缺状态头)` | — | — |
 | [handoffs/2026-08-27-v2bn12-td17-malformed-body-400.md](handoffs/2026-08-27-v2bn12-td17-malformed-body-400.md) | TD-17 清债:坏 JSON body → 400(不再 500) | `(缺状态头)` | — | — |
