@@ -101,6 +101,21 @@ function createPayload(clientCreateKey: string, overrides: Record<string, unknow
   };
 }
 
+test('TD-17 T-1 malformed REST JSON maps to the existing 400 error shape', async () => {
+  await withHttpDb(async ({ baseUrl }) => {
+    const response = await fetch(`${baseUrl}/api/notes`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: '{"broken":',
+    });
+
+    assert.equal(response.status, 400);
+    assert.deepEqual(await response.json(), {
+      error: 'Malformed JSON body',
+    });
+  });
+});
+
 test('manual note block HTTP route persists authoritative operation batch timestamps', async () => {
   await withHttpDb(async ({ baseUrl, db, noteId }) => {
     const created = await postJson(baseUrl, `/api/notes/${noteId}/blocks`, {

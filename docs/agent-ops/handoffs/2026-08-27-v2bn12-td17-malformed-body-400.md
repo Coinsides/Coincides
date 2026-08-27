@@ -1,4 +1,4 @@
-> from: claude(opus,工程调度会话) | to: codex(builder) | status: ready | re: v2bn12-TD-17 | date: 2026-08-27
+> from: claude(opus,工程调度会话) | to: codex(builder) | status: done | re: v2bn12-TD-17 | date: 2026-08-27
 
 # TD-17 清债:坏 JSON body → 400(不再 500)
 
@@ -76,3 +76,140 @@ TD-17 描述了**两个症状**:
 回执 **UTF-8** 追加 `## Result`:**你实测到的 body-parser 错误对象真实字段**(以及与本工单描述的差异,若有)· K-1 红点原文与行号 · K-2(或其「未做 + 理由」)· **明写「(乙)非法 Host 先 403 未做」**与 `-32700` 的实况 · `git diff --numstat` 对照边界 · 显式范围排除。
 
 ⏱ 预估 25–35 分钟。
+
+## Result
+
+> builder: codex | date: 2026-08-27 | disposition: **部分清偿——仅 (甲) 完成；(乙) 未做**
+
+### 交付
+
+- `server/src/middleware/errorHandler.ts:23-32` 在既有 `AppError` 分支之后、原 500 兜底之前新增窄分支：仅当结构化字段 `type === 'entity.parse.failed'` 且 `status === 400` 时返回 HTTP 400。
+- 响应保持既有错误体形状，仅返回 `{"error":"Malformed JSON body"}`；没有向客户端回显原始 `message`、坏 `body`、stack 或其他解析详情。
+- `AppError` 分支、普通异常的 `console.error('Unhandled error:', err)` 与 500 兜底原文未改。已知 malformed JSON 现在作为已处理的客户端 4xx，不再打 “Unhandled error” stack；理由是它已不属于未处理的服务端异常。
+- T-1 放入已由 `test:v2` 接门的既有 `server/src/__tests__/v2NoteBlockLifecycle.test.ts:104-118`；T-2 放入既有 `test:mcp-transport` 文件 `server/src/__tests__/v2McpTransport.test.ts:784-803`。未新建测试文件，因此 `server/package.json` 未动。
+- `docs/agent-ops/current-state/deferred-tests.md:32` 已追加一行，成对登记 (乙) 与 `-32700` 的残留实况。
+
+### body-parser 真实错误对象探针
+
+在仓库当前 `server/node_modules` 版本上启动一次性 Express app（`express.json()` → 探针 error middleware），向真实 HTTP POST 发送 `Content-Type: application/json` 与原始坏体 `{"broken":`。探针收到：
+
+| 项 | 实测值 |
+|---|---|
+| prototype chain | `SyntaxError → Error → Object` |
+| own fields | `stack`, `message`, `expose`, `statusCode`, `status`, `body`, `type` |
+| enumerable fields | `expose`, `statusCode`, `status`, `body`, `type` |
+| `type` | `'entity.parse.failed'` |
+| `statusCode` / `status` | `400` / `400` |
+| `expose` | `true` |
+| `body` | 原始坏体 `{"broken":` |
+| `message` | `Unexpected end of JSON input` |
+
+与工单“通常带 `type` / `status` / `statusCode` / `expose`”的描述**无差异**；实测另明确了原型为 `SyntaxError`，并存在原始 `body` 字段。生产判别只使用 `type + status` 两个结构化字段；**没有用 `err.message` 做任何匹配**，也没有读取 `body` / `expose` / `statusCode`。
+
+### 常驻测试实况
+
+| 测试 | 真实请求 | 最终断言 |
+|---|---|---|
+| T-1 REST | 既有 POST `/api/notes`，`application/json`，原始语法坏体 | HTTP `400`；body 深等于 `{ error: 'Malformed JSON body' }` |
+| T-2 MCP | POST `/api/mcp`，显式合法 `Host=127.0.0.1:<port>`、合法 `Origin`、合法 Bearer、协议/方法头，原始语法坏体 | HTTP `400`；body 深等于 `{ error: 'Malformed JSON body' }` |
+
+T-2 **未产出 JSON-RPC `-32700`**：`express.json()` 在请求进入 MCP transport 之前解析失败，响应是普通 HTTP 400 错误体；未为凑 `-32700` 改 transport。
+
+### 必红 / 不误伤
+
+**K-1 灵魂刀**
+
+1. 临时完整删除新增 body-parser 分支。
+2. 施刀后先跑 server `npx.cmd tsc --noEmit`：exit `0`，证明 mutation 自身可编译。
+3. T-1 targeted run：exit `1`，红点原文 `Expected values to be strictly equal: 500 !== 400`，落点 `v2NoteBlockLifecycle.test.ts:112`。
+4. T-2 targeted run：exit `1`，红点原文 `Expected values to be strictly equal: 500 !== 400`，落点 `v2McpTransport.test.ts:799`。
+5. 恢复新增分支后 server `tsc --noEmit` exit `0`；T-1 / T-2 targeted run 均 exit `0`。
+
+**K-2 普通异常 500**
+
+- 用一次性内存 Express 测试路由抛出语法合法的 `new Error('boom')`，直接挂当前生产 `errorHandler`；未改任何 route 文件。
+- 实测仍输出 `Unhandled error: Error: boom`，HTTP `500`，body `{"error":"Internal server error"}`，探针 exit `0`。因此新增分支没有把普通异常误映为 400，既有 500 与 `console.error` 行为仍承重。
+
+### 验证门
+
+按工单顺序执行：
+
+| 门 | 命令 / 结果 | exit |
+|---|---|---:|
+| docs-first | `npm.cmd run docs:check`（`object-inventory` 最新） | 0 |
+| client tsc | `client: npx.cmd tsc --noEmit` | 0 |
+| server tsc | `server: npx.cmd tsc --noEmit` | 0 |
+| unit | `npm.cmd run test:unit`（222/222） | 0 |
+| server V2 | `server: npm.cmd run test:v2`（经隔离 runner，280/280） | 0 |
+| MCP transport | `server: npm.cmd run test:mcp-transport`（49/49） | 0 |
+| registry | `npm.cmd run test:tool-face-registry`（5/5） | 0 |
+| manifest test | `npm.cmd run test:tool-face-manifest`（10/10） | 0 |
+| manifest check | `npm.cmd run check:tool-face-manifest` | 0 |
+| parity test | `npm.cmd run test:tool-face-parity`（10/10） | 0 |
+| parity check | `npm.cmd run check:tool-face-parity` | 0 |
+| 契约专项 | `server: node --import tsx --test src/__tests__/textFlowIdentityContract.test.ts`（4/4） | 0 |
+| 总门 | `npm.cmd run verify:v2-bn8-runtime` | 0 |
+
+总门内的 client/server build、runtime checks、docs check、`git diff --check` 与 changed-file secrets scan 均随总门 exit 0。
+
+### 边界与工件核对
+
+最终 `git diff --numstat`（tracked 全工作树）：
+
+```text
+1	0	docs/agent-ops/current-state/deferred-tests.md
+98	1	docs/agent-ops/handoffs/2026-08-27-v2bn12-td17-malformed-body-400.md
+53	0	server/src/__tests__/v2McpTransport.test.ts
+15	0	server/src/__tests__/v2NoteBlockLifecycle.test.ts
+10	0	server/src/middleware/errorHandler.ts
+```
+
+- 三处现场 EOL 假阳性均按要求用 filtered blob 判真，全部与 HEAD 相等：`useNoteCanvasRuntimeController.ts` = `3efe5f820e2077850611b54d4d09482845e89545`；`SelectionToolbarLayer.tsx` = `29de8952e37a29bda051d6f82e17508d8c694637`；`routes/projections.ts` = `561902a449b50ce254b650de5a337973a8fbc26d`。
+- `server/uploads/**` 门后枚举为 7 个目录/文件项（3 个存量 PNG，文件时间均为 2026-06；另有目录 / `.tmp`），未见本单测试工件。`server/dist/tool-face-manifest.json` 由规定的 pretest/build 流程刷新，SHA-256 `7700E4E69740AA1F3DD3D76B9B6F0EAAEDB6623D7AA35DFE6535B0AB8EE2DC3D`，与 `docs/generated/tool-face-manifest.json` 逐位相等。两者均为 ignored 工件。
+- 本单没有修改 `server/src/index.ts`，没有移动全局 `express.json()`；没有修改 `server/src/mcp/transport.ts` 或 MCP 骨架；没有修改 registry / binding / manifest 真相源；没有修改任何 route/service 业务逻辑、`shared/`、migration/schema、tsconfig、`pretest:v2`、`scripts/run-server-test-suite.mjs`、客户端或 `.claude/**`。
+- 未取、未覆盖、未删除发单方持有的 `.codex-tmp/builder.lock.d`；未杀任何 Codex 进程；未 commit、未 push、未碰 main。
+- 工作期间发单方把 TD-12 与本工单提交进当前分支、另有并行文档工作；本单没有回滚或吸收这些并行改动。当前非 numstat 的三处 EOL 状态与其他 untracked 文件均不归本单。
+
+### 明确残留
+
+**(乙)「坏体 + 非法 Host」先 403 未做。** 该行为仍受全局 `express.json()` 早于 MCP Host/Origin 守卫的中间件顺序约束；本单没有处理它。故这里只能声明 TD-17 **部分清偿**，**不得也没有声称 TD-17 已全清**。`-32700` 同样未产出，原因如上。
+
+## Review
+
+> reviewer: claude(opus,工程调度会话) | date: 2026-08-27 | verdict: **PASS 0/0/0/0 —— TD-17 判「部分清偿」**((甲)已清 · (乙)残留)
+
+### 1. 收工判定(两条并用)
+
+进程 `36312` **消失** ∧ 交付物出现(`errorHandler.ts` +10 · `v2NoteBlockLifecycle.test.ts` +15 · `v2McpTransport.test.ts` +53 · `deferred-tests.md` +1)。
+
+### 2. 位点复核(⭐ 亲手施刀,不吃回执)
+
+| 位点 | 复核方验证 | 结果 |
+|---|---|---|
+| **判别条件** | 读 diff | `'type' in err && err.type === 'entity.parse.failed' && 'status' in err && err.status === 400` —— **纯结构化字段、双条件收窄**;⛔ **无 `err.message` 子串匹配**(工单红线) |
+| **响应体** | 读 diff | `{ error: 'Malformed JSON body' }` —— 与既有 400 同形;⭐ **未回显原始坏体** ⚠️ 这一点比看上去重要:探针实测显示该错误对象**自带 `body` 字段(原始坏体)**,若顺手把 `err` 展开就是**信息回显**;它没有 |
+| **500 兜底与 AppError 分支** | 读 diff | 未改 |
+| **边界** | `git diff --numstat` | `server/src/index.ts` **零 diff** ⇒ ⛔ `express.json()` 挂载位置未被动 —— (乙) 确实没被顺手做 |
+| ⭐ **K-1(复核方亲施)** | 完整删除新增分支;⭐ **先跑 `tsc --noEmit` 证 mutation 自身 exit 0** | **两条都红且红在状态码**:`500 !== 400` @ `v2McpTransport.test.ts:799` 与 `v2NoteBlockLifecycle.test.ts:112` —— **与回执自述落点逐字相同** |
+| **还原保真** | sha256 + 复跑 | `errorHandler.ts` 与备份**逐位相同**;三条 targeted 测试 **3/3 绿** |
+
+### 3. ⭐ builder 三处诚实,记功
+
+1. **探针实测优先于工单描述**:它没有照抄我给的「通常带 `type`/`status`」,而是**起了一次性 Express app、真发一次坏体**,把错误对象的原型链(`SyntaxError → Error → Object`)、own/enumerable 字段、各字段实值全部列出。⇒ 结论「与工单描述无差异」是**验过之后的无差异**,不是**默认的无差异**。
+   ⭐ 它还多告诉了我们一件事:该错误对象**自带原始 `body`** —— 这正是「不要把原始解析错误详情吐给客户端」那条红线的**具体理由**,从抽象警告变成了具体风险。
+2. **K-2 用一次性内存路由做,不改任何 route 文件**:抛语法合法的 `new Error('boom')` 挂当前生产 `errorHandler` ⇒ 仍 `500` + `Unhandled error: Error: boom`。⇒ **既有 500 与日志行为都没被改宽**,而且验证过程零污染。
+3. **`-32700` 不凑**:如实写「未产出,因 `express.json()` 在进 transport 之前就失败」,⛔ 没为凑它改 transport。
+
+### 4. 一处已声明的行为变更(接受,但记在案)
+
+**malformed JSON 不再打 `console.error('Unhandled error:', ...)`** —— builder 主动申报并给了理由:它现在是**已处理的客户端 4xx**,不属于未处理的服务端异常。
+⇒ **判为合理**:这与「把 500 改成 400」是同一个语义变更的两面,分开做反而不一致。⚠️ **但它是行为变更,不是纯映射** ⇒ 已在此记档,⛔ 不得在收口记录里把本单描述为「只改状态码」。
+
+### 5. 结论
+
+**PASS 0/0/0/0**,但 **TD-17 判「部分清偿」**:
+- ✅ **(甲)坏 body → 400** 已清,两条常驻测试接门(T-1 在 `test:v2`、T-2 在 `test:mcp-transport`),K-1 双红双绿。
+- ⛔ **(乙)「坏体 + 非法 Host」先 403 未做** —— 需移动 `express.json()` 的全局挂载位置,爆炸半径覆盖每条依赖全局 JSON 解析的路由,**属独立改动面,收版期不碰**。
+- 📌 **`-32700` 未产出**为该架构下的**必然结果**(解析早于 transport),不是缺陷;若将来要产出它,与 (乙) 是同一件事(都要求解析发生在 MCP 管线内部)。
+
+⇒ TD-17 条目标 **「部分清偿 · 残留面 = (乙) + `-32700`」**,⛔ 不得标全清。

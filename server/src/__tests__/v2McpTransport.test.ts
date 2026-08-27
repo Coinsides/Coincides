@@ -694,6 +694,37 @@ async function postAuthenticated(
   return { response, body: await response.json() };
 }
 
+async function rawJsonPost(
+  port: number,
+  path: string,
+  payload: string,
+  headers: Record<string, string>,
+): Promise<{ status: number; body: Buffer }> {
+  const payloadBuffer = Buffer.from(payload);
+  return new Promise((resolve, reject) => {
+    const request = httpRequest({
+      hostname: '127.0.0.1',
+      port,
+      path,
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'content-length': String(payloadBuffer.length),
+        ...headers,
+      },
+    }, (response) => {
+      const chunks: Buffer[] = [];
+      response.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
+      response.on('end', () => resolve({
+        status: response.statusCode ?? 0,
+        body: Buffer.concat(chunks),
+      }));
+    });
+    request.on('error', reject);
+    request.end(payloadBuffer);
+  });
+}
+
 async function rawMcpRequest(
   port: number,
   headers: Record<string, string>,
@@ -748,6 +779,28 @@ test('S1 config gate defaults local-only and rejects non-hostname deployment val
       /MCP_ALLOWED_HOSTNAMES/,
     );
   }
+});
+
+test('TD-17 T-2 malformed MCP JSON with legal transport and Bearer maps to HTTP 400', async () => {
+  await withMcpHttp({}, async (fixture) => {
+    const result = await rawJsonPost(
+      fixture.port,
+      '/api/mcp',
+      '{"broken":',
+      {
+        authorization: `Bearer ${fixture.token}`,
+        host: `127.0.0.1:${fixture.port}`,
+        origin: fixture.baseUrl,
+        'mcp-protocol-version': MODERN_PROTOCOL_VERSION,
+        'mcp-method': 'tools/list',
+      },
+    );
+
+    assert.equal(result.status, 400);
+    assert.deepEqual(JSON.parse(result.body.toString('utf8')), {
+      error: 'Malformed JSON body',
+    });
+  });
 });
 
 test('K-0 MCP tools/call list_notes is end-to-end equivalent to the same REST request', async () => {
