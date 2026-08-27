@@ -135,3 +135,4 @@ Strict dependency order. **Do not work on a later pillar before the earlier ones
 ## 5. Maintenance
 
 Updating this folder is part of every `V2.BN.x` **definition of done**. If a version changes pillar status, the version is not "done" until this folder reflects it.
+可选的提交前文档软闸位于 `.githooks/pre-commit`；仓库使用者可运行 `git config core.hooksPath .githooks` 显式启用；该钩子只作警告，任何路径（包括钩子自身失败）均不阻断提交。

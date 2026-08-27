@@ -1,0 +1,41 @@
+#!/bin/sh
+# Every executable line ends before a comment marker so the hook remains safe
+# when a Windows checkout rewrites LF to CRLF under core.autocrlf=true.
+allow_commit() { #
+  trap - 0 1 2 3 15; #
+  exit 0; #
+} #
+trap 'allow_commit' 0 1 2 3 15; #
+#
+soft_gate_failed() { #
+  printf '%s\n' "⚠️ Coincides 文档软闸自身失败，已跳过（$1）；本次提交继续。" >&2; #
+} #
+#
+docs_check_failed() { #
+  printf '⚠️ Coincides 文档软闸警告：npm run docs:check 未通过（exit %s）；本钩子只警告、不阻断，本次提交仍会继续。\n' "$1" >&2; #
+  printf '%s\n' '请运行 npm run docs:check 查看详情；索引修复：node scripts/docs-index.mjs' >&2; #
+  printf '%s\n' '射程边界 1：docs:check 检查工作树，不检查暂存快照。若旧版生成件已 git add、工作树随后重新生成，软闸可能说绿，但提交的仍是旧版；它看不见 index 与工作树的差异。' >&2; #
+  printf '%s\n' '射程边界 2：软闸只覆盖 docs:check 的两项（docs-index / docs-inventory），不覆盖“新文件忘了 git add”；这正是 d799d50 事故的形状。' >&2; #
+} #
+#
+if ! command -v npm >/dev/null 2>&1; then #
+  soft_gate_failed 'npm 不存在'; #
+  exit 0; #
+fi #
+#
+if ! command -v timeout >/dev/null 2>&1; then #
+  soft_gate_failed 'timeout 不存在'; #
+  exit 0; #
+fi #
+#
+timeout -k 5s 60s npm run docs:check >/dev/null 2>&1; #
+check_status=$?; #
+#
+case "$check_status" in #
+  0) exit 0 ;; #
+  124|137) soft_gate_failed 'docs:check 超时' ;; #
+  125|126|127) soft_gate_failed "无法运行 docs:check，exit $check_status" ;; #
+  *) docs_check_failed "$check_status" ;; #
+esac #
+#
+exit 0; #
