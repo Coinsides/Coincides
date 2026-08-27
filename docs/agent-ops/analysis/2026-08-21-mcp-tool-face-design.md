@@ -353,3 +353,18 @@ KIND_HANDLERS（画布对象，6 种）
 - **malformed JSON**:全局 `express.json()` 先于 route,坏 JSON 被 body-parser 截获并由全局 `errorHandler` 映成 REST **500**——这是既有 REST 缺陷(应为 400),不是 transport 的错;记 **TD-17**:`errorHandler` 对 body-parser 的 `entity.parse.failed`/`SyntaxError(status 400)` 统一映 400(全路由受益),修后 MCP 自动得 400;JSON-RPC `-32700` 体与「坏体 + 非法 Host 先 403」不作 phase 1 要求。本单不改解析边界(越界)。
 
 **施工单(12.2a-3)结构**:S0 dialect(generator)→ S1 transport 骨架(`/api/mcp`,Host/Origin,auth bridge,per-request server,manifest loader/projector/binding)→ S2 killers(过滤 ×2 / Host/Origin ×2 / binding 等集合 / artifact loader / MRTR 降级策略测试 / 生产接线)→ S3 build copy step。5.6。触及面按短笺 §7;**不得**在 transport 内造 schema/白名单/内存状态。
+
+---
+
+## 附录(2026-08-26 裁定):`human_entry.client_call_site` 的语义
+
+**问题**(S4-1 首轮停手暴露):server route 存在、但客户端零调用点时,`human_entry` 怎么填?
+
+**裁定:客户端调用点是硬要求(口径 a)。`human_entry` 指的是真实产品界面上的人类动作,不是 route 的存在。**
+
+理由三条:
+1. **红线的本义**:「Agent 能做的,人类必须 100% 能做」里的「人类能做」指**通过产品**能做——人类「可以直接 curl」不算产品的人类面。
+2. **这条要求是反 CRUD 蠕变的承重墙**:若放宽为「有 route 即算」,则整个 REST 面每个端点都自动有了「人类门」,parity 闸对 CRUD 镜像的拦截力立即归零(参见 08-26 辩论 C 板块:闸 1 的强度继承自「人类 UI 恰好是意图形状」——放宽口径就是亲手拆自己的地基)。
+3. **后果是对的**:「有 route 无客户端消费」= 该能力在人类侧本来就是冗余或未启用 ⇒ Agent 门更没有理由先于人类面存在。若 Agent 真需要它,正路是**先给它人类半身**,再登记工具(同源先例:辩论第七题「Agent 造的工具过不了人类门 ⇒ 不是它不够格,是那个能力缺它的人类半身」)。
+
+**执行细则**:撞到「有 route 无调用点」⇒ 该工具不登记,停手上报,⛔ 不以任何相邻调用点冒充;是否为它补人类面,逐案升裁定。
