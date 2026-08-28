@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 188 份文档。
+共 189 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -192,6 +192,7 @@
 | [handoffs/2026-08-28-text-unit-gutter-de-occupation.md](handoffs/2026-08-28-text-unit-gutter-de-occupation.md) | 单 A:行首控件迁出排版流(纯力学) | `ready` | — | — |
 | [handoffs/2026-08-28-v12-9b-b1-imprint-schema.md](handoffs/2026-08-28-v12-9b-b1-imprint-schema.md) | b-1:碎片流 schema 落地 + 拓印件出生证 | `ready` | — | — |
 | [handoffs/2026-08-28-v12-9b-b2-never-reject.md](handoffs/2026-08-28-v12-9b-b2-never-reject.md) | b-2:入库永不拒收 + 两条兜底 | `draft` | — | — |
+| [handoffs/2026-08-28-v12-9b-b2b-container.md](handoffs/2026-08-28-v12-9b-b2b-container.md) | b-2b:容器策略(zip / 文件夹)—— 逐条目降级 + 如实申报 | `draft` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
 | [handoffs/plans/v12-9b-anchored-fragment-stream-spec.md](handoffs/plans/v12-9b-anchored-fragment-stream-spec.md) | 带锚碎片流(Anchored Fragment Stream)规格 v0 | `active` | — | — |
