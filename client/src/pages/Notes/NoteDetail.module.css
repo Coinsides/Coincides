@@ -1717,8 +1717,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 .textUnitRow {
   position: relative;
   display: grid;
-  grid-template-columns: 58px minmax(0, 1fr);
-  gap: 4px;
+  grid-template-columns: minmax(0, 1fr);
   align-items: start;
   margin-left: calc(var(--text-unit-indent, 0) * 24px);
   min-height: 28px;
@@ -1739,6 +1738,9 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 }
 
 .textUnitGutter {
+  position: absolute;
+  top: 0;
+  right: calc(100% + 4px);
   display: flex;
   align-items: center;
   gap: 3px;

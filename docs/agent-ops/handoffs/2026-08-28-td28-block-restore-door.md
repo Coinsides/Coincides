@@ -54,8 +54,8 @@
 ## 5. 收工前必跑
 
 ```
-npm run test:v2
-npm --prefix client run test
+npm --prefix server run test:v2
+npm --prefix client run test:unit
 npm run check:tool-face-parity
 npm run test:tool-face-parity
 npm --prefix client run build
