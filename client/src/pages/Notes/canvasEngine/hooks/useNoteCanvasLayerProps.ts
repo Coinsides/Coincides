@@ -63,6 +63,8 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
   if (!input.note) return null;
 
   const chromeProps: NoteChromeLayerProps = {
+    blockTrashLoadFailed: input.blockTrashLoadFailed,
+    blockTrashLoading: input.blockTrashLoading,
     chromeCollapsed: input.chromeCollapsed,
     contentReadOnly: input.contentReadOnly,
     exportPreview: input.exportPreview,
@@ -73,6 +75,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     pageFrames: input.pageFrames,
     primaryPageFrameId: input.primaryPageFrameId,
     selectedPageFrameId: input.selectedPageFrameId,
+    showBlockTrash: input.showBlockTrash,
     showExportPreview: input.showExportPreview,
     showLayoutPanel: input.showLayoutPanel,
     showMoreActions: input.showMoreActions,
@@ -87,7 +90,9 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     surfaceMode: input.surfaceMode,
     surfacePolicy: input.surfacePolicy,
     titleDraft: input.titleDraft,
+    trashedBlocks: input.trashedBlocks,
     documentTypographyProfile: input.documentTypographyProfile,
+    restoringBlockId: input.restoringBlockId,
     onAddFavorite: handleAddFavorite,
     onBackProject: handleBackProject,
     onCloseOverlay: input.onCloseOverlay,
@@ -102,6 +107,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     onToggleLayoutMode: input.onToggleLayoutMode,
     onToggleMoreActions: input.onToggleMoreActions,
     onToggleNoteInfo: input.onToggleNoteInfo,
+    onOpenBlockTrash: input.onOpenBlockTrash,
     onOpenLayoutPanel: input.onOpenLayoutPanel,
     onAddPageBelow: input.onAddPageBelow,
     onDeletePageFrame: input.onDeletePageFrame,
@@ -109,6 +115,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     onDuplicatePageFrame: input.onDuplicatePageFrame,
     onInsertPageFrame: input.onInsertPageFrame,
     onMergePageStackWithPrevious: input.onMergePageStackWithPrevious,
+    onRestoreTrashedBlock: input.onRestoreTrashedBlock,
     onSelectPageFrame: input.onSelectPageFrame,
     onSetPrimaryPageFrame: input.onSetPrimaryPageFrame,
     onSplitPageStackAtFrame: input.onSplitPageStackAtFrame,

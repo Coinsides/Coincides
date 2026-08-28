@@ -199,7 +199,18 @@ router.post('/:id/restore', (req: AuthRequest, res: Response) => {
 // GET /api/notes/:id/blocks
 router.get('/:id/blocks', (req: AuthRequest, res: Response) => {
   const noteId = req.params.id as string;
-  res.json(listNoteBlocks({ userId: req.userId!, noteId }));
+  const requestedStatus = req.query.status;
+  const hasMalformedStatusKey = Object.keys(req.query)
+    .some((key) => key.startsWith('status['));
+  const status = requestedStatus === undefined ? 'active' : requestedStatus;
+  if (
+    hasMalformedStatusKey
+    || typeof status !== 'string'
+    || (status !== 'active' && status !== 'trashed')
+  ) {
+    throw new AppError(400, 'Unsupported note block status');
+  }
+  res.json(listNoteBlocks({ userId: req.userId!, noteId, status }));
 });
 
 // POST /api/notes/:id/blocks

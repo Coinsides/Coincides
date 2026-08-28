@@ -9,7 +9,7 @@ import {
   type RuntimeInteractionState,
 } from '../interactionController';
 
-export type FloatingOverlayPanel = 'layout' | 'noteInfo' | 'moreActions' | 'preview';
+export type FloatingOverlayPanel = 'layout' | 'noteInfo' | 'moreActions' | 'blockTrash' | 'preview';
 
 export interface UseFloatingOverlayControllerOptions {
   setInteractionState: (state: RuntimeInteractionState) => void;
@@ -66,6 +66,7 @@ export function useFloatingOverlayController({
     collapseChrome,
     expandChrome,
     showExportPreview: activeOverlay === 'preview',
+    showBlockTrash: activeOverlay === 'blockTrash',
     showLayoutPanel: activeOverlay === 'layout',
     showMoreActions: activeOverlay === 'moreActions',
     showNoteInfo: activeOverlay === 'noteInfo',
@@ -74,6 +75,7 @@ export function useFloatingOverlayController({
     showPreviewExportStatus,
     showPreviewLabelOverlay,
     openLayoutPanel: () => setOverlay('layout'),
+    openBlockTrash: () => setOverlay('blockTrash'),
     toggleExportPreview: () => toggleOverlay('preview'),
     toggleMoreActions: () => toggleOverlay('moreActions'),
     toggleNoteInfo: () => toggleOverlay('noteInfo'),

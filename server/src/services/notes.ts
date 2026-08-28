@@ -15,6 +15,12 @@ interface NoteReadTarget {
   noteId: string;
 }
 
+export type NoteBlockStatus = 'active' | 'trashed';
+
+interface NoteBlockReadTarget extends NoteReadTarget {
+  status?: NoteBlockStatus;
+}
+
 interface NoteLifecycleTarget {
   userId: string;
   noteId: string;
@@ -135,7 +141,11 @@ export function getNote({ userId, noteId }: NoteReadTarget) {
   return hydrateNote(note);
 }
 
-export function listNoteBlocks({ userId, noteId }: NoteReadTarget) {
+export function listNoteBlocks({
+  userId,
+  noteId,
+  status = 'active',
+}: NoteBlockReadTarget) {
   getOwnedNote(noteId, userId);
 
   const blocks = getDb().prepare(`
@@ -183,10 +193,10 @@ export function listNoteBlocks({ userId, noteId }: NoteReadTarget) {
     FROM note_block_placements nbp
     JOIN note_blocks nb ON nb.id = nbp.block_id
     LEFT JOIN note_block_sources nbs ON nbs.block_id = nb.id
-    WHERE nbp.note_id = ? AND nb.user_id = ? AND nb.status = 'active'
+    WHERE nbp.note_id = ? AND nb.user_id = ? AND nb.status = ?
     GROUP BY nbp.id, nb.id
     ORDER BY nbp.order_index ASC
-  `).all(noteId, userId);
+  `).all(noteId, userId, status);
 
   return blocks.map((block: any) => {
     const hydrated = hydrateBlock(block);

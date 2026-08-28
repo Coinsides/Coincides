@@ -11,6 +11,7 @@ import {
   MoreHorizontal,
   PanelTopClose,
   PanelTopOpen,
+  RotateCcw,
   Star,
   Trash2,
   X,
@@ -18,7 +19,7 @@ import {
 import { useCallback, useEffect, useRef } from 'react';
 import type { ChangeEvent } from 'react';
 import type { ExportPreviewModel } from '../exportPreviewService';
-import type { Note } from '../runtimeDataTypes';
+import type { Note, NoteBlock } from '../runtimeDataTypes';
 import type {
   DocumentTypographyProfile,
   PageFrameCollectionModel,
@@ -40,6 +41,8 @@ export interface SurfacePolicyView {
 }
 
 export interface NoteChromeLayerProps {
+  blockTrashLoadFailed: boolean;
+  blockTrashLoading: boolean;
   chromeCollapsed: boolean;
   contentReadOnly: boolean;
   exportPreview: ExportPreviewModel;
@@ -50,6 +53,7 @@ export interface NoteChromeLayerProps {
   pageFrames: PageFrameModel[];
   primaryPageFrameId: string | null;
   selectedPageFrameId: string | null;
+  showBlockTrash: boolean;
   showExportPreview: boolean;
   showLayoutPanel: boolean;
   showMoreActions: boolean;
@@ -64,7 +68,9 @@ export interface NoteChromeLayerProps {
   surfaceMode: 'page' | 'canvas';
   surfacePolicy: SurfacePolicyView;
   titleDraft: string;
+  trashedBlocks: NoteBlock[];
   documentTypographyProfile: DocumentTypographyProfile;
+  restoringBlockId: string | null;
   onAddFavorite: () => void;
   onBackProject: () => void;
   onCloseOverlay: () => void;
@@ -82,10 +88,12 @@ export interface NoteChromeLayerProps {
   onToggleMoreActions: () => void;
   onToggleNoteInfo: () => void;
   onOpenLayoutPanel: () => void;
+  onOpenBlockTrash: () => void;
   onDeletePageFrame: (frameId: string) => void;
   onDuplicatePageFrame: (frameId: string) => void;
   onInsertPageFrame: (afterFrameId: string) => void;
   onMergePageStackWithPrevious: (stackId: string) => void;
+  onRestoreTrashedBlock: (block: NoteBlock) => void | Promise<NoteBlock | null | undefined>;
   onSelectPageFrame: (frameId: string) => void;
   onSetPrimaryPageFrame: (frameId: string) => void;
   onSplitPageStackAtFrame: (frameId: string) => void;
@@ -99,6 +107,8 @@ export interface NoteChromeLayerProps {
 }
 
 export function NoteChromeLayer({
+  blockTrashLoadFailed,
+  blockTrashLoading,
   chromeCollapsed,
   contentReadOnly,
   exportPreview,
@@ -109,6 +119,7 @@ export function NoteChromeLayer({
   pageFrames,
   primaryPageFrameId,
   selectedPageFrameId,
+  showBlockTrash,
   showExportPreview,
   showLayoutPanel,
   showMoreActions,
@@ -123,7 +134,9 @@ export function NoteChromeLayer({
   surfaceMode,
   surfacePolicy,
   titleDraft,
+  trashedBlocks,
   documentTypographyProfile,
+  restoringBlockId,
   onAddFavorite,
   onBackProject,
   onCloseOverlay,
@@ -139,10 +152,12 @@ export function NoteChromeLayer({
   onToggleLayoutMode,
   onToggleMoreActions,
   onToggleNoteInfo,
+  onOpenBlockTrash,
   onOpenLayoutPanel,
   onDeletePageFrame,
   onDuplicatePageFrame,
   onMergePageStackWithPrevious,
+  onRestoreTrashedBlock,
   onSelectPageFrame,
   onSetPrimaryPageFrame,
   onSplitPageStackAtFrame,
@@ -463,7 +478,7 @@ export function NoteChromeLayer({
             </button>
           </div>
 
-          <FloatingOverlayLayer open={showNoteInfo || showLayoutPanel || showMoreActions || showExportPreview}>
+          <FloatingOverlayLayer open={showNoteInfo || showLayoutPanel || showMoreActions || showBlockTrash || showExportPreview}>
             {showNoteInfo && (
               <div className={`${styles.infoPopover} ${styles.floatingPanelPopover}`}>
                 <div className={styles.popoverHeader}>
@@ -626,6 +641,16 @@ export function NoteChromeLayer({
                   <span>Note-level actions</span>
                   <small>History, duplicate, archive, import, export, and delete controls will live here.</small>
                 </div>
+                <button
+                  type="button"
+                  className={styles.moreAction}
+                  onClick={onOpenBlockTrash}
+                  aria-label="Deleted blocks"
+                >
+                  <Trash2 size={15} />
+                  <span>Deleted blocks</span>
+                  <small>Review and restore blocks removed from this note.</small>
+                </button>
                 <div
                   className={styles.typographyControls}
                   data-typography-controls="document"
@@ -703,6 +728,56 @@ export function NoteChromeLayer({
                 <p className={styles.popoverNote}>
                   Layout controls have moved into the Layout panel.
                 </p>
+              </div>
+            )}
+
+            {showBlockTrash && (
+              <div className={`${styles.infoPopover} ${styles.actionsPopover} ${styles.floatingPanelPopover}`}>
+                <div className={styles.popoverHeader}>
+                  <div>
+                    <div className={styles.popoverEyebrow}>Note actions</div>
+                    <strong>Deleted blocks</strong>
+                  </div>
+                  <button className={styles.iconBtn} onClick={onCloseOverlay} title="Close">
+                    <X size={15} />
+                  </button>
+                </div>
+                <div className={styles.blockTrashList} data-block-trash-drawer="true">
+                  {blockTrashLoading ? (
+                    <p className={styles.blockTrashQuiet}>Loading deleted blocks…</p>
+                  ) : blockTrashLoadFailed ? (
+                    <p className={styles.blockTrashQuiet}>Deleted blocks could not be loaded.</p>
+                  ) : trashedBlocks.length === 0 ? (
+                    <p className={styles.blockTrashQuiet}>Nothing to restore.</p>
+                  ) : (
+                    trashedBlocks.map((block) => {
+                      const blockLabel = block.title?.trim()
+                        || block.plain_text?.trim().slice(0, 80)
+                        || 'Untitled block';
+                      return (
+                        <div className={styles.blockTrashRow} key={block.id}>
+                          <div className={styles.blockTrashIdentity}>
+                            <strong>{blockLabel}</strong>
+                            <small>{block.block_type}</small>
+                          </div>
+                          <button
+                            type="button"
+                            className={styles.blockTrashRestoreButton}
+                            onClick={() => void onRestoreTrashedBlock(block)}
+                            disabled={contentReadOnly || restoringBlockId !== null}
+                            aria-label={`Restore ${blockLabel}`}
+                          >
+                            <RotateCcw size={14} />
+                            {restoringBlockId === block.id ? 'Restoring…' : 'Restore'}
+                          </button>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+                {contentReadOnly && (
+                  <p className={styles.popoverNote}>Source-projection blocks can be reviewed here but not restored.</p>
+                )}
               </div>
             )}
 

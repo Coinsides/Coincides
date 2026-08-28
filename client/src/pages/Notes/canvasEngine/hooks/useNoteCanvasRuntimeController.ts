@@ -7,6 +7,7 @@ import { useRuntimePresentationController } from './useRuntimePresentationContro
 import { useRuntimeSurfaceStateController } from './useRuntimeSurfaceStateController';
 import { useBlockTextFlowEditController } from './useBlockTextFlowEditController';
 import { useSlashBlockRollbackController } from './useSlashBlockRollbackController';
+import { useNoteBlockTrashController } from './useNoteBlockTrashController';
 import { tableObjectSavePayload } from '../tableObjectService';
 import type {
   StructuredCanvasObject,
@@ -37,6 +38,7 @@ export function useNoteCanvasRuntimeController() {
     releaseTextFocus,
     resolveInitialSurfaceMode,
     movingBlockIdRef,
+    openBlockTrash,
     openLayoutPanel,
     pageOffsetX,
     panViewportBy,
@@ -51,6 +53,7 @@ export function useNoteCanvasRuntimeController() {
     setViewportSize,
     snapEnabled,
     snapGuide,
+    showBlockTrash,
     showExportPreview,
     showLayoutPanel,
     showMoreActions,
@@ -147,6 +150,23 @@ export function useNoteCanvasRuntimeController() {
     clearBlockSelection,
     noteId,
   });
+
+  const {
+    blockTrashLoadFailed,
+    blockTrashLoading,
+    loadTrashedBlocks,
+    restoreTrashedBlock,
+    restoringBlockId,
+    trashedBlocks,
+  } = useNoteBlockTrashController({
+    noteId,
+    restoreBlock,
+  });
+
+  const handleOpenBlockTrash = useCallback(() => {
+    openBlockTrash();
+    void loadTrashedBlocks();
+  }, [loadTrashedBlocks, openBlockTrash]);
 
   const persistStructuredObjectForHistory = useCallback(async (
     objectId: string,
@@ -312,6 +332,8 @@ export function useNoteCanvasRuntimeController() {
     anchorsBySourceRef,
     allBlocks: sortedBlocks,
     blockFieldDrafts,
+    blockTrashLoadFailed,
+    blockTrashLoading,
     blockEditRecoveryReceipts,
     blockLayouts,
     blockListRef,
@@ -348,6 +370,7 @@ export function useNoteCanvasRuntimeController() {
     savingBlockId,
     selectedBlockId,
     setSourceJumpTarget,
+    showBlockTrash,
     showExportPreview,
     showLayoutPanel,
     showMoreActions,
@@ -374,6 +397,8 @@ export function useNoteCanvasRuntimeController() {
     surfacePolicyMode: surfacePolicy.mode,
     templateWarning,
     titleDraft,
+    trashedBlocks,
+    restoringBlockId,
     viewportTransform,
     visibleBlocks,
     onCreateBlock: createBlock,
@@ -427,7 +452,9 @@ export function useNoteCanvasRuntimeController() {
     onToggleLayoutMode: toggleLayoutMode,
     onToggleMoreActions: toggleMoreActions,
     onToggleNoteInfo: toggleNoteInfo,
+    onOpenBlockTrash: handleOpenBlockTrash,
     onOpenLayoutPanel: openLayoutPanel,
+    onRestoreTrashedBlock: restoreTrashedBlock,
     onTogglePreviewAIVisibility: togglePreviewAIVisibility,
     onTogglePreviewBlockTypes: togglePreviewBlockTypes,
     onTogglePreviewExportStatus: togglePreviewExportStatus,
