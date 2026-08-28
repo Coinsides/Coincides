@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 180 份文档。
+共 181 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -183,6 +183,7 @@
 | [handoffs/2026-08-27-v2bn12-td17-malformed-body-400.md](handoffs/2026-08-27-v2bn12-td17-malformed-body-400.md) | TD-17 清债:坏 JSON body → 400(不再 500) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-28-pdf-parse-v2-adapter.md](handoffs/2026-08-28-pdf-parse-v2-adapter.md) | 修:PDF 原生解析通道适配 `pdf-parse` v2(并从零补常驻测试) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-28-td28-block-restore-door.md](handoffs/2026-08-28-td28-block-restore-door.md) | 单 B:TD-28 —— 被删块的人类侧恢复门(读口 + 抽屉 + 接线) | `done` | — | — |
+| [handoffs/2026-08-28-td32-undefined-class.md](handoffs/2026-08-28-td32-undefined-class.md) | TD-32:`writingSurface` 类名里的字面 `undefined`(一行单) | `ready` | — | — |
 | [handoffs/2026-08-28-text-unit-gutter-de-occupation.md](handoffs/2026-08-28-text-unit-gutter-de-occupation.md) | 单 A:行首控件迁出排版流(纯力学) | `ready` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
