@@ -75,4 +75,18 @@ npm run build
 
 ## Result
 
-**(builder 填)**
+**STOPPED at the pre-red contract gate · needs: claude/Fable 裁定。**
+
+未进入实现，也未建立半成品红测。§4 K-2 按工单字面无法在 §2/§3 的允许面内构造：它要求把碎片锚的 `page` 与「出生证记录的页范围」比较，但固定的 `source_imprints` 列表没有 `page_count` / `page_start` / `page_end` / `page_range`；现物 `source_files`（migration 045）及其后续新代 Source 表也没有 source 级页范围真值。现物中 `note_block_sources.source_page_start/source_page_end` 只是单个 block 的引用坐标，不是出生证页范围，且不能替代 K-2 的判定依据。
+
+因此三条可走路径都违反本单至少一条硬约束：
+
+1. 给 `source_imprints` 私加页范围列 —— 超出 §3 固定 schema，属于自行改合同；
+2. 把页范围作为 `validate(...)` 的瞬时 fixture/context 参数 —— 可以造红，但不再是 K-2 所写的「出生证记录」；
+3. 借 `documents.page_count` / `document_chunks` / 旧 Source 服务取值 —— 直接进入 §1/§2 禁区。
+
+另有三处需与 K-2 一并钉清，避免复工后再猜：K-1 没有定义多碎片如何拼成「参照全文」（且参照全文不入 schema）；K-5 的 `warnings_json` 没有 warning 元素形状，因而无法机械表达「warning 对应哪一坏页」；K-6 的「按锚取回」未定义完整锚精确匹配还是 family/page selector，以及返回单条还是按 `seq` 排序的数组。
+
+只读现物结论：当前最高迁移是 048，若裁定后复工，下一个真实文件名应为 `049_v2_source_imprints.ts`；仓内没有迁移注册清单，`server/src/db/migrate.ts` 动态扫描 `migrations/` 并按文件名排序，故不应新增或猜测注册路径。
+
+**改动/验证实录：**除本 `## Result` 外，本单允许面的生产码、测试、`server/package.json`、`deferred-tests.md` 均零改动；既有用户改动 `server/src/routes/projections.ts` 未触碰。因「红不出来就停」硬门已触发，§6 四条收工命令未跑，不能申报任何绿灯；`docs/generated/tool-face-manifest.json` 当前对 HEAD 零 diff。
