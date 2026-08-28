@@ -40,7 +40,7 @@
 
 ```
 { "source_id": …, "transcriber": {"name":"docling","version":"x.y.z","lockfile":"tools/…"},
-  "anchor_fidelity": "block", "text_normalization": "none|punctuation|whitespace", "fragment_count": 812, "created_at": …, "warnings": […] }
+  "anchor_fidelity": "block", "text_normalization": "none|punctuation|whitespace", "fragment_count": 812, "created_at": …, "warnings": [{"code":…,"anchor":{族锰,机械可扣},"detail"?:…}], "status":"accepted|rejected", "rejection_reasons"?: […] }
 ```
 
 用途:换工具重拓可比对择优;锚粒度消费方可见;`warnings` 如实记(乱码页/空页/解析失败段——**残缺如实申报,⛔ 不静默跳过**)。
@@ -54,8 +54,13 @@
 
 ## §6 Killer 方向(拆单时具体化)
 
-K-1 逐字保真(v0.1):对参照全文施加**同一申报类**归一化后逐字节比对(机械非模糊;页面族允许布局重排申报);申报 none 而实测有归一 ⇒ 必红(伪高保真同条)。K-2 锚真实性:抽样碎片按锚回原件取文本,须命中(fidelity 相应粒度)。K-3 伪高保真必红:出生证申报 page 级而碎片带 bbox ⇒ 校验器拒。K-4 顺序保真:seq 乱序注入 ⇒ 必红。K-5 残缺申报:人为坏页 ⇒ warnings 非空且对应碎片缺席,⛔ 不得以空 text 碎片顶位。
+K-1 逐字保真(v0.2):对参照全文**扣除已申报残缺区间后**施加**同一申报类**归一化后逐字节比对(机械非模糊;页面族允许布局重排申报);申报 none 而实测有归一 ⇒ 必红(伪高保真同条)。K-2 锚真实性:抽样碎片按锚回原件取文本,须命中(fidelity 相应粒度)。K-3 伪高保真必红:出生证申报 page 级而碎片带 bbox ⇒ 校验器拒。K-4 顺序保真:seq 乱序注入 ⇒ 必红。K-5 残缺申报:人为坏页 ⇒ warnings 非空且对应碎片缺席,⛔ 不得以空 text 碎片顶位。
 
 **v0.1(2026-08-28)**:归一化纳入保真阶梯——与 anchor_fidelity 同形(低保真合法,不申报违法)。待探:转写器能否另给原始 glyph 文本(能则取更高保真,不阻塞)。
 
 **v0.1 补(2026-08-28,2b 实证)**:**引用校验闸**——理解轨产物以碎片 id 作出处时,入库前机械校验 `id ∈ 该拓印件碎片集`,违者拒收。依据:引用制不消灭幻觉,**把幻觉从「坐标不准」(需裁图人眼判)变成「引用不存在的 id」(一行 in 判掉)——错误可判定性的差别,不是能力的差别**;2b 实测 2/9 虚构 id ⇒ 查的义务在门,⛔ 不靠模型自觉。副证:删掉坐标字段后 JSON 残缺同步消失——**让模型少造一样东西,连格式都稳**。
+
+**v0.2(2026-08-28 夜,b-1 二停实证两洞,修宪)**:
+1. **K-1/K-5 互斥解消——分工定义**:K-1 守**忠实性**(凡交付的文本必须逐字),K-5 守**申报性**(凡未交付的区间必须申报)。总不变式:**碎片拼接 ⊎ 已申报残缺区间 = 原件全文的分割**——K-1 比对范围=原件减已申报区间;**未申报的缺失仍 K-1 必红**(丢文本不申报=藏不住)。
+2. **warnings 元素升结构化**:`{code, anchor, detail?}`——anchor 用**与碎片同族的锰形状**(机械可扣,才扣得动 K-1);原 `anchor_hint` 字符串降为 detail。**申报与碎片说同一种地址语言。**
+3. **拒收与申报分族(修订此前「拒收留痕走 warnings 族」之裁——它欠定义)**:warnings=**已收之件的自我申报**(残缺类闭集,随件走);拒收=**未收之件的审判记录**——落在**出生证本身**:出生证得 `status: accepted|rejected`,rejected 时带 `rejection_reasons`(**validation 族新闭集**:fidelity_mismatch / anchor_invalid / fidelity_overclaim / order_violation …),**碎片不落库**。出生证就是那次拓印尝试的收据——拒收也有收据,但两族 code ⛔ 永不混用(把未发生的解码失败写进申报=伪造申报)。
