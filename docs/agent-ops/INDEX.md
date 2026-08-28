@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-08-27
+> **日期 (Updated)**: 2026-08-28
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 167 份文档。
+共 168 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -39,6 +39,7 @@
 | [analysis/2026-08-26-agent-org-charter.md](analysis/2026-08-26-agent-org-charter.md) | Agent 时代组织总纲(收敛稿) | `active` | 2026-08-26 | — |
 | [analysis/2026-08-26-model-tier-experiment-design.md](analysis/2026-08-26-model-tier-experiment-design.md) | 模型档位实验矩阵(预注册) | `draft` | 2026-08-26 | — |
 | [analysis/2026-08-26-v12-9-infra-integration-node.md](analysis/2026-08-26-v12-9-infra-integration-node.md) | V12.9 基建集成节 —— 章程 | `active` | — | — |
+| [analysis/2026-08-27-design-meeting-library-learning-tooling.md](analysis/2026-08-27-design-meeting-library-learning-tooling.md) | 设计会议记录:库治理 · 自由学习 · 三位一体 · 导入窄腰 | `active` | — | — |
 | [analysis/2026-08-27-v12-closeout-journey-sheet.md](analysis/2026-08-27-v12-closeout-journey-sheet.md) | V12 收口统一走查单(收口批第 9 项) | `draft` | 2026-08-27 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
