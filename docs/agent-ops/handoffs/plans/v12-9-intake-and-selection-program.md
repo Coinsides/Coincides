@@ -39,7 +39,7 @@
 ## §4 Henry 手动准备清单(2026-08-28 缩编定稿)
 
 1. **DeepSeek API key**(旗舰/便宜档各一,设消费上限)→ **填入仓根 `.env.experiment`**(实验专用 key 柜,已建模板并 gitignore;实验结束可整文件作废——Henry 2026-08-28 定)。
-2. **各族真品语料一个文件夹**(建议 `D:\Coinsides\v12.9-samples\`):真雅思 PDF 两三份(含扫描版)· 真会存的网页· epub 一本· lecture pptx 一套· 旧格式教学资料一两份(.doc/.ppt)。
+2. **各族真品语料一个文件夹**→ **`D:\Coinsides\v12.9-selection\samples\`**(已建;官方免费样题 4 份已由 Fable 代下:听力/学术阅读/写作样题+考官评分范文;公共材料与工具下载归我们,Henry 只供私人真料;`tools\` 子目录留给工具箱与模型权重):真雅思 PDF 两三份(含扫描版)· 真会存的网页· epub 一本· lecture pptx 一套· 旧格式教学资料一两份(.doc/.ppt)。
 3. (半行)阿里云 DashScope key(Qwen-VL 视觉车道)——在国内顺手办。
 - ~~Anthropic/Google key~~(划掉)· ~~Python 环境~~(已由 Fable 裁定作废,见 §4.1)。
 
