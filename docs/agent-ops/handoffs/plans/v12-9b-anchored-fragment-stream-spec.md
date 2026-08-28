@@ -40,7 +40,7 @@
 
 ```
 { "source_id": …, "transcriber": {"name":"docling","version":"x.y.z","lockfile":"tools/…"},
-  "anchor_fidelity": "block", "text_normalization": "none|punctuation|whitespace", "fragment_count": 812, "created_at": …, "warnings": [{"code":…,"anchor":{族锰,机械可扣},"detail"?:…}], "status":"accepted|rejected", "rejection_reasons"?: […] }
+  "anchor_fidelity": "block", "text_normalization": "none|punctuation|whitespace", "fragment_count": 812, "created_at": …, "warnings": [{"code":…,"anchor":{族锚,机械可扣},"detail"?:…}], "status":"accepted|rejected", "rejection_reasons"?: […] }
 ```
 
 用途:换工具重拓可比对择优;锚粒度消费方可见;`warnings` 如实记(乱码页/空页/解析失败段——**残缺如实申报,⛔ 不静默跳过**)。
