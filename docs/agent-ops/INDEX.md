@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 185 份文档。
+共 186 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -49,6 +49,7 @@
 | [analysis/2026-08-28-v12-9b-b0-survey.md](analysis/2026-08-28-v12-9b-b0-survey.md) | b-0 现物核实:碎片流落库前的地基清点 | `active` | — | — |
 | [analysis/2026-08-28-v12-9b-b2-preread.md](analysis/2026-08-28-v12-9b-b2-preread.md) | b-2 预读:「入库永不拒收」的现物前提 | `active` | — | — |
 | [analysis/2026-08-28-v12-9b-b3-preread.md](analysis/2026-08-28-v12-9b-b3-preread.md) | b-3 预读:引用校验闸的载体与定位 | `active` | — | — |
+| [analysis/2026-08-28-v12-9b-b4-preread.md](analysis/2026-08-28-v12-9b-b4-preread.md) | b-4 预读:文档面要改哪几行,以及**最该防的那个错** | `active` | — | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
