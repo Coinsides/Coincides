@@ -22,7 +22,7 @@
 }
 ```
 
-**不变式**:①`anchor` 必填(允许粒度降级但须在拓印件出生证申报 fidelity);②`seq` 连续且与原件阅读序一致;③`text` 与原件逐字(转写器的忠实性由回程票考卷验);④role 是**结构**描述,永不是语义描述。
+**不变式**:①`anchor` 必填(允许粒度降级但须在拓印件出生证申报 fidelity);②`seq` 连续且与原件阅读序一致;③`text` 与原件逐字,**或与原件逐字模一类已申报的归一化**(出生证 `text_normalization`;v0.1 修定,据 12.9a 第 1 场实证:Docling 归一标点)——⛔ 未申报的偏离一律违法(转写器的忠实性由回程票考卷验);④role 是**结构**描述,永不是语义描述。
 
 ## §3 锚(五族,封闭)
 
@@ -40,7 +40,7 @@
 
 ```
 { "source_id": …, "transcriber": {"name":"docling","version":"x.y.z","lockfile":"tools/…"},
-  "anchor_fidelity": "block", "fragment_count": 812, "created_at": …, "warnings": […] }
+  "anchor_fidelity": "block", "text_normalization": "none|punctuation|whitespace", "fragment_count": 812, "created_at": …, "warnings": […] }
 ```
 
 用途:换工具重拓可比对择优;锚粒度消费方可见;`warnings` 如实记(乱码页/空页/解析失败段——**残缺如实申报,⛔ 不静默跳过**)。
@@ -54,4 +54,6 @@
 
 ## §6 Killer 方向(拆单时具体化)
 
-K-1 逐字保真:碎片 text 逐 seq 拼接 vs 独立抽取的原件全文,逐字节比对(页面族允许布局重排申报)。K-2 锚真实性:抽样碎片按锚回原件取文本,须命中(fidelity 相应粒度)。K-3 伪高保真必红:出生证申报 page 级而碎片带 bbox ⇒ 校验器拒。K-4 顺序保真:seq 乱序注入 ⇒ 必红。K-5 残缺申报:人为坏页 ⇒ warnings 非空且对应碎片缺席,⛔ 不得以空 text 碎片顶位。
+K-1 逐字保真(v0.1):对参照全文施加**同一申报类**归一化后逐字节比对(机械非模糊;页面族允许布局重排申报);申报 none 而实测有归一 ⇒ 必红(伪高保真同条)。K-2 锚真实性:抽样碎片按锚回原件取文本,须命中(fidelity 相应粒度)。K-3 伪高保真必红:出生证申报 page 级而碎片带 bbox ⇒ 校验器拒。K-4 顺序保真:seq 乱序注入 ⇒ 必红。K-5 残缺申报:人为坏页 ⇒ warnings 非空且对应碎片缺席,⛔ 不得以空 text 碎片顶位。
+
+**v0.1(2026-08-28)**:归一化纳入保真阶梯——与 anchor_fidelity 同形(低保真合法,不申报违法)。待探:转写器能否另给原始 glyph 文本(能则取更高保真,不阻塞)。
