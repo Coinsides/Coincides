@@ -274,3 +274,14 @@ builder/reviewer 的沙箱模式、网络开关(`sandbox_workspace_write.network
 📌 **F-3 尤其重要**:它是**阴性对照** —— 一个只会「放宽」的重写会让 F-1/F-2 变绿而**把 F-3 一起放过去**,那就是把闸改钝了。
 
 ⚠️ **顺带一条通例(裁定方语)**:**盲区不可怕,未申报的盲区才可怕。** 与出生证的 fidelity 哲学同源 —— **低保真合法,不申报违法。**
+
+### ⚠️ 文档提交:`docs/agent-ops/` 与 `docs/generated/` 是**两个目录**(2026-08-28,一日内同错两次)
+
+`node scripts/docs-index.mjs` 写 `docs/agent-ops/INDEX.md`,而 `node scripts/docs-inventory.mjs` 写 **`docs/generated/object-inventory.md`** —— **后者不在 `docs/agent-ops/` 下**。
+⇒ ⛔ **`git add docs/agent-ops/` 会漏掉它**,而 `docs:check` 会在**下一次**才报出来。调度方 2026-08-28 **同一天在同一个文件上栽了两次**。
+
+**正确形状**:
+```bash
+node scripts/docs-index.mjs && node scripts/docs-inventory.mjs && git add docs/agent-ops/ docs/generated/
+```
+📌 **第二次重发现 = 未机械化的证据。** 本条先立文字;**机械化落点** = 仓内那份**尚未启用**的 `.githooks/pre-commit`(warn-only)—— 它正是为这类「生成件漏装」而写,启用需 `git config core.hooksPath .githooks`,**⚠️ 那是仓主自己的一行,⛔ 不由 Agent 代设**。
