@@ -53,3 +53,4 @@ tmp/
 # External research repos
 _external_research/
 _external_tools/
+.env.experiment
