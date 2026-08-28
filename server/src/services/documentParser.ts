@@ -1,8 +1,6 @@
 import { readFile } from 'fs/promises';
 import { v4 as uuidv4 } from 'uuid';
 import Anthropic from '@anthropic-ai/sdk';
-import pdfParseModule from 'pdf-parse';
-const pdfParse = (pdfParseModule as any).default || pdfParseModule;
 import { PDFDocument } from 'pdf-lib';
 import * as mammoth from 'mammoth';
 import * as XLSX from 'xlsx';
@@ -53,8 +51,19 @@ function isImageFile(filename: string): boolean {
 }
 
 async function parsePdfNative(buffer: Buffer): Promise<{ text: string; pageCount: number }> {
-  const data = await pdfParse(buffer);
-  return { text: data.text, pageCount: data.numpages };
+  const { PDFParse } = await import('pdf-parse') as unknown as {
+    PDFParse: new (options: { data: Buffer }) => {
+      getText(): Promise<{ text: string; total: number }>;
+      destroy(): Promise<void>;
+    };
+  };
+  const parser = new PDFParse({ data: buffer });
+  try {
+    const data = await parser.getText();
+    return { text: data.text, pageCount: data.total };
+  } finally {
+    await parser.destroy();
+  }
 }
 
 async function parsePdfWithVision(buffer: Buffer, userId?: string): Promise<{ text: string; pageCount: number }> {

@@ -32,3 +32,4 @@
 - 2026-08-27 · TD-17 部分清偿 · (乙)「坏 body + 非法 Host」先 403 未做；MCP 坏 body 仅得 HTTP 400，不产出 JSON-RPC `-32700`（`express.json()` 早于 transport）· 挡「非法 Host 在解析前优先拒绝 / transport 级 JSON-RPC parse-error 信封」· 单 `handoffs/2026-08-27-v2bn12-td17-malformed-body-400.md`
 - 2026-08-27 · dead-code retirement · `/api/proposals` 既有客户端消费旅程、`ContentGroupPanel` 的 `loadRelations` / `loadRelationTypes` 交互矩阵未新增（本单只加两条精确零引用断言并复跑既有门）· 分别挡「近名活提案系统被误伤」与「plural Relation 读取交互被误伤」· 单 `handoffs/2026-08-27-v2bn12-dead-code-retirement.md`
 - 2026-08-27 · pre-commit docs 软闸 · 未建常驻回归测试（本单仅以 K-1/K-2/K-3 施工期直跑验证），npm 缺失/脚本异常/超时的完整失败矩阵与两条射程边界文案均无常驻守卫 · 挡「后续改动让软闸漏警告、删掉边界说明或返回非零而误阻断提交」· 单 `handoffs/2026-08-27-v2bn12-precommit-docs-warn.md`
+- 2026-08-28 · pdf-parse v2 adapter · 加密/口令、损坏结构、超大页数、复杂字体/CMap、表格/多栏、表单/附件等 PDF 变体矩阵未覆盖；视觉兜底通道实现本身仍无测试（本单只在 `fetch` 边界打桩验证分支走向与 `ocr` 标记）· 挡「更多 PDF 形态下的原生抽取/资源释放/诚实降级，以及真实视觉接线回归」· 单 `handoffs/2026-08-28-pdf-parse-v2-adapter.md`
