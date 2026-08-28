@@ -31,13 +31,20 @@
 | 页面族·数字原生 PDF | 回程票 + 表格公式保真 | 现役 pdf 解析升级 vs Docling/MinerU 产物对齐 | 2 |
 | 流式族·HTML 正文抽取 | 剥导航广告 + 结构保真 | Readability 系 · trafilatura 系 | 3 |
 | 幻灯族·pptx | 页+形状锚 + 讲义语义 | 现役 xlsx 同族方案(OOXML 解析)扩展 | 4 |
-| 识别器(语义,第③步) | 定义识别 + 出处携带 | Claude(主)· Gemini(对照)· DeepSeek(压测) | 与 1 并 |
+| 识别器(语义,第③步) | 定义识别 + 出处携带 | **DeepSeek(主力=真生产配置)· Qwen-VL(视觉车道)**;Claude/Gemini 划掉(Henry 2026-08-28:赴华度假不可用+日常主力必为量大管饱档,人民币计费) | 与 1 并 |
 | 嵌入 + 向量库 | 近义定义聚类(中英混) | Voyage(已接线)vs BGE-M3(本地)· 存储:sqlite-vec(倾向直接钉) | 5 |
 | 旧格式转换(T2) | 转换保真 | LibreOffice headless(doc/ppt/xls→现代格式)等 | 6 |
 
-## §4 Henry 手动准备清单(自动化工程做不了的)
+## §4 Henry 手动准备清单(2026-08-28 缩编定稿)
 
-见当日会话详单;要点:API 钥匙与消费上限(Anthropic/Google/DeepSeek)· 大件本地安装的放行(Python 环境、多 GB 模型权重)· **各族真品语料各一两份** · 两个待点头决策(Python 旁路依赖、消费上限额度)。
+1. **DeepSeek API key**(旗舰/便宜档各一,设消费上限)→ `.env`/Coincides_Private。
+2. **各族真品语料一个文件夹**(建议 `D:\Coinsides\v12.9-samples\`):真雅思 PDF 两三份(含扫描版)· 真会存的网页· epub 一本· lecture pptx 一套· 旧格式教学资料一两份(.doc/.ppt)。
+3. (半行)阿里云 DashScope key(Qwen-VL 视觉车道)——在国内顺手办。
+- ~~Anthropic/Google key~~(划掉)· ~~Python 环境~~(已由 Fable 裁定作废,见 §4.1)。
+
+### §4.1 Python 环境裁定(Fable,2026-08-28,Henry 授权代定)
+
+产品本体**零 Python**(JS+单文件 SQLite 哲学不破);Python 类工具(Docling/MinerU/PaddleOCR 若选中)以**隔离工具箱**形态存在:`uv` 管理、自带版本锁死的 Python 与依赖 lockfile、不碰系统环境、删目录即卸载。版本错配类怪 bug 的解法=锁死随工具走,非选对全局版本。Henry 无需手动装任何 Python。
 
 ## §5 版本切分(Fable 定稿,2026-08-27;Henry 授权「具体怎么扩你来定」)
 
