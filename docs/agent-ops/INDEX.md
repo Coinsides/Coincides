@@ -40,7 +40,7 @@
 | [analysis/2026-08-26-model-tier-experiment-design.md](analysis/2026-08-26-model-tier-experiment-design.md) | 模型档位实验矩阵(预注册) | `draft` | 2026-08-26 | — |
 | [analysis/2026-08-26-v12-9-infra-integration-node.md](analysis/2026-08-26-v12-9-infra-integration-node.md) | V12.9 基建集成节 —— 章程 | `active` | — | — |
 | [analysis/2026-08-27-design-meeting-library-learning-tooling.md](analysis/2026-08-27-design-meeting-library-learning-tooling.md) | 设计会议记录:库治理 · 自由学习 · 三位一体 · 导入窄腰 | `active` | — | — |
-| [analysis/2026-08-27-v12-closeout-journey-sheet.md](analysis/2026-08-27-v12-closeout-journey-sheet.md) | V12 收口统一走查单(收口批第 9 项) | `draft` | 2026-08-27 | — |
+| [analysis/2026-08-27-v12-closeout-journey-sheet.md](analysis/2026-08-27-v12-closeout-journey-sheet.md) | V12 收口统一走查单(收口批第 9 项) | `active` | 2026-08-28 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
