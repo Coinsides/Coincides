@@ -1,4 +1,4 @@
-> **状态 (Status)**: draft(Fable 夜稿 2026-08-28;12.9a 初赛证据回来后按实测修订,再翻 active 拆单)
+> **状态 (Status)**: **active**(2026-08-28 晚翻牌:转写器两候选全卷实证已回、v0.1 两次修宪均据实测——规格可施工;后续修宪照三分表门槛)
 > **层 (Layer)**: 设计规格 / V12.9b
 > **权威 (Authoritative)**: 翻 active 后是;draft 期仅供讨论
 > **上游**: `v12-9-intake-and-selection-program.md` §1 · 会议记录附录 A/B · 词典(拓印/锚/碎片)
