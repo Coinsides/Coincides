@@ -32,7 +32,10 @@
 ## 3. Schema(按规格 §2–§4;**表名即词典词**)
 
 **`source_imprints`(拓印件出生证)** —— 一次拓印一行:
-`id` · `user_id` · `source_file_id`(→ `source_files` ON DELETE CASCADE)· `transcriber_name` · `transcriber_version` · `transcriber_lockfile` · `anchor_fidelity` · `text_normalization` · `fragment_count` · `warnings_json`(默认 `'[]'`)· `created_at`
+`id` · `user_id` · `source_file_id`(→ `source_files` ON DELETE CASCADE)· `transcriber_name` · `transcriber_version` · `transcriber_lockfile` · `anchor_fidelity` · `text_normalization` · `fragment_count` · `warnings_json`(默认 `'[]'`)· ⭐ **`status`**(`accepted` / `rejected`)· ⭐ **`rejection_reasons_json`**(默认 `'[]'`)· `created_at`
+
+⭐ **规格 v0.2 新增(`55cdf3b`):出生证就是那次拓印尝试的收据 —— 拒收也有收据。**
+⇒ **校验拒收时**:出生证**照落库**,`status = 'rejected'` 且 `rejection_reasons_json` 非空;⛔ **碎片不落库**。
 
 **`imprint_fragments`(碎片)** —— 一碎片一行:
 `id` · `imprint_id`(→ `source_imprints` ON DELETE CASCADE)· `seq` · `text` · `role` · `anchor_json` · `style_json`(可空)· `lang`(可空)· `created_at`
@@ -42,6 +45,11 @@
 - `anchor.family`:`page|flow|table|slide|time`
 - `anchor_fidelity`:`region|block|page|char|element|section|cell`
 - `text_normalization`:`none|punctuation|whitespace`
+- ⭐ **`warnings[].code`(残缺族,已收之件的自我申报)**:`unreadable_segment|empty_segment|decode_failed`
+- ⭐ **`rejection_reasons[].code`(validation 族,未收之件的审判记录)**:`fidelity_mismatch|anchor_invalid|fidelity_overclaim|order_violation`
+
+⛔⛔ **两族 code 永不混用**(规格 v0.2 明裁)。**warnings = 已收之件的自我申报;拒收 = 未收之件的审判记录。**
+📌 **理由(第二次派工的 builder 提出,裁定方采纳)**:把保真/顺序类拒收硬映射成 `decode_failed`,等于**把并未发生的解码失败写进申报** —— **伪造申报比不申报更坏。**
 
 ⚠️ **`time` 族本期无生产者** —— **形状收得进,⛔ 不实现写入端**(规格 🅿)。
 
@@ -60,11 +68,16 @@
 
 | # | 断言 | 说明 |
 |---|---|---|
-| **K-1 逐字保真** | 按 `seq` 升序拼接全部碎片 `text`,与**参照全文**(§3.1,从原件读)施加**申报的归一化类**后**逐字节比对**;申报 `none` 而实测有偏离 ⇒ **拒收** | ⭐ **拼接规则明确写死**:`fragments.sort(by seq).map(f => f.text).join('')`;⛔ 不许自行加分隔符 |
+| ⭐ **K-1 逐字保真**(v0.2) | 按 `seq` 升序拼接全部碎片 `text`,与**参照全文扣除「已申报残缺区间」之后**的部分,施加**申报的归一化类**后**逐字节比对**;申报 `none` 而实测有偏离 ⇒ **拒收**(`fidelity_mismatch`) | ⭐ 拼接规则写死:`sort by seq` + `join('')`,⛔ 不许自行加分隔符。<br>⭐ **残缺区间由 `warnings[].anchor` 机械扣除**(所以 v0.2 才把它升成结构化锚) |
+| ⭐⭐ **K-1b 未申报的缺失照红** | **人为删掉一段碎片但【不写 warning】** ⇒ **必须拒收** | ⭐ **这条保住 K-1 的锋利** —— ⛔ 不能让「扣除残缺区间」变成「丢了文本也能过」。**丢文本不申报 = 藏不住。** |
+| ⭐ **K-1c 分割不变式** | **碎片拼接 ⊎ 已申报残缺区间 = 原件全文的一个分割**(既不重叠也不遗漏)⇒ 违反必红 | 规格 v0.2 的总不变式;⛔ 重叠或留白都算违反 |
 | **K-2 锚真实性**⚠️ | ⭐ **回程票**:按碎片锚的 `char` 区间从**原件**切片,该切片**必须包含**碎片 `text`;不含 ⇒ **拒收** | ⚠️ **2026-08-28 订正**:原文写「与出生证的页范围比对」,**而规格 §4 的出生证没有页范围字段**(现物已核)⇒ 不可实现。现回到规格原意。<br>⛔ **region(bbox)级语义回验仍不做**(见 §5 deferred) |
 | **K-3 伪高保真** | 出生证申报 `anchor_fidelity: 'page'` 而碎片 anchor **带 `bbox`** ⇒ **拒收**;**且** `bbox` 非「归一化 0–1 的四元组」⇒ **拒收** | ⭐ 后半句是 Fable 加的**结构校验**:**收得进,只是不验真** |
 | **K-4 顺序保真** | `seq` 乱序 / 不连续注入 ⇒ **拒收** | |
-| **K-5 残缺申报** | 人为坏段 ⇒ `warnings` **非空**、其中**至少一条的 `anchor_hint` 指向该坏段**,且**该段无对应碎片**;⛔ 出现 `text` 为空串的碎片顶位 ⇒ **拒收** | ⭐ **`warnings_json` 元素形状写死**(原单未定义,导致无法机械表达「哪一段坏了」):`{"code": string, "anchor_hint": string, "detail"?: string}`;`code` 闭集:`unreadable_segment` / `empty_segment` / `decode_failed` |
+| **K-5 残缺申报**(v0.2:守**申报性**) | 人为坏段(**含非空文本的那种**)⇒ `warnings` **非空**、其中**至少一条的 `anchor` 精确指向该坏段区间**,且**该段无对应碎片**;⛔ 出现 `text` 为空串的碎片顶位 ⇒ **拒收** | ⭐ **K-1 与 K-5 分工不重叠(v0.2 明裁)**:**K-1 守忠实性(凡交付必逐字)· K-5 守申报性(凡未交付必申报)**。⛔ **第二次派工卡住的正是这里** —— 原单让两刀在「含非空文本的坏段」上互斥。<br>⭐ **`warnings_json` 元素形状(规格 v0.2 定)**:`{"code": string, "anchor": <与碎片同族的锚>, "detail"?: string}`。
+⭐ **`anchor` 必须用与碎片同族的锚形状** —— **申报与碎片说同一种地址语言,才机械可扣**(K-1 要按它扣除残缺区间)。
+⚠️ **原单的 `anchor_hint`(纯字符串)已降为 `detail`** —— 字符串扣不动,那正是第二次派工卡住的地方。 |
+| ⭐ **K-5b 拒收也有收据** | 任一拒收(K-1/K-1b/K-1c/K-2/K-3/K-4 触发)⇒ **出生证照落库且 `status='rejected'`、`rejection_reasons_json` 非空且 code ∈ validation 族**;⛔ **碎片不落库**;⛔ **`warnings_json` 里不得出现 validation 族的 code** | ⭐ **两族不混用要有刀守着**,否则「永不混用」只是一句话 |
 | **K-6 全环** | 手造碎片流走完 **存 → 出生证 → 校验 → 按锚取回**,取回内容与存入**逐字相同** | ⭐ **「按锚取回」语义写死**(原单未定义):**①完整锚精确匹配 ⇒ 返回且仅返回那一条碎片**;**②只给 `family` + 定位主键(如 `path`)的选择器 ⇒ 返回该定位下全部碎片,按 `seq` 升序**。两种都要有断言。 |
 
 ### ⚠️ 4.1 拒收留痕的载体(Fable 2026-08-28 裁)
@@ -181,6 +194,25 @@ K-1~K-4 的拒收原因是**保真 / 锚 / 伪高保真 / 顺序**违规,而本�
 
 **只读结论沿用**:迁移序号仍为 **049**;裁定到位后可沿已验证的六刀次序重新施工。
 
+## 调度方处置(claude,2026-08-28 · 第三次派工前订正)
+
+**两条冲突已由 Fable 裁定,规格升 v0.2(`55cdf3b`,复核方已核树上原文)。** 本单相应订正:
+
+| 项 | v0.2 后 |
+|---|---|
+| **K-1 比对范围** | **原件扣除已申报残缺区间**后比对 |
+| ⭐ **总不变式** | **碎片拼接 ⊎ 已申报残缺区间 = 原件全文的一个分割**(新增 **K-1c**) |
+| ⭐ **K-1 的锋利保住** | 新增 **K-1b:删了碎片却不写 warning ⇒ 必红** —— ⛔ 不让「扣除残缺」变成「丢文本也能过」 |
+| **两刀分工** | **K-1 守忠实性(凡交付必逐字)· K-5 守申报性(凡未交付必申报)** —— 不再重叠 |
+| **warnings 元素** | `{code, **anchor**(与碎片同族的锚), detail?}`;⚠️ **原 `anchor_hint` 降为 `detail`** —— 字符串扣不动,那正是上次卡住的地方 |
+| ⭐ **拒收留痕** | **出生证得 `status`(accepted/rejected)+ `rejection_reasons_json`**;拒收时**出生证照落库、碎片不落库** |
+| ⭐ **两族 code 永不混用** | warnings = **已收之件的自我申报**(残缺族)· rejection_reasons = **未收之件的审判记录**(validation 族);新增 **K-5b** 守它 |
+
+📌 **⛔ 两族不混用要有刀守着,否则「永不混用」只是一句话** —— 故加 K-5b。
+⭐ **裁定方明记:builder 拒绝把保真类拒收硬映射成 `decode_failed` 是对的 —— 伪造申报比不申报更坏。**
+
+⚠️ **规格里一处错字(不影响施工,已报裁定方)**:§4 出生证示例中 `"anchor":{族锰,机械可扣}`,**「族锰」应为「族锚」**。
+
 ## Result(第三次派工)
 
-**(待裁定后填)**
+**(builder 填)**
