@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 178 份文档。
+共 179 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -44,6 +44,7 @@
 | [analysis/2026-08-28-editor-interaction-direction.md](analysis/2026-08-28-editor-interaction-direction.md) | 编辑交互方向:Word 的安静 | `active` | — | — |
 | [analysis/2026-08-28-v12-9a-trial-1-transcriber.md](analysis/2026-08-28-v12-9a-trial-1-transcriber.md) | V12.9a 第 1 场:转写器「回程票」赛 | `active` | 2026-08-28 | — |
 | [analysis/2026-08-28-v12-9a-trial-2-recognizer.md](analysis/2026-08-28-v12-9a-trial-2-recognizer.md) | V12.9a 第 2 场:识别器「出处携带」赛 | `active` | 2026-08-28 | — |
+| [analysis/2026-08-28-v12-9a-trial-3-embedding.md](analysis/2026-08-28-v12-9a-trial-3-embedding.md) | V12.9a 第 3 场:嵌入「近义定义聚类」赛 + `sqlite-vec` 存储探针 | `active` | 2026-08-28 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
