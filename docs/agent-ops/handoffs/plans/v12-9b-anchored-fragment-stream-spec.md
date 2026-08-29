@@ -64,3 +64,9 @@ K-1 逐字保真(v0.2):对参照全文**扣除已申报残缺区间后**施加**
 1. **K-1/K-5 互斥解消——分工定义**:K-1 守**忠实性**(凡交付的文本必须逐字),K-5 守**申报性**(凡未交付的区间必须申报)。总不变式:**碎片拼接 ⊎ 已申报残缺区间 = 原件全文的分割**——K-1 比对范围=原件减已申报区间;**未申报的缺失仍 K-1 必红**(丢文本不申报=藏不住)。
 2. **warnings 元素升结构化**:`{code, anchor, detail?}`——anchor 用**与碎片同族的锰形状**(机械可扣,才扣得动 K-1);原 `anchor_hint` 字符串降为 detail。**申报与碎片说同一种地址语言。**
 3. **拒收与申报分族(修订此前「拒收留痕走 warnings 族」之裁——它欠定义)**:warnings=**已收之件的自我申报**(残缺类闭集,随件走);拒收=**未收之件的审判记录**——落在**出生证本身**:出生证得 `status: accepted|rejected`,rejected 时带 `rejection_reasons`(**validation 族新闭集**:fidelity_mismatch / anchor_invalid / fidelity_overclaim / order_violation …),**碎片不落库**。出生证就是那次拓印尝试的收据——拒收也有收据,但两族 code ⛔ 永不混用(把未发生的解码失败写进申报=伪造申报)。
+
+**v0.3(2026-08-29 凌晨,b-2 一停实证,修宪)**:
+1. **申报住所总原则(统一三处落点)**:**申报住在被申报物身上**——描述拓印产物的申报住出生证 warnings(残缺族);描述拓印尝试被拒的住出生证 rejection_reasons(validation 族);**描述文件本身的住 source 记录层**(intake 申报族,新闭集)。
+2. **二进制兜底采 (C)「只存不拓」字面义**:不产拓印件⇒无出生证无 warnings——intake 申报落 source 记录层。此前「拒收留痕走 warnings 族」之裁**限缩为拓印件层适用**(第三次修订自裁,就地记)。⛔ 锚族不加 whole_file(为从未出生之物造出生证=假身份);⛔ 锚不许置空(毁机械可扣性)。
+3. **intake 申报族闭集 v1**:`unknown_extension` · `signature_mismatch` · `non_utf8_text` · `nul_bytes` · `binary_unparsed`——三套闭集(intake/残缺/validation)各守各层,永不互串。
+4. **mime_extension_mismatch 在永不拒收射程内**:改判为收下+申报;**归族以魔数为准,后缀是自称**——字节是事实,名字是主张;不符即按魔数归族并申报 `signature_mismatch`。
