@@ -66,7 +66,7 @@
 ### ⭐ K-3 阳性对照:**自造一份真扫描件**(裁定 ⑤)
 
 - ⛔ **不许拿有文本层的 PDF 冒充**。
-- ✅ **自造**:取一页样题**渲染成位图**,再封成 **image-only PDF**(现址 venv 里 MinerU 的依赖链带 PyMuPDF,可直接用;⛔ 产物落仓外临时目录,不入仓)。
+- ✅ **自造**:取一页样题**渲染成位图**,再封成 **image-only PDF**(⚠️ **2026-08-29 更正(builder 实测,调度方复核确认)**:原文写的「依赖链带 PyMuPDF」是**调度方未查现物的断言,事实是错的** —— `PyMuPDF`/`fitz` **不在**现址 venv,`uv.lock` 里**零命中**。实际在场的是 **Pillow 12.3.0**,builder 用它完成了同义的「渲染位图再封 PDF」。⛔ 后续任何单**不得**反写为 PyMuPDF 原本在场;⛔ 产物落仓外临时目录,不入仓)。
   ⇒ 它**是**无文本层的原件,不是冒充。
 - **自验(⭐ 这一步不能省)**:先用**现役 `pdf-parse`** 抽这份自造 PDF,**必须得空或近空**。
   ⇒ 若 `pdf-parse` 抽出了文本,**说明这份"扫描件"根本没造成功**(文本层还在),⛔ 此时不许拿它当对照,重造。
@@ -121,3 +121,19 @@
 
 回执须含:K-0 四哈希判定、K-1 三层红绿实况、K-2 逐字节比对与 check-ignore 正反、K-3 对照成立与否(**含两者皆空的诚实判读**)、K-4 冷热两组、K-5 判定、K-6 两个版本号、以及**任何停线点**。
 ⛔ 不许翻本工单顶部状态行(那是调度方的活)。
+
+## Result
+
+**总判定：遗产环境可继续沿用。** Python `3.12.11` / MinerU `3.4.5` 能立且能对真正 image-only 单页执行 OCR；本单没有安装、升级、搬迁、全卷或批量运行。完整命令、输出和九节证据见 `../analysis/2026-08-29-v12-9c-c1a-mineru-env-probe.md`。
+
+- **K-0 ✅ 四哈希逐一不变**：`.python-version` `7b55f8e6…7d16d`、`pyproject.toml` `253b88b0…8ba57`、`uv.lock` `67c4b42d…e231`、`.venv/pyvenv.cfg` `cb9ad065…07a6e`；前后全等，`K0_ALL_UNCHANGED=True`，证据本体未触发污染停线。
+- **K-1 三层均绿**：①“能立”——现址解释器 exit 0，Python `3.12.11`，`mineru` 可导入且安装元数据为 `3.4.5`；②“真跑了”——单页 exit 0，`page_size=[595,842]`，3 块，roles=`{title:1,text:2}`，排除 `image_path` 后仍有 3 个文本块 / 500 字，Markdown 506 字；③“会咬”——见 K-3 阳性对照。
+- **K-2 ✅ 逐字节与 ignore 正反均成立**：入库三件各自与现址 SHA-256、长度完全相同；`git check-ignore -q` 对三件均 exit 1（未忽略），对 `_external_tools/browser-harness/` 与 `_external_tools/mineru/.venv/pyvenv.cfg` 均 exit 0（仍忽略）。
+- **K-3 ✅ 对照成立，不是两者皆空的假绿**：自造 PDF 为单页、仅一个 `PdfImage`、PDFium 文本 0；生产 `parseSourceArtifact/native-pdf@2.4.5` 得 0 blocks / 0 chars，底层 `pdf-parse` 只有自动页分隔符、页内文本 0；MinerU 对同一 SHA-256 `503f2d83…9bb3` 的 PDF 得 3 块 / 500 真实文本字符。
+- **K-4 ✅ 冷热两组**：同一 Python 进程、同一单页、同一 `pipeline+ocr` 参数；冷 `13.175846 s`（`13.175846 s/页`），紧接热 `6.151887 s`（`6.151887 s/页`）。模型仓三次均为 16 文件 / `1,082,446,549` 字节且元数据集合不变，日志使用 configured local model path，观测权重下载 `0 B`。
+- **K-5 ✅ 三元组可复核**：`{transcriber_name:"mineru", transcriber_version:"3.4.5", transcriber_lockfile:"_external_tools/mineru/uv.lock"}`；仓根 `Resolve-Path` 成功，`git ls-files --cached --others --exclude-standard` 精确认出三件。诚实边界：调度方尚未 `git add` 前，tracked-only `--error-unmatch` 仍 exit 1；本回执不越权改 index。
+- **K-6 ✅ 今日未漂移**：现役版 `3.4.5`；在仓内副本目录执行 `uv lock --dry-run --upgrade-package mineru --refresh-package mineru`，exit 0、`No lockfile changes detected`，今日 dry-run 仍解 `3.4.5`。三副本 dry-run 前后哈希不变，没有安装或生成 `.venv`。
+- **`needs: claude`**：工单假设“现址 venv 带 PyMuPDF”不成立，`import fitz` 实测 `ModuleNotFoundError`。本单未补包，改用同一 venv 已有的 `pypdfium2 5.10.1 + Pillow 12.3.0` 完成同义的“渲染位图再封 PDF”，结构/文本层/视觉自验均通过；请后续更正工单环境描述，不要反写为 PyMuPDF 原本在场。
+- **失败前置如实保留**：stdin runner 因 Windows multiprocessing 无真实主模块路径而 `BrokenProcessPool`，发生在 `DocAnalysis init` 前，不计冷热；改为仓外真实脚本后两次成功。无系统重启。
+- **验证门 `needs: claude`**：`npm run verify:v2-bn8-runtime` 在 230 个 client 单测、各契约、双 build 与 performance smoke 通过后，停于 `docs:check` 报 `docs/agent-ops/INDEX.md` 过期；该 INDEX 又被本工单明确列为零 diff 禁区，故未越权生成。被短路的 inventory / glossary / `git diff --check` / secret scan 已单跑且 exit 0。总门不冒充全绿。
+- **K 项停线点：无。** `server/**`、`client/**`、`docs/agent-ops/INDEX.md` 收尾 `git diff --numstat` 为空；工单顶部状态行未改；遗产现址 K-0 四量具前后不变。仓库总验证门的 INDEX 冲突见上一条。
