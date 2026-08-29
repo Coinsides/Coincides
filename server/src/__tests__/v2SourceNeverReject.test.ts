@@ -840,6 +840,7 @@ test('K-7 intake, warning, and validation code families never cross storage laye
       'non_utf8_text',
       'nul_bytes',
       'binary_unparsed',
+      'container_expansion_incomplete',
     ]);
     const intakeCodes = new Set<string>(SOURCE_INTAKE_DECLARATION_CODES);
     const warningCodes = new Set<string>(SOURCE_IMPRINT_WARNING_CODES);

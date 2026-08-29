@@ -19,6 +19,10 @@ import {
   findSourceRecordByContentHash,
 } from './sourceRecords.js';
 import { isSourceArtifactErrorRetryable } from './sourceMaterializationErrors.js';
+import {
+  expandZipSourceContainer,
+  type SourceContainerExpansionReport,
+} from './sourceContainerIntake.js';
 import { ensureHomeCourse } from './systemCourses.js';
 
 export const SOURCE_UPLOAD_MAX_BYTES = 50 * 1024 * 1024;
@@ -35,6 +39,7 @@ export type SourceFormat =
   | 'pptx'
   | 'xlsx'
   | 'csv'
+  | 'zip'
   | 'binary';
 export type SourceCapability = 'materializable' | 'stored_only';
 export type SourceOriginEntryKind = 'project_upload' | 'library_upload' | 'import';
@@ -45,6 +50,7 @@ export const SOURCE_INTAKE_DECLARATION_CODES = [
   'non_utf8_text',
   'nul_bytes',
   'binary_unparsed',
+  'container_expansion_incomplete',
 ] as const;
 export type SourceIntakeDeclarationCode = typeof SOURCE_INTAKE_DECLARATION_CODES[number];
 
@@ -152,6 +158,15 @@ const SOURCE_FORMATS: SourceFormatDefinition[] = [
     parserKey: 'stored-only',
     parserVersion: 'none',
   },
+  {
+    format: 'zip',
+    extensions: ['.zip'],
+    mimeTypes: ['application/zip', 'application/x-zip-compressed'],
+    capability: 'stored_only',
+    signature: 'zip',
+    parserKey: 'stored-only',
+    parserVersion: 'none',
+  },
 ];
 
 const BINARY_FALLBACK_DEFINITION: SourceFormatDefinition = {
@@ -186,6 +201,8 @@ export interface SourceStorageOptions {
   renameFile?: (from: string, to: string) => void;
   afterIdentityStaged?: (sourceRecordId: string) => void;
   beforeReadyFlip?: (sourceRecordId: string) => void;
+  expandContainers?: boolean;
+  onContainerExpansion?: (report: SourceContainerExpansionReport) => void;
 }
 
 interface SourceInternalRow {
@@ -778,6 +795,126 @@ export function getSourceRecordDetail(
   };
 }
 
+export interface SourceFileIntakeResult {
+  created: boolean;
+  deduplicated: boolean;
+  source: ReturnType<typeof getSourceRecordDetail>;
+}
+
+function setSourceFileIntakeDeclaration(
+  db: Database.Database,
+  userId: string,
+  sourceFileId: string,
+  code: SourceIntakeDeclarationCode,
+  present: boolean,
+): void {
+  const row = db.prepare(`
+    SELECT intake_declarations_json
+    FROM source_files
+    WHERE id = ? AND user_id = ?
+  `).get(sourceFileId, userId) as { intake_declarations_json: string } | undefined;
+  if (!row) throw new Error('Source intake declaration target was not found');
+
+  const declarations = new Set(parseIntakeDeclarations(row.intake_declarations_json));
+  if (declarations.has(code) === present) return;
+  if (present) declarations.add(code);
+  else declarations.delete(code);
+  const next = SOURCE_INTAKE_DECLARATION_CODES.filter((candidate) => declarations.has(candidate));
+  const updated = db.prepare(`
+    UPDATE source_files
+    SET intake_declarations_json = ?
+    WHERE id = ? AND user_id = ?
+  `).run(JSON.stringify(next), sourceFileId, userId);
+  if (updated.changes !== 1) {
+    throw new Error('Source intake declaration did not update exactly one row');
+  }
+}
+
+async function expandStoredZipContainer(
+  db: Database.Database,
+  userId: string,
+  target: { courseId: string; originEntryKind: SourceOriginEntryKind },
+  stored: SourceFileIntakeResult,
+  options: SourceStorageOptions,
+): Promise<SourceFileIntakeResult> {
+  const containerRow = getInternalSourceRow(db, userId, stored.source.id);
+  const report = await expandZipSourceContainer({
+    zipPath: resolveSourceStorageKey(containerRow.storage_key, options.rootDir),
+    tempDirectory: getSourceTempDirectory(options.rootDir),
+    maximumEntryBytes: SOURCE_UPLOAD_MAX_BYTES,
+    intakeEntry: async (entry) => {
+      const definition = definitionForFilenameOrNull(entry.original_filename);
+      const child = await intakeSourceTempFile(db, userId, {
+        course_id: target.courseId,
+        origin_entry_kind: target.originEntryKind,
+        file: {
+          path: entry.path,
+          originalname: entry.original_filename,
+          mimetype: definition?.mimeTypes[0] || 'application/octet-stream',
+        },
+      }, {
+        rootDir: options.rootDir,
+        now: options.now,
+        expandContainers: false,
+      });
+      return {
+        source_record_id: child.source.id,
+        source_file_id: child.source.file.id,
+        content_hash: child.source.file.content_hash,
+      };
+    },
+  });
+
+  setSourceFileIntakeDeclaration(
+    db,
+    userId,
+    stored.source.file.id,
+    'container_expansion_incomplete',
+    report.incomplete,
+  );
+  try {
+    options.onContainerExpansion?.(report);
+  } catch (error) {
+    console.warn('Source container expansion observer failed', { error });
+  }
+  return {
+    ...stored,
+    source: getSourceRecordDetail(db, userId, stored.source.id, options),
+  };
+}
+
+function storedSourceIsZipContainer(
+  db: Database.Database,
+  userId: string,
+  sourceRecordId: string,
+): boolean {
+  const row = getInternalSourceRow(db, userId, sourceRecordId);
+  return extname(row.original_filename).toLowerCase() === '.zip'
+    || definitionForStoredRow(row).format === 'zip';
+}
+
+async function finishStoredSourceIntake(
+  db: Database.Database,
+  userId: string,
+  target: { courseId: string; originEntryKind: SourceOriginEntryKind },
+  inspected: InspectedSourceTempFile,
+  stored: SourceFileIntakeResult,
+  options: SourceStorageOptions,
+): Promise<SourceFileIntakeResult> {
+  const isZipContainer = inspected.extension === '.zip'
+    || stored.source.file.format === 'zip'
+    || extname(stored.source.file.original_filename).toLowerCase() === '.zip';
+  if (options.expandContainers === false || !isZipContainer) return stored;
+  setSourceFileIntakeDeclaration(
+    db,
+    userId,
+    stored.source.file.id,
+    'container_expansion_incomplete',
+    true,
+  );
+  return expandStoredZipContainer(db, userId, target, stored, options);
+}
+
 export function listSourceRecords(
   db: Database.Database,
   userId: string,
@@ -973,7 +1110,7 @@ export async function intakeSourceTempFile(
   userId: string,
   input: SourceFileIntakeInput,
   options: SourceStorageOptions = {},
-) {
+): Promise<SourceFileIntakeResult> {
   let inspected: InspectedSourceTempFile;
   try {
     inspected = await inspectSourceTempFile(input.file, options, 'intake');
@@ -984,6 +1121,12 @@ export async function intakeSourceTempFile(
       // A rejected unmanaged path must not be unlinked by this service.
     }
     throw error;
+  }
+  if (inspected.extension === '.zip') {
+    const declarations = new Set(inspected.intake_declarations);
+    declarations.add('container_expansion_incomplete');
+    inspected.intake_declarations = SOURCE_INTAKE_DECLARATION_CODES
+      .filter((code) => declarations.has(code));
   }
 
   let target: ReturnType<typeof resolveTargetCourse>;
@@ -996,6 +1139,18 @@ export async function intakeSourceTempFile(
 
   const existing = duplicateRowByHash(db, userId, inspected.content_hash);
   if (existing) {
+    const expandsExistingZip = options.expandContainers !== false
+      && (inspected.extension === '.zip'
+        || storedSourceIsZipContainer(db, userId, existing.source_record_id));
+    if (expandsExistingZip) {
+      setSourceFileIntakeDeclaration(
+        db,
+        userId,
+        existing.source_file_id,
+        'container_expansion_incomplete',
+        true,
+      );
+    }
     const duplicateResult = finalizeDuplicate(db, userId, target.courseId, existing, inspected, options);
     if (duplicateResult) {
       if (inspected.fallback_text !== null) {
@@ -1007,7 +1162,7 @@ export async function intakeSourceTempFile(
           options,
         );
       }
-      return duplicateResult;
+      return finishStoredSourceIntake(db, userId, target, inspected, duplicateResult, options);
     }
   }
 
@@ -1022,11 +1177,7 @@ export async function intakeSourceTempFile(
   let sourceRecordId: string | null = null;
   let renameAttempted = false;
   let renamed = false;
-  let storedResult: {
-    created: boolean;
-    deduplicated: boolean;
-    source: ReturnType<typeof getSourceRecordDetail>;
-  } | null = null;
+  let storedResult: SourceFileIntakeResult | null = null;
   try {
     const stageIdentity = () => db.transaction(() => {
       const created = createSourceIdentityFloor(db, userId, {
@@ -1065,6 +1216,18 @@ export async function intakeSourceTempFile(
     } catch (error) {
       const raced = duplicateRowByHash(db, userId, inspected.content_hash);
       if (raced) {
+        const expandsRacedZip = options.expandContainers !== false
+          && (inspected.extension === '.zip'
+            || storedSourceIsZipContainer(db, userId, raced.source_record_id));
+        if (expandsRacedZip) {
+          setSourceFileIntakeDeclaration(
+            db,
+            userId,
+            raced.source_file_id,
+            'container_expansion_incomplete',
+            true,
+          );
+        }
         const duplicateResult = finalizeDuplicate(db, userId, target.courseId, raced, inspected, options);
         if (duplicateResult) storedResult = duplicateResult;
         else created = stageIdentity();
@@ -1123,7 +1286,7 @@ export async function intakeSourceTempFile(
       options,
     );
   }
-  return storedResult;
+  return finishStoredSourceIntake(db, userId, target, inspected, storedResult, options);
 }
 
 export function precheckSourceHash(

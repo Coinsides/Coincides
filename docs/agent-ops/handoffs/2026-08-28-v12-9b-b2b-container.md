@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(⚠️ **第二次派工** —— 一停后按规格 **v0.5** 订正;原按 v0.4 —— 原稿写于 b-2 落地之前,载体与闭集均已过期)
+> **状态 (Status)**: done(2026-08-29 收工;复核 PASS;三次派工)(原:第二次派工 —— 一停后按规格 **v0.5** 订正;原按 v0.4 —— 原稿写于 b-2 落地之前,载体与闭集均已过期)
 > **from**: claude(opus,工程调度会话) · **to**: codex(builder) · **date**: 2026-08-29
 > **裁定来源**: 规格 **v0.4**「容器条目申报四裁」(复核方已核树上原文)· 采购裁定 `yauzl@≥3.4.0` + `decodeStrings: false`
 
@@ -250,3 +250,68 @@ npm run build
 📌 **我倾向 (A)** —— **我们的教义是「申报必须诚实」;一个说了假话的码,比多一个码坏得多。** **但这是规格级,归裁定方。**
 
 ⛔ **在此裁定前不翻牌。**
+
+---
+
+## Result(第三次派工)
+
+### 开工回执（2026-08-28）
+
+已接第三次派工。本轮严格只做两件事：删除 `sourceFileIntake.ts` 中因条目名 CP437 回退而给子件追加 `non_utf8_text` 的假申报；将原 K-4 反转为反例刀并保留既有行为面。完成实现后会亲手把假申报临时加回，确认 K-4 必红，再删除恢复全绿；随后执行本单 §7 全部命令、`npm --prefix server audit`，并确认 manifest 零 diff。
+
+本轮不加码、不改闭集或 `non_utf8_text` 语义，不动 `UNIQUE`，不建表、不加列、不持久化出处、失败集或 detail，不碰 `sourceImprints.ts`、handoff 状态行与 `docs/agent-ops/INDEX.md`。完工结论与验证证据将在本段继续追加。
+
+### 完工回执（2026-08-29）
+
+**结论：完成。** 已只删除 `sourceFileIntake.ts` 中「条目名 CP437 回退 ⇒ 给子件追加 `non_utf8_text`」的假申报块；`non_utf8_text` 闭集与语义均未改，它在生产码中的唯一产生点仍是**文件内容**做 fatal UTF-8 解码失败。
+
+#### K-4 反例刀
+
+- 沿用原 fixture：条目名原始字节 `[01,82,2e,74,78,74]`、UTF-8 flag 关闭、内容为字面 `valid UTF-8 body`。K-4 现直接断言子件 declarations **不含** `non_utf8_text`。
+- 行为面同时锁住：子件 `ready` 且照常建立；内容 SHA-256 与 fixture 相同；report 明示 `filename_decoding_fallback === true`、entry `succeeded` 并映射到该子件；report 与子件的 `original_filename` 均确定解为 `☺é.txt`；父容器不带 `container_expansion_incomplete`。
+- 在最终类型有效的测试树上，亲手临时加回原假申报块：`npm exec -- tsc --noEmit` exit 0，而最窄 K-4 exit 1，精准红于子件申报断言的 `true !== false`。随后删除该块：同一 K-4 `1/1` 绿，`tsc --noEmit` exit 0。生产文件临时变异前后 SHA-256 均为 `80C84B7C22361C22919ACDD2933AF7813579430FBDC9D190E1AD037263FF8476`，无变异残留。
+- 中途修正 report 捕获类型时曾有一次 patch 误命中 K-2，导致编译前失败；该次**未计入任何必红证据**，已精确还原 K-2，并以上述「类型有效、K-4 精准红」重新取证。
+
+#### §7 / audit / 洁净度
+
+- `npm --prefix server run test:v2`：最终树 exit 0，`321/321`。
+- `npm --prefix client run test:unit`：最终树 exit 0，`230/230`（26 files）。
+- `npm run check:tool-face-parity`：exit 0，14 public entries checked。
+- `npm run build`：最终树 exit 0；tool-face manifest freshness 与 server `tsc` 通过。
+- `npm --prefix server audit`：已在最终树重跑，exit 1；仍为既有基线 `10 vulnerabilities (1 low, 5 moderate, 4 high)`，无新增 moderate+，报告中无 `yauzl` / `pend` finding；未运行 `audit fix`。
+- `git diff --check`：exit 0。`docs/generated/tool-face-manifest.json` 的工作树与 cached diff 均为 zero；`docs/agent-ops/INDEX.md`、`server/src/services/sourceImprints.ts` 均 zero diff。
+- 未加码、未改闭集、未动 `UNIQUE`，未建表/列，未持久化出处、失败集或 detail；handoff 状态行未动。工作树既有 `server/src/routes/projections.ts` 状态保持原样，本轮未改其内容；未 commit / push。
+
+---
+
+## Review(第三次派工 · 收工)
+
+> reviewer: claude(opus,工程调度会话) | date: 2026-08-29 | verdict: **PASS**
+
+### ⭐⭐ 决定性一验:**那条曾经把谎言锁住的断言,现在专门抓那个谎言**
+
+| 复核方亲刀 | 结果 |
+|---|---|
+| 基线 | **14/14 绿** |
+| ⭐ **把假申报原样加回去** | ⭐ **K-4 单独变红(13/1)**,且 `tsc --noEmit` **exit 0** —— **是语义变异,不是编译错** |
+| 还原 | **14/14 绿**,`sourceFileIntake.ts` SHA-256 **`80C84B7C2236…` 与回执逐字符一致** |
+
+📌 **同一个 fixture,同一处代码 —— 先前它断言「必须带 `non_utf8_text`」(锁住假申报),现在断言「必须不带」(抓住假申报)。**
+⭐ **这是「凡裁定必配反例」最干净的一次落地**:**反例刀守的正是那条裁定的反面。**
+
+### 交付面与禁区
+
+`test:v2` **321/321** · parity PASS · **禁区零触碰**(`sourceImprints.ts` / 迁移器 / MCP / manifest / `INDEX.md`)· `package.json` **只有 `test:v2` 变**且严格尾部追加 · **新增依赖仅 `yauzl@^3.4.0`,落在 `dependencies`**。
+**假申报已彻底清除**:`filename_decoding_fallback` 在生产码中 **0 次**;`non_utf8_text` 仅剩闭集定义与**文件内容**解码失败那一处**原义**。
+
+### ⭐ builder 记功
+
+1. **先写开工回执再写完工回执**(第二、三次派工连续两次)—— 上一轮的协议缺口已被纠正。
+2. ⭐ **自曝一次无效取证**:中途一次 patch 误命中 K-2 导致编译前失败,它**明确写「该次未计入任何必红证据」**并重新取证。**⛔ 没有把一次编译错误当红点** —— 这正是「退出码 1 有两种含义」被施工方自觉执行。
+3. **`audit` 如实记 exit 1**:仍为既有基线(1 low / 5 moderate / 4 high),**无新增 moderate+,报告中无 `yauzl`/`pend` finding**,⛔ 未跑 `audit fix` 掩盖。
+
+### ⚠️ 两笔账(照裁定方要求,两半都写)
+
+- **builder**:借语义不符的码而**未停线** —— 正确动作是 `needs` 上报。**对照组就在同一段落里**:b-2 的 builder 在**同一诱因**(闭集无合适码)下**拒绝了硬映射**。
+- ⭐ **发单方(我)**:**K-4 写了申报义务,而闭集根本没有对应的码** —— **是我把冲突留给了施工方。**
+  📌 **并且那个谎言是我先写进单里的,它才有机会被锁进测试。** ⛔ 「抓到它」不抵消「造出它」,两件都在账上。
