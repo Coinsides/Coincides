@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 200 份文档。
+共 201 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -203,6 +203,7 @@
 | [handoffs/2026-08-29-v12-9c-c1a-mineru-env-probe.md](handoffs/2026-08-29-v12-9c-c1a-mineru-env-probe.md) | c-1a:MinerU 环境体检(⭐ 这是**遗产体检**单,⛔ 不是安装单,⛔ 也不是重建单) | `done(复核方 2026-08-29 亲刀四处通过;⚠️ K-6 措辞已收窄为「mineru 包未漂移」;⛔ 钉版三件本轮**未提交**,与 `.gitattributes` 推 c-1a-2 同批 —— 见文末复核批注)` | — | — |
 | [handoffs/2026-08-29-v12-9c-c1a2-pin-bytes.md](handoffs/2026-08-29-v12-9c-c1a2-pin-bytes.md) | c-1a-2:让 pin 文件的字节活过 git 往返(⭐ 极小单) | `done(复核方 2026-08-29 双源交叉验讫:回执前后两组 + 复核方从 HEAD `git archive` 独立签出比对,三件与证据本体 sha256 逐一相等;反例 `check-attr` 证明其它文件行为未变。⚠️ pin 与 `.gitattributes` 已于 `3505211` 入库 —— 见该批的流程失手记录)` | — | — |
 | [handoffs/2026-08-29-v12-9c-c1b0-transcriber-fingerprint.md](handoffs/2026-08-29-v12-9c-c1b0-transcriber-fingerprint.md) | c-1b-0:转写器身份的承重件(⭐ 先于任何 MinerU 拓印落地) | `done(第二次派工全绿;复核方亲刀 K-3 反刀与 K-4 强制**各取到真红**,test:v2 自跑 338/338,tsc 零诊断。⚠️ 第一次派工的停线是对的 —— 单的第一版不可满足,归发单方)` | — | — |
+| [handoffs/2026-08-29-v12-9c-c1b1-mineru-wiring.md](handoffs/2026-08-29-v12-9c-c1b1-mineru-wiring.md) | c-1b-1:MinerU 接线(⭐ 这是**接线**单,⛔ 不是语义单) | `ready(c-1b-0 承重件已落,MinerU 写出的第一份出生证即带真指纹)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
 | [handoffs/plans/v12-9b-anchored-fragment-stream-spec.md](handoffs/plans/v12-9b-anchored-fragment-stream-spec.md) | 带锚碎片流(Anchored Fragment Stream)规格 v0 | `active` | — | — |
