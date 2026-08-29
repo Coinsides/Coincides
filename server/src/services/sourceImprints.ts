@@ -123,6 +123,7 @@ export interface SourceImprintInput {
     name: string;
     version: string;
     lockfile: string;
+    lockfile_hash: string;
   };
   anchor_fidelity: SourceImprintAnchorFidelity;
   text_normalization: SourceImprintTextNormalization;
@@ -154,6 +155,7 @@ interface SourceImprintRow {
   transcriber_name: string;
   transcriber_version: string;
   transcriber_lockfile: string;
+  transcriber_lockfile_hash: string | null;
   anchor_fidelity: SourceImprintAnchorFidelity;
   text_normalization: SourceImprintTextNormalization;
   fragment_count: number;
@@ -191,6 +193,26 @@ function requiredText(value: unknown, label: string): string {
     throw new AppError(400, `${label} is required`);
   }
   return value.trim();
+}
+
+function requiredSha256(value: unknown, label: string): string {
+  if (typeof value !== 'string' || !/^[a-f0-9]{64}$/.test(value)) {
+    throw new AppError(400, `${label} must be a lowercase SHA-256 hex digest`);
+  }
+  return value;
+}
+
+export function sameSourceImprintTranscriber(
+  left: { transcriber_lockfile_hash: string | null },
+  right: { transcriber_lockfile_hash: string | null },
+): boolean {
+  const leftHash = left.transcriber_lockfile_hash;
+  const rightHash = right.transcriber_lockfile_hash;
+  return typeof leftHash === 'string'
+    && typeof rightHash === 'string'
+    && /^[a-f0-9]{64}$/.test(leftHash)
+    && /^[a-f0-9]{64}$/.test(rightHash)
+    && leftHash === rightHash;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -324,6 +346,7 @@ function assertInputContract(input: SourceImprintInput): void {
   requiredText(input.transcriber.name, 'transcriber.name');
   requiredText(input.transcriber.version, 'transcriber.version');
   requiredText(input.transcriber.lockfile, 'transcriber.lockfile');
+  requiredSha256(input.transcriber.lockfile_hash, 'transcriber.lockfile_hash');
   if (!SOURCE_IMPRINT_ANCHOR_FIDELITIES.includes(input.anchor_fidelity)) {
     throw new AppError(400, 'Invalid Source imprint anchor fidelity');
   }
@@ -812,10 +835,11 @@ export function storeSourceImprint(
     db.prepare(`
       INSERT INTO source_imprints (
         id, user_id, source_file_id, transcriber_name, transcriber_version,
-        transcriber_lockfile, anchor_fidelity, text_normalization, fragment_count,
-        warnings_json, status, rejection_reasons_json, created_at
+        transcriber_lockfile, transcriber_lockfile_hash, anchor_fidelity,
+        text_normalization, fragment_count, warnings_json, status,
+        rejection_reasons_json, created_at
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `).run(
       imprintId,
       userId,
@@ -823,6 +847,7 @@ export function storeSourceImprint(
       requiredText(input.transcriber.name, 'transcriber.name'),
       requiredText(input.transcriber.version, 'transcriber.version'),
       requiredText(input.transcriber.lockfile, 'transcriber.lockfile'),
+      requiredSha256(input.transcriber.lockfile_hash, 'transcriber.lockfile_hash'),
       input.anchor_fidelity,
       input.text_normalization,
       input.fragments.length,

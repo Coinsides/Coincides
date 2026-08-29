@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import {
   mkdirSync,
   mkdtempSync,
@@ -901,7 +902,14 @@ test('K-7 intake, warning, and validation code families never cross storage laye
       FROM source_files
       WHERE source_record_id = ? AND user_id = ?
     `).get(textResult.source.id, userId) as { id: string };
-    const transcriber = { name: 'k7-family-lock', version: '1', lockfile: 'server/package-lock.json' };
+    const transcriber = {
+      name: 'k7-family-lock',
+      version: '1',
+      lockfile: 'server/package-lock.json',
+      lockfile_hash: createHash('sha256')
+        .update('k7-family-lockfile-bytes-v1\n', 'utf8')
+        .digest('hex'),
+    };
 
     const imprintCountBeforeInvalid = countRows(
       db,

@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import {
   mkdirSync,
   mkdtempSync,
@@ -115,6 +116,9 @@ function imprintInput(
       name: 'fixture-transcriber',
       version: '1.0.0',
       lockfile: 'fixtures/imprint-transcriber.lock',
+      lockfile_hash: createHash('sha256')
+        .update('fixture-transcriber-lockfile-bytes-v1\n', 'utf8')
+        .digest('hex'),
     },
     anchor_fidelity: 'char',
     text_normalization: 'none',
@@ -625,6 +629,7 @@ test('schema contract fixes the two table vocabularies and cascade directions', 
       'status',
       'rejection_reasons_json',
       'created_at',
+      'transcriber_lockfile_hash',
     ]);
     const fragmentColumns = (db.prepare('PRAGMA table_info(imprint_fragments)').all() as Array<{ name: string }>)
       .map((column) => column.name);

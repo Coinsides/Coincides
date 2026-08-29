@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import {
   existsSync,
   readFileSync,
@@ -423,6 +424,9 @@ test('K-5 whitespace canonicalization keeps its non-whitespace meta-invariant re
       name: 'meta-invariant-probe',
       version: '1.0.0',
       lockfile: 'server/package-lock.json',
+      lockfile_hash: createHash('sha256')
+        .update('meta-invariant-probe-lockfile-bytes-v1\n', 'utf8')
+        .digest('hex'),
     },
     anchor_fidelity: 'char',
     text_normalization: 'whitespace',
@@ -471,6 +475,9 @@ test('K-6 none normalization remains byte-exact and rejects whitespace loss', ()
       name: 'none-normalization-probe',
       version: '1.0.0',
       lockfile: 'server/package-lock.json',
+      lockfile_hash: createHash('sha256')
+        .update('none-normalization-probe-lockfile-bytes-v1\n', 'utf8')
+        .digest('hex'),
     },
     anchor_fidelity: 'char',
     text_normalization: 'none',
@@ -527,6 +534,9 @@ test('K-8 block_index is page disambiguation while bbox remains a fidelity overc
         name: 'k8-anchor-probe',
         version: '1.0.0',
         lockfile: 'server/package-lock.json',
+        lockfile_hash: createHash('sha256')
+          .update('k8-anchor-probe-lockfile-bytes-v1\n', 'utf8')
+          .digest('hex'),
       },
       anchor_fidelity: 'page',
       text_normalization: 'whitespace',

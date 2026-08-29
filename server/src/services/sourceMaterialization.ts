@@ -1,4 +1,6 @@
 import type Database from 'better-sqlite3';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { AppError } from '../middleware/errorHandler.js';
 import {
   SourceArtifactError,
@@ -17,6 +19,21 @@ import { storeSourceImprint, type SourceImprintInput } from './sourceImprints.js
 
 const INTERRUPTED_AFTER_MS = 10 * 60 * 1000;
 const SOURCE_ARTIFACT_TRANSCRIBER_LOCKFILE = 'server/package-lock.json';
+const SOURCE_ARTIFACT_TRANSCRIBER_LOCKFILE_URL = new URL('../../package-lock.json', import.meta.url);
+
+function sourceArtifactTranscriberLockfileHash(): string {
+  try {
+    return createHash('sha256')
+      .update(readFileSync(SOURCE_ARTIFACT_TRANSCRIBER_LOCKFILE_URL))
+      .digest('hex');
+  } catch (error) {
+    throw new SourceArtifactError(
+      'internal_interrupted',
+      `SourceArtifact transcriber lockfile could not be read: ${SOURCE_ARTIFACT_TRANSCRIBER_LOCKFILE}`,
+      { cause: error },
+    );
+  }
+}
 
 type MaterializationStatus = 'received' | 'parsing' | 'publishing' | 'materialized' | 'failed';
 
@@ -244,6 +261,7 @@ function sourceArtifactImprintInput(
       name: artifact.parser_key,
       version: artifact.parser_version,
       lockfile: SOURCE_ARTIFACT_TRANSCRIBER_LOCKFILE,
+      lockfile_hash: sourceArtifactTranscriberLockfileHash(),
     },
     anchor_fidelity: paged ? 'page' : 'element',
     text_normalization: 'whitespace',
@@ -271,17 +289,13 @@ function ensureSourceArtifactImprint(
     FROM source_imprints
     WHERE source_file_id = ?
       AND user_id = ?
-      AND transcriber_name = ?
-      AND transcriber_version = ?
-      AND transcriber_lockfile = ?
+      AND transcriber_lockfile_hash = ?
       AND status = 'accepted'
     LIMIT 1
   `).get(
     sourceFileId,
     userId,
-    input.transcriber.name,
-    input.transcriber.version,
-    input.transcriber.lockfile,
+    input.transcriber.lockfile_hash,
   );
   if (existing) return;
 

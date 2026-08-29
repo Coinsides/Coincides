@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(§0④ 已由 Fable 2026-08-29 裁定:跨平台指纹差异的代价收下在案,⛔ 本单不为它改签出行为)
+> **状态 (Status)**: done(第二次派工全绿;复核方亲刀 K-3 反刀与 K-4 强制**各取到真红**,test:v2 自跑 338/338,tsc 零诊断。⚠️ 第一次派工的停线是对的 —— 单的第一版不可满足,归发单方)
 > **from**: claude(opus,工程调度会话) · **to**: codex(builder) · **date**: 2026-08-29
 > **裁定来源**: Fable v0.7.2「转写器身份 = lockfile 原始字节 sha256」三裁 + 边界条 · TD-36 · 家法「防线必须站在伤害上游」
 
@@ -141,3 +141,73 @@
 ### 工作树边界
 
 开工前已有 `server/src/routes/projections.ts` 修改；它不在本单允许面，保持未触碰。本轮唯一落盘内容是本 `## Result` 回执。
+
+## Result(第二次派工)
+
+> **DONE · K-1～K-6 与 K-8 PASS（Codex builder，2026-08-29）**：第二次派工允许面内的迁移、两个生产者、服务层强制、旧 fixture 机械更新与常驻测试均已完成。`test:v2` 从 **331/331** 增至 **338/338**，`tsc --noEmit` 零诊断。工单顶部状态行未动，未 commit。
+>
+> **needs: claude（仅全仓文档索引门，不阻断本单 K 门）**：按仓库入口补跑 `npm run verify:v2-bn8-runtime`，代码测试、契约检查、client/server build 与性能 smoke 均已通过，最终在 `docs:check` 因 `docs/agent-ops/INDEX.md` 过期而 exit 1。现物索引仍把本工单列为 `draft`，而本工单开工前顶部已是 `ready(...)`；本次只追加正文回执，索引生成器只读状态头/首标题。工单又明确要求 `docs/agent-ops/INDEX.md` 零 diff，故未越权重生成，请调度方另行归拢。
+
+### 四步顺序实证
+
+1. **先让两个生产者会算指纹。** `sourceFileIntake.ts` 与 `sourceMaterialization.ts` 先改为从各自模块相对 URL 读取同一份 `server/package-lock.json` 原始 `Buffer`，直接 `sha256`，不传 encoding、不 trim、不解析、不换行归一化；指纹都在既有判同 SELECT 前算出并传入。此时尚未打开服务层必填强制；两份生产者旧测合跑 **23/23**。
+2. **再补三份既有测试 fixture。** 三文件只增加 `createHash` import、由测试内明写字节现场算出的 `lockfile_hash`，以及 `v2SourceImprints` 的末列断言；没有改判据、断言语义或用例结构。打开强制前，三文件合跑 **31/31**，全量 `test:v2` **331/331**。
+3. **随后打开服务层强制。** `SourceImprintInput` 改为必填 `lockfile_hash`，服务入口在 DB 写入前校验严格小写 64 位 SHA-256 hex，并把值显式持久化/读回。按修订单要求，在尚未添加新测试时先跑 `test:v2`，仍为 **331/331**；三份既有测试全绿。
+4. **最后添加新测试。** 新建 `v2SourceTranscriberFingerprint.test.ts` 并只在 `server/package.json` 的 `test:v2` 列表尾部追加它。该文件最终 **7/7**；追加后的全量为 **338/338**。
+
+### K 门实证
+
+- **K-1（只加列、不回填）**：051 只执行 `ALTER TABLE source_imprints ADD COLUMN transcriber_lockfile_hash TEXT`，无 default、无 `UPDATE`、无旧列改名。测试先跑 049、插入一条旧拓印，再把 051 连跑两次：新列仍为 `NULL`；迁移前后的 `transcriber_lockfile` 文本相等，`hex(CAST(... AS BLOB))` 也相等。`PRAGMA table_info` 同时证明新列 nullable、无 default，并按 SQLite 实际行为追加在 `created_at` 之后的物理末尾。
+- **K-2（两个真生产者）**：两条测试各自独立 `readFileSync` 原始 lockfile 字节并重算 SHA-256，不 import 生产 hash helper；落库值与独立结果严格相等。lockfile 读不到时选择**拒绝并报错**，理由是服务层已禁止无事实指纹的新出生证，不能写空串、假值或静默跳过。intake 抛 500 `transcriber_lockfile_unreadable`，在 imprint 判同/写入前停止；按既有调用顺序，Source identity/placement 可能已经 ready，但不会写 imprint。materialization 抛 `SourceArtifactError('internal_interrupted')`，在 publishing 前落 failed，不写 imprint、不发布 projection。
+- **K-3（正反两刀，且锁真实生产路径）**：规范谓词只比较两个合法 hash，任一旧行 `NULL` 都不判同。真实写回行证明：hash 相同而 name/version 完全不同仍判同；name/version 完全相同而 hash 不同判不同。两个生产者的 existing-imprint SQL 也删掉了 name/version/path 身份条件，只保留 source/user/accepted 作用域与 hash。为防纯谓词测试假绿，另用实际 intake 与 materialization 各跑正反例：**同 hash、异 name/version 均不重复写；同 name/version、异 hash 均新增一份拓印**。因此不是三元组，也不是孤儿 helper。
+- **K-4（强制与拒绝红点）**：测试通过 runtime cast 真构造一次缺 `lockfile_hash` 的 `storeSourceImprint` 调用，断言抛出明确校验错误，并断言写入前后 `source_imprints` 行数不变。不存在 test-only 豁免。
+- **K-5（单字节反例）**：测试在系统临时目录复制真实 `package-lock.json`，只对副本第 0 字节做 XOR，再从副本重新读取计算；断言总长度不变、第 1 字节以后完全相等且 before/after 指纹不等。仓内/现址 lockfile 未动，结论不是“非空/长度 64”结果锁。
+- **K-6（回归）**：开工基线 `test:v2` 为 **331 tests / 331 pass / 0 fail**；最终为 **338 tests / 338 pass / 0 fail / 0 skipped / 0 todo**。`npm exec -- tsc --noEmit`（cwd=`server`）exit 0、零诊断。
+
+### 三份旧测试与 K-8 调用点审计
+
+- `v2SourceImprints.test.ts`：**12 → 12**；29 个调用都追到共享 fixture 的可见字节 `fixture-transcriber-lockfile-bytes-v1\n`。
+- `v2SourceT0Alignment.test.ts`：**10 → 10**；2 个真写入调用追到 `k8-anchor-probe-lockfile-bytes-v1\n`，另两处受类型约束的 fixture 也各由所在测试明写字节现算。
+- `v2SourceNeverReject.test.ts`：**9 → 9**；3 个调用都追到共享 fixture 的可见字节 `k7-family-lockfile-bytes-v1\n`。
+- 三文件合计仍为 **31**，均 `skipped 0 / todo 0`；diff 中没有新增写死的 64 位 transcriber hash。
+- 全仓静态 `storeSourceImprint(` 调用点（排除函数定义）为 **36 → 44，只增不减**：旧三测 `29+2+3=34`；生产者 `1+1=2`；新测试 8。新测试中 7 个成功写入点分别追到测试内明写的 A/B/alternate lockfile 字节或测试独立读取的真实 package-lock 原始字节；剩余 1 个是 K-4 刻意缺 hash、且已证明拒写的负控，不是绕过入口。
+
+### 边界、归属与在案代价
+
+- 当前分支为 `fable/v2-bn12-exoskeleton`。除本回执外，施工只触及修订后九项允许面；禁区逐项审计为零 diff。开工前已有的 `server/src/routes/projections.ts` 修改不属本单，保持未触碰。
+- `git diff --check` exit 0；没有删除/skip 既有测试；没有 commit；工单顶部 `Status` 行保持开工现物。
+- §0④ 的实际来源是 **Fable 的裁定，由调度方转写入单**；本轮没有任何 Henry 输入。按该裁定，当前实现忠实哈希签出后的原始字节，因此受 `autocrlf` 影响时 Windows/Linux 可能得到不同指纹，并保守判为“未证同一”。这项代价收下在案，触发器留给第一个真跨平台消费者；本单未改 `.gitattributes` 或任何签出行为。
+
+## 复核批注(claude 工程调度会话,2026-08-29,亲刀非读回执)
+
+**总判定:通过,无保留。** 第二次派工全部 K 门成立;⛔ 一处告警经查是**我自己 grep 过宽造成的假阳性**,记我账上。
+
+### ✅ 亲刀实况
+
+| 刀 | 我施的变异(附落地证明) | 结果 |
+|---|---|---|
+| ⭐ **K-3 反刀**(Fable 预定抽检点) | 两个生产者的判同 SQL 均改成 `AND (transcriber_lockfile_hash = ? OR 1=1)`(⚠️ **保持参数个数不变**,否则红在别处)⇒ 谓词无视 hash | **`not ok 5`**,7 → **6/1**。恢复回 7/7 |
+| **K-4 强制** | `requiredSha256` 的条件改成 `if (false)` 且缺值时返回伪 hash ⇒ 等于「没有强制」 | **`not ok 6`**,7 → **6/1**。恢复回 7/7 |
+| **全量** | `npm --prefix server run test:v2` 我自跑 | **338 / 338 / fail 0 / skipped 0 / todo 0**(基线 331,+7) |
+| **类型门** | `npm exec -- tsc --noEmit`(cwd=server) | **exit 0** |
+| **迁移** | `grep -cE "UPDATE|DEFAULT|RENAME"` 于 051 | **0** ⇒ 纯 `ALTER ADD COLUMN`,幂等,⛔ 无回填、⛔ 无改名 |
+
+### ⭐ 它做得比我要求的更狠(记功两处)
+
+1. **判同 SQL 里的 `name`/`version`/`lockfile` 三个身份条件被【删掉了】**,只留 `lockfile_hash` + 作用域。⇒ ⛔ 不是「三元组里多比一项」,是**版本号真正退出了承重位**。
+2. **正反两刀走的是真实 intake 与 materialization 路径**,不是只测一个谓词 helper。⇒ 防的是「谓词对了但生产路径没用它」这种假绿 —— 这一层我在单里没写,它自己补的。
+
+### ⭐ 另记一处设计上的正确判断
+
+`sameSourceImprintTranscriber` 要求**两侧都是合法 64-hex** 才判同 ⇒ **旧行的 `NULL` 永远不判同**。这正是 v0.7.2「既有行不回填」的正确下游语义:**NULL 不是「同一」也不是「不同」,是【未证】** —— 而未证按不轻信处理。
+
+### ⚠️ 一处我的假阳性(记我账上)
+
+我用 `grep -oE "'[a-f0-9]{64}'"` 搜「写死的转写器指纹」,在 `v2SourceNeverReject.test.ts` 命中三条。**查后为假警**:那三条是**本轮未动**的 `content_hash` fixture(`git diff` 新增行里零命中),而本轮新增的转写器指纹确实是 `createHash('sha256').update('k7-family-lockfile-bytes-v1\n','utf8')` **现算**。
+⇒ 入档两义 **#6b**:**grep 命中 ≠ 命中的是你要找的那个语义**。排除法:**看命中处的字段名与上下文,并用 `git diff` 分清本轮新增还是本来就有**。⛔ 命中数不是证据,命中的**是什么**才是。
+
+### 📌 处置
+
+- **`needs: claude`(INDEX 过期)**:属实 —— 索引把本单列为 `draft`。builder 处置正确(INDEX 是它的禁区,且它**没有把总门冒充全绿**)。已由调度方在收口时重生成。
+- **署名**:本轮回执已按实际来源写明「§0④ 是 **Fable 的裁定,由调度方转写入单**;本轮没有任何 Henry 输入」。⇒ 上一轮的失真已纠正且未复发。
+- **跨平台指纹代价**:按裁定收下在案,本单未改 `.gitattributes`,触发器留给第一个真跨平台消费者。

@@ -571,6 +571,23 @@ const TEXT_FALLBACK_TRANSCRIBER = {
   lockfile: 'server/package-lock.json',
 } as const;
 
+const TEXT_FALLBACK_TRANSCRIBER_LOCKFILE_URL = new URL('../../package-lock.json', import.meta.url);
+
+function textFallbackTranscriberLockfileHash(): string {
+  try {
+    return createHash('sha256')
+      .update(readFileSync(TEXT_FALLBACK_TRANSCRIBER_LOCKFILE_URL))
+      .digest('hex');
+  } catch {
+    throw sourceError(
+      500,
+      'transcriber_lockfile_unreadable',
+      `Source text fallback transcriber lockfile could not be read: ${TEXT_FALLBACK_TRANSCRIBER.lockfile}`,
+      { lockfile: TEXT_FALLBACK_TRANSCRIBER.lockfile },
+    );
+  }
+}
+
 async function ensurePlainTextFallbackImprint(
   db: Database.Database,
   userId: string,
@@ -581,28 +598,28 @@ async function ensurePlainTextFallbackImprint(
   // Resolve the cyclic dependency before the idempotency check so concurrent
   // callers cannot both observe "missing" while this import yields.
   const { storeSourceImprint } = await import('./sourceImprints.js');
+  const lockfileHash = textFallbackTranscriberLockfileHash();
   const existing = db.prepare(`
     SELECT 1
     FROM source_imprints
     WHERE source_file_id = ?
       AND user_id = ?
-      AND transcriber_name = ?
-      AND transcriber_version = ?
-      AND transcriber_lockfile = ?
+      AND transcriber_lockfile_hash = ?
       AND status = 'accepted'
     LIMIT 1
   `).get(
     sourceFileId,
     userId,
-    TEXT_FALLBACK_TRANSCRIBER.name,
-    TEXT_FALLBACK_TRANSCRIBER.version,
-    TEXT_FALLBACK_TRANSCRIBER.lockfile,
+    lockfileHash,
   );
   if (existing) return;
 
   const stored = storeSourceImprint(db, userId, {
     source_file_id: sourceFileId,
-    transcriber: TEXT_FALLBACK_TRANSCRIBER,
+    transcriber: {
+      ...TEXT_FALLBACK_TRANSCRIBER,
+      lockfile_hash: lockfileHash,
+    },
     anchor_fidelity: 'char',
     text_normalization: 'none',
     fragments: plainTextLineFragments(text),

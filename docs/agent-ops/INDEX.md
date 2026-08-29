@@ -202,7 +202,7 @@
 | [handoffs/2026-08-29-v12-9c-c0-t0-alignment.md](handoffs/2026-08-29-v12-9c-c0-t0-alignment.md) | c-0:T0 存量对齐带锚碎片流(⭐ 这是**映射**单,不是建造单) | `done(第二次派工按 v0.7 落地;复核方 2026-08-29 亲刀:K-5 元不变式 + K-1c 第三产生点 + K-4 结构锁 三条实测有咬,test:v2 331/331 自跑,禁区零 diff,第七查 exit 0)` | — | — |
 | [handoffs/2026-08-29-v12-9c-c1a-mineru-env-probe.md](handoffs/2026-08-29-v12-9c-c1a-mineru-env-probe.md) | c-1a:MinerU 环境体检(⭐ 这是**遗产体检**单,⛔ 不是安装单,⛔ 也不是重建单) | `done(复核方 2026-08-29 亲刀四处通过;⚠️ K-6 措辞已收窄为「mineru 包未漂移」;⛔ 钉版三件本轮**未提交**,与 `.gitattributes` 推 c-1a-2 同批 —— 见文末复核批注)` | — | — |
 | [handoffs/2026-08-29-v12-9c-c1a2-pin-bytes.md](handoffs/2026-08-29-v12-9c-c1a2-pin-bytes.md) | c-1a-2:让 pin 文件的字节活过 git 往返(⭐ 极小单) | `done(复核方 2026-08-29 双源交叉验讫:回执前后两组 + 复核方从 HEAD `git archive` 独立签出比对,三件与证据本体 sha256 逐一相等;反例 `check-attr` 证明其它文件行为未变。⚠️ pin 与 `.gitattributes` 已于 `3505211` 入库 —— 见该批的流程失手记录)` | — | — |
-| [handoffs/2026-08-29-v12-9c-c1b0-transcriber-fingerprint.md](handoffs/2026-08-29-v12-9c-c1b0-transcriber-fingerprint.md) | c-1b-0:转写器身份的承重件(⭐ 先于任何 MinerU 拓印落地) | `draft` | — | — |
+| [handoffs/2026-08-29-v12-9c-c1b0-transcriber-fingerprint.md](handoffs/2026-08-29-v12-9c-c1b0-transcriber-fingerprint.md) | c-1b-0:转写器身份的承重件(⭐ 先于任何 MinerU 拓印落地) | `done(第二次派工全绿;复核方亲刀 K-3 反刀与 K-4 强制**各取到真红**,test:v2 自跑 338/338,tsc 零诊断。⚠️ 第一次派工的停线是对的 —— 单的第一版不可满足,归发单方)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
 | [handoffs/plans/v12-9b-anchored-fragment-stream-spec.md](handoffs/plans/v12-9b-anchored-fragment-stream-spec.md) | 带锚碎片流(Anchored Fragment Stream)规格 v0 | `active` | — | — |
