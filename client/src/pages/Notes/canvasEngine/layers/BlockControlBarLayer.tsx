@@ -2,6 +2,7 @@ import {
   Eye,
   FileText,
   GripVertical,
+  Plus,
   Save,
   Tag,
   Trash2,
@@ -31,6 +32,7 @@ interface BlockControlBarLayerProps {
   saving: boolean;
   contentReadOnly: boolean;
   onBeginMove: (event: ReactPointerEvent<HTMLElement>) => void;
+  onInsertTextUnitBelow?: () => void;
   onToggleExportRole: () => void;
   onToggleAIVisibility: () => void;
   onSaveBlock: () => Promise<BlockSaveOutcome>;
@@ -47,6 +49,7 @@ export function BlockControlBarLayer({
   saving,
   contentReadOnly,
   onBeginMove,
+  onInsertTextUnitBelow,
   onToggleExportRole,
   onToggleAIVisibility,
   onSaveBlock,
@@ -98,6 +101,18 @@ export function BlockControlBarLayer({
           >
             <GripVertical size={15} />
           </button>
+          {onInsertTextUnitBelow && (
+            <button
+              type="button"
+              className={styles.iconBtn}
+              onClick={onInsertTextUnitBelow}
+              disabled={contentReadOnly}
+              title="Insert text unit below"
+              aria-label="Insert text unit below"
+            >
+              <Plus size={15} />
+            </button>
+          )}
           <button
             className={`${styles.iconBtn} ${exportRole === 'included' ? styles.policyBtnOn : ''}`}
             onClick={onToggleExportRole}

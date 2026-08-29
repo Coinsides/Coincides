@@ -1,3 +1,4 @@
+import { clamp } from './geometry';
 import {
   getPageFrameContentRect,
   getPageFrameOuterRect,
@@ -131,4 +132,31 @@ export function derivePlacementPageFrameAffiliation({
   return affiliations.find((affiliation) => affiliation.kind === 'inside')
     || affiliations.find((affiliation) => affiliation.kind === 'crossing')
     || workspaceOnlyAffiliation();
+}
+
+export function clampCrossingPlacementIntoPageFrameContent({
+  placement,
+  pageFrames,
+}: DerivePlacementPageFrameAffiliationInput): CanvasRect {
+  const rect = placementRect(placement);
+  const affiliation = derivePlacementPageFrameAffiliation({
+    placement,
+    pageFrames,
+    boundary: 'content',
+  });
+  if (affiliation.kind !== 'crossing' || !affiliation.pageFrameId) return rect;
+
+  const pageFrame = pageFrames.find((frame) => frame.id === affiliation.pageFrameId);
+  if (!pageFrame) return rect;
+  const contentRect = getPageFrameContentRect(pageFrame);
+
+  // Release collection is translation-only. An oversized rect has no legal
+  // full-fit translation, so keep its geometry instead of silently resizing it.
+  if (rect.width > contentRect.width || rect.height > contentRect.height) return rect;
+
+  return {
+    ...rect,
+    x: clamp(rect.x, contentRect.x, contentRect.x + contentRect.width - rect.width),
+    y: clamp(rect.y, contentRect.y, contentRect.y + contentRect.height - rect.height),
+  };
 }

@@ -62,7 +62,6 @@ export interface NoteChromeLayerProps {
   showPreviewBlockTypes: boolean;
   showPreviewExportStatus: boolean;
   showPreviewLabelOverlay: boolean;
-  snapEnabled: boolean;
   sortedBlockCount: number;
   sourceReferenceCount: number;
   surfaceMode: 'page' | 'canvas';
@@ -102,7 +101,6 @@ export interface NoteChromeLayerProps {
   onTogglePreviewBlockTypes: () => void;
   onTogglePreviewExportStatus: () => void;
   onTogglePreviewLabelOverlay: () => void;
-  onToggleSnapEnabled: () => void;
   onToggleSurfaceMode: () => void;
 }
 
@@ -128,7 +126,6 @@ export function NoteChromeLayer({
   showPreviewBlockTypes,
   showPreviewExportStatus,
   showPreviewLabelOverlay,
-  snapEnabled,
   sortedBlockCount,
   sourceReferenceCount,
   surfaceMode,
@@ -166,7 +163,6 @@ export function NoteChromeLayer({
   onTogglePreviewBlockTypes,
   onTogglePreviewExportStatus,
   onTogglePreviewLabelOverlay,
-  onToggleSnapEnabled,
   onToggleSurfaceMode,
 }: NoteChromeLayerProps) {
   const layoutHoverTimerRef = useRef<number | null>(null);
@@ -525,22 +521,6 @@ export function NoteChromeLayer({
                     <X size={15} />
                   </button>
                 </div>
-                <button
-                  className={styles.moreAction}
-                  onClick={onToggleSnapEnabled}
-                  disabled={contentReadOnly}
-                >
-                  <LayoutDashboard size={15} />
-                  <span>Snap alignment</span>
-                  <small>
-                    {snapEnabled
-                      ? 'On: moving and resizing can align to page and neighbor edges.'
-                      : 'Off: moving and resizing use free placement.'}
-                  </small>
-                  <span className={`${styles.togglePill} ${snapEnabled ? styles.togglePillOn : styles.togglePillOff}`}>
-                    {snapEnabled ? 'On' : 'Off'}
-                  </span>
-                </button>
                 <div className={styles.pageFramePanel} data-page-frame-panel="true">
                   <button
                     type="button"

@@ -84,7 +84,6 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     showPreviewBlockTypes: input.showPreviewBlockTypes,
     showPreviewExportStatus: input.showPreviewExportStatus,
     showPreviewLabelOverlay: input.showPreviewLabelOverlay,
-    snapEnabled: input.snapEnabled,
     sortedBlockCount: input.sortedBlockCount,
     sourceReferenceCount: input.sourceReferenceCount,
     surfaceMode: input.surfaceMode,
@@ -124,7 +123,6 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     onTogglePreviewBlockTypes: input.onTogglePreviewBlockTypes,
     onTogglePreviewExportStatus: input.onTogglePreviewExportStatus,
     onTogglePreviewLabelOverlay: input.onTogglePreviewLabelOverlay,
-    onToggleSnapEnabled: input.onToggleSnapEnabled,
     onToggleSurfaceMode: input.onToggleSurfaceMode,
   };
 

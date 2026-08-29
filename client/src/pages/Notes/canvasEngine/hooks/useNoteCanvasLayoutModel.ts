@@ -4,6 +4,7 @@ import { buildExportPreviewModel } from '../exportPreviewService';
 import { estimateBlockHeight } from '../measurementService';
 import {
   getVisibleBlocksForSurface,
+  isPageFrameAffiliatedWorkspaceBlock,
   type SurfaceModePolicy,
 } from '../modePolicyService';
 import {
@@ -39,6 +40,7 @@ import type {
   DocumentTypographyProfile,
   ImageCanvasObject,
   PageFrameCollectionModel,
+  PageFrameModel,
   RelationEndpointReserve,
   StructuredCanvasObject,
   VisualConnector,
@@ -53,6 +55,7 @@ export interface UseNoteCanvasResolvedLayoutModelOptions {
   documentTypographyProfile: DocumentTypographyProfile;
   layoutDrafts: Record<string, BlockBoxLayout>;
   sortedBlocks: NoteBlock[];
+  pageFrames: PageFrameModel[];
   surfaceMode: SurfaceMode;
   surfacePolicy: SurfaceModePolicy;
 }
@@ -81,6 +84,7 @@ export function useNoteCanvasResolvedLayoutModel({
   contentWidth,
   documentTypographyProfile,
   layoutDrafts,
+  pageFrames,
   sortedBlocks,
   surfaceMode,
   surfacePolicy,
@@ -91,31 +95,60 @@ export function useNoteCanvasResolvedLayoutModel({
   );
 
   const visibleBlocks = useMemo(
-    () => getVisibleBlocksForSurface(sortedBlocks, surfacePolicy, contentWidth),
-    [contentWidth, sortedBlocks, surfacePolicy],
+    () => getVisibleBlocksForSurface(sortedBlocks, surfacePolicy, contentWidth, {
+      pageFrames,
+      boundary: 'outer',
+    }),
+    [contentWidth, pageFrames, sortedBlocks, surfacePolicy],
+  );
+
+  const pageAffiliatedWorkspaceBlockIds = useMemo(
+    () => new Set(
+      surfacePolicy.isPageMode
+        ? visibleBlocks
+          .filter((block) => isPageFrameAffiliatedWorkspaceBlock(
+            block,
+            contentWidth,
+            pageFrames,
+            'outer',
+          ))
+          .map((block) => block.id)
+        : [],
+    ),
+    [contentWidth, pageFrames, surfacePolicy.isPageMode, visibleBlocks],
   );
 
   const blockLayouts = useMemo(() => {
     const defaults = buildDefaultBlockLayouts(visibleBlocks, contentWidth, estimateBlockHeightWithTypography);
     return visibleBlocks.reduce<Record<string, BlockBoxLayout>>((acc, block) => {
       const draft = layoutDrafts[block.id];
+      const normalizationSurfaceMode = pageAffiliatedWorkspaceBlockIds.has(block.id)
+        ? 'canvas'
+        : surfaceMode;
       const resolved = draft || normalizeBlockLayout({
         block,
         fallback: defaults[block.id],
         contentWidth,
-        surfaceMode,
+        surfaceMode: normalizationSurfaceMode,
         estimateHeight: estimateBlockHeightWithTypography,
       });
       acc[block.id] = normalizeResolvedBlockLayout({
         block,
         layout: resolved,
         contentWidth,
-        surfaceMode,
+        surfaceMode: normalizationSurfaceMode,
         estimateHeight: estimateBlockHeightWithTypography,
       });
       return acc;
     }, {});
-  }, [contentWidth, estimateBlockHeightWithTypography, layoutDrafts, surfaceMode, visibleBlocks]);
+  }, [
+    contentWidth,
+    estimateBlockHeightWithTypography,
+    layoutDrafts,
+    pageAffiliatedWorkspaceBlockIds,
+    surfaceMode,
+    visibleBlocks,
+  ]);
 
   const defaultDraftLayout = useMemo(() => {
     return createDefaultDraftLayout(blockLayouts, contentWidth);

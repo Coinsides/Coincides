@@ -69,7 +69,6 @@ function noteChromeProps(
     showPreviewBlockTypes: false,
     showPreviewExportStatus: false,
     showPreviewLabelOverlay: false,
-    snapEnabled: false,
     sortedBlockCount: 1,
     sourceReferenceCount: 0,
     surfaceMode: 'page',
@@ -110,7 +109,6 @@ function noteChromeProps(
     onTogglePreviewBlockTypes: noop,
     onTogglePreviewExportStatus: noop,
     onTogglePreviewLabelOverlay: noop,
-    onToggleSnapEnabled: noop,
     onToggleSurfaceMode: noop,
     ...overrides,
   };
@@ -180,5 +178,17 @@ describe('NoteChromeLayer block restore door', () => {
     expect((restoreButton as HTMLButtonElement).disabled).toBe(true);
     fireEvent.click(restoreButton);
     expect(onRestoreTrashedBlock).not.toHaveBeenCalled();
+  });
+});
+
+describe('NoteChromeLayer organize mode', () => {
+  it('keeps the Layout pill while removing the independent Snap alignment control', () => {
+    render(<NoteChromeLayer {...noteChromeProps({
+      showLayoutPanel: true,
+      showMoreActions: false,
+    })} />);
+
+    expect(screen.getByRole('button', { name: 'Layout' })).toBeTruthy();
+    expect(screen.queryByText('Snap alignment')).toBeNull();
   });
 });

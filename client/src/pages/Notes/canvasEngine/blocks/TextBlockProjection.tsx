@@ -58,7 +58,6 @@ import {
   parseTextUnitsFromPlainText,
   pasteTextIntoTextFlow,
   setTextUnitWritingRole,
-  splitTextUnitAtOffset,
   splitTextUnitForEnter,
   textUnitMarkerForDisplay,
   updateTextUnitMetadata,
@@ -487,7 +486,6 @@ export function TextBlockProjection({
     unitId: string;
     point: { x: number; y: number };
   } | null>(null);
-  const [selectedTextUnitIds, setSelectedTextUnitIds] = useState<string[]>([]);
   const editableFlow = useMemo(
     () => alignFlowWithText(text, textFlow, presentationKind),
     [presentationKind, text, textFlow],
@@ -503,15 +501,6 @@ export function TextBlockProjection({
     }),
     [annotations, labelDisplayState],
   );
-
-  useEffect(() => {
-    const handleKeyDown = (event: globalThis.KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
-      setSelectedTextUnitIds([]);
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
 
   const focusTextUnit = (unitId: string, caret: number) => {
     const node = unitRefs.current[unitId];
@@ -683,13 +672,6 @@ export function TextBlockProjection({
     onTextUnitSelection(selectionRangeForTextUnit(unit), anchorRect);
   };
 
-  const handleToggleTextUnitRowSelection = (unit: TextUnit) => {
-    setSelectedTextUnitIds((current) => {
-      if (current.includes(unit.id)) return current.filter((id) => id !== unit.id);
-      return [...current, unit.id];
-    });
-  };
-
   const handleTextUnitContextMenu = (unit: TextUnit, event: MouseEvent<HTMLTextAreaElement>) => {
     if (layoutMode) return;
 
@@ -764,15 +746,6 @@ export function TextBlockProjection({
     }
     event.preventDefault();
     onAnnotationContextMenu(targetAnnotation.id, point);
-  };
-
-  const handleInsertBelow = (unit: TextUnit) => {
-    const split = splitTextUnitAtOffset(editableFlow, unit.id, unit.text.length);
-    const inserted = split.units[split.units.findIndex((item) => item.id === unit.id) + 1];
-    const nextFlow = setTextUnitWritingRole(split, inserted.id, 'paragraph');
-    pendingFocusRef.current = { unitId: inserted.id, caret: 0 };
-    emitFlowChange(nextFlow, inserted.id, 0, unitRefs.current[unit.id], { sync: true });
-    focusTextUnit(inserted.id, 0);
   };
 
   const handleSetRole = (unit: TextUnit, role: TextUnitWritingRole) => {
@@ -1055,18 +1028,13 @@ export function TextBlockProjection({
               hasFullUnitAnnotation ? styles.textUnitAnnotated : '',
               hasSelectedFullUnitAnnotation ? styles.textUnitAnnotationSelected : '',
               hasDraftRange ? styles.textUnitDraftRange : '',
-              selectedTextUnitIds.includes(unit.id) ? styles.textUnitRowSelected : '',
               parentAnnotationBadges.length > 0 || childAnnotationBadges.length > 0 ? styles.textUnitRowWithAnnotationBadge : '',
             ].filter(Boolean).join(' ')}
             style={{ '--text-unit-indent': unit.indent_level } as CSSProperties}
           >
             <TextUnitGutterLayer
               role={unit.writing_role}
-              selected={selectedTextUnitIds.includes(unit.id)}
-              onToggleRowSelection={() => handleToggleTextUnitRowSelection(unit)}
-              onInsertBelow={() => handleInsertBelow(unit)}
               onSetRole={(role) => handleSetRole(unit, role)}
-              onAnnotateUnit={() => handleAnnotateTextUnit(unit)}
               onOpenMenu={layoutMode ? undefined : (point) => setTextUnitContextMenu({ unitId: unit.id, point })}
             />
             <div className={styles.textUnitLine}>

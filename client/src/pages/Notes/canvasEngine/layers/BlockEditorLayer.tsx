@@ -14,6 +14,7 @@ import {
   presentationKindForBlock,
   type FieldValueRecord,
 } from '../blockContentService';
+import type { BlockAffiliationOutlineState } from '../blockAffiliationOutlineService';
 import {
   resizeTextareaToContent,
 } from '../measurementService';
@@ -35,8 +36,15 @@ import type {
 } from '../types';
 import type { CapturedSelectionRange } from '../selectionRangeService';
 import {
+  createTextBlockContentV1,
   getTextFlowContent,
+  projectTextFlowContent,
+  TEXT_FLOW_CONTENT_KEY,
 } from '../textFlowService';
+import {
+  setTextUnitWritingRole,
+  splitTextUnitAtOffset,
+} from '../textUnitEditorService';
 import type { TextFocusReceipt } from '../textFocusReceipt';
 import {
   buildBlockAnnotationCluster,
@@ -66,6 +74,7 @@ interface BlockEditorLayerProps {
   layout: BlockBoxLayout;
   blockFragments?: PageStackBlockFragmentProjection[];
   blockControlAnchor: { x: number; y: number } | null;
+  affiliationOutline: BlockAffiliationOutlineState | null;
   fieldDraft?: FieldValueRecord;
   layoutMode: boolean;
   pageOffsetX: number;
@@ -124,6 +133,7 @@ export function BlockEditorLayer({
   layout,
   blockFragments = [],
   blockControlAnchor,
+  affiliationOutline,
   fieldDraft,
   layoutMode,
   pageOffsetX,
@@ -218,6 +228,23 @@ export function BlockEditorLayer({
       label: block.title || block.block_type || 'Block',
       text_preview: text,
     });
+  };
+
+  const handleInsertTextUnitBelow = () => {
+    if (contentReadOnly || presentationKind !== 'paragraph') return;
+    const currentFlow = textFlow || createTextBlockContentV1(text);
+    const targetUnit = currentFlow.units[currentFlow.units.length - 1];
+    if (!targetUnit) return;
+
+    const splitFlow = splitTextUnitAtOffset(currentFlow, targetUnit.id, targetUnit.text.length);
+    const insertedIndex = splitFlow.units.findIndex((unit) => unit.id === targetUnit.id) + 1;
+    const insertedUnit = splitFlow.units[insertedIndex];
+    if (!insertedUnit) return;
+
+    const nextFlow = setTextUnitWritingRole(splitFlow, insertedUnit.id, 'paragraph');
+    const projection = projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: nextFlow }, text);
+    onTextFlowChange(nextFlow);
+    onTextChange(projection.plain_text, projection.plain_text.length, textareaRef.current);
   };
 
   useBlockMeasurement({
@@ -315,6 +342,8 @@ export function BlockEditorLayer({
         top: layout.y,
         width: layout.width,
         minHeight: layout.height,
+        borderColor: affiliationOutline?.colorToken,
+        borderStyle: affiliationOutline ? 'dashed' : undefined,
       }}
       onMouseDown={handleBlockMouseDown}
       onContextMenu={handleBlockContextMenu}
@@ -336,6 +365,7 @@ export function BlockEditorLayer({
         saving={saving}
         contentReadOnly={contentReadOnly}
         onBeginMove={onBeginMove}
+        onInsertTextUnitBelow={presentationKind === 'paragraph' ? handleInsertTextUnitBelow : undefined}
         onToggleExportRole={onToggleExportRole}
         onToggleAIVisibility={onToggleAIVisibility}
         onSaveBlock={() => onSave(false)}

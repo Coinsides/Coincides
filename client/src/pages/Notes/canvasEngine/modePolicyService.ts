@@ -10,8 +10,12 @@ import {
 } from './runtimeLayout';
 import {
   isCanvasWorkspaceBlock,
+  readStoredLayout,
   type PlacementSeedBlock,
 } from './placementService';
+import {
+  derivePlacementPageFrameAffiliation,
+} from './pageFrameAffiliationService';
 import {
   snapRectToPageFrameGuides,
 } from './pageFrameGuideService';
@@ -36,6 +40,44 @@ export interface SurfaceModeTransitionPolicy {
   closeOverlay: boolean;
   clearSnapGuide: boolean;
   clearBlockSelection: boolean;
+}
+
+export interface SurfaceVisibilityContext {
+  pageFrames?: PageFrameModel[];
+  boundary?: 'content' | 'outer';
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+export function isPageFrameAffiliatedWorkspaceBlock(
+  block: PlacementSeedBlock,
+  contentWidth: number,
+  pageFrames: PageFrameModel[],
+  boundary: 'content' | 'outer' = 'outer',
+): boolean {
+  if (!isCanvasWorkspaceBlock(block, contentWidth)) return false;
+  const stored = readStoredLayout(block);
+  if (
+    !isFiniteNumber(stored?.x)
+    || !isFiniteNumber(stored?.y)
+    || !isFiniteNumber(stored?.width)
+    || !isFiniteNumber(stored?.height)
+  ) {
+    return false;
+  }
+
+  return derivePlacementPageFrameAffiliation({
+    placement: {
+      x: stored.x,
+      y: stored.y,
+      width: stored.width,
+      height: stored.height,
+    },
+    pageFrames,
+    boundary,
+  }).kind !== 'workspace_only';
 }
 
 export function createSurfaceModePolicy(surfaceMode: SurfaceMode): SurfaceModePolicy {
@@ -69,11 +111,20 @@ export function getVisibleBlocksForSurface<TBlock extends PlacementSeedBlock & {
   blocks: TBlock[],
   policy: SurfaceModePolicy,
   contentWidth: number,
+  context: SurfaceVisibilityContext = {},
 ): TBlock[] {
   const renderableBlocks = blocks.filter((block) => !isCanvasObjectBackingBlock(block));
   return policy.showWorkspaceBlocks
     ? renderableBlocks
-    : renderableBlocks.filter((block) => !isCanvasWorkspaceBlock(block, contentWidth));
+    : renderableBlocks.filter((block) => (
+      !isCanvasWorkspaceBlock(block, contentWidth)
+      || isPageFrameAffiliatedWorkspaceBlock(
+        block,
+        contentWidth,
+        context.pageFrames || [],
+        context.boundary,
+      )
+    ));
 }
 
 export function shouldResolvePageCollisions(policy: SurfaceModePolicy): boolean {

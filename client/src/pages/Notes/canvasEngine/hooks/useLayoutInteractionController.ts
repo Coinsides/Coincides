@@ -9,7 +9,6 @@ export type LayoutModeKind = 'off' | 'persistent' | 'temporary';
 export function useLayoutInteractionController() {
   const [layoutModeKind, setLayoutModeKind] = useState<LayoutModeKind>('off');
   const [snapGuide, setSnapGuide] = useState<SnapGuide | null>(null);
-  const [snapEnabled, setSnapEnabled] = useState(true);
 
   const clearSnapGuide = useCallback(() => {
     setSnapGuide(null);
@@ -35,11 +34,6 @@ export function useLayoutInteractionController() {
     setLayoutModeKind((current) => (current === 'temporary' ? 'off' : current));
   }, [clearSnapGuide]);
 
-  const toggleSnapEnabled = useCallback(() => {
-    clearSnapGuide();
-    setSnapEnabled((value) => !value);
-  }, [clearSnapGuide]);
-
   return {
     beginTemporaryLayoutMode,
     clearSnapGuide,
@@ -49,8 +43,7 @@ export function useLayoutInteractionController() {
     layoutMode: layoutModeKind !== 'off',
     layoutModeKind,
     setSnapGuide,
-    snapEnabled,
+    snapEnabled: layoutModeKind === 'persistent',
     snapGuide,
-    toggleSnapEnabled,
   };
 }

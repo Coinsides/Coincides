@@ -23,6 +23,7 @@ import {
   type FieldValueRecord,
 } from '../blockContentService';
 import type { RuntimeInteractionState } from '../interactionController';
+import { resolveBlockAffiliationOutline } from '../blockAffiliationOutlineService';
 import {
   hasLegitimatePendingWritingEditor,
   hasMeaningfulWritingSurfaceContent,
@@ -720,6 +721,9 @@ export function NoteWritingSurfaceLayer({
   const placementByObjectId = useMemo(() => (
     new Map(noteCanvasRuntime.canvasPlacements.map((placement) => [placement.objectId, placement]))
   ), [noteCanvasRuntime.canvasPlacements]);
+  const blockPlacementByBlockId = useMemo(() => (
+    new Map(noteCanvasRuntime.blockPlacements.map((placement) => [placement.blockId, placement]))
+  ), [noteCanvasRuntime.blockPlacements]);
   const shapePlacements = useMemo(() => (
     noteCanvasRuntime.canvasPlacements.filter((placement) => (
       canvasObjectById.get(placement.objectId)?.kind === 'shape'
@@ -3675,6 +3679,12 @@ export function NoteWritingSurfaceLayer({
           const isActive = activeBlockId === block.id || focusBlockId === block.id || selectedBlockId === block.id;
           const layout = blockLayouts[block.id];
           const blockControlAnchor = isActive ? getBlockControlAnchorForLayout(layout) : null;
+          const affiliationOutline = resolveBlockAffiliationOutline({
+            blockId: block.id,
+            interactionState,
+            placement: blockPlacementByBlockId.get(block.id) || null,
+            pageFrames: noteCanvasRuntime.pageFrames,
+          });
           return (
             <BlockEditorLayer
               key={block.id}
@@ -3684,6 +3694,7 @@ export function NoteWritingSurfaceLayer({
               layout={layout}
               blockFragments={blockFragmentsByBlockId.get(block.id)}
               blockControlAnchor={blockControlAnchor}
+              affiliationOutline={affiliationOutline}
               textFlowDraft={blockTextFlowDrafts[block.id]}
               annotations={annotationTruths}
               draftAnnotationRanges={draftAnnotationRanges}

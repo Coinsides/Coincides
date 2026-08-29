@@ -30,7 +30,6 @@ export function useRuntimeSurfaceStateController({ noteId }: { noteId?: string }
     setSnapGuide,
     snapEnabled,
     snapGuide,
-    toggleSnapEnabled,
   } = useLayoutInteractionController();
 
   const {
@@ -182,7 +181,6 @@ export function useRuntimeSurfaceStateController({ noteId }: { noteId?: string }
     togglePreviewBlockTypes,
     togglePreviewExportStatus,
     togglePreviewLabelOverlay,
-    toggleSnapEnabled,
     toggleSurfaceMode,
     viewportTransform,
     zoomViewportAt,

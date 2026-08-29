@@ -15,6 +15,7 @@ import {
   selectedBlockInteraction,
   type RuntimeInteractionState,
 } from '../interactionController';
+import { clampCrossingPlacementIntoPageFrameContent } from '../pageFrameAffiliationService';
 import {
   shouldResolvePageCollisions,
   shouldUseElasticAvoidance,
@@ -26,7 +27,7 @@ import {
   type BlockBoxLayout,
   type SnapGuide,
 } from '../runtimeLayout';
-import type { CanvasViewport } from '../types';
+import type { CanvasViewport, PageFrameModel } from '../types';
 
 interface PlacementInteractionBlock {
   id: string;
@@ -38,6 +39,8 @@ export interface UseBlockPlacementInteractionsOptions<TBlock extends PlacementIn
   estimateBlockHeightForText: (block: TBlock, text: string, width: number) => number;
   movingBlockIdRef: MutableRefObject<string | null>;
   orderedBlocks: TBlock[];
+  pageFrames: PageFrameModel[];
+  pageOffsetX: number;
   persistChangedBlockLayouts: (layouts: Record<string, BlockBoxLayout>) => void;
   pushLayoutHistory: (
     before: Record<string, BlockBoxLayout>,
@@ -55,12 +58,54 @@ export interface UseBlockPlacementInteractionsOptions<TBlock extends PlacementIn
   viewportTransform: CanvasViewport;
 }
 
+function collectCrossingBlockOnRelease({
+  blockId,
+  layouts,
+  organizeModeEnabled,
+  pageFrames,
+  pageOffsetX,
+}: {
+  blockId: string;
+  layouts: Record<string, BlockBoxLayout>;
+  organizeModeEnabled: boolean;
+  pageFrames: PageFrameModel[];
+  pageOffsetX: number;
+}): Record<string, BlockBoxLayout> {
+  if (!organizeModeEnabled) return layouts;
+  const layout = layouts[blockId];
+  if (!layout) return layouts;
+
+  const worldOffsetX = layout.coordinate_space === 'canvas_world' ? 0 : pageOffsetX;
+  const collected = clampCrossingPlacementIntoPageFrameContent({
+    placement: {
+      x: layout.x + worldOffsetX,
+      y: layout.y,
+      width: layout.width,
+      height: layout.height,
+    },
+    pageFrames,
+  });
+  const nextX = collected.x - worldOffsetX;
+  if (nextX === layout.x && collected.y === layout.y) return layouts;
+
+  return {
+    ...layouts,
+    [blockId]: {
+      ...layout,
+      x: nextX,
+      y: collected.y,
+    },
+  };
+}
+
 export function useBlockPlacementInteractions<TBlock extends PlacementInteractionBlock>({
   blockLayouts,
   contentWidth,
   estimateBlockHeightForText,
   movingBlockIdRef,
   orderedBlocks,
+  pageFrames,
+  pageOffsetX,
   persistChangedBlockLayouts,
   pushLayoutHistory,
   beginTemporaryLayoutMode,
@@ -126,13 +171,22 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
     attachWindowPointerSession({
       onMove: handlePointerMove,
       onEnd: () => {
+        const releasedLayouts = collectCrossingBlockOnRelease({
+          blockId: block.id,
+          layouts: latestLayouts,
+          organizeModeEnabled: snapEnabled,
+          pageFrames,
+          pageOffsetX,
+        });
+        latestLayouts = releasedLayouts;
         suppressMeasuredReflowUntilRef.current = Date.now() + LAYOUT_MEASURE_SUPPRESSION_MS;
         movingBlockIdRef.current = null;
         setSnapGuide(null);
         clearTemporaryLayoutMode();
         setInteractionState(selectedBlockInteraction(block.id));
-        pushLayoutHistory(startLayouts, latestLayouts);
-        persistChangedBlockLayouts(latestLayouts);
+        setLayoutDrafts(releasedLayouts);
+        pushLayoutHistory(startLayouts, releasedLayouts);
+        persistChangedBlockLayouts(releasedLayouts);
       },
     });
   }, [
@@ -140,6 +194,8 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
     contentWidth,
     movingBlockIdRef,
     orderedBlockIds,
+    pageFrames,
+    pageOffsetX,
     persistChangedBlockLayouts,
     pushLayoutHistory,
     beginTemporaryLayoutMode,
@@ -194,11 +250,20 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
     attachWindowPointerSession({
       onMove: handlePointerMove,
       onEnd: () => {
+        const releasedLayouts = collectCrossingBlockOnRelease({
+          blockId: block.id,
+          layouts: latestLayouts,
+          organizeModeEnabled: snapEnabled,
+          pageFrames,
+          pageOffsetX,
+        });
+        latestLayouts = releasedLayouts;
         setSnapGuide(null);
         clearTemporaryLayoutMode();
         setInteractionState(selectedBlockInteraction(block.id));
-        pushLayoutHistory(startLayouts, latestLayouts);
-        persistChangedBlockLayouts(latestLayouts);
+        setLayoutDrafts(releasedLayouts);
+        pushLayoutHistory(startLayouts, releasedLayouts);
+        persistChangedBlockLayouts(releasedLayouts);
       },
     });
   }, [
@@ -206,6 +271,8 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
     contentWidth,
     estimateBlockHeightForText,
     orderedBlockIds,
+    pageFrames,
+    pageOffsetX,
     persistChangedBlockLayouts,
     pushLayoutHistory,
     beginTemporaryLayoutMode,

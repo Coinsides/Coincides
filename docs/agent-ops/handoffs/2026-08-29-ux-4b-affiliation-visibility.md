@@ -1,4 +1,4 @@
-> from: claude(fable,代理期直发——调度会话下线,授权:claude-log/2026-08-19.md 条目 1;方案 Henry 2026-08-29 晨当面拍板) | to: codex(builder) | status: needs: claude | re: UX-4b | date: 2026-08-29
+> from: claude(fable,代理期直发——调度会话下线,授权:claude-log/2026-08-19.md 条目 1;方案 Henry 2026-08-29 晨当面拍板) | to: codex(builder) | status: done | re: UX-4b | date: 2026-08-29
 
 # UX-4b:页面归属可见性接线 + 虚线框分色 + 行首按钮删除 + 整理模式合并
 
@@ -226,3 +226,95 @@ Henry 实测走查 🅰 头号(档案:`docs/agent-ops/analysis/2026-08-29-ux-wal
 - 本工单 tracked numstat：`88/1`（新增五派回执，并把顶层/五派状态改成 `needs: claude`）。授权面合计为 `925/87`；所有真实内容 diff 均位于准许的 `client/src/pages/Notes/canvasEngine/**` 或本工单。
 - 禁区显式排除：`server/src/routes/projections.ts` 的 HEAD blob 与工作树 `git hash-object` 均为 `561902a449b50ce254b650de5a337973a8fbc26d`，确认仍只是 EOL 假脏；既有 `?? .claude/settings.local.json` 未触碰。没有 `shared/**`、Sources、12.9c、package/tsconfig、其他 handoff/analysis、锁或 PID 内容 diff。
 - 停线探针：`git diff --check` exit=`0`。五派未 commit、未 push；发现冲突后未改任何生产文件/测试，唯一续写为本工单 Result 与状态。
+
+## Result 六次派工
+
+> builder 六次派工开工回执 | 2026-08-29 | `status: in_progress` | 依据「## 修订二(Fable 裁定,六次派工)」解除五派停线；规格不动，遗产 resize 刀作废重写
+
+### 六派开工边界与续建基线（即时落盘）
+
+- 当前分支亲验为 `fable/v2-bn12-exoskeleton`，仓根 `.codegraph/` 存在。PowerShell 中 `codegraph` CLI 不可执行；随后查得本会话延迟加载的 `mcp__codegraph__codegraph_explore` 并已用它读取 UX-4b 调用链，故代码定位仍遵守 CodeGraph-first。
+- 五派遗产体检表继续有效：交付物 1、3 视为「成形但 mutation 未验」；交付物 2、4 视为「残缺，须续建」。不重写成形件，不把五派自然红绿冒充本轮 mutation 证据。
+- 修订二边界已复核：`crossing` 才在整理模式松手收编；`inside` 即使边溢出也不动；旧 resize fixture 与旧期望数值全部作废。move / resize 共用同一松手归属规则，resize 仅在能构造真实 crossing 时保留专项刀。
+- 已显式排除且不触碰：`server/**`（含既有 `server/src/routes/projections.ts` 假脏）、`shared/**`、Sources / 12.9c 在飞面、`.claude/**`、其他 handoff/analysis、package/tsconfig、main、锁与 PID；不 commit、不 push。
+- 本轮执行纪律：先补交付物 2 并立刻回写；再补交付物 4 并立刻回写；随后逐 K 施变异。每刀先记录当前断言原文与行号，再以 diff/源码探针证明变异落地，之后才读取红点；还原后亲取绿。
+
+### 交付物 2 完成（即时落盘）
+
+- 已补四派断链：`BlockEditorLayer.tsx:17,77,136` 接收并解构 `BlockAffiliationOutlineState | null`；`:345-346` 把实时 token 写到既有 block border，并在手势态强制 `dashed`。这是复用既有框，不新增 DOM / CSS 类 / 色值；page / canvas 两模式共用同一 `BlockEditorLayer` 接点。
+- 已补真实 UI 桥常驻断言：`BlockEditorLayer.test.tsx:130-142` 分别把 page / workspace 状态送入组件，精确断言既有虚线框的 `borderStyle` 与 `borderColor`；不再只有 service 映射自洽而 UI 断链仍绿。
+- 完成时亲跑：两份专项 `blockAffiliationOutlineService.test.ts` + `BlockEditorLayer.test.tsx` 为 `2 files / 8 tests` 全绿，exit=`0`；client `npx.cmd tsc --noEmit` exit=`0`，五派唯一 TS2322 已消失；`git diff --check` exit=`0`。
+- K-3 mutation 红点尚未冒领：这里只记交付物成形与自然绿；两态逐刀变异仍在后续 K 面按「落地证明→读红→还原绿」执行。
+
+### 交付物 4 完成（即时落盘）
+
+- 整理模式已真正合一：`useLayoutInteractionController.ts:46` 令 `snapEnabled` 仅在 `layoutModeKind === 'persistent'` 时为真；temporary 手势只闪辅助线，不会偷开吸附。独立 snap state / toggle 已删除，`NoteChromeLayer` 的 `Snap alignment` 控件与 `useRuntimeSurfaceStateController` → `useNoteCanvasRuntimeController` → `useNoteCanvasLayerProps` 回调链一并拆净；全域 `toggleSnapEnabled|onToggleSnapEnabled` 零命中。既有 `layoutMode` 消费者未改接线。
+- 松手收编共用一条规则：`pageFrameAffiliationService.ts:137-163` 先按权威中心点/content boundary 判归属，只给 `crossing` 做 translation-only 最小平移；`inside`（含合法边溢出）与 `workspace_only` 原样返回。`useBlockPlacementInteractions.ts:61-96` 只做 world/local x 换算；move `:174-189` 与 resize `:253-266` 都把同一个 `releasedLayouts` 送入 draft / history / persist。
+- fallback frame 接线未漏：`useRuntimeLayoutModelController.ts:86` 把它在 `:49-55` 已合成的 `pageFrames` 带出，`useNoteCanvasRuntimeController.ts:197,296` 再送进 placement hook；无持久化 `pageFrameCollection` 的普通 Note 也走同一规则。
+- 五派作废 resize 刀已整段重写：新 fixture 从 `{x:355,y:90,width:45,height:52}` 右扩 `70`，候选为 `{x:355,y:90,width:115,height:64}`，中心 `412.5 > contentRight 400` 且左缘 `355 < 400`，是真实 crossing；最小平移唯一得到 `x=285`。`useBlockPlacementInteractions.test.tsx:165-190` 同时锁 persist / draft / history，未沿用阵亡者的 fixture 或期望数值；`:195` 另锁「中心 inside 但右边溢出」保持不动，保护 Henry hitbox 律。
+- 完成时亲跑：layout-controller + placement + chrome 三份专项 `3 files / 11 tests` 全绿，exit=`0`；补强 resize 三通道断言后单文件 `6/6` 复跑绿；client `npx.cmd tsc --noEmit` exit=`0`；`git diff --check` exit=`0`。
+- K-5 mutation 红点尚未冒领：这里只记交付物成形与自然绿；整理模式派生、开/关 move、resize 与 inside-overflow 各刀仍在后续 K 面亲施。
+
+### K-1 mutation 红绿完成（即时落盘）
+
+- 红点断言原文：`useNoteCanvasLayoutModel.affiliationVisibility.test.tsx:68-70` —— `expect(result.current.visibleBlocks.map((block) => block.id)).toEqual([ outerMarginBlock.id ])`。
+- 变异：把 `useNoteCanvasLayoutModel.ts:100` 的可见性 boundary 从权威 `outer` 改成 `content`。读红前先用源码探针确认 `:97-102` 已实际落成 `boundary: 'content'`，并由 diff 探针看见新增行，变异非空。
+- 红：单文件专项 exit=`1`，`1 failed / 1 passed`；上述断言在 `:68` 收到 `[]`，期望 `['outer-margin-canvas-block']`。这证明「中心压在纸边距上也算在纸上」由测试真实守住。
+- 还原：用 `apply_patch` 恢复 `boundary: 'outer'`；同一单文件专项复跑 exit=`0`，`2/2` 绿。
+
+### K-2 两半 mutation 红绿完成（即时落盘）
+
+- **K-2a 坐标不挤位**断言原文：`useNoteCanvasLayoutModel.affiliationVisibility.test.tsx:104-106` —— `expect(result.current.blockLayouts[crossingBlock.id]).toMatchObject(persistedCrossingRect)`。⚠️ 遗产变量名仍叫 `crossingBlock`，但按修订二 outer hitbox，其中心在页内，几何实义是「合法 inside 溢出」；本轮不为改名扩面，断言保护的仍是权威规格。
+- K-2a 变异：把 `useNoteCanvasLayoutModel.ts:125-127` 的 workspace-affiliated canvas normalization 分支临时折成 `const normalizationSurfaceMode = surfaceMode`。读红前源码探针确认该单行已落地，diff 探针亦见该新增行。红：专项 exit=`1`，`:104` 收到 `{x:0,y:0,width:760,height:42}`，期望持久化 `{x:-40,y:160,width:120,height:80}`；可见集合仍对，只有「不挤位」半刀红。还原后三同文件 `2/2` 绿。
+- **K-2b workspace-only 对照**断言原文：同文件 `:101-103` 只允许 `[crossingBlock.id]`，`:107` 另断 `workspaceOnlyBlock` layout 为 `undefined`。
+- K-2b 变异：在 `modePolicyService.ts:80` 临时追加 `|| true`，放行所有 workspace 块。读红前源码探针确认 `}).kind !== 'workspace_only' || true` 已落地，diff 探针亦命中。红：专项 exit=`1`，`:101` 实收多出 `'workspace-only-canvas-block'`；K-1 仍绿。还原精确 guard 后同文件复跑 `2/2` 绿。
+
+### K-3 两态 mutation 红绿完成（即时落盘）
+
+- 两态共同断言原文：`BlockEditorLayer.test.tsx:130-141` 参数化 page / workspace；`:140` 为 `expect(blockShell?.style.borderStyle).toBe('dashed')`，`:141` 为 `expect(blockShell?.style.borderColor).toBe(colorToken)`。
+- **page 蓝框刀**：把 `BlockEditorLayer.tsx:345` 临时固定成 `affiliationOutline ? 'var(--border-default)' : undefined`。读红前源码与 diff 探针均确认灰 token 已落地；单文件专项 exit=`1`，仅 page 用例红，`:141` 期望 `var(--border-focus)`、实收 `var(--border-default)`，其余 `4/4` 绿。用 `apply_patch` 恢复动态 `affiliationOutline?.colorToken` 后，同文件 `5/5` 绿。
+- **workspace 灰框刀**：同一接点临时固定成 `affiliationOutline ? 'var(--border-focus)' : undefined`。读红前源码探针看见 `BlockEditorLayer.tsx:345` 的蓝 token，diff 探针亦命中；单文件专项 exit=`1`，仅 workspace 用例红，`:141` 期望 `var(--border-default)`、实收 `var(--border-focus)`，其余 `4/4` 绿。再次用 `apply_patch` 恢复动态 token 后，同文件 `5/5` 绿。
+- 两刀都由同一精确状态—颜色配对断言独立触发，`:140` 同时保持虚线样式约束；没有用计数或「两色都出现」冒充状态配对。
+
+### K-4 三半 mutation 红绿完成（即时落盘）
+
+- **K-4.1 gutter 零渲染**断言原文：`BlockEditorLayer.test.tsx:148-151` 的三个 gutter button 均 `toBeNull()`，且 `expect(within(gutter).getByRole('combobox', { name: 'Text unit writing role' })).toBeTruthy()`。变异是在 `TextUnitGutterLayer.tsx:38` 临时补回一个 `aria-label="Insert text unit below"` 的 button；读红前源码与 diff 探针均看见该真实 DOM。红：单文件专项 exit=`1`，仅 K-4.1 红，`:149` 期望 `null`、实收该 button；其余 `4/4` 绿。移除临时 button 后同文件 `5/5` 绿。
+- **K-4.2 右侧 Insert 真功能**断言原文：`:157` 点击右栏 button 后，`:159` 为 `expect(subject.onTextFlowChange).toHaveBeenCalledTimes(1)`，`:160-175` 继续锁两 unit、空 paragraph 与 plain text `Alpha\n`。变异把 `BlockControlBarLayer.tsx:108` 的 Insert `onClick` 临时断成 `() => undefined`；读红前源码与 diff 探针确认空回调已落地且 button 仍渲染。红：exit=`1`，仅 K-4.2 红，`:159` 期望 `1` 次、实收 `0` 次；其余 `4/4` 绿。恢复真实回调后 `5/5` 绿。
+- **K-4.3 既有控制不回归**断言原文：`:189-195` 对 Move / Export / AI / Save / Label / Trash 六条回调逐一 `toHaveBeenCalledTimes(1)`，并锁 Save 参数为 `false`。变异只把 `BlockControlBarLayer.tsx:97` 的 Move `onPointerDown` 临时断成空回调；读红前源码与 diff 探针确认变异落地。红：exit=`1`，仅 K-4.3 红，`:189` 的 `onBeginMove` 期望 `1` 次、实收 `0` 次；其余 `4/4` 绿。恢复 `onBeginMove` 后 `5/5` 绿。
+- 三半均从当前生产接点独立断开并各自读红；每半恢复后都复跑同一组件专项取绿，没有把「按钮存在」冒充「功能真实」。
+
+### K-5 mutation 红绿完成（即时落盘）
+
+- **整理模式派生刀**断言原文：`useLayoutInteractionController.test.tsx:9-20` 依次锁 off 的 `snapEnabled=false`、temporary 的 `snapEnabled=false`（`:15`）、persistent 的 `snapEnabled=true`。变异把 `useLayoutInteractionController.ts:46` 从 `layoutModeKind === 'persistent'` 改为 `layoutModeKind !== 'off'`；读红前源码与 diff 探针确认变异落地。红：单文件 exit=`1`，`:15` 期望 `false`、实收 `true`，证明 temporary 辅助线不能偷开吸附。恢复后 `1/1` 绿。
+- **独立 UI 删除刀**断言原文：`NoteChromeLayer.test.tsx:191-192` —— Layout button 存在，`expect(screen.queryByText('Snap alignment')).toBeNull()`。变异在真实 Layout panel 临时补回 `<span>Snap alignment</span>`；读红前 `NoteChromeLayer.tsx:524` 源码与 diff 探针均见该节点。红：单文件 exit=`1`，仅 organize-mode 用例红，`:192` 期望 `null`、实收该 span；其余 `3/3` 绿。移除临时节点后 `4/4` 绿。
+- **整理开 / move 刀**断言原文：`useBlockPlacementInteractions.test.tsx:130-145` 要求 crossing 候选松手后 `{x:100,y:260,width:80,height:60}` 同时进入 persist、current draft 与 history。变异只把 move 松手调用点 `useBlockPlacementInteractions.ts:177` 临时传成 `organizeModeEnabled:false`；读红前源码与 diff 探针确认该实参已落地。红：单文件 exit=`1`，仅「organize on drag」用例红，`:130` 期望 `(100,260)`、实收候选 `(40,310)`；其余 `5/5` 绿。恢复 `snapEnabled` 后 `6/6` 绿。
+- **整理关 / move 刀**断言原文：同测试 `:160-162` —— `crossingCandidate={x:40,y:310,width:80,height:60}` 在 persist 与 current draft 中逐值不变。变异只把同一 move 调用点 `:177` 临时传成 `organizeModeEnabled:true`；读红前源码与 diff 探针确认常真已落地。红：exit=`1`，仅「organize off drag」用例红，`:161` 期望 `(40,310)`、实收被收编的 `(100,260)`；其余 `5/5` 绿。恢复后 `6/6` 绿。开、关两刀各自单独触发，未以同一刀同时打红冒领双向证据。
+- **真实 crossing resize 刀**断言原文：`:178-190` 精确锁 `collectedLayout={x:285,y:90,width:115,height:64,width_mode:'manual'}`，并要求 persist / current draft / history 同值。该 fixture 从 `{x:355,width:45}` 右扩 `70` 得候选 `{x:355,width:115}`，中心 `412.5>400` 且左缘 `355<400`，确为 crossing；期望 x=285 是独立算出的最小左移 70。变异只把 resize 松手调用点 `useBlockPlacementInteractions.ts:256` 临时传成 `organizeModeEnabled:false`；读红前源码与 diff 探针确认落地。红：exit=`1`，仅 resize 用例红，`:185` 期望 x=285、实收 x=355；其余 `5/5` 绿。恢复后 `6/6` 绿。五派的旧 `{x:240,width:60}+140` 刀及其旧期望均未沿用。
+- **inside 合法溢出律刀**断言原文：`:193-208` 参数 `inside with legal overflow={x:350,y:80,width:80,height:60}`，`:208` 要求松手 persist 逐值等于输入。变异把 `pageFrameAffiliationService.ts:147` 的「非 crossing 即返回」临时改成只让 `workspace_only` 返回，使 inside 也错误进入 clamp；读红前源码与 diff 探针确认新 guard 落地。红：exit=`1`，仅合法溢出用例红，`:208` 期望 x=350、实收 x=320；其余 `5/5` 绿。恢复权威 `affiliation.kind !== 'crossing'` 后 `6/6` 绿，直接守住 Henry 的「中心进了就算进了」hitbox 律。
+- 上述生产变异均已手工反向恢复；当前没有遗留 mutation。K-5 六组证据分别覆盖派生、独立入口删除、move 开、move 关、resize 同规与 inside 不动。
+
+### K-6 formal_page 精确回归与 mutation 完成（即时落盘）
+
+- 已在本单真正改动的 pointer-up hook 边界补回归：`useBlockPlacementInteractions.test.tsx:214-255` 以 page policy、`pageOffsetX=0` 和整理模式开，构造完整原生 `formal_page` / `page_frame_local` 布局 `{x:350,width:80,...}`。它的中心 390 落在 content `[100,400]` 内、右缘 430 合法溢出；不发 pointermove，直接 pointerup。
+- 断言原文：`:251` `expect(JSON.stringify(persistedLayout(...))).toBe(initialBytes)`；`:252` 对 current draft 同断；`:253-254` 对 history before / after 同断；`:255` 另锁输入对象本身。比较串包含 rotation、export / AI、surface、width mode、coordinate space、frame / boundary 与 authority，故不是 subset 等价。
+- 新回归落地后的首轮全文件基线遇到一次 Node 自身 `InitializeBundledRootCertificates` native assertion / `ERR_IPC_CHANNEL_CLOSED`，没有测试断言、未计红绿；原命令立即重跑 `7/7` 绿，确认是瞬时进程故障而非现物冲突。
+- mutation：把 `pageFrameAffiliationService.ts:147` 临时改成只让 `workspace_only` 返回，使 inside-overflow 错进 clamp。读红前源码探针确认 `affiliation.kind === 'workspace_only'` 已落地，diff 探针亦命中；随后用 `-t "K-6"` 只读该回归。红：exit=`1`，`:251` 的完整 JSON 仅 x 从期望 350 变成实收 320，其余字节相同；`1 failed / 6 skipped`。恢复 `affiliation.kind !== 'crossing'` 后同一 targeted 命令 exit=`0`，`1 passed / 6 skipped`。
+- 该回归直接经过本轮新 release helper，补上五派体检所指出的旧 `surfacePersistenceContract` / `useSurfaceModeController` 覆盖不到的 hook 边界；当前 mutation 已恢复。
+
+### K-6 重门（逐门即时落盘）
+
+| 顺序 | 命令 | exit / 结果 |
+|---|---|---|
+| 1 | client `npx.cmd tsc --noEmit` | `0`；无诊断，约 5.7s |
+| 2 | client `npm.cmd run test:unit` | `0`；`31 files / 249 tests` 全绿，约 9.7s；仅既有 React Router future warning 与 rollback stderr，无失败 |
+| 3 | client 六份本单 `vitest run`（affiliation visibility / outline / BlockEditor / layout interaction / placement / NoteChrome） | `0`；`6 files / 22 tests` 全绿，约 2.3s |
+| 4 | client `npm.cmd run check:canvas-runtime-boundary`（`canvasRuntimeBoundaryCheck.mjs`） | `0`；`159 checks` 全部 passed，约 0.2s |
+| 5 | repo `npm.cmd run verify:v2-bn8-runtime` | `0`；约 41.6s；unit 249、tool-face registry/manifest/parity、server-shared boundary、159 runtime checks、各 shell/source/BN11 契约、60-group model smoke、client/server build、performance、docs、diff check 与 changed-file secret scan 全过；仅既有 recursive-schema / Vite chunk 等 warning |
+
+### 六派最终边界、numstat 与交付判定
+
+- mutation 恢复探针：生产现物分别为 `BlockEditorLayer.tsx:345 affiliationOutline?.colorToken`、`useLayoutInteractionController.ts:46 layoutModeKind === 'persistent'`、move / resize `useBlockPlacementInteractions.ts:177,256 organizeModeEnabled:snapEnabled`、`pageFrameAffiliationService.ts:147 affiliation.kind !== 'crossing'`；`toggleSnapEnabled|onToggleSnapEnabled` 在 `canvasEngine/**` 零命中，`Snap alignment` 只剩“应不存在”的测试文字。无遗留变异。
+- `git diff --numstat` 边界：tracked `canvasEngine/**` 合计 `285 insertions / 128 deletions`；六个授权 untracked service / test 合计 `730 / 0`；代码面总计 `1015 / 128`，全部位于允许的 `client/src/pages/Notes/canvasEngine/**`。本 handoff 为 `93 insertions / 1 deletion`；除既知 EOL 假脏外没有越界 tracked 内容。
+- 禁区复核：`server/src/routes/projections.ts` 的 HEAD blob 与工作树 `git hash-object` 仍同为 `561902a449b50ce254b650de5a337973a8fbc26d`，确认只有 EOL 假脏；`shared/**`、Sources / 12.9c、`.claude/**`、其他 handoff/analysis、package/tsconfig、锁与 PID 均未触碰。既有 untracked `.claude/settings.local.json` 原样留置。
+- 本段落地后的收尾 `git diff --check` exit=`0`；无 commit、无 push、未碰 main、未碰任何锁。
+- **交付判定：四件交付物均成形；五派残缺件 2 与 4 已续建完成；K-1～K-6 mutation 取证、formal_page 精确回归与全部重门均完成。六次派工状态置 `done`。**
