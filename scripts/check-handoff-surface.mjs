@@ -115,6 +115,22 @@ for (const m of order.matchAll(NPM_CMD)) {
 console.log('  npm 命令 ' + seenCmd.size + ' 条,不存在的 ' + badCmds.length + ' 条');
 if (badCmds.length) fail('⛔ 工单点名了树上不存在的 npm script:', badCmds);
 
+const hintLines = [];
+for (const s of allowSecs) {
+  for (const line of s.text.split(String.fromCharCode(10))) {
+    if (!line.includes(String.fromCharCode(9940))) continue;
+    if (FORBID_LINE.test(line)) continue;
+    if ([...line.matchAll(PATHLIKE)].length === 0) continue;
+    hintLines.push(line.trim().slice(0, 90));
+  }
+}
+if (hintLines.length) {
+  console.log('');
+  console.log('⚠️ 允许面段里有 ' + hintLines.length + ' 行同时含 ⛔ 与路径 —— 请逐行确认它们确实是【允许触碰】的条目:');
+  for (const h of hintLines) console.log('   · ' + h);
+  console.log('   (同形已三次:migrate.ts / 归档条目名 / INDEX.md —— 都是说明性引用被算进了允许面)');
+}
+
 const missing = [...needed].filter((p) => !covered(p, allowed));
 if (missing.length) fail('⛔ 判据与边界打架 —— 下列文件在判据段被点名要触碰,却不在允许面:', missing);
 
