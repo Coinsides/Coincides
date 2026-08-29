@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 203 份文档。
+共 204 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -206,6 +206,7 @@
 | [handoffs/2026-08-29-v12-9c-c1b0-transcriber-fingerprint.md](handoffs/2026-08-29-v12-9c-c1b0-transcriber-fingerprint.md) | c-1b-0:转写器身份的承重件(⭐ 先于任何 MinerU 拓印落地) | `done(第二次派工全绿;复核方亲刀 K-3 反刀与 K-4 强制**各取到真红**,test:v2 自跑 338/338,tsc 零诊断。⚠️ 第一次派工的停线是对的 —— 单的第一版不可满足,归发单方)` | — | — |
 | [handoffs/2026-08-29-v12-9c-c1b1-mineru-wiring.md](handoffs/2026-08-29-v12-9c-c1b1-mineru-wiring.md) | c-1b-1:MinerU 接线(⭐ 这是**接线**单,⛔ 不是语义单) | `done(第二次派工全绿;复核方亲刀 K-2 取真红、K-1 补掐冗余第二层后取到**真孤儿**,test:v2 自跑 343/343。⚠️ 第一次派工的停线是对的 —— 单的第一版不可满足,归发单方)` | — | — |
 | [handoffs/2026-08-29-v12-9c-c1b2-region-and-cells.md](handoffs/2026-08-29-v12-9c-c1b2-region-and-cells.md) | c-1b-2:region 保真与单元格可寻址(⭐ 本单有**结构面**,⛔ 不是纯语义单) | `done(第二次派工按 v0.7.5 全绿;复核方亲刀**排他半边**取到真红,test:v2 自跑 350/350。⚠️ 第一次派工的停线是对的 —— 它发现的是工具的结构性上限,并**拒绝**了两条能凑绿的路)` | — | — |
+| [handoffs/2026-08-29-v12-9c-c1c-per-type-rulers.md](handoffs/2026-08-29-v12-9c-c1c-per-type-rulers.md) | c-1c:考卷分角色(三级火箭第 1 级)—— **每类东西用它该用的尺子** | `ready(⭐ 这是**语义实验单**,⛔ 不产生任何生产码接线)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
 | [handoffs/plans/v12-9b-anchored-fragment-stream-spec.md](handoffs/plans/v12-9b-anchored-fragment-stream-spec.md) | 带锚碎片流(Anchored Fragment Stream)规格 v0 | `active` | — | — |
