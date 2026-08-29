@@ -4,6 +4,7 @@ import {
   createReadStream,
   existsSync,
   mkdirSync,
+  readFileSync,
   readdirSync,
   renameSync,
   statSync,
@@ -33,16 +34,26 @@ export type SourceFormat =
   | 'webp'
   | 'pptx'
   | 'xlsx'
-  | 'csv';
+  | 'csv'
+  | 'binary';
 export type SourceCapability = 'materializable' | 'stored_only';
 export type SourceOriginEntryKind = 'project_upload' | 'library_upload' | 'import';
+
+export const SOURCE_INTAKE_DECLARATION_CODES = [
+  'unknown_extension',
+  'signature_mismatch',
+  'non_utf8_text',
+  'nul_bytes',
+  'binary_unparsed',
+] as const;
+export type SourceIntakeDeclarationCode = typeof SOURCE_INTAKE_DECLARATION_CODES[number];
 
 interface SourceFormatDefinition {
   format: SourceFormat;
   extensions: string[];
   mimeTypes: string[];
   capability: SourceCapability;
-  signature: 'pdf' | 'zip' | 'png' | 'jpeg' | 'webp' | 'text';
+  signature: 'pdf' | 'zip' | 'png' | 'jpeg' | 'webp' | 'text' | 'binary';
   parserKey: string;
   parserVersion: string;
 }
@@ -143,6 +154,18 @@ const SOURCE_FORMATS: SourceFormatDefinition[] = [
   },
 ];
 
+const BINARY_FALLBACK_DEFINITION: SourceFormatDefinition = {
+  format: 'binary',
+  extensions: [],
+  mimeTypes: ['application/octet-stream'],
+  capability: 'stored_only',
+  signature: 'binary',
+  parserKey: 'stored-only',
+  parserVersion: 'none',
+};
+
+const TEXT_FALLBACK_DEFINITION = SOURCE_FORMATS.find((definition) => definition.format === 'txt')!;
+
 export interface SourceTempFileInput {
   path: string;
   originalname: string;
@@ -194,6 +217,7 @@ interface SourceInternalRow {
   error_message: string | null;
   started_at: string | null;
   completed_at: string | null;
+  intake_declarations_json: string;
 }
 
 interface DuplicateRow {
@@ -215,6 +239,8 @@ interface InspectedSourceTempFile {
   capability: SourceCapability;
   parser_key: string;
   parser_version: string;
+  intake_declarations: SourceIntakeDeclarationCode[];
+  fallback_text: string | null;
 }
 
 function sourceError(
@@ -276,11 +302,16 @@ function normalizeMimeType(mimeType: string): string {
 
 function definitionForFilename(filename: string): SourceFormatDefinition {
   const extension = extname(filename).toLowerCase();
-  const definition = SOURCE_FORMATS.find((candidate) => candidate.extensions.includes(extension));
+  const definition = definitionForFilenameOrNull(filename);
   if (!definition) {
     throw sourceError(400, 'unsupported_file_type', `Unsupported Source file extension: ${extension || '(none)'}`);
   }
   return definition;
+}
+
+function definitionForFilenameOrNull(filename: string): SourceFormatDefinition | null {
+  const extension = extname(filename).toLowerCase();
+  return SOURCE_FORMATS.find((candidate) => candidate.extensions.includes(extension)) || null;
 }
 
 function hasZipSignature(buffer: Buffer): boolean {
@@ -292,21 +323,37 @@ function hasZipSignature(buffer: Buffer): boolean {
       || (buffer[2] === 0x07 && buffer[3] === 0x08));
 }
 
-function assertSignature(definition: SourceFormatDefinition, head: Buffer): void {
-  let valid = false;
-  if (definition.signature === 'pdf') {
-    valid = head.subarray(0, 1024).indexOf(Buffer.from('%PDF-')) >= 0;
-  } else if (definition.signature === 'zip') {
-    valid = hasZipSignature(head);
-  } else if (definition.signature === 'png') {
-    valid = head.length >= 8 && head.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
-  } else if (definition.signature === 'jpeg') {
-    valid = head.length >= 3 && head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff;
-  } else if (definition.signature === 'webp') {
-    valid = head.length >= 12
+function hasSignature(signature: SourceFormatDefinition['signature'], head: Buffer): boolean {
+  if (signature === 'pdf') {
+    return head.subarray(0, 1024).indexOf(Buffer.from('%PDF-')) >= 0;
+  }
+  if (signature === 'zip') return hasZipSignature(head);
+  if (signature === 'png') {
+    return head.length >= 8 && head.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+  }
+  if (signature === 'jpeg') {
+    return head.length >= 3 && head[0] === 0xff && head[1] === 0xd8 && head[2] === 0xff;
+  }
+  if (signature === 'webp') {
+    return head.length >= 12
       && head.subarray(0, 4).toString('ascii') === 'RIFF'
       && head.subarray(8, 12).toString('ascii') === 'WEBP';
-  } else {
+  }
+  return false;
+}
+
+function definitionForDistinctMagic(head: Buffer): SourceFormatDefinition | null {
+  for (const signature of ['pdf', 'png', 'jpeg', 'webp'] as const) {
+    if (hasSignature(signature, head)) {
+      return SOURCE_FORMATS.find((definition) => definition.signature === signature) || null;
+    }
+  }
+  return null;
+}
+
+function assertSignature(definition: SourceFormatDefinition, head: Buffer): void {
+  let valid = false;
+  if (definition.signature === 'text') {
     if (head.includes(0)) {
       throw sourceError(400, 'invalid_text_encoding', 'Text Source contains NUL bytes');
     }
@@ -316,6 +363,8 @@ function assertSignature(definition: SourceFormatDefinition, head: Buffer): void
     } catch {
       throw sourceError(400, 'invalid_text_encoding', 'Text Source must be valid UTF-8');
     }
+  } else {
+    valid = hasSignature(definition.signature, head);
   }
 
   if (!valid) {
@@ -336,6 +385,7 @@ async function hashFile(filePath: string): Promise<string> {
 export async function inspectSourceTempFile(
   file: SourceTempFileInput,
   options: Pick<SourceStorageOptions, 'rootDir'> = {},
+  mode: 'strict' | 'intake' = 'strict',
 ): Promise<InspectedSourceTempFile> {
   ensureSourceStorageDirectories(options.rootDir);
   const tempPath = assertTempPath(file.path, options.rootDir);
@@ -353,9 +403,12 @@ export async function inspectSourceTempFile(
   }
 
   const originalFilename = cleanFilename(file.originalname);
-  const definition = definitionForFilename(originalFilename);
-  const mimeType = normalizeMimeType(file.mimetype);
-  if (!definition.mimeTypes.includes(mimeType)) {
+  const claimedDefinition = definitionForFilenameOrNull(originalFilename);
+  let definition = claimedDefinition || (mode === 'intake'
+    ? BINARY_FALLBACK_DEFINITION
+    : definitionForFilename(originalFilename));
+  let mimeType = normalizeMimeType(file.mimetype) || 'application/octet-stream';
+  if (mode === 'strict' && claimedDefinition && !definition.mimeTypes.includes(mimeType)) {
     throw sourceError(400, 'mime_extension_mismatch', 'Source MIME type does not match its file extension', {
       mime_type: mimeType,
       extension: extname(originalFilename).toLowerCase(),
@@ -370,7 +423,75 @@ export async function inspectSourceTempFile(
     bytes.copy(head, offset);
     offset += bytes.length;
   }
-  assertSignature(definition, head.subarray(0, offset));
+  const declarationSet = new Set<SourceIntakeDeclarationCode>();
+  let fallbackText: string | null = null;
+  const inspectedHead = head.subarray(0, offset);
+  if (mode === 'strict') {
+    assertSignature(definition, inspectedHead);
+  } else {
+    const detectedDefinition = definitionForDistinctMagic(inspectedHead);
+    if (!claimedDefinition) declarationSet.add('unknown_extension');
+    if (claimedDefinition && !claimedDefinition.mimeTypes.includes(mimeType)) {
+      declarationSet.add('signature_mismatch');
+    }
+
+    if (detectedDefinition) {
+      if (!claimedDefinition
+        || detectedDefinition.signature !== claimedDefinition.signature
+        || !detectedDefinition.mimeTypes.includes(mimeType)) {
+        declarationSet.add('signature_mismatch');
+      }
+      definition = detectedDefinition;
+      if (!definition.mimeTypes.includes(mimeType)) mimeType = definition.mimeTypes[0];
+    } else if (hasZipSignature(inspectedHead)) {
+      if (claimedDefinition?.signature === 'zip') {
+        definition = claimedDefinition;
+        if (!definition.mimeTypes.includes(mimeType)) {
+          declarationSet.add('signature_mismatch');
+          mimeType = definition.mimeTypes[0];
+        }
+      } else {
+        if (claimedDefinition || mimeType !== 'application/octet-stream') {
+          declarationSet.add('signature_mismatch');
+        }
+        declarationSet.add('binary_unparsed');
+        definition = BINARY_FALLBACK_DEFINITION;
+        mimeType = definition.mimeTypes[0];
+      }
+    } else {
+      const bytes = readFileSync(tempPath);
+      const containsNul = bytes.includes(0);
+      let decodedText: string | null = null;
+      if (containsNul) {
+        declarationSet.add('nul_bytes');
+      } else {
+        try {
+          decodedText = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+        } catch {
+          declarationSet.add('non_utf8_text');
+        }
+      }
+
+      if (decodedText !== null && (!claimedDefinition || claimedDefinition.signature === 'text')) {
+        definition = claimedDefinition || TEXT_FALLBACK_DEFINITION;
+        if (!definition.mimeTypes.includes(mimeType)) {
+          if (claimedDefinition || mimeType !== 'application/octet-stream') {
+            declarationSet.add('signature_mismatch');
+          }
+          mimeType = definition.mimeTypes[0];
+        }
+        if (!claimedDefinition) fallbackText = decodedText;
+      } else {
+        if (claimedDefinition && claimedDefinition.signature !== 'text') {
+          declarationSet.add('signature_mismatch');
+        }
+        declarationSet.add('binary_unparsed');
+        definition = BINARY_FALLBACK_DEFINITION;
+        mimeType = definition.mimeTypes[0];
+      }
+    }
+  }
+  const declarations = SOURCE_INTAKE_DECLARATION_CODES.filter((code) => declarationSet.has(code));
 
   return {
     temp_path: tempPath,
@@ -383,7 +504,96 @@ export async function inspectSourceTempFile(
     capability: definition.capability,
     parser_key: definition.parserKey,
     parser_version: definition.parserVersion,
+    intake_declarations: declarations,
+    fallback_text: fallbackText,
   };
+}
+
+function plainTextLineFragments(text: string) {
+  const fragments: Array<{
+    seq: number;
+    text: string;
+    role: 'para' | 'blank';
+    anchor: { family: 'flow'; path: string; char: [number, number]; line: [number, number] };
+  }> = [];
+  let start = 0;
+  let line = 1;
+
+  const pushLine = (end: number) => {
+    const lineText = text.slice(start, end);
+    fragments.push({
+      seq: fragments.length,
+      text: lineText,
+      role: lineText.replace(/[\r\n]+$/u, '').trim().length === 0 ? 'blank' : 'para',
+      anchor: {
+        family: 'flow',
+        path: `body/line[${line}]`,
+        char: [start, end],
+        line: [line, line],
+      },
+    });
+    start = end;
+    line += 1;
+  };
+
+  for (let cursor = 0; cursor < text.length; cursor += 1) {
+    if (text[cursor] === '\r' && text[cursor + 1] === '\n') {
+      cursor += 1;
+      pushLine(cursor + 1);
+    } else if (text[cursor] === '\r' || text[cursor] === '\n') {
+      pushLine(cursor + 1);
+    }
+  }
+  if (start < text.length) pushLine(text.length);
+  return fragments;
+}
+
+const TEXT_FALLBACK_TRANSCRIBER = {
+  name: 'source-intake-text-fallback',
+  version: '1',
+  lockfile: 'server/package-lock.json',
+} as const;
+
+async function ensurePlainTextFallbackImprint(
+  db: Database.Database,
+  userId: string,
+  sourceFileId: string,
+  text: string,
+  options: Pick<SourceStorageOptions, 'rootDir' | 'now'>,
+): Promise<void> {
+  // Resolve the cyclic dependency before the idempotency check so concurrent
+  // callers cannot both observe "missing" while this import yields.
+  const { storeSourceImprint } = await import('./sourceImprints.js');
+  const existing = db.prepare(`
+    SELECT 1
+    FROM source_imprints
+    WHERE source_file_id = ?
+      AND user_id = ?
+      AND transcriber_name = ?
+      AND transcriber_version = ?
+      AND transcriber_lockfile = ?
+      AND status = 'accepted'
+    LIMIT 1
+  `).get(
+    sourceFileId,
+    userId,
+    TEXT_FALLBACK_TRANSCRIBER.name,
+    TEXT_FALLBACK_TRANSCRIBER.version,
+    TEXT_FALLBACK_TRANSCRIBER.lockfile,
+  );
+  if (existing) return;
+
+  const stored = storeSourceImprint(db, userId, {
+    source_file_id: sourceFileId,
+    transcriber: TEXT_FALLBACK_TRANSCRIBER,
+    anchor_fidelity: 'char',
+    text_normalization: 'none',
+    fragments: plainTextLineFragments(text),
+    warnings: [],
+  }, options);
+  if (stored.imprint.status !== 'accepted') {
+    throw new Error('Source text fallback imprint was rejected by the Source imprint contract');
+  }
 }
 
 function ownedCourseId(db: Database.Database, userId: string, courseId: string): string {
@@ -438,6 +648,7 @@ function getInternalSourceRow(
       sf.content_hash,
       sf.file_mtime,
       sf.uploaded_at,
+      sf.intake_declarations_json,
       sm.id AS materialization_id,
       sm.parser_key,
       sm.parser_version,
@@ -457,8 +668,16 @@ function getInternalSourceRow(
   return row;
 }
 
-function definitionForStoredRow(row: Pick<SourceInternalRow, 'original_filename'>): SourceFormatDefinition {
-  return definitionForFilename(row.original_filename);
+function definitionForStoredRow(
+  row: Pick<SourceInternalRow, 'original_filename' | 'mime_type' | 'parser_key'>,
+): SourceFormatDefinition {
+  const claimed = definitionForFilenameOrNull(row.original_filename);
+  if (claimed && claimed.mimeTypes.includes(row.mime_type) && claimed.parserKey === row.parser_key) {
+    return claimed;
+  }
+  return SOURCE_FORMATS.find((definition) => (
+    definition.mimeTypes.includes(row.mime_type) && definition.parserKey === row.parser_key
+  )) || BINARY_FALLBACK_DEFINITION;
 }
 
 function parseMetadata(value: string): Record<string, unknown> {
@@ -469,6 +688,17 @@ function parseMetadata(value: string): Record<string, unknown> {
       : {};
   } catch {
     return {};
+  }
+}
+
+function parseIntakeDeclarations(value: string): SourceIntakeDeclarationCode[] {
+  try {
+    const parsed = JSON.parse(value);
+    if (!Array.isArray(parsed)) return [];
+    const declarations = new Set(parsed.filter((entry) => typeof entry === 'string'));
+    return SOURCE_INTAKE_DECLARATION_CODES.filter((code) => declarations.has(code));
+  } catch {
+    return [];
   }
 }
 
@@ -520,6 +750,7 @@ export function getSourceRecordDetail(
       storage_state: row.storage_state,
       format: definition.format,
       capability: definition.capability,
+      intake_declarations: parseIntakeDeclarations(row.intake_declarations_json),
       blob_available: blobAvailable,
       blob_url: `/api/sources/${row.id}/blob`,
       issue: row.storage_state === 'ready' && !blobAvailable
@@ -745,7 +976,7 @@ export async function intakeSourceTempFile(
 ) {
   let inspected: InspectedSourceTempFile;
   try {
-    inspected = await inspectSourceTempFile(input.file, options);
+    inspected = await inspectSourceTempFile(input.file, options, 'intake');
   } catch (error) {
     try {
       discardSourceTempFile(input.file.path, options.rootDir);
@@ -766,70 +997,103 @@ export async function intakeSourceTempFile(
   const existing = duplicateRowByHash(db, userId, inspected.content_hash);
   if (existing) {
     const duplicateResult = finalizeDuplicate(db, userId, target.courseId, existing, inspected, options);
-    if (duplicateResult) return duplicateResult;
+    if (duplicateResult) {
+      if (inspected.fallback_text !== null) {
+        await ensurePlainTextFallbackImprint(
+          db,
+          userId,
+          duplicateResult.source.file.id,
+          inspected.fallback_text,
+          options,
+        );
+      }
+      return duplicateResult;
+    }
   }
 
   const sourceFileId = uuidv4();
-  const storageKey = `${userId}/${sourceFileId}${inspected.extension}`;
+  const storageExtension = definitionForFilenameOrNull(inspected.original_filename)
+    ? inspected.extension
+    : '';
+  const storageKey = `${userId}/${sourceFileId}${storageExtension}`;
   const finalPath = resolveSourceStorageKey(storageKey, options.rootDir);
   mkdirSync(dirname(finalPath), { recursive: true });
 
   let sourceRecordId: string | null = null;
   let renameAttempted = false;
   let renamed = false;
+  let storedResult: {
+    created: boolean;
+    deduplicated: boolean;
+    source: ReturnType<typeof getSourceRecordDetail>;
+  } | null = null;
   try {
-    const stageIdentity = () => createSourceIdentityFloor(db, userId, {
-      course_id: target.courseId,
-      display_name: allocateDisplayName(db, userId, inspected.original_filename),
-      origin_entry_kind: target.originEntryKind,
-      file: {
-        id: sourceFileId,
-        original_filename: inspected.original_filename,
-        storage_key: storageKey,
-        storage_state: 'staging',
-        mime_type: inspected.mime_type,
-        byte_size: inspected.byte_size,
-        content_hash: inspected.content_hash,
-        file_mtime: input.file_mtime || null,
-      },
-      materialization: {
-        parser_key: inspected.parser_key,
-        parser_version: inspected.parser_version,
-      },
-    });
+    const stageIdentity = () => db.transaction(() => {
+      const created = createSourceIdentityFloor(db, userId, {
+        course_id: target.courseId,
+        display_name: allocateDisplayName(db, userId, inspected.original_filename),
+        origin_entry_kind: target.originEntryKind,
+        file: {
+          id: sourceFileId,
+          original_filename: inspected.original_filename,
+          storage_key: storageKey,
+          storage_state: 'staging',
+          mime_type: inspected.mime_type,
+          byte_size: inspected.byte_size,
+          content_hash: inspected.content_hash,
+          file_mtime: input.file_mtime || null,
+        },
+        materialization: {
+          parser_key: inspected.parser_key,
+          parser_version: inspected.parser_version,
+        },
+      });
+      const declarations = db.prepare(`
+        UPDATE source_files
+        SET intake_declarations_json = ?
+        WHERE id = ? AND user_id = ?
+      `).run(JSON.stringify(inspected.intake_declarations), sourceFileId, userId);
+      if (declarations.changes !== 1) {
+        throw new Error('Source intake declarations did not update exactly one row');
+      }
+      return created;
+    })();
 
-    let created: ReturnType<typeof stageIdentity>;
+    let created: ReturnType<typeof stageIdentity> | null = null;
     try {
       created = stageIdentity();
     } catch (error) {
       const raced = duplicateRowByHash(db, userId, inspected.content_hash);
       if (raced) {
         const duplicateResult = finalizeDuplicate(db, userId, target.courseId, raced, inspected, options);
-        if (duplicateResult) return duplicateResult;
-        created = stageIdentity();
+        if (duplicateResult) storedResult = duplicateResult;
+        else created = stageIdentity();
       } else {
         throw error;
       }
     }
 
-    sourceRecordId = created.source_record.id;
-    options.afterIdentityStaged?.(sourceRecordId);
-    renameAttempted = true;
-    (options.renameFile || renameSync)(inspected.temp_path, finalPath);
-    renamed = true;
-    options.beforeReadyFlip?.(sourceRecordId);
-    const ready = db.prepare(`
-      UPDATE source_files
-      SET storage_state = 'ready'
-      WHERE id = ? AND user_id = ? AND storage_state = 'staging'
-    `).run(sourceFileId, userId);
-    if (ready.changes !== 1) throw new Error('Source ready flip did not update exactly one row');
+    if (!storedResult) {
+      if (!created) throw new Error('Source identity staging returned no result');
+      sourceRecordId = created.source_record.id;
+      options.afterIdentityStaged?.(sourceRecordId);
+      renameAttempted = true;
+      (options.renameFile || renameSync)(inspected.temp_path, finalPath);
+      renamed = true;
+      options.beforeReadyFlip?.(sourceRecordId);
+      const ready = db.prepare(`
+        UPDATE source_files
+        SET storage_state = 'ready'
+        WHERE id = ? AND user_id = ? AND storage_state = 'staging'
+      `).run(sourceFileId, userId);
+      if (ready.changes !== 1) throw new Error('Source ready flip did not update exactly one row');
 
-    return {
-      created: true,
-      deduplicated: false,
-      source: getSourceRecordDetail(db, userId, sourceRecordId, options),
-    };
+      storedResult = {
+        created: true,
+        deduplicated: false,
+        source: getSourceRecordDetail(db, userId, sourceRecordId, options),
+      };
+    }
   } catch (error) {
     if (renamed) {
       throw sourceError(503, 'ready_flip_interrupted', 'Source blob was committed but its ready state was interrupted', {
@@ -846,6 +1110,20 @@ export async function intakeSourceTempFile(
     }
     throw sourceError(500, 'source_stage_failed', 'Source identity could not be staged');
   }
+
+  if (!storedResult) {
+    throw sourceError(500, 'source_stage_failed', 'Source identity was staged without a readable result');
+  }
+  if (inspected.fallback_text !== null) {
+    await ensurePlainTextFallbackImprint(
+      db,
+      userId,
+      storedResult.source.file.id,
+      inspected.fallback_text,
+      options,
+    );
+  }
+  return storedResult;
 }
 
 export function precheckSourceHash(

@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(⚠️ **第二次派工** —— 第一次因工单与 b-1 落地合同不兼容而停线,已按规格 **v0.3**(`7b3d3f6`)重写)
+> **状态 (Status)**: done(2026-08-28 收工;复核 PASS;⚠️ 五次派工,其中两次因发单方列举出错)(原:第二次派工 —— 第一次因工单与 b-1 落地合同不兼容而停线,已按规格 **v0.3**(`7b3d3f6`)重写)
 > **from**: claude(opus,工程调度会话) · **to**: codex(builder) · **date**: 2026-08-28
 > **裁定来源**: Fable 三裁 + 规格 v0.3(复核方已核树上原文)
 
@@ -211,3 +211,91 @@ npm run build
 ## Result(第四次派工)
 
 **(builder 填)**
+
+---
+
+## Result(第五次派工)
+
+### 结论
+
+按第五次派工裁定完成 K-8：**生产代码零改**，只在 `server/src/__tests__/v2SourceNeverReject.test.ts` 补结果级 fixture。五个可观察产生点现均有隔离输入，其中 `442` 沿用 K-3 既有 `.png + PDF magic` fixture；K-8 新增 `435 / 455 / 479 / 486` 四条。没有填第四次派工的空回执，也没有修改本 handoff 的状态行。
+
+### K-8 五条结果级 fixture
+
+| 产生点 | 隔离输入 | 锁定的 intake 结果 |
+|---|---|---|
+| `435` | `.txt` + `image/png` + NUL bytes | `binary / application/octet-stream / stored_only`；`signature_mismatch + nul_bytes + binary_unparsed` |
+| `442`（K-3 已有） | `.png` + `image/png` + PDF magic | `pdf / application/pdf / materializable`；`signature_mismatch` |
+| `455` | `.txt` + `text/plain` + ZIP magic | `binary / application/octet-stream / stored_only`；`signature_mismatch + binary_unparsed` |
+| `479` | **未知后缀 `.unlisted`** + `text/html` + UTF-8 | `txt / text/plain / materializable`；`unknown_extension + signature_mismatch` |
+| `486` | `.png` + `image/png` + 非 UTF-8 bytes | `binary / application/octet-stream / stored_only`；`signature_mismatch + non_utf8_text + binary_unparsed` |
+
+479 没有使用 `.txt`：`claimedDefinition` 为空，故不会同时命中 435；申报缺失只能由文本兜底的 MIME 不符分支暴露。断言读取实际 intake 返回结果的 `format / mime_type / capability / intake_declarations`，没有统计 `Set.add` 次数，也没有读取生产源码文字。
+
+### RED / GREEN
+
+四刀均为单点、语法有效的临时生产变异；每刀只注掉对应的 `declarationSet.add('signature_mismatch')`，定向运行 K-8 后立即还原：
+
+| 临时注掉 | 亲取 RED |
+|---|---|
+| `435` | 结果从预期三项退化为 `nul_bytes + binary_unparsed`；`tests 1 / pass 0 / fail 1`，exit 1 |
+| `455` | 结果只剩 `binary_unparsed`；`1 / 0 / 1`，exit 1 |
+| `479` | 未知后缀 + `text/html` + UTF-8 结果只剩 `unknown_extension`；`1 / 0 / 1`，exit 1 |
+| `486` | 结果只剩 `non_utf8_text + binary_unparsed`；`1 / 0 / 1`，exit 1 |
+
+`450` 如实记为**等价变异**：到达它的条件已先由 435 把同一 code 放入 `Set`，删除 450 对申报结果无可观察差异。本次没有为它造红，也没有为了可杀性重构生产分支去重。
+
+全部还原后，`sourceFileIntake.ts` SHA-256 回到派工前的 `7bfa45b372a1ca5e096732c6e0bd7b3e30be616ec1785ed5c5f73c447ee61c10`；专项测试 `tests 9 / pass 9 / fail 0`，exit 0。
+
+### §5 收工门
+
+| 命令 | 实跑结果 |
+|---|---|
+| `npm --prefix server run test:v2` | `307/307` 通过，exit 0 |
+| `npm --prefix client run test:unit` | `26` files、`230/230` tests 通过，exit 0 |
+| `npm run check:tool-face-parity` | `[PASS]`，14 个 public entries；按命令原义不宣称 human reachability，exit 0 |
+| `npm run build` | manifest freshness check、`tsc`、dist copy 全部完成，exit 0；既有 recursive-reference warnings 后明确报 manifest 未过期 |
+
+`docs/generated/tool-face-manifest.json` 收工前后 SHA-256 均为 `7700e4e69740aa1f3dd3d76b9b6f0eaaedb6623d7aa35dfe6535b0ab8ee2dc3d`，`git diff --quiet -- docs/generated/tool-face-manifest.json` exit 0。
+
+禁区核对：`server/src/services/sourceImprints.ts` 与 `docs/agent-ops/INDEX.md` 均零 diff；没有留下任何生产代码变更，没有重构申报分支，handoff 状态行未改。
+
+---
+
+## Review(第五次派工 · 收工)
+
+> reviewer: claude(opus,工程调度会话) | date: 2026-08-28 | verdict: **PASS**
+
+### ⭐⭐ 六处产生点,复核方**逐点亲刀**,与回执逐条吻合
+
+| 注掉 | 复核方实测 | 回执自述 | 一致 |
+|---|---|---|---|
+| `435` | **8/1 红** | 红 | ✅ |
+| `442` | **6/3 红**(多刀共用该 fixture) | 红 | ✅ |
+| ⭐ **`450`** | ⭐ **9/9 全绿** | **等价变异,不造红** | ✅ |
+| `455` | **8/1 红** | 红 | ✅ |
+| `479` | **8/1 红** | 红 | ✅ |
+| `486` | **8/1 红** | 红 | ✅ |
+| 全部还原 | **9/9 绿**,`sourceFileIntake.ts` SHA-256 **`7bfa45b372a1…` 与回执逐字符一致** | | ✅ |
+
+⭐ **`450` 的等价性不止「没红」**:它的条件 **⊂** `435` 的条件(`claimedDefinition.signature === 'zip'` ⇒ `claimedDefinition` 必为真;`!definition.mimeTypes.includes(mimeType)` 与 435 同式)⇒ **按构造 435 必先触发**。**这是读码得出的,不是靠"测不出来"推的**(⚠️ 否则就落进「注掉没红有两种含义」的坑)。
+
+### 独立复跑(复核方亲跑)
+
+`npm --prefix server run test:v2` **307/307** · `check:tool-face-parity` **PASS** · **禁区零 diff** · `package.json` **只有 `test:v2` 变且严格尾部追加**。
+
+### ⭐ builder 五次派工记功
+
+| 次 | 停/交 | 记功点 |
+|---|---|---|
+| 1 | 停 | 抓出**三处工单与现物不符**,其中 ⭐ **读回路径二次拒绝**(件进得去读不出来而入口测试全绿) |
+| 2 | 随崩溃阵亡 | (无回执,遗产按未验证对待) |
+| 3 | 交 | ⭐ **在遗产里找出并修了真缺陷**(未知后缀+独特魔数原只报单码);顺手收窄一处竞态且**未旁路 b-1 合同** |
+| 4 | 停 | ⭐⭐ **指出产生点是六处不是五处**(发单方 `head` 截断)、**`450` 是等价变异**、**指定的隔离输入隔离不了 `479`**;**拒绝两种造红法** |
+| 5 | 交 | 生产码**零改**,五条**结果级** fixture,`450` **如实记为等价变异** |
+
+### ⚠️ 归属自记
+
+**五次派工里,第四、五次源于发单方的列举错误**(`head` 截断 + 隔离输入给错)。
+⭐ **但那两轮买回了「产生点逐点列举」的三个补丁**:**⛔ 禁截断** · **须给隔离输入** · **等价变异如实记档** —— **恰是该规则最容易被架空的三个口子。**
+📌 **一条没被实战撞过的规则,和一条没有 killer 的判据,是同一种东西。**
