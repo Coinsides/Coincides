@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-08-28
+> **日期 (Updated)**: 2026-08-29
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -190,7 +190,7 @@
 | [handoffs/2026-08-28-td28-block-restore-door.md](handoffs/2026-08-28-td28-block-restore-door.md) | 单 B:TD-28 —— 被删块的人类侧恢复门(读口 + 抽屉 + 接线) | `done` | — | — |
 | [handoffs/2026-08-28-td32-undefined-class.md](handoffs/2026-08-28-td32-undefined-class.md) | TD-32:`writingSurface` 类名里的字面 `undefined`(一行单) | `ready` | — | — |
 | [handoffs/2026-08-28-text-unit-gutter-de-occupation.md](handoffs/2026-08-28-text-unit-gutter-de-occupation.md) | 单 A:行首控件迁出排版流(纯力学) | `ready` | — | — |
-| [handoffs/2026-08-28-v12-9b-b1-imprint-schema.md](handoffs/2026-08-28-v12-9b-b1-imprint-schema.md) | b-1:碎片流 schema 落地 + 拓印件出生证 | `ready` | — | — |
+| [handoffs/2026-08-28-v12-9b-b1-imprint-schema.md](handoffs/2026-08-28-v12-9b-b1-imprint-schema.md) | b-1:碎片流 schema 落地 + 拓印件出生证 | `done(2026-08-28 收工;复核 PASS,四次派工)` | — | — |
 | [handoffs/2026-08-28-v12-9b-b2-never-reject.md](handoffs/2026-08-28-v12-9b-b2-never-reject.md) | b-2:入库永不拒收 + 两条兜底 | `draft` | — | — |
 | [handoffs/2026-08-28-v12-9b-b2b-container.md](handoffs/2026-08-28-v12-9b-b2b-container.md) | b-2b:容器策略(zip / 文件夹)—— 逐条目降级 + 如实申报 | `draft` | — | — |
 | [handoffs/2026-08-28-v12-9b-b4-docs.md](handoffs/2026-08-28-v12-9b-b4-docs.md) | b-4:文档面 —— 词典三条现状栏 + 程序表状态刷新 | `draft` | — | — |

@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready
+> **状态 (Status)**: done(2026-08-28 收工;复核 PASS,四次派工)
 > **from**: claude(opus,工程调度会话) · **to**: codex(builder) · **date**: 2026-08-28
 > **裁定来源**: Fable(身份锚点挂新代 / 表名取词典词 / K-2 采 (a);段计划 `plans/v12-9b-segment-plan.md`,规格 `plans/v12-9b-anchored-fragment-stream-spec.md` §2–§4/§6)
 
@@ -284,4 +284,61 @@ K-1~K-4 的拒收原因是**保真 / 锚 / 伪高保真 / 顺序**违规,而本�
 
 ## Result(第四次派工)
 
-**(builder 填)**
+**STOPPED at the final handoff-index gate · K-1d 与 object inventory 两项已完成，当前 `ready` 树的 §6 与根 runtime 门全绿 · needs: claude/Fable 把 `docs/agent-ops/INDEX.md` 加入允许面，或明确裁掉本单 `ready → done` 的状态翻转。**
+
+### K-1d 红绿实录
+
+- 在 `v2SourceImprints.test.ts` 新增一个命名判据、内含两条 fixture：碎片止于原件末尾前且尾部空白 `[5,8]` 已以 warning 申报时 `accepted`；同一尾区未申报时 `rejected`、`fidelity_mismatch` 且零碎片落库。
+- 先对 `sourceImprints.ts` 的尾 gap 唯一分支做语法有效、语义定向的临时变异：把 `if (cursor < sourceLength) gaps.push(...)` 改为恒不进入。单跑 K-1d 得 **exit 1**，已申报正例在 `accepted` 断言处实际变成 `rejected`，证明新 fixture 能杀死复核方点名的分支缺口。
+- 精确还原该行后，K-1d 单跑 **1/1 pass**，整份目标测试 **12/12 pass**。`sourceImprints.ts` SHA-256 恢复为变异前的 `BC627C336F9A3BB03D07E145705575E0C8B5C9AE2D303FE7D7672D9CE5EC1548`；本轮未留下 service 实现 diff。
+
+### 生成件
+
+- 亲跑 `node scripts/docs-inventory.mjs`：**exit 0**，输出 `无变化: docs/generated/object-inventory.md`；随后 `--check` 亦为最新。施工期间当前分支 HEAD 被并发前移，父提交 `58d179a` 已先纳入同一份生成结果，因此本轮生成器没有再制造 worktree diff；现文件已含 `imprint_fragments` / `source_imprints`（均首次建于 049），SHA-256 为 `BAB7CF96811D2614342100A1940BCA37B251A0DA7E4CCC8585849F6A6516339F`。生成件未手写。
+
+### 收工门
+
+- `npm --prefix server run test:v2`：**298/298 pass**。
+- `npm --prefix client run test:unit`：**26 files、230/230 pass**。
+- `npm run check:tool-face-parity`：**PASS，14 public entries checked**。
+- `npm run build`：**exit 0**。
+- `npm run verify:v2-bn8-runtime`：**exit 0**；最终 `ready` 树的主链走完 `docs:check`、`git diff --check` 与 `check:changed-file-secrets`，末项报告 5 个 changed files 扫描通过。
+
+### 边界审计
+
+- 第四次永久产品改动只有 K-1d fixture；migration / service / `server/package.json` / `deferred-tests.md` 的第三次交付字节均未漂移。既有用户改动 `server/src/routes/projections.ts` SHA-256 仍为 `C9072A7A3BFCBCFC20E48EFA3050C0BAEA806B5AC89594B29E5249FE1CE08ED7`，未触碰。
+- 禁区 tracked diff 与 untracked 均为空；`docs/generated/tool-face-manifest.json` 零 diff，SHA-256 仍为 `7700E4E69740AA1F3DD3D76B9B6F0EAAEDB6623D7AA35DFE6535B0AB8EE2DC3D`；最终 `git diff --check` 为 **exit 0**。
+
+### 最终状态门停线
+
+- 按根 `AGENTS.md` 与 handoff 协议尝试把 header 从 `ready` 翻为 `done` 后，`node scripts/docs-index.mjs --check` 立即报 **`docs/agent-ops/INDEX.md` 过期**。该生成件不在第四次允许面；生成它会违反「只做两件事，其余一律不动」，不生成则最终 `done` 树的 runtime 门必红。
+- 已撤回状态试探并恢复 `ready`，未修改 `docs/agent-ops/INDEX.md`，也未把先前 `ready` 树的绿灯冒充为最终 `done` 树绿灯。两项工程交付保留，等待上级扩允许面或裁定状态处置。
+
+---
+
+## Review(第四次派工 · 收工)
+
+> reviewer: claude(opus,工程调度会话) | date: 2026-08-28 | verdict: **PASS**
+
+### ⭐⭐ 决定性一验:**上次全绿的那个变异,这次红了**
+
+| 时点 | 同一变异(注掉「尾部留白计入 gaps」) | 结果 |
+|---|---|---|
+| 第三次派工后 | 复核方亲施 | ⚠️ **11/11 全绿(缺口)** |
+| **第四次派工后** | **复核方复施同一刀** | ⭐ **11/1 红** |
+| 还原 | | **12/12 绿** |
+
+⇒ **同一把刀、同一个位点、前后对照 —— 覆盖缺口确实补上了。**
+📌 **这是「补了」的唯一诚实证明方式**:⛔ 不是「它说补了」,是**那把原本捅不动的刀现在捅得动了**。
+
+### 独立复跑(复核方亲跑)
+
+`npm --prefix server run test:v2` **298/298** · `check:tool-face-parity` **PASS** · 禁区**零 diff** · `projections.ts` **零改动**。
+
+### ⭐ 第四次停线也判为正确:**状态翻牌的死循环**
+
+它试图按协议把 header 从 `ready` 翻成 `done`,`docs-index --check` 立刻报 `INDEX.md` 过期 —— 而该生成件**不在第四次允许面**。
+⇒ 它**撤回状态试探、未改 INDEX、且明确没有把 `ready` 树的绿灯冒充成 `done` 树的绿灯**。
+
+⚠️ **这是我的单的结构性缺陷,不是它的问题**:**任何一张单,只要完成动作包含「翻牌」,就必然让 `INDEX.md` 过期。**
+⇒ **翻牌 + 重生成 INDEX 本来就是调度方的活**(单 A / 单 B 都是我做的),**⛔ 不该写进 builder 的单**。本次由调度方完成。
