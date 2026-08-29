@@ -6,6 +6,13 @@ import {
   isSourceArtifactErrorRetryable,
   type SourceArtifactErrorCode,
 } from './sourceMaterializationErrors.js';
+import {
+  MINERU_MAX_PDF_PAGES,
+  MINERU_PARSER_KEY,
+  MINERU_TIMEOUT_MS,
+  SourceMineruParserError,
+  mineruParser,
+} from './sourceMineruParser.js';
 import { canonicalizeSourceText } from './sourceTextCanonical.js';
 
 export {
@@ -51,6 +58,7 @@ export interface SourceArtifactLimits {
 
 export interface SourceParser {
   key: string;
+  ownsTimeout?: boolean;
   parse(input: SourceParserInput, limits: SourceArtifactLimits): Promise<SourceArtifact>;
 }
 
@@ -81,12 +89,15 @@ export class SourceArtifactError extends Error {
   }
 }
 
-function limitsFrom(options: ParseSourceArtifactOptions): SourceArtifactLimits {
+function limitsFrom(options: ParseSourceArtifactOptions, parserKey: string): SourceArtifactLimits {
+  const defaults = parserKey === MINERU_PARSER_KEY
+    ? { ...DEFAULT_LIMITS, maxPdfPages: MINERU_MAX_PDF_PAGES, timeoutMs: MINERU_TIMEOUT_MS }
+    : DEFAULT_LIMITS;
   return {
-    maxPdfPages: Math.max(1, Math.trunc(options.limits?.maxPdfPages ?? DEFAULT_LIMITS.maxPdfPages)),
-    maxBlocks: Math.max(1, Math.trunc(options.limits?.maxBlocks ?? DEFAULT_LIMITS.maxBlocks)),
-    maxZipExpansionRatio: Math.max(1, options.limits?.maxZipExpansionRatio ?? DEFAULT_LIMITS.maxZipExpansionRatio),
-    timeoutMs: Math.max(1, Math.trunc(options.limits?.timeoutMs ?? DEFAULT_LIMITS.timeoutMs)),
+    maxPdfPages: Math.max(1, Math.trunc(options.limits?.maxPdfPages ?? defaults.maxPdfPages)),
+    maxBlocks: Math.max(1, Math.trunc(options.limits?.maxBlocks ?? defaults.maxBlocks)),
+    maxZipExpansionRatio: Math.max(1, options.limits?.maxZipExpansionRatio ?? defaults.maxZipExpansionRatio),
+    timeoutMs: Math.max(1, Math.trunc(options.limits?.timeoutMs ?? defaults.timeoutMs)),
   };
 }
 
@@ -315,7 +326,16 @@ const PARSERS: Record<string, SourceParser> = {
   [docxParser.key]: docxParser,
   [textParser.key]: textParser,
   [imageParser.key]: imageParser,
+  [mineruParser.key]: mineruParser,
 };
+
+export function registerSourceParserForTesting(parser: SourceParser): () => void {
+  if (PARSERS[parser.key]) throw new Error(`Source parser ${parser.key} is already registered`);
+  PARSERS[parser.key] = parser;
+  return () => {
+    if (PARSERS[parser.key] === parser) delete PARSERS[parser.key];
+  };
+}
 
 function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
   return new Promise<T>((resolve, reject) => {
@@ -340,14 +360,15 @@ export async function parseSourceArtifact(
   input: SourceParserInput,
   options: ParseSourceArtifactOptions = {},
 ): Promise<SourceArtifact> {
-  const limits = limitsFrom(options);
   const parser = options.parser || PARSERS[input.parser_key];
   if (!parser || parser.key !== input.parser_key) {
     throw new SourceArtifactError('unsupported_format', `No Source parser is registered for ${input.parser_key}`);
   }
+  const limits = limitsFrom(options, parser.key);
 
   try {
-    const artifact = await withTimeout(parser.parse(input, limits), limits.timeoutMs);
+    const parse = parser.parse(input, limits);
+    const artifact = parser.ownsTimeout ? await parse : await withTimeout(parse, limits.timeoutMs);
     if (artifact.schema_version !== 'source-artifact.v1') {
       throw new SourceArtifactError('parser_failure', 'Parser returned an unsupported SourceArtifact version');
     }
@@ -355,6 +376,9 @@ export async function parseSourceArtifact(
     return artifact;
   } catch (error) {
     if (error instanceof SourceArtifactError) throw error;
+    if (error instanceof SourceMineruParserError) {
+      throw new SourceArtifactError(error.code, error.message, { cause: error });
+    }
     throw new SourceArtifactError('parser_failure', 'Source parser failed unexpectedly', { cause: error });
   }
 }

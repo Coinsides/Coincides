@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(c-1b-0 承重件已落,MinerU 写出的第一份出生证即带真指纹)
+> **状态 (Status)**: done(第二次派工全绿;复核方亲刀 K-2 取真红、K-1 补掐冗余第二层后取到**真孤儿**,test:v2 自跑 343/343。⚠️ 第一次派工的停线是对的 —— 单的第一版不可满足,归发单方)
 > **from**: claude(opus,工程调度会话) · **to**: codex(builder) · **date**: 2026-08-29
 > **裁定来源**: Fable 2026-08-29「c-1 拆三张」+ 并发闸三件套照准 + 降级须与永不拒收对齐 · c-1a 体检报告 · v0.7.2
 
@@ -171,3 +171,100 @@
 - `npm exec -- tsc --noEmit`（cwd=`server`）：exit 0，零诊断。
 - 既有核心回归 `v2SourceMaterialization.test.ts`：**11/11**。按实际触发生产 parser 的顶层测试计（共享用例有重叠）：`native-pdf` **2/2**、`native-docx` **2/2**、`native-text` **5/5**、`native-image` **3/3**；支撑回归为 `v2SourceT0Alignment` **10/10**、`v2DocumentParserPdf` **2/2**、`v2SourceNeverReject` **9/9**。
 - 开工前已有 `server/src/routes/projections.ts` 修改；它不在本单允许面，保持未触碰。本轮唯一落盘内容是本 `## Result` 回执。裁定来源按工单如实记为 **Fable，由调度方转写**，未写成 Henry。
+
+## Result(第二次派工)
+
+> **DONE（Codex builder，2026-08-29）**：第二次派工的 MinerU 接线已经完成。裁定来源按工单如实记为 **Fable，由调度方转写**，未写成 Henry。本段追加在第一次停线记录之后，未覆盖第一次的正确停线记录；工单顶部状态行未动，未 commit。
+
+### 落地内容
+
+- 新建 `server/src/services/sourceMineruParser.ts`：从仓内 `uv.lock` 精确读取 MinerU 版本，执行真实 `.py` runner，产出最小可信 page-family 文本块；独立实施总 deadline、页限额、输出协议/版本校验、页码上界与空结果拒绝，并在超时、崩溃和非零退出后先清完整进程树再返回。
+- `server/src/services/sourceArtifact.ts` 注册 `mineru`；仅 MinerU 申报 `ownsTimeout` 并绕开既有外层 `Promise.race`，既有 parser 的限额与超时行为不变。增加了仅供 K-8 使用、可撤销的 parser 注册测试缝。
+- 新建 `server/src/services/sourceMaterializationConcurrency.ts`：模块级 FIFO=1，API 接收 lazy callback；只约束 `mineru`，并在 `finally` 释放。
+- `server/src/services/sourceMaterialization.ts` 只在 parse 分支外接并发闸，并建立无默认回退的显式身份表：`native-pdf`/`native-docx`/`native-text` 使用原始 `server/package-lock.json`，`native-image` 显式申报“不写出生证”，`mineru` 使用原始 `_external_tools/mineru/uv.lock`；page/flow family 也由同一申报决定。未改认领、状态机或投影发布。
+- `server/src/services/sourceFileIntake.ts` 每次 intake 动态读取 `COINCIDES_PDF_PARSER`：只有精确值 `mineru` 才选择 MinerU；未设置和未知值都保持 `native-pdf@2.4.5`。这里只选择 parser，未前移拓印、分段或校验工序。
+- 新建 `server/src/__tests__/v2SourceMineruWiring.test.ts` 的 5 个顶层红刀，并把它追加到 `server/package.json` 的 `test:v2` 尾部。
+
+### K-1：超时后进程树真实消失
+
+- Windows fixture 的 Python 根进程再派生带唯一 token 的 Python 孙进程；用 `Win32_Process` 按命令行 token 实际计数。
+- 实测计数为 **超时前 0 → 挂起中 2 → materialization 返回后 0**，不是以 promise reject 代替进程证据。
+- 另测“根进程先 `os.abort()`、孙进程继续挂住”的崩溃竞态：marker 确认孙进程确实启动，处理结束后同 token 进程数回到 **0**。
+- Windows 清理会先快照 parent graph，再杀仍归当前 child 所有且仍存在的根及快照后代，复查进程表归零后才 reject；不会对探针已确认消失的死 PID 调 `taskkill`。POSIX 使用独立进程组清理。
+
+### K-2 / K-8：逐 parser 身份与独立指纹
+
+- MinerU 成功出生证实测为 `transcriber_name=mineru`、`transcriber_version=3.4.5`、`transcriber_lockfile=_external_tools/mineru/uv.lock`、`anchor_fidelity=page`。
+- 测试没有 import 生产 hash helper，也没有写死 hash；它自行 `readFileSync` lock 原始字节并以 `createHash('sha256')` 重算。落库值与独立值一致：`67c4b42dcd269ffa3e9f05633ce98d6259812bc460f2dd2f8f58cb142e3ee231`。
+- native-pdf 的出生证仍逐字节使用 `server/package-lock.json`，独立重算值为 `891f3c048bc81e417e6f8317ac413bfc648f369fbf8b2586f50bce6073e02d95`，既有 lockfile 字符串与 hash 均未改。
+- K-8 反例使用实际 registry 临时注册 `registered-without-identity`，把同一次 materialization 的持久 parser identity 对齐到该 key，并且不传 `parseArtifact` 注入；`parserCalls=1` 证明走了 registry dispatch。结果为 `failed/parser_failure`，出生证 0、投影 0，未回退到 `package-lock.json`，测试结束后撤销注册。
+
+### K-3 / K-9：互相可解释的限额与两向红刀
+
+- 采用 c-1a 同口径 `en` 温启实测 **13,180 ms/页** 与总时限 **120,000 ms**：`floor(120000 / 13180) = 9`，故 MinerU 的有效 PDF 上限为 **9 页**。
+- **10 页**输入在启动 Python 前即实测落 `resource_limit`、`retryable=false`；runner marker 不存在，证明不是超时伪装。
+- **页限内但挂住**的输入实测落 `internal_interrupted`、`retryable=true`，并完成上述 `0 → 2 → 0` 的进程树清理。两向错误码明确不同。
+
+### K-4：MinerU-only 并发闸
+
+- 通过真实 `intake → materializeSourceNow → registry parser` 同时发起 **N=3** 个不同 PDF；从第一轮采样起持续计峰值，实测活跃 MinerU Python **peak=1**、完成 **3/3**、最终进程数 **0**，三个 materialization 与投影都完成。
+- 第一份 MinerU 仍占槽时并行 materialize native-text；native-text 已完成而 MinerU 计数仍为 1，证明既有轻量 parser 没有被串行化。
+
+### K-5：失败不上浮，成功不被吞掉
+
+- 崩溃：HTTP **202**，落 `failed/parser_failure` 且已分类可重试；source row 仍存在、文件 `storage_state=ready` 且 blob 可用；`projection_note_id=null`；出生证 0。fixture 同时证明根进程先崩溃时孙进程最终归零。
+- 超时：HTTP **202**，落 `failed/internal_interrupted` 且可重试；intake/source/blob 不受影响；无投影、无出生证；进程树归零。
+- 非零退出（17）：HTTP **202**，落 `failed/parser_failure` 且可重试，错误消息保留 exit code 与 stderr 证据；intake/source/blob 不受影响；无投影、无出生证。
+- 另加一条“exit 0 但无可用文本块”的防假绿反例，同样 `failed/parser_failure`，不写出生证。
+- 成功反例走同一真实生产接线路径，最终 `materialized`，写出 `accepted` MinerU 出生证与 page fragment，并发布 source projection 与既有 operation batch；成功路径没有被降级逻辑吞掉。
+
+### K-6 / K-7：回归与真实选择路径
+
+- `COINCIDES_PDF_PARSER` 关闭时，真实 PDF intake 仍选择 `native-pdf@2.4.5`，并沿既有 materialization 写出原 lockfile/hash 与投影；全量既有 PDF 结果不变。
+- 开关打开时，测试从新 PDF 的真实 intake 开始，持久行即为 `mineru@3.4.5`，随后经 materialization、正式 registry、出生证与投影走完；没有直接伪造 `parser_key='mineru'` 的数据库行。
+- `npm --prefix server run test:v2`：**343 tests / 343 pass / 0 fail / 0 skipped / 0 todo / 0 cancelled**，TAP 顶层 `1..336`；相对开工基线 **338 → 343**，恰好新增 5 个顶层测试。
+- `npm exec -- tsc --noEmit`（cwd=`server`）：exit 0，**零诊断**。
+- 既有相关五文件仍为 **39/39**（`v2SourceMaterialization` 11、`v2SourceNeverReject` 9、`v2SourceT0Alignment` 10、`v2SourceTranscriberFingerprint` 7、`v2DocumentParserPdf` 2）；连同新文件为 **44/44**。按开工相同口径，既有 parser 触发计数仍是 `native-pdf` **2/2**、`native-docx` **2/2**、`native-text` **5/5**、`native-image` **3/3**。
+
+### 边界审计与 needs: claude
+
+- 实际内容 diff 只在第二次派工修订后的七项允许面及本回执；`client/**`、`sourceImprints.ts`、`sourceTextCanonical.ts`、既有迁移、`documentParser.ts` 家族、MCP、工具注册、`operation_batches`、`docs/agent-ops/INDEX.md` 均为零 diff。本工单顶部状态行未动，`D:/Coinsides/v12.9-selection/**` 未写入。
+- 开工前已有的 `server/src/routes/projections.ts` 工作树状态仍在，但 `git diff --quiet -- server/src/routes/projections.ts` 为真；本单没有触碰其内容。
+- 最终测试清理后，带 MinerU fixture token 的 Python 进程数为 **0**；仓内没有被测试意外创建 `_external_tools/mineru/.venv`。
+- **needs: claude（部署前置，不阻断本单接线判据）**：当前 checkout 没有 `_external_tools/mineru/.venv`。默认生产 runner 指向该仓内 venv，也允许用 `COINCIDES_MINERU_PYTHON` 只替换 Python executable；部署侧须预先 provision MinerU 3.4.5（建议 `uv sync --project _external_tools/mineru --frozen --no-install-project`）或设置该变量。代码不会在 intake/请求路径自动安装依赖；未 provision 时会诚实降级为 failed，而不会拒收或 5xx。`COINCIDES_MINERU_COMMAND_JSON` 仅作为显式 argv/集成测试缝保留。
+- 非阻断后续硬化候选：Win32 CIM/PowerShell 探针本身尚无独立 watchdog；若要覆盖 WMI 自身挂死，可由 Claude/Fable 另裁 Job Object 或探针限时。本单要求的 timeout、root+grandchild 与 root-first-crash 三种进程表证据均已实测通过。
+
+## 复核批注(claude 工程调度会话,2026-08-29,亲刀非读回执)
+
+**总判定:通过,无保留。**
+
+### ✅ 亲刀实况(Fable 预定的两处我都先跑了)
+
+| 刀 | 我施的变异(附落地证明) | 结果 |
+|---|---|---|
+| ⭐ **K-2 指纹来源** | 把 `MINERU_TRANSCRIBER_LOCKFILE_URL` 指向 `package-lock.json`(= 非现址字节) | **`not ok 4`**,5 → 4/1。恢复回 5/5 |
+| ⭐ **K-1 杀得死** | ①先去掉 `taskkill /T` ⇒ **照绿**(见下);②再把 `descendants` 枚举改成返回 `[]` ⇒ **测试挂死** + **机器上真的留下孤儿** | 见下 |
+| **全量** | `npm --prefix server run test:v2` 自跑 | **343 / 343**(基线 338,+5) |
+| **类型门** | `tsc --noEmit` | **exit 0** |
+| **默认不变** | `COINCIDES_PDF_PARSER` 未设时 | 仍走 `native-pdf`,既有 PDF 行为不变 |
+
+⭐ **K-2 的第三方闭环已成立**:落库值 `67c4b42dcd269ffa3e9f05633ce98d6259812bc460f2dd2f8f58cb142e3ee231` 与**复核方在本单之前**独立算出的 `uv.lock` sha256 **完全一致** —— 两次计算相隔数小时、来源互不相干。
+
+### ⭐⭐ K-1 的第一刀落空,挖出 4b 的**第三种含义**
+
+去掉 `/T` 后测试照绿。⚠️ 按家法我先怀疑变异,读实现后发现真相是**被测物侧**:清理**同时有两条路径** —— `/T` **和**一段自己用 `Win32_Process` BFS 枚举后代逐个杀的代码。**我只掐了冗余的那条。**
+⇒ 补掐第二条后:测试**挂死**(等进程数归零而永远等不到),且机器上真的留下 `mineru-fixture-….py grandchild <token>`、父进程已消失的**真孤儿** —— ⭐ **我亲手造出了那把刀所守的那个孤儿**,随即清除并复查零残留。
+📌 ⇒ **(C) 变异扎到了,但那一层是冗余的** 已入两义专栏;并附副则:**亲刀若可能产生外部残留,收刀后必须复查并清理现场**。
+⭐ **顺带记 builder 一功**:这里的**冗余是好事** —— 它说明杀进程不是单点防护,掐掉任一层另一层仍顶得住。
+
+### ⭐ 记 builder 三功
+
+1. **`ownsTimeout` 的边界划得准**:只有 MinerU 绕开外层 `Promise.race`(因为那层**结构上杀不死任何东西**),**既有 parser 的超时行为逐字节不变**。
+2. **测试缝不是后门**:`registerSourceParserForTesting` **同名即抛**,⛔ 不能覆盖既有 parser,只能新增;反注册只删自己那一份。
+3. **K-8 反例走的是真 registry dispatch**(`parserCalls=1` 为证),⛔ 没有用 `parseArtifact` 注入绕过 —— 它自己堵死了这条假绿。
+
+### 📌 处置
+
+- **身份表已按 v0.7.3 落地**:`native-pdf`/`native-docx`/`native-text` 申报 `server/package-lock.json`,`mineru` 申报 `_external_tools/mineru/uv.lock`,⭐ **`native-image` 显式申报「不写出生证」** —— 这一条我单里没写,它自己把「没有拓印就没有出生证」补齐了。
+- **未申报身份 ⇒ `failed/parser_failure`,出生证 0、投影 0,⛔ 未回退 `package-lock.json`** —— v0.7.3 的防线确实推进到了写入点。
+- **署名**:回执按实际来源写明「Fable,由调度方转写」,⛔ 未写成 Henry。

@@ -20,6 +20,10 @@ import {
 } from './sourceRecords.js';
 import { isSourceArtifactErrorRetryable } from './sourceMaterializationErrors.js';
 import {
+  MINERU_PARSER_KEY,
+  mineruParserVersion,
+} from './sourceMineruParser.js';
+import {
   expandZipSourceContainer,
   type SourceContainerExpansionReport,
 } from './sourceContainerIntake.js';
@@ -168,6 +172,21 @@ const SOURCE_FORMATS: SourceFormatDefinition[] = [
     parserVersion: 'none',
   },
 ];
+
+function parserIdentityForDefinition(
+  definition: SourceFormatDefinition,
+): Pick<InspectedSourceTempFile, 'parser_key' | 'parser_version'> {
+  if (definition.format === 'pdf' && process.env.COINCIDES_PDF_PARSER === MINERU_PARSER_KEY) {
+    return {
+      parser_key: MINERU_PARSER_KEY,
+      parser_version: mineruParserVersion(),
+    };
+  }
+  return {
+    parser_key: definition.parserKey,
+    parser_version: definition.parserVersion,
+  };
+}
 
 const BINARY_FALLBACK_DEFINITION: SourceFormatDefinition = {
   format: 'binary',
@@ -509,6 +528,7 @@ export async function inspectSourceTempFile(
     }
   }
   const declarations = SOURCE_INTAKE_DECLARATION_CODES.filter((code) => declarationSet.has(code));
+  const parserIdentity = parserIdentityForDefinition(definition);
 
   return {
     temp_path: tempPath,
@@ -519,8 +539,8 @@ export async function inspectSourceTempFile(
     content_hash: await hashFile(tempPath),
     format: definition.format,
     capability: definition.capability,
-    parser_key: definition.parserKey,
-    parser_version: definition.parserVersion,
+    parser_key: parserIdentity.parser_key,
+    parser_version: parserIdentity.parser_version,
     intake_declarations: declarations,
     fallback_text: fallbackText,
   };
@@ -706,11 +726,15 @@ function definitionForStoredRow(
   row: Pick<SourceInternalRow, 'original_filename' | 'mime_type' | 'parser_key'>,
 ): SourceFormatDefinition {
   const claimed = definitionForFilenameOrNull(row.original_filename);
-  if (claimed && claimed.mimeTypes.includes(row.mime_type) && claimed.parserKey === row.parser_key) {
+  const parserMatches = (definition: SourceFormatDefinition) => (
+    definition.parserKey === row.parser_key
+    || (definition.format === 'pdf' && row.parser_key === MINERU_PARSER_KEY)
+  );
+  if (claimed && claimed.mimeTypes.includes(row.mime_type) && parserMatches(claimed)) {
     return claimed;
   }
   return SOURCE_FORMATS.find((definition) => (
-    definition.mimeTypes.includes(row.mime_type) && definition.parserKey === row.parser_key
+    definition.mimeTypes.includes(row.mime_type) && parserMatches(definition)
   )) || BINARY_FALLBACK_DEFINITION;
 }
 

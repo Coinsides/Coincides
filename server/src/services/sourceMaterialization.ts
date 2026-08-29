@@ -11,6 +11,11 @@ import {
 } from './sourceArtifact.js';
 import { getSourceMaterializationFile } from './sourceFileIntake.js';
 import {
+  MINERU_PARSER_KEY,
+  MINERU_TRANSCRIBER_LOCKFILE,
+} from './sourceMineruParser.js';
+import { runWithSourceMaterializationConcurrency } from './sourceMaterializationConcurrency.js';
+import {
   publishSourceProjection,
   sweepOrphanSourceProjectionAssets,
   type PublishSourceProjectionHooks,
@@ -20,6 +25,7 @@ import { storeSourceImprint, type SourceImprintInput } from './sourceImprints.js
 const INTERRUPTED_AFTER_MS = 10 * 60 * 1000;
 const SOURCE_ARTIFACT_TRANSCRIBER_LOCKFILE = 'server/package-lock.json';
 const SOURCE_ARTIFACT_TRANSCRIBER_LOCKFILE_URL = new URL('../../package-lock.json', import.meta.url);
+const MINERU_TRANSCRIBER_LOCKFILE_URL = new URL('../../../_external_tools/mineru/uv.lock', import.meta.url);
 
 function sourceArtifactTranscriberLockfileHash(): string {
   try {
@@ -34,6 +40,57 @@ function sourceArtifactTranscriberLockfileHash(): string {
     );
   }
 }
+
+function mineruTranscriberLockfileHash(): string {
+  try {
+    return createHash('sha256')
+      .update(readFileSync(MINERU_TRANSCRIBER_LOCKFILE_URL))
+      .digest('hex');
+  } catch (error) {
+    throw new SourceArtifactError(
+      'internal_interrupted',
+      `SourceArtifact transcriber lockfile could not be read: ${MINERU_TRANSCRIBER_LOCKFILE}`,
+      { cause: error },
+    );
+  }
+}
+
+type SourceArtifactTranscriberIdentity =
+  | {
+    kind: 'document';
+    anchorFamily: 'page' | 'flow';
+    lockfile: string;
+    fingerprint: () => string;
+  }
+  | { kind: 'no-imprint' };
+
+const SOURCE_ARTIFACT_TRANSCRIBER_IDENTITIES: Record<string, SourceArtifactTranscriberIdentity> = {
+  'native-pdf': {
+    kind: 'document',
+    anchorFamily: 'page',
+    lockfile: SOURCE_ARTIFACT_TRANSCRIBER_LOCKFILE,
+    fingerprint: sourceArtifactTranscriberLockfileHash,
+  },
+  'native-docx': {
+    kind: 'document',
+    anchorFamily: 'flow',
+    lockfile: SOURCE_ARTIFACT_TRANSCRIBER_LOCKFILE,
+    fingerprint: sourceArtifactTranscriberLockfileHash,
+  },
+  'native-text': {
+    kind: 'document',
+    anchorFamily: 'flow',
+    lockfile: SOURCE_ARTIFACT_TRANSCRIBER_LOCKFILE,
+    fingerprint: sourceArtifactTranscriberLockfileHash,
+  },
+  'native-image': { kind: 'no-imprint' },
+  [MINERU_PARSER_KEY]: {
+    kind: 'document',
+    anchorFamily: 'page',
+    lockfile: MINERU_TRANSCRIBER_LOCKFILE,
+    fingerprint: mineruTranscriberLockfileHash,
+  },
+};
 
 type MaterializationStatus = 'received' | 'parsing' | 'publishing' | 'materialized' | 'failed';
 
@@ -253,15 +310,30 @@ function sourceArtifactImprintInput(
   sourceFileId: string,
   artifact: SourceArtifact,
 ): SourceImprintInput | null {
-  if (artifact.artifact_kind !== 'document') return null;
-  const paged = artifact.parser_key === 'native-pdf';
+  const identity = SOURCE_ARTIFACT_TRANSCRIBER_IDENTITIES[artifact.parser_key];
+  if (!identity) {
+    throw new SourceArtifactError(
+      'parser_failure',
+      `Source parser ${artifact.parser_key} has no transcriber identity declaration`,
+    );
+  }
+  if (identity.kind === 'no-imprint') {
+    if (artifact.artifact_kind !== 'image') {
+      throw new SourceArtifactError('parser_failure', 'No-imprint parser returned a document SourceArtifact');
+    }
+    return null;
+  }
+  if (artifact.artifact_kind !== 'document') {
+    throw new SourceArtifactError('parser_failure', 'Document transcriber returned an image SourceArtifact');
+  }
+  const paged = identity.anchorFamily === 'page';
   return {
     source_file_id: sourceFileId,
     transcriber: {
       name: artifact.parser_key,
       version: artifact.parser_version,
-      lockfile: SOURCE_ARTIFACT_TRANSCRIBER_LOCKFILE,
-      lockfile_hash: sourceArtifactTranscriberLockfileHash(),
+      lockfile: identity.lockfile,
+      lockfile_hash: identity.fingerprint(),
     },
     anchor_fidelity: paged ? 'page' : 'element',
     text_normalization: 'whitespace',
@@ -323,9 +395,11 @@ async function executeClaimedSourceMaterialization(
     const source = getSourceMaterializationFile(db, userId, sourceRecordId, {
       rootDir: options.sourceRootDir,
     });
-    const artifact = options.parseArtifact
-      ? await options.parseArtifact(parserInput(source))
-      : await parseSourceArtifact(parserInput(source));
+    const artifact = await runWithSourceMaterializationConcurrency(source.parser_key, async () => (
+      options.parseArtifact
+        ? await options.parseArtifact(parserInput(source))
+        : await parseSourceArtifact(parserInput(source))
+    ));
     if (artifact.schema_version !== 'source-artifact.v1') {
       throw new SourceArtifactError('parser_failure', 'Parser returned an unsupported SourceArtifact version');
     }
