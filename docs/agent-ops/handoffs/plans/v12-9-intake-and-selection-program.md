@@ -17,7 +17,7 @@
 
 ## §2 载体处理器分档(Henry 2026-08-27 调序定案)
 
-- **T0 已有**:pdf(数字原生,页级锚)· docx · xlsx · csv · txt · md —— 存量升级目标:对齐带锚碎片流。
+- **T0 已有**:pdf(数字原生,页级锚)· docx · xlsx · csv · txt · md —— 存量升级目标:对齐带锚碎片流;该流的落库形状已就位,⛔ 但 T0 存量对齐动作仍归 12.9c(TD-29 / TD-30)。
 - **T1 主力书面材料(本纲领的完成线)**:html/htm/mhtml(正文抽取)· epub(蹭 HTML)· pptx · png/jpg/jpeg/webp(识别器车道)· json/jsonl(方言地基)· zip+文件夹(容器策略:解包、目录=出生语境、逐件归族)· **pdf 扫描版**(识别器车道,选品主战场)。
 - **T2 旧格式抢救(Henry 升序:高于原 T2)**:旧二进制 Office(doc/xls/ppt——正经教学资料与案例库的常见载体;方针:转换后入,不直啃)· djvu · caj(知网,已知痛点)。
 - **T3 方言与小众**:ipynb · enex/XML · eml · Anki apkg(SQLite 方言)——真拖进来再写适配片。
