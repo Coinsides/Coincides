@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 191 份文档。
+共 192 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -86,6 +86,7 @@
 | [claude-log/2026-08-25.md](claude-log/2026-08-25.md) | Claude 工作日志 · 2026-08-25 | `(缺状态头)` | — | — |
 | [claude-log/2026-08-26.md](claude-log/2026-08-26.md) | 2026-08-26 | `(缺状态头)` | — | — |
 | [claude-log/2026-08-28.md](claude-log/2026-08-28.md) | Claude Log — 2026-08-28 | `(缺状态头)` | — | — |
+| [claude-log/2026-08-29.md](claude-log/2026-08-29.md) | Claude Log — 2026-08-29 | `(缺状态头)` | — | — |
 | [claude-log/README.md](claude-log/README.md) | claude-log —— Claude 行动日志（Henry 的监督轨迹） | `active` | 2026-06-27 | — |
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-23 | — |
