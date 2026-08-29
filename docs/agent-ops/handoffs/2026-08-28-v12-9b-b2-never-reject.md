@@ -80,4 +80,53 @@ npm run build
 
 ## Result
 
-**(builder 填)**
+**STOPPED at the pre-red contract gate · needs: claude/Fable 补裁。**
+
+未进入实现，也未建立半成品红测。本单与 b-1 已落现物有两处硬合同冲突，另有一处 K-5 红绿语义必须按定向变异解释；warning 合同不补裁就无法进入诚实绿灯，故按「红不出来 / 合同不成立就停」停线。
+
+1. **b-2 的 warning 合同与 b-1 最终合同不兼容，且修正文件不在允许面。** 本单 §3 要求 `{code, anchor_hint, detail?}` 与五个新 code；现物 `services/sourceImprints.ts` 的闭集仍只有 `unreadable_segment | empty_segment | decode_failed`，warning 形状是 `{code, anchor, detail?}`，`storeSourceImprint` 会先经 `assertInputContract` 拒绝新 code / 缺失 anchor。b-1 最终裁定已明确把旧 `anchor_hint` 降为 `detail`，结构化 `anchor` 才是现行。二进制兜底又没有可诚实伪造的原件锚；若伪造 flow-char anchor，service 会尝试按 fatal UTF-8 读取二进制原件并 422。`sourceImprints.ts` 不在 §2 允许面，故不能扩合同；先调 `storeSourceImprint` 再直接 `UPDATE warnings_json` 虽可字面过测，却会旁路 b-1 service 合同，未采用。
+2. **K-5 的自然基线必然先绿；其「红」只能解释为语义定向变异。** K-5 明文要求 12 后缀行为等于「改动前捕获的死值」且逐一不变，因此先捕获死值后，未经变异的改动前基线应为 GREEN。若「五刀先红后绿」的意思是 K-5 也要证明会红，唯一不破坏死值的诚实做法是：先冻结 12 组死值，再临时施加一条语法有效、语义定向的已知后缀行为漂移，使 K-5 红，随后还原并保持绿；不能靠写错 expected 造红。复工时将按此前者执行；若要求 K-5 在无变异的原码上自然红，则与回归锁定义冲突，需补裁。
+3. **现物还有工单未列的独立 MIME 闸。** `inspectSourceTempFile` 对 MIME/后缀不匹配另抛 `mime_extension_mismatch`；本单只列三道闸，新 warning 闭集也无该理由的 code。若标题「永不拒收」覆盖它，就必须补 warning code / 改判；若不覆盖，需明写它继续拒收，不能由 builder 自裁。另工单所称 `resolveFormat` 的现物名实际是 `definitionForFilename`；未知后缀即使通过 intake，返回结果时 `getSourceRecordDetail -> definitionForStoredRow -> definitionForFilename` 仍会再次拒绝，复工时必须在同一允许文件内保护这条读回路径，不能只改首道检查。
+
+**改动 / 验证实录：**除本 `## Result` 回执外，`server/src/services/sourceFileIntake.ts`、`server/package.json` 与新测试文件均零改动；`v2SourceNeverReject.test.ts` 不存在。既有工作树项 `server/src/routes/projections.ts` 未触碰（现物核实为行尾 / index 状态假脏，语义 diff 为零）。handoff 状态行与 `docs/agent-ops/INDEX.md` 未动。因在 pre-red 合同门停线，§6 四条收工命令未跑，不能申报绿灯；`docs/generated/tool-face-manifest.json` 对 HEAD 零 diff。
+
+---
+
+## 调度方处置(claude,2026-08-28 · 第一次派工停线)
+
+### ⭐ 三条申报全部复核为真,记功
+
+| # | 申报 | 复核 |
+|---|---|---|
+| 1 | b-2 的 warning 合同与 b-1 落地的**不兼容** | ✅ b-1 落地的是 `{code, **anchor**, detail?}` + **3 个 code 的闭集**(`sourceImprints.ts:21`),且 `assertInputContract` **在代码里强制**;而本单写的是 `anchor_hint` + **5 个自造 code** |
+| 2 | 现物**还有第四道闸** | ✅ `sourceFileIntake.ts:359` `mime_extension_mismatch`;且本单称的 `resolveFormat` **实名是 `definitionForFilename`**(`:277`) |
+| 3 | ⭐ **读回路径会二次拒绝** | ✅ `getSourceRecordDetail`(`:475`)→ `definitionForStoredRow`(`:460`)→ `definitionForFilename` ⇒ **未知后缀即使入库成功,列表/详情仍会抛** |
+
+⭐ **第 3 条最值钱**:**只改入口不改读回 ⇒ 件进得去、读不出来** —— 而**入口测试会全绿**。**这正是「半修比不修更糟」的形状**,它在写第一行代码之前就指出来了。
+⭐ **它还拒绝了一条能字面过测的捷径**:先调 `storeSourceImprint` 再直接 `UPDATE warnings_json` —— **那会旁路 b-1 的 service 合同**。它写明「未采用」。
+
+### ⚠️ 归属:**工单缺陷,而且形状是新的(第 7 次)**
+
+**本单是在 b-1 落地【之前】起草的,b-1 落地后我没有回头把它对现物。**
+⇒ ⭐ **新家法(已立进 `handoffs/README.md`)**:**候锁期间其依赖发生落地的单,派发前必须重新过一遍现物** —— **⛔ 过闸 ≠ 对现物**;第七查查的是「点名之物是否在允许面」,**查不出「单里的合同是否还与树上一致」。**
+
+### ⇒ 我能改的已改(见 §1/§3/§4),但**有一条设计级问题必须先裁**
+
+⭐ **二进制兜底的 warning 该挂什么锚?**
+b-1 的合同要求 warning 携带**封闭五族之一的结构化锚**,而**二进制件没有任何诚实可给的锚**(伪造 flow-char 锚会让 service 按 fatal UTF-8 去读二进制原件而 422 —— builder 已实测)。
+
+**三条路,⛔ 我不选**:
+| 路 | 说明 |
+|---|---|
+| **(A)** 给锚族加一个 `whole_file` 形态 | 改的是**规格的封闭锚族** |
+| **(B)** 二进制兜底类的 code 允许 `anchor` 为空 | 在 b-1 的合同上开一个例外 |
+| ⭐ **(C)** **二进制兜底「只存不拓」⇒ 根本不产生拓印件 ⇒ 没有出生证,也就没有 warnings** | 那么**申报该挂在 source 记录层而非拓印件层** ⇒ **本单 §5「留痕走 warnings 族」的前提就不成立**,需要另一个载体 |
+
+📌 **我倾向 (C)** —— 它与「只存不拓」的字面最自洽:**没有拓印,哪来的拓印件出生证**。
+⚠️ **但它推翻的是你自己 §5 的裁定**(留痕走 warnings 族),**所以必须你裁。**
+
+**另需你裁**:①`mime_extension_mismatch` 是否也在「永不拒收」的射程内?②**扩 warning 闭集**是规格级动作(b-1 的闭集源自 spec v0.2 且在代码里强制)—— 扩不扩、扩哪些?
+
+## Result(第二次派工)
+
+**(待裁定后填)**
