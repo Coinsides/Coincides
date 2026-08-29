@@ -1,10 +1,12 @@
 import { readFile, stat } from 'node:fs/promises';
 import { extname } from 'node:path';
 import * as mammoth from 'mammoth';
+import { PDFParse } from 'pdf-parse';
 import {
   isSourceArtifactErrorRetryable,
   type SourceArtifactErrorCode,
 } from './sourceMaterializationErrors.js';
+import { canonicalizeSourceText } from './sourceTextCanonical.js';
 
 export {
   isSourceArtifactErrorRetryable,
@@ -88,12 +90,12 @@ function limitsFrom(options: ParseSourceArtifactOptions): SourceArtifactLimits {
   };
 }
 
-function normalizeText(value: string): string {
+function prepareTextForParagraphSplitting(value: string): string {
   return value.replace(/\r\n?/g, '\n').replace(/[\t ]+\n/g, '\n').trim();
 }
 
 function splitParagraphs(value: string): string[] {
-  const normalized = normalizeText(value);
+  const normalized = prepareTextForParagraphSplitting(value);
   if (!normalized) return [];
   return normalized
     .split(/\n\s*\n+/)
@@ -182,17 +184,6 @@ const pdfParser: SourceParser = {
   key: 'native-pdf',
   async parse(input, limits) {
     const data = await readFile(input.file_path);
-    const pdfModule = await import('pdf-parse') as unknown as {
-      PDFParse: new (options: { data: Buffer }) => {
-        getInfo(): Promise<{ total: number }>;
-        getText(): Promise<{
-          total: number;
-          pages: Array<{ num: number; text: string }>;
-        }>;
-        destroy(): Promise<void>;
-      };
-    };
-    const { PDFParse } = pdfModule;
     const parser = new PDFParse({ data });
     try {
       const info = await parser.getInfo();
@@ -203,8 +194,8 @@ const pdfParser: SourceParser = {
         );
       }
       const result = await parser.getText();
-      const blocks = result.pages.flatMap((page: { num: number; text: string }) => (
-        splitParagraphs(page.text).map((text, blockIndex): SourceArtifactBlock => ({
+      const blocks = result.pages.flatMap((page: { num: number; text: string }) => {
+        const pageBlocks = splitParagraphs(page.text).map((text, blockIndex): SourceArtifactBlock => ({
           artifact_block_id: `pdf-page-${page.num}-block-${blockIndex + 1}`,
           kind: 'text',
           text,
@@ -212,8 +203,19 @@ const pdfParser: SourceParser = {
           page_index: page.num,
           locator: { kind: 'pdf_page', page_index: page.num, block_index: blockIndex + 1 },
           metadata: {},
-        }))
-      ));
+        }));
+        const deliveredPageText = pageBlocks.map((block) => block.text).join('');
+        if (
+          canonicalizeSourceText(deliveredPageText, 'whitespace')
+          !== canonicalizeSourceText(page.text, 'whitespace')
+        ) {
+          throw new SourceArtifactError(
+            'parser_failure',
+            `PDF page ${page.num} segmentation lost non-whitespace source text`,
+          );
+        }
+        return pageBlocks;
+      });
       return documentArtifact(input, assertBlockLimit(blocks, limits), {
         page_count: result.total,
       });

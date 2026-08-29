@@ -197,7 +197,7 @@
 | [handoffs/2026-08-28-v12-9b-b2-never-reject.md](handoffs/2026-08-28-v12-9b-b2-never-reject.md) | b-2:入库永不拒收 + 两条兜底 | `done(2026-08-28 收工;复核 PASS;⚠️ 五次派工,其中两次因发单方列举出错)(原:第二次派工 —— 第一次因工单与 b-1 落地合同不兼容而停线,已按规格 **v0.3**(`7b3d3f6`)重写)` | — | — |
 | [handoffs/2026-08-28-v12-9b-b2b-container.md](handoffs/2026-08-28-v12-9b-b2b-container.md) | b-2b:容器策略(zip / 文件夹)—— 逐条目降级 + 如实申报 | `done(2026-08-29 收工;复核 PASS;三次派工)(原:第二次派工 —— 一停后按规格 **v0.5** 订正;原按 v0.4 —— 原稿写于 b-2 落地之前,载体与闭集均已过期)` | — | — |
 | [handoffs/2026-08-28-v12-9b-b4-docs.md](handoffs/2026-08-28-v12-9b-b4-docs.md) | b-4:文档面 —— 词典三条现状栏 + 程序表状态刷新 | `done(2026-08-28 收工;复核 PASS)` | — | — |
-| [handoffs/2026-08-29-v12-9c-c0-t0-alignment.md](handoffs/2026-08-29-v12-9c-c0-t0-alignment.md) | c-0:T0 存量对齐带锚碎片流(⭐ 这是**映射**单,不是建造单) | `ready` | — | — |
+| [handoffs/2026-08-29-v12-9c-c0-t0-alignment.md](handoffs/2026-08-29-v12-9c-c0-t0-alignment.md) | c-0:T0 存量对齐带锚碎片流(⭐ 这是**映射**单,不是建造单) | `done(第二次派工按 v0.7 落地;复核方 2026-08-29 亲刀:K-5 元不变式 + K-1c 第三产生点 + K-4 结构锁 三条实测有咬,test:v2 331/331 自跑,禁区零 diff,第七查 exit 0)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
 | [handoffs/plans/v12-9b-anchored-fragment-stream-spec.md](handoffs/plans/v12-9b-anchored-fragment-stream-spec.md) | 带锚碎片流(Anchored Fragment Stream)规格 v0 | `active` | — | — |

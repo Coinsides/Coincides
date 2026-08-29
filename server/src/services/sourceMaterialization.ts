@@ -13,8 +13,10 @@ import {
   sweepOrphanSourceProjectionAssets,
   type PublishSourceProjectionHooks,
 } from './sourceProjectionMaterializer.js';
+import { storeSourceImprint, type SourceImprintInput } from './sourceImprints.js';
 
 const INTERRUPTED_AFTER_MS = 10 * 60 * 1000;
+const SOURCE_ARTIFACT_TRANSCRIBER_LOCKFILE = 'server/package-lock.json';
 
 type MaterializationStatus = 'received' | 'parsing' | 'publishing' | 'materialized' | 'failed';
 
@@ -189,6 +191,112 @@ function parserInput(source: ReturnType<typeof getSourceMaterializationFile>): S
   };
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function pageAnchorForBlock(block: SourceArtifact['blocks'][number]) {
+  const locatorPage = isRecord(block.locator) ? block.locator.page_index : undefined;
+  const blockIndex = isRecord(block.locator) ? block.locator.block_index : undefined;
+  if (
+    !Number.isInteger(block.page_index)
+    || (block.page_index as number) < 1
+    || locatorPage !== block.page_index
+    || !Number.isInteger(blockIndex)
+    || (blockIndex as number) < 0
+  ) {
+    throw new SourceArtifactError('parser_failure', 'PDF SourceArtifact block is missing its page-local locator');
+  }
+  return {
+    family: 'page' as const,
+    page: block.page_index as number,
+    block_index: blockIndex as number,
+  };
+}
+
+function flowAnchorForBlock(block: SourceArtifact['blocks'][number]) {
+  const locatorKind = isRecord(block.locator) ? block.locator.kind : undefined;
+  const locatorIndex = isRecord(block.locator) ? block.locator.index : undefined;
+  if (
+    block.page_index !== null
+    || typeof locatorKind !== 'string'
+    || locatorKind.trim().length === 0
+    || !Number.isInteger(locatorIndex)
+    || (locatorIndex as number) < 1
+  ) {
+    throw new SourceArtifactError('parser_failure', 'Flow SourceArtifact block is missing its format-native locator');
+  }
+  return {
+    family: 'flow' as const,
+    path: `${locatorKind}[${locatorIndex}]`,
+  };
+}
+
+function sourceArtifactImprintInput(
+  sourceFileId: string,
+  artifact: SourceArtifact,
+): SourceImprintInput | null {
+  if (artifact.artifact_kind !== 'document') return null;
+  const paged = artifact.parser_key === 'native-pdf';
+  return {
+    source_file_id: sourceFileId,
+    transcriber: {
+      name: artifact.parser_key,
+      version: artifact.parser_version,
+      lockfile: SOURCE_ARTIFACT_TRANSCRIBER_LOCKFILE,
+    },
+    anchor_fidelity: paged ? 'page' : 'element',
+    text_normalization: 'whitespace',
+    fragments: artifact.blocks.map((block, seq) => ({
+      seq,
+      text: block.text,
+      role: block.writing_role === 'heading' ? 'heading' : 'para',
+      anchor: paged ? pageAnchorForBlock(block) : flowAnchorForBlock(block),
+    })),
+    warnings: [],
+  };
+}
+
+function ensureSourceArtifactImprint(
+  db: Database.Database,
+  userId: string,
+  sourceFileId: string,
+  artifact: SourceArtifact,
+  options: SourceMaterializationOptions,
+): void {
+  const input = sourceArtifactImprintInput(sourceFileId, artifact);
+  if (!input) return;
+  const existing = db.prepare(`
+    SELECT 1
+    FROM source_imprints
+    WHERE source_file_id = ?
+      AND user_id = ?
+      AND transcriber_name = ?
+      AND transcriber_version = ?
+      AND transcriber_lockfile = ?
+      AND status = 'accepted'
+    LIMIT 1
+  `).get(
+    sourceFileId,
+    userId,
+    input.transcriber.name,
+    input.transcriber.version,
+    input.transcriber.lockfile,
+  );
+  if (existing) return;
+
+  const stored = storeSourceImprint(db, userId, input, {
+    rootDir: options.sourceRootDir,
+    now: options.now,
+  });
+  if (stored.imprint.status !== 'accepted') {
+    throw new SourceArtifactError(
+      'parser_failure',
+      'SourceArtifact imprint was rejected by the Source imprint contract',
+    );
+  }
+}
+
 async function executeClaimedSourceMaterialization(
   db: Database.Database,
   userId: string,
@@ -208,6 +316,7 @@ async function executeClaimedSourceMaterialization(
       throw new SourceArtifactError('parser_failure', 'Parser returned an unsupported SourceArtifact version');
     }
     options.hooks?.afterParse?.(artifact);
+    ensureSourceArtifactImprint(db, userId, source.source_file_id, artifact, options);
 
     const publishingAt = (options.now || new Date()).toISOString();
     const publishing = db.prepare(`

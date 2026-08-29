@@ -4,6 +4,10 @@ import type Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 import { AppError } from '../middleware/errorHandler.js';
 import { resolveSourceStorageKey } from './sourceFileIntake.js';
+import {
+  canonicalizeSourceText,
+  nonWhitespaceText,
+} from './sourceTextCanonical.js';
 
 export const SOURCE_IMPRINT_ROLES = [
   'heading',
@@ -56,6 +60,7 @@ export type SourceImprintTextNormalization = typeof SOURCE_IMPRINT_TEXT_NORMALIZ
 export type PageAnchor = {
   family: 'page';
   page: number;
+  block_index?: number;
   bbox?: [number, number, number, number];
 };
 
@@ -222,6 +227,9 @@ function isSourceImprintAnchor(value: unknown): value is SourceImprintAnchor {
   if (value.family === 'page') {
     return Number.isInteger(value.page)
       && (value.page as number) >= 1
+      && (value.block_index === undefined || (
+        Number.isInteger(value.block_index) && (value.block_index as number) >= 0
+      ))
       && (value.bbox === undefined || isNormalizedBbox(value.bbox));
   }
   if (value.family === 'flow') {
@@ -258,6 +266,7 @@ function projectAnchor(anchor: unknown): unknown {
     return {
       family: 'page',
       page: anchor.page,
+      ...(anchor.block_index === undefined ? {} : { block_index: anchor.block_index }),
       ...(anchor.bbox === undefined ? {} : { bbox: anchor.bbox }),
     };
   }
@@ -347,27 +356,6 @@ function assertInputContract(input: SourceImprintInput): void {
   }
 }
 
-function normalizeText(value: string, normalization: SourceImprintTextNormalization): string {
-  if (normalization === 'none') return value;
-  if (normalization === 'whitespace') return value.replace(/\s+/gu, ' ');
-  const replacements: Record<string, string> = {
-    '‘': "'",
-    '’': "'",
-    '“': '"',
-    '”': '"',
-    '–': '-',
-    '—': '-',
-    '…': '...',
-    '，': ',',
-    '。': '.',
-    '：': ':',
-    '；': ';',
-    '！': '!',
-    '？': '?',
-  };
-  return value.replace(/[‘’“”–—…，。：；！？]/gu, (character) => replacements[character]);
-}
-
 function byteEqual(left: string, right: string): boolean {
   return Buffer.from(left, 'utf8').equals(Buffer.from(right, 'utf8'));
 }
@@ -380,6 +368,25 @@ function addReason(
   if (!reasons.some((reason) => reason.code === code && reason.detail === detail)) {
     reasons.push({ code, detail });
   }
+}
+
+function canonicalizeValidatedText(
+  value: string,
+  normalization: SourceImprintTextNormalization,
+  reasons: SourceImprintRejectionReason[],
+): string {
+  const canonical = canonicalizeSourceText(value, normalization);
+  if (
+    normalization === 'whitespace'
+    && !byteEqual(nonWhitespaceText(canonical), nonWhitespaceText(value))
+  ) {
+    addReason(
+      reasons,
+      'fidelity_mismatch',
+      'Whitespace canonicalization must preserve the complete non-whitespace byte sequence',
+    );
+  }
+  return canonical;
 }
 
 function checkSequence(
@@ -538,8 +545,8 @@ function checkTextFidelity(
     .join('');
   const reference = sourceWithoutWarnings(source, warningSpans);
   if (!byteEqual(
-    normalizeText(delivered, input.text_normalization),
-    normalizeText(reference, input.text_normalization),
+    canonicalizeValidatedText(delivered, input.text_normalization, reasons),
+    canonicalizeValidatedText(reference, input.text_normalization, reasons),
   )) {
     addReason(
       reasons,
@@ -616,8 +623,16 @@ function checkAnchorTruth(
   for (const fragment of input.fragments) {
     const span = flowSpan(fragment.anchor);
     if (!span) continue;
-    const sourceSlice = normalizeText(source.slice(span.start, span.end), input.text_normalization);
-    const fragmentText = normalizeText(fragment.text, input.text_normalization);
+    const sourceSlice = canonicalizeValidatedText(
+      source.slice(span.start, span.end),
+      input.text_normalization,
+      reasons,
+    );
+    const fragmentText = canonicalizeValidatedText(
+      fragment.text,
+      input.text_normalization,
+      reasons,
+    );
     if (!sourceSlice.includes(fragmentText)) {
       addReason(
         reasons,
