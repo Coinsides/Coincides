@@ -192,7 +192,7 @@
 | [handoffs/2026-08-28-text-unit-gutter-de-occupation.md](handoffs/2026-08-28-text-unit-gutter-de-occupation.md) | 单 A:行首控件迁出排版流(纯力学) | `ready` | — | — |
 | [handoffs/2026-08-28-v12-9b-b1-imprint-schema.md](handoffs/2026-08-28-v12-9b-b1-imprint-schema.md) | b-1:碎片流 schema 落地 + 拓印件出生证 | `done(2026-08-28 收工;复核 PASS,四次派工)` | — | — |
 | [handoffs/2026-08-28-v12-9b-b2-never-reject.md](handoffs/2026-08-28-v12-9b-b2-never-reject.md) | b-2:入库永不拒收 + 两条兜底 | `done(2026-08-28 收工;复核 PASS;⚠️ 五次派工,其中两次因发单方列举出错)(原:第二次派工 —— 第一次因工单与 b-1 落地合同不兼容而停线,已按规格 **v0.3**(`7b3d3f6`)重写)` | — | — |
-| [handoffs/2026-08-28-v12-9b-b2b-container.md](handoffs/2026-08-28-v12-9b-b2b-container.md) | b-2b:容器策略(zip / 文件夹)—— 逐条目降级 + 如实申报 | `draft` | — | — |
+| [handoffs/2026-08-28-v12-9b-b2b-container.md](handoffs/2026-08-28-v12-9b-b2b-container.md) | b-2b:容器策略(zip / 文件夹)—— 逐条目降级 + 如实申报 | `ready(⚠️ **2026-08-29 按规格 v0.4 完全重写** —— 原稿写于 b-2 落地之前,载体与闭集均已过期)` | — | — |
 | [handoffs/2026-08-28-v12-9b-b4-docs.md](handoffs/2026-08-28-v12-9b-b4-docs.md) | b-4:文档面 —— 词典三条现状栏 + 程序表状态刷新 | `done(2026-08-28 收工;复核 PASS)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
