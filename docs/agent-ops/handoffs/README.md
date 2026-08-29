@@ -320,3 +320,11 @@ node scripts/docs-index.mjs && node scripts/docs-inventory.mjs && git add docs/a
 ⇒ ⚠️ **根因不是「忘了」,是「按目录 add」这个动作本身既会漏也会扫。**
 **正确形状(README 早有,今日三次都没照做)**:**点名 add** + **`git status --short` 复查 `??` 与 ` M` 两者**。
 ⛔ **不得用 `git add <目录>` 图省事** —— 它同时具备漏装与误装两种失败模式,而**两种都不会报错**。
+
+### ⚠️ 状态翻牌是**调度方**的活,⛔ 别写进 builder 的单(2026-08-28,b-1 第四次派工撞出来的)
+
+**任何一张单,只要「完成动作」包含把 handoff header 从 `ready` 翻成 `done`,就必然让 `docs/agent-ops/INDEX.md` 过期** —— 而 INDEX 通常**不在该单的允许面**里。
+⇒ ⛔ **builder 会陷入死循环**:不翻牌则协议未走完,翻了牌则 `docs:check` 必红、而修它又越界。
+
+**正确形状**:**翻牌 + 重生成 INDEX/inventory + 提交,全部由调度方在复核之后做。**
+📌 b-1 的 builder 撞上后**撤回了状态试探,并且明确没有把 `ready` 树的绿灯冒充成 `done` 树的绿灯** —— 处置正确;**缺陷在单,不在它。**

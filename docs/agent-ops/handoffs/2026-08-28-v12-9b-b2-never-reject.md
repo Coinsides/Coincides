@@ -1,4 +1,4 @@
-> **状态 (Status)**: draft(⚠️ **依赖 b-1 落地后才可派** —— 两兜底要写 b-1 造的 `imprint_fragments`)
+> **状态 (Status)**: ready(**b-1 已落地 `18cdb8b`** —— `source_imprints` / `imprint_fragments` 与 `services/sourceImprints.ts` 均在树上)
 > **from**: claude(opus,工程调度会话) · **to**: codex(builder) · **date**: 2026-08-28
 > **裁定来源**: Fable(b-2 瘦身为「改判 + 两兜底」;zip 容器策略已拆出为 b-2b)
 
