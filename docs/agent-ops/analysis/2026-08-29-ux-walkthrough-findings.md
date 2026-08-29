@@ -71,6 +71,12 @@
 
 - **原话**:「template studio 是旧时代产物,当下存在意义有待商榷。」
 - **初判**:产品裁决题,与「annotation 层级 = pre-pivot 遗物」同类候选。讨论前需盘点:它现在能做什么、谁在消费它的产物、退役/冻结/降级入口三条路的代价。
+- **现状盘点(Fable 探子,2026-08-29)**:
+  - **遗物证据硬**:页面与 19 张表全部诞生于 2026-05-23~24 两天,**此后 3 个月零改动**(其间主干 692 次提交);UI 下拉仍提供 6 月已被下游简化删掉的 11 项学习角色词表;有专门维护 `legacy_block_type` 的下拉——字段名自陈身份。
+  - **库存空心**:模板注册表 6 月精简后只剩 **3 个系统模板**,Studio 的「模板库」默认就 3 行;slash 命令只认这 3 个硬编码 key,自定义模板走不了 `/`。
+  - **半孤立**:四面板(模板编辑/Domain Packages/Domain Refinement/导入导出)的专属路由,client 消费者 grep 命中 = **仅 Studio 自己**;`composition_templates` 全家 client **零消费**。**但 templateDefinitions 运行时是活的**(每次写块都过它,插入菜单坐在 `GET /templates` 上)⛔ 不能删。
+  - **天然降级切口**:留 template_definitions + `GET /templates` + 插入菜单;删 Studio 页面 + 三块死面板 + 6 条路由 + ~4600 行 service。附带:TD-33(包导入空指纹)钉在 packagePortability,删除即债随码销。
+- **Fable 倾向(⛔ 待 Henry 裁)**:**降级切口**——运行时留、工作室删;将来真需要「用户造模板」时按 ContentGroup 语法重设计,⛔ 不复活这套。归 V12.10 执行。
 - **讨论结论**:(待)
 
 ## 8. Navigator bar 栏目需要折叠菜单
