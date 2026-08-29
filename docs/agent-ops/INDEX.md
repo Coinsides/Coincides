@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 196 份文档。
+共 197 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -197,6 +197,7 @@
 | [handoffs/2026-08-28-v12-9b-b2-never-reject.md](handoffs/2026-08-28-v12-9b-b2-never-reject.md) | b-2:入库永不拒收 + 两条兜底 | `done(2026-08-28 收工;复核 PASS;⚠️ 五次派工,其中两次因发单方列举出错)(原:第二次派工 —— 第一次因工单与 b-1 落地合同不兼容而停线,已按规格 **v0.3**(`7b3d3f6`)重写)` | — | — |
 | [handoffs/2026-08-28-v12-9b-b2b-container.md](handoffs/2026-08-28-v12-9b-b2b-container.md) | b-2b:容器策略(zip / 文件夹)—— 逐条目降级 + 如实申报 | `done(2026-08-29 收工;复核 PASS;三次派工)(原:第二次派工 —— 一停后按规格 **v0.5** 订正;原按 v0.4 —— 原稿写于 b-2 落地之前,载体与闭集均已过期)` | — | — |
 | [handoffs/2026-08-28-v12-9b-b4-docs.md](handoffs/2026-08-28-v12-9b-b4-docs.md) | b-4:文档面 —— 词典三条现状栏 + 程序表状态刷新 | `done(2026-08-28 收工;复核 PASS)` | — | — |
+| [handoffs/2026-08-29-seventh-check-functionize.md](handoffs/2026-08-29-seventh-check-functionize.md) | 第七查函数化重写(⭐ 把「按形状猜路径」换成「向仓库问」) | `ready(⏳ **候锁** —— c-1a 正持锁,本单排在其后;派发前按家法**重新对 HEAD 现物**)` | — | — |
 | [handoffs/2026-08-29-v12-9c-c0-t0-alignment.md](handoffs/2026-08-29-v12-9c-c0-t0-alignment.md) | c-0:T0 存量对齐带锚碎片流(⭐ 这是**映射**单,不是建造单) | `done(第二次派工按 v0.7 落地;复核方 2026-08-29 亲刀:K-5 元不变式 + K-1c 第三产生点 + K-4 结构锁 三条实测有咬,test:v2 331/331 自跑,禁区零 diff,第七查 exit 0)` | — | — |
 | [handoffs/2026-08-29-v12-9c-c1a-mineru-env-probe.md](handoffs/2026-08-29-v12-9c-c1a-mineru-env-probe.md) | c-1a:MinerU 环境体检(⭐ 这是**遗产体检**单,⛔ 不是安装单,⛔ 也不是重建单) | `ready(⭐ 四条冲突已由 Fable 2026-08-29 全裁,本单按裁定重写:沿用现物 3.12/3.4.5、⛔ 不搬不重建、钉版三件入库并逐字节锁、扫描件自造)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
