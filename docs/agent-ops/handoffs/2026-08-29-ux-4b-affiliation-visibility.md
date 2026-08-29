@@ -1,4 +1,4 @@
-> from: claude(fable,代理期直发——调度会话下线,授权:claude-log/2026-08-19.md 条目 1;方案 Henry 2026-08-29 晨当面拍板) | to: codex(builder) | status: ready | re: UX-4b | date: 2026-08-29
+> from: claude(fable,代理期直发——调度会话下线,授权:claude-log/2026-08-19.md 条目 1;方案 Henry 2026-08-29 晨当面拍板) | to: codex(builder) | status: needs: claude | re: UX-4b | date: 2026-08-29
 
 # UX-4b:页面归属可见性接线 + 虚线框分色 + 行首按钮删除 + 整理模式合并
 
@@ -77,7 +77,15 @@ Henry 实测走查 🅰 头号(档案:`docs/agent-ops/analysis/2026-08-29-ux-wal
 
 其余交付物与 K 面照原文。允许面不变(`BlockControlBarLayer`/`NoteChromeLayer` 均在 `canvasEngine/**` 内)。
 
-## Result
+## 修订二(Fable 裁定,六次派工;针对五派停线点)
+
+**① 规格不动**:crossing(中心在页外、rect 与页相交)⇒ 松手收编最小平移;`inside`(中心在页内)⇒ **不动,即使有边溢出**——这是 Henry 的 hitbox 律原文(「点进了就算进了」),溢出的 inside 块是合法形态,其显示由 K-2 保护。⛔ 不为了让遗产测试变绿而改规格。
+
+**② 遗产 resize 刀判作废,重写**:五派已证它双重违约(候选中心在页内该判 inside 却期望收编;期望值 x=100 连最小平移 x=200 都不符)。重写规则:fixture 改为**真实 crossing 候选**(中心在页外且 rect 与页相交),期望值**自己按最小平移计算**,⛔ 不得沿用阵亡者的任何数值。**收编规则对 move 与 resize 手势统一适用**(松手时判归属,crossing 即收编,不分手势);若几何上 resize 手势难以自然产生 crossing 场景,如实删刀并在 Result 申报「该场景不存在」——以几何事实为准,⛔ 不硬造。
+
+**③ 交付物 2 断链(TS2322)属四派阵亡半成品**,按体检表续建补完(BlockEditorLayer 接收并渲染 `affiliationOutline`),无规格问题。
+
+**④ 解除停线,授权续建至完工**:K 面变异取证照协议(先落地证明再读红绿);继续小步勤落盘。
 
 > builder 开工回执 | 2026-08-29 | `status: needs: claude` | 施工状态: **K-0 停线,生产代码零修改**(已由上方修订段解除,二次派工)
 
@@ -131,3 +139,90 @@ Henry 实测走查 🅰 头号(档案:`docs/agent-ops/analysis/2026-08-29-ux-wal
 - `git diff --numstat`：`55  0  docs/agent-ops/handoffs/2026-08-29-ux-4b-affiliation-visibility.md`；与开工前空基线相比，唯一 tracked diff 即本回执。
 - `git diff --name-only`：仅本工单；`git diff --check` exit=`0`。
 - 同一 status 探针仍看见且仅额外看见既有 ` M server/src/routes/projections.ts`、`?? .claude/settings.local.json`；前者复核 blob 仍与 HEAD 同 hash，二者均未触碰。
+
+## Result 二次派工
+
+> builder 二次开工回执 | 2026-08-29 | `status: in_progress` | 依据「## 修订(Fable 裁定,二次派工)」复工
+
+### K-0 继承与二次复核
+
+- 上一段 Result 的 K-0 逐产生点清单继续有效；本轮已复核当前分支仍为 `fable/v2-bn12-exoskeleton`，`.codegraph/` 存在，现物没有出现新的前提冲突。
+- 停线问题 1 已由修订段裁清：以 `layoutMode` 为存续的「整理模式」开关，`snapEnabled` 随它派生；既有 `layoutMode` 消费者全部保持原接线与原语义，不扩界。
+- 停线问题 2 已由修订段裁清：授权在 `BlockControlBarLayer` 新增真实的 Insert text unit below 入口；gutter 删除 Grip / Insert / Label 三按钮，保留 role select。
+- 开工边界基线：tracked 内容 diff 为空；共享树仍有 `server/src/routes/projections.ts` 的已知 EOL 假脏与 `?? .claude/settings.local.json`，均属禁区且本轮不触碰。`server/src/routes/projections.ts` 工作树 `git hash-object` 为 `561902a449b50ce254b650de5a337973a8fbc26d`；最终回执将用 HEAD blob id 再做同口径复核。
+- 本轮将按 K-1→K-5 逐刀记录红点断言原文与行号；每次施变异先以 diff/源码探针证明变异落地，再读取测试红绿；K-6 最后统一验门。
+
+## Result 三次续建
+
+> builder 三次续建开工回执 | 2026-08-29 | `status: in_progress` | 四次派工；前三派因沙箱 ACL 故障终止，本轮不继承任何未落盘绿结论
+
+### 开工边界与 K-0 待验清单
+
+- 当前分支已亲验为 `fable/v2-bn12-exoskeleton`，仓根 `.codegraph/` 存在；后续代码定位先走 CodeGraph。
+- 开工时工作树中的 UX-4b 未验证遗产为：`modePolicyService.ts`、`useNoteCanvasLayoutModel.ts`、`useNoteCanvasRuntimeController.ts`、`useRuntimeLayoutModelController.ts`、`TextBlockProjection.tsx`、`BlockControlBarLayer.tsx`、`BlockEditorLayer.tsx`、`NoteChromeLayer.test.tsx`、`NoteWritingSurfaceLayer.tsx`、`TextUnitGutterLayer.tsx`，以及新建 `blockAffiliationOutlineService.ts` 与六个专项 `.test` 文件。它们一律先按「待体检」处理，不把存在等同于成形。
+- K-0 本轮将重新逐点核：page-mode 可见性过滤定义与全部消费者；`layoutMode` / `snapEnabled` 的入口、状态、持久化与消费者；gutter 三按钮与右侧工具条的产生点。前两段 Result 只作历史收据，不作为本轮断言证据。
+- 既知禁区现物仍包括 `server/src/routes/projections.ts` 的 EOL 假脏与 `?? .claude/settings.local.json`；本轮不触碰。最终用 blob / numstat 对照，不用 porcelain 假脏承重。
+- 本轮按「遗产体检 → 补断言/续建 → 逐刀变异 → K-6 门禁」推进；每刀先展示变异已落地的源码或 diff 证明，再读该刀红点，随后还原并取绿。⛔ 不 commit、不 push、不碰任何锁。
+
+## Result 五次派工
+
+> builder 五次派工开工回执 | 2026-08-29 | `status: needs: claude` | 三派止于沙箱 ACL、四派止于机器蓝屏；本轮采用小步施工、勤落盘，任何既有代码与测试结论均按未验证遗产重新亲验
+
+### 五派开工边界与执行纪律
+
+- 当前分支已亲验为 `fable/v2-bn12-exoskeleton`，仓根 `.codegraph/` 存在；现有 UX-4b 生产代码、`blockAffiliationOutlineService.ts` 与专项测试仅证明已落盘，不证明四件交付物或 K-1～K-6 已成形。
+- 本轮先逐件完成遗产体检表，再按 K 刀补齐与亲跑；每完成一件交付物立即追写本段，绝不等到全单结束才集中回执。
+- 每刀红点只采本轮亲自执行所得：先记录断言原文与行号，再施可辨识变异，以源码/diff 探针证明变异确已落地，随后读取红点；还原后再亲取绿。
+- 已看见的禁区现物 `server/src/routes/projections.ts` 与 `.claude/settings.local.json` 明确排除；不碰锁、不碰 PID、不改其他 handoff/analysis，不 commit、不 push。
+
+### 遗产体检即时记录（小步落盘）
+
+- **交付物 4 已确认残缺，尚不可验收**：本轮亲读现物，`useLayoutInteractionController.ts:12,38-54` 仍保留独立 `snapEnabled` state / toggle，未随 persistent `layoutMode` 派生；`useBlockPlacementInteractions.ts:35-56,126-136,194-202` 的生产接口与两条松手路径均不接 `pageFrames` / `pageOffsetX`，也没有 crossing 收编。遗产测试 `useLayoutInteractionController.test.tsx:9-20` 已要求 off/temporary=false、persistent=true；`useBlockPlacementInteractions.test.tsx:80-103` 则以类型强转塞入生产接口尚不存在的两个参数，不能证明接线。结论：交付物 4 = **残缺，需续建**。
+- **交付物 2 已确认残缺，尚不可验收**：`blockAffiliationOutlineService.ts:29-52` 已把 inside/crossing 配成蓝 token、workspace_only 配成灰 token，`NoteWritingSurfaceLayer.tsx:3682-3697` 也计算并向下传 `affiliationOutline`；但当前 `BlockEditorLayer.tsx` 的 props、解构与 `<article>` style 均无该字段/渲染接点，全文件零命中，样式文件亦无本单新增接线。结论：service 映射已成形，真实拖拽/缩放虚线框 **未落地**，且当前 JSX prop 会造成类型错误；交付物 2 = **残缺，需续建**。
+- **遗产专项原貌（本轮亲跑，未施 mutation）**：`npx.cmd vitest run` 六个本单文件，exit=`1`，`3 failed / 3 passed`、`4 failed / 14 passed`。自然红点为：`useLayoutInteractionController.test.tsx:10`（off 期望 false，收到 true）；`useBlockPlacementInteractions.test.tsx:133`（期望收编 `{x:100,y:260}`，收到 crossing `{x:40,y:310}`）；同文件 `:181`（resize 期望 x=100，收到 x=240）；`NoteChromeLayer.test.tsx:194`（独立 `Snap alignment` 仍在）。自然绿仅说明 K-1/K-2 service/layout 测试、K-3 service 映射测试、K-4 组件测试当前通过，尚不替代后续本轮逐刀 mutation 取证。
+- **遗产 TypeScript 原貌（本轮亲跑，未施 mutation）**：client `npx.cmd tsc --noEmit` exit=`1`；唯一报错为 `NoteWritingSurfaceLayer.tsx:3697` 向 `BlockEditorLayer` 传入不存在的 `affiliationOutline` prop（TS2322），与交付物 2 的断链诊断一致。
+
+### 遗产体检表（五派现物判定）
+
+| 交付物 | 五派判定 | 本轮直接取证 | 尚缺 |
+|---|---|---|---|
+| 1. 几何归属接 page-mode 可见性 | **成形，未完成 mutation 验证** | `pageFrameAffiliationService.ts:87-133` 以中心点优先、相交次之判定；`modePolicyService.ts:54-80,110-127` 只对 `canvas_workspace` 读取持久化 rect 并按 outer 归页；`useNoteCanvasLayoutModel.ts:97-150` 保留 canvas-world 坐标。K-1/K-2 专项在本轮自然基线中通过 | 仍缺按工单协议亲施 K-1 与 K-2 两半变异红点；停线后不得继续施变异 |
+| 2. 拖拽/缩放虚线框分色 | **残缺** | service 已形成 inside/crossing 蓝、workspace_only 灰；writing surface 已求值并下传 | `BlockEditorLayer` 不接受也不渲染 `affiliationOutline`，且 client tsc 以 TS2322 证实断链；K-3 现有测试只锁 service，UI 断链时仍可绿 |
+| 3. gutter 删除 + 右侧真实 Insert | **成形，未完成 mutation 验证** | `TextUnitGutterLayer.tsx:18-50` 只留 role select/context menu；`BlockEditorLayer.tsx:230-245` 真正 split 并同步 flow/plain text；K-4 三半组件专项本轮自然基线 3/3 通过 | 仍缺 K-4 三半逐刀 mutation 红点；停线后不得继续施变异 |
+| 4. 整理模式合并 + crossing 松手收编 | **残缺，并触发现物不符停线** | 独立 snap state/UI 仍在；placement 两条 pointerup 均无收编；K-5 自然基线 4 个失败 | resize 遗产刀与权威语义及最小平移同时矛盾，须 Claude/Fable 裁清后续 fixture |
+
+### 停线点：K-5 resize 遗产刀违约
+
+- 权威原文 `:31` 要求仅当松手归属为 `crossing` 才最小平移进 content rect，`inside` / `workspace_only` 不动；K-5 `:49` 再次要求 crossing + 最小平移。
+- 遗产夹具 `useBlockPlacementInteractions.test.tsx:168-180` 从 `{x:240,y:80,width:60,height:60}` 向右 resize 140，候选 rect 为 `{x:240,y:80,width:200,height:60}`。页 content rect 由同文件 `:23-32` 得 `{x:100,y:20,width:300,height:300}`；候选中心 `{x:340,y:110}` 落在 content 内。
+- 现成权威归属实现 `pageFrameAffiliationService.ts:87-104` 明确先以中心点判 `inside`，所以该候选必须是 `inside`，按工单不得收编。
+- 即使越过归属规则强行 clamp，该 rect 右缘 440、content 右缘 400，最小平移也只能得到 `x=200`；遗产断言 `useBlockPlacementInteractions.test.tsx:181-187` 却要求 `x=100`。因此不能以此测试倒逼生产代码。
+- 这是工单 `:41,:56` 所列“现物不符”条件。五派已在任何生产续建/变异之前停线，状态改为 **`needs: claude`**。请裁定：将 resize fixture 改成真实 crossing 候选并按最小平移给期望，还是另行修改归属/收编规格。
+
+### K 逐刀状态与本轮可用红点
+
+> 下列红点均为五派亲跑的**遗产自然基线**，不是 mutation 红点；因先命中 `needs: claude`，本轮没有施任何变异，也不冒充完成“先红后绿”。
+
+| K | 当前断言原文与行号 | 五派读数 |
+|---|---|---|
+| K-1 | `useNoteCanvasLayoutModel.affiliationVisibility.test.tsx:68-70`：`expect(result.current.visibleBlocks.map((block) => block.id)).toEqual([outerMarginBlock.id]);` | 自然绿；mutation 未启动 |
+| K-2a | 同文件 `:101-106`：只留 crossing id，且 `expect(result.current.blockLayouts[crossingBlock.id]).toMatchObject(persistedCrossingRect);` | 自然绿；坐标半刀 mutation 未启动 |
+| K-2b | 同文件 `:107-113`：workspace_only layout 为 `undefined`，输入持久化 layout/authority 不变 | 自然绿；不可见半刀 mutation 未启动 |
+| K-3 | `blockAffiliationOutlineService.test.ts:34-68`：drag/resize 下 inside/crossing 精确为 `{tone:'page',colorToken:'var(--border-focus)'}`，workspace_only 精确为 `{tone:'workspace',colorToken:'var(--border-default)'}` | service 自然绿，但 UI 断链；mutation 未启动 |
+| K-4a | `BlockEditorLayer.test.tsx:130-133`：三个 gutter button 均 `toBeNull()`，role combobox `toBeTruthy()` | 自然绿；mutation 未启动 |
+| K-4b | 同文件 `:139-157`：点击右侧 Insert 后两 units、第二 unit 为空 paragraph、plain text 为 `Alpha\n` | 自然绿；mutation 未启动 |
+| K-4c | 同文件 `:164-177`：Move/Export/AI/Save/Label/Trash 六回调逐一 `toHaveBeenCalledTimes(1)` | 自然绿；mutation 未启动 |
+| K-5 派生 | `useLayoutInteractionController.test.tsx:10`：`expect(subject.result.current.snapEnabled).toBe(false);` | **自然红**：收到 `true` |
+| K-5 独立 UI | `NoteChromeLayer.test.tsx:194`：`expect(screen.queryByText('Snap alignment')).toBeNull();` | **自然红**：元素仍存在 |
+| K-5 开 | `useBlockPlacementInteractions.test.tsx:133-148`：收编后的 `{x:100,y:260,width:80,height:60}` 同时进入 persist/draft/history | **自然红**：仍为 `{x:40,y:310,...}` |
+| K-5 关 | 同文件 `:163-165`：同一候选逐值保持 `{x:40,y:310,width:80,height:60}` | 自然绿 |
+| K-5 resize 遗产附加刀 | 同文件 `:181-187`：期望 `{x:100,y:80,width:200,height:60,width_mode:'manual'}` | **自然红且断言违约**：实际 x=240；几何上应判 inside，不应收编 |
+| K-6 | 尚无本单 hook 边界的 formal_page 精确回归；既有 `surfacePersistenceContract.test.ts:84-108` 与 `useSurfaceModeController.test.tsx:161-174` 只提供旧契约覆盖 | 因停线未跑重门、未施回归 mutation |
+
+### 五派停线时 numstat 与允许面对照
+
+- tracked `canvasEngine/**`：`176 insertions / 86 deletions`；逐文件为 `TextBlockProjection 0/32`、`useNoteCanvasLayoutModel 38/5`、`useNoteCanvasRuntimeController 1/0`、`useRuntimeLayoutModelController 22/3`、`BlockControlBarLayer 15/0`、`BlockEditorLayer 25/0`、`NoteChromeLayer.test 12/0`、`NoteWritingSurfaceLayer 11/0`、`TextUnitGutterLayer 0/45`、`modePolicyService 52/1`。
+- untracked `canvasEngine/**`：`661/0`；逐文件行数为 `blockAffiliationOutlineService.test 86`、`blockAffiliationOutlineService 53`、`useBlockPlacementInteractions.test 206`、`useLayoutInteractionController.test 22`、`useNoteCanvasLayoutModel.affiliationVisibility.test 115`、`BlockEditorLayer.test 179`。
+- 本工单 tracked numstat：`88/1`（新增五派回执，并把顶层/五派状态改成 `needs: claude`）。授权面合计为 `925/87`；所有真实内容 diff 均位于准许的 `client/src/pages/Notes/canvasEngine/**` 或本工单。
+- 禁区显式排除：`server/src/routes/projections.ts` 的 HEAD blob 与工作树 `git hash-object` 均为 `561902a449b50ce254b650de5a337973a8fbc26d`，确认仍只是 EOL 假脏；既有 `?? .claude/settings.local.json` 未触碰。没有 `shared/**`、Sources、12.9c、package/tsconfig、其他 handoff/analysis、锁或 PID 内容 diff。
+- 停线探针：`git diff --check` exit=`0`。五派未 commit、未 push；发现冲突后未改任何生产文件/测试，唯一续写为本工单 Result 与状态。
