@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 197 份文档。
+共 198 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -52,6 +52,7 @@
 | [analysis/2026-08-28-v12-9b-b3-preread.md](analysis/2026-08-28-v12-9b-b3-preread.md) | b-3 预读:引用校验闸的载体与定位 | `active` | — | — |
 | [analysis/2026-08-28-v12-9b-b4-preread.md](analysis/2026-08-28-v12-9b-b4-preread.md) | b-4 预读:文档面要改哪几行,以及**最该防的那个错** | `active` | — | — |
 | [analysis/2026-08-29-ux-walkthrough-findings.md](analysis/2026-08-29-ux-walkthrough-findings.md) | 2026-08-29 Henry 实测走查八条(凌晨,12.9b 铸段当夜) | `active` | 2026-08-29 | — |
+| [analysis/2026-08-29-v12-9c-c1a-mineru-env-probe.md](analysis/2026-08-29-v12-9c-c1a-mineru-env-probe.md) | V12.9c c-1a：MinerU 遗产环境体检报告 | `frozen` | 2026-08-29 | — |
 | [analysis/2026-08-29-v12-9c-plan-realign.md](analysis/2026-08-29-v12-9c-plan-realign.md) | 12.9c 段计划:对 HEAD 重对现物 | `active` | — | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
@@ -199,7 +200,7 @@
 | [handoffs/2026-08-28-v12-9b-b4-docs.md](handoffs/2026-08-28-v12-9b-b4-docs.md) | b-4:文档面 —— 词典三条现状栏 + 程序表状态刷新 | `done(2026-08-28 收工;复核 PASS)` | — | — |
 | [handoffs/2026-08-29-seventh-check-functionize.md](handoffs/2026-08-29-seventh-check-functionize.md) | 第七查函数化重写(⭐ 把「按形状猜路径」换成「向仓库问」) | `ready(⏳ **候锁** —— c-1a 正持锁,本单排在其后;派发前按家法**重新对 HEAD 现物**)` | — | — |
 | [handoffs/2026-08-29-v12-9c-c0-t0-alignment.md](handoffs/2026-08-29-v12-9c-c0-t0-alignment.md) | c-0:T0 存量对齐带锚碎片流(⭐ 这是**映射**单,不是建造单) | `done(第二次派工按 v0.7 落地;复核方 2026-08-29 亲刀:K-5 元不变式 + K-1c 第三产生点 + K-4 结构锁 三条实测有咬,test:v2 331/331 自跑,禁区零 diff,第七查 exit 0)` | — | — |
-| [handoffs/2026-08-29-v12-9c-c1a-mineru-env-probe.md](handoffs/2026-08-29-v12-9c-c1a-mineru-env-probe.md) | c-1a:MinerU 环境体检(⭐ 这是**遗产体检**单,⛔ 不是安装单,⛔ 也不是重建单) | `ready(⭐ 四条冲突已由 Fable 2026-08-29 全裁,本单按裁定重写:沿用现物 3.12/3.4.5、⛔ 不搬不重建、钉版三件入库并逐字节锁、扫描件自造)` | — | — |
+| [handoffs/2026-08-29-v12-9c-c1a-mineru-env-probe.md](handoffs/2026-08-29-v12-9c-c1a-mineru-env-probe.md) | c-1a:MinerU 环境体检(⭐ 这是**遗产体检**单,⛔ 不是安装单,⛔ 也不是重建单) | `done(复核方 2026-08-29 亲刀四处通过;⚠️ K-6 措辞已收窄为「mineru 包未漂移」;⛔ 钉版三件本轮**未提交**,与 `.gitattributes` 推 c-1a-2 同批 —— 见文末复核批注)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
 | [handoffs/plans/v12-9b-anchored-fragment-stream-spec.md](handoffs/plans/v12-9b-anchored-fragment-stream-spec.md) | 带锚碎片流(Anchored Fragment Stream)规格 v0 | `active` | — | — |

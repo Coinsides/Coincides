@@ -52,5 +52,10 @@ tmp/
 
 # External research repos
 _external_research/
-_external_tools/
+_external_tools/*
+!_external_tools/mineru/
+_external_tools/mineru/*
+!_external_tools/mineru/.python-version
+!_external_tools/mineru/pyproject.toml
+!_external_tools/mineru/uv.lock
 .env.experiment
