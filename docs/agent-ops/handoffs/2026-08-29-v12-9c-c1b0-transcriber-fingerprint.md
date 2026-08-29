@@ -1,4 +1,4 @@
-> **状态 (Status)**: draft(⏳ 候锁 —— c-1a-2 正持锁;⚠️ 一处待裁见 §0④)
+> **状态 (Status)**: ready(§0④ 已由 Fable 2026-08-29 裁定:跨平台指纹差异的代价收下在案,⛔ 本单不为它改签出行为)
 > **from**: claude(opus,工程调度会话) · **to**: codex(builder) · **date**: 2026-08-29
 > **裁定来源**: Fable v0.7.2「转写器身份 = lockfile 原始字节 sha256」三裁 + 边界条 · TD-36 · 家法「防线必须站在伤害上游」
 
@@ -14,7 +14,7 @@
 > - `server/src/services/sourceFileIntake.ts:603`(text-fallback 转写器,lockfile 记 `server/package-lock.json`)
 > - `server/src/services/sourceMaterialization.ts:288`(c-0 那条链,lockfile 记 `SOURCE_ARTIFACT_TRANSCRIBER_LOCKFILE`)
 >
-> **④ ⚠️ 一处待裁(⛔ builder 不自决,遇到即按现状实现并如实记)**:`server/package-lock.json` 在本仓受 `autocrlf` 影响,**Windows 与 Linux 签出的字节不同** ⇒ 同一份 lock 在两个平台算出**不同指纹** ⇒ 跨平台会判「未证同一」。这与 v0.7.2「错也错在不轻信」的方向一致,**但代价须记录在案**。⛔ 本单**不**为此改 `.gitattributes`(那会动既有文件的签出行为)。
+> **④ ✅ 已裁(Fable 2026-08-29):跨平台指纹差异的代价【收下,在案】** —— 单机现状下它是**零成本的诚实**;触发器 = **第一个真跨平台消费者**(打包/部署单),届时按「防线在上游」整案处理签出策略。⛔ **本单不动既有文件的签出行为**。builder 只需**如实记录该代价**,⛔ 不为它做任何改动。原文:`server/package-lock.json` 在本仓受 `autocrlf` 影响,**Windows 与 Linux 签出的字节不同** ⇒ 同一份 lock 在两个平台算出**不同指纹** ⇒ 跨平台会判「未证同一」。这与 v0.7.2「错也错在不轻信」的方向一致,**但代价须记录在案**。⛔ 本单**不**为此改 `.gitattributes`(那会动既有文件的签出行为)。
 
 ## 1. 允许面(⛔ 只这些)
 
