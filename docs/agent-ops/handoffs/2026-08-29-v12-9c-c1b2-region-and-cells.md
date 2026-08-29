@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(按 Fable v0.7.4 裁定:锚族随格式的真实定位能力走;PDF 单元格在 page 族内以 region + 归一化 bbox 表达)
+> **状态 (Status)**: done(第二次派工按 v0.7.5 全绿;复核方亲刀**排他半边**取到真红,test:v2 自跑 350/350。⚠️ 第一次派工的停线是对的 —— 它发现的是工具的结构性上限,并**拒绝**了两条能凑绿的路)
 > **from**: claude(opus,工程调度会话) · **to**: codex(builder) · **date**: 2026-08-29
 > **裁定来源**: Fable v0.7.4「锚答在哪,角色答是什么」· TD-30 · 12.9a 欠下的 region 语义验证 · 「数字连同计数口径申报」
 
@@ -172,3 +172,113 @@ TD-30 的「单元格**几何**可寻址」记为 **本转写器不可达**,触�
   - writing tasks `F9B5B43FBB3F070741F970ECF2ADBFAAEF8B2F520EB5E2D350BAE39557B1C7AF`
   - listening `1C260DE1460889397D04A73F297BB1D62D6401210DCFE72584373968C45A9D3E`
 - 只读探针开始时刻之后，`D:/Coinsides/v12.9-selection/**` 无 `LastWriteTime` 变化；证据本体零触碰。
+
+## Result(第二次派工)
+
+> **回执（Codex builder，2026-08-29）** · **PASS / 已完成**。本次按 **Fable v0.7.5** 三裁施工，裁定由 **Claude 调度方转写**；裁定来源不是 Henry。第一次派工的 STOP 记录完整保留。本次未 commit，未翻工单顶部状态行，`needs: claude`：无。
+
+### 交付形态与允许面
+
+- `sourceArtifact.ts`：把 block 扩成 `text | table` 判别联合；将 MinerU 同一 `middle` 输出里的 `raw_bbox + page_size` 绑定为一个强类型 `source_region`；增加结构化 cells、闭集计数、K-7 能力声明与三枚闭集 trigger。
+- `sourceMineruParser.ts`：生产 runner 同时读取唯一的 `*_middle.json`；bbox 与 `page_size` 均取自同一 `pdf_info[]` 坐标面。表格 cells 只由 MinerU 自己落盘的 HTML 经 Python 标准库 `html.parser` 读取，保留 row/column index、row/column span、`td|th` 与文本；没有生成任何 cell bbox。旧 runner envelope 不带 `middle_pages` 时仍走原 content-list/page 保真兼容路径。
+- `sourceMaterialization.ts`：只做 region 保真选择、同源 `raw/page_size` 归一化、表格角色映射，并把 `source_table` 结构随 accepted fragment 持久到既有 `style_json` 通道；不 clamp、不排序/交换坏坐标。真实整表粒度申报 `role:'table_row'`，明确没有冒充 `cell`。
+- 新增 `v2SourceRegionCells.test.ts`，并仅将它追加到 `server/package.json#test:v2` 尾部。没有新增依赖、迁移或其它文件。
+
+### K-1：真实表级锚的命中 ∧ 排他
+
+- 原件：`D:/Coinsides/v12.9-selection/samples/ielts-listening-sample-tasks-2023.pdf` 原第 30 页（zero-based 29）；测试只把该页复制到系统 TEMP，并用 pinned MinerU 3.4.5 跑一次真实生产转写。目标按修订后诚实粒度是**一个整表 fragment**，不是某个 cell；锚为 `{"family":"page","page":1,"block_index":3,"bbox":[0.09411764705882353,0.15695600475624258,0.892436974789916,0.3864447086801427]}`。
+- 先用 `getImprintFragmentsByAnchor(...,{match:'exact',anchor})` 按完整锚取回，结果恰为该 1 个 persisted `table_row` fragment；不是直接 SQL，也不是只按 page locator 取整页。
+- 独立验证器 `pypdfium2 5.10.1` 读取 PDF 文本层；生产归一化不看媒体框，媒体框只在验证器内做 top-left → bottom-left 换算。实际 PDFium crop box 为 `[56.03011833639706,516.5644603824502,531.2855863683365,709.7755860681341]`，取回：
+
+```text
+Day Time Event Venue Ticket price
+Monday and
+Tuesday
+7.30 p.m. ‘The Magic Flute’
+(opera by Mozart)
+17 …………… from £8.00
+Wednesday 8.00 p.m. 18 ‘……………’
+(Canadian film)
+Cinema 2 19 ……………
+Saturday and
+Sunday
+11 a.m. to
+10 p.m.
+20 ‘……………’
+(art exhibition)
+Gallery 1 free
+```
+
+- **命中半边**：crop 的归一化文本包含完整表 fragment 文本。**排他半边**：crop 不包含同拓印件正文 fragment 的独有文本 `Complete the table below.`。
+- 额外容差只做：**删除 whitespace 与 Unicode punctuation**；保留大小写、字母、数字和 `£` 等符号，不做 casefold、模糊匹配或重排。必要性仅是 MinerU HTML OCR 会合并空白，而 PDF 文本层使用直/弯引号及答题点线的差异。
+- 红点：换成整页 `[0,0,1,1]` 后，表文本仍命中，但 `Complete the table below.` 也同时命中，故排他半边确定为红；旧“只验命中”的平凡绿已被堵住。
+
+### K-2 / K-3：单锚族与 region 诚实性三刀
+
+- **K-2**：从真实 accepted MinerU imprint 派生，将一个锚换成形状本身合法的 `{family:'table',sheet:'Sheet1',cell:'A1'}`，其余保留合法 page 锚。结果 `accepted=false`，精确理由为 `anchor_invalid / One imprint must use a single anchor family`；不是靠坏 table anchor 制造假阳性。
+- **K-3 正向**：整表 raw bbox 直接来自该次真实 `*_middle.json → pdf_info[0].para_blocks[type='table'].bbox=[56,132,531,325]`，没有从 HTML 行列、block 序号或其它坐标面推算。把 bbox 改成按 `block_index / fragment_count` 纵向均分页的合形推造矩形后，PDFium 不再命中完整表 fragment，寻址断言为红。
+- **K-3 反向第一刀**：同一真实 stored imprint 改报 `anchor_fidelity:'page'` 并保留 bbox，结果拒绝，精确理由 `fidelity_overclaim / Page fidelity cannot carry a region bbox`。
+- **K-3 反向第二刀**：同一真实 stored imprint 保留 `anchor_fidelity:'region'` 但删除表 fragment bbox，结果拒绝，精确理由 `fidelity_overclaim / Region fidelity requires a bbox`。
+
+### K-4：同一输出坐标面、换分母与坏坐标红点
+
+- 同一 MinerU `middle` 页内的分子/分母：`raw_bbox=[56,132,531,325]`，`page_size=[595,841]`。逐坐标确定性归一化精确为 `[0.09411764705882353,0.15695600475624258,0.892436974789916,0.3864447086801427]`，stored anchor 与该值完全相等。
+- PDF 媒体框实测 `[595.3200073242188,841.9199829101562]`；媒体框 / MinerU 尺寸比例为 `[1.0005378274356618,1.0010939154698648]`（简写 `1.0005 / 1.0011`）。若偷换媒体框分母，会得到 `[0.09406705521573659,0.15678449577088385,0.8919572557063595,0.3860224327692216]`，与锁定值不等，断言为红。
+- 跨面错配红点：把 content-list raw `[94,156,892,386]` 塞到 middle `[595,841]`，`x2=892/595=1.4991596638655462`；真实 mapper 没有 clamp，落库拓印被 `anchor_invalid` 拒，理由含 `Page bbox must be a normalized 0-1 four-tuple`。
+- 顺序红点：从同一真实 artifact 派生 `[531,132,56,325]` 的反向 raw bbox，经同一 mapper 后也被 `anchor_invalid` 拒；证明没有静默排序或交换 `x0/x1`。
+
+### K-5：闭集计数与不同数
+
+- accepted fragment 的 `style.source_table` 持久携带 4 行 × 5 列的 **20 个结构化 cells**，均来自 MinerU HTML；20 个均为非空 `td`，没有 cell 几何。
+- 闭集精确为 `table_fragment_count | cell_text_count | non_empty_td_count`；每项均是 `{basis,value}` 且 value 为非负整数，未知 `free_text_basis` 不在闭集中。
+- 同一输入可按 basis 名取回：`table_fragment_count=1`、`cell_text_count=20`、`non_empty_td_count=20`；明确锁住 `1 != 20`，口径名不是装饰。
+
+### K-7：不可达被申报而非省略
+
+- accepted fragment 的 `style.source_table.cell_geometry_addressing` 明确持久记录：**「单元格几何寻址：本转写器不可达」**，状态为 `unavailable_for_this_transcriber`。
+- 三条闭集触发器均在数据和代码注释中：
+  1. `switch_to_transcriber_with_cell_geometry`：换用能给 cell 几何的转写器；
+  2. `mineru_standard_output_includes_cell_bboxes`：MinerU 标准输出正式纳入 `cell_bboxes`；
+  3. `patched_independent_transcriber_identity`：补丁版以独立转写器身份运行。
+- 第三条的身份约束也结构化持久：未来 patched 版 `transcriber_name` 必须不同于 `mineru`，补丁字节必须进入 lockfile 指纹，`silent_patch_forbidden=true`。**v0.7.2 禁的不是打补丁，而是打了补丁仍自称原版；静默补丁永禁。**
+
+### K-6：回归、证据哈希与范围审计
+
+- `npm --prefix server run test:v2`：基线 **343** → 本单新增 TAP 计数 **7**（1 个 parent + 6 个子测试）→ **350/350 pass**，`fail=0`、`skipped=0`。
+- `npm exec -- tsc --noEmit`（cwd=`server`）：exit 0，零诊断。
+- 既有链单独复跑：`v2SourceMaterialization.test.ts` **11** + `v2SourceMineruWiring.test.ts` **5** = **16/16 pass**，计数不变；覆盖 native-pdf / DOCX / text / image 与 c-1b-1 MinerU 接线。wiring 正控仍显式删除 `COINCIDES_PDF_PARSER` 并通过 native-pdf/page/accepted 断言，未设环境变量时行为不变。
+- 新测试单独复跑 **7/7 pass**；真实 MinerU 只用于建立真实 artifact，region 复验始终由独立 PDFium 完成。
+- 证据目录全量清单口径：对按相对路径排序的 **94,935** 个文件逐一取 SHA-256，再以 `relative_path + NUL + file_hash + LF` 聚合 SHA-256。开工与所有测试结束后的值均为 `ebcb8fa9a4bf9387f9da8d1dff042f63dced6d15f41193811ce09894fff00432`；`D:/Coinsides/v12.9-selection/**` 一个字节未写。
+- `git diff --check` 无错误。除本回执外，内容 diff 只在获准的 5 项交付面；`client/**`、`sourceImprints.ts`、`sourceTextCanonical.ts`、`sourceFileIntake.ts`、`sourceMaterializationConcurrency.ts`、迁移、`documentParser*`、MCP、工具注册、`operation_batches`、`docs/agent-ops/INDEX.md` 等禁区均零 diff。
+- 开工前已有 `server/src/routes/projections.ts` stat/EOL 脏标记；HEAD/index/worktree 无内容 patch（`git diff --quiet` 为 0），本单未触碰。
+
+## 复核批注(claude 工程调度会话,2026-08-29,亲刀非读回执)
+
+**总判定:通过,无保留。**
+
+### ✅ 亲刀实况
+
+| 刀 | 变异(附落地证明) | 结果 |
+|---|---|---|
+| ⭐ **排他半边**(Fable 预定抽检) | 把归一化的分子换成整页:`[x0,y0,x1,y1] = [0,0,pageWidth,pageHeight]` ⇒ 表级锚膨胀成整页 | **`not ok 1 - …hit and exclusion, and red on wider or inferred boxes`**,7 → **4/3**。恢复回 7/7 |
+| **全量** | `npm --prefix server run test:v2` 自跑 | **350 / 350**(基线 343,+7),skipped 0 |
+| **类型门** | `tsc --noEmit` | **exit 0** |
+| **K-7 落地** | grep 生产码 | 三条触发器是 `sourceArtifact.ts:57-75` 的**闭集类型常量**,⛔ 不是回执里的散文 |
+
+### ⭐⭐ 三处值得单独记
+
+1. **法进了执行结构,不再只在 README。**
+   - `normalizedRegionBbox` 里写着:*"Deliberately do not clamp: an out-of-range or reversed result must reach the Source imprint contract and be rejected as anchor_invalid."* ⇒ **clamp 禁令成了代码注释 + 真实行为**。
+   - **K-7 的三条触发器是【类型】**:`silent_patch_forbidden: true`、`transcriber_name_must_differ_from: 'mineru'` 都是**字面量类型** ⇒ ⭐ **「打了补丁还自称原版」这条裁定现在由编译器执行** —— 任何人想构造一个不满足它的申报,类型检查先拦下。
+   ⇒ 这正是元条说的:**README 是法的中转站,不是归宿。** 本单一次搬走了两条。
+
+2. **诚实粒度落得干净**:表级 fragment 报 `role:'table_row'`,**明确没有冒充 `cell`**;20 个结构化 cells 走 `style.source_table`,**没有生成任何 cell bbox**。⇒ 「做得少」被如实申报,⛔ 没有被说成做得多。
+
+3. **K-4 它自己多加了一刀**:除了换分母与跨面错配,它还测了**反序 bbox** `[531,132,56,325]` 被拒 —— ⭐ **证明没有静默排序或交换 `x0/x1`**。⚠️ 这一刀我单里没写:静默排序会把一个坏坐标变成一个**看起来合法**的坐标,正是「看起来对的错东西」家族的又一员。
+
+### 📌 处置
+
+- **证据本体**:它按**全量清单口径**验(94,935 个文件逐一 sha256 再聚合),前后同为 `ebcb8fa9a4bf9387f9da8d1dff042f63dced6d15f41193811ce09894fff00432`;复核方另以 `uv.lock` 单文件 md5 复测,亦未变。**两种口径互证。**
+- **既有链**:`v2SourceMaterialization` 11 + `v2SourceMineruWiring` 5 = 16/16,计数不变;wiring 正控显式删除 `COINCIDES_PDF_PARSER` 后仍走 native-pdf。
+- **署名**:回执写明「裁定来自 **Fable v0.7.5**,由调度方转写;⛔ 不是 Henry」。
+- **TD-30**:已按诚实拆分更新,三条触发器在案(含第三出口的合法形态)。

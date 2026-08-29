@@ -11,6 +11,9 @@ import type {
   SourceArtifactLimits,
   SourceParser,
   SourceParserInput,
+  SourceArtifactPageSize,
+  SourceArtifactRegion,
+  SourceArtifactTableCell,
 } from './sourceArtifact.js';
 import type { SourceArtifactErrorCode } from './sourceMaterializationErrors.js';
 
@@ -30,7 +33,101 @@ const PYTHON_RUNNER = String.raw`from __future__ import annotations
 import argparse
 import importlib.metadata
 import json
+from html.parser import HTMLParser
 from pathlib import Path
+
+
+def positive_span(value: str | None) -> int:
+    try:
+        parsed = int(value or "1")
+    except ValueError:
+        return 1
+    return parsed if parsed > 0 else 1
+
+
+class TableCellParser(HTMLParser):
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=True)
+        self.cells: list[dict[str, object]] = []
+        self.row_index = -1
+        self.column_index = 0
+        self.current: dict[str, object] | None = None
+        self.parts: list[str] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        lowered = tag.lower()
+        if lowered == "tr":
+            self.row_index += 1
+            self.column_index = 0
+            return
+        if lowered not in {"td", "th"}:
+            if lowered == "br" and self.current is not None:
+                self.parts.append(" ")
+            return
+        if self.row_index < 0:
+            self.row_index = 0
+        attributes = {key.lower(): value for key, value in attrs}
+        row_span = positive_span(attributes.get("rowspan"))
+        column_span = positive_span(attributes.get("colspan"))
+        self.current = {
+            "row_index": self.row_index,
+            "column_index": self.column_index,
+            "row_span": row_span,
+            "column_span": column_span,
+            "element": lowered,
+        }
+        self.column_index += column_span
+        self.parts = []
+
+    def handle_data(self, data: str) -> None:
+        if self.current is not None:
+            self.parts.append(data)
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag.lower() not in {"td", "th"} or self.current is None:
+            return
+        self.current["text"] = " ".join("".join(self.parts).split())
+        self.cells.append(self.current)
+        self.current = None
+        self.parts = []
+
+
+def first_table_html(value: object) -> str | None:
+    if isinstance(value, dict):
+        html = value.get("html")
+        if isinstance(html, str) and html.strip():
+            return html
+        for child in value.values():
+            found = first_table_html(child)
+            if found is not None:
+                return found
+    elif isinstance(value, list):
+        for child in value:
+            found = first_table_html(child)
+            if found is not None:
+                return found
+    return None
+
+
+def attach_structured_table_cells(middle_pages: object) -> None:
+    if not isinstance(middle_pages, list):
+        raise RuntimeError("MinerU middle output is missing pdf_info")
+    for page in middle_pages:
+        if not isinstance(page, dict):
+            continue
+        blocks = page.get("para_blocks")
+        if not isinstance(blocks, list):
+            continue
+        for block in blocks:
+            if not isinstance(block, dict) or block.get("type") != "table":
+                continue
+            html = first_table_html(block)
+            if html is None:
+                raise RuntimeError("MinerU table block is missing HTML")
+            parser = TableCellParser()
+            parser.feed(html)
+            parser.close()
+            block["coincides_cells"] = parser.cells
 
 
 def main() -> int:
@@ -67,11 +164,18 @@ def main() -> int:
     candidates = list(output.rglob("*_content_list.json"))
     if len(candidates) != 1:
         raise RuntimeError(f"expected one MinerU content list, found {len(candidates)}")
+    middle_candidates = list(output.rglob("*_middle.json"))
+    if len(middle_candidates) != 1:
+        raise RuntimeError(f"expected one MinerU middle output, found {len(middle_candidates)}")
     content_list = json.loads(candidates[0].read_text(encoding="utf-8"))
+    middle = json.loads(middle_candidates[0].read_text(encoding="utf-8"))
+    middle_pages = middle.get("pdf_info") if isinstance(middle, dict) else None
+    attach_structured_table_cells(middle_pages)
     result.write_text(json.dumps({
         "protocol": "coincides-mineru.v1",
         "mineru_version": importlib.metadata.version("mineru"),
         "content_list": content_list,
+        "middle_pages": middle_pages,
     }, ensure_ascii=False), encoding="utf-8")
     return 0
 
@@ -401,6 +505,7 @@ interface MineruRunnerEnvelope {
   protocol: string;
   mineru_version: string;
   content_list: unknown[];
+  middle_pages?: unknown[];
 }
 
 function runnerEnvelope(value: unknown): MineruRunnerEnvelope {
@@ -412,10 +517,203 @@ function runnerEnvelope(value: unknown): MineruRunnerEnvelope {
     record.protocol !== RUNNER_PROTOCOL
     || typeof record.mineru_version !== 'string'
     || !Array.isArray(record.content_list)
+    || (record.middle_pages !== undefined && !Array.isArray(record.middle_pages))
   ) {
     throw new SourceMineruParserError('parser_failure', 'MinerU runner returned an incompatible result envelope');
   }
   return record as unknown as MineruRunnerEnvelope;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+}
+
+function finiteTuple(value: unknown, length: number): value is number[] {
+  return Array.isArray(value)
+    && value.length === length
+    && value.every((entry) => typeof entry === 'number' && Number.isFinite(entry));
+}
+
+function middlePageSize(value: unknown): SourceArtifactPageSize {
+  if (!finiteTuple(value, 2) || value[0] <= 0 || value[1] <= 0) {
+    throw new SourceMineruParserError('parser_failure', 'MinerU middle page is missing a positive page_size');
+  }
+  return [value[0], value[1]];
+}
+
+function middleRegion(value: Record<string, unknown>, pageSize: SourceArtifactPageSize): SourceArtifactRegion {
+  if (!finiteTuple(value.bbox, 4)) {
+    throw new SourceMineruParserError('parser_failure', 'MinerU middle block is missing its raw bbox');
+  }
+  return {
+    coordinate_space: 'mineru-middle-page',
+    raw_bbox: [value.bbox[0], value.bbox[1], value.bbox[2], value.bbox[3]],
+    page_size: [...pageSize],
+  };
+}
+
+function collectMiddleText(value: unknown, parts: string[]): void {
+  if (Array.isArray(value)) {
+    for (const child of value) collectMiddleText(child, parts);
+    return;
+  }
+  if (!isRecord(value)) return;
+  if (value.type === 'text' && typeof value.content === 'string' && value.content.trim().length > 0) {
+    parts.push(value.content.trim());
+    return;
+  }
+  for (const child of Object.values(value)) collectMiddleText(child, parts);
+}
+
+function middleText(value: Record<string, unknown>): string {
+  const parts: string[] = [];
+  collectMiddleText(value, parts);
+  return parts.join(' ').trim();
+}
+
+function middleTableCells(value: unknown): SourceArtifactTableCell[] {
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new SourceMineruParserError('parser_failure', 'MinerU table HTML produced no structured cells');
+  }
+  return value.map((candidate, index) => {
+    if (
+      !isRecord(candidate)
+      || !Number.isInteger(candidate.row_index)
+      || (candidate.row_index as number) < 0
+      || !Number.isInteger(candidate.column_index)
+      || (candidate.column_index as number) < 0
+      || !Number.isInteger(candidate.row_span)
+      || (candidate.row_span as number) < 1
+      || !Number.isInteger(candidate.column_span)
+      || (candidate.column_span as number) < 1
+      || !['td', 'th'].includes(String(candidate.element))
+      || typeof candidate.text !== 'string'
+    ) {
+      throw new SourceMineruParserError(
+        'parser_failure',
+        `MinerU table cell ${index} has an invalid structured shape`,
+      );
+    }
+    return {
+      row_index: candidate.row_index as number,
+      column_index: candidate.column_index as number,
+      row_span: candidate.row_span as number,
+      column_span: candidate.column_span as number,
+      element: candidate.element as 'td' | 'th',
+      text: candidate.text,
+    };
+  });
+}
+
+function tableText(cells: SourceArtifactTableCell[]): string {
+  const rows = new Map<number, SourceArtifactTableCell[]>();
+  for (const cell of cells) {
+    const row = rows.get(cell.row_index) || [];
+    row.push(cell);
+    rows.set(cell.row_index, row);
+  }
+  return [...rows.entries()]
+    .sort(([left], [right]) => left - right)
+    .map(([, row]) => [...row]
+      .sort((left, right) => left.column_index - right.column_index)
+      .map((cell) => cell.text)
+      .join('\t'))
+    .join('\n')
+    .trim();
+}
+
+function middleBlocks(middlePages: unknown[], pageCount: number): SourceArtifactBlock[] {
+  const blocks: SourceArtifactBlock[] = [];
+  for (const pageValue of middlePages) {
+    if (!isRecord(pageValue) || !Number.isInteger(pageValue.page_idx) || (pageValue.page_idx as number) < 0) {
+      throw new SourceMineruParserError('parser_failure', 'MinerU middle page is missing a zero-based page_idx');
+    }
+    const pageIndex = (pageValue.page_idx as number) + 1;
+    if (pageIndex > pageCount) {
+      throw new SourceMineruParserError(
+        'parser_failure',
+        `MinerU middle page ${pageIndex} exceeds the PDF page count ${pageCount}`,
+      );
+    }
+    const pageSize = middlePageSize(pageValue.page_size);
+    if (!Array.isArray(pageValue.para_blocks)) {
+      throw new SourceMineruParserError('parser_failure', `MinerU middle page ${pageIndex} is missing para_blocks`);
+    }
+    let blockIndex = 0;
+    for (const blockValue of pageValue.para_blocks) {
+      if (!isRecord(blockValue) || !['text', 'title', 'table'].includes(String(blockValue.type))) continue;
+      blockIndex += 1;
+      const sourceRegion = middleRegion(blockValue, pageSize);
+      const locator = {
+        kind: 'mineru_page',
+        page_index: pageIndex,
+        block_index: blockIndex,
+      };
+      if (blockValue.type === 'table') {
+        const cells = middleTableCells(blockValue.coincides_cells);
+        const text = tableText(cells);
+        if (text.length === 0) {
+          throw new SourceMineruParserError('parser_failure', 'MinerU table HTML produced no usable text');
+        }
+        const nonEmptyCellCount = cells.filter((cell) => cell.text.trim().length > 0).length;
+        blocks.push({
+          artifact_block_id: `mineru-page-${pageIndex}-block-${blockIndex}`,
+          kind: 'table',
+          text,
+          writing_role: 'paragraph',
+          imprint_role: 'table_row',
+          page_index: pageIndex,
+          locator,
+          source_region: sourceRegion,
+          table: {
+            cells,
+            counts: [
+              { basis: 'table_fragment_count', value: 1 },
+              { basis: 'cell_text_count', value: nonEmptyCellCount },
+              {
+                basis: 'non_empty_td_count',
+                value: cells.filter((cell) => cell.element === 'td' && cell.text.trim().length > 0).length,
+              },
+            ],
+            cell_geometry_addressing: {
+              status: 'unavailable_for_this_transcriber',
+              declaration: '单元格几何寻址：本转写器不可达',
+              triggers: [
+                'switch_to_transcriber_with_cell_geometry',
+                'mineru_standard_output_includes_cell_bboxes',
+                'patched_independent_transcriber_identity',
+              ],
+              // A patched build is legal only as a separately named transcriber whose patch bytes
+              // participate in its lockfile fingerprint. A silent patch that still claims "mineru"
+              // is forbidden; v0.7.2 banned false identity, not patches themselves.
+              patched_transcriber_policy: {
+                transcriber_name_must_differ_from: 'mineru',
+                patch_bytes_must_be_in_lockfile_fingerprint: true,
+                silent_patch_forbidden: true,
+              },
+            },
+          },
+          metadata: { mineru_type: blockValue.type },
+        });
+        continue;
+      }
+      const text = middleText(blockValue);
+      if (text.length === 0) {
+        throw new SourceMineruParserError('parser_failure', 'MinerU middle text block produced no usable text');
+      }
+      blocks.push({
+        artifact_block_id: `mineru-page-${pageIndex}-block-${blockIndex}`,
+        kind: 'text',
+        text,
+        writing_role: blockValue.type === 'title' ? 'heading' : 'paragraph',
+        page_index: pageIndex,
+        locator,
+        source_region: sourceRegion,
+        metadata: { mineru_type: blockValue.type },
+      });
+    }
+  }
+  return blocks;
 }
 
 function contentListBlocks(contentList: unknown[], pageCount: number): SourceArtifactBlock[] {
@@ -508,7 +806,9 @@ async function parseWithMineru(input: SourceParserInput, limits: SourceArtifactL
         `MinerU runtime version ${envelope.mineru_version} does not match lockfile version ${expectedVersion}`,
       );
     }
-    const blocks = contentListBlocks(envelope.content_list, pageCount);
+    const blocks = envelope.middle_pages === undefined
+      ? contentListBlocks(envelope.content_list, pageCount)
+      : middleBlocks(envelope.middle_pages, pageCount);
     if (blocks.length === 0) {
       throw new SourceMineruParserError('parser_failure', 'MinerU returned no usable text blocks');
     }

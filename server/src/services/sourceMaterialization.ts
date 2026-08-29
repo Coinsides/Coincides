@@ -269,6 +269,37 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
 }
 
+function finiteNumberTuple(value: unknown, length: number): value is number[] {
+  return Array.isArray(value)
+    && value.length === length
+    && value.every((entry) => typeof entry === 'number' && Number.isFinite(entry));
+}
+
+function normalizedRegionBbox(block: SourceArtifact['blocks'][number]) {
+  const region = block.source_region;
+  if (region === undefined) return undefined;
+  if (
+    !isRecord(region)
+    || region.coordinate_space !== 'mineru-middle-page'
+    || !finiteNumberTuple(region.raw_bbox, 4)
+    || !finiteNumberTuple(region.page_size, 2)
+    || region.page_size[0] <= 0
+    || region.page_size[1] <= 0
+  ) {
+    throw new SourceArtifactError('parser_failure', 'PDF SourceArtifact block has an invalid source region');
+  }
+  const [pageWidth, pageHeight] = region.page_size;
+  const [x0, y0, x1, y1] = region.raw_bbox;
+  // Deliberately do not clamp: an out-of-range or reversed result must reach the
+  // Source imprint contract and be rejected as anchor_invalid.
+  return [x0 / pageWidth, y0 / pageHeight, x1 / pageWidth, y1 / pageHeight] as [
+    number,
+    number,
+    number,
+    number,
+  ];
+}
+
 function pageAnchorForBlock(block: SourceArtifact['blocks'][number]) {
   const locatorPage = isRecord(block.locator) ? block.locator.page_index : undefined;
   const blockIndex = isRecord(block.locator) ? block.locator.block_index : undefined;
@@ -281,10 +312,12 @@ function pageAnchorForBlock(block: SourceArtifact['blocks'][number]) {
   ) {
     throw new SourceArtifactError('parser_failure', 'PDF SourceArtifact block is missing its page-local locator');
   }
+  const bbox = normalizedRegionBbox(block);
   return {
     family: 'page' as const,
     page: block.page_index as number,
     block_index: blockIndex as number,
+    ...(bbox ? { bbox } : {}),
   };
 }
 
@@ -327,6 +360,15 @@ function sourceArtifactImprintInput(
     throw new SourceArtifactError('parser_failure', 'Document transcriber returned an image SourceArtifact');
   }
   const paged = identity.anchorFamily === 'page';
+  const regionBlockCount = paged
+    ? artifact.blocks.filter((block) => block.source_region !== undefined).length
+    : 0;
+  if (paged && regionBlockCount > 0 && regionBlockCount !== artifact.blocks.length) {
+    throw new SourceArtifactError(
+      'parser_failure',
+      'A region-faithful PDF SourceArtifact must carry a same-output region on every fragment',
+    );
+  }
   return {
     source_file_id: sourceFileId,
     transcriber: {
@@ -335,13 +377,18 @@ function sourceArtifactImprintInput(
       lockfile: identity.lockfile,
       lockfile_hash: identity.fingerprint(),
     },
-    anchor_fidelity: paged ? 'page' : 'element',
+    anchor_fidelity: paged
+      ? (regionBlockCount === artifact.blocks.length && artifact.blocks.length > 0 ? 'region' : 'page')
+      : 'element',
     text_normalization: 'whitespace',
     fragments: artifact.blocks.map((block, seq) => ({
       seq,
       text: block.text,
-      role: block.writing_role === 'heading' ? 'heading' : 'para',
+      role: block.kind === 'table'
+        ? block.imprint_role
+        : (block.writing_role === 'heading' ? 'heading' : 'para'),
       anchor: paged ? pageAnchorForBlock(block) : flowAnchorForBlock(block),
+      ...(block.kind === 'table' ? { style: { source_table: block.table } } : {}),
     })),
     warnings: [],
   };

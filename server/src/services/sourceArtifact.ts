@@ -22,15 +22,87 @@ export {
 
 export type SourceArtifactWritingRole = 'paragraph' | 'heading';
 
-export interface SourceArtifactBlock {
+export const SOURCE_ARTIFACT_COUNT_BASES = [
+  'table_fragment_count',
+  'cell_text_count',
+  'non_empty_td_count',
+] as const;
+
+export type SourceArtifactCountBasis = typeof SOURCE_ARTIFACT_COUNT_BASES[number];
+
+export interface SourceArtifactCount {
+  basis: SourceArtifactCountBasis;
+  value: number;
+}
+
+export type SourceArtifactBbox = [number, number, number, number];
+export type SourceArtifactPageSize = [number, number];
+
+export interface SourceArtifactRegion {
+  coordinate_space: 'mineru-middle-page';
+  raw_bbox: SourceArtifactBbox;
+  page_size: SourceArtifactPageSize;
+}
+
+export interface SourceArtifactTableCell {
+  row_index: number;
+  column_index: number;
+  row_span: number;
+  column_span: number;
+  element: 'td' | 'th';
+  text: string;
+}
+
+export const SOURCE_ARTIFACT_CELL_GEOMETRY_TRIGGERS = [
+  'switch_to_transcriber_with_cell_geometry',
+  'mineru_standard_output_includes_cell_bboxes',
+  'patched_independent_transcriber_identity',
+] as const;
+
+export type SourceArtifactCellGeometryTrigger =
+  typeof SOURCE_ARTIFACT_CELL_GEOMETRY_TRIGGERS[number];
+
+export const SOURCE_ARTIFACT_CELL_GEOMETRY_UNAVAILABLE_DECLARATION =
+  '单元格几何寻址：本转写器不可达' as const;
+
+export interface SourceArtifactCellGeometryAddressing {
+  status: 'unavailable_for_this_transcriber';
+  declaration: typeof SOURCE_ARTIFACT_CELL_GEOMETRY_UNAVAILABLE_DECLARATION;
+  triggers: SourceArtifactCellGeometryTrigger[];
+  patched_transcriber_policy: {
+    transcriber_name_must_differ_from: 'mineru';
+    patch_bytes_must_be_in_lockfile_fingerprint: true;
+    silent_patch_forbidden: true;
+  };
+}
+
+interface SourceArtifactBlockBase {
   artifact_block_id: string;
-  kind: 'text';
   text: string;
   writing_role: SourceArtifactWritingRole;
   page_index: number | null;
   locator: Record<string, unknown>;
   metadata: Record<string, unknown>;
 }
+
+export interface SourceArtifactTextBlock extends SourceArtifactBlockBase {
+  kind: 'text';
+  source_region?: SourceArtifactRegion;
+}
+
+export interface SourceArtifactTableBlock extends SourceArtifactBlockBase {
+  kind: 'table';
+  writing_role: 'paragraph';
+  imprint_role: 'table_row';
+  source_region: SourceArtifactRegion;
+  table: {
+    cells: SourceArtifactTableCell[];
+    counts: SourceArtifactCount[];
+    cell_geometry_addressing: SourceArtifactCellGeometryAddressing;
+  };
+}
+
+export type SourceArtifactBlock = SourceArtifactTextBlock | SourceArtifactTableBlock;
 
 export interface SourceArtifact {
   schema_version: 'source-artifact.v1';
