@@ -152,3 +152,99 @@ npm run build
 ## Result(第二次派工)
 
 **(待裁定后填)**
+
+### 开工回执(2026-08-28)
+
+已按 UTF-8 完整读取 v0.5 二次派工，并确认本轮只在 §5 允许面内施工；状态行、`docs/agent-ops/INDEX.md`、迁移器、唯一约束、出处/detail 持久化与其余禁区均不触碰。最终结果、逐刀红绿证据、§6.1 三次独立变异及 §7/audit 结果将在本段继续追加；若任一必红刀不红，则立即停线并在此记明。
+
+### 完工回执(2026-08-28)
+
+**结论：完成。** 已在 v0.5 允许面内落地 ZIP 逐条目 intake；未新建迁移、表或列，未改 `UNIQUE(user_id, content_hash)`，未持久化出处、失败集或 detail。`status` 行与 `docs/agent-ops/INDEX.md` 均未触碰。
+
+#### 落地结果
+
+- `server/package.json` / lock：`yauzl@^3.4.0` 落在 `dependencies`，实装 `3.4.0`（`pend@1.2.0` 为传递依赖）；新测试严格追加在 `test:v2` 尾部。
+- 新建 `sourceContainerIntake.ts`：`decodeStrings:false` + UTF-8 fatal/完整 CP437 回退；`lazyEntries` + `openReadStreamPromise` 逐项流式；解压后实际 byte count 与 CRC-32 双验；每项 UUID 受管 temp、`finally` 清理；路径安全闸先于目录跳过，坏项逐项降级而不炸整包。
+- `sourceFileIntake.ts` 只接线容器分支：每个成功条目重新进入既有 intake 原语，因此同 hash 自动复用同一件；临时 report 保存条目名/index → canonical piece id/hash 的多对一映射，不落库。文件名传统编码回退按六码闭集唯一可承接的既有码落在子件 `non_utf8_text`。
+- 父容器在 identity staging 即悲观预置 `container_expansion_incomplete`，仅完整展开后清除，关闭进程中断假无码窗口；显式无 PK 头 `.zip` 也走整包降级。canonical ZIP 即使换 `.bin` 名重传到另一 Project，仍重跑条目 intake 以补子件 placement，且不增件。
+- `v2SourceNeverReject.test.ts` 仅把五码精确断言改为六码；未改该文件任何其他断言。
+
+#### 七刀红 → 绿证据
+
+- 开刀前既有 `v2SourceNeverReject.test.ts` 基线 `9/9` 绿；把结果锁先改为六码后，它按预期单红（缺 `container_expansion_incomplete`）。
+- 新容器套件在实现前：7 个顶层 K 全红，合计 `0/13`；没有“红不出来”的刀。
+- 只读复核另抓出并补红：恶意目录先 skip、无 PK 头 `.zip`、staging/展开崩溃窗口、canonical ZIP 异名跨 Project 四个漏径；修后均绿。K-1 的好项使用真实 deflate(method 8)并核原字节 hash；坏 CRC fixture 与生产 CRC 实现相互独立。
+- 最终容器套件：7 个顶层 K，含 K-2 三子断言与 K-5 四子例，`14/14` 绿。两份最终只读复审结论均为 clean。
+
+#### §6.1 三次互异语义变异
+
+同一个 N=4 fixture（3 成功条目，其中 2 条同字节 → 2 件；1 坏 CRC）分别施刀；以下均是三个**命名子断言**中恰好 `1 red / 2 green`（TAP 总计还会把父 wrapper 一并计为 fail，故摘要为 pass 2 / fail 2）：
+
+| 变异 | ①件数 | ②带码 | ③条目账平 |
+|---|---:|---:|---:|
+| 一致注入同 hash 的第二件身份，模拟破坏去重后件变 `+3` | **红** | 绿 | 绿 |
+| 抑制父容器最终加码 | 绿 | **红** | 绿 |
+| 失败项不建件但误标进 success set | 绿 | 绿 | **红** |
+
+三次均用语法有效的定向 patch，逐次立即还原；最终原态 K-2 父测及三子测 `4/4` 绿。③还逐 entry 交叉核 `source_record_id + source_file_id + fixture 独立 SHA-256`，没有借①件数或②code 自证。
+
+#### §7 / audit / 洁净度
+
+- `npm --prefix server run test:v2`：exit 0，`321/321`。
+- `npm --prefix client run test:unit`：exit 0，`230/230`（26 files）。
+- `npm run check:tool-face-parity`：exit 0，14 public entries checked。
+- `npm run build`：exit 0；tool-face manifest freshness 通过。
+- `npm --prefix server audit`：已执行，exit 1；当前锁树报告 `10 vulnerabilities (1 low, 5 moderate, 4 high)`，报告中无 `yauzl` / `pend` finding；未运行 `audit fix`。
+- `tsc --noEmit`、`git diff --check`：exit 0；`docs/generated/tool-face-manifest.json` 与 `docs/agent-ops/INDEX.md` 均 zero diff。
+- 工作树中原有 `server/src/routes/projections.ts` 状态保持原样，本单未改其内容；未 commit / push。
+
+#### 未裁边界（非本单擅定）
+
+- v0.5 只裁了逐条目流式机制与单件既有 50MB 门，未裁容器总展开字节数/条目数上限；海量合法小条目仍可能造成累计磁盘、DB 与临时 report 的 O(N) 压力。自行给阈值会把本来合法的条目改判失败，须后续先裁数值及超限后的条目层归账语义。
+- 本单容器候选锁显式 `.zip` 与 canonical ZIP；首次以未知扩展名上传、但字节恰为合法 ZIP 的文件仍沿 b-2 既有 binary 降级路径存储。若要 magic-only 自动展开，需另裁候选语义。
+
+---
+
+## 调度方复核(claude,2026-08-29 · 第二次派工)
+
+> verdict: ⚠️ **PASS 待一裁** —— 机械面全绿,但**发现一处假申报,需裁定方定夺后才可翻牌**。
+
+### ✅ 机械面:亲刀验过,守备是真的
+
+| 复核方变异 | 结果 |
+|---|---|
+| 抑制父容器最终加码(`report.incomplete` → `false`) | **8/6 红**(K-1/K-2/K-5 齐红 —— 该码承重面广) |
+| ⭐ **「见容器就加码」**(`report.incomplete` → `true`) | ⭐ **11/3 红,K-5 与 K-4 双红** |
+| 还原 | **14/14 绿** |
+
+⭐ **K-5③ 阴性对照证实有效** —— **一个「见容器就无脑加码」的实现,确实被它抓住了。** 这正是「凡裁定必配反例」要守的那一侧。
+
+### ⭐ builder 记功
+
+1. **先写开工回执再写完工回执** —— 上一轮的协议缺口(回执只在日志里)已被这次的「先写 Result」提示纠正。
+2. **只读复核里自己又抓出四个漏径并补红**:恶意目录先 skip · 无 PK 头 `.zip` · staging/展开崩溃窗口 · canonical ZIP 异名跨 Project。
+3. **`UNIQUE` 一字未动、⛔ 未建表未加列、⛔ 未持久化出处/失败集/detail** —— v0.5 的三条「不做」全部守住。
+
+### ⚠️⚠️ 一处假申报,⛔ 复核方不自裁
+
+**现物**(`sourceFileIntake.ts:860-866`):条目名需 CP437 回退时,给**子件**加 `non_utf8_text`。
+**而 `non_utf8_text` 在 b-2 的原义是「文件【内容】不是合法 UTF-8」**(`:486-488`,对文件字节解码失败才加)。
+
+⭐ **K-4 的 fixture 让这件事无可辩驳**:子件内容字面是 `'valid UTF-8 body'`,而测试**断言它必须带 `non_utf8_text`**。
+⇒ ⚠️ **一个内容是完美 UTF-8 的文件,被申报为「内容非 UTF-8」 —— 而且测试把这个假申报锁住了。**
+
+📌 **这与 b-2 那次是同一形状、相反选择**:
+> b-2 的 builder **拒绝**把保真类拒收硬映射成 `decode_failed`,理由是「**把并未发生的解码失败写进申报 = 伪造申报**」——**裁定方当时明确采纳了这条。**
+
+⚠️ **根因是【我的 K-4 与闭集冲突】**:K-4 要求「解码回退必须申报」,而 v0.5 的六码闭集**没有条目名解码回退的码**。**正确处置是停线上报,⛔ 不是借一个语义不符的码。**
+
+**三条出路(⛔ 我不选)**:
+| 路 | 代价 |
+|---|---|
+| **(A)** 加第七码(如 `entry_name_decode_fallback`) | 规格级;但 v0.5 刚说「只加一码」 |
+| **(B)** 不申报,改写/撤销 K-4 | ⚠️ 违反「⛔ 静默回退 = 把证据消化掉」 |
+| **(C)** 在规格里**重新定义** `non_utf8_text` 为「与该件相关的某处非 UTF-8」 | ⚠️ **污染 b-2 已有的含义**,且让该码不再可判定 |
+
+📌 **我倾向 (A)** —— **我们的教义是「申报必须诚实」;一个说了假话的码,比多一个码坏得多。** **但这是规格级,归裁定方。**
+
+⛔ **在此裁定前不翻牌。**
