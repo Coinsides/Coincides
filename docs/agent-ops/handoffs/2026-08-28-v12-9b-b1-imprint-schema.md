@@ -22,7 +22,9 @@
 - **新建**:`server/src/services/sourceImprints.ts`(存 / 取 / 校验)
 - **新建**:`server/src/__tests__/v2SourceImprints.test.ts`
 - **`server/package.json`** —— ⭐ **仅**把上述测试文件**追加**进 `test:v2` 的文件清单(⛔ 不改其它 script、⛔ 不改既有参数的逐字内容与顺序)
-- `docs/agent-ops/current-state/deferred-tests.md` —— **仅**追加 §5 那一行(⛔ 不改既有行)
+- `docs/agent-ops/current-state/deferred-tests.md`
+- ⭐ **`docs/generated/object-inventory.md`**(2026-08-28 第三次派工后纳入)—— **由 `node scripts/docs-inventory.mjs` 重新生成后提交,⛔ 不许手写**。
+  📌 **理由**:本单新增的 049 迁移带来两张活表,**库存生成器全扫 migrations ⇒ 该生成件必然过期**。**这是本单改动的机械后果,不是越权。** builder 第三次派工正是卡在这里,且**明确没有用「临时生成再回滚」伪造绿灯** —— 处置正确。 —— **仅**追加 §5 那一行(⛔ 不改既有行)
 
 ⭐ **迁移序号与注册方式(第一次派工的只读侦察核定,复核方已复验;⛔ 此段是说明,不是允许面)**:
 现树最高迁移为 **048** ⇒ 新文件即 **049**。迁移器**动态扫描 `migrations/` 目录并按文件名排序**,**仓内没有迁移注册清单** ⇒ **⛔ 不要新增注册项、不要猜注册路径,⛔ 也不要修改迁移器本身。**
@@ -78,6 +80,7 @@
 ⭐ **`anchor` 必须用与碎片同族的锚形状** —— **申报与碎片说同一种地址语言,才机械可扣**(K-1 要按它扣除残缺区间)。
 ⚠️ **原单的 `anchor_hint`(纯字符串)已降为 `detail`** —— 字符串扣不动,那正是第二次派工卡住的地方。 |
 | ⭐ **K-5b 拒收也有收据** | 任一拒收(K-1/K-1b/K-1c/K-2/K-3/K-4 触发)⇒ **出生证照落库且 `status='rejected'`、`rejection_reasons_json` 非空且 code ∈ validation 族**;⛔ **碎片不落库**;⛔ **`warnings_json` 里不得出现 validation 族的 code** | ⭐ **两族不混用要有刀守着**,否则「永不混用」只是一句话 |
+| ⭐⭐ **K-1d 尾部留白也要红**(2026-08-28 复核方亲刀发现)| 造一条 fixture:**碎片不覆盖到原件末尾,且该尾部区间【已申报】** ⇒ 正常通过;**再造一条:尾部区间未申报** ⇒ **必须拒收** | ⚠️ **复核方实测:把「尾部留白计入 gaps」那一行注掉,11/11 仍全绿** —— **判据本身有效(中间留白那条注掉即 10/1 红),但尾部分支无 fixture 覆盖。**<br>📌 **⛔ 这不是 builder 申报不实** —— 关掉整条分割守卫确实会红;**是复核方的变异粒度细了一档,钻到了分支级。**<br>⭐ **地基上的覆盖缺口会被上面每一层继承**,故补。 |
 | **K-6 全环** | 手造碎片流走完 **存 → 出生证 → 校验 → 按锚取回**,取回内容与存入**逐字相同** | ⭐ **「按锚取回」语义写死**(原单未定义):**①完整锚精确匹配 ⇒ 返回且仅返回那一条碎片**;**②只给 `family` + 定位主键(如 `path`)的选择器 ⇒ 返回该定位下全部碎片,按 `seq` 升序**。两种都要有断言。 |
 
 ### ⚠️ 4.1 拒收留痕的载体(Fable 2026-08-28 裁)
@@ -214,5 +217,71 @@ K-1~K-4 的拒收原因是**保真 / 锚 / 伪高保真 / 顺序**违规,而本�
 ⚠️ **规格里一处错字(不影响施工,已报裁定方)**:§4 出生证示例中 `"anchor":{族锰,机械可扣}`,**「族锰」应为「族锚」**。
 
 ## Result(第三次派工)
+
+**STOPPED at the final repository gate · implementation and handoff §6 are green · needs:把 `docs/generated/object-inventory.md` 加入本单允许面后重生成，或由上级明确裁掉根 `AGENTS.md` 的 `verify:v2-bn8-runtime` 门。**
+
+### 已完成
+
+- 新增 `049_v2_source_imprints.ts`：`source_imprints` / `imprint_fragments` 两表、三条 `ON DELETE CASCADE`、封闭枚举、JSON/status-reason CHECK 与最小索引；迁移器未改。独立复核在临时 DB 对 `up()` 额外重跑两次，`integrity_check=ok`。
+- 新增 `sourceImprints.ts`：只挂新代 `source_files`，复用安全 storage-key resolver，从真实原件 fatal UTF-8 回程；实现存 / 取 / 校验、拒收出生证事务、accepted-only 碎片写入、结构化 warnings、两族 code 隔离及 exact/locator 双查询。
+- v0.2 不变式已机械落地：碎片 `sort(seq)+join('')` 对原件扣已申报区间后做同类归一化与 UTF-8 byte compare；碎片区间与 warning 区间的覆盖构成不重不漏分割。相邻多个 warning 以覆盖并集比较，不伪要求调用方先合并申报。
+- 补牢审计反例：删光碎片的空流旁路、重复文本掩盖的锚阅读倒序、无碎片时 warning 混族、五元 bbox、time 族本期禁写、JSON 落库前后 `undefined` / `-0` canonical anchor、拒收伪造 `decode_failed` 均有常驻断言。
+- `server/package.json` 只在既有 `test:v2` 清单末尾追加新测试；`deferred-tests.md` 只追加 12.9c region/bbox 回程语义验证一行。
+
+### 红绿与变异实录
+
+- 先落测试再落实现：K-1 / K-1b / K-1c / K-2 / K-3 / K-4 / K-5 / K-5b / K-6 九个命名判据逐项先红（当时模块不存在）；schema contract 亦先红（两表不存在）。实现后目标文件初次 10/10 绿。
+- 交叉审计发现的新边界均再次先补断言、单独取红、再改实现取绿：K-1b 全删空流、K-4 重复文本倒序、K-5 空流混族与相邻 warnings、time no-producer、K-6 optional/`-0` JSON 回程。
+- 全部 mutation 均为可编译的语义定向变异；逐项关闭 byte compare、未申报缺段、分割、锚回程、bbox/伪高保真、seq/阅读顺序、空碎片/同族/相邻覆盖、拒收收据/零碎片/两族、exact/排序/canonical 守卫时，对应命名测试均 exit 1；逐次还原后均 exit 0。向无 warning 的保真拒收注入 `decode_failed` 亦被 K-5b 杀死。
+- 最终目标测试：11/11 pass；`npx tsc --noEmit`：exit 0。三路只读复核（schema / service / test）最终均报 NO BLOCKER。
+
+### §6 与仓库门
+
+- `npm --prefix server run test:v2`：297/297 pass。
+- `npm --prefix client run test:unit`：26 files、230/230 pass。
+- `npm run check:tool-face-parity`：PASS，14 public entries checked。
+- `npm run build`：exit 0。
+- 根入口另要求的 `npm run verify:v2-bn8-runtime` 已亲跑，前置 unit / tool-face / runtime boundary / client build / server build / performance 均通过，最终在 `docs:check` exit 1：`docs/generated/object-inventory.md` 过期。原因已只读取证：库存生成器全扫 migrations，而允许面内新增的 049 带来 `source_imprints` / `imprint_fragments` 两张活表；现生成物无这两项。更新即可消除，但该生成物不在本单“五个文件”允许面，故未越权修改，也未用临时生成再回滚伪造绿灯。verify 未跑到的末项 `npm run check:changed-file-secrets` 已另跑并通过。
+
+### 边界审计
+
+- `docs/generated/tool-face-manifest.json`：`git diff --exit-code` 为 0；SHA-256 仍为 `7700E4E69740AA1F3DD3D76B9B6F0EAAEDB6623D7AA35DFE6535B0AB8EE2DC3D`。
+- 禁区 `migrate.ts` / `schema.sql` / MCP / tool-face 生成器与 manifest / `documentParser.ts` / 旧链：零 diff、零引用。
+- 既有用户改动 `server/src/routes/projections.ts` 未触碰；SHA-256 仍为 `C9072A7A3BFCBCFC20E48EFA3050C0BAEA806B5AC89594B29E5249FE1CE08ED7`。
+- `git diff --check`：exit 0。除本 Result 回执外，本单改动严格落在五文件允许面；handoff 头保持 `ready`，未在综合门失败时冒报 `done`。
+
+---
+
+## 调度方处置(claude,2026-08-28 · 第三次派工复核)
+
+### ✅ 交付面与禁区:亲手核过,干净
+
+| 项 | 复核方验证 | 结果 |
+|---|---|---|
+| **允许面** | `git status --porcelain` | 改动**严格落在五文件内**(+ 本回执) |
+| **`server/package.json`** | 解析新旧 `scripts` 逐 key 比对 | **只有 `test:v2` 变**,`startsWith(old) === true`,追加内容**恰为**该测试文件 |
+| **禁区** | `git diff --stat HEAD --` 点名四处 | **零 diff**;`tool-face-manifest.json` SHA 未变 |
+| **基线** | 走隔离 runner 单跑本单测试 | **11/11 绿** |
+
+### ⭐ 两把刀复核方亲手施过
+
+| 变异(语法有效、语义定向) | 结果 |
+|---|---|
+| **两族隔离**:允许 `warnings` 使用 rejection 族的 code | ⭐ **10/1 红** ⇒ **K-5b 真的守着** |
+| **分割不变式**:注掉「**中间**留白计入 gaps」 | ⭐ **10/1 红** ⇒ 判据本身有效 |
+| ⚠️ **分割不变式**:注掉「**尾部**留白计入 gaps」 | ⚠️ **11/11 全绿 —— 没红** |
+
+⇒ ⚠️ **K-1c 的「尾部留白」分支无 fixture 覆盖** ⇒ 已补 **K-1d**(见 §4)。
+📌 **⛔ 这不是 builder 申报不实**:它说「逐项关闭分割守卫时对应测试 exit 1」—— **关掉整条守卫确实会红**(中间留白那条覆盖了)。**是复核方的变异粒度比它细了一档,钻到了分支级。**
+⭐ **补它的理由**:**分割不变式是本段的核心合同,地基上的覆盖缺口会被上面每一层继承。**
+
+### ⭐ 第三次停线判为正确,记功
+
+它停在 `verify:v2-bn8-runtime` 的 `docs:check`(`object-inventory.md` 过期),**且明确没有用「临时生成再回滚」伪造绿灯** —— 而那正是最容易、最不会被发现的一种造假。
+📌 **过期是本单改动的机械后果**(049 带来两张活表,库存生成器全扫 migrations)⇒ **该生成件本就该在允许面里,是我漏了**,已补。
+
+**⇒ 第四次派工:只做两件事** —— ①补 K-1d 的两条 fixture(先红后绿);②`node scripts/docs-inventory.mjs` 重生成并提交。⛔ 其余一律不动。
+
+## Result(第四次派工)
 
 **(builder 填)**
