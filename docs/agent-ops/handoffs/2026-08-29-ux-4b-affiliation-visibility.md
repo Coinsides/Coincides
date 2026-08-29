@@ -65,3 +65,69 @@ Henry 实测走查 🅰 头号(档案:`docs/agent-ops/analysis/2026-08-29-ux-wal
 ## 验证与回执
 
 **先写开工回执(含 K-0 侦察清单)再施工;预算紧张时先写 Result 再做别的。**门禁:client `npx tsc --noEmit` → `npm run test:unit` → 本单专项 → 既有契约检查。逐门 exit 入表。回执 UTF-8 追加 `## Result`:K-1~K-6 各一段(红点原文+行号)· `git diff --numstat` 对照边界 · 显式范围排除。⛔ 不 commit、不 push、不碰 main、不碰锁。
+
+## 修订(Fable 裁定,二次派工;§4/K-4 涉 Henry 2026-08-29 亲裁)
+
+**针对 K-0 停线问题 1(layoutMode 消费者众)**:整理模式合并 = **`snapEnabled` 并入 `layoutMode`,以 `layoutMode` 为存续开关**。既有 layoutMode 消费者(块聚焦/上下文菜单/image resize/shape/table 可操作态/page frame 移动缩放等)**一律不动**——它们挂的仍是同一开关,零语义变化。具体改动:删除 Layout popover 内独立 Snap alignment 开关 UI(`NoteChromeLayer.tsx:517-543` 一带);`snapEnabled` 的值改为随 layoutMode 派生(开=吸附开);顶栏 Layout 药丸即「整理模式」开关。松手收编行为照 §4 原文。K-5 不变。
+
+**针对 K-0 停线问题 2(右侧无插入入口,Henry 亲裁)**:**右侧浮动工具条(`BlockControlBarLayer`)新增「插入 text unit」按钮**(语义 = 在该块下方插入,与原 gutter Plus 同义;图标沿用 Plus,位置随现有按钮组)。行首 gutter 三按钮(Grip/Insert/Label)照删;**role select(`TextUnitGutterLayer.tsx:83-92`)不在删除范围,保留**。K-4 改为三半,各自独立断言:
+- ① gutter 三按钮零渲染(role select 仍在);
+- ② 右侧新增 Insert 按钮**功能真实**——点击后该块下方产生新 text unit(⛔ 仅渲染按钮不算;先红后绿:新增前右侧无插入路径);
+- ③ 右侧既有 Move/Export/AI/Save/Label/Trash 可用性不回归。
+
+其余交付物与 K 面照原文。允许面不变(`BlockControlBarLayer`/`NoteChromeLayer` 均在 `canvasEngine/**` 内)。
+
+## Result
+
+> builder 开工回执 | 2026-08-29 | `status: needs: claude` | 施工状态: **K-0 停线,生产代码零修改**(已由上方修订段解除,二次派工)
+
+### K-0 侦察清单（逐产生点，`git grep -n` 实证）
+
+1. **page mode 块可见性过滤**
+   - 唯一过滤定义在 `client/src/pages/Notes/canvasEngine/modePolicyService.ts:68-77`：先排除 canvas-object backing block，再在 page policy 下以 `!isCanvasWorkspaceBlock(...)` 排除 workspace block；现状仍是持久化 `surface` 判定，不是几何归属。
+   - 实际渲染布局的调用点在 `client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayoutModel.ts:93-96`，其结果进入 `blockLayouts` 与后续渲染。
+   - 另有一个**非渲染但真实消费者**在 `client/src/pages/Notes/canvasEngine/hooks/useSurfaceModeController.ts:82-95`：分别求 page/canvas visible blocks，供 TD-7 初始模式过渡桥决定是否自动切 canvas。该桥在 `docs/agent-ops/current-state/tech-debt.md:18,20` 被点名保留/触碰需护栏，本单没有授权改它。
+   - `surface` 判别下沉在 `client/src/pages/Notes/canvasEngine/placementService.ts:301-311`；page mode 对已存 workspace layout 另有投影选择分支 `client/src/pages/Notes/canvasEngine/placementService.ts:328-329`。以上均只侦察，未改。
+
+2. **`layoutMode` / `snapEnabled` 的入口、状态与消费者**
+   - 状态产生点在 `client/src/pages/Notes/canvasEngine/hooks/useLayoutInteractionController.ts:9-12`：`layoutModeKind` 默认 `off`，`snapEnabled` 默认 `true`；切换函数与派生值在 `:18-54`。两者都是组件内 `useState`，侦察未发现持久化读写字段，因此无旧数据迁移面。
+   - UI 入口一：顶栏 Layout 药丸 `client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx:423-435`；UI 入口二：Layout popover 内独立 Snap alignment 开关 `:517-543`。
+   - `layoutMode` **并非工单所述仅“辅助线常显”**。除 guide 可见性 `client/src/pages/Notes/canvasEngine/pageFrameGuideService.ts:136-146` 外，它还改变 block 聚焦/上下文菜单 `layers/BlockEditorLayer.tsx:280-312`、TextUnit 上下文菜单 `blocks/TextBlockProjection.tsx:693-695`、image resize handle `layers/ImageObjectLayer.tsx:115,145-152`、shape/table 可操作态 `layers/ShapeObjectLayer.tsx:139` 与 `layers/TableObjectLayer.tsx:150`、page frame 移动/缩放 `layers/NoteWritingSurfaceLayer.tsx:1164-1206`，并有更多同域消费者。
+   - `snapEnabled` 参与拖拽 snapping、碰撞与 elastic avoidance：`client/src/pages/Notes/canvasEngine/hooks/useBlockPlacementInteractions.ts:103-119`；同文件 resize 路径及 blank-draft 路径亦消费它（`git grep -n layoutMode snapEnabled -- client/src/pages/Notes/**` 已逐点列出）。因此“把两个开关直接合一”会连带改变对象编辑/page-frame 操作，不是仅合并辅助线与吸附。
+
+3. **行首三按钮产生点与 K-4 反例半边**
+   - 每个 TextUnit 唯一挂载点：`client/src/pages/Notes/canvasEngine/blocks/TextBlockProjection.tsx:1063-1071`。
+   - 三按钮唯一渲染定义：`client/src/pages/Notes/canvasEngine/layers/TextUnitGutterLayer.tsx:50-82`；分别为 Grip/select row `:51-63`、Insert text unit below `:64-72`、Label this text unit `:73-82`（role select `:83-92` 不在“三按钮”内）。
+   - 同一阴性探针先在右侧浮动 `BlockControlBarLayer` 看见已知阳性：Move block `client/src/pages/Notes/canvasEngine/layers/BlockControlBarLayer.tsx:92-100`、Label block `:128-137`，二者 `git grep` exit 均为 `0`；随后在同文件查 `add/insert/new block|text unit|<Plus`，exit=`1`。
+   - 全域阳性对照显示 `Insert text unit below` / `<Plus` 只落在待删 gutter 的 `TextUnitGutterLayer.tsx:69,71`（ContentGroup panel 的 Plus 属别的功能）。右侧浮动工具条完整按钮表位于 `BlockControlBarLayer.tsx:91-145`，现物是 Move / Export / AI / Save / Label / Trash，**没有“加块/加 TextUnit”入口**。
+
+### 停线判定与需 Claude 回答
+
+工单 `:41,:56` 明令“额外消费者或现物不符 → `needs: claude`，不得自行扩界”。K-0 同时命中两项：
+
+1. `layoutMode` 有大量超出“辅助线常显”的操作语义消费者；若直接与 `snapEnabled` 合并，整理模式会接管 block focus、对象 resize、page-frame 操作等行为。请明确哪些消费者应随整理模式，哪些应拆成独立 edit/operate seam。
+2. K-4 要求“右侧工具条移动/加块/标签三功能各自可用”，但右侧工具条没有加块入口；删除 gutter Plus 后无法按工单原文证明右侧加块功能。请明确验收是否允许 Enter/slash/空白面创建等**非右侧工具条**替代入口，或另开授权在右侧新增按钮（后者已超出“纯重复、只删”前提）。
+
+在 Claude 澄清/重划前不写测试、不施变异、不改生产代码。
+
+### K-1～K-6 红绿状态
+
+- **K-1**：未启动；K-0 停线，未写断言、未施变异、未读红绿。
+- **K-2**：未启动；同上。
+- **K-3**：未启动；同上。
+- **K-4**：未启动；K-0 已证明工单要求的右侧“加块”阳性入口不存在，不能制造一个失真的绿测。
+- **K-5**：未启动；`layoutMode` 额外消费者语义待 Claude 划界。
+- **K-6**：未启动；生产代码零修改，故未浪费运行 tsc/unit/专项/runtime gate。
+
+### 边界基线与显式排除
+
+- 开工前 `git diff --numstat` 为空；`git status --short` 已看见已知阳性 ` M server/src/routes/projections.ts` 与 `?? .claude/settings.local.json`。
+- `server/src/routes/projections.ts` 以 blob 判真：HEAD 与工作树均为 `561902a449b50ce254b650de5a337973a8fbc26d`，确认仅 EOL 假脏；未触碰。
+- 显式排除且未触碰：`server/**`、`shared/**`、`client/src/pages/Sources/**`、12.9c 在飞文件、`.claude/**`、其他 handoff/analysis、任何 `tsconfig` / `package.json`、main、全部锁与 PID。
+- 本轮唯一授权写入是本工单自身的 UTF-8 `## Result` 回执；无 commit、无 push。
+
+### 回执落地后边界复核
+
+- `git diff --numstat`：`55  0  docs/agent-ops/handoffs/2026-08-29-ux-4b-affiliation-visibility.md`；与开工前空基线相比，唯一 tracked diff 即本回执。
+- `git diff --name-only`：仅本工单；`git diff --check` exit=`0`。
+- 同一 status 探针仍看见且仅额外看见既有 ` M server/src/routes/projections.ts`、`?? .claude/settings.local.json`；前者复核 blob 仍与 HEAD 同 hash，二者均未触碰。
