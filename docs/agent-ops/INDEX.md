@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 207 份文档。
+共 208 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -51,6 +51,7 @@
 | [analysis/2026-08-28-v12-9b-b2b-zip-probe.md](analysis/2026-08-28-v12-9b-b2b-zip-probe.md) | b-2b 采购探针:zip 解包候选四维实测 | `active` | — | — |
 | [analysis/2026-08-28-v12-9b-b3-preread.md](analysis/2026-08-28-v12-9b-b3-preread.md) | b-3 预读:引用校验闸的载体与定位 | `active` | — | — |
 | [analysis/2026-08-28-v12-9b-b4-preread.md](analysis/2026-08-28-v12-9b-b4-preread.md) | b-4 预读:文档面要改哪几行,以及**最该防的那个错** | `active` | — | — |
+| [analysis/2026-08-29-component-nursery-charter.md](analysis/2026-08-29-component-nursery-charter.md) | 组件产房章程(Component Nursery Charter)v1 | `active` | 2026-08-29 | — |
 | [analysis/2026-08-29-ux-walkthrough-findings.md](analysis/2026-08-29-ux-walkthrough-findings.md) | 2026-08-29 Henry 实测走查八条(凌晨,12.9b 铸段当夜) | `active` | 2026-08-29 | — |
 | [analysis/2026-08-29-v12-9c-c1a-mineru-env-probe.md](analysis/2026-08-29-v12-9c-c1a-mineru-env-probe.md) | V12.9c c-1a：MinerU 遗产环境体检报告 | `frozen` | 2026-08-29 | — |
 | [analysis/2026-08-29-v12-9c-c1c-per-type-rulers.md](analysis/2026-08-29-v12-9c-c1c-per-type-rulers.md) | V12.9c c-1c：MinerU 回程票按类型复测 | `active` | 2026-08-29 | — |
