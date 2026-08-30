@@ -1,4 +1,4 @@
-> from: claude(fable,代理期直发) | to: codex(builder) | status: ready | re: UX-6+10 | date: 2026-08-29
+> from: claude(fable,代理期直发) | to: codex(builder) | status: done | re: UX-6+10 | date: 2026-08-29
 
 # UX-6+10:Project 卡片「生活痕迹卡」落地(方案 Henry 已拍,v3 瘦高版)
 
