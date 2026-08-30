@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 210 份文档。
+共 211 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -201,6 +201,7 @@
 | [handoffs/2026-08-28-v12-9b-b2b-container.md](handoffs/2026-08-28-v12-9b-b2b-container.md) | b-2b:容器策略(zip / 文件夹)—— 逐条目降级 + 如实申报 | `done(2026-08-29 收工;复核 PASS;三次派工)(原:第二次派工 —— 一停后按规格 **v0.5** 订正;原按 v0.4 —— 原稿写于 b-2 落地之前,载体与闭集均已过期)` | — | — |
 | [handoffs/2026-08-28-v12-9b-b4-docs.md](handoffs/2026-08-28-v12-9b-b4-docs.md) | b-4:文档面 —— 词典三条现状栏 + 程序表状态刷新 | `done(2026-08-28 收工;复核 PASS)` | — | — |
 | [handoffs/2026-08-29-seventh-check-functionize.md](handoffs/2026-08-29-seventh-check-functionize.md) | 第七查函数化重写(⭐ 把「按形状猜路径」换成「向仓库问」) | `ready(⏳ **候锁** —— c-1a 正持锁,本单排在其后;派发前按家法**重新对 HEAD 现物**)` | — | — |
+| [handoffs/2026-08-29-ux-3-gallery-nav.md](handoffs/2026-08-29-ux-3-gallery-nav.md) | UX-3:Group Gallery 左栏「去处化」改造(方案「去处与摆法」v3,Henry 已拍) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-29-ux-4b-affiliation-visibility.md](handoffs/2026-08-29-ux-4b-affiliation-visibility.md) | UX-4b:页面归属可见性接线 + 虚线框分色 + 行首按钮删除 + 整理模式合并 | `(缺状态头)` | — | — |
 | [handoffs/2026-08-29-ux-6-10-project-card.md](handoffs/2026-08-29-ux-6-10-project-card.md) | UX-6+10:Project 卡片「生活痕迹卡」落地(方案 Henry 已拍,v3 瘦高版) | `(缺状态头)` | — | — |
 | [handoffs/2026-08-29-v12-9c-c0-t0-alignment.md](handoffs/2026-08-29-v12-9c-c0-t0-alignment.md) | c-0:T0 存量对齐带锚碎片流(⭐ 这是**映射**单,不是建造单) | `done(第二次派工按 v0.7 落地;复核方 2026-08-29 亲刀:K-5 元不变式 + K-1c 第三产生点 + K-4 结构锁 三条实测有咬,test:v2 331/331 自跑,禁区零 diff,第七查 exit 0)` | — | — |
