@@ -115,6 +115,41 @@ async function deleteCourseThroughRoute(userId: string, courseId: string) {
   }
 }
 
+async function requestCoursesRoute(userId: string, path = '', init?: RequestInit) {
+  const app = express();
+  app.use(express.json());
+  app.use((req, _res, next) => {
+    (req as any).userId = userId;
+    next();
+  });
+  app.use('/api/courses', courseRoutes);
+  app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    res.status(err.statusCode || err.status || 500).json({ error: err.message });
+  });
+
+  const server = await new Promise<ReturnType<typeof app.listen>>((resolve) => {
+    const running = app.listen(0, () => resolve(running));
+  });
+  try {
+    const address = server.address();
+    assert.equal(typeof address, 'object');
+    assert.notEqual(address, null);
+    const response = await fetch(`http://127.0.0.1:${(address as any).port}/api/courses${path}`, init);
+    const text = await response.text();
+    return {
+      status: response.status,
+      body: text ? JSON.parse(text) as unknown : null,
+    };
+  } finally {
+    await new Promise<void>((resolve, reject) => {
+      server.close((error?: Error) => {
+        if (error) reject(error);
+        else resolve();
+      });
+    });
+  }
+}
+
 function seedCanvasImageAsset(
   db: Awaited<ReturnType<typeof initDb>>,
   ids: { userId: string; courseId: string; noteId: string },
@@ -502,6 +537,73 @@ test('Canvas persistence migration creates durable entity tables', async () => {
     assert.equal(tableNames.includes('structured_object_extensions'), true);
     assert.equal(tableNames.includes('annotation_truths'), true);
     assert.equal(tableNames.includes('annotation_ranges'), true);
+  });
+});
+
+test('GET /api/courses supplies the newest active note and its ordered active-block excerpt', async () => {
+  await withDb(async (db) => {
+    const ids = seedUserCourseNote(db);
+    const recentNoteId = seedNote(db, ids, 'Newest active note');
+    const earlierSameSecondNoteId = seedNote(db, ids, 'Earlier fractional note');
+    const trashedNoteId = seedNote(db, ids, 'Newer but trashed');
+    const emptyCourseId = uuidv4();
+
+    db.prepare('UPDATE notes SET updated_at = ? WHERE id = ?')
+      .run('2026-08-28T10:00:00.000Z', ids.noteId);
+    db.prepare('UPDATE notes SET updated_at = ? WHERE id = ?')
+      .run('2026-08-29 15:30:00.900', recentNoteId);
+    db.prepare('UPDATE notes SET updated_at = ? WHERE id = ?')
+      .run('2026-08-29T15:30:00.100Z', earlierSameSecondNoteId);
+    db.prepare("UPDATE notes SET status = 'trashed', updated_at = ? WHERE id = ?")
+      .run('2026-08-29T16:30:00.000Z', trashedNoteId);
+    db.prepare("INSERT INTO courses (id, user_id, name, created_at, updated_at) VALUES (?, ?, 'Empty Project', datetime('now'), datetime('now'))")
+      .run(emptyCourseId, ids.userId);
+
+    const firstBlockId = uuidv4();
+    const secondBlockId = uuidv4();
+    const trashedBlockId = uuidv4();
+    db.prepare(`
+      INSERT INTO note_blocks (
+        id, user_id, course_id, block_type, plain_text, status, metadata, created_at, updated_at
+      ) VALUES (?, ?, ?, 'paragraph', ?, ?, '{}', datetime('now'), datetime('now'))
+    `).run(firstBlockId, ids.userId, ids.courseId, 'First excerpt line', 'active');
+    db.prepare(`
+      INSERT INTO note_blocks (
+        id, user_id, course_id, block_type, plain_text, status, metadata, created_at, updated_at
+      ) VALUES (?, ?, ?, 'paragraph', ?, ?, '{}', datetime('now'), datetime('now'))
+    `).run(secondBlockId, ids.userId, ids.courseId, 'Second excerpt line', 'active');
+    db.prepare(`
+      INSERT INTO note_blocks (
+        id, user_id, course_id, block_type, plain_text, status, metadata, created_at, updated_at
+      ) VALUES (?, ?, ?, 'paragraph', ?, ?, '{}', datetime('now'), datetime('now'))
+    `).run(trashedBlockId, ids.userId, ids.courseId, 'Do not expose this line', 'trashed');
+
+    db.prepare(`
+      INSERT INTO note_block_placements (id, note_id, block_id, order_index, display_overrides_json)
+      VALUES (?, ?, ?, ?, '{}')
+    `).run(uuidv4(), recentNoteId, secondBlockId, 20);
+    db.prepare(`
+      INSERT INTO note_block_placements (id, note_id, block_id, order_index, display_overrides_json)
+      VALUES (?, ?, ?, ?, '{}')
+    `).run(uuidv4(), recentNoteId, firstBlockId, 10);
+    db.prepare(`
+      INSERT INTO note_block_placements (id, note_id, block_id, order_index, display_overrides_json)
+      VALUES (?, ?, ?, ?, '{}')
+    `).run(uuidv4(), recentNoteId, trashedBlockId, 0);
+
+    const response = await requestCoursesRoute(ids.userId);
+    assert.equal(response.status, 200);
+    const courses = response.body as Array<Record<string, unknown>>;
+    const project = courses.find((course) => course.id === ids.courseId);
+    const emptyProject = courses.find((course) => course.id === emptyCourseId);
+
+    assert.deepEqual(project?.recent_note, {
+      id: recentNoteId,
+      title: 'Newest active note',
+      updated_at: '2026-08-29 15:30:00.900',
+      excerpt: 'First excerpt line\nSecond excerpt line',
+    });
+    assert.equal(emptyProject?.recent_note, null);
   });
 });
 

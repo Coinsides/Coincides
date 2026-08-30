@@ -97,3 +97,65 @@
 工单交付物 2 明令“Edit/Create Project 表单移除 Priority Weight 选择器”（本单 `:18`），但该必改表单的现物在 `client/src/components/CourseModal/**`；允许面（本单 `:41`）未包含该目录，禁越界规则在 `:42-43`。完成 K-3b 必然修改 `CourseModal.tsx`（并应清理其 weight CSS），不存在允许面内的等价施工路径。
 
 **请求 Claude 裁定：**将 `client/src/components/CourseModal/CourseModal.tsx` 与 `CourseModal.module.css` 显式加入允许面后重新翻牌，或改写 K-3b 交付方案。在此之前保持 `status: ready` 原头不擅改，按协作协议仅在 Result 标 `needs: claude`；零产品码、零测试码、零锁、零禁区改动，未 commit、未 push。
+
+### 二次派工复工回执（2026-08-29，builder）
+
+Fable 修订已解除 K-0 停线，本轮从既有侦察继续施工。复工前复核：分支仍为 `fable/v2-bn12-exoskeleton`（HEAD `2e36fcc`）；工作树既有项仍只有 `server/src/routes/projections.ts` 的 EOL 假脏与未跟踪 `.claude/settings.local.json`，两者均排除于本单触及面。CodeGraph 已再次确认 `CoursesPage → courseStore → GET /api/courses` 链、`CourseModal` 的 weight state/回填/payload/控件，以及详情页 weight 表面均与 K-0 记录一致；本轮不重建索引、不碰锁、不翻 handoff 状态、不 commit、不 push。
+
+### 交付物 4：最近笔记数据供给（完成）
+
+1. `server/src/services/courseCards.ts:21-71` 新增只读 `listCourseCards`：每个 Project 只取 `updated_at` 最新的 active Note；excerpt 沿 `note_block_placements.order_index` 汇集 active block 的非空 `plain_text`，截到 200 字符。`server/src/routes/courses.ts:23` 的既有 `GET /api/courses` 改为调用该服务。无表、列、索引、migration、写路径或 validator 改动；POST/PUT 对旧 `weight` 字段的兼容行为原样保留。
+2. `client/src/stores/courseStore.ts:5-14` 在 store 本地声明 `RecentCourseNote` / `CourseWithRecentNote`，`:17` 令列表使用本地交叉类型，`:37` 给 GET 响应加类型；`:53` 编辑时以 `{ ...旧卡, ...响应 }` 合并，避免 PUT 的旧响应形状顺手抹掉 `recent_note`。`shared/**` 零触碰。
+3. **先红后绿（数据刀）**：常驻断言原文 `assert.deepEqual(project?.recent_note, { ... })` 在 `server/src/__tests__/v2CanvasPersistenceCutover.test.ts:597-602`；空项目断言原文 `assert.equal(emptyProject?.recent_note, null)` 在 `:603`。产品码落地前专项 exit 1，`:597` 实际为 `undefined`；落地后同一专项 1/1、exit 0。
+4. **mutation 落地证明**：先把 `server/src/services/courseCards.ts:25` 单点改成 `NULL AS recent_note_id, -- mutation proof: erase the recent-note identity`，命令先打印该源码行再跑专项；结果仅红在 `:597`（actual `null`，expected 最近笔记对象），exit 1。随后还原为 `recent.id AS recent_note_id`，先打印还原行再复跑 1/1、exit 0。
+5. 早期两次 `npx tsc --noEmit` 实际未起跑（PowerShell ExecutionPolicy 拦 `npx.ps1`，exit 1），未冒充产品红；改用 `npx.cmd tsc --noEmit` 后 client exit 0、server exit 0。
+6. 本件 numstat（不含未跟踪新文件）：`courseStore.ts +14/-3`、`v2CanvasPersistenceCutover.test.ts +99/-0`、`routes/courses.ts +2/-2`；新文件 `courseCards.ts` 71 行。显式排除：`shared/**`、schema/migrations、`client/src/pages/Notes/**`、五个 12.9c 禁区文件、package/tsconfig、既有两项脏项均未触碰。
+
+#### 交付物 4 勘误加固：混合时间格式同秒排序
+
+只读复核指出上版 `datetime(updated_at) + raw string` 会把小数秒截平，再被 SQLite 空格格式与 ISO `T` 格式的字典序误导。新增同秒反例后，断言原文仍为 `assert.deepEqual(project?.recent_note, { ... })`（现行 `v2CanvasPersistenceCutover.test.ts:600-605`）：较晚的 `2026-08-29 15:30:00.900` 被较早的 `2026-08-29T15:30:00.100Z` 抢位，专项 exit 1，实际标题为 `Earlier fractional note`。`courseCards.ts:48` 改为 `ORDER BY julianday(candidate.updated_at) DESC, candidate.id DESC` 后，同一专项 1/1 exit 0，server tsc exit 0。前一小节记录的 `:597` 是加反例前的历史行号；断言正文未变，现行行号以本段为准。
+
+### 交付物 1：瘦高生活痕迹卡（完成）
+
+1. `client/src/pages/Courses/Courses.tsx` 同文件导出纯 `ProjectCard`，页面只接回原有 callbacks；头部改为色点、名称、可选 code 与独立 semester，彻底移除 `No code` fallback 与旧 project description。最近笔记分支提供 `Continue · <title>`、语义化 `<time dateTime>`、本页内相对时间函数及只在 trim 后非空时挂 DOM 的 excerpt；无最近笔记分支提供可点击的虚线空项目入口。`Courses.module.css` 将栅格改为 `minmax(208px, 1fr)`、卡与 Add Project 最小高 260px，excerpt 四行 clamp。旧 weight 章和 toolbar 仍在本件之后作为交付物 2/3 的独立红点，未在此冒充退场。
+2. **先红后绿**：在产品改动前新增 `Courses.test.tsx`，旧实现 7/7 红；最终本件专项 7/7 exit 0，client tsc exit 0。现行判据原文与行号：K-1 标题 `expect(within(card).getByText('Matrix inverses')).toBeTruthy();`（`:104`）；时间 `expect(within(card).getByText('Today')).toBeTruthy();`（`:111`）；Continue 目标 `expect(mocks.navigate).toHaveBeenCalledWith('/notes/note-recent');`（`:119`）；K-2a excerpt `expect(within(card).getByTestId('project-card-excerpt').textContent).toContain('First line from the note');`（`:126-127`）；K-2b 旧 description 与空 excerpt DOM 均为 null（`:138-139`）；K-5 空项目点击后 `expect(mocks.navigate).toHaveBeenCalledWith('/projects/course-empty');`（`:150`）；无 code 判据与 semester 正控在 `:157-158`。
+3. **K-1 时间 mutation**：先打印落地行 `Courses.tsx:31 if (daysAgo <= 0) return 'Yesterday'; // mutation proof: K-1 relative time`；定向测试仅 K-1 时间 1 条红于 `Courses.test.tsx:111`（找不到 `Today`），exit 1。还原后同一条 1/1 exit 0。
+4. **K-1 Continue mutation**：先打印落地行 `Courses.tsx:96 onOpenNote(course.id); // mutation proof: K-1 Continue target`；定向测试仅 Continue 1 条红于 `Courses.test.tsx:119`（收到 `/notes/course-1`，期待 `/notes/note-recent`），exit 1。还原后 1/1 exit 0。
+5. **K-2a mutation**：先打印落地行 `Courses.tsx:110 {false && ( // mutation proof: K-2a excerpt presence`；第一次 Vitest 在载入前触发 Node bundled-root-certificate native assertion，属未起跑、未算产品红；原变异保持落地后重跑，仅 K-2a 1 条红于 `Courses.test.tsx:126`（找不到 excerpt），exit 1。还原后 1/1 exit 0。
+6. **K-2b mutation**：先打印落地行 `Courses.tsx:110 {true && ( // mutation proof: K-2b empty excerpt shell`；定向测试仅 K-2b 1 条红于 `Courses.test.tsx:139`（收到空 `<div data-testid="project-card-excerpt">`），exit 1。还原后 1/1 exit 0。
+7. **K-5 mutation**：先打印落地行 `Courses.tsx:123 void course.id; // mutation proof: K-5 empty-project target`；定向测试仅 K-5 1 条红于 `Courses.test.tsx:150`（详情导航 0 次），exit 1。还原后全件 7/7 exit 0。
+8. 本件当前 numstat：`Courses.tsx +189/-48`、`Courses.module.css +125/-13`；新文件 `Courses.test.tsx` 160 行。无依赖、package/tsconfig、禁区或既有脏项改动；未碰锁、未 commit、未 push。
+
+### 交付物 2：Priority Weight UI 摘除（完成）
+
+1. 卡片已删除 weight 章及对应 CSS；`CourseModal` 已删除 weight state、编辑回填、提交 payload 字段、Priority Weight 控件及其 CSS；详情页抽出可独立验证的 `ProjectIdentity` 后删除 weight 表面及 CSS，并在 code/semester 都为空时不挂空 `.courseMeta`。对六个 UI/CSS 文件精确查找 `Priority Weight|weightBadge|weightButtons|weightBtn|weight1|weight2|weight3` 零命中。
+2. **数据库与兼容明确保留**：schema/迁移/validator 零改；`server/src/routes/courses.ts:35,42` 创建仍写 `weight` 且缺省为 2，`:81` 更新仍只在旧客户端显式提供 weight 时改值。新表单不再发送该 own field，因此既有项目保存其他字段时 DB weight 不被清空或覆盖。
+3. **四半先红后绿**：K-3a 现物红于 `Courses.test.tsx:166`，收到卡片 `<span>High</span>`；K-3b 现物红于 `CourseModal.test.tsx:73`，收到 `<label>Priority Weight</label>`；K-3c own-field 现物红于 `CourseModal.test.tsx:79`（received true），同时独立合并正控 `expect({ ...existingCourse, ...submittedPatch }.weight).toBe(existingCourse.weight);`（`:85`）保持绿；K-3d 现物红于 `CourseDetail.test.tsx:43`，收到详情 `<span>High</span>`。清理后 3 files / 14 tests 全绿，client tsc exit 0。
+4. 现行断言原文：K-3a `expect(within(card).queryByText('High')).toBeNull();`（`Courses.test.tsx:166`）；K-3b `expect(screen.queryByText('Priority Weight')).toBeNull();`（`CourseModal.test.tsx:73`）；K-3c `expect(Object.prototype.hasOwnProperty.call(submittedPatch, 'weight')).toBe(false);`（`:79`）与保值正控（`:85`）；K-3d `expect(screen.queryByText('High')).toBeNull();`（`CourseDetail.test.tsx:43`）。
+5. **K-3a mutation**：先打印落地行 `Courses.tsx:131 <span>High</span> {/* mutation proof: K-3a card weight surface */}`；定向测试仅 K-3a 红于 `Courses.test.tsx:166`，exit 1；还原后 1/1 exit 0。
+6. **K-3b mutation**：先打印落地行 `CourseModal.tsx:111 <label>Priority Weight</label> {/* mutation proof: K-3b form weight surface */}`；定向测试仅 K-3b 红于 `CourseModal.test.tsx:73`，exit 1；还原后 1/1 exit 0。
+7. **K-3c mutation**：先打印落地行 `CourseModal.tsx:49 weight: existing?.weight, // mutation proof: K-3c payload own field`；K-3c 两测中仅 own-field 判据红于 `:79`，保值正控仍绿，exit 1；还原后 K-3c 2/2 exit 0。
+8. **K-3d mutation**：先打印落地行 `CourseDetail.tsx:411 <span>High</span> {/* mutation proof: K-3d detail weight surface */}`；定向测试仅 K-3d 红于 `CourseDetail.test.tsx:43`，exit 1；还原后 1/1 exit 0。
+9. 本件 numstat：`CourseModal.module.css -40`、`CourseModal.tsx -24`、`CourseDetail.module.css -25`、`CourseDetail.tsx +19/-14`、`CourseDetail.test.tsx +24/-1`；新文件 `CourseModal.test.tsx` 87 行。`Courses.*` 是交付物 1/2/3 的累计 diff，未在本段重复冒充单件数。未碰 DB、shared、package/tsconfig、禁区、锁或既有脏项；未 commit、未 push。
+
+### 交付物 3：卡片操作菜单与 toolbar 退场（完成）
+
+1. `ProjectCard` 内局部实现一个菜单状态与同一 `role="menu"` 外壳；卡片右键和 hover/focus/touch 可见的 ⋯ 均调用同一 `openProjectMenu`。菜单通过 `createPortal(..., document.body)` + `position: fixed` 脱离 `.page` 动画留下的 transform containing block 与卡片 overflow；坐标按 viewport clamp。五项只复接既有 callbacks：Open、Sources、Tags、Edit、Move to Trash，后者仍走 `setConfirmDelete(course)` → `ProjectDeleteDialog`，未新增 archive/trash API。
+2. 旧四按钮常驻 toolbar 及 CSS 全删。⋯ 带 `aria-haspopup/expanded/controls`；菜单打开聚焦首项，支持 ArrowUp/ArrowDown/Home/End 循环；Escape 关闭并回焦入口，document 外点关闭；危险项沿用 error token；hover/focus/touch 可发现性与 reduced-motion 均在本页 CSS 内完成。
+3. **先红后绿**：产品改动前 K-4 新增 10 条全部红，原 8 条保持绿；红因分别为右键无 menu、无 ⋯、五项不可达、旧 Sources toolbar 尚存，及关闭行为无外壳可测。落地后 `Courses.test.tsx` 18/18 exit 0，client tsc exit 0。
+4. **两个入口判据原文**：右键 `expect(screen.getByRole('menu')).toBeTruthy();`（`Courses.test.tsx:175`）；⋯ 点击在 `:182-184`，同一 menu 断言在 `:186`。mutation 前先打印 `Courses.tsx:184 if (event.type === 'contextmenu') return; // mutation proof: K-4 context-menu entry`，仅右键入口红于 `:175`；还原 1/1 绿。随后先打印 `Courses.tsx:215 void rect; // mutation proof: K-4 ellipsis entry`，仅 ⋯ 入口红于 `:186`；还原 1/1 绿。
+5. **Open**：断言 `expect(mocks.navigate).toHaveBeenCalledWith('/projects/course-1');`（`:198`）。mutation 前打印 `Courses.tsx:143 onClick={() => runMenuAction(() => undefined)}` 与 `:145 mutation proof: K-4 Open handler`；仅本项红（调用 0 次），还原 1/1 绿。
+6. **Sources**：断言 `expect(mocks.navigate).toHaveBeenCalledWith('/projects/course-1?focus=sources');`（`:210`）。mutation 前打印 `Courses.tsx:147` 的 no-op handler 与 `:149 mutation proof: K-4 Sources handler`；仅本项红，随后还原绿。
+7. **Tags**：断言 `expect(mocks.openModal).toHaveBeenCalledWith('tag-group-manager', { courseId: 'course-1', courseName: 'Linear Algebra' });`（`:222-225`）。mutation 前打印 `Courses.tsx:151` 的 no-op handler 与 `:153 mutation proof: K-4 Tags handler`；仅本项红，随后还原绿。
+8. **Edit**：断言 `expect(mocks.openModal).toHaveBeenCalledWith('course-edit', { course: recentCourse });`（`:237`）。mutation 前打印 `Courses.tsx:155` 的 no-op handler 与 `:157 mutation proof: K-4 Edit handler`；仅本项红，随后还原绿。
+9. **Move to Trash**：判据原文 `expect(mocks.projectDeleteDialog).toHaveBeenCalledWith(expect.objectContaining({ projectId: 'course-1', projectName: 'Linear Algebra' }));`（`:251-254`）。mutation 前打印 `Courses.tsx:164` 的 no-op handler 与 `:167 mutation proof: K-4 Trash handler`；仅本项红（dialog props 调用 0 次），随后还原绿。
+10. **toolbar 退场 mutation**：判据 `expect(within(card).queryByRole('button', { name: 'Sources' })).toBeNull();`（`:262`）。先打印落地行 `Courses.tsx:271 <button type="button">Sources</button> {/* mutation proof: K-4 legacy toolbar */}`；仅该判据红，随后还原。Escape 回焦判据在 `:273-278`，外点关闭判据在 `:288-292`，最终一并绿。
+11. `Courses.*` 相对 HEAD 的三件累计 numstat 现为 `Courses.tsx +282/-50`、`Courses.module.css +193/-61`；新 `Courses.test.tsx` 294 行，其中本件新增 126 行。未碰 Notes、共享 ContextMenuLayer、依赖、package/tsconfig、锁或既有脏项；未 commit、未 push。
+
+### K-6 最终门禁与范围回执（完成）
+
+1. **client**：`npx.cmd tsc --noEmit` exit 0；`Courses.test.tsx` 定点 18/18、exit 0；`npm.cmd run test:unit` 全量 33 files / 271 tests、exit 0。既有 `CourseDetail.test.tsx` 与新增 `CourseModal.test.tsx`、`Courses.test.tsx` 均在全量中通过。
+2. **server**：`npx.cmd tsc --noEmit` exit 0；最终以 `node --import tsx --test --test-name-pattern "GET /api/courses" src/__tests__/v2CanvasPersistenceCutover.test.ts` 复跑课程列表专项 1/1、exit 0。`npm.cmd run test:v2` 全量实际起跑 341 tests，339 pass / 2 fail、exit 1；两处分别为 `v2SourceMineruWiring.test.ts` 的 `spawnSync python.exe ENOENT`，以及 `v2SourceRegionCells.test.ts` 的既有 uv Python 路径失效 / MinerU code 101，均属本机 Python/MinerU 环境且落在 12.9c 明示禁区，本单未越界修理。日志中的 migration 047 “failed” 是预期拒绝用例内部输出，并非额外 `not ok`。
+3. **仓级必跑门禁**：根目录 `npm.cmd run verify:v2-bn8-runtime` 完整 exit 0；其内客户端全测、client/server build、159 项 runtime boundary、60 组 Canvas model contract、Canvas performance seed、tool-face gates、`docs:check` 与 changed-file secret scan 全绿。构建仅保留既有 chunk-size / dynamic-import 提示与 Git LF→CRLF 提示，无失败。
+4. **最终清面**：`git diff --check` exit 0；分支仍为 `fable/v2-bn12-exoskeleton`。触及产品/测试文件内不存在临时 mutation 落地残留；所有 mutation 均已在对应小节记录还原后的定点绿。最终跟踪文件 numstat（交接单本身除外）：`CourseModal.module.css -40`、`CourseModal.tsx -24`、`CourseDetail.module.css -25`、`CourseDetail.test.tsx +24/-1`、`CourseDetail.tsx +19/-14`、`Courses.module.css +193/-61`、`Courses.tsx +282/-50`、`courseStore.ts +14/-3`、server 专项 `+102/-0`、courses route `+2/-2`；新文件为 `CourseModal.test.tsx` 87 行、`Courses.test.tsx` 294 行、`courseCards.ts` 76 行。
+5. **显式排除**：开工前既有 `server/src/routes/projections.ts` 仍只呈 EOL 假脏且 `git diff --raw --` 零输出；未跟踪 `.claude/settings.local.json` 原样未碰。`client/src/pages/Notes/**`、五个 12.9c source 文件、`shared/**`、schema/migrations、其他 handoff/analysis、package/tsconfig、锁均零触碰。未 commit、未 push；handoff 头仍保留 `status: ready`，交由调度方/Fable 翻牌。

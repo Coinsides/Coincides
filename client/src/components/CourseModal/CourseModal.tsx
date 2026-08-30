@@ -22,7 +22,6 @@ export default function CourseModal() {
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [color, setColor] = useState(PRESET_COLORS[0]);
-  const [weight, setWeight] = useState(2);
   const [description, setDescription] = useState('');
   const [semester, setSemester] = useState('');
   const [saving, setSaving] = useState(false);
@@ -32,7 +31,6 @@ export default function CourseModal() {
       setName(existing.name);
       setCode(existing.code || '');
       setColor(existing.color);
-      setWeight(existing.weight);
       setDescription(existing.description || '');
       setSemester(existing.semester || '');
     }
@@ -48,7 +46,6 @@ export default function CourseModal() {
         name: name.trim(),
         code: code.trim() || undefined,
         color,
-        weight,
         description: description.trim() || undefined,
         semester: semester.trim() || undefined,
       };
@@ -107,27 +104,6 @@ export default function CourseModal() {
                   style={{ backgroundColor: c }}
                   onClick={() => setColor(c)}
                 />
-              ))}
-            </div>
-          </div>
-
-          <div className={styles.field}>
-            <label>Priority Weight</label>
-            <div className={styles.weightButtons}>
-              {([
-                { value: 1, label: 'Low', desc: 'Reference project' },
-                { value: 2, label: 'Medium', desc: 'Active project' },
-                { value: 3, label: 'High', desc: 'Core / heavy project' },
-              ] as const).map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  className={`${styles.weightBtn} ${weight === opt.value ? styles.weightBtnActive : ''}`}
-                  onClick={() => setWeight(opt.value)}
-                >
-                  <span className={styles.weightBtnLabel}>{opt.label}</span>
-                  <span className={styles.weightBtnDesc}>{opt.desc}</span>
-                </button>
               ))}
             </div>
           </div>

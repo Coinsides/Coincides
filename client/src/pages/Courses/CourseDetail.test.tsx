@@ -1,6 +1,7 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ProjectNotesSection } from './CourseDetail';
+import type { Course } from '@shared/types';
+import { ProjectIdentity, ProjectNotesSection } from './CourseDetail';
 
 const mocks = vi.hoisted(() => ({
   delete: vi.fn(),
@@ -20,6 +21,28 @@ const note = {
   description: 'Human lifecycle entry',
   updated_at: '2026-08-23T12:00:00.000Z',
 };
+
+const project: Course = {
+  id: 'course-1',
+  user_id: 'user-1',
+  name: 'Linear Algebra',
+  code: 'MAT 240',
+  color: '#6366f1',
+  weight: 3,
+  description: 'Vector spaces and linear maps',
+  semester: '2026 Fall',
+  created_at: '2026-08-01T12:00:00.000Z',
+  updated_at: '2026-08-29T12:00:00.000Z',
+};
+
+describe('ProjectIdentity', () => {
+  it('K-3d renders Project identity without a priority weight surface', () => {
+    render(<ProjectIdentity course={project} />);
+
+    expect(screen.getByText('Linear Algebra')).toBeTruthy();
+    expect(screen.queryByText('High')).toBeNull();
+  });
+});
 
 describe('ProjectNotesSection lifecycle actions', () => {
   beforeEach(() => {

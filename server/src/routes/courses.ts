@@ -7,6 +7,7 @@ import {
   deleteProjectWithSourcePolicy,
   getProjectDeletionImpact,
 } from '../services/courseLifecycle.js';
+import { listCourseCards } from '../services/courseCards.js';
 import { assertCourseCanRename } from '../services/systemCourses.js';
 import { createCourseSchema, updateCourseSchema } from '../validators/index.js';
 import { z, ZodError } from 'zod';
@@ -19,8 +20,7 @@ const deleteProjectSchema = z.object({
 // GET /api/courses
 router.get('/', (req: AuthRequest, res: Response) => {
   const db = getDb();
-  const courses = db.prepare('SELECT * FROM courses WHERE user_id = ? ORDER BY created_at DESC').all(req.userId!);
-  res.json(courses);
+  res.json(listCourseCards(db, req.userId!));
 });
 
 // POST /api/courses

@@ -158,31 +158,6 @@
   padding: 4px 8px;
 }
 
-.weightBadge {
-  display: inline-block;
-  padding: 3px 10px;
-  border-radius: 9999px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  border: 1px solid var(--glass-border);
-}
-
-.weight1 {
-  background: var(--glass-elevated);
-  color: var(--text-muted);
-}
-
-.weight2 {
-  background: var(--accent-primary-bg);
-  color: var(--accent-primary);
-}
-
-.weight3 {
-  background: rgba(239, 68, 68, 0.12);
-  color: #f87171;
-}
-
 /* Sections */
 .section {
   margin-bottom: 28px;

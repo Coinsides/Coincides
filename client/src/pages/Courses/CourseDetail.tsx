@@ -397,6 +397,24 @@ function formatRoleLabel(value: string | undefined): string {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+export function ProjectIdentity({ course }: { course: Course }) {
+  return (
+    <div className={styles.courseInfo}>
+      <div className={styles.colorBar} style={{ backgroundColor: course.color }} />
+      <div className={styles.courseTitle}>{course.name}</div>
+      {(course.code || course.semester) && (
+        <div className={styles.courseMeta}>
+          {course.code && <span>{course.code}</span>}
+          {course.semester && <span>{course.semester}</span>}
+        </div>
+      )}
+      {course.description && (
+        <div className={styles.courseDescription}>{course.description}</div>
+      )}
+    </div>
+  );
+}
+
 export default function CourseDetailPage() {
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
@@ -976,20 +994,7 @@ export default function CourseDetailPage() {
       </div>
 
       {/* Project Info */}
-      <div className={styles.courseInfo}>
-        <div className={styles.colorBar} style={{ backgroundColor: course.color }} />
-        <div className={styles.courseTitle}>{course.name}</div>
-        <div className={styles.courseMeta}>
-          {course.code && <span>{course.code}</span>}
-          {course.semester && <span>{course.semester}</span>}
-          <span className={`${styles.weightBadge} ${styles[`weight${course.weight}`]}`}>
-            {course.weight === 1 ? 'Low' : course.weight === 2 ? 'Medium' : 'High'}
-          </span>
-        </div>
-        {course.description && (
-          <div className={styles.courseDescription}>{course.description}</div>
-        )}
-      </div>
+      <ProjectIdentity course={course} />
 
       {workspaceLandingSection}
 

@@ -2,8 +2,19 @@ import { create } from 'zustand';
 import api from '@/services/api';
 import type { Course, CreateCourseRequest, UpdateCourseRequest } from '@shared/types';
 
+export interface RecentCourseNote {
+  id: string;
+  title: string;
+  updated_at: string;
+  excerpt: string | null;
+}
+
+export type CourseWithRecentNote = Course & {
+  recent_note?: RecentCourseNote | null;
+};
+
 interface CourseState {
-  courses: Course[];
+  courses: CourseWithRecentNote[];
   loading: boolean;
   selectedCourseFilter: string | null;
   fetchCourses: () => Promise<void>;
@@ -23,7 +34,7 @@ export const useCourseStore = create<CourseState>((set, get) => ({
   fetchCourses: async () => {
     set({ loading: true });
     try {
-      const { data } = await api.get('/courses');
+      const { data } = await api.get<CourseWithRecentNote[]>('/courses');
       set({ courses: data, loading: false });
     } catch (err) {
       console.error('Failed to fetch courses:', err);
@@ -39,7 +50,7 @@ export const useCourseStore = create<CourseState>((set, get) => ({
 
   updateCourse: async (id, courseData) => {
     const { data } = await api.put(`/courses/${id}`, courseData);
-    set({ courses: get().courses.map((c) => (c.id === id ? data : c)) });
+    set({ courses: get().courses.map((c) => (c.id === id ? { ...c, ...data } : c)) });
     return data;
   },
 
