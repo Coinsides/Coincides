@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useState, type CSSProperties, type DragEvent, type ReactNode } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ChevronRight,
+  Clock3,
   Folder,
   FolderPlus,
+  LayoutGrid,
   Plus,
   Search,
 } from 'lucide-react';
@@ -35,7 +37,6 @@ import {
   activeFolders,
   activeGroups,
   cleanLabel,
-  flattenGroups,
   folderPathText,
   loadGroupGalleryRecords,
   makeFolderKey,
@@ -53,7 +54,17 @@ import {
 import {
   buildGalleryGroupCardView,
   galleryModeLabel,
+  galleryNoteLabel,
 } from './groupGalleryShellModel';
+import {
+  buildGalleryDestinationModel,
+  galleryDestinationLabel,
+  groupsForGalleryDestination,
+  normalizeGalleryDestinationKey,
+  recordHasFolderWork,
+  resolveGalleryCreationTarget,
+  type GalleryDestinationKey,
+} from './groupGalleryNavigationModel';
 
 interface GroupSection {
   key: string;
@@ -97,21 +108,6 @@ function scopedRootFolder(
   )) || null;
 }
 
-function recordsForFolderScope(
-  records: GalleryRecord[],
-  fallbackRecord: GalleryRecord | null,
-  folder: GroupFolderV1,
-): GalleryRecord[] {
-  if (folder.scope.kind === 'workspace') return records;
-  if (folder.scope.kind === 'project') {
-    return records.filter((record) => record.project.id === folder.scope.project_id);
-  }
-  if (folder.scope.kind === 'note') {
-    return records.filter((record) => record.note.id === folder.scope.note_id);
-  }
-  return fallbackRecord ? [fallbackRecord] : [];
-}
-
 function countGroupsInFolder(records: GalleryRecord[], folderId: string): number {
   return records.reduce((count, record) => (
     count + activeGroups(record.groups).filter((group) => groupFolderId(group) === folderId).length
@@ -132,7 +128,7 @@ function galleryBreadcrumbText(record: GalleryRecord | null, folder: GroupFolder
   return [
     'Workspace',
     record.project.name,
-    record.note.title || 'Untitled note',
+    galleryNoteLabel(record.note),
     ...folderPath,
   ].join(' / ');
 }
@@ -145,6 +141,9 @@ export default function GroupGalleryPage() {
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<GalleryMode>(normalizeGalleryMode(searchParams.get('mode')));
   const [query, setQuery] = useState(searchParams.get('query') || '');
+  const [destinationKey, setDestinationKey] = useState<GalleryDestinationKey>(
+    normalizeGalleryDestinationKey(searchParams.get('destination')),
+  );
   const [selectedFolderKey, setSelectedFolderKey] = useState<string | null>(null);
   const [folderTitleDraft, setFolderTitleDraft] = useState('');
   const [dropTargetKey, setDropTargetKey] = useState<string | null>(null);
@@ -152,8 +151,10 @@ export default function GroupGalleryPage() {
   useEffect(() => {
     const nextMode = normalizeGalleryMode(searchParams.get('mode'));
     const nextQuery = searchParams.get('query') || '';
+    const nextDestination = normalizeGalleryDestinationKey(searchParams.get('destination'));
     setMode((current) => (current === nextMode ? current : nextMode));
     setQuery((current) => (current === nextQuery ? current : nextQuery));
+    setDestinationKey((current) => (current === nextDestination ? current : nextDestination));
   }, [searchParams]);
 
   const loadGallery = useCallback(async () => {
@@ -177,15 +178,10 @@ export default function GroupGalleryPage() {
     if (records.length === 0 || selectedFolderKey) return;
     const queryNoteId = searchParams.get('note_id');
     const queryFolderId = searchParams.get('folder_id');
-    const record = records.find((item) => item.note.id === queryNoteId) || records[0];
-    const folderId = queryFolderId
-      || systemGroupFolderId({
-        kind: 'note',
-        project_id: record.note.course_id,
-        note_id: record.note.id,
-        label: null,
-      });
-    setSelectedFolderKey(makeFolderKey(record.note.id, folderId));
+    if (!queryNoteId || !queryFolderId) return;
+    const record = records.find((item) => item.note.id === queryNoteId);
+    if (!record || !record.folders.some((folder) => folder.id === queryFolderId)) return;
+    setSelectedFolderKey(makeFolderKey(record.note.id, queryFolderId));
   }, [records, searchParams, selectedFolderKey]);
 
   const selectedFolderRef = splitKey(selectedFolderKey);
@@ -221,15 +217,24 @@ export default function GroupGalleryPage() {
     return null;
   }, [records]);
 
+  const destinationModel = useMemo(() => buildGalleryDestinationModel(records), [records]);
+  const destinationLabel = galleryDestinationLabel(destinationModel, destinationKey);
+  const destinationGroups = useMemo(
+    () => groupsForGalleryDestination(records, destinationKey),
+    [destinationKey, records],
+  );
+  const destinationCreationTarget = useMemo(
+    () => resolveGalleryCreationTarget(records, destinationKey),
+    [destinationKey, records],
+  );
+  const creationTarget = selectedFolderRecord && selectedFolder
+    ? { record: selectedFolderRecord, folder: selectedFolder }
+    : destinationCreationTarget;
+
   const visibleGroups = useMemo<GroupRef[]>(() => {
     const allGroups = mode === 'folder' && selectedFolder
-      ? recordsForFolderScope(records, selectedFolderRecord, selectedFolder)
-        .flatMap((record) => (
-          activeGroups(record.groups)
-            .filter((group) => groupFolderId(group) === selectedFolder.id)
-            .map((group) => ({ record, group }))
-        ))
-      : flattenGroups(selectedFolderRecord ? [selectedFolderRecord] : records);
+      ? destinationGroups.filter(({ group }) => groupFolderId(group) === selectedFolder.id)
+      : destinationGroups;
     const trimmedQuery = query.trim().toLowerCase();
     if (!trimmedQuery) return allGroups;
     return allGroups.filter(({ record, group }) => [
@@ -238,15 +243,16 @@ export default function GroupGalleryPage() {
       group.identity.type || group.identity.role || '',
       group.identity.summary || '',
       record.note.title || '',
+      record.project.name,
       folderPathText(record.folders, groupFolderId(group)),
     ].join(' ').toLowerCase().includes(trimmedQuery));
-  }, [mode, query, records, selectedFolder, selectedFolderRecord]);
+  }, [destinationGroups, mode, query, selectedFolder]);
 
   const groupedVisibleGroups = useMemo<GroupSection[]>(() => {
     if (mode === 'folder') {
       return [{
         key: selectedFolder?.id || 'all',
-        title: selectedFolder ? selectedFolder.title : 'All groups',
+        title: selectedFolder ? selectedFolder.title : destinationLabel,
         groups: visibleGroups,
       }];
     }
@@ -261,7 +267,7 @@ export default function GroupGalleryPage() {
     return Array.from(map.entries())
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([key, groups]) => ({ key, title: key, groups }));
-  }, [mode, selectedFolder, visibleGroups]);
+  }, [destinationLabel, mode, selectedFolder, visibleGroups]);
 
   const selectedFolderCanDelete = Boolean(selectedFolderRecord && selectedFolder && canDeleteGroupFolder({
     folders: selectedFolderRecord.folders,
@@ -269,7 +275,18 @@ export default function GroupGalleryPage() {
     folderId: selectedFolder.id,
   }));
 
-  const selectedFolderPath = galleryBreadcrumbText(selectedFolderRecord, selectedFolder);
+  const selectedFolderPath = selectedFolder
+    ? galleryBreadcrumbText(selectedFolderRecord, selectedFolder)
+    : destinationLabel;
+  const creationTargetLabel = creationTarget
+    ? creationTarget.folder.system_root
+      ? creationTarget.folder.scope.kind === 'workspace'
+        ? 'Workspace root'
+        : creationTarget.folder.scope.kind === 'project'
+          ? `${creationTarget.record.project.name} project root`
+          : `${galleryNoteLabel(creationTarget.record.note)} note root`
+      : creationTarget.folder.title
+    : 'No creation target';
   const emptyMessage = query.trim()
     ? `No content groups match "${query.trim()}".`
     : mode === 'folder'
@@ -305,6 +322,18 @@ export default function GroupGalleryPage() {
     });
   };
 
+  const handleSelectDestination = (nextDestination: GalleryDestinationKey) => {
+    setDestinationKey(nextDestination);
+    setSelectedFolderKey(null);
+    patchGallerySearchParams({
+      destination: nextDestination === 'all' ? null : nextDestination,
+      note_id: null,
+      folder_id: null,
+      mode,
+      query,
+    });
+  };
+
   const handleModeChange = (item: GalleryMode) => {
     setMode(item);
     patchGallerySearchParams({ mode: item });
@@ -316,17 +345,18 @@ export default function GroupGalleryPage() {
   };
 
   const handleCreateFolder = async () => {
-    if (!selectedFolderRecord || !selectedFolder) return;
-    const siblingCount = groupFolderChildren(selectedFolderRecord.folders, selectedFolder.id).length;
+    if (!creationTarget) return;
+    const { record, folder: parentFolder } = creationTarget;
+    const siblingCount = groupFolderChildren(record.folders, parentFolder.id).length;
     const title = siblingCount === 0 ? 'New folder' : `New folder ${siblingCount + 1}`;
     const nextFolder = createGroupFolder({
       title,
-      scope: selectedFolder.scope,
-      parentFolderId: selectedFolder.id,
-      orderIndex: selectedFolderRecord.folders.length,
+      scope: parentFolder.scope,
+      parentFolderId: parentFolder.id,
+      orderIndex: record.folders.length,
     });
-    await persistRecord(selectedFolderRecord, selectedFolderRecord.groups, [...selectedFolderRecord.folders, nextFolder]);
-    handleSelectFolder(selectedFolderRecord, nextFolder.id);
+    await persistRecord(record, record.groups, [...record.folders, nextFolder]);
+    handleSelectFolder(record, nextFolder.id);
   };
 
   const handleRenameFolder = async () => {
@@ -388,23 +418,18 @@ export default function GroupGalleryPage() {
   };
 
   const handleCreateGroup = async () => {
-    if (!selectedFolderRecord) return;
-    const folderId = selectedFolder?.id || systemGroupFolderId({
-      kind: 'note',
-      project_id: selectedFolderRecord.note.course_id,
-      note_id: selectedFolderRecord.note.id,
-      label: null,
-    });
+    if (!creationTarget) return;
+    const { record, folder } = creationTarget;
     const nextGroup = createContentGroup({
-      projectId: selectedFolderRecord.note.course_id,
-      noteId: selectedFolderRecord.note.id,
-      canvasId: selectedFolderRecord.note.id,
+      projectId: record.note.course_id,
+      noteId: record.note.id,
+      canvasId: record.note.id,
       title: 'New content group',
-      folderId,
-      folders: selectedFolderRecord.folders,
+      folderId: folder.id,
+      folders: record.folders,
       members: [],
     });
-    const nextRecord = await persistRecord(selectedFolderRecord, [...selectedFolderRecord.groups, nextGroup]);
+    const nextRecord = await persistRecord(record, [...record.groups, nextGroup]);
     openEditor(nextRecord, nextGroup);
   };
 
@@ -495,7 +520,7 @@ export default function GroupGalleryPage() {
             className={styles.iconTextButton}
             type="button"
             onClick={() => void handleCreateFolder()}
-            disabled={!selectedFolder}
+            disabled={!creationTarget}
           >
             <FolderPlus size={15} />
             New folder
@@ -504,7 +529,7 @@ export default function GroupGalleryPage() {
             className={styles.primaryButton}
             type="button"
             onClick={() => void handleCreateGroup()}
-            disabled={!selectedFolderRecord}
+            disabled={!creationTarget}
           >
             <Plus size={15} />
             New group
@@ -520,60 +545,40 @@ export default function GroupGalleryPage() {
       </header>
 
       <section className={styles.galleryShell}>
-        <aside className={styles.folderPane} aria-label="Group folders">
+        <aside className={`${styles.folderPane} ${styles.destinationPane}`} aria-label="Gallery destinations">
           <div className={styles.paneHeader}>
-            <span>Folders</span>
-            <span>...</span>
+            <span>去处</span>
           </div>
-          <div className={styles.folderTree}>
-            <span className={styles.folderSectionLabel}>Workspace</span>
-            {workspaceRootEntry ? (
-              <section className={styles.workspaceGroup}>
-                {renderFolderBranch(workspaceRootEntry.record, workspaceRootEntry.folders, workspaceRootEntry.folder)}
-              </section>
-            ) : null}
-            <span className={styles.folderSectionLabel}>Projects</span>
-            {recordsByProject.map(({ project, records: projectRecords }) => (
-              <section key={project.id} className={styles.projectGroup}>
-                <div className={styles.projectTitle}>
-                  <span className={styles.projectDot} style={{ background: project.color || '#64748b' }} />
-                  <span>{project.name}</span>
-                  <span className={styles.folderCount}>{projectRecords.length}</span>
-                </div>
-                {(() => {
-                  const projectRootEntry = projectRecords
-                    .map((record) => {
-                      const folders = activeFolders(record.folders);
-                      return {
-                        record,
-                        folders,
-                        folder: scopedRootFolder(folders, 'project', project.id, null),
-                      };
-                    })
-                    .find((entry) => entry.folder);
-                  return projectRootEntry?.folder ? (
-                    <div className={styles.projectRootBlock}>
-                      {renderFolderBranch(projectRootEntry.record, projectRootEntry.folders, projectRootEntry.folder)}
-                    </div>
-                  ) : null;
-                })()}
-                <span className={styles.folderSectionLabel}>Notes</span>
-                {projectRecords.map((record) => {
-                  const folders = activeFolders(record.folders);
-                  const noteRoot = scopedRootFolder(folders, 'note', record.project.id, record.note.id);
-                  return (
-                    <div key={record.note.id} className={styles.noteFolderBlock}>
-                      <Link className={styles.noteLink} to={`/notes/${record.note.id}`}>
-                        <span>{record.note.title || 'Untitled note'}</span>
-                        <ChevronRight size={12} />
-                      </Link>
-                      {noteRoot ? renderFolderBranch(record, folders, noteRoot) : null}
-                    </div>
-                  );
-                })}
-              </section>
+          <nav className={styles.destinationNav} aria-label="固定去处">
+            {destinationModel.primary.map((destination) => (
+              <button
+                key={destination.key}
+                type="button"
+                className={`${styles.destinationRow} ${destinationKey === destination.key ? styles.destinationRowActive : ''}`}
+                onClick={() => handleSelectDestination(destination.key)}
+              >
+                {destination.kind === 'recent' ? <Clock3 size={15} /> : <LayoutGrid size={15} />}
+                <span className={styles.destinationLabel}>{destination.label}</span>
+                {destination.count === null ? null : <span className={styles.destinationCount}>{destination.count}</span>}
+              </button>
             ))}
-          </div>
+            <div className={styles.destinationDivider} />
+            <span className={styles.destinationSectionLabel}>按项目</span>
+            {destinationModel.scoped.map((destination) => (
+              <button
+                key={destination.key}
+                type="button"
+                className={`${styles.destinationRow} ${destinationKey === destination.key ? styles.destinationRowActive : ''}`}
+                onClick={() => handleSelectDestination(destination.key)}
+              >
+                {destination.kind === 'project' ? (
+                  <span className={styles.projectDot} style={{ background: destination.color || '#64748b' }} />
+                ) : <Folder size={15} />}
+                <span className={styles.destinationLabel}>{destination.label}</span>
+                <span className={styles.destinationCount}>{destination.count}</span>
+              </button>
+            ))}
+          </nav>
         </aside>
 
         <main className={styles.galleryPane}>
@@ -591,14 +596,77 @@ export default function GroupGalleryPage() {
               ))}
             </div>
             <div className={styles.viewSummary}>
-              <span>{mode === 'folder' ? 'All current-folder groups' : `${galleryModeLabel(mode)} groups`}</span>
+              <span>{mode === 'folder' ? `${destinationLabel} groups` : `${galleryModeLabel(mode)} groups`}</span>
               <span>{visibleGroups.length} visible</span>
             </div>
           </div>
 
+          {mode === 'folder' ? (
+            <section className={styles.folderWorkspace} aria-label="Folder view navigator">
+              <div className={styles.folderWorkspaceHeader}>
+                <span>Folder view</span>
+                <span>{destinationLabel}</span>
+              </div>
+              <div className={styles.folderWorkspaceTree}>
+                {destinationKey !== 'workspace' && destinationKey.startsWith('project:') ? null : (
+                  workspaceRootEntry && (
+                    countGroupsInFolder(records, workspaceRootEntry.folder.id) > 0
+                    || groupFolderChildren(workspaceRootEntry.folders, workspaceRootEntry.folder.id).length > 0
+                    || destinationKey === 'workspace'
+                  ) ? (
+                    <section className={styles.workspaceGroup}>
+                      {renderFolderBranch(workspaceRootEntry.record, workspaceRootEntry.folders, workspaceRootEntry.folder)}
+                    </section>
+                  ) : null
+                )}
+                {destinationKey === 'workspace' ? null : recordsByProject
+                  .filter(({ projectId }) => (
+                    !destinationKey.startsWith('project:') || destinationKey === `project:${projectId}`
+                  ))
+                  .map(({ project, records: projectRecords }) => {
+                    const recordsWithFolderWork = projectRecords.filter(recordHasFolderWork);
+                    if (recordsWithFolderWork.length === 0) return null;
+                    const projectRootEntry = projectRecords
+                      .map((record) => {
+                        const folders = activeFolders(record.folders);
+                        return {
+                          record,
+                          folders,
+                          folder: scopedRootFolder(folders, 'project', project.id, null),
+                        };
+                      })
+                      .find((entry) => entry.folder);
+                    return (
+                      <section key={project.id} className={styles.folderWorkspaceProject}>
+                        <div className={styles.folderWorkspaceContext}>
+                          <span className={styles.projectDot} style={{ background: project.color || '#64748b' }} />
+                          <span>{project.name}</span>
+                        </div>
+                        {projectRootEntry?.folder ? (
+                          <div className={styles.projectRootBlock}>
+                            {renderFolderBranch(projectRootEntry.record, projectRootEntry.folders, projectRootEntry.folder)}
+                          </div>
+                        ) : null}
+                        {recordsWithFolderWork.map((record) => {
+                          const folders = activeFolders(record.folders);
+                          const noteRoot = scopedRootFolder(folders, 'note', record.project.id, record.note.id);
+                          return noteRoot ? (
+                            <div key={record.note.id} className={styles.noteFolderBlock}>
+                              <span className={styles.folderWorkspaceNote}>{record.note.title || '未命名'}</span>
+                              {renderFolderBranch(record, folders, noteRoot)}
+                            </div>
+                          ) : null;
+                        })}
+                      </section>
+                    );
+                  })}
+              </div>
+            </section>
+          ) : null}
+
           <div className={styles.scopeBar}>
             <div className={styles.scopeBlock}>
-              <span className={styles.scopeLabel}>Current folder</span>
+              <span className={styles.scopeLabel}>{selectedFolder ? 'Selected folder' : 'Destination target'}</span>
               <div className={styles.breadcrumbLine}>
                 {selectedFolderPath.split(' / ').map((part, index) => (
                   <span key={`${part}-${index}`}>{part}</span>
@@ -654,7 +722,8 @@ export default function GroupGalleryPage() {
                       group,
                       folders: record.folders,
                       folderId,
-                      sourceNoteTitle: record.note.title,
+                      sourceProject: record.project,
+                      sourceNote: record.note,
                     });
                     const topicStyle = {
                       '--topic-color': topicColor(group.identity.topic),
@@ -700,7 +769,6 @@ export default function GroupGalleryPage() {
                                 <span className={styles.topicDot} />
                                 {card.topicLabel}
                               </span>
-                              <span className={styles.cardSource}>From {card.sourceLabel}</span>
                             </span>
                             <span
                               className={styles.statusChip}
@@ -710,6 +778,15 @@ export default function GroupGalleryPage() {
                               {card.statusLabel}
                             </span>
                           </span>
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.cardOriginBadge}
+                          aria-label={card.originLabel}
+                          onClick={() => navigate(card.originRoute)}
+                        >
+                          <span className={styles.originDot} style={{ background: card.originColor }} />
+                          <span>{card.originLabel}</span>
                         </button>
                       </article>
                     );
@@ -721,8 +798,8 @@ export default function GroupGalleryPage() {
         </main>
       </section>
       <footer className={styles.galleryStatusBar}>
-        <span>{selectedFolder ? `${selectedFolder.title} selected. New group will be created in current folder.` : 'No folder selected'}</span>
-        <span>{galleryModeLabel(mode)} - {visibleGroups.length} visible groups - current folder target</span>
+        <span>New groups and folders: {creationTargetLabel}</span>
+        <span>{galleryModeLabel(mode)} · {visibleGroups.length} visible groups · {destinationLabel} destination</span>
       </footer>
     </div>
   );

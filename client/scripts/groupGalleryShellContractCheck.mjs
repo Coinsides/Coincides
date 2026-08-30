@@ -32,6 +32,7 @@ function assertContainsNone(name, text, tokens) {
 const page = readProjectFile('src/pages/GroupGallery/GroupGallery.tsx');
 const css = readProjectFile('src/pages/GroupGallery/GroupGallery.module.css');
 const model = readProjectFile('src/pages/GroupGallery/groupGalleryShellModel.ts');
+const navigationModel = readProjectFile('src/pages/GroupGallery/groupGalleryNavigationModel.ts');
 
 assertContainsAll('Gallery keeps organize surface role', page, [
   'CONTENT_GROUP_SURFACE_ROLES.gallery',
@@ -47,25 +48,58 @@ assertContainsAll('Gallery exposes resource manager shell anchors', page, [
   'Folder view',
   'Topic view',
   'Type view',
-  'Current folder',
+]);
+
+assertContainsAll('Gallery exposes fixed destination navigation and creation targets', page + navigationModel, [
+  'aria-label="固定去处"',
+  "label: '全部组'",
+  "label: '最近'",
+  '按项目',
+  'destinationKey',
+  'resolveGalleryCreationTarget',
+  'New groups and folders:',
 ]);
 
 assertContainsAll('Gallery card exposes OpenDesign anatomy', page + model, [
   'typeLabel',
   'topicLabel',
-  'sourceLabel',
+  'originLabel',
+  'originColor',
+  'originRoute',
   'statusLabel',
   'memberCountLabel',
 ]);
 
-assertContainsAll('Gallery shell CSS has dedicated card/folder/status language', css, [
+assertContainsAll('Gallery shell CSS has dedicated destination/card/folder/status language', css, [
   '.galleryShell',
-  '.folderPane',
+  '.destinationNav',
+  '.destinationRow',
+  '.folderWorkspace',
   '.modeTabs',
   '.groupCard',
   '.cardRoleTab',
+  '.cardOriginBadge',
+  '.originDot',
   '.statusChip',
   '.topicDot',
+]);
+
+assertContainsAll('Gallery middle pane reserves the conditional folder navigator row', css, [
+  'grid-template-rows: 44px auto 42px minmax(0, 1fr);',
+  'grid-row: 1;',
+  'grid-row: 2;',
+  'grid-row: 3;',
+  'grid-row: 4;',
+]);
+
+assertContainsNone('Gallery does not retain removed left-folder target anchors', page + model, [
+  'Current folder',
+  'All current-folder groups',
+  'New group will be created in current folder.',
+  'current folder target',
+  'From Untitled note',
+  'Untitled note',
+  'sourceLabel',
 ]);
 
 assertContainsNone('Gallery shell does not implement deferred systems', page + model, [

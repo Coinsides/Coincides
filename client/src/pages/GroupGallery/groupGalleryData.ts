@@ -28,9 +28,14 @@ import type {
 
 export type GalleryMode = 'folder' | 'topic' | 'type';
 
+export interface GalleryNote extends Note {
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface GalleryRecord {
   project: Course;
-  note: Note;
+  note: GalleryNote;
   folders: GroupFolderV1[];
   groups: ContentGroupV1[];
   purposes: PurposeFrameV1[];
@@ -113,7 +118,7 @@ export async function loadGroupGalleryRecords(): Promise<GalleryRecord[]> {
   const projects = courseResponse.data || [];
   const noteResponses = await Promise.all(
     projects.map(async (project) => {
-      const noteResponse = await api.get<Note[]>(`/notes?course_id=${project.id}`);
+      const noteResponse = await api.get<GalleryNote[]>(`/notes?course_id=${project.id}`);
       return Promise.all((noteResponse.data || []).map(async (note) => {
         const groups = await loadContentGroupsForNote({ note });
         const [folders, purposes] = await Promise.all([
