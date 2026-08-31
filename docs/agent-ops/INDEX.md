@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 226 份文档。
+共 227 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -225,6 +225,7 @@
 | [handoffs/2026-08-29-v12-9c-c2-dual-transcription-recon.md](handoffs/2026-08-29-v12-9c-c2-dual-transcription-recon.md) | c-2 侦察结论:双拓互证**不是轻单**,且**顺序可能要重排** | `done(M1 收官 —— v3 两遍制 PASS 无停线:门遍 856 全量、覆盖率 24 行 remaining=0、分类遍 320/320 未触发 K-3;终审五路零 blocking,分母本身经第一性原理重建证成。⚠️ 已知瑕疵:§4 编码破损 → 并入 M2/c-4 从 JSON 重渲;K-8 的 5MB JSON 归宿划给 c-4)` | — | — |
 | [handoffs/2026-08-31-v12-9c-c4-section4-rerender.md](handoffs/2026-08-31-v12-9c-c4-section4-rerender.md) | c-4-a:从 canonical JSON 重渲 §4 两表(⭐ 极小单,机械) | `done(2026-08-31 收工;调度方复核 PASS —— 六判据磁盘回读复算 + §6 证据本体端到端亲验)` | — | — |
 | [handoffs/2026-08-31-v12-9c-segment-closeout.md](handoffs/2026-08-31-v12-9c-segment-closeout.md) | V12.9c 段收口:插头真插进了插座(⛔ 但只插了一半) | `done(12.9c 全段收口;⛔ **c-3 全段未开单**,如实移交)` | — | — |
+| [handoffs/2026-08-31-v12-9d-d0-wiring-and-smoke.md](handoffs/2026-08-31-v12-9d-d0-wiring-and-smoke.md) | d-0:接线图 + 嵌入供应商冒烟(⭐ 轻量单,⛔ 不写生产码) | `ready(M3/12.9d 首单;轻量侦察 + 选型冒烟,⛔ 不动生产码)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
