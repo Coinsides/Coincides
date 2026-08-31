@@ -193,6 +193,7 @@ import {
   pageFrameTemplateToCssVars,
 } from '../pageFrameTemplateService';
 import {
+  getPageViewportCenteringOffsetX,
   viewportPointToWorldPoint,
 } from '../viewportService';
 import { AnnotationInspectorPanel } from '../panels/AnnotationInspectorPanel';
@@ -982,6 +983,24 @@ export function NoteWritingSurfaceLayer({
     observer.observe(target);
     return () => observer.disconnect();
   }, [noteCanvasRuntime.world, onViewportSizeChange, surfaceMode]);
+
+  useEffect(() => {
+    if (!surfaceRef.current || surfaceMode !== 'page') return undefined;
+    const surface = surfaceRef.current;
+    const appMain = surface.closest<HTMLElement>('[data-app-main-scroll="true"]');
+    if (!appMain) return undefined;
+    const centerOnViewport = () => surface.style.setProperty(
+      '--page-centering-offset-x',
+      `${getPageViewportCenteringOffsetX(appMain.getBoundingClientRect().left, appMain.clientWidth, window.innerWidth)}px`,
+    );
+    const observer = new ResizeObserver(centerOnViewport);
+    observer.observe(appMain);
+    centerOnViewport();
+    return () => {
+      observer.disconnect();
+      surface.style.removeProperty('--page-centering-offset-x');
+    };
+  }, [surfaceMode]);
 
   useEffect(() => {
     if (surfaceMode !== 'canvas') {

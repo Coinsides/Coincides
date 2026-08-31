@@ -1020,6 +1020,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 
 .writingSurface {
   position: relative;
+  left: var(--page-centering-offset-x, 0px);
   display: flex;
   justify-content: center;
   min-height: 580px;
@@ -1030,6 +1031,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 }
 
 .writingSurfaceCanvas {
+  left: 0;
   align-items: flex-start;
   justify-content: flex-start;
   height: 100%;

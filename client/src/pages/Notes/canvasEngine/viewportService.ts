@@ -31,6 +31,14 @@ export function getPrimaryPageOffsetX(surfaceMode: SurfaceMode): number {
   return surfaceMode === 'canvas' ? CANVAS_PRIMARY_PAGE_OFFSET_X : 0;
 }
 
+export function getPageViewportCenteringOffsetX(
+  containerLeft: number,
+  containerClientWidth: number,
+  viewportWidth: number,
+): number {
+  return viewportWidth / 2 - (containerLeft + containerClientWidth / 2);
+}
+
 export function createRuntimeViewport(
   surfaceMode: SurfaceMode,
   pageFrameHeight: number,
