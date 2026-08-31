@@ -69,3 +69,48 @@
 ## 6. 回执(`## Result`)
 
 K-1 porcelain 全文 · K-2 三行对账 · K-3 标红表汇总(几张有数据、最大行数)· K-4 含糊区条数 · K-5 两门 exit · K-6 清单 · 报告路径 · 任何停线点。
+
+## Result
+
+### K-1 零改动自证
+
+`git status --porcelain` 全文：
+
+```text
+ M docs/agent-ops/handoffs/2026-08-31-v12-10-k0-template-studio-recon.md
+ M server/src/routes/projections.ts
+?? docs/agent-ops/analysis/2026-08-31-v12-10-k0-template-studio-recon.md
+```
+
+允许面只有本工单回执与新报告。`server/src/routes/projections.ts` 为开工前已存在的 EOL 状态噪音；`git diff --numstat -- server/src/routes/projections.ts` 无 numstat 行，`git diff -- server/src/routes/projections.ts | Measure-Object -Line` = `0`，本单未触碰。
+
+### K-2 三口径对账
+
+- 行数：口径 ~4600；现物核心 whole-file 7029（UI 2182 + 六 route 210 + 五 service 4637）；差异解释为 ~4600 几乎精确对应五 service 子集，未含 UI/route。迁移另 475 行、测试另列。
+- 路由：口径 6；现物 6 个专属 mount（`composition-templates`、`package-manifests`、`domain-block-sets`、`package-exports`、`package-imports`、`domain-refinements`）；初核另两项 `/api/templates`、`/api/study-templates` 有运行时消费者，排除。
+- 表：口径 18；现物 18，即迁移 026–030 的 3+4+3+4+4 张；初扫 17 张漏了 4 张 package I/O 表并混入 3 张 runtime 表，集合纠正后为 18。
+
+### K-3 分母与标红汇总
+
+18/18 表逐表只读查询完成，无静默缺失。5 张有数据：`composition_templates` 6、`package_manifests` 1、`domain_block_sets` 3、`domain_block_set_templates` 20、`domain_block_set_compositions` 7；最大 20。全部属于 d-1a 已申报测试账号 user id `3f346a00-c53e-4ed9-8202-e869c65e8cf9`。SQL 原文及三类处置选项已入报告。
+
+### K-4 含糊区
+
+共 **7 项**，全部只列不判：template runtime/CRUD 函数切面、composition 能力、共享 proposals/validators、NoteBlock lifecycle blocker、历史迁移策略、五张标红表数据处置、template compatibility report 归属。
+
+### K-5 门禁
+
+- `npm exec --prefix server -- tsc --noEmit -p server`：exit `0`。
+- `npm --prefix server run test:v2`：exit `0`，`362/362` pass，`0` fail。
+
+### K-6 本单明确没做
+
+- 未删除任何东西。
+- 未裁任何含糊项。
+- 删除计划为 `status: draft`，未生效。
+- OD / i18n / 走查 4a 不在本单。
+- 未调用 API、未 commit、未 push、未杀进程、未输出 key 值、未翻状态头。
+
+报告：`docs/agent-ops/analysis/2026-08-31-v12-10-k0-template-studio-recon.md`。
+
+停线点：无。TD-33 的条件结论为：`packagePortability.ts` 三处空指纹仍在 361/441/659；其生产调用方全在工作室删除族，因此只在该族整体删除后「债随码销」成立。

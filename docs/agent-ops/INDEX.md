@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 236 份文档。
+共 238 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -61,6 +61,7 @@
 | [analysis/2026-08-30-paper-and-board-direction.md](analysis/2026-08-30-paper-and-board-direction.md) | 纸与板 —— 笔记载体架构变更方向 | `active` | 2026-08-30 | — |
 | [analysis/2026-08-30-v12-9c-c2-divergence-census.md](analysis/2026-08-30-v12-9c-c2-divergence-census.md) | V12.9c c-2：MinerU × Docling 分歧普查 | `active` | 2026-08-30 | — |
 | [analysis/2026-08-31-paper-viewport-design.md](analysis/2026-08-31-paper-viewport-design.md) | 纸的视口 —— 阅读标尺锁定方案(13.1 的图纸) | `active` | 2026-08-31 | — |
+| [analysis/2026-08-31-v12-10-k0-template-studio-recon.md](analysis/2026-08-31-v12-10-k0-template-studio-recon.md) | 12.10 K-0：Template Studio 面侦察 | `draft` | 2026-08-31 | — |
 | [analysis/2026-08-31-v12-9c-c2-divergence-census-v2.md](analysis/2026-08-31-v12-9c-c2-divergence-census-v2.md) | V12.9c c-2：MinerU × Docling 分歧普查 v2 | `active` | 2026-08-31 | — |
 | [analysis/2026-08-31-v12-9c-c2-divergence-census-v3.md](analysis/2026-08-31-v12-9c-c2-divergence-census-v3.md) | V12.9c c-2：MinerU × Docling 分歧普查 v3 | `active` | 2026-08-31 | — |
 | [analysis/2026-08-31-v12-9d-d0-provider-smoke.md](analysis/2026-08-31-v12-9d-d0-provider-smoke.md) | 12.9d · d-0：现役检索接线图与 DashScope 嵌入冒烟 | `complete(d-0 接线侦察 + 供应商冒烟;⭐ 401 已由复核定因=区域端点,见文末复核补充 —— 国际站端点实测 200/1024 维)` | 2026-08-31 | — |
@@ -240,6 +241,7 @@
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
 | [handoffs/plans/v12-9b-anchored-fragment-stream-spec.md](handoffs/plans/v12-9b-anchored-fragment-stream-spec.md) | 带锚碎片流(Anchored Fragment Stream)规格 v0 | `active` | — | — |
 | [handoffs/plans/v12-9b-segment-plan.md](handoffs/plans/v12-9b-segment-plan.md) | V12.9b 段计划:腰与底盘 | `draft` | — | — |
+| [handoffs/plans/v12-9c-c3-citation-mode-skeleton.md](handoffs/plans/v12-9c-c3-citation-mode-skeleton.md) | c-3 · 识别器引用模式 —— 规格骨架(含归域裁定) | `active` | 2026-08-31 | — |
 | [handoffs/plans/v12-9c-segment-plan.md](handoffs/plans/v12-9c-segment-plan.md) | V12.9c 段计划骨架:插头开始上插座 | `draft` | — | — |
 | [handoffs/plans/v12-9d-retrieval-foundation-skeleton.md](handoffs/plans/v12-9d-retrieval-foundation-skeleton.md) | 12.9d · 检索地基 —— 规格骨架 | `active` | 2026-08-31 | — |
 | [handoffs/plans/v12-closeout-milestones.md](handoffs/plans/v12-closeout-milestones.md) | V12 收官里程碑(M1–M5) | `active` | 2026-08-30 | — |
