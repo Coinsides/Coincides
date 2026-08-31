@@ -37,5 +37,5 @@ d-0 侦察+选型冒烟(运行时/存储/读取路径,附规模实测)→ d-1 �
 > 原 §一.2 与 §二「云嵌入」两条系总部凭印象所写,违「裁前必查」,被 K-0 现物推翻,以下为准:
 
 1. **向量存储改裁**:sqlite-vec 已在产(vec0 虚表/混合检索/embedding 路由挂载)——⛔ 不做暴力余弦。**另起新代表(如 `imprint_fragment_vec`)、共用 sqlite-vec 机关**;⛔ 新代码零 join 旧代表(documents/document_chunks),两代并存各查各的,新面即 TD-34 收敛时的存活侧;FTS 半边不进最小面,挂需求触发器。
-2. **嵌入 provider 改裁**:原「⛔ 云嵌入不做默认」作废(误将 key 纪律推广为内容纪律,且违 Henry 08-07 云优先 pivot)。新纪律:**key 值零出境** + **内容接收方闭集**(限 Henry 已在用供应商)——第一候选 **DashScope text-embedding 系**(同 key 同内容面零新出境;d-0 冒烟用测试文本);Voyage 仅当 key 已存在且判断点候 Henry 追认;旧代 Voyage 机关不动。**BGE-M3 降为 V14 终选实验候选**,工作假设=既有供应商嵌入模型(候 Henry 复核)。
+2. **嵌入 provider 改裁**:原「⛔ 云嵌入不做默认」作废(误将 key 纪律推广为内容纪律,且违 Henry 08-07 云优先 pivot)。新纪律:**key 值零出境** + **内容接收方闭集**(限 Henry 已在用供应商)——第一候选 **DashScope text-embedding 系**(同 key 同内容面零新出境;d-0 已实测背书:`text-embedding-v4` @ **endpoint=`dashscope-intl.aliyuncs.com`**(北京端点 401,国际站 200/1024 维)——endpoint 常量入 provider 纪律,c-3 同步钉死);Voyage 仅当 key 已存在且判断点候 Henry 追认;旧代 Voyage 机关不动。**BGE-M3 降为 V14 终选实验候选**,工作假设=既有供应商嵌入模型(候 Henry 复核)。
 3. **规模申报改裁**:dev 库现物全零——d-0 规模按语料上限**假设申报**(明写"实测在 d-1");**造数并入 d-1 第一动作**(走 c-0 链灌雅思四卷,实测回填)。
