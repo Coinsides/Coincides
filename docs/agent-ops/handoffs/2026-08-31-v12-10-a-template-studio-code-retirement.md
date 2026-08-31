@@ -249,3 +249,120 @@ npm run check:tool-face-manifest                  exit 0
 ```
 
 停线点：`docs/generated/object-inventory.md` 不在允许面而门禁要求其刷新；needs: dispatcher。腿 2 未宣告完成，未进入腿 3。
+
+## Result(腿 3)
+
+腿 3 已完成；仅收缩五个工作室 service、四个专用测试、裁定函数段与点名测试/清单/legacy check。未重做腿 1 / 腿 2，未进入单乙；未 commit，未 push，未调用 API，未终止进程，未输出 key 值，未翻状态头，未修改生成件。
+
+### K-1 允许面自证
+
+收工 `git status --porcelain=v1` 全文：
+
+```text
+ M client/scripts/v2Bn11LegacyShutdownContractCheck.mjs
+ M docs/agent-ops/handoffs/2026-08-31-v12-10-a-template-studio-code-retirement.md
+ M server/package.json
+ D server/src/__tests__/v2DomainPackages.test.ts
+ D server/src/__tests__/v2DomainRefinement.test.ts
+ M server/src/__tests__/v2MaterialLibrary.test.ts
+ D server/src/__tests__/v2PackagePortability.test.ts
+ M server/src/__tests__/v2SourceMaterialization.test.ts
+ D server/src/__tests__/v2TemplateMigration.test.ts
+ M server/src/routes/projections.ts
+ D server/src/services/compositionTemplates.ts
+ D server/src/services/domainPackages.ts
+ D server/src/services/domainRefinementProposals.ts
+ D server/src/services/packagePortability.ts
+ M server/src/services/templateDefinitions.ts
+ D server/src/services/templateMigrationProposals.ts
+```
+
+- 五个 service 与四个专用测试：按腿 3 清单删除。
+- `server/src/services/templateDefinitions.ts`：删除 create/copy/update/lifecycle/usage 与 compatibility report 及其专属 helper/type，只留 runtime seed/list/get/metadata merge 内核。
+- `server/src/__tests__/v2MaterialLibrary.test.ts`：删除 composition 5 条、template editor CRUD/usage 6 条、compatibility 1 条；runtime seed/merge/canvas 测试条数、名字与断言意图保留。
+- `server/src/__tests__/v2SourceMaterialization.test.ts`：混合 scanner 测试改为只覆盖仍活的 source-anchor runtime scanner，条数不减。
+- `server/package.json`：仅从 `test:v2` 列表移除四个已删测试文件，依赖未改。
+- `client/scripts/v2Bn11LegacyShutdownContractCheck.mjs`：仅移除对已删 `templateMigrationProposals.ts` 的 read，其余断言保留。
+- 本 handoff：把预切割 blocked 回执原位改写为本完成态 `## Result(腿 3)`，状态头未翻。
+- `server/src/routes/projections.ts`：开工前既有噪音；`git diff --quiet -- server/src/routes/projections.ts` exit 0，`git diff --cached --quiet -- server/src/routes/projections.ts` exit 0，本腿未触碰。
+- `git diff --check`：exit 0。
+
+### canvas 保留测试 setup 等价性与语义
+
+`v2.5.1 canvas block insertion accepts runtime user templates` 的测试名和原有断言未改，只替换 setup：
+
+- 行形状对齐迁移 025 的 `template_definitions` schema：完整写入 id/user/key/version/origin/scope/label/taxonomy/schema/behavior/summary/status/is_system/metadata 与时间戳。
+- 对齐删前 `copyTemplateDefinition`：`origin='user'`、`scope_type='global'`、`scope_id=''`、`is_system=0`，复制系统模板的 description、system/learning/legacy taxonomy、field/default/render/source/relation/proposal JSON 与 summary，并保留 copied-from metadata。
+- 对齐删前 `activateTemplateDefinition`：fixture 直接写 `status='active'`。
+- 该测试现语义为：生产创建路径已退役后，数据库中既有的用户所有 active 历史模板仍须被 canvas runtime 接受与尊重。
+
+### K-2 test:v2 总数与裁定对账
+
+K-0 §4.3 逐项：
+
+```text
+v2DomainPackages.test.ts        5
+v2TemplateMigration.test.ts     6
+v2PackagePortability.test.ts    7
+v2DomainRefinement.test.ts      5
+四专用文件小计                 23
+MaterialLibrary composition     5
+MaterialLibrary editor CRUD     6
+MaterialLibrary compatibility   1
+总删除                          35
+Source mixed scanner            1 -> 1（改写，条数不减）
+总数                           362 -> 327
+```
+
+- `v2MaterialLibrary.test.ts`：71 → 59，恰减 12。
+- `v2SourceMaterialization.test.ts`：11 → 11。
+- 首跑总数已为 327，但既有 DevQuickLogin 固定端口 50550 瞬时碰撞：326 pass / 1 fail，exit 1；未杀进程、未改测试。
+- 完整复跑：327/327 pass，0 fail，exit 0，恰等裁定值。
+
+### K-3 运行时留侧零 diff与 templateDefinitions 保留函数
+
+逐项执行 `git diff --quiet -- <path>`：
+
+```text
+server/src/services/noteBlockLifecycle.ts  exit 0
+server/src/db                              exit 0
+server/src/routes/studyTemplates.ts        exit 0
+server/src/routes/timeBlocks.ts            exit 0
+client/src/components/CardFlip             exit 0
+```
+
+`server/src/services/templateDefinitions.ts` 收工仅保留以下 exported functions：
+
+```text
+seedSystemTemplateDefinitions
+listTemplateDefinitions
+getTemplateDefinition
+mergeRuntimeNoteBlockTemplateMetadata
+legacyBlockTypeForRuntimeTemplate
+```
+
+其中 seed/list/get/runtime metadata merge 与 runtime legacy block type 解析均在；对五个已删 module 路径及 create/copy/update/lifecycle/usage/compatibility 判死函数做精确反扫，零命中（`rg` exit 1）。
+
+### K-4 新钉子申报
+
+未发现。预切割发现的 canvas setup 互斥已按调度方修复裁定处理：只在测试 fixture 层直接种等价历史 active 用户模板，测试名、条数与断言意图不动；未发现其他保留测试或生产文件消费判死函数。删除后 tsc、327/327 与六门禁均未暴露允许面外编译断点。
+
+### K-5 本腿明确未做
+
+- 未做腿 1 / 腿 2：未改前端工作室产品码、六 route 或共享入口。
+- 未做单乙全部内容：18 表仍在库；未动 schema、迁移、`noteBlockLifecycle.ts`、数据处置、TD-33 销账或任何 DB 层文件。原有 `noteBlockLifecycle.ts` 对候删表的查询按裁定保持原样。
+- 未修改 INDEX / inventory 等生成件；本腿 `docs:check` 直接为绿。
+- 未扩改其它 Source/canvas/runtime 测试或产品逻辑。
+
+### 门禁
+
+```text
+npm exec --prefix server -- tsc --noEmit -p server  exit 0
+npm --prefix server run test:v2                   exit 0  (327/327 pass, 0 fail；复跑)
+npm run docs:check                                exit 0
+npm run check:v2-bn11-legacy-shutdown             exit 0
+npm run check:tool-face-manifest                  exit 0
+npm --prefix client run build                     exit 0
+```
+
+client build 仅有既有动态/静态 import 与 chunk size 警告；无编译失败。测试首跑固定端口碰撞已在 K-2 如实申报，最终完整门禁为绿。停线点：无。

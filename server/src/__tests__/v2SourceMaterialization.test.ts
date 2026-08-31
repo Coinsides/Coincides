@@ -32,15 +32,6 @@ import {
   sweepSourceMaterializations,
   waitForScheduledSourceMaterializations,
 } from '../services/sourceMaterialization.js';
-import {
-  getTemplateCompatibilityReport,
-  getTemplateUsage,
-  listTemplateDefinitions,
-  seedSystemTemplateDefinitions,
-} from '../services/templateDefinitions.js';
-import { createTemplateMigrationProposal } from '../services/templateMigrationProposals.js';
-import { listDomainBlockSets, seedSystemDomainPackages } from '../services/domainPackages.js';
-import { createDomainRefinementProposal } from '../services/domainRefinementProposals.js';
 import { generateSourceAnchors } from '../services/sourceAnchors.js';
 
 const ONE_PIXEL_PNG = Buffer.from(
@@ -661,58 +652,14 @@ test('materialize route runs asynchronously and SourceProjection content routes 
   });
 });
 
-test('legacy template, domain, compatibility, usage, and source-anchor scanners exclude projection blocks', async () => {
+test('source-anchor scanner excludes projection blocks', async () => {
   await withDbAndStorage(async ({ db, sourceRootDir, canvasAssetRootDir }) => {
     const { userId, courseId } = seedUserCourse(db);
     const uploaded = await intake(db, userId, courseId, sourceRootDir, 'scanner.txt', 'Scanner body', 'text/plain');
-    const materialized = await materializeSourceNow(db, userId, uploaded.source.id, {
+    await materializeSourceNow(db, userId, uploaded.source.id, {
       sourceRootDir,
       canvasAssetRootDir,
     });
-    const block = db.prepare('SELECT id, metadata FROM note_blocks WHERE operation_batch_id = ?')
-      .get(materialized.operation_batch_id) as any;
-
-    seedSystemTemplateDefinitions(db, userId);
-    const template = listTemplateDefinitions(db, userId, { template_key: 'text.paragraph', status: 'active' })[0];
-    assert.ok(template);
-    seedSystemDomainPackages(db, userId);
-    const domain = listDomainBlockSets(db, userId, { domain_key: 'learning.math.basic' })[0];
-    assert.ok(domain);
-    db.prepare('UPDATE note_blocks SET metadata = ? WHERE id = ?').run(JSON.stringify({
-      ...JSON.parse(block.metadata),
-      template_definition_id: template.id,
-      template_key: template.template_key,
-      template_version: template.version,
-      template_id: template.template_key,
-      current_domain_block_set_id: domain.id,
-      current_domain_key: domain.domain_key,
-      current_domain_version: domain.version,
-    }), block.id);
-
-    assert.equal(getTemplateUsage(db, userId, template.id).total_blocks, 0);
-    assert.equal(getTemplateCompatibilityReport(db, userId, { course_id: courseId }).totals.total_blocks, 0);
-
-    const migration = createTemplateMigrationProposal(db, userId, {
-      source_template_id: template.id,
-      target_template_patch: { label: 'Projection exclusion target' },
-      migration_mode: 'soft_migration',
-      course_id: courseId,
-    });
-    assert.equal(migration.data.affected_object_count, 0);
-
-    const refinement = createDomainRefinementProposal(db, userId, {
-      source_domain_id: domain.id,
-      target_domain_patch: {
-        domain_key: 'learning.math.projection-exclusion',
-        label: 'Projection exclusion target',
-        domain_kind: 'learning',
-      },
-      refinement_action: 'promote',
-      migration_mode: 'soft_migration',
-      course_id: courseId,
-      object_reclassifications: [],
-    });
-    assert.equal(refinement.data.affected_counts.note_blocks, 0);
 
     const anchors = generateSourceAnchors(db, userId, { course_id: courseId });
     assert.equal(anchors.anchors_created_count, 0);

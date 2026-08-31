@@ -49,25 +49,10 @@ import {
 import { generateSourceSnapshots, getSourceSnapshot, listSourceSnapshots } from '../services/sourceSnapshots.js';
 import { inferNoteBlockTemplateMetadata } from '../lib/noteBlockTemplates.js';
 import {
-  activateTemplateDefinition,
-  archiveTemplateDefinition,
-  copyTemplateDefinition,
-  createUserTemplateDefinition,
-  deprecateTemplateDefinition,
-  getTemplateCompatibilityReport,
-  getTemplateUsage,
   listTemplateDefinitions,
   mergeRuntimeNoteBlockTemplateMetadata,
   seedSystemTemplateDefinitions,
-  updateTemplateDefinition,
 } from '../services/templateDefinitions.js';
-import {
-  applyCompositionTemplateProposal,
-  createCompositionTemplateProposal,
-  getCompositionTemplateCompatibilityReport,
-  listCompositionTemplates,
-  seedSystemCompositionTemplates,
-} from '../services/compositionTemplates.js';
 
 async function withDb(run: (db: Awaited<ReturnType<typeof initDb>>) => void | Promise<void>) {
   const dir = mkdtempSync(join(tmpdir(), 'coincides-v21-'));
@@ -866,239 +851,50 @@ test('runtime template metadata resolves explicit and legacy NoteBlock inputs', 
   });
 });
 
-test('template compatibility report classifies runtime, legacy, and missing template blocks', async () => {
-  await withDb((db) => {
-    const { userId, courseId } = seedUserCourse(db);
-    seedSystemTemplateDefinitions(db, userId);
-    const definitionTemplate = listTemplateDefinitions(db, userId, { template_key: 'text.paragraph' })[0];
-
-    db.prepare(`
-      INSERT INTO note_blocks (
-        id, user_id, course_id, block_type, content_json, plain_text, metadata, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, '{}', ?, ?, datetime('now'), datetime('now'))
-    `).run(uuidv4(), userId, courseId, 'definition', 'Runtime block', JSON.stringify({
-      template_definition_id: definitionTemplate.id,
-      template_key: 'text.paragraph',
-      template_version: '1.0.0',
-    }));
-    db.prepare(`
-      INSERT INTO note_blocks (
-        id, user_id, course_id, block_type, content_json, plain_text, metadata, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, '{}', ?, ?, datetime('now'), datetime('now'))
-    `).run(uuidv4(), userId, courseId, 'formula', 'Legacy inferred block', JSON.stringify({}));
-    db.prepare(`
-      INSERT INTO note_blocks (
-        id, user_id, course_id, block_type, content_json, plain_text, metadata, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, '{}', ?, ?, datetime('now'), datetime('now'))
-    `).run(uuidv4(), userId, courseId, 'paragraph', 'Missing template block', JSON.stringify({
-      template_id: 'missing.template',
-    }));
-
-    const report = getTemplateCompatibilityReport(db, userId, { course_id: courseId });
-
-    assert.equal(report.totals.total_blocks, 3);
-    assert.equal(report.totals.runtime_resolved, 1);
-    assert.equal(report.totals.legacy_inferred, 1);
-    assert.equal(report.totals.template_missing, 1);
-    assert.equal(report.totals.manual_review_required, 1);
-    assert.equal(report.details.some((detail) => detail.status === 'template_missing'), true);
-  });
-});
-
-test('v2.5.1 template editor copies system templates into user drafts', async () => {
-  await withDb((db) => {
-    const { userId } = seedUserCourse(db);
-    seedSystemTemplateDefinitions(db, userId);
-    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'text.paragraph' })[0];
-
-    const draft = copyTemplateDefinition(db, userId, systemTemplate.id, {
-      template_key: 'definition.custom',
-      label: 'Custom Definition',
-    });
-
-    assert.equal(draft.origin, 'user');
-    assert.equal(draft.is_system, false);
-    assert.equal(draft.status, 'draft');
-    assert.equal(draft.scope_type, 'global');
-    assert.equal(draft.template_key, 'definition.custom');
-    assert.equal(draft.label, 'Custom Definition');
-    assert.deepEqual(draft.field_schema, systemTemplate.field_schema);
-    assert.deepEqual(draft.source_behavior, systemTemplate.source_behavior);
-    assert.equal(draft.metadata.copied_from_template_definition_id, systemTemplate.id);
-
-    const original = listTemplateDefinitions(db, userId, { template_key: 'text.paragraph' })[0];
-    assert.equal(original.origin, 'system_seed');
-    assert.equal(original.is_system, true);
-    assert.equal(original.status, 'active');
-  });
-});
-
-test('v2.5.1 template editor rejects direct system template updates', async () => {
-  await withDb((db) => {
-    const { userId } = seedUserCourse(db);
-    seedSystemTemplateDefinitions(db, userId);
-    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'text.paragraph' })[0];
-
-    assert.throws(() => updateTemplateDefinition(db, userId, systemTemplate.id, {
-      label: 'Edited system definition',
-    }), /System templates are read-only/);
-  });
-});
-
-test('v2.5.1 template editor creates, edits, and activates user drafts', async () => {
-  await withDb((db) => {
-    const { userId } = seedUserCourse(db);
-
-    const draft = createUserTemplateDefinition(db, userId, {
-      template_key: 'concept.research',
-      label: 'Research Concept',
-      description: 'Concept template for research notes.',
-      system_type: 'text',
-      learning_role: 'concept',
-      field_schema: [
-        { key: 'term', label: 'Term', kind: 'text', required: true },
-        { key: 'body', label: 'Body', kind: 'textarea', required: true },
-      ],
-      default_content: { term: '', body: '' },
-      summary_for_agent: 'Use for compact concept explanations in research notes.',
-    });
-
-    const edited = updateTemplateDefinition(db, userId, draft.id, {
-      field_schema: [
-        { key: 'term', label: 'Term', kind: 'text', required: true },
-        { key: 'body', label: 'Explanation', kind: 'textarea', required: true },
-        { key: 'tags', label: 'Tags', kind: 'list', required: false },
-      ],
-      default_content: { term: '', body: '', tags: [] },
-      source_behavior: { source_reference_policy: 'recommended' },
-    });
-    const active = activateTemplateDefinition(db, userId, draft.id);
-
-    assert.equal(edited.field_schema.length, 3);
-    assert.deepEqual(edited.source_behavior, { source_reference_policy: 'recommended' });
-    assert.equal(active.status, 'active');
-    assert.equal(active.origin, 'user');
-  });
-});
-
-test('v2.5.1 active templates with usage reject structural edits but allow safe edits', async () => {
-  await withDb((db) => {
-    const { userId, courseId } = seedUserCourse(db);
-    seedSystemTemplateDefinitions(db, userId);
-    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'text.paragraph' })[0];
-    const draft = copyTemplateDefinition(db, userId, systemTemplate.id, {
-      template_key: 'definition.used',
-      label: 'Used Definition',
-    });
-    const active = activateTemplateDefinition(db, userId, draft.id);
-
-    db.prepare(`
-      INSERT INTO note_blocks (
-        id, user_id, course_id, block_type, content_json, plain_text, metadata, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, '{}', ?, ?, datetime('now'), datetime('now'))
-    `).run(uuidv4(), userId, courseId, 'definition', 'Used runtime block', JSON.stringify({
-      template_definition_id: active.id,
-      template_key: active.template_key,
-      template_version: active.version,
-    }));
-
-    assert.throws(() => updateTemplateDefinition(db, userId, active.id, {
-      field_schema: [
-        { key: 'body', label: 'Changed Body', kind: 'textarea', required: true },
-      ],
-    }), /proposal_required/);
-
-    const edited = updateTemplateDefinition(db, userId, active.id, {
-      label: 'Used Definition Updated',
-      summary_for_agent: 'Updated safe summary.',
-      render_hints: { reading: { intent: 'definition' } },
-    });
-
-    assert.equal(edited.label, 'Used Definition Updated');
-    assert.equal(edited.summary_for_agent, 'Updated safe summary.');
-    assert.equal(edited.status, 'active');
-  });
-});
-
-test('v2.5.1 archive rejects templates with usage while deprecate remains resolvable', async () => {
-  await withDb((db) => {
-    const { userId, courseId } = seedUserCourse(db);
-    seedSystemTemplateDefinitions(db, userId);
-    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'text.paragraph' })[0];
-    const draft = copyTemplateDefinition(db, userId, systemTemplate.id, {
-      template_key: 'definition.deprecated-user',
-      label: 'Deprecated User Definition',
-    });
-    const active = activateTemplateDefinition(db, userId, draft.id);
-
-    db.prepare(`
-      INSERT INTO note_blocks (
-        id, user_id, course_id, block_type, content_json, plain_text, metadata, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, '{}', ?, ?, datetime('now'), datetime('now'))
-    `).run(uuidv4(), userId, courseId, 'definition', 'Deprecated runtime block', JSON.stringify({
-      template_definition_id: active.id,
-      template_key: active.template_key,
-      template_version: active.version,
-    }));
-
-    assert.throws(() => archiveTemplateDefinition(db, userId, active.id), /Cannot archive template with existing usage/);
-
-    const deprecated = deprecateTemplateDefinition(db, userId, active.id);
-    const resolved = mergeRuntimeNoteBlockTemplateMetadata(db, userId, {
-      template_definition_id: active.id,
-      template_key: active.template_key,
-      template_version: active.version,
-    }, 'definition');
-
-    assert.equal(deprecated.status, 'deprecated');
-    assert.equal(resolved.metadata.template_definition_id, active.id);
-    assert.equal(resolved.metadata.template_resolution_status, 'template_deprecated');
-  });
-});
-
-test('v2.5.1 template usage counts runtime, key-version, and legacy template references', async () => {
-  await withDb((db) => {
-    const { userId, courseId } = seedUserCourse(db);
-    seedSystemTemplateDefinitions(db, userId);
-    const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'text.paragraph' })[0];
-    const draft = copyTemplateDefinition(db, userId, systemTemplate.id, {
-      template_key: 'definition.usage',
-      label: 'Usage Definition',
-    });
-    const active = activateTemplateDefinition(db, userId, draft.id);
-
-    const metadataRows = [
-      { template_definition_id: active.id, template_key: active.template_key, template_version: active.version },
-      { template_key: active.template_key, template_version: active.version },
-      { template_id: active.template_key },
-    ];
-
-    metadataRows.forEach((metadata, index) => {
-      db.prepare(`
-        INSERT INTO note_blocks (
-          id, user_id, course_id, block_type, content_json, plain_text, metadata, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, '{}', ?, ?, datetime('now'), datetime('now'))
-      `).run(uuidv4(), userId, courseId, 'definition', `Usage block ${index + 1}`, JSON.stringify(metadata));
-    });
-
-    const usage = getTemplateUsage(db, userId, active.id);
-
-    assert.equal(usage.total_blocks, 3);
-    assert.equal(usage.runtime_reference_count, 1);
-    assert.equal(usage.key_version_reference_count, 2);
-    assert.equal(usage.legacy_template_id_count, 1);
-  });
-});
-
 test('v2.5.1 canvas block insertion accepts runtime user templates', async () => {
   await withDb((db) => {
     const { userId, courseId } = seedUserCourse(db);
     seedSystemTemplateDefinitions(db, userId);
     const systemTemplate = listTemplateDefinitions(db, userId, { template_key: 'text.paragraph' })[0];
-    const userTemplate = activateTemplateDefinition(db, userId, copyTemplateDefinition(db, userId, systemTemplate.id, {
+    const userTemplateId = uuidv4();
+    db.prepare(`
+      INSERT INTO template_definitions (
+        id, user_id, template_key, version, origin, scope_type, scope_id, label,
+        description, system_type, learning_role, legacy_block_type, field_schema,
+        default_content, render_hints, source_behavior, relation_behavior,
+        proposal_behavior, summary_for_agent, status, is_system, metadata,
+        created_at, updated_at
+      )
+      VALUES (?, ?, ?, ?, 'user', 'global', '', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', 0, ?, datetime('now'), datetime('now'))
+    `).run(
+      userTemplateId,
+      userId,
+      'definition.canvas-user',
+      systemTemplate.version,
+      'Canvas User Definition',
+      systemTemplate.description,
+      systemTemplate.system_type,
+      systemTemplate.learning_role,
+      systemTemplate.legacy_block_type,
+      JSON.stringify(systemTemplate.field_schema),
+      JSON.stringify(systemTemplate.default_content),
+      JSON.stringify(systemTemplate.render_hints),
+      JSON.stringify(systemTemplate.source_behavior),
+      JSON.stringify(systemTemplate.relation_behavior),
+      JSON.stringify(systemTemplate.proposal_behavior),
+      systemTemplate.summary_for_agent,
+      JSON.stringify({
+        ...systemTemplate.metadata,
+        copied_from_template_definition_id: systemTemplate.id,
+        copied_from_template_key: systemTemplate.template_key,
+        created_from: 'v2.5.1_template_studio_copy',
+        graph_native_candidate: 'forked_template_definition_node',
+      }),
+    );
+    const userTemplate = listTemplateDefinitions(db, userId, {
       template_key: 'definition.canvas-user',
-      label: 'Canvas User Definition',
-    }).id);
+      status: 'active',
+    })[0];
     const canvas = createLearningCanvas(db, userId, {
       course_id: courseId,
       title: 'Template Runtime Canvas',
@@ -2308,159 +2104,5 @@ test('canvas layout proposal rejects empty and cross-course inputs without parti
     assert.equal((db.prepare('SELECT COUNT(*) AS count FROM proposals').get() as any).count, beforeProposalCount.count);
     assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes WHERE canvas_id = ?').get(canvas.id) as any).count, 0);
     assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_frames WHERE canvas_id = ?').get(canvas.id) as any).count, 0);
-  });
-});
-
-test('v2.5.2 migration creates composition template tables', async () => {
-  await withDb((db) => {
-    const tableNames = db.prepare("SELECT name FROM sqlite_master WHERE type = 'table'")
-      .all()
-      .map((row: any) => row.name);
-
-    assert.equal(tableNames.includes('composition_templates'), true);
-    assert.equal(tableNames.includes('composition_instances'), true);
-    assert.equal(tableNames.includes('composition_instance_slots'), true);
-  });
-});
-
-test('v2.5.2 seeds system composition templates and validates slot references', async () => {
-  await withDb((db) => {
-    const { userId } = seedUserCourse(db);
-
-    const firstSeed = seedSystemCompositionTemplates(db, userId);
-    const secondSeed = seedSystemCompositionTemplates(db, userId);
-    const templates = listCompositionTemplates(db, userId, {});
-    const report = getCompositionTemplateCompatibilityReport(db, userId) as any;
-
-    assert.equal(firstSeed.length >= 6, true);
-    assert.equal(secondSeed.length, firstSeed.length);
-    assert.equal(templates.some((item: any) => item.composition_key === 'formula_sheet.basic'), true);
-    assert.equal(templates.some((item: any) => item.composition_key === 'theorem_proof_example.basic'), true);
-    assert.equal(report.invalid_slot_reference_count, 0);
-    assert.equal(report.templates_checked >= 6, true);
-  });
-});
-
-test('v2.5.2 composition proposal previews without mutating content or canvas records', async () => {
-  await withDb((db) => {
-    const { userId, courseId } = seedUserCourse(db);
-    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
-    const composition = seedSystemCompositionTemplates(db, userId)
-      .find((item: any) => item.composition_key === 'theorem_proof_example.basic') as any;
-    const beforeRows = {
-      notes: (db.prepare('SELECT COUNT(*) AS count FROM notes').get() as any).count,
-      blocks: (db.prepare('SELECT COUNT(*) AS count FROM note_blocks').get() as any).count,
-      nodes: (db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes').get() as any).count,
-      frames: (db.prepare('SELECT COUNT(*) AS count FROM canvas_frames').get() as any).count,
-      instances: (db.prepare('SELECT COUNT(*) AS count FROM composition_instances').get() as any).count,
-    };
-
-    const proposal = createCompositionTemplateProposal(db, userId, {
-      course_id: courseId,
-      canvas_id: canvas.id,
-      composition_template_id: composition.id,
-      layout_goal: 'a4_section',
-      slot_inputs: [
-        { slot_key: 'theorem', plain_text: 'If a function is differentiable, then it is continuous.' },
-        { slot_key: 'proof', plain_text: 'Use the limit definition of derivative to show continuity.' },
-        { slot_key: 'example', plain_text: 'The polynomial x^2 is differentiable and continuous.' },
-      ],
-    }) as any;
-
-    assert.equal(proposal.type, 'composition_template');
-    assert.equal(proposal.data.proposal_kind, 'composition_template');
-    assert.equal(proposal.data.apply_behavior, 'create_new_content_and_projection_records_only');
-    assert.equal(proposal.data.slot_plan.filter((slot: any) => slot.status === 'filled').length, 3);
-    assert.equal(proposal.data.relation_blueprint_suggestions.length > 0, true);
-    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM notes').get() as any).count, beforeRows.notes);
-    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM note_blocks').get() as any).count, beforeRows.blocks);
-    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes').get() as any).count, beforeRows.nodes);
-    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_frames').get() as any).count, beforeRows.frames);
-    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM composition_instances').get() as any).count, beforeRows.instances);
-  });
-});
-
-test('v2.5.2 applying composition proposal creates new blocks, canvas records, and slot history only', async () => {
-  await withDb((db) => {
-    const { userId, courseId } = seedUserCourse(db);
-    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
-    const composition = seedSystemCompositionTemplates(db, userId)
-      .find((item: any) => item.composition_key === 'theorem_proof_example.basic') as any;
-    const proposal = createCompositionTemplateProposal(db, userId, {
-      course_id: courseId,
-      canvas_id: canvas.id,
-      composition_template_id: composition.id,
-      slot_inputs: [
-        { slot_key: 'theorem', plain_text: 'Every convergent sequence is bounded.' },
-        { slot_key: 'proof', plain_text: 'Convergence gives a finite tail bound and the head is finite.' },
-        { slot_key: 'example', plain_text: 'The sequence 1/n is convergent and bounded.' },
-      ],
-    }) as any;
-    const proposalRow = db.prepare('SELECT * FROM proposals WHERE id = ? AND user_id = ?')
-      .get(proposal.id, userId) as any;
-    const retiredRelationTable = db.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'object_relations'").get();
-    assert.equal(retiredRelationTable, undefined);
-
-    const result = applyCompositionTemplateProposal(db, userId, proposalRow) as any;
-
-    assert.equal(result.blocks_created_count, 3);
-    assert.equal(result.canvas_nodes_created_count, 3);
-    assert.equal(typeof result.composition_instance_id, 'string');
-    assert.equal(typeof result.canvas_frame_id, 'string');
-
-    const instance = db.prepare('SELECT * FROM composition_instances WHERE id = ?')
-      .get(result.composition_instance_id) as any;
-    assert.equal(instance.composition_key, 'theorem_proof_example.basic');
-    assert.equal(instance.canvas_id, canvas.id);
-    assert.equal(instance.source_proposal_id, proposal.id);
-
-    const slots = db.prepare('SELECT * FROM composition_instance_slots WHERE composition_instance_id = ? ORDER BY slot_index ASC')
-      .all(result.composition_instance_id) as any[];
-    assert.equal(slots.length, 3);
-    assert.equal(slots.every((slot) => slot.status === 'filled'), true);
-    assert.equal(slots.every((slot) => Boolean(slot.note_block_id) && Boolean(slot.canvas_node_id)), true);
-
-    const backingNote = db.prepare(`
-      SELECT n.note_class
-      FROM notes n
-      JOIN note_block_placements p ON p.note_id = n.id
-      WHERE p.block_id = ?
-    `).get(slots[0].note_block_id) as any;
-    assert.equal(backingNote.note_class, 'system');
-
-    const createdBlock = db.prepare('SELECT metadata FROM note_blocks WHERE id = ?')
-      .get(slots[0].note_block_id) as any;
-    const metadata = JSON.parse(createdBlock.metadata);
-    assert.equal(metadata.composition_template_id, composition.id);
-    assert.equal(metadata.composition_instance_id, result.composition_instance_id);
-    assert.equal(metadata.template_key, 'text.paragraph');
-  });
-});
-
-test('v2.5.2 partial composition proposal records skipped slots and discard is non-mutating', async () => {
-  await withDb((db) => {
-    const { userId, courseId } = seedUserCourse(db);
-    const canvas = createLearningCanvas(db, userId, { course_id: courseId }) as any;
-    const composition = seedSystemCompositionTemplates(db, userId)
-      .find((item: any) => item.composition_key === 'source_quote_interpretation.basic') as any;
-    const proposal = createCompositionTemplateProposal(db, userId, {
-      course_id: courseId,
-      canvas_id: canvas.id,
-      composition_template_id: composition.id,
-      partial_slot_keys: ['interpretation'],
-      slot_inputs: [
-        { slot_key: 'source_quote', plain_text: 'Original source sentence.' },
-      ],
-    }) as any;
-
-    assert.equal(proposal.data.slot_plan.some((slot: any) => slot.slot_key === 'interpretation' && slot.status === 'skipped'), true);
-    assert.equal(proposal.data.warnings.some((warning: string) => warning.includes('interpretation')), true);
-
-    db.prepare("UPDATE proposals SET status = 'discarded', resolved_at = datetime('now') WHERE id = ? AND user_id = ?")
-      .run(proposal.id, userId);
-
-    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM note_blocks').get() as any).count, 0);
-    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_nodes').get() as any).count, 0);
-    assert.equal((db.prepare('SELECT COUNT(*) AS count FROM composition_instances').get() as any).count, 0);
   });
 });

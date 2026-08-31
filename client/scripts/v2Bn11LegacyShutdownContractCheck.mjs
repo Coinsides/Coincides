@@ -97,10 +97,7 @@ assertAbsent('active learning canvas service retired Relation branches', learnin
   'unbindCanvasEdgeRelation',
 ]);
 
-const activeRelationMetadata = [
-  '../server/src/services/templateDefinitions.ts',
-  '../server/src/services/templateMigrationProposals.ts',
-].map(read).join('\n');
+const activeRelationMetadata = read('../server/src/services/templateDefinitions.ts');
 assertAbsent('active server Relation metadata', activeRelationMetadata, [
   'object_relations',
   'ObjectRelations',
