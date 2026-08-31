@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 221 份文档。
+共 223 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -100,6 +100,7 @@
 | [claude-log/2026-08-28.md](claude-log/2026-08-28.md) | Claude Log — 2026-08-28 | `(缺状态头)` | — | — |
 | [claude-log/2026-08-29.md](claude-log/2026-08-29.md) | Claude Log — 2026-08-29 | `(缺状态头)` | — | — |
 | [claude-log/2026-08-30.md](claude-log/2026-08-30.md) | Claude 工作日志 · 2026-08-30 | `(缺状态头)` | — | — |
+| [claude-log/2026-08-31.md](claude-log/2026-08-31.md) | Claude 工作日志 2026-08-31 | `active` | — | — |
 | [claude-log/README.md](claude-log/README.md) | claude-log —— Claude 行动日志（Henry 的监督轨迹） | `active` | 2026-06-27 | — |
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-23 | — |
@@ -221,6 +222,7 @@
 | [handoffs/2026-08-29-v12-9c-c1b2-region-and-cells.md](handoffs/2026-08-29-v12-9c-c1b2-region-and-cells.md) | c-1b-2:region 保真与单元格可寻址(⭐ 本单有**结构面**,⛔ 不是纯语义单) | `done(第二次派工按 v0.7.5 全绿;复核方亲刀**排他半边**取到真红,test:v2 自跑 350/350。⚠️ 第一次派工的停线是对的 —— 它发现的是工具的结构性上限,并**拒绝**了两条能凑绿的路)` | — | — |
 | [handoffs/2026-08-29-v12-9c-c1c-per-type-rulers.md](handoffs/2026-08-29-v12-9c-c1c-per-type-rulers.md) | c-1c:考卷分角色(三级火箭第 1 级)—— **每类东西用它该用的尺子** | `done(复核方**独立重算**与 builder 逐条对上;⭐ 补一条口径脚注:**158 = 154 条文本回程票 + 4 条图像回程票**,⛔ 不是同一个谓词的合计。零成本自证成立,证据本体整树哈希前后一致)` | — | — |
 | [handoffs/2026-08-29-v12-9c-c2-dual-transcription-recon.md](handoffs/2026-08-29-v12-9c-c2-dual-transcription-recon.md) | c-2 侦察结论:双拓互证**不是轻单**,且**顺序可能要重排** | `done(M1 收官 —— v3 两遍制 PASS 无停线:门遍 856 全量、覆盖率 24 行 remaining=0、分类遍 320/320 未触发 K-3;终审五路零 blocking,分母本身经第一性原理重建证成。⚠️ 已知瑕疵:§4 编码破损 → 并入 M2/c-4 从 JSON 重渲;K-8 的 5MB JSON 归宿划给 c-4)` | — | — |
+| [handoffs/2026-08-31-v12-9c-c4-section4-rerender.md](handoffs/2026-08-31-v12-9c-c4-section4-rerender.md) | c-4-a:从 canonical JSON 重渲 §4 两表(⭐ 极小单,机械) | `ready(M2/c-4 的唯一施工工项;⛔ 其余收口动作归调度方)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
