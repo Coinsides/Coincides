@@ -34,3 +34,4 @@
 - 2026-08-27 · pre-commit docs 软闸 · 未建常驻回归测试（本单仅以 K-1/K-2/K-3 施工期直跑验证），npm 缺失/脚本异常/超时的完整失败矩阵与两条射程边界文案均无常驻守卫 · 挡「后续改动让软闸漏警告、删掉边界说明或返回非零而误阻断提交」· 单 `handoffs/2026-08-27-v2bn12-precommit-docs-warn.md`
 - 2026-08-28 · pdf-parse v2 adapter · 加密/口令、损坏结构、超大页数、复杂字体/CMap、表格/多栏、表单/附件等 PDF 变体矩阵未覆盖；视觉兜底通道实现本身仍无测试（本单只在 `fetch` 边界打桩验证分支走向与 `ocr` 标记）· 挡「更多 PDF 形态下的原生抽取/资源释放/诚实降级，以及真实视觉接线回归」· 单 `handoffs/2026-08-28-pdf-parse-v2-adapter.md`
 - 2026-08-28 · 12.9b b-1 · region 锚语义验证（回程票式：按 bbox 裁原件取文本并比对）未做，落点为 12.9c 接真转写器之日 · 挡「region/bbox 锚形状合法但无法证明回原件命中」· 单 `handoffs/2026-08-28-v12-9b-b1-imprint-schema.md`
+- 2026-08-31 · 12.9d d-2 · HTTP 全链路端到端(wire 级经 express+authMiddleware 的 `POST /api/imprint-retrieval/query`)未测;走查走 in-process 服务路径,路由薄壳的校验/错误信封分支无 wire 级覆盖 · 挡「路由层参数校验、错误信封、鉴权接线的回归」· 单 `handoffs/2026-08-31-v12-9d-d2-retrieval-api.md` K-6
