@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 219 份文档。
+共 220 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -61,6 +61,7 @@
 | [analysis/2026-08-30-paper-and-board-direction.md](analysis/2026-08-30-paper-and-board-direction.md) | 纸与板 —— 笔记载体架构变更方向 | `active` | 2026-08-30 | — |
 | [analysis/2026-08-30-v12-9c-c2-divergence-census.md](analysis/2026-08-30-v12-9c-c2-divergence-census.md) | V12.9c c-2：MinerU × Docling 分歧普查 | `active` | 2026-08-30 | — |
 | [analysis/2026-08-31-paper-viewport-design.md](analysis/2026-08-31-paper-viewport-design.md) | 纸的视口 —— 阅读标尺锁定方案(13.1 的图纸) | `active` | 2026-08-31 | — |
+| [analysis/2026-08-31-v12-9c-c2-divergence-census-v2.md](analysis/2026-08-31-v12-9c-c2-divergence-census-v2.md) | V12.9c c-2：MinerU × Docling 分歧普查 v2 | `active` | 2026-08-31 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
@@ -218,7 +219,7 @@
 | [handoffs/2026-08-29-v12-9c-c1b1-mineru-wiring.md](handoffs/2026-08-29-v12-9c-c1b1-mineru-wiring.md) | c-1b-1:MinerU 接线(⭐ 这是**接线**单,⛔ 不是语义单) | `done(第二次派工全绿;复核方亲刀 K-2 取真红、K-1 补掐冗余第二层后取到**真孤儿**,test:v2 自跑 343/343。⚠️ 第一次派工的停线是对的 —— 单的第一版不可满足,归发单方)` | — | — |
 | [handoffs/2026-08-29-v12-9c-c1b2-region-and-cells.md](handoffs/2026-08-29-v12-9c-c1b2-region-and-cells.md) | c-1b-2:region 保真与单元格可寻址(⭐ 本单有**结构面**,⛔ 不是纯语义单) | `done(第二次派工按 v0.7.5 全绿;复核方亲刀**排他半边**取到真红,test:v2 自跑 350/350。⚠️ 第一次派工的停线是对的 —— 它发现的是工具的结构性上限,并**拒绝**了两条能凑绿的路)` | — | — |
 | [handoffs/2026-08-29-v12-9c-c1c-per-type-rulers.md](handoffs/2026-08-29-v12-9c-c1c-per-type-rulers.md) | c-1c:考卷分角色(三级火箭第 1 级)—— **每类东西用它该用的尺子** | `done(复核方**独立重算**与 builder 逐条对上;⭐ 补一条口径脚注:**158 = 154 条文本回程票 + 4 条图像回程票**,⛔ 不是同一个谓词的合计。零成本自证成立,证据本体整树哈希前后一致)` | — | — |
-| [handoffs/2026-08-29-v12-9c-c2-dual-transcription-recon.md](handoffs/2026-08-29-v12-9c-c2-dual-transcription-recon.md) | c-2 侦察结论:双拓互证**不是轻单**,且**顺序可能要重排** | `ready(v2 —— v1 轮已收工并复核通过[七路零 blocking],档案原样封存为附录;§11 按总部 2026-08-31 裁定补为 v2 工单:配对门 + 射程申报 + K-3 牙齿不拔 + 存在域占位挂 c-3)` | — | — |
+| [handoffs/2026-08-29-v12-9c-c2-dual-transcription-recon.md](handoffs/2026-08-29-v12-9c-c2-dual-transcription-recon.md) | c-2 侦察结论:双拓互证**不是轻单**,且**顺序可能要重排** | `ready(v3 —— v1/v2 两轮均已收工并复核通过[7 路 + 6 路,零 blocking],档案原样封存为存在维与角色维的发现证据;§12 按总部 2026-08-31 两次裁定补为 v3 工单:⭐ 两遍制[门遍全量无停线 → 分类遍 K-3 牙齿原样] + 角色相容性门 + 分母义务 + 跨遍闭合)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
