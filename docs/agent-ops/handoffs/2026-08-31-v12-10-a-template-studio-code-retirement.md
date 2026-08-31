@@ -161,3 +161,91 @@ npm run docs:check                                exit 0
 ```
 
 client build 仅保留既有的动态/静态 import 与 chunk size 警告；无编译失败。停线点：无。
+
+## Result(腿 2)
+
+needs: dispatcher
+
+腿 2 的代码切口已按定义落盘：删除六个 route 文件，移除 `server/src/index.ts` 的六个 import 与六个 mount；`/api/templates` 与 `/api/study-templates` mount 原样保留；`server/src/routes/templates.ts` 仅保留 runtime seed/list/get 面（`GET /`、`POST /seed-system`、`GET /:id`）；`server/src/routes/proposals.ts` 与 `server/src/validators/index.ts` 已机械切除 template migration / domain refinement 分支与 schema。未 commit，未 push，未调用 API，未终止进程，未输出 key 值，未翻状态头。
+
+但腿 2 尚不能判定完成：`npm run docs:check` 报 `docs/generated/object-inventory.md` 过期。该生成文件未列入工单总允许面、腿 2 允许面或 K-0 钉子底账；依 §5「允许面不够 / K-0 未列钉子即停线」纪律，没有运行会写入该文件的生成器，也没有修改该文件。需调度方明确授权将 `docs/generated/object-inventory.md` 纳入腿 2 机械生成面，或给出其他处置。
+
+### K-1 允许面自证
+
+收工 `git status --porcelain=v1` 全文：
+
+```text
+ M docs/agent-ops/handoffs/2026-08-31-v12-10-a-template-studio-code-retirement.md
+ M server/src/index.ts
+ D server/src/routes/compositionTemplates.ts
+ D server/src/routes/domainBlockSets.ts
+ D server/src/routes/domainRefinements.ts
+ D server/src/routes/packageExports.ts
+ D server/src/routes/packageImports.ts
+ D server/src/routes/packageManifests.ts
+ M server/src/routes/projections.ts
+ M server/src/routes/proposals.ts
+ M server/src/routes/templates.ts
+ M server/src/validators/index.ts
+```
+
+- `server/src/index.ts`：仅移除六个退役 route 的 import 与 mount；`/api/templates`、`/api/study-templates` 均仍在。
+- 六个 `server/src/routes/*.ts`：按腿 2 清单删除。
+- `server/src/routes/templates.ts`：仅切工作室 create/copy/update/lifecycle/usage/compatibility 写作与诊断面，保留 runtime seed/list/get。
+- `server/src/routes/proposals.ts`、`server/src/validators/index.ts`：仅切 template migration / domain refinement 两分支及对应 schema。
+- 本 handoff：仅追加本段 `## Result(腿 2)`，状态头未翻。
+- `server/src/routes/projections.ts`：开工前既有噪音；`git diff --quiet -- server/src/routes/projections.ts` exit 0，`git diff --cached --quiet -- server/src/routes/projections.ts` exit 0，本腿未触碰。
+- `docs/generated/object-inventory.md`：`git diff --quiet -- docs/generated/object-inventory.md` exit 0；因不在允许面而保持未改。
+- `git diff --check`：exit 0。
+
+### K-2 test:v2 总数与裁定对账
+
+- 裁定值：腿 2 后 362/362。
+- 实跑：362/362 pass，0 fail，exit 0。
+- 本腿删除测试：无，0 条；五个 service 与全部测试文件均保留。对账为 362 → 362，符合 K-0 §4.3 与本单 §3。
+
+### 裁 3 共享宿主表 pending 申报
+
+切除后对共享宿主表 `proposals` 只读 COUNT（未读取或输出业务行内容）：
+
+```text
+template_migration  pending  0
+domain_refinement   pending  0
+```
+
+### K-3 运行时留侧零 diff
+
+逐项执行 `git diff --quiet -- <path>`：
+
+```text
+server/src/services/noteBlockLifecycle.ts  exit 0
+server/src/db                              exit 0
+server/src/routes/studyTemplates.ts        exit 0
+server/src/routes/timeBlocks.ts            exit 0
+client/src/components/CardFlip             exit 0
+```
+
+另核：五个腿 3 service 合并 `git diff --quiet` exit 0；`server/src/__tests__`、`client/src`、`server/package.json` 合并 `git diff --quiet` exit 0。
+
+### K-4 新钉子申报
+
+- 发现一枚 K-0 未列钉子：六 route 删除使 `docs/generated/object-inventory.md` 过期，导致 `docs:check` exit 1；但该生成文件不在允许面。已停线，未运行写入生成器，未越面修复。
+- 除上述生成库存钉子外，未发现 K-0 未列的 importer 或断点。CodeGraph 与精确反扫确认：六个 route 模块只由 `server/src/index.ts` 挂载；客户端模板消费者只剩 `client/src/services/templateOptions.ts` 的 `GET /templates`，其 runtime 面已保留。
+
+### K-5 本腿明确未做
+
+- 未做腿 1：未改任何 client 文件；腿 1 已由调度方所述提交 `b15ab2a` 承载，本腿没有回改。
+- 未做腿 3：未删除五个 service 或四个专用测试，未手术 `templateDefinitions.ts`、MaterialLibrary / SourceMaterialization 测试、`server/package.json` 或 BN11 legacy check 脚本。
+- 未做单乙全部内容：未动 18 表、schema、迁移、`noteBlockLifecycle.ts`、数据处置、TD-33 销账或任何 DB 层内容。
+
+### 门禁
+
+```text
+npm exec --prefix server -- tsc --noEmit -p server  exit 0
+npm --prefix server run test:v2                   exit 0  (362/362 pass, 0 fail)
+npm run docs:check                                exit 1  (docs/generated/object-inventory.md 过期)
+npm run check:v2-bn11-legacy-shutdown             exit 0
+npm run check:tool-face-manifest                  exit 0
+```
+
+停线点：`docs/generated/object-inventory.md` 不在允许面而门禁要求其刷新；needs: dispatcher。腿 2 未宣告完成，未进入腿 3。

@@ -147,7 +147,7 @@
 
 ---
 
-## 2. HTTP 路由模块（50）
+## 2. HTTP 路由模块（44）
 
 | 模块 | 挂载路径 |
 |---|---|
@@ -157,7 +157,6 @@
 | `routes/canvasAssets.ts` | `/api/canvas-assets` |
 | `routes/canvasObjects.ts` | `/api/canvas-objects` |
 | `routes/cards.ts` | `/api/cards` |
-| `routes/compositionTemplates.ts` | `/api/composition-templates` |
 | `routes/contentGroups.ts` | `/api/content-groups` |
 | `routes/courseMaterials.ts` | `/api/course-materials` |
 | `routes/courses.ts` | `/api/courses` |
@@ -165,8 +164,6 @@
 | `routes/dailyStatus.ts` | `/api/daily-status` |
 | `routes/decks.ts` | `/api/decks` |
 | `routes/documents.ts` | `/api/documents` |
-| `routes/domainBlockSets.ts` | `/api/domain-block-sets` |
-| `routes/domainRefinements.ts` | `/api/domain-refinements` |
 | `routes/embedding.ts` | `/api/embedding` |
 | `routes/goals.ts` | `/api/goals` |
 | `routes/groupFolders.ts` | `/api/group-folders` |
@@ -175,9 +172,6 @@
 | `routes/materialSegments.ts` | `/api/material-segments` |
 | `routes/noteBlocks.ts` | `/api/note-blocks` |
 | `routes/notes.ts` | `/api/notes` |
-| `routes/packageExports.ts` | `/api/package-exports` |
-| `routes/packageImports.ts` | `/api/package-imports` |
-| `routes/packageManifests.ts` | `/api/package-manifests` |
 | `routes/projections.ts` | `/api/projections` |
 | `routes/proposals.ts` | `/api/proposals` |
 | `routes/purposes.ts` | `/api/purposes` |
