@@ -147,7 +147,7 @@
 
 ---
 
-## 2. HTTP 路由模块（49）
+## 2. HTTP 路由模块（50）
 
 | 模块 | 挂载路径 |
 |---|---|
@@ -170,6 +170,7 @@
 | `routes/embedding.ts` | `/api/embedding` |
 | `routes/goals.ts` | `/api/goals` |
 | `routes/groupFolders.ts` | `/api/group-folders` |
+| `routes/imprintRetrieval.ts` | `/api/imprint-retrieval` |
 | `routes/items.ts` | `/api/items` |
 | `routes/materialSegments.ts` | `/api/material-segments` |
 | `routes/noteBlocks.ts` | `/api/note-blocks` |
