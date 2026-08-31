@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 243 份文档。
+共 244 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -231,9 +231,10 @@
 | [handoffs/2026-08-29-v12-9c-c2-dual-transcription-recon.md](handoffs/2026-08-29-v12-9c-c2-dual-transcription-recon.md) | c-2 侦察结论:双拓互证**不是轻单**,且**顺序可能要重排** | `done(M1 收官 —— v3 两遍制 PASS 无停线:门遍 856 全量、覆盖率 24 行 remaining=0、分类遍 320/320 未触发 K-3;终审五路零 blocking,分母本身经第一性原理重建证成。⚠️ 已知瑕疵:§4 编码破损 → 并入 M2/c-4 从 JSON 重渲;K-8 的 5MB JSON 归宿划给 c-4)` | — | — |
 | [handoffs/2026-08-31-v12-10-a-template-studio-code-retirement.md](handoffs/2026-08-31-v12-10-a-template-studio-code-retirement.md) | 施工单甲:Template Studio 代码域退役(Step 1–3;⛔ 可逆域,零 DB 动作) | `done(2026-08-31 总部翻牌:判据全绿,verify 全链 exit 0——见收官报告与本单 Result)` | — | — |
 | [handoffs/2026-08-31-v12-10-b-template-studio-table-decommission.md](handoffs/2026-08-31-v12-10-b-template-studio-table-decommission.md) | 施工单乙:18 表 forward decommission(⛔ 不可逆域;双前置已齐) | `done(2026-08-31 总部翻牌:判据全绿,verify 全链 exit 0——见收官报告与本单 Result)` | — | — |
-| [handoffs/2026-08-31-v12-10-c-i18n-english-copy.md](handoffs/2026-08-31-v12-10-c-i18n-english-copy.md) | 施工单丙:client UI 中文文案统一为英文(中文进翻译档) | `ready(顶班调度按总部 2026-08-31 M4 余量令翻牌;裁定出处:Henry 已裁「英文为准,中文进翻译档」+ 总部当日续办令;不代表 Henry 逐张批过本单)` | — | — |
-| [handoffs/2026-08-31-v12-10-d-page-centering.md](handoffs/2026-08-31-v12-10-d-page-centering.md) | 施工单丁:page 模式「居中不是很中」诊断与小修(走查 #4a) | `ready(顶班调度按总部 2026-08-31 M4 余量令翻牌;裁定出处:走查 #4a(🅱 老病在案)+ 总部当日续办令;不代表 Henry 逐张批过本单)` | — | — |
+| [handoffs/2026-08-31-v12-10-c-i18n-english-copy.md](handoffs/2026-08-31-v12-10-c-i18n-english-copy.md) | 施工单丙:client UI 中文文案统一为英文(中文进翻译档) | `done(2026-08-31 总部翻牌:判据全绿——见本单 Result 与收官报告)` | — | — |
+| [handoffs/2026-08-31-v12-10-d-page-centering.md](handoffs/2026-08-31-v12-10-d-page-centering.md) | 施工单丁:page 模式「居中不是很中」诊断与小修(走查 #4a) | `done(2026-08-31 总部翻牌:判据全绿——见本单 Result 与收官报告)` | — | — |
 | [handoffs/2026-08-31-v12-10-k0-template-studio-recon.md](handoffs/2026-08-31-v12-10-k0-template-studio-recon.md) | 12.10 K-0:Template Studio 面侦察(⛔⛔ 全程只读,零删除零改动) | `done(2026-08-31 总部翻牌:判据全绿,verify 全链 exit 0——见收官报告与本单 Result)` | — | — |
+| [handoffs/2026-08-31-v12-9c-c3-citation-mode.md](handoffs/2026-08-31-v12-9c-c3-citation-mode.md) | c-3:识别器引用模式(引用契约 + 校验闸 + 四卷抽页实验) | `ready(顶班调度按总部 2026-08-31 c-3 续办令翻牌;裁定出处:`plans/v12-9c-c3-citation-mode-skeleton.md`(骨架+归域三裁)+ 总部当日拆单五注;不代表 Henry 逐张批过本单)` | — | — |
 | [handoffs/2026-08-31-v12-9c-c4-section4-rerender.md](handoffs/2026-08-31-v12-9c-c4-section4-rerender.md) | c-4-a:从 canonical JSON 重渲 §4 两表(⭐ 极小单,机械) | `done(2026-08-31 收工;调度方复核 PASS —— 六判据磁盘回读复算 + §6 证据本体端到端亲验)` | — | — |
 | [handoffs/2026-08-31-v12-9c-segment-closeout.md](handoffs/2026-08-31-v12-9c-segment-closeout.md) | V12.9c 段收口:插头真插进了插座(⛔ 但只插了一半) | `done(12.9c 全段收口;⛔ **c-3 全段未开单**,如实移交)` | — | — |
 | [handoffs/2026-08-31-v12-9d-d0-wiring-and-smoke.md](handoffs/2026-08-31-v12-9d-d0-wiring-and-smoke.md) | d-0:接线图 + 嵌入供应商冒烟(⭐ 轻量单,⛔ 不写生产码) | `done(2026-08-31 收工;复核 PASS —— key 零泄漏与八处禁区独立复算,401 已定因=区域端点)` | — | — |
