@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(顶班调度按总部 2026-08-31 M4 余量令翻牌;裁定出处:Henry 已裁「英文为准,中文进翻译档」+ 总部当日续办令;不代表 Henry 逐张批过本单)
+> **状态 (Status)**: done(2026-08-31 总部翻牌:判据全绿——见本单 Result 与收官报告)
 > **from**: claude(fable5,顶班调度会话 bc871bf7) · **to**: codex(builder) · **date**: 2026-08-31
 > **裁定来源**: 总部(Fable)2026-08-31「i18n 统一小单」。⛔ **不是 Henry**(Henry 裁的是「英文为准,中文进翻译档」方向)。
 > **上游**: 调度方侦察(本单 §2 普查底账)· `client/src/i18n.ts`(react-i18next,en/zh locale 已在)
