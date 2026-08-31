@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-08-30
+> **日期 (Updated)**: 2026-08-31
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 213 份文档。
+共 216 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -58,6 +58,7 @@
 | [analysis/2026-08-29-v12-9c-c1a-mineru-env-probe.md](analysis/2026-08-29-v12-9c-c1a-mineru-env-probe.md) | V12.9c c-1a：MinerU 遗产环境体检报告 | `frozen` | 2026-08-29 | — |
 | [analysis/2026-08-29-v12-9c-c1c-per-type-rulers.md](analysis/2026-08-29-v12-9c-c1c-per-type-rulers.md) | V12.9c c-1c：MinerU 回程票按类型复测 | `active` | 2026-08-29 | — |
 | [analysis/2026-08-29-v12-9c-plan-realign.md](analysis/2026-08-29-v12-9c-plan-realign.md) | 12.9c 段计划:对 HEAD 重对现物 | `active` | — | — |
+| [analysis/2026-08-30-paper-and-board-direction.md](analysis/2026-08-30-paper-and-board-direction.md) | 纸与板 —— 笔记载体架构变更方向 | `active` | 2026-08-30 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
@@ -94,6 +95,7 @@
 | [claude-log/2026-08-26.md](claude-log/2026-08-26.md) | 2026-08-26 | `(缺状态头)` | — | — |
 | [claude-log/2026-08-28.md](claude-log/2026-08-28.md) | Claude Log — 2026-08-28 | `(缺状态头)` | — | — |
 | [claude-log/2026-08-29.md](claude-log/2026-08-29.md) | Claude Log — 2026-08-29 | `(缺状态头)` | — | — |
+| [claude-log/2026-08-30.md](claude-log/2026-08-30.md) | Claude 工作日志 · 2026-08-30 | `(缺状态头)` | — | — |
 | [claude-log/README.md](claude-log/README.md) | claude-log —— Claude 行动日志（Henry 的监督轨迹） | `active` | 2026-06-27 | — |
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-23 | — |
@@ -214,13 +216,14 @@
 | [handoffs/2026-08-29-v12-9c-c1b1-mineru-wiring.md](handoffs/2026-08-29-v12-9c-c1b1-mineru-wiring.md) | c-1b-1:MinerU 接线(⭐ 这是**接线**单,⛔ 不是语义单) | `done(第二次派工全绿;复核方亲刀 K-2 取真红、K-1 补掐冗余第二层后取到**真孤儿**,test:v2 自跑 343/343。⚠️ 第一次派工的停线是对的 —— 单的第一版不可满足,归发单方)` | — | — |
 | [handoffs/2026-08-29-v12-9c-c1b2-region-and-cells.md](handoffs/2026-08-29-v12-9c-c1b2-region-and-cells.md) | c-1b-2:region 保真与单元格可寻址(⭐ 本单有**结构面**,⛔ 不是纯语义单) | `done(第二次派工按 v0.7.5 全绿;复核方亲刀**排他半边**取到真红,test:v2 自跑 350/350。⚠️ 第一次派工的停线是对的 —— 它发现的是工具的结构性上限,并**拒绝**了两条能凑绿的路)` | — | — |
 | [handoffs/2026-08-29-v12-9c-c1c-per-type-rulers.md](handoffs/2026-08-29-v12-9c-c1c-per-type-rulers.md) | c-1c:考卷分角色(三级火箭第 1 级)—— **每类东西用它该用的尺子** | `done(复核方**独立重算**与 builder 逐条对上;⭐ 补一条口径脚注:**158 = 154 条文本回程票 + 4 条图像回程票**,⛔ 不是同一个谓词的合计。零成本自证成立,证据本体整树哈希前后一致)` | — | — |
-| [handoffs/2026-08-29-v12-9c-c2-dual-transcription-recon.md](handoffs/2026-08-29-v12-9c-c2-dual-transcription-recon.md) | c-2 侦察结论:双拓互证**不是轻单**,且**顺序可能要重排** | `draft` | — | — |
+| [handoffs/2026-08-29-v12-9c-c2-dual-transcription-recon.md](handoffs/2026-08-29-v12-9c-c2-dual-transcription-recon.md) | c-2 侦察结论:双拓互证**不是轻单**,且**顺序可能要重排** | `ready(⭐ §9 裁定已下:**实验层可派**;§10 由调度方 2026-08-30 补为可派工单 —— ⛔ 持久层仍押后,触发器 = c-3 门开)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
 | [handoffs/plans/v12-9b-anchored-fragment-stream-spec.md](handoffs/plans/v12-9b-anchored-fragment-stream-spec.md) | 带锚碎片流(Anchored Fragment Stream)规格 v0 | `active` | — | — |
 | [handoffs/plans/v12-9b-segment-plan.md](handoffs/plans/v12-9b-segment-plan.md) | V12.9b 段计划:腰与底盘 | `draft` | — | — |
 | [handoffs/plans/v12-9c-segment-plan.md](handoffs/plans/v12-9c-segment-plan.md) | V12.9c 段计划骨架:插头开始上插座 | `draft` | — | — |
+| [handoffs/plans/v12-closeout-milestones.md](handoffs/plans/v12-closeout-milestones.md) | V12 收官里程碑(M1–M5) | `active` | 2026-08-30 | — |
 | [handoffs/plans/v2-bn12-2-mcp-tool-face.md](handoffs/plans/v2-bn12-2-mcp-tool-face.md) | Plan V2.BN.12.2 — MCP 工具面(末端执行器第一次实体化) | `active` | — | — |
 | [handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md](handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md) | V2.BN.12.2b:第一个写工具 + 候选审阅队列 + HTTP 层 K-5 | `done(**铸版 2026-08-23,Fable**——五单施工 + b-4 旅程 + b-5/b-5-fix 补单全复核 PASS;旅程合并分 **A 12/12 + B 8/8** 达通过线,重走记录 `analysis/2026-08-23-v2bn12-2b4-journey-sheet.md` §7;铸版记录 log 08-23 #40;未亲刀缺口见 TD-19/TD-20)` | 2026-08-23 | — |
 | [handoffs/plans/v2-bn12-2c-selection-receipts-and-resolve.md](handoffs/plans/v2-bn12-2c-selection-receipts-and-resolve.md) | V2.BN.12.2c:选区收据(值,不是行)+ `resolve_selection`(只读解析) | `draft` | 2026-08-26 | — |
