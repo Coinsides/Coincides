@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 230 份文档。
+共 231 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -229,6 +229,7 @@
 | [handoffs/2026-08-31-v12-9c-segment-closeout.md](handoffs/2026-08-31-v12-9c-segment-closeout.md) | V12.9c 段收口:插头真插进了插座(⛔ 但只插了一半) | `done(12.9c 全段收口;⛔ **c-3 全段未开单**,如实移交)` | — | — |
 | [handoffs/2026-08-31-v12-9d-d0-wiring-and-smoke.md](handoffs/2026-08-31-v12-9d-d0-wiring-and-smoke.md) | d-0:接线图 + 嵌入供应商冒烟(⭐ 轻量单,⛔ 不写生产码) | `done(2026-08-31 收工;复核 PASS —— key 零泄漏与八处禁区独立复算,401 已定因=区域端点)` | — | — |
 | [handoffs/2026-08-31-v12-9d-d1a-corpus-seed.md](handoffs/2026-08-31-v12-9d-d1a-corpus-seed.md) | d-1a:走真链灌四卷,把「规模」从假设变成实测(⛔ 零 API 调用) | `done(2026-08-31 收工;复核 PASS —— 全部数字独立查库复算;⚠️ 撞出设计级发现:碎片粒度是页级,较 MinerU 粗 7.35 倍)` | — | — |
+| [handoffs/2026-08-31-v12-9d-d1b-embedding-pipeline.md](handoffs/2026-08-31-v12-9d-d1b-embedding-pipeline.md) | d-1b:新代向量表 + 嵌入工序(⛔ 只到"存得下",检索 API 归 d-2) | `ready(M3/12.9d 第三单;新代向量表 + DashScope 嵌入工序 + 覆盖率申报)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
