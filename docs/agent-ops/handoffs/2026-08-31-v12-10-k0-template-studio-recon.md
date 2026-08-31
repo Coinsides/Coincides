@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(顶班调度按总部 2026-08-31 M4 开单令翻牌;裁定出处:`plans/v12-closeout-milestones.md` M4.1(Henry 已裁「运行时留、工作室删」)+ 总部当日续办令;不代表 Henry 逐张批过本单)
+> **状态 (Status)**: done(2026-08-31 总部翻牌:判据全绿,verify 全链 exit 0——见收官报告与本单 Result)
 > **from**: claude(fable5,顶班调度会话 bc871bf7) · **to**: codex(builder) · **date**: 2026-08-31
 > **裁定来源**: 总部(Fable)2026-08-31「M4 第一单:Template Studio 降级切口——侦察先行,施工后置」。⛔ **不是 Henry**(Henry 裁的是方向「运行时留、工作室删」,不是本单)。
 > **上游**: `plans/v12-closeout-milestones.md` §M4 · `current-state/tech-debt.md` TD-33

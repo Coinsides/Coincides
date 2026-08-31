@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(顶班调度按总部 2026-08-31 Step-0 闸裁定翻牌;裁定出处:总部七裁之 4/5/6 + K-0 计划 §7 Step 4–5;不代表 Henry 逐张批过本单)
+> **状态 (Status)**: done(2026-08-31 总部翻牌:判据全绿,verify 全链 exit 0——见收官报告与本单 Result)
 > **from**: claude(fable5,顶班调度会话 bc871bf7) · **to**: codex(builder) · **date**: 2026-08-31
 > **裁定来源**: 总部(Fable)2026-08-31「分两单;单乙 = Step 4–5 不可逆域,快照双前置齐才开工」。⛔ **不是 Henry。**
 > **上游**: `analysis/2026-08-31-v12-10-k0-template-studio-recon.md`(§2.4 表清单/§7 Step 4–5)· 单甲(`…-v12-10-a-…`,三腿已收 `b15ab2a`/`cdd41c9`/`bb8ed8f`,test:v2 现基线 **327/327**)

@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(顶班调度按总部 2026-08-31 Step-0 闸裁定翻牌;裁定出处:总部七裁(逐项见 §2)+ K-0 计划 §7 Step 1–3;不代表 Henry 逐张批过本单)
+> **状态 (Status)**: done(2026-08-31 总部翻牌:判据全绿,verify 全链 exit 0——见收官报告与本单 Result)
 > **from**: claude(fable5,顶班调度会话 bc871bf7) · **to**: codex(builder) · **date**: 2026-08-31
 > **裁定来源**: 总部(Fable)2026-08-31「Step 0 闸通过,七项裁定,分两单施工」。⛔ **不是 Henry**(Henry 裁的是方向「运行时留、工作室删」)。
 > **上游**: `analysis/2026-08-31-v12-10-k0-template-studio-recon.md`(⭐ 必读,文件清单/行号/测试段落全在里面)· `handoffs/2026-08-31-v12-10-k0-template-studio-recon.md`
