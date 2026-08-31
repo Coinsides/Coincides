@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(M3/12.9d 第三单;新代向量表 + DashScope 嵌入工序 + 覆盖率申报)
+> **状态 (Status)**: ready(第二次派工;⚠️ 首次因凭证事件作废停线,TD-39 已清偿 —— 修订见 §4)
 > **from**: claude(opus,工程调度会话 coincides-8b) · **to**: codex(builder) · **date**: 2026-08-31
 > **裁定来源**: 总部(Fable)2026-08-31「照准,一字不改派 d-1b」。⛔ **不是 Henry。**
 > **上游**: `handoffs/2026-08-31-v12-9d-d1a-corpus-seed.md`(⭐ 先读,含复核批注与粒度发现)· `analysis/2026-08-31-v12-9d-d0-provider-smoke.md`(⭐ 含 endpoint 实测)
@@ -71,3 +71,28 @@ d-0 实测:DashScope `text-embedding-v4` 返回 **1024 维**,与旧代 `doc_chun
 
 K-1 四条(含那条隔离测试的名字与断言)· K-2 入行字段 · K-3 覆盖率**连同 SQL** · K-4 预算台账 · K-5 声明已写入的位置 · K-6 清单 · K-7 三项 · 任何停线点。
 ⚠️ **回执里出现 key 任何片段 = 本单作废。**
+## 4. ⚠️ 第二次派工的修订(2026-08-31;第一次派工因凭证事件作废停线)
+
+> **本节写在 `## Result` 之前,因为闸只看 Result 之前的内容。** 第一次派工的经过与处置见 `current-state/tech-debt.md` 的 **TD-39**(已清偿)。⛔ **不要去读、不要去动那份 codex 会话记录** —— Henry 明令保留,后续任何单不得触碰。
+
+### 修订 A ⭐⭐ 搜索范围界定:**写成动作,不是叮嘱**
+
+第一次派工作废的直接成因是**一条搜索命令逸出仓库范围**。⇒ 本次把范围界定写成**可照抄的动作**:
+
+1. **先 `cd` 进仓库根**(`D:/Coinsides/v2.x/Coincides`),⛔ 不在别处发起搜索;
+2. **一切路径用仓内相对路径**(`server/src/...`、`docs/...`),⛔ **不许出现裸盘符**(`C:\`、`D:\`)于任何搜索/遍历命令;
+3. ⚠️ **PowerShell 续行(反引号)是本次的凶器** —— 若必须多行,**改用单行命令或脚本文件**,⛔ 不用反引号续行;
+4. **⛔ 唯一允许的绝对路径例外:无。** 本单不需要访问仓外任何东西。
+
+⇒ **若某次搜索的输出里出现了仓外路径,那本身就是逸出的信号:立即停下、上报,⛔ 不要继续。**
+
+### 修订 B 嵌入 provider 的 key 来源改为 `server/.env`
+
+- provider 读 **`process.env.DASHSCOPE_API_KEY`**,由 server 既有的 `import 'dotenv/config'` 从 **`server/.env`** 注入(该文件已就位,DASHSCOPE 有效长度 **116**,已 gitignore 且未被 git 跟踪);
+- ⛔ **不要显式去读 `.env.experiment`** —— d-0 的探针那样做是探针的事,生产码走 `process.env`;
+- endpoint 常量仍为 `https://dashscope-intl.aliyuncs.com/compatible-mode/v1/embeddings`(判据 §0.3 不变)。
+
+### 其余一切不变
+
+§0 七句(含 **§0.6「key 值零出境……出现即本单作废」**)、§1 允许面与禁区、§2 判据 K-1~K-7、§3 回执要求**全部照旧**。
+⭐ **§0.6 上次真的生效了** —— builder 撞上后立即停线、零调用、零文件、且拒写 `## Result` 以免把作废工单冒充完成。**本次同样按此执行。**
