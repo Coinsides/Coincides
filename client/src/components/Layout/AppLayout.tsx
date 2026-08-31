@@ -4,7 +4,6 @@ import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home,
   BookOpen,
-  LayoutTemplate,
   Settings,
   PanelLeftClose,
   PanelLeftOpen,
@@ -27,7 +26,6 @@ const navItems = [
   { to: '/', icon: Home, labelKey: 'nav.home' },
   { to: '/projects', icon: BookOpen, labelKey: 'nav.projects' },
   { to: '/sources', icon: LibraryBig, labelKey: 'nav.sources' },
-  { to: '/templates', icon: LayoutTemplate, labelKey: 'nav.templates' },
   { to: '/group-gallery', icon: Boxes, label: 'Group Gallery' },
   { to: '/settings', icon: Settings, labelKey: 'nav.settings' },
 ];

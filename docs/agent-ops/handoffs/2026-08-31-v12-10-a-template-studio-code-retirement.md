@@ -98,3 +98,66 @@
 ## 6. 回执(每腿追加一段 `## Result(腿 N)`)
 
 K-1 porcelain 全文 · K-2 总数与对账 · K-3 逐项 exit · K-4 · K-5 · 门禁各 exit · 停线点。
+
+## Result(腿 1)
+
+腿 1 已完成；仅退役前端 Template Studio 页面、样式、路由挂载与导航入口。⛔ 未进入腿 2 / 腿 3，未 commit，未 push，未调用 API，未终止进程，未输出 key 值，未翻状态头。
+
+### K-1 允许面自证
+
+收工 `git status --porcelain=v1` 全文：
+
+```text
+ M client/src/App.tsx
+ M client/src/components/Layout/AppLayout.tsx
+ D client/src/pages/Templates/TemplateStudio.module.css
+ D client/src/pages/Templates/TemplateStudio.tsx
+ M docs/agent-ops/handoffs/2026-08-31-v12-10-a-template-studio-code-retirement.md
+ M server/src/routes/projections.ts
+```
+
+- `client/src/App.tsx`：仅移除 `TemplateStudioPage` import 与 `templates` route。
+- `client/src/components/Layout/AppLayout.tsx`：仅移除 `/templates` 导航项及随之失去消费者的 `LayoutTemplate` import。
+- `client/src/pages/Templates/TemplateStudio.tsx`：删除 1462 行。
+- `client/src/pages/Templates/TemplateStudio.module.css`：删除 720 行。
+- `server/src/routes/projections.ts`：开工前既有噪音；`git diff --quiet -- server/src/routes/projections.ts` exit 0，`git diff --cached --quiet -- server/src/routes/projections.ts` exit 0，确认零内容 diff，本腿未触碰。
+- `git diff --check`：exit 0。
+
+### K-2 test:v2 总数与裁定对账
+
+- 裁定值：腿 1 后 362/362。
+- 实跑：362/362 pass，0 fail，exit 0。
+- 本腿删除测试：无，0 条；对账为 362 → 362，符合 K-0 §4.3 与本单 §3。
+
+### K-3 运行时留侧零 diff
+
+逐项执行 `git diff --quiet -- <path>`：
+
+```text
+server/src/services/noteBlockLifecycle.ts  exit 0
+server/src/db                              exit 0
+server/src/routes/studyTemplates.ts        exit 0
+server/src/routes/timeBlocks.ts            exit 0
+client/src/components/CardFlip             exit 0
+```
+
+### K-4 新钉子申报
+
+未发现。CodeGraph 反向边与 K-0 一致；切割后对 `client/src` 精确复扫 `pages/Templates/TemplateStudio`、`TemplateStudioPage`、`to: '/templates'`、`path="templates"` 为零命中（`rg` exit 1），server tsc 与 client build 均无编译断点。
+
+### K-5 本腿明确未做
+
+- 未做腿 2：未删除六个 server route，未手术 `server/src/index.ts`、`server/src/routes/templates.ts`、`server/src/routes/proposals.ts`、`server/src/validators/index.ts`。
+- 未做腿 3：未删除五个 server service 或四个专用测试，未手术 `templateDefinitions.ts`、MaterialLibrary / SourceMaterialization 测试、`server/package.json` 或 BN11 legacy check。
+- 未做单乙全部内容：未动 18 表、schema、迁移、`noteBlockLifecycle.ts`、数据处置、TD-33 销账或任何 DB 层内容。
+
+### 门禁
+
+```text
+npm exec --prefix server -- tsc --noEmit -p server  exit 0
+npm --prefix server run test:v2                   exit 0  (362/362 pass, 0 fail)
+npm --prefix client run build                     exit 0
+npm run docs:check                                exit 0
+```
+
+client build 仅保留既有的动态/静态 import 与 chunk size 警告；无编译失败。停线点：无。

@@ -11,7 +11,6 @@ import CoursesPage from '@/pages/Courses/Courses';
 import CourseDetailPage from '@/pages/Courses/CourseDetail';
 import NoteDetailPage from '@/pages/Notes/NoteDetail';
 import SourceLibraryPage from '@/pages/Sources/SourceLibrary';
-import TemplateStudioPage from '@/pages/Templates/TemplateStudio';
 import GroupGalleryPage from '@/pages/GroupGallery/GroupGallery';
 import SingleContentGroupEditorPage from '@/pages/GroupGallery/SingleContentGroupEditor';
 import SettingsPage from '@/pages/Settings/Settings';
@@ -95,7 +94,6 @@ export default function App() {
           <Route path="courses/:courseId" element={<CourseDetailPage />} />
           <Route path="notes/:noteId" element={<NoteDetailPage />} />
           <Route path="sources" element={<SourceLibraryPage />} />
-          <Route path="templates" element={<TemplateStudioPage />} />
           <Route path="group-gallery" element={<GroupGalleryPage />} />
           <Route path="group-gallery/editor" element={<SingleContentGroupEditorPage />} />
           <Route path="decks" element={<DecksPage />} />
