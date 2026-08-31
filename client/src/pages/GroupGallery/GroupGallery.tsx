@@ -539,7 +539,7 @@ export default function GroupGalleryPage() {
             type="button"
             onClick={() => (selectedFolderRecord ? navigate(`/notes/${selectedFolderRecord.note.id}`) : navigate(-1))}
           >
-            返回
+            Back
           </button>
         </div>
       </header>
@@ -547,9 +547,9 @@ export default function GroupGalleryPage() {
       <section className={styles.galleryShell}>
         <aside className={`${styles.folderPane} ${styles.destinationPane}`} aria-label="Gallery destinations">
           <div className={styles.paneHeader}>
-            <span>去处</span>
+            <span>Destinations</span>
           </div>
-          <nav className={styles.destinationNav} aria-label="固定去处">
+          <nav className={styles.destinationNav} aria-label="Pinned destinations">
             {destinationModel.primary.map((destination) => (
               <button
                 key={destination.key}
@@ -563,7 +563,7 @@ export default function GroupGalleryPage() {
               </button>
             ))}
             <div className={styles.destinationDivider} />
-            <span className={styles.destinationSectionLabel}>按项目</span>
+            <span className={styles.destinationSectionLabel}>By project</span>
             {destinationModel.scoped.map((destination) => (
               <button
                 key={destination.key}
@@ -652,7 +652,7 @@ export default function GroupGalleryPage() {
                           const noteRoot = scopedRootFolder(folders, 'note', record.project.id, record.note.id);
                           return noteRoot ? (
                             <div key={record.note.id} className={styles.noteFolderBlock}>
-                              <span className={styles.folderWorkspaceNote}>{record.note.title || '未命名'}</span>
+                              <span className={styles.folderWorkspaceNote}>{record.note.title || 'Untitled'}</span>
                               {renderFolderBranch(record, folders, noteRoot)}
                             </div>
                           ) : null;

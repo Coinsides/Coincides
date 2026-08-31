@@ -51,10 +51,10 @@ assertContainsAll('Gallery exposes resource manager shell anchors', page, [
 ]);
 
 assertContainsAll('Gallery exposes fixed destination navigation and creation targets', page + navigationModel, [
-  'aria-label="固定去处"',
-  "label: '全部组'",
-  "label: '最近'",
-  '按项目',
+  'aria-label="Pinned destinations"',
+  "label: 'All groups'",
+  "label: 'Recent'",
+  'By project',
   'destinationKey',
   'resolveGalleryCreationTarget',
   'New groups and folders:',

@@ -36,7 +36,7 @@ export function galleryNoteLabel(note: GalleryNote): string {
   if (title) return title;
   const timestamp = note.updated_at || note.created_at || '';
   const match = /^(?:\d{4})-(\d{2})-(\d{2})/.exec(timestamp);
-  return match ? `未命名 · ${Number(match[1])}/${Number(match[2])}` : '未命名';
+  return match ? `Untitled · ${Number(match[1])}/${Number(match[2])}` : 'Untitled';
 }
 
 export function galleryModeLabel(mode: GalleryShellMode): string {
@@ -68,9 +68,9 @@ export function buildGalleryGroupCardView(params: {
       ? 'project'
       : 'note';
   const originLabel = originKind === 'workspace'
-    ? 'Workspace · 工作区级'
+    ? 'Workspace · Workspace level'
     : originKind === 'project'
-      ? `${sourceProject.name} · 项目级`
+      ? `${sourceProject.name} · Project level`
       : `${sourceProject.name} · ${galleryNoteLabel(sourceNote)}`;
   const originRoute = originKind === 'workspace'
     ? '/group-gallery?destination=workspace'

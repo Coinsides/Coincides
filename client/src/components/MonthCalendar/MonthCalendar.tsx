@@ -68,7 +68,7 @@ function buildCalendarGrid(year: number, month: number) {
   return cells;
 }
 
-const WEEKDAYS = ['日', '一', '二', '三', '四', '五', '六'];
+const WEEKDAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export default function MonthCalendar({
   selectedDates,
@@ -200,9 +200,9 @@ export default function MonthCalendar({
 
   // Summary text
   const summaryText = useMemo(() => {
-    if (selectedDates.length === 0) return '请选择日期（拖选连续范围，或单击选择）';
+    if (selectedDates.length === 0) return 'Select dates (drag for a range or click to select)';
     if (selectedDates.length === 1) {
-      return `已选 1 天：${selectedDates[0]}`;
+      return `1 day selected: ${selectedDates[0]}`;
     }
     // Check if continuous
     const sorted = [...selectedDates].sort();
@@ -216,9 +216,9 @@ export default function MonthCalendar({
       }
     }
     if (continuous) {
-      return `已选 ${sorted.length} 天：${sorted[0]} 至 ${sorted[sorted.length - 1]}`;
+      return `${sorted.length} days selected: ${sorted[0]} to ${sorted[sorted.length - 1]}`;
     }
-    return `已选 ${sorted.length} 天`;
+    return `${sorted.length} days selected`;
   }, [selectedDates]);
 
   return (
@@ -233,7 +233,7 @@ export default function MonthCalendar({
           <ChevronLeft size={16} />
         </button>
         <span className={styles.monthLabel}>
-          {viewYear}年 {viewMonth + 1}月
+          {viewYear} / {viewMonth + 1}
         </span>
         <button className={styles.navBtn} onClick={goToNextMonth} type="button">
           <ChevronRight size={16} />

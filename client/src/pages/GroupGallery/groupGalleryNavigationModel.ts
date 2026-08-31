@@ -95,8 +95,8 @@ export function buildGalleryDestinationModel(records: GalleryRecord[]): GalleryD
 
   return {
     primary: [
-      { key: 'all', kind: 'all', label: '全部组', count: allCount, projectId: null, color: null },
-      { key: 'recent', kind: 'recent', label: '最近', count: null, projectId: null, color: null },
+      { key: 'all', kind: 'all', label: 'All groups', count: allCount, projectId: null, color: null },
+      { key: 'recent', kind: 'recent', label: 'Recent', count: null, projectId: null, color: null },
     ],
     scoped,
   };
@@ -106,7 +106,7 @@ export function galleryDestinationLabel(
   model: GalleryDestinationModel,
   destination: GalleryDestinationKey,
 ): string {
-  return [...model.primary, ...model.scoped].find((row) => row.key === destination)?.label || '全部组';
+  return [...model.primary, ...model.scoped].find((row) => row.key === destination)?.label || 'All groups';
 }
 
 export function resolveGalleryCreationTarget(

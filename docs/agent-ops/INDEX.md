@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 242 份文档。
+共 243 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -61,6 +61,7 @@
 | [analysis/2026-08-30-paper-and-board-direction.md](analysis/2026-08-30-paper-and-board-direction.md) | 纸与板 —— 笔记载体架构变更方向 | `active` | 2026-08-30 | — |
 | [analysis/2026-08-30-v12-9c-c2-divergence-census.md](analysis/2026-08-30-v12-9c-c2-divergence-census.md) | V12.9c c-2：MinerU × Docling 分歧普查 | `active` | 2026-08-30 | — |
 | [analysis/2026-08-31-paper-viewport-design.md](analysis/2026-08-31-paper-viewport-design.md) | 纸的视口 —— 阅读标尺锁定方案(13.1 的图纸) | `active` | 2026-08-31 | — |
+| [analysis/2026-08-31-v12-10-i18n-chinese-copy-archive.md](analysis/2026-08-31-v12-10-i18n-chinese-copy-archive.md) | V12.10 i18n Chinese copy archive | `(缺状态头)` | — | — |
 | [analysis/2026-08-31-v12-10-k0-template-studio-recon.md](analysis/2026-08-31-v12-10-k0-template-studio-recon.md) | 12.10 K-0：Template Studio 面侦察 | `draft` | 2026-08-31 | — |
 | [analysis/2026-08-31-v12-9c-c2-divergence-census-v2.md](analysis/2026-08-31-v12-9c-c2-divergence-census-v2.md) | V12.9c c-2：MinerU × Docling 分歧普查 v2 | `active` | 2026-08-31 | — |
 | [analysis/2026-08-31-v12-9c-c2-divergence-census-v3.md](analysis/2026-08-31-v12-9c-c2-divergence-census-v3.md) | V12.9c c-2：MinerU × Docling 分歧普查 v3 | `active` | 2026-08-31 | — |

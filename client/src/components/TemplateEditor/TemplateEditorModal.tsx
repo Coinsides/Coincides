@@ -58,10 +58,10 @@ export default function TemplateEditorModal({ onClose, onApplied }: TemplateEdit
 
   const handleCreateSet = async () => {
     try {
-      const newSet = await createTemplateSet('新模板');
+      const newSet = await createTemplateSet('New template');
       setActiveSetId(newSet.id);
     } catch {
-      addToast('error', '创建模板失败');
+      addToast('error', 'Could not create template');
     }
   };
 
@@ -77,18 +77,18 @@ export default function TemplateEditorModal({ onClose, onApplied }: TemplateEdit
       await renameTemplateSet(activeSetId, renameValue.trim());
       setRenameMode(false);
     } catch {
-      addToast('error', '重命名失败');
+      addToast('error', 'Could not rename template');
     }
   };
 
   const handleDeleteSet = async () => {
     if (!activeSetId) return;
-    if (!confirm('确定要删除这个模板集吗？')) return;
+    if (!confirm('Delete this template set?')) return;
     try {
       await deleteTemplateSet(activeSetId);
       setActiveSetId(templateSets.find((s) => s.id !== activeSetId)?.id || null);
     } catch {
-      addToast('error', '删除模板失败');
+      addToast('error', 'Could not delete template');
     }
   };
 
@@ -134,9 +134,9 @@ export default function TemplateEditorModal({ onClose, onApplied }: TemplateEdit
         color: item.color || undefined,
       })));
       setDirty(false);
-      addToast('success', '模板已保存');
+      addToast('success', 'Template saved');
     } catch {
-      addToast('error', '保存失败');
+      addToast('error', 'Could not save template');
     }
   };
 
@@ -154,7 +154,7 @@ export default function TemplateEditorModal({ onClose, onApplied }: TemplateEdit
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div className={styles.header}>
-          <h2 className={styles.title}>Time Block 模板</h2>
+          <h2 className={styles.title}>Time Block templates</h2>
           <button className={styles.closeBtn} onClick={onClose}>
             <X size={18} />
           </button>
@@ -174,15 +174,15 @@ export default function TemplateEditorModal({ onClose, onApplied }: TemplateEdit
             ))}
           </div>
           <div className={styles.setActions}>
-            <button className={styles.iconBtn} onClick={handleCreateSet} title="新建模板集">
+            <button className={styles.iconBtn} onClick={handleCreateSet} title="New template set">
               <Plus size={14} />
             </button>
             {activeSet && (
               <>
-                <button className={styles.iconBtn} onClick={handleRenameStart} title="重命名">
+                <button className={styles.iconBtn} onClick={handleRenameStart} title="Rename">
                   <Edit3 size={14} />
                 </button>
-                <button className={styles.iconBtn} onClick={handleDeleteSet} title="删除模板集">
+                <button className={styles.iconBtn} onClick={handleDeleteSet} title="Delete template set">
                   <Trash2 size={14} />
                 </button>
               </>
@@ -200,8 +200,8 @@ export default function TemplateEditorModal({ onClose, onApplied }: TemplateEdit
               autoFocus
               className={styles.renameInput}
             />
-            <button className={styles.renameSave} onClick={handleRenameSubmit}>确认</button>
-            <button className={styles.renameCancel} onClick={() => setRenameMode(false)}>取消</button>
+            <button className={styles.renameSave} onClick={handleRenameSubmit}>Confirm</button>
+            <button className={styles.renameCancel} onClick={() => setRenameMode(false)}>Cancel</button>
           </div>
         )}
 
@@ -217,7 +217,7 @@ export default function TemplateEditorModal({ onClose, onApplied }: TemplateEdit
           </div>
         ) : (
           <div className={styles.emptyState}>
-            <p>还没有模板集。点击上方 + 号创建一个。</p>
+            <p>No template sets yet. Select + above to create one.</p>
           </div>
         )}
 
@@ -225,7 +225,7 @@ export default function TemplateEditorModal({ onClose, onApplied }: TemplateEdit
         <div className={styles.footer}>
           {dirty && (
             <button className={styles.saveBtn} onClick={handleSave}>
-              保存模板
+              Save template
             </button>
           )}
           <button
@@ -234,7 +234,7 @@ export default function TemplateEditorModal({ onClose, onApplied }: TemplateEdit
             disabled={!activeSetId || localItems.length === 0}
           >
             <Calendar size={14} />
-            应用到日期范围
+            Apply to date range
           </button>
         </div>
 
@@ -287,14 +287,14 @@ function ApplyTemplateDialog({ setId, onClose, onApplied }: ApplyDialogProps) {
     setApplying(true);
     try {
       const result = await applyTemplate(setId, { dates: selectedDates, overwrite });
-      const msg = `已创建 ${result.created_count} 个 Time Block` +
-        (result.skipped_dates.length > 0 ? `，跳过 ${result.skipped_dates.length} 天（已有数据）` : '');
+      const msg = `Created ${result.created_count} Time Blocks` +
+        (result.skipped_dates.length > 0 ? `; skipped ${result.skipped_dates.length} days (existing data)` : '');
       addToast('success', msg);
       // Refresh calendar week data
       fetchWeek(selectedDates[0]);
       onApplied();
     } catch {
-      addToast('error', '应用模板失败');
+      addToast('error', 'Could not apply template');
     } finally {
       setApplying(false);
     }
@@ -303,7 +303,7 @@ function ApplyTemplateDialog({ setId, onClose, onApplied }: ApplyDialogProps) {
   return (
     <div className={styles.dialogOverlay} onClick={onClose}>
       <div className={styles.dialog} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.dialogTitle}>选择应用日期</div>
+        <div className={styles.dialogTitle}>Select dates</div>
         <div className={styles.calendarWrap}>
           <MonthCalendar
             selectedDates={selectedDates}
@@ -318,16 +318,16 @@ function ApplyTemplateDialog({ setId, onClose, onApplied }: ApplyDialogProps) {
             checked={overwrite}
             onChange={(e) => setOverwrite(e.target.checked)}
           />
-          <span>覆盖已有 Time Block</span>
+          <span>Overwrite existing Time Blocks</span>
         </label>
         <div className={styles.dialogActions}>
-          <button className={styles.cancelBtn} onClick={onClose}>取消</button>
+          <button className={styles.cancelBtn} onClick={onClose}>Cancel</button>
           <button
             className={styles.applyBtn}
             onClick={handleApply}
             disabled={selectedDates.length === 0 || applying}
           >
-            {applying ? '应用中...' : `确认应用（${selectedDates.length} 天）`}
+            {applying ? 'Applying...' : `Apply (${selectedDates.length} days)`}
           </button>
         </div>
       </div>

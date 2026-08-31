@@ -3,7 +3,7 @@ import { Plus, Trash2, Edit3 } from 'lucide-react';
 import type { TimeBlockTemplate } from '@shared/types';
 import styles from './TemplateWeekView.module.css';
 
-const DAYS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
 const DISPLAY_TO_DOW = [1, 2, 3, 4, 5, 6, 0];
 const DOW_TO_DISPLAY: Record<number, number> = { 1: 0, 2: 1, 3: 2, 4: 3, 5: 4, 6: 5, 0: 6 };
 
@@ -133,7 +133,7 @@ export default function TemplateWeekView({ items, onAdd, onEdit, onDelete }: Tem
         {DAYS.map((day, i) => (
           <div key={i} className={styles.dayHeader}>
             <span>{day}</span>
-            <button className={styles.addDayBtn} onClick={() => openAddForm(i)} title={`在${day}添加`}>
+            <button className={styles.addDayBtn} onClick={() => openAddForm(i)} title={`Add on ${day}`}>
               <Plus size={12} />
             </button>
           </div>
@@ -169,8 +169,8 @@ export default function TemplateWeekView({ items, onAdd, onEdit, onDelete }: Tem
                     <span className={styles.blockTime}>{item.start_time}–{item.end_time}</span>
                   </div>
                   <div className={styles.blockActions}>
-                    <button onClick={() => openEditForm(item)} title="编辑"><Edit3 size={10} /></button>
-                    <button onClick={() => onDelete(item.id)} title="删除"><Trash2 size={10} /></button>
+                    <button onClick={() => openEditForm(item)} title="Edit"><Edit3 size={10} /></button>
+                    <button onClick={() => onDelete(item.id)} title="Delete"><Trash2 size={10} /></button>
                   </div>
                 </div>
               );

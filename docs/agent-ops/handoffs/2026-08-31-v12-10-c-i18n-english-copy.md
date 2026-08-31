@@ -56,3 +56,105 @@ PreferenceForm 10 · MonthCalendar 6 · Calendar 10 · TemplateWeekView 4 · Tem
 ## 5. 回执(`## Result`)
 
 K-1 两条 rg 输出全文 + 白名单表 · K-2 分文件对账 · K-3 申明 · K-4 各 exit · K-5 · 停线点。
+
+## Result
+
+施工完成。状态头按单保持 `ready`，未翻。仅改允许面内的 UI 字符串字面量、Group Gallery 随文案断言 token，并新增翻译档；未触碰既有 `server/src/routes/projections.ts` 工作区修改。
+
+### K-1 零中文
+
+命令：
+
+```text
+rg -n "\p{Han}" client/src --glob "*.ts" --glob "*.tsx"
+```
+
+输出全文（空，`rg` 无匹配按约定返回 exit 1）：
+
+```text
+```
+
+命令：
+
+```text
+rg -n "\p{Han}" client/scripts
+```
+
+输出全文（空，`rg` 无匹配按约定返回 exit 1）：
+
+```text
+```
+
+白名单：
+
+| 文件:行 | 不改原因 |
+|---|---|
+| — | 无。现物未发现作为数据键、枚举值或逻辑比较值的中文字面量。 |
+
+locale 零 diff：
+
+```text
+git diff --quiet -- client/src/locales
+exit 0
+```
+
+### K-2 翻译档全量对账
+
+翻译档：`docs/agent-ops/analysis/2026-08-31-v12-10-i18n-chinese-copy-archive.md`。
+
+计数口径为含中文的实际替换行；数组或同一表达式内的多个字面量在一行内逐项完整列出。`git diff --numstat -- client/src client/scripts` 合计删除 98 行、增加 98 行；翻译档编号行机械计数 98 条，零缺失。
+
+| 文件 | 实际替换 | 翻译档 | 差额 |
+|---|---:|---:|---:|
+| `client/src/components/AgentPanel/PreferenceForm.tsx` | 10 | 10 | 0 |
+| `client/src/components/MonthCalendar/MonthCalendar.tsx` | 6 | 6 | 0 |
+| `client/src/pages/Calendar/Calendar.tsx` | 10 | 10 | 0 |
+| `client/src/components/TemplateEditor/TemplateWeekView.tsx` | 4 | 4 | 0 |
+| `client/src/components/TemplateEditor/TemplateEditorModal.tsx` | 23 | 23 | 0 |
+| `client/src/components/TaskViewModal/TaskViewModal.tsx` | 3 | 3 | 0 |
+| `client/src/pages/Goals/Goals.tsx` | 4 | 4 | 0 |
+| `client/src/pages/GroupGallery/GroupGallery.test.tsx` | 12 | 12 | 0 |
+| `client/src/pages/Settings/Settings.tsx` | 1 | 1 | 0 |
+| `client/src/components/Layout/AppLayout.tsx` | 1 | 1 | 0 |
+| `client/src/pages/GroupGallery/groupGalleryNavigationModel.ts` | 3 | 3 | 0 |
+| `client/src/pages/GroupGallery/groupGalleryShellModel.ts` | 3 | 3 | 0 |
+| `client/src/pages/GroupGallery/GroupGallery.tsx` | 5 | 5 | 0 |
+| `client/src/pages/Courses/CourseDetail.tsx` | 7 | 7 | 0 |
+| `client/src/pages/Notes/canvasEngine/layers/BlockEditorLayer.tsx` | 2 | 2 | 0 |
+| `client/scripts/groupGalleryShellContractCheck.mjs` | 4 | 4 | 0 |
+| **合计** | **98** | **98** | **0** |
+
+### K-3 逻辑零变
+
+- 产品代码只替换字符串字面量或 JSX 文字节点；标识符、条件、调用、数据结构与组件结构未改。
+- `BlockEditorLayer.tsx` 仅把 `上接` / `下续` 两个字符串替换为 `From previous` / `To next`，其余逻辑一字未动。
+- `GroupGallery.test.tsx` 的 12 行断言/参数 token 与产品文案同步；断言未删。
+- `groupGalleryShellContractCheck.mjs` 的 4 个硬断言 token 与产品文案同步；断言未删。
+- 未修改注释，未新增 `t()` 接线，未修改 `client/src/i18n.ts` 或 locale JSON。
+- `git diff --check -- client/src client/scripts docs/agent-ops/analysis/2026-08-31-v12-10-i18n-chinese-copy-archive.md`：exit 0。
+
+### K-4 门禁
+
+| 门禁 | 结果 | 摘要 |
+|---|---:|---|
+| `npm --prefix client run build` | exit 0 | Vite build 完成；仅既有 chunk / dynamic-import 警告 |
+| `npm run test:unit` | exit 0 | 34 files，288/288 tests passed |
+| `npm run check:group-gallery-shell` | exit 0 | 8 checks passed |
+| `npm run check:groups-rail-shell` | exit 0 | passed |
+| `npm run check:single-editor-shell` | exit 0 | passed |
+| `npm run check:source-experience` | exit 0 | contract + model contract passed |
+| `npm run docs:check` | exit 1 | 仅 `docs/agent-ops/INDEX.md` 生成件过期；按工单申报，不在本单重生成 |
+| `npm --prefix server run test:v2` | exit 0 | 328/328 tests passed |
+
+### K-5 本单明确未做
+
+- 未做全量 `t()` 化。
+- 未扩充 zh locale。
+- 未做语言切换 UI。
+- 未做 4a / OD。
+- 零 API 调用、零模型费用；未 commit、未 push、未杀进程。
+
+### 停线点 / 调度方后续
+
+- `needs: dispatcher`：`docs:check` 因新增 analysis 翻译档而报告 `docs/agent-ops/INDEX.md` 过期；按工单，生成件重生成归调度方。
+- 除上述已允许申报项外，无字面矛盾、无停线点。

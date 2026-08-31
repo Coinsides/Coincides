@@ -504,9 +504,9 @@ export default function CalendarPage() {
         const { data } = await api.get('/tasks', { params: { date: dateStr } });
         setDayTasks(data);
       }
-      addToast('success', '任务已移动');
+      addToast('success', 'Task moved');
     } catch {
-      addToast('error', '移动失败');
+      addToast('error', 'Could not move task');
     }
   };
 
@@ -703,10 +703,10 @@ export default function CalendarPage() {
           <button
             className={styles.templateBtn}
             onClick={() => setShowTemplateEditor(true)}
-            title="Time Block 模板"
+            title="Time Block templates"
           >
             <LayoutTemplate size={14} />
-            模板
+            Templates
           </button>
 
           <button className={styles.navBtn} onClick={() => setCurrentMonth(view === 'week' ? subWeeks(currentMonth, 1) : subMonths(currentMonth, 1))}>
@@ -1581,12 +1581,12 @@ export default function CalendarPage() {
       {moveTask && (
         <div className={styles.overlay} onClick={(e) => { if (e.target === e.currentTarget) setMoveTask(null); }}>
           <div className={styles.tbEditModal} onClick={(e) => e.stopPropagation()}>
-            <div className={styles.tbEditTitle}>移动任务</div>
+            <div className={styles.tbEditTitle}>Move task</div>
             <p style={{ color: 'var(--text-primary)', fontSize: 14, margin: '4px 0 12px', fontWeight: 500 }}>
               {moveTask.title}
             </p>
             <div className={styles.tbEditField}>
-              <label>目标日期</label>
+              <label>Target date</label>
               <input
                 type="date"
                 value={moveDate}
@@ -1596,13 +1596,13 @@ export default function CalendarPage() {
             </div>
             {moveTargetBlocks.length > 0 && (
               <div className={styles.tbEditField}>
-                <label>放入 Time Block（可选）</label>
+                <label>Add to Time Block (optional)</label>
                 <select
                   value={moveTimeBlockId}
                   onChange={(e) => setMoveTimeBlockId(e.target.value)}
                   className={styles.tbFormInput}
                 >
-                  <option value="">不放入 Time Block</option>
+                  <option value="">Do not add to a Time Block</option>
                   {moveTargetBlocks.map((b) => (
                     <option key={b.id} value={b.id}>
                       {b.type.charAt(0).toUpperCase() + b.type.slice(1)} ({b.start_time}\u2013{b.end_time})
@@ -1612,8 +1612,8 @@ export default function CalendarPage() {
               </div>
             )}
             <div className={styles.tbEditActions}>
-              <button className={styles.tbFormCancel} onClick={() => setMoveTask(null)}>取消</button>
-              <button className={styles.tbFormSave} onClick={handleMoveTask} disabled={!moveDate}>确认移动</button>
+              <button className={styles.tbFormCancel} onClick={() => setMoveTask(null)}>Cancel</button>
+              <button className={styles.tbFormSave} onClick={handleMoveTask} disabled={!moveDate}>Move task</button>
             </div>
           </div>
         </div>

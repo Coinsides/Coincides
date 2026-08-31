@@ -88,7 +88,7 @@ export default function PreferenceForm({ form }: PreferenceFormProps) {
       <div className={styles.formContainer}>
         <div className={styles.formHeader}>
           <Check size={14} className={styles.checkIcon} />
-          <span className={styles.headerText}>偏好已提交</span>
+          <span className={styles.headerText}>Preferences submitted</span>
         </div>
         <div className={styles.submittedSummary}>
           {form.questions.map((q) => {
@@ -103,7 +103,7 @@ export default function PreferenceForm({ form }: PreferenceFormProps) {
             } else if (q.type === 'date_picker') {
               const vals = val as string[] | undefined;
               if (vals && vals.length > 0) {
-                display = vals.length === 1 ? vals[0] : `${vals[0]} 至 ${vals[vals.length - 1]}（${vals.length}天）`;
+                display = vals.length === 1 ? vals[0] : `${vals[0]} to ${vals[vals.length - 1]} (${vals.length} days)`;
               } else {
                 display = '—';
               }
@@ -128,7 +128,7 @@ export default function PreferenceForm({ form }: PreferenceFormProps) {
   return (
     <div className={styles.formContainer}>
       <div className={styles.formHeader}>
-        <span className={styles.headerText}>请填写以下偏好</span>
+        <span className={styles.headerText}>Complete the following preferences</span>
       </div>
 
       <div className={styles.questions}>
@@ -149,7 +149,7 @@ export default function PreferenceForm({ form }: PreferenceFormProps) {
       </div>
 
       <button className={styles.submitBtn} onClick={handleSubmit} disabled={streaming}>
-        提交
+        Submit
       </button>
     </div>
   );
@@ -184,7 +184,7 @@ function QuestionRenderer({
     <div className={styles.question}>
       <div className={styles.questionLabel}>
         {q.label}
-        {q.required === false && <span className={styles.optional}>(可选)</span>}
+        {q.required === false && <span className={styles.optional}>(Optional)</span>}
       </div>
 
       {q.type === 'single_choice' && q.options && (
@@ -228,7 +228,7 @@ function QuestionRenderer({
             );
           })}
           {q.max_select && (
-            <div className={styles.maxHint}>最多选择 {q.max_select} 项</div>
+            <div className={styles.maxHint}>Select up to {q.max_select} options</div>
           )}
         </div>
       )}
@@ -239,7 +239,7 @@ function QuestionRenderer({
           className={styles.numberInput}
           value={String(value || '')}
           onChange={(e) => onNumberInput(q.id, e.target.value)}
-          placeholder={q.placeholder || '请输入数字'}
+          placeholder={q.placeholder || 'Enter a number'}
           min={1}
           max={20}
         />
@@ -271,7 +271,7 @@ function QuestionRenderer({
                   <div className={styles.docInfo}>
                     <span className={styles.docName}>{doc.filename}</span>
                     <span className={styles.docMeta}>
-                      {doc.page_count ? `${doc.page_count}页` : ''}
+                      {doc.page_count ? `${doc.page_count} pages` : ''}
                       {doc.document_type ? ` · ${doc.document_type}` : ''}
                     </span>
                   </div>
@@ -290,14 +290,14 @@ function QuestionRenderer({
           })}
           {q.max_select && (
             <div className={styles.maxHint}>
-              最多选择 {q.max_select} 个文档
+              Select up to {q.max_select} documents
               {(() => {
                 const sel = (value as string[]) || [];
                 const totalPages = sel.reduce((sum, id) => {
                   const d = q.documents?.find((doc) => doc.id === id);
                   return sum + (d?.page_count || 0);
                 }, 0);
-                return totalPages > 0 ? ` · 已选 ${totalPages} 页` : '';
+                return totalPages > 0 ? ` · ${totalPages} pages selected` : '';
               })()}
             </div>
           )}

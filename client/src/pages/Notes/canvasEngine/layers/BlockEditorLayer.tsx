@@ -187,8 +187,8 @@ export function BlockEditorLayer({
   const fragmentContinuesFromPrevious = blockFragments.some((fragment) => fragment.clippedTop);
   const fragmentContinuesToNext = blockFragments.some((fragment) => fragment.clippedBottom);
   const fragmentContinuationLabel = [
-    fragmentContinuesFromPrevious ? '上接' : null,
-    fragmentContinuesToNext ? '下续' : null,
+    fragmentContinuesFromPrevious ? 'From previous' : null,
+    fragmentContinuesToNext ? 'To next' : null,
   ].filter(Boolean).join(' / ');
   const textFlow = textFlowDraft || getTextFlowContent(block.content_json);
   const fallbackFocusReceipt: TextFocusReceipt = {

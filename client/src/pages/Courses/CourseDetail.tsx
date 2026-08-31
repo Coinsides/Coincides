@@ -1124,7 +1124,7 @@ export default function CourseDetailPage() {
                     >
                       <span className={styles.snapshotItemTitle}>{snapshot.title}</span>
                       <span className={styles.snapshotItemMeta}>
-                        {snapshot.status} 璺?{snapshot.page_count || 0} pages 璺?{snapshot.chunk_count || 0} chunks
+                        {snapshot.status} · {snapshot.page_count || 0} pages · {snapshot.chunk_count || 0} chunks
                       </span>
                     </button>
                   ))}
@@ -1160,7 +1160,7 @@ export default function CourseDetailPage() {
                           <span>{scope.label}</span>
                           <small>
                             {scope.scope_kind.replace(/_/g, ' ')}
-                            {scope.page_start ? ` 路 p.${scope.page_start}${scope.page_end && scope.page_end !== scope.page_start ? `-${scope.page_end}` : ''}` : ''}
+                            {scope.page_start ? ` · p.${scope.page_start}${scope.page_end && scope.page_end !== scope.page_start ? `-${scope.page_end}` : ''}` : ''}
                           </small>
                         </button>
                         <button
@@ -1220,7 +1220,7 @@ export default function CourseDetailPage() {
                     <div className={styles.sourceBoardToolbar}>
                       <span className={styles.safetyMeta}>
                         {activeSourceBoard.nodes.length} active nodes
-                        {activeSourceBoardScopeNodeCount > 0 ? ' 路 used by new proposals' : ''}
+                        {activeSourceBoardScopeNodeCount > 0 ? ' · used by new proposals' : ''}
                       </span>
                       <button
                         type="button"
@@ -1245,7 +1245,7 @@ export default function CourseDetailPage() {
                               title="Open board node source"
                             >
                               <span>{node.title}</span>
-                              <small>{node.node_type.replace(/_/g, ' ')}{node.summary ? ` 路 ${node.summary}` : ''}</small>
+                              <small>{node.node_type.replace(/_/g, ' ')}{node.summary ? ` · ${node.summary}` : ''}</small>
                             </button>
                             <button
                               type="button"
@@ -1325,7 +1325,7 @@ export default function CourseDetailPage() {
                   <div>
                     <div className={styles.proposalEyebrow}>Reconciliation safety</div>
                     <div className={styles.safetyTitle}>
-                      {reconciliationSafety.active_exclusions.length} exclusions 路 {reconciliationSafety.open_conflicts.length} open conflicts
+                      {reconciliationSafety.active_exclusions.length} exclusions · {reconciliationSafety.open_conflicts.length} open conflicts
                     </div>
                   </div>
                   <span className={styles.safetyMeta}>No source rows are deleted</span>
@@ -1393,7 +1393,7 @@ export default function CourseDetailPage() {
                     <div className={styles.safetyGroupTitle}>Recent recovery</div>
                     {reconciliationSafety.recent_recovery_events.slice(0, 2).map((item) => (
                       <div key={item.id} className={styles.safetyEvent}>
-                        {item.event_type.replace(/_/g, ' ')} 路 {item.next_status}
+                        {item.event_type.replace(/_/g, ' ')} · {item.next_status}
                       </div>
                     ))}
                   </div>
@@ -1487,7 +1487,7 @@ export default function CourseDetailPage() {
                         <span className={styles.itemKind}>{group.group_kind.replace(/_/g, ' ')}</span>
                         <span className={styles.itemText}>{group.title}</span>
                         <span className={styles.itemMetaSmall}>
-                          {group.evidence.length} sources 路 {Math.round((group.confidence || 0) * 100)}%
+                          {group.evidence.length} sources · {Math.round((group.confidence || 0) * 100)}%
                         </span>
                         <div className={styles.roleHintRow}>
                           <span className={styles.roleHint}>

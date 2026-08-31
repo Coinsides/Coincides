@@ -228,7 +228,7 @@ export default function SettingsPage() {
                   i18n.changeLanguage('zh');
                 }}
               >
-                中文
+                Chinese
               </button>
             </div>
           </div>

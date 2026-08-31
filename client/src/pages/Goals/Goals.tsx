@@ -306,7 +306,7 @@ function SortableGoalRow({
                 <button
                   className={styles.taskDeleteBtn}
                   onClick={(e) => { e.stopPropagation(); onDeleteTask(task.id); }}
-                  title="删除任务"
+                  title="Delete task"
                 >
                   <Trash2 size={12} />
                 </button>
@@ -405,7 +405,7 @@ export default function GoalsPage() {
   const handleDelete = async (id: string) => {
     try {
       await deleteGoal(id);
-      addToast('success', '目标及其下属任务已删除');
+      addToast('success', 'Goal and its tasks deleted');
     } catch {
       addToast('error', 'Failed to delete goal');
     }
@@ -432,9 +432,9 @@ export default function GoalsPage() {
         const { data } = await api.get('/tasks', { params: { goal_id: showTasksFor } });
         setGoalTasks((prev) => ({ ...prev, [showTasksFor]: data }));
       }
-      addToast('success', '任务已删除');
+      addToast('success', 'Task deleted');
     } catch {
-      addToast('error', '删除失败');
+      addToast('error', 'Could not delete task');
     }
   };
 

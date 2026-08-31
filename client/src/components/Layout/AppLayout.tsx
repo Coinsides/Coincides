@@ -130,7 +130,7 @@ export default function AppLayout() {
             </NavLink>
           ))}
 
-          {sidebarOpen ? <div className={styles.sectionLabel}><span>辅助</span></div> : null}
+          {sidebarOpen ? <div className={styles.sectionLabel}><span>Utilities</span></div> : null}
           <NavLink
             to="/tool-receipts"
             className={({ isActive }) =>

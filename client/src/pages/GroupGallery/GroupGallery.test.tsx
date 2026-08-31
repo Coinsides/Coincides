@@ -197,9 +197,9 @@ describe('Group Gallery destination navigation', () => {
   it('K-1a renders the fixed destinations and the project group count', async () => {
     renderGallery([activeRecord, emptyRecord]);
 
-    expect(await screen.findByRole('button', { name: '全部组 1' })).toBeTruthy();
-    expect(screen.getByRole('button', { name: '最近' })).toBeTruthy();
-    expect(screen.getByText('按项目')).toBeTruthy();
+    expect(await screen.findByRole('button', { name: 'All groups 1' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Recent' })).toBeTruthy();
+    expect(screen.getByText('By project')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'Active Project 1' })).toBeTruthy();
   });
 
@@ -220,7 +220,7 @@ describe('Group Gallery origin badges', () => {
   it('K-2a renders the project badge for a project-level group', async () => {
     renderGallery([projectLevelRecord]);
 
-    expect(await screen.findByRole('button', { name: 'Active Project · 项目级' })).toBeTruthy();
+    expect(await screen.findByRole('button', { name: 'Active Project · Project level' })).toBeTruthy();
   });
 
   it('K-2b renders the project and note badge for a note-level group', async () => {
@@ -232,7 +232,7 @@ describe('Group Gallery origin badges', () => {
   it('K-2b renders an unnamed note with its M/D date and no bare fallback', async () => {
     renderGallery([unnamedRecord]);
 
-    expect(await screen.findByRole('button', { name: 'Active Project · 未命名 · 8/29' })).toBeTruthy();
+    expect(await screen.findByRole('button', { name: 'Active Project · Untitled · 8/29' })).toBeTruthy();
     expect(screen.queryByText('From Untitled note')).toBeNull();
   });
 });
@@ -245,7 +245,7 @@ describe('Group Gallery origin navigation', () => {
   it('K-3 opens the Project page from a project-level badge', async () => {
     renderGallery([projectLevelRecord]);
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Active Project · 项目级' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Active Project · Project level' }));
     expect(screen.getByTestId('location-probe').textContent).toBe('/projects/project-active');
   });
 
@@ -273,13 +273,13 @@ describe('Group Gallery creation destinations', () => {
   });
 
   it.each([
-    ['全部组', null],
-    ['最近', '最近'],
+    ['All groups', null],
+    ['Recent', 'Recent'],
   ])('K-4 creates a group in the workspace root from %s', async (_label, destination) => {
     renderGallery([activeRecord]);
 
     if (destination) fireEvent.click(await screen.findByRole('button', { name: destination }));
-    else await screen.findByRole('button', { name: '全部组 1' });
+    else await screen.findByRole('button', { name: 'All groups 1' });
     fireEvent.click(screen.getByRole('button', { name: 'New group' }));
     await waitFor(() => expect(mocks.saveGalleryRecord).toHaveBeenCalledTimes(1));
     const savedGroups = mocks.saveGalleryRecord.mock.calls[0][1] as ContentGroupV1[];
@@ -298,13 +298,13 @@ describe('Group Gallery creation destinations', () => {
   });
 
   it.each([
-    ['全部组', null],
-    ['最近', '最近'],
+    ['All groups', null],
+    ['Recent', 'Recent'],
   ])('K-4 creates a folder under the workspace root from %s', async (_label, destination) => {
     renderGallery([activeRecord]);
 
     if (destination) fireEvent.click(await screen.findByRole('button', { name: destination }));
-    else await screen.findByRole('button', { name: '全部组 1' });
+    else await screen.findByRole('button', { name: 'All groups 1' });
     fireEvent.click(screen.getByRole('button', { name: 'New folder' }));
     await waitFor(() => expect(mocks.saveGalleryRecord).toHaveBeenCalledTimes(1));
     const savedFolders = mocks.saveGalleryRecord.mock.calls[0][2] as GroupFolderV1[];

@@ -109,7 +109,7 @@ export default function TaskViewModal() {
           <div className={styles.headerActions}>
             <button className={styles.editBtn} onClick={handleEdit}>
               <Pencil size={14} />
-              编辑
+              Edit
             </button>
             <button className={styles.closeBtn} onClick={closeModal}>
               <X size={16} />
@@ -119,7 +119,7 @@ export default function TaskViewModal() {
 
         {/* Status badge */}
         {task.status === 'completed' && (
-          <div className={styles.completedBadge}>已完成</div>
+          <div className={styles.completedBadge}>Completed</div>
         )}
 
         {/* Meta info */}
@@ -207,7 +207,7 @@ export default function TaskViewModal() {
         {/* Task-level linked cards */}
         {taskLevelCards.length > 0 && (
           <div className={styles.section}>
-            <h3 className={styles.sectionTitle}>关联卡片</h3>
+            <h3 className={styles.sectionTitle}>Related cards</h3>
             <div className={styles.cardBubbleGrid}>
               {taskLevelCards.map((link) => (
                 <CardBubble key={link.id} card={link as CardBubbleData} />
