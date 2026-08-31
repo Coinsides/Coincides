@@ -96,3 +96,215 @@ K-1 四条(含那条隔离测试的名字与断言)· K-2 入行字段 · K-3 �
 
 §0 七句(含 **§0.6「key 值零出境……出现即本单作废」**)、§1 允许面与禁区、§2 判据 K-1~K-7、§3 回执要求**全部照旧**。
 ⭐ **§0.6 上次真的生效了** —— builder 撞上后立即停线、零调用、零文件、且拒写 `## Result` 以免把作废工单冒充完成。**本次同样按此执行。**
+
+
+## Result
+
+**needs: dispatcher — 本次续跑已停线，未收工。**
+
+### 现实对齐
+
+第二次派工 builder 死于 app 重启；其遗产为 `server/src/db/migrations/052_v2_imprint_fragment_vectors.ts`、`server/src/embedding/dashscope.ts`、`server/src/services/imprintEmbedding.ts`、`server/src/__tests__/v2ImprintEmbedding.test.ts`、`scripts/embed-imprint-fragments.mjs`、`server/package.json`（仅 `test:v2` 挂新测试文件）。本次对这 6 处零改动。本次是第三次派工的续跑运行时半程，起点为 052 未入库、嵌入行数为 0。
+
+### 停线点
+
+在仓库根原样执行 `node --env-file=server/.env --import tsx scripts/embed-imprint-fragments.mjs`，Node 在脚本入口执行前以 `ERR_MODULE_NOT_FOUND` 失败：无法从仓库根解析包 `tsx`；exit code 1。失败发生在脚本模块装载前，因此未进入 052 迁移、未发出 DashScope API 调用、未写入向量，也没有脚本 event JSON 可记录。输出未包含任何 key 片段。按工单“任何失败即停线”，本次未改变命令形态、未重试、未自修遗产代码。
+
+### K-1
+
+遗产测试与断言本次未改、未复跑：包括按 `model_id` 隔离检索的测试，以及每行带 `model_id`、换模型不原地覆写、查询按 `model_id` 过滤的既有断言。由于跑批入口在模块解析阶段失败，本次不冒充完成 K-1 运行时复核。
+
+### K-2
+
+未执行入行；无新增 `fragment_id` / `model_id` / `dimensions` / `l2_normalized` / `encoding_format` / `normalization` 数据可申报。
+
+### K-3
+
+未执行跑批后的查库对账，未新建覆盖率报告，未产生可贴入报告的 SQL 结果；不得用预期值或 stdout 计数器冒充查库数字。
+
+### K-4
+
+实际 API 调用次数 0；实际输入字符数 0；批大小未进入运行；重试次数 0。没有触发 30 次 / 150,000 字符预算上限。
+
+### K-5
+
+覆盖率报告未生成，故硬声明尚未写入报告。
+
+### K-6
+
+本次没有做检索 API 与水合（归 d-2）、FTS 半边、粒度升级（切 MinerU 默认路径须另立显式单）、嵌入模型终选（延 V14）；也没有夹带任何这些工作。
+
+### K-7
+
+因跑批失败触发停线，`npm --prefix server run test:v2`、`npm exec --prefix server -- tsc --noEmit -p server` 与禁区逐项 `git diff --quiet` 均未执行；不得把第二次派工已过的门禁冒充本次结果。`server/src/routes/projections.ts` 未触碰。
+
+### 调度所需处置
+
+请调度方裁定指定的仓库根命令如何获得可解析的 `tsx`，或重新签发允许的调用方式；本单不自行修改依赖、脚本或命令。
+
+
+## Result(续跑二段,2026-08-31)
+
+**结论：完成，无新增停线点。** 前一停线段的病根系调度方签发的仓库根命令形态错误（仓库根无法解析安装于 `server/node_modules` 的 `tsx`），已由续跑二段更正令解除；遗产代码无缺陷、零修改需求。前一停线段按 append-only 纪律原样保留。
+
+### 现实对齐
+
+第二次派工 builder 死于 app 重启；其遗产仍为 `server/src/db/migrations/052_v2_imprint_fragment_vectors.ts`、`server/src/embedding/dashscope.ts`、`server/src/services/imprintEmbedding.ts`、`server/src/__tests__/v2ImprintEmbedding.test.ts`、`scripts/embed-imprint-fragments.mjs`、`server/package.json`（仅 `test:v2` 挂新测试文件）。本次续跑二段对这 6 处零改动；只执行跑批、查库、写覆盖率报告、跑门禁并追加本回执。
+
+从 `server` 目录原样执行 `node --env-file=.env --import tsx ../scripts/embed-imprint-fragments.mjs`，exit 0。凭证只申报存在与有效长度 116，未输出任何 key 值或片段。052 应用 1 次；完成 event 为 `model_id=dashscope:text-embedding-v4:1024`、`total_fragments=110`、`pending_fragments=110`、`inserted=110`、`already_embedded=0`、`skipped=[]`。
+
+完整覆盖率报告：`docs/agent-ops/analysis/2026-08-31-v12-9d-d1b-embedding-coverage.md`。
+
+### K-1 · model_id 四条
+
+1. **每行带模型身份。** 迁移测试 `migration 052 fixes identity columns, vec0 partition shape, and idempotence` 断言身份收据列精确包含 `fragment_id / model_id / dimensions / l2_normalized / encoding_format / normalization`，并断言 vec0 schema 含 `model_id TEXT NOT NULL PARTITION KEY` 与 `FLOAT[1024] distance_metric=cosine`。查库再证两表各 110 行、distinct `model_id` 都为 1，值均为 `dashscope:text-embedding-v4:1024`。
+2. **查询路径按模型过滤。** 隔离测试 `K-1 model partition filters inside KNN: querying A cannot return closer model B` 构造 MODEL_A 与 MODEL_B 两行，并故意用更接近 B 的 query；断言结果仅 1 行、fragment 为 A、`modelId=MODEL_A`、B 不在结果中，且 A 的 distance 为 1。
+3. **换模型新身份、不原地覆写。** 测试 `K-1 model change creates a new identity and same-model rerun never overwrites` 断言同模型第二次写入返回 `existing` 且 id 不变；换 MODEL_B 得到不同 id，同 fragment 共 2 条身份行；随后用原 A 向量检索仍命中首个 A id、distance 为 0，证明第二次同模型调用没有覆写原向量。
+4. **隔离测试是真判据。** 上述 A/B 隔离测试直接断言“按 A 查不会返回 B”，不是只检查 `model_id` 字段存在。新代服务未 join 旧代表，旧代 Voyage 机关保持禁区零 diff。
+
+### K-2 · 入行身份
+
+查库 distinct 值：
+
+- fragment 身份：`fragment_id`，每条收据指向对应 `imprint_fragments.id`；
+- 模型标识：`model_id=dashscope:text-embedding-v4:1024`；
+- 维度：`dimensions=1024`，vec0 payload schema 亦为 `FLOAT[1024]`；
+- 归一化口径：`l2_normalized=0`、`encoding_format=float`、`normalization=none`。
+
+两张表分别为 `imprint_fragment_vectors=110` 行、`imprint_fragment_vec=110` 行；各自 distinct `model_id` 数均为 1。
+
+### K-3 · 覆盖率与 SQL
+
+`db_migrations` 查得：`id=052_v2_imprint_fragment_vectors`，`applied_at=2026-08-31 20:15:46`。
+
+| 卷 | imprint_id | fragments 总数 | 已嵌 | 剩余 | 跳过 |
+|---|---|---:|---:|---:|---:|
+| reading | `d5247f8f-a4ff-4dce-8273-c62d4114425c` | 46 | 46 | 0 | 0 |
+| writing-responses | `d238deb2-e80d-4378-b693-40f1f4c90c71` | 5 | 5 | 0 | 0 |
+| writing-tasks | `b5df948c-d1c1-4448-a32d-b18ecadbf31e` | 26 | 26 | 0 | 0 |
+| listening | `1d1d8c63-f7ab-459c-a871-cfdf9739a89a` | 33 | 33 | 0 | 0 |
+| **合计** | — | **110** | **110** | **0** | **0** |
+
+跳过明细 SQL 返回 0 行；所以没有可逐条列出的跳过 fragment 或原因。查询显式枚举 `blank_text / missing_vector_receipt / missing_vector_payload` 三类原因，均未命中。
+
+覆盖率原 SQL：
+
+```sql
+WITH target(ord, volume, imprint_id) AS (VALUES
+  (1, 'reading', 'd5247f8f-a4ff-4dce-8273-c62d4114425c'),
+  (2, 'writing-responses', 'd238deb2-e80d-4378-b693-40f1f4c90c71'),
+  (3, 'writing-tasks', 'b5df948c-d1c1-4448-a32d-b18ecadbf31e'),
+  (4, 'listening', '1d1d8c63-f7ab-459c-a871-cfdf9739a89a')
+), scoped AS (
+  SELECT t.ord, t.volume, f.id AS fragment_id, f.text,
+         r.id AS receipt_id, v.vector_id AS payload_id
+  FROM target t
+  LEFT JOIN imprint_fragments f ON f.imprint_id = t.imprint_id
+  LEFT JOIN imprint_fragment_vectors r
+    ON r.fragment_id = f.id
+   AND r.model_id = 'dashscope:text-embedding-v4:1024'
+  LEFT JOIN imprint_fragment_vec v
+    ON v.vector_id = r.id
+   AND v.model_id = r.model_id
+), coverage AS (
+  SELECT ord, volume,
+         COUNT(fragment_id) AS total_fragments,
+         SUM(CASE WHEN receipt_id IS NOT NULL AND payload_id IS NOT NULL THEN 1 ELSE 0 END) AS embedded,
+         SUM(CASE WHEN fragment_id IS NOT NULL AND (receipt_id IS NULL OR payload_id IS NULL) THEN 1 ELSE 0 END) AS remaining,
+         SUM(CASE WHEN fragment_id IS NOT NULL AND trim(text) = '' THEN 1 ELSE 0 END) AS blank_text,
+         SUM(length(text)) AS input_characters
+  FROM scoped
+  GROUP BY ord, volume
+  UNION ALL
+  SELECT 5, 'TOTAL',
+         COUNT(fragment_id),
+         SUM(CASE WHEN receipt_id IS NOT NULL AND payload_id IS NOT NULL THEN 1 ELSE 0 END),
+         SUM(CASE WHEN fragment_id IS NOT NULL AND (receipt_id IS NULL OR payload_id IS NULL) THEN 1 ELSE 0 END),
+         SUM(CASE WHEN fragment_id IS NOT NULL AND trim(text) = '' THEN 1 ELSE 0 END),
+         SUM(length(text))
+  FROM scoped
+)
+SELECT ord, volume, total_fragments, embedded, remaining,
+       blank_text, input_characters
+FROM coverage
+ORDER BY ord;
+```
+
+跳过与缺失原 SQL：
+
+```sql
+WITH target(ord, volume, imprint_id) AS (VALUES
+  (1, 'reading', 'd5247f8f-a4ff-4dce-8273-c62d4114425c'),
+  (2, 'writing-responses', 'd238deb2-e80d-4378-b693-40f1f4c90c71'),
+  (3, 'writing-tasks', 'b5df948c-d1c1-4448-a32d-b18ecadbf31e'),
+  (4, 'listening', '1d1d8c63-f7ab-459c-a871-cfdf9739a89a')
+)
+SELECT t.volume, f.id AS fragment_id,
+       CASE
+         WHEN trim(f.text) = '' THEN 'blank_text'
+         WHEN r.id IS NULL THEN 'missing_vector_receipt'
+         WHEN v.vector_id IS NULL THEN 'missing_vector_payload'
+       END AS reason
+FROM target t
+JOIN imprint_fragments f ON f.imprint_id = t.imprint_id
+LEFT JOIN imprint_fragment_vectors r
+  ON r.fragment_id = f.id
+ AND r.model_id = 'dashscope:text-embedding-v4:1024'
+LEFT JOIN imprint_fragment_vec v
+  ON v.vector_id = r.id
+ AND v.model_id = r.model_id
+WHERE trim(f.text) = ''
+   OR r.id IS NULL
+   OR v.vector_id IS NULL
+ORDER BY t.ord, f.seq, f.id;
+-- 0 rows
+```
+
+迁移、双表身份、schema 与 role 的其余实际 SQL 原文及查询结果均收录于覆盖率报告。
+
+### K-4 · 预算台账
+
+跑批 event JSON：实际 API 调用 **11** 次，实际输入字符 **114,066**，批大小 **10**，重试 **0** 次；未触发 30 次 / 150,000 字符硬上限。数据库文本字符合计同为 114,066，且双表 110/110 行与 remaining 0 互证。
+
+### K-5 · 声明位置与粒度事实
+
+硬声明已逐字写入 `docs/agent-ops/analysis/2026-08-31-v12-9d-d1b-embedding-coverage.md` 的“K-5 · 粒度边界”：
+
+「本轮检索质量只代表 page 级地板上的检索质量,⛔ 不代表本产品的检索质量。」
+
+同节记录 d-1a 已证事实：同四卷 MinerU 侧 808 碎片 vs 本代 110，7.35 倍；本次查库 role 分布为 `para 110 / heading 0`。
+
+### K-6 · 本单没做
+
+- 检索 API 与水合：未做，归 d-2。
+- FTS 半边：未做。
+- 粒度升级：未做；切 MinerU 默认路径是它自己的显式单，不随本单夹带。
+- 嵌入模型终选：未做，延 V14。
+
+### K-7 · 门禁与禁区
+
+- `npm --prefix server run test:v2`：exit 0；tests **358** / pass **358** / fail 0 / skipped 0。相对基线 351/351，增量 **+7**，新总数 **358/358**。
+- `npm exec --prefix server -- tsc --noEmit -p server`：exit 0，无输出。
+- 工单 §1 禁区逐项 `git diff --quiet -- <path>`：
+
+| 禁区 | exit code |
+|---|---:|
+| `server/src/db/init.ts` | 0 |
+| `server/src/embedding/index.ts` | 0 |
+| `server/src/embedding/vectorStore.ts` | 0 |
+| `server/src/embedding/voyage.ts` | 0 |
+| `server/src/routes/embedding.ts` | 0 |
+| `server/src/agent` | 0 |
+| `server/src/services/documentParser.ts` | 0 |
+| `client/src` | 0 |
+| `package.json` | 0 |
+| `.env` | 0 |
+| `.env.experiment` | 0 |
+| `docs/agent-ops/current-state` | 0 |
+| `docs/agent-ops/handoffs/plans` | 0 |
+
+`server/src/routes/projections.ts` 的内容 diff 另验 exit 0；开工前 EOL 状态噪音保留，本次未触碰。
+
+### 停线点
+
+前一段唯一停线点（错误 cwd 下无法解析 `tsx`）已由调度更正令解除。本续跑二段跑批、查库与门禁均成功，无新增停线点；未 commit、未 push。
