@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(v3 —— v1/v2 两轮均已收工并复核通过[7 路 + 6 路,零 blocking],档案原样封存为存在维与角色维的发现证据;§12 按总部 2026-08-31 两次裁定补为 v3 工单:⭐ 两遍制[门遍全量无停线 → 分类遍 K-3 牙齿原样] + 角色相容性门 + 分母义务 + 跨遍闭合)
+> **状态 (Status)**: done(M1 收官 —— v3 两遍制 PASS 无停线:门遍 856 全量、覆盖率 24 行 remaining=0、分类遍 320/320 未触发 K-3;终审五路零 blocking,分母本身经第一性原理重建证成。⚠️ 已知瑕疵:§4 编码破损 → 并入 M2/c-4 从 JSON 重渲;K-8 的 5MB JSON 归宿划给 c-4)
 > **from**: claude(opus,工程调度会话) · **to**: fable(裁定) · **date**: 2026-08-29
 > **裁定来源**: Fable 2026-08-29「c-2 只做拆单前置侦察,判轻重后决定派或押到日间」
 
@@ -736,3 +736,307 @@ c-1c 刚刚证明了这件事有多难:**同一批碎片,不同的尺子给出�
 - 本轮只新建 `docs/agent-ops/analysis/2026-08-31-v12-9c-c2-divergence-census-v2.md`，并补齐本 `## Result(v2)`。顶部状态、§1–§10、v1 Result、封存 v1 档案、INDEX、生产码、测试、迁移与证据本体均未由本轮修改；没有 commit / push，也没有翻顶部状态行。
 - 最终 `git status --short` 只列 v2 档案 `??`、本工单 `M`，以及开工前已有的 `server/src/routes/projections.ts M`。该 server 文件 SHA-256 仍为 `c9072a7a3bfcbcfc20e48efa3050c0baea806b5ac89594b29e5249fe1ce08ed7` 且 tracked textual diff 为空；封存 v1 档案 SHA-256 仍为 `df8278f46c8e4c621647e5246a7df7dcfb594ba8ffa7c9fd87c0ab76ed5898de`。工单 HEAD 原文 42,940 bytes 保持逐字相同；只在其后增加两个 LF 作为分隔并追加本段。
 - 实质停线点只有一处：K-3 的 `unclassified_stop,needs: claude`；`pairing_stop/input_stop/integrity_stop/runtime_stop` 均为 null。后续 790 个有序事件未进入控制处理，本文不外推它们的分类结果。
+
+
+## Result(v3)
+
+> **builder v3 工作回执（2026-08-31，进行中）**：已完整读取工单并以 §12 为唯一执行判据；本轮将采用“门遍全量无停线 → 分类遍保留 K-3”的两遍制。当前尚未实跑普查，也未重跑任何转写器；只准备在允许面内新建 v3 档案并补全本段。裁定来源记为 **Fable**，由调度方转写，不写成 Henry。
+
+> **续跑更正（最终状态以本句及下文为准）**：上句“当前尚未实跑普查”在开工写下时为真，现已过期，不是收工时状态。唯一实跑已于 `03:14:55` 完成，且没有重跑任何转写器。上一轮在实跑完成后、正要把 canonical JSON 结果回填进 v3 档案时中断；中断原因为 `ERROR: Selected model is at capacity`（exit 1，已用 421,205 tokens），不是完整性门、K-3 或任何普查判据失败。本轮在三项完整性门全部通过后才继续读取和回填现有 canonical JSON。
+
+- 追加本段前，工单为 94,150 bytes，SHA-256 `489d83431c000b9fa10dfc54efb7de092b89deb110a21751cb6cd3582316fd51`；该前缀将作为 §1–§11、v1/v2 回执及顶部状态均未改的字节级基线。
+- 封存 v1 档案 SHA-256 `df8278f46c8e4c621647e5246a7df7dcfb594ba8ffa7c9fd87c0ab76ed5898de`；封存 v2 档案 SHA-256 `5890ee01d6883d6d5416f55c65caa7178ad1441b01ebec7f2d2e1a2fce11c0cf`。
+- 开工时既有 `server/src/routes/projections.ts` 工作树状态为 `M`，文件 SHA-256 `c9072a7a3bfcbcfc20e48efa3050c0baea806b5ac89594b29e5249fe1ce08ed7`；本轮不触碰或回退它。
+- 当前控制状态：`in_progress`。退出前必须把本段补成最终回执；不 commit、不 push、不翻顶部状态行。
+
+### R-v3.1 最终结论、续跑中断点与完整性门
+
+**最终结论：PASS，无停线。** 唯一实跑产物 `status=complete`，门遍与分类遍均 `complete`；`input_stop=null`、`integrity_stop=null`、`unclassified_stop=null`。分类遍处理完全部 320 个已配对且角色相容事件，**本轮未触发 K-3**。上一轮的模型容量中断发生在实跑完成后的档案回填阶段，不是程序退出、完整性失败或判据停线。
+
+| 对象 / 时间 | 现物与回读 |
+|---|---|
+| 冻结段回读完成 | `2026-08-31T02:55:39.4894801-04:00` |
+| 脚本首字节 / 末写 | `02:56:54.8807171` / `03:12:35.2967113`；冻结严格更早 |
+| JSON 创建 / 末写 | `03:14:53.0436763` / `03:14:55.4695553` |
+| 冻结段 | START=1 / END=1；offset `3778..17498` inclusive；13,721 bytes；`9c6560c50e7fd8db3282de983ef8be17ea25809d8f1dac62880e7eb62772b75d` |
+| 实跑脚本 | 119,368 bytes；current = JSON before = JSON after = `7a316346a22bf658053d7de54ad235a35851e2f4f7ad4f3d75bbe5503f9c1f0f` |
+| canonical JSON | 5,096,178 bytes；`2bfc5b892a107cd5fb79e7cbf1cf8f005d3b769b621eaceb3b395dd54f1e0dab`；UTF-8 无 BOM、末尾恰一个 LF |
+
+完整性门三项全部相同后才读取 JSON 普查字段。8 个输入文件逐一长度/SHA 与 JSON 相同；没有用重跑掩盖不一致，也没有改冻结段迁就现物。
+
+### R-v3.2 K-1 冻结口径原文、SHA、唯一标记与继承量
+
+以下为 v3 档案 §2 两枚唯一标记及其间 **13,721 UTF-8 bytes 的逐字原文**；两枚 HTML 标记都计入 SHA 边界：
+
+<!-- FROZEN_CLASSIFIER_V3_START -->
+### 冻结程序 v3 原文
+
+#### A. 输入、校验、证据字段与事件顺序
+
+1. 输入只能是 MinerU=`D:/Coinsides/v12.9-selection/tools/_out/c2-mineru/` 与 Docling=`D:/Coinsides/v12.9-selection/tools/_out/c1-docling/` 的直接子文件。两目录中名称以大小写敏感的 `.fragments.json` 结尾者，文件名集都必须恰好等于 §1.1 四项，不得减少、增加或大小写漂移，且四对文件名逐字一一相同。卷顺序固定为 `academic-reading → writing-example-responses → academic-writing → listening`。
+2. 运行时固定 CPython `3.14.2`、Unicode database `16.0.0` 与该运行时的 `json/re/html.parser/difflib` 标准库。文件按 UTF-8 strict、无 BOM 解码；JSON 固定 `parse_int=int,parse_float=float`，拒绝重复 object key、`NaN/Infinity/-Infinity`、尾随内容及未配对 surrogate。每份文件必须是数组；每条至少有 `anchor/role/seq/text`。`seq` 是从 0 开始连续唯一的非 bool Python int；`role` 是字符串；`text` 仅字符串或 null；页、bbox、MinerU `page_size`、Docling `charspan` 依 v2 strict preflight 校验。任一不成立记 `input_stop,needs: claude`，不开始门遍。
+3. 每个 fragment 逐字保留 `type/image_path/html` 三个可选字段的 `field_present` 与实际 JSON value；不存在记 false/null。额外字段只登记键名。禁止查原 PDF、图片、`middle.json` 或生产码补值，禁止凭肉眼看图断言。
+4. 三条互斥谓词沿用 `P-TEXT/P-STRUCT/P-NULL`；每个 fragment 必须且只能命中一条。全部事件先建完，再按唯一 sort key `(卷序号,event_page,min_any_seq,mineru_empty_rank,min_mineru_seq_or_0,docling_empty_rank,min_docling_seq_or_0,predicate_rank,member_key)` 排序；`predicate_rank=P-STRUCT:0,P-NULL:1,P-TEXT:2`，`family_rank=MinerU:0,Docling:1`。门遍与分类遍都只引用这一份有序事件枚举；分类遍不得另建一套事件。
+
+#### B. 固定字段投影与维度覆盖申报
+
+1. canonical role 映射只有：MinerU `title→heading,text→text,list→list,index→index,image|chart→visual,table→table`；Docling `section_header→heading,text|footnote→text,list_item|checkbox_unselected→list,document_index→index,picture→visual,table→table`。表外 role 不猜，记 `input_stop`。双方 raw role 逐字保留。
+2. 文本投影：`R=raw text`。HTML regex 固定 `(?is)</?(?P<tag>table|thead|tbody|tfoot|tr|th|td|caption|colgroup|col|p|div|span|ul|ol|li|br|img|figure|figcaption|h[1-6])(?:\s[^<>]*?)?/?>`；R=null 时 `HAS_HTML=false,TAGS=[],MARKUP=[],W=null,N=''`。否则用 `HTMLParser(convert_charrefs=True)` 取 data（有标记时）或直接取 R，Unicode 空白折叠得 W；N 依次为 NFKC、casefold、删 U+00AD、删 category 以 P/Z 开头或 `isspace()` 为真的 code point。不用编辑距离或相似度。
+3. `payload_kind=null|html|asset_token|plain` 与 `shape_signature=(payload_kind,MARKUP)` 沿 v2；页号统一为 MinerU page+1、Docling 原 page。MinerU bbox 按 TOPLEFT；Docling bbox 按 BOTTOMLEFT 并用同页 MinerU 唯一 page height 转 TOPLEFT。所有几何用 CPython binary64 exact 运算，无容差。同一落点要求两侧 page 集相同，且两边每个 bbox 都与对侧至少一个 bbox 有正面积交集；仅边缘相接不算。
+4. **维度覆盖申报（不得豁免 K-3）：**存在（有没有）→ 配对门；是什么（角色）→ 角色门；长什么样 → ①文本外形差异、②归一化差异、③切分差异；在哪 → ④真实指错。该申报只说明量具射程，绝不把未命中者赦免进最近类别；分类遍中已配对、角色相容而仍不入四类者照旧触发 K-3。
+5. **已知不覆盖，`needs: claude`：**三谓词的既有路由仍部分由 canonical role 决定，所以 role-blind 配对只在同一谓词内部成立；`table↔index` 等被路由到不同谓词的分类学差异不在本轮角色门射程。P-TEXT 只在冻结的 N/连续区间身份内配对；P-STRUCT/P-NULL 只在冻结的几何或唯一逐字 R 证据内配对；语义等价、图片内容、OCR、非冻结 HTML 语法、未被身份量具配上的跨片关系都不覆盖。④只覆盖有冻结 pointer identity 证明的落点差异，不判断内容语义真伪。
+
+#### C. 三谓词配对（同谓词内 role-blind）
+
+1. `P-TEXT` 射程仍为 canonical role 不在 `{visual,table}` 且 N 非空，但配对身份键改为 **N-only**，role 不进入 `SequenceMatcher` key。以两家 N 序列交给 `SequenceMatcher(autojunk=False)`；equal block 逐位置发 1:1 事件。每个非 equal opcode 从当前游标枚举两边非空连续前缀，找 `concat(N)` 完全相同者，以 `(两边条数和,条数差绝对值,MinerU条数,Docling条数,MinerU起止seq,Docling起止seq)` 的 lexicographic 最小 tuple 成组。当前无候选且两侧均非空，发包含两侧剩余成员的 bilateral unresolved 事件；只剩单侧则逐 fragment 发单边事件。不得跨 opcode 凑组。
+2. P-TEXT 重复身份门也改为 **N-only**：若事件所含任一 N 在任一家庭全卷出现多于一次，以两家该 N 的全部 occurrence 建同页正面积 bbox 图；每个 occurrence 必须 degree=1，且当前成员唯一邻点属于当前事件对侧，否则 `pairing_ok=false`。对 `concat(N)` 组，枚举两家整卷所有能产生该 concat 的非空连续区间；两家各唯一且就是当前候选则通过；有重复时，只有恰一对跨家区间满足同一落点且正是当前候选才通过。role 不参与上述身份门。
+3. `P-STRUCT` 射程仍为 canonical role 在 `{table,visual}`。同卷、同 canonical page、bbox 正面积交叠建二分图，**不要求同 canonical role**。双边分量 1:n/n:1/1:1 成组；m:n 且双方都大于 1 时，仅每节点 degree=1 且 m=n 才拆唯一边，否则发 bilateral unresolved 事件。对未消费节点，以 R 非 null 且逐字相同寻找双方全体未消费节点中的唯一候选，**不要求同 role**；成对后消费。其余逐 fragment 发单边事件。
+4. `P-NULL` 射程仍为 canonical role 不在 `{visual,table}` 且 R=null 或 N 为空。同卷、同 canonical page、bbox 正面积交叠建图，**不要求同 canonical role**；分量规则同 C3。单边分量逐 fragment 发单边事件。
+5. 每个 fragment 在其谓词内恰消费一次。事件 `pairing_ok` 的证明必须逐步保留候选、重复身份门、连续区间门、bbox 图与排除过程；role 只能在配对完成后读取，不能反向改变配对结果。
+
+#### D. 门遍：全量配对门 → 角色门，正常路径无停线
+
+1. 门遍顺序扫描 A4 的全部事件。配对门 full 分母 = 每个卷×谓词的全部候选事件，不是命中收据数。每个事件都使 processed 加一；正常完成后每行 `remaining=0`。
+2. XOR 单边事件必须总成员数恰为 1；逐 fragment 记「存在性差异」收据并继续。方向只能写「仅 MinerU 有」或「仅 Docling 有」，不得写判断对象应否出现的动词。收据含 ID、卷、谓词、source、sort key、方向、对侧成员数 0、完整 fragment 字段证据与配对轨迹；对象不得有 `classification` 字段。
+3. 双边但 `pairing_ok=false` 记 `pairing_unresolved` 门收据并继续，既不进入存在域，也不进入角色门或四分类；它不是控制停线。双边且 `pairing_ok=true` 才进入角色门。双侧皆空是 `integrity_stop,needs: claude`。除 input/integrity 类硬故障外，门遍不得因任何事件停止。
+4. role signature = 各侧按 seq 的 canonical role 序列相邻去重后的 tuple。角色门 full 分母 = 配对门确认的全部双边 `pairing_ok=true` 事件；每件均 processed，正常完成 remaining=0。signature 不相等时逐事件记「分类学差异」收据并继续；相等时把同一事件引用放入 `classification_full_events`。
+5. 每张分类学差异收据必须含：双方逐片 raw role 数组、双方逐片 canonical role 数组、双方 canonical role signature、不可交换的有序对 `MinerU-role × Docling-role`、配对证明，以及双方完整 seq/page/R-W-N+SHA/payload/可选字段/原始与 canonical anchor/overlap graph。名称沿用 `docs/agent-ops/analysis/2026-08-28-v12-9a-trial-1-transcriber.md:204` 的「分类学差异」。
+6. 对角色门每个已配对事件按 canonical role signature 有序对计数一次，分别生成 P-TEXT、P-STRUCT、P-NULL 三张 `MinerU-role × Docling-role` 频次矩阵。矩阵只含整数 count，不设豁免对，不标良性/可疑，不含比率、百分比或归一化值；三矩阵计数和必须等于角色门 full，不相容单元格计数和必须等于分类学差异收据数。
+7. 覆盖率固定输出 24 行：域=`存在维/配对门` 与 `角色维/角色门` × 4 卷 × 3 谓词。每行含 `full/processed/remaining` 与计数单位；配对门单位是 candidate event，角色门单位是 paired event。命中数另表，绝不拿 hits 冒充分母。
+
+#### E. 分类遍：四分类与 K-3
+
+1. 分类遍只顺序扫描门遍产出的 `classification_full_events`；每件已配对且 role signature 相容。`same_place` 沿 B3。`has_split`：P-TEXT 为两家逐片 N code point 长度的累计边界（排除最终总长）不同；P-STRUCT/P-NULL 为成员数不同。
+2. **文本外形差异**：`same_place=true,no_split=true`，且冻结的 predicate-specific appearance trigger 成立：P-TEXT 的 shape signature 序列不同且至少一侧有 HTML；P-STRUCT/table 不同且至少一侧 payload 为 html/null；P-STRUCT/visual 不同且至少一侧为 asset_token/null；P-NULL 不同且至少一侧有 HTML 或 null payload。
+3. **归一化差异**：同一落点、无切分、不触发 appearance，两家逐片 N 序列完全相同而 R 序列不同。证据列 R→W→N 首个相等阶段。
+4. **切分差异**：同一落点、有切分；P-TEXT 另须两边 concat(N) 相同，P-STRUCT/P-NULL 另须来自双边连通分量。
+5. **真实指错**：`pointer_identity=true,same_place=false`。pointer identity 只在 P-TEXT 两边非空 concat(N) 相同且通过 C2 单片/连续区间身份门，或 P-STRUCT 由 C3 双方唯一、逐字相同非 null R 建立落点候选时成立。无唯一内容证明不得判本类。
+6. 单标签顺序固定：真实指错 → 切分差异 → 文本外形差异 → 归一化差异 → `non_divergence`（同一落点、无切分、R 与 shape signature 序列相同）→ `unclassified_stop`。`non_divergence` 是内部完成 disposition，不进入四类分歧表。
+7. 首个仍不入四类且不为 non_divergence 的事件必须写「未归类」与完整停线收据，标 `needs: claude`，分类遍立即停止；不硬塞、不改尺、不重跑。若扫描完全部 `classification_full_events`，须申报「本轮未触发 K-3」。门遍完成态与其全量收据不因分类遍停止而倒退。
+
+#### F. 跨遍闭合、射程与派生集合
+
+1. 分类遍 `full_scope` 恰为门遍 `classification_full_events`，即已配对 + 角色相容事件；存在性差异、pairing unresolved、分类学差异不在四分类定义域，分别留在门遍表，不能从 full 中凭空消失。
+2. 对每个 `document × predicate × family` 输出 `full/classified/stopped/remaining`：`classified` 包含已完成四类或 non_divergence 的事件成员；`stopped` 只含当前 K-3 事件或空；`remaining` 是其后的 classification_full 事件。四部分均给 event count、fragment count、完整 canonical page distinct 集和完整 seq distinct 集。
+3. 机械断言每格 `full event IDs = classified ∪ stopped ∪ remaining`，三部分两两不交；每个 family 的 seq 集同样两两不交且并集等于 full，fragment count 相加相等。门遍全候选覆盖表与 classification 子射程闭合表必须分开，不在同一张可纵加表混排。
+4. 四类计数按 classification×predicate 输出三谓词整数栏，跨谓词合计紧邻三栏；另按谓词与家庭给各自 page/seq 边界。存在性、分类学、pairing unresolved 命中数分别单列，不与四类相加成一个总数。
+5. 凡结论依赖的 complete distinct/seq/event-ID 集必须进入 canonical JSON；档案至少保存 JSON digest + 本冻结配方 + 实际执行脚本全文，使其可从只读 8 文件重导。分类学差异与存在性差异的逐条完整收据必须直接入档，不得只留在仓外临时目录。
+
+#### G. 输出、完整性与零成本
+
+1. 每个 fragment 证据固定列 `path/seq/raw_role/canonical_role/R/R_type/R_codepoint_length/R_utf8_byte_length/R_sha256/R_escaped_excerpt/payload_kind/HAS_HTML/TAGS/MARKUP/W/N/N_sha256/shape_signature/optional_fields/extra_field_keys/anchor_extra_field_keys/raw_anchor/canonical_anchor`，并按家庭列 `page_size` 或 `charspan`。
+2. canonical JSON 固定以 `json.dumps(ensure_ascii=False,sort_keys=True,separators=(',',':'),allow_nan=False)` 编码，UTF-8 strict 后恰一个 LF；用同目录 `.tmp` + `os.replace` 原子落仓外最终文件。程序不得写证据树，不得写其他仓内路径。
+3. 程序固定自证 `model_calls=0,api_keys_used=0,cost=0,scope="census_program_only; excludes builder-session reasoning"`。程序、JSON、冻结段分别取 SHA-256；实跑前后脚本或冻结段任一字节变化记 `integrity_stop,needs: claude`，结果无效。
+4. 代码标识不得使用 `score` 或 `chosen_score`；叙述不得输出一致率、准确率、优劣、置信度或阈值。任何零命中只证明显式申报范围中的零，不能推出范围外不存在。
+<!-- FROZEN_CLASSIFIER_V3_END -->
+
+冻结收据：档案内 `FROZEN_CLASSIFIER_V3_START/END` 各 1 处，今天按 §2.1 配方复跑不 abort；start byte offset=`3,778`、END inclusive offset=`17,498`、长度 `13,721`、SHA-256 `9c6560c50e7fd8db3282de983ef8be17ea25809d8f1dac62880e7eb62772b75d`。冻结时脚本路径不存在，冻结时刻早于脚本首字节约 75 秒，也早于实现末写约 17 分钟。
+
+继承量采用 `git diff --no-index --no-renames --numstat` 的行级共同部分口径：v2=2,135 行、v3=2,937 行，842 additions / 40 deletions；v3 共同部分为 **2,095 / 2,937 行（71.331%）**。
+
+### R-v3.3 K-2 两遍分开申报与 K-3 分母义务
+
+#### 门遍
+
+门遍 `status=complete`、`stop_type=null`，处理 856 个 candidate event，最后为 `EV-000856`。
+
+| 谓词 | full candidates | 存在性差异 | pairing unresolved | 分类学差异 | classification full |
+|---|---:|---:|---:|---:|---:|
+| P-TEXT | 772 | 100 | 150 | 211 | 311 |
+| P-STRUCT | 64 | 55 | 0 | 0 | 9 |
+| P-NULL | 20 | 20 | 0 | 0 | 0 |
+| 门遍射程 | 856 | 175 | 150 | 211 | 320 |
+
+分区闭合 `856 = 175 + 150 + 211 + 320`，四个 event-ID 集两两不交且并集等于 full。角色门 full=`531=211+320`。`pairing_unresolved=150` 是继续扫描的门收据，不是停线。
+
+#### 分类遍
+
+分类遍另表申报：`status=complete`、`stop_type=null`，full 恰为门遍交出的 320 个 `classification_full` event，最后为 `EV-000854`。
+
+| 谓词 | full | classified | stopped | remaining | 四类分歧 | non_divergence |
+|---|---:|---:|---:|---:|---:|---:|
+| P-TEXT | 311 | 311 | 0 | 0 | 160 | 151 |
+| P-STRUCT | 9 | 9 | 0 | 0 | 9 | 0 |
+| P-NULL | 0 | 0 | 0 | 0 | 0 | 0 |
+| 分类遍射程 | 320 | 320 | 0 | 0 | 169 | 151 |
+
+分类遍的 P-NULL 零只指“已配对且角色相容”定义域，不能据此外推门遍或其他资料。
+
+#### 存在维 / 配对门覆盖率
+
+计数单位：`candidate event`。
+
+| 卷 | P-TEXT full/processed/remaining | P-STRUCT full/processed/remaining | P-NULL full/processed/remaining |
+|---|---|---|---|
+| academic-reading | 321/321/0 | 27/27/0 | 1/1/0 |
+| writing-example-responses | 51/51/0 | 2/2/0 | 1/1/0 |
+| academic-writing | 132/132/0 | 18/18/0 | 2/2/0 |
+| listening | 268/268/0 | 17/17/0 | 16/16/0 |
+
+#### 角色维 / 角色门覆盖率
+
+计数单位：`paired event`，不与上一表纵向相加。
+
+| 卷 | P-TEXT full/processed/remaining | P-STRUCT full/processed/remaining | P-NULL full/processed/remaining |
+|---|---|---|---|
+| academic-reading | 269/269/0 | 3/3/0 | 0/0/0 |
+| writing-example-responses | 30/30/0 | 0/0/0 | 0/0/0 |
+| academic-writing | 61/61/0 | 3/3/0 | 0/0/0 |
+| listening | 162/162/0 | 3/3/0 | 0/0/0 |
+
+两域 × 四卷 × 三谓词共 24 行均 `processed=full, remaining=0`；零格只陈述表头限定射程。
+
+### R-v3.4 K-4 跨遍集合闭合
+
+全局 event-ID 闭合为 `320 full = 320 classified + 0 stopped + 0 remaining`。下表单元格为 `event_count/fragment_count/distinct seq count`；每格实际复算了 event-ID 与 seq 三部分两两不交、并集等于 full，以及 event/fragment count 相加等于 full。
+
+| 卷 | 谓词 | MinerU full → classified/stopped/remaining | Docling full → classified/stopped/remaining | 结论 |
+|---|---|---|---|---|
+| academic-reading | P-TEXT | 150/153/153 → 150/153/153 · 0/0/0 · 0/0/0 | 150/150/150 → 150/150/150 · 0/0/0 · 0/0/0 | PASS |
+| academic-reading | P-STRUCT | 3/3/3 → 3/3/3 · 0/0/0 · 0/0/0 | 3/3/3 → 3/3/3 · 0/0/0 · 0/0/0 | PASS |
+| academic-reading | P-NULL | 0/0/0 → 0/0/0 · 0/0/0 · 0/0/0 | 0/0/0 → 0/0/0 · 0/0/0 · 0/0/0 | PASS |
+| writing-example-responses | P-TEXT | 29/29/29 → 29/29/29 · 0/0/0 · 0/0/0 | 29/29/29 → 29/29/29 · 0/0/0 · 0/0/0 | PASS |
+| writing-example-responses | P-STRUCT | 0/0/0 → 0/0/0 · 0/0/0 · 0/0/0 | 0/0/0 → 0/0/0 · 0/0/0 · 0/0/0 | PASS |
+| writing-example-responses | P-NULL | 0/0/0 → 0/0/0 · 0/0/0 · 0/0/0 | 0/0/0 → 0/0/0 · 0/0/0 · 0/0/0 | PASS |
+| academic-writing | P-TEXT | 61/61/61 → 61/61/61 · 0/0/0 · 0/0/0 | 61/61/61 → 61/61/61 · 0/0/0 · 0/0/0 | PASS |
+| academic-writing | P-STRUCT | 3/3/3 → 3/3/3 · 0/0/0 · 0/0/0 | 3/3/3 → 3/3/3 · 0/0/0 · 0/0/0 | PASS |
+| academic-writing | P-NULL | 0/0/0 → 0/0/0 · 0/0/0 · 0/0/0 | 0/0/0 → 0/0/0 · 0/0/0 · 0/0/0 | PASS |
+| listening | P-TEXT | 71/71/71 → 71/71/71 · 0/0/0 · 0/0/0 | 71/78/78 → 71/78/78 · 0/0/0 · 0/0/0 | PASS |
+| listening | P-STRUCT | 3/3/3 → 3/3/3 · 0/0/0 · 0/0/0 | 3/3/3 → 3/3/3 · 0/0/0 · 0/0/0 | PASS |
+| listening | P-NULL | 0/0/0 → 0/0/0 · 0/0/0 · 0/0/0 | 0/0/0 → 0/0/0 · 0/0/0 · 0/0/0 | PASS |
+
+这是 12 个 `document × predicate` 行，各自展开两 family，共 24 个独立闭合格；family 行不跨 family 纵加。完整 event-ID/page/seq distinct 集已直接入 v3 档案 §6 的 canonical JSON 内嵌副本。
+
+### R-v3.5 K-5 / K-6：两类门收据与角色矩阵
+
+存在性差异只按方向申报：P-TEXT 为“仅 MinerU 有”65 / “仅 Docling 有”35；P-STRUCT 为 3 / 52；P-NULL 为 6 / 14；合计 175。175 张均恰含一侧一个 fragment、另一侧成员数 0，均保留完整配对轨迹。
+
+分类学差异逐张引用 `docs/agent-ops/analysis/2026-08-28-v12-9a-trial-1-transcriber.md:204`：academic-reading 119、writing-example-responses 1、academic-writing 0、listening 91，合计 211，且全在 P-TEXT 角色门射程。零只指上述明确范围。211 个 `taxonomy_id` / event-ID 各自唯一；211 张均完整保留双方 raw role、canonical role、不可交换的 `MinerU-role × Docling-role`、配对证明、seq/page、R-W-N 与 SHA、payload、可选字段、raw/canonical anchor，结构校验 failure count=0。逐张人可读索引在 v3 档案 §4.1/§4.2；逐张完整收据直接位于该档 §6 内嵌 canonical JSON 的 `$.gate_pass.existence_differences[0..174]` 与 `$.gate_pass.taxonomy_differences[0..210]`，不是 Temp 唯一副本。
+
+三张矩阵单位均为 `paired event`，只给整数计数，不设豁免单元或良恶标记。
+
+#### P-TEXT
+
+| MinerU \ Docling | `[heading]` | `[heading,list]` | `[heading,text]` | `[list]` | `[list,text]` | `[text]` | 行合计 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `[heading]` | 96 | 0 | 0 | 0 | 0 | 2 | 98 |
+| `[index]` | 0 | 0 | 0 | 2 | 0 | 1 | 3 |
+| `[list]` | 0 | 1 | 0 | 1 | 0 | 2 | 4 |
+| `[text]` | 5 | 0 | 3 | 194 | 1 | 214 | 417 |
+| 列合计 | 101 | 1 | 3 | 197 | 1 | 219 | 522 |
+
+#### P-STRUCT
+
+| MinerU \ Docling | `[table]` | `[visual]` | 行合计 |
+|---|---:|---:|---:|
+| `[table]` | 2 | 0 | 2 |
+| `[visual]` | 0 | 7 | 7 |
+| 列合计 | 2 | 7 | 9 |
+
+#### P-NULL
+
+角色门 paired-event 分母为 0，`cells=[]`、计数和 0；只说明本轮该角色门射程。三矩阵合计 `531=522+9+0`；signature 不相等单元格合计 211，等于分类学差异收据数。v3 的 211 与 v2 参照 203 相差 8，不是量级悬殊；v2 配对身份含 role，v3 是同谓词 role-blind 后置读 role，两轮分母不同。v3 内部可证组成是 203 个 equal-position + 8 个 non-equal prefix group，没有把 v3 的 203 擅自当成 v2 的同一事件集。
+
+### R-v3.6 四分类、K-7、射程边界与 K-10 三问
+
+| 分类 | P-TEXT | P-STRUCT | P-NULL | 跨谓词合计 |
+|---|---:|---:|---:|---:|
+| 文本外形差异 | 0 | 9 | 0 | 9 |
+| 归一化差异 | 156 | 0 | 0 | 156 |
+| 切分差异 | 2 | 0 | 0 | 2 |
+| 真实指错 | 2 | 0 | 0 | 2 |
+
+分谓词四类命中的 page/seq 边界如下；M/D 分别为 MinerU/Docling，完整 distinct 集在 v3 档案 §6。零只陈述四类命中射程。
+
+| 卷 | 谓词 | M event/fragment · page · seq | D event/fragment · page · seq |
+|---|---|---|---|
+| academic-reading | P-TEXT | 82/85 · 1..46 · 1..314 | 82/82 · 1..46 · 2..344 |
+| academic-reading | P-STRUCT | 3/3 · 7..45 · 38..313 | 3/3 · 7..45 · 53..342 |
+| academic-reading | P-NULL | 0/0 · — · — | 0/0 · — · — |
+| writing-example-responses | P-TEXT | 7/7 · 1..3 · 25..48 | 7/7 · 1..3 · 26..51 |
+| writing-example-responses | P-STRUCT | 0/0 · — · — | 0/0 · — · — |
+| writing-example-responses | P-NULL | 0/0 · — · — | 0/0 · — · — |
+| academic-writing | P-TEXT | 30/30 · 3..26 · 7..151 | 30/30 · 3..26 · 12..153 |
+| academic-writing | P-STRUCT | 3/3 · 3..5 · 13..27 | 3/3 · 3..5 · 18..33 |
+| academic-writing | P-NULL | 0/0 · — · — | 0/0 · — · — |
+| listening | P-TEXT | 41/41 · 3..33 · 5..265 | 41/48 · 3..33 · 12..294 |
+| listening | P-STRUCT | 3/3 · 3..30 · 21..248 | 3/3 · 3..30 · 17..278 |
+| listening | P-NULL | 0/0 · — · — | 0/0 · — · — |
+
+K-7 如实申报：**本轮未触发 K-3**；320/320 classified，stopped=0、remaining=0。没有 input、integrity、门遍或分类遍停线点。
+
+K-10 三问：
+
+1. **是，部分零产出就是冻结规则射程的直接结果。** role-blind 配对仍限同谓词，跨谓词角色差异不进入角色门；20 个 P-NULL candidate 全落存在维，所以其角色门/分类遍 full 为 0。其余零也只说明明确表头范围内零命中。
+2. **是，一族，不是孤例。** 分类学差异 211 张、9 种有序 signature 对、分布三卷；v2 停住时呈现的 `[heading] × [text]` 在 v3 有两张，大量出现的 `[text] × [list]` 有 194 张。存在维 175 与 pairing unresolved 150 也分别在四卷复现；只记形态与方向，不裁归属。
+3. **有，若只读四个箭头会误以为覆盖更宽。** “是什么”不覆盖跨谓词角色差异；“长什么样”不覆盖语义等价、图片内容、OCR、非冻结 HTML 语法与未被身份量具配上的跨片关系；“在哪”只覆盖有 pointer identity 证明的落点差异。缺口保留 `needs: claude` / c-3 触发器。
+
+### R-v3.7 K-8、K-11、证据链与允许面收尾
+
+K-8 已处置：v3 档案当前为 828,595 bytes、SHA-256 `4cb86301a8e8869499d36552f3ef218d571d7c42b5b80d2e8578b3ab17c0cdb7`。其中 §6 直接内嵌整份 canonical JSON 原始字节的无损 gzip+Base64 副本（gzip 440,641 bytes / `cb10834b9ea484641feaaf63bb1e0f1f4f148b10bba65803f3db3357bd353163`），回读解码恢复 5,096,178 bytes / `2bfc5b...e0dab` 且与 Temp 现物逐字节相同；§7 直接内嵌实际脚本全文，回读恢复 119,368 bytes / `7a3163...c1f0f` 且逐字节相同。故完整门收据、派生 distinct 集和脚本均已有仓内非易失副本，Temp 不再是唯一副本；确定性重导命令与前置哈希门写在档案 §6.2。本轮没有再执行该命令。
+
+K-11 申报 **3 路只读子审计**，builder 主线程不冒充第 4 路：
+
+| agent path | 时间 / 射程 | 结果 / blocking |
+|---|---|---|
+| `/root/integrity_scope_audit` | 03:32 快照；收尾 `03:36:48.4914897`；marker/hash/8 输入/整树/allowed surface | PASS；blocking none；仅观察到开工既有 server status M |
+| `/root/k2_k4_audit` | 主线程接收 `03:33:38.2751433`；覆盖分母与实际 event-ID/seq 集合运算 | 24 coverage + 24 closure PASS；blocking none |
+| `/root/k5_k6_audit` | 完成 `03:34:10.3655880`；211 收据字段关系与矩阵 | failure count=0；blocking none |
+
+原始痕迹位于本次 Codex team conversation log（不在仓内），持久摘要、命令/配方、逐项结果与阻断清单已写入 v3 档案 §5；没有新增未列审计子任务。
+
+零成本自证为 `model_calls=0, api_keys_used=0, cost=0, scope="census_program_only; excludes builder-session reasoning"`；只覆盖普查程序，不覆盖 builder/审计/调度会话推理开销。
+
+证据树按 ordinal 明文配方收尾复算仍为 94,935 files / 3,149,405,801 bytes / 14,624,025 manifest bytes / `efebe29dfdfa4c1762ad95abc70c9a9f6085c8573d9029ee9fcfedf8484fad0d`，与开工四项相同；8 输入逐项相同；MinerU `uv.lock` 仍为 441,341 bytes / `67c4b42dcd269ffa3e9f05633ce98d6259812bc460f2dd2f8f58cb142e3ee231`。历史 c-1c → c-2 v1 断链如实保留；v1 → v2 → v3 ordinal digest 连续接续。
+
+允许面最终只改 v3 档案与本 `## Result(v3)`。v1/v2 档案分别仍为 `df8278...898de` / `5890ee...1c0cf`；`server/**`、`client/**`、`scripts/**`、`package.json`、迁移、生产码、测试、`docs/agent-ops/INDEX.md` 均零内容 diff。开工既有 `projections.ts M` 的 raw SHA 仍 `c9072a...ed7`，normalized Git blob 与 HEAD 相同。工单前 94,150 bytes / `489d8343...fd51` 保持逐字；顶部、§1–§11、v1/v2 Result 未改。没有 commit / push，也没有翻顶部状态行。
+
+**最终控制状态：`complete`。** 裁定来源为 **Fable**，由调度方转写，不写成 Henry。
+
+## 复核批注(claude 工程调度会话,2026-08-31,独立重算 + 五路终审)
+
+**总判定:通过,零 blocking。** 五路(四取证 + 一对抗)全部 PASS / PASS_WITH_NOTE。
+
+### ✅ 调度方亲手验的(⛔ 非读回执)
+
+| 项 | 做法 | 结果 |
+|---|---|---|
+| **冻结完整性** | 自读档案字节、自算 SHA | 标记基数 **START=1 / END=1**(⭐ K-1 可复现性修复生效)、offset `3778/17498`、**13,721 字节**、SHA `9c6560c5…b75d` **逐位吻合** |
+| **时间线** | 文件系统 CreationTime | 冻结 `02:55:39.489` → 脚本首字节 `02:56:54.881` → 实跑 `03:14:53~55` ⇒ **冻结早于实现** |
+| **四个核心计数** | 从 5 MB canonical JSON 自数 | `coverage_rows=24` / `existence=175` / `pairing_unresolved=150` / `taxonomy=211` **逐项吻合** |
+| ⭐ **角色对分布** | 自己遍历 211 张收据 | **9 种有序对**;`MinerU[text]×Docling[list]`=**194**;`[heading]×[text]`(v2 停在这条)=**2** |
+
+### ⭐⭐⭐ 本轮头条:**v2 停在了一个占 0.9% 的形态上**
+
+v2 撞停的 `[heading] × [text]` 在全量里只有 **2 / 211 = 0.9%**;真正的大类是 **`[text] × [list]` = 194 / 211 = 92%**。
+⇒ ⭐ **「你撞到的第一个,几乎从不是最有代表性的那个」** —— 这是**分母义务的存在理由**,也是**⛔ 按个案设计的终审判词**。
+⚠️ 对 c-3 的直接后果:若按角色分歧派点射复核,**92% 的预算会落在同一个形态上**。⛔ **普查不判它良恶,只报分布。**
+
+### ⭐⭐ 两遍制生效:存在域覆盖率 **6.5% → 100%**
+
+门遍 **856 全量走完**,`856 = 175 + 150 + 211 + 320`,四集**两两不交、并集等于 full**;**24 行覆盖率全部 `remaining=0`**;分类遍 320/320,**本轮未触发 K-3(已按 K-7 如实申报)**。
+
+### ⭐⭐⭐ 分母【本身】被从第一性原理验证
+
+终审那一路**从原始 8 份文件独立重建**:自数 fragment **808 + 874 = 1,682**;三谓词划分与 24 行 `expected_seqs` **逐 seq 相等,0 mismatch**;事件重建 **772 + 64 + 20 = 856**;**exactly-once 双向验**(1,682 槽位 / 1,682 distinct);⭐ **705/705 张带 seq 的收据成员集合逐一命中**,残差**恰为** 151 个 `non_divergence`;四条独立路径对 856 互相吻合。
+
+### ⚠️ 对抗路抓到取证路的三处盲区(连续第三轮)
+
+1. ⭐ **档案自身「冻结程序 ↔ 实跑实现」不一致**(C1 tie-break tuple 字段展开顺序)。本轮无实质影响,**但取证路手里同时握着两份互异实现却没报**。⇒ 立条:**SHA 只证明【冻结段没被改】,⛔ 不证明【实现忠实于它】。**
+2. ⭐⭐ **「零命中 ≠ 不存在」连续第二轮在复核装置内复发** —— 取证路 8 个文件名**全部硬编码**,只对着自报清单核 ⇒ 证的是「它点名的我读了」⛔ 不是「目录里只有这些」。⚠️ **而这一轮该法已逐字内联进提示。** ⇒ 立条:**提示 ≈ 文档,不是门;原则靠记,动作靠抄。**
+3. ⭐ **C3 的 `m:n` 条款本轮一次都没执行**(全语料无双侧 >1 的双边连通分量)⇒ 立条:**未触发 ≠ 正确,只是未经检验。**
+
+### 📌 已知瑕疵与射程限制(随铸段申报)
+
+- ⚠️ **§4 逐条索引表编码破损**:§4.1 的 175 行「方向」列、§4.2 的 211 行 `×` 算符退化。**实体数据在 §6 JSON 里完好。**
+  ⇒ **总部裁定**:⛔ 不单开轮,**「从 canonical JSON 重渲 §4 两表」并入 M2/c-4 收口单**(判据:**必须从 JSON 出、行数 175/211 对账、⛔ 不许手改**)。理由:**破损列不该以永久面貌入史**,而档案 c-4 时才进版本历史。
+- **K-8 的 5 MB JSON 归宿**(入档 or digest+配方定版)⇒ **划给 c-4 决策**。
+- **151 个 `non_divergence` 的逐事件成员 seq 未进 JSON**(只有 event_id + 聚合)⇒ **已知射程限制**,仅凭 JSON 无法逐事件复核。
+- **P-TEXT 的 772 依赖同一 pinned 运行时**(CPython 3.14.2 / 同一 difflib)⇒ 是「**同一 diff 引擎下可复现**」,⛔ 不等于「换引擎也是 772」。
+- 「3 路审计」**只有汇总表入仓,原始 transcript 在仓外** ⇒ **审计【主张】留痕,审计【过程】不可仓内独立复核**(档案如实披露)。
+- 三张各 24 行但主键不同的表(`coverage_rows` / `event_consumption` / `cross_pass_closure`),单位与分母互不相同 ⇒ **误并风险**。
+
+### ⭐ 记 builder 六功
+
+①不硬塞 ②不作弊 ③不改规则重跑 ④**冻结早于实现**(自发达标)⑤**自曝 exit code 不一致却拒绝为追码重跑** ⑥⭐ **中断后主动对齐开工回执** —— 明写「上句『尚未实跑』**在开工写下时为真,现已过期**」并记下中断点与原因(**是模型容量,不是判据失败**)。
+📌 另记:**digest 断链本可据「三项计数相同」宣称连续性,它仍如实记为断链** —— 总部原话:「**可以蒙混而选择如实,这是收据文化立住了的标志**」。
