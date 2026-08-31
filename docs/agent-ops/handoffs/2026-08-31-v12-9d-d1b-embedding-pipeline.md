@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(第二次派工;⚠️ 首次因凭证事件作废停线,TD-39 已清偿 —— 修订见 §4)
+> **状态 (Status)**: done(2026-08-31 总部翻牌:K 判据全绿+门禁全过,e8ea3c4 已提交;历程=首派凭证事件作废停线 → 二派崩机死于半程(遗产 5 件代码面全绿)→ 续跑段完成运行时半程收工)
 > **from**: claude(opus,工程调度会话 coincides-8b) · **to**: codex(builder) · **date**: 2026-08-31
 > **裁定来源**: 总部(Fable)2026-08-31「照准,一字不改派 d-1b」。⛔ **不是 Henry。**
 > **上游**: `handoffs/2026-08-31-v12-9d-d1a-corpus-seed.md`(⭐ 先读,含复核批注与粒度发现)· `analysis/2026-08-31-v12-9d-d0-provider-smoke.md`(⭐ 含 endpoint 实测)
