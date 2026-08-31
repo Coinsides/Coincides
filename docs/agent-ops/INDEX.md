@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 229 份文档。
+共 230 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -64,6 +64,7 @@
 | [analysis/2026-08-31-v12-9c-c2-divergence-census-v2.md](analysis/2026-08-31-v12-9c-c2-divergence-census-v2.md) | V12.9c c-2：MinerU × Docling 分歧普查 v2 | `active` | 2026-08-31 | — |
 | [analysis/2026-08-31-v12-9c-c2-divergence-census-v3.md](analysis/2026-08-31-v12-9c-c2-divergence-census-v3.md) | V12.9c c-2：MinerU × Docling 分歧普查 v3 | `active` | 2026-08-31 | — |
 | [analysis/2026-08-31-v12-9d-d0-provider-smoke.md](analysis/2026-08-31-v12-9d-d0-provider-smoke.md) | 12.9d · d-0：现役检索接线图与 DashScope 嵌入冒烟 | `complete(d-0 接线侦察 + 供应商冒烟;⭐ 401 已由复核定因=区域端点,见文末复核补充 —— 国际站端点实测 200/1024 维)` | 2026-08-31 | — |
+| [analysis/2026-08-31-v12-9d-d1a-corpus-scale.md](analysis/2026-08-31-v12-9d-d1a-corpus-scale.md) | 12.9d · d-1a：四卷默认解析路径的语料规模实测 | `complete` | 2026-08-31 | — |
 | [analysis/2026-08-31-v12-9d-k0-recon.md](analysis/2026-08-31-v12-9d-k0-recon.md) | 12.9d · K-0 侦察:检索地基不是空地,上面已经有一栋楼 | `active` | 2026-08-31 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
@@ -227,7 +228,7 @@
 | [handoffs/2026-08-31-v12-9c-c4-section4-rerender.md](handoffs/2026-08-31-v12-9c-c4-section4-rerender.md) | c-4-a:从 canonical JSON 重渲 §4 两表(⭐ 极小单,机械) | `done(2026-08-31 收工;调度方复核 PASS —— 六判据磁盘回读复算 + §6 证据本体端到端亲验)` | — | — |
 | [handoffs/2026-08-31-v12-9c-segment-closeout.md](handoffs/2026-08-31-v12-9c-segment-closeout.md) | V12.9c 段收口:插头真插进了插座(⛔ 但只插了一半) | `done(12.9c 全段收口;⛔ **c-3 全段未开单**,如实移交)` | — | — |
 | [handoffs/2026-08-31-v12-9d-d0-wiring-and-smoke.md](handoffs/2026-08-31-v12-9d-d0-wiring-and-smoke.md) | d-0:接线图 + 嵌入供应商冒烟(⭐ 轻量单,⛔ 不写生产码) | `done(2026-08-31 收工;复核 PASS —— key 零泄漏与八处禁区独立复算,401 已定因=区域端点)` | — | — |
-| [handoffs/2026-08-31-v12-9d-d1a-corpus-seed.md](handoffs/2026-08-31-v12-9d-d1a-corpus-seed.md) | d-1a:走真链灌四卷,把「规模」从假设变成实测(⛔ 零 API 调用) | `ready(M3/12.9d 第二单;造数 + 规模实测,⛔ 零 API 调用)` | — | — |
+| [handoffs/2026-08-31-v12-9d-d1a-corpus-seed.md](handoffs/2026-08-31-v12-9d-d1a-corpus-seed.md) | d-1a:走真链灌四卷,把「规模」从假设变成实测(⛔ 零 API 调用) | `done(2026-08-31 收工;复核 PASS —— 全部数字独立查库复算;⚠️ 撞出设计级发现:碎片粒度是页级,较 MinerU 粗 7.35 倍)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
