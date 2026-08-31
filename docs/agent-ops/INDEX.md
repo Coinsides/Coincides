@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 224 份文档。
+共 226 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -63,6 +63,7 @@
 | [analysis/2026-08-31-paper-viewport-design.md](analysis/2026-08-31-paper-viewport-design.md) | 纸的视口 —— 阅读标尺锁定方案(13.1 的图纸) | `active` | 2026-08-31 | — |
 | [analysis/2026-08-31-v12-9c-c2-divergence-census-v2.md](analysis/2026-08-31-v12-9c-c2-divergence-census-v2.md) | V12.9c c-2：MinerU × Docling 分歧普查 v2 | `active` | 2026-08-31 | — |
 | [analysis/2026-08-31-v12-9c-c2-divergence-census-v3.md](analysis/2026-08-31-v12-9c-c2-divergence-census-v3.md) | V12.9c c-2：MinerU × Docling 分歧普查 v3 | `active` | 2026-08-31 | — |
+| [analysis/2026-08-31-v12-9d-k0-recon.md](analysis/2026-08-31-v12-9d-k0-recon.md) | 12.9d · K-0 侦察:检索地基不是空地,上面已经有一栋楼 | `active` | 2026-08-31 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |
@@ -230,6 +231,7 @@
 | [handoffs/plans/v12-9b-anchored-fragment-stream-spec.md](handoffs/plans/v12-9b-anchored-fragment-stream-spec.md) | 带锚碎片流(Anchored Fragment Stream)规格 v0 | `active` | — | — |
 | [handoffs/plans/v12-9b-segment-plan.md](handoffs/plans/v12-9b-segment-plan.md) | V12.9b 段计划:腰与底盘 | `draft` | — | — |
 | [handoffs/plans/v12-9c-segment-plan.md](handoffs/plans/v12-9c-segment-plan.md) | V12.9c 段计划骨架:插头开始上插座 | `draft` | — | — |
+| [handoffs/plans/v12-9d-retrieval-foundation-skeleton.md](handoffs/plans/v12-9d-retrieval-foundation-skeleton.md) | 12.9d · 检索地基 —— 规格骨架 | `active` | 2026-08-31 | — |
 | [handoffs/plans/v12-closeout-milestones.md](handoffs/plans/v12-closeout-milestones.md) | V12 收官里程碑(M1–M5) | `active` | 2026-08-30 | — |
 | [handoffs/plans/v13-foundation-rebuild-plan.md](handoffs/plans/v13-foundation-rebuild-plan.md) | V13 · 地基重做版 —— 总 plan v1 | `active` | 2026-08-30 | — |
 | [handoffs/plans/v2-bn12-2-mcp-tool-face.md](handoffs/plans/v2-bn12-2-mcp-tool-face.md) | Plan V2.BN.12.2 — MCP 工具面(末端执行器第一次实体化) | `active` | — | — |
