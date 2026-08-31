@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 238 份文档。
+共 239 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -228,6 +228,7 @@
 | [handoffs/2026-08-29-v12-9c-c1b2-region-and-cells.md](handoffs/2026-08-29-v12-9c-c1b2-region-and-cells.md) | c-1b-2:region 保真与单元格可寻址(⭐ 本单有**结构面**,⛔ 不是纯语义单) | `done(第二次派工按 v0.7.5 全绿;复核方亲刀**排他半边**取到真红,test:v2 自跑 350/350。⚠️ 第一次派工的停线是对的 —— 它发现的是工具的结构性上限,并**拒绝**了两条能凑绿的路)` | — | — |
 | [handoffs/2026-08-29-v12-9c-c1c-per-type-rulers.md](handoffs/2026-08-29-v12-9c-c1c-per-type-rulers.md) | c-1c:考卷分角色(三级火箭第 1 级)—— **每类东西用它该用的尺子** | `done(复核方**独立重算**与 builder 逐条对上;⭐ 补一条口径脚注:**158 = 154 条文本回程票 + 4 条图像回程票**,⛔ 不是同一个谓词的合计。零成本自证成立,证据本体整树哈希前后一致)` | — | — |
 | [handoffs/2026-08-29-v12-9c-c2-dual-transcription-recon.md](handoffs/2026-08-29-v12-9c-c2-dual-transcription-recon.md) | c-2 侦察结论:双拓互证**不是轻单**,且**顺序可能要重排** | `done(M1 收官 —— v3 两遍制 PASS 无停线:门遍 856 全量、覆盖率 24 行 remaining=0、分类遍 320/320 未触发 K-3;终审五路零 blocking,分母本身经第一性原理重建证成。⚠️ 已知瑕疵:§4 编码破损 → 并入 M2/c-4 从 JSON 重渲;K-8 的 5MB JSON 归宿划给 c-4)` | — | — |
+| [handoffs/2026-08-31-v12-10-a-template-studio-code-retirement.md](handoffs/2026-08-31-v12-10-a-template-studio-code-retirement.md) | 施工单甲:Template Studio 代码域退役(Step 1–3;⛔ 可逆域,零 DB 动作) | `ready(顶班调度按总部 2026-08-31 Step-0 闸裁定翻牌;裁定出处:总部七裁(逐项见 §2)+ K-0 计划 §7 Step 1–3;不代表 Henry 逐张批过本单)` | — | — |
 | [handoffs/2026-08-31-v12-10-k0-template-studio-recon.md](handoffs/2026-08-31-v12-10-k0-template-studio-recon.md) | 12.10 K-0:Template Studio 面侦察(⛔⛔ 全程只读,零删除零改动) | `ready(顶班调度按总部 2026-08-31 M4 开单令翻牌;裁定出处:`plans/v12-closeout-milestones.md` M4.1(Henry 已裁「运行时留、工作室删」)+ 总部当日续办令;不代表 Henry 逐张批过本单)` | — | — |
 | [handoffs/2026-08-31-v12-9c-c4-section4-rerender.md](handoffs/2026-08-31-v12-9c-c4-section4-rerender.md) | c-4-a:从 canonical JSON 重渲 §4 两表(⭐ 极小单,机械) | `done(2026-08-31 收工;调度方复核 PASS —— 六判据磁盘回读复算 + §6 证据本体端到端亲验)` | — | — |
 | [handoffs/2026-08-31-v12-9c-segment-closeout.md](handoffs/2026-08-31-v12-9c-segment-closeout.md) | V12.9c 段收口:插头真插进了插座(⛔ 但只插了一半) | `done(12.9c 全段收口;⛔ **c-3 全段未开单**,如实移交)` | — | — |
