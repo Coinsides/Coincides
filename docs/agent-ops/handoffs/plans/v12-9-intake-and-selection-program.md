@@ -17,8 +17,8 @@
 
 ## §2 载体处理器分档(Henry 2026-08-27 调序定案)
 
-- **T0 已有**:pdf(数字原生,页级锚)· docx · xlsx · csv · txt · md —— 存量升级目标:对齐带锚碎片流;该流的落库形状已就位,⛔ 但 T0 存量对齐动作仍归 12.9c(TD-29 / TD-30)。
-- **T1 主力书面材料(本纲领的完成线)**:html/htm/mhtml(正文抽取)· epub(蹭 HTML)· pptx · png/jpg/jpeg/webp(识别器车道)· json/jsonl(方言地基)· zip+文件夹(容器策略:解包、目录=出生语境、逐件归族)· **pdf 扫描版**(识别器车道,选品主战场)。
+- **T0 已有**:pdf(数字原生,页级锚)· docx · xlsx · csv · txt · md —— 存量升级目标:对齐带锚碎片流。**12.9c/c-0 只对齐了其中四种**:`pdf` / `docx` / `txt` / `md` 经 materialization 写出出生证与碎片(`server/src/services/sourceMaterialization.ts:421`,c-0 `6ba6152`);⛔ **`xlsx` 与 `csv` 在格式表里仍是 `stored_only`**(`server/src/services/sourceFileIntake.ts:141-162`)——**这两种的 T0 对齐是 12.9c 未清的欠账**,不随 c-4 收段而消失(见 `current-state/tech-debt.md`)。TD-29 已清(c-0);TD-30 已诚实拆分,单元格几何本转写器不可达部分随触发器另走。
+- **T1 主力书面材料(本纲领的完成线)**:html/htm/mhtml(正文抽取)· epub(蹭 HTML)· pptx · png/jpg/jpeg/webp(识别器车道)· json/jsonl(方言地基)· zip+文件夹(容器策略:解包、目录=出生语境、逐件归族)· **pdf 扫描版**(识别器车道,选品主战场)。**12.9c 进度**:`png` / `jpg` / `jpeg` / `webp` 已入格式表且为 `materializable`,但按 `no-imprint` 声明**只过链不产出生证**,等 c-3 识别器车道接上才有内容(`server/src/services/sourceMaterialization.ts:353`);MinerU 转写器已注册进解析器表,**须 `COINCIDES_PDF_PARSER=mineru` 显式点名**才被选中(c-1b-1 `d3c8661`);⛔ `pptx` / `zip` 仍 `stored_only`,html/epub/json 尚未入表。
 - **T2 旧格式抢救(Henry 升序:高于原 T2)**:旧二进制 Office(doc/xls/ppt——正经教学资料与案例库的常见载体;方针:转换后入,不直啃)· djvu · caj(知网,已知痛点)。
 - **T3 方言与小众**:ipynb · enex/XML · eml · Anki apkg(SQLite 方言)——真拖进来再写适配片。
 - **🅿 停车**:音视频本体 **及字幕**(Henry 裁:字幕也不想——一并停车,视频提取成熟后整体再议)。
