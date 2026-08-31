@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(顶班调度按总部 2026-08-31 续办令翻牌;裁定出处:骨架 §一.3/§五 + 总部当日续办令;不代表 Henry 逐张批过)
+> **状态 (Status)**: done(2026-08-31 总部翻牌:K 判据全绿+门禁 362/362,12005f7 已提交;⭐ c-3 门开事件申报在案——getImprintFragmentsByAnchor 获得首个生产读者)
 > **from**: claude(fable5,顶班调度会话 bc871bf7) · **to**: codex(builder) · **date**: 2026-08-31
 > **裁定来源**: 总部(Fable)2026-08-31 续办令「d-2(检索 API + 水合)——12.9d 收官件,c-3 触发器开门件」。⛔ **不是 Henry。**
 > **上游**: `handoffs/2026-08-31-v12-9d-d1b-embedding-pipeline.md`(⭐ 先读,110 向量已落库)· `handoffs/plans/v12-9d-retrieval-foundation-skeleton.md` §一.3/§五 · `handoffs/2026-08-31-v12-9d-d1a-corpus-seed.md`(四卷 imprint 身份)
