@@ -737,12 +737,7 @@ function collectReferenceBlockers(
   ))) {
     blockers.push('source_anchor');
   }
-  if (exists(db, 'SELECT 1 FROM composition_instance_slots WHERE user_id = ? AND note_block_id = ? LIMIT 1', userId, blockId)) {
-    blockers.push('composition');
-  }
-  if (exists(db, 'SELECT 1 FROM template_migration_record_items WHERE user_id = ? AND note_block_id = ? LIMIT 1', userId, blockId)) {
-    blockers.push('template_migration_history');
-  }
+  // 12.10-b 裁 4:Template Studio 已退役,历史引用不再阻止删除(保护对象已亡,枷锁不留);见 handoffs/2026-08-31-v12-10-b-*.md
   if (exists(db, 'SELECT 1 FROM source_board_nodes WHERE user_id = ? AND note_block_id = ? LIMIT 1', userId, blockId)
     || targetIds.some((targetId) => exists(
       db,
@@ -760,33 +755,6 @@ function collectReferenceBlockers(
       targetId,
     ))) {
     blockers.push('learning_canvas');
-  }
-  if (targetIds.some((targetId) => exists(
-    db,
-    `SELECT 1 FROM package_import_record_items
-     WHERE user_id = ? AND target_id = ? LIMIT 1`,
-    userId,
-    targetId,
-  ))) {
-    blockers.push('package_history');
-  }
-  if (targetIds.some((targetId) => exists(
-    db,
-    `SELECT 1 FROM domain_refinement_record_items
-     WHERE user_id = ? AND object_id = ? LIMIT 1`,
-    userId,
-    targetId,
-  ))) {
-    blockers.push('domain_refinement_history');
-  }
-  if (targetIds.some((targetId) => exists(
-    db,
-    `SELECT 1 FROM domain_object_classifications
-     WHERE user_id = ? AND target_id = ? LIMIT 1`,
-    userId,
-    targetId,
-  ))) {
-    blockers.push('domain_classification');
   }
   if (targetIds.some((targetId) => exists(
     db,

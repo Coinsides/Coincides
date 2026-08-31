@@ -30,15 +30,12 @@ export const COURSE_LIFECYCLE_POLICIES: CourseLifecyclePolicyEntry[] = [
   { table: 'canvas_placements', column: 'course_id', policy: 'move', reason: 'Projection layout truth' },
   { table: 'canvas_viewport_states', column: 'course_id', policy: 'move', reason: 'Projection view state' },
   { table: 'card_decks', column: 'course_id', policy: 'delete', reason: 'Project-owned study data' },
-  { table: 'composition_instance_slots', column: 'course_id', policy: 'delete', reason: 'Project-owned composition data' },
-  { table: 'composition_instances', column: 'course_id', policy: 'delete', reason: 'Project-owned composition data' },
+  // 12.10-b:六表已由 053 退役,登记随亡;见 handoffs/2026-08-31-v12-10-b-*.md
   { table: 'conflict_review_items', column: 'course_id', policy: 'delete', reason: 'Project reconciliation data' },
   { table: 'content_group_members', column: 'course_id', policy: 'move', reason: 'ContentGroup user work' },
   { table: 'content_groups', column: 'course_id', policy: 'move', reason: 'ContentGroup root user work' },
   { table: 'content_mounts', column: 'course_id', policy: 'move', reason: 'Projection mount truth' },
   { table: 'documents', column: 'course_id', policy: 'delete', reason: 'Legacy Project document' },
-  { table: 'domain_object_classifications', column: 'course_id', policy: 'preserve', reason: 'FK retains history with NULL Project' },
-  { table: 'domain_refinement_records', column: 'course_id', policy: 'preserve', reason: 'FK retains history with NULL Project' },
   { table: 'evidence_items', column: 'course_id', policy: 'delete', reason: 'Project reconciliation data' },
   { table: 'evidence_sets', column: 'course_id', policy: 'delete', reason: 'Project reconciliation data' },
   { table: 'excluded_material_scopes', column: 'course_id', policy: 'delete', reason: 'Project reconciliation data' },
@@ -82,8 +79,6 @@ export const COURSE_LIFECYCLE_POLICIES: CourseLifecyclePolicyEntry[] = [
   { table: 'structured_object_extensions', column: 'course_id', policy: 'move', reason: 'Projection structured object' },
   { table: 'tag_groups', column: 'course_id', policy: 'delete', reason: 'Project-owned taxonomy' },
   { table: 'tasks', column: 'course_id', policy: 'delete', reason: 'Project-owned planning data' },
-  { table: 'template_migration_record_items', column: 'course_id', policy: 'preserve', reason: 'FK retains history with NULL Project' },
-  { table: 'template_migration_records', column: 'course_id', policy: 'preserve', reason: 'FK retains history with NULL Project' },
   { table: 'visual_connector_extensions', column: 'course_id', policy: 'move', reason: 'Projection visual connector' },
 ];
 

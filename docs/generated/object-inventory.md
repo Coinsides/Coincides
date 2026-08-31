@@ -22,12 +22,12 @@
 
 ---
 
-## 1. 数据表（活表 101 张）
+## 1. 数据表（活表 83 张）
 
 > **口径**：已核 `server/src/db/init.ts:33,156` —— **先应用 `schema.sql`，再跑 migrations**。
 > 故 **活表 = `schema.sql` 声明 ∪ migrations 建表 − migrations 落表**。
-> `schema.sql` 单独声明 76 张，**那不是活表数** ——
-> 部分晚期表被回填进 `schema.sql`（56 张），部分没有（25 张）。
+> `schema.sql` 单独声明 58 张，**那不是活表数** ——
+> 部分晚期表被回填进 `schema.sql`（38 张），部分没有（25 张）。
 > 这是回填不一致，不是缺陷；但它意味着**任何"数一下 schema.sql"得出的数字都是错的**。
 
 | # | 表 | 首次建于 | 在 `schema.sql` |
@@ -48,100 +48,100 @@
 | 14 | `card_sections` | `schema.sql`（基线） | ✅ |
 | 15 | `card_tags` | `schema.sql`（基线） | ✅ |
 | 16 | `cards` | `schema.sql`（基线） | ✅ |
-| 17 | `composition_instance_slots` | 026_v2_composition_templates | ✅ |
-| 18 | `composition_instances` | 026_v2_composition_templates | ✅ |
-| 19 | `composition_templates` | 026_v2_composition_templates | ✅ |
-| 20 | `conflict_review_items` | 018_v2_reconciliation_safety | ✅ |
-| 21 | `content_group_folder_placements` | 032_v2_group_folders | ✅ |
-| 22 | `content_group_members` | 033_v2_content_group_members | ✅ |
-| 23 | `content_groups` | 031_v2_content_groups | ✅ |
-| 24 | `content_mounts` | 035_v2_canvas_objects | — |
-| 25 | `courses` | `schema.sql`（基线） | ✅ |
-| 26 | `daily_statuses` | `schema.sql`（基线） | ✅ |
-| 27 | `document_chunks` | `schema.sql`（基线） | ✅ |
-| 28 | `documents` | `schema.sql`（基线） | ✅ |
-| 29 | `domain_block_set_compositions` | 027_v2_domain_packages | ✅ |
-| 30 | `domain_block_set_templates` | 027_v2_domain_packages | ✅ |
-| 31 | `domain_block_sets` | 027_v2_domain_packages | ✅ |
-| 32 | `domain_object_classifications` | 030_v2_domain_refinement_proposals | ✅ |
-| 33 | `domain_refinement_mappings` | 030_v2_domain_refinement_proposals | ✅ |
-| 34 | `domain_refinement_record_items` | 030_v2_domain_refinement_proposals | ✅ |
-| 35 | `domain_refinement_records` | 030_v2_domain_refinement_proposals | ✅ |
-| 36 | `evidence_items` | 017_v2_reconciliation_evidence | ✅ |
-| 37 | `evidence_sets` | 017_v2_reconciliation_evidence | ✅ |
-| 38 | `excluded_material_scopes` | 018_v2_reconciliation_safety | ✅ |
-| 39 | `goal_dependencies` | 008_goal_dependencies | ✅ |
-| 40 | `goals` | `schema.sql`（基线） | ✅ |
-| 41 | `group_folders` | 032_v2_group_folders | ✅ |
-| 42 | `image_object_extensions` | 041_v2_canvas_image_assets | — |
-| 43 | `imprint_fragment_vectors` | 052_v2_imprint_fragment_vectors | — |
-| 44 | `imprint_fragments` | 049_v2_source_imprints | — |
-| 45 | `item_anchors` | 047_v2_item_relation_floor | ✅ |
-| 46 | `item_snapshots` | 047_v2_item_relation_floor | ✅ |
-| 47 | `items` | 047_v2_item_relation_floor | ✅ |
-| 48 | `learning_canvases` | 023_v2_learning_canvas | ✅ |
-| 49 | `managed_file_cleanup_jobs` | 046_v2_source_lifecycle_closure | — |
-| 50 | `material_reconciliation_decisions` | 017_v2_reconciliation_evidence | ✅ |
-| 51 | `material_segment_fragments` | 016_v2_material_proposal | ✅ |
-| 52 | `material_segments` | 016_v2_material_proposal | ✅ |
-| 53 | `note_block_placements` | 015_v2_note_foundation | ✅ |
-| 54 | `note_block_sources` | 015_v2_note_foundation | ✅ |
-| 55 | `note_blocks` | 015_v2_note_foundation | ✅ |
-| 56 | `notes` | 015_v2_note_foundation | ✅ |
-| 57 | `operation_batches` | 015_v2_note_foundation | ✅ |
-| 58 | `package_exports` | 029_v2_package_import_export | ✅ |
-| 59 | `package_import_previews` | 029_v2_package_import_export | ✅ |
-| 60 | `package_import_record_items` | 029_v2_package_import_export | ✅ |
-| 61 | `package_import_records` | 029_v2_package_import_export | ✅ |
-| 62 | `package_manifests` | 027_v2_domain_packages | ✅ |
-| 63 | `page_frame_extensions` | 035_v2_canvas_objects | — |
-| 64 | `projections` | 015_v2_note_foundation | ✅ |
-| 65 | `proposals` | `schema.sql`（基线） | ✅ |
-| 66 | `purpose_members` | 044_v2_purposes | — |
-| 67 | `purposes` | 044_v2_purposes | — |
-| 68 | `reconciliation_recovery_events` | 018_v2_reconciliation_safety | ✅ |
-| 69 | `recurring_task_groups` | `schema.sql`（基线） | ✅ |
-| 70 | `relation_assessments` | 047_v2_item_relation_floor | ✅ |
-| 71 | `relations` | 047_v2_item_relation_floor | ✅ |
-| 72 | `source_anchor_links` | 020_v2_source_anchors | ✅ |
-| 73 | `source_anchors` | 020_v2_source_anchors | ✅ |
-| 74 | `source_board_nodes` | 022_v2_source_boards | ✅ |
-| 75 | `source_boards` | 022_v2_source_boards | ✅ |
-| 76 | `source_files` | 045_v2_source_identity_floor | — |
-| 77 | `source_fragments` | 016_v2_material_proposal | ✅ |
-| 78 | `source_imprints` | 049_v2_source_imprints | — |
-| 79 | `source_materializations` | 045_v2_source_identity_floor | — |
-| 80 | `source_materials` | 016_v2_material_proposal | ✅ |
-| 81 | `source_project_placements` | 045_v2_source_identity_floor | — |
-| 82 | `source_records` | 045_v2_source_identity_floor | — |
-| 83 | `source_scopes` | 021_v2_source_scopes | ✅ |
-| 84 | `source_snapshot_pages` | 019_v2_source_snapshots | ✅ |
-| 85 | `source_snapshots` | 019_v2_source_snapshots | ✅ |
-| 86 | `structured_object_extensions` | 042_v2_structured_object_extensions | — |
-| 87 | `study_activity_log` | `schema.sql`（基线） | ✅ |
-| 88 | `study_mode_templates` | `schema.sql`（基线） | ✅ |
-| 89 | `tag_groups` | `schema.sql`（基线） | ✅ |
-| 90 | `tags` | `schema.sql`（基线） | ✅ |
-| 91 | `task_cards` | 011_task_cards | — |
-| 92 | `tasks` | `schema.sql`（基线） | ✅ |
-| 93 | `template_definitions` | 025_v2_template_definitions | ✅ |
-| 94 | `template_migration_mappings` | 028_v2_template_migration_proposals | ✅ |
-| 95 | `template_migration_record_items` | 028_v2_template_migration_proposals | ✅ |
-| 96 | `template_migration_records` | 028_v2_template_migration_proposals | ✅ |
-| 97 | `time_block_template_sets` | 012_time_block_templates | — |
-| 98 | `time_block_templates` | 012_time_block_templates | — |
-| 99 | `time_blocks` | 007_time_blocks | — |
-| 100 | `users` | `schema.sql`（基线） | ✅ |
-| 101 | `visual_connector_extensions` | 040_v2_visual_connector_extensions | — |
+| 17 | `conflict_review_items` | 018_v2_reconciliation_safety | ✅ |
+| 18 | `content_group_folder_placements` | 032_v2_group_folders | ✅ |
+| 19 | `content_group_members` | 033_v2_content_group_members | ✅ |
+| 20 | `content_groups` | 031_v2_content_groups | ✅ |
+| 21 | `content_mounts` | 035_v2_canvas_objects | — |
+| 22 | `courses` | `schema.sql`（基线） | ✅ |
+| 23 | `daily_statuses` | `schema.sql`（基线） | ✅ |
+| 24 | `document_chunks` | `schema.sql`（基线） | ✅ |
+| 25 | `documents` | `schema.sql`（基线） | ✅ |
+| 26 | `evidence_items` | 017_v2_reconciliation_evidence | ✅ |
+| 27 | `evidence_sets` | 017_v2_reconciliation_evidence | ✅ |
+| 28 | `excluded_material_scopes` | 018_v2_reconciliation_safety | ✅ |
+| 29 | `goal_dependencies` | 008_goal_dependencies | ✅ |
+| 30 | `goals` | `schema.sql`（基线） | ✅ |
+| 31 | `group_folders` | 032_v2_group_folders | ✅ |
+| 32 | `image_object_extensions` | 041_v2_canvas_image_assets | — |
+| 33 | `imprint_fragment_vectors` | 052_v2_imprint_fragment_vectors | — |
+| 34 | `imprint_fragments` | 049_v2_source_imprints | — |
+| 35 | `item_anchors` | 047_v2_item_relation_floor | ✅ |
+| 36 | `item_snapshots` | 047_v2_item_relation_floor | ✅ |
+| 37 | `items` | 047_v2_item_relation_floor | ✅ |
+| 38 | `learning_canvases` | 023_v2_learning_canvas | ✅ |
+| 39 | `managed_file_cleanup_jobs` | 046_v2_source_lifecycle_closure | — |
+| 40 | `material_reconciliation_decisions` | 017_v2_reconciliation_evidence | ✅ |
+| 41 | `material_segment_fragments` | 016_v2_material_proposal | ✅ |
+| 42 | `material_segments` | 016_v2_material_proposal | ✅ |
+| 43 | `note_block_placements` | 015_v2_note_foundation | ✅ |
+| 44 | `note_block_sources` | 015_v2_note_foundation | ✅ |
+| 45 | `note_blocks` | 015_v2_note_foundation | ✅ |
+| 46 | `notes` | 015_v2_note_foundation | ✅ |
+| 47 | `operation_batches` | 015_v2_note_foundation | ✅ |
+| 48 | `page_frame_extensions` | 035_v2_canvas_objects | — |
+| 49 | `projections` | 015_v2_note_foundation | ✅ |
+| 50 | `proposals` | `schema.sql`（基线） | ✅ |
+| 51 | `purpose_members` | 044_v2_purposes | — |
+| 52 | `purposes` | 044_v2_purposes | — |
+| 53 | `reconciliation_recovery_events` | 018_v2_reconciliation_safety | ✅ |
+| 54 | `recurring_task_groups` | `schema.sql`（基线） | ✅ |
+| 55 | `relation_assessments` | 047_v2_item_relation_floor | ✅ |
+| 56 | `relations` | 047_v2_item_relation_floor | ✅ |
+| 57 | `source_anchor_links` | 020_v2_source_anchors | ✅ |
+| 58 | `source_anchors` | 020_v2_source_anchors | ✅ |
+| 59 | `source_board_nodes` | 022_v2_source_boards | ✅ |
+| 60 | `source_boards` | 022_v2_source_boards | ✅ |
+| 61 | `source_files` | 045_v2_source_identity_floor | — |
+| 62 | `source_fragments` | 016_v2_material_proposal | ✅ |
+| 63 | `source_imprints` | 049_v2_source_imprints | — |
+| 64 | `source_materializations` | 045_v2_source_identity_floor | — |
+| 65 | `source_materials` | 016_v2_material_proposal | ✅ |
+| 66 | `source_project_placements` | 045_v2_source_identity_floor | — |
+| 67 | `source_records` | 045_v2_source_identity_floor | — |
+| 68 | `source_scopes` | 021_v2_source_scopes | ✅ |
+| 69 | `source_snapshot_pages` | 019_v2_source_snapshots | ✅ |
+| 70 | `source_snapshots` | 019_v2_source_snapshots | ✅ |
+| 71 | `structured_object_extensions` | 042_v2_structured_object_extensions | — |
+| 72 | `study_activity_log` | `schema.sql`（基线） | ✅ |
+| 73 | `study_mode_templates` | `schema.sql`（基线） | ✅ |
+| 74 | `tag_groups` | `schema.sql`（基线） | ✅ |
+| 75 | `tags` | `schema.sql`（基线） | ✅ |
+| 76 | `task_cards` | 011_task_cards | — |
+| 77 | `tasks` | `schema.sql`（基线） | ✅ |
+| 78 | `template_definitions` | 025_v2_template_definitions | ✅ |
+| 79 | `time_block_template_sets` | 012_time_block_templates | — |
+| 80 | `time_block_templates` | 012_time_block_templates | — |
+| 81 | `time_blocks` | 007_time_blocks | — |
+| 82 | `users` | `schema.sql`（基线） | ✅ |
+| 83 | `visual_connector_extensions` | 040_v2_visual_connector_extensions | — |
 
-### 1.1 已由 migration 落表（8）
+### 1.1 已由 migration 落表（26）
 
 - `canvas_edges` —— 047_v2_item_relation_floor
+- `composition_instance_slots` —— 053_v2_template_studio_decommission
+- `composition_instances` —— 053_v2_template_studio_decommission
+- `composition_templates` —— 053_v2_template_studio_decommission
 - `content_group_fragments` —— 047_v2_item_relation_floor
 - `content_group_petal_fragments` —— 047_v2_item_relation_floor
 - `content_group_petals` —— 047_v2_item_relation_floor
+- `domain_block_set_compositions` —— 053_v2_template_studio_decommission
+- `domain_block_set_templates` —— 053_v2_template_studio_decommission
+- `domain_block_sets` —— 053_v2_template_studio_decommission
+- `domain_object_classifications` —— 053_v2_template_studio_decommission
+- `domain_refinement_mappings` —— 053_v2_template_studio_decommission
+- `domain_refinement_record_items` —— 053_v2_template_studio_decommission
+- `domain_refinement_records` —— 053_v2_template_studio_decommission
 - `object_relations` —— 047_v2_item_relation_floor
+- `package_exports` —— 053_v2_template_studio_decommission
+- `package_import_previews` —— 053_v2_template_studio_decommission
+- `package_import_record_items` —— 053_v2_template_studio_decommission
+- `package_import_records` —— 053_v2_template_studio_decommission
+- `package_manifests` —— 053_v2_template_studio_decommission
 - `relation_layers` —— 047_v2_item_relation_floor
+- `template_migration_mappings` —— 053_v2_template_studio_decommission
+- `template_migration_record_items` —— 053_v2_template_studio_decommission
+- `template_migration_records` —— 053_v2_template_studio_decommission
 - `time_block_overrides` —— 013_time_block_instances
 - `time_blocks_old` —— 013_time_block_instances
 
