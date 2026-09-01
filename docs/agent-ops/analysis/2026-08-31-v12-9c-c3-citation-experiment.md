@@ -99,41 +99,108 @@ d-2 的生产现物 `hydrateImprintRetrievalMatch` 已用完全相同的调用�
 
 它已冻结：输入/输出 JSON schema、纯文本调用形态、完整逐字 prompt、现役 lockfile 条件、d-2 exact 锚复放、判废枚举、存在域 page 级单证投影与预算计数法。冻结文件为 10,354 bytes，SHA-256 `8dd249db1cbbb34a04c0f4080bd34c73ebf319f10a4eb191c94078c8583832aa`。契约自身不写自指哈希；本值只写实验报告与工单回执。
 
-## 8. 腿 2 实验台账骨架（未执行）
+## 8. 腿 2·续实验台账（已执行）
 
-### 8.1 K-1 冻结复核
+### 8.1 K-1 双冻结件复核
 
-- 腿 1 SHA：待回执。
-- 腿 2 开工 SHA：待 resume 后复算。
-- 是否逐字相等：待填；不等即停线。
+开工第一步逐字节复算通过，且实跑脚本在首次 API 调用前再次执行同一复核：
 
-### 8.2 分卷分母与结果
+| 冻结件 | bytes | 调度方冻结 SHA-256 | 开工/脚本复算 | 结论 |
+|---|---:|---|---|---|
+| 主契约 | 10,354 | `8dd249db1cbbb34a04c0f4080bd34c73ebf319f10a4eb191c94078c8583832aa` | 同值 | PASS；字节未改 |
+| 补遗 1 | 1,743 | `2ab5f08231a37acf0279f6b051af04e32455cbc6cf3667b50d108c40d6237b4f` | 同值 | PASS |
 
-| 卷 | 候选 page range | 实跑 | 跳过及原因 | claims | 有效引用 | 判废 | 单证引用 |
-|---|---:|---:|---|---:|---:|---:|---:|
-| academic-reading | 2 | 待填 | 待填 | 待填 | 待填 | 待填 | 待填 |
-| writing-example-responses | 1 | 待填 | 待填 | 待填 | 待填 | 待填 | 待填 |
-| academic-writing | 1 | 待填 | 待填 | 待填 | 待填 | 待填 | 待填 |
-| listening | 1 | 待填 | 待填 | 待填 | 待填 | 待填 | 待填 |
+补遗 1 的自证测试构造四对现物名，逐对只剥 `.fragments.json` / `.pdf` 后逐字同 stem；另以中性功能样本的错误后缀断言 `identity_mapping_stop`。脚本又对 175 张存在域收据及四卷 host 全量执行同一映射，均在首次发送前通过。
 
-### 8.3 判废清单
+### 8.2 实跑形态与只读来源
 
-待腿 2 逐条记录：request / claim / citation / reason code / 是否进入台账。不得静默缺失。
+实际命令从 `server` 目录执行：
 
-### 8.4 预算台账
+```text
+node --env-file=.env --import tsx ../scripts/cite-imprint-pages.mjs
+```
 
-待腿 2 逐次记录：request_id / 发送前累计调用 / 本次 request body 字符 / 累计字符 / 是否放行 / provider usage。计划之外重试也计入分母。
+脚本以 `readonly=true` 打开 `server/coincides.db`，并设置 `PRAGMA query_only=ON`；按固定 imprint ID 调 `getSourceImprint` 取现役候选，再对每个候选调用 `getImprintFragmentsByAnchor(db,userId,imprintId,{match:'exact',anchor})` 并按 ID 回找。闸校验同样调用该生产 exact 锚门。数据库写入为 0。
 
-### 8.5 点射消费形态（c-2 持久层解锁申报）
+census canonical JSON 从 c-2 v3 文档唯一 Base64 围栏恢复，实跑前复核为 5,096,178 bytes、SHA-256 `2bfc5b892a107cd5fb79e7cbf1cf8f005d3b769b621eaceb3b395dd54f1e0dab`、UTF-8 无 BOM、末尾单 LF；只消费 `$.gate_pass.existence_differences` 的 175 张收据，未消费分类学差异。
 
-待腿 2 根据实际结果申报：置信度是 per-fragment 还是 per-imprint、谁读取；本段不先建字段。
+工作假设识别器为 `qwen-vl-max`，国际站 chat-completions endpoint；输入恰为冻结契约的纯文本 request body，没有 `image_url`、base64 或页图。key 仅回执 `present=true,length=116`，值未进入 prompt、日志或落盘物。
 
-### 8.6 K-5 硬声明
+### 8.3 分卷分母与结果
 
-腿 2 报告必须逐字保留：
+“有效引用率”的分母是模型返回的 citation references；“单证率”的分母是过闸有效 citation。零 citation 的卷写 `— (0/0)`，不以 0% 冒充分母。
+
+| 卷 | 候选 page range | 实跑 | 跳过及原因 | claims | citation references | 有效引用率 | 判废 claims / citations | 单证引用率 |
+|---|---:|---:|---|---:|---:|---:|---:|---:|
+| academic-reading | 2 | 2 | 0；无跳过 | 15 | 15 | 15/15 = 100% | 0 / 0 | 0/15 = 0% |
+| writing-example-responses | 1 | 1 | 0；无跳过 | 6 | 6 | 6/6 = 100% | 0 / 0 | 6/6 = 100% |
+| academic-writing | 1 | 1 | 0；无跳过；模型合规 abstain | 0 | 0 | — (0/0) | 0 / 0 | — (0/0) |
+| listening | 1 | 1 | 0；无跳过；模型合规 abstain | 0 | 0 | — (0/0) | 0 / 0 | — (0/0) |
+| **合计** | **5** | **5** | **0** | **21** | **21** | **21/21 = 100%** | **0 / 0** | **6/21 = 28.57%** |
+
+writing-example-responses p4 的 6 条有效 citation 均被 host 闸标为 `uncorroborated=true`，且 `existence_receipt_ids=["E-000052"]`；状态仍为 `accepted`。academic-writing p4 与 listening p8 虽分别投影到 `E-000060`、`E-000104..E-000108`，但模型没有产生 citation，故没有凭空生成单证引用。
+
+### 8.4 两个④类 event 点射结果（单列）
+
+| ④类 event | request | 页范围 / fragments | claims / citations | 过闸 | 单证 |
+|---|---|---|---:|---|---|
+| `D-000029 / EV-000143` | `c3-academic-reading-p19` | p19 / 1 | 7 / 7 | 7/7 有效；response `accepted` | 0/7 |
+| `D-000059 / EV-000268` | `c3-academic-reading-p34-p35` | p34–35 / 2 | 8 / 8 | 8/8 有效；response `accepted` | 0/8 |
+
+这里的“点射”只表示按 c-2 的两个真实指错 event 选定 page range 后观察 page-fragment 引用闸结果；不把 claim 数或 fragment 数改称 event 基数，也不声称识别器修复了上游 pointer divergence。
+
+### 8.5 判废清单（逐 request，零静默）
+
+| request | response 状态 | claim/citation 判废项 | reason code | 是否进入台账 |
+|---|---|---|---|---|
+| `c3-academic-reading-p19` | accepted | 无 | 无 | `rejection_ledger=[]` |
+| `c3-academic-reading-p34-p35` | accepted | 无 | 无 | `rejection_ledger=[]` |
+| `c3-writing-responses-p4` | accepted | 无 | 无 | `rejection_ledger=[]` |
+| `c3-academic-writing-p4` | accepted（`insufficient_support`） | 无 | 无 | `rejection_ledger=[]` |
+| `c3-listening-p8` | accepted（`insufficient_support`） | 无 | 无 | `rejection_ledger=[]` |
+
+实跑判废总数为 0，不等于测试没有真牙。fake recognizer 测试分别命中并断言六个冻结码：`output_schema_invalid`、`request_id_mismatch`、`citation_fragment_unknown`、`citation_imprint_mismatch`、`citation_lockfile_mismatch`、`citation_anchor_replay_failed`；每个红样本都检查台账，另有全绿路径与“单证只标不拒”路径。测试没有真实 API 调用，功能样本均为中性措辞。
+
+### 8.6 预算与 provider usage 台账
+
+脚本先准备全部 5 个实际 `JSON.stringify(requestBody)`，逐一核对冻结计划字符数并核对全量预算，之后才读取 key、进入发送循环；循环内每次发送前再次计算 next cumulative。重试 0，故没有隐藏分母。
+
+| request | 发送前累计 calls | 本次 body 字符 | 发送后累计字符 | 放行 | provider tokens（prompt/completion/total） |
+|---|---:|---:|---:|---|---:|
+| `c3-academic-reading-p19` | 0 | 4,437 | 4,437 | 是 | 1,064 / 605 / 1,669 |
+| `c3-academic-reading-p34-p35` | 1 | 7,326 | 11,763 | 是 | 1,681 / 660 / 2,341 |
+| `c3-writing-responses-p4` | 2 | 3,456 | 15,219 | 是 | 756 / 530 / 1,286 |
+| `c3-academic-writing-p4` | 3 | 1,633 | 16,852 | 是 | 382 / 35 / 417 |
+| `c3-listening-p8` | 4 | 1,544 | 18,396 | 是 | 367 / 34 / 401 |
+| **合计** | — | **18,396** | **18,396** | **5/5** | **4,250 / 1,864 / 6,114** |
+
+最终消费：**5 calls / 18,396 出境字符 / 0 retries**，满足 `5 <= 20` 与 `18,396 <= 30,000`；余量 15 calls / 11,604 字符。脚本计数、实跑回执与本报告三方相等。
+
+### 8.7 点射消费形态（per-fragment / 谁读）
+
+本轮模型没有输出“置信度”，因此不存在可诚实申报为 per-imprint 或 per-fragment 的 confidence，也没有为它开持久字段。实际可消费的点射结果是 **per-citation、由 cited fragment 定位**：每个有效 citation 携带 `fragment_id`，host 再以该 fragment 的 page anchor 派生 `uncorroborated + existence_receipt_ids`。它不是 per-imprint 汇总；同一 imprint 的不同页可以有不同单证结果。
+
+当前读取者只有 `scripts/cite-imprint-pages.mjs` 的实验台账与本报告。生产 service 返回该 per-fragment citation 形态，但本单没有接 API、UI 或数据库消费者。若后续要持久化或展示，消费者应读取 citation 级字段，不能把一个页的 `uncorroborated` 外推到整个 imprint。
+
+### 8.8 K-5 硬声明
 
 「本轮引用质量只代表 page 级地板碎片上的引用质量,⛔ 不代表本产品的引用质量。」
 
-### 8.7 本单没有做
+### 8.9 本单没有做
 
-待腿 2 复核并申报：置信度持久层、嵌入终选、UI、TD-38、识别器终选、TD-40；安全类/对抗类测试始终零设计零执行。
+- 没有置信度持久层，也没有虚构模型 confidence；
+- 没有嵌入终选、识别器终选、UI、API 路由或新 fragment；
+- 没有修 TD-38；TD-40 仍按 §6 的“不自然同路”判定原地留债；
+- 没有页图、多模态输入、分类学差异消费或 census 输入写入；
+- 没有数据库写入、迁移或现役水合链改写；
+- 安全类/对抗类测试零设计零执行；判废测试均为中性功能数据样本。
+
+### 8.10 门禁
+
+| 门禁 | 结果 |
+|---|---|
+| `npx tsc --noEmit`（`server`） | exit 0 |
+| `npm run test:v2`（`server`） | exit 0；337/337，较工单基线 328/328 增 9 |
+| `npm run docs:check`（仓库根） | exit 0；生成件最新，glossary K-1..K-3 PASS |
+
+禁区 `git diff --quiet HEAD -- <path>`：主契约、补遗 1、`sourceImprints.ts`、`imprintEmbedding.ts`、`imprintRetrieval.ts`、`embedding/dashscope.ts`、`server/src/db/**`、`client/**`、根 `package.json`、`.env*`、`docs/agent-ops/current-state/**`、`.claude/**`、`AGENTS.md`、`CLAUDE.md` 均 exit 0；既有 `server/src/routes/projections.ts` EOL 状态噪音也为内容 diff exit 0。最终复跑与 porcelain 见工单 `## Result(腿 2·续)`。

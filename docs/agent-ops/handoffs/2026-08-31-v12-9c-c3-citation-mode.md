@@ -173,3 +173,80 @@ getImprintFragmentsByAnchor(db, userId, imprintId, { match: 'exact', anchor })
  M docs/agent-ops/handoffs/2026-08-31-v12-9c-c3-citation-mode.md
  M server/src/routes/projections.ts
 ```
+
+## Result(腿 2·续)
+
+**结论：腿 2·续完成，无新增 `needs: dispatcher`，按令停线交回。** 先前 `## Result(腿 2)` 的停线事实与文字原样保留；调度方补遗 1 已机械冻结该阻断点，本续段只按补遗恢复施工，没有改主契约字节。
+
+### K-1 · 双冻结件先于实现
+
+开工第一步与跑批首次发送前各复算一次：
+
+- 主契约：10,354 bytes，SHA-256 `8dd249db1cbbb34a04c0f4080bd34c73ebf319f10a4eb191c94078c8583832aa`；与冻结值逐字相等，`git diff --quiet` exit 0；
+- 补遗 1：1,743 bytes，SHA-256 `2ab5f08231a37acf0279f6b051af04e32455cbc6cf3667b50d108c40d6237b4f`；与冻结值逐字相等，`git diff --quiet` exit 0。
+
+补遗自证测试覆盖四对现物名同 stem，以及一个错误后缀的中性功能样本触发 `identity_mapping_stop`。实跑前又对 175 张收据和四卷 host 全量跑同一映射；没有其他大小写、空白或 Unicode 归一化。
+
+### K-2 · 三验真牙与零写库
+
+新增 `server/src/services/imprintCitations.ts`：请求准备只读 page-range 水合；响应闸依次执行候选/ownership-imprint、现役 lockfile hash、生产 `getImprintFragmentsByAnchor(...,{match:'exact',anchor})` 回放与 ID 回找；存在域只给有效 citation 透传 `uncorroborated + existence_receipt_ids`，不判废、不写库。
+
+新增测试 9 条，fake recognizer 的真实调用计数为 0。全绿路径外，六个冻结码均有中性功能判废样本并断言台账：`output_schema_invalid`、`request_id_mismatch`、`citation_fragment_unknown`、`citation_imprint_mismatch`、`citation_lockfile_mismatch`、`citation_anchor_replay_failed`；另断言单证标注不拒绝、未知 citation 的 partial 结果不静默删除。
+
+### K-3 · 预算与实跑
+
+按指定命令从 `server` 目录运行：
+
+```text
+node --env-file=.env --import tsx ../scripts/cite-imprint-pages.mjs
+```
+
+首次发送前完整预检为 5 calls / 6 fragments / 18,396 出境字符；逐 request 字符为 4,437、7,326、3,456、1,633、1,544。实际为 **5 calls / 18,396 chars / 0 retries**，与计划及报告三方相等，满足 `<=20 / <=30,000`；余量 15 calls / 11,604 chars。provider usage 合计 prompt 4,250、completion 1,864、total 6,114 tokens。key 只申报 `present=true,length=116`，值未进入 prompt、日志、回执或落盘物；本次为真实 provider 调用，provider 未返回可据以申报的货币费用数值。
+
+### K-4 · 四卷分母、结果与判废台账
+
+| 卷 | 候选 / 实跑 / 跳过 | claims | 有效引用 | 判废 | 单证引用 |
+|---|---|---:|---:|---:|---:|
+| academic-reading | 2 / 2 / 0 | 15 | 15/15 | 0 | 0/15 |
+| writing-example-responses | 1 / 1 / 0 | 6 | 6/6 | 0 | 6/6（`E-000052`） |
+| academic-writing | 1 / 1 / 0 | 0（合规 abstain） | 0/0 | 0 | 0/0 |
+| listening | 1 / 1 / 0 | 0（合规 abstain） | 0/0 | 0 | 0/0 |
+| **合计** | **5 / 5 / 0** | **21** | **21/21** | **0** | **6/21** |
+
+五个 response 均为 `accepted`，各自 `rejection_ledger=[]`；零判废已逐 request 写入报告 §8.5，没有用汇总值掩盖条目。
+
+两个④类 event 单列：`D-000029 / EV-000143`（p19）得到 7 claims / 7 citations，7/7 过闸；`D-000059 / EV-000268`（p34–35）得到 8 claims / 8 citations，8/8 过闸。两者单证均 0，且没有把 claim、citation、fragment 或 page 数改称 event 基数。完整分卷、budget 与 provider usage 台账见实验报告 §8.3–§8.6。
+
+### K-5 · 消费形态、硬声明与门禁
+
+点射消费形态见实验报告 §8.7：没有模型 confidence，实际结果是 **per-citation / cited-fragment** 的引用与单证注解，不是 per-imprint；当前读取者只有跑批台账和报告，本单没有接 API/UI/持久层。
+
+硬声明位于实验报告 §8.8，并逐字为：
+
+「本轮引用质量只代表 page 级地板碎片上的引用质量,⛔ 不代表本产品的引用质量。」
+
+最终门禁：
+
+- `npx tsc --noEmit`（server）：exit 0；
+- `npm run test:v2`（server）：exit 0，**337/337**；工单基线 328/328，本单增量 **+9**；
+- `npm run docs:check`（根）：exit 0；生成件最新，glossary K-1..K-3 PASS。
+
+禁区逐项 `git diff --quiet HEAD -- <path>`：主契约、补遗 1、`sourceImprints.ts`、`imprintEmbedding.ts`、`imprintRetrieval.ts`、`embedding/dashscope.ts`、`server/src/db/**`、`client/**`、根 `package.json`、`.env*`、`docs/agent-ops/current-state/**`、`.claude/**`、`AGENTS.md`、`CLAUDE.md` 均 exit 0。既有 `server/src/routes/projections.ts` EOL 状态噪音内容 diff 亦 exit 0，未触碰。
+
+### K-6 · 本单没有做与停线点
+
+没有置信度持久层、嵌入终选、识别器终选、UI、API 路由、TD-38、TD-40、页图、多模态输入、新 fragment、迁移或数据库写入；没有消费分类学差异；安全类/对抗类测试零设计零执行。未 commit、未 push、未翻状态头、未碰锁、进程（含 PID 8292）、census 仓外输入、current-state、会话记录或 key 值。
+
+本续段无新增停线点；先前身份映射停线仅由调度方补遗 1 解除，历史段保留。
+
+### porcelain 全文
+
+```text
+ M docs/agent-ops/analysis/2026-08-31-v12-9c-c3-citation-experiment.md
+ M docs/agent-ops/handoffs/2026-08-31-v12-9c-c3-citation-mode.md
+ M server/package.json
+ M server/src/routes/projections.ts
+?? scripts/cite-imprint-pages.mjs
+?? server/src/__tests__/v2ImprintCitations.test.ts
+?? server/src/services/imprintCitations.ts
+```
