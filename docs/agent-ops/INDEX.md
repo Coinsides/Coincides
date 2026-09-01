@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 247 份文档。
+共 249 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -237,7 +237,8 @@
 | [handoffs/2026-08-31-v12-10-c-i18n-english-copy.md](handoffs/2026-08-31-v12-10-c-i18n-english-copy.md) | 施工单丙:client UI 中文文案统一为英文(中文进翻译档) | `done(2026-08-31 总部翻牌:判据全绿——见本单 Result 与收官报告)` | — | — |
 | [handoffs/2026-08-31-v12-10-d-page-centering.md](handoffs/2026-08-31-v12-10-d-page-centering.md) | 施工单丁:page 模式「居中不是很中」诊断与小修(走查 #4a) | `done(2026-08-31 总部翻牌:判据全绿——见本单 Result 与收官报告)` | — | — |
 | [handoffs/2026-08-31-v12-10-k0-template-studio-recon.md](handoffs/2026-08-31-v12-10-k0-template-studio-recon.md) | 12.10 K-0:Template Studio 面侦察(⛔⛔ 全程只读,零删除零改动) | `done(2026-08-31 总部翻牌:判据全绿,verify 全链 exit 0——见收官报告与本单 Result)` | — | — |
-| [handoffs/2026-08-31-v12-9c-c3-citation-mode.md](handoffs/2026-08-31-v12-9c-c3-citation-mode.md) | c-3:识别器引用模式(引用契约 + 校验闸 + 四卷抽页实验) | `ready(顶班调度按总部 2026-08-31 c-3 续办令翻牌;裁定出处:`plans/v12-9c-c3-citation-mode-skeleton.md`(骨架+归域三裁)+ 总部当日拆单五注;不代表 Henry 逐张批过本单)` | — | — |
+| [handoffs/2026-08-31-v12-10-segment-closeout.md](handoffs/2026-08-31-v12-10-segment-closeout.md) | 12.10 段收口:打磨节 —— 四单全落,一件解耦候 Henry | `done(12.10 段收口;总部清点令,调度自办)` | — | — |
+| [handoffs/2026-08-31-v12-9c-c3-citation-mode.md](handoffs/2026-08-31-v12-9c-c3-citation-mode.md) | c-3:识别器引用模式(引用契约 + 校验闸 + 四卷抽页实验) | `done(2026-08-31 总部翻牌:K 全绿,21/21 引用过闸,三级火箭第 3 级落地)` | — | — |
 | [handoffs/2026-08-31-v12-9c-c4-section4-rerender.md](handoffs/2026-08-31-v12-9c-c4-section4-rerender.md) | c-4-a:从 canonical JSON 重渲 §4 两表(⭐ 极小单,机械) | `done(2026-08-31 收工;调度方复核 PASS —— 六判据磁盘回读复算 + §6 证据本体端到端亲验)` | — | — |
 | [handoffs/2026-08-31-v12-9c-segment-closeout.md](handoffs/2026-08-31-v12-9c-segment-closeout.md) | V12.9c 段收口:插头真插进了插座(⛔ 但只插了一半) | `done(12.9c 全段收口;⛔ **c-3 全段未开单**,如实移交)` | — | — |
 | [handoffs/2026-08-31-v12-9d-d0-wiring-and-smoke.md](handoffs/2026-08-31-v12-9d-d0-wiring-and-smoke.md) | d-0:接线图 + 嵌入供应商冒烟(⭐ 轻量单,⛔ 不写生产码) | `done(2026-08-31 收工;复核 PASS —— key 零泄漏与八处禁区独立复算,401 已定因=区域端点)` | — | — |
@@ -245,6 +246,7 @@
 | [handoffs/2026-08-31-v12-9d-d1b-embedding-pipeline.md](handoffs/2026-08-31-v12-9d-d1b-embedding-pipeline.md) | d-1b:新代向量表 + 嵌入工序(⛔ 只到"存得下",检索 API 归 d-2) | `done(2026-08-31 总部翻牌:K 判据全绿+门禁全过,e8ea3c4 已提交;历程=首派凭证事件作废停线 → 二派崩机死于半程(遗产 5 件代码面全绿)→ 续跑段完成运行时半程收工)` | — | — |
 | [handoffs/2026-08-31-v12-9d-d2-retrieval-api.md](handoffs/2026-08-31-v12-9d-d2-retrieval-api.md) | d-2:最小检索 API + 经锚水合(⛔ 不做 UI;c-3 开门件) | `done(2026-08-31 总部翻牌:K 判据全绿+门禁 362/362,12005f7 已提交;⭐ c-3 门开事件申报在案——getImprintFragmentsByAnchor 获得首个生产读者)` | — | — |
 | [handoffs/2026-08-31-v12-9d-segment-closeout.md](handoffs/2026-08-31-v12-9d-segment-closeout.md) | d-3 段收口:12.9d 检索地基 —— 碎片有了第一个生产读者 | `done(d-3 段收口;12.9d 全段关账)` | — | — |
+| [handoffs/2026-08-31-v12-version-closeout.md](handoffs/2026-08-31-v12-version-closeout.md) | V12 版本收官对账:12.9a → 12.10 | `done(V12 版本收官对账;push 与收官批显式候 Henry,见 §5)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
