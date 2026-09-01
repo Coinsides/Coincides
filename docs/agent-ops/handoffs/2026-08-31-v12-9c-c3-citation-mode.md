@@ -53,3 +53,77 @@ R-1 ④类基数与权威来源(§0.5)· R-2 存在域收据集合的机器可�
 ## 6. 回执
 
 腿 1:R-1~R-7 · 契约 SHA · porcelain。腿 2:K-1~K-6 逐项 · 台账 · 硬声明位置 · 点射消费形态专节指针 · 门禁 exit · 停线点。
+
+## Result(腿 1)
+
+**结论：腿 1 完成，无 `needs: dispatcher`；已按分腿纪律停线，等待调度方复核契约并发 resume 令。** 本腿只做 K-0 与冻结草案：实现代码 0、外部 API 调用 0、出境字符 0、费用 0、key 读取 0、进程操作 0。
+
+两份交付物：
+
+- 契约：`docs/agent-ops/analysis/2026-08-31-c3-citation-prompt-contract.md`；
+- 报告骨：`docs/agent-ops/analysis/2026-08-31-v12-9c-c3-citation-experiment.md`。
+
+### R-1 · ④类基数与判数源
+
+获准的 `D:/Coinsides/v12.9-selection/tools/_out/**` 内没有 standalone `divergence-census-v3.json`。本单以指定 c-2 v3 文档 §6.1 内嵌 canonical JSON 为机器判数源：恢复后 5,096,178 bytes，SHA-256 `2bfc5b892a107cd5fb79e7cbf1cf8f005d3b769b621eaceb3b395dd54f1e0dab`。
+
+`$.classification_pass.counts_by_classification_and_predicate["真实指错"].cross_predicate_total = 2`；过滤 `$.classification_pass.divergences[*].classification == "真实指错"` 也恰为 2。两件为 `D-000029 / EV-000143`（academic-reading，p19）与 `D-000059 / EV-000268`（academic-reading，MinerU p34–35、Docling p34）。基数单位是 **event**，不把 175 张存在性差异、150 个 pairing unresolved 或 211 张分类学差异混入。
+
+### R-2 · 存在域收据机器形态
+
+机器路径固定为 `$.gate_pass.existence_differences[0..174]`，恰 175 张；单张含 `existence_id/event_id/document/predicate/source/direction/sort_key/opposite_side_member_count`、双方 role/seq、完整 evidence、overlap graph 与 pairing proof。读取前按 c-2 §6.1 复核解码字节数、SHA、UTF-8 与末尾 LF。
+
+收据没有现役 native-pdf fragment ID，故本轮 page-fidelity 映射冻结为“单边 evidence 的 path basename = 现役 original_filename，且 canonical page = 现役 page anchor”。命中后给有效 citation 透传 `uncorroborated=true + existence_receipt_ids`；**只标不拒**。这是保守页级投影，不声称 bbox 碎片与整页 fragment 身份相等，也不建持久字段。
+
+### R-3 · 调用形态与模态
+
+工作假设模型 `qwen-vl-max`，endpoint 固定 `https://dashscope-intl.aliyuncs.com/compatible-mode/v1/`，不冒充终选。12.9a 视觉 2b 现物是“页图 + 转写碎片清单 → source_seq”；文本档是“碎片清单 → source_seq”。本单选择**纯文本**：目标是引用既有 `id/anchor/text`，不是重建 bbox；trial-2 最小页图 104,030 bytes，base64 理论下界 138,708 字符，单图已击穿全单 30,000 字符闸。契约明确禁止 `image_url`、base64 与页图。
+
+### R-4 · 抽页与预算算术
+
+计划 5 calls / 4 volumes / 6 page fragments：
+
+| request | 页范围 | fragments | 文本字符 | 完整 request body 字符 |
+|---|---|---:|---:|---:|
+| academic-reading 点射 1 | p19 | 1 | 2,921 | 4,437 |
+| academic-reading 点射 2 | p34–35 | 2 | 5,764 | 7,326 |
+| writing responses 校准 | p4 | 1 | 2,113 | 3,456 |
+| academic writing 校准 | p4 | 1 | 335 | 1,633 |
+| listening 校准 | p8 | 1 | 243 | 1,544 |
+| **合计** | **6 页** | **6** | **11,376** | **18,396** |
+
+两个 reading request 只瞄 2 个④类 event；其余三卷复用 trial-2 已登记页以履行四卷分母，不因存在域或分类学差异选页。完整 body 以冻结 prompt、现役只读 DB 文本与 `JSON.stringify(requestBody)` 的 Unicode code point 数精算：`5 <= 20`、`18,396 <= 30,000`，余量 15 calls / 11,604 chars。腿 2 仍须发送前按实际 body 累计预检，重试也计数，越界前拒发。
+
+### R-5 · d-2 水合链复用点
+
+现役签名为 `getImprintFragmentsByAnchor(db: Database.Database, userId: string, imprintId: string, query: SourceImprintAnchorQuery)`；固定调用式：
+
+```ts
+getImprintFragmentsByAnchor(db, userId, imprintId, { match: 'exact', anchor })
+```
+
+随后必须在返回集合内按 cited fragment ID 回找；找不到即 `citation_anchor_replay_failed` 判废。d-2 的 `hydrateImprintRetrievalMatch` 已走同一调用式。c-3 只 import/call，不改 `sourceImprints.ts`，不重写锚等价。
+
+### R-6 · TD-40 同路判定
+
+**不自然同路，原地留债。** TD-40 属 `storeSourceImprint` 写入链尾的增量 embedding 钩子；c-3 是既有 fragment 的只读 page-range 组装、引用与校验，实验也不经 KNN。捎带会触碰 `sourceImprints.ts` / `imprintEmbedding.ts` 禁区并扩大允许面。本单不修、不改债状态。
+
+### R-7 · 契约冻结草案
+
+契约已冻结输入/输出 JSON schema、纯文本 request body、逐字 system/user prompt、现役 lockfile hash 条件、六项判废 code、d-2 exact 锚复放、存在域单证投影与预算计数法。
+
+- bytes：10,354；
+- SHA-256：`8dd249db1cbbb34a04c0f4080bd34c73ebf319f10a4eb191c94078c8583832aa`。
+
+腿 2 开工第一步须复算同值；不等即停线。实验报告 §8 已留分卷台账、判废清单、预算、点射消费形态、K-5 硬声明与未做清单骨架，均未冒充实跑结果。
+
+### porcelain 全文
+
+```text
+ M docs/agent-ops/handoffs/2026-08-31-v12-9c-c3-citation-mode.md
+ M server/src/routes/projections.ts
+?? docs/agent-ops/analysis/2026-08-31-c3-citation-prompt-contract.md
+?? docs/agent-ops/analysis/2026-08-31-v12-9c-c3-citation-experiment.md
+```
+
+未 commit、未 push、未翻状态头；未碰锁、`.claude/**`、agent 指令、current-state、key、会话记录、证据本体写面或任何进程（含 PID 8292）。开工前既有 `server/src/routes/projections.ts` 状态噪音完整保留，未触碰。

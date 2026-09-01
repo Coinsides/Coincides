@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-08-31
+> **日期 (Updated)**: 2026-09-01
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 244 份文档。
+共 246 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -60,11 +60,13 @@
 | [analysis/2026-08-29-v12-9c-plan-realign.md](analysis/2026-08-29-v12-9c-plan-realign.md) | 12.9c 段计划:对 HEAD 重对现物 | `active` | — | — |
 | [analysis/2026-08-30-paper-and-board-direction.md](analysis/2026-08-30-paper-and-board-direction.md) | 纸与板 —— 笔记载体架构变更方向 | `active` | 2026-08-30 | — |
 | [analysis/2026-08-30-v12-9c-c2-divergence-census.md](analysis/2026-08-30-v12-9c-c2-divergence-census.md) | V12.9c c-2：MinerU × Docling 分歧普查 | `active` | 2026-08-30 | — |
+| [analysis/2026-08-31-c3-citation-prompt-contract.md](analysis/2026-08-31-c3-citation-prompt-contract.md) | c-3 引用模式 prompt 契约（腿 1 冻结草案） | `draft` | 2026-08-31 | — |
 | [analysis/2026-08-31-paper-viewport-design.md](analysis/2026-08-31-paper-viewport-design.md) | 纸的视口 —— 阅读标尺锁定方案(13.1 的图纸) | `active` | 2026-08-31 | — |
 | [analysis/2026-08-31-v12-10-i18n-chinese-copy-archive.md](analysis/2026-08-31-v12-10-i18n-chinese-copy-archive.md) | V12.10 i18n Chinese copy archive | `(缺状态头)` | — | — |
 | [analysis/2026-08-31-v12-10-k0-template-studio-recon.md](analysis/2026-08-31-v12-10-k0-template-studio-recon.md) | 12.10 K-0：Template Studio 面侦察 | `draft` | 2026-08-31 | — |
 | [analysis/2026-08-31-v12-9c-c2-divergence-census-v2.md](analysis/2026-08-31-v12-9c-c2-divergence-census-v2.md) | V12.9c c-2：MinerU × Docling 分歧普查 v2 | `active` | 2026-08-31 | — |
 | [analysis/2026-08-31-v12-9c-c2-divergence-census-v3.md](analysis/2026-08-31-v12-9c-c2-divergence-census-v3.md) | V12.9c c-2：MinerU × Docling 分歧普查 v3 | `active` | 2026-08-31 | — |
+| [analysis/2026-08-31-v12-9c-c3-citation-experiment.md](analysis/2026-08-31-v12-9c-c3-citation-experiment.md) | V12.9c c-3：识别器引用模式实验 | `active` | 2026-08-31 | — |
 | [analysis/2026-08-31-v12-9d-d0-provider-smoke.md](analysis/2026-08-31-v12-9d-d0-provider-smoke.md) | 12.9d · d-0：现役检索接线图与 DashScope 嵌入冒烟 | `complete(d-0 接线侦察 + 供应商冒烟;⭐ 401 已由复核定因=区域端点,见文末复核补充 —— 国际站端点实测 200/1024 维)` | 2026-08-31 | — |
 | [analysis/2026-08-31-v12-9d-d1a-corpus-scale.md](analysis/2026-08-31-v12-9d-d1a-corpus-scale.md) | 12.9d · d-1a：四卷默认解析路径的语料规模实测 | `complete` | 2026-08-31 | — |
 | [analysis/2026-08-31-v12-9d-d1b-embedding-coverage.md](analysis/2026-08-31-v12-9d-d1b-embedding-coverage.md) | V12.9d d-1b 嵌入覆盖率报告 | `frozen` | 2026-08-31 | — |
