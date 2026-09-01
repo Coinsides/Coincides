@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 246 份文档。
+共 247 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -60,6 +60,7 @@
 | [analysis/2026-08-29-v12-9c-plan-realign.md](analysis/2026-08-29-v12-9c-plan-realign.md) | 12.9c 段计划:对 HEAD 重对现物 | `active` | — | — |
 | [analysis/2026-08-30-paper-and-board-direction.md](analysis/2026-08-30-paper-and-board-direction.md) | 纸与板 —— 笔记载体架构变更方向 | `active` | 2026-08-30 | — |
 | [analysis/2026-08-30-v12-9c-c2-divergence-census.md](analysis/2026-08-30-v12-9c-c2-divergence-census.md) | V12.9c c-2：MinerU × Docling 分歧普查 | `active` | 2026-08-30 | — |
+| [analysis/2026-08-31-c3-citation-prompt-contract-addendum-1.md](analysis/2026-08-31-c3-citation-prompt-contract-addendum-1.md) | c-3 引用契约补遗 1:存在域文件身份映射(机械冻结) | `active` | 2026-08-31 | — |
 | [analysis/2026-08-31-c3-citation-prompt-contract.md](analysis/2026-08-31-c3-citation-prompt-contract.md) | c-3 引用模式 prompt 契约（腿 1 冻结草案） | `draft` | 2026-08-31 | — |
 | [analysis/2026-08-31-paper-viewport-design.md](analysis/2026-08-31-paper-viewport-design.md) | 纸的视口 —— 阅读标尺锁定方案(13.1 的图纸) | `active` | 2026-08-31 | — |
 | [analysis/2026-08-31-v12-10-i18n-chinese-copy-archive.md](analysis/2026-08-31-v12-10-i18n-chinese-copy-archive.md) | V12.10 i18n Chinese copy archive | `(缺状态头)` | — | — |

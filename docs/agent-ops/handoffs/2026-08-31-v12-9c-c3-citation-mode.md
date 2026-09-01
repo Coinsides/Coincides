@@ -127,3 +127,49 @@ getImprintFragmentsByAnchor(db, userId, imprintId, { match: 'exact', anchor })
 ```
 
 未 commit、未 push、未翻状态头；未碰锁、`.claude/**`、agent 指令、current-state、key、会话记录、证据本体写面或任何进程（含 PID 8292）。开工前既有 `server/src/routes/projections.ts` 状态噪音完整保留，未触碰。
+
+## Result(腿 2)
+
+**needs: dispatcher —— 新钉子导致腿 2 在实现前停线；本段未完成。**
+
+### K-1 冻结复核
+
+开工第一步复算通过：契约仍为 **10,354 bytes**，SHA-256 仍为 `8dd249db1cbbb34a04c0f4080bd34c73ebf319f10a4eb191c94078c8583832aa`，与腿 1 冻结值及调度令逐字相等。契约文件零 diff。
+
+### 阻断事实：存在域文件身份映射未被机械冻结
+
+冻结契约 §5 要求“以收据单边 evidence 的 `path` basename 对齐 host 的 `original_filename`”，但两侧现物后缀不同：
+
+| census evidence basename | host `original_filename` |
+|---|---|
+| `ielts-academic-reading-sample-tasks-2023.fragments.json` | `ielts-academic-reading-sample-tasks-2023.pdf` |
+| `ielts-academic-writing-example-responses-to-parts-1-and-2-with-band-scores-and-examiner-comments.fragments.json` | `ielts-academic-writing-example-responses-to-parts-1-and-2-with-band-scores-and-examiner-comments.pdf` |
+| `ielts-academic-writing-sample-tasks-2023.fragments.json` | `ielts-academic-writing-sample-tasks-2023.pdf` |
+| `ielts-listening-sample-tasks-2023.fragments.json` | `ielts-listening-sample-tasks-2023.pdf` |
+
+只读复证得到两组各 4 个 distinct 名称，逐字交集为 `[]`。因此：
+
+- 若按 basename 逐字相等实现，175 张收据对现役四卷全部零命中，腿 1 R-4 钉定的 `E-000052`、`E-000060`、`E-000104..E-000108` 单证验证会静默消失；
+- 若 builder 自行剥 `.fragments.json` 与 `.pdf` 后缀再比 stem，则是在生效契约之外新增未冻结的身份算法；
+- 契约已由调度令声明“一字不改”，本单纪律又要求新钉子/字面矛盾停线，故不能自行选边。
+
+### 需要的最小调度裁定
+
+请用不改契约字节的明确 addendum 指定文件身份映射。最小候选是：census basename 必须以字面后缀 `.fragments.json` 结尾、host filename 必须以 `.pdf` 结尾，分别只剥这两个完整后缀后，剩余 stem 必须逐字相等；任何后缀或 stem 不满足即发送前停线，不猜测、不模糊匹配。
+
+### 本次停线范围
+
+- `imprintCitations.ts`：未创建；
+- `v2ImprintCitations.test.ts`：未创建；
+- `cite-imprint-pages.mjs`：未创建；
+- `server/package.json`：未修改；
+- 外部 API 调用 0、出境字符 0、费用 0、key 读取 0；
+- 未运行实现门禁或实验，未生成任何结果数字；
+- 未 commit、未 push、未改契约、未改状态头、未碰锁/进程/current-state/census 输入/key/会话记录。
+
+### porcelain 全文
+
+```text
+ M docs/agent-ops/handoffs/2026-08-31-v12-9c-c3-citation-mode.md
+ M server/src/routes/projections.ts
+```
