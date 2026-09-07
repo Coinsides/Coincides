@@ -177,6 +177,13 @@ export function typographyProfileFromMetadata(
   return normalizeDocumentTypographyProfile(rawMetadata.activeProfile);
 }
 
+export function hasDocumentTypographyProfileOverride(
+  metadata: Record<string, unknown> | null | undefined,
+): boolean {
+  // Match the existing hydration channel, including its legacy unwrapped form.
+  return isRecord(metadata?.[NOTE_TYPOGRAPHY_PROFILE_METADATA_KEY]);
+}
+
 export function writeTypographyProfileMetadata(
   metadata: Record<string, unknown> | null | undefined,
   profile: DocumentTypographyProfile,

@@ -27,7 +27,7 @@ import {
   type BlockBoxLayout,
   type SnapGuide,
 } from '../runtimeLayout';
-import type { CanvasViewport, PageFrameModel } from '../types';
+import type { CanvasViewport, DocumentTypographyProfile, PageFrameModel } from '../types';
 
 interface PlacementInteractionBlock {
   id: string;
@@ -36,7 +36,8 @@ interface PlacementInteractionBlock {
 export interface UseBlockPlacementInteractionsOptions<TBlock extends PlacementInteractionBlock> {
   blockLayouts: Record<string, BlockBoxLayout>;
   contentWidth: number;
-  estimateBlockHeightForText: (block: TBlock, text: string, width: number) => number;
+  documentTypographyProfile?: DocumentTypographyProfile;
+  estimateBlockHeightForText: (block: TBlock, text: string, width: number, typography?: DocumentTypographyProfile) => number;
   movingBlockIdRef: MutableRefObject<string | null>;
   orderedBlocks: TBlock[];
   pageFrames: PageFrameModel[];
@@ -101,6 +102,7 @@ function collectCrossingBlockOnRelease({
 export function useBlockPlacementInteractions<TBlock extends PlacementInteractionBlock>({
   blockLayouts,
   contentWidth,
+  documentTypographyProfile,
   estimateBlockHeightForText,
   movingBlockIdRef,
   orderedBlocks,
@@ -239,7 +241,7 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
           snapEnabled,
           orderedBlockIds,
           resolveCollisions: shouldResolvePageCollisions(surfacePolicy),
-          estimateHeight: (width) => estimateBlockHeightForText(block, text, width),
+          estimateHeight: (width) => estimateBlockHeightForText(block, text, width, documentTypographyProfile),
         });
         latestLayouts = result.layouts;
         setSnapGuide(result.guide);
@@ -269,6 +271,7 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
   }, [
     blockLayouts,
     contentWidth,
+    documentTypographyProfile,
     estimateBlockHeightForText,
     orderedBlockIds,
     pageFrames,

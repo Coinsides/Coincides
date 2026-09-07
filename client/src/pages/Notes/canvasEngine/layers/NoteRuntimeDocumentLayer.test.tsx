@@ -6,11 +6,13 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { BlockEditRecoveryReceipt } from '../draftBlockPersistence';
 import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import type { NoteBlock } from '../runtimeDataTypes';
 import type { NoteCanvasRuntimeModel } from '../types';
+import { createPageFrameDefaultTypographyProfile } from '../pageFrameTypographyService';
+import { createDefaultDocumentTypographyProfile } from '../typographyProfileService';
 import { NoteRuntimeDocumentLayer } from './NoteRuntimeDocumentLayer';
 import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
 
@@ -200,6 +202,42 @@ function writingSurfaceProps(
 }
 
 describe('NoteRuntimeDocumentLayer block edit recovery queue', () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it('renders the effective page typography without a frame extension and preserves the canvas fallback', () => {
+    vi.stubGlobal('ResizeObserver', class {
+      observe() {}
+      disconnect() {}
+    });
+    const profile = createPageFrameDefaultTypographyProfile();
+    const props = {
+      ...writingSurfaceProps(vi.fn()),
+      documentTypographyProfile: profile,
+    };
+    const renderDocument = (surfaceMode: 'page' | 'canvas') => (
+      <NoteRuntimeDocumentLayer
+        blockEditRecoveryReceipts={[]}
+        floatingPanelProps={{} as never}
+        onApplyBlockEditRecovery={vi.fn()}
+        onDismissBlockEditRecovery={vi.fn(() => true)}
+        onSurfacePointerDown={vi.fn()}
+        surfaceMode={surfaceMode}
+        templateWarning={null}
+        writingSurfaceProps={{ ...props, surfaceMode }}
+      />
+    );
+    const { container, rerender } = render(renderDocument('page'));
+    const surface = () => container.querySelector<HTMLElement>('[data-document-font-size]')!;
+    expect(surface().dataset.documentFontSize).toBe(String(profile.fontSizePx));
+    expect(surface().style.getPropertyValue('--document-font-size')).toBe(`${profile.fontSizePx}px`);
+    expect(surface().style.getPropertyValue('--document-line-height')).toBe(`${profile.lineHeightPx}px`);
+
+    rerender(renderDocument('canvas'));
+    const canvasDefault = createDefaultDocumentTypographyProfile();
+    expect(surface().dataset.documentFontSize).toBe(String(canvasDefault.fontSizePx));
+    expect(surface().style.getPropertyValue('--document-font-size')).toBe(`${canvasDefault.fontSizePx}px`);
+  });
+
   it('shows the current-note receipt and exposes explicit Apply and Dismiss actions', () => {
     const onApplyBlockEditRecovery = vi.fn(async () => true);
     const onDismissBlockEditRecovery = vi.fn(() => true);

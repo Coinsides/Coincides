@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect } from 'react';
+import { useCallback, useLayoutEffect, useMemo } from 'react';
 import { useNoteCanvasRuntime } from './useNoteCanvasRuntime';
 import { useRuntimeBlockOperationsController } from './useRuntimeBlockOperationsController';
 import { useRuntimeDocumentDataController } from './useRuntimeDocumentDataController';
@@ -9,6 +9,7 @@ import { useBlockTextFlowEditController } from './useBlockTextFlowEditController
 import { useSlashBlockRollbackController } from './useSlashBlockRollbackController';
 import { useNoteBlockTrashController } from './useNoteBlockTrashController';
 import { tableObjectSavePayload } from '../tableObjectService';
+import { resolveEffectiveDocumentTypographyProfile } from '../pageFrameTypographyService';
 import type {
   StructuredCanvasObject,
   TableStructuredPayload,
@@ -105,7 +106,7 @@ export function useNoteCanvasRuntimeController() {
     persistedVisualConnectors,
     persistedImageObjects,
     persistedStructuredObjects,
-    documentTypographyProfile,
+    documentTypographyProfile: hydratedDocumentTypographyProfile,
     blockTextDrafts,
     setBlockTextDrafts,
     blockTextFlowDrafts,
@@ -149,6 +150,13 @@ export function useNoteCanvasRuntimeController() {
     clearBlockSelection,
     noteId,
   });
+
+  const documentTypographyProfile = useMemo(() => resolveEffectiveDocumentTypographyProfile({
+    surfaceMode,
+    metadata: note?.metadata,
+    pageFrames: pageFrameCollection?.pageFrames,
+    hydratedProfile: hydratedDocumentTypographyProfile,
+  }), [surfaceMode, note?.metadata, pageFrameCollection?.pageFrames, hydratedDocumentTypographyProfile]);
 
   const {
     blockTrashLoadFailed,

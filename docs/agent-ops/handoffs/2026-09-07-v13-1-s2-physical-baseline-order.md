@@ -1,6 +1,6 @@
 > **From**: fable
 > **To**: codex
-> **Status**: ready(两层制;13.1 单 2,按冻结裁定先行)
+> **Status**: done(两层制;13.1 单 2 施工完成,工作树交 HQ 验收)
 > **日期 (Date)**: 2026-09-07
 > **性质**: 施工单(client 引擎,中单)
 
@@ -93,3 +93,77 @@ console.log(JSON.stringify(rows, null, 2));
 3. **断言容差冻结**:单测换算断言=派生内部 px 与精确换算差 ≤0.05px(单步舍入界);等比跟随冒烟断言=归一化后映回物理 pt 与 11pt 偏差 ≤0.5%,⛔ 断言 A4:Letter 内部比例的精确值;
 4. **射程补充(采纳停线建议 2)**:`useNoteCanvasRuntimeController.ts` 的有效 profile 派生与转递(:66,82,101,108 持有点与 :204,287,348 分发点)**纳入本单射程**;守则:⛔ 无条件改 adapter 默认值;canvas 零变化以对照冒烟为证;
 5. 其余口径全部不变(§一 1-7、§二、§三)。按本补遗续作至完工 Result。
+
+## Result
+
+2026-09-07 · Codex builder · **按 §一（经补遗一）施工完成，工作树交 HQ；未 commit，验收与放行仍归 HQ。** 原停线记录与补遗一保留；本次未遇需要新裁定的现物冲突。
+
+### 实现与边界
+
+- `pageFramePrintScaleService.ts` 为物理映射唯一定义点：`physicalWidthMm` 按 pageSize 取 A4=210、Letter=215.9、Custom=null；`physicalScale` 全精度计算，Custom/screen_note 为 1。原内部宽高、inset 常量不变；读取已有 frame.width 计算映射，不写 frame 几何。
+- 同层纯函数 `pageFrameTypographyService.ts` 按 templateId 定族，纸族从 11pt 经物理映射生成内部 px，网页族 16px。行高保持旧族 22/15 的比例、段距保持旧族 0、平均字宽保持旧族 0.48 的比例，各度量先算后统一走原归一化；roundOne/clamp 全部保留。
+- runtime controller 单点派生有效 profile：canvas 维持 hydrated profile，note metadata 中用户覆盖永远优先（包括旧格式与复用旧 profileId 的覆盖），无覆盖 page 按首帧补默认。adapter 的 hydration/乐观保存/回滚通道与 metadata 结构未改；派生默认不自动持久化。
+- 同一有效值进入布局估高闭包、natural writing→页栈续页、presentation→屏显与 Preview。页面屏显直接取已转递的有效 profile，修正显式空 frame 集合时旧 15px fallback 与估高不一致的缺口；仍只有 `documentTypographyToCssVars` 输出排版 CSS，未改 `pageFrameTemplateToCssVars`。
+- resize 已传入当前有效 profile；共享调用链上的 **canvas 用户覆盖也因此开始正确用于 resize 估高**，这是 §一.6 指定修漏的效果。canvas 默认族、坐标分叉与空 frame 屏显 fallback 保持原行为；下面的“零变化”证据限定为纸型切换时的 canvas 默认族对照，不申报 canvas 所有行为逐位不变。
+
+### numstat
+
+以下 `E/` = `client/src/pages/Notes/canvasEngine/`。已跟踪文件来自 `git diff --numstat -- client/src/pages/Notes/canvasEngine`；两个新文件来自 `git diff --no-index --numstat -- NUL <path>`，不操作 index。
+
+| 文件（E/ 下） | additions | deletions |
+|---|---:|---:|
+| types.ts | 3 | 0 |
+| pageFramePrintScaleService.ts | 21 | 1 |
+| typographyProfileService.ts | 7 | 0 |
+| pageFrameTypographyService.ts（新） | 67 | 0 |
+| hooks/useNoteCanvasRuntimeController.ts | 10 | 2 |
+| hooks/useBlockPlacementInteractions.ts | 6 | 3 |
+| layers/NoteWritingSurfaceLayer.tsx | 3 | 1 |
+| pageFrameTypographyService.test.ts（新） | 131 | 0 |
+| hooks/useNoteCanvasRuntimeController.test.tsx | 139 | 20 |
+| hooks/useBlockPlacementInteractions.test.tsx | 35 | 2 |
+| layers/NoteRuntimeDocumentLayer.test.tsx | 39 | 1 |
+| **产品代码小计（7 文件）** | **117** | **7** |
+| **测试小计（4 文件）** | **344** | **23** |
+| **代码与测试合计（11 文件）** | **461** | **30** |
+
+本工单的 status 前翻与本 Result 为 **75 additions / 1 deletion**；本单总计 **12 文件、536 additions / 31 deletions**（含两个未跟踪新文件）。开工已有的其他修改/未跟踪材料不计入本单。限定施工目录及本工单的 `git diff --check` 通过（Git 仅提示 LF/CRLF 转换）。
+
+### 实跑验证
+
+所有命令均在 `client/` 执行。现有 `build` 脚本为 `tsc -b && vite build`、`test:unit` 为 `vitest run`；为遵守本单禁读 .env，执行其现有程序的等价入口并显式禁用 env 文件加载，未改配置、未安装依赖或新造测试基建。
+
+1. Typecheck：`node node_modules/typescript/bin/tsc -b` → **exit 0，无诊断**。
+2. Build：`node --input-type=module -e "import { build } from 'vite'; await build({ envFile: false });"` → **exit 0**；Vite 5.4.21，**2183 modules transformed，built in 4.21s**。最终 JS 1477.52 kB（gzip 427.43 kB）；有 taskStore 动态/静态导入并存及 chunk >500 kB 警告，无构建错误。
+3. 既有 Vitest 3.2.7 定向测试（以下均 exit 0）：
+
+```powershell
+node --input-type=module -e "import { startVitest } from 'vitest/node'; await startVitest('test', ['src/pages/Notes/canvasEngine/pageFrameTypographyService.test.ts', 'src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx'], { run: true }, { envFile: false });"
+node --input-type=module -e "import { startVitest } from 'vitest/node'; await startVitest('test', ['src/pages/Notes/canvasEngine/hooks/useBlockPlacementInteractions.test.tsx'], { run: true }, { envFile: false });"
+node --input-type=module -e "import { startVitest } from 'vitest/node'; await startVitest('test', ['src/pages/Notes/canvasEngine/pageFrameTypographyService.test.ts'], { run: true }, { envFile: false });"
+node --input-type=module -e "import { startVitest } from 'vitest/node'; await startVitest('test', ['src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx'], { run: true }, { envFile: false });"
+```
+
+- 第一批 **2 files / 22 tests passed**（纯函数 18 + runtime root 4，含一条功能冒烟）；resize **1 file / 8 tests passed**。复核修正 screen_note+A4 的 physicalWidthMm 应为 210（仅 scale 为 1）后，纯函数 **18/18 重跑通过**。
+- 新增空 frame DOM 回归先因 jsdom 无 ResizeObserver 在 canvas 分支失败；仅在本测试内补 stub 并按测试清理后，显示层 **1 file / 3 tests passed**。没有用跳过或弱化断言消除失败。
+- **最终不同用例合计 4 files / 33 tests passed**。覆盖四 template × 三 pageSize 共 12 组合、A4/Letter 精确 scale 与 ≤0.05px 量化界、已有宽度不变、网页族、用户覆盖优先级、首帧选择、真实 pointer resize 与无 frame 时实际 DOM CSS。
+
+### 一条功能冒烟的证据与射程
+
+同一 root controller 挂载实例、同一 noteId 与 frameId，以 rerender 切 `a4_portrait→letter_portrait`；94 字符、内部布局宽 760，实跑 `useNoteCanvasResolvedLayoutModel` 的估高闭包。未断言 A4:Letter 内部比例精确相等。
+
+| 模式/纸型 | 字号 px | 行高 px | 平均字宽 px | 每行容量 | 行数 | 估高 px | 映回物理 pt |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| page / A4 | 16.7 | 24.5 | 8 | 92 | 2 | 65 | 10.996794648456556 |
+| page / Letter | 16.2 | 23.8 | 7.8 | 95 | 1 | 42 | 10.967256637168141 |
+| canvas / A4 | 15 | 22 | 7.2 | 103 | 1 | 42 | 不适用 |
+| canvas / Letter | 15 | 22 | 7.2 | 103 | 1 | 42 | 不适用 |
+
+纸族映回与 11pt 偏差均 **≤0.5%**；换纸不改内部布局宽，canvas 两次 profile/测量/布局相同，输入 frame 几何逐值保留。root 三个分发点接收同一 profile 实例；CSS 与 Preview 以所收值实调、断言一致。operations/presentation 在该 root 冒烟中为接收端 mock；续页传递另经源码链核对，resize 与空 frame DOM 分别有上述真实交互/显示单测。**这是一条 hook/runtime 功能冒烟，不是完整浏览器端到端旅程，也不是最终打印保真验收。**
+
+### 未做清单
+
+- 未做单 1 的阅读档位/整页 transform/输入坐标适配，未做单 3 的打印或 PDF 输出及光栅对比；未做人眼比例验收。
+- 按本单 §二 与段 plan 的定向验证纪律，**未跑完整 `npm run verify:v2-bn8-runtime`**（该聚合门包含全套测试、性能/文档与安全扫描），未跑马拉松、安全类测试或其他版本收口门；不以本回执申报这些门通过。
+- 未改现有测量函数签名或引入 zoom 输入；未改 frame 几何/preset 宽高/inset、note metadata 结构、adapter 默认值、模板 CSS helper、server、agent 指令/权限配置。
+- 未读取 .env 或凭证材料，未打印任何密钥，未 commit/push/PR/merge。开工已有 `server/src/routes/projections.ts` 修改及三项未跟踪材料均未触碰。产物留在工作树，供 HQ 实质验收与代账。

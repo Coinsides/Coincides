@@ -3,6 +3,7 @@ import type {
   PageFrameModel,
   PageFramePageSize,
   PageFramePrintProfile,
+  PageFrameTemplateId,
 } from './types';
 import {
   createDefaultDocumentTypographyProfile,
@@ -21,7 +22,7 @@ const DEFAULT_CONTENT_WIDTH = 760;
 const DEFAULT_HORIZONTAL_MARGIN = 72;
 const DEFAULT_BOTTOM_MARGIN = 96;
 
-export const PAGE_FRAME_PRINT_PRESETS: Record<Exclude<PageFramePageSize, 'Custom'>, Omit<PageFramePrintProfile, 'documentTypography'>> = {
+export const PAGE_FRAME_PRINT_PRESETS: Record<Exclude<PageFramePageSize, 'Custom'>, Omit<PageFramePrintProfile, 'documentTypography' | 'physicalWidthMm' | 'physicalScale'>> = {
   A4: {
     pageSize: 'A4',
     width: DEFAULT_CONTENT_WIDTH + DEFAULT_HORIZONTAL_MARGIN * 2,
@@ -52,6 +53,23 @@ export const PAGE_FRAME_PRINT_PRESETS: Record<Exclude<PageFramePageSize, 'Custom
   },
 };
 
+export function getPageFramePhysicalMapping(
+  pageSize: PageFramePageSize,
+  internalWidth: number,
+  templateId?: PageFrameTemplateId,
+): Pick<PageFramePrintProfile, 'physicalWidthMm' | 'physicalScale'> {
+  const physicalWidthMm = pageSize === 'Custom'
+    ? null
+    : pageSize === 'Letter' ? 215.9 : 210;
+  return {
+    physicalWidthMm,
+    // Continuous presentation scale: only derived typography is quantized.
+    physicalScale: physicalWidthMm === null || templateId === 'screen_note'
+      ? 1
+      : (physicalWidthMm / 25.4 * 96) / internalWidth,
+  };
+}
+
 export function createPageFramePrintProfile(
   pageSize: PageFramePageSize = DEFAULT_PAGE_FRAME_PAGE_SIZE,
   typography: DocumentTypographyProfile = createDefaultDocumentTypographyProfile(),
@@ -61,6 +79,8 @@ export function createPageFramePrintProfile(
     : PAGE_FRAME_PRINT_PRESETS[pageSize] || PAGE_FRAME_PRINT_PRESETS[DEFAULT_PAGE_FRAME_PAGE_SIZE];
   return {
     ...preset,
+    pageSize,
+    ...getPageFramePhysicalMapping(pageSize, preset.width),
     documentTypography: normalizeDocumentTypographyProfile(typography),
   };
 }

@@ -1,8 +1,13 @@
 import { useLayoutEffect } from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { NoteBlock } from '../runtimeDataTypes';
-import { DEFAULT_PAGE_CONTENT_WIDTH } from '../runtimeLayout';
+import { DEFAULT_PAGE_CONTENT_WIDTH, type BlockBoxLayout } from '../runtimeLayout';
+import { createPageFramePrintProfile } from '../pageFramePrintScaleService';
+import { createDefaultDocumentTypographyProfile, documentTypographyToCssVars } from '../typographyProfileService';
+import { estimateTypographyTextBlockHeight } from '../typographyMeasurementService';
+import { buildExportPreviewModel } from '../exportPreviewService';
+import type { DocumentTypographyProfile, PageFrameCollectionModel, PageFrameModel } from '../types';
 
 interface ResolverCall {
   blocks: NoteBlock[];
@@ -15,8 +20,13 @@ const rootBridgeContract = vi.hoisted(() => ({
   blocks: [] as NoteBlock[],
   contentWidth: 0,
   loading: true,
-  note: undefined as { id: string } | undefined,
+  note: undefined as { id: string; metadata?: Record<string, unknown> } | undefined,
   noteId: undefined as string | undefined,
+  pageFrameCollection: null as PageFrameCollectionModel | null,
+  hydratedProfile: undefined as DocumentTypographyProfile | undefined,
+  dispatchedProfiles: {} as Record<string, DocumentTypographyProfile>,
+  blockLayouts: {} as Record<string, BlockBoxLayout>,
+  toggleSurfaceMode: () => undefined as void,
   resolverCalls: [] as ResolverCall[],
   layoutPhaseReceipts: [] as Array<{
     resolverCallCount: number;
@@ -50,6 +60,7 @@ vi.mock('./useRuntimeSurfaceStateController', async () => {
         rootBridgeContract.resolverCalls.push(input);
         surface.resolveInitialSurfaceMode(input);
       }, [surface.resolveInitialSurfaceMode]);
+      rootBridgeContract.toggleSurfaceMode = surface.toggleSurfaceMode;
 
       return new Proxy({
         ...surface,
@@ -73,7 +84,8 @@ vi.mock('./useRuntimeDocumentDataController', () => ({
     blocks: rootBridgeContract.blocks,
     loading: rootBridgeContract.loading,
     note: rootBridgeContract.note,
-    pageFrameCollection: null,
+    pageFrameCollection: rootBridgeContract.pageFrameCollection,
+    documentTypographyProfile: rootBridgeContract.hydratedProfile,
     sourceProjectionPolicy: { contentReadOnly: false },
     sourceReferenceCount: 0,
     sortedBlocks: rootBridgeContract.blocks,
@@ -86,27 +98,47 @@ vi.mock('./useRuntimeDocumentDataController', () => ({
   }),
 }));
 
-vi.mock('./useRuntimeLayoutModelController', () => ({
-  useRuntimeLayoutModelController: () => ({
-    blockLayouts: {},
-    contentWidth: rootBridgeContract.contentWidth,
-    defaultDraftLayout: { x: 0, y: 0, width: 640, height: 72 },
-    persistChangedBlockLayouts: rootBridgeContract.noop,
-    persistLayoutSnapshot: rootBridgeContract.noop,
-    visibleBlocks: rootBridgeContract.blocks,
-  }),
-}));
+vi.mock('./useRuntimeLayoutModelController', async () => {
+  const { useNoteCanvasResolvedLayoutModel } = await vi.importActual<typeof import('./useNoteCanvasLayoutModel')>(
+    './useNoteCanvasLayoutModel',
+  );
+  return {
+    useRuntimeLayoutModelController: (options: Parameters<typeof useNoteCanvasResolvedLayoutModel>[0]) => {
+      rootBridgeContract.dispatchedProfiles.layout = options.documentTypographyProfile;
+      const pageFrames = rootBridgeContract.pageFrameCollection?.pageFrames || [];
+      const resolved = useNoteCanvasResolvedLayoutModel({
+        ...options,
+        contentWidth: rootBridgeContract.contentWidth,
+        layoutDrafts: {},
+        pageFrames,
+      });
+      rootBridgeContract.blockLayouts = resolved.blockLayouts;
+      return {
+        ...resolved,
+        pageFrames,
+        contentWidth: rootBridgeContract.contentWidth,
+        persistChangedBlockLayouts: rootBridgeContract.noop,
+        persistLayoutSnapshot: rootBridgeContract.noop,
+      };
+    },
+  };
+});
 
 vi.mock('./useRuntimeBlockOperationsController', () => ({
-  useRuntimeBlockOperationsController: () => new Proxy({}, {
-    get: () => rootBridgeContract.noop,
-  }),
+  useRuntimeBlockOperationsController: ({ documentTypographyProfile }: { documentTypographyProfile: DocumentTypographyProfile }) => {
+    rootBridgeContract.dispatchedProfiles.operations = documentTypographyProfile;
+    return new Proxy({}, { get: () => rootBridgeContract.noop });
+  },
 }));
 
 vi.mock('./useRuntimePresentationController', () => ({
-  useRuntimePresentationController: ({ surfaceMode }: { surfaceMode: string }) => ({
-    layerProps: { surfaceMode },
-  }),
+  useRuntimePresentationController: ({ surfaceMode, documentTypographyProfile }: {
+    surfaceMode: string;
+    documentTypographyProfile: DocumentTypographyProfile;
+  }) => {
+    rootBridgeContract.dispatchedProfiles.presentation = documentTypographyProfile;
+    return { layerProps: { surfaceMode } };
+  },
 }));
 
 vi.mock('./useBlockTextFlowEditController', () => ({
@@ -201,6 +233,10 @@ describe('useNoteCanvasRuntimeController initial-surface production bridge', () 
     rootBridgeContract.loading = false;
     rootBridgeContract.note = { id: NOTE_ID };
     rootBridgeContract.noteId = NOTE_ID;
+    rootBridgeContract.pageFrameCollection = null;
+    rootBridgeContract.hydratedProfile = createDefaultDocumentTypographyProfile();
+    rootBridgeContract.dispatchedProfiles = {};
+    rootBridgeContract.blockLayouts = {};
     rootBridgeContract.resolverCalls = [];
     rootBridgeContract.layoutPhaseReceipts = [];
   });
@@ -239,5 +275,88 @@ describe('useNoteCanvasRuntimeController initial-surface production bridge', () 
     expect(rootBridgeContract.resolverCalls[0]?.blocks).toBe(blocks);
     expect(rootBridgeContract.layoutPhaseReceipts[0]?.resolverCallCount).toBe(1);
     expect(screen.getByTestId('root-surface-mode').textContent).toBe(expectedSurfaceMode);
+  });
+
+  it('13.1 smoke: same-note A4 to Letter follows quantized 11pt in layout and wrapping; canvas is unchanged', () => {
+    const frameFor = (pageSize: 'A4' | 'Letter'): PageFrameModel => {
+      const print = createPageFramePrintProfile(pageSize);
+      return {
+        id: 'same-note-paper-frame',
+        role: 'primary_page_frame',
+        templateId: pageSize === 'A4' ? 'a4_portrait' : 'letter_portrait',
+        pageSize,
+        exportable: true,
+        x: 0,
+        y: 0,
+        width: print.width,
+        height: print.height,
+        contentInset: { ...print.contentInset },
+      };
+    };
+    const a4 = frameFor('A4');
+    const letter = frameFor('Letter');
+    const framesBefore = structuredClone([a4, letter]);
+    const specimen = {
+      ...formalPageSpecimen,
+      canvas_layout: undefined,
+      plain_text: 'x'.repeat(94),
+      content_json: { body: 'x'.repeat(94) },
+    };
+    rootBridgeContract.blocks = [specimen];
+    const setFrame = (frame: PageFrameModel) => {
+      rootBridgeContract.pageFrameCollection = {
+        pageFrames: [frame], primaryFrameId: frame.id, selectedFrameId: frame.id,
+      };
+    };
+    setFrame(a4);
+    const { rerender } = render(<RootBridgeHarness />);
+
+    const snapshot = (frame: PageFrameModel) => {
+      const profile = rootBridgeContract.dispatchedProfiles.layout;
+      expect(rootBridgeContract.dispatchedProfiles.operations).toBe(profile);
+      expect(rootBridgeContract.dispatchedProfiles.presentation).toBe(profile);
+      const layout = rootBridgeContract.blockLayouts[specimen.id];
+      const measurement = estimateTypographyTextBlockHeight({
+        text: specimen.plain_text,
+        width: layout.width,
+        typography: profile,
+      });
+      const preview = buildExportPreviewModel([specimen], { [specimen.id]: layout }, {
+        pageFrames: [frame], primaryPageFrameId: frame.id, documentTypography: profile,
+      });
+      expect(preview.pageFrames[0].documentTypography).toEqual(profile);
+      expect(documentTypographyToCssVars(profile)['--document-font-size']).toBe(`${profile.fontSizePx}px`);
+      expect(layout.height).toBe(measurement.heightPx);
+      return { profile, measurement, layout: { ...layout } };
+    };
+
+    const a4Page = snapshot(a4);
+    setFrame(letter);
+    rerender(<RootBridgeHarness />);
+    const letterPage = snapshot(letter);
+    expect(screen.getByTestId('root-surface-mode').textContent).toBe('page');
+    expect(rootBridgeContract.noteId).toBe(NOTE_ID);
+    expect(a4Page.profile.fontSizePx).toBe(16.7);
+    expect(letterPage.profile.fontSizePx).toBe(16.2);
+    expect(a4Page.measurement.lineCount).toBeGreaterThan(letterPage.measurement.lineCount);
+    expect(a4Page.layout.height).toBeGreaterThan(letterPage.layout.height);
+    expect(a4Page.layout.width).toBe(letterPage.layout.width);
+    for (const [pageSize, sample] of [['A4', a4Page], ['Letter', letterPage]] as const) {
+      const { physicalScale } = createPageFramePrintProfile(pageSize);
+      const physicalPt = sample.profile.fontSizePx * physicalScale * 72 / 96;
+      expect(Math.abs(physicalPt - 11) / 11).toBeLessThanOrEqual(0.005);
+    }
+
+    act(() => rootBridgeContract.toggleSurfaceMode());
+    const letterCanvas = snapshot(letter);
+    expect(screen.getByTestId('root-surface-mode').textContent).toBe('canvas');
+    setFrame(a4);
+    rerender(<RootBridgeHarness />);
+    const a4Canvas = snapshot(a4);
+    expect(a4Canvas.profile).toBe(rootBridgeContract.hydratedProfile);
+    expect(letterCanvas.profile).toBe(rootBridgeContract.hydratedProfile);
+    expect(a4Canvas.measurement).toEqual(letterCanvas.measurement);
+    expect(a4Canvas.layout).toEqual(letterCanvas.layout);
+    expect([a4, letter]).toEqual(framesBefore);
   });
 });

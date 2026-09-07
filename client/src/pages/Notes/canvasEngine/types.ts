@@ -73,6 +73,7 @@ export interface PageFrameBackgroundStyle {
 export interface DocumentTypographyProfile {
   profileId: string;
   fontFamily: string;
+  // Layout units are internal px; paper presentation applies physicalScale later.
   fontSizePx: number;
   lineHeightPx: number;
   paragraphSpacingPx: number;
@@ -81,6 +82,8 @@ export interface DocumentTypographyProfile {
 
 export interface PageFramePrintProfile {
   pageSize: PageFramePageSize;
+  physicalWidthMm: number | null;
+  physicalScale: number;
   width: number;
   height: number;
   contentInset: CanvasInset;

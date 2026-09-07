@@ -699,7 +699,9 @@ export function NoteWritingSurfaceLayer({
   const primaryPageFrameExportable = primaryPageFrame?.exportable ? 'true' : 'false';
   const primaryPageFrameExtension = noteCanvasRuntime.pageFrameExtensions
     .find((extension) => extension.frameId === primaryPageFrame?.id);
-  const documentTypography = primaryPageFrameExtension?.documentTypography || DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE;
+  const documentTypography = surfaceMode === 'page'
+    ? documentTypographyProfile
+    : primaryPageFrameExtension?.documentTypography || DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE;
   const documentTypographyStyle = documentTypographyToCssVars(documentTypography);
   const primaryPageFrameTemplateStyle = pageFrameTemplateToCssVars(
     primaryPageFrameExtension?.background || primaryPageFrame?.background,

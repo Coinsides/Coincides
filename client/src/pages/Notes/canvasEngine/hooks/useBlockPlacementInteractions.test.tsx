@@ -5,8 +5,10 @@ import {
 import { useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import { createSurfaceModePolicy } from '../modePolicyService';
+import { createPageFrameDefaultTypographyProfile } from '../pageFrameTypographyService';
+import { estimateTextBlockHeight } from '../measurementService';
 import type { BlockBoxLayout } from '../runtimeLayout';
-import type { PageFrameModel } from '../types';
+import type { DocumentTypographyProfile, PageFrameModel } from '../types';
 import {
   useBlockPlacementInteractions,
   type UseBlockPlacementInteractionsOptions,
@@ -56,10 +58,14 @@ function renderPlacementSubject({
   initialLayout,
   snapEnabled,
   surfaceMode = 'canvas',
+  documentTypographyProfile,
+  estimateBlockHeightForText = () => 64,
 }: {
   initialLayout: BlockBoxLayout;
   snapEnabled: boolean;
   surfaceMode?: 'page' | 'canvas';
+  documentTypographyProfile?: DocumentTypographyProfile;
+  estimateBlockHeightForText?: UseBlockPlacementInteractionsOptions<PlacementTestBlock>['estimateBlockHeightForText'];
 }) {
   const persistChangedBlockLayouts = vi.fn();
   const pushLayoutHistory = vi.fn();
@@ -76,7 +82,8 @@ function renderPlacementSubject({
     const options = {
       blockLayouts: layouts,
       contentWidth: 500,
-      estimateBlockHeightForText: () => 64,
+      documentTypographyProfile,
+      estimateBlockHeightForText,
       movingBlockIdRef,
       orderedBlocks: [BLOCK],
       pageFrames: [PAGE_FRAME],
@@ -212,6 +219,32 @@ describe('useBlockPlacementInteractions K-5 release collection', () => {
 });
 
 describe('useBlockPlacementInteractions K-6 formal page regression', () => {
+  it('uses the effective paper profile when a pointer resize estimates text height', () => {
+    const profile = createPageFrameDefaultTypographyProfile({ templateId: 'letter_portrait', pageSize: 'Letter' });
+    const text = 'physical typography resize '.repeat(12);
+    const estimate = vi.fn((_block: PlacementTestBlock, value: string, width: number, typography?: DocumentTypographyProfile) => (
+      estimateTextBlockHeight({ text: value, width, typography })
+    ));
+    const initialLayout = { x: 0, y: 0, width: 300, height: 60 };
+    const runtime = renderPlacementSubject({
+      initialLayout,
+      snapEnabled: false,
+      surfaceMode: 'page',
+      documentTypographyProfile: profile,
+      estimateBlockHeightForText: estimate,
+    });
+
+    act(() => runtime.subject.result.current.beginResizeBlock(pointerStart(0, 0), BLOCK, text, initialLayout));
+    act(() => dispatchWindowPointer('pointermove', -100, 0));
+    act(() => dispatchWindowPointer('pointerup'));
+
+    const resized = persistedLayout(runtime.persistChangedBlockLayouts);
+    expect(resized.width).toBe(200);
+    expect(estimate).toHaveBeenCalledWith(BLOCK, text, resized.width, profile);
+    expect(resized.height).toBe(estimateTextBlockHeight({ text, width: resized.width, typography: profile }));
+    expect(resized.height).not.toBe(estimateTextBlockHeight({ text, width: resized.width }));
+  });
+
   it('keeps a native formal_page inside-overflow release byte-for-byte unchanged', () => {
     const initialLayout = {
       x: 350,
