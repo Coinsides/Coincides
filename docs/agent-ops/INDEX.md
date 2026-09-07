@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 265 份文档。
+共 267 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -77,6 +77,7 @@
 | [analysis/2026-09-07-layout-template-schema-v1.md](analysis/2026-09-07-layout-template-schema-v1.md) | 13.0 图四 · 版面模板 schema v1 —— 纸的第三设计层 | `active` | 2026-09-07 | — |
 | [analysis/2026-09-07-v13-1-k0-recon.md](analysis/2026-09-07-v13-1-k0-recon.md) | V13.1 · K-0 纸的视口侦察 | `active` | 2026-09-07 | — |
 | [analysis/2026-09-07-v13-1-s4-coordinate-contract-recon.md](analysis/2026-09-07-v13-1-s4-coordinate-contract-recon.md) | V13.1 单 4：坐标契约 K-0 侦察 | `frozen` | 2026-09-07 | — |
+| [analysis/2026-09-07-v13-2-s0-recon.md](analysis/2026-09-07-v13-2-s0-recon.md) | V13.2 单 0：野地退役与坐标 census | `frozen` | 2026-09-07 | — |
 | [analysis/2026-09-07-wilderness-migration-mapping.md](analysis/2026-09-07-wilderness-migration-mapping.md) | 13.0 图三 · 野地退役迁移映射表 | `active` | 2026-09-07 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
@@ -261,6 +262,7 @@
 | [handoffs/2026-09-07-v13-1-s3-print-channel-order.md](handoffs/2026-09-07-v13-1-s3-print-channel-order.md) | 13.1 · 单 3 · 打印通道 v1 + K-比例保真 | `(缺状态头)` | — | — |
 | [handoffs/2026-09-07-v13-1-s4-coordinate-contract-recon-order.md](handoffs/2026-09-07-v13-1-s4-coordinate-contract-recon-order.md) | 13.1 · 单 4 · 坐标契约 K-0 侦察(只读) | `(缺状态头)` | — | — |
 | [handoffs/2026-09-07-v13-2-s0-recon-order.md](handoffs/2026-09-07-v13-2-s0-recon-order.md) | 13.2 · 单 0 · K-0 侦察(野地退役+坐标归一 双题) | `(缺状态头)` | — | — |
+| [handoffs/2026-09-07-v13-2-s1-events-ledger-order.md](handoffs/2026-09-07-v13-2-s1-events-ledger-order.md) | 13.2 · 单 1 · 史记 v0(events 表 + 书记官助手) | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
