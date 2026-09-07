@@ -1,0 +1,80 @@
+/* Mounted only for a print job. Keep a measurable layout before print media is applied. */
+[data-note-print-root] {
+  position: fixed;
+  left: -100000px;
+  top: 0;
+  visibility: hidden;
+  pointer-events: none;
+  margin: 0;
+  padding: 0;
+  color: #17181a;
+  --text-primary: #17181a;
+  --text-secondary: #424750;
+  --text-muted: #606873;
+  --bg-primary: white;
+  --bg-secondary: #f5f5f5;
+  --bg-tertiary: #eeeeee;
+}
+
+[data-note-print-page] {
+  position: relative;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  break-inside: avoid;
+  break-after: page;
+  background: white;
+}
+
+[data-note-print-page]:last-of-type { break-after: auto; }
+[data-note-print-page][data-paper-size="A4"] { page: coincides-a4; }
+[data-note-print-page][data-paper-size="Letter"] { page: coincides-letter; }
+
+[data-note-print-canvas] {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  background: white;
+}
+
+[data-note-print-fragment] {
+  position: absolute;
+  overflow: hidden;
+}
+
+@media print {
+  @page coincides-a4 { size: A4 portrait; margin: 0; }
+  @page coincides-letter { size: Letter portrait; margin: 0; }
+
+  html:has([data-note-print-root]),
+  body:has(> [data-note-print-root]) {
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    background: white !important;
+  }
+
+  body:has(> [data-note-print-root]) > :not([data-note-print-root]) {
+    /* Keep editors measurable: display:none would notify their ResizeObservers
+       with zero heights and reflow the screen's layout drafts during printing. */
+    position: fixed !important;
+    visibility: hidden !important;
+  }
+
+  body:has(> [data-note-print-root]) > :not([data-note-print-root]) * {
+    visibility: hidden !important;
+  }
+
+  [data-note-print-root] {
+    position: static;
+    visibility: visible;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

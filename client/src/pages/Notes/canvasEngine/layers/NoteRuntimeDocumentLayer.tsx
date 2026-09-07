@@ -8,6 +8,7 @@ import {
   type NoteWritingSurfaceLayerProps,
 } from './NoteWritingSurfaceLayer';
 import type { BlockEditRecoveryReceipt } from '../draftBlockPersistence';
+import { NotePrintLayer } from './NotePrintLayer';
 import styles from '../../NoteDetail.module.css';
 
 export interface NoteRuntimeDocumentLayerProps {
@@ -78,6 +79,7 @@ export function NoteRuntimeDocumentLayer({
 
       <NoteFloatingPanelLayer {...floatingPanelProps} />
       <NoteWritingSurfaceLayer {...writingSurfaceProps} />
+      <NotePrintLayer {...writingSurfaceProps} />
     </div>
   );
 }

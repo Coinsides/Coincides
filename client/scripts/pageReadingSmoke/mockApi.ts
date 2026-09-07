@@ -3,8 +3,12 @@ import { listNoteBlockTemplates, legacyBlockTypeForTemplate } from '@shared/type
 import type { Note, NoteBlock } from '../../src/pages/Notes/canvasEngine/runtimeDataTypes';
 import type { PageFrameModel } from '../../src/pages/Notes/canvasEngine/types';
 import { createPageFramePrintProfile } from '../../src/pages/Notes/canvasEngine/pageFramePrintScaleService';
+import { createPrintSpecimen, PRINT_NOTE_ID } from './printSpecimen';
 
-export const NOTE_ID = 'page-reading-smoke-note';
+const isPrintFixture = typeof window !== 'undefined' && window.location.pathname.endsWith('/print.html');
+const requestedPaper = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('paper') : null;
+export const printSpecimen = createPrintSpecimen(requestedPaper === 'Letter' || requestedPaper === 'web' ? requestedPaper : 'A4');
+export const NOTE_ID = isPrintFixture ? PRINT_NOTE_ID : 'page-reading-smoke-note';
 const FRAME_ID = 'page-reading-smoke-a4';
 const print = createPageFramePrintProfile('A4');
 export const fixtureFrame: PageFrameModel = {
@@ -97,9 +101,9 @@ const api = axios.create({
       // The specimen is read-only. Keep attempted mutations visible to the smoke.
       throw new Error(`Unexpected fixture mutation: ${method} ${url}`);
     }
-    if (url === `/notes/${NOTE_ID}`) data = fixtureNote;
-    else if (url === `/notes/${NOTE_ID}/blocks`) data = fixtureBlocks;
-    else if (url === `/canvas-objects/by-note/${NOTE_ID}`) data = fixtureCanvas;
+    if (url === `/notes/${NOTE_ID}`) data = isPrintFixture ? printSpecimen.note : fixtureNote;
+    else if (url === `/notes/${NOTE_ID}/blocks`) data = isPrintFixture ? printSpecimen.blocks : fixtureBlocks;
+    else if (url === `/canvas-objects/by-note/${NOTE_ID}`) data = isPrintFixture ? printSpecimen.canvas : fixtureCanvas;
     else if (url === '/templates') data = templates;
     else if (url === '/source-anchors/generate') data = {};
     else if (url === '/content-groups' || url === '/group-folders' || url === '/source-anchors'

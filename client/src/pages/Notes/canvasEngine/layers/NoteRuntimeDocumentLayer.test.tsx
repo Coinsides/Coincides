@@ -259,7 +259,7 @@ describe('NoteRuntimeDocumentLayer block edit recovery queue', () => {
       />,
     );
 
-    expect(screen.getByRole('status').textContent).toContain('recover this edit');
+    expect(screen.getByText('recover this edit').closest('[role="status"]')?.textContent).toContain('recover this edit');
     const applyButton = screen.getByRole('button', { name: 'Apply' });
     const dismissButton = screen.getByRole('button', { name: 'Dismiss' });
     const applyMouseDown = createEvent.mouseDown(applyButton, { button: 0 });

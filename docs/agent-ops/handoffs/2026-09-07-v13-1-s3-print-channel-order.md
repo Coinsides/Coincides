@@ -100,3 +100,61 @@ exit        0
 6. 其余口径不变(网页族 fit A4 宽、§二、§三)。按本补遗续作至完工 Result。
 
 > 战役级备注(HQ 自记,非 builder 义务):本停线揭示屏显 page 模式的"真纸叠 DOM 化"尚未发生——本单的打印投影即其原型,屏显侧迁移候 13.x 排期,走查①一并向 Henry 报。
+
+## Result
+
+2026-09-07 · Codex builder · **补遗一续作后的再次停线回执，不是完工 Result；status 保持 ready，未前翻 done。** 已完整重读原单、第一次停线与补遗一，按获批范围试做 print-only 纸叠投影。§二类型检查、构建、定向单测已实跑；真实浏览器打印媒体冒烟暴露内容坐标归属失败。按补遗一第 5 条及 §三停止扩建，以下草稿随工作树交 HQ，**不可据单测绿灯放行**。
+
+### 已实施的草稿与边界
+
+- 新建 `E/pagePrintProjectionService.ts`、`E/layers/NotePrintLayer.tsx` 与 `.css`（`E/` 仍指 `client/src/pages/Notes/canvasEngine/`）：由 `beforeprint` / print media 挂载只读 portal，`afterprint` / 返回 screen 卸载；固定 A4/Letter 物理页、全精度 paper scale、网页族 fit A4 宽；复用 `BlockEditorLayer` 与有效 document typography，按 runtime fragments 的 visibleRect 裁剪并重定位。仅消费现有 page `visibleBlocks`，不增加 export-role 或对象可见性判断，不挂载 canvas 对象层。**当前 fragment 输入存在下述结构缺口，内容归页仍错误。**
+- `NoteRuntimeDocumentLayer.tsx` 只增加 import 与独立打印层调用；常态打印层返回 null。打印期间隐藏屏显采用 `position:fixed + visibility:hidden`，保持原编辑器可测量，避免 `display:none` 使 ResizeObserver 将屏显高度写成零。六次浏览器采样中原节点身份、布局、frame 与 textarea 尺寸均保持；未改屏显 DOM 结构、Preview、原 physicalScale 算法或共享 hydration 实现。
+- 扩展现有内存 mock，新增 `print.html` / `printFixture.tsx` / `printSpecimen.ts`：两帧 A4、Letter、web 合成笔记，分别有首帧页标、次帧页标、跨帧 code；显示应见/不应见检查单及实际 print media 的 computed-style 收据。沿用无后端 fixture，任何未被 mock 的 `/api` 请求本地失败，非白名单写请求报错；既有白名单 POST `/source-anchors/generate` 只返回内存空响应。
+- 新增 12 项打印单测；既有 document-layer 测试只收紧 recovery 状态定位（此前单 1 的阅读比例 `<output>` 也有 status 角色，旧 `getByRole('status')` 本身已不唯一；移除打印接线的内存基线探针同样失败）。现有 3 项复跑通过。
+
+### 新结构级缺口：运行时无法区分局部 y 与已保留的世界 y
+
+| 现物 | 源码证据 | 后果 |
+|---|---|---|
+| page runtime placement 没有完整 frame-local → world 转换 | `E/viewportService.ts:30–31` 的 pageOffsetX=0；`E/placementService.ts:483–484` 仅对 local x 加该 offset，y 原样；`E/engineModel.ts:367–373` 用这些 placement 派生 fragments | 合法局部坐标被当成 world 裁片坐标：A4/Letter 次帧页标落入第一页，首行左侧少 72px 被裁掉。 |
+| 已有完整转换 helper，但不能直接对所有 hydrated local 再调用 | `E/placementService.ts:496–522` 的 `projectPageFrameLocalLayoutToCanvasLayout` 加 frame content-left 及 frame.y+inset.top；`E/hooks/useRuntimeNaturalWritingController.ts:47–75` 可解析 frame 并避免显式 world 重复投影 | helper 本身可复用；问题不在缺少加法或 frame 查找。 |
+| hydration 将 world 标成 local，却只减 x、不减 y | `E/placementService.ts:254–267`；原 local 路径 `:270–298` 也保留 y | 两种来源落入相同 `coordinate_space/frame_id` 表达，不能再无歧义恢复正确 world y。 |
+| 打印入口拿不到转换前的来源 | `E/canvasObjectRepository.ts:41–48` 用 reconciled layout 覆盖 block；`E/hooks/useNoteCanvasDataAdapter.ts:591–601` 只保留 hydrated blocks 等状态，未保留 raw blockLayouts | 仅在打印投影加转换，会修好原 local 样本，却把正常写入后重载的次页内容再次下移。不能用 y 大小猜来源。 |
+
+独立只读合成探针使用真实 project / hydrate helper，次帧 y=1358、inset.top=0、content-left=72，结果为：
+
+```text
+local          x=0,  y=314,  page_frame_local
+project        x=72, y=1672, canvas_world
+hydrate        x=0,  y=1672, page_frame_local
+project again  x=72, y=3030, canvas_world
+Tests          1 passed | 12 skipped (13), exit 0
+```
+
+探针仅在内存向既有测试注入，`envFile:false`，未改产品/常驻测试；仓库根复跑 `node .codex-tmp/print-smoke/coordinateProbe.mjs`。该 PASS 表示**复现歧义成立**，不是打印功能通过。网页样本还暴露既有屏显碰撞把次帧 local 页标 y=420 推到 821；其变化发生在打印前，不是投影副作用。未通过伪改 fixture 为 world、挪页标、加行数或放宽归页断言掩盖问题。
+
+需要 HQ 裁定并补单：统一/修复客户端 hydration 的坐标契约，或明确保留并传递可权威解释的原始坐标来源，再为打印提供正确的 world fragments。前者会触及本单冻结的共享屏显运行时行为，后者新增数据流且须覆盖重载及未保存编辑；当前批准的“按现有 fragments 裁片”不足以裁定二者。builder 未实施任何分支，也未改 server。
+
+### §二实跑与 3b 第二级结果
+
+| 验证 | 实跑结果与限度 |
+|---|---|
+| client typecheck | client 目录 `node node_modules/typescript/bin/tsc -b`，exit 0。 |
+| client build | client 目录通过 Node 调用 `vite.build({envFile:false})`，exit 0，2190 modules，7.13s。保留 Vite 的 taskStore 静态/动态混合导入及 >500kB chunk 提示。 |
+| 定向测试 | `startVitest('test', ['src/pages/Notes/canvasEngine/layers/NotePrintLayer.test.tsx', 'src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx'], {run:true}, {envFile:false})` 后关闭 ctx；2 files / 15 tests passed，2.06s，exit 0。fixture 另作 TypeScript program 检查，0 diagnostics。 |
+| 真实浏览器机械冒烟 | 系统已安装的 Chrome + Node 原生 CDP，隔离临时 profile，仅访问合成 fixture；`Emulation.setEmulatedMedia('print')` 实际触发打印媒体与投影。保存 6 次收据，**6 次整体 FAIL，runner exit 1**。未生成 PDF。 |
+| 尺寸与样式 | A4/web 每页实测 793.688×1122.52px，Letter 816×1056px，均在 ±0.5px 内；paper scale 分别 0.8779875966831581 / 0.9026548672566371，web 0.7086614173228347。每次 2 个固定 print page DOM、break/clipping 规则、隐藏 chrome、排除 workspace/backing block、零非白名单写请求、原屏显节点/几何保持均通过；白名单 POST 仅为上述内存空响应，无后台写入。 |
+| 内容与档位 | A4/Letter 次帧页标归属 FAIL；web 跨帧块仅 1 个 fragment，FAIL。A4 与 web 确实覆盖 fit_width/step=1 和 physical/step=1.1，打印尺寸/scale 不变。**Letter 第二次收据实际仍是 fit_width/1，不计作 physical 档覆盖。** 停线后仅为诊断脚本补上 actual gear/step 等待和断言，语法检查通过，未重跑该修订版。 |
+| 原生预览路径 | 合成 fixture 点击真实 `window.print()` 已触发 beforeprint；原生打印模态阻塞当前 UI 自动化，未取得可验证的原生预览内容或完整关闭收据。随后关闭本次创建的 fixture tab。**不申报原生预览/人工验收成功。** 后续机械证据来自上述 Chrome print-media emulation。 |
+
+**覆盖限制**：12 项新增单测通过 `placement()` 手填正确 world placements，再用真实 engine 派生 fragments；未经过持久化 hydration。它们证明打印生命周期、固定容器/样式规则及**world 输入正确时**的裁片重定位，不证明实际 local 输入的内容归属或首字符完整性。visibleBlocks 测试仅证明尊重传入集合；页数是打印 DOM 容器数，非 PDF 页数。CSSOM 与浏览器媒体样式证据不冒充物理输出或人眼验收。**3b 依补遗直接走第二级，但第二级与 3a 均未验收通过。**
+
+浏览器证据在 `.codex-tmp/print-smoke/receipts.json`、`A4-fit_width-print.png` 等六张 print-media 截图及三张屏显截图（忽略的工作区取证文件，非产品资产）。截图还可见 code 块深色背景残留；视觉检查尚未收尾。复跑先在 client 目录启动 `node scripts/pageReadingSmoke/start.mjs`，检查页为 `http://127.0.0.1:5181/scripts/pageReadingSmoke/print.html?paper=A4`；另开进程运行 `node scripts/pageReadingSmoke/verifyPrint.mjs`。本 Windows 受限环境的隔离 Chrome renderer 只有显式 `--isolated-chrome-no-sandbox` 才能工作；该开关只作用于新建临时合成样本 profile，不修改用户浏览器配置，脚本默认不关闭 sandbox。本次临时 profile 已清理，fixture Vite 已停止；原有 `start.mjs` 未修改。
+
+### 变更量、未做与交付
+
+客户端源码/fixture/测试合计 **1150 additions / 5 deletions**：已跟踪 3 文件 `git diff --numstat` 为 11/5；8 个新文件按完整新增行计为 1139/0（普通 git diff 不计 untracked，未用 git add）。其中新文件行数依次为：`print.html` 12、`printFixture.tsx` 234、`printSpecimen.ts` 92、`verifyPrint.mjs` 149、`NotePrintLayer.css` 80、`NotePrintLayer.test.tsx` 372、`NotePrintLayer.tsx` 156、`pagePrintProjectionService.ts` 44。本工单本次追加 **58/0**，本单总计 **1208/5**；限定本单已跟踪文件的 `git diff --check` 与 8 个新文件的空白/末尾换行检查均通过。开工既有 server 修改和三份未跟踪材料不计入本单。
+
+- 未完成：坐标契约缺口、正确内容归页/首字符完整性、web 跨帧完整性、Letter physical 档浏览器覆盖、原生预览可验证全流程、剩余视觉检查。未产出 PDF、未触碰 Henry 真实笔记、未做人眼主观验收；完整 runtime、安全类与马拉松验证未跑，遵守段 plan 的定向验证口径。
+- 停线后仅整理诊断脚本与本回执，未修共享 placement/hydration、未新增坐标启发式、未扩建产品。工作树保留连入 document layer 的**未完成草稿**，HQ 续作前须看此停线结论。
+- 未 commit/push/PR/merge、未装依赖、未读 .env、未打印 key、未动 server、未查询用户数据、未修改 agent 指令或权限配置。CodeGraph CLI 与 rg 不可用，按定向 PowerShell 读取回退，未索引或安装工具。
