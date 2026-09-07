@@ -113,6 +113,7 @@ export function visualConnectorSavePayload(
       surface: placement.surface,
       boundary_role: placement.boundaryRole,
       z_index: placement.zIndex,
+      order_index: placement.orderIndex ?? null,
       visibility_state: placement.visibilityState || 'normal',
       render_visibility: placement.renderVisibility || 'visible',
     },

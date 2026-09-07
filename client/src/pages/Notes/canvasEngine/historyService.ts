@@ -3,6 +3,7 @@ import type { LayoutHistoryEntry } from './runtimeLayout';
 import type { TableStructuredPayload } from './types';
 
 export type RuntimeHistoryEntry =
+  | { type: 'reversibleEdit'; undo: () => Promise<boolean>; redo: () => Promise<boolean> }
   | { type: 'layout'; entry: LayoutHistoryEntry }
   | { type: 'createdBlock'; block: NoteBlock }
   | { type: 'trashedBlock'; block: NoteBlock }
@@ -55,6 +56,7 @@ export async function applyRuntimeHistoryUndo(
   entry: RuntimeHistoryEntry,
   handlers: RuntimeHistoryApplyHandlers,
 ): Promise<RuntimeHistoryEntry | null> {
+  if (entry.type === 'reversibleEdit') return await entry.undo() ? entry : null;
   if (entry.type === 'layout') {
     handlers.applyLayoutDrafts(entry.entry.before);
     handlers.persistLayoutSnapshot(entry.entry.before);
@@ -82,6 +84,7 @@ export async function applyRuntimeHistoryRedo(
   entry: RuntimeHistoryEntry,
   handlers: RuntimeHistoryApplyHandlers,
 ): Promise<RuntimeHistoryEntry | null> {
+  if (entry.type === 'reversibleEdit') return await entry.redo() ? entry : null;
   if (entry.type === 'layout') {
     handlers.applyLayoutDrafts(entry.entry.after);
     handlers.persistLayoutSnapshot(entry.entry.after);

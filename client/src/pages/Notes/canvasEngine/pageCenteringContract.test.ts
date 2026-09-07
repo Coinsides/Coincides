@@ -1,6 +1,6 @@
 /**
  * jsdom has no layout engine, so numeric cases lock the centering formula while
- * source assertions lock its page-only wiring and the canvas zero-offset override.
+ * source assertions lock the current page-reading centering and canvas override.
  */
 // @ts-expect-error -- Vitest runs this source-only contract in Node.
 import { readFileSync } from 'node:fs';
@@ -34,10 +34,12 @@ describe('page viewport centering contract', () => {
     expect(getPageViewportCenteringOffsetX(270, 1633, 1920)).toBe(-126.5);
   });
 
-  it('wires the correction only in page mode', () => {
-    expect(layerSource).toContain("surfaceMode !== 'page'");
-    expect(layerSource).toContain('getPageViewportCenteringOffsetX(appMain.getBoundingClientRect().left, appMain.clientWidth, window.innerWidth)');
-    expect(layerSource).toContain("surface.style.setProperty(\n      '--page-centering-offset-x'");
+  it('centers the scaled reading space inside the available page surface', () => {
+    // 13.1 replaced the viewport offset effect with measured, scaled paper space.
+    expect(layerSource).toContain("enabled: surfaceMode === 'page'");
+    expect(layerSource).toContain("surfaceMode === 'page' ? styles.pageReadingSpace");
+    expect(cssRuleBody('.writingSurface.pageReadingSurface')).toMatch(/left:\s*0\b/);
+    expect(cssRuleBody('.pageReadingSpace')).toMatch(/margin:\s*0 auto/);
   });
 
   it('keeps canvas at zero presentation offset', () => {

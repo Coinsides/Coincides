@@ -28,7 +28,8 @@ export interface BlockBoxLayout {
   rotation?: number;
   export_role?: ExportRole;
   ai_visibility?: AIVisibility;
-  surface?: 'formal_page' | 'canvas_workspace';
+  surface?: 'formal_page' | 'canvas_workspace' | 'tray';
+  order_index?: number | null;
   width_mode?: LayoutWidthMode;
   coordinate_space?: CanvasSurfaceCoordinateSpace;
   frame_id?: string;

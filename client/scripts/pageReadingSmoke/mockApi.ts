@@ -6,6 +6,7 @@ import { createPageFramePrintProfile } from '../../src/pages/Notes/canvasEngine/
 import { createPrintSpecimen, PRINT_NOTE_ID } from './printSpecimen';
 
 const isPrintFixture = typeof window !== 'undefined' && window.location.pathname.endsWith('/print.html');
+const isTrayFixture = typeof window !== 'undefined' && window.location.pathname.endsWith('/tray.html');
 const requestedPaper = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('paper') : null;
 export const printSpecimen = createPrintSpecimen(requestedPaper === 'Letter' || requestedPaper === 'web' ? requestedPaper : 'A4');
 export const NOTE_ID = isPrintFixture ? PRINT_NOTE_ID : 'page-reading-smoke-note';
@@ -96,6 +97,15 @@ const api = axios.create({
     const method = (config.method || 'get').toUpperCase();
     const url = config.url || '';
     apiCalls.push({ method, url });
+    if (isTrayFixture && (url.startsWith('/notes/') || url.startsWith('/canvas-objects/') || url.startsWith('/note-blocks/'))) {
+      const response = await fetch(`/api${url}`, {
+        method, headers: { 'content-type': 'application/json' },
+        body: method === 'GET' ? undefined : config.data,
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(`Synthetic tray API failed: ${response.status}`);
+      return { data, status: response.status, statusText: response.statusText, headers: {}, config };
+    }
     let data: unknown;
     if (method !== 'GET' && url !== '/source-anchors/generate') {
       // The specimen is read-only. Keep attempted mutations visible to the smoke.
@@ -106,7 +116,8 @@ const api = axios.create({
     else if (url === `/canvas-objects/by-note/${NOTE_ID}`) data = isPrintFixture ? printSpecimen.canvas : fixtureCanvas;
     else if (url === '/templates') data = templates;
     else if (url === '/source-anchors/generate') data = {};
-    else if (url === '/content-groups' || url === '/group-folders' || url === '/source-anchors'
+    else if ((isTrayFixture && (url.startsWith('/annotation-truths/by-note/') || url.startsWith('/purposes/by-note/')))
+      || url === '/content-groups' || url === '/group-folders' || url === '/source-anchors'
       || url === `/annotation-truths/by-note/${NOTE_ID}` || url === `/purposes/by-note/${NOTE_ID}`) data = [];
     else throw new Error(`Unmapped fixture request: ${method} ${url}`);
     return { data: structuredClone(data), status: 200, statusText: 'OK', headers: {}, config };

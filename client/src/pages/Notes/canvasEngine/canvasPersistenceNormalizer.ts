@@ -144,6 +144,7 @@ function normalizeCanvasPlacement(raw: unknown): CanvasPlacement | null {
     height: readNumber(raw, ['height']),
     rotation: readNumber(raw, ['rotation']),
     zIndex: readNumber(raw, ['zIndex', 'z_index']),
+    orderIndex: readOptionalNumber(raw, ['orderIndex', 'order_index']) ?? null,
     snapState: normalizeSnapState(raw.snapState ?? raw.snap_state),
     visibilityState: readOptionalString(
       raw,

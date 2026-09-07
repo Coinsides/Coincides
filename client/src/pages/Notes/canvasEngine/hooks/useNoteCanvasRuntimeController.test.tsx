@@ -89,6 +89,9 @@ vi.mock('./useRuntimeDocumentDataController', () => ({
     sourceProjectionPolicy: { contentReadOnly: false },
     sourceReferenceCount: 0,
     sortedBlocks: rootBridgeContract.blocks,
+    persistedCanvasObjects: [],
+    persistedCanvasPlacements: [],
+    persistedContentMounts: [],
   }, {
     get(target, property, receiver) {
       return Reflect.has(target, property)

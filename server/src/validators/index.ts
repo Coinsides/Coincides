@@ -714,7 +714,7 @@ export const updateNoteBlockPlacementSchema = z.object({
 });
 
 const canvasRuntimeIdSchema = z.string().min(1).max(220);
-const canvasSurfaceSchema = z.enum(['formal_page', 'canvas_workspace']);
+const canvasSurfaceSchema = z.enum(['formal_page', 'canvas_workspace', 'tray']);
 const canvasBoundaryRoleSchema = z.enum(['inside', 'outside', 'crossing']);
 const canvasVisibilityStateSchema = z.enum(['normal', 'scratch', 'ai_hidden', 'export_hidden']);
 const canvasRenderVisibilitySchema = z.enum(['visible', 'hidden', 'collapsed']);
@@ -730,6 +730,7 @@ const canvasPlacementCoreSchema = z.object({
   surface: canvasSurfaceSchema.optional(),
   boundary_role: canvasBoundaryRoleSchema.optional(),
   z_index: z.number().int().optional(),
+  order_index: z.number().int().nullable().optional(),
   visibility_state: canvasVisibilityStateSchema.optional(),
   render_visibility: canvasRenderVisibilitySchema.optional(),
   export_role: z.enum(['included', 'excluded', 'scratch']).optional(),

@@ -1788,6 +1788,22 @@ export function useNoteCanvasDataAdapter({
     }
   }, [addToast, allowSourceContentMutation]);
 
+  const refreshTrayState = useCallback(async (changedBlockIds: string[] = []) => {
+    if (!note) return;
+    const [blocksResponse, persistence] = await Promise.all([
+      api.get(`/notes/${note.id}/blocks`),
+      loadCanvasPersistenceForNote({ note, importLegacy: false }),
+    ]);
+    if (routeNoteIdRef.current !== note.id) return;
+    setBlocks(applyCanvasLayoutsToBlocks(blocksResponse.data, persistence.blockLayouts, {
+      pageFrameCollection: persistence.pageFrameCollection,
+    }));
+    setPersistedCanvasObjects(persistence.canvasObjects);
+    setPersistedCanvasPlacements(persistence.canvasPlacements);
+    setPersistedContentMounts(persistence.contentMounts);
+    changedBlockIds.forEach(clearLayoutDraftForBlock);
+  }, [clearLayoutDraftForBlock, note]);
+
   const persistBlockLayout = useCallback(async (block: NoteBlock, layout: BlockBoxLayout) => {
     if (!note) return;
     if (!allowSourceContentMutation()) return;
@@ -2214,6 +2230,7 @@ export function useNoteCanvasDataAdapter({
     saveDraftBlockPlacement,
     applyTemplateToBlock,
     persistBlockLayout,
+    refreshTrayState,
     toggleBlockExportRole,
     toggleBlockAIVisibility,
     trashBlock,

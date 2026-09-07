@@ -320,7 +320,7 @@ export function buildNoteCanvasRuntimeModel({
   pageFrames,
   pageStacks = [],
   viewport,
-  blockPlacements,
+  blockPlacements: inputBlockPlacements,
   documentTypography = createDefaultDocumentTypographyProfile(),
   canvasObjectReserve = [],
   relationEndpointReserve = [],
@@ -350,6 +350,14 @@ export function buildNoteCanvasRuntimeModel({
   genericStructuredObjects?: StructuredCanvasObject[];
   textByContentTargetId?: Record<string, string>;
 }): NoteCanvasRuntimeModel {
+  const trayPlacementIds = new Set(genericCanvasPlacements
+    .filter((placement) => placement.surface === 'tray').map((placement) => placement.placementId));
+  const trayObjectIds = new Set(genericCanvasPlacements
+    .filter((placement) => placement.surface === 'tray').map((placement) => placement.objectId));
+  const placedObjectIds = new Set(genericCanvasPlacements
+    .filter((placement) => placement.surface !== 'tray').map((placement) => placement.objectId));
+  const blockPlacements = inputBlockPlacements.filter((placement) => placement.surface !== 'tray'
+    && !trayPlacementIds.has(placement.placementId));
   const canvasId = blockPlacements[0]?.canvasId || 'primary-note-canvas';
   const runtimePageFrames = (pageFrames || (primaryPageFrame ? [primaryPageFrame] : []))
     .map(normalizePageFramePrintBaseline);
@@ -393,11 +401,13 @@ export function buildNoteCanvasRuntimeModel({
   const runtimeGenericObjects = genericCanvasObjects.filter((object) => (
     object.kind !== 'page_frame'
     && object.kind !== 'paragraph_block_projection'
+    && (!trayObjectIds.has(object.objectId) || placedObjectIds.has(object.objectId))
     && !builtObjectIds.has(object.objectId)
   ));
   const runtimeGenericObjectIds = new Set(runtimeGenericObjects.map((object) => object.objectId));
   const runtimeGenericPlacements = genericCanvasPlacements.filter((placement) => (
     runtimeGenericObjectIds.has(placement.objectId)
+    && placement.surface !== 'tray'
   ));
   const runtimeGenericContentMounts = genericContentMounts.filter((mount) => (
     runtimeGenericObjectIds.has(mount.objectId)

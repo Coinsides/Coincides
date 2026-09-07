@@ -28,6 +28,7 @@ export type UseNoteCanvasLayerPropsInput =
     | 'onDismissBlockEditRecovery'
     | 'onSurfacePointerDown'
     | 'templateWarning'
+    | 'tray'
   >
   & {
     note: Note | null;
@@ -244,12 +245,14 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     onRestoreBlockById: input.onRestoreBlockById,
     onViewportSizeChange: input.onViewportSizeChange,
     onViewSource: input.onViewSource,
+    onDropTrayBlock: input.onDropTrayBlock,
     onZoomViewportAt: input.onZoomViewportAt,
   };
 
   return {
     chromeProps,
     documentLayerProps: {
+      tray: input.tray,
       blockEditRecoveryReceipts: input.blockEditRecoveryReceipts,
       floatingPanelProps,
       onApplyBlockEditRecovery: input.onApplyBlockEditRecovery,

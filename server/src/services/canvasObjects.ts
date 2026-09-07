@@ -22,6 +22,7 @@ interface CanvasPlacementRow {
   surface: string;
   boundary_role: string;
   z_index: number;
+  order_index: number | null;
   snap_state_json: string | null;
   visibility_state: string;
   render_visibility: string;
@@ -300,12 +301,13 @@ function layoutFromPlacement(row: CanvasPlacementRow): Record<string, unknown> {
     y: Math.round(Number(row.y || 0)),
     width: Math.round(Number(row.width || 0)),
     height: Math.round(Number(row.height || 0)),
-    surface: row.surface === 'canvas_workspace' ? 'canvas_workspace' : 'formal_page',
+    surface: row.surface === 'tray' ? 'tray' : row.surface === 'canvas_workspace' ? 'canvas_workspace' : 'formal_page',
     boundary_role: row.boundary_role === 'crossing' || row.boundary_role === 'outside'
       ? row.boundary_role
       : 'inside',
   };
   if (row.frame_id) layout.frame_id = row.frame_id;
+  if (row.order_index != null) layout.order_index = row.order_index;
   if (policy.coordinate_space === 'page_frame_local' || policy.coordinate_space === 'canvas_world') {
     layout.coordinate_space = policy.coordinate_space;
   }
@@ -343,6 +345,7 @@ function canvasPlacementFromRow(row: CanvasPlacementRow) {
     surface: row.surface,
     boundary_role: row.boundary_role,
     z_index: Number(row.z_index || 0),
+    order_index: row.order_index ?? null,
     snap_state: parseJson<Record<string, unknown>>(row.snap_state_json, {}),
     visibility_state: row.visibility_state,
     render_visibility: row.render_visibility,
@@ -463,13 +466,14 @@ function normalizePlacementForWrite(
     metadata?: Record<string, unknown>;
   } = {},
 ) {
-  const surface = placement.surface === 'formal_page' ? 'formal_page' : 'canvas_workspace';
+  const surface = placement.surface === 'tray' ? 'tray' : placement.surface === 'formal_page' ? 'formal_page' : 'canvas_workspace';
   const boundaryRole = placement.boundary_role === 'inside'
     || placement.boundary_role === 'crossing'
     || placement.boundary_role === 'outside'
     ? placement.boundary_role
     : null;
   const effectiveSurface = defaults.surface || surface;
+  const isTray = effectiveSurface === 'tray';
   const coordinateSpace = placement.coordinate_space === 'page_frame_local'
     || placement.coordinate_space === 'canvas_world'
     ? placement.coordinate_space
@@ -478,17 +482,19 @@ function normalizePlacementForWrite(
     id: placementId,
     object_id: objectId,
     canvas_id: canvasId,
-    x: numeric(placement.x, 0),
-    y: numeric(placement.y, 0),
-    width: numeric(placement.width, 0),
-    height: numeric(placement.height, 0),
-    rotation: numeric(placement.rotation, 0),
-    frame_id: optionalText(placement.frame_id),
+    x: isTray ? 0 : numeric(placement.x, 0),
+    y: isTray ? 0 : numeric(placement.y, 0),
+    width: isTray ? 0 : numeric(placement.width, 0),
+    height: isTray ? 0 : numeric(placement.height, 0),
+    rotation: isTray ? 0 : numeric(placement.rotation, 0),
+    frame_id: isTray ? null : optionalText(placement.frame_id),
     surface: effectiveSurface,
     boundary_role: defaults.boundaryRole
       || boundaryRole
       || (effectiveSurface === 'formal_page' ? 'inside' : 'outside'),
     z_index: integer(placement.z_index, 0),
+    order_index: typeof placement.order_index === 'number' && Number.isInteger(placement.order_index)
+      ? placement.order_index : null,
     snap_state_json: stringifyJson(defaults.snapState || { state: surface === 'formal_page' ? 'snapped' : 'free' }, {}),
     visibility_state: optionalText(placement.visibility_state)
       || defaults.visibilityState
@@ -558,13 +564,13 @@ function upsertCanvasPlacementCore(
     INSERT INTO canvas_placements (
       id, user_id, course_id, note_id, object_id, canvas_id,
       x, y, width, height, rotation, frame_id, surface, boundary_role,
-      z_index, snap_state_json, visibility_state, render_visibility, metadata,
+      z_index, order_index, snap_state_json, visibility_state, render_visibility, metadata,
       created_at, updated_at
     )
     VALUES (
       @id, @user_id, @course_id, @note_id, @object_id, @canvas_id,
       @x, @y, @width, @height, @rotation, @frame_id, @surface, @boundary_role,
-      @z_index, @snap_state_json, @visibility_state, @render_visibility, @metadata,
+      @z_index, @order_index, @snap_state_json, @visibility_state, @render_visibility, @metadata,
       datetime('now'), datetime('now')
     )
     ON CONFLICT(id) DO UPDATE SET
@@ -579,6 +585,7 @@ function upsertCanvasPlacementCore(
       surface = excluded.surface,
       boundary_role = excluded.boundary_role,
       z_index = excluded.z_index,
+      order_index = excluded.order_index,
       snap_state_json = excluded.snap_state_json,
       visibility_state = excluded.visibility_state,
       render_visibility = excluded.render_visibility,

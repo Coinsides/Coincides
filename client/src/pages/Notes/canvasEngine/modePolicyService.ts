@@ -113,7 +113,8 @@ export function getVisibleBlocksForSurface<TBlock extends PlacementSeedBlock & {
   contentWidth: number,
   context: SurfaceVisibilityContext = {},
 ): TBlock[] {
-  const renderableBlocks = blocks.filter((block) => !isCanvasObjectBackingBlock(block));
+  const renderableBlocks = blocks.filter((block) => !isCanvasObjectBackingBlock(block)
+    && readStoredLayout(block)?.surface !== 'tray');
   return policy.showWorkspaceBlocks
     ? renderableBlocks
     : renderableBlocks.filter((block) => (

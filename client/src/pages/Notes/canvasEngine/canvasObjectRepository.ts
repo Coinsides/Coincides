@@ -43,8 +43,14 @@ export function applyCanvasLayoutsToBlocks(
     item.block_id,
     reconcileHydratedBlockLayoutSurfaceAuthority(item.layout, pageFrames),
   ]));
+  const layoutsByPlacementId = new Map(blockLayouts.map((item) => [
+    item.placement_id,
+    reconcileHydratedBlockLayoutSurfaceAuthority(item.layout, pageFrames),
+  ]));
   return blocks.map((block) => {
-    const layout = layoutsByBlockId.get(block.id);
+    const layout = block.placement_id
+      ? layoutsByPlacementId.get(block.placement_id)
+      : layoutsByBlockId.get(block.id);
     return layout ? { ...block, canvas_layout: layout } : block;
   });
 }

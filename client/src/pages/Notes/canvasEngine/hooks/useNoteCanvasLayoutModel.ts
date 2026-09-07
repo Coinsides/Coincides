@@ -96,11 +96,11 @@ export function useNoteCanvasResolvedLayoutModel({
   );
 
   const visibleBlocks = useMemo(
-    () => getVisibleBlocksForSurface(sortedBlocks, surfacePolicy, contentWidth, {
+    () => getVisibleBlocksForSurface(sortedBlocks.filter((block) => layoutDrafts[block.id]?.surface !== 'tray'), surfacePolicy, contentWidth, {
       pageFrames,
       boundary: 'outer',
     }),
-    [contentWidth, pageFrames, sortedBlocks, surfacePolicy],
+    [contentWidth, layoutDrafts, pageFrames, sortedBlocks, surfacePolicy],
   );
 
   const pageAffiliatedWorkspaceBlockIds = useMemo(

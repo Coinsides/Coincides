@@ -141,6 +141,7 @@ export function usePlacementHistory({
   }, [redoRuntimeHistory, target, undoRuntimeHistory]);
 
   return {
+    pushHistoryEntry,
     pushCreatedBlockHistory,
     pushLayoutHistory,
     pushStructuredMutationHistory,

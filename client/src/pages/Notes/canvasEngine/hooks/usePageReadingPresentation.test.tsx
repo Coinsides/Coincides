@@ -54,7 +54,7 @@ function specimen(paperHeight = printProfile.height) {
  * rendered width and transform. All state, measurement and layout hooks are real.
  */
 function ReadingHarness({
-  data, mode = 'page', scrollTo, blockLeft = 300, blockTop = 180, appTop = 60, surfaceTop = 60,
+  data, mode = 'page', scrollTo, blockLeft = 300, blockTop = 180, appTop = 60, surfaceTop = 60, surfaceWidth = 680,
 }: {
   data: ReturnType<typeof specimen>;
   mode?: SurfaceMode;
@@ -63,6 +63,7 @@ function ReadingHarness({
   blockTop?: number;
   appTop?: number;
   surfaceTop?: number;
+  surfaceWidth?: number;
 }) {
   const surfaceRef = useRef<HTMLDivElement | null>(null);
   const blockListRef = useRef<HTMLDivElement | null>(null);
@@ -120,7 +121,7 @@ function ReadingHarness({
     {(['fit_width', 'physical', 'fit_page'] as PageReadingGear[]).map((gear) => (
       <button key={gear} onClick={() => controller.setPageReadingGear(gear)}>{gear}</button>
     ))}
-    <div ref={mountSurface} data-testid="surface" data-surface-top={surfaceTop} style={{ width: 680 }}>
+    <div ref={mountSurface} data-testid="surface" data-surface-top={surfaceTop} style={{ width: surfaceWidth }}>
       <div data-testid="paper-space" style={mode === 'page' ? { width: reading.paperWidth * reading.displayScale, height: reading.paperHeight * reading.displayScale } : { display: 'contents' }}>
         <div data-testid="paper" data-page-display-scale={mode === 'page' ? reading.displayScale : undefined}
           data-effective-gear={reading.effectiveGear}
@@ -144,6 +145,23 @@ function ReadingHarness({
 }
 
 describe('K-reading-gears: presentation → clientWidth → resolved layout → runtime', () => {
+  it('settles repeated sidebar width changes in every gear without mutating block geometry', () => {
+    const data = specimen();
+    const scrollTo = vi.fn();
+    const subject = render(<ReadingHarness data={data} scrollTo={scrollTo} surfaceWidth={980} />);
+    const list = subject.getByTestId('block-list');
+    const layouts = list.dataset.layouts;
+    for (const gear of ['fit_width', 'fit_page', 'physical']) {
+      fireEvent.click(subject.getByRole('button', { name: gear }));
+      for (const width of [724, 980, 724, 980]) {
+        subject.rerender(<ReadingHarness data={data} scrollTo={scrollTo} surfaceWidth={width} blockLeft={width / 2} />);
+        expect(list.dataset.layouts).toBe(layouts);
+        expect(subject.getByTestId('paper').dataset.effectiveGear).toBe(gear);
+        expect(JSON.parse(list.dataset.runtimeViewport || '{}').zoom)
+          .toBe(Number(subject.getByTestId('paper').dataset.pageDisplayScale));
+      }
+    }
+  });
   it('changes outer transform across all gears while preserving measured layout width and every local block geometry', () => {
     const data = specimen();
     const inputBytes = JSON.stringify(data);

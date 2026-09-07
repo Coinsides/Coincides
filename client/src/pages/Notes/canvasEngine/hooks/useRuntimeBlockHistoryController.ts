@@ -22,6 +22,7 @@ export function useRuntimeBlockHistoryController({
   trashBlock,
 }: UseRuntimeBlockHistoryControllerOptions) {
   const {
+    pushHistoryEntry,
     pushCreatedBlockHistory,
     pushLayoutHistory,
     pushStructuredMutationHistory,
@@ -42,6 +43,7 @@ export function useRuntimeBlockHistoryController({
   }, [blocks, pushTrashedBlockHistory, trashBlock]);
 
   return {
+    pushHistoryEntry,
     handleTrashBlock,
     pushCreatedBlockHistory,
     pushLayoutHistory,

@@ -9,9 +9,11 @@ import {
 } from './NoteWritingSurfaceLayer';
 import type { BlockEditRecoveryReceipt } from '../draftBlockPersistence';
 import { NotePrintLayer } from './NotePrintLayer';
+import { NoteTraySidebar, type NoteTrayState } from './NoteTraySidebar';
 import styles from '../../NoteDetail.module.css';
 
 export interface NoteRuntimeDocumentLayerProps {
+  tray?: NoteTrayState;
   blockEditRecoveryReceipts: BlockEditRecoveryReceipt[];
   floatingPanelProps: NoteFloatingPanelLayerProps;
   onApplyBlockEditRecovery: (recoveryKey: string) => void | Promise<boolean>;
@@ -23,6 +25,7 @@ export interface NoteRuntimeDocumentLayerProps {
 }
 
 export function NoteRuntimeDocumentLayer({
+  tray,
   blockEditRecoveryReceipts,
   floatingPanelProps,
   onApplyBlockEditRecovery,
@@ -32,7 +35,7 @@ export function NoteRuntimeDocumentLayer({
   templateWarning,
   writingSurfaceProps,
 }: NoteRuntimeDocumentLayerProps) {
-  return (
+  const document = (
     <div
       className={`${styles.documentShell} ${surfaceMode === 'canvas' ? styles.documentShellCanvas : ''}`}
       onMouseDown={onSurfacePointerDown}
@@ -82,4 +85,13 @@ export function NoteRuntimeDocumentLayer({
       <NotePrintLayer {...writingSurfaceProps} />
     </div>
   );
+  if (surfaceMode !== 'page' || !tray) return document;
+  return <div className={styles.trayViewport}>
+    <button type="button" className={styles.trayToggle} aria-expanded={tray.open}
+      onClick={() => tray.setOpen(!tray.open)}>Tray ({tray.entries.length})</button>
+    <div className={styles.trayDocumentRow}>
+      {document}
+      {tray.open && <NoteTraySidebar tray={tray} />}
+    </div>
+  </div>;
 }

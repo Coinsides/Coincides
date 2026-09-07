@@ -74,7 +74,7 @@ function isAIVisibility(value: unknown): value is AIVisibility {
 }
 
 function isStoredLayoutSurface(value: unknown): value is NonNullable<BlockBoxLayout['surface']> {
-  return value === 'formal_page' || value === 'canvas_workspace';
+  return value === 'formal_page' || value === 'canvas_workspace' || value === 'tray';
 }
 
 function isStoredCoordinateSpace(value: unknown): value is NonNullable<BlockBoxLayout['coordinate_space']> {
@@ -202,6 +202,7 @@ export function reconcileHydratedBlockLayoutSurfaceAuthority(
   layout: Record<string, unknown>,
   pageFrames: PageFrameModel[],
 ): Record<string, unknown> {
+  if (layout.surface === 'tray') return layout;
   const x = typeof layout.x === 'number' ? layout.x : Number.NaN;
   const width = typeof layout.width === 'number' ? layout.width : Number.NaN;
   if (!Number.isFinite(x) || !Number.isFinite(width)) return layout;
@@ -543,6 +544,15 @@ export function buildRelationEndpointReserveForPlacement(placement: BlockPlaceme
 }
 
 export function buildLayoutPayload(layout: BlockBoxLayout): Record<string, unknown> {
+  if (layout.surface === 'tray') {
+    return {
+      x: 0, y: 0, width: 0, height: 0, rotation: 0,
+      surface: 'tray', boundary_role: 'outside', frame_id: null,
+      order_index: layout.order_index ?? null,
+      export_role: layout.export_role, ai_visibility: layout.ai_visibility,
+      width_mode: layout.width_mode,
+    };
+  }
   const roundedLayout: BlockBoxLayout = {
     ...layout,
     x: Math.round(layout.x),
@@ -588,6 +598,7 @@ export function layoutsEqual(a: BlockBoxLayout, b: BlockBoxLayout): boolean {
     && a.export_role === b.export_role
     && a.ai_visibility === b.ai_visibility
     && a.surface === b.surface
+    && a.order_index === b.order_index
     && a.width_mode === b.width_mode;
 }
 

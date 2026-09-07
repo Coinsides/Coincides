@@ -343,6 +343,19 @@
   line-height: 1.4;
 }
 
+.trayViewport { width: min(980px, 100%); margin: 0 auto; padding-top: 26px; }
+.trayToggle { margin: 0 0 12px; padding: 6px 12px; }
+.trayDocumentRow { display: flex; align-items: flex-start; gap: 16px; }
+.trayDocumentRow > .documentShell { flex: 1 1 0; min-width: 0; padding-top: 0; }
+.traySidebar { position: sticky; top: 16px; flex: 0 0 240px; max-width: 40%; max-height: calc(100vh - 100px); overflow: auto; padding: 16px; border: 1px solid var(--border-subtle); background: var(--bg-primary); }
+.trayHeading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.trayHint { color: var(--text-secondary); font-size: 12px; line-height: 1.5; }
+.trayList { list-style: none; padding: 0; max-height: 55vh; overflow-y: auto; }
+.trayList li { padding: 10px 0; border-bottom: 1px solid var(--border-color); overflow-wrap: anywhere; }
+.trayList label { display: flex; gap: 8px; align-items: flex-start; }
+.trayCategory { display: block; color: var(--text-secondary); font-size: 11px; margin-bottom: 4px; }
+.traySidebar input:not([type="checkbox"]) { display: block; box-sizing: border-box; width: 100%; margin: 8px 0; }
+
 .blockTrashList {
   display: grid;
   gap: 8px;

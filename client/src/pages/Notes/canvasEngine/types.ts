@@ -1,6 +1,6 @@
 export type NoteCanvasMode = 'page' | 'canvas';
 
-export type CanvasSurface = 'formal_page' | 'canvas_workspace';
+export type CanvasSurface = 'formal_page' | 'canvas_workspace' | 'tray';
 
 export type CanvasBoundaryKind = 'inside' | 'outside' | 'crossing';
 
@@ -333,6 +333,7 @@ export interface CanvasPlacement extends CanvasRect {
   surface: CanvasSurface;
   boundaryRole: CanvasBoundaryKind;
   zIndex: number;
+  orderIndex?: number | null;
   snapState?: 'snapped' | 'free';
   visibilityState?: CanvasPlacementVisibilityState;
   renderVisibility?: CanvasRenderVisibility;

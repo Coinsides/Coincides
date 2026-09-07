@@ -219,6 +219,7 @@ import {
 } from './TableObjectLayer';
 import { VisualConnectorLayer } from './VisualConnectorLayer';
 import styles from '../../NoteDetail.module.css';
+import { TRAY_DRAG_TYPE } from '../trayService';
 import type { DraftBlockLifecyclePhase } from '../draftBlockLifecycleReducer';
 import {
   type TextFocusReceipt,
@@ -226,6 +227,7 @@ import {
 } from '../textFocusReceipt';
 
 export interface NoteWritingSurfaceLayerProps {
+  onDropTrayBlock?: (placementId: string, layout: BlockBoxLayout) => Promise<void>;
   activeBlockId: string | null;
   contentReadOnly: boolean;
   activeSlashCommandId: string | null;
@@ -441,6 +443,7 @@ function shapeSavePayload(
       surface: placement.surface,
       boundary_role: placement.boundaryRole,
       z_index: placement.zIndex,
+      order_index: placement.orderIndex ?? null,
       visibility_state: placement.visibilityState || 'normal',
       render_visibility: placement.renderVisibility || 'visible',
     },
@@ -501,6 +504,7 @@ function readImageFileDimensions(file: File): Promise<{ width: number; height: n
 }
 
 export function NoteWritingSurfaceLayer({
+  onDropTrayBlock,
   activeBlockId,
   contentReadOnly,
   activeSlashCommandId,
@@ -3245,6 +3249,11 @@ export function NoteWritingSurfaceLayer({
 
   const handleBlankSurfaceDragOver = (event: DragEvent<HTMLDivElement>) => {
     if (!isBlankSurfaceDropTarget(event)) return;
+    if (surfaceMode === 'page' && onDropTrayBlock && event.dataTransfer.types.includes(TRAY_DRAG_TYPE)) {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'move';
+      return;
+    }
     if (!hasContentGroupDragPayloadType(event.dataTransfer)) return;
     event.preventDefault();
     event.dataTransfer.dropEffect = 'copy';
@@ -3252,6 +3261,15 @@ export function NoteWritingSurfaceLayer({
 
   const handleBlankSurfaceDrop = (event: DragEvent<HTMLDivElement>) => {
     if (!isBlankSurfaceDropTarget(event)) return;
+    const trayPlacementId = event.dataTransfer.getData(TRAY_DRAG_TYPE);
+    if (surfaceMode === 'page' && onDropTrayBlock && trayPlacementId) {
+      const layout = layoutForBlankDrop(event);
+      if (!layout) return;
+      event.preventDefault();
+      event.stopPropagation();
+      void onDropTrayBlock(trayPlacementId, layout);
+      return;
+    }
     const droppedText = blankDropTextFromEvent(event);
     if (!droppedText) return;
     const layout = layoutForBlankDrop(event);

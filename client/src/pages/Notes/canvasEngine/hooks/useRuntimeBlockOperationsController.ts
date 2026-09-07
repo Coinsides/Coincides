@@ -27,6 +27,7 @@ export function useRuntimeBlockOperationsController(
 ) {
   const addToast = useUIStore((s) => s.addToast);
   const {
+    pushHistoryEntry,
     handleTrashBlock,
     pushCreatedBlockHistory,
     pushLayoutHistory,
@@ -47,6 +48,7 @@ export function useRuntimeBlockOperationsController(
   });
 
   return {
+    pushHistoryEntry,
     handleTrashBlock,
     pushStructuredMutationHistory,
     ...naturalWriting,

@@ -1,6 +1,7 @@
 import { Router, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { ZodError } from 'zod';
+import { z, ZodError } from 'zod';
+import { splitTrayNote, setTraySplitApplied } from '../services/trayNotes.js';
 import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
@@ -434,6 +435,21 @@ router.put('/:id/blocks/reorder', (req: AuthRequest, res: Response) => {
     }
     throw err;
   }
+});
+
+router.post('/:id/tray/split', (req: AuthRequest, res: Response) => {
+  const data = z.object({
+    placement_ids: z.array(z.string().min(1).max(220)).min(1),
+    title: z.string().trim().min(1).max(500),
+  }).safeParse(req.body);
+  if (!data.success) { res.status(400).json({ error: 'Validation error', details: data.error.errors }); return; }
+  res.status(201).json(splitTrayNote(getDb(), req.userId!, req.params.id as string, data.data));
+});
+
+router.post('/:id/tray/split/:batchId', (req: AuthRequest, res: Response) => {
+  const data = z.object({ applied: z.boolean() }).safeParse(req.body);
+  if (!data.success) { res.status(400).json({ error: 'Validation error', details: data.error.errors }); return; }
+  res.json(setTraySplitApplied(getDb(), req.userId!, req.params.id as string, req.params.batchId as string, data.data.applied));
 });
 
 export default router;

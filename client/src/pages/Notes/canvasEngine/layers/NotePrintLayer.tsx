@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal, flushSync } from 'react-dom';
 import { textFromContent } from '../blockContentService';
+import { readStoredLayout } from '../placementService';
 import { getPagePrintFragmentGeometry, getPagePrintGeometry } from '../pagePrintProjectionService';
 import { documentTypographyToCssVars } from '../typographyProfileService';
 import { BlockEditorLayer } from './BlockEditorLayer';
@@ -23,7 +24,8 @@ const noSave = async (): Promise<BlockSaveOutcome> => ({
 
 /** A read-only reuse of the editor renderer; no persistence or measurement callbacks escape. */
 function PrintPages({ input }: { input: NotePrintInput }) {
-  const blocks = new Map(input.visibleBlocks.map((block) => [block.id, block]));
+  const blocks = new Map(input.visibleBlocks.filter((block) => readStoredLayout(block)?.surface !== 'tray')
+    .map((block) => [block.id, block]));
   return <div data-note-print-root="true" data-note-id={input.noteId}>
     {input.noteCanvasRuntime.pageFrames.map((frame) => {
       const print = getPagePrintGeometry(frame);

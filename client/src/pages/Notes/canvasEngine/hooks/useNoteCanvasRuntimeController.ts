@@ -8,6 +8,7 @@ import { useRuntimeSurfaceStateController } from './useRuntimeSurfaceStateContro
 import { useBlockTextFlowEditController } from './useBlockTextFlowEditController';
 import { useSlashBlockRollbackController } from './useSlashBlockRollbackController';
 import { useNoteBlockTrashController } from './useNoteBlockTrashController';
+import { useTrayController } from './useTrayController';
 import { tableObjectSavePayload } from '../tableObjectService';
 import { resolveEffectiveDocumentTypographyProfile } from '../pageFrameTypographyService';
 import type {
@@ -140,6 +141,7 @@ export function useNoteCanvasRuntimeController() {
     saveDraftBlockPlacement,
     applyTemplateToBlock,
     persistBlockLayout,
+    refreshTrayState,
     toggleBlockExportRole,
     toggleBlockAIVisibility,
     trashBlock,
@@ -275,6 +277,7 @@ export function useNoteCanvasRuntimeController() {
     placementPending,
     persistDraft,
     pushStructuredMutationHistory,
+    pushHistoryEntry,
     resizeDraftFromTextarea,
     slashCommands,
     slashTarget,
@@ -341,7 +344,21 @@ export function useNoteCanvasRuntimeController() {
     handleDurableFocusReceipt(receipt);
   }, [handleDurableFocusReceipt, markBlockFocused]);
 
+  const tray = useTrayController({
+    noteId, enabled: surfaceMode === 'page' && !sourceProjectionPolicy.contentReadOnly,
+    blocks, objects: persistedCanvasObjects, placements: persistedCanvasPlacements,
+    mounts: persistedContentMounts, selectedBlockId, blockLayouts,
+    collection: pageFrameCollection, pageOffsetX, refresh: refreshTrayState,
+    clearSelection: clearBlockSelection, pushHistory: pushHistoryEntry,
+    flushBlock: async (block) => {
+      const result = await saveBlock(block, blockTextDrafts[block.id] ?? block.plain_text, { silent: true });
+      return result.status === 'saved';
+    },
+  });
+
   const { layerProps } = useRuntimePresentationController({
+    tray,
+    onDropTrayBlock: tray.dropOnPaper,
     activeBlockId,
     activeSlashCommandId,
     anchorsBySourceRef,

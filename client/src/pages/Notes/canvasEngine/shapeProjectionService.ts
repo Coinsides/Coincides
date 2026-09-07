@@ -79,7 +79,7 @@ export interface VisualConnectorProjection {
 }
 
 function surfaceForLayout(layout: BlockBoxLayout): CanvasSurface {
-  return layout.surface === 'formal_page' ? 'formal_page' : 'canvas_workspace';
+  return layout.surface === 'tray' ? 'tray' : layout.surface === 'formal_page' ? 'formal_page' : 'canvas_workspace';
 }
 
 function layoutFromPlacement(placement: CanvasPlacement): BlockBoxLayout {
@@ -156,6 +156,7 @@ function createShapePlacement({
     height: layout.height,
     rotation: layout.rotation || 0,
     zIndex,
+    orderIndex: layout.order_index,
     snapState: surface === 'formal_page' ? 'snapped' : 'free',
     visibilityState: 'normal',
     renderVisibility: 'visible',

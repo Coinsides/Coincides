@@ -38,7 +38,7 @@ export interface TableCellSelection {
 }
 
 function surfaceForLayout(layout: BlockBoxLayout): CanvasSurface {
-  return layout.surface === 'formal_page' ? 'formal_page' : 'canvas_workspace';
+  return layout.surface === 'tray' ? 'tray' : layout.surface === 'formal_page' ? 'formal_page' : 'canvas_workspace';
 }
 
 function columnLabel(index: number): string {
@@ -321,6 +321,7 @@ function createTablePlacement({
     height: layout.height,
     rotation: layout.rotation || 0,
     zIndex,
+    orderIndex: layout.order_index,
     snapState: surface === 'formal_page' ? 'snapped' : 'free',
     visibilityState: 'normal',
     renderVisibility: 'visible',
@@ -403,6 +404,7 @@ export function tableObjectSavePayload(
       surface: placement.surface,
       boundary_role: placement.boundaryRole,
       z_index: placement.zIndex,
+      order_index: placement.orderIndex ?? null,
       visibility_state: placement.visibilityState || 'normal',
       render_visibility: placement.renderVisibility || 'visible',
     },

@@ -1,6 +1,6 @@
 export type CanvasSurfaceCoordinateSpace = 'page_frame_local' | 'canvas_world';
 
-export type CanvasSurfaceAuthority = 'formal_page' | 'canvas_workspace';
+export type CanvasSurfaceAuthority = 'formal_page' | 'canvas_workspace' | 'tray';
 
 export type CanvasSurfaceBoundaryRole = 'inside' | 'crossing' | 'outside';
 
@@ -60,6 +60,8 @@ function fallbackDecision(
 export function classifyCanvasSurfaceAuthority(
   input: ClassifyCanvasSurfaceAuthorityInput,
 ): CanvasSurfaceAuthorityDecision {
+  // Tray membership has no geometry. Never classify its placeholder rectangle.
+  if (input.explicitSurface === 'tray') return { surface: 'tray', boundaryRole: 'outside', frameId: null };
   const pageBoundary = input.coordinateSpace === 'page_frame_local'
     ? input.pageBoundary || {
       left: 0,
