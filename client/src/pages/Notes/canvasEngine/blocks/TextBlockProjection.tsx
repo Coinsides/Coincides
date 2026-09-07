@@ -21,6 +21,7 @@ import { textFlowIdForBlock } from '../../../../../../shared/types/textFlow';
 import type { BlockPresentationKind } from '../blockContentService';
 import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import { resizeTextareaToContent } from '../measurementService';
+import { getPageDisplayScale } from '../overlayService';
 import type {
   AnnotationTruthV1,
   AnnotationRangeV1,
@@ -420,9 +421,10 @@ function textareaOffsetFromPoint(
 
   document.body.appendChild(mirror);
   const textareaRect = textarea.getBoundingClientRect();
+  const pageScale = getPageDisplayScale(textarea);
   const localPoint = {
-    x: point.x - textareaRect.left + textarea.scrollLeft,
-    y: point.y - textareaRect.top + textarea.scrollTop,
+    x: (point.x - textareaRect.left) / pageScale + textarea.scrollLeft,
+    y: (point.y - textareaRect.top) / pageScale + textarea.scrollTop,
   };
   let bestOffset = textarea.selectionStart;
   let bestDistance = Number.POSITIVE_INFINITY;

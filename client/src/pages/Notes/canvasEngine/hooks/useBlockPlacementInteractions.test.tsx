@@ -58,12 +58,14 @@ function renderPlacementSubject({
   initialLayout,
   snapEnabled,
   surfaceMode = 'canvas',
+  displayScale = 1,
   documentTypographyProfile,
   estimateBlockHeightForText = () => 64,
 }: {
   initialLayout: BlockBoxLayout;
   snapEnabled: boolean;
   surfaceMode?: 'page' | 'canvas';
+  displayScale?: number;
   documentTypographyProfile?: DocumentTypographyProfile;
   estimateBlockHeightForText?: UseBlockPlacementInteractionsOptions<PlacementTestBlock>['estimateBlockHeightForText'];
 }) {
@@ -104,7 +106,7 @@ function renderPlacementSubject({
         y: 0,
         width: 1200,
         height: 900,
-        zoom: 1,
+        zoom: displayScale,
       },
     } satisfies UseBlockPlacementInteractionsOptions<PlacementTestBlock>;
     const interactions = useBlockPlacementInteractions(options);
@@ -215,6 +217,52 @@ describe('useBlockPlacementInteractions K-5 release collection', () => {
     act(() => dispatchWindowPointer('pointerup'));
 
     expect(persistedLayout(runtime.persistChangedBlockLayouts)).toEqual(initialLayout);
+  });
+});
+
+describe('useBlockPlacementInteractions reading-scale coordinate boundary', () => {
+  it.each([
+    { surfaceMode: 'page', displayScale: 0.5 },
+    { surfaceMode: 'page', displayScale: 1.5 },
+    { surfaceMode: 'canvas', displayScale: 0.5 },
+    { surfaceMode: 'canvas', displayScale: 1.5 },
+  ] as const)('converts $surfaceMode drag and resize screen deltas at scale $displayScale into layout units', ({ surfaceMode, displayScale }) => {
+    const initialLayout: BlockBoxLayout = {
+      x: 100,
+      y: 80,
+      width: 180,
+      height: 60,
+      coordinate_space: surfaceMode === 'page' ? 'page_frame_local' : 'canvas_world',
+      frame_id: PAGE_FRAME.id,
+    };
+    const estimate = vi.fn(() => 64);
+    const runtime = renderPlacementSubject({
+      initialLayout,
+      snapEnabled: false,
+      surfaceMode,
+      displayScale,
+      estimateBlockHeightForText: estimate,
+    });
+
+    act(() => runtime.subject.result.current.beginMoveBlock(pointerStart(120, 200), BLOCK, initialLayout));
+    act(() => dispatchWindowPointer('pointermove', 120 + 60 * displayScale, 200 + 30 * displayScale));
+    act(() => dispatchWindowPointer('pointerup'));
+    const movedLayout = { ...initialLayout, x: 160, y: 110 };
+    expect(persistedLayout(runtime.persistChangedBlockLayouts)).toEqual(movedLayout);
+    expect(runtime.subject.result.current.layouts[BLOCK.id]).toEqual(movedLayout);
+
+    act(() => runtime.subject.result.current.beginResizeBlock(pointerStart(40, 200), BLOCK, 'resize text', movedLayout));
+    act(() => dispatchWindowPointer('pointermove', 40 + 60 * displayScale, 200));
+    act(() => dispatchWindowPointer('pointerup'));
+    const resizedLayout = { ...movedLayout, width: 240, height: 64, width_mode: 'manual' };
+    expect(runtime.persistChangedBlockLayouts).toHaveBeenLastCalledWith({ [BLOCK.id]: resizedLayout });
+    expect(runtime.subject.result.current.layouts[BLOCK.id]).toEqual(resizedLayout);
+    expect(estimate).toHaveBeenCalledWith(BLOCK, 'resize text', 240, undefined);
+    expect(initialLayout).toEqual({
+      x: 100, y: 80, width: 180, height: 60,
+      coordinate_space: surfaceMode === 'page' ? 'page_frame_local' : 'canvas_world',
+      frame_id: PAGE_FRAME.id,
+    });
   });
 });
 

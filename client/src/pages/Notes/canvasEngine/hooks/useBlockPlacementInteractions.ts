@@ -144,7 +144,7 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
 
     const handlePointerMove = (moveEvent: PointerEvent) => {
       setLayoutDrafts(() => {
-        const zoom = surfacePolicy.isCanvasMode ? viewportTransform.zoom : 1;
+        const zoom = viewportTransform.zoom;
         const deltaX = (moveEvent.clientX - startClientX) / zoom;
         const deltaY = (moveEvent.clientY - startClientY) / zoom;
         const result = calculateDraggedBlockLayouts({
@@ -228,7 +228,7 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
     const startLayouts = { ...blockLayouts };
 
     const handlePointerMove = (moveEvent: PointerEvent) => {
-      const zoom = surfacePolicy.isCanvasMode ? viewportTransform.zoom : 1;
+      const zoom = viewportTransform.zoom;
       const deltaX = (moveEvent.clientX - startClientX) / zoom;
       setLayoutDrafts((current) => {
         const result = calculateResizedBlockLayouts({

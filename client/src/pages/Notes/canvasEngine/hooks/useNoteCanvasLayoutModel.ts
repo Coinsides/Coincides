@@ -77,6 +77,7 @@ export interface UseNoteCanvasFrameModelOptions {
   pageOffsetX: number;
   surfaceMode: SurfaceMode;
   viewportTransform: CanvasViewport;
+  pageReadingViewport?: CanvasViewport;
   visibleBlocks: NoteBlock[];
 }
 
@@ -178,6 +179,7 @@ export function useNoteCanvasFrameModel({
   pageOffsetX,
   surfaceMode,
   viewportTransform,
+  pageReadingViewport,
   visibleBlocks,
 }: UseNoteCanvasFrameModelOptions) {
   const pageContentHeight = useMemo(() => {
@@ -237,6 +239,7 @@ export function useNoteCanvasFrameModel({
       ? createPageModeFocusViewport({
         pageFrame: primaryPageFrame,
         viewport: seedViewport,
+        presentationViewport: pageReadingViewport,
       })
       : seedViewport;
 
@@ -279,6 +282,7 @@ export function useNoteCanvasFrameModel({
     runtimePageFrameCollection.pageStacks,
     surfaceMode,
     viewportTransform,
+    pageReadingViewport,
   ]);
 
   const exportPreview = useMemo(() => {

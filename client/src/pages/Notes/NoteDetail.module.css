@@ -1134,7 +1134,61 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 }
 
 .blockListPage {
-  width: min(100%, 760px);
+  width: 760px;
+  flex: none;
+}
+
+.writingSurface.pageReadingSurface {
+  left: 0;
+  display: block;
+  min-height: 0;
+  padding: 0 0 64px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.pageReadingSpace {
+  position: relative;
+  flex: none;
+  margin: 0 auto;
+  /* Contain the unscaled overflow box; the explicit scaled size owns scrolling. */
+  overflow: clip;
+}
+
+.pageReadingPaper {
+  position: absolute;
+  box-sizing: border-box;
+  background: var(--page-frame-background, var(--bg-primary));
+  outline: 1px solid var(--page-frame-border-color, var(--border-subtle));
+}
+
+.pageReadingControl {
+  position: sticky;
+  bottom: 16px;
+  margin: 16px 0 0 16px;
+  max-width: calc(100% - 32px);
+  height: auto;
+  min-height: 34px;
+  flex-wrap: wrap;
+}
+
+.pageReadingControl button[aria-pressed='true'] {
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+}
+
+.pageReadingControl button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.pageReadingPercent {
+  min-width: 48px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
 .blockListCanvas {

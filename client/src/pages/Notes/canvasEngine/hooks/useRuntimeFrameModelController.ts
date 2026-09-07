@@ -30,6 +30,7 @@ export interface UseRuntimeFrameModelControllerOptions {
   pageOffsetX: number;
   surfaceMode: SurfaceMode;
   viewportTransform: CanvasViewport;
+  pageReadingViewport?: CanvasViewport;
   visibleBlocks: NoteBlock[];
 }
 
@@ -50,6 +51,7 @@ export function useRuntimeFrameModelController({
   pageOffsetX,
   surfaceMode,
   viewportTransform,
+  pageReadingViewport,
   visibleBlocks,
 }: UseRuntimeFrameModelControllerOptions) {
   return useNoteCanvasFrameModel({
@@ -69,6 +71,7 @@ export function useRuntimeFrameModelController({
     pageOffsetX,
     surfaceMode,
     viewportTransform,
+    pageReadingViewport,
     visibleBlocks,
   });
 }

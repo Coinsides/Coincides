@@ -123,10 +123,14 @@ export function resolvePrimaryPageFrameAfterDelete({
 export function createPageModeFocusViewport({
   pageFrame,
   viewport,
+  presentationViewport,
 }: {
   pageFrame: PageFrameModel;
   viewport: CanvasViewport;
+  presentationViewport?: CanvasViewport;
 }): CanvasViewport {
+  // Page display is measured independently of the canvas pan/zoom controller.
+  if (presentationViewport) return presentationViewport;
   const contentRect = getPageFrameContentRect(pageFrame);
   return {
     ...viewport,

@@ -78,6 +78,13 @@ const MIRROR_STYLE_PROPERTIES = [
   'textTransform',
 ] as const;
 
+/** Page presentation scales the DOM outside the unchanged text layout box. */
+export function getPageDisplayScale(element: HTMLElement): number {
+  const pageSurface = element.closest<HTMLElement>('[data-page-display-scale]');
+  const scale = Number(pageSurface?.dataset.pageDisplayScale);
+  return Number.isFinite(scale) && scale > 0 ? scale : 1;
+}
+
 export function createViewportOverlayAnchor(
   anchorRect: ClientRectLike,
   source: OverlayAnchorSource = 'fixed_viewport',
@@ -233,9 +240,10 @@ function getTextInputCaretRect(element: HTMLElement, caret?: number): ClientRect
 
   const mirrorRect = mirror.getBoundingClientRect();
   const markerRect = marker.getBoundingClientRect();
-  const left = elementRect.left + markerRect.left - mirrorRect.left - element.scrollLeft;
-  const top = elementRect.top + markerRect.top - mirrorRect.top - element.scrollTop;
-  const bottom = elementRect.top + markerRect.bottom - mirrorRect.top - element.scrollTop;
+  const pageScale = getPageDisplayScale(element);
+  const left = elementRect.left + (markerRect.left - mirrorRect.left - element.scrollLeft) * pageScale;
+  const top = elementRect.top + (markerRect.top - mirrorRect.top - element.scrollTop) * pageScale;
+  const bottom = elementRect.top + (markerRect.bottom - mirrorRect.top - element.scrollTop) * pageScale;
 
   document.body.removeChild(mirror);
 

@@ -1,4 +1,7 @@
-import { useCallback } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
+import { usePageReadingViewportController } from './usePageReadingViewportController';
+import { scrollPageReadingToRect } from '../pageReadingDomService';
+import type { CanvasRect, CanvasViewport, CanvasWorldModel } from '../types';
 import { useBlockSelectionController } from './useBlockSelectionController';
 import { useFloatingOverlayController } from './useFloatingOverlayController';
 import { useLayoutInteractionController } from './useLayoutInteractionController';
@@ -115,7 +118,7 @@ export function useRuntimeSurfaceStateController({ noteId }: { noteId?: string }
   });
 
   const {
-    focusViewportOnRect,
+    focusViewportOnRect: focusCanvasViewportOnRect,
     panViewportBy,
     resetViewport,
     scrollViewportBy,
@@ -124,7 +127,34 @@ export function useRuntimeSurfaceStateController({ noteId }: { noteId?: string }
     zoomViewportAt,
   } = useViewportTransformController({ surfaceMode });
 
+  const pageReading = usePageReadingViewportController({ noteId });
+  const [pageViewportState, setPageViewportState] = useState<{ noteId?: string; viewport?: CanvasViewport }>({ noteId });
+  const pageReadingViewport = pageViewportState.noteId === noteId ? pageViewportState.viewport : undefined;
+  const setPageReadingViewport = useCallback((viewport: CanvasViewport) => {
+    setPageViewportState((current) => current.noteId === noteId && current.viewport
+      && (['x', 'y', 'width', 'height', 'zoom'] as const).every((field) => current.viewport?.[field] === viewport[field])
+      ? current : { noteId, viewport });
+  }, [noteId]);
+  const pageFocusFrameRef = useRef<number | null>(null);
+  useLayoutEffect(() => () => {
+    if (pageFocusFrameRef.current !== null) cancelAnimationFrame(pageFocusFrameRef.current);
+    pageFocusFrameRef.current = null;
+  }, [noteId, surfaceMode]);
+  const focusViewportOnRect = useCallback((rect: CanvasRect, world?: CanvasWorldModel) => {
+    if (surfaceMode === 'page') {
+      if (pageFocusFrameRef.current !== null) cancelAnimationFrame(pageFocusFrameRef.current);
+      // New-page/continuation callers focus before their taller DOM has committed.
+      pageFocusFrameRef.current = requestAnimationFrame(() => {
+        pageFocusFrameRef.current = null;
+        scrollPageReadingToRect(blockListRef.current, rect);
+      });
+    } else focusCanvasViewportOnRect(rect, world);
+  }, [blockListRef, focusCanvasViewportOnRect, surfaceMode]);
+
   return {
+    ...pageReading,
+    pageReadingViewport,
+    setPageReadingViewport,
     activeBlockId,
     blockListRef,
     chromeCollapsed,

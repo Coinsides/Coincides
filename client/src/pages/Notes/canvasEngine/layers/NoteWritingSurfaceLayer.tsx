@@ -1,4 +1,6 @@
 import { Boxes } from 'lucide-react';
+import { usePageReadingPresentation } from '../hooks/usePageReadingPresentation';
+import { createDefaultPageReadingViewState, type PageReadingGear, type PageReadingViewState } from '../pageReadingViewportService';
 import type { TemplateOption } from '@/services/templateOptions';
 import {
   useEffect,
@@ -193,7 +195,6 @@ import {
   pageFrameTemplateToCssVars,
 } from '../pageFrameTemplateService';
 import {
-  getPageViewportCenteringOffsetX,
   viewportPointToWorldPoint,
 } from '../viewportService';
 import { AnnotationInspectorPanel } from '../panels/AnnotationInspectorPanel';
@@ -277,6 +278,10 @@ export interface NoteWritingSurfaceLayerProps {
   surfaceMode: 'page' | 'canvas';
   surfacePolicyMode: string;
   viewportTransform: CanvasViewport;
+  pageReadingViewState?: PageReadingViewState;
+  onPageReadingGearChange?: (gear: PageReadingGear) => void;
+  onPageReadingStep?: (direction: -1 | 1) => void;
+  onPageReadingViewportChange?: (viewport: CanvasViewport) => void;
   visibleBlocks: NoteBlock[];
   onCreateBlock: (
     template: TemplateOption,
@@ -548,6 +553,10 @@ export function NoteWritingSurfaceLayer({
   surfaceMode,
   surfacePolicyMode,
   viewportTransform,
+  pageReadingViewState,
+  onPageReadingGearChange,
+  onPageReadingStep,
+  onPageReadingViewportChange,
   visibleBlocks,
   onCreateBlock,
   onPersistCanvasObject,
@@ -706,6 +715,21 @@ export function NoteWritingSurfaceLayer({
   const primaryPageFrameTemplateStyle = pageFrameTemplateToCssVars(
     primaryPageFrameExtension?.background || primaryPageFrame?.background,
   );
+  const readingViewState = pageReadingViewState || createDefaultPageReadingViewState();
+  const pageReading = usePageReadingPresentation({
+    enabled: surfaceMode === 'page', noteId, surfaceRef, blockListRef, pageFrame: primaryPageFrame,
+    pageContentHeight, viewState: readingViewState, onViewportChange: onPageReadingViewportChange,
+  });
+  const pageDisplayBounds = useMemo(() => {
+    const layouts = visibleBlocks.map((block) => blockLayouts[block.id]).filter(Boolean);
+    if (draftActive) layouts.push(draftLayout || defaultDraftLayout);
+    const left = Math.min(0, ...layouts.map((layout) => pageReading.inset.left + layout.x));
+    const top = Math.min(0, ...layouts.map((layout) => pageReading.inset.top + layout.y));
+    const right = Math.max(pageReading.paperWidth, ...layouts.map((layout) => pageReading.inset.left + layout.x + layout.width));
+    const bottom = Math.max(pageReading.paperHeight, ...layouts.map((layout) => pageReading.inset.top + layout.y + layout.height));
+    return { left, top, width: right - left, height: bottom - top };
+  }, [visibleBlocks, blockLayouts, draftActive, draftLayout, defaultDraftLayout,
+    pageReading.inset.left, pageReading.inset.top, pageReading.paperWidth, pageReading.paperHeight]);
   const pageFrameGuideVisibility = shouldShowPageFrameGuides({
     surfaceMode,
     layoutMode,
@@ -985,24 +1009,6 @@ export function NoteWritingSurfaceLayer({
     observer.observe(target);
     return () => observer.disconnect();
   }, [noteCanvasRuntime.world, onViewportSizeChange, surfaceMode]);
-
-  useEffect(() => {
-    if (!surfaceRef.current || surfaceMode !== 'page') return undefined;
-    const surface = surfaceRef.current;
-    const appMain = surface.closest<HTMLElement>('[data-app-main-scroll="true"]');
-    if (!appMain) return undefined;
-    const centerOnViewport = () => surface.style.setProperty(
-      '--page-centering-offset-x',
-      `${getPageViewportCenteringOffsetX(appMain.getBoundingClientRect().left, appMain.clientWidth, window.innerWidth)}px`,
-    );
-    const observer = new ResizeObserver(centerOnViewport);
-    observer.observe(appMain);
-    centerOnViewport();
-    return () => {
-      observer.disconnect();
-      surface.style.removeProperty('--page-centering-offset-x');
-    };
-  }, [surfaceMode]);
 
   useEffect(() => {
     if (surfaceMode !== 'canvas') {
@@ -2492,10 +2498,10 @@ export function NoteWritingSurfaceLayer({
     const blockListRect = blockListRef.current?.getBoundingClientRect();
     if (!blockListRect) return null;
     return getBlockControlAnchorFromRect({
-      left: blockListRect.left + worldRect.x,
-      right: blockListRect.left + worldRect.x + worldRect.width,
-      top: blockListRect.top + worldRect.y,
-      bottom: blockListRect.top + worldRect.y + worldRect.height,
+      left: blockListRect.left + worldRect.x * pageReading.displayScale,
+      right: blockListRect.left + (worldRect.x + worldRect.width) * pageReading.displayScale,
+      top: blockListRect.top + worldRect.y * pageReading.displayScale,
+      bottom: blockListRect.top + (worldRect.y + worldRect.height) * pageReading.displayScale,
     });
   };
 
@@ -3231,7 +3237,7 @@ export function NoteWritingSurfaceLayer({
     if (!blockListRect) return null;
     return {
       ...defaultDraftLayout,
-      y: Math.max(0, event.clientY - blockListRect.top),
+      y: Math.max(0, (event.clientY - blockListRect.top) / pageReading.displayScale),
       height,
       surface: 'formal_page',
     };
@@ -3261,7 +3267,7 @@ export function NoteWritingSurfaceLayer({
   return (
     <section
       ref={surfaceRef}
-      className={`${styles.writingSurface} ${surfaceMode === 'canvas' ? styles.writingSurfaceCanvas : ''} ${spacePanReady ? styles.canvasPanReady : ''} ${canvasPanning ? styles.canvasPanning : ''}`}
+      className={`${styles.writingSurface} ${surfaceMode === 'canvas' ? styles.writingSurfaceCanvas : styles.pageReadingSurface} ${spacePanReady ? styles.canvasPanReady : ''} ${canvasPanning ? styles.canvasPanning : ''}`}
       data-page-frame-template={primaryPageFrameExtension?.templateId || primaryPageFrame?.templateId || 'none'}
       data-page-frame-background={primaryPageFrameExtension?.background.kind || primaryPageFrame?.background?.kind || 'none'}
       style={surfaceMode === 'page' ? primaryPageFrameTemplateStyle as CSSProperties & Record<string, string> : undefined}
@@ -3280,6 +3286,33 @@ export function NoteWritingSurfaceLayer({
         tabIndex={-1}
         onChange={handleImageFileChange}
       />
+      <div
+        className={surfaceMode === 'page' ? styles.pageReadingSpace : undefined}
+        data-page-reading-space={surfaceMode === 'page' ? 'true' : undefined}
+        style={surfaceMode === 'page' ? {
+          width: pageDisplayBounds.width * pageReading.displayScale,
+          height: pageDisplayBounds.height * pageReading.displayScale,
+          overflowClipMargin: `${32 * pageReading.displayScale}px`,
+        } : { display: 'contents' }}
+      >
+      <div
+        className={surfaceMode === 'page' ? styles.pageReadingPaper : undefined}
+        data-page-display-scale={surfaceMode === 'page' ? pageReading.displayScale : undefined}
+        data-page-reading-gear={surfaceMode === 'page' ? readingViewState.gear : undefined}
+        data-page-reading-effective-gear={surfaceMode === 'page' ? pageReading.effectiveGear : undefined}
+        data-page-reading-step={surfaceMode === 'page' ? readingViewState.stepFactor : undefined}
+        style={surfaceMode === 'page' ? {
+          ...primaryPageFrameTemplateStyle,
+          width: pageReading.paperWidth,
+          height: pageReading.paperHeight,
+          left: -pageDisplayBounds.left * pageReading.displayScale,
+          top: -pageDisplayBounds.top * pageReading.displayScale,
+          paddingTop: pageReading.inset.top,
+          paddingLeft: pageReading.inset.left,
+          transform: `scale(${pageReading.displayScale})`,
+          transformOrigin: '0 0',
+        } : { display: 'contents' }}
+      >
       <div
         ref={blockListRef}
         className={`${styles.blockList} ${surfaceMode === 'canvas' ? styles.blockListCanvas : styles.blockListPage} ${layoutMode && !contentReadOnly ? styles.layoutMode : ''}`}
@@ -3311,7 +3344,8 @@ export function NoteWritingSurfaceLayer({
         data-document-font-size={documentTypography.fontSizePx}
         data-document-line-height={documentTypography.lineHeightPx}
         style={{
-          minHeight: surfaceMode === 'canvas' ? noteCanvasRuntime.world.height : pageContentHeight,
+          minHeight: surfaceMode === 'canvas' ? noteCanvasRuntime.world.height : pageReading.paperHeight - pageReading.inset.top - pageReading.inset.bottom,
+          ...(surfaceMode === 'page' ? { width: pageReading.layoutWidth } : {}),
           ...transformedWorldStyle,
           ...documentTypographyStyle,
           ...primaryPageFrameTemplateStyle,
@@ -3825,6 +3859,29 @@ export function NoteWritingSurfaceLayer({
         )}
 
       </div>
+      </div>
+      </div>
+      {surfaceMode === 'page' && (
+        <div className={`${styles.canvasZoomControl} ${styles.pageReadingControl}`} data-page-reading-control="true" role="group" aria-label="Page reading controls">
+          {([
+            ['fit_width', 'Fit width'], ['fit_page', 'Fit page'], ['physical', '100% physical'],
+          ] as const).map(([gear, label]) => (
+            <button key={gear} type="button" className={styles.canvasZoomReset}
+              aria-pressed={readingViewState.gear === gear} data-page-reading-select={gear}
+              onClick={() => {
+                onPageReadingGearChange?.(gear);
+                if (gear === 'fit_page' && pageReading.isLongPage) {
+                  surfaceRef.current?.closest<HTMLElement>('[data-app-main-scroll="true"]')?.scrollTo({ top: 0, behavior: 'auto' });
+                }
+              }}>{label}</button>
+          ))}
+          <button type="button" className={styles.canvasZoomButton} aria-label="Decrease page reading step"
+            disabled={readingViewState.stepFactor <= 0.5} onClick={() => onPageReadingStep?.(-1)}>−</button>
+          <output className={styles.pageReadingPercent} aria-label="Page display scale">{Math.round(pageReading.displayScale * 100)}%</output>
+          <button type="button" className={styles.canvasZoomButton} aria-label="Increase page reading step"
+            disabled={readingViewState.stepFactor >= 2} onClick={() => onPageReadingStep?.(1)}>+</button>
+        </div>
+      )}
       {surfaceMode === 'canvas' && (
         <div
           className={styles.canvasZoomControl}

@@ -44,7 +44,7 @@ export function useCanvasSurfacePointerController({
   const handlePageSpaceDoubleClick = useCallback((event: MouseEvent<HTMLDivElement>) => {
     if (event.target !== event.currentTarget) return;
     const rect = event.currentTarget.getBoundingClientRect();
-    const zoom = surfacePolicy.isCanvasMode ? viewportTransform.zoom : 1;
+    const zoom = viewportTransform.zoom;
     const worldX = (event.clientX - rect.left) / zoom;
     const worldY = (event.clientY - rect.top) / zoom;
     const rawX = worldX - pageOffsetX;
