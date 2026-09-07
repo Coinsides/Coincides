@@ -8,6 +8,8 @@ export function createProvider(providerName: string, config: ProviderConfig): AI
       return new AnthropicProvider(config);
     case 'openai':
     case 'generic':
+    case 'deepseek':
+    case 'dashscope':
       return new OpenAIProvider(config);
     default:
       throw new Error(`Unknown provider: ${providerName}`);
@@ -24,13 +26,29 @@ export function getProviderFromSettings(userSettings: Record<string, unknown>): 
 
   let apiKey = providerConfig?.api_key;
   let model = providerConfig?.default_model;
+  let baseUrl = providerConfig?.base_url;
 
   // Fallback to env
   if (!apiKey && activeProvider === 'anthropic') {
-    apiKey = process.env.ANTHROPIC_API_KEY;
+    apiKey = process.env['ANTHROPIC_API_KEY'];
+  }
+  if (!apiKey && activeProvider === 'deepseek') {
+    apiKey = process.env['DEEPSEEK_API_KEY'];
+  }
+  if (!apiKey && activeProvider === 'dashscope') {
+    apiKey = process.env['DASHSCOPE_API_KEY'];
   }
   if (!apiKey) {
     throw new Error('No API key configured. Go to Settings to add one.');
+  }
+
+  if (activeProvider === 'deepseek' || activeProvider === 'dashscope') {
+    model ||= activeProvider === 'deepseek' ? 'deepseek-chat' : 'qwen-plus';
+    baseUrl ||= activeProvider === 'deepseek'
+      ? 'https://api.deepseek.com'
+      : 'https://dashscope-intl.aliyuncs.com/compatible-mode';
+    // OpenAIProvider appends /v1; normalize only these new settings branches.
+    baseUrl = baseUrl.replace(/\/v1\/?$/, '');
   }
 
   if (!model) {
@@ -38,7 +56,7 @@ export function getProviderFromSettings(userSettings: Record<string, unknown>): 
   }
 
   return {
-    provider: createProvider(activeProvider, { apiKey, model, baseUrl: providerConfig?.base_url }),
+    provider: createProvider(activeProvider, { apiKey, model, baseUrl }),
     providerName: activeProvider,
   };
 }
