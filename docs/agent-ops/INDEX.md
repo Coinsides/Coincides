@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-09-01
+> **日期 (Updated)**: 2026-09-07
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 249 份文档。
+共 252 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -111,6 +111,8 @@
 | [claude-log/2026-08-29.md](claude-log/2026-08-29.md) | Claude Log — 2026-08-29 | `(缺状态头)` | — | — |
 | [claude-log/2026-08-30.md](claude-log/2026-08-30.md) | Claude 工作日志 · 2026-08-30 | `(缺状态头)` | — | — |
 | [claude-log/2026-08-31.md](claude-log/2026-08-31.md) | Claude 工作日志 · 2026-08-31 | `(缺状态头)` | — | — |
+| [claude-log/2026-09-04.md](claude-log/2026-09-04.md) | Claude 工作日志 · 2026-09-04 | `(缺状态头)` | — | — |
+| [claude-log/2026-09-07.md](claude-log/2026-09-07.md) | Claude Log · 2026-09-07(Fable 会话) | `(缺状态头)` | — | — |
 | [claude-log/README.md](claude-log/README.md) | claude-log —— Claude 行动日志（Henry 的监督轨迹） | `active` | 2026-06-27 | — |
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-23 | — |
@@ -247,6 +249,7 @@
 | [handoffs/2026-08-31-v12-9d-d2-retrieval-api.md](handoffs/2026-08-31-v12-9d-d2-retrieval-api.md) | d-2:最小检索 API + 经锚水合(⛔ 不做 UI;c-3 开门件) | `done(2026-08-31 总部翻牌:K 判据全绿+门禁 362/362,12005f7 已提交;⭐ c-3 门开事件申报在案——getImprintFragmentsByAnchor 获得首个生产读者)` | — | — |
 | [handoffs/2026-08-31-v12-9d-segment-closeout.md](handoffs/2026-08-31-v12-9d-segment-closeout.md) | d-3 段收口:12.9d 检索地基 —— 碎片有了第一个生产读者 | `done(d-3 段收口;12.9d 全段关账)` | — | — |
 | [handoffs/2026-08-31-v12-version-closeout.md](handoffs/2026-08-31-v12-version-closeout.md) | V12 版本收官对账:12.9a → 12.10 | `done(V12 版本收官对账;push 与收官批显式候 Henry,见 §5)` | — | — |
+| [handoffs/2026-09-07-deepseek-dashscope-provider-wiring-micro.md](handoffs/2026-09-07-deepseek-dashscope-provider-wiring-micro.md) | 微单 · DeepSeek / DashScope(qwen)provider 接线 | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
