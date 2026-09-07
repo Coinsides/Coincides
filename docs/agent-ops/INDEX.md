@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 260 份文档。
+共 261 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -257,6 +257,7 @@
 | [handoffs/2026-09-07-v13-1-k0-recon-order.md](handoffs/2026-09-07-v13-1-k0-recon-order.md) | 13.1 · 单 0 · K-0 视口侦察(只读) | `(缺状态头)` | — | — |
 | [handoffs/2026-09-07-v13-1-s1-reading-gears-order.md](handoffs/2026-09-07-v13-1-s1-reading-gears-order.md) | 13.1 · 单 1 · page 阅读档位通道(三档+步进) | `(缺状态头)` | — | — |
 | [handoffs/2026-09-07-v13-1-s2-physical-baseline-order.md](handoffs/2026-09-07-v13-1-s2-physical-baseline-order.md) | 13.1 · 单 2 · 物理映射基线 + 双族 profile | `(缺状态头)` | — | — |
+| [handoffs/2026-09-07-v13-1-s3-print-channel-order.md](handoffs/2026-09-07-v13-1-s3-print-channel-order.md) | 13.1 · 单 3 · 打印通道 v1 + K-比例保真 | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
