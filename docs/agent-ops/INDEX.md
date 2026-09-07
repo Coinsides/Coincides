@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 263 份文档。
+共 264 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -76,6 +76,7 @@
 | [analysis/2026-09-07-board-data-model-design.md](analysis/2026-09-07-board-data-model-design.md) | 13.0 图二 · 板数据模型 —— 板、魂、钢的骨相 | `active` | 2026-09-07 | — |
 | [analysis/2026-09-07-layout-template-schema-v1.md](analysis/2026-09-07-layout-template-schema-v1.md) | 13.0 图四 · 版面模板 schema v1 —— 纸的第三设计层 | `active` | 2026-09-07 | — |
 | [analysis/2026-09-07-v13-1-k0-recon.md](analysis/2026-09-07-v13-1-k0-recon.md) | V13.1 · K-0 纸的视口侦察 | `active` | 2026-09-07 | — |
+| [analysis/2026-09-07-v13-1-s4-coordinate-contract-recon.md](analysis/2026-09-07-v13-1-s4-coordinate-contract-recon.md) | V13.1 单 4：坐标契约 K-0 侦察 | `frozen` | 2026-09-07 | — |
 | [analysis/2026-09-07-wilderness-migration-mapping.md](analysis/2026-09-07-wilderness-migration-mapping.md) | 13.0 图三 · 野地退役迁移映射表 | `active` | 2026-09-07 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |

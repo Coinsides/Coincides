@@ -21,3 +21,17 @@
 ## 二 · 报告与边界
 
 报告文件 `docs/agent-ops/analysis/2026-09-07-v13-1-s4-coordinate-contract-recon.md`(标准状态头,五问分节,末节「修复建议对照表」)。完工本文件末尾 apply_patch 追加 `## Result`(报告路径+五问一行摘要+未做清单)。⛔ 改产品代码(合成探针走内存注入,与单 3 停线取证同法);⛔ 实跑用户库;⛔ commit;⛔ 读 .env;⛔ 打印任何 key。
+
+## Result
+
+2026-09-07 · Codex 侦察员 · 本只读侦察已完成；先完整读本单与单 3 两次停线。报告：[坐标契约 K-0 侦察](../analysis/2026-09-07-v13-1-s4-coordinate-contract-recon.md)。按本单要求仅追加回执，原 Status/正文不改；本结果不放行单 3、13.1 或迁移，A/B 裁定留 HQ。
+
+1. **读写链**：已列 persist→两条 hydrate→两类 project→屏显/fragments/打印/归属/碰撞等文件:行号证据；world hydrate 仅减 x 却保 world y 标 local，API 原始来源在客户端 normalize/reconcile 链丢失。
+2. **存量判定**：035 原样搬 x/y、漏迁坐标标签并删旧 layout；boundary_role 仅按 surface 填值，不读 y。报告附只读候选分布 SQL；年代/阈值不能唯一判污，真实存量数量未查。
+3. **两轮落库**：真实 SQLite `:memory:` + 生产 client repository/server writer/reader，五样本各初写后两轮；普通保存 y=1672→1672→1672，但首轮 x=72→0、world→local；受控每轮再 project 才为1672→3030→4388。另实跑035三例，SQL总分母8、035痕迹3，全部断言通过、exit 0。
+4. **A/B影响**：已列具体函数/文件、屏显与未保存编辑/重载风险、13.2 census影响和迁移量级；A需消费端同步，B需来源随draft/history/recovery更新，均不能凭空恢复历史来源；未替HQ选边。
+5. **走查2**：原症状是提示与分隔线错位，尚未坐实为坐标病；已给坐标原点、排版覆盖、frame恢复、测高时序及多帧的机械对照方案，维持待证。
+
+验证：探针全部内存注入，无DB文件/应用启动/真实API；从报告内代码块抽取复跑通过，窄块横不相交但world纵轴候选成立的SQL对照通过；72个显式源码引用路径/行号上界检查通过，报告空白/末尾换行检查通过。
+
+未做：产品/常驻测试/配置修改；用户库查询、真实迁移、完整13.2 census、A/B修复、单3续作；typecheck/build、完整 `npm run verify:v2-bn8-runtime`、安全类/马拉松、浏览器打印/PDF或人工验收；依赖安装、`.env`读取、key输出、commit/push/PR/merge。仅新增报告并在本单追加Result，其他开工已有改动未动；探针PASS不替代验证门。
