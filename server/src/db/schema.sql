@@ -1234,3 +1234,28 @@ CREATE TABLE IF NOT EXISTS template_definitions (
 CREATE INDEX IF NOT EXISTS idx_template_definitions_user_status ON template_definitions(user_id, status, template_key);
 CREATE INDEX IF NOT EXISTS idx_template_definitions_lookup ON template_definitions(user_id, template_key, version, scope_type, scope_id);
 CREATE INDEX IF NOT EXISTS idx_template_definitions_taxonomy ON template_definitions(user_id, system_type, learning_role, status);
+
+-- ============================================================
+-- V13.2 events ledger (migration 054)
+-- Identity values are historical references, without cascading foreign keys.
+-- Append-only triggers are installed by migration 054 after this base schema.
+-- Do not put trigger bodies here: initDb splits this file on semicolons.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS events (
+  seq INTEGER PRIMARY KEY AUTOINCREMENT,
+  ts TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+  user_id TEXT NOT NULL,
+  actor_kind TEXT NOT NULL,
+  channel TEXT NOT NULL,
+  verb TEXT NOT NULL CHECK (verb IN (
+    'migrated', 'rolled_back', 'note_created', 'board_created',
+    'mounted', 'unmounted', 'purpose_created', 'purpose_amended',
+    'purpose_sealed', 'proposal_issued', 'proposal_approved',
+    'proposal_rejected', 'published'
+  )),
+  objects TEXT NOT NULL CHECK (json_valid(objects) AND json_type(objects) = 'array'),
+  summary TEXT NOT NULL,
+  meta TEXT NOT NULL DEFAULT '{}' CHECK (json_valid(meta))
+);
+CREATE INDEX IF NOT EXISTS idx_events_user_ts ON events(user_id, ts);
+CREATE INDEX IF NOT EXISTS idx_events_verb ON events(verb);
