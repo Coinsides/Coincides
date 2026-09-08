@@ -111,7 +111,8 @@ const api = axios.create({
       // The specimen is read-only. Keep attempted mutations visible to the smoke.
       throw new Error(`Unexpected fixture mutation: ${method} ${url}`);
     }
-    if (url === `/notes/${NOTE_ID}`) data = isPrintFixture ? printSpecimen.note : fixtureNote;
+    if (isPrintFixture && url === '/canvas-objects/coordinate-contract') data = { coordinate_contract: 'v2' };
+    else if (url === `/notes/${NOTE_ID}`) data = isPrintFixture ? printSpecimen.note : fixtureNote;
     else if (url === `/notes/${NOTE_ID}/blocks`) data = isPrintFixture ? printSpecimen.blocks : fixtureBlocks;
     else if (url === `/canvas-objects/by-note/${NOTE_ID}`) data = isPrintFixture ? printSpecimen.canvas : fixtureCanvas;
     else if (url === '/templates') data = templates;

@@ -1,5 +1,5 @@
 // Run start.mjs first. Uses installed Chrome + Node built-ins; no PDF output or user profile.
-// Diagnostic draft: S3 is stopped on the coordinate contract; content assertions must fail.
+// V2 revival: retain the original specimen and assertions; preserve the S3 FAIL receipts.
 // --isolated-chrome-no-sandbox is an explicit workaround for this Windows test host only.
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
@@ -7,7 +7,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-const output = fileURLToPath(new URL('../../../.codex-tmp/print-smoke/', import.meta.url));
+const output = fileURLToPath(new URL('../../../.codex-tmp/print-revival/', import.meta.url));
 await mkdir(output, { recursive: true });
 const profile = await mkdtemp(path.join(output, 'chrome-'));
 const executable = process.argv.slice(2).find((argument) => !argument.startsWith('--'));
@@ -50,6 +50,16 @@ const geometryScript = `JSON.stringify([...document.querySelectorAll('#root arti
 async function screenshot(name) {
   const shot = await call('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
   await writeFile(path.join(output, name), Buffer.from(shot.data, 'base64'));
+}
+async function screenshotPages(prefix) {
+  const clips = await evaluate(`([...document.querySelectorAll('[data-note-print-page]')].map(page => {
+    const r = page.getBoundingClientRect();
+    return {x:r.x+scrollX,y:r.y+scrollY,width:r.width,height:r.height,scale:1};
+  }))`);
+  for (const [index, clip] of clips.entries()) {
+    const shot = await call('Page.captureScreenshot', { format: 'png', captureBeyondViewport: true, clip });
+    await writeFile(path.join(output, `${prefix}-page-${index + 1}.png`), Buffer.from(shot.data, 'base64'));
+  }
 }
 const samples = [];
 try {
@@ -113,6 +123,7 @@ try {
       assert.ok(receipt, 'print media receipt must exist');
       samples.push({ paper, gear, receipt });
       await screenshot(`${paper}-${gear}-print.png`);
+      await screenshotPages(`${paper}-${gear}`);
       await call('Emulation.setEmulatedMedia', { media: 'screen' });
       await until(`document.querySelectorAll('[data-note-print-root]').length===0`);
       await delay(250);
@@ -126,9 +137,15 @@ try {
       screenGeometryUnchanged: sample.screenGeometryUnchanged, checks: sample.receipt.checks,
       pages: sample.receipt.pages.map(p=>({ id:p.frameId, width:p.width, height:p.height,scale:p.declaredScale,fragments:p.fragments.length })) }));
     assert.equal(sample.receipt.screenGear, sample.gear, 'receipt must match the requested reading gear');
+    assert.equal(sample.receipt.coordinateContract, 'v2', 'receipt must use the production v2 contract');
     assert.equal(sample.receipt.screenStep, sample.gear === 'physical' ? 1.1 : 1);
     assert.equal(sample.receipt.result, 'PASS');
     assert.equal(sample.screenGeometryUnchanged, true, 'printing must preserve screen block geometry');
+  }
+  for (const paper of ['A4', 'Letter', 'web']) {
+    const configurations = samples.filter((sample) => sample.paper === paper);
+    assert.deepEqual(configurations[0].receipt.pages, configurations[1].receipt.pages,
+      `${paper}: reading gear/step must not alter any print page or fragment geometry`);
   }
   assert.equal(errors.length, 0, 'no browser runtime errors');
   console.log('PASS print-media browser smoke: 3 paper families × 2 reading configurations; zero PDFs');

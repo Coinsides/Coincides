@@ -112,6 +112,8 @@ function PrintPages({ input }: { input: NotePrintInput }) {
       [data-note-print-root] .${styles.sourceRefAction},
       [data-note-print-root] .${styles.blockStatusBadges} { display: none !important; }
       [data-note-print-root] .${styles.blockBox} { border-color: transparent; }
+      [data-note-print-root] .${styles.codeBlockBox},
+      [data-note-print-root] .${styles.codeBlockProjection} { background: white; }
     `}</style>
   </div>;
 }

@@ -19,6 +19,32 @@ type ScreenSnapshot = ReturnType<typeof sampleScreen>;
 const mmToPx = (mm: number) => mm / 25.4 * 96;
 const close = (actual: number, expected: number) => Math.abs(actual - expected) <= 0.5;
 
+// Textareas expose no glyph Range. Sample the first character's text-origin box
+// from the real textarea metrics, and retain page screenshots for visual review.
+function sampleFirstCharacter(fragment: HTMLElement, scale: number) {
+  const textarea = fragment.querySelector('textarea');
+  if (!textarea?.value) return null;
+  const style = getComputedStyle(textarea);
+  const rect = textarea.getBoundingClientRect();
+  const context = document.createElement('canvas').getContext('2d')!;
+  context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+  const left = rect.left + (parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft) - textarea.scrollLeft) * scale;
+  const top = rect.top + (parseFloat(style.borderTopWidth) + parseFloat(style.paddingTop) - textarea.scrollTop) * scale;
+  const width = context.measureText(textarea.value[0]!).width * scale;
+  const height = parseFloat(style.lineHeight) * scale;
+  let visible = width > 0 && height > 0 && style.visibility === 'visible' && style.display !== 'none';
+  for (let node: HTMLElement | null = textarea; node; node = node.parentElement) {
+    const computed = getComputedStyle(node);
+    const box = node.getBoundingClientRect();
+    if (computed.visibility !== 'visible' || computed.display === 'none' || computed.opacity === '0') visible = false;
+    if (computed.overflowX !== 'visible' && (left < box.left - 0.5 || left + width > box.right + 0.5)) visible = false;
+    if (computed.overflowY !== 'visible' && (top < box.top - 0.5 || top + height > box.bottom + 0.5)) visible = false;
+    if (node.hasAttribute('data-note-print-page')) break;
+  }
+  return { character: textarea.value[0], prefix: textarea.value.slice(0, 12), left, top, width, height,
+    insetFromClipLeft: left - fragment.getBoundingClientRect().left, visible };
+}
+
 function sampleScreen(runtime: Runtime) {
   const props = runtime.layerProps?.documentLayerProps.writingSurfaceProps;
   const nodes = [...document.querySelectorAll<HTMLElement>('#root article[data-note-block-shell], #root article[data-note-block-shell] *')];
@@ -55,6 +81,7 @@ function samplePrint(runtime: Runtime, reason: string, screenBaseline: ScreenSna
         left: parseFloat(style.left), top: parseFloat(style.top),
         width: parseFloat(style.width), height: parseFloat(style.height),
         overflow: style.overflow,
+        firstCharacter: sampleFirstCharacter(fragment, Number(page.dataset.printScale)),
       };
     });
     return {
@@ -63,6 +90,7 @@ function samplePrint(runtime: Runtime, reason: string, screenBaseline: ScreenSna
       expectedWidth: mmToPx(physicalWidth), expectedHeight: mmToPx(physicalHeight),
       breakAfter: computed.breakAfter, breakInside: computed.breakInside, overflow: computed.overflow,
       transform, scale, declaredScale: Number(page.dataset.printScale), expectedScale,
+      mappedCanvasWidth: canvas?.getBoundingClientRect().width,
       fragments,
     };
   });
@@ -73,6 +101,8 @@ function samplePrint(runtime: Runtime, reason: string, screenBaseline: ScreenSna
   const appPosition = appRoot ? getComputedStyle(appRoot).position : null;
   const mutations = apiCalls.filter((call) => call.method !== 'GET' && call.url !== '/source-anchors/generate');
   const crossFragments = pages.flatMap((page) => page.fragments).filter((fragment) => fragment.blockId === PRINT_CROSS_BLOCK_ID);
+  const labelIds = ['print-first-frame-block', 'print-second-frame-block'];
+  const pageLabels = pages.flatMap((page) => page.fragments).filter((fragment) => labelIds.includes(fragment.blockId || ''));
   const currentScreen = sampleScreen(runtime);
   const screenPreservation = screenBaseline ? {
     blockLayoutsUnchanged: currentScreen.blockLayouts === screenBaseline.blockLayouts,
@@ -84,9 +114,13 @@ function samplePrint(runtime: Runtime, reason: string, screenBaseline: ScreenSna
     { check: 'one fixed physical page per frame', pass: pages.length === printSpecimen.frames.length },
     { check: 'physical page width/height within 0.5px', pass: pages.length > 0 && pages.every((page) => close(page.width, page.expectedWidth) && close(page.height, page.expectedHeight)) },
     { check: 'full-precision print scale (screen gear/step excluded)', pass: pages.length > 0 && pages.every((page) => page.expectedScale !== null && Math.abs(page.declaredScale - page.expectedScale) < 1e-12 && Math.abs(page.scale - page.expectedScale) < 1e-6) },
-    { check: 'forced page breaks and clipping', pass: pages.length > 0 && pages.every((page, index) => (index === pages.length - 1 || page.breakAfter === 'page') && page.overflow === 'hidden' && page.fragments.every((fragment) => fragment.overflow === 'hidden')) },
+    { check: 'paper physical mapping / web fits A4 width', pass: pages.length > 0 && pages.every((page) => page.mappedCanvasWidth !== undefined && close(page.mappedCanvasWidth, page.expectedWidth)) },
+    { check: 'forced page breaks and clipping', pass: pages.length > 0 && pages.every((page, index) => page.breakAfter === (index === pages.length - 1 ? 'auto' : 'page') && page.breakInside === 'avoid' && page.overflow === 'hidden' && page.fragments.every((fragment) => fragment.overflow === 'hidden')) },
     { check: 'cross-frame block has two clipped projections', pass: crossFragments.length === 2 },
     { check: 'each frame keeps its own page label', pass: pages[0]?.fragments.some((fragment) => fragment.blockId === 'print-first-frame-block') === true && pages[1]?.fragments.some((fragment) => fragment.blockId === 'print-second-frame-block') === true },
+    { check: 'page labels occur once and never on the wrong frame', pass: pageLabels.length === 2 && pages.every((page, index) => page.fragments.filter((fragment) => labelIds.includes(fragment.blockId || '')).map((fragment) => fragment.blockId).join() === labelIds[index]) },
+    { check: 'page label first characters are unclipped (no lost 72px)', pass: pageLabels.length === 2 && pageLabels.every((fragment) => fragment.firstCharacter?.character === 'P' && fragment.firstCharacter.visible) },
+    { check: 'cross-frame first character is intact on its starting page', pass: pages[0]?.fragments.find((fragment) => fragment.blockId === PRINT_CROSS_BLOCK_ID)?.firstCharacter?.visible === true },
     { check: 'app chrome/checklist hidden without collapsing screen layout', pass: appVisibility === 'hidden' && appPosition === 'fixed' },
     { check: 'workspace and canvas backing blocks absent', pass: excludedIds.length === 0 && !printRoot?.textContent?.includes('MUST NOT PRINT') },
     { check: 'zero unexpected API writes', pass: mutations.length === 0 },
@@ -94,6 +128,7 @@ function samplePrint(runtime: Runtime, reason: string, screenBaseline: ScreenSna
   ];
   return {
     reason, printMedia, mode: props?.surfaceMode,
+    coordinateContract: props?.noteCanvasRuntime.coordinateContract,
     screenGear: props?.pageReadingViewState?.gear,
     screenStep: props?.pageReadingViewState?.stepFactor,
     screenBlockCount: document.querySelectorAll('#root article[data-note-block-shell]').length,
@@ -186,7 +221,7 @@ function PrintSmokeRuntime() {
   const latestReceipt = receipts[receipts.length - 1];
   return <>
     <aside aria-label="Print preview checklist" style={{ position: 'fixed', top: 0, left: 0, right: 0, height: 268, boxSizing: 'border-box', overflow: 'auto', background: '#fff', color: '#172033', padding: '10px 20px', zIndex: 30000, font: '13px/1.45 system-ui', borderBottom: '1px solid #999' }}>
-      <strong>13.1 print preview inspection — synthetic two-frame {printSpecimen.paper} note</strong>
+      <strong>13.1 print preview inspection — v2 synthetic two-frame {printSpecimen.paper} note</strong>
       <nav aria-label="Print specimen choices" style={{ display: 'flex', gap: 18, margin: '5px 0' }}>
         <a href="./print.html?paper=A4">A4 specimen</a>
         <a href="./print.html?paper=Letter">Letter specimen</a>
@@ -199,7 +234,8 @@ function PrintSmokeRuntime() {
         <button type="button" disabled={!ready} onClick={() => capture.current('manual computed-style sample')}>Sample computed styles</button>
       </div>
       <ul style={{ margin: '5px 0', paddingLeft: 20 }}>
-        <li><strong>Should see:</strong> exactly two {printSpecimen.paper === 'Letter' ? 'Letter' : 'A4'} portrait pages; PAGE ONE on the first; PAGE TWO on the second; CROSS FRAME code cropped at the frame boundaries and repositioned on both pages.</li>
+        <li><strong>Should see:</strong> exactly two {printSpecimen.paper === 'Letter' ? 'Letter' : 'A4'} portrait pages; PAGE ONE on the first; PAGE TWO on the second; one CROSS FRAME block fragment on each page. A4/Letter show the last code lines on page two; the web specimen’s second fragment contains only the box tail, not readable code lines.</li>
+        <li><strong>First characters:</strong> both page labels begin with the full P in PAGE; code begins with the full C in CROSS FRAME. No missing 72px strip on the left, no duplicate page labels, and no dark code backdrop. Frame gaps and margins clip code; this check does not promise text reflow across those gaps.</li>
         <li><strong>Should not see:</strong> this checklist, note toolbar, trays, selection/edit controls, continuation badges, workspace-only text or canvas object backing text. Inter-frame canvas gaps do not become blank print pages.</li>
       </ul>
       <output aria-live="polite" data-print-smoke-status="true">

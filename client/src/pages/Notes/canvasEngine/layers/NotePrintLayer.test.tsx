@@ -5,9 +5,14 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildNoteCanvasRuntimeModel } from '../engineModel';
+import { applyCanvasLayoutsToBlocks } from '../canvasObjectRepository';
+import { buildRuntimeBlockPlacement, readStoredLayout } from '../placementService';
+import { createPageFrameTemplate } from '../pageFrameTemplateService';
+import type { PageReadingGear } from '../pageReadingViewportService';
 import { createPageStackFromFrame } from '../pageStackCollectionService';
 import { createDefaultDocumentTypographyProfile } from '../typographyProfileService';
 import type { NoteBlock } from '../runtimeDataTypes';
+import type { BlockBoxLayout } from '../runtimeLayout';
 import type { BlockPlacementModel, PageFrameModel } from '../types';
 import { NotePrintLayer, type NotePrintInput } from './NotePrintLayer';
 
@@ -233,7 +238,15 @@ describe('NotePrintLayer physical pages and fragment projection', () => {
       expect(style.breakAfter).toBe(index === 2 ? 'auto' : 'page');
       const canvas = page.querySelector<HTMLElement>(CANVAS)!;
       expect(canvas.style.width).toBe(`${frames[index].width}px`);
+      expect(canvas.style.height).toBe(`${frames[index].height}px`);
       expect(Number(page.dataset.printScale)).toBeCloseTo(expected[index].scale, 12);
+      expect(canvas.style.transform).toBe(`scale(${expected[index].scale})`);
+      expect(Math.abs(frames[index].width * Number(page.dataset.printScale) - expected[index].width)).toBeLessThanOrEqual(0.5);
+      // The third sample deliberately has a grown screen height; only the two
+      // standard paper presets promise matching internal and physical heights.
+      if (index < 2) {
+        expect(Math.abs(frames[index].height * Number(page.dataset.printScale) - expected[index].height)).toBeLessThanOrEqual(0.5);
+      }
       expect(canvas.style.getPropertyValue('--document-font-size')).toBe('19px');
       expect(canvas.style.getPropertyValue('--document-line-height')).toBe('28px');
       expect(canvas.style.getPropertyValue('--document-paragraph-spacing')).toBe('3px');
@@ -254,6 +267,7 @@ describe('NotePrintLayer physical pages and fragment projection', () => {
     expect(parseFloat(style.width)).toBeCloseTo(793.7007874015749, 10);
     expect(parseFloat(style.height)).toBeCloseTo(1122.5196850393702, 10);
     expect(Number(page.dataset.printScale)).toBeCloseTo(0.7086614173228347, 12);
+    expect(Math.abs(1120 * Number(page.dataset.printScale) - parseFloat(style.width))).toBeLessThanOrEqual(0.5);
     expect(page.querySelector<HTMLElement>(CANVAS)!.style.height).toBe('7000px');
     expect(style.overflow).toBe('hidden');
     expect(pages()).toHaveLength(1);
@@ -261,14 +275,14 @@ describe('NotePrintLayer physical pages and fragment projection', () => {
 
   it('does not allow reading gear, step, viewport zoom or screen content height into print geometry', () => {
     const input = inputFor();
-    const renderInput = (gear: string, stepFactor: number) => ({
+    const renderInput = (gear: PageReadingGear, stepFactor: number) => ({
       ...input, pageReadingViewState: { gear, stepFactor }, pageContentHeight: 8000 * stepFactor,
       noteCanvasRuntime: { ...input.noteCanvasRuntime, viewport: { ...input.noteCanvasRuntime.viewport, zoom: stepFactor } },
     });
     const { rerender } = render(<NotePrintLayer {...renderInput('fit_width', 0.5)} />);
     printEvent('beforeprint');
     const baseline = pageBoxes();
-    for (const [gear, stepFactor] of [['fit_page', 1.5], ['physical_100', 2]] as const) {
+    for (const [gear, stepFactor] of [['fit_page', 1.5], ['physical', 2]] as const) {
       printEvent('afterprint');
       rerender(<NotePrintLayer {...renderInput(gear, stepFactor)} />);
       printEvent('beforeprint');
@@ -277,6 +291,80 @@ describe('NotePrintLayer physical pages and fragment projection', () => {
       expect(document.querySelector(`${ROOT} [data-page-display-scale]`)).toBeNull();
     }
   });
+
+  it.each(['a4_portrait', 'letter_portrait', 'screen_note'] as const)(
+    'prints hydrated v2 %s frame-local rows on their own pages without losing the leading characters',
+    (templateId) => {
+      const template = createPageFrameTemplate(templateId);
+      const frames = [0, 1].map((index) => frame(`v2-frame-${index + 1}`, {
+        ...template, role: index === 0 ? 'primary_page_frame' : 'secondary_page_frame',
+        x: 100, y: 200 + index * (template.height + 80),
+      }));
+      const width = template.width - template.contentInset.left - template.contentInset.right;
+      const blocks = [
+        block('first-label', 'PAGE ONE — first character must remain P'),
+        block('second-label', 'PAGE TWO — first character must remain P'),
+        block('crossing-v2', 'CROSS FRAME — first character must remain C', 'code'),
+      ];
+      const localLayouts: BlockBoxLayout[] = blocks.map((_item, index) => ({
+        x: 0, y: index === 2 ? template.height - template.contentInset.top - 260 : 40,
+        width, height: index === 2 ? 680 : 120,
+        coordinate_space: 'page_frame_local', frame_id: frames[index === 1 ? 1 : 0].id,
+        surface: 'formal_page', boundary_role: 'inside',
+      }));
+      const storedBefore = JSON.stringify(localLayouts);
+      const stack = createPageStackFromFrame(frames[0], { id: 'v2-print-stack' });
+      stack.frameIds = frames.map((item) => item.id);
+      const hydrated = applyCanvasLayoutsToBlocks(blocks, localLayouts.map((layout, index) => ({
+        block_id: blocks[index].id, placement_id: blocks[index].placement_id!, layout: { ...layout },
+      })), {
+        coordinateContract: 'v2',
+        pageFrameCollection: { pageFrames: frames, pageStacks: [stack], primaryFrameId: frames[0].id, primaryStackId: stack.id },
+      });
+      const placements = hydrated.map((item, index) => buildRuntimeBlockPlacement({
+        block: item, canvasId: 'v2-print-canvas', layout: readStoredLayout(item) as BlockBoxLayout,
+        pageOffsetX: 0, pageFrame: frames[0], pageFrames: frames, contract: 'v2', zIndex: index,
+      }));
+      placements.forEach((item, index) => {
+        const owner = frames[index === 1 ? 1 : 0];
+        expect(item.x).toBe(owner.x + owner.contentInset.left);
+        expect(item.y).toBe(owner.y + owner.contentInset.top + localLayouts[index].y);
+      });
+      const input = inputFor({ frames, blocks: hydrated, placements });
+      const fragments = input.noteCanvasRuntime.blockFragmentProjections;
+      expect(fragments.filter((item) => item.blockId === 'first-label').map((item) => item.pageFrameId)).toEqual([frames[0].id]);
+      expect(fragments.filter((item) => item.blockId === 'second-label').map((item) => item.pageFrameId)).toEqual([frames[1].id]);
+      expect(fragments.filter((item) => item.blockId === 'crossing-v2').map((item) => item.pageFrameId)).toEqual(frames.map((item) => item.id));
+      render(<NotePrintLayer {...input} />);
+      printEvent('beforeprint');
+      expect(pages()).toHaveLength(frames.length);
+      pages().forEach((page, index) => {
+        const labelId = index === 0 ? 'first-label' : 'second-label';
+        const otherLabelId = index === 0 ? 'second-label' : 'first-label';
+        const clip = page.querySelector<HTMLElement>(`[data-note-print-fragment][data-block-id="${labelId}"]`)!;
+        const article = clip.querySelector<HTMLElement>('article[data-note-block-shell]')!;
+        expect(page.dataset.pageFrameId).toBe(frames[index].id);
+        expect(page.querySelector(`[data-note-print-fragment][data-block-id="${otherLabelId}"]`)).toBeNull();
+        expect(clip.style.left).toBe(`${template.contentInset.left}px`);
+        expect(clip.style.top).toBe(`${template.contentInset.top + 40}px`);
+        expect(clip.style.width).toBe(`${width}px`);
+        // jsdom cannot measure glyphs. These committed DOM values establish that
+        // the complete text begins at the clip origin, rather than 72px outside.
+        expect(article.style.left).toBe('0px');
+        expect(article.style.top).toBe('0px');
+        expect(article.querySelector('textarea')?.value).toBe(blocks[index].plain_text);
+        const crossing = page.querySelector<HTMLElement>('[data-note-print-fragment][data-block-id="crossing-v2"]')!;
+        const crossingArticle = crossing.querySelector<HTMLElement>('article[data-note-block-shell]')!;
+        expect(crossing.style.left).toBe(`${template.contentInset.left}px`);
+        expect(crossing.style.top).toBe(`${index === 0 ? template.height - 260 : template.contentInset.top}px`);
+        expect(crossing.style.height).toBe(`${index === 0 ? 260 - template.contentInset.bottom : 340 - template.contentInset.top}px`);
+        expect(crossingArticle.style.left).toBe('0px');
+        expect(crossingArticle.style.top).toBe(`${index === 0 ? 0 : -(340 + template.contentInset.top)}px`);
+        expect(crossingArticle.querySelector('textarea')?.value).toBe(blocks[2].plain_text);
+      });
+      expect(JSON.stringify(localLayouts)).toBe(storedBefore);
+    },
+  );
 
   it('repositions real world-space fragments independently and honors the supplied page-visible block set', () => {
     const crossing = block('crossing', 'Cross-page synthetic text');
