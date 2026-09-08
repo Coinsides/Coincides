@@ -25,10 +25,6 @@ import {
 import {
   CONTENT_GROUP_SURFACE_ROLES,
 } from '@/pages/Notes/canvasEngine/contentGroupSurfaceRoleService';
-import {
-  purposeRoleForContentGroup,
-  upsertDefaultPurposeRoleForContentGroup,
-} from '@/pages/Notes/canvasEngine/purposeService';
 import type {
   ContentGroupV1,
 } from '@/pages/Notes/canvasEngine/runtimeDataTypes';
@@ -63,7 +59,6 @@ export default function SingleContentGroupEditorPage() {
   const [error, setError] = useState<string | null>(null);
   const [summaryOpen, setSummaryOpen] = useState(false);
   const [infoOpen, setInfoOpen] = useState(false);
-  const [purposeRoleDraft, setPurposeRoleDraft] = useState('');
   const [draft, setDraft] = useState<ContentGroupEditorDraft>({
     title: '',
     topic: '',
@@ -103,7 +98,6 @@ export default function SingleContentGroupEditorPage() {
       type: selected.group.identity.type || selected.group.identity.role || '',
       summary: selected.group.identity.summary || '',
     });
-    setPurposeRoleDraft(purposeRoleForContentGroup(selected.record.purposes, selected.group.id) || '');
   }, [selected?.group.id]);
 
   const persistGroup = useCallback(async (record: GalleryRecord, nextGroup: ContentGroupV1) => {
@@ -119,19 +113,7 @@ export default function SingleContentGroupEditorPage() {
   const handleSaveDraft = async () => {
     if (!selected) return;
     const nextGroup = applyContentGroupEditorDraft({ group: selected.group, draft });
-    const savedRecord = await persistGroup(selected.record, nextGroup);
-    const nextPurposes = upsertDefaultPurposeRoleForContentGroup({
-      purposes: savedRecord.purposes,
-      groupId: selected.group.id,
-      role: purposeRoleDraft,
-    });
-    const nextRecord = await saveGalleryRecord(
-      savedRecord,
-      savedRecord.groups,
-      savedRecord.folders,
-      nextPurposes,
-    );
-    setRecords((current) => replaceRecord(current, nextRecord));
+    await persistGroup(selected.record, nextGroup);
   };
 
   const membersFromDragEvent = (event: DragEvent<HTMLElement>) => {
@@ -201,7 +183,10 @@ export default function SingleContentGroupEditorPage() {
             value={draft.title}
             disabled={!selected}
             aria-label="Content group title"
-            onChange={(event) => setDraft((current) => ({ ...current, title: event.currentTarget.value }))}
+            onChange={(event) => {
+              const title = event.currentTarget.value;
+              setDraft((current) => ({ ...current, title }));
+            }}
             placeholder="Content group"
           />
           {selected ? (
@@ -225,21 +210,20 @@ export default function SingleContentGroupEditorPage() {
               className={styles.singleEditorChipInput}
               value={draft.type}
               aria-label="Content group type"
-              onChange={(event) => setDraft((current) => ({ ...current, type: event.currentTarget.value }))}
+              onChange={(event) => {
+                const type = event.currentTarget.value;
+                setDraft((current) => ({ ...current, type }));
+              }}
               placeholder="type"
-            />
-            <input
-              className={styles.singleEditorChipInput}
-              value={purposeRoleDraft}
-              aria-label="Default purpose role"
-              onChange={(event) => setPurposeRoleDraft(event.currentTarget.value)}
-              placeholder="purpose role"
             />
             <input
               className={styles.singleEditorChipInput}
               value={draft.topic}
               aria-label="Content group topic"
-              onChange={(event) => setDraft((current) => ({ ...current, topic: event.currentTarget.value }))}
+              onChange={(event) => {
+                const topic = event.currentTarget.value;
+                setDraft((current) => ({ ...current, topic }));
+              }}
               placeholder="topic"
             />
             <div className={styles.singleEditorInfoWrap}>
@@ -293,7 +277,10 @@ export default function SingleContentGroupEditorPage() {
               <textarea
                 className={styles.singleEditorSummaryEditor}
                 value={draft.summary}
-                onChange={(event) => setDraft((current) => ({ ...current, summary: event.currentTarget.value }))}
+                onChange={(event) => {
+                  const summary = event.currentTarget.value;
+                  setDraft((current) => ({ ...current, summary }));
+                }}
                 rows={3}
                 aria-label="Content group summary"
               />
@@ -385,7 +372,6 @@ export default function SingleContentGroupEditorPage() {
               <dl className={styles.singleEditorFactsList}>
                 <div><dt>Topic</dt><dd>{shellView?.topicLabel}</dd></div>
                 <div><dt>Type</dt><dd>{shellView?.typeLabel}</dd></div>
-                <div><dt>Purpose</dt><dd>{purposeRoleDraft || 'No role'}</dd></div>
                 <div><dt>State</dt><dd>{shellView?.stabilityLabel}</dd></div>
                 <div><dt>Source</dt><dd>{shellView?.sourceNoteTitle}</dd></div>
               </dl>

@@ -1,9 +1,7 @@
 import {
   Archive,
   ArrowLeft,
-  ArrowDown,
   ArrowRight,
-  ArrowUp,
   Check,
   ChevronRight,
   ExternalLink,
@@ -77,12 +75,7 @@ import {
 import {
   buildRelationInspectorRows,
 } from '../relationInspectorService';
-import {
-  activePurposeFrames,
-  movePurposeMember,
-  removePurposeItemMember,
-  upsertPurposeItemMember,
-} from '../purposeService';
+import { activePurposeFrames } from '../purposeService';
 import type {
   AnnotationRangeV1,
   AnnotationTruthV1,
@@ -134,7 +127,6 @@ interface ContentGroupPanelProps {
   onClose: () => void;
   onSaveContentGroups: (groups: ContentGroupV1[]) => Promise<boolean | void> | boolean | void;
   onSaveGroupFolders: (folders: GroupFolderV1[]) => Promise<void> | void;
-  onSavePurposeFrames: (purposes: PurposeFrameV1[]) => Promise<boolean | void> | boolean | void;
 }
 
 function groupFolderId(group: ContentGroupV1): string | null {
@@ -246,7 +238,6 @@ export function ContentGroupPanel({
   canvasId,
   onClose,
   onSaveContentGroups,
-  onSavePurposeFrames,
 }: ContentGroupPanelProps) {
   const navigate = useNavigate();
   const activeGroups = useMemo(
@@ -309,10 +300,6 @@ export function ContentGroupPanel({
   const [itemById, setItemById] = useState<Record<string, ItemV1>>({});
   const [inspectedItemId, setInspectedItemId] = useState<string | null>(null);
   const [itemDraft, setItemDraft] = useState({ plainText: '', itemType: '', topic: '' });
-  const [purposeEdgeDrafts, setPurposeEdgeDrafts] = useState<Record<string, {
-    role: string;
-    fitness: string;
-  }>>({});
   const [unlinkedItem, setUnlinkedItem] = useState<ItemV1 | null>(null);
   const [itemBusy, setItemBusy] = useState(false);
   const [itemError, setItemError] = useState<string | null>(null);
@@ -406,26 +393,6 @@ export function ContentGroupPanel({
     const selected = poolAnchors.filter((anchor) => selectedPoolAnchorIds.includes(anchor.id));
     setCastBody(selected.map((anchor) => anchor.excerpt).join('\n\n'));
   }, [poolAnchors, selectedPoolAnchorIds]);
-
-  useEffect(() => {
-    if (!inspectedItemId) {
-      setPurposeEdgeDrafts({});
-      return;
-    }
-    const nextDrafts: Record<string, { role: string; fitness: string }> = {};
-    activePurposes.forEach((purpose) => {
-      const edge = purpose.members.find((member) => (
-        member.member_kind === 'item'
-        && member.member_id === inspectedItemId
-      ));
-      if (!edge) return;
-      nextDrafts[edge.id] = {
-        role: edge.role || '',
-        fitness: edge.fitness || 'unknown',
-      };
-    });
-    setPurposeEdgeDrafts(nextDrafts);
-  }, [activePurposes, inspectedItemId]);
 
   useEffect(() => {
     let cancelled = false;
@@ -752,54 +719,6 @@ export function ContentGroupPanel({
     } finally {
       setItemBusy(false);
     }
-  };
-
-  const persistPurposeChange = async (nextPurpose: PurposeFrameV1) => {
-    setItemBusy(true);
-    setItemError(null);
-    try {
-      const saved = await onSavePurposeFrames(
-        purposeFrames.map((purpose) => purpose.id === nextPurpose.id ? nextPurpose : purpose),
-      );
-      if (saved === false) throw new Error('Failed to save Purpose membership');
-    } catch (error) {
-      setItemError(itemErrorMessage(error));
-    } finally {
-      setItemBusy(false);
-    }
-  };
-
-  const handleAddItemToPurpose = async (purpose: PurposeFrameV1, itemId: string) => {
-    await persistPurposeChange(upsertPurposeItemMember({
-      purpose,
-      itemId,
-      fitness: 'unknown',
-    }));
-  };
-
-  const handleUpdateItemPurposeEdge = async (input: {
-    purpose: PurposeFrameV1;
-    itemId: string;
-    role?: string | null;
-    fitness?: string;
-  }) => {
-    await persistPurposeChange(upsertPurposeItemMember(input));
-  };
-
-  const handleRemoveItemFromPurpose = async (purpose: PurposeFrameV1, itemId: string) => {
-    await persistPurposeChange(removePurposeItemMember({ purpose, itemId }));
-  };
-
-  const handleMoveItemInPurpose = async (
-    purpose: PurposeFrameV1,
-    memberEdgeId: string,
-    direction: 'up' | 'down',
-  ) => {
-    await persistPurposeChange(movePurposeMember({
-      purpose,
-      memberId: memberEdgeId,
-      direction,
-    }));
   };
 
   const handleCreateGroup = async (members = candidateMembers) => {
@@ -1588,146 +1507,6 @@ export function ContentGroupPanel({
                               <p className={styles.itemQuietText}>No active Relations.</p>
                             )}
                             {relationError ? <p className={styles.itemErrorText}>{relationError}</p> : null}
-                          </div>
-                          <div className={styles.itemPurposeMembership}>
-                            <div className={styles.itemWorkbenchHeader}>
-                              <span>Purpose membership</span>
-                              <small>{activePurposes.length} active</small>
-                            </div>
-                            {activePurposes.length > 0 ? (
-                              <div className={styles.itemPurposeList}>
-                                {activePurposes.map((purpose) => {
-                                  const directEdge = purpose.members.find((member) => (
-                                    member.member_kind === 'item'
-                                    && member.member_id === inspectedItem.id
-                                  ));
-                                  const derivedViaCurrentGroup = purpose.members.some((member) => (
-                                    member.member_kind === 'content_group'
-                                    && member.member_id === group.id
-                                  ));
-                                  const edgeIndex = directEdge
-                                    ? purpose.members.findIndex((member) => member.id === directEdge.id)
-                                    : -1;
-                                  const edgeDraft = directEdge
-                                    ? purposeEdgeDrafts[directEdge.id] || {
-                                      role: directEdge.role || '',
-                                      fitness: directEdge.fitness || 'unknown',
-                                    }
-                                    : null;
-                                  const edgeDraftChanged = Boolean(directEdge && edgeDraft && (
-                                    edgeDraft.role.trim() !== (directEdge.role || '')
-                                    || (edgeDraft.fitness.trim() || 'unknown') !== directEdge.fitness
-                                  ));
-                                  return (
-                                    <section key={purpose.id} className={styles.itemPurposeRow}>
-                                      <div className={styles.itemPurposeIdentity}>
-                                        <strong>{purpose.title}</strong>
-                                        <span>
-                                          {directEdge ? 'direct' : derivedViaCurrentGroup ? 'via current group' : 'no direct edge'}
-                                        </span>
-                                      </div>
-                                      {directEdge && edgeDraft ? (
-                                        <>
-                                          <div className={styles.itemFieldRow}>
-                                            <input
-                                              value={edgeDraft.role}
-                                              placeholder="Role"
-                                              aria-label={`Role in ${purpose.title}`}
-                                              onChange={(event) => {
-                                                const role = event.currentTarget.value;
-                                                setPurposeEdgeDrafts((current) => ({
-                                                  ...current,
-                                                  [directEdge.id]: {
-                                                    ...edgeDraft,
-                                                    role,
-                                                  },
-                                                }));
-                                              }}
-                                              disabled={itemBusy || inspectedItem.status === 'retired'}
-                                            />
-                                            <input
-                                              value={edgeDraft.fitness}
-                                              placeholder="Fitness"
-                                              aria-label={`Fitness in ${purpose.title}`}
-                                              onChange={(event) => {
-                                                const fitness = event.currentTarget.value;
-                                                setPurposeEdgeDrafts((current) => ({
-                                                  ...current,
-                                                  [directEdge.id]: {
-                                                    ...edgeDraft,
-                                                    fitness,
-                                                  },
-                                                }));
-                                              }}
-                                              disabled={itemBusy || inspectedItem.status === 'retired'}
-                                            />
-                                          </div>
-                                          <div className={styles.itemPurposeActions}>
-                                            <button
-                                              type="button"
-                                              className={styles.iconBtn}
-                                              onClick={() => void handleUpdateItemPurposeEdge({
-                                                purpose,
-                                                itemId: inspectedItem.id,
-                                                role: edgeDraft.role.trim() || null,
-                                                fitness: edgeDraft.fitness.trim() || 'unknown',
-                                              })}
-                                              disabled={itemBusy || inspectedItem.status === 'retired' || !edgeDraftChanged}
-                                              title="Save Purpose edge"
-                                              aria-label={`Save ${inspectedItem.plain_text} membership in ${purpose.title}`}
-                                            >
-                                              <Save size={12} />
-                                            </button>
-                                            <button
-                                              type="button"
-                                              className={styles.iconBtn}
-                                              onClick={() => void handleMoveItemInPurpose(purpose, directEdge.id, 'up')}
-                                              disabled={itemBusy || edgeIndex <= 0}
-                                              title="Move Purpose edge up"
-                                              aria-label={`Move ${inspectedItem.plain_text} up in ${purpose.title}`}
-                                            >
-                                              <ArrowUp size={12} />
-                                            </button>
-                                            <button
-                                              type="button"
-                                              className={styles.iconBtn}
-                                              onClick={() => void handleMoveItemInPurpose(purpose, directEdge.id, 'down')}
-                                              disabled={itemBusy || edgeIndex < 0 || edgeIndex >= purpose.members.length - 1}
-                                              title="Move Purpose edge down"
-                                              aria-label={`Move ${inspectedItem.plain_text} down in ${purpose.title}`}
-                                            >
-                                              <ArrowDown size={12} />
-                                            </button>
-                                            <button
-                                              type="button"
-                                              className={styles.iconBtn}
-                                              onClick={() => void handleRemoveItemFromPurpose(purpose, inspectedItem.id)}
-                                              disabled={itemBusy}
-                                              title="Remove direct Purpose edge"
-                                              aria-label={`Remove ${inspectedItem.plain_text} from ${purpose.title}`}
-                                            >
-                                              <X size={12} />
-                                            </button>
-                                          </div>
-                                        </>
-                                      ) : (
-                                        <button
-                                          type="button"
-                                          className={styles.secondaryBtn}
-                                          onClick={() => void handleAddItemToPurpose(purpose, inspectedItem.id)}
-                                          disabled={itemBusy || inspectedItem.status === 'retired'}
-                                        >
-                                          <Plus size={13} />
-                                          Add direct
-                                        </button>
-                                      )}
-                                    </section>
-                                  );
-                                })}
-                              </div>
-                            ) : (
-                              <p className={styles.itemQuietText}>No active Purpose is available for this note.</p>
-                            )}
                           </div>
                           <div className={styles.contentGroupActionRow}>
                             <button

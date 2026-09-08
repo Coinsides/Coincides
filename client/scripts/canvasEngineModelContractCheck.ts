@@ -328,13 +328,9 @@ import {
   plainTextFromContentGroupDragPayload,
 } from '../src/pages/Notes/canvasEngine/contentGroupDragService';
 import {
-  movePurposeMember,
   normalizePurposeCompiledScope,
   normalizePurposeFrames,
-  removePurposeItemMember,
   purposeRoleForContentGroup,
-  upsertPurposeItemMember,
-  upsertDefaultPurposeRoleForContentGroup,
 } from '../src/pages/Notes/canvasEngine/purposeService';
 import {
   normalizeRelation,
@@ -4957,11 +4953,16 @@ function testPurposeFrameContract(): void {
     created_at: '2026-07-05T00:00:00.000Z',
     updated_at: '2026-07-05T00:00:00.000Z',
   }]);
-  const rolePurposes = upsertDefaultPurposeRoleForContentGroup({
-    purposes,
-    groupId: group.id,
-    role: 'exam_review',
-  });
+  // Historical roles remain readable; there is no membership writer.
+  const rolePurposes = normalizePurposeFrames([{
+    ...purposes[0]!,
+    members: [{
+      id: 'historical-group-edge', purpose_id: purposes[0]!.id,
+      member_kind: 'content_group', member_id: group.id, role: 'exam_review',
+      fitness: 'unknown', order_index: 7,
+      created_at: purposes[0]!.created_at, updated_at: purposes[0]!.updated_at,
+    }],
+  }]);
 
   assertEqual(group.identity.type, 'definition', 'ContentGroup identity type stays on group identity');
   assertEqual(purposeRoleForContentGroup(rolePurposes, group.id), 'exam_review', 'purpose role lives on Purpose member edge');
@@ -4995,37 +4996,12 @@ function testPurposeFrameContract(): void {
     'Purpose client normalizer preserves Item membership kind',
   );
 
-  const withSecondItem = upsertPurposeItemMember({
-    purpose: itemPurpose[0]!,
-    itemId: 'item-purpose-contract-2',
-    role: 'exam_example',
-    fitness: 'medium',
-  });
-  const updatedFirstItem = upsertPurposeItemMember({
-    purpose: withSecondItem,
-    itemId: 'item-purpose-contract',
-    role: 'core_definition',
-    fitness: 'essential',
-  });
-  assertEqual(updatedFirstItem.members.length, 2, 'Purpose Item upsert does not duplicate existing Item edges');
-  assertEqual(updatedFirstItem.members[0]?.role, 'core_definition', 'Purpose Item role updates on the direct edge');
-  assertEqual(updatedFirstItem.members[0]?.fitness, 'essential', 'Purpose Item fitness updates on the direct edge');
-
-  const moved = movePurposeMember({
-    purpose: updatedFirstItem,
-    memberId: 'item-purpose-contract-2',
-    direction: 'up',
-  });
-  assertEqual(moved.members[0]?.member_id, 'item-purpose-contract-2', 'Purpose member reorder updates edge order');
-  assertEqual(moved.members[0]?.order_index, 0, 'Purpose member reorder normalizes first order index');
-  assertEqual(moved.members[1]?.order_index, 1, 'Purpose member reorder normalizes second order index');
-
-  const removed = removePurposeItemMember({
-    purpose: moved,
-    itemId: 'item-purpose-contract',
-  });
-  assertEqual(removed.members.length, 1, 'Purpose Item removal deletes only the selected direct edge');
-  assertEqual(removed.members[0]?.member_id, 'item-purpose-contract-2', 'Purpose Item removal preserves other members');
+  const librarySoul = normalizePurposeFrames([{
+    ...purposes[0]!, project_id: null, course_id: null, status: 'sealed',
+  }])[0]!;
+  assertEqual(librarySoul.project_id, null, 'Library soul nullable project survives normalization');
+  assertEqual(librarySoul.status, 'sealed', 'Sealed soul storage state survives normalization');
+  assertEqual(rolePurposes[0]?.members[0]?.order_index, 7, 'Historical member order is read without rewriting');
 
   const compiled = normalizePurposeCompiledScope({
     purpose_id: purposes[0]!.id,

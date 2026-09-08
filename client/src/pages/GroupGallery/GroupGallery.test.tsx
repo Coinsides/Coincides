@@ -122,7 +122,6 @@ const activeRecord: GalleryRecord = {
     activeNoteRoot,
   ],
   groups: [group('active', activeProject.id, activeNote.id, activeNoteRoot.id)],
-  purposes: [],
 };
 
 const emptyProject = project('project-empty', 'Empty Project', '#94a3b8');
@@ -136,7 +135,6 @@ const emptyRecord: GalleryRecord = {
     folder('note-root-empty', 'Note groups', 'note', emptyProject.id, emptyNote.id),
   ],
   groups: [],
-  purposes: [],
 };
 
 const projectRoot = activeRecord.folders.find((item) => item.scope.kind === 'project')!;
@@ -166,7 +164,6 @@ const unnamedRecord: GalleryRecord = {
     unnamedNoteRoot,
   ],
   groups: [group('unnamed', activeProject.id, unnamedNote.id, unnamedNoteRoot.id)],
-  purposes: [],
 };
 
 function renderGallery(records: GalleryRecord[]) {

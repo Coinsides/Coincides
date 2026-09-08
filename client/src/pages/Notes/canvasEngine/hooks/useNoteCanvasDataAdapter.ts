@@ -84,8 +84,7 @@ import {
   saveGroupFoldersForNote,
 } from '../groupFolderRepository';
 import {
-  loadPurposeFramesForNote,
-  savePurposeFramesForNote,
+  loadLibraryPurposes,
 } from '../purposeRepository';
 import {
   normalizeGroupFolders,
@@ -452,7 +451,6 @@ export function useNoteCanvasDataAdapter({
   const annotationSaveResponseSequenceRef = useRef(0);
   const annotationSaveTailsByNoteRef = useRef(new Map<string, Promise<void>>());
   const contentGroupSaveGenerationRef = useRef(0);
-  const purposeFrameSaveGenerationRef = useRef(0);
   const pageFrameSaveGenerationRef = useRef(0);
   const typographyProfileSaveGenerationRef = useRef(0);
   const recoveryFailureNotifiedKeysRef = useRef(new Set<string>());
@@ -575,7 +573,7 @@ export function useNoteCanvasDataAdapter({
         loadGroupFoldersForNote({ note: hydratedNote }),
         loadCanvasPersistenceForNote({ note: hydratedNote, contractSession }),
         loadAnnotationTruthsForNote({ note: hydratedNote }),
-        loadPurposeFramesForNote({ note: hydratedNote }),
+        loadLibraryPurposes(),
       ]);
       if (!requestIsCurrent()) return;
       const hydratedBlocks = applyCanvasLayoutsToBlocks(
@@ -897,31 +895,6 @@ export function useNoteCanvasDataAdapter({
       }
     }
   }, [addToast, groupFolders, note]);
-
-  const savePurposeFrames = useCallback(async (nextPurposes: PurposeFrameV1[]): Promise<boolean> => {
-    const currentNote = noteRef.current || note;
-    if (!currentNote) return false;
-    const previousPurposes = purposeFrames;
-    const saveGeneration = purposeFrameSaveGenerationRef.current + 1;
-    purposeFrameSaveGenerationRef.current = saveGeneration;
-    setPurposeFrames(nextPurposes);
-    try {
-      const savedPurposes = await savePurposeFramesForNote({
-        noteId: currentNote.id,
-        purposes: nextPurposes,
-      });
-      if (purposeFrameSaveGenerationRef.current !== saveGeneration) return true;
-      setPurposeFrames(savedPurposes);
-      return true;
-    } catch (err) {
-      console.error('Failed to save purposes:', err);
-      addToast('error', 'Failed to save purpose');
-      if (purposeFrameSaveGenerationRef.current === saveGeneration) {
-        setPurposeFrames(previousPurposes);
-      }
-      return false;
-    }
-  }, [addToast, note, purposeFrames]);
 
   const savePageFrameCollection = useCallback(async (nextCollection: PageFrameCollectionModel) => {
     const currentNote = noteRef.current || note;
@@ -2261,7 +2234,6 @@ export function useNoteCanvasDataAdapter({
     saveAnnotationTruths,
     saveContentGroups,
     saveGroupFolders,
-    savePurposeFrames,
     savePageFrameCollection,
     persistCanvasObject,
     deleteCanvasObject,

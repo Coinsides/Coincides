@@ -87,7 +87,7 @@ export function ProjectDeleteDialog({
               <label className={action === 'move_to_home' ? styles.selected : undefined}>
                 <input type="radio" name="projection-action" checked={action === 'move_to_home'} onChange={() => setAction('move_to_home')} />
                 <ArchiveRestore size={16} />
-                <span><strong>Move projections to Home</strong><small>Keep their blocks, layout, annotations, ContentGroups, purposes, and images.</small></span>
+                <span><strong>Move projections to Home</strong><small>Keep their blocks, layout, annotations, ContentGroups, and images.</small></span>
                 {impact.recommended_action === 'move_to_home' && <em>Recommended</em>}
               </label>
               <label className={action === 'delete_projection' ? styles.selected : undefined}>
@@ -97,6 +97,8 @@ export function ProjectDeleteDialog({
                 {impact.recommended_action === 'delete_projection' && <em>Recommended</em>}
               </label>
             </fieldset>
+            <p>Library purposes and boards keep their identities; only their Project tags are cleared. They do not move to Home with projections.</p>
+            <p>Some older purposes still belong to a note. Deleting that note also deletes an unboarded legacy purpose; if the purpose has a board, permanent deletion is blocked. This preview does not identify those legacy links.</p>
           </>
         )}
 

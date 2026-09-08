@@ -14,6 +14,7 @@ import {
   Clock3,
   Boxes,
   ListChecks,
+  PanelsTopLeft,
 } from 'lucide-react';
 import { useUIStore } from '@/stores/uiStore';
 import { useCourseStore } from '@/stores/courseStore';
@@ -26,6 +27,7 @@ const navItems = [
   { to: '/', icon: Home, labelKey: 'nav.home' },
   { to: '/projects', icon: BookOpen, labelKey: 'nav.projects' },
   { to: '/sources', icon: LibraryBig, labelKey: 'nav.sources' },
+  { to: '/boards', icon: PanelsTopLeft, label: 'Boards' },
   { to: '/group-gallery', icon: Boxes, label: 'Group Gallery' },
   { to: '/settings', icon: Settings, labelKey: 'nav.settings' },
 ];
@@ -48,6 +50,7 @@ export default function AppLayout() {
   const favoriteProjects = courses.slice(0, 3);
   const recentProjects = [...courses].slice(-4).reverse();
   const contentGroupWorkspace = location.pathname.startsWith('/group-gallery');
+  const boardWorkspace = /^\/boards\/[^/]+\/?$/.test(location.pathname);
 
   useEffect(() => {
     loadUser();
@@ -212,11 +215,11 @@ export default function AppLayout() {
 
       {/* Main content */}
       <main
-        className={`${styles.main} ${contentGroupWorkspace ? styles.immersiveMain : ''}`}
+        className={`${styles.main} ${contentGroupWorkspace ? styles.immersiveMain : ''} ${boardWorkspace ? styles.boardMain : ''}`}
         data-app-main-scroll="true"
       >
         <div
-          className={`${styles.content} ${contentGroupWorkspace ? styles.immersiveContent : ''}`}
+          className={`${styles.content} ${contentGroupWorkspace || boardWorkspace ? styles.immersiveContent : ''}`}
           data-app-content-shell="true"
         >
           <Outlet />

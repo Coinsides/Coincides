@@ -10,6 +10,8 @@ import GoalsPage from '@/pages/Goals/Goals';
 import CoursesPage from '@/pages/Courses/Courses';
 import CourseDetailPage from '@/pages/Courses/CourseDetail';
 import NoteDetailPage from '@/pages/Notes/NoteDetail';
+import BoardList from '@/pages/Boards/BoardList';
+import BoardPage from '@/pages/Boards/BoardPage';
 import SourceLibraryPage from '@/pages/Sources/SourceLibrary';
 import GroupGalleryPage from '@/pages/GroupGallery/GroupGallery';
 import SingleContentGroupEditorPage from '@/pages/GroupGallery/SingleContentGroupEditor';
@@ -93,6 +95,8 @@ export default function App() {
           <Route path="courses" element={<CoursesPage />} />
           <Route path="courses/:courseId" element={<CourseDetailPage />} />
           <Route path="notes/:noteId" element={<NoteDetailPage />} />
+          <Route path="boards" element={<BoardList />} />
+          <Route path="boards/:boardId" element={<BoardPage />} />
           <Route path="sources" element={<SourceLibraryPage />} />
           <Route path="group-gallery" element={<GroupGalleryPage />} />
           <Route path="group-gallery/editor" element={<SingleContentGroupEditorPage />} />

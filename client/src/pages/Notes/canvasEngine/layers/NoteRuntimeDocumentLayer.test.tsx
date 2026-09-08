@@ -151,7 +151,6 @@ function writingSurfaceProps(
     onSaveContentGroups: vi.fn(async () => true),
     onSaveDocumentTypographyProfile: noOp,
     onSaveGroupFolders: vi.fn(async () => undefined),
-    onSavePurposeFrames: vi.fn(async () => true),
     onActivateDraft: noOp,
     onBeginMoveBlock: noOp,
     onBeginResizeBlock: noOp,

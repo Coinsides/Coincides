@@ -368,7 +368,7 @@ export interface RelationAssessmentV1 {
   created_at: string;
 }
 
-export type PurposeStatus = 'active' | 'archived';
+export type PurposeStatus = 'active' | 'sealed' | 'archived';
 export type PurposeCreatedBy = 'human' | 'ai' | 'system' | 'ai_proposal' | 'importer';
 export type PurposeMemberKind = 'content_group' | 'item';
 
@@ -387,7 +387,7 @@ export interface PurposeMemberV1 {
 
 export interface PurposeFrameV1 {
   id: string;
-  project_id: string;
+  project_id: string | null;
   course_id?: string | null;
   note_id?: string | null;
   title: string;

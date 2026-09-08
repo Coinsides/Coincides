@@ -66,8 +66,10 @@ export function SourceDeleteDialog({ source, onCancel, onConfirm }: SourceDelete
             <div><strong>{impact.projection_note_id ? 1 : 0}</strong><span>extracted projection removed</span></div>
             <div><strong>{impact.retained_receipt_count}</strong><span>external receipts retained as historical evidence</span></div>
             {impact.projection_user_work?.has_user_work && (
-              <p>Annotations, purposes, or presentation work attached directly to the extracted projection will be removed. ContentGroup snapshots retain their group-local content but lose their live source target.</p>
+              <p>Annotations and presentation work attached directly to the extracted projection will be removed. ContentGroup snapshots retain their group-local content but lose their live source target.</p>
             )}
+            <p>Library purposes and boards keep their identities. Project tags are weak associations and do not make a purpose part of this Source.</p>
+            <p>Some older purposes still belong to the extracted note. An unboarded legacy purpose is deleted with that note; if the purpose has a board, permanent deletion is blocked. This preview does not identify those legacy links.</p>
             {impact.deletion_blocked && <p>{impact.blocked_reason}</p>}
           </div>
         )}

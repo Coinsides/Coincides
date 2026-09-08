@@ -273,7 +273,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       if (
         url === '/content-groups'
         || url === '/group-folders'
-        || url === `/purposes/by-note/${note.id}`
+        || url === '/purposes'
         || url === '/templates'
       ) return { data: [] };
       throw new Error(`Unexpected GET ${url}`);
@@ -283,6 +283,24 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
   afterEach(() => {
     consoleError.mockRestore();
     consoleWarn.mockRestore();
+  });
+
+  it('V13 S2 saves paper without a retired purpose writer', async () => {
+    mocks.put.mockImplementation(async (url: string, payload: unknown) => {
+      if (url.startsWith('/purposes')) throw { response: { status: 410 } };
+      if (url === `/notes/${note.id}`) return { data: { ...note, ...(payload as object) } };
+      throw new Error(`Unexpected PUT ${url}`);
+    });
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.note?.id).toBe(note.id));
+    expect(subject.result.current).not.toHaveProperty('savePurposeFrames');
+    expect(mocks.get).toHaveBeenCalledWith('/purposes');
+    expect(subject.result.current.purposeFrames).toEqual([]);
+    act(() => subject.result.current.setTitleDraft('Updated paper'));
+    await act(async () => { await subject.result.current.saveTitle(); });
+    expect(mocks.put).toHaveBeenCalledWith(`/notes/${note.id}`, { title: 'Updated paper' });
+    expect(mocks.put.mock.calls.some(([url]) => String(url).startsWith('/purposes'))).toBe(false);
+    expect(mocks.addToast.mock.calls.some(([kind]) => kind === 'error')).toBe(false);
   });
 
   it.each(['argument', 'draft'] as const)(
@@ -643,8 +661,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       if (
         url === '/content-groups'
         || url === '/group-folders'
-        || url === `/purposes/by-note/${note.id}`
-        || url === `/purposes/by-note/${noteB.id}`
+        || url === '/purposes'
         || url === '/templates'
       ) return { data: [] };
       throw new Error(`Unexpected GET ${url}`);
@@ -736,8 +753,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       if (
         url === '/content-groups'
         || url === '/group-folders'
-        || url === `/purposes/by-note/${note.id}`
-        || url === `/purposes/by-note/${noteB.id}`
+        || url === '/purposes'
         || url === '/templates'
       ) return { data: [] };
       throw new Error(`Unexpected GET ${url}`);
@@ -829,8 +845,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       if (
         url === '/content-groups'
         || url === '/group-folders'
-        || url === `/purposes/by-note/${note.id}`
-        || url === `/purposes/by-note/${noteB.id}`
+        || url === '/purposes'
         || url === '/templates'
       ) return { data: [] };
       throw new Error(`Unexpected GET ${url}`);
@@ -912,7 +927,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       if (
         url === '/content-groups'
         || url === '/group-folders'
-        || url === `/purposes/by-note/${note.id}`
+        || url === '/purposes'
         || url === '/templates'
       ) return { data: [] };
       throw new Error(`Unexpected GET ${url}`);
@@ -968,7 +983,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       if (
         url === '/content-groups'
         || url === '/group-folders'
-        || url === `/purposes/by-note/${note.id}`
+        || url === '/purposes'
         || url === '/templates'
       ) return { data: [] };
       throw new Error(`Unexpected GET ${url}`);
@@ -1084,8 +1099,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       if (
         url === '/content-groups'
         || url === '/group-folders'
-        || url === `/purposes/by-note/${note.id}`
-        || url === `/purposes/by-note/${noteB.id}`
+        || url === '/purposes'
         || url === '/templates'
       ) return { data: [] };
       throw new Error(`Unexpected GET ${url}`);
@@ -1254,7 +1268,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       if (
         url === '/content-groups'
         || url === '/group-folders'
-        || url === `/purposes/by-note/${note.id}`
+        || url === '/purposes'
         || url === '/templates'
       ) return { data: [] };
       throw new Error(`Unexpected GET ${url}`);
@@ -1344,7 +1358,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       if (
         url === '/content-groups'
         || url === '/group-folders'
-        || url === `/purposes/by-note/${note.id}`
+        || url === '/purposes'
         || url === '/templates'
       ) return { data: [] };
       throw new Error(`Unexpected GET ${url}`);
@@ -1425,7 +1439,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       if (
         url === '/content-groups'
         || url === '/group-folders'
-        || url === `/purposes/by-note/${note.id}`
+        || url === '/purposes'
         || url === '/templates'
       ) return { data: [] };
       throw new Error(`Unexpected GET ${url}`);
@@ -1512,7 +1526,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       if (
         url === '/content-groups'
         || url === '/group-folders'
-        || url === `/purposes/by-note/${note.id}`
+        || url === '/purposes'
         || url === '/templates'
       ) return { data: [] };
       throw new Error(`Unexpected GET ${url}`);
@@ -1604,7 +1618,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       if (
         url === '/content-groups'
         || url === '/group-folders'
-        || url === `/purposes/by-note/${note.id}`
+        || url === '/purposes'
         || url === '/templates'
       ) return { data: [] };
       throw new Error(`Unexpected GET ${url}`);
@@ -1703,7 +1717,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       if (
         url === '/content-groups'
         || url === '/group-folders'
-        || url === `/purposes/by-note/${note.id}`
+        || url === '/purposes'
         || url === '/templates'
       ) return { data: [] };
       throw new Error(`Unexpected GET ${url}`);
@@ -1797,7 +1811,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       if (
         url === '/content-groups'
         || url === '/group-folders'
-        || url === `/purposes/by-note/${note.id}`
+        || url === '/purposes'
         || url === '/templates'
       ) return { data: [] };
       throw new Error(`Unexpected GET ${url}`);
@@ -1969,8 +1983,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       if (
         url === '/content-groups'
         || url === '/group-folders'
-        || url === `/purposes/by-note/${note.id}`
-        || url === `/purposes/by-note/${noteB.id}`
+        || url === '/purposes'
         || url === '/templates'
       ) return { data: [] };
       throw new Error(`Unexpected GET ${url}`);
@@ -2051,8 +2064,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       if (
         url === '/content-groups'
         || url === '/group-folders'
-        || url === `/purposes/by-note/${note.id}`
-        || url === `/purposes/by-note/${noteB.id}`
+        || url === '/purposes'
         || url === '/templates'
       ) return { data: [] };
       throw new Error(`Unexpected GET ${url}`);

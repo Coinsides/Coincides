@@ -196,7 +196,6 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     onSaveContentGroups: input.onSaveContentGroups,
     onSaveDocumentTypographyProfile: input.onSaveDocumentTypographyProfile,
     onSaveGroupFolders: input.onSaveGroupFolders,
-    onSavePurposeFrames: input.onSavePurposeFrames,
     onPersistCanvasObject: input.onPersistCanvasObject,
     onPushStructuredMutationHistory: input.onPushStructuredMutationHistory,
     onDeleteCanvasObject: input.onDeleteCanvasObject,

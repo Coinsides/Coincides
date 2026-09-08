@@ -316,7 +316,6 @@ export interface NoteWritingSurfaceLayerProps {
   onSaveContentGroups: (groups: ContentGroupV1[]) => Promise<boolean | void>;
   onSaveDocumentTypographyProfile: (profile: DocumentTypographyProfile) => void | Promise<void>;
   onSaveGroupFolders: (folders: GroupFolderV1[]) => Promise<void>;
-  onSavePurposeFrames: (purposes: PurposeFrameV1[]) => Promise<boolean | void>;
   onActivateDraft: (layout?: BlockBoxLayout) => void;
   onBeginMoveBlock: (event: ReactPointerEvent<HTMLElement>, block: NoteBlock, layout: BlockBoxLayout) => void;
   onBeginResizeBlock: (event: ReactPointerEvent<HTMLElement>, block: NoteBlock, text: string, layout: BlockBoxLayout) => void;
@@ -571,7 +570,6 @@ export function NoteWritingSurfaceLayer({
   onSaveContentGroups,
   onSaveDocumentTypographyProfile,
   onSaveGroupFolders,
-  onSavePurposeFrames,
   onActivateDraft,
   onBeginMoveBlock,
   onBeginResizeBlock,
@@ -4100,7 +4098,6 @@ export function NoteWritingSurfaceLayer({
           onClose={() => setContentGroupPanelOpen(false)}
           onSaveContentGroups={onSaveContentGroups}
           onSaveGroupFolders={onSaveGroupFolders}
-          onSavePurposeFrames={onSavePurposeFrames}
         />
       )}
     </section>

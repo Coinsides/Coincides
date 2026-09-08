@@ -1,0 +1,111 @@
+.library, .workspace, .loading {
+  --board-ink: var(--text-primary);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+}
+.library { max-width: 960px; margin: 0 auto; padding: 32px 16px; }
+.libraryHeader { margin-bottom: 32px; }
+.libraryHeader h1 { font-size: 2rem; font-weight: 650; letter-spacing: -0.025em; margin-bottom: 8px; }
+.libraryHeader p { color: var(--text-secondary); max-width: 65ch; }
+.createForm { padding: 24px 0 32px; border-top: 1px solid var(--border-default); border-bottom: 1px solid var(--border-default); }
+.createForm > label { display: block; margin-bottom: 12px; font-weight: 600; font-size: 1rem; }
+.createRow { display: flex; align-items: stretch; gap: 12px; }
+.createRow input { min-width: 0; flex: 1; }
+.library input, .library select, .picker input {
+  background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 6px; padding: 10px 12px;
+}
+.library input::placeholder, .picker input::placeholder { color: var(--text-secondary); }
+.library select { max-width: 100%; }
+.button, .primaryButton {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px; flex-shrink: 0;
+  min-height: 36px; padding: 7px 10px; border-radius: 6px; font-size: 0.8125rem;
+  white-space: nowrap; transition: background-color 150ms ease-out;
+}
+.button { border: 1px solid transparent; color: var(--text-secondary); }
+.button:hover { background: var(--bg-hover); color: var(--text-primary); }
+.button[aria-pressed='true'] { background: var(--accent-primary-bg); color: var(--text-primary); border-color: var(--border-focus); }
+.primaryButton { background: var(--accent-primary); color: #fff; font-weight: 600; }
+.primaryButton:hover { background: var(--gradient-primary-hover); }
+.library button:disabled, .workspace button:disabled { opacity: 0.45; cursor: default; }
+.library :focus-visible, .workspace :focus-visible, .loading :focus-visible {
+  outline: 2px solid var(--border-focus); outline-offset: 3px;
+}
+.existingPurpose { margin-top: 16px; color: var(--text-secondary); }
+.existingPurpose summary { cursor: pointer; width: fit-content; }
+.existingPurpose label { display: block; margin: 16px 0 6px; }
+.existingPurpose select { width: 100%; }
+.error { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding: 12px 16px; background: var(--bg-elevated); border-bottom: 1px solid var(--border-default); }
+.error a, .error button { text-decoration: underline; text-underline-offset: 3px; }
+.library .error { margin-top: 16px; }
+.listHeading { display: flex; justify-content: space-between; align-items: baseline; margin: 32px 0 12px; }
+.listHeading h2 { font-size: 1.125rem; font-weight: 600; }
+.listHeading span, .listEnd { color: var(--text-secondary); }
+.boardList li { border-bottom: 1px solid var(--border-subtle); }
+.boardList a { display: flex; justify-content: space-between; align-items: center; gap: 24px; padding: 18px 12px; border-radius: 4px; }
+.boardList a:hover { background: var(--bg-hover); }
+.boardList strong { font-weight: 600; display: block; overflow-wrap: anywhere; }
+.boardList small { display: block; color: var(--text-secondary); margin-top: 4px; }
+.listEnd { display: flex; gap: 18px; align-items: center; white-space: nowrap; font-size: 0.75rem; }
+.empty { padding: 32px 0; color: var(--text-secondary); }
+.workspace { height: 100%; min-height: 0; display: flex; flex-direction: column; background: var(--bg-primary); overflow: hidden; }
+.boardHeader { display: flex; align-items: center; gap: 16px; padding: 12px 16px; border-bottom: 1px solid var(--border-default); }
+.boardHeader h1 { min-width: 0; flex: 1; font-size: 1.125rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.saveStatus { color: var(--text-secondary); font-size: 0.6875rem; }
+.toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; padding: 8px 12px; border-bottom: 1px solid var(--border-default); background: var(--bg-surface); }
+.toolHint { font-size: 0.6875rem; color: var(--text-secondary); margin-left: 12px; }
+.zoomControls { display: flex; margin-left: auto; }
+.boardBody { display: flex; flex: 1; min-height: 0; }
+.picker { flex: 0 0 280px; width: 280px; padding: 16px; overflow: auto; background: var(--bg-surface); border-right: 1px solid var(--border-default); }
+.picker label { display: block; font-weight: 600; margin-bottom: 10px; }
+.picker input { width: 100%; margin-bottom: 16px; }
+.picker p { color: var(--text-secondary); margin-bottom: 12px; }
+.candidate { width: 100%; text-align: left; padding: 12px 4px; border-bottom: 1px solid var(--border-default); }
+.candidate:hover { background: var(--bg-hover); }
+.candidate strong, .candidate span, .candidate small { display: block; }
+.candidate strong { font-size: 0.8125rem; font-weight: 600; overflow-wrap: anywhere; }
+.candidate span { color: var(--text-secondary); font-size: 0.75rem; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.candidate small { color: var(--text-secondary); font-size: 0.625rem; margin-top: 8px; }
+.surface { flex: 1; min-width: 0; min-height: 0; position: relative; overflow: hidden; touch-action: none; cursor: default; background: var(--bg-deepest); }
+.surface:focus-visible { outline-offset: -3px; }
+.penSurface { cursor: crosshair; }
+.world { position: absolute; top: 0; left: 0; width: 1px; height: 1px; transform-origin: 0 0; isolation: isolate; }
+.connections { position: absolute; width: 1px; height: 1px; overflow: visible; pointer-events: none; }
+.edgeLine, .inkLine, .selectedLine { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.edgeLine { stroke: var(--text-secondary); stroke-width: 2; }
+.inkLine { stroke: var(--board-ink); stroke-width: 2.5; }
+.selectedLine { stroke: var(--accent-primary-hover); stroke-width: 3; }
+.lineHit { fill: none; stroke: transparent; stroke-width: 16; pointer-events: stroke; cursor: pointer; }
+.lineHit:focus-visible { stroke: var(--accent-primary-bg); outline: none; }
+.edgeLabel { fill: var(--text-primary); font-size: 12px; text-anchor: middle; }
+.member { position: absolute; padding: 16px; transform-origin: 0 0; background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 8px; cursor: grab; user-select: none; }
+.member:active { cursor: grabbing; }
+.selected { border-color: var(--accent-primary-hover); outline: 1px solid var(--accent-primary-hover); }
+.memberKind { display: flex; align-items: center; justify-content: space-between; color: var(--text-secondary); font-size: 10px; margin-bottom: 8px; }
+.member h2 { font-size: 16px; line-height: 1.3; font-weight: 600; margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.member p { font-size: 12px; line-height: 1.5; color: var(--text-secondary); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.member small { display: block; font-size: 10px; color: var(--text-secondary); }
+.member[aria-disabled='true'] { border-style: dashed; }
+.resizeHandle { position: absolute; bottom: -5px; right: -5px; width: 14px; height: 14px; background: var(--bg-elevated); border: 1px solid var(--border-focus); border-radius: 2px; cursor: nwse-resize; opacity: 0; }
+.selected .resizeHandle, .member:hover .resizeHandle, .resizeHandle:focus-visible { opacity: 1; }
+.canvasEmpty { position: absolute; top: 28%; left: 12%; right: 12%; max-width: 460px; pointer-events: none; }
+.canvasEmpty h2 { font-size: 1.375rem; font-weight: 500; margin-bottom: 8px; }
+.canvasEmpty p { color: var(--text-secondary); margin-bottom: 16px; }
+.canvasEmpty button { pointer-events: auto; border-color: var(--border-default); }
+.selectionBar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 8px 12px; border-top: 1px solid var(--border-default); background: var(--bg-surface); }
+.selectionBar > span { font-size: 12px; color: var(--text-secondary); }
+.loading { padding: 24px; }
+.loading p { margin: 24px 0; }
+@media (max-width: 760px) {
+  .library { padding: 12px 0; }
+  .createRow { flex-direction: column; }
+  .boardHeader { gap: 8px; padding: 8px; }
+  .saveStatus, .toolHint { display: none; }
+  .picker { width: 220px; flex-basis: 220px; padding: 12px; }
+  .toolbar { padding: 4px; }
+  .toolbar .button { font-size: 11px; padding: 6px; }
+  .boardBody { position: relative; }
+  .picker { position: absolute; inset: 0 auto 0 0; z-index: 2; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .button, .primaryButton { transition: none; }
+}

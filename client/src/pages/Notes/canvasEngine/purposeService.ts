@@ -32,7 +32,7 @@ function cloneMetadata(value: unknown): Record<string, unknown> {
 }
 
 function normalizeStatus(status: unknown): PurposeStatus {
-  return status === 'archived' ? 'archived' : 'active';
+  return status === 'archived' || status === 'sealed' ? status : 'active';
 }
 
 function normalizeCreatedBy(createdBy: unknown): PurposeCreatedBy {
@@ -72,8 +72,8 @@ export function normalizePurposeFrame(purpose: Partial<PurposeFrameV1>): Purpose
   const id = cleanText(purpose.id, `purpose-${crypto.randomUUID()}`);
   return {
     id,
-    project_id: cleanText(purpose.project_id || purpose.course_id, ''),
-    course_id: cleanOptionalText(purpose.course_id || purpose.project_id),
+    project_id: cleanOptionalText(purpose.project_id === undefined ? purpose.course_id : purpose.project_id),
+    course_id: cleanOptionalText(purpose.course_id === undefined ? purpose.project_id : purpose.course_id),
     note_id: cleanOptionalText(purpose.note_id),
     title: cleanText(purpose.title, 'Untitled purpose'),
     intent: cleanOptionalText(purpose.intent),
@@ -82,10 +82,9 @@ export function normalizePurposeFrame(purpose: Partial<PurposeFrameV1>): Purpose
     is_note_default: purpose.is_note_default === true,
     created_by: normalizeCreatedBy(purpose.created_by),
     members: (Array.isArray(purpose.members) ? purpose.members : [])
-      .map((member, index) => ({
+      .map((member) => ({
         ...normalizePurposeMember(member),
         purpose_id: id,
-        order_index: index,
       }))
       .filter((member) => member.member_id.length > 0),
     metadata: cloneMetadata(purpose.metadata),
@@ -96,95 +95,6 @@ export function normalizePurposeFrame(purpose: Partial<PurposeFrameV1>): Purpose
 
 export function normalizePurposeFrames(purposes: PurposeFrameV1[]): PurposeFrameV1[] {
   return purposes.map(normalizePurposeFrame);
-}
-
-function purposeWithOrderedMembers(
-  purpose: PurposeFrameV1,
-  members: PurposeMemberV1[],
-): PurposeFrameV1 {
-  const timestamp = nowIso();
-  return normalizePurposeFrame({
-    ...purpose,
-    members: members.map((member, index) => ({
-      ...member,
-      purpose_id: purpose.id,
-      order_index: index,
-      updated_at: member.updated_at || timestamp,
-    })),
-    updated_at: timestamp,
-  });
-}
-
-export function upsertPurposeItemMember(input: {
-  purpose: PurposeFrameV1;
-  itemId: string;
-  role?: string | null;
-  fitness?: string;
-}): PurposeFrameV1 {
-  const purpose = normalizePurposeFrame(input.purpose);
-  const itemId = cleanText(input.itemId, '');
-  if (!itemId) return purpose;
-  const timestamp = nowIso();
-  const existingIndex = purpose.members.findIndex((member) => (
-    member.member_kind === 'item' && member.member_id === itemId
-  ));
-  const nextMember: PurposeMemberV1 = existingIndex >= 0
-    ? {
-        ...purpose.members[existingIndex]!,
-        role: input.role === undefined
-          ? purpose.members[existingIndex]!.role || null
-          : cleanOptionalText(input.role),
-        fitness: input.fitness === undefined
-          ? purpose.members[existingIndex]!.fitness
-          : cleanText(input.fitness, 'unknown'),
-        updated_at: timestamp,
-      }
-    : {
-        id: `purpose-member-${crypto.randomUUID()}`,
-        purpose_id: purpose.id,
-        member_kind: 'item',
-        member_id: itemId,
-        role: cleanOptionalText(input.role),
-        fitness: cleanText(input.fitness, 'unknown'),
-        order_index: purpose.members.length,
-        metadata: {},
-        created_at: timestamp,
-        updated_at: timestamp,
-      };
-  const members = existingIndex >= 0
-    ? purpose.members.map((member, index) => index === existingIndex ? nextMember : member)
-    : [...purpose.members, nextMember];
-  return purposeWithOrderedMembers(purpose, members);
-}
-
-export function removePurposeItemMember(input: {
-  purpose: PurposeFrameV1;
-  itemId: string;
-}): PurposeFrameV1 {
-  const purpose = normalizePurposeFrame(input.purpose);
-  return purposeWithOrderedMembers(
-    purpose,
-    purpose.members.filter((member) => !(
-      member.member_kind === 'item' && member.member_id === input.itemId
-    )),
-  );
-}
-
-export function movePurposeMember(input: {
-  purpose: PurposeFrameV1;
-  memberId: string;
-  direction: 'up' | 'down';
-}): PurposeFrameV1 {
-  const purpose = normalizePurposeFrame(input.purpose);
-  const currentIndex = purpose.members.findIndex((member) => (
-    member.id === input.memberId || member.member_id === input.memberId
-  ));
-  if (currentIndex < 0) return purpose;
-  const targetIndex = input.direction === 'up' ? currentIndex - 1 : currentIndex + 1;
-  if (targetIndex < 0 || targetIndex >= purpose.members.length) return purpose;
-  const members = [...purpose.members];
-  [members[currentIndex], members[targetIndex]] = [members[targetIndex]!, members[currentIndex]!];
-  return purposeWithOrderedMembers(purpose, members);
 }
 
 function normalizeCompiledMembershipKind(value: unknown): PurposeCompiledMembershipKind {
@@ -260,7 +170,6 @@ export function activePurposeFrames(purposes: PurposeFrameV1[]): PurposeFrameV1[
   return normalizePurposeFrames(purposes)
     .filter((purpose) => purpose.status === 'active')
     .sort((left, right) => {
-      if (left.is_note_default !== right.is_note_default) return left.is_note_default ? -1 : 1;
       return right.updated_at.localeCompare(left.updated_at) || left.title.localeCompare(right.title);
     });
 }
@@ -284,52 +193,4 @@ export function purposeRoleForContentGroup(
   groupId: string,
 ): string | null {
   return purposeMemberForContentGroup(purposes, groupId)?.role || null;
-}
-
-export function upsertDefaultPurposeRoleForContentGroup(input: {
-  purposes: PurposeFrameV1[];
-  groupId: string;
-  role: string | null;
-}): PurposeFrameV1[] {
-  const activePurposes = activePurposeFrames(input.purposes);
-  const defaultPurpose = activePurposes.find((purpose) => purpose.is_note_default) || activePurposes[0] || null;
-  if (!defaultPurpose) return input.purposes.map(normalizePurposeFrame);
-
-  const normalizedRole = cleanOptionalText(input.role);
-  const timestamp = nowIso();
-  const existingIndex = defaultPurpose.members.findIndex((member) => (
-    member.member_kind === 'content_group'
-    && member.member_id === input.groupId
-  ));
-  const nextMembers = existingIndex >= 0
-    ? defaultPurpose.members.map((member, index) => (
-      index === existingIndex
-        ? { ...member, role: normalizedRole, updated_at: timestamp }
-        : member
-    ))
-    : [
-      ...defaultPurpose.members,
-      {
-        id: `purpose-member-${crypto.randomUUID()}`,
-        purpose_id: defaultPurpose.id,
-        member_kind: 'content_group' as const,
-        member_id: input.groupId,
-        role: normalizedRole,
-        fitness: 'unknown',
-        order_index: defaultPurpose.members.length,
-        metadata: {},
-        created_at: timestamp,
-        updated_at: timestamp,
-      },
-    ];
-
-  return input.purposes.map((purpose) => (
-    purpose.id === defaultPurpose.id
-      ? normalizePurposeFrame({
-        ...purpose,
-        members: nextMembers,
-        updated_at: timestamp,
-      })
-      : normalizePurposeFrame(purpose)
-  ));
 }

@@ -24,14 +24,9 @@ export async function loadPurposeFramesForNote(input: {
   return responsePurposes(response.data);
 }
 
-export async function savePurposeFramesForNote(input: {
-  noteId: string;
-  purposes: PurposeFrameV1[];
-}): Promise<PurposeFrameV1[]> {
-  const normalized = normalizePurposeFrames(input.purposes);
-  const response = await api.put(`/purposes/by-note/${input.noteId}`, {
-    purposes: normalized,
-  });
+/** Library souls are independent of notes; legacy note/default fields are read-only history. */
+export async function loadLibraryPurposes(): Promise<PurposeFrameV1[]> {
+  const response = await api.get('/purposes');
   return responsePurposes(response.data);
 }
 
