@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 276 份文档。
+共 277 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -267,6 +267,7 @@
 | [handoffs/2026-09-07-v13-2-s1-events-ledger-order.md](handoffs/2026-09-07-v13-2-s1-events-ledger-order.md) | 13.2 · 单 1 · 史记 v0(events 表 + 书记官助手) | `(缺状态头)` | — | — |
 | [handoffs/2026-09-07-v13-2-s2-tray-order.md](handoffs/2026-09-07-v13-2-s2-tray-order.md) | 13.2 · 单 2 · 托盘 + 分蘖 v1 | `(缺状态头)` | — | — |
 | [handoffs/2026-09-07-v13-2-s3-shadow-run-order.md](handoffs/2026-09-07-v13-2-s3-shadow-run-order.md) | 13.2 · 单 3 · census + 影子跑(野地去处 × 坐标解释 双轨) | `(缺状态头)` | — | — |
+| [handoffs/2026-09-08-v13-1-print-revival-order.md](handoffs/2026-09-08-v13-1-print-revival-order.md) | 13.1 尾款 · 打印通道复活(v2 世界) | `(缺状态头)` | — | — |
 | [handoffs/2026-09-08-v13-2-s4a-dual-contract-order.md](handoffs/2026-09-08-v13-2-s4a-dual-contract-order.md) | 13.2 · 单 4a · 坐标契约双模改造(client 消费链) | `(缺状态头)` | — | — |
 | [handoffs/2026-09-08-v13-2-s4b-executor-order.md](handoffs/2026-09-08-v13-2-s4b-executor-order.md) | 13.2 · 单 4b · 迁移执行器(野地搬迁 + 坐标归一 + 回滚) | `(缺状态头)` | — | — |
 | [handoffs/2026-09-08-v13-2-s5-dual-mode-retirement-order.md](handoffs/2026-09-08-v13-2-s5-dual-mode-retirement-order.md) | 13.2 · 单 5 · 双模退役(canvas 入口摘除 + 新写禁令) | `(缺状态头)` | — | — |
