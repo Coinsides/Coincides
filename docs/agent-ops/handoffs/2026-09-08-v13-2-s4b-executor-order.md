@@ -1,6 +1,6 @@
 > **From**: fable
 > **To**: codex
-> **Status**: done(builder 按补遗一/二工程完工,工作树候 HQ 复核;⛔ 用户库零接触,真实执行=扳机日 Henry 亲跑)
+> **Status**: done(仅补遗一/二工程回执;⛔ 补遗三结构级冲突停线,未完工,详见末尾 Result;用户库零接触,真实执行=扳机日 Henry 亲跑)
 > **日期 (Date)**: 2026-09-08
 > **性质**: 施工单(扳机日的刀——本单只铸刀与演练,⛔ 挥刀)
 
@@ -152,3 +152,37 @@
 3. **保险丝(机械化本次教训)**:同事务内,若 formal 候选行的归一成功占比 <50%,事务**中止**报 `FAILED: normalization_rate_anomaly`(法条级异常候 HQ),⛔ 把大面积无解当例外搬家——今天这类灾难从此在物理上不可提交;
 4. **演练红线**:合成谱必须新增**生产同构阳性样本**(帧 (80,80)、inset (72,96)/(54,112)、Source 物化形态 x=152 等非零 O.x 形态)断言全部可解+屏显逐位相等;另加保险丝阳性对照(人造大面积无解,断言中止零写);⛔ 全毒谱掩盖法条无解类错误;
 5. 真库 events seq1-4 与已归档备份为历史,⛔ 清除;再执行走新 generation(补遗二代际机制);其余口径(含补遗一 2/3 条、补遗二)不变。按本补遗续作至完工 Result 追补。
+
+## Result
+
+### 2026-09-08 · builder 按补遗三停线回执（未完工，不是再次迁移放行）
+
+完整重读工单、三份补遗、入口/方向/现状/active ADR、段 plan 与迁移图后续作；按 §三“现物冲突⇒停线举证”和用户本轮停线指令，发现新的结构级缺口即停止实施。原工单与全部历史 Result、补遗原文保留；顶部 done 仅指补遗一/二，**不能据此认定补遗三已完成**。
+
+**停线点：原始存储值的 resolveScreenRect 相等不保证实际 hydration 后屏显相等；生产同构 Source 阳性无法同时满足新等式与屏显/表面保持。** 源码实际 Source 正文为帧 (80,80)、794×1123、inset (72,96)、行 (152,176,650,72)、canvas_world 标签。依补遗三候选为 (152,0)、page_frame_local：原始 4a screen 前后均为 (152,176,650,72)，但现役 hydration 把旧 x 转为 0；新 local x=152、width=650 则跨出内容区 [0,650]。因此 hydration 后屏显 **(0,176)→(152,176)**，表面 **formal_page→canvas_workspace**。纯屏显裁尺会计此行成功，保险丝看到 100% 成功率也不会拦截；保留 hydration 检查则 Source 仍为例外，无法满足“生产同构阳性全部可解”。不再涉及 world 相等约束。
+
+反向对照：Source 新 x=0 能保持 hydration 后屏显与 formal 归属，却违反补遗三 x′=x 和旧/新存储值直接比较的 screen 等式。builder 未自行改成该解，未修改 4a、删除 hydration 检查或改变 Source 样本标签/宽度凑绿。需 HQ 闭合**裁尺的输入阶段（原始存储 / 实际 hydration 后布局）以及 Source 消费链的归一规则**；若需修改 4a，另给施工范围。
+
+**现物证据**：`docs/audits/2026-09-08-v13-2-s4b-合成-补遗三Source屏显停线.md` 与同名 `.json`；可复跑探针 `server/scripts/wildernessExecutor/addendum3SourceProbe.ts`。两条非零 O.x 普通阳性（帧 80/80，inset 72/96 与 54/112）均 raw/hydrated screen 全等、负 local 合法；Source 保持生产 canvas_world 标签及 650 宽，精确复现冲突。定向只读协助核实 persistence→applyCanvasLayoutsToBlocks→hydration→BlockEditorLayer 的真实源码链，Source 没有几何旁路；**没有声称浏览器实测**。
+
+### 验证输出摘要（本线程亲跑）
+
+- server 目录 `node --import tsx scripts/wildernessExecutor/addendum3SourceProbe.ts`：**exit 0，SOURCE_HYDRATION_CONFLICT_REPRODUCED**；rawScreenEqual=3、hydratedScreenEqual=2、sourceRequiredPositiveFailed=true、rawScreenNormalizationRate=1。exit 0 仅代表冲突断言成立，非迁移 PASS。探针纯合成，不开 DB、不读 env、不发网络请求。
+- `node scripts/run-isolated-coordinate-validation.mjs --cwd server -- npm run typecheck:v13-wilderness-executor`：**exit 0，1s**（含新增探针）。
+- 完整必经门 `node scripts/run-isolated-coordinate-validation.mjs`（实际 `npm run verify:v2-bn8-runtime`）：**exit 0，44s**；client **50 files / 459 tests pass**，registry **5/5**、manifest **10/10**、parity **10/10**，client/server build、模型/性能冒烟、静态门、docs/diff/变更扫描通过。使用现有空 env、内存 DB 与隔离资产入口。此门通过不消除上述已实证的专项缺口。
+- **补遗三的执行器单测、保险丝中止零写阳性及迁移→回滚→再执行全链未交付/未验证**。没有把既有补遗二测试或此次基础门冒充补遗三完工证据。
+
+### 工作树、预期申报与未做
+
+- 临时求解/保险丝/CLI 改动已通过 apply_patch 撤回；`coordinates.ts`、`executor.ts`、`v13WildernessExecute.ts` 对开工基线零 diff。当前执行器仍为补遗二版本，**本轮没有交付可用于再次真库执行的新版本**。
+- **真库预期申报：checked≈126、exceptions≈0、迁准备区仅野地约 21 件**（发单方目标；未读库、未实测，结构缺口解决前不能保证）。
+- 未接触用户库，未清除或修改真库 events seq1–4、任何归档备份；未读 `.env`、未打印任何 key、未操作 3001/5173；未修改产品/UI、启动迁移链、4a、S3 去处矩阵、双模退役或 Agent 工具面；未 commit/push/PR/merge。开工已有全部未跟踪设置/审计/会议记录保留。
+- 最终 numstat：**4 文件，+352/-1**。本工单 **+27/-1**（状态头 1 行，其余追加），新增纯合成探针 **+63/-0**、停线审计 **+54/-0**、JSON **+208/-0**；新增文件按完整行数计，不含既有未跟踪内容。`git diff --check` 通过。工作树只交停线证据与本回执，候 HQ 修订后续作。
+
+## 补遗四(2026-09-08,发单方 Fable;补遗三裁尺量错输入阶段——原始值屏显≠hydration 后屏显,Source 反例成立)
+
+1. **裁尺终版:唯一不变量=现役完整管线 hydration 后的屏显与表面归属**——逐行以真实 hydration 链(applyCanvasLayoutsToBlocks→4a screen 读法,或 builder 已在探针中复用的等价现役函数)重放旧、新存储值,要求**屏显 rect 逐位相等且 formal/surface 归属分类不变**;⛔ 再以原始存储值直比作终审;
+2. **解析解降级为候选,按标签分派**:`canvas_world` 标签行→x'=x−O.x, y'=y−O.y(Source 反例的正确解 x'=0 即由此出);`page_frame_local`/无标签行→x'=x, y'=y−O.y;**每行候选必须过第 1 条裁尺复验才算归一成功**,复验不过→例外迁准备区——由此"法条对某形态失手"整类错误被逐行重放兜底,不再依赖法条完备;
+3. **保险丝判据同步**换到 hydration 后裁尺(formal 候选归一成功率<50% 事务中止,不变);
+4. **演练红线更新**:Source 生产同构阳性(canvas_world、x=152、宽 650、帧 (80,80)/inset(72,96))必须断言归一为 x'=0、formal 归属保持、hydration 后屏显逐位相等;两条非零 O.x 普通阳性照旧;保险丝阳性对照照旧;
+5. 其余口径(三份补遗未被本补遗覆盖的部分)不变。按本补遗续作至完工 Result 追补。

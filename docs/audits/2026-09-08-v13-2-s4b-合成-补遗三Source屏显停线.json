@@ -1,0 +1,208 @@
+{
+  "result": "SOURCE_HYDRATION_CONFLICT_REPRODUCED",
+  "synthetic": true,
+  "rawScreenEqual": 3,
+  "hydratedScreenEqual": 2,
+  "sourceRequiredPositiveFailed": true,
+  "rawScreenNormalizationRate": 1,
+  "evidence": [
+    {
+      "name": "nonzero-origin-72-96",
+      "frame": {
+        "id": "synthetic-source-frame",
+        "role": "primary_page_frame",
+        "exportable": true,
+        "x": 80,
+        "y": 80,
+        "width": 794,
+        "height": 1123,
+        "contentInset": {
+          "left": 72,
+          "right": 72,
+          "top": 96,
+          "bottom": 96
+        }
+      },
+      "original": {
+        "x": 10,
+        "y": 10,
+        "width": 100,
+        "height": 72,
+        "rotation": 0,
+        "frame_id": "synthetic-source-frame",
+        "surface": "formal_page",
+        "boundary_role": "inside",
+        "coordinate_space": "page_frame_local"
+      },
+      "candidate": {
+        "x": 10,
+        "y": -166,
+        "width": 100,
+        "height": 72,
+        "rotation": 0,
+        "frame_id": "synthetic-source-frame",
+        "surface": "formal_page",
+        "boundary_role": "inside",
+        "coordinate_space": "page_frame_local"
+      },
+      "screenBefore": {
+        "x": 10,
+        "y": 10,
+        "width": 100,
+        "height": 72
+      },
+      "screenAfter": {
+        "x": 10,
+        "y": 10,
+        "width": 100,
+        "height": 72
+      },
+      "hydratedScreenBefore": {
+        "x": 10,
+        "y": 10,
+        "width": 100,
+        "height": 72
+      },
+      "hydratedScreenAfter": {
+        "x": 10,
+        "y": 10,
+        "width": 100,
+        "height": 72
+      },
+      "surfaceBefore": "formal_page",
+      "surfaceAfter": "formal_page"
+    },
+    {
+      "name": "nonzero-origin-54-112",
+      "frame": {
+        "id": "synthetic-source-frame",
+        "role": "primary_page_frame",
+        "exportable": true,
+        "x": 80,
+        "y": 80,
+        "width": 794,
+        "height": 1123,
+        "contentInset": {
+          "left": 54,
+          "right": 72,
+          "top": 112,
+          "bottom": 96
+        }
+      },
+      "original": {
+        "x": 10,
+        "y": 10,
+        "width": 100,
+        "height": 72,
+        "rotation": 0,
+        "frame_id": "synthetic-source-frame",
+        "surface": "formal_page",
+        "boundary_role": "inside",
+        "coordinate_space": "page_frame_local"
+      },
+      "candidate": {
+        "x": 10,
+        "y": -182,
+        "width": 100,
+        "height": 72,
+        "rotation": 0,
+        "frame_id": "synthetic-source-frame",
+        "surface": "formal_page",
+        "boundary_role": "inside",
+        "coordinate_space": "page_frame_local"
+      },
+      "screenBefore": {
+        "x": 10,
+        "y": 10,
+        "width": 100,
+        "height": 72
+      },
+      "screenAfter": {
+        "x": 10,
+        "y": 10,
+        "width": 100,
+        "height": 72
+      },
+      "hydratedScreenBefore": {
+        "x": 10,
+        "y": 10,
+        "width": 100,
+        "height": 72
+      },
+      "hydratedScreenAfter": {
+        "x": 10,
+        "y": 10,
+        "width": 100,
+        "height": 72
+      },
+      "surfaceBefore": "formal_page",
+      "surfaceAfter": "formal_page"
+    },
+    {
+      "name": "source-materialized-x152",
+      "frame": {
+        "id": "synthetic-source-frame",
+        "role": "primary_page_frame",
+        "exportable": true,
+        "x": 80,
+        "y": 80,
+        "width": 794,
+        "height": 1123,
+        "contentInset": {
+          "left": 72,
+          "right": 72,
+          "top": 96,
+          "bottom": 96
+        }
+      },
+      "original": {
+        "x": 152,
+        "y": 176,
+        "width": 650,
+        "height": 72,
+        "rotation": 0,
+        "frame_id": "synthetic-source-frame",
+        "surface": "formal_page",
+        "boundary_role": "inside",
+        "coordinate_space": "canvas_world"
+      },
+      "candidate": {
+        "x": 152,
+        "y": 0,
+        "width": 650,
+        "height": 72,
+        "rotation": 0,
+        "frame_id": "synthetic-source-frame",
+        "surface": "formal_page",
+        "boundary_role": "inside",
+        "coordinate_space": "page_frame_local"
+      },
+      "screenBefore": {
+        "x": 152,
+        "y": 176,
+        "width": 650,
+        "height": 72
+      },
+      "screenAfter": {
+        "x": 152,
+        "y": 176,
+        "width": 650,
+        "height": 72
+      },
+      "hydratedScreenBefore": {
+        "x": 0,
+        "y": 176,
+        "width": 650,
+        "height": 72
+      },
+      "hydratedScreenAfter": {
+        "x": 152,
+        "y": 176,
+        "width": 650,
+        "height": 72
+      },
+      "surfaceBefore": "formal_page",
+      "surfaceAfter": "canvas_workspace"
+    }
+  ]
+}
