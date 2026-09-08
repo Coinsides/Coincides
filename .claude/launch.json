@@ -4,22 +4,14 @@
     {
       "name": "coincides-server",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
-      "cwd": "server",
+      "runtimeArgs": ["--prefix", "server", "run", "dev"],
       "port": 3001
     },
     {
       "name": "coincides-client",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
-      "cwd": "client",
+      "runtimeArgs": ["--prefix", "client", "run", "dev"],
       "port": 5173
-    },
-    {
-      "name": "docs-static",
-      "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8123", "--directory", "docs"],
-      "port": 8123
     }
   ]
 }

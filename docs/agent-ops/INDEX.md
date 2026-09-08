@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-09-07
+> **日期 (Updated)**: 2026-09-08
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 269 份文档。
+共 270 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -119,6 +119,7 @@
 | [claude-log/2026-08-31.md](claude-log/2026-08-31.md) | Claude 工作日志 · 2026-08-31 | `(缺状态头)` | — | — |
 | [claude-log/2026-09-04.md](claude-log/2026-09-04.md) | Claude 工作日志 · 2026-09-04 | `(缺状态头)` | — | — |
 | [claude-log/2026-09-07.md](claude-log/2026-09-07.md) | Claude Log · 2026-09-07(Fable 会话) | `(缺状态头)` | — | — |
+| [claude-log/2026-09-08.md](claude-log/2026-09-08.md) | Claude Log · 2026-09-08(Fable 会话) | `(缺状态头)` | — | — |
 | [claude-log/README.md](claude-log/README.md) | claude-log —— Claude 行动日志（Henry 的监督轨迹） | `active` | 2026-06-27 | — |
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-23 | — |
