@@ -107,13 +107,13 @@ function resolveHydration(
   }));
 }
 
-describe('useSurfaceModeController initial-surface bridge', () => {
-  it('A-2: switches a hydrated canvas-only legacy specimen to Canvas once', () => {
+describe('useSurfaceModeController retired initial-surface bridge', () => {
+  it('S5: keeps a hydrated canvas-only legacy specimen on Page', () => {
     const { subject } = renderSubject();
 
     expect(subject.result.current.surfaceMode).toBe('page');
     resolveHydration(subject);
-    expect(subject.result.current.surfaceMode).toBe('canvas');
+    expect(subject.result.current.surfaceMode).toBe('page');
 
     act(() => subject.result.current.toggleSurfaceMode());
     expect(subject.result.current.surfaceMode).toBe('page');
@@ -121,7 +121,7 @@ describe('useSurfaceModeController initial-surface bridge', () => {
     expect(subject.result.current.surfaceMode).toBe('page');
   });
 
-  it('T-1a: keeps Page while hydration is incomplete without consuming the decision', () => {
+  it('S5: keeps Page before and after hydration completes', () => {
     const { subject } = renderSubject();
 
     resolveHydration(subject, {
@@ -132,7 +132,7 @@ describe('useSurfaceModeController initial-surface bridge', () => {
     expect(subject.result.current.surfaceMode).toBe('page');
 
     resolveHydration(subject);
-    expect(subject.result.current.surfaceMode).toBe('canvas');
+    expect(subject.result.current.surfaceMode).toBe('page');
   });
 
   it('keeps Page while the loaded note belongs to the previous route generation', () => {
@@ -145,7 +145,7 @@ describe('useSurfaceModeController initial-surface bridge', () => {
     expect(subject.result.current.surfaceMode).toBe('page');
 
     resolveHydration(subject);
-    expect(subject.result.current.surfaceMode).toBe('canvas');
+    expect(subject.result.current.surfaceMode).toBe('page');
   });
 
   it('T-1b: decides that a truly empty hydrated note stays on Page', () => {
@@ -177,7 +177,7 @@ describe('useSurfaceModeController initial-surface bridge', () => {
     expect(subject.result.current.surfaceMode).toBe('page');
   });
 
-  it('T-2: never reclaims the surface after a manual pre-hydration toggle', () => {
+  it('S5: stale pre-hydration toggles keep Page', () => {
     const { subject } = renderSubject();
 
     resolveHydration(subject, {
@@ -193,14 +193,14 @@ describe('useSurfaceModeController initial-surface bridge', () => {
     expect(subject.result.current.surfaceMode).toBe('page');
   });
 
-  it('G-X2: resets the manual guard when routing from note A to note B', () => {
+  it('S5: retains Page when routing from note A to note B', () => {
     const { subject } = renderSubject();
 
     resolveHydration(subject, { blocks: [] });
     expect(subject.result.current.surfaceMode).toBe('page');
 
     act(() => subject.result.current.toggleSurfaceMode());
-    expect(subject.result.current.surfaceMode).toBe('canvas');
+    expect(subject.result.current.surfaceMode).toBe('page');
     act(() => subject.result.current.toggleSurfaceMode());
     expect(subject.result.current.surfaceMode).toBe('page');
 
@@ -208,14 +208,14 @@ describe('useSurfaceModeController initial-surface bridge', () => {
     act(() => subject.rerender({ currentNoteId: nextNoteId }));
     expect(subject.result.current.surfaceMode).toBe('page');
     resolveHydration(subject, { loadedNoteId: nextNoteId });
-    expect(subject.result.current.surfaceMode).toBe('canvas');
+    expect(subject.result.current.surfaceMode).toBe('page');
   });
 
-  it('G-X2: resets note-keyed Canvas state across an A-to-B-to-A route matrix', () => {
+  it('S5: retains Page across an A-to-B-to-A route matrix', () => {
     const { subject } = renderSubject();
 
     resolveHydration(subject);
-    expect(subject.result.current.surfaceMode).toBe('canvas');
+    expect(subject.result.current.surfaceMode).toBe('page');
 
     const nextNoteId = 'next-note-id';
     act(() => subject.rerender({ currentNoteId: nextNoteId }));

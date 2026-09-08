@@ -12,6 +12,7 @@ import {
 } from '../modePolicyService';
 import type { PlacementSeedBlock } from '../placementService';
 import type { SnapGuide, SurfaceMode } from '../runtimeLayout';
+import { CANVAS_MODE_RETIRED, resolveActiveNoteCanvasMode } from '../canvasRetirementPolicy';
 
 export interface UseSurfaceModeControllerOptions {
   noteId?: string;
@@ -44,7 +45,7 @@ export function useSurfaceModeController({
   const decisionNoteIdRef = useRef(noteId);
   const decidedRef = useRef(false);
   const manualToggledRef = useRef(false);
-  const surfaceMode = surfaceState.noteId === noteId ? surfaceState.mode : 'page';
+  const surfaceMode = resolveActiveNoteCanvasMode(surfaceState.noteId === noteId ? surfaceState.mode : 'page');
   const surfacePolicy = useMemo(
     () => createSurfaceModePolicy(surfaceMode),
     [surfaceMode],
@@ -67,6 +68,7 @@ export function useSurfaceModeController({
     loadedNoteId,
     loading,
   }: ResolveInitialSurfaceModeInput) => {
+    if (CANVAS_MODE_RETIRED) return;
     const hydrated = !loading && loadedNoteId === noteId;
     if (
       !noteId
@@ -97,6 +99,7 @@ export function useSurfaceModeController({
   }, [noteId]);
 
   const toggleSurfaceMode = useCallback(() => {
+    if (CANVAS_MODE_RETIRED) return;
     manualToggledRef.current = true;
     const transition = createSurfaceModeTransitionPolicy(surfaceMode);
     setSurfaceState({ noteId, mode: transition.nextMode });

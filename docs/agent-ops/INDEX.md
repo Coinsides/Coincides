@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 274 份文档。
+共 275 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -79,6 +79,7 @@
 | [analysis/2026-09-07-v13-1-s4-coordinate-contract-recon.md](analysis/2026-09-07-v13-1-s4-coordinate-contract-recon.md) | V13.1 单 4：坐标契约 K-0 侦察 | `frozen` | 2026-09-07 | — |
 | [analysis/2026-09-07-v13-2-s0-recon.md](analysis/2026-09-07-v13-2-s0-recon.md) | V13.2 单 0：野地退役与坐标 census | `frozen` | 2026-09-07 | — |
 | [analysis/2026-09-07-wilderness-migration-mapping.md](analysis/2026-09-07-wilderness-migration-mapping.md) | 13.0 图三 · 野地退役迁移映射表 | `active` | 2026-09-07 | — |
+| [analysis/2026-09-08-v13-2-canvas-deadcode-inventory.md](analysis/2026-09-08-v13-2-canvas-deadcode-inventory.md) | V13.2 单 5 · canvas 模式死代码清册 | `frozen` | 2026-09-08 | — |
 | [analysis/canvas-object-review-issue-register.md](analysis/canvas-object-review-issue-register.md) | Canvas Object Family — 审查问题登记册 | `active` | 2026-06-30 | — |
 | [analysis/dissent-register.md](analysis/dissent-register.md) | 分歧登记簿 (Dissent Register) | `active` | 2026-07-12 | — |
 | [analysis/external-candidate-registry.md](analysis/external-candidate-registry.md) | 外部候选登记册(External Candidate Registry) | `active` | 2026-08-16 | — |

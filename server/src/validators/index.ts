@@ -714,8 +714,10 @@ export const updateNoteBlockPlacementSchema = z.object({
 });
 
 const canvasRuntimeIdSchema = z.string().min(1).max(220);
-const canvasSurfaceSchema = z.enum(['formal_page', 'canvas_workspace', 'tray']);
-const canvasBoundaryRoleSchema = z.enum(['inside', 'outside', 'crossing']);
+const canvasSurfaceSchema = z.enum(['formal_page', 'canvas_workspace', 'tray'])
+  .refine((value) => value !== 'canvas_workspace', { message: 'canvas_workspace_retired' });
+const canvasBoundaryRoleSchema = z.enum(['inside', 'outside', 'crossing'])
+  .refine((value) => value !== 'crossing', { message: 'canvas_crossing_retired' });
 const canvasVisibilityStateSchema = z.enum(['normal', 'scratch', 'ai_hidden', 'export_hidden']);
 const canvasRenderVisibilitySchema = z.enum(['visible', 'hidden', 'collapsed']);
 

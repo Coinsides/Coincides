@@ -1,4 +1,5 @@
 import type Database from 'better-sqlite3';
+import { assertCanvasPlacementWriteAllowed } from './canvasWritePolicy.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { finalizeCanvasAssetCleanup, releaseAssetReference } from './canvasAssets.js';
 import type { ManagedFileTask } from './managedFileCleanup.js';
@@ -447,6 +448,7 @@ function normalizePlacementForWrite(
     metadata?: Record<string, unknown>;
   } = {},
 ) {
+  assertCanvasPlacementWriteAllowed({ surface: placement.surface, boundary_role: placement.boundary_role });
   const surface = placement.surface === 'tray' ? 'tray' : placement.surface === 'formal_page' ? 'formal_page' : 'canvas_workspace';
   const boundaryRole = placement.boundary_role === 'inside'
     || placement.boundary_role === 'crossing'
@@ -454,6 +456,7 @@ function normalizePlacementForWrite(
     ? placement.boundary_role
     : null;
   const effectiveSurface = defaults.surface || surface;
+  assertCanvasPlacementWriteAllowed({ surface: effectiveSurface, boundary_role: defaults.boundaryRole || boundaryRole });
   const isTray = effectiveSurface === 'tray';
   const coordinateSpace = placement.coordinate_space === 'page_frame_local'
     || placement.coordinate_space === 'canvas_world'
@@ -541,6 +544,7 @@ function upsertCanvasPlacementCore(
   note: OwnedNote,
   placement: ReturnType<typeof normalizePlacementForWrite>,
 ) {
+  assertCanvasPlacementWriteAllowed(placement);
   db.prepare(`
     INSERT INTO canvas_placements (
       id, user_id, course_id, note_id, object_id, canvas_id,

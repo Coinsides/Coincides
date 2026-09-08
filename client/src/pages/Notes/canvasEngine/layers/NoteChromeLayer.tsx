@@ -17,6 +17,7 @@ import {
   X,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef } from 'react';
+import { CANVAS_MODE_RETIRED } from '../canvasRetirementPolicy';
 import type { ChangeEvent } from 'react';
 import type { ExportPreviewModel } from '../exportPreviewService';
 import type { Note, NoteBlock } from '../runtimeDataTypes';
@@ -398,6 +399,8 @@ export function NoteChromeLayer({
           )}
 
           <div className={styles.chromeActions}>
+            {/* V13.2: unmount the entry; retain its implementation for the 13.6 inventory. */}
+            {!CANVAS_MODE_RETIRED && (
             <button
               className={`${styles.modePill} ${surfaceMode === 'canvas' ? styles.modePillActive : ''}`}
               onClick={onToggleSurfaceMode}
@@ -407,6 +410,7 @@ export function NoteChromeLayer({
               <FileText size={15} />
               {surfacePolicy.label}
             </button>
+            )}
             <button
               className={`${styles.modePill} ${showExportPreview ? styles.modePillActive : ''}`}
               onClick={onToggleExportPreview}

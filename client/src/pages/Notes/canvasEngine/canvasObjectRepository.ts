@@ -1,4 +1,5 @@
 import api from '@/services/api';
+import { assertNoRetiredCanvasWrite, requireCanvasObjectWritePayload, requireCanvasPlacementWritePayload } from './canvasRetirementPolicy';
 import { createCoordinateContractSession, type CoordinateContractSession } from './coordinateContractSession';
 import {
   requiresFrameLocalWriteContext,
@@ -127,11 +128,12 @@ export async function saveBlockCanvasPlacementForNote(input: {
   pageFrameCollection?: PageFrameCollectionModel | null;
   coordinateContract?: CoordinateContract;
 }): Promise<CanvasBlockLayoutRecord> {
+  assertNoRetiredCanvasWrite(input.layout);
   const response = await api.put<CanvasBlockLayoutRecord>(
     `/canvas-objects/by-note/${input.noteId}/block-placements/${input.block.placement_id}`,
     {
       block_id: input.block.id,
-      layout: buildLayoutPayload(requireStoredLayout(input.layout, input.pageFrameCollection?.pageFrames || [], input.coordinateContract)),
+      layout: requireCanvasPlacementWritePayload(buildLayoutPayload(requireStoredLayout(input.layout, input.pageFrameCollection?.pageFrames || [], input.coordinateContract))),
     },
   );
   return {
@@ -151,9 +153,12 @@ export async function saveGenericCanvasObjectForNote(input: {
   coordinateContract?: CoordinateContract;
   pageFrameCollection?: PageFrameCollectionModel | null;
 }): Promise<Record<string, unknown>> {
+  if (input.payload.placement && typeof input.payload.placement === 'object') {
+    assertNoRetiredCanvasWrite(input.payload.placement);
+  }
   const response = await api.put<Record<string, unknown>>(
     `/canvas-objects/by-note/${input.noteId}/objects/${input.objectId}`,
-    toStoredGenericCanvasObjectPayload(input.payload, input.pageFrameCollection?.pageFrames || [], input.coordinateContract),
+    requireCanvasObjectWritePayload(toStoredGenericCanvasObjectPayload(input.payload, input.pageFrameCollection?.pageFrames || [], input.coordinateContract)),
   );
   return response.data;
 }

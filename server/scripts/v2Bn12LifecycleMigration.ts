@@ -1,4 +1,5 @@
 import Database from 'better-sqlite3';
+import { assertCanvasPlacementWriteAllowed } from '../src/services/canvasWritePolicy.js';
 import * as sqliteVec from 'sqlite-vec';
 import { createHash } from 'node:crypto';
 import {
@@ -919,12 +920,20 @@ export function planHash(plan: MigrationPlan): string {
   return sha256Text(canonicalCompactJson(plan));
 }
 
+/** Dry-run remains a historical diagnostic; apply cannot regenerate retired values. */
+export function assertRetiredSurfaceUpdatesAllowed(plan: Pick<MigrationPlan, 'surfaceUpdates'>): void {
+  for (const update of plan.surfaceUpdates) {
+    assertCanvasPlacementWriteAllowed({ surface: update.next.surface, boundary_role: update.next.boundaryRole });
+  }
+}
+
 function applyLockedPlan(db: Database.Database, plan: MigrationPlan): {
   surfaceUpdates: number;
   canvasObjectsDeleted: number;
   noteBlocksDeleted: number;
   postflight: MigrationPlan['preflight'];
 } {
+  assertRetiredSurfaceUpdatesAllowed(plan);
   let surfaceUpdates = 0;
   let canvasObjectsDeleted = 0;
   let noteBlocksDeleted = 0;
@@ -1114,6 +1123,7 @@ async function run(options: CliOptions): Promise<void> {
       return;
     }
 
+    assertRetiredSurfaceUpdatesAllowed(initialPlan);
     if (initialHash !== options.expectPlan) {
       const error = `Plan hash mismatch before backup: expected ${options.expectPlan}, got ${initialHash}`;
       writeReceipt(options.receiptPath, {

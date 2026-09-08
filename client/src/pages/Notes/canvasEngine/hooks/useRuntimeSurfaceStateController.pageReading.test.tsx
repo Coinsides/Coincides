@@ -85,7 +85,7 @@ describe('page reading programmatic focus scheduling', () => {
     expect(result.current.viewportTransform).toEqual(beforeViewport);
   });
 
-  it('cancels pending page focus when the note changes or the mode switches to canvas', () => {
+  it('cancels pending page focus on note changes and preserves it after a retired mode toggle', () => {
     const raf = animationFrames();
     const dom = pageDom();
     const subject = renderHook(({ noteId }) => useRuntimeSurfaceStateController({ noteId }), {
@@ -105,14 +105,14 @@ describe('page reading programmatic focus scheduling', () => {
     act(() => subject.result.current.focusViewportOnRect(target));
     const secondId = [...raf.pending.keys()][0];
     act(() => subject.result.current.toggleSurfaceMode());
-    expect(subject.result.current.surfaceMode).toBe('canvas');
-    expect(raf.cancel).toHaveBeenCalledWith(secondId);
-    expect(raf.pending.size).toBe(0);
+    expect(subject.result.current.surfaceMode).toBe('page');
+    expect(raf.cancel).not.toHaveBeenCalledWith(secondId);
+    expect(raf.pending.size).toBe(1);
     raf.flush();
-    expect(dom.scroll).not.toHaveBeenCalled();
+    expect(dom.scroll).toHaveBeenCalledTimes(1);
   });
 
-  it('keeps canvas focus synchronous and leaves page reading state untouched', () => {
+  it('keeps page focus scheduled and reading state untouched after a retired toggle', () => {
     const raf = animationFrames();
     const dom = pageDom();
     const { result } = renderHook(() => useRuntimeSurfaceStateController({ noteId: 'note-a' }));
@@ -125,8 +125,8 @@ describe('page reading programmatic focus scheduling', () => {
 
     act(() => result.current.focusViewportOnRect({ x: 3000, y: 2400, width: 200, height: 160 }, world));
 
-    expect(result.current.viewportTransform).toMatchObject({ x: 2600, y: 2080, zoom: beforeZoom });
-    expect(raf.request).not.toHaveBeenCalled();
+    expect(result.current.viewportTransform).toMatchObject({ x: 0, y: 0, zoom: beforeZoom });
+    expect(raf.request).toHaveBeenCalledTimes(1);
     expect(dom.scroll).not.toHaveBeenCalled();
     expect(result.current.pageReadingViewState).toEqual({ gear: 'fit_page', stepFactor: 1 });
   });

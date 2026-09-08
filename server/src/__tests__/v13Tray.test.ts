@@ -26,7 +26,7 @@ async function fixture(run: (db: Database.Database) => void) {
   } finally { closeDb(); }
 }
 
-test('tray validator keeps finite geometry and accepts nullable integer ordering; legacy workspace/crossing still writes', async () => {
+test('tray validator keeps finite geometry and accepts nullable integer ordering; retired workspace/crossing remains readable', async () => {
   const parsed = saveCanvasBlockPlacementSchema.parse({ block_id: 'block-1', layout });
   assert.equal(parsed.layout.order_index, 7);
   assert.equal(saveCanvasBlockPlacementSchema.safeParse({ block_id: 'b', layout: { ...layout, x: Infinity } }).success, false);
@@ -41,9 +41,12 @@ test('tray validator keeps finite geometry and accepts nullable integer ordering
     const read = getNoteCanvasPersistence(db, 'tray-user', 'tray-note');
     assert.equal(read.canvasPlacements.find((p) => p.placement_id === 'placement-1')?.order_index, 7);
     assert.equal(read.blockLayouts.find((p) => p.placement_id === 'placement-1')?.layout.surface, 'tray');
-    const legacy = saveBlockCanvasPlacement(db, 'tray-user', 'tray-note', 'placement-1', {
+    assert.throws(() => saveBlockCanvasPlacement(db, 'tray-user', 'tray-note', 'placement-1', {
       block_id: 'block-1', layout: { ...layout, surface: 'canvas_workspace', boundary_role: 'crossing', order_index: null },
-    });
+    }), { message: 'canvas_workspace_retired' });
+    // Historical fixture rows bypass current writers; production history is never rewritten.
+    db.exec("UPDATE canvas_placements SET surface='canvas_workspace', boundary_role='crossing', x=10 WHERE id='placement-1'");
+    const legacy = getNoteCanvasPersistence(db, 'tray-user', 'tray-note').blockLayouts.find((p) => p.placement_id === 'placement-1')!;
     assert.equal(legacy.layout.surface, 'canvas_workspace');
     assert.equal(legacy.layout.boundary_role, 'crossing');
     assert.equal(legacy.layout.x, 10);

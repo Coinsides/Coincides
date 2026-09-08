@@ -2137,7 +2137,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     );
   });
 
-  it('drives response-loss replay through adapter and controller to a latest PUT', async () => {
+  it('drives response-loss replay through adapter and controller to a latest PUT on Page', async () => {
     let durableText = '';
     const createPayloads: Array<Record<string, unknown>> = [];
     mocks.post.mockImplementation(async (url: string, payload: Record<string, unknown>) => {
@@ -2172,7 +2172,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       const adapter = useNoteCanvasDataAdapter(stableAdapterOptions);
       const controller = useDraftBlockController({
         createBlock: adapter.createDraftBlock,
-        defaultDraftLayout,
+        defaultDraftLayout: { ...defaultDraftLayout, surface: 'formal_page', boundary_role: 'inside' },
         defaultTextTemplate: adapter.defaultTextTemplate,
         discardDraftBlock: adapter.discardDraftBlock,
         finalizeDraftBlock: adapter.finalizeDraftBlock,

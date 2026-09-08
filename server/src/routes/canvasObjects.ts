@@ -21,6 +21,12 @@ const router = Router();
 
 function handleValidationError(err: unknown, res: Response): boolean {
   if (err instanceof ZodError) {
+    const retirementError = err.errors.find((issue) => issue.message === 'canvas_workspace_retired'
+      || issue.message === 'canvas_crossing_retired');
+    if (retirementError) {
+      res.status(400).json({ error: retirementError.message, details: err.errors });
+      return true;
+    }
     res.status(400).json({ error: 'Validation error', details: err.errors });
     return true;
   }

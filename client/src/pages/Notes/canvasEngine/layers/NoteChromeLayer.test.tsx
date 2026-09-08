@@ -115,6 +115,15 @@ function noteChromeProps(
 }
 
 describe('NoteChromeLayer block restore door', () => {
+  it('S5 removes the mode switch from the DOM even with legacy canvas props', () => {
+    for (const surfaceMode of ['page', 'canvas'] as const) {
+      const subject = render(<NoteChromeLayer {...noteChromeProps({ surfaceMode })} />);
+      expect(subject.container.querySelector('[title="Switch to Canvas"]')).toBeNull();
+      expect(screen.queryByRole('button', { name: /^(Page|Canvas)$/ })).toBeNull();
+      expect(screen.getByRole('button', { name: 'Preview' })).toBeTruthy();
+      subject.unmount();
+    }
+  });
   beforeEach(() => {
     mocks.get.mockReset();
   });

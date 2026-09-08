@@ -248,7 +248,7 @@ describe('useNoteCanvasRuntimeController initial-surface production bridge', () 
     {
       label: 'canvas-only',
       blocks: [canvasOnlySpecimen],
-      expectedSurfaceMode: 'canvas',
+      expectedSurfaceMode: 'page',
     },
     {
       label: 'mixed formal and canvas',
@@ -280,7 +280,7 @@ describe('useNoteCanvasRuntimeController initial-surface production bridge', () 
     expect(screen.getByTestId('root-surface-mode').textContent).toBe(expectedSurfaceMode);
   });
 
-  it('13.1 smoke: same-note A4 to Letter follows quantized 11pt in layout and wrapping; canvas is unchanged', () => {
+  it('13.1/S5 smoke: same-note A4 to Letter follows quantized 11pt before and after a retired mode toggle', () => {
     const frameFor = (pageSize: 'A4' | 'Letter'): PageFrameModel => {
       const print = createPageFramePrintProfile(pageSize);
       return {
@@ -352,14 +352,14 @@ describe('useNoteCanvasRuntimeController initial-surface production bridge', () 
 
     act(() => rootBridgeContract.toggleSurfaceMode());
     const letterCanvas = snapshot(letter);
-    expect(screen.getByTestId('root-surface-mode').textContent).toBe('canvas');
+    expect(screen.getByTestId('root-surface-mode').textContent).toBe('page');
     setFrame(a4);
     rerender(<RootBridgeHarness />);
     const a4Canvas = snapshot(a4);
-    expect(a4Canvas.profile).toBe(rootBridgeContract.hydratedProfile);
-    expect(letterCanvas.profile).toBe(rootBridgeContract.hydratedProfile);
-    expect(a4Canvas.measurement).toEqual(letterCanvas.measurement);
-    expect(a4Canvas.layout).toEqual(letterCanvas.layout);
+    expect(a4Canvas.profile).toEqual(a4Page.profile);
+    expect(letterCanvas.profile).toEqual(letterPage.profile);
+    expect(a4Canvas.measurement).toEqual(a4Page.measurement);
+    expect(letterCanvas.layout).toEqual(letterPage.layout);
     expect([a4, letter]).toEqual(framesBefore);
   });
 });
