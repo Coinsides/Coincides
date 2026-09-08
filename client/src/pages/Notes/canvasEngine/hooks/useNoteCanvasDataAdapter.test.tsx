@@ -2,11 +2,12 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import type { AnnotationTruthV1, Note, NoteBlock } from '../runtimeDataTypes';
+import type { AnnotationTruthV1, Note, NoteBlock, TextBlockContentV1 } from '../runtimeDataTypes';
 import {
   DRAFT_RECOVERY_STORAGE_KEY_V1,
   DRAFT_RECOVERY_STORAGE_KEY_V2,
   createBlockEditRecoveryKey,
+  listBlockEditRecoveryReceipts,
 } from '../draftBlockPersistence';
 import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
 import { useDraftBlockController } from './useDraftBlockController';
@@ -16,6 +17,7 @@ import {
 } from './useNoteCanvasDataAdapter';
 
 const mocks = vi.hoisted(() => ({
+  coordinateContract: 'v1' as 'v1' | 'v2',
   addToast: vi.fn(),
   get: vi.fn(),
   post: vi.fn(),
@@ -26,7 +28,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock('@/services/api', () => ({
   default: {
     get: (url: string, ...args: unknown[]) => url === '/canvas-objects/coordinate-contract'
-      ? Promise.resolve({ data: { coordinate_contract: 'v1' } })
+      ? Promise.resolve({ data: { coordinate_contract: mocks.coordinateContract } })
       : mocks.get(url, ...args),
     post: mocks.post,
     put: mocks.put,
@@ -91,6 +93,7 @@ const recoveryTemplate = {
 
 let canvasPersistenceResponse: Record<string, unknown> = {};
 let durableAnnotationTruths: AnnotationTruthV1[] = [];
+let durableBlocks: NoteBlock[] = [];
 
 function deferred<T>() {
   let resolve!: (value: T | PromiseLike<T>) => void;
@@ -254,13 +257,15 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
   beforeEach(() => {
     sessionStorage.clear();
     vi.clearAllMocks();
+    mocks.coordinateContract = 'v1';
     canvasPersistenceResponse = {};
     durableAnnotationTruths = [];
+    durableBlocks = [];
     consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     mocks.get.mockImplementation(async (url: string) => {
       if (url === `/notes/${note.id}`) return { data: note };
-      if (url === `/notes/${note.id}/blocks`) return { data: [] };
+      if (url === `/notes/${note.id}/blocks`) return { data: durableBlocks };
       if (url === `/canvas-objects/by-note/${note.id}`) return { data: canvasPersistenceResponse };
       if (url === `/annotation-truths/by-note/${note.id}`) {
         return { data: durableAnnotationTruths };
@@ -278,6 +283,275 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
   afterEach(() => {
     consoleError.mockRestore();
     consoleWarn.mockRestore();
+  });
+
+  it.each(['argument', 'draft'] as const)(
+    'skips a v2 unchanged blur save with equivalent serialized TextFlow from %s',
+    async (flowSource) => {
+      mocks.coordinateContract = 'v2';
+      const storedFlow = createTextBlockContentV1('same paragraph', 'paragraph', {
+        formatting: { weight: 'normal', color: 'default' },
+      });
+      const blurFlow: TextBlockContentV1 = {
+        metadata: { formatting: { color: 'default', weight: 'normal' } },
+        inline_structures: [],
+        units: storedFlow.units.map((unit) => ({
+          status: unit.status,
+          metadata: { ...unit.metadata },
+          order_index: unit.order_index,
+          indent_level: unit.indent_level,
+          writing_role: unit.writing_role,
+          text: unit.text,
+          id: unit.id,
+        })),
+        textflow_version: storedFlow.textflow_version,
+      };
+      durableBlocks = [{
+        ...serverBlock('same paragraph', false),
+        content_json: { body: 'same paragraph', [TEXT_FLOW_CONTENT_KEY]: storedFlow },
+      }];
+      const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+      await waitFor(() => expect(subject.result.current.coordinateContract).toBe('v2'));
+      const block = subject.result.current.blocks[0];
+      expect(blurFlow).not.toBe(storedFlow);
+      expect(JSON.stringify(blurFlow)).not.toBe(JSON.stringify(storedFlow));
+      expect(blurFlow).toEqual(storedFlow);
+      if (flowSource === 'draft') {
+        act(() => subject.result.current.setBlockTextFlowDrafts({ [block.id]: blurFlow }));
+      }
+
+      let outcome!: BlockSaveOutcome;
+      await act(async () => {
+        outcome = await subject.result.current.saveBlock(block, 'same paragraph', {
+          ...(flowSource === 'argument' ? { textFlow: blurFlow } : {}),
+          silent: true,
+        });
+      });
+
+      expect(outcome).toMatchObject({ status: 'saved', reconciliation: 'not_needed' });
+      expect(mocks.put).not.toHaveBeenCalled();
+      expect(listBlockEditRecoveryReceipts(note.id)).toEqual([]);
+      expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2)).toBeNull();
+      expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
+      expect(subject.result.current.savingBlockId).toBeNull();
+    },
+  );
+
+  it.each(['materialized', 'reformatted'] as const)(
+    'saves %s TextFlow once in v2 while keeping its in-flight receipt durable and hidden',
+    async (change) => {
+      mocks.coordinateContract = 'v2';
+      const storedFlow = createTextBlockContentV1('same paragraph');
+      const nextFlow: TextBlockContentV1 = {
+        ...storedFlow,
+        units: storedFlow.units.map((unit) => ({
+          ...unit,
+          writing_role: change === 'reformatted' ? 'heading' : unit.writing_role,
+        })),
+      };
+      durableBlocks = [{
+        ...serverBlock('same paragraph', false),
+        content_json: {
+          body: 'same paragraph',
+          ...(change === 'reformatted' ? { [TEXT_FLOW_CONTENT_KEY]: storedFlow } : {}),
+        },
+      }];
+      const heldPut = deferred<{ data: NoteBlock }>();
+      mocks.put.mockReturnValue(heldPut.promise);
+      const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+      await waitFor(() => expect(subject.result.current.coordinateContract).toBe('v2'));
+      const block = subject.result.current.blocks[0];
+      let save!: Promise<BlockSaveOutcome>;
+      act(() => {
+        save = subject.result.current.saveBlock(block, 'same paragraph', { textFlow: nextFlow });
+      });
+
+      expect(mocks.put).toHaveBeenCalledTimes(1);
+      expect(mocks.put).toHaveBeenCalledWith(`/note-blocks/${block.id}`, {
+        content_json: { body: 'same paragraph', [TEXT_FLOW_CONTENT_KEY]: nextFlow },
+        plain_text: 'same paragraph',
+      });
+      expect(subject.result.current.savingBlockId).toBe(block.id);
+      expect(listBlockEditRecoveryReceipts(note.id)).toEqual([
+        expect.objectContaining({
+          blockId: block.id,
+          plainText: 'same paragraph',
+          contentJson: { body: 'same paragraph', [TEXT_FLOW_CONTENT_KEY]: nextFlow },
+        }),
+      ]);
+      expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2)).toContain('same paragraph');
+      expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
+
+      let outcome!: BlockSaveOutcome;
+      await act(async () => {
+        heldPut.resolve({
+          data: { ...block, content_json: { body: 'same paragraph', [TEXT_FLOW_CONTENT_KEY]: nextFlow } },
+        });
+        outcome = await save;
+      });
+      expect(outcome).toMatchObject({ status: 'saved', reconciliation: 'response' });
+      expect(mocks.put).toHaveBeenCalledTimes(1);
+      expect(subject.result.current.blocks[0].content_json[TEXT_FLOW_CONTENT_KEY]).toEqual(nextFlow);
+      expect(listBlockEditRecoveryReceipts(note.id)).toEqual([]);
+      expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
+      expect(subject.result.current.savingBlockId).toBeNull();
+    },
+  );
+
+  it('shows a v2 failed write immediately during held reconciliation and applies it explicitly', async () => {
+    mocks.coordinateContract = 'v2';
+    durableBlocks = [serverBlock('server old', false)];
+    const heldPut = deferred<{ data: NoteBlock }>();
+    const heldRead = deferred<{ data: NoteBlock[] }>();
+    const heldApply = deferred<{ data: NoteBlock }>();
+    const defaultGet = mocks.get.getMockImplementation()!;
+    let blockReads = 0;
+    mocks.get.mockImplementation((url: string) => {
+      if (url === `/notes/${note.id}/blocks` && ++blockReads === 2) return heldRead.promise;
+      return defaultGet(url);
+    });
+    mocks.put.mockReturnValueOnce(heldPut.promise).mockReturnValueOnce(heldApply.promise);
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.coordinateContract).toBe('v2'));
+    const block = subject.result.current.blocks[0];
+    let save!: Promise<BlockSaveOutcome>;
+    const saveSettled = vi.fn();
+    act(() => {
+      save = subject.result.current.saveBlock(block, 'recover me');
+      void save.then(saveSettled);
+    });
+    const pending = listBlockEditRecoveryReceipts(note.id)[0];
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
+
+    await act(async () => {
+      heldPut.reject(new Error('synthetic pre-commit failure'));
+    });
+    // No timer advances or waitFor: the failure must surface before this read resolves.
+    expect(blockReads).toBe(2);
+    expect(saveSettled).not.toHaveBeenCalled();
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([pending]);
+    expect(mocks.put).toHaveBeenCalledTimes(1);
+
+    let failed!: BlockSaveOutcome;
+    await act(async () => {
+      heldRead.resolve({ data: durableBlocks });
+      failed = await save;
+    });
+    expect(failed).toMatchObject({ status: 'rejected', durableState: 'conflict' });
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([pending]);
+    let apply!: Promise<boolean>;
+    act(() => {
+      apply = subject.result.current.applyBlockEditRecovery(pending.recoveryKey);
+    });
+    expect(mocks.put).toHaveBeenCalledTimes(2);
+    expect(listBlockEditRecoveryReceipts(note.id)).toEqual([
+      expect.objectContaining({ text: 'recover me' }),
+    ]);
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
+
+    let applied = false;
+    await act(async () => {
+      const payload = mocks.put.mock.calls[1][1] as Pick<NoteBlock, 'content_json' | 'plain_text'>;
+      heldApply.resolve({ data: { ...block, ...payload } });
+      applied = await apply;
+    });
+    expect(applied).toBe(true);
+    expect(subject.result.current.blocks[0].plain_text).toBe('recover me');
+    expect(listBlockEditRecoveryReceipts(note.id)).toEqual([]);
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
+    expect(mocks.put).toHaveBeenCalledTimes(2);
+  });
+
+  it('filters concurrent v2 block saves independently and preserves the other block failure', async () => {
+    mocks.coordinateContract = 'v2';
+    durableBlocks = [
+      serverBlock('first old', false),
+      { ...serverBlock('second old', false), id: 'block-2', placement_id: 'placement-2' },
+    ];
+    const firstPut = deferred<{ data: NoteBlock }>();
+    const secondPut = deferred<{ data: NoteBlock }>();
+    mocks.put.mockImplementation((url: string) => (
+      url === '/note-blocks/block-1' ? firstPut.promise : secondPut.promise
+    ));
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.coordinateContract).toBe('v2'));
+    const [firstBlock, secondBlock] = subject.result.current.blocks;
+    let firstSave!: Promise<BlockSaveOutcome>;
+    let secondSave!: Promise<BlockSaveOutcome>;
+    act(() => {
+      firstSave = subject.result.current.saveBlock(firstBlock, 'first edit');
+      secondSave = subject.result.current.saveBlock(secondBlock, 'second edit');
+    });
+    expect(mocks.put).toHaveBeenCalledTimes(2);
+    expect(listBlockEditRecoveryReceipts(note.id)).toHaveLength(2);
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
+
+    await act(async () => {
+      firstPut.reject(new Error('first block pre-commit rejection'));
+      await firstSave;
+    });
+    expect(subject.result.current.savingBlockId).toBe(secondBlock.id);
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([
+      expect.objectContaining({ blockId: firstBlock.id, text: 'first edit' }),
+    ]);
+    expect(listBlockEditRecoveryReceipts(note.id)).toHaveLength(2);
+
+    await act(async () => {
+      const payload = mocks.put.mock.calls[1][1] as Pick<NoteBlock, 'content_json' | 'plain_text'>;
+      secondPut.resolve({ data: { ...secondBlock, ...payload } });
+      await secondSave;
+    });
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([
+      expect.objectContaining({ blockId: firstBlock.id, text: 'first edit' }),
+    ]);
+    expect(listBlockEditRecoveryReceipts(note.id)).toHaveLength(1);
+    expect(subject.result.current.savingBlockId).toBeNull();
+    expect(mocks.put).toHaveBeenCalledTimes(2);
+  });
+
+  it('saves a v2 edit back to the original content when a changed save is still in flight', async () => {
+    mocks.coordinateContract = 'v2';
+    const originalFlow = createTextBlockContentV1('original A');
+    const changedFlow = createTextBlockContentV1('changed B');
+    durableBlocks = [{
+      ...serverBlock('original A', false),
+      content_json: { body: 'original A', [TEXT_FLOW_CONTENT_KEY]: originalFlow },
+    }];
+    const firstPut = deferred<{ data: NoteBlock }>();
+    const secondPut = deferred<{ data: NoteBlock }>();
+    mocks.put.mockReturnValueOnce(firstPut.promise).mockReturnValueOnce(secondPut.promise);
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.coordinateContract).toBe('v2'));
+    const originalBlock = subject.result.current.blocks[0];
+    let firstSave!: Promise<BlockSaveOutcome>;
+    let secondSave!: Promise<BlockSaveOutcome>;
+    act(() => {
+      firstSave = subject.result.current.saveBlock(originalBlock, 'changed B', { textFlow: changedFlow });
+      secondSave = subject.result.current.saveBlock(originalBlock, 'original A', { textFlow: originalFlow });
+    });
+    expect(mocks.put).toHaveBeenCalledTimes(2);
+    expect(mocks.put.mock.calls[1]).toEqual([
+      `/note-blocks/${originalBlock.id}`,
+      { content_json: originalBlock.content_json, plain_text: 'original A' },
+    ]);
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
+
+    await act(async () => {
+      const payload = mocks.put.mock.calls[0][1] as Pick<NoteBlock, 'content_json' | 'plain_text'>;
+      durableBlocks = [{ ...originalBlock, ...payload }];
+      firstPut.resolve({ data: durableBlocks[0] });
+      await firstSave;
+    });
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
+    await act(async () => {
+      durableBlocks = [originalBlock];
+      secondPut.resolve({ data: originalBlock });
+      await secondSave;
+    });
+    expect(subject.result.current.blocks[0].plain_text).toBe('original A');
+    expect(subject.result.current.blocks[0].content_json).toEqual(originalBlock.content_json);
+    expect(listBlockEditRecoveryReceipts(note.id)).toEqual([]);
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
   });
 
   it('reconciles every annotation save after a pre-commit rejection', async () => {
@@ -679,6 +953,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
   });
 
   it('keeps a remounted save recoverable when the old mount settles before the new save rejects', async () => {
+    mocks.coordinateContract = 'v2';
     let durableBlock = serverBlock('server old', false, 'remount-recovery-key');
     const heldOldSave = deferred<{ data: NoteBlock }>();
     const heldNewSave = deferred<{ data: NoteBlock }>();
@@ -717,8 +992,9 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       oldSave = oldMount.result.current.saveBlock(oldBlock, 'old mount edit');
     });
     await waitFor(() => expect(blockPutCount).toBe(1));
-    const oldRecoveryKey = oldMount.result.current.blockEditRecoveryReceipts[0]?.recoveryKey;
+    const oldRecoveryKey = listBlockEditRecoveryReceipts(note.id)[0]?.recoveryKey;
     expect(oldRecoveryKey).toBeTruthy();
+    expect(oldMount.result.current.blockEditRecoveryReceipts).toEqual([]);
     oldMount.unmount();
 
     const newMount = renderHook(
@@ -729,15 +1005,18 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       { initialProps: { onNoteLoaded: newMountHydrated }, wrapper },
     );
     await waitFor(() => expect(newMountHydrated).toHaveBeenCalled());
+    expect(newMount.result.current.coordinateContract).toBe('v2');
+    expect(newMount.result.current.blockEditRecoveryReceipts).toEqual([
+      expect.objectContaining({ recoveryKey: oldRecoveryKey, text: 'old mount edit' }),
+    ]);
     const newBlock = newMount.result.current.blocks[0];
     let newSave!: Promise<BlockSaveOutcome>;
     act(() => {
       newSave = newMount.result.current.saveBlock(newBlock, 'new mount edit');
     });
     await waitFor(() => expect(blockPutCount).toBe(2));
-    await waitFor(() => expect(newMount.result.current.blockEditRecoveryReceipts[0]?.text)
-      .toBe('new mount edit'));
-    const newRecoveryKey = newMount.result.current.blockEditRecoveryReceipts[0]?.recoveryKey;
+    expect(newMount.result.current.blockEditRecoveryReceipts).toEqual([]);
+    const newRecoveryKey = listBlockEditRecoveryReceipts(note.id)[0]?.recoveryKey;
     const newReceiptBytes = sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2);
     expect(newRecoveryKey).toBeTruthy();
     expect(newRecoveryKey).not.toBe(oldRecoveryKey);
@@ -761,9 +1040,10 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     expect(newMount.result.current.blocks[0]?.plain_text).toBe('server old');
     expect(newMount.result.current.savingBlockId).toBe(newBlock.id);
     expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2)).toBe(newReceiptBytes);
-    expect(newMount.result.current.blockEditRecoveryReceipts).toEqual([
+    expect(listBlockEditRecoveryReceipts(note.id)).toEqual([
       expect.objectContaining({ recoveryKey: newRecoveryKey, text: 'new mount edit' }),
     ]);
+    expect(newMount.result.current.blockEditRecoveryReceipts).toEqual([]);
 
     let newOutcome!: BlockSaveOutcome;
     await act(async () => {
@@ -1472,8 +1752,9 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     expect(subject.result.current.blocks[0]?.plain_text).toBe('server newer');
     expect(subject.result.current.blockTextDrafts[originalBlock.id]).toBe('edit one');
     const recoveryBytesBeforeStaleRead = sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2);
-    const recoveryKeyBeforeStaleRead = subject.result.current.blockEditRecoveryReceipts[0]?.recoveryKey;
+    const recoveryKeyBeforeStaleRead = listBlockEditRecoveryReceipts(note.id)[0]?.recoveryKey;
     expect(recoveryKeyBeforeStaleRead).toBeTruthy();
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
 
     let outcome!: BlockSaveOutcome;
     await act(async () => {

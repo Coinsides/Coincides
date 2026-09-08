@@ -1,6 +1,6 @@
 > **From**: fable
 > **To**: codex
-> **Status**: ready(两层制;13.2 附单=v2 失焦保存首发失败修复;Henry 真库眼验报障)
+> **Status**: done(两层制;13.2 附单 s5a;按补遗一完成 builder 施工与验证,待 HQ 复核)
 > **日期 (Date)**: 2026-09-08
 > **性质**: 缺陷修复单(client/server 定位后定;⛔ 用户库接触)
 
@@ -77,3 +77,53 @@ apply_patch 追加 ## Result(根因陈述+numstat+验证输出+未做);⛔ commi
 3. **顺手修搭车病**:仅选中→失焦、内容零实质变化时⛔ 发保存——短路判据=body/plain_text/text_flow 与已存序列化相等则跳过(text_flow 真有新数据算实质变更,照常保存);
 4. **测试**:①工单手势链在 v2 下零橙盒闪现且(无变化时)零 PUT;②真失败收据仍入盒并可 Apply 的回归;③有实质 text_flow 变更时保存照发;
 5. 验证照原 §二;其余口径不变。按本补遗续作至完工 Result。
+
+## Result
+
+### 2026-09-08 · builder 完工回执（按补遗一续作）
+
+**补遗一要求已实施，原 §二验证已实跑通过；工作树交 HQ，未 commit，不代作主观验收或放行。** 上方停线回执作为当时事实保留；其中「未实施产品修复／未运行完整验证」已由本次续作完成，不能再作为当前施工状态。
+
+### 根因与实现
+
+- 根因沿用补遗改判：防丢预写在 HTTP 之前持久化，旧 UI 无条件列出持久收据，把正常保存误展示成待恢复。没有重定性为首发失败，也没有引入消抖。
+- `useNoteCanvasDataAdapter.ts` 复用既有 `outstandingBlockSaveOperationsRef`，给保存操作关联精确 `pendingRecoveryKey`；展示列表排除仍由该在途操作持有的收据。HTTP 拒绝时先解除展示过滤、通知渲染，再等待读回核对，因此读回慢也不会拖延失败展示；操作结束同样通知刷新，覆盖并发时 `savingBlockId` 未变的情况。
+- 预写、持久化格式、读回核对、显式 Apply 和已有清理规则保留。重新挂载后没有本挂载持有的在途操作，遗留收据仍为待 Apply 项。**没有另建恢复库或第二份业务状态机关**：恢复内容仍在原 sessionStorage 队列，操作身份仍在原操作表；新增 version 只用于通知 React 刷新展示。
+- 无变化判断移到真实保存载荷生成之后，复用 `blockMatchesIssuedSave` 比较 `plain_text` 与完整 `content_json` 的稳定序列化（包含 body、text_flow、字段值；对象字段顺序不影响，数组顺序保留）。相等则在创建收据／发 PUT 前返回 `saved/not_needed`。TextFlow 首次物化或角色等实质变化照常保存，不能只因 plain_text 相等而跳过。
+- 并发保护：同 note/block 尚有在途操作时不走该短路，避免「原文 A → B 保存未决 → 用户改回 A」的最后一次编辑被旧快照比较吞掉。独立静态复核指出此边界后已修，并加入回归。
+
+### 单测与原 §二验证输出
+
+所有命令均由仓内 `scripts/run-isolated-coordinate-validation.mjs` 执行：强制 `DB_PATH=:memory:`、空 Vite envDir、独立临时素材目录，原始日志不打印或存盘，只回显汇总。
+
+| 命令（repo 根执行） | 实跑结果 |
+| --- | --- |
+| `node scripts/run-isolated-coordinate-validation.mjs --cwd client -- node node_modules/typescript/bin/tsc --noEmit --pretty false` | exit 0，16s |
+| `node scripts/run-isolated-coordinate-validation.mjs --cwd server -- node node_modules/typescript/bin/tsc --noEmit --pretty false` | exit 0，10s |
+| `node scripts/run-isolated-coordinate-validation.mjs --cwd client -- npm run test:unit -- src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx` | 1 文件，37 tests passed，exit 0，7s |
+| `node scripts/run-isolated-coordinate-validation.mjs`（完整 `npm run verify:v2-bn8-runtime`） | exit 0，74s；客户端 **50 文件／466 tests passed**；registry 5/5、manifest 10/10、parity 10/10；双端 build、模型／性能 smoke、运行时边界、文档检查、diff 与 changed-file secrets 门全部完成 |
+
+新增 7 个 v2 单测案例覆盖：序列化相等的显式 TextFlow／draft 两入口零 PUT、零预写；首次物化／角色变化各首发一次成功；held PUT 时持久收据存在而展示为空；真实拒绝在 held reconciliation GET 期间立即可见，随后明确 Apply 成功；双块并发独立过滤；A→B→A 不误短路。已有 remount、旧响应和 stale read 回归继续保留，需检查防丢时改读持久队列，需检查展示时读过滤后的列表。
+
+### 合成浏览器实跑与落库
+
+独立 `.codex-tmp/s5a-fix/` fixture 继续使用真实 client runtime、Express 路由和 SQLite；仅 `initDb(':memory:')` 的人工数据设置 v2。第 1 段预存 body + TextFlow，第 2 段预存 body；都已有合法 `tray-frame` 与 frame-local placement。Vite `configFile:false, envFile:false`，仅监听 **127.0.0.1:5184**。用 Chrome 新建标签实际点击／输入／失焦／Apply，未直接调用产品保存函数。
+
+| 实跑阶段 | 请求、DOM 与 SQL 证据 |
+| --- | --- |
+| 第 1 段仅选中 → 页内空白 → 失焦 | **0 PUT、0 queue-shown**；内容和 placement 不变，无注入延迟或失败 |
+| 实际追加 ` saved edit` 后失焦 | **1 PUT、首发 200**；测试夹具主动保持该 PUT 在途约 18.5s，期间和成功后均 **0 queue-shown**；SQL 回读正文与 TextFlow 同步保存 |
+| 再追加 ` recover me` 后失焦 | 夹具仅对这一 PUT 注入合成 **503**；响应时刻 119785.2ms，queue-shown 119833.5ms，读回 200 为 119834.4ms；恢复盒在读回完成前出现，未设置延迟／消抖 |
+| 点击橙盒 Apply | 仅由用户点击发起下一次 PUT，**200**；橙盒移除，SQL 正文及 TextFlow 均为 `Synthetic tray block 1 saved edit recover me` |
+| 第 2 段仅选中 → 失焦 | 新增 TextFlow 属实质数据变更，**1 PUT、首发 200**；不新增 queue-shown。随后重复同一手势 **0 新 PUT、0 新 queue-shown** |
+
+全链共 **4 PUT（200／503／200／200）**，仅合成失败产生一次恢复盒展示。每阶段 SQL 比较均 `placementsUnchanged=true`：所有 canvas placement 的 id、x、y、width、height、frame_id、surface、metadata 不变；两段仍分别 `(0,260,760,100)`、`(0,420,760,100)`。DOM 事件来自 MutationObserver，截图核验可见状态；不冒充逐帧录像或 Henry 真库验证。
+
+合成原始证据在 `.codex-tmp/s5a-fix/01-noop.json` 至 `07-final.json`（忽略目录诊断件；永久回归在上述单测文件）：`01-noop.json` SHA-256 `32301b5c342de4381c0056c3be54e26ae5e7e84fc557ff5bf1ef3da8936d3daa`；汇总全链的 `07-final.json` SHA-256 `1572584694b9b8945fcef6c857f833065e39651e36ccc1662c9b35d542d09147`。重跑入口为 `node .codex-tmp/s5a-fix/prepare.mjs`，再 `node scripts/run-isolated-coordinate-validation.mjs --cwd server -- node --import tsx ../.codex-tmp/s5a-fix/start.mjs`，打开 `http://127.0.0.1:5184/scripts/pageReadingSmoke/tray.html`；合成控制门 `/api/__s5a-control` 分别接受 `holdNext`、`release`、`failNext`，只存在于此诊断件。
+
+### numstat、清理与未做
+
+- 产品代码 **1 文件 +34/-11**；回归测试 **1 文件 +290/-9**；本工单 **+51/-1**，仅更新 Status、追加本次 Result（既有停线回执与补遗正文未回改）。本次 tracked 变更总计 **3 文件，+375/-21**。
+- 已关闭成功验证标签，已核对独立 5184 listener 并结束本次 fixture（PID 19372，内存库释放）；其常驻 wrapper 随主动终止返回非零，**这不是测试门失败**。首次导航建立的失联测试标签无法通过连接器关闭，交浏览器会话自动清理；不再有后台 fixture 服务。
+- 未接触用户库、未读取 `.env`、未打印 key；未操作或请求 3001/5173；未修改 4a 语义判定／帧校验／执行器／canvas 模式机件；未 commit/push/PR。开工已存在的不相关未跟踪文件未改。
+- 未跑用户真库、外部服务或主观体验验收，未扩大为其他版本收口。以上工程完成与证据只覆盖本单补遗一，交 HQ 后续复核与放行。

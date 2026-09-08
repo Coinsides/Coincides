@@ -411,6 +411,7 @@ export function useNoteCanvasDataAdapter({
   const [templateOptions, setTemplateOptions] = useState<TemplateOption[]>(STATIC_TEMPLATE_OPTIONS);
   const [templateWarning, setTemplateWarning] = useState<string | null>(null);
   const [savingBlockId, setSavingBlockId] = useState<string | null>(null);
+  const [, setBlockEditRecoveryVersion] = useState(0);
   const [anchorsBySourceRef, setAnchorsBySourceRef] = useState<Record<string, SourceAnchor>>({});
   const [sourceJumpTarget, setSourceJumpTarget] = useState<SourceJumpTarget | null>(null);
   const [sourceJumpBusy, setSourceJumpBusy] = useState<string | null>(null);
@@ -462,6 +463,7 @@ export function useNoteCanvasDataAdapter({
     blockId: string;
     requestedNoteId: string;
     creationGeneration: number;
+    pendingRecoveryKey?: string;
   }>>());
   const blockSaveOutcomeVersionRef = useRef(0);
   routeNoteIdRef.current = noteId;
@@ -526,7 +528,13 @@ export function useNoteCanvasDataAdapter({
     () => [...blocks].sort((a, b) => a.order_index - b.order_index),
     [blocks],
   );
-  const blockEditRecoveryReceipts = listBlockEditRecoveryReceipts(noteId);
+  // Prewrite receipts protect pending saves too; only unresolved edits belong in the UI.
+  // A receipt restored after remount has no live operation here and remains actionable.
+  const pendingRecoveryKeys = new Set(Array.from(
+    outstandingBlockSaveOperationsRef.current.values(),
+  ).map((operation) => operation.pendingRecoveryKey));
+  const blockEditRecoveryReceipts = listBlockEditRecoveryReceipts(noteId)
+    .filter((receipt) => !pendingRecoveryKeys.has(receipt.recoveryKey));
 
   const insertTemplateGroups = useMemo(
     () => buildInsertTemplateGroups(templateOptions),
@@ -1394,17 +1402,7 @@ export function useNoteCanvasDataAdapter({
     const nextText = textFlowDraft
       ? (projectedTextFlow ?? text)
       : text.trimEnd();
-    const previousText = textFromContent(block).trimEnd();
     const fieldValues = options.fieldValues || blockFieldDrafts[block.id];
-    if (nextText === previousText && !fieldValues && !textFlowDraft) {
-      if (options.recoveryKey) forgetBlockEditRecoveryReceipt(options.recoveryKey);
-      return {
-        status: 'saved',
-        block,
-        recoveryReceipt: null,
-        reconciliation: 'not_needed',
-      };
-    }
     const kind = presentationKindForBlock(block);
     const textFlowContent = textFlowDraft
       ? contentForEditedTextFlowBlock(block, textFlowDraft)
@@ -1415,6 +1413,21 @@ export function useNoteCanvasDataAdapter({
         : textFlowContent
       : contentForEditedBlock(block, nextText, fieldValues);
     const requestedPlainText = plainTextForBlockContent(kind, nextContent, nextText);
+    // A pending write can still replace this snapshot (including an edit changed back).
+    const hasOutstandingSaveForBlock = Array.from(outstandingBlockSaveOperationsRef.current.values())
+      .some((operation) => operation.blockId === block.id && operation.requestedNoteId === requestedNoteId);
+    if (!hasOutstandingSaveForBlock && blockMatchesIssuedSave(block, requestedPlainText, nextContent)) {
+      if (options.recoveryKey) {
+        forgetBlockEditRecoveryReceipt(options.recoveryKey);
+        setBlockEditRecoveryVersion((version) => version + 1);
+      }
+      return {
+        status: 'saved',
+        block,
+        recoveryReceipt: null,
+        reconciliation: 'not_needed',
+      };
+    }
     const operationSequence = blockSaveOperationSequenceRef.current + 1;
     blockSaveOperationSequenceRef.current = operationSequence;
     const recoveryReceipt: BlockEditRecoveryReceipt = Object.freeze({
@@ -1524,7 +1537,9 @@ export function useNoteCanvasDataAdapter({
       blockId: block.id,
       requestedNoteId,
       creationGeneration: requestGeneration,
+      pendingRecoveryKey: recoveryReceipt.recoveryKey,
     });
+    setBlockEditRecoveryVersion((version) => version + 1);
     setSavingBlockId(block.id);
     try {
       const res = await api.put(`/note-blocks/${block.id}`, {
@@ -1597,6 +1612,13 @@ export function useNoteCanvasDataAdapter({
       };
     } catch (err) {
       blockSaveOutcomeVersionRef.current += 1;
+      // Surface a failed write immediately, including while its read-back is pending.
+      outstandingBlockSaveOperationsRef.current.set(operationSequence, {
+        blockId: block.id,
+        requestedNoteId,
+        creationGeneration: requestGeneration,
+      });
+      if (adapterMountActiveRef.current) setBlockEditRecoveryVersion((version) => version + 1);
       console.error('Failed to save block:', err);
       if (requestIsCurrent()) addToast('error', 'Failed to save block');
       const reconciliation = await reconcileIssuedSave('read_after_error');
@@ -1623,6 +1645,7 @@ export function useNoteCanvasDataAdapter({
       };
     } finally {
       outstandingBlockSaveOperationsRef.current.delete(operationSequence);
+      if (adapterMountActiveRef.current) setBlockEditRecoveryVersion((version) => version + 1);
       if (requestRouteIsCurrent()) {
         const activeRoute = {
           noteId: routeNoteIdRef.current,
