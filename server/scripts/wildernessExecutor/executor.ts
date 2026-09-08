@@ -55,33 +55,43 @@ function snapshot(db: Database.Database, user: string) {
 }
 type Snapshot = ReturnType<typeof snapshot>;
 export type Stage = 'backup' | 'normalize' | 'relocate' | 'event' | 'flag' | 'restore' | 'rollback_event' | 'archive';
-export interface Hooks { afterStep?: (stage: Stage) => void }
+export interface Hooks { afterStep?: (stage: Stage, user?: string) => void }
 interface Change { id: string; note: string; destination: string; reason: string; original: Row; solution?: Solution }
 interface Journal {
-  version: 1; user: string; generation: string; beforeCensus: string;
+  version: 2; users: string[]; generation: string; beforeCensus: Record<string, string>;
   before: Record<string, string>; after: Record<string, string>; dependencies: Record<string, string>;
 }
-export interface ExecutionReport {
-  version: 'v13.2-s4b'; action: 'executed' | 'rolled_back'; scopeUserId: string;
+export interface UserExecutionReport {
+  scopeUserId: string;
   before: Snapshot; after: Snapshot; changes: Change[]; exceptions: Change[];
   conservation: ReturnType<typeof validateConservation>[];
   invariants: { checked: number; formalExceptions: number; pageOffsetX: number };
-  eventSeq: number; backups: string[];
+  eventSeq: number;
+}
+export interface ExecutionReport {
+  version: 'v13.2-s4b-multi-user'; action: 'executed' | 'rolled_back'; scopeUserIds: string[];
+  users: UserExecutionReport[]; backups: string[];
   hashes: { before: Record<string, string>; after: Record<string, string> };
 }
-function preflight(db: Database.Database, user: string) {
-  requireThat(!db.readonly && !db.inTransaction && user.trim(), 'executor_explicit_writable_scope_required');
+export function normalizeUsers(scope: string | readonly string[]): string[] {
+  const values = (typeof scope === 'string' ? [scope] : scope).flatMap(value => value.split(',').map(user => user.trim()));
+  requireThat(values.length > 0 && values.every(Boolean), 'executor_explicit_scope_required');
+  return [...new Set(values)].sort();
+}
+function preflight(db: Database.Database) {
+  requireThat(!db.readonly && !db.inTransaction, 'executor_explicit_writable_scope_required');
   requireThat(db.pragma('foreign_keys', { simple: true }) === 1, 'executor_foreign_keys_required');
   for (const t of [...TABLES, 'events', 'database_meta', 'page_frame_extensions']) requireThat(exists(db, t), 'executor_schema_missing');
   requireThat(db.prepare('PRAGMA table_info(canvas_placements)').all().some(c => (c as { name: string }).name === 'order_index'), 'executor_order_schema_missing');
 }
-function assertScope(db: Database.Database, user: string) {
-  requireThat(db.prepare('SELECT 1 FROM notes WHERE user_id=?').get(user), 'executor_unknown_scope');
+function assertScope(db: Database.Database, users: string[]) {
+  for (const user of users) requireThat(db.prepare('SELECT 1 FROM notes WHERE user_id=?').get(user), 'executor_unknown_scope');
   // The flag is database-wide. Never silently migrate someone outside --user.
   // Even workspace local rows can change under 4a, so only structural/tray rows are exempt.
   requireThat(!db.prepare(`SELECT 1 FROM canvas_placements p LEFT JOIN canvas_objects o
     ON o.id=p.object_id AND o.user_id=p.user_id AND o.note_id=p.note_id
-    WHERE p.user_id<>? AND p.surface<>'tray' AND (o.kind IS NULL OR o.kind<>'page_frame') LIMIT 1`).get(user),
+    WHERE p.user_id NOT IN (${users.map(() => '?').join(',')}) AND p.surface<>'tray'
+      AND (o.kind IS NULL OR o.kind<>'page_frame') LIMIT 1`).get(...users),
   'executor_out_of_scope_nontray_rows');
 }
 function conservation(before: Snapshot, after: Snapshot, changes: Change[]) {
@@ -114,19 +124,29 @@ function recordMigration(db: Database.Database, user: string, verb: 'migrated' |
 function journal(db: Database.Database): Journal {
   const row = db.prepare('SELECT value FROM database_meta WHERE key=?').get(JOURNAL) as { value: string } | undefined;
   requireThat(row, 'executor_journal_missing');
-  const value = JSON.parse(row.value) as Journal;
-  requireThat(value.version === 1 && typeof value.user === 'string', 'executor_journal_invalid');
+  const value = JSON.parse(row.value) as Journal | (Omit<Journal, 'version' | 'users' | 'beforeCensus'>
+    & { version: 1; user: string; beforeCensus: string });
+  // Existing single-user executions keep their original rollback path; no journal rewrite.
+  if (value.version === 1) {
+    requireThat(typeof value.user === 'string' && typeof value.beforeCensus === 'string', 'executor_journal_invalid');
+    return { ...value, version: 2, users: [value.user], beforeCensus: { [value.user]: value.beforeCensus } };
+  }
+  requireThat(value.version === 2 && Array.isArray(value.users) && value.users.every(u => typeof u === 'string')
+    && json(normalizeUsers(value.users)) === json(value.users)
+    && value.beforeCensus && json(Object.keys(value.beforeCensus).sort()) === json(value.users)
+    && Object.values(value.beforeCensus).every(hash => typeof hash === 'string'), 'executor_journal_invalid');
   return value;
 }
 
-export function execute(db: Database.Database, user: string, hooks: Hooks = {}): ExecutionReport {
-  preflight(db, user);
+export function execute(db: Database.Database, scope: string | readonly string[], hooks: Hooks = {}): ExecutionReport {
+  const users = normalizeUsers(scope);
+  preflight(db);
   return db.transaction(() => {
-    assertScope(db, user);
+    assertScope(db, users);
     for (const t of TABLES) requireThat(!exists(db, t + BACKUP_SUFFIX), 'executor_backup_exists');
     requireThat(readCoordinateContract(db) === 'v1', 'executor_requires_v1');
     requireThat(!db.prepare('SELECT 1 FROM database_meta WHERE key=?').get(JOURNAL), 'executor_journal_exists');
-    const before = snapshot(db, user);
+    const before = new Map(users.map(user => [user, snapshot(db, user)]));
     const beforeHashes = fingerprints(db, TABLES);
     const dependencies = fingerprints(db, DEPENDENCIES);
     const generation = randomUUID().replaceAll('-', '');
@@ -139,6 +159,26 @@ export function execute(db: Database.Database, user: string, hooks: Hooks = {}):
       requireThat(tableHash(db, backup) === beforeHashes[t], 'executor_backup_mismatch');
     }
     hooks.afterStep?.('backup');
+    const reports = users.map(user => migrateUser(db, user, before.get(user)!, hooks));
+    requireThat(json(dependencies) === json(fingerprints(db, DEPENDENCIES)), 'executor_dependency_changed');
+    // Every user's work and receipt belongs to this same transaction. Flip just once.
+    for (const report of reports) {
+      report.eventSeq = recordMigration(db, report.scopeUserId, 'migrated', report.changes, report.before);
+      hooks.afterStep?.('event', report.scopeUserId);
+    }
+    db.prepare("INSERT INTO database_meta(key,value) VALUES('coordinate_contract','v2') ON CONFLICT(key) DO UPDATE SET value='v2'").run();
+    hooks.afterStep?.('flag');
+    const afterHashes = fingerprints(db, TABLES);
+    const state: Journal = { version: 2, users, generation,
+      beforeCensus: Object.fromEntries(reports.map(r => [r.scopeUserId, r.before.censusSha256])),
+      before: beforeHashes, after: afterHashes, dependencies };
+    db.prepare('INSERT INTO database_meta(key,value) VALUES(?,?)').run(JOURNAL, JSON.stringify(state));
+    return { version: 'v13.2-s4b-multi-user', action: 'executed', scopeUserIds: users, users: reports,
+      backups: TABLES.map(t => t + BACKUP_SUFFIX), hashes: { before: beforeHashes, after: afterHashes } };
+  }).immediate() as ExecutionReport;
+}
+
+function migrateUser(db: Database.Database, user: string, before: Snapshot, hooks: Hooks): UserExecutionReport {
     const changes: Change[] = [];
     const source = rows(db, 'canvas_placements').filter(r => r.user_id === user);
     const inventory = new Map(before.census.placement_inventory.map(p => [p.id, p]));
@@ -152,7 +192,7 @@ export function execute(db: Database.Database, user: string, hooks: Hooks = {}):
       if (solution.status === 'normalized') db.prepare('UPDATE canvas_placements SET x=?, y=?, metadata=? WHERE id=?')
         .run(solution.candidate.x, solution.candidate.y, solution.metadata, row.id);
     }
-    hooks.afterStep?.('normalize');
+    hooks.afterStep?.('normalize', user);
     // 3. S3 is the sole wilderness routing authority. Destinations live on placements;
     // objects/mounts have no surface column and retain their entire identity/content rows.
     const changedIds = new Set(changes.map(c => c.id));
@@ -173,7 +213,7 @@ export function execute(db: Database.Database, user: string, hooks: Hooks = {}):
       tails.set(c.note, order);
       db.prepare("UPDATE canvas_placements SET surface='tray', order_index=? WHERE id=?").run(order, c.id);
     }
-    hooks.afterStep?.('relocate');
+    hooks.afterStep?.('relocate', user);
     const actual = new Map(rows(db, 'canvas_placements').map(r => [r.id, r]));
     let checked = 0;
     for (const c of changes) {
@@ -186,34 +226,22 @@ export function execute(db: Database.Database, user: string, hooks: Hooks = {}):
     const formal = source.filter(r => r.surface === 'formal_page' && inventory.get(r.id)?.kind !== 'page_frame');
     requireThat(formal.every(r => changes.some(c => c.id === r.id
       && (c.solution?.status === 'normalized' || actual.get(c.id)?.surface === 'tray'))), 'executor_formal_exception_remaining');
-    requireThat(json(dependencies) === json(fingerprints(db, DEPENDENCIES)), 'executor_dependency_changed');
     const after = snapshot(db, user);
     const conserved = conservation(before, after, changes);
-    // 4. The event is provisional in this exact transaction, like all preceding writes.
-    const eventSeq = recordMigration(db, user, 'migrated', changes, before);
-    hooks.afterStep?.('event');
-    // 5. Flip only after the final formal check and actual census pass.
-    db.prepare("INSERT INTO database_meta(key,value) VALUES('coordinate_contract','v2') ON CONFLICT(key) DO UPDATE SET value='v2'").run();
-    hooks.afterStep?.('flag');
-    const afterHashes = fingerprints(db, TABLES);
-    const state: Journal = { version: 1, user, generation, beforeCensus: before.censusSha256, before: beforeHashes,
-      after: afterHashes, dependencies };
-    db.prepare('INSERT INTO database_meta(key,value) VALUES(?,?)').run(JOURNAL, JSON.stringify(state));
-    return { version: 'v13.2-s4b', action: 'executed', scopeUserId: user, before, after, changes,
+    return { scopeUserId: user, before, after, changes,
       exceptions: changes.filter(c => c.solution?.status === 'exception'), conservation: conserved,
-      invariants: { checked, formalExceptions: 0, pageOffsetX: 0 }, eventSeq,
-      backups: TABLES.map(t => t + BACKUP_SUFFIX), hashes: { before: beforeHashes, after: afterHashes } };
-  }).immediate() as ExecutionReport;
+      invariants: { checked, formalExceptions: 0, pageOffsetX: 0 }, eventSeq: 0 };
 }
 
-export function rollback(db: Database.Database, user: string, hooks: Hooks = {}): ExecutionReport {
-  preflight(db, user);
+export function rollback(db: Database.Database, scope: string | readonly string[], hooks: Hooks = {}): ExecutionReport {
+  const users = normalizeUsers(scope);
+  preflight(db);
   return db.transaction(() => {
     const state = journal(db);
-    requireThat(state.user === user && readCoordinateContract(db) === 'v2', 'executor_rollback_scope_or_contract');
+    requireThat(json(state.users) === json(users) && readCoordinateContract(db) === 'v2', 'executor_rollback_scope_or_contract');
     requireThat(json(state.after) === json(fingerprints(db, TABLES)), 'executor_post_execution_drift');
     requireThat(json(state.dependencies) === json(fingerprints(db, DEPENDENCIES)), 'executor_dependency_drift');
-    const before = snapshot(db, user);
+    const before = new Map(users.map(user => [user, snapshot(db, user)]));
     const changes: Change[] = [];
     for (const t of TABLES) {
       const backup = t + BACKUP_SUFFIX;
@@ -236,18 +264,23 @@ export function rollback(db: Database.Database, user: string, hooks: Hooks = {})
     }
     hooks.afterStep?.('restore');
     db.prepare("UPDATE database_meta SET value='v1' WHERE key='coordinate_contract'").run();
-    const after = snapshot(db, user);
-    requireThat(after.censusSha256 === state.beforeCensus, 'executor_restore_census_mismatch');
     requireThat(json(state.dependencies) === json(fingerprints(db, DEPENDENCIES)), 'executor_restore_dependency_changed');
-    const eventSeq = recordMigration(db, user, 'rolled_back', changes, before);
-    hooks.afterStep?.('rollback_event');
+    const reports = users.map((user): UserExecutionReport => {
+      const after = snapshot(db, user);
+      requireThat(after.censusSha256 === state.beforeCensus[user], 'executor_restore_census_mismatch');
+      const scopedChanges = changes.filter(c => c.original.user_id === user);
+      const eventSeq = recordMigration(db, user, 'rolled_back', scopedChanges, before.get(user)!);
+      hooks.afterStep?.('rollback_event', user);
+      return { scopeUserId: user, before: before.get(user)!, after, changes: scopedChanges, exceptions: [],
+        conservation: conservation(before.get(user)!, after, []),
+        invariants: { checked: 0, formalExceptions: 0, pageOffsetX: 0 }, eventSeq };
+    });
     // Preserve immutable generations, release only their fixed active names after a verified rollback.
-    const backups = TABLES.map(t => t + BACKUP_SUFFIX + '_rolled_back_' + eventSeq);
+    const backups = TABLES.map(t => t + BACKUP_SUFFIX + '_rolled_back_' + reports.at(-1)!.eventSeq);
     TABLES.forEach((t, i) => db.exec(`ALTER TABLE ${quote(t + BACKUP_SUFFIX)} RENAME TO ${quote(backups[i])}`));
     db.prepare('DELETE FROM database_meta WHERE key=?').run(JOURNAL);
     hooks.afterStep?.('archive');
-    return { version: 'v13.2-s4b', action: 'rolled_back', scopeUserId: user, before, after, changes,
-      exceptions: [], conservation: conservation(before, after, []), invariants: { checked: 0, formalExceptions: 0, pageOffsetX: 0 },
-      eventSeq, backups, hashes: { before: state.after, after: fingerprints(db, TABLES) } };
+    return { version: 'v13.2-s4b-multi-user', action: 'rolled_back', scopeUserIds: users, users: reports,
+      backups, hashes: { before: state.after, after: fingerprints(db, TABLES) } };
   }).immediate() as ExecutionReport;
 }

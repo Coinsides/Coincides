@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import Database from 'better-sqlite3';
 import { createExecutorSyntheticBuffer } from './synthetic.js';
 import { readCoordinateContract } from '../../src/services/coordinateContract.js';
-import { encode, TABLES, tableHash, type ExecutionReport } from './executor.js';
+import { encode, TABLES, tableHash, type ExecutionReport, type UserExecutionReport } from './executor.js';
 
 const root = fileURLToPath(new URL('../../../', import.meta.url));
 const output = process.argv[2];
@@ -31,7 +31,8 @@ try {
       '--user', 's0-user', '--out', name, ...(action === 'preview' ? [] : [`--${action}`])],
     { cwd: path.join(root, 'server'), env: childEnv, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true });
     if (before) assert.deepEqual(readFileSync(database), before);
-    reports.push(JSON.parse(readFileSync(path.join(root, name + '.json'), 'utf8')));
+    const report = JSON.parse(readFileSync(path.join(root, name + '.json'), 'utf8'));
+    reports.push({ ...report, ...report.users[0] });
   }
   const [preview, first, post, undone, restored, second] = reports;
   assert.equal(preview.evidence.censusSha256, restored.evidence.censusSha256);
@@ -50,7 +51,8 @@ try {
     assert.deepEqual(db.pragma('foreign_key_check'), []);
     finalHashes = Object.fromEntries(TABLES.map(t => [t, tableHash(db, t)]));
   } finally { db.close(); }
-  const summary = (r: ExecutionReport) => ({ action: r.action, beforeCensus: r.before.censusSha256,
+  type SingleReport = UserExecutionReport & Pick<ExecutionReport, 'action' | 'hashes' | 'backups'>;
+  const summary = (r: SingleReport) => ({ action: r.action, beforeCensus: r.before.censusSha256,
     afterCensus: r.after.censusSha256, hashes: r.hashes, conservation: r.conservation,
     invariants: r.invariants, eventSeq: r.eventSeq, backups: r.backups,
     exceptions: r.exceptions, normalized: r.changes.filter(c => c.solution?.status === 'normalized') });
@@ -61,7 +63,7 @@ try {
       additions: '054/055/056 + real 040/041/042 dependencies + 24 exact controls, O=(0,220)',
       scopedExecutionAdjustment: 'foreign-placement starts in tray; unchanged original foreign formal/workspace are tested as preflight refusal',
       localAndCrossNote: 'original S3 rows unchanged before execution; both no_exact_solution -> tray at actual page offset 0' },
-    executions: [summary(first as ExecutionReport), summary(undone as ExecutionReport), summary(second as ExecutionReport)] };
+    executions: [summary(first as SingleReport), summary(undone as SingleReport), summary(second as SingleReport)] };
   writeFileSync(base + '.json', JSON.stringify(encode(artifact), null, 2) + '\n', { flag: 'wx' });
   const lines = [
     '> **状态 (Status)**: frozen', '> **层 (Layer)**: 审计 / 合成全谱演练', '> **日期 (Updated)**: 2026-09-08',

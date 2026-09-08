@@ -1,6 +1,6 @@
 > **From**: fable
 > **To**: codex
-> **Status**: done(builder 按补遗一工程完工,工作树候 HQ 复核;⛔ 用户库零接触,真实执行=扳机日 Henry 亲跑)
+> **Status**: done(builder 按补遗一/二工程完工,工作树候 HQ 复核;⛔ 用户库零接触,真实执行=扳机日 Henry 亲跑)
 > **日期 (Date)**: 2026-09-08
 > **性质**: 施工单(扳机日的刀——本单只铸刀与演练,⛔ 挥刀)
 
@@ -112,3 +112,35 @@
 2. 预览/回滚同步支持多用户;核对单按用户分节;
 3. 演练样本追加:双用户库(主户全谱+副户单行 formal)——断言单用户调用拒绝、双用户调用全链通过+回滚还原;
 4. 其余口径(含补遗一)全部不变。按本补遗续作至完工 Result 追补。
+
+## Result
+
+### 2026-09-08 · builder 按补遗二完工回执（工作树交 HQ，非真实迁移放行）
+
+完整重读原工单、两份补遗及上游后续作；补遗一的双尺方程、负 local 合法、无解迁 tray 与 formal 零例外规则保留。本次完成多用户射程扩展，未发现需按条款停线的结构级缺口。历史 Result 与补遗原文未回改。
+
+- **执行/预览/回滚同一参数口径**：`--user` 可重复或逗号分隔，去首尾空白、去重、排序，空项拒绝。未列出的用户仍有非结构非 tray 行时执行零写拒绝；列全后共同进入一个 `BEGIN IMMEDIATE`。原有三张全表只读备份由全部用户共用，只有一套备份与一次翻旗，各用户分别归一、搬迁、census、守恒及 `recordEvent(migrated)`，没有循环提交的单用户事务。
+- **回滚精确配对**：journal v2 持久化完整用户集合与逐用户 beforeCensus；回滚须同一集合（顺序可换，少列/多列均零写拒绝），整表恢复后各户 census 与执行前全等，各记 `rolled_back`，最后一条回滚事件 seq 用于共享备份归档。兼容补遗一的 journal v1 单用户回滚。
+- **核对单按用户分节**：执行/回滚 JSON 改为 `v13.2-s4b-multi-user`，预览为 `v13.2-s4b-multi-user-preview`，均含 `scopeUserIds/users`；每户独立事件、守恒、变更/例外和 census 指纹。预览及提交后只读复测的全部用户共处一个读事务，继续复用 S3 原函数与 SQL。README 与原单用户演练同步适配。
+
+### 验证输出摘要（本线程亲跑）
+
+- `node scripts/run-isolated-coordinate-validation.mjs --cwd server -- npm run typecheck:v13-wilderness-executor`：**exit 0，1s**；server `tsc --noEmit` 经同隔离入口运行：**exit 0，4s**。
+- `node scripts/run-isolated-coordinate-validation.mjs --cwd server -- npm run test:v13-wilderness-executor`：**19 tests / 19 pass / 0 fail，exit 0，72s**。保留原 15 项覆盖，新增参数集合、双用户全链/事件归属、第二户归一/搬迁/记账失败的全事务撤销（含回滚事件）、旧 journal v1 兼容；遗漏/多列回滚与遗漏执行均断言库序列化字节不变。
+- 双用户独立 CLI：`node --import tsx scripts/wildernessExecutor/multiUserRehearsal.ts docs/audits/2026-09-08-v13-2-s4b-合成双用户演练`（server 目录），**PASS，exit 0**。stdout：`users=2; conserved=[3,24]; checked=[1,26]; exceptions=[0,24]; incompleteScopeZeroWrite=true; rollbackExact=true; repeatExact=true`。
+- 双用户样本为主户 S3 全谱 + 24 条严格可解对照，副户 **1 条 paragraph formal 正文 + 1 条 page_frame 结构行**，副户未预置 tray。实跑：单用户执行拒绝 → 双用户预览 → 执行 → 复测 → 单用户回滚拒绝 → 双用户回滚 → 复测还原 → 再执行。主户 local/cross-note 仍迁 tray；副户按自己的同名 f1 帧精确归一 y=10、留在 formal。两户 formal 例外均 0；完整回滚三表指纹和各户 census 全等，再执行终态全等；事件各为 migrated → rolled_back → migrated。
+- 原单用户独立 CLI 演练回归：`node --import tsx scripts/wildernessExecutor/rehearsal.ts docs/audits/2026-09-08-v13-2-s4b-合成单用户补遗二回归`，**PASS，exit 0**；`conserved=24; checked=26; exceptions=24; rollbackExact=true; repeatExact=true`。
+- 完整必经门：`node scripts/run-isolated-coordinate-validation.mjs`（实际运行 `npm run verify:v2-bn8-runtime`），**exit 0，45s**。client **50 files / 459 tests pass**；registry **5/5**、manifest **10/10**、parity **10/10**；client/server build、模型/性能冒烟、静态门、docs、diff 与变更扫描均通过。沿用空 env 目录、内存 DB 与隔离资产目录；未跳过或豁免验证门。
+- 并行协助仅定向只读复查，未派第二 builder；发现的预览标题层级问题已修复并回读确认，最终未发现新的具体功能漏洞。协助结论不冒充亲跑验证。
+
+### 演练归档
+
+- **`docs/audits/2026-09-08-v13-2-s4b-合成双用户演练.md`** 与同名 `.json`：按用户分节；完整变更原值/例外、双尺证据、守恒、census/三表指纹与事件序列。
+- **`docs/audits/2026-09-08-v13-2-s4b-合成单用户补遗二回归.md`** 与同名 `.json`：原全谱单用户回归证据。两条演练入口均自产临时合成库；本轮生成的中间报告与临时库已按确切路径清理，最终审计保留。
+
+### numstat、未做与工作树交接
+
+- 最终 numstat：**12 文件，+15661/-83**。逐项：`v13WildernessExecute.test.ts` +115/-7；CLI +46/-21；executor +78/-45；README +10/-5；原 rehearsal +6/-4；synthetic +21/-0；新增 multiUserRehearsal +128/-0；双用户审计 MD/JSON +60/+6817；单用户回归审计 MD/JSON +37/+8310；本工单 +33/-1（状态头替换，其余追加）。未跟踪新增文件按完整文件行数计；`git diff --check` 通过。
+- **未接触用户库、未读 .env、未打印任何 key、未操作 3001/5173**；未修改产品/UI、4a 双尺、S3 去处矩阵、启动迁移链、双模退役或 Agent 工具面。未 commit/push/PR/merge，未作 Henry 主观验收或真实迁移放行。
+- 沿用此前限制：回滚拒绝提交后数据/扩展漂移；报告 I/O 或提交后并发复测可能在已提交后失败，仍须按 README 核对旗标/事件/备份；备份保留期与清理不在本单。
+- 开工已有 7 项未跟踪内容（本地 Claude 设置、09-07 模拟用户测试单、09-09 扳机日预览/执行四份审计、09-04 会议记录）保留，不计入本次 numstat。CodeGraph CLI 与 rg 不可用且无可调用 CodeGraph MCP，已先尝试后使用定向 PowerShell 读取，未建索引。`Status=done` 仅指本单 builder 工程完工，工作树交 HQ 复核。

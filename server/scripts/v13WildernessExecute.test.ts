@@ -9,10 +9,10 @@ import { resolveWorldRect, resolveScreenRect } from '../../client/src/pages/Note
 import { readCoordinateContract } from '../src/services/coordinateContract.js';
 import { readShadowReport } from './wildernessShadow/census.js';
 import { createSyntheticBuffer } from './wildernessShadow/synthetic.js';
-import { createExecutorSyntheticBuffer } from './wildernessExecutor/synthetic.js';
+import { createExecutorSyntheticBuffer, createMultiUserSyntheticBuffer } from './wildernessExecutor/synthetic.js';
 import { solveCoordinates, readFrame, type Row } from './wildernessExecutor/coordinates.js';
 import { execute, rollback, TABLES, BACKUP_SUFFIX, tableHash, json, encode, type Stage } from './wildernessExecutor/executor.js';
-import { parseArgs, run } from './v13WildernessExecute.js';
+import { parseArgs, run, readPreview, renderPreview, renderExecution } from './v13WildernessExecute.js';
 
 const user = 's0-user';
 function fixture(foreignFormal = false) {
@@ -74,7 +74,8 @@ test('synthetic preview -> execute -> exact census/invariants -> rollback -> ful
     const beforeHashes = hashes(db);
     const foreign = get(db, 'foreign-placement');
     const original = new Map(['local', 'cross-note', 'infinite-x'].map(id => [id, get(db, id)]));
-    const result = execute(db, user);
+    const execution = execute(db, user);
+    const result = execution.users[0];
     assert.equal(readCoordinateContract(db), 'v2');
     assert.equal(result.conservation.length, 24);
     assert.equal(result.conservation.every(c => c.ok), true);
@@ -103,11 +104,11 @@ test('synthetic preview -> execute -> exact census/invariants -> rollback -> ful
     assert.equal(readCoordinateContract(db), 'v1');
     assert.deepEqual(hashes(db), beforeHashes);
     assert.deepEqual(census(db).census, preview.census);
-    assert.equal(undone.after.censusSha256, preview.evidence.censusSha256);
+    assert.equal(undone.users[0].after.censusSha256, preview.evidence.censusSha256);
     for (const t of undone.backups) assert.throws(() => db.exec(`DELETE FROM ${t}`), /executor_backup_readonly/);
     const second = execute(db, user);
-    assert.equal(second.after.censusSha256, result.after.censusSha256);
-    assert.deepEqual(second.hashes.after, result.hashes.after);
+    assert.equal(second.users[0].after.censusSha256, result.after.censusSha256);
+    assert.deepEqual(second.hashes.after, execution.hashes.after);
     assert.deepEqual(db.prepare('SELECT verb FROM events ORDER BY seq').all(), [{ verb: 'migrated' }, { verb: 'rolled_back' }, { verb: 'migrated' }]);
     assert.deepEqual(db.pragma('foreign_key_check'), []);
     for (const t of TABLES) assert.throws(() => db.exec(`DELETE FROM ${t + BACKUP_SUFFIX}`), /executor_backup_readonly/);
@@ -172,7 +173,7 @@ test('SQLite 64-bit integers survive backup, full-row rollback and exception rep
   try {
     db.exec("UPDATE canvas_placements SET z_index=9007199254740993 WHERE id IN ('local','s4-exact-1')");
     const result = execute(db, user);
-    assert.ok(json(result.exceptions.find(c => c.id === 'local')!.original).includes('9007199254740993'));
+    assert.ok(json(result.users[0].exceptions.find(c => c.id === 'local')!.original).includes('9007199254740993'));
     rollback(db, user);
     assert.deepEqual(db.prepare("SELECT z_index FROM canvas_placements WHERE id IN ('local','s4-exact-1')").safeIntegers(true).all(),
       [{ z_index: 9007199254740993n }, { z_index: 9007199254740993n }]);
@@ -218,4 +219,111 @@ test('independent CLI entry and explicit arguments: full on-disk synthetic flow'
     for (const file of reports) { try { unlinkSync(file); } catch { /* failed before output creation */ } }
     unlinkSync(database); rmdirSync(folder);
   }
+});
+
+const multiUsers = ['s0-other', user];
+function multiFixture() {
+  const db = new Database(createMultiUserSyntheticBuffer());
+  db.pragma('foreign_keys = ON');
+  return db;
+}
+test('repeat/comma user arguments form one nonempty canonical scope; singleton options still refuse duplicates', () => {
+  const args = ['--db', 'synthetic.sqlite', '--out', 'docs/audits/合成'];
+  assert.deepEqual(parseArgs([...args, '--user', `${user}, s0-other`, '--user', user]).users, multiUsers);
+  for (const values of [[], ['--user', ''], ['--user', 's0-other,'], ['--user', ',s0-other'], ['--user', 's0-other,,s0-user']]) {
+    assert.throws(() => parseArgs([...args, ...values]));
+  }
+  assert.throws(() => parseArgs([...args, '--user', user, '--db', 'again']));
+  assert.throws(() => parseArgs([...args, '--user', user, '--out', 'again']));
+});
+test('two-user scope: incomplete execute/rollback refuse zero-write; all users migrate, restore and repeat exactly', () => {
+  const db = multiFixture();
+  try {
+    const initial = db.serialize();
+    const beforeHashes = hashes(db);
+    for (const scope of [user, 's0-other', [user, 'unknown'], []]) {
+      assert.throws(() => execute(db, scope), /executor_(out_of_scope_nontray_rows|unknown_scope|explicit_scope_required)/);
+      assert.deepEqual(db.serialize(), initial);
+    }
+    const reader = new Database(initial, { readonly: true });
+    const preview = (() => { try { return readPreview(reader, [user, 's0-other']); } finally { reader.close(); } })();
+    assert.deepEqual(db.serialize(), initial);
+    for (const id of multiUsers) assert.ok(renderPreview(preview).includes(`## 用户 ${id}`));
+    assert.equal(preview.users.find(u => u.scopeUserId === 's0-other')!.census.placement_inventory.length, 2);
+    const originalForeign = get(db, 'foreign-placement');
+    let flips = 0;
+    const result = execute(db, [user, 's0-other', user], { afterStep(stage) { if (stage === 'flag') flips++; } });
+    assert.equal(flips, 1);
+    assert.deepEqual(result.scopeUserIds, multiUsers);
+    assert.equal(result.backups.length, 3, 'one immutable full-table generation covers both users');
+    assert.equal(readCoordinateContract(db), 'v2');
+    for (const u of result.users) {
+      assert.ok(u.conservation.every(c => c.ok));
+      assert.equal(u.invariants.formalExceptions, 0);
+      assert.ok(u.changes.every(c => c.original.user_id === u.scopeUserId));
+      assert.ok(renderExecution(result).includes(`## 用户 ${u.scopeUserId}`));
+      const receipt = db.prepare('SELECT user_id,objects FROM events WHERE seq=?').get(u.eventSeq) as { user_id: string; objects: string };
+      assert.equal(receipt.user_id, u.scopeUserId);
+      for (const object of JSON.parse(receipt.objects) as { kind: string; id: string }[]) {
+        const table = object.kind === 'canvas_placement' ? 'canvas_placements' : object.kind === 'canvas_object' ? 'canvas_objects' : 'content_mounts';
+        assert.equal((db.prepare(`SELECT user_id FROM ${table} WHERE id=?`).get(object.id) as { user_id: string }).user_id, u.scopeUserId);
+      }
+    }
+    assert.equal(result.users.find(u => u.scopeUserId === 's0-other')!.invariants.checked, 1);
+    assert.ok(result.users.find(u => u.scopeUserId === user)!.invariants.checked >= 20);
+    assert.equal(get(db, 'foreign-placement').surface, 'formal_page');
+    assert.equal(get(db, 'foreign-placement').y, 10);
+    const committed = db.serialize();
+    for (const scope of [user, 's0-other', [...multiUsers, 'extra']]) {
+      assert.throws(() => rollback(db, scope), /executor_rollback_scope_or_contract/);
+      assert.deepEqual(db.serialize(), committed);
+    }
+    const restored = rollback(db, [user, 's0-other']);
+    assert.equal(readCoordinateContract(db), 'v1');
+    assert.deepEqual(get(db, 'foreign-placement'), originalForeign);
+    assert.deepEqual(hashes(db), beforeHashes);
+    restored.users.forEach((u, i) => assert.equal(u.after.censusSha256, preview.users[i].evidence.censusSha256));
+    const repeated = execute(db, multiUsers);
+    assert.deepEqual(repeated.hashes.after, result.hashes.after);
+    repeated.users.forEach((u, i) => assert.equal(u.after.censusSha256, result.users[i].after.censusSha256));
+    for (const id of multiUsers) assert.deepEqual(db.prepare('SELECT verb FROM events WHERE user_id=? ORDER BY seq').all(id),
+      [{ verb: 'migrated' }, { verb: 'rolled_back' }, { verb: 'migrated' }]);
+    assert.deepEqual(db.pragma('foreign_key_check'), []);
+  } finally { db.close(); }
+});
+test('second user failure undoes both users, backup DDL, receipts and flag in execute and rollback', () => {
+  for (const stage of ['normalize', 'relocate', 'event', 'rollback_event'] as Stage[]) {
+    const db = multiFixture();
+    try {
+      if (stage === 'rollback_event') execute(db, multiUsers);
+      const before = db.serialize();
+      const operation = stage === 'rollback_event' ? rollback : execute;
+      assert.throws(() => operation(db, multiUsers, { afterStep(s, scope) {
+        if (s === stage && scope === user) {
+          if (stage === 'event' || stage === 'rollback_event') {
+            assert.equal((db.prepare('SELECT count(*) AS n FROM events WHERE verb=?').get(
+              stage === 'event' ? 'migrated' : 'rolled_back') as { n: number }).n, 2);
+          }
+          throw new Error('second_user_failure');
+        }
+      } }), /second_user_failure/);
+      assert.deepEqual(db.serialize(), before);
+    } finally { db.close(); }
+  }
+});
+test('legacy version-1 single-user journal still rolls back with the exact original scope', () => {
+  const db = fixture();
+  try {
+    const original = hashes(db);
+    execute(db, user);
+    const entry = db.prepare("SELECT value FROM database_meta WHERE key='v13_2_wilderness_executor'").get() as { value: string };
+    const state = JSON.parse(entry.value);
+    const { users, beforeCensus, ...common } = state;
+    db.prepare("UPDATE database_meta SET value=? WHERE key='v13_2_wilderness_executor'").run(
+      JSON.stringify({ ...common, version: 1, user: users[0], beforeCensus: beforeCensus[user] }));
+    assert.throws(() => rollback(db, multiUsers), /executor_rollback_scope_or_contract/);
+    rollback(db, user);
+    assert.deepEqual(hashes(db), original);
+    assert.equal(readCoordinateContract(db), 'v1');
+  } finally { db.close(); }
 });

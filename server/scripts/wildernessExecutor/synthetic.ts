@@ -45,3 +45,24 @@ export function createExecutorSyntheticBuffer(foreignFormal = false): Buffer {
     return db.serialize();
   } finally { db.close(); }
 }
+
+/** Addendum 2: main user's full spectrum + a second user's single formal paragraph
+ * and structural frame. Reuse frame_id=f1 across users to exercise scoped resolution.
+ */
+export function createMultiUserSyntheticBuffer(): Buffer {
+  const db = new Database(createExecutorSyntheticBuffer(true));
+  try {
+    db.pragma('foreign_keys = ON');
+    db.exec(`UPDATE canvas_objects SET kind='paragraph_block_projection' WHERE id='foreign-object';
+      UPDATE canvas_placements SET x=10,y=230 WHERE id='foreign-placement';
+      INSERT INTO canvas_objects(id,user_id,course_id,note_id,canvas_id,kind)
+        VALUES('foreign-frame','s0-other','s0-course','foreign-note','foreign-note','page_frame');
+      INSERT INTO canvas_placements(id,user_id,course_id,note_id,canvas_id,object_id,x,y,width,height,frame_id)
+        VALUES('foreign-frame-placement','s0-other','s0-course','foreign-note','foreign-note','foreign-frame',-10,200,120,140,'f1');
+      INSERT INTO page_frame_extensions(frame_id,user_id,course_id,note_id,object_id,canvas_id,content_inset_json)
+        VALUES('f1','s0-other','s0-course','foreign-note','foreign-frame','foreign-note','{"left":10,"right":10,"top":20,"bottom":20}');
+      INSERT INTO canvas_page_collections(note_id,user_id,course_id,canvas_id,primary_frame_id)
+        VALUES('foreign-note','s0-other','s0-course','foreign-note','f1');`);
+    return db.serialize();
+  } finally { db.close(); }
+}
