@@ -4,7 +4,7 @@ import { recordEvent } from '../../src/db/recordEvent.js';
 import { readCoordinateContract } from '../../src/services/coordinateContract.js';
 import { CENSUS_SQL } from '../wildernessShadow/census.js';
 import { buildShadowPlan, validateConservation, type Census, type PlannedRow } from '../wildernessShadow/model.js';
-import { readFrame, solveCoordinates, verifySolution, type Row, type Solution } from './coordinates.js';
+import { readFrame, readFrames, solveCoordinates, verifySolution, type Row, type Solution } from './coordinates.js';
 
 export const TABLES = ['canvas_placements', 'canvas_objects', 'content_mounts'] as const;
 const DEPENDENCIES = ['page_frame_extensions', 'canvas_page_collections', 'visual_connector_extensions',
@@ -65,7 +65,8 @@ export interface UserExecutionReport {
   scopeUserId: string;
   before: Snapshot; after: Snapshot; changes: Change[]; exceptions: Change[];
   conservation: ReturnType<typeof validateConservation>[];
-  invariants: { checked: number; formalExceptions: number; pageOffsetX: number };
+  invariants: { checked: number; formalExceptions: number; pageOffsetX: number;
+    formalCandidates: number; normalizationRate: number | null; ruler: 'hydrated_screen_and_surface' };
   eventSeq: number;
 }
 export interface ExecutionReport {
@@ -185,10 +186,10 @@ function migrateUser(db: Database.Database, user: string, before: Snapshot, hook
     // 2. Normalize every non-structural formal row, including inactive/unresolved identities.
     for (const row of source) {
       if (row.surface !== 'formal_page' || inventory.get(row.id)?.kind === 'page_frame') continue;
-      const solution = solveCoordinates(row, readFrame(db, row));
+      const solution = solveCoordinates(row, readFrame(db, row), readFrames(db, row), inventory.get(row.id)?.kind ?? null);
       changes.push({ id: row.id, note: row.note_id, original: row, solution,
         destination: solution.status === 'normalized' ? 'normalized' : 'tray',
-        reason: solution.status === 'normalized' ? 'exact_world_and_screen' : solution.reason });
+        reason: solution.status === 'normalized' ? 'exact_hydrated_screen_and_surface' : solution.reason });
       if (solution.status === 'normalized') db.prepare('UPDATE canvas_placements SET x=?, y=?, metadata=? WHERE id=?')
         .run(solution.candidate.x, solution.candidate.y, solution.metadata, row.id);
     }
@@ -224,13 +225,19 @@ function migrateUser(db: Database.Database, user: string, before: Snapshot, hook
       } else requireThat(row.surface === 'tray', 'executor_destination_failed');
     }
     const formal = source.filter(r => r.surface === 'formal_page' && inventory.get(r.id)?.kind !== 'page_frame');
+    // The denominator includes ALL formal candidates, including malformed rows.
+    // Count only persisted rows that passed the same live hydration replay above.
+    // Each user's cohort must pass: another user's positives cannot hide a disaster.
+    const normalizationRate = formal.length ? checked / formal.length : null;
+    requireThat(normalizationRate === null || normalizationRate >= 0.5, 'normalization_rate_anomaly');
     requireThat(formal.every(r => changes.some(c => c.id === r.id
       && (c.solution?.status === 'normalized' || actual.get(c.id)?.surface === 'tray'))), 'executor_formal_exception_remaining');
     const after = snapshot(db, user);
     const conserved = conservation(before, after, changes);
     return { scopeUserId: user, before, after, changes,
       exceptions: changes.filter(c => c.solution?.status === 'exception'), conservation: conserved,
-      invariants: { checked, formalExceptions: 0, pageOffsetX: 0 }, eventSeq: 0 };
+      invariants: { checked, formalExceptions: 0, pageOffsetX: 0, formalCandidates: formal.length,
+        normalizationRate, ruler: 'hydrated_screen_and_surface' }, eventSeq: 0 };
 }
 
 export function rollback(db: Database.Database, scope: string | readonly string[], hooks: Hooks = {}): ExecutionReport {
@@ -273,7 +280,8 @@ export function rollback(db: Database.Database, scope: string | readonly string[
       hooks.afterStep?.('rollback_event', user);
       return { scopeUserId: user, before: before.get(user)!, after, changes: scopedChanges, exceptions: [],
         conservation: conservation(before.get(user)!, after, []),
-        invariants: { checked: 0, formalExceptions: 0, pageOffsetX: 0 }, eventSeq };
+        invariants: { checked: 0, formalExceptions: 0, pageOffsetX: 0, formalCandidates: 0,
+          normalizationRate: null, ruler: 'hydrated_screen_and_surface' }, eventSeq };
     });
     // Preserve immutable generations, release only their fixed active names after a verified rollback.
     const backups = TABLES.map(t => t + BACKUP_SUFFIX + '_rolled_back_' + reports.at(-1)!.eventSeq);

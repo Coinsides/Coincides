@@ -42,6 +42,10 @@ export function createExecutorSyntheticBuffer(foreignFormal = false): Buffer {
       VALUES('object-image','s0-user','s0-course','n','n','synthetic-asset');
       INSERT INTO structured_object_extensions(object_id,user_id,course_id,note_id,canvas_id,structured_kind,schema_version,data_json)
       VALUES('object-table','s0-user','s0-course','n','n','table','table.v1','{"synthetic":"retained"}');`);
+    // Declare these deliberately small S3/S4 geometries as Custom so the live
+    // print baseline keeps their stated origins. Original placement rows stay intact.
+    db.exec("UPDATE page_frame_extensions SET page_size='Custom'");
+    addProductionPositives(db);
     return db.serialize();
   } finally { db.close(); }
 }
@@ -59,10 +63,37 @@ export function createMultiUserSyntheticBuffer(): Buffer {
         VALUES('foreign-frame','s0-other','s0-course','foreign-note','foreign-note','page_frame');
       INSERT INTO canvas_placements(id,user_id,course_id,note_id,canvas_id,object_id,x,y,width,height,frame_id)
         VALUES('foreign-frame-placement','s0-other','s0-course','foreign-note','foreign-note','foreign-frame',-10,200,120,140,'f1');
-      INSERT INTO page_frame_extensions(frame_id,user_id,course_id,note_id,object_id,canvas_id,content_inset_json)
-        VALUES('f1','s0-other','s0-course','foreign-note','foreign-frame','foreign-note','{"left":10,"right":10,"top":20,"bottom":20}');
+      INSERT INTO page_frame_extensions(frame_id,user_id,course_id,note_id,object_id,canvas_id,page_size,content_inset_json)
+        VALUES('f1','s0-other','s0-course','foreign-note','foreign-frame','foreign-note','Custom','{"left":10,"right":10,"top":20,"bottom":20}');
       INSERT INTO canvas_page_collections(note_id,user_id,course_id,canvas_id,primary_frame_id)
         VALUES('foreign-note','s0-other','s0-course','foreign-note','f1');`);
     return db.serialize();
   } finally { db.close(); }
+}
+
+export const PRODUCTION_POSITIVE_IDS = ['production-local-72-96', 'production-local-54-112', 'production-source-x152'] as const;
+function addProductionPositives(db: Database.Database) {
+  for (const [index, id] of PRODUCTION_POSITIVE_IDS.entries()) {
+    const left = index === 1 ? 54 : 72;
+    const top = index === 1 ? 112 : 96;
+    db.prepare("INSERT INTO notes VALUES(?,'s0-user','s0-course','{}',NULL)").run(id);
+    db.prepare(`INSERT INTO canvas_objects(id,user_id,course_id,note_id,canvas_id,kind)
+      VALUES(?,'s0-user','s0-course',?,?,'page_frame')`).run('frame-' + id, id, id);
+    db.prepare(`INSERT INTO canvas_placements(id,user_id,course_id,note_id,canvas_id,object_id,x,y,width,height,frame_id)
+      VALUES(?,'s0-user','s0-course',?,?,?,80,80,794,1123,?)`).run('pf-' + id, id, id, 'frame-' + id, id);
+    db.prepare(`INSERT INTO page_frame_extensions(frame_id,user_id,course_id,note_id,object_id,canvas_id,page_size,content_inset_json)
+      VALUES(?,'s0-user','s0-course',?,?,?,'A4',?)`).run(id, id, 'frame-' + id, id,
+      JSON.stringify({ left, right: 72, top, bottom: 96 }));
+    db.prepare(`INSERT INTO canvas_page_collections(note_id,user_id,course_id,canvas_id,primary_frame_id)
+      VALUES(?,'s0-user','s0-course',?,?)`).run(id, id, id);
+    db.prepare(`INSERT INTO canvas_objects(id,user_id,course_id,note_id,canvas_id,kind)
+      VALUES(?,'s0-user','s0-course',?,?,'paragraph_block_projection')`).run('o-' + id, id, id);
+    db.prepare(`INSERT INTO canvas_placements(id,user_id,course_id,note_id,canvas_id,object_id,x,y,width,height,frame_id,metadata)
+      VALUES(?,'s0-user','s0-course',?,?,?,?,?,?,72,?,?)`).run(id, id, id, 'o-' + id,
+      index === 2 ? 152 : 10, index === 2 ? 176 : 10, index === 2 ? 650 : 100, id,
+      JSON.stringify({ layout_policy: { coordinate_space: index === 2 ? 'canvas_world' : 'page_frame_local' } }));
+    db.prepare("INSERT INTO note_blocks VALUES(?,'s0-user','s0-course','active')").run('b-' + id);
+    db.prepare(`INSERT INTO content_mounts(id,user_id,course_id,note_id,object_id,target_kind,target_id)
+      VALUES(?,'s0-user','s0-course',?,?,'note_block',?)`).run('m-' + id, id, 'o-' + id, 'b-' + id);
+  }
 }

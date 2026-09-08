@@ -6,11 +6,14 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import Database from 'better-sqlite3';
 import { resolveWorldRect, resolveScreenRect } from '../../client/src/pages/Notes/canvasEngine/placementContractService.js';
+import { reconcileHydratedBlockLayoutSurfaceAuthority } from '../../client/src/pages/Notes/canvasEngine/placementService.js';
+import type { BlockBoxLayout } from '../../client/src/pages/Notes/canvasEngine/runtimeLayout.js';
 import { readCoordinateContract } from '../src/services/coordinateContract.js';
+import { projectCanvasPlacementLayout } from '../src/services/canvasPlacementLayout.js';
 import { readShadowReport } from './wildernessShadow/census.js';
 import { createSyntheticBuffer } from './wildernessShadow/synthetic.js';
-import { createExecutorSyntheticBuffer, createMultiUserSyntheticBuffer } from './wildernessExecutor/synthetic.js';
-import { solveCoordinates, readFrame, type Row } from './wildernessExecutor/coordinates.js';
+import { createExecutorSyntheticBuffer, createMultiUserSyntheticBuffer, PRODUCTION_POSITIVE_IDS } from './wildernessExecutor/synthetic.js';
+import { solveCoordinates, readFrame, readFrames, verifySolution, type Row } from './wildernessExecutor/coordinates.js';
 import { execute, rollback, TABLES, BACKUP_SUFFIX, tableHash, json, encode, type Stage } from './wildernessExecutor/executor.js';
 import { parseArgs, run, readPreview, renderPreview, renderExecution } from './v13WildernessExecute.js';
 
@@ -30,7 +33,7 @@ function census(db: Database.Database) {
 function hashes(db: Database.Database) {
   return TABLES.map(t => tableHash(db, t));
 }
-test('4a equations: exact negative local, no simultaneous solution, missing frame, nonfinite and metadata exceptions', () => {
+test('tag-dispatched candidates: negative local, exact hydrated view, missing frame, nonfinite and metadata exceptions', () => {
   const db = fixture();
   try {
     const originalS3 = new Database(createSyntheticBuffer(), { readonly: true });
@@ -40,8 +43,8 @@ test('4a equations: exact negative local, no simultaneous solution, missing fram
     for (const id of ['local', 'cross-note', 'mixed', 'second']) {
       const row = get(db, id);
       const s = solveCoordinates(row, readFrame(db, row));
-      assert.equal(s.status, 'exception');
-      if (s.status === 'exception') assert.equal(s.reason, 'no_exact_solution');
+      assert.equal(s.status, 'normalized');
+      if (s.status === 'normalized') assert.deepEqual(s.afterHydrated, s.beforeHydrated);
     }
     const row = get(db, 's4-exact-0');
     const solution = solveCoordinates(row, readFrame(db, row));
@@ -49,8 +52,7 @@ test('4a equations: exact negative local, no simultaneous solution, missing fram
     if (solution.status !== 'normalized') throw new Error('expected exact solution');
     assert.equal(solution.candidate.x, -5);
     assert.equal(solution.candidate.y, -219.75);
-    assert.deepEqual(resolveWorldRect(solution.candidate, solution.frame, 'v2', 0), solution.beforeWorld);
-    assert.deepEqual(resolveScreenRect(solution.candidate, solution.frame, 'v2', 0), solution.beforeScreen);
+    assert.deepEqual(solution.afterHydrated, solution.beforeHydrated);
     assert.equal(JSON.parse(solution.metadata).layout_policy.retained, true);
     for (const id of ['missing-frame', 'invalid-inset', 'duplicate-frame', 'infinite-x', 'invalid-meta']) {
       const row = get(db, id);
@@ -59,9 +61,9 @@ test('4a equations: exact negative local, no simultaneous solution, missing fram
       if (solution.status === 'exception') assert.deepEqual(solution.original, row);
     }
     assert.equal(json(get(db, 'infinite-x')).includes('"$sqliteNumber":"Infinity"'), true);
-    const imprecise = { ...row, y: 0.1 };
-    const s = solveCoordinates(imprecise, readFrame(db, imprecise));
-    assert.equal(s.status, 'exception', 'strict double-ruler comparison must catch cancellation, not round it away');
+    const fractionalFrame = { ...solution.frame, y: -19.75 };
+    const s = solveCoordinates({ ...row, y: 1 }, fractionalFrame);
+    assert.equal(s.status, 'exception', 'read-side rounding at a fractional origin must not create a false positive');
   } finally { db.close(); }
 });
 
@@ -73,11 +75,11 @@ test('synthetic preview -> execute -> exact census/invariants -> rollback -> ful
     assert.deepEqual(db.serialize(), bytes);
     const beforeHashes = hashes(db);
     const foreign = get(db, 'foreign-placement');
-    const original = new Map(['local', 'cross-note', 'infinite-x'].map(id => [id, get(db, id)]));
+    const original = new Map(['stored-inside-wrong', 'untagged-world', 'infinite-x'].map(id => [id, get(db, id)]));
     const execution = execute(db, user);
     const result = execution.users[0];
     assert.equal(readCoordinateContract(db), 'v2');
-    assert.equal(result.conservation.length, 24);
+    assert.equal(result.conservation.length, 33);
     assert.equal(result.conservation.every(c => c.ok), true);
     assert.ok(result.invariants.checked >= 20);
     assert.equal(result.invariants.formalExceptions, 0);
@@ -93,6 +95,10 @@ test('synthetic preview -> execute -> exact census/invariants -> rollback -> ful
       assert.ok(Number(get(db, id).order_index) > 40);
     }
     assert.equal(get(db, 's4-exact-0').y, -219.75);
+    for (const [id, y] of [['local', -210], ['cross-note', -2010]] as const) {
+      assert.equal(get(db, id).surface, 'formal_page');
+      assert.equal(get(db, id).y, y);
+    }
     assert.deepEqual(get(db, 'foreign-placement'), foreign);
     assert.equal(tableHash(db, 'canvas_objects'), beforeHashes[1]);
     assert.equal(tableHash(db, 'content_mounts'), beforeHashes[2]);
@@ -171,11 +177,11 @@ test('rollback refuses subsequent writes and extension drift without discarding 
 test('SQLite 64-bit integers survive backup, full-row rollback and exception reports exactly', () => {
   const db = fixture();
   try {
-    db.exec("UPDATE canvas_placements SET z_index=9007199254740993 WHERE id IN ('local','s4-exact-1')");
+    db.exec("UPDATE canvas_placements SET z_index=9007199254740993 WHERE id IN ('infinite-x','s4-exact-1')");
     const result = execute(db, user);
-    assert.ok(json(result.users[0].exceptions.find(c => c.id === 'local')!.original).includes('9007199254740993'));
+    assert.ok(json(result.users[0].exceptions.find(c => c.id === 'infinite-x')!.original).includes('9007199254740993'));
     rollback(db, user);
-    assert.deepEqual(db.prepare("SELECT z_index FROM canvas_placements WHERE id IN ('local','s4-exact-1')").safeIntegers(true).all(),
+    assert.deepEqual(db.prepare("SELECT z_index FROM canvas_placements WHERE id IN ('infinite-x','s4-exact-1')").safeIntegers(true).all(),
       [{ z_index: 9007199254740993n }, { z_index: 9007199254740993n }]);
   } finally { db.close(); }
 });
@@ -186,6 +192,176 @@ test('untagged formal row whose hydration changes surface is an exception, not a
     const result = solveCoordinates(original, readFrame(db, original));
     assert.equal(result.status, 'exception');
     if (result.status === 'exception') assert.equal(result.reason, 'hydration_mismatch');
+  } finally { db.close(); }
+});
+
+test('production positives: Source x=152 becomes x=0; nonzero origins retain formal and exact live hydrated screen', () => {
+  const db = fixture();
+  try {
+    const before = PRODUCTION_POSITIVE_IDS.map(id => get(db, id));
+    const result = execute(db, user).users[0];
+    for (const row of before) {
+      const saved = get(db, row.id);
+      const change = result.changes.find(c => c.id === row.id)!;
+      assert.equal(change.solution?.status, 'normalized');
+      if (change.solution?.status !== 'normalized') throw new Error('positive rejected');
+      const frames = readFrames(db, row)!;
+      // Independent direct calls to the real chain, not just the solver's boolean.
+      const hydrate = (r: Row, contract: 'v1' | 'v2') => reconcileHydratedBlockLayoutSurfaceAuthority(
+        projectCanvasPlacementLayout(r as unknown as BlockBoxLayout, JSON.parse(String(r.metadata)).layout_policy),
+        frames, contract) as unknown as BlockBoxLayout;
+      const oldHydrated = hydrate(row, 'v1');
+      const newHydrated = hydrate(saved, 'v2');
+      const frame = frames.find(f => f.id === row.frame_id)!;
+      assert.equal(oldHydrated.surface, 'formal_page');
+      assert.equal(newHydrated.surface, 'formal_page');
+      assert.equal(saved.surface, 'formal_page');
+      assert.deepEqual(resolveScreenRect(newHydrated, frame, 'v2', 0), resolveScreenRect(oldHydrated, frame, 'v1', 0));
+      assert.equal(verifySolution(saved, change.solution), true);
+      assert.equal(verifySolution({ ...saved, x: Number(saved.x) + 1 }, change.solution), false);
+      assert.equal(verifySolution({ ...saved, surface: 'tray' }, change.solution), false);
+      if (row.id === 'production-source-x152') {
+        assert.equal(saved.x, 0);
+        assert.equal(saved.y, 0);
+        assert.equal(saved.width, 650);
+        assert.deepEqual(change.solution.beforeHydrated.screen, { x: 0, y: 176, width: 650, height: 72 });
+        assert.notDeepEqual(resolveWorldRect(newHydrated, frame, 'v2', 0), resolveWorldRect(oldHydrated, frame, 'v1', 0),
+          'world is allowed to change; it must never become a hidden second invariant');
+      } else {
+        assert.equal(saved.x, 10);
+        assert.equal(saved.y, row.id === 'production-local-72-96' ? -166 : -182);
+      }
+    }
+  } finally { db.close(); }
+});
+
+test('complete frame replay rejects single-frame false positives and refuses incomplete context', () => {
+  const db = fixture();
+  try {
+    db.exec("UPDATE canvas_placements SET x=200 WHERE id='pf-zero-fnext'");
+    const row = { ...get(db, 'agree-inside'), x: 210 };
+    const frame = readFrame(db, row)!;
+    assert.equal(solveCoordinates(row, frame).status, 'normalized', 'the old single-frame probe misses reaffiliation');
+    assert.equal(solveCoordinates(row, frame, readFrames(db, row)).status, 'exception');
+    db.exec("UPDATE canvas_placements SET z_index=-1 WHERE id='pf-zero-fnext'");
+    assert.deepEqual(readFrames(db, row)!.map(f => f.id), ['fnext', 'f0', 's4-frame']);
+    db.exec("DELETE FROM page_frame_extensions WHERE note_id='zero' AND frame_id='fnext'");
+    assert.equal(readFrames(db, row), null, 'missing extensions cannot silently disappear from hydration context');
+    assert.equal(solveCoordinates(row, frame, readFrames(db, row)).status, 'exception');
+  } finally { db.close(); }
+});
+
+test('live print baseline is applied when page_size is absent, while explicit A4 preserves Source origin', () => {
+  const db = fixture();
+  try {
+    const row = get(db, 'production-source-x152');
+    assert.equal(readFrame(db, row)!.contentInset.top, 96);
+    db.prepare('UPDATE page_frame_extensions SET page_size=NULL WHERE frame_id=?').run(row.frame_id);
+    const frame = readFrame(db, row)!;
+    assert.equal(frame.width, 904);
+    assert.equal(frame.contentInset.top, 0);
+    const result = solveCoordinates(row, frame, readFrames(db, row));
+    assert.equal(result.status, 'normalized');
+    if (result.status === 'normalized') assert.equal(result.candidate.y, 96);
+  } finally { db.close(); }
+});
+
+test('stale untagged boundary receipts do not add a hidden invariant to unchanged screen/surface', () => {
+  const db = fixture();
+  try {
+    const row = { ...get(db, 'production-local-72-96'), metadata: '{}', boundary_role: 'crossing' };
+    const result = solveCoordinates(row, readFrame(db, row), readFrames(db, row));
+    assert.equal(result.status, 'normalized');
+    if (result.status === 'normalized') {
+      assert.deepEqual(result.beforeHydrated.screen, result.afterHydrated.screen);
+      assert.equal(result.beforeHydrated.surface, result.afterHydrated.surface);
+      assert.notEqual(result.beforeHydrated.boundaryRole, result.afterHydrated.boundaryRole);
+    }
+  } finally { db.close(); }
+});
+
+test('block read-side rounding is replayed, never applied to stored candidates; generic uses its own live consumer', () => {
+  const db = fixture();
+  try {
+    const original = get(db, 'production-local-72-96');
+    const frame = readFrame(db, original)!;
+    const fractionalFrame = { ...frame, y: -frame.contentInset.top + 0.25 };
+    const row = { ...original, y: 1 };
+    const candidate = { ...row, y: 0.75, coordinate_space: 'page_frame_local' } as unknown as BlockBoxLayout;
+    assert.deepEqual(resolveScreenRect(candidate, fractionalFrame, 'v2', 0),
+      resolveScreenRect(row as unknown as BlockBoxLayout, fractionalFrame, 'v1', 0), 'raw-only replay falsely passes');
+    const projected = projectCanvasPlacementLayout(candidate, { coordinate_space: 'page_frame_local' });
+    assert.equal(projected.y, 1);
+    assert.equal(resolveScreenRect(projected as unknown as BlockBoxLayout, fractionalFrame, 'v2', 0).y, 1.25);
+    assert.equal(solveCoordinates(row, fractionalFrame).status, 'exception');
+    const valid = solveCoordinates({ ...original, y: 10.25 }, frame);
+    assert.equal(valid.status, 'normalized');
+    if (valid.status === 'normalized') {
+      assert.equal(valid.candidate.y, -165.75, 'never round the stored candidate');
+      assert.equal(valid.beforeHydrated.screen.y, 10, 'faithful existing read-side projection');
+    }
+    assert.equal(solveCoordinates(original, frame, [frame], 'shape').status, 'exception',
+      'generic local x would move by origin.x even when the block-screen ruler passes');
+    const world = get(db, 'production-source-x152');
+    const generic = solveCoordinates(world, readFrame(db, world), readFrames(db, world), 'image');
+    assert.equal(generic.status, 'normalized');
+    if (generic.status === 'normalized') {
+      assert.deepEqual(generic.beforeHydrated.screen, { x: 152, y: 176, width: 650, height: 72 });
+      assert.deepEqual(generic.afterHydrated.screen, generic.beforeHydrated.screen);
+    }
+  } finally { db.close(); }
+});
+
+test('hydration fuse: raw-screen-solvable surface failures abort all writes, including old events and archived backups', () => {
+  const db = fixture();
+  try {
+    execute(db, user);
+    rollback(db, user);
+    db.exec(`UPDATE canvas_placements SET x=10000, metadata='{}'
+      WHERE surface='formal_page' AND object_id IN (SELECT id FROM canvas_objects WHERE kind<>'page_frame')`);
+    const row = get(db, 'production-source-x152');
+    const frame = readFrame(db, row)!;
+    const layout = { ...row } as unknown as BlockBoxLayout;
+    const candidate = { ...layout, y: layout.y - frame.y - frame.contentInset.top, coordinate_space: 'page_frame_local' as const };
+    assert.deepEqual(resolveScreenRect(layout, frame, 'v1', 0), resolveScreenRect(candidate, frame, 'v2', 0));
+    const solution = solveCoordinates(row, frame, readFrames(db, row));
+    assert.equal(solution.status, 'exception');
+    if (solution.status === 'exception') assert.equal(solution.reason, 'hydration_mismatch');
+    const before = db.serialize();
+    assert.throws(() => execute(db, user), /normalization_rate_anomaly/);
+    assert.deepEqual(db.serialize(), before, 'placements, events, flag, journal and backup generations all roll back');
+  } finally { db.close(); }
+});
+
+test('fuse boundary: exactly 50% passes, below 50% refuses, and empty formal denominator is N/A', () => {
+  for (const count of [0, 2, 3]) {
+    const db = fixture();
+    try {
+      db.exec(`UPDATE canvas_placements SET surface='tray' WHERE object_id IN (SELECT id FROM canvas_objects WHERE kind<>'page_frame')`);
+      for (const [i, id] of PRODUCTION_POSITIVE_IDS.slice(0, count).entries()) {
+        db.prepare("UPDATE canvas_placements SET surface='formal_page',x=?,metadata='{}' WHERE id=?").run(i ? 10000 : 10, id);
+      }
+      const before = db.serialize();
+      if (count === 3) {
+        assert.throws(() => execute(db, user), /normalization_rate_anomaly/);
+        assert.deepEqual(db.serialize(), before);
+      } else {
+        const report = execute(db, user).users[0];
+        assert.equal(report.invariants.formalCandidates, count);
+        assert.equal(report.invariants.normalizationRate, count ? 0.5 : null);
+        assert.equal(report.exceptions.length, count ? 1 : 0);
+      }
+    } finally { db.close(); }
+  }
+});
+
+test('one user failing the hydration fuse cannot be masked by the other users positives', () => {
+  const db = multiFixture();
+  try {
+    db.exec("UPDATE canvas_placements SET x=10000,metadata='{}' WHERE id='foreign-placement'");
+    const before = db.serialize();
+    assert.throws(() => execute(db, multiUsers), /normalization_rate_anomaly/);
+    assert.deepEqual(db.serialize(), before);
   } finally { db.close(); }
 });
 test('independent CLI entry and explicit arguments: full on-disk synthetic flow', () => {
@@ -210,8 +386,8 @@ test('independent CLI entry and explicit arguments: full on-disk synthetic flow'
     const db = new Database(database, { readonly: true });
     try {
       assert.equal(readCoordinateContract(db), 'v2');
-      assert.equal(get(db, 'local').surface, 'tray');
-      assert.equal(get(db, 'cross-note').surface, 'tray');
+      assert.equal(get(db, 'local').surface, 'formal_page');
+      assert.equal(get(db, 'cross-note').surface, 'formal_page');
       assert.equal((db.prepare('SELECT COUNT(*) AS n FROM events').get() as { n: number }).n, 3);
     } finally { db.close(); }
   } finally {

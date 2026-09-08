@@ -2,6 +2,7 @@ import type Database from 'better-sqlite3';
 import { AppError } from '../middleware/errorHandler.js';
 import { finalizeCanvasAssetCleanup, releaseAssetReference } from './canvasAssets.js';
 import type { ManagedFileTask } from './managedFileCleanup.js';
+import { projectCanvasPlacementLayout } from './canvasPlacementLayout.js';
 
 interface OwnedNote {
   id: string;
@@ -295,27 +296,7 @@ function layoutPolicyFromPlacement(row: CanvasPlacementRow): Record<string, unkn
 }
 
 function layoutFromPlacement(row: CanvasPlacementRow): Record<string, unknown> {
-  const policy = layoutPolicyFromPlacement(row);
-  const layout: Record<string, unknown> = {
-    x: Math.round(Number(row.x || 0)),
-    y: Math.round(Number(row.y || 0)),
-    width: Math.round(Number(row.width || 0)),
-    height: Math.round(Number(row.height || 0)),
-    surface: row.surface === 'tray' ? 'tray' : row.surface === 'canvas_workspace' ? 'canvas_workspace' : 'formal_page',
-    boundary_role: row.boundary_role === 'crossing' || row.boundary_role === 'outside'
-      ? row.boundary_role
-      : 'inside',
-  };
-  if (row.frame_id) layout.frame_id = row.frame_id;
-  if (row.order_index != null) layout.order_index = row.order_index;
-  if (policy.coordinate_space === 'page_frame_local' || policy.coordinate_space === 'canvas_world') {
-    layout.coordinate_space = policy.coordinate_space;
-  }
-  if (Number(row.rotation || 0) !== 0) layout.rotation = Number(row.rotation || 0);
-  if (typeof policy.export_role === 'string') layout.export_role = policy.export_role;
-  if (typeof policy.ai_visibility === 'string') layout.ai_visibility = policy.ai_visibility;
-  if (policy.width_mode === 'manual') layout.width_mode = 'manual';
-  return layout;
+  return projectCanvasPlacementLayout(row, layoutPolicyFromPlacement(row));
 }
 
 function canvasObjectFromRow(row: CanvasObjectRow) {

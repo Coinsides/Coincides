@@ -41,11 +41,12 @@ export function renderExecution(report: ExecutionReport): string {
     '> **权威 (Authoritative)**: 否；机械核对单，不是用户迁移放行', '',
     `# V13.2 单 4b · ${report.action} 核对单`, '',
     `scopes=${report.scopeUserIds.map(cell).join(', ')}；全部用户共用一次事务、一套全表备份与一次旗标切换。`,
-    '归一以现役 page offset=0 的 4a world/screen 双尺严格相等为准。没有 ε、clamp 或取整。负 local 合法。',
+    '归一以现役完整 hydration 后的屏显 rect 与表面归属逐位不变为准；page offset=0。解析式只生成候选，没有 ε、clamp 或取整。负 local 合法。',
     '三表分别计数；object/mount 去处由 placement 承载，内容与身份行不改写。原始值全量见同名 JSON；非有限数以 $sqliteNumber 保真编码。', '',
     ...report.users.flatMap(user => [
       `## 用户 ${cell(user.scopeUserId)}`, '', `event seq=${user.eventSeq}。`,
       `三表逐 note 身份守恒=${user.conservation.every(c => c.ok)}；复验=${user.invariants.checked}；formal 例外=${user.invariants.formalExceptions}。`, '',
+      `normalized=${user.invariants.checked}；tray=${user.changes.filter(c => c.destination === 'tray').length}；exceptions=${user.exceptions.length}；formal candidates=${user.invariants.formalCandidates}；归一成功率=${user.invariants.normalizationRate ?? 'N/A'}（<50% 整事务中止）。`, '',
       '| note | unit | before | after | original | tray | exact |', '| --- | --- | --- | --- | --- | --- | --- |',
       ...user.conservation.map(c => `| ${cell(c.note)} | ${c.unit} | ${c.before} | ${c.after} | ${c.original} | ${c.tray} | ${c.ok} |`), '',
       '| placement | destination | reason |', '| --- | --- | --- |',
@@ -98,6 +99,8 @@ export function run(options: Options) {
     } finally { reader.close(); }
     return { action: report.action, scopeUserIds: users, conservation: report.users.every(u => u.conservation.every(c => c.ok)),
       checked: report.users.reduce((n, u) => n + u.invariants.checked, 0),
+      normalized: report.users.reduce((n, u) => n + u.invariants.checked, 0),
+      tray: report.users.reduce((n, u) => n + u.changes.filter(c => c.destination === 'tray').length, 0),
       exceptions: report.users.reduce((n, u) => n + u.exceptions.length, 0),
       events: report.users.map(u => ({ user: u.scopeUserId, seq: u.eventSeq })) };
   } finally { db.close(); }
@@ -107,9 +110,15 @@ if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === imp
     console.log('Usage: node --import tsx scripts/v13WildernessExecute.ts --db <explicit-path> --user <scope[,scope...]> [--user <scope> ...] --out docs/audits/<new-basename> [--execute | --rollback]');
     console.log('Default: read-only S3 preview. Real database execution belongs to Henry. Rollback requires unchanged post-execution data.');
   } else {
-    try { console.log(JSON.stringify({ result: 'WILDERNESS_EXECUTOR_PASS', ...run(parseArgs(process.argv.slice(2))) })); }
-    catch {
-      console.error('WILDERNESS_EXECUTOR_FAILED: check explicit arguments/schema/scope/backup state. If report I/O or post-commit verification failed, inspect coordinate_contract and events before retrying.');
+    try {
+      const result = run(parseArgs(process.argv.slice(2)));
+      console.log(JSON.stringify({ result: 'WILDERNESS_EXECUTOR_PASS', ...result }));
+      if ('normalized' in result) console.log(`normalized=${result.normalized}; tray=${result.tray}; exceptions=${result.exceptions}`);
+    }
+    catch (error) {
+      if (error instanceof Error && error.message === 'normalization_rate_anomaly') {
+        console.error('FAILED: normalization_rate_anomaly; transaction aborted; hydration normalization below 50%; refer to HQ.');
+      } else console.error('WILDERNESS_EXECUTOR_FAILED: check explicit arguments/schema/scope/backup state. If report I/O or post-commit verification failed, inspect coordinate_contract and events before retrying.');
       process.exitCode = 1;
     }
   }

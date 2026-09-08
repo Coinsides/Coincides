@@ -1,6 +1,6 @@
 > **From**: fable
 > **To**: codex
-> **Status**: done(仅补遗一/二工程回执;⛔ 补遗三结构级冲突停线,未完工,详见末尾 Result;用户库零接触,真实执行=扳机日 Henry 亲跑)
+> **Status**: done(补遗四工程完工及合成演练,详见末尾 Result;非真实迁移放行,用户库零接触,真实执行=扳机日 Henry 亲跑)
 > **日期 (Date)**: 2026-09-08
 > **性质**: 施工单(扳机日的刀——本单只铸刀与演练,⛔ 挥刀)
 
@@ -186,3 +186,33 @@
 3. **保险丝判据同步**换到 hydration 后裁尺(formal 候选归一成功率<50% 事务中止,不变);
 4. **演练红线更新**:Source 生产同构阳性(canvas_world、x=152、宽 650、帧 (80,80)/inset(72,96))必须断言归一为 x'=0、formal 归属保持、hydration 后屏显逐位相等;两条非零 O.x 普通阳性照旧;保险丝阳性对照照旧;
 5. 其余口径(三份补遗未被本补遗覆盖的部分)不变。按本补遗续作至完工 Result 追补。
+
+## Result
+
+### 2026-09-08 · builder 按补遗四完工回执（工作树交 HQ，非真实迁移放行）
+
+完整重读本工单、全部历史 Result、四份补遗及入口/方向/现状/active ADR、段 plan、迁移映射后续作。补遗三的停线由补遗四闭合；本轮完成新裁尺、保险丝、读侧重放及合成演练，未留下需另行裁法的结构级缺口。原补遗、历史停线审计及 `addendum3SourceProbe.ts` 原字节保留。
+
+- **候选与终审分离**：canvas_world → x′=x−O.x、y′=y−O.y；local/无标签 → x′=x、y′=y−O.y。候选不 clamp、不取整，负 local 合法；只以现役 hydration 后屏显 rect 与 surface 分类逐位不变判成功，落库后全部重新过同一裁尺。world/raw screen 不再是终审；boundary/frame 收据保留诊断，不另加隐含不变量。
+- **真实输入阶段补齐**：正文先经现有存储→layout 投影，再复用旧 Source 探针的 `reconcileHydratedBlockLayoutSurfaceAuthority` → 4a `resolveScreenRect`。把 `canvasObjects.ts` 原四轴读侧取整/字段映射纯提取为 `canvasPlacementLayout.ts`，产品调用同一函数、policy 解析不变，产品行为零变化；取整仅复现现役读取，候选存储绝不取整。generic 按 S3 kind 分派，复用 `resolveGenericPlacementToWorld`，比较 renderer 直接消费的 rect/surface，不能套正文读法。缺身份/消费者证据列例外。
+- **完整帧上下文**：同用户/同 note 全帧按生产 z_index/frame_id 顺序重放，复用现役 print baseline；缺扩展/坏帧/重复帧不静默漏过。分数原点引起的读后漂移、generic local 横轴漂移及 surface 变化均由例外机制接住；失败行完整原值保留并迁 tray，沿用 SQLite 保真编码。
+- **保险丝和输出**：每用户全部非结构 formal 候选作分母（含坏行），落库后通过 hydration 裁尺的 checked 作分子；<50% 抛 `normalization_rate_anomaly`，整个多用户事务撤销，CLI 明报 `FAILED: normalization_rate_anomaly`。50% 可过、零分母 N/A，其他用户阳性不能掩盖单户灾难。核对单及 CLI 末行并列 normalized/tray/exceptions；共享只读三表备份、逐户事件、一次翻旗、精确回滚、归档与新 generation 机制保留。
+
+### 验证输出摘要（本线程亲跑）
+
+- 独立 typecheck：`node scripts/run-isolated-coordinate-validation.mjs --cwd server -- npm run typecheck:v13-wilderness-executor`，**exit 0，1s**；server `node node_modules/typescript/bin/tsc --noEmit` 经同隔离入口执行，**exit 0，4s**。
+- `node scripts/run-isolated-coordinate-validation.mjs --cwd server -- npm run test:v13-wilderness-executor`：最终 **27 tests / 27 pass / 0 fail，exit 0，98s**。保留备份拒覆盖、各阶段原子回滚、扩展/64 位整数、多用户限域、旧 journal 兼容；新增生产阳性、全帧反例、print baseline、陈旧 boundary 非隐含不变量、读侧取整/分数原点、generic 分派、保险丝低于/等于 50%/零分母及历史事件备份零写保护。
+- **Source 红线阳性**：生产同构 A4 帧 (80,80)、inset (72,96)、canvas_world 行 (152,176,650,72) → **(0,0,650,72)**；实际 hydration 后屏显前后均 **(0,176,650,72)**，formal 保持；普通非零 O.x 两例（inset 72/96 与 54/112）全部通过。原 local/cross-note 分别归一 y=−210/−2010，formal 与屏显保持。均为现役函数机械重放，未声称浏览器实测。
+- **双用户独立 CLI 全链**：server 目录 `node --import tsx scripts/wildernessExecutor/multiUserRehearsal.ts docs/audits/2026-09-08-v13-2-s4b-合成双用户补遗四演练`，**PASS / exit 0**。单户执行拒绝 → 双户预览 → 执行 → 复测 → 单户回滚拒绝 → 双户回滚 → 复测还原 → 再执行。副户 **checked=1/1、tray=0、exceptions=0**；主户 **checked=43/53、tray=26、exceptions=10**（刻意坏数据谱，含 16 条 S3 野地搬迁）；三表逐 note 守恒 **3/3 + 33/33**，formal 例外均 0；三表/各户 census 回滚全等、再执行终态全等，逐户事件 migrated → rolled_back → migrated。CLI 末行三数逐项断言。
+- **保险丝 CLI 阳性**：另用自产演练库副本，回滚后把主户 formal 行改成无标签 x=10000，引发读后 surface 变化；独立 CLI **exit 1 + FAILED: normalization_rate_anomaly**，整个库文件逐字节不变，包含原事件、归档备份、旗标、journal 与所有本轮事务写入。主演练终态不受副本影响。
+- **单用户回归**：server 目录 `node --import tsx scripts/wildernessExecutor/rehearsal.ts docs/audits/2026-09-08-v13-2-s4b-合成单用户补遗四回归`，**PASS / exit 0**；33 项守恒全等、checked=43、exceptions=10、回滚/再执行全等。造样差异明确申报：S3/S4 小帧显式 Custom，保持旧谱声明的几何；原 S3 fixture 及 local/cross-note placement 行不改。新增三条生产阳性为显式 A4，Source 标签和完整 650 宽未削改。
+- **完整必经门**：`node scripts/run-isolated-coordinate-validation.mjs`（实际 `npm run verify:v2-bn8-runtime`），最终 **exit 0，44s**；client **50 files / 459 tests pass**，registry **5/5**、manifest **10/10**、parity **10/10**，client/server build、模型/性能冒烟、全部静态门、docs、diff 与变更扫描通过。首次总门仅因纯提取使自动 inventory 源码行号过期失败，已用原生成脚本更新一行引用（1285→1266）后重跑全门通过。沿用空 env、内存 DB、隔离资产入口，未跳门或豁免。
+- 并行协助仅只读复核，指出的额外约束、帧上下文、正文投影和 generic 消费差异均已闭合并纳入验证；最终未发现新具体漏洞。协助结论不冒充亲跑测试，仍只有本线程 builder 施工。
+
+### 归档、真库预期及边界
+
+- 核对单：**`docs/audits/2026-09-08-v13-2-s4b-合成双用户补遗四演练.md`**、**`docs/audits/2026-09-08-v13-2-s4b-合成单用户补遗四回归.md`** 及各自同名 JSON，含原值/例外/重放证据/守恒/指纹/事件。仅清理本轮自产临时合成库与中间报告；最终归档保留。
+- **真库预期申报：checked≈126、exceptions≈0、迁准备区仅野地约 21 件。** 这是发单方预期，**本轮未读用户库、未实测或保证该计数**；合成坏数据谱的 10 条例外不能当真库预估。真实执行仍由 Henry 扳机日亲跑，须看新一代实际核对单。
+- **用户库零接触；未清除/修改真库 events seq1–4 或任何归档备份；未读 `.env`、未打印任何 key、未操作 3001/5173。** 未改产品行为/UI、4a 消费规则、S3 去处矩阵、启动迁移链、双模退役或 Agent 工具面；未 commit/push/PR/merge，未作主观验收或真实迁移放行。所有开工已有未跟踪设置/审计/会议记录保持原状。
+- 原限制仍适用：提交后数据/扩展漂移时回滚拒绝；报告 I/O 或提交后并发复测可在提交后失败，需按 README 核对旗标/事件/备份。CodeGraph CLI/MCP 与 rg 不可用，已先尝试后定向 PowerShell 读取，未建索引或扩搜私域。Status=done 仅指补遗四工程完工，工作树交 HQ 复核。
+- 最终 numstat：**16 文件，+25156/-104**。本工单 **+31/-1**（状态头替换，其余追加）；9 个现有代码/测试/说明文件合计 **+411/-102**；自动 inventory **+1/-1**；新增纯投影函数 **+29/-0**；双用户 MD/JSON **+72/+9967**，单用户 MD/JSON **+40/+14605**（四份完整证据合计 +24684）。新增文件按完整行数计，不计开工既有未跟踪内容。`git diff --check` 通过。
