@@ -1,12 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
-import { join } from 'node:path';
-import { tmpdir } from 'node:os';
 import { v4 as uuidv4 } from 'uuid';
 import { closeDb, initDb } from '../db/init.js';
 import relationRoutes from '../routes/relations.js';
 import { createItem, listItems, retireItem, updateItem } from '../services/items.js';
+import { createPurpose } from '../services/purposes.js';
 import {
   RELATION_TYPE_DEFINITIONS,
   createRelation,
@@ -27,13 +25,11 @@ import {
 type Db = Awaited<ReturnType<typeof initDb>>;
 
 async function withDb(run: (db: Db) => void | Promise<void>) {
-  const dir = mkdtempSync(join(tmpdir(), 'coincides-relations-'));
   try {
-    const db = await initDb(join(dir, 'test.db'));
+    const db = await initDb(':memory:');
     await run(db);
   } finally {
     closeDb();
-    rmSync(dir, { recursive: true, force: true });
   }
 }
 
@@ -65,25 +61,11 @@ function seedPurpose(
   userId: string,
   workspace: ReturnType<typeof seedWorkspace>,
   label: string,
-  itemIds: string[] = [],
 ) {
-  const purposeId = uuidv4();
-  const now = new Date().toISOString();
-  db.prepare(`
-    INSERT INTO purposes (
-      id, user_id, course_id, note_id, title, status,
-      is_note_default, created_by, metadata, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, 'active', 0, 'human', '{}', ?, ?)
-  `).run(purposeId, userId, workspace.courseId, workspace.noteId, label, now, now);
-  itemIds.forEach((itemId, index) => {
-    db.prepare(`
-      INSERT INTO purpose_members (
-        id, user_id, purpose_id, member_kind, member_id,
-        fitness, order_index, metadata, created_at, updated_at
-      ) VALUES (?, ?, ?, 'item', ?, 'unknown', ?, '{}', ?, ?)
-    `).run(uuidv4(), userId, purposeId, itemId, index, now, now);
-  });
-  return purposeId;
+  return db.transaction(() => createPurpose(db, userId, {
+    title: label,
+    project_id: workspace.courseId,
+  }))().id;
 }
 
 function relationRow(db: Db, relationId: string) {
@@ -348,7 +330,7 @@ test('revoke preserves history, recreate gets a new identity, and Item lists are
   });
 });
 
-test('Purpose-scope reads use compiled endpoint presence while origin remains a disposable receipt', async () => {
+test('Purpose-scope reads are deferred while Item reads and the optional birth receipt remain intact', async () => {
   await withDb((db) => {
     const userId = seedUser(db, 'Purpose Relation user');
     const workspace = seedWorkspace(db, userId, 'Purpose Relation workspace');
@@ -356,7 +338,7 @@ test('Purpose-scope reads use compiled endpoint presence while origin remains a 
     const second = createItem(db, userId, { plain_text: 'Scoped second' });
     const outside = createItem(db, userId, { plain_text: 'Outside Item' });
     const originPurposeId = seedPurpose(db, userId, workspace, 'Origin purpose');
-    const readingPurposeId = seedPurpose(db, userId, workspace, 'Reading purpose', [first.id, second.id]);
+    const readingPurposeId = seedPurpose(db, userId, workspace, 'Reading purpose');
 
     const inside = createRelation(db, userId, {
       from_item_id: first.id,
@@ -371,14 +353,15 @@ test('Purpose-scope reads use compiled endpoint presence while origin remains a 
       origin_purpose_id: originPurposeId,
     });
 
-    const scoped = listRelations(db, userId, { purpose_id: readingPurposeId });
-    assert.deepEqual(scoped.map((relation) => relation.id), [inside.id]);
-    assert.equal(scoped[0]?.origin_purpose_id, originPurposeId);
+    assert.throws(() => listRelations(db, userId, { purpose_id: readingPurposeId }), /purpose_compiled_scope_deferred/);
+    assert.equal(listRelations(db, userId, { item_id: first.id }).length, 2);
+    assert.equal(getRelation(db, userId, inside.id).origin_purpose_id, originPurposeId);
 
     db.prepare('DELETE FROM purposes WHERE id = ? AND user_id = ?').run(originPurposeId, userId);
     const survived = getRelation(db, userId, inside.id);
     assert.equal(survived.origin_purpose_id, null);
-    assert.equal(listRelations(db, userId, { purpose_id: readingPurposeId }).length, 1);
+    assert.equal(listRelations(db, userId, { item_id: second.id }).length, 1);
+    assert.throws(() => listRelations(db, userId, { purpose_id: readingPurposeId }), /purpose_compiled_scope_deferred/);
   });
 });
 

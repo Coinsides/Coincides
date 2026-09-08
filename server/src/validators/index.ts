@@ -579,7 +579,11 @@ const purposeSchema = z.object({
 
 export const replaceNotePurposesSchema = z.object({
   purposes: z.array(purposeSchema).max(100),
-}).strict();
+}).strict().superRefine((_value, context) => {
+  // Historical import/type compatibility only. The HTTP door returns the same
+  // retirement name with 410 before parsing any old replacement payload.
+  context.addIssue({ code: z.ZodIssueCode.custom, message: 'note_purpose_writer_retired' });
+});
 
 export const purposeItemSearchQuerySchema = z.object({
   q: z.string().max(240).optional(),

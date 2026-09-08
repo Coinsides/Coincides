@@ -1,742 +1,200 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
-import { join } from 'node:path';
-import { tmpdir } from 'node:os';
-import { v4 as uuidv4 } from 'uuid';
-import { initDb, closeDb } from '../db/init.js';
-import purposeMigration from '../db/migrations/044_v2_purposes.js';
+import Database from 'better-sqlite3';
+import type { Router } from 'express';
+import purposesMigration from '../db/migrations/044_v2_purposes.js';
+import eventsMigration from '../db/migrations/054_v13_events_ledger.js';
+import boardsMigration from '../db/migrations/057_v13_boards.js';
+import { createPurposeRouter } from '../routes/purposes.js';
+import { AppError } from '../middleware/errorHandler.js';
+import { createPurposeInputSchema } from '../validators/purposes.js';
 import {
-  replaceNoteContentGroups,
-  upsertContentGroup,
-} from '../services/contentGroups.js';
-import {
+  createPurpose,
+  ensureNoteDefaultPurpose,
+  getPurpose,
   getPurposeCompiledScope,
   listNotePurposes,
+  listPurposes,
   replaceNotePurposes,
   searchPurposeItems,
 } from '../services/purposes.js';
-import {
-  createItem,
-  getItem,
-  retireItem,
-} from '../services/items.js';
-import {
-  createRelation,
-  getRelation,
-} from '../services/relations.js';
-import { replaceNotePurposesSchema } from '../validators/index.js';
+import { COURSE_LIFECYCLE_POLICIES } from '../services/courseLifecyclePolicies.js';
 
-async function withDb(run: (db: Awaited<ReturnType<typeof initDb>>) => void | Promise<void>) {
-  const dir = mkdtempSync(join(tmpdir(), 'coincides-purposes-'));
-  const dbPath = join(dir, 'test.db');
-
+function withMemoryDb(run: (db: Database.Database) => void): void {
+  const db = new Database(':memory:');
   try {
-    const db = await initDb(dbPath);
-    await run(db);
+    db.pragma('foreign_keys = ON');
+    db.exec(`
+      CREATE TABLE users (id TEXT PRIMARY KEY);
+      CREATE TABLE courses (id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id));
+      CREATE TABLE notes (
+        id TEXT PRIMARY KEY, user_id TEXT NOT NULL REFERENCES users(id),
+        course_id TEXT NOT NULL REFERENCES courses(id)
+      );
+      CREATE TABLE content_groups (id TEXT PRIMARY KEY, identity_role TEXT);
+      INSERT INTO users VALUES ('purpose-test-user');
+      INSERT INTO courses VALUES ('purpose-test-project', 'purpose-test-user');
+      INSERT INTO notes VALUES ('purpose-test-note', 'purpose-test-user', 'purpose-test-project');
+    `);
+    purposesMigration.up(db);
+    db.exec(`
+      INSERT INTO purposes (
+        id, user_id, course_id, note_id, title, is_note_default, created_by, created_at, updated_at
+      ) VALUES (
+        'legacy-soul', 'purpose-test-user', 'purpose-test-project', 'purpose-test-note',
+        'Existing default soul', 1, 'system', '2026-09-01', '2026-09-01'
+      );
+      INSERT INTO purpose_members (
+        id, user_id, purpose_id, member_kind, member_id, created_at, updated_at
+      ) VALUES (
+        'legacy-membership', 'purpose-test-user', 'legacy-soul', 'item',
+        'historical-item', '2026-09-01', '2026-09-01'
+      );
+    `);
+    eventsMigration.up(db);
+    boardsMigration.up(db);
+    run(db);
   } finally {
-    closeDb();
-    rmSync(dir, { recursive: true, force: true });
+    db.close();
   }
 }
 
-function seedUserCourseNote(db: Awaited<ReturnType<typeof initDb>>) {
-  const userId = uuidv4();
-  const courseId = uuidv4();
-  const noteId = uuidv4();
+const userId = 'purpose-test-user';
+const noteId = 'purpose-test-note';
 
-  db.prepare("INSERT INTO users (id, email, password_hash, name, created_at) VALUES (?, ?, ?, ?, datetime('now'))")
-    .run(userId, `${userId}@example.com`, 'hash', 'Purpose User');
-  db.prepare("INSERT INTO courses (id, user_id, name, created_at, updated_at) VALUES (?, ?, ?, datetime('now'), datetime('now'))")
-    .run(courseId, userId, 'AMATH 231');
-  db.prepare('INSERT INTO notes (id, user_id, course_id, title, metadata) VALUES (?, ?, ?, ?, ?)')
-    .run(noteId, userId, courseId, 'Power Series note', '{}');
-
-  return { userId, courseId, noteId };
+function createSoul(db: Database.Database, input: Parameters<typeof createPurpose>[2]) {
+  return db.transaction(() => createPurpose(db, userId, input))();
 }
 
-function groupInput(courseId: string, noteId: string, title: string, extra: Record<string, unknown> = {}) {
-  return {
-    project_id: courseId,
-    note_id: noteId,
-    canvas_id: 'canvas-a',
-    title,
-    status: 'active',
-    created_by: 'human',
-    members: [],
-    fragments: [],
-    petals: [],
-    placements: [],
-    identity: {
-      status: 'none',
-      type: null,
-      role: null,
-      topic: null,
-      summary: null,
-      created_by: 'human',
-      reviewed_by: null,
-      confidence: null,
-      updated_at: '2026-07-05T00:00:00.000Z',
-      accepted_at: null,
-      metadata: {},
-    },
-    view_state: {},
-    metadata: {},
-    ...extra,
+function hasError(status: number, message: string) {
+  return (err: unknown) => err instanceof AppError
+    && err.statusCode === status && err.message === message;
+}
+
+// Invoke the registered handler with an already-authenticated synthetic request.
+// No HTTP listener, application init, default database, or network is involved.
+function invoke(router: Router, method: string, path: string, input: Record<string, unknown> = {}) {
+  const layer = (router as any).stack.find((entry: any) => (
+    entry.route?.path === path && entry.route.methods[method]
+  ));
+  assert.ok(layer, `Route ${method} ${path} is registered`);
+  const response = {
+    statusCode: 200,
+    body: undefined as any,
+    status(code: number) { this.statusCode = code; return this; },
+    json(body: unknown) { this.body = body; return this; },
   };
+  layer.route.stack[0].handle({ userId, params: {}, query: {}, body: {}, ...input }, response);
+  return response;
 }
 
-test('V2.BN.9 migration creates purpose tables and backfills legacy identity_role into identity_type', async () => {
-  await withDb((db) => {
-    const tableNames = db
-      .prepare("SELECT name FROM sqlite_master WHERE type = 'table'")
-      .all()
-      .map((row: any) => row.name);
-
-    assert.equal(tableNames.includes('purposes'), true);
-    assert.equal(tableNames.includes('purpose_members'), true);
-
-    const { userId, courseId, noteId } = seedUserCourseNote(db);
-    const group = upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Legacy role group', {
-      id: 'legacy-role-group',
-    }));
-
-    db.prepare('UPDATE content_groups SET identity_role = ?, identity_type = NULL WHERE id = ?')
-      .run('definition', group.id);
-    purposeMigration.up(db);
-
-    const row = db.prepare('SELECT identity_type, identity_role FROM content_groups WHERE id = ?')
-      .get(group.id) as { identity_type: string | null; identity_role: string | null };
-    assert.equal(row.identity_type, 'definition');
-    assert.equal(row.identity_role, 'definition');
+test('V13.3 legacy note reads preserve history and never bootstrap or rewrite memberships', () => {
+  withMemoryDb((db) => {
+    const before = db.prepare('SELECT * FROM purposes').all();
+    const membersBefore = db.prepare('SELECT * FROM purpose_members').all();
+    const noteBefore = db.prepare('SELECT * FROM notes').all();
+    const existing = listNotePurposes(db, userId, noteId);
+    assert.equal(existing.length, 1);
+    assert.equal(existing[0].id, 'legacy-soul');
+    assert.equal(existing[0].status, 'active');
+    assert.equal(existing[0].is_note_default, true);
+    assert.equal(existing[0].members[0].id, 'legacy-membership');
+    db.prepare('INSERT INTO notes VALUES (?, ?, ?)').run('empty-note', userId, 'purpose-test-project');
+    assert.deepEqual(listNotePurposes(db, userId, 'empty-note'), []);
+    assert.deepEqual(listNotePurposes(db, userId, 'empty-note'), []);
+    assert.deepEqual(db.prepare('SELECT * FROM purposes').all(), before);
+    assert.deepEqual(db.prepare('SELECT * FROM purpose_members').all(), membersBefore);
+    assert.deepEqual(db.prepare('SELECT * FROM notes WHERE id = ?').all(noteId), noteBefore);
   });
 });
 
-test('V2.BN.9 purpose migration rejects duplicate note defaults and default purposes without note scope', async () => {
-  await withDb((db) => {
-    const { userId, courseId, noteId } = seedUserCourseNote(db);
-    db.prepare(`
-      INSERT INTO purposes (
-        id, user_id, course_id, note_id, title, status,
-        is_note_default, created_by, metadata, created_at, updated_at
-      )
-      VALUES (?, ?, ?, ?, ?, 'active', 1, 'human', '{}', datetime('now'), datetime('now'))
-    `).run('purpose-db-default-a', userId, courseId, noteId, 'Default A');
-
-    assert.throws(() => db.prepare(`
-      INSERT INTO purposes (
-        id, user_id, course_id, note_id, title, status,
-        is_note_default, created_by, metadata, created_at, updated_at
-      )
-      VALUES (?, ?, ?, ?, ?, 'active', 1, 'human', '{}', datetime('now'), datetime('now'))
-    `).run('purpose-db-default-b', userId, courseId, noteId, 'Default B'));
-
-    assert.throws(() => db.prepare(`
-      INSERT INTO purposes (
-        id, user_id, course_id, note_id, title, status,
-        is_note_default, created_by, metadata, created_at, updated_at
-      )
-      VALUES (?, ?, ?, NULL, ?, 'active', 1, 'human', '{}', datetime('now'), datetime('now'))
-    `).run('purpose-db-floating-default', userId, courseId, 'Floating default'));
+test('V13.3 old note writer and compiled-scope consumers fail closed without touching history', () => {
+  withMemoryDb((db) => {
+    const before = db.prepare('SELECT * FROM purposes').all();
+    const membersBefore = db.prepare('SELECT * FROM purpose_members').all();
+    assert.throws(() => ensureNoteDefaultPurpose(db, userId, noteId), hasError(410, 'note_purpose_writer_retired'));
+    assert.throws(() => replaceNotePurposes(db, userId, noteId, []), hasError(410, 'note_purpose_writer_retired'));
+    assert.throws(() => getPurposeCompiledScope(db, userId, 'legacy-soul'), hasError(410, 'purpose_compiled_scope_deferred'));
+    assert.throws(() => searchPurposeItems(db, userId, 'legacy-soul', { query: 'old' }), hasError(410, 'purpose_compiled_scope_deferred'));
+    const router = createPurposeRouter(() => db);
+    assert.throws(() => invoke(router, 'put', '/by-note/:noteId', {
+      params: { noteId }, body: { malformed: true },
+    }), hasError(410, 'note_purpose_writer_retired'));
+    assert.throws(() => invoke(router, 'get', '/:purposeId/compiled-scope', {
+      params: { purposeId: 'legacy-soul' },
+    }), hasError(410, 'purpose_compiled_scope_deferred'));
+    assert.deepEqual(db.prepare('SELECT * FROM purposes').all(), before);
+    assert.deepEqual(db.prepare('SELECT * FROM purpose_members').all(), membersBefore);
   });
 });
 
-test('listNotePurposes lazily creates one default purpose and bootstraps active groups only once', async () => {
-  await withDb((db) => {
-    const { userId, courseId, noteId } = seedUserCourseNote(db);
-    upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Active group', {
-      id: 'purpose-active-group',
-    }));
-    upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Deleted group', {
-      id: 'purpose-deleted-group',
-      status: 'deleted',
-    }));
-
-    const first = listNotePurposes(db, userId, noteId);
-    assert.equal(first.length, 1);
-    assert.equal(first[0]?.is_note_default, true);
-    assert.deepEqual(first[0]?.members.map((member: any) => member.member_id), ['purpose-active-group']);
-
-    upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Later group', {
-      id: 'purpose-later-group',
-    }));
-    const second = listNotePurposes(db, userId, noteId);
-    assert.equal(second.length, 1);
-    assert.deepEqual(second[0]?.members.map((member: any) => member.member_id), ['purpose-active-group']);
-
-    const rawDefaults = db.prepare('SELECT COUNT(*) AS count FROM purposes WHERE note_id = ? AND is_note_default = 1')
-      .get(noteId) as { count: number };
-    assert.equal(rawDefaults.count, 1);
-  });
-});
-
-test('replaceNotePurposes roundtrips purpose members and de-dupes duplicate content groups', async () => {
-  await withDb((db) => {
-    const { userId, courseId, noteId } = seedUserCourseNote(db);
-    upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Definition group', {
-      id: 'purpose-definition-group',
-    }));
-
-    const replaced = replaceNotePurposes(db, userId, noteId, [{
-      id: 'purpose-midterm-review',
-      title: 'Midterm review',
-      intent: 'Prepare for the first exam.',
-      scope_note: 'Chapter 1 to 3',
-      is_note_default: true,
-      members: [{
-        id: 'purpose-member-a',
-        member_kind: 'content_group',
-        member_id: 'purpose-definition-group',
-        role: 'definition',
-        fitness: 'high',
-      }, {
-        id: 'purpose-member-duplicate',
-        member_kind: 'content_group',
-        member_id: 'purpose-definition-group',
-        role: 'duplicate',
-      }],
-      metadata: { source: 'test' },
-    }]);
-
-    assert.equal(replaced.length, 1);
-    assert.equal(replaced[0]?.id, 'purpose-midterm-review');
-    assert.equal(replaced[0]?.members.length, 1);
-    assert.equal(replaced[0]?.members[0]?.role, 'definition');
-    assert.equal(replaced[0]?.members[0]?.fitness, 'high');
-    assert.deepEqual(replaced[0]?.metadata, { source: 'test' });
-  });
-});
-
-test('V2.BN.11.7 replacing a surviving Purpose preserves Relation origin receipt identity', async () => {
-  await withDb((db) => {
-    const { userId, noteId } = seedUserCourseNote(db);
-    const first = createItem(db, userId, { plain_text: 'Purpose receipt first endpoint' });
-    const second = createItem(db, userId, { plain_text: 'Purpose receipt second endpoint' });
-    const purposeId = 'purpose-stable-relation-receipt';
-
-    replaceNotePurposes(db, userId, noteId, [{
-      id: purposeId,
-      title: 'Original purpose title',
-      is_note_default: true,
-      members: [],
-    }]);
-    const relation = createRelation(db, userId, {
-      from_item_id: first.id,
-      to_item_id: second.id,
-      relation_type: 'supports',
-      origin_purpose_id: purposeId,
-    });
-    assert.equal(relation.origin_purpose_id, purposeId);
-
-    replaceNotePurposes(db, userId, noteId, [{
-      id: purposeId,
-      title: 'Renamed without replacing identity',
-      is_note_default: true,
-      members: [],
-    }]);
-
-    assert.equal(getRelation(db, userId, relation.id).origin_purpose_id, purposeId);
-  });
-});
-
-test('V2.BN.11.7 omitting a Purpose deletes organization edges and honestly degrades Relation origin', async () => {
-  await withDb((db) => {
-    const { userId, noteId } = seedUserCourseNote(db);
-    const first = createItem(db, userId, { plain_text: 'Purpose deletion first endpoint' });
-    const second = createItem(db, userId, { plain_text: 'Purpose deletion second endpoint' });
-    const removedPurposeId = 'purpose-removed-from-replacement';
-
-    replaceNotePurposes(db, userId, noteId, [{
-      id: removedPurposeId,
-      title: 'Purpose that will be removed',
-      is_note_default: true,
-      members: [{
-        id: 'purpose-member-that-will-be-removed',
-        member_kind: 'item',
-        member_id: first.id,
-      }],
-    }]);
-    const relation = createRelation(db, userId, {
-      from_item_id: first.id,
-      to_item_id: second.id,
-      relation_type: 'supports',
-      origin_purpose_id: removedPurposeId,
-    });
-
-    replaceNotePurposes(db, userId, noteId, [{
-      id: 'purpose-surviving-replacement',
-      title: 'Surviving purpose',
-      is_note_default: true,
-      members: [],
-    }]);
-
-    assert.equal(db.prepare('SELECT id FROM purposes WHERE id = ?').get(removedPurposeId), undefined);
-    assert.equal(
-      db.prepare('SELECT id FROM purpose_members WHERE purpose_id = ?').get(removedPurposeId),
-      undefined,
-    );
-    assert.equal(getItem(db, userId, first.id).id, first.id);
-    assert.equal(getItem(db, userId, second.id).id, second.id);
-    assert.equal(getRelation(db, userId, relation.id).origin_purpose_id, null);
-  });
-});
-
-test('V2.BN.11.7 Purpose replacement cannot claim an id from another Note or user', async () => {
-  await withDb((db) => {
-    const owner = seedUserCourseNote(db);
-    const otherNoteId = uuidv4();
-    db.prepare('INSERT INTO notes (id, user_id, course_id, title, metadata) VALUES (?, ?, ?, ?, ?)')
-      .run(otherNoteId, owner.userId, owner.courseId, 'Other owner note', '{}');
-    replaceNotePurposes(db, owner.userId, otherNoteId, [{
-      id: 'purpose-owned-by-other-note',
-      title: 'Other note purpose',
-      is_note_default: true,
-      members: [],
-    }]);
-
-    assert.throws(
-      () => replaceNotePurposes(db, owner.userId, owner.noteId, [{
-        id: 'purpose-owned-by-other-note',
-        title: 'Attempted same-user Note claim',
-        is_note_default: true,
-        members: [],
-      }]),
-      /another owner or Note/i,
-    );
-
-    const foreign = seedUserCourseNote(db);
-    replaceNotePurposes(db, foreign.userId, foreign.noteId, [{
-      id: 'purpose-owned-by-other-user',
-      title: 'Foreign purpose',
-      is_note_default: true,
-      members: [],
-    }]);
-    assert.throws(
-      () => replaceNotePurposes(db, owner.userId, owner.noteId, [{
-        id: 'purpose-owned-by-other-user',
-        title: 'Attempted cross-user claim',
-        is_note_default: true,
-        members: [],
-      }]),
-      /another owner or Note/i,
-    );
-  });
-});
-
-test('ContentGroup soft delete hides purpose edge without deleting it, and restore revives the edge', async () => {
-  await withDb((db) => {
-    const { userId, courseId, noteId } = seedUserCourseNote(db);
-    upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Group to restore', {
-      id: 'purpose-restore-group',
-    }));
-    const first = listNotePurposes(db, userId, noteId);
-    assert.equal(first[0]?.members.length, 1);
-
-    replaceNoteContentGroups(db, userId, noteId, []);
-    const afterDelete = listNotePurposes(db, userId, noteId);
-    assert.equal(afterDelete[0]?.members.length, 0);
-    const rawEdges = db.prepare('SELECT COUNT(*) AS count FROM purpose_members WHERE member_id = ?')
-      .get('purpose-restore-group') as { count: number };
-    assert.equal(rawEdges.count, 1);
-
-    upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Group restored', {
-      id: 'purpose-restore-group',
-      status: 'active',
-    }));
-    const afterRestore = listNotePurposes(db, userId, noteId);
-    assert.deepEqual(afterRestore[0]?.members.map((member: any) => member.member_id), ['purpose-restore-group']);
-  });
-});
-
-test('replaceNotePurposes preserves hidden soft-deleted ContentGroup edges during filtered view roundtrip', async () => {
-  await withDb((db) => {
-    const { userId, courseId, noteId } = seedUserCourseNote(db);
-    const deletedLaterGroup = upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Deleted later group', {
-      id: 'purpose-hidden-edge-group-a',
-    }));
-    const visibleGroup = upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Visible group', {
-      id: 'purpose-hidden-edge-group-b',
-    }));
-
-    replaceNotePurposes(db, userId, noteId, [{
-      id: 'purpose-hidden-edge-default',
-      title: 'Default purpose',
-      is_note_default: true,
-      members: [{
-        id: 'purpose-hidden-edge-member-a',
-        member_kind: 'content_group',
-        member_id: deletedLaterGroup.id,
-        role: 'definition',
-        fitness: 'high',
-        order_index: 7,
-      }, {
-        id: 'purpose-hidden-edge-member-b',
-        member_kind: 'content_group',
-        member_id: visibleGroup.id,
-        role: 'key_point',
-        fitness: 'medium',
-        order_index: 8,
-      }],
-    }]);
-
-    replaceNoteContentGroups(db, userId, noteId, [visibleGroup]);
-    const filteredPurposes = listNotePurposes(db, userId, noteId);
-    assert.deepEqual(
-      filteredPurposes[0]?.members.map((member: any) => member.member_id),
-      [visibleGroup.id],
-    );
-
-    replaceNotePurposes(db, userId, noteId, filteredPurposes);
-
-    upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Restored hidden edge group', {
-      id: deletedLaterGroup.id,
-      status: 'active',
-    }));
-    const restoredPurposes = listNotePurposes(db, userId, noteId);
-    const restoredEdge = restoredPurposes[0]?.members.find((member: any) => member.member_id === deletedLaterGroup.id);
-
-    assert.equal(restoredEdge?.id, 'purpose-hidden-edge-member-a');
-    assert.equal(restoredEdge?.role, 'definition');
-    assert.equal(restoredEdge?.fitness, 'high');
-    assert.equal(restoredEdge?.order_index, 7);
-  });
-});
-
-test('deleting a purpose does not delete its ContentGroup, and note trash/restore keeps purposes', async () => {
-  await withDb((db) => {
-    const { userId, courseId, noteId } = seedUserCourseNote(db);
-    upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Surviving group', {
-      id: 'purpose-surviving-group',
-    }));
-
-    replaceNotePurposes(db, userId, noteId, [{
-      id: 'purpose-temporary',
-      title: 'Temporary purpose',
-      is_note_default: true,
-      members: [{
-        member_kind: 'content_group',
-        member_id: 'purpose-surviving-group',
-      }],
-    }]);
-    replaceNotePurposes(db, userId, noteId, []);
-
-    const group = db.prepare('SELECT id, status FROM content_groups WHERE id = ?')
-      .get('purpose-surviving-group') as { id: string; status: string };
-    assert.equal(group.id, 'purpose-surviving-group');
-    assert.equal(group.status, 'active');
-
-    db.prepare("UPDATE notes SET status = 'trashed' WHERE id = ?").run(noteId);
-    assert.equal(listNotePurposes(db, userId, noteId).length, 1);
-    db.prepare("UPDATE notes SET status = 'active' WHERE id = ?").run(noteId);
-    assert.equal(listNotePurposes(db, userId, noteId).length, 1);
-  });
-});
-
-test('V2.BN.11.4 Package A validates and roundtrips direct Item members without washing their kind', async () => {
-  await withDb((db) => {
-    const { userId, courseId, noteId } = seedUserCourseNote(db);
-    const first = createItem(db, userId, {
-      plain_text: 'The radius of convergence bounds the interval of convergence.',
-      item_type: 'definition',
-      topic: 'Power series',
-      origin_course_id: courseId,
-      origin_note_id: noteId,
-    });
-    const second = createItem(db, userId, {
-      plain_text: 'Check both endpoints after applying the ratio test.',
-      item_type: 'procedure',
-      topic: 'Endpoint checks',
-      origin_course_id: courseId,
-      origin_note_id: noteId,
-    });
-
-    const payload = replaceNotePurposesSchema.parse({
-      purposes: [{
-        id: 'purpose-package-a',
-        title: 'Exam review',
-        is_note_default: true,
-        members: [{
-          id: 'purpose-item-first',
-          member_kind: 'item',
-          member_id: first.id,
-          role: 'core_definition',
-          fitness: 'high',
-          order_index: 4,
-        }, {
-          id: 'purpose-item-second',
-          member_kind: 'item',
-          member_id: second.id,
-          role: 'checklist',
-          fitness: 'medium',
-          order_index: 8,
-        }],
-      }],
-    });
-    const replaced = replaceNotePurposes(db, userId, noteId, payload.purposes);
-
-    assert.deepEqual(
-      replaced[0]?.members.map((member: any) => [member.member_kind, member.member_id, member.role, member.fitness]),
-      [
-        ['item', first.id, 'core_definition', 'high'],
-        ['item', second.id, 'checklist', 'medium'],
-      ],
-    );
-
-    const reordered = replaceNotePurposes(db, userId, noteId, [{
-      ...replaced[0],
-      members: [{
-        ...replaced[0]!.members[1],
-        role: 'exam_action',
-        fitness: 'essential',
-        order_index: 0,
-      }],
-    }]);
-    assert.deepEqual(
-      reordered[0]?.members.map((member: any) => [member.member_id, member.role, member.fitness, member.order_index]),
-      [[second.id, 'exam_action', 'essential', 0]],
-    );
-    const rawFirst = db.prepare('SELECT COUNT(*) AS count FROM purpose_members WHERE member_id = ?')
-      .get(first.id) as { count: number };
-    assert.equal(rawFirst.count, 0, 'omitting an active direct Item intentionally removes its edge');
-
-    replaceNotePurposes(db, userId, noteId, reordered);
-    const rawFirstAfterSecondCycle = db.prepare('SELECT COUNT(*) AS count FROM purpose_members WHERE member_id = ?')
-      .get(first.id) as { count: number };
-    assert.equal(rawFirstAfterSecondCycle.count, 0, 'a second replacement cycle does not resurrect an omitted active Item edge');
-  });
-});
-
-test('V2.BN.11.4 full replacement preserves filtered retired and missing Item edges', async () => {
-  await withDb((db) => {
-    const { userId, courseId, noteId } = seedUserCourseNote(db);
-    const retired = createItem(db, userId, {
-      plain_text: 'A historical Item that should remain recoverable.',
-      origin_course_id: courseId,
-      origin_note_id: noteId,
-    });
-    replaceNotePurposes(db, userId, noteId, [{
-      id: 'purpose-hidden-items',
-      title: 'Hidden Item recovery',
-      is_note_default: true,
-      members: [{
-        id: 'purpose-member-retired-item',
-        member_kind: 'item',
-        member_id: retired.id,
-        role: 'historical_evidence',
-        fitness: 'medium',
-        order_index: 7,
-      }],
-    }]);
-    retireItem(db, userId, retired.id, {});
-    db.prepare(`
-      INSERT INTO purpose_members (
-        id, user_id, purpose_id, member_kind, member_id,
-        role, fitness, order_index, metadata, created_at, updated_at
-      ) VALUES (?, ?, ?, 'item', ?, ?, ?, ?, '{}', datetime('now'), datetime('now'))
-    `).run(
-      'purpose-member-missing-item',
-      userId,
-      'purpose-hidden-items',
-      'item-that-no-longer-exists',
-      'lost_evidence',
-      'unknown',
-      11,
-    );
-
-    const filtered = listNotePurposes(db, userId, noteId);
-    assert.equal(filtered[0]?.members.length, 0);
-    replaceNotePurposes(db, userId, noteId, filtered);
-
-    const recovered = db.prepare(`
-      SELECT id, member_id, role, fitness, order_index
-      FROM purpose_members
-      WHERE purpose_id = ? AND member_kind = 'item'
-      ORDER BY order_index ASC
-    `).all('purpose-hidden-items') as Array<Record<string, unknown>>;
-    assert.deepEqual(recovered, [{
-      id: 'purpose-member-retired-item',
-      member_id: retired.id,
-      role: 'historical_evidence',
-      fitness: 'medium',
-      order_index: 7,
-    }, {
-      id: 'purpose-member-missing-item',
-      member_id: 'item-that-no-longer-exists',
-      role: 'lost_evidence',
-      fitness: 'unknown',
-      order_index: 11,
-    }]);
-  });
-});
-
-test('V2.BN.11.4 stale pre-retirement payload cannot kill or rewrite a newly hidden Item edge', async () => {
-  await withDb((db) => {
-    const { userId, courseId, noteId } = seedUserCourseNote(db);
-    const item = createItem(db, userId, {
-      plain_text: 'This Item is about to become historical.',
-      origin_course_id: courseId,
-      origin_note_id: noteId,
-    });
-    const stalePayload = replaceNotePurposes(db, userId, noteId, [{
-      id: 'purpose-stale-client',
-      title: 'Stale client contract',
-      is_note_default: true,
-      members: [{
-        id: 'purpose-stale-item-edge',
-        member_kind: 'item',
-        member_id: item.id,
-        role: 'original_role',
-        fitness: 'high',
-        order_index: 3,
-      }],
-    }]);
-    retireItem(db, userId, item.id, {});
-
-    stalePayload[0]!.members[0]!.role = 'stale_client_rewrite';
-    stalePayload[0]!.members[0]!.fitness = 'low';
-    replaceNotePurposes(db, userId, noteId, stalePayload);
-
-    const raw = db.prepare(`
-      SELECT id, role, fitness, order_index
-      FROM purpose_members
-      WHERE purpose_id = ? AND member_kind = 'item' AND member_id = ?
-    `).get('purpose-stale-client', item.id) as Record<string, unknown>;
-    assert.deepEqual(raw, {
-      id: 'purpose-stale-item-edge',
-      role: 'original_role',
-      fitness: 'high',
-      order_index: 3,
-    });
-    const count = db.prepare(`
-      SELECT COUNT(*) AS count
-      FROM purpose_members
-      WHERE purpose_id = ? AND member_kind = 'item' AND member_id = ?
-    `).get('purpose-stale-client', item.id) as { count: number };
-    assert.equal(count.count, 1, 'stale replacement cannot duplicate a newly hidden Item edge');
-  });
-});
-
-test('V2.BN.11.4 rejects new retired and cross-user direct Item memberships', async () => {
-  await withDb((db) => {
-    const firstOwner = seedUserCourseNote(db);
-    const secondOwner = seedUserCourseNote(db);
-    const retired = createItem(db, firstOwner.userId, {
-      plain_text: 'Retired before Purpose membership.',
-      origin_course_id: firstOwner.courseId,
-      origin_note_id: firstOwner.noteId,
-    });
-    const foreign = createItem(db, secondOwner.userId, {
-      plain_text: 'Owned by a different user.',
-      origin_course_id: secondOwner.courseId,
-      origin_note_id: secondOwner.noteId,
-    });
-    retireItem(db, firstOwner.userId, retired.id, {});
-
-    for (const itemId of [retired.id, foreign.id]) {
-      assert.throws(() => replaceNotePurposes(db, firstOwner.userId, firstOwner.noteId, [{
-        id: `purpose-reject-${itemId}`,
-        title: 'Rejected Item edge',
-        is_note_default: true,
-        members: [{ member_kind: 'item', member_id: itemId }],
-      }]));
+test('V13.3 library soul create/list/get preserve nullable labels, all stored states and birth signatures', () => {
+  withMemoryDb((db) => {
+    assert.throws(() => createPurpose(db, userId, { title: 'Missing transaction' }), /purpose_transaction_required/);
+    const created = createSoul(db, { title: 'A question without a notebook', project_id: null });
+    assert.equal(created.project_id, null);
+    assert.equal(created.course_id, null);
+    assert.equal(created.note_id, null);
+    assert.equal(created.is_note_default, false);
+    assert.equal(created.status, 'active');
+    assert.deepEqual(created.members, []);
+    assert.deepEqual(listPurposes(db, userId, { project_id: null }), [created]);
+    for (const status of ['active', 'sealed', 'archived'] as const) {
+      db.prepare('UPDATE purposes SET status = ? WHERE id = ?').run(status, created.id);
+      assert.equal(getPurpose(db, userId, created.id).status, status);
+      assert.equal(listPurposes(db, userId, { status }).some((row) => row.id === created.id), true);
     }
+    for (const created_by of ['human', 'ai', 'system', 'ai_proposal', 'importer'] as const) {
+      const soul = createSoul(db, {
+        title: 'Library birth', project_id: 'purpose-test-project', created_by,
+      });
+      assert.equal(soul.created_by, created_by);
+      assert.equal(soul.project_id, 'purpose-test-project');
+    }
+    assert.equal((db.prepare('SELECT COUNT(*) AS n FROM purpose_members').get() as { n: number }).n, 1);
   });
 });
 
-test('V2.BN.11.4 compiled scope de-dupes direct and derived Items, explains paths, and never persists derivation', async () => {
-  await withDb((db) => {
-    const { userId, courseId, noteId } = seedUserCourseNote(db);
-    const shared = createItem(db, userId, {
-      plain_text: 'A power series is centered at a chosen expansion point.',
-      item_type: 'definition',
-      topic: 'Power series',
-      origin_course_id: courseId,
-      origin_note_id: noteId,
-    });
-    const derivedOnly = createItem(db, userId, {
-      plain_text: 'The ratio test yields the radius before endpoint checks.',
-      item_type: 'procedure',
-      topic: 'Convergence',
-      origin_course_id: courseId,
-      origin_note_id: noteId,
-    });
-    const firstGroup = upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Definitions', {
-      id: 'purpose-compiled-group-a',
-      members: [{ id: 'group-a-shared', kind: 'item', item_id: shared.id }],
-    }));
-    const secondGroup = upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Procedures', {
-      id: 'purpose-compiled-group-b',
-      members: [
-        { id: 'group-b-shared', kind: 'item', item_id: shared.id },
-        { id: 'group-b-derived', kind: 'item', item_id: derivedOnly.id },
-      ],
-    }));
-    replaceNotePurposes(db, userId, noteId, [{
-      id: 'purpose-compiled-scope',
-      title: 'Final review',
-      is_note_default: true,
-      members: [{
-        id: 'purpose-direct-shared',
-        member_kind: 'item',
-        member_id: shared.id,
-        role: 'anchor',
-        fitness: 'high',
-      }, {
-        id: 'purpose-group-a',
-        member_kind: 'content_group',
-        member_id: firstGroup.id,
-        role: 'definitions',
-        fitness: 'high',
-      }, {
-        id: 'purpose-group-b',
-        member_kind: 'content_group',
-        member_id: secondGroup.id,
-        role: 'procedures',
-        fitness: 'medium',
-      }],
-    }]);
-    const persistedBefore = db.prepare('SELECT COUNT(*) AS count FROM purpose_members WHERE purpose_id = ?')
-      .get('purpose-compiled-scope') as { count: number };
+test('V13.3 creation contract has no note/default/member writer or status-changing side door', () => {
+  const forbidden = [
+    { note_id: null }, { is_note_default: false }, { members: [] },
+    { parent_id: 'parent' }, { status: 'sealed' }, { course_id: null },
+  ];
+  for (const fields of forbidden) {
+    assert.equal(createPurposeInputSchema.safeParse({ title: 'Library soul', ...fields }).success, false);
+  }
+  assert.equal(createPurposeInputSchema.safeParse({ title: '   ' }).success, false);
+});
 
-    const scope = getPurposeCompiledScope(db, userId, 'purpose-compiled-scope');
-    assert.equal(scope.items.length, 2);
-    const sharedProjection = scope.items.find((entry: any) => entry.item.id === shared.id);
-    const derivedProjection = scope.items.find((entry: any) => entry.item.id === derivedOnly.id);
-    assert.equal(sharedProjection?.membership_kind, 'direct_and_derived');
-    assert.equal(sharedProjection?.direct, true);
-    assert.equal(sharedProjection?.derived, true);
-    assert.deepEqual(
-      sharedProjection?.paths.map((path: any) => [path.kind, path.content_group_id || null]),
-      [['direct', null], ['content_group', firstGroup.id], ['content_group', secondGroup.id]],
-    );
-    assert.equal(derivedProjection?.membership_kind, 'derived');
-    assert.deepEqual(derivedProjection?.paths.map((path: any) => path.content_group_id), [secondGroup.id]);
-
-    const search = searchPurposeItems(db, userId, 'purpose-compiled-scope', {
-      query: 'ratio convergence',
-      limit: 10,
-    });
-    assert.deepEqual(search.items.map((entry: any) => entry.item.id), [derivedOnly.id]);
-    const persistedAfterRead = db.prepare('SELECT COUNT(*) AS count FROM purpose_members WHERE purpose_id = ?')
-      .get('purpose-compiled-scope') as { count: number };
-    assert.equal(persistedAfterRead.count, persistedBefore.count);
-    assert.equal(persistedAfterRead.count, 3, 'derived Item paths never become purpose_members rows');
-
-    upsertContentGroup(db, userId, groupInput(courseId, noteId, 'Procedures', {
-      id: secondGroup.id,
-      members: [{ id: 'group-b-shared', kind: 'item', item_id: shared.id }],
-    }));
-    const afterGroupChange = getPurposeCompiledScope(db, userId, 'purpose-compiled-scope');
-    assert.deepEqual(afterGroupChange.items.map((entry: any) => entry.item.id), [shared.id]);
-
-    retireItem(db, userId, shared.id, {});
-    const afterRetire = getPurposeCompiledScope(db, userId, 'purpose-compiled-scope');
-    assert.equal(afterRetire.items.length, 0);
-    const rawDirectEdge = db.prepare(`
-      SELECT COUNT(*) AS count
-      FROM purpose_members
-      WHERE purpose_id = ? AND member_kind = 'item' AND member_id = ?
-    `).get('purpose-compiled-scope', shared.id) as { count: number };
-    assert.equal(rawDirectEdge.count, 1);
+test('V13.3 purpose route commits its event with original summary and rolls business back when ledger fails', () => {
+  withMemoryDb((db) => {
+    const router = createPurposeRouter(() => db);
+    const summary = '  My original handoff.\n';
+    const response = invoke(router, 'post', '/', { body: { title: 'Why does this work?', summary } });
+    assert.equal(response.statusCode, 201);
+    const purposeId = response.body.purpose.id;
+    const event = db.prepare('SELECT * FROM events').get() as Record<string, any>;
+    assert.equal(event.user_id, userId);
+    assert.equal(event.actor_kind, 'human');
+    assert.equal(event.channel, 'POST /api/purposes');
+    assert.equal(event.verb, 'purpose_created');
+    assert.equal(event.summary, summary);
+    assert.deepEqual(JSON.parse(event.objects), [{ kind: 'purpose', id: purposeId }]);
+    assert.equal(invoke(router, 'get', '/:purposeId', { params: { purposeId } }).body.purpose.id, purposeId);
+    assert.equal(invoke(router, 'get', '/').body.purposes.length, 2);
+    const before = db.prepare('SELECT * FROM purposes ORDER BY id').all();
+    db.exec(`CREATE TRIGGER synthetic_event_failure BEFORE INSERT ON events
+      BEGIN SELECT RAISE(ABORT, 'synthetic_event_failure'); END;`);
+    assert.throws(() => invoke(router, 'post', '/', { body: { title: 'Must roll back' } }), /synthetic_event_failure/);
+    assert.deepEqual(db.prepare('SELECT * FROM purposes ORDER BY id').all(), before);
+    assert.equal((db.prepare('SELECT COUNT(*) AS n FROM events').get() as { n: number }).n, 1);
   });
+});
+
+test('V13.3 library Project labels are registered as preserving weak references', () => {
+  for (const [table, column] of [['purposes', 'course_id'], ['boards', 'project_id']]) {
+    const entry = COURSE_LIFECYCLE_POLICIES.find((row) => row.table === table && row.column === column);
+    assert.equal(entry?.policy, 'preserve');
+    assert.equal(entry?.onDelete, 'SET NULL');
+  }
 });

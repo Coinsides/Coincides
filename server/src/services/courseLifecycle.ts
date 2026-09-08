@@ -67,15 +67,13 @@ export function getProjectionUserWork(
     userId,
     noteId,
   );
+  // Historical note references still have their original FK until a separately
+  // authorized migration. Count them as deletion risk; default-ness no longer
+  // makes a soul disposable, and new library souls never enter this query.
   const purposeCount = count(db, `
     SELECT COUNT(*) AS count
     FROM purposes p
-    WHERE p.user_id = ? AND p.note_id = ? AND p.status = 'active'
-      AND NOT (
-        p.is_note_default = 1
-        AND p.created_by = 'system'
-        AND NOT EXISTS (SELECT 1 FROM purpose_members pm WHERE pm.purpose_id = p.id)
-      )
+    WHERE p.user_id = ? AND p.note_id = ? AND p.status IN ('active', 'sealed')
   `, userId, noteId);
   const displayOverrideCount = count(db, `
     SELECT (
@@ -235,7 +233,6 @@ function moveProjectionToHome(
     'image_object_extensions',
     'structured_object_extensions',
     'visual_connector_extensions',
-    'purposes',
   ]) {
     db.prepare(`UPDATE ${table} SET course_id = ? WHERE user_id = ? AND note_id = ?`)
       .run(homeCourseId, userId, noteId);

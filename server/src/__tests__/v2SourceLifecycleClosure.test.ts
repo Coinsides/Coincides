@@ -24,6 +24,7 @@ import {
   getSourceDeletionImpact,
 } from '../services/sourceLifecycle.js';
 import { materializeSourceNow } from '../services/sourceMaterialization.js';
+import { createPurpose, getPurpose } from '../services/purposes.js';
 import { ensureSourceProjectPlacement } from '../services/sourceRecords.js';
 
 const ONE_PIXEL_PNG = Buffer.from(
@@ -44,7 +45,7 @@ async function withLifecycleStorage(
   const sourceRootDir = join(root, 'source-blobs');
   const canvasAssetRootDir = join(root, 'canvas-assets');
   try {
-    const db = await initDb(join(root, 'test.db'));
+    const db = await initDb(':memory:');
     await run({ db, sourceRootDir, canvasAssetRootDir });
   } finally {
     closeDb();
@@ -145,7 +146,10 @@ function sourceBlobPath(db: Db, sourceRootDir: string, sourceId: string): string
 function seedProjectionUserWork(db: Db, userId: string, courseId: string, noteId: string) {
   const annotationId = uuidv4();
   const groupId = uuidv4();
-  const purposeId = uuidv4();
+  const purposeId = db.transaction(() => createPurpose(db, userId, {
+    title: 'Exam review',
+    project_id: courseId,
+  }))().id;
   const blockId = uuidv4();
   db.prepare(`
     INSERT INTO annotation_truths (
@@ -157,12 +161,6 @@ function seedProjectionUserWork(db: Db, userId: string, courseId: string, noteId
       id, user_id, course_id, note_id, title, status, created_by
     ) VALUES (?, ?, ?, ?, 'Preserved group', 'active', 'human')
   `).run(groupId, userId, courseId, noteId);
-  db.prepare(`
-    INSERT INTO purposes (
-      id, user_id, course_id, note_id, title, status, is_note_default,
-      created_by, metadata, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, 'Exam review', 'active', 0, 'human', '{}', datetime('now'), datetime('now'))
-  `).run(purposeId, userId, courseId, noteId);
   db.prepare(`
     INSERT INTO note_blocks (
       id, user_id, course_id, block_type, content_json, plain_text, source_kind, metadata
@@ -297,7 +295,8 @@ test('Project deletion dynamically protects user work and moves the full SourceP
     assert.equal((db.prepare('SELECT course_id FROM notes WHERE id = ?').get(source.projectionNoteId) as any).course_id, homeId);
     assert.equal((db.prepare('SELECT course_id FROM annotation_truths WHERE id = ?').get(work.annotationId) as any).course_id, homeId);
     assert.equal((db.prepare('SELECT course_id FROM content_groups WHERE id = ?').get(work.groupId) as any).course_id, homeId);
-    assert.equal((db.prepare('SELECT course_id FROM purposes WHERE id = ?').get(work.purposeId) as any).course_id, homeId);
+    assert.equal(getPurpose(db, userId, work.purposeId).course_id, null);
+    assert.equal(getPurpose(db, userId, work.purposeId).note_id, null);
     assert.equal((db.prepare('SELECT course_id FROM note_blocks WHERE id = ?').get(work.blockId) as any).course_id, homeId);
     assert.equal((db.prepare('SELECT COUNT(*) AS count FROM canvas_objects WHERE note_id = ? AND course_id = ?')
       .get(source.projectionNoteId, homeId) as any).count > 0, true);

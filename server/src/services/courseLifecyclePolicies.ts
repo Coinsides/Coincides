@@ -22,6 +22,7 @@ interface CourseReference {
 export const COURSE_LIFECYCLE_POLICIES: CourseLifecyclePolicyEntry[] = [
   { table: 'annotation_ranges', column: 'course_id', policy: 'move', reason: 'Projection annotation satellite' },
   { table: 'annotation_truths', column: 'course_id', policy: 'move', reason: 'Projection annotation truth' },
+  { table: 'boards', column: 'project_id', policy: 'preserve', onDelete: 'SET NULL', reason: 'Library board weak Project label, never a container boundary' },
   { table: 'canvas_assets', column: 'course_id', policy: 'move', reason: 'Projection-owned asset origin' },
   { table: 'canvas_frames', column: 'course_id', policy: 'delete', reason: 'Legacy Project canvas data' },
   { table: 'canvas_nodes', column: 'course_id', policy: 'delete', reason: 'Legacy Project canvas data' },
@@ -57,7 +58,7 @@ export const COURSE_LIFECYCLE_POLICIES: CourseLifecyclePolicyEntry[] = [
   { table: 'operation_batches', column: 'course_id', policy: 'move', reason: 'Projection materialization receipt' },
   { table: 'page_frame_extensions', column: 'course_id', policy: 'move', reason: 'Projection PageFrame state' },
   { table: 'projections', column: 'course_id', policy: 'delete', reason: 'Legacy Project projection' },
-  { table: 'purposes', column: 'course_id', policy: 'move', reason: 'Purpose user work' },
+  { table: 'purposes', column: 'course_id', policy: 'preserve', onDelete: 'SET NULL', reason: 'Library soul weak Project label; legacy note references await explicit migration' },
   { table: 'reconciliation_recovery_events', column: 'course_id', policy: 'delete', reason: 'Project reconciliation data' },
   { table: 'source_anchor_links', column: 'course_id', policy: 'delete', reason: 'Legacy Project source seed' },
   { table: 'source_anchors', column: 'course_id', policy: 'delete', reason: 'Legacy Project source seed' },

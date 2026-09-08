@@ -1,8 +1,5 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
-import { join } from 'node:path';
-import { tmpdir } from 'node:os';
 import { v4 as uuidv4 } from 'uuid';
 import { closeDb, initDb } from '../db/init.js';
 import { deleteProjectWithSourcePolicy } from '../services/courseLifecycle.js';
@@ -14,7 +11,7 @@ import {
   getItem,
   retireItem,
 } from '../services/items.js';
-import { listNotePurposes, replaceNotePurposes } from '../services/purposes.js';
+import { createPurpose, getPurpose, getPurposeCompiledScope } from '../services/purposes.js';
 import {
   createRelation,
   getRelation,
@@ -25,13 +22,11 @@ import {
 type Db = Awaited<ReturnType<typeof initDb>>;
 
 async function withDb(run: (db: Db) => void | Promise<void>) {
-  const dir = mkdtempSync(join(tmpdir(), 'coincides-relation-lifecycle-'));
   try {
-    const db = await initDb(join(dir, 'test.db'));
+    const db = await initDb(':memory:');
     await run(db);
   } finally {
     closeDb();
-    rmSync(dir, { recursive: true, force: true });
   }
 }
 
@@ -168,18 +163,15 @@ test('V2.BN.11.7 Project deletion degrades origins while cross-Project organizat
       origin_course_id: origin.courseId,
       origin_note_id: origin.noteId,
     });
-    const originPurposeId = 'purpose-origin-project-receipt';
-    replaceNotePurposes(db, userId, origin.noteId, [{
-      id: originPurposeId,
+    const originPurpose = db.transaction(() => createPurpose(db, userId, {
       title: 'Origin Project purpose',
-      is_note_default: true,
-      members: [],
-    }]);
+      project_id: origin.courseId,
+    }))();
     const relation = createRelation(db, userId, {
       from_item_id: first.id,
       to_item_id: second.id,
       relation_type: 'supports',
-      origin_purpose_id: originPurposeId,
+      origin_purpose_id: originPurpose.id,
     });
 
     const organizerGroupId = uuidv4();
@@ -192,31 +184,26 @@ test('V2.BN.11.7 Project deletion degrades origins while cross-Project organizat
         { id: uuidv4(), kind: 'item', item_id: second.id },
       ],
     ));
-    replaceNotePurposes(db, userId, organizer.noteId, [{
-      id: 'purpose-cross-project-organizer',
+    const organizerPurpose = db.transaction(() => createPurpose(db, userId, {
       title: 'Cross-Project organizer purpose',
-      is_note_default: true,
-      members: [
-        { id: uuidv4(), member_kind: 'item', member_id: first.id },
-        { id: uuidv4(), member_kind: 'item', member_id: second.id },
-      ],
-    }]);
+      project_id: organizer.courseId,
+    }))();
 
     deleteProjectWithSourcePolicy(db, userId, origin.courseId, 'delete_projection');
 
     const survivedFirst = getItem(db, userId, first.id);
     assert.equal(survivedFirst.origin_course_id, null);
     assert.equal(survivedFirst.origin_note_id, null);
-    assert.equal(getRelation(db, userId, relation.id).origin_purpose_id, null);
+    assert.equal(getRelation(db, userId, relation.id).origin_purpose_id, originPurpose.id);
+    assert.equal(getPurpose(db, userId, originPurpose.id).project_id, null);
+    assert.equal(getPurpose(db, userId, originPurpose.id).note_id, null);
     assert.equal(db.prepare('SELECT id FROM courses WHERE id = ?').get(origin.courseId), undefined);
     assert.deepEqual(
       getContentGroup(db, userId, organizerGroupId).members.map((member: any) => member.item_id),
       [first.id, second.id],
     );
-    assert.deepEqual(
-      listNotePurposes(db, userId, organizer.noteId)[0]?.members.map((member: any) => member.member_id),
-      [first.id, second.id],
-    );
+    assert.equal(getPurpose(db, userId, organizerPurpose.id).project_id, organizer.courseId);
+    assert.throws(() => getPurposeCompiledScope(db, userId, organizerPurpose.id), /purpose_compiled_scope_deferred/);
   });
 });
 
