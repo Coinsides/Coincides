@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 280 份文档。
+共 281 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -275,6 +275,7 @@
 | [handoffs/2026-09-08-v13-2-s5a-recovery-flash-fix-order.md](handoffs/2026-09-08-v13-2-s5a-recovery-flash-fix-order.md) | 13.2 · 附单 s5a · v2 下失焦保存首发失败(恢复队列橙盒闪现) | `(缺状态头)` | — | — |
 | [handoffs/2026-09-08-v13-3-s0-recon-order.md](handoffs/2026-09-08-v13-3-s0-recon-order.md) | 13.3 · 单 0 · K-0 侦察(板/魂/书记官业务面) | `(缺状态头)` | — | — |
 | [handoffs/2026-09-08-v13-3-s1-data-layer-order.md](handoffs/2026-09-08-v13-3-s1-data-layer-order.md) | 13.3 · 单 1 · 板/魂数据与服务层(含书记官业务面首秀) | `(缺状态头)` | — | — |
+| [handoffs/2026-09-08-v13-3-s2-board-ui-order.md](handoffs/2026-09-08-v13-3-s2-board-ui-order.md) | 13.3 · 单 2 · 板 UI MVP + 旧 Purpose 消费面对齐 | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
