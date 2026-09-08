@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 270 份文档。
+共 271 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -266,6 +266,7 @@
 | [handoffs/2026-09-07-v13-2-s1-events-ledger-order.md](handoffs/2026-09-07-v13-2-s1-events-ledger-order.md) | 13.2 · 单 1 · 史记 v0(events 表 + 书记官助手) | `(缺状态头)` | — | — |
 | [handoffs/2026-09-07-v13-2-s2-tray-order.md](handoffs/2026-09-07-v13-2-s2-tray-order.md) | 13.2 · 单 2 · 托盘 + 分蘖 v1 | `(缺状态头)` | — | — |
 | [handoffs/2026-09-07-v13-2-s3-shadow-run-order.md](handoffs/2026-09-07-v13-2-s3-shadow-run-order.md) | 13.2 · 单 3 · census + 影子跑(野地去处 × 坐标解释 双轨) | `(缺状态头)` | — | — |
+| [handoffs/2026-09-08-v13-2-s4a-dual-contract-order.md](handoffs/2026-09-08-v13-2-s4a-dual-contract-order.md) | 13.2 · 单 4a · 坐标契约双模改造(client 消费链) | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
