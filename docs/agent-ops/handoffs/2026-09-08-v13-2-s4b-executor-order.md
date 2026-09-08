@@ -1,6 +1,6 @@
 > **From**: fable
 > **To**: codex
-> **Status**: ready(两层制;13.2 单 4b=迁移执行器+回滚,server 脚本单;⛔ 用户库零接触,真实执行=扳机日 Henry 亲跑)
+> **Status**: done(builder 按补遗一工程完工,工作树候 HQ 复核;⛔ 用户库零接触,真实执行=扳机日 Henry 亲跑)
 > **日期 (Date)**: 2026-09-08
 > **性质**: 施工单(扳机日的刀——本单只铸刀与演练,⛔ 挥刀)
 
@@ -73,3 +73,33 @@
 3. **无解行→准备区**:缺帧/非有限/方程无解的行,⛔ 原样留在 formal 面——一律搬准备区(tray,order_index 追尾,原值全量存入例外清单供回看)。由此**翻旗前 formal 面零例外**,§一.2e 的"安全解释"从假设变为构造保证;
 4. **演练样本追加义务**:必须含停线举证的 `local`(y=10,O=(110,220))与 `cross-note` 两行——断言其处置后(归一或入准备区)v2 屏显与 v1 屏显逐位相等或已离开 formal 面;
 5. 段 plan 修订三之归一条款以本补遗为准(补遗链,⛔ 回改原字节);其余口径不变。按本补遗续作至完工 Result。
+
+## Result
+
+### 2026-09-08 · builder 按补遗一完工回执（工作树交 HQ，非迁移放行）
+
+完整重读本工单、原停线回执、补遗一及上游后续工。原停线证据与补遗保留；本次完成独立 CLI、五步单事务、回滚及合成全谱演练，未再发现需停线的结构级缺口。
+
+**交付现物**：`server/scripts/v13WildernessExecute.ts`（`--db --user --out` 必填；默认 S3 只读预览；显式 `--execute` / `--rollback`）；`server/scripts/wildernessExecutor/`（方程求解、执行器、合成样本/演练入口与使用说明）；`server/scripts/v13WildernessExecute.test.ts`；server package 新增执行/单测/typecheck 命令。未接入启动链。
+
+- 五步共用一个 `BEGIN IMMEDIATE`：三表全量只读备份（既存拒覆盖）→ formal 非结构行归一 → 复用 S3 去处矩阵搬迁 → `recordEvent(migrated)` → `coordinate_contract=v2`。同事务内用 S3 同 SQL 复测身份守恒，归一成功行全部重新比较 4a 双尺，formal 例外归零后才翻旗；CLI 提交后另开只读连接再次 census。
+- 归一数值直接解方程，以未改动的 4a `resolveWorldRect` / `resolveScreenRect` 裁判；还复用现役 hydration 对照，防止加标签后改变显示表面。负 local 不 clamp、不取整；缺帧/非有限/无精确解/证据不足一律 tray，原值完整保留在例外 JSON。Infinity 与 64 位整数采用保真编码，不被 JSON 静默转成 null 或 JS 舍入。
+- **停线原两行实测结果**：page 实际 offset=0（现役 `getPrimaryPageOffsetX('page')`），`local` 的 O.x=110、`cross-note` 的 O.x=1010 使 world/screen 横轴无同时解，均迁 tray 并断言离开 formal。未把旧停线探针用于隔离纵轴的 offset=O.x 冒充真实屏显上下文。另有 O=(0,220) 的负 local 成功对照，含 `(-5,-219.75)`。
+- 准备区按 note 的既有 `order_index` 追尾；画物/mount 通过关联 placement 承载去处，object/mount 全量行不改。`--user` 限域与全库旗标的边界有前置拒绝：若其他用户存在非结构、非 tray placement，零写拒绝，不扩范围暗迁。
+- 回滚先核对提交后三表及扩展/legacy 表指纹，随后从备份原位恢复每列，SQLite 内部取值、不 DELETE/REPLACE object，避免级联损坏帧/图片/结构化/连接线扩展。旗回 v1、同 SQL census 与执行前全等、同事务 `rolled_back`。成功后将旧备份按回滚事件 seq 归档保留，只读触发器不丢；释放固定名以便再执行，新旧代均不覆盖。数据漂移或任一步失败则全事务回滚。
+
+### 验证输出摘要（均亲跑）
+
+- server typecheck：隔离入口执行 `node node_modules/typescript/bin/tsc --noEmit`，**exit 0**；执行器独立 `npm.cmd run typecheck:v13-wilderness-executor`，**exit 0**。
+- `npm.cmd run test:v13-wilderness-executor`：最终 **15 tests / 15 pass / 0 fail**。含相等/不等/缺帧、非有限与例外原值、负 local、精确浮点比较、三个备份名拒覆盖、五个执行阶段和三个回滚阶段故障注入（DDL/事件/旗标一起回滚）、扩展表与大整数恢复、跨用户拒绝、hydration 表面变化、磁盘合成 CLI 全流程。
+- 独立子进程 CLI 演练：`node --import tsx scripts/wildernessExecutor/rehearsal.ts docs/audits/2026-09-08-v13-2-s4b-合成全谱演练`，**PASS，exit 0**。预览→执行→复测→回滚→复测→再执行；**24 项逐 note 三表守恒、26 行双尺复验、24 条例外迁 tray、formal 例外 0**；预览文件字节不变、回滚 census/三表 SHA-256 全等、再执行终态全等，事件顺序 `migrated → rolled_back → migrated`。
+- 合成核对单：**`docs/audits/2026-09-08-v13-2-s4b-合成全谱演练.md`**；同名 `.json` 保存完整例外原值、归一样本与三表指纹。复用 S3 全谱并追加 24 行严格可解对照与真实扩展表依赖。原 S3 外用户 formal/workspace 行用于前置拒绝测试；可执行 fixture 仅将该外用户行预置 tray，此造样差异在核对单明确申报；local/cross-note 原行完整保留。
+- 完整必经门：`node scripts/run-isolated-coordinate-validation.mjs`（现有入口，实际运行 `npm run verify:v2-bn8-runtime`），**exit 0，46s**。客户端 **50 files / 459 tests pass**，registry **5/5**、manifest **10/10**、parity **10/10**，client/server build、模型/性能冒烟、全部静态门、docs 检查、diff 与变更扫描均通过。空 env 目录、内存 DB 与隔离资产目录沿用现有验证入口，未跳门或豁免。
+- 只读协助复查所指出的整数恢复与 hydration 两个边界已修复并纳入上述实跑；最终只读复查未发现新具体漏洞。builder 仍只有本线程施工。
+
+### 限制、未做与工作树交接
+
+- 本次只铸刀和合成演练：未接触用户库，未读取 `.env`，未打印密钥，未操作 3001/5173；未改产品/UI、4a 双尺、启动迁移链、双模退役或 Agent 工具面；未 commit/push/PR/merge，未作 Henry 主观验收或真实迁移放行。
+- 回滚适用于提交后数据未继续改写的状态；漂移则拒绝，避免抹掉后来写入。报告 I/O 或提交后并发 census 失败可能发生在已提交之后，CLI 与 README 明确提示检查旗/事件/备份后再操作。旧备份保留期和清理仍不在本单。
+- 开工已有 `.claude/settings.local.json`、09-07 模拟用户测试单、09-04 会议记录三项未跟踪内容原样保留。当前 `Status=done` 仅指 builder 工程完成，工作树交 HQ 复核。
+- 最终 numstat：**12 文件，+9218/-1**。本工单 **+31/-1**（仅状态头替换，其余追加）；`server/package.json` **+3/-0**；8 个新增脚本/测试/配置/说明文件合计 **+837/-0**；新增合成审计 Markdown **+37/-0**、完整证据 JSON **+8310/-0**。未跟踪新增文件按完整文件行数计，不计三项既有未跟踪内容。`git diff --check` 通过。
