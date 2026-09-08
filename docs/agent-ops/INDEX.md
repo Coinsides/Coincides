@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 275 份文档。
+共 276 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -282,6 +282,7 @@
 | [handoffs/plans/v12-closeout-milestones.md](handoffs/plans/v12-closeout-milestones.md) | V12 收官里程碑(M1–M5) | `active` | 2026-08-30 | — |
 | [handoffs/plans/v13-1-paper-viewport-plan.md](handoffs/plans/v13-1-paper-viewport-plan.md) | V13.1 · 纸的视口(标尺锁定)—— 段 plan | `active` | 2026-09-07 | — |
 | [handoffs/plans/v13-2-wilderness-retirement-plan.md](handoffs/plans/v13-2-wilderness-retirement-plan.md) | V13.2 · 野地退役 + 迁移 —— 段 plan | `active` | 2026-09-07 | — |
+| [handoffs/plans/v13-3-board-mvp-plan.md](handoffs/plans/v13-3-board-mvp-plan.md) | V13.3 · 板 MVP(线索黑板)—— 段 plan | `active` | 2026-09-08 | — |
 | [handoffs/plans/v13-foundation-rebuild-plan.md](handoffs/plans/v13-foundation-rebuild-plan.md) | V13 · 地基重做版 —— 总 plan v1 | `active` | 2026-08-30 | — |
 | [handoffs/plans/v2-bn12-2-mcp-tool-face.md](handoffs/plans/v2-bn12-2-mcp-tool-face.md) | Plan V2.BN.12.2 — MCP 工具面(末端执行器第一次实体化) | `active` | — | — |
 | [handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md](handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md) | V2.BN.12.2b:第一个写工具 + 候选审阅队列 + HTTP 层 K-5 | `done(**铸版 2026-08-23,Fable**——五单施工 + b-4 旅程 + b-5/b-5-fix 补单全复核 PASS;旅程合并分 **A 12/12 + B 8/8** 达通过线,重走记录 `analysis/2026-08-23-v2bn12-2b4-journey-sheet.md` §7;铸版记录 log 08-23 #40;未亲刀缺口见 TD-19/TD-20)` | 2026-08-23 | — |
