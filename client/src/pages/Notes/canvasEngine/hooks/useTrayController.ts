@@ -1,3 +1,4 @@
+import type { CoordinateContract } from '../placementContractService';
 import { useMemo, useRef, useState } from 'react';
 import api from '@/services/api';
 import { saveBlockCanvasPlacementForNote } from '../canvasObjectRepository';
@@ -11,6 +12,7 @@ import type { CanvasObject, CanvasPlacement, ContentMount, PageFrameCollectionMo
 
 export function useTrayController(input: {
   noteId?: string;
+  coordinateContract?: CoordinateContract;
   enabled: boolean;
   blocks: NoteBlock[];
   objects: CanvasObject[];
@@ -46,7 +48,7 @@ export function useTrayController(input: {
     finally { busyRef.current = false; setBusy(false); }
   };
   const save = async (block: NoteBlock, layout: BlockBoxLayout) => {
-    await saveBlockCanvasPlacementForNote({ noteId: input.noteId!, block, layout, pageFrameCollection: input.collection });
+    await saveBlockCanvasPlacementForNote({ noteId: input.noteId!, block, layout, pageFrameCollection: input.collection, coordinateContract: input.coordinateContract });
     await refresh([block.id]);
     input.clearSelection();
   };
@@ -77,16 +79,16 @@ export function useTrayController(input: {
     const entry = entries.find((item) => item.placement.placementId === placementId);
     if (!entry?.block) return;
     const authority = resolvePageDraftSessionAuthority({
+      coordinateContract: input.coordinateContract,
       collection: input.collection, layout, pageOffsetX: input.pageOffsetX,
       selectedFrameId: input.collection?.selectedFrameId,
     });
     if (!authority) return;
     const before = readStoredLayout(entry.block) as BlockBoxLayout;
-    // The existing blank-drop layout is already relative to the paper's block list.
-    // Use the same local layout save path as moving an existing paper block.
+    // The surface has already converted the drop to the loaded contract.
     const after = reconcileHydratedBlockLayoutSurfaceAuthority({
       ...layout, coordinate_space: 'page_frame_local', frame_id: authority.frameId,
-    }, input.collection?.pageFrames || []) as unknown as BlockBoxLayout;
+    }, input.collection?.pageFrames || [], input.coordinateContract) as unknown as BlockBoxLayout;
     await editLayout(entry.block, before, after);
   };
   const split = async (placementIds: string[], title: string) => {

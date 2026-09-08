@@ -1,3 +1,4 @@
+import { resolveAffiliationRect, selectPlacementFrame, moveAffiliatedLayout, type CoordinateContract } from './placementContractService';
 import type { BlockBoxLayout } from './runtimeLayout';
 import type { CanvasRect, PageFrameModel } from './types';
 
@@ -16,6 +17,8 @@ export interface PageFrameLayoutAffiliationInput {
   pageFrame: PageFrameModel;
   blockLayouts: Record<string, BlockBoxLayout>;
   blockWorldOffsetX?: number;
+  coordinateContract?: CoordinateContract;
+  pageFrames?: PageFrameModel[];
 }
 
 export interface MovePageFrameAffiliatedBlockLayoutsInput extends PageFrameLayoutAffiliationInput {
@@ -28,15 +31,6 @@ function rectRight(rect: CanvasRect): number {
 
 function rectBottom(rect: CanvasRect): number {
   return rect.y + rect.height;
-}
-
-function layoutToWorldRect(layout: BlockBoxLayout, blockWorldOffsetX: number): CanvasRect {
-  return {
-    x: layout.x + blockWorldOffsetX,
-    y: layout.y,
-    width: layout.width,
-    height: layout.height,
-  };
 }
 
 function rectFullyContains(container: CanvasRect, target: CanvasRect): boolean {
@@ -67,10 +61,12 @@ export function deriveLayoutAffiliationsForPageFrame({
   pageFrame,
   blockLayouts,
   blockWorldOffsetX = 0,
+  coordinateContract = 'v1',
+  pageFrames = [pageFrame],
 }: PageFrameLayoutAffiliationInput): Record<string, LayoutAffiliation> {
   return Object.fromEntries(
     Object.entries(blockLayouts).map(([objectId, layout]) => {
-      const blockRect = layoutToWorldRect(layout, blockWorldOffsetX);
+      const blockRect = resolveAffiliationRect(layout, selectPlacementFrame(layout, pageFrames, coordinateContract, pageFrame), coordinateContract, blockWorldOffsetX);
       if (rectFullyContains(pageFrame, blockRect)) {
         return [objectId, {
           objectId,
@@ -111,12 +107,16 @@ export function movePageFrameAffiliatedBlockLayouts({
   pageFrame,
   blockLayouts,
   blockWorldOffsetX = 0,
+  coordinateContract = 'v1',
+  pageFrames = [pageFrame],
   delta,
 }: MovePageFrameAffiliatedBlockLayoutsInput): Record<string, BlockBoxLayout> {
   const cohort = new Set(derivePageFrameMoveCohort({
     pageFrame,
     blockLayouts,
     blockWorldOffsetX,
+    coordinateContract,
+    pageFrames,
   }));
 
   return Object.fromEntries(
@@ -124,11 +124,7 @@ export function movePageFrameAffiliatedBlockLayouts({
       .filter(([blockId]) => cohort.has(blockId))
       .map(([blockId, layout]) => [
         blockId,
-        {
-          ...layout,
-          x: layout.x + delta.x,
-          y: layout.y + delta.y,
-        },
+        moveAffiliatedLayout(layout, pageFrame, delta, coordinateContract),
       ]),
   );
 }

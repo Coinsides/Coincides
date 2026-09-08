@@ -1,3 +1,4 @@
+import type { CoordinateContract } from '../placementContractService';
 import { useMemo, type RefObject } from 'react';
 import { useCanvasContentWidth } from './useCanvasContentWidth';
 import { useLayoutPersistenceController } from './useLayoutPersistenceController';
@@ -16,6 +17,7 @@ import type {
 } from '../types';
 
 export interface UseRuntimeLayoutModelControllerOptions {
+  coordinateContract?: CoordinateContract;
   blocks: NoteBlock[];
   blockListRef: RefObject<HTMLElement>;
   documentTypographyProfile: DocumentTypographyProfile;
@@ -30,6 +32,7 @@ export interface UseRuntimeLayoutModelControllerOptions {
 
 export function useRuntimeLayoutModelController({
   blocks,
+  coordinateContract,
   blockListRef,
   documentTypographyProfile,
   layoutDrafts,
@@ -60,6 +63,7 @@ export function useRuntimeLayoutModelController({
     visibleBlocks,
   } = useNoteCanvasResolvedLayoutModel({
     contentWidth,
+    coordinateContract,
     documentTypographyProfile,
     layoutDrafts,
     pageFrames,
@@ -72,6 +76,7 @@ export function useRuntimeLayoutModelController({
     persistChangedBlockLayouts,
     persistLayoutSnapshot,
   } = useLayoutPersistenceController({
+    coordinateContract,
     blocks,
     blockLayouts,
     persistBlockLayout,

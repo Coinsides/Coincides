@@ -1,3 +1,4 @@
+import type { CoordinateContract } from '../placementContractService';
 import { useCallback, type MutableRefObject } from 'react';
 import { presentationKindForBlock } from '../blockContentService';
 import {
@@ -15,10 +16,12 @@ export interface ApplyMeasuredBlockHeightDraft {
     measuredHeight: number;
     orderedBlockIds: string[];
     resolveCollisions: boolean;
+    coordinateContract?: CoordinateContract;
   }): void;
 }
 
 export interface UseMeasuredBlockReflowControllerOptions {
+  coordinateContract?: CoordinateContract;
   applyMeasuredBlockHeightDraft: ApplyMeasuredBlockHeightDraft;
   blockLayouts: Record<string, BlockBoxLayout>;
   movingBlockIdRef: MutableRefObject<string | null>;
@@ -29,6 +32,7 @@ export interface UseMeasuredBlockReflowControllerOptions {
 
 export function useMeasuredBlockReflowController({
   applyMeasuredBlockHeightDraft,
+  coordinateContract,
   blockLayouts,
   movingBlockIdRef,
   orderedBlocks,
@@ -50,6 +54,7 @@ export function useMeasuredBlockReflowController({
     if (movingBlockIdRef.current) return;
     if (!allowActiveContentReflow && Date.now() < suppressMeasuredReflowUntilRef.current) return;
     applyMeasuredBlockHeightDraft({
+      coordinateContract,
       baseLayouts: blockLayouts,
       blockId: block.id,
       fallbackLayout: layout,
@@ -60,6 +65,7 @@ export function useMeasuredBlockReflowController({
   }, [
     applyMeasuredBlockHeightDraft,
     blockLayouts,
+    coordinateContract,
     movingBlockIdRef,
     orderedBlocks,
     suppressMeasuredReflowUntilRef,

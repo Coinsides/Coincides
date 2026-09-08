@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '@/services/api';
+import { createCoordinateContractSession } from '../coordinateContractSession';
+import type { CoordinateContract } from '../placementContractService';
 import {
   loadRuntimeTemplateOptions,
   metadataForTemplateOption,
@@ -62,6 +64,7 @@ import {
 } from '../annotationTruthRepository';
 import {
   applyCanvasLayoutsToBlocks,
+  resolveCanvasPlacementWriteContext,
   deleteGenericCanvasObjectForNote,
   loadCanvasPersistenceForNote,
   saveGenericCanvasObjectForNote,
@@ -400,6 +403,8 @@ export function useNoteCanvasDataAdapter({
   const addToast = useUIStore((s) => s.addToast);
 
   const [note, setNote] = useState<Note | null>(null);
+  const contractSession = useMemo(() => createCoordinateContractSession(), [noteId]);
+  const [coordinateContract, setCoordinateContract] = useState<CoordinateContract>('v1');
   const [blocks, setBlocks] = useState<NoteBlock[]>([]);
   const [loading, setLoading] = useState(true);
   const [titleDraft, setTitleDraft] = useState('');
@@ -560,7 +565,7 @@ export function useNoteCanvasDataAdapter({
       const savedContentGroups = await loadContentGroupsForNote({ note: hydratedNote });
       const [savedGroupFolders, canvasPersistence, savedAnnotationTruths, savedPurposeFrames] = await Promise.all([
         loadGroupFoldersForNote({ note: hydratedNote }),
-        loadCanvasPersistenceForNote({ note: hydratedNote }),
+        loadCanvasPersistenceForNote({ note: hydratedNote, contractSession }),
         loadAnnotationTruthsForNote({ note: hydratedNote }),
         loadPurposeFramesForNote({ note: hydratedNote }),
       ]);
@@ -568,7 +573,7 @@ export function useNoteCanvasDataAdapter({
       const hydratedBlocks = applyCanvasLayoutsToBlocks(
         (blocksRes.data as any[]).map(hydrateClientBlock),
         canvasPersistence.blockLayouts,
-        { pageFrameCollection: canvasPersistence.pageFrameCollection },
+        { pageFrameCollection: canvasPersistence.pageFrameCollection, coordinateContract: canvasPersistence.coordinateContract },
       );
       const cleanMetadata = stripLegacyAnnotationMetadata(stripLegacyPageFrameMetadata(hydratedNote.metadata));
       let persistedNote = hydratedNote;
@@ -589,6 +594,7 @@ export function useNoteCanvasDataAdapter({
       setGroupFolders(savedGroupFolders);
       setPurposeFrames(savedPurposeFrames);
       setPageFrameCollection(canvasPersistence.pageFrameCollection);
+      setCoordinateContract(canvasPersistence.coordinateContract || 'v1');
       setPersistedCanvasObjects(canvasPersistence.canvasObjects);
       setPersistedCanvasPlacements(canvasPersistence.canvasPlacements);
       setPersistedContentMounts(canvasPersistence.contentMounts);
@@ -641,6 +647,7 @@ export function useNoteCanvasDataAdapter({
       if (requestIsCurrent()) setLoading(false);
     }
   }, [
+    contractSession,
     noteId,
     addToast,
     blockEditRecoveryMountNonce,
@@ -930,7 +937,7 @@ export function useNoteCanvasDataAdapter({
       if (pageFrameSaveGenerationRef.current !== saveGeneration) return;
       setPageFrameCollection(previousCollection);
     }
-  }, [addToast, allowSourceContentMutation, note, pageFrameCollection]);
+  }, [addToast, allowSourceContentMutation, note, pageFrameCollection, contractSession]);
 
   const saveDocumentTypographyProfile = useCallback(async (nextProfile: DocumentTypographyProfile) => {
     const currentNote = noteRef.current || note;
@@ -1053,10 +1060,12 @@ export function useNoteCanvasDataAdapter({
     if (options.layout) {
       try {
         const savedLayout = await saveBlockCanvasPlacementForNote({
+          ...await resolveCanvasPlacementWriteContext({
+            noteId: requestedNote.id, loadedNoteId: note?.id, pageFrameCollection, contractSession,
+          }),
           noteId: requestedNote.id,
           block: created,
           layout: options.layout,
-          pageFrameCollection,
         });
         created = { ...created, canvas_layout: savedLayout.layout };
       } catch (err) {
@@ -1079,7 +1088,7 @@ export function useNoteCanvasDataAdapter({
     }
     if (!options.silent) addToast('success', 'Block added');
     return created;
-  }, [note, addToast, allowSourceContentMutation, pageFrameCollection]);
+  }, [note, addToast, allowSourceContentMutation, pageFrameCollection, contractSession]);
 
   const createDraftBlock = useCallback(async (
     template: TemplateOption,
@@ -1137,10 +1146,12 @@ export function useNoteCanvasDataAdapter({
     if (options.layout) {
       try {
         const savedLayout = await saveBlockCanvasPlacementForNote({
+          ...await resolveCanvasPlacementWriteContext({
+            noteId: requestedNote.id, loadedNoteId: note?.id, pageFrameCollection, contractSession,
+          }),
           noteId: requestedNote.id,
           block: created,
           layout: options.layout,
-          pageFrameCollection,
         });
         created = { ...created, canvas_layout: savedLayout.layout };
         placementPersisted = true;
@@ -1168,7 +1179,7 @@ export function useNoteCanvasDataAdapter({
       placementPersisted,
       reused,
     };
-  }, [note, addToast, allowSourceContentMutation, pageFrameCollection]);
+  }, [note, addToast, allowSourceContentMutation, pageFrameCollection, contractSession]);
 
   const saveDraftBlockPlacement = useCallback(async (
     block: NoteBlock,
@@ -1186,10 +1197,12 @@ export function useNoteCanvasDataAdapter({
     );
     try {
       const savedLayout = await saveBlockCanvasPlacementForNote({
+        ...await resolveCanvasPlacementWriteContext({
+          noteId: requestedNoteId, loadedNoteId: note?.id, pageFrameCollection, contractSession,
+        }),
         noteId: requestedNoteId,
         block,
         layout,
-        pageFrameCollection,
       });
       const placed = { ...block, canvas_layout: savedLayout.layout };
       if (requestIsCurrent()) {
@@ -1209,7 +1222,7 @@ export function useNoteCanvasDataAdapter({
       }
       return null;
     }
-  }, [addToast, pageFrameCollection]);
+  }, [addToast, note?.id, pageFrameCollection, contractSession]);
 
   const finalizeDraftBlock = useCallback(async (
     receipt: DraftRecoveryReceipt,
@@ -1231,10 +1244,12 @@ export function useNoteCanvasDataAdapter({
         },
         savePlacement: async (durableBlock, pendingReceipt) => {
           await saveBlockCanvasPlacementForNote({
+            ...await resolveCanvasPlacementWriteContext({
+              noteId: pendingReceipt.noteId, loadedNoteId: note?.id, pageFrameCollection, contractSession,
+            }),
             noteId: pendingReceipt.noteId,
             block: durableBlock,
             layout: pendingReceipt.layout,
-            pageFrameCollection,
           });
         },
         saveLatest: async (durableBlock) => {
@@ -1254,7 +1269,7 @@ export function useNoteCanvasDataAdapter({
       }
       return false;
     }
-  }, [addToast, pageFrameCollection]);
+  }, [addToast, note?.id, pageFrameCollection, contractSession]);
 
   useEffect(() => {
     const recoveryQueue = loadDraftRecoveryQueue();
@@ -1792,27 +1807,30 @@ export function useNoteCanvasDataAdapter({
     if (!note) return;
     const [blocksResponse, persistence] = await Promise.all([
       api.get(`/notes/${note.id}/blocks`),
-      loadCanvasPersistenceForNote({ note, importLegacy: false }),
+      loadCanvasPersistenceForNote({ note, importLegacy: false, contractSession }),
     ]);
     if (routeNoteIdRef.current !== note.id) return;
     setBlocks(applyCanvasLayoutsToBlocks(blocksResponse.data, persistence.blockLayouts, {
       pageFrameCollection: persistence.pageFrameCollection,
+      coordinateContract: persistence.coordinateContract,
     }));
     setPersistedCanvasObjects(persistence.canvasObjects);
     setPersistedCanvasPlacements(persistence.canvasPlacements);
     setPersistedContentMounts(persistence.contentMounts);
     changedBlockIds.forEach(clearLayoutDraftForBlock);
-  }, [clearLayoutDraftForBlock, note]);
+  }, [clearLayoutDraftForBlock, contractSession, note]);
 
   const persistBlockLayout = useCallback(async (block: NoteBlock, layout: BlockBoxLayout) => {
     if (!note) return;
     if (!allowSourceContentMutation()) return;
     try {
       const savedLayout = await saveBlockCanvasPlacementForNote({
+        ...await resolveCanvasPlacementWriteContext({
+          noteId: note.id, loadedNoteId: note?.id, pageFrameCollection, contractSession,
+        }),
         noteId: note.id,
         block,
         layout,
-        pageFrameCollection,
       });
       setBlocks((current) => current.map((item) => (
         item.id === block.id
@@ -1824,7 +1842,7 @@ export function useNoteCanvasDataAdapter({
       console.error('Failed to save block layout:', err);
       addToast('error', 'Failed to save block layout');
     }
-  }, [note, addToast, allowSourceContentMutation, clearLayoutDraftForBlock, pageFrameCollection]);
+  }, [note, addToast, allowSourceContentMutation, clearLayoutDraftForBlock, pageFrameCollection, contractSession]);
 
   const updateBlockPolicy = useCallback(async (
     block: NoteBlock,
@@ -2010,7 +2028,11 @@ export function useNoteCanvasDataAdapter({
       setPersistedStructuredObjects((current) => upsertStructuredObject(current, structuredObject));
     }
     try {
+      const writeContext = await resolveCanvasPlacementWriteContext({
+        noteId: currentNote.id, loadedNoteId: note?.id, pageFrameCollection, contractSession,
+      });
       const saved = await saveGenericCanvasObjectForNote({
+        ...writeContext,
         noteId: currentNote.id,
         objectId: canvasObject.objectId,
         payload,
@@ -2033,7 +2055,7 @@ export function useNoteCanvasDataAdapter({
         structuredObjects: Array.isArray(savedRecord.structuredObjects)
           ? savedRecord.structuredObjects
           : savedStructuredObject,
-      });
+      }, writeContext.coordinateContract, writeContext.pageFrameCollection?.pageFrames || []);
       const nextObject = normalized.canvasObjects[0] || canvasObject;
       const nextPlacement = normalized.canvasPlacements[0] || placement;
       const nextVisualConnector = normalized.visualConnectors[0] || visualConnector;
@@ -2070,6 +2092,8 @@ export function useNoteCanvasDataAdapter({
   }, [
     addToast,
     allowSourceContentMutation,
+    contractSession,
+    pageFrameCollection,
     note,
     persistedCanvasObjects,
     persistedCanvasPlacements,
@@ -2172,6 +2196,7 @@ export function useNoteCanvasDataAdapter({
 
   return {
     note,
+    coordinateContract,
     sourceProjectionPolicy,
     blocks,
     sortedBlocks,

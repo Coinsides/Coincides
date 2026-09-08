@@ -1,3 +1,4 @@
+import type { CoordinateContract } from '../placementContractService';
 import { useCallback } from 'react';
 import { usePlacementHistory } from './usePlacementHistory';
 import type { BlockBoxLayout } from '../runtimeLayout';
@@ -5,6 +6,7 @@ import type { NoteBlock } from '../runtimeDataTypes';
 import type { TableStructuredPayload } from '../types';
 
 export interface UseRuntimeBlockHistoryControllerOptions {
+  coordinateContract?: CoordinateContract;
   applyLayoutDrafts: (layouts: Record<string, BlockBoxLayout>) => void;
   blocks: NoteBlock[];
   persistLayoutSnapshot: (layouts: Record<string, BlockBoxLayout>) => void;
@@ -15,6 +17,7 @@ export interface UseRuntimeBlockHistoryControllerOptions {
 
 export function useRuntimeBlockHistoryController({
   applyLayoutDrafts,
+  coordinateContract,
   blocks,
   persistLayoutSnapshot,
   persistStructuredObjectForHistory,
@@ -28,6 +31,7 @@ export function useRuntimeBlockHistoryController({
     pushStructuredMutationHistory,
     pushTrashedBlockHistory,
   } = usePlacementHistory({
+    coordinateContract,
     applyLayoutDrafts,
     persistLayoutSnapshot,
     persistStructuredObject: persistStructuredObjectForHistory,

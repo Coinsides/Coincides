@@ -1,3 +1,5 @@
+import { screenLayoutToLocal, type CoordinateContract } from '../placementContractService';
+import type { PageFrameModel } from '../types';
 import {
   useCallback,
   type MouseEvent,
@@ -10,6 +12,8 @@ import type { BlockBoxLayout } from '../runtimeLayout';
 import type { CanvasViewport } from '../types';
 
 export interface UseCanvasSurfacePointerControllerOptions {
+  coordinateContract?: CoordinateContract;
+  pageFrames?: PageFrameModel[];
   activateDraft: (layout?: BlockBoxLayout) => void;
   clearBlockSelection: () => void;
   contentWidth: number;
@@ -22,6 +26,8 @@ export interface UseCanvasSurfacePointerControllerOptions {
 
 export function useCanvasSurfacePointerController({
   activateDraft,
+  coordinateContract,
+  pageFrames,
   clearBlockSelection,
   contentWidth,
   defaultDraftLayout,
@@ -49,16 +55,21 @@ export function useCanvasSurfacePointerController({
     const worldY = (event.clientY - rect.top) / zoom;
     const rawX = worldX - pageOffsetX;
     const rawY = worldY;
-    activateDraft(createBlankDraftLayout({
+    const nextLayout = createBlankDraftLayout({
       policy: surfacePolicy,
       snapEnabled,
       rawX,
       rawY,
       contentWidth,
       defaultDraftLayout,
-    }));
+    });
+    activateDraft(nextLayout === defaultDraftLayout || surfacePolicy.isCanvasMode
+      ? nextLayout
+      : screenLayoutToLocal(nextLayout, pageFrames || [], coordinateContract));
   }, [
     activateDraft,
+    coordinateContract,
+    pageFrames,
     contentWidth,
     defaultDraftLayout,
     pageOffsetX,

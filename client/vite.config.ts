@@ -4,6 +4,7 @@ import path from 'path';
 
 export default defineConfig({
   base: './',
+  envDir: process.env.COINCIDES_VALIDATION_ENV_DIR || undefined,
   plugins: [react()],
   resolve: {
     alias: {

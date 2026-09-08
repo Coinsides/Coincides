@@ -1,3 +1,4 @@
+import type { CoordinateContract } from './placementContractService';
 import {
   BLOCK_VERTICAL_CHROME,
   DEFAULT_BLOCK_HEIGHT,
@@ -30,6 +31,7 @@ export interface TextBlockHeightEstimate {
 }
 
 export interface ApplyMeasuredBlockLayoutInput {
+  coordinateContract?: CoordinateContract;
   currentLayouts: Record<string, BlockBoxLayout>;
   baseLayouts: Record<string, BlockBoxLayout>;
   blockId: string;
@@ -119,12 +121,13 @@ export function applyMeasuredBlockLayoutToLayouts({
   nextLayout,
   orderedBlockIds,
   resolveCollisions,
+  coordinateContract,
 }: ApplyMeasuredBlockLayoutInput): Record<string, BlockBoxLayout> {
   const previousLayout = currentLayouts[blockId] || fallbackLayout;
   const baseline = { ...baseLayouts, ...currentLayouts };
-  const reflowedLayouts = reflowLayoutsAfterHeightChange(baseline, blockId, previousLayout, nextLayout);
+  const reflowedLayouts = reflowLayoutsAfterHeightChange(baseline, blockId, previousLayout, nextLayout, coordinateContract);
   return resolveCollisions
-    ? resolveStackedLayoutCollisions(reflowedLayouts, orderedBlockIds)
+    ? resolveStackedLayoutCollisions(reflowedLayouts, orderedBlockIds, coordinateContract)
     : reflowedLayouts;
 }
 

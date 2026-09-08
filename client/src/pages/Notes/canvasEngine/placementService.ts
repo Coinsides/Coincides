@@ -25,6 +25,17 @@ import {
 import {
   snapRectToPageFrameGuides,
 } from './pageFrameGuideService';
+import {
+  placementCoordinateIdentityEqual,
+  preserveContractLayoutCoordinates,
+  projectContractLayoutToWorld,
+  reconcileContractHydratedLayout,
+  resolveWorldRect,
+  sameLayoutFrame,
+  selectPlacementFrame,
+  toStoredLayout,
+  type CoordinateContract,
+} from './placementContractService';
 import type {
   BlockPlacementModel,
   CanvasBoundaryKind,
@@ -201,6 +212,14 @@ function applyAuthorityDecisionToHydratedLayout(
 export function reconcileHydratedBlockLayoutSurfaceAuthority(
   layout: Record<string, unknown>,
   pageFrames: PageFrameModel[],
+  contract: CoordinateContract = 'v1',
+): Record<string, unknown> {
+  return reconcileContractHydratedLayout(layout, pageFrames, contract, reconcileLegacyHydratedBlockLayoutSurfaceAuthority);
+}
+
+function reconcileLegacyHydratedBlockLayoutSurfaceAuthority(
+  layout: Record<string, unknown>,
+  pageFrames: PageFrameModel[],
 ): Record<string, unknown> {
   if (layout.surface === 'tray') return layout;
   const x = typeof layout.x === 'number' ? layout.x : Number.NaN;
@@ -318,12 +337,14 @@ export function normalizeBlockLayout<TBlock extends PlacementSeedBlock>({
   contentWidth,
   surfaceMode,
   estimateHeight,
+  contract = 'v1',
 }: {
   block: TBlock;
   fallback: BlockBoxLayout;
   contentWidth: number;
   surfaceMode: SurfaceMode;
   estimateHeight: (block: TBlock, width: number) => number;
+  contract?: CoordinateContract;
 }): BlockBoxLayout {
   const stored = readStoredLayout(block);
   const useStoredPlacement = !(surfaceMode === 'page' && stored?.surface === 'canvas_workspace');
@@ -335,7 +356,7 @@ export function normalizeBlockLayout<TBlock extends PlacementSeedBlock>({
     && typeof stored?.width === 'number'
     && (isWorkspaceLayout || stored.width_mode === 'manual');
   const preserveWorldCoordinates = useStoredPlacement
-    && stored?.coordinate_space === 'canvas_world';
+    && preserveContractLayoutCoordinates(stored, contract);
   const width = clamp(
     shouldUseStoredWidth ? stored.width as number : fallback.width,
     MIN_BLOCK_WIDTH,
@@ -377,12 +398,14 @@ export function normalizeResolvedBlockLayout<TBlock extends PlacementSeedBlock>(
   contentWidth,
   surfaceMode,
   estimateHeight,
+  contract = 'v1',
 }: {
   block: TBlock;
   layout: BlockBoxLayout;
   contentWidth: number;
   surfaceMode: SurfaceMode;
   estimateHeight: (block: TBlock, width: number) => number;
+  contract?: CoordinateContract;
 }): BlockBoxLayout {
   const isWorkspaceLayout = surfaceMode === 'canvas' && layout.surface === 'canvas_workspace';
   const maxPlacementWidth = isWorkspaceLayout
@@ -395,7 +418,7 @@ export function normalizeResolvedBlockLayout<TBlock extends PlacementSeedBlock>(
     MIN_BLOCK_WIDTH,
     Math.max(MIN_BLOCK_WIDTH, maxPlacementWidth),
   );
-  const preserveWorldCoordinates = layout.coordinate_space === 'canvas_world';
+  const preserveWorldCoordinates = preserveContractLayoutCoordinates(layout, contract);
   const x = preserveWorldCoordinates
     ? layout.x
     : clamp(layout.x, 0, Math.max(0, maxPlacementWidth - width));
@@ -451,6 +474,8 @@ export function buildRuntimeBlockPlacement({
   layout,
   pageOffsetX,
   pageFrame,
+  pageFrames = pageFrame ? [pageFrame] : [],
+  contract = 'v1',
   zIndex,
 }: {
   block: PlacementSeedBlock;
@@ -458,14 +483,17 @@ export function buildRuntimeBlockPlacement({
   layout: BlockBoxLayout;
   pageOffsetX: number;
   pageFrame: PageFrameModel | null;
+  pageFrames?: PageFrameModel[];
+  contract?: CoordinateContract;
   zIndex: number;
 }): BlockPlacementModel {
+  const resolvedFrame = selectPlacementFrame(layout, pageFrames, contract, pageFrame);
   const authority = classifyBlockSurfaceAuthority(layout, {
-    pageFrame,
+    pageFrame: resolvedFrame,
     pageLocalWidth: DEFAULT_PAGE_CONTENT_WIDTH,
   });
   const boundary = toCanvasBoundaryKind(authority.boundaryRole);
-  const isCanvasWorldLayout = layout.coordinate_space === 'canvas_world';
+  const rect = resolveWorldRect(layout, resolvedFrame, contract, pageOffsetX);
   const visibilityState = layout.export_role === 'scratch'
     ? 'scratch'
     : layout.ai_visibility === 'hidden'
@@ -480,9 +508,9 @@ export function buildRuntimeBlockPlacement({
     objectId: block.id,
     objectKind: 'note_block',
     canvasId,
-    frameId: authority.frameId || (boundary === 'inside' ? pageFrame?.id : undefined),
-    x: isCanvasWorldLayout ? layout.x : layout.x + pageOffsetX,
-    y: layout.y,
+    frameId: authority.frameId || (boundary === 'inside' ? resolvedFrame?.id : undefined),
+    x: rect.x,
+    y: rect.y,
     width: layout.width,
     height: layout.height,
     rotation: layout.rotation || 0,
@@ -498,7 +526,17 @@ export function projectPageFrameLocalLayoutToCanvasLayout({
   layout,
   pageFrame,
   pageOffsetX,
+  contract = 'v1',
 }: {
+  layout: BlockBoxLayout;
+  pageFrame: PageFrameModel | null | undefined;
+  pageOffsetX: number;
+  contract?: CoordinateContract;
+}): BlockBoxLayout {
+  return projectContractLayoutToWorld(layout, pageFrame, pageOffsetX, contract, () => projectLegacyPageFrameLocalLayoutToCanvasLayout({ layout, pageFrame, pageOffsetX }));
+}
+
+function projectLegacyPageFrameLocalLayoutToCanvasLayout({ layout, pageFrame, pageOffsetX }: {
   layout: BlockBoxLayout;
   pageFrame: PageFrameModel | null | undefined;
   pageOffsetX: number;
@@ -543,7 +581,12 @@ export function buildRelationEndpointReserveForPlacement(placement: BlockPlaceme
   ];
 }
 
-export function buildLayoutPayload(layout: BlockBoxLayout): Record<string, unknown> {
+export function buildLayoutPayload(
+  layout: BlockBoxLayout,
+  contract: CoordinateContract = 'v1',
+  pageFrames: PageFrameModel[] = [],
+): Record<string, unknown> {
+  layout = toStoredLayout(layout, pageFrames, contract);
   if (layout.surface === 'tray') {
     return {
       x: 0, y: 0, width: 0, height: 0, rotation: 0,
@@ -589,7 +632,7 @@ export function writeLayoutOverride(block: PlacementSeedBlock, layout: BlockBoxL
   };
 }
 
-export function layoutsEqual(a: BlockBoxLayout, b: BlockBoxLayout): boolean {
+export function layoutsEqual(a: BlockBoxLayout, b: BlockBoxLayout, contract: CoordinateContract = 'v1'): boolean {
   return Math.round(a.x) === Math.round(b.x)
     && Math.round(a.y) === Math.round(b.y)
     && Math.round(a.width) === Math.round(b.width)
@@ -599,12 +642,14 @@ export function layoutsEqual(a: BlockBoxLayout, b: BlockBoxLayout): boolean {
     && a.ai_visibility === b.ai_visibility
     && a.surface === b.surface
     && a.order_index === b.order_index
-    && a.width_mode === b.width_mode;
+    && a.width_mode === b.width_mode
+    && placementCoordinateIdentityEqual(a, b, contract);
 }
 
 export function buildLayoutHistoryEntry(
   before: Record<string, BlockBoxLayout>,
   after: Record<string, BlockBoxLayout>,
+  contract: CoordinateContract = 'v1',
 ): LayoutHistoryEntry | null {
   const beforeChanged: Record<string, BlockBoxLayout> = {};
   const afterChanged: Record<string, BlockBoxLayout> = {};
@@ -613,7 +658,7 @@ export function buildLayoutHistoryEntry(
   ids.forEach((id) => {
     const beforeLayout = before[id];
     const afterLayout = after[id];
-    if (!beforeLayout || !afterLayout || layoutsEqual(beforeLayout, afterLayout)) return;
+    if (!beforeLayout || !afterLayout || layoutsEqual(beforeLayout, afterLayout, contract)) return;
     beforeChanged[id] = { ...beforeLayout };
     afterChanged[id] = { ...afterLayout };
   });
@@ -644,6 +689,7 @@ function hasHorizontalOverlap(a: BlockBoxLayout, b: BlockBoxLayout): boolean {
 export function resolveStackedLayoutCollisions(
   layouts: Record<string, BlockBoxLayout>,
   orderedBlockIds: string[],
+  contract: CoordinateContract = 'v1',
 ): Record<string, BlockBoxLayout> {
   const nextLayouts = { ...layouts };
   const orderedIds = orderedBlockIds
@@ -658,6 +704,7 @@ export function resolveStackedLayoutCollisions(
     let current = nextLayouts[id];
     for (let previousIndex = 0; previousIndex < index; previousIndex += 1) {
       const previous = nextLayouts[orderedIds[previousIndex]];
+      if (!sameLayoutFrame(current, previous, contract)) continue;
       if (!hasHorizontalOverlap(current, previous)) continue;
       const minimumY = previous.y + previous.height + STACKED_BLOCK_GAP;
       if (current.y < minimumY && current.y >= previous.y - 1) {
@@ -675,6 +722,7 @@ export function reflowLayoutsAfterHeightChange(
   blockId: string,
   previousLayout: BlockBoxLayout,
   nextLayout: BlockBoxLayout,
+  contract: CoordinateContract = 'v1',
 ): Record<string, BlockBoxLayout> {
   const delta = nextLayout.height - previousLayout.height;
   const nextLayouts = { ...layouts, [blockId]: nextLayout };
@@ -683,6 +731,7 @@ export function reflowLayoutsAfterHeightChange(
   const previousBottom = previousLayout.y + previousLayout.height;
   Object.entries(layouts).forEach(([id, layout]) => {
     if (id === blockId) return;
+    if (!sameLayoutFrame(layout, previousLayout, contract)) return;
     if (layout.y < previousBottom - 1) return;
     if (!hasHorizontalOverlap(layout, previousLayout)) return;
     nextLayouts[id] = { ...layout, y: Math.max(0, layout.y + delta) };
@@ -705,9 +754,10 @@ export function applyMoveSnap(
   blockId: string,
   layouts: Record<string, BlockBoxLayout>,
   contentWidth: number,
+  contract: CoordinateContract = 'v1',
 ): { layout: BlockBoxLayout; guide: SnapGuide | null } {
   const otherLayouts = Object.entries(layouts)
-    .filter(([id]) => id !== blockId)
+    .filter(([id, item]) => id !== blockId && sameLayoutFrame(layout, item, contract))
     .map(([, item]) => item);
   const pageFrameSnap = snapRectToPageFrameGuides({
     rect: {

@@ -1,3 +1,4 @@
+import { screenLayoutToLocal, resolveScreenRect, selectPlacementFrame } from '../placementContractService';
 import { Boxes } from 'lucide-react';
 import { usePageReadingPresentation } from '../hooks/usePageReadingPresentation';
 import { createDefaultPageReadingViewState, type PageReadingGear, type PageReadingViewState } from '../pageReadingViewportService';
@@ -724,15 +725,23 @@ export function NoteWritingSurfaceLayer({
     enabled: surfaceMode === 'page', noteId, surfaceRef, blockListRef, pageFrame: primaryPageFrame,
     pageContentHeight, viewState: readingViewState, onViewportChange: onPageReadingViewportChange,
   });
+  const snapGuideLayout = blockLayouts[selectedBlockId || ''] || draftLayout || defaultDraftLayout;
+  const screenSnapGuide = resolveScreenRect(
+    { ...snapGuideLayout, x: snapGuide?.x || 0, y: snapGuide?.y || 0 },
+    selectPlacementFrame(snapGuideLayout, noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract),
+    noteCanvasRuntime.coordinateContract,
+    pageOffsetX,
+  );
   const pageDisplayBounds = useMemo(() => {
-    const layouts = visibleBlocks.map((block) => blockLayouts[block.id]).filter(Boolean);
-    if (draftActive) layouts.push(draftLayout || defaultDraftLayout);
+    const screen = (layout: BlockBoxLayout) => resolveScreenRect(layout, selectPlacementFrame(layout, noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract), noteCanvasRuntime.coordinateContract);
+    const layouts = visibleBlocks.map((block) => blockLayouts[block.id]).filter(Boolean).map(screen);
+    if (draftActive) layouts.push(screen(draftLayout || defaultDraftLayout));
     const left = Math.min(0, ...layouts.map((layout) => pageReading.inset.left + layout.x));
     const top = Math.min(0, ...layouts.map((layout) => pageReading.inset.top + layout.y));
     const right = Math.max(pageReading.paperWidth, ...layouts.map((layout) => pageReading.inset.left + layout.x + layout.width));
     const bottom = Math.max(pageReading.paperHeight, ...layouts.map((layout) => pageReading.inset.top + layout.y + layout.height));
     return { left, top, width: right - left, height: bottom - top };
-  }, [visibleBlocks, blockLayouts, draftActive, draftLayout, defaultDraftLayout,
+  }, [noteCanvasRuntime, visibleBlocks, blockLayouts, draftActive, draftLayout, defaultDraftLayout,
     pageReading.inset.left, pageReading.inset.top, pageReading.paperWidth, pageReading.paperHeight]);
   const pageFrameGuideVisibility = shouldShowPageFrameGuides({
     surfaceMode,
@@ -2481,12 +2490,7 @@ export function NoteWritingSurfaceLayer({
   };
 
   const getBlockControlAnchorForLayout = (layout: BlockBoxLayout) => {
-    const worldRect = {
-      x: layout.x + pageOffsetX,
-      y: layout.y,
-      width: layout.width,
-      height: layout.height,
-    };
+    const worldRect = resolveScreenRect(layout, selectPlacementFrame(layout, noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract), noteCanvasRuntime.coordinateContract, pageOffsetX);
 
     if (surfaceMode === 'canvas') {
       const surfaceRect = surfaceRef.current?.getBoundingClientRect();
@@ -3239,12 +3243,12 @@ export function NoteWritingSurfaceLayer({
 
     const blockListRect = blockListRef.current?.getBoundingClientRect();
     if (!blockListRect) return null;
-    return {
+    return screenLayoutToLocal({
       ...defaultDraftLayout,
       y: Math.max(0, (event.clientY - blockListRect.top) / pageReading.displayScale),
       height,
       surface: 'formal_page',
-    };
+    }, noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract);
   };
 
   const handleBlankSurfaceDragOver = (event: DragEvent<HTMLDivElement>) => {
@@ -3742,10 +3746,10 @@ export function NoteWritingSurfaceLayer({
           />
         )}
         {snapGuide?.x !== undefined && (
-          <div className={styles.snapGuideVertical} style={{ left: snapGuide.x + pageOffsetX }} />
+          <div className={styles.snapGuideVertical} style={{ left: screenSnapGuide.x }} />
         )}
         {snapGuide?.y !== undefined && (
-          <div className={styles.snapGuideHorizontal} style={{ top: snapGuide.y }} />
+          <div className={styles.snapGuideHorizontal} style={{ top: screenSnapGuide.y }} />
         )}
         {visibleBlocks.map((block) => {
           const text = blockTextDrafts[block.id] ?? textFromContent(block);
@@ -3762,6 +3766,8 @@ export function NoteWritingSurfaceLayer({
             <BlockEditorLayer
               key={block.id}
               block={block}
+              coordinateContract={noteCanvasRuntime.coordinateContract}
+              pageFrame={selectPlacementFrame(layout, noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract)}
               contentReadOnly={contentReadOnly}
               text={text}
               layout={layout}
@@ -3843,6 +3849,8 @@ export function NoteWritingSurfaceLayer({
         })}
 
         <DraftWritingEntryLayer
+          coordinateContract={noteCanvasRuntime.coordinateContract}
+          pageFrame={selectPlacementFrame(draftLayout || defaultDraftLayout, noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract)}
           contentReadOnly={contentReadOnly}
           creating={creatingDraft}
           draftActive={draftActive}

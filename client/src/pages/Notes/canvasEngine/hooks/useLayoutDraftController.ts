@@ -1,3 +1,4 @@
+import type { CoordinateContract } from '../placementContractService';
 import {
   useCallback,
   useState,
@@ -6,6 +7,7 @@ import { applyMeasuredBlockHeightToLayouts } from '../measurementService';
 import type { BlockBoxLayout } from '../runtimeLayout';
 
 export interface ApplyMeasuredBlockHeightDraftOptions {
+  coordinateContract?: CoordinateContract;
   baseLayouts: Record<string, BlockBoxLayout>;
   blockId: string;
   fallbackLayout: BlockBoxLayout;
@@ -44,6 +46,7 @@ export function useLayoutDraftController() {
     measuredHeight,
     orderedBlockIds,
     resolveCollisions,
+    coordinateContract,
   }: ApplyMeasuredBlockHeightDraftOptions) => {
     setLayoutDrafts((current) => (
       applyMeasuredBlockHeightToLayouts({
@@ -54,6 +57,7 @@ export function useLayoutDraftController() {
         measuredHeight,
         orderedBlockIds,
         resolveCollisions,
+        coordinateContract,
       })
     ));
   }, []);

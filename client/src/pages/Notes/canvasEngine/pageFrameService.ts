@@ -1,3 +1,4 @@
+import { resolveDefaultDraftLayout, type CoordinateContract } from './placementContractService';
 import { createPrimaryPageFrame } from './engineModel';
 import {
   DEFAULT_BLOCK_GAP,
@@ -17,14 +18,18 @@ function isInsidePrimaryPageFrame(layout: Pick<BlockBoxLayout, 'x' | 'width'>): 
 export function createDefaultDraftLayout(
   blockLayouts: Record<string, BlockBoxLayout>,
   contentWidth: number,
+  pageFrames: PageFrameModel[] = [],
+  contract: CoordinateContract = 'v1',
 ): BlockBoxLayout {
-  const bottoms = Object.values(blockLayouts)
-    .filter(isInsidePrimaryPageFrame)
-    .map((layout) => layout.y + layout.height);
-  const y = bottoms.length > 0 ? Math.max(...bottoms) + DEFAULT_BLOCK_GAP : 0;
-  const width = Math.min(DEFAULT_PAGE_CONTENT_WIDTH, contentWidth);
+  return resolveDefaultDraftLayout(blockLayouts, contentWidth, pageFrames, contract, () => {
+    const bottoms = Object.values(blockLayouts)
+      .filter(isInsidePrimaryPageFrame)
+      .map((layout) => layout.y + layout.height);
+    const y = bottoms.length > 0 ? Math.max(...bottoms) + DEFAULT_BLOCK_GAP : 0;
+    const width = Math.min(DEFAULT_PAGE_CONTENT_WIDTH, contentWidth);
 
-  return { x: 0, y, width, height: DEFAULT_BLOCK_HEIGHT };
+    return { x: 0, y, width, height: DEFAULT_BLOCK_HEIGHT };
+  });
 }
 
 export function calculatePageFrameHeight({

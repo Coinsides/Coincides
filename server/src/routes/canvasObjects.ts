@@ -15,6 +15,7 @@ import {
   savePageFrameCollectionSchema,
 } from '../validators/index.js';
 import { assertSourceProjectionNoteContentWriteAllowed } from '../services/sourceProjectionPolicy.js';
+import { readCoordinateContract } from '../services/coordinateContract.js';
 
 const router = Router();
 
@@ -25,6 +26,11 @@ function handleValidationError(err: unknown, res: Response): boolean {
   }
   return false;
 }
+
+router.get('/coordinate-contract', (_req: AuthRequest, res: Response) => {
+  res.set('Cache-Control', 'no-store');
+  res.json({ coordinate_contract: readCoordinateContract(getDb()) });
+});
 
 router.get('/by-note/:noteId', (req: AuthRequest, res: Response) => {
   res.json(getNoteCanvasPersistence(getDb(), req.userId!, String(req.params.noteId)));

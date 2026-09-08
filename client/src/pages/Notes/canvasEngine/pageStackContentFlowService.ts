@@ -1,3 +1,4 @@
+import { resolveFlowFrameStartLayout, resolveWorldRect, toStoredLayout, type CoordinateContract } from './placementContractService';
 import {
   getPageFrameContentRect,
 } from './pageFrameService';
@@ -19,6 +20,7 @@ import type {
 } from './types';
 
 interface ResolvePageStackContentFlowPlanInput {
+  coordinateContract?: CoordinateContract;
   collection: PageFrameCollectionModel;
   currentFrameId: string | null | undefined;
   draftLayout: BlockBoxLayout;
@@ -63,22 +65,25 @@ function createDraftLayoutAtFrameStart(
   pageFrame: PageFrameModel,
   draftLayout: BlockBoxLayout,
   blockWorldOffsetX: number,
+  contract: CoordinateContract,
 ): BlockBoxLayout {
-  const contentRect = getPageFrameContentRect(pageFrame);
-  const {
-    coordinate_space: _coordinateSpace,
-    surface_authority: _surfaceAuthority,
-    ...runtimeLayout
-  } = draftLayout;
-  return {
-    ...runtimeLayout,
-    x: contentRect.x - blockWorldOffsetX,
-    y: contentRect.y,
-    width: Math.min(draftLayout.width, contentRect.width || draftLayout.width),
-    surface: 'formal_page',
-    frame_id: pageFrame.id,
-    boundary_role: 'inside',
-  };
+  return resolveFlowFrameStartLayout(pageFrame, draftLayout, blockWorldOffsetX, contract, () => {
+    const contentRect = getPageFrameContentRect(pageFrame);
+    const {
+      coordinate_space: _coordinateSpace,
+      surface_authority: _surfaceAuthority,
+      ...runtimeLayout
+    } = draftLayout;
+    return {
+      ...runtimeLayout,
+      x: contentRect.x - blockWorldOffsetX,
+      y: contentRect.y,
+      width: Math.min(draftLayout.width, contentRect.width || draftLayout.width),
+      surface: 'formal_page',
+      frame_id: pageFrame.id,
+      boundary_role: 'inside',
+    };
+  });
 }
 
 function bindDraftLayoutToFrame(
@@ -127,6 +132,7 @@ export function resolvePageStackContentFlowPlan({
   draftText,
   documentTypography,
   blockWorldOffsetX = 0,
+  coordinateContract = 'v1',
 }: ResolvePageStackContentFlowPlanInput): PageStackContentFlowPlan {
   const currentFrame = findPageFrame(collection, currentFrameId);
   if (!currentFrame) {
@@ -140,7 +146,7 @@ export function resolvePageStackContentFlowPlan({
   const contentRect = getPageFrameContentRect(currentFrame);
   const contentBottom = contentRect.y + contentRect.height;
   const draftBottom = estimateDraftBottom({
-    draftLayout,
+    draftLayout: { ...draftLayout, ...resolveWorldRect(draftLayout, currentFrame, coordinateContract, blockWorldOffsetX) },
     draftText,
     documentTypography,
   });
@@ -148,7 +154,7 @@ export function resolvePageStackContentFlowPlan({
     return {
       kind: 'stay_on_current_page',
       targetFrameId: currentFrame.id,
-      targetLayout: bindDraftLayoutToFrame(currentFrame, draftLayout),
+      targetLayout: bindDraftLayoutToFrame(currentFrame, toStoredLayout(draftLayout, [currentFrame], coordinateContract)),
     };
   }
 
@@ -167,7 +173,7 @@ export function resolvePageStackContentFlowPlan({
     return {
       kind: 'move_to_existing_next_page',
       targetFrameId: nextFrame.id,
-      targetLayout: createDraftLayoutAtFrameStart(nextFrame, draftLayout, blockWorldOffsetX),
+      targetLayout: createDraftLayoutAtFrameStart(nextFrame, draftLayout, blockWorldOffsetX, coordinateContract),
     };
   }
 
@@ -179,7 +185,7 @@ export function resolvePageStackContentFlowPlan({
     afterFrameId: currentFrame.id,
     targetFrameId: appendedFrame?.id || null,
     targetLayout: appendedFrame
-      ? createDraftLayoutAtFrameStart(appendedFrame, draftLayout, blockWorldOffsetX)
+      ? createDraftLayoutAtFrameStart(appendedFrame, draftLayout, blockWorldOffsetX, coordinateContract)
       : draftLayout,
   };
 }

@@ -1,3 +1,5 @@
+import { resolveScreenRect, type CoordinateContract } from '../placementContractService';
+import type { PageFrameModel } from '../types';
 import {
   useEffect,
   useLayoutEffect,
@@ -64,6 +66,8 @@ import { BlockStatusBadgeLayer } from './BlockStatusBadgeLayer';
 import styles from '../../NoteDetail.module.css';
 
 interface BlockEditorLayerProps {
+  coordinateContract?: CoordinateContract;
+  pageFrame?: PageFrameModel | null;
   block: NoteBlock;
   contentReadOnly: boolean;
   text: string;
@@ -124,6 +128,8 @@ function shouldKeepNativeFocusTarget(target: EventTarget | null): boolean {
 
 export function BlockEditorLayer({
   block,
+  coordinateContract,
+  pageFrame,
   contentReadOnly,
   text,
   textFlowDraft,
@@ -171,6 +177,7 @@ export function BlockEditorLayer({
   sourceJumpBusy,
   onViewSource,
 }: BlockEditorLayerProps) {
+  const screenRect = resolveScreenRect(layout, pageFrame, coordinateContract, pageOffsetX);
   const blockContentRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const focusedReceiptRef = useRef<TextFocusReceipt | null>(null);
@@ -338,8 +345,8 @@ export function BlockEditorLayer({
       data-cross-page-fragment-roles={crossPageFragment ? fragmentRoles : undefined}
       className={`${styles.block} ${styles.blockBox} ${presentationKind === 'code' ? styles.codeBlockBox : ''} ${layoutMode ? styles.blockBoxLayoutMode : ''} ${active ? styles.blockActive : ''} ${boundary !== 'inside' ? styles.blockScratch : ''} ${crossPageFragment ? styles.blockCrossPageFragment : ''}`}
       style={{
-        left: layout.x + pageOffsetX,
-        top: layout.y,
+        left: screenRect.x,
+        top: screenRect.y,
         width: layout.width,
         minHeight: layout.height,
         borderColor: affiliationOutline?.colorToken,

@@ -1,3 +1,5 @@
+import { resolveScreenRect, type CoordinateContract } from '../placementContractService';
+import type { PageFrameModel } from '../types';
 import type {
   KeyboardEvent,
   RefObject,
@@ -10,6 +12,8 @@ import { DraftBlockEditorLayer } from './DraftBlockEditorLayer';
 import styles from '../../NoteDetail.module.css';
 
 export interface DraftWritingEntryLayerProps {
+  coordinateContract?: CoordinateContract;
+  pageFrame?: PageFrameModel | null;
   contentReadOnly: boolean;
   creating: boolean;
   draftActive: boolean;
@@ -36,6 +40,8 @@ export interface DraftWritingEntryLayerProps {
 
 export function DraftWritingEntryLayer({
   contentReadOnly,
+  coordinateContract,
+  pageFrame,
   creating,
   draftActive,
   focusReceipt,
@@ -69,7 +75,7 @@ export function DraftWritingEntryLayer({
         <DraftBlockEditorLayer
           creating={creating}
           focusReceipt={focusReceipt}
-          layout={layout}
+          layout={{ ...layout, ...resolveScreenRect(layout, pageFrame, coordinateContract) }}
           pageOffsetX={pageOffsetX}
           phase={phase}
           slashTargetActive={slashTargetActive}

@@ -1,6 +1,7 @@
 import {
   normalizePageFrameCollection,
 } from './pageFrameCollectionService';
+import { resolveGenericPlacementToWorld, type CoordinateContract } from './placementContractService';
 import type {
   CanvasBoundaryKind,
   CanvasMountTargetKind,
@@ -19,6 +20,7 @@ import type {
   ContentMount,
   ImageCanvasObject,
   PageFrameCollectionModel,
+  PageFrameModel,
   StructuredCanvasObject,
   TableCellModel,
   TableColumnModel,
@@ -34,6 +36,7 @@ export interface CanvasBlockLayoutRecord {
 }
 
 export interface NoteCanvasPersistencePayload {
+  coordinateContract?: CoordinateContract;
   canvasObjects: CanvasObject[];
   canvasPlacements: CanvasPlacement[];
   contentMounts: ContentMount[];
@@ -121,13 +124,18 @@ function normalizeSnapState(value: unknown): CanvasPlacement['snapState'] {
   return undefined;
 }
 
-function normalizeCanvasPlacement(raw: unknown): CanvasPlacement | null {
+function normalizeCanvasPlacement(
+  raw: unknown,
+  objectKinds: Map<string, CanvasObjectKind>,
+  frames: PageFrameModel[],
+  coordinateContract: CoordinateContract,
+): CanvasPlacement | null {
   if (!isRecord(raw)) return null;
   const placementId = readString(raw, ['placementId', 'placement_id', 'id']);
   const objectId = readString(raw, ['objectId', 'object_id']);
   if (!placementId || !objectId) return null;
   const surface = readString(raw, ['surface'], 'canvas_workspace') as CanvasSurface;
-  return {
+  const placement: CanvasPlacement = {
     placementId,
     objectId,
     canvasId: readString(raw, ['canvasId', 'canvas_id'], 'primary-note-canvas'),
@@ -155,6 +163,15 @@ function normalizeCanvasPlacement(raw: unknown): CanvasPlacement | null {
       ['renderVisibility', 'render_visibility'],
     ) as CanvasRenderVisibility | undefined,
   };
+  const metadata = isRecord(raw.metadata) ? raw.metadata : {};
+  const layoutPolicy = isRecord(metadata.layout_policy) ? metadata.layout_policy : {};
+  return resolveGenericPlacementToWorld(
+    placement,
+    objectKinds.get(objectId),
+    raw.coordinate_space ?? layoutPolicy.coordinate_space,
+    frames,
+    coordinateContract,
+  );
 }
 
 function normalizeContentMount(raw: unknown): ContentMount | null {
@@ -322,11 +339,19 @@ function normalizeStructuredObject(raw: unknown): StructuredCanvasObject | null 
   };
 }
 
-export function normalizeCanvasPersistencePayload(raw: unknown): NoteCanvasPersistencePayload {
+export function normalizeCanvasPersistencePayload(
+  raw: unknown,
+  coordinateContract: CoordinateContract = 'v1',
+  pageFrames: PageFrameModel[] = [],
+): NoteCanvasPersistencePayload {
   const payload = isRecord(raw) ? raw : {};
   const pageFrameCollection = payload.pageFrameCollection
     ? normalizePageFrameCollection(payload.pageFrameCollection as PageFrameCollectionModel)
     : null;
+  const canvasObjects = Array.isArray(payload.canvasObjects)
+    ? payload.canvasObjects.map(normalizeCanvasObject).filter((object): object is CanvasObject => Boolean(object))
+    : [];
+  const objectKinds = new Map(canvasObjects.map((object) => [object.objectId, object.kind]));
   const blockLayouts = Array.isArray(payload.blockLayouts)
     ? payload.blockLayouts.filter((layout): layout is CanvasBlockLayoutRecord => (
       Boolean(layout)
@@ -337,11 +362,11 @@ export function normalizeCanvasPersistencePayload(raw: unknown): NoteCanvasPersi
     ))
     : [];
   return {
-    canvasObjects: Array.isArray(payload.canvasObjects)
-      ? payload.canvasObjects.map(normalizeCanvasObject).filter((object): object is CanvasObject => Boolean(object))
-      : [],
+    canvasObjects,
     canvasPlacements: Array.isArray(payload.canvasPlacements)
-      ? payload.canvasPlacements.map(normalizeCanvasPlacement).filter((placement): placement is CanvasPlacement => Boolean(placement))
+      ? payload.canvasPlacements.map((placement) => normalizeCanvasPlacement(
+        placement, objectKinds, pageFrameCollection?.pageFrames || pageFrames, coordinateContract,
+      )).filter((placement): placement is CanvasPlacement => Boolean(placement))
       : [],
     contentMounts: Array.isArray(payload.contentMounts)
       ? payload.contentMounts.map(normalizeContentMount).filter((mount): mount is ContentMount => Boolean(mount))

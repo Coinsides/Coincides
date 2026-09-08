@@ -1,3 +1,4 @@
+import { resolveWorldRect, selectPlacementFrame, type CoordinateContract } from './placementContractService';
 import { getPrimaryPageOffsetX } from './viewportService';
 import {
   CANVAS_WORKSPACE_WIDTH,
@@ -43,6 +44,7 @@ export interface SurfaceModeTransitionPolicy {
 }
 
 export interface SurfaceVisibilityContext {
+  coordinateContract?: CoordinateContract;
   pageFrames?: PageFrameModel[];
   boundary?: 'content' | 'outer';
 }
@@ -56,6 +58,7 @@ export function isPageFrameAffiliatedWorkspaceBlock(
   contentWidth: number,
   pageFrames: PageFrameModel[],
   boundary: 'content' | 'outer' = 'outer',
+  coordinateContract: CoordinateContract = 'v1',
 ): boolean {
   if (!isCanvasWorkspaceBlock(block, contentWidth)) return false;
   const stored = readStoredLayout(block);
@@ -69,12 +72,7 @@ export function isPageFrameAffiliatedWorkspaceBlock(
   }
 
   return derivePlacementPageFrameAffiliation({
-    placement: {
-      x: stored.x,
-      y: stored.y,
-      width: stored.width,
-      height: stored.height,
-    },
+    placement: resolveWorldRect(stored as BlockBoxLayout, selectPlacementFrame(stored, pageFrames, coordinateContract), coordinateContract),
     pageFrames,
     boundary,
   }).kind !== 'workspace_only';
@@ -124,6 +122,7 @@ export function getVisibleBlocksForSurface<TBlock extends PlacementSeedBlock & {
         contentWidth,
         context.pageFrames || [],
         context.boundary,
+        context.coordinateContract,
       )
     ));
 }

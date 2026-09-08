@@ -1,4 +1,11 @@
 import api from '@/services/api';
+import { createCoordinateContractSession, type CoordinateContractSession } from './coordinateContractSession';
+import {
+  requiresFrameLocalWriteContext,
+  requireStoredLayout,
+  toStoredGenericCanvasObjectPayload,
+  type CoordinateContract,
+} from './placementContractService';
 import {
   buildLayoutPayload,
   reconcileHydratedBlockLayoutSurfaceAuthority,
@@ -30,22 +37,42 @@ export function stripLegacyPageFrameMetadata(metadata: Record<string, unknown> |
   return next;
 }
 
+/** Recovery receipts can belong to a different note from the mounted editor. */
+export async function resolveCanvasPlacementWriteContext(input: {
+  noteId: string;
+  loadedNoteId?: string;
+  pageFrameCollection?: PageFrameCollectionModel | null;
+  contractSession: CoordinateContractSession;
+}): Promise<{ coordinateContract: CoordinateContract; pageFrameCollection: PageFrameCollectionModel | null }> {
+  const coordinateContract = await input.contractSession.load();
+  if (!requiresFrameLocalWriteContext(coordinateContract)
+    || (input.noteId === input.loadedNoteId && input.pageFrameCollection)) {
+    return { coordinateContract, pageFrameCollection: input.pageFrameCollection || null };
+  }
+  const response = await api.get<NoteCanvasPersistencePayload>(`/canvas-objects/by-note/${input.noteId}`);
+  return {
+    coordinateContract,
+    pageFrameCollection: normalizeCanvasPersistencePayload(response.data, coordinateContract).pageFrameCollection,
+  };
+}
+
 export function applyCanvasLayoutsToBlocks(
   blocks: NoteBlock[],
   blockLayouts: CanvasBlockLayoutRecord[],
   options: {
     pageFrameCollection?: PageFrameCollectionModel | null;
+    coordinateContract?: CoordinateContract;
   } = {},
 ): NoteBlock[] {
   if (blockLayouts.length === 0) return blocks;
   const pageFrames = options.pageFrameCollection?.pageFrames || [];
   const layoutsByBlockId = new Map(blockLayouts.map((item) => [
     item.block_id,
-    reconcileHydratedBlockLayoutSurfaceAuthority(item.layout, pageFrames),
+    reconcileHydratedBlockLayoutSurfaceAuthority(item.layout, pageFrames, options.coordinateContract),
   ]));
   const layoutsByPlacementId = new Map(blockLayouts.map((item) => [
     item.placement_id,
-    reconcileHydratedBlockLayoutSurfaceAuthority(item.layout, pageFrames),
+    reconcileHydratedBlockLayoutSurfaceAuthority(item.layout, pageFrames, options.coordinateContract),
   ]));
   return blocks.map((block) => {
     const layout = block.placement_id
@@ -58,10 +85,14 @@ export function applyCanvasLayoutsToBlocks(
 export async function loadCanvasPersistenceForNote(input: {
   note: Note;
   importLegacy?: boolean;
+  contractSession?: CoordinateContractSession;
 }): Promise<NoteCanvasPersistencePayload> {
+  const coordinateContract = await (input.contractSession || createCoordinateContractSession()).load();
   const response = await api.get<NoteCanvasPersistencePayload>(`/canvas-objects/by-note/${input.note.id}`);
-  const entityPayload = normalizeCanvasPersistencePayload(response.data);
   const legacyCollection = pageFrameCollectionFromMetadata(input.note.metadata);
+  const entityPayload = {
+    ...normalizeCanvasPersistencePayload(response.data, coordinateContract, legacyCollection?.pageFrames), coordinateContract,
+  };
 
   if (input.importLegacy !== false && !entityPayload.pageFrameCollection && legacyCollection) {
     const savedCollection = await savePageFrameCollectionForNote({
@@ -94,12 +125,13 @@ export async function saveBlockCanvasPlacementForNote(input: {
   block: Pick<NoteBlock, 'id' | 'placement_id'>;
   layout: BlockBoxLayout;
   pageFrameCollection?: PageFrameCollectionModel | null;
+  coordinateContract?: CoordinateContract;
 }): Promise<CanvasBlockLayoutRecord> {
   const response = await api.put<CanvasBlockLayoutRecord>(
     `/canvas-objects/by-note/${input.noteId}/block-placements/${input.block.placement_id}`,
     {
       block_id: input.block.id,
-      layout: buildLayoutPayload(input.layout),
+      layout: buildLayoutPayload(requireStoredLayout(input.layout, input.pageFrameCollection?.pageFrames || [], input.coordinateContract)),
     },
   );
   return {
@@ -107,6 +139,7 @@ export async function saveBlockCanvasPlacementForNote(input: {
     layout: reconcileHydratedBlockLayoutSurfaceAuthority(
       response.data.layout,
       input.pageFrameCollection?.pageFrames || [],
+      input.coordinateContract,
     ),
   };
 }
@@ -115,10 +148,12 @@ export async function saveGenericCanvasObjectForNote(input: {
   noteId: string;
   objectId: string;
   payload: Record<string, unknown>;
+  coordinateContract?: CoordinateContract;
+  pageFrameCollection?: PageFrameCollectionModel | null;
 }): Promise<Record<string, unknown>> {
   const response = await api.put<Record<string, unknown>>(
     `/canvas-objects/by-note/${input.noteId}/objects/${input.objectId}`,
-    input.payload,
+    toStoredGenericCanvasObjectPayload(input.payload, input.pageFrameCollection?.pageFrames || [], input.coordinateContract),
   );
   return response.data;
 }

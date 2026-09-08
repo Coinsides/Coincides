@@ -1,3 +1,4 @@
+import { applyWorldRectToLayout, resolveWorldRect, selectPlacementFrame, type CoordinateContract } from '../placementContractService';
 import {
   useCallback,
   useMemo,
@@ -34,6 +35,7 @@ interface PlacementInteractionBlock {
 }
 
 export interface UseBlockPlacementInteractionsOptions<TBlock extends PlacementInteractionBlock> {
+  coordinateContract?: CoordinateContract;
   blockLayouts: Record<string, BlockBoxLayout>;
   contentWidth: number;
   documentTypographyProfile?: DocumentTypographyProfile;
@@ -65,42 +67,39 @@ function collectCrossingBlockOnRelease({
   organizeModeEnabled,
   pageFrames,
   pageOffsetX,
+  coordinateContract,
 }: {
   blockId: string;
   layouts: Record<string, BlockBoxLayout>;
   organizeModeEnabled: boolean;
   pageFrames: PageFrameModel[];
   pageOffsetX: number;
+  coordinateContract?: CoordinateContract;
 }): Record<string, BlockBoxLayout> {
   if (!organizeModeEnabled) return layouts;
   const layout = layouts[blockId];
   if (!layout) return layouts;
 
-  const worldOffsetX = layout.coordinate_space === 'canvas_world' ? 0 : pageOffsetX;
+  const worldRect = resolveWorldRect(layout, selectPlacementFrame(layout, pageFrames, coordinateContract), coordinateContract, pageOffsetX);
   const collected = clampCrossingPlacementIntoPageFrameContent({
-    placement: {
-      x: layout.x + worldOffsetX,
-      y: layout.y,
-      width: layout.width,
-      height: layout.height,
-    },
+    placement: worldRect,
     pageFrames,
   });
-  const nextX = collected.x - worldOffsetX;
-  if (nextX === layout.x && collected.y === layout.y) return layouts;
+  const nextLayout = applyWorldRectToLayout(layout, worldRect, collected, coordinateContract, () => {
+    const worldOffsetX = layout.coordinate_space === 'canvas_world' ? 0 : pageOffsetX;
+    return { ...layout, x: collected.x - worldOffsetX, y: collected.y };
+  });
+  if (nextLayout.x === layout.x && nextLayout.y === layout.y) return layouts;
 
   return {
     ...layouts,
-    [blockId]: {
-      ...layout,
-      x: nextX,
-      y: collected.y,
-    },
+    [blockId]: nextLayout,
   };
 }
 
 export function useBlockPlacementInteractions<TBlock extends PlacementInteractionBlock>({
   blockLayouts,
+  coordinateContract,
   contentWidth,
   documentTypographyProfile,
   estimateBlockHeightForText,
@@ -148,6 +147,7 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
         const deltaX = (moveEvent.clientX - startClientX) / zoom;
         const deltaY = (moveEvent.clientY - startClientY) / zoom;
         const result = calculateDraggedBlockLayouts({
+          coordinateContract,
           blockId: block.id,
           startLayouts,
           initialLayout: layout,
@@ -174,6 +174,7 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
       onMove: handlePointerMove,
       onEnd: () => {
         const releasedLayouts = collectCrossingBlockOnRelease({
+          coordinateContract,
           blockId: block.id,
           layouts: latestLayouts,
           organizeModeEnabled: snapEnabled,
@@ -193,6 +194,7 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
     });
   }, [
     blockLayouts,
+    coordinateContract,
     contentWidth,
     movingBlockIdRef,
     orderedBlockIds,
@@ -232,7 +234,8 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
       const deltaX = (moveEvent.clientX - startClientX) / zoom;
       setLayoutDrafts((current) => {
         const result = calculateResizedBlockLayouts({
-          blockId: block.id,
+          coordinateContract,
+            blockId: block.id,
           baseLayouts: blockLayouts,
           currentLayouts: current,
           initialLayout: layout,
@@ -253,6 +256,7 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
       onMove: handlePointerMove,
       onEnd: () => {
         const releasedLayouts = collectCrossingBlockOnRelease({
+          coordinateContract,
           blockId: block.id,
           layouts: latestLayouts,
           organizeModeEnabled: snapEnabled,
@@ -270,6 +274,7 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
     });
   }, [
     blockLayouts,
+    coordinateContract,
     contentWidth,
     documentTypographyProfile,
     estimateBlockHeightForText,

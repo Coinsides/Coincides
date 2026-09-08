@@ -1,3 +1,4 @@
+import { resolveScreenRect, selectPlacementFrame, toStoredLayout, type CoordinateContract } from '../placementContractService';
 import { useMemo } from 'react';
 import { buildNoteCanvasRuntimeModel } from '../engineModel';
 import { buildExportPreviewModel } from '../exportPreviewService';
@@ -51,6 +52,7 @@ import {
 } from '../viewportService';
 
 export interface UseNoteCanvasResolvedLayoutModelOptions {
+  coordinateContract?: CoordinateContract;
   contentWidth: number;
   documentTypographyProfile: DocumentTypographyProfile;
   layoutDrafts: Record<string, BlockBoxLayout>;
@@ -61,6 +63,7 @@ export interface UseNoteCanvasResolvedLayoutModelOptions {
 }
 
 export interface UseNoteCanvasFrameModelOptions {
+  coordinateContract?: CoordinateContract;
   blockLayouts: Record<string, BlockBoxLayout>;
   defaultDraftLayout: BlockBoxLayout;
   documentTypographyProfile: DocumentTypographyProfile;
@@ -83,6 +86,7 @@ export interface UseNoteCanvasFrameModelOptions {
 
 export function useNoteCanvasResolvedLayoutModel({
   contentWidth,
+  coordinateContract,
   documentTypographyProfile,
   layoutDrafts,
   pageFrames,
@@ -99,8 +103,9 @@ export function useNoteCanvasResolvedLayoutModel({
     () => getVisibleBlocksForSurface(sortedBlocks.filter((block) => layoutDrafts[block.id]?.surface !== 'tray'), surfacePolicy, contentWidth, {
       pageFrames,
       boundary: 'outer',
+      coordinateContract,
     }),
-    [contentWidth, layoutDrafts, pageFrames, sortedBlocks, surfacePolicy],
+    [contentWidth, coordinateContract, layoutDrafts, pageFrames, sortedBlocks, surfacePolicy],
   );
 
   const pageAffiliatedWorkspaceBlockIds = useMemo(
@@ -112,11 +117,12 @@ export function useNoteCanvasResolvedLayoutModel({
             contentWidth,
             pageFrames,
             'outer',
+            coordinateContract,
           ))
           .map((block) => block.id)
         : [],
     ),
-    [contentWidth, pageFrames, surfacePolicy.isPageMode, visibleBlocks],
+    [contentWidth, coordinateContract, pageFrames, surfacePolicy.isPageMode, visibleBlocks],
   );
 
   const blockLayouts = useMemo(() => {
@@ -130,20 +136,24 @@ export function useNoteCanvasResolvedLayoutModel({
         block,
         fallback: defaults[block.id],
         contentWidth,
+        contract: coordinateContract,
         surfaceMode: normalizationSurfaceMode,
         estimateHeight: estimateBlockHeightWithTypography,
       });
-      acc[block.id] = normalizeResolvedBlockLayout({
+      acc[block.id] = toStoredLayout(normalizeResolvedBlockLayout({
         block,
         layout: resolved,
         contentWidth,
+        contract: coordinateContract,
         surfaceMode: normalizationSurfaceMode,
         estimateHeight: estimateBlockHeightWithTypography,
-      });
+      }), pageFrames, coordinateContract);
       return acc;
     }, {});
   }, [
     contentWidth,
+    coordinateContract,
+    pageFrames,
     estimateBlockHeightWithTypography,
     layoutDrafts,
     pageAffiliatedWorkspaceBlockIds,
@@ -152,8 +162,8 @@ export function useNoteCanvasResolvedLayoutModel({
   ]);
 
   const defaultDraftLayout = useMemo(() => {
-    return createDefaultDraftLayout(blockLayouts, contentWidth);
-  }, [blockLayouts, contentWidth]);
+    return createDefaultDraftLayout(blockLayouts, contentWidth, pageFrames, coordinateContract);
+  }, [blockLayouts, contentWidth, pageFrames, coordinateContract]);
 
   return {
     visibleBlocks,
@@ -164,6 +174,7 @@ export function useNoteCanvasResolvedLayoutModel({
 
 export function useNoteCanvasFrameModel({
   blockLayouts,
+  coordinateContract,
   defaultDraftLayout,
   documentTypographyProfile,
   draftActive,
@@ -183,13 +194,15 @@ export function useNoteCanvasFrameModel({
   visibleBlocks,
 }: UseNoteCanvasFrameModelOptions) {
   const pageContentHeight = useMemo(() => {
+    const frames = pageFrameCollection?.pageFrames || [];
+    const screen = (layout: BlockBoxLayout) => ({ ...layout, ...resolveScreenRect(layout, selectPlacementFrame(layout, frames, coordinateContract), coordinateContract) });
     return calculatePageFrameHeight({
-      blockLayouts,
+      blockLayouts: Object.fromEntries(Object.entries(blockLayouts).map(([id, layout]) => [id, screen(layout)])),
       draftActive,
-      draftLayout,
-      defaultDraftLayout,
+      draftLayout: draftLayout ? screen(draftLayout) : null,
+      defaultDraftLayout: screen(defaultDraftLayout),
     });
-  }, [blockLayouts, draftActive, draftLayout, defaultDraftLayout]);
+  }, [blockLayouts, draftActive, draftLayout, defaultDraftLayout, pageFrameCollection, coordinateContract]);
 
   const primaryPageFrameSeed = useMemo(
     () => createRuntimePageFrame({
@@ -222,10 +235,12 @@ export function useNoteCanvasFrameModel({
         layout,
         pageOffsetX,
         pageFrame: primaryPageFrame,
+        pageFrames: runtimePageFrameCollection.pageFrames,
+        contract: coordinateContract,
         zIndex: index,
       })];
     }),
-    [blockLayouts, pageOffsetX, primaryPageFrame, visibleBlocks],
+    [blockLayouts, pageOffsetX, primaryPageFrame, runtimePageFrameCollection.pageFrames, coordinateContract, visibleBlocks],
   );
 
   const relationEndpointReserve = useMemo<RelationEndpointReserve[]>(
@@ -243,7 +258,7 @@ export function useNoteCanvasFrameModel({
       })
       : seedViewport;
 
-    return buildNoteCanvasRuntimeModel({
+    return { ...buildNoteCanvasRuntimeModel({
       mode: surfaceMode,
       world: createRuntimeWorld(surfaceMode, pageContentHeight, {
         pageFrames: runtimePageFrameCollection.pageFrames,
@@ -264,9 +279,10 @@ export function useNoteCanvasFrameModel({
       genericImageObjects: persistedImageObjects,
       genericStructuredObjects: persistedStructuredObjects,
       textByContentTargetId: buildTextByContentTargetId(contentLookupBlocks || visibleBlocks),
-    });
+    }), coordinateContract };
   }, [
     canvasBlockPlacements,
+    coordinateContract,
     contentLookupBlocks,
     documentTypographyProfile,
     pageContentHeight,

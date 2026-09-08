@@ -1,3 +1,4 @@
+import { sameLayoutFrame, type CoordinateContract } from './placementContractService';
 import { clamp } from './geometry';
 import { applyMeasuredBlockLayoutToLayouts } from './measurementService';
 import {
@@ -123,6 +124,7 @@ export function attachWindowPointerSession({
 }
 
 export interface CalculateDraggedBlockLayoutsInput {
+  coordinateContract?: CoordinateContract;
   blockId: string;
   startLayouts: Record<string, BlockBoxLayout>;
   initialLayout: BlockBoxLayout;
@@ -152,6 +154,7 @@ export function calculateDraggedBlockLayouts({
   snapEnabled,
   orderedBlockIds,
   resolveCollisions,
+  coordinateContract,
   useElasticAvoidance,
 }: CalculateDraggedBlockLayoutsInput): DraggedBlockLayoutResult {
   const currentLayout = startLayouts[blockId] || initialLayout;
@@ -162,11 +165,11 @@ export function calculateDraggedBlockLayouts({
     y: Math.max(0, currentLayout.y + deltaY),
   };
   const snapped = snapEnabled
-    ? applyMoveSnap(rawLayout, blockId, startLayouts, contentWidth)
+    ? applyMoveSnap(rawLayout, blockId, startLayouts, contentWidth, coordinateContract)
     : { layout: rawLayout, guide: null };
   const candidateLayouts = { ...startLayouts, [blockId]: snapped.layout };
   const layouts = resolveCollisions || useElasticAvoidance
-    ? resolveStackedLayoutCollisions(candidateLayouts, orderedBlockIds)
+    ? resolveStackedLayoutCollisions(candidateLayouts, orderedBlockIds, coordinateContract)
     : candidateLayouts;
 
   return {
@@ -176,6 +179,7 @@ export function calculateDraggedBlockLayouts({
 }
 
 export interface CalculateResizedBlockLayoutsInput {
+  coordinateContract?: CoordinateContract;
   blockId: string;
   baseLayouts: Record<string, BlockBoxLayout>;
   currentLayouts: Record<string, BlockBoxLayout>;
@@ -204,6 +208,7 @@ export function calculateResizedBlockLayouts({
   snapEnabled,
   orderedBlockIds,
   resolveCollisions,
+  coordinateContract,
   estimateHeight,
 }: CalculateResizedBlockLayoutsInput): ResizedBlockLayoutResult {
   const width = clamp(
@@ -215,7 +220,7 @@ export function calculateResizedBlockLayouts({
     ? snapToTargets(initialLayout.x + width, [
       contentWidth,
       ...Object.entries(baseLayouts)
-        .filter(([id]) => id !== blockId)
+        .filter(([id, item]) => id !== blockId && sameLayoutFrame(initialLayout, item, coordinateContract))
         .flatMap(([, item]) => [item.x, item.x + item.width]),
     ])
     : { value: initialLayout.x + width };
@@ -241,6 +246,7 @@ export function calculateResizedBlockLayouts({
       nextLayout: layout,
       orderedBlockIds,
       resolveCollisions,
+      coordinateContract,
     }),
     guide: snappedRight.snapped !== undefined ? { x: snappedRight.snapped } : null,
   };

@@ -88,6 +88,7 @@ export function useNoteCanvasRuntimeController() {
     applyMeasuredBlockHeightDraft,
     note,
     sourceProjectionPolicy,
+    coordinateContract,
     blocks,
     sortedBlocks,
     loading,
@@ -214,6 +215,7 @@ export function useNoteCanvasRuntimeController() {
     persistLayoutSnapshot,
     visibleBlocks,
   } = useRuntimeLayoutModelController({
+    coordinateContract,
     blocks,
     blockListRef,
     documentTypographyProfile,
@@ -285,6 +287,7 @@ export function useNoteCanvasRuntimeController() {
     beginMoveBlock,
     beginResizeBlock,
   } = useRuntimeBlockOperationsController({
+    coordinateContract,
     applyLayoutDrafts: mergeLayoutDrafts,
     applyMeasuredBlockHeightDraft,
     applyTemplateToBlock,
@@ -345,6 +348,7 @@ export function useNoteCanvasRuntimeController() {
   }, [handleDurableFocusReceipt, markBlockFocused]);
 
   const tray = useTrayController({
+    coordinateContract,
     noteId, enabled: surfaceMode === 'page' && !sourceProjectionPolicy.contentReadOnly,
     blocks, objects: persistedCanvasObjects, placements: persistedCanvasPlacements,
     mounts: persistedContentMounts, selectedBlockId, blockLayouts,
@@ -357,6 +361,7 @@ export function useNoteCanvasRuntimeController() {
   });
 
   const { layerProps } = useRuntimePresentationController({
+    coordinateContract,
     tray,
     onDropTrayBlock: tray.dropOnPaper,
     activeBlockId,

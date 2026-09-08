@@ -12,6 +12,7 @@ import { dirname, extname, isAbsolute, join, relative, resolve, sep } from 'node
 import { v4 as uuidv4 } from 'uuid';
 import type { SourceArtifact, SourceArtifactBlock } from './sourceArtifact.js';
 import type { SourceMaterializationFile } from './sourceFileIntake.js';
+import { readCoordinateContract, type CoordinateContract } from './coordinateContract.js';
 
 const PAGE_WIDTH = 794;
 const PAGE_HEIGHT = 1123;
@@ -44,6 +45,8 @@ interface ProjectionBlockPlan {
   frame: ProjectionFramePlan;
   x: number;
   y: number;
+  localX: number;
+  localY: number;
   width: number;
   height: number;
 }
@@ -200,6 +203,8 @@ function buildProjectionLayout(blocks: SourceArtifactBlock[]): {
       frame,
       x: frame.x + CONTENT_LEFT,
       y: frame.y + localY,
+      localX: 0,
+      localY: localY - CONTENT_TOP,
       width: CONTENT_WIDTH,
       height,
     });
@@ -208,6 +213,26 @@ function buildProjectionLayout(blocks: SourceArtifactBlock[]): {
 
   if (frames.length === 0) addFrame(null);
   return { frames, blocks: plannedBlocks };
+}
+
+function resolveProjectionBlockCoordinates(block: ProjectionBlockPlan, contract: CoordinateContract) {
+  return contract === 'v2'
+    ? { x: block.localX, y: block.localY, coordinateSpace: 'page_frame_local' }
+    : { x: block.x, y: block.y, coordinateSpace: 'canvas_world' };
+}
+
+function resolveProjectionImagePlacement(frame: ProjectionFramePlan, contract: CoordinateContract) {
+  return contract === 'v2'
+    ? {
+      x: 0,
+      y: 0,
+      metadata: { placement_kind: 'source_image', layout_policy: { coordinate_space: 'page_frame_local' } },
+    }
+    : {
+      x: frame.x + CONTENT_LEFT,
+      y: frame.y + CONTENT_TOP,
+      metadata: { placement_kind: 'source_image' },
+    };
 }
 
 function textFlowContent(block: SourceArtifactBlock): Record<string, unknown> {
@@ -284,6 +309,8 @@ export function publishSourceProjection(
       if (!run || run.status !== 'publishing' || run.projection_note_id) {
         throw new Error('Materialization run is not publishable');
       }
+      // One database snapshot governs every block in this publication.
+      const coordinateContract = readCoordinateContract(db);
 
       db.prepare(`
         INSERT INTO operation_batches (
@@ -461,6 +488,7 @@ export function publishSourceProjection(
       `);
 
       for (const block of layout.blocks) {
+        const coordinates = resolveProjectionBlockCoordinates(block, coordinateContract);
         const metadata = {
           projection_kind: 'source_text_projection',
           source_record_id: source.source_record_id,
@@ -533,8 +561,8 @@ export function publishSourceProjection(
           noteId,
           block.canvasObjectId,
           canvasId,
-          block.x,
-          block.y,
+          coordinates.x,
+          coordinates.y,
           block.width,
           block.height,
           block.frame.frameId,
@@ -543,7 +571,7 @@ export function publishSourceProjection(
             placement_kind: 'source_block',
             source_page_index: block.artifact.page_index,
             layout_policy: {
-              coordinate_space: 'canvas_world',
+              coordinate_space: coordinates.coordinateSpace,
             },
           }),
           now,
@@ -589,6 +617,7 @@ export function publishSourceProjection(
           now,
         );
         const frame = layout.frames[0];
+        const imagePlacement = resolveProjectionImagePlacement(frame, coordinateContract);
         const objectId = `canvas-object:${noteId}:source-image:${source.materialization_id}`;
         insertCanvasObject.run(
           objectId,
@@ -615,13 +644,13 @@ export function publishSourceProjection(
           noteId,
           objectId,
           canvasId,
-          frame.x + CONTENT_LEFT,
-          frame.y + CONTENT_TOP,
+          imagePlacement.x,
+          imagePlacement.y,
           CONTENT_WIDTH,
           PAGE_HEIGHT - CONTENT_TOP - CONTENT_BOTTOM,
           frame.frameId,
           10,
-          JSON.stringify({ placement_kind: 'source_image' }),
+          JSON.stringify(imagePlacement.metadata),
           now,
           now,
         );

@@ -1,3 +1,4 @@
+import { canonicalizeDraftLayout, draftAuthorityBoundary, resolveFlowCurrentFrameId, type CoordinateContract } from '../placementContractService';
 import { useCallback, type KeyboardEvent } from 'react';
 import {
   useCanvasSurfacePointerController,
@@ -77,11 +78,13 @@ function shouldProjectPageFrameLocalLayout(
 
 export function canonicalizeDraftRecoveryReceiptForSurface({
   receipt,
+  coordinateContract,
   isPageMode,
   pageFrame,
   pageOffsetX,
 }: {
   receipt: DraftRecoveryReceipt;
+  coordinateContract?: CoordinateContract;
   isPageMode: boolean;
   pageFrame: PageFrameModel | null;
   pageOffsetX: number;
@@ -93,6 +96,7 @@ export function canonicalizeDraftRecoveryReceiptForSurface({
   return {
     ...receipt,
     layout: projectPageFrameLocalLayoutToCanvasLayout({
+      contract: coordinateContract,
       layout: receipt.layout,
       pageFrame: pageFrame || DEFAULT_PRIMARY_PAGE_FRAME,
       pageOffsetX,
@@ -104,6 +108,7 @@ export function createPageFrameDraftSessionAuthority(
   pageFrame: PageFrameModel,
   pageOffsetX: number,
   layoutCoordinates: 'page_frame_local' | 'runtime_surface' = 'page_frame_local',
+  coordinateContract: CoordinateContract = 'v1',
 ): DraftSessionAuthority {
   const snapshot: PageFrameModel = {
     ...pageFrame,
@@ -112,12 +117,8 @@ export function createPageFrameDraftSessionAuthority(
   const contentRect = getPageFrameContentRect(snapshot);
   return {
     frameId: snapshot.id,
-    pageBoundary: {
-      left: contentRect.x,
-      right: contentRect.x + contentRect.width,
-      frameId: snapshot.id,
-    },
-    canonicalizeLayout: (layout) => layoutCoordinates === 'runtime_surface'
+    pageBoundary: draftAuthorityBoundary(snapshot, coordinateContract),
+    canonicalizeLayout: (layout) => canonicalizeDraftLayout(layout, snapshot, pageOffsetX, layoutCoordinates, coordinateContract, () => layoutCoordinates === 'runtime_surface'
       ? {
         ...layout,
         x: layout.x + pageOffsetX,
@@ -139,10 +140,11 @@ export function createPageFrameDraftSessionAuthority(
         ...projectPageFrameLocalLayoutToCanvasLayout({
           layout,
           pageFrame: snapshot,
+          contract: coordinateContract,
           pageOffsetX,
         }),
         boundary_role: 'inside',
-      },
+      }),
   };
 }
 
@@ -153,6 +155,7 @@ export function resolvePageDraftSessionAuthority({
   pageOffsetX,
   pageFrameOverride,
   layoutCoordinates = 'page_frame_local',
+  coordinateContract = 'v1',
 }: {
   collection: PageFrameCollectionModel | null | undefined;
   layout: BlockBoxLayout;
@@ -160,6 +163,7 @@ export function resolvePageDraftSessionAuthority({
   pageOffsetX: number;
   pageFrameOverride?: PageFrameModel | null;
   layoutCoordinates?: 'page_frame_local' | 'runtime_surface';
+  coordinateContract?: CoordinateContract;
 }): DraftSessionAuthority | null {
   const layoutFrameId = layout.frame_id;
   const boundaryFrameId = layout.surface_authority?.pageBoundary?.frameId;
@@ -171,6 +175,7 @@ export function resolvePageDraftSessionAuthority({
       pageFrameOverride,
       pageOffsetX,
       layoutCoordinates,
+      coordinateContract,
     );
   }
   const pageFrame = findPageFrameForLayout(
@@ -180,7 +185,7 @@ export function resolvePageDraftSessionAuthority({
     true,
   ) || (!explicitFrameId ? DEFAULT_PRIMARY_PAGE_FRAME : null);
   return pageFrame
-    ? createPageFrameDraftSessionAuthority(pageFrame, pageOffsetX, layoutCoordinates)
+    ? createPageFrameDraftSessionAuthority(pageFrame, pageOffsetX, layoutCoordinates, coordinateContract)
     : null;
 }
 
@@ -200,6 +205,7 @@ const canvasWorldSessionAuthority: DraftSessionAuthority = {
 };
 
 interface PageStackContentFlowRuntimeOptions {
+  coordinateContract?: CoordinateContract;
   documentTypographyProfile?: DocumentTypographyProfile;
   pageFrameCollection?: PageFrameCollectionModel | null;
   selectedPageFrameId?: string | null;
@@ -230,6 +236,7 @@ export function useRuntimeNaturalWritingController(options: UseRuntimeNaturalWri
       return canvasWorldSessionAuthority.canonicalizeLayout(layout);
     }
     const authority = resolvePageDraftSessionAuthority({
+      coordinateContract: options.coordinateContract,
       collection: options.pageFrameCollection,
       layout,
       selectedFrameId: options.selectedPageFrameId,
@@ -267,6 +274,7 @@ export function useRuntimeNaturalWritingController(options: UseRuntimeNaturalWri
       ...createOptions,
       layout: projectPageFrameLocalLayoutToCanvasLayout({
         layout: createOptions.layout,
+        contract: options.coordinateContract,
         pageFrame,
         pageOffsetX: options.pageOffsetX,
       }),
@@ -292,6 +300,7 @@ export function useRuntimeNaturalWritingController(options: UseRuntimeNaturalWri
     const projectedLayout = shouldProject
       ? projectPageFrameLocalLayoutToCanvasLayout({
         layout,
+        contract: options.coordinateContract,
         pageFrame,
         pageOffsetX: options.pageOffsetX,
       })
@@ -303,6 +312,7 @@ export function useRuntimeNaturalWritingController(options: UseRuntimeNaturalWri
     NonNullable<UseDraftBlockControllerOptions['canonicalizeRecoveryReceipt']>
   >((receipt) => canonicalizeDraftRecoveryReceiptForSurface({
     receipt,
+    coordinateContract: options.coordinateContract,
     isPageMode: options.surfacePolicy.isPageMode,
     pageFrame: findPageFrameForLayout(
       options.pageFrameCollection,
@@ -359,6 +369,7 @@ export function useRuntimeNaturalWritingController(options: UseRuntimeNaturalWri
       return;
     }
     const authority = resolvePageDraftSessionAuthority({
+      coordinateContract: options.coordinateContract,
       collection: options.pageFrameCollection,
       layout: nextLayout,
       selectedFrameId: options.selectedPageFrameId,
@@ -382,8 +393,9 @@ export function useRuntimeNaturalWritingController(options: UseRuntimeNaturalWri
         || options.pageFrameCollection.selectedFrameId
         || options.pageFrameCollection.primaryFrameId;
     const plan = resolvePageStackContentFlowPlan({
+      coordinateContract: options.coordinateContract,
       collection: options.pageFrameCollection,
-      currentFrameId,
+      currentFrameId: resolveFlowCurrentFrameId(options.defaultDraftLayout, currentFrameId, options.coordinateContract),
       draftLayout: options.defaultDraftLayout,
       draftText: draftTextRef.current || draftText,
       documentTypography: options.documentTypographyProfile,

@@ -25,7 +25,9 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock('@/services/api', () => ({
   default: {
-    get: mocks.get,
+    get: (url: string, ...args: unknown[]) => url === '/canvas-objects/coordinate-contract'
+      ? Promise.resolve({ data: { coordinate_contract: 'v1' } })
+      : mocks.get(url, ...args),
     post: mocks.post,
     put: mocks.put,
     delete: mocks.delete,

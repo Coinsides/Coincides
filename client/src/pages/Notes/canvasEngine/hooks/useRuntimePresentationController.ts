@@ -214,6 +214,8 @@ export function useRuntimePresentationController(
     const pageFrame = currentPageFrameCollection.pageFrames.find((frame) => frame.id === frameId);
     const movedBlockLayouts = pageFrame
       ? movePageFrameAffiliatedBlockLayouts({
+        coordinateContract: options.coordinateContract,
+        pageFrames: currentPageFrameCollection.pageFrames,
         pageFrame,
         blockLayouts: options.blockLayouts,
         blockWorldOffsetX: options.pageOffsetX,

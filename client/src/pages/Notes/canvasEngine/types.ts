@@ -669,6 +669,7 @@ export interface RelationEndpointReserve {
 }
 
 export interface NoteCanvasRuntimeModel {
+  coordinateContract?: import('./placementContractService').CoordinateContract;
   version: string;
   route: 'self_owned_minimal_hybrid';
   mode: NoteCanvasMode;
