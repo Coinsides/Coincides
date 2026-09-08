@@ -354,7 +354,8 @@
 .trayList li { padding: 10px 0; border-bottom: 1px solid var(--border-color); overflow-wrap: anywhere; }
 .trayList label { display: flex; gap: 8px; align-items: flex-start; }
 .trayCategory { display: block; color: var(--text-secondary); font-size: 11px; margin-bottom: 4px; }
-.traySidebar input:not([type="checkbox"]) { display: block; box-sizing: border-box; width: 100%; margin: 8px 0; }
+.traySidebar input:not([type="checkbox"]), .traySidebar select { display: block; box-sizing: border-box; width: 100%; margin: 8px 0; }
+.trayRelocation { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 
 .blockTrashList {
   display: grid;

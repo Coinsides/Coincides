@@ -5,6 +5,7 @@ import type {
   Board, BoardCandidate, BoardDetail, BoardEdge, BoardMember, BoardVisual,
   CreateBoardInput, CreateBoardEdgeInput, CreateBoardVisualInput, MountBoardMemberInput,
   PatchBoardInput, PatchBoardMemberInput, PatchBoardEdgeInput, PatchBoardVisualInput,
+  TrayRelocationResult,
 } from './boardTypes';
 
 export type { BoardCandidate } from './boardTypes';
@@ -63,6 +64,18 @@ export const boardRepository = {
   async deleteVisual(boardId: string, id: string): Promise<void> {
     await api.delete(childPath(boardId, 'visuals', id));
   },
+  async relocateTray(boardId: string, placementIds: string[]): Promise<TrayRelocationResult> {
+    const { data } = await api.post<TrayRelocationResult>(`${boardPath(boardId)}/relocate-tray`, {
+      placement_ids: placementIds,
+    });
+    return data;
+  },
+  async undoTrayRelocation(boardId: string, batchId: string): Promise<TrayRelocationResult> {
+    const { data } = await api.post<TrayRelocationResult>(
+      `${childPath(boardId, 'relocate-tray', batchId)}/undo`, {},
+    );
+    return data;
+  },
 };
 
 function preview(value: unknown): string {
@@ -117,6 +130,25 @@ export function boardErrorMessage(error: unknown): string {
     ? (error as { response?: { status?: number; data?: { error?: unknown } } }).response
     : undefined;
   switch (response?.data?.error) {
+    case 'tray_placement_unavailable':
+    case 'tray_object_unavailable':
+      return 'Some selected items are no longer available in the tray. Refresh the note and try again.';
+    case 'tray_blocks_cannot_mount_board':
+    case 'tray_object_kind_not_relocatable':
+      return 'This selection cannot move to a board. Choose drawings or group mounts.';
+    case 'tray_connector_endpoint_ambiguous':
+    case 'tray_connector_endpoint_unavailable':
+    case 'tray_visual_extension_unavailable':
+    case 'tray_shape_backing_unavailable':
+      return 'This drawing cannot be moved with all its contents intact. It has been kept in the tray.';
+    case 'tray_relocation_target_changed':
+    case 'tray_relocation_target_has_edges':
+      return 'The moved items have been edited on the board. Undo is unavailable because it would remove those changes.';
+    case 'tray_relocation_source_changed':
+      return 'The original tray content has changed. Undo is unavailable because it would replace those changes.';
+    case 'tray_relocation_not_found':
+    case 'tray_relocation_state_conflict':
+      return 'This move can no longer be undone. Refresh the note and board.';
     case 'purpose_already_has_board':
       return 'This purpose already has a board. Choose another purpose or open its board.';
     case 'board_member_reference_unavailable':

@@ -28,6 +28,10 @@ export const updateBoardSchema = z.object({
   viewport: boardViewportSchema.optional(),
 }).strict().refine((value) => Object.keys(value).length > 0, 'No board changes provided');
 
+export const relocateTraySchema = z.object({
+  placement_ids: z.array(idSchema).min(1).max(500),
+}).strict();
+
 const memberGeometry = {
   x: finiteNumber.optional(),
   y: finiteNumber.optional(),

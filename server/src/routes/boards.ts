@@ -10,11 +10,13 @@ import {
   createBoardEdge, updateBoardEdge, deleteBoardEdge,
   createBoardVisual, updateBoardVisual, deleteBoardVisual,
 } from '../services/boards.js';
+import { relocateTrayToBoard, undoTrayRelocation } from '../services/boardTrayRelocation.js';
 import {
   createBoardSchema, updateBoardSchema,
   mountBoardMemberSchema, updateBoardMemberSchema,
   createBoardEdgeSchema, updateBoardEdgeSchema,
   createBoardVisualSchema, updateBoardVisualSchema,
+  relocateTraySchema,
 } from '../validators/boards.js';
 
 const summarySchema = z.string().max(4000).optional();
@@ -80,6 +82,38 @@ export function createBoardRouter(database: () => Database.Database = getDb): Ro
     const input = updateBoardSchema.parse(req.body);
     const board = db.transaction(() => updateBoard(db, req.userId!, String(req.params.boardId), input))();
     res.json({ board });
+  }));
+
+  router.post('/:boardId/relocate-tray', handle((req, res) => {
+    const input = relocateTraySchema.parse(req.body);
+    const boardId = String(req.params.boardId);
+    const result = runRecordedAction(database(), req, 'POST /api/boards/:boardId/relocate-tray', (db, userId) => {
+      const { value, members } = relocateTrayToBoard(db, userId, boardId, input);
+      return { value, events: members.map((member) => ({
+        verb: 'mounted' as const,
+        objects: [{ kind: 'board', id: boardId }, { kind: 'board_member', id: member.id },
+          { kind: 'content_group', id: member.member_id }],
+        summary: `Mounted content_group: ${member.member_id}`,
+        meta: { batch_id: value.batch_id },
+      })) };
+    });
+    res.status(201).json(result);
+  }));
+
+  router.post('/:boardId/relocate-tray/:batchId/undo', handle((req, res) => {
+    z.object({}).strict().parse(req.body ?? {});
+    const boardId = String(req.params.boardId);
+    const result = runRecordedAction(database(), req, 'POST /api/boards/:boardId/relocate-tray/:batchId/undo', (db, userId) => {
+      const { value, members } = undoTrayRelocation(db, userId, boardId, String(req.params.batchId));
+      return { value, events: members.map((member) => ({
+        verb: 'unmounted' as const,
+        objects: [{ kind: 'board', id: boardId }, { kind: 'board_member', id: member.id },
+          { kind: 'content_group', id: member.member_id }],
+        summary: `Unmounted content_group: ${member.member_id}`,
+        meta: { batch_id: value.batch_id },
+      })) };
+    });
+    res.json(result);
   }));
 
   router.post('/:boardId/members', handle((req, res) => {

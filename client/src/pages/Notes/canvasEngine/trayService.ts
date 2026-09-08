@@ -8,6 +8,7 @@ export interface TrayEntry {
   category: 'block' | 'object' | 'mount';
   label: string;
   block?: NoteBlock;
+  boardKind?: 'shape' | 'image' | 'table' | 'connector' | 'content_group';
 }
 
 export function buildTrayEntries(
@@ -24,8 +25,12 @@ export function buildTrayEntries(
       const block = object?.kind === 'paragraph_block_projection'
         ? blocks.find((item) => item.placement_id === placement.placementId && item.id === blockMount?.targetId)
         : undefined;
+      const boardKind: TrayEntry['boardKind'] = object?.kind === 'visual_connector' ? 'connector'
+        : object?.kind === 'shape' || object?.kind === 'image' || object?.kind === 'table' ? object.kind
+          : object?.kind === 'content_group_projection' && ownedMounts.length === 1 && ownedMounts[0].targetKind === 'content_group'
+            ? 'content_group' : undefined;
       return {
-        placement, block,
+        placement, block, boardKind,
         category: object?.kind === 'paragraph_block_projection' ? 'block' : ownedMounts.length ? 'mount' : 'object',
         label: block ? (block.title || textFromContent(block).trim() || 'Empty block').slice(0, 160)
           : object?.kind || 'Canvas object',

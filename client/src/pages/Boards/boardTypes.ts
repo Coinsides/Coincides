@@ -81,6 +81,19 @@ export interface BoardDetail {
   visuals: BoardVisual[];
 }
 
+export interface TrayRelocationResult {
+  board_id: string;
+  batch_id: string;
+  placement_ids: string[];
+  visual_ids: string[];
+  member_ids: string[];
+  applied: boolean;
+  geometry: {
+    preserved_placement_ids: string[];
+    default_grid_placement_ids: string[];
+  };
+}
+
 export interface CreateBoardPurposeInput {
   title: string;
   project_id?: string | null;

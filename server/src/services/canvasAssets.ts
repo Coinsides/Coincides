@@ -210,6 +210,17 @@ export function releaseAssetReference(
       AND object_id != ?
   `).get(userId, assetId, excludeObjectId) as { count: number };
 
+  // A relocated visual owns a durable reference even after its original note is
+  // removed. The existence check also keeps pre-board migration fixtures valid.
+  if (db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'board_visuals'").get()) {
+    const boardReferences = db.prepare(`SELECT COUNT(*) AS count FROM board_visuals bv
+      JOIN boards b ON b.id = bv.board_id
+      WHERE b.user_id = ? AND bv.visual_kind = 'image'
+        AND json_extract(bv.data, '$.tray_source.extensions.image.asset_id') = ?`)
+      .get(userId, assetId) as { count: number };
+    remaining.count += boardReferences.count;
+  }
+
   if (remaining.count > 0) {
     return { asset_id: assetId, released: false, remaining_references: remaining.count, cleanup_task: null };
   }

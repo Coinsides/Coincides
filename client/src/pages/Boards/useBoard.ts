@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { boardErrorMessage, boardRepository } from './boardRepository';
+import { subscribeBoardChanges } from './boardEvents';
 import type {
   BoardDetail,
   CreateBoardEdgeInput,
@@ -103,6 +104,9 @@ export function useBoard(boardId: string | undefined) {
   }, [boardId, load, scope]);
 
   const reload = useCallback(() => load(scope), [load, scope]);
+  useEffect(() => subscribeBoardChanges((changedBoardId) => {
+    if (changedBoardId === boardId) void reload();
+  }), [boardId, reload]);
   const clearError = useCallback(() => {
     if (!isCurrent(scope)) return;
     saveFailure.current = null;

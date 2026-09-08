@@ -95,6 +95,16 @@
 .selectionBar > span { font-size: 12px; color: var(--text-secondary); }
 .loading { padding: 24px; }
 .loading p { margin: 24px 0; }
+.relocatedVisual, .relocatedConnector { position: absolute; transform-origin: 0 0; }
+.relocatedConnector { overflow: visible; pointer-events: none; }
+.visualContent { width: 100%; height: 100%; border: 1px solid var(--border-default); background: var(--bg-surface); }
+.visualContent[role='button'] { cursor: pointer; }
+.visualContent img { width: 100%; height: 100%; display: block; }
+.visualShapeText { white-space: pre-wrap; overflow-wrap: anywhere; }
+.visualCaption { display: block; background: var(--bg-surface); padding: 4px; }
+.visualTableScroll { width: 100%; height: 100%; overflow: auto; }
+.visualTableScroll table { border-collapse: collapse; width: 100%; font-size: 12px; }
+.visualTableScroll td { border: 1px solid var(--border-default); padding: 6px 8px; white-space: pre-wrap; }
 @media (max-width: 760px) {
   .library { padding: 12px 0; }
   .createRow { flex-direction: column; }

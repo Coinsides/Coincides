@@ -32,6 +32,20 @@ const visual: BoardVisual = {
 beforeEach(() => vi.resetAllMocks());
 
 describe('board HTTP repository', () => {
+  it('relocates only placement identities and undoes the server batch without client snapshots', async () => {
+    const receipt = { board_id: 'board/a', batch_id: 'batch/b', placement_ids: ['placement-1'],
+      visual_ids: ['visual-1'], member_ids: [], applied: true,
+      geometry: { preserved_placement_ids: ['placement-1'], default_grid_placement_ids: [] } };
+    api.post.mockResolvedValueOnce({ data: receipt });
+    expect(await boardRepository.relocateTray('board/a', ['placement-1'])).toEqual(receipt);
+    expect(api.post).toHaveBeenLastCalledWith('/boards/board%2Fa/relocate-tray', { placement_ids: ['placement-1'] });
+    api.post.mockResolvedValueOnce({ data: { ...receipt, applied: false } });
+    expect((await boardRepository.undoTrayRelocation('board/a', 'batch/b')).applied).toBe(false);
+    expect(api.post).toHaveBeenLastCalledWith('/boards/board%2Fa/relocate-tray/batch%2Fb/undo', {});
+    api.post.mockRejectedValueOnce(new Error('fixture conflict'));
+    await expect(boardRepository.undoTrayRelocation('board/a', 'batch/b')).rejects.toThrow('fixture conflict');
+  });
+
   it('accepts exactly one soul creation path and projection-only member geometry types', () => {
     const newSoul = { title: 'One sentence', purpose: { title: 'One sentence' } } satisfies CreateBoardInput;
     const existingSoul = { title: 'One sentence', soul_id: 'soul-1' } satisfies CreateBoardInput;

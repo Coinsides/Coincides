@@ -5,6 +5,7 @@ import { boardErrorMessage, loadBoardCandidates } from './boardRepository';
 import type { BoardCandidate, BoardMember, BoardViewport, BoardVisual } from './boardTypes';
 import { pointsPath, toBoardPoint, zoomBoardAt, type BoardPoint } from './boardViewport';
 import { useBoard } from './useBoard';
+import { BoardRelocatedVisual } from './BoardRelocatedVisual';
 import styles from './Boards.module.css';
 
 type Tool = 'select' | 'pan' | 'connect' | 'pen';
@@ -380,6 +381,9 @@ export default function BoardPage() {
             </g>)}
             {ink.length > 0 && <path d={pointsPath(ink)} className={styles.inkLine} />}
           </svg>
+          {detail.visuals.filter((visual) => visual.visual_kind !== 'freehand').map((visual) =>
+            <BoardRelocatedVisual key={visual.id} visual={visual} selected={selection?.id === visual.id}
+              selectable={tool === 'select'} onSelect={() => setSelection({ kind: 'visual', id: visual.id })} />)}
           {visibleMembers.map((member) => {
             const candidate = candidateById.get(`${member.member_kind}:${member.member_id}`);
             return <article key={member.id} data-testid={`board-member-${member.id}`} tabIndex={0}
