@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 292 份文档。
+共 293 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -284,6 +284,7 @@
 | [handoffs/2026-09-09-v13-3-s4-polish-order.md](handoffs/2026-09-09-v13-3-s4-polish-order.md) | 13.3 · 单 4 · 走查③打磨(板名独立/入口淡化/两件收起) | `(缺状态头)` | — | — |
 | [handoffs/2026-09-09-v13-4-s0-recon-order.md](handoffs/2026-09-09-v13-4-s0-recon-order.md) | 13.4 · 单 0 · 投影全谱与 item 化侦察 | `(缺状态头)` | — | — |
 | [handoffs/2026-09-09-v13-4-s1-item-floor-order.md](handoffs/2026-09-09-v13-4-s1-item-floor-order.md) | 13.4 单 1 · item 化地基 | `ready` | — | — |
+| [handoffs/2026-09-09-v13-4-s2-text-range-order.md](handoffs/2026-09-09-v13-4-s2-text-range-order.md) | 13.4 单 2 · text_range 上板 | `ready` | — | — |
 | [handoffs/2026-09-09-v13-4-wave1-wiring-order.md](handoffs/2026-09-09-v13-4-wave1-wiring-order.md) | 13.4 单 A · 接线批 + 生命周期批 | `ready` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
