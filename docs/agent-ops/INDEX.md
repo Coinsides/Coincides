@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-09-08
+> **日期 (Updated)**: 2026-09-09
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 282 份文档。
+共 284 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -122,6 +122,7 @@
 | [claude-log/2026-09-04.md](claude-log/2026-09-04.md) | Claude 工作日志 · 2026-09-04 | `(缺状态头)` | — | — |
 | [claude-log/2026-09-07.md](claude-log/2026-09-07.md) | Claude Log · 2026-09-07(Fable 会话) | `(缺状态头)` | — | — |
 | [claude-log/2026-09-08.md](claude-log/2026-09-08.md) | Claude Log · 2026-09-08(Fable 会话) | `(缺状态头)` | — | — |
+| [claude-log/2026-09-09.md](claude-log/2026-09-09.md) | Claude Log · 2026-09-09(Fable 会话) | `(缺状态头)` | — | — |
 | [claude-log/README.md](claude-log/README.md) | claude-log —— Claude 行动日志（Henry 的监督轨迹） | `active` | 2026-06-27 | — |
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-23 | — |
@@ -277,6 +278,7 @@
 | [handoffs/2026-09-08-v13-3-s1-data-layer-order.md](handoffs/2026-09-08-v13-3-s1-data-layer-order.md) | 13.3 · 单 1 · 板/魂数据与服务层(含书记官业务面首秀) | `(缺状态头)` | — | — |
 | [handoffs/2026-09-08-v13-3-s2-board-ui-order.md](handoffs/2026-09-08-v13-3-s2-board-ui-order.md) | 13.3 · 单 2 · 板 UI MVP + 旧 Purpose 消费面对齐 | `(缺状态头)` | — | — |
 | [handoffs/2026-09-08-v13-3-s3-tray-relocation-order.md](handoffs/2026-09-08-v13-3-s3-tray-relocation-order.md) | 13.3 · 单 3 · 准备区→板搬迁(图三承诺兑现) | `(缺状态头)` | — | — |
+| [handoffs/2026-09-09-v13-3-s4-polish-order.md](handoffs/2026-09-09-v13-3-s4-polish-order.md) | 13.3 · 单 4 · 走查③打磨(板名独立/入口淡化/两件收起) | `(缺状态头)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
