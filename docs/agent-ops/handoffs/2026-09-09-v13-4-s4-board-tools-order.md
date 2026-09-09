@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready
+> **状态 (Status)**: done
 > **From**: fable(HQ) · **To**: codex(builder)
 > **日期**: 2026-09-09
 > **上游**: 13.4 段 plan 修订二波次四单 4;现物证据=单 0 侦察 §四(串行写队列可作栈落点/恢复两缺口:ID 契约+下板级联)+走查③口径(要什么工具做什么)
@@ -79,3 +79,76 @@
 3. **确认框三类明示**:"N 张卡及其相连的 K 条连线将移出(不可撤回)+ M 件画物与独立连线(可撤回)"——K 按选区实算(含未选中但因端点被删而级联的边,数字要真);
 4. **冒烟⑥改判**:混选 {成员 A、边 E(A→B)、一画物} 群删→确认框三类数字正确→执行后画物可 undo 恢复,A 与 E 不复原且 events 有 unmounted;独立边(两端存活)的删除可撤已由冒烟③覆盖,⛔ 另造;
 5. 其余五裁不变;**续工:全单照做**,新 Result 追加于本补遗后(完工判据认新 Result+产品码 numstat,⛔ 认上方停线回执)。
+
+## Result
+
+2026-09-09 · Codex builder · **单 4 全部实施，工程验证通过；主观验收与放行留 HQ。** 已完整重读本单并按补遗一续工；上方停线回执及 HQ 裁定原文保留。本次没有新增停线事项。
+
+### 交付
+
+- 橡皮工具只擦 freehand 整笔；pointer capture 下沿扫过路径采样，使用现有透明 SVG stroke 的原生命中路径，一手势多笔删除只入一条命令。
+- `useBoard` 串行队列内接入板内命令栈：member 几何（move/resize/scale/z/pin）、visual 几何、pen、edge 创建/删除/label/direction、visual 删除（含橡皮批）、chalk 创建/编辑/删除。一次拖动及群拖各一条，80 条上限，成功才推进，新增编辑清 redo，换板隔离、reload 清栈。同步保存已确认 detail，排队中的 undo 排在前项写入之后。
+- 队列内逻辑对象到当前服务端 ID 的映射贯穿 create/delete/undo/redo；恢复对象换 ID 后，早先与后续命令均指向活 ID。没有修改 server create 契约。
+- Set + anchor 多选：Select 空白拖动按世界坐标框选 member/edge/visual/chalk；Shift 点击加减，群拖跳过 pinned 并提示。边按实际线段与框相交判断，画物计入旋转后的范围。
+- 群删按补遗一分类。N 是实选成员数，K 是这些成员全部相连边的去重数（包括未选中的级联边），M 是画物/chalk 与两端存活的独立边数；确认框明确前两类不可撤、后一类可撤。成员下板沿原接口级联，相关历史目标被清理；只将可撤部分组成一条命令。
+- 输入框和弹窗内板快捷键让位。原生浏览器发现的混删弹窗关闭后焦点丢失已修复；关闭后回到板，立即 Ctrl+Z 生效。工具栏 Undo/Redo 同样将焦点交回板。保留原有单选、staging 与搬迁交互。
+
+### numstat
+
+工作树产品代码合计 **651 added / 124 deleted**。下列含新文件的完整行数；新增文件未 stage，不能只看默认 `git diff --numstat` 而漏算。
+
+文档另含本回执及工单状态更新；`node scripts/docs-index.mjs` 生成的 `docs/agent-ops/INDEX.md` 仅同步本单 `ready → done`（1 added / 1 deleted）。
+
+```text
+257  87  client/src/pages/Boards/BoardPage.tsx
+2     2  client/src/pages/Boards/BoardRelocatedVisual.tsx
+2     0  client/src/pages/Boards/Boards.module.css
+66   35  client/src/pages/Boards/useBoard.ts
+249   0  client/src/pages/Boards/boardCommandHistory.ts                 (new)
+75    0  client/src/pages/Boards/boardSelection.ts                      (new)
+```
+
+测试合计 **501 added / 2 deleted**；浏览器夹具与说明 **204 added / 0 deleted**：
+
+```text
+33    0  client/src/pages/Boards/BoardPage.modal.test.tsx
+5     2  client/src/pages/Boards/BoardPage.smoke.test.tsx
+211   0  client/src/pages/Boards/BoardPage.tools.test.tsx                (new)
+252   0  client/src/pages/Boards/useBoard.history.test.tsx               (new)
+13    0  client/scripts/boardToolsSmoke/README.md                       (new)
+35    0  client/scripts/boardToolsSmoke/fixture.tsx                     (new)
+3     0  client/scripts/boardToolsSmoke/index.html                      (new)
+117   0  client/scripts/boardToolsSmoke/mockApi.ts                      (new)
+36    0  client/scripts/boardToolsSmoke/start.mjs                       (new)
+```
+
+既有 smoke 用例仅跟随两处实际契约调整：空白平移明确选择 Pan；队列几何请求断言改为只发送变化字段，同时保留并补足最终完整几何断言。未删用例、未使用 name-pattern 过滤。
+
+### 六冒烟逐条
+
+以下六条均完成 **Chrome 原生交互 + 自动化工作流测试**。浏览器夹具加载生产 `BoardPage`、`useBoard`、`boardRepository`，API 替换为内存 transport；`envFile: false`，不启动应用后端、不接触用户数据库。重开板验证的是内存 transport 保存后的重新挂载；实际服务端行为另由既有隔离路由套件验证。复跑入口见 `client/scripts/boardToolsSmoke/README.md`。
+
+1. **通过**：画三笔，橡皮一个连续手势擦两笔；第三笔保留，Ctrl+Z 一次两笔全回，Ctrl+Y 再擦两笔。Chrome 使用原生 `getScreenCTM` / `isPointInStroke`，不依赖 jsdom 替身。
+2. **通过**：单卡拖动，undo 回原位、redo 回终位；重开板仍在保存终位且撤回栈为空。原生样本 B 从 `(480,80)` 到 `(560,130)`，重开保持后者。
+3. **通过**：删两端均存活且有 label/方向的独立边；undo 以新 ID 恢复 label 与箭头方向，redo 再删，其余边不受影响。自动化另覆盖双向箭头。
+4. **通过**：删除画物后 undo/redo/undo，恢复 ID 连续变化；继续拖动保存并再 undo/redo，命令使用当前 ID，无旧 ID 请求/404。Chrome 中 `visual-7 → visual-8 → visual-9` 后拖动仍成功。
+5. **通过**：框选三对象（普通卡、pinned 卡、chalk），群拖只移动可动对象，显示跳过 1 个 pinned；undo 一步恢复整体。Shift 点击 pinned 对象使计数 `3 → 2 → 3`。
+6. **通过，按补遗改判**：混选 A、E(A→B)、一画物，另有未选中的 C→A。确认框实算 `N=1 / K=2 / M=1`；执行后 A 与两条相连边消失；立即 Ctrl+Z 只恢复画物，A/E 均不复挂。夹具写入记录只有 member DELETE、visual DELETE/POST，无 member POST。夹具的 `unmounted` 是模拟记录；真实 FK 级联及 `unmounted` 记账由既有 `server/src/__tests__/v13BoardRoutes.test.ts` 整文件实跑证明。
+
+### typecheck / build / 定向回归
+
+验证命令经既有 `scripts/run-isolated-coordinate-validation.mjs` 包装执行，使用空 Vite envDir、内存数据库及合成资源。所有选中的既有测试文件/套件均整跑，没有测试名过滤。
+
+- 最终客户端全套 `npm run test:unit`：**80 文件，693/693**。Boards 全目录加外部 staging hook：**17 文件，128/128**；最终焦点修复后 tools/smoke/modal 三文件 **25/25**，随后客户端全套再次通过。
+- 新六工作流 **6/6**；history 新八例与既有 useBoard 八例合计 **16/16**，覆盖排队中撤回、全部几何字段、活 ID、80 条、换板/reload、失败不推进及批量失败补偿。modal 整文件 **8/8**，使用非空 undo/redo 栈验证弹窗让位。
+- `npm run build:client`（含 `tsc -b`、Vite）与 `npm run build`（含 server `tsc`）均 **exit 0**；最终焦点修改后重新跑客户端构建通过。
+- 服务端既有 `test:v13-boards` **25/25**；staging、tray relocation、visual manipulation 三个既有文件完整运行 **9/9**。未增加或修改服务端测试。
+- runtime 其余组成项均 **exit 0**：`test:tool-face-registry`（5/5）、`test:tool-face-manifest`（10/10）、`check:tool-face-manifest`、`test:tool-face-parity`（10/10）、`check:tool-face-parity`、`check:server-shared-runtime-import`、`check:canvas-runtime-boundary`、`check:group-gallery-shell`、`check:groups-rail-shell`、`check:single-editor-shell`、`check:source-experience`、`check:v2-bn11-legacy-shutdown`、`check:v2-bn11-relation-freshness`、`smoke:canvas-engine-model-contract`、`smoke:canvas-engine-performance`。
+- 回执落盘后 `npm run docs:check` 与 `git diff --check` 通过。
+- 一次客户端测试与构建并行时，未改动的 Gallery 测试出现瞬时失败；该文件整跑 3/3、随后客户端全套单独重跑 693/693 通过。没有修改 Gallery 或过滤失败用例。
+
+### 未做清单 / 停线事项
+
+- **没有未完成的单 4 产品项，也无新的停线事项。** 每对象 HTTP 的可撤批量写采用已成功子项逆操作补偿；若补偿本身也失败，暴露错误与已确认状态，不承诺服务端原子事务。成员下板已成功的部分始终不可撤，不因后续请求失败而重新挂载。
+- **凭据扫描留 HQ**：没有执行 `check:changed-file-secrets`；`verify:v2-bn8-runtime` 原命令包含该扫描，因此本次按组成项执行其余验证，**不宣称原命令完整通过**。主观验收、HQ 放行未代行。
+- 未设计/新增安全类测试；未读 `.env`、未使 key 出境、未触碰用户数据库；未 commit/push/PR/merge。未改 server create、event verb、搬迁撤销/409 保护、纸内块栈或 agent 权限/操作指令。开工已存在的无关未跟踪文件保持原样。

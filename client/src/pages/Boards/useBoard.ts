@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { boardErrorMessage, boardRepository } from './boardRepository';
 import { subscribeBoardChanges } from './boardEvents';
+import { BoardCommandHistory, type BoardGeometryChange, type BoardRemovalSelection } from './boardCommandHistory';
 import type {
   BoardDetail,
   CreateBoardEdgeInput,
@@ -15,6 +16,7 @@ import type {
 
 interface BoardScope {
   boardId: string | undefined;
+  history: BoardCommandHistory;
 }
 
 interface BoardState {
@@ -32,10 +34,10 @@ function upsert<T extends { id: string }>(items: T[], value: T): T[] {
 }
 
 export function useBoard(boardId: string | undefined) {
-  const scope = useMemo<BoardScope>(() => ({ boardId }), [boardId]);
+  const scope = useMemo<BoardScope>(() => ({ boardId, history: new BoardCommandHistory() }), [boardId]);
   const renderedId = useRef(boardId);
   renderedId.current = boardId;
-  const scopeRef = useRef<BoardScope>({ boardId: undefined });
+  const scopeRef = useRef<BoardScope>({ boardId: undefined, history: new BoardCommandHistory() });
   const alive = useRef(false);
   const queue = useRef<Promise<void>>(Promise.resolve());
   const saveFailure = useRef<{ scope: BoardScope; message: string } | null>(null);
@@ -67,9 +69,12 @@ export function useBoard(boardId: string | undefined) {
       if (kind === 'read' && !isCurrent(scope)) return false;
       try {
         const value = await work(id);
+        // Update the queue-owned snapshot synchronously: the next queued undo
+        // must see this write even before React processes its render.
+        scope.history.detail = apply(scope.history.detail, value);
         if (isCurrent(scope)) {
           setState((current) => current.scope === scope && isCurrent(scope)
-            ? { ...current, detail: apply(current.detail, value) }
+            ? { ...current, detail: scope.history.detail }
             : current);
         }
         return true;
@@ -77,7 +82,7 @@ export function useBoard(boardId: string | undefined) {
         if (isCurrent(scope)) {
           const message = boardErrorMessage(error);
           if (kind === 'write') saveFailure.current = { scope, message };
-          setState((current) => current.scope === scope ? { ...current, error: message } : current);
+          setState((current) => current.scope === scope ? { ...current, detail: scope.history.detail, error: message } : current);
         }
         return false;
       } finally {
@@ -94,7 +99,10 @@ export function useBoard(boardId: string | undefined) {
   }, [isCurrent]);
 
   const load = useCallback(async (scope: BoardScope) => {
-    await enqueue((id) => boardRepository.get(id), (_detail, value) => value, 'read', scope);
+    await enqueue((id) => boardRepository.get(id), (_detail, value) => {
+      scope.history.reset(value);
+      return value;
+    }, 'read', scope);
   }, [enqueue]);
 
   useEffect(() => {
@@ -124,78 +132,98 @@ export function useBoard(boardId: string | undefined) {
 
   const mount = useCallback((input: MountBoardMemberInput) => enqueue(
     (id) => boardRepository.mount(id, input),
-    (detail, member) => detail ? { ...detail, members: upsert(detail.members, member) } : detail,
+    (detail, member) => {
+      scope.history.newEdit();
+      return detail ? { ...detail, members: upsert(detail.members, member) } : detail;
+    },
     'write', scope,
   ), [enqueue, scope]);
 
   const updateMember = useCallback((memberId: string, input: PatchBoardMemberInput) => enqueue(
-    (id) => boardRepository.updateMember(id, memberId, input),
-    (detail, member) => detail
-      ? { ...detail, members: detail.members.map((item) => item.id === member.id ? member : item) }
-      : detail,
+    (id) => scope.history.patch(id, 'member', memberId, input),
+    (detail) => detail,
     'write', scope,
   ), [enqueue, scope]);
 
   const mountTextRange = useCallback((input: MountBoardTextRangeInput) => enqueue(
     (id) => boardRepository.mountTextRange(id, input),
-    (detail, member) => detail ? { ...detail, members: upsert(detail.members, member) } : detail,
+    (detail, member) => {
+      scope.history.newEdit();
+      return detail ? { ...detail, members: upsert(detail.members, member) } : detail;
+    },
     'write', scope,
   ), [enqueue, scope]);
 
   const unmount = useCallback((memberId: string) => enqueue(
-    (id) => boardRepository.unmount(id, memberId),
-    (detail) => detail ? {
-      ...detail,
-      members: detail.members.filter((member) => member.id !== memberId),
-      edges: detail.edges.filter((edge) => edge.from_member_id !== memberId && edge.to_member_id !== memberId),
-    } : detail,
+    (id) => scope.history.removeSelection(id, { memberIds: [memberId], edgeIds: [], visualIds: [] }),
+    (detail) => detail,
     'write', scope,
   ), [enqueue, scope]);
 
   const addEdge = useCallback((input: CreateBoardEdgeInput) => enqueue(
-    (id) => boardRepository.createEdge(id, input),
-    (detail, edge) => detail ? { ...detail, edges: upsert(detail.edges, edge) } : detail,
+    (id) => scope.history.create(id, 'edge', input),
+    (detail) => detail,
     'write', scope,
   ), [enqueue, scope]);
 
   const removeEdge = useCallback((edgeId: string) => enqueue(
-    (id) => boardRepository.deleteEdge(id, edgeId),
-    (detail) => detail ? { ...detail, edges: detail.edges.filter((edge) => edge.id !== edgeId) } : detail,
+    (id) => scope.history.removeSelection(id, { memberIds: [], edgeIds: [edgeId], visualIds: [] }),
+    (detail) => detail,
     'write', scope,
   ), [enqueue, scope]);
 
   const updateEdge = useCallback((edgeId: string, input: PatchBoardEdgeInput) => enqueue(
-    (id) => boardRepository.updateEdge(id, edgeId, input),
-    (detail, edge) => detail ? { ...detail, edges: upsert(detail.edges, edge) } : detail,
+    (id) => scope.history.patch(id, 'edge', edgeId, input),
+    (detail) => detail,
     'write', scope,
   ), [enqueue, scope]);
 
   const addVisual = useCallback((input: CreateBoardVisualInput) => enqueue(
-    (id) => boardRepository.createVisual(id, input),
-    (detail, visual) => detail ? { ...detail, visuals: upsert(detail.visuals, visual) } : detail,
+    (id) => scope.history.create(id, 'visual', input),
+    (detail) => detail,
     'write', scope,
   ), [enqueue, scope]);
 
   const removeVisual = useCallback((visualId: string) => enqueue(
-    (id) => boardRepository.deleteVisual(id, visualId),
-    (detail) => detail ? { ...detail, visuals: detail.visuals.filter((visual) => visual.id !== visualId) } : detail,
+    (id) => scope.history.removeSelection(id, { memberIds: [], edgeIds: [], visualIds: [visualId] }),
+    (detail) => detail,
     'write', scope,
   ), [enqueue, scope]);
 
   const updateVisual = useCallback((visualId: string, input: PatchBoardVisualInput) => enqueue(
-    (id) => boardRepository.updateVisual(id, visualId, input),
-    (detail, visual) => detail ? { ...detail, visuals: upsert(detail.visuals, visual) } : detail,
+    (id) => scope.history.patch(id, 'visual', visualId, input),
+    (detail) => detail,
     'write', scope,
   ), [enqueue, scope]);
 
   const castVisual = useCallback((visualId: string) => enqueue(
-    (id) => boardRepository.castVisual(id, visualId),
-    (detail, result) => detail ? {
-      ...detail,
-      members: upsert(detail.members, result.member),
-      visuals: detail.visuals.filter((visual) => visual.id !== result.removed_visual_id),
-    } : detail,
+    (id) => boardRepository.castVisual(id, scope.history.resolve('visual', visualId)),
+    (detail, result) => {
+      scope.history.invalidate('visual', [result.removed_visual_id]);
+      scope.history.newEdit();
+      return detail ? {
+        ...detail,
+        members: upsert(detail.members, result.member),
+        visuals: detail.visuals.filter((visual) => visual.id !== result.removed_visual_id),
+      } : detail;
+    },
     'write', scope,
+  ), [enqueue, scope]);
+
+  const updateGeometryBatch = useCallback((changes: BoardGeometryChange[]) => enqueue(
+    (id) => scope.history.updateGeometryBatch(id, changes), (detail) => detail, 'write', scope,
+  ), [enqueue, scope]);
+  const removeSelection = useCallback((selection: BoardRemovalSelection) => enqueue(
+    (id) => scope.history.removeSelection(id, selection), (detail) => detail, 'write', scope,
+  ), [enqueue, scope]);
+  const removeVisuals = useCallback((visualIds: string[]) => removeSelection({
+    memberIds: [], edgeIds: [], visualIds,
+  }), [removeSelection]);
+  const undo = useCallback(() => enqueue(
+    (id) => scope.history.undo(id), (detail) => detail, 'write', scope,
+  ), [enqueue, scope]);
+  const redo = useCallback(() => enqueue(
+    (id) => scope.history.redo(id), (detail) => detail, 'write', scope,
   ), [enqueue, scope]);
 
   const flush = useCallback(async () => {
@@ -215,7 +243,10 @@ export function useBoard(boardId: string | undefined) {
     loading: current ? state.loadingCount > 0 : Boolean(boardId),
     error: current ? state.error : null,
     pending: current && state.pendingCount > 0,
+    canUndo: current && scope.history.canUndo,
+    canRedo: current && scope.history.canRedo,
     reload, updateBoard, mount, mountTextRange, updateMember, unmount, addEdge, removeEdge,
     addVisual, removeVisual, updateVisual, castVisual, updateEdge, clearError, flush,
+    updateGeometryBatch, removeSelection, removeVisuals, undo, redo,
   };
 }

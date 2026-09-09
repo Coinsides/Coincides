@@ -122,6 +122,8 @@
 .canvasEmpty button { pointer-events: auto; border-color: var(--border-default); }
 .selectionBar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 8px 12px; border-top: 1px solid var(--border-default); background: var(--bg-surface); }
 .selectionBar > span { font-size: 12px; color: var(--text-secondary); }
+.selectionNotice { padding: 6px 16px; font-size: 12px; color: var(--text-secondary); background: var(--bg-surface); }
+.marquee { position: absolute; pointer-events: none; z-index: 2147483647; border: 1px solid var(--border-focus); background: var(--accent-primary-bg); }
 .loading { padding: 24px; }
 .loading p { margin: 24px 0; }
 .relocatedVisual, .relocatedConnector { position: absolute; transform-origin: 0 0; }

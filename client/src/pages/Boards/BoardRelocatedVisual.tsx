@@ -65,7 +65,7 @@ export function BoardRelocatedVisual({ visual, selected, selectable, onSelect, o
   visual: BoardVisual;
   selected: boolean;
   selectable: boolean;
-  onSelect: () => void;
+  onSelect: (event?: React.SyntheticEvent) => void;
   onPointerDown?: (event: React.PointerEvent) => void;
   onResize?: (event: React.PointerEvent) => void;
 }) {
@@ -80,7 +80,7 @@ export function BoardRelocatedVisual({ visual, selected, selectable, onSelect, o
   const select = (event: React.SyntheticEvent) => {
     if (!selectable) return;
     event.stopPropagation();
-    onSelect();
+    onSelect(event);
   };
   const label = `Select moved ${visual.visual_kind}`;
   if (visual.visual_kind === 'connector') {

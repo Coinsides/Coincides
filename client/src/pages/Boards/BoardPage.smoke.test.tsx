@@ -647,8 +647,10 @@ describe('V13 S2 board and paper smoke', () => {
     await waitFor(() => expect(detail.members[0].x).toBe(130));
     await saved();
     expect(http.patch).toHaveBeenCalledTimes(2);
+    expect(detail.members[0]).toMatchObject({ x: 130, y: 70, w: 260, h: 156 });
+    // History patches only changed coordinates; dimensions remain intact without replaying a stale resize.
     expect(http.patch.mock.calls[1]).toEqual(['/boards/drag-board/members/member-drag-board', {
-      x: 130, y: 70, w: 260, h: 156,
+      x: 130,
     }]);
     expect(unexpectedWrites).toEqual([]);
   });
@@ -717,7 +719,8 @@ describe('V13 S2 board and paper smoke', () => {
     expect(card(group.title).style.width).toBe('360px');
     expect(card(group.title).style.height).toBe('206px');
 
-    // Blank-space pan adds screen deltas; the saved zoom and content geometry remain independent.
+    // The Pan tool adds screen deltas; Select now reserves blank-space drag for marquee.
+    fireEvent.click(screen.getByRole('button', { name: 'Pan' }));
     const beforePan = clone(detail.board.viewport);
     pointer(surface, 'pointerDown', 20, 20);
     pointer(surface, 'pointerMove', 50, 60);

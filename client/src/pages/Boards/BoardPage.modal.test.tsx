@@ -81,6 +81,39 @@ beforeEach(() => {
 });
 
 describe('BoardPage note modal host', () => {
+  it('leaves nonempty board undo and redo stacks untouched while the note modal owns keyboard input', async () => {
+    http.patch.mockImplementation(async (url: string, input: Partial<BoardMember>) => {
+      const target = detail.members.find(({ id }) => url === `/boards/board/members/${id}`);
+      if (!target) throw new Error('Unexpected fixture geometry target');
+      Object.assign(target, input);
+      return clone({ member: target });
+    });
+    openBoard();
+    const first = await screen.findByRole('article', { name: 'first' });
+    fireEvent.focus(first);
+    fireEvent.click(screen.getByRole('button', { name: 'Pin' }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Unpin' })).toBeTruthy());
+    fireEvent.click(screen.getByRole('button', { name: 'Unpin' }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Pin' })).toBeTruthy());
+    const surface = screen.getByTestId('board-surface');
+    fireEvent.keyDown(surface, { key: 'z', ctrlKey: true });
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Unpin' })).toBeTruthy());
+    expect((screen.getByRole('button', { name: 'Undo board action' }) as HTMLButtonElement).disabled).toBe(false);
+    expect((screen.getByRole('button', { name: 'Redo board action' }) as HTMLButtonElement).disabled).toBe(false);
+    fireEvent.doubleClick(first);
+    const dialog = await screen.findByRole('dialog', { name: 'Open first' });
+    const count = http.patch.mock.calls.length;
+    for (const target of [surface, dialog, within(dialog).getByRole('button', { name: 'Close note' })]) {
+      fireEvent.keyDown(target, { key: 'z', ctrlKey: true });
+      fireEvent.keyDown(target, { key: 'y', ctrlKey: true });
+      fireEvent.keyDown(target, { key: 'z', metaKey: true, shiftKey: true });
+    }
+    await act(async () => undefined);
+    expect(http.patch).toHaveBeenCalledTimes(count);
+    expect(detail.members[0].pinned).toBe(true);
+    expect(screen.getByRole('dialog', { name: 'Open first' })).toBeTruthy();
+  });
+
   it('keeps the selected board unchanged while the New note dialog owns input and an older paste finishes', async () => {
     const showModal = Object.getOwnPropertyDescriptor(HTMLDialogElement.prototype, 'showModal');
     Object.defineProperty(HTMLDialogElement.prototype, 'showModal', {

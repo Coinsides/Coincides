@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Hand, Link2, MousePointer2, Pencil, Plus, Minus, Pin, Trash2, ExternalLink, X, Inbox } from 'lucide-react';
+import { ArrowLeft, Hand, Link2, MousePointer2, Pencil, Plus, Minus, Pin, Trash2, ExternalLink, X, Inbox, Eraser, Undo2, Redo2 } from 'lucide-react';
 import { boardErrorMessage, loadBoardCandidates, loadBoardNotePreview } from './boardRepository';
 import type { BoardCandidate, BoardEdge, BoardMember, BoardViewport, BoardVisual } from './boardTypes';
 import { pointsPath, toBoardPoint, zoomBoardAt, type BoardPoint } from './boardViewport';
@@ -14,13 +14,18 @@ import { BoardStaging, BOARD_STAGING_MIME } from './BoardStaging';
 import type { BoardTextRangeSelection } from '@shared/types/boardTextRange';
 import { itemOriginLabel } from '@/services/itemSummaryReader';
 import { BOARD_TEXT_RANGE_MIME, parseBoardTextRangeClipboard } from './boardTextRangeClipboard';
+import { connectionPoint, deletionScope, marqueeSelection, selectionKey, selectionRect, type BoardSelection, type BoardRect } from './boardSelection';
 import styles from './Boards.module.css';
 
-type Tool = 'select' | 'pan' | 'connect' | 'pen';
-type Selection = { kind: 'member' | 'edge' | 'visual'; id: string } | null;
+type Tool = 'select' | 'pan' | 'connect' | 'pen' | 'eraser';
+type Selection = BoardSelection | null;
+type MoveObject = BoardMember | BoardVisual;
 type Gesture =
   | { kind: 'pan'; start: BoardPoint; viewport: BoardViewport }
-  | { kind: 'move' | 'resize'; start: BoardPoint; object: BoardMember | BoardVisual }
+  | { kind: 'resize'; start: BoardPoint; object: MoveObject }
+  | { kind: 'move'; start: BoardPoint; objects: MoveObject[] }
+  | { kind: 'marquee'; start: BoardPoint; base: Set<string>; additive: boolean }
+  | { kind: 'eraser'; ids: Set<string>; previous?: BoardPoint }
   | { kind: 'pen'; points: BoardPoint[] };
 
 function strokePath(visual: BoardVisual): string {
@@ -30,23 +35,45 @@ function strokePath(visual: BoardVisual): string {
     && typeof point.x === 'number' && typeof point.y === 'number')));
 }
 
-function connectionPoint(member: BoardMember, other: BoardMember): BoardPoint {
-  const center = { x: member.x + member.w * member.scale / 2, y: member.y + member.h * member.scale / 2 };
-  const dx = other.x + other.w * other.scale / 2 - center.x;
-  const dy = other.y + other.h * other.scale / 2 - center.y;
-  const distance = Math.hypot(dx, dy);
-  if (!distance) return center;
-  const reach = Math.min(dx ? member.w * member.scale / 2 / Math.abs(dx) : Infinity,
-    dy ? member.h * member.scale / 2 / Math.abs(dy) : Infinity) + 6 / distance;
-  return { x: center.x + dx * reach, y: center.y + dy * reach };
-}
-
 export default function BoardPage() {
   const { boardId } = useParams();
   const navigate = useNavigate();
   const board = useBoard(boardId);
   const [tool, setTool] = useState<Tool>('select');
-  const [selection, setSelection] = useState<Selection>(null);
+  const [selectionState, setSelectionState] = useState<{ keys: Set<string>; anchor: Selection }>({ keys: new Set(), anchor: null });
+  const selectedKeys = selectionState.keys;
+  const selection = selectedKeys.size === 1 ? selectionState.anchor : null;
+  const [marquee, setMarquee] = useState<BoardRect | null>(null);
+  const [erasedIds, setErasedIds] = useState<Set<string>>(new Set());
+  const [selectionNotice, setSelectionNotice] = useState<string | null>(null);
+  const [deleteKeys, setDeleteKeys] = useState<Set<string> | null>(null);
+  const groupDeleteDialog = useRef<HTMLDialogElement>(null);
+  const groupDeleteWasOpen = useRef(false);
+  const [groupDrafts, setGroupDrafts] = useState<Map<string, MoveObject>>(new Map());
+  const groupDraftsRef = useRef<Map<string, MoveObject>>(new Map());
+  function setSelection(next: Selection) {
+    setSelectionState({ keys: new Set(next ? [selectionKey(next)] : []), anchor: next });
+  }
+  function selectObject(next: BoardSelection, toggle = false, preserve = false) {
+    const key = selectionKey(next);
+    if (preserve && selectedKeys.has(key)) return;
+    setSelectionState((current) => {
+      const keys = toggle ? new Set(current.keys) : new Set<string>();
+      if (toggle && keys.has(key)) keys.delete(key); else keys.add(key);
+      const anchorKey = keys.has(key) ? key : [...keys][keys.size - 1];
+      const anchor = anchorKey ? { kind: anchorKey.slice(0, anchorKey.indexOf(':')) as BoardSelection['kind'], id: anchorKey.slice(anchorKey.indexOf(':') + 1) } : null;
+      return { keys, anchor };
+    });
+  }
+  function isSelected(kind: BoardSelection['kind'], id: string) { return selectedKeys.has(selectionKey({ kind, id })); }
+  function focusSelection(next: BoardSelection) { if (!gesture.current) selectObject(next, false, true); }
+  useEffect(() => {
+    if (deleteKeys) groupDeleteDialog.current?.showModal();
+    // Native showModal makes the canvas inert until React removes the dialog.
+    // Restore focus after that commit so the next undo shortcut reaches the board.
+    else if (groupDeleteWasOpen.current) surface.current?.focus();
+    groupDeleteWasOpen.current = Boolean(deleteKeys);
+  }, [deleteKeys]);
   const [connectFrom, setConnectFrom] = useState<string | null>(null);
   const [candidates, setCandidates] = useState<BoardCandidate[]>([]);
   const [candidateError, setCandidateError] = useState<string | null>(null);
@@ -124,6 +151,12 @@ export default function BoardPage() {
     setViewportDirty(false);
     viewportRef.current = null;
     setSelection(null);
+    setDeleteKeys(null);
+    setMarquee(null);
+    setErasedIds(new Set());
+    setSelectionNotice(null);
+    setGroupDrafts(new Map());
+    groupDraftsRef.current = new Map();
     setConnectFrom(null);
     gesture.current = null;
     setObjectDraft(null);
@@ -226,7 +259,7 @@ export default function BoardPage() {
   }
 
   async function pasteReference(event: React.ClipboardEvent<HTMLElement>) {
-    if (boardPaused.current) return;
+    if (boardPaused.current || deleteKeys || deleting) return;
     const visit = visitRevision.current;
     if ((event.target as HTMLElement).closest('input, textarea, select, [contenteditable="true"]')) return;
     const raw = event.clipboardData.getData(BOARD_TEXT_RANGE_MIME)
@@ -278,13 +311,31 @@ export default function BoardPage() {
 
   const stagedMembers = (detail?.members || []).filter((member) => member.placed === false);
   const visibleMembers = (detail?.members || []).filter((member) => member.placed !== false)
-    .map((member) => objectDraft?.id === member.id && 'member_kind' in objectDraft ? objectDraft : member);
-  const visibleVisuals = (detail?.visuals || []).map((visual) => objectDraft?.id === visual.id && 'visual_kind' in objectDraft ? objectDraft : visual);
+    .map((member) => (groupDrafts.get(member.id) as BoardMember | undefined) || (objectDraft?.id === member.id && 'member_kind' in objectDraft ? objectDraft : member));
+  const visibleVisuals = (detail?.visuals || []).map((visual) => (groupDrafts.get(visual.id) as BoardVisual | undefined) || (objectDraft?.id === visual.id && 'visual_kind' in objectDraft ? objectDraft : visual));
   const visibleEdges = (detail?.edges || []).filter((edge) => visibleMembers.some((member) => member.id === edge.from_member_id)
     && visibleMembers.some((member) => member.id === edge.to_member_id));
   const selectedMember = selection?.kind === 'member' ? visibleMembers.find(({ id }) => id === selection.id) : undefined;
   const selectedVisual = selection?.kind === 'visual' ? visibleVisuals.find(({ id }) => id === selection.id) : undefined;
   const selectedEdge = selection?.kind === 'edge' ? visibleEdges.find(({ id }) => id === selection.id) : undefined;
+
+  // Recreated objects receive new server IDs. A selection of a removed object
+  // must not leave a phantom control bar after undo, redo, or a projection reload.
+  useEffect(() => {
+    if (!detail || board.pending || gesture.current) return;
+    const liveKeys = new Set([
+      ...detail.members.filter((member) => member.placed !== false).map(({ id }) => selectionKey({ kind: 'member', id })),
+      ...detail.edges.map(({ id }) => selectionKey({ kind: 'edge', id })),
+      ...detail.visuals.map(({ id }) => selectionKey({ kind: 'visual', id })),
+    ]);
+    setSelectionState((current) => {
+      const keys = new Set([...current.keys].filter((key) => liveKeys.has(key)));
+      if (keys.size === current.keys.size) return current;
+      const key = [...keys][keys.size - 1];
+      const anchor = key ? { kind: key.slice(0, key.indexOf(':')) as BoardSelection['kind'], id: key.slice(key.indexOf(':') + 1) } : null;
+      return { keys, anchor };
+    });
+  }, [detail, board.pending]);
 
   function defaultMemberPosition() {
     return toBoardPoint({ x: 80 + (visibleMembers.length % 3) * 300,
@@ -419,10 +470,37 @@ export default function BoardPage() {
     if (await board.addEdge({ from_member_id: connectFrom, to_member_id: member.id })) setConnectFrom(null);
   }
 
-  function begin(event: React.PointerEvent, object?: BoardMember | BoardVisual, resize = false) {
+  function eraseAt(event: { clientX: number; clientY: number; target: EventTarget | null }) {
+    const current = gesture.current;
+    if (current?.kind !== 'eraser') return;
+    const paths = new Set<SVGPathElement>();
+    if (event.target instanceof Element) {
+      const direct = event.target.closest<SVGPathElement>('[data-eraser-id]');
+      if (direct) paths.add(direct);
+    }
+    const previous = current.previous || { x: event.clientX, y: event.clientY };
+    const dx = event.clientX - previous.x; const dy = event.clientY - previous.y;
+    const steps = Math.max(1, Math.ceil(Math.hypot(dx, dy) / 4));
+    // Pointer capture retargets events to the surface. Hit-test the same transparent
+    // stroke paths in their own coordinate systems so captured sweeps still erase.
+    surface.current?.querySelectorAll<SVGPathElement>('[data-eraser-id]').forEach((path) => {
+      if (!path.isPointInStroke || !path.getScreenCTM) return;
+      const matrix = path.getScreenCTM();
+      if (!matrix) return;
+      const inverse = matrix.inverse();
+      for (let step = 0; step <= steps; step += 1) {
+        const point = new DOMPoint(previous.x + dx * step / steps, previous.y + dy * step / steps).matrixTransform(inverse);
+        if (path.isPointInStroke(point)) { paths.add(path); break; }
+      }
+    });
+    current.previous = { x: event.clientX, y: event.clientY };
+    paths.forEach((path) => { if (path.dataset.eraserId) current.ids.add(path.dataset.eraserId); });
+    setErasedIds(new Set(current.ids));
+  }
+
+  function begin(event: React.PointerEvent, object?: MoveObject | BoardEdge, resize = false) {
     if (event.button !== 0 && event.button !== 1) return;
-    if (!detail || !viewportRef.current) return;
-    if (chalkDraft) return;
+    if (!detail || !viewportRef.current || chalkDraft || deleteKeys) return;
     event.preventDefault();
     event.stopPropagation();
     surface.current?.focus();
@@ -436,22 +514,44 @@ export default function BoardPage() {
       gesture.current = { kind: 'pen', points };
       setInk(points);
       setSelection(null);
-    } else if (object) {
-      const kind = 'visual_kind' in object ? 'visual' : 'member';
-      setSelection({ kind, id: object.id });
-      if (tool === 'connect') { if ('member_kind' in object) void connect(object); return; }
-      if (object.pinned) return;
-      if (resize && 'visual_kind' in object && (object.visual_kind === 'freehand' || object.visual_kind === 'connector')) return;
-      gesture.current = { kind: resize ? 'resize' : 'move', start, object };
-      objectDraftRef.current = object;
-      setObjectDraft(object);
-    } else {
+    } else if (tool === 'eraser') {
+      gesture.current = { kind: 'eraser', ids: new Set() };
       setSelection(null);
+      eraseAt(event);
+    } else if (object) {
+      const kind = 'visual_kind' in object ? 'visual' : 'member_kind' in object ? 'member' : 'edge';
+      const target: BoardSelection = { kind, id: object.id };
+      if (tool === 'connect') { if ('member_kind' in object) void connect(object); return; }
+      if (event.shiftKey && !resize) { selectObject(target, true); return; }
+      const keepSelection = selectedKeys.has(selectionKey(target)) && !resize;
+      selectObject(target, false, keepSelection);
+      if (resize && 'pinned' in object) {
+        if (object.pinned || ('visual_kind' in object && (object.visual_kind === 'freehand' || object.visual_kind === 'connector'))) return;
+        gesture.current = { kind: 'resize', start, object };
+        objectDraftRef.current = object;
+        setObjectDraft(object);
+      } else {
+        const keys = keepSelection ? selectedKeys : new Set([selectionKey(target)]);
+        const objects = [...visibleMembers, ...visibleVisuals].filter((entry) => keys.has(selectionKey({
+          kind: 'member_kind' in entry ? 'member' : 'visual', id: entry.id,
+        })));
+        const pinnedCount = objects.filter((entry) => entry.pinned).length;
+        setSelectionNotice(pinnedCount ? `Skipped ${pinnedCount} pinned ${pinnedCount === 1 ? 'object' : 'objects'}.` : null);
+        const movable = objects.filter((entry) => !entry.pinned);
+        if (!movable.length) return;
+        gesture.current = { kind: 'move', start, objects: movable };
+        groupDraftsRef.current = new Map(movable.map((entry) => [entry.id, entry]));
+        setGroupDrafts(new Map(groupDraftsRef.current));
+      }
+    } else if (tool === 'select') {
       setConnectFrom(null);
-      gesture.current = { kind: 'pan', start, viewport: current };
-    }
-    // Keep clicks/double-clicks targeted at the member while drag events bubble to the surface.
-    capturedPointer.current = object ? event.currentTarget : surface.current;
+      setSelectionNotice(null);
+      const point = toBoardPoint(start, current);
+      gesture.current = { kind: 'marquee', start: point, base: new Set(selectedKeys), additive: event.shiftKey };
+      setMarquee(selectionRect(point, point));
+      if (!event.shiftKey) setSelection(null);
+    } else { setSelection(null); setConnectFrom(null); return; }
+    capturedPointer.current = object && tool !== 'eraser' ? event.currentTarget : surface.current;
     capturedPointer.current?.setPointerCapture(event.pointerId);
   }
 
@@ -462,27 +562,41 @@ export default function BoardPage() {
     if (current.kind === 'pan') {
       changeViewport({ ...current.viewport, x: current.viewport.x + point.x - current.start.x,
         y: current.viewport.y + point.y - current.start.y }, false);
+    } else if (current.kind === 'eraser') {
+      eraseAt(event);
+    } else if (current.kind === 'marquee') {
+      const rect = selectionRect(current.start, toBoardPoint(point, viewportRef.current));
+      setMarquee(rect);
+      const hits = marqueeSelection(rect, { members: visibleMembers, visuals: visibleVisuals, edges: visibleEdges });
+      const keys = current.additive ? new Set(current.base) : new Set<string>();
+      hits.forEach((hit) => keys.add(selectionKey(hit)));
+      const key = [...keys][keys.size - 1];
+      const anchor = key ? { kind: key.slice(0, key.indexOf(':')) as BoardSelection['kind'], id: key.slice(key.indexOf(':') + 1) } : null;
+      setSelectionState({ keys, anchor });
     } else if (current.kind === 'pen') {
-      const next = toBoardPoint(point, viewportRef.current);
-      current.points = [...current.points, next];
+      current.points = [...current.points, toBoardPoint(point, viewportRef.current)];
       setInk(current.points);
     } else {
       const dx = (point.x - current.start.x) / viewportRef.current.zoom;
       const dy = (point.y - current.start.y) / viewportRef.current.zoom;
-      const object = current.object;
-      const visual = 'visual_kind' in object;
-      const next = current.kind === 'move'
-        ? { ...object, x: object.x + dx, y: object.y + dy }
-        : { ...object, w: Math.max(visual ? 16 : 160, object.w + dx / object.scale),
+      if (current.kind === 'move') {
+        groupDraftsRef.current = new Map(current.objects.map((object) => [object.id, { ...object, x: object.x + dx, y: object.y + dy }]));
+        setGroupDrafts(new Map(groupDraftsRef.current));
+      } else {
+        const object = current.object;
+        const visual = 'visual_kind' in object;
+        const next = { ...object, w: Math.max(visual ? 16 : 160, object.w + dx / object.scale),
           h: Math.max(visual ? 16 : 100, object.h + dy / object.scale) };
-      objectDraftRef.current = next;
-      setObjectDraft(next);
+        objectDraftRef.current = next;
+        setObjectDraft(next);
+      }
     }
   }
 
   async function end(event: React.PointerEvent, cancel = false) {
     const current = gesture.current;
     const revision = gestureRevision.current;
+    if (current?.kind === 'eraser' && !cancel) eraseAt(event);
     gesture.current = null;
     if (capturedPointer.current?.hasPointerCapture(event.pointerId)) capturedPointer.current.releasePointerCapture(event.pointerId);
     capturedPointer.current = null;
@@ -490,6 +604,16 @@ export default function BoardPage() {
     if (current.kind === 'pan') {
       if (cancel) changeViewport(current.viewport, false);
       await commitViewport();
+    } else if (current.kind === 'marquee') {
+      setMarquee(null);
+      if (cancel) {
+        const key = [...current.base][current.base.size - 1];
+        const anchor = key ? { kind: key.slice(0, key.indexOf(':')) as BoardSelection['kind'], id: key.slice(key.indexOf(':') + 1) } : null;
+        setSelectionState({ keys: current.base, anchor });
+      }
+    } else if (current.kind === 'eraser') {
+      if (!cancel && current.ids.size) await board.removeVisuals([...current.ids]);
+      if (revision === gestureRevision.current) setErasedIds(new Set());
     } else if (current.kind === 'pen') {
       setInk([]);
       if (cancel) return;
@@ -499,47 +623,67 @@ export default function BoardPage() {
       }), { x: Infinity, y: Infinity, right: -Infinity, bottom: -Infinity });
       const { x, y } = bounds;
       const points = current.points.map((point) => ({ x: point.x - x, y: point.y - y }));
-      // A tap leaves a visible dot instead of an invisible one-point path.
       if (points.length === 1) points.push({ x: points[0].x + 0.01, y: points[0].y });
       await board.addVisual({ visual_kind: 'freehand', x, y,
         w: Math.max(1, bounds.right - x), h: Math.max(1, bounds.bottom - y),
         data: { points, path: pointsPath(points), style: { color_token: 'ink', width: 2.5 } } });
+    } else if (current.kind === 'move') {
+      const changes = current.objects.flatMap((object) => {
+        const next = groupDraftsRef.current.get(object.id);
+        return next && (next.x !== object.x || next.y !== object.y) ? [{
+          kind: ('member_kind' in object ? 'member' : 'visual') as 'member' | 'visual', id: object.id, input: { x: next.x, y: next.y },
+        }] : [];
+      });
+      if (!cancel && changes.length) await board.updateGeometryBatch(changes);
+      if (revision === gestureRevision.current) { groupDraftsRef.current = new Map(); setGroupDrafts(new Map()); }
     } else {
       const next = objectDraftRef.current;
-      if (!cancel && next && (next.x !== current.object.x || next.y !== current.object.y || next.w !== current.object.w || next.h !== current.object.h)) {
-        const patch = { x: next.x, y: next.y, w: next.w, h: next.h };
+      if (!cancel && next && (next.w !== current.object.w || next.h !== current.object.h)) {
+        const patch = { w: next.w, h: next.h };
         if ('visual_kind' in next) await board.updateVisual(next.id, patch);
         else await board.updateMember(next.id, patch);
       }
-      if (revision === gestureRevision.current) {
-        objectDraftRef.current = null;
-        setObjectDraft(null);
-      }
+      if (revision === gestureRevision.current) { objectDraftRef.current = null; setObjectDraft(null); }
+    }
+  }
+
+  async function executeDeletion(keys: Set<string>) {
+    if (!detail) return;
+    const visit = visitRevision.current;
+    const scope = deletionScope(keys, detail);
+    if (await board.removeSelection(scope) && visit === visitRevision.current) {
+      setSelection(null);
+      setDeleteKeys(null);
+      surface.current?.focus();
     }
   }
 
   async function removeSelection() {
-    if (!selection || chalkDraft || board.pending) return;
-    if ((selection.kind === 'member' && !selectedMember) || (selection.kind === 'edge' && !selectedEdge)) return;
-    const removed = selection.kind === 'member' ? await board.unmount(selection.id)
-      : selection.kind === 'edge' ? await board.removeEdge(selection.id) : await board.removeVisual(selection.id);
-    if (removed) setSelection(null);
+    if (!selectedKeys.size || !detail || chalkDraft || board.pending) return;
+    const scope = deletionScope(selectedKeys, detail);
+    if (scope.memberIds.length) setDeleteKeys(new Set(selectedKeys));
+    else await executeDeletion(new Set(selectedKeys));
   }
 
-  function keyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-    if (boardPaused.current) return;
-    if ((event.target as HTMLElement).closest('input, select, textarea, button, a')) return;
+  function keyDown(event: React.KeyboardEvent<HTMLElement>) {
+    if (boardPaused.current || deleteKeys || deleting || chalkDraft || labelDraft) return;
+    if ((event.target as HTMLElement).closest('input, select, textarea, [contenteditable="true"], [role="dialog"], dialog')) return;
+    const key = event.key.toLowerCase();
+    if ((event.ctrlKey || event.metaKey) && !event.altKey && (key === 'z' || key === 'y')) {
+      event.preventDefault();
+      if (gesture.current) return;
+      if (key === 'y' || event.shiftKey) void board.redo(); else void board.undo();
+      return;
+    }
+    if ((event.target as HTMLElement).closest('button, a')) return;
     if (event.code === 'Space') { event.preventDefault(); spaceDown.current = true; }
     if (event.key === 'Escape') { setSelection(null); setConnectFrom(null); setLabelDraft(null); setTool('select'); }
     if (event.key === 'Enter' && selectedMember) {
       event.preventDefault();
-      if (tool === 'connect') void connect(selectedMember);
-      else void openMember(selectedMember);
+      if (tool === 'connect') void connect(selectedMember); else void openMember(selectedMember);
     }
-    if (event.key === 'Enter' && selectedVisual?.visual_kind === 'sticky') {
-      event.preventDefault(); editChalk(selectedVisual);
-    }
-    if ((event.key === 'Delete' || event.key === 'Backspace') && selection) { event.preventDefault(); void removeSelection(); }
+    if (event.key === 'Enter' && selectedVisual?.visual_kind === 'sticky') { event.preventDefault(); editChalk(selectedVisual); }
+    if ((event.key === 'Delete' || event.key === 'Backspace') && selectedKeys.size) { event.preventDefault(); void removeSelection(); }
     if (selectedMember && !selectedMember.pinned && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
       event.preventDefault();
       if (board.pending) return;
@@ -586,7 +730,7 @@ export default function BoardPage() {
     }, factor));
   }
 
-  return <><section className={styles.workspace} aria-label="Board workspace" onPaste={pasteReference}
+  return <><section className={styles.workspace} aria-label="Board workspace" onPaste={pasteReference} onKeyDown={keyDown}
     onKeyDownCapture={pauseBoard} onKeyUpCapture={pauseBoard} onPasteCapture={pauseBoard}
     onPointerDownCapture={pauseBoard} onPointerMoveCapture={pauseBoard} onPointerUpCapture={pauseBoard}
     onClickCapture={pauseBoard} onContextMenuCapture={pauseBoard} onDragOverCapture={pauseBoard} onDropCapture={pauseBoard}
@@ -637,11 +781,15 @@ export default function BoardPage() {
     </div>}
     <div className={styles.toolbar} role="toolbar" aria-label="Board tools">
       {([{ key: 'select', label: 'Select', Icon: MousePointer2 }, { key: 'pan', label: 'Pan', Icon: Hand },
-        { key: 'connect', label: 'Connect', Icon: Link2 }, { key: 'pen', label: 'Pen', Icon: Pencil }] as const).map(({ key, label, Icon }) =>
+        { key: 'connect', label: 'Connect', Icon: Link2 }, { key: 'pen', label: 'Pen', Icon: Pencil },
+        { key: 'eraser', label: 'Eraser', Icon: Eraser }] as const).map(({ key, label, Icon }) =>
         <button key={key} className={styles.button} aria-pressed={tool === key}
           onClick={() => { setTool(key); setConnectFrom(null); }}><Icon size={16} />{label}</button>)}
+      <button className={styles.button} aria-label="Undo board action" disabled={!board.canUndo || Boolean(chalkDraft) || Boolean(deleteKeys)} onClick={() => { surface.current?.focus(); void board.undo(); }}><Undo2 size={16} />Undo</button>
+      <button className={styles.button} aria-label="Redo board action" disabled={!board.canRedo || Boolean(chalkDraft) || Boolean(deleteKeys)} onClick={() => { surface.current?.focus(); void board.redo(); }}><Redo2 size={16} />Redo</button>
       <span className={styles.toolHint}>{tool === 'connect' ? (connectFrom ? 'Choose the next card' : 'Choose two cards to connect')
-        : tool === 'pen' ? 'Draw on the board' : 'Drag to arrange · Double-click blank space to write chalk'}</span>
+        : tool === 'pen' ? 'Draw on the board' : tool === 'eraser' ? 'Sweep to erase whole pen strokes'
+          : 'Drag blank space to select · Shift-click to add or remove · Space-drag to pan'}</span>
       <div className={styles.zoomControls}>
         <button className={styles.button} aria-label="Zoom board out" onClick={() => zoom(1 / 1.2)}><Minus size={16} /></button>
         <button className={styles.button} aria-label="Reset board zoom" onClick={() => zoom(1 / activeViewport.zoom)}>{Math.round(activeViewport.zoom * 100)}%</button>
@@ -683,8 +831,8 @@ export default function BoardPage() {
               aria-label={`Stage ${candidate.title}`} onClick={() => { void stageCandidate(candidate); }}>Stage</button></li>)}</ul></section>;
           })}
       </aside>}
-      <div className={`${styles.surface} ${tool === 'pen' ? styles.penSurface : ''}`} ref={surface}
-        data-testid="board-surface" tabIndex={0} aria-label="Board canvas" onKeyDown={keyDown}
+      <div className={`${styles.surface} ${tool === 'pen' || tool === 'eraser' ? styles.penSurface : ''}`} ref={surface}
+        data-testid="board-surface" tabIndex={0} aria-label="Board canvas"
         onKeyUp={(event) => { if (event.code === 'Space') spaceDown.current = false; }}
         onBlur={() => { spaceDown.current = false; }}
         onDoubleClick={draftChalk}
@@ -715,13 +863,13 @@ export default function BoardPage() {
                 <path d={path} data-testid={`board-edge-${edge.id}`}
                   markerStart={edge.style.direction === 'both' ? 'url(#board-edge-arrow)' : undefined}
                   markerEnd={edge.style.direction === 'forward' || edge.style.direction === 'both' ? 'url(#board-edge-arrow)' : undefined}
-                  className={selection?.id === edge.id ? styles.selectedLine : styles.edgeLine} />
+                  className={isSelected('edge', edge.id) ? styles.selectedLine : styles.edgeLine} />
                 {tool === 'select' && <path d={path} className={styles.lineHit} role="button" tabIndex={0}
                   aria-label={`Connection ${from.reference.title || 'note'} to ${to.reference.title || 'note'}`}
-                  onFocus={() => setSelection({ kind: 'edge', id: edge.id })}
-                  onPointerDown={(event) => { event.stopPropagation(); setSelection({ kind: 'edge', id: edge.id }); }}
+                  onFocus={() => focusSelection({ kind: 'edge', id: edge.id })}
+                  onPointerDown={(event) => begin(event, edge)}
                   onDoubleClick={(event) => { event.stopPropagation(); editLabel(edge); }}
-                  onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); setSelection({ kind: 'edge', id: edge.id }); } }} />}
+                  onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); selectObject({ kind: 'edge', id: edge.id }, event.shiftKey); } }} />}
                 {labelDraft?.id === edge.id ? <foreignObject x={(start.x + finish.x) / 2 - 140}
                   y={(start.y + finish.y) / 2 - 30} width="280" height="80" className={styles.edgeEditor}
                   onPointerDown={(event) => event.stopPropagation()} onDoubleClick={(event) => event.stopPropagation()}>
@@ -736,29 +884,31 @@ export default function BoardPage() {
               </g>;
             })}
             {visibleVisuals.filter((visual) => visual.visual_kind === 'freehand').map((visual) => <g key={visual.id} data-testid={`board-visual-${visual.id}`}
+              style={erasedIds.has(visual.id) ? { opacity: 0.2 } : undefined}
               transform={`translate(${visual.x} ${visual.y}) rotate(${visual.rotation}) scale(${visual.scale})`}>
-              <path d={strokePath(visual)} className={selection?.id === visual.id ? styles.selectedLine : styles.inkLine} />
-              {tool === 'select' && <path d={strokePath(visual)} className={styles.lineHit} role="button" tabIndex={0}
-                aria-label="Select drawing" onPointerDown={(event) => begin(event, visual)}
-                onFocus={() => setSelection({ kind: 'visual', id: visual.id })}
-                onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); setSelection({ kind: 'visual', id: visual.id }); } }} />}
+              <path d={strokePath(visual)} className={isSelected('visual', visual.id) ? styles.selectedLine : styles.inkLine} />
+              {(tool === 'select' || tool === 'eraser') && <path d={strokePath(visual)} className={styles.lineHit} role="button" tabIndex={tool === 'select' ? 0 : -1}
+                data-eraser-id={visual.id} aria-label={tool === 'eraser' ? 'Erase drawing' : 'Select drawing'} onPointerDown={(event) => begin(event, visual)}
+                onFocus={() => { if (tool === 'select') focusSelection({ kind: 'visual', id: visual.id }); }}
+                onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); selectObject({ kind: 'visual', id: visual.id }, event.shiftKey); } }} />}
             </g>)}
             {ink.length > 0 && <path d={pointsPath(ink)} className={styles.inkLine} />}
           </svg>
           {visibleVisuals.filter((visual) => visual.visual_kind !== 'freehand' && visual.visual_kind !== 'sticky').map((visual) =>
-            <BoardRelocatedVisual key={visual.id} visual={visual} selected={selection?.id === visual.id}
-              selectable={tool === 'select'} onSelect={() => setSelection({ kind: 'visual', id: visual.id })}
+            <BoardRelocatedVisual key={visual.id} visual={visual} selected={isSelected('visual', visual.id)}
+              selectable={tool === 'select'} onSelect={(event) => event?.type === 'keydown' ? selectObject({ kind: 'visual', id: visual.id }, (event as React.KeyboardEvent).shiftKey) : focusSelection({ kind: 'visual', id: visual.id })}
               onPointerDown={(event) => begin(event, visual)} onResize={(event) => begin(event, visual, true)} />)}
           {visibleVisuals.filter((visual) => visual.visual_kind === 'sticky' && visual.id !== chalkDraft?.id).map((visual) =>
-            <div key={visual.id} className={`${styles.chalk} ${selection?.id === visual.id ? styles.selected : ''}`}
+            <div key={visual.id} className={`${styles.chalk} ${isSelected('visual', visual.id) ? styles.selected : ''}`}
               style={chalkGeometry(visual)} data-testid={`board-visual-${visual.id}`} data-visual-kind="sticky"
               role={tool === 'select' ? 'button' : undefined} tabIndex={tool === 'select' ? 0 : undefined}
               aria-label="Select chalk" title={visual.pinned ? 'Pinned chalk · Double-click to edit' : 'Double-click to edit chalk'}
-              onFocus={() => { if (tool === 'select') setSelection({ kind: 'visual', id: visual.id }); }}
+              onFocus={() => { if (tool === 'select') focusSelection({ kind: 'visual', id: visual.id }); }}
               onPointerDown={(event) => begin(event, visual)}
               onDoubleClick={(event) => { event.stopPropagation(); editChalk(visual); }}>
               <p>{typeof visual.data.text === 'string' ? visual.data.text : ''}</p>
             </div>)}
+          {marquee && <div className={styles.marquee} data-testid="board-marquee" style={{ left: marquee.x, top: marquee.y, width: marquee.w, height: marquee.h }} />}
           {chalkDraft && <BoardChalkEditor key={chalkDraft.id || 'new'} draft={chalkDraft}
             onSave={saveChalk} onCancel={() => setChalkDraft(null)} />}
           {visibleMembers.map((member) => {
@@ -778,11 +928,11 @@ export default function BoardPage() {
               aria-label={title}
               aria-disabled={!canOpen}
               title={openHint}
-              className={`${styles.member} ${selection?.id === member.id || connectFrom === member.id ? styles.selected : ''}`}
+              className={`${styles.member} ${isSelected('member', member.id) || connectFrom === member.id ? styles.selected : ''}`}
               style={{ left: member.x, top: member.y, width: member.w, height: member.h,
                 transform: `scale(${member.scale})`, zIndex: member.z_index }}
               onPointerDown={(event) => begin(event, member)}
-              onFocus={() => setSelection({ kind: 'member', id: member.id })}
+              onFocus={() => focusSelection({ kind: 'member', id: member.id })}
               onDoubleClick={canOpen ? (event) => {
                 event.stopPropagation();
                 if (tool !== 'select') return;
@@ -834,7 +984,10 @@ export default function BoardPage() {
         onPlace={(member) => { void placeMember(member); }}
         onRemove={(member) => { void board.unmount(member.id); }} />}
     </div>
-    {selection && (selectedMember || selectedEdge || selectedVisual) && <div className={styles.selectionBar} role="toolbar" aria-label="Selected projection controls">
+    {selectionNotice && <p className={styles.selectionNotice} role="status">{selectionNotice}</p>}
+    {selectedKeys.size > 0 && <div className={styles.selectionBar} role="toolbar" aria-label="Selected projection controls">
+      <span>{selectedKeys.size} selected</span>
+      {selectedKeys.size > 1 && <button className={styles.button} onClick={() => { setSelection(null); surface.current?.focus(); }}>Clear selection</button>}
       {selectedVisual?.visual_kind === 'sticky' && <button className={styles.button} disabled={board.pending || Boolean(chalkDraft)}
         onClick={() => { void castChalk(selectedVisual); }}>Cast to item</button>}
       {selectedVisual && <button className={styles.button} disabled={board.pending || Boolean(chalkDraft)} aria-pressed={selectedVisual.pinned}
@@ -857,8 +1010,25 @@ export default function BoardPage() {
         <button className={styles.button} disabled={selectedMember.pinned || board.pending} onClick={() => { void board.updateMember(selectedMember.id, { z_index: Math.max(...visibleMembers.map((member) => member.z_index)) + 1 }); }}>Bring forward</button>
         <button className={styles.button} disabled={selectedMember.pinned || board.pending} onClick={() => { void board.updateMember(selectedMember.id, { z_index: Math.min(...visibleMembers.map((member) => member.z_index)) - 1 }); }}>Send back</button>
       </>}
-      <button className={styles.button} disabled={board.pending || Boolean(chalkDraft)} onClick={() => { void removeSelection(); }}><Trash2 size={15} />{selection.kind === 'member' ? 'Remove from board' : selection.kind === 'edge' ? 'Delete connection' : selectedVisual?.visual_kind === 'sticky' ? 'Delete chalk' : 'Delete drawing'}</button>
+      <button className={styles.button} disabled={board.pending || Boolean(chalkDraft)} onClick={() => { void removeSelection(); }}><Trash2 size={15} />{selectedKeys.size > 1 ? 'Delete selected' : selection?.kind === 'member' ? 'Remove from board' : selection?.kind === 'edge' ? 'Delete connection' : selectedVisual?.visual_kind === 'sticky' ? 'Delete chalk' : 'Delete drawing'}</button>
     </div>}
+    {deleteKeys && (() => {
+      const scope = deletionScope(deleteKeys, detail);
+      return <dialog ref={groupDeleteDialog} className={styles.deleteDialog} aria-labelledby="delete-selection-title"
+        aria-describedby="delete-selection-scope" onKeyDown={(event) => event.stopPropagation()}
+        onCancel={(event) => { event.preventDefault(); if (!board.pending) { setDeleteKeys(null); surface.current?.focus(); } }}>
+        <h2 id="delete-selection-title">Remove selected objects?</h2>
+        <div id="delete-selection-scope">
+          <p>{scope.memberIds.length} {scope.memberIds.length === 1 ? 'card' : 'cards'} and {scope.connectedEdgeCount} connected {scope.connectedEdgeCount === 1 ? 'edge' : 'edges'} will be removed from the board. This cannot be undone.</p>
+          <p>{scope.reversibleCount} {scope.reversibleCount === 1 ? 'drawing or independent connection' : 'drawings and independent connections'} will be deleted. This can be undone.</p>
+        </div>
+        {board.error && <p role="alert">{board.error}</p>}
+        <div className={styles.dialogActions}>
+          <button className={styles.button} autoFocus disabled={board.pending} onClick={() => { setDeleteKeys(null); surface.current?.focus(); }}>Cancel</button>
+          <button className={styles.button} disabled={board.pending} onClick={() => { void executeDeletion(deleteKeys); }}>{board.pending ? 'Removing…' : 'Remove selected'}</button>
+        </div>
+      </dialog>;
+    })()}
     {deleting && <BoardDeleteDialog board={detail.board} onCancel={() => setDeleting(false)} onDeleted={() => navigate('/boards')} />}
   </section>
     {newNoteOpen && <BoardNewNoteDialog key={boardId} initialProjectId={detail.board.project_id}
