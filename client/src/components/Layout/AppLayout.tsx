@@ -36,6 +36,7 @@ export default function AppLayout() {
   const location = useLocation();
   const sidebarOpen = useUIStore((s) => s.sidebarOpen);
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
+  const setSidebarOpen = useUIStore((s) => s.setSidebarOpen);
   const openModal = useUIStore((s) => s.openModal);
   const courses = useCourseStore((s) => s.courses);
   const fetchCourses = useCourseStore((s) => s.fetchCourses);
@@ -50,7 +51,16 @@ export default function AppLayout() {
   const favoriteProjects = courses.slice(0, 3);
   const recentProjects = [...courses].slice(-4).reverse();
   const contentGroupWorkspace = location.pathname.startsWith('/group-gallery');
-  const boardWorkspace = /^\/boards\/[^/]+\/?$/.test(location.pathname);
+  const boardId = location.pathname.match(/^\/boards\/([^/]+)\/?$/)?.[1] ?? null;
+  const boardWorkspace = boardId !== null;
+
+  useEffect(() => {
+    if (!boardId) return;
+    // Keep the pre-board preference outside this board's manual toggles.
+    const previousSidebarOpen = useUIStore.getState().sidebarOpen;
+    setSidebarOpen(false);
+    return () => setSidebarOpen(previousSidebarOpen);
+  }, [boardId, setSidebarOpen]);
 
   useEffect(() => {
     loadUser();
@@ -113,7 +123,13 @@ export default function AppLayout() {
               <span className={styles.brandName}>Coincides</span>
             </div>
           )}
-          <button className={styles.collapseBtn} onClick={toggleSidebar}>
+          <button
+            className={styles.collapseBtn}
+            onClick={toggleSidebar}
+            aria-label={sidebarOpen ? 'Collapse navigator' : 'Expand navigator'}
+            title={sidebarOpen ? 'Collapse navigator' : 'Expand navigator'}
+            aria-expanded={sidebarOpen}
+          >
             {sidebarOpen ? <PanelLeftClose size={18} /> : <PanelLeftOpen size={18} />}
           </button>
         </div>

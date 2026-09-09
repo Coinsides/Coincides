@@ -11,7 +11,7 @@ export default function BoardList() {
   const navigate = useNavigate();
   const [boards, setBoards] = useState<Board[]>([]);
   const [souls, setSouls] = useState<PurposeFrameV1[]>([]);
-  const [statement, setStatement] = useState('');
+  const [boardName, setBoardName] = useState('');
   const [soulId, setSoulId] = useState('');
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -31,12 +31,12 @@ export default function BoardList() {
 
   async function createBoard(event: React.FormEvent) {
     event.preventDefault();
-    if (busy || !statement.trim()) return;
+    if (busy || !boardName.trim()) return;
     setBusy(true);
     setError(null);
     setOccupied(null);
     try {
-      const title = statement.trim();
+      const title = boardName.trim();
       const board = await boardRepository.create(soulId
         ? { title, soul_id: soulId }
         : { title, purpose: { title } });
@@ -57,30 +57,29 @@ export default function BoardList() {
   return <section className={styles.library}>
     <header className={styles.libraryHeader}>
       <h1>Boards</h1>
-      <p>Gather notes around a question. Arrange them, connect them, and follow a thought.</p>
+      <p>Bring notes together, arrange them, and draw connections.</p>
     </header>
     <form className={styles.createForm} onSubmit={(event) => { void createBoard(event); }}>
-      <label htmlFor="board-statement">What are you working through?</label>
+      <label htmlFor="board-name">Board name</label>
       <div className={styles.createRow}>
-        <input id="board-statement" value={statement} maxLength={300} required
-          placeholder="A question, a hunch, something to figure out…"
-          onChange={(event) => setStatement(event.currentTarget.value)} />
-        <button className={styles.primaryButton} type="submit" disabled={loading || busy || !statement.trim()}>
+        <input id="board-name" value={boardName} maxLength={80} required
+          placeholder="e.g. Exam revision"
+          onChange={(event) => setBoardName(event.currentTarget.value)} />
+        <button className={styles.primaryButton} type="submit" disabled={loading || busy || !boardName.trim()}>
           <Plus size={16} />{busy ? 'Opening…' : 'Open board'}
         </button>
       </div>
       <details className={styles.existingPurpose}>
-        <summary>Use an existing purpose</summary>
-        <label htmlFor="board-existing-purpose">Library purpose</label>
+        <summary>Advanced: use an existing purpose</summary>
+        <label htmlFor="board-existing-purpose">Existing purpose</label>
         <select id="board-existing-purpose" value={soulId} disabled={loading || busy}
           onChange={(event) => {
             const id = event.currentTarget.value;
             setSoulId(id);
             setOccupied(null);
             setError(null);
-            if (id) setStatement(souls.find((soul) => soul.id === id)?.title || '');
           }}>
-          <option value="">New purpose from the sentence above</option>
+          <option value="">Create a new purpose with this board name</option>
           {souls.map((soul) => <option key={soul.id} value={soul.id}>
             {soul.title}{soul.status !== 'active' ? ` (${soul.status})` : ''}
           </option>)}
@@ -94,12 +93,10 @@ export default function BoardList() {
     </div>}
     {loading ? <p role="status">Loading boards…</p> : <>
       <div className={styles.listHeading}><h2>Your boards</h2><span>{boards.length}</span></div>
-      {boards.length === 0 ? <p className={styles.empty}>Start with one sentence above, then bring your notes onto the board.</p>
+      {boards.length === 0 ? <p className={styles.empty}>Name your board above, then add your notes.</p>
         : <ul className={styles.boardList}>{boards.map((board) => <li key={board.id}>
           <Link to={`/boards/${encodeURIComponent(board.id)}`}>
-            <span><strong>{board.title}</strong><small>
-              {souls.find((soul) => soul.id === board.soul_id)?.title || 'Purpose linked'}
-            </small></span>
+            <strong>{board.title}</strong>
             <span className={styles.listEnd}><time dateTime={board.updated_at}>
               {new Date(board.updated_at).toLocaleDateString()}
             </time><ArrowRight size={18} /></span>

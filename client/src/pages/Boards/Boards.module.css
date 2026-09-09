@@ -57,6 +57,8 @@
 .boardBody { display: flex; flex: 1; min-height: 0; }
 .picker { flex: 0 0 280px; width: 280px; padding: 16px; overflow: auto; background: var(--bg-surface); border-right: 1px solid var(--border-default); }
 .picker label { display: block; font-weight: 600; margin-bottom: 10px; }
+.pickerHeader { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.pickerHeader label { margin-bottom: 0; }
 .picker input { width: 100%; margin-bottom: 16px; }
 .picker p { color: var(--text-secondary); margin-bottom: 12px; }
 .candidate { width: 100%; text-align: left; padding: 12px 4px; border-bottom: 1px solid var(--border-default); }

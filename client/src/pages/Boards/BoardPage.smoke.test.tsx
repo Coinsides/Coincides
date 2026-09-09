@@ -4,6 +4,8 @@ import { Link, MemoryRouter, Route, Routes, useParams } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import BoardList from './BoardList';
 import BoardPage from './BoardPage';
+import AppLayout from '@/components/Layout/AppLayout';
+import { useUIStore } from '@/stores/uiStore';
 import type { Board, BoardDetail, BoardEdge, BoardMember, BoardVisual, CreateBoardInput } from './boardTypes';
 import { useNoteCanvasDataAdapter } from '../Notes/canvasEngine/hooks/useNoteCanvasDataAdapter';
 import { useNoteCanvasFrameModel, useNoteCanvasResolvedLayoutModel } from '../Notes/canvasEngine/hooks/useNoteCanvasLayoutModel';
@@ -14,11 +16,15 @@ import { resolveEffectiveDocumentTypographyProfile } from '../Notes/canvasEngine
 import { normalizeContentGroup } from '../Notes/canvasEngine/contentGroupService';
 import type { Note, NoteBlock, PurposeFrameV1 } from '../Notes/canvasEngine/runtimeDataTypes';
 
-// Only transport is replaced. Board UI/repository/hook and paper hydration/layout/reading hooks are production code.
+// Mock transport and unrelated shell initialization; board/paper hooks, AppLayout and uiStore are production code.
 const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), delete: vi.fn() }));
 const addToast = vi.hoisted(() => vi.fn());
 vi.mock('@/services/api', () => ({ default: http }));
-vi.mock('@/stores/uiStore', () => ({ useUIStore: (select: (state: { addToast: typeof addToast }) => unknown) => select({ addToast }) }));
+vi.mock('@/stores/courseStore', () => ({ useCourseStore: (select: any) => select({ courses: [], fetchCourses: () => undefined }) }));
+vi.mock('@/stores/tagStore', () => ({ useTagStore: (select: any) => select({ fetchTags: () => undefined }) }));
+vi.mock('@/stores/authStore', () => ({ useAuthStore: (select: any) => select({ user: null, loadUser: () => undefined }) }));
+vi.mock('@/components/Onboarding/Onboarding', () => ({ default: () => null }));
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key: string) => key, i18n: { language: 'en' } }) }));
 
 const date = '2026-09-08T12:00:00.000Z';
 const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
@@ -117,13 +123,15 @@ function unexpectedWrite(method: string, url: string): never {
   throw new Error(`Unexpected fixture write: ${method} ${url}`);
 }
 
-function renderRoutes(initial = `/notes/${notes[0].id}`, externalPath?: string) {
+function renderRoutes(initial = `/notes/${notes[0].id}`, externalPath?: string, withLayout = false) {
   return render(<MemoryRouter initialEntries={[initial]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
     {externalPath && <Link to={externalPath}>Go to another board</Link>}
     <Routes>
+      <Route element={withLayout ? <AppLayout /> : undefined}>
       <Route path="/boards" element={<BoardList />} />
       <Route path="/boards/:boardId" element={<BoardPage />} />
       <Route path="/notes/:noteId" element={<PaperProbe />} />
+      </Route>
     </Routes>
   </MemoryRouter>);
 }
@@ -155,6 +163,7 @@ function seedBoard(id: string, title: string, withMember = true) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  useUIStore.setState({ sidebarOpen: true, addToast });
   sessionStorage.clear();
   boards = []; purposes = []; sequence = 0; unexpectedWrites = [];
   // jsdom supplies the viewport, while all paper geometry and scale calculations remain real.
@@ -260,6 +269,53 @@ afterEach(() => {
   Reflect.deleteProperty(HTMLElement.prototype, 'hasPointerCapture');
 });
 
+describe('V13 S4 board polish smoke', () => {
+  it('opens a board by name, births its namesake soul, collapses the navigator and closes/reopens the note picker', async () => {
+    renderRoutes('/boards', undefined, true);
+    expect(screen.getByRole('button', { name: 'Collapse navigator' })).toBeTruthy();
+    const name = await screen.findByRole('textbox', { name: 'Board name' });
+    expect(screen.getByText('Advanced: use an existing purpose').closest('details')?.open).toBe(false);
+    fireEvent.change(name, { target: { value: '  Exam revision  ' } });
+    await waitFor(() => expect((screen.getByRole('button', { name: 'Open board' }) as HTMLButtonElement).disabled).toBe(false));
+    fireEvent.click(screen.getByRole('button', { name: 'Open board' }));
+    await screen.findByRole('heading', { name: 'Exam revision' });
+    expect(http.post).toHaveBeenCalledWith('/boards', { title: 'Exam revision', purpose: { title: 'Exam revision' } });
+    expect(purposes).toHaveLength(1);
+    expect(purposes[0].title).toBe('Exam revision');
+    expect(boards[0].board).toMatchObject({ title: 'Exam revision', soul_id: purposes[0].id });
+    expect(screen.getByRole('button', { name: 'Expand navigator' })).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Expand navigator' }));
+    const addNotes = screen.getByRole('button', { name: 'Add notes' });
+    expect(addNotes.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(addNotes);
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Notes and groups' }), { target: { value: notes[0].title } });
+    fireEvent.click(await screen.findByRole('button', { name: `Add ${notes[0].title} to board` }));
+    await screen.findByRole('article', { name: notes[0].title });
+    await saved();
+    const persisted = clone(boards[0]);
+    fireEvent.click(screen.getByRole('button', { name: 'Close note picker' }));
+    expect(screen.queryByRole('complementary', { name: 'Add projections' })).toBeNull();
+    expect(addNotes.getAttribute('aria-expanded')).toBe('false');
+    expect(document.activeElement).toBe(addNotes);
+    fireEvent.click(addNotes);
+    const search = screen.getByRole('searchbox', { name: 'Notes and groups' }) as HTMLInputElement;
+    expect(search.value).toBe(notes[0].title);
+    expect(addNotes.getAttribute('aria-expanded')).toBe('true');
+    expect(screen.getByRole('button', { name: 'Collapse navigator' })).toBeTruthy();
+    expect(boards[0]).toEqual(persisted);
+    fireEvent.keyDown(search, { key: 'Escape' });
+    expect(screen.queryByRole('complementary', { name: 'Add projections' })).toBeNull();
+    expect(document.activeElement).toBe(addNotes);
+    fireEvent.click(screen.getByRole('button', { name: 'Boards' }));
+    await screen.findByRole('heading', { name: 'Your boards' });
+    expect(screen.getByRole('button', { name: 'Collapse navigator' })).toBeTruthy();
+    expect(unexpectedWrites).toEqual([]);
+    console.info('V13_S4_BOARD_POLISH_SMOKE', JSON.stringify({ boardName: boards[0].board.title,
+      soulTitle: purposes[0].title, navigator: 'collapsed on entry, manual expansion retained, restored on exit',
+      picker: 'open, mount, close, reopen with search retained, Escape, focus returned', members: boards[0].members.length }));
+  });
+});
+
 describe('V13 S2 board and paper smoke', () => {
   it('opens a soul, arranges three notes, connects and draws, reopens, then zooms and enters unchanged production paper', async () => {
     renderRoutes();
@@ -270,7 +326,7 @@ describe('V13 S2 board and paper smoke', () => {
     expect(before.stored[0].canvas_layout).toMatchObject({ x: 0, y: 40, width: 760, frame_id: 'frame-a', coordinate_space: 'page_frame_local' });
     expect(before.resolved['block-a']).toMatchObject({ x: 0, y: 40, width: 760, height: 88, surface: 'formal_page' });
     fireEvent.click(screen.getByRole('link', { name: 'Go to boards' }));
-    fireEvent.change(await screen.findByRole('textbox', { name: 'What are you working through?' }), { target: { value: 'Why do these observations connect?' } });
+    fireEvent.change(await screen.findByRole('textbox', { name: 'Board name' }), { target: { value: 'Why do these observations connect?' } });
     await waitFor(() => expect((screen.getByRole('button', { name: 'Open board' }) as HTMLButtonElement).disabled).toBe(false));
     fireEvent.click(screen.getByRole('button', { name: 'Open board' }));
     await screen.findByRole('heading', { name: 'Why do these observations connect?' });
@@ -357,9 +413,10 @@ describe('V13 S2 board and paper smoke', () => {
     boards.push({ board: { id: 'existing-board', user_id: 'fixture-user', title: 'Existing board', soul_id: existing.id,
       project_id: null, viewport: { x: 10, y: 20, zoom: 0.8 }, created_at: date, updated_at: date }, members: [], edges: [], visuals: [] });
     renderRoutes('/boards');
-    fireEvent.click(screen.getByText('Use an existing purpose'));
+    fireEvent.change(await screen.findByRole('textbox', { name: 'Board name' }), { target: { value: 'Another board name' } });
+    fireEvent.click(screen.getByText('Advanced: use an existing purpose'));
     await screen.findByRole('option', { name: existing.title });
-    fireEvent.change(screen.getByRole('combobox', { name: 'Library purpose' }), { target: { value: existing.id } });
+    fireEvent.change(screen.getByRole('combobox', { name: 'Existing purpose' }), { target: { value: existing.id } });
     fireEvent.click(screen.getByRole('button', { name: 'Open board' }));
     expect((await screen.findByRole('alert')).textContent).toContain('Choose another purpose or open its board');
     expect(boards).toHaveLength(1);

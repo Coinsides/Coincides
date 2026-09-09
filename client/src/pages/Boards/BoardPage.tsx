@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Hand, Link2, MousePointer2, Pencil, Plus, Minus, Pin, Trash2, ExternalLink } from 'lucide-react';
+import { ArrowLeft, Hand, Link2, MousePointer2, Pencil, Plus, Minus, Pin, Trash2, ExternalLink, X } from 'lucide-react';
 import { boardErrorMessage, loadBoardCandidates } from './boardRepository';
 import type { BoardCandidate, BoardMember, BoardViewport, BoardVisual } from './boardTypes';
 import { pointsPath, toBoardPoint, zoomBoardAt, type BoardPoint } from './boardViewport';
@@ -33,6 +33,7 @@ export default function BoardPage() {
   const [candidateError, setCandidateError] = useState<string | null>(null);
   const [candidateLoading, setCandidateLoading] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const pickerToggle = useRef<HTMLButtonElement>(null);
   const [search, setSearch] = useState('');
   const [viewport, setViewport] = useState<BoardViewport | null>(null);
   const [viewportDirty, setViewportDirty] = useState(false);
@@ -53,6 +54,11 @@ export default function BoardPage() {
   saveViewport.current = board.updateBoard;
   const spaceDown = useRef(false);
   const detail = board.detail;
+
+  function closePicker() {
+    setPickerOpen(false);
+    pickerToggle.current?.focus();
+  }
 
   const loadCandidates = useCallback(async () => {
     setCandidateLoading(true);
@@ -298,7 +304,8 @@ export default function BoardPage() {
       <button className={styles.button} onClick={() => { void leave('/boards'); }}><ArrowLeft size={16} />Boards</button>
       <h1 title={detail.board.title}>{detail.board.title}</h1>
       <span className={styles.saveStatus} role="status">{board.error ? 'Changes need attention' : board.pending || viewportDirty ? 'Saving…' : 'Saved'}</span>
-      <button className={styles.primaryButton} aria-expanded={pickerOpen} onClick={() => setPickerOpen(!pickerOpen)}><Plus size={16} />Add notes</button>
+      <button ref={pickerToggle} className={styles.primaryButton} aria-expanded={pickerOpen} aria-controls="board-note-picker"
+        onClick={() => setPickerOpen(!pickerOpen)}><Plus size={16} />Add notes</button>
     </header>
     {board.error && <div className={styles.error} role="alert"><span>{board.error}</span>
       <button onClick={() => {
@@ -325,8 +332,15 @@ export default function BoardPage() {
       </div>
     </div>
     <div className={styles.boardBody}>
-      {pickerOpen && <aside className={styles.picker} aria-label="Add projections">
-        <label htmlFor="board-candidate-search">Notes and groups</label>
+      {pickerOpen && <aside id="board-note-picker" className={styles.picker} aria-label="Add projections"
+        onKeyDown={(event) => {
+          if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); closePicker(); }
+        }}>
+        <div className={styles.pickerHeader}>
+          <label htmlFor="board-candidate-search">Notes and groups</label>
+          <button type="button" className={styles.button} aria-label="Close note picker" title="Close note picker"
+            onClick={closePicker}><X size={16} /></button>
+        </div>
         <input id="board-candidate-search" type="search" value={search} placeholder="Search your library"
           onChange={(event) => setSearch(event.currentTarget.value)} />
         {candidateLoading ? <p role="status">Loading notes…</p> : candidateError ? <div role="alert"><p>{candidateError}</p>
