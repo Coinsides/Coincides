@@ -41,6 +41,7 @@
 | 语境定位三阶梯 | L1 选区 → L2 现场(`openAgentWithContext` 缝已在)→ L3 跨库 | 待设计;L3 另案 |
 | provider/key 设置产品化(走查 9) | Settings 统一入口、应用数据目录存储、测试连接 | 与 Agent 用库设计一并 |
 | UI 控制面工具族 | Agent 开笔记/跳转等(数据面之外的新族) | 13 开场设计 |
+| **agent_memories 人类 CRUD(红线清偿)** | Agent 可写记忆而人类零查改删入口=现役红线违章;补一条路由+设置页列表 | **13.5**(Settings/凭据库半场同批;Henry 09-09 裁"往后延,选合适版本加上") |
 
 ## D · V13.x 产房链(章程已铸:`2026-08-29-component-nursery-charter.md`)
 
