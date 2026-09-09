@@ -131,7 +131,7 @@ describe('text range copy and board paste user loop', () => {
     const event = clipboardEvent(workspace, 'paste', data);
     expect(event.defaultPrevented).toBe(true);
     const card = await screen.findByRole('article', { name: 'Source note' });
-    expect(within(card).getByText('Live')).toBeTruthy();
+    expect(within(card).getByRole('button', { name: 'Reference details' }).getAttribute('data-reference-health')).toBe('active');
     expect(within(card).getByText('beta')).toBeTruthy();
     expect(http.post).toHaveBeenCalledWith('/boards/board/text-ranges', expect.objectContaining({ text_range: reference, w: 320, h: 220 }));
     await waitFor(() => expect(screen.getByText('Saved')).toBeTruthy());
@@ -181,7 +181,7 @@ describe('text range copy and board paste user loop', () => {
     const workspace = await screen.findByRole('region', { name: 'Board workspace' });
     expect(clipboardEvent(workspace, 'paste', data).defaultPrevented).toBe(true);
     const card = await screen.findByRole('article', { name: 'Source note' });
-    expect(within(card).getByText('Live')).toBeTruthy();
+    expect(within(card).getByRole('button', { name: 'Reference details' }).getAttribute('data-reference-health')).toBe('active');
     expect(within(card).getByText('beta')).toBeTruthy();
     expect(http.post).toHaveBeenCalledWith('/boards/board/text-ranges', expect.objectContaining({ text_range: JSON.parse(raw) }));
   });
@@ -201,7 +201,7 @@ describe('text range copy and board paste user loop', () => {
     const workspace = await screen.findByRole('region', { name: 'Board workspace' });
     clipboardEvent(workspace, 'paste', data);
     const card = await screen.findByRole('article', { name: 'Source note' });
-    expect(within(card).getByText('Live')).toBeTruthy();
+    expect(within(card).getByRole('button', { name: 'Reference details' }).getAttribute('data-reference-health')).toBe('active');
     expect(within(card).getByText('beta')).toBeTruthy();
     expect(read).toHaveBeenCalledTimes(1);
     expect(getType).toHaveBeenCalledWith(format);
@@ -257,9 +257,10 @@ describe('text range copy and board paste user loop', () => {
       start_offset: 6, end_offset: 10, excerpt: 'beta', at: date }, status));
     renderApp('/boards/board');
     const card = await screen.findByRole('article', { name: 'Source note' });
-    expect(within(card).getByText(status === 'drifted' ? 'Drifted' : 'Lost')).toBeTruthy();
+    expect(within(card).getByRole('button', { name: 'Reference details' }).getAttribute('data-reference-health')).toBe(status);
     expect(within(card).getByText('beta')).toBeTruthy();
-    expect(within(card).getByText(status === 'drifted' ? 'Source changed · Last valid snapshot' : 'Source lost · Last valid snapshot')).toBeTruthy();
+    fireEvent.click(within(card).getByRole('button', { name: 'Reference details' }));
+    expect(within(card).getByText(status === 'drifted' ? /The source changed/ : /The source is unavailable/)).toBeTruthy();
     fireEvent.click(within(card).getByRole('button', { name: 'Open source note' }));
     expect(await screen.findByRole('textbox', { name: 'Source text' })).toBeTruthy();
   });

@@ -278,6 +278,21 @@ export function deleteProjectWithSourcePolicy(
   const cleanupTasks: ManagedFileTask[] = [];
   let homeCourseId: string | null = null;
   db.transaction(() => {
+    // A legacy note-bound soul is still protected by boards.soul_id RESTRICT.
+    // Explain that existing blocker before any deletion, rather than exposing
+    // its expected FK rejection as a generic 500. Library souls are not selected.
+    const retainedNotes = new Set(action === 'move_to_home'
+      ? impact.projections.map((projection) => projection.projection_note_id) : []);
+    const legacyBoards = db.prepare(`SELECT b.id AS board_id, p.id AS purpose_id, p.note_id
+      FROM purposes p JOIN boards b ON b.soul_id = p.id
+      JOIN notes n ON n.id = p.note_id
+      WHERE n.course_id = ? AND n.user_id = ? AND p.user_id = ? AND b.user_id = ?`)
+      .all(courseId, userId, userId, userId) as Array<{ board_id: string; purpose_id: string; note_id: string }>;
+    const blocked = legacyBoards.filter((entry) => !retainedNotes.has(entry.note_id));
+    if (blocked.length) {
+      throw new AppError(409, 'This Project contains a legacy note-bound purpose with a board. Permanent deletion is blocked; the Project and its contents have been kept.',
+        { code: 'project_legacy_purpose_has_board', boards: blocked });
+    }
     if (action === 'move_to_home' && impact.projections.length) {
       homeCourseId = ensureHomeCourse(db, userId).id;
       for (const projection of impact.projections) {

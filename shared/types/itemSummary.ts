@@ -2,6 +2,8 @@
 export interface ItemSummary {
   id: string;
   summary: string;
+  /** Full body for reference surfaces; summary remains the compact preview. */
+  plain_text?: string;
   status: 'active' | 'retired';
   item_type: string | null;
   topic: string | null;

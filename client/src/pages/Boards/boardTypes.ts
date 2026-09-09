@@ -46,6 +46,7 @@ export interface BoardMemberReference {
   title: string | null;
   note_id: string | null;
   summary?: string;
+  plain_text?: string;
   item_type?: string | null;
   topic?: string | null;
   item_status?: 'active' | 'retired' | 'missing';
@@ -53,6 +54,8 @@ export interface BoardMemberReference {
   origin_board_title?: string | null;
   anchor_status?: BoardTextRangeStatus;
   block_id?: string | null;
+  start_offset?: number | null;
+  end_offset?: number | null;
 }
 
 export interface BoardMember extends BoardGeometry {

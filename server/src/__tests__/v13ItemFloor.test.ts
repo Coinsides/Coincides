@@ -18,7 +18,7 @@ test('Item summaries batch reads current text once per identity without snapshot
     status TEXT, item_type TEXT, topic TEXT, origin_note_id TEXT, origin_course_id TEXT, origin_board_id TEXT)`);
   db.prepare('INSERT INTO items VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
     .run('item', 'user', '  Current\n\tbody  ', 'active', 'claim', 'Topic', 'note', 'project', null);
-  const expected = { id: 'item', summary: 'Current body', status: 'active', item_type: 'claim',
+  const expected = { id: 'item', summary: 'Current body', plain_text: '  Current\n\tbody  ', status: 'active', item_type: 'claim',
     topic: 'Topic', origin_note_id: 'note', origin_course_id: 'project', origin_board_id: null, origin_board_title: null };
   assert.deepEqual(listItemSummaries(db, 'user', ['item', 'item', 'missing']), [expected]);
   assert.deepEqual(listItemSummaries(db, 'user', []), []);
@@ -27,6 +27,7 @@ test('Item summaries batch reads current text once per identity without snapshot
   const current = listItemSummaries(db, 'user', ['item']);
   assert.equal(current[0].summary, `New ${'text '.repeat(80)}`.trim().slice(0, 240));
   assert.equal(current[0].status, 'retired');
+  assert.equal(current[0].plain_text, `  New\n${'text '.repeat(80)}`);
 });
 
 test('13.4 synthetic HTTP Item floor: mount, reopen current body, retire in place and retain missing cards', async () => {
@@ -104,10 +105,10 @@ test('13.4 synthetic HTTP Item floor: mount, reopen current body, retire in plac
       item_ids: [item.id, standalone.id, item.id, 'missing'],
     });
     assert.deepEqual(summaries, [
-      { id: item.id, summary: 'Changed current body', status: 'active', item_type: 'claim',
+      { id: item.id, summary: 'Changed current body', plain_text: 'Changed\n current body', status: 'active', item_type: 'claim',
         topic: 'New topic', origin_note_id: noteId, origin_course_id: projectId,
         origin_board_id: null, origin_board_title: null },
-      { id: standalone.id, summary: 'Standalone body', status: 'active', item_type: null,
+      { id: standalone.id, summary: 'Standalone body', plain_text: 'Standalone body', status: 'active', item_type: null,
         topic: null, origin_note_id: null, origin_course_id: null, origin_board_id: null, origin_board_title: null },
     ]);
     assert.deepEqual(db.prepare('SELECT * FROM item_snapshots ORDER BY id').all(), snapshotsBefore);

@@ -1,6 +1,7 @@
 import { FileText, Layers, Quote, Square, X } from 'lucide-react';
 import type { BoardCandidate, BoardMember } from './boardTypes';
 import styles from './BoardStaging.module.css';
+import { BoardReferenceTag } from './BoardReferenceTag';
 import { BOARD_STAGING_MIME } from './boardStagingDrag';
 
 export { BOARD_STAGING_MIME } from './boardStagingDrag';
@@ -37,6 +38,7 @@ export function BoardStaging({ boardId, members, candidates, busy, onClose, onPl
       : <ul className={styles.list}>{members.map((member) => {
         const { label, Icon } = kinds[member.member_kind];
         const candidate = candidateById.get(`${member.member_kind}:${member.member_id}`);
+        const reference = member.member_kind === 'item' || member.member_kind === 'text_range';
         const title = ((member.member_kind === 'item' || member.member_kind === 'text_range')
           ? member.reference.summary || candidate?.summary : '')
           || member.reference.title || candidate?.title || `Unavailable ${label.toLowerCase()}`;
@@ -50,8 +52,12 @@ export function BoardStaging({ boardId, members, candidates, busy, onClose, onPl
             event.dataTransfer.setData(BOARD_STAGING_MIME, JSON.stringify({ boardId, memberId: member.id }));
             event.dataTransfer.effectAllowed = member.member_kind === 'item' ? 'copyMove' : 'move';
           }}>
-          <div className={styles.name}><Icon size={15} aria-label={label} /><span>{title.replace(/\s+/g, ' ').trim()}</span></div>
-          <div className={styles.source}><span>{source}</span>
+          {reference ? <>
+            <div className={styles.referenceCorner}><BoardReferenceTag member={member}
+              noteTitle={member.reference.note_id ? notes.get(member.reference.note_id) : undefined} /></div>
+            <p className={styles.referenceBody}>{member.reference.plain_text ?? title}</p>
+          </> : <div className={styles.name}><Icon size={15} aria-label={label} /><span>{title.replace(/\s+/g, ' ').trim()}</span></div>}
+          <div className={styles.source}>{!reference && <span>{source}</span>}
             {member.mounted_actor && member.mounted_actor !== 'human' && <span className={styles.actor}>{member.mounted_actor}</span>}
           </div>
           <div className={styles.actions}>

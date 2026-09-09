@@ -21,10 +21,12 @@ export function BoardChalkEditor({ draft, onSave, onCancel }: {
   const finished = useRef(false);
   const composing = useRef(false);
   const tooLong = text.length > BOARD_STICKY_TEXT_LIMIT;
+  const empty = !text.trim();
 
   async function save() {
     if (finished.current || composing.current || tooLong) return;
-    if (text === draft.text && draft.id) { finished.current = true; onCancel(); return; }
+    if (empty && !draft.id) { finished.current = true; onCancel(); return; }
+    if (!empty && text === draft.text && draft.id) { finished.current = true; onCancel(); return; }
     finished.current = true;
     setSaving(true);
     const saved = await onSave(text);
@@ -35,7 +37,8 @@ export function BoardChalkEditor({ draft, onSave, onCancel }: {
     }
   }
 
-  return <div className={`${styles.chalk} ${styles.chalkEditor}`} style={chalkGeometry(draft)}
+  return <div className={`${styles.chalk} ${styles.chalkEditor} ${empty ? styles.chalkGhost : ''}`}
+    data-chalk-state={empty ? 'ghost' : 'filled'} style={chalkGeometry(draft)}
     onPointerDown={(event) => event.stopPropagation()} onDoubleClick={(event) => event.stopPropagation()}>
     <textarea aria-label="Chalk text" aria-describedby="board-chalk-help" aria-invalid={tooLong || undefined}
       autoFocus value={text} readOnly={saving}

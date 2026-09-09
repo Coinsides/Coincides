@@ -99,12 +99,15 @@ export interface BoardMemberReference {
   title: string | null;
   note_id: string | null;
   summary?: string;
+  plain_text?: string;
   item_type?: string | null;
   topic?: string | null;
   item_status?: 'active' | 'retired' | 'missing';
   origin_board_id?: string | null;
   origin_board_title?: string | null;
   block_id?: string;
+  start_offset?: number | null;
+  end_offset?: number | null;
   anchor_status?: 'active' | 'drifted' | 'lost';
 }
 
@@ -183,6 +186,7 @@ export function resolveBoardMember(
     if (!range) return { ...base, state: 'missing', reason: 'reference_missing', anchor_status: 'lost' };
     const replay = replayBoardTextRange(db, userId, range);
     return { ...base, title: replay.title, note_id: range.note_id, block_id: range.block_id,
+      start_offset: range.start_offset, end_offset: range.end_offset,
       summary: replay.text, anchor_status: replay.status, reason: replay.reason,
       state: replay.status === 'active' ? 'available' : 'unavailable' };
   }
@@ -207,7 +211,7 @@ export function resolveBoardMember(
         origin_board_id: string | null; origin_board_title: string | null;
       } | undefined;
     if (!row) return { ...base, state: 'missing', reason: 'reference_missing', item_status: 'missing' };
-    return { ...base, summary: row.plain_text.replace(/\s+/g, ' ').trim().slice(0, 240),
+    return { ...base, plain_text: row.plain_text, summary: row.plain_text.replace(/\s+/g, ' ').trim().slice(0, 240),
       item_type: row.item_type, topic: row.topic, note_id: row.origin_note_id, item_status: row.status,
       origin_board_id: row.origin_board_id, origin_board_title: row.origin_board_title,
       state: row.status === 'active' ? 'available' : 'unavailable',

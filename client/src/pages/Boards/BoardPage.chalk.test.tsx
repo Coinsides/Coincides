@@ -131,6 +131,31 @@ afterEach(() => {
 });
 
 describe('V13.4 S9 chalk interaction smoke', () => {
+  it('discards a blank ghost without a write and deletes saved chalk cleared back to a ghost', async () => {
+    openBoard();
+    const empty = await draft('');
+    expect(empty.parentElement?.getAttribute('data-chalk-state')).toBe('ghost');
+    fireEvent.change(empty, { target: { value: 'temporary' } });
+    expect(empty.parentElement?.getAttribute('data-chalk-state')).toBe('filled');
+    fireEvent.change(empty, { target: { value: '  ' } });
+    expect(empty.parentElement?.getAttribute('data-chalk-state')).toBe('ghost');
+    fireEvent.blur(empty);
+    await waitFor(() => expect(screen.queryByRole('textbox', { name: 'Chalk text' })).toBeNull());
+    expect(http.post).not.toHaveBeenCalled();
+    expect(detail.visuals).toEqual([]);
+    const filled = await draft('Saved thought');
+    fireEvent.blur(filled);
+    await waitFor(() => expect(detail.visuals).toHaveLength(1));
+    await saved();
+    const id = detail.visuals[0].id;
+    fireEvent.doubleClick(screen.getByTestId(`board-visual-${id}`));
+    const editing = screen.getByRole('textbox', { name: 'Chalk text' });
+    fireEvent.change(editing, { target: { value: '' } });
+    fireEvent.blur(editing);
+    await waitFor(() => expect(detail.visuals).toEqual([]));
+    expect(http.delete).toHaveBeenCalledWith(`${path}/visuals/${id}`);
+    expect(http.patch).not.toHaveBeenCalled();
+  });
   it('double-clicks blank space, saves with Enter at board coordinates and rereads chalk on reopening', async () => {
     detail.board.viewport = { x: 30, y: 50, zoom: 2 };
     const view = openBoard();
@@ -215,7 +240,10 @@ describe('V13.4 S9 chalk interaction smoke', () => {
     await saved();
     expect(screen.queryByTestId(`board-visual-${visual.id}`)).toBeNull();
     expect(within(card).getByText('This thought becomes an item.')).toBeTruthy();
-    expect(within(card).getByText('Born on board Chalk workshop')).toBeTruthy();
+    expect(within(card).queryByText(/Chalk workshop/)).toBeNull();
+    fireEvent.click(within(card).getByRole('button', { name: 'Reference details' }));
+    expect(within(card).getByText('Board chalk · Chalk workshop')).toBeTruthy();
+    fireEvent.click(within(card).getByRole('button', { name: 'Close reference details' }));
     expect(card.style.left).toBe('120px');
     expect(card.style.top).toBe('180px');
     expect(card.style.transform).toBe('scale(1.25)');
@@ -283,13 +311,14 @@ describe('V13.4 S9 chalk interaction smoke', () => {
     const view = openBoard();
     await selectChalk(visual);
     fireEvent.click(screen.getByRole('button', { name: 'Cast to item' }));
-    await screen.findByText('Born on board Chalk workshop');
+    await screen.findByTestId('board-member-cast-member');
     // The real FK deletion and response are covered by the isolated server test.
     detail.members[0].reference.origin_board_id = null;
     detail.members[0].reference.origin_board_title = null;
     view.unmount();
     openBoard();
     const card = await screen.findByTestId('board-member-cast-member');
+    fireEvent.click(within(card).getByRole('button', { name: 'Reference details' }));
     expect(within(card).getByText('Birthplace unavailable')).toBeTruthy();
     expect(within(card).getByText('The body survives its birthplace.')).toBeTruthy();
   });

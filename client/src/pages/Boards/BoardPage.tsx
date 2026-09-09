@@ -15,7 +15,7 @@ import { BoardLayers } from './BoardLayers';
 import { boardLayerScene, layerIdOf } from './boardLayerScene';
 import { getActiveBoardLayer, setActiveBoardLayer } from './boardActiveLayer';
 import type { BoardTextRangeSelection } from '@shared/types/boardTextRange';
-import { itemOriginLabel } from '@/services/itemSummaryReader';
+import { BoardReferenceTag } from './BoardReferenceTag';
 import { BOARD_TEXT_RANGE_MIME, parseBoardTextRangeClipboard } from './boardTextRangeClipboard';
 import { connectionPoint, deletionScope, marqueeSelection, selectionKey, selectionRect, type BoardSelection, type BoardRect } from './boardSelection';
 import styles from './Boards.module.css';
@@ -447,7 +447,7 @@ export default function BoardPage() {
     const draft = chalkDraft;
     const visit = visitRevision.current;
     const saved = draft.id
-      ? await board.updateVisual(draft.id, { data: { text } })
+      ? !text.trim() ? await board.removeVisual(draft.id) : await board.updateVisual(draft.id, { data: { text } })
       : await board.addVisual({ visual_kind: 'sticky', data: { text },
         x: draft.x, y: draft.y, w: draft.w, h: draft.h, scale: draft.scale, z_index: draft.z_index, layer_id: draft.layer_id ?? null });
     if (saved && visit === visitRevision.current) setChalkDraft((current) => current === draft ? null : current);
@@ -967,9 +967,6 @@ export default function BoardPage() {
             const candidate = candidateById.get(`${member.member_kind}:${member.member_id}`);
             const isItem = member.member_kind === 'item';
             const isTextRange = member.member_kind === 'text_range';
-            const anchorStatus = member.reference.anchor_status || 'lost';
-            const itemState = member.reference.state === 'missing' ? 'Missing'
-              : member.reference.reason === 'item_retired' ? 'Retired' : 'Active';
             const title = member.reference.title || (isItem ? member.reference.item_type || 'Item' : candidate?.title)
               || (isTextRange ? 'Source note unavailable' : 'Unavailable projection');
             const canOpen = (isTextRange || member.reference.state === 'available') && Boolean(member.reference.note_id);
@@ -980,7 +977,7 @@ export default function BoardPage() {
               aria-label={title}
               aria-disabled={!canOpen}
               title={openHint}
-              className={`${styles.member} ${isSelected('member', member.id) || connectFrom === member.id ? styles.selected : ''}`}
+              className={`${styles.member} ${isItem || isTextRange ? styles.referenceMember : ''} ${isSelected('member', member.id) || connectFrom === member.id ? styles.selected : ''}`}
               style={{ left: member.x, top: member.y, width: member.w, height: member.h,
                 transform: `scale(${member.scale})`, zIndex: member.z_index }}
               onPointerDown={(event) => begin(event, member)}
@@ -991,35 +988,23 @@ export default function BoardPage() {
                 if (member.member_kind === 'note') openNote(member);
                 else void openMember(member);
               } : undefined}>
+              {isItem || isTextRange ? <>
+                <div className={styles.referenceCorner}><BoardReferenceTag member={member}
+                  noteTitle={candidates.find((entry) => entry.member_kind === 'note' && entry.member_id === member.reference.note_id)?.title}
+                  onOpenSource={canOpen ? () => { void openMember(member); } : undefined} />
+                  {member.pinned && <Pin size={13} aria-label="Pinned" />}</div>
+                <p className={styles.referenceBody}>{isTextRange ? member.reference.summary || 'Text snapshot unavailable.'
+                  : member.reference.plain_text ?? member.reference.summary ?? 'This content is no longer available.'}</p>
+              </> : <>
               <div className={styles.memberKind}>{{ note: 'Note', content_group: 'Group', item: 'Item', text_range: 'Text range' }[member.member_kind]}
-                {isTextRange && <span className={styles.itemStatus} data-anchor-status={anchorStatus}>
-                  {{ active: 'Live', drifted: 'Drifted', lost: 'Lost' }[anchorStatus]}</span>}
-                {isItem && <span className={styles.itemStatus}>{itemState}</span>}{member.pinned && <Pin size={13} aria-label="Pinned" />}</div>
+                {member.pinned && <Pin size={13} aria-label="Pinned" />}</div>
               <h2>{title}</h2>
-              <p>{isTextRange ? member.reference.summary || 'Text snapshot unavailable.'
-                : member.reference.state !== 'available' ? (member.reference.state === 'missing' ? 'This content is no longer available.' : 'This content is currently unavailable.')
-                : isItem ? member.reference.summary || 'Item preview unavailable.'
+              <p>{member.reference.state !== 'available' ? (member.reference.state === 'missing' ? 'This content is no longer available.' : 'This content is currently unavailable.')
                   : member.member_kind === 'note' && member.reference.note_id && notePreviews[member.reference.note_id] !== undefined
                     ? notePreviews[member.reference.note_id] || 'This note is empty.'
                   : candidate?.summary || (candidateError ? 'Preview unavailable. Open the note to read.' : 'Open the note to read more.')}</p>
-              {isItem && member.reference.topic && <small className={styles.itemTopic}>{member.reference.topic}</small>}
-              {isItem && member.reference.state !== 'missing' && <small>{itemOriginLabel({
-                origin_note_id: member.reference.note_id,
-                origin_board_id: member.reference.origin_board_id ?? null,
-                origin_board_title: member.reference.origin_board_title ?? null,
-              })}</small>}
-              {isTextRange && <>
-                {anchorStatus !== 'active' && <small className={styles.anchorNotice}>
-                  {anchorStatus === 'drifted' ? 'Source changed' : 'Source lost'} · Last valid snapshot
-                </small>}
-                <button type="button" className={styles.sourceLink} disabled={!canOpen}
-                  onPointerDown={(event) => event.stopPropagation()}
-                  onDoubleClick={(event) => event.stopPropagation()}
-                  onClick={(event) => { event.stopPropagation(); void openMember(member); }}>
-                  <ExternalLink size={12} />Open source note
-                </button>
-              </>}
               {!member.reference.note_id && <small>No linked note to open</small>}
+              </>}
               {!member.pinned && tool === 'select' && <button type="button" className={`${styles.resizeHandle} ${styles.memberResizeHandle}`}
                 aria-label={`Resize ${member.reference.title || 'projection'}`} title="Resize card"
                 onDoubleClick={(event) => event.stopPropagation()}
@@ -1100,7 +1085,7 @@ export default function BoardPage() {
     })()}
     {deleting && <BoardDeleteDialog board={detail.board} onCancel={() => setDeleting(false)} onDeleted={() => navigate('/boards')} />}
   </section>
-    {newNoteOpen && <BoardNewNoteDialog key={boardId} initialProjectId={detail.board.project_id}
+    {newNoteOpen && <BoardNewNoteDialog key={boardId} boardId={detail.board.id} initialProjectId={detail.board.project_id}
       onCancel={() => { setNewNoteOpen(false); newNoteToggle.current?.focus(); }}
       onCreated={(noteId) => { setNewNoteOpen(false); setOpenNoteId(noteId); void loadCandidates(); }} />}
     {openNoteId && <BoardNoteModal key={openNoteId} ref={noteModal} noteId={openNoteId}

@@ -14,6 +14,7 @@ import {
   castBoardSticky,
 } from '../services/boards.js';
 import { relocateTrayToBoard, undoTrayRelocation } from '../services/boardTrayRelocation.js';
+import { createBoardCeremonyNote } from '../services/boardCeremonyNote.js';
 import { listBoardTextRanges, updateBoardTextRanges } from '../services/boardTextRanges.js';
 import {
   createBoardSchema, updateBoardSchema,
@@ -90,6 +91,10 @@ export function createBoardRouter(database: () => Database.Database = getDb): Ro
 
   router.get('/:boardId', handle((req, res) => {
     res.json(getBoard(database(), req.userId!, String(req.params.boardId)));
+  }));
+
+  router.post('/:boardId/ceremony-note', handle((req, res) => {
+    res.status(201).json(createBoardCeremonyNote(database(), req.userId!, String(req.params.boardId), req.body));
   }));
 
   router.patch('/:boardId', handle((req, res) => {

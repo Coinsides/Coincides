@@ -114,6 +114,9 @@
 .sourceLink:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 3px; }
 .sourceLink:disabled { opacity: 0.5; cursor: default; }
 .member[aria-disabled='true'] { border-style: dashed; }
+.referenceMember { display: flex; flex-direction: column; }
+.referenceCorner { display: flex; align-items: center; justify-content: flex-end; flex: 0 0 auto; margin: -8px -8px 0 0; }
+.member .referenceBody { display: block; flex: 1; min-height: 0; margin: 0; font-size: 16px; line-height: 1.6; color: var(--text-primary); white-space: pre-wrap; overflow: auto; -webkit-line-clamp: unset; }
 .resizeHandle { position: absolute; bottom: -5px; right: -5px; width: 14px; height: 14px; background: var(--bg-elevated); border: 1px solid var(--border-focus); border-radius: 2px; cursor: nwse-resize; opacity: 0; }
 .selected .resizeHandle, .member:hover .resizeHandle, .member:focus-within .resizeHandle, .resizeHandle:focus-visible { opacity: 1; }
 .memberResizeHandle {
@@ -159,6 +162,9 @@
 }
 .chalkEditor small { font-size: 10px; line-height: 1.4; }
 .chalkEditor small[role='alert'] { font-weight: 600; }
+.chalkGhost { background: transparent; border-style: dashed; }
+.chalkEditor:focus-within { border-color: var(--border-focus); }
+.chalkEditor textarea:focus-visible { outline: none; box-shadow: none; }
 @media (max-width: 760px) {
   .library { padding: 12px 0; }
   .createRow { flex-direction: column; }

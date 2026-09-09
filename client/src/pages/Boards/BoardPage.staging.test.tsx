@@ -155,7 +155,8 @@ describe('board staging dock', () => {
     fireEvent.click(within(modal).getByRole('button', { name: 'Send to staging' }));
     const row = await screen.findByTestId('staging-member-range-member');
     expect(within(row).getByText('Selected passage')).toBeTruthy();
-    expect(within(row).getByText('Source note')).toBeTruthy();
+    expect(within(row).queryByText('Source note')).toBeNull();
+    expect(within(row).getByRole('button', { name: 'Reference details' })).toBeTruthy();
     expect(screen.queryByTestId('board-member-range-member')).toBeNull();
     expect(modal.getAttribute('data-staging-open')).toBe('true');
     expect(http.post).toHaveBeenCalledWith('/boards/board/text-ranges', expect.objectContaining({ placed: false,

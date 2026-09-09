@@ -124,8 +124,12 @@ beforeEach(() => {
     return fail('GET', url);
   });
   http.post.mockImplementation(async (url: string, input: any) => {
-    if (url === '/courses') { const project = { id: 'new-project', ...input }; projects.push(project); return response(project); }
-    if (url === '/notes') { const note = { id: 'new-note', ...input, description: null, metadata: {}, status: 'active' }; notes.push(note); return response(note); }
+    if (url === '/boards/board/ceremony-note') {
+      const project = { id: 'new-project', ...input.project }; projects.push(project);
+      const note = { id: 'new-note', course_id: project.id, title: input.title, description: null, metadata: {}, status: 'active' };
+      notes.push(note); collection = structuredClone(input.collection);
+      return response({ project, note, collection });
+    }
     if (url === '/items/summaries') return response(input.item_ids.includes(item.id) ? [{ ...item, summary: item.plain_text }] : []);
     if (url === '/source-anchors/generate') return response({ generated: 0 });
     if (url === '/notes/new-note/blocks') {
@@ -162,7 +166,10 @@ describe('13.4 unboxing through production board and note runtime', () => {
     await createNote();
     expect(await screen.findByText('Drag items from staging')).toBeTruthy();
     const runtime = await dropItem();
-    expect(within(runtime).getByText(/Born on board Unboxing board/)).toBeTruthy();
+    expect(within(runtime).queryByText(/Born on board Unboxing board/)).toBeNull();
+    fireEvent.click(within(runtime).getByRole('button', { name: 'Reference details' }));
+    expect(within(runtime).getByText('Board chalk · Unboxing board')).toBeTruthy();
+    fireEvent.click(within(runtime).getByRole('button', { name: 'Close reference details' }));
     expect(runtime.querySelector('[data-note-block-shell="true"] textarea')).toBeNull();
     expect(layouts).toHaveLength(1);
     const initialY = layouts[0].layout.y;
@@ -197,7 +204,9 @@ describe('13.4 unboxing through production board and note runtime', () => {
     fireEvent.keyDown(card, { key: 'Enter' });
     const page = await readyRuntime('page');
     await within(page).findByText(item.plain_text);
-    expect(within(page).getByText(/Born on board Unboxing board/)).toBeTruthy();
+    fireEvent.click(within(page).getByRole('button', { name: 'Reference details' }));
+    expect(within(page).getByText(/Board chalk · Unboxing board/)).toBeTruthy();
+    fireEvent.click(within(page).getByRole('button', { name: 'Close reference details' }));
     expect(screen.getByTestId('fixture-location').textContent).toBe('/notes/new-note');
     const writes = http.post.mock.calls.filter(([url]) => url === '/notes/new-note/blocks').length;
     await act(async () => { drop(page.querySelector('[data-canvas-engine-version]')!, staleTransfer); });

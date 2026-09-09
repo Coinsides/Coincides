@@ -8,6 +8,7 @@ export type ItemSummaryMap = ReadonlyMap<string, ItemSummary>;
 export function itemSummaryFromItem(item: ItemV1): ItemSummary {
   return {
     id: item.id,
+    plain_text: item.plain_text,
     summary: item.plain_text.replace(/\s+/g, ' ').trim().slice(0, 240),
     status: item.status,
     item_type: item.item_type,

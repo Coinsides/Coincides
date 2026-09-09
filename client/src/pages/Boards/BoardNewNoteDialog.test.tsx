@@ -11,9 +11,7 @@ const showModal = Object.getOwnPropertyDescriptor(HTMLDialogElement.prototype, '
 beforeEach(() => {
   vi.resetAllMocks();
   http.get.mockResolvedValue({ data: projects });
-  http.post.mockImplementation(async (path: string) => path === '/courses'
-    ? { data: { id: 'project-new', name: 'Chinese history' } }
-    : { data: { id: 'note-new', course_id: 'project-new', title: 'Trade routes' } });
+  http.post.mockResolvedValue({ data: { note: { id: 'note-new', course_id: 'project-new', title: 'Trade routes' } } });
   http.put.mockImplementation(async (_path: string, input: { collection: unknown }) => ({ data: input.collection }));
   Object.defineProperty(HTMLDialogElement.prototype, 'showModal', {
     configurable: true, value: function (this: HTMLDialogElement) { this.open = true; },
@@ -28,7 +26,7 @@ afterEach(() => {
 function openDialog(initialProjectId: string | null = null) {
   const onCreated = vi.fn();
   const onCancel = vi.fn();
-  return { ...render(<BoardNewNoteDialog initialProjectId={initialProjectId} onCreated={onCreated} onCancel={onCancel} />), onCreated, onCancel };
+  return { ...render(<BoardNewNoteDialog boardId="board" initialProjectId={initialProjectId} onCreated={onCreated} onCancel={onCancel} />), onCreated, onCancel };
 }
 
 async function chooseNewProject() {
@@ -49,7 +47,7 @@ function deferred<T>() {
 }
 
 describe('Board New note ceremony', () => {
-  it('requires a project and nonblank title, creates a name-only project, then opens the real note identity', async () => {
+  it('requires a project and nonblank title, atomically creates a name-only project and framed note, then opens its identity', async () => {
     const { onCreated } = openDialog();
     const submit = screen.getByRole('button', { name: 'Create note' }) as HTMLButtonElement;
     expect(submit.disabled).toBe(true);
@@ -60,12 +58,11 @@ describe('Board New note ceremony', () => {
     fillTitle();
     fireEvent.click(submit);
     await waitFor(() => expect(onCreated).toHaveBeenCalledExactlyOnceWith('note-new'));
-    expect(http.post.mock.calls).toEqual([
-      ['/courses', { name: 'Chinese history' }],
-      ['/notes', { course_id: 'project-new', title: 'Trade routes' }],
-    ]);
-    expect(http.put).toHaveBeenCalledExactlyOnceWith('/canvas-objects/by-note/note-new/page-frame-collection',
-      { collection: expect.objectContaining({ pageFrames: [expect.any(Object)] }) });
+    expect(http.post).toHaveBeenCalledExactlyOnceWith('/boards/board/ceremony-note', {
+      project: { name: 'Chinese history' }, title: 'Trade routes',
+      collection: expect.objectContaining({ pageFrames: [expect.any(Object)] }),
+    });
+    expect(http.put).not.toHaveBeenCalled();
   });
 
   it('offers existing projects and creates the note under the selected project', async () => {
@@ -76,25 +73,29 @@ describe('Board New note ceremony', () => {
     fillTitle();
     fireEvent.click(screen.getByRole('button', { name: 'Create note' }));
     await waitFor(() => expect(onCreated).toHaveBeenCalledExactlyOnceWith('note-new'));
-    expect(http.post).toHaveBeenCalledExactlyOnceWith('/notes', { course_id: 'project-second', title: 'Trade routes' });
+    expect(http.post).toHaveBeenCalledExactlyOnceWith('/boards/board/ceremony-note', {
+      project_id: 'project-second', title: 'Trade routes', collection: expect.any(Object),
+    });
     expect(screen.queryByRole('textbox', { name: 'Project name' })).toBeNull();
   });
 
-  it('keeps a newly created project selected when note creation fails, so retry does not create another project', async () => {
-    http.post.mockResolvedValueOnce({ data: { id: 'project-new', name: 'Chinese history' } })
-      .mockRejectedValueOnce(new Error('Synthetic note write failure'))
-      .mockResolvedValueOnce({ data: { id: 'note-retried' } });
+  it('keeps the inline project draft after an atomic failure and retries the whole ceremony', async () => {
+    http.post.mockRejectedValueOnce(new Error('Synthetic frame write failure'))
+      .mockResolvedValueOnce({ data: { note: { id: 'note-retried' } } });
     const { onCreated } = openDialog();
     await chooseNewProject();
     fillTitle();
     fireEvent.click(screen.getByRole('button', { name: 'Create note' }));
-    expect((await screen.findByRole('alert')).textContent).toContain('Your selected project is kept');
+    expect((await screen.findByRole('alert')).textContent).toContain('Your entries are kept');
     expect(onCreated).not.toHaveBeenCalled();
-    expect((screen.getByRole('combobox', { name: 'Project' }) as HTMLSelectElement).value).toBe('project-new');
+    expect((screen.getByRole('combobox', { name: 'Project' }) as HTMLSelectElement).value).toBe('__new_project__');
+    expect((screen.getByRole('textbox', { name: 'Project name' }) as HTMLInputElement).value).toBe('  Chinese history  ');
     expect((screen.getByRole('textbox', { name: 'Note title' }) as HTMLInputElement).value).toBe('  Trade routes  ');
-    fireEvent.click(screen.getByRole('button', { name: 'Create note' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Retry creating note' }));
     await waitFor(() => expect(onCreated).toHaveBeenCalledExactlyOnceWith('note-retried'));
-    expect(http.post.mock.calls.map(([path]) => path)).toEqual(['/courses', '/notes', '/notes']);
+    expect(http.post.mock.calls.map(([path]) => path)).toEqual(['/boards/board/ceremony-note', '/boards/board/ceremony-note']);
+    expect(http.post.mock.calls[1]).toEqual(http.post.mock.calls[0]);
+    expect(http.put).not.toHaveBeenCalled();
   });
 
   it('preserves the form after project creation fails and never creates a note prematurely', async () => {
@@ -103,27 +104,29 @@ describe('Board New note ceremony', () => {
     await chooseNewProject();
     fillTitle();
     fireEvent.click(screen.getByRole('button', { name: 'Create note' }));
-    expect((await screen.findByRole('alert')).textContent).toContain('Could not create the project');
-    expect(http.post).toHaveBeenCalledExactlyOnceWith('/courses', { name: 'Chinese history' });
+    expect((await screen.findByRole('alert')).textContent).toContain('Could not create the note');
+    expect(http.post).toHaveBeenCalledExactlyOnceWith('/boards/board/ceremony-note', {
+      project: { name: 'Chinese history' }, title: 'Trade routes', collection: expect.any(Object),
+    });
     expect(onCreated).not.toHaveBeenCalled();
     expect((screen.getByRole('textbox', { name: 'Project name' }) as HTMLInputElement).value).toBe('  Chinese history  ');
   });
 
-  it('waits for stored layout before opening and retries setup on the same created note and frame', async () => {
-    http.put.mockRejectedValueOnce(new Error('Synthetic page collection write failure'));
+  it('keeps the existing project and editable title after frame failure, then opens only after a successful retry', async () => {
+    http.post.mockRejectedValueOnce(new Error('Synthetic page collection write failure'));
     const { onCreated } = openDialog('project-first');
     await waitFor(() => expect((screen.getByRole('combobox', { name: 'Project' }) as HTMLSelectElement).value).toBe('project-first'));
     fillTitle();
     fireEvent.click(screen.getByRole('button', { name: 'Create note' }));
-    expect((await screen.findByRole('alert')).textContent).toContain('Retry opening the same note');
+    expect((await screen.findByRole('alert')).textContent).toContain('Could not create the note');
     expect(onCreated).not.toHaveBeenCalled();
-    expect((screen.getByRole('textbox', { name: 'Note title' }) as HTMLInputElement).disabled).toBe(true);
-    expect((screen.getByRole('combobox', { name: 'Project' }) as HTMLSelectElement).disabled).toBe(true);
-    const originalCollection = structuredClone(http.put.mock.calls[0]);
-    fireEvent.click(screen.getByRole('button', { name: 'Retry opening note' }));
+    expect((screen.getByRole('textbox', { name: 'Note title' }) as HTMLInputElement).disabled).toBe(false);
+    expect((screen.getByRole('combobox', { name: 'Project' }) as HTMLSelectElement).value).toBe('project-first');
+    const originalRequest = structuredClone(http.post.mock.calls[0]);
+    fireEvent.click(screen.getByRole('button', { name: 'Retry creating note' }));
     await waitFor(() => expect(onCreated).toHaveBeenCalledExactlyOnceWith('note-new'));
-    expect(http.post).toHaveBeenCalledExactlyOnceWith('/notes', { course_id: 'project-first', title: 'Trade routes' });
-    expect(http.put.mock.calls).toEqual([originalCollection, originalCollection]);
+    expect(http.post.mock.calls).toEqual([originalRequest, originalRequest]);
+    expect(http.put).not.toHaveBeenCalled();
   });
 
   it('retries a failed project list without losing the note title and cancels without writes', async () => {
@@ -141,9 +144,9 @@ describe('Board New note ceremony', () => {
     expect(http.post).not.toHaveBeenCalled();
   });
 
-  it('serializes double submission and does not continue into a note write after the board host unmounts', async () => {
-    const createProject = deferred<{ data: { id: string; name: string } }>();
-    http.post.mockReturnValueOnce(createProject.promise);
+  it('serializes double submission and does not open the completed note after the board host unmounts', async () => {
+    const ceremony = deferred<{ data: { note: { id: string } } }>();
+    http.post.mockReturnValueOnce(ceremony.promise);
     const { onCreated, onCancel, unmount } = openDialog();
     await chooseNewProject();
     fillTitle();
@@ -155,7 +158,7 @@ describe('Board New note ceremony', () => {
     expect(onCancel).not.toHaveBeenCalled();
     expect((screen.getByRole('button', { name: 'Cancel' }) as HTMLButtonElement).disabled).toBe(true);
     unmount();
-    await act(async () => { createProject.resolve({ data: { id: 'project-new', name: 'Chinese history' } }); await createProject.promise; });
+    await act(async () => { ceremony.resolve({ data: { note: { id: 'note-new' } } }); await ceremony.promise; });
     expect(http.post).toHaveBeenCalledOnce();
     expect(onCreated).not.toHaveBeenCalled();
   });

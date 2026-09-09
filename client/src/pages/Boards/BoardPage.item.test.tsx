@@ -156,8 +156,8 @@ describe('V13.4 item projection smoke', () => {
     const view = openBoard();
     const card = await mount('Claim');
     expect(within(card).getByText('Current standalone body.')).toBeTruthy();
-    expect(within(card).getByText('Active')).toBeTruthy();
-    expect(within(card).getByText('Mechanics')).toBeTruthy();
+    expect(within(card).queryByText('Active')).toBeNull();
+    expect(within(card).getByRole('button', { name: 'Reference details' })).toBeTruthy();
     const input = http.post.mock.calls.find(([url]) => url.endsWith('/members'))![1];
     expect(input.member_kind).toBe('item');
     expect(input.member_id).toBe('standalone');
@@ -180,13 +180,14 @@ describe('V13.4 item projection smoke', () => {
     view = openBoard();
     let card = await screen.findByTestId(`board-member-${memberId}`);
     expect(card.getAttribute('aria-disabled')).toBe('true');
-    expect(within(card).getByText('Retired')).toBeTruthy();
-    expect(within(card).getByText('This content is currently unavailable.')).toBeTruthy();
+    expect(within(card).getByText('Current standalone body.')).toBeTruthy();
+    fireEvent.click(within(card).getByRole('button', { name: 'Reference details' }));
+    expect(within(card).getByText(/This item is retired/)).toBeTruthy();
     items = items.filter((item) => item.id !== 'standalone');
     view.unmount();
     openBoard();
     card = await screen.findByTestId(`board-member-${memberId}`);
-    expect(within(card).getByText('Missing')).toBeTruthy();
+    expect(within(card).getByRole('button', { name: 'Reference details' }).getAttribute('data-reference-health')).toBe('lost');
     expect(within(card).getByText('This content is no longer available.')).toBeTruthy();
   });
 

@@ -19,7 +19,7 @@ export function listItemSummaries(
     WHERE i.user_id = ? AND i.id IN (${ids.map(() => '?').join(', ')})
   `).all(userId, ...ids) as ItemSummaryRow[];
   const byId = new Map(rows.map(({ plain_text, ...row }) => [row.id, {
-    ...row, summary: plain_text.replace(/\s+/g, ' ').trim().slice(0, 240),
+    ...row, plain_text, summary: plain_text.replace(/\s+/g, ' ').trim().slice(0, 240),
   }]));
   return ids.flatMap((id) => {
     const row = byId.get(id);
