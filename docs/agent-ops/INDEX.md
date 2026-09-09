@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 300 份文档。
+共 301 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -288,9 +288,10 @@
 | [handoffs/2026-09-09-v13-4-s2-text-range-order.md](handoffs/2026-09-09-v13-4-s2-text-range-order.md) | 13.4 单 2 · text_range 上板 | `done` | — | — |
 | [handoffs/2026-09-09-v13-4-s3-tray-polish-order.md](handoffs/2026-09-09-v13-4-s3-tray-polish-order.md) | 13.4 单 3 · 准备区二件 + 正名(笔记侧) | `done(HQ 收口:S3-V1 裁不违例,交付收货)` | — | — |
 | [handoffs/2026-09-09-v13-4-s4-board-tools-order.md](handoffs/2026-09-09-v13-4-s4-board-tools-order.md) | 13.4 单 4 · 板工具批 | `done` | — | — |
+| [handoffs/2026-09-09-v13-4-s5-overview-order.md](handoffs/2026-09-09-v13-4-s5-overview-order.md) | 13.4 单 5 · 铺陈统揽视图 | `ready` | — | — |
 | [handoffs/2026-09-09-v13-4-s6-open-note-modal-order.md](handoffs/2026-09-09-v13-4-s6-open-note-modal-order.md) | 13.4 单 6 · Open note 弹窗 | `done` | — | — |
 | [handoffs/2026-09-09-v13-4-s7-staging-dock-order.md](handoffs/2026-09-09-v13-4-s7-staging-dock-order.md) | 13.4 单 7 · 板级装卸区 | `done` | — | — |
-| [handoffs/2026-09-09-v13-4-s8-board-layers-order.md](handoffs/2026-09-09-v13-4-s8-board-layers-order.md) | 13.4 单 8 · 板分层(薄版) | `blocked` | — | — |
+| [handoffs/2026-09-09-v13-4-s8-board-layers-order.md](handoffs/2026-09-09-v13-4-s8-board-layers-order.md) | 13.4 单 8 · 板分层(薄版) | `done(HQ 收口:STOP-1 经补遗一修复验证,收货)` | — | — |
 | [handoffs/2026-09-09-v13-4-s9-chalk-and-cast-order.md](handoffs/2026-09-09-v13-4-s9-chalk-and-cast-order.md) | 13.4 单 9 · 粉笔 + 铸卡 | `done` | — | — |
 | [handoffs/2026-09-09-v13-4-wave1-wiring-order.md](handoffs/2026-09-09-v13-4-wave1-wiring-order.md) | 13.4 单 A · 接线批 + 生命周期批 | `ready` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
