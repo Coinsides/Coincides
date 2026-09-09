@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 304 份文档。
+共 305 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -81,6 +81,7 @@
 | [analysis/2026-09-07-wilderness-migration-mapping.md](analysis/2026-09-07-wilderness-migration-mapping.md) | 13.0 图三 · 野地退役迁移映射表 | `active` | 2026-09-07 | — |
 | [analysis/2026-09-08-v13-2-canvas-deadcode-inventory.md](analysis/2026-09-08-v13-2-canvas-deadcode-inventory.md) | V13.2 单 5 · canvas 模式死代码清册 | `frozen` | 2026-09-08 | — |
 | [analysis/2026-09-08-v13-3-s0-recon.md](analysis/2026-09-08-v13-3-s0-recon.md) | V13.3 单 0 · 板 / 魂 / 书记官只读侦察 | `frozen` | 2026-09-08 | — |
+| [analysis/2026-09-09-block-endgame-direction.md](analysis/2026-09-09-block-endgame-direction.md) | 块的终局 —— 方向档 v0 | `active` | 2026-09-09 | — |
 | [analysis/2026-09-09-editing-maturity-and-agent-symmetry-panel.md](analysis/2026-09-09-editing-maturity-and-agent-symmetry-panel.md) | 编辑成熟度与 Agent 对称 —— 对谈分析档 | `active` | 2026-09-09 | — |
 | [analysis/2026-09-09-v13-4-s0-recon.md](analysis/2026-09-09-v13-4-s0-recon.md) | V13.4 单 0 · 投影全谱与 item 化侦察 | `active` | 2026-09-09 | — |
 | [analysis/2026-09-09-v13-4-s1-item-depth.md](analysis/2026-09-09-v13-4-s1-item-depth.md) | 13.4 单 1 · Item 三道深水题 | `active` | 2026-09-09 | — |
