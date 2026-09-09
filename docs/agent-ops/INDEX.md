@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 301 份文档。
+共 302 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -282,13 +282,14 @@
 | [handoffs/2026-09-08-v13-3-s2-board-ui-order.md](handoffs/2026-09-08-v13-3-s2-board-ui-order.md) | 13.3 · 单 2 · 板 UI MVP + 旧 Purpose 消费面对齐 | `(缺状态头)` | — | — |
 | [handoffs/2026-09-08-v13-3-s3-tray-relocation-order.md](handoffs/2026-09-08-v13-3-s3-tray-relocation-order.md) | 13.3 · 单 3 · 准备区→板搬迁(图三承诺兑现) | `(缺状态头)` | — | — |
 | [handoffs/2026-09-09-v13-3-s4-polish-order.md](handoffs/2026-09-09-v13-3-s4-polish-order.md) | 13.3 · 单 4 · 走查③打磨(板名独立/入口淡化/两件收起) | `(缺状态头)` | — | — |
+| [handoffs/2026-09-09-v13-4-closing-chain-smoke-order.md](handoffs/2026-09-09-v13-4-closing-chain-smoke-order.md) | 13.4 段收口 · 全链冒烟 | `ready` | — | — |
 | [handoffs/2026-09-09-v13-4-s0-recon-order.md](handoffs/2026-09-09-v13-4-s0-recon-order.md) | 13.4 · 单 0 · 投影全谱与 item 化侦察 | `(缺状态头)` | — | — |
 | [handoffs/2026-09-09-v13-4-s1-item-floor-order.md](handoffs/2026-09-09-v13-4-s1-item-floor-order.md) | 13.4 单 1 · item 化地基 | `ready` | — | — |
 | [handoffs/2026-09-09-v13-4-s10-unboxing-ceremony-order.md](handoffs/2026-09-09-v13-4-s10-unboxing-ceremony-order.md) | 13.4 单 10 · 开箱仪式 | `done` | — | — |
 | [handoffs/2026-09-09-v13-4-s2-text-range-order.md](handoffs/2026-09-09-v13-4-s2-text-range-order.md) | 13.4 单 2 · text_range 上板 | `done` | — | — |
 | [handoffs/2026-09-09-v13-4-s3-tray-polish-order.md](handoffs/2026-09-09-v13-4-s3-tray-polish-order.md) | 13.4 单 3 · 准备区二件 + 正名(笔记侧) | `done(HQ 收口:S3-V1 裁不违例,交付收货)` | — | — |
 | [handoffs/2026-09-09-v13-4-s4-board-tools-order.md](handoffs/2026-09-09-v13-4-s4-board-tools-order.md) | 13.4 单 4 · 板工具批 | `done` | — | — |
-| [handoffs/2026-09-09-v13-4-s5-overview-order.md](handoffs/2026-09-09-v13-4-s5-overview-order.md) | 13.4 单 5 · 铺陈统揽视图 | `ready` | — | — |
+| [handoffs/2026-09-09-v13-4-s5-overview-order.md](handoffs/2026-09-09-v13-4-s5-overview-order.md) | 13.4 单 5 · 铺陈统揽视图 | `done` | — | — |
 | [handoffs/2026-09-09-v13-4-s6-open-note-modal-order.md](handoffs/2026-09-09-v13-4-s6-open-note-modal-order.md) | 13.4 单 6 · Open note 弹窗 | `done` | — | — |
 | [handoffs/2026-09-09-v13-4-s7-staging-dock-order.md](handoffs/2026-09-09-v13-4-s7-staging-dock-order.md) | 13.4 单 7 · 板级装卸区 | `done` | — | — |
 | [handoffs/2026-09-09-v13-4-s8-board-layers-order.md](handoffs/2026-09-09-v13-4-s8-board-layers-order.md) | 13.4 单 8 · 板分层(薄版) | `done(HQ 收口:STOP-1 经补遗一修复验证,收货)` | — | — |
