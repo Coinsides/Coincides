@@ -97,7 +97,11 @@ const BoardNoteModal = forwardRef<BoardNoteModalHandle, BoardNoteModalProps>(fun
           }
         });
         await activeRuntime.flushPendingSaves();
-        return alive.current ? await onSendToStaging(selection) : false;
+        if (!alive.current || !await onSendToStaging(selection)) return false;
+        // Keep the same editing session and the staging input barrier until its
+        // newly minted anchors can participate in the next ordinary text edit.
+        await activeRuntime.refreshBoardTextRanges();
+        return true;
       } finally {
         stagingPending.current = null;
         if (alive.current) setSaving(false);

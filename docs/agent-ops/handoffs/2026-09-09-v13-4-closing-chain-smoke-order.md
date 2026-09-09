@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready
+> **状态 (Status)**: done
 > **From**: fable(HQ) · **To**: codex(builder)
 > **日期**: 2026-09-09
 > **上游**: 13.4 段 plan 修订二段收口条款(定向核查+终点判据全链冒烟归档)
@@ -166,3 +166,60 @@
 2. **第 8 步剧本修订**:重开板后**先做一步新board操作**(拖动 Item 卡到新位置)→**Ctrl+Z 回原位**→Ctrl+Y 复位;然后画一笔 freehand→**橡皮擦掉**→Ctrl+Z 笔回来;
 3. **样本续用**:第 1-7 步收据有效(本轮零产品改动),从修订版第 8 步继续到第 9 步终检,⛔ 重走 1-7;
 4. 完成后新 Result 追加(九步全 PASS 判据以修订剧本为准)。
+
+## Result
+
+2026-09-09 · Codex(builder) · **补遗二续工：修订旅程 9/9 PASS。第 1–7 步沿用有效收据，本轮只执行修订版第 8 步及第 9 步，零产品修改、零 commit。** 工单 `done` 表示本单执行交付完成；13.4 主观验收与放行仍归 HQ。
+
+旧第 8 步的 Undo 禁用、零请求、状态不变事实与全部停线原件均保留；其归因为剧本缺陷是**本补遗二的 HQ 裁定**，并非 Codex 自行改判。reload 清栈设计未动。
+
+### 同样本续接与九步结果
+
+归档位于 [补遗二 README](../../../.codex-tmp/v13-4-closing-chain-resume/hq-addendum-2/README.md)。旧临时浏览器标签已清理，本轮新增夹具 `checkpoint.html/ts` 从原 `08-STOP-history-empty.json` 恢复**同一板、同一笔记/Item/锚/成员/事件账**，没有执行 1–7、替换样本或注入历史命令。恢复前后 10 类业务状态全等，原 124 个请求（248 行 started/committed）完整保持；重挂只新增 #125–131 七个 GET。[恢复比较](../../../.codex-tmp/v13-4-closing-chain-resume/hq-addendum-2/checkpoint-comparison.json)。原收据是 diagnostic，包含重算 reference；因此只声称业务状态完整恢复，不声称 raw sessionStorage 字节镜像。
+
+| 步 | 结果 | 证据与本轮边界 |
+|---|---|---|
+| 1 粉笔→铸卡 | **PASS（沿用）** | [01 原收据](../../../.codex-tmp/v13-4-closing-chain-resume/receipts/01-chalk-cast.json)：原位替换、origin 指本板；未重走。 |
+| 2 Stage→Place 源笔记 | **PASS（沿用）** | [02 原收据](../../../.codex-tmp/v13-4-closing-chain-resume/receipts/02-source-placed.json)：同 member placed、无额外 mounted；未重走。 |
+| 3 弹窗选段→Send→Place | **PASS（沿用）** | [03 原收据](../../../.codex-tmp/v13-4-closing-chain-resume/receipts/03-range-placed.json)：同 modal 新锚登记、Live 卡；未重走。 |
+| 4 同会话前插字→保存跟变 | **PASS（沿用）** | [04 原收据](../../../.codex-tmp/v13-4-closing-chain-resume/receipts/04-range-followed.json)：38..63→47..72、原 excerpt 不变；本轮终检仍 Live。 |
+| 5 分层、遮挡、显隐 | **PASS（沿用）** | [05c 真交换](../../../.codex-tmp/v13-4-closing-chain-resume/receipts/05c-order-swapped-confirmed.json)、[05d 隐藏](../../../.codex-tmp/v13-4-closing-chain-resume/receipts/05d-layer-hidden.json)、[05 恢复](../../../.codex-tmp/v13-4-closing-chain-resume/receipts/05-layers-restored.json)；旧 05b 误标不作为通过证据。本轮只读终检层序/显隐。 |
+| 6 New note→item_ref | **PASS（沿用）** | [06 原收据](../../../.codex-tmp/v13-4-closing-chain-resume/receipts/06-item-ref-in-note.json)：project/title 与原 Item 引用块保持；未重走。 |
+| 7 Item 正文双面跟变 | **PASS（沿用）** | [07 原收据](../../../.codex-tmp/v13-4-closing-chain-resume/receipts/07-item-both-surfaces-followed.json)：新笔记块与板 Item 卡跟变；本轮未再改 Item。 |
+| 8 新移动→Undo/Redo→笔/橡皮/Undo | **PASS（修订剧本）** | #132 原 Item 卡 `(1090,232)→(1290,352)`；#133 Ctrl+Z 回原位，整板等于移动前；#134 Ctrl+Y 回新位，整板等于移动后。#135 Pen 一笔→#136 Eraser 删除→#137 Ctrl+Z 笔回来。[结果/请求比较](../../../.codex-tmp/v13-4-closing-chain-resume/hq-addendum-2/step-08-result.json)；[移动](../../../.codex-tmp/v13-4-closing-chain-resume/hq-addendum-2/receipts/08b-item-moved.png)、[Undo](../../../.codex-tmp/v13-4-closing-chain-resume/hq-addendum-2/receipts/08c-item-undo.png)、[Redo](../../../.codex-tmp/v13-4-closing-chain-resume/hq-addendum-2/receipts/08d-item-redo.png)、[擦除](../../../.codex-tmp/v13-4-closing-chain-resume/hq-addendum-2/receipts/08f-freehand-erased.png)、[笔回来](../../../.codex-tmp/v13-4-closing-chain-resume/hq-addendum-2/receipts/08g-freehand-undo-restored.png)。 |
+| 9 重开板+两笔记+事件终检 | **PASS** | 重开板，分别双击源笔记与新笔记，关窗后再重开板；终点 sequence **192**。10 类业务字段与第 8 步末完全相等：两笔记/两 blocks、Item、range、project、collections、板几何/层/边/墨迹等保持；source **Context 前缀 + 原文**，item_ref **当前 Item 正文及板出处**亲见。[源笔记截图](../../../.codex-tmp/v13-4-closing-chain-resume/hq-addendum-2/receipts/09b-source-note-reopened.png)、[新笔记截图](../../../.codex-tmp/v13-4-closing-chain-resume/hq-addendum-2/receipts/09c-synthesis-note-reopened.png)、[终点板截图](../../../.codex-tmp/v13-4-closing-chain-resume/hq-addendum-2/receipts/09e-terminal-board.png)、[全部比较及事件抽核](../../../.codex-tmp/v13-4-closing-chain-resume/hq-addendum-2/step-09-result.json)。 |
+
+事件终检逐条对应原请求与 member：**mounted=5**（#7/#16/#30/#54/#94，五个不同 member），**unmounted=0 / board_created=0 / board_deleted=0 / rejected=0**；与第 7 步原账相同，续走未新增冗余。终点为 5 members（4 placed + 1 staging）、2 自定义层、1 edge、1 freehand。板为 seed，未实际执行创建/删除；零这两类事件只证明旅程无冗余，真实 SQL 行为由既有 server 完整板族套件独立覆盖。
+
+### 检查器纠正与观察边界（原证据保留）
+
+笔恢复时，检查器额外要求“整个 board JSON 连 visual ID 全等”，抛出 `FAIL_STOP: stroke undo differs`，当时立即冻结动作。差异只有物理 ID `closing-chain-visual-135→137`；几何、points/path/style、层与其它板状态全等。只读核查 `boardCommandHistory.ts:109,127` 与既有 `useBoard.history.test.tsx:126,171` 明确以 createVisual 重建并跟踪新 live ID，后者还断言恢复 ID 不同于原 ID。**这是额外夹具断言错误，HQ 本步判据为“笔回来”**；未改产品、未重做动作、未回写任何既有停线裁定。[原差异](../../../.codex-tmp/v13-4-closing-chain-resume/hq-addendum-2/step-08-comparison.json) 与[纠正依据](../../../.codex-tmp/v13-4-closing-chain-resume/hq-addendum-2/ink-id-comparison-correction.json) 分别保留；`08g` 原收据里过早写出的 “same identity” 备注以纠正记录为准。
+
+笔记关闭后，板卡曾显示临时 notePreviews 摘要（纯 item_ref 笔记为 `This note is empty.`）；真实 runtime 内 Item 内容正确、持久字段差异为空，重挂读回保存摘要。该现象按 `BoardPage.tsx:1003–1004` 的现有预览路径如实留在截图/AX 中，不宣称 UI 全面无瑕疵，也不据此改产品。
+
+### 定向核查与最后全量
+
+工单实际列十面，既有[十面功能/测试映射](../../../.codex-tmp/v13-4-closing-chain-resume/targeted-audit.md)沿用；其第 8/9 步红/未达文字属于补遗一历史，新旅程状态以上表为准。**C2**=[client 全库日志](../../../.codex-tmp/v13-4-closing-chain-resume/verification/01-test-unit.log)，**S2**=[server 板族日志](../../../.codex-tmp/v13-4-closing-chain-resume/verification/server-board-family.log)。
+
+| 面 | 本段改变及最新绿证 | 补遗二终检补足 |
+|---|---|---|
+| 接线批 | 板投影几何/边/生命周期接线；C2 smoke/useBoard/DeleteDialog，S2 BoardWave1/Routes/Services/Schema/EventsLedger | 原成员/边/几何与事件账保持。 |
+| item | 当前摘要与出处读取；C2 BoardPage.item/itemSummaryReader，S2 ItemFloor/BoardChalk | Item 卡、item_ref 均显示同一当前正文与出处。 |
+| text_range | 同 session 新锚增量登记；C2 rangeSession/editSession/adapter，S2 BoardTextRanges | 47..72、原 excerpt、active/Live 保持。 |
+| 粉笔铸卡 | 原位 Cast 与板出生证；C2 BoardPage.chalk，S2 BoardChalk | 原 Item/出生证与投影身份保持。 |
+| 弹窗 | 真 runtime、关闭保存屏障；C2 BoardNoteModal/modal/writeRegistry/rangeSession | 两笔记重开、关窗后块内容保持。 |
+| 装卸区 | Stage/Place 与 Item 拖入；C2 staging/Tray 全家，S2 BoardStaging/Tray/TrayOrder/Relocation | 单个 unplaced Item 仍在 dock；未重复 mount。 |
+| 开箱 | project/title 与 item_ref；C2 NewNoteDialog/unboxing/adapter，S2 ItemRefBlocks | 新 project/note、块 identity、page-frame collections 保持。 |
+| 工具 | 会话栈、Pen/Eraser；C2 tools/useBoard.history/useBoard，S2 板族 | 修订第 8 步全通过；重开后栈空仍正确。 |
+| 分层 | stacking/Move/层序/显隐；C2 layers/history，S2 Schema/Services/Relocation | Layer 1 高于 Layer 2、两层可见、连边与分层保持。 |
+| 统揽 | Overview 与只读打印投影；C2 NoteRuntimeDocumentLayer/NotePrintLayer/BoardNoteModal | 续用既有整跑；未额外重跑历史浏览器/打印场景。 |
+
+最后一次整跑仍为 `2026-09-09T13:01:12.543Z→13:02:13.131Z`：[23 条原命令/退出码](../../../.codex-tmp/v13-4-closing-chain-resume/verification/results.json)。**Client 82 文件 / 709 PASS；server 板族 15 文件 / 68 PASS，0 FAIL/skip/cancel/todo；client/server typecheck 与 build PASS；23 命令全部 exit 0。** 本轮无产品修改，原 manifest 明列的 8 个产品/测试源码哈希全部相等；前次报告 HEAD `beda0cc…` 至本轮观察 HEAD `0dca416…` 在指定 client/src、server/src、shared、scripts、package 清单上无 diff。故续用最新整跑，不重复测试；`git diff --check` 本轮 exit 0。
+
+原 runtime 门允许的 **20 个子命令全 PASS**（model contract 60 组、performance 5 场景）；**原 `verify:v2-bn8-runtime` 聚合门未整体执行，不标 PASS**，其凭据扫描按直令留 HQ。原 precheck/first-full 红日志与旧停线收据未覆盖，原套件既有安全断言未过滤。
+
+### 交付、未做与铁律
+
+新增交付均在 `hq-addendum-2/`：**14 份逐步 JSON + 14 张 PNG**、恢复比较、步骤 8/9 比较、检查器纠正、终点 checkpoint、完整终点 AX、README 与[定点哈希清单](../../../.codex-tmp/v13-4-closing-chain-resume/hq-addendum-2/artifact-manifest.json)。旧 1–7 及停线原收据哈希保持。合成夹具端口 5195、最终标签供 HQ 复核；不接真实 backend/用户库。
+
+未做：1–7 重走、产品或既有测试修改、真实数据库/SQL null 规范验证、HQ 凭据扫描、主观验收/放行。**无新增产品停线；零 git commit；未读 `.env`；无 key 输出/出境；未触碰用户数据库；未设计/新增安全类测试。** 本单交付完成，交 HQ 复核与放行。

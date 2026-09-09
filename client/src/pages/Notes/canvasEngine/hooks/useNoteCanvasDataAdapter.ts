@@ -2294,7 +2294,14 @@ export function useNoteCanvasDataAdapter({
     }
   }, [addToast]);
 
+  const refreshBoardTextRanges = useCallback(async () => {
+    if (!noteId) return;
+    const nextRanges = await loadBoardTextRangesForNote(noteId);
+    boardRangeSession.mergeNewRanges(nextRanges);
+  }, [noteId, boardRangeSession]);
+
   return {
+    refreshBoardTextRanges,
     whenIdle: writeRegistry.whenIdle,
     trackPendingWrite: writeRegistry.track,
     note,

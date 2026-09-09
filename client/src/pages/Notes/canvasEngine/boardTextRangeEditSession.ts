@@ -96,6 +96,16 @@ export function createBoardTextRangeEditSession(
       drafts.clear();
       loaded = true;
     },
+    mergeNewRanges(nextRanges: BoardTextRangeV1[]) {
+      // Mid-session minting only registers new identities. Existing ranges may
+      // already have local edits or an in-flight save, so keep them and drafts.
+      const knownIds = new Set(ranges.map((range) => range.id));
+      for (const range of nextRanges) {
+        if (range.note_id !== noteId || knownIds.has(range.id)) continue;
+        ranges.push(range);
+        knownIds.add(range.id);
+      }
+    },
     rebase(blockId: string, previousTextFlow: TextBlockContentV1 | null, nextTextFlow: TextBlockContentV1 | null) {
       if (!loaded) return;
       const previous = drafts.has(blockId) ? drafts.get(blockId)! : previousTextFlow;

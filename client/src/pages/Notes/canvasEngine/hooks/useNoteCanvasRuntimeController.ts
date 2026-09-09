@@ -108,6 +108,7 @@ export function useNoteCanvasRuntimeController() {
     sourceJumpBusy,
     annotationTruths,
     rebaseBoardTextRanges,
+    refreshBoardTextRanges,
     contentGroups,
     groupFolders,
     purposeFrames,
@@ -544,6 +545,7 @@ export function useNoteCanvasRuntimeController() {
   return {
     dismissTransientUI,
     flushPendingSaves,
+    refreshBoardTextRanges,
     layerProps,
     loading,
     loadError,

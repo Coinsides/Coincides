@@ -6,10 +6,11 @@ import * as sqliteVec from 'sqlite-vec';
 import { closeDb, initDb } from '../db/init.js';
 import { runMigrations, type Migration } from '../db/migrate.js';
 import migration054 from '../db/migrations/054_v13_events_ledger.js';
+import migration058 from '../db/migrations/058_v13_board_deleted_event.js';
 import { EVENT_VERBS, recordEvent, type EventEntry } from '../db/recordEvent.js';
 
-const VERBS_V0 = [
-  'migrated', 'rolled_back', 'note_created', 'board_created', 'mounted', 'unmounted',
+const VERBS_V13 = [
+  'migrated', 'rolled_back', 'note_created', 'board_created', 'board_deleted', 'mounted', 'unmounted',
   'purpose_created', 'purpose_amended', 'purpose_sealed', 'proposal_issued',
   'proposal_approved', 'proposal_rejected', 'published',
 ] as const;
@@ -31,6 +32,7 @@ function ledgerDb(t: TestContext): Database.Database {
   t.after(() => db.close());
   db.pragma('foreign_keys = ON');
   db.transaction(() => migration054.up(db))();
+  db.transaction(() => migration058.up(db))();
   return db;
 }
 
@@ -39,7 +41,9 @@ function ledgerSchema(db: Database.Database) {
     SELECT type, name, sql FROM sqlite_master
     WHERE tbl_name = 'events' ORDER BY type, name
   `).all() as Array<{ type: string; name: string; sql: string }>).map((row) => ({
-    ...row, sql: row.sql.replace(/\s+/g, ' ').trim(),
+    // 058's ALTER TABLE rename quotes this identifier; keep all other SQL exact.
+    ...row, sql: row.sql.replace(/\s+/g, ' ').trim()
+      .replace(/^CREATE TABLE "events" \(/, 'CREATE TABLE events ('),
   }));
 }
 
@@ -88,10 +92,12 @@ test('054 fresh startup and an actual pre-054 migration fixture converge and rer
     }
     assert.equal(legacy.prepare("SELECT 1 FROM sqlite_master WHERE name = 'events'").get(), undefined);
     const existingSchema = legacy.prepare('SELECT type, name, sql FROM sqlite_master ORDER BY name').all();
-    assert.equal(await runMigrations(legacy), 1);
+    // Preserve 054's original no-change guard before later migrations alter their own tables.
+    legacy.transaction(() => migration054.up(legacy))();
     for (const row of existingSchema as Array<{ type: string; name: string; sql: string | null }>) {
       assert.deepEqual(legacy.prepare('SELECT type, name, sql FROM sqlite_master WHERE name = ?').get(row.name), row);
     }
+    assert.equal(await runMigrations(legacy), 9); // 054–062, explicitly closed through V13.4.
     assert.deepEqual(legacy.prepare('SELECT * FROM synthetic_existing').all(), [
       { id: 1, value: 'preserve-existing-row' },
     ]);
@@ -163,11 +169,11 @@ test('recordEvent requires the caller transaction and does not commit or replace
   assert.deepEqual(db.prepare('SELECT * FROM events').all(), []);
 });
 
-test('all thirteen v0 verbs work and unknown verbs are rejected by both helper and SQL', (t) => {
+test('all fourteen V13 verbs work and unknown verbs are rejected by both helper and SQL', (t) => {
   const db = ledgerDb(t);
-  assert.deepEqual(EVENT_VERBS, VERBS_V0);
-  for (const verb of VERBS_V0) db.transaction(() => recordEvent(db, entry({ verb })))();
-  assert.deepEqual(db.prepare('SELECT verb FROM events ORDER BY seq').all(), VERBS_V0.map((verb) => ({ verb })));
+  assert.deepEqual(EVENT_VERBS, VERBS_V13);
+  for (const verb of VERBS_V13) db.transaction(() => recordEvent(db, entry({ verb })))();
+  assert.deepEqual(db.prepare('SELECT verb FROM events ORDER BY seq').all(), VERBS_V13.map((verb) => ({ verb })));
   for (const verb of ['unknown', '', 'MIGRATED', null, 7]) {
     assert.throws(() => db.transaction(() => recordEvent(db, { ...entry(), verb } as unknown as EventEntry))(), /events_invalid_entry/);
     assert.throws(() => db.prepare(`
@@ -175,7 +181,7 @@ test('all thirteen v0 verbs work and unknown verbs are rejected by both helper a
       VALUES ('synthetic-user', 'system', 'synthetic', ?, '[]', 'synthetic')
     `).run(verb), /constraint failed/i);
   }
-  assert.equal((db.prepare('SELECT COUNT(*) AS n FROM events').get() as { n: number }).n, 13);
+  assert.equal((db.prepare('SELECT COUNT(*) AS n FROM events').get() as { n: number }).n, 14);
 });
 
 test('objects must be an array of kind/id string pairs; invalid input rolls back the action', (t) => {

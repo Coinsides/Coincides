@@ -5,7 +5,7 @@ import BoardNoteModal, { type BoardNoteModalHandle } from './BoardNoteModal';
 import type { BoardTextRangeSelection } from '@shared/types/boardTextRange';
 
 const runtime = vi.hoisted(() => ({
-  dismiss: vi.fn(), idle: vi.fn(), order: [] as string[], mounts: [] as string[], live: 0, peakLive: 0,
+  dismiss: vi.fn(), idle: vi.fn(), refreshRanges: vi.fn(), order: [] as string[], mounts: [] as string[], live: 0, peakLive: 0,
   sendToStaging: undefined as ((selection: BoardTextRangeSelection) => Promise<boolean>) | undefined,
 }));
 vi.mock('../Notes/canvasEngine/NoteCanvasRuntimeProvider', () => ({
@@ -18,7 +18,7 @@ vi.mock('../Notes/canvasEngine/NoteCanvasRuntime', async () => {
   const React = await import('react');
   return { default: React.forwardRef(function RuntimeProbe(_props: unknown, ref: any) {
     const element = React.useRef<HTMLTextAreaElement>(null);
-    React.useImperativeHandle(ref, () => ({ dismissTransientUI: runtime.dismiss, flushPendingSaves: runtime.idle }));
+    React.useImperativeHandle(ref, () => ({ dismissTransientUI: runtime.dismiss, flushPendingSaves: runtime.idle, refreshBoardTextRanges: runtime.refreshRanges }));
     React.useEffect(() => {
       runtime.live += 1; runtime.peakLive = Math.max(runtime.peakLive, runtime.live);
       runtime.mounts.push(element.current!.closest('[data-note-id]')!.getAttribute('data-note-id')!);
@@ -83,6 +83,7 @@ beforeEach(() => {
   runtime.sendToStaging = undefined;
   runtime.dismiss.mockImplementation(() => { runtime.order.push('dismiss'); });
   runtime.idle.mockImplementation(async () => { runtime.order.push('idle'); });
+  runtime.refreshRanges.mockImplementation(async () => { runtime.order.push('refresh ranges'); });
   document.body.style.overflow = 'scroll';
 });
 
@@ -105,7 +106,7 @@ describe('Open note staging dock', () => {
     expect(runtime.dismiss).not.toHaveBeenCalled();
     expect(await host.handle.current!.requestClose()).toBe(false);
     await act(async () => { saving.resolve(); expect(await sent).toBe(true); });
-    expect(runtime.order).toEqual(['blur', 'idle', 'mount']);
+    expect(runtime.order).toEqual(['blur', 'idle', 'mount', 'refresh ranges']);
     expect(mount).toHaveBeenCalledExactlyOnceWith(passage);
     expect(screen.getByRole('dialog')).toBeTruthy();
     expect(host.closed).not.toHaveBeenCalled();

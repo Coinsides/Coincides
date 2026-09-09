@@ -10,11 +10,12 @@ import styles from '../NoteDetail.module.css';
 export interface NoteCanvasRuntimeHandle {
   dismissTransientUI: () => void;
   flushPendingSaves: () => Promise<void>;
+  refreshBoardTextRanges: () => Promise<void>;
 }
 
 const NoteCanvasRuntime = forwardRef<NoteCanvasRuntimeHandle, { onRequestClose?: () => void }>(function NoteCanvasRuntime({ onRequestClose }, ref) {
   const { hostMode = 'page' } = useNoteCanvasRuntime();
-  const { layerProps, loading, loadError, note, dismissTransientUI: dismissControllerUI, flushPendingSaves } = useNoteCanvasRuntimeController();
+  const { layerProps, loading, loadError, note, dismissTransientUI: dismissControllerUI, flushPendingSaves, refreshBoardTextRanges } = useNoteCanvasRuntimeController();
   const documentRef = useRef<NoteRuntimeDocumentHandle>(null);
   const leaving = useRef(false);
   const addToast = useUIStore((state) => state.addToast);
@@ -22,7 +23,7 @@ const NoteCanvasRuntime = forwardRef<NoteCanvasRuntimeHandle, { onRequestClose?:
     documentRef.current?.resumeEditingForExit();
     dismissControllerUI();
   }, [dismissControllerUI]);
-  useImperativeHandle(ref, () => ({ dismissTransientUI, flushPendingSaves }), [dismissTransientUI, flushPendingSaves]);
+  useImperativeHandle(ref, () => ({ dismissTransientUI, flushPendingSaves, refreshBoardTextRanges }), [dismissTransientUI, flushPendingSaves, refreshBoardTextRanges]);
   const surfaceMode = layerProps?.documentLayerProps.surfaceMode;
 
   const backToProject = async () => {
