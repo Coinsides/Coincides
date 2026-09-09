@@ -78,6 +78,10 @@ export interface BoardMemberReference {
   reason: string | null;
   title: string | null;
   note_id: string | null;
+  summary?: string;
+  item_type?: string | null;
+  topic?: string | null;
+  item_status?: 'active' | 'retired' | 'missing';
 }
 
 function parse<T extends z.ZodTypeAny>(schema: T, value: unknown): z.infer<T> {
@@ -147,10 +151,16 @@ export function resolveBoardMember(
     return { ...base, title: row.title, note_id: row.id, state: 'available', reason: null };
   }
   if (kind === 'item') {
-    const row = db.prepare('SELECT status FROM items WHERE id = ? AND user_id = ?')
-      .get(id, userId) as { status: string } | undefined;
-    if (!row) return { ...base, state: 'missing', reason: 'reference_missing' };
-    return { ...base, state: row.status === 'active' ? 'available' : 'unavailable',
+    const row = db.prepare(`SELECT plain_text, item_type, topic, origin_note_id, status
+      FROM items WHERE id = ? AND user_id = ?`)
+      .get(id, userId) as {
+        plain_text: string; item_type: string | null; topic: string | null;
+        origin_note_id: string | null; status: 'active' | 'retired';
+      } | undefined;
+    if (!row) return { ...base, state: 'missing', reason: 'reference_missing', item_status: 'missing' };
+    return { ...base, summary: row.plain_text.replace(/\s+/g, ' ').trim().slice(0, 240),
+      item_type: row.item_type, topic: row.topic, note_id: row.origin_note_id, item_status: row.status,
+      state: row.status === 'active' ? 'available' : 'unavailable',
       reason: row.status === 'active' ? null : 'item_retired' };
   }
   const row = db.prepare(`

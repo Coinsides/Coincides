@@ -29,7 +29,7 @@ export interface Board {
 }
 
 export type BoardMemberKind = 'note' | 'item' | 'content_group' | 'text_range';
-export type BoardWritableMemberKind = 'note' | 'content_group';
+export type BoardWritableMemberKind = 'note' | 'content_group' | 'item';
 
 export interface BoardMemberReference {
   kind: BoardMemberKind;
@@ -38,6 +38,10 @@ export interface BoardMemberReference {
   reason: string | null;
   title: string | null;
   note_id: string | null;
+  summary?: string;
+  item_type?: string | null;
+  topic?: string | null;
+  item_status?: 'active' | 'retired' | 'missing';
 }
 
 export interface BoardMember extends BoardGeometry {
@@ -150,8 +154,10 @@ export type PatchBoardVisualInput = Partial<Omit<CreateBoardVisualInput, 'visual
 export interface BoardCandidate {
   member_kind: BoardWritableMemberKind;
   member_id: string;
-  note_id: string;
+  note_id: string | null;
   title: string;
   summary: string;
   project_title: string;
+  item_type?: string | null;
+  topic?: string | null;
 }

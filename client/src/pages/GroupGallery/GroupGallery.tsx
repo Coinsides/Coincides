@@ -724,6 +724,7 @@ export default function GroupGalleryPage() {
                       folderId,
                       sourceProject: record.project,
                       sourceNote: record.note,
+                      itemSummaries: record.itemSummaries,
                     });
                     const topicStyle = {
                       '--topic-color': topicColor(group.identity.topic),

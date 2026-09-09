@@ -42,10 +42,10 @@ const memberGeometry = {
   pinned: z.boolean().optional(),
 };
 
-// Item and text_range retain their database slots; their write contract opens in 13.4.
+// text_range retains its database slot until its durable range contract opens.
 export const mountBoardMemberSchema = z.object({
   id: idSchema.optional(),
-  member_kind: z.enum(['note', 'content_group']),
+  member_kind: z.enum(['note', 'content_group', 'item']),
   member_id: idSchema,
   ...memberGeometry,
   metadata: objectSchema.optional(),

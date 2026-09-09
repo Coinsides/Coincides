@@ -547,6 +547,10 @@ export const itemListQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(200).optional(),
 }).strict();
 
+export const itemSummariesSchema = z.object({
+  item_ids: z.array(contentGroupRuntimeIdSchema).max(200),
+}).strict();
+
 const purposeMemberSchema = z.object({
   id: contentGroupRuntimeIdSchema.optional(),
   purpose_id: contentGroupRuntimeIdSchema.optional(),

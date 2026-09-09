@@ -44,6 +44,7 @@ export default function BoardPage() {
   const [candidates, setCandidates] = useState<BoardCandidate[]>([]);
   const [candidateError, setCandidateError] = useState<string | null>(null);
   const [candidateLoading, setCandidateLoading] = useState(false);
+  const candidateRevision = useRef(0);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [titleDraft, setTitleDraft] = useState<string | null>(null);
@@ -77,13 +78,25 @@ export default function BoardPage() {
   }
 
   const loadCandidates = useCallback(async () => {
+    const revision = ++candidateRevision.current;
     setCandidateLoading(true);
     setCandidateError(null);
-    try { setCandidates(await loadBoardCandidates()); }
-    catch (cause) { setCandidateError(boardErrorMessage(cause)); }
-    finally { setCandidateLoading(false); }
+    try {
+      const next = await loadBoardCandidates();
+      if (revision === candidateRevision.current) setCandidates(next);
+    }
+    catch (cause) { if (revision === candidateRevision.current) setCandidateError(boardErrorMessage(cause)); }
+    finally { if (revision === candidateRevision.current) setCandidateLoading(false); }
   }, []);
-  useEffect(() => { void loadCandidates(); }, [loadCandidates]);
+  useEffect(() => {
+    void loadCandidates();
+    return () => { candidateRevision.current += 1; };
+  }, [boardId, loadCandidates]);
+
+  function openPicker() {
+    setPickerOpen(true);
+    void loadCandidates();
+  }
   useEffect(() => {
     visitRevision.current += 1;
     setViewport(null);
@@ -354,7 +367,7 @@ export default function BoardPage() {
   </section>;
 
   const activeViewport = viewport || detail.board.viewport;
-  const matching = candidates.filter((candidate) => `${candidate.title} ${candidate.summary} ${candidate.project_title}`
+  const matching = candidates.filter((candidate) => `${candidate.title} ${candidate.summary} ${candidate.project_title} ${candidate.item_type || ''} ${candidate.topic || ''}`
     .toLocaleLowerCase().includes(search.toLocaleLowerCase()));
   const candidateById = new Map(candidates.map((candidate) => [`${candidate.member_kind}:${candidate.member_id}`, candidate]));
   function zoom(factor: number) {
@@ -379,7 +392,7 @@ export default function BoardPage() {
       </form>}
       <span className={styles.saveStatus} role="status">{board.error ? 'Changes need attention' : board.pending || viewportDirty ? 'Saving…' : 'Saved'}</span>
       <button ref={pickerToggle} className={styles.primaryButton} aria-expanded={pickerOpen} aria-controls="board-note-picker"
-        onClick={() => setPickerOpen(!pickerOpen)}><Plus size={16} />Add notes</button>
+        onClick={() => pickerOpen ? closePicker() : openPicker()}><Plus size={16} />Add notes and items</button>
       <details className={styles.boardMenu}>
         <summary aria-label="Board menu">More</summary>
         <button className={styles.button} disabled={board.pending} onClick={() => { void prepareDelete(); }}>Delete board</button>
@@ -415,15 +428,20 @@ export default function BoardPage() {
           if (event.key === 'Escape') { event.preventDefault(); event.stopPropagation(); closePicker(); }
         }}>
         <div className={styles.pickerHeader}>
-          <label htmlFor="board-candidate-search">Notes and groups</label>
+          <label htmlFor="board-candidate-search">Notes, groups and items</label>
           <button type="button" className={styles.button} aria-label="Close note picker" title="Close note picker"
             onClick={closePicker}><X size={16} /></button>
         </div>
         <input id="board-candidate-search" type="search" value={search} placeholder="Search your library"
           onChange={(event) => setSearch(event.currentTarget.value)} />
-        {candidateLoading ? <p role="status">Loading notes…</p> : candidateError ? <div role="alert"><p>{candidateError}</p>
-          <button className={styles.button} onClick={() => { void loadCandidates(); }}>Retry notes</button></div>
-          : matching.length === 0 ? <p>No matching notes or groups.</p> : <ul>{matching.map((candidate) =>
+        {candidateLoading ? <p role="status">Loading library…</p> : candidateError ? <div role="alert"><p>{candidateError}</p>
+          <button className={styles.button} onClick={() => { void loadCandidates(); }}>Retry library</button></div>
+          : matching.length === 0 ? <p>No matching notes, groups or items.</p> : (
+            [{ kind: 'note', label: 'Notes' }, { kind: 'content_group', label: 'Groups' }, { kind: 'item', label: 'Items' }] as const
+          ).map(({ kind, label }) => {
+            const entries = matching.filter((candidate) => candidate.member_kind === kind);
+            return entries.length > 0 && <section key={kind} aria-label={label} className={styles.candidateGroup}>
+              <h2>{label}</h2><ul>{entries.map((candidate) =>
             <li key={`${candidate.member_kind}:${candidate.member_id}`}><button className={styles.candidate}
               disabled={board.pending} aria-label={`Add ${candidate.title} to board`}
               onClick={() => {
@@ -434,8 +452,10 @@ export default function BoardPage() {
                   z_index: Math.max(0, ...detail.members.map((member) => member.z_index)) + 1 });
               }}>
               <strong>{candidate.title}</strong><span>{candidate.summary || 'Open the note to read more.'}</span>
-              <small>{candidate.member_kind === 'note' ? 'Note' : 'Group'} · {candidate.project_title}</small>
-            </button></li>)}</ul>}
+              <small>{candidate.member_kind === 'item' ? [candidate.item_type, candidate.topic].filter(Boolean).join(' · ') || 'Item'
+                : candidate.member_kind === 'note' ? 'Note' : 'Group'} · {candidate.project_title}</small>
+            </button></li>)}</ul></section>;
+          })}
       </aside>}
       <div className={`${styles.surface} ${tool === 'pen' ? styles.penSurface : ''}`} ref={surface}
         data-testid="board-surface" tabIndex={0} aria-label="Board canvas" onKeyDown={keyDown}
@@ -498,19 +518,30 @@ export default function BoardPage() {
               onPointerDown={(event) => begin(event, visual)} onResize={(event) => begin(event, visual, true)} />)}
           {visibleMembers.map((member) => {
             const candidate = candidateById.get(`${member.member_kind}:${member.member_id}`);
+            const isItem = member.member_kind === 'item';
+            const itemState = member.reference.state === 'missing' ? 'Missing'
+              : member.reference.reason === 'item_retired' ? 'Retired' : 'Active';
+            const title = member.reference.title || (isItem ? member.reference.item_type || 'Item' : candidate?.title) || 'Unavailable projection';
+            const canOpen = member.reference.state === 'available' && Boolean(member.reference.note_id);
+            const openHint = isItem && !member.reference.note_id
+              ? 'This item has no origin note. Double-click is unavailable.' : undefined;
             return <article key={member.id} data-testid={`board-member-${member.id}`} tabIndex={0}
-              aria-label={member.reference.title || 'Unavailable projection'}
+              aria-label={title}
               aria-disabled={member.reference.state !== 'available'}
+              title={openHint}
               className={`${styles.member} ${selection?.id === member.id || connectFrom === member.id ? styles.selected : ''}`}
               style={{ left: member.x, top: member.y, width: member.w, height: member.h,
                 transform: `scale(${member.scale})`, zIndex: member.z_index }}
               onPointerDown={(event) => begin(event, member)}
               onFocus={() => setSelection({ kind: 'member', id: member.id })}
-              onDoubleClick={(event) => { event.stopPropagation(); if (tool === 'select') void openMember(member); }}>
-              <div className={styles.memberKind}>{{ note: 'Note', content_group: 'Group', item: 'Item', text_range: 'Text range' }[member.member_kind]}{member.pinned && <Pin size={13} aria-label="Pinned" />}</div>
-              <h2>{member.reference.title || candidate?.title || 'Unavailable projection'}</h2>
+              onDoubleClick={canOpen ? (event) => { event.stopPropagation(); if (tool === 'select') void openMember(member); } : undefined}>
+              <div className={styles.memberKind}>{{ note: 'Note', content_group: 'Group', item: 'Item', text_range: 'Text range' }[member.member_kind]}
+                {isItem && <span className={styles.itemStatus}>{itemState}</span>}{member.pinned && <Pin size={13} aria-label="Pinned" />}</div>
+              <h2>{title}</h2>
               <p>{member.reference.state !== 'available' ? (member.reference.state === 'missing' ? 'This content is no longer available.' : 'This content is currently unavailable.')
-                : candidate?.summary || (candidateError ? 'Preview unavailable. Open the note to read.' : 'Open the note to read more.')}</p>
+                : isItem ? member.reference.summary || 'Item preview unavailable.'
+                  : candidate?.summary || (candidateError ? 'Preview unavailable. Open the note to read.' : 'Open the note to read more.')}</p>
+              {isItem && member.reference.topic && <small className={styles.itemTopic}>{member.reference.topic}</small>}
               {!member.reference.note_id && <small>No linked note to open</small>}
               {!member.pinned && tool === 'select' && <button className={styles.resizeHandle} aria-label={`Resize ${member.reference.title || 'projection'}`}
                 onDoubleClick={(event) => event.stopPropagation()}
@@ -520,7 +551,7 @@ export default function BoardPage() {
         </div>
         {detail.members.length === 0 && detail.visuals.length === 0 && <div className={styles.canvasEmpty}>
           <h2>Give this thought some room.</h2><p>Add a few notes, draw a connection, or pick up the pen.</p>
-          <button className={styles.button} onPointerDown={(event) => event.stopPropagation()} onClick={() => setPickerOpen(true)}>Add your first note</button>
+          <button className={styles.button} onPointerDown={(event) => event.stopPropagation()} onClick={openPicker}>Add your first note or item</button>
         </div>}
       </div>
     </div>

@@ -190,6 +190,7 @@ beforeEach(() => {
     if (url.startsWith('/boards/')) return response(detailFor(url));
     if (url === '/purposes') return response({ purposes });
     if (url === '/courses') return response(projects);
+    if (url === '/items') return response([]);
     if (url === '/notes') return response(notes.filter(({ course_id }) => course_id === config?.params?.course_id));
     if (url === '/content-groups') return response(config?.params?.course_id === projects[0].id ? [group] : []);
     if (url === '/group-folders' || url === '/templates' || url === '/source-anchors') return response([]);
@@ -474,10 +475,10 @@ describe('V13 S4 board polish smoke', () => {
     expect(boards[0].board).toMatchObject({ title: 'Exam revision', soul_id: purposes[0].id });
     expect(screen.getByRole('button', { name: 'Expand navigator' })).toBeTruthy();
     fireEvent.click(screen.getByRole('button', { name: 'Expand navigator' }));
-    const addNotes = screen.getByRole('button', { name: 'Add notes' });
+    const addNotes = screen.getByRole('button', { name: 'Add notes and items' });
     expect(addNotes.getAttribute('aria-expanded')).toBe('false');
     fireEvent.click(addNotes);
-    fireEvent.change(screen.getByRole('searchbox', { name: 'Notes and groups' }), { target: { value: notes[0].title } });
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Notes, groups and items' }), { target: { value: notes[0].title } });
     fireEvent.click(await screen.findByRole('button', { name: `Add ${notes[0].title} to board` }));
     await screen.findByRole('article', { name: notes[0].title });
     await saved();
@@ -487,7 +488,7 @@ describe('V13 S4 board polish smoke', () => {
     expect(addNotes.getAttribute('aria-expanded')).toBe('false');
     expect(document.activeElement).toBe(addNotes);
     fireEvent.click(addNotes);
-    const search = screen.getByRole('searchbox', { name: 'Notes and groups' }) as HTMLInputElement;
+    const search = screen.getByRole('searchbox', { name: 'Notes, groups and items' }) as HTMLInputElement;
     expect(search.value).toBe(notes[0].title);
     expect(addNotes.getAttribute('aria-expanded')).toBe('true');
     expect(screen.getByRole('button', { name: 'Collapse navigator' })).toBeTruthy();
@@ -521,7 +522,7 @@ describe('V13 S2 board and paper smoke', () => {
     await screen.findByRole('heading', { name: 'Why do these observations connect?' });
     expect(purposes).toHaveLength(1);
     expect(boards[0].board.soul_id).toBe(purposes[0].id);
-    fireEvent.click(screen.getByRole('button', { name: 'Add notes' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add notes and items' }));
     await screen.findByRole('button', { name: `Add ${group.title} to board` });
     for (const note of notes) {
       fireEvent.click(screen.getByRole('button', { name: `Add ${note.title} to board` }));
@@ -696,7 +697,7 @@ describe('V13 S2 board and paper smoke', () => {
     expect(screen.queryByLabelText('Select drawing')).toBeNull();
     expect(http.delete).toHaveBeenCalledWith(`/boards/group-board/visuals/${drawingId}`);
 
-    fireEvent.click(screen.getByRole('button', { name: 'Add notes' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add notes and items' }));
     fireEvent.click(await screen.findByRole('button', { name: `Add ${group.title} to board` }));
     await screen.findByRole('article', { name: group.title });
     await saved();

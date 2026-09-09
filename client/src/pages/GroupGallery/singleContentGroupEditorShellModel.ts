@@ -14,6 +14,7 @@ import {
   memberLabel,
   memberPreview,
 } from './groupGalleryData';
+import type { ItemSummaryMap } from '@/services/itemSummaryReader';
 
 export interface SingleEditorShellView {
   title: string;
@@ -73,20 +74,22 @@ export function buildSingleEditorShellView(input: {
   };
 }
 
-export function buildSingleEditorMemberRows(group: ContentGroupV1): SingleEditorMemberShellRow[] {
+export function buildSingleEditorMemberRows(group: ContentGroupV1, itemSummaries?: ItemSummaryMap): SingleEditorMemberShellRow[] {
   return group.members.map((member) => ({
     id: member.id,
     label: memberLabel(member),
     kindLabel: member.kind,
-    preview: memberPreview(member),
-    sourceStatusLabel: sourceStatusLabel(member),
+    preview: memberPreview(member, itemSummaries),
+    sourceStatusLabel: member.kind === 'item'
+      ? `item ${itemSummaries?.get(member.item_id || '')?.status || 'missing'}`
+      : sourceStatusLabel(member),
   }));
 }
 
-export function buildSingleEditorMemberHint(group: ContentGroupV1, memberId: string): string {
+export function buildSingleEditorMemberHint(group: ContentGroupV1, memberId: string, itemSummaries?: ItemSummaryMap): string {
   const member = group.members.find((item) => item.id === memberId);
   if (!member) return 'Source member missing';
-  return `${memberLabel(member)} / ${memberPreview(member)}`;
+  return `${memberLabel(member)} / ${memberPreview(member, itemSummaries)}`;
 }
 
 function sourceStatusLabel(member: ContentGroupMemberV1): string {

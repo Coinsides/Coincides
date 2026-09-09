@@ -159,7 +159,7 @@ export default function SingleContentGroupEditorPage() {
     })
     : null;
   const memberRowById = new Map(
-    (selected ? buildSingleEditorMemberRows(selected.group) : []).map((row) => [row.id, row]),
+    (selected ? buildSingleEditorMemberRows(selected.group, selected.record.itemSummaries) : []).map((row) => [row.id, row]),
   );
   const selectedStability = selected
     ? summarizeContentGroupStability({ group: selected.group, folder: selectedFolder })
@@ -344,7 +344,7 @@ export default function SingleContentGroupEditorPage() {
                         <span>{row?.label || memberLabel(member)}</span>
                         <small>{row?.sourceStatusLabel || member.kind}</small>
                       </div>
-                      <p>{row?.preview || memberPreview(member)}</p>
+                      <p>{row?.preview || memberPreview(member, selected.record.itemSummaries)}</p>
                       <button
                         type="button"
                         onClick={() => void persistGroup(

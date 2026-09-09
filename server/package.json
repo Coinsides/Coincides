@@ -19,6 +19,7 @@
     "typecheck:v13-wilderness-executor": "tsc --project scripts/wildernessExecutor/tsconfig.json",
     "test:v13-coordinate-contract": "node --import tsx --test src/__tests__/v2SourceMaterialization.test.ts src/__tests__/v13CoordinateContract.test.ts",
     "test:v13-boards": "node --import tsx --test src/__tests__/v13BoardSchema.test.ts src/__tests__/v13BoardServices.test.ts src/__tests__/v13BoardRoutes.test.ts src/__tests__/v13BoardWave1.test.ts src/__tests__/v13RecordedAction.test.ts src/__tests__/v2Purposes.test.ts",
+    "test:v13-item-floor": "node --import tsx --test src/__tests__/v13BoardServices.test.ts src/__tests__/v13BoardRoutes.test.ts src/__tests__/v13ItemFloor.test.ts",
     "test:v13-wilderness": "node --import tsx --test scripts/v13WildernessShadowRun.test.ts",
     "typecheck:v13-wilderness": "tsc --project scripts/wildernessShadow/tsconfig.json",
     "test:tool-face-registry": "node --import tsx --test src/toolFace/registry.test.ts",

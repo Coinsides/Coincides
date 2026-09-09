@@ -56,9 +56,9 @@ describe('board HTTP repository', () => {
     const missingSoul: CreateBoardInput = { title: 'One sentence' };
     // @ts-expect-error the creation paths are mutually exclusive
     const bothSouls: CreateBoardInput = { title: 'One sentence', soul_id: 'soul-1', purpose: { title: 'One sentence' } };
-    // @ts-expect-error item creation remains reserved for the next segment
-    const reservedMember: MountBoardMemberInput = { member_kind: 'item', member_id: 'item-1' };
-    expect([missingSoul, bothSouls, reservedMember]).toHaveLength(3);
+    const itemMember: MountBoardMemberInput = { member_kind: 'item', member_id: 'item-1' };
+    expect(itemMember.member_kind).toBe('item');
+    expect([missingSoul, bothSouls]).toHaveLength(2);
   });
 
   it('unwraps list and creation receipts without losing nullable labels or free viewport values', async () => {
@@ -162,10 +162,11 @@ describe('read-only board candidate library', () => {
     id, title: id, note_id: noteId, status: 'active', identity: { summary: 'Group summary' }, members: [], ...extra,
   });
 
-  it('aggregates projects and filters unusable or paperless references using only GET requests', async () => {
+  it('aggregates projects and filters unusable or paperless references without writes', async () => {
     api.get.mockImplementation(async (url: string, options?: { params?: { course_id?: string; status?: string } }) => {
       if (url === '/courses') return { data: [{ id: 'project-1', name: 'First project' }, { id: 'project-2', name: 'Second project' }] };
       expect(options?.params?.status).toBe('active');
+      if (url === '/items') return { data: [] };
       if (options?.params?.course_id === 'project-2') {
         if (url === '/notes') return { data: [note('note-2', { course_id: 'project-2', note_class: 'source_projection', source_kind: 'source_projection' })] };
         if (url === '/content-groups') return { data: [group('group-2', 'note-2', { identity: { summary: null }, members: [{ current_content: 'Fresh preview' }] })] };
@@ -180,7 +181,7 @@ describe('read-only board candidate library', () => {
       { member_kind: 'note', member_id: 'note-2', note_id: 'note-2', title: 'note-2', summary: 'A concise summary.', project_title: 'Second project' },
       { member_kind: 'content_group', member_id: 'group-2', note_id: 'note-2', title: 'group-2', summary: 'Fresh preview', project_title: 'Second project' },
     ]);
-    expect(api.get).toHaveBeenCalledTimes(5);
+    expect(api.get).toHaveBeenCalledTimes(6);
     expect(api.post).not.toHaveBeenCalled();
     expect(api.patch).not.toHaveBeenCalled();
     expect(api.delete).not.toHaveBeenCalled();
@@ -197,8 +198,51 @@ describe('read-only board candidate library', () => {
   });
 
   it('keeps a successfully read empty library empty without extra requests', async () => {
-    api.get.mockResolvedValueOnce({ data: [] });
+    api.get.mockResolvedValue({ data: [] });
     await expect(loadBoardCandidates()).resolves.toEqual([]);
-    expect(api.get).toHaveBeenCalledTimes(1);
+    expect(api.get).toHaveBeenCalledTimes(2);
+  });
+
+  it('shares current Item text with group previews while retaining standalone candidates and excluding retired items', async () => {
+    const item = (id: string, extra = {}) => ({
+      id, plain_text: '  Current\nItem body  ', status: 'active', item_type: 'Claim', topic: 'Testing',
+      origin_course_id: 'project-1', origin_note_id: 'note-1', ...extra,
+    });
+    const membership = [
+      { id: 'member-1', kind: 'item', item_id: 'item-1', current_content: 'Stale membership text' },
+      { id: 'member-2', kind: 'item', item_id: 'retired' },
+    ];
+    const originalMembership = structuredClone(membership);
+    api.get.mockImplementation(async (url: string) => {
+      if (url === '/courses') return { data: [{ id: 'project-1', name: 'First project' }] };
+      if (url === '/notes') return { data: [note('note-1')] };
+      if (url === '/content-groups') return { data: [
+        group('group-1', 'note-1', { identity: { summary: null }, members: membership }),
+        group('group-2', 'note-1', { identity: { summary: null }, members: membership }),
+      ] };
+      if (url === '/items') return { data: [
+        item('item-1'),
+        item('standalone', { origin_note_id: null, origin_course_id: null, item_type: null, topic: null }),
+        item('retired', { status: 'retired' }),
+      ] };
+      throw new Error('Unexpected fixture GET');
+    });
+    api.post.mockResolvedValueOnce({ data: [{
+      id: 'retired', summary: 'Last Item text', status: 'retired', item_type: null, topic: null,
+      origin_note_id: null, origin_course_id: null,
+    }] });
+
+    const candidates = await loadBoardCandidates();
+
+    expect(candidates.filter((candidate) => candidate.member_kind === 'content_group').map((candidate) => candidate.summary))
+      .toEqual(['Current Item body / Retired item: Last Item text', 'Current Item body / Retired item: Last Item text']);
+    expect(candidates.filter((candidate) => candidate.member_kind === 'item')).toEqual([
+      { member_kind: 'item', member_id: 'item-1', note_id: 'note-1', title: 'Claim', summary: 'Current Item body', project_title: 'First project', item_type: 'Claim', topic: 'Testing' },
+      { member_kind: 'item', member_id: 'standalone', note_id: null, title: 'Item', summary: 'Current Item body', project_title: 'Standalone items', item_type: null, topic: null },
+    ]);
+    expect(api.post).toHaveBeenCalledExactlyOnceWith('/items/summaries', { item_ids: ['retired'] });
+    expect(membership).toEqual(originalMembership);
+    expect(api.patch).not.toHaveBeenCalled();
+    expect(api.delete).not.toHaveBeenCalled();
   });
 });

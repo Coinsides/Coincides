@@ -1,6 +1,12 @@
 import api from '@/services/api';
 import type { Course } from '@shared/types';
 import {
+  contentGroupItemIds,
+  itemSummaryPreview,
+  loadItemSummaries,
+  type ItemSummaryMap,
+} from '@/services/itemSummaryReader';
+import {
   loadContentGroupsForNote,
   saveContentGroupsForNote,
 } from '@/pages/Notes/canvasEngine/contentGroupRepository';
@@ -33,6 +39,7 @@ export interface GalleryRecord {
   note: GalleryNote;
   folders: GroupFolderV1[];
   groups: ContentGroupV1[];
+  itemSummaries?: ItemSummaryMap;
 }
 
 export interface GroupRef {
@@ -60,15 +67,18 @@ export function cleanLabel(value: string | null | undefined, fallback: string): 
   return text || fallback;
 }
 
-export function groupPreview(group: ContentGroupV1): string {
+export function groupPreview(group: ContentGroupV1, itemSummaries?: ItemSummaryMap): string {
   const memberText = group.members
-    .map((member) => member.current_content || member.preview_text || member.label || member.target_id || '')
+    .map((member) => member.kind === 'item'
+      ? itemSummaryPreview(member.item_id, itemSummaries)
+      : member.current_content || member.preview_text || member.label || member.target_id || '')
     .filter(Boolean)
     .join(' / ');
   return cleanLabel(memberText || group.identity.summary, 'No preview yet.');
 }
 
-export function memberPreview(member: ContentGroupV1['members'][number]): string {
+export function memberPreview(member: ContentGroupV1['members'][number], itemSummaries?: ItemSummaryMap): string {
+  if (member.kind === 'item') return itemSummaryPreview(member.item_id, itemSummaries);
   return cleanLabel(member.current_content || member.preview_text || member.label || member.target_id, 'No preview');
 }
 
@@ -125,7 +135,9 @@ export async function loadGroupGalleryRecords(): Promise<GalleryRecord[]> {
       }));
     }),
   );
-  return noteResponses.flat();
+  const records = noteResponses.flat();
+  const itemSummaries = await loadItemSummaries(contentGroupItemIds(records.flatMap((record) => record.groups)));
+  return records.map((record) => ({ ...record, itemSummaries }));
 }
 
 export async function saveGalleryRecord(
@@ -143,6 +155,7 @@ export async function saveGalleryRecord(
       folders,
     }),
   ]);
+  // Retain the independently loaded map. A preview read must not turn a successful save into a failure.
   return {
     ...record,
     folders: savedFolders,

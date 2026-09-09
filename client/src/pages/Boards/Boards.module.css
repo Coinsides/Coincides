@@ -76,6 +76,10 @@
 .pickerHeader label { margin-bottom: 0; }
 .picker input { width: 100%; margin-bottom: 16px; }
 .picker p { color: var(--text-secondary); margin-bottom: 12px; }
+.candidateGroup + .candidateGroup { margin-top: 20px; }
+.candidateGroup h2 { color: var(--text-secondary); font-size: 0.75rem; font-weight: 600; }
+.itemStatus { margin-left: auto; padding: 1px 5px; border: 1px solid var(--border-default); border-radius: 4px; }
+.itemTopic { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .candidate { width: 100%; text-align: left; padding: 12px 4px; border-bottom: 1px solid var(--border-default); }
 .candidate:hover { background: var(--bg-hover); }
 .candidate strong, .candidate span, .candidate small { display: block; }

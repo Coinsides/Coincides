@@ -1,6 +1,12 @@
 import api from '@/services/api';
+import {
+  contentGroupItemIds,
+  itemSummaryFromItem,
+  itemSummaryPreview,
+  loadItemSummaries,
+} from '@/services/itemSummaryReader';
 import type { Course } from '@shared/types';
-import type { ContentGroupV1, Note } from '@/pages/Notes/canvasEngine/runtimeDataTypes';
+import type { ContentGroupV1, ItemV1, Note } from '@/pages/Notes/canvasEngine/runtimeDataTypes';
 import type {
   Board, BoardCandidate, BoardDetail, BoardEdge, BoardMember, BoardVisual,
   CreateBoardInput, CreateBoardEdgeInput, CreateBoardVisualInput, MountBoardMemberInput,
@@ -91,15 +97,31 @@ function availableNote(note: Note): boolean {
 
 /** Aggregate existing read APIs across the library; never import note metadata or copy content to a board. */
 export async function loadBoardCandidates(): Promise<BoardCandidate[]> {
-  const { data: projects } = await api.get<Course[]>('/courses');
-  const candidates = await Promise.all(projects.map(async (project) => {
+  const [{ data: projects }, { data: items }] = await Promise.all([
+    api.get<Course[]>('/courses'),
+    api.get<ItemV1[]>('/items', { params: { status: 'active' } }),
+  ]);
+  const records = await Promise.all(projects.map(async (project) => {
     const [{ data: notes }, { data: groups }] = await Promise.all([
       api.get<Note[]>('/notes', { params: { course_id: project.id, status: 'active' } }),
       api.get<ContentGroupV1[]>('/content-groups', { params: { course_id: project.id, status: 'active' } }),
     ]);
     const visibleNotes = notes.filter(availableNote);
     const noteIds = new Set(visibleNotes.map((note) => note.id));
-    const result: BoardCandidate[] = visibleNotes.map((note) => ({
+    return {
+      project,
+      notes: visibleNotes,
+      // Project-level groups have no paper to open. Existing projections remain readable.
+      groups: groups.filter((group) => group.status === 'active' && noteIds.has(group.note_id)),
+    };
+  }));
+  const activeItems = items.filter((item) => item.status === 'active');
+  const itemSummaries = await loadItemSummaries(
+    contentGroupItemIds(records.flatMap((record) => record.groups)),
+    activeItems.map(itemSummaryFromItem),
+  );
+  const candidates = records.flatMap(({ project, notes, groups }) => {
+    const result: BoardCandidate[] = notes.map((note) => ({
       member_kind: 'note',
       member_id: note.id,
       note_id: note.id,
@@ -108,11 +130,10 @@ export async function loadBoardCandidates(): Promise<BoardCandidate[]> {
       project_title: project.name,
     }));
     for (const group of groups) {
-      // Project-level groups have no paper to open. Their existing projections still remain readable.
-      if (group.status !== 'active' || !noteIds.has(group.note_id)) continue;
-      const memberText = group.members.map((member) => (
-        member.current_content || member.preview_text || member.label || ''
-      )).filter(Boolean).join(' / ');
+      const memberText = group.members.map((member) => member.kind === 'item'
+        ? itemSummaryPreview(member.item_id, itemSummaries)
+        : member.current_content || member.preview_text || member.label || ''
+      ).filter(Boolean).join(' / ');
       result.push({
         member_kind: 'content_group',
         member_id: group.id,
@@ -123,8 +144,21 @@ export async function loadBoardCandidates(): Promise<BoardCandidate[]> {
       });
     }
     return result;
-  }));
-  return candidates.flat();
+  });
+  const projectNames = new Map(projects.map((project) => [project.id, project.name]));
+  for (const item of activeItems) {
+    candidates.push({
+      member_kind: 'item',
+      member_id: item.id,
+      note_id: item.origin_note_id,
+      title: item.item_type?.trim() || 'Item',
+      summary: itemSummaries.get(item.id)!.summary,
+      project_title: projectNames.get(item.origin_course_id || '') || 'Standalone items',
+      item_type: item.item_type,
+      topic: item.topic,
+    });
+  }
+  return candidates;
 }
 
 /** Show fixed UI copy, never arbitrary server bodies or raw error messages. */
@@ -155,7 +189,7 @@ export function boardErrorMessage(error: unknown): string {
     case 'purpose_already_has_board':
       return 'This purpose already has a board. Choose another purpose or open its board.';
     case 'board_member_reference_unavailable':
-      return 'This note or group is no longer available. Refresh the library and choose another.';
+      return 'This note, group, or item is no longer available. Refresh the library and choose another.';
     case 'board_member_identity_conflict':
     case 'board_member_id_conflict':
       return 'This projection has changed. Reopen the board before trying again.';

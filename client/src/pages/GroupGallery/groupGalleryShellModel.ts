@@ -12,6 +12,7 @@ import {
   groupPreview,
   type GalleryNote,
 } from './groupGalleryData';
+import type { ItemSummaryMap } from '@/services/itemSummaryReader';
 
 export type GalleryShellMode = 'folder' | 'topic' | 'type';
 
@@ -51,6 +52,7 @@ export function buildGalleryGroupCardView(params: {
   folderId: string | null | undefined;
   sourceProject: { id: string; name: string; color?: string | null };
   sourceNote: GalleryNote;
+  itemSummaries?: ItemSummaryMap;
 }): GalleryGroupCardView {
   const {
     group,
@@ -79,7 +81,7 @@ export function buildGalleryGroupCardView(params: {
       : `/notes/${sourceNote.id}`;
   return {
     title: group.title,
-    preview: groupPreview(group),
+    preview: groupPreview(group, params.itemSummaries),
     topicLabel: cleanLabel(group.identity.topic, 'No topic'),
     typeLabel: cleanLabel(group.identity.type || group.identity.role, 'No type'),
     originLabel,

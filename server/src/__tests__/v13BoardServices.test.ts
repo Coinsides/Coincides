@@ -21,14 +21,15 @@ function fixture(t: TestContext) {
     CREATE TABLE courses (id TEXT PRIMARY KEY, user_id TEXT);
     CREATE TABLE notes (id TEXT PRIMARY KEY, user_id TEXT, course_id TEXT,
       title TEXT, status TEXT, note_class TEXT, source_kind TEXT);
-    CREATE TABLE items (id TEXT PRIMARY KEY, user_id TEXT, status TEXT);
+    CREATE TABLE items (id TEXT PRIMARY KEY, user_id TEXT, status TEXT, plain_text TEXT,
+      item_type TEXT, topic TEXT, origin_note_id TEXT);
     CREATE TABLE content_groups (id TEXT PRIMARY KEY, user_id TEXT, course_id TEXT,
       note_id TEXT, title TEXT, status TEXT, identity_type TEXT, identity_role TEXT);
     INSERT INTO users VALUES ('user');
     INSERT INTO courses VALUES ('project-a','user'),('project-b','user');
     INSERT INTO notes VALUES ('note','user','project-b','Paper','active','user','manual');
     INSERT INTO content_groups VALUES ('group','user','project-b','note','Bundle','active',NULL,NULL);
-    INSERT INTO items VALUES ('item','user','active');
+    INSERT INTO items VALUES ('item','user','active','Current item text','claim','Topic','note');
   `);
   db.transaction(() => {
     migration044.up(db);
@@ -126,10 +127,10 @@ test('member reads retain geometry through trash/restore/missing and reserved ki
   db.prepare("UPDATE items SET status = 'retired' WHERE id = 'item'").run();
   assert.equal(resolveBoardMember(db, 'user', 'item', 'item').state, 'unavailable');
   assert.equal(resolveBoardMember(db, 'user', 'text_range', 'some-block-id').reason, 'text_range_reserved');
-  for (const kind of ['item', 'text_range']) {
-    assert.throws(() => db.transaction(() => mountBoardMember(db, 'user', board.id,
-      { member_kind: kind, member_id: 'item' }))(), /invalid_board_input/);
-  }
+  assert.throws(() => db.transaction(() => mountBoardMember(db, 'user', board.id,
+    { member_kind: 'item', member_id: 'item' }))(), /board_member_reference_unavailable/);
+  assert.throws(() => db.transaction(() => mountBoardMember(db, 'user', board.id,
+    { member_kind: 'text_range', member_id: 'item' }))(), /invalid_board_input/);
 });
 
 test('visuals preserve rotation, raw connector endpoints and extension data independently of member edges', (t) => {
