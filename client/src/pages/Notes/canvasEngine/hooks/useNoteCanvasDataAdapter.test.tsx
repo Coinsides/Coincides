@@ -311,6 +311,32 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     await expect(subject.result.current.adapter.whenIdle()).resolves.toBeUndefined();
   });
 
+  it('flushes a readonly Item reference for ordinary placement without writing its body', async () => {
+    durableBlocks = [{
+      ...serverBlock('', false),
+      block_type: 'item_ref',
+      content_json: { item_id: 'item-1' },
+    }];
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.blocks).toHaveLength(1));
+    const reference = subject.result.current.blocks[0];
+    let outcome!: BlockSaveOutcome;
+    await act(async () => {
+      outcome = await subject.result.current.saveBlock(reference, 'body edits are ignored', { silent: true });
+      await subject.result.current.whenIdle();
+    });
+    expect(outcome.status).toBe('saved');
+    expect(outcome.block).toBe(reference);
+    expect(subject.result.current.blocks[0].content_json).toEqual({ item_id: 'item-1' });
+    expect(mocks.put).not.toHaveBeenCalled();
+    expect(mocks.boardRangesPut).not.toHaveBeenCalled();
+    await act(async () => {
+      expect(await subject.result.current.applyTemplateToBlock(reference, recoveryTemplate, 'copy')).toBeNull();
+      await subject.result.current.whenIdle();
+    });
+    expect(mocks.put).not.toHaveBeenCalled();
+  });
+
   it('keeps whenIdle pending through the body PUT and the board-range second write', async () => {
     const oldFlow = createTextBlockContentV1('alpha beta gamma');
     const newFlow = { ...oldFlow, units: [{ ...oldFlow.units[0], text: 'prefix alpha beta gamma' }] };

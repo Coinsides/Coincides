@@ -1,8 +1,9 @@
 import { FileText, Layers, Quote, Square, X } from 'lucide-react';
 import type { BoardCandidate, BoardMember } from './boardTypes';
 import styles from './BoardStaging.module.css';
+import { BOARD_STAGING_MIME } from './boardStagingDrag';
 
-export const BOARD_STAGING_MIME = 'application/x-coincides-board-staging';
+export { BOARD_STAGING_MIME } from './boardStagingDrag';
 
 const kinds = {
   note: { label: 'Note', Icon: FileText },
@@ -31,7 +32,7 @@ export function BoardStaging({ boardId, members, candidates, busy, onClose, onPl
       <h2>Staging <span>({members.length})</span></h2>
       <button type="button" aria-label="Close staging" onClick={onClose}><X size={16} /></button>
     </header>
-    <p className={styles.hint}>Drag a row onto the board, or choose Place.</p>
+    <p className={styles.hint}>Drag a row onto the board, or choose Place. Drag items into an open note to reference them.</p>
     {members.length === 0 ? <p className={styles.empty}>Nothing in staging. Stage something from the picker or an open note.</p>
       : <ul className={styles.list}>{members.map((member) => {
         const { label, Icon } = kinds[member.member_kind];
@@ -47,7 +48,7 @@ export function BoardStaging({ boardId, members, candidates, busy, onClose, onPl
             if (busy) { event.preventDefault(); return; }
             event.stopPropagation();
             event.dataTransfer.setData(BOARD_STAGING_MIME, JSON.stringify({ boardId, memberId: member.id }));
-            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.effectAllowed = member.member_kind === 'item' ? 'copyMove' : 'move';
           }}>
           <div className={styles.name}><Icon size={15} aria-label={label} /><span>{title.replace(/\s+/g, ' ').trim()}</span></div>
           <div className={styles.source}><span>{source}</span>

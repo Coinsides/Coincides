@@ -137,7 +137,7 @@ describe('board staging dock', () => {
     const transfer = { types: [BOARD_STAGING_MIME], effectAllowed: '', dropEffect: '',
       setData: (type: string, value: string) => data.set(type, value), getData: (type: string) => data.get(type) || '' };
     fireEvent.dragStart(screen.getByTestId(`staging-member-${id}`), { dataTransfer: transfer });
-    expect(transfer.effectAllowed).toBe('move');
+    expect(transfer.effectAllowed).toBe('copyMove');
     fireEvent.dragOver(surface, { dataTransfer: transfer });
     const drop = new Event('drop', { bubbles: true, cancelable: true });
     Object.assign(drop, { dataTransfer: transfer, clientX: 530, clientY: 350 });

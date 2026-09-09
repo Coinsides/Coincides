@@ -7,6 +7,7 @@ import { pointsPath, toBoardPoint, zoomBoardAt, type BoardPoint } from './boardV
 import { useBoard } from './useBoard';
 import { BoardRelocatedVisual } from './BoardRelocatedVisual';
 import { BoardDeleteDialog } from './BoardDeleteDialog';
+import { BoardNewNoteDialog } from './BoardNewNoteDialog';
 import { BoardChalkEditor, chalkGeometry, type ChalkDraft } from './BoardChalk';
 import BoardNoteModal, { type BoardNoteModalHandle } from './BoardNoteModal';
 import { BoardStaging, BOARD_STAGING_MIME } from './BoardStaging';
@@ -59,11 +60,15 @@ export default function BoardPage() {
   const [labelDraft, setLabelDraft] = useState<{ id: string; value: string } | null>(null);
   const [chalkDraft, setChalkDraft] = useState<ChalkDraft | null>(null);
   const [openNoteId, setOpenNoteId] = useState<string | null>(null);
+  const [newNoteOpen, setNewNoteOpen] = useState(false);
+  const newNoteToggle = useRef<HTMLButtonElement>(null);
   const [notePreviews, setNotePreviews] = useState<Record<string, string>>({});
   const notePreviewRevisions = useRef(new Map<string, number>());
   const noteModal = useRef<BoardNoteModalHandle>(null);
   const openNoteIdRef = useRef<string | null>(null);
   openNoteIdRef.current = openNoteId;
+  const boardPaused = useRef(false);
+  boardPaused.current = Boolean(openNoteId) || newNoteOpen;
   const titleInput = useRef<HTMLInputElement>(null);
   const pickerToggle = useRef<HTMLButtonElement>(null);
   const stagingToggle = useRef<HTMLButtonElement>(null);
@@ -127,6 +132,7 @@ export default function BoardPage() {
     setLabelDraft(null);
     setChalkDraft(null);
     setOpenNoteId(null);
+    setNewNoteOpen(false);
     setNotePreviews({});
     notePreviewRevisions.current.clear();
     setDeleting(false);
@@ -213,14 +219,14 @@ export default function BoardPage() {
   }
 
   function pauseBoard(event: React.SyntheticEvent) {
-    if (!openNoteIdRef.current) return;
-    if ((event.target as Element).closest('[data-board-staging="true"], [data-board-staging-control="true"]')) return;
+    if (!boardPaused.current) return;
+    if (!newNoteOpen && (event.target as Element).closest('[data-board-staging="true"], [data-board-staging-control="true"]')) return;
     event.preventDefault();
     event.stopPropagation();
   }
 
   async function pasteReference(event: React.ClipboardEvent<HTMLElement>) {
-    if (openNoteIdRef.current) return;
+    if (boardPaused.current) return;
     const visit = visitRevision.current;
     if ((event.target as HTMLElement).closest('input, textarea, select, [contenteditable="true"]')) return;
     const raw = event.clipboardData.getData(BOARD_TEXT_RANGE_MIME)
@@ -252,7 +258,7 @@ export default function BoardPage() {
     }
     const reference = parseBoardTextRangeClipboard(payload);
     // An async clipboard read cannot start a board edit after another host takes focus.
-    if (openNoteIdRef.current || visit !== visitRevision.current) return;
+    if (boardPaused.current || visit !== visitRevision.current) return;
     if (!raw && !blob && reference?.excerpt !== pastedText) return;
     if (!reference) {
       setPasteError('This board reference could not be read. Select the passage and copy it again.');
@@ -521,7 +527,7 @@ export default function BoardPage() {
   }
 
   function keyDown(event: React.KeyboardEvent<HTMLDivElement>) {
-    if (openNoteIdRef.current) return;
+    if (boardPaused.current) return;
     if ((event.target as HTMLElement).closest('input, select, textarea, button, a')) return;
     if (event.code === 'Space') { event.preventDefault(); spaceDown.current = true; }
     if (event.key === 'Escape') { setSelection(null); setConnectFrom(null); setLabelDraft(null); setTool('select'); }
@@ -551,7 +557,7 @@ export default function BoardPage() {
     if (!element) return;
     function wheel(event: WheelEvent) {
       event.preventDefault();
-      if (openNoteIdRef.current) return;
+      if (boardPaused.current) return;
       const current = viewportRef.current;
       if (!current || gesture.current) return;
       const units = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? element!.clientHeight : 1;
@@ -583,10 +589,10 @@ export default function BoardPage() {
   return <><section className={styles.workspace} aria-label="Board workspace" onPaste={pasteReference}
     onKeyDownCapture={pauseBoard} onKeyUpCapture={pauseBoard} onPasteCapture={pauseBoard}
     onPointerDownCapture={pauseBoard} onPointerMoveCapture={pauseBoard} onPointerUpCapture={pauseBoard}
-    onClickCapture={pauseBoard} onContextMenuCapture={pauseBoard}
+    onClickCapture={pauseBoard} onContextMenuCapture={pauseBoard} onDragOverCapture={pauseBoard} onDropCapture={pauseBoard}
     onDoubleClickCapture={(event) => {
       // The visible board edge remains a note-switch target while all other board gestures yield.
-      if (!(event.target as Element).closest('[data-board-note-switch="true"]')) pauseBoard(event);
+      if (newNoteOpen || !(event.target as Element).closest('[data-board-note-switch="true"]')) pauseBoard(event);
     }}>
     {pasteError && <p role="alert">{pasteError}</p>}
     <header className={styles.boardHeader}>
@@ -603,6 +609,10 @@ export default function BoardPage() {
         <button className={styles.button} type="button" disabled={board.pending} onClick={() => setTitleDraft(null)}>Cancel</button>
       </form>}
       <span className={styles.saveStatus} role="status">{board.error ? 'Changes need attention' : board.pending || viewportDirty ? 'Saving…' : 'Saved'}</span>
+      <button ref={newNoteToggle} className={styles.button} disabled={board.pending || Boolean(chalkDraft) || Boolean(openNoteId)}
+        onClick={() => { spaceDown.current = false; setPickerOpen(false); setConnectFrom(null); setNewNoteOpen(true); }}>
+        <Plus size={16} />New note
+      </button>
       <button ref={pickerToggle} className={styles.primaryButton} aria-expanded={pickerOpen} aria-controls="board-note-picker"
         onClick={() => pickerOpen ? closePicker() : openPicker()}><Plus size={16} />Add notes and items</button>
       <button ref={stagingToggle} className={`${styles.button} ${styles.stagingToggle}`} data-board-staging-control="true"
@@ -851,8 +861,16 @@ export default function BoardPage() {
     </div>}
     {deleting && <BoardDeleteDialog board={detail.board} onCancel={() => setDeleting(false)} onDeleted={() => navigate('/boards')} />}
   </section>
+    {newNoteOpen && <BoardNewNoteDialog key={boardId} initialProjectId={detail.board.project_id}
+      onCancel={() => { setNewNoteOpen(false); newNoteToggle.current?.focus(); }}
+      onCreated={(noteId) => { setNewNoteOpen(false); setOpenNoteId(noteId); void loadCandidates(); }} />}
     {openNoteId && <BoardNoteModal key={openNoteId} ref={noteModal} noteId={openNoteId}
       stagingOpen={stagingOpen} onSendToStaging={stageTextRange}
+      stagingItemDrop={stagingOpen && !board.pending && !chalkDraft ? {
+        boardId: detail.board.id,
+        items: stagedMembers.filter((member) => member.member_kind === 'item' && member.reference.state === 'available')
+          .map((member) => ({ memberId: member.id, itemId: member.member_id })),
+      } : undefined}
       onClosed={() => { setOpenNoteId(null); refreshProjections(openNoteId); }}
       onSwitchNote={(noteId) => { setOpenNoteId(noteId); refreshProjections(openNoteId); }}
       onOpenFullPage={(noteId) => { setOpenNoteId(null); void leave(`/notes/${encodeURIComponent(noteId)}`); }} />}

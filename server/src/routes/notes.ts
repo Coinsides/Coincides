@@ -30,6 +30,7 @@ import {
   trashNoteAsUser,
 } from '../services/notes.js';
 import { hydrateBlock, hydrateNote } from '../services/noteHydration.js';
+import { assertItemRefBlockContent } from '../services/itemRefBlocks.js';
 
 export { hydrateNote };
 
@@ -244,6 +245,7 @@ router.post('/:id/blocks', (req: AuthRequest, res: Response) => {
       });
       return;
     }
+    assertItemRefBlockContent(db, req.userId!, data);
     const id = uuidv4();
     const placementId = uuidv4();
     const now = new Date().toISOString();
@@ -267,7 +269,7 @@ router.post('/:id/blocks', (req: AuthRequest, res: Response) => {
         data.title || null,
         stringifyJson(data.content_json, {}),
         data.plain_text || null,
-        stringifyJson(mergeRuntimeNoteBlockTemplateMetadata(db, req.userId!, data.metadata, data.block_type).metadata, {}),
+        stringifyJson(data.block_type === 'item_ref' ? data.metadata : mergeRuntimeNoteBlockTemplateMetadata(db, req.userId!, data.metadata, data.block_type).metadata, {}),
         operationBatchId,
         now,
         now

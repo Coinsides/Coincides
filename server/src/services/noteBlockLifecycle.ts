@@ -3,6 +3,7 @@ import type Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 import { AppError } from '../middleware/errorHandler.js';
 import { mergeRuntimeNoteBlockTemplateMetadata } from './templateDefinitions.js';
+import { assertItemRefBlockContent } from './itemRefBlocks.js';
 
 const CLIENT_CREATE_SOURCE_TYPE = 'client_note_block_create';
 const CLIENT_CREATE_CLEANUP_CONFLICT_SOURCE_TYPE = 'client_note_block_cleanup_conflict';
@@ -426,6 +427,7 @@ export function createClientNoteBlock(
       };
     }
 
+    assertItemRefBlockContent(db, userId, data);
     const blockId = uuidv4();
     const placementId = uuidv4();
     const now = new Date().toISOString();
@@ -433,7 +435,7 @@ export function createClientNoteBlock(
     const title = data.title || null;
     const plainText = data.plain_text || null;
     const metadata = stringifyJson(
-      mergeRuntimeNoteBlockTemplateMetadata(
+      data.block_type === 'item_ref' ? (data.metadata || {}) : mergeRuntimeNoteBlockTemplateMetadata(
         db,
         userId,
         data.metadata,

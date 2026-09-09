@@ -51,6 +51,7 @@ export const noteBlockTypeSchema = z.enum([
   'exercise',
   'answer',
   'sidenote',
+  'item_ref',
 ]);
 
 const checklistItemSchema = z.object({
@@ -694,6 +695,10 @@ const sourceReferenceSchema = z.object({
   { message: 'source_page_end must be greater than or equal to source_page_start', path: ['source_page_end'] }
 );
 
+export const itemRefBlockDataSchema = z.object({
+  item_id: z.string().uuid('Invalid Item ID'),
+}).strict();
+
 export const createNoteBlockSchema = z.object({
   client_create_key: z.string().trim().min(1).max(220).optional(),
   block_type: noteBlockTypeSchema,
@@ -703,6 +708,17 @@ export const createNoteBlockSchema = z.object({
   metadata: jsonObjectSchema.optional(),
   display_overrides_json: jsonObjectSchema.optional(),
   source_references: z.array(sourceReferenceSchema).max(20).optional(),
+}).superRefine((data, ctx) => {
+  if (data.block_type !== 'item_ref') return;
+  const result = itemRefBlockDataSchema.safeParse(data.content_json);
+  if (!result.success) {
+    for (const issue of result.error.issues) {
+      ctx.addIssue({ ...issue, path: ['content_json', ...issue.path] });
+    }
+  }
+  if (data.plain_text) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Item reference blocks cannot store copied plain text', path: ['plain_text'] });
+  }
 });
 
 export const discardClientNoteBlockCreateSchema = z.object({

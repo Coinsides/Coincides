@@ -168,6 +168,7 @@ export function plainTextForBlockContent(kind: BlockPresentationKind, content: R
 }
 
 export function textFromContent(block: BlockContentInput): string {
+  if (block.block_type === 'item_ref') return '';
   const kind = presentationKindForBlock(block);
   if (kind === 'formula') {
     return formulaFieldsFromBlock(block).latex_input;
@@ -182,6 +183,7 @@ export function textFromContent(block: BlockContentInput): string {
 }
 
 export function hasMeaningfulRenderableBlockContent(block: NoteBlock): boolean {
+  if (block.block_type === 'item_ref') return true;
   if (block.title?.trim()) return true;
   if (textFromContent(block).trim() || block.plain_text?.trim()) return true;
   if (block.source_references.length > 0) return true;
@@ -209,6 +211,7 @@ export function contentForEditedBlock(
   body: string,
   fieldValuesOverride?: FieldValueRecord,
 ): Record<string, unknown> {
+  if (block.block_type === 'item_ref') return { item_id: block.content_json.item_id };
   const kind = presentationKindForBlock(block);
   if (kind === 'formula') return contentForFormula(body, block.content_json, fieldValuesOverride);
   return contentWithTextFlow({ ...block.content_json, body }, body, kind);
@@ -218,6 +221,7 @@ export function contentForEditedTextFlowBlock(
   block: BlockContentInput,
   textFlow: TextBlockContentV1,
 ): Record<string, unknown> {
+  if (block.block_type === 'item_ref') return { item_id: block.content_json.item_id };
   const projection = projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: textFlow }, block.plain_text || '');
   return {
     ...block.content_json,

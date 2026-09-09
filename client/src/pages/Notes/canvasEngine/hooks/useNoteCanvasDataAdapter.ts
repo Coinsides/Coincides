@@ -1033,7 +1033,7 @@ export function useNoteCanvasDataAdapter({
       && noteRef.current?.id === requestedNote.id
     );
     const body = text.trimEnd();
-    const metadata = {
+    const metadata = template.legacy_block_type === 'item_ref' ? {} : {
       ...metadataForTemplateOption(template),
       ...(options.metadataPatch || {}),
     };
@@ -1359,6 +1359,11 @@ export function useNoteCanvasDataAdapter({
       recoveryKey?: string;
     } = {},
   ): Promise<BlockSaveOutcome> => {
+    // Read-only references have no body draft to flush. Ordinary placement/tray
+    // operations still cross this barrier and must not become failed writes.
+    if (block.block_type === 'item_ref') {
+      return { status: 'saved', block, recoveryReceipt: null, reconciliation: 'response' };
+    }
     if (!allowSourceContentMutation()) {
       return {
         status: 'rejected',
@@ -1786,7 +1791,7 @@ export function useNoteCanvasDataAdapter({
       metadataPatch?: Record<string, unknown>;
     } = {},
   ) => {
-    if (!allowSourceContentMutation()) return null;
+    if (block.block_type === 'item_ref' || !allowSourceContentMutation()) return null;
     const requestedNoteId = noteRef.current?.id || null;
     if (!requestedNoteId || routeNoteIdRef.current !== requestedNoteId) {
       console.error('Failed to convert block: route receipt is unavailable');

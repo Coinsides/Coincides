@@ -31,6 +31,7 @@ interface BlockControlBarLayerProps {
   open: boolean;
   saving: boolean;
   contentReadOnly: boolean;
+  bodyReadOnly?: boolean;
   onBeginMove: (event: ReactPointerEvent<HTMLElement>) => void;
   onInsertTextUnitBelow?: () => void;
   onToggleExportRole: () => void;
@@ -48,6 +49,7 @@ export function BlockControlBarLayer({
   open,
   saving,
   contentReadOnly,
+  bodyReadOnly = false,
   onBeginMove,
   onInsertTextUnitBelow,
   onToggleExportRole,
@@ -135,7 +137,7 @@ export function BlockControlBarLayer({
               const outcome = await onSaveBlock();
               if (outcome.status !== 'saved') return;
             }}
-            disabled={saving || contentReadOnly}
+            disabled={saving || contentReadOnly || bodyReadOnly}
             title="Save block"
           >
             <Save size={16} />

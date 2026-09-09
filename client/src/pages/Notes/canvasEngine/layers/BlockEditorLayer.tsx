@@ -57,6 +57,7 @@ import {
 import { FormulaBlockProjection } from '../blocks/FormulaBlockProjection';
 import { TextBlockProjection } from '../blocks/TextBlockProjection';
 import { CodeBlockProjection } from '../blocks/CodeBlockProjection';
+import { ItemRefBlockProjection } from '../blocks/ItemRefBlockProjection';
 import { useBlockMeasurement } from '../hooks/useBlockMeasurement';
 import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import { BlockControlBarLayer } from './BlockControlBarLayer';
@@ -187,6 +188,7 @@ export function BlockEditorLayer({
   const exportRole = getEffectiveExportRole(layout);
   const aiVisibility = getEffectiveAIVisibility(layout);
   const presentationKind = presentationKindForBlock(block);
+  const itemReference = block.block_type === 'item_ref';
   const fragmentTotal = blockFragments[0]?.fragmentTotal || blockFragments.length;
   const crossPageFragment = fragmentTotal > 1;
   const fragmentRoles = blockFragments.map((fragment) => fragment.role).join(',');
@@ -206,7 +208,7 @@ export function BlockEditorLayer({
   const formulaFields = presentationKind === 'formula'
     ? formulaFieldsFromBlock(block, fieldDraft ? text : undefined, fieldDraft)
     : null;
-  const blockTypeLabel = presentationKind === 'code'
+  const blockTypeLabel = itemReference ? 'REFERENCED ITEM' : presentationKind === 'code'
     ? 'CODE'
     : getNoteBlockTemplateLabel(block.metadata, block.block_type);
   const showContextualTypeBadge = active || showBlockTypeBadge;
@@ -371,8 +373,9 @@ export function BlockEditorLayer({
         open={active}
         saving={saving}
         contentReadOnly={contentReadOnly}
+        bodyReadOnly={itemReference}
         onBeginMove={onBeginMove}
-        onInsertTextUnitBelow={presentationKind === 'paragraph' ? handleInsertTextUnitBelow : undefined}
+        onInsertTextUnitBelow={!itemReference && presentationKind === 'paragraph' ? handleInsertTextUnitBelow : undefined}
         onToggleExportRole={onToggleExportRole}
         onToggleAIVisibility={onToggleAIVisibility}
         onSaveBlock={() => onSave(false)}
@@ -420,7 +423,9 @@ export function BlockEditorLayer({
           onFocusReleased(receipt);
         }}
       >
-        {presentationKind === 'formula' && formulaFields ? (
+        {itemReference ? (
+          <ItemRefBlockProjection itemId={typeof block.content_json.item_id === 'string' ? block.content_json.item_id : ''} />
+        ) : presentationKind === 'formula' && formulaFields ? (
           <FormulaBlockProjection
             active={active}
             readOnly={contentReadOnly}

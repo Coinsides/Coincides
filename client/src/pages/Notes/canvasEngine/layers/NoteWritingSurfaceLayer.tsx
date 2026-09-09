@@ -1,10 +1,14 @@
 import { screenLayoutToLocal, resolveScreenRect, selectPlacementFrame } from '../placementContractService';
 import { Boxes } from 'lucide-react';
+import { NoteCanvasRuntimeContext } from '../NoteCanvasRuntimeProvider';
+import { BOARD_STAGING_MIME, resolveStagingItemDrop } from '../../../Boards/boardStagingDrag';
+import type { ItemRefBlockData } from '@shared/types/itemRef';
 import { usePageReadingPresentation } from '../hooks/usePageReadingPresentation';
 import { createDefaultPageReadingViewState, type PageReadingGear, type PageReadingViewState } from '../pageReadingViewportService';
 import type { TemplateOption } from '@/services/templateOptions';
 import {
   useEffect,
+  useContext,
   useMemo,
   useRef,
   useState,
@@ -648,6 +652,8 @@ export function NoteWritingSurfaceLayer({
     startWidth: number;
     startHeight: number;
   } | null>(null);
+  const stagingItemDrop = useContext(NoteCanvasRuntimeContext)?.stagingItemDrop;
+  const itemDropPending = useRef(false);
   const [spacePanReady, setSpacePanReady] = useState(false);
   const [canvasPanning, setCanvasPanning] = useState(false);
   const [pageFrameInteractionPreview, setPageFrameInteractionPreview] = useState<{
@@ -2548,7 +2554,8 @@ export function NoteWritingSurfaceLayer({
     kind: 'block_shell',
     point: blockContextMenu.point,
     title: 'Block',
-    items: buildBlockShellMenu(),
+    items: buildBlockShellMenu().filter((item) => item.id !== 'save-block'
+      || visibleBlocks.find((block) => block.id === blockContextMenu.blockId)?.block_type !== 'item_ref'),
   } : null;
 
   const canvasBlankMenu: CommandSurfaceMenu | null = canvasBlankContextMenu && !contentReadOnly ? {
@@ -3277,6 +3284,31 @@ export function NoteWritingSurfaceLayer({
     event.dataTransfer.dropEffect = 'copy';
   };
 
+  const handleStagingDragOver = (event: DragEvent<HTMLDivElement>) => {
+    if (hostMode !== 'modal' || !event.dataTransfer.types.includes(BOARD_STAGING_MIME)) return;
+    // Keep a staged row out of TextFlow's text-drop path, including over a block.
+    event.preventDefault();
+    event.stopPropagation();
+    event.dataTransfer.dropEffect = stagingItemDrop && !contentReadOnly && !itemDropPending.current ? 'copy' : 'none';
+  };
+
+  const handleStagingDrop = (event: DragEvent<HTMLDivElement>) => {
+    if (hostMode !== 'modal' || !event.dataTransfer.types.includes(BOARD_STAGING_MIME)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    if (contentReadOnly || itemDropPending.current) return;
+    const itemId = resolveStagingItemDrop(event.dataTransfer.getData(BOARD_STAGING_MIME), stagingItemDrop);
+    const layout = layoutForBlankDrop(event);
+    if (!itemId || !layout) return;
+    itemDropPending.current = true;
+    // Reuse ordinary durable block creation and placement, without a template registration.
+    void onCreateBlock({ ...defaultTextTemplate, legacy_block_type: 'item_ref' }, '', {
+      contentJson: { item_id: itemId } satisfies ItemRefBlockData, layout,
+    }).then((created) => {
+      if (created) onSelectBlock(created.id);
+    }).finally(() => { itemDropPending.current = false; });
+  };
+
   const handleBlankSurfaceDrop = (event: DragEvent<HTMLDivElement>) => {
     if (!isBlankSurfaceDropTarget(event)) return;
     const trayPlacementId = event.dataTransfer.getData(TRAY_DRAG_TYPE);
@@ -3313,6 +3345,9 @@ export function NoteWritingSurfaceLayer({
       onPointerCancel={endCanvasPan}
       onWheel={handleCanvasWheel}
     >
+      {hostMode === 'modal' && !hasMeaningfulRenderableContent && (
+        <p data-staging-empty-hint="true">Drag items from staging</p>
+      )}
       <input
         ref={imageFileInputRef}
         type="file"
@@ -3395,6 +3430,8 @@ export function NoteWritingSurfaceLayer({
         onDoubleClick={contentReadOnly ? undefined : onPageSpaceDoubleClick}
         onDragOver={contentReadOnly ? undefined : handleBlankSurfaceDragOver}
         onDrop={contentReadOnly ? undefined : handleBlankSurfaceDrop}
+        onDragOverCapture={handleStagingDragOver}
+        onDropCapture={handleStagingDrop}
       >
         {surfaceMode === 'canvas' && (
           <>

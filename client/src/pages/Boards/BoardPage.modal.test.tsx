@@ -81,6 +81,46 @@ beforeEach(() => {
 });
 
 describe('BoardPage note modal host', () => {
+  it('keeps the selected board unchanged while the New note dialog owns input and an older paste finishes', async () => {
+    const showModal = Object.getOwnPropertyDescriptor(HTMLDialogElement.prototype, 'showModal');
+    Object.defineProperty(HTMLDialogElement.prototype, 'showModal', {
+      configurable: true, value: function (this: HTMLDialogElement) { this.open = true; },
+    });
+    try {
+      openBoard();
+      const first = await screen.findByRole('article', { name: 'first' });
+      fireEvent.focus(first);
+      const surface = screen.getByTestId('board-surface');
+      let finish!: (text: string) => void;
+      fireEvent.paste(surface, { clipboardData: {
+        getData: () => '', files: [{ type: BOARD_TEXT_RANGE_MIME, size: 200,
+          text: () => new Promise<string>((resolve) => { finish = resolve; }) }],
+      } });
+      fireEvent.click(screen.getByRole('button', { name: 'New note' }));
+      const dialog = await screen.findByRole('dialog', { name: 'New note' });
+      await waitFor(() => expect((within(dialog).getByRole('combobox', { name: 'Project' }) as HTMLSelectElement).disabled).toBe(false));
+      fireEvent.change(within(dialog).getByRole('combobox'), { target: { value: 'project' } });
+      fireEvent.change(within(dialog).getByRole('textbox', { name: 'Note title' }), { target: { value: 'Draft' } });
+      for (const name of ['Create note', 'Cancel']) {
+        const button = within(dialog).getByRole('button', { name });
+        button.focus();
+        for (const key of ['Delete', 'Enter', 'Escape']) fireEvent.keyDown(button, { key });
+      }
+      fireEvent.keyDown(surface, { key: 'Delete' });
+      await act(async () => { finish(JSON.stringify({ note_id: 'first', block_id: 'block', text_flow_id: 'flow',
+        text_unit_id: 'unit', start_offset: 0, end_offset: 5, excerpt: 'hello', at: '2026-09-09T12:00:00.000Z' })); });
+      for (const method of [http.post, http.put, http.patch, http.delete]) expect(method).not.toHaveBeenCalled();
+      expect(screen.getAllByRole('dialog')).toEqual([dialog]);
+      expect(screen.getByRole('toolbar', { name: 'Selected projection controls' })).toBeTruthy();
+      fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+      expect(screen.queryByRole('dialog')).toBeNull();
+      expect(screen.getByRole('article', { name: 'first' })).toBeTruthy();
+    } finally {
+      if (showModal) Object.defineProperty(HTMLDialogElement.prototype, 'showModal', showModal);
+      else Reflect.deleteProperty(HTMLDialogElement.prototype, 'showModal');
+    }
+  });
+
   it('opens a note in place, refreshes its saved body after close and keeps Enter as navigation', async () => {
     await openFirst();
     expect(screen.getByRole('heading', { name: 'Modal board' })).toBeTruthy();

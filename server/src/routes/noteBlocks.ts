@@ -10,6 +10,7 @@ import {
   restoreNoteBlockForCanvasLifecycle,
 } from '../services/canvasObjects.js';
 import { assertSourceProjectionBlockContentWriteAllowed } from '../services/sourceProjectionPolicy.js';
+import { assertItemRefBlockContent } from '../services/itemRefBlocks.js';
 
 const router = Router();
 
@@ -26,10 +27,10 @@ function parseJson<T>(value: string | null | undefined, fallback: T): T {
   }
 }
 
-function getOwnedBlock(blockId: string, userId: string): { id: string; course_id: string; block_type: string; metadata: string; source_kind: string } {
+function getOwnedBlock(blockId: string, userId: string): { id: string; course_id: string; block_type: string; content_json: string; plain_text: string | null; metadata: string; source_kind: string } {
   const block = getDb()
-    .prepare('SELECT id, course_id, block_type, metadata, source_kind FROM note_blocks WHERE id = ? AND user_id = ?')
-    .get(blockId, userId) as { id: string; course_id: string; block_type: string; metadata: string; source_kind: string } | undefined;
+    .prepare('SELECT id, course_id, block_type, content_json, plain_text, metadata, source_kind FROM note_blocks WHERE id = ? AND user_id = ?')
+    .get(blockId, userId) as { id: string; course_id: string; block_type: string; content_json: string; plain_text: string | null; metadata: string; source_kind: string } | undefined;
   if (!block) throw new AppError(404, 'Note block not found');
   return block;
 }
@@ -57,6 +58,13 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
     const currentBlock = getOwnedBlock(blockId, req.userId!);
     assertSourceProjectionBlockContentWriteAllowed(getDb(), req.userId!, blockId, 'update_note_block');
     const data = updateNoteBlockSchema.parse(req.body);
+    if (data.block_type !== undefined || data.content_json !== undefined || data.plain_text !== undefined) {
+      assertItemRefBlockContent(getDb(), req.userId!, {
+        block_type: data.block_type ?? currentBlock.block_type,
+        content_json: data.content_json ?? parseJson(currentBlock.content_json, {}),
+        plain_text: data.plain_text === undefined ? currentBlock.plain_text : data.plain_text,
+      });
+    }
     if (data.status && data.status !== 'active') {
       assertNoteBlockStatusChangeAllowed(getDb(), req.userId!, blockId, data.status);
     }
@@ -88,7 +96,7 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
       };
       fields.push('metadata = ?');
       values.push(stringifyJson(
-        mergeRuntimeNoteBlockTemplateMetadata(
+        (data.block_type ?? currentBlock.block_type) === 'item_ref' ? mergedMetadata : mergeRuntimeNoteBlockTemplateMetadata(
           getDb(),
           req.userId!,
           mergedMetadata,

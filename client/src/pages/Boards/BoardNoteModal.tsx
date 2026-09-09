@@ -5,6 +5,7 @@ import NoteCanvasRuntime, { type NoteCanvasRuntimeHandle } from '../Notes/canvas
 import { NoteCanvasRuntimeProvider } from '../Notes/canvasEngine/NoteCanvasRuntimeProvider';
 import type { BoardTextRangeSelection } from '@shared/types/boardTextRange';
 import styles from './BoardNoteModal.module.css';
+import type { StagingItemDrop } from './boardStagingDrag';
 
 export type NoteCloseDestination = { kind: 'note' | 'page'; noteId: string };
 export interface BoardNoteModalHandle {
@@ -16,11 +17,12 @@ interface BoardNoteModalProps {
   onOpenFullPage: (noteId: string) => void;
   onSwitchNote: (noteId: string) => void;
   stagingOpen?: boolean;
+  stagingItemDrop?: StagingItemDrop;
   onSendToStaging?: (selection: BoardTextRangeSelection) => Promise<boolean>;
 }
 
 const BoardNoteModal = forwardRef<BoardNoteModalHandle, BoardNoteModalProps>(function BoardNoteModal({
-  noteId, onClosed, onOpenFullPage, onSwitchNote, stagingOpen = false, onSendToStaging,
+  noteId, onClosed, onOpenFullPage, onSwitchNote, stagingOpen = false, onSendToStaging, stagingItemDrop,
 }, ref) {
   const runtime = useRef<NoteCanvasRuntimeHandle>(null);
   const dialog = useRef<HTMLDivElement>(null);
@@ -195,7 +197,8 @@ const BoardNoteModal = forwardRef<BoardNoteModalHandle, BoardNoteModalProps>(fun
         <button type="button" onClick={() => complete(failedDestination.current)}>Close anyway</button>
       </div>}
       <div className={styles.content} aria-busy={saving}>
-        <NoteCanvasRuntimeProvider noteId={noteId} hostMode="modal" onSendToStaging={onSendToStaging ? sendToStaging : undefined}>
+        <NoteCanvasRuntimeProvider noteId={noteId} hostMode="modal" onSendToStaging={onSendToStaging ? sendToStaging : undefined}
+          stagingItemDrop={saving ? undefined : stagingItemDrop}>
           <NoteCanvasRuntime ref={runtime} onRequestClose={() => { void requestClose(); }} />
         </NoteCanvasRuntimeProvider>
       </div>
