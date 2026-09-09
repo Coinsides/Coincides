@@ -6,7 +6,7 @@ import BoardPage from './BoardPage';
 import type { BoardDetail, BoardMember, BoardMemberReference } from './boardTypes';
 
 // Only transport is replaced. BoardPage, repositories, the summary adapter and useBoard are real.
-const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn() }));
+const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn() }));
 vi.mock('@/services/api', () => ({ default: http }));
 
 interface FixtureItem {
@@ -60,6 +60,18 @@ async function mount(title: string) {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  vi.stubGlobal('PointerEvent', class extends MouseEvent {
+    readonly pointerId: number;
+    constructor(type: string, init: PointerEventInit = {}) {
+      super(type, init);
+      this.pointerId = init.pointerId || 0;
+    }
+  });
+  Object.defineProperties(HTMLElement.prototype, {
+    setPointerCapture: { configurable: true, value: () => {} },
+    releasePointerCapture: { configurable: true, value: () => {} },
+    hasPointerCapture: { configurable: true, value: () => false },
+  });
   items = [
     { id: 'standalone', plain_text: 'Current standalone body.', item_type: 'Claim', topic: 'Mechanics',
       status: 'active', origin_note_id: null, origin_course_id: null },
@@ -100,9 +112,46 @@ beforeEach(() => {
     items[0].plain_text = input.plain_text;
     return clone(items[0]);
   });
+  http.patch.mockImplementation(async (url: string, input: Partial<BoardMember>) => {
+    const member = detail.members.find((entry) => url === `/boards/item-board/members/${entry.id}`);
+    if (!member) throw new Error(`Unexpected fixture PATCH ${url}`);
+    Object.assign(member, input);
+    return clone({ member });
+  });
 });
 
 describe('V13.4 item projection smoke', () => {
+  it('resizes an item projection at board zoom, retains its minimum size and rereads saved geometry', async () => {
+    detail.board.viewport.zoom = 2;
+    const view = openBoard();
+    const card = await mount('Claim');
+    const memberId = detail.members[0].id;
+    const surface = screen.getByTestId('board-surface');
+    const resize = within(card).getByRole('button', { name: 'Resize Claim' });
+    const pointer = { pointerId: 1, button: 0, buttons: 1 };
+    fireEvent.pointerDown(resize, { ...pointer, clientX: 200, clientY: 200 });
+    fireEvent.pointerMove(surface, { ...pointer, clientX: 320, clientY: 280 });
+    fireEvent.pointerUp(surface, { ...pointer, clientX: 320, clientY: 280 });
+    await waitFor(() => expect(detail.members[0]).toMatchObject({ w: 320, h: 196 }));
+    await waitFor(() => expect(screen.getByText('Saved')).toBeTruthy());
+    expect(card.style.width).toBe('320px');
+    expect(card.style.height).toBe('196px');
+    fireEvent.pointerDown(resize, { ...pointer, clientX: 320, clientY: 280 });
+    fireEvent.pointerMove(surface, { ...pointer, clientX: -1000, clientY: -1000 });
+    fireEvent.pointerUp(surface, { ...pointer, clientX: -1000, clientY: -1000 });
+    await waitFor(() => expect(detail.members[0]).toMatchObject({ w: 160, h: 100 }));
+    await waitFor(() => expect(screen.getByText('Saved')).toBeTruthy());
+    expect(http.patch.mock.calls.map(([, input]) => input)).toEqual([
+      { w: 320, h: 196 }, { w: 160, h: 100 },
+    ]);
+    view.unmount();
+    openBoard();
+    const reopened = await screen.findByTestId(`board-member-${memberId}`);
+    expect(reopened.style.width).toBe('160px');
+    expect(reopened.style.height).toBe('100px');
+    expect(within(reopened).getByRole('button', { name: 'Resize Claim' })).toBeTruthy();
+  });
+
   it('mounts through the item picker, shows current body and rereads it on reopening without copying membership content', async () => {
     const view = openBoard();
     const card = await mount('Claim');

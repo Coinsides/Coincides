@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import { createPortal, flushSync } from 'react-dom';
 import { ExternalLink, X } from 'lucide-react';
 import NoteCanvasRuntime, { type NoteCanvasRuntimeHandle } from '../Notes/canvasEngine/NoteCanvasRuntime';
@@ -21,6 +21,10 @@ interface BoardNoteModalProps {
   onSendToStaging?: (selection: BoardTextRangeSelection) => Promise<boolean>;
 }
 
+type DialogPosition = { left: number; top: number };
+// This belongs to the current app session, never to a note or persisted UI state.
+let sessionPosition: DialogPosition | null = null;
+
 const BoardNoteModal = forwardRef<BoardNoteModalHandle, BoardNoteModalProps>(function BoardNoteModal({
   noteId, onClosed, onOpenFullPage, onSwitchNote, stagingOpen = false, onSendToStaging, stagingItemDrop,
 }, ref) {
@@ -32,6 +36,71 @@ const BoardNoteModal = forwardRef<BoardNoteModalHandle, BoardNoteModalProps>(fun
   const alive = useRef(true);
   const [saving, setSaving] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [position, setPosition] = useState<DialogPosition | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const drag = useRef<{ pointerId: number; x: number; y: number; position: DialogPosition; handle: HTMLElement } | null>(null);
+
+  const fitPosition = useCallback((preferred: DialogPosition | null) => {
+    const element = dialog.current;
+    const available = element?.parentElement?.getBoundingClientRect();
+    if (!element || !available) return null;
+    const box = element.getBoundingClientRect();
+    const marginX = Math.min(16, Math.max(0, (available.width - box.width) / 2));
+    const marginY = Math.min(16, Math.max(0, (available.height - box.height) / 2));
+    return {
+      left: Math.max(marginX, Math.min(preferred?.left ?? (available.width - box.width) / 2, available.width - box.width - marginX)),
+      top: Math.max(marginY, Math.min(preferred?.top ?? (available.height - box.height) / 2, available.height - box.height - marginY)),
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    const reposition = () => {
+      const next = fitPosition(sessionPosition);
+      if (next) setPosition((previous) => previous?.left === next.left && previous.top === next.top ? previous : next);
+    };
+    // The backdrop's existing dock reservation owns the available rectangle.
+    // Clamp the displayed window without overwriting the user's remembered place.
+    reposition();
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(reposition);
+    if (dialog.current) observer?.observe(dialog.current);
+    if (dialog.current?.parentElement) observer?.observe(dialog.current.parentElement);
+    window.addEventListener('resize', reposition);
+    return () => { observer?.disconnect(); window.removeEventListener('resize', reposition); };
+  }, [fitPosition, stagingOpen]);
+
+  const startDrag = (event: ReactPointerEvent<HTMLElement>) => {
+    if (event.button !== 0 || pending.current || stagingPending.current || drag.current
+      || (event.target instanceof Element && event.target.closest('button, a, input, textarea, select'))) return;
+    const start = position ?? fitPosition(sessionPosition);
+    if (!start) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.currentTarget.setPointerCapture?.(event.pointerId);
+    drag.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, position: start, handle: event.currentTarget };
+    setDragging(true);
+  };
+
+  const moveDrag = (event: ReactPointerEvent<HTMLElement>) => {
+    const current = drag.current;
+    if (!current || current.pointerId !== event.pointerId) return;
+    const next = fitPosition({
+      left: current.position.left + event.clientX - current.x,
+      top: current.position.top + event.clientY - current.y,
+    });
+    if (!next) return;
+    event.preventDefault();
+    event.stopPropagation();
+    sessionPosition = next;
+    setPosition(next);
+  };
+
+  const endDrag = (event: ReactPointerEvent<HTMLElement>) => {
+    const current = drag.current;
+    if (!current || current.pointerId !== event.pointerId) return;
+    drag.current = null;
+    setDragging(false);
+    if (current.handle.hasPointerCapture?.(event.pointerId)) current.handle.releasePointerCapture(event.pointerId);
+  };
 
   const complete = useCallback((destination?: NoteCloseDestination) => {
     if (!alive.current) return;
@@ -187,8 +256,10 @@ const BoardNoteModal = forwardRef<BoardNoteModalHandle, BoardNoteModalProps>(fun
   }, [requestClose, stagingOpen]);
 
   return createPortal(<div className={`${styles.backdrop} ${stagingOpen ? styles.withStaging : ''}`} data-board-note-staging-open={stagingOpen}>
-    <div className={styles.dialog} role="dialog" aria-modal={!stagingOpen} aria-label="Open note" tabIndex={-1} ref={dialog}>
-      <header className={styles.header}>
+    <div className={styles.dialog} role="dialog" aria-modal={!stagingOpen} aria-label="Open note" tabIndex={-1} ref={dialog}
+      style={position ? { left: position.left, top: position.top } : undefined}>
+      <header className={`${styles.header} ${dragging ? styles.dragging : ''}`} data-note-dialog-drag-handle="true"
+        onPointerDown={startDrag} onPointerMove={moveDrag} onPointerUp={endDrag} onPointerCancel={endDrag} onLostPointerCapture={endDrag}>
         <span>Open note</span>
         <span className={styles.status} role="status">{saving ? 'Saving…' : ''}</span>
         <button type="button" disabled={saving} onMouseDown={(event) => event.preventDefault()}

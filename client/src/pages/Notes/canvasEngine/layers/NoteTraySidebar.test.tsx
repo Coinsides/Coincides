@@ -137,8 +137,8 @@ describe('Note staging row reorder', () => {
     const { getByRole } = renderSidebar(tray);
     expect(getByRole('complementary', { name: 'Note staging' })).toBeTruthy();
     expect(getByRole('button', { name: 'Close staging' })).toBeTruthy();
-    fireEvent.click(getByRole('button', { name: 'Move selected block to staging' }));
+    fireEvent.click(getByRole('button', { name: 'Stage' }));
     expect(tray.moveSelectedToTray).toHaveBeenCalledTimes(1);
-    expect(getByRole('status').textContent).toContain('Staging is empty');
+    expect(getByRole('status', { name: 'Empty staging' }).textContent).toBe('');
   });
 });

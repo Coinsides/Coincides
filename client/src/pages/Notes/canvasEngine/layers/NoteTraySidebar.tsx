@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type DragEvent } from 'react';
+import { ArrowDownToLine, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { useTrayController } from '../hooks/useTrayController';
 import { TRAY_DRAG_TYPE } from '../trayService';
@@ -12,6 +13,7 @@ export function NoteTraySidebar({ tray }: { tray: NoteTrayState }) {
   const [selectedForBoard, setSelectedForBoard] = useState<string[]>([]);
   const [boardId, setBoardId] = useState('');
   const [title, setTitle] = useState('Untitled note');
+  const [pointerDragOver, setPointerDragOver] = useState(false);
   const drag = useRef<{ placementId: string; originalOrder: string[] } | null>(null);
   const [dropTarget, setDropTarget] = useState<TrayDropTarget | null>(null);
   const clearDrag = () => { drag.current = null; setDropTarget(null); };
@@ -50,16 +52,23 @@ export function NoteTraySidebar({ tray }: { tray: NoteTrayState }) {
   };
   const lastPlacementId = tray.entries[tray.entries.length - 1]?.placement.placementId;
   return <aside ref={tray.dropTargetRef} className={styles.traySidebar} aria-label="Note staging" data-note-tray="true"
+    data-drop-active={pointerDragOver || undefined}
+    onPointerEnter={(event) => setPointerDragOver((event.buttons & 1) === 1)}
+    onPointerMove={(event) => setPointerDragOver((event.buttons & 1) === 1)}
+    onPointerLeave={() => setPointerDragOver(false)}
+    onPointerUp={() => setPointerDragOver(false)} onPointerCancel={() => setPointerDragOver(false)}
     onMouseDown={(event) => event.stopPropagation()}>
     <div className={styles.trayHeading}><strong>Staging</strong>
-      <button type="button" aria-label="Close staging" onClick={() => tray.setOpen(false)}>Close</button></div>
-    <button type="button" disabled={!tray.canMoveSelected || tray.busy}
+      <button type="button" className={styles.trayClose} aria-label="Close staging" onClick={() => tray.setOpen(false)}>
+        <X size={16} aria-hidden="true" />
+      </button></div>
+    {tray.canMoveSelected && <button type="button" className={styles.trayStageButton} disabled={tray.busy}
       onMouseDown={(event) => event.preventDefault()} onClick={() => void tray.moveSelectedToTray()}>
-      Move selected block to staging
-    </button>
-    <p className={styles.trayHint}>Drag rows to reorder staging. Drag a block between the paper and staging, or select blocks to start a new note.</p>
-    {tray.entries.some((entry) => entry.boardKind) && <p className={styles.trayHint}>Select drawings or group mounts to move them to a board.</p>}
-    {tray.entries.length === 0 ? <p role="status">Staging is empty. Drag a block here from the paper.</p> : <ul className={styles.trayList}
+      <ArrowDownToLine size={14} aria-hidden="true" /><span>Stage</span>
+    </button>}
+    {tray.entries.length === 0 ? <div className={styles.trayEmpty} role="status" aria-label="Empty staging">
+      <ArrowDownToLine size={24} aria-hidden="true" />
+    </div> : <ul className={styles.trayList}
       onDragOver={(event) => {
         if (event.target === event.currentTarget && lastPlacementId && acceptDrag(event)) {
           setDropTarget({ placementId: lastPlacementId, edge: 'after' });

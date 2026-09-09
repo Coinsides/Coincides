@@ -115,7 +115,13 @@
 .sourceLink:disabled { opacity: 0.5; cursor: default; }
 .member[aria-disabled='true'] { border-style: dashed; }
 .resizeHandle { position: absolute; bottom: -5px; right: -5px; width: 14px; height: 14px; background: var(--bg-elevated); border: 1px solid var(--border-focus); border-radius: 2px; cursor: nwse-resize; opacity: 0; }
-.selected .resizeHandle, .member:hover .resizeHandle, .resizeHandle:focus-visible { opacity: 1; }
+.selected .resizeHandle, .member:hover .resizeHandle, .member:focus-within .resizeHandle, .resizeHandle:focus-visible { opacity: 1; }
+.memberResizeHandle {
+  bottom: -7px; right: -7px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+  color: var(--text-primary); background: var(--bg-surface); border-radius: 4px;
+}
+.memberResizeHandle:hover, .memberResizeHandle:active { background: var(--accent-primary-bg); border-color: var(--accent-primary-hover); }
+.memberResizeHandle svg { pointer-events: none; }
 .visualResizeHandle { opacity: 1; }
 .canvasEmpty { position: absolute; top: 28%; left: 12%; right: 12%; max-width: 460px; pointer-events: none; }
 .canvasEmpty h2 { font-size: 1.375rem; font-weight: 500; margin-bottom: 8px; }

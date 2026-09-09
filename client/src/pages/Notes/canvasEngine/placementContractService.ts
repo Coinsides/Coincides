@@ -1,7 +1,7 @@
 import { classifyCanvasSurfaceAuthority } from '../../../../../shared/types/canvasSurfaceAuthority';
 import { derivePlacementPageFrameAffiliation } from './pageFrameAffiliationService';
 import { DEFAULT_BLOCK_GAP, DEFAULT_BLOCK_HEIGHT, DEFAULT_PAGE_CONTENT_WIDTH, type BlockBoxLayout, type SurfaceMode } from './runtimeLayout';
-import type { CanvasRect, PageFrameModel } from './types';
+import type { CanvasRect, PageFrameCollectionModel, PageFrameModel } from './types';
 
 /** The contract belongs to the loaded canvas session, never to an individual row. */
 export type CoordinateContract = 'v1' | 'v2';
@@ -130,6 +130,53 @@ export function requireStoredLayout(
     throw new Error('A resolved page frame is required to save this coordinate contract');
   }
   return stored;
+}
+
+/** First-save affiliation for unplaced blocks on the continuous paper.
+ * Compare the block and frame outlines in the renderer's common coordinate
+ * system, then undo the horizontal paper projection before world -> local.
+ * Reading/hydration and already affiliated layouts keep their existing rules.
+ */
+export function normalizeBlockLayoutForSave(
+  layout: BlockBoxLayout,
+  collection: PageFrameCollectionModel | null | undefined,
+  contract: CoordinateContract = 'v1',
+  pageOffsetX = 0,
+): BlockBoxLayout {
+  const frames = collection?.pageFrames || [];
+  if (contract !== 'v2' || layout.frame_id || layout.coordinate_space === 'canvas_world'
+    || layout.surface === 'tray' || layout.surface === 'canvas_workspace') {
+    return requireStoredLayout(layout, frames, contract);
+  }
+  const screen = resolveScreenRect(layout, undefined, contract, pageOffsetX);
+  let frame: PageFrameModel | undefined;
+  let largestOverlap = 0;
+  for (const candidate of frames) {
+    const outline = resolveScreenRect({
+      x: -candidate.contentInset.left, y: -candidate.contentInset.top,
+      width: candidate.width, height: candidate.height, coordinate_space: 'page_frame_local',
+    }, candidate, contract, pageOffsetX);
+    const overlap = Math.max(0, Math.min(screen.x + screen.width, outline.x + outline.width) - Math.max(screen.x, outline.x))
+      * Math.max(0, Math.min(screen.y + screen.height, outline.y + outline.height) - Math.max(screen.y, outline.y));
+    if (overlap > largestOverlap) {
+      frame = candidate;
+      largestOverlap = overlap;
+    }
+  }
+  if (!frame) {
+    // An unplaced block belongs to the note's primary stack, not the selected stack.
+    const stack = collection?.pageStacks?.find((candidate) => candidate.id === collection.primaryStackId)
+      || collection?.pageStacks?.find((candidate) => candidate.frameIds.includes(collection.primaryFrameId || ''));
+    const primaryFrameId = stack ? stack.primaryFrameId : collection?.primaryFrameId;
+    frame = frames.find((candidate) => candidate.id === primaryFrameId);
+  }
+  if (!frame) return requireStoredLayout(layout, frames, contract);
+  const origin = contentOrigin(frame);
+  return requireStoredLayout({
+    ...layout, ...screen,
+    x: screen.x - pageOffsetX + origin.x,
+    coordinate_space: 'canvas_world', frame_id: frame.id,
+  }, frames, contract);
 }
 
 export function sameLayoutFrame(a: BlockBoxLayout, b: BlockBoxLayout, contract: CoordinateContract = 'v1'): boolean {

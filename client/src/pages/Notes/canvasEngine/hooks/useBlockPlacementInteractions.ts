@@ -86,7 +86,11 @@ function collectCrossingBlockOnRelease({
   const layout = layouts[blockId];
   if (!layout) return layouts;
 
-  const worldRect = resolveWorldRect(layout, selectPlacementFrame(layout, pageFrames, coordinateContract), coordinateContract, pageOffsetX);
+  const frame = selectPlacementFrame(layout, pageFrames, coordinateContract);
+  // Unplaced paper coordinates have no world frame yet. First-save affiliation
+  // must preserve their presentation before later releases can collect them.
+  if (coordinateContract === 'v2' && layout.coordinate_space !== 'canvas_world' && !frame) return layouts;
+  const worldRect = resolveWorldRect(layout, frame, coordinateContract, pageOffsetX);
   const collected = clampCrossingPlacementIntoPageFrameContent({
     placement: worldRect,
     pageFrames,

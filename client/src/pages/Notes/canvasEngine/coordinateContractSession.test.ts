@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createCoordinateContractSession } from './coordinateContractSession';
-import { loadCanvasPersistenceForNote, resolveCanvasPlacementWriteContext, saveBlockCanvasPlacementForNote } from './canvasObjectRepository';
-import type { Note } from './runtimeDataTypes';
+import { applyCanvasLayoutsToBlocks, loadCanvasPersistenceForNote, resolveCanvasPlacementWriteContext, saveBlockCanvasPlacementForNote } from './canvasObjectRepository';
+import { resolveScreenRect, selectPlacementFrame } from './placementContractService';
+import { buildDefaultBlockLayouts, normalizeBlockLayout } from './placementService';
+import type { CanvasBlockLayoutRecord } from './canvasPersistenceNormalizer';
+import type { Note, NoteBlock } from './runtimeDataTypes';
 import type { PageFrameCollectionModel } from './types';
 
 const transport = vi.hoisted(() => ({ get: vi.fn(), put: vi.fn() }));
@@ -89,6 +92,69 @@ function frameCollection(id: string, y: number): PageFrameCollectionModel {
 }
 
 describe('coordinate contract write context', () => {
+  it('saves an unplaced default through the repository and reloads the same screen geometry', async () => {
+    const target = frameCollection('trace-frame', 0);
+    target.pageFrames[0] = { ...target.pageFrames[0], x: 0, height: 1279 };
+    const block: NoteBlock = {
+      id: 'unplaced-block', placement_id: 'unplaced-placement', block_type: 'paragraph',
+      title: null, content_json: {}, plain_text: 'Synthetic paragraph', metadata: {},
+      order_index: 0, source_references: [], display_overrides_json: {}, canvas_layout: null,
+    };
+    let durable: CanvasBlockLayoutRecord | null = null;
+    transport.get.mockImplementation(async (url: string) => {
+      if (url === flagUrl) return { data: { coordinate_contract: 'v2' } };
+      if (url === canvasUrl) return { data: { pageFrameCollection: target, blockLayouts: durable ? [durable] : [] } };
+      throw new Error('Unexpected synthetic request');
+    });
+    transport.put.mockImplementation(async (url: string, payload: { block_id: string; layout: Record<string, unknown> }) => {
+      expect(url).toBe(`${canvasUrl}/block-placements/${block.placement_id}`);
+      durable = { block_id: payload.block_id, placement_id: block.placement_id, layout: { ...payload.layout } };
+      return { data: durable };
+    });
+    const contractSession = createCoordinateContractSession();
+    const initial = await loadCanvasPersistenceForNote({ note, importLegacy: false, contractSession });
+    expect(initial.blockLayouts).toEqual([]);
+    const fallback = buildDefaultBlockLayouts([block], 760, () => 44)[block.id];
+    const normalize = (currentBlock: NoteBlock) => normalizeBlockLayout({
+      block: currentBlock, fallback, contentWidth: 760, surfaceMode: 'page',
+      contract: 'v2', estimateHeight: () => 44,
+    });
+    const before = normalize(block);
+    const beforeScreen = resolveScreenRect(before, undefined, 'v2');
+    const context = await resolveCanvasPlacementWriteContext({
+      noteId: note.id, loadedNoteId: note.id, pageFrameCollection: initial.pageFrameCollection, contractSession,
+    });
+    const saved = await saveBlockCanvasPlacementForNote({ ...context, noteId: note.id, block, layout: before });
+    expect(transport.put.mock.calls[0]?.[1]).toMatchObject({
+      block_id: block.id,
+      layout: { x: 0, y: -96, width: 760, height: 44, frame_id: 'trace-frame',
+        coordinate_space: 'page_frame_local', surface: 'formal_page', boundary_role: 'inside' },
+    });
+    expect(saved.layout).toMatchObject({ x: 0, y: -96, frame_id: 'trace-frame' });
+
+    const reloaded = await loadCanvasPersistenceForNote({ note, importLegacy: false, contractSession });
+    const hydratedBlocks = applyCanvasLayoutsToBlocks([block], reloaded.blockLayouts, {
+      pageFrameCollection: reloaded.pageFrameCollection, coordinateContract: reloaded.coordinateContract,
+    });
+    const after = normalize(hydratedBlocks[0]);
+    const frame = selectPlacementFrame(after, reloaded.pageFrameCollection?.pageFrames || [], 'v2');
+    expect(resolveScreenRect(after, frame, 'v2')).toEqual(beforeScreen);
+    expect(after).toMatchObject({ frame_id: 'trace-frame', x: 0, y: -96 });
+
+    const moved = { ...after, y: after.y + 60 };
+    await saveBlockCanvasPlacementForNote({ ...context, noteId: note.id, block: hydratedBlocks[0], layout: moved });
+    expect(transport.put.mock.calls[1]?.[1].layout).toMatchObject({ x: 0, y: -36, frame_id: 'trace-frame' });
+  });
+
+  it('reports the unresolved-frame error for an unplaced block in a genuinely frameless note', async () => {
+    await expect(saveBlockCanvasPlacementForNote({
+      coordinateContract: 'v2', pageFrameCollection: { pageFrames: [], primaryFrameId: null },
+      noteId: note.id, block: { id: 'unplaced-block', placement_id: 'unplaced-placement' },
+      layout: { x: 0, y: 0, width: 760, height: 44, coordinate_space: 'page_frame_local' },
+    })).rejects.toThrow('A resolved page frame is required to save this coordinate contract');
+    expect(transport.put).not.toHaveBeenCalled();
+  });
+
   it.each(['foreign note', 'not yet hydrated'] as const)(
     'loads the target frame collection for v2 recovery from a %s context', async (caseName) => {
       const target = frameCollection('target-frame', 1239);

@@ -346,7 +346,7 @@ export function normalizeBlockLayout<TBlock extends PlacementSeedBlock>({
   estimateHeight: (block: TBlock, width: number) => number;
   contract?: CoordinateContract;
 }): BlockBoxLayout {
-  const stored = readStoredLayout(block);
+  const stored = readStoredLayout(block) ?? fallback;
   const useStoredPlacement = !(surfaceMode === 'page' && stored?.surface === 'canvas_workspace');
   const isWorkspaceLayout = surfaceMode === 'canvas' && stored?.surface === 'canvas_workspace';
   const maxPlacementWidth = isWorkspaceLayout

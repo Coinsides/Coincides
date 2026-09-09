@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Hand, Link2, MousePointer2, Pencil, Plus, Minus, Pin, Trash2, ExternalLink, X, Inbox, Eraser, Undo2, Redo2, Layers } from 'lucide-react';
+import { ArrowLeft, Hand, Link2, MousePointer2, MoveDiagonal2, Pencil, Plus, Minus, Pin, Trash2, ExternalLink, X, Inbox, Eraser, Undo2, Redo2, Layers } from 'lucide-react';
 import { boardErrorMessage, loadBoardCandidates, loadBoardNotePreview } from './boardRepository';
 import type { BoardCandidate, BoardEdge, BoardMember, BoardViewport, BoardVisual } from './boardTypes';
 import { pointsPath, toBoardPoint, zoomBoardAt, type BoardPoint } from './boardViewport';
@@ -1020,9 +1020,12 @@ export default function BoardPage() {
                 </button>
               </>}
               {!member.reference.note_id && <small>No linked note to open</small>}
-              {!member.pinned && tool === 'select' && <button className={styles.resizeHandle} aria-label={`Resize ${member.reference.title || 'projection'}`}
+              {!member.pinned && tool === 'select' && <button type="button" className={`${styles.resizeHandle} ${styles.memberResizeHandle}`}
+                aria-label={`Resize ${member.reference.title || 'projection'}`} title="Resize card"
                 onDoubleClick={(event) => event.stopPropagation()}
-                onPointerDown={(event) => begin(event, member, true)} />}
+                onPointerDown={(event) => begin(event, member, true)}>
+                <MoveDiagonal2 size={16} aria-hidden="true" />
+              </button>}
             </article>;
           })}
           </div>)}

@@ -178,6 +178,83 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+describe('Open note window placement', () => {
+  let viewportWidth: number;
+  const props = { noteId: 'note-a', onClosed: vi.fn(), onSwitchNote: vi.fn(), onOpenFullPage: vi.fn() };
+  const pointer = (target: Element, type: string, x: number, y: number) => fireEvent(target,
+    Object.assign(new MouseEvent(type, { bubbles: true, cancelable: true, button: 0, clientX: x, clientY: y }), { pointerId: 1 }));
+  const handle = () => screen.getByRole('dialog').querySelector<HTMLElement>('[data-note-dialog-drag-handle]')!;
+  const position = () => {
+    const { style } = screen.getByRole('dialog');
+    return { left: Number.parseFloat(style.left), top: Number.parseFloat(style.top) };
+  };
+  const dragTo = (left: number, top: number) => {
+    const start = position();
+    pointer(handle(), 'pointerdown', 0, 0);
+    pointer(handle(), 'pointermove', left - start.left, top - start.top);
+    pointer(handle(), 'pointerup', left - start.left, top - start.top);
+  };
+
+  beforeEach(() => {
+    viewportWidth = 1400;
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+      if (this.hasAttribute('data-board-note-staging-open')) {
+        return new DOMRect(0, 0, viewportWidth - (this.dataset.boardNoteStagingOpen === 'true' ? 280 : 0), 1000);
+      }
+      if (this.getAttribute('role') === 'dialog') {
+        const reserved = this.parentElement?.dataset.boardNoteStagingOpen === 'true' ? 280 : 0;
+        return new DOMRect(Number.parseFloat(this.style.left) || 0, Number.parseFloat(this.style.top) || 0,
+          Math.min(952, viewportWidth - reserved - 32), 900);
+      }
+      return new DOMRect();
+    });
+  });
+
+  it('moves by the title bar, keeps the whole window in view, and remembers its place after reopening', () => {
+    const host = render(<BoardNoteModal {...props} />);
+    const editor = screen.getByRole('textbox', { name: 'Runtime editor' });
+    editor.focus();
+    dragTo(340, 64);
+    expect(position()).toEqual({ left: 340, top: 64 });
+    expect(document.activeElement).toBe(editor);
+    expect(runtime.order).toEqual([]);
+    host.unmount();
+    render(<BoardNoteModal {...props} />);
+    expect(position()).toEqual({ left: 340, top: 64 });
+    dragTo(2000, 2000);
+    expect(position()).toEqual({ left: 432, top: 84 });
+    dragTo(-2000, -2000);
+    expect(position()).toEqual({ left: 16, top: 16 });
+  });
+
+  it('gives the staging dock priority and restores the preferred place when the dock closes', () => {
+    const host = render(<BoardNoteModal {...props} />);
+    dragTo(400, 40);
+    host.rerender(<BoardNoteModal {...props} stagingOpen />);
+    expect(position()).toEqual({ left: 152, top: 40 });
+    host.rerender(<BoardNoteModal {...props} />);
+    expect(position()).toEqual({ left: 400, top: 40 });
+    viewportWidth = 900;
+    fireEvent(window, new Event('resize'));
+    expect(position()).toEqual({ left: 16, top: 40 });
+    expect(runtime.mounts).toEqual(['note-a']);
+  });
+
+  it('leaves header buttons clickable and releases the drag on pointer cancellation', () => {
+    render(<BoardNoteModal {...props} />);
+    const start = position();
+    pointer(screen.getByRole('button', { name: 'Open full page' }), 'pointerdown', 0, 0);
+    pointer(handle(), 'pointermove', 80, 10);
+    expect(position()).toEqual(start);
+    pointer(handle(), 'pointerdown', 0, 0);
+    pointer(handle(), 'pointermove', 20, 10);
+    const moved = position();
+    pointer(handle(), 'pointercancel', 20, 10);
+    pointer(handle(), 'pointermove', 120, 20);
+    expect(position()).toEqual(moved);
+  });
+});
+
 describe('Open note modal close protocol', () => {
   it.each<ClosePath>(['X', 'Escape', 'switch', 'full page'])('%s waits for runtime writes before completing its destination', async (path) => {
     const saving = deferred();

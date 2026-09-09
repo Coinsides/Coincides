@@ -8,6 +8,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { createSurfaceModePolicy } from '../modePolicyService';
 import { createPageFrameDefaultTypographyProfile } from '../pageFrameTypographyService';
 import { estimateTextBlockHeight } from '../measurementService';
+import { normalizeBlockLayoutForSave, type CoordinateContract } from '../placementContractService';
 import type { BlockBoxLayout } from '../runtimeLayout';
 import type { DocumentTypographyProfile, PageFrameModel } from '../types';
 import {
@@ -62,6 +63,9 @@ function renderPlacementSubject({
   snapEnabled,
   surfaceMode = 'canvas',
   displayScale = 1,
+  coordinateContract,
+  contentWidth = 500,
+  pageFrames = [PAGE_FRAME],
   documentTypographyProfile,
   estimateBlockHeightForText = () => 64,
   additionalLayouts = {},
@@ -72,6 +76,9 @@ function renderPlacementSubject({
   snapEnabled: boolean;
   surfaceMode?: 'page' | 'canvas';
   displayScale?: number;
+  coordinateContract?: CoordinateContract;
+  contentWidth?: number;
+  pageFrames?: PageFrameModel[];
   documentTypographyProfile?: DocumentTypographyProfile;
   estimateBlockHeightForText?: UseBlockPlacementInteractionsOptions<PlacementTestBlock>['estimateBlockHeightForText'];
   additionalLayouts?: Record<string, BlockBoxLayout>;
@@ -96,12 +103,13 @@ function renderPlacementSubject({
     const options = {
       noteId,
       blockLayouts: layouts,
-      contentWidth: 500,
+      coordinateContract,
+      contentWidth,
       documentTypographyProfile,
       estimateBlockHeightForText,
       movingBlockIdRef,
       orderedBlocks: [BLOCK, ...Object.keys(additionalLayouts).map((id) => ({ id }))],
-      pageFrames: [PAGE_FRAME],
+      pageFrames,
       pageOffsetX: 0,
       persistChangedBlockLayouts,
       pushLayoutHistory,
@@ -278,6 +286,38 @@ describe('useBlockPlacementInteractions staging gesture', () => {
 });
 
 describe('useBlockPlacementInteractions K-5 release collection', () => {
+  it('passes an unplaced v2 organize drag unchanged to first-save affiliation instead of clamping fake world coordinates', () => {
+    const frame: PageFrameModel = {
+      ...PAGE_FRAME, x: 0, y: 0, width: 904, height: 1279,
+      contentInset: { left: 72, right: 72, top: 96, bottom: 96 },
+    };
+    const initialLayout: BlockBoxLayout = {
+      x: 0, y: 0, width: 760, height: 44, coordinate_space: 'page_frame_local',
+    };
+    const runtime = renderPlacementSubject({
+      initialLayout, snapEnabled: true, surfaceMode: 'page', coordinateContract: 'v2',
+      displayScale: 0.987, contentWidth: 760, pageFrames: [frame],
+    });
+
+    act(() => runtime.subject.result.current.beginMoveBlock(pointerStart(0, 0), BLOCK, initialLayout));
+    act(() => dispatchWindowPointer('pointermove', 0, 60));
+    const preview = runtime.subject.result.current.layouts[BLOCK.id];
+    expect(preview.x).toBe(0);
+    expect(preview.y).toBeCloseTo(60 / 0.987, 10);
+    expect(preview.y + preview.height / 2).toBeLessThan(frame.contentInset.top);
+    expect(preview.frame_id).toBeUndefined();
+
+    act(() => dispatchWindowPointer('pointerup', 0, 60));
+    expect(runtime.subject.result.current.layouts[BLOCK.id]).toEqual(preview);
+    expect(runtime.persistChangedBlockLayouts).toHaveBeenCalledExactlyOnceWith({ [BLOCK.id]: preview });
+    expect(runtime.pushLayoutHistory).toHaveBeenCalledWith({ [BLOCK.id]: initialLayout }, { [BLOCK.id]: preview });
+    const saved = normalizeBlockLayoutForSave(persistedLayout(runtime.persistChangedBlockLayouts), {
+      pageFrames: [frame], primaryFrameId: frame.id,
+    }, 'v2');
+    expect(saved).toMatchObject({ x: 0, frame_id: frame.id, surface: 'formal_page', boundary_role: 'inside' });
+    expect(saved.y).toBe(preview.y - 96);
+  });
+
   it('clamps a crossing drag into its affiliated page content rect by minimum translation when organize mode is on', () => {
     const initialLayout = { x: 200, y: 60, width: 80, height: 60 };
     const runtime = renderPlacementSubject({ initialLayout, snapEnabled: true });

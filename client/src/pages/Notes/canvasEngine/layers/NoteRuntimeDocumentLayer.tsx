@@ -1,4 +1,5 @@
 import { forwardRef, useImperativeHandle, type PointerEvent as ReactPointerEvent } from 'react';
+import { Inbox } from 'lucide-react';
 import {
   NoteFloatingPanelLayer,
   type NoteFloatingPanelLayerProps,
@@ -104,8 +105,10 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
   );
   if (surfaceMode !== 'page' || !tray) return document;
   return <div className={styles.trayViewport}>
-    <button type="button" className={styles.trayToggle} aria-expanded={tray.open}
-      onClick={() => tray.setOpen(!tray.open)}>Staging ({tray.entries.length})</button>
+    <button type="button" className={`${styles.contentGroupLauncher} ${styles.trayToggle}`} aria-expanded={tray.open}
+      data-note-tray-toggle="true" onClick={() => tray.setOpen(!tray.open)}>
+      <Inbox size={16} aria-hidden="true" /><span>Staging ({tray.entries.length})</span>
+    </button>
     <div className={styles.trayDocumentRow}>
       {document}
       {tray.open && <NoteTraySidebar tray={tray} />}
