@@ -5,13 +5,14 @@ import { derivePageReadingViewport, type PageReadingViewState } from '../pageRea
 import type { CanvasViewport, PageFrameModel } from '../types';
 
 export function usePageReadingPresentation({
-  enabled, noteId, surfaceRef, blockListRef, pageFrame, pageContentHeight, viewState, onViewportChange,
+  enabled, noteId, surfaceRef, blockListRef, pageFrame, pageFrames = [], pageContentHeight, viewState, onViewportChange,
 }: {
   enabled: boolean;
   noteId?: string;
   surfaceRef: RefObject<HTMLElement>;
   blockListRef: RefObject<HTMLElement>;
   pageFrame: PageFrameModel | null;
+  pageFrames?: PageFrameModel[];
   pageContentHeight: number;
   viewState: PageReadingViewState;
   onViewportChange?: (viewport: CanvasViewport) => void;
@@ -21,7 +22,10 @@ export function usePageReadingPresentation({
   const lastPublished = useRef<{ noteId?: string; viewport: CanvasViewport; receiver: typeof onViewportChange }>();
   const paperWidth = pageFrame?.width || 904;
   const inset = pageFrame?.contentInset || { top: 0, right: 72, bottom: 96, left: 72 };
-  const paperHeight = Math.max(pageFrame?.height || 0, pageContentHeight + inset.top);
+  // Empty trailing pages still need a reading destination. This changes only
+  // the displayed paper extent, never persisted frames or content layout.
+  const paperHeight = Math.max(pageFrame?.height || 0, pageContentHeight + inset.top,
+    ...pageFrames.map((frame) => frame.y + frame.height));
   const layoutWidth = Math.max(1, paperWidth - inset.left - inset.right);
   const physicalScale = getPageFramePhysicalMapping(
     pageFrame?.pageSize || 'A4', paperWidth, pageFrame?.templateId,

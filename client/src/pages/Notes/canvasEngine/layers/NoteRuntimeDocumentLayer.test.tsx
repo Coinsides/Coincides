@@ -1,19 +1,21 @@
-import { createRef } from 'react';
+import { createRef, type RefObject } from 'react';
 import {
+  act,
   createEvent,
   fireEvent,
   render,
   screen,
   waitFor,
 } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { BlockEditRecoveryReceipt } from '../draftBlockPersistence';
 import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import type { NoteBlock } from '../runtimeDataTypes';
-import type { NoteCanvasRuntimeModel } from '../types';
+import type { NoteCanvasRuntimeModel, PageFrameModel } from '../types';
+import * as pageReadingDom from '../pageReadingDomService';
 import { createPageFrameDefaultTypographyProfile } from '../pageFrameTypographyService';
 import { createDefaultDocumentTypographyProfile } from '../typographyProfileService';
-import { NoteRuntimeDocumentLayer } from './NoteRuntimeDocumentLayer';
+import { NoteRuntimeDocumentLayer, type NoteRuntimeDocumentHandle } from './NoteRuntimeDocumentLayer';
 import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
 
 vi.mock('./NoteFloatingPanelLayer', () => ({
@@ -324,5 +326,174 @@ describe('NoteRuntimeDocumentLayer block edit recovery queue', () => {
     await waitFor(() => expect(onApplyBlockEditRecovery).toHaveBeenCalledWith(receipt.recoveryKey));
     expect(events).toEqual(['apply']);
     expect(durableText === receipt.text || selectedReceiptRecoverable).toBe(true);
+  });
+});
+
+describe('NoteRuntimeDocumentLayer overview navigation', () => {
+  beforeEach(() => {
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(960);
+    vi.stubGlobal('ResizeObserver', class {
+      private callback: ResizeObserverCallback;
+      constructor(callback: ResizeObserverCallback) { this.callback = callback; }
+      observe(target: Element) {
+        this.callback([{ target, contentRect: { width: 960, height: 720 } } as ResizeObserverEntry], this as unknown as ResizeObserver);
+      }
+      disconnect() {}
+      unobserve() {}
+    });
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.unstubAllGlobals();
+  });
+
+  function overviewProps(pageCount: number): NoteWritingSurfaceLayerProps {
+    const pageFrames: PageFrameModel[] = Array.from({ length: pageCount }, (_, index) => ({
+      id: `overview-page-${index + 1}`,
+      role: index === 0 ? 'primary_page_frame' : 'secondary_page_frame',
+      templateId: 'a4_portrait', pageSize: 'A4', exportable: true,
+      x: 100, y: index * 1358, width: 904, height: 1278,
+      contentInset: { left: 72, right: 72, top: 0, bottom: 96 },
+    }));
+    return {
+      ...writingSurfaceProps(vi.fn(async (): Promise<BlockSaveOutcome> => ({
+        status: 'saved', block: codeBlock, recoveryReceipt: null, reconciliation: 'not_needed',
+      }))),
+      onFocusBlock: vi.fn(),
+      onReleaseTextFocus: vi.fn(),
+      documentTypographyProfile: createDefaultDocumentTypographyProfile(),
+      selectedPageFrameId: pageFrames[0].id,
+      noteCanvasRuntime: {
+        ...runtimeModel,
+        primaryPageFrame: pageFrames[0],
+        pageFrames,
+      },
+    };
+  }
+
+  function documentFor(props: NoteWritingSurfaceLayerProps, documentRef?: RefObject<NoteRuntimeDocumentHandle>) {
+    return <div data-app-main-scroll="true" ref={(element) => {
+      if (element) element.scrollTo = vi.fn();
+    }}>
+      <NoteRuntimeDocumentLayer
+        ref={documentRef}
+        blockEditRecoveryReceipts={[]}
+        floatingPanelProps={{} as never}
+        onApplyBlockEditRecovery={vi.fn()}
+        onDismissBlockEditRecovery={vi.fn(() => true)}
+        onSurfacePointerDown={vi.fn()}
+        surfaceMode={props.surfaceMode}
+        templateWarning={null}
+        writingSurfaceProps={props}
+      />
+    </div>;
+  }
+
+  function writers(props: NoteWritingSurfaceLayerProps) {
+    return [
+      props.onSaveBlock, props.onPersistDraft, props.onBlockTextChange,
+      props.onBlockTextFlowChange, props.onApplyBlockTextFlowEdit, props.onFieldDraftChange,
+      props.onSaveDocumentTypographyProfile, props.onPersistCanvasObject, props.onMeasuredBlockHeight,
+      props.onBeginMoveBlock, props.onBeginResizeBlock, props.onMovePageFrame, props.onResizePageFrame,
+      props.onSelectPageFrame, props.onSetPrimaryPageFrame,
+    ];
+  }
+
+  it.each([1, 4, 9])('opens %i pages with bounded pagination and closes without invoking writers', async (pageCount) => {
+    const props = overviewProps(pageCount);
+    const { container } = render(documentFor(props));
+    vi.clearAllMocks();
+    const toggle = screen.getByRole('button', { name: 'Page overview' });
+    fireEvent.click(toggle);
+    await waitFor(() => expect(container.querySelector('[data-note-overview-root]')).not.toBeNull());
+    const grid = container.querySelector<HTMLElement>('[data-note-overview-grid]')!;
+    expect(grid.dataset.columns).toBe('4');
+    expect(container.querySelectorAll('[data-note-overview-page]')).toHaveLength(Math.min(pageCount, 8));
+    if (pageCount === 9) {
+      fireEvent.click(container.querySelector('[data-note-overview-next]')!);
+      expect(container.querySelectorAll('[data-note-overview-page]')).toHaveLength(1);
+      expect(container.querySelector('[data-note-overview-page]')?.getAttribute('data-page-frame-id')).toBe('overview-page-9');
+      fireEvent.click(container.querySelector('[data-note-overview-previous]')!);
+      expect(container.querySelectorAll('[data-note-overview-page]')).toHaveLength(8);
+    }
+    fireEvent.click(container.querySelector('[data-note-overview-close]')!);
+    expect(container.querySelector('[data-note-overview-root]')).toBeNull();
+    writers(props).forEach((callback) => expect(callback).not.toHaveBeenCalled());
+  });
+
+  it('restores the dirty editor after local page navigation and resumes its ordinary blur save', async () => {
+    const props = overviewProps(9);
+    const dirtyText = 'Unsaved code draft survives overview';
+    props.blockTextDrafts = { [codeBlock.id]: dirtyText };
+    const scroll = vi.spyOn(pageReadingDom, 'scrollPageReadingToRect').mockImplementation(() => undefined);
+    const { container } = render(documentFor(props));
+    const editor = screen.getByRole('textbox');
+    editor.focus();
+    vi.clearAllMocks();
+    const toggle = screen.getByRole('button', { name: 'Page overview' });
+    const mouseDown = createEvent.mouseDown(toggle, { button: 0 });
+    fireEvent(toggle, mouseDown);
+    expect(mouseDown.defaultPrevented).toBe(true);
+    fireEvent.click(toggle);
+    expect(container.contains(editor)).toBe(true);
+    fireEvent.click(container.querySelector('[data-note-overview-next]')!);
+    fireEvent.click(container.querySelector('[data-note-overview-page][data-page-frame-id="overview-page-9"]')!);
+    await waitFor(() => expect(scroll).toHaveBeenCalledWith(
+      props.blockListRef.current,
+      expect.objectContaining({ ...props.noteCanvasRuntime.pageFrames[8], x: 0 }),
+    ));
+    expect(container.querySelector('[data-note-overview-root]')).toBeNull();
+    expect(screen.getByRole('textbox')).toBe(editor);
+    expect(document.activeElement).toBe(editor);
+    expect((editor as HTMLTextAreaElement).value).toBe(dirtyText);
+    writers(props).forEach((callback) => expect(callback).not.toHaveBeenCalled());
+
+    // Returning from overview must preserve the next normal save opportunity.
+    fireEvent.blur(editor);
+    await waitFor(() => expect(props.onSaveBlock).toHaveBeenCalledTimes(1));
+    expect(props.onSaveBlock).toHaveBeenCalledWith(codeBlock, dirtyText, expect.objectContaining({ silent: true }));
+  });
+
+  it('does not resurrect overview across note or surface-mode changes', () => {
+    const props = overviewProps(4);
+    const { container, rerender } = render(documentFor(props));
+    fireEvent.click(screen.getByRole('button', { name: 'Page overview' }));
+    expect(container.querySelector('[data-note-overview-root]')).not.toBeNull();
+    rerender(documentFor({ ...props, noteId: 'another-overview-note' }));
+    expect(container.querySelector('[data-note-overview-root]')).toBeNull();
+    rerender(documentFor(props));
+    expect(container.querySelector('[data-note-overview-root]')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Page overview' }));
+    rerender(documentFor({ ...props, surfaceMode: 'canvas' }));
+    expect(container.querySelector('[data-note-overview-root]')).toBeNull();
+    rerender(documentFor(props));
+    expect(container.querySelector('[data-note-overview-root]')).toBeNull();
+  });
+
+  it('resumes an overview editor synchronously for host exit without writing before the host blur', async () => {
+    const props = overviewProps(4);
+    const dirtyText = 'Unsaved code retained for the host exit workflow';
+    props.blockTextDrafts = { [codeBlock.id]: dirtyText };
+    const handle = createRef<NoteRuntimeDocumentHandle>();
+    const { container } = render(documentFor(props, handle));
+    const editor = screen.getByRole('textbox');
+    editor.focus();
+    vi.clearAllMocks();
+    fireEvent.click(screen.getByRole('button', { name: 'Page overview' }));
+    expect(container.querySelector('[data-note-overview-root]')).not.toBeNull();
+
+    act(() => handle.current!.resumeEditingForExit());
+    expect(container.querySelector('[data-note-overview-root]')).toBeNull();
+    expect(document.activeElement).toBe(editor);
+    expect((editor as HTMLTextAreaElement).value).toBe(dirtyText);
+    writers(props).forEach((callback) => expect(callback).not.toHaveBeenCalled());
+
+    // A second host dismiss is harmless; the host owns the subsequent blur/save.
+    act(() => handle.current!.resumeEditingForExit());
+    writers(props).forEach((callback) => expect(callback).not.toHaveBeenCalled());
+    act(() => editor.blur());
+    await waitFor(() => expect(props.onSaveBlock).toHaveBeenCalledTimes(1));
+    expect(props.onSaveBlock).toHaveBeenCalledWith(codeBlock, dirtyText, expect.objectContaining({ silent: true }));
   });
 });

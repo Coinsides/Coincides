@@ -1,4 +1,4 @@
-import type { PointerEvent as ReactPointerEvent } from 'react';
+import { forwardRef, useImperativeHandle, type PointerEvent as ReactPointerEvent } from 'react';
 import {
   NoteFloatingPanelLayer,
   type NoteFloatingPanelLayerProps,
@@ -9,6 +9,8 @@ import {
 } from './NoteWritingSurfaceLayer';
 import type { BlockEditRecoveryReceipt } from '../draftBlockPersistence';
 import { NotePrintLayer } from './NotePrintLayer';
+import { NoteOverviewLayer } from './NoteOverviewLayer';
+import { useNoteOverviewController } from '../hooks/useNoteOverviewController';
 import { NoteTraySidebar, type NoteTrayState } from './NoteTraySidebar';
 import styles from '../../NoteDetail.module.css';
 
@@ -24,7 +26,11 @@ export interface NoteRuntimeDocumentLayerProps {
   writingSurfaceProps: NoteWritingSurfaceLayerProps;
 }
 
-export function NoteRuntimeDocumentLayer({
+export interface NoteRuntimeDocumentHandle {
+  resumeEditingForExit: () => void;
+}
+
+export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, NoteRuntimeDocumentLayerProps>(function NoteRuntimeDocumentLayer({
   tray,
   blockEditRecoveryReceipts,
   floatingPanelProps,
@@ -34,11 +40,20 @@ export function NoteRuntimeDocumentLayer({
   surfaceMode,
   templateWarning,
   writingSurfaceProps,
-}: NoteRuntimeDocumentLayerProps) {
+}, ref) {
+  const overview = useNoteOverviewController({
+    noteId: writingSurfaceProps.noteId,
+    surfaceMode,
+    blockListRef: writingSurfaceProps.blockListRef,
+    pageFrames: writingSurfaceProps.noteCanvasRuntime.pageFrames,
+  });
+  useImperativeHandle(ref, () => ({ resumeEditingForExit: overview.resumeForExit }));
   const document = (
     <div
       className={`${styles.documentShell} ${surfaceMode === 'canvas' ? styles.documentShellCanvas : ''}`}
-      onMouseDown={onSurfacePointerDown}
+      data-note-overview-active={overview.open ? 'true' : 'false'}
+      data-page-reading-target-frame={overview.targetFrameId || undefined}
+      onMouseDown={overview.open ? undefined : onSurfacePointerDown}
     >
       {templateWarning && <div className={styles.templateWarning}>{templateWarning}</div>}
       {blockEditRecoveryReceipts.length > 0 && (
@@ -81,7 +96,9 @@ export function NoteRuntimeDocumentLayer({
       )}
 
       <NoteFloatingPanelLayer {...floatingPanelProps} />
-      <NoteWritingSurfaceLayer {...writingSurfaceProps} />
+      {overview.open && <NoteOverviewLayer writingSurfaceProps={writingSurfaceProps}
+        onSelectPage={overview.selectPage} onClose={overview.close} />}
+      <NoteWritingSurfaceLayer {...writingSurfaceProps} overviewOpen={overview.open} onToggleOverview={overview.toggle} />
       <NotePrintLayer {...writingSurfaceProps} />
     </div>
   );
@@ -94,4 +111,4 @@ export function NoteRuntimeDocumentLayer({
       {tray.open && <NoteTraySidebar tray={tray} />}
     </div>
   </div>;
-}
+});

@@ -196,7 +196,7 @@ const BoardNoteModal = forwardRef<BoardNoteModalHandle, BoardNoteModalProps>(fun
         <span>Changes could not be saved. Review the save error and try again, or close anyway.</span>
         <button type="button" onClick={() => complete(failedDestination.current)}>Close anyway</button>
       </div>}
-      <div className={styles.content} aria-busy={saving}>
+      <div className={styles.content} aria-busy={saving} data-app-main-scroll="true">
         <NoteCanvasRuntimeProvider noteId={noteId} hostMode="modal" onSendToStaging={onSendToStaging ? sendToStaging : undefined}
           stagingItemDrop={saving ? undefined : stagingItemDrop}>
           <NoteCanvasRuntime ref={runtime} onRequestClose={() => { void requestClose(); }} />

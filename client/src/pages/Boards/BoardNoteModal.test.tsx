@@ -184,6 +184,9 @@ describe('Open note modal close protocol', () => {
     const host = renderHost();
     expect(screen.getByTestId('runtime-provider').getAttribute('data-host-mode')).toBe('modal');
     expect(document.body.style.overflow).toBe('hidden');
+    const readingScroll = screen.getByRole('textbox', { name: 'Runtime editor' }).closest('[data-app-main-scroll="true"]');
+    expect(readingScroll).not.toBeNull();
+    expect(screen.getByRole('dialog').contains(readingScroll)).toBe(true);
     screen.getByRole('textbox', { name: 'Runtime editor' }).focus();
     await act(async () => { request(path, host); });
 

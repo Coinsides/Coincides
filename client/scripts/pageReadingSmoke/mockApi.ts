@@ -4,12 +4,17 @@ import type { Note, NoteBlock } from '../../src/pages/Notes/canvasEngine/runtime
 import type { PageFrameModel } from '../../src/pages/Notes/canvasEngine/types';
 import { createPageFramePrintProfile } from '../../src/pages/Notes/canvasEngine/pageFramePrintScaleService';
 import { createPrintSpecimen, PRINT_NOTE_ID } from './printSpecimen';
+import { createOverviewSpecimen, OVERVIEW_NOTE_ID } from './overviewSpecimen';
 
 const isPrintFixture = typeof window !== 'undefined' && window.location.pathname.endsWith('/print.html');
 const isTrayFixture = typeof window !== 'undefined' && window.location.pathname.endsWith('/tray.html');
+const isOverviewFixture = typeof window !== 'undefined' && window.location.pathname.endsWith('/overview.html');
+const overviewParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+const overviewPageCount = Number(overviewParams?.get('pages'));
+export const overviewSpecimen = createOverviewSpecimen(overviewPageCount === 1 || overviewPageCount === 4 ? overviewPageCount : 9, overviewParams?.get('long') === '1', overviewParams?.get('blank') === '1');
 const requestedPaper = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('paper') : null;
 export const printSpecimen = createPrintSpecimen(requestedPaper === 'Letter' || requestedPaper === 'web' ? requestedPaper : 'A4');
-export const NOTE_ID = isPrintFixture ? PRINT_NOTE_ID : 'page-reading-smoke-note';
+export const NOTE_ID = isOverviewFixture ? OVERVIEW_NOTE_ID : isPrintFixture ? PRINT_NOTE_ID : 'page-reading-smoke-note';
 const FRAME_ID = 'page-reading-smoke-a4';
 const print = createPageFramePrintProfile('A4');
 export const fixtureFrame: PageFrameModel = {
@@ -111,15 +116,15 @@ const api = axios.create({
       // The specimen is read-only. Keep attempted mutations visible to the smoke.
       throw new Error(`Unexpected fixture mutation: ${method} ${url}`);
     }
-    if (isPrintFixture && url === '/canvas-objects/coordinate-contract') data = { coordinate_contract: 'v2' };
-    else if (url === `/notes/${NOTE_ID}`) data = isPrintFixture ? printSpecimen.note : fixtureNote;
-    else if (url === `/notes/${NOTE_ID}/blocks`) data = isPrintFixture ? printSpecimen.blocks : fixtureBlocks;
+    if ((isPrintFixture || isOverviewFixture) && url === '/canvas-objects/coordinate-contract') data = { coordinate_contract: 'v2' };
+    else if (url === `/notes/${NOTE_ID}`) data = isOverviewFixture ? overviewSpecimen.note : isPrintFixture ? printSpecimen.note : fixtureNote;
+    else if (url === `/notes/${NOTE_ID}/blocks`) data = isOverviewFixture ? overviewSpecimen.blocks : isPrintFixture ? printSpecimen.blocks : fixtureBlocks;
     else if (url === `/boards/text-ranges/by-note/${NOTE_ID}`) data = { text_ranges: [] };
-    else if (url === `/canvas-objects/by-note/${NOTE_ID}`) data = isPrintFixture ? printSpecimen.canvas : fixtureCanvas;
+    else if (url === `/canvas-objects/by-note/${NOTE_ID}`) data = isOverviewFixture ? overviewSpecimen.canvas : isPrintFixture ? printSpecimen.canvas : fixtureCanvas;
     else if (url === '/templates') data = templates;
     else if (url === '/source-anchors/generate') data = {};
     else if ((isTrayFixture && (url.startsWith('/annotation-truths/by-note/') || url.startsWith('/purposes/by-note/')))
-      || url === '/content-groups' || url === '/group-folders' || url === '/source-anchors'
+      || url === '/content-groups' || url === '/group-folders' || url === '/source-anchors' || url === '/purposes'
       || url === `/annotation-truths/by-note/${NOTE_ID}` || url === `/purposes/by-note/${NOTE_ID}`) data = [];
     else throw new Error(`Unmapped fixture request: ${method} ${url}`);
     return { data: structuredClone(data), status: 200, statusText: 'OK', headers: {}, config };

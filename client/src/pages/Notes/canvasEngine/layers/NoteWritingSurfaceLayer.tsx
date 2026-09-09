@@ -294,6 +294,8 @@ export interface NoteWritingSurfaceLayerProps {
   onPageReadingGearChange?: (gear: PageReadingGear) => void;
   onPageReadingStep?: (direction: -1 | 1) => void;
   onPageReadingViewportChange?: (viewport: CanvasViewport) => void;
+  overviewOpen?: boolean;
+  onToggleOverview?: () => void;
   visibleBlocks: NoteBlock[];
   onCreateBlock: (
     template: TemplateOption,
@@ -572,6 +574,8 @@ export function NoteWritingSurfaceLayer({
   onPageReadingGearChange,
   onPageReadingStep,
   onPageReadingViewportChange,
+  overviewOpen = false,
+  onToggleOverview,
   visibleBlocks,
   onCreateBlock,
   onPersistCanvasObject,
@@ -733,7 +737,8 @@ export function NoteWritingSurfaceLayer({
   );
   const readingViewState = pageReadingViewState || createDefaultPageReadingViewState();
   const pageReading = usePageReadingPresentation({
-    enabled: surfaceMode === 'page', noteId, surfaceRef, blockListRef, pageFrame: primaryPageFrame,
+    enabled: surfaceMode === 'page' && !overviewOpen, noteId, surfaceRef, blockListRef, pageFrame: primaryPageFrame,
+    pageFrames: noteCanvasRuntime.pageFrames,
     pageContentHeight, viewState: readingViewState, onViewportChange: onPageReadingViewportChange,
   });
   const snapGuideLayout = blockLayouts[selectedBlockId || ''] || draftLayout || defaultDraftLayout;
@@ -3335,7 +3340,7 @@ export function NoteWritingSurfaceLayer({
   return (
     <section
       ref={surfaceRef}
-      className={`${styles.writingSurface} ${surfaceMode === 'canvas' ? styles.writingSurfaceCanvas : styles.pageReadingSurface} ${spacePanReady ? styles.canvasPanReady : ''} ${canvasPanning ? styles.canvasPanning : ''}`}
+      className={`${styles.writingSurface} ${surfaceMode === 'canvas' ? styles.writingSurfaceCanvas : styles.pageReadingSurface} ${overviewOpen ? styles.overviewWritingSurface : ''} ${spacePanReady ? styles.canvasPanReady : ''} ${canvasPanning ? styles.canvasPanning : ''}`}
       data-page-frame-template={primaryPageFrameExtension?.templateId || primaryPageFrame?.templateId || 'none'}
       data-page-frame-background={primaryPageFrameExtension?.background.kind || primaryPageFrame?.background?.kind || 'none'}
       style={surfaceMode === 'page' ? primaryPageFrameTemplateStyle as CSSProperties & Record<string, string> : undefined}
@@ -3360,6 +3365,9 @@ export function NoteWritingSurfaceLayer({
       <div
         className={surfaceMode === 'page' ? styles.pageReadingSpace : undefined}
         data-page-reading-space={surfaceMode === 'page' ? 'true' : undefined}
+        // Overview takes keyboard focus without committing the suspended editor.
+        // Keep its draft and focus receipt alive until ordinary editing resumes.
+        onBlurCapture={overviewOpen ? (event) => event.stopPropagation() : undefined}
         style={surfaceMode === 'page' ? {
           width: pageDisplayBounds.width * pageReading.displayScale,
           height: pageDisplayBounds.height * pageReading.displayScale,
@@ -3386,6 +3394,7 @@ export function NoteWritingSurfaceLayer({
       >
       <div
         ref={blockListRef}
+        tabIndex={-1}
         className={`${styles.blockList} ${surfaceMode === 'canvas' ? styles.blockListCanvas : styles.blockListPage} ${layoutMode && !contentReadOnly ? styles.layoutMode : ''}`}
         data-source-content-read-only={contentReadOnly ? 'true' : 'false'}
         data-canvas-engine-version={noteCanvasRuntime.version}
@@ -3944,6 +3953,7 @@ export function NoteWritingSurfaceLayer({
             ['fit_width', 'Fit width'], ['fit_page', 'Fit page'], ['physical', '100% physical'],
           ] as const).map(([gear, label]) => (
             <button key={gear} type="button" className={styles.canvasZoomReset}
+              disabled={overviewOpen}
               aria-pressed={readingViewState.gear === gear} data-page-reading-select={gear}
               onClick={() => {
                 onPageReadingGearChange?.(gear);
@@ -3952,11 +3962,15 @@ export function NoteWritingSurfaceLayer({
                 }
               }}>{label}</button>
           ))}
+          {onToggleOverview && <button type="button" className={styles.canvasZoomReset}
+            data-note-overview-toggle="true" aria-label="Page overview" aria-pressed={overviewOpen}
+            onMouseDown={(event) => { event.preventDefault(); event.stopPropagation(); }}
+            onClick={onToggleOverview}>Overview</button>}
           <button type="button" className={styles.canvasZoomButton} aria-label="Decrease page reading step"
-            disabled={readingViewState.stepFactor <= 0.5} onClick={() => onPageReadingStep?.(-1)}>−</button>
+            disabled={overviewOpen || readingViewState.stepFactor <= 0.5} onClick={() => onPageReadingStep?.(-1)}>−</button>
           <output className={styles.pageReadingPercent} aria-label="Page display scale">{Math.round(pageReading.displayScale * 100)}%</output>
           <button type="button" className={styles.canvasZoomButton} aria-label="Increase page reading step"
-            disabled={readingViewState.stepFactor >= 2} onClick={() => onPageReadingStep?.(1)}>+</button>
+            disabled={overviewOpen || readingViewState.stepFactor >= 2} onClick={() => onPageReadingStep?.(1)}>+</button>
         </div>
       )}
       {surfaceMode === 'canvas' && (

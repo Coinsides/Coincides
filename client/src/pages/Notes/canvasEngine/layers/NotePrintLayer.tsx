@@ -1,13 +1,9 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal, flushSync } from 'react-dom';
-import { textFromContent } from '../blockContentService';
-import { readStoredLayout } from '../placementService';
-import { getPagePrintFragmentGeometry, getPagePrintGeometry } from '../pagePrintProjectionService';
+import { getPagePrintGeometry } from '../pagePrintProjectionService';
 import { documentTypographyToCssVars } from '../typographyProfileService';
-import { BlockEditorLayer } from './BlockEditorLayer';
+import { NoteReadOnlyPageContent } from './NoteReadOnlyPageContent';
 import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
-import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
-import styles from '../../NoteDetail.module.css';
 import './NotePrintLayer.css';
 
 export type NotePrintInput = Pick<NoteWritingSurfaceLayerProps,
@@ -15,17 +11,8 @@ export type NotePrintInput = Pick<NoteWritingSurfaceLayerProps,
   | 'blockTextDrafts' | 'blockTextFlowDrafts' | 'blockFieldDrafts'
   | 'documentTypographyProfile' | 'anchorsBySourceRef'>;
 
-const noOp = () => undefined;
-const noSave = async (): Promise<BlockSaveOutcome> => ({
-  status: 'rejected', block: null, recoveryReceipt: null,
-  reconciliation: 'not_attempted', durableState: 'not_checked',
-  reason: 'mutation_not_allowed', staleEpoch: false,
-});
-
 /** A read-only reuse of the editor renderer; no persistence or measurement callbacks escape. */
 function PrintPages({ input }: { input: NotePrintInput }) {
-  const blocks = new Map(input.visibleBlocks.filter((block) => readStoredLayout(block)?.surface !== 'tray')
-    .map((block) => [block.id, block]));
   return <div data-note-print-root="true" data-note-id={input.noteId}>
     {input.noteCanvasRuntime.pageFrames.map((frame) => {
       const print = getPagePrintGeometry(frame);
@@ -46,75 +33,19 @@ function PrintPages({ input }: { input: NotePrintInput }) {
             transform: `scale(${print.scale})`,
           } as CSSProperties}
         >
-          {input.noteCanvasRuntime.blockFragmentProjections
-            .filter((fragment) => fragment.pageFrameId === frame.id && blocks.has(fragment.blockId))
-            .map((fragment) => {
-              const block = blocks.get(fragment.blockId)!;
-              const geometry = getPagePrintFragmentGeometry(frame, fragment);
-              return <div
-                key={block.id}
-                data-note-print-fragment="true"
-                data-block-id={block.id}
-                style={geometry.clip}
-              >
-                <BlockEditorLayer
-                  block={block}
-                  text={input.blockTextDrafts[block.id] ?? textFromContent(block)}
-                  textFlowDraft={input.blockTextFlowDrafts[block.id]}
-                  fieldDraft={input.blockFieldDrafts[block.id]}
-                  layout={geometry.block}
-                  contentReadOnly
-                  layoutMode={false}
-                  pageOffsetX={0}
-                  blockControlAnchor={null}
-                  affiliationOutline={null}
-                  annotations={[]}
-                  selectedAnnotationIds={[]}
-                  saving={false}
-                  active={false}
-                  autoFocus={false}
-                  showBlockTypeBadge={false}
-                  showAIStatusBadge={false}
-                  showExportStatusBadge={false}
-                  showLabelOverlay={false}
-                  anchorsBySourceRef={input.anchorsBySourceRef}
-                  sourceJumpBusy={null}
-                  onFocused={noOp}
-                  onFocusReleased={noOp}
-                  onAnnotationSelect={noOp}
-                  onAnnotationContextMenu={noOp}
-                  onAnnotationStackSelect={noOp}
-                  onTextUnitSelection={noOp}
-                  onTextUnitContextMenu={noOp}
-                  onBlockContextMenu={noOp}
-                  onTextChange={noOp}
-                  onTextFlowChange={noOp}
-                  onFieldDraftChange={noOp}
-                  onSave={noSave}
-                  onTrash={noOp}
-                  onSelect={noOp}
-                  onBeginMove={noOp}
-                  onBeginResize={noOp}
-                  onToggleExportRole={noOp}
-                  onToggleAIVisibility={noOp}
-                  onAnnotateBlock={noOp}
-                  onKeyDown={noOp}
-                  onMeasuredHeight={noOp}
-                  onViewSource={noOp}
-                />
-              </div>;
-            })}
+          <NoteReadOnlyPageContent
+            frame={frame}
+            fragments={input.noteCanvasRuntime.blockFragmentProjections}
+            visibleBlocks={input.visibleBlocks}
+            blockTextDrafts={input.blockTextDrafts}
+            blockTextFlowDrafts={input.blockTextFlowDrafts}
+            blockFieldDrafts={input.blockFieldDrafts}
+            anchorsBySourceRef={input.anchorsBySourceRef}
+            print
+          />
         </div>
       </section>;
     })}
-    <style>{`
-      [data-note-print-root] .${styles.textUnitGutter},
-      [data-note-print-root] .${styles.sourceRefAction},
-      [data-note-print-root] .${styles.blockStatusBadges} { display: none !important; }
-      [data-note-print-root] .${styles.blockBox} { border-color: transparent; }
-      [data-note-print-root] .${styles.codeBlockBox},
-      [data-note-print-root] .${styles.codeBlockProjection} { background: white; }
-    `}</style>
   </div>;
 }
 

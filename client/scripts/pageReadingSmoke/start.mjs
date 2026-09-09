@@ -36,7 +36,8 @@ const server = await createServer({
       '@shared': path.resolve(clientRoot, '../shared'),
     },
   },
-  server: { host: '127.0.0.1', port: 5181, strictPort: true },
+  // A smoke run must not hot-swap controller hooks while its user flow is active.
+  server: { host: '127.0.0.1', port: 5181, strictPort: true, hmr: false },
 });
 await server.listen();
 console.log('Page reading smoke: http://127.0.0.1:5181/scripts/pageReadingSmoke/index.html');

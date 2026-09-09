@@ -1174,6 +1174,29 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   overflow: clip;
 }
 
+/* Keep the reading editors mounted and at their layout width. Unmounting or
+   display:none would release focus receipts / trigger measurement changes. */
+.writingSurface.overviewWritingSurface {
+  visibility: hidden;
+  overflow: clip;
+}
+
+.overviewWritingSurface > .pageReadingSpace {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.overviewWritingSurface > .pageReadingControl {
+  visibility: visible;
+}
+
+/* Global form-control transition:all would animate inherited visibility and
+   leave the resumed caret unfocusable after the reading DOM has returned. */
+.pageReadingSpace :is(textarea, input, select) {
+  transition-property: color, background-color, border-color, box-shadow, opacity;
+}
+
 .pageReadingPaper {
   position: absolute;
   box-sizing: border-box;
