@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { boardErrorMessage, boardRepository } from './boardRepository';
 import { subscribeBoardChanges } from './boardEvents';
-import { BoardCommandHistory, type BoardGeometryChange, type BoardRemovalSelection } from './boardCommandHistory';
+import { BoardCommandHistory, type BoardGeometryChange, type BoardLayerSelection, type BoardRemovalSelection } from './boardCommandHistory';
 import type {
   BoardDetail,
+  BoardLayer,
+  CreateBoardLayerInput,
+  PatchBoardLayerInput,
   CreateBoardEdgeInput,
   CreateBoardVisualInput,
   MountBoardMemberInput,
@@ -130,6 +133,30 @@ export function useBoard(boardId: string | undefined) {
     'write', scope,
   ), [enqueue, scope]);
 
+  const createLayer = useCallback(async (input: CreateBoardLayerInput): Promise<BoardLayer | null> => {
+    let created: BoardLayer | null = null;
+    await enqueue((id) => boardRepository.createLayer(id, input), (detail, layer) => {
+      created = layer;
+      return detail ? { ...detail, layers: upsert(detail.layers ?? [], layer) } : detail;
+    }, 'write', scope);
+    return created;
+  }, [enqueue, scope]);
+  const updateLayer = useCallback((layerId: string, input: PatchBoardLayerInput) => enqueue(
+    (id) => boardRepository.updateLayer(id, layerId, input),
+    (detail, layer) => detail ? { ...detail, layers: upsert(detail.layers ?? [], layer) } : detail,
+    'write', scope,
+  ), [enqueue, scope]);
+  const reorderLayers = useCallback((layerIds: string[]) => enqueue(
+    (id) => boardRepository.reorderLayers(id, layerIds),
+    (detail, layers) => detail ? { ...detail, layers } : detail,
+    'write', scope,
+  ), [enqueue, scope]);
+  const deleteLayer = useCallback((layerId: string) => enqueue(
+    (id) => boardRepository.deleteLayer(id, layerId),
+    () => { scope.history.rehomeDeletedLayer(layerId); return scope.history.detail; },
+    'write', scope,
+  ), [enqueue, scope]);
+
   const mount = useCallback((input: MountBoardMemberInput) => enqueue(
     (id) => boardRepository.mount(id, input),
     (detail, member) => {
@@ -213,6 +240,9 @@ export function useBoard(boardId: string | undefined) {
   const updateGeometryBatch = useCallback((changes: BoardGeometryChange[]) => enqueue(
     (id) => scope.history.updateGeometryBatch(id, changes), (detail) => detail, 'write', scope,
   ), [enqueue, scope]);
+  const moveSelectionToLayer = useCallback((selection: BoardLayerSelection, layerId: string | null) => enqueue(
+    (id) => scope.history.moveSelectionToLayer(id, selection, layerId), (detail) => detail, 'write', scope,
+  ), [enqueue, scope]);
   const removeSelection = useCallback((selection: BoardRemovalSelection) => enqueue(
     (id) => scope.history.removeSelection(id, selection), (detail) => detail, 'write', scope,
   ), [enqueue, scope]);
@@ -248,5 +278,6 @@ export function useBoard(boardId: string | undefined) {
     reload, updateBoard, mount, mountTextRange, updateMember, unmount, addEdge, removeEdge,
     addVisual, removeVisual, updateVisual, castVisual, updateEdge, clearError, flush,
     updateGeometryBatch, removeSelection, removeVisuals, undo, redo,
+    createLayer, updateLayer, reorderLayers, deleteLayer, moveSelectionToLayer,
   };
 }

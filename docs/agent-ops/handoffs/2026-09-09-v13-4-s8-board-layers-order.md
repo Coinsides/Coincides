@@ -1,4 +1,4 @@
-> **状态 (Status)**: blocked
+> **状态 (Status)**: done(HQ 收口:STOP-1 经补遗一修复验证,收货)
 > **From**: fable(HQ) · **To**: codex(builder)
 > **日期**: 2026-09-09
 > **上游**: 13.4 段 plan 修订二波次四单 8;现物证据=单 0 侦察附录⑨(z_index 分类各排,跨类型统一层序不存在——分层连带渲染次序重构+edges 跨层规则);Henry 拍定(分层砍薄白话版无异议)
@@ -145,3 +145,44 @@ added deleted path
 2. **改判:`sameRow` 加 schema 增列容忍**——比较时,**快照中缺席且当前值为 NULL 的列予以豁免**(schema 长列的默认 NULL ≠ 用户改动);**当前值非 NULL 则照旧判变拒撤**(用户已归层=目标确实变了,拒撤正确);⛔ 重写历史 receipt(收据不可篡);⛔ 其它比较规则放宽;
 3. **回归两条**:①062 前收据+目标未归层→迁移后 undo 成功(用你已建的复现样本转正向);②062 前收据+目标已归层(layer_id 非 NULL)→undo 仍拒 tray_relocation_target_changed;
 4. **续工:仅此修复+两回归+受影响 server 测试面重跑**,新 Result 追加于本补遗后;其余交付已验,⛔ 重做。
+
+## Result
+
+2026-09-09 · From: codex(builder) · 补遗一续工回执。分支 `fable/v2-bn12-exoskeleton`，本次开工与结束 HEAD 均为 `cc576e03c63e7e0a8bb8bf9ec420ab446dc0f55b`。**HQ 已裁的 STOP-1 定向修复与两条回归完成，受影响 server 验证通过；整单放行仍交 HQ。** 原 Result、停线证据及补遗原文保留。
+
+### 实现与本次增量
+
+- `sameRow` 保留快照已有字段逐项 `===`；当前额外列仅在快照无自有键且当前值严格为 `null` 时豁免。非 NULL 增列仍判变，批次状态、来源比对、行数量及 edges 拒撤规则未改。
+- 原 STOP-1 内存合成样本转入既有 `v13BoardTrayRelocation.test.ts`，新增恰好两条功能回归；历史 receipt 的读取、写入路径未改，测试验证 `metadata` 字符串原文不变。原临时复现脚本及日志原样保留。
+- 相对本次续工前工作树，代码/测试 **2 文件，+75 / -1**，不含本节回执与临时验证日志；既有主体成品未重做。
+
+```text
+added deleted path
+2     1       server/src/services/boardTrayRelocation.ts
+73    0       server/src/__tests__/v13BoardTrayRelocation.test.ts
+```
+
+### 两条回归与验证
+
+1. **旧收据未归层：PASS。** 使用 `beforeLayersMigration` 内存库，先证迁移前生产 undo 成功并由外层事务回滚保留同一样本；执行真实 062 后目标仅多 `layer_id:null`，undo 成功、目标删除、来源 placement 原样恢复、batch 置 reverted，receipt 原文不变。
+2. **旧收据已归层：PASS。** 同样本迁移后只改 `layer_id` 为非 NULL，保留原 `updated_at` 以隔离该字段；undo 准确拒绝 `409 / tray_relocation_target_changed`，目标保留、来源不恢复、完整 batch 保持 applied 且原文不变。
+
+先加入回归、未修生产逻辑时整跑搬迁文件：**9 条，8 PASS / 1 FAIL**，唯一失败恰为第 1 条迁移后的 `tray_relocation_target_changed`，确认回归能复现已知 STOP-1。修复后在 `server` 目录执行：
+
+```powershell
+npm.cmd run test:v13-boards
+node --import tsx --test src/__tests__/v13BoardChalk.test.ts src/__tests__/v13BoardStaging.test.ts src/__tests__/v13BoardTextRanges.test.ts src/__tests__/v13BoardTrayRelocation.test.ts src/__tests__/v13ItemFloor.test.ts src/__tests__/v13ItemRefBlocks.test.ts src/__tests__/v13Tray.test.ts src/__tests__/v13TrayOrder.test.ts
+npm.cmd exec tsc -- --noEmit
+npm.cmd run build
+```
+
+- 两组既有测试面均整文件执行，无 test-name 过滤：**25/25 + 36/36 = 61/61，14 文件，零跳过**；包含新增两条与既有几何、edges、来源后续编辑、整批事务回滚回归。
+- server typecheck / build **PASS**；build 的 manifest 检查有 recursive-reference 转 any 提示，退出码 0、manifest 未过期。受改文件 `git diff --check` **PASS**。
+- 日志在 `.codex-tmp/s8-resume-validation/`：`relocation-before-fix.log`（已知失败证据）、`server-boards.log`、`server-related.log`、`server-typecheck.log`、`server-build.log`。前两份 `.before.ts` / `.before.test.ts` 副本用于核对本次增量；原 handoff 副本用于确认追加前正文未变。
+
+### 六冒烟、未做与停线事项
+
+- 原六冒烟①两层拖序重开、②显隐/命中/跨层边、③删层迁 Base 保几何、④活动层新笔/chalk、⑤多选换层 Ctrl+Z、⑥全 NULL 旧板观感：**逐条沿用上份 Result 已验结果，本次按补遗不重跑、不重做主体。**
+- 本次只执行上述受影响 server 验证；未重跑 client 或整条 `verify:v2-bn8-runtime`，凭据扫描留 HQ。
+- 未 commit / push / PR / merge；未读 `.env`、未导出 key、未接触用户数据库。测试数据库全部为合成 `:memory:`；HTTP 测试仅连接其 loopback fixture。未设计或新增安全类测试。
+- **无新增停线事项。** STOP-1 的比较接缝仅依本补遗的 HQ 裁定落地；未自行扩展放宽或改判，未重写历史 receipt。

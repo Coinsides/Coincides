@@ -8,6 +8,7 @@ import migration044 from '../db/migrations/044_v2_purposes.js';
 import migration057 from '../db/migrations/057_v13_boards.js';
 import migration059 from '../db/migrations/059_v13_board_text_ranges.js';
 import migration061 from '../db/migrations/061_v13_board_staging.js';
+import migration062 from '../db/migrations/062_v13_board_layers.js';
 import migration054 from '../db/migrations/054_v13_events_ledger.js';
 import { createBoardRouter } from '../routes/boards.js';
 import type { AuthRequest } from '../middleware/auth.js';
@@ -34,7 +35,7 @@ function fixture(t: TestContext) {
     INSERT INTO note_blocks VALUES ('block','user','{}','active');
     INSERT INTO note_block_placements VALUES ('placement','block','note');
   `);
-  db.transaction(() => { migration044.up(db); migration057.up(db); migration059.up(db); migration061.up(db); })();
+  db.transaction(() => { migration044.up(db); migration057.up(db); migration059.up(db); migration061.up(db); migration062.up(db); })();
   return db;
 }
 

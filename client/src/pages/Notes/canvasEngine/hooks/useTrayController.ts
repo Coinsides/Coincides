@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import api from '@/services/api';
 import { boardErrorMessage, boardRepository } from '@/pages/Boards/boardRepository';
 import { notifyBoardChanged } from '@/pages/Boards/boardEvents';
+import { getActiveBoardLayer } from '@/pages/Boards/boardActiveLayer';
 import type { Board } from '@/pages/Boards/boardTypes';
 import { saveBlockCanvasPlacementForNote } from '../canvasObjectRepository';
 import { buildTrayEntries } from '../trayService';
@@ -168,7 +169,8 @@ export function useTrayController(input: {
     if (!boardId || !placementIds.length || new Set(placementIds).size !== placementIds.length
       || placementIds.some((id) => !entries.some((entry) => entry.placement.placementId === id && entry.boardKind))) return false;
     return run(`relocate:${boardId}:${[...placementIds].sort().join(',')}`, async () => {
-      const receipt = await boardRepository.relocateTray(boardId, placementIds);
+      const layerId = getActiveBoardLayer(boardId);
+      const receipt = await boardRepository.relocateTray(boardId, placementIds, layerId ?? undefined);
       rememberTrayRelocation(input.noteId!, receipt);
       await refreshAfterRelocation(boardId);
     }, boardErrorMessage);

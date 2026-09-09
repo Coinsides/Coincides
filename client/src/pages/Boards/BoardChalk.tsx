@@ -5,6 +5,7 @@ import styles from './Boards.module.css';
 
 export interface ChalkDraft extends BoardGeometry {
   id?: string;
+  layer_id?: string | null;
   text: string;
 }
 

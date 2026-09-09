@@ -6,6 +6,7 @@ interface FixtureOptions {
   beforeBoardsMigration?: boolean;
   beforeChalkMigration?: boolean;
   beforeStagingMigration?: boolean;
+  beforeLayersMigration?: boolean;
 }
 
 /** Real schema/migrations in a disposable connection, without app startup or seed. */
@@ -14,6 +15,10 @@ export async function createV13BoardsFixture(options: FixtureOptions = {}): Prom
   try {
     db.pragma('foreign_keys = ON');
     let schema = readFileSync(new URL('../../db/schema.sql', import.meta.url), 'utf8');
+    if (options.beforeBoardsMigration || options.beforeChalkMigration || options.beforeStagingMigration || options.beforeLayersMigration) {
+      schema = schema.replace(/-- V13\.4 layers \(migration 062\)\.[\s\S]*?(?=CREATE TABLE IF NOT EXISTS board_members)/, '')
+        .replace(/  layer_id TEXT REFERENCES board_layers\(id\) ON DELETE SET NULL,\r?\n/g, '');
+    }
     if (options.beforeBoardsMigration || options.beforeChalkMigration || options.beforeStagingMigration) {
       schema = schema.replace(/  placed INTEGER NOT NULL DEFAULT 1 CHECK \(placed IN \(0, 1\)\),\r?\n/, '')
         .replace(/  mounted_actor TEXT NOT NULL DEFAULT 'human',\r?\n/, '');
@@ -40,6 +45,7 @@ export async function createV13BoardsFixture(options: FixtureOptions = {}): Prom
       if (options.beforeBoardsMigration && file >= '057_') continue;
       if (options.beforeChalkMigration && file >= '060_') continue;
       if (options.beforeStagingMigration && file >= '061_') continue;
+      if (options.beforeLayersMigration && file >= '062_') continue;
       const { default: migration } = await import(new URL(file, directory).href) as {
         default: { up: (connection: Database.Database) => void };
       };

@@ -22,7 +22,7 @@ function seed(db: Database.Database): void {
 
 test('061 preserves every legacy member and geometry as placed human, matches fresh defaults, and adds no tables', async (t) => {
   const db = await createV13BoardsFixture({ beforeStagingMigration: true });
-  const fresh = await createV13BoardsFixture();
+  const fresh = await createV13BoardsFixture({ beforeLayersMigration: true });
   t.after(() => { db.close(); fresh.close(); });
   seed(db);
   db.exec(`

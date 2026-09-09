@@ -1,4 +1,4 @@
-import type { BoardDetail, BoardEdge, BoardMember, BoardVisual } from '../../src/pages/Boards/boardTypes';
+import type { BoardDetail, BoardEdge, BoardLayer, BoardMember, BoardVisual } from '../../src/pages/Boards/boardTypes';
 
 // Shared synthetic transport for the six UI workflows and the local browser fixture.
 // All data lives in this module; the production repository and hook run unchanged.
@@ -63,17 +63,26 @@ export function seedEdge(from: BoardMember, to: BoardMember, input: Partial<Boar
   detail.edges.push(edge);
   return edge;
 }
+export function seedLayer(name: string, input: Partial<BoardLayer> = {}) {
+  const layers = detail.layers ??= [];
+  const layer: BoardLayer = { id: `layer-${++sequence}`, board_id: BOARD_ID, user_id: detail.board.user_id,
+    name, order_index: layers.length + 1, visible: true, ...copy(input) };
+  layers.push(layer);
+  return layer;
+}
 function missing(url: string): never { throw new Error(`Synthetic transport: object missing at ${url}`); }
 function record(method: string, url: string, input?: unknown) { writes.push({ method, url, input: copy(input) }); }
 const api = {
   async get(url: string) {
     if (url === BOARD_PATH) return response(detail);
+    if (url === `${BOARD_PATH}/layers`) return response({ layers: detail.layers || [] });
     if (url === '/courses' || url === '/items') return response([]);
     if (url === `${BOARD_PATH}/events`) return response({ events });
     throw new Error(`Unexpected synthetic GET: ${url}`);
   },
   async post(url: string, input: Record<string, unknown>) {
     record('POST', url, input);
+    if (url === `${BOARD_PATH}/layers`) return response({ layer: seedLayer(String(input.name)) });
     if (url === `${BOARD_PATH}/visuals`) return response({ visual: seedVisual(input) });
     if (url === `${BOARD_PATH}/edges`) {
       const from = detail.members.find(({ id }) => id === input.from_member_id);
@@ -86,6 +95,8 @@ const api = {
   async patch(url: string, input: Record<string, unknown>) {
     record('PATCH', url, input);
     if (url === BOARD_PATH) { Object.assign(detail.board, copy(input)); return response({ board: detail.board }); }
+    const layer = detail.layers?.find(({ id }) => url === `${BOARD_PATH}/layers/${id}`);
+    if (layer) { Object.assign(layer, copy(input)); return response({ layer }); }
     for (const [kind, objects] of [['member', detail.members], ['visual', detail.visuals], ['edge', detail.edges]] as const) {
       if (!url.startsWith(`${BOARD_PATH}/${kind}s/`)) continue;
       const object = objects.find(({ id }) => url === `${BOARD_PATH}/${kind}s/${id}`);
@@ -97,6 +108,14 @@ const api = {
   },
   async delete(url: string) {
     record('DELETE', url);
+    const layer = detail.layers?.find(({ id }) => url === `${BOARD_PATH}/layers/${id}`);
+    if (layer) {
+      const objects = [...detail.members, ...detail.visuals].filter((object) => object.layer_id === layer.id);
+      objects.forEach((object) => { object.layer_id = null; });
+      detail.layers = detail.layers!.filter(({ id }) => id !== layer.id);
+      detail.layers.forEach((entry, index) => { entry.order_index = index + 1; });
+      return response({ removed: true, moved_count: objects.length });
+    }
     const member = detail.members.find(({ id }) => url === `${BOARD_PATH}/members/${id}`);
     if (member) {
       detail.members = detail.members.filter(({ id }) => id !== member.id);
@@ -110,8 +129,20 @@ const api = {
     if (edge) { detail.edges = detail.edges.filter(({ id }) => id !== edge.id); return response({}); }
     return missing(url);
   },
-  async put(url: string) { throw new Error(`Unexpected synthetic PUT: ${url}`); },
+  async put(url: string, input: { layer_ids: string[] }) {
+    record('PUT', url, input);
+    if (url === `${BOARD_PATH}/layers/order`) {
+      detail.layers = input.layer_ids.map((id, index) => {
+        const layer = detail.layers?.find((entry) => entry.id === id);
+        if (!layer) return missing(url);
+        layer.order_index = index + 1;
+        return layer;
+      });
+      return response({ layers: detail.layers });
+    }
+    throw new Error(`Unexpected synthetic PUT: ${url}`);
+  },
 };
-export function diagnostic() { return copy({ members: detail.members, edges: detail.edges, visuals: detail.visuals, events, writes }); }
+export function diagnostic() { return copy({ board: detail.board, layers: detail.layers || [], members: detail.members, edges: detail.edges, visuals: detail.visuals, events, writes }); }
 resetSample();
 export default api;

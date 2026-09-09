@@ -10,6 +10,7 @@ import {
   mountBoardTextRange,
   createBoardEdge, updateBoardEdge, deleteBoardEdge,
   createBoardVisual, updateBoardVisual, deleteBoardVisual,
+  listBoardLayers, createBoardLayer, updateBoardLayer, reorderBoardLayers, deleteBoardLayer,
   castBoardSticky,
 } from '../services/boards.js';
 import { relocateTrayToBoard, undoTrayRelocation } from '../services/boardTrayRelocation.js';
@@ -19,6 +20,7 @@ import {
   mountBoardMemberSchema, updateBoardMemberSchema,
   createBoardEdgeSchema, updateBoardEdgeSchema,
   createBoardVisualSchema, updateBoardVisualSchema,
+  createBoardLayerSchema, updateBoardLayerSchema, reorderBoardLayersSchema,
   relocateTraySchema,
 } from '../validators/boards.js';
 
@@ -95,6 +97,42 @@ export function createBoardRouter(database: () => Database.Database = getDb): Ro
     const input = updateBoardSchema.parse(req.body);
     const board = db.transaction(() => updateBoard(db, req.userId!, String(req.params.boardId), input))();
     res.json({ board });
+  }));
+
+  router.get('/:boardId/layers', handle((req, res) => {
+    res.json({ layers: listBoardLayers(database(), req.userId!, String(req.params.boardId)) });
+  }));
+
+  router.post('/:boardId/layers', handle((req, res) => {
+    const db = database();
+    const input = createBoardLayerSchema.parse(req.body);
+    const layer = db.transaction(() => createBoardLayer(db, req.userId!, String(req.params.boardId), input))();
+    res.status(201).json({ layer });
+  }));
+
+  router.put('/:boardId/layers/order', handle((req, res) => {
+    const db = database();
+    const input = reorderBoardLayersSchema.parse(req.body);
+    const layers = db.transaction(() => reorderBoardLayers(db, req.userId!, String(req.params.boardId), input))();
+    res.json({ layers });
+  }));
+
+  router.patch('/:boardId/layers/:layerId', handle((req, res) => {
+    const db = database();
+    const input = updateBoardLayerSchema.parse(req.body);
+    const layer = db.transaction(() => updateBoardLayer(
+      db, req.userId!, String(req.params.boardId), String(req.params.layerId), input,
+    ))();
+    res.json({ layer });
+  }));
+
+  router.delete('/:boardId/layers/:layerId', handle((req, res) => {
+    z.object({}).strict().parse(req.body ?? {});
+    const db = database();
+    const result = db.transaction(() => deleteBoardLayer(
+      db, req.userId!, String(req.params.boardId), String(req.params.layerId),
+    ))();
+    res.json(result);
   }));
 
   router.delete('/:boardId', handle((req, res) => {

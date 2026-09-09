@@ -68,7 +68,7 @@ async function withApi(run: (db: Database.Database, request: (
 
 test('060 upgrades actual pre-chalk schema without changing existing visuals or Items and can repeat', async (t) => {
   const db = await createV13BoardsFixture({ beforeChalkMigration: true });
-  const fresh = await createV13BoardsFixture();
+  const fresh = await createV13BoardsFixture({ beforeLayersMigration: true });
   t.after(() => { db.close(); fresh.close(); });
   seed(db);
   db.prepare(`INSERT INTO purposes (id, user_id, title, created_at, updated_at)

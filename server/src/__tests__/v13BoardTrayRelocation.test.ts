@@ -3,10 +3,12 @@ import type { Server } from 'node:http';
 import test from 'node:test';
 import express from 'express';
 import type Database from 'better-sqlite3';
+import migration062 from '../db/migrations/062_v13_board_layers.js';
 import type { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { createBoardRouter } from '../routes/boards.js';
 import { createBoard } from '../services/boards.js';
+import { undoTrayRelocation } from '../services/boardTrayRelocation.js';
 import { releaseCourseCanvasAssets } from '../services/canvasAssets.js';
 import { createV13BoardsFixture } from './helpers/v13BoardsFixture.js';
 
@@ -111,6 +113,77 @@ async function withRoutes(run: (db: Database.Database, request: Request, path: s
     db.close();
   }
 }
+
+// Preserve the pre-062 STOP-1 sample: capture its receipt before adding layer_id.
+async function createLegacyRelocationFixture() {
+  const db = await createV13BoardsFixture({ beforeLayersMigration: true });
+  try {
+    db.exec(`
+      INSERT INTO users (id,email,password_hash,name) VALUES ('u','layers-repro@example.invalid','synthetic','Synthetic');
+      INSERT INTO courses (id,user_id,name) VALUES ('p','u','Synthetic');
+      INSERT INTO notes (id,user_id,course_id,title) VALUES ('n','u','p','Synthetic');
+      INSERT INTO purposes (id,user_id,title,created_at,updated_at) VALUES ('s','u','Question','before','before');
+      INSERT INTO boards (id,user_id,title,soul_id,created_at,updated_at) VALUES ('b','u','Board','s','before','before');
+      INSERT INTO canvas_objects (id,user_id,course_id,note_id,canvas_id,kind,backing) VALUES ('o','u','p','n','n','shape','none');
+      INSERT INTO canvas_placements (id,user_id,course_id,note_id,object_id,canvas_id,surface) VALUES ('placement','u','p','n','o','n','tray');
+      INSERT INTO board_visuals (id,board_id,visual_kind,x,y,w,h,data,created_at,updated_at) VALUES ('v','b','shape',30,40,100,80,'{}','before','before');
+    `);
+    const source = { object: rows(db, 'canvas_objects')[0], placement: rows(db, 'canvas_placements')[0],
+      mounts: [], extensions: { image: null, table: null, connector: null }, backing_blocks: [], endpoint_placements: [] };
+    const target = rows(db, 'board_visuals')[0];
+    assert.equal(Object.prototype.hasOwnProperty.call(target, 'layer_id'), false);
+    const metadata = JSON.stringify({ tray_relocation: { version: 1, board_id: 'b',
+      entries: [{ source, target_table: 'board_visuals', target, geometry_mode: 'preserved' }] } });
+    db.prepare(`INSERT INTO operation_batches (id,user_id,course_id,source_type,label,status,metadata,applied_at)
+      VALUES ('batch','u',NULL,'manual','Relocate tray to board','applied',?,'before')`).run(metadata);
+    db.exec("DELETE FROM canvas_placements WHERE id='placement'");
+    return { db, source, target, metadata };
+  } catch (error) {
+    db.close();
+    throw error;
+  }
+}
+
+test('pre-062 receipt still undoes after migration when the added layer column remains NULL', async () => {
+  const { db, source, target, metadata } = await createLegacyRelocationFixture();
+  try {
+    const rollback = Symbol('rollback pre-062 baseline');
+    assert.throws(() => db.transaction(() => {
+      assert.equal(undoTrayRelocation(db, 'u', 'b', 'batch').value.applied, false);
+      throw rollback;
+    })(), (error: unknown) => error === rollback);
+    db.transaction(() => migration062.up(db))();
+    assert.deepEqual(rows(db, 'board_visuals'), [{ ...target, layer_id: null }]);
+    assert.equal(rows(db, 'operation_batches')[0].metadata, metadata);
+
+    const undone = db.transaction(() => undoTrayRelocation(db, 'u', 'b', 'batch'))();
+    assert.equal(undone.value.applied, false);
+    assert.deepEqual(undone.value.visual_ids, [target.id]);
+    assert.deepEqual(rows(db, 'board_visuals'), []);
+    assert.deepEqual(rows(db, 'canvas_placements'), [source.placement]);
+    assert.equal(rows(db, 'operation_batches')[0].status, 'reverted');
+    assert.equal(rows(db, 'operation_batches')[0].metadata, metadata);
+  } finally { db.close(); }
+});
+
+test('pre-062 receipt still rejects undo with tray_relocation_target_changed after assignment to a layer', async () => {
+  const { db, target, metadata } = await createLegacyRelocationFixture();
+  try {
+    db.transaction(() => migration062.up(db))();
+    db.exec(`INSERT INTO board_layers (id,board_id,user_id,name,order_index) VALUES ('layer','b','u','Layer',0);
+      UPDATE board_visuals SET layer_id='layer' WHERE id='v'`);
+    const batch = rows(db, 'operation_batches')[0];
+    assert.equal(batch.metadata, metadata);
+
+    assert.throws(() => db.transaction(() => undoTrayRelocation(db, 'u', 'b', 'batch'))(),
+      (error: unknown) => error instanceof AppError && error.statusCode === 409
+        && error.message === 'tray_relocation_target_changed');
+    assert.deepEqual(rows(db, 'board_visuals'), [{ ...target, layer_id: 'layer' }]);
+    assert.deepEqual(rows(db, 'canvas_placements'), []);
+    assert.equal(batch.status, 'applied');
+    assert.deepEqual(rows(db, 'operation_batches'), [batch]);
+  } finally { db.close(); }
+});
 
 test('mixed tray relocation preserves raw rows, historical geometry and zero-geometry grid; undo restores placements', async () => {
   await withRoutes(async (db, request, path) => {

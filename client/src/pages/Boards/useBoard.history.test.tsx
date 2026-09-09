@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import type { BoardDetail, BoardEdge, BoardMember, BoardVisual, CreateBoardEdgeInput, CreateBoardVisualInput, PatchBoardMemberInput, PatchBoardVisualInput } from './boardTypes';
+import type { BoardDetail, BoardEdge, BoardLayer, BoardMember, BoardVisual, CreateBoardEdgeInput, CreateBoardLayerInput, CreateBoardVisualInput, PatchBoardLayerInput, PatchBoardMemberInput, PatchBoardVisualInput } from './boardTypes';
 import { useBoard } from './useBoard';
 
 // Synthetic persistence only: this suite neither starts a server nor opens a database.
@@ -8,6 +8,7 @@ const repository = vi.hoisted(() => ({
   get: vi.fn(), updateMember: vi.fn(), unmount: vi.fn(),
   createEdge: vi.fn(), updateEdge: vi.fn(), deleteEdge: vi.fn(),
   createVisual: vi.fn(), updateVisual: vi.fn(), deleteVisual: vi.fn(),
+  createLayer: vi.fn(), updateLayer: vi.fn(), reorderLayers: vi.fn(), deleteLayer: vi.fn(),
 }));
 vi.mock('./boardRepository', () => ({
   boardRepository: repository,
@@ -28,6 +29,9 @@ const makeVisual = (id: string): BoardVisual => ({
 const makeEdge = (id: string, from = 'a', to = 'b'): BoardEdge => ({
   id, board_id: 'board-a', from_member_id: from, to_member_id: to,
   style: { direction: 'both', stroke: '#123456' }, label: 'A labeled edge', created_at: timestamp,
+});
+const makeLayer = (id: string, order_index = 0): BoardLayer => ({
+  id, board_id: 'board-a', user_id: 'fixture', name: id, order_index, visible: true,
 });
 let saved: BoardDetail;
 let nextId: number;
@@ -88,6 +92,27 @@ beforeEach(() => {
     saved.members = saved.members.filter((member) => member.id !== id);
     saved.edges = saved.edges.filter((edge) => edge.from_member_id !== id && edge.to_member_id !== id);
     events.push(`unmounted:${id}`);
+  });
+  repository.createLayer.mockImplementation(async (_boardId: string, input: CreateBoardLayerInput) => {
+    const layer = { ...makeLayer(`new-layer${++nextId}`, saved.layers?.length ?? 0), ...input };
+    saved.layers = [...saved.layers ?? [], layer];
+    return structuredClone(layer);
+  });
+  repository.updateLayer.mockImplementation(async (_boardId: string, id: string, input: PatchBoardLayerInput) => {
+    const layer = { ...saved.layers!.find((candidate) => candidate.id === id)!, ...input };
+    saved.layers = saved.layers!.map((candidate) => candidate.id === id ? layer : candidate);
+    return structuredClone(layer);
+  });
+  repository.reorderLayers.mockImplementation(async (_boardId: string, ids: string[]) => {
+    saved.layers = ids.map((id, order_index) => ({ ...saved.layers!.find((layer) => layer.id === id)!, order_index }));
+    return structuredClone(saved.layers);
+  });
+  repository.deleteLayer.mockImplementation(async (_boardId: string, id: string) => {
+    const movedCount = [...saved.members, ...saved.visuals].filter((object) => object.layer_id === id).length;
+    saved.layers = saved.layers?.filter((layer) => layer.id !== id);
+    saved.members = saved.members.map((member) => member.layer_id === id ? { ...member, layer_id: null } : member);
+    saved.visuals = saved.visuals.map((visual) => visual.layer_id === id ? { ...visual, layer_id: null } : visual);
+    return { removed: true, moved_count: movedCount };
   });
 });
 
@@ -182,6 +207,84 @@ describe('board queue command history', () => {
     expect(saved.members[0]).toMatchObject(geometry);
     expect(saved.visuals[0]).toMatchObject(geometry);
     expect(result.current.canUndo).toBe(false);
+  });
+
+  it('moves three mixed objects including pinned objects to a layer in one command, then restores their different original layers', async () => {
+    saved.layers = [makeLayer('source'), makeLayer('target', 1)];
+    saved.members[2].layer_id = 'source';
+    saved.visuals[0] = { ...saved.visuals[0], layer_id: 'source', pinned: true };
+    const originalGeometry = [...saved.members, ...saved.visuals].map(({ id, x, y, w, h, scale, z_index, pinned }) => ({ id, x, y, w, h, scale, z_index, pinned }));
+    const { result } = await mountHook();
+    await act(async () => { expect(await result.current.moveSelectionToLayer({ memberIds: ['a', 'c'], visualIds: ['v1'] }, 'target')).toBe(true); });
+    expect(saved.members.filter((member) => ['a', 'c'].includes(member.id)).map((member) => member.layer_id)).toEqual(['target', 'target']);
+    expect(saved.visuals[0].layer_id).toBe('target');
+    expect(repository.updateMember).toHaveBeenCalledTimes(2);
+    expect(repository.updateVisual).toHaveBeenCalledTimes(1);
+    await act(async () => { expect(await result.current.undo()).toBe(true); });
+    expect(saved.members[0].layer_id).toBeNull();
+    expect(saved.members[2].layer_id).toBe('source');
+    expect(saved.visuals[0].layer_id).toBe('source');
+    expect(repository.updateMember).toHaveBeenLastCalledWith('board-a', 'a', { layer_id: null });
+    expect(result.current.canUndo).toBe(false);
+    expect([...saved.members, ...saved.visuals].map(({ id, x, y, w, h, scale, z_index, pinned }) => ({ id, x, y, w, h, scale, z_index, pinned }))).toEqual(originalGeometry);
+    await act(async () => { await result.current.redo(); });
+    expect(saved.members[2]).toMatchObject({ layer_id: 'target', pinned: true });
+    expect(saved.visuals[0]).toMatchObject({ layer_id: 'target', pinned: true });
+  });
+
+  it('keeps object history through layer create, rename and reorder, then scrubs deleted layers from past and future replay snapshots', async () => {
+    saved.layers = [makeLayer('doomed'), makeLayer('kept', 1)];
+    const { result } = await mountHook();
+    let createdVisualId = '';
+    await act(async () => {
+      await result.current.addVisual({ visual_kind: 'sticky', data: { text: 'Layer chalk' }, layer_id: 'doomed', x: 80 });
+      createdVisualId = saved.visuals[saved.visuals.length - 1].id;
+      await result.current.updateVisual(createdVisualId, { x: 140 });
+      await result.current.moveSelectionToLayer({ memberIds: ['a'], visualIds: [] }, 'doomed');
+      await result.current.undo();
+    });
+    expect(result.current.canRedo).toBe(true);
+    await act(async () => {
+      const added = await result.current.createLayer({ name: 'Extra' });
+      expect(added?.name).toBe('Extra');
+      await result.current.updateLayer('kept', { name: 'Renamed', visible: false });
+      await result.current.reorderLayers([added!.id, 'kept', 'doomed']);
+    });
+    expect(result.current.canRedo).toBe(true);
+    expect(result.current.detail?.layers?.map((layer) => layer.id)).toEqual([saved.layers![0].id, 'kept', 'doomed']);
+    await act(async () => { expect(await result.current.deleteLayer('doomed')).toBe(true); });
+    expect(result.current.canRedo).toBe(true);
+    expect(result.current.detail?.visuals.find((visual) => visual.id === createdVisualId)).toMatchObject({ layer_id: null, x: 140 });
+    expect(result.current.detail?.layers?.some((layer) => layer.id === 'doomed')).toBe(false);
+    repository.updateMember.mockClear();
+    repository.updateVisual.mockClear();
+    repository.createVisual.mockClear();
+    await act(async () => {
+      await result.current.redo();
+      await result.current.undo();
+      await result.current.undo();
+      await result.current.undo();
+    });
+    expect(saved.visuals.some((visual) => visual.id === createdVisualId)).toBe(false);
+    expect(result.current.canUndo).toBe(false);
+    await act(async () => { await result.current.redo(); await result.current.redo(); });
+    expect(saved.visuals[saved.visuals.length - 1]).toMatchObject({ layer_id: null, x: 140, data: { text: 'Layer chalk' } });
+    const replayInputs = [...repository.updateMember.mock.calls, ...repository.updateVisual.mock.calls].map(([, , input]) => input);
+    replayInputs.push(...repository.createVisual.mock.calls.map(([, input]) => input));
+    expect(replayInputs.some((input) => input.layer_id === 'doomed')).toBe(false);
+    expect(result.current.error).toBeNull();
+  });
+
+  it('preserves a new visual layer through ordinary undo and redo', async () => {
+    saved.layers = [makeLayer('ink')];
+    const { result } = await mountHook();
+    await act(async () => {
+      await result.current.addVisual({ visual_kind: 'freehand', data: makeVisual('fixture').data, layer_id: 'ink' });
+      await result.current.undo();
+      await result.current.redo();
+    });
+    expect(saved.visuals[saved.visuals.length - 1].layer_id).toBe('ink');
+    expect(repository.createVisual.mock.calls.every(([, input]) => input.layer_id === 'ink')).toBe(true);
   });
 
   it('leaves members and selected/unselected incident edges removed while undo restores mixed-delete visuals and prunes dead past targets', async () => {

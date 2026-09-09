@@ -37,8 +37,9 @@ function row(db: Database.Database, table: 'board_visuals' | 'board_members', id
 }
 
 function sameRow(actual: Row | undefined, expected: Row): boolean {
+  // Schema-added NULL columns do not invalidate older snapshots; non-NULL additions do.
   return Boolean(actual && Object.keys(expected).every((key) => actual[key] === expected[key])
-    && Object.keys(actual).length === Object.keys(expected).length);
+    && Object.keys(actual).every((key) => Object.prototype.hasOwnProperty.call(expected, key) || actual[key] === null));
 }
 
 function sourceRows(db: Database.Database, userId: string, id: string): TraySource {
@@ -152,7 +153,9 @@ function result(receipt: Receipt, batchId: string, applied: boolean) {
     } };
 }
 
-/** Only placement IDs cross the client boundary. The receipt is evidence read on this connection. */
+/** Placement IDs and optional destination layer cross the client boundary.
+ * The receipt remains evidence read on this connection.
+ */
 export function relocateTrayToBoard(db: Database.Database, userId: string, boardId: string, value: unknown) {
   requireTransaction(db);
   ownedBoard(db, userId, boardId);
@@ -180,7 +183,7 @@ export function relocateTrayToBoard(db: Database.Database, userId: string, board
     let targetTable: RelocatedEntry['target_table'];
     let targetId: string;
     if (kind) {
-      const visual = createBoardVisual(db, userId, boardId, { visual_kind: kind, ...layout.values,
+      const visual = createBoardVisual(db, userId, boardId, { visual_kind: kind, ...layout.values, layer_id: input.data.layer_id,
         data: { tray_source: source, ...(kind === 'connector' && { connector_points: connectorPoints(source, sources, layouts) }) },
         metadata: { tray_relocation: metadata.tray_relocation } });
       targetTable = 'board_visuals';
@@ -188,7 +191,7 @@ export function relocateTrayToBoard(db: Database.Database, userId: string, board
     } else {
       const { rotation: _rotation, ...memberGeometry } = layout.values;
       const { member } = mountBoardMember(db, userId, boardId, { member_kind: 'content_group',
-        member_id: source.mounts[0].target_id, ...memberGeometry, metadata });
+        member_id: source.mounts[0].target_id, ...memberGeometry, layer_id: input.data.layer_id, metadata });
       members.push(member);
       targetTable = 'board_members';
       targetId = member.id;

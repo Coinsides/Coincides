@@ -13,6 +13,10 @@ import {
   updateBoardEdgeSchema,
   createBoardVisualSchema,
   updateBoardVisualSchema,
+  createBoardLayerSchema,
+  updateBoardLayerSchema,
+  reorderBoardLayersSchema,
+  BOARD_LAYER_LIMIT,
   type BoardVisualKind,
 } from '../validators/boards.js';
 import { createPurpose, getPurpose } from './purposes.js';
@@ -35,6 +39,7 @@ interface BoardRow {
 }
 
 interface GeometryRow {
+  layer_id: string | null;
   x: number;
   y: number;
   w: number;
@@ -64,6 +69,15 @@ interface BoardEdgeRow {
   style: string;
   label: string | null;
   created_at: string;
+}
+
+interface BoardLayerRow {
+  id: string;
+  board_id: string;
+  user_id: string;
+  name: string;
+  order_index: number;
+  visible: number;
 }
 
 interface BoardVisualRow extends GeometryRow {
@@ -121,7 +135,25 @@ function memberRow(db: Database.Database, boardId: string, memberId: string): Bo
 }
 
 function hydrateBoard(row: BoardRow) {
-  return { ...row, viewport: json<{ x: number; y: number; zoom: number }>(row.viewport) };
+  const { base_layer_visible = true, ...viewport } = json<{
+    x: number; y: number; zoom: number; base_layer_visible?: boolean;
+  }>(row.viewport);
+  return { ...row, viewport, base_layer_visible };
+}
+
+function hydrateLayer(row: BoardLayerRow) {
+  return { ...row, visible: row.visible === 1 };
+}
+
+function layerRow(db: Database.Database, userId: string, boardId: string, layerId: string): BoardLayerRow {
+  const row = db.prepare('SELECT * FROM board_layers WHERE id = ? AND board_id = ? AND user_id = ?')
+    .get(layerId, boardId, userId) as BoardLayerRow | undefined;
+  if (!row) throw new AppError(404, 'board_layer_not_found');
+  return row;
+}
+
+function validateLayer(db: Database.Database, userId: string, boardId: string, layerId?: string | null): void {
+  if (layerId != null) layerRow(db, userId, boardId, layerId);
 }
 
 function hydrateEdge(row: BoardEdgeRow) {
@@ -209,6 +241,66 @@ export type Board = ReturnType<typeof hydrateBoard>;
 export type BoardMember = ReturnType<typeof hydrateMember>;
 export type BoardEdge = ReturnType<typeof hydrateEdge>;
 export type BoardVisual = ReturnType<typeof hydrateVisual>;
+export type BoardLayer = ReturnType<typeof hydrateLayer>;
+
+export function listBoardLayers(db: Database.Database, userId: string, boardId: string): BoardLayer[] {
+  boardRow(db, userId, boardId);
+  return (db.prepare('SELECT * FROM board_layers WHERE board_id = ? AND user_id = ? ORDER BY order_index, id')
+    .all(boardId, userId) as BoardLayerRow[]).map(hydrateLayer);
+}
+
+export function createBoardLayer(db: Database.Database, userId: string, boardId: string, value: unknown): BoardLayer {
+  requireTransaction(db);
+  const input = parse(createBoardLayerSchema, value);
+  const layers = listBoardLayers(db, userId, boardId);
+  if (layers.length >= BOARD_LAYER_LIMIT - 1) throw new AppError(409, 'board_layer_limit_reached');
+  const id = uuidv4();
+  const order = layers.length ? layers[layers.length - 1].order_index + 1 : 0;
+  db.prepare('INSERT INTO board_layers (id, board_id, user_id, name, order_index) VALUES (?, ?, ?, ?, ?)')
+    .run(id, boardId, userId, input.name, order);
+  touchBoard(db, boardId);
+  return hydrateLayer(layerRow(db, userId, boardId, id));
+}
+
+export function updateBoardLayer(db: Database.Database, userId: string, boardId: string, layerId: string, value: unknown): BoardLayer {
+  requireTransaction(db);
+  const input = parse(updateBoardLayerSchema, value);
+  boardRow(db, userId, boardId);
+  const layer = layerRow(db, userId, boardId, layerId);
+  db.prepare('UPDATE board_layers SET name = ?, visible = ? WHERE id = ? AND board_id = ? AND user_id = ?')
+    .run(input.name ?? layer.name, input.visible === undefined ? layer.visible : Number(input.visible), layerId, boardId, userId);
+  touchBoard(db, boardId);
+  return hydrateLayer(layerRow(db, userId, boardId, layerId));
+}
+
+export function reorderBoardLayers(db: Database.Database, userId: string, boardId: string, value: unknown): BoardLayer[] {
+  requireTransaction(db);
+  const input = parse(reorderBoardLayersSchema, value);
+  const layers = listBoardLayers(db, userId, boardId);
+  const currentIds = new Set(layers.map((layer) => layer.id));
+  if (input.layer_ids.length !== currentIds.size || new Set(input.layer_ids).size !== currentIds.size
+    || input.layer_ids.some((id) => !currentIds.has(id))) {
+    throw new AppError(400, 'board_layer_order_must_include_all_layers');
+  }
+  const update = db.prepare('UPDATE board_layers SET order_index = ? WHERE id = ? AND board_id = ? AND user_id = ?');
+  input.layer_ids.forEach((id, index) => update.run(index, id, boardId, userId));
+  touchBoard(db, boardId);
+  return listBoardLayers(db, userId, boardId);
+}
+
+export function deleteBoardLayer(db: Database.Database, userId: string, boardId: string, layerId: string) {
+  requireTransaction(db);
+  boardRow(db, userId, boardId);
+  layerRow(db, userId, boardId, layerId);
+  const now = new Date().toISOString();
+  const members = db.prepare('UPDATE board_members SET layer_id = NULL, updated_at = ? WHERE board_id = ? AND layer_id = ?')
+    .run(now, boardId, layerId).changes;
+  const visuals = db.prepare('UPDATE board_visuals SET layer_id = NULL, updated_at = ? WHERE board_id = ? AND layer_id = ?')
+    .run(now, boardId, layerId).changes;
+  db.prepare('DELETE FROM board_layers WHERE id = ? AND board_id = ? AND user_id = ?').run(layerId, boardId, userId);
+  touchBoard(db, boardId);
+  return { removed: true, moved_count: members + visuals };
+}
 
 export function createBoard(db: Database.Database, userId: string, value: unknown) {
   requireTransaction(db);
@@ -244,15 +336,18 @@ export function getBoard(db: Database.Database, userId: string, boardId: string)
     .all(boardId) as BoardEdgeRow[]).map(hydrateEdge);
   const visuals = (db.prepare('SELECT * FROM board_visuals WHERE board_id = ? ORDER BY z_index, created_at, id')
     .all(boardId) as BoardVisualRow[]).map(hydrateVisual);
-  return { board, members, edges, visuals };
+  return { board, members, edges, visuals, layers: listBoardLayers(db, userId, boardId) };
 }
 
 export function updateBoard(db: Database.Database, userId: string, boardId: string, value: unknown): Board {
   requireTransaction(db);
   const input = parse(updateBoardSchema, value);
   const row = boardRow(db, userId, boardId);
+  // Keep virtual Base visibility when a pan/zoom patch replaces geometry.
+  const viewport = { ...json<JsonObject>(row.viewport), ...input.viewport,
+    ...(input.base_layer_visible === undefined ? {} : { base_layer_visible: input.base_layer_visible }) };
   db.prepare('UPDATE boards SET title = ?, viewport = ?, updated_at = ? WHERE id = ?')
-    .run(input.title ?? row.title, input.viewport ? JSON.stringify(input.viewport) : row.viewport, new Date().toISOString(), boardId);
+    .run(input.title ?? row.title, JSON.stringify(viewport), new Date().toISOString(), boardId);
   return hydrateBoard(boardRow(db, userId, boardId));
 }
 
@@ -300,6 +395,7 @@ export function mountBoardMember(db: Database.Database, userId: string, boardId:
       throw new AppError(409, 'board_member_id_conflict');
     }
   }
+  validateLayer(db, userId, boardId, input.layer_id);
   validateBoardRangeMount(db, userId, boardId, input.member_kind, input.member_id);
   const reference = resolveBoardMember(db, userId, input.member_kind, input.member_id);
   if (reference.state !== 'available') {
@@ -308,11 +404,11 @@ export function mountBoardMember(db: Database.Database, userId: string, boardId:
   const id = input.id ?? uuidv4();
   const now = new Date().toISOString();
   db.prepare(`INSERT INTO board_members
-    (id, board_id, member_kind, member_id, x, y, w, h, scale, z_index, pinned, placed, mounted_actor, metadata, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'human', ?, ?, ?)`)
+    (id, board_id, member_kind, member_id, x, y, w, h, scale, z_index, pinned, placed, layer_id, mounted_actor, metadata, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'human', ?, ?, ?)`)
     .run(id, boardId, input.member_kind, input.member_id, input.x ?? 0, input.y ?? 0,
       input.w ?? 0, input.h ?? 0, input.scale ?? 1, input.z_index ?? 0, input.pinned ? 1 : 0,
-      input.placed === false ? 0 : 1,
+      input.placed === false ? 0 : 1, input.layer_id ?? null,
       JSON.stringify(input.metadata ?? {}), now, now);
   touchBoard(db, boardId);
   return { member: hydrateMember(db, userId, memberRow(db, boardId, id)!), created: true };
@@ -332,11 +428,13 @@ export function updateBoardMember(db: Database.Database, userId: string, boardId
   boardRow(db, userId, boardId);
   const row = memberRow(db, boardId, memberId);
   if (!row) throw new AppError(404, 'board_member_not_found');
-  db.prepare(`UPDATE board_members SET x = ?, y = ?, w = ?, h = ?, scale = ?, z_index = ?, pinned = ?, placed = ?, updated_at = ?
+  validateLayer(db, userId, boardId, input.layer_id);
+  db.prepare(`UPDATE board_members SET x = ?, y = ?, w = ?, h = ?, scale = ?, z_index = ?, pinned = ?, placed = ?, layer_id = ?, updated_at = ?
     WHERE id = ? AND board_id = ?`).run(input.x ?? row.x, input.y ?? row.y, input.w ?? row.w,
     input.h ?? row.h, input.scale ?? row.scale, input.z_index ?? row.z_index,
     input.pinned === undefined ? row.pinned : Number(input.pinned),
-    input.placed === undefined ? row.placed : Number(input.placed), new Date().toISOString(), memberId, boardId);
+    input.placed === undefined ? row.placed : Number(input.placed),
+    input.layer_id === undefined ? row.layer_id : input.layer_id, new Date().toISOString(), memberId, boardId);
   touchBoard(db, boardId);
   return hydrateMember(db, userId, memberRow(db, boardId, memberId)!);
 }
@@ -418,14 +516,15 @@ export function createBoardVisual(db: Database.Database, userId: string, boardId
   requireTransaction(db);
   const input = parse(createBoardVisualSchema, value);
   boardRow(db, userId, boardId);
+  validateLayer(db, userId, boardId, input.layer_id);
   validateVisualData(input.visual_kind, input.data);
   const id = uuidv4();
   const now = new Date().toISOString();
   db.prepare(`INSERT INTO board_visuals
-    (id, board_id, visual_kind, x, y, w, h, scale, rotation, z_index, pinned, data, metadata, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(id, boardId, input.visual_kind,
+    (id, board_id, visual_kind, x, y, w, h, scale, rotation, z_index, pinned, layer_id, data, metadata, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`).run(id, boardId, input.visual_kind,
     input.x ?? 0, input.y ?? 0, input.w ?? 0, input.h ?? 0, input.scale ?? 1, input.rotation ?? 0,
-    input.z_index ?? 0, input.pinned ? 1 : 0, JSON.stringify(input.data), JSON.stringify(input.metadata ?? {}), now, now);
+    input.z_index ?? 0, input.pinned ? 1 : 0, input.layer_id ?? null, JSON.stringify(input.data), JSON.stringify(input.metadata ?? {}), now, now);
   touchBoard(db, boardId);
   return hydrateVisual(visualRow(db, boardId, id)!);
 }
@@ -436,12 +535,14 @@ export function updateBoardVisual(db: Database.Database, userId: string, boardId
   boardRow(db, userId, boardId);
   const row = visualRow(db, boardId, visualId);
   if (!row) throw new AppError(404, 'board_visual_not_found');
+  validateLayer(db, userId, boardId, input.layer_id);
   if (input.data) validateVisualData(row.visual_kind, input.data);
   db.prepare(`UPDATE board_visuals SET x = ?, y = ?, w = ?, h = ?, scale = ?, rotation = ?,
-    z_index = ?, pinned = ?, data = ?, metadata = ?, updated_at = ? WHERE id = ? AND board_id = ?`)
+    z_index = ?, pinned = ?, layer_id = ?, data = ?, metadata = ?, updated_at = ? WHERE id = ? AND board_id = ?`)
     .run(input.x ?? row.x, input.y ?? row.y, input.w ?? row.w, input.h ?? row.h, input.scale ?? row.scale,
       input.rotation ?? row.rotation, input.z_index ?? row.z_index,
-      input.pinned === undefined ? row.pinned : Number(input.pinned), input.data ? JSON.stringify(input.data) : row.data,
+      input.pinned === undefined ? row.pinned : Number(input.pinned), input.layer_id === undefined ? row.layer_id : input.layer_id,
+      input.data ? JSON.stringify(input.data) : row.data,
       input.metadata ? JSON.stringify(input.metadata) : row.metadata, new Date().toISOString(), visualId, boardId);
   touchBoard(db, boardId);
   return hydrateVisual(visualRow(db, boardId, visualId)!);
@@ -468,7 +569,7 @@ export function castBoardSticky(db: Database.Database, userId: string, boardId: 
   const { member } = mountBoardMember(db, userId, boardId, {
     member_kind: 'item', member_id: item.id,
     x: visual.x, y: visual.y, w: visual.w, h: visual.h, scale: visual.scale,
-    z_index: visual.z_index, pinned: visual.pinned === 1,
+    z_index: visual.z_index, pinned: visual.pinned === 1, layer_id: visual.layer_id,
   });
   deleteBoardVisual(db, userId, boardId, visualId);
   return { item, member, removed_visual_id: visualId };

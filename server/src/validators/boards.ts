@@ -4,6 +4,18 @@ import { createPurposeInputSchema } from './purposes.js';
 const idSchema = z.string().trim().min(1).max(180);
 const objectSchema = z.record(z.unknown());
 const finiteNumber = z.number().finite();
+// Mirrored in shared/types/boardLayers.ts; Base counts toward the limit.
+export const BOARD_LAYER_LIMIT = 12;
+const layerNameSchema = z.string().trim().min(1).max(120);
+
+export const createBoardLayerSchema = z.object({ name: layerNameSchema }).strict();
+export const updateBoardLayerSchema = z.object({
+  name: layerNameSchema.optional(),
+  visible: z.boolean().optional(),
+}).strict().refine((value) => Object.keys(value).length > 0, 'No layer changes provided');
+export const reorderBoardLayersSchema = z.object({
+  layer_ids: z.array(idSchema).max(BOARD_LAYER_LIMIT - 1),
+}).strict();
 
 export const boardViewportSchema = z.object({
   x: finiteNumber,
@@ -26,13 +38,16 @@ export const createBoardSchema = z.object({
 export const updateBoardSchema = z.object({
   title: z.string().trim().min(1).max(500).optional(),
   viewport: boardViewportSchema.optional(),
+  base_layer_visible: z.boolean().optional(),
 }).strict().refine((value) => Object.keys(value).length > 0, 'No board changes provided');
 
 export const relocateTraySchema = z.object({
   placement_ids: z.array(idSchema).min(1).max(500),
+  layer_id: idSchema.nullable().optional(),
 }).strict();
 
 const memberGeometry = {
+  layer_id: idSchema.nullable().optional(),
   x: finiteNumber.optional(),
   y: finiteNumber.optional(),
   w: finiteNumber.nonnegative().optional(),

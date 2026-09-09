@@ -1,5 +1,10 @@
 export type BoardJsonObject = Record<string, unknown>;
 import type { BoardTextRangeSelection, BoardTextRangeStatus } from '@shared/types/boardTextRange';
+export type { BoardLayer } from '@shared/types/boardLayers';
+import type { BoardLayer } from '@shared/types/boardLayers';
+
+/** Includes the virtual Base layer. */
+export const BOARD_LAYER_LIMIT = 12;
 
 export interface BoardViewport {
   x: number;
@@ -25,6 +30,7 @@ export interface Board {
   soul_id: string;
   project_id: string | null;
   viewport: BoardViewport;
+  base_layer_visible?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -52,6 +58,8 @@ export interface BoardMemberReference {
 export interface BoardMember extends BoardGeometry {
   id: string;
   board_id: string;
+  /** Omitted in older snapshots; null is the virtual Base layer. */
+  layer_id?: string | null;
   member_kind: BoardMemberKind;
   member_id: string;
   /** Older in-flight projections omit these; only explicit false means staging.
@@ -79,6 +87,7 @@ export type BoardVisualKind = 'freehand' | 'shape' | 'image' | 'table' | 'connec
 export interface BoardVisual extends BoardGeometry {
   id: string;
   board_id: string;
+  layer_id?: string | null;
   visual_kind: BoardVisualKind;
   rotation: number;
   data: BoardJsonObject;
@@ -92,6 +101,7 @@ export interface BoardDetail {
   members: BoardMember[];
   edges: BoardEdge[];
   visuals: BoardVisual[];
+  layers?: BoardLayer[];
 }
 
 export interface TrayRelocationResult {
@@ -130,9 +140,14 @@ export type CreateBoardInput = {
 export interface PatchBoardInput {
   title?: string;
   viewport?: BoardViewport;
+  base_layer_visible?: boolean;
 }
 
+export interface CreateBoardLayerInput { name: string }
+export interface PatchBoardLayerInput { name?: string; visible?: boolean }
+
 export interface MountBoardMemberInput extends Partial<BoardGeometry> {
+  layer_id?: string | null;
   placed?: boolean;
   id?: string;
   member_kind: BoardWritableMemberKind;
@@ -141,9 +156,10 @@ export interface MountBoardMemberInput extends Partial<BoardGeometry> {
   summary?: string;
 }
 
-export type PatchBoardMemberInput = Partial<BoardGeometry> & { placed?: boolean };
+export type PatchBoardMemberInput = Partial<BoardGeometry> & { placed?: boolean; layer_id?: string | null };
 
 export interface MountBoardTextRangeInput extends Partial<BoardGeometry> {
+  layer_id?: string | null;
   placed?: boolean;
   text_range: BoardTextRangeSelection;
 }
@@ -158,6 +174,7 @@ export interface CreateBoardEdgeInput {
 export type PatchBoardEdgeInput = Partial<CreateBoardEdgeInput>;
 
 export interface CreateBoardVisualInput extends Partial<BoardGeometry> {
+  layer_id?: string | null;
   visual_kind: BoardVisualKind;
   rotation?: number;
   data: BoardJsonObject;

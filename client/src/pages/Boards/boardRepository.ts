@@ -9,11 +9,12 @@ import type { Course } from '@shared/types';
 import type { ContentGroupV1, ItemV1, Note, NoteBlock } from '@/pages/Notes/canvasEngine/runtimeDataTypes';
 import { textFromContent } from '@/pages/Notes/canvasEngine/blockContentService';
 import type {
-  Board, BoardCandidate, BoardDetail, BoardEdge, BoardMember, BoardVisual,
+  Board, BoardCandidate, BoardDetail, BoardEdge, BoardMember, BoardVisual, BoardLayer,
   CreateBoardInput, CreateBoardEdgeInput, CreateBoardVisualInput, MountBoardMemberInput,
   PatchBoardInput, PatchBoardMemberInput, PatchBoardEdgeInput, PatchBoardVisualInput,
   TrayRelocationResult,
   MountBoardTextRangeInput,
+  CreateBoardLayerInput, PatchBoardLayerInput,
 } from './boardTypes';
 
 export type { BoardCandidate } from './boardTypes';
@@ -41,6 +42,22 @@ export const boardRepository = {
   },
   async delete(boardId: string): Promise<void> {
     await api.delete(boardPath(boardId));
+  },
+  async createLayer(boardId: string, input: CreateBoardLayerInput): Promise<BoardLayer> {
+    const { data } = await api.post<{ layer: BoardLayer }>(`${boardPath(boardId)}/layers`, input);
+    return data.layer;
+  },
+  async updateLayer(boardId: string, layerId: string, input: PatchBoardLayerInput): Promise<BoardLayer> {
+    const { data } = await api.patch<{ layer: BoardLayer }>(childPath(boardId, 'layers', layerId), input);
+    return data.layer;
+  },
+  async reorderLayers(boardId: string, layerIds: string[]): Promise<BoardLayer[]> {
+    const { data } = await api.put<{ layers: BoardLayer[] }>(`${boardPath(boardId)}/layers/order`, { layer_ids: layerIds });
+    return data.layers;
+  },
+  async deleteLayer(boardId: string, layerId: string): Promise<{ removed: boolean; moved_count: number }> {
+    const { data } = await api.delete<{ removed: boolean; moved_count: number }>(childPath(boardId, 'layers', layerId));
+    return data;
   },
   async mount(boardId: string, input: MountBoardMemberInput): Promise<BoardMember> {
     const { data } = await api.post<{ member: BoardMember; created: boolean }>(`${boardPath(boardId)}/members`, input);
@@ -85,9 +102,10 @@ export const boardRepository = {
     );
     return data;
   },
-  async relocateTray(boardId: string, placementIds: string[]): Promise<TrayRelocationResult> {
+  async relocateTray(boardId: string, placementIds: string[], layerId?: string | null): Promise<TrayRelocationResult> {
     const { data } = await api.post<TrayRelocationResult>(`${boardPath(boardId)}/relocate-tray`, {
       placement_ids: placementIds,
+      ...(layerId !== undefined ? { layer_id: layerId } : {}),
     });
     return data;
   },
@@ -185,6 +203,10 @@ export function boardErrorMessage(error: unknown): string {
     ? (error as { response?: { status?: number; data?: { error?: unknown } } }).response
     : undefined;
   switch (response?.data?.error) {
+    case 'board_layer_limit_reached':
+      return 'A board can have up to 12 layers, including Base.';
+    case 'board_layer_not_found':
+      return 'This layer is no longer available. Choose another layer.';
     case 'Item content is required':
       return 'Add some text to the chalk before casting it to an item.';
     case 'Board chalk is limited to 280 characters':

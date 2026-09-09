@@ -1283,6 +1283,17 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_boards_soul ON boards(soul_id);
 CREATE INDEX IF NOT EXISTS idx_boards_user_updated ON boards(user_id, updated_at);
 CREATE INDEX IF NOT EXISTS idx_boards_user_project ON boards(user_id, project_id);
 
+-- V13.4 layers (migration 062). Base is virtual and is represented by NULL.
+CREATE TABLE IF NOT EXISTS board_layers (
+  id TEXT PRIMARY KEY,
+  board_id TEXT NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL CHECK (length(trim(name)) BETWEEN 1 AND 120),
+  order_index INTEGER NOT NULL CHECK (order_index >= 0),
+  visible INTEGER NOT NULL DEFAULT 1 CHECK (visible IN (0, 1))
+);
+CREATE INDEX IF NOT EXISTS idx_board_layers_board_order ON board_layers(board_id, order_index);
+
 CREATE TABLE IF NOT EXISTS board_members (
   id TEXT PRIMARY KEY,
   board_id TEXT NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
@@ -1290,6 +1301,7 @@ CREATE TABLE IF NOT EXISTS board_members (
   member_id TEXT NOT NULL CHECK (length(member_id) BETWEEN 1 AND 180),
   placed INTEGER NOT NULL DEFAULT 1 CHECK (placed IN (0, 1)),
   mounted_actor TEXT NOT NULL DEFAULT 'human',
+  layer_id TEXT REFERENCES board_layers(id) ON DELETE SET NULL,
   x REAL NOT NULL DEFAULT 0,
   y REAL NOT NULL DEFAULT 0,
   w REAL NOT NULL DEFAULT 0 CHECK (w >= 0),
@@ -1323,6 +1335,7 @@ CREATE TABLE IF NOT EXISTS board_visuals (
   id TEXT PRIMARY KEY,
   board_id TEXT NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
   visual_kind TEXT NOT NULL CHECK (visual_kind IN ('freehand', 'shape', 'image', 'table', 'connector', 'sticky')),
+  layer_id TEXT REFERENCES board_layers(id) ON DELETE SET NULL,
   x REAL NOT NULL DEFAULT 0,
   y REAL NOT NULL DEFAULT 0,
   w REAL NOT NULL DEFAULT 0 CHECK (w >= 0),

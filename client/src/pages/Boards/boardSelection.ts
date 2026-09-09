@@ -64,11 +64,14 @@ export function marqueeSelection(rect: BoardRect, detail: Pick<BoardDetail, 'mem
   ];
 }
 
-export function deletionScope(keys: Set<string>, detail: Pick<BoardDetail, 'members' | 'edges' | 'visuals'>) {
+export function deletionScope(keys: Set<string>, detail: Pick<BoardDetail, 'members' | 'edges' | 'visuals'>,
+  incidentEdges: BoardEdge[] = detail.edges) {
   const memberIds = detail.members.filter((member) => keys.has(selectionKey({ kind: 'member', id: member.id }))).map(({ id }) => id);
   const memberSet = new Set(memberIds);
   const connected = (edge: BoardEdge) => memberSet.has(edge.from_member_id) || memberSet.has(edge.to_member_id);
-  const connectedEdges = detail.edges.filter(connected);
+  // Hidden connections are not independent targets, but removing a visible
+  // endpoint still cascades to them. The confirmation must count that impact.
+  const connectedEdges = incidentEdges.filter(connected);
   const edgeIds = detail.edges.filter((edge) => !connected(edge) && keys.has(selectionKey({ kind: 'edge', id: edge.id }))).map(({ id }) => id);
   const visualIds = detail.visuals.filter((visual) => keys.has(selectionKey({ kind: 'visual', id: visual.id }))).map(({ id }) => id);
   return { memberIds, edgeIds, visualIds, connectedEdgeCount: connectedEdges.length, reversibleCount: edgeIds.length + visualIds.length };

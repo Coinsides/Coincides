@@ -28,9 +28,10 @@ export interface BoardRemovalSelection {
   edgeIds: string[];
   visualIds: string[];
 }
+export type BoardLayerSelection = Pick<BoardRemovalSelection, 'memberIds' | 'visualIds'>;
 
 const geometryFields = ['x', 'y', 'w', 'h', 'scale', 'z_index', 'pinned'];
-const visualFields = [...geometryFields, 'visual_kind', 'rotation', 'data', 'metadata'];
+const visualFields = [...geometryFields, 'layer_id', 'visual_kind', 'rotation', 'data', 'metadata'];
 const edgeFields = ['from_member_id', 'to_member_id', 'style', 'label'];
 const otherDirection = (direction: Direction): Direction => direction === 'before' ? 'after' : 'before';
 function pick(value: Snapshot, fields: string[]): Record<string, unknown> {
@@ -172,7 +173,9 @@ export class BoardCommandHistory {
   }
 
   private patchOperation(kind: Kind, id: string, input: Patch): Operation | null {
-    const before = this.entity(kind, id);
+    const entity = this.entity(kind, id);
+    // Legacy DTOs omit layer_id. Undo must explicitly PATCH null to restore Base.
+    const before = kind === 'edge' ? entity : { ...entity, layer_id: (entity as BoardMember | BoardVisual).layer_id ?? null };
     const fields = Object.keys(input).filter((field) => field !== 'placed'
       && JSON.stringify((before as unknown as Record<string, unknown>)[field]) !== JSON.stringify((input as Record<string, unknown>)[field]));
     return fields.length ? { kind, key: this.key(kind, id), before, after: { ...before, ...input }, fields } : null;
@@ -201,6 +204,38 @@ export class BoardCommandHistory {
       if (operation) command.push(operation);
     }
     await this.commit(boardId, command);
+  }
+
+  async moveSelectionToLayer(boardId: string, selection: BoardLayerSelection, layerId: string | null) {
+    const command: Command = [];
+    for (const kind of ['member', 'visual'] as const) {
+      const ids = kind === 'member' ? selection.memberIds : selection.visualIds;
+      for (const id of new Set(ids)) {
+        // Pinning restricts geometry gestures, not an object's layer membership.
+        const operation = this.patchOperation(kind, id, { layer_id: layerId });
+        if (operation) command.push(operation);
+      }
+    }
+    await this.commit(boardId, command);
+  }
+
+  /** Layer deletion is outside undo. Old object snapshots must not revive its FK. */
+  rehomeDeletedLayer(layerId: string) {
+    const rehome = <T extends Snapshot>(value: T): T => (
+      'layer_id' in value && value.layer_id === layerId ? { ...value, layer_id: null } : value
+    );
+    for (const command of [...this.past, ...this.future]) {
+      for (const operation of command) {
+        if (operation.before) operation.before = rehome(operation.before);
+        if (operation.after) operation.after = rehome(operation.after);
+      }
+    }
+    if (this.detail) this.detail = {
+      ...this.detail,
+      layers: (this.detail.layers ?? []).filter((layer) => layer.id !== layerId),
+      members: this.detail.members.map(rehome),
+      visuals: this.detail.visuals.map(rehome),
+    };
   }
 
   async create(boardId: string, kind: 'edge' | 'visual', input: CreateBoardEdgeInput | CreateBoardVisualInput) {
