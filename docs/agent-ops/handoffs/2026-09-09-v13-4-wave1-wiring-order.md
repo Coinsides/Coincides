@@ -51,3 +51,55 @@
 ## 四 · Result 格式(工单尾追加)
 
 `## Result`:numstat + 五冒烟逐条结果 + 未做清单 + 停线事项(如有);**⛔ commit**(工作树交 HQ 代账);⛔ 读 .env;⛔ key 出境;⛔ 用户库接触;⛔ 安全类测试。
+
+## Result
+
+> **日期**: 2026-09-09
+> **From**: codex(builder)
+> **结论**: STOPPED — 施工前触发本单 §二“现物与本单假设冲突”停线条件；五件均未实施，不标 done，待 HQ 裁定。
+> **取证基线**: `fable/v2-bn12-exoskeleton`，HEAD `b097ebe31dca236437bbbb238a3193d29235a192`；以下行号为本次工作树静态源码证据。
+
+### numstat
+
+本次仅追加本工单回执，产品代码为 `0 additions / 0 deletions`。开工时 tracked diff 为空；原有未跟踪文件未读取、未改动。
+
+```text
+44	0	docs/agent-ops/handoffs/2026-09-09-v13-4-wave1-wiring-order.md
+```
+
+### 停线事项
+
+1. **A2：visuals 已有 pinned，工单的无字段假设不成立。** 本单 §二（第 42 行）写“pinned 语义不适用 visuals（无 pinned 字段）”；实际 `server/src/db/migrations/057_v13_boards.ts:71` 已声明 `board_visuals.pinned`。`server/src/validators/boards.ts:42` 定义该字段，`:68`、`:77` 将它纳入 visual PATCH；`server/src/services/boards.ts:118` hydrate 为 boolean，`:351` 插入、`:367` 与 `:370` 更新它；`client/src/pages/Boards/boardTypes.ts:66` 的 BoardVisual 继承含 pinned 的 BoardGeometry（`:17`）。这是现有契约事实，不是本次增设字段。依第 41 行停线，不自行决定拖移/缩放是否忽略或遵守 pinned。
+2. **A4：objects 标题快照字段缺口。** 本单要求事件 objects 保存 board id + title 快照；`server/src/db/recordEvent.ts:38` 的 objects 元素仅允许 `kind/id`，`:41` 使用 strict，`:65`–`:68` 对不符项抛 `events_invalid_entry`。不能直接放入 title；本次未扩该公共契约，也未改放 summary/meta 代替工单指定位置。`board_deleted` 新 verb 本来就是本单授权新增，不把它尚未存在另算停线原因。
+
+### 其余已核事实（不是冒烟通过）
+
+- **A4 级联**：限定全体 `server/src/db/migrations/*.ts` 与 `server/src/db/schema.sql` 静态核对，只见 members/edges/visuals 指向 boards（schema `:1286`、`:1306`、`:1320`）及 edges 两端指向 members（`:1312`、`:1313`），未发现工单未列品类的 FK 级联。soul FK 为 RESTRICT（`:1273`），一魂一板索引在 `:1280`；未连接任何数据库验证实际存量。
+- **A4 搬迁撤销后果**：operation_batches 没有 board FK（schema `:382`–`:394`）；board_id 在搬迁 JSON receipt 内（`server/src/services/boardTrayRelocation.ts:199`）。删板后旧 batch 不随 FK 删除，撤销入口先核旧 board（`:209`），会走 board_not_found（`:29`–`:32`）；同魂新板也不是旧 board id（`:213`）。仅列现有后果，未改批次保留或失效设计。
+- **A5 可用软删底座**：`server/src/routes/notes.ts:179` DELETE 已接 trash，`:193` 有 restore；`server/src/services/notes.ts:43`、`:51` 仅改 status/trashed_at，`:123` 默认过滤 active。`client/src/pages/Courses/CourseDetail.tsx:142`、`:193`、`:223` 已有恢复调用、Trash 页签与 Restore 入口。无需因“仅硬删可行”停 A5。
+- **A5 板卡降级底座**：`server/src/services/boards.ts:146` 将非 active 笔记解析为 unavailable/note_inactive，`:147` 在 active 时恢复 available；`:213` 仍读取成员。`client/src/pages/Boards/BoardPage.tsx:403`–`:415` 渲染降级卡。`NoteChromeLayer.tsx:623`–`:627` 的笔记内 More 仍占位，未接线。
+
+### 五条冒烟逐条结果
+
+| # | 工单冒烟 | 本次结果 |
+|---|---|---|
+| ① | 改板名，重开仍在 | **未运行**：施工前停线，A1 未实施。 |
+| ② | 挪一笔画、缩放一图形，重开保持 | **未运行**：A2 pinned 假设冲突，未改拖移/缩放。 |
+| ③ | 加 label、切单向箭头，重开保持 | **未运行**：施工前停线，A3 未实施。 |
+| ④ | 删含画物的板、确认计数、同魂重开、board_deleted | **未运行**：A4 未实施；无删板或事件写入。 |
+| ⑤ | 删除有板挂载的笔记、删除期可见降级、恢复回活 | **未运行**：只核现有软删链，A5 UI 未实施。 |
+
+### 验证与未做清单
+
+- 已做：完整读取工单、核对相关现物与引用行号、检查本次文档 diff/numstat/空白；CodeGraph 优先尝试但 MCP 未见可用入口、CLI 不在 PATH，rg 也不可用，回落限定路径 PowerShell 静态读取。
+- 未做：A1–A5 全部实现；typecheck、build、`useBoard.test.tsx`、`BoardPage.smoke.test.tsx`、`npm run verify:v2-bn8-runtime` 及五条冒烟。停线回执不是产品完工，也不是验证门豁免或通过。
+- 未做：任何数据库连接/读写、迁移执行、产品/API/浏览器启动与操作、网络/模型调用、安全类测试；未读取 `.env`，未输出或传输 key。
+- 未做：git commit/push/PR/merge；未修改工单既有正文与 ready 状态、current-state、agent 指令或权限配置。工作树仅交 HQ 本停线回执，裁定留 HQ。
+
+## 补遗一(HQ 裁定,2026-09-09,两停线全裁,续工令)
+
+1. **A2 改判**:§二"visuals 无 pinned 字段"假设作废(builder 举证成立,057:71 现物为准)——visuals 拖移/缩放**遵守 pinned**(pinned=拒绝几何变更,与 member 同语义);selectionBar 对选中 visual 提供 Pin/Unpin(PATCH 契约已备,与 member 一致);
+2. **A4 改判**:⛔ 扩 recordEvent objects 公共契约——objects=`[{kind:'board', id}]` 即可;板名与射程数字入 **summary**(形如 `Board "<title>" deleted: N members, M edges, K visuals`)与 **meta**(`{title, member_count, edge_count, visual_count}`);
+3. **A4 附账认可**:删板后旧搬迁批次撤销走 board_not_found=**可接受的现有后果**,⛔ 本单改批次保留/失效设计;
+4. **A5 确认**:按回执已核软删底座(DELETE /notes:179+restore+trash 链)直接接线,恢复入口沿现有 Trash 面;
+5. 其余条款照原单;**续工:A1–A5 全做**,typecheck/build+五冒烟+既有测试回归,新 Result 追加于本补遗之后(上方已有停线回执,完工判据认新 Result+产品码 numstat,⛔ 认旧回执)。
