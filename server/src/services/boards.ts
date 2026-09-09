@@ -228,6 +228,23 @@ export function updateBoard(db: Database.Database, userId: string, boardId: stri
   return hydrateBoard(boardRow(db, userId, boardId));
 }
 
+export function deleteBoard(db: Database.Database, userId: string, boardId: string) {
+  requireTransaction(db);
+  const board = hydrateBoard(boardRow(db, userId, boardId));
+  const counts = db.prepare(`SELECT
+    (SELECT COUNT(*) FROM board_members WHERE board_id = ?) AS member_count,
+    (SELECT COUNT(*) FROM board_edges WHERE board_id = ?) AS edge_count,
+    (SELECT COUNT(*) FROM board_visuals WHERE board_id = ?) AS visual_count
+  `).get(boardId, boardId, boardId) as { member_count: number; edge_count: number; visual_count: number };
+  // Capture impact before removing endpoints. Only the board's owned rows go;
+  // the soul, referenced content and historical relocation batches survive.
+  db.prepare('DELETE FROM board_edges WHERE board_id = ?').run(boardId);
+  db.prepare('DELETE FROM board_members WHERE board_id = ?').run(boardId);
+  db.prepare('DELETE FROM board_visuals WHERE board_id = ?').run(boardId);
+  db.prepare('DELETE FROM boards WHERE id = ? AND user_id = ?').run(boardId, userId);
+  return { removed: true, board, ...counts };
+}
+
 export function mountBoardMember(db: Database.Database, userId: string, boardId: string, value: unknown) {
   requireTransaction(db);
   const input = parse(mountBoardMemberSchema, value);

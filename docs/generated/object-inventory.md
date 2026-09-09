@@ -22,12 +22,12 @@
 
 ---
 
-## 1. 数据表（活表 85 张）
+## 1. 数据表（活表 89 张）
 
 > **口径**：已核 `server/src/db/init.ts:33,156` —— **先应用 `schema.sql`，再跑 migrations**。
 > 故 **活表 = `schema.sql` 声明 ∪ migrations 建表 − migrations 落表**。
-> `schema.sql` 单独声明 59 张，**那不是活表数** ——
-> 部分晚期表被回填进 `schema.sql`（39 张），部分没有（26 张）。
+> `schema.sql` 单独声明 63 张，**那不是活表数** ——
+> 部分晚期表被回填进 `schema.sql`（43 张），部分没有（26 张）。
 > 这是回填不一致，不是缺陷；但它意味着**任何"数一下 schema.sql"得出的数字都是错的**。
 
 | # | 表 | 首次建于 | 在 `schema.sql` |
@@ -37,86 +37,90 @@
 | 3 | `agent_messages` | `schema.sql`（基线） | ✅ |
 | 4 | `annotation_ranges` | 036_v2_annotation_truths | — |
 | 5 | `annotation_truths` | 036_v2_annotation_truths | — |
-| 6 | `canvas_assets` | 041_v2_canvas_image_assets | — |
-| 7 | `canvas_frames` | 023_v2_learning_canvas | ✅ |
-| 8 | `canvas_nodes` | 023_v2_learning_canvas | ✅ |
-| 9 | `canvas_objects` | 035_v2_canvas_objects | — |
-| 10 | `canvas_page_collections` | 035_v2_canvas_objects | — |
-| 11 | `canvas_placements` | 035_v2_canvas_objects | — |
-| 12 | `canvas_viewport_states` | 023_v2_learning_canvas | ✅ |
-| 13 | `card_decks` | `schema.sql`（基线） | ✅ |
-| 14 | `card_sections` | `schema.sql`（基线） | ✅ |
-| 15 | `card_tags` | `schema.sql`（基线） | ✅ |
-| 16 | `cards` | `schema.sql`（基线） | ✅ |
-| 17 | `conflict_review_items` | 018_v2_reconciliation_safety | ✅ |
-| 18 | `content_group_folder_placements` | 032_v2_group_folders | ✅ |
-| 19 | `content_group_members` | 033_v2_content_group_members | ✅ |
-| 20 | `content_groups` | 031_v2_content_groups | ✅ |
-| 21 | `content_mounts` | 035_v2_canvas_objects | — |
-| 22 | `courses` | `schema.sql`（基线） | ✅ |
-| 23 | `daily_statuses` | `schema.sql`（基线） | ✅ |
-| 24 | `database_meta` | 056_v13_coordinate_contract | — |
-| 25 | `document_chunks` | `schema.sql`（基线） | ✅ |
-| 26 | `documents` | `schema.sql`（基线） | ✅ |
-| 27 | `events` | 054_v13_events_ledger | ✅ |
-| 28 | `evidence_items` | 017_v2_reconciliation_evidence | ✅ |
-| 29 | `evidence_sets` | 017_v2_reconciliation_evidence | ✅ |
-| 30 | `excluded_material_scopes` | 018_v2_reconciliation_safety | ✅ |
-| 31 | `goal_dependencies` | 008_goal_dependencies | ✅ |
-| 32 | `goals` | `schema.sql`（基线） | ✅ |
-| 33 | `group_folders` | 032_v2_group_folders | ✅ |
-| 34 | `image_object_extensions` | 041_v2_canvas_image_assets | — |
-| 35 | `imprint_fragment_vectors` | 052_v2_imprint_fragment_vectors | — |
-| 36 | `imprint_fragments` | 049_v2_source_imprints | — |
-| 37 | `item_anchors` | 047_v2_item_relation_floor | ✅ |
-| 38 | `item_snapshots` | 047_v2_item_relation_floor | ✅ |
-| 39 | `items` | 047_v2_item_relation_floor | ✅ |
-| 40 | `learning_canvases` | 023_v2_learning_canvas | ✅ |
-| 41 | `managed_file_cleanup_jobs` | 046_v2_source_lifecycle_closure | — |
-| 42 | `material_reconciliation_decisions` | 017_v2_reconciliation_evidence | ✅ |
-| 43 | `material_segment_fragments` | 016_v2_material_proposal | ✅ |
-| 44 | `material_segments` | 016_v2_material_proposal | ✅ |
-| 45 | `note_block_placements` | 015_v2_note_foundation | ✅ |
-| 46 | `note_block_sources` | 015_v2_note_foundation | ✅ |
-| 47 | `note_blocks` | 015_v2_note_foundation | ✅ |
-| 48 | `notes` | 015_v2_note_foundation | ✅ |
-| 49 | `operation_batches` | 015_v2_note_foundation | ✅ |
-| 50 | `page_frame_extensions` | 035_v2_canvas_objects | — |
-| 51 | `projections` | 015_v2_note_foundation | ✅ |
-| 52 | `proposals` | `schema.sql`（基线） | ✅ |
-| 53 | `purpose_members` | 044_v2_purposes | — |
-| 54 | `purposes` | 044_v2_purposes | — |
-| 55 | `reconciliation_recovery_events` | 018_v2_reconciliation_safety | ✅ |
-| 56 | `recurring_task_groups` | `schema.sql`（基线） | ✅ |
-| 57 | `relation_assessments` | 047_v2_item_relation_floor | ✅ |
-| 58 | `relations` | 047_v2_item_relation_floor | ✅ |
-| 59 | `source_anchor_links` | 020_v2_source_anchors | ✅ |
-| 60 | `source_anchors` | 020_v2_source_anchors | ✅ |
-| 61 | `source_board_nodes` | 022_v2_source_boards | ✅ |
-| 62 | `source_boards` | 022_v2_source_boards | ✅ |
-| 63 | `source_files` | 045_v2_source_identity_floor | — |
-| 64 | `source_fragments` | 016_v2_material_proposal | ✅ |
-| 65 | `source_imprints` | 049_v2_source_imprints | — |
-| 66 | `source_materializations` | 045_v2_source_identity_floor | — |
-| 67 | `source_materials` | 016_v2_material_proposal | ✅ |
-| 68 | `source_project_placements` | 045_v2_source_identity_floor | — |
-| 69 | `source_records` | 045_v2_source_identity_floor | — |
-| 70 | `source_scopes` | 021_v2_source_scopes | ✅ |
-| 71 | `source_snapshot_pages` | 019_v2_source_snapshots | ✅ |
-| 72 | `source_snapshots` | 019_v2_source_snapshots | ✅ |
-| 73 | `structured_object_extensions` | 042_v2_structured_object_extensions | — |
-| 74 | `study_activity_log` | `schema.sql`（基线） | ✅ |
-| 75 | `study_mode_templates` | `schema.sql`（基线） | ✅ |
-| 76 | `tag_groups` | `schema.sql`（基线） | ✅ |
-| 77 | `tags` | `schema.sql`（基线） | ✅ |
-| 78 | `task_cards` | 011_task_cards | — |
-| 79 | `tasks` | `schema.sql`（基线） | ✅ |
-| 80 | `template_definitions` | 025_v2_template_definitions | ✅ |
-| 81 | `time_block_template_sets` | 012_time_block_templates | — |
-| 82 | `time_block_templates` | 012_time_block_templates | — |
-| 83 | `time_blocks` | 007_time_blocks | — |
-| 84 | `users` | `schema.sql`（基线） | ✅ |
-| 85 | `visual_connector_extensions` | 040_v2_visual_connector_extensions | — |
+| 6 | `board_edges` | 057_v13_boards | ✅ |
+| 7 | `board_members` | 057_v13_boards | ✅ |
+| 8 | `board_visuals` | 057_v13_boards | ✅ |
+| 9 | `boards` | 057_v13_boards | ✅ |
+| 10 | `canvas_assets` | 041_v2_canvas_image_assets | — |
+| 11 | `canvas_frames` | 023_v2_learning_canvas | ✅ |
+| 12 | `canvas_nodes` | 023_v2_learning_canvas | ✅ |
+| 13 | `canvas_objects` | 035_v2_canvas_objects | — |
+| 14 | `canvas_page_collections` | 035_v2_canvas_objects | — |
+| 15 | `canvas_placements` | 035_v2_canvas_objects | — |
+| 16 | `canvas_viewport_states` | 023_v2_learning_canvas | ✅ |
+| 17 | `card_decks` | `schema.sql`（基线） | ✅ |
+| 18 | `card_sections` | `schema.sql`（基线） | ✅ |
+| 19 | `card_tags` | `schema.sql`（基线） | ✅ |
+| 20 | `cards` | `schema.sql`（基线） | ✅ |
+| 21 | `conflict_review_items` | 018_v2_reconciliation_safety | ✅ |
+| 22 | `content_group_folder_placements` | 032_v2_group_folders | ✅ |
+| 23 | `content_group_members` | 033_v2_content_group_members | ✅ |
+| 24 | `content_groups` | 031_v2_content_groups | ✅ |
+| 25 | `content_mounts` | 035_v2_canvas_objects | — |
+| 26 | `courses` | `schema.sql`（基线） | ✅ |
+| 27 | `daily_statuses` | `schema.sql`（基线） | ✅ |
+| 28 | `database_meta` | 056_v13_coordinate_contract | — |
+| 29 | `document_chunks` | `schema.sql`（基线） | ✅ |
+| 30 | `documents` | `schema.sql`（基线） | ✅ |
+| 31 | `events` | 054_v13_events_ledger | ✅ |
+| 32 | `evidence_items` | 017_v2_reconciliation_evidence | ✅ |
+| 33 | `evidence_sets` | 017_v2_reconciliation_evidence | ✅ |
+| 34 | `excluded_material_scopes` | 018_v2_reconciliation_safety | ✅ |
+| 35 | `goal_dependencies` | 008_goal_dependencies | ✅ |
+| 36 | `goals` | `schema.sql`（基线） | ✅ |
+| 37 | `group_folders` | 032_v2_group_folders | ✅ |
+| 38 | `image_object_extensions` | 041_v2_canvas_image_assets | — |
+| 39 | `imprint_fragment_vectors` | 052_v2_imprint_fragment_vectors | — |
+| 40 | `imprint_fragments` | 049_v2_source_imprints | — |
+| 41 | `item_anchors` | 047_v2_item_relation_floor | ✅ |
+| 42 | `item_snapshots` | 047_v2_item_relation_floor | ✅ |
+| 43 | `items` | 047_v2_item_relation_floor | ✅ |
+| 44 | `learning_canvases` | 023_v2_learning_canvas | ✅ |
+| 45 | `managed_file_cleanup_jobs` | 046_v2_source_lifecycle_closure | — |
+| 46 | `material_reconciliation_decisions` | 017_v2_reconciliation_evidence | ✅ |
+| 47 | `material_segment_fragments` | 016_v2_material_proposal | ✅ |
+| 48 | `material_segments` | 016_v2_material_proposal | ✅ |
+| 49 | `note_block_placements` | 015_v2_note_foundation | ✅ |
+| 50 | `note_block_sources` | 015_v2_note_foundation | ✅ |
+| 51 | `note_blocks` | 015_v2_note_foundation | ✅ |
+| 52 | `notes` | 015_v2_note_foundation | ✅ |
+| 53 | `operation_batches` | 015_v2_note_foundation | ✅ |
+| 54 | `page_frame_extensions` | 035_v2_canvas_objects | — |
+| 55 | `projections` | 015_v2_note_foundation | ✅ |
+| 56 | `proposals` | `schema.sql`（基线） | ✅ |
+| 57 | `purpose_members` | 044_v2_purposes | — |
+| 58 | `purposes` | 044_v2_purposes | — |
+| 59 | `reconciliation_recovery_events` | 018_v2_reconciliation_safety | ✅ |
+| 60 | `recurring_task_groups` | `schema.sql`（基线） | ✅ |
+| 61 | `relation_assessments` | 047_v2_item_relation_floor | ✅ |
+| 62 | `relations` | 047_v2_item_relation_floor | ✅ |
+| 63 | `source_anchor_links` | 020_v2_source_anchors | ✅ |
+| 64 | `source_anchors` | 020_v2_source_anchors | ✅ |
+| 65 | `source_board_nodes` | 022_v2_source_boards | ✅ |
+| 66 | `source_boards` | 022_v2_source_boards | ✅ |
+| 67 | `source_files` | 045_v2_source_identity_floor | — |
+| 68 | `source_fragments` | 016_v2_material_proposal | ✅ |
+| 69 | `source_imprints` | 049_v2_source_imprints | — |
+| 70 | `source_materializations` | 045_v2_source_identity_floor | — |
+| 71 | `source_materials` | 016_v2_material_proposal | ✅ |
+| 72 | `source_project_placements` | 045_v2_source_identity_floor | — |
+| 73 | `source_records` | 045_v2_source_identity_floor | — |
+| 74 | `source_scopes` | 021_v2_source_scopes | ✅ |
+| 75 | `source_snapshot_pages` | 019_v2_source_snapshots | ✅ |
+| 76 | `source_snapshots` | 019_v2_source_snapshots | ✅ |
+| 77 | `structured_object_extensions` | 042_v2_structured_object_extensions | — |
+| 78 | `study_activity_log` | `schema.sql`（基线） | ✅ |
+| 79 | `study_mode_templates` | `schema.sql`（基线） | ✅ |
+| 80 | `tag_groups` | `schema.sql`（基线） | ✅ |
+| 81 | `tags` | `schema.sql`（基线） | ✅ |
+| 82 | `task_cards` | 011_task_cards | — |
+| 83 | `tasks` | `schema.sql`（基线） | ✅ |
+| 84 | `template_definitions` | 025_v2_template_definitions | ✅ |
+| 85 | `time_block_template_sets` | 012_time_block_templates | — |
+| 86 | `time_block_templates` | 012_time_block_templates | — |
+| 87 | `time_blocks` | 007_time_blocks | — |
+| 88 | `users` | `schema.sql`（基线） | ✅ |
+| 89 | `visual_connector_extensions` | 040_v2_visual_connector_extensions | — |
 
 ### 1.1 已由 migration 落表（26）
 
@@ -149,13 +153,14 @@
 
 ---
 
-## 2. HTTP 路由模块（44）
+## 2. HTTP 路由模块（45）
 
 | 模块 | 挂载路径 |
 |---|---|
 | `routes/agent.ts` | `/api/agent` |
 | `routes/annotationTruths.ts` | `/api/annotation-truths` |
 | `routes/auth.ts` | `/api/auth` |
+| `routes/boards.ts` | `/api/boards` |
 | `routes/canvasAssets.ts` | `/api/canvas-assets` |
 | `routes/canvasObjects.ts` | `/api/canvas-objects` |
 | `routes/cards.ts` | `/api/cards` |

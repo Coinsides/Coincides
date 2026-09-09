@@ -146,7 +146,7 @@ test('13.3 synthetic HTTP smoke: create soul/board, two projections, edge, visua
   });
 });
 
-test('real route event failures roll back new soul/board, mount, and unmount with incident edges', async () => {
+test('real route event failures roll back create, mount, unmount and board deletion with owned rows', async () => {
   await withRoutes(async (db, request) => {
     const failVerb = (verb: string) => {
       db.exec('DROP TRIGGER IF EXISTS synthetic_event_failure');
@@ -176,6 +176,19 @@ test('real route event failures roll back new soul/board, mount, and unmount wit
     await request('DELETE', `${path}/members/${first.id}`, undefined, 500);
     assert.deepEqual({ boards: rows(db, 'boards'), members: rows(db, 'board_members'), edges: rows(db, 'board_edges'),
       events: db.prepare('SELECT * FROM events ORDER BY seq').all() }, before);
-    console.log('V13_S1_BOARD_ATOMICITY_PASS create_with_soul=PASS mount=PASS unmount_with_edges=PASS');
+    await request('POST', `${path}/visuals`, { visual_kind: 'shape', w: 100, h: 80, data: {} }, 201);
+    const beforeDelete = {
+      boards: rows(db, 'boards'), members: rows(db, 'board_members'), edges: rows(db, 'board_edges'),
+      visuals: rows(db, 'board_visuals'), purposes: rows(db, 'purposes'),
+      events: db.prepare('SELECT * FROM events ORDER BY seq').all(),
+    };
+    failVerb('board_deleted');
+    await request('DELETE', path, undefined, 500);
+    assert.deepEqual({
+      boards: rows(db, 'boards'), members: rows(db, 'board_members'), edges: rows(db, 'board_edges'),
+      visuals: rows(db, 'board_visuals'), purposes: rows(db, 'purposes'),
+      events: db.prepare('SELECT * FROM events ORDER BY seq').all(),
+    }, beforeDelete);
+    console.log('V13_S1_BOARD_ATOMICITY_PASS create_with_soul=PASS mount=PASS unmount_with_edges=PASS delete_board=PASS');
   });
 });

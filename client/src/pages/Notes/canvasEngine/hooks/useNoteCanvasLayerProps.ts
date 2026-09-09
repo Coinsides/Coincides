@@ -5,6 +5,7 @@ import type {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUIStore } from '@/stores/uiStore';
+import { useNoteTrashAction } from './useNoteTrashAction';
 import type {
   NoteChromeLayerProps,
 } from '../layers/NoteChromeLayer';
@@ -18,7 +19,7 @@ import type {
 } from '../runtimeDataTypes';
 
 export type UseNoteCanvasLayerPropsInput =
-  Omit<NoteChromeLayerProps, 'note' | 'onAddFavorite' | 'onBackProject'>
+  Omit<NoteChromeLayerProps, 'note' | 'onAddFavorite' | 'onBackProject' | 'onTrashNote'>
   & Omit<NoteFloatingPanelLayerProps, 'onCloseSourceJump' | 'onFocusBlock'>
   & Omit<NoteWritingSurfaceLayerProps, 'onFocusBlock' | 'onRequestFocusBlock' | 'noteId' | 'projectId'>
   & Pick<
@@ -47,6 +48,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
   const navigate = useNavigate();
   const addToast = useUIStore((s) => s.addToast);
   const courseId = input.note?.course_id;
+  const handleTrashNote = useNoteTrashAction(input.note);
 
   const handleAddFavorite = useCallback(() => {
     addToast('info', 'Favorites will become persistent in a later Better Notebook patch');
@@ -95,6 +97,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     restoringBlockId: input.restoringBlockId,
     onAddFavorite: handleAddFavorite,
     onBackProject: handleBackProject,
+    onTrashNote: handleTrashNote,
     onCloseOverlay: input.onCloseOverlay,
     onCollapseChrome: input.onCollapseChrome,
     onCreatePageFrame: input.onCreatePageFrame,

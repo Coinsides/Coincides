@@ -5,7 +5,7 @@ import { getDb } from '../db/init.js';
 import type { AuthRequest } from '../middleware/auth.js';
 import { runRecordedAction, type RecordedActionEvent } from '../middleware/recordedAction.js';
 import {
-  createBoard, getBoard, listBoards, updateBoard,
+  createBoard, getBoard, listBoards, updateBoard, deleteBoard,
   mountBoardMember, updateBoardMember, unmountBoardMember,
   createBoardEdge, updateBoardEdge, deleteBoardEdge,
   createBoardVisual, updateBoardVisual, deleteBoardVisual,
@@ -82,6 +82,25 @@ export function createBoardRouter(database: () => Database.Database = getDb): Ro
     const input = updateBoardSchema.parse(req.body);
     const board = db.transaction(() => updateBoard(db, req.userId!, String(req.params.boardId), input))();
     res.json({ board });
+  }));
+
+  router.delete('/:boardId', handle((req, res) => {
+    z.object({}).strict().parse(req.body ?? {});
+    const boardId = String(req.params.boardId);
+    const result = runRecordedAction(database(), req, 'DELETE /api/boards/:boardId', (db, userId) => {
+      const value = deleteBoard(db, userId, boardId);
+      const { board, member_count, edge_count, visual_count } = value;
+      return {
+        value,
+        events: [{
+          verb: 'board_deleted',
+          objects: [{ kind: 'board', id: board.id }],
+          summary: `Board "${board.title}" deleted: ${member_count} members, ${edge_count} edges, ${visual_count} visuals`,
+          meta: { title: board.title, member_count, edge_count, visual_count },
+        }],
+      };
+    });
+    res.json(result);
   }));
 
   router.post('/:boardId/relocate-tray', handle((req, res) => {

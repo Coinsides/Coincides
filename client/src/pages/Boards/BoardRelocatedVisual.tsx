@@ -61,11 +61,13 @@ function TableContent({ extension }: { extension: Row }) {
 }
 
 /** Read the server's original rows without normalizing or saving them back through the paper writer. */
-export function BoardRelocatedVisual({ visual, selected, selectable, onSelect }: {
+export function BoardRelocatedVisual({ visual, selected, selectable, onSelect, onPointerDown, onResize }: {
   visual: BoardVisual;
   selected: boolean;
   selectable: boolean;
   onSelect: () => void;
+  onPointerDown?: (event: React.PointerEvent) => void;
+  onResize?: (event: React.PointerEvent) => void;
 }) {
   const source = record(visual.data.tray_source);
   const object = record(source.object);
@@ -105,7 +107,7 @@ export function BoardRelocatedVisual({ visual, selected, selectable, onSelect }:
           markerStart={marker(extension.start_marker)} markerEnd={marker(extension.end_marker)} />
         {selected && <path d={path} className={styles.selectedLine} />}
         {selectable && <path d={path} className={styles.lineHit} role="button" tabIndex={0} aria-label={label}
-          onPointerDown={select} onFocus={select} onKeyDown={(event) => {
+          onPointerDown={onPointerDown || select} onFocus={select} onKeyDown={(event) => {
             if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); select(event); }
           }} />}
       </g>
@@ -127,12 +129,14 @@ export function BoardRelocatedVisual({ visual, selected, selectable, onSelect }:
     <div className={`${styles.visualContent} ${selected ? styles.selected : ''}`}
       style={{ ...shapeStyle, transform: `rotate(${visual.rotation}deg)` }}
       role={selectable ? 'button' : undefined} tabIndex={selectable ? 0 : undefined} aria-label={label}
-      onPointerDown={select} onFocus={select} onKeyDown={(event) => {
+      onPointerDown={selectable ? onPointerDown || select : undefined} onFocus={select} onKeyDown={(event) => {
         if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); select(event); }
       }}>
       {visual.visual_kind === 'shape' && <span className={styles.visualShapeText}>{shapeText}</span>}
       {visual.visual_kind === 'image' && <ImageContent extension={record(extensions.image)} />}
       {visual.visual_kind === 'table' && <TableContent extension={record(extensions.table)} />}
     </div>
+    {selectable && selected && !visual.pinned && onResize && <button className={`${styles.resizeHandle} ${styles.visualResizeHandle}`}
+      aria-label={`Resize moved ${visual.visual_kind}`} onPointerDown={onResize} onDoubleClick={(event) => event.stopPropagation()} />}
   </div>;
 }

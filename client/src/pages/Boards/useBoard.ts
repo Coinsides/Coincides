@@ -8,6 +8,8 @@ import type {
   MountBoardMemberInput,
   PatchBoardInput,
   PatchBoardMemberInput,
+  PatchBoardEdgeInput,
+  PatchBoardVisualInput,
 } from './boardTypes';
 
 interface BoardScope {
@@ -155,6 +157,12 @@ export function useBoard(boardId: string | undefined) {
     'write', scope,
   ), [enqueue, scope]);
 
+  const updateEdge = useCallback((edgeId: string, input: PatchBoardEdgeInput) => enqueue(
+    (id) => boardRepository.updateEdge(id, edgeId, input),
+    (detail, edge) => detail ? { ...detail, edges: upsert(detail.edges, edge) } : detail,
+    'write', scope,
+  ), [enqueue, scope]);
+
   const addVisual = useCallback((input: CreateBoardVisualInput) => enqueue(
     (id) => boardRepository.createVisual(id, input),
     (detail, visual) => detail ? { ...detail, visuals: upsert(detail.visuals, visual) } : detail,
@@ -164,6 +172,12 @@ export function useBoard(boardId: string | undefined) {
   const removeVisual = useCallback((visualId: string) => enqueue(
     (id) => boardRepository.deleteVisual(id, visualId),
     (detail) => detail ? { ...detail, visuals: detail.visuals.filter((visual) => visual.id !== visualId) } : detail,
+    'write', scope,
+  ), [enqueue, scope]);
+
+  const updateVisual = useCallback((visualId: string, input: PatchBoardVisualInput) => enqueue(
+    (id) => boardRepository.updateVisual(id, visualId, input),
+    (detail, visual) => detail ? { ...detail, visuals: upsert(detail.visuals, visual) } : detail,
     'write', scope,
   ), [enqueue, scope]);
 
@@ -185,6 +199,6 @@ export function useBoard(boardId: string | undefined) {
     error: current ? state.error : null,
     pending: current && state.pendingCount > 0,
     reload, updateBoard, mount, updateMember, unmount, addEdge, removeEdge,
-    addVisual, removeVisual, clearError, flush,
+    addVisual, removeVisual, updateVisual, updateEdge, clearError, flush,
   };
 }

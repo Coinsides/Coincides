@@ -31,6 +31,9 @@ export const boardRepository = {
     const { data } = await api.patch<{ board: Board }>(boardPath(boardId), input);
     return data.board;
   },
+  async delete(boardId: string): Promise<void> {
+    await api.delete(boardPath(boardId));
+  },
   async mount(boardId: string, input: MountBoardMemberInput): Promise<BoardMember> {
     const { data } = await api.post<{ member: BoardMember; created: boolean }>(`${boardPath(boardId)}/members`, input);
     return data.member;

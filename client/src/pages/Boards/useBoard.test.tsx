@@ -6,7 +6,8 @@ import { useBoard } from './useBoard';
 // All repository I/O is synthetic; only the fixed error-copy mapper is real.
 const repository = vi.hoisted(() => ({
   get: vi.fn(), update: vi.fn(), mount: vi.fn(), updateMember: vi.fn(), unmount: vi.fn(),
-  createEdge: vi.fn(), deleteEdge: vi.fn(), createVisual: vi.fn(), deleteVisual: vi.fn(),
+  createEdge: vi.fn(), updateEdge: vi.fn(), deleteEdge: vi.fn(),
+  createVisual: vi.fn(), updateVisual: vi.fn(), deleteVisual: vi.fn(),
 }));
 vi.mock('@/services/api', () => ({ default: {} }));
 vi.mock('./boardRepository', async (importOriginal) => {
@@ -46,12 +47,113 @@ function detail(id = 'board-a'): BoardDetail {
   return { board: board(id), members: [member('member-a', id), member('member-b', id)], edges: [], visuals: [] };
 }
 
+function visualAndEdgeDetail(): BoardDetail {
+  return {
+    ...detail(),
+    visuals: [{
+      id: 'visual-a', board_id: 'board-a', visual_kind: 'shape', ...geometry,
+      rotation: 0, data: { shape: 'rectangle' }, metadata: {},
+      created_at: timestamp, updated_at: timestamp,
+    }],
+    edges: [{
+      id: 'edge-a', board_id: 'board-a', from_member_id: 'member-a', to_member_id: 'member-b',
+      style: { stroke: '#123456' }, label: 'Original label', created_at: timestamp,
+    }],
+  };
+}
+
 beforeEach(() => {
   vi.resetAllMocks();
   repository.get.mockImplementation(async (id: string) => detail(id));
 });
 
 describe('useBoard persistence queue', () => {
+  it('serializes visual and edge patches before reload and applies their hydrated response objects', async () => {
+    const initial = visualAndEdgeDetail();
+    const savedVisual = { ...initial.visuals[0], x: 61, w: 315, pinned: true, updated_at: '2026-09-09T12:00:00.000Z' };
+    const savedEdge = { ...initial.edges[0], label: 'Saved label', style: { stroke: '#123456', direction: 'forward' } };
+    const visualSave = deferred<BoardVisual>();
+    const edgeSave = deferred<BoardEdge>();
+    const reloadRead = deferred<BoardDetail>();
+    repository.get.mockResolvedValueOnce(initial).mockReturnValueOnce(reloadRead.promise);
+    repository.updateVisual.mockReturnValueOnce(visualSave.promise);
+    repository.updateEdge.mockReturnValueOnce(edgeSave.promise);
+    const { result } = renderHook(() => useBoard('board-a'));
+    await waitFor(() => expect(result.current.detail).toEqual(initial));
+
+    let visualWrite!: Promise<boolean>;
+    let edgeWrite!: Promise<boolean>;
+    let reload!: Promise<void>;
+    let flush!: Promise<void>;
+    let flushed = false;
+    act(() => {
+      visualWrite = result.current.updateVisual('visual-a', { x: 60, w: 310, pinned: true });
+      edgeWrite = result.current.updateEdge('edge-a', { label: 'Saved label', style: { direction: 'forward' } });
+      reload = result.current.reload();
+      flush = result.current.flush().then(() => { flushed = true; });
+    });
+    await waitFor(() => expect(repository.updateVisual).toHaveBeenCalledExactlyOnceWith('board-a', 'visual-a', { x: 60, w: 310, pinned: true }));
+    expect(repository.updateEdge).not.toHaveBeenCalled();
+    expect(repository.get).toHaveBeenCalledTimes(1);
+    expect(result.current.detail?.visuals).toEqual(initial.visuals);
+    expect(result.current.pending).toBe(true);
+
+    await act(async () => { visualSave.resolve(savedVisual); expect(await visualWrite).toBe(true); });
+    expect(result.current.detail?.visuals).toEqual([savedVisual]);
+    expect(result.current.detail?.edges).toEqual(initial.edges);
+    expect(repository.updateEdge).toHaveBeenCalledExactlyOnceWith('board-a', 'edge-a', {
+      label: 'Saved label', style: { direction: 'forward' },
+    });
+    expect(repository.get).toHaveBeenCalledTimes(1);
+    await act(async () => { edgeSave.resolve(savedEdge); expect(await edgeWrite).toBe(true); });
+    expect(result.current.detail?.edges).toEqual([savedEdge]);
+    expect(result.current.detail?.members).toEqual(initial.members);
+    expect(repository.get).toHaveBeenCalledTimes(2);
+    expect(result.current.loading).toBe(true);
+    expect(flushed).toBe(false);
+
+    const reopened = { ...initial, board: { ...initial.board, title: 'Reloaded snapshot' }, visuals: [savedVisual], edges: [savedEdge] };
+    await act(async () => { reloadRead.resolve(reopened); await reload; await flush; });
+    expect(result.current.detail).toEqual(reopened);
+    expect(result.current.pending).toBe(false);
+    expect(result.current.loading).toBe(false);
+    expect(flushed).toBe(true);
+  });
+
+  it.each(['visual', 'edge'] as const)('shows a failed %s patch, retains its confirmed value, and runs the next queued patch', async (failedKind) => {
+    const initial = visualAndEdgeDetail();
+    const savedVisual = { ...initial.visuals[0], y: 420, pinned: true };
+    const savedEdge = { ...initial.edges[0], label: null, style: { direction: 'both' } };
+    repository.get.mockResolvedValue(initial);
+    const { result } = renderHook(() => useBoard('board-a'));
+    await waitFor(() => expect(result.current.detail).toEqual(initial));
+    repository.updateVisual.mockImplementation(async () => {
+      if (failedKind === 'visual') throw new Error('Fixture patch failed');
+      return savedVisual;
+    });
+    repository.updateEdge.mockImplementation(async () => {
+      if (failedKind === 'edge') throw new Error('Fixture patch failed');
+      return savedEdge;
+    });
+    const patchVisual = () => result.current.updateVisual('visual-a', { y: 420, pinned: true });
+    const patchEdge = () => result.current.updateEdge('edge-a', { label: null, style: { direction: 'both' } });
+    await act(async () => {
+      const failure = failedKind === 'visual' ? patchVisual() : patchEdge();
+      const next = failedKind === 'visual' ? patchEdge() : patchVisual();
+      expect(await failure).toBe(false);
+      expect(await next).toBe(true);
+    });
+    expect(result.current.detail?.visuals).toEqual(failedKind === 'visual' ? initial.visuals : [savedVisual]);
+    expect(result.current.detail?.edges).toEqual(failedKind === 'edge' ? initial.edges : [savedEdge]);
+    expect(result.current.detail?.members).toEqual(initial.members);
+    expect(result.current.error).toBe('Could not complete the board action. Try again.');
+    expect(result.current.pending).toBe(false);
+    await expect(result.current.flush()).rejects.toThrow('Could not complete the board action. Try again.');
+    act(() => result.current.clearError());
+    expect(result.current.error).toBeNull();
+    await expect(result.current.flush()).resolves.toBeUndefined();
+  });
+
   it('serializes writes and reloads, and flush waits for the final submitted action', async () => {
     const firstSave = deferred<Board>();
     const savedBoard = { ...board(), viewport: { x: -4200, y: 9000, zoom: 3.25 } };

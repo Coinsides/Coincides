@@ -103,3 +103,79 @@
 3. **A4 附账认可**:删板后旧搬迁批次撤销走 board_not_found=**可接受的现有后果**,⛔ 本单改批次保留/失效设计;
 4. **A5 确认**:按回执已核软删底座(DELETE /notes:179+restore+trash 链)直接接线,恢复入口沿现有 Trash 面;
 5. 其余条款照原单;**续工:A1–A5 全做**,typecheck/build+五冒烟+既有测试回归,新 Result 追加于本补遗之后(上方已有停线回执,完工判据认新 Result+产品码 numstat,⛔ 认旧回执)。
+
+## Result
+
+> **日期**: 2026-09-09
+> **From**: codex(builder)
+> **结论**: A1–A5 全部实施；本单五条功能冒烟、两端 typecheck/build 与既有功能回归 PASS。完整 `verify:v2-bn8-runtime` **不判 PASS**：末项凭据扫描与本轮「禁止安全类测试」冲突，未运行；全部其余子项已分别通过。工单头保留 ready，交 HQ 判断总门与放行，不自行豁免。
+> **交付基线**: `fable/v2-bn12-exoskeleton`，本轮核验 HEAD `e0a0e39a26508bc53deec8a8eb221988375b3b00`；仅工作树交付，无 git commit。
+
+### 实施
+
+- **A1**：板内标题双击或 Rename board 按钮进入内联编辑，空白拒绝、80 字上限；通过既有 PATCH 保存，只改板名，不改魂名。
+- **A2**：freehand / shape / image / table / connector 共用 member 的 begin/move/end 管线，换算 viewport zoom，拖拽结束后 PATCH；shape/image/table 提供 resize 手柄并计入对象 scale。visuals 遵守 pinned，selectionBar 提供 Pin/Unpin；freehand/connector 不提供 resize。失败统一进入 useBoard 错误面，保留原排队与连续拖拽行为。
+- **A3**：select 下双击边或 Edit label 进入内联输入，清空发送 null；`style.direction = none | forward | both`，更新时保留其他 style 字段。箭头端点裁到卡边界外，编辑时输入层位于投影之上，避免卡片遮挡。
+- **A4**：新增 `DELETE /api/boards/:boardId`，runRecordedAction 同事务删 edges/members/visuals/board 并写 board_deleted；魂、笔记、知识内容、旧搬迁批次保留。objects 仍仅 kind/id，summary/meta 按补遗一保存标题与三项真实计数。058 迁移只扩 events verb CHECK，保留旧收据、序号、索引和触发器；未扩 objects 公共契约。BoardList 与板内 More 均接删除确认框，先重新 GET 实数再允许确认，明示搬迁画物真身随板删除。错误可重试、取消不写、离页后的迟到响应不抢导航。
+- **A5**：笔记 More 的 Delete 接既有软删，确认面明示移入 Project Trash、可恢复与板卡暂不可用；成功返回所属 Project，恢复沿既有 Trash/Restore。失败留确认面，跨 note/离页的旧请求不关闭新确认或抢导航。其余占位保留。
+
+### numstat
+
+产品与测试（含 5 个新增文件，标 *；未 git add）：**1275 additions / 54 deletions，24 文件**。
+
+```text
+12    0   client/src/pages/Boards/BoardList.tsx
+190   1   client/src/pages/Boards/BoardPage.smoke.test.tsx
+147   37  client/src/pages/Boards/BoardPage.tsx
+7     3   client/src/pages/Boards/BoardRelocatedVisual.tsx
+17    1   client/src/pages/Boards/Boards.module.css
+3     0   client/src/pages/Boards/boardRepository.ts
+103   1   client/src/pages/Boards/useBoard.test.tsx
+15    1   client/src/pages/Boards/useBoard.ts
+62    0   client/src/pages/Boards/BoardDeleteDialog.tsx *
+132   0   client/src/pages/Boards/BoardDeleteDialog.test.tsx *
+48    0   client/src/pages/Notes/NoteDetail.module.css
+4     1   client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts
+28    0   client/src/pages/Notes/canvasEngine/hooks/useNoteTrashAction.ts *
+132   1   client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx
+78    2   client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx
+1     1   server/package.json
+15    2   server/src/__tests__/v13BoardRoutes.test.ts
+189   0   server/src/__tests__/v13BoardWave1.test.ts *
+1     0   server/src/db/recordEvent.ts
+1     1   server/src/db/schema.sql
+52    0   server/src/db/migrations/058_v13_board_deleted_event.ts *
+1     1   server/src/middleware/recordedAction.ts
+20    1   server/src/routes/boards.ts
+17    0   server/src/services/boards.ts
+```
+
+随行文档：`docs/generated/object-inventory.md` **89/84**（docs:check 发现生成清单尚缺既有 057 的四张板表与 boards 路由，运行原生成器同步；不是本单新增四张表）。本工单仅在补遗一后追加本 Result，旧 STOPPED 回执及 HQ 裁定原文保留。
+
+### 五条冒烟逐条结果
+
+| # | 结果 | 本轮证据 |
+|---|---|---|
+| ① 改板名重开 | **PASS** | BoardPage smoke 经真实组件/仓储、mock HTTP 保存并离页重开；server wave1 经真实 PATCH→GET，标题保留、未新增事件。 |
+| ② 挪笔画、缩图形重开 | **PASS** | UI smoke 在 2× viewport 移动全部五种 visual，并缩放 scale=1.5 的 shape；重开保持、Pin 后无几何 PATCH 且隐藏 resize，Unpin 恢复。server HTTP 重读核 freehand 数据与形状尺寸/pinned。 |
+| ③ label、单向箭头重开 | **PASS** | UI 双击输入、保存、单向 marker 与卡边界坐标、离页重开均核对；另核清空/null、双向/无箭头及 style 其他键保留。server PATCH→GET 核 label/direction 持久化。 |
+| ④ 删含画物的板、计数、同魂重开、事件 | **PASS** | 板内/列表两入口分别核真实 scope，列表打开前新增第三画物后重新取数，取消零 DELETE；删除后同魂创建新板。server 另核 2 members / 1 edge / 2 visuals 的真实落库、魂/内容完整保留、board_deleted objects/summary/meta 与事件失败时整体回滚。 |
+| ⑤ 删挂板笔记、降级、恢复 | **PASS** | NoteChrome smoke 经真实删除 action→Project Trash→既有 Restore；server 真实 notes DELETE/restore→板 GET，member 身份/位置不变，unavailable/note_inactive→available；BoardPage smoke 核降级卡仍可见、重读恢复后可开笔记。 |
+
+**证据边界**：client 是 jsdom 的生产组件/路由/hooks + mock HTTP，server 是生产路由/服务 + 自建内存 SQLite + loopback 随机端口；两层分别取证。不是连接用户数据的浏览器端到端，也未声称真人体感验收。jsdom 的 dialog/pointer capture 仅补测试平台方法，不等于真实浏览器原生弹窗/命中测试。
+
+### 验证
+
+- client `test:unit`：最终 **62 文件 / 535 条 PASS**，包含 `useBoard.test.tsx` **8/8**、`BoardPage.smoke.test.tsx` **11/11**、`BoardDeleteDialog.test.tsx` **4/4**、`NoteChromeLayer.test.tsx` **9/9**。日志：`.codex-tmp/v13-4-validation/test-unit-final.log`。
+- server `test:v13-boards`：**25/25 PASS**（旧板面 18 + 新 wave1 7，含五个子冒烟及 058 迁移保留验证）；server `tsc --noEmit` 与 `npm run build` PASS。
+- client `build:client`（含 `tsc -b`）PASS。构建保留既有大 chunk、server recursive-schema 提示，无错误。
+- 总门其余功能子项全部分别 PASS：tool-face registry / manifest 测试及校验、parity 测试及校验、server/shared runtime import、canvas runtime boundary、group-gallery / groups-rail / single-editor shell、source experience、V11 legacy shutdown / relation freshness、canvas model contract **60 组**、canvas performance **5 场景**、docs:check、git diff --check。日志在 `.codex-tmp/v13-4-validation/`；未改总门脚本。
+- 验证过程保留：新增测试曾因不支持的 Testing Library `exact` 类型参数使 build 失败，已修正并重建 PASS；docs:check 初次因上述生成清单过期失败，同步后 PASS。一次默认并行全量出现未改动的 `groupGalleryPurposeRetirement.test.tsx:111` 短暂失败，随后该文件专项 **3/3**、最终全量 **535/535** 均通过；未修改其测试或产品代码，具体时序原因尚未证明。
+
+### 未做清单与停线举证
+
+- **总门冲突留 HQ**：`package.json` 的 `verify:v2-bn8-runtime` 最后一项是 `npm run check:changed-file-secrets`，指向 `scripts/changedFileSecretScan.mjs`。它枚举并读取变更文件检查凭据，属于本轮禁止的安全类检查；**未运行该项、未原样执行完整总门、未宣布总门 PASS 或豁免**。已执行并通过的是允许子项，不以换名或改脚本绕过。
+- A2/A4 原两条停线已按补遗一解决，无新增数据契约/级联假设冲突。旧搬迁批次删板后撤销仍 board_not_found，按 HQ 已认可后果保留。
+- 不做：BoardList 改名、freehand/connector resize、板软删/回收站、笔记 duplicate/archive/import/export、其他新 event verb、批次保留/失效设计变更。
+- 未读 `.env`。每个 Vitest/Vite 进程使用 `COINCIDES_VALIDATION_ENV_DIR` 指向新建空目录 `.codex-tmp/v13-4-validation-env`；server 验证不启动应用入口，固定内存 fixture。未连接/读取/写入用户数据库，未在用户库执行迁移；无外部模型请求、key 输出/传输或安全类测试。
+- 未 git commit/push/PR/merge，未改 agent 指令/权限文件。开工前已有未跟踪配置、审计、研究文件原样保留；工作树交 HQ。

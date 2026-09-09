@@ -5,6 +5,7 @@ import { loadLibraryPurposes } from '@/pages/Notes/canvasEngine/purposeRepositor
 import type { PurposeFrameV1 } from '@/pages/Notes/canvasEngine/runtimeDataTypes';
 import { boardErrorMessage, boardRepository } from './boardRepository';
 import type { Board } from './boardTypes';
+import { BoardDeleteDialog } from './BoardDeleteDialog';
 import styles from './Boards.module.css';
 
 export default function BoardList() {
@@ -17,6 +18,7 @@ export default function BoardList() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [occupied, setOccupied] = useState<Board | null>(null);
+  const [deleting, setDeleting] = useState<Board | null>(null);
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -101,7 +103,17 @@ export default function BoardList() {
               {new Date(board.updated_at).toLocaleDateString()}
             </time><ArrowRight size={18} /></span>
           </Link>
+          <details className={styles.boardMenu}>
+            <summary aria-label={`Board menu for ${board.title}`}>More</summary>
+            <button className={styles.button} onClick={() => setDeleting(board)}>Delete board</button>
+          </details>
         </li>)}</ul>}
     </>}
+    {deleting && <BoardDeleteDialog key={deleting.id} board={deleting} onCancel={() => setDeleting(null)}
+      onDeleted={() => {
+        setBoards((current) => current.filter(({ id }) => id !== deleting.id));
+        if (occupied?.id === deleting.id) { setOccupied(null); setError(null); }
+        setDeleting(null);
+      }} />}
   </section>;
 }

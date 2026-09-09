@@ -4,11 +4,16 @@ import {
   render,
   renderHook,
   screen,
+  waitFor,
 } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { useState } from 'react';
+import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
+import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import type { NoteBlock } from '../runtimeDataTypes';
 import { DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE } from '../typographyProfileService';
 import { useNoteBlockTrashController } from '../hooks/useNoteBlockTrashController';
+import { useNoteTrashAction } from '../hooks/useNoteTrashAction';
+import { ProjectNotesSection } from '../../../Courses/CourseDetail';
 import {
   NoteChromeLayer,
   type NoteChromeLayerProps,
@@ -16,11 +21,15 @@ import {
 
 const mocks = vi.hoisted(() => ({
   get: vi.fn(),
+  delete: vi.fn(),
+  post: vi.fn(),
 }));
 
 vi.mock('@/services/api', () => ({
   default: {
     get: mocks.get,
+    delete: mocks.delete,
+    post: mocks.post,
   },
 }));
 
@@ -80,6 +89,7 @@ function noteChromeProps(
     restoringBlockId: null,
     onAddFavorite: noop,
     onBackProject: noop,
+    onTrashNote: vi.fn().mockResolvedValue(undefined),
     onCloseOverlay: noop,
     onCollapseChrome: noop,
     onAddPageBelow: noop,
@@ -199,5 +209,126 @@ describe('NoteChromeLayer organize mode', () => {
 
     expect(screen.getByRole('button', { name: 'Layout' })).toBeTruthy();
     expect(screen.queryByText('Snap alignment')).toBeNull();
+  });
+});
+
+describe('NoteChromeLayer note trash smoke', () => {
+  const showModalDescriptor = Object.getOwnPropertyDescriptor(HTMLDialogElement.prototype, 'showModal');
+  const closeDescriptor = Object.getOwnPropertyDescriptor(HTMLDialogElement.prototype, 'close');
+
+  beforeEach(() => {
+    mocks.delete.mockReset();
+    mocks.post.mockReset();
+    // jsdom has no native dialog top layer; preserve its observable open state.
+    Object.defineProperty(HTMLDialogElement.prototype, 'showModal', {
+      configurable: true,
+      value(this: HTMLDialogElement) { this.open = true; },
+    });
+    Object.defineProperty(HTMLDialogElement.prototype, 'close', {
+      configurable: true,
+      value(this: HTMLDialogElement) { this.open = false; },
+    });
+  });
+
+  afterEach(() => {
+    if (showModalDescriptor) Object.defineProperty(HTMLDialogElement.prototype, 'showModal', showModalDescriptor);
+    else Reflect.deleteProperty(HTMLDialogElement.prototype, 'showModal');
+    if (closeDescriptor) Object.defineProperty(HTMLDialogElement.prototype, 'close', closeDescriptor);
+    else Reflect.deleteProperty(HTMLDialogElement.prototype, 'close');
+  });
+
+  it('requires confirmation, cancels without deleting, and keeps a failed delete visible for retry', async () => {
+    const onTrashNote = vi.fn().mockRejectedValueOnce(new Error('Request failed')).mockResolvedValue(undefined);
+    render(<NoteChromeLayer {...noteChromeProps({ onTrashNote })} />);
+
+    expect(screen.getByText(/History, duplicate, archive, import, and export/).closest('[aria-disabled="true"]')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Delete note' }));
+    expect(screen.getByRole('dialog').textContent).toContain('can be restored from the Project Trash tab');
+    expect(onTrashNote).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(onTrashNote).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Delete note' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Move to Trash' }));
+    expect(await screen.findByRole('alert')).toHaveProperty('textContent', 'Could not move the note to Trash. Please try again.');
+    expect(screen.getByRole('dialog')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Move to Trash' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(onTrashNote).toHaveBeenCalledTimes(2);
+  });
+
+  it('moves the note through the real delete action, navigates to its Project, and restores through the existing Trash entry', async () => {
+    const props = noteChromeProps();
+    let noteStatus: 'active' | 'trashed' = 'active';
+    mocks.delete.mockImplementation(async () => { noteStatus = 'trashed'; return { data: {} }; });
+    mocks.post.mockImplementation(async () => { noteStatus = 'active'; return { data: {} }; });
+    const noteSummary = { ...props.note, updated_at: '2026-09-09T12:00:00Z' };
+
+    function NoteScreen() {
+      const onTrashNote = useNoteTrashAction(props.note);
+      return <NoteChromeLayer {...props} onTrashNote={onTrashNote} />;
+    }
+
+    function ProjectScreen() {
+      const [status, setStatus] = useState<'active' | 'trashed'>('active');
+      const [, refresh] = useState(0);
+      return <ProjectNotesSection
+        notes={status === noteStatus ? [noteSummary] : []}
+        status={status}
+        onStatusChange={setStatus}
+        onCreateNote={vi.fn()}
+        onOpenNote={vi.fn()}
+        refreshNotes={async () => { refresh((value) => value + 1); }}
+        addToast={vi.fn()}
+      />;
+    }
+
+    render(<MemoryRouter initialEntries={['/notes/note-td28']} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><Routes>
+      <Route path="/notes/:noteId" element={<NoteScreen />} />
+      <Route path="/projects/course-td28" element={<ProjectScreen />} />
+    </Routes></MemoryRouter>);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Delete note' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Move to Trash' }));
+    expect(await screen.findByText('No notes yet.')).toBeTruthy();
+    expect(mocks.delete).toHaveBeenCalledExactlyOnceWith('/notes/note-td28');
+    fireEvent.click(screen.getByRole('button', { name: 'Trash' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Restore Restore door' }));
+    expect(await screen.findByText('Trash is empty.')).toBeTruthy();
+    expect(mocks.post).toHaveBeenCalledExactlyOnceWith('/notes/note-td28/restore');
+    fireEvent.click(screen.getByRole('button', { name: 'Notes' }));
+    expect(screen.getByRole('button', { name: 'Open note Restore door' })).toBeTruthy();
+  });
+
+  it('keeps a late delete response from navigating away from the next page', async () => {
+    let resolveDelete!: () => void;
+    mocks.delete.mockReturnValue(new Promise<void>((resolve) => { resolveDelete = resolve; }));
+    const props = noteChromeProps();
+    function NoteScreen() {
+      const trashNote = useNoteTrashAction(props.note);
+      return <><button onClick={() => void trashNote()}>Delete pending note</button><Link to="/next">Next page</Link></>;
+    }
+    render(<MemoryRouter initialEntries={['/notes/note-td28']} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><Routes>
+      <Route path="/notes/:noteId" element={<NoteScreen />} />
+      <Route path="/next" element={<p>Next page retained</p>} />
+      <Route path="/projects/:courseId" element={<p>Old project</p>} />
+    </Routes></MemoryRouter>);
+    fireEvent.click(screen.getByRole('button', { name: 'Delete pending note' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Next page' }));
+    await act(async () => resolveDelete());
+    expect(screen.getByText('Next page retained')).toBeTruthy();
+    expect(screen.queryByText('Old project')).toBeNull();
+    expect(mocks.delete).toHaveBeenCalledExactlyOnceWith('/notes/note-td28');
+  });
+
+  it('closes the prior note confirmation when the mounted chrome receives another note', () => {
+    const props = noteChromeProps();
+    const subject = render(<NoteChromeLayer {...props} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Delete note' }));
+    expect(screen.getByRole('dialog')).toBeTruthy();
+    subject.rerender(<NoteChromeLayer {...props} note={{ ...props.note, id: 'note-next', title: 'Next note' }} />);
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(props.onTrashNote).not.toHaveBeenCalled();
   });
 });

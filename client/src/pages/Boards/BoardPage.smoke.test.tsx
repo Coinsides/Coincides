@@ -1,11 +1,12 @@
 import { useMemo, useRef } from 'react';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { Link, MemoryRouter, Route, Routes, useParams } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import BoardList from './BoardList';
 import BoardPage from './BoardPage';
 import AppLayout from '@/components/Layout/AppLayout';
 import { useUIStore } from '@/stores/uiStore';
+import { notifyBoardChanged } from './boardEvents';
 import type { Board, BoardDetail, BoardEdge, BoardMember, BoardVisual, CreateBoardInput } from './boardTypes';
 import { useNoteCanvasDataAdapter } from '../Notes/canvasEngine/hooks/useNoteCanvasDataAdapter';
 import { useNoteCanvasFrameModel, useNoteCanvasResolvedLayoutModel } from '../Notes/canvasEngine/hooks/useNoteCanvasLayoutModel';
@@ -180,6 +181,10 @@ beforeEach(() => {
     releasePointerCapture: { configurable: true, value: noOp },
     hasPointerCapture: { configurable: true, value: () => false },
   });
+  Object.defineProperty(SVGElement.prototype, 'setPointerCapture', { configurable: true, value: noOp });
+  Object.defineProperty(SVGElement.prototype, 'hasPointerCapture', { configurable: true, value: () => false });
+  Object.defineProperty(SVGElement.prototype, 'releasePointerCapture', { configurable: true, value: noOp });
+  Object.defineProperty(HTMLDialogElement.prototype, 'showModal', { configurable: true, value: function (this: HTMLDialogElement) { this.open = true; } });
   http.get.mockImplementation(async (url: string, config?: { params?: { course_id?: string; note_id?: string } }) => {
     if (url === '/boards') return response({ boards: boards.map(({ board }) => board) });
     if (url.startsWith('/boards/')) return response(detailFor(url));
@@ -244,11 +249,26 @@ beforeEach(() => {
       Object.assign(member, clone(input));
       return response({ member });
     }
+    if (url.includes('/visuals/')) {
+      const visual = detail.visuals.find(({ id }) => id === url.split('/')[4])!;
+      Object.assign(visual, clone(input));
+      return response({ visual });
+    }
+    if (url.includes('/edges/')) {
+      const edge = detail.edges.find(({ id }) => id === url.split('/')[4])!;
+      Object.assign(edge, clone(input));
+      return response({ edge });
+    }
     if (url.split('/').length === 3) { Object.assign(detail.board, clone(input)); return response({ board: detail.board }); }
     return unexpectedWrite('PATCH', url);
   });
   http.put.mockImplementation(async (url: string) => unexpectedWrite('PUT', url));
   http.delete.mockImplementation(async (url: string) => {
+    if (/^\/boards\/[^/]+$/.test(url)) {
+      const detail = detailFor(url);
+      boards = boards.filter(({ board }) => board.id !== detail.board.id);
+      return response({ removed: true });
+    }
     if (url.startsWith('/boards/') && url.includes('/visuals/')) {
       const detail = detailFor(url);
       const visualId = url.split('/')[4];
@@ -267,6 +287,175 @@ afterEach(() => {
   Reflect.deleteProperty(HTMLElement.prototype, 'setPointerCapture');
   Reflect.deleteProperty(HTMLElement.prototype, 'releasePointerCapture');
   Reflect.deleteProperty(HTMLElement.prototype, 'hasPointerCapture');
+  Reflect.deleteProperty(SVGElement.prototype, 'setPointerCapture');
+  Reflect.deleteProperty(SVGElement.prototype, 'hasPointerCapture');
+  Reflect.deleteProperty(SVGElement.prototype, 'releasePointerCapture');
+});
+
+function seedVisual(detail: BoardDetail, kind: BoardVisual['visual_kind']) {
+  const visual: BoardVisual = { ...geometry, id: `${kind}-${detail.board.id}`, board_id: detail.board.id,
+    visual_kind: kind, x: 400, y: 400, w: 200, h: 120, scale: 1.5, rotation: 0, metadata: {},
+    created_at: date, updated_at: date,
+    data: kind === 'freehand' ? { points: [{ x: 0, y: 0 }, { x: 40, y: 20 }] }
+      : { tray_source: { object: {}, backing_blocks: [{ plain_text: 'Moved shape content' }], extensions: {} },
+        connector_points: { start: { x: 0, y: 0 }, end: { x: 180, y: 100 } } } };
+  detail.visuals.push(visual);
+  return visual;
+}
+
+describe('V13.4 wave 1 wiring smoke', () => {
+  it('A1 renames in the board, rejects a blank name and reopens the saved title', async () => {
+    const detail = seedBoard('rename', 'Original name');
+    renderRoutes('/boards/rename');
+    fireEvent.doubleClick(await screen.findByRole('heading', { name: 'Original name' }));
+    const input = screen.getByRole('textbox', { name: 'Board name' }) as HTMLInputElement;
+    expect(input.maxLength).toBe(80);
+    fireEvent.change(input, { target: { value: '   ' } });
+    fireEvent.submit(input.closest('form')!);
+    expect(http.patch).not.toHaveBeenCalled();
+    fireEvent.change(input, { target: { value: '  Renamed board  ' } });
+    fireEvent.submit(input.closest('form')!);
+    await screen.findByRole('heading', { name: 'Renamed board' });
+    expect(detail.board.title).toBe('Renamed board');
+    expect(purposes[0].title).toBe('Question for Original name');
+    fireEvent.click(screen.getByRole('button', { name: 'Boards' }));
+    fireEvent.click(await screen.findByRole('link', { name: /Renamed board/ }));
+    await screen.findByRole('heading', { name: 'Renamed board' });
+    expect(unexpectedWrites).toEqual([]);
+  });
+
+  it('A2 moves every visual kind, resizes a scaled shape, respects Pin and reopens geometry', async () => {
+    const detail = seedBoard('visuals', 'Visual board', false);
+    detail.board.viewport.zoom = 2;
+    const visuals = (['freehand', 'shape', 'image', 'table', 'connector'] as const).map((kind) => seedVisual(detail, kind));
+    renderRoutes('/boards/visuals');
+    await screen.findByRole('heading', { name: 'Visual board' });
+    const surface = screen.getByTestId('board-surface');
+    for (const visual of visuals) {
+      const label = visual.visual_kind === 'freehand' ? 'Select drawing' : `Select moved ${visual.visual_kind}`;
+      pointer(screen.getByRole('button', { name: label }), 'pointerDown', 20, 20);
+      pointer(surface, 'pointerMove', 100, 80);
+      pointer(surface, 'pointerUp', 100, 80);
+      await waitFor(() => expect(visual).toMatchObject({ x: 440, y: 430 }));
+      await saved();
+    }
+    pointer(screen.getByRole('button', { name: 'Select moved shape' }), 'pointerDown', 20, 20);
+    pointer(surface, 'pointerUp', 20, 20);
+    pointer(screen.getByRole('button', { name: 'Resize moved shape' }), 'pointerDown', 20, 20);
+    pointer(surface, 'pointerMove', 140, 80);
+    pointer(surface, 'pointerUp', 140, 80);
+    await waitFor(() => expect(visuals[1]).toMatchObject({ w: 240, h: 140, scale: 1.5 }));
+    await saved();
+    fireEvent.click(screen.getByRole('button', { name: 'Pin' }));
+    await screen.findByRole('button', { name: 'Unpin' });
+    await saved();
+    const calls = http.patch.mock.calls.length;
+    pointer(screen.getByRole('button', { name: 'Select moved shape' }), 'pointerDown', 10, 10);
+    pointer(surface, 'pointerMove', 200, 200);
+    pointer(surface, 'pointerUp', 200, 200);
+    expect(http.patch.mock.calls).toHaveLength(calls);
+    expect(screen.queryByRole('button', { name: 'Resize moved shape' })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Unpin' }));
+    await saved();
+    expect(visuals[1].pinned).toBe(false);
+    fireEvent.click(screen.getByRole('button', { name: 'Boards' }));
+    fireEvent.click(await screen.findByRole('link', { name: /Visual board/ }));
+    await screen.findByRole('heading', { name: 'Visual board' });
+    expect(screen.getByTestId(`board-visual-${visuals[0].id}`).getAttribute('transform')).toContain('translate(440 430)');
+    expect(screen.getByTestId(`board-visual-${visuals[1].id}`).style.width).toBe('240px');
+    expect(screen.getByTestId(`board-visual-${visuals[1].id}`).style.height).toBe('140px');
+    expect(unexpectedWrites).toEqual([]);
+  });
+
+  it('A3 saves and clears a label, persists three arrow states and renders arrowheads outside cards', async () => {
+    const detail = seedBoard('edges', 'Edge board');
+    detail.members.push({ ...clone(detail.members[0]), id: 'member-2', x: 540 });
+    detail.edges.push({ id: 'edge-a', board_id: 'edges', from_member_id: detail.members[0].id,
+      to_member_id: 'member-2', style: { existing: 'retained' }, label: null, created_at: date });
+    renderRoutes('/boards/edges');
+    const edge = await screen.findByRole('button', { name: /^Connection / });
+    fireEvent.doubleClick(edge);
+    fireEvent.change(screen.getByRole('textbox', { name: 'Connection label' }), { target: { value: 'supports' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save label' }));
+    await screen.findByText('supports');
+    fireEvent.click(screen.getByRole('button', { name: 'One-way' }));
+    await saved();
+    expect(detail.edges[0]).toMatchObject({ label: 'supports', style: { direction: 'forward', existing: 'retained' } });
+    const line = screen.getByTestId('board-edge-edge-a');
+    expect(line.getAttribute('marker-end')).toBe('url(#board-edge-arrow)');
+    expect(line.getAttribute('marker-start')).toBeNull();
+    expect(line.getAttribute('d')).toBe('M 346 148 L 534 148');
+    fireEvent.click(screen.getByRole('button', { name: 'Boards' }));
+    fireEvent.click(await screen.findByRole('link', { name: /Edge board/ }));
+    await screen.findByText('supports');
+    expect(screen.getByTestId('board-edge-edge-a').getAttribute('marker-end')).toBe('url(#board-edge-arrow)');
+    fireEvent.doubleClick(screen.getByRole('button', { name: /^Connection / }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Connection label' }), { target: { value: '' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save label' }));
+    await waitFor(() => expect(detail.edges[0].label).toBeNull());
+    await saved();
+    fireEvent.click(screen.getByRole('button', { name: 'Two-way' }));
+    await saved();
+    expect(screen.getByTestId('board-edge-edge-a').getAttribute('marker-start')).toBe('url(#board-edge-arrow)');
+    fireEvent.click(screen.getByRole('button', { name: 'No arrows' }));
+    await saved();
+    expect(screen.getByTestId('board-edge-edge-a').getAttribute('marker-end')).toBeNull();
+    expect(unexpectedWrites).toEqual([]);
+  });
+
+  it('A4 shows fresh counts from both menus, cancels safely, deletes and reuses the retained purpose', async () => {
+    const detail = seedBoard('delete', 'Delete fixture');
+    seedVisual(detail, 'shape'); seedVisual(detail, 'freehand');
+    detail.edges.push({ id: 'count-edge', board_id: 'delete', from_member_id: detail.members[0].id,
+      to_member_id: detail.members[0].id, style: {}, label: null, created_at: date });
+    renderRoutes('/boards/delete');
+    await screen.findByRole('heading', { name: 'Delete fixture' });
+    fireEvent.click(screen.getByLabelText('Board menu'));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete board' }));
+    let dialog = await screen.findByRole('dialog');
+    await within(dialog).findByText(/2 drawings, 1 connections, and all 1 placements/);
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+    expect(http.delete).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Boards' }));
+    await screen.findByRole('heading', { name: 'Your boards' });
+    seedVisual(detail, 'table');
+    fireEvent.click(screen.getByLabelText('Board menu for Delete fixture'));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete board' }));
+    dialog = await screen.findByRole('dialog');
+    await within(dialog).findByText(/3 drawings, 1 connections, and all 1 placements/);
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Delete board' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(boards).toHaveLength(0); expect(purposes).toHaveLength(1);
+    fireEvent.change(screen.getByRole('textbox', { name: 'Board name' }), { target: { value: 'Replacement' } });
+    fireEvent.click(screen.getByText('Advanced: use an existing purpose'));
+    fireEvent.change(screen.getByRole('combobox', { name: 'Existing purpose' }), { target: { value: detail.board.soul_id } });
+    fireEvent.click(screen.getByRole('button', { name: 'Open board' }));
+    await screen.findByRole('heading', { name: 'Replacement' });
+    expect(boards[0].board.soul_id).toBe(detail.board.soul_id);
+    expect(unexpectedWrites).toEqual([]);
+  });
+
+  it('A5 keeps an unavailable note card visible and revives it on the next board read', async () => {
+    const detail = seedBoard('note-trash', 'Retained note card');
+    const original = clone(detail.members[0]);
+    detail.members[0].reference = { kind: 'note', id: notes[0].id, title: null, note_id: null,
+      state: 'unavailable', reason: 'note_inactive' };
+    renderRoutes('/boards/note-trash');
+    const unavailable = await screen.findByRole('article', { name: 'Unavailable projection' });
+    expect(unavailable.getAttribute('aria-disabled')).toBe('true');
+    expect(within(unavailable).getByText('This content is currently unavailable.')).toBeTruthy();
+    expect(unavailable.style.left).toBe(`${original.x}px`);
+    expect(screen.getAllByRole('article')).toHaveLength(1);
+    detail.members[0].reference = original.reference;
+    await act(async () => { notifyBoardChanged(detail.board.id); });
+    const restored = await screen.findByRole('article', { name: notes[0].title });
+    expect(restored.getAttribute('aria-disabled')).toBe('false');
+    expect(restored.style.left).toBe(`${original.x}px`);
+    expect(screen.getAllByRole('article')).toHaveLength(1);
+    fireEvent.doubleClick(restored);
+    await screen.findByTestId('paper-snapshot');
+    expect(unexpectedWrites).toEqual([]);
+  });
 });
 
 describe('V13 S4 board polish smoke', () => {

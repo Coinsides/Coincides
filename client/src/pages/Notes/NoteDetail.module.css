@@ -1829,6 +1829,54 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   color: var(--error);
 }
 
+.noteDeleteDialog {
+  max-width: min(440px, calc(100vw - 40px));
+  padding: 24px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.noteDeleteDialog::backdrop {
+  background: rgb(0 0 0 / 35%);
+}
+
+.noteDeleteDialog h2 {
+  margin: 0 0 12px;
+  font-size: 18px;
+  overflow-wrap: anywhere;
+}
+
+.noteDeleteDialog p {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.noteDeleteError {
+  color: var(--error);
+}
+
+.noteDeleteActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.noteDeleteActions button {
+  padding: 8px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+.noteDeleteActions button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
 .pageTextArea {
   display: block;
   box-sizing: border-box;

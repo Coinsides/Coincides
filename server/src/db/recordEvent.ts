@@ -7,6 +7,7 @@ export const EVENT_VERBS = [
   'rolled_back',
   'note_created',
   'board_created',
+  'board_deleted',
   'mounted',
   'unmounted',
   'purpose_created',

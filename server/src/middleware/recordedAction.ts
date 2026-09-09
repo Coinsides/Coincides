@@ -4,7 +4,7 @@ import type { AuthRequest } from './auth.js';
 import { AppError } from './errorHandler.js';
 
 export const RECORDED_ACTION_VERBS = [
-  'purpose_created', 'board_created', 'mounted', 'unmounted',
+  'purpose_created', 'board_created', 'board_deleted', 'mounted', 'unmounted',
 ] as const;
 
 export type RecordedActionEvent = Pick<EventEntry, 'objects' | 'summary' | 'meta'> & {

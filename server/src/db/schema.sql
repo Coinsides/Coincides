@@ -1248,7 +1248,7 @@ CREATE TABLE IF NOT EXISTS events (
   actor_kind TEXT NOT NULL,
   channel TEXT NOT NULL,
   verb TEXT NOT NULL CHECK (verb IN (
-    'migrated', 'rolled_back', 'note_created', 'board_created',
+    'migrated', 'rolled_back', 'note_created', 'board_created', 'board_deleted',
     'mounted', 'unmounted', 'purpose_created', 'purpose_amended',
     'purpose_sealed', 'proposal_issued', 'proposal_approved',
     'proposal_rejected', 'published'

@@ -16,7 +16,7 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { CANVAS_MODE_RETIRED } from '../canvasRetirementPolicy';
 import type { ChangeEvent } from 'react';
 import type { ExportPreviewModel } from '../exportPreviewService';
@@ -73,6 +73,7 @@ export interface NoteChromeLayerProps {
   restoringBlockId: string | null;
   onAddFavorite: () => void;
   onBackProject: () => void;
+  onTrashNote: () => Promise<void>;
   onCloseOverlay: () => void;
   onCollapseChrome: () => void;
   onAddPageBelow: (frameId: string) => void;
@@ -137,6 +138,7 @@ export function NoteChromeLayer({
   restoringBlockId,
   onAddFavorite,
   onBackProject,
+  onTrashNote,
   onCloseOverlay,
   onCollapseChrome,
   onAddPageBelow,
@@ -167,6 +169,41 @@ export function NoteChromeLayer({
   onToggleSurfaceMode,
 }: NoteChromeLayerProps) {
   const layoutHoverTimerRef = useRef<number | null>(null);
+  const deleteDialogRef = useRef<HTMLDialogElement>(null);
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const [deletingNote, setDeletingNote] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const deleteScopeRef = useRef({ active: true });
+
+  useEffect(() => {
+    const scope = { active: true };
+    deleteScopeRef.current = scope;
+    setConfirmingDelete(false);
+    setDeletingNote(false);
+    setDeleteError(null);
+    return () => { scope.active = false; };
+  }, [note.id]);
+
+  useEffect(() => {
+    const dialog = deleteDialogRef.current;
+    if (confirmingDelete && dialog && !dialog.open) dialog.showModal();
+    if (!confirmingDelete && dialog?.open) dialog.close();
+  }, [confirmingDelete]);
+
+  const handleTrashNote = async () => {
+    if (deletingNote) return;
+    const scope = deleteScopeRef.current;
+    setDeletingNote(true);
+    setDeleteError(null);
+    try {
+      await onTrashNote();
+      if (scope.active) setConfirmingDelete(false);
+    } catch {
+      if (scope.active) setDeleteError('Could not move the note to Trash. Please try again.');
+    } finally {
+      if (scope.active) setDeletingNote(false);
+    }
+  };
 
   const clearLayoutHoverTimer = useCallback(() => {
     if (layoutHoverTimerRef.current === null) return;
@@ -623,8 +660,22 @@ export function NoteChromeLayer({
                 <div className={styles.moreAction} aria-disabled="true">
                   <MoreHorizontal size={15} />
                   <span>Note-level actions</span>
-                  <small>History, duplicate, archive, import, export, and delete controls will live here.</small>
+                  <small>History, duplicate, archive, import, and export controls will live here.</small>
                 </div>
+                <button
+                  type="button"
+                  className={styles.moreAction}
+                  disabled={contentReadOnly || note.status === 'trashed'}
+                  aria-label="Delete note"
+                  onClick={() => {
+                    setDeleteError(null);
+                    setConfirmingDelete(true);
+                  }}
+                >
+                  <Trash2 size={15} />
+                  <span>Delete note</span>
+                  <small>Move this note to Trash. Restore it from the Project Trash tab.</small>
+                </button>
                 <button
                   type="button"
                   className={styles.moreAction}
@@ -782,6 +833,31 @@ export function NoteChromeLayer({
           </FloatingOverlayLayer>
         </div>
       )}
+      <dialog
+        ref={deleteDialogRef}
+        className={styles.noteDeleteDialog}
+        aria-labelledby="note-delete-title"
+        aria-describedby="note-delete-description"
+        onCancel={(event) => {
+          event.preventDefault();
+          if (!deletingNote) setConfirmingDelete(false);
+        }}
+      >
+        <h2 id="note-delete-title">Delete {note.title || 'Untitled note'}?</h2>
+        <p id="note-delete-description">
+          This note will move to Trash and can be restored from the Project Trash tab.
+          Its board cards will remain visible as unavailable until you restore it.
+        </p>
+        {deleteError && <p className={styles.noteDeleteError} role="alert">{deleteError}</p>}
+        <div className={styles.noteDeleteActions}>
+          <button type="button" autoFocus disabled={deletingNote} onClick={() => setConfirmingDelete(false)}>
+            Cancel
+          </button>
+          <button type="button" className={styles.dangerBtn} disabled={deletingNote} onClick={() => void handleTrashNote()}>
+            {deletingNote ? 'Moving to Trash…' : 'Move to Trash'}
+          </button>
+        </div>
+      </dialog>
     </div>
   );
 }
