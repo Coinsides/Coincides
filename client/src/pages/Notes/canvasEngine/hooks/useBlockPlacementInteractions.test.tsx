@@ -1,5 +1,6 @@
 import {
   act,
+  render,
   renderHook,
 } from '@testing-library/react';
 import { useState } from 'react';
@@ -36,20 +37,22 @@ const PAGE_FRAME: PageFrameModel = {
 
 const BLOCK: PlacementTestBlock = { id: 'block-k5' };
 
-function pointerStart(clientX: number, clientY: number) {
+function pointerStart(clientX: number, clientY: number, pointerId = 1) {
   return {
     clientX,
     clientY,
+    pointerId,
     preventDefault: vi.fn(),
     stopPropagation: vi.fn(),
   } as never;
 }
 
-function dispatchWindowPointer(type: 'pointermove' | 'pointerup', clientX = 0, clientY = 0) {
+function dispatchWindowPointer(type: 'pointermove' | 'pointerup' | 'pointercancel', clientX = 0, clientY = 0, pointerId = 1) {
   const event = new Event(type);
   Object.defineProperties(event, {
     clientX: { value: clientX },
     clientY: { value: clientY },
+    pointerId: { value: pointerId },
   });
   window.dispatchEvent(event);
 }
@@ -61,6 +64,9 @@ function renderPlacementSubject({
   displayScale = 1,
   documentTypographyProfile,
   estimateBlockHeightForText = () => 64,
+  additionalLayouts = {},
+  trayDropTargetRef,
+  onMoveBlockToTray,
 }: {
   initialLayout: BlockBoxLayout;
   snapEnabled: boolean;
@@ -68,32 +74,39 @@ function renderPlacementSubject({
   displayScale?: number;
   documentTypographyProfile?: DocumentTypographyProfile;
   estimateBlockHeightForText?: UseBlockPlacementInteractionsOptions<PlacementTestBlock>['estimateBlockHeightForText'];
+  additionalLayouts?: Record<string, BlockBoxLayout>;
+  trayDropTargetRef?: UseBlockPlacementInteractionsOptions<PlacementTestBlock>['trayDropTargetRef'];
+  onMoveBlockToTray?: UseBlockPlacementInteractionsOptions<PlacementTestBlock>['onMoveBlockToTray'];
 }) {
   const persistChangedBlockLayouts = vi.fn();
   const pushLayoutHistory = vi.fn();
   const setInteractionState = vi.fn();
   const setSelectedBlockId = vi.fn();
   const setSnapGuide = vi.fn();
+  const beginTemporaryLayoutMode = vi.fn();
+  const clearTemporaryLayoutMode = vi.fn();
   const movingBlockIdRef = { current: null as string | null };
   const suppressMeasuredReflowUntilRef = { current: 0 };
 
-  const subject = renderHook(() => {
+  const subject = renderHook(({ noteId }) => {
     const [layouts, setLayouts] = useState<Record<string, BlockBoxLayout>>({
       [BLOCK.id]: initialLayout,
+      ...additionalLayouts,
     });
     const options = {
+      noteId,
       blockLayouts: layouts,
       contentWidth: 500,
       documentTypographyProfile,
       estimateBlockHeightForText,
       movingBlockIdRef,
-      orderedBlocks: [BLOCK],
+      orderedBlocks: [BLOCK, ...Object.keys(additionalLayouts).map((id) => ({ id }))],
       pageFrames: [PAGE_FRAME],
       pageOffsetX: 0,
       persistChangedBlockLayouts,
       pushLayoutHistory,
-      beginTemporaryLayoutMode: vi.fn(),
-      clearTemporaryLayoutMode: vi.fn(),
+      beginTemporaryLayoutMode,
+      clearTemporaryLayoutMode,
       setInteractionState,
       setLayoutDrafts: setLayouts,
       setSelectedBlockId,
@@ -101,6 +114,8 @@ function renderPlacementSubject({
       snapEnabled,
       suppressMeasuredReflowUntilRef,
       surfacePolicy: createSurfaceModePolicy(surfaceMode),
+      trayDropTargetRef,
+      onMoveBlockToTray,
       viewportTransform: {
         x: 0,
         y: 0,
@@ -111,11 +126,16 @@ function renderPlacementSubject({
     } satisfies UseBlockPlacementInteractionsOptions<PlacementTestBlock>;
     const interactions = useBlockPlacementInteractions(options);
     return { layouts, ...interactions };
-  });
+  }, { initialProps: { noteId: 'note-before' } });
 
   return {
     persistChangedBlockLayouts,
     pushLayoutHistory,
+    beginTemporaryLayoutMode,
+    clearTemporaryLayoutMode,
+    setInteractionState,
+    setSnapGuide,
+    movingBlockIdRef,
     subject,
   };
 }
@@ -124,6 +144,138 @@ function persistedLayout(persistChangedBlockLayouts: ReturnType<typeof vi.fn>): 
   const layouts = persistChangedBlockLayouts.mock.calls[0]?.[0] as Record<string, BlockBoxLayout>;
   return layouts[BLOCK.id];
 }
+
+describe('useBlockPlacementInteractions staging gesture', () => {
+  const initialLayout: BlockBoxLayout = { x: 100, y: 20, width: 180, height: 60, surface: 'formal_page' };
+  const neighborLayout: BlockBoxLayout = { x: 100, y: 100, width: 180, height: 60, surface: 'formal_page' };
+
+  function stagingSubject() {
+    const tray = render(<aside />).container.firstElementChild as HTMLElement;
+    tray.getBoundingClientRect = () => ({
+      x: 800, y: 0, left: 800, top: 0, right: 1000, bottom: 600, width: 200, height: 600,
+      toJSON: () => ({}),
+    });
+    const onMoveBlockToTray = vi.fn();
+    const runtime = renderPlacementSubject({
+      initialLayout, additionalLayouts: { neighbor: neighborLayout }, snapEnabled: true, surfaceMode: 'page',
+      trayDropTargetRef: { current: tray }, onMoveBlockToTray,
+    });
+    return { ...runtime, onMoveBlockToTray };
+  }
+
+  it('restores a visibly displaced neighbor before handing the drop its explicit block and original layout', () => {
+    const runtime = stagingSubject();
+    act(() => runtime.subject.result.current.beginMoveBlock(pointerStart(100, 20), BLOCK, initialLayout));
+    act(() => dispatchWindowPointer('pointermove', 100, 70));
+    expect(runtime.subject.result.current.layouts.neighbor.y).toBeGreaterThan(neighborLayout.y);
+    expect(runtime.subject.result.current.layouts[BLOCK.id]).not.toEqual(initialLayout);
+    expect(runtime.movingBlockIdRef.current).toBe(BLOCK.id);
+    expect(runtime.setSnapGuide.mock.calls.some(([guide]) => guide !== null)).toBe(true);
+
+    act(() => dispatchWindowPointer('pointerup', 850, 120));
+
+    expect(runtime.subject.result.current.layouts).toEqual({ [BLOCK.id]: initialLayout, neighbor: neighborLayout });
+    expect(runtime.onMoveBlockToTray).toHaveBeenCalledExactlyOnceWith(BLOCK.id, initialLayout);
+    expect(runtime.persistChangedBlockLayouts).not.toHaveBeenCalled();
+    expect(runtime.pushLayoutHistory).not.toHaveBeenCalled();
+    expect(runtime.movingBlockIdRef.current).toBeNull();
+    expect(runtime.clearTemporaryLayoutMode).toHaveBeenCalledTimes(1);
+    expect(runtime.setSnapGuide).toHaveBeenLastCalledWith(null);
+    expect(runtime.setInteractionState).toHaveBeenLastCalledWith({ mode: 'selectedBlock', target: 'block', blockId: BLOCK.id });
+
+    act(() => dispatchWindowPointer('pointermove', 100, 250));
+    act(() => dispatchWindowPointer('pointerup', 850, 120));
+    expect(runtime.onMoveBlockToTray).toHaveBeenCalledTimes(1);
+    expect(runtime.subject.result.current.layouts).toEqual({ [BLOCK.id]: initialLayout, neighbor: neighborLayout });
+    expect(runtime.persistChangedBlockLayouts).not.toHaveBeenCalled();
+  });
+
+  it('cancels the active pointer, restores all pushed layouts, and removes both move and end listeners', () => {
+    const runtime = stagingSubject();
+    act(() => runtime.subject.result.current.beginMoveBlock(pointerStart(100, 20), BLOCK, initialLayout));
+    act(() => dispatchWindowPointer('pointermove', 100, 70));
+    const pushedLayouts = runtime.subject.result.current.layouts;
+    expect(pushedLayouts.neighbor.y).toBeGreaterThan(neighborLayout.y);
+
+    act(() => dispatchWindowPointer('pointermove', 100, 300, 2));
+    act(() => dispatchWindowPointer('pointerup', 850, 120, 2));
+    act(() => dispatchWindowPointer('pointercancel', 850, 120, 2));
+    expect(runtime.subject.result.current.layouts).toEqual(pushedLayouts);
+    expect(runtime.movingBlockIdRef.current).toBe(BLOCK.id);
+    act(() => dispatchWindowPointer('pointercancel', 850, 120));
+
+    expect(runtime.subject.result.current.layouts).toEqual({ [BLOCK.id]: initialLayout, neighbor: neighborLayout });
+    expect(runtime.movingBlockIdRef.current).toBeNull();
+    expect(runtime.clearTemporaryLayoutMode).toHaveBeenCalledTimes(1);
+    expect(runtime.setSnapGuide).toHaveBeenLastCalledWith(null);
+    expect(runtime.setInteractionState).toHaveBeenLastCalledWith({ mode: 'selectedBlock', target: 'block', blockId: BLOCK.id });
+    act(() => dispatchWindowPointer('pointermove', 100, 250));
+    act(() => dispatchWindowPointer('pointerup', 850, 120));
+    expect(runtime.subject.result.current.layouts).toEqual({ [BLOCK.id]: initialLayout, neighbor: neighborLayout });
+    expect(runtime.clearTemporaryLayoutMode).toHaveBeenCalledTimes(1);
+    expect(runtime.onMoveBlockToTray).not.toHaveBeenCalled();
+    expect(runtime.persistChangedBlockLayouts).not.toHaveBeenCalled();
+    expect(runtime.pushLayoutHistory).not.toHaveBeenCalled();
+  });
+
+  it('restores the drag snapshot when movement and cancellation are batched in one React update', () => {
+    const runtime = stagingSubject();
+    act(() => runtime.subject.result.current.beginMoveBlock(pointerStart(100, 20), BLOCK, initialLayout));
+    act(() => {
+      dispatchWindowPointer('pointermove', 100, 70);
+      dispatchWindowPointer('pointercancel', 850, 120);
+    });
+    expect(runtime.subject.result.current.layouts).toEqual({ [BLOCK.id]: initialLayout, neighbor: neighborLayout });
+    expect(runtime.movingBlockIdRef.current).toBeNull();
+    expect(runtime.setSnapGuide).toHaveBeenLastCalledWith(null);
+    expect(runtime.clearTemporaryLayoutMode).toHaveBeenCalledTimes(1);
+    expect(runtime.onMoveBlockToTray).not.toHaveBeenCalled();
+    expect(runtime.persistChangedBlockLayouts).not.toHaveBeenCalled();
+    expect(runtime.pushLayoutHistory).not.toHaveBeenCalled();
+  });
+
+  it('keeps the ordinary geometry save when the release misses staging', () => {
+    const runtime = stagingSubject();
+    act(() => runtime.subject.result.current.beginMoveBlock(pointerStart(100, 20), BLOCK, initialLayout));
+    act(() => dispatchWindowPointer('pointermove', 100, 70));
+    act(() => dispatchWindowPointer('pointerup', 799, 120));
+    expect(runtime.onMoveBlockToTray).not.toHaveBeenCalled();
+    expect(runtime.persistChangedBlockLayouts).toHaveBeenCalledTimes(1);
+    expect(runtime.pushLayoutHistory).toHaveBeenCalledTimes(1);
+  });
+
+  it('detaches an unfinished drag on unmount so later pointer events cannot write', () => {
+    const runtime = stagingSubject();
+    act(() => runtime.subject.result.current.beginMoveBlock(pointerStart(100, 20), BLOCK, initialLayout));
+    act(() => dispatchWindowPointer('pointermove', 100, 70));
+    const guideCalls = runtime.setSnapGuide.mock.calls.length;
+    runtime.subject.unmount();
+    act(() => dispatchWindowPointer('pointermove', 100, 250));
+    act(() => dispatchWindowPointer('pointerup', 850, 120));
+    act(() => dispatchWindowPointer('pointercancel', 850, 120));
+    expect(runtime.setSnapGuide).toHaveBeenCalledTimes(guideCalls);
+    expect(runtime.onMoveBlockToTray).not.toHaveBeenCalled();
+    expect(runtime.persistChangedBlockLayouts).not.toHaveBeenCalled();
+    expect(runtime.pushLayoutHistory).not.toHaveBeenCalled();
+  });
+
+  it('ends the old pointer session when noteId changes without unmounting the hook', () => {
+    const runtime = stagingSubject();
+    act(() => runtime.subject.result.current.beginMoveBlock(pointerStart(100, 20), BLOCK, initialLayout));
+    act(() => dispatchWindowPointer('pointermove', 100, 70));
+    runtime.subject.rerender({ noteId: 'note-after' });
+    const guideCalls = runtime.setSnapGuide.mock.calls.length;
+    const layoutsAfterNavigation = runtime.subject.result.current.layouts;
+    expect(runtime.movingBlockIdRef.current).toBeNull();
+    act(() => dispatchWindowPointer('pointermove', 100, 250));
+    act(() => dispatchWindowPointer('pointerup', 850, 120));
+    expect(runtime.subject.result.current.layouts).toEqual(layoutsAfterNavigation);
+    expect(runtime.setSnapGuide).toHaveBeenCalledTimes(guideCalls);
+    expect(runtime.onMoveBlockToTray).not.toHaveBeenCalled();
+    expect(runtime.persistChangedBlockLayouts).not.toHaveBeenCalled();
+    expect(runtime.pushLayoutHistory).not.toHaveBeenCalled();
+  });
+});
 
 describe('useBlockPlacementInteractions K-5 release collection', () => {
   it('clamps a crossing drag into its affiliated page content rect by minimum translation when organize mode is on', () => {

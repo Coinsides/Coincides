@@ -99,27 +99,40 @@ export function getInteractionBlockId(state: RuntimeInteractionState): string | 
 export interface WindowPointerSessionOptions {
   onMove: (event: PointerEvent) => void;
   onEnd: (event: PointerEvent) => void;
+  onCancel?: (event: PointerEvent) => void;
+  pointerId?: number;
   target?: Window;
 }
 
 export function attachWindowPointerSession({
   onMove,
   onEnd,
+  onCancel,
+  pointerId,
   target = window,
 }: WindowPointerSessionOptions): () => void {
-  let handlePointerUp: (event: PointerEvent) => void;
+  const matchesPointer = (event: PointerEvent) => pointerId === undefined || event.pointerId === pointerId;
+  const handlePointerMove = (event: PointerEvent) => { if (matchesPointer(event)) onMove(event); };
   const cleanup = () => {
-    target.removeEventListener('pointermove', onMove);
+    target.removeEventListener('pointermove', handlePointerMove);
     target.removeEventListener('pointerup', handlePointerUp);
+    target.removeEventListener('pointercancel', handlePointerCancel);
   };
 
-  handlePointerUp = (event: PointerEvent) => {
+  const handlePointerUp = (event: PointerEvent) => {
+    if (!matchesPointer(event)) return;
     cleanup();
     onEnd(event);
   };
+  const handlePointerCancel = (event: PointerEvent) => {
+    if (!matchesPointer(event)) return;
+    cleanup();
+    onCancel?.(event);
+  };
 
-  target.addEventListener('pointermove', onMove);
-  target.addEventListener('pointerup', handlePointerUp, { once: true });
+  target.addEventListener('pointermove', handlePointerMove);
+  target.addEventListener('pointerup', handlePointerUp);
+  target.addEventListener('pointercancel', handlePointerCancel);
   return cleanup;
 }
 

@@ -2,6 +2,8 @@ import { Router, Response } from 'express';
 import { v4 as uuidv4 } from 'uuid';
 import { z, ZodError } from 'zod';
 import { splitTrayNote, setTraySplitApplied } from '../services/trayNotes.js';
+import { reorderNoteTray } from '../services/trayOrder.js';
+import { reorderNoteTraySchema } from '../validators/trayOrder.js';
 import { getDb } from '../db/init.js';
 import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
@@ -437,6 +439,12 @@ router.put('/:id/blocks/reorder', (req: AuthRequest, res: Response) => {
     }
     throw err;
   }
+});
+
+router.put('/:id/tray/order', (req: AuthRequest, res: Response) => {
+  const data = reorderNoteTraySchema.safeParse(req.body);
+  if (!data.success) { res.status(400).json({ error: 'Validation error', details: data.error.errors }); return; }
+  res.json(reorderNoteTray(getDb(), req.userId!, req.params.id as string, data.data));
 });
 
 router.post('/:id/tray/split', (req: AuthRequest, res: Response) => {

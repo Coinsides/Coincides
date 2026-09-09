@@ -351,7 +351,11 @@
 .trayHeading { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .trayHint { color: var(--text-secondary); font-size: 12px; line-height: 1.5; }
 .trayList { list-style: none; padding: 0; max-height: 55vh; overflow-y: auto; }
-.trayList li { padding: 10px 0; border-bottom: 1px solid var(--border-color); overflow-wrap: anywhere; }
+.trayList li { position: relative; padding: 10px 0; border-bottom: 1px solid var(--border-color); overflow-wrap: anywhere; }
+.trayList li[draggable="true"] { cursor: grab; }
+.trayInsertBefore::before, .trayInsertAfter::after { content: ''; position: absolute; left: 0; right: 0; border-top: 2px solid var(--text-primary); pointer-events: none; }
+.trayInsertBefore::before { top: 0; }
+.trayInsertAfter::after { bottom: 0; }
 .trayList label { display: flex; gap: 8px; align-items: flex-start; }
 .trayCategory { display: block; color: var(--text-secondary); font-size: 11px; margin-bottom: 4px; }
 .traySidebar input:not([type="checkbox"]), .traySidebar select { display: block; box-sizing: border-box; width: 100%; margin: 8px 0; }

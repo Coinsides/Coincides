@@ -286,7 +286,7 @@
 | [handoffs/2026-09-09-v13-4-s1-item-floor-order.md](handoffs/2026-09-09-v13-4-s1-item-floor-order.md) | 13.4 单 1 · item 化地基 | `ready` | — | — |
 | [handoffs/2026-09-09-v13-4-s10-unboxing-ceremony-order.md](handoffs/2026-09-09-v13-4-s10-unboxing-ceremony-order.md) | 13.4 单 10 · 开箱仪式 | `done` | — | — |
 | [handoffs/2026-09-09-v13-4-s2-text-range-order.md](handoffs/2026-09-09-v13-4-s2-text-range-order.md) | 13.4 单 2 · text_range 上板 | `done` | — | — |
-| [handoffs/2026-09-09-v13-4-s3-tray-polish-order.md](handoffs/2026-09-09-v13-4-s3-tray-polish-order.md) | 13.4 单 3 · 准备区二件 + 正名(笔记侧) | `ready` | — | — |
+| [handoffs/2026-09-09-v13-4-s3-tray-polish-order.md](handoffs/2026-09-09-v13-4-s3-tray-polish-order.md) | 13.4 单 3 · 准备区二件 + 正名(笔记侧) | `done(HQ 收口:S3-V1 裁不违例,交付收货)` | — | — |
 | [handoffs/2026-09-09-v13-4-s6-open-note-modal-order.md](handoffs/2026-09-09-v13-4-s6-open-note-modal-order.md) | 13.4 单 6 · Open note 弹窗 | `done` | — | — |
 | [handoffs/2026-09-09-v13-4-s7-staging-dock-order.md](handoffs/2026-09-09-v13-4-s7-staging-dock-order.md) | 13.4 单 7 · 板级装卸区 | `done` | — | — |
 | [handoffs/2026-09-09-v13-4-s9-chalk-and-cast-order.md](handoffs/2026-09-09-v13-4-s9-chalk-and-cast-order.md) | 13.4 单 9 · 粉笔 + 铸卡 | `done` | — | — |

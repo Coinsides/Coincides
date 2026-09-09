@@ -88,7 +88,7 @@ export function NoteRuntimeDocumentLayer({
   if (surfaceMode !== 'page' || !tray) return document;
   return <div className={styles.trayViewport}>
     <button type="button" className={styles.trayToggle} aria-expanded={tray.open}
-      onClick={() => tray.setOpen(!tray.open)}>Tray ({tray.entries.length})</button>
+      onClick={() => tray.setOpen(!tray.open)}>Staging ({tray.entries.length})</button>
     <div className={styles.trayDocumentRow}>
       {document}
       {tray.open && <NoteTraySidebar tray={tray} />}

@@ -193,7 +193,7 @@ export function boardErrorMessage(error: unknown): string {
       return 'The copied text has changed. Save the note, select the passage again, and copy a new reference.';
     case 'tray_placement_unavailable':
     case 'tray_object_unavailable':
-      return 'Some selected items are no longer available in the tray. Refresh the note and try again.';
+      return 'Some selected items are no longer available in Staging. Refresh the note and try again.';
     case 'tray_blocks_cannot_mount_board':
     case 'tray_object_kind_not_relocatable':
       return 'This selection cannot move to a board. Choose drawings or group mounts.';
@@ -201,12 +201,12 @@ export function boardErrorMessage(error: unknown): string {
     case 'tray_connector_endpoint_unavailable':
     case 'tray_visual_extension_unavailable':
     case 'tray_shape_backing_unavailable':
-      return 'This drawing cannot be moved with all its contents intact. It has been kept in the tray.';
+      return 'This drawing cannot be moved with all its contents intact. It has been kept in Staging.';
     case 'tray_relocation_target_changed':
     case 'tray_relocation_target_has_edges':
       return 'The moved items have been edited on the board. Undo is unavailable because it would remove those changes.';
     case 'tray_relocation_source_changed':
-      return 'The original tray content has changed. Undo is unavailable because it would replace those changes.';
+      return 'The original Staging content has changed. Undo is unavailable because it would replace those changes.';
     case 'tray_relocation_not_found':
     case 'tray_relocation_state_conflict':
       return 'This move can no longer be undone. Refresh the note and board.';

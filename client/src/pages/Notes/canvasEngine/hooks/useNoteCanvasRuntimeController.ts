@@ -1,4 +1,4 @@
-import { useCallback, useLayoutEffect, useMemo } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef } from 'react';
 import { useNoteCanvasRuntime } from './useNoteCanvasRuntime';
 import { useRuntimeBlockOperationsController } from './useRuntimeBlockOperationsController';
 import { useRuntimeDocumentDataController } from './useRuntimeDocumentDataController';
@@ -18,6 +18,7 @@ import type {
 
 export function useNoteCanvasRuntimeController() {
   const { noteId, hostMode = 'page' } = useNoteCanvasRuntime();
+  const trayDropTargetRef = useRef<HTMLElement>(null);
   const {
     activeBlockId,
     beginTemporaryLayoutMode,
@@ -294,6 +295,9 @@ export function useNoteCanvasRuntimeController() {
     beginMoveBlock,
     beginResizeBlock,
   } = useRuntimeBlockOperationsController({
+    noteId,
+    trayDropTargetRef,
+    onMoveBlockToTray: (blockId, before) => { void tray.moveBlockToTray(blockId, before); },
     coordinateContract,
     applyLayoutDrafts: mergeLayoutDrafts,
     applyMeasuredBlockHeightDraft,
@@ -355,6 +359,7 @@ export function useNoteCanvasRuntimeController() {
   }, [handleDurableFocusReceipt, markBlockFocused]);
 
   const tray = useTrayController({
+    dropTargetRef: trayDropTargetRef,
     hostMode,
     trackPendingWrite,
     coordinateContract,

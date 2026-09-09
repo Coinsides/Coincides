@@ -222,7 +222,7 @@ describe('V13 S3 tray relocation', () => {
         expect(button.title).toBe('Open full page to use this');
         expect(screen.queryByRole('link', { name })).toBeNull();
         fireEvent.click(button);
-        expect(screen.getByLabelText('Note tray')).toBeTruthy();
+        expect(screen.getByLabelText('Note staging')).toBeTruthy();
       } else expect(screen.getByRole('link', { name }).getAttribute('href')).toBe(href);
     }
   });

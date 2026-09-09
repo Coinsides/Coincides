@@ -1,5 +1,5 @@
 import type { CoordinateContract } from '../placementContractService';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type RefObject } from 'react';
 import api from '@/services/api';
 import { boardErrorMessage, boardRepository } from '@/pages/Boards/boardRepository';
 import { notifyBoardChanged } from '@/pages/Boards/boardEvents';
@@ -17,6 +17,7 @@ import type { CanvasObject, CanvasPlacement, ContentMount, PageFrameCollectionMo
 
 export function useTrayController(input: {
   noteId?: string;
+  dropTargetRef?: RefObject<HTMLElement>;
   hostMode?: 'page' | 'modal';
   trackPendingWrite?: TrackPendingWrite;
   coordinateContract?: CoordinateContract;
@@ -35,6 +36,7 @@ export function useTrayController(input: {
   flushBlock: (block: NoteBlock) => Promise<boolean>;
 }) {
   const [open, setOpen] = useState(false);
+  const localDropTargetRef = useRef<HTMLElement>(null);
   const [busy, setBusy] = useState(false);
   const busyRef = useRef(false);
   const currentNote = useRef(input.noteId);
@@ -64,7 +66,7 @@ export function useTrayController(input: {
   const selectedBlock = input.blocks.find((block) => block.id === input.selectedBlockId
     && input.blockLayouts[block.id] && readStoredLayout(block)?.surface !== 'tray');
   const isCurrent = () => alive.current && currentNote.current === input.noteId;
-  const run = async (writeKey: string, action: () => Promise<void>, message = (_error: unknown) => 'The tray edit could not be saved. Please try again.'): Promise<boolean> => {
+  const run = async (writeKey: string, action: () => Promise<void>, message = (_error: unknown) => 'The Staging edit could not be saved. Please try again.'): Promise<boolean> => {
     if (!input.enabled || !input.noteId || !isCurrent() || busyRef.current) return false;
     busyRef.current = true;
     setBusy(true);
@@ -86,7 +88,7 @@ export function useTrayController(input: {
   };
   const refresh = async (blockIds: string[]) => {
     try { await input.refresh(blockIds); }
-    catch { setError('The edit was saved. Reload this note to refresh the tray.'); }
+    catch { setError('The edit was saved. Reload this note to refresh Staging.'); }
   };
   const editLayout = async (block: NoteBlock, before: BlockBoxLayout, after: BlockBoxLayout, flush = false) => {
     await run(`placement:${block.id}`, async () => {
@@ -98,15 +100,29 @@ export function useTrayController(input: {
       });
     });
   };
-  const moveSelectedToTray = async () => {
-    if (!selectedBlock) return;
+  const moveBlockToTray = async (blockId: string, before: BlockBoxLayout) => {
+    const block = input.blocks.find((item) => item.id === blockId);
+    if (!block || before.surface === 'tray' || readStoredLayout(block)?.surface === 'tray') return;
     const order = Math.max(-1, ...entries.map((entry) => entry.placement.orderIndex ?? -1)) + 1;
-    await editLayout(selectedBlock, input.blockLayouts[selectedBlock.id], {
+    await editLayout(block, before, {
       x: 0, y: 0, width: 0, height: 0, surface: 'tray', order_index: order,
-      export_role: input.blockLayouts[selectedBlock.id].export_role,
-      ai_visibility: input.blockLayouts[selectedBlock.id].ai_visibility,
+      export_role: before.export_role,
+      ai_visibility: before.ai_visibility,
     }, true);
-    setOpen(true);
+    if (isCurrent()) setOpen(true);
+  };
+  const moveSelectedToTray = async () => {
+    if (selectedBlock) await moveBlockToTray(selectedBlock.id, input.blockLayouts[selectedBlock.id]);
+  };
+  const reorder = async (placementIds: string[]): Promise<boolean> => {
+    const currentIds = entries.map((entry) => entry.placement.placementId);
+    if (placementIds.length !== currentIds.length || new Set(placementIds).size !== placementIds.length
+      || placementIds.some((id) => !currentIds.includes(id))) return false;
+    if (placementIds.every((id, index) => id === currentIds[index])) return false;
+    return run('order', async () => {
+      await api.put(`/notes/${input.noteId}/tray/order`, { placementIds });
+      await refresh([]);
+    }, () => 'The Staging order could not be saved. The previous order has been kept. Please try again.');
   };
   const dropOnPaper = async (placementId: string, layout: BlockBoxLayout) => {
     const entry = entries.find((item) => item.placement.placementId === placementId);
@@ -146,7 +162,7 @@ export function useTrayController(input: {
     notifyBoardChanged(boardId);
     if (!isCurrent()) return;
     try { await input.refresh([]); }
-    catch { if (isCurrent()) setError('The board move was saved. Reload this note to refresh the tray.'); }
+    catch { if (isCurrent()) setError('The board move was saved. Reload this note to refresh Staging.'); }
   };
   const relocateToBoard = async (placementIds: string[], boardId: string): Promise<boolean> => {
     if (!boardId || !placementIds.length || new Set(placementIds).size !== placementIds.length
@@ -166,7 +182,8 @@ export function useTrayController(input: {
     }, boardErrorMessage);
   };
   return { open, setOpen, busy, error, entries, createdNoteId, canMoveSelected: Boolean(selectedBlock) && input.enabled,
-    moveSelectedToTray, dropOnPaper, split, boards, boardsLoading, boardsError,
+    moveSelectedToTray, moveBlockToTray, reorder, canReorder: input.enabled, dropTargetRef: input.dropTargetRef ?? localDropTargetRef,
+    dropOnPaper, split, boards, boardsLoading, boardsError,
     reloadBoards: () => setBoardsRevision((revision) => revision + 1), boardActionsEnabled: input.enabled,
     relocateToBoard, undoBoardRelocation, latestRelocation, navigationDisabled: input.hostMode === 'modal' };
 }

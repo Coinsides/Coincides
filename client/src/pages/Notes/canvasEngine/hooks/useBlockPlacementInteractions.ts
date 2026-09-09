@@ -1,9 +1,12 @@
 import { applyWorldRectToLayout, resolveWorldRect, selectPlacementFrame, type CoordinateContract } from '../placementContractService';
 import {
   useCallback,
+  useEffect,
   useMemo,
+  useRef,
   type Dispatch,
   type MutableRefObject,
+  type RefObject,
   type PointerEvent as ReactPointerEvent,
   type SetStateAction,
 } from 'react';
@@ -35,6 +38,7 @@ interface PlacementInteractionBlock {
 }
 
 export interface UseBlockPlacementInteractionsOptions<TBlock extends PlacementInteractionBlock> {
+  noteId?: string;
   coordinateContract?: CoordinateContract;
   blockLayouts: Record<string, BlockBoxLayout>;
   contentWidth: number;
@@ -59,6 +63,8 @@ export interface UseBlockPlacementInteractionsOptions<TBlock extends PlacementIn
   suppressMeasuredReflowUntilRef: MutableRefObject<number>;
   surfacePolicy: SurfaceModePolicy;
   viewportTransform: CanvasViewport;
+  trayDropTargetRef?: RefObject<HTMLElement>;
+  onMoveBlockToTray?: (blockId: string, before: BlockBoxLayout) => void;
 }
 
 function collectCrossingBlockOnRelease({
@@ -98,6 +104,7 @@ function collectCrossingBlockOnRelease({
 }
 
 export function useBlockPlacementInteractions<TBlock extends PlacementInteractionBlock>({
+  noteId,
   blockLayouts,
   coordinateContract,
   contentWidth,
@@ -119,7 +126,14 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
   suppressMeasuredReflowUntilRef,
   surfacePolicy,
   viewportTransform,
+  trayDropTargetRef,
+  onMoveBlockToTray,
 }: UseBlockPlacementInteractionsOptions<TBlock>) {
+  const pointerSessionCleanup = useRef<(() => void) | null>(null);
+  useEffect(() => () => {
+    pointerSessionCleanup.current?.();
+    movingBlockIdRef.current = null;
+  }, [movingBlockIdRef, noteId]);
   const orderedBlockIds = useMemo(
     () => orderedBlocks.map((item) => item.id),
     [orderedBlocks],
@@ -137,42 +151,62 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
     beginTemporaryLayoutMode();
     const startClientX = event.clientX;
     const startClientY = event.clientY;
-    const startLayouts = { ...blockLayouts };
+    const startLayouts = { ...blockLayouts, [block.id]: layout };
     let latestLayouts: Record<string, BlockBoxLayout> = startLayouts;
     movingBlockIdRef.current = block.id;
 
     const handlePointerMove = (moveEvent: PointerEvent) => {
-      setLayoutDrafts(() => {
-        const zoom = viewportTransform.zoom;
-        const deltaX = (moveEvent.clientX - startClientX) / zoom;
-        const deltaY = (moveEvent.clientY - startClientY) / zoom;
-        const result = calculateDraggedBlockLayouts({
-          coordinateContract,
-          blockId: block.id,
-          startLayouts,
-          initialLayout: layout,
-          deltaX,
-          deltaY,
-          contentWidth,
-          dragBoundsWidth: surfacePolicy.isCanvasMode ? CANVAS_WORKSPACE_WIDTH : contentWidth,
+      const zoom = viewportTransform.zoom;
+      const deltaX = (moveEvent.clientX - startClientX) / zoom;
+      const deltaY = (moveEvent.clientY - startClientY) / zoom;
+      const result = calculateDraggedBlockLayouts({
+        coordinateContract,
+        blockId: block.id,
+        startLayouts,
+        initialLayout: layout,
+        deltaX,
+        deltaY,
+        contentWidth,
+        dragBoundsWidth: surfacePolicy.isCanvasMode ? CANVAS_WORKSPACE_WIDTH : contentWidth,
+        snapEnabled,
+        orderedBlockIds,
+        resolveCollisions: shouldResolvePageCollisions(surfacePolicy) || snapEnabled,
+        useElasticAvoidance: shouldUseElasticAvoidance({
+          policy: surfacePolicy,
           snapEnabled,
-          orderedBlockIds,
-          resolveCollisions: shouldResolvePageCollisions(surfacePolicy) || snapEnabled,
-          useElasticAvoidance: shouldUseElasticAvoidance({
-            policy: surfacePolicy,
-            snapEnabled,
-            deltaY,
-          }),
-        });
-        latestLayouts = result.layouts;
-        setSnapGuide(result.guide);
-        return latestLayouts;
+          deltaY,
+        }),
       });
+      latestLayouts = result.layouts;
+      setSnapGuide(result.guide);
+      setLayoutDrafts(latestLayouts);
     };
 
-    attachWindowPointerSession({
+    const restoreBeforeDrag = () => {
+      suppressMeasuredReflowUntilRef.current = Date.now() + LAYOUT_MEASURE_SUPPRESSION_MS;
+      movingBlockIdRef.current = null;
+      setSnapGuide(null);
+      clearTemporaryLayoutMode();
+      setInteractionState(selectedBlockInteraction(block.id));
+      // Collision avoidance is only a preview. Restore every pushed neighbour too.
+      setLayoutDrafts(startLayouts);
+    };
+
+    pointerSessionCleanup.current?.();
+    pointerSessionCleanup.current = attachWindowPointerSession({
+      pointerId: event.pointerId,
       onMove: handlePointerMove,
-      onEnd: () => {
+      onCancel: restoreBeforeDrag,
+      onEnd: (endEvent) => {
+        const target = trayDropTargetRef?.current;
+        const rect = target?.getBoundingClientRect();
+        if (onMoveBlockToTray && target?.isConnected && rect && rect.width > 0 && rect.height > 0
+          && endEvent.clientX >= rect.left && endEvent.clientX <= rect.right
+          && endEvent.clientY >= rect.top && endEvent.clientY <= rect.bottom) {
+          restoreBeforeDrag();
+          onMoveBlockToTray(block.id, startLayouts[block.id]);
+          return;
+        }
         const releasedLayouts = collectCrossingBlockOnRelease({
           coordinateContract,
           blockId: block.id,
@@ -212,6 +246,8 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
     suppressMeasuredReflowUntilRef,
     surfacePolicy,
     viewportTransform,
+    trayDropTargetRef,
+    onMoveBlockToTray,
   ]);
 
   const beginResizeBlock = useCallback((
@@ -252,8 +288,16 @@ export function useBlockPlacementInteractions<TBlock extends PlacementInteractio
       });
     };
 
-    attachWindowPointerSession({
+    pointerSessionCleanup.current?.();
+    pointerSessionCleanup.current = attachWindowPointerSession({
+      pointerId: event.pointerId,
       onMove: handlePointerMove,
+      onCancel: () => {
+        setSnapGuide(null);
+        clearTemporaryLayoutMode();
+        setInteractionState(selectedBlockInteraction(block.id));
+        setLayoutDrafts(startLayouts);
+      },
       onEnd: () => {
         const releasedLayouts = collectCrossingBlockOnRelease({
           coordinateContract,
