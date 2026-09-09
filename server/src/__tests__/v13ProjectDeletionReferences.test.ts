@@ -1,11 +1,13 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
+import { serialize } from 'node:v8';
+import type { Request, Response } from 'express';
 import { createV13BoardsFixture } from './helpers/v13BoardsFixture.js';
 import { createBoard, createBoardLayer, createBoardVisual, castBoardSticky, getBoard, mountBoardMember, mountBoardTextRange } from '../services/boards.js';
 import { createItem } from '../services/items.js';
 import { deleteProjectWithSourcePolicy } from '../services/courseLifecycle.js';
 import { assertCourseLifecyclePolicyCoverage } from '../services/courseLifecyclePolicies.js';
-import { AppError } from '../middleware/errorHandler.js';
+import { AppError, errorHandler } from '../middleware/errorHandler.js';
 import migration057 from '../db/migrations/057_v13_boards.js';
 import migration058 from '../db/migrations/058_v13_board_deleted_event.js';
 import migration059 from '../db/migrations/059_v13_board_text_ranges.js';
@@ -18,6 +20,68 @@ function seed(db: Awaited<ReturnType<typeof createV13BoardsFixture>>) {
     INSERT INTO courses(id,user_id,name) VALUES('project','fixture','Project');
     INSERT INTO notes(id,user_id,course_id,title) VALUES('note','fixture','project','Origin note');`);
 }
+
+test('Project deletion preserves six 13.2 archives byte-for-byte while unknown live tables still block it', async (t) => {
+  const db = await createV13BoardsFixture(); t.after(() => db.close()); seed(db);
+  const archives = [
+    ['canvas_objects', ''],
+    ['canvas_placements', ''],
+    ['content_mounts', ''],
+    ['canvas_objects', '_rolled_back_2'],
+    ['canvas_placements', '_rolled_back_4'],
+    ['content_mounts', '_rolled_back_4'],
+  ].map(([table, generation]) => {
+    const archive = `${table}_backup_pre13_2${generation}`;
+    // Match the trigger-day executor's constraint-free snapshot shape, using
+    // only synthetic memory data. No executor or user database is opened.
+    db.exec(`CREATE TABLE ${archive} AS SELECT * FROM ${table}`);
+    const insert = db.prepare(`INSERT INTO ${archive}(id,user_id,course_id,note_id,metadata) VALUES(?,?,?,?,?)`);
+    insert.run('archive-text', 'fixture', 'project', 'note', '{ "text": "扳机日 archive\\nkeep spacing", "value": null }');
+    insert.run('archive-blob', 'fixture', 'historical-project', 'historical-note', Buffer.from([0, 255, 128, 13, 10]));
+    return archive;
+  });
+  const archiveBytes = () => serialize(archives.map((table) => ({
+    schema: db.prepare('SELECT sql FROM sqlite_master WHERE type = ? AND name = ?').get('table', table),
+    rows: db.prepare(`SELECT * FROM ${table} ORDER BY id`).safeIntegers(true).raw().all(),
+  })));
+  const before = archiveBytes();
+  const result = deleteProjectWithSourcePolicy(db, 'fixture', 'project');
+  assert.equal(result.project_id, 'project');
+  assert.equal(db.prepare("SELECT id FROM courses WHERE id='project'").get(), undefined);
+  assert.equal(db.prepare("SELECT id FROM notes WHERE id='note'").get(), undefined);
+  assert.deepEqual(archiveBytes(), before);
+
+  // Positive control in the same database: archive exemption must not disable
+  // coverage for a real, unregistered course-scoped table.
+  db.exec(`INSERT INTO courses(id,user_id,name) VALUES('blocked-project','fixture','Blocked Project');
+    CREATE TABLE unregistered_project_work(id TEXT PRIMARY KEY, course_id TEXT, body TEXT);
+    INSERT INTO unregistered_project_work VALUES('work','blocked-project','Keep this work');`);
+  const projectBefore = db.prepare("SELECT * FROM courses WHERE id='blocked-project'").get();
+  const workBefore = db.prepare('SELECT * FROM unregistered_project_work').all();
+  assert.throws(() => deleteProjectWithSourcePolicy(db, 'fixture', 'blocked-project'), (error: unknown) => {
+    assert.ok(error instanceof AppError);
+    assert.equal(error.statusCode, 409);
+    assert.match(error.message, /missing=\[unregistered_project_work\.course_id\]/);
+    assert.deepEqual(error.details, {
+      code: 'course_lifecycle_policy_coverage_mismatch',
+      missing: ['unregistered_project_work.course_id'], stale: [], duplicate: [], onDeleteMismatch: [],
+    });
+    // Exercise the production error envelope without opening an HTTP server.
+    let status: number | undefined;
+    let body: unknown;
+    const response = {
+      status(code: number) { status = code; return this; },
+      json(value: unknown) { body = value; return this; },
+    };
+    errorHandler(error, {} as Request, response as Response, () => assert.fail('Unexpected next()'));
+    assert.equal(status, 409);
+    assert.deepEqual(body, { error: error.message, details: error.details });
+    return true;
+  });
+  assert.deepEqual(db.prepare("SELECT * FROM courses WHERE id='blocked-project'").get(), projectBefore);
+  assert.deepEqual(db.prepare('SELECT * FROM unregistered_project_work').all(), workBefore);
+  assert.deepEqual(archiveBytes(), before);
+});
 
 test('Project deletion retains ranges, Item bodies, boards, souls and layers with visible reference degradation', async (t) => {
   const db = await createV13BoardsFixture(); t.after(() => db.close()); seed(db);

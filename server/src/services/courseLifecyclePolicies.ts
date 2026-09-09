@@ -1,4 +1,5 @@
 import type Database from 'better-sqlite3';
+import { AppError } from '../middleware/errorHandler.js';
 
 export type CourseLifecyclePolicy = 'move' | 'delete' | 'preserve' | 'fk-derived';
 export type CourseReferenceDeleteAction = 'CASCADE' | 'SET NULL' | 'NO ACTION' | 'RESTRICT' | 'SET DEFAULT';
@@ -16,6 +17,18 @@ interface CourseReference {
   column: string;
   onDelete: string | null;
 }
+
+// 13.2 trigger-day backups from the wilderness/coordinate executor
+// (server/scripts/wildernessExecutor/executor.ts): CREATE TABLE AS snapshots,
+// optionally archived after rollback with the event sequence as _rolled_back_N.
+// preserve means the deletion chain must never move, update or delete these
+// historical rows. Register them separately as coverage exemptions, never as
+// active tables in COURSE_LIFECYCLE_POLICIES or in deletion/move traversal.
+const COURSE_LIFECYCLE_ARCHIVE_POLICIES = [{
+  tablePattern: /^(canvas_objects|canvas_placements|content_mounts)_backup_pre13_2(?:_rolled_back_[0-9]+)?$/,
+  policy: 'preserve',
+  reason: '13.2 trigger-day wilderness/coordinate executor backups; immutable historical snapshots',
+}] as const;
 
 // This registry is deliberately explicit. A Project reference is a lifecycle
 // decision, including historical origin receipts whose column is not course_id.
@@ -142,7 +155,10 @@ export function assertCourseLifecyclePolicyCoverage(
     registered.set(key, policy);
   }
 
-  const missing = [...actual.keys()].filter((key) => !registered.has(key));
+  const missing = [...actual.entries()].filter(([key, reference]) => (
+    !registered.has(key)
+    && !COURSE_LIFECYCLE_ARCHIVE_POLICIES.some((archive) => archive.tablePattern.test(reference.table))
+  )).map(([key]) => key);
   const stale = [...registered.keys()].filter((key) => !actual.has(key));
   const onDeleteMismatch = [...registered.entries()].flatMap(([key, policy]) => {
     if (!policy.onDelete) return [];
@@ -153,10 +169,12 @@ export function assertCourseLifecyclePolicyCoverage(
   });
 
   if (missing.length || stale.length || duplicate.length || onDeleteMismatch.length) {
-    throw new Error(
+    throw new AppError(
+      409,
       'Course lifecycle policy coverage mismatch; '
       + `missing=[${missing.join(', ')}], stale=[${stale.join(', ')}], `
       + `duplicate=[${duplicate.join(', ')}], onDeleteMismatch=[${onDeleteMismatch.join(', ')}]`,
+      { code: 'course_lifecycle_policy_coverage_mismatch', missing, stale, duplicate, onDeleteMismatch },
     );
   }
 }
