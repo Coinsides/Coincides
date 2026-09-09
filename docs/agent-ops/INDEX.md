@@ -282,7 +282,7 @@
 | [handoffs/2026-09-08-v13-3-s2-board-ui-order.md](handoffs/2026-09-08-v13-3-s2-board-ui-order.md) | 13.3 · 单 2 · 板 UI MVP + 旧 Purpose 消费面对齐 | `(缺状态头)` | — | — |
 | [handoffs/2026-09-08-v13-3-s3-tray-relocation-order.md](handoffs/2026-09-08-v13-3-s3-tray-relocation-order.md) | 13.3 · 单 3 · 准备区→板搬迁(图三承诺兑现) | `(缺状态头)` | — | — |
 | [handoffs/2026-09-09-v13-3-s4-polish-order.md](handoffs/2026-09-09-v13-3-s4-polish-order.md) | 13.3 · 单 4 · 走查③打磨(板名独立/入口淡化/两件收起) | `(缺状态头)` | — | — |
-| [handoffs/2026-09-09-v13-4-closing-chain-smoke-order.md](handoffs/2026-09-09-v13-4-closing-chain-smoke-order.md) | 13.4 段收口 · 全链冒烟 | `ready` | — | — |
+| [handoffs/2026-09-09-v13-4-closing-chain-smoke-order.md](handoffs/2026-09-09-v13-4-closing-chain-smoke-order.md) | 13.4 段收口 · 全链冒烟 | `done` | — | — |
 | [handoffs/2026-09-09-v13-4-s0-recon-order.md](handoffs/2026-09-09-v13-4-s0-recon-order.md) | 13.4 · 单 0 · 投影全谱与 item 化侦察 | `(缺状态头)` | — | — |
 | [handoffs/2026-09-09-v13-4-s1-item-floor-order.md](handoffs/2026-09-09-v13-4-s1-item-floor-order.md) | 13.4 单 1 · item 化地基 | `ready` | — | — |
 | [handoffs/2026-09-09-v13-4-s10-unboxing-ceremony-order.md](handoffs/2026-09-09-v13-4-s10-unboxing-ceremony-order.md) | 13.4 单 10 · 开箱仪式 | `done` | — | — |
