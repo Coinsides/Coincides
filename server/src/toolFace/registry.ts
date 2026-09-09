@@ -195,6 +195,8 @@ const itemOutputSchema = z.object({
   retired_into_item_id: z.string().nullable(),
   origin_course_id: z.string().nullable(),
   origin_note_id: z.string().nullable(),
+  origin_board_id: z.string().nullable(),
+  origin_board_title: z.string().nullable(),
   created_by: z.string(),
   metadata: jsonObjectSchema,
   created_at: z.string(),

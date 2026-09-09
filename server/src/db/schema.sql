@@ -955,6 +955,8 @@ CREATE TABLE IF NOT EXISTS items (
   retired_into_item_id TEXT REFERENCES items(id) ON DELETE SET NULL,
   origin_course_id TEXT REFERENCES courses(id) ON DELETE SET NULL,
   origin_note_id TEXT REFERENCES notes(id) ON DELETE SET NULL,
+  origin_board_id TEXT REFERENCES boards(id) ON DELETE SET NULL
+    CHECK (origin_board_id IS NULL OR (origin_note_id IS NULL AND origin_course_id IS NULL)),
   created_by TEXT NOT NULL DEFAULT 'user',
   metadata TEXT NOT NULL DEFAULT '{}',
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -1318,7 +1320,7 @@ CREATE INDEX IF NOT EXISTS idx_board_edges_to ON board_edges(board_id, to_member
 CREATE TABLE IF NOT EXISTS board_visuals (
   id TEXT PRIMARY KEY,
   board_id TEXT NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
-  visual_kind TEXT NOT NULL CHECK (visual_kind IN ('freehand', 'shape', 'image', 'table', 'connector')),
+  visual_kind TEXT NOT NULL CHECK (visual_kind IN ('freehand', 'shape', 'image', 'table', 'connector', 'sticky')),
   x REAL NOT NULL DEFAULT 0,
   y REAL NOT NULL DEFAULT 0,
   w REAL NOT NULL DEFAULT 0 CHECK (w >= 0),

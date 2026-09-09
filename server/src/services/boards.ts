@@ -4,6 +4,7 @@ import type { z } from 'zod';
 import { AppError } from '../middleware/errorHandler.js';
 import {
   boardFreehandDataSchema,
+  boardStickyDataSchema,
   createBoardSchema,
   updateBoardSchema,
   mountBoardMemberSchema,
@@ -17,6 +18,7 @@ import {
 import { createPurpose, getPurpose } from './purposes.js';
 import { createBoardTextRange, getBoardTextRange, replayBoardTextRange } from './boardTextRanges.js';
 import { mountBoardTextRangeSchema } from '../validators/boardTextRanges.js';
+import { createItem } from './items.js';
 
 export type BoardMemberKind = 'note' | 'item' | 'content_group' | 'text_range';
 type JsonObject = Record<string, unknown>;
@@ -84,6 +86,8 @@ export interface BoardMemberReference {
   item_type?: string | null;
   topic?: string | null;
   item_status?: 'active' | 'retired' | 'missing';
+  origin_board_id?: string | null;
+  origin_board_title?: string | null;
   block_id?: string;
   anchor_status?: 'active' | 'drifted' | 'lost';
 }
@@ -159,15 +163,19 @@ export function resolveBoardMember(
     return { ...base, title: row.title, note_id: row.id, state: 'available', reason: null };
   }
   if (kind === 'item') {
-    const row = db.prepare(`SELECT plain_text, item_type, topic, origin_note_id, status
-      FROM items WHERE id = ? AND user_id = ?`)
+    const row = db.prepare(`SELECT i.plain_text, i.item_type, i.topic, i.origin_note_id, i.status,
+      i.origin_board_id, b.title AS origin_board_title
+      FROM items i LEFT JOIN boards b ON b.id = i.origin_board_id AND b.user_id = i.user_id
+      WHERE i.id = ? AND i.user_id = ?`)
       .get(id, userId) as {
         plain_text: string; item_type: string | null; topic: string | null;
         origin_note_id: string | null; status: 'active' | 'retired';
+        origin_board_id: string | null; origin_board_title: string | null;
       } | undefined;
     if (!row) return { ...base, state: 'missing', reason: 'reference_missing', item_status: 'missing' };
     return { ...base, summary: row.plain_text.replace(/\s+/g, ' ').trim().slice(0, 240),
       item_type: row.item_type, topic: row.topic, note_id: row.origin_note_id, item_status: row.status,
+      origin_board_id: row.origin_board_id, origin_board_title: row.origin_board_title,
       state: row.status === 'active' ? 'available' : 'unavailable',
       reason: row.status === 'active' ? null : 'item_retired' };
   }
@@ -396,6 +404,10 @@ function visualRow(db: Database.Database, boardId: string, visualId: string): Bo
 
 function validateVisualData(kind: BoardVisualKind, data: JsonObject): void {
   if (kind === 'freehand') parse(boardFreehandDataSchema, data);
+  if (kind === 'sticky') {
+    const result = boardStickyDataSchema.safeParse(data);
+    if (!result.success) throw new AppError(400, result.error.issues[0]?.message ?? 'Invalid board chalk');
+  }
 }
 
 export function createBoardVisual(db: Database.Database, userId: string, boardId: string, value: unknown): BoardVisual {
@@ -437,4 +449,23 @@ export function deleteBoardVisual(db: Database.Database, userId: string, boardId
   const changed = db.prepare('DELETE FROM board_visuals WHERE id = ? AND board_id = ?').run(visualId, boardId).changes > 0;
   if (changed) touchBoard(db, boardId);
   return changed;
+}
+
+/** The recorded-action caller commits the Item, placement, chalk removal and mounted receipt together. */
+export function castBoardSticky(db: Database.Database, userId: string, boardId: string, visualId: string) {
+  requireTransaction(db);
+  boardRow(db, userId, boardId);
+  const visual = visualRow(db, boardId, visualId);
+  if (!visual) throw new AppError(404, 'board_visual_not_found');
+  if (visual.visual_kind !== 'sticky') throw new AppError(400, 'Only board chalk can be cast to an Item');
+  const data = json<JsonObject>(visual.data);
+  validateVisualData('sticky', data);
+  const item = createItem(db, userId, { plain_text: data.text as string, origin_board_id: boardId });
+  const { member } = mountBoardMember(db, userId, boardId, {
+    member_kind: 'item', member_id: item.id,
+    x: visual.x, y: visual.y, w: visual.w, h: visual.h, scale: visual.scale,
+    z_index: visual.z_index, pinned: visual.pinned === 1,
+  });
+  deleteBoardVisual(db, userId, boardId, visualId);
+  return { item, member, removed_visual_id: visualId };
 }

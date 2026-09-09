@@ -12,8 +12,11 @@ export function listItemSummaries(
   const ids = [...new Set(itemIds)];
   if (ids.length === 0) return [];
   const rows = db.prepare(`
-    SELECT id, plain_text, status, item_type, topic, origin_note_id, origin_course_id
-    FROM items WHERE user_id = ? AND id IN (${ids.map(() => '?').join(', ')})
+    SELECT i.id, i.plain_text, i.status, i.item_type, i.topic, i.origin_note_id, i.origin_course_id,
+      i.origin_board_id, b.title AS origin_board_title
+    FROM items i
+    LEFT JOIN boards b ON b.id = i.origin_board_id AND b.user_id = i.user_id
+    WHERE i.user_id = ? AND i.id IN (${ids.map(() => '?').join(', ')})
   `).all(userId, ...ids) as ItemSummaryRow[];
   const byId = new Map(rows.map(({ plain_text, ...row }) => [row.id, {
     ...row, summary: plain_text.replace(/\s+/g, ' ').trim().slice(0, 240),

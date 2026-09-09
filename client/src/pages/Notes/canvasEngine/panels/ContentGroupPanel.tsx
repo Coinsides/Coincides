@@ -27,6 +27,7 @@ import {
   type SyntheticEvent,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { itemOriginLabel } from '@/services/itemSummaryReader';
 import {
   addMembersToContentGroup,
   createContentGroup,
@@ -1283,7 +1284,7 @@ export function ContentGroupPanel({
                           </div>
                           <div className={styles.itemReceiptSummary}>
                             <span>Origin project: {inspectedItem.origin_course_id || 'removed / none'}</span>
-                            <span>Origin note: {inspectedItem.origin_note_id || 'removed / none'}</span>
+                            <span>{itemOriginLabel(inspectedItem)}</span>
                             <span>Snapshot: {inspectedItem.current_snapshot.content_hash.slice(0, 20)}...</span>
                           </div>
                           <div className={styles.itemReceiptList}>

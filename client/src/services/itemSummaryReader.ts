@@ -14,7 +14,16 @@ export function itemSummaryFromItem(item: ItemV1): ItemSummary {
     topic: item.topic,
     origin_note_id: item.origin_note_id,
     origin_course_id: item.origin_course_id,
+    origin_board_id: item.origin_board_id,
+    origin_board_title: item.origin_board_title,
   };
+}
+
+/** SET NULL origins cannot distinguish a deleted birthplace from an unrecorded one. */
+export function itemOriginLabel(item: Pick<ItemSummary, 'origin_note_id' | 'origin_board_id' | 'origin_board_title'>): string {
+  if (item.origin_board_id && item.origin_board_title) return `Born on board ${item.origin_board_title}`;
+  if (item.origin_note_id) return `Origin note: ${item.origin_note_id}`;
+  return 'Birthplace unavailable';
 }
 
 export function contentGroupItemIds(groups: readonly ContentGroupV1[]): string[] {

@@ -36,7 +36,7 @@ function board(db: Database.Database, id: string, soulId: string | null, project
 }
 
 test('057 fresh and actual pre-057 upgrade converge, retaining historical souls, membership and birth receipts', async (t) => {
-  const fresh = await createV13BoardsFixture();
+  const fresh = await createV13BoardsFixture({ beforeChalkMigration: true });
   t.after(() => fresh.close());
   const upgrade = await createV13BoardsFixture({ beforeBoardsMigration: true });
   t.after(() => upgrade.close());

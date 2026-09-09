@@ -666,6 +666,18 @@
               "null"
             ]
           },
+          "origin_board_id": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "origin_board_title": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "created_by": {
             "type": "string"
           },
@@ -914,6 +926,8 @@
           "retired_into_item_id",
           "origin_course_id",
           "origin_note_id",
+          "origin_board_id",
+          "origin_board_title",
           "created_by",
           "metadata",
           "created_at",
@@ -1021,6 +1035,18 @@
           ]
         },
         "origin_note_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "origin_board_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "origin_board_title": {
           "type": [
             "string",
             "null"
@@ -1272,6 +1298,8 @@
         "retired_into_item_id",
         "origin_course_id",
         "origin_note_id",
+        "origin_board_id",
+        "origin_board_title",
         "created_by",
         "metadata",
         "created_at",

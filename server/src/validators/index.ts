@@ -481,9 +481,17 @@ export const createItemSchema = z.object({
   topic: z.string().max(240).nullable().optional(),
   origin_course_id: z.string().uuid('Invalid origin project ID').nullable().optional(),
   origin_note_id: z.string().uuid('Invalid origin note ID').nullable().optional(),
+  origin_board_id: z.string().uuid('Invalid origin board ID').nullable().optional(),
   created_by: itemCreatedBySchema.optional(),
   metadata: jsonObjectSchema.optional(),
-}).strict().superRefine(requireItemBody);
+}).strict().superRefine(requireItemBody).superRefine((value, context) => {
+  if (value.origin_board_id && value.origin_note_id) {
+    context.addIssue({ code: z.ZodIssueCode.custom, message: 'Item birth note and board are mutually exclusive', path: ['origin_board_id'] });
+  }
+  if (value.origin_board_id && value.origin_course_id) {
+    context.addIssue({ code: z.ZodIssueCode.custom, message: 'Board-born Items must leave origin project empty', path: ['origin_course_id'] });
+  }
+});
 
 export const updateItemSchema = z.object({
   body_json: jsonObjectSchema.optional(),

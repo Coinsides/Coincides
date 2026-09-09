@@ -7,4 +7,6 @@ export interface ItemSummary {
   topic: string | null;
   origin_note_id: string | null;
   origin_course_id: string | null;
+  origin_board_id: string | null;
+  origin_board_title: string | null;
 }

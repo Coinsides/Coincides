@@ -4,6 +4,7 @@ import * as sqliteVec from 'sqlite-vec';
 
 interface FixtureOptions {
   beforeBoardsMigration?: boolean;
+  beforeChalkMigration?: boolean;
 }
 
 /** Real schema/migrations in a disposable connection, without app startup or seed. */
@@ -12,6 +13,11 @@ export async function createV13BoardsFixture(options: FixtureOptions = {}): Prom
   try {
     db.pragma('foreign_keys = ON');
     let schema = readFileSync(new URL('../../db/schema.sql', import.meta.url), 'utf8');
+    if (options.beforeBoardsMigration || options.beforeChalkMigration) {
+      // Historical fixtures must not inherit 060's forward FK to boards or new visual kind.
+      schema = schema.replace(/  origin_board_id TEXT REFERENCES boards\(id\) ON DELETE SET NULL\r?\n    CHECK \(origin_board_id IS NULL OR \(origin_note_id IS NULL AND origin_course_id IS NULL\)\),\r?\n/, '')
+        .replace("'table', 'connector', 'sticky'", "'table', 'connector'");
+    }
     if (options.beforeBoardsMigration) {
       const marker = '-- V13.3 library boards (migration 057)';
       const offset = schema.indexOf(marker);
@@ -27,6 +33,7 @@ export async function createV13BoardsFixture(options: FixtureOptions = {}): Prom
     const files = readdirSync(directory).filter((file) => file.endsWith('.ts')).sort();
     for (const file of files) {
       if (options.beforeBoardsMigration && file >= '057_') continue;
+      if (options.beforeChalkMigration && file >= '060_') continue;
       const { default: migration } = await import(new URL(file, directory).href) as {
         default: { up: (connection: Database.Database) => void };
       };

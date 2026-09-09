@@ -43,6 +43,8 @@ export interface BoardMemberReference {
   item_type?: string | null;
   topic?: string | null;
   item_status?: 'active' | 'retired' | 'missing';
+  origin_board_id?: string | null;
+  origin_board_title?: string | null;
   anchor_status?: BoardTextRangeStatus;
   block_id?: string | null;
 }
@@ -68,7 +70,7 @@ export interface BoardEdge {
   created_at: string;
 }
 
-export type BoardVisualKind = 'freehand' | 'shape' | 'image' | 'table' | 'connector';
+export type BoardVisualKind = 'freehand' | 'shape' | 'image' | 'table' | 'connector' | 'sticky';
 
 export interface BoardVisual extends BoardGeometry {
   id: string;

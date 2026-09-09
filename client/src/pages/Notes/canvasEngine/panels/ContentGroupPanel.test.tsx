@@ -44,6 +44,8 @@ function item(id: string, body: string): ItemV1 {
     retired_into_item_id: null,
     origin_course_id: 'fixture-project',
     origin_note_id: 'fixture-note',
+    origin_board_id: null,
+    origin_board_title: null,
     created_by: 'human',
     metadata: {},
     created_at: timestamp,
@@ -209,5 +211,18 @@ describe('ContentGroupPanel library Purpose alignment', () => {
     }));
     expect(screen.queryByText('Purpose membership')).toBeNull();
     expect(screen.queryByText(/410|Failed to save Purpose/)).toBeNull();
+  });
+
+  it.each([
+    ['board-1', 'Thinking board', 'Born on board Thinking board'],
+    [null, null, 'Birthplace unavailable'],
+  ])('shows board birthplace %s without affecting the editable body', async (boardId, boardTitle, label) => {
+    mocks.loadItem.mockResolvedValue({ ...inspected, origin_note_id: null, origin_course_id: null,
+      origin_board_id: boardId, origin_board_title: boardTitle });
+    await openItemInspector([]);
+    expect(screen.getByText(label!)).toBeTruthy();
+    expect((screen.getByRole('textbox', { name: 'Edit Item body' }) as HTMLTextAreaElement).value)
+      .toBe(inspected.plain_text);
+    expect((screen.getByRole('button', { name: 'Save Item' }) as HTMLButtonElement).disabled).toBe(false);
   });
 });

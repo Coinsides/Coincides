@@ -188,6 +188,16 @@ export function useBoard(boardId: string | undefined) {
     'write', scope,
   ), [enqueue, scope]);
 
+  const castVisual = useCallback((visualId: string) => enqueue(
+    (id) => boardRepository.castVisual(id, visualId),
+    (detail, result) => detail ? {
+      ...detail,
+      members: upsert(detail.members, result.member),
+      visuals: detail.visuals.filter((visual) => visual.id !== result.removed_visual_id),
+    } : detail,
+    'write', scope,
+  ), [enqueue, scope]);
+
   const flush = useCallback(async () => {
     let pending: Promise<void>;
     do {
@@ -206,6 +216,6 @@ export function useBoard(boardId: string | undefined) {
     error: current ? state.error : null,
     pending: current && state.pendingCount > 0,
     reload, updateBoard, mount, mountTextRange, updateMember, unmount, addEdge, removeEdge,
-    addVisual, removeVisual, updateVisual, updateEdge, clearError, flush,
+    addVisual, removeVisual, updateVisual, castVisual, updateEdge, clearError, flush,
   };
 }

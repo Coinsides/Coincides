@@ -1,17 +1,33 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { ItemSummary } from '@shared/types/itemSummary';
-import { loadItemSummaries } from './itemSummaryReader';
+import { itemOriginLabel, loadItemSummaries } from './itemSummaryReader';
 
 const http = vi.hoisted(() => ({ post: vi.fn() }));
 vi.mock('@/services/api', () => ({ default: http }));
 
 function summary(id: string, text = id): ItemSummary {
-  return { id, summary: text, status: 'active', item_type: null, topic: null, origin_note_id: null, origin_course_id: null };
+  return { id, summary: text, status: 'active', item_type: null, topic: null, origin_note_id: null,
+    origin_course_id: null, origin_board_id: null, origin_board_title: null };
 }
 
 beforeEach(() => vi.resetAllMocks());
 
 describe('shared Item summary reader', () => {
+  it('keeps the current birthplace label separate from Item body and degrades a removed origin', async () => {
+    const boardItem = { ...summary('board-item', 'Preserved body'),
+      origin_board_id: 'board-1', origin_board_title: 'Thinking board' };
+    http.post.mockResolvedValueOnce({ data: [boardItem] });
+    const loaded = (await loadItemSummaries(['board-item'])).get('board-item')!;
+    expect(itemOriginLabel(loaded)).toBe('Born on board Thinking board');
+    expect(loaded.summary).toBe('Preserved body');
+
+    http.post.mockResolvedValueOnce({ data: [{ ...boardItem, origin_board_id: null, origin_board_title: null }] });
+    const reopened = (await loadItemSummaries(['board-item'])).get('board-item')!;
+    expect(itemOriginLabel(reopened)).toBe('Birthplace unavailable');
+    expect(reopened.summary).toBe('Preserved body');
+    expect(itemOriginLabel({ ...boardItem, origin_board_title: null })).toBe('Birthplace unavailable');
+  });
+
   it('deduplicates repeated group references, batches over 200, and preserves omitted missing ids', async () => {
     const ids = Array.from({ length: 201 }, (_, index) => `item-${index}`);
     http.post.mockImplementation(async (_path: string, body: { item_ids: string[] }) => ({

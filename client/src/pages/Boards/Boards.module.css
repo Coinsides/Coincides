@@ -131,6 +131,20 @@
 .visualTableScroll { width: 100%; height: 100%; overflow: auto; }
 .visualTableScroll table { border-collapse: collapse; width: 100%; font-size: 12px; }
 .visualTableScroll td { border: 1px solid var(--border-default); padding: 6px 8px; white-space: pre-wrap; }
+.chalk {
+  position: absolute; transform-origin: 0 0; padding: 14px; border-radius: 2px;
+  color: var(--text-primary); background: var(--canvas-sticky-note-fill, var(--bg-elevated));
+  border: 1px solid var(--canvas-sticky-note-stroke, var(--border-default));
+  cursor: grab; user-select: none;
+}
+.chalk p { font-size: 14px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; height: 100%; overflow: auto; }
+.chalkEditor { display: flex; flex-direction: column; gap: 8px; cursor: text; user-select: text; }
+.chalkEditor textarea {
+  flex: 1; min-height: 0; width: 100%; resize: none; border: 0; padding: 0;
+  background: transparent; color: inherit; font: inherit; line-height: 1.5; overflow-wrap: anywhere;
+}
+.chalkEditor small { font-size: 10px; line-height: 1.4; }
+.chalkEditor small[role='alert'] { font-weight: 600; }
 @media (max-width: 760px) {
   .library { padding: 12px 0; }
   .createRow { flex-direction: column; }

@@ -7,6 +7,8 @@ import { pointsPath, toBoardPoint, zoomBoardAt, type BoardPoint } from './boardV
 import { useBoard } from './useBoard';
 import { BoardRelocatedVisual } from './BoardRelocatedVisual';
 import { BoardDeleteDialog } from './BoardDeleteDialog';
+import { BoardChalkEditor, chalkGeometry, type ChalkDraft } from './BoardChalk';
+import { itemOriginLabel } from '@/services/itemSummaryReader';
 import { BOARD_TEXT_RANGE_MIME, parseBoardTextRangeClipboard } from './boardTextRangeClipboard';
 import styles from './Boards.module.css';
 
@@ -51,6 +53,7 @@ export default function BoardPage() {
   const [deleting, setDeleting] = useState(false);
   const [titleDraft, setTitleDraft] = useState<string | null>(null);
   const [labelDraft, setLabelDraft] = useState<{ id: string; value: string } | null>(null);
+  const [chalkDraft, setChalkDraft] = useState<ChalkDraft | null>(null);
   const titleInput = useRef<HTMLInputElement>(null);
   const pickerToggle = useRef<HTMLButtonElement>(null);
   const [search, setSearch] = useState('');
@@ -111,6 +114,7 @@ export default function BoardPage() {
     objectDraftRef.current = null;
     setTitleDraft(null);
     setLabelDraft(null);
+    setChalkDraft(null);
     setDeleting(false);
     setPasteError(null);
     setInk([]);
@@ -219,6 +223,42 @@ export default function BoardPage() {
   const selectedVisual = selection?.kind === 'visual' ? visibleVisuals.find(({ id }) => id === selection.id) : undefined;
   const selectedEdge = selection?.kind === 'edge' ? detail?.edges.find(({ id }) => id === selection.id) : undefined;
 
+  function draftChalk(event: React.MouseEvent<HTMLDivElement>) {
+    if (tool !== 'select' || spaceDown.current || !detail || chalkDraft) return;
+    // Disabled note/item projections and drawing controls are still occupied space.
+    if ((event.target as Element).closest('article, [data-visual-kind], [data-testid^="board-visual-"], button, input, textarea, [role="button"]')) return;
+    const point = toBoardPoint(localPoint(event), viewportRef.current || detail.board.viewport);
+    setSelection(null);
+    setChalkDraft({ text: '', x: point.x, y: point.y, w: 240, h: 160, scale: 1, pinned: false,
+      z_index: Math.max(0, ...detail.members.map((member) => member.z_index), ...detail.visuals.map((visual) => visual.z_index)) + 1 });
+  }
+
+  function editChalk(visual: BoardVisual) {
+    if (tool !== 'select' || chalkDraft || board.pending) return;
+    setSelection({ kind: 'visual', id: visual.id });
+    setChalkDraft({ ...visual, text: typeof visual.data.text === 'string' ? visual.data.text : '' });
+  }
+
+  async function saveChalk(text: string) {
+    if (!chalkDraft) return false;
+    const draft = chalkDraft;
+    const visit = visitRevision.current;
+    const saved = draft.id
+      ? await board.updateVisual(draft.id, { data: { text } })
+      : await board.addVisual({ visual_kind: 'sticky', data: { text },
+        x: draft.x, y: draft.y, w: draft.w, h: draft.h, scale: draft.scale, z_index: draft.z_index });
+    if (saved && visit === visitRevision.current) setChalkDraft((current) => current === draft ? null : current);
+    return saved;
+  }
+
+  async function castChalk(visual: BoardVisual) {
+    const visit = visitRevision.current;
+    if (await board.castVisual(visual.id) && visit === visitRevision.current) {
+      setSelection(null);
+      void loadCandidates();
+    }
+  }
+
   function editLabel(edge: BoardEdge) {
     if (tool !== 'select' || board.pending) return;
     setSelection({ kind: 'edge', id: edge.id });
@@ -264,6 +304,7 @@ export default function BoardPage() {
   function begin(event: React.PointerEvent, object?: BoardMember | BoardVisual, resize = false) {
     if (event.button !== 0 && event.button !== 1) return;
     if (!detail || !viewportRef.current) return;
+    if (chalkDraft) return;
     event.preventDefault();
     event.stopPropagation();
     surface.current?.focus();
@@ -360,7 +401,7 @@ export default function BoardPage() {
   }
 
   async function removeSelection() {
-    if (!selection) return;
+    if (!selection || chalkDraft || board.pending) return;
     const removed = selection.kind === 'member' ? await board.unmount(selection.id)
       : selection.kind === 'edge' ? await board.removeEdge(selection.id) : await board.removeVisual(selection.id);
     if (removed) setSelection(null);
@@ -374,6 +415,9 @@ export default function BoardPage() {
       event.preventDefault();
       if (tool === 'connect') void connect(selectedMember);
       else void openMember(selectedMember);
+    }
+    if (event.key === 'Enter' && selectedVisual?.visual_kind === 'sticky') {
+      event.preventDefault(); editChalk(selectedVisual);
     }
     if ((event.key === 'Delete' || event.key === 'Backspace') && selection) { event.preventDefault(); void removeSelection(); }
     if (selectedMember && !selectedMember.pinned && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) {
@@ -461,7 +505,7 @@ export default function BoardPage() {
         <button key={key} className={styles.button} aria-pressed={tool === key}
           onClick={() => { setTool(key); setConnectFrom(null); }}><Icon size={16} />{label}</button>)}
       <span className={styles.toolHint}>{tool === 'connect' ? (connectFrom ? 'Choose the next card' : 'Choose two cards to connect')
-        : tool === 'pen' ? 'Draw on the board' : 'Drag to arrange · Double-click to open a note'}</span>
+        : tool === 'pen' ? 'Draw on the board' : 'Drag to arrange · Double-click blank space to write chalk'}</span>
       <div className={styles.zoomControls}>
         <button className={styles.button} aria-label="Zoom board out" onClick={() => zoom(1 / 1.2)}><Minus size={16} /></button>
         <button className={styles.button} aria-label="Reset board zoom" onClick={() => zoom(1 / activeViewport.zoom)}>{Math.round(activeViewport.zoom * 100)}%</button>
@@ -507,6 +551,7 @@ export default function BoardPage() {
         data-testid="board-surface" tabIndex={0} aria-label="Board canvas" onKeyDown={keyDown}
         onKeyUp={(event) => { if (event.code === 'Space') spaceDown.current = false; }}
         onBlur={() => { spaceDown.current = false; }}
+        onDoubleClick={draftChalk}
         onPointerDown={(event) => begin(event)} onPointerMove={move}
         onPointerUp={(event) => { void end(event); }} onPointerCancel={(event) => { void end(event, true); }}>
         <div className={styles.world} data-testid="board-world"
@@ -558,10 +603,22 @@ export default function BoardPage() {
             </g>)}
             {ink.length > 0 && <path d={pointsPath(ink)} className={styles.inkLine} />}
           </svg>
-          {visibleVisuals.filter((visual) => visual.visual_kind !== 'freehand').map((visual) =>
+          {visibleVisuals.filter((visual) => visual.visual_kind !== 'freehand' && visual.visual_kind !== 'sticky').map((visual) =>
             <BoardRelocatedVisual key={visual.id} visual={visual} selected={selection?.id === visual.id}
               selectable={tool === 'select'} onSelect={() => setSelection({ kind: 'visual', id: visual.id })}
               onPointerDown={(event) => begin(event, visual)} onResize={(event) => begin(event, visual, true)} />)}
+          {visibleVisuals.filter((visual) => visual.visual_kind === 'sticky' && visual.id !== chalkDraft?.id).map((visual) =>
+            <div key={visual.id} className={`${styles.chalk} ${selection?.id === visual.id ? styles.selected : ''}`}
+              style={chalkGeometry(visual)} data-testid={`board-visual-${visual.id}`} data-visual-kind="sticky"
+              role={tool === 'select' ? 'button' : undefined} tabIndex={tool === 'select' ? 0 : undefined}
+              aria-label="Select chalk" title={visual.pinned ? 'Pinned chalk · Double-click to edit' : 'Double-click to edit chalk'}
+              onFocus={() => { if (tool === 'select') setSelection({ kind: 'visual', id: visual.id }); }}
+              onPointerDown={(event) => begin(event, visual)}
+              onDoubleClick={(event) => { event.stopPropagation(); editChalk(visual); }}>
+              <p>{typeof visual.data.text === 'string' ? visual.data.text : ''}</p>
+            </div>)}
+          {chalkDraft && <BoardChalkEditor key={chalkDraft.id || 'new'} draft={chalkDraft}
+            onSave={saveChalk} onCancel={() => setChalkDraft(null)} />}
           {visibleMembers.map((member) => {
             const candidate = candidateById.get(`${member.member_kind}:${member.member_id}`);
             const isItem = member.member_kind === 'item';
@@ -594,6 +651,11 @@ export default function BoardPage() {
                 : isItem ? member.reference.summary || 'Item preview unavailable.'
                   : candidate?.summary || (candidateError ? 'Preview unavailable. Open the note to read.' : 'Open the note to read more.')}</p>
               {isItem && member.reference.topic && <small className={styles.itemTopic}>{member.reference.topic}</small>}
+              {isItem && member.reference.state !== 'missing' && <small>{itemOriginLabel({
+                origin_note_id: member.reference.note_id,
+                origin_board_id: member.reference.origin_board_id ?? null,
+                origin_board_title: member.reference.origin_board_title ?? null,
+              })}</small>}
               {isTextRange && <>
                 {anchorStatus !== 'active' && <small className={styles.anchorNotice}>
                   {anchorStatus === 'drifted' ? 'Source changed' : 'Source lost'} · Last valid snapshot
@@ -612,14 +674,16 @@ export default function BoardPage() {
             </article>;
           })}
         </div>
-        {detail.members.length === 0 && detail.visuals.length === 0 && <div className={styles.canvasEmpty}>
-          <h2>Give this thought some room.</h2><p>Add a few notes, draw a connection, or pick up the pen.</p>
+        {detail.members.length === 0 && detail.visuals.length === 0 && !chalkDraft && <div className={styles.canvasEmpty}>
+          <h2>Give this thought some room.</h2><p>Double-click blank space to write chalk, add a note, or pick up the pen.</p>
           <button className={styles.button} onPointerDown={(event) => event.stopPropagation()} onClick={openPicker}>Add your first note or item</button>
         </div>}
       </div>
     </div>
     {selection && <div className={styles.selectionBar} role="toolbar" aria-label="Selected projection controls">
-      {selectedVisual && <button className={styles.button} disabled={board.pending} aria-pressed={selectedVisual.pinned}
+      {selectedVisual?.visual_kind === 'sticky' && <button className={styles.button} disabled={board.pending || Boolean(chalkDraft)}
+        onClick={() => { void castChalk(selectedVisual); }}>Cast to item</button>}
+      {selectedVisual && <button className={styles.button} disabled={board.pending || Boolean(chalkDraft)} aria-pressed={selectedVisual.pinned}
         onClick={() => { void board.updateVisual(selectedVisual.id, { pinned: !selectedVisual.pinned }); }}>
         <Pin size={15} />{selectedVisual.pinned ? 'Unpin' : 'Pin'}
       </button>}
@@ -639,7 +703,7 @@ export default function BoardPage() {
         <button className={styles.button} disabled={selectedMember.pinned || board.pending} onClick={() => { void board.updateMember(selectedMember.id, { z_index: Math.max(...detail.members.map((member) => member.z_index)) + 1 }); }}>Bring forward</button>
         <button className={styles.button} disabled={selectedMember.pinned || board.pending} onClick={() => { void board.updateMember(selectedMember.id, { z_index: Math.min(...detail.members.map((member) => member.z_index)) - 1 }); }}>Send back</button>
       </>}
-      <button className={styles.button} disabled={board.pending} onClick={() => { void removeSelection(); }}><Trash2 size={15} />{selection.kind === 'member' ? 'Remove from board' : selection.kind === 'edge' ? 'Delete connection' : 'Delete drawing'}</button>
+      <button className={styles.button} disabled={board.pending || Boolean(chalkDraft)} onClick={() => { void removeSelection(); }}><Trash2 size={15} />{selection.kind === 'member' ? 'Remove from board' : selection.kind === 'edge' ? 'Delete connection' : selectedVisual?.visual_kind === 'sticky' ? 'Delete chalk' : 'Delete drawing'}</button>
     </div>}
     {deleting && <BoardDeleteDialog board={detail.board} onCancel={() => setDeleting(false)} onDeleted={() => navigate('/boards')} />}
   </section>;

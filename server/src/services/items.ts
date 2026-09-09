@@ -19,6 +19,7 @@ export interface CreateItemInput {
   topic?: string | null;
   origin_course_id?: string | null;
   origin_note_id?: string | null;
+  origin_board_id?: string | null;
   created_by?: string;
   metadata?: Record<string, unknown>;
 }
@@ -69,6 +70,7 @@ interface ItemRow {
   retired_into_item_id: string | null;
   origin_course_id: string | null;
   origin_note_id: string | null;
+  origin_board_id: string | null;
   created_by: string;
   metadata: string;
   created_at: string;
@@ -276,8 +278,14 @@ function hydrateItem(db: Database.Database, row: ItemRow, includeAnchors = true)
   assertItemRowInvariant(row);
   const snapshot = getCurrentSnapshot(db, row.user_id, row.id, row.plain_text);
   const anchors = includeAnchors ? listClaimedAnchorRows(db, row.user_id, row.id).map(hydrateAnchor) : [];
+  const originBoard = row.origin_board_id
+    ? db.prepare('SELECT title FROM boards WHERE id = ? AND user_id = ?')
+      .get(row.origin_board_id, row.user_id) as { title: string } | undefined
+    : undefined;
   return {
     ...row,
+    origin_board_id: row.origin_board_id ?? null,
+    origin_board_title: originBoard?.title ?? null,
     body_json: parseJson<Record<string, unknown>>(row.body_json, {}),
     metadata: parseJson<Record<string, unknown>>(row.metadata, {}),
     current_snapshot: snapshot,
@@ -288,10 +296,18 @@ function hydrateItem(db: Database.Database, row: ItemRow, includeAnchors = true)
 function resolveOrigins(
   db: Database.Database,
   userId: string,
-  input: { origin_course_id?: string | null; origin_note_id?: string | null },
+  input: { origin_course_id?: string | null; origin_note_id?: string | null; origin_board_id?: string | null },
 ) {
   let courseId = optionalText(input.origin_course_id);
   const noteId = optionalText(input.origin_note_id);
+  const boardId = optionalText(input.origin_board_id);
+  if (boardId) {
+    if (noteId) throw new AppError(400, 'Item birth note and board are mutually exclusive');
+    if (courseId) throw new AppError(400, 'Board-born Items must leave origin project empty');
+    if (!db.prepare('SELECT id FROM boards WHERE id = ? AND user_id = ?').get(boardId, userId)) {
+      throw new AppError(404, 'Origin board not found');
+    }
+  }
   if (noteId) {
     const note = db.prepare('SELECT id, course_id FROM notes WHERE id = ? AND user_id = ?')
       .get(noteId, userId) as { id: string; course_id: string } | undefined;
@@ -305,14 +321,14 @@ function resolveOrigins(
     const course = db.prepare('SELECT id FROM courses WHERE id = ? AND user_id = ?').get(courseId, userId);
     if (!course) throw new AppError(404, 'Origin project not found');
   }
-  return { courseId, noteId };
+  return { courseId, noteId, boardId };
 }
 
 function insertItem(
   db: Database.Database,
   userId: string,
   input: CreateItemInput,
-  forcedOrigins?: { courseId: string | null; noteId: string | null },
+  forcedOrigins?: { courseId: string | null; noteId: string | null; boardId: string | null },
 ): string {
   const id = uuidv4();
   const body = normalizeItemBody(id, input);
@@ -321,9 +337,9 @@ function insertItem(
   db.prepare(`
     INSERT INTO items (
       id, user_id, body_json, plain_text, item_type, topic, status,
-      retired_into_item_id, origin_course_id, origin_note_id,
+      retired_into_item_id, origin_course_id, origin_note_id, origin_board_id,
       created_by, metadata, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, 'active', NULL, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, 'active', NULL, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     id,
     userId,
@@ -333,6 +349,7 @@ function insertItem(
     optionalText(input.topic),
     origins.courseId,
     origins.noteId,
+    origins.boardId,
     optionalText(input.created_by) || 'human',
     stringifyJson(input.metadata),
     now,

@@ -10,6 +10,7 @@ import {
   mountBoardTextRange,
   createBoardEdge, updateBoardEdge, deleteBoardEdge,
   createBoardVisual, updateBoardVisual, deleteBoardVisual,
+  castBoardSticky,
 } from '../services/boards.js';
 import { relocateTrayToBoard, undoTrayRelocation } from '../services/boardTrayRelocation.js';
 import { listBoardTextRanges, updateBoardTextRanges } from '../services/boardTextRanges.js';
@@ -252,6 +253,21 @@ export function createBoardRouter(database: () => Database.Database = getDb): Ro
       db, req.userId!, String(req.params.boardId), String(req.params.visualId), input,
     ))();
     res.json({ visual });
+  }));
+
+  router.post('/:boardId/visuals/:visualId/cast', handle((req, res) => {
+    z.object({}).strict().parse(req.body ?? {});
+    const boardId = String(req.params.boardId);
+    const result = runRecordedAction(database(), req, 'POST /api/boards/:boardId/visuals/:visualId/cast', (db, userId) => {
+      const value = castBoardSticky(db, userId, boardId, String(req.params.visualId));
+      return { value, events: [{
+        verb: 'mounted',
+        objects: [{ kind: 'board', id: boardId }, { kind: 'board_member', id: value.member.id },
+          { kind: 'item', id: value.item.id }],
+        summary: `Mounted item: ${value.item.id}`,
+      }] };
+    });
+    res.status(201).json(result);
   }));
 
   router.delete('/:boardId/visuals/:visualId', handle((req, res) => {

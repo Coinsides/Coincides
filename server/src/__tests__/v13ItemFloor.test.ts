@@ -13,12 +13,13 @@ import { createV13BoardsFixture } from './helpers/v13BoardsFixture.js';
 test('Item summaries batch reads current text once per identity without snapshot or anchor tables', (t) => {
   const db = new Database(':memory:');
   t.after(() => db.close());
-  db.exec(`CREATE TABLE items (id TEXT PRIMARY KEY, user_id TEXT, plain_text TEXT,
-    status TEXT, item_type TEXT, topic TEXT, origin_note_id TEXT, origin_course_id TEXT)`);
-  db.prepare('INSERT INTO items VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
-    .run('item', 'user', '  Current\n\tbody  ', 'active', 'claim', 'Topic', 'note', 'project');
+  db.exec(`CREATE TABLE boards (id TEXT PRIMARY KEY, user_id TEXT, title TEXT);
+    CREATE TABLE items (id TEXT PRIMARY KEY, user_id TEXT, plain_text TEXT,
+    status TEXT, item_type TEXT, topic TEXT, origin_note_id TEXT, origin_course_id TEXT, origin_board_id TEXT)`);
+  db.prepare('INSERT INTO items VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)')
+    .run('item', 'user', '  Current\n\tbody  ', 'active', 'claim', 'Topic', 'note', 'project', null);
   const expected = { id: 'item', summary: 'Current body', status: 'active', item_type: 'claim',
-    topic: 'Topic', origin_note_id: 'note', origin_course_id: 'project' };
+    topic: 'Topic', origin_note_id: 'note', origin_course_id: 'project', origin_board_id: null, origin_board_title: null };
   assert.deepEqual(listItemSummaries(db, 'user', ['item', 'item', 'missing']), [expected]);
   assert.deepEqual(listItemSummaries(db, 'user', []), []);
   db.prepare("UPDATE items SET plain_text = ?, status = 'retired' WHERE id = 'item'")
@@ -104,9 +105,10 @@ test('13.4 synthetic HTTP Item floor: mount, reopen current body, retire in plac
     });
     assert.deepEqual(summaries, [
       { id: item.id, summary: 'Changed current body', status: 'active', item_type: 'claim',
-        topic: 'New topic', origin_note_id: noteId, origin_course_id: projectId },
+        topic: 'New topic', origin_note_id: noteId, origin_course_id: projectId,
+        origin_board_id: null, origin_board_title: null },
       { id: standalone.id, summary: 'Standalone body', status: 'active', item_type: null,
-        topic: null, origin_note_id: null, origin_course_id: null },
+        topic: null, origin_note_id: null, origin_course_id: null, origin_board_id: null, origin_board_title: null },
     ]);
     assert.deepEqual(db.prepare('SELECT * FROM item_snapshots ORDER BY id').all(), snapshotsBefore);
     await request('POST', `/api/items/${item.id}/retire`, {});

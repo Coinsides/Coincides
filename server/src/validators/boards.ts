@@ -64,7 +64,13 @@ export const createBoardEdgeSchema = z.object({
 export const updateBoardEdgeSchema = createBoardEdgeSchema.partial()
   .refine((value) => Object.keys(value).length > 0, 'No edge changes provided');
 
-export const boardVisualKindSchema = z.enum(['freehand', 'shape', 'image', 'table', 'connector']);
+export const boardVisualKindSchema = z.enum(['freehand', 'shape', 'image', 'table', 'connector', 'sticky']);
+// Mirrored in shared/types/boardSticky.ts; the cross-end test locks equality.
+// Server product runtime imports from shared are intentionally forbidden.
+export const BOARD_STICKY_TEXT_LIMIT = 280;
+export const boardStickyDataSchema = z.object({
+  text: z.string().max(BOARD_STICKY_TEXT_LIMIT, `Board chalk is limited to ${BOARD_STICKY_TEXT_LIMIT} characters`),
+}).strict();
 const visualGeometry = { ...memberGeometry, rotation: finiteNumber.optional() };
 
 export const createBoardVisualSchema = z.object({

@@ -78,6 +78,12 @@ export const boardRepository = {
   async deleteVisual(boardId: string, id: string): Promise<void> {
     await api.delete(childPath(boardId, 'visuals', id));
   },
+  async castVisual(boardId: string, id: string): Promise<{ item: ItemV1; member: BoardMember; removed_visual_id: string }> {
+    const { data } = await api.post<{ item: ItemV1; member: BoardMember; removed_visual_id: string }>(
+      `${childPath(boardId, 'visuals', id)}/cast`, {},
+    );
+    return data;
+  },
   async relocateTray(boardId: string, placementIds: string[]): Promise<TrayRelocationResult> {
     const { data } = await api.post<TrayRelocationResult>(`${boardPath(boardId)}/relocate-tray`, {
       placement_ids: placementIds,
@@ -172,6 +178,10 @@ export function boardErrorMessage(error: unknown): string {
     ? (error as { response?: { status?: number; data?: { error?: unknown } } }).response
     : undefined;
   switch (response?.data?.error) {
+    case 'Item content is required':
+      return 'Add some text to the chalk before casting it to an item.';
+    case 'Board chalk is limited to 280 characters':
+      return 'Chalk can contain at most 280 characters. Shorten the text and try again.';
     case 'board_text_range_source_changed':
       return 'The copied text has changed. Save the note, select the passage again, and copy a new reference.';
     case 'tray_placement_unavailable':

@@ -295,6 +295,8 @@ export interface ItemV1 {
   retired_into_item_id: string | null;
   origin_course_id: string | null;
   origin_note_id: string | null;
+  origin_board_id: string | null;
+  origin_board_title: string | null;
   created_by: string;
   metadata: Record<string, unknown>;
   created_at: string;

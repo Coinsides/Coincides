@@ -23,14 +23,14 @@ function fixture(t: TestContext) {
     CREATE TABLE notes (id TEXT PRIMARY KEY, user_id TEXT, course_id TEXT,
       title TEXT, status TEXT, note_class TEXT, source_kind TEXT);
     CREATE TABLE items (id TEXT PRIMARY KEY, user_id TEXT, status TEXT, plain_text TEXT,
-      item_type TEXT, topic TEXT, origin_note_id TEXT);
+      item_type TEXT, topic TEXT, origin_note_id TEXT, origin_board_id TEXT);
     CREATE TABLE content_groups (id TEXT PRIMARY KEY, user_id TEXT, course_id TEXT,
       note_id TEXT, title TEXT, status TEXT, identity_type TEXT, identity_role TEXT);
     INSERT INTO users VALUES ('user');
     INSERT INTO courses VALUES ('project-a','user'),('project-b','user');
     INSERT INTO notes VALUES ('note','user','project-b','Paper','active','user','manual');
     INSERT INTO content_groups VALUES ('group','user','project-b','note','Bundle','active',NULL,NULL);
-    INSERT INTO items VALUES ('item','user','active','Current item text','claim','Topic','note');
+    INSERT INTO items VALUES ('item','user','active','Current item text','claim','Topic','note',NULL);
   `);
   db.transaction(() => {
     migration044.up(db);
