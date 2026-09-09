@@ -47,12 +47,13 @@ export const mountBoardMemberSchema = z.object({
   id: idSchema.optional(),
   member_kind: z.enum(['note', 'content_group', 'item', 'text_range']),
   member_id: idSchema,
+  placed: z.boolean().optional(),
   ...memberGeometry,
   metadata: objectSchema.optional(),
 }).strict();
 
-export const updateBoardMemberSchema = z.object(memberGeometry).strict()
-  .refine((value) => Object.keys(value).length > 0, 'No member geometry changes provided');
+export const updateBoardMemberSchema = z.object({ ...memberGeometry, placed: z.boolean().optional() }).strict()
+  .refine((value) => Object.keys(value).length > 0, 'No member placement changes provided');
 
 export const createBoardEdgeSchema = z.object({
   from_member_id: idSchema,

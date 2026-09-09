@@ -214,6 +214,7 @@ import { ImageObjectLayer } from './ImageObjectLayer';
 import { SelectionToolbarLayer } from './SelectionToolbarLayer';
 import { SelectionTypographyToolbarLayer } from './SelectionTypographyToolbarLayer';
 import { useBoardReferenceClipboard } from '../hooks/useBoardReferenceClipboard';
+import { useBoardStagingSelection } from '../hooks/useBoardStagingSelection';
 import { ShapeObjectLayer } from './ShapeObjectLayer';
 import { SlashMenuLayer } from './SlashMenuLayer';
 import {
@@ -940,6 +941,10 @@ export function NoteWritingSurfaceLayer({
   const boardReferenceBlockIds = useMemo(() => visibleBlocks.map((block) => block.id), [visibleBlocks]);
   const copySelectionAsBoardReference = useBoardReferenceClipboard({
     noteId, surfaceRef, surfaceMode, selection: draftRangeCount === 1 ? latestDraftRange : null,
+    blockIds: boardReferenceBlockIds,
+  });
+  const sendSelectionToStaging = useBoardStagingSelection({
+    noteId, surfaceRef, selection: draftRangeCount === 1 ? latestDraftRange : null,
     blockIds: boardReferenceBlockIds,
   });
   useEffect(() => {
@@ -3996,6 +4001,7 @@ export function NoteWritingSurfaceLayer({
         } : null}
         typographyProfile={documentTypographyProfile}
         onCopyBoardReference={copySelectionAsBoardReference}
+        onSendToStaging={sendSelectionToStaging}
         onSaveTypographyProfile={onSaveDocumentTypographyProfile}
         onClose={clearDraft}
       />

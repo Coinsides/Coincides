@@ -5,6 +5,8 @@ import {
 import {
   useCallback,
   useEffect,
+  useRef,
+  useState,
   type ChangeEvent,
   type MouseEvent,
 } from 'react';
@@ -28,6 +30,7 @@ interface SelectionTypographyToolbarLayerProps {
   onSaveTypographyProfile: (profile: DocumentTypographyProfile) => void | Promise<void>;
   onClose: () => void;
   onCopyBoardReference?: () => void | Promise<void>;
+  onSendToStaging?: () => Promise<boolean>;
 }
 
 export function SelectionTypographyToolbarLayer({
@@ -36,7 +39,21 @@ export function SelectionTypographyToolbarLayer({
   onSaveTypographyProfile,
   onClose,
   onCopyBoardReference,
+  onSendToStaging,
 }: SelectionTypographyToolbarLayerProps) {
+  const sending = useRef(false);
+  const [sendingToStaging, setSendingToStaging] = useState(false);
+  const sendToStaging = async () => {
+    if (!onSendToStaging || sending.current) return;
+    sending.current = true;
+    setSendingToStaging(true);
+    try {
+      if (await onSendToStaging()) onClose();
+    } finally {
+      sending.current = false;
+      setSendingToStaging(false);
+    }
+  };
   const savePatch = useCallback((patch: Partial<DocumentTypographyProfile>) => {
     const nextProfile = patchDocumentTypographyProfile(typographyProfile, patch);
     void onSaveTypographyProfile(nextProfile);
@@ -87,7 +104,7 @@ export function SelectionTypographyToolbarLayer({
 
   const placement = placeSelectionToolbar({
     anchorRect: selection.anchorRect,
-    toolbarWidth: onCopyBoardReference ? 710 : 520,
+    toolbarWidth: (onCopyBoardReference ? 710 : 520) + (onSendToStaging ? 140 : 0),
     toolbarHeight: 44,
   });
   const minimumLineHeightPx = Math.max(
@@ -112,6 +129,12 @@ export function SelectionTypographyToolbarLayer({
           onClick={() => { void onCopyBoardReference(); }}
         >
           Copy as board reference
+        </button>
+      )}
+      {onSendToStaging && (
+        <button type="button" className={`${styles.selectionTypographyButton} ${styles.selectionBoardReferenceButton}`}
+          disabled={sendingToStaging} onClick={() => { void sendToStaging(); }}>
+          {sendingToStaging ? 'Sending…' : 'Send to staging'}
         </button>
       )}
       <span className={styles.selectionTypographyScope}>Document typography</span>

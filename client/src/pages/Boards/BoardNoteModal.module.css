@@ -20,6 +20,8 @@
   overflow: hidden;
   pointer-events: auto;
 }
+.withStaging { right: 280px; }
+.withStaging .dialog { width: calc(100% - 32px); max-width: 82vw; }
 .header {
   display: flex;
   align-items: center;

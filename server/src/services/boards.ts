@@ -49,6 +49,8 @@ interface BoardMemberRow extends GeometryRow {
   board_id: string;
   member_kind: BoardMemberKind;
   member_id: string;
+  placed: number;
+  mounted_actor: string;
   metadata: string;
   created_at: string;
   updated_at: string;
@@ -199,7 +201,7 @@ export function resolveBoardMember(
 }
 
 function hydrateMember(db: Database.Database, userId: string, row: BoardMemberRow) {
-  return { ...row, pinned: row.pinned === 1, metadata: json<JsonObject>(row.metadata),
+  return { ...row, placed: row.placed === 1, pinned: row.pinned === 1, metadata: json<JsonObject>(row.metadata),
     reference: resolveBoardMember(db, userId, row.member_kind, row.member_id) };
 }
 
@@ -306,10 +308,11 @@ export function mountBoardMember(db: Database.Database, userId: string, boardId:
   const id = input.id ?? uuidv4();
   const now = new Date().toISOString();
   db.prepare(`INSERT INTO board_members
-    (id, board_id, member_kind, member_id, x, y, w, h, scale, z_index, pinned, metadata, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
+    (id, board_id, member_kind, member_id, x, y, w, h, scale, z_index, pinned, placed, mounted_actor, metadata, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'human', ?, ?, ?)`)
     .run(id, boardId, input.member_kind, input.member_id, input.x ?? 0, input.y ?? 0,
       input.w ?? 0, input.h ?? 0, input.scale ?? 1, input.z_index ?? 0, input.pinned ? 1 : 0,
+      input.placed === false ? 0 : 1,
       JSON.stringify(input.metadata ?? {}), now, now);
   touchBoard(db, boardId);
   return { member: hydrateMember(db, userId, memberRow(db, boardId, id)!), created: true };
@@ -329,10 +332,11 @@ export function updateBoardMember(db: Database.Database, userId: string, boardId
   boardRow(db, userId, boardId);
   const row = memberRow(db, boardId, memberId);
   if (!row) throw new AppError(404, 'board_member_not_found');
-  db.prepare(`UPDATE board_members SET x = ?, y = ?, w = ?, h = ?, scale = ?, z_index = ?, pinned = ?, updated_at = ?
+  db.prepare(`UPDATE board_members SET x = ?, y = ?, w = ?, h = ?, scale = ?, z_index = ?, pinned = ?, placed = ?, updated_at = ?
     WHERE id = ? AND board_id = ?`).run(input.x ?? row.x, input.y ?? row.y, input.w ?? row.w,
     input.h ?? row.h, input.scale ?? row.scale, input.z_index ?? row.z_index,
-    input.pinned === undefined ? row.pinned : Number(input.pinned), new Date().toISOString(), memberId, boardId);
+    input.pinned === undefined ? row.pinned : Number(input.pinned),
+    input.placed === undefined ? row.placed : Number(input.placed), new Date().toISOString(), memberId, boardId);
   touchBoard(db, boardId);
   return hydrateMember(db, userId, memberRow(db, boardId, memberId)!);
 }

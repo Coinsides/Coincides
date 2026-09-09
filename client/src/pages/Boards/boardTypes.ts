@@ -54,6 +54,10 @@ export interface BoardMember extends BoardGeometry {
   board_id: string;
   member_kind: BoardMemberKind;
   member_id: string;
+  /** Older in-flight projections omit these; only explicit false means staging.
+   * Current server DTOs always hydrate both fields (true / human are the legacy defaults). */
+  placed?: boolean;
+  mounted_actor?: string;
   metadata: BoardJsonObject;
   reference: BoardMemberReference;
   created_at: string;
@@ -129,6 +133,7 @@ export interface PatchBoardInput {
 }
 
 export interface MountBoardMemberInput extends Partial<BoardGeometry> {
+  placed?: boolean;
   id?: string;
   member_kind: BoardWritableMemberKind;
   member_id: string;
@@ -136,9 +141,10 @@ export interface MountBoardMemberInput extends Partial<BoardGeometry> {
   summary?: string;
 }
 
-export type PatchBoardMemberInput = Partial<BoardGeometry>;
+export type PatchBoardMemberInput = Partial<BoardGeometry> & { placed?: boolean };
 
 export interface MountBoardTextRangeInput extends Partial<BoardGeometry> {
+  placed?: boolean;
   text_range: BoardTextRangeSelection;
 }
 

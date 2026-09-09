@@ -286,7 +286,7 @@
 | [handoffs/2026-09-09-v13-4-s1-item-floor-order.md](handoffs/2026-09-09-v13-4-s1-item-floor-order.md) | 13.4 单 1 · item 化地基 | `ready` | — | — |
 | [handoffs/2026-09-09-v13-4-s2-text-range-order.md](handoffs/2026-09-09-v13-4-s2-text-range-order.md) | 13.4 单 2 · text_range 上板 | `done` | — | — |
 | [handoffs/2026-09-09-v13-4-s6-open-note-modal-order.md](handoffs/2026-09-09-v13-4-s6-open-note-modal-order.md) | 13.4 单 6 · Open note 弹窗 | `done` | — | — |
-| [handoffs/2026-09-09-v13-4-s7-staging-dock-order.md](handoffs/2026-09-09-v13-4-s7-staging-dock-order.md) | 13.4 单 7 · 板级装卸区 | `ready` | — | — |
+| [handoffs/2026-09-09-v13-4-s7-staging-dock-order.md](handoffs/2026-09-09-v13-4-s7-staging-dock-order.md) | 13.4 单 7 · 板级装卸区 | `done` | — | — |
 | [handoffs/2026-09-09-v13-4-s9-chalk-and-cast-order.md](handoffs/2026-09-09-v13-4-s9-chalk-and-cast-order.md) | 13.4 单 9 · 粉笔 + 铸卡 | `done` | — | — |
 | [handoffs/2026-09-09-v13-4-wave1-wiring-order.md](handoffs/2026-09-09-v13-4-wave1-wiring-order.md) | 13.4 单 A · 接线批 + 生命周期批 | `ready` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |

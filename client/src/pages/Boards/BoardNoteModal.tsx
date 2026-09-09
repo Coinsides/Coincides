@@ -3,6 +3,7 @@ import { createPortal, flushSync } from 'react-dom';
 import { ExternalLink, X } from 'lucide-react';
 import NoteCanvasRuntime, { type NoteCanvasRuntimeHandle } from '../Notes/canvasEngine/NoteCanvasRuntime';
 import { NoteCanvasRuntimeProvider } from '../Notes/canvasEngine/NoteCanvasRuntimeProvider';
+import type { BoardTextRangeSelection } from '@shared/types/boardTextRange';
 import styles from './BoardNoteModal.module.css';
 
 export type NoteCloseDestination = { kind: 'note' | 'page'; noteId: string };
@@ -14,14 +15,17 @@ interface BoardNoteModalProps {
   onClosed: () => void;
   onOpenFullPage: (noteId: string) => void;
   onSwitchNote: (noteId: string) => void;
+  stagingOpen?: boolean;
+  onSendToStaging?: (selection: BoardTextRangeSelection) => Promise<boolean>;
 }
 
 const BoardNoteModal = forwardRef<BoardNoteModalHandle, BoardNoteModalProps>(function BoardNoteModal({
-  noteId, onClosed, onOpenFullPage, onSwitchNote,
+  noteId, onClosed, onOpenFullPage, onSwitchNote, stagingOpen = false, onSendToStaging,
 }, ref) {
   const runtime = useRef<NoteCanvasRuntimeHandle>(null);
   const dialog = useRef<HTMLDivElement>(null);
   const pending = useRef<Promise<boolean> | null>(null);
+  const stagingPending = useRef<Promise<boolean> | null>(null);
   const failedDestination = useRef<NoteCloseDestination>();
   const alive = useRef(true);
   const [saving, setSaving] = useState(false);
@@ -36,6 +40,7 @@ const BoardNoteModal = forwardRef<BoardNoteModalHandle, BoardNoteModalProps>(fun
 
   const requestClose = useCallback((destination?: NoteCloseDestination): Promise<boolean> => {
     if (pending.current) return pending.current;
+    if (stagingPending.current) return Promise.resolve(false);
     const activeRuntime = runtime.current;
     if (!activeRuntime) return Promise.resolve(false);
     setSaving(true);
@@ -75,6 +80,31 @@ const BoardNoteModal = forwardRef<BoardNoteModalHandle, BoardNoteModalProps>(fun
   }, [complete]);
   useImperativeHandle(ref, () => ({ requestClose }), [requestClose]);
 
+  const sendToStaging = useCallback((selection: BoardTextRangeSelection): Promise<boolean> => {
+    if (stagingPending.current) return stagingPending.current;
+    const activeRuntime = runtime.current;
+    if (!onSendToStaging || !activeRuntime || pending.current) return Promise.resolve(false);
+    setSaving(true);
+    const task = Promise.resolve().then(async () => {
+      try {
+        // The receipt was captured before blur. Persist the current text through
+        // the existing runtime barrier before the mount endpoint mints its anchor.
+        flushSync(() => {
+          if (document.activeElement instanceof HTMLElement && dialog.current?.contains(document.activeElement)) {
+            document.activeElement.blur();
+          }
+        });
+        await activeRuntime.flushPendingSaves();
+        return alive.current ? await onSendToStaging(selection) : false;
+      } finally {
+        stagingPending.current = null;
+        if (alive.current) setSaving(false);
+      }
+    });
+    stagingPending.current = task;
+    return task;
+  }, [onSendToStaging]);
+
   useEffect(() => {
     alive.current = true;
     const priorFocus = document.activeElement;
@@ -90,26 +120,37 @@ const BoardNoteModal = forwardRef<BoardNoteModalHandle, BoardNoteModalProps>(fun
 
   useEffect(() => {
     const keyDown = (event: KeyboardEvent) => {
+      const inStaging = event.target instanceof Element
+        && event.target.closest('[data-board-staging="true"], [data-board-staging-control="true"]');
+      if (inStaging && event.key !== 'Tab' && !pending.current && !stagingPending.current) {
+        // Dock keyboard input must not reach the note's document-level shortcuts.
+        event.stopImmediatePropagation();
+        return;
+      }
       if (event.key === 'Escape') {
         // Native Escape first reaches the editor and its existing window listeners.
         // A microtask starts host teardown only after that dispatch has completed.
-        if (!pending.current) queueMicrotask(() => { void requestClose(); });
+        if (!pending.current && !stagingPending.current) queueMicrotask(() => { void requestClose(); });
         return;
       }
-      if (pending.current) { event.preventDefault(); event.stopImmediatePropagation(); return; }
+      if (pending.current || stagingPending.current) { event.preventDefault(); event.stopImmediatePropagation(); return; }
       if (event.key !== 'Tab') return;
-      const roots = [dialog.current, ...document.querySelectorAll<HTMLElement>('[data-canvas-layer="floating-overlay"]')];
-      const focusable = roots.flatMap((root) => root ? Array.from(root.querySelectorAll<HTMLElement>(
-        'button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), a[href], [tabindex="0"]',
-      )) : []).filter((element) => element.getClientRects().length > 0);
+      const selector = 'button:not(:disabled), input:not(:disabled), textarea:not(:disabled), select:not(:disabled), a[href], [tabindex="0"]';
+      const roots = [dialog.current, ...document.querySelectorAll<HTMLElement>(
+        `[data-canvas-layer="floating-overlay"], [data-board-staging-control="true"]${stagingOpen ? ', [data-board-staging="true"]' : ''}`,
+      )];
+      const focusable = [...new Set(roots.flatMap((root) => root
+        ? [...(root.matches(selector) ? [root] : []), ...root.querySelectorAll<HTMLElement>(selector)] : []))]
+        .filter((element) => element.getClientRects().length > 0);
       const first = focusable[0];
-      const last = focusable[focusable.length - 1];
       if (!first) { event.preventDefault(); dialog.current?.focus(); return; }
-      const current = document.activeElement;
-      if (!focusable.includes(current as HTMLElement) || (!event.shiftKey && current === last) || (event.shiftKey && current === first)) {
-        event.preventDefault();
-        (event.shiftKey ? last : first).focus();
-      }
+      // The note is portaled after the board in DOM order. Traverse the complete
+      // allowed ring explicitly so native Tab cannot cross into the paused board.
+      const currentIndex = focusable.indexOf(document.activeElement as HTMLElement);
+      const nextIndex = currentIndex < 0 ? (event.shiftKey ? focusable.length - 1 : 0)
+        : (currentIndex + (event.shiftKey ? -1 : 1) + focusable.length) % focusable.length;
+      event.preventDefault();
+      focusable[nextIndex].focus();
     };
     const pointerDown = (event: PointerEvent) => {
       const target = event.target;
@@ -117,13 +158,16 @@ const BoardNoteModal = forwardRef<BoardNoteModalHandle, BoardNoteModalProps>(fun
         dialog.current?.contains(target) || target.closest('[data-canvas-layer="floating-overlay"]')
       );
       const switchesNote = target instanceof Element && target.closest('[data-board-note-switch="true"]');
-      if (!pending.current && (inRuntime || switchesNote)) return;
+      const inStaging = target instanceof Element
+        && target.closest('[data-board-staging="true"], [data-board-staging-control="true"]');
+      if (!pending.current && !stagingPending.current && (inRuntime || switchesNote || inStaging)) return;
       event.preventDefault(); event.stopImmediatePropagation();
     };
     const click = (event: MouseEvent) => {
       const target = event.target;
+      if (stagingPending.current) { event.preventDefault(); event.stopImmediatePropagation(); return; }
       if (target instanceof Element && (dialog.current?.contains(target)
-        || target.closest('[data-canvas-layer="floating-overlay"], [data-board-note-switch="true"]'))) return;
+        || target.closest('[data-canvas-layer="floating-overlay"], [data-board-note-switch="true"], [data-board-staging="true"], [data-board-staging-control="true"]'))) return;
       event.preventDefault(); event.stopImmediatePropagation();
     };
     window.addEventListener('keydown', keyDown, true);
@@ -134,10 +178,10 @@ const BoardNoteModal = forwardRef<BoardNoteModalHandle, BoardNoteModalProps>(fun
       window.removeEventListener('pointerdown', pointerDown, true);
       window.removeEventListener('click', click, true);
     };
-  }, [requestClose]);
+  }, [requestClose, stagingOpen]);
 
-  return createPortal(<div className={styles.backdrop}>
-    <div className={styles.dialog} role="dialog" aria-modal="true" aria-label="Open note" tabIndex={-1} ref={dialog}>
+  return createPortal(<div className={`${styles.backdrop} ${stagingOpen ? styles.withStaging : ''}`} data-board-note-staging-open={stagingOpen}>
+    <div className={styles.dialog} role="dialog" aria-modal={!stagingOpen} aria-label="Open note" tabIndex={-1} ref={dialog}>
       <header className={styles.header}>
         <span>Open note</span>
         <span className={styles.status} role="status">{saving ? 'Saving…' : ''}</span>
@@ -151,7 +195,7 @@ const BoardNoteModal = forwardRef<BoardNoteModalHandle, BoardNoteModalProps>(fun
         <button type="button" onClick={() => complete(failedDestination.current)}>Close anyway</button>
       </div>}
       <div className={styles.content} aria-busy={saving}>
-        <NoteCanvasRuntimeProvider noteId={noteId} hostMode="modal">
+        <NoteCanvasRuntimeProvider noteId={noteId} hostMode="modal" onSendToStaging={onSendToStaging ? sendToStaging : undefined}>
           <NoteCanvasRuntime ref={runtime} onRequestClose={() => { void requestClose(); }} />
         </NoteCanvasRuntimeProvider>
       </div>

@@ -2,13 +2,17 @@ import { createRef, useState } from 'react';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import BoardNoteModal, { type BoardNoteModalHandle } from './BoardNoteModal';
+import type { BoardTextRangeSelection } from '@shared/types/boardTextRange';
 
 const runtime = vi.hoisted(() => ({
   dismiss: vi.fn(), idle: vi.fn(), order: [] as string[], mounts: [] as string[], live: 0, peakLive: 0,
+  sendToStaging: undefined as ((selection: BoardTextRangeSelection) => Promise<boolean>) | undefined,
 }));
 vi.mock('../Notes/canvasEngine/NoteCanvasRuntimeProvider', () => ({
-  NoteCanvasRuntimeProvider: ({ noteId, hostMode, children }: any) =>
-    <section data-testid="runtime-provider" data-note-id={noteId} data-host-mode={hostMode}>{children}</section>,
+  NoteCanvasRuntimeProvider: ({ noteId, hostMode, onSendToStaging, children }: any) => {
+    runtime.sendToStaging = onSendToStaging;
+    return <section data-testid="runtime-provider" data-note-id={noteId} data-host-mode={hostMode}>{children}</section>;
+  },
 }));
 vi.mock('../Notes/canvasEngine/NoteCanvasRuntime', async () => {
   const React = await import('react');
@@ -32,7 +36,7 @@ function deferred() {
   return { promise, resolve, reject };
 }
 type ClosePath = 'X' | 'Escape' | 'switch' | 'full page';
-function renderHost() {
+function renderHost(options: { stagingOpen?: boolean; onSendToStaging?: (selection: BoardTextRangeSelection) => Promise<boolean> } = {}) {
   const handle = createRef<BoardNoteModalHandle>();
   const closed = vi.fn();
   const switched = vi.fn();
@@ -42,6 +46,7 @@ function renderHost() {
     return <>
       <span>Board remains mounted</span>
       {noteId && <BoardNoteModal key={noteId} ref={handle} noteId={noteId}
+        {...options}
         onClosed={() => { closed(); setNoteId(null); }}
         onSwitchNote={(next) => { switched(next); setNoteId(next); }}
         onOpenFullPage={(next) => { page(next); setNoteId(null); }} />}
@@ -75,9 +80,96 @@ function expectDestination(path: ClosePath, host: Host) {
 beforeEach(() => {
   vi.clearAllMocks();
   runtime.order = []; runtime.mounts = []; runtime.live = 0; runtime.peakLive = 0;
+  runtime.sendToStaging = undefined;
   runtime.dismiss.mockImplementation(() => { runtime.order.push('dismiss'); });
   runtime.idle.mockImplementation(async () => { runtime.order.push('idle'); });
   document.body.style.overflow = 'scroll';
+});
+
+describe('Open note staging dock', () => {
+  const passage: BoardTextRangeSelection = {
+    note_id: 'note-a', block_id: 'block-a', text_flow_id: 'flow-a', text_unit_id: 'unit-a',
+    start_offset: 0, end_offset: 9, excerpt: 'Synthetic', at: '2026-09-09T00:00:00.000Z',
+  };
+
+  it('flushes pending text before sending the captured range and leaves the note open', async () => {
+    const saving = deferred();
+    runtime.idle.mockImplementation(() => { runtime.order.push('idle'); return saving.promise; });
+    const mount = vi.fn(async () => { runtime.order.push('mount'); return true; });
+    const host = renderHost({ onSendToStaging: mount });
+    screen.getByRole('textbox', { name: 'Runtime editor' }).focus();
+    let sent!: Promise<boolean>;
+    await act(async () => { sent = runtime.sendToStaging!(passage); });
+    expect(runtime.order).toEqual(['blur', 'idle']);
+    expect(mount).not.toHaveBeenCalled();
+    expect(runtime.dismiss).not.toHaveBeenCalled();
+    expect(await host.handle.current!.requestClose()).toBe(false);
+    await act(async () => { saving.resolve(); expect(await sent).toBe(true); });
+    expect(runtime.order).toEqual(['blur', 'idle', 'mount']);
+    expect(mount).toHaveBeenCalledExactlyOnceWith(passage);
+    expect(screen.getByRole('dialog')).toBeTruthy();
+    expect(host.closed).not.toHaveBeenCalled();
+    expect(runtime.mounts).toEqual(['note-a']);
+  });
+
+  it('does not mount a range if flushing fails and allows a later retry', async () => {
+    runtime.idle.mockRejectedValueOnce(new Error('Synthetic save failed')).mockResolvedValue(undefined);
+    const mount = vi.fn(async () => true);
+    renderHost({ onSendToStaging: mount });
+    await act(async () => { await expect(runtime.sendToStaging!(passage)).rejects.toThrow('Synthetic save failed'); });
+    expect(mount).not.toHaveBeenCalled();
+    expect(screen.getByRole('dialog')).toBeTruthy();
+    await act(async () => { expect(await runtime.sendToStaging!(passage)).toBe(true); });
+    expect(mount).toHaveBeenCalledExactlyOnceWith(passage);
+  });
+
+  it('allows dock controls and includes them in focus traversal while keeping board interactions paused', () => {
+    const stageClick = vi.fn();
+    const placeClick = vi.fn();
+    const boardClick = vi.fn();
+    vi.spyOn(HTMLElement.prototype, 'getClientRects').mockImplementation(() => [new DOMRect(0, 0, 80, 30)] as unknown as DOMRectList);
+    const props = { noteId: 'note-a', onClosed: vi.fn(), onSwitchNote: vi.fn(), onOpenFullPage: vi.fn() };
+    const scene = (open: boolean) => <>
+      <button data-board-staging-control="true" onClick={stageClick}>Staging (1)</button>
+      {open && <aside data-board-staging="true"><button onClick={placeClick}>Place on board</button></aside>}
+      <button onClick={boardClick}>Ordinary board control</button>
+      <BoardNoteModal {...props} stagingOpen={open} />
+    </>;
+    const host = render(scene(true));
+    expect(screen.getByRole('dialog').getAttribute('aria-modal')).toBe('false');
+    expect(screen.getByRole('dialog').parentElement?.getAttribute('data-board-note-staging-open')).toBe('true');
+    const place = screen.getByRole('button', { name: 'Place on board' });
+    expect(fireEvent.pointerDown(place)).toBe(true);
+    fireEvent.click(place);
+    fireEvent.click(screen.getByRole('button', { name: 'Staging (1)' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Ordinary board control' }));
+    expect(placeClick).toHaveBeenCalledOnce();
+    expect(stageClick).toHaveBeenCalledOnce();
+    expect(boardClick).not.toHaveBeenCalled();
+
+    const editor = screen.getByRole('textbox', { name: 'Runtime editor' });
+    const toggle = screen.getByRole('button', { name: 'Staging (1)' });
+    editor.focus();
+    fireEvent.keyDown(editor, { key: 'Tab' });
+    expect(document.activeElement).toBe(toggle);
+    fireEvent.keyDown(toggle, { key: 'Tab', shiftKey: true });
+    expect(document.activeElement).toBe(editor);
+    place.focus();
+    fireEvent.keyDown(place, { key: 'Tab' });
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Open full page' }));
+    fireEvent.keyDown(document.activeElement!, { key: 'Tab', shiftKey: true });
+    expect(document.activeElement).toBe(place);
+    const noteShortcut = vi.fn();
+    window.addEventListener('keydown', noteShortcut);
+    fireEvent.keyDown(place, { key: 'Delete' });
+    expect(noteShortcut).not.toHaveBeenCalled();
+    window.removeEventListener('keydown', noteShortcut);
+
+    host.rerender(scene(false));
+    expect(screen.getByRole('dialog').getAttribute('aria-modal')).toBe('true');
+    expect(screen.getByRole('dialog').parentElement?.getAttribute('data-board-note-staging-open')).toBe('false');
+    expect(runtime.mounts).toEqual(['note-a']);
+  });
 });
 afterEach(() => {
   cleanup();

@@ -4,6 +4,7 @@ import Database from 'better-sqlite3';
 import migration044 from '../db/migrations/044_v2_purposes.js';
 import migration057 from '../db/migrations/057_v13_boards.js';
 import migration059 from '../db/migrations/059_v13_board_text_ranges.js';
+import migration061 from '../db/migrations/061_v13_board_staging.js';
 import {
   createBoard, getBoard, listBoards, updateBoard,
   mountBoardMember, updateBoardMember, unmountBoardMember, resolveBoardMember,
@@ -36,6 +37,7 @@ function fixture(t: TestContext) {
     migration044.up(db);
     migration057.up(db);
     migration059.up(db);
+    migration061.up(db);
   })();
   return db;
 }

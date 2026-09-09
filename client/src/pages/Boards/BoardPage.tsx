@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Hand, Link2, MousePointer2, Pencil, Plus, Minus, Pin, Trash2, ExternalLink, X } from 'lucide-react';
+import { ArrowLeft, Hand, Link2, MousePointer2, Pencil, Plus, Minus, Pin, Trash2, ExternalLink, X, Inbox } from 'lucide-react';
 import { boardErrorMessage, loadBoardCandidates, loadBoardNotePreview } from './boardRepository';
 import type { BoardCandidate, BoardEdge, BoardMember, BoardViewport, BoardVisual } from './boardTypes';
 import { pointsPath, toBoardPoint, zoomBoardAt, type BoardPoint } from './boardViewport';
@@ -9,6 +9,8 @@ import { BoardRelocatedVisual } from './BoardRelocatedVisual';
 import { BoardDeleteDialog } from './BoardDeleteDialog';
 import { BoardChalkEditor, chalkGeometry, type ChalkDraft } from './BoardChalk';
 import BoardNoteModal, { type BoardNoteModalHandle } from './BoardNoteModal';
+import { BoardStaging, BOARD_STAGING_MIME } from './BoardStaging';
+import type { BoardTextRangeSelection } from '@shared/types/boardTextRange';
 import { itemOriginLabel } from '@/services/itemSummaryReader';
 import { BOARD_TEXT_RANGE_MIME, parseBoardTextRangeClipboard } from './boardTextRangeClipboard';
 import styles from './Boards.module.css';
@@ -51,6 +53,7 @@ export default function BoardPage() {
   const [candidateLoading, setCandidateLoading] = useState(false);
   const candidateRevision = useRef(0);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [stagingOpen, setStagingOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [titleDraft, setTitleDraft] = useState<string | null>(null);
   const [labelDraft, setLabelDraft] = useState<{ id: string; value: string } | null>(null);
@@ -63,6 +66,7 @@ export default function BoardPage() {
   openNoteIdRef.current = openNoteId;
   const titleInput = useRef<HTMLInputElement>(null);
   const pickerToggle = useRef<HTMLButtonElement>(null);
+  const stagingToggle = useRef<HTMLButtonElement>(null);
   const [search, setSearch] = useState('');
   const [viewport, setViewport] = useState<BoardViewport | null>(null);
   const [viewportDirty, setViewportDirty] = useState(false);
@@ -126,6 +130,7 @@ export default function BoardPage() {
     setNotePreviews({});
     notePreviewRevisions.current.clear();
     setDeleting(false);
+    setStagingOpen(false);
     setPasteError(null);
     setInk([]);
     return () => { visitRevision.current += 1; };
@@ -209,6 +214,7 @@ export default function BoardPage() {
 
   function pauseBoard(event: React.SyntheticEvent) {
     if (!openNoteIdRef.current) return;
+    if ((event.target as Element).closest('[data-board-staging="true"], [data-board-staging-control="true"]')) return;
     event.preventDefault();
     event.stopPropagation();
   }
@@ -255,7 +261,7 @@ export default function BoardPage() {
     setPasteError(null);
     void board.mountTextRange({
       text_range: reference, x: point.x - 160, y: point.y - 110, w: 320, h: 220,
-      z_index: Math.max(0, ...detail.members.map((member) => member.z_index)) + 1,
+      z_index: nextMemberZ(),
     });
   }
 
@@ -264,11 +270,69 @@ export default function BoardPage() {
     return { x: event.clientX - rect.left, y: event.clientY - rect.top };
   }
 
-  const visibleMembers = (detail?.members || []).map((member) => objectDraft?.id === member.id && 'member_kind' in objectDraft ? objectDraft : member);
+  const stagedMembers = (detail?.members || []).filter((member) => member.placed === false);
+  const visibleMembers = (detail?.members || []).filter((member) => member.placed !== false)
+    .map((member) => objectDraft?.id === member.id && 'member_kind' in objectDraft ? objectDraft : member);
   const visibleVisuals = (detail?.visuals || []).map((visual) => objectDraft?.id === visual.id && 'visual_kind' in objectDraft ? objectDraft : visual);
+  const visibleEdges = (detail?.edges || []).filter((edge) => visibleMembers.some((member) => member.id === edge.from_member_id)
+    && visibleMembers.some((member) => member.id === edge.to_member_id));
   const selectedMember = selection?.kind === 'member' ? visibleMembers.find(({ id }) => id === selection.id) : undefined;
   const selectedVisual = selection?.kind === 'visual' ? visibleVisuals.find(({ id }) => id === selection.id) : undefined;
-  const selectedEdge = selection?.kind === 'edge' ? detail?.edges.find(({ id }) => id === selection.id) : undefined;
+  const selectedEdge = selection?.kind === 'edge' ? visibleEdges.find(({ id }) => id === selection.id) : undefined;
+
+  function defaultMemberPosition() {
+    return toBoardPoint({ x: 80 + (visibleMembers.length % 3) * 300,
+      y: 70 + Math.floor(visibleMembers.length / 3) * 200 }, viewportRef.current || detail!.board.viewport);
+  }
+
+  function nextMemberZ() {
+    return Math.max(0, ...visibleMembers.map((member) => member.z_index), ...visibleVisuals.map((visual) => visual.z_index)) + 1;
+  }
+
+  async function stageCandidate(candidate: BoardCandidate) {
+    if (board.pending) return;
+    const visit = visitRevision.current;
+    const saved = await board.mount({ id: crypto.randomUUID(), member_kind: candidate.member_kind,
+      member_id: candidate.member_id, placed: false });
+    if (saved && visit === visitRevision.current) setStagingOpen(true);
+  }
+
+  async function stageTextRange(text_range: BoardTextRangeSelection) {
+    const visit = visitRevision.current;
+    const saved = await board.mountTextRange({ text_range, placed: false });
+    if (saved && visit === visitRevision.current) setStagingOpen(true);
+    return saved;
+  }
+
+  async function placeMember(member: BoardMember, point = defaultMemberPosition()) {
+    if (board.pending || chalkDraft || !detail?.members.some((current) => current.id === member.id && current.placed === false)) return;
+    const visit = visitRevision.current;
+    // Unplaced geometry has no meaning. Assign a complete placement in the one PATCH.
+    const saved = await board.updateMember(member.id, { placed: true, x: point.x, y: point.y,
+      w: member.member_kind === 'text_range' ? 320 : 260, h: member.member_kind === 'text_range' ? 220 : 156,
+      scale: 1, pinned: false, z_index: nextMemberZ() });
+    if (saved && visit === visitRevision.current) {
+      setSelection({ kind: 'member', id: member.id });
+      setConnectFrom(null);
+    }
+  }
+
+  function dropStagedMember(event: React.DragEvent<HTMLDivElement>) {
+    if (!event.dataTransfer.types.includes(BOARD_STAGING_MIME)) return;
+    event.preventDefault();
+    event.stopPropagation();
+    let payload: { boardId?: unknown; memberId?: unknown };
+    try { payload = JSON.parse(event.dataTransfer.getData(BOARD_STAGING_MIME)); }
+    catch { return; }
+    if (!payload || payload.boardId !== boardId || typeof payload.memberId !== 'string') return;
+    const member = stagedMembers.find((current) => current.id === payload.memberId);
+    if (member) void placeMember(member, toBoardPoint(localPoint(event), viewportRef.current || detail!.board.viewport));
+  }
+
+  function closeStaging() {
+    setStagingOpen(false);
+    stagingToggle.current?.focus();
+  }
 
   function draftChalk(event: React.MouseEvent<HTMLDivElement>) {
     if (tool !== 'select' || spaceDown.current || !detail || chalkDraft) return;
@@ -277,7 +341,7 @@ export default function BoardPage() {
     const point = toBoardPoint(localPoint(event), viewportRef.current || detail.board.viewport);
     setSelection(null);
     setChalkDraft({ text: '', x: point.x, y: point.y, w: 240, h: 160, scale: 1, pinned: false,
-      z_index: Math.max(0, ...detail.members.map((member) => member.z_index), ...detail.visuals.map((visual) => visual.z_index)) + 1 });
+      z_index: nextMemberZ() });
   }
 
   function editChalk(visual: BoardVisual) {
@@ -343,7 +407,8 @@ export default function BoardPage() {
 
   async function connect(member: BoardMember) {
     if (board.pending) return;
-    if (!connectFrom) { setConnectFrom(member.id); return; }
+    if (member.placed === false) return;
+    if (!connectFrom || !visibleMembers.some((current) => current.id === connectFrom)) { setConnectFrom(member.id); return; }
     if (connectFrom === member.id) { setConnectFrom(null); return; }
     if (await board.addEdge({ from_member_id: connectFrom, to_member_id: member.id })) setConnectFrom(null);
   }
@@ -449,6 +514,7 @@ export default function BoardPage() {
 
   async function removeSelection() {
     if (!selection || chalkDraft || board.pending) return;
+    if ((selection.kind === 'member' && !selectedMember) || (selection.kind === 'edge' && !selectedEdge)) return;
     const removed = selection.kind === 'member' ? await board.unmount(selection.id)
       : selection.kind === 'edge' ? await board.removeEdge(selection.id) : await board.removeVisual(selection.id);
     if (removed) setSelection(null);
@@ -539,6 +605,10 @@ export default function BoardPage() {
       <span className={styles.saveStatus} role="status">{board.error ? 'Changes need attention' : board.pending || viewportDirty ? 'Saving…' : 'Saved'}</span>
       <button ref={pickerToggle} className={styles.primaryButton} aria-expanded={pickerOpen} aria-controls="board-note-picker"
         onClick={() => pickerOpen ? closePicker() : openPicker()}><Plus size={16} />Add notes and items</button>
+      <button ref={stagingToggle} className={`${styles.button} ${styles.stagingToggle}`} data-board-staging-control="true"
+        aria-expanded={stagingOpen} aria-controls="board-staging" onClick={() => stagingOpen ? closeStaging() : setStagingOpen(true)}>
+        <Inbox size={16} />Staging ({stagedMembers.length})
+      </button>
       <details className={styles.boardMenu}>
         <summary aria-label="Board menu">More</summary>
         <button className={styles.button} disabled={board.pending} onClick={() => { void prepareDelete(); }}>Delete board</button>
@@ -591,16 +661,16 @@ export default function BoardPage() {
             <li key={`${candidate.member_kind}:${candidate.member_id}`}><button className={styles.candidate}
               disabled={board.pending} aria-label={`Add ${candidate.title} to board`}
               onClick={() => {
-                const position = toBoardPoint({ x: 80 + (detail.members.length % 3) * 300,
-                  y: 70 + Math.floor(detail.members.length / 3) * 200 }, viewportRef.current || activeViewport);
+                const position = defaultMemberPosition();
                 void board.mount({ id: crypto.randomUUID(), member_kind: candidate.member_kind, member_id: candidate.member_id,
                   x: position.x, y: position.y, w: 260, h: 156, scale: 1,
-                  z_index: Math.max(0, ...detail.members.map((member) => member.z_index)) + 1 });
+                  z_index: nextMemberZ() });
               }}>
               <strong>{candidate.title}</strong><span>{candidate.summary || 'Open the note to read more.'}</span>
               <small>{candidate.member_kind === 'item' ? [candidate.item_type, candidate.topic].filter(Boolean).join(' · ') || 'Item'
                 : candidate.member_kind === 'note' ? 'Note' : 'Group'} · {candidate.project_title}</small>
-            </button></li>)}</ul></section>;
+            </button><button type="button" className={styles.stageCandidate} disabled={board.pending}
+              aria-label={`Stage ${candidate.title}`} onClick={() => { void stageCandidate(candidate); }}>Stage</button></li>)}</ul></section>;
           })}
       </aside>}
       <div className={`${styles.surface} ${tool === 'pen' ? styles.penSurface : ''}`} ref={surface}
@@ -608,6 +678,12 @@ export default function BoardPage() {
         onKeyUp={(event) => { if (event.code === 'Space') spaceDown.current = false; }}
         onBlur={() => { spaceDown.current = false; }}
         onDoubleClick={draftChalk}
+        onDragOver={(event) => {
+          if (!event.dataTransfer.types.includes(BOARD_STAGING_MIME) || board.pending || chalkDraft) return;
+          event.preventDefault();
+          event.dataTransfer.dropEffect = 'move';
+        }}
+        onDrop={dropStagedMember}
         onPointerDown={(event) => begin(event)} onPointerMove={move}
         onPointerUp={(event) => { void end(event); }} onPointerCancel={(event) => { void end(event, true); }}>
         <div className={styles.world} data-testid="board-world"
@@ -618,7 +694,7 @@ export default function BoardPage() {
               markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-secondary)" />
             </marker></defs>
-            {detail.edges.map((edge) => {
+            {visibleEdges.map((edge) => {
               const from = visibleMembers.find((member) => member.id === edge.from_member_id);
               const to = visibleMembers.find((member) => member.id === edge.to_member_id);
               if (!from || !to) return null;
@@ -738,13 +814,17 @@ export default function BoardPage() {
             </article>;
           })}
         </div>
-        {detail.members.length === 0 && detail.visuals.length === 0 && !chalkDraft && <div className={styles.canvasEmpty}>
+        {visibleMembers.length === 0 && detail.visuals.length === 0 && !chalkDraft && <div className={styles.canvasEmpty}>
           <h2>Give this thought some room.</h2><p>Double-click blank space to write chalk, add a note, or pick up the pen.</p>
           <button className={styles.button} onPointerDown={(event) => event.stopPropagation()} onClick={openPicker}>Add your first note or item</button>
         </div>}
       </div>
+      {stagingOpen && <BoardStaging boardId={detail.board.id} members={stagedMembers} candidates={candidates}
+        busy={board.pending || Boolean(chalkDraft)} onClose={closeStaging}
+        onPlace={(member) => { void placeMember(member); }}
+        onRemove={(member) => { void board.unmount(member.id); }} />}
     </div>
-    {selection && <div className={styles.selectionBar} role="toolbar" aria-label="Selected projection controls">
+    {selection && (selectedMember || selectedEdge || selectedVisual) && <div className={styles.selectionBar} role="toolbar" aria-label="Selected projection controls">
       {selectedVisual?.visual_kind === 'sticky' && <button className={styles.button} disabled={board.pending || Boolean(chalkDraft)}
         onClick={() => { void castChalk(selectedVisual); }}>Cast to item</button>}
       {selectedVisual && <button className={styles.button} disabled={board.pending || Boolean(chalkDraft)} aria-pressed={selectedVisual.pinned}
@@ -764,14 +844,15 @@ export default function BoardPage() {
         <button className={styles.button} aria-label="Shrink projection" disabled={selectedMember.pinned || board.pending} onClick={() => { void board.updateMember(selectedMember.id, { scale: Math.max(0.1, selectedMember.scale / 1.1) }); }}><Minus size={15} /></button>
         <span>{Math.round(selectedMember.scale * 100)}%</span>
         <button className={styles.button} aria-label="Enlarge projection" disabled={selectedMember.pinned || board.pending} onClick={() => { void board.updateMember(selectedMember.id, { scale: Math.min(10, selectedMember.scale * 1.1) }); }}><Plus size={15} /></button>
-        <button className={styles.button} disabled={selectedMember.pinned || board.pending} onClick={() => { void board.updateMember(selectedMember.id, { z_index: Math.max(...detail.members.map((member) => member.z_index)) + 1 }); }}>Bring forward</button>
-        <button className={styles.button} disabled={selectedMember.pinned || board.pending} onClick={() => { void board.updateMember(selectedMember.id, { z_index: Math.min(...detail.members.map((member) => member.z_index)) - 1 }); }}>Send back</button>
+        <button className={styles.button} disabled={selectedMember.pinned || board.pending} onClick={() => { void board.updateMember(selectedMember.id, { z_index: Math.max(...visibleMembers.map((member) => member.z_index)) + 1 }); }}>Bring forward</button>
+        <button className={styles.button} disabled={selectedMember.pinned || board.pending} onClick={() => { void board.updateMember(selectedMember.id, { z_index: Math.min(...visibleMembers.map((member) => member.z_index)) - 1 }); }}>Send back</button>
       </>}
       <button className={styles.button} disabled={board.pending || Boolean(chalkDraft)} onClick={() => { void removeSelection(); }}><Trash2 size={15} />{selection.kind === 'member' ? 'Remove from board' : selection.kind === 'edge' ? 'Delete connection' : selectedVisual?.visual_kind === 'sticky' ? 'Delete chalk' : 'Delete drawing'}</button>
     </div>}
     {deleting && <BoardDeleteDialog board={detail.board} onCancel={() => setDeleting(false)} onDeleted={() => navigate('/boards')} />}
   </section>
     {openNoteId && <BoardNoteModal key={openNoteId} ref={noteModal} noteId={openNoteId}
+      stagingOpen={stagingOpen} onSendToStaging={stageTextRange}
       onClosed={() => { setOpenNoteId(null); refreshProjections(openNoteId); }}
       onSwitchNote={(noteId) => { setOpenNoteId(noteId); refreshProjections(openNoteId); }}
       onOpenFullPage={(noteId) => { setOpenNoteId(null); void leave(`/notes/${encodeURIComponent(noteId)}`); }} />}

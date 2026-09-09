@@ -14,8 +14,9 @@ export const NOTE_A = 'open-smoke-note-a';
 export const NOTE_B = 'open-smoke-note-b';
 export const BLOCK_A = 'open-smoke-block-a';
 export const BOARD_ID = 'open-smoke-board';
+export const ITEM_ID = 'open-smoke-staging-item';
 export const STATE_EVENT = 'open-note-smoke-state';
-const KEY = 'coincides.synthetic.open-note-smoke.v1';
+const KEY = 'coincides.synthetic.open-note-smoke.v2-staging';
 const at = '2026-09-09T12:00:00.000Z';
 const firstText = 'Preface. The selected passage stays alive. Closing words.';
 const TRAY_BLOCK = 'open-smoke-tray-block';
@@ -29,6 +30,7 @@ const layout = { x: 0, y: 60, width: 760, height: 120, coordinate_space: 'page_f
 type Call = { sequence: number; method: string; url: string; phase: 'started' | 'committed' | 'rejected'; input?: unknown };
 type StoredBlock = NoteBlock & { note_id: string; status: string };
 type WriteKind = 'body' | 'range';
+type SyntheticEvent = { verb: 'mounted' | 'unmounted'; member_id: string; sequence: number };
 function initial() {
   const notes: Note[] = [NOTE_A, NOTE_B].map((id, index) => ({
     id, course_id: 'open-smoke-project', title: index ? 'Synthetic second note' : 'Synthetic source note',
@@ -48,7 +50,8 @@ function initial() {
     end_offset: 9 + 'The selected passage stays alive.'.length,
     excerpt: 'The selected passage stays alive.', at, status: 'active', pre_edit_offsets: null, created_at: at, updated_at: at,
   };
-  const geometry = { w: 310, h: 194, scale: 1, z_index: 0, pinned: false, metadata: {}, created_at: at, updated_at: at };
+  const geometry = { w: 310, h: 194, scale: 1, z_index: 0, pinned: false, placed: true, mounted_actor: 'human',
+    metadata: {}, created_at: at, updated_at: at };
   const members: BoardMember[] = notes.map((note, index) => ({
     ...geometry, id: `open-smoke-member-${index}`, board_id: BOARD_ID, member_kind: 'note', member_id: note.id,
     x: 64 + 370 * index, y: 65, reference: { kind: 'note', id: note.id, title: note.title,
@@ -60,7 +63,12 @@ function initial() {
   const board: BoardDetail = { board: { id: BOARD_ID, user_id: 'synthetic-user', title: 'Open note verification board',
     soul_id: 'open-smoke-soul', project_id: null, viewport: { x: 0, y: 0, zoom: 1 }, created_at: at, updated_at: at },
     members, edges: [], visuals: [] };
-  return { notes, blocks, board, ranges: [range], sequence: 0, calls: [] as Call[], annotations: [] as unknown[],
+  const items = [{ id: ITEM_ID, user_id: 'synthetic-user', plain_text: 'Synthetic staging Item ready to place.',
+    body_json: {}, item_type: 'Synthetic staging Item', topic: 'Staging smoke', status: 'active' as const,
+    origin_note_id: NOTE_A, origin_course_id: 'open-smoke-project', origin_board_id: null, origin_board_title: null,
+    created_by: 'human', metadata: {}, created_at: at, updated_at: at }];
+  return { notes, blocks, board, items, ranges: [range], sequence: 0, calls: [] as Call[],
+    syntheticEvents: [] as SyntheticEvent[], annotations: [] as unknown[],
     navigationTargets: false, groups: [] as ContentGroupV1[] };
 }
 let state = (() => {
@@ -97,14 +105,21 @@ function rangeReference(range: BoardTextRangeV1) {
 function boardDetail() {
   return { ...state.board, members: state.board.members.map((member) => member.member_kind === 'text_range'
     ? { ...member, reference: rangeReference(state.ranges.find(({ id }) => id === member.member_id)!) }
-    : { ...member, reference: { ...member.reference, title: state.notes.find(({ id }) => id === member.member_id)!.title } }) };
+    : member.member_kind === 'note'
+      ? { ...member, reference: { ...member.reference, title: state.notes.find(({ id }) => id === member.member_id)!.title } }
+      : member.member_kind === 'item'
+        ? { ...member, reference: { ...member.reference,
+          summary: state.items.find(({ id }) => id === member.member_id)!.plain_text } }
+        : { ...member, reference: { ...member.reference, title: state.groups.find(({ id }) => id === member.member_id)!.title } }) };
 }
 export function diagnostic() {
   return {
     notes: state.notes.map(({ id, title, description }) => ({ id, title, description })),
     blocks: state.blocks.map(({ id, note_id, plain_text }) => ({ id, note_id, plain_text })),
     ranges: state.ranges.map((range) => ({ ...range, replay_status: rangeReference(range).anchor_status })),
-    members: state.board.members.map(({ id, member_kind, x, y, w, h, scale }) => ({ id, member_kind, x, y, w, h, scale })),
+    members: state.board.members.map(({ id, member_kind, member_id, placed, mounted_actor, x, y, w, h, scale }) =>
+      ({ id, member_kind, member_id, placed, mounted_actor, x, y, w, h, scale })),
+    syntheticEvents: state.syntheticEvents,
     nextWrite, heldWrite: heldWrite?.kind || null, failNextNoteLoad, navigationTargets: Boolean(state.navigationTargets),
     boardReads: state.calls.filter(({ method, url, phase }) => method === 'GET' && url === `/boards/${BOARD_ID}` && phase === 'started').length,
     boardWrites: state.calls.filter(({ method, url, phase }) => method !== 'GET' && url.startsWith(`/boards/${BOARD_ID}`) && phase === 'started'),
@@ -180,7 +195,7 @@ const api = axios.create({ adapter: async (config) => {
     else if (method === 'PUT' && note) { Object.assign(note, input); data = note; }
     else if (method === 'GET' && url === '/notes') data = state.notes;
     else if (method === 'GET' && url === '/courses') data = [{ id: 'open-smoke-project', name: 'Synthetic project' }];
-    else if (method === 'GET' && url === '/items') data = [];
+    else if (method === 'GET' && url === '/items') data = state.items;
     else if (method === 'GET' && url === '/purposes') data = { purposes: [{ id: state.board.board.soul_id,
       title: 'Open note verification board', project_id: null, course_id: null, note_id: null, status: 'active',
       is_note_default: false, created_by: 'human', members: [], created_at: at, updated_at: at }] };
@@ -207,12 +222,48 @@ const api = axios.create({ adapter: async (config) => {
     } else if (method === 'GET' && url === '/boards') data = { boards: state.navigationTargets ? [] : [state.board.board] };
     else if (method === 'GET' && url === `/boards/${BOARD_ID}`) data = boardDetail();
     else if (method === 'PATCH' && url === `/boards/${BOARD_ID}`) { Object.assign(state.board.board, input); data = { board: state.board.board }; }
+    else if (method === 'POST' && (url === `/boards/${BOARD_ID}/members` || url === `/boards/${BOARD_ID}/text-ranges`)) {
+      const existing = input.id && state.board.members.find(({ id }) => id === input.id);
+      if (existing) data = { member: existing, created: false };
+      else {
+        const range = url.endsWith('/text-ranges') ? { ...input.text_range, id: `open-smoke-range-${sequence}`,
+          board_id: BOARD_ID, status: 'active' as const, pre_edit_offsets: null, created_at: at, updated_at: at } : null;
+        const memberKind = range ? 'text_range' : input.member_kind;
+        const targetId = range?.id || input.member_id;
+        const targetNote = state.notes.find(({ id }) => id === targetId);
+        const item = state.items.find(({ id }) => id === targetId);
+        const group = state.groups.find(({ id }) => id === targetId);
+        if (!range && !targetNote && !item && !group) throw new Error('Unknown synthetic member target');
+        if (range) state.ranges.push(range);
+        const member: BoardMember = {
+          id: input.id || `open-smoke-mounted-${sequence}`, board_id: BOARD_ID, member_kind: memberKind, member_id: targetId,
+          placed: input.placed !== false, mounted_actor: 'human', x: input.x ?? 0, y: input.y ?? 0,
+          w: input.w ?? 0, h: input.h ?? 0, scale: input.scale ?? 1, z_index: input.z_index ?? 0,
+          pinned: input.pinned ?? false, metadata: input.metadata ?? {}, created_at: at, updated_at: at,
+          reference: range ? rangeReference(range) as BoardMember['reference'] : {
+            kind: memberKind, id: targetId, title: targetNote?.title ?? group?.title ?? null,
+            note_id: targetNote?.id ?? group?.note_id ?? item?.origin_note_id ?? null,
+            state: 'available', reason: null,
+            ...(item ? { summary: item.plain_text, item_type: item.item_type, item_status: item.status, topic: item.topic } : {}),
+          },
+        };
+        state.board.members.push(member);
+        state.syntheticEvents.push({ verb: 'mounted', member_id: member.id, sequence });
+        data = { member, created: true };
+      }
+    }
     else if (method === 'PATCH' && url.startsWith(`/boards/${BOARD_ID}/members/`)) {
       const member = state.board.members.find(({ id }) => id === url.split('/')[4]);
       if (!member) throw new Error('Unknown synthetic member');
       Object.assign(member, input); data = { member };
     } else if (method === 'DELETE' && url.startsWith(`/boards/${BOARD_ID}/members/`)) {
-      state.board.members = state.board.members.filter(({ id }) => id !== url.split('/')[4]); data = { removed: true };
+      const member = state.board.members.find(({ id }) => id === url.split('/')[4]);
+      if (member) {
+        state.board.members = state.board.members.filter(({ id }) => id !== member.id);
+        if (member.member_kind === 'text_range') state.ranges = state.ranges.filter(({ id }) => id !== member.member_id);
+        state.syntheticEvents.push({ verb: 'unmounted', member_id: member.id, sequence });
+      }
+      data = { removed: Boolean(member) };
     } else if (method === 'GET' && url === '/canvas-objects/coordinate-contract') data = { coordinate_contract: 'v2' };
     else if (method === 'GET' && url.startsWith('/canvas-objects/by-note/')) data = {
       canvasObjects: [...(state.navigationTargets && url.endsWith(`/${NOTE_A}`)

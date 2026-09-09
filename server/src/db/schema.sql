@@ -1288,6 +1288,8 @@ CREATE TABLE IF NOT EXISTS board_members (
   board_id TEXT NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
   member_kind TEXT NOT NULL CHECK (member_kind IN ('note', 'item', 'content_group', 'text_range')),
   member_id TEXT NOT NULL CHECK (length(member_id) BETWEEN 1 AND 180),
+  placed INTEGER NOT NULL DEFAULT 1 CHECK (placed IN (0, 1)),
+  mounted_actor TEXT NOT NULL DEFAULT 'human',
   x REAL NOT NULL DEFAULT 0,
   y REAL NOT NULL DEFAULT 0,
   w REAL NOT NULL DEFAULT 0 CHECK (w >= 0),

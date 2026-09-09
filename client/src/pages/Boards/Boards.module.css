@@ -69,7 +69,10 @@
 .toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 4px; padding: 8px 12px; border-bottom: 1px solid var(--border-default); background: var(--bg-surface); }
 .toolHint { font-size: 0.6875rem; color: var(--text-secondary); margin-left: 12px; }
 .zoomControls { display: flex; margin-left: auto; }
-.boardBody { display: flex; flex: 1; min-height: 0; }
+.boardBody { position: relative; display: flex; flex: 1; min-height: 0; }
+.stagingToggle { position: relative; z-index: 61; background: var(--bg-surface); }
+.stageCandidate { padding: 6px 8px; margin-bottom: 8px; font-size: 12px; border-radius: 4px; color: var(--text-secondary); }
+.stageCandidate:hover { background: var(--bg-hover); color: var(--text-primary); }
 .picker { flex: 0 0 280px; width: 280px; padding: 16px; overflow: auto; background: var(--bg-surface); border-right: 1px solid var(--border-default); }
 .picker label { display: block; font-weight: 600; margin-bottom: 10px; }
 .pickerHeader { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }

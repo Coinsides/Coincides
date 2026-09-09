@@ -51,7 +51,7 @@ describe('board HTTP repository', () => {
     const existingSoul = { title: 'One sentence', soul_id: 'soul-1' } satisfies CreateBoardInput;
     expectTypeOf<typeof newSoul>().toMatchTypeOf<CreateBoardInput>();
     expectTypeOf<typeof existingSoul>().toMatchTypeOf<CreateBoardInput>();
-    expectTypeOf<PatchBoardMemberInput>().toEqualTypeOf<Partial<typeof geometry>>();
+    expectTypeOf<PatchBoardMemberInput>().toEqualTypeOf<Partial<typeof geometry> & { placed?: boolean }>();
     // @ts-expect-error a board must have a soul, either existing or created with it
     const missingSoul: CreateBoardInput = { title: 'One sentence' };
     // @ts-expect-error the creation paths are mutually exclusive
