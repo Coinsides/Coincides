@@ -50,6 +50,7 @@ import {
 import {
   normalizeContentGroup,
 } from '../contentGroupService';
+import { createInFlightWriteRegistry } from '../inFlightWriteRegistry';
 import { useBlockDraftAuthority } from './useBlockDraftAuthority';
 import { createBoardTextRangeEditSession, type BoardRangeSaveSnapshot } from '../boardTextRangeEditSession';
 import { loadBoardTextRangesForNote, saveBoardTextRangesForNote } from '../boardTextRangeRepository';
@@ -139,6 +140,7 @@ export interface InsertTemplateGroup {
 
 export interface UseNoteCanvasDataAdapterOptions {
   noteId?: string;
+  hostMode?: 'page' | 'modal';
   onNoteLoaded: () => void;
   clearLayoutDraftForBlock: (blockId: string) => void;
   setLayoutDraftForBlock: (blockId: string, layout: BlockBoxLayout) => void;
@@ -397,10 +399,12 @@ function presentationKindForTemplate(template: TemplateOption, _sourceQuote = fa
 
 export function useNoteCanvasDataAdapter({
   noteId,
+  hostMode = 'page',
   onNoteLoaded,
   clearLayoutDraftForBlock,
   setLayoutDraftForBlock,
 }: UseNoteCanvasDataAdapterOptions) {
+  const writeRegistry = useMemo(() => createInFlightWriteRegistry(), [noteId]);
   const navigate = useNavigate();
   const addToast = useUIStore((s) => s.addToast);
 
@@ -413,6 +417,7 @@ export function useNoteCanvasDataAdapter({
   const [coordinateContract, setCoordinateContract] = useState<CoordinateContract>('v1');
   const [blocks, setBlocks] = useState<NoteBlock[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [titleDraft, setTitleDraft] = useState('');
   const [templateOptions, setTemplateOptions] = useState<TemplateOption[]>(STATIC_TEMPLATE_OPTIONS);
   const [templateWarning, setTemplateWarning] = useState<string | null>(null);
@@ -559,7 +564,7 @@ export function useNoteCanvasDataAdapter({
     [templateOptions],
   );
 
-  const fetchNote = useCallback(async () => {
+  const fetchNote = useCallback(writeRegistry.hold('fetchNote', async () => {
     if (!noteId) return;
     const requestedNoteId = noteId;
     const loadGeneration = noteLoadGenerationRef.current + 1;
@@ -569,17 +574,18 @@ export function useNoteCanvasDataAdapter({
       && routeNoteIdRef.current === requestedNoteId
     );
     setLoading(true);
+    setLoadError(null);
     try {
       const [noteRes, blocksRes] = await Promise.all([
         api.get(`/notes/${noteId}`),
         api.get(`/notes/${noteId}/blocks`),
       ]);
       const hydratedNote = noteRes.data as Note;
-      const savedContentGroups = await loadContentGroupsForNote({ note: hydratedNote });
+      const savedContentGroups = await writeRegistry.track('hydrate-content-groups:' + hydratedNote.id, async () => loadContentGroupsForNote({ note: hydratedNote }));
       const [savedGroupFolders, canvasPersistence, savedAnnotationTruths, savedPurposeFrames, savedBoardRanges] = await Promise.all([
-        loadGroupFoldersForNote({ note: hydratedNote }),
-        loadCanvasPersistenceForNote({ note: hydratedNote, contractSession }),
-        loadAnnotationTruthsForNote({ note: hydratedNote }),
+        writeRegistry.track('hydrate-group-folders:' + hydratedNote.id, async () => loadGroupFoldersForNote({ note: hydratedNote })),
+        writeRegistry.track('hydrate-canvas:' + hydratedNote.id, async () => loadCanvasPersistenceForNote({ note: hydratedNote, contractSession })),
+        writeRegistry.track('hydrate-annotations:' + hydratedNote.id, async () => loadAnnotationTruthsForNote({ note: hydratedNote })),
         loadLibraryPurposes(),
         loadBoardTextRangesForNote(requestedNoteId),
       ]);
@@ -592,7 +598,7 @@ export function useNoteCanvasDataAdapter({
       const cleanMetadata = stripLegacyAnnotationMetadata(stripLegacyPageFrameMetadata(hydratedNote.metadata));
       let persistedNote = hydratedNote;
       if (metadataChanged(hydratedNote.metadata, cleanMetadata)) {
-        const stripResponse = await api.put<Note>(`/notes/${hydratedNote.id}`, { metadata: cleanMetadata });
+        const stripResponse = await writeRegistry.track('fetchNote:' + `/notes/${hydratedNote.id}`, async () => api.put<Note>(`/notes/${hydratedNote.id}`, { metadata: cleanMetadata }));
         if (!requestIsCurrent()) return;
         persistedNote = stripResponse.data || { ...hydratedNote, metadata: cleanMetadata };
       }
@@ -657,14 +663,16 @@ export function useNoteCanvasDataAdapter({
       if (!requestIsCurrent()) return;
       console.error('Failed to load note:', err);
       addToast('error', 'Failed to load note');
-      navigate('/projects');
+      if (hostMode === 'modal') setLoadError('Failed to load note. Close this window to return to the board.');
+      else navigate('/projects');
     } finally {
       if (requestIsCurrent()) setLoading(false);
     }
-  }, [
+  }), [writeRegistry,
     contractSession,
     boardRangeSession,
     noteId,
+    hostMode,
     addToast,
     blockEditRecoveryMountNonce,
     navigate,
@@ -687,12 +695,12 @@ export function useNoteCanvasDataAdapter({
     return () => { cancelled = true; };
   }, []);
 
-  const fetchSourceAnchors = useCallback(async (courseId: string) => {
+  const fetchSourceAnchors = useCallback(writeRegistry.hold('fetchSourceAnchors', async (courseId: string) => {
     try {
-      await api.post('/source-anchors/generate', {
+      await writeRegistry.track('fetchSourceAnchors:' + '/source-anchors/generate', async () => api.post('/source-anchors/generate', {
         course_id: courseId,
         target_type: 'note_block',
-      });
+      }));
       const res = await api.get('/source-anchors', { params: { course_id: courseId } });
       const nextAnchors: Record<string, SourceAnchor> = {};
       for (const anchor of res.data as SourceAnchor[]) {
@@ -704,19 +712,19 @@ export function useNoteCanvasDataAdapter({
       console.error('Failed to load source anchors:', err);
       setAnchorsBySourceRef({});
     }
-  }, []);
+  }), [writeRegistry]);
 
   useEffect(() => {
     if (!note?.course_id || blocks.length === 0) return;
     fetchSourceAnchors(note.course_id);
   }, [note?.course_id, blocks.length, fetchSourceAnchors]);
 
-  const saveTitle = useCallback(async () => {
+  const saveTitle = useCallback(writeRegistry.hold('saveTitle', async () => {
     const nextTitle = titleDraft.trim();
     if (!note || !nextTitle || nextTitle === note.title) return;
     if (!allowSourceContentMutation()) return;
     try {
-      const res = await api.put(`/notes/${note.id}`, { title: nextTitle });
+      const res = await writeRegistry.track('saveTitle:' + `/notes/${note.id}`, async () => api.put(`/notes/${note.id}`, { title: nextTitle }));
       setNote(res.data);
       setTitleDraft(res.data?.title || nextTitle);
       addToast('success', 'Note renamed');
@@ -724,9 +732,9 @@ export function useNoteCanvasDataAdapter({
       console.error('Failed to rename note:', err);
       addToast('error', 'Failed to rename note');
     }
-  }, [note, titleDraft, addToast, allowSourceContentMutation]);
+  }), [writeRegistry, note, titleDraft, addToast, allowSourceContentMutation]);
 
-  const saveAnnotationTruths = useCallback(async (nextAnnotations: AnnotationTruthV1[]) => {
+  const saveAnnotationTruths = useCallback(writeRegistry.hold('saveAnnotationTruths', async (nextAnnotations: AnnotationTruthV1[]) => {
     const currentNote = note;
     const receipt = annotationSaveRouteReceipt;
     if (!currentNote || !receipt) {
@@ -785,10 +793,10 @@ export function useNoteCanvasDataAdapter({
     const publish = async () => {
       if (rejectStaleReceipt('publish')) return;
       try {
-        const savedAnnotations = await saveAnnotationTruthsForNote({
+        const savedAnnotations = await writeRegistry.track('annotations:' + receipt.noteId, async () => saveAnnotationTruthsForNote({
           noteId: receipt.noteId,
           annotations: nextAnnotations,
-        });
+        }));
         if (rejectStaleReceipt('publish_response')) return;
         setSnapshotIfCurrent(savedAnnotations);
       } catch (err) {
@@ -806,15 +814,16 @@ export function useNoteCanvasDataAdapter({
           });
           if (rejectStaleReceipt('reconciliation_read')) return;
           if (annotationTruthsDurablyEqual(observedAnnotations, nextAnnotations)) {
+            writeRegistry.confirm('annotations:' + receipt.noteId);
             setSnapshotIfCurrent(observedAnnotations);
             return;
           }
 
           if (rejectStaleReceipt('repair')) return;
-          const repairedAnnotations = await saveAnnotationTruthsForNote({
+          const repairedAnnotations = await writeRegistry.track('annotations:' + receipt.noteId, async () => saveAnnotationTruthsForNote({
             noteId: receipt.noteId,
             annotations: nextAnnotations,
-          });
+          }));
           if (rejectStaleReceipt('repair_response')) return;
           setSnapshotIfCurrent(repairedAnnotations);
         } catch (reconciliationError) {
@@ -846,9 +855,9 @@ export function useNoteCanvasDataAdapter({
       }
     });
     await queuedPublish;
-  }, [addToast, annotationSaveRouteReceipt, note, setAnnotationTruthsSnapshot]);
+  }), [writeRegistry, addToast, annotationSaveRouteReceipt, note, setAnnotationTruthsSnapshot]);
 
-  const saveContentGroups = useCallback(async (nextGroups: ContentGroupV1[]): Promise<boolean> => {
+  const saveContentGroups = useCallback(writeRegistry.hold('saveContentGroups', async (nextGroups: ContentGroupV1[]): Promise<boolean> => {
     const currentNote = noteRef.current || note;
     if (!currentNote) return false;
     const previousGroups = contentGroups;
@@ -857,10 +866,10 @@ export function useNoteCanvasDataAdapter({
     contentGroupSaveGenerationRef.current = saveGeneration;
     setContentGroups(normalizedGroups);
     try {
-      const savedGroups = await saveContentGroupsForNote({
+      const savedGroups = await writeRegistry.track('content-groups:' + currentNote.id, async () => saveContentGroupsForNote({
         noteId: currentNote.id,
         groups: normalizedGroups,
-      });
+      }));
       if (contentGroupSaveGenerationRef.current === saveGeneration) {
         setContentGroups(savedGroups);
       }
@@ -873,9 +882,9 @@ export function useNoteCanvasDataAdapter({
       }
       return false;
     }
-  }, [addToast, contentGroups, note]);
+  }), [writeRegistry, addToast, contentGroups, note]);
 
-  const saveGroupFolders = useCallback(async (nextFolders: GroupFolderV1[]) => {
+  const saveGroupFolders = useCallback(writeRegistry.hold('saveGroupFolders', async (nextFolders: GroupFolderV1[]) => {
     const currentNote = noteRef.current || note;
     if (!currentNote) return;
     const previousFolders = groupFolders;
@@ -884,10 +893,10 @@ export function useNoteCanvasDataAdapter({
     contentGroupSaveGenerationRef.current = saveGeneration;
     setGroupFolders(normalizedFolders);
     try {
-      const savedFolders = await saveGroupFoldersForNote({
+      const savedFolders = await writeRegistry.track('group-folders:' + currentNote.id, async () => saveGroupFoldersForNote({
         noteId: currentNote.id,
         folders: normalizedFolders,
-      });
+      }));
       if (contentGroupSaveGenerationRef.current !== saveGeneration) return;
       setGroupFolders(savedFolders);
     } catch (err) {
@@ -904,9 +913,9 @@ export function useNoteCanvasDataAdapter({
         setGroupFolders(previousFolders);
       }
     }
-  }, [addToast, groupFolders, note]);
+  }), [writeRegistry, addToast, groupFolders, note]);
 
-  const savePageFrameCollection = useCallback(async (nextCollection: PageFrameCollectionModel) => {
+  const savePageFrameCollection = useCallback(writeRegistry.hold('savePageFrameCollection', async (nextCollection: PageFrameCollectionModel) => {
     const currentNote = noteRef.current || note;
     if (!currentNote) return;
     if (!allowSourceContentMutation()) return;
@@ -916,10 +925,10 @@ export function useNoteCanvasDataAdapter({
     pageFrameSaveGenerationRef.current = saveGeneration;
     setPageFrameCollection(normalizedCollection);
     try {
-      const savedCollection = await savePageFrameCollectionForNote({
+      const savedCollection = await writeRegistry.track('page-frames:' + currentNote.id, async () => savePageFrameCollectionForNote({
         noteId: currentNote.id,
         collection: normalizedCollection,
-      });
+      }));
       if (pageFrameSaveGenerationRef.current !== saveGeneration) return;
       setPageFrameCollection(savedCollection);
     } catch (err) {
@@ -928,9 +937,9 @@ export function useNoteCanvasDataAdapter({
       if (pageFrameSaveGenerationRef.current !== saveGeneration) return;
       setPageFrameCollection(previousCollection);
     }
-  }, [addToast, allowSourceContentMutation, note, pageFrameCollection, contractSession]);
+  }), [writeRegistry, addToast, allowSourceContentMutation, note, pageFrameCollection, contractSession]);
 
-  const saveDocumentTypographyProfile = useCallback(async (nextProfile: DocumentTypographyProfile) => {
+  const saveDocumentTypographyProfile = useCallback(writeRegistry.hold('saveDocumentTypographyProfile', async (nextProfile: DocumentTypographyProfile) => {
     const currentNote = noteRef.current || note;
     if (!currentNote) return;
     const previousProfile = documentTypographyProfile;
@@ -946,7 +955,7 @@ export function useNoteCanvasDataAdapter({
     setNote(optimisticNote);
     setDocumentTypographyProfile(normalizedProfile);
     try {
-      const res = await api.put(`/notes/${currentNote.id}`, { metadata: nextMetadata });
+      const res = await writeRegistry.track('saveDocumentTypographyProfile:' + `/notes/${currentNote.id}`, async () => api.put(`/notes/${currentNote.id}`, { metadata: nextMetadata }));
       const updated = res.data as Note;
       if (typographyProfileSaveGenerationRef.current !== saveGeneration) return;
       const savedProfile = typographyProfileFromMetadata(updated.metadata);
@@ -961,9 +970,9 @@ export function useNoteCanvasDataAdapter({
       setNote(currentNote);
       setDocumentTypographyProfile(previousProfile);
     }
-  }, [addToast, documentTypographyProfile, note]);
+  }), [writeRegistry, addToast, documentTypographyProfile, note]);
 
-  const saveReadingInterpretations = useCallback(async (nextInterpretations: ReadingInterpretationV1[]) => {
+  const saveReadingInterpretations = useCallback(writeRegistry.hold('saveReadingInterpretations', async (nextInterpretations: ReadingInterpretationV1[]) => {
     if (!note) return;
     const nextMetadata = {
       ...(note.metadata || {}),
@@ -971,7 +980,7 @@ export function useNoteCanvasDataAdapter({
     };
     setReadingInterpretations(nextInterpretations);
     try {
-      const res = await api.put(`/notes/${note.id}`, { metadata: nextMetadata });
+      const res = await writeRegistry.track('saveReadingInterpretations:' + `/notes/${note.id}`, async () => api.put(`/notes/${note.id}`, { metadata: nextMetadata }));
       const updated = res.data as Note;
       setNote(updated);
       setReadingInterpretations(readingInterpretationsFromMetadata(updated.metadata));
@@ -980,9 +989,9 @@ export function useNoteCanvasDataAdapter({
       addToast('error', 'Failed to save reading interpretation');
       setReadingInterpretations(readingInterpretationsFromMetadata(note.metadata));
     }
-  }, [addToast, note]);
+  }), [writeRegistry, addToast, note]);
 
-  const saveAnnotationProposals = useCallback(async (nextProposals: AnnotationProposalV1[]) => {
+  const saveAnnotationProposals = useCallback(writeRegistry.hold('saveAnnotationProposals', async (nextProposals: AnnotationProposalV1[]) => {
     if (!note) return;
     const nextMetadata = {
       ...(note.metadata || {}),
@@ -990,7 +999,7 @@ export function useNoteCanvasDataAdapter({
     };
     setAnnotationProposals(nextProposals);
     try {
-      const res = await api.put(`/notes/${note.id}`, { metadata: nextMetadata });
+      const res = await writeRegistry.track('saveAnnotationProposals:' + `/notes/${note.id}`, async () => api.put(`/notes/${note.id}`, { metadata: nextMetadata }));
       const updated = res.data as Note;
       setNote(updated);
       setAnnotationProposals(annotationProposalsFromMetadata(updated.metadata));
@@ -999,9 +1008,9 @@ export function useNoteCanvasDataAdapter({
       addToast('error', 'Failed to save annotation proposal');
       setAnnotationProposals(annotationProposalsFromMetadata(note.metadata));
     }
-  }, [addToast, note]);
+  }), [writeRegistry, addToast, note]);
 
-  const createBlock = useCallback(async (
+  const createBlock = useCallback(writeRegistry.hold('createBlock', async (
     template: TemplateOption,
     text: string,
     options: {
@@ -1032,13 +1041,13 @@ export function useNoteCanvasDataAdapter({
     const nextKind = presentationKindForTemplate(template, true);
     let created: NoteBlock;
     try {
-      const res = await api.post(`/notes/${requestedNote.id}/blocks`, {
+      const res = await writeRegistry.track('createBlock:' + `/notes/${requestedNote.id}/blocks`, async () => api.post(`/notes/${requestedNote.id}/blocks`, {
         block_type: template.legacy_block_type,
         title: options.title || undefined,
         content_json: nextContent,
         plain_text: plainTextForBlockContent(nextKind, nextContent, body),
         metadata,
-      });
+      }));
       created = hydrateClientBlock(res.data);
     } catch (err) {
       if (!requestIsCurrent()) return null;
@@ -1049,15 +1058,16 @@ export function useNoteCanvasDataAdapter({
     if (!requestIsCurrent()) return null;
 
     if (options.layout) {
+      const requestedLayout = options.layout;
       try {
-        const savedLayout = await saveBlockCanvasPlacementForNote({
+        const savedLayout = await writeRegistry.track('placement:' + requestedNote.id + ':' + created.id, async () => saveBlockCanvasPlacementForNote({
           ...await resolveCanvasPlacementWriteContext({
             noteId: requestedNote.id, loadedNoteId: note?.id, pageFrameCollection, contractSession,
           }),
           noteId: requestedNote.id,
           block: created,
-          layout: options.layout,
-        });
+          layout: requestedLayout,
+        }));
         created = { ...created, canvas_layout: savedLayout.layout };
       } catch (err) {
         if (!requestIsCurrent()) return null;
@@ -1079,9 +1089,9 @@ export function useNoteCanvasDataAdapter({
     }
     if (!options.silent) addToast('success', 'Block added');
     return created;
-  }, [note, addToast, allowSourceContentMutation, pageFrameCollection, contractSession]);
+  }), [writeRegistry, note, addToast, allowSourceContentMutation, pageFrameCollection, contractSession]);
 
-  const createDraftBlock = useCallback(async (
+  const createDraftBlock = useCallback(writeRegistry.hold('createDraftBlock', async (
     template: TemplateOption,
     text: string,
     options: {
@@ -1114,18 +1124,21 @@ export function useNoteCanvasDataAdapter({
     let created: NoteBlock;
     let reused = false;
     try {
-      const response = await api.post(`/notes/${requestedNote.id}/blocks`, {
+      const response = await writeRegistry.track('draft-create:' + options.clientCreateKey, async () => api.post(`/notes/${requestedNote.id}/blocks`, {
         block_type: template.legacy_block_type,
         title: options.title || undefined,
         content_json: nextContent,
         plain_text: plainTextForBlockContent(nextKind, nextContent, body),
         metadata,
         client_create_key: options.clientCreateKey,
-      });
+      }));
       created = hydrateClientBlock(response.data);
       reused = response.data?.client_create_receipt?.reused === true;
     } catch (err: any) {
-      if (err?.response?.data?.status === 'canceled') return null;
+      if (err?.response?.data?.status === 'canceled') {
+        writeRegistry.confirm('draft-create:' + options.clientCreateKey);
+        return null;
+      }
       if (requestIsCurrent()) {
         console.error('Failed to create draft block:', err);
         addToast('error', 'Failed to create block');
@@ -1135,15 +1148,16 @@ export function useNoteCanvasDataAdapter({
 
     let placementPersisted = !options.layout;
     if (options.layout) {
+      const requestedLayout = options.layout;
       try {
-        const savedLayout = await saveBlockCanvasPlacementForNote({
+        const savedLayout = await writeRegistry.track('placement:' + requestedNote.id + ':' + created.id, async () => saveBlockCanvasPlacementForNote({
           ...await resolveCanvasPlacementWriteContext({
             noteId: requestedNote.id, loadedNoteId: note?.id, pageFrameCollection, contractSession,
           }),
           noteId: requestedNote.id,
           block: created,
-          layout: options.layout,
-        });
+          layout: requestedLayout,
+        }));
         created = { ...created, canvas_layout: savedLayout.layout };
         placementPersisted = true;
       } catch (err) {
@@ -1170,9 +1184,9 @@ export function useNoteCanvasDataAdapter({
       placementPersisted,
       reused,
     };
-  }, [note, addToast, allowSourceContentMutation, pageFrameCollection, contractSession]);
+  }), [writeRegistry, note, addToast, allowSourceContentMutation, pageFrameCollection, contractSession]);
 
-  const saveDraftBlockPlacement = useCallback(async (
+  const saveDraftBlockPlacement = useCallback(writeRegistry.hold('saveDraftBlockPlacement', async (
     block: NoteBlock,
     layout: BlockBoxLayout,
     _clientCreateKey: string,
@@ -1187,14 +1201,14 @@ export function useNoteCanvasDataAdapter({
       && noteRef.current?.id === requestedNoteId
     );
     try {
-      const savedLayout = await saveBlockCanvasPlacementForNote({
+      const savedLayout = await writeRegistry.track('placement:' + requestedNoteId + ':' + block.id, async () => saveBlockCanvasPlacementForNote({
         ...await resolveCanvasPlacementWriteContext({
           noteId: requestedNoteId, loadedNoteId: note?.id, pageFrameCollection, contractSession,
         }),
         noteId: requestedNoteId,
         block,
         layout,
-      });
+      }));
       const placed = { ...block, canvas_layout: savedLayout.layout };
       if (requestIsCurrent()) {
         const textFlow = getTextFlowContent(placed.content_json);
@@ -1213,9 +1227,9 @@ export function useNoteCanvasDataAdapter({
       }
       return null;
     }
-  }, [addToast, note?.id, pageFrameCollection, contractSession]);
+  }), [writeRegistry, addToast, note?.id, pageFrameCollection, contractSession]);
 
-  const finalizeDraftBlock = useCallback(async (
+  const finalizeDraftBlock = useCallback(writeRegistry.hold('finalizeDraftBlock', async (
     receipt: DraftRecoveryReceipt,
   ): Promise<boolean> => {
     const body = receipt.text.trimEnd();
@@ -1224,30 +1238,30 @@ export function useNoteCanvasDataAdapter({
     try {
       await finalizeDraftRecoveryReceipt(receipt, {
         createOrReuse: async (pendingReceipt) => {
-          const response = await api.post(`/notes/${pendingReceipt.noteId}/blocks`, {
+          const response = await writeRegistry.track('draft-create:' + pendingReceipt.clientCreateKey, async () => api.post(`/notes/${pendingReceipt.noteId}/blocks`, {
             block_type: pendingReceipt.template.legacy_block_type,
             content_json: contentJson,
             plain_text: plainTextForBlockContent(presentationKind, contentJson, body),
             metadata: metadataForTemplateOption(pendingReceipt.template),
             client_create_key: pendingReceipt.clientCreateKey,
-          });
+          }));
           return hydrateClientBlock(response.data);
         },
         savePlacement: async (durableBlock, pendingReceipt) => {
-          await saveBlockCanvasPlacementForNote({
+          await writeRegistry.track('placement:' + pendingReceipt.noteId + ':' + durableBlock.id, async () => saveBlockCanvasPlacementForNote({
             ...await resolveCanvasPlacementWriteContext({
               noteId: pendingReceipt.noteId, loadedNoteId: note?.id, pageFrameCollection, contractSession,
             }),
             noteId: pendingReceipt.noteId,
             block: durableBlock,
             layout: pendingReceipt.layout,
-          });
+          }));
         },
         saveLatest: async (durableBlock) => {
-          await api.put(`/note-blocks/${durableBlock.id}`, {
+          await writeRegistry.track('block-body:' + `/note-blocks/${durableBlock.id}`, async () => api.put(`/note-blocks/${durableBlock.id}`, {
             content_json: contentJson,
             plain_text: plainTextForBlockContent(presentationKind, contentJson, body),
-          });
+          }));
         },
       });
       recoveryFailureNotifiedKeysRef.current.delete(receipt.clientCreateKey);
@@ -1260,7 +1274,7 @@ export function useNoteCanvasDataAdapter({
       }
       return false;
     }
-  }, [addToast, note?.id, pageFrameCollection, contractSession]);
+  }), [writeRegistry, addToast, note?.id, pageFrameCollection, contractSession]);
 
   useEffect(() => {
     const recoveryQueue = loadDraftRecoveryQueue();
@@ -1284,7 +1298,7 @@ export function useNoteCanvasDataAdapter({
     });
   }, [addToast, finalizeDraftBlock]);
 
-  const discardDraftBlock = useCallback(async (
+  const discardDraftBlock = useCallback(writeRegistry.hold('discardDraftBlock', async (
     requestedNoteId: string,
     clientCreateKey: string,
   ): Promise<boolean> => {
@@ -1297,10 +1311,16 @@ export function useNoteCanvasDataAdapter({
       && noteRef.current?.id === requestedNoteId
     );
     try {
-      const response = await api.post(`/notes/${requestedNoteId}/blocks/discard-client-create`, {
+      const response = await writeRegistry.track('draft-discard:' + clientCreateKey, async () => api.post(`/notes/${requestedNoteId}/blocks/discard-client-create`, {
         client_create_key: clientCreateKey,
-      });
+      }));
+      writeRegistry.confirm('draft-create:' + clientCreateKey);
       const blockId = typeof response.data?.block_id === 'string' ? response.data.block_id : null;
+      if (blockId) {
+        writeRegistry.confirm('placement:' + requestedNoteId + ':' + blockId);
+        writeRegistry.confirm('block-body:' + `/note-blocks/${blockId}`);
+        writeRegistry.confirm('operation:block-save:' + blockId);
+      }
       if (blockId && requestIsCurrent()) {
         setBlocks((current) => current.filter((block) => block.id !== blockId));
         setBlockTextDrafts((current) => {
@@ -1327,9 +1347,9 @@ export function useNoteCanvasDataAdapter({
       }
       return false;
     }
-  }, [addToast]);
+  }), [writeRegistry, addToast]);
 
-  const saveBlock = useCallback(async (
+  const saveBlock = useCallback(writeRegistry.hold((block: NoteBlock) => `block-save:${block.id}`, async (
     block: NoteBlock,
     text: string,
     options: {
@@ -1410,7 +1430,7 @@ export function useNoteCanvasDataAdapter({
     }
     const syncBoardRangesAfterBody = async (savedBlock: NoteBlock): Promise<BlockSaveOutcome | null> => {
       try {
-        await boardRangeSession.persist(boardRangeSnapshot);
+        await writeRegistry.track('board-ranges:' + requestedNoteId + ':' + block.id, async () => boardRangeSession.persist(boardRangeSnapshot));
         return null;
       } catch (error) {
         if (requestRouteIsCurrent()) {
@@ -1427,6 +1447,7 @@ export function useNoteCanvasDataAdapter({
     const hasOutstandingSaveForBlock = Array.from(outstandingBlockSaveOperationsRef.current.values())
       .some((operation) => operation.blockId === block.id && operation.requestedNoteId === requestedNoteId);
     if (!hasOutstandingSaveForBlock && blockMatchesIssuedSave(block, requestedPlainText, nextContent)) {
+      writeRegistry.confirm('block-body:' + `/note-blocks/${block.id}`);
       const rangeFailure = await syncBoardRangesAfterBody(block);
       if (rangeFailure) return rangeFailure;
       if (options.recoveryKey) {
@@ -1554,10 +1575,10 @@ export function useNoteCanvasDataAdapter({
     setBlockEditRecoveryVersion((version) => version + 1);
     setSavingBlockId(block.id);
     try {
-      const res = await api.put(`/note-blocks/${block.id}`, {
+      const res = await writeRegistry.track('block-body:' + `/note-blocks/${block.id}`, async () => api.put(`/note-blocks/${block.id}`, {
         content_json: nextContent,
         plain_text: requestedPlainText,
-      });
+      }));
       const rangeFailure = await syncBoardRangesAfterBody(
         hydrateClientBlock({ ...block, ...res.data, source_references: block.source_references }),
       );
@@ -1676,7 +1697,12 @@ export function useNoteCanvasDataAdapter({
         setSavingBlockId(latestOutstandingOperation?.[1].blockId || null);
       }
     }
-  }, [
+  }, (outcome) => (
+    outcome.status === 'saved'
+      || (outcome.status === 'stale_epoch' && outcome.durableState === 'matches_requested')
+      ? undefined
+      : ('error' in outcome ? outcome.error : undefined) || new Error('A block edit is still pending')
+  )), [writeRegistry,
     addToast,
     allowSourceContentMutation,
     blockEditRecoveryMountNonce,
@@ -1750,7 +1776,7 @@ export function useNoteCanvasDataAdapter({
     return true;
   }, [addToast, setBlockFieldDrafts, setBlockTextDrafts, setBlockTextFlowDrafts]);
 
-  const applyTemplateToBlock = useCallback(async (
+  const applyTemplateToBlock = useCallback(writeRegistry.hold('applyTemplateToBlock', async (
     block: NoteBlock,
     template: TemplateOption,
     text: string,
@@ -1803,15 +1829,15 @@ export function useNoteCanvasDataAdapter({
       const nextKind = presentationKindForTemplate(template);
       boardRangeSession.rebase(block.id, getTextFlowContent(block.content_json), getTextFlowContent(nextContent));
       const boardRangeSnapshot = boardRangeSession.capture(block.id);
-      const res = await api.put(`/note-blocks/${block.id}`, {
+      const res = await writeRegistry.track('block-body:' + `/note-blocks/${block.id}`, async () => api.put(`/note-blocks/${block.id}`, {
         block_type: template.legacy_block_type,
         title: options.title ?? block.title,
         content_json: nextContent,
         plain_text: plainTextForBlockContent(nextKind, nextContent, nextText),
         metadata,
-      });
+      }));
       try {
-        await boardRangeSession.persist(boardRangeSnapshot);
+        await writeRegistry.track('board-ranges:' + requestedNoteId + ':' + block.id, async () => boardRangeSession.persist(boardRangeSnapshot));
       } catch {
         if (requestRouteIsCurrent()) {
           addToast('error', 'Text converted, but board references could not sync. Retry saving this block.');
@@ -1864,7 +1890,7 @@ export function useNoteCanvasDataAdapter({
         setSavingBlockId(latestOutstandingOperation?.[1].blockId || null);
       }
     }
-  }, [addToast, allowSourceContentMutation, boardRangeSession]);
+  }), [writeRegistry, addToast, allowSourceContentMutation, boardRangeSession]);
 
   const refreshTrayState = useCallback(async (changedBlockIds: string[] = []) => {
     if (!note) return;
@@ -1883,18 +1909,18 @@ export function useNoteCanvasDataAdapter({
     changedBlockIds.forEach(clearLayoutDraftForBlock);
   }, [clearLayoutDraftForBlock, contractSession, note]);
 
-  const persistBlockLayout = useCallback(async (block: NoteBlock, layout: BlockBoxLayout) => {
+  const persistBlockLayout = useCallback(writeRegistry.hold('persistBlockLayout', async (block: NoteBlock, layout: BlockBoxLayout) => {
     if (!note) return;
     if (!allowSourceContentMutation()) return;
     try {
-      const savedLayout = await saveBlockCanvasPlacementForNote({
+      const savedLayout = await writeRegistry.track('placement:' + note.id + ':' + block.id, async () => saveBlockCanvasPlacementForNote({
         ...await resolveCanvasPlacementWriteContext({
           noteId: note.id, loadedNoteId: note?.id, pageFrameCollection, contractSession,
         }),
         noteId: note.id,
         block,
         layout,
-      });
+      }));
       setBlocks((current) => current.map((item) => (
         item.id === block.id
           ? { ...item, canvas_layout: savedLayout.layout }
@@ -1905,7 +1931,7 @@ export function useNoteCanvasDataAdapter({
       console.error('Failed to save block layout:', err);
       addToast('error', 'Failed to save block layout');
     }
-  }, [note, addToast, allowSourceContentMutation, clearLayoutDraftForBlock, pageFrameCollection, contractSession]);
+  }), [writeRegistry, note, addToast, allowSourceContentMutation, clearLayoutDraftForBlock, pageFrameCollection, contractSession]);
 
   const updateBlockPolicy = useCallback(async (
     block: NoteBlock,
@@ -1929,13 +1955,13 @@ export function useNoteCanvasDataAdapter({
     void updateBlockPolicy(block, layout, { ai_visibility: nextVisibility });
   }, [updateBlockPolicy]);
 
-  const trashBlock = useCallback(async (
+  const trashBlock = useCallback(writeRegistry.hold('trashBlock', async (
     blockId: string,
     options: { silent?: boolean } = {},
   ): Promise<boolean> => {
     if (!allowSourceContentMutation()) return false;
     try {
-      await api.delete(`/note-blocks/${blockId}`);
+      await writeRegistry.track('block-status:' + `/note-blocks/${blockId}`, async () => api.delete(`/note-blocks/${blockId}`));
       setBlocks((current) => current.filter((block) => block.id !== blockId));
       setBlockTextDrafts((current) => {
         const next = { ...current };
@@ -1959,7 +1985,7 @@ export function useNoteCanvasDataAdapter({
       if (!options.silent) addToast('error', 'Failed to trash block');
       return false;
     }
-  }, [addToast, allowSourceContentMutation]);
+  }), [writeRegistry, addToast, allowSourceContentMutation]);
 
   const forgetBlockLocally = useCallback((blockId: string): void => {
     setBlocks((current) => current.filter((block) => block.id !== blockId));
@@ -1980,7 +2006,7 @@ export function useNoteCanvasDataAdapter({
     });
   }, []);
 
-  const restoreBlockById = useCallback(async (
+  const restoreBlockById = useCallback(writeRegistry.hold('restoreBlockById', async (
     blockId: string,
     options: { silent?: boolean; metadataPatch?: Record<string, unknown> } = {},
   ): Promise<NoteBlock | null> => {
@@ -1988,7 +2014,7 @@ export function useNoteCanvasDataAdapter({
     try {
       const payload: { status: 'active'; metadata?: Record<string, unknown> } = { status: 'active' };
       if (options.metadataPatch) payload.metadata = options.metadataPatch;
-      const res = await api.put(`/note-blocks/${blockId}`, payload);
+      const res = await writeRegistry.track('block-status:' + `/note-blocks/${blockId}`, async () => api.put(`/note-blocks/${blockId}`, payload));
       const restored = hydrateClientBlock(res.data);
       setBlocks((current) => (
         [...current.filter((item) => item.id !== restored.id), restored]
@@ -2015,15 +2041,15 @@ export function useNoteCanvasDataAdapter({
       if (!options.silent) addToast('error', 'Failed to restore block');
       return null;
     }
-  }, [addToast, allowSourceContentMutation]);
+  }), [writeRegistry, addToast, allowSourceContentMutation]);
 
-  const restoreBlock = useCallback(async (
+  const restoreBlock = useCallback(writeRegistry.hold('restoreBlock', async (
     block: NoteBlock,
     options: { silent?: boolean } = {},
   ): Promise<NoteBlock | null> => {
     if (!allowSourceContentMutation()) return null;
     try {
-      const res = await api.put(`/note-blocks/${block.id}`, { status: 'active' });
+      const res = await writeRegistry.track('block-status:' + `/note-blocks/${block.id}`, async () => api.put(`/note-blocks/${block.id}`, { status: 'active' }));
       const restored = hydrateClientBlock({
         ...block,
         ...res.data,
@@ -2054,9 +2080,9 @@ export function useNoteCanvasDataAdapter({
       if (!options.silent) addToast('error', 'Failed to restore block');
       return null;
     }
-  }, [addToast, allowSourceContentMutation]);
+  }), [writeRegistry, addToast, allowSourceContentMutation]);
 
-  const persistCanvasObject = useCallback(async ({
+  const persistCanvasObject = useCallback(writeRegistry.hold('persistCanvasObject', async ({
     canvasObject,
     placement,
     contentMounts = [],
@@ -2091,15 +2117,21 @@ export function useNoteCanvasDataAdapter({
       setPersistedStructuredObjects((current) => upsertStructuredObject(current, structuredObject));
     }
     try {
-      const writeContext = await resolveCanvasPlacementWriteContext({
-        noteId: currentNote.id, loadedNoteId: note?.id, pageFrameCollection, contractSession,
-      });
-      const saved = await saveGenericCanvasObjectForNote({
-        ...writeContext,
-        noteId: currentNote.id,
-        objectId: canvasObject.objectId,
-        payload,
-      });
+      const { saved, writeContext } = await writeRegistry.track(
+        'canvas-object:' + currentNote.id + ':' + canvasObject.objectId,
+        async () => {
+          const writeContext = await resolveCanvasPlacementWriteContext({
+            noteId: currentNote.id, loadedNoteId: note?.id, pageFrameCollection, contractSession,
+          });
+          const saved = await saveGenericCanvasObjectForNote({
+            ...writeContext,
+            noteId: currentNote.id,
+            objectId: canvasObject.objectId,
+            payload,
+          });
+          return { saved, writeContext };
+        },
+      );
       const savedRecord = recordFromUnknown(saved);
       const savedPlacement = savedRecord.placement ? [savedRecord.placement] : [];
       const savedVisualConnector = savedRecord.visualConnector ? [savedRecord.visualConnector] : [];
@@ -2152,7 +2184,7 @@ export function useNoteCanvasDataAdapter({
       setPersistedStructuredObjects(previousStructured);
       return false;
     }
-  }, [
+  }), [writeRegistry,
     addToast,
     allowSourceContentMutation,
     contractSession,
@@ -2166,7 +2198,7 @@ export function useNoteCanvasDataAdapter({
     persistedVisualConnectors,
   ]);
 
-  const deleteCanvasObject = useCallback(async (objectId: string): Promise<boolean> => {
+  const deleteCanvasObject = useCallback(writeRegistry.hold('deleteCanvasObject', async (objectId: string): Promise<boolean> => {
     const currentNote = noteRef.current || note;
     if (!currentNote) return false;
     if (!allowSourceContentMutation()) return false;
@@ -2193,10 +2225,10 @@ export function useNoteCanvasDataAdapter({
     setPersistedImageObjects((current) => current.filter((item) => !removedObjectIds.has(item.objectId)));
     setPersistedStructuredObjects((current) => current.filter((item) => !removedObjectIds.has(item.objectId)));
     try {
-      await deleteGenericCanvasObjectForNote({
+      await writeRegistry.track('canvas-object:' + currentNote.id + ':' + objectId, async () => deleteGenericCanvasObjectForNote({
         noteId: currentNote.id,
         objectId,
-      });
+      }));
       return true;
     } catch (err) {
       console.error('Failed to delete CanvasObject:', err);
@@ -2209,7 +2241,7 @@ export function useNoteCanvasDataAdapter({
       setPersistedStructuredObjects(previousStructured);
       return false;
     }
-  }, [
+  }), [writeRegistry,
     addToast,
     allowSourceContentMutation,
     note,
@@ -2221,7 +2253,7 @@ export function useNoteCanvasDataAdapter({
     persistedVisualConnectors,
   ]);
 
-  const moveBlock = useCallback(async (placementId: string, direction: -1 | 1) => {
+  const moveBlock = useCallback(writeRegistry.hold('moveBlock', async (placementId: string, direction: -1 | 1) => {
     if (!note) return;
     if (!allowSourceContentMutation()) return;
     const current = sortedBlocks.findIndex((block) => block.placement_id === placementId);
@@ -2236,13 +2268,13 @@ export function useNoteCanvasDataAdapter({
     }));
 
     try {
-      await api.put(`/notes/${note.id}/blocks/reorder`, { placements });
+      await writeRegistry.track('moveBlock:' + `/notes/${note.id}/blocks/reorder`, async () => api.put(`/notes/${note.id}/blocks/reorder`, { placements }));
       setBlocks(reordered.map((block, index) => ({ ...block, order_index: index })));
     } catch (err) {
       console.error('Failed to reorder blocks:', err);
       addToast('error', 'Failed to reorder blocks');
     }
-  }, [note, sortedBlocks, addToast, allowSourceContentMutation]);
+  }), [writeRegistry, note, sortedBlocks, addToast, allowSourceContentMutation]);
 
   const handleViewSource = useCallback(async (anchorId: string) => {
     setSourceJumpBusy(anchorId);
@@ -2258,12 +2290,15 @@ export function useNoteCanvasDataAdapter({
   }, [addToast]);
 
   return {
+    whenIdle: writeRegistry.whenIdle,
+    trackPendingWrite: writeRegistry.track,
     note,
     coordinateContract,
     sourceProjectionPolicy,
     blocks,
     sortedBlocks,
     loading,
+    loadError,
     titleDraft,
     setTitleDraft,
     templateWarning,

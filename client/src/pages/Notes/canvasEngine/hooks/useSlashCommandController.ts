@@ -592,6 +592,7 @@ export function useSlashCommandController({
   }, [activateDraft, exitSlashSession, handleSlashMenuKeyDown, saveBlock, slashTarget]);
 
   return {
+    dismissSlashSession: () => exitSlashSession('escape'),
     activeSlashCommandId: slashCommands[activeSlashCommandIndex]?.id ?? null,
     clearSlashTarget,
     handleBlockKeyDown,

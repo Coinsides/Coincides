@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready
+> **状态 (Status)**: done
 > **From**: fable(HQ) · **To**: codex(builder)
 > **日期**: 2026-09-09
 > **上游**: 13.4 段 plan 修订二波次三单 6;现物证据=单 0 侦察附录⑦(`analysis/2026-09-09-v13-4-s0-recon.md`:运行时可独立挂载,但 overlay portal/window 键盘/body lock 三处全局假设未隔离)
@@ -200,3 +200,83 @@ Vite/Vitest 命令的 `COINCIDES_VALIDATION_ENV_DIR` 显式指向仓内新建空
 4. 图片插入链若在 page 模式本不可达(CANVAS_MODE_RETIRED 门),Result 记一笔即可;可达则按 3 处理;
 5. 笔记页(/notes/:id)行为照旧⛔动;
 6. **续工验证**:typecheck/build+定向回归;冒烟③⑤复验+**新增冒烟⑦**:用你自己的 boardOpenNoteSmoke 旁路复现器验证——压住 body 写后,弹窗内已无任何可导航出口能造成"卸载而写在途"(bypass 闭合的直接证据);新 Result 追加于本补遗后。
+
+## Result
+
+> **执行者**: codex(builder) · **日期**: 2026-09-09
+> **结果**: **补遗二授权的隔离缺口已补齐，工程交付完成，待 HQ 复核放行。** header 的 done 表示 builder 完成交付，不替代 HQ 放行或主观验收。前两轮停线回执原文保留，已采纳的停线不改判；本轮无新增停线事项。
+
+### 本轮增量：只补宿主隔离
+
+- `ContentGroupPanel` 在 modal 下禁用 **Open Group Gallery / Open full Gallery / Open editor**，全部带 `title="Open full page to use this"`，导航 callback 同时设守卫。**Item tools 是本地展开按钮，现物没有 workbench 跨页导航**；保留该编辑面，未把本地工作台误裁为导航。
+- 8 类直接 Item/Relation mutator 接入现有 `trackPendingWrite`：collect、discard、cast、update、retire、Relation create/reaffirm/revoke；collect 循环、cast → Group edge 连续写在同一完整作用域中登记。cast 后 edge 失败的 Retry link 使用同一个目标 key，修复成功可解除该失败。其余 mutator 后仅 GET 或本地状态更新，不存在未登记的第二写。modal 若缺 tracker 则 Item tools 防御性禁用；实际生产接线已传入 tracker，没有因接线面大而禁用额外编辑入口。
+- `useTrayController` 在 modal 分支对已有 `run` 的完整操作登记：flush → placement → refresh，split、relocate 及 undo/redo；原拒绝先进入注册表，再由原 UI catch 显示错误，不以吞错后的成功状态清除失败。目标 key 分隔，独立操作成功不会擦去别处的失败。三个原 Link（**Create a board / Open board / Open new note**）替换为 disabled button 并附同一提示。
+- More 的现存跨页出口只有 Delete note，modal 下 UI 与 handler 双守卫禁用。Deleted blocks 仍只是本地恢复面，Typography 走既有 adapter，均保留。Project 按钮沿前轮已经接好的 modal 关闭回调；本轮另亲跑其等待协议。
+- adapter 的加载 catch 在 modal 下返回 `loadError`，经 controller 显示在 modal 内；**Return to board** 复用原关闭协议。page catch 保留 `navigate('/projects')`。hostMode、tracker 经既有 presentation/layer props 机械传递；page 的 Groups/Tray 写直接走原操作，不新接 page 关闭行为。
+- **未重做**前两轮 modal、手势、键盘让位、body lock、四路径收尾、GET 复放和 whenIdle 注册表。
+
+### 图片与其余路径核查
+
+- 图片上传前半仍未接新 tracker，原因是**现物不可达**：`canvasRetirementPolicy.ts` 将运行面强制为 page；`useSurfaceModeController` 的初始、自动及手动切换都遵守退休门。图片的两个 trigger 只来自 canvas blank/page-frame 右键菜单；`NoteWritingSurfaceLayer` 的菜单构造器在 `surfaceMode !== 'canvas'` 时立即返回，隐藏 file input 的 change 亦要求此前设置插入点。按补遗二 §4 记账，不改图片链。
+- 初挂 `POST /source-anchors/generate` 已在前轮 adapter 的 `fetchSourceAnchors` 外层 hold 与内层 track 中；后续 GET 也在 hold 内，无需重复改造。Source snapshot 浮层未发现跨页 Link/navigate。
+
+### 冒烟③⑤⑦与六条原单逐项状态
+
+全部本轮浏览器验证使用 **本机 Chrome + boardOpenNoteSmoke 合成内存 transport + 真 BoardPage / 真笔记 runtime**。未启动业务后端，未接用户库。全页目的地仍是 fixture 的 pageReadingSmoke 式装配，不冒称验证完整生产 AppLayout/NoteDetail；浏览器自身后退、刷新、关标签页不属于本次产品入口验收。
+
+| # | 本轮结果 |
+|---|---|
+| ① 双击 note 打开真编辑面 | **本轮亦观察到 PASS**，作为③⑤⑦共同前置；原独立六冒烟记录保留。 |
+| ② 保存后 Enter 验证 | **沿用补遗一后 Result 的 PASS，本轮未独立重跑 Enter 旅程**；⑦另验证保存后 Open full page。 |
+| ③ 板层键盘让位 | **复验 PASS**：焦点在 modal 容器，实按 Delete、Backspace、四方向键、Ctrl+Z、Ctrl+Y、Ctrl+Shift+Z；三张卡的 `(x,y,w,h,scale)` 仍为 `(64,65,310,194,1)`、`(434,65,310,194,1)`、`(64,318,310,194,1)`，诊断 `boardWrites: []`。 |
+| ④ Open full page 同笔记 | **⑦中复验 PASS**：释放写后到 `/notes/open-smoke-note-a`，真实正文包含 probe，modal 卸载。 |
+| ⑤ Escape 回板更新缩影 | **复验 PASS**：追加 ` Escape HQ2 saved.` 后 Escape；板卡显示新正文。诊断正文 PUT **18**、range PUT **19** 均 committed 后，才开始预览 GET **22**、board GET **23**，boardReads 由 1 → 2。 |
+| ⑥ 被引用源段编辑后引卡跟变 | **沿用補遗一后 Result 的 PASS，本轮未独立重跑引用内编辑旅程**；⑤⑦中的 range 第二写顺序已复验。 |
+| ⑦ 压住写后的导航旁路 | **PASS**；具体直接证据见下。 |
+
+⑦在修正后的复现器上从 Reset sample 重走：Populate navigation targets → **Tray (2)** → 选合成段并 Create note from selection → 选 shape，让三个 Tray 导航同时出现。组内展开能看到 Open editor，文件夹选择器能看到 Open full Gallery。seed 的 relocation receipt 仅为可见入口布置，**不是实测 board relocation 的证据**。
+
+1. Hold next body write → 源正文追加 ` Held HQ2 bypass probe.` → Groups 触发失焦。正文 PUT **24** 只有 started，存储正文仍为旧文，诊断 `heldWrite: "body"`、`boardReads: 1`、`boardWrites: []`。
+2. 在同一 held 请求期间，按截图坐标实际点击三处 Groups 导航、三类 Tray 导航及 Delete note。各项 AX 均为 disabled 并带指定 title，**无路径变化、无 modal 卸载、无板重读**；Item tools 实际展开本地工作台也未导航。语义 click 工具会拒绝 disabled 元素，故实际尝试使用截图定位的原生坐标点击，没有通过执行 callback 绕过禁用。
+3. 点击保留的 **Open full page**：modal 显示 Saving，仍在原板，held body 未释放、boardReads 仍为 1。用 fixture 的 Release held write 放行后，轨迹为 **PUT 24 committed → range PUT 26 committed → 全页 note GET 27 / blocks GET 28 started**，随后才显示同 note 全页和新正文。没有“卸载而写在途”。
+4. 另外对 **Project** 做 held 实验：新增 ` Project waits.` → Project，modal 留存/Saving/held body，boardReads 为 3；Release 后 **正文 PUT 65 → range PUT 66 → preview GET 69 / board GET 70**，回板并显新正文，boardReads 才增至 4。
+5. **加载失败复验 PASS**：Fail next note load → 打开源 note，错误文案留在 modal，路由仍 `/boards/open-smoke-board`；Return to board 关闭成功，未跳 `/projects`。
+
+fixture 仅扩展 `fixture.tsx / mockApi.ts / README.md`：补导航目标、一次加载失败开关，以及可在等待期间点击 Release/Reject 的 fixture-only floating-overlay 控制根；**未修改产品 click 守卫**。首次导航场景的 Tray 段缺 persisted object/placement/mount 三元组，导致只显示 shape；已补正确合成输入并以 Tray (2) 起点重跑⑦。该准备阶段 HMR 不计入实验，held 写期间未再改代码。所有持有请求均已收束，浏览器标签页与独立 fixture 服务已关闭。
+
+### 验证
+
+Vite/Vitest 的 `COINCIDES_VALIDATION_ENV_DIR` 均指向仓内空目录；fixture 继续 `configFile:false / envFile:false`。以下只申报实际执行项：
+
+| 命令 / 检查 | 结果 |
+|---|---|
+| `client/node_modules/.bin/tsc.cmd -b client/tsconfig.json` | **PASS**；首次发现专测 spy 的泛型类型错误，已修并重跑通过。 |
+| `npm.cmd --prefix client run build` | **PASS**，含 `tsc -b` 和 Vite 构建；保留 >500 kB bundle 提示。日志 `.codex-tmp/v13-4-s6-hq2-build.log`。 |
+| `client/node_modules/.bin/tsc.cmd -p server/tsconfig.json --noEmit` | **PASS**，未启动服务器。 |
+| `client/node_modules/.bin/tsc.cmd --noEmit -p client/scripts/boardOpenNoteSmoke/tsconfig.json` | **PASS**，fixture 最终版本。 |
+| `npm.cmd --prefix client run test:unit -- src/pages/Boards src/pages/Notes/canvasEngine --maxWorkers=1 --no-file-parallelism` | **PASS：62 files / 563 tests**（前轮 548，本轮新增 15）；含四关闭路径 deferred/失败、Item/Relation 连续写、Tray 完整操作/失败重试、modal/page 导航区别。日志 `.codex-tmp/v13-4-s6-hq2-regression.log`。 |
+| `npm.cmd --prefix client run check:canvas-runtime-boundary` | **PASS：159 checks**。 |
+| `npm.cmd --prefix client run smoke:canvas-engine-model-contract` | **PASS：60 groups**，日志 `.codex-tmp/v13-4-s6-hq2-model.log`。 |
+| `npm.cmd --prefix client run smoke:canvas-engine-performance` | **PASS：5 scenarios**，日志 `.codex-tmp/v13-4-s6-hq2-performance.log`。 |
+| `git diff --check` | **PASS**。 |
+
+**未原样执行 `npm run verify:v2-bn8-runtime`**：其尾项仍包含本单明禁的 `check:changed-file-secrets`。未修改聚合门，**未宣称总门通过**；凭据扫描及未列门项留 HQ。
+
+### numstat（区分本轮与已有成品）
+
+本轮增量以开工时复制的三个已有改动产品文件及 adapter 测试为基线，其余本轮新触及的 tracked 源文件以 HEAD 为基线，用 `git diff --no-index --numstat` 核算。没有把前两轮产品成品重新计入本轮：
+
+| 分类 | 文件数 | 新增 | 删除 |
+|---|---:|---:|---:|
+| **本轮产品增量** | 10 | **140** | **62** |
+| **本轮单测增量** | 5 | **300** | **10** |
+| 既有未跟踪 fixture 全件（含前轮，从 0 计；不与以上增量相加） | 6 | **419** | **0** |
+
+产品逐文件（本轮新增/删除）：NoteCanvasRuntime **10/1**；useNoteCanvasDataAdapter **8/1**；useNoteCanvasRuntimeController **9/1**；useRuntimeDocumentDataController **3/0**；useNoteCanvasLayerProps **3/0**；useTrayController **19/9**；NoteChromeLayer **7/3**；NoteWritingSurfaceLayer **7/0**；NoteTraySidebar **9/3**；ContentGroupPanel **65/44**。明细 `.codex-tmp/v13-4-s6-hq2-numstat.json`。本回执及 header ready → done 另计文档 diff。
+
+### 未做与停线边界
+
+- 本轮无新增停线；原两次停线均按 HQ 已采纳事实保留，不用新绿覆盖历史证据。
+- 未改 `/notes/:id` 自身关闭行为、未处理旧实例保存竞态的一般性 page 风险；该项仍留 13.5–13.6。图片退休链仅记账。
+- 未建设装卸区、拖出、多弹窗、event verb、推送、固定保存延时或 GET 轮询；未改服务端产品码、用户数据库或 agent 操作/权限文件。
+- 未 git add / commit / push / PR / merge；未读 `.env`、未输出或传出 key；未接触用户数据库、未运行安全类测试。其余开工已存在的用户未跟踪文件未读未改。主观验收与最终放行仍归 HQ。

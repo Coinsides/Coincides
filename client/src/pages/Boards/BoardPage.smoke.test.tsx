@@ -454,7 +454,8 @@ describe('V13.4 wave 1 wiring smoke', () => {
     expect(restored.getAttribute('aria-disabled')).toBe('false');
     expect(restored.style.left).toBe(`${original.x}px`);
     expect(screen.getAllByRole('article')).toHaveLength(1);
-    fireEvent.doubleClick(restored);
+    fireEvent.focus(restored);
+    fireEvent.click(screen.getByRole('button', { name: 'Enter note' }));
     await screen.findByTestId('paper-snapshot');
     expect(unexpectedWrites).toEqual([]);
   });
@@ -583,7 +584,8 @@ describe('V13 S2 board and paper smoke', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Zoom board in' }));
     await waitFor(() => expect(boards[0].board.viewport.zoom).toBe(1.2));
     expect(screen.getByTestId('board-world').style.transform).toContain('scale(1.2)');
-    fireEvent.doubleClick(card(notes[0].title));
+    fireEvent.focus(card(notes[0].title));
+    fireEvent.click(screen.getByRole('button', { name: 'Enter note' }));
     await screen.findByTestId('paper-snapshot');
     await waitFor(() => expect(JSON.parse(screen.getByTestId('paper-snapshot').textContent!).reading[0].baseScale).toBe(1.25));
     const after = JSON.parse(screen.getByTestId('paper-snapshot').textContent!);

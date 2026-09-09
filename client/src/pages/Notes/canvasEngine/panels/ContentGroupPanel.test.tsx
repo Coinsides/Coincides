@@ -1,10 +1,11 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createContentGroup, createContentGroupMemberFromItem } from '../contentGroupService';
 import { createGroupFolder } from '../groupFolderService';
 import type { ItemV1, PurposeFrameV1, RelationV1 } from '../runtimeDataTypes';
 import { ContentGroupPanel } from './ContentGroupPanel';
+import { createInFlightWriteRegistry, type TrackPendingWrite } from '../inFlightWriteRegistry';
 
 const mocks = vi.hoisted(() => ({
   loadItem: vi.fn(),
@@ -14,11 +15,11 @@ const mocks = vi.hoisted(() => ({
   loadRelations: vi.fn(),
   loadRelationTypes: vi.fn(),
   createRelation: vi.fn(),
+  castItemFromAnchors: vi.fn(),
 }));
 
 vi.mock('../itemRepository', () => ({
   ...mocks,
-  castItemFromAnchors: vi.fn(),
   collectItemAnchor: vi.fn(),
   discardItemAnchor: vi.fn(),
   retireItem: vi.fn(),
@@ -87,7 +88,23 @@ const libraryPurpose: PurposeFrameV1 = {
   }],
 };
 
-async function openItemInspector(purposes: PurposeFrameV1[]) {
+function LocationProbe() {
+  const location = useLocation();
+  return <output aria-label="Current route">{location.pathname}{location.search}</output>;
+}
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  let reject!: (error: unknown) => void;
+  const promise = new Promise<T>((done, fail) => { resolve = done; reject = fail; });
+  return { promise, resolve, reject };
+}
+
+async function openItemInspector(purposes: PurposeFrameV1[], options: {
+  hostMode?: 'page' | 'modal';
+  trackPendingWrite?: TrackPendingWrite;
+  saveGroups?: ReturnType<typeof vi.fn>;
+} = {}) {
   const folder = createGroupFolder({
     title: 'Note groups',
     scope: { kind: 'note', project_id: 'fixture-project', note_id: 'fixture-note' },
@@ -102,10 +119,13 @@ async function openItemInspector(purposes: PurposeFrameV1[]) {
     folders: [folder],
     members: [createContentGroupMemberFromItem(inspected.id)],
   });
-  const saveGroups = vi.fn().mockResolvedValue(true);
+  const saveGroups = options.saveGroups ?? vi.fn().mockResolvedValue(true);
   render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={['/boards/fixture-board']}>
+      <LocationProbe />
       <ContentGroupPanel
+        hostMode={options.hostMode}
+        trackPendingWrite={options.trackPendingWrite}
         annotations={[]}
         contentGroups={[group]}
         groupFolders={[folder]}
@@ -224,5 +244,102 @@ describe('ContentGroupPanel library Purpose alignment', () => {
     expect((screen.getByRole('textbox', { name: 'Edit Item body' }) as HTMLTextAreaElement).value)
       .toBe(inspected.plain_text);
     expect((screen.getByRole('button', { name: 'Save Item' }) as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it('keeps all Gallery/editor navigation disabled in a modal while local Item tools remain usable', async () => {
+    const registry = createInFlightWriteRegistry();
+    await openItemInspector([], { hostMode: 'modal', trackPendingWrite: registry.track });
+    fireEvent.click(screen.getByRole('button', { name: /Note groups/ }));
+    for (const name of ['Open Group Gallery', 'Open full Gallery', 'Open editor']) {
+      const button = screen.getByRole('button', { name }) as HTMLButtonElement;
+      expect(button.disabled).toBe(true);
+      expect(button.title).toBe('Open full page to use this');
+      fireEvent.click(button);
+      expect(screen.getByRole('status', { name: 'Current route' }).textContent).toBe('/boards/fixture-board');
+    }
+    expect((screen.getByRole('button', { name: 'Item tools' }) as HTMLButtonElement).disabled).toBe(false);
+  });
+
+  it('preserves page navigation and does not register page Item writes', async () => {
+    const tracked = vi.fn();
+    const track: TrackPendingWrite = (key, operation) => {
+      tracked(key);
+      return operation();
+    };
+    await openItemInspector([], { trackPendingWrite: track });
+    fireEvent.click(screen.getByRole('button', { name: 'Save Item' }));
+    await waitFor(() => expect(mocks.updateItem).toHaveBeenCalled());
+    expect(tracked).not.toHaveBeenCalled();
+    const gallery = screen.getByRole('button', { name: 'Open Group Gallery' }) as HTMLButtonElement;
+    expect(gallery.disabled).toBe(false);
+    fireEvent.click(gallery);
+    expect(screen.getByRole('status', { name: 'Current route' }).textContent).toMatch(/^\/group-gallery\?/);
+  });
+
+  it('holds modal exit for a direct Item write and preserves failure until a successful retry', async () => {
+    const registry = createInFlightWriteRegistry();
+    const write = deferred<ItemV1>();
+    mocks.updateItem.mockReturnValueOnce(write.promise);
+    await openItemInspector([], { hostMode: 'modal', trackPendingWrite: registry.track });
+    fireEvent.click(screen.getByRole('button', { name: 'Save Item' }));
+    const idle = vi.fn();
+    const failed = vi.fn();
+    void registry.whenIdle().then(idle, failed);
+    await act(async () => { await Promise.resolve(); });
+    expect(idle).not.toHaveBeenCalled();
+    expect(failed).not.toHaveBeenCalled();
+    const error = new Error('Synthetic Item write rejected');
+    await act(async () => { write.reject(error); });
+    expect(failed).toHaveBeenCalledWith(error);
+    expect(screen.getByText(error.message)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Save Item' }));
+    await act(async () => { await registry.whenIdle(); });
+    expect(mocks.updateItem).toHaveBeenCalledTimes(2);
+    expect(screen.queryByText(error.message)).toBeNull();
+  });
+
+  it('keeps the complete cast and subsequent Group write pending, and recovers a failed edge through Retry link', async () => {
+    const registry = createInFlightWriteRegistry();
+    const castWrite = deferred<ItemV1>();
+    const groupWrite = deferred<boolean>();
+    const saveGroups = vi.fn().mockReturnValueOnce(groupWrite.promise).mockResolvedValue(true);
+    mocks.loadPoolItemAnchors.mockResolvedValue([{ id: 'fixture-anchor', excerpt: 'Collected material', target_kind: 'block' }]);
+    mocks.castItemFromAnchors.mockReturnValue(castWrite.promise);
+    await openItemInspector([], { hostMode: 'modal', trackPendingWrite: registry.track, saveGroups });
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Select material: Collected material' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Quick cast Item' }));
+    const idle = vi.fn();
+    const failed = vi.fn();
+    void registry.whenIdle().then(idle, failed);
+    await act(async () => { castWrite.resolve(candidate); });
+    expect(saveGroups).toHaveBeenCalledTimes(1);
+    expect(idle).not.toHaveBeenCalled();
+    expect(failed).not.toHaveBeenCalled();
+    await act(async () => { groupWrite.resolve(false); });
+    expect(failed).toHaveBeenCalled();
+    expect(screen.getByText(/Group edge needs retry/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Retry link' }));
+    await act(async () => { await registry.whenIdle(); });
+    expect(saveGroups).toHaveBeenCalledTimes(2);
+    expect(screen.queryByRole('button', { name: 'Retry link' })).toBeNull();
+  });
+
+  it('holds modal exit for a direct Relation write', async () => {
+    const registry = createInFlightWriteRegistry();
+    const relationWrite = deferred<RelationV1>();
+    mocks.createRelation.mockReturnValueOnce(relationWrite.promise);
+    await openItemInspector([], { hostMode: 'modal', trackPendingWrite: registry.track });
+    fireEvent.click(screen.getByRole('button', { name: 'Create Relation' }));
+    fireEvent.keyDown(screen.getByRole('textbox', { name: 'Search Relation endpoint Items' }), { key: 'Enter' });
+    fireEvent.click(await screen.findByRole('option', { name: /A claim from another paper/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Create Relation' }));
+    const settled = vi.fn();
+    void registry.whenIdle().then(settled, settled);
+    await act(async () => { await Promise.resolve(); });
+    expect(settled).not.toHaveBeenCalled();
+    const error = new Error('Synthetic Relation write rejected');
+    await act(async () => { relationWrite.reject(error); });
+    expect(settled).toHaveBeenCalledWith(error);
+    expect(screen.getByText(error.message)).toBeTruthy();
   });
 });

@@ -66,6 +66,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
   if (!input.note) return null;
 
   const chromeProps: NoteChromeLayerProps = {
+    hostMode: input.hostMode,
     blockTrashLoadFailed: input.blockTrashLoadFailed,
     blockTrashLoading: input.blockTrashLoading,
     chromeCollapsed: input.chromeCollapsed,
@@ -137,6 +138,8 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
   };
 
   const writingSurfaceProps: NoteWritingSurfaceLayerProps = {
+    hostMode: input.hostMode,
+    trackPendingWrite: input.trackPendingWrite,
     activeBlockId: input.activeBlockId,
     contentReadOnly: input.contentReadOnly,
     activeSlashCommandId: input.activeSlashCommandId,

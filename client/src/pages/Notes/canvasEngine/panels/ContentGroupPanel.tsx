@@ -77,6 +77,7 @@ import {
   buildRelationInspectorRows,
 } from '../relationInspectorService';
 import { activePurposeFrames } from '../purposeService';
+import type { TrackPendingWrite } from '../inFlightWriteRegistry';
 import type {
   AnnotationRangeV1,
   AnnotationTruthV1,
@@ -114,6 +115,8 @@ const railViewTabs: { id: RailViewMode; label: string }[] = [
 ];
 
 interface ContentGroupPanelProps {
+  hostMode?: 'page' | 'modal';
+  trackPendingWrite?: TrackPendingWrite;
   annotations: AnnotationTruthV1[];
   contentGroups: ContentGroupV1[];
   groupFolders: GroupFolderV1[];
@@ -226,6 +229,8 @@ function anchorInputsForMember(
 }
 
 export function ContentGroupPanel({
+  hostMode = 'page',
+  trackPendingWrite,
   annotations,
   contentGroups,
   groupFolders,
@@ -241,6 +246,14 @@ export function ContentGroupPanel({
   onSaveContentGroups,
 }: ContentGroupPanelProps) {
   const navigate = useNavigate();
+  const navigationDisabled = hostMode === 'modal';
+  const navigationTitle = navigationDisabled ? 'Open full page to use this' : undefined;
+  const itemToolsDisabled = navigationDisabled && !trackPendingWrite;
+  const trackPanelWrite: TrackPendingWrite = (key, operation) => (
+    hostMode === 'modal' && trackPendingWrite
+      ? trackPendingWrite(`content-group:${key}`, operation)
+      : operation()
+  );
   const activeGroups = useMemo(
     () => contentGroups.filter((group) => group.status !== 'deleted'),
     [contentGroups],
@@ -468,11 +481,13 @@ export function ContentGroupPanel({
     setItemError(null);
     const collected: ItemAnchorV1[] = [];
     try {
-      for (const input of inputs) {
-        collected.push(await collectItemAnchor(input));
-      }
-      await refreshPool(group.id);
-      setSelectedPoolAnchorIds(collected.map((anchor) => anchor.id));
+      await trackPanelWrite(`collect:${group.id}`, async () => {
+        for (const input of inputs) {
+          collected.push(await collectItemAnchor(input));
+        }
+        await refreshPool(group.id);
+        setSelectedPoolAnchorIds(collected.map((anchor) => anchor.id));
+      });
     } catch (error) {
       await refreshPool(group.id).catch(() => undefined);
       setItemError(itemErrorMessage(error));
@@ -485,7 +500,7 @@ export function ContentGroupPanel({
     setItemBusy(true);
     setItemError(null);
     try {
-      await discardItemAnchor(anchorId);
+      await trackPanelWrite(`discard:${anchorId}`, () => discardItemAnchor(anchorId));
       await refreshPool(group.id);
     } catch (error) {
       setItemError(itemErrorMessage(error));
@@ -507,34 +522,36 @@ export function ContentGroupPanel({
     setItemError(null);
     let item: ItemV1 | null = null;
     try {
-      item = await castItemFromAnchors({
-        anchor_ids: selectedPoolAnchorIds,
-        plain_text: castBody,
-        item_type: castType.trim() || null,
-        topic: castTopic.trim() || null,
-        origin_course_id: projectId,
-        origin_note_id: noteId,
-        created_by: 'human',
-        claimed_by: 'human',
+      await trackPanelWrite(`cast:${group.id}`, async () => {
+        item = await castItemFromAnchors({
+          anchor_ids: selectedPoolAnchorIds,
+          plain_text: castBody,
+          item_type: castType.trim() || null,
+          topic: castTopic.trim() || null,
+          origin_course_id: projectId,
+          origin_note_id: noteId,
+          created_by: 'human',
+          claimed_by: 'human',
+        });
+        setItemById((current) => ({ ...current, [item!.id]: item! }));
+        try {
+          await attachItemToGroup(group, item);
+          setUnlinkedItem(null);
+        } catch (error) {
+          setUnlinkedItem(item);
+          throw new Error(`Item ${item.id} was cast, but its Group edge needs retry: ${itemErrorMessage(error)}`);
+        }
+        setSelectedPoolAnchorIds([]);
+        setCastType('');
+        setCastTopic('');
+        setInspectedItemId(item.id);
+        setItemDraft({
+          plainText: item.plain_text,
+          itemType: item.item_type || '',
+          topic: item.topic || '',
+        });
+        await refreshPool(group.id);
       });
-      setItemById((current) => ({ ...current, [item!.id]: item! }));
-      try {
-        await attachItemToGroup(group, item);
-        setUnlinkedItem(null);
-      } catch (error) {
-        setUnlinkedItem(item);
-        throw new Error(`Item ${item.id} was cast, but its Group edge needs retry: ${itemErrorMessage(error)}`);
-      }
-      setSelectedPoolAnchorIds([]);
-      setCastType('');
-      setCastTopic('');
-      setInspectedItemId(item.id);
-      setItemDraft({
-        plainText: item.plain_text,
-        itemType: item.item_type || '',
-        topic: item.topic || '',
-      });
-      await refreshPool(group.id);
     } catch (error) {
       if (item) await refreshPool(group.id).catch(() => undefined);
       setItemError(itemErrorMessage(error));
@@ -548,7 +565,7 @@ export function ContentGroupPanel({
     setItemBusy(true);
     setItemError(null);
     try {
-      await attachItemToGroup(group, unlinkedItem);
+      await trackPanelWrite(`cast:${group.id}`, () => attachItemToGroup(group, unlinkedItem));
       setUnlinkedItem(null);
     } catch (error) {
       setItemError(itemErrorMessage(error));
@@ -611,14 +628,14 @@ export function ContentGroupPanel({
     setRelationBusy(true);
     setRelationError(null);
     try {
-      const relation = await createRelation({
+      const relation = await trackPanelWrite(`relation:create:${inspectedItemId}`, () => createRelation({
         from_item_id: directedIncoming ? relationTargetId : inspectedItemId,
         to_item_id: directedIncoming ? inspectedItemId : relationTargetId,
         relation_type: relationType,
         note: relationNote.trim() || null,
         created_by: 'human',
         origin_purpose_id: relationPurposeId || null,
-      });
+      }));
       setItemRelations((current) => [relation, ...current.filter((entry) => entry.id !== relation.id)]);
       setRelationCreateOpen(false);
       setRelationCandidates([]);
@@ -638,7 +655,7 @@ export function ContentGroupPanel({
     setRelationBusy(true);
     setRelationError(null);
     try {
-      const relation = await reaffirmRelation(relationId);
+      const relation = await trackPanelWrite(`relation:reaffirm:${relationId}`, () => reaffirmRelation(relationId));
       setItemRelations((current) => current.map((entry) => (
         entry.id === relation.id ? relation : entry
       )));
@@ -653,7 +670,7 @@ export function ContentGroupPanel({
     setRelationBusy(true);
     setRelationError(null);
     try {
-      await revokeRelation(relationId);
+      await trackPanelWrite(`relation:revoke:${relationId}`, () => revokeRelation(relationId));
       setItemRelations((current) => current.filter((entry) => entry.id !== relationId));
     } catch (error) {
       setRelationError(itemErrorMessage(error));
@@ -667,11 +684,11 @@ export function ContentGroupPanel({
     setItemBusy(true);
     setItemError(null);
     try {
-      const item = await updateItem(inspectedItemId, {
+      const item = await trackPanelWrite(`item:save:${inspectedItemId}`, () => updateItem(inspectedItemId, {
         plain_text: itemDraft.plainText,
         item_type: itemDraft.itemType.trim() || null,
         topic: itemDraft.topic.trim() || null,
-      });
+      }));
       setItemById((current) => ({ ...current, [item.id]: item }));
       setItemDraft({
         plainText: item.plain_text,
@@ -695,7 +712,7 @@ export function ContentGroupPanel({
     setItemBusy(true);
     setItemError(null);
     try {
-      const item = await retireItem(inspectedItemId);
+      const item = await trackPanelWrite(`item:retire:${inspectedItemId}`, () => retireItem(inspectedItemId));
       setItemById((current) => ({ ...current, [item.id]: item }));
       try {
         await refreshItemRelations(item.id);
@@ -777,6 +794,7 @@ export function ContentGroupPanel({
   };
 
   const openGallery = () => {
+    if (navigationDisabled) return;
     const params = new URLSearchParams({
       note_id: noteId,
       folder_id: selectedFolderId || noteRootFolderId,
@@ -785,6 +803,7 @@ export function ContentGroupPanel({
   };
 
   const openEditor = (group: ContentGroupV1) => {
+    if (navigationDisabled) return;
     const params = new URLSearchParams({
       note_id: noteId,
       group_id: group.id,
@@ -854,7 +873,7 @@ export function ContentGroupPanel({
           <strong>Groups</strong>
         </div>
         <div className={styles.contentGroupActionRow}>
-          <button type="button" className={styles.iconBtn} onClick={openGallery} aria-label="Open Group Gallery">
+          <button type="button" className={styles.iconBtn} onClick={openGallery} aria-label="Open Group Gallery" disabled={navigationDisabled} title={navigationTitle}>
             <Menu size={15} />
           </button>
           <button type="button" className={styles.iconBtn} onClick={onClose} aria-label="Close content groups">
@@ -901,7 +920,7 @@ export function ContentGroupPanel({
                 <span>{folder.title}</span>
               </button>
             ))}
-            <button type="button" className={styles.contentGroupFolderRow} onClick={openGallery}>
+            <button type="button" className={styles.contentGroupFolderRow} onClick={openGallery} disabled={navigationDisabled} title={navigationTitle}>
               <ExternalLink size={13} />
               <span>Open full Gallery</span>
             </button>
@@ -1046,13 +1065,15 @@ export function ContentGroupPanel({
                     </div>
 
                     <div className={styles.contentGroupExpandedActions}>
-                      <button type="button" className={styles.contentGroupOpenEditor} onClick={() => openEditor(group)}>
+                      <button type="button" className={styles.contentGroupOpenEditor} onClick={() => openEditor(group)} disabled={navigationDisabled} title={navigationTitle}>
                         Open editor
                       </button>
                       <button
                         type="button"
                         className={styles.contentGroupOpenEditor}
                         aria-expanded={itemWorkbenchGroupId === group.id}
+                        disabled={itemToolsDisabled}
+                        title={itemToolsDisabled ? navigationTitle : undefined}
                         onClick={() => setItemWorkbenchGroupId((current) => current === group.id ? null : group.id)}
                       >
                         Item tools

@@ -332,6 +332,7 @@ export function useRuntimeNaturalWritingController(options: UseRuntimeNaturalWri
 
   const {
     activateDraft,
+    whenDraftIdle,
     creatingDraft,
     discardDraft,
     draftActive,
@@ -438,6 +439,7 @@ export function useRuntimeNaturalWritingController(options: UseRuntimeNaturalWri
 
   const {
     activeSlashCommandId,
+    dismissSlashSession,
     clearSlashTarget,
     handleBlockKeyDown,
     handleBlockTextChange,
@@ -484,6 +486,8 @@ export function useRuntimeNaturalWritingController(options: UseRuntimeNaturalWri
   });
 
   return {
+    dismissSlashSession,
+    whenDraftIdle,
     activateDraft: activateDraftWithPageStackFlow,
     clearSlashTarget,
     creatingDraft,

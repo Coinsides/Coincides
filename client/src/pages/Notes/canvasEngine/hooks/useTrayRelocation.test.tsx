@@ -8,7 +8,8 @@ import { subscribeBoardChanges } from '@/pages/Boards/boardEvents';
 import type { Board, BoardDetail, BoardVisual, TrayRelocationResult } from '@/pages/Boards/boardTypes';
 import { NoteTraySidebar } from '../layers/NoteTraySidebar';
 import { buildTrayEntries } from '../trayService';
-import { forgetTrayRelocation } from '../trayRelocationHistory';
+import { forgetTrayRelocation, rememberTrayRelocation } from '../trayRelocationHistory';
+import { createInFlightWriteRegistry } from '../inFlightWriteRegistry';
 import type { CanvasObject, CanvasPlacement, ContentMount } from '../types';
 import type { NoteBlock } from '../runtimeDataTypes';
 import { useTrayController } from './useTrayController';
@@ -65,7 +66,7 @@ function options(noteId = 'tray-source') {
     clearSelection: vi.fn(), pushHistory: vi.fn(), flushBlock: vi.fn().mockResolvedValue(true) };
 }
 
-function TrayPaper() {
+function TrayPaper({ hostMode = 'page' }: { hostMode?: 'page' | 'modal' }) {
   const { noteId } = useParams();
   const [rows, setRows] = useState<CanvasPlacement[]>([]);
   const refresh = async () => {
@@ -73,7 +74,7 @@ function TrayPaper() {
     refreshCount += 1;
     setRows(data.placements);
   };
-  const tray = useTrayController({ ...options(noteId), placements: rows, refresh });
+  const tray = useTrayController({ ...options(noteId), placements: rows, refresh, hostMode });
   useEffect(() => { void refresh(); tray.setOpen(true); }, [noteId]);
   return <NoteTraySidebar tray={tray} />;
 }
@@ -167,6 +168,63 @@ describe('V13 S3 tray relocation', () => {
     unmount();
     const again = renderHook(() => useTrayController(options()));
     expect(again.result.current.latestRelocation?.batch_id).toBe(receipt.batch_id);
+  });
+
+  it('keeps modal relocation and undo registered through refresh and preserves an undo failure for close', async () => {
+    const registry = createInFlightWriteRegistry();
+    const input = { ...options(), hostMode: 'modal' as const, trackPendingWrite: registry.track };
+    let finishWrite!: (value: ReturnType<typeof response<TrayRelocationResult>>) => void;
+    let finishRefresh!: () => void;
+    http.post.mockImplementationOnce(() => new Promise((resolve) => { finishWrite = resolve; }));
+    input.refresh.mockImplementationOnce(() => new Promise<void>((resolve) => { finishRefresh = resolve; }));
+    const { result } = renderHook(() => useTrayController(input));
+    let pending!: Promise<boolean>;
+    act(() => { pending = result.current.relocateToBoard(selectedIds, board.id); });
+    const idle = vi.fn(); const closing = registry.whenIdle().then(idle);
+    await act(async () => { finishWrite(response(receipt)); });
+    expect(result.current.latestRelocation?.batch_id).toBe(receipt.batch_id);
+    expect(idle).not.toHaveBeenCalled();
+    await act(async () => { finishRefresh(); expect(await pending).toBe(true); await closing; });
+    expect(idle).toHaveBeenCalledTimes(1);
+    const failure = new Error('Synthetic undo rejection');
+    http.post.mockRejectedValueOnce(failure);
+    await act(async () => { expect(await result.current.undoBoardRelocation()).toBe(false); });
+    await expect(registry.whenIdle()).rejects.toBe(failure);
+    expect(result.current.latestRelocation?.batch_id).toBe(receipt.batch_id);
+    input.refresh.mockImplementationOnce(() => new Promise<void>((resolve) => { finishRefresh = resolve; }));
+    act(() => { pending = result.current.undoBoardRelocation(); });
+    const undoIdle = vi.fn(); const undoClose = registry.whenIdle().then(undoIdle);
+    await act(async () => { await Promise.resolve(); });
+    expect(undoIdle).not.toHaveBeenCalled();
+    await act(async () => { finishRefresh(); expect(await pending).toBe(true); await undoClose; });
+    expect(undoIdle).toHaveBeenCalledTimes(1);
+    expect(result.current.latestRelocation).toBeNull();
+  });
+
+  it.each(['modal', 'page'] as const)('gates all three tray navigation destinations only in %s host mode', async (hostMode) => {
+    rememberTrayRelocation('tray-source', receipt);
+    const defaultGet = http.get.getMockImplementation()!;
+    http.get.mockImplementation(async (path: string) => path === '/boards' ? response({ boards: [] }) : defaultGet(path));
+    render(<MemoryRouter initialEntries={['/notes/tray-source']}><Routes>
+      <Route path="/notes/:noteId" element={<TrayPaper hostMode={hostMode} />} />
+    </Routes></MemoryRouter>);
+    await screen.findByRole('checkbox', { name: 'Select shape for board' });
+    const blockRow = document.querySelector('[data-tray-placement-id="p-block"]') as HTMLElement;
+    fireEvent.click(within(blockRow).getByRole('checkbox'));
+    fireEvent.click(screen.getByRole('button', { name: 'Create note from selection' }));
+    await screen.findByText('Open new note');
+    fireEvent.click(screen.getByRole('checkbox', { name: 'Select shape for board' }));
+    await screen.findByText('Create a board');
+    for (const [name, href] of [['Create a board', '/boards'], ['Open board', `/boards/${board.id}`], ['Open new note', '/notes/split-note']]) {
+      if (hostMode === 'modal') {
+        const button = screen.getByRole('button', { name }) as HTMLButtonElement;
+        expect(button.disabled).toBe(true);
+        expect(button.title).toBe('Open full page to use this');
+        expect(screen.queryByRole('link', { name })).toBeNull();
+        fireEvent.click(button);
+        expect(screen.getByLabelText('Note tray')).toBeTruthy();
+      } else expect(screen.getByRole('link', { name }).getAttribute('href')).toBe(href);
+    }
   });
 
   it('keeps block selection in split and distinguishes a failed board list from an empty library', async () => {

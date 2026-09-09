@@ -17,7 +17,7 @@ import type {
 } from '../types';
 
 export function useNoteCanvasRuntimeController() {
-  const { noteId } = useNoteCanvasRuntime();
+  const { noteId, hostMode = 'page' } = useNoteCanvasRuntime();
   const {
     activeBlockId,
     beginTemporaryLayoutMode,
@@ -86,12 +86,15 @@ export function useNoteCanvasRuntimeController() {
   } = useRuntimeSurfaceStateController({ noteId });
   const {
     applyMeasuredBlockHeightDraft,
+    whenIdle,
+    trackPendingWrite,
     note,
     sourceProjectionPolicy,
     coordinateContract,
     blocks,
     sortedBlocks,
     loading,
+    loadError,
     titleDraft,
     setTitleDraft,
     templateOptions,
@@ -157,6 +160,7 @@ export function useNoteCanvasRuntimeController() {
   } = useRuntimeDocumentDataController({
     clearBlockSelection,
     noteId,
+    hostMode,
   });
 
   const documentTypographyProfile = useMemo(() => resolveEffectiveDocumentTypographyProfile({
@@ -254,6 +258,8 @@ export function useNoteCanvasRuntimeController() {
   });
   const {
     activateDraft,
+    dismissSlashSession,
+    whenDraftIdle,
     activeSlashCommandId,
     clearSlashTarget,
     creatingDraft,
@@ -349,6 +355,8 @@ export function useNoteCanvasRuntimeController() {
   }, [handleDurableFocusReceipt, markBlockFocused]);
 
   const tray = useTrayController({
+    hostMode,
+    trackPendingWrite,
     coordinateContract,
     noteId, enabled: surfaceMode === 'page' && !sourceProjectionPolicy.contentReadOnly,
     blocks, objects: persistedCanvasObjects, placements: persistedCanvasPlacements,
@@ -362,6 +370,8 @@ export function useNoteCanvasRuntimeController() {
   });
 
   const { layerProps } = useRuntimePresentationController({
+    hostMode,
+    trackPendingWrite: hostMode === 'modal' ? trackPendingWrite : undefined,
     coordinateContract,
     tray,
     onDropTrayBlock: tray.dropOnPaper,
@@ -513,9 +523,25 @@ export function useNoteCanvasRuntimeController() {
     onWritingSurfaceRequestBlockFocus: setFocusBlockId,
   });
 
+  const dismissTransientUI = useCallback(() => {
+    dismissSlashSession();
+    closeOverlay();
+    setSourceJumpTarget(null);
+  }, [dismissSlashSession, closeOverlay, setSourceJumpTarget]);
+
+  const flushPendingSaves = useCallback(async () => {
+    // Draft creation can schedule another adapter write after its first receipt.
+    // Await that existing workflow before waiting for the adapter's write registry.
+    await whenDraftIdle();
+    await whenIdle();
+  }, [whenDraftIdle, whenIdle]);
+
   return {
+    dismissTransientUI,
+    flushPendingSaves,
     layerProps,
     loading,
+    loadError,
     note,
   };
 }

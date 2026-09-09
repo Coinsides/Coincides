@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Hand, Link2, MousePointer2, Pencil, Plus, Minus, Pin, Trash2, ExternalLink, X } from 'lucide-react';
-import { boardErrorMessage, loadBoardCandidates } from './boardRepository';
+import { boardErrorMessage, loadBoardCandidates, loadBoardNotePreview } from './boardRepository';
 import type { BoardCandidate, BoardEdge, BoardMember, BoardViewport, BoardVisual } from './boardTypes';
 import { pointsPath, toBoardPoint, zoomBoardAt, type BoardPoint } from './boardViewport';
 import { useBoard } from './useBoard';
 import { BoardRelocatedVisual } from './BoardRelocatedVisual';
 import { BoardDeleteDialog } from './BoardDeleteDialog';
 import { BoardChalkEditor, chalkGeometry, type ChalkDraft } from './BoardChalk';
+import BoardNoteModal, { type BoardNoteModalHandle } from './BoardNoteModal';
 import { itemOriginLabel } from '@/services/itemSummaryReader';
 import { BOARD_TEXT_RANGE_MIME, parseBoardTextRangeClipboard } from './boardTextRangeClipboard';
 import styles from './Boards.module.css';
@@ -54,6 +55,12 @@ export default function BoardPage() {
   const [titleDraft, setTitleDraft] = useState<string | null>(null);
   const [labelDraft, setLabelDraft] = useState<{ id: string; value: string } | null>(null);
   const [chalkDraft, setChalkDraft] = useState<ChalkDraft | null>(null);
+  const [openNoteId, setOpenNoteId] = useState<string | null>(null);
+  const [notePreviews, setNotePreviews] = useState<Record<string, string>>({});
+  const notePreviewRevisions = useRef(new Map<string, number>());
+  const noteModal = useRef<BoardNoteModalHandle>(null);
+  const openNoteIdRef = useRef<string | null>(null);
+  openNoteIdRef.current = openNoteId;
   const titleInput = useRef<HTMLInputElement>(null);
   const pickerToggle = useRef<HTMLButtonElement>(null);
   const [search, setSearch] = useState('');
@@ -115,6 +122,9 @@ export default function BoardPage() {
     setTitleDraft(null);
     setLabelDraft(null);
     setChalkDraft(null);
+    setOpenNoteId(null);
+    setNotePreviews({});
+    notePreviewRevisions.current.clear();
     setDeleting(false);
     setPasteError(null);
     setInk([]);
@@ -170,7 +180,42 @@ export default function BoardPage() {
     await leave(`/notes/${encodeURIComponent(member.reference.note_id)}`);
   }
 
+  function openNote(member: BoardMember) {
+    const noteId = member.reference.note_id;
+    if (member.member_kind !== 'note' || member.reference.state !== 'available' || !noteId) return;
+    if (openNoteIdRef.current) {
+      if (openNoteIdRef.current !== noteId) void noteModal.current?.requestClose({ kind: 'note', noteId });
+      return;
+    }
+    spaceDown.current = false;
+    setPickerOpen(false);
+    setConnectFrom(null);
+    setOpenNoteId(noteId);
+  }
+
+  function refreshProjections(noteId: string) {
+    // Keep the live viewport and selection; only replay the saved references.
+    void board.reload();
+    void loadCandidates();
+    const visit = visitRevision.current;
+    const revision = (notePreviewRevisions.current.get(noteId) || 0) + 1;
+    notePreviewRevisions.current.set(noteId, revision);
+    const present = (summary: string) => {
+      if (visit !== visitRevision.current || notePreviewRevisions.current.get(noteId) !== revision) return;
+      setNotePreviews((current) => ({ ...current, [noteId]: summary }));
+    };
+    void loadBoardNotePreview(noteId).then(present, () => present('Preview unavailable. Enter the note to read.'));
+  }
+
+  function pauseBoard(event: React.SyntheticEvent) {
+    if (!openNoteIdRef.current) return;
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
   async function pasteReference(event: React.ClipboardEvent<HTMLElement>) {
+    if (openNoteIdRef.current) return;
+    const visit = visitRevision.current;
     if ((event.target as HTMLElement).closest('input, textarea, select, [contenteditable="true"]')) return;
     const raw = event.clipboardData.getData(BOARD_TEXT_RANGE_MIME)
       || event.clipboardData.getData(`web ${BOARD_TEXT_RANGE_MIME}`);
@@ -200,6 +245,8 @@ export default function BoardPage() {
       } catch { return; }
     }
     const reference = parseBoardTextRangeClipboard(payload);
+    // An async clipboard read cannot start a board edit after another host takes focus.
+    if (openNoteIdRef.current || visit !== visitRevision.current) return;
     if (!raw && !blob && reference?.excerpt !== pastedText) return;
     if (!reference) {
       setPasteError('This board reference could not be read. Select the passage and copy it again.');
@@ -408,6 +455,7 @@ export default function BoardPage() {
   }
 
   function keyDown(event: React.KeyboardEvent<HTMLDivElement>) {
+    if (openNoteIdRef.current) return;
     if ((event.target as HTMLElement).closest('input, select, textarea, button, a')) return;
     if (event.code === 'Space') { event.preventDefault(); spaceDown.current = true; }
     if (event.key === 'Escape') { setSelection(null); setConnectFrom(null); setLabelDraft(null); setTool('select'); }
@@ -437,6 +485,7 @@ export default function BoardPage() {
     if (!element) return;
     function wheel(event: WheelEvent) {
       event.preventDefault();
+      if (openNoteIdRef.current) return;
       const current = viewportRef.current;
       if (!current || gesture.current) return;
       const units = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? element!.clientHeight : 1;
@@ -465,7 +514,14 @@ export default function BoardPage() {
     }, factor));
   }
 
-  return <section className={styles.workspace} aria-label="Board workspace" onPaste={pasteReference}>
+  return <><section className={styles.workspace} aria-label="Board workspace" onPaste={pasteReference}
+    onKeyDownCapture={pauseBoard} onKeyUpCapture={pauseBoard} onPasteCapture={pauseBoard}
+    onPointerDownCapture={pauseBoard} onPointerMoveCapture={pauseBoard} onPointerUpCapture={pauseBoard}
+    onClickCapture={pauseBoard} onContextMenuCapture={pauseBoard}
+    onDoubleClickCapture={(event) => {
+      // The visible board edge remains a note-switch target while all other board gestures yield.
+      if (!(event.target as Element).closest('[data-board-note-switch="true"]')) pauseBoard(event);
+    }}>
     {pasteError && <p role="alert">{pasteError}</p>}
     <header className={styles.boardHeader}>
       <button className={styles.button} onClick={() => { void leave('/boards'); }}><ArrowLeft size={16} />Boards</button>
@@ -632,6 +688,7 @@ export default function BoardPage() {
             const openHint = isItem && !member.reference.note_id
               ? 'This item has no origin note. Double-click is unavailable.' : undefined;
             return <article key={member.id} data-testid={`board-member-${member.id}`} tabIndex={0}
+              data-board-note-switch={member.member_kind === 'note' && canOpen ? 'true' : undefined}
               aria-label={title}
               aria-disabled={!canOpen}
               title={openHint}
@@ -640,7 +697,12 @@ export default function BoardPage() {
                 transform: `scale(${member.scale})`, zIndex: member.z_index }}
               onPointerDown={(event) => begin(event, member)}
               onFocus={() => setSelection({ kind: 'member', id: member.id })}
-              onDoubleClick={canOpen ? (event) => { event.stopPropagation(); if (tool === 'select') void openMember(member); } : undefined}>
+              onDoubleClick={canOpen ? (event) => {
+                event.stopPropagation();
+                if (tool !== 'select') return;
+                if (member.member_kind === 'note') openNote(member);
+                else void openMember(member);
+              } : undefined}>
               <div className={styles.memberKind}>{{ note: 'Note', content_group: 'Group', item: 'Item', text_range: 'Text range' }[member.member_kind]}
                 {isTextRange && <span className={styles.itemStatus} data-anchor-status={anchorStatus}>
                   {{ active: 'Live', drifted: 'Drifted', lost: 'Lost' }[anchorStatus]}</span>}
@@ -649,6 +711,8 @@ export default function BoardPage() {
               <p>{isTextRange ? member.reference.summary || 'Text snapshot unavailable.'
                 : member.reference.state !== 'available' ? (member.reference.state === 'missing' ? 'This content is no longer available.' : 'This content is currently unavailable.')
                 : isItem ? member.reference.summary || 'Item preview unavailable.'
+                  : member.member_kind === 'note' && member.reference.note_id && notePreviews[member.reference.note_id] !== undefined
+                    ? notePreviews[member.reference.note_id] || 'This note is empty.'
                   : candidate?.summary || (candidateError ? 'Preview unavailable. Open the note to read.' : 'Open the note to read more.')}</p>
               {isItem && member.reference.topic && <small className={styles.itemTopic}>{member.reference.topic}</small>}
               {isItem && member.reference.state !== 'missing' && <small>{itemOriginLabel({
@@ -695,7 +759,7 @@ export default function BoardPage() {
             onClick={() => { void board.updateEdge(selectedEdge.id, { style: { ...selectedEdge.style, direction: value } }); }}>{label}</button>)}
       </>}
       {selectedMember && <>
-        <button className={styles.button} disabled={!selectedMember.reference.note_id || (selectedMember.member_kind !== 'text_range' && selectedMember.reference.state !== 'available')} onClick={() => { void openMember(selectedMember); }}><ExternalLink size={15} />Open note</button>
+        <button className={styles.button} disabled={!selectedMember.reference.note_id || (selectedMember.member_kind !== 'text_range' && selectedMember.reference.state !== 'available')} onClick={() => { void openMember(selectedMember); }}><ExternalLink size={15} />Enter note</button>
         <button className={styles.button} disabled={board.pending} aria-pressed={selectedMember.pinned} onClick={() => { void board.updateMember(selectedMember.id, { pinned: !selectedMember.pinned }); }}><Pin size={15} />{selectedMember.pinned ? 'Unpin' : 'Pin'}</button>
         <button className={styles.button} aria-label="Shrink projection" disabled={selectedMember.pinned || board.pending} onClick={() => { void board.updateMember(selectedMember.id, { scale: Math.max(0.1, selectedMember.scale / 1.1) }); }}><Minus size={15} /></button>
         <span>{Math.round(selectedMember.scale * 100)}%</span>
@@ -706,5 +770,10 @@ export default function BoardPage() {
       <button className={styles.button} disabled={board.pending || Boolean(chalkDraft)} onClick={() => { void removeSelection(); }}><Trash2 size={15} />{selection.kind === 'member' ? 'Remove from board' : selection.kind === 'edge' ? 'Delete connection' : selectedVisual?.visual_kind === 'sticky' ? 'Delete chalk' : 'Delete drawing'}</button>
     </div>}
     {deleting && <BoardDeleteDialog board={detail.board} onCancel={() => setDeleting(false)} onDeleted={() => navigate('/boards')} />}
-  </section>;
+  </section>
+    {openNoteId && <BoardNoteModal key={openNoteId} ref={noteModal} noteId={openNoteId}
+      onClosed={() => { setOpenNoteId(null); refreshProjections(openNoteId); }}
+      onSwitchNote={(noteId) => { setOpenNoteId(noteId); refreshProjections(openNoteId); }}
+      onOpenFullPage={(noteId) => { setOpenNoteId(null); void leave(`/notes/${encodeURIComponent(noteId)}`); }} />}
+  </>;
 }

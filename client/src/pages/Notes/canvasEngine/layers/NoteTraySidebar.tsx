@@ -64,18 +64,24 @@ export function NoteTraySidebar({ tray }: { tray: NoteTrayState }) {
       {tray.boardsLoading && <p role="status">Loading boards…</p>}
       {tray.boardsError && <p role="alert">{tray.boardsError}{' '}
         <button type="button" disabled={tray.busy} onClick={tray.reloadBoards}>Retry boards</button></p>}
-      {!tray.boardsLoading && !tray.boardsError && tray.boards.length === 0 && <p>No boards yet. <Link to="/boards">Create a board</Link></p>}
+      {!tray.boardsLoading && !tray.boardsError && tray.boards.length === 0 && <p>No boards yet. {tray.navigationDisabled
+        ? <button type="button" disabled title="Open full page to use this">Create a board</button>
+        : <Link to="/boards">Create a board</Link>}</p>}
       <button type="submit" disabled={tray.busy || tray.boardsLoading || !boardId || !tray.boardActionsEnabled}>
         Move selection to board
       </button>
     </form>}
     {tray.latestRelocation && <div className={styles.trayRelocation}>
-      <Link to={`/boards/${tray.latestRelocation.board_id}`}>Open board</Link>
+      {tray.navigationDisabled
+        ? <button type="button" disabled title="Open full page to use this">Open board</button>
+        : <Link to={`/boards/${tray.latestRelocation.board_id}`}>Open board</Link>}
       <button type="button" disabled={tray.busy || !tray.boardActionsEnabled} onClick={() => void tray.undoBoardRelocation()}>
         Undo move to board
       </button>
     </div>}
     {tray.error && <p role="alert">{tray.error}</p>}
-    {tray.createdNoteId && <Link to={`/notes/${tray.createdNoteId}`}>Open new note</Link>}
+    {tray.createdNoteId && (tray.navigationDisabled
+      ? <button type="button" disabled title="Open full page to use this">Open new note</button>
+      : <Link to={`/notes/${tray.createdNoteId}`}>Open new note</Link>)}
   </aside>;
 }

@@ -148,7 +148,7 @@ describe('V13.4 item projection smoke', () => {
     fireEvent.doubleClick(standalone);
     expect(screen.queryByText(/Opened origin/)).toBeNull();
     fireEvent.focus(standalone);
-    expect((screen.getByRole('button', { name: 'Open note' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: 'Enter note' }) as HTMLButtonElement).disabled).toBe(true);
     const linked = await mount('Observation');
     fireEvent.doubleClick(linked);
     expect(await screen.findByText('Opened origin origin-note')).toBeTruthy();

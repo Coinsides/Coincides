@@ -42,6 +42,7 @@ export interface SurfacePolicyView {
 }
 
 export interface NoteChromeLayerProps {
+  hostMode?: 'page' | 'modal';
   blockTrashLoadFailed: boolean;
   blockTrashLoading: boolean;
   chromeCollapsed: boolean;
@@ -107,6 +108,7 @@ export interface NoteChromeLayerProps {
 }
 
 export function NoteChromeLayer({
+  hostMode = 'page',
   blockTrashLoadFailed,
   blockTrashLoading,
   chromeCollapsed,
@@ -191,7 +193,7 @@ export function NoteChromeLayer({
   }, [confirmingDelete]);
 
   const handleTrashNote = async () => {
-    if (deletingNote) return;
+    if (hostMode === 'modal' || deletingNote) return;
     const scope = deleteScopeRef.current;
     setDeletingNote(true);
     setDeleteError(null);
@@ -665,9 +667,11 @@ export function NoteChromeLayer({
                 <button
                   type="button"
                   className={styles.moreAction}
-                  disabled={contentReadOnly || note.status === 'trashed'}
+                  disabled={hostMode === 'modal' || contentReadOnly || note.status === 'trashed'}
+                  title={hostMode === 'modal' ? 'Open full page to use this' : undefined}
                   aria-label="Delete note"
                   onClick={() => {
+                    if (hostMode === 'modal') return;
                     setDeleteError(null);
                     setConfirmingDelete(true);
                   }}
@@ -853,7 +857,7 @@ export function NoteChromeLayer({
           <button type="button" autoFocus disabled={deletingNote} onClick={() => setConfirmingDelete(false)}>
             Cancel
           </button>
-          <button type="button" className={styles.dangerBtn} disabled={deletingNote} onClick={() => void handleTrashNote()}>
+          <button type="button" className={styles.dangerBtn} disabled={hostMode === 'modal' || deletingNote} onClick={() => void handleTrashNote()}>
             {deletingNote ? 'Moving to Trash…' : 'Move to Trash'}
           </button>
         </div>

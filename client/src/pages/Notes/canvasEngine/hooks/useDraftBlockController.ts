@@ -573,6 +573,7 @@ export function useDraftBlockController({
   }, [setDraftLayout]);
 
   return {
+    whenDraftIdle: () => persistPromiseRef.current || Promise.resolve(),
     activateDraft,
     creatingDraft,
     discardDraft,

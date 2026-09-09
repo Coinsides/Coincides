@@ -6,11 +6,13 @@ import { useRuntimeDocumentStatsController } from './useRuntimeDocumentStatsCont
 interface UseRuntimeDocumentDataControllerOptions {
   clearBlockSelection: () => void;
   noteId: string | undefined;
+  hostMode?: 'page' | 'modal';
 }
 
 export function useRuntimeDocumentDataController({
   clearBlockSelection,
   noteId,
+  hostMode,
 }: UseRuntimeDocumentDataControllerOptions) {
   const {
     applyMeasuredBlockHeightDraft,
@@ -29,6 +31,7 @@ export function useRuntimeDocumentDataController({
 
   const documentData = useNoteCanvasDataAdapter({
     noteId,
+    hostMode,
     onNoteLoaded: handleNoteLoaded,
     clearLayoutDraftForBlock,
     setLayoutDraftForBlock,

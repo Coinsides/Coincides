@@ -6,7 +6,8 @@ import {
   loadItemSummaries,
 } from '@/services/itemSummaryReader';
 import type { Course } from '@shared/types';
-import type { ContentGroupV1, ItemV1, Note } from '@/pages/Notes/canvasEngine/runtimeDataTypes';
+import type { ContentGroupV1, ItemV1, Note, NoteBlock } from '@/pages/Notes/canvasEngine/runtimeDataTypes';
+import { textFromContent } from '@/pages/Notes/canvasEngine/blockContentService';
 import type {
   Board, BoardCandidate, BoardDetail, BoardEdge, BoardMember, BoardVisual,
   CreateBoardInput, CreateBoardEdgeInput, CreateBoardVisualInput, MountBoardMemberInput,
@@ -100,6 +101,12 @@ export const boardRepository = {
 
 function preview(value: unknown): string {
   return typeof value === 'string' ? value.replace(/\s+/g, ' ').trim().slice(0, 240) : '';
+}
+
+/** Refresh a closed note's projection from saved TextFlow, without changing note.description. */
+export async function loadBoardNotePreview(noteId: string): Promise<string> {
+  const { data: blocks } = await api.get<NoteBlock[]>(`/notes/${encodeURIComponent(noteId)}/blocks`);
+  return preview(blocks.map(textFromContent).filter(Boolean).join(' '));
 }
 
 function availableNote(note: Note): boolean {

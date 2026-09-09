@@ -125,6 +125,19 @@ function noteChromeProps(
 }
 
 describe('NoteChromeLayer block restore door', () => {
+  it('disables modal note deletion while retaining the local deleted-block drawer', () => {
+    const props = noteChromeProps({ hostMode: 'modal' });
+    render(<NoteChromeLayer {...props} />);
+    const entry = screen.getByRole('button', { name: 'Delete note' }) as HTMLButtonElement;
+    expect(entry.disabled).toBe(true);
+    expect(entry.title).toBe('Open full page to use this');
+    fireEvent.click(entry);
+    expect(screen.queryByRole('dialog')).toBeNull();
+    expect(props.onTrashNote).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Deleted blocks' }));
+    expect(props.onOpenBlockTrash).toHaveBeenCalledOnce();
+  });
+
   it('S5 removes the mode switch from the DOM even with legacy canvas props', () => {
     for (const surfaceMode of ['page', 'canvas'] as const) {
       const subject = render(<NoteChromeLayer {...noteChromeProps({ surfaceMode })} />);

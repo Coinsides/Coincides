@@ -200,6 +200,7 @@ import {
 } from '../viewportService';
 import { AnnotationInspectorPanel } from '../panels/AnnotationInspectorPanel';
 import { ContentGroupPanel } from '../panels/ContentGroupPanel';
+import type { TrackPendingWrite } from '../inFlightWriteRegistry';
 import {
   type AnnotationContextMenuState,
 } from './AnnotationContextMenuLayer';
@@ -229,6 +230,8 @@ import {
 } from '../textFocusReceipt';
 
 export interface NoteWritingSurfaceLayerProps {
+  hostMode?: 'page' | 'modal';
+  trackPendingWrite?: TrackPendingWrite;
   onDropTrayBlock?: (placementId: string, layout: BlockBoxLayout) => Promise<void>;
   activeBlockId: string | null;
   contentReadOnly: boolean;
@@ -505,6 +508,8 @@ function readImageFileDimensions(file: File): Promise<{ width: number; height: n
 }
 
 export function NoteWritingSurfaceLayer({
+  hostMode = 'page',
+  trackPendingWrite,
   onDropTrayBlock,
   activeBlockId,
   contentReadOnly,
@@ -4091,6 +4096,8 @@ export function NoteWritingSurfaceLayer({
       )}
       {contentGroupPanelOpen && (
         <ContentGroupPanel
+          hostMode={hostMode}
+          trackPendingWrite={trackPendingWrite}
           annotations={annotationTruths}
           contentGroups={contentGroups}
           groupFolders={groupFolders}

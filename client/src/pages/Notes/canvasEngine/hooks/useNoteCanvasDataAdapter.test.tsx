@@ -1,6 +1,6 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AnnotationTruthV1, Note, NoteBlock, TextBlockContentV1 } from '../runtimeDataTypes';
 import type { BoardTextRangeV1 } from '../../../../../../shared/types/boardTextRange';
@@ -11,10 +11,12 @@ import {
   listBlockEditRecoveryReceipts,
 } from '../draftBlockPersistence';
 import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
+import * as canvasObjectRepository from '../canvasObjectRepository';
 import { useDraftBlockController } from './useDraftBlockController';
 import {
   useNoteCanvasDataAdapter,
   type BlockSaveOutcome,
+  type PersistCanvasObjectInput,
 } from './useNoteCanvasDataAdapter';
 
 const mocks = vi.hoisted(() => ({
@@ -294,6 +296,136 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     consoleWarn.mockRestore();
   });
 
+  it.each(['modal', 'page'] as const)('keeps the %s host load-error navigation contract', async (hostMode) => {
+    const get = mocks.get.getMockImplementation()!;
+    mocks.get.mockImplementation((url: string) => url === `/notes/${note.id}`
+      ? Promise.reject(new Error('Synthetic note load failure')) : get(url));
+    const subject = renderHook(() => ({
+      adapter: useNoteCanvasDataAdapter({ ...stableAdapterOptions, hostMode }),
+      location: useLocation(),
+    }), { wrapper });
+    await waitFor(() => expect(subject.result.current.adapter.loading).toBe(false));
+    expect(subject.result.current.location.pathname).toBe(hostMode === 'modal' ? '/' : '/projects');
+    expect(subject.result.current.adapter.loadError).toBe(hostMode === 'modal'
+      ? 'Failed to load note. Close this window to return to the board.' : null);
+    await expect(subject.result.current.adapter.whenIdle()).resolves.toBeUndefined();
+  });
+
+  it('keeps whenIdle pending through the body PUT and the board-range second write', async () => {
+    const oldFlow = createTextBlockContentV1('alpha beta gamma');
+    const newFlow = { ...oldFlow, units: [{ ...oldFlow.units[0], text: 'prefix alpha beta gamma' }] };
+    durableBlocks = [{ ...serverBlock('alpha beta gamma', false), content_json: { body: 'alpha beta gamma', [TEXT_FLOW_CONTENT_KEY]: oldFlow } }];
+    mocks.boardRangesGet.mockResolvedValue({ data: { text_ranges: [{
+      id: 'anchor', board_id: 'board', note_id: note.id, block_id: durableBlocks[0].id,
+      text_flow_id: `textflow-${durableBlocks[0].id}`, text_unit_id: oldFlow.units[0].id,
+      start_offset: 6, end_offset: 10, excerpt: 'beta', status: 'active', pre_edit_offsets: null,
+    }] } });
+    const body = deferred<{ data: NoteBlock }>();
+    const ranges = deferred<{ data: { text_ranges: BoardTextRangeV1[] } }>();
+    mocks.put.mockReturnValue(body.promise);
+    mocks.boardRangesPut.mockReturnValue(ranges.promise);
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.blocks).toHaveLength(1));
+    let saving!: Promise<BlockSaveOutcome>;
+    const idle = vi.fn();
+    let drain!: Promise<void>;
+    act(() => {
+      saving = subject.result.current.saveBlock(subject.result.current.blocks[0], newFlow.units[0].text, { textFlow: newFlow });
+      drain = subject.result.current.whenIdle().then(idle);
+    });
+    expect(idle).not.toHaveBeenCalled();
+    await act(async () => { body.resolve({ data: { ...durableBlocks[0], ...mocks.put.mock.calls[0][1] } }); });
+    expect(mocks.boardRangesPut).toHaveBeenCalledOnce();
+    expect(idle).not.toHaveBeenCalled();
+    await act(async () => {
+      ranges.resolve({ data: mocks.boardRangesPut.mock.calls[0][1] });
+      await saving;
+      await drain;
+    });
+    expect(idle).toHaveBeenCalledOnce();
+  });
+
+  it('waits through draft creation and placement and preserves caught placement errors for retry', async () => {
+    const layout = { ...defaultDraftLayout, surface: 'formal_page' as const, boundary_role: 'inside' as const };
+    const created = deferred<{ data: NoteBlock }>();
+    const placed = deferred<{ data: unknown }>();
+    mocks.post.mockReturnValue(created.promise);
+    mocks.put.mockReturnValueOnce(placed.promise);
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.note?.id).toBe(note.id));
+    let saving!: ReturnType<typeof subject.result.current.createDraftBlock>;
+    const settled = vi.fn();
+    let drain!: Promise<void>;
+    act(() => {
+      saving = subject.result.current.createDraftBlock(recoveryTemplate, 'draft', { layout, clientCreateKey: 'draft-close' });
+      drain = subject.result.current.whenIdle().then(settled, settled);
+    });
+    await act(async () => { created.resolve({ data: serverBlock('draft', false, 'draft-close') }); });
+    expect(consoleError.mock.calls).toEqual([]);
+    expect(mocks.put).toHaveBeenCalledOnce();
+    expect(settled).not.toHaveBeenCalled();
+    const error = new Error('placement unavailable');
+    await act(async () => {
+      placed.reject(error);
+      await saving;
+      await drain;
+    });
+    expect(settled).toHaveBeenCalledWith(error);
+    await expect(subject.result.current.whenIdle()).rejects.toBe(error);
+    mocks.put.mockResolvedValueOnce({ data: { block_id: 'block-1', placement_id: 'placement-1', layout } });
+    await act(async () => {
+      await subject.result.current.saveDraftBlockPlacement(serverBlock('draft', false), layout, 'draft-close', note.id);
+      await subject.result.current.whenIdle();
+    });
+  });
+
+  it('records a canvas-object save prerequisite failure before PUT and clears it on successful retry', async () => {
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.note?.id).toBe(note.id));
+    const context = deferred<Awaited<ReturnType<typeof canvasObjectRepository.resolveCanvasPlacementWriteContext>>>();
+    const resolveContext = vi.spyOn(canvasObjectRepository, 'resolveCanvasPlacementWriteContext')
+      .mockReturnValueOnce(context.promise);
+    const saveObject = vi.spyOn(canvasObjectRepository, 'saveGenericCanvasObjectForNote')
+      .mockResolvedValue({});
+    const input: PersistCanvasObjectInput = {
+      canvasObject: { objectId: 'shape-1', canvasId: 'canvas-1', kind: 'shape', backing: 'none', objectClass: 'pure', status: 'active' },
+      placement: { placementId: 'shape-place-1', objectId: 'shape-1', canvasId: 'canvas-1', surface: 'formal_page', boundaryRole: 'inside', x: 0, y: 0, width: 100, height: 100, zIndex: 1, rotation: 0 },
+      payload: {},
+    };
+    try {
+      let saving!: Promise<boolean>;
+      const settled = vi.fn();
+      let drain!: Promise<void>;
+      act(() => {
+        saving = subject.result.current.persistCanvasObject(input);
+        drain = subject.result.current.whenIdle().then(settled, settled);
+      });
+      expect(saveObject).not.toHaveBeenCalled();
+      expect(settled).not.toHaveBeenCalled();
+      const error = new Error('placement write context unavailable');
+      await act(async () => {
+        context.reject(error);
+        expect(await saving).toBe(false);
+        await drain;
+      });
+      expect(saveObject).not.toHaveBeenCalled();
+      expect(settled).toHaveBeenCalledWith(error);
+      expect(mocks.addToast).toHaveBeenCalledWith('error', 'Failed to save canvas object');
+      expect(subject.result.current.persistedCanvasObjects).toEqual([]);
+      await expect(subject.result.current.whenIdle()).rejects.toBe(error);
+      resolveContext.mockResolvedValueOnce({ coordinateContract: 'v1', pageFrameCollection: null });
+      await act(async () => {
+        expect(await subject.result.current.persistCanvasObject(input)).toBe(true);
+        await subject.result.current.whenIdle();
+      });
+      expect(saveObject).toHaveBeenCalledOnce();
+      expect(subject.result.current.persistedCanvasObjects).toEqual([input.canvasObject]);
+    } finally {
+      resolveContext.mockRestore();
+      saveObject.mockRestore();
+    }
+  });
+
   it('loads all board anchors, writes text first, then synchronizes both boards without double shifting', async () => {
     const oldFlow = createTextBlockContentV1('alpha beta gamma');
     oldFlow.units[0].id = 'unit-1';
@@ -341,12 +473,14 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     let failed!: BlockSaveOutcome;
     await act(async () => { failed = await subject.result.current.saveBlock(subject.result.current.blocks[0], 'alpha  gamma', { textFlow: newFlow }); });
     expect(failed).toMatchObject({ status: 'rejected', reason: 'board_range_sync_failed', durableState: 'matches_requested' });
+    await expect(subject.result.current.whenIdle()).rejects.toThrow('second write unavailable');
     expect(mocks.addToast).toHaveBeenCalledWith('error', 'Text saved, but board references could not sync. Retry saving this block.');
     expect(mocks.addToast.mock.calls.some(([kind, message]) => kind === 'success' && message === 'Block saved')).toBe(false);
     expect(mocks.boardRangesPut.mock.calls[0][1].text_ranges[0]).toMatchObject({ status: 'drifted', excerpt: 'beta', pre_edit_offsets: { start_offset: 6, end_offset: 10 } });
     let retried!: BlockSaveOutcome;
     await act(async () => { retried = await subject.result.current.saveBlock(subject.result.current.blocks[0], 'alpha  gamma', { textFlow: newFlow }); });
     expect(retried.status).toBe('saved');
+    await expect(subject.result.current.whenIdle()).resolves.toBeUndefined();
     expect(mocks.boardRangesPut).toHaveBeenCalledTimes(2);
   });
 
