@@ -114,6 +114,7 @@ const api = axios.create({
     if (isPrintFixture && url === '/canvas-objects/coordinate-contract') data = { coordinate_contract: 'v2' };
     else if (url === `/notes/${NOTE_ID}`) data = isPrintFixture ? printSpecimen.note : fixtureNote;
     else if (url === `/notes/${NOTE_ID}/blocks`) data = isPrintFixture ? printSpecimen.blocks : fixtureBlocks;
+    else if (url === `/boards/text-ranges/by-note/${NOTE_ID}`) data = { text_ranges: [] };
     else if (url === `/canvas-objects/by-note/${NOTE_ID}`) data = isPrintFixture ? printSpecimen.canvas : fixtureCanvas;
     else if (url === '/templates') data = templates;
     else if (url === '/source-anchors/generate') data = {};

@@ -2413,6 +2413,13 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   padding: 0;
 }
 
+.selectionBoardReferenceButton {
+  flex: 0 0 auto;
+  width: auto;
+  padding: 0 9px;
+  white-space: nowrap;
+}
+
 .selectionTypographySelect:hover,
 .selectionTypographySelect:focus-visible,
 .selectionTypographyNumber:hover,

@@ -103,6 +103,7 @@ export function useNoteCanvasRuntimeController() {
     setSourceJumpTarget,
     sourceJumpBusy,
     annotationTruths,
+    rebaseBoardTextRanges,
     contentGroups,
     groupFolders,
     purposeFrames,
@@ -238,6 +239,7 @@ export function useNoteCanvasRuntimeController() {
 
   const applyBlockTextFlowEdit = useBlockTextFlowEditController({
     annotationTruths,
+    rebaseBoardTextRanges,
     blockTextFlowDrafts,
     saveAnnotationTruths,
     setBlockTextFlowDrafts,

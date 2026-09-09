@@ -27,6 +27,7 @@ interface SelectionTypographyToolbarLayerProps {
   typographyProfile: DocumentTypographyProfile;
   onSaveTypographyProfile: (profile: DocumentTypographyProfile) => void | Promise<void>;
   onClose: () => void;
+  onCopyBoardReference?: () => void | Promise<void>;
 }
 
 export function SelectionTypographyToolbarLayer({
@@ -34,6 +35,7 @@ export function SelectionTypographyToolbarLayer({
   typographyProfile,
   onSaveTypographyProfile,
   onClose,
+  onCopyBoardReference,
 }: SelectionTypographyToolbarLayerProps) {
   const savePatch = useCallback((patch: Partial<DocumentTypographyProfile>) => {
     const nextProfile = patchDocumentTypographyProfile(typographyProfile, patch);
@@ -85,7 +87,7 @@ export function SelectionTypographyToolbarLayer({
 
   const placement = placeSelectionToolbar({
     anchorRect: selection.anchorRect,
-    toolbarWidth: 520,
+    toolbarWidth: onCopyBoardReference ? 710 : 520,
     toolbarHeight: 44,
   });
   const minimumLineHeightPx = Math.max(
@@ -103,6 +105,15 @@ export function SelectionTypographyToolbarLayer({
       data-selection-typography-scope="document"
       onMouseDown={handleToolbarMouseDown}
     >
+      {onCopyBoardReference && (
+        <button
+          type="button"
+          className={`${styles.selectionTypographyButton} ${styles.selectionBoardReferenceButton}`}
+          onClick={() => { void onCopyBoardReference(); }}
+        >
+          Copy as board reference
+        </button>
+      )}
       <span className={styles.selectionTypographyScope}>Document typography</span>
       <select
         className={styles.selectionTypographySelect}

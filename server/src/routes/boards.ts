@@ -7,10 +7,12 @@ import { runRecordedAction, type RecordedActionEvent } from '../middleware/recor
 import {
   createBoard, getBoard, listBoards, updateBoard, deleteBoard,
   mountBoardMember, updateBoardMember, unmountBoardMember,
+  mountBoardTextRange,
   createBoardEdge, updateBoardEdge, deleteBoardEdge,
   createBoardVisual, updateBoardVisual, deleteBoardVisual,
 } from '../services/boards.js';
 import { relocateTrayToBoard, undoTrayRelocation } from '../services/boardTrayRelocation.js';
+import { listBoardTextRanges, updateBoardTextRanges } from '../services/boardTextRanges.js';
 import {
   createBoardSchema, updateBoardSchema,
   mountBoardMemberSchema, updateBoardMemberSchema,
@@ -48,6 +50,16 @@ export function createBoardRouter(database: () => Database.Database = getDb): Ro
 
   router.get('/', handle((req, res) => {
     res.json({ boards: listBoards(database(), req.userId!, listBoardsQuery.parse(req.query)) });
+  }));
+
+  router.get('/text-ranges/by-note/:noteId', handle((req, res) => {
+    res.json({ text_ranges: listBoardTextRanges(database(), req.userId!, String(req.params.noteId)) });
+  }));
+
+  router.put('/text-ranges/by-note/:noteId', handle((req, res) => {
+    const db = database();
+    const text_ranges = db.transaction(() => updateBoardTextRanges(db, req.userId!, String(req.params.noteId), req.body))();
+    res.json({ text_ranges });
   }));
 
   router.post('/', handle((req, res) => {
@@ -155,6 +167,21 @@ export function createBoardRouter(database: () => Database.Database = getDb): Ro
       };
     });
     res.status(result.created ? 201 : 200).json(result);
+  }));
+
+  router.post('/:boardId/text-ranges', handle((req, res) => {
+    const { summary, ...body } = mountActionEnvelope.parse(req.body);
+    const boardId = String(req.params.boardId);
+    const result = runRecordedAction(database(), req, 'POST /api/boards/:boardId/text-ranges', (db, userId) => {
+      const value = mountBoardTextRange(db, userId, boardId, body);
+      return { value, events: [{
+        verb: 'mounted',
+        objects: [{ kind: 'board', id: boardId }, { kind: 'board_member', id: value.member.id },
+          { kind: 'text_range', id: value.member.member_id }],
+        summary: summary ?? `Mounted text_range: ${value.member.member_id}`,
+      }] };
+    });
+    res.status(201).json(result);
   }));
 
   router.patch('/:boardId/members/:memberId', handle((req, res) => {

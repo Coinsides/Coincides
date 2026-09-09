@@ -7,6 +7,7 @@ import { pointsPath, toBoardPoint, zoomBoardAt, type BoardPoint } from './boardV
 import { useBoard } from './useBoard';
 import { BoardRelocatedVisual } from './BoardRelocatedVisual';
 import { BoardDeleteDialog } from './BoardDeleteDialog';
+import { BOARD_TEXT_RANGE_MIME, parseBoardTextRangeClipboard } from './boardTextRangeClipboard';
 import styles from './Boards.module.css';
 
 type Tool = 'select' | 'pan' | 'connect' | 'pen';
@@ -43,6 +44,7 @@ export default function BoardPage() {
   const [connectFrom, setConnectFrom] = useState<string | null>(null);
   const [candidates, setCandidates] = useState<BoardCandidate[]>([]);
   const [candidateError, setCandidateError] = useState<string | null>(null);
+  const [pasteError, setPasteError] = useState<string | null>(null);
   const [candidateLoading, setCandidateLoading] = useState(false);
   const candidateRevision = useRef(0);
   const [pickerOpen, setPickerOpen] = useState(false);
@@ -110,6 +112,7 @@ export default function BoardPage() {
     setTitleDraft(null);
     setLabelDraft(null);
     setDeleting(false);
+    setPasteError(null);
     setInk([]);
     return () => { visitRevision.current += 1; };
   }, [boardId]);
@@ -159,8 +162,50 @@ export default function BoardPage() {
   }
 
   async function openMember(member: BoardMember) {
-    if (member.reference.state !== 'available' || !member.reference.note_id) return;
+    if ((member.member_kind !== 'text_range' && member.reference.state !== 'available') || !member.reference.note_id) return;
     await leave(`/notes/${encodeURIComponent(member.reference.note_id)}`);
+  }
+
+  async function pasteReference(event: React.ClipboardEvent<HTMLElement>) {
+    if ((event.target as HTMLElement).closest('input, textarea, select, [contenteditable="true"]')) return;
+    const raw = event.clipboardData.getData(BOARD_TEXT_RANGE_MIME)
+      || event.clipboardData.getData(`web ${BOARD_TEXT_RANGE_MIME}`);
+    const pastedText = event.clipboardData.getData('text/plain');
+    // Async ClipboardItem custom formats can arrive as a typed Blob on paste.
+    const blob = Array.from(event.clipboardData.files || []).find((file) =>
+      file.type === BOARD_TEXT_RANGE_MIME || file.type === `web ${BOARD_TEXT_RANGE_MIME}`);
+    if (!detail || !surface.current) return;
+    if (raw || blob) event.preventDefault();
+    const point = toBoardPoint({ x: surface.current.clientWidth / 2, y: surface.current.clientHeight / 2 },
+      viewportRef.current || detail.board.viewport);
+    let payload = raw;
+    if (!payload && blob && blob.size <= 210000) {
+      try { payload = await blob.text(); } catch { /* Show the same unreadable-reference feedback. */ }
+    }
+    if (!raw && !blob) {
+      // Some browsers expose web custom formats only through navigator.clipboard.read.
+      // Inspect that exact MIME on the user's paste gesture; ordinary text stays ordinary text.
+      try {
+        if (!navigator.clipboard?.read) return;
+        const items = await navigator.clipboard.read();
+        const format = `web ${BOARD_TEXT_RANGE_MIME}`;
+        const item = items.find((entry) => entry.types.includes(format));
+        if (!item) return;
+        const data = await item.getType(format);
+        if (data.size <= 210000) payload = await data.text();
+      } catch { return; }
+    }
+    const reference = parseBoardTextRangeClipboard(payload);
+    if (!raw && !blob && reference?.excerpt !== pastedText) return;
+    if (!reference) {
+      setPasteError('This board reference could not be read. Select the passage and copy it again.');
+      return;
+    }
+    setPasteError(null);
+    void board.mountTextRange({
+      text_range: reference, x: point.x - 160, y: point.y - 110, w: 320, h: 220,
+      z_index: Math.max(0, ...detail.members.map((member) => member.z_index)) + 1,
+    });
   }
 
   function localPoint(event: { clientX: number; clientY: number }): BoardPoint {
@@ -376,7 +421,8 @@ export default function BoardPage() {
     }, factor));
   }
 
-  return <section className={styles.workspace} aria-label="Board workspace">
+  return <section className={styles.workspace} aria-label="Board workspace" onPaste={pasteReference}>
+    {pasteError && <p role="alert">{pasteError}</p>}
     <header className={styles.boardHeader}>
       <button className={styles.button} onClick={() => { void leave('/boards'); }}><ArrowLeft size={16} />Boards</button>
       {titleDraft === null ? <>
@@ -519,15 +565,18 @@ export default function BoardPage() {
           {visibleMembers.map((member) => {
             const candidate = candidateById.get(`${member.member_kind}:${member.member_id}`);
             const isItem = member.member_kind === 'item';
+            const isTextRange = member.member_kind === 'text_range';
+            const anchorStatus = member.reference.anchor_status || 'lost';
             const itemState = member.reference.state === 'missing' ? 'Missing'
               : member.reference.reason === 'item_retired' ? 'Retired' : 'Active';
-            const title = member.reference.title || (isItem ? member.reference.item_type || 'Item' : candidate?.title) || 'Unavailable projection';
-            const canOpen = member.reference.state === 'available' && Boolean(member.reference.note_id);
+            const title = member.reference.title || (isItem ? member.reference.item_type || 'Item' : candidate?.title)
+              || (isTextRange ? 'Source note unavailable' : 'Unavailable projection');
+            const canOpen = (isTextRange || member.reference.state === 'available') && Boolean(member.reference.note_id);
             const openHint = isItem && !member.reference.note_id
               ? 'This item has no origin note. Double-click is unavailable.' : undefined;
             return <article key={member.id} data-testid={`board-member-${member.id}`} tabIndex={0}
               aria-label={title}
-              aria-disabled={member.reference.state !== 'available'}
+              aria-disabled={!canOpen}
               title={openHint}
               className={`${styles.member} ${selection?.id === member.id || connectFrom === member.id ? styles.selected : ''}`}
               style={{ left: member.x, top: member.y, width: member.w, height: member.h,
@@ -536,12 +585,26 @@ export default function BoardPage() {
               onFocus={() => setSelection({ kind: 'member', id: member.id })}
               onDoubleClick={canOpen ? (event) => { event.stopPropagation(); if (tool === 'select') void openMember(member); } : undefined}>
               <div className={styles.memberKind}>{{ note: 'Note', content_group: 'Group', item: 'Item', text_range: 'Text range' }[member.member_kind]}
+                {isTextRange && <span className={styles.itemStatus} data-anchor-status={anchorStatus}>
+                  {{ active: 'Live', drifted: 'Drifted', lost: 'Lost' }[anchorStatus]}</span>}
                 {isItem && <span className={styles.itemStatus}>{itemState}</span>}{member.pinned && <Pin size={13} aria-label="Pinned" />}</div>
               <h2>{title}</h2>
-              <p>{member.reference.state !== 'available' ? (member.reference.state === 'missing' ? 'This content is no longer available.' : 'This content is currently unavailable.')
+              <p>{isTextRange ? member.reference.summary || 'Text snapshot unavailable.'
+                : member.reference.state !== 'available' ? (member.reference.state === 'missing' ? 'This content is no longer available.' : 'This content is currently unavailable.')
                 : isItem ? member.reference.summary || 'Item preview unavailable.'
                   : candidate?.summary || (candidateError ? 'Preview unavailable. Open the note to read.' : 'Open the note to read more.')}</p>
               {isItem && member.reference.topic && <small className={styles.itemTopic}>{member.reference.topic}</small>}
+              {isTextRange && <>
+                {anchorStatus !== 'active' && <small className={styles.anchorNotice}>
+                  {anchorStatus === 'drifted' ? 'Source changed' : 'Source lost'} · Last valid snapshot
+                </small>}
+                <button type="button" className={styles.sourceLink} disabled={!canOpen}
+                  onPointerDown={(event) => event.stopPropagation()}
+                  onDoubleClick={(event) => event.stopPropagation()}
+                  onClick={(event) => { event.stopPropagation(); void openMember(member); }}>
+                  <ExternalLink size={12} />Open source note
+                </button>
+              </>}
               {!member.reference.note_id && <small>No linked note to open</small>}
               {!member.pinned && tool === 'select' && <button className={styles.resizeHandle} aria-label={`Resize ${member.reference.title || 'projection'}`}
                 onDoubleClick={(event) => event.stopPropagation()}
@@ -568,7 +631,7 @@ export default function BoardPage() {
             onClick={() => { void board.updateEdge(selectedEdge.id, { style: { ...selectedEdge.style, direction: value } }); }}>{label}</button>)}
       </>}
       {selectedMember && <>
-        <button className={styles.button} disabled={!selectedMember.reference.note_id || selectedMember.reference.state !== 'available'} onClick={() => { void openMember(selectedMember); }}><ExternalLink size={15} />Open note</button>
+        <button className={styles.button} disabled={!selectedMember.reference.note_id || (selectedMember.member_kind !== 'text_range' && selectedMember.reference.state !== 'available')} onClick={() => { void openMember(selectedMember); }}><ExternalLink size={15} />Open note</button>
         <button className={styles.button} disabled={board.pending} aria-pressed={selectedMember.pinned} onClick={() => { void board.updateMember(selectedMember.id, { pinned: !selectedMember.pinned }); }}><Pin size={15} />{selectedMember.pinned ? 'Unpin' : 'Pin'}</button>
         <button className={styles.button} aria-label="Shrink projection" disabled={selectedMember.pinned || board.pending} onClick={() => { void board.updateMember(selectedMember.id, { scale: Math.max(0.1, selectedMember.scale / 1.1) }); }}><Minus size={15} /></button>
         <span>{Math.round(selectedMember.scale * 100)}%</span>

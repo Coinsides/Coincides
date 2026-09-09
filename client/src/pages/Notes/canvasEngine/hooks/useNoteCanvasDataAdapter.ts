@@ -51,6 +51,8 @@ import {
   normalizeContentGroup,
 } from '../contentGroupService';
 import { useBlockDraftAuthority } from './useBlockDraftAuthority';
+import { createBoardTextRangeEditSession, type BoardRangeSaveSnapshot } from '../boardTextRangeEditSession';
+import { loadBoardTextRangesForNote, saveBoardTextRangesForNote } from '../boardTextRangeRepository';
 import {
   NOTE_ANNOTATION_PROPOSALS_METADATA_KEY,
   NOTE_READING_INTERPRETATIONS_METADATA_KEY,
@@ -201,6 +203,7 @@ export type BlockSaveOutcome =
       | 'mutation_not_allowed'
       | 'route_receipt_unavailable'
       | 'recovery_receipt_unavailable'
+      | 'board_range_sync_failed'
       | 'request_failed';
     error?: unknown;
     staleEpoch: boolean;
@@ -403,6 +406,10 @@ export function useNoteCanvasDataAdapter({
 
   const [note, setNote] = useState<Note | null>(null);
   const contractSession = useMemo(() => createCoordinateContractSession(), [noteId]);
+  const boardRangeSession = useMemo(
+    () => createBoardTextRangeEditSession(noteId ?? '', saveBoardTextRangesForNote),
+    [noteId],
+  );
   const [coordinateContract, setCoordinateContract] = useState<CoordinateContract>('v1');
   const [blocks, setBlocks] = useState<NoteBlock[]>([]);
   const [loading, setLoading] = useState(true);
@@ -569,11 +576,12 @@ export function useNoteCanvasDataAdapter({
       ]);
       const hydratedNote = noteRes.data as Note;
       const savedContentGroups = await loadContentGroupsForNote({ note: hydratedNote });
-      const [savedGroupFolders, canvasPersistence, savedAnnotationTruths, savedPurposeFrames] = await Promise.all([
+      const [savedGroupFolders, canvasPersistence, savedAnnotationTruths, savedPurposeFrames, savedBoardRanges] = await Promise.all([
         loadGroupFoldersForNote({ note: hydratedNote }),
         loadCanvasPersistenceForNote({ note: hydratedNote, contractSession }),
         loadAnnotationTruthsForNote({ note: hydratedNote }),
         loadLibraryPurposes(),
+        loadBoardTextRangesForNote(requestedNoteId),
       ]);
       if (!requestIsCurrent()) return;
       const hydratedBlocks = applyCanvasLayoutsToBlocks(
@@ -596,6 +604,7 @@ export function useNoteCanvasDataAdapter({
       setNote(noteForState);
       setTitleDraft(noteRes.data.title);
       setAnnotationTruthsSnapshot(savedAnnotationTruths);
+      boardRangeSession.hydrate(savedBoardRanges);
       setContentGroups(savedContentGroups);
       setGroupFolders(savedGroupFolders);
       setPurposeFrames(savedPurposeFrames);
@@ -654,6 +663,7 @@ export function useNoteCanvasDataAdapter({
     }
   }, [
     contractSession,
+    boardRangeSession,
     noteId,
     addToast,
     blockEditRecoveryMountNonce,
@@ -1386,10 +1396,39 @@ export function useNoteCanvasDataAdapter({
         : textFlowContent
       : contentForEditedBlock(block, nextText, fieldValues);
     const requestedPlainText = plainTextForBlockContent(kind, nextContent, nextText);
+    // This also covers direct source-backed/structural saves that bypass the live edit callback.
+    boardRangeSession.rebase(block.id, getTextFlowContent(block.content_json), getTextFlowContent(nextContent));
+    let boardRangeSnapshot: BoardRangeSaveSnapshot;
+    try {
+      boardRangeSnapshot = boardRangeSession.capture(block.id);
+    } catch (error) {
+      addToast('error', 'Board references are not loaded. Reopen the note before saving.');
+      return {
+        status: 'rejected', block: null, recoveryReceipt: null, reconciliation: 'not_attempted',
+        durableState: 'not_checked', reason: 'board_range_sync_failed', error, staleEpoch: false,
+      };
+    }
+    const syncBoardRangesAfterBody = async (savedBlock: NoteBlock): Promise<BlockSaveOutcome | null> => {
+      try {
+        await boardRangeSession.persist(boardRangeSnapshot);
+        return null;
+      } catch (error) {
+        if (requestRouteIsCurrent()) {
+          addToast('error', 'Text saved, but board references could not sync. Retry saving this block.');
+        }
+        return {
+          status: 'rejected', block: savedBlock, recoveryReceipt: null, reconciliation: 'not_attempted',
+          durableState: 'matches_requested', reason: 'board_range_sync_failed', error,
+          staleEpoch: !requestIsCurrent(),
+        };
+      }
+    };
     // A pending write can still replace this snapshot (including an edit changed back).
     const hasOutstandingSaveForBlock = Array.from(outstandingBlockSaveOperationsRef.current.values())
       .some((operation) => operation.blockId === block.id && operation.requestedNoteId === requestedNoteId);
     if (!hasOutstandingSaveForBlock && blockMatchesIssuedSave(block, requestedPlainText, nextContent)) {
+      const rangeFailure = await syncBoardRangesAfterBody(block);
+      if (rangeFailure) return rangeFailure;
       if (options.recoveryKey) {
         forgetBlockEditRecoveryReceipt(options.recoveryKey);
         setBlockEditRecoveryVersion((version) => version + 1);
@@ -1519,6 +1558,10 @@ export function useNoteCanvasDataAdapter({
         content_json: nextContent,
         plain_text: requestedPlainText,
       });
+      const rangeFailure = await syncBoardRangesAfterBody(
+        hydrateClientBlock({ ...block, ...res.data, source_references: block.source_references }),
+      );
+      if (rangeFailure) return rangeFailure;
       blockSaveOutcomeVersionRef.current += 1;
       if (!requestIsCurrent() || !operationIsLatest()) {
         const reconciliation = await reconcileIssuedSave('read_after_outcome');
@@ -1639,6 +1682,7 @@ export function useNoteCanvasDataAdapter({
     blockEditRecoveryMountNonce,
     blockFieldDrafts,
     blockTextFlowDrafts,
+    boardRangeSession,
   ]);
 
   const applyBlockEditRecovery = useCallback(async (recoveryKey: string): Promise<boolean> => {
@@ -1659,7 +1703,8 @@ export function useNoteCanvasDataAdapter({
       recoveryKey: receipt.recoveryKey,
     });
     const applied = outcome.status === 'saved'
-      || ('durableState' in outcome && outcome.durableState === 'matches_requested');
+      || ('durableState' in outcome && outcome.durableState === 'matches_requested'
+        && outcome.reason !== 'board_range_sync_failed');
     if (applied && routeNoteIdRef.current === activeNoteId) {
       addToast('success', 'Recovered block edit applied');
     }
@@ -1756,6 +1801,8 @@ export function useNoteCanvasDataAdapter({
       };
       const nextContent = options.contentJson || contentForTemplate(template, nextText);
       const nextKind = presentationKindForTemplate(template);
+      boardRangeSession.rebase(block.id, getTextFlowContent(block.content_json), getTextFlowContent(nextContent));
+      const boardRangeSnapshot = boardRangeSession.capture(block.id);
       const res = await api.put(`/note-blocks/${block.id}`, {
         block_type: template.legacy_block_type,
         title: options.title ?? block.title,
@@ -1763,6 +1810,26 @@ export function useNoteCanvasDataAdapter({
         plain_text: plainTextForBlockContent(nextKind, nextContent, nextText),
         metadata,
       });
+      try {
+        await boardRangeSession.persist(boardRangeSnapshot);
+      } catch {
+        if (requestRouteIsCurrent()) {
+          addToast('error', 'Text converted, but board references could not sync. Retry saving this block.');
+        }
+        if (requestIsCurrent() && latestBlockSaveOperationByBlockRef.current.get(block.id) === operationSequence) {
+          const converted = hydrateClientBlock({ ...block, ...res.data, source_references: block.source_references });
+          setBlocks((current) => current.map((item) => item.id === block.id ? converted : item));
+          setBlockTextDrafts((current) => ({ ...current, [block.id]: nextText }));
+          setBlockTextFlowDrafts((current) => {
+            const next = { ...current };
+            const textFlow = getTextFlowContent(nextContent);
+            if (textFlow) next[block.id] = textFlow;
+            else delete next[block.id];
+            return next;
+          });
+        }
+        return null;
+      }
       blockSaveOutcomeVersionRef.current += 1;
       const updated = hydrateClientBlock({ ...block, ...res.data, source_references: block.source_references });
       if (
@@ -1797,7 +1864,7 @@ export function useNoteCanvasDataAdapter({
         setSavingBlockId(latestOutstandingOperation?.[1].blockId || null);
       }
     }
-  }, [addToast, allowSourceContentMutation]);
+  }, [addToast, allowSourceContentMutation, boardRangeSession]);
 
   const refreshTrayState = useCallback(async (changedBlockIds: string[] = []) => {
     if (!note) return;
@@ -2203,6 +2270,7 @@ export function useNoteCanvasDataAdapter({
     savingBlockId,
     blockEditRecoveryReceipts,
     annotationTruths,
+    rebaseBoardTextRanges: boardRangeSession.rebase,
     contentGroups,
     groupFolders,
     purposeFrames,

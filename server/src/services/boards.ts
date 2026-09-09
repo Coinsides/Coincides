@@ -15,6 +15,8 @@ import {
   type BoardVisualKind,
 } from '../validators/boards.js';
 import { createPurpose, getPurpose } from './purposes.js';
+import { createBoardTextRange, getBoardTextRange, replayBoardTextRange } from './boardTextRanges.js';
+import { mountBoardTextRangeSchema } from '../validators/boardTextRanges.js';
 
 export type BoardMemberKind = 'note' | 'item' | 'content_group' | 'text_range';
 type JsonObject = Record<string, unknown>;
@@ -82,6 +84,8 @@ export interface BoardMemberReference {
   item_type?: string | null;
   topic?: string | null;
   item_status?: 'active' | 'retired' | 'missing';
+  block_id?: string;
+  anchor_status?: 'active' | 'drifted' | 'lost';
 }
 
 function parse<T extends z.ZodTypeAny>(schema: T, value: unknown): z.infer<T> {
@@ -127,7 +131,7 @@ function touchBoard(db: Database.Database, boardId: string): void {
 }
 
 /** Resolve identity on reads. Missing/trash preserves projection geometry; restore revives it.
- * No content is copied into board storage, and no content deletion is an implicit unmount.
+ * Text ranges retain an owned recovery excerpt. No content deletion is an implicit unmount.
  */
 export function resolveBoardMember(
   db: Database.Database,
@@ -137,8 +141,12 @@ export function resolveBoardMember(
 ): BoardMemberReference {
   const base = { kind, id, title: null, note_id: null };
   if (kind === 'text_range') {
-    // There is no frozen range identity yet. In particular, a block ID is not a range ID.
-    return { ...base, state: 'unavailable', reason: 'text_range_reserved' };
+    const range = getBoardTextRange(db, userId, id);
+    if (!range) return { ...base, state: 'missing', reason: 'reference_missing', anchor_status: 'lost' };
+    const replay = replayBoardTextRange(db, userId, range);
+    return { ...base, title: replay.title, note_id: range.note_id, block_id: range.block_id,
+      summary: replay.text, anchor_status: replay.status, reason: replay.reason,
+      state: replay.status === 'active' ? 'available' : 'unavailable' };
   }
   if (kind === 'note') {
     const row = db.prepare('SELECT id, title, status, note_class, source_kind FROM notes WHERE id = ? AND user_id = ?')
@@ -250,9 +258,19 @@ export function deleteBoard(db: Database.Database, userId: string, boardId: stri
   // the soul, referenced content and historical relocation batches survive.
   db.prepare('DELETE FROM board_edges WHERE board_id = ?').run(boardId);
   db.prepare('DELETE FROM board_members WHERE board_id = ?').run(boardId);
+  db.prepare('DELETE FROM board_text_ranges WHERE board_id = ?').run(boardId);
   db.prepare('DELETE FROM board_visuals WHERE board_id = ?').run(boardId);
   db.prepare('DELETE FROM boards WHERE id = ? AND user_id = ?').run(boardId, userId);
   return { removed: true, board, ...counts };
+}
+
+function validateBoardRangeMount(db: Database.Database, userId: string, boardId: string, kind: BoardMemberKind, id: string): void {
+  if (kind !== 'text_range') return;
+  const range = getBoardTextRange(db, userId, id);
+  if (!range || range.board_id !== boardId) throw new AppError(404, 'board_text_range_not_found');
+  if (db.prepare("SELECT id FROM board_members WHERE member_kind = 'text_range' AND member_id = ?").get(id)) {
+    throw new AppError(409, 'board_text_range_already_mounted');
+  }
 }
 
 export function mountBoardMember(db: Database.Database, userId: string, boardId: string, value: unknown) {
@@ -272,6 +290,7 @@ export function mountBoardMember(db: Database.Database, userId: string, boardId:
       throw new AppError(409, 'board_member_id_conflict');
     }
   }
+  validateBoardRangeMount(db, userId, boardId, input.member_kind, input.member_id);
   const reference = resolveBoardMember(db, userId, input.member_kind, input.member_id);
   if (reference.state !== 'available') {
     throw new AppError(reference.state === 'missing' ? 404 : 409, 'board_member_reference_unavailable', { reason: reference.reason });
@@ -286,6 +305,14 @@ export function mountBoardMember(db: Database.Database, userId: string, boardId:
       JSON.stringify(input.metadata ?? {}), now, now);
   touchBoard(db, boardId);
   return { member: hydrateMember(db, userId, memberRow(db, boardId, id)!), created: true };
+}
+
+/** Paste owns one new anchor per board placement, atomically with its mount. */
+export function mountBoardTextRange(db: Database.Database, userId: string, boardId: string, value: unknown) {
+  requireTransaction(db);
+  const { text_range, ...geometry } = parse(mountBoardTextRangeSchema, value);
+  const range = createBoardTextRange(db, userId, boardId, text_range);
+  return mountBoardMember(db, userId, boardId, { ...geometry, member_kind: 'text_range', member_id: range.id });
 }
 
 export function updateBoardMember(db: Database.Database, userId: string, boardId: string, memberId: string, value: unknown): BoardMember {
@@ -310,6 +337,10 @@ export function unmountBoardMember(db: Database.Database, userId: string, boardI
   const member = hydrateMember(db, userId, row);
   // Endpoint FKs remove board edges; neither the content nor purpose_members is touched.
   db.prepare('DELETE FROM board_members WHERE id = ? AND board_id = ?').run(memberId, boardId);
+  if (row.member_kind === 'text_range') {
+    db.prepare('DELETE FROM board_text_ranges WHERE id = ? AND board_id = ? AND user_id = ?')
+      .run(row.member_id, boardId, userId);
+  }
   touchBoard(db, boardId);
   return { member, removed: true };
 }

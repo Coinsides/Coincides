@@ -33,6 +33,7 @@ interface UseBlockTextFlowEditControllerOptions {
   blockTextFlowDrafts: Record<string, TextBlockContentV1>;
   saveAnnotationTruths: (annotations: AnnotationTruthV1[]) => Promise<void> | void;
   setBlockTextFlowDrafts: Dispatch<SetStateAction<Record<string, TextBlockContentV1>>>;
+  rebaseBoardTextRanges?: (blockId: string, previous: TextBlockContentV1 | null, next: TextBlockContentV1) => void;
 }
 
 export function useBlockTextFlowEditController({
@@ -40,6 +41,7 @@ export function useBlockTextFlowEditController({
   blockTextFlowDrafts,
   saveAnnotationTruths,
   setBlockTextFlowDrafts,
+  rebaseBoardTextRanges,
 }: UseBlockTextFlowEditControllerOptions): ApplyBlockTextFlowEdit {
   const annotationTruthsRef = useRef(annotationTruths);
   const blockTextFlowDraftsRef = useRef(blockTextFlowDrafts);
@@ -56,6 +58,7 @@ export function useBlockTextFlowEditController({
     };
     blockTextFlowDraftsRef.current = nextDrafts;
     setBlockTextFlowDrafts(nextDrafts);
+    rebaseBoardTextRanges?.(block.id, previousTextFlow, nextTextFlow);
     if (!previousTextFlow) return;
 
     let nextAnnotations = annotationTruthsRef.current;
@@ -75,5 +78,5 @@ export function useBlockTextFlowEditController({
     if (nextAnnotations === annotationTruthsRef.current) return;
     annotationTruthsRef.current = nextAnnotations;
     await saveAnnotationTruths(nextAnnotations);
-  }, [saveAnnotationTruths, setBlockTextFlowDrafts]);
+  }, [saveAnnotationTruths, setBlockTextFlowDrafts, rebaseBoardTextRanges]);
 }

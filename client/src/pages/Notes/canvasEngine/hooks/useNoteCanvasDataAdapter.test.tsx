@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AnnotationTruthV1, Note, NoteBlock, TextBlockContentV1 } from '../runtimeDataTypes';
+import type { BoardTextRangeV1 } from '../../../../../../shared/types/boardTextRange';
 import {
   DRAFT_RECOVERY_STORAGE_KEY_V1,
   DRAFT_RECOVERY_STORAGE_KEY_V2,
@@ -23,15 +24,21 @@ const mocks = vi.hoisted(() => ({
   post: vi.fn(),
   put: vi.fn(),
   delete: vi.fn(),
+  boardRangesGet: vi.fn(),
+  boardRangesPut: vi.fn(),
 }));
 
 vi.mock('@/services/api', () => ({
   default: {
-    get: (url: string, ...args: unknown[]) => url === '/canvas-objects/coordinate-contract'
+    get: (url: string, ...args: unknown[]) => url.startsWith('/boards/text-ranges/by-note/')
+      ? mocks.boardRangesGet(url, ...args)
+      : url === '/canvas-objects/coordinate-contract'
       ? Promise.resolve({ data: { coordinate_contract: mocks.coordinateContract } })
       : mocks.get(url, ...args),
     post: mocks.post,
-    put: mocks.put,
+    put: (url: string, ...args: unknown[]) => url.startsWith('/boards/text-ranges/by-note/')
+      ? mocks.boardRangesPut(url, ...args)
+      : mocks.put(url, ...args),
     delete: mocks.delete,
   },
 }));
@@ -261,6 +268,8 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     canvasPersistenceResponse = {};
     durableAnnotationTruths = [];
     durableBlocks = [];
+    mocks.boardRangesGet.mockResolvedValue({ data: { text_ranges: [] } });
+    mocks.boardRangesPut.mockImplementation(async (_url: string, payload: { text_ranges: BoardTextRangeV1[] }) => ({ data: payload }));
     consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
     consoleWarn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     mocks.get.mockImplementation(async (url: string) => {
@@ -283,6 +292,62 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
   afterEach(() => {
     consoleError.mockRestore();
     consoleWarn.mockRestore();
+  });
+
+  it('loads all board anchors, writes text first, then synchronizes both boards without double shifting', async () => {
+    const oldFlow = createTextBlockContentV1('alpha beta gamma');
+    oldFlow.units[0].id = 'unit-1';
+    const newFlow = { ...oldFlow, units: [{ ...oldFlow.units[0], text: 'prefix alpha beta gamma' }] };
+    durableBlocks = [{ ...serverBlock('alpha beta gamma', false), content_json: { body: 'alpha beta gamma', [TEXT_FLOW_CONTENT_KEY]: oldFlow } }];
+    const anchors: BoardTextRangeV1[] = ['one', 'two'].map((id) => ({
+      id, board_id: `board-${id}`, note_id: note.id, block_id: durableBlocks[0].id,
+      text_flow_id: `textflow-${durableBlocks[0].id}`, text_unit_id: 'unit-1',
+      start_offset: 6, end_offset: 10, excerpt: 'beta', status: 'active', pre_edit_offsets: null,
+      at: '', created_at: '', updated_at: '',
+    }));
+    mocks.boardRangesGet.mockResolvedValue({ data: { text_ranges: anchors } });
+    const order: string[] = [];
+    mocks.put.mockImplementation(async (_url: string, payload: object) => {
+      order.push('body');
+      return { data: { ...durableBlocks[0], ...payload } };
+    });
+    mocks.boardRangesPut.mockImplementation(async (_url: string, payload: { text_ranges: BoardTextRangeV1[] }) => {
+      order.push('ranges');
+      return { data: payload };
+    });
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.blocks).toHaveLength(1));
+    act(() => subject.result.current.rebaseBoardTextRanges(durableBlocks[0].id, oldFlow, newFlow));
+    let outcome!: BlockSaveOutcome;
+    await act(async () => { outcome = await subject.result.current.saveBlock(subject.result.current.blocks[0], newFlow.units[0].text, { textFlow: newFlow }); });
+    expect(outcome.status).toBe('saved');
+    expect(order).toEqual(['body', 'ranges']);
+    expect(mocks.boardRangesPut.mock.calls[0][1].text_ranges).toEqual(anchors.map((range) => expect.objectContaining({ id: range.id, start_offset: 13, end_offset: 17, excerpt: 'beta' })));
+  });
+
+  it('retains failed second writes for retry and never reports a synchronized save', async () => {
+    const oldFlow = createTextBlockContentV1('alpha beta gamma');
+    const newFlow = { ...oldFlow, units: [{ ...oldFlow.units[0], text: 'alpha  gamma' }] };
+    durableBlocks = [{ ...serverBlock('alpha beta gamma', false), content_json: { body: 'alpha beta gamma', [TEXT_FLOW_CONTENT_KEY]: oldFlow } }];
+    mocks.boardRangesGet.mockResolvedValue({ data: { text_ranges: [{
+      id: 'anchor', board_id: 'board', note_id: note.id, block_id: durableBlocks[0].id,
+      text_flow_id: `textflow-${durableBlocks[0].id}`, text_unit_id: oldFlow.units[0].id,
+      start_offset: 6, end_offset: 10, excerpt: 'beta', status: 'active', pre_edit_offsets: null,
+    }] } });
+    mocks.put.mockImplementation(async (_url: string, payload: object) => ({ data: { ...durableBlocks[0], ...payload } }));
+    mocks.boardRangesPut.mockRejectedValueOnce(new Error('second write unavailable'));
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.blocks).toHaveLength(1));
+    let failed!: BlockSaveOutcome;
+    await act(async () => { failed = await subject.result.current.saveBlock(subject.result.current.blocks[0], 'alpha  gamma', { textFlow: newFlow }); });
+    expect(failed).toMatchObject({ status: 'rejected', reason: 'board_range_sync_failed', durableState: 'matches_requested' });
+    expect(mocks.addToast).toHaveBeenCalledWith('error', 'Text saved, but board references could not sync. Retry saving this block.');
+    expect(mocks.addToast.mock.calls.some(([kind, message]) => kind === 'success' && message === 'Block saved')).toBe(false);
+    expect(mocks.boardRangesPut.mock.calls[0][1].text_ranges[0]).toMatchObject({ status: 'drifted', excerpt: 'beta', pre_edit_offsets: { start_offset: 6, end_offset: 10 } });
+    let retried!: BlockSaveOutcome;
+    await act(async () => { retried = await subject.result.current.saveBlock(subject.result.current.blocks[0], 'alpha  gamma', { textFlow: newFlow }); });
+    expect(retried.status).toBe('saved');
+    expect(mocks.boardRangesPut).toHaveBeenCalledTimes(2);
   });
 
   it('V13 S2 saves paper without a retired purpose writer', async () => {

@@ -212,6 +212,7 @@ import { ObjectInspectorLayer } from './ObjectInspectorLayer';
 import { ImageObjectLayer } from './ImageObjectLayer';
 import { SelectionToolbarLayer } from './SelectionToolbarLayer';
 import { SelectionTypographyToolbarLayer } from './SelectionTypographyToolbarLayer';
+import { useBoardReferenceClipboard } from '../hooks/useBoardReferenceClipboard';
 import { ShapeObjectLayer } from './ShapeObjectLayer';
 import { SlashMenuLayer } from './SlashMenuLayer';
 import {
@@ -931,6 +932,11 @@ export function NoteWritingSurfaceLayer({
     clearDraft,
     reconcileTextOwner,
   } = useSelectionDraftController();
+  const boardReferenceBlockIds = useMemo(() => visibleBlocks.map((block) => block.id), [visibleBlocks]);
+  const copySelectionAsBoardReference = useBoardReferenceClipboard({
+    noteId, surfaceRef, surfaceMode, selection: draftRangeCount === 1 ? latestDraftRange : null,
+    blockIds: boardReferenceBlockIds,
+  });
   useEffect(() => {
     if (!draftOwnerReconciliation) return;
     reconcileTextOwner(draftOwnerReconciliation);
@@ -3984,6 +3990,7 @@ export function NoteWritingSurfaceLayer({
           anchorRect: selectionDraft.anchorRect,
         } : null}
         typographyProfile={documentTypographyProfile}
+        onCopyBoardReference={copySelectionAsBoardReference}
         onSaveTypographyProfile={onSaveDocumentTypographyProfile}
         onClose={clearDraft}
       />

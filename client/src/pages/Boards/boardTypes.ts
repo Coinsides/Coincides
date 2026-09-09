@@ -1,4 +1,5 @@
 export type BoardJsonObject = Record<string, unknown>;
+import type { BoardTextRangeSelection, BoardTextRangeStatus } from '@shared/types/boardTextRange';
 
 export interface BoardViewport {
   x: number;
@@ -29,7 +30,7 @@ export interface Board {
 }
 
 export type BoardMemberKind = 'note' | 'item' | 'content_group' | 'text_range';
-export type BoardWritableMemberKind = 'note' | 'content_group' | 'item';
+export type BoardWritableMemberKind = 'note' | 'content_group' | 'item' | 'text_range';
 
 export interface BoardMemberReference {
   kind: BoardMemberKind;
@@ -42,6 +43,8 @@ export interface BoardMemberReference {
   item_type?: string | null;
   topic?: string | null;
   item_status?: 'active' | 'retired' | 'missing';
+  anchor_status?: BoardTextRangeStatus;
+  block_id?: string | null;
 }
 
 export interface BoardMember extends BoardGeometry {
@@ -132,6 +135,10 @@ export interface MountBoardMemberInput extends Partial<BoardGeometry> {
 }
 
 export type PatchBoardMemberInput = Partial<BoardGeometry>;
+
+export interface MountBoardTextRangeInput extends Partial<BoardGeometry> {
+  text_range: BoardTextRangeSelection;
+}
 
 export interface CreateBoardEdgeInput {
   from_member_id: string;

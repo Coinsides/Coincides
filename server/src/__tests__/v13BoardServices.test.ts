@@ -3,6 +3,7 @@ import test, { type TestContext } from 'node:test';
 import Database from 'better-sqlite3';
 import migration044 from '../db/migrations/044_v2_purposes.js';
 import migration057 from '../db/migrations/057_v13_boards.js';
+import migration059 from '../db/migrations/059_v13_board_text_ranges.js';
 import {
   createBoard, getBoard, listBoards, updateBoard,
   mountBoardMember, updateBoardMember, unmountBoardMember, resolveBoardMember,
@@ -34,6 +35,7 @@ function fixture(t: TestContext) {
   db.transaction(() => {
     migration044.up(db);
     migration057.up(db);
+    migration059.up(db);
   })();
   return db;
 }
@@ -108,7 +110,7 @@ test('mounts stay references across projects; retries preserve geometry; unmount
   assert.equal((db.prepare('SELECT count(*) AS n FROM purpose_members').get() as { n: number }).n, 0);
 });
 
-test('member reads retain geometry through trash/restore/missing and reserved kinds do not mint fake ranges', (t) => {
+test('member reads retain geometry through trash/restore/missing and text ranges require durable anchor identities', (t) => {
   const db = fixture(t);
   const board = open(db);
   const mounted = db.transaction(() => mountBoardMember(db, 'user', board.id,
@@ -126,11 +128,11 @@ test('member reads retain geometry through trash/restore/missing and reserved ki
   assert.equal(resolveBoardMember(db, 'user', 'item', 'item').state, 'available');
   db.prepare("UPDATE items SET status = 'retired' WHERE id = 'item'").run();
   assert.equal(resolveBoardMember(db, 'user', 'item', 'item').state, 'unavailable');
-  assert.equal(resolveBoardMember(db, 'user', 'text_range', 'some-block-id').reason, 'text_range_reserved');
+  assert.equal(resolveBoardMember(db, 'user', 'text_range', 'some-block-id').reason, 'reference_missing');
   assert.throws(() => db.transaction(() => mountBoardMember(db, 'user', board.id,
     { member_kind: 'item', member_id: 'item' }))(), /board_member_reference_unavailable/);
   assert.throws(() => db.transaction(() => mountBoardMember(db, 'user', board.id,
-    { member_kind: 'text_range', member_id: 'item' }))(), /invalid_board_input/);
+    { member_kind: 'text_range', member_id: 'item' }))(), /board_text_range_not_found/);
 });
 
 test('visuals preserve rotation, raw connector endpoints and extension data independently of member edges', (t) => {

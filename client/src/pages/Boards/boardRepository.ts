@@ -12,6 +12,7 @@ import type {
   CreateBoardInput, CreateBoardEdgeInput, CreateBoardVisualInput, MountBoardMemberInput,
   PatchBoardInput, PatchBoardMemberInput, PatchBoardEdgeInput, PatchBoardVisualInput,
   TrayRelocationResult,
+  MountBoardTextRangeInput,
 } from './boardTypes';
 
 export type { BoardCandidate } from './boardTypes';
@@ -46,6 +47,10 @@ export const boardRepository = {
   },
   async updateMember(boardId: string, id: string, input: PatchBoardMemberInput): Promise<BoardMember> {
     const { data } = await api.patch<{ member: BoardMember }>(childPath(boardId, 'members', id), input);
+    return data.member;
+  },
+  async mountTextRange(boardId: string, input: MountBoardTextRangeInput): Promise<BoardMember> {
+    const { data } = await api.post<{ member: BoardMember }>(`${boardPath(boardId)}/text-ranges`, input);
     return data.member;
   },
   async unmount(boardId: string, id: string): Promise<void> {
@@ -167,6 +172,8 @@ export function boardErrorMessage(error: unknown): string {
     ? (error as { response?: { status?: number; data?: { error?: unknown } } }).response
     : undefined;
   switch (response?.data?.error) {
+    case 'board_text_range_source_changed':
+      return 'The copied text has changed. Save the note, select the passage again, and copy a new reference.';
     case 'tray_placement_unavailable':
     case 'tray_object_unavailable':
       return 'Some selected items are no longer available in the tray. Refresh the note and try again.';

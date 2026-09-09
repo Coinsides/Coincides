@@ -6,6 +6,7 @@ import type {
   CreateBoardEdgeInput,
   CreateBoardVisualInput,
   MountBoardMemberInput,
+  MountBoardTextRangeInput,
   PatchBoardInput,
   PatchBoardMemberInput,
   PatchBoardEdgeInput,
@@ -135,6 +136,12 @@ export function useBoard(boardId: string | undefined) {
     'write', scope,
   ), [enqueue, scope]);
 
+  const mountTextRange = useCallback((input: MountBoardTextRangeInput) => enqueue(
+    (id) => boardRepository.mountTextRange(id, input),
+    (detail, member) => detail ? { ...detail, members: upsert(detail.members, member) } : detail,
+    'write', scope,
+  ), [enqueue, scope]);
+
   const unmount = useCallback((memberId: string) => enqueue(
     (id) => boardRepository.unmount(id, memberId),
     (detail) => detail ? {
@@ -198,7 +205,7 @@ export function useBoard(boardId: string | undefined) {
     loading: current ? state.loadingCount > 0 : Boolean(boardId),
     error: current ? state.error : null,
     pending: current && state.pendingCount > 0,
-    reload, updateBoard, mount, updateMember, unmount, addEdge, removeEdge,
+    reload, updateBoard, mount, mountTextRange, updateMember, unmount, addEdge, removeEdge,
     addVisual, removeVisual, updateVisual, updateEdge, clearError, flush,
   };
 }

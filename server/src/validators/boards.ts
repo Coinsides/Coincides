@@ -42,10 +42,10 @@ const memberGeometry = {
   pinned: z.boolean().optional(),
 };
 
-// text_range retains its database slot until its durable range contract opens.
+// text_range uses a board-owned anchor, minted with its projection in one transaction.
 export const mountBoardMemberSchema = z.object({
   id: idSchema.optional(),
-  member_kind: z.enum(['note', 'content_group', 'item']),
+  member_kind: z.enum(['note', 'content_group', 'item', 'text_range']),
   member_id: idSchema,
   ...memberGeometry,
   metadata: objectSchema.optional(),
