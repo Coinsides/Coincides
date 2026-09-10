@@ -1,4 +1,4 @@
-> **状态 (Status)**: done（builder 施工回执；完整总门末项凭据扫描留 HQ）
+> **状态 (Status)**: done(HQ 收口:波次 C 末单收官)
 > **From**: fable(HQ) · **To**: codex(builder)
 > **日期**: 2026-09-10
 > **上游**: 13.3"笔迹⛔入纸"已由 Henry 显式翻案(claude-log §74,两次口径一致);板 freehand 现物=数据模型参照(boardFreehandDataSchema/整笔橡皮);纸板底层侦察在案(板绘画栈内联 BoardPage⛔直接复用,搬模型不搬存储)
