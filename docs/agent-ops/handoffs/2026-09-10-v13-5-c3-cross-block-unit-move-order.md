@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready
+> **状态 (Status)**: done(HQ 收口:补裁一落地,普通块碰撞停线解除)
 > **From**: fable(HQ) · **To**: codex(builder)
 > **日期**: 2026-09-10
 > **上游**: B10 v1.5 记账兑现(Henry 波次 C 全拍);B10 双块原子迁移端点(unit-transfer)现成
