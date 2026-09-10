@@ -249,6 +249,7 @@ export interface CanvasWorldModel extends CanvasSize {
 
 export type CanvasObjectKind =
   | 'page_frame'
+  | 'freehand'
   | 'paragraph_block_projection'
   | 'shape'
   | 'visual_connector'
@@ -323,6 +324,18 @@ export interface CanvasObject {
   metadata?: Record<string, unknown>;
   createdAt?: string;
   updatedAt?: string;
+}
+
+/** Paper ink has the board's data shape, with an independent canvas owner/store. */
+export interface PaperFreehandData {
+  points?: CanvasPoint[];
+  path?: string;
+  style?: Record<string, unknown>;
+}
+
+export interface FreehandCanvasObject extends CanvasObject {
+  kind: 'freehand';
+  data: PaperFreehandData;
 }
 
 export interface CanvasPlacement extends CanvasRect {

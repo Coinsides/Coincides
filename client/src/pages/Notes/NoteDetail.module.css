@@ -1222,6 +1222,22 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   flex-wrap: wrap;
 }
 
+.paperInkLayer {
+  position: absolute;
+  z-index: 40;
+  outline: none;
+}
+
+.paperInkError {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  padding: 8px 12px;
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-default);
+}
+
 .pageReadingControl button[aria-pressed='true'] {
   border-color: var(--accent-primary);
   color: var(--text-primary);

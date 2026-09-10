@@ -10,6 +10,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { useSlashBlockRollbackController } from './useSlashBlockRollbackController';
 import { useNoteBlockTrashController } from './useNoteBlockTrashController';
 import { useTrayController } from './useTrayController';
+import { usePaperInkCommands } from './usePaperInkCommands';
 import { tableObjectSavePayload } from '../tableObjectService';
 import { resolveEffectiveDocumentTypographyProfile } from '../pageFrameTypographyService';
 import type {
@@ -389,6 +390,13 @@ export function useNoteCanvasRuntimeController() {
   });
   textHistoryHostRef.current = { pushHistoryEntry, enqueueRuntimeHistoryOperation, whenHistoryIdle, isReplaying: isRuntimeHistoryReplaying };
 
+  const inkCommands = usePaperInkCommands({
+    noteId, generation: textHistoryGeneration,
+    objects: persistedCanvasObjects, placements: persistedCanvasPlacements,
+    persistCanvasObject, deleteCanvasObject,
+    boundary: textHistory.boundary, pushHistoryEntry, enqueueRuntimeHistoryOperation,
+  });
+
   const handleWritingSurfaceFocusBlock = useCallback((receipt: Parameters<typeof markBlockFocused>[0]) => {
     markBlockFocused(receipt);
     handleDurableFocusReceipt(receipt);
@@ -547,9 +555,9 @@ export function useNoteCanvasRuntimeController() {
     onSaveContentGroups: saveContentGroups,
     onSaveGroupFolders: saveGroupFolders,
     onSavePageFrameCollection: savePageFrameCollection,
-    onPersistCanvasObject: persistCanvasObject,
+    onPersistCanvasObject: inkCommands.persistCanvasObject,
     onPushStructuredMutationHistory: pushStructuredMutationHistory,
-    onDeleteCanvasObject: deleteCanvasObject,
+    onDeleteCanvasObject: inkCommands.deleteCanvasObject,
     onSaveDocumentTypographyProfile: saveDocumentTypographyProfile,
     onSelectBlock: markBlockSelected,
     onClearBlockSelection: clearBlockSelection,

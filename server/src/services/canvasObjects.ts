@@ -4,6 +4,8 @@ import { AppError } from '../middleware/errorHandler.js';
 import { finalizeCanvasAssetCleanup, releaseAssetReference } from './canvasAssets.js';
 import type { ManagedFileTask } from './managedFileCleanup.js';
 import { projectCanvasPlacementLayout } from './canvasPlacementLayout.js';
+import { readCoordinateContract } from './coordinateContract.js';
+import { paperFreehandDataSchema } from '../validators/paperInk.js';
 
 interface OwnedNote {
   id: string;
@@ -195,6 +197,7 @@ export interface GenericCanvasObjectInput {
   placement: CanvasPlacementInput;
   source?: Record<string, unknown>;
   metadata?: Record<string, unknown>;
+  data?: Record<string, unknown>;
   extension?: Record<string, unknown>;
   mount?: Record<string, unknown>;
 }
@@ -651,6 +654,58 @@ function validateBlockProjection(
   `).get(context.placementId, note.id, blockId, userId) as { id: string; course_id: string } | undefined;
   if (!block) throw new AppError(404, 'Note block placement not found');
   return { block_id: block.id };
+}
+
+function validateFreehandObject(
+  db: Database.Database,
+  userId: string,
+  note: OwnedNote,
+  context: CanvasKindHandlerContext,
+) {
+  const { input } = context;
+  const placement = input.placement;
+  assertCanvasPlacementWriteAllowed({ surface: placement.surface, boundary_role: placement.boundary_role });
+  if (readCoordinateContract(db) !== 'v2') {
+    throw new AppError(400, 'Paper ink requires coordinate contract v2');
+  }
+  if (placement.surface !== 'formal_page' || placement.boundary_role !== 'inside'
+    || placement.coordinate_space !== 'page_frame_local' || !optionalText(placement.frame_id)) {
+    throw new AppError(400, 'Paper ink requires page_frame_local placement on one formal page');
+  }
+  if ((input.backing && input.backing !== 'none') || (input.object_class && input.object_class !== 'pure')
+    || input.mount || input.extension) {
+    throw new AppError(400, 'Paper ink is a pure canvas object without content backing');
+  }
+  const frame = db.prepare(`
+    SELECT cp.width, cp.height, pfe.content_inset_json
+    FROM page_frame_extensions pfe
+    JOIN canvas_objects co ON co.id = pfe.object_id AND co.kind = 'page_frame' AND co.status = 'active'
+    JOIN canvas_placements cp ON cp.object_id = co.id
+    WHERE pfe.frame_id = ? AND pfe.note_id = ? AND pfe.user_id = ?
+  `).get(placement.frame_id, note.id, userId) as {
+    width: number; height: number; content_inset_json: string | null;
+  } | undefined;
+  if (!frame) throw new AppError(400, 'Paper ink page not found');
+  const inset = parseJson<Record<string, unknown>>(frame.content_inset_json, {});
+  const left = -numeric(inset.left, 0);
+  const top = -numeric(inset.top, 0);
+  const { x, y, width, height } = placement;
+  const epsilon = 1e-6;
+  if (![x, y, width, height].every((value) => typeof value === 'number' && Number.isFinite(value))
+    || Number(width) < 0 || Number(height) < 0
+    || Number(x) < left - epsilon || Number(y) < top - epsilon
+    || Number(x) + Number(width) > left + frame.width + epsilon
+    || Number(y) + Number(height) > top + frame.height + epsilon
+    || numeric(placement.rotation, 0) !== 0) {
+    throw new AppError(400, 'Paper ink bounds must stay inside its page');
+  }
+  const parsed = paperFreehandDataSchema.safeParse(input.data);
+  if (!parsed.success) throw new AppError(400, 'Invalid paper ink data');
+  if (parsed.data.points?.some((point) => point.x < -epsilon || point.y < -epsilon
+    || point.x > Number(width) + epsilon || point.y > Number(height) + epsilon)) {
+    throw new AppError(400, 'Paper ink points must stay inside its bounds');
+  }
+  return { data: parsed.data };
 }
 
 function validateShapeObject(
@@ -1268,6 +1323,20 @@ function upsertStructuredObjectExtension(
 }
 
 const KIND_HANDLERS: Record<string, CanvasKindHandler> = {
+  freehand: {
+    kind: 'freehand',
+    backing: 'none',
+    objectClass: 'pure',
+    source: 'paper_ink',
+    validate: validateFreehandObject,
+    writeExtension(db, userId, note, context, validation) {
+      db.prepare('UPDATE canvas_objects SET metadata = ? WHERE id = ? AND user_id = ? AND note_id = ?')
+        .run(stringifyJson({ ...context.input.metadata, freehand: validation.data }, {}), context.objectId, userId, note.id);
+      // A pen stroke owns exactly one page placement, including after undo/redo saves.
+      db.prepare('DELETE FROM canvas_placements WHERE object_id = ? AND user_id = ? AND note_id = ? AND id != ?')
+        .run(context.objectId, userId, note.id, context.placementId);
+    },
+  },
   paragraph_block_projection: {
     kind: 'paragraph_block_projection',
     backing: 'note_block',

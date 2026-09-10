@@ -110,6 +110,7 @@ function normalizeCanvasObject(raw: unknown): CanvasObject | null {
     status: readString(raw, ['status'], 'active') as CanvasObjectStatus,
     source: normalizeCanvasObjectSource(raw.source ?? raw.source_json),
     metadata,
+    ...(kind === 'freehand' && isRecord(metadata.freehand) ? { data: metadata.freehand } : {}),
     createdAt: readOptionalString(raw, ['createdAt', 'created_at']),
     updatedAt: readOptionalString(raw, ['updatedAt', 'updated_at']),
   };

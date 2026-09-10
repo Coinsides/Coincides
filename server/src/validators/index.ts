@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { paperFreehandDataSchema } from './paperInk.js';
 
 // --- Auth ---
 
@@ -797,6 +798,29 @@ const saveTestProbeObjectSchema = z.object({
   source: canvasObjectSourceSchema,
 });
 
+const saveFreehandObjectSchema = z.object({
+  kind: z.literal('freehand'),
+  backing: z.literal('none').optional(),
+  object_class: z.literal('pure').optional(),
+  placement: canvasPlacementCoreSchema.extend({
+    frame_id: canvasRuntimeIdSchema,
+    coordinate_space: z.literal('page_frame_local'),
+  }).superRefine((placement, ctx) => {
+    if (placement.surface !== 'formal_page') ctx.addIssue({
+      code: z.ZodIssueCode.custom, path: ['surface'], message: 'Paper ink requires formal_page',
+    });
+    if (placement.boundary_role !== 'inside') ctx.addIssue({
+      code: z.ZodIssueCode.custom, path: ['boundary_role'], message: 'Paper ink requires inside page ownership',
+    });
+  }),
+  data: paperFreehandDataSchema,
+  metadata: canvasObjectMetadataSchema,
+  source: canvasObjectSourceSchema,
+  extension: z.never().optional(),
+  mount: z.never().optional(),
+  contentMount: z.never().optional(),
+});
+
 const shapeContentMountSchema = z.object({
   mount_id: canvasRuntimeIdSchema.optional(),
   target_id: canvasRuntimeIdSchema.optional(),
@@ -1120,6 +1144,7 @@ export const saveCanvasBlockPlacementSchema = z.object({
 export const saveCanvasObjectSchema = z.union([
   saveParagraphBlockProjectionObjectSchema,
   saveShapeObjectSchema,
+  saveFreehandObjectSchema,
   saveVisualConnectorObjectSchema,
   saveImageObjectSchema,
   saveTableObjectSchema,

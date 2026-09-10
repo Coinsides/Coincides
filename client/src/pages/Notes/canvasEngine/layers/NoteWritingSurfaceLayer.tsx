@@ -3,7 +3,9 @@ import { createBlankDraftLayout, createSurfaceModePolicy } from '../modePolicySe
 import { useUIStore } from '@/stores/uiStore';
 import { sliceGraphemes } from '../../../../../../shared/graphemes';
 import { projectPageFrameToReadingSurface } from '../pageFramePresentationService';
-import { Boxes } from 'lucide-react';
+import { Boxes, Pencil, Eraser } from 'lucide-react';
+import type { PaperInkTool } from '../freehandService';
+import { PaperInkLayer } from './PaperInkLayer';
 import { NoteCanvasRuntimeContext } from '../NoteCanvasRuntimeProvider';
 import { BOARD_STAGING_MIME, resolveStagingItemDrop } from '../../../Boards/boardStagingDrag';
 import type { ItemRefBlockData } from '@shared/types/itemRef';
@@ -682,6 +684,10 @@ export function NoteWritingSurfaceLayer({
   } | null>(null);
   const stagingItemDrop = useContext(NoteCanvasRuntimeContext)?.stagingItemDrop;
   const itemDropPending = useRef(false);
+  const [paperInkTool, setPaperInkTool] = useState<PaperInkTool>('write');
+  const paperInkEnabled = !contentReadOnly && !layoutMode && !overviewOpen
+    && noteCanvasRuntime.coordinateContract === 'v2';
+  useEffect(() => { setPaperInkTool('write'); }, [noteId, contentReadOnly, layoutMode, overviewOpen, surfaceMode]);
   const [spacePanReady, setSpacePanReady] = useState(false);
   const [unitMoveTarget, setUnitMoveTarget] = useState<CrossBlockUnitDropTarget | null>(null);
   const [canvasPanning, setCanvasPanning] = useState(false);
@@ -3557,6 +3563,13 @@ export function NoteWritingSurfaceLayer({
         onDragOverCapture={handleStagingDragOver}
         onDropCapture={handleStagingDrop}
       >
+        {surfaceMode === 'page' && noteCanvasRuntime.pageFrames.map((frame) => (
+          <PaperInkLayer key={frame.id} frame={frame}
+            displayFrame={projectPageFrameToReadingSurface(frame, noteCanvasRuntime.coordinateContract, pageOffsetX)}
+            objects={noteCanvasRuntime.canvasObjects} placements={noteCanvasRuntime.canvasPlacements}
+            canvasId={noteCanvasRuntime.canvasObjects[0]?.canvasId || 'primary-note-canvas'} tool={paperInkEnabled ? paperInkTool : 'write'}
+            onCreate={onPersistCanvasObject} onDelete={onDeleteCanvasObject} />
+        ))}
         {surfaceMode === 'canvas' && (
           <>
             {noteCanvasRuntime.pageFrames.map((pageFrame, index) => {
@@ -4089,6 +4102,15 @@ export function NoteWritingSurfaceLayer({
       </div>
       {surfaceMode === 'page' && (
         <div className={`${styles.canvasZoomControl} ${styles.pageReadingControl}`} data-page-reading-control="true" role="group" aria-label="Page reading controls">
+          <button type="button" className={styles.canvasZoomReset} aria-pressed={paperInkTool === 'write'}
+            disabled={!paperInkEnabled} onClick={() => setPaperInkTool('write')}>Write</button>
+          {([{ key: 'pen', label: 'Pen', Icon: Pencil }, { key: 'eraser', label: 'Eraser', Icon: Eraser }] as const).map(({ key, label, Icon }) => (
+            <button key={key} type="button" className={styles.canvasZoomReset} aria-label={label}
+              aria-pressed={paperInkTool === key} disabled={!paperInkEnabled}
+              onClick={() => { setPaperInkTool(paperInkTool === key ? 'write' : key); }}>
+              <Icon size={14} aria-hidden="true" /> {label}
+            </button>
+          ))}
           {([
             ['fit_width', 'Fit width'], ['fit_page', 'Fit page'], ['physical', '100% physical'],
           ] as const).map(([gear, label]) => (

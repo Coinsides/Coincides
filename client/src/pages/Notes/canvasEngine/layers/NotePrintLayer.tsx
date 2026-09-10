@@ -36,6 +36,8 @@ function PrintPages({ input }: { input: NotePrintInput }) {
           <NoteReadOnlyPageContent
             frame={frame}
             fragments={input.noteCanvasRuntime.blockFragmentProjections}
+            canvasObjects={input.noteCanvasRuntime.canvasObjects}
+            canvasPlacements={input.noteCanvasRuntime.canvasPlacements}
             visibleBlocks={input.visibleBlocks}
             blockTextDrafts={input.blockTextDrafts}
             blockTextFlowDrafts={input.blockTextFlowDrafts}

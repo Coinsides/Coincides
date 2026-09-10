@@ -141,6 +141,17 @@ function alignment(frameX: number, mode: SurfaceMode, options: {
   return result;
 }
 
+it('C4 paper tools are available in writing and disabled in layout and read-only modes', () => {
+  const props = propsFor(frame(0), 'page');
+  const view = render(<NoteWritingSurfaceLayer {...props} contentReadOnly={false} layoutMode={false} />);
+  expect((view.getByRole('button', { name: /^Pen$/ }) as HTMLButtonElement).disabled).toBe(false);
+  expect((view.getByRole('button', { name: /^Eraser$/ }) as HTMLButtonElement).disabled).toBe(false);
+  view.rerender(<NoteWritingSurfaceLayer {...props} contentReadOnly={false} layoutMode />);
+  expect((view.getByRole('button', { name: /^Pen$/ }) as HTMLButtonElement).disabled).toBe(true);
+  view.rerender(<NoteWritingSurfaceLayer {...props} contentReadOnly layoutMode={false} />);
+  expect((view.getByRole('button', { name: /^Eraser$/ }) as HTMLButtonElement).disabled).toBe(true);
+});
+
 describe('B10 extraction landing through the actual writing surface', () => {
   function expectLandedPageVisible(source: NoteBlock, layout: BlockBoxLayout, pageFrame: PageFrameModel, pageOffsetX: number) {
     const landed: NoteBlock = { ...source, id: `${source.id}-landed`, placement_id: `${source.placement_id}-landed`,

@@ -2,8 +2,9 @@ import { textFromContent } from '../blockContentService';
 import { readStoredLayout } from '../placementService';
 import { getPagePrintFragmentGeometry } from '../pagePrintProjectionService';
 import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
-import type { PageFrameModel, PageStackBlockFragmentProjection } from '../types';
+import type { CanvasObject, CanvasPlacement, PageFrameModel, PageStackBlockFragmentProjection } from '../types';
 import { BlockEditorLayer } from './BlockEditorLayer';
+import { PaperInkSvg } from './PaperInkSvg';
 import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
 import styles from '../../NoteDetail.module.css';
 
@@ -11,6 +12,8 @@ export type NoteReadOnlyPageContentProps = Pick<NoteWritingSurfaceLayerProps,
   'visibleBlocks' | 'blockTextDrafts' | 'blockTextFlowDrafts' | 'blockFieldDrafts' | 'anchorsBySourceRef'> & {
   frame: PageFrameModel;
   fragments: readonly PageStackBlockFragmentProjection[];
+  canvasObjects?: readonly CanvasObject[];
+  canvasPlacements?: readonly CanvasPlacement[];
   /** Retain the existing print fragment markers without sharing its event lifecycle. */
   print?: boolean;
 };
@@ -25,9 +28,12 @@ const noSave = async (): Promise<BlockSaveOutcome> => ({
 /**
  * Page-local block fragments shared by print and overview. The caller owns the
  * page box, typography and scale; this renderer has no write or measurement API.
- * Fidelity follows the existing print projection: no annotations or generic objects.
+ * Ink shares its pure SVG renderer with writing; other generic objects and annotations
+ * retain the existing print projection's exclusions.
  */
-export function NoteReadOnlyPageContent({ frame, fragments, print = false, ...input }: NoteReadOnlyPageContentProps) {
+export function NoteReadOnlyPageContent({
+  frame, fragments, canvasObjects = [], canvasPlacements = [], print = false, ...input
+}: NoteReadOnlyPageContentProps) {
   const blocks = new Map(input.visibleBlocks.filter((block) => readStoredLayout(block)?.surface !== 'tray')
     .map((block) => [block.id, block]));
 
@@ -91,6 +97,7 @@ export function NoteReadOnlyPageContent({ frame, fragments, print = false, ...in
           />
         </div>;
       })}
+    <PaperInkSvg frame={frame} objects={canvasObjects} placements={canvasPlacements} print={print} />
     <style>{`
       [data-note-readonly-fragment] .${styles.textUnitGutter},
       [data-note-readonly-fragment] .${styles.sourceRefAction},
