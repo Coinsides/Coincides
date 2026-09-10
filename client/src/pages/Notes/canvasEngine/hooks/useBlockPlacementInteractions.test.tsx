@@ -8,7 +8,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { createSurfaceModePolicy } from '../modePolicyService';
 import { createPageFrameDefaultTypographyProfile } from '../pageFrameTypographyService';
 import { estimateTextBlockHeight } from '../measurementService';
-import { normalizeBlockLayoutForSave, type CoordinateContract } from '../placementContractService';
+import { normalizeBlockLayoutForSave, resolveScreenRect, type CoordinateContract } from '../placementContractService';
 import type { BlockBoxLayout } from '../runtimeLayout';
 import type { DocumentTypographyProfile, PageFrameModel } from '../types';
 import {
@@ -133,7 +133,7 @@ function renderPlacementSubject({
       },
     } satisfies UseBlockPlacementInteractionsOptions<PlacementTestBlock>;
     const interactions = useBlockPlacementInteractions(options);
-    return { layouts, ...interactions };
+    return { layouts, setLayouts, ...interactions };
   }, { initialProps: { noteId: 'note-before' } });
 
   return {
@@ -286,13 +286,17 @@ describe('useBlockPlacementInteractions staging gesture', () => {
 });
 
 describe('useBlockPlacementInteractions K-5 release collection', () => {
-  it('passes an unplaced v2 organize drag unchanged to first-save affiliation instead of clamping fake world coordinates', () => {
+  it.each([
+    { frame_id: undefined, coordinate_space: 'page_frame_local' as const },
+    { frame_id: 'retired-frame', coordinate_space: 'page_frame_local' as const },
+    { frame_id: 'retired-frame', coordinate_space: 'canvas_world' as const },
+  ])('passes an unresolved v2 organize drag ($frame_id, $coordinate_space) unchanged to save-time affiliation', ({ frame_id, coordinate_space }) => {
     const frame: PageFrameModel = {
       ...PAGE_FRAME, x: 0, y: 0, width: 904, height: 1279,
       contentInset: { left: 72, right: 72, top: 96, bottom: 96 },
     };
     const initialLayout: BlockBoxLayout = {
-      x: 0, y: 0, width: 760, height: 44, coordinate_space: 'page_frame_local',
+      x: 0, y: 0, width: 760, height: 44, coordinate_space, frame_id,
     };
     const runtime = renderPlacementSubject({
       initialLayout, snapEnabled: true, surfaceMode: 'page', coordinateContract: 'v2',
@@ -305,7 +309,7 @@ describe('useBlockPlacementInteractions K-5 release collection', () => {
     expect(preview.x).toBe(0);
     expect(preview.y).toBeCloseTo(60 / 0.987, 10);
     expect(preview.y + preview.height / 2).toBeLessThan(frame.contentInset.top);
-    expect(preview.frame_id).toBeUndefined();
+    expect(preview.frame_id).toBe(frame_id);
 
     act(() => dispatchWindowPointer('pointerup', 0, 60));
     expect(runtime.subject.result.current.layouts[BLOCK.id]).toEqual(preview);
@@ -316,6 +320,43 @@ describe('useBlockPlacementInteractions K-5 release collection', () => {
     }, 'v2');
     expect(saved).toMatchObject({ x: 0, frame_id: frame.id, surface: 'formal_page', boundary_role: 'inside' });
     expect(saved.y).toBe(preview.y - 96);
+    expect(resolveScreenRect(saved, frame, 'v2')).toEqual(resolveScreenRect(preview, undefined, 'v2'));
+
+    // Feed the persisted affiliation back into the same hook before dragging again.
+    act(() => runtime.subject.result.current.setLayouts({ [BLOCK.id]: saved }));
+    act(() => runtime.subject.result.current.beginMoveBlock(pointerStart(0, 0), BLOCK, saved));
+    const contentBottom = frame.height - frame.contentInset.top - frame.contentInset.bottom;
+    const secondClientY = (contentBottom - 10 - saved.y) * 0.987;
+    act(() => dispatchWindowPointer('pointermove', 0, secondClientY));
+    const secondPreview = runtime.subject.result.current.layouts[BLOCK.id];
+    expect(secondPreview.frame_id).toBe(frame.id);
+    expect(secondPreview.y).toBeLessThan(contentBottom);
+    expect(secondPreview.y + secondPreview.height / 2).toBeGreaterThan(contentBottom);
+
+    act(() => dispatchWindowPointer('pointerup', 0, secondClientY));
+    const collected = { ...secondPreview, x: 0, y: contentBottom - secondPreview.height };
+    expect(runtime.subject.result.current.layouts[BLOCK.id]).toEqual(collected);
+    expect(runtime.persistChangedBlockLayouts).toHaveBeenNthCalledWith(2, { [BLOCK.id]: collected });
+    expect(runtime.pushLayoutHistory).toHaveBeenLastCalledWith({ [BLOCK.id]: saved }, { [BLOCK.id]: collected });
+    expect(normalizeBlockLayoutForSave(collected, { pageFrames: [frame], primaryFrameId: frame.id }, 'v2')).toEqual(collected);
+
+    // Valid world IDs and geometric world affiliation retain the same collection rule.
+    for (const worldFrameId of [frame.id, undefined]) {
+      const worldLayout: BlockBoxLayout = {
+        ...saved, x: 72, y: 96, width: 600, coordinate_space: 'canvas_world', frame_id: worldFrameId,
+      };
+      act(() => runtime.subject.result.current.setLayouts({ [BLOCK.id]: worldLayout }));
+      act(() => runtime.subject.result.current.beginMoveBlock(pointerStart(0, 0), BLOCK, worldLayout));
+      const worldClientY = (contentBottom - 10) * 0.987;
+      act(() => dispatchWindowPointer('pointermove', 0, worldClientY));
+      const worldPreview = runtime.subject.result.current.layouts[BLOCK.id];
+      expect(worldPreview.y).toBeLessThan(frame.height - frame.contentInset.bottom);
+      expect(worldPreview.y + worldPreview.height / 2).toBeGreaterThan(frame.height - frame.contentInset.bottom);
+      act(() => dispatchWindowPointer('pointerup', 0, worldClientY));
+      expect(runtime.subject.result.current.layouts[BLOCK.id]).toEqual({
+        ...worldPreview, y: frame.height - frame.contentInset.bottom - worldPreview.height,
+      });
+    }
   });
 
   it('clamps a crossing drag into its affiliated page content rect by minimum translation when organize mode is on', () => {

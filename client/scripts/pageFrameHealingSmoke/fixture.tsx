@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import { flushSync } from 'react-dom';
 import { HashRouter } from 'react-router-dom';
 import { NoteCanvasRuntimeProvider } from '../../src/pages/Notes/canvasEngine/NoteCanvasRuntimeProvider';
 import { useNoteCanvasRuntimeController } from '../../src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController';
@@ -8,7 +9,7 @@ import { NoteRuntimeDocumentLayer } from '../../src/pages/Notes/canvasEngine/lay
 import ToastContainer from '../../src/components/Toast/Toast';
 import { useUIStore } from '../../src/stores/uiStore';
 import { TRAY_DRAG_TYPE } from '../../src/pages/Notes/canvasEngine/trayService';
-import { apiCalls, collectionPending, healthy, NOTE_ID, releaseCollection, storedState } from './mockApi';
+import { apiCalls, collectionPending, placementPending, healthy, stale, NOTE_ID, releaseCollection, releasePlacement, storedState } from './mockApi';
 import styles from '../../src/pages/Notes/NoteDetail.module.css';
 import appStyles from '../../src/components/Layout/AppLayout.module.css';
 import '../../src/i18n';
@@ -17,6 +18,7 @@ import '../../src/styles/global.css';
 type Runtime = ReturnType<typeof useNoteCanvasRuntimeController>;
 const toastReceipts: Array<{ type: string; message: string }> = [];
 const dropReceipts: Array<{ tag: string | null; attributes: Record<string, string>; types: string[]; trayPlacement: string }> = [];
+const releasePreviews: Array<{ layouts: unknown; blockRects: unknown; rects: unknown }> = [];
 function sample(runtime: Runtime) {
   const props = runtime.layerProps?.documentLayerProps.writingSurfaceProps;
   const blockList = props?.blockListRef.current;
@@ -31,14 +33,14 @@ function sample(runtime: Runtime) {
       x: rect.x, y: rect.y, width: rect.width, height: rect.height };
   });
   return structuredClone({
-    ready: Boolean(!runtime.loading && blockList), healthy,
+    ready: Boolean(!runtime.loading && blockList), healthy, stale,
     overview: Boolean(document.querySelector('[data-note-overview-root]')),
     runtimeCollection: runtime.runtimePageFrameCollection,
     runtimePlacements: props?.noteCanvasRuntime.blockPlacements,
     layouts: props?.blockLayouts, viewport: props?.noteCanvasRuntime.viewport,
-    rects, blockRects, stored: storedState(), calls: apiCalls, pendingCollection: collectionPending(),
+    rects, blockRects, stored: storedState(), calls: apiCalls, pendingCollection: collectionPending(), pendingPlacement: placementPending(),
     toasts: useUIStore.getState().toasts.map(({ type, message }) => ({ type, message })),
-    toastReceipts, dropReceipts,
+    toastReceipts, dropReceipts, releasePreviews,
     tray: runtime.layerProps?.documentLayerProps.tray?.entries.map((entry) => ({
       label: entry.label, category: entry.category, placement: entry.placement, blockId: entry.block?.id,
     })),
@@ -76,10 +78,22 @@ function HealingRuntime() {
       });
     };
     document.addEventListener('drop', recordDrop, true);
+    const recordReleasePreview = (event: PointerEvent) => {
+      if (event.target instanceof Element && event.target.closest('aside')) return;
+      // Finish the final pointermove render before measuring; fast drags can batch it with pointerup.
+      flushSync(() => {});
+      const { layouts, blockRects, rects } = sample(latest.current);
+      releasePreviews.push({ layouts, blockRects, rects });
+    };
+    // Capture runs before the hook's release collector so DOM movement is measurable.
+    window.addEventListener('pointerup', recordReleasePreview, true);
     const timer = window.setInterval(() => {
-      setStatus(`${healthy ? 'Healthy' : 'Incomplete'} note · API calls ${apiCalls.length} · collection PUT pending ${collectionPending()}`);
+      setStatus(`${stale ? 'Stale frame' : healthy ? 'Healthy' : 'Incomplete'} note · API calls ${apiCalls.length} · collection PUT pending ${collectionPending()} · placement PUT pending ${placementPending()}`);
     }, 150);
-    return () => { window.clearInterval(timer); unsubscribe(); document.removeEventListener('drop', recordDrop, true); delete window.__frameHealingSmoke; };
+    return () => {
+      window.clearInterval(timer); unsubscribe(); document.removeEventListener('drop', recordDrop, true);
+      window.removeEventListener('pointerup', recordReleasePreview, true); delete window.__frameHealingSmoke;
+    };
   }, []);
   const assertSmokeOne = () => {
     const state = storedState();
@@ -88,7 +102,7 @@ function HealingRuntime() {
     const frameIds = state.collection?.pageFrames.map((frame) => frame.id) || [];
     const latestLayout = layoutWrites[layoutWrites.length - 1]?.body as { layout?: { frame_id?: string } } | undefined;
     const failures = [
-      ...(collectionPuts.length !== (healthy ? 0 : 1) ? [`Expected ${healthy ? 0 : 1} collection PUT, received ${collectionPuts.length}`] : []),
+      ...(collectionPuts.length !== (healthy || (stale && !new URLSearchParams(window.location.search).has('missing')) ? 0 : 1) ? [`Unexpected collection PUT count: ${collectionPuts.length}`] : []),
       ...(!layoutWrites.length ? ['No successful block placement PUT'] : []),
       ...(!latestLayout?.layout?.frame_id || !frameIds.includes(latestLayout.layout.frame_id) ? ['Saved block layout lacks a frame_id in the stored collection'] : []),
       ...(toastReceipts.some((toast) => toast.message === 'Failed to save block layout') ? ['Observed Henry toast: Failed to save block layout'] : []),
@@ -103,6 +117,15 @@ function HealingRuntime() {
       <button style={{ color: '#172033', background: '#eee' }} type="button" onClick={() => setEvidence(JSON.stringify(sample(latest.current), null, 2))}>Capture evidence</button>{' '}
       <button style={{ color: '#172033', background: '#eee' }} type="button" onClick={assertSmokeOne}>Assert smoke 1</button>{' '}
       <button style={{ color: '#172033', background: '#eee' }} type="button" onClick={() => { beforeSave.current = sample(latest.current); releaseCollection(); }}>Release collection PUT</button>{' '}
+      <button style={{ color: '#172033', background: '#eee' }} type="button" onClick={() => { beforeSave.current = sample(latest.current); releasePlacement(); }}>Release placement PUT</button>{' '}
+      <button style={{ color: '#172033', background: '#eee' }} type="button" onClick={() => {
+        const before = beforeSave.current;
+        const after = sample(latest.current);
+        const sameRects = Boolean(before && JSON.stringify(before.blockRects) === JSON.stringify(after.blockRects)
+          && JSON.stringify(before.rects) === JSON.stringify(after.rects));
+        setAssertion(`${sameRects ? 'PASS' : 'FAIL'} zero jump: all block and text DOM rectangles byte-equal`);
+        setEvidence(JSON.stringify({ before, after }, null, 2));
+      }}>Check zero jump</button>{' '}
       <button style={{ color: '#172033', background: '#eee' }} type="button" onClick={() => {
         const before = beforeSave.current;
         const after = sample(latest.current);
@@ -116,7 +139,7 @@ function HealingRuntime() {
         setAssertion(`${sameRects && sameCollection ? 'PASS' : 'FAIL'} smoke 2: rectangles equal=${sameRects}, runtime/PUT/after collection equal=${sameCollection}`);
         setEvidence(JSON.stringify({ before, after }, null, 2));
       }}>Check saved geometry</button>{' '}
-      <a href="?healthy=1">Healthy note</a>{' · '}<a href="?hold=1">Incomplete note, hold collection PUT</a>{' · '}<a href="?">Reset incomplete note</a>
+      <a href="?healthy=1">Healthy note</a>{' · '}<a href="?stale=1">Stale frame note</a>{' · '}<a href="?stale=1&missing=1&hold=1">Missing collection + stale frame</a>{' · '}<a href="?hold=1">Incomplete note, hold collection PUT</a>{' · '}<a href="?">Reset incomplete note</a>
       <details><summary>Captured runtime, screen rectangles, API payloads and toasts</summary><pre data-f11-evidence="true" style={{ whiteSpace: 'pre-wrap' }}>{evidence}</pre></details>
       <output data-f11-assertion="true" style={{ display: 'block' }}>{assertion}</output>
     </aside>

@@ -1,4 +1,5 @@
 import { screenLayoutToLocal, resolveScreenRect, selectPlacementFrame } from '../placementContractService';
+import { projectPageFrameToReadingSurface } from '../pageFramePresentationService';
 import { Boxes } from 'lucide-react';
 import { NoteCanvasRuntimeContext } from '../NoteCanvasRuntimeProvider';
 import { BOARD_STAGING_MIME, resolveStagingItemDrop } from '../../../Boards/boardStagingDrag';
@@ -899,8 +900,10 @@ export function NoteWritingSurfaceLayer({
     new Map(noteCanvasRuntime.pageFrameExtensions.map((extension) => [extension.frameId, extension]))
   ), [noteCanvasRuntime.pageFrameExtensions]);
   const pageFrameGuides = useMemo(() => (
-    visiblePageFrames.map(createPageFrameGuides)
-  ), [visiblePageFrames]);
+    visiblePageFrames.map((frame) => createPageFrameGuides(surfaceMode === 'page'
+      ? projectPageFrameToReadingSurface(frame, noteCanvasRuntime.coordinateContract, pageOffsetX)
+      : frame))
+  ), [visiblePageFrames, surfaceMode, noteCanvasRuntime.coordinateContract, pageOffsetX]);
   const blockFragmentsByBlockId = useMemo(() => {
     const next = new Map<string, PageStackBlockFragmentProjection[]>();
     noteCanvasRuntime.blockFragmentProjections.forEach((fragment) => {

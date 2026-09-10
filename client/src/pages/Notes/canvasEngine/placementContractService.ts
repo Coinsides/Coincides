@@ -132,7 +132,7 @@ export function requireStoredLayout(
   return stored;
 }
 
-/** First-save affiliation for unplaced blocks on the continuous paper.
+/** Save-time affiliation for unplaced or stale-frame blocks on the continuous paper.
  * Compare the block and frame outlines in the renderer's common coordinate
  * system, then undo the horizontal paper projection before world -> local.
  * Reading/hydration and already affiliated layouts keep their existing rules.
@@ -144,10 +144,14 @@ export function normalizeBlockLayoutForSave(
   pageOffsetX = 0,
 ): BlockBoxLayout {
   const frames = collection?.pageFrames || [];
-  if (contract !== 'v2' || layout.frame_id || layout.coordinate_space === 'canvas_world'
+  const staleFrame = Boolean(layout.frame_id && !frames.some((frame) => frame.id === layout.frame_id));
+  if (contract !== 'v2' || (!staleFrame && (layout.frame_id || layout.coordinate_space === 'canvas_world'))
     || layout.surface === 'tray' || layout.surface === 'canvas_workspace') {
     return requireStoredLayout(layout, frames, contract);
   }
+  // The renderer treats a missing explicit frame as frameless. Reaffiliate that
+  // same screen rectangle, including stale rows tagged as world coordinates.
+  if (staleFrame) layout = { ...layout, frame_id: undefined };
   const screen = resolveScreenRect(layout, undefined, contract, pageOffsetX);
   let frame: PageFrameModel | undefined;
   let largestOverlap = 0;
@@ -168,7 +172,7 @@ export function normalizeBlockLayoutForSave(
     const stack = collection?.pageStacks?.find((candidate) => candidate.id === collection.primaryStackId)
       || collection?.pageStacks?.find((candidate) => candidate.frameIds.includes(collection.primaryFrameId || ''));
     const primaryFrameId = stack ? stack.primaryFrameId : collection?.primaryFrameId;
-    frame = frames.find((candidate) => candidate.id === primaryFrameId);
+    frame = frames.find((candidate) => candidate.id === primaryFrameId) || frames[0];
   }
   if (!frame) return requireStoredLayout(layout, frames, contract);
   const origin = contentOrigin(frame);

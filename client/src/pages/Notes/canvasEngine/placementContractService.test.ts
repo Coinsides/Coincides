@@ -12,6 +12,7 @@ import {
   resolveFlowCurrentFrameId,
   resolveFlowFrameStartLayout,
   resolveScreenRect,
+  requireStoredLayout,
   screenLayoutToLocal,
   resolveWorldRect,
   selectPlacementFrame,
@@ -139,11 +140,53 @@ describe('first-save block affiliation on continuous paper', () => {
     }
   });
 
-  it('keeps absent frames and dangling explicit identities unresolved', () => {
+  it('keeps absent frames unresolved', () => {
     expect(() => normalizeBlockLayoutForSave(unplaced(), { pageFrames: [], primaryFrameId: null }, 'v2'))
       .toThrow('A resolved page frame is required to save this coordinate contract');
-    expect(() => normalizeBlockLayoutForSave({ ...unplaced(), frame_id: 'missing' }, collection, 'v2'))
+    expect(() => normalizeBlockLayoutForSave({ ...unplaced(), frame_id: 'missing' }, { pageFrames: [], primaryFrameId: null }, 'v2'))
       .toThrow('A resolved page frame is required to save this coordinate contract');
+  });
+
+  it.each(['page_frame_local', 'canvas_world', undefined] as const)('reaffiliates a stale %s layout from its rendered rectangle without a jump', (coordinate_space) => {
+    const shifted = { ...firstFrame, x: 420, y: 150, contentInset: { left: 54, right: 54, top: 112, bottom: 112 } };
+    const current = { ...collection, pageFrames: [shifted] };
+    const before: BlockBoxLayout = { ...unplaced(), x: 17, y: 180, width: 300, frame_id: 'retired', coordinate_space };
+    const bytes = JSON.stringify(before);
+    for (const offset of [0, 72, 137.25]) {
+      expect(selectPlacementFrame(before, current.pageFrames, 'v2')).toBeUndefined();
+      const saved = normalizeBlockLayoutForSave(before, current, 'v2', offset);
+      expect(saved).toMatchObject({ x: 17, y: -82, frame_id: shifted.id, coordinate_space: 'page_frame_local' });
+      expect(screen(saved, current, offset)).toEqual(screen(before, current, offset));
+      const hydrated = reconcileHydratedBlockLayoutSurfaceAuthority({ ...saved }, current.pageFrames, 'v2') as unknown as BlockBoxLayout;
+      expect(screen(hydrated, current, offset)).toEqual(screen(before, current, offset));
+      expect(normalizeBlockLayoutForSave(saved, current, 'v2', offset)).toEqual(saved);
+    }
+    expect(JSON.stringify(before)).toBe(bytes);
+  });
+
+  it('falls back to the first existing frame when primary and stack pointers dangle', () => {
+    const current: PageFrameCollectionModel = {
+      pageFrames: frames, primaryFrameId: 'retired', primaryStackId: 'stale-stack',
+      pageStacks: [{ ...createPageStackFromFrame(frames[1], { id: 'stale-stack' }), primaryFrameId: 'retired', frameIds: ['retired'] }],
+    };
+    for (const frame_id of [undefined, 'retired']) {
+      const before = { ...unplaced(), y: 9000, frame_id };
+      const saved = normalizeBlockLayoutForSave(before, current, 'v2', 72);
+      expect(saved.frame_id).toBe(frames[0].id);
+      expect(screen(saved, current)).toEqual(screen(before, current));
+    }
+  });
+
+  it('keeps valid-frame save payload bytes identical to the existing write path', () => {
+    for (const frame of frames) {
+      for (const coordinate_space of ['page_frame_local', 'canvas_world'] as const) {
+        const before = { ...local(frame.id, -20.5), x: -12.25, coordinate_space, width_mode: 'manual' as const };
+        const current = { pageFrames: frames, primaryFrameId: frames[0].id };
+        const payload = (layout: BlockBoxLayout) => JSON.stringify(buildLayoutPayload(layout, 'v2', frames));
+        expect(payload(normalizeBlockLayoutForSave(before, current, 'v2', 137)))
+          .toBe(payload(requireStoredLayout(before, frames, 'v2')));
+      }
+    }
   });
 
   it('preserves signed fallback coordinates and identity while stored ownership still wins', () => {

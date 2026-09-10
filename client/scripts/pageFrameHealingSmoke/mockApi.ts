@@ -7,8 +7,13 @@ import { createRuntimePageFrame } from '../../src/pages/Notes/canvasEngine/pageF
 
 const params = new URLSearchParams(window.location.search);
 export const healthy = params.get('healthy') === '1';
+export const stale = params.get('stale') === '1';
 export const NOTE_ID = healthy ? 'f11-healthy-note' : 'f11-incomplete-note';
-const frame = createRuntimePageFrame({ contentX: 64, height: 1120 });
+const frame = {
+  ...createRuntimePageFrame({ contentX: 64, height: 1120 }),
+  ...(params.get('misaligned') === '1' ? { x: 80 } : {}),
+  ...(params.get('world') === '1' ? { x: 0, contentInset: { left: 72, right: 72, top: 96, bottom: 96 } } : {}),
+};
 export const fixtureNote: Note = {
   id: NOTE_ID, course_id: 'f11-memory-project', title: 'F11 synthetic paragraph note',
   description: null, status: 'active', note_class: params.get('readonly') === '1' ? 'source_projection' : 'user', source_kind: 'manual', metadata: {},
@@ -24,12 +29,15 @@ export const fixtureBlocks: NoteBlock[] = [
   canvas_layout: params.get('staged') === '1' && index === 0 ? {
     x: 0, y: 0, width: 0, height: 0, surface: 'tray', order_index: 0,
   } : {
-    x: 0, y: 60 + index * 220, width: 620, height: 100,
+    x: 0, y: (params.get('world') === '1' ? 0 : 60) + index * 220, width: 620, height: 100,
     surface: 'formal_page', boundary_role: 'inside',
-    ...(healthy ? { coordinate_space: 'page_frame_local', frame_id: frame.id } : {}),
+    ...(healthy || stale ? {
+      coordinate_space: params.get('world') === '1' ? 'canvas_world' : 'page_frame_local',
+      frame_id: stale ? 'retired-frame' : frame.id,
+    } : {}),
   },
 }));
-let storedCollection: PageFrameCollectionModel | null = healthy
+let storedCollection: PageFrameCollectionModel | null = healthy || (stale && params.get('missing') !== '1')
   ? normalizePageFrameCollection({ pageFrames: [frame], primaryFrameId: frame.id, selectedFrameId: frame.id }) : null;
 export function storedState() {
   return structuredClone({ note: fixtureNote, blocks: fixtureBlocks, collection: storedCollection });
@@ -65,9 +73,13 @@ const templates = listNoteBlockTemplates().map((template) => ({
 export type ApiCall = { method: string; url: string; body: unknown; completed: boolean };
 export const apiCalls: ApiCall[] = [];
 let holdCollection = params.get('hold') === '1';
+let holdPlacement = params.get('holdLayout') === '1';
 const pendingReleases: Array<() => void> = [];
+const pendingPlacements: Array<() => void> = [];
 export const collectionPending = () => pendingReleases.length > 0;
+export const placementPending = () => pendingPlacements.length > 0;
 export function releaseCollection() { holdCollection = false; pendingReleases.splice(0).forEach((release) => release()); }
+export function releasePlacement() { holdPlacement = false; pendingPlacements.splice(0).forEach((release) => release()); }
 export const API_BASE = '/api';
 export const getToken = () => null;
 export const setToken = (_value: unknown) => undefined;
@@ -96,6 +108,7 @@ const api = axios.create({ adapter: async (config) => {
     storedCollection = structuredClone(body.collection);
     data = storedCollection;
   } else if (method === 'PUT' && url.startsWith(`/canvas-objects/by-note/${NOTE_ID}/block-placements/`)) {
+    if (holdPlacement) await new Promise<void>((resolve) => { pendingPlacements.push(resolve); });
     const block = fixtureBlocks.find((item) => url.endsWith(`/${item.placement_id}`));
     if (!block || block.id !== body.block_id) throw new Error('Unknown synthetic block placement');
     block.canvas_layout = structuredClone(body.layout);

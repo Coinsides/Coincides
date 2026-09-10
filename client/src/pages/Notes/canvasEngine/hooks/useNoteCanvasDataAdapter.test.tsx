@@ -320,10 +320,11 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     consoleWarn.mockRestore();
   });
 
-  it('F11 persists the exact rendered collection before a first block placement without changing its fractional rectangle', async () => {
+  it.each([undefined, 'retired-frame'])('F11 persists the rendered collection before affiliation (%s) without changing its fractional rectangle', async (frame_id) => {
     mocks.coordinateContract = 'v2';
     durableBlocks = [serverBlock('incomplete paper', false)];
     const collection = f11RuntimeCollection();
+    const inputLayout = { ...f11PaperLayout, frame_id };
     const snapshot = JSON.parse(JSON.stringify(collection));
     const collectionUrl = `/canvas-objects/by-note/${note.id}/page-frame-collection`;
     const collectionWrite = deferred<{ data: PageFrameCollectionModel }>();
@@ -335,7 +336,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     subject.result.current.runtimePageFrameCollectionRef.current = { noteId: note.id, collection };
     expect(mocks.put).not.toHaveBeenCalled();
     let saving!: Promise<void>;
-    act(() => { saving = subject.result.current.persistBlockLayout(subject.result.current.blocks[0], f11PaperLayout); });
+    act(() => { saving = subject.result.current.persistBlockLayout(subject.result.current.blocks[0], inputLayout); });
     await waitFor(() => expect(mocks.put).toHaveBeenCalledOnce());
     expect(mocks.put).toHaveBeenCalledWith(collectionUrl, { collection: snapshot });
     expect(subject.result.current.pageFrameCollection).toBeNull();
@@ -353,7 +354,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     expect(savedLayout.frame_id).toBe(collection.primaryFrameId);
     expect(savedLayout.coordinate_space).toBe('page_frame_local');
     expect(resolveScreenRect(savedLayout, collection.pageFrames[0], 'v2'))
-      .toEqual(resolveScreenRect(f11PaperLayout, undefined, 'v2'));
+      .toEqual(resolveScreenRect(inputLayout, undefined, 'v2'));
   });
 
   it.each(['pending', 'complete'] as const)('F11 shares one collection PUT when a concurrent missing-collection read arrives with healing %s', async (healingPhase) => {
