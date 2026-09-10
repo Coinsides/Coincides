@@ -17,7 +17,7 @@ function Smoke() {
   return <>
     <nav aria-label="Synthetic fixture controls" style={{ display: 'flex', gap: 20, padding: 12, background: '#fff', color: '#111' }}>
       <strong>13.4 Board tools · memory fixture</strong>
-      {(['empty', 'group', 'mixed'] as const).map((sample) => <button key={sample}
+      {(['empty', 'group', 'mixed', 'alignment'] as const).map((sample) => <button key={sample}
         onClick={() => { resetSample(sample); setVisit((n) => n + 1); }}>{sample} sample</button>)}
       <button onClick={() => setVisit((n) => n + 1)}>Reopen saved board</button>
     </nav>

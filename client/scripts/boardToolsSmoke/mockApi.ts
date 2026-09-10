@@ -18,7 +18,7 @@ let sequence = 0;
 function changed() { if (typeof window !== 'undefined') window.dispatchEvent(new Event(STATE_EVENT)); }
 function response<T>(data: T) { changed(); return { data: copy(data) }; }
 
-export function resetSample(sample: 'empty' | 'group' | 'mixed' = 'empty') {
+export function resetSample(sample: 'empty' | 'group' | 'mixed' | 'alignment' = 'empty') {
   sequence = 0; writes = []; events = [];
   detail = {
     board: { id: BOARD_ID, user_id: 'synthetic-user', title: 'Board tools workshop', soul_id: 'synthetic-soul',
@@ -37,6 +37,14 @@ export function resetSample(sample: 'empty' | 'group' | 'mixed' = 'empty') {
     seedEdge(a, b, { label: 'Selected connection', style: { direction: 'forward' } });
     seedEdge(c, a, { label: 'Unselected cascade', style: { direction: 'both' } });
     seedVisual({ x: 80, y: 300 });
+  }
+  if (sample === 'alignment') {
+    const primary = seedMember('An idea in progress', { x: 80, y: 80, w: 260, h: 156 });
+    primary.reference.summary = 'Learning improves when we connect a new idea to something we already understand.';
+    const target = seedMember('A useful connection', { x: 480, y: 450, w: 200, h: 180 });
+    target.reference.summary = 'A concrete example helps us remember the relationship between two ideas.';
+    seedVisual({ visual_kind: 'sticky', x: 850, y: 80, w: 160, h: 100,
+      data: { text: 'Compare the two ideas, then write down the connection.' } });
   }
   changed();
 }

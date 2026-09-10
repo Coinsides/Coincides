@@ -58,6 +58,17 @@ async function mount(title: string) {
   return card;
 }
 
+function seedItem(overrides: Partial<BoardMember> = {}) {
+  const member: BoardMember = {
+    id: 'saved-item-projection', board_id: detail.board.id, member_kind: 'item', member_id: 'standalone',
+    x: 80, y: 70, w: 260, h: 156, scale: 1, z_index: 1, pinned: false,
+    metadata: {}, created_at: '2026-09-10', updated_at: '2026-09-10', reference: reference('standalone'),
+    ...overrides,
+  };
+  detail.members.push(member);
+  return member;
+}
+
 beforeEach(() => {
   vi.clearAllMocks();
   vi.stubGlobal('PointerEvent', class extends MouseEvent {
@@ -202,5 +213,102 @@ describe('V13.4 item projection smoke', () => {
     const linked = await mount('Observation');
     fireEvent.doubleClick(linked);
     expect(await screen.findByText('Opened origin origin-note')).toBeTruthy();
+  });
+});
+
+describe('V13.5 item resize command smoke', () => {
+  it.each([
+    { zoom: 0.5, scale: 2, w: 380, h: 246 },
+    { zoom: 2, scale: 1.5, w: 300, h: 186 },
+  ])('resizes at zoom $zoom and projection scale $scale as one undoable command and refreshes its final geometry', async ({ zoom, scale, w, h }) => {
+    detail.board.viewport.zoom = zoom;
+    const original = structuredClone(seedItem({ scale }));
+    const view = openBoard();
+    const card = await screen.findByTestId(`board-member-${original.id}`);
+    const surface = screen.getByTestId('board-surface');
+    const resize = within(card).getByRole('button', { name: 'Resize Claim' });
+    const undo = screen.getByRole('button', { name: 'Undo board action' }) as HTMLButtonElement;
+    const redo = screen.getByRole('button', { name: 'Redo board action' }) as HTMLButtonElement;
+    const pointer = { pointerId: 11, button: 0, buttons: 1 };
+    expect(undo.disabled).toBe(true);
+    fireEvent.pointerDown(resize, { ...pointer, clientX: 200, clientY: 200 });
+    fireEvent.pointerMove(surface, { ...pointer, clientX: 260, clientY: 230 });
+    fireEvent.pointerMove(surface, { ...pointer, clientX: 320, clientY: 290 });
+    expect(card.style.width).toBe(`${w}px`);
+    expect(card.style.height).toBe(`${h}px`);
+    expect(card.style.transform).toBe(`scale(${scale})`);
+    expect(http.patch).not.toHaveBeenCalled();
+    expect(detail.members[0]).toEqual(original);
+    fireEvent.pointerUp(surface, { ...pointer, clientX: 320, clientY: 290 });
+    await waitFor(() => expect(screen.getByText('Saved')).toBeTruthy());
+    expect(detail.members[0]).toEqual({ ...original, w, h });
+    expect(http.patch.mock.calls.map(([, input]) => input)).toEqual([{ w, h }]);
+    expect(within(card).getByText('Current standalone body.')).toBeTruthy();
+    expect(undo.disabled).toBe(false);
+    fireEvent.click(undo);
+    await waitFor(() => expect(screen.getByText('Saved')).toBeTruthy());
+    expect(detail.members[0]).toEqual(original);
+    expect(card.style.width).toBe('260px');
+    expect(card.style.height).toBe('156px');
+    expect(undo.disabled).toBe(true);
+    expect(redo.disabled).toBe(false);
+    fireEvent.click(redo);
+    await waitFor(() => expect(screen.getByText('Saved')).toBeTruthy());
+    expect(detail.members[0]).toEqual({ ...original, w, h });
+    expect(http.patch.mock.calls.map(([, input]) => input)).toEqual([
+      { w, h }, { w: 260, h: 156 }, { w, h },
+    ]);
+    expect(redo.disabled).toBe(true);
+    view.unmount();
+    openBoard();
+    const reopened = await screen.findByTestId(`board-member-${original.id}`);
+    expect(reopened.style.width).toBe(`${w}px`);
+    expect(reopened.style.height).toBe(`${h}px`);
+    expect(reopened.style.transform).toBe(`scale(${scale})`);
+    expect(within(reopened).getByRole('button', { name: 'Resize Claim' })).toBeTruthy();
+    expect(within(reopened).getByText('Current standalone body.')).toBeTruthy();
+    expect((screen.getByRole('button', { name: 'Undo board action' }) as HTMLButtonElement).disabled).toBe(true);
+    expect(http.put).not.toHaveBeenCalled();
+  });
+
+  it('discards a cancelled item resize without persisting geometry or adding a command', async () => {
+    const original = structuredClone(seedItem());
+    openBoard();
+    const card = await screen.findByTestId(`board-member-${original.id}`);
+    const surface = screen.getByTestId('board-surface');
+    const pointer = { pointerId: 12, button: 0, buttons: 1 };
+    fireEvent.pointerDown(within(card).getByRole('button', { name: 'Resize Claim' }),
+      { ...pointer, clientX: 200, clientY: 200 });
+    fireEvent.pointerMove(surface, { ...pointer, clientX: 320, clientY: 290 });
+    expect(card.style.width).toBe('380px');
+    expect(card.style.height).toBe('246px');
+    fireEvent.pointerCancel(surface, pointer);
+    fireEvent.pointerUp(surface, { ...pointer, clientX: 320, clientY: 290 });
+    expect(card.style.width).toBe('260px');
+    expect(card.style.height).toBe('156px');
+    expect(detail.members[0]).toEqual(original);
+    expect(http.patch).not.toHaveBeenCalled();
+    expect((screen.getByRole('button', { name: 'Undo board action' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: 'Redo board action' }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it('keeps a pinned item fixed with no resize handle or enabled projection scale controls', async () => {
+    const original = structuredClone(seedItem({ pinned: true, scale: 1.5 }));
+    openBoard();
+    const card = await screen.findByTestId(`board-member-${original.id}`);
+    expect(within(card).queryByRole('button', { name: 'Resize Claim' })).toBeNull();
+    fireEvent.focus(card);
+    expect((screen.getByRole('button', { name: 'Shrink projection' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole('button', { name: 'Enlarge projection' }) as HTMLButtonElement).disabled).toBe(true);
+    const surface = screen.getByTestId('board-surface');
+    const pointer = { pointerId: 13, button: 0, buttons: 1 };
+    fireEvent.pointerDown(card, { ...pointer, clientX: 200, clientY: 200 });
+    fireEvent.pointerMove(surface, { ...pointer, clientX: 320, clientY: 290 });
+    fireEvent.pointerUp(surface, { ...pointer, clientX: 320, clientY: 290 });
+    expect(card.style.width).toBe('260px');
+    expect(card.style.height).toBe('156px');
+    expect(detail.members[0]).toEqual(original);
+    expect(http.patch).not.toHaveBeenCalled();
+    expect((screen.getByRole('button', { name: 'Undo board action' }) as HTMLButtonElement).disabled).toBe(true);
   });
 });

@@ -19,6 +19,7 @@ import type { BoardTextRangeSelection } from '@shared/types/boardTextRange';
 import { BoardReferenceTag } from './BoardReferenceTag';
 import { BOARD_TEXT_RANGE_MIME, parseBoardTextRangeClipboard } from './boardTextRangeClipboard';
 import { connectionPoint, deletionScope, marqueeSelection, selectionFromKeys, selectionKey, selectionRect, visualBounds, type BoardSelection, type BoardRect } from './boardSelection';
+import { snapBoardTranslation, type BoardAlignmentGuide } from './boardSnapping';
 import styles from './Boards.module.css';
 
 type Tool = 'select' | 'pan' | 'connect' | 'pen' | 'eraser';
@@ -27,7 +28,7 @@ type MoveObject = BoardMember | BoardVisual;
 type Gesture =
   | { kind: 'pan'; start: BoardPoint; viewport: BoardViewport }
   | { kind: 'resize'; start: BoardPoint; object: MoveObject }
-  | { kind: 'move'; start: BoardPoint; objects: MoveObject[] }
+  | { kind: 'move'; start: BoardPoint; point: BoardPoint; objects: MoveObject[]; primary: BoardRect; targets: BoardRect[]; moved: boolean }
   | { kind: 'marquee'; start: BoardPoint; base: Set<string>; mode: 'replace' | 'add' | 'subtract' }
   | { kind: 'eraser'; ids: Set<string>; previous?: BoardPoint }
   | { kind: 'pen'; points: BoardPoint[]; layer_id: string | null };
@@ -48,6 +49,7 @@ export default function BoardPage() {
   const selectedKeys = selectionState.keys;
   const selection = selectedKeys.size === 1 ? selectionState.anchor : null;
   const [marquee, setMarquee] = useState<BoardRect | null>(null);
+  const [alignmentGuides, setAlignmentGuides] = useState<BoardAlignmentGuide[]>([]);
   const [erasedIds, setErasedIds] = useState<Set<string>>(new Set());
   const [selectionNotice, setSelectionNotice] = useState<string | null>(null);
   const [selectionListOpen, setSelectionListOpen] = useState(false);
@@ -175,6 +177,7 @@ export default function BoardPage() {
     setFlash(null);
     setDeleteKeys(null);
     setMarquee(null);
+    setAlignmentGuides([]);
     setErasedIds(new Set());
     setSelectionNotice(null);
     setGroupDrafts(new Map());
@@ -625,6 +628,7 @@ export default function BoardPage() {
     setBoardHoverKey(null);
     const start = localPoint(event);
     const current = viewportRef.current;
+    setAlignmentGuides([]);
     gestureRevision.current += 1;
     if (event.button === 1 || spaceDown.current || tool === 'pan') {
       gesture.current = { kind: 'pan', start, viewport: current };
@@ -658,7 +662,13 @@ export default function BoardPage() {
         setSelectionNotice(pinnedCount ? `Skipped ${pinnedCount} pinned ${pinnedCount === 1 ? 'object' : 'objects'}.` : null);
         const movable = objects.filter((entry) => !entry.pinned);
         if (!movable.length) return;
-        gesture.current = { kind: 'move', start, objects: movable };
+        const bounds = (entry: MoveObject): BoardRect => 'visual_kind' in entry ? visualBounds(entry)
+          : { x: entry.x, y: entry.y, w: entry.w * entry.scale, h: entry.h * entry.scale };
+        const movingIds = new Set(movable.map((entry) => entry.id));
+        // Use the grabbed object, even when scene order differs from selection order.
+        const primary = movable.find((entry) => entry.id === object.id) || movable[0];
+        gesture.current = { kind: 'move', start, point: start, objects: movable, primary: bounds(primary), moved: false,
+          targets: [...visibleMembers, ...visibleVisuals].filter((entry) => !movingIds.has(entry.id)).map(bounds) };
         groupDraftsRef.current = new Map(movable.map((entry) => [entry.id, entry]));
         setGroupDrafts(new Map(groupDraftsRef.current));
       }
@@ -673,6 +683,21 @@ export default function BoardPage() {
     } else { setSelection(null); setConnectFrom(null); return; }
     capturedPointer.current = object && tool !== 'eraser' ? event.currentTarget : surface.current;
     capturedPointer.current?.setPointerCapture(event.pointerId);
+  }
+
+  function updateMoveDraft(current: Extract<Gesture, { kind: 'move' }>, point: BoardPoint, bypass: boolean) {
+    if (!viewportRef.current) return;
+    current.point = point;
+    const delta = { x: (point.x - current.start.x) / viewportRef.current.zoom,
+      y: (point.y - current.start.y) / viewportRef.current.zoom };
+    current.moved ||= delta.x !== 0 || delta.y !== 0;
+    // A selection click is not a geometry edit, even when an object is near a guide.
+    const snapped = bypass || !current.moved ? { delta, guides: [] }
+      : snapBoardTranslation(current.primary, delta, current.targets, viewportRef.current.zoom);
+    groupDraftsRef.current = new Map(current.objects.map((object) => [object.id,
+      { ...object, x: object.x + snapped.delta.x, y: object.y + snapped.delta.y }]));
+    setGroupDrafts(new Map(groupDraftsRef.current));
+    setAlignmentGuides(snapped.guides);
   }
 
   function move(event: React.PointerEvent) {
@@ -698,8 +723,7 @@ export default function BoardPage() {
       const dx = (point.x - current.start.x) / viewportRef.current.zoom;
       const dy = (point.y - current.start.y) / viewportRef.current.zoom;
       if (current.kind === 'move') {
-        groupDraftsRef.current = new Map(current.objects.map((object) => [object.id, { ...object, x: object.x + dx, y: object.y + dy }]));
-        setGroupDrafts(new Map(groupDraftsRef.current));
+        updateMoveDraft(current, point, event.shiftKey);
       } else {
         const object = current.object;
         const visual = 'visual_kind' in object;
@@ -714,6 +738,10 @@ export default function BoardPage() {
   async function end(event: React.PointerEvent, cancel = false) {
     const current = gesture.current;
     const revision = gestureRevision.current;
+    // Include the release position/modifier, then remove guides before awaiting a save.
+    // An older save completion must never clear a newer gesture's guides.
+    if (current?.kind === 'move' && !cancel) updateMoveDraft(current, localPoint(event), event.shiftKey);
+    setAlignmentGuides([]);
     if (current?.kind === 'eraser' && !cancel) eraseAt(event);
     gesture.current = null;
     if (capturedPointer.current?.hasPointerCapture(event.pointerId)) capturedPointer.current.releasePointerCapture(event.pointerId);
@@ -785,6 +813,11 @@ export default function BoardPage() {
     if (boardPaused.current || deleteKeys || deleting || chalkDraft || labelDraft) return;
     if ((event.target as HTMLElement).closest('input, select, textarea, [contenteditable="true"], [role="dialog"], dialog')) return;
     const key = event.key.toLowerCase();
+    if (event.key === 'Shift' && gesture.current?.kind === 'move') {
+      event.preventDefault();
+      updateMoveDraft(gesture.current, gesture.current.point, true);
+      return;
+    }
     if ((event.ctrlKey || event.metaKey) && !event.altKey && (key === 'z' || key === 'y')) {
       event.preventDefault();
       if (gesture.current) return;
@@ -856,6 +889,11 @@ export default function BoardPage() {
 
   return <><section className={styles.workspace} aria-label="Board workspace" onPaste={pasteReference} onKeyDown={keyDown}
     onKeyDownCapture={pauseBoard} onKeyUpCapture={pauseBoard} onPasteCapture={pauseBoard}
+    onKeyUp={(event) => {
+      if (event.key === 'Shift' && gesture.current?.kind === 'move') {
+        updateMoveDraft(gesture.current, gesture.current.point, false);
+      }
+    }}
     onPointerDownCapture={pauseBoard} onPointerMoveCapture={pauseBoard} onPointerUpCapture={pauseBoard}
     onClickCapture={pauseBoard} onContextMenuCapture={pauseBoard} onDragOverCapture={pauseBoard} onDropCapture={pauseBoard}
     onDoubleClickCapture={(event) => {
@@ -917,7 +955,7 @@ export default function BoardPage() {
       <button className={styles.button} aria-label="Redo board action" disabled={!board.canRedo || Boolean(chalkDraft) || Boolean(deleteKeys)} onClick={() => { surface.current?.focus(); void board.redo(); }}><Redo2 size={16} />Redo</button>
       <span className={styles.toolHint}>{tool === 'connect' ? (connectFrom ? 'Choose the next card' : 'Choose two cards to connect')
         : tool === 'pen' ? 'Draw on the board' : tool === 'eraser' ? 'Sweep to erase whole pen strokes'
-          : 'Drag blank space to select · Ctrl-drag to add · Alt-drag to subtract · Ctrl/Shift-click to toggle · Esc to clear · Space-drag to pan'}</span>
+          : 'Drag blank space to select · Ctrl-drag to add · Alt-drag to subtract · Ctrl/Shift-click to toggle · Hold Shift after starting an object drag to ignore snapping · Esc to clear · Space-drag to pan'}</span>
       {!activeLayerVisible && <span className={styles.toolHint} role="status">Active layer is hidden. New objects will be hidden.</span>}
       <div className={styles.zoomControls}>
         <button className={styles.button} aria-label="Zoom board out" onClick={() => zoom(1 / 1.2)}><Minus size={16} /></button>
@@ -1110,6 +1148,13 @@ export default function BoardPage() {
           </div>)}
           {marquee && <div className={styles.marquee} data-testid="board-marquee" style={{ left: marquee.x, top: marquee.y, width: marquee.w, height: marquee.h }} />}
         </div>
+        {alignmentGuides.length > 0 && <svg className={styles.alignmentGuides} data-testid="board-alignment-guides" aria-hidden="true">
+          {alignmentGuides.map((guide) => <line key={guide.axis} data-axis={guide.axis}
+            x1={activeViewport.x + (guide.axis === 'x' ? guide.position : guide.start) * activeViewport.zoom}
+            x2={activeViewport.x + (guide.axis === 'x' ? guide.position : guide.end) * activeViewport.zoom}
+            y1={activeViewport.y + (guide.axis === 'y' ? guide.position : guide.start) * activeViewport.zoom}
+            y2={activeViewport.y + (guide.axis === 'y' ? guide.position : guide.end) * activeViewport.zoom} />)}
+        </svg>}
         {detail.members.every((member) => member.placed === false) && detail.visuals.length === 0 && !chalkDraft && <div className={styles.canvasEmpty}>
           <h2>Give this thought some room.</h2><p>Double-click blank space to write chalk, add a note, or pick up the pen.</p>
           <button className={styles.button} onPointerDown={(event) => event.stopPropagation()} onClick={openPicker}>Add your first note or item</button>
