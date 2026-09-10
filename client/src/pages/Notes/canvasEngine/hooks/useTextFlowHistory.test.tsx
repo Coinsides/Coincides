@@ -13,12 +13,13 @@ import { useTextFlowHistory, type TextFlowHistoryHost } from './useTextFlowHisto
 
 const plainTextFromTextFlow = (flow: TextBlockContentV1) => flow.units.map((unit) => unit.text).join('\n');
 
-function renderHistoryEditor(initialText = 'original', options: { legacy?: boolean } = {}) {
-  const initialFlow = createTextBlockContentV1(initialText);
+function renderHistoryEditor(initialText = 'original', options: { legacy?: boolean; flow?: TextBlockContentV1 } = {}) {
+  const initialFlow = options.flow ?? createTextBlockContentV1(initialText);
+  const initialPlainText = options.flow ? plainTextFromTextFlow(options.flow) : initialText;
   const block: NoteBlock = {
     id: 'synthetic-block', placement_id: 'synthetic-placement', display_overrides_json: {},
     block_type: 'paragraph', title: null, content_json: options.legacy ? {} : { [TEXT_FLOW_CONTENT_KEY]: initialFlow },
-    plain_text: initialText, metadata: {}, order_index: 0, source_references: [],
+    plain_text: initialPlainText, metadata: {}, order_index: 0, source_references: [],
   };
   const boardRanges = createBoardTextRangeEditSession('synthetic-note', async (_note, ranges) => ranges);
   boardRanges.hydrate([]);
@@ -72,7 +73,7 @@ function renderHistoryEditor(initialText = 'original', options: { legacy?: boole
       },
     };
     const flow = drafts.blockTextFlowDrafts[block.id] ?? (options.legacy ? null : initialFlow);
-    return <TextBlockProjection blockId={block.id} text={flow ? plainTextFromTextFlow(flow) : initialText} textFlow={flow}
+    return <TextBlockProjection blockId={block.id} text={flow ? plainTextFromTextFlow(flow) : initialPlainText} textFlow={flow}
       presentationKind="paragraph" readOnly={textHistory.replaying || history.historyReplaying} annotations={annotations} selectedAnnotationIds={[]}
       showLabelOverlay={false} textareaRef={null} onFocused={vi.fn()} onAnnotationSelect={vi.fn()}
       onAnnotationContextMenu={vi.fn()} onTextUnitSelection={vi.fn()} onTextUnitContextMenu={vi.fn()}
@@ -85,15 +86,18 @@ function renderHistoryEditor(initialText = 'original', options: { legacy?: boole
       }} onKeyDown={vi.fn()} />;
   }
   const view = render(<Editor />);
-  const textarea = () => view.container.querySelector('textarea')!;
-  const focus = () => { act(() => textarea().focus()); };
-  const input = (value: string, beforeStart: number, beforeEnd = beforeStart, inputType = 'insertText', composing = false) => {
-    const node = textarea();
-    focus();
+  const textarea = (unitIndex = 0) => view.container.querySelectorAll('textarea')[unitIndex]!;
+  const focus = (unitIndex = 0) => { act(() => textarea(unitIndex).focus()); };
+  const inputAt = (unitIndex: number, value: string, beforeStart: number, beforeEnd = beforeStart, inputType = 'insertText', composing = false) => {
+    const node = textarea(unitIndex);
+    focus(unitIndex);
     node.setSelectionRange(beforeStart, beforeEnd);
     fireEvent(node, new InputEvent('beforeinput', { bubbles: true, inputType, isComposing: composing }));
     const caret = beforeStart + value.length - node.value.length + beforeEnd - beforeStart;
     fireEvent.input(node, { target: { value, selectionStart: caret, selectionEnd: caret }, inputType, isComposing: composing });
+  };
+  const input = (value: string, beforeStart: number, beforeEnd = beforeStart, inputType = 'insertText', composing = false) => {
+    inputAt(0, value, beforeStart, beforeEnd, inputType, composing);
   };
   const idle = async () => { await act(async () => { await current.history.whenHistoryIdle(); }); };
   const key = async (keyName: string, target: HTMLElement | Window = textarea()) => {
@@ -104,7 +108,7 @@ function renderHistoryEditor(initialText = 'original', options: { legacy?: boole
     });
     return allowed;
   };
-  return { ...view, current: () => current, savedTexts, saveBlock, saveLayout, textarea, focus, input, idle, key };
+  return { ...view, current: () => current, savedTexts, saveBlock, saveLayout, textarea, focus, input, inputAt, idle, key };
 }
 
 describe('B4 TextFlow and application history integration (synthetic memory)', () => {
@@ -241,5 +245,110 @@ describe('B4 TextFlow and application history integration (synthetic memory)', (
     expect(editor.textarea().selectionStart).toBe(5);
     await editor.key('y');
     expect(units()).toEqual([{ id: 'tu-1', text: 'alpha X' }, { id: 'tu-2', text: 'beta' }]);
+  });
+});
+
+describe('B5 smoke 6: cursor traversal preserves B4 history (synthetic memory)', () => {
+  function renderUnits(texts: string[]) {
+    const flow = createTextBlockContentV1('');
+    flow.units = texts.map((text, index) => ({
+      ...createTextBlockContentV1(text).units[0], id: `b5-unit-${index + 1}`, order_index: index,
+    }));
+    const editor = renderHistoryEditor('', { flow });
+    const units = () => [...editor.container.querySelectorAll('textarea')].map((node) => ({
+      id: node.dataset.textUnitId, text: node.value,
+    }));
+    const expectCaret = (unitIndex: number, caret: number) => {
+      const node = editor.textarea(unitIndex);
+      expect(document.activeElement).toBe(node);
+      expect(node.selectionStart).toBe(caret);
+      expect(node.selectionEnd).toBe(caret);
+    };
+    const arrow = async (key: 'ArrowLeft' | 'ArrowRight') => {
+      await act(async () => {
+        fireEvent.keyDown(document.activeElement!, { key });
+        fireEvent.keyUp(document.activeElement!, { key });
+        await editor.current().history.whenHistoryIdle();
+      });
+    };
+    return { ...editor, units, expectCaret, arrow };
+  }
+
+  it.each([2, 3])('leaves undo and redo empty after a pure %i-unit left/right round trip', async (count) => {
+    const editor = renderUnits(count === 2 ? ['a', 'c'] : ['a', '', 'c']);
+    const before = editor.units();
+    editor.focus();
+    editor.textarea().setSelectionRange(1, 1);
+    for (let index = 1; index < count; index += 1) {
+      await editor.arrow('ArrowRight');
+      editor.expectCaret(index, 0);
+    }
+    for (let index = count - 2; index >= 0; index -= 1) {
+      await editor.arrow('ArrowLeft');
+      editor.expectCaret(index, index === 0 ? 1 : 0);
+    }
+    expect(editor.units()).toEqual(before);
+    await act(async () => {
+      expect(await editor.current().history.undoRuntimeHistory()).toBe(false);
+      expect(await editor.current().history.redoRuntimeHistory()).toBe(false);
+    });
+    expect(editor.units()).toEqual(before);
+  });
+
+  it('seals A typing before traversing to B and replays exactly two edits with their unit identities and carets', async () => {
+    const editor = renderUnits(['a', 'b']);
+    const expectTexts = (a: string, b: string) => expect(editor.units()).toEqual([
+      { id: 'b5-unit-1', text: a }, { id: 'b5-unit-2', text: b },
+    ]);
+    editor.inputAt(0, 'aX', 1);
+    await editor.arrow('ArrowRight');
+    editor.expectCaret(1, 0);
+    editor.inputAt(1, 'Yb', 0);
+    expectTexts('aX', 'Yb');
+
+    await editor.key('z', window);
+    expectTexts('aX', 'b');
+    editor.expectCaret(1, 0);
+    await editor.key('z', window);
+    expectTexts('a', 'b');
+    editor.expectCaret(0, 1);
+    await act(async () => { expect(await editor.current().history.undoRuntimeHistory()).toBe(false); });
+
+    await editor.key('y', window);
+    expectTexts('aX', 'b');
+    editor.expectCaret(0, 2);
+    await editor.key('y', window);
+    expectTexts('aX', 'Yb');
+    editor.expectCaret(1, 1);
+    await act(async () => { expect(await editor.current().history.redoRuntimeHistory()).toBe(false); });
+  });
+
+  it('keeps typing groups separate after traversing away and back to the same unit and caret', async () => {
+    const editor = renderUnits(['a', 'b']);
+    const expectTexts = (a: string) => expect(editor.units()).toEqual([
+      { id: 'b5-unit-1', text: a }, { id: 'b5-unit-2', text: 'b' },
+    ]);
+    editor.inputAt(0, 'aX', 1);
+    await editor.arrow('ArrowRight');
+    editor.expectCaret(1, 0);
+    await editor.arrow('ArrowLeft');
+    editor.expectCaret(0, 2);
+    editor.inputAt(0, 'aXY', 2);
+
+    await editor.key('z', window);
+    expectTexts('aX');
+    editor.expectCaret(0, 2);
+    await editor.key('z', window);
+    expectTexts('a');
+    editor.expectCaret(0, 1);
+    await act(async () => { expect(await editor.current().history.undoRuntimeHistory()).toBe(false); });
+
+    await editor.key('y', window);
+    expectTexts('aX');
+    editor.expectCaret(0, 2);
+    await editor.key('y', window);
+    expectTexts('aXY');
+    editor.expectCaret(0, 3);
+    await act(async () => { expect(await editor.current().history.redoRuntimeHistory()).toBe(false); });
   });
 });

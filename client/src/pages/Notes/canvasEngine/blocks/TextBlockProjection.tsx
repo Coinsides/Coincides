@@ -21,6 +21,7 @@ import { textFlowIdForBlock } from '../../../../../../shared/types/textFlow';
 import type { BlockPresentationKind } from '../blockContentService';
 import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import { resizeTextareaToContent } from '../measurementService';
+import { measureTextareaNavigation, textareaBoundaryCaret } from '../textareaNavigation';
 import { getPageDisplayScale } from '../overlayService';
 import type {
   AnnotationTruthV1,
@@ -488,6 +489,10 @@ export function TextBlockProjection({
   const pendingFocusRef = useRef<{ unitId: string; caret: number } | null>(null);
   const latestFlowRef = useRef<TextBlockContentV1 | null>(null);
   const compositionRef = useRef(false);
+  const verticalColumnRef = useRef<number | null>(null);
+  const traversingRef = useRef(false);
+  const caretLineRef = useRef<{ unitId: string; offset: number; y: number } | null>(null);
+  const nativeLineTargetRef = useRef<{ unitId: string; y: number } | null>(null);
   const deferredBlurRef = useRef(false);
   const selectionRef = useRef<TextFlowEditSelection | null>(null);
   const beforeInputRef = useRef<{ selection: TextFlowEditSelection; inputType: string } | null>(null);
@@ -515,6 +520,13 @@ export function TextBlockProjection({
       previous.unitId !== selection.unitId || previous.start !== selection.start || previous.end !== selection.end
     )) onTextEditBoundary?.('selection', selection);
     selectionRef.current = selection;
+  };
+
+  const captureNativeCaretLine = (unitId: string, textarea: HTMLTextAreaElement) => {
+    const target = nativeLineTargetRef.current;
+    if (target?.unitId !== unitId) return;
+    const measured = measureTextareaNavigation(textarea, textarea.selectionStart, target.y);
+    if (measured) caretLineRef.current = { unitId, offset: textarea.selectionStart, y: measured.y };
   };
 
   // Native beforeinput preserves the actual pre-edit selection for typing,
@@ -551,6 +563,7 @@ export function TextBlockProjection({
     node.focus({ preventScroll: true });
     node.selectionStart = nextCaret;
     node.selectionEnd = nextCaret;
+    selectionRef.current = readSelection(unitId, node);
     resizeTextareaToContent(node);
   };
 
@@ -649,6 +662,9 @@ export function TextBlockProjection({
     anchorElement?: HTMLTextAreaElement | null,
     options: { sync?: boolean; edit?: TextFlowEditMetadata } = {},
   ) => {
+    verticalColumnRef.current = null;
+    caretLineRef.current = null;
+    nativeLineTargetRef.current = null;
     const previousTextFlow = latestFlowRef.current || editableFlow;
     const sourceUnitId = anchorElement?.dataset.textUnitId || unitId;
     const beforeSelection = anchorElement
@@ -886,12 +902,78 @@ export function TextBlockProjection({
 
   const handleUnitKeyDown = (unit: TextUnit, event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (compositionRef.current || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
+    captureNativeCaretLine(unit.id, event.currentTarget);
+    nativeLineTargetRef.current = null;
     selectionRef.current = readSelection(unit.id, event.currentTarget);
     onKeyDown(event);
-    if (event.defaultPrevented) return;
+    if (event.defaultPrevented) {
+      verticalColumnRef.current = null;
+      caretLineRef.current = null;
+      return;
+    }
 
     const textarea = event.currentTarget;
     const hasSelection = textarea.selectionStart !== textarea.selectionEnd;
+    const vertical = event.key === 'ArrowUp' || event.key === 'ArrowDown';
+    const horizontal = event.key === 'ArrowLeft' || event.key === 'ArrowRight';
+    const plainArrow = (vertical || horizontal) && !hasSelection
+      && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey;
+    if (!plainArrow || !vertical) verticalColumnRef.current = null;
+    const previousLine = caretLineRef.current;
+    const measurement = (plainArrow || event.key === 'Home' || event.key === 'End')
+      ? measureTextareaNavigation(textarea, textarea.selectionStart,
+        previousLine?.unitId === unit.id && previousLine.offset === textarea.selectionStart ? previousLine.y : undefined)
+      : null;
+    if (measurement) nativeLineTargetRef.current = {
+      unitId: unit.id,
+      y: measurement.y + (plainArrow && vertical ? (event.key === 'ArrowDown' ? 1 : -1) * measurement.lineHeight : 0),
+    };
+
+    if (plainArrow) {
+      const forward = event.key === 'ArrowDown' || event.key === 'ArrowRight';
+      if (vertical && measurement && verticalColumnRef.current === null) verticalColumnRef.current = measurement.x;
+      const atBoundary = vertical
+        ? (forward ? measurement?.atLastLine : measurement?.atFirstLine)
+        : textarea.selectionStart === (forward ? textarea.value.length : 0);
+      if (atBoundary) {
+        const entries = visibleUnitEntries(editableFlow.units);
+        const sourceIndex = entries.findIndex((entry) => entry.unit.id === unit.id);
+        for (let index = sourceIndex + (forward ? 1 : -1);
+          index >= 0 && index < entries.length; index += forward ? 1 : -1) {
+          const targetUnit = entries[index].unit;
+          const target = unitRefs.current[targetUnit.id];
+          if (!target || target.disabled || target.readOnly || target.hidden
+            || target.closest('[hidden], [inert]')) continue;
+          if (typeof target.checkVisibility === 'function' && !target.checkVisibility()) continue;
+          const targetStyle = window.getComputedStyle(target);
+          if (targetStyle.display === 'none' || targetStyle.visibility !== 'visible') continue;
+          const caret = vertical
+            ? textareaBoundaryCaret(target, forward ? 'first' : 'last', verticalColumnRef.current!)
+            : { offset: forward ? 0 : target.value.length, y: undefined, nativeLineEndFrom: undefined, nativeColumnSeed: undefined };
+          if (caret === null) break;
+          event.preventDefault();
+          caretLineRef.current = null;
+          nativeLineTargetRef.current = null;
+          traversingRef.current = true;
+          try {
+            const nativeSelection = target.ownerDocument.getSelection();
+            const canMoveNatively = typeof nativeSelection?.modify === 'function';
+            focusTextUnit(targetUnit.id, (canMoveNatively ? caret.nativeColumnSeed?.offset : undefined)
+              ?? caret.nativeLineEndFrom ?? caret.offset);
+            // setSelectionRange at a soft wrap selects the next line's start.
+            // Native line-end motion preserves the first line's end affinity.
+            if (canMoveNatively && caret.nativeColumnSeed) {
+              for (let step = 0; step < caret.nativeColumnSeed.steps; step += 1) {
+                nativeSelection?.modify('move', caret.nativeColumnSeed.direction, 'line');
+              }
+            } else if (canMoveNatively && caret.nativeLineEndFrom !== undefined) nativeSelection.modify('move', 'forward', 'lineboundary');
+            selectionRef.current = readSelection(targetUnit.id, target);
+            if (caret.y !== undefined) caretLineRef.current = { unitId: targetUnit.id, offset: target.selectionStart, y: caret.y };
+          } finally { traversingRef.current = false; }
+          return;
+        }
+      }
+    }
 
     if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey && !event.metaKey) {
       event.preventDefault();
@@ -932,11 +1014,17 @@ export function TextBlockProjection({
   const handleUnitKeyUp = (unit: TextUnit, event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (compositionRef.current || event.nativeEvent.isComposing) return;
     if (event.key === 'Control' || event.key === 'Meta' || event.key === 'Alt' || event.key === 'Shift') return;
+    captureNativeCaretLine(unit.id, event.currentTarget);
     captureSelectionBoundary(unit.id, event.currentTarget);
     handleTextUnitSelection(unit, event.currentTarget);
   };
 
   const handleUnitMouseDown = (event: MouseEvent<HTMLTextAreaElement>) => {
+    verticalColumnRef.current = null;
+    caretLineRef.current = null;
+    nativeLineTargetRef.current = { unitId: event.currentTarget.dataset.textUnitId!,
+      y: (event.clientY - event.currentTarget.getBoundingClientRect().top) / getPageDisplayScale(event.currentTarget)
+        + event.currentTarget.scrollTop };
     additiveSelectionSessionRef.current = event.ctrlKey || event.metaKey;
   };
 
@@ -1238,6 +1326,10 @@ export function TextBlockProjection({
                   value={unit.text}
                   readOnly={readOnly}
                   onFocus={(event) => {
+                    if (!traversingRef.current) {
+                      verticalColumnRef.current = null;
+                      caretLineRef.current = null;
+                    }
                     selectionRef.current = readSelection(unit.id, event.currentTarget);
                     if (!readOnly && !compositionRef.current) onTextEditBoundary?.('focus', selectionRef.current);
                     onFocused({ blockId, textFlowId, textUnitId: unit.id });
@@ -1248,12 +1340,16 @@ export function TextBlockProjection({
                       (event.nativeEvent as InputEvent).inputType, (event.nativeEvent as InputEvent).isComposing)}
                   onSelect={(event) => {
                     if (compositionRef.current) return;
+                    captureNativeCaretLine(unit.id, event.currentTarget);
                     captureSelectionBoundary(unit.id, event.currentTarget);
                     handleTextUnitSelection(unit, event.currentTarget, {
                       preserveDraft: additiveSelectionSessionRef.current,
                     });
                   }}
                   onCompositionStart={readOnly ? undefined : (event) => {
+                    verticalColumnRef.current = null;
+                    caretLineRef.current = null;
+                    nativeLineTargetRef.current = null;
                     const selection = readSelection(unit.id, event.currentTarget);
                     selectionRef.current = selection;
                     beforeInputRef.current = { selection, inputType: 'insertCompositionText' };
@@ -1280,6 +1376,7 @@ export function TextBlockProjection({
                   onKeyUp={(event) => handleUnitKeyUp(unit, event)}
                   onContextMenu={(event) => handleTextUnitContextMenu(unit, event)}
                   onBlur={readOnly ? undefined : (event) => {
+                    if (!traversingRef.current) verticalColumnRef.current = null;
                     if (compositionRef.current) {
                       deferredBlurRef.current = true;
                       return;
