@@ -16,6 +16,7 @@ import SourceLibraryPage from '@/pages/Sources/SourceLibrary';
 import GroupGalleryPage from '@/pages/GroupGallery/GroupGallery';
 import SingleContentGroupEditorPage from '@/pages/GroupGallery/SingleContentGroupEditor';
 import SettingsPage from '@/pages/Settings/Settings';
+import AgentMemoriesPage from '@/pages/AgentMemories/AgentMemories';
 import ToolReceiptsPage from '@/pages/ToolReceipts/ToolReceipts';
 import DecksPage from '@/pages/Decks/Decks';
 import DeckDetailPage from '@/pages/Decks/DeckDetail';
@@ -105,6 +106,7 @@ export default function App() {
           <Route path="review" element={<ReviewPage />} />
           <Route path="statistics" element={<StatisticsPage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="agent-memories" element={<AgentMemoriesPage />} />
           <Route path="tool-receipts" element={<ToolReceiptsPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

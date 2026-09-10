@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
-import { Check, ChevronDown, Zap, Battery, BatteryLow, BarChart3, Play, Clock, CheckSquare, ArrowRight } from 'lucide-react';
+import { Check, ChevronDown, Zap, Battery, BatteryLow, BarChart3, Play, Clock, CheckSquare, ArrowRight, MessageSquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useDailyBriefStore } from '@/stores/dailyBriefStore';
 import { useCourseStore } from '@/stores/courseStore';
@@ -33,6 +33,7 @@ export default function DailyBrief() {
   const { briefData, loading, fetchDailyBrief, setDailyStatus, updateTaskInBrief } = useDailyBriefStore();
   const courses = useCourseStore((s) => s.courses);
   const addToast = useUIStore((s) => s.addToast);
+  const setAgentPanelOpen = useUIStore((s) => s.setAgentPanelOpen);
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -67,10 +68,27 @@ export default function DailyBrief() {
   const dateStr = format(today, 'EEEE, MMMM d');
   const hour = today.getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const header = (
+    <div className={styles.header}>
+      <div>
+        <div className={styles.date}>{dateStr}</div>
+        <div className={styles.greeting}>{greeting}</div>
+      </div>
+      <button
+        type="button"
+        className={styles.agentEntry}
+        onClick={() => setAgentPanelOpen(true)}
+      >
+        <MessageSquare size={18} aria-hidden="true" />
+        {t('dailyBriefPage.chatWithAgent', { defaultValue: 'Chat with Agent' })}
+      </button>
+    </div>
+  );
 
   if (loading && !briefData) {
     return (
       <div className={styles.page}>
+        {header}
         <div className={styles.skeleton} />
         <div className={styles.skeleton} />
         <div className={styles.skeleton} />
@@ -81,10 +99,7 @@ export default function DailyBrief() {
   return (
     <div className={styles.page}>
       {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.date}>{dateStr}</div>
-        <div className={styles.greeting}>{greeting}</div>
-      </div>
+      {header}
 
       {/* Time Block overview — only shown when user has blocks (§2: never prompt to set up) */}
       {briefData && briefData.time_blocks && briefData.time_blocks.length > 0 && (
