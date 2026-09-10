@@ -247,3 +247,82 @@
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+.memoryList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.memoryRow {
+  padding: 13px 0;
+  min-width: 0;
+}
+
+.memoryRow + .memoryRow {
+  border-top: 1px solid var(--glass-border);
+}
+
+.memoryContent {
+  margin: 0 0 12px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--text-primary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.memoryInput {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 8px 0 12px;
+  text-align: left;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.memoryMetadata {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 12px 0;
+  color: var(--text-muted);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.memoryActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.memoryConfirmation {
+  margin-top: 12px;
+}
+
+.memoryConfirmation p {
+  margin: 0 0 12px;
+}
+
+.memoryDeleteBtn {
+  color: var(--danger);
+}
+
+.memoryError {
+  margin: 12px 0 0;
+  color: var(--danger);
+  font-size: 14px;
+}
+
+.memoryStatus {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.memoryStatus .memoryError {
+  margin: 0;
+}

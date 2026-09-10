@@ -4,8 +4,11 @@ import { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { updateSettingsSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
+import agentMemoriesRoutes from './agentMemories.js';
 
 const router = Router();
+
+router.use('/agent-memories', agentMemoriesRoutes);
 
 // GET /api/settings
 router.get('/', (req: AuthRequest, res: Response) => {

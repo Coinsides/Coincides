@@ -5,6 +5,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
 import api from '@/services/api';
+import AgentMemoriesSection from './AgentMemoriesSection';
 import styles from './Settings.module.css';
 
 const providerOptions = [
@@ -394,6 +395,8 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      <AgentMemoriesSection />
 
       {/* Preferences */}
       <div className={styles.section}>
