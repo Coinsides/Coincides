@@ -373,6 +373,7 @@ export interface NoteWritingSurfaceLayerProps {
   ) => Promise<BlockSaveOutcome>;
   onScrollViewportBy: (delta: CanvasPoint, world?: CanvasWorldModel) => void;
   onSelectBlock: (blockId: string) => void;
+  onClearBlockSelection?: () => void;
   onSelectPageFrame: (frameId: string) => void;
   onSelectSlashCommand: (command: NoteSlashCommand) => void;
   onResizePageFrame: (frameId: string, size: { width: number; height: number }) => void;
@@ -630,6 +631,7 @@ export function NoteWritingSurfaceLayer({
   onSaveBlock,
   onScrollViewportBy,
   onSelectBlock,
+  onClearBlockSelection,
   onSelectPageFrame,
   onSelectSlashCommand,
   onResizePageFrame,
@@ -646,8 +648,7 @@ export function NoteWritingSurfaceLayer({
 }: NoteWritingSurfaceLayerProps) {
   const surfaceRef = useRef<HTMLElement | null>(null);
   const textNavigationTargetsRef = useRef(new Map<string, TextFlowNavigationTarget>());
-  const documentTextSelection = useDocumentTextFlowSelection({ noteId, visibleBlocks,
-    disabled: contentReadOnly || layoutMode, applyDocumentEdit: onApplyDocumentTextFlowEdit });
+  const objectNavigationColumnRef = useRef<number | null>(null);
   const panSessionRef = useRef<{ pointerId: number; clientX: number; clientY: number } | null>(null);
   const pageFrameOperationRef = useRef<{
     kind: 'move' | 'resize';
@@ -819,6 +820,41 @@ export function NoteWritingSurfaceLayer({
       canvasObjectById.get(placement.objectId)?.kind === 'table'
     ))
   ), [canvasObjectById, noteCanvasRuntime.canvasPlacements]);
+  const navigationObstacles = useMemo(() => surfaceMode === 'canvas' ? [
+    ...imagePlacements.filter((placement) => imageObjectById.has(placement.objectId)),
+    ...tablePlacements.filter((placement) => structuredObjectById.has(placement.objectId)),
+  ].map((placement) => ({ id: 'object:' + placement.objectId, x: placement.x, y: placement.y })) : [],
+  [surfaceMode, imagePlacements, imageObjectById, tablePlacements, structuredObjectById]);
+  const navigationLayout = { blockLayouts, pageFrames: noteCanvasRuntime.pageFrames,
+    coordinateContract: noteCanvasRuntime.coordinateContract, pageOffsetX, obstacles: navigationObstacles };
+  const documentTextSelection = useDocumentTextFlowSelection({ noteId, visibleBlocks, ...navigationLayout,
+    disabled: contentReadOnly || layoutMode, applyDocumentEdit: onApplyDocumentTextFlowEdit });
+  const navigateBoundary = (fromBlockId: string, request: Parameters<TextFlowNavigationTarget>[0]) =>
+    navigateTextFlowBlockBoundary({ visibleBlocks, ...navigationLayout, fromBlockId, request,
+      targets: textNavigationTargetsRef.current, disabled: contentReadOnly || layoutMode });
+  const registerObjectNavigation = (id: string, node: HTMLDivElement | null) => {
+    const key = 'object:' + id;
+    if (!node || contentReadOnly || layoutMode) { textNavigationTargetsRef.current.delete(key); return; }
+    textNavigationTargetsRef.current.set(key, (request) => {
+      if (request.selectionAnchor) return false;
+      documentTextSelection.clear();
+      clearDraft();
+      objectNavigationColumnRef.current = request.columnX;
+      onClearBlockSelection?.();
+      setSelectedCanvasObjectId(id);
+      node.focus({ preventScroll: true });
+      node.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+      return true;
+    });
+  };
+  const handleObjectNavigation = (id: string, event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget || contentReadOnly || layoutMode
+      || event.ctrlKey || event.metaKey || event.altKey || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229
+      || !['ArrowUp', 'ArrowDown'].includes(event.key)) return;
+    event.preventDefault();
+    if (!event.shiftKey) navigateBoundary('object:' + id, { direction: event.key === 'ArrowDown' ? 'down' : 'up',
+      columnX: objectNavigationColumnRef.current });
+  };
   const visualConnectorByObjectId = useMemo(() => (
     new Map(noteCanvasRuntime.visualConnectors.map((connector) => [connector.objectId, connector]))
   ), [noteCanvasRuntime.visualConnectors]);
@@ -3700,6 +3736,8 @@ export function NoteWritingSurfaceLayer({
         )}
         {surfaceMode === 'canvas' && (
           <ImageObjectLayer
+            onNavigationElement={registerObjectNavigation}
+            onNavigationKeyDown={handleObjectNavigation}
             placements={imagePlacements}
             canvasObjectById={canvasObjectById}
             imageObjectById={imageObjectById}
@@ -3732,6 +3770,8 @@ export function NoteWritingSurfaceLayer({
         )}
         {surfaceMode === 'canvas' && (
           <TableObjectLayer
+            onNavigationElement={registerObjectNavigation}
+            onNavigationKeyDown={handleObjectNavigation}
             placements={tablePlacements}
             canvasObjectById={canvasObjectById}
             structuredObjectById={structuredObjectById}
@@ -3879,7 +3919,7 @@ export function NoteWritingSurfaceLayer({
                   end: draftOwnerReconciliation.selectionEnd,
                 }
                 : null}
-              onFocused={onFocusBlock}
+              onFocused={(receipt) => { setSelectedCanvasObjectId(null); onFocusBlock(receipt); }}
               onFocusReleased={onReleaseTextFocus}
               onAnnotationSelect={(annotationId) => setSelectedAnnotationIds([annotationId])}
               onAnnotationContextMenu={handleAnnotationContextMenu}
@@ -3906,13 +3946,8 @@ export function NoteWritingSurfaceLayer({
               }}
               onTextFlowChange={(textFlow, metadata, previousTextFlow) => void handleBlockTextFlowChange(block, textFlow, metadata, previousTextFlow)}
               onTextEditBoundary={onTextEditBoundary}
-              onBoundaryNavigate={(request) => navigateTextFlowBlockBoundary({
-                visibleBlocks,
-                fromBlockId: block.id,
-                request,
-                targets: textNavigationTargetsRef.current,
-                disabled: contentReadOnly || layoutMode,
-              })}
+              onFlowSelectionStart={clearDraft}
+              onBoundaryNavigate={(request) => navigateBoundary(block.id, request)}
               onNavigationTarget={(target) => {
                 if (target) textNavigationTargetsRef.current.set(block.id, target);
                 else textNavigationTargetsRef.current.delete(block.id);
@@ -3927,7 +3962,7 @@ export function NoteWritingSurfaceLayer({
                 });
               }}
               onTrash={() => onTrashBlock(block.id)}
-              onSelect={() => onSelectBlock(block.id)}
+              onSelect={() => { setSelectedCanvasObjectId(null); onSelectBlock(block.id); }}
               onBeginMove={(event) => onBeginMoveBlock(event, block, layout)}
               onBeginResize={(event) => onBeginResizeBlock(event, block, text, layout)}
               onToggleExportRole={() => onToggleExportRole(block, layout)}

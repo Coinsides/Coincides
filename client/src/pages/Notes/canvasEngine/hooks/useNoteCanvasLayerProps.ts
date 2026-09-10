@@ -243,6 +243,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     onSaveBlock: input.onSaveBlock,
     onScrollViewportBy: input.onScrollViewportBy,
     onSelectBlock: input.onSelectBlock,
+    onClearBlockSelection: input.onClearBlockSelection,
     onSelectPageFrame: input.onSelectPageFrame,
     onSelectSlashCommand: input.onSelectSlashCommand,
     onToggleAIVisibility: input.onToggleAIVisibility,

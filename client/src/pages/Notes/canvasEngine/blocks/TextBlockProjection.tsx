@@ -115,6 +115,7 @@ interface TextBlockProjectionProps {
   onKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
   onBoundaryNavigate?: (request: TextFlowBoundaryNavigationRequest) => boolean;
   onNavigationTarget?: (target: TextFlowNavigationTarget | null) => void;
+  onFlowSelectionStart?: () => void;
 }
 
 function plainTextForFlow(flow: TextBlockContentV1): string {
@@ -504,6 +505,7 @@ export function TextBlockProjection({
   onKeyDown,
   onBoundaryNavigate,
   onNavigationTarget,
+  onFlowSelectionStart,
 }: TextBlockProjectionProps) {
   const documentSelection = useContext(DocumentTextFlowSelectionContext);
   const unitRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
@@ -627,7 +629,9 @@ export function TextBlockProjection({
       : { offset: forward ? 0 : target.value.length, y: undefined, nativeLineEndFrom: undefined, nativeColumnSeed: undefined };
     if (!caret) return false;
     if (request.selectionAnchor) {
+      const starting = !documentSelection?.read();
       if (!documentSelection?.select(request.selectionAnchor, { blockId, unitId: targetUnit.id, offset: caret.offset })) return false;
+      if (starting) onFlowSelectionStart?.();
       verticalColumnRef.current = vertical ? request.columnX : null;
       caretLineRef.current = caret.y === undefined ? null : { unitId: targetUnit.id, offset: caret.offset, y: caret.y };
       return true;
@@ -663,7 +667,7 @@ export function TextBlockProjection({
       return target ? focusBoundary(target.unit, request) : false;
     });
     return () => onNavigationTarget?.(null);
-  }, [onNavigationTarget, readOnly, editableFlow, documentSelection]);
+  }, [onNavigationTarget, readOnly, editableFlow, documentSelection, onFlowSelectionStart]);
 
   useLayoutEffect(() => {
     documentSelection?.register(blockId, { flow: editableFlow, editable: !readOnly,
@@ -689,6 +693,8 @@ export function TextBlockProjection({
       documentSelection?.select(documentRange.anchor, { blockId, ...focus });
       return;
     }
+    // Capture both endpoints before clearing the native annotation preview.
+    if (!flowSelectionRef.current && anchor.unitId !== focus.unitId) onFlowSelectionStart?.();
     traversingRef.current = true;
     try {
       // Native selection still owns a range that has contracted to one textarea.
@@ -1375,7 +1381,7 @@ export function TextBlockProjection({
         const anchor = documentRange?.anchor ?? { blockId: current!.dataset.blockId!, ...(localAnchor ?? {
           unitId: current!.dataset.textUnitId!, offset: current!.selectionDirection === 'backward' ? current!.selectionEnd : current!.selectionStart }) };
         event.preventDefault();
-        if (caret) documentSelection.select(anchor, { blockId, unitId: event.currentTarget.dataset.textUnitId!, offset: caret.offset });
+        if (caret && documentSelection.select(anchor, { blockId, unitId: event.currentTarget.dataset.textUnitId!, offset: caret.offset })) onFlowSelectionStart?.();
         flowShiftClickRef.current = true;
         return;
       }

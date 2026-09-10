@@ -1,6 +1,32 @@
 import { presentationKindForBlock } from './blockContentService';
 import type { NoteBlock } from './runtimeDataTypes';
 import type { DocumentFlowPoint } from './documentTextFlowSelection';
+import { resolveScreenRect, selectPlacementFrame, type CoordinateContract } from './placementContractService';
+import type { BlockBoxLayout } from './runtimeLayout';
+import type { PageFrameModel } from './types';
+
+export interface TextFlowLayoutOrder {
+  obstacles?: readonly { id: string; x: number; y: number }[];
+  blockLayouts?: Record<string, BlockBoxLayout>;
+  pageFrames?: PageFrameModel[];
+  coordinateContract?: CoordinateContract;
+  pageOffsetX?: number;
+}
+
+/** Moving a placement does not change order_index. Share its reading order with selection. */
+export function textFlowReadingOrder(blocks: readonly NoteBlock[], layout: TextFlowLayoutOrder): { id: string; block?: NoteBlock }[] {
+  const entries = blocks.map((block, index) => {
+    const box = layout.blockLayouts?.[block.id];
+    return { id: block.id, block, index, rect: box ? resolveScreenRect(box,
+      selectPlacementFrame(box, layout.pageFrames ?? [], layout.coordinateContract), layout.coordinateContract, layout.pageOffsetX) : null };
+  });
+  const obstacles = (layout.obstacles ?? []).map((obstacle, index) => ({
+    id: obstacle.id, block: undefined, index: blocks.length + index, rect: obstacle,
+  }));
+  return [...entries, ...obstacles].sort((a, b) => a.rect && b.rect
+    ? a.rect.y - b.rect.y || a.rect.x - b.rect.x || a.index - b.index
+    : a.index - b.index).map(({ id, block }) => ({ id, block }));
+}
 
 export interface TextFlowBoundaryNavigationRequest {
   direction: 'up' | 'down' | 'left' | 'right';
@@ -23,32 +49,35 @@ export function supportsTextFlowBlockNavigation(block: NoteBlock): boolean {
     && presentationKindForBlock(block) === 'paragraph';
 }
 
-/** Follow the exact rendered Layout order, never geometry, IDs or a second sort. */
+/** Use the same placement reading order for navigation and document selections. */
 export function navigateTextFlowBlockBoundary({
   visibleBlocks,
   fromBlockId,
   request,
   targets,
   disabled = false,
+  ...layout
 }: {
   visibleBlocks: readonly NoteBlock[];
   fromBlockId: string;
   request: TextFlowBoundaryNavigationRequest;
   targets: ReadonlyMap<string, TextFlowNavigationTarget>;
   disabled?: boolean;
-}): boolean {
+} & TextFlowLayoutOrder): boolean {
   if (disabled) return false;
-  const sourceIndex = visibleBlocks.findIndex((block) => block.id === fromBlockId);
-  if (sourceIndex === -1 || !supportsTextFlowBlockNavigation(visibleBlocks[sourceIndex])) return false;
+  const entries = textFlowReadingOrder(visibleBlocks, layout);
+  const sourceIndex = entries.findIndex((entry) => entry.id === fromBlockId);
+  const source = entries[sourceIndex]?.block;
+  if (sourceIndex === -1 || (request.selectionAnchor && (!source || !supportsTextFlowBlockNavigation(source)))) return false;
   const step = request.direction === 'up' || request.direction === 'left' ? -1 : 1;
-  for (let index = sourceIndex + step; index >= 0 && index < visibleBlocks.length; index += step) {
-    const block = visibleBlocks[index];
-    if (!supportsTextFlowBlockNavigation(block)) {
+  for (let index = sourceIndex + step; index >= 0 && index < entries.length; index += step) {
+    const { id, block } = entries[index];
+    if (!block || !supportsTextFlowBlockNavigation(block)) {
       if (request.selectionAnchor) return false;
-      continue;
+      return targets.get(id)?.(request) ?? false;
     }
     // Read-only, unmounted and hidden editors have no live target or refuse focus.
-    if (targets.get(block.id)?.(request)) return true;
+    if (targets.get(id)?.(request)) return true;
     if (request.selectionAnchor) return false;
   }
   return false;

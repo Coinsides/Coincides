@@ -547,6 +547,7 @@ export function useNoteCanvasRuntimeController() {
     onDeleteCanvasObject: deleteCanvasObject,
     onSaveDocumentTypographyProfile: saveDocumentTypographyProfile,
     onSelectBlock: markBlockSelected,
+    onClearBlockSelection: clearBlockSelection,
     onSelectSlashCommand: handleSelectSlashCommand,
     onSurfacePointerDown: handleSurfacePointerDown,
     onTitleDraftChange: setTitleDraft,

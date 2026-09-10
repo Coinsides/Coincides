@@ -24,6 +24,8 @@ export interface DocumentFlowBlock {
   editable: boolean;
 }
 
+export type DocumentFlowEntry = DocumentFlowBlock | { obstacleId: string };
+
 export interface OrderedDocumentFlowSelection {
   start: DocumentFlowPoint;
   end: DocumentFlowPoint;
@@ -41,21 +43,24 @@ export interface DocumentFlowEdit {
 
 /** Inputs must include every visible block in rendered order, including barriers. */
 export function orderedDocumentFlowSelection(
-  blocks: readonly DocumentFlowBlock[],
+  blocks: readonly DocumentFlowEntry[],
   selection: DocumentFlowSelection,
 ): OrderedDocumentFlowSelection | null {
-  const anchorIndex = blocks.findIndex(({ block }) => block.id === selection.anchor.blockId);
-  const focusIndex = blocks.findIndex(({ block }) => block.id === selection.focus.blockId);
+  const anchorIndex = blocks.findIndex((entry) => 'block' in entry && entry.block.id === selection.anchor.blockId);
+  const focusIndex = blocks.findIndex((entry) => 'block' in entry && entry.block.id === selection.focus.blockId);
   if (anchorIndex < 0 || focusIndex < 0) return null;
 
-  const anchorUnitIndex = blocks[anchorIndex].flow.units.findIndex((unit) => unit.id === selection.anchor.unitId);
-  const focusUnitIndex = blocks[focusIndex].flow.units.findIndex((unit) => unit.id === selection.focus.unitId);
+  const anchorEntry = blocks[anchorIndex];
+  const focusEntry = blocks[focusIndex];
+  if (!('block' in anchorEntry) || !('block' in focusEntry)) return null;
+  const anchorUnitIndex = anchorEntry.flow.units.findIndex((unit) => unit.id === selection.anchor.unitId);
+  const focusUnitIndex = focusEntry.flow.units.findIndex((unit) => unit.id === selection.focus.unitId);
   if (anchorUnitIndex < 0 || focusUnitIndex < 0) return null;
   // Order the original UTF-16 endpoints before expanding the selected range.
   // Snapping each as a collapsed caret first could omit half-selected clusters.
   const clamp = (offset: number, length: number) => Math.min(length, Math.max(0, Number.isNaN(offset) ? 0 : Math.trunc(offset)));
-  const anchor = { ...selection.anchor, offset: clamp(selection.anchor.offset, blocks[anchorIndex].flow.units[anchorUnitIndex].text.length) };
-  const focus = { ...selection.focus, offset: clamp(selection.focus.offset, blocks[focusIndex].flow.units[focusUnitIndex].text.length) };
+  const anchor = { ...selection.anchor, offset: clamp(selection.anchor.offset, anchorEntry.flow.units[anchorUnitIndex].text.length) };
+  const focus = { ...selection.focus, offset: clamp(selection.focus.offset, focusEntry.flow.units[focusUnitIndex].text.length) };
 
   const forward = anchorIndex < focusIndex || (anchorIndex === focusIndex && (
     anchorUnitIndex < focusUnitIndex || (
@@ -72,6 +77,7 @@ export function orderedDocumentFlowSelection(
   for (let index = startIndex; index <= endIndex; index += 1) {
     const entry = blocks[index];
     // A selection must stay in one uninterrupted run of editable text blocks.
+    if (!('block' in entry)) return null;
     if (!entry.editable || !supportsTextFlowBlockNavigation(entry.block) || !entry.flow.units.length) return null;
     const firstUnit = entry.flow.units[0];
     const lastUnit = entry.flow.units[entry.flow.units.length - 1];
@@ -97,7 +103,7 @@ export function orderedDocumentFlowSelection(
 }
 
 export function documentFlowSelectionText(
-  blocks: readonly DocumentFlowBlock[],
+  blocks: readonly DocumentFlowEntry[],
   selection: DocumentFlowSelection,
 ): string {
   const range = orderedDocumentFlowSelection(blocks, selection);
@@ -106,7 +112,7 @@ export function documentFlowSelectionText(
 
 /** Delete per block; insert only at the earlier endpoint, without joining blocks. */
 export function replaceDocumentFlowSelection(
-  blocks: readonly DocumentFlowBlock[],
+  blocks: readonly DocumentFlowEntry[],
   selection: DocumentFlowSelection,
   text: string,
   inputType = 'insertText',

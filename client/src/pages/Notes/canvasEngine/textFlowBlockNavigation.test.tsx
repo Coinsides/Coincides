@@ -7,10 +7,14 @@ import {
   DocumentTextFlowSelectionContext,
   useDocumentTextFlowSelection,
 } from './hooks/useDocumentTextFlowSelection';
+import { useNoteCanvasResolvedLayoutModel } from './hooks/useNoteCanvasLayoutModel';
+import { createSurfaceModePolicy } from './modePolicyService';
+import { createDefaultDocumentTypographyProfile } from './typographyProfileService';
 import type { DocumentFlowEdit } from './documentTextFlowSelection';
 import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from './textFlowService';
 import {
   navigateTextFlowBlockBoundary,
+  textFlowReadingOrder,
   type TextFlowNavigationTarget,
 } from './textFlowBlockNavigation';
 
@@ -52,8 +56,10 @@ function renderBlocks(blocks: NoteBlock[], options: {
   disabled?: boolean;
   rerenderOnFocus?: boolean;
   documentSelection?: boolean;
+  realLayout?: boolean;
 } = {}) {
   const onChange = vi.fn();
+  const onSelect = vi.fn();
   const onDocumentEdit = vi.fn(async (_changes: DocumentFlowEdit[]) => true);
   let changeNote!: (noteId: string) => void;
   function Fixture() {
@@ -62,8 +68,16 @@ function renderBlocks(blocks: NoteBlock[], options: {
     const [drafts, setDrafts] = useState<Record<string, TextBlockContentV1>>({});
     const [noteId, setNoteId] = useState('synthetic-b6b-note');
     changeNote = setNoteId;
+    const resolved = useNoteCanvasResolvedLayoutModel({
+      contentWidth: 760, documentTypographyProfile: createDefaultDocumentTypographyProfile(),
+      layoutDrafts: {}, sortedBlocks: [...blocks].sort((a, b) => a.order_index - b.order_index),
+      surfaceMode: 'canvas', surfacePolicy: createSurfaceModePolicy('canvas'), pageFrames: [],
+    });
+    const visibleBlocks = options.realLayout ? resolved.visibleBlocks : blocks;
+    const layoutOrder = options.realLayout ? { blockLayouts: resolved.blockLayouts, pageFrames: [] } : {};
+
     const selection = useDocumentTextFlowSelection({
-      noteId, visibleBlocks: blocks,
+      noteId, visibleBlocks, ...layoutOrder,
       disabled: !options.documentSelection || options.disabled,
       applyDocumentEdit: async (changes) => {
         setDrafts((current) => ({ ...current, ...Object.fromEntries(changes.map((change) => [change.block.id, change.nextTextFlow])) }));
@@ -85,13 +99,13 @@ function renderBlocks(blocks: NoteBlock[], options: {
         onAnnotationSelect: noop, onAnnotationContextMenu: noop, onAnnotationStackSelect: noop,
         onTextUnitSelection: noop, onTextUnitContextMenu: noop, onBlockContextMenu: noop,
         onTextChange: onChange, onTextFlowChange: onChange, onFieldDraftChange: noop,
-        onSave: vi.fn().mockResolvedValue({ status: 'saved' }), onTrash: noop, onSelect: noop,
+        onSave: vi.fn().mockResolvedValue({ status: 'saved' }), onTrash: noop, onSelect: () => onSelect(entry.id),
         onBeginMove: noop, onBeginResize: noop, onToggleExportRole: noop, onToggleAIVisibility: noop,
         onAnnotateBlock: noop, showBlockTypeBadge: false, showAIStatusBadge: false,
         showExportStatusBadge: false, showLabelOverlay: false, onKeyDown: noop,
         onMeasuredHeight: noop, anchorsBySourceRef: {}, sourceJumpBusy: null, onViewSource: noop,
         onBoundaryNavigate: (request) => navigateTextFlowBlockBoundary({
-          visibleBlocks: blocks, fromBlockId: entry.id, request, targets: targets.current,
+          visibleBlocks, ...layoutOrder, fromBlockId: entry.id, request, targets: targets.current,
           disabled: options.disabled,
         }),
         onNavigationTarget: (target) => {
@@ -104,7 +118,7 @@ function renderBlocks(blocks: NoteBlock[], options: {
   }
   const view = render(<Fixture />);
   return {
-    ...view, onChange, onDocumentEdit, switchNote: (noteId: string) => act(() => changeNote(noteId)),
+    ...view, onChange, onSelect, onDocumentEdit, switchNote: (noteId: string) => act(() => changeNote(noteId)),
     unit: (id: string, index = 0) => view.container.querySelector<HTMLTextAreaElement>(
       `textarea[data-text-unit-id="${id}-unit-${index}"]`,
     )!,
@@ -112,6 +126,39 @@ function renderBlocks(blocks: NoteBlock[], options: {
 }
 
 describe('B6 cross-block cursor navigation', () => {
+  it.each(['v1', 'v2'] as const)('orders same-row objects and text in the rendered %s coordinate system', (coordinateContract) => {
+    expect(textFlowReadingOrder([block('text', 'text')], {
+      coordinateContract, pageOffsetX: 80, pageFrames: [],
+      blockLayouts: { text: { x: 0, y: 0, width: 320, height: 72, coordinate_space: 'canvas_world', surface: 'canvas_workspace' } },
+      obstacles: [{ id: 'object:image', x: 40, y: 0 }],
+    }).map((entry) => entry.id)).toEqual(['object:image', 'text']);
+  });
+
+  it('fix1 smoke 3: follows real Layout placement after movement leaves order_index unchanged', () => {
+    const editor = renderBlocks([
+      block('lower', 'lower paragraph', { order_index: 0, canvas_layout: { x: 0, y: 220, width: 320, height: 72, surface: 'canvas_workspace' } }),
+      block('upper', 'upper paragraph', { order_index: 1, canvas_layout: { x: 0, y: 0, width: 320, height: 72, surface: 'canvas_workspace' } }),
+    ], { documentSelection: true, realLayout: true });
+    const upper = editor.unit('upper');
+    act(() => { upper.focus(); upper.setSelectionRange(5, 5); });
+    fireEvent.keyDown(upper, { key: 'ArrowDown', shiftKey: true });
+    expect(document.activeElement).toBe(editor.unit('lower'));
+    const setData = vi.fn();
+    fireEvent.copy(editor.unit('lower'), { clipboardData: { setData } });
+    expect(setData).toHaveBeenCalledWith('text/plain', ' paragraph\n\nlower');
+  });
+
+  it('fix1 smoke 1: Henry three paragraphs keep the mid-unit anchor through two Shift+Down steps', () => {
+    const editor = renderBlocks([block('henry', 'We are the Champions of the world\nSecond paragraph has more text here\nThird paragraph has more text here')], { documentSelection: true, rerenderOnFocus: true });
+    const first = editor.unit('henry');
+    act(() => { first.focus(); first.setSelectionRange(21, 21); });
+    fireEvent.keyDown(first, { key: 'ArrowDown', shiftKey: true });
+    fireEvent.keyDown(editor.unit('henry', 1), { key: 'ArrowDown', shiftKey: true });
+    const setData = vi.fn();
+    fireEvent.copy(editor.unit('henry', 2), { clipboardData: { setData } });
+    expect(setData).toHaveBeenCalledWith('text/plain', 'of the world\nSecond paragraph has more text here\nThird paragraph has m');
+  });
+
   it('B9 keeps cross-block Shift hit coordinates and subsequent emoji traversal on grapheme boundaries', () => {
     const editor = renderBlocks([block('first', 'start'), block('last', 'A😀e\u0301B')], { documentSelection: true });
     const source = editor.unit('first');
@@ -164,26 +211,39 @@ describe('B6 cross-block cursor navigation', () => {
     expect(editor.onChange).not.toHaveBeenCalled();
   });
 
-  it('smoke 4: follows rendered order and skips item, source projection, media and read-only blocks', () => {
+  it('fix1 smoke 4: lands on item, projection and image shells, then leaves with the next arrow', () => {
     const editor = renderBlocks([
-      block('z-first', 'long first text', { order_index: 90 }),
+      block('first', 'long first text'),
       block('item', '', { block_type: 'item_ref', content_json: { item_id: 'synthetic-item' } }),
       block('projection', 'Source projection', { source_kind: 'source_projection' }),
       block('media', 'Image caption', { block_type: 'image' }),
-      block('paused', 'Read only'),
-      block('a-next', 'next text content', { order_index: 1 }),
-    ], { readOnlyIds: ['paused'] });
-    const source = editor.unit('z-first');
-    const target = editor.unit('a-next');
+      block('last', 'last text content'),
+    ]);
+    const source = editor.unit('first');
     act(() => { source.focus(); source.setSelectionRange(7, 7); });
-    expect(fireEvent.keyDown(source, { key: 'ArrowDown' })).toBe(false);
-    expect(document.activeElement).toBe(target);
-    expect(target.selectionStart).toBe(7);
-    expect(editor.unit('paused').readOnly).toBe(true);
-    expect(editor.onChange).not.toHaveBeenCalled();
-    fireEvent.keyDown(target, { key: 'ArrowUp' });
+    const shell = (id: string) => editor.container.querySelector<HTMLElement>('article[data-block-id="' + id + '"]')!;
+    let current: HTMLElement = source;
+    for (const id of ['item', 'projection', 'media']) {
+      fireEvent.keyDown(current, { key: 'ArrowDown' });
+      expect(document.activeElement).toBe(shell(id));
+      expect(editor.onSelect).toHaveBeenLastCalledWith(id);
+      fireEvent.keyDown(shell(id), { key: 'ArrowDown', shiftKey: true });
+      expect(document.activeElement).toBe(shell(id));
+      expect(fireEvent.keyDown(shell(id), { key: 'Enter' })).toBe(true);
+      expect(fireEvent.keyDown(shell(id), { key: 'x' })).toBe(true);
+      current = shell(id);
+    }
+    fireEvent.keyDown(current, { key: 'ArrowDown' });
+    expect(document.activeElement).toBe(editor.unit('last'));
+    expect(editor.unit('last').selectionStart).toBe(7);
+    for (const id of ['media', 'projection', 'item']) {
+      fireEvent.keyDown(document.activeElement!, { key: 'ArrowUp' });
+      expect(document.activeElement).toBe(shell(id));
+    }
+    fireEvent.keyDown(document.activeElement!, { key: 'ArrowUp' });
     expect(document.activeElement).toBe(source);
     expect(source.selectionStart).toBe(7);
+    expect(editor.onChange).not.toHaveBeenCalled();
   });
 
   it('retains the sticky column through a short block and reverses across blocks', () => {

@@ -1,3 +1,4 @@
+import type { KeyboardEvent as NavigationKeyboardEvent } from 'react';
 import type {
   KeyboardEvent as ReactKeyboardEvent,
   MouseEvent as ReactMouseEvent,
@@ -23,6 +24,8 @@ export type PendingTableCellEdit = {
 
 type TableObjectLayerProps = {
   placements: CanvasPlacement[];
+  onNavigationElement?: (id: string, node: HTMLDivElement | null) => void;
+  onNavigationKeyDown?: (id: string, event: NavigationKeyboardEvent<HTMLDivElement>) => void;
   canvasObjectById: Map<string, CanvasObject>;
   structuredObjectById: Map<string, StructuredCanvasObject>;
   selectedObjectId: string | null;
@@ -73,6 +76,8 @@ function buildCellMap(cells: TableCellModel[]): Map<string, TableCellModel> {
 
 export function TableObjectLayer({
   placements,
+  onNavigationElement,
+  onNavigationKeyDown,
   canvasObjectById,
   structuredObjectById,
   selectedObjectId,
@@ -151,6 +156,9 @@ export function TableObjectLayer({
             data-canvas-table="true"
             data-canvas-table-object="true"
             data-canvas-structured-object="table"
+            ref={(node) => onNavigationElement?.(canvasObject.objectId, node)}
+            tabIndex={onNavigationElement ? -1 : undefined}
+            onKeyDown={(event) => onNavigationKeyDown?.(canvasObject.objectId, event)}
             data-canvas-object-id={canvasObject.objectId}
             data-canvas-object-kind="table"
             data-canvas-object-backing="structured_object"

@@ -1,10 +1,11 @@
 import { createContext, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { NoteBlock, TextBlockContentV1 } from '../runtimeDataTypes';
 import type { FlowPoint } from '../textFlowSelection';
+import { textFlowReadingOrder, type TextFlowLayoutOrder } from '../textFlowBlockNavigation';
 import { snapGraphemeOffset } from '../../../../../../shared/graphemes';
 import {
   documentFlowSelectionText, orderedDocumentFlowSelection, replaceDocumentFlowSelection,
-  type DocumentFlowBlock, type DocumentFlowEdit, type DocumentFlowPoint, type DocumentFlowSelection,
+  type DocumentFlowEntry, type DocumentFlowEdit, type DocumentFlowPoint, type DocumentFlowSelection,
 } from '../documentTextFlowSelection';
 
 interface Editor {
@@ -14,7 +15,7 @@ interface Editor {
   anchor: () => FlowPoint | null;
 }
 
-interface Options {
+interface Options extends TextFlowLayoutOrder {
   noteId: string;
   visibleBlocks: readonly NoteBlock[];
   disabled?: boolean;
@@ -36,7 +37,8 @@ export function useDocumentTextFlowSelection(options: Options) {
     range.current = null;
     render((value) => value + 1);
   }, [range]);
-  const blocks = (): DocumentFlowBlock[] => latest.current.visibleBlocks.map((block) => {
+  const blocks = (): DocumentFlowEntry[] => textFlowReadingOrder(latest.current.visibleBlocks, latest.current).map(({ id, block }) => {
+    if (!block) return { obstacleId: id };
     const editor = editors.get(block.id);
     return { block, flow: editor?.flow ?? { textflow_version: 'TextBlockContentV1', units: [], inline_structures: [], metadata: {} },
       editable: Boolean(editor?.editable) && !latest.current.disabled };

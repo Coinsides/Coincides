@@ -2223,7 +2223,6 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 .textUnitDraftRange {
   position: relative;
   z-index: 12;
-  background: color-mix(in srgb, var(--accent-primary-bg) 18%, transparent);
 }
 
 .textUnitDraftRangeBadge {

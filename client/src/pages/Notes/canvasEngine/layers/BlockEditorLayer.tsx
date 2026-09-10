@@ -108,6 +108,7 @@ interface BlockEditorLayerProps {
   onTextEditBoundary?: (reason: TextFlowEditBoundary, selection?: TextFlowEditSelection) => void;
   onBoundaryNavigate?: (request: TextFlowBoundaryNavigationRequest) => boolean;
   onNavigationTarget?: (target: TextFlowNavigationTarget | null) => void;
+  onFlowSelectionStart?: () => void;
   onFieldDraftChange: (fieldValues: FieldValueRecord) => void;
   onSave: (
     silent?: boolean,
@@ -139,6 +140,7 @@ function shouldKeepNativeFocusTarget(target: EventTarget | null): boolean {
 
 export function BlockEditorLayer({
   block,
+  onFlowSelectionStart,
   coordinateContract,
   pageFrame,
   contentReadOnly,
@@ -195,6 +197,8 @@ export function BlockEditorLayer({
   const screenRect = resolveScreenRect(layout, pageFrame, coordinateContract, pageOffsetX);
   const blockContentRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+  const shellRef = useRef<HTMLElement | null>(null);
+  const navigationColumnRef = useRef<number | null>(null);
   const focusedReceiptRef = useRef<TextFocusReceipt | null>(null);
   const onFocusReleasedRef = useRef(onFocusReleased);
   onFocusReleasedRef.current = onFocusReleased;
@@ -204,6 +208,18 @@ export function BlockEditorLayer({
   const presentationKind = presentationKindForBlock(block);
   const itemReference = block.block_type === 'item_ref';
   const allowTextNavigation = !contentReadOnly && !layoutMode && supportsTextFlowBlockNavigation(block);
+  useLayoutEffect(() => {
+    if (allowTextNavigation || contentReadOnly || layoutMode) return;
+    onNavigationTarget?.((request) => {
+      if (request.selectionAnchor || !shellRef.current) return false;
+      navigationColumnRef.current = request.columnX;
+      onSelect();
+      shellRef.current.focus({ preventScroll: true });
+      shellRef.current.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+      return true;
+    });
+    return () => onNavigationTarget?.(null);
+  }, [allowTextNavigation, contentReadOnly, layoutMode, onNavigationTarget, onSelect]);
   const fragmentTotal = blockFragments[0]?.fragmentTotal || blockFragments.length;
   const crossPageFragment = fragmentTotal > 1;
   const fragmentRoles = blockFragments.map((fragment) => fragment.role).join(',');
@@ -360,6 +376,18 @@ export function BlockEditorLayer({
 
   return (
     <article
+      ref={shellRef}
+      tabIndex={-1}
+      data-block-id={block.id}
+      onKeyDown={(event) => {
+        if (event.target !== event.currentTarget || contentReadOnly || layoutMode
+          || event.ctrlKey || event.metaKey || event.altKey
+          || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229
+          || !['ArrowUp', 'ArrowDown'].includes(event.key)) return;
+        event.preventDefault();
+        if (!event.shiftKey) onBoundaryNavigate?.({ direction: event.key === 'ArrowDown' ? 'down' : 'up',
+          columnX: navigationColumnRef.current });
+      }}
       data-note-block-shell="true"
       data-cross-page-block-fragment={crossPageFragment ? 'true' : undefined}
       data-cross-page-fragment-count={crossPageFragment ? fragmentTotal : undefined}
@@ -470,6 +498,7 @@ export function BlockEditorLayer({
           />
         ) : (
           <TextBlockProjection
+            onFlowSelectionStart={onFlowSelectionStart}
             blockId={block.id}
             readOnly={contentReadOnly}
             text={text}

@@ -1,3 +1,4 @@
+import type { KeyboardEvent as NavigationKeyboardEvent } from 'react';
 import {
   useEffect,
   useState,
@@ -18,6 +19,8 @@ import styles from '../../NoteDetail.module.css';
 
 type ImageObjectLayerProps = {
   placements: CanvasPlacement[];
+  onNavigationElement?: (id: string, node: HTMLDivElement | null) => void;
+  onNavigationKeyDown?: (id: string, event: NavigationKeyboardEvent<HTMLDivElement>) => void;
   canvasObjectById: Map<string, CanvasObject>;
   imageObjectById: Map<string, ImageCanvasObject>;
   selectedObjectId: string | null;
@@ -89,6 +92,8 @@ function CanvasImageMedia({
 
 export function ImageObjectLayer({
   placements,
+  onNavigationElement,
+  onNavigationKeyDown,
   canvasObjectById,
   imageObjectById,
   selectedObjectId,
@@ -115,6 +120,9 @@ export function ImageObjectLayer({
             className={`${styles.canvasImageObject} ${selected ? styles.canvasImageSelected : ''} ${layoutMode && !readOnly ? styles.canvasImageOperable : ''}`}
             data-canvas-image="true"
             data-canvas-image-object="true"
+            ref={(node) => onNavigationElement?.(canvasObject.objectId, node)}
+            tabIndex={onNavigationElement ? -1 : undefined}
+            onKeyDown={(event) => onNavigationKeyDown?.(canvasObject.objectId, event)}
             data-canvas-object-id={canvasObject.objectId}
             data-canvas-object-kind="image"
             data-canvas-object-backing="asset"

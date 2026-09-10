@@ -2,6 +2,7 @@ import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createTextBlockContentV1 } from '../textFlowService';
+import { useSelectionDraftController } from '../hooks/useSelectionDraftController';
 import { TextBlockProjection } from './TextBlockProjection';
 import { measureTextareaNavigation, textareaBoundaryCaret, textareaCaretAtPoint } from '../textareaNavigation';
 
@@ -18,12 +19,13 @@ vi.mock('../textareaNavigation', async (importOriginal) => ({
 
 afterEach(cleanup);
 
-function renderEditor(initialText = 'alpha SELECT omega', separateUnits = false) {
+function renderEditor(initialText = 'alpha SELECT omega', separateUnits = false, nativeDraft = false) {
   const onFlow = vi.fn();
   const onKeyDown = vi.fn();
   const onBoundary = vi.fn();
   const onSave = vi.fn().mockResolvedValue({ status: 'saved' });
   function Editor() {
+    const selectionDraft = useSelectionDraftController();
     const [flow, setFlow] = useState(() => {
       const initial = createTextBlockContentV1(initialText);
       return separateUnits ? { ...initial, units: initialText.split('\n').map((text, index) => ({
@@ -43,7 +45,9 @@ function renderEditor(initialText = 'alpha SELECT omega', separateUnits = false)
       onFocused={vi.fn()}
       onAnnotationSelect={vi.fn()}
       onAnnotationContextMenu={vi.fn()}
-      onTextUnitSelection={vi.fn()}
+      draftAnnotationRanges={nativeDraft ? selectionDraft.draftAnnotationRanges : []}
+      onFlowSelectionStart={selectionDraft.clearDraft}
+      onTextUnitSelection={nativeDraft ? (range, anchorRect) => selectionDraft.replaceDraft({ range, anchorRect }) : vi.fn()}
       onTextUnitContextMenu={vi.fn()}
       onTextChange={vi.fn()}
       onTextFlowChange={(next, edit) => { onFlow(next, edit); setFlow(next); }}
@@ -65,6 +69,57 @@ function renderEditor(initialText = 'alpha SELECT omega', separateUnits = false)
 }
 
 describe('B4 TextFlow input boundaries with synthetic content', () => {
+  it('fix1 smoke 2: reverses across the original middle-unit anchor without moving it', () => {
+    const editor = renderEditor('First paragraph has enough text here\nWe are the Champions of the world\nThird paragraph has enough text here', true, true);
+    const [first, middle, last] = [...editor.container.querySelectorAll('textarea')];
+    act(() => { middle.focus(); middle.setSelectionRange(21, 21); });
+    fireEvent.keyDown(middle, { key: 'ArrowDown', shiftKey: true });
+    fireEvent.keyDown(last, { key: 'ArrowUp', shiftKey: true });
+    expect([middle.selectionStart, middle.selectionEnd]).toEqual([21, 21]);
+    fireEvent.keyDown(middle, { key: 'ArrowUp', shiftKey: true });
+    const setData = vi.fn();
+    fireEvent.copy(first, { clipboardData: { setData } });
+    expect(setData).toHaveBeenCalledWith('text/plain', first.value.slice(21) + '\nWe are the Champions ');
+    fireEvent.keyDown(first, { key: 'ArrowDown', shiftKey: true });
+    expect([middle.selectionStart, middle.selectionEnd]).toEqual([21, 21]);
+    expect(editor.container.querySelector('[data-textflow-selection-layer]')).toBeNull();
+  });
+
+  it.each(['Delete', 'Backspace', 'beforeinput', 'paste'] as const)('fix1 Henry %s changes only the anchor-to-focus interval', (operation) => {
+    const editor = renderEditor('We are the Champions of the world\nSecond paragraph has more text here\nThird paragraph has more text here', true, true);
+    const [first, second, third] = [...editor.container.querySelectorAll('textarea')];
+    const suffix = third.value.slice(21);
+    act(() => { first.focus(); first.setSelectionRange(21, 21); });
+    fireEvent.keyDown(first, { key: 'ArrowDown', shiftKey: true });
+    fireEvent.keyDown(second, { key: 'ArrowDown', shiftKey: true });
+    const replacement = operation === 'beforeinput' || operation === 'paste' ? 'X' : '';
+    if (operation === 'beforeinput') fireEvent(third, new InputEvent('beforeinput', { bubbles: true, cancelable: true, inputType: 'insertText', data: 'X' }));
+    else if (operation === 'paste') fireEvent.paste(third, { clipboardData: { getData: () => 'X' } });
+    else fireEvent.keyDown(third, { key: operation });
+    expect(editor.texts()).toEqual(['We are the Champions ' + replacement + suffix]);
+    expect(editor.onFlow).toHaveBeenCalledTimes(1);
+    expect(editor.onFlow.mock.calls[0][1].beforeSelection).toEqual({ unitId: 'tu-1', start: 21, end: 21 });
+  });
+
+  it('F14 red: Henry mid-paragraph native Shift then cross-unit Shift must retire the full-row draft highlight', () => {
+    const editor = renderEditor('We are the Champions of the world\nSecond paragraph has more text here\nThird paragraph has more text here', true, true);
+    const [first, second] = [...editor.container.querySelectorAll('textarea')];
+    act(() => { first.focus(); first.setSelectionRange(21, 21); });
+    vi.mocked(measureTextareaNavigation).mockReturnValueOnce({ x: 168, y: 0, lineHeight: 20, atFirstLine: true, atLastLine: false });
+    expect(fireEvent.keyDown(first, { key: 'ArrowDown', shiftKey: true })).toBe(true);
+    // jsdom has no native line movement. Supply the real browser's first-step range.
+    act(() => first.setSelectionRange(21, first.value.length, 'forward'));
+    fireEvent.select(first);
+    fireEvent.keyUp(first, { key: 'ArrowDown', shiftKey: true });
+    expect(editor.container.querySelector('[class*="textUnitDraftRange"]')).not.toBeNull();
+    fireEvent.keyDown(first, { key: 'ArrowDown', shiftKey: true });
+    expect(document.activeElement).toBe(second);
+    const setData = vi.fn();
+    fireEvent.copy(second, { clipboardData: { setData } });
+    expect(setData).toHaveBeenCalledWith('text/plain', 'of the world\nSecond paragraph has ');
+    expect(editor.container.querySelector('[class*="textUnitDraftRange"]'), 'native annotation draft must not paint before the pinned offset after traversal').toBeNull();
+  });
+
   it.each(['😀', '👩‍👩‍👧‍👦', 'e\u0301'])('B9 Shift and plain arrows cross %s in one UTF-16 boundary step', (cluster) => {
     const editor = renderEditor(`A${cluster}B`);
     const node = editor.textarea;
