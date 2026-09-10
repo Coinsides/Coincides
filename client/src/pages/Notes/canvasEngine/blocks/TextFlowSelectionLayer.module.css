@@ -1,0 +1,13 @@
+.layer {
+  position: absolute;
+  z-index: 2;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+}
+
+.rectangle {
+  position: absolute;
+  background: color-mix(in srgb, var(--accent-primary) 24%, transparent);
+  pointer-events: none;
+}

@@ -3,15 +3,17 @@ import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createTextBlockContentV1 } from '../textFlowService';
 import { TextBlockProjection } from './TextBlockProjection';
-import { measureTextareaNavigation, textareaBoundaryCaret } from '../textareaNavigation';
+import { measureTextareaNavigation, textareaBoundaryCaret, textareaCaretAtPoint } from '../textareaNavigation';
 
 // jsdom has no line layout. Native wrapping and visual columns are also checked
 // in the real-browser synthetic fixture; these tests exercise event routing.
-vi.mock('../textareaNavigation', () => ({
+vi.mock('../textareaNavigation', async (importOriginal) => ({
+  ...await importOriginal<typeof import('../textareaNavigation')>(),
   measureTextareaNavigation: vi.fn((_node: HTMLTextAreaElement, offset: number) => ({
     x: offset * 8, y: 0, lineHeight: 20, atFirstLine: true, atLastLine: true,
   })),
   textareaBoundaryCaret: vi.fn((node: HTMLTextAreaElement, _edge: string, x: number) => ({ offset: Math.min(node.value.length, Math.round(x / 8)), y: 0 })),
+  textareaCaretAtPoint: vi.fn((_node: HTMLTextAreaElement, x: number) => ({ offset: x / 8, y: 0 })),
 }));
 
 afterEach(cleanup);
@@ -63,6 +65,19 @@ function renderEditor(initialText = 'alpha SELECT omega', separateUnits = false)
 }
 
 describe('B4 TextFlow input boundaries with synthetic content', () => {
+  it('B6 smoke 1: Shift+Down crosses the textarea boundary and copies the flow range', () => {
+    const editor = renderEditor('first\nsecond\nthird', true);
+    const units = [...editor.container.querySelectorAll('textarea')];
+    expect(units).toHaveLength(3);
+    act(() => { units[0].focus(); units[0].setSelectionRange(2, 2); });
+    fireEvent.keyDown(units[0], { key: 'ArrowDown', shiftKey: true });
+    expect(document.activeElement).toBe(units[1]);
+    const setData = vi.fn();
+    fireEvent.copy(units[1], { clipboardData: { setData } });
+    expect(setData).toHaveBeenCalledWith('text/plain', 'rst\nse');
+    expect(editor.onFlow).not.toHaveBeenCalled();
+  });
+
   it('B5 smoke 1: arrows traverse three paragraphs in both directions', () => {
     const editor = renderEditor('first\nsecond\nthird', true);
     const units = [...editor.container.querySelectorAll('textarea')];
@@ -205,13 +220,14 @@ describe('B4 TextFlow input boundaries with synthetic content', () => {
     }
   });
 
-  it('B5 leaves modifier arrows, selections and Home/End/Page keys native', () => {
+  it('B5 leaves Ctrl/Meta/Alt arrows, single-unit selections and Home/End/Page keys native', () => {
     const editor = renderEditor('first\nsecond', true);
     act(() => { editor.textarea.focus(); editor.textarea.setSelectionRange(0, 0); });
     for (const key of ['Home', 'End', 'PageUp', 'PageDown']) {
       expect(fireEvent.keyDown(editor.textarea, { key })).toBe(true);
     }
-    for (const modifier of ['shiftKey', 'ctrlKey', 'metaKey', 'altKey']) {
+    // Shift across a unit boundary is now owned by B6; the other modifiers stay native.
+    for (const modifier of ['ctrlKey', 'metaKey', 'altKey']) {
       expect(fireEvent.keyDown(editor.textarea, { key: 'ArrowDown', [modifier]: true })).toBe(true);
     }
     act(() => editor.textarea.setSelectionRange(0, 3));
@@ -313,5 +329,261 @@ describe('B4 TextFlow input boundaries with synthetic content', () => {
     expect(editor.onFlow).not.toHaveBeenCalled();
     expect(editor.texts()).toEqual(['synthetic']);
     fireEvent.compositionEnd(editor.textarea);
+  });
+});
+
+describe('B6 cross-unit selection event boundaries', () => {
+  const layers = (container: HTMLElement) => container.querySelectorAll('[data-textflow-selection-layer="true"]');
+  const clipboardText = (textarea: HTMLTextAreaElement) => {
+    const setData = vi.fn();
+    fireEvent.copy(textarea, { clipboardData: { setData } });
+    return setData.mock.lastCall?.[1] as string | undefined;
+  };
+  const focusAt = (textarea: HTMLTextAreaElement, offset: number) => {
+    act(() => { textarea.focus(); textarea.setSelectionRange(offset, offset); });
+  };
+
+  it('extends and retracts Shift+Right into a forward native range without losing its anchor', () => {
+    const editor = renderEditor('first\nsecond', true);
+    const units = [...editor.container.querySelectorAll('textarea')];
+    act(() => { units[0].focus(); units[0].setSelectionRange(2, 5, 'forward'); });
+    expect(fireEvent.keyDown(units[0], { key: 'ArrowRight', shiftKey: true })).toBe(false);
+    expect(document.activeElement).toBe(units[1]);
+    expect(clipboardText(units[1])).toBe('rst\n');
+    fireEvent.keyDown(units[1], { key: 'ArrowRight', shiftKey: true });
+    expect(clipboardText(units[1])).toBe('rst\ns');
+    fireEvent.keyDown(units[1], { key: 'ArrowLeft', shiftKey: true });
+    expect(clipboardText(units[1])).toBe('rst\n');
+    fireEvent.keyDown(units[1], { key: 'ArrowLeft', shiftKey: true });
+    expect(document.activeElement).toBe(units[0]);
+    expect([units[0].selectionStart, units[0].selectionEnd, units[0].selectionDirection]).toEqual([2, 5, 'forward']);
+    expect(layers(editor.container)).toHaveLength(0);
+    expect(clipboardText(units[0])).toBeUndefined();
+    // Re-expanding must keep offset 2 as the anchor after the native hand-back.
+    fireEvent.keyDown(units[0], { key: 'ArrowRight', shiftKey: true });
+    expect(clipboardText(units[1])).toBe('rst\n');
+    expect(editor.onFlow).not.toHaveBeenCalled();
+  });
+
+  it('extends and retracts Shift+Left into a backward native range without reversing its anchor', () => {
+    const editor = renderEditor('first\nsecond', true);
+    const units = [...editor.container.querySelectorAll('textarea')];
+    act(() => { units[1].focus(); units[1].setSelectionRange(0, 3, 'backward'); });
+    expect(fireEvent.keyDown(units[1], { key: 'ArrowLeft', shiftKey: true })).toBe(false);
+    expect(document.activeElement).toBe(units[0]);
+    expect(clipboardText(units[0])).toBe('\nsec');
+    fireEvent.keyDown(units[0], { key: 'ArrowLeft', shiftKey: true });
+    expect(clipboardText(units[0])).toBe('t\nsec');
+    fireEvent.keyDown(units[0], { key: 'ArrowRight', shiftKey: true });
+    expect(clipboardText(units[0])).toBe('\nsec');
+    fireEvent.keyDown(units[0], { key: 'ArrowRight', shiftKey: true });
+    expect(document.activeElement).toBe(units[1]);
+    expect([units[1].selectionStart, units[1].selectionEnd, units[1].selectionDirection]).toEqual([0, 3, 'backward']);
+    expect(layers(editor.container)).toHaveLength(0);
+    expect(clipboardText(units[1])).toBeUndefined();
+    fireEvent.keyDown(units[1], { key: 'ArrowLeft', shiftKey: true });
+    expect(clipboardText(units[0])).toBe('\nsec');
+    expect(editor.onFlow).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { source: 0, anchor: 2, target: 2, offset: 3, expected: 'rst\nsecond\nthi' },
+    { source: 2, anchor: 3, target: 0, offset: 1, expected: 'irst\nsecond\nthi' },
+  ])('Shift+Click maps its point to the correct endpoint from unit $source to $target', ({ source, anchor, target, offset, expected }) => {
+    const editor = renderEditor('first\nsecond\nthird', true);
+    const units = [...editor.container.querySelectorAll('textarea')];
+    focusAt(units[source], anchor);
+    expect(fireEvent.mouseDown(units[target], { shiftKey: true, clientX: offset * 8, clientY: 12 })).toBe(false);
+    expect(textareaCaretAtPoint).toHaveBeenLastCalledWith(units[target], offset * 8, 12);
+    expect(document.activeElement).toBe(units[target]);
+    expect(units[target].selectionStart).toBe(offset);
+    expect(clipboardText(units[target])).toBe(expected);
+    expect(editor.onFlow).not.toHaveBeenCalled();
+  });
+
+  it('Shift+Click keeps the original anchor while moving the endpoint and contracting to one unit', () => {
+    const editor = renderEditor('first\nsecond\nthird', true);
+    const units = [...editor.container.querySelectorAll('textarea')];
+    focusAt(units[0], 2);
+    fireEvent.mouseDown(units[2], { shiftKey: true, clientX: 24, clientY: 10 });
+    fireEvent.mouseDown(units[1], { shiftKey: true, clientX: 8, clientY: 10 });
+    expect(clipboardText(units[1])).toBe('rst\ns');
+    fireEvent.mouseDown(units[0], { shiftKey: true, clientX: 8, clientY: 10 });
+    expect([units[0].selectionStart, units[0].selectionEnd, units[0].selectionDirection]).toEqual([1, 2, 'backward']);
+    expect(layers(editor.container)).toHaveLength(0);
+    expect(editor.onFlow).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { key: 'Escape', target: 1 },
+    { key: 'ArrowLeft', target: 0 },
+    { key: 'ArrowUp', target: 0 },
+    { key: 'ArrowRight', target: 1 },
+    { key: 'ArrowDown', target: 1 },
+  ])('$key collapses the range to its semantic endpoint and stops intercepting copy', ({ key, target }) => {
+    const editor = renderEditor('first\nsecond', true);
+    const units = [...editor.container.querySelectorAll('textarea')];
+    focusAt(units[0], 2);
+    fireEvent.keyDown(units[0], { key: 'ArrowDown', shiftKey: true });
+    expect(clipboardText(units[1])).toBe('rst\nse');
+    expect(fireEvent.keyDown(units[1], { key })).toBe(false);
+    expect(document.activeElement).toBe(units[target]);
+    expect([units[target].selectionStart, units[target].selectionEnd]).toEqual([2, 2]);
+    expect(layers(editor.container)).toHaveLength(0);
+    expect(clipboardText(units[target])).toBeUndefined();
+    expect(editor.onFlow).not.toHaveBeenCalled();
+  });
+
+  it('ordinary mouse down clears the range before native click placement', () => {
+    const editor = renderEditor('first\nsecond', true);
+    const units = [...editor.container.querySelectorAll('textarea')];
+    focusAt(units[0], 2);
+    fireEvent.keyDown(units[0], { key: 'ArrowDown', shiftKey: true });
+    expect(layers(editor.container)).toHaveLength(2);
+    expect(fireEvent.mouseDown(units[0], { clientX: 8, clientY: 10 })).toBe(true);
+    focusAt(units[0], 1); // jsdom does not perform native mousedown caret placement.
+    expect(layers(editor.container)).toHaveLength(0);
+    expect(clipboardText(units[0])).toBeUndefined();
+    expect(editor.onFlow).not.toHaveBeenCalled();
+  });
+
+  it('compositionStart first clears the range, then Shift arrows and Shift+Click cannot cross units', () => {
+    const editor = renderEditor('first\nsecond\nthird', true);
+    const units = [...editor.container.querySelectorAll('textarea')];
+    focusAt(units[0], 2);
+    fireEvent.keyDown(units[0], { key: 'ArrowDown', shiftKey: true });
+    expect(layers(editor.container)).toHaveLength(2);
+    fireEvent.compositionStart(units[1]);
+    expect(layers(editor.container)).toHaveLength(0);
+    const boundaries = editor.onBoundary.mock.calls.length;
+    const parentKeys = editor.onKeyDown.mock.calls.length;
+    for (const key of ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']) {
+      const offset = key === 'ArrowRight' || key === 'ArrowDown' ? units[1].value.length : 0;
+      act(() => units[1].setSelectionRange(offset, offset));
+      expect(fireEvent.keyDown(units[1], { key, shiftKey: true })).toBe(true);
+      expect(document.activeElement).toBe(units[1]);
+      expect([units[1].selectionStart, units[1].selectionEnd]).toEqual([offset, offset]);
+      expect(layers(editor.container)).toHaveLength(0);
+    }
+    expect(fireEvent.mouseDown(units[2], { shiftKey: true, clientX: 8, clientY: 10 })).toBe(false);
+    expect(document.activeElement).toBe(units[1]);
+    expect(editor.onBoundary).toHaveBeenCalledTimes(boundaries);
+    expect(editor.onKeyDown).toHaveBeenCalledTimes(parentKeys);
+    expect(editor.onFlow).not.toHaveBeenCalled();
+    fireEvent.compositionEnd(units[1]);
+  });
+
+  it.each([{ isComposing: true }, { keyCode: 229 }])('native IME guard %j preserves an already active range', (guard) => {
+    const editor = renderEditor('first\nsecond\nthird', true);
+    const units = [...editor.container.querySelectorAll('textarea')];
+    focusAt(units[0], 2);
+    fireEvent.keyDown(units[0], { key: 'ArrowDown', shiftKey: true });
+    const boundaries = editor.onBoundary.mock.calls.length;
+    const parentKeys = editor.onKeyDown.mock.calls.length;
+    for (const key of ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']) {
+      expect(fireEvent.keyDown(units[1], { key, shiftKey: true, ...guard })).toBe(true);
+      expect(document.activeElement).toBe(units[1]);
+      expect([units[1].selectionStart, units[1].selectionEnd]).toEqual([2, 2]);
+      expect(clipboardText(units[1])).toBe('rst\nse');
+      expect(layers(editor.container)).toHaveLength(2);
+    }
+    expect(editor.onBoundary).toHaveBeenCalledTimes(boundaries);
+    expect(editor.onKeyDown).toHaveBeenCalledTimes(parentKeys);
+    expect(editor.onFlow).not.toHaveBeenCalled();
+  });
+
+  it.each([{ isComposing: true }, { keyCode: 229 }])('native IME guard %j cannot initiate a Shift range across a boundary', (guard) => {
+    const editor = renderEditor('first\nsecond', true);
+    const units = [...editor.container.querySelectorAll('textarea')];
+    focusAt(units[0], units[0].value.length);
+    expect(fireEvent.keyDown(units[0], { key: 'ArrowRight', shiftKey: true, ...guard })).toBe(true);
+    expect(fireEvent.keyDown(units[0], { key: 'ArrowDown', shiftKey: true, ...guard })).toBe(true);
+    expect(document.activeElement).toBe(units[0]);
+    expect(layers(editor.container)).toHaveLength(0);
+    expect(editor.onKeyDown).not.toHaveBeenCalled();
+    expect(editor.onFlow).not.toHaveBeenCalled();
+  });
+
+  it.each(['ctrlKey', 'metaKey', 'altKey'])('%s+Shift+Arrow clears an old flow range and returns control to the browser', (modifier) => {
+    const editor = renderEditor('first\nsecond', true);
+    const units = [...editor.container.querySelectorAll('textarea')];
+    focusAt(units[0], 2);
+    fireEvent.keyDown(units[0], { key: 'ArrowDown', shiftKey: true });
+    expect(clipboardText(units[1])).toBe('rst\nse');
+    expect(fireEvent.keyDown(units[1], { key: 'ArrowDown', shiftKey: true, [modifier]: true })).toBe(true);
+    expect(layers(editor.container)).toHaveLength(0);
+    expect(clipboardText(units[1])).toBeUndefined();
+    expect(editor.onFlow).not.toHaveBeenCalled();
+  });
+
+  it('Shift arrows within one unit preserve native selection ownership and direction', () => {
+    const editor = renderEditor('first\nsecond', true);
+    const units = [...editor.container.querySelectorAll('textarea')];
+    const measure = vi.mocked(measureTextareaNavigation);
+    const original = measure.getMockImplementation()!;
+    measure.mockImplementation((_node, offset) => ({ x: offset * 8, y: 20, lineHeight: 20, atFirstLine: false, atLastLine: false }));
+    try {
+      act(() => { units[0].focus(); units[0].setSelectionRange(1, 3, 'backward'); });
+      for (const key of ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']) {
+        expect(fireEvent.keyDown(units[0], { key, shiftKey: true })).toBe(true);
+        expect(document.activeElement).toBe(units[0]);
+        // Native motion is not emulated by jsdom; the handler must leave it alone.
+        expect([units[0].selectionStart, units[0].selectionEnd, units[0].selectionDirection]).toEqual([1, 3, 'backward']);
+        expect(layers(editor.container)).toHaveLength(0);
+      }
+      expect(editor.onFlow).not.toHaveBeenCalled();
+    } finally { measure.mockImplementation(original); }
+  });
+
+  it('includes each separator when Shift+Right traverses an empty unit', () => {
+    const editor = renderEditor('first\n\nthird', true);
+    const units = [...editor.container.querySelectorAll('textarea')];
+    focusAt(units[0], units[0].value.length);
+    fireEvent.keyDown(units[0], { key: 'ArrowRight', shiftKey: true });
+    expect(document.activeElement).toBe(units[1]);
+    expect(clipboardText(units[1])).toBe('\n');
+    fireEvent.keyDown(units[1], { key: 'ArrowRight', shiftKey: true });
+    expect(document.activeElement).toBe(units[2]);
+    expect(clipboardText(units[2])).toBe('\n\n');
+    expect(layers(editor.container)).toHaveLength(3);
+    expect(editor.texts()).toEqual(['first', '', 'third']);
+    expect(editor.onFlow).not.toHaveBeenCalled();
+  });
+
+  it('a noncancelable beforeinput defers cross-unit replacement to exactly one input fallback', () => {
+    const editor = renderEditor('first\nsecond', true);
+    const units = [...editor.container.querySelectorAll('textarea')];
+    focusAt(units[0], 2);
+    fireEvent.keyDown(units[0], { key: 'ArrowDown', shiftKey: true });
+    const before = new InputEvent('beforeinput', { bubbles: true, cancelable: false, inputType: 'insertText', data: 'X' });
+    fireEvent(units[1], before);
+    expect(before.defaultPrevented).toBe(false);
+    expect(editor.onFlow).not.toHaveBeenCalled();
+    expect(clipboardText(units[1])).toBe('rst\nse');
+    fireEvent.input(units[1], { target: { value: 'seXcond', selectionStart: 3, selectionEnd: 3 }, inputType: 'insertText', data: 'X' });
+    expect(editor.texts()).toEqual(['fiXcond']);
+    expect(editor.onFlow).toHaveBeenCalledTimes(1);
+    expect(editor.onFlow.mock.calls[0][1]).toMatchObject({ kind: 'structural', inputType: 'replaceFlowSelection' });
+    expect(editor.onFlow.mock.calls[0][0].units[0].id).toBe('tu-1');
+    const merged = editor.container.querySelector('textarea')!;
+    expect([merged.selectionStart, merged.selectionEnd]).toEqual([3, 3]);
+    expect(layers(editor.container)).toHaveLength(0);
+    fireEvent.input(merged, { target: { value: 'fiXcond', selectionStart: 3, selectionEnd: 3 }, inputType: 'insertText', data: 'X' });
+    expect(editor.onFlow).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['X', 'ONE\nTWO'])('paste replaces the complete flow range once with %j', (pasted) => {
+    const editor = renderEditor('first\nsecond', true);
+    const units = [...editor.container.querySelectorAll('textarea')];
+    focusAt(units[0], 2);
+    fireEvent.keyDown(units[0], { key: 'ArrowDown', shiftKey: true });
+    expect(fireEvent.paste(units[1], { clipboardData: { getData: () => pasted } })).toBe(false);
+    expect(editor.texts()).toEqual([`fi${pasted}cond`]);
+    expect(editor.onFlow).toHaveBeenCalledTimes(1);
+    expect(editor.onFlow.mock.calls[0][1]).toMatchObject({ kind: 'structural', inputType: 'replaceFlowSelection' });
+    expect(editor.onFlow.mock.calls[0][0].units.map((unit: { id: string }) => unit.id)).toEqual(['tu-1']);
+    const merged = editor.container.querySelector('textarea')!;
+    expect([merged.selectionStart, merged.selectionEnd]).toEqual([2 + pasted.length, 2 + pasted.length]);
+    expect(layers(editor.container)).toHaveLength(0);
   });
 });

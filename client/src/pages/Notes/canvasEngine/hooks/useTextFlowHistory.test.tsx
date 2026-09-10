@@ -24,8 +24,10 @@ function renderHistoryEditor(initialText = 'original', options: { legacy?: boole
   const boardRanges = createBoardTextRangeEditSession('synthetic-note', async (_note, ranges) => ranges);
   boardRanges.hydrate([]);
   const savedTexts: string[] = [];
-  const saveBlock = vi.fn(async (_block: NoteBlock, text: string): Promise<BlockSaveOutcome> => {
+  const savedFlows: TextBlockContentV1[] = [];
+  const saveBlock = vi.fn(async (_block: NoteBlock, text: string, saveOptions?: { textFlow?: TextBlockContentV1 }): Promise<BlockSaveOutcome> => {
     savedTexts.push(text);
+    if (saveOptions?.textFlow) savedFlows.push(structuredClone(saveOptions.textFlow));
     return { status: 'saved', block, recoveryReceipt: null, reconciliation: 'response' };
   });
   const saveLayout = vi.fn(async () => true);
@@ -34,6 +36,7 @@ function renderHistoryEditor(initialText = 'original', options: { legacy?: boole
     textHistory: ReturnType<typeof useTextFlowHistory>;
     move: (x: number) => void;
     layout: BlockBoxLayout;
+    flow: TextBlockContentV1 | null;
   };
   function Editor() {
     const drafts = useBlockDraftAuthority();
@@ -64,15 +67,15 @@ function renderHistoryEditor(initialText = 'original', options: { legacy?: boole
       persistLayoutSnapshot: saveLayout,
     });
     hostRef.current = history;
+    const flow = drafts.blockTextFlowDrafts[block.id] ?? (options.legacy ? null : initialFlow);
     current = {
-      history, textHistory, layout,
+      history, textHistory, layout, flow,
       move: (x) => {
         const after = { ...layout, x };
         history.pushLayoutHistory({ [block.id]: layout }, { [block.id]: after });
         setLayout(after);
       },
     };
-    const flow = drafts.blockTextFlowDrafts[block.id] ?? (options.legacy ? null : initialFlow);
     return <TextBlockProjection blockId={block.id} text={flow ? plainTextFromTextFlow(flow) : initialPlainText} textFlow={flow}
       presentationKind="paragraph" readOnly={textHistory.replaying || history.historyReplaying} annotations={annotations} selectedAnnotationIds={[]}
       showLabelOverlay={false} textareaRef={null} onFocused={vi.fn()} onAnnotationSelect={vi.fn()}
@@ -108,7 +111,7 @@ function renderHistoryEditor(initialText = 'original', options: { legacy?: boole
     });
     return allowed;
   };
-  return { ...view, current: () => current, savedTexts, saveBlock, saveLayout, textarea, focus, input, inputAt, idle, key };
+  return { ...view, current: () => current, savedTexts, savedFlows, saveBlock, saveLayout, textarea, focus, input, inputAt, idle, key };
 }
 
 describe('B4 TextFlow and application history integration (synthetic memory)', () => {
@@ -350,5 +353,114 @@ describe('B5 smoke 6: cursor traversal preserves B4 history (synthetic memory)',
     expectTexts('aXY');
     editor.expectCaret(0, 3);
     await act(async () => { expect(await editor.current().history.redoRuntimeHistory()).toBe(false); });
+  });
+});
+
+describe('B6 smokes 2 and 3: cross-unit edits retain B4 history (synthetic memory)', () => {
+  function renderCrossUnitEditor() {
+    const flow: TextBlockContentV1 = {
+      ...createTextBlockContentV1(''),
+      metadata: { locale: 'en', nested: { preserved: true } },
+      units: [
+        { ...createTextBlockContentV1('alpha').units[0], id: 'b6-first', writing_role: 'todo_item',
+          indent_level: 1, order_index: 0, metadata: { checked: true, origin: { label: 'first' } } },
+        { ...createTextBlockContentV1('beta').units[0], id: 'b6-middle', writing_role: 'heading',
+          indent_level: 2, order_index: 1, metadata: { level: 2, origin: { label: 'middle' } } },
+        { ...createTextBlockContentV1('gamma').units[0], id: 'b6-last', writing_role: 'quote',
+          indent_level: 0, order_index: 2, metadata: { origin: { label: 'last' } } },
+      ],
+      inline_structures: [{
+        id: 'b6-inline', semantic_kind: 'inline_code', parent_text_unit_id: 'b6-middle',
+        anchor_text: 'et', anchor_range: { start: 1, end: 3 },
+        field_values: { language: 'text' }, metadata: { retained: { yes: true } }, status: 'active',
+      }],
+    };
+    const before = structuredClone(flow);
+    const editor = renderHistoryEditor('', { flow });
+    const selectAcross = async () => {
+      editor.focus();
+      editor.textarea().setSelectionRange(2, 5, 'forward');
+      // Cross alpha -> beta, traverse all of beta, then select the first two letters of gamma.
+      for (let step = 0; step < 8; step += 1) {
+        await act(async () => {
+          expect(fireEvent.keyDown(document.activeElement!, { key: 'ArrowRight', shiftKey: true })).toBe(false);
+          fireEvent.keyUp(document.activeElement!, { key: 'ArrowRight', shiftKey: true });
+        });
+      }
+      expect(document.activeElement).toBe(editor.textarea(2));
+      expect(editor.textarea(2).selectionStart).toBe(2);
+      expect(editor.textarea(2).selectionEnd).toBe(2);
+      expect(editor.current().flow).toEqual(before);
+      await editor.idle();
+      // B5 may save the unchanged flow on a unit blur. These saves do not create history entries.
+      for (const saved of editor.savedFlows) expect(saved).toEqual(before);
+      expect(editor.savedTexts).toEqual(editor.savedFlows.map(plainTextFromTextFlow));
+      await act(async () => {
+        expect(await editor.current().history.undoRuntimeHistory()).toBe(false);
+        expect(await editor.current().history.redoRuntimeHistory()).toBe(false);
+      });
+      // Reset observation buffers only; the live editor and history remain untouched.
+      editor.savedFlows.length = 0;
+      editor.savedTexts.length = 0;
+    };
+    const assertReplayWithFollowingTyping = async (inserted: string) => {
+      const mergedText = `al${inserted}mma`;
+      const after = { ...before, units: [{ ...before.units[0], text: mergedText }] };
+      const afterTyping = { ...before, units: [{ ...before.units[0], text: `al${inserted}Ymma` }] };
+      await editor.idle();
+      expect(editor.current().flow).toEqual(after);
+      expect(editor.textarea().dataset.textUnitId).toBe('b6-first');
+      expect(editor.textarea().selectionStart).toBe(2 + inserted.length);
+      expect(editor.savedFlows).toEqual([after]);
+
+      editor.inputAt(0, afterTyping.units[0].text, 2 + inserted.length);
+      expect(editor.current().flow).toEqual(afterTyping);
+      await editor.key('z', window);
+      expect(editor.current().flow).toEqual(after);
+      expect(editor.textarea().selectionStart).toBe(2 + inserted.length);
+      await editor.key('z', window);
+      expect(editor.current().flow).toEqual(before);
+      expect([...editor.container.querySelectorAll('textarea')].map((node) => node.dataset.textUnitId))
+        .toEqual(['b6-first', 'b6-middle', 'b6-last']);
+      expect(editor.textarea().selectionStart).toBe(2);
+      await act(async () => { expect(await editor.current().history.undoRuntimeHistory()).toBe(false); });
+
+      await editor.key('y', window);
+      expect(editor.current().flow).toEqual(after);
+      await editor.key('y', window);
+      expect(editor.current().flow).toEqual(afterTyping);
+      await act(async () => { expect(await editor.current().history.redoRuntimeHistory()).toBe(false); });
+      expect(editor.savedFlows).toEqual([after, afterTyping, after, before, after, afterTyping]);
+      expect(editor.savedTexts).toEqual(editor.savedFlows.map(plainTextFromTextFlow));
+      expect(flow).toEqual(before);
+    };
+    return { ...editor, selectAcross, assertReplayWithFollowingTyping };
+  }
+
+  it('smoke 2: native beforeinput replaces a cross-unit range in one independent entry', async () => {
+    const editor = renderCrossUnitEditor();
+    await editor.selectAcross();
+    const input = new InputEvent('beforeinput', {
+      bubbles: true, cancelable: true, inputType: 'insertText', data: 'X',
+    });
+    expect(fireEvent(document.activeElement!, input)).toBe(false);
+    await editor.assertReplayWithFollowingTyping('X');
+  });
+
+  it.each(['Delete', 'Backspace'])('smoke 3: %s merges a cross-unit range and restores every field on replay', async (key) => {
+    const editor = renderCrossUnitEditor();
+    await editor.selectAcross();
+    expect(fireEvent.keyDown(document.activeElement!, { key })).toBe(false);
+    await editor.assertReplayWithFollowingTyping('');
+  });
+
+  it('smoke 3: cut copies unit separators and records only the deletion as an independent entry', async () => {
+    const editor = renderCrossUnitEditor();
+    await editor.selectAcross();
+    const setData = vi.fn();
+    expect(fireEvent.cut(document.activeElement!, { clipboardData: { setData } })).toBe(false);
+    expect(setData).toHaveBeenCalledTimes(1);
+    expect(setData).toHaveBeenCalledWith('text/plain', 'pha\nbeta\nga');
+    await editor.assertReplayWithFollowingTyping('');
   });
 });

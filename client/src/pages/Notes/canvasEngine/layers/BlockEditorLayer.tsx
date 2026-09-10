@@ -61,6 +61,11 @@ import { ItemRefBlockProjection } from '../blocks/ItemRefBlockProjection';
 import { useBlockMeasurement } from '../hooks/useBlockMeasurement';
 import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import type { TextFlowEditBoundary, TextFlowEditMetadata, TextFlowEditSelection } from '../textFlowEditSession';
+import {
+  supportsTextFlowBlockNavigation,
+  type TextFlowBoundaryNavigationRequest,
+  type TextFlowNavigationTarget,
+} from '../textFlowBlockNavigation';
 import { BlockControlBarLayer } from './BlockControlBarLayer';
 import { BlockResizeHandleLayer } from './BlockResizeHandleLayer';
 import { BlockSourceReferenceLayer } from './BlockSourceReferenceLayer';
@@ -101,6 +106,8 @@ interface BlockEditorLayerProps {
   onTextChange: (value: string, caret: number, anchorElement?: HTMLElement | null) => void;
   onTextFlowChange: (textFlow: TextBlockContentV1, metadata?: TextFlowEditMetadata, previousTextFlow?: TextBlockContentV1) => void;
   onTextEditBoundary?: (reason: TextFlowEditBoundary, selection?: TextFlowEditSelection) => void;
+  onBoundaryNavigate?: (request: TextFlowBoundaryNavigationRequest) => boolean;
+  onNavigationTarget?: (target: TextFlowNavigationTarget | null) => void;
   onFieldDraftChange: (fieldValues: FieldValueRecord) => void;
   onSave: (
     silent?: boolean,
@@ -164,6 +171,8 @@ export function BlockEditorLayer({
   onTextChange,
   onTextFlowChange,
   onTextEditBoundary,
+  onBoundaryNavigate,
+  onNavigationTarget,
   onFieldDraftChange,
   onSave,
   onTrash,
@@ -194,6 +203,7 @@ export function BlockEditorLayer({
   const aiVisibility = getEffectiveAIVisibility(layout);
   const presentationKind = presentationKindForBlock(block);
   const itemReference = block.block_type === 'item_ref';
+  const allowTextNavigation = !contentReadOnly && !layoutMode && supportsTextFlowBlockNavigation(block);
   const fragmentTotal = blockFragments[0]?.fragmentTotal || blockFragments.length;
   const crossPageFragment = fragmentTotal > 1;
   const fragmentRoles = blockFragments.map((fragment) => fragment.role).join(',');
@@ -479,6 +489,8 @@ export function BlockEditorLayer({
             onTextChange={onTextChange}
             onTextFlowChange={onTextFlowChange}
             onTextEditBoundary={onTextEditBoundary}
+            onBoundaryNavigate={allowTextNavigation ? onBoundaryNavigate : undefined}
+            onNavigationTarget={allowTextNavigation ? onNavigationTarget : undefined}
             onSave={onSave}
             onKeyDown={onKeyDown}
           />

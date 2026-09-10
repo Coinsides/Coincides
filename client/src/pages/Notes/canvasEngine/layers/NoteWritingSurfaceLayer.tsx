@@ -80,6 +80,7 @@ import {
 } from '../textFlowService';
 import type { ApplyBlockTextFlowEdit } from '../hooks/useBlockTextFlowEditController';
 import type { TextFlowEditBoundary, TextFlowEditMetadata, TextFlowEditSelection } from '../textFlowEditSession';
+import { navigateTextFlowBlockBoundary, type TextFlowNavigationTarget } from '../textFlowBlockNavigation';
 import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import {
   setTextUnitWritingRole,
@@ -639,6 +640,7 @@ export function NoteWritingSurfaceLayer({
   onZoomViewportAt,
 }: NoteWritingSurfaceLayerProps) {
   const surfaceRef = useRef<HTMLElement | null>(null);
+  const textNavigationTargetsRef = useRef(new Map<string, TextFlowNavigationTarget>());
   const panSessionRef = useRef<{ pointerId: number; clientX: number; clientY: number } | null>(null);
   const pageFrameOperationRef = useRef<{
     kind: 'move' | 'resize';
@@ -3890,6 +3892,17 @@ export function NoteWritingSurfaceLayer({
               }}
               onTextFlowChange={(textFlow, metadata, previousTextFlow) => void handleBlockTextFlowChange(block, textFlow, metadata, previousTextFlow)}
               onTextEditBoundary={onTextEditBoundary}
+              onBoundaryNavigate={(request) => navigateTextFlowBlockBoundary({
+                visibleBlocks,
+                fromBlockId: block.id,
+                request,
+                targets: textNavigationTargetsRef.current,
+                disabled: contentReadOnly || layoutMode,
+              })}
+              onNavigationTarget={(target) => {
+                if (target) textNavigationTargetsRef.current.set(block.id, target);
+                else textNavigationTargetsRef.current.delete(block.id);
+              }}
               onFieldDraftChange={(fieldValues) => onFieldDraftChange(block, text, fieldValues)}
               onSave={async (silent, fieldValues, textFlow) => {
                 const save = blockSaveTextAndFlow(block, text, fieldValues, textFlow);

@@ -1,7 +1,15 @@
 /// <reference lib="es2022.intl" />
 import { getPageDisplayScale } from './overlayService';
 
-interface CaretPoint { x: number; y: number }
+interface CaretPoint { x: number; y: number; height: number }
+export interface TextareaSelectionRect { left: number; top: number; width: number; height: number }
+interface TextareaLayout {
+  selectionRects: (start: number, end: number) => TextareaSelectionRect[];
+  localPoint: (point: CaretPoint) => TextareaSelectionRect;
+  pointerY: (clientY: number) => number;
+  clip: (rect: TextareaSelectionRect) => TextareaSelectionRect | null;
+  breakWidth: number;
+}
 interface BoundaryCaret {
   offset: number;
   y: number;
@@ -14,7 +22,7 @@ interface BoundaryCaret {
 // count approximation. Offsets remain textarea UTF-16 offsets.
 function withTextareaLayout<T>(
   textarea: HTMLTextAreaElement,
-  read: (point: (offset: number, upstream?: boolean) => CaretPoint | null) => T | null,
+  read: (point: (offset: number, upstream?: boolean) => CaretPoint | null, layout: TextareaLayout) => T | null,
 ): T | null {
   const computed = window.getComputedStyle(textarea);
   const mirror = document.createElement('div');
@@ -41,7 +49,8 @@ function withTextareaLayout<T>(
     const textareaRect = textarea.getBoundingClientRect();
     const scale = getPageDisplayScale(textarea);
     const borderLeft = Number.parseFloat(computed.borderLeftWidth) || 0;
-    return read((offset, upstream = false) => {
+    const borderTop = Number.parseFloat(computed.borderTopWidth) || 0;
+    const point = (offset: number, upstream = false): CaretPoint | null => {
       const previousCharacter = upstream && offset > 0 && textarea.value[offset - 1] !== '\n';
       if (previousCharacter) {
         range.setStart(text, offset - 1);
@@ -59,11 +68,126 @@ function withTextareaLayout<T>(
       return {
         x: textareaRect.left + (borderLeft + (previousCharacter ? rect.right : rect.left) - mirrorRect.left - textarea.scrollLeft) * scale,
         y: rect.top - mirrorRect.top,
+        height: rect.height,
       };
+    };
+    return read(point, {
+      selectionRects: (start, end) => {
+        range.setStart(text, start);
+        range.setEnd(text, end);
+        return [...range.getClientRects()].map((rect) => ({
+          left: borderLeft + rect.left - mirrorRect.left - textarea.scrollLeft,
+          top: borderTop + rect.top - mirrorRect.top - textarea.scrollTop,
+          width: rect.width,
+          height: rect.height,
+        }));
+      },
+      localPoint: (caret) => ({
+        left: (caret.x - textareaRect.left) / scale,
+        top: borderTop + caret.y - textarea.scrollTop,
+        width: 0,
+        height: caret.height,
+      }),
+      pointerY: (clientY) => (clientY - textareaRect.top) / scale + textarea.scrollTop - borderTop,
+      clip: (rect) => {
+        const left = Math.max(borderLeft, rect.left);
+        const top = Math.max(borderTop, rect.top);
+        const right = Math.min(borderLeft + textarea.clientWidth, rect.left + rect.width);
+        const bottom = Math.min(borderTop + textarea.clientHeight, rect.top + rect.height);
+        return right > left && bottom > top ? { left, top, width: right - left, height: bottom - top } : null;
+      },
+      breakWidth: Math.max(3, (Number.parseFloat(computed.fontSize) || 16) * 0.4),
     });
   } finally {
     mirror.remove();
   }
+}
+
+/** Unscaled CSS rectangles relative to the textarea border box, clipped to its viewport. */
+export function measureTextareaSelection(
+  textarea: HTMLTextAreaElement,
+  start: number,
+  end: number,
+  includeBreak = false,
+): TextareaSelectionRect[] {
+  const low = Math.max(0, Math.min(textarea.value.length, Math.min(start, end)));
+  const high = Math.max(low, Math.min(textarea.value.length, Math.max(start, end)));
+  if (low === high && !includeBreak) return [];
+  return withTextareaLayout(textarea, (point, layout) => {
+    const rectangles = low < high ? layout.selectionRects(low, high).filter((rect) => rect.width > 0) : [];
+    const addBreak = (offset: number) => {
+      const caret = point(offset);
+      if (caret) rectangles.push({ ...layout.localPoint(caret), width: layout.breakWidth });
+    };
+    // Range rectangles have zero width for explicit line breaks. Keep these and
+    // the selected inter-unit separator visible, including an empty TextUnit.
+    for (let index = low; index < high; index += 1) {
+      if (textarea.value[index] === '\n') addBreak(index);
+    }
+    if (includeBreak) addBreak(textarea.value.length);
+    return rectangles.map(layout.clip).filter((rect): rect is TextareaSelectionRect => rect !== null);
+  }) || [];
+}
+
+function graphemeCarets(
+  value: string,
+  point: (offset: number, upstream?: boolean) => CaretPoint | null,
+): (CaretPoint & { offset: number })[] {
+  const offsets = [...new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(value)]
+    .map((segment) => segment.index);
+  offsets.push(value.length);
+  return offsets.flatMap((offset) => {
+    const caret = point(offset);
+    if (!caret) return [];
+    const upstream = point(offset, true);
+    return upstream && Math.abs(upstream.y - caret.y) >= 1
+      ? [{ ...caret, offset }, { ...upstream, offset }]
+      : [{ ...caret, offset }];
+  });
+}
+
+/** The click is in viewport coordinates; the result uses the B5 caret affinity. */
+export function textareaCaretAtPoint(textarea: HTMLTextAreaElement, clientX: number, clientY: number): BoundaryCaret | null {
+  return withTextareaLayout(textarea, (point, layout) => {
+    const candidates = graphemeCarets(textarea.value, point);
+    const targetY = layout.pointerY(clientY);
+    let closest: (CaretPoint & { offset: number }) | null = null;
+    for (const candidate of candidates) {
+      const rowDistance = Math.abs(candidate.y + candidate.height / 2 - targetY);
+      const bestRowDistance = closest ? Math.abs(closest.y + closest.height / 2 - targetY) : Infinity;
+      if (rowDistance < bestRowDistance - 0.1
+        || (Math.abs(rowDistance - bestRowDistance) < 0.1 && closest
+          && Math.abs(candidate.x - clientX) < Math.abs(closest.x - clientX))) closest = candidate;
+    }
+    return closest ? { offset: closest.offset, y: closest.y } : null;
+  });
+}
+
+/** Used only while a flow selection owns the caret; ordinary B5 arrows stay native. */
+export function textareaLineCaret(
+  textarea: HTMLTextAreaElement,
+  offset: number,
+  direction: 'up' | 'down',
+  targetX: number,
+  preferredY?: number,
+): BoundaryCaret | null {
+  return withTextareaLayout(textarea, (point) => {
+    let current = point(offset);
+    const upstream = point(offset, true);
+    if (current && upstream && preferredY !== undefined
+      && Math.abs(upstream.y - preferredY) < Math.abs(current.y - preferredY)) current = upstream;
+    if (!current) return null;
+    const sign = direction === 'down' ? 1 : -1;
+    const candidates = graphemeCarets(textarea.value, point)
+      .filter((candidate) => (candidate.y - current.y) * sign >= 1);
+    const nearestRow = candidates.reduce((distance, candidate) => Math.min(distance, Math.abs(candidate.y - current.y)), Infinity);
+    let closest: (CaretPoint & { offset: number }) | null = null;
+    for (const candidate of candidates) {
+      if (Math.abs(Math.abs(candidate.y - current.y) - nearestRow) >= 1) continue;
+      if (!closest || Math.abs(candidate.x - targetX) < Math.abs(closest.x - targetX)) closest = candidate;
+    }
+    return closest ? { offset: closest.offset, y: closest.y } : null;
+  });
 }
 
 export function measureTextareaNavigation(textarea: HTMLTextAreaElement, offset: number, preferredY?: number) {
