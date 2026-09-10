@@ -6,6 +6,7 @@ import {
 import { flushSync } from 'react-dom';
 import {
   useEffect,
+  useContext,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -23,6 +24,7 @@ import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import { resizeTextareaToContent } from '../measurementService';
 import { measureTextareaNavigation, textareaBoundaryCaret, textareaCaretAtPoint, textareaLineCaret } from '../textareaNavigation';
 import { TextFlowSelectionLayer } from './TextFlowSelectionLayer';
+import { DocumentTextFlowSelectionContext } from '../hooks/useDocumentTextFlowSelection';
 import { flowSelectionText, orderedFlowSelection, replaceFlowSelection, type FlowPoint, type FlowSelection } from '../textFlowSelection';
 import type { TextFlowBoundaryNavigationRequest, TextFlowNavigationTarget } from '../textFlowBlockNavigation';
 import { getPageDisplayScale } from '../overlayService';
@@ -492,6 +494,7 @@ export function TextBlockProjection({
   onBoundaryNavigate,
   onNavigationTarget,
 }: TextBlockProjectionProps) {
+  const documentSelection = useContext(DocumentTextFlowSelectionContext);
   const unitRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
   const pendingFocusRef = useRef<{ unitId: string; caret: number } | null>(null);
   const latestFlowRef = useRef<TextBlockContentV1 | null>(null);
@@ -546,7 +549,7 @@ export function TextBlockProjection({
       if (!node || readOnly) return [];
       const capture = (event: Event) => {
         const input = event as InputEvent;
-        if (event.cancelable && flowSelectionRef.current && !compositionRef.current && !input.isComposing) {
+        if (event.cancelable && (flowSelectionRef.current || documentSelection?.read()) && !compositionRef.current && !input.isComposing) {
           if (input.inputType.startsWith('delete') || input.data !== null
             || input.inputType === 'insertLineBreak' || input.inputType === 'insertParagraph') {
             event.preventDefault();
@@ -563,7 +566,7 @@ export function TextBlockProjection({
       return [() => node.removeEventListener('beforeinput', capture)];
     });
     return () => listeners.forEach((remove) => remove());
-  }, [editableFlow.units, readOnly]);
+  }, [editableFlow.units, readOnly, documentSelection]);
   const labelDisplayState = useMemo(() => ({
     labelsVisible: showLabelOverlay,
   }), [showLabelOverlay]);
@@ -608,6 +611,12 @@ export function TextBlockProjection({
       ? textareaBoundaryCaret(target, forward ? 'first' : 'last', request.columnX)
       : { offset: forward ? 0 : target.value.length, y: undefined, nativeLineEndFrom: undefined, nativeColumnSeed: undefined };
     if (!caret) return false;
+    if (request.selectionAnchor) {
+      if (!documentSelection?.select(request.selectionAnchor, { blockId, unitId: targetUnit.id, offset: caret.offset })) return false;
+      verticalColumnRef.current = vertical ? request.columnX : null;
+      caretLineRef.current = caret.y === undefined ? null : { unitId: targetUnit.id, offset: caret.offset, y: caret.y };
+      return true;
+    }
     traversingRef.current = true;
     try {
       clearFlowSelection();
@@ -638,9 +647,26 @@ export function TextBlockProjection({
       return target ? focusBoundary(target.unit, request) : false;
     });
     return () => onNavigationTarget?.(null);
-  }, [onNavigationTarget, readOnly, editableFlow]);
+  }, [onNavigationTarget, readOnly, editableFlow, documentSelection]);
+
+  useLayoutEffect(() => {
+    documentSelection?.register(blockId, { flow: editableFlow, editable: !readOnly,
+      anchor: () => flowSelectionRef.current?.anchor ?? null,
+      focus: (point) => {
+        clearFlowSelection();
+        focusTextUnit(point.unitId, point.offset);
+        unitRefs.current[point.unitId]?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+      },
+    });
+    return () => documentSelection?.register(blockId, null);
+  }, [blockId, editableFlow, readOnly, documentSelection?.register]);
 
   const selectFlowRange = (anchor: FlowPoint, focus: FlowPoint) => {
+    const documentRange = documentSelection?.read();
+    if (documentRange) {
+      documentSelection?.select(documentRange.anchor, { blockId, ...focus });
+      return;
+    }
     traversingRef.current = true;
     try {
       // Native selection still owns a range that has contracted to one textarea.
@@ -660,6 +686,11 @@ export function TextBlockProjection({
   };
 
   const replaceSelection = (replacement: string, textarea: HTMLTextAreaElement) => {
+    if (documentSelection?.read()) {
+      if (readOnly || compositionRef.current) return false;
+      beforeInputRef.current = null;
+      return documentSelection.replace(replacement, 'replaceDocumentSelection');
+    }
     const selection = flowSelectionRef.current;
     if (!selection || readOnly || compositionRef.current) return false;
     const currentFlow = latestFlowRef.current || editableFlow;
@@ -680,6 +711,13 @@ export function TextBlockProjection({
   };
 
   const copyFlowRange = (event: ClipboardEvent<HTMLTextAreaElement>, cut: boolean) => {
+    if (documentSelection?.read()) {
+      event.preventDefault();
+      if (compositionRef.current || readOnly) return;
+      event.clipboardData.setData('text/plain', documentSelection.text());
+      if (cut) replaceSelection('', event.currentTarget);
+      return;
+    }
     const selection = flowSelectionRef.current;
     if (!selection) return;
     event.preventDefault();
@@ -690,6 +728,10 @@ export function TextBlockProjection({
 
   useLayoutEffect(() => {
     const previous = latestFlowRef.current;
+    if (documentSelection?.ordered()?.blocks.some((entry) => entry.block.id === blockId) && (readOnly || (previous && (
+      previous.units.length !== editableFlow.units.length || previous.units.some((unit, index) =>
+        unit.id !== editableFlow.units[index].id || unit.text !== editableFlow.units[index].text)
+    )))) documentSelection.clear();
     if (flowSelectionRef.current && (readOnly || !previous || previous.units.length !== editableFlow.units.length
       || previous.units.some((unit, index) => unit.id !== editableFlow.units[index].id || unit.text !== editableFlow.units[index].text))) clearFlowSelection();
     latestFlowRef.current = editableFlow;
@@ -839,7 +881,7 @@ export function TextBlockProjection({
     let suffix = 0;
     while (suffix < currentUnit.text.length - prefix && suffix < value.length - prefix
       && currentUnit.text[currentUnit.text.length - 1 - suffix] === value[value.length - 1 - suffix]) suffix += 1;
-    if (flowSelectionRef.current && !compositionRef.current && !nativeIsComposing) {
+    if ((flowSelectionRef.current || documentSelection?.read()) && !compositionRef.current && !nativeIsComposing) {
       // Fallback for input methods that deliver input without cancelable beforeinput.
       replaceSelection(value.slice(prefix, value.length - suffix), textarea);
       return;
@@ -876,7 +918,7 @@ export function TextBlockProjection({
     textarea: HTMLTextAreaElement,
     options: { additive?: boolean; preserveDraft?: boolean; hitTestOnly?: boolean } = {},
   ) => {
-    if (flowSelectionRef.current) return;
+    if (flowSelectionRef.current || documentSelection?.read()) return;
     const startOffset = textarea.selectionStart;
     const endOffset = textarea.selectionEnd;
     if (startOffset === endOffset && !options.hitTestOnly) return;
@@ -1033,6 +1075,26 @@ export function TextBlockProjection({
 
   const handleUnitKeyDown = (unit: TextUnit, event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (compositionRef.current || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
+    const documentRange = documentSelection?.read();
+    const arrow = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key);
+    if (documentRange && (event.key === 'Escape' || (arrow && !event.shiftKey))) {
+      event.preventDefault();
+      const ordered = documentSelection!.ordered();
+      const forward = event.key === 'ArrowDown' || event.key === 'ArrowRight';
+      const point = event.key === 'Escape' ? documentRange.focus : ordered ? (forward ? ordered.end : ordered.start) : documentRange.focus;
+      documentSelection!.clear();
+      documentSelection!.focus(point);
+      verticalColumnRef.current = null;
+      return;
+    }
+    if (documentRange && ['Delete', 'Backspace', 'Enter'].includes(event.key)) {
+      event.preventDefault();
+      replaceSelection(event.key === 'Enter' ? '\n' : '', event.currentTarget);
+      return;
+    }
+    if (documentRange && (['Tab', 'Home', 'End'].includes(event.key)
+      || (arrow && (event.ctrlKey || event.metaKey || event.altKey))
+      || ((event.ctrlKey || event.metaKey) && ['z', 'y', 'a'].includes(event.key.toLowerCase())))) documentSelection!.clear();
     captureNativeCaretLine(unit.id, event.currentTarget);
     nativeLineTargetRef.current = null;
     selectionRef.current = readSelection(unit.id, event.currentTarget);
@@ -1047,7 +1109,7 @@ export function TextBlockProjection({
     const hasSelection = textarea.selectionStart !== textarea.selectionEnd;
     const vertical = event.key === 'ArrowUp' || event.key === 'ArrowDown';
     const horizontal = event.key === 'ArrowLeft' || event.key === 'ArrowRight';
-    const activeRange = flowSelectionRef.current;
+    const activeRange = documentSelection?.read() ?? flowSelectionRef.current;
     const forward = event.key === 'ArrowDown' || event.key === 'ArrowRight';
     if (activeRange && (event.key === 'Escape' || ((vertical || horizontal) && !event.shiftKey))) {
       event.preventDefault();
@@ -1090,6 +1152,13 @@ export function TextBlockProjection({
           const caret = vertical ? textareaBoundaryCaret(target, forward ? 'first' : 'last', verticalColumnRef.current!)
             : { offset: forward ? 0 : target.value.length, y: undefined };
           if (caret) { focus = { unitId: next.id, offset: caret.offset }; focusY = caret.y; }
+        } else if (documentSelection && onBoundaryNavigate) {
+          const selectionAnchor = documentSelection.read()?.anchor ?? { blockId, ...anchor };
+          if (onBoundaryNavigate({ direction: event.key === 'ArrowDown' ? 'down' : event.key === 'ArrowUp' ? 'up'
+            : event.key === 'ArrowRight' ? 'right' : 'left', columnX: vertical ? verticalColumnRef.current : null, selectionAnchor })) {
+            event.preventDefault();
+            return;
+          }
         }
       } else if (activeRange) {
         if (vertical && measured) {
@@ -1109,8 +1178,7 @@ export function TextBlockProjection({
         nativeLineTargetRef.current = null;
         return;
       }
-      // The selection is deliberately bounded by this flow. Never let a native
-      // key replace the logical multi-textarea range at its outer edge.
+      // At a document obstacle, keep the logical range inside its text segment.
       if (activeRange) { event.preventDefault(); return; }
       if (vertical && measured) nativeLineTargetRef.current = { unitId: unit.id, y: measured.y + (forward ? 1 : -1) * measured.lineHeight };
       return;
@@ -1219,7 +1287,7 @@ export function TextBlockProjection({
 
   const handleUnitKeyUp = (unit: TextUnit, event: KeyboardEvent<HTMLTextAreaElement>) => {
     if (compositionRef.current || event.nativeEvent.isComposing) return;
-    if (flowSelectionRef.current) return;
+    if (flowSelectionRef.current || documentSelection?.read()) return;
     if (event.key === 'Control' || event.key === 'Meta' || event.key === 'Alt' || event.key === 'Shift') return;
     captureNativeCaretLine(unit.id, event.currentTarget);
     captureSelectionBoundary(unit.id, event.currentTarget);
@@ -1234,6 +1302,18 @@ export function TextBlockProjection({
     }
     if (event.shiftKey && !readOnly) {
       const current = document.activeElement as HTMLTextAreaElement | null;
+      if (current?.dataset.runtimeTextflowComposing === 'true') { event.preventDefault(); return; }
+      const documentRange = documentSelection?.read();
+      if (documentSelection && (documentRange || (current?.dataset.blockId && current.dataset.blockId !== blockId))) {
+        const caret = textareaCaretAtPoint(event.currentTarget, event.clientX, event.clientY);
+        const localAnchor = documentSelection.anchorFor(current?.dataset.blockId ?? '');
+        const anchor = documentRange?.anchor ?? { blockId: current!.dataset.blockId!, ...(localAnchor ?? {
+          unitId: current!.dataset.textUnitId!, offset: current!.selectionDirection === 'backward' ? current!.selectionEnd : current!.selectionStart }) };
+        event.preventDefault();
+        if (caret) documentSelection.select(anchor, { blockId, unitId: event.currentTarget.dataset.textUnitId!, offset: caret.offset });
+        flowShiftClickRef.current = true;
+        return;
+      }
       const existing = flowSelectionRef.current;
       const sourceId = current?.dataset?.textUnitId;
       const targetId = event.currentTarget.dataset.textUnitId!;
@@ -1252,6 +1332,7 @@ export function TextBlockProjection({
         }
       }
     }
+    documentSelection?.clear();
     clearFlowSelection();
     verticalColumnRef.current = null;
     caretLineRef.current = null;
@@ -1288,7 +1369,7 @@ export function TextBlockProjection({
 
   const handleUnitMouseUp = (unit: TextUnit, event: MouseEvent<HTMLTextAreaElement>) => {
     if (compositionRef.current) return;
-    if (flowSelectionRef.current || flowShiftClickRef.current) return;
+    if (flowSelectionRef.current || documentSelection?.read() || flowShiftClickRef.current) return;
     captureSelectionBoundary(unit.id, event.currentTarget);
     const additive = event.ctrlKey || event.metaKey || additiveSelectionSessionRef.current;
     const hasSelection = event.currentTarget.selectionStart !== event.currentTarget.selectionEnd;
@@ -1310,7 +1391,7 @@ export function TextBlockProjection({
     if (compositionRef.current) return;
     const pastedText = event.clipboardData.getData('text/plain');
     if (!pastedText) return;
-    if (flowSelectionRef.current) {
+    if (flowSelectionRef.current || documentSelection?.read()) {
       event.preventDefault();
       replaceSelection(pastedText, event.currentTarget);
       return;
@@ -1367,6 +1448,8 @@ export function TextBlockProjection({
     title: 'Text unit',
     items: buildTextUnitHandleMenu(),
   } : null;
+  const documentRangeForDisplay = documentSelection?.ordered();
+  const documentBlockForDisplay = documentRangeForDisplay?.blocks.find((entry) => entry.block.id === blockId);
 
   return (
     <>
@@ -1578,7 +1661,7 @@ export function TextBlockProjection({
                     : (event) => handleUnitTextChange(unit, event.currentTarget.value, event.currentTarget,
                       (event.nativeEvent as InputEvent).inputType, (event.nativeEvent as InputEvent).isComposing)}
                   onSelect={(event) => {
-                    if (compositionRef.current || flowSelectionRef.current) return;
+                    if (compositionRef.current || flowSelectionRef.current || documentSelection?.read()) return;
                     captureNativeCaretLine(unit.id, event.currentTarget);
                     captureSelectionBoundary(unit.id, event.currentTarget);
                     handleTextUnitSelection(unit, event.currentTarget, {
@@ -1586,6 +1669,7 @@ export function TextBlockProjection({
                     });
                   }}
                   onCompositionStart={readOnly ? undefined : (event) => {
+                    documentSelection?.clear();
                     clearFlowSelection();
                     verticalColumnRef.current = null;
                     caretLineRef.current = null;
@@ -1616,6 +1700,7 @@ export function TextBlockProjection({
                   onKeyUp={(event) => handleUnitKeyUp(unit, event)}
                   onContextMenu={(event) => handleTextUnitContextMenu(unit, event)}
                   onBlur={readOnly ? undefined : (event) => {
+                    if (!documentSelection?.traversing.current) documentSelection?.clear();
                     if (!traversingRef.current) verticalColumnRef.current = null;
                     if (!traversingRef.current) clearFlowSelection();
                     if (compositionRef.current) {
@@ -1637,13 +1722,15 @@ export function TextBlockProjection({
                   data-runtime-textflow-editor={!readOnly || onTextEditBoundary ? 'true' : undefined}
                   rows={1}
                 />
-                {flowSelection && (() => {
-                  const ordered = orderedFlowSelection(editableFlow, flowSelection);
+                {(flowSelection || documentSelection?.selection) && (() => {
+                  const selection = documentBlockForDisplay?.selection ?? flowSelection;
+                  if (!selection) return null;
+                  const ordered = orderedFlowSelection(editableFlow, selection);
                   if (!ordered || index < ordered.startIndex || index > ordered.endIndex) return null;
                   return <TextFlowSelectionLayer textarea={unitRefs.current[unit.id]}
                     start={index === ordered.startIndex ? ordered.start.offset : 0}
                     end={index === ordered.endIndex ? ordered.end.offset : unit.text.length}
-                    includeBreak={index < ordered.endIndex} />;
+                    includeBreak={index < ordered.endIndex || Boolean(documentBlockForDisplay && documentRangeForDisplay?.end.blockId !== blockId)} />;
                 })()}
                 {parentAnnotationBadges.map(({ annotation }, badgeIndex) => {
                   const annotationBadgeAnchor = annotationBadgeAnchors[annotation.id];

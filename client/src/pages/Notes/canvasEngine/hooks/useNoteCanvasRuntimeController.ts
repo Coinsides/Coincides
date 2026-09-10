@@ -511,6 +511,7 @@ export function useNoteCanvasRuntimeController() {
     onBlockTextChange: (...args) => { if (!textHistory.isReplaying()) handleBlockTextChange(...args); },
     onBlockTextFlowChange: setBlockTextFlowDrafts,
     onApplyBlockTextFlowEdit: applyBlockTextFlowEdit,
+    onApplyDocumentTextFlowEdit: textHistory.applyDocumentEdit,
     onTextEditBoundary: sourceProjectionPolicy.contentReadOnly ? undefined : textHistory.boundary,
     onApplyBlockEditRecovery: applyBlockEditRecovery,
     onApplyBlockLayoutDrafts: (layouts) => { if (textHistory.boundary()) mergeLayoutDrafts(layouts); },

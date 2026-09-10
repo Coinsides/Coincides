@@ -214,6 +214,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     onBlockTextChange: input.onBlockTextChange,
     onBlockTextFlowChange: input.onBlockTextFlowChange,
       onApplyBlockTextFlowEdit: input.onApplyBlockTextFlowEdit,
+      onApplyDocumentTextFlowEdit: input.onApplyDocumentTextFlowEdit,
       onTextEditBoundary: input.onTextEditBoundary,
     onClearSlashTarget: input.onClearSlashTarget,
     onCreatePageFrame: input.onCreatePageFrame,

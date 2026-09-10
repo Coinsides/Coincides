@@ -2,7 +2,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, typ
 import type { RuntimeHistoryEntry } from '../historyService';
 import type { BoardRangeSaveSnapshot } from '../boardTextRangeEditSession';
 import type { AnnotationTruthV1, NoteBlock, TextBlockContentV1 } from '../runtimeDataTypes';
-import { createTextFlowEditSession, restoreAnnotationRangeSnapshots, type TextFlowEditBoundary, type TextFlowEditSelection, type TextFlowEditSnapshot, type TextFlowEditTransaction } from '../textFlowEditSession';
+import { createTextFlowEditSession, restoreAnnotationRangeSnapshots, type TextFlowEditBoundary, type TextFlowEditMetadata, type TextFlowEditSelection, type TextFlowEditSnapshot, type TextFlowEditTransaction } from '../textFlowEditSession';
 import { createTextBlockContentV1, getTextFlowContent } from '../textFlowService';
 import { useBlockTextFlowEditController, type ApplyBlockTextFlowEdit } from './useBlockTextFlowEditController';
 import type { BlockSaveOutcome, useNoteCanvasDataAdapter } from './useNoteCanvasDataAdapter';
@@ -50,6 +50,17 @@ interface TemplateTransaction {
   typingRecovery?: TextFlowEditSnapshot;
 }
 
+export interface DocumentTextFlowEdit {
+  block: NoteBlock;
+  previousTextFlow: TextBlockContentV1;
+  nextTextFlow: TextBlockContentV1;
+  metadata: TextFlowEditMetadata;
+}
+
+interface DocumentTransaction {
+  blocks: { edit: TextFlowEditTransaction; typingRecovery: TextFlowEditSnapshot }[];
+}
+
 const blockPayload = ({ block_type, title, content_json, plain_text, metadata }: NoteBlock): BlockTemplatePayload => (
   structuredClone({ block_type, title, content_json, plain_text, metadata })
 );
@@ -86,12 +97,19 @@ export function useTextFlowHistory(options: Options) {
     const current = () => mounted.current && active.current === token;
     let replaying = false;
     let templatePending = false;
+    let documentPending = false;
     // Recovery attempts are keyed by the same immutable history entry, never a second undo stack.
     const failures = new Map<TextFlowEditTransaction, 'before' | 'after'>();
     const lastSave = new Map<string, { transaction: TextFlowEditTransaction; side: 'before' | 'after'; outcome: BlockSaveOutcome }>();
     // Failed conversion intents are recovery metadata for existing reversibleEdit entries.
     const templateFailures = new Map<TemplateTransaction, 'before' | 'after'>();
     const lastTemplateSave = new Map<string, { transaction: TemplateTransaction; side: 'before' | 'after'; block: NoteBlock | null }>();
+    const documentFailures = new Map<DocumentTransaction, 'before' | 'after'>();
+    const documentProgress = new WeakMap<DocumentTransaction, { side: 'before' | 'after'; completed: Set<string> }>();
+    const setDocumentPending = (value: boolean) => {
+      documentPending = value;
+      if (current()) setReplayScope(value ? token : null);
+    };
     const restoreSelection = (blockId: string, selection: TextFlowEditSelection) => {
       if (current()) setSelectionRequest({ token, blockId, selection });
     };
@@ -196,6 +214,68 @@ export function useTextFlowHistory(options: Options) {
       }
       return current() && success;
     };
+    // One entry owns the ordered block snapshots. The server still receives the
+    // existing individual saves; a same-side retry only finishes missing blocks.
+    const persistDocument = async (transaction: DocumentTransaction, side: 'before' | 'after', replay = false): Promise<boolean> => {
+      if (!current()) return false;
+      let progress = documentProgress.get(transaction);
+      if (!progress || progress.side !== side) {
+        progress = { side, completed: new Set() };
+        documentProgress.set(transaction, progress);
+      }
+      documentFailures.set(transaction, side);
+      setDocumentPending(true);
+      let success = false;
+      try {
+        const api = latest.current;
+        // Restore all local fields together, including blocks whose durable save
+        // was already completed by an earlier attempt of this same direction.
+        for (const { edit } of transaction.blocks) {
+          const snapshot = edit[side];
+          api.setBlockTextFlowDrafts((drafts) => ({ ...drafts, [edit.blockId]: structuredClone(snapshot.textFlow) }));
+          api.setBlockTextDrafts((drafts) => ({ ...drafts, [edit.blockId]: plainTextFromTextFlow(snapshot.textFlow) }));
+          api.setAnnotationTruthsSnapshot(restoreAnnotationRangeSnapshots(api.readAnnotationTruths(), snapshot.annotationRanges));
+          api.restoreBoardTextRanges(edit.blockId, snapshot.textFlow, { ranges: snapshot.boardRanges });
+        }
+        for (const { edit, typingRecovery } of transaction.blocks) {
+          if (!current()) return false;
+          if (progress.completed.has(edit.blockId)) continue;
+          // Earlier typing was sealed before this entry was reserved. If its
+          // queued write failed, retire that recovery using the complete state
+          // immediately before the document edit, never an older typing body.
+          const failedTyping = [...failures.entries()].find(([failed]) => failed.blockId === edit.blockId);
+          if (failedTyping && !await persist(failedTyping[0], failedTyping[1], false, typingRecovery)) return false;
+          if (!current()) return false;
+          const block = latest.current.blocks.find((candidate) => candidate.id === edit.blockId);
+          if (!block) return false;
+          const snapshot = edit[side];
+          let outcome = await latest.current.saveBlock(block, plainTextFromTextFlow(snapshot.textFlow), {
+            silent: true, textFlow: snapshot.textFlow, boardRangeSnapshot: { ranges: snapshot.boardRanges }, preserveDrafts: true,
+          });
+          if (!current()) return false;
+          if (outcome.status === 'saved' && snapshot.annotationRanges.length
+            && !await latest.current.saveAnnotationTruthsOutcome(
+              restoreAnnotationRangeSnapshots(latest.current.readAnnotationTruths(), snapshot.annotationRanges), { preserveDrafts: true },
+            )) outcome = { ...rejected(), block: outcome.block };
+          if (!current()) return false;
+          lastSave.set(edit.blockId, { transaction: edit, side, outcome });
+          if (outcome.status !== 'saved') return false;
+          progress.completed.add(edit.blockId);
+        }
+        success = true;
+        documentFailures.delete(transaction);
+        return true;
+      } catch {
+        return false;
+      } finally {
+        if (current()) {
+          if (!success) latest.current.onSaveFailure?.();
+          setDocumentPending(false);
+          const first = transaction.blocks[0]?.edit;
+          if (replay && first) restoreSelection(first.blockId, first[side].selection);
+        }
+      }
+    };
     const session = createTextFlowEditSession({
       noteId: options.noteId, generation: options.generation,
       onSeal(transaction) {
@@ -210,8 +290,9 @@ export function useTextFlowHistory(options: Options) {
       },
     });
     return { token, current, session, failures, lastSave, persist, templateFailures, lastTemplateSave, persistTemplate,
+      documentFailures, persistDocument, setDocumentPending,
       setTemplatePending(value: boolean) { templatePending = value; if (current()) setReplayScope(value ? token : null); },
-      isReplaying: () => replaying || templatePending };
+      isReplaying: () => replaying || templatePending || documentPending };
   }, [options.noteId, options.generation]);
   active.current = scope.token;
 
@@ -240,7 +321,7 @@ export function useTextFlowHistory(options: Options) {
     },
   });
   const applyEdit: ApplyBlockTextFlowEdit = useCallback(async (block, flow, editOptions) => {
-    if (!scope.current() || scope.isReplaying() || scope.templateFailures.size || latest.current.history.current?.isReplaying?.()) return;
+    if (!scope.current() || scope.isReplaying() || scope.templateFailures.size || scope.documentFailures.size || latest.current.history.current?.isReplaying?.()) return;
     const fullBlock = latest.current.blocks.find((candidate) => candidate.id === block.id);
     const previousTextFlow = editOptions?.previousTextFlow
       ?? (!latest.current.blockTextFlowDrafts[block.id] && !getTextFlowContent(block.content_json ?? {}) && fullBlock
@@ -254,10 +335,74 @@ export function useTextFlowHistory(options: Options) {
     if (reason === 'selection' && selection) return scope.session.selectionChanged(selection);
     return scope.session.seal();
   }, [scope]);
+  const applyDocumentEdit = useCallback(async (changes: DocumentTextFlowEdit[]): Promise<boolean> => {
+    if (!changes.length || !scope.current() || scope.templateFailures.size || scope.documentFailures.size
+      || !boundary() || changes.some((change) => change.metadata.isComposing)) return false;
+    const api = latest.current;
+    const host = api.history.current;
+    if (!host || new Set(changes.map((change) => change.block.id)).size !== changes.length
+      || changes.some((change) => !api.blocks.some((block) => block.id === change.block.id))
+      || changes.every((change) => JSON.stringify(change.previousTextFlow) === JSON.stringify(change.nextTextFlow))) return false;
+    const transaction: DocumentTransaction = {
+      blocks: changes.map((change) => {
+        const before: TextFlowEditSnapshot = {
+          textFlow: change.previousTextFlow, selection: change.metadata.beforeSelection,
+          annotationRanges: api.readAnnotationTruths().flatMap((annotation) => annotation.ranges
+            .filter((range) => range.block_id === change.block.id).map((range) => ({ annotationId: annotation.id, range }))),
+          boardRanges: api.captureBoardTextRanges(change.block.id).ranges,
+        };
+        return structuredClone({
+          edit: { noteId: api.noteId, generation: api.generation, blockId: change.block.id, metadata: change.metadata,
+            before, after: { textFlow: change.nextTextFlow, selection: change.metadata.afterSelection, annotationRanges: [], boardRanges: [] } },
+          typingRecovery: structuredClone(before),
+        });
+      }),
+    };
+    // Seal and reserve before applying drafts or awaiting work. No per-block
+    // controller invocation below is allowed to create another history entry.
+    if (!host.pushHistoryEntry({ type: 'reversibleEdit',
+      undo: () => scope.persistDocument(transaction, 'before', true), redo: () => scope.persistDocument(transaction, 'after', true),
+    }, { skipBoundary: true })) return false;
+    scope.setDocumentPending(true);
+    const applied = changes.map((change, index) => {
+      const result = apply(change.block, change.nextTextFlow, {
+        previousTextFlow: change.previousTextFlow, metadata: change.metadata, skipHistory: true,
+      });
+      api.setBlockTextDrafts((drafts) => ({ ...drafts, [change.block.id]: plainTextFromTextFlow(change.nextTextFlow) }));
+      const edit = transaction.blocks[index].edit;
+      const afterBoard = api.captureBoardTextRanges(change.block.id).ranges;
+      edit.before.boardRanges = edit.before.boardRanges.filter((range) => {
+        const next = afterBoard.find((candidate) => candidate.id === range.id);
+        return next && JSON.stringify(next) !== JSON.stringify(range);
+      });
+      edit.after.boardRanges = structuredClone(edit.before.boardRanges.map((range) => afterBoard.find((candidate) => candidate.id === range.id)!));
+      return result.then((ranges) => {
+        edit.before.annotationRanges = structuredClone(ranges.beforeAnnotationRanges);
+        edit.after.annotationRanges = structuredClone(ranges.afterAnnotationRanges);
+      });
+    });
+    // Install rejection handling immediately; earlier queued saves may still be
+    // in flight while this local snapshot preparation completes.
+    const prepared = Promise.all(applied).then(() => true, () => false);
+    try {
+      return await host.enqueueRuntimeHistoryOperation(async () => {
+        if (!await prepared || !scope.current()) {
+          if (scope.current()) {
+            scope.documentFailures.set(transaction, 'after');
+            latest.current.onSaveFailure?.();
+          }
+          return false;
+        }
+        return scope.persistDocument(transaction, 'after');
+      });
+    } finally {
+      scope.setDocumentPending(false);
+    }
+  }, [apply, boundary, scope]);
   const applyTemplateToBlock = useCallback(async (
     block: NoteBlock, template: TemplateOption, text: string, selection?: TextFlowEditSelection,
   ): Promise<NoteBlock | null> => {
-    if (!boundary() || scope.templateFailures.size || !latest.current.applyTemplateToBlock) return null;
+    if (!boundary() || scope.templateFailures.size || scope.documentFailures.size || !latest.current.applyTemplateToBlock) return null;
     const api = latest.current;
     const host = api.history.current;
     const liveBlock = api.blocks.find((candidate) => candidate.id === block.id);
@@ -329,6 +474,15 @@ export function useTextFlowHistory(options: Options) {
     // existing flush boundary cannot miss a save scheduled by an earlier tail.
     await host.enqueueRuntimeHistoryOperation(async () => {
       if (!scope.current()) return false;
+      const failedDocument = [...scope.documentFailures.entries()].find(([transaction]) => transaction.blocks.some(({ edit }) => edit.blockId === block.id));
+      if (failedDocument) {
+        const [transaction, side] = failedDocument;
+        if (await scope.persistDocument(transaction, side)) outcome = scope.lastSave.get(block.id)?.outcome ?? rejected();
+        return outcome.status === 'saved';
+      }
+      // A failed multi-block intent owns its drafts until retry or undo. An
+      // unrelated blur must not write a stale body while that intent is pending.
+      if (scope.documentFailures.size) return false;
       const failedTemplate = [...scope.templateFailures.entries()].find(([transaction]) => transaction.blockId === block.id);
       if (failedTemplate) {
         const [transaction, side] = failedTemplate;
@@ -363,12 +517,15 @@ export function useTextFlowHistory(options: Options) {
   }, [boundary, options.history, scope]);
   const flush = useCallback(async () => {
     if (!boundary()) throw new Error('Text composition is still active');
-    if (!await options.history.current?.whenHistoryIdle() || !scope.current() || scope.failures.size || scope.templateFailures.size) {
+    if (!await options.history.current?.whenHistoryIdle() || !scope.current() || scope.failures.size || scope.templateFailures.size || scope.documentFailures.size) {
       throw new Error('Text changes could not be saved. Retry saving or undo before leaving the note.');
     }
   }, [boundary, options.history, scope]);
-  return { applyEdit, applyTemplateToBlock, boundary, saveBlock, flush,
+  return { applyEdit, applyDocumentEdit, applyTemplateToBlock, boundary, saveBlock, flush,
     isReplaying: () => scope.isReplaying() || Boolean(latest.current.history.current?.isReplaying?.()),
-    recoveryBlockIds: scope.isReplaying() ? [] : [...new Set([...scope.templateFailures.keys()].map((transaction) => transaction.blockId))],
-    replaying: replayScope === scope.token || scope.templateFailures.size > 0 };
+    recoveryBlockIds: scope.isReplaying() ? [] : [...new Set([
+      ...[...scope.templateFailures.keys()].map((transaction) => transaction.blockId),
+      ...[...scope.documentFailures.keys()].flatMap((transaction) => transaction.blocks.map(({ edit }) => edit.blockId)),
+    ])],
+    replaying: replayScope === scope.token || scope.templateFailures.size > 0 || scope.documentFailures.size > 0 };
 }

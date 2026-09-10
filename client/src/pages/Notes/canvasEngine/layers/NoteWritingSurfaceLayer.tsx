@@ -79,6 +79,8 @@ import {
   replaceTextUnitText,
 } from '../textFlowService';
 import type { ApplyBlockTextFlowEdit } from '../hooks/useBlockTextFlowEditController';
+import { DocumentTextFlowSelectionContext, useDocumentTextFlowSelection } from '../hooks/useDocumentTextFlowSelection';
+import type { DocumentFlowEdit } from '../documentTextFlowSelection';
 import type { TextFlowEditBoundary, TextFlowEditMetadata, TextFlowEditSelection } from '../textFlowEditSession';
 import { navigateTextFlowBlockBoundary, type TextFlowNavigationTarget } from '../textFlowBlockNavigation';
 import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
@@ -339,6 +341,7 @@ export interface NoteWritingSurfaceLayerProps {
   onBlockTextChange: (blockId: string, value: string, caret: number, anchorElement?: HTMLElement | null) => void;
   onBlockTextFlowChange: Dispatch<SetStateAction<Record<string, TextBlockContentV1>>>;
   onApplyBlockTextFlowEdit: ApplyBlockTextFlowEdit;
+  onApplyDocumentTextFlowEdit?: (changes: DocumentFlowEdit[]) => Promise<boolean>;
   onTextEditBoundary?: (reason: TextFlowEditBoundary, selection?: TextFlowEditSelection) => void;
   onClearSlashTarget: () => void;
   onAddPageBelow: (frameId: string) => void;
@@ -599,6 +602,7 @@ export function NoteWritingSurfaceLayer({
   onBlockTextChange,
   onBlockTextFlowChange,
   onApplyBlockTextFlowEdit,
+  onApplyDocumentTextFlowEdit,
   onTextEditBoundary,
   onClearSlashTarget,
   onAddPageBelow,
@@ -641,6 +645,8 @@ export function NoteWritingSurfaceLayer({
 }: NoteWritingSurfaceLayerProps) {
   const surfaceRef = useRef<HTMLElement | null>(null);
   const textNavigationTargetsRef = useRef(new Map<string, TextFlowNavigationTarget>());
+  const documentTextSelection = useDocumentTextFlowSelection({ noteId, visibleBlocks,
+    disabled: contentReadOnly || layoutMode, applyDocumentEdit: onApplyDocumentTextFlowEdit });
   const panSessionRef = useRef<{ pointerId: number; clientX: number; clientY: number } | null>(null);
   const pageFrameOperationRef = useRef<{
     kind: 'move' | 'resize';
@@ -3350,6 +3356,7 @@ export function NoteWritingSurfaceLayer({
   };
 
   return (
+    <DocumentTextFlowSelectionContext.Provider value={documentTextSelection}>
     <section
       ref={surfaceRef}
       className={`${styles.writingSurface} ${surfaceMode === 'canvas' ? styles.writingSurfaceCanvas : styles.pageReadingSurface} ${overviewOpen ? styles.overviewWritingSurface : ''} ${spacePanReady ? styles.canvasPanReady : ''} ${canvasPanning ? styles.canvasPanning : ''}`}
@@ -4197,5 +4204,6 @@ export function NoteWritingSurfaceLayer({
         />
       )}
     </section>
+    </DocumentTextFlowSelectionContext.Provider>
   );
 }
