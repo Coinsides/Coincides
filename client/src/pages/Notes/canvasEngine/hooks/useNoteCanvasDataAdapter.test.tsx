@@ -320,6 +320,64 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     consoleWarn.mockRestore();
   });
 
+  it.each([
+    {
+      label: 'unresolved page frame',
+      contract: 'v2' as const,
+      layout: f11PaperLayout,
+      message: 'A resolved page frame is required to save this coordinate contract',
+      suffix: 'page frame unresolved',
+    },
+    {
+      label: 'retired workspace surface',
+      contract: 'v1' as const,
+      layout: defaultDraftLayout,
+      message: 'canvas_workspace_retired',
+      suffix: 'retired surface',
+    },
+    {
+      label: 'retired crossing surface',
+      contract: 'v1' as const,
+      layout: { ...f11PaperLayout, boundary_role: 'crossing' as const },
+      message: 'canvas_crossing_retired',
+      suffix: 'retired surface',
+    },
+  ])('A3 shows a distinct save failure code for $label and preserves the full console error', async ({ contract, layout, message, suffix }) => {
+    mocks.coordinateContract = contract;
+    durableBlocks = [serverBlock('synthetic save failure', false)];
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    expect(subject.result.current.coordinateContract).toBe(contract);
+    await act(async () => {
+      await subject.result.current.persistBlockLayout(subject.result.current.blocks[0], layout);
+    });
+    const failure = consoleError.mock.calls.find(([label]) => label === 'Failed to save block layout:')?.[1];
+    expect(failure).toBeInstanceOf(Error);
+    expect(failure).toHaveProperty('message', message);
+    expect(failure).toHaveProperty('stack', expect.stringContaining(message));
+    expect(mocks.addToast).toHaveBeenCalledWith('error', `Failed to save block layout (${suffix})`);
+    expect(mocks.put).not.toHaveBeenCalled();
+    expect(stableAdapterOptions.clearLayoutDraftForBlock).not.toHaveBeenCalled();
+    await expect(subject.result.current.whenIdle()).rejects.toBe(failure);
+  });
+
+  it('A3 truncates an ordinary save failure message only in the toast', async () => {
+    durableBlocks = [serverBlock('synthetic long save failure', false)];
+    const message = 'Synthetic placement save unavailable: ' + 'detail '.repeat(30);
+    const failure = new Error(message);
+    mocks.put.mockRejectedValueOnce(failure);
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    await act(async () => {
+      await subject.result.current.persistBlockLayout(subject.result.current.blocks[0], f11PaperLayout);
+    });
+    expect(mocks.addToast).toHaveBeenCalledWith('error', `Failed to save block layout (${message.slice(0, 117)}...)`);
+    expect(consoleError).toHaveBeenCalledWith('Failed to save block layout:', failure);
+    expect(failure.message).toBe(message);
+    expect(failure.stack).toContain(message);
+    await expect(subject.result.current.whenIdle()).rejects.toBe(failure);
+  });
+
   it.each([undefined, 'retired-frame'])('F11 persists the rendered collection before affiliation (%s) without changing its fractional rectangle', async (frame_id) => {
     mocks.coordinateContract = 'v2';
     durableBlocks = [serverBlock('incomplete paper', false)];
@@ -461,7 +519,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     expect(mocks.put.mock.calls.map(([url]) => url)).toEqual([collectionUrl]);
     expect(subject.result.current.pageFrameCollection).toBeNull();
     expect(subject.result.current.blocks[0].canvas_layout).toBeNull();
-    expect(mocks.addToast).toHaveBeenCalledWith('error', 'Failed to save block layout');
+    expect(mocks.addToast).toHaveBeenCalledWith('error', 'Failed to save block layout (Synthetic collection save unavailable)');
     await expect(subject.result.current.whenIdle()).rejects.toBe(failure);
     await act(async () => {
       await subject.result.current.persistBlockLayout(subject.result.current.blocks[0], f11PaperLayout);

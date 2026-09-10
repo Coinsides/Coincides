@@ -60,7 +60,7 @@ export function isPageFrameAffiliatedWorkspaceBlock(
   boundary: 'content' | 'outer' = 'outer',
   coordinateContract: CoordinateContract = 'v1',
 ): boolean {
-  if (!isCanvasWorkspaceBlock(block, contentWidth)) return false;
+  if (!isCanvasWorkspaceBlock(block, contentWidth, { contract: coordinateContract, pageFrames })) return false;
   const stored = readStoredLayout(block);
   if (
     !isFiniteNumber(stored?.x)
@@ -116,7 +116,7 @@ export function getVisibleBlocksForSurface<TBlock extends PlacementSeedBlock & {
   return policy.showWorkspaceBlocks
     ? renderableBlocks
     : renderableBlocks.filter((block) => (
-      !isCanvasWorkspaceBlock(block, contentWidth)
+      !isCanvasWorkspaceBlock(block, contentWidth, { contract: context.coordinateContract, pageFrames: context.pageFrames })
       || isPageFrameAffiliatedWorkspaceBlock(
         block,
         contentWidth,

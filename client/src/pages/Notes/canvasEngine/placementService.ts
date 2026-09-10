@@ -35,6 +35,7 @@ import {
   selectPlacementFrame,
   toStoredLayout,
   type CoordinateContract,
+  type PlacementContractContext,
 } from './placementContractService';
 import type {
   BlockPlacementModel,
@@ -318,14 +319,36 @@ function reconcileLegacyHydratedBlockLayoutSurfaceAuthority(
   };
 }
 
-export function isCanvasWorkspaceBlock(block: PlacementSeedBlock, contentWidth: number): boolean {
+export function isCanvasWorkspaceBlock(
+  block: PlacementSeedBlock,
+  contentWidth: number,
+  context: PlacementContractContext = {},
+): boolean {
   const stored = readStoredLayout(block);
   if (!stored) return false;
   if ((typeof stored.x !== 'number' || typeof stored.width !== 'number') && !stored.surface) return false;
-  return classifyBlockSurfaceAuthority({
-    ...stored,
+  const box = {
     x: typeof stored.x === 'number' ? stored.x : Number.NaN,
     width: typeof stored.width === 'number' ? stored.width : Number.NaN,
+  };
+  const frame = context.contract === 'v2'
+    ? selectPlacementFrame(stored, context.pageFrames || [], context.contract)
+    : undefined;
+  if (frame) {
+    // Current frame geometry owns the v2 boundary; render hints and old receipts do not.
+    return classifyCanvasSurfaceAuthority({
+      coordinateSpace: stored.coordinate_space === 'canvas_world' ? 'canvas_world' : 'page_frame_local',
+      box,
+      pageBoundary: stored.coordinate_space === 'canvas_world'
+        ? pageBoundaryForFrame(frame)
+        : { left: 0, right: frame.width - frame.contentInset.left - frame.contentInset.right, frameId: frame.id },
+      explicitSurface: stored.surface,
+    }).surface === 'canvas_workspace';
+  }
+  // Unresolved frames and v1 retain the complete legacy account, including old receipts.
+  return classifyBlockSurfaceAuthority({
+    ...stored,
+    ...box,
   }, {
     pageLocalWidth: contentWidth,
   }).surface === 'canvas_workspace';

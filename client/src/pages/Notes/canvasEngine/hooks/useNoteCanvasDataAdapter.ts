@@ -1968,7 +1968,15 @@ export function useNoteCanvasDataAdapter({
       clearLayoutDraftForBlock(block.id);
     } catch (err) {
       console.error('Failed to save block layout:', err);
-      addToast('error', 'Failed to save block layout');
+      let detail = err instanceof Error ? err.message : String(err);
+      if (detail === 'A resolved page frame is required to save this coordinate contract') {
+        detail = 'page frame unresolved';
+      } else if (detail === 'canvas_workspace_retired' || detail === 'canvas_crossing_retired') {
+        detail = 'retired surface';
+      } else if (detail.length > 120) {
+        detail = `${detail.slice(0, 117)}...`;
+      }
+      addToast('error', `Failed to save block layout (${detail})`);
     }
   }), [writeRegistry, note, addToast, allowSourceContentMutation, clearLayoutDraftForBlock, pageFrameCollection, contractSession, resolvePlacementWriteContext]);
 
