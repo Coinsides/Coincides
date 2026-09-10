@@ -144,13 +144,12 @@ export interface UserSettings {
   daily_status_enabled?: boolean;
   keyboard_shortcuts_enabled?: boolean;
   embedding_provider?: string;
-  embedding_api_key?: string;
   embedding_model?: string;
 }
 
 export interface AIProviderConfig {
-  api_key?: string;
   default_model?: string;
+  base_url?: string;
 }
 
 export interface Course {

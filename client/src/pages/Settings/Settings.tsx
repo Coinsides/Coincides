@@ -1,21 +1,27 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Eye, EyeOff } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
 import api from '@/services/api';
 import AgentMemoriesSection from './AgentMemoriesSection';
+import ProvidersSection from './ProvidersSection';
 import styles from './Settings.module.css';
 
 const providerOptions = [
   { value: 'anthropic', label: 'Anthropic' },
-  { value: 'openai', label: 'OpenAI Compatible' },
+  { value: 'openai', label: 'OpenAI' },
+  { value: 'generic', label: 'OpenAI Compatible' },
+  { value: 'deepseek', label: 'DeepSeek' },
+  { value: 'dashscope', label: 'DashScope' },
 ];
 
 const defaultModels: Record<string, string> = {
   anthropic: 'claude-sonnet-4-20250514',
   openai: 'gpt-4o',
+  generic: 'gpt-4o',
+  deepseek: 'deepseek-chat',
+  dashscope: 'qwen-plus',
 };
 
 const embeddingProviderOptions = [
@@ -24,6 +30,7 @@ const embeddingProviderOptions = [
 
 const embeddingModelOptions: Record<string, Array<{ value: string; label: string }>> = {
   voyage: [
+    { value: 'voyage-4', label: 'voyage-4' },
     { value: 'voyage-3', label: 'voyage-3' },
     { value: 'voyage-3-lite', label: 'voyage-3-lite' },
     { value: 'voyage-3-large', label: 'voyage-3-large' },
@@ -46,9 +53,8 @@ export default function SettingsPage() {
   const settings = user?.settings || {};
   const [agentName, setAgentName] = useState(settings.agent_name || 'Mr. Zero');
   const [activeProvider, setActiveProvider] = useState(settings.active_provider || 'anthropic');
-  const [apiKey, setApiKey] = useState(settings.ai_providers?.[activeProvider]?.api_key || '');
   const [model, setModel] = useState(settings.ai_providers?.[activeProvider]?.default_model || defaultModels[activeProvider] || '');
-  const [showKey, setShowKey] = useState(false);
+  const [baseUrl, setBaseUrl] = useState(settings.ai_providers?.[activeProvider]?.base_url || '');
   const [saving, setSaving] = useState(false);
 
   const handleTheme = async (theme: 'dark' | 'light') => {
@@ -56,7 +62,7 @@ export default function SettingsPage() {
       await updateSettings({ theme });
       document.documentElement.setAttribute('data-theme', theme);
     } catch (err) {
-      console.error('Failed to load API keys:', err);
+      console.error('Failed to update theme:', err);
       addToast('error', 'Failed to update settings');
     }
   };
@@ -65,7 +71,7 @@ export default function SettingsPage() {
     try {
       await updateSettings({ [key]: !settings[key] });
     } catch (err) {
-      console.error('Failed to save API keys:', err);
+      console.error('Failed to update preferences:', err);
       addToast('error', 'Failed to update settings');
     }
   };
@@ -76,7 +82,7 @@ export default function SettingsPage() {
         await updateSettings({ agent_name: agentName.trim() });
         addToast('success', 'Agent name updated');
       } catch (err) {
-        console.error('Failed to test Anthropic key:', err);
+        console.error('Failed to update agent name:', err);
         addToast('error', 'Failed to update');
       }
     }
@@ -84,8 +90,8 @@ export default function SettingsPage() {
 
   const handleProviderChange = (provider: string) => {
     setActiveProvider(provider);
-    setApiKey(settings.ai_providers?.[provider]?.api_key || '');
     setModel(settings.ai_providers?.[provider]?.default_model || defaultModels[provider] || '');
+    setBaseUrl(settings.ai_providers?.[provider]?.base_url || '');
   };
 
   const handleSaveProvider = async () => {
@@ -94,10 +100,13 @@ export default function SettingsPage() {
       await updateSettings({
         active_provider: activeProvider,
         ai_providers: {
-          ...settings.ai_providers,
+          ...Object.fromEntries(Object.entries(settings.ai_providers || {}).map(([provider, config]) => [provider, {
+            default_model: config.default_model,
+            base_url: config.base_url,
+          }])),
           [activeProvider]: {
-            api_key: apiKey,
             default_model: model || defaultModels[activeProvider],
+            base_url: baseUrl.trim() || undefined,
           },
         },
       });
@@ -116,9 +125,7 @@ export default function SettingsPage() {
 
   // Embedding provider state
   const [embProvider, setEmbProvider] = useState(settings.embedding_provider || 'voyage');
-  const [embApiKey, setEmbApiKey] = useState(settings.embedding_api_key || '');
-  const [embModel, setEmbModel] = useState(settings.embedding_model || 'voyage-3');
-  const [showEmbKey, setShowEmbKey] = useState(false);
+  const [embModel, setEmbModel] = useState(settings.embedding_model || 'voyage-4');
   const [savingEmb, setSavingEmb] = useState(false);
   const [embStatus, setEmbStatus] = useState<EmbeddingStatus | null>(null);
   const [backfilling, setBackfilling] = useState(false);
@@ -141,7 +148,6 @@ export default function SettingsPage() {
     try {
       await updateSettings({
         embedding_provider: embProvider,
-        embedding_api_key: embApiKey,
         embedding_model: embModel,
       });
       addToast('success', 'Embedding provider settings saved');
@@ -167,8 +173,14 @@ export default function SettingsPage() {
     setBackfilling(false);
   };
 
-  const hasApiKey = !!settings.ai_providers?.[activeProvider]?.api_key;
-  const hasEmbApiKey = !!settings.embedding_api_key;
+  const connectionSettings = Object.fromEntries(providerOptions.map(({ value }) => {
+    const saved = settings.ai_providers?.[value];
+    return [value, {
+      model: value === activeProvider ? model || defaultModels[value] : saved?.default_model || defaultModels[value],
+      base_url: (value === activeProvider ? baseUrl.trim() : saved?.base_url) || undefined,
+    }];
+  }));
+  connectionSettings[embProvider] = { model: embModel, base_url: undefined };
 
   return (
     <div className={styles.page}>
@@ -251,46 +263,41 @@ export default function SettingsPage() {
             />
           </div>
           <div className={styles.row}>
-            <span className={styles.rowLabel}>Provider</span>
-            <div className={styles.providerSelect}>
+            <label className={styles.rowLabel} htmlFor="agent-provider">Provider</label>
+            <select
+              id="agent-provider"
+              className={styles.inlineInput}
+              value={activeProvider}
+              onChange={(event) => handleProviderChange(event.target.value)}
+            >
               {providerOptions.map((opt) => (
-                <button
-                  key={opt.value}
-                  className={`${styles.themeBtn} ${activeProvider === opt.value ? styles.active : ''}`}
-                  onClick={() => handleProviderChange(opt.value)}
-                >
-                  {opt.label}
-                </button>
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
-            </div>
+            </select>
           </div>
           <div className={styles.row}>
-            <span className={styles.rowLabel}>
-              API Key
-              {hasApiKey && <span className={styles.connectedDot} title="Connected" />}
-            </span>
-            <div className={styles.keyInput}>
-              <input
-                className={styles.inlineInput}
-                type={showKey ? 'text' : 'password'}
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="sk-..."
-              />
-              <button className={styles.eyeBtn} onClick={() => setShowKey(!showKey)}>
-                {showKey ? <EyeOff size={14} /> : <Eye size={14} />}
-              </button>
-            </div>
-          </div>
-          <div className={styles.row}>
-            <span className={styles.rowLabel}>Model</span>
+            <label className={styles.rowLabel} htmlFor="agent-model">Model</label>
             <input
+              id="agent-model"
               className={styles.inlineInput}
               value={model}
               onChange={(e) => setModel(e.target.value)}
               placeholder={defaultModels[activeProvider]}
             />
           </div>
+          <div className={styles.row}>
+            <label className={styles.rowLabel} htmlFor="agent-base-url">Base URL (optional)</label>
+            <input
+              id="agent-base-url"
+              className={styles.inlineInput}
+              type="url"
+              value={baseUrl}
+              onChange={(event) => setBaseUrl(event.target.value)}
+              placeholder="Provider default"
+              aria-describedby="agent-base-url-help"
+            />
+          </div>
+          <p id="agent-base-url-help" className={styles.providerHelp}>Use the base URL without /v1. Leave blank for the provider or environment default.</p>
           <div className={styles.row}>
             <span className={styles.rowLabel} />
             <button
@@ -323,24 +330,6 @@ export default function SettingsPage() {
                   {opt.label}
                 </button>
               ))}
-            </div>
-          </div>
-          <div className={styles.row}>
-            <span className={styles.rowLabel}>
-              API Key
-              {hasEmbApiKey && <span className={styles.connectedDot} title="Connected" />}
-            </span>
-            <div className={styles.keyInput}>
-              <input
-                className={styles.inlineInput}
-                type={showEmbKey ? 'text' : 'password'}
-                value={embApiKey}
-                onChange={(e) => setEmbApiKey(e.target.value)}
-                placeholder="pa-..."
-              />
-              <button className={styles.eyeBtn} onClick={() => setShowEmbKey(!showEmbKey)}>
-                {showEmbKey ? <EyeOff size={14} /> : <Eye size={14} />}
-              </button>
             </div>
           </div>
           <div className={styles.row}>
@@ -395,6 +384,8 @@ export default function SettingsPage() {
           </div>
         </div>
       </div>
+
+      <ProvidersSection connectionSettings={connectionSettings} onCredentialsChange={() => { void fetchEmbeddingStatus(); }} />
 
       <AgentMemoriesSection />
 

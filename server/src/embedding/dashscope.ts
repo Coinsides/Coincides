@@ -1,3 +1,5 @@
+import { resolveProviderCredential } from '../services/providerCredentials.js';
+
 export const DASHSCOPE_EMBEDDING_ENDPOINT =
   'https://dashscope-intl.aliyuncs.com/compatible-mode/v1/embeddings';
 export const DASHSCOPE_EMBEDDING_MODEL = 'text-embedding-v4';
@@ -63,12 +65,12 @@ interface DashScopeResponseBody {
 }
 
 export function getDashScopeCredentialMetadata(): DashScopeCredentialMetadata {
-  const value = process.env.DASHSCOPE_API_KEY?.trim() ?? '';
+  const value = resolveProviderCredential('dashscope') ?? '';
   return { present: value.length > 0, length: value.length };
 }
 
 function readDashScopeApiKey(): string {
-  const value = process.env.DASHSCOPE_API_KEY?.trim() ?? '';
+  const value = resolveProviderCredential('dashscope') ?? '';
   if (!value) {
     throw new DashScopeEmbeddingError(
       'missing_api_key',

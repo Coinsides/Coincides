@@ -7,6 +7,7 @@ import * as XLSX from 'xlsx';
 import { getDb } from '../db/init.js';
 import { getEmbeddingProvider } from '../embedding/index.js';
 import { VectorStore } from '../embedding/vectorStore.js';
+import { resolveProviderCredential } from './providerCredentials.js';
 
 const CLAUDE_MODEL = 'claude-haiku-4-5-20251001';
 const CHUNK_SIZE = 5000;
@@ -15,30 +16,10 @@ const PDF_BATCH_SIZE = 50;
 const MAX_PDF_PAGES = 200;
 
 /**
- * Get Anthropic client — reads API key from user Settings first, falls back to .env.
- * This allows users to configure their key in the Settings UI without needing a .env file.
+ * OCR shares the machine-local Anthropic credential with chat, with env fallback.
  */
-function getAnthropicClient(userId?: string): Anthropic {
-  // Try user settings first
-  if (userId) {
-    try {
-      const db = getDb();
-      const user = db.prepare('SELECT settings FROM users WHERE id = ?').get(userId) as { settings: string } | undefined;
-      if (user?.settings) {
-        const settings = JSON.parse(user.settings);
-        const aiProviders = settings?.ai_providers as Record<string, Record<string, string>> | undefined;
-        const anthropicConfig = aiProviders?.anthropic;
-        if (anthropicConfig?.api_key) {
-          return new Anthropic({ apiKey: anthropicConfig.api_key });
-        }
-      }
-    } catch (err) {
-      console.error('Failed to load Anthropic config from settings:', err);
-    }
-  }
-
-  // Fallback to env (requires ANTHROPIC_API_KEY in .env)
-  return new Anthropic();
+function getAnthropicClient(_userId?: string): Anthropic {
+  return new Anthropic({ apiKey: resolveProviderCredential('anthropic') });
 }
 
 function getFileExtension(filename: string): string {

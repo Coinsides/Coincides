@@ -326,3 +326,93 @@
 .memoryStatus .memoryError {
   margin: 0;
 }
+
+.providerDisclosure {
+  margin: 0 0 12px;
+  color: var(--text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.providerCredential {
+  padding: 20px 0;
+  min-width: 0;
+}
+
+.providerCredential + .providerCredential {
+  border-top: 1px solid var(--glass-border);
+}
+
+.providerCredential:last-child {
+  padding-bottom: 0;
+}
+
+.providerHeading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-bottom: 16px;
+}
+
+.providerName {
+  margin: 0;
+  color: var(--text-primary);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.providerStatus {
+  color: var(--text-secondary);
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.providerKeyInput {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 8px 0 12px;
+  text-align: left;
+}
+
+.providerKeyInput::placeholder {
+  color: var(--text-secondary);
+}
+
+.providerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.providerHelp,
+.providerFeedback {
+  margin: 12px 0 0;
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.providerActions button:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+  .row {
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .providerActions button {
+    flex: 1 1 auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page {
+    animation: none;
+  }
+}

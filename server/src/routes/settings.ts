@@ -5,10 +5,13 @@ import { AppError } from '../middleware/errorHandler.js';
 import { updateSettingsSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
 import agentMemoriesRoutes from './agentMemories.js';
+import providerCredentialsRoutes from './providerCredentials.js';
+import { publicSettings } from '../services/publicSettings.js';
 
 const router = Router();
 
 router.use('/agent-memories', agentMemoriesRoutes);
+router.use('/providers', providerCredentialsRoutes);
 
 // GET /api/settings
 router.get('/', (req: AuthRequest, res: Response) => {
@@ -19,7 +22,7 @@ router.get('/', (req: AuthRequest, res: Response) => {
     throw new AppError(404, 'User not found');
   }
 
-  res.json(JSON.parse(user.settings || '{}'));
+  res.json(publicSettings(JSON.parse(user.settings || '{}')));
 });
 
 // PUT /api/settings
@@ -35,7 +38,7 @@ router.put('/', (req: AuthRequest, res: Response) => {
 
     // Merge existing settings with new ones
     const currentSettings = JSON.parse(user.settings || '{}');
-    const mergedSettings = { ...currentSettings, ...data.settings };
+    const mergedSettings = publicSettings({ ...currentSettings, ...data.settings });
 
     const now = new Date().toISOString();
     db.prepare('UPDATE users SET settings = ?, updated_at = ? WHERE id = ?').run(

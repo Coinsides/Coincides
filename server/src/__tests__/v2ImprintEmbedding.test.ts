@@ -190,7 +190,7 @@ test('K-1 model change creates a new identity and same-model rerun never overwri
 
 test('DashScope provider uses the fixed international endpoint and validates 1024-float responses', async () => {
   const previousKey = process.env.DASHSCOPE_API_KEY;
-  process.env.DASHSCOPE_API_KEY = 'unit-test-placeholder';
+  process.env.DASHSCOPE_API_KEY = 'synthetic-key-not-real-embedding';
   const requests: Array<{ url: string; init?: RequestInit }> = [];
   try {
     const provider = createDashScopeEmbeddingProvider({
@@ -219,7 +219,7 @@ test('DashScope provider uses the fixed international endpoint and validates 102
       dimensions: 1024,
       encoding_format: 'float',
     });
-    assert.equal(new Headers(requests[0].init?.headers).get('authorization'), 'Bearer unit-test-placeholder');
+    assert.equal(new Headers(requests[0].init?.headers).get('authorization'), 'Bearer synthetic-key-not-real-embedding');
     assert.equal(result.vectors.length, 2);
     assert.equal(result.vectors[0][0], 1);
     assert.equal(result.vectors[1][1], 1);

@@ -141,12 +141,11 @@ export const updateSettingsSchema = z.object({
     daily_status_enabled: z.boolean().optional(),
     keyboard_shortcuts_enabled: z.boolean().optional(),
     ai_providers: z.record(z.object({
-      api_key: z.string().optional(),
       default_model: z.string().optional(),
+      base_url: z.string().optional(),
     })).optional(),
     active_provider: z.string().optional(),
     embedding_provider: z.enum(['voyage', 'openai', 'cohere']).optional(),
-    embedding_api_key: z.string().optional(),
     embedding_model: z.string().optional(),
   }),
 });

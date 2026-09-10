@@ -1,6 +1,7 @@
 import type { EmbeddingProvider, EmbeddingConfig } from './types.js';
 import { VoyageProvider } from './voyage.js';
 import { getDb } from '../db/init.js';
+import { resolveProviderCredential } from '../services/providerCredentials.js';
 
 export type { EmbeddingProvider, EmbeddingConfig, SearchResult } from './types.js';
 
@@ -9,7 +10,7 @@ export type { EmbeddingProvider, EmbeddingConfig, SearchResult } from './types.j
  * Returns null if no API key is available (graceful degradation).
  */
 export function getEmbeddingProvider(userId?: string): EmbeddingProvider | null {
-  // Try user settings first
+  // User settings carry provider/model metadata only; credentials are machine-local.
   if (userId) {
     try {
       const db = getDb();
@@ -28,7 +29,7 @@ export function getEmbeddingProvider(userId?: string): EmbeddingProvider | null 
   }
 
   // Fall back to env
-  const envKey = process.env.VOYAGE_API_KEY;
+  const envKey = resolveProviderCredential('voyage');
   if (envKey) {
     return new VoyageProvider(envKey, 'voyage-4');
   }
@@ -41,7 +42,7 @@ export function getEmbeddingProvider(userId?: string): EmbeddingProvider | null 
  */
 function getConfigFromSettings(settings: Record<string, unknown>): EmbeddingConfig | null {
   const provider = settings.embedding_provider as string | undefined;
-  const apiKey = settings.embedding_api_key as string | undefined;
+  const apiKey = resolveProviderCredential(provider || 'voyage');
   const model = settings.embedding_model as string | undefined;
 
   if (!apiKey) return null;

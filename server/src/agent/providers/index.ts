@@ -1,6 +1,7 @@
 import type { AIProvider, ProviderConfig } from './types.js';
 import { AnthropicProvider } from './anthropic.js';
 import { OpenAIProvider } from './openai.js';
+import { resolveProviderCredential } from '../../services/providerCredentials.js';
 
 export function createProvider(providerName: string, config: ProviderConfig): AIProvider {
   switch (providerName) {
@@ -24,20 +25,10 @@ export function getProviderFromSettings(userSettings: Record<string, unknown>): 
   const aiProviders = userSettings?.ai_providers as Record<string, Record<string, string>> | undefined;
   const providerConfig = aiProviders?.[activeProvider];
 
-  let apiKey = providerConfig?.api_key;
+  const apiKey = resolveProviderCredential(activeProvider);
   let model = providerConfig?.default_model;
   let baseUrl = providerConfig?.base_url;
 
-  // Fallback to env
-  if (!apiKey && activeProvider === 'anthropic') {
-    apiKey = process.env['ANTHROPIC_API_KEY'];
-  }
-  if (!apiKey && activeProvider === 'deepseek') {
-    apiKey = process.env['DEEPSEEK_API_KEY'];
-  }
-  if (!apiKey && activeProvider === 'dashscope') {
-    apiKey = process.env['DASHSCOPE_API_KEY'];
-  }
   if (!apiKey) {
     throw new Error('No API key configured. Go to Settings to add one.');
   }

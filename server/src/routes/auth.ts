@@ -7,6 +7,7 @@ import { AuthRequest, authMiddleware, generateToken } from '../middleware/auth.j
 import { AppError } from '../middleware/errorHandler.js';
 import { registerSchema, loginSchema } from '../validators/index.js';
 import { ZodError } from 'zod';
+import { publicSettings } from '../services/publicSettings.js';
 
 const router = Router();
 
@@ -86,7 +87,7 @@ router.post('/login', (req: AuthRequest, res: Response) => {
         id: user.id,
         email: user.email,
         name: user.name,
-        settings: JSON.parse(user.settings || '{}'),
+        settings: publicSettings(JSON.parse(user.settings || '{}')),
         onboarding_completed: !!user.onboarding_completed,
         created_at: user.created_at,
         updated_at: user.updated_at,
@@ -112,7 +113,7 @@ router.get('/me', authMiddleware, (req: AuthRequest, res: Response) => {
 
   res.json({
     ...user,
-    settings: JSON.parse(user.settings || '{}'),
+    settings: publicSettings(JSON.parse(user.settings || '{}')),
     onboarding_completed: !!user.onboarding_completed,
   });
 });

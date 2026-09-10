@@ -8,6 +8,7 @@ import type Database from 'better-sqlite3';
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
 import { closeDb, initDb } from '../db/init.js';
 import { parseDocument } from '../services/documentParser.js';
+import { saveProviderCredential } from '../services/providerCredentials.js';
 
 const USER_ID = '6d6e2bc0-71fd-4fc4-b04a-93db2c701001';
 const COURSE_ID = '6d6e2bc0-71fd-4fc4-b04a-93db2c701002';
@@ -36,9 +37,12 @@ interface Fixture {
 async function withFixture(run: (fixture: Fixture) => Promise<void>): Promise<void> {
   const tempRoot = mkdtempSync(join(tmpdir(), 'coincides-document-parser-pdf-'));
   const previousVoyageKey = process.env.VOYAGE_API_KEY;
+  const previousAppData = process.env.COINCIDES_APP_DATA_DIR;
   delete process.env.VOYAGE_API_KEY;
+  process.env.COINCIDES_APP_DATA_DIR = join(tempRoot, 'app-data');
 
   try {
+    saveProviderCredential('anthropic', 'synthetic-key-not-real-document-parser');
     const db = await initDb(join(tempRoot, 'test.db'));
     db.prepare(`
       INSERT INTO users (id, email, password_hash, name, settings, created_at)
@@ -46,7 +50,7 @@ async function withFixture(run: (fixture: Fixture) => Promise<void>): Promise<vo
     `).run(
       USER_ID,
       'pdf-parser@example.com',
-      JSON.stringify({ ai_providers: { anthropic: { api_key: 'test-anthropic-key' } } }),
+      JSON.stringify({ ai_providers: { anthropic: {} } }),
     );
     db.prepare(`
       INSERT INTO courses (id, user_id, name, created_at, updated_at)
@@ -56,6 +60,8 @@ async function withFixture(run: (fixture: Fixture) => Promise<void>): Promise<vo
     await run({ db, tempRoot });
   } finally {
     closeDb();
+    if (previousAppData === undefined) delete process.env.COINCIDES_APP_DATA_DIR;
+    else process.env.COINCIDES_APP_DATA_DIR = previousAppData;
     if (previousVoyageKey === undefined) {
       delete process.env.VOYAGE_API_KEY;
     } else {

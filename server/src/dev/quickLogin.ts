@@ -3,6 +3,7 @@ import { z, ZodError } from 'zod';
 import { getDb } from '../db/init.js';
 import { generateToken } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
+import { publicSettings } from '../services/publicSettings.js';
 
 if (process.env.NODE_ENV === 'production') {
   throw new Error('Dev quick login must not be loaded in production');
@@ -43,7 +44,7 @@ devQuickLoginRouter.post('/quick-login', (req: Request, res: Response) => {
         id: user.id,
         email: user.email,
         name: user.name,
-        settings: JSON.parse(user.settings || '{}'),
+        settings: publicSettings(JSON.parse(user.settings || '{}')),
         onboarding_completed: !!user.onboarding_completed,
         created_at: user.created_at,
         updated_at: user.updated_at,

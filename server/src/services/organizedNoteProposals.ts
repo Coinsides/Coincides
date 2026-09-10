@@ -2,6 +2,7 @@ import type Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 import { AppError } from '../middleware/errorHandler.js';
 import { getProviderFromSettings } from '../agent/providers/index.js';
+import { resolveProviderCredential } from './providerCredentials.js';
 import { ensureSegmentsForMaterial, listCourseMaterials } from './courseMaterials.js';
 import {
   legacyBlockTypeForRuntimeTemplate,
@@ -91,9 +92,7 @@ function getUserSettings(db: Database.Database, userId: string): Record<string, 
 
 function hasAiKey(settings: Record<string, unknown>): boolean {
   const activeProvider = settings.active_provider || 'anthropic';
-  const providers = settings.ai_providers as Record<string, Record<string, string>> | undefined;
-  const configuredKey = providers?.[String(activeProvider)]?.api_key;
-  return Boolean(configuredKey || (activeProvider === 'anthropic' && process.env.ANTHROPIC_API_KEY));
+  return Boolean(resolveProviderCredential(String(activeProvider)));
 }
 
 function scopedSegments(
