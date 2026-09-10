@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-09-09
+> **日期 (Updated)**: 2026-09-10
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 306 份文档。
+共 307 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -298,6 +298,7 @@
 | [handoffs/2026-09-09-v13-4-w4-fix1-order.md](handoffs/2026-09-09-v13-4-w4-fix1-order.md) | 走查修一 | `done` | — | — |
 | [handoffs/2026-09-09-v13-4-w4-fix2-order.md](handoffs/2026-09-09-v13-4-w4-fix2-order.md) | 走查修二 | `done(HQ 收口:F5 经补遗一原子端点修复验证,F6 局部修复+F7-F9 收货;凭据扫描 HQ 例行补跑)` | — | — |
 | [handoffs/2026-09-09-v13-4-w4-fix3-order.md](handoffs/2026-09-09-v13-4-w4-fix3-order.md) | 走查修三 · F10 | `done(HQ 收口:F10 收货;STOP-1 裁陈旧红入 13.6 清册)` | — | — |
+| [handoffs/2026-09-09-v13-4-w4-fix4-order.md](handoffs/2026-09-09-v13-4-w4-fix4-order.md) | 走查修四 · 选区精修批 | `ready` | — | — |
 | [handoffs/2026-09-09-v13-4-wave1-wiring-order.md](handoffs/2026-09-09-v13-4-wave1-wiring-order.md) | 13.4 单 A · 接线批 + 生命周期批 | `ready` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
