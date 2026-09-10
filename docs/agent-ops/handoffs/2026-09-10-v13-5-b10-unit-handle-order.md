@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready
+> **状态 (Status)**: done(HQ 收口:两停线收货为 v1 边界——落籍太挤取消明示⛔强塞;旧正文块先存后拖)
 > **From**: fable(HQ) · **To**: codex(builder)
 > **日期**: 2026-09-10
 > **上游**: Henry 09-10 对谈拍定(单元把手 v2 三职能+A案自由落点+形态从简);TextUnitGutterLayer 现物(原生 role select,V12 老住户);B4-B9 地基(历史/多块 entry/inline 随行/阅读序)
