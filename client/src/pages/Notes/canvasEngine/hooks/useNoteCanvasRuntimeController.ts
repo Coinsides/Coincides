@@ -149,6 +149,7 @@ export function useNoteCanvasRuntimeController() {
     deleteCanvasObject,
     saveDocumentTypographyProfile,
     createBlock,
+    transferTextUnit,
     createDraftBlock,
     discardDraftBlock,
     finalizeDraftBlock,
@@ -270,6 +271,7 @@ export function useNoteCanvasRuntimeController() {
     saveBlock: saveBlockRaw,
     applyTemplateToBlock,
     onSaveFailure: () => addToast('error', 'Text changes could not be saved. Retry saving or undo before leaving the note.'),
+    createDraftBlock, saveDraftBlockPlacement, discardDraftBlock, trashBlock, restoreBlock, transferTextUnit,
   });
   const { applyEdit: applyBlockTextFlowEdit, saveBlock } = textHistory;
   const rollbackBlockSlashSession = useSlashBlockRollbackController({
@@ -512,6 +514,8 @@ export function useNoteCanvasRuntimeController() {
     onBlockTextFlowChange: setBlockTextFlowDrafts,
     onApplyBlockTextFlowEdit: applyBlockTextFlowEdit,
     onApplyDocumentTextFlowEdit: textHistory.applyDocumentEdit,
+    onExtractTextUnit: (block: Parameters<typeof textHistory.extractUnit>[0], unitId: string, layout: Parameters<typeof textHistory.extractUnit>[3]) =>
+      textHistory.extractUnit(block, unitId, defaultTextTemplate, layout),
     onTextEditBoundary: sourceProjectionPolicy.contentReadOnly ? undefined : textHistory.boundary,
     onApplyBlockEditRecovery: applyBlockEditRecovery,
     onApplyBlockLayoutDrafts: (layouts) => { if (textHistory.boundary()) mergeLayoutDrafts(layouts); },

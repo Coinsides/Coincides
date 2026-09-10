@@ -21,7 +21,7 @@ import {
   type FieldValueRecord,
 } from '../blockContentService';
 import { buildBlockTemplatePayload, type BlockTemplatePayload } from '../blockTemplateConversionService';
-import { saveAtomicText } from '../atomicTextSaveRepository';
+import { saveAtomicText, saveTextUnitTransfer } from '../atomicTextSaveRepository';
 import { restoreAnnotationRangeSnapshots, type AnnotationRangeSnapshot } from '../textFlowEditSession';
 import {
   getEffectiveAIVisibility,
@@ -473,6 +473,7 @@ export function useNoteCanvasDataAdapter({
   const successfulHydrationEpochRef = useRef(0);
   const annotationSaveResponseSequenceRef = useRef(0);
   const annotationSaveTailsByNoteRef = useRef(new Map<string, Promise<void>>());
+  const unitTransferTailsByNoteRef = useRef(new Map<string, Promise<{ confirmed: boolean; ranges: AnnotationTruthV1['ranges'] }>>());
   const contentGroupSaveGenerationRef = useRef(0);
   const pageFrameSaveGenerationRef = useRef(0);
   const typographyProfileSaveGenerationRef = useRef(0);
@@ -655,6 +656,7 @@ export function useNoteCanvasDataAdapter({
       const noteForState: Note = { ...persistedNote, metadata: cleanMetadata };
       const hydrationEpoch = successfulHydrationEpochRef.current + 1;
       successfulHydrationEpochRef.current = hydrationEpoch;
+      unitTransferTailsByNoteRef.current.delete(hydratedNote.id);
       setSuccessfulHydrationEpoch(hydrationEpoch);
       noteRef.current = noteForState;
       setNote(noteForState);
@@ -824,6 +826,23 @@ export function useNoteCanvasDataAdapter({
     const responseSequence = annotationSaveResponseSequenceRef.current + 1;
     annotationSaveResponseSequenceRef.current = responseSequence;
     if (!options.preserveDrafts) setAnnotationTruthsSnapshot(nextAnnotations);
+
+    const pendingTransfer = unitTransferTailsByNoteRef.current.get(currentNote.id);
+    if (pendingTransfer) {
+      const transfer = await pendingTransfer;
+      if (rejectStaleReceipt('publish')) return false;
+      if (!transfer.confirmed) {
+        addToast('error', 'The unit move is not confirmed. Retry saving or undo before saving annotations.');
+        return false;
+      }
+      // Keep the ordinary optimistic sequence above: a subsequent color edit
+      // must already see a pending rename. Only confirmed owners are adopted.
+      const liveRanges = new Map(transfer.ranges.map((range) => [range.id, range]));
+      nextAnnotations = nextAnnotations.map((annotation) => ({ ...annotation, ranges: annotation.ranges.map((range) => {
+        const live = liveRanges.get(range.id);
+        return live ? { ...range, block_id: live.block_id, text_flow_id: live.text_flow_id } : range;
+      }) }));
+    }
 
     const setSnapshotIfCurrent = (annotations: AnnotationTruthV1[]) => {
       if (options.preserveDrafts) return;
@@ -2349,7 +2368,104 @@ export function useNoteCanvasDataAdapter({
     boardRangeSession.mergeNewRanges(nextRanges);
   }, [noteId, boardRangeSession]);
 
+  const transferTextUnit = useCallback(writeRegistry.hold('transferTextUnit', async (input: {
+    sourceBlock: NoteBlock; targetBlock: NoteBlock; textUnitId: string;
+    sourceTextFlow: TextBlockContentV1; targetTextFlow: TextBlockContentV1;
+    sourceBaseRevision: number; targetBaseRevision: number;
+    sourcePayload?: Pick<BlockTemplatePayload, 'content_json' | 'plain_text'>;
+    targetPayload?: Pick<BlockTemplatePayload, 'content_json' | 'plain_text'>;
+  }): Promise<{ sourceBlock: NoteBlock; targetBlock: NoteBlock } | null> => {
+    const requestedNote = noteRef.current;
+    const generation = routeRequestGenerationRef.current;
+    const epoch = successfulHydrationEpochRef.current;
+    if (!requestedNote || requestedNote.id !== routeNoteIdRef.current || !allowSourceContentMutation()) return null;
+    const previousAnnotations = annotationSaveTailsByNoteRef.current.get(requestedNote.id);
+    let releaseTransfer!: (result: { confirmed: boolean; ranges: AnnotationTruthV1['ranges'] }) => void;
+    let confirmedOwners: AnnotationTruthV1['ranges'] = [];
+    let transferConfirmed = false;
+    const transferTail = new Promise<{ confirmed: boolean; ranges: AnnotationTruthV1['ranges'] }>((resolve) => { releaseTransfer = resolve; });
+    unitTransferTailsByNoteRef.current.set(requestedNote.id, transferTail);
+    const current = () => adapterMountActiveRef.current && noteRef.current?.id === requestedNote.id
+      && routeNoteIdRef.current === requestedNote.id && routeRequestGenerationRef.current === generation
+      && successfulHydrationEpochRef.current === epoch;
+    const sourcePayload = input.sourcePayload ?? { content_json: contentForEditedTextFlowBlock(input.sourceBlock, input.sourceTextFlow),
+      plain_text: input.sourceTextFlow.units.map((unit) => unit.text).join('\n') };
+    const targetPayload = input.targetPayload ?? { content_json: contentForEditedTextFlowBlock(input.targetBlock, input.targetTextFlow),
+      plain_text: input.targetTextFlow.units.map((unit) => unit.text).join('\n') };
+    const sourceContent = sourcePayload.content_json;
+    const targetContent = targetPayload.content_json;
+    try {
+      await previousAnnotations;
+      if (!current()) return null;
+      const movedInlineIds = new Set(input.targetTextFlow.inline_structures
+        .filter((inline) => inline.parent_text_unit_id === input.textUnitId).map((inline) => inline.id));
+      const movedRangeIds = new Set(annotationTruthsRef.current.flatMap((annotation) => annotation.ranges
+        .filter((range) => (range.block_id === input.sourceBlock.id && range.text_unit_id === input.textUnitId)
+          || Boolean(range.inline_structure_id && movedInlineIds.has(range.inline_structure_id))))
+        .map((range) => range.id));
+      let result: Awaited<ReturnType<typeof saveTextUnitTransfer>>;
+      try {
+        result = await saveTextUnitTransfer({
+          noteId: requestedNote.id, sourceBlockId: input.sourceBlock.id, targetBlockId: input.targetBlock.id,
+          textUnitId: input.textUnitId, sourceBaseRevision: input.sourceBaseRevision, targetBaseRevision: input.targetBaseRevision,
+          sourceBlock: sourcePayload, targetBlock: targetPayload,
+        });
+      } catch (error) {
+        // A lost response must not turn retry into a second move. Both revisions,
+        // both bodies and the migrated owners are checked before accepting it.
+        const [blockResponse, annotations, textRanges] = await Promise.all([
+          api.get<NoteBlock[]>(`/notes/${requestedNote.id}/blocks`),
+          loadAnnotationTruthsForNote({ note: requestedNote }), loadBoardTextRangesForNote(requestedNote.id),
+        ]);
+        const source = blockResponse.data.find((block) => block.id === input.sourceBlock.id);
+        const target = blockResponse.data.find((block) => block.id === input.targetBlock.id);
+        const inlineIds = new Set(input.targetTextFlow.inline_structures
+          .filter((inline) => inline.parent_text_unit_id === input.textUnitId).map((inline) => inline.id));
+        const oldAnnotationIds = new Set(annotationTruthsRef.current.flatMap((annotation) => annotation.ranges
+          .filter((range) => range.block_id === input.sourceBlock.id && (range.text_unit_id === input.textUnitId
+            || Boolean(range.inline_structure_id && inlineIds.has(range.inline_structure_id))))).map((range) => range.id));
+        const oldBoardIds = new Set(boardRangeSession.snapshot(input.sourceBlock.id).ranges
+          .filter((range) => range.text_unit_id === input.textUnitId).map((range) => range.id));
+        if (!source || !target || source.text_save_revision !== input.sourceBaseRevision + 1
+          || target.text_save_revision !== input.targetBaseRevision + 1
+          || source.plain_text !== sourcePayload.plain_text || target.plain_text !== targetPayload.plain_text
+          || JSON.stringify(canonicalJsonValue(source.content_json)) !== JSON.stringify(canonicalJsonValue(sourceContent))
+          || JSON.stringify(canonicalJsonValue(target.content_json)) !== JSON.stringify(canonicalJsonValue(targetContent))
+          || annotations.some((annotation) => annotation.ranges.some((range) => oldAnnotationIds.has(range.id) && range.block_id !== target.id))
+          || textRanges.some((range) => oldBoardIds.has(range.id) && range.block_id !== target.id)) throw error;
+        result = { source_block: source, target_block: target, annotations, text_ranges: textRanges,
+          source_revision: source.text_save_revision, target_revision: target.text_save_revision };
+      }
+      if (!current()) return null;
+      const sourceBlock = hydrateClientBlock({ ...input.sourceBlock, ...result.source_block, source_references: input.sourceBlock.source_references });
+      const targetBlock = hydrateClientBlock({ ...input.targetBlock, ...result.target_block, source_references: input.targetBlock.source_references });
+      committedTextRevisions.current.set(sourceBlock.id, result.source_revision);
+      committedTextRevisions.current.set(targetBlock.id, result.target_revision);
+      setBlocks((blocks) => blocks.map((block) => block.id === sourceBlock.id ? sourceBlock : block.id === targetBlock.id ? targetBlock : block));
+      setBlockTextFlowDrafts((drafts) => ({ ...drafts, [sourceBlock.id]: input.sourceTextFlow, [targetBlock.id]: input.targetTextFlow }));
+      setBlockTextDrafts((drafts) => ({ ...drafts, [sourceBlock.id]: sourcePayload.plain_text ?? '', [targetBlock.id]: targetPayload.plain_text ?? '' }));
+      const confirmedRanges = result.annotations.flatMap((annotation) => annotation.ranges
+        .filter((range) => movedRangeIds.has(range.id)).map((range) => ({ annotationId: annotation.id, range })));
+      confirmedOwners = confirmedRanges.map((snapshot) => snapshot.range);
+      setAnnotationTruthsSnapshot(restoreAnnotationRangeSnapshots(annotationTruthsRef.current, confirmedRanges));
+      boardRangeSession.acceptUnitTransfer({ ...input, sourceBlockId: sourceBlock.id, targetBlockId: targetBlock.id, confirmedRanges: result.text_ranges });
+      transferConfirmed = true;
+      return { sourceBlock, targetBlock };
+    } catch {
+      if (current()) addToast('error', 'The unit could not be moved. Retry saving or undo before leaving the note.');
+      return null;
+    } finally {
+      if ((transferConfirmed || !current()) && unitTransferTailsByNoteRef.current.get(requestedNote.id) === transferTail) {
+        unitTransferTailsByNoteRef.current.delete(requestedNote.id);
+      }
+      // An unresolved move keeps a settled failure barrier for future annotation
+      // saves too. Retry/undo or a fresh hydration supplies confirmed ownership.
+      releaseTransfer({ confirmed: transferConfirmed, ranges: confirmedOwners });
+    }
+  }), [writeRegistry, allowSourceContentMutation, boardRangeSession, setAnnotationTruthsSnapshot, addToast]);
+
   return {
+    transferTextUnit,
     refreshBoardTextRanges,
     whenIdle: writeRegistry.whenIdle,
     trackPendingWrite: writeRegistry.track,

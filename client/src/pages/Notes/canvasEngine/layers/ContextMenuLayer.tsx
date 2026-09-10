@@ -179,7 +179,7 @@ export function ContextMenuLayer({
           <button
             type="button"
             className={styles.contextMenuItem}
-            onClick={() => setOpenSubmenuId(open ? null : item.id)}
+            onClick={() => setOpenSubmenuId(menu.kind === 'text_unit_handle' ? item.id : open ? null : item.id)}
             aria-haspopup="menu"
             aria-expanded={open}
           >

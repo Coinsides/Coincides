@@ -377,6 +377,163 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     consoleWarn.mockRestore();
   });
 
+  it.each([
+    { lostResponse: false, nullPlainText: false },
+    { lostResponse: true, nullPlainText: false },
+    { lostResponse: true, nullPlainText: true },
+  ])('B10 real adapter restores complete payloads without adding body (lost response: $lostResponse, null: $nullPlainText)', async ({ lostResponse, nullPlainText }) => {
+    const originalFlow = createTextBlockContentV1('move me', 'todo_item');
+    originalFlow.units[0].metadata = { checked: true };
+    const empty = { ...createTextBlockContentV1(''), units: [] };
+    const source = { ...serverBlock('move me', false), text_save_revision: 0,
+      title: 'keep title', metadata: { keep: true }, plain_text: nullPlainText ? null : 'move me',
+      content_json: { [TEXT_FLOW_CONTENT_KEY]: originalFlow, sentinel: { nested: 'keep' } } };
+    const target = { ...serverBlock('', false), id: 'destination', text_save_revision: 0,
+      content_json: { [TEXT_FLOW_CONTENT_KEY]: empty, sentinel: 'destination' } };
+    durableBlocks = structuredClone([source, target]);
+    const originalAnnotations = [annotationWithOffsets(note.id, 0, 4, 'move')];
+    durableAnnotationTruths = structuredClone(originalAnnotations);
+    const movedFlow = structuredClone(originalFlow);
+    let loseResponse = lostResponse;
+    mocks.put.mockImplementation(async (url, payload) => {
+      expect(url).toContain('/unit-transfer');
+      const sourceId = payload.source_block_id;
+      const targetId = url.split('/')[2];
+      const sourceBlock = { ...durableBlocks.find((block) => block.id === sourceId)!, ...payload.source_block,
+        text_save_revision: payload.source_base_revision + 1 };
+      const targetBlock = { ...durableBlocks.find((block) => block.id === targetId)!, ...payload.target_block,
+        text_save_revision: payload.target_base_revision + 1 };
+      durableBlocks = durableBlocks.map((block) => block.id === sourceId ? sourceBlock : targetBlock);
+      durableAnnotationTruths = durableAnnotationTruths.map((annotation) => ({ ...annotation, ranges: annotation.ranges.map((range) =>
+        range.block_id === sourceId ? { ...range, block_id: targetId, text_flow_id: `textflow-${targetId}` } : range) }));
+      if (loseResponse) { loseResponse = false; throw new Error('response lost after the atomic commit'); }
+      return { data: { source_block: sourceBlock, target_block: targetBlock, source_revision: sourceBlock.text_save_revision,
+        target_revision: targetBlock.text_save_revision, annotations: structuredClone(durableAnnotationTruths), text_ranges: [] } };
+    });
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    const sourceAfter = { content_json: { ...source.content_json, [TEXT_FLOW_CONTENT_KEY]: empty }, plain_text: '' };
+    const targetAfter = { content_json: { ...target.content_json, [TEXT_FLOW_CONTENT_KEY]: movedFlow }, plain_text: 'move me' };
+    let moved: Awaited<ReturnType<typeof subject.result.current.transferTextUnit>> = null;
+    await act(async () => { moved = await subject.result.current.transferTextUnit({ sourceBlock: source, targetBlock: target,
+      textUnitId: 'tu-1', sourceTextFlow: empty, targetTextFlow: movedFlow, sourceBaseRevision: 0, targetBaseRevision: 0,
+      sourcePayload: sourceAfter, targetPayload: targetAfter }); });
+    expect(moved).not.toBeNull();
+    expect(mocks.put).toHaveBeenCalledTimes(1);
+    loseResponse = nullPlainText;
+    await act(async () => { expect(await subject.result.current.transferTextUnit({
+      sourceBlock: subject.result.current.blocks.find((block) => block.id === target.id)!,
+      targetBlock: subject.result.current.blocks.find((block) => block.id === source.id)!, textUnitId: 'tu-1',
+      sourceTextFlow: empty, targetTextFlow: originalFlow, sourceBaseRevision: 1, targetBaseRevision: 1,
+      sourcePayload: { content_json: target.content_json, plain_text: target.plain_text },
+      targetPayload: { content_json: source.content_json, plain_text: source.plain_text },
+    })).not.toBeNull(); });
+    expect(durableBlocks).toEqual([{ ...source, text_save_revision: 2 }, { ...target, text_save_revision: 2 }]);
+    expect(durableBlocks[0].content_json).not.toHaveProperty('body');
+    expect(subject.result.current.blocks[0].content_json).toEqual(source.content_json);
+    expect(subject.result.current.annotationTruths[0].raw_label).toBe(originalAnnotations[0].raw_label);
+    expect(subject.result.current.annotationTruths[0].ranges[0]).toMatchObject({ block_id: source.id, text_flow_id: `textflow-${source.id}` });
+  });
+
+  it('B10 keeps an optimistic rename then color change while waiting for confirmed range ownership', async () => {
+    const flow = createTextBlockContentV1('move');
+    const empty = { ...createTextBlockContentV1(''), units: [] };
+    const source = { ...serverBlock('move', false), text_save_revision: 0, content_json: { [TEXT_FLOW_CONTENT_KEY]: flow } };
+    const target = { ...serverBlock('', false), id: 'destination', text_save_revision: 0, content_json: { [TEXT_FLOW_CONTENT_KEY]: empty } };
+    durableBlocks = [source, target];
+    durableAnnotationTruths = [annotationWithOffsets(note.id, 0, 4, 'move')];
+    const held = deferred<void>();
+    mocks.put.mockImplementation(async (url, payload) => {
+      if (url.endsWith('/unit-transfer')) {
+        await held.promise;
+        const sourceBlock = { ...source, ...payload.source_block, text_save_revision: 1 };
+        const targetBlock = { ...target, ...payload.target_block, text_save_revision: 1 };
+        durableBlocks = [sourceBlock, targetBlock];
+        durableAnnotationTruths = durableAnnotationTruths.map((annotation) => ({ ...annotation, ranges: annotation.ranges.map((range) => ({
+          ...range, block_id: target.id, text_flow_id: `textflow-${target.id}`,
+        })) }));
+        return { data: { source_block: sourceBlock, target_block: targetBlock, source_revision: 1, target_revision: 1,
+          annotations: structuredClone(durableAnnotationTruths), text_ranges: [] } };
+      }
+      expect(url).toBe(`/annotation-truths/by-note/${note.id}`);
+      durableAnnotationTruths = structuredClone(payload.annotations);
+      return { data: durableAnnotationTruths };
+    });
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    let transfer!: Promise<unknown>;
+    act(() => { transfer = subject.result.current.transferTextUnit({ sourceBlock: source, targetBlock: target, textUnitId: 'tu-1',
+      sourceTextFlow: empty, targetTextFlow: flow, sourceBaseRevision: 0, targetBaseRevision: 0 }); });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
+    let rename!: Promise<boolean>;
+    act(() => { rename = subject.result.current.saveAnnotationTruthsOutcome(subject.result.current.annotationTruths
+      .map((annotation) => ({ ...annotation, raw_label: 'new label during transfer' }))); });
+    expect(subject.result.current.annotationTruths[0].raw_label).toBe('new label during transfer');
+    let color!: Promise<boolean>;
+    act(() => { color = subject.result.current.saveAnnotationTruthsOutcome(subject.result.current.annotationTruths
+      .map((annotation) => ({ ...annotation, visual_style: { ...annotation.visual_style, color_token: 'green' } }))); });
+    expect(mocks.put).toHaveBeenCalledTimes(1);
+    await act(async () => { held.resolve(); await transfer; expect(await rename).toBe(true); expect(await color).toBe(true); });
+    expect(durableAnnotationTruths[0].raw_label).toBe('new label during transfer');
+    expect(durableAnnotationTruths[0].ranges[0]).toMatchObject({ block_id: target.id, text_flow_id: `textflow-${target.id}` });
+    expect(subject.result.current.annotationTruths[0].raw_label).toBe('new label during transfer');
+    expect(durableAnnotationTruths[0].visual_style.color_token).toBe('green');
+  });
+
+  it('B10 blocks waiting and later annotation saves after an unconfirmed move until retry verifies the commit', async () => {
+    const flow = createTextBlockContentV1('move');
+    const empty = { ...createTextBlockContentV1(''), units: [] };
+    const source = { ...serverBlock('move', false), text_save_revision: 0, content_json: { [TEXT_FLOW_CONTENT_KEY]: flow } };
+    const target = { ...serverBlock('', false), id: 'destination', text_save_revision: 0, content_json: { [TEXT_FLOW_CONTENT_KEY]: empty } };
+    durableBlocks = [source, target];
+    durableAnnotationTruths = [annotationWithOffsets(note.id, 0, 4, 'move')];
+    const held = deferred<void>();
+    let committed = false;
+    let readUnavailable = false;
+    const ordinaryGet = mocks.get.getMockImplementation()!;
+    mocks.get.mockImplementation(async (...args) => {
+      if (readUnavailable) throw new Error('read unavailable after commit');
+      return ordinaryGet(...args);
+    });
+    mocks.put.mockImplementation(async (url, payload) => {
+      if (url.endsWith('/unit-transfer')) {
+        if (committed) throw new Error('strict OCC rejects replay');
+        await held.promise;
+        durableBlocks = [{ ...source, ...payload.source_block, text_save_revision: 1 },
+          { ...target, ...payload.target_block, text_save_revision: 1 }];
+        durableAnnotationTruths = durableAnnotationTruths.map((annotation) => ({ ...annotation, ranges: annotation.ranges.map((range) => ({
+          ...range, block_id: target.id, text_flow_id: `textflow-${target.id}`,
+        })) }));
+        committed = true; readUnavailable = true;
+        throw new Error('response lost after commit');
+      }
+      expect(url).toBe(`/annotation-truths/by-note/${note.id}`);
+      durableAnnotationTruths = structuredClone(payload.annotations);
+      return { data: durableAnnotationTruths };
+    });
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    const input = { sourceBlock: source, targetBlock: target, textUnitId: 'tu-1',
+      sourceTextFlow: empty, targetTextFlow: flow, sourceBaseRevision: 0, targetBaseRevision: 0 };
+    let transfer!: ReturnType<typeof subject.result.current.transferTextUnit>;
+    act(() => { transfer = subject.result.current.transferTextUnit(input); });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
+    let rename!: Promise<boolean>;
+    act(() => { rename = subject.result.current.saveAnnotationTruthsOutcome(subject.result.current.annotationTruths
+      .map((annotation) => ({ ...annotation, raw_label: 'pending rename' }))); });
+    await act(async () => { held.resolve(); expect(await transfer).toBeNull(); expect(await rename).toBe(false); });
+    await act(async () => { expect(await subject.result.current.saveAnnotationTruthsOutcome(subject.result.current.annotationTruths)).toBe(false); });
+    expect(mocks.put).toHaveBeenCalledTimes(1);
+    expect(durableAnnotationTruths[0].ranges[0].block_id).toBe(target.id);
+    expect(mocks.addToast).toHaveBeenCalledWith('error', expect.stringContaining('unit move is not confirmed'));
+    readUnavailable = false;
+    await act(async () => { expect(await subject.result.current.transferTextUnit(input)).not.toBeNull(); });
+    expect(subject.result.current.annotationTruths[0].raw_label).toBe('pending rename');
+    await act(async () => { expect(await subject.result.current.saveAnnotationTruthsOutcome(subject.result.current.annotationTruths)).toBe(true); });
+    expect(durableAnnotationTruths[0].raw_label).toBe('pending rename');
+    expect(durableAnnotationTruths[0].ranges[0].block_id).toBe(target.id);
+  });
+
   it('B7 smoke 4: one composite failure retains the entry, retries all resources, and undoes with the confirmed revision', async () => {
     const originalFlow = createTextBlockContentV1('alpha beta gamma');
     const original = { ...serverBlock('alpha beta gamma', false), text_save_revision: 3,

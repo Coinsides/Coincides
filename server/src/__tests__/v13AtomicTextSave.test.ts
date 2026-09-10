@@ -240,3 +240,115 @@ test('B7 read-only source projection content stays closed in both text-save and 
     assert.deepEqual(snapshot(), before);
   });
 });
+
+const TRANSFER_TARGET = 'extracted-block';
+function transferFixture(db: Awaited<ReturnType<typeof initDb>>, role = 'todo_item') {
+  const unit = { ...flow('before target after').units[0], writing_role: role,
+    order_index: 1, metadata: { checked: true, sentinel: 'unit metadata' } };
+  const inline = { id: 'inline', parent_text_unit_id: unit.id, semantic_kind: 'inline_code',
+    anchor_text: 'target', anchor_range: { start: 7, end: 13 }, field_values: { code: 'target' },
+    metadata: { sentinel: 'inline metadata' }, status: 'active' };
+  const peer = { ...flow('peer unit').units[0], id: 'peer-unit', order_index: 0 };
+  const original = { content_json: { text_flow: { ...flow(''), units: [peer, unit], inline_structures: [inline] } },
+    plain_text: 'peer unit\nbefore target after' };
+  const remainder = { content_json: { text_flow: { ...flow(''), units: [peer], inline_structures: [] } }, plain_text: 'peer unit' };
+  const empty = { content_json: { text_flow: { ...flow(''), units: [], inline_structures: [] } }, plain_text: '' };
+  const extracted = { content_json: { text_flow: { ...flow(''), units: [{ ...unit, order_index: 0 }], inline_structures: [inline] } },
+    plain_text: unit.text };
+  db.prepare('UPDATE note_blocks SET content_json = ?, plain_text = ? WHERE id = ?')
+    .run(JSON.stringify(original.content_json), original.plain_text, BLOCK);
+  db.prepare("INSERT INTO note_blocks(id,user_id,course_id,block_type,content_json,plain_text) VALUES(?,?,'project','paragraph',?,'')")
+    .run(TRANSFER_TARGET, USER, JSON.stringify(empty.content_json));
+  db.prepare("INSERT INTO note_block_placements(id,note_id,block_id,order_index) VALUES('extracted-placement',?,?,1)")
+    .run(NOTE, TRANSFER_TARGET);
+  replaceNoteAnnotationTruths(db, USER, NOTE, [{ ...annotation, ranges: [...annotation.ranges,
+    { id: 'inline-range', target_kind: 'inline_structure', block_id: BLOCK,
+      text_flow_id: `textflow-${BLOCK}`, inline_structure_id: inline.id, metadata: { sentinel: 'inline anchor' } },
+    { id: 'inline-only-range', target_kind: 'inline_structure', inline_structure_id: inline.id,
+      metadata: { sentinel: 'inline identity without optional ownership columns' } },
+    { id: 'peer-range', target_kind: 'text_unit', block_id: BLOCK,
+      text_flow_id: `textflow-${BLOCK}`, text_unit_id: peer.id, metadata: { sentinel: 'peer anchor' } },
+    { id: 'block-range', target_kind: 'block', block_id: BLOCK, metadata: { sentinel: 'block anchor' } },
+  ] }]);
+  return { original, remainder, empty, extracted,
+    input: { note_id: NOTE, source_block_id: BLOCK, text_unit_id: unit.id,
+      source_base_revision: 0, target_base_revision: 0, source_block: remainder, target_block: extracted } };
+}
+
+test('B10 extraction, undo and redo preserve todo/bullet units, inline and every anchor field', async () => {
+  for (const role of ['todo_item', 'bullet_item']) {
+    await withFixture(async ({ db, put, snapshot }) => {
+      const fixture = transferFixture(db, role);
+      const before = snapshot();
+      const movedAnchors = (rows: unknown[]) => rows.map((row) => {
+        const entry = row as Record<string, unknown>;
+        return entry.text_unit_id === 'unit' || entry.inline_structure_id === 'inline'
+          ? { ...entry, block_id: entry.block_id === null ? null : TRANSFER_TARGET,
+            text_flow_id: entry.text_flow_id === null ? null : `textflow-${TRANSFER_TARGET}` } : entry;
+      });
+      const saved = await put(`/note-blocks/${TRANSFER_TARGET}/unit-transfer`, fixture.input);
+      assert.equal(saved.source_revision, 1);
+      assert.equal(saved.target_revision, 1);
+      assert.deepEqual(saved.source_block.content_json, fixture.remainder.content_json);
+      assert.deepEqual(saved.target_block.content_json, fixture.extracted.content_json);
+      const after = snapshot();
+      assert.deepEqual(after.annotation_truths, before.annotation_truths);
+      assert.deepEqual(after.annotation_ranges, movedAnchors(before.annotation_ranges));
+      assert.deepEqual(after.board_text_ranges, movedAnchors(before.board_text_ranges));
+      assert.equal(saved.annotations[0].ranges.find((range: any) => range.id === 'range').block_id, TRANSFER_TARGET);
+      assert.equal(saved.text_ranges[0].block_id, TRANSFER_TARGET);
+      assert.equal(saved.text_ranges[0].status, 'active');
+      const undone = await put(`/note-blocks/${BLOCK}/unit-transfer`, {
+        ...fixture.input, source_block_id: TRANSFER_TARGET, source_base_revision: 1, target_base_revision: 1,
+        source_block: fixture.empty, target_block: fixture.original,
+      });
+      assert.equal(undone.source_revision, 2);
+      assert.equal(undone.target_revision, 2);
+      assert.deepEqual(undone.source_block.content_json, fixture.empty.content_json);
+      assert.deepEqual(undone.target_block.content_json, fixture.original.content_json);
+      const undoSnapshot = snapshot();
+      for (const table of ['annotation_truths', 'annotation_ranges', 'board_text_ranges']) {
+        assert.deepEqual(undoSnapshot[table], before[table], `${role}: ${table}`);
+      }
+      await put(`/note-blocks/${TRANSFER_TARGET}/unit-transfer`, {
+        ...fixture.input, source_base_revision: 2, target_base_revision: 2,
+      });
+      assert.deepEqual(snapshot().annotation_ranges, after.annotation_ranges);
+      assert.deepEqual(snapshot().board_text_ranges, after.board_text_ranges);
+    });
+  }
+});
+
+test('B10 late anchor failure rolls back both block bodies, revisions and all anchor fields', async () => {
+  await withFixture(async ({ db, put, snapshot }) => {
+    const fixture = transferFixture(db);
+    const before = snapshot();
+    db.exec(`CREATE TRIGGER transfer_range_failure BEFORE UPDATE ON board_text_ranges
+      BEGIN SELECT RAISE(ABORT, 'Synthetic transfer anchor failure'); END`);
+    await put(`/note-blocks/${TRANSFER_TARGET}/unit-transfer`, fixture.input, 500);
+    assert.deepEqual(snapshot(), before);
+    assert.equal(db.inTransaction, false);
+    db.exec('DROP TRIGGER transfer_range_failure');
+    await put(`/note-blocks/${TRANSFER_TARGET}/unit-transfer`, fixture.input);
+  });
+});
+
+test('B10 stale source or target revisions and altered unit/inline payload never apply a partial move', async () => {
+  await withFixture(async ({ db, put, snapshot }) => {
+    const fixture = transferFixture(db);
+    const before = snapshot();
+    for (const stale of [{ source_base_revision: 1 }, { target_base_revision: 1 }]) {
+      const failure = await put(`/note-blocks/${TRANSFER_TARGET}/unit-transfer`, { ...fixture.input, ...stale }, 409);
+      assert.equal(failure.error, 'stale_revision');
+      assert.deepEqual(snapshot(), before);
+    }
+    const alteredUnit = structuredClone(fixture.input);
+    alteredUnit.target_block.content_json.text_flow.units[0].writing_role = 'paragraph';
+    await put(`/note-blocks/${TRANSFER_TARGET}/unit-transfer`, alteredUnit, 409);
+    assert.deepEqual(snapshot(), before);
+    const alteredInline = structuredClone(fixture.input);
+    alteredInline.target_block.content_json.text_flow.inline_structures[0].anchor_range.end = 14;
+    await put(`/note-blocks/${TRANSFER_TARGET}/unit-transfer`, alteredInline, 409);
+    assert.deepEqual(snapshot(), before);
+  });
+});

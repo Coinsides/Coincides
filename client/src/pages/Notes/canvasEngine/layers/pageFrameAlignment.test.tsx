@@ -1,5 +1,5 @@
 import { createRef } from 'react';
-import { act, cleanup, render } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildNoteCanvasRuntimeModel } from '../engineModel';
 import { createSurfaceModePolicy } from '../modePolicyService';
@@ -8,11 +8,15 @@ import { createPageStackFromFrame } from '../pageStackCollectionService';
 import { buildRuntimeBlockPlacement } from '../placementService';
 import type { NoteBlock } from '../runtimeDataTypes';
 import type { BlockBoxLayout, SurfaceMode } from '../runtimeLayout';
+import { MIN_BLOCK_WIDTH } from '../runtimeLayout';
 import { createDefaultDocumentTypographyProfile } from '../typographyProfileService';
 import type { PageFrameModel } from '../types';
 import { NoteWritingSurfaceLayer, type NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
 import { NoteOverviewLayer } from './NoteOverviewLayer';
 import { NotePrintLayer } from './NotePrintLayer';
+import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
+import { resolveScreenRect } from '../placementContractService';
+import { useNoteCanvasResolvedLayoutModel } from '../hooks/useNoteCanvasLayoutModel';
 
 vi.mock('@/services/api', () => ({ default: {
   get: vi.fn().mockRejectedValue(new Error('No HTTP in synthetic alignment fixture')),
@@ -136,6 +140,158 @@ function alignment(frameX: number, mode: SurfaceMode, options: {
   view.unmount();
   return result;
 }
+
+describe('B10 extraction landing through the actual writing surface', () => {
+  function expectLandedPageVisible(source: NoteBlock, layout: BlockBoxLayout, pageFrame: PageFrameModel, pageOffsetX: number) {
+    const landed: NoteBlock = { ...source, id: `${source.id}-landed`, placement_id: `${source.placement_id}-landed`,
+      canvas_layout: { ...layout } };
+    const resolved = renderHook(() => useNoteCanvasResolvedLayoutModel({
+      contentWidth: 760, coordinateContract: 'v2',
+      documentTypographyProfile: createDefaultDocumentTypographyProfile(), layoutDrafts: {},
+      sortedBlocks: [landed], pageFrames: [pageFrame], surfaceMode: 'page', surfacePolicy: createSurfaceModePolicy('page'),
+    }));
+    expect(resolved.result.current.visibleBlocks.map((block) => block.id)).toEqual([landed.id]);
+    const persistedLayout = resolved.result.current.blockLayouts[landed.id];
+    expect(persistedLayout.x).toBeCloseTo(layout.x);
+    expect(persistedLayout.y).toBeCloseTo(layout.y);
+    expect(persistedLayout.width).toBeCloseTo(layout.width);
+    const pageProps = propsFor(pageFrame, 'page');
+    const view = render(<NoteWritingSurfaceLayer {...pageProps} contentReadOnly={false} layoutMode={false}
+      allBlocks={[landed]} visibleBlocks={resolved.result.current.visibleBlocks}
+      blockLayouts={resolved.result.current.blockLayouts} pageOffsetX={pageOffsetX} />);
+    const shell = view.container.querySelector<HTMLElement>(`[data-note-block-shell="true"][data-block-id="${landed.id}"]`)!;
+    expect(shell).not.toBeNull();
+    expect(shell.hidden).toBe(false);
+    const screen = resolveScreenRect(layout, pageFrame, 'v2', pageOffsetX);
+    expect(Number.parseFloat(shell.style.left)).toBeCloseTo(screen.x);
+    expect(Number.parseFloat(shell.style.top)).toBeCloseTo(screen.y);
+    view.unmount();
+    resolved.unmount();
+  }
+
+  it('round-trips canvas zoom/pan and nonzero frame origin to the actual release point on paper', () => {
+    const pageFrame = { ...frame(200), y: 80, contentInset: { left: 72, right: 72, top: 40, bottom: 96 } };
+    const props = propsFor(pageFrame, 'canvas');
+    const flow = createTextBlockContentV1('Synthetic canvas extraction');
+    flow.units[0].id = 'synthetic-canvas-unit';
+    const source = { ...props.visibleBlocks[0], plain_text: flow.units[0].text,
+      content_json: { [TEXT_FLOW_CONTENT_KEY]: flow } };
+    const extract = vi.fn(async (_block: NoteBlock, _unitId: string, _layout: BlockBoxLayout) => true);
+    const pageOffsetX = 96;
+    const viewport = { x: 250, y: 150, zoom: 1.5, width: 1024, height: 768 };
+    const view = render(<NoteWritingSurfaceLayer {...props} visibleBlocks={[source]} allBlocks={[source]}
+      contentReadOnly={false} layoutMode={false} pageOffsetX={pageOffsetX} viewportTransform={viewport}
+      onExtractTextUnit={extract} />);
+    expect(props.defaultDraftLayout.width).toBe(760);
+    const surface = view.container.querySelector<HTMLElement>('[data-page-frame-template]')!;
+    const projection = view.container.querySelector<HTMLElement>('[data-text-unit-editor]')!;
+    const handle = view.container.querySelector<HTMLElement>('[data-text-unit-handle="synthetic-canvas-unit"]')!;
+    vi.spyOn(surface, 'getBoundingClientRect').mockReturnValue({ left: 20, top: 30, width: 1024, height: 768 } as DOMRect);
+    vi.spyOn(projection, 'getBoundingClientRect').mockReturnValue({ left: 100, top: 100, right: 320, bottom: 160,
+      width: 220, height: 60 } as DOMRect);
+    const originalHit = Object.getOwnPropertyDescriptor(document, 'elementFromPoint');
+    Object.defineProperty(document, 'elementFromPoint', { configurable: true, value: () => props.blockListRef.current });
+    const release = { x: 20 + (500 - viewport.x) * viewport.zoom, y: 30 + (500 - viewport.y) * viewport.zoom };
+    const drop = (x: number, y: number) => {
+      for (const [type, clientX, clientY] of [
+        ['pointerdown', 95, 110], ['pointermove', x, y], ['pointerup', x, y],
+      ] as const) {
+        const event = new MouseEvent(type, { bubbles: true, cancelable: true, button: 0, clientX, clientY });
+        Object.defineProperties(event, { pointerId: { value: 20 }, pointerType: { value: 'mouse' }, isPrimary: { value: true } });
+        fireEvent(handle, event);
+      }
+    };
+    try {
+      drop(release.x, release.y);
+      expect(extract).toHaveBeenCalledTimes(1);
+      const layout = extract.mock.calls[0][2];
+      const rendered = resolveScreenRect(layout, pageFrame, 'v2', pageOffsetX);
+      expect(20 + (rendered.x - viewport.x) * viewport.zoom).toBeCloseTo(release.x);
+      expect(30 + (rendered.y - viewport.y) * viewport.zoom).toBeCloseTo(release.y);
+      expect(layout).toMatchObject({ coordinate_space: 'page_frame_local', frame_id: pageFrame.id, surface: 'formal_page' });
+      expect(layout.width).toBeLessThanOrEqual(760 - layout.x);
+      expectLandedPageVisible(source, layout, pageFrame, pageOffsetX);
+      drop(release.x + 4000, release.y);
+      expect(extract).toHaveBeenCalledTimes(1);
+    } finally {
+      if (originalHit) Object.defineProperty(document, 'elementFromPoint', originalHit);
+      else delete (document as unknown as { elementFromPoint?: unknown }).elementFromPoint;
+    }
+  });
+
+  it.each([220, 760 - MIN_BLOCK_WIDTH])('maps release x=%i through page scale/frame origin, including the last legal point, and rejects invalid drops', (releaseX) => {
+    const pageFrame = { ...frame(200), y: 80, contentInset: { left: 72, right: 72, top: 40, bottom: 96 } };
+    const props = propsFor(pageFrame, 'page');
+    const flow = createTextBlockContentV1('Synthetic unit to extract');
+    flow.units[0].id = 'synthetic-extract-unit';
+    const source = { ...props.visibleBlocks[0], plain_text: flow.units[0].text,
+      content_json: { [TEXT_FLOW_CONTENT_KEY]: flow } };
+    const extract = vi.fn(async (_block: NoteBlock, _unitId: string, _layout: BlockBoxLayout) => true);
+    const view = render(<NoteWritingSurfaceLayer {...props} visibleBlocks={[source]} allBlocks={[source]}
+      contentReadOnly={false} layoutMode={false} pageOffsetX={40}
+      pageReadingViewState={{ gear: 'fit_width', stepFactor: 0.8 }} onExtractTextUnit={extract} />);
+    expect(props.defaultDraftLayout.width).toBe(760);
+    const blockList = props.blockListRef.current!;
+    const projection = view.container.querySelector<HTMLElement>('[data-text-unit-editor]')!;
+    const handle = view.container.querySelector<HTMLElement>('[data-text-unit-handle="synthetic-extract-unit"]')!;
+    const paper = projection.closest<HTMLElement>('[data-page-display-scale]')!;
+    const scale = Number(paper.dataset.pageDisplayScale);
+    expect(scale).toBeGreaterThan(0);
+    expect(scale).not.toBe(1);
+    const rect = (x: number, y: number, width: number, height: number): DOMRect => ({ x, y, left: x, top: y,
+      right: x + width, bottom: y + height, width, height, toJSON: () => ({ x, y, width, height }) });
+    vi.spyOn(blockList, 'getBoundingClientRect').mockReturnValue(rect(120, 180, 760 * scale, 1182 * scale));
+    vi.spyOn(projection, 'getBoundingClientRect').mockReturnValue(rect(130, 190, 200, 50));
+    const point = { x: 120 + (releaseX + 40) * scale, y: 180 + 400 * scale };
+    const hit = vi.fn((): Element | null => blockList);
+    const originalHit = Object.getOwnPropertyDescriptor(document, 'elementFromPoint');
+    Object.defineProperty(document, 'elementFromPoint', { configurable: true, value: hit });
+    const drop = (x: number, y: number) => {
+      for (const [type, clientX, clientY] of [
+        ['pointerdown', 120, 200], ['pointermove', x, y], ['pointerup', x, y],
+      ] as const) {
+        const event = new MouseEvent(type, { bubbles: true, cancelable: true, button: 0, clientX, clientY });
+        Object.defineProperties(event, { pointerId: { value: 19 }, pointerType: { value: 'mouse' }, isPrimary: { value: true } });
+        fireEvent(handle, event);
+      }
+    };
+    try {
+      drop(point.x, point.y);
+      expect(extract).toHaveBeenCalledTimes(1);
+      expect(extract.mock.calls[0][0]).toMatchObject({ id: source.id });
+      expect(extract.mock.calls[0][1]).toBe('synthetic-extract-unit');
+      const layout = extract.mock.calls[0][2] as BlockBoxLayout;
+      expect(layout.x).toBeCloseTo(releaseX);
+      expect(layout.y).toBeCloseTo(280);
+      expect(layout).toMatchObject({ coordinate_space: 'page_frame_local', frame_id: pageFrame.id, surface: 'formal_page' });
+      expect(layout.width).toBeLessThanOrEqual(760 - layout.x);
+      if (releaseX === 760 - MIN_BLOCK_WIDTH) expect(layout.width).toBeCloseTo(MIN_BLOCK_WIDTH);
+      const rendered = resolveScreenRect(layout, pageFrame, 'v2', 40);
+      expect(120 + rendered.x * scale).toBeCloseTo(point.x);
+      expect(180 + rendered.y * scale).toBeCloseTo(point.y);
+      expectLandedPageVisible(source, layout, pageFrame, 40);
+      // A shell hit must not become cross-block migration, even at a valid paper point.
+      const neighbor = document.createElement('article');
+      neighbor.dataset.noteBlockShell = 'true';
+      blockList.appendChild(neighbor);
+      hit.mockReturnValue(neighbor);
+      drop(point.x, point.y);
+      hit.mockReturnValue(blockList);
+      // Still inside paper, but only MIN_BLOCK_WIDTH - 1 px remain. Do not
+      // invoke the history/create owner when its legacy landing writer cannot save it.
+      drop(120 + (760 - MIN_BLOCK_WIDTH + 1 + 40) * scale, point.y);
+      expect(extract).toHaveBeenCalledTimes(1);
+      drop(120 + 1200 * scale, point.y);
+      hit.mockReturnValue(document.body);
+      drop(point.x, point.y);
+      expect(extract).toHaveBeenCalledTimes(1);
+      expect(props.onCreateBlock).not.toHaveBeenCalled();
+    } finally {
+      if (originalHit) Object.defineProperty(document, 'elementFromPoint', originalHit);
+      else delete (document as unknown as { elementFromPoint?: unknown }).elementFromPoint;
+    }
+  });
+});
 
 describe('page frame decoration alignment on synthetic collections', () => {
   it('aligns the page top ruler with the block column despite a historical frame x', () => {

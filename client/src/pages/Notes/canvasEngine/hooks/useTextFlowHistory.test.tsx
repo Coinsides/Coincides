@@ -1,6 +1,7 @@
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { useRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
+import type { BoardTextRangeV1 } from '../../../../../../shared/types/boardTextRange';
 import { TextBlockProjection } from '../blocks/TextBlockProjection';
 import { createBoardTextRangeEditSession } from '../boardTextRangeEditSession';
 import type { AnnotationTruthV1, NoteBlock, TextBlockContentV1 } from '../runtimeDataTypes';
@@ -13,7 +14,10 @@ import { useTextFlowHistory, type TextFlowHistoryHost } from './useTextFlowHisto
 
 const plainTextFromTextFlow = (flow: TextBlockContentV1) => flow.units.map((unit) => unit.text).join('\n');
 
-function renderHistoryEditor(initialText = 'original', options: { legacy?: boolean; flow?: TextBlockContentV1 } = {}) {
+function renderHistoryEditor(initialText = 'original', options: {
+  legacy?: boolean; flow?: TextBlockContentV1;
+  annotations?: AnnotationTruthV1[]; boardRanges?: BoardTextRangeV1[];
+} = {}) {
   const initialFlow = options.flow ?? createTextBlockContentV1(initialText);
   const initialPlainText = options.flow ? plainTextFromTextFlow(options.flow) : initialText;
   const block: NoteBlock = {
@@ -22,7 +26,7 @@ function renderHistoryEditor(initialText = 'original', options: { legacy?: boole
     plain_text: initialPlainText, metadata: {}, order_index: 0, source_references: [],
   };
   const boardRanges = createBoardTextRangeEditSession('synthetic-note', async (_note, ranges) => ranges);
-  boardRanges.hydrate([]);
+  boardRanges.hydrate(options.boardRanges ?? []);
   const savedTexts: string[] = [];
   const savedFlows: TextBlockContentV1[] = [];
   const saveBlock = vi.fn(async (_block: NoteBlock, text: string, saveOptions?: { textFlow?: TextBlockContentV1 }): Promise<BlockSaveOutcome> => {
@@ -37,10 +41,11 @@ function renderHistoryEditor(initialText = 'original', options: { legacy?: boole
     move: (x: number) => void;
     layout: BlockBoxLayout;
     flow: TextBlockContentV1 | null;
+    annotations: AnnotationTruthV1[];
   };
   function Editor() {
     const drafts = useBlockDraftAuthority();
-    const [annotations, setAnnotations] = useState<AnnotationTruthV1[]>([]);
+    const [annotations, setAnnotations] = useState<AnnotationTruthV1[]>(options.annotations ?? []);
     const annotationsRef = useRef(annotations);
     annotationsRef.current = annotations;
     const hostRef = useRef<TextFlowHistoryHost | null>(null);
@@ -69,7 +74,7 @@ function renderHistoryEditor(initialText = 'original', options: { legacy?: boole
     hostRef.current = history;
     const flow = drafts.blockTextFlowDrafts[block.id] ?? (options.legacy ? null : initialFlow);
     current = {
-      history, textHistory, layout, flow,
+      history, textHistory, layout, flow, annotations,
       move: (x) => {
         const after = { ...layout, x };
         history.pushLayoutHistory({ [block.id]: layout }, { [block.id]: after });
@@ -111,8 +116,78 @@ function renderHistoryEditor(initialText = 'original', options: { legacy?: boole
     });
     return allowed;
   };
-  return { ...view, current: () => current, savedTexts, savedFlows, saveBlock, saveLayout, textarea, focus, input, inputAt, idle, key };
+  return { ...view, current: () => current, savedTexts, savedFlows, saveBlock, saveLayout, textarea, focus, input, inputAt, idle, key, boardRanges };
 }
+
+describe('B10 pointer reorder through the existing runtime history', () => {
+  it('smokes 2/3: one drag preserves every anchor field and one undo/redo restores exact unit order', async () => {
+    const flow = createTextBlockContentV1('Alpha');
+    flow.metadata = { nested: { retained: 'flow metadata' } };
+    flow.units = ['Alpha', 'Bravo', 'Charlie'].map((text, index) => ({
+      ...flow.units[0], id: `drag-unit-${index}`, text, order_index: index,
+      writing_role: index === 1 ? 'todo_item' : 'paragraph', indent_level: index,
+      metadata: { checked: true, nested: { original: index } },
+    }));
+    flow.inline_structures = [{
+      id: 'inline-on-bravo', semantic_kind: 'inline_code', parent_text_unit_id: 'drag-unit-1',
+      anchor_text: 'rav', anchor_range: { start: 1, end: 4 }, field_values: { language: 'text' },
+      metadata: { nested: { retained: 'inline metadata' } }, status: 'active',
+    }];
+    const ranges: BoardTextRangeV1[] = [{
+      id: 'board-range-on-bravo', note_id: 'synthetic-note', board_id: 'synthetic-board',
+      block_id: 'synthetic-block', text_flow_id: 'textflow-synthetic-block', text_unit_id: 'drag-unit-1',
+      start_offset: 1, end_offset: 4, excerpt: 'rav', status: 'active', pre_edit_offsets: null,
+      at: 'synthetic-at', created_at: 'synthetic-created', updated_at: 'synthetic-updated',
+    }];
+    const annotations: AnnotationTruthV1[] = [{
+      id: 'annotation-on-bravo', note_id: 'synthetic-note', canvas_id: 'synthetic-canvas', raw_label: 'Bravo span',
+      ranges: [{ id: 'annotation-range-on-bravo', target_kind: 'text_span', block_id: 'synthetic-block',
+        text_flow_id: 'textflow-synthetic-block', text_unit_id: 'drag-unit-1',
+        start_offset: 1, end_offset: 4, range_text_cache: 'rav' }],
+      parent_annotation_id: null, child_annotation_ids: [],
+      visual_style: { color_token: 'blue', marker_kind: 'highlight' }, created_by: 'human', status: 'active',
+      created_at: 'synthetic-created', updated_at: 'synthetic-updated',
+    }];
+    const before = structuredClone({ flow, ranges, annotations });
+    const editor = renderHistoryEditor('', { flow, annotations, boardRanges: ranges });
+    const projection = editor.container.querySelector<HTMLElement>('[data-text-unit-editor]')!;
+    const rect = (y: number, height: number): DOMRect => ({ x: 100, y, left: 100, top: y, right: 500,
+      bottom: y + height, width: 400, height, toJSON: () => ({ y, height }) });
+    vi.spyOn(projection, 'getBoundingClientRect').mockReturnValue(rect(100, 120));
+    [...projection.querySelectorAll<HTMLElement>('[data-text-unit-row]')].forEach((row, index) => {
+      vi.spyOn(row, 'getBoundingClientRect').mockReturnValue(rect(100 + index * 40, 40));
+    });
+    const handle = projection.querySelector<HTMLElement>('[data-text-unit-handle="drag-unit-1"]')!;
+    const pointer = (type: string, y: number) => {
+      const event = new MouseEvent(type, { bubbles: true, cancelable: true, button: 0, clientX: 90, clientY: y });
+      Object.defineProperties(event, { pointerId: { value: 7 }, pointerType: { value: 'mouse' }, isPrimary: { value: true } });
+      fireEvent(handle, event);
+    };
+    pointer('pointerdown', 150);
+    pointer('pointermove', 105);
+    expect(projection.querySelector('[data-text-unit-drop-indicator="drag-unit-0"]')?.getAttribute('data-drop-edge')).toBe('before');
+    pointer('pointerup', 105);
+    await editor.idle();
+    const after = { ...before.flow,
+      units: [1, 0, 2].map((index, order_index) => ({ ...before.flow.units[index], order_index })) };
+    expect(editor.current().flow).toEqual(after);
+    expect(editor.current().annotations).toEqual(before.annotations);
+    expect(editor.boardRanges.snapshot('synthetic-block').ranges).toEqual(before.ranges);
+    expect(editor.savedFlows).toEqual([after]);
+
+    await editor.key('z', window);
+    expect(editor.current().flow).toEqual(before.flow);
+    expect(editor.current().annotations).toEqual(before.annotations);
+    expect(editor.boardRanges.snapshot('synthetic-block').ranges).toEqual(before.ranges);
+    await act(async () => { expect(await editor.current().history.undoRuntimeHistory()).toBe(false); });
+    await editor.key('y', window);
+    expect(editor.current().flow).toEqual(after);
+    expect(editor.current().annotations).toEqual(before.annotations);
+    expect(editor.boardRanges.snapshot('synthetic-block').ranges).toEqual(before.ranges);
+    await act(async () => { expect(await editor.current().history.redoRuntimeHistory()).toBe(false); });
+    expect(editor.savedFlows).toEqual([after, before.flow, after]);
+  });
+});
 
 describe('B4 TextFlow and application history integration (synthetic memory)', () => {
   it('keeps managed editing closed until a layout replay save finishes', async () => {

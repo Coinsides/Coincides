@@ -11,6 +11,43 @@ export interface AtomicTextSaveResult {
   revision: number;
 }
 
+export interface TextUnitTransferResult {
+  source_block: NoteBlock;
+  target_block: NoteBlock;
+  annotations: AnnotationTruthV1[];
+  text_ranges: BoardTextRangeV1[];
+  source_revision: number;
+  target_revision: number;
+}
+
+export async function saveTextUnitTransfer(input: {
+  noteId: string;
+  sourceBlockId: string;
+  targetBlockId: string;
+  textUnitId: string;
+  sourceBaseRevision: number;
+  targetBaseRevision: number;
+  sourceBlock: Partial<BlockTemplatePayload>;
+  targetBlock: Partial<BlockTemplatePayload>;
+}): Promise<TextUnitTransferResult> {
+  const { data } = await api.put<TextUnitTransferResult>(`/note-blocks/${input.targetBlockId}/unit-transfer`, {
+    note_id: input.noteId,
+    source_block_id: input.sourceBlockId,
+    text_unit_id: input.textUnitId,
+    source_base_revision: input.sourceBaseRevision,
+    target_base_revision: input.targetBaseRevision,
+    source_block: input.sourceBlock,
+    target_block: input.targetBlock,
+  });
+  if (data?.source_block?.id !== input.sourceBlockId || data?.target_block?.id !== input.targetBlockId
+    || data.source_revision !== input.sourceBaseRevision + 1 || data.target_revision !== input.targetBaseRevision + 1
+    || data.source_block.text_save_revision !== data.source_revision || data.target_block.text_save_revision !== data.target_revision
+    || !Array.isArray(data.annotations) || !Array.isArray(data.text_ranges)) {
+    throw new Error('Text unit transfer was not confirmed');
+  }
+  return data;
+}
+
 export async function saveAtomicText(input: {
   noteId: string;
   blockId: string;

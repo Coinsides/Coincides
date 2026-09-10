@@ -73,6 +73,8 @@ import {
   updateTextUnitMetadata,
 } from '../textUnitEditorService';
 import { TextUnitGutterLayer } from '../layers/TextUnitGutterLayer';
+import { useTextUnitHandleDrag } from '../hooks/useTextUnitHandleDrag';
+import { reorderTextUnit } from '../textUnitOrderService';
 import {
   hasContentGroupDragPayloadType,
   plainTextFromContentGroupDragPayload,
@@ -116,6 +118,7 @@ interface TextBlockProjectionProps {
   onBoundaryNavigate?: (request: TextFlowBoundaryNavigationRequest) => boolean;
   onNavigationTarget?: (target: TextFlowNavigationTarget | null) => void;
   onFlowSelectionStart?: () => void;
+  onExtractTextUnit?: (unitId: string, point: { x: number; y: number }) => void;
 }
 
 function plainTextForFlow(flow: TextBlockContentV1): string {
@@ -506,7 +509,9 @@ export function TextBlockProjection({
   onBoundaryNavigate,
   onNavigationTarget,
   onFlowSelectionStart,
+  onExtractTextUnit,
 }: TextBlockProjectionProps) {
+  const editorRef = useRef<HTMLDivElement>(null);
   const documentSelection = useContext(DocumentTextFlowSelectionContext);
   const unitRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
   const pendingFocusRef = useRef<{ unitId: string; caret: number } | null>(null);
@@ -1100,7 +1105,7 @@ export function TextBlockProjection({
   const handleTextUnitMenuAction = (actionId: CommandActionId) => {
     const unit = editableFlow.units.find((item) => item.id === textUnitContextMenu?.unitId);
     if (!unit) return;
-    const role = WRITING_ROLE_BY_COMMAND[actionId];
+    const role = actionId === 'turn_unit_into_code_line' ? 'code_line' : WRITING_ROLE_BY_COMMAND[actionId];
     if (role) {
       handleSetRole(unit, role);
       return;
@@ -1520,12 +1525,29 @@ export function TextBlockProjection({
     title: 'Text unit',
     items: buildTextUnitHandleMenu(),
   } : null;
+  const unitHandleDrag = useTextUnitHandleDrag({
+    editorRef,
+    disabled: readOnly || layoutMode,
+    isComposing: () => compositionRef.current,
+    onExtract: onExtractTextUnit,
+    onReorder: (unitId, target) => {
+      const current = latestFlowRef.current || editableFlow;
+      const next = reorderTextUnit(current, unitId, target.unitId, target.edge);
+      if (next === current) return;
+      documentSelection?.clear();
+      setTextUnitContextMenu(null);
+      const textarea = unitRefs.current[unitId];
+      const caret = textarea?.selectionStart ?? 0;
+      pendingFocusRef.current = { unitId, caret };
+      emitFlowChange(next, unitId, caret, textarea, { sync: true });
+    },
+  });
   const documentRangeForDisplay = documentSelection?.ordered();
   const documentBlockForDisplay = documentRangeForDisplay?.blocks.find((entry) => entry.block.id === blockId);
 
   return (
     <>
-    <div className={styles.textUnitEditor}>
+    <div ref={editorRef} className={styles.textUnitEditor} data-text-unit-editor={blockId}>
       {visibleUnitEntries(editableFlow.units).map(({ unit, index }) => {
         const marker = textUnitMarkerForDisplay(editableFlow.units, index);
         const hasMarker = marker.length > 0;
@@ -1609,6 +1631,8 @@ export function TextBlockProjection({
         return (
           <div
             key={unit.id}
+            data-text-unit-row={unit.id}
+            data-text-unit-dragging={unitHandleDrag.draggingUnitId === unit.id || undefined}
             className={[
               styles.textUnitRow,
               unit.writing_role === 'heading' ? styles.textUnitHeadingRow : '',
@@ -1620,10 +1644,24 @@ export function TextBlockProjection({
             style={{ '--text-unit-indent': unit.indent_level } as CSSProperties}
           >
             <TextUnitGutterLayer
+              unitId={unit.id}
               role={unit.writing_role}
-              onSetRole={(role) => handleSetRole(unit, role)}
+              disabled={readOnly || layoutMode}
+              menuOpen={textUnitContextMenu?.unitId === unit.id}
+              onPointerDown={(event) => unitHandleDrag.start(unit.id, event)}
+              onClickMenu={(point) => {
+                if (unitHandleDrag.canOpenMenu()) setTextUnitContextMenu({ unitId: unit.id, point });
+              }}
               onOpenMenu={layoutMode ? undefined : (point) => setTextUnitContextMenu({ unitId: unit.id, point })}
             />
+            {unitHandleDrag.dropTarget?.unitId === unit.id && (
+              <div
+                className={styles.textUnitDropIndicator}
+                data-text-unit-drop-indicator={unit.id}
+                data-drop-edge={unitHandleDrag.dropTarget.edge}
+                aria-hidden="true"
+              />
+            )}
             <div className={styles.textUnitLine}>
               {unit.writing_role === 'todo_item' && (
                 <input

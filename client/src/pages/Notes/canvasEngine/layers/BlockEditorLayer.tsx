@@ -106,6 +106,7 @@ interface BlockEditorLayerProps {
   onTextChange: (value: string, caret: number, anchorElement?: HTMLElement | null) => void;
   onTextFlowChange: (textFlow: TextBlockContentV1, metadata?: TextFlowEditMetadata, previousTextFlow?: TextBlockContentV1) => void;
   onTextEditBoundary?: (reason: TextFlowEditBoundary, selection?: TextFlowEditSelection) => void;
+  onExtractTextUnit?: (unitId: string, point: { x: number; y: number }) => void;
   onBoundaryNavigate?: (request: TextFlowBoundaryNavigationRequest) => boolean;
   onNavigationTarget?: (target: TextFlowNavigationTarget | null) => void;
   onFlowSelectionStart?: () => void;
@@ -173,6 +174,7 @@ export function BlockEditorLayer({
   onTextChange,
   onTextFlowChange,
   onTextEditBoundary,
+  onExtractTextUnit,
   onBoundaryNavigate,
   onNavigationTarget,
   onFieldDraftChange,
@@ -518,6 +520,7 @@ export function BlockEditorLayer({
             onTextChange={onTextChange}
             onTextFlowChange={onTextFlowChange}
             onTextEditBoundary={onTextEditBoundary}
+            onExtractTextUnit={onExtractTextUnit}
             onBoundaryNavigate={allowTextNavigation ? onBoundaryNavigate : undefined}
             onNavigationTarget={allowTextNavigation ? onNavigationTarget : undefined}
             onSave={onSave}

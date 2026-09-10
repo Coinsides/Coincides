@@ -24,6 +24,7 @@ export type CommandActionId =
   | 'turn_into_todo'
   | 'turn_into_toggle'
   | 'turn_into_paragraph'
+  | 'turn_unit_into_code_line'
   | 'inline_formula'
   | 'inline_code'
   | 'link'
@@ -311,6 +312,7 @@ export function buildTextUnitHandleMenu(): CommandMenuItem[] {
       children: [
         { id: 'turn-into-paragraph', kind: 'item', label: 'Text', actionId: 'turn_into_paragraph', iconName: 'pilcrow' },
         ...textTurnIntoCommands,
+        { id: 'turn-unit-into-code-line', kind: 'item', label: 'Code line', actionId: 'turn_unit_into_code_line', iconName: 'code' },
       ],
     },
     { id: 'label-text-unit', kind: 'item', label: 'Label this unit', actionId: 'label_text_unit', iconName: 'tag' },
@@ -331,7 +333,7 @@ export function buildTextUnitHandleMenu(): CommandMenuItem[] {
       actionId: 'extract_unit_to_block',
       iconName: 'move-up-right',
       disabled: true,
-      disabledReason: 'Extraction is reserved for the later TextFlow structure pass.',
+      disabledReason: 'Drag the unit handle onto blank paper to extract it.',
     },
     {
       id: 'duplicate-unit',

@@ -194,14 +194,15 @@ describe('BlockEditorLayer K-4 affiliation controls', () => {
     expect(blockShell?.style.borderColor).toBe(colorToken);
   });
 
-  it('K-4.1 removes the three gutter buttons while keeping the role select', () => {
+  it('K-4.1 keeps retired gutter actions absent and replaces the role select with the unit handle', () => {
     renderSubject();
 
     const gutter = screen.getByLabelText('Text unit tools');
     expect(within(gutter).queryByRole('button', { name: /text unit row/i })).toBeNull();
     expect(within(gutter).queryByRole('button', { name: 'Insert text unit below' })).toBeNull();
     expect(within(gutter).queryByRole('button', { name: 'Label this text unit' })).toBeNull();
-    expect(within(gutter).getByRole('combobox', { name: 'Text unit writing role' })).toBeTruthy();
+    expect(within(gutter).queryByRole('combobox', { name: 'Text unit writing role' })).toBeNull();
+    expect(within(gutter).getByRole('button', { name: 'Text unit handle' })).toBeTruthy();
   });
 
   it('K-4.2 inserts a real paragraph text unit below the active block', () => {

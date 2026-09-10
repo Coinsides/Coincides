@@ -1,4 +1,6 @@
 import { screenLayoutToLocal, resolveScreenRect, selectPlacementFrame } from '../placementContractService';
+import { createBlankDraftLayout, createSurfaceModePolicy } from '../modePolicyService';
+import { useUIStore } from '@/stores/uiStore';
 import { sliceGraphemes } from '../../../../../../shared/graphemes';
 import { projectPageFrameToReadingSurface } from '../pageFramePresentationService';
 import { Boxes } from 'lucide-react';
@@ -343,6 +345,7 @@ export interface NoteWritingSurfaceLayerProps {
   onBlockTextFlowChange: Dispatch<SetStateAction<Record<string, TextBlockContentV1>>>;
   onApplyBlockTextFlowEdit: ApplyBlockTextFlowEdit;
   onApplyDocumentTextFlowEdit?: (changes: DocumentFlowEdit[]) => Promise<boolean>;
+  onExtractTextUnit?: (block: NoteBlock, unitId: string, layout: BlockBoxLayout) => Promise<boolean>;
   onTextEditBoundary?: (reason: TextFlowEditBoundary, selection?: TextFlowEditSelection) => void;
   onClearSlashTarget: () => void;
   onAddPageBelow: (frameId: string) => void;
@@ -605,6 +608,7 @@ export function NoteWritingSurfaceLayer({
   onBlockTextFlowChange,
   onApplyBlockTextFlowEdit,
   onApplyDocumentTextFlowEdit,
+  onExtractTextUnit,
   onTextEditBoundary,
   onClearSlashTarget,
   onAddPageBelow,
@@ -646,6 +650,7 @@ export function NoteWritingSurfaceLayer({
   onViewSource,
   onZoomViewportAt,
 }: NoteWritingSurfaceLayerProps) {
+  const addToast = useUIStore((state) => state.addToast);
   const surfaceRef = useRef<HTMLElement | null>(null);
   const textNavigationTargetsRef = useRef(new Map<string, TextFlowNavigationTarget>());
   const objectNavigationColumnRef = useRef<number | null>(null);
@@ -3338,6 +3343,49 @@ export function NoteWritingSurfaceLayer({
     }, noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract);
   };
 
+  const handleExtractTextUnit = (block: NoteBlock, unitId: string, point: CanvasPoint) => {
+    if (contentReadOnly || layoutMode || !onExtractTextUnit) return;
+    const extractionFlow = blockTextFlowDrafts[block.id] ?? getTextFlowContent(block.content_json);
+    if (!extractionFlow?.units.some((unit) => unit.id === unitId)) {
+      addToast('info', 'Edit and save this block before moving a unit.');
+      return;
+    }
+    const surface = surfaceRef.current;
+    const hit = document.elementFromPoint(point.x, point.y);
+    if (!surface || !hit || !surface.contains(hit) || hit.closest([
+      '[data-note-block-shell="true"]', '[data-command-context-menu="true"]',
+      '[data-content-group-panel="true"]', '[data-canvas-shape="true"]',
+      '[data-canvas-image="true"]', '[data-canvas-table="true"]',
+      '[data-canvas-visual-connector="true"]', 'textarea', 'input', 'button', 'a', '[role="button"]',
+    ].join(','))) return;
+    let layout: BlockBoxLayout | null = null;
+    const freeLayout = (x: number, y: number, contentWidth: number) => {
+      const placed = createBlankDraftLayout({ policy: createSurfaceModePolicy('page'), snapEnabled: false,
+        rawX: x, rawY: y, contentWidth, defaultDraftLayout });
+      // A successful free drop keeps its release point. The ordinary landing
+      // engine supplies available width; its edge-clamped points are rejected.
+      if (Math.abs(placed.x - x) > 0.001 || Math.abs(placed.y - y) > 0.001) return null;
+      return screenLayoutToLocal({ ...defaultDraftLayout, ...placed, surface: 'formal_page' },
+        noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract);
+    };
+    if (surfaceMode === 'page') {
+      const rect = blockListRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      const x = (point.x - rect.left) / pageReading.displayScale;
+      const y = (point.y - rect.top) / pageReading.displayScale;
+      if (x < -pageReading.inset.left || x > pageReading.paperWidth - pageReading.inset.left
+        || y < -pageReading.inset.top || y > pageReading.paperHeight - pageReading.inset.top) return;
+      layout = freeLayout(x - pageOffsetX, y, pageReading.layoutWidth);
+    } else {
+      const world = worldPointFromClientPoint(point);
+      const frame = pageFrameAtWorldPoint(world);
+      if (!frame) return;
+      layout = freeLayout(world.x - pageOffsetX, world.y, frame.width - frame.contentInset.left - frame.contentInset.right);
+    }
+    if (layout) void onExtractTextUnit(block, unitId, layout);
+    else addToast('info', 'There is not enough room for a block at this point.');
+  };
+
   const handleBlankSurfaceDragOver = (event: DragEvent<HTMLDivElement>) => {
     if (!isBlankSurfaceDropTarget(event)) return;
     if (surfaceMode === 'page' && onDropTrayBlock && event.dataTransfer.types.includes(TRAY_DRAG_TYPE)) {
@@ -3946,6 +3994,7 @@ export function NoteWritingSurfaceLayer({
               }}
               onTextFlowChange={(textFlow, metadata, previousTextFlow) => void handleBlockTextFlowChange(block, textFlow, metadata, previousTextFlow)}
               onTextEditBoundary={onTextEditBoundary}
+              onExtractTextUnit={(unitId, point) => handleExtractTextUnit(block, unitId, point)}
               onFlowSelectionStart={clearDraft}
               onBoundaryNavigate={(request) => navigateBoundary(block.id, request)}
               onNavigationTarget={(target) => {

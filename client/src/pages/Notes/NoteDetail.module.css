@@ -1943,11 +1943,6 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   min-height: 28px;
 }
 
-.textUnitRow:hover .textUnitGutter,
-.textUnitRow:focus-within .textUnitGutter {
-  opacity: 1;
-}
-
 .textUnitHeadingRow {
   margin-top: 3px;
   margin-bottom: 2px;
@@ -1965,30 +1960,29 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   align-items: center;
   gap: 3px;
   min-height: 27px;
-  opacity: 0;
-  transition: opacity var(--transition-fast);
+  opacity: 1;
 }
 
-.textUnitGutterButton,
-.textUnitRoleSelect {
+.textUnitGutterButton {
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
   background: transparent;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .textUnitGutterButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 24px;
+  width: 14px;
+  height: 20px;
   padding: 0;
+  cursor: grab;
+  touch-action: none;
 }
 
 .textUnitGutterButton:hover,
-.textUnitRoleSelect:hover,
-.textUnitRoleSelect:focus {
+.textUnitGutterButton:focus-visible {
   border-color: var(--border-default);
   background: var(--bg-hover);
   color: var(--text-primary);
@@ -2000,12 +1994,28 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   color: var(--text-primary);
 }
 
-.textUnitRoleSelect {
-  width: 8px;
-  height: 24px;
-  padding: 0;
-  font-size: 0;
-  cursor: pointer;
+.textUnitGutterButton:disabled {
+  cursor: default;
+}
+
+.textUnitGutterButton:active {
+  cursor: grabbing;
+}
+
+.textUnitDropIndicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -1px;
+  height: 2px;
+  background: var(--accent-primary);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.textUnitDropIndicator[data-drop-edge='after'] {
+  top: auto;
+  bottom: -1px;
 }
 
 .textUnitLine {

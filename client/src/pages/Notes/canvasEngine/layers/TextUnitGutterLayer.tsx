@@ -1,29 +1,27 @@
-import type { MouseEvent } from 'react';
+import { GripVertical } from 'lucide-react';
+import type { MouseEvent, PointerEvent } from 'react';
 import type {
   TextUnitWritingRole,
 } from '../runtimeDataTypes';
 import styles from '../../NoteDetail.module.css';
 
-const WRITING_ROLE_OPTIONS: Array<{ value: TextUnitWritingRole; label: string }> = [
-  { value: 'paragraph', label: 'Text' },
-  { value: 'heading', label: 'Heading' },
-  { value: 'quote', label: 'Quote' },
-  { value: 'bullet_item', label: 'Bullet' },
-  { value: 'numbered_item', label: 'Numbered' },
-  { value: 'todo_item', label: 'Todo' },
-  { value: 'toggle_item', label: 'Toggle' },
-  { value: 'code_line', label: 'Code line' },
-];
-
 interface TextUnitGutterLayerProps {
+  unitId: string;
   role: TextUnitWritingRole;
-  onSetRole: (role: TextUnitWritingRole) => void;
+  disabled?: boolean;
+  menuOpen?: boolean;
+  onPointerDown: (event: PointerEvent<HTMLButtonElement>) => void;
+  onClickMenu?: (point: { x: number; y: number }) => void;
   onOpenMenu?: (point: { x: number; y: number }) => void;
 }
 
 export function TextUnitGutterLayer({
+  unitId,
   role,
-  onSetRole,
+  disabled,
+  menuOpen,
+  onPointerDown,
+  onClickMenu,
   onOpenMenu,
 }: TextUnitGutterLayerProps) {
   const handleContextMenu = (event: MouseEvent<HTMLDivElement>) => {
@@ -35,16 +33,27 @@ export function TextUnitGutterLayer({
 
   return (
     <div className={styles.textUnitGutter} aria-label="Text unit tools" onContextMenu={handleContextMenu}>
-      <select
-        className={styles.textUnitRoleSelect}
-        value={role}
-        onChange={(event) => onSetRole(event.currentTarget.value as TextUnitWritingRole)}
-        aria-label="Text unit writing role"
+      <button
+        type="button"
+        className={styles.textUnitGutterButton}
+        data-text-unit-handle={unitId}
+        title="Drag to reorder or move out; click for unit menu"
+        aria-label="Text unit handle"
+        aria-description={role}
+        aria-haspopup="menu"
+        aria-expanded={menuOpen || false}
+        disabled={disabled}
+        onPointerDown={onPointerDown}
+        onMouseDown={(event) => event.preventDefault()}
+        onDragStart={(event) => event.preventDefault()}
+        onClick={(event) => {
+          event.stopPropagation();
+          const rect = event.currentTarget.getBoundingClientRect();
+          onClickMenu?.(event.detail === 0 ? { x: rect.right, y: rect.bottom } : { x: event.clientX, y: event.clientY });
+        }}
       >
-        {WRITING_ROLE_OPTIONS.map((option) => (
-          <option key={option.value} value={option.value}>{option.label}</option>
-        ))}
-      </select>
+        <GripVertical size={12} aria-hidden="true" />
+      </button>
     </div>
   );
 }

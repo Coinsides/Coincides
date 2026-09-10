@@ -104,6 +104,23 @@ export function createBoardTextRangeEditSession(
   };
   return {
     acknowledge,
+    acceptUnitTransfer(input: {
+      sourceBlockId: string; targetBlockId: string; textUnitId: string;
+      sourceTextFlow: TextBlockContentV1; targetTextFlow: TextBlockContentV1;
+      confirmedRanges: BoardTextRangeV1[];
+    }) {
+      if (!loaded) throw new Error('Board references are not loaded; reopen the note before moving a unit');
+      const confirmed = new Map(input.confirmedRanges.map((range) => [range.id, range]));
+      ranges = ranges.flatMap((range) => {
+        if (range.block_id !== input.sourceBlockId || range.text_unit_id !== input.textUnitId) return [range];
+        dirty.delete(range.id);
+        failedSnapshots.delete(range.id);
+        const next = confirmed.get(range.id);
+        return next ? [structuredClone(next)] : [];
+      });
+      drafts.set(input.sourceBlockId, input.sourceTextFlow);
+      drafts.set(input.targetBlockId, input.targetTextFlow);
+    },
     hydrate(nextRanges: BoardTextRangeV1[]) {
       // A refresh must not erase a failed second write that the user can still retry.
       // Unsaved drafts are reset by note hydration; only confirmed-body/failed-range writes survive it.

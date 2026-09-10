@@ -7,6 +7,7 @@ import { assertNoteBlockStatusChangeAllowed } from '../services/canvasObjects.js
 import { assertSourceProjectionBlockContentWriteAllowed } from '../services/sourceProjectionPolicy.js';
 import { updateNoteBlockContent } from '../services/noteBlockContent.js';
 import { saveAtomicText } from '../services/atomicTextSave.js';
+import { saveAtomicTextUnitTransfer } from '../services/atomicTextUnitTransfer.js';
 
 const router = Router();
 
@@ -35,6 +36,19 @@ router.put('/:id', (req: AuthRequest, res: Response) => {
 router.put('/:id/text-save', (req: AuthRequest, res: Response) => {
   try {
     res.json(saveAtomicText(getDb(), req.userId!, String(req.params.id), req.body));
+  } catch (err) {
+    if (err instanceof ZodError) {
+      res.status(400).json({ error: 'Validation error', details: err.errors });
+      return;
+    }
+    throw err;
+  }
+});
+
+// B10 keeps two block bodies and the moved unit's anchor ownership in one transaction.
+router.put('/:id/unit-transfer', (req: AuthRequest, res: Response) => {
+  try {
+    res.json(saveAtomicTextUnitTransfer(getDb(), req.userId!, String(req.params.id), req.body));
   } catch (err) {
     if (err instanceof ZodError) {
       res.status(400).json({ error: 'Validation error', details: err.errors });

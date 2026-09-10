@@ -34,4 +34,16 @@ describe('text unit gutter de-occupation structure', () => {
 
     expect(textUnitGutterRule).toMatch(/position:\s*absolute\b/);
   });
+
+  it('B10 keeps the handle visible without hover and smaller than the old 24px role control', () => {
+    const gutter = cssRuleBody('.textUnitGutter');
+    const buttons = [...noteDetailCss.matchAll(/^\s*\.textUnitGutterButton\s*\{([^}]*)\}/gm)]
+      .map((match) => match[1]).join('\n');
+    expect(gutter).toMatch(/opacity:\s*1\s*;/);
+    expect(gutter).not.toMatch(/visibility:\s*hidden|display:\s*none/);
+    expect(buttons).toMatch(/width:\s*14px\s*;/);
+    expect(buttons).toMatch(/height:\s*20px\s*;/);
+    expect(noteDetailCss).not.toMatch(/\.textUnitRoleSelect\b/);
+    expect(noteDetailCss).not.toMatch(/\.textUnitRow[^{}]*:hover[^{}]*\.textUnitGutter\s*\{/);
+  });
 });
