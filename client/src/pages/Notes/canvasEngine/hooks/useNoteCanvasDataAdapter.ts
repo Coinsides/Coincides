@@ -20,6 +20,7 @@ import {
   type BlockPresentationKind,
   type FieldValueRecord,
 } from '../blockContentService';
+import { buildBlockTemplatePayload, type BlockTemplatePayload } from '../blockTemplateConversionService';
 import {
   getEffectiveAIVisibility,
   getEffectiveExportRole,
@@ -427,6 +428,7 @@ export function useNoteCanvasDataAdapter({
   const [sourceJumpTarget, setSourceJumpTarget] = useState<SourceJumpTarget | null>(null);
   const [sourceJumpBusy, setSourceJumpBusy] = useState<string | null>(null);
   const [annotationTruths, setAnnotationTruths] = useState<AnnotationTruthV1[]>([]);
+  const annotationTruthsRef = useRef(annotationTruths);
   const [successfulHydrationEpoch, setSuccessfulHydrationEpoch] = useState(0);
   const [contentGroups, setContentGroups] = useState<ContentGroupV1[]>([]);
   const [groupFolders, setGroupFolders] = useState<GroupFolderV1[]>([]);
@@ -525,8 +527,10 @@ export function useNoteCanvasDataAdapter({
   }, [nextRouteRequestGeneration.generation, noteId]);
 
   const setAnnotationTruthsSnapshot = useCallback((nextAnnotations: AnnotationTruthV1[]) => {
+    annotationTruthsRef.current = nextAnnotations;
     setAnnotationTruths(nextAnnotations);
   }, []);
+  const readAnnotationTruths = useCallback(() => annotationTruthsRef.current, []);
 
   const sourceProjectionPolicy = useMemo(
     () => sourceProjectionPolicyForNote(note),
@@ -776,7 +780,9 @@ export function useNoteCanvasDataAdapter({
     }
   }), [writeRegistry, note, titleDraft, addToast, allowSourceContentMutation]);
 
-  const saveAnnotationTruths = useCallback(writeRegistry.hold('saveAnnotationTruths', async (nextAnnotations: AnnotationTruthV1[]) => {
+  const saveAnnotationTruthsOutcome = useCallback(writeRegistry.hold('saveAnnotationTruths', async (
+    nextAnnotations: AnnotationTruthV1[], options: { preserveDrafts?: boolean } = {},
+  ): Promise<boolean> => {
     const currentNote = note;
     const receipt = annotationSaveRouteReceipt;
     if (!currentNote || !receipt) {
@@ -786,7 +792,7 @@ export function useNoteCanvasDataAdapter({
         phase: 'enqueue',
         reason: 'route_receipt_unavailable',
       });
-      return;
+      return false;
     }
     const requestIsCurrent = () => (
       routeRequestGenerationMatches(
@@ -810,12 +816,13 @@ export function useNoteCanvasDataAdapter({
       });
       return true;
     };
-    if (rejectStaleReceipt('enqueue')) return;
+    if (rejectStaleReceipt('enqueue')) return false;
     const responseSequence = annotationSaveResponseSequenceRef.current + 1;
     annotationSaveResponseSequenceRef.current = responseSequence;
-    setAnnotationTruthsSnapshot(nextAnnotations);
+    if (!options.preserveDrafts) setAnnotationTruthsSnapshot(nextAnnotations);
 
     const setSnapshotIfCurrent = (annotations: AnnotationTruthV1[]) => {
+      if (options.preserveDrafts) return;
       if (rejectStaleReceipt('snapshot')) return;
       if (annotationSaveResponseSequenceRef.current !== responseSequence) {
         console.warn('Rejected stale annotation save receipt:', {
@@ -832,17 +839,18 @@ export function useNoteCanvasDataAdapter({
       setAnnotationTruthsSnapshot(annotations);
     };
 
-    const publish = async () => {
-      if (rejectStaleReceipt('publish')) return;
+    const publish = async (): Promise<boolean> => {
+      if (rejectStaleReceipt('publish')) return false;
       try {
         const savedAnnotations = await writeRegistry.track('annotations:' + receipt.noteId, async () => saveAnnotationTruthsForNote({
           noteId: receipt.noteId,
           annotations: nextAnnotations,
         }));
-        if (rejectStaleReceipt('publish_response')) return;
+        if (rejectStaleReceipt('publish_response')) return false;
         setSnapshotIfCurrent(savedAnnotations);
+        return annotationTruthsDurablyEqual(savedAnnotations, nextAnnotations);
       } catch (err) {
-        if (rejectStaleReceipt('publish_error')) return;
+        if (rejectStaleReceipt('publish_error')) return false;
         console.error(
           'Failed to save annotations; durable outcome is unknown until reconciliation read:',
           err,
@@ -854,22 +862,23 @@ export function useNoteCanvasDataAdapter({
             note: currentNote,
             importLegacy: false,
           });
-          if (rejectStaleReceipt('reconciliation_read')) return;
+          if (rejectStaleReceipt('reconciliation_read')) return false;
           if (annotationTruthsDurablyEqual(observedAnnotations, nextAnnotations)) {
             writeRegistry.confirm('annotations:' + receipt.noteId);
             setSnapshotIfCurrent(observedAnnotations);
-            return;
+            return true;
           }
 
-          if (rejectStaleReceipt('repair')) return;
+          if (rejectStaleReceipt('repair')) return false;
           const repairedAnnotations = await writeRegistry.track('annotations:' + receipt.noteId, async () => saveAnnotationTruthsForNote({
             noteId: receipt.noteId,
             annotations: nextAnnotations,
           }));
-          if (rejectStaleReceipt('repair_response')) return;
+          if (rejectStaleReceipt('repair_response')) return false;
           setSnapshotIfCurrent(repairedAnnotations);
+          return annotationTruthsDurablyEqual(repairedAnnotations, nextAnnotations);
         } catch (reconciliationError) {
-          if (rejectStaleReceipt('reconciliation_error')) return;
+          if (rejectStaleReceipt('reconciliation_error')) return false;
           console.error(
             'Failed to reconcile annotations; durable outcome remains unknown:',
             reconciliationError,
@@ -877,6 +886,7 @@ export function useNoteCanvasDataAdapter({
           // The active editor's optimistic snapshot remains authoritative. A
           // rejected request is not evidence that the server did not commit it.
           setSnapshotIfCurrent(nextAnnotations);
+          return false;
         }
       }
     };
@@ -896,8 +906,11 @@ export function useNoteCanvasDataAdapter({
         annotationSaveTailsByNoteRef.current.delete(tailKey);
       }
     });
-    await queuedPublish;
-  }), [writeRegistry, addToast, annotationSaveRouteReceipt, note, setAnnotationTruthsSnapshot]);
+    return queuedPublish;
+  }, (saved) => saved ? undefined : new Error('Annotation save was not confirmed')), [writeRegistry, addToast, annotationSaveRouteReceipt, note, setAnnotationTruthsSnapshot]);
+  const saveAnnotationTruths = useCallback(async (annotations: AnnotationTruthV1[]) => {
+    await saveAnnotationTruthsOutcome(annotations);
+  }, [saveAnnotationTruthsOutcome]);
 
   const saveContentGroups = useCallback(writeRegistry.hold('saveContentGroups', async (nextGroups: ContentGroupV1[]): Promise<boolean> => {
     const currentNote = noteRef.current || note;
@@ -1393,6 +1406,8 @@ export function useNoteCanvasDataAdapter({
       fieldValues?: FieldValueRecord;
       textFlow?: TextBlockContentV1;
       recoveryKey?: string;
+      boardRangeSnapshot?: BoardRangeSaveSnapshot;
+      preserveDrafts?: boolean;
     } = {},
   ): Promise<BlockSaveOutcome> => {
     // Read-only references have no body draft to flush. Ordinary placement/tray
@@ -1458,10 +1473,12 @@ export function useNoteCanvasDataAdapter({
       : contentForEditedBlock(block, nextText, fieldValues);
     const requestedPlainText = plainTextForBlockContent(kind, nextContent, nextText);
     // This also covers direct source-backed/structural saves that bypass the live edit callback.
-    boardRangeSession.rebase(block.id, getTextFlowContent(block.content_json), getTextFlowContent(nextContent));
+    if (!options.boardRangeSnapshot) {
+      boardRangeSession.rebase(block.id, getTextFlowContent(block.content_json), getTextFlowContent(nextContent));
+    }
     let boardRangeSnapshot: BoardRangeSaveSnapshot;
     try {
-      boardRangeSnapshot = boardRangeSession.capture(block.id);
+      boardRangeSnapshot = options.boardRangeSnapshot ?? boardRangeSession.capture(block.id);
     } catch (error) {
       addToast('error', 'Board references are not loaded. Reopen the note before saving.');
       return {
@@ -1666,15 +1683,17 @@ export function useNoteCanvasDataAdapter({
       }
       const updated = hydrateClientBlock({ ...block, ...res.data, source_references: block.source_references });
       setBlocks((current) => current.map((item) => item.id === block.id ? updated : item));
-      setBlockTextDrafts((current) => ({ ...current, [block.id]: nextText }));
-      if (textFlowDraft) {
-        setBlockTextFlowDrafts((current) => ({ ...current, [block.id]: textFlowDraft }));
+      if (!options.preserveDrafts) {
+        setBlockTextDrafts((current) => ({ ...current, [block.id]: nextText }));
+        if (textFlowDraft) {
+          setBlockTextFlowDrafts((current) => ({ ...current, [block.id]: textFlowDraft }));
+        }
+        setBlockFieldDrafts((current) => {
+          const next = { ...current };
+          delete next[block.id];
+          return next;
+        });
       }
-      setBlockFieldDrafts((current) => {
-        const next = { ...current };
-        delete next[block.id];
-        return next;
-      });
       if (!options.silent) addToast('success', 'Block saved');
       if (!hasOtherOutstandingOperationForBlock()) {
         forgetBlockEditRecoveryReceipt(recoveryReceipt.recoveryKey);
@@ -1825,6 +1844,7 @@ export function useNoteCanvasDataAdapter({
       title?: string | null;
       contentJson?: Record<string, unknown>;
       metadataPatch?: Record<string, unknown>;
+      historySnapshot?: { payload: BlockTemplatePayload; boardRanges: BoardRangeSaveSnapshot };
     } = {},
   ) => {
     if (block.block_type === 'item_ref' || !allowSourceContentMutation()) return null;
@@ -1848,7 +1868,7 @@ export function useNoteCanvasDataAdapter({
       requestRouteIsCurrent()
       && successfulHydrationEpochRef.current === requestHydrationEpoch
     );
-    const nextText = text.trimEnd();
+    const nextText = options.historySnapshot ? text : text.trimEnd();
     const recoveryKeysAtCreation = listBlockEditRecoveryReceipts(requestedNoteId)
       .filter((receipt) => receipt.blockId === block.id)
       .map((receipt) => receipt.recoveryKey);
@@ -1862,21 +1882,23 @@ export function useNoteCanvasDataAdapter({
     });
     setSavingBlockId(block.id);
     try {
-      const metadata = {
-        ...metadataForTemplateOption(template),
-        ...(options.metadataPatch || {}),
-      };
-      const nextContent = options.contentJson || contentForTemplate(template, nextText);
-      const nextKind = presentationKindForTemplate(template);
-      boardRangeSession.rebase(block.id, getTextFlowContent(block.content_json), getTextFlowContent(nextContent));
-      const boardRangeSnapshot = boardRangeSession.capture(block.id);
-      const res = await writeRegistry.track('block-body:' + `/note-blocks/${block.id}`, async () => api.put(`/note-blocks/${block.id}`, {
-        block_type: template.legacy_block_type,
-        title: options.title ?? block.title,
-        content_json: nextContent,
-        plain_text: plainTextForBlockContent(nextKind, nextContent, nextText),
-        metadata,
-      }));
+      const payload = options.historySnapshot?.payload ?? buildBlockTemplatePayload(block, template, text, options);
+      const nextContent = payload.content_json;
+      const nextFlow = getTextFlowContent(nextContent);
+      if (options.historySnapshot) {
+        // Field drafts belong to the replaced payload and must not shadow replay.
+        setBlockFieldDrafts((current) => {
+          if (!(block.id in current)) return current;
+          const next = { ...current };
+          delete next[block.id];
+          return next;
+        });
+        boardRangeSession.restore(block.id, nextFlow, options.historySnapshot.boardRanges);
+      } else {
+        boardRangeSession.rebase(block.id, getTextFlowContent(block.content_json), nextFlow);
+      }
+      const boardRangeSnapshot = options.historySnapshot?.boardRanges ?? boardRangeSession.capture(block.id);
+      const res = await writeRegistry.track('block-body:' + `/note-blocks/${block.id}`, async () => api.put(`/note-blocks/${block.id}`, payload));
       try {
         await writeRegistry.track('board-ranges:' + requestedNoteId + ':' + block.id, async () => boardRangeSession.persist(boardRangeSnapshot));
       } catch {
@@ -1905,10 +1927,17 @@ export function useNoteCanvasDataAdapter({
       ) return null;
       setBlocks((current) => current.map((item) => item.id === block.id ? updated : item));
       setBlockTextDrafts((current) => ({ ...current, [block.id]: nextText }));
+      setBlockTextFlowDrafts((current) => {
+        const next = { ...current };
+        if (nextFlow) next[block.id] = nextFlow;
+        else delete next[block.id];
+        return next;
+      });
       recoveryKeysAtCreation.forEach((recoveryKey) => {
         forgetBlockEditRecoveryReceipt(recoveryKey);
       });
-      addToast('success', `Converted to ${template.label}`);
+      // History still has to confirm annotation ranges after this door returns.
+      if (!options.historySnapshot) addToast('success', `Converted to ${template.label}`);
       return updated;
     } catch (err) {
       blockSaveOutcomeVersionRef.current += 1;
@@ -1951,8 +1980,10 @@ export function useNoteCanvasDataAdapter({
   }, [clearLayoutDraftForBlock, contractSession, note]);
 
   const persistBlockLayout = useCallback(writeRegistry.hold('persistBlockLayout', async (block: NoteBlock, layout: BlockBoxLayout) => {
-    if (!note) return;
-    if (!allowSourceContentMutation()) return;
+    if (!note || routeNoteIdRef.current !== note.id) return false;
+    if (!allowSourceContentMutation()) return false;
+    const generation = routeRequestGenerationRef.current;
+    const epoch = successfulHydrationEpochRef.current;
     try {
       const savedLayout = await writeRegistry.track('placement:' + note.id + ':' + block.id, async () => saveBlockCanvasPlacementForNote({
         ...await resolvePlacementWriteContext(note.id),
@@ -1960,12 +1991,15 @@ export function useNoteCanvasDataAdapter({
         block,
         layout,
       }));
+      if (!adapterMountActiveRef.current || routeNoteIdRef.current !== note.id
+        || routeRequestGenerationRef.current !== generation || successfulHydrationEpochRef.current !== epoch) return false;
       setBlocks((current) => current.map((item) => (
         item.id === block.id
           ? { ...item, canvas_layout: savedLayout.layout }
           : item
       )));
       clearLayoutDraftForBlock(block.id);
+      return true;
     } catch (err) {
       console.error('Failed to save block layout:', err);
       let detail = err instanceof Error ? err.message : String(err);
@@ -1977,8 +2011,9 @@ export function useNoteCanvasDataAdapter({
         detail = `${detail.slice(0, 117)}...`;
       }
       addToast('error', `Failed to save block layout (${detail})`);
+      return false;
     }
-  }), [writeRegistry, note, addToast, allowSourceContentMutation, clearLayoutDraftForBlock, pageFrameCollection, contractSession, resolvePlacementWriteContext]);
+  }, (saved) => saved ? undefined : new Error('Layout save was not confirmed')), [writeRegistry, note, addToast, allowSourceContentMutation, clearLayoutDraftForBlock, pageFrameCollection, contractSession, resolvePlacementWriteContext]);
 
   const updateBlockPolicy = useCallback(async (
     block: NoteBlock,
@@ -2358,6 +2393,12 @@ export function useNoteCanvasDataAdapter({
     savingBlockId,
     blockEditRecoveryReceipts,
     annotationTruths,
+    readAnnotationTruths,
+    setAnnotationTruthsSnapshot,
+    saveAnnotationTruthsOutcome,
+    textHistoryGeneration: nextRouteRequestGeneration.generation,
+    captureBoardTextRanges: boardRangeSession.snapshot,
+    restoreBoardTextRanges: boardRangeSession.restore,
     rebaseBoardTextRanges: boardRangeSession.rebase,
     contentGroups,
     groupFolders,

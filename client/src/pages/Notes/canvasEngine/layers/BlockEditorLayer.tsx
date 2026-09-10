@@ -60,6 +60,7 @@ import { CodeBlockProjection } from '../blocks/CodeBlockProjection';
 import { ItemRefBlockProjection } from '../blocks/ItemRefBlockProjection';
 import { useBlockMeasurement } from '../hooks/useBlockMeasurement';
 import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
+import type { TextFlowEditBoundary, TextFlowEditMetadata, TextFlowEditSelection } from '../textFlowEditSession';
 import { BlockControlBarLayer } from './BlockControlBarLayer';
 import { BlockResizeHandleLayer } from './BlockResizeHandleLayer';
 import { BlockSourceReferenceLayer } from './BlockSourceReferenceLayer';
@@ -71,6 +72,7 @@ interface BlockEditorLayerProps {
   pageFrame?: PageFrameModel | null;
   block: NoteBlock;
   contentReadOnly: boolean;
+  allowSaveRecovery?: boolean;
   text: string;
   textFlowDraft?: TextBlockContentV1;
   annotations: AnnotationTruthV1[];
@@ -97,7 +99,8 @@ interface BlockEditorLayerProps {
   onTextUnitContextMenu: (selection: CapturedSelectionRange, anchorRect: DOMRect, point: { x: number; y: number }) => void;
   onBlockContextMenu: (point: { x: number; y: number }) => void;
   onTextChange: (value: string, caret: number, anchorElement?: HTMLElement | null) => void;
-  onTextFlowChange: (textFlow: TextBlockContentV1) => void;
+  onTextFlowChange: (textFlow: TextBlockContentV1, metadata?: TextFlowEditMetadata, previousTextFlow?: TextBlockContentV1) => void;
+  onTextEditBoundary?: (reason: TextFlowEditBoundary, selection?: TextFlowEditSelection) => void;
   onFieldDraftChange: (fieldValues: FieldValueRecord) => void;
   onSave: (
     silent?: boolean,
@@ -132,6 +135,7 @@ export function BlockEditorLayer({
   coordinateContract,
   pageFrame,
   contentReadOnly,
+  allowSaveRecovery = false,
   text,
   textFlowDraft,
   annotations,
@@ -159,6 +163,7 @@ export function BlockEditorLayer({
   onBlockContextMenu,
   onTextChange,
   onTextFlowChange,
+  onTextEditBoundary,
   onFieldDraftChange,
   onSave,
   onTrash,
@@ -241,6 +246,7 @@ export function BlockEditorLayer({
 
   const handleInsertTextUnitBelow = () => {
     if (contentReadOnly || presentationKind !== 'paragraph') return;
+    if (textareaRef.current?.dataset.runtimeTextflowComposing === 'true') return;
     const currentFlow = textFlow || createTextBlockContentV1(text);
     const targetUnit = currentFlow.units[currentFlow.units.length - 1];
     if (!targetUnit) return;
@@ -252,7 +258,11 @@ export function BlockEditorLayer({
 
     const nextFlow = setTextUnitWritingRole(splitFlow, insertedUnit.id, 'paragraph');
     const projection = projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: nextFlow }, text);
-    onTextFlowChange(nextFlow);
+    onTextFlowChange(nextFlow, {
+      unitId: targetUnit.id, inputType: 'insertParagraph', kind: 'structural', isComposing: false,
+      beforeSelection: { unitId: targetUnit.id, start: targetUnit.text.length, end: targetUnit.text.length },
+      afterSelection: { unitId: insertedUnit.id, start: 0, end: 0 },
+    }, currentFlow);
     onTextChange(projection.plain_text, projection.plain_text.length, textareaRef.current);
   };
 
@@ -373,6 +383,7 @@ export function BlockEditorLayer({
         open={active}
         saving={saving}
         contentReadOnly={contentReadOnly}
+        allowSaveRecovery={allowSaveRecovery}
         bodyReadOnly={itemReference}
         onBeginMove={onBeginMove}
         onInsertTextUnitBelow={!itemReference && presentationKind === 'paragraph' ? handleInsertTextUnitBelow : undefined}
@@ -467,6 +478,7 @@ export function BlockEditorLayer({
             onTextUnitContextMenu={onTextUnitContextMenu}
             onTextChange={onTextChange}
             onTextFlowChange={onTextFlowChange}
+            onTextEditBoundary={onTextEditBoundary}
             onSave={onSave}
             onKeyDown={onKeyDown}
           />

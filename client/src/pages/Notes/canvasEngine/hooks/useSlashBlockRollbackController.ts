@@ -137,7 +137,7 @@ export function useSlashBlockRollbackController({
       if (rollback.textFlow) {
         textFlowEdit = applyBlockTextFlowEdit(block ?? { id: blockId }, rollback.textFlow, {
           previousTextFlow: currentTextFlow,
-        });
+        }).then(() => undefined);
       }
       if (hasFormulaAuthority) setBlockFieldDrafts(nextFieldDrafts);
     });

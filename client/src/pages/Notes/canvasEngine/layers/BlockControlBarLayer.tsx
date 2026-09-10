@@ -31,6 +31,7 @@ interface BlockControlBarLayerProps {
   open: boolean;
   saving: boolean;
   contentReadOnly: boolean;
+  allowSaveRecovery?: boolean;
   bodyReadOnly?: boolean;
   onBeginMove: (event: ReactPointerEvent<HTMLElement>) => void;
   onInsertTextUnitBelow?: () => void;
@@ -49,6 +50,7 @@ export function BlockControlBarLayer({
   open,
   saving,
   contentReadOnly,
+  allowSaveRecovery = false,
   bodyReadOnly = false,
   onBeginMove,
   onInsertTextUnitBelow,
@@ -137,8 +139,8 @@ export function BlockControlBarLayer({
               const outcome = await onSaveBlock();
               if (outcome.status !== 'saved') return;
             }}
-            disabled={saving || contentReadOnly || bodyReadOnly}
-            title="Save block"
+            disabled={saving || (contentReadOnly && !allowSaveRecovery) || bodyReadOnly}
+            title={allowSaveRecovery ? 'Retry saving block' : 'Save block'}
           >
             <Save size={16} />
           </button>

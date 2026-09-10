@@ -72,6 +72,11 @@ import {
 } from '../contentGroupDragService';
 import styles from '../../NoteDetail.module.css';
 import type { TextFocusReceipt } from '../textFocusReceipt';
+import type {
+  TextFlowEditBoundary,
+  TextFlowEditMetadata,
+  TextFlowEditSelection,
+} from '../textFlowEditSession';
 
 interface TextBlockProjectionProps {
   blockId: string;
@@ -91,7 +96,8 @@ interface TextBlockProjectionProps {
   onTextUnitSelection: (selection: CapturedSelectionRange, anchorRect: DOMRect, options?: { additive?: boolean; preserveDraft?: boolean; hitTestOnly?: boolean }) => void;
   onTextUnitContextMenu: (selection: CapturedSelectionRange, anchorRect: DOMRect, point: { x: number; y: number }) => void;
   onTextChange: (value: string, caret: number, anchorElement?: HTMLElement | null) => void;
-  onTextFlowChange: (textFlow: TextBlockContentV1) => void;
+  onTextFlowChange: (textFlow: TextBlockContentV1, edit?: TextFlowEditMetadata, previousTextFlow?: TextBlockContentV1) => void;
+  onTextEditBoundary?: (reason: TextFlowEditBoundary, selection?: TextFlowEditSelection) => void;
   onSave: (
     silent?: boolean,
     fieldValues?: undefined,
@@ -474,12 +480,17 @@ export function TextBlockProjection({
   onTextUnitContextMenu,
   onTextChange,
   onTextFlowChange,
+  onTextEditBoundary,
   onSave,
   onKeyDown,
 }: TextBlockProjectionProps) {
   const unitRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
   const pendingFocusRef = useRef<{ unitId: string; caret: number } | null>(null);
   const latestFlowRef = useRef<TextBlockContentV1 | null>(null);
+  const compositionRef = useRef(false);
+  const deferredBlurRef = useRef(false);
+  const selectionRef = useRef<TextFlowEditSelection | null>(null);
+  const beforeInputRef = useRef<{ selection: TextFlowEditSelection; inputType: string } | null>(null);
   const additiveSelectionSessionRef = useRef(false);
   const [annotationBadgeAnchors, setAnnotationBadgeAnchors] = useState<Record<string, { left: number; top: number }>>({});
   const [childAnnotationBadgeAnchors, setChildAnnotationBadgeAnchors] = useState<Record<string, { left: number; top: number }>>({});
@@ -493,6 +504,35 @@ export function TextBlockProjection({
     [presentationKind, text, textFlow],
   );
   const textFlowId = textFlowIdForBlock(blockId);
+  const readSelection = (unitId: string, textarea: HTMLTextAreaElement): TextFlowEditSelection => ({
+    unitId, start: textarea.selectionStart, end: textarea.selectionEnd,
+  });
+
+  const captureSelectionBoundary = (unitId: string, textarea: HTMLTextAreaElement) => {
+    const selection = readSelection(unitId, textarea);
+    const previous = selectionRef.current;
+    if (!readOnly && !compositionRef.current && previous && (
+      previous.unitId !== selection.unitId || previous.start !== selection.start || previous.end !== selection.end
+    )) onTextEditBoundary?.('selection', selection);
+    selectionRef.current = selection;
+  };
+
+  // Native beforeinput preserves the actual pre-edit selection for typing,
+  // replacement, deletion and paste (React's beforeinput is a polyfill).
+  useEffect(() => {
+    const listeners = Object.entries(unitRefs.current).flatMap(([unitId, node]) => {
+      if (!node || readOnly) return [];
+      const capture = (event: Event) => {
+        beforeInputRef.current = {
+          selection: readSelection(unitId, node),
+          inputType: (event as InputEvent).inputType || 'insertText',
+        };
+      };
+      node.addEventListener('beforeinput', capture);
+      return [() => node.removeEventListener('beforeinput', capture)];
+    });
+    return () => listeners.forEach((remove) => remove());
+  }, [editableFlow.units, readOnly]);
   const labelDisplayState = useMemo(() => ({
     labelsVisible: showLabelOverlay,
   }), [showLabelOverlay]);
@@ -607,12 +647,26 @@ export function TextBlockProjection({
     unitId: string,
     caret: number,
     anchorElement?: HTMLTextAreaElement | null,
-    options: { sync?: boolean } = {},
+    options: { sync?: boolean; edit?: TextFlowEditMetadata } = {},
   ) => {
+    const previousTextFlow = latestFlowRef.current || editableFlow;
+    const sourceUnitId = anchorElement?.dataset.textUnitId || unitId;
+    const beforeSelection = anchorElement
+      ? readSelection(sourceUnitId, anchorElement)
+      : selectionRef.current || { unitId: sourceUnitId, start: caret, end: caret };
+    const edit = options.edit || {
+      unitId: sourceUnitId,
+      inputType: 'structure',
+      beforeSelection,
+      afterSelection: { unitId, start: caret, end: caret },
+      isComposing: false,
+      kind: 'structural' as const,
+    };
+    selectionRef.current = edit.afterSelection;
     latestFlowRef.current = nextFlow;
     const projection = projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: nextFlow }, text);
     const publish = () => {
-      onTextFlowChange(nextFlow);
+      onTextFlowChange(nextFlow, edit, previousTextFlow);
       onTextChange(projection.plain_text, globalCaretForUnit(nextFlow.units, unitId, caret), anchorElement);
     };
     if (options.sync) {
@@ -622,15 +676,53 @@ export function TextBlockProjection({
     publish();
   };
 
-  const handleUnitTextChange = (unit: TextUnit, value: string, caret: number, textarea: HTMLTextAreaElement) => {
+  const handleUnitTextChange = (
+    unit: TextUnit,
+    value: string,
+    textarea: HTMLTextAreaElement,
+    nativeInputType?: string,
+    nativeIsComposing = false,
+  ) => {
     resizeTextareaToContent(textarea);
+    const currentFlow = latestFlowRef.current || editableFlow;
+    const currentUnit = currentFlow.units.find((item) => item.id === unit.id) || unit;
+    const afterSelection = readSelection(unit.id, textarea);
+    const captured = beforeInputRef.current;
+    beforeInputRef.current = null;
+    if (currentUnit.text === value) {
+      selectionRef.current = afterSelection;
+      return;
+    }
+    let prefix = 0;
+    while (prefix < currentUnit.text.length && prefix < value.length && currentUnit.text[prefix] === value[prefix]) prefix += 1;
+    let suffix = 0;
+    while (suffix < currentUnit.text.length - prefix && suffix < value.length - prefix
+      && currentUnit.text[currentUnit.text.length - 1 - suffix] === value[value.length - 1 - suffix]) suffix += 1;
+    const beforeSelection = captured?.selection.unitId === unit.id
+      ? captured.selection
+      : selectionRef.current?.unitId === unit.id
+        ? selectionRef.current
+        : { unitId: unit.id, start: prefix, end: currentUnit.text.length - suffix };
+    const isComposing = compositionRef.current || nativeIsComposing;
     const nextFlow = {
-      ...editableFlow,
-      units: editableFlow.units.map((item) => (
+      ...currentFlow,
+      units: currentFlow.units.map((item) => (
         item.id === unit.id ? { ...item, text: value } : item
       )),
     };
-    emitFlowChange(nextFlow, unit.id, caret, textarea);
+    emitFlowChange(nextFlow, unit.id, afterSelection.start, textarea, { edit: {
+      unitId: unit.id,
+      inputType: isComposing ? 'insertCompositionText' : nativeInputType || captured?.inputType || 'insertText',
+      beforeSelection,
+      afterSelection,
+      isComposing,
+      kind: 'typing',
+    } });
+  };
+
+  const saveAfterBlur = (selection: TextFlowEditSelection) => {
+    onTextEditBoundary?.('blur', selection);
+    void onSave(true, undefined, latestFlowRef.current || editableFlow);
   };
 
   const handleTextUnitSelection = (
@@ -751,6 +843,7 @@ export function TextBlockProjection({
   };
 
   const handleSetRole = (unit: TextUnit, role: TextUnitWritingRole) => {
+    if (readOnly || compositionRef.current) return;
     const nextFlow = setTextUnitWritingRole(editableFlow, unit.id, role);
     pendingFocusRef.current = { unitId: unit.id, caret: unit.text.length };
     emitFlowChange(nextFlow, unit.id, unit.text.length, unitRefs.current[unit.id]);
@@ -770,6 +863,7 @@ export function TextBlockProjection({
   };
 
   const handleToggleTodo = (unit: TextUnit) => {
+    if (readOnly || compositionRef.current) return;
     const textarea = unitRefs.current[unit.id];
     const caret = textarea?.selectionStart ?? unit.text.length;
     const nextFlow = updateTextUnitMetadata(editableFlow, unit.id, {
@@ -780,6 +874,7 @@ export function TextBlockProjection({
   };
 
   const handleToggleCollapsed = (unit: TextUnit) => {
+    if (readOnly || compositionRef.current) return;
     const textarea = unitRefs.current[unit.id];
     const caret = textarea?.selectionStart ?? unit.text.length;
     const nextFlow = updateTextUnitMetadata(editableFlow, unit.id, {
@@ -790,6 +885,8 @@ export function TextBlockProjection({
   };
 
   const handleUnitKeyDown = (unit: TextUnit, event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (compositionRef.current || event.nativeEvent.isComposing || event.nativeEvent.keyCode === 229) return;
+    selectionRef.current = readSelection(unit.id, event.currentTarget);
     onKeyDown(event);
     if (event.defaultPrevented) return;
 
@@ -798,7 +895,7 @@ export function TextBlockProjection({
 
     if (event.key === 'Enter' && !event.shiftKey && !event.ctrlKey && !event.metaKey) {
       event.preventDefault();
-      const nextFlow = splitTextUnitForEnter(editableFlow, unit.id, textarea.selectionStart);
+      const nextFlow = splitTextUnitForEnter(editableFlow, unit.id, textarea.selectionStart, textarea.selectionEnd);
       const currentIndex = nextFlow.units.findIndex((item) => item.id === unit.id);
       const nextUnit = nextFlow.units[currentIndex + 1];
       if (nextUnit) {
@@ -833,7 +930,9 @@ export function TextBlockProjection({
   };
 
   const handleUnitKeyUp = (unit: TextUnit, event: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (compositionRef.current || event.nativeEvent.isComposing) return;
     if (event.key === 'Control' || event.key === 'Meta' || event.key === 'Alt' || event.key === 'Shift') return;
+    captureSelectionBoundary(unit.id, event.currentTarget);
     handleTextUnitSelection(unit, event.currentTarget);
   };
 
@@ -867,6 +966,8 @@ export function TextBlockProjection({
   };
 
   const handleUnitMouseUp = (unit: TextUnit, event: MouseEvent<HTMLTextAreaElement>) => {
+    if (compositionRef.current) return;
+    captureSelectionBoundary(unit.id, event.currentTarget);
     const additive = event.ctrlKey || event.metaKey || additiveSelectionSessionRef.current;
     const hasSelection = event.currentTarget.selectionStart !== event.currentTarget.selectionEnd;
     if (!hasSelection && draftAnnotationRanges.length === 0) {
@@ -884,12 +985,13 @@ export function TextBlockProjection({
   };
 
   const handleUnitPaste = (unit: TextUnit, event: ClipboardEvent<HTMLTextAreaElement>) => {
+    if (compositionRef.current) return;
     const pastedText = event.clipboardData.getData('text/plain');
     if (!pastedText) return;
     if (!pastedText.includes('\n') && !/^(#{1,6}\s|[-*]\s|\d+[.)]\s|>\s?|\[ ?x? ?\])/i.test(pastedText.trim())) return;
     event.preventDefault();
     const textarea = event.currentTarget;
-    const nextFlow = pasteTextIntoTextFlow(editableFlow, unit.id, textarea.selectionStart, pastedText);
+    const nextFlow = pasteTextIntoTextFlow(editableFlow, unit.id, textarea.selectionStart, pastedText, textarea.selectionEnd);
     const pastedUnit = nextFlow.units[Math.min(nextFlow.units.length - 1, editableFlow.units.findIndex((item) => item.id === unit.id) + 1)]
       || nextFlow.units[0];
     pendingFocusRef.current = { unitId: pastedUnit.id, caret: pastedUnit.text.length };
@@ -910,6 +1012,7 @@ export function TextBlockProjection({
   };
 
   const handleUnitDrop = (unit: TextUnit, event: DragEvent<HTMLTextAreaElement>) => {
+    if (compositionRef.current) return;
     const droppedText = droppedTextFromEvent(event);
     if (!droppedText) return;
     event.preventDefault();
@@ -1134,25 +1237,55 @@ export function TextBlockProjection({
                   ].filter(Boolean).join(' ')}
                   value={unit.text}
                   readOnly={readOnly}
-                  onFocus={() => onFocused({
-                    blockId,
-                    textFlowId,
-                    textUnitId: unit.id,
-                  })}
+                  onFocus={(event) => {
+                    selectionRef.current = readSelection(unit.id, event.currentTarget);
+                    if (!readOnly && !compositionRef.current) onTextEditBoundary?.('focus', selectionRef.current);
+                    onFocused({ blockId, textFlowId, textUnitId: unit.id });
+                  }}
                   onChange={readOnly
                     ? undefined
-                    : (event) => handleUnitTextChange(unit, event.currentTarget.value, event.currentTarget.selectionStart, event.currentTarget)}
-                  onSelect={(event) => handleTextUnitSelection(unit, event.currentTarget, {
-                    preserveDraft: additiveSelectionSessionRef.current,
-                  })}
+                    : (event) => handleUnitTextChange(unit, event.currentTarget.value, event.currentTarget,
+                      (event.nativeEvent as InputEvent).inputType, (event.nativeEvent as InputEvent).isComposing)}
+                  onSelect={(event) => {
+                    if (compositionRef.current) return;
+                    captureSelectionBoundary(unit.id, event.currentTarget);
+                    handleTextUnitSelection(unit, event.currentTarget, {
+                      preserveDraft: additiveSelectionSessionRef.current,
+                    });
+                  }}
+                  onCompositionStart={readOnly ? undefined : (event) => {
+                    const selection = readSelection(unit.id, event.currentTarget);
+                    selectionRef.current = selection;
+                    beforeInputRef.current = { selection, inputType: 'insertCompositionText' };
+                    compositionRef.current = true;
+                    event.currentTarget.dataset.runtimeTextflowComposing = 'true';
+                    onTextEditBoundary?.('compositionStart', selection);
+                  }}
+                  onCompositionEnd={readOnly ? undefined : (event) => {
+                    // Browser engines may deliver the final input on either side of
+                    // compositionend. Publish its complete DOM value before sealing;
+                    // an identical trailing input is ignored by handleUnitTextChange.
+                    handleUnitTextChange(unit, event.currentTarget.value, event.currentTarget, 'insertCompositionText', true);
+                    compositionRef.current = false;
+                    event.currentTarget.dataset.runtimeTextflowComposing = 'false';
+                    const selection = readSelection(unit.id, event.currentTarget);
+                    onTextEditBoundary?.('compositionEnd', selection);
+                    if (deferredBlurRef.current) {
+                      deferredBlurRef.current = false;
+                      saveAfterBlur(selection);
+                    }
+                  }}
                   onMouseDown={handleUnitMouseDown}
                   onMouseUp={(event) => handleUnitMouseUp(unit, event)}
                   onKeyUp={(event) => handleUnitKeyUp(unit, event)}
                   onContextMenu={(event) => handleTextUnitContextMenu(unit, event)}
-                onBlur={readOnly ? undefined : async () => {
-                  const outcome = await onSave(true, undefined, latestFlowRef.current || editableFlow);
-                  if (outcome.status !== 'saved') return;
-                }}
+                  onBlur={readOnly ? undefined : (event) => {
+                    if (compositionRef.current) {
+                      deferredBlurRef.current = true;
+                      return;
+                    }
+                    saveAfterBlur(readSelection(unit.id, event.currentTarget));
+                  }}
                   onKeyDown={readOnly ? undefined : (event) => handleUnitKeyDown(unit, event)}
                   onPaste={readOnly ? undefined : (event) => handleUnitPaste(unit, event)}
                   onDragOver={readOnly ? undefined : handleUnitDragOver}
@@ -1161,6 +1294,7 @@ export function TextBlockProjection({
                   data-text-flow-id={textFlowId}
                   data-text-unit-id={unit.id}
                   data-text-unit-text={unit.text}
+                  data-runtime-textflow-editor={!readOnly || onTextEditBoundary ? 'true' : undefined}
                   rows={1}
                 />
                 {parentAnnotationBadges.map(({ annotation }, badgeIndex) => {

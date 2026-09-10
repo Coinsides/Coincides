@@ -105,4 +105,61 @@ describe('board-owned text range editing', () => {
     session.rebase('block-1', after, flow('more prefix alpha beta gamma'));
     expect(session.capture('block-1').ranges[0].start_offset).toBe(18);
   });
+
+  it('restores the captured identities after drift without replacing a later board reference', async () => {
+    const persist = vi.fn(async (_note: string, ranges: BoardTextRangeV1[]) => ranges);
+    const session = createBoardTextRangeEditSession('note-1', persist);
+    const before = flow('alpha beta gamma');
+    const after = flow('alph gamma');
+    session.hydrate([anchor()]);
+    const original = session.snapshot('block-1');
+    session.rebase('block-1', before, after);
+    const changed = session.snapshot('block-1');
+    expect(changed.ranges[0].status).toBe('drifted');
+    const later = { ...anchor('later'), start_offset: 0, end_offset: 4, excerpt: 'alph' };
+    session.mergeNewRanges([later]);
+
+    session.restore('block-1', before, original);
+    // The ordinary save fallback must see the restored draft baseline.
+    session.rebase('block-1', after, structuredClone(before));
+    expect(session.snapshot('block-1').ranges).toEqual([anchor(), later]);
+    await session.persist(session.capture('block-1'));
+    session.restore('block-1', after, changed);
+    expect(session.snapshot('block-1').ranges).toEqual([changed.ranges[0], later]);
+  });
+
+  it('retains all issued identities after partial acknowledgement and supports one retry', async () => {
+    const persist = vi.fn(async (_note: string, ranges: BoardTextRangeV1[]) => ranges);
+    persist.mockImplementationOnce(async (_note, ranges) => ranges.slice(0, 1));
+    const session = createBoardTextRangeEditSession('note-1', persist);
+    session.hydrate([anchor('one'), anchor('two')]);
+    session.rebase('block-1', flow('alpha beta gamma'), flow('prefix alpha beta gamma'));
+    const snapshot = session.capture('block-1');
+    await expect(session.persist(snapshot)).rejects.toThrow('not acknowledged');
+    expect(session.capture('block-1')).toEqual(snapshot);
+    await session.persist(session.capture('block-1'));
+    expect(session.capture('block-1').ranges).toEqual([]);
+    expect(persist).toHaveBeenCalledTimes(2);
+  });
+
+  it('acknowledges a cloned history snapshot without erasing a newer local range draft', async () => {
+    let complete!: (ranges: BoardTextRangeV1[]) => void;
+    const persist = vi.fn(() => new Promise<BoardTextRangeV1[]>((resolve) => { complete = resolve; }));
+    const session = createBoardTextRangeEditSession('note-1', persist);
+    session.hydrate([anchor()]);
+    session.rebase('block-1', flow('alpha beta gamma'), flow('prefix alpha beta gamma'));
+    const savedSnapshot = session.snapshot('block-1');
+    const first = session.persist(savedSnapshot);
+    complete(savedSnapshot.ranges);
+    await first;
+    expect(session.capture('block-1').ranges).toEqual([]);
+
+    session.rebase('block-1', flow('prefix alpha beta gamma'), flow('more prefix alpha beta gamma'));
+    const older = session.snapshot('block-1');
+    const second = session.persist(older);
+    session.rebase('block-1', flow('more prefix alpha beta gamma'), flow('even more prefix alpha beta gamma'));
+    complete(older.ranges);
+    await second;
+    expect(session.capture('block-1').ranges[0].start_offset).toBe(23);
+  });
 });

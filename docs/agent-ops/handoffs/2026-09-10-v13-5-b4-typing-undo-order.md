@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready
+> **状态 (Status)**: done(HQ 收口:主体+补遗一收货,863全库,扫描绿)
 > **From**: fable(HQ) · **To**: codex(builder)
 > **日期**: 2026-09-10
 > **上游**: B2 调查回执 §4(两案与共同验收边界,证据行号全在案);Henry 09-10 拍板方案 A 提前施工;V14 硬前置 2(打字撤销=机械闸法源)
@@ -122,3 +122,64 @@
 5. docs INDEX 过期=HQ 收口重生成,⛔builder 碰。
 
 **裁定:按补遗一续建,做完追加 Result 二。**
+
+## Result 二
+
+> **日期**: 2026-09-10 · **执行者**: Codex builder
+> **交付状态**: 补遗一已落工作树，冒烟⑨及 client 全库通过；**停线待 HQ 复核与 docs INDEX 收口，保留 ready**，不作验收放行。
+> **本轮增量基线**: 开工时工作树（含前轮 B4 实现与 HQ 复核），分支 `fable/v2-bn12-exoskeleton`，开工/收尾 HEAD 均为 `5f4ee176c066a1972b0f79b9a7fc1be0f64d97e0`；未 stage/commit/push。
+
+### 1. 补遗落地
+
+- slash 模板转换以完整 `block_type/title/content_json/plain_text/metadata`、可空 flow、选区及触及范围的 before/after 快照进入**既有 runtime reversibleEdit 双栈**；转换前封组，转换独立 entry，after 载荷只生成一次，重试/redo 不重建 unit 身份。没有新增命令域、历史栈或跨会话历史。
+- 回放仍调用 adapter 原 `applyTemplateToBlock`，内部 `historySnapshot` 选项向**原五字段 PUT**传精确载荷，继续共用原守卫、Note/generation/epoch 检查、板范围持久与失败返回；普通模板转换的裁尾、默认载荷和元数据语义不变。快照恢复不再裁尾、重算正文或合并模板元数据，null title/旧 metadata/尾空白可原样回放；调用时用当前块的 `source_references`，不覆回整块旧出处。
+- formula 的实际 flow 为 null；回放删除旧 flow/field 草稿，板范围直接 restore 快照，跳过反向 rebase。annotation 与 board 只按记录 ID 恢复触及范围，保留后来新增的批注/范围及改名。slash 关闭前捕获真实选区。
+- 打字 finalize、转换及回放使用同一保存队列。旧打字保存失败时，转换先补齐转换前全文及全部待恢复范围；失败转换暂停文本编辑，原 Save 按钮仍可重试，受管只读 textarea 仍能走应用 Ctrl+Z。实际回放期间继续锁定；false/throw/未确认仍留原 entry，确认成功才移栈。快照正门不提前发成功 toast，避免后续批注保存失败时虚报。
+
+### 2. numstat 增量
+
+**仅本轮代码与测试：13 文件，+563/-32**。下表 `N/` = `client/src/pages/Notes/canvasEngine/`；按编辑前工作树副本与收尾文件执行 `git diff --no-index --numstat`，新 helper 按 `+30/-0`，不包含前轮既有改动，也未 stage 来凑统计。
+
+| 文件 | + | - |
+|---|---:|---:|
+| `N/blockTemplateConversionService.ts` | 30 | 0 |
+| `N/blocks/TextBlockProjection.tsx` | 1 | 1 |
+| `N/boardTextRangeEditSession.ts` | 1 | 1 |
+| `N/hooks/useNoteCanvasDataAdapter.test.tsx` | 266 | 2 |
+| `N/hooks/useNoteCanvasDataAdapter.ts` | 28 | 17 |
+| `N/hooks/useNoteCanvasLayerProps.ts` | 1 | 0 |
+| `N/hooks/useNoteCanvasRuntimeController.ts` | 4 | 2 |
+| `N/hooks/useSlashCommandController.ts` | 7 | 1 |
+| `N/hooks/useTextFlowHistory.ts` | 162 | 6 |
+| `N/layers/BlockControlBarLayer.tsx` | 4 | 2 |
+| `N/layers/BlockEditorLayer.test.tsx` | 53 | 0 |
+| `N/layers/BlockEditorLayer.tsx` | 3 | 0 |
+| `N/layers/NoteWritingSurfaceLayer.tsx` | 3 | 0 |
+
+本工单仅追加本节，**+61/-0**；含回执本轮合计 **14 文件，+624/-32**。既有其他工作树改动、未跟踪审计稿及权限配置保持原样；未改 server/shared 产品码、current-state 或 docs INDEX。
+
+### 3. 冒烟⑨
+
+均为内存合成数据、mock API 持久层及 jsdom 真实组件/事件，未接触用户库。常驻证据在 `N/hooks/useNoteCanvasDataAdapter.test.tsx` 的 `B4 smoke 9` 三个参数案例，以及 `N/layers/BlockEditorLayer.test.tsx` 新增五例。
+
+| 路径 | 结果与逐项断言 |
+|---|---|
+| 段落 → formula.math → undo → redo → 再 undo | **PASS**。live 与 mock durable 五字段逐字段相等；原 null title、非模板 metadata、尾空白、两个自定义 unit ID、inline 及 flow metadata 全恢复；formula flow 始终 null。批注 offsets/metadata 与板范围 active/drifted、坐标、pre_edit_offsets 往返恢复，来源收据/source_kind 保持。 |
+| 段落 → code.snippet 模板 → undo → redo → 再 undo | **PASS**。确实命中 code.snippet 模板分支；五字段、非默认 title、flow/unit/inline、批注与板范围同验。保留原正门的 paragraph block_type + code_line flow 形态，不另改模板语义。 |
+| 保存异常及随后新建范围 | **PASS**。上述两例均注入“转换正文成功/板范围失败”，flush 拒绝，编辑暂停且输入无作用，save 重试后恢复；又注入 undo 范围失败，原 entry 可再次 undo，最终栈仅一条。转换后新增 annotation、同 annotation 的新 range、板新 range 及后来改名，逐次回放均保留。 |
+| 打字失败 → 转换的时序 | **PASS**。第三例先打字封组并让范围保存失败，转换前补存当前全文及两个范围；正文写序严格为 typed → typed 恢复 → formula。转换后的 flush/blur 不把旧段落 flow 写回公式；逐次 undo 先回 typed 段落，再回最初原文，仅两个独立 entry。 |
+| 用户可达恢复入口 | **PASS**。真实 BlockEditor 的失败块 Retry 按钮可点、普通只读及保存进行中仍禁 Save；受管只读 textarea 的 Ctrl+Z 进入现有 history，未受管只读表单保持原路径。 |
+
+### 4. 全库复跑与其余验证
+
+- 最终 `npm run test:unit` **98/98 文件、863/863 测试 PASS**，整跑无过滤；输出开始 `06:59:48`，耗时 15.55s。包含前轮八冒烟、Boards/history/tray 与既有修五六七回归；本轮新增 8 个案例（⑨三例 + 恢复 UI 五例）。完整临时输出 `.codex-tmp/b4-supplement/client-full-2.log`，常驻断言及本节保留独立可重导证据。
+- 首轮整跑 `06:52:40` 为 855 绿/2 红：新 board mock 错把只含 editable fields 的请求当完整服务端响应，导致五个范围归属/时间字段缺失；已改为合并完整行再返回，**未削弱逐字段断言**。这不是本轮“修前红”证据。
+- client typecheck 通过，最终 `npm run build:client`（含 tsc -b）PASS；`npm run build`（server）PASS。Vite 全程指向仓内空 `COINCIDES_VALIDATION_ENV_DIR`，未读取 .env、未启动业务服务；既有 chunk 大小/manifest 递归 schema 提示不影响构建成功。
+- runtime 的 registry/manifest/parity 测试均完整运行；manifest/parity/server-shared-import、canvas boundary（159 checks）、Gallery/Rail/SingleEditor、source experience、legacy shutdown、relation freshness、canvas model（60 groups）及 performance 子门均 PASS。模型检查中发现 helper 新增的 runtime alias 导入不适合独立模型产物，已将转换载荷 helper 隔离到独立模块并复跑通过。`git diff --check` PASS。
+- `docs:check` **FAIL**：仅 `docs/agent-ops/INDEX.md` 过期，exit 1。未重生成；另外单独执行原 inventory check 与 glossary K-1–K-3，均 PASS。**未宣称 `verify:v2-bn8-runtime` 聚合门 PASS**：该命令末尾含本单明禁的凭据扫描，未执行聚合命令或扫描；其他子门如上分别执行。
+
+### 5. 未做与停线
+
+- **按铁律未做**：stage/commit/push/PR，.env/key 内容读取，用户库/真实笔记/业务 API，安全类专项测试与凭据扫描，docs INDEX 修改；未做操作系统真实 IME、真实浏览器人工旅程或主观验收。
+- **未扩面、未清偿**：TD-6/TF-06 服务端跨资源原子性，TF-02/03 光标穿行/跨界选择，TF-07 inline 生命周期，CanvasCommand 空间域，TD-28 跨会话历史。
+- **停线**：上一轮模板转换的功能缺口已按 HQ 补遗一补齐；工作树留待 HQ 复核，docs INDEX 收口与凭据扫描仍由 HQ 执行。保留 ready，不代行翻牌或放行。

@@ -58,6 +58,8 @@ import {
 } from '../slashCommandReducer';
 import type { RollbackBlockSlashSession } from './useSlashBlockRollbackController';
 import type { BlockSaveOutcome } from './useNoteCanvasDataAdapter';
+import type { ApplyBlockTextFlowEdit } from './useBlockTextFlowEditController';
+import type { TextFlowEditSelection } from '../textFlowEditSession';
 
 export type { SlashTarget } from '../slashCommandReducer';
 
@@ -79,11 +81,14 @@ function textareaMatchesOwner(
 }
 
 export interface UseSlashCommandControllerOptions {
+  applyBlockTextFlowEdit?: ApplyBlockTextFlowEdit;
+  beforeTextStructure?: () => boolean;
   addToast: (type: Toast['type'], message: string) => void;
   applyTemplateToBlock: (
     block: NoteBlock,
     template: TemplateOption,
     text: string,
+    selection?: TextFlowEditSelection,
   ) => Promise<NoteBlock | null>;
   blockListRef: RefObject<HTMLDivElement>;
   blocks: NoteBlock[];
@@ -115,6 +120,8 @@ export interface UseSlashCommandControllerOptions {
 }
 
 export function useSlashCommandController({
+  applyBlockTextFlowEdit,
+  beforeTextStructure,
   addToast,
   applyTemplateToBlock,
   blockListRef,
@@ -404,6 +411,9 @@ export function useSlashCommandController({
 
   const handleSelectSlashCommand = useCallback(async (command: NoteSlashCommand) => {
     if (!slashTarget) return;
+    // Mouse selection and keyboard commit enter through the same boundary, before
+    // trigger cleanup or a direct template conversion can mutate the text owner.
+    if (beforeTextStructure?.() === false) return;
     if (command.disabledReason) {
       addToast('info', command.disabledReason);
       exitSlashSession('disabled');
@@ -442,9 +452,37 @@ export function useSlashCommandController({
         || createTextBlockContentV1(currentText, 'paragraph');
       const nextFlow = applyWritingRoleToFlow(baseFlow, slashTarget.trigger, command.writingRole);
       const projected = projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: nextFlow }, currentText).plain_text;
+      if (applyBlockTextFlowEdit) {
+        let offset = 0;
+        const unit = baseFlow.units.find((candidate) => {
+          if (slashTarget.trigger.start <= offset + candidate.text.length) return true;
+          offset += candidate.text.length + 1;
+          return false;
+        }) || baseFlow.units[0];
+        if (!unit) return;
+        const editor = slashOwnerElementRef.current;
+        const hasOwnedSelection = editor?.dataset.textUnitId === unit.id;
+        const beforeCaret = Math.max(0, Math.min(unit.text.length, slashTarget.trigger.end - offset));
+        const nextUnit = nextFlow.units.find((candidate) => candidate.id === unit.id) || unit;
+        const afterCaret = Math.max(0, Math.min(nextUnit.text.length, slashTarget.trigger.start - offset));
+        const edited = await applyBlockTextFlowEdit(block, nextFlow, {
+          previousTextFlow: baseFlow,
+          metadata: {
+            kind: 'structural', inputType: 'formatWritingRole', unitId: unit.id, isComposing: false,
+            beforeSelection: {
+              unitId: unit.id,
+              start: hasOwnedSelection && editor ? editor.selectionStart : beforeCaret,
+              end: hasOwnedSelection && editor ? editor.selectionEnd : beforeCaret,
+            },
+            afterSelection: { unitId: unit.id, start: afterCaret, end: afterCaret },
+          },
+        });
+        if (edited?.success === false) return;
+      } else {
+        setBlockTextFlowDrafts((current) => ({ ...current, [block.id]: nextFlow }));
+      }
       exitSlashSession('commit', currentText);
       setBlockTextDrafts((current) => ({ ...current, [block.id]: projected }));
-      setBlockTextFlowDrafts((current) => ({ ...current, [block.id]: nextFlow }));
       const saveOutcome = await saveBlock(block, projected, { silent: true, textFlow: nextFlow });
       if (saveOutcome.status === 'saved') setFocusBlockId(block.id);
       return;
@@ -485,13 +523,19 @@ export function useSlashCommandController({
 
     const currentText = blockTextDrafts[block.id] ?? textFromContent(block);
     const cleanedText = applySlashExitToText({ text: currentText, target: slashTarget, reason: 'commit' });
+    const editor = slashOwnerElementRef.current;
+    const selection = editor?.dataset.blockId === block.id && editor.dataset.textUnitId
+      ? { unitId: editor.dataset.textUnitId, start: editor.selectionStart, end: editor.selectionEnd }
+      : undefined;
     exitSlashSession('commit', currentText);
     setBlockTextDrafts((current) => ({ ...current, [block.id]: cleanedText }));
 
-    const updated = await applyTemplateToBlock(block, template, cleanedText);
+    const updated = await applyTemplateToBlock(block, template, cleanedText, selection);
     if (updated) setFocusBlockId(block.id);
   }, [
     addToast,
+    applyBlockTextFlowEdit,
+    beforeTextStructure,
     applyWritingRoleToFlow,
     applyTemplateToBlock,
     blocks,

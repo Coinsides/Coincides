@@ -5,7 +5,8 @@ import { useRuntimeDocumentDataController } from './useRuntimeDocumentDataContro
 import { useRuntimeLayoutModelController } from './useRuntimeLayoutModelController';
 import { useRuntimePresentationController } from './useRuntimePresentationController';
 import { useRuntimeSurfaceStateController } from './useRuntimeSurfaceStateController';
-import { useBlockTextFlowEditController } from './useBlockTextFlowEditController';
+import { useTextFlowHistory, type TextFlowHistoryHost } from './useTextFlowHistory';
+import { useUIStore } from '@/stores/uiStore';
 import { useSlashBlockRollbackController } from './useSlashBlockRollbackController';
 import { useNoteBlockTrashController } from './useNoteBlockTrashController';
 import { useTrayController } from './useTrayController';
@@ -19,6 +20,8 @@ import type {
 export function useNoteCanvasRuntimeController() {
   const { noteId, hostMode = 'page' } = useNoteCanvasRuntime();
   const trayDropTargetRef = useRef<HTMLElement>(null);
+  const textHistoryHostRef = useRef<TextFlowHistoryHost | null>(null);
+  const addToast = useUIStore((state) => state.addToast);
   const {
     activeBlockId,
     beginTemporaryLayoutMode,
@@ -107,6 +110,12 @@ export function useNoteCanvasRuntimeController() {
     setSourceJumpTarget,
     sourceJumpBusy,
     annotationTruths,
+    readAnnotationTruths,
+    setAnnotationTruthsSnapshot,
+    saveAnnotationTruthsOutcome,
+    textHistoryGeneration,
+    captureBoardTextRanges,
+    restoreBoardTextRanges,
     rebaseBoardTextRanges,
     refreshBoardTextRanges,
     contentGroups,
@@ -143,7 +152,7 @@ export function useNoteCanvasRuntimeController() {
     createDraftBlock,
     discardDraftBlock,
     finalizeDraftBlock,
-    saveBlock,
+    saveBlock: saveBlockRaw,
     applyBlockEditRecovery,
     dismissBlockEditRecovery,
     saveDraftBlockPlacement,
@@ -245,13 +254,24 @@ export function useNoteCanvasRuntimeController() {
     });
   }, [contentWidth, loading, note?.id, resolveInitialSurfaceMode, sortedBlocks]);
 
-  const applyBlockTextFlowEdit = useBlockTextFlowEditController({
+  const textHistory = useTextFlowHistory({
+    noteId: noteId ?? '', generation: textHistoryGeneration, blocks,
+    history: textHistoryHostRef,
     annotationTruths,
+    readAnnotationTruths,
+    setAnnotationTruthsSnapshot,
+    saveAnnotationTruthsOutcome,
+    captureBoardTextRanges,
+    restoreBoardTextRanges,
     rebaseBoardTextRanges,
     blockTextFlowDrafts,
-    saveAnnotationTruths,
     setBlockTextFlowDrafts,
+    setBlockTextDrafts,
+    saveBlock: saveBlockRaw,
+    applyTemplateToBlock,
+    onSaveFailure: () => addToast('error', 'Text changes could not be saved. Retry saving or undo before leaving the note.'),
   });
+  const { applyEdit: applyBlockTextFlowEdit, saveBlock } = textHistory;
   const rollbackBlockSlashSession = useSlashBlockRollbackController({
     applyBlockTextFlowEdit,
     blocks,
@@ -291,6 +311,10 @@ export function useNoteCanvasRuntimeController() {
     persistDraft,
     pushStructuredMutationHistory,
     pushHistoryEntry,
+    enqueueRuntimeHistoryOperation,
+    whenHistoryIdle,
+    isReplaying: isRuntimeHistoryReplaying,
+    historyReplaying,
     resizeDraftFromTextarea,
     slashCommands,
     slashTarget,
@@ -299,12 +323,16 @@ export function useNoteCanvasRuntimeController() {
     beginResizeBlock,
   } = useRuntimeBlockOperationsController({
     noteId,
+    generation: textHistoryGeneration,
+    beforeHistoryBoundary: textHistory.boundary,
+    beforeTextStructure: textHistory.boundary,
+    applyBlockTextFlowEdit,
     trayDropTargetRef,
     onMoveBlockToTray: (blockId, before) => { void tray.moveBlockToTray(blockId, before); },
     coordinateContract,
     applyLayoutDrafts: mergeLayoutDrafts,
     applyMeasuredBlockHeightDraft,
-    applyTemplateToBlock,
+    applyTemplateToBlock: textHistory.applyTemplateToBlock,
     blockLayouts,
     blockListRef,
     blocks,
@@ -329,7 +357,9 @@ export function useNoteCanvasRuntimeController() {
     pageFrames,
     selectedPageFrameId: pageFrameCollection?.selectedFrameId || pageFrameCollection?.primaryFrameId || null,
     viewportTransform: surfaceMode === 'page' ? pageReadingViewport || viewportTransform : viewportTransform,
-    persistChangedBlockLayouts,
+    persistChangedBlockLayouts: (layouts) => {
+      void textHistoryHostRef.current?.enqueueRuntimeHistoryOperation(() => persistChangedBlockLayouts(layouts));
+    },
     persistLayoutSnapshot,
     restoreBlockForHistory: restoreBlock,
     rollbackBlockSlashSession,
@@ -355,6 +385,7 @@ export function useNoteCanvasRuntimeController() {
     templateOptions,
     trashBlock,
   });
+  textHistoryHostRef.current = { pushHistoryEntry, enqueueRuntimeHistoryOperation, whenHistoryIdle, isReplaying: isRuntimeHistoryReplaying };
 
   const handleWritingSurfaceFocusBlock = useCallback((receipt: Parameters<typeof markBlockFocused>[0]) => {
     markBlockFocused(receipt);
@@ -451,7 +482,8 @@ export function useNoteCanvasRuntimeController() {
     groupFolders,
     purposeFrames,
     sourceReferenceCount,
-    contentReadOnly: sourceProjectionPolicy.contentReadOnly,
+    contentReadOnly: sourceProjectionPolicy.contentReadOnly || textHistory.replaying || historyReplaying,
+    recoveryBlockIds: sourceProjectionPolicy.contentReadOnly || historyReplaying ? [] : textHistory.recoveryBlockIds,
     surfaceMode,
     surfacePolicy,
     surfacePolicyMode: surfacePolicy.mode,
@@ -468,15 +500,20 @@ export function useNoteCanvasRuntimeController() {
     onPageReadingViewportChange: setPageReadingViewport,
     onCreateBlock: createBlock,
     onActivateDraft: activateDraft,
-    onBeginMoveBlock: beginMoveBlock,
-    onBeginResizeBlock: beginResizeBlock,
-    onBlockKeyDown: handleBlockKeyDown,
+    onBeginMoveBlock: (...args) => { if (textHistory.boundary()) beginMoveBlock(...args); },
+    onBeginResizeBlock: (...args) => { if (textHistory.boundary()) beginResizeBlock(...args); },
+    onBlockKeyDown: (...args) => {
+      const event = args[2];
+      if (['Enter', 'Tab'].includes(event.key) && !textHistory.boundary()) return;
+      handleBlockKeyDown(...args);
+    },
     onBlockListMouseDown: handleBlockListMouseDown,
-    onBlockTextChange: handleBlockTextChange,
+    onBlockTextChange: (...args) => { if (!textHistory.isReplaying()) handleBlockTextChange(...args); },
     onBlockTextFlowChange: setBlockTextFlowDrafts,
     onApplyBlockTextFlowEdit: applyBlockTextFlowEdit,
+    onTextEditBoundary: sourceProjectionPolicy.contentReadOnly ? undefined : textHistory.boundary,
     onApplyBlockEditRecovery: applyBlockEditRecovery,
-    onApplyBlockLayoutDrafts: mergeLayoutDrafts,
+    onApplyBlockLayoutDrafts: (layouts) => { if (textHistory.boundary()) mergeLayoutDrafts(layouts); },
     onClearSlashTarget: clearSlashTarget,
     onCloseOverlay: closeOverlay,
     onCollapseChrome: collapseChrome,
@@ -493,7 +530,9 @@ export function useNoteCanvasRuntimeController() {
     onMeasuredBlockHeight: handleMeasuredBlockHeight,
     onPageSpaceDoubleClick: handlePageSpaceDoubleClick,
     onPersistDraft: (text, options) => persistDraft(text, undefined, options),
-    onPersistChangedBlockLayouts: persistChangedBlockLayouts,
+    onPersistChangedBlockLayouts: (layouts) => {
+      if (textHistory.boundary()) void enqueueRuntimeHistoryOperation(() => persistChangedBlockLayouts(layouts));
+    },
     onResizeDraftFromTextarea: resizeDraftFromTextarea,
     onResetViewport: resetViewport,
     onSaveBlock: saveBlock,
@@ -549,11 +588,12 @@ export function useNoteCanvasRuntimeController() {
   }, [dismissSlashSession, closeOverlay, setSourceJumpTarget]);
 
   const flushPendingSaves = useCallback(async () => {
+    await textHistory.flush();
     // Draft creation can schedule another adapter write after its first receipt.
     // Await that existing workflow before waiting for the adapter's write registry.
     await whenDraftIdle();
     await whenIdle();
-  }, [whenDraftIdle, whenIdle]);
+  }, [textHistory.flush, whenDraftIdle, whenIdle]);
 
   return {
     dismissTransientUI,

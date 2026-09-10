@@ -324,6 +324,74 @@ async function renderReconciledSlashRuntime(input: {
 describe('useRuntimeNaturalWritingController Page draft authority', () => {
   beforeEach(() => sessionStorage.clear());
 
+  it('routes a Slash role edit through TextFlow history with the original unit and selection', async () => {
+    const flow = createTextBlockContentV1('first', 'paragraph');
+    flow.units.push({ ...flow.units[0]!, id: 'tu-2', text: 'second /hea' });
+    const text = 'first\nsecond /hea';
+    const block = { ...createdBlock(text), content_json: { [TEXT_FLOW_CONTENT_KEY]: flow } };
+    const editor = document.createElement('textarea');
+    editor.value = 'second /hea';
+    editor.dataset.blockId = block.id;
+    editor.dataset.textFlowId = 'textflow-block-1';
+    editor.dataset.textUnitId = 'tu-2';
+    editor.setSelectionRange(11, 11);
+    const calls: string[] = [];
+    const directFlowSetter = vi.fn();
+    const applyEdit = vi.fn<NonNullable<UseRuntimeNaturalWritingControllerOptions['applyBlockTextFlowEdit']>>(async () => {
+      calls.push('history');
+      return { success: true, beforeAnnotationRanges: [], afterAnnotationRanges: [] };
+    });
+    const saveBlock = vi.fn(async () => { calls.push('save'); return savedBlockOutcome(block); });
+    const subject = renderHook(() => useRuntimeNaturalWritingController(makeRuntimeOptions({
+      blocks: [block], blockTextDrafts: { [block.id]: text }, blockTextFlowDrafts: { [block.id]: flow },
+      focusedTextOwner: { blockId: block.id, textFlowId: 'textflow-block-1', textUnitId: 'tu-2' },
+      applyBlockTextFlowEdit: applyEdit,
+      beforeTextStructure: () => { calls.push('boundary'); return true; },
+      setBlockTextFlowDrafts: directFlowSetter,
+      saveBlock,
+    })));
+    act(() => subject.result.current.handleBlockTextChange(block.id, text, text.length, editor));
+    await act(async () => {
+      await subject.result.current.handleSelectSlashCommand(NOTE_SLASH_COMMANDS.find((command) => command.id === 'heading')!);
+    });
+    expect(calls).toEqual(['boundary', 'history', 'save']);
+    expect(directFlowSetter).not.toHaveBeenCalled();
+    expect(applyEdit).toHaveBeenCalledWith(block, expect.objectContaining({
+      units: [flow.units[0], expect.objectContaining({ id: 'tu-2', text: 'second', writing_role: 'heading' })],
+    }), expect.objectContaining({
+      previousTextFlow: flow,
+      metadata: expect.objectContaining({
+        kind: 'structural', unitId: 'tu-2',
+        beforeSelection: { unitId: 'tu-2', start: 11, end: 11 },
+        afterSelection: { unitId: 'tu-2', start: 6, end: 6 },
+      }),
+    }));
+  });
+
+  it('blocks mouse Slash commit before role or template mutation while the text boundary is closed', async () => {
+    const block = createdBlock('text /hea');
+    const applyEdit = vi.fn(async () => undefined);
+    const applyTemplateToBlock = vi.fn(async () => null);
+    const saveBlock = vi.fn(async () => savedBlockOutcome(block));
+    const setBlockTextFlowDrafts = vi.fn();
+    const subject = renderHook(() => useRuntimeNaturalWritingController(makeRuntimeOptions({
+      blocks: [block], blockTextDrafts: { [block.id]: 'text /hea' },
+      focusedTextOwner: { blockId: block.id, textFlowId: 'textflow-block-1', textUnitId: 'tu-1' },
+      applyBlockTextFlowEdit: applyEdit, beforeTextStructure: () => false,
+      applyTemplateToBlock, saveBlock, setBlockTextFlowDrafts,
+    })));
+    act(() => subject.result.current.handleBlockTextChange(block.id, 'text /hea', 9));
+    await act(async () => {
+      await subject.result.current.handleSelectSlashCommand(NOTE_SLASH_COMMANDS.find((command) => command.id === 'heading')!);
+      await subject.result.current.handleSelectSlashCommand(NOTE_SLASH_COMMANDS.find((command) => command.id === 'formula')!);
+    });
+    expect(applyEdit).not.toHaveBeenCalled();
+    expect(applyTemplateToBlock).not.toHaveBeenCalled();
+    expect(saveBlock).not.toHaveBeenCalled();
+    expect(setBlockTextFlowDrafts).not.toHaveBeenCalled();
+    expect(subject.result.current.slashTarget).not.toBeNull();
+  });
+
   it('corrects a held stale create after draft Slash rollback before durable reconciliation', async () => {
     const primary = frame('slash-draft-primary', 0, 'primary_page_frame');
     const createAttempt = deferred<DraftBlockCreateResult | null>();

@@ -117,6 +117,26 @@ export function createBoardTextRangeEditSession(
       ranges = nextRanges;
       drafts.set(blockId, nextTextFlow);
     },
+    snapshot(blockId: string): BoardRangeSaveSnapshot {
+      if (!loaded) throw new Error('Board references are not loaded; reopen the note before editing');
+      return { ranges: structuredClone(ranges.filter((range) => range.block_id === blockId)) };
+    },
+    restore(blockId: string, textFlow: TextBlockContentV1 | null, snapshot: BoardRangeSaveSnapshot) {
+      if (!loaded) throw new Error('Board references are not loaded; reopen the note before editing');
+      const restoredById = new Map(snapshot.ranges
+        .filter((range) => range.note_id === noteId && range.block_id === blockId)
+        .map((range) => [range.id, range]));
+      ranges = ranges.map((range) => {
+        const restored = restoredById.get(range.id);
+        if (!restored || range.block_id !== blockId) return range;
+        const next = structuredClone(restored);
+        dirty.add(range.id);
+        // A replay replaces the failed range intent as well as the live draft.
+        if (failedSnapshots.has(range.id)) failedSnapshots.set(range.id, next);
+        return next;
+      });
+      drafts.set(blockId, textFlow);
+    },
     capture(blockId: string): BoardRangeSaveSnapshot {
       if (!loaded) throw new Error('Board references are not loaded; reopen the note before saving');
       return { ranges: ranges.filter((range) => range.block_id === blockId && dirty.has(range.id)) };
@@ -138,7 +158,8 @@ export function createBoardTextRangeEditSession(
       }
       snapshot.ranges.forEach((range) => failedSnapshots.delete(range.id));
       ranges = ranges.map((range) => {
-        if (issuedById.get(range.id) !== range) return range;
+        const issued = issuedById.get(range.id);
+        if (!issued || JSON.stringify(issued) !== JSON.stringify(range)) return range;
         dirty.delete(range.id);
         return savedById.get(range.id)!;
       });

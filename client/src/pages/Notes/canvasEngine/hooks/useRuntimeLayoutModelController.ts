@@ -24,7 +24,7 @@ export interface UseRuntimeLayoutModelControllerOptions {
   layoutDrafts: Record<string, BlockBoxLayout>;
   pageOffsetX: number;
   pageFrameCollection: PageFrameCollectionModel | null;
-  persistBlockLayout: (block: NoteBlock, layout: BlockBoxLayout) => void | Promise<void>;
+  persistBlockLayout: (block: NoteBlock, layout: BlockBoxLayout) => void | boolean | Promise<void | boolean>;
   sortedBlocks: NoteBlock[];
   surfaceMode: SurfaceMode;
   surfacePolicy: SurfaceModePolicy;

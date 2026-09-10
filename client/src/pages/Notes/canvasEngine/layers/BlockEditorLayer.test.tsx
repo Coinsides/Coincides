@@ -1,6 +1,8 @@
 import {
+  act,
   fireEvent,
   render,
+  renderHook,
   screen,
   waitFor,
   within,
@@ -17,6 +19,7 @@ import {
   TEXT_FLOW_CONTENT_KEY,
 } from '../textFlowService';
 import { BlockEditorLayer } from './BlockEditorLayer';
+import { usePlacementHistory } from '../hooks/usePlacementHistory';
 
 type BlockEditorLayerProps = ComponentProps<typeof BlockEditorLayer>;
 
@@ -124,6 +127,56 @@ function getBlockToolbar(): HTMLElement {
 }
 
 describe('BlockEditorLayer K-4 affiliation controls', () => {
+  it('keeps only recovery saving available while text editing remains paused', async () => {
+    const subject = renderSubject({ contentReadOnly: true, allowSaveRecovery: true });
+    const retry = screen.getByTitle('Retry saving block') as HTMLButtonElement;
+    expect(retry.disabled).toBe(false);
+    expect((screen.getByRole('button', { name: 'Move block' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((document.querySelector('textarea') as HTMLTextAreaElement).readOnly).toBe(true);
+    fireEvent.click(retry);
+    await waitFor(() => expect(subject.onSave).toHaveBeenCalledWith(false));
+  });
+
+  it.each([
+    ['ordinary read-only', false, false],
+    ['recovery already saving', true, true],
+  ] as const)('does not enable Save for %s', (_label, allowSaveRecovery, saving) => {
+    const subject = renderSubject({ contentReadOnly: true, allowSaveRecovery, saving });
+    const save = screen.getByTitle(allowSaveRecovery ? 'Retry saving block' : 'Save block') as HTMLButtonElement;
+    expect(save.disabled).toBe(true);
+    fireEvent.click(save);
+    expect(subject.onSave).not.toHaveBeenCalled();
+  });
+
+  it('routes Ctrl+Z from a paused managed textarea to its existing runtime history', async () => {
+    const undo = vi.fn(async () => true);
+    const history = renderHook(() => usePlacementHistory({
+      applyLayoutDrafts: vi.fn(), persistLayoutSnapshot: vi.fn(async () => true),
+    }));
+    renderSubject({ contentReadOnly: true, onTextEditBoundary: vi.fn() });
+    const textarea = document.querySelector('textarea')!;
+    await act(async () => {
+      history.result.current.pushHistoryEntry({ type: 'reversibleEdit', undo, redo: async () => true });
+      fireEvent.keyDown(textarea, { key: 'z', ctrlKey: true });
+      await history.result.current.whenHistoryIdle();
+    });
+    expect(undo).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not enroll an unmanaged read-only textarea in runtime undo', async () => {
+    const undo = vi.fn(async () => true);
+    const history = renderHook(() => usePlacementHistory({
+      applyLayoutDrafts: vi.fn(), persistLayoutSnapshot: vi.fn(async () => true),
+    }));
+    renderSubject({ contentReadOnly: true });
+    await act(async () => {
+      history.result.current.pushHistoryEntry({ type: 'reversibleEdit', undo, redo: async () => true });
+      fireEvent.keyDown(document.querySelector('textarea')!, { key: 'z', ctrlKey: true });
+      await history.result.current.whenHistoryIdle();
+    });
+    expect(undo).not.toHaveBeenCalled();
+  });
+
   it.each([
     ['page', 'var(--border-focus)'],
     ['workspace', 'var(--border-default)'],

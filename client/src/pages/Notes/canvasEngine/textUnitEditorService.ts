@@ -142,16 +142,18 @@ export function splitTextUnitForEnter(
   flow: TextBlockContentV1,
   unitId: string,
   offset: number,
+  selectionEnd = offset,
 ): TextBlockContentV1 {
   const nextFlow = cloneFlow(flow);
   const unitIndex = nextFlow.units.findIndex((unit) => unit.id === unitId);
   if (unitIndex < 0) return nextFlow;
 
   const unit = nextFlow.units[unitIndex];
-  const splitOffset = clamp(offset, 0, unit.text.length);
+  const splitOffset = clamp(Math.min(offset, selectionEnd), 0, unit.text.length);
+  const endOffset = clamp(Math.max(offset, selectionEnd), splitOffset, unit.text.length);
   const beforeText = unit.text.slice(0, splitOffset);
-  const afterText = unit.text.slice(splitOffset);
-  const nextRole = enterSplitRoleForUnit(unit, splitOffset);
+  const afterText = unit.text.slice(endOffset);
+  const nextRole = enterSplitRoleForUnit(unit, endOffset);
   const afterUnit: TextUnit = {
     ...cloneUnit(unit),
     id: createNextUnitId(nextFlow),
@@ -361,6 +363,7 @@ export function pasteTextIntoTextFlow(
   targetUnitId: string,
   offset: number,
   pastedText: string,
+  selectionEnd = offset,
 ): TextBlockContentV1 {
   const nextFlow = cloneFlow(flow);
   const targetIndex = nextFlow.units.findIndex((unit) => unit.id === targetUnitId);
@@ -374,9 +377,10 @@ export function pasteTextIntoTextFlow(
   }
 
   const target = nextFlow.units[targetIndex];
-  const pasteOffset = clamp(offset, 0, target.text.length);
+  const pasteOffset = clamp(Math.min(offset, selectionEnd), 0, target.text.length);
+  const endOffset = clamp(Math.max(offset, selectionEnd), pasteOffset, target.text.length);
   const prefix = target.text.slice(0, pasteOffset);
-  const suffix = target.text.slice(pasteOffset);
+  const suffix = target.text.slice(endOffset);
   const firstParsed = parsedUnits[0];
   const firstUnit: TextUnit = {
     ...target,

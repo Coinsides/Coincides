@@ -16,7 +16,7 @@ export type RuntimeHistoryEntry =
 
 export interface RuntimeHistoryApplyHandlers {
   applyLayoutDrafts: (layouts: LayoutHistoryEntry['before']) => void;
-  persistLayoutSnapshot: (layouts: LayoutHistoryEntry['before']) => void;
+  persistLayoutSnapshot: (layouts: LayoutHistoryEntry['before']) => void | boolean | Promise<void | boolean>;
   persistStructuredObject?: (objectId: string, payload: TableStructuredPayload) => Promise<boolean> | boolean;
   restoreBlockForHistory?: (block: NoteBlock, options?: { silent?: boolean }) => Promise<NoteBlock | null>;
   trashBlockForHistory?: (blockId: string, options?: { silent?: boolean }) => Promise<boolean>;
@@ -30,11 +30,18 @@ export interface RuntimeHistoryKeyboardIntentInput {
   metaKey: boolean;
   shiftKey: boolean;
   target: EventTarget | null;
+  isComposing?: boolean;
+  keyCode?: number;
 }
 
 export function isEditableDomTarget(target: EventTarget | null): boolean {
-  if (!(target instanceof HTMLElement)) return false;
+  if (typeof HTMLElement === 'undefined' || !(target instanceof HTMLElement)) return false;
   return Boolean(target.closest('input, textarea, select, [contenteditable="true"]'));
+}
+
+export function isManagedTextFlowHistoryTarget(target: EventTarget | null): boolean {
+  if (typeof HTMLElement === 'undefined' || !(target instanceof HTMLElement)) return false;
+  return Boolean(target.closest('[data-runtime-textflow-editor="true"]'));
 }
 
 export function getRuntimeHistoryKeyboardIntent({
@@ -43,8 +50,13 @@ export function getRuntimeHistoryKeyboardIntent({
   metaKey,
   shiftKey,
   target,
+  isComposing,
+  keyCode,
 }: RuntimeHistoryKeyboardIntentInput): RuntimeHistoryKeyboardIntent | null {
-  if (!(ctrlKey || metaKey) || isEditableDomTarget(target)) return null;
+  if (isComposing || keyCode === 229 || !(ctrlKey || metaKey)) return null;
+  if (typeof HTMLElement !== 'undefined' && target instanceof HTMLElement
+    && target.closest('[data-runtime-textflow-composing="true"]')) return null;
+  if (isEditableDomTarget(target) && !isManagedTextFlowHistoryTarget(target)) return null;
 
   const normalizedKey = key.toLowerCase();
   if (normalizedKey === 'z' && !shiftKey) return 'undo';
@@ -59,8 +71,8 @@ export async function applyRuntimeHistoryUndo(
   if (entry.type === 'reversibleEdit') return await entry.undo() ? entry : null;
   if (entry.type === 'layout') {
     handlers.applyLayoutDrafts(entry.entry.before);
-    handlers.persistLayoutSnapshot(entry.entry.before);
-    return entry;
+    const saved = await handlers.persistLayoutSnapshot(entry.entry.before);
+    return saved === false ? null : entry;
   }
 
   if (entry.type === 'createdBlock') {
@@ -87,8 +99,8 @@ export async function applyRuntimeHistoryRedo(
   if (entry.type === 'reversibleEdit') return await entry.redo() ? entry : null;
   if (entry.type === 'layout') {
     handlers.applyLayoutDrafts(entry.entry.after);
-    handlers.persistLayoutSnapshot(entry.entry.after);
-    return entry;
+    const saved = await handlers.persistLayoutSnapshot(entry.entry.after);
+    return saved === false ? null : entry;
   }
 
   if (entry.type === 'createdBlock') {

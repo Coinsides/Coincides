@@ -1,5 +1,5 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { AnnotationTruthV1, Note, NoteBlock, TextBlockContentV1 } from '../runtimeDataTypes';
@@ -10,13 +10,18 @@ import {
   createBlockEditRecoveryKey,
   listBlockEditRecoveryReceipts,
 } from '../draftBlockPersistence';
-import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
+import { createTextBlockContentV1, getTextFlowContent, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
+import { NOTE_SLASH_COMMANDS } from '../../noteSlashCommands';
 import * as canvasObjectRepository from '../canvasObjectRepository';
 import { normalizePageFrameCollection } from '../pageFrameCollectionService';
 import { resolveScreenRect } from '../placementContractService';
 import type { BlockBoxLayout } from '../runtimeLayout';
 import type { PageFrameCollectionModel } from '../types';
 import { useDraftBlockController } from './useDraftBlockController';
+import { usePlacementHistory } from './usePlacementHistory';
+import { useSlashBlockRollbackController } from './useSlashBlockRollbackController';
+import { useSlashCommandController } from './useSlashCommandController';
+import { useTextFlowHistory, type TextFlowHistoryHost } from './useTextFlowHistory';
 import {
   useNoteCanvasDataAdapter,
   type BlockSaveOutcome,
@@ -393,7 +398,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     await waitFor(() => expect(subject.result.current.coordinateContract).toBe('v2'));
     subject.result.current.runtimePageFrameCollectionRef.current = { noteId: note.id, collection };
     expect(mocks.put).not.toHaveBeenCalled();
-    let saving!: Promise<void>;
+    let saving!: Promise<boolean>;
     act(() => { saving = subject.result.current.persistBlockLayout(subject.result.current.blocks[0], inputLayout); });
     await waitFor(() => expect(mocks.put).toHaveBeenCalledOnce());
     expect(mocks.put).toHaveBeenCalledWith(collectionUrl, { collection: snapshot });
@@ -436,8 +441,8 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       if (url === `/canvas-objects/by-note/${note.id}` && ++placementContextReads === 2) return lateRead.promise;
       return get(url);
     });
-    let first!: Promise<void>;
-    let second!: Promise<void>;
+    let first!: Promise<boolean>;
+    let second!: Promise<boolean>;
     act(() => {
       first = subject.result.current.persistBlockLayout(subject.result.current.blocks[0], f11PaperLayout);
       second = subject.result.current.persistBlockLayout(subject.result.current.blocks[1], { ...f11PaperLayout, y: 360 });
@@ -479,7 +484,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
     await waitFor(() => expect(subject.result.current.coordinateContract).toBe('v2'));
     subject.result.current.runtimePageFrameCollectionRef.current = { noteId: note.id, collection };
-    let placing!: Promise<void>;
+    let placing!: Promise<boolean>;
     let editing!: Promise<void>;
     act(() => { placing = subject.result.current.persistBlockLayout(subject.result.current.blocks[0], f11PaperLayout); });
     await waitFor(() => expect(collectionWrites).toBe(1));
@@ -807,6 +812,265 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     expect(mocks.boardRangesPut).toHaveBeenCalledTimes(2);
   });
 
+  it.each([
+    { commandId: 'formula', templateKey: 'formula.math', failedTyping: false },
+    { commandId: 'code', templateKey: 'code.snippet', failedTyping: false },
+    { commandId: 'formula', templateKey: 'formula.math', failedTyping: true },
+  ])('B4 smoke 9: paragraph to $templateKey restores all five fields, flow and touched ranges through slash undo/redo (prior typing failure: $failedTyping)', async ({ commandId, templateKey, failedTyping }) => {
+    const firstUnitText = `alpha beta /${commandId}`;
+    const originalText = `${firstUnitText}\nsecond gamma  `;
+    const originalFlow = createTextBlockContentV1(firstUnitText, 'paragraph', { note: 'retain flow metadata' });
+    originalFlow.units[0] = { ...originalFlow.units[0], id: 'original-unit-a', metadata: { authored: true } };
+    originalFlow.units.push({ ...originalFlow.units[0], id: 'original-unit-b', text: 'second gamma  ', order_index: 1 });
+    originalFlow.inline_structures.push({
+      id: 'original-inline', semantic_kind: 'inline_code', parent_text_unit_id: 'original-unit-a',
+      anchor_text: 'beta', anchor_range: { start: 6, end: 10 }, field_values: { code: 'beta' },
+      metadata: { language: 'text' }, status: 'active',
+    });
+    const original: NoteBlock = {
+      ...serverBlock(originalText, false), title: commandId === 'formula' ? null : 'Authored title',
+      content_json: { body: originalText, field_values: { summary: 'paragraph companion' }, untouched: { nested: [1, 2] }, [TEXT_FLOW_CONTENT_KEY]: originalFlow },
+      metadata: { provenance: { author: 'synthetic-human', revision: 7 } },
+      source_kind: 'manual',
+      source_references: [{ id: 'source-receipt', document_id: 'synthetic-document', source_page_start: 3, source_page_end: 4, source_excerpt: 'original source excerpt', confidence: 0.9 }],
+    };
+    durableBlocks = [structuredClone(original)];
+    const originalAnnotation = annotationWithOffsets(note.id, 6, 10, 'beta');
+    originalAnnotation.ranges[0].text_unit_id = 'original-unit-a';
+    originalAnnotation.ranges[0].metadata = { anchor_status: 'active', retained: 'range metadata' };
+    originalAnnotation.ranges.push({
+      ...originalAnnotation.ranges[0], id: 'original-second-range', text_unit_id: 'original-unit-b',
+      start_offset: 7, end_offset: 12, range_text_cache: 'gamma',
+    });
+    durableAnnotationTruths = [structuredClone(originalAnnotation)];
+    const originalBoardRanges: BoardTextRangeV1[] = originalAnnotation.ranges.map((range, index) => ({
+      id: `original-board-range-${index}`, board_id: `board-${index}`, note_id: note.id, block_id: original.id,
+      text_flow_id: `textflow-${original.id}`, text_unit_id: range.text_unit_id!, start_offset: range.start_offset!,
+      end_offset: range.end_offset!, excerpt: range.range_text_cache!, status: 'active', pre_edit_offsets: null,
+      at: '2026-09-10T00:00:00Z', created_at: '2026-09-10T00:00:00Z', updated_at: '2026-09-10T00:00:00Z',
+    }));
+    let durableBoardRanges = structuredClone(originalBoardRanges);
+    mocks.boardRangesGet.mockImplementation(async () => ({ data: { text_ranges: structuredClone(durableBoardRanges) } }));
+    mocks.boardRangesPut.mockImplementation(async (_url: string, payload: { text_ranges: Array<Partial<BoardTextRangeV1> & Pick<BoardTextRangeV1, 'id'>> }) => {
+      const issued = new Map(payload.text_ranges.map((range) => [range.id, structuredClone(range)]));
+      durableBoardRanges = durableBoardRanges.map((range) => ({ ...range, ...issued.get(range.id) }));
+      // The repository sends editable fields; the server returns complete range rows.
+      return { data: { text_ranges: structuredClone(durableBoardRanges.filter((range) => issued.has(range.id))) } };
+    });
+    mocks.put.mockImplementation(async (url: string, payload: Record<string, unknown>) => {
+      if (url === `/note-blocks/${original.id}`) {
+        durableBlocks = durableBlocks.map((block) => ({ ...block, ...structuredClone(payload) }));
+        // Conversion responses can omit provenance; the adapter must retain the existing receipt.
+        return { data: { id: original.id, ...structuredClone(payload) } };
+      }
+      if (url === `/annotation-truths/by-note/${note.id}`) {
+        durableAnnotationTruths = structuredClone(payload.annotations as AnnotationTruthV1[]);
+        return { data: durableAnnotationTruths };
+      }
+      throw new Error(`Unexpected PUT ${url}`);
+    });
+
+    const subject = renderHook(() => {
+      const adapter = useNoteCanvasDataAdapter(stableAdapterOptions);
+      const historyHost = useRef<TextFlowHistoryHost | null>(null);
+      const blockListRef = useRef<HTMLDivElement>(null);
+      const draftTextRef = useRef('');
+      const editing = useTextFlowHistory({
+        noteId: note.id, generation: adapter.textHistoryGeneration, blocks: adapter.blocks,
+        annotationTruths: adapter.annotationTruths, readAnnotationTruths: adapter.readAnnotationTruths,
+        setAnnotationTruthsSnapshot: adapter.setAnnotationTruthsSnapshot,
+        saveAnnotationTruthsOutcome: adapter.saveAnnotationTruthsOutcome,
+        blockTextFlowDrafts: adapter.blockTextFlowDrafts, setBlockTextFlowDrafts: adapter.setBlockTextFlowDrafts,
+        setBlockTextDrafts: adapter.setBlockTextDrafts, captureBoardTextRanges: adapter.captureBoardTextRanges,
+        restoreBoardTextRanges: adapter.restoreBoardTextRanges, rebaseBoardTextRanges: adapter.rebaseBoardTextRanges,
+        saveBlock: adapter.saveBlock, applyTemplateToBlock: adapter.applyTemplateToBlock, history: historyHost,
+      });
+      const history = usePlacementHistory({
+        noteId: note.id, generation: adapter.textHistoryGeneration, beforeHistoryBoundary: () => editing.boundary(),
+        applyLayoutDrafts: vi.fn(), persistLayoutSnapshot: vi.fn(), target: null,
+      });
+      historyHost.current = history;
+      const rollbackBlockSlashSession = useSlashBlockRollbackController({
+        applyBlockTextFlowEdit: editing.applyEdit, blocks: adapter.blocks, readBlockDraftSnapshot: adapter.readBlockDraftSnapshot,
+        saveBlock: editing.saveBlock, setBlockFieldDrafts: adapter.setBlockFieldDrafts, setBlockTextDrafts: adapter.setBlockTextDrafts,
+      });
+      const slash = useSlashCommandController({
+        applyBlockTextFlowEdit: editing.applyEdit, beforeTextStructure: () => editing.boundary(),
+        addToast: mocks.addToast, applyTemplateToBlock: editing.applyTemplateToBlock,
+        blockListRef, blocks: adapter.blocks, blockTextDrafts: adapter.blockTextDrafts,
+        blockTextFlowDrafts: adapter.blockTextFlowDrafts, draftText: '', draftTextRef,
+        focusedTextOwner: { blockId: original.id, textFlowId: `textflow-${original.id}`, textUnitId: 'original-unit-a' },
+        insertTemplateOptions: adapter.templateOptions, templateOptions: adapter.templateOptions,
+        persistDraft: vi.fn(), rollbackBlockSlashSession, saveBlock: editing.saveBlock,
+        setBlockTextDrafts: adapter.setBlockTextDrafts, setBlockTextFlowDrafts: adapter.setBlockTextFlowDrafts,
+        setDraftText: vi.fn(), setFocusBlockId: vi.fn(), setInteractionState: vi.fn(), activateDraft: vi.fn(),
+      });
+      return { adapter, editing, history, slash };
+    }, { wrapper });
+    await waitFor(() => expect(subject.result.current.adapter.loading).toBe(false));
+    expect(subject.result.current.adapter.blocks[0].content_json).toEqual(original.content_json);
+    const prefix = failedTyping ? 'typed ' : '';
+    const conversionInput = prefix + originalText;
+    let beforeConversion = structuredClone(original);
+    let beforeConversionAnnotations = structuredClone(originalAnnotation.ranges);
+    let beforeConversionBoardRanges = structuredClone(originalBoardRanges);
+    if (failedTyping) {
+      const typedFlow = structuredClone(originalFlow);
+      typedFlow.units[0].text = prefix + firstUnitText;
+      mocks.boardRangesPut.mockRejectedValueOnce(new Error('synthetic preceding typing range write failed'));
+      await act(async () => {
+        await subject.result.current.editing.applyEdit(subject.result.current.adapter.blocks[0], typedFlow, {
+          metadata: {
+            kind: 'typing', inputType: 'insertText', unitId: 'original-unit-a', isComposing: false,
+            beforeSelection: { unitId: 'original-unit-a', start: 0, end: 0 },
+            afterSelection: { unitId: 'original-unit-a', start: prefix.length, end: prefix.length },
+          },
+        });
+        subject.result.current.editing.boundary('blur');
+        await subject.result.current.history.whenHistoryIdle();
+      });
+      await expect(subject.result.current.editing.flush()).rejects.toThrow('could not be saved');
+      expect(durableBlocks[0].plain_text).toBe(conversionInput);
+      expect(durableBoardRanges).toEqual(originalBoardRanges);
+      beforeConversion = { ...original, content_json: { ...original.content_json, body: conversionInput, [TEXT_FLOW_CONTENT_KEY]: typedFlow }, plain_text: conversionInput };
+      beforeConversionAnnotations = structuredClone(subject.result.current.adapter.annotationTruths[0].ranges);
+      beforeConversionBoardRanges = structuredClone(subject.result.current.adapter.captureBoardTextRanges(original.id).ranges);
+      expect(beforeConversionAnnotations[0]).toMatchObject({ start_offset: 12, end_offset: 16 });
+      expect(beforeConversionBoardRanges[0]).toMatchObject({ status: 'active', start_offset: 12, end_offset: 16 });
+    }
+    act(() => subject.result.current.slash.handleBlockTextChange(original.id, conversionInput, prefix.length + firstUnitText.length));
+    const command = NOTE_SLASH_COMMANDS.find((candidate) => candidate.id === commandId)!;
+    expect(command).toMatchObject({ templateKey, objectKind: 'structured_block' });
+    expect(subject.result.current.slash.slashCommands.find((candidate) => candidate.id === commandId)?.disabledReason).toBeUndefined();
+    if (!failedTyping) mocks.boardRangesPut.mockRejectedValueOnce(new Error('synthetic forward conversion range write failed'));
+    await act(async () => {
+      await subject.result.current.slash.handleSelectSlashCommand(command);
+      await subject.result.current.history.whenHistoryIdle();
+    });
+    expect(durableBlocks[0].metadata.template_id).toBe(templateKey);
+    if (failedTyping) {
+      expect(mocks.put.mock.calls.filter(([url]) => url === `/note-blocks/${original.id}`).map(([, payload]) => payload.plain_text))
+        .toEqual([conversionInput, conversionInput, prefix + 'alpha beta \nsecond gamma']);
+      expect(mocks.boardRangesPut.mock.calls[1][1].text_ranges).toEqual(beforeConversionBoardRanges.map((range) => expect.objectContaining({
+        id: range.id, status: 'active', start_offset: range.start_offset, end_offset: range.end_offset,
+      })));
+      await subject.result.current.editing.flush();
+      // A subsequent blur must not reuse the failed paragraph flow inside the formula.
+      await act(async () => {
+        const convertedBlock = subject.result.current.adapter.blocks[0];
+        expect((await subject.result.current.editing.saveBlock(convertedBlock, convertedBlock.plain_text ?? '', { silent: true })).status).toBe('saved');
+      });
+      expect(getTextFlowContent(durableBlocks[0].content_json)).toBeNull();
+      expect(durableBlocks[0].block_type).toBe('formula');
+    } else {
+      expect(durableBoardRanges).toEqual(originalBoardRanges);
+      expect(subject.result.current.editing.replaying).toBe(true);
+      const failedConversionDraft = structuredClone(subject.result.current.adapter.readBlockDraftSnapshot());
+      const writesBeforeBlockedInput = mocks.put.mock.calls.length;
+      await act(async () => {
+        expect(await subject.result.current.editing.applyEdit(
+          subject.result.current.adapter.blocks[0], createTextBlockContentV1('input must wait for conversion recovery'),
+        )).toBeUndefined();
+      });
+      expect(subject.result.current.adapter.readBlockDraftSnapshot()).toEqual(failedConversionDraft);
+      expect(mocks.put).toHaveBeenCalledTimes(writesBeforeBlockedInput);
+      await expect(subject.result.current.editing.flush()).rejects.toThrow('could not be saved');
+      await act(async () => {
+        const convertedBlock = subject.result.current.adapter.blocks[0];
+        expect((await subject.result.current.editing.saveBlock(convertedBlock, convertedBlock.plain_text ?? '', { silent: true })).status).toBe('saved');
+        await subject.result.current.editing.flush();
+      });
+    }
+    expect(subject.result.current.editing.replaying).toBe(false);
+
+    const converted = structuredClone(subject.result.current.adapter.blocks[0]);
+    const convertedFlow = getTextFlowContent(converted.content_json);
+    const convertedAnnotations = structuredClone(subject.result.current.adapter.annotationTruths[0].ranges);
+    const convertedBoardRanges = structuredClone(subject.result.current.adapter.captureBoardTextRanges(original.id).ranges);
+    expect(converted.metadata.template_id).toBe(templateKey);
+    expect(converted.block_type).toBe(commandId === 'formula' ? 'formula' : 'paragraph');
+    expect(converted.plain_text).toBe(prefix + 'alpha beta \nsecond gamma');
+    expect(converted.title).toBe(original.title);
+    expect(converted.content_json).not.toEqual(original.content_json);
+    expect(converted.metadata).not.toEqual(original.metadata);
+    if (commandId === 'formula') {
+      expect(convertedFlow).toBeNull();
+      expect(converted.content_json.field_values).toMatchObject({ latex_input: prefix + 'alpha beta \nsecond gamma' });
+    } else {
+      expect(convertedFlow?.units.map((unit) => ({ id: unit.id, writing_role: unit.writing_role })))
+        .toEqual([{ id: 'tu-1', writing_role: 'code_line' }]);
+      expect(convertedFlow?.inline_structures).toEqual([]);
+    }
+    convertedAnnotations.forEach((range, index) => {
+      expect(range.start_offset).toBeUndefined();
+      expect(range.end_offset).toBeUndefined();
+      expect(range.metadata?.pre_edit_offsets).toMatchObject({
+        start_offset: beforeConversionAnnotations[index].start_offset, end_offset: beforeConversionAnnotations[index].end_offset,
+      });
+    });
+    convertedBoardRanges.forEach((range, index) => expect(range).toMatchObject({
+      status: 'drifted', start_offset: null, end_offset: null,
+      pre_edit_offsets: { start_offset: beforeConversionBoardRanges[index].start_offset, end_offset: beforeConversionBoardRanges[index].end_offset },
+    }));
+
+    const laterAnnotationRange = { ...originalAnnotation.ranges[0], id: 'later-annotation-range', start_offset: 0, end_offset: 5, range_text_cache: 'alpha' };
+    const laterAnnotation: AnnotationTruthV1 = { ...originalAnnotation, id: 'later-annotation', raw_label: 'created after conversion', ranges: [{ ...laterAnnotationRange, id: 'later-other-range' }] };
+    const laterBoardRange: BoardTextRangeV1 = { ...originalBoardRanges[0], id: 'later-board-range', start_offset: 0, end_offset: 5, excerpt: 'alpha' };
+    durableBoardRanges.push(structuredClone(laterBoardRange));
+    await act(async () => {
+      await subject.result.current.adapter.saveAnnotationTruths([
+        { ...subject.result.current.adapter.annotationTruths[0], raw_label: 'renamed after conversion', ranges: [...convertedAnnotations, laterAnnotationRange] },
+        laterAnnotation,
+      ]);
+      await subject.result.current.adapter.refreshBoardTextRanges();
+    });
+
+    const assertSnapshot = (expected: NoteBlock, expectedRanges: AnnotationTruthV1['ranges'], expectedBoardRanges: BoardTextRangeV1[]) => {
+      const live = subject.result.current.adapter.blocks[0];
+      for (const field of ['block_type', 'title', 'content_json', 'plain_text', 'metadata'] as const) {
+        expect(live[field], `live ${field}`).toEqual(expected[field]);
+        expect(durableBlocks[0][field], `durable ${field}`).toEqual(expected[field]);
+      }
+      expect(getTextFlowContent(live.content_json)).toEqual(getTextFlowContent(expected.content_json));
+      expect(subject.result.current.adapter.blockTextFlowDrafts[original.id] ?? null).toEqual(getTextFlowContent(expected.content_json));
+      expect(live.source_references).toEqual(original.source_references);
+      expect(durableBlocks[0].source_references).toEqual(original.source_references);
+      expect(live.source_kind).toBe('manual');
+      for (const annotations of [subject.result.current.adapter.annotationTruths, durableAnnotationTruths]) {
+        expect(annotations[0].raw_label).toBe('renamed after conversion');
+        expect(annotations[0].ranges).toEqual([...expectedRanges, laterAnnotationRange]);
+        expect(annotations[1]).toEqual(laterAnnotation);
+      }
+      expect(subject.result.current.adapter.captureBoardTextRanges(original.id).ranges).toEqual([...expectedBoardRanges, laterBoardRange]);
+      expect(durableBoardRanges).toEqual([...expectedBoardRanges, laterBoardRange]);
+    };
+    assertSnapshot(converted, convertedAnnotations, convertedBoardRanges);
+    await act(async () => { expect(await subject.result.current.history.undoRuntimeHistory()).toBe(true); });
+    assertSnapshot(beforeConversion, beforeConversionAnnotations, beforeConversionBoardRanges);
+    await act(async () => { expect(await subject.result.current.history.redoRuntimeHistory()).toBe(true); });
+    assertSnapshot(converted, convertedAnnotations, convertedBoardRanges);
+    mocks.boardRangesPut.mockRejectedValueOnce(new Error('synthetic conversion replay range write failed'));
+    await act(async () => { expect(await subject.result.current.history.undoRuntimeHistory()).toBe(false); });
+    expect(subject.result.current.editing.replaying).toBe(true);
+    expect(subject.result.current.adapter.blocks[0].source_references).toEqual(original.source_references);
+    await act(async () => { expect(await subject.result.current.history.undoRuntimeHistory()).toBe(true); });
+    expect(subject.result.current.editing.replaying).toBe(false);
+    assertSnapshot(beforeConversion, beforeConversionAnnotations, beforeConversionBoardRanges);
+    if (failedTyping) {
+      await act(async () => { expect(await subject.result.current.history.undoRuntimeHistory()).toBe(true); });
+      assertSnapshot(original, originalAnnotation.ranges, originalBoardRanges);
+    }
+    await act(async () => { expect(await subject.result.current.history.undoRuntimeHistory()).toBe(false); });
+    const blockWrites = mocks.put.mock.calls.filter(([url]) => url === `/note-blocks/${original.id}`);
+    const conversionWrites = blockWrites.filter(([, payload]) => 'block_type' in payload);
+    expect(conversionWrites).toHaveLength(failedTyping ? 5 : 6);
+    if (!failedTyping) expect(blockWrites).toHaveLength(6);
+    conversionWrites.forEach(([, payload]) => expect(Object.keys(payload).sort())
+      .toEqual(['block_type', 'content_json', 'metadata', 'plain_text', 'title']));
+    expect(mocks.post).not.toHaveBeenCalled();
+    expect(mocks.delete).not.toHaveBeenCalled();
+  });
+
   it('V13 S2 saves paper without a retired purpose writer', async () => {
     mocks.put.mockImplementation(async (url: string, payload: unknown) => {
       if (url.startsWith('/purposes')) throw { response: { status: 410 } };
@@ -1092,6 +1356,123 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     expect(subject.result.current.blocks[0].content_json).toEqual(originalBlock.content_json);
     expect(listBlockEditRecoveryReceipts(note.id)).toEqual([]);
     expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
+  });
+
+  it('B4 reports an unconfirmed annotation result after failed reconciliation and keeps the live draft for retry', async () => {
+    const initial = annotationWithOffsets(note.id, 6, 10, 'beta');
+    const desired = annotationWithOffsets(note.id, 13, 17, 'beta');
+    durableAnnotationTruths = [initial];
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.annotationTruths).toEqual([initial]));
+    const originalGet = mocks.get.getMockImplementation()!;
+    mocks.get.mockImplementation(async (url: string) => {
+      if (url === `/annotation-truths/by-note/${note.id}`) throw new Error('synthetic reconciliation unavailable');
+      return originalGet(url);
+    });
+    mocks.put.mockRejectedValue(new Error('synthetic annotation write failed'));
+    let outcome = true;
+    await act(async () => {
+      subject.result.current.setAnnotationTruthsSnapshot([desired]);
+      outcome = await subject.result.current.saveAnnotationTruthsOutcome([desired], { preserveDrafts: true });
+    });
+    expect(outcome).toBe(false);
+    expect(subject.result.current.readAnnotationTruths()).toEqual([desired]);
+    expect(durableAnnotationTruths).toEqual([initial]);
+    await expect(subject.result.current.whenIdle()).rejects.toThrow();
+
+    mocks.get.mockImplementation(originalGet);
+    mocks.put.mockImplementation(async (_url: string, payload: { annotations: AnnotationTruthV1[] }) => {
+      durableAnnotationTruths = payload.annotations;
+      return { data: durableAnnotationTruths };
+    });
+    await act(async () => {
+      expect(await subject.result.current.saveAnnotationTruthsOutcome([desired], { preserveDrafts: true })).toBe(true);
+    });
+    await expect(subject.result.current.whenIdle()).resolves.toBeUndefined();
+  });
+
+  it('B4 rejects a partial annotation acknowledgement without replacing newer live annotations', async () => {
+    const first = annotationWithOffsets(note.id, 6, 10, 'beta');
+    const second = { ...first, id: 'second-annotation', ranges: [{ ...first.ranges[0], id: 'second-range' }] };
+    durableAnnotationTruths = [first];
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.annotationTruths).toEqual([first]));
+    mocks.put.mockResolvedValue({ data: [first] });
+    let outcome = true;
+    await act(async () => {
+      subject.result.current.setAnnotationTruthsSnapshot([first, second]);
+      outcome = await subject.result.current.saveAnnotationTruthsOutcome([first, second], { preserveDrafts: true });
+    });
+    expect(outcome).toBe(false);
+    expect(subject.result.current.readAnnotationTruths()).toEqual([first, second]);
+    await expect(subject.result.current.whenIdle()).rejects.toThrow();
+  });
+
+  it('B4 returns false for a held annotation response after the Note hydration generation changes', async () => {
+    const initial = annotationWithOffsets(note.id, 6, 10, 'beta');
+    const desired = annotationWithOffsets(note.id, 13, 17, 'beta');
+    const newer = annotationWithOffsets(note.id, 20, 24, 'beta');
+    durableAnnotationTruths = [initial];
+    const held = deferred<{ data: AnnotationTruthV1[] }>();
+    mocks.put.mockReturnValue(held.promise);
+    const subject = renderHook(
+      ({ onNoteLoaded }: { onNoteLoaded: () => void }) => useNoteCanvasDataAdapter({ ...stableAdapterOptions, onNoteLoaded }),
+      { initialProps: { onNoteLoaded: vi.fn() }, wrapper },
+    );
+    await waitFor(() => expect(subject.result.current.annotationTruths).toEqual([initial]));
+    const oldSave = subject.result.current.saveAnnotationTruthsOutcome;
+    let saving!: Promise<boolean>;
+    act(() => { saving = oldSave([desired], { preserveDrafts: true }); });
+    durableAnnotationTruths = [newer];
+    subject.rerender({ onNoteLoaded: vi.fn() });
+    await waitFor(() => expect(subject.result.current.annotationTruths).toEqual([newer]));
+    await act(async () => {
+      held.resolve({ data: [desired] });
+      expect(await saving).toBe(false);
+      expect(await oldSave([desired], { preserveDrafts: true })).toBe(false);
+    });
+    expect(subject.result.current.readAnnotationTruths()).toEqual([newer]);
+    expect(mocks.put).toHaveBeenCalledTimes(1);
+  });
+
+  it('B4 keeps newer local TextFlow and annotation drafts when an earlier queued save is acknowledged', async () => {
+    const before = createTextBlockContentV1('alpha beta gamma');
+    const firstFlow = createTextBlockContentV1('prefix alpha beta gamma');
+    const laterFlow = createTextBlockContentV1('more prefix alpha beta gamma');
+    const initialRange = annotationWithOffsets(note.id, 6, 10, 'beta');
+    const firstRange = annotationWithOffsets(note.id, 13, 17, 'beta');
+    const laterRange = annotationWithOffsets(note.id, 18, 22, 'beta');
+    durableAnnotationTruths = [initialRange];
+    durableBlocks = [{ ...serverBlock('alpha beta gamma', false), content_json: { body: 'alpha beta gamma', [TEXT_FLOW_CONTENT_KEY]: before } }];
+    const bodyPut = deferred<{ data: NoteBlock }>();
+    const annotationPut = deferred<{ data: AnnotationTruthV1[] }>();
+    mocks.put.mockImplementation((url: string) => url.startsWith('/note-blocks/') ? bodyPut.promise : annotationPut.promise);
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.blocks).toHaveLength(1));
+    const block = subject.result.current.blocks[0];
+    let bodySave!: Promise<BlockSaveOutcome>;
+    let annotationSave!: Promise<boolean>;
+    act(() => {
+      subject.result.current.setBlockTextFlowDrafts({ [block.id]: firstFlow });
+      subject.result.current.setBlockTextDrafts({ [block.id]: 'prefix alpha beta gamma' });
+      subject.result.current.setAnnotationTruthsSnapshot([firstRange]);
+      bodySave = subject.result.current.saveBlock(block, 'prefix alpha beta gamma', { textFlow: firstFlow, preserveDrafts: true });
+      annotationSave = subject.result.current.saveAnnotationTruthsOutcome([firstRange], { preserveDrafts: true });
+    });
+    act(() => {
+      subject.result.current.setBlockTextFlowDrafts({ [block.id]: laterFlow });
+      subject.result.current.setBlockTextDrafts({ [block.id]: 'more prefix alpha beta gamma' });
+      subject.result.current.setAnnotationTruthsSnapshot([laterRange]);
+    });
+    await act(async () => {
+      bodyPut.resolve({ data: { ...block, plain_text: 'prefix alpha beta gamma', content_json: { body: 'prefix alpha beta gamma', [TEXT_FLOW_CONTENT_KEY]: firstFlow } } });
+      annotationPut.resolve({ data: [firstRange] });
+      expect(await bodySave).toMatchObject({ status: 'saved' });
+      expect(await annotationSave).toBe(true);
+    });
+    expect(subject.result.current.blockTextFlowDrafts[block.id]).toEqual(laterFlow);
+    expect(subject.result.current.blockTextDrafts[block.id]).toBe('more prefix alpha beta gamma');
+    expect(subject.result.current.readAnnotationTruths()).toEqual([laterRange]);
   });
 
   it('reconciles every annotation save after a pre-commit rejection', async () => {

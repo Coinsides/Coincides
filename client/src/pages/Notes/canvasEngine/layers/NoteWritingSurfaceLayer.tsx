@@ -79,6 +79,7 @@ import {
   replaceTextUnitText,
 } from '../textFlowService';
 import type { ApplyBlockTextFlowEdit } from '../hooks/useBlockTextFlowEditController';
+import type { TextFlowEditBoundary, TextFlowEditMetadata, TextFlowEditSelection } from '../textFlowEditSession';
 import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import {
   setTextUnitWritingRole,
@@ -241,6 +242,7 @@ export interface NoteWritingSurfaceLayerProps {
   onDropTrayBlock?: (placementId: string, layout: BlockBoxLayout) => Promise<void>;
   activeBlockId: string | null;
   contentReadOnly: boolean;
+  recoveryBlockIds?: string[];
   activeSlashCommandId: string | null;
   allBlocks: NoteBlock[];
   anchorsBySourceRef: Record<string, SourceAnchor>;
@@ -336,6 +338,7 @@ export interface NoteWritingSurfaceLayerProps {
   onBlockTextChange: (blockId: string, value: string, caret: number, anchorElement?: HTMLElement | null) => void;
   onBlockTextFlowChange: Dispatch<SetStateAction<Record<string, TextBlockContentV1>>>;
   onApplyBlockTextFlowEdit: ApplyBlockTextFlowEdit;
+  onTextEditBoundary?: (reason: TextFlowEditBoundary, selection?: TextFlowEditSelection) => void;
   onClearSlashTarget: () => void;
   onAddPageBelow: (frameId: string) => void;
   onCreatePageFrame: () => void;
@@ -521,6 +524,7 @@ export function NoteWritingSurfaceLayer({
   onDropTrayBlock,
   activeBlockId,
   contentReadOnly,
+  recoveryBlockIds = [],
   activeSlashCommandId,
   allBlocks,
   anchorsBySourceRef,
@@ -594,6 +598,7 @@ export function NoteWritingSurfaceLayer({
   onBlockTextChange,
   onBlockTextFlowChange,
   onApplyBlockTextFlowEdit,
+  onTextEditBoundary,
   onClearSlashTarget,
   onAddPageBelow,
   onCreatePageFrame,
@@ -2271,8 +2276,10 @@ export function NoteWritingSurfaceLayer({
   const handleBlockTextFlowChange = async (
     block: NoteBlock,
     nextTextFlow: TextBlockContentV1,
+    metadata?: TextFlowEditMetadata,
+    previousTextFlow?: TextBlockContentV1,
   ) => {
-    await onApplyBlockTextFlowEdit(block, nextTextFlow);
+    await onApplyBlockTextFlowEdit(block, nextTextFlow, { metadata, previousTextFlow });
   };
 
   const textFlowWithPlainText = (
@@ -3832,6 +3839,7 @@ export function NoteWritingSurfaceLayer({
               coordinateContract={noteCanvasRuntime.coordinateContract}
               pageFrame={selectPlacementFrame(layout, noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract)}
               contentReadOnly={contentReadOnly}
+              allowSaveRecovery={recoveryBlockIds.includes(block.id)}
               text={text}
               layout={layout}
               blockFragments={blockFragmentsByBlockId.get(block.id)}
@@ -3880,7 +3888,8 @@ export function NoteWritingSurfaceLayer({
                 }
                 onBlockTextChange(block.id, value, caret, anchorElement);
               }}
-              onTextFlowChange={(textFlow) => void handleBlockTextFlowChange(block, textFlow)}
+              onTextFlowChange={(textFlow, metadata, previousTextFlow) => void handleBlockTextFlowChange(block, textFlow, metadata, previousTextFlow)}
+              onTextEditBoundary={onTextEditBoundary}
               onFieldDraftChange={(fieldValues) => onFieldDraftChange(block, text, fieldValues)}
               onSave={async (silent, fieldValues, textFlow) => {
                 const save = blockSaveTextAndFlow(block, text, fieldValues, textFlow);
