@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 307 份文档。
+共 310 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -299,6 +299,8 @@
 | [handoffs/2026-09-09-v13-4-w4-fix2-order.md](handoffs/2026-09-09-v13-4-w4-fix2-order.md) | 走查修二 | `done(HQ 收口:F5 经补遗一原子端点修复验证,F6 局部修复+F7-F9 收货;凭据扫描 HQ 例行补跑)` | — | — |
 | [handoffs/2026-09-09-v13-4-w4-fix3-order.md](handoffs/2026-09-09-v13-4-w4-fix3-order.md) | 走查修三 · F10 | `done(HQ 收口:F10 收货;STOP-1 裁陈旧红入 13.6 清册)` | — | — |
 | [handoffs/2026-09-09-v13-4-w4-fix4-order.md](handoffs/2026-09-09-v13-4-w4-fix4-order.md) | 走查修四 · 选区精修批 | `done（施工回执；完整 runtime gate 停线待 HQ）` | — | — |
+| [handoffs/2026-09-09-v13-4-w4-fix5-order.md](handoffs/2026-09-09-v13-4-w4-fix5-order.md) | 走查修五 · F11 | `done（builder施工回执；HQ复核/完整总门待接）` | — | — |
+| [handoffs/2026-09-09-v13-4-w4-fix6-order.md](handoffs/2026-09-09-v13-4-w4-fix6-order.md) | 走查修六 · F11-B + F12 | `done(HQ 收口:双修+两补遗收货;T-1 红判环境候查入 13.6 基线)` | — | — |
 | [handoffs/2026-09-09-v13-4-wave1-wiring-order.md](handoffs/2026-09-09-v13-4-wave1-wiring-order.md) | 13.4 单 A · 接线批 + 生命周期批 | `ready` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
@@ -313,6 +315,7 @@
 | [handoffs/plans/v13-2-wilderness-retirement-plan.md](handoffs/plans/v13-2-wilderness-retirement-plan.md) | V13.2 · 野地退役 + 迁移 —— 段 plan | `active` | 2026-09-07 | — |
 | [handoffs/plans/v13-3-board-mvp-plan.md](handoffs/plans/v13-3-board-mvp-plan.md) | V13.3 · 板 MVP(线索黑板)—— 段 plan | `active` | 2026-09-08 | — |
 | [handoffs/plans/v13-4-projection-itemization-plan.md](handoffs/plans/v13-4-projection-itemization-plan.md) | V13.4 · 投影全谱 + item 化 + 板成熟 —— 段 plan(修订二) | `active` | 2026-09-09 | — |
+| [handoffs/plans/v13-5-layout-credentials-plan.md](handoffs/plans/v13-5-layout-credentials-plan.md) | V13.5 · 版面与凭据 —— 段计划草案 | `draft` | 2026-09-09 | — |
 | [handoffs/plans/v13-foundation-rebuild-plan.md](handoffs/plans/v13-foundation-rebuild-plan.md) | V13 · 地基重做版 —— 总 plan v1 | `active` | 2026-08-30 | — |
 | [handoffs/plans/v14-agent-era-plan-draft.md](handoffs/plans/v14-agent-era-plan-draft.md) | V14 · Agent 时代 —— 总 plan 草稿 v0 | `draft` | 2026-09-09 | — |
 | [handoffs/plans/v2-bn12-2-mcp-tool-face.md](handoffs/plans/v2-bn12-2-mcp-tool-face.md) | Plan V2.BN.12.2 — MCP 工具面(末端执行器第一次实体化) | `active` | — | — |
