@@ -11,6 +11,7 @@ import { contentForEditedTextFlowBlock, plainTextForBlockContent, presentationKi
 import { buildBlockTemplatePayload, type BlockTemplatePayload } from '../blockTemplateConversionService';
 import type { BlockBoxLayout } from '../runtimeLayout';
 import { extractTextUnit } from '../textUnitExtractionService';
+import { moveTextUnitBetweenFlows, type TextUnitIdMapping } from '../textUnitMoveService';
 import { TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
 
 export interface TextFlowHistoryHost {
@@ -68,6 +69,12 @@ export interface DocumentTextFlowEdit {
 
 interface DocumentTransaction {
   blocks: { edit: TextFlowEditTransaction; typingRecovery: TextFlowEditSnapshot }[];
+  move?: {
+    sourceBlock: NoteBlock; targetBlock: NoteBlock; textUnitId: string;
+    idMapping: TextUnitIdMapping;
+    appliedSide: 'before' | 'after'; unresolvedTransfer?: 'before' | 'after';
+    sourcePayload: TransferPayloads; targetPayload: TransferPayloads;
+  };
   extraction?: {
     sourceBlock: NoteBlock; textUnitId: string; template: TemplateOption; layout: BlockBoxLayout;
     extracted: TextBlockContentV1; createdBlock: NoteBlock | null; createdVisible: boolean;
@@ -78,6 +85,11 @@ interface DocumentTransaction {
     unresolvedTransfer?: 'before' | 'after';
   };
 }
+
+type TransferPayloads = {
+  before: Pick<BlockTemplatePayload, 'content_json' | 'plain_text'>;
+  after: Pick<BlockTemplatePayload, 'content_json' | 'plain_text'>;
+};
 
 const blockPayload = ({ block_type, title, content_json, plain_text, metadata }: NoteBlock): BlockTemplatePayload => (
   structuredClone({ block_type, title, content_json, plain_text, metadata })
@@ -143,7 +155,10 @@ export function useTextFlowHistory(options: Options) {
     };
     const setDocumentPending = (value: boolean) => {
       documentPending = value;
-      if (current()) setReplayScope(value ? token : null);
+      // A rejected pair write can leave every draft unchanged. Keep a visible
+      // recovery state so React does not batch true -> null into no render and
+      // hide both retry controls while documentFailures still owns the entry.
+      if (current()) setReplayScope(value || documentFailures.size > 0 ? token : null);
     };
     const restoreSelection = (blockId: string, selection: TextFlowEditSelection) => {
       if (current()) setSelectionRequest({ token, blockId, selection });
@@ -256,6 +271,85 @@ export function useTextFlowHistory(options: Options) {
       }
       return current() && success;
     };
+    // Extraction and migration use the same atomic pair write and frozen OCC
+    // bases. Only extraction owns a destination block lifecycle.
+    const persistUnitTransfer = async (
+      transaction: DocumentTransaction, side: 'before' | 'after',
+      state: { sourceBlock: NoteBlock; targetBlock: NoteBlock; textUnitId: string;
+        idMapping?: TextUnitIdMapping;
+        sourcePayload: TransferPayloads; targetPayload: TransferPayloads },
+    ): Promise<{ sourceBlock: NoteBlock; targetBlock: NoteBlock } | null> => {
+      if (!current() || !latest.current.transferTextUnit) return null;
+      const [source, target] = transaction.blocks;
+      const original = latest.current.blocks.find((block) => block.id === source.edit.blockId) ?? state.sourceBlock;
+      const destination = latest.current.blocks.find((block) => block.id === target.edit.blockId) ?? state.targetBlock;
+      const forward = side === 'after';
+      const result = await latest.current.transferTextUnit({
+        sourceBlock: forward ? original : destination, targetBlock: forward ? destination : original,
+        textUnitId: forward ? state.textUnitId : state.idMapping?.unit_id ?? state.textUnitId,
+        ...(state.idMapping ? { idMapping: forward ? state.idMapping : {
+          unit_id: state.textUnitId,
+          inline_ids: Object.fromEntries(Object.entries(state.idMapping.inline_ids).map(([from, to]) => [to, from])),
+        } } : {}),
+        sourceTextFlow: forward ? source.edit.after.textFlow : target.edit.before.textFlow,
+        targetTextFlow: forward ? target.edit.after.textFlow : source.edit.before.textFlow,
+        sourcePayload: forward ? state.sourcePayload.after : state.targetPayload.before,
+        targetPayload: forward ? state.targetPayload.after : state.sourcePayload.before,
+        sourceBaseRevision: baseFor(forward ? source.edit : target.edit, side, forward ? original : destination),
+        targetBaseRevision: baseFor(forward ? target.edit : source.edit, side, forward ? destination : original),
+      });
+      if (!current() || !result) return null;
+      const sourceBlock = forward ? result.sourceBlock : result.targetBlock;
+      const targetBlock = forward ? result.targetBlock : result.sourceBlock;
+      for (const { edit } of transaction.blocks) {
+        const block = edit.blockId === sourceBlock.id ? sourceBlock : targetBlock;
+        committed(edit, block);
+        lastSave.set(edit.blockId, { transaction: edit, side,
+          outcome: { status: 'saved', block, recoveryReceipt: null, reconciliation: 'response' } });
+      }
+      return { sourceBlock, targetBlock };
+    };
+    const persistMove = async (transaction: DocumentTransaction, side: 'before' | 'after', replay: boolean): Promise<boolean> => {
+      const move = transaction.move!;
+      documentFailures.set(transaction, side);
+      setDocumentPending(true);
+      let success = false;
+      try {
+        if (!current()) return false;
+        // A failed response can already have committed. Reconcile the original
+        // direction first, retaining its exact two bases, before reversing it.
+        if (move.unresolvedTransfer && move.unresolvedTransfer !== side) {
+          if (!await persistMove(transaction, move.unresolvedTransfer, false) || !current()) return false;
+          documentFailures.set(transaction, side);
+          setDocumentPending(true);
+        }
+        for (const { edit, typingRecovery } of transaction.blocks) {
+          const failedTyping = [...failures.entries()].find(([failed]) => failed.blockId === edit.blockId);
+          if (failedTyping && !await persist(failedTyping[0], failedTyping[1], false, typingRecovery)) return false;
+          if (!current()) return false;
+        }
+        if (move.appliedSide !== side) {
+          move.unresolvedTransfer = side;
+          const result = await persistUnitTransfer(transaction, side, move);
+          if (!current() || !result) return false;
+          Object.assign(move, result);
+          move.appliedSide = side;
+          move.unresolvedTransfer = undefined;
+        }
+        success = true;
+        documentFailures.delete(transaction);
+        return true;
+      } catch {
+        return false;
+      } finally {
+        if (current()) {
+          if (!success) latest.current.onSaveFailure?.();
+          setDocumentPending(false);
+          if (replay && success) restoreSelection(side === 'after' ? move.targetBlock.id : move.sourceBlock.id,
+            { ...transaction.blocks[0].edit.before.selection, unitId: side === 'after' ? move.idMapping.unit_id : move.textUnitId });
+        }
+      }
+    };
     const persistExtraction = async (transaction: DocumentTransaction, side: 'before' | 'after', replay: boolean): Promise<boolean> => {
       const extraction = transaction.extraction!;
       documentFailures.set(transaction, side);
@@ -310,32 +404,16 @@ export function useTextFlowHistory(options: Options) {
           extraction.placementPersisted = true;
         }
         if (extraction.createdBlock && extraction.appliedSide !== side) {
-          const original = latest.current.blocks.find((block) => block.id === source.edit.blockId) ?? extraction.sourceBlock;
-          const created = extraction.createdBlock;
-          const target = transaction.blocks[1];
-          const forward = side === 'after';
           extraction.unresolvedTransfer = side;
-          const result = await api.transferTextUnit({
-            sourceBlock: forward ? original : created, targetBlock: forward ? created : original,
-            textUnitId: extraction.textUnitId,
-            sourceTextFlow: forward ? source.edit.after.textFlow : target.edit.before.textFlow,
-            targetTextFlow: forward ? target.edit.after.textFlow : source.edit.before.textFlow,
-            sourcePayload: forward ? extraction.sourcePayload.after : extraction.createdPayload!.before,
-            targetPayload: forward ? extraction.createdPayload!.after : extraction.sourcePayload.before,
-            sourceBaseRevision: baseFor(forward ? source.edit : target.edit, side, forward ? original : created),
-            targetBaseRevision: baseFor(forward ? target.edit : source.edit, side, forward ? created : original),
+          const result = await persistUnitTransfer(transaction, side, {
+            sourceBlock: extraction.sourceBlock, targetBlock: extraction.createdBlock, textUnitId: extraction.textUnitId,
+            sourcePayload: extraction.sourcePayload, targetPayload: extraction.createdPayload!,
           });
           if (!current() || !result) return false;
-          extraction.sourceBlock = forward ? result.sourceBlock : result.targetBlock;
-          extraction.createdBlock = forward ? result.targetBlock : result.sourceBlock;
+          extraction.sourceBlock = result.sourceBlock;
+          extraction.createdBlock = result.targetBlock;
           extraction.appliedSide = side;
           extraction.unresolvedTransfer = undefined;
-          for (const { edit } of transaction.blocks) {
-            const block = edit.blockId === extraction.sourceBlock.id ? extraction.sourceBlock : extraction.createdBlock;
-            committed(edit, block);
-            lastSave.set(edit.blockId, { transaction: edit, side,
-              outcome: { status: 'saved', block, recoveryReceipt: null, reconciliation: 'response' } });
-          }
         }
         if (side === 'before' && extraction.createdBlock && extraction.createdVisible) {
           if (!await api.trashBlock(extraction.createdBlock.id, { silent: true }) || !current()) return false;
@@ -367,6 +445,7 @@ export function useTextFlowHistory(options: Options) {
     // existing individual saves; a same-side retry only finishes missing blocks.
     const persistDocument = async (transaction: DocumentTransaction, side: 'before' | 'after', replay = false): Promise<boolean> => {
       if (transaction.extraction) return persistExtraction(transaction, side, replay);
+      if (transaction.move) return persistMove(transaction, side, replay);
       if (!current()) return false;
       let progress = documentProgress.get(transaction);
       if (!progress || progress.side !== side) {
@@ -586,6 +665,57 @@ export function useTextFlowHistory(options: Options) {
     try { return await host.enqueueRuntimeHistoryOperation(() => scope.persistDocument(transaction, 'after')); }
     finally { scope.setDocumentPending(false); }
   }, [boundary, scope]);
+  const moveUnit = useCallback(async (
+    block: NoteBlock, textUnitId: string, targetBlock: NoteBlock, targetUnitId: string, edge: 'before' | 'after',
+  ): Promise<boolean> => {
+    if (!scope.current() || scope.templateFailures.size || scope.documentFailures.size || !boundary()) return false;
+    const api = latest.current;
+    const host = api.history.current;
+    // The active note's complete block list is the membership boundary; neither
+    // caller-supplied block content nor an old route's projection is trusted.
+    const source = api.blocks.find((candidate) => candidate.id === block.id);
+    const target = api.blocks.find((candidate) => candidate.id === targetBlock.id);
+    const textProjection = (candidate: NoteBlock) => candidate.block_type !== 'item_ref'
+      && presentationKindForBlock(candidate) === 'paragraph';
+    if (!host || !api.transferTextUnit || !source || !target || source.id === target.id
+      || !textProjection(source) || !textProjection(target)) return false;
+    const sourceFlow = api.blockTextFlowDrafts[source.id] ?? getTextFlowContent(source.content_json);
+    const targetFlow = api.blockTextFlowDrafts[target.id] ?? getTextFlowContent(target.content_json);
+    const moved = sourceFlow && targetFlow && moveTextUnitBetweenFlows(sourceFlow, textUnitId, targetFlow, targetUnitId, edge);
+    if (!sourceFlow || !targetFlow || !moved) return false;
+    const selection = { unitId: textUnitId, start: 0, end: 0 };
+    const snapshot = (owner: NoteBlock, textFlow: TextBlockContentV1): TextFlowEditSnapshot => ({
+      textFlow, selection,
+      annotationRanges: api.readAnnotationTruths().flatMap((annotation) => annotation.ranges
+        .filter((range) => range.block_id === owner.id).map((range) => ({ annotationId: annotation.id, range }))),
+      boardRanges: api.captureBoardTextRanges(owner.id).ranges,
+    });
+    const payloads = (owner: NoteBlock, before: TextBlockContentV1, after: TextBlockContentV1): TransferPayloads => ({
+      before: JSON.stringify(before) === JSON.stringify(getTextFlowContent(owner.content_json))
+        ? { content_json: owner.content_json, plain_text: owner.plain_text }
+        : { content_json: contentForEditedTextFlowBlock(owner, before), plain_text: plainTextFromTextFlow(before) },
+      after: { content_json: contentForEditedTextFlowBlock(owner, after), plain_text: plainTextFromTextFlow(after) },
+    });
+    const transaction: DocumentTransaction = structuredClone({
+      blocks: [{ owner: source, before: sourceFlow, after: moved.source }, { owner: target, before: targetFlow, after: moved.target }]
+        .map(({ owner, before, after }) => {
+          const beforeSnapshot = snapshot(owner, before);
+          return { edit: { noteId: api.noteId, generation: api.generation, blockId: owner.id,
+            metadata: { unitId: textUnitId, inputType: 'moveTextUnit', kind: 'structural', isComposing: false,
+              beforeSelection: selection, afterSelection: selection }, before: beforeSnapshot,
+            after: { ...beforeSnapshot, textFlow: after } }, typingRecovery: beforeSnapshot };
+        }),
+      move: { sourceBlock: source, targetBlock: target, textUnitId, idMapping: moved.idMapping, appliedSide: 'before',
+        sourcePayload: payloads(source, sourceFlow, moved.source), targetPayload: payloads(target, targetFlow, moved.target) },
+    });
+    if (!host.pushHistoryEntry({ type: 'reversibleEdit',
+      undo: () => scope.persistDocument(transaction, 'before', true),
+      redo: () => scope.persistDocument(transaction, 'after', true),
+    }, { skipBoundary: true })) return false;
+    scope.setDocumentPending(true);
+    try { return await host.enqueueRuntimeHistoryOperation(() => scope.persistDocument(transaction, 'after')); }
+    finally { scope.setDocumentPending(false); }
+  }, [boundary, scope]);
   const applyTemplateToBlock = useCallback(async (
     block: NoteBlock, template: TemplateOption, text: string, selection?: TextFlowEditSelection,
   ): Promise<NoteBlock | null> => {
@@ -709,7 +839,7 @@ export function useTextFlowHistory(options: Options) {
       throw new Error('Text changes could not be saved. Retry saving or undo before leaving the note.');
     }
   }, [boundary, options.history, scope]);
-  return { applyEdit, applyDocumentEdit, extractUnit, applyTemplateToBlock, boundary, saveBlock, flush,
+  return { applyEdit, applyDocumentEdit, extractUnit, moveUnit, applyTemplateToBlock, boundary, saveBlock, flush,
     isReplaying: () => scope.isReplaying() || Boolean(latest.current.history.current?.isReplaying?.()),
     recoveryBlockIds: scope.isReplaying() ? [] : [...new Set([
       ...[...scope.templateFailures.keys()].map((transaction) => transaction.blockId),

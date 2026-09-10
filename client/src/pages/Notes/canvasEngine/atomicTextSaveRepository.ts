@@ -3,6 +3,7 @@ import type { BoardTextRangeV1 } from '../../../../../shared/types/boardTextRang
 import type { AnnotationTruthV1, NoteBlock } from './runtimeDataTypes';
 import type { AnnotationRangeSnapshot } from './textFlowEditSession';
 import type { BlockTemplatePayload } from './blockTemplateConversionService';
+import type { TextUnitIdMapping } from './textUnitMoveService';
 
 export interface AtomicTextSaveResult {
   block: NoteBlock;
@@ -25,6 +26,7 @@ export async function saveTextUnitTransfer(input: {
   sourceBlockId: string;
   targetBlockId: string;
   textUnitId: string;
+  idMapping?: TextUnitIdMapping;
   sourceBaseRevision: number;
   targetBaseRevision: number;
   sourceBlock: Partial<BlockTemplatePayload>;
@@ -34,6 +36,7 @@ export async function saveTextUnitTransfer(input: {
     note_id: input.noteId,
     source_block_id: input.sourceBlockId,
     text_unit_id: input.textUnitId,
+    ...(input.idMapping ? { id_mapping: input.idMapping } : {}),
     source_base_revision: input.sourceBaseRevision,
     target_base_revision: input.targetBaseRevision,
     source_block: input.sourceBlock,

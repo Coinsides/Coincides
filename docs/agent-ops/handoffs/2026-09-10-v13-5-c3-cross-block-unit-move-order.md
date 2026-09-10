@@ -89,3 +89,55 @@
 4. 补冒烟:两个普通块(均 tu-1,各挂批注+板引用+inline)互迁首行→重映射成功、引用逐字段可解析、undo 逆映射恢复、redo 重放;409 路径转为仅保留给"映射后仍不可行"的真异常。
 
 **裁定:按补裁一续建,做完追加 Result 二。**
+
+## Result 二
+
+2026-09-10 · Codex builder · **HQ 补裁已实现，普通块 ID 碰撞停线点已解除；工程交回复核，保持 ready，不自行放行。**
+
+### 本轮实现
+
+- 仅在迁入 unit/inline ID 与目标块已有 ID 碰撞时分配未占用 ID；避让时预留源、目标全部已有 ID，未碰撞的 ID 保持原值。创建链及默认 `tu-1` / `tu-N` 命名零改动。
+- 既有 `unit-transfer` 接收可选 `id_mapping: { unit_id, inline_ids }`。客户端准备双块快照及映射，服务端在同一双 revision 事务内核对映射可用性和 unit/inline 字段保真，写入双块、inline parent、批注四地址字段及板文字引用 unit 地址。offset/excerpt/status/metadata 不因迁居重算。
+- 原 `DocumentTransaction.move` 保存映射表和源原 ID；undo 用映射后的 unit ID 发起逆迁、传 inline 逆映射，redo 复用初次映射。B10 不传映射的路径继续兼容，没有第二条 history、创建链或持久化入口。
+- 批注同时带 unit+inline 时按稳定 range ID 一次改完，避免先迁 block 再漏改 inline。客户端按源归属识别迁出批注，正响应及丢响应读回均核对映射后的完整地址；等待迁移的批注改名/换色保存继承完整地址，目标块同名 inline 的批注不被误迁。
+
+### numstat 增量
+
+**相对本轮开工快照（已含前轮 Result 及 HQ 复核），代码与测试 9 文件，+699/-103。** 不以 HEAD 累计差异冒充本轮增量；快照在 `.codex-tmp/c3-r2-baseline/`，逐文件使用 `git diff --no-index --numstat` 计算。新增于前轮的未跟踪文件亦按本轮快照计增量。
+
+| 文件（client 路径均相对 `client/src/pages/Notes/canvasEngine/`） | + | - |
+|---|---:|---:|
+| `atomicTextSaveRepository.ts` | 3 | 0 |
+| `textUnitMoveService.ts` | 28 | 6 |
+| `textUnitMoveService.test.ts` | 42 | 4 |
+| `hooks/useTextFlowHistory.ts` | 10 | 4 |
+| `hooks/useTextFlowHistory.move.test.tsx` | 168 | 20 |
+| `hooks/useNoteCanvasDataAdapter.ts` | 45 | 15 |
+| `hooks/useNoteCanvasDataAdapter.test.tsx` | 145 | 0 |
+| `server/src/services/atomicTextUnitTransfer.ts`（仓根相对） | 69 | 23 |
+| `server/src/__tests__/v13AtomicTextSave.test.ts`（仓根相对） | 189 | 31 |
+
+本回执文档 **+52/-0**，本轮合计 **10 文件，+751/-103**；明细 `.codex-tmp/c3-r2-numstat.json`，配方 `.codex-tmp/c3-r2-numstat.cjs` 可直接复算。未暂存。
+
+### 五冒烟（含 HQ 补冒烟）
+
+1. **① PASS。** 前轮修前断言与停线证据保留在原 Result；本轮不改落点手势/指示线，实际 writing-surface pointer 的 before/after 行间落点、一次派发与 role 保真测试继续通过。普通块同 `tu-1` 的 flow 插入不再被客户端拒绝，unit 与 inline 碰撞均映射；目标原 unit 的 ID、正文和角色保留。
+2. **② PASS。** 双普通块分别以 A→B、B→A 起步，每次迁移一步 undo 恢复两块完整 payload/批注/板引用原地址，redo 重放同一映射；无多余历史项，双 revision 为 0→1→2→3。另同一会话 A 首行→B 行后，再将 B 原首行→A 空块，连续 undo 两次/redo 两次逐字段恢复，revision 到 6。映射后的 redo 焦点、原方向失败重试、逆向前先确认前向、typing 依赖均通过。
+3. **③ PASS，HQ 补冒烟闭合。** 两个真实 `createClientNoteBlock` 普通块均保留 `tu-1`，各挂同名 `inline-1`、批注及板引用，经实际 HTTP/内存 SQLite 在两个方向分别正迁→undo 逆映射→redo。逐字段核对 unit role/indent/metadata、inline parent/range/field_values/status、批注 unit-only/inline-only/同时 unit+inline、板文字引用；每阶段地址可解析，目标原有引用不变，excerpt/offset 零变。明确 flow 但 block 为 NULL 的锚保持 NULL；不碰撞的 inline 保持 ID。双 revision 拒绝、映射不可用及晚锚写失败均回滚双块与全部引用。客户端另验证丢响应读回与待决批注改名/换色不会写回旧 ID。
+4. **④ PASS。** 首行也是末行时，迁出块仍 active、正文为空、`units=[]`，placement 不动；可将对块原首行迁回该空块占位行。B10 原 7 条 extraction history、原服务端 3 条 B10 测试及 page/canvas 空白落地、悬停目标后转投空白的新建行为均保持通过；未改 B10 创建/placement/trash/restore 机器。
+5. **⑤ PASS。** 源/目标 IME 拒绝、组字开始清线取消、非文本块/其他写作面/其他 note 拒绝迁入均通过。B4–B10/C1/C2 既有 client 测试完整保留、无过滤整库最终 **113 files / 1221 tests PASS**；三个 server 功能文件完整运行 **23/23 PASS，0 skipped**。
+
+### 验证门、过程异常与未做
+
+- **通过**：`npm.cmd run test:unit`（client 全库）、`npm.cmd run build:client`、`npm.cmd run build`（两端均含 typecheck）；末批 client 测试追加后另跑 `node node_modules/typescript/bin/tsc -b`（cwd=`client`）通过；`git diff --check` 通过。所有 Vite 调用均使用新建空临时 `COINCIDES_VALIDATION_ENV_DIR`，不加载项目 `.env`。
+- server 命令（cwd=`server`）：`node ../scripts/run-server-test-suite.mjs src/__tests__/v13AtomicTextSave.test.ts src/__tests__/v13AtomicTextSaveMigration.test.ts src/__tests__/v13GraphemeTextRanges.test.ts`；合成内存库及 runner 临时资产隔离，未启动用户实例。
+- 允许的总门子项已实跑：registry/manifest/parity 测试及检查、server shared import、canvas boundary、三 shell、source experience、legacy shutdown、relation freshness、canvas model/performance 均通过。**`docs:check` 仍非绿**：本轮未改的 `docs/agent-ops/INDEX.md` 过期，与前轮一致；未擅自重生成全局索引。其后 inventory 与 glossary 子项已独立实跑通过。
+- 过程异常如实保留：client 第一轮 **1220 PASS / 1 FAIL** 为新互迁夹具误期望剩余 unit 的 `order_index=0`，修为 B10 既有保留值 1，未动生产；第二轮 C3 全绿，但未改的 `groupGalleryPurposeRetirement.test.tsx:111` 出现一次标题断言失败（预期 `Saved through editor`，实际 `Original group`），原因未定。只读检查提示初始化 effect 时序窗口，但没有事件轨迹证明；未称其已证实的既有 flake，未改 Gallery。第三轮完整 client 全绿。server 构建首轮因新增测试 `Object.hasOwn` 超出 ES2020 失败，改兼容写法后重跑两端 build 全绿。
+- **未做**：完整 `verify:v2-bn8-runtime` 聚合末项含本单禁止的 `check:changed-file-secrets`，因此未调用聚合、凭据扫描留 HQ；未新增/执行安全专项，既有功能套件整跑无过滤。未读 `.env`/key、未接触用户库、未 stage/commit/push；未动权限文件或其他开工既有未跟踪件。
+- **验证射程**：真实 React pointer/IME 冒泡 + jsdom 几何夹具；真实 history 搭持久层内存替身；真实 adapter/repository 搭 HTTP seam；实际 Express/SQLite 服务测试。它们是分层链路证据，**未做真实浏览器到 SQLite 的单条 E2E，也未做人类体感签收**。
+- **保留的真异常**：inline 批注的 `block_id`、`text_flow_id` 同时为空，且同 note 其他块亦有同 inline ID 时，已有数据无法判断归属；返回 409、事务零变化。明确 block/flow 的普通碰撞已正常迁移，该异常不再代表日常首行互迁。
+- 日志/配方：`.codex-tmp/c3-r2-test-unit.log`（最终全库）、`c3-r2-test-unit-first.log`、`c3-r2-test-unit-second.log`、`c3-r2-server-functional.log`、`c3-r2-allowed-gates.cjs` 及 client/build/gates summary；独立只读增量复核未发现新增阻塞，放行仍由 HQ 决定。
+
+### 停线
+
+**补裁一及补冒烟施工完成，追加回执后停线交 HQ。** 普通局部 ID 碰撞的原停线原因已解除；文档索引既有红项、凭据扫描及主观/浏览器签收按上述边界留 HQ，不自行翻 done，不接下一单，不 stage/commit/push。

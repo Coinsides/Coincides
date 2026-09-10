@@ -40,6 +40,7 @@ import {
   hasMeaningfulWritingSurfaceContent,
 } from '../writingEntryVisibility';
 import type { SlashTarget } from '../hooks/useSlashCommandController';
+import type { CrossBlockUnitDropTarget } from '../hooks/useTextUnitHandleDrag';
 import type {
   AnnotationTruthV1,
   ContentGroupV1,
@@ -346,6 +347,7 @@ export interface NoteWritingSurfaceLayerProps {
   onApplyBlockTextFlowEdit: ApplyBlockTextFlowEdit;
   onApplyDocumentTextFlowEdit?: (changes: DocumentFlowEdit[]) => Promise<boolean>;
   onExtractTextUnit?: (block: NoteBlock, unitId: string, layout: BlockBoxLayout) => Promise<boolean>;
+  onMoveTextUnit?: (block: NoteBlock, unitId: string, targetBlock: NoteBlock, targetUnitId: string, edge: 'before' | 'after') => Promise<boolean>;
   onTextEditBoundary?: (reason: TextFlowEditBoundary, selection?: TextFlowEditSelection) => void;
   onClearSlashTarget: () => void;
   onAddPageBelow: (frameId: string) => void;
@@ -609,6 +611,7 @@ export function NoteWritingSurfaceLayer({
   onApplyBlockTextFlowEdit,
   onApplyDocumentTextFlowEdit,
   onExtractTextUnit,
+  onMoveTextUnit,
   onTextEditBoundary,
   onClearSlashTarget,
   onAddPageBelow,
@@ -680,6 +683,7 @@ export function NoteWritingSurfaceLayer({
   const stagingItemDrop = useContext(NoteCanvasRuntimeContext)?.stagingItemDrop;
   const itemDropPending = useRef(false);
   const [spacePanReady, setSpacePanReady] = useState(false);
+  const [unitMoveTarget, setUnitMoveTarget] = useState<CrossBlockUnitDropTarget | null>(null);
   const [canvasPanning, setCanvasPanning] = useState(false);
   const [pageFrameInteractionPreview, setPageFrameInteractionPreview] = useState<{
     frameId: string;
@@ -3450,6 +3454,7 @@ export function NoteWritingSurfaceLayer({
     <DocumentTextFlowSelectionContext.Provider value={documentTextSelection}>
     <section
       ref={surfaceRef}
+      data-text-unit-move-scope={noteId}
       className={`${styles.writingSurface} ${surfaceMode === 'canvas' ? styles.writingSurfaceCanvas : styles.pageReadingSurface} ${overviewOpen ? styles.overviewWritingSurface : ''} ${spacePanReady ? styles.canvasPanReady : ''} ${canvasPanning ? styles.canvasPanning : ''}`}
       data-page-frame-template={primaryPageFrameExtension?.templateId || primaryPageFrame?.templateId || 'none'}
       data-page-frame-background={primaryPageFrameExtension?.background.kind || primaryPageFrame?.background?.kind || 'none'}
@@ -3995,6 +4000,18 @@ export function NoteWritingSurfaceLayer({
               onTextFlowChange={(textFlow, metadata, previousTextFlow) => void handleBlockTextFlowChange(block, textFlow, metadata, previousTextFlow)}
               onTextEditBoundary={onTextEditBoundary}
               onExtractTextUnit={(unitId, point) => handleExtractTextUnit(block, unitId, point)}
+              onMoveTextUnit={onMoveTextUnit ? (unitId, target) => {
+                if (contentReadOnly || layoutMode || document.querySelector('[data-runtime-textflow-composing="true"]')) return;
+                const destination = allBlocks.find((candidate) => candidate.id === target.blockId);
+                if (destination && destination.id !== block.id && destination.block_type !== 'item_ref'
+                  && presentationKindForBlock(destination) === 'paragraph') {
+                  void onMoveTextUnit(block, unitId, destination, target.unitId, target.edge);
+                }
+              } : undefined}
+              onUnitDropTargetChange={(next) => setUnitMoveTarget((current) => (
+                current?.blockId === next?.blockId && current?.unitId === next?.unitId && current?.edge === next?.edge ? current : next
+              ))}
+              unitDropTarget={unitMoveTarget?.blockId === block.id ? unitMoveTarget : null}
               onFlowSelectionStart={clearDraft}
               onBoundaryNavigate={(request) => navigateBoundary(block.id, request)}
               onNavigationTarget={(target) => {

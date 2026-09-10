@@ -377,6 +377,151 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     consoleWarn.mockRestore();
   });
 
+  function c3TransferFixture(options: {
+    lostResponse?: boolean;
+    staleAddress?: 'text unit' | 'inline' | 'board unit';
+    held?: Promise<void>;
+  } = {}) {
+    const sourceFlow = createTextBlockContentV1('move', 'quote');
+    const targetFlow = createTextBlockContentV1('stay', 'heading');
+    sourceFlow.inline_structures.push({ id: 'inline', parent_text_unit_id: 'tu-1', semantic_kind: 'inline_code',
+      anchor_range: { start: 0, end: 4 }, anchor_text: 'move', field_values: { language: 'text' }, metadata: { source: true }, status: 'active' });
+    targetFlow.inline_structures.push({ ...sourceFlow.inline_structures[0], anchor_text: 'stay', metadata: { target: true } });
+    const source = { ...serverBlock('move', false), text_save_revision: 0,
+      content_json: { [TEXT_FLOW_CONTENT_KEY]: sourceFlow, retained: 'source' } };
+    const target = { ...serverBlock('stay', false), id: 'destination', text_save_revision: 0,
+      content_json: { [TEXT_FLOW_CONTENT_KEY]: targetFlow, retained: 'target' } };
+    const originals = [source, target].map((block, index) => {
+      const annotation = annotationWithOffsets(note.id, 0, 4, index ? 'stay' : 'move');
+      return { ...annotation, id: `annotation-${block.id}`, ranges: [
+        { ...annotation.ranges[0], id: `span-${block.id}`, block_id: block.id, text_flow_id: `textflow-${block.id}` },
+        { id: `inline-${block.id}`, target_kind: 'inline_structure' as const, block_id: block.id,
+          text_flow_id: `textflow-${block.id}`, inline_structure_id: 'inline', metadata: { retained: index } },
+      ] };
+    });
+    const originalBoardRanges: BoardTextRangeV1[] = [source, target].map((block, index) => ({
+      id: `board-${block.id}`, note_id: note.id, board_id: 'board', block_id: block.id, text_flow_id: `textflow-${block.id}`,
+      text_unit_id: 'tu-1', start_offset: 0, end_offset: 4, excerpt: index ? 'stay' : 'move', status: 'active',
+      pre_edit_offsets: null, at: 'at', created_at: 'created', updated_at: 'updated',
+    }));
+    const idMapping = { unit_id: 'tu-1-move-fixed', inline_ids: { inline: 'inline-move-fixed' } };
+    const sourceAfter = { ...sourceFlow, units: [], inline_structures: [] };
+    const targetAfter = { ...targetFlow, units: [{ ...sourceFlow.units[0], id: idMapping.unit_id },
+      { ...targetFlow.units[0], order_index: 1 }], inline_structures: [...targetFlow.inline_structures,
+      { ...sourceFlow.inline_structures[0], id: idMapping.inline_ids.inline, parent_text_unit_id: idMapping.unit_id }] };
+    const expectedAnnotations = structuredClone(originals);
+    expectedAnnotations[0].ranges = expectedAnnotations[0].ranges.map((range) => ({ ...range,
+      block_id: target.id, text_flow_id: `textflow-${target.id}`,
+      ...('text_unit_id' in range ? { text_unit_id: idMapping.unit_id } : { inline_structure_id: idMapping.inline_ids.inline }),
+    }));
+    const expectedBoardRanges = originalBoardRanges.map((range, index) => index ? range : { ...range,
+      block_id: target.id, text_flow_id: `textflow-${target.id}`, text_unit_id: idMapping.unit_id });
+    durableBlocks = structuredClone([source, target]);
+    durableAnnotationTruths = structuredClone(originals);
+    let durableBoardRanges = structuredClone(originalBoardRanges);
+    mocks.boardRangesGet.mockImplementation(async () => ({ data: { text_ranges: structuredClone(durableBoardRanges) } }));
+    mocks.put.mockImplementation(async (url, payload) => {
+      if (url.endsWith('/unit-transfer')) {
+        expect(url).toBe(`/note-blocks/${target.id}/unit-transfer`);
+        expect(payload).toMatchObject({ source_block_id: source.id, text_unit_id: 'tu-1', id_mapping: idMapping,
+          source_base_revision: 0, target_base_revision: 0 });
+        await options.held;
+        const sourceBlock = { ...source, ...payload.source_block, text_save_revision: 1 };
+        const targetBlock = { ...target, ...payload.target_block, text_save_revision: 1 };
+        durableBlocks = [sourceBlock, targetBlock];
+        durableAnnotationTruths = structuredClone(expectedAnnotations);
+        durableBoardRanges = structuredClone(expectedBoardRanges);
+        if (options.staleAddress === 'text unit') durableAnnotationTruths[0].ranges[0].text_unit_id = 'tu-1';
+        if (options.staleAddress === 'inline') durableAnnotationTruths[0].ranges[1].inline_structure_id = 'inline';
+        if (options.staleAddress === 'board unit') durableBoardRanges[0].text_unit_id = 'tu-1';
+        if (options.lostResponse) throw new Error('response lost after collision transfer');
+        return { data: { source_block: sourceBlock, target_block: targetBlock, source_revision: 1, target_revision: 1,
+          annotations: structuredClone(durableAnnotationTruths), text_ranges: structuredClone(durableBoardRanges) } };
+      }
+      expect(url).toBe(`/annotation-truths/by-note/${note.id}`);
+      durableAnnotationTruths = structuredClone(payload.annotations);
+      return { data: structuredClone(durableAnnotationTruths) };
+    });
+    const input = { sourceBlock: source, targetBlock: target, textUnitId: 'tu-1', idMapping,
+      sourceTextFlow: sourceAfter, targetTextFlow: targetAfter, sourceBaseRevision: 0, targetBaseRevision: 0,
+      sourcePayload: { content_json: { ...source.content_json, [TEXT_FLOW_CONTENT_KEY]: sourceAfter }, plain_text: '' },
+      targetPayload: { content_json: { ...target.content_json, [TEXT_FLOW_CONTENT_KEY]: targetAfter }, plain_text: 'move\nstay' },
+    };
+    return { input, source, target, originals, expectedAnnotations, originalBoardRanges, expectedBoardRanges };
+  }
+
+  it.each([false, true])('C3 real adapter and repository confirm mapped unit, inline and board addresses (lost response: %s)', async (lostResponse) => {
+    const fixture = c3TransferFixture({ lostResponse });
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    const readsBefore = mocks.get.mock.calls.length;
+    let receipt: Awaited<ReturnType<typeof subject.result.current.transferTextUnit>> = null;
+    await act(async () => { receipt = await subject.result.current.transferTextUnit(fixture.input); });
+    expect(receipt).not.toBeNull();
+    expect(mocks.put).toHaveBeenCalledTimes(1);
+    expect(subject.result.current.blocks.map((block) => block.content_json)).toEqual([
+      fixture.input.sourcePayload.content_json, fixture.input.targetPayload.content_json,
+    ]);
+    expect(subject.result.current.annotationTruths).toEqual(fixture.expectedAnnotations);
+    expect(subject.result.current.captureBoardTextRanges(fixture.source.id).ranges).toEqual([]);
+    expect(subject.result.current.captureBoardTextRanges(fixture.target.id).ranges).toEqual(fixture.expectedBoardRanges);
+    expect(durableAnnotationTruths[1]).toEqual(fixture.originals[1]);
+    expect(fixture.expectedBoardRanges[1]).toEqual(fixture.originalBoardRanges[1]);
+    if (lostResponse) {
+      expect(mocks.get.mock.calls.slice(readsBefore).map(([url]) => url)).toEqual(expect.arrayContaining([
+        `/notes/${note.id}/blocks`, `/annotation-truths/by-note/${note.id}`,
+      ]));
+      expect(mocks.boardRangesGet.mock.calls.length).toBeGreaterThan(1);
+    }
+    expect(mocks.boardRangesPut).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { lostResponse: false, staleAddress: 'text unit' as const },
+    { lostResponse: true, staleAddress: 'text unit' as const },
+    { lostResponse: false, staleAddress: 'inline' as const },
+    { lostResponse: true, staleAddress: 'inline' as const },
+    { lostResponse: false, staleAddress: 'board unit' as const },
+    { lostResponse: true, staleAddress: 'board unit' as const },
+  ])('C3 does not confirm stale $staleAddress ownership even when its block and flow match (lost response: $lostResponse)', async (options) => {
+    const fixture = c3TransferFixture(options);
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    await act(async () => { expect(await subject.result.current.transferTextUnit(fixture.input)).toBeNull(); });
+    expect(subject.result.current.blocks.map((block) => block.text_save_revision)).toEqual([0, 0]);
+    expect(subject.result.current.annotationTruths).toEqual(fixture.originals);
+    expect(subject.result.current.captureBoardTextRanges(fixture.source.id).ranges).toEqual([fixture.originalBoardRanges[0]]);
+    expect(mocks.put).toHaveBeenCalledTimes(1);
+  });
+
+  it('C3 retains optimistic rename and color while the pending save inherits both mapped unit and inline ownership', async () => {
+    const held = deferred<void>();
+    const fixture = c3TransferFixture({ held: held.promise });
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    let transfer!: ReturnType<typeof subject.result.current.transferTextUnit>;
+    act(() => { transfer = subject.result.current.transferTextUnit(fixture.input); });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
+    let rename!: Promise<boolean>;
+    act(() => { rename = subject.result.current.saveAnnotationTruthsOutcome(subject.result.current.annotationTruths
+      .map((annotation, index) => index ? annotation : { ...annotation, raw_label: 'renamed during collision move' })); });
+    let color!: Promise<boolean>;
+    act(() => { color = subject.result.current.saveAnnotationTruthsOutcome(subject.result.current.annotationTruths
+      .map((annotation, index) => index ? annotation : { ...annotation, visual_style: { ...annotation.visual_style, color_token: 'green' } })); });
+    expect(subject.result.current.annotationTruths[0]).toMatchObject({ raw_label: 'renamed during collision move',
+      visual_style: { color_token: 'green' } });
+    expect(mocks.put).toHaveBeenCalledTimes(1);
+    await act(async () => { held.resolve(); expect(await transfer).not.toBeNull(); expect(await rename).toBe(true); expect(await color).toBe(true); });
+    const expected = structuredClone(fixture.expectedAnnotations);
+    expected[0].raw_label = 'renamed during collision move'; expected[0].visual_style.color_token = 'green';
+    expect(durableAnnotationTruths).toEqual(expected);
+    expect(subject.result.current.annotationTruths).toEqual(expected);
+    const annotationWrites = mocks.put.mock.calls.filter(([url]) => url === `/annotation-truths/by-note/${note.id}`);
+    expect(annotationWrites).toHaveLength(2);
+    for (const [, payload] of annotationWrites) expect(payload.annotations[0].ranges).toEqual(fixture.expectedAnnotations[0].ranges);
+    expect(subject.result.current.captureBoardTextRanges(fixture.target.id).ranges).toEqual(fixture.expectedBoardRanges);
+  });
+
   it.each([
     { lostResponse: false, nullPlainText: false },
     { lostResponse: true, nullPlainText: false },

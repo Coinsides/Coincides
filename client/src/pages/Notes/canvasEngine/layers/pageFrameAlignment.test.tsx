@@ -293,6 +293,169 @@ describe('B10 extraction landing through the actual writing surface', () => {
   });
 });
 
+describe('C3 cross-block unit handle events through the actual writing surface', () => {
+  let hit: ReturnType<typeof vi.fn<() => Element | null>>;
+  let originalHit: PropertyDescriptor | undefined;
+  beforeEach(() => {
+    originalHit = Object.getOwnPropertyDescriptor(document, 'elementFromPoint');
+    hit = vi.fn((): Element | null => null);
+    Object.defineProperty(document, 'elementFromPoint', { configurable: true, value: hit });
+  });
+  afterEach(() => {
+    if (originalHit) Object.defineProperty(document, 'elementFromPoint', originalHit);
+    else delete (document as unknown as { elementFromPoint?: unknown }).elementFromPoint;
+  });
+
+  const rect = (x: number, y: number, width: number, height: number): DOMRect => ({
+    x, y, left: x, top: y, right: x + width, bottom: y + height, width, height,
+    toJSON: () => ({ x, y, width, height }),
+  });
+  function pointer(handle: HTMLElement, type: string, x: number, y: number) {
+    const event = new MouseEvent(type, { bubbles: true, cancelable: true, button: 0,
+      buttons: type === 'pointerup' ? 0 : 1, clientX: x, clientY: y });
+    Object.defineProperties(event, { pointerId: { value: 31 }, pointerType: { value: 'mouse' }, isPrimary: { value: true } });
+    fireEvent(handle, event);
+  }
+  function renderMoveSurface(prefix = 'c3', noteId = 'synthetic-c3-note') {
+    const props = propsFor(frame(0), 'page');
+    const sourceFlow = createTextBlockContentV1('Synthetic checked task');
+    sourceFlow.units[0] = { ...sourceFlow.units[0], id: `${prefix}-move`, writing_role: 'todo_item',
+      indent_level: 2, metadata: { checked: true, retained: { field: 'source' } } };
+    const targetFlow = createTextBlockContentV1('');
+    targetFlow.units = ['Before', 'After'].map((text, index) => ({ ...targetFlow.units[0],
+      id: `${prefix}-target-${index}`, text, order_index: index, writing_role: 'quote' as const }));
+    const source: NoteBlock = { ...props.visibleBlocks[0], id: `${prefix}-source`,
+      placement_id: `${prefix}-source-placement`, plain_text: sourceFlow.units[0].text,
+      content_json: { [TEXT_FLOW_CONTENT_KEY]: sourceFlow } };
+    const target: NoteBlock = { ...source, id: `${prefix}-target`, placement_id: `${prefix}-target-placement`,
+      plain_text: 'Before\nAfter', content_json: { [TEXT_FLOW_CONTENT_KEY]: targetFlow }, order_index: 1 };
+    const code: NoteBlock = { ...source, id: `${prefix}-code`, placement_id: `${prefix}-code-placement`,
+      block_type: 'code', plain_text: 'const synthetic = true;', content_json: { body: 'const synthetic = true;', language: 'typescript' },
+      metadata: { template_key: 'text.code' }, order_index: 2 };
+    const blocks = [source, target, code];
+    const layouts = Object.fromEntries(blocks.map((block, index) => [block.id, { ...props.defaultDraftLayout, y: index * 180 }]));
+    const move = vi.fn<NonNullable<NoteWritingSurfaceLayerProps['onMoveTextUnit']>>(async () => true);
+    const extract = vi.fn<NonNullable<NoteWritingSurfaceLayerProps['onExtractTextUnit']>>(async () => true);
+    const view = render(<NoteWritingSurfaceLayer {...props} noteId={noteId} contentReadOnly={false} layoutMode={false}
+      allBlocks={blocks} visibleBlocks={blocks} sortedBlockCount={blocks.length} blockLayouts={layouts}
+      pageOffsetX={0} onMoveTextUnit={move} onExtractTextUnit={extract} />);
+    const editor = (blockId: string) => view.container.querySelector<HTMLElement>(`[data-text-unit-editor="${blockId}"]`)!;
+    const sourceEditor = editor(source.id);
+    const targetEditor = editor(target.id);
+    const sourceHandle = sourceEditor.querySelector<HTMLElement>(`[data-text-unit-handle="${prefix}-move"]`)!;
+    vi.spyOn(sourceEditor, 'getBoundingClientRect').mockReturnValue(rect(100, 100, 400, 40));
+    vi.spyOn(sourceEditor.querySelector<HTMLElement>('[data-text-unit-row]')!, 'getBoundingClientRect')
+      .mockReturnValue(rect(100, 100, 400, 40));
+    vi.spyOn(targetEditor, 'getBoundingClientRect').mockReturnValue(rect(100, 300, 400, 80));
+    [...targetEditor.querySelectorAll<HTMLElement>('[data-text-unit-row]')].forEach((row, index) => {
+      vi.spyOn(row, 'getBoundingClientRect').mockReturnValue(rect(100, 300 + index * 40, 400, 40));
+    });
+    const blockList = props.blockListRef.current!;
+    const scale = Number(sourceEditor.closest<HTMLElement>('[data-page-display-scale]')!.dataset.pageDisplayScale);
+    vi.spyOn(blockList, 'getBoundingClientRect').mockReturnValue(rect(100, 100, 760 * scale, 1182 * scale));
+    return { ...view, props, blocks, source, target, code, sourceFlow, targetFlow, move, extract, sourceEditor,
+      targetEditor, sourceHandle, blockList, scale,
+      start: () => pointer(sourceHandle, 'pointerdown', 90, 110),
+      over: (y = 340) => pointer(sourceHandle, 'pointermove', 120, y),
+      release: (y = 340) => pointer(sourceHandle, 'pointerup', 120, y),
+    };
+  }
+
+  it.each([{ y: 340, edge: 'before' }, { y: 375, edge: 'after' }] as const)(
+    'smoke 1: paints the target $edge line and dispatches one move with the original role and fields', ({ y, edge }) => {
+      const editor = renderMoveSurface();
+      const before = structuredClone(editor.blocks);
+      hit.mockReturnValue(editor.targetEditor.querySelector('[data-text-unit-row="c3-target-1"]'));
+      editor.start(); editor.over(y);
+      const line = editor.targetEditor.querySelector<HTMLElement>('[data-text-unit-drop-indicator="c3-target-1"]');
+      expect(line?.dataset.dropEdge).toBe(edge);
+      expect(editor.sourceEditor.querySelector('[data-text-unit-drop-indicator]')).toBeNull();
+      expect(editor.move).not.toHaveBeenCalled();
+      expect(editor.extract).not.toHaveBeenCalled();
+      editor.release(y);
+      expect(editor.move).toHaveBeenCalledExactlyOnceWith(editor.source, 'c3-move', editor.target, 'c3-target-1', edge);
+      // This surface dispatches the intact truth to the atomic history owner;
+      // its persistence and undo are exercised by the dedicated history tests.
+      expect(editor.move.mock.calls[0][0].content_json).toEqual(before[0].content_json);
+      expect(editor.sourceFlow.units[0]).toMatchObject({ writing_role: 'todo_item', indent_level: 2,
+        metadata: { checked: true, retained: { field: 'source' } } });
+      expect(editor.blocks).toEqual(before);
+      expect(editor.extract).not.toHaveBeenCalled();
+      expect(editor.container.querySelector('[data-text-unit-drop-indicator]')).toBeNull();
+    },
+  );
+
+  it('smoke 4: moving over a text block then releasing on blank paper keeps B10 extraction', () => {
+    const editor = renderMoveSurface();
+    hit.mockReturnValue(editor.targetEditor);
+    editor.start(); editor.over();
+    expect(editor.targetEditor.querySelector('[data-text-unit-drop-indicator]')).not.toBeNull();
+    hit.mockReturnValue(editor.blockList);
+    const blank = { x: 100 + 220 * editor.scale, y: 100 + 600 * editor.scale };
+    pointer(editor.sourceHandle, 'pointermove', blank.x, blank.y);
+    expect(editor.container.querySelector('[data-text-unit-drop-indicator]')).toBeNull();
+    pointer(editor.sourceHandle, 'pointerup', blank.x, blank.y);
+    expect(editor.move).not.toHaveBeenCalled();
+    expect(editor.extract).toHaveBeenCalledTimes(1);
+    expect(editor.extract.mock.calls[0].slice(0, 2)).toEqual([editor.source, 'c3-move']);
+    const layout = editor.extract.mock.calls[0][2];
+    const screen = resolveScreenRect(layout, frame(0), 'v2', 0);
+    expect(100 + screen.x * editor.scale).toBeCloseTo(blank.x);
+    expect(100 + screen.y * editor.scale).toBeCloseTo(blank.y);
+    expect(layout.surface).toBe('formal_page');
+  });
+
+  it('smoke 5: source/target composition refuses a drag and composition beginning mid-drag clears the line', () => {
+    const editor = renderMoveSurface();
+    hit.mockReturnValue(editor.targetEditor);
+    for (const textarea of [editor.sourceEditor.querySelector('textarea')!, editor.targetEditor.querySelector('textarea')!]) {
+      fireEvent.compositionStart(textarea);
+      editor.start(); editor.over(); editor.release();
+      expect(editor.move).not.toHaveBeenCalled();
+      expect(editor.extract).not.toHaveBeenCalled();
+      expect(editor.container.querySelector('[data-text-unit-drop-indicator]')).toBeNull();
+      fireEvent.compositionEnd(textarea);
+    }
+    editor.start(); editor.over();
+    expect(editor.targetEditor.querySelector('[data-text-unit-drop-indicator]')).not.toBeNull();
+    const targetTextarea = editor.targetEditor.querySelector('textarea')!;
+    fireEvent.compositionStart(targetTextarea);
+    expect(editor.container.querySelector('[data-text-unit-drop-indicator]')).toBeNull();
+    fireEvent.compositionEnd(targetTextarea);
+    editor.release();
+    expect(editor.move).not.toHaveBeenCalled();
+    expect(editor.extract).not.toHaveBeenCalled();
+    editor.start(); editor.over(); editor.release();
+    expect(editor.move).toHaveBeenCalledTimes(1);
+  });
+
+  it('smoke 5: a code block rejects the unit without becoming a blank-paper extraction', () => {
+    const editor = renderMoveSurface();
+    const codeShell = editor.container.querySelector<HTMLElement>(`[data-note-block-shell="true"][data-block-id="${editor.code.id}"]`)!;
+    expect(codeShell).not.toBeNull();
+    expect(codeShell.querySelector('[data-text-unit-editor]')).toBeNull();
+    hit.mockReturnValue(codeShell.querySelector('textarea') ?? codeShell);
+    editor.start(); editor.over(); editor.release();
+    expect(editor.move).not.toHaveBeenCalled();
+    expect(editor.extract).not.toHaveBeenCalled();
+    expect(editor.container.querySelector('[data-text-unit-drop-indicator]')).toBeNull();
+  });
+
+  it.each(['synthetic-c3-note', 'synthetic-other-note'])(
+    'smoke 5: another mounted writing surface (note %s) cannot receive this drag', (noteId) => {
+      const editor = renderMoveSurface();
+      const other = renderMoveSurface('foreign-c3', noteId);
+      hit.mockReturnValue(other.targetEditor);
+      editor.start(); editor.over(); editor.release();
+      expect(editor.move).not.toHaveBeenCalled();
+      expect(editor.extract).not.toHaveBeenCalled();
+      expect(other.move).not.toHaveBeenCalled();
+      expect(other.extract).not.toHaveBeenCalled();
+      expect(document.querySelector('[data-text-unit-drop-indicator]')).toBeNull();
+    },
+  );
+});
+
 describe('page frame decoration alignment on synthetic collections', () => {
   it('aligns the page top ruler with the block column despite a historical frame x', () => {
     const sample = alignment(80, 'page');

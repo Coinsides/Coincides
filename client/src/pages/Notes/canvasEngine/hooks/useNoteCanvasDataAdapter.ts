@@ -22,6 +22,8 @@ import {
 } from '../blockContentService';
 import { buildBlockTemplatePayload, type BlockTemplatePayload } from '../blockTemplateConversionService';
 import { saveAtomicText, saveTextUnitTransfer } from '../atomicTextSaveRepository';
+import type { TextUnitIdMapping } from '../textUnitMoveService';
+import type { BoardTextRangeV1 } from '../../../../../../shared/types/boardTextRange';
 import { restoreAnnotationRangeSnapshots, type AnnotationRangeSnapshot } from '../textFlowEditSession';
 import {
   getEffectiveAIVisibility,
@@ -840,7 +842,8 @@ export function useNoteCanvasDataAdapter({
       const liveRanges = new Map(transfer.ranges.map((range) => [range.id, range]));
       nextAnnotations = nextAnnotations.map((annotation) => ({ ...annotation, ranges: annotation.ranges.map((range) => {
         const live = liveRanges.get(range.id);
-        return live ? { ...range, block_id: live.block_id, text_flow_id: live.text_flow_id } : range;
+        return live ? { ...range, block_id: live.block_id, text_flow_id: live.text_flow_id,
+          text_unit_id: live.text_unit_id, inline_structure_id: live.inline_structure_id } : range;
       }) }));
     }
 
@@ -2370,6 +2373,7 @@ export function useNoteCanvasDataAdapter({
 
   const transferTextUnit = useCallback(writeRegistry.hold('transferTextUnit', async (input: {
     sourceBlock: NoteBlock; targetBlock: NoteBlock; textUnitId: string;
+    idMapping?: TextUnitIdMapping;
     sourceTextFlow: TextBlockContentV1; targetTextFlow: TextBlockContentV1;
     sourceBaseRevision: number; targetBaseRevision: number;
     sourcePayload?: Pick<BlockTemplatePayload, 'content_json' | 'plain_text'>;
@@ -2397,17 +2401,50 @@ export function useNoteCanvasDataAdapter({
     try {
       await previousAnnotations;
       if (!current()) return null;
+      const targetUnitId = input.idMapping?.unit_id ?? input.textUnitId;
+      const inlineMapping = new Map(Object.entries(input.idMapping?.inline_ids ?? {}));
+      const inverseInlineMapping = new Map([...inlineMapping].map(([from, to]) => [to, from]));
       const movedInlineIds = new Set(input.targetTextFlow.inline_structures
-        .filter((inline) => inline.parent_text_unit_id === input.textUnitId).map((inline) => inline.id));
-      const movedRangeIds = new Set(annotationTruthsRef.current.flatMap((annotation) => annotation.ranges
-        .filter((range) => (range.block_id === input.sourceBlock.id && range.text_unit_id === input.textUnitId)
-          || Boolean(range.inline_structure_id && movedInlineIds.has(range.inline_structure_id))))
-        .map((range) => range.id));
+        .filter((inline) => inline.parent_text_unit_id === targetUnitId)
+        .map((inline) => inverseInlineMapping.get(inline.id) ?? inline.id));
+      const sourceFlowId = `textflow-${input.sourceBlock.id}`;
+      const targetFlowId = `textflow-${input.targetBlock.id}`;
+      const movedRanges = annotationTruthsRef.current.flatMap((annotation) => annotation.ranges.filter((range) => {
+        const owned = range.block_id === input.sourceBlock.id
+          || (range.block_id == null && range.text_flow_id === sourceFlowId);
+        const legacyInline = range.block_id == null && range.text_flow_id == null;
+        return (owned && range.text_unit_id === input.textUnitId)
+          || ((owned || legacyInline) && Boolean(range.inline_structure_id && movedInlineIds.has(range.inline_structure_id)));
+      }));
+      const movedRangeIds = new Set(movedRanges.map((range) => range.id));
+      const expectedAddress = (range: AnnotationTruthV1['ranges'][number]) => ({
+        block_id: range.block_id == null ? null : input.targetBlock.id,
+        text_flow_id: range.text_flow_id == null ? null : targetFlowId,
+        text_unit_id: range.text_unit_id === input.textUnitId ? targetUnitId : range.text_unit_id ?? null,
+        inline_structure_id: range.inline_structure_id == null ? null : inlineMapping.get(range.inline_structure_id) ?? range.inline_structure_id,
+      });
+      const movedBoardRanges = boardRangeSession.snapshot(input.sourceBlock.id).ranges
+        .filter((range) => range.text_unit_id === input.textUnitId);
+      const addressesConfirmed = (annotations: AnnotationTruthV1[], textRanges: BoardTextRangeV1[]) => {
+        const confirmedAnnotations = new Map(annotations.flatMap((annotation) => annotation.ranges.map((range) => [range.id, range] as const)));
+        const confirmedBoard = new Map(textRanges.map((range) => [range.id, range]));
+        return movedRanges.every((range) => {
+          const confirmed = confirmedAnnotations.get(range.id);
+          return confirmed && Object.entries(expectedAddress(range)).every(([field, value]) =>
+            (confirmed[field as keyof typeof confirmed] ?? null) === value);
+        }) && movedBoardRanges.every((range) => {
+          const confirmed = confirmedBoard.get(range.id);
+          // A board reference may have been independently deleted while saving.
+          return !confirmed || (confirmed.block_id === input.targetBlock.id && confirmed.text_flow_id === targetFlowId
+            && confirmed.text_unit_id === targetUnitId);
+        });
+      };
       let result: Awaited<ReturnType<typeof saveTextUnitTransfer>>;
       try {
         result = await saveTextUnitTransfer({
           noteId: requestedNote.id, sourceBlockId: input.sourceBlock.id, targetBlockId: input.targetBlock.id,
           textUnitId: input.textUnitId, sourceBaseRevision: input.sourceBaseRevision, targetBaseRevision: input.targetBaseRevision,
+          idMapping: input.idMapping,
           sourceBlock: sourcePayload, targetBlock: targetPayload,
         });
       } catch (error) {
@@ -2419,24 +2456,17 @@ export function useNoteCanvasDataAdapter({
         ]);
         const source = blockResponse.data.find((block) => block.id === input.sourceBlock.id);
         const target = blockResponse.data.find((block) => block.id === input.targetBlock.id);
-        const inlineIds = new Set(input.targetTextFlow.inline_structures
-          .filter((inline) => inline.parent_text_unit_id === input.textUnitId).map((inline) => inline.id));
-        const oldAnnotationIds = new Set(annotationTruthsRef.current.flatMap((annotation) => annotation.ranges
-          .filter((range) => range.block_id === input.sourceBlock.id && (range.text_unit_id === input.textUnitId
-            || Boolean(range.inline_structure_id && inlineIds.has(range.inline_structure_id))))).map((range) => range.id));
-        const oldBoardIds = new Set(boardRangeSession.snapshot(input.sourceBlock.id).ranges
-          .filter((range) => range.text_unit_id === input.textUnitId).map((range) => range.id));
         if (!source || !target || source.text_save_revision !== input.sourceBaseRevision + 1
           || target.text_save_revision !== input.targetBaseRevision + 1
           || source.plain_text !== sourcePayload.plain_text || target.plain_text !== targetPayload.plain_text
           || JSON.stringify(canonicalJsonValue(source.content_json)) !== JSON.stringify(canonicalJsonValue(sourceContent))
           || JSON.stringify(canonicalJsonValue(target.content_json)) !== JSON.stringify(canonicalJsonValue(targetContent))
-          || annotations.some((annotation) => annotation.ranges.some((range) => oldAnnotationIds.has(range.id) && range.block_id !== target.id))
-          || textRanges.some((range) => oldBoardIds.has(range.id) && range.block_id !== target.id)) throw error;
+          || !addressesConfirmed(annotations, textRanges)) throw error;
         result = { source_block: source, target_block: target, annotations, text_ranges: textRanges,
           source_revision: source.text_save_revision, target_revision: target.text_save_revision };
       }
       if (!current()) return null;
+      if (!addressesConfirmed(result.annotations, result.text_ranges)) throw new Error('Text unit addresses were not confirmed');
       const sourceBlock = hydrateClientBlock({ ...input.sourceBlock, ...result.source_block, source_references: input.sourceBlock.source_references });
       const targetBlock = hydrateClientBlock({ ...input.targetBlock, ...result.target_block, source_references: input.targetBlock.source_references });
       committedTextRevisions.current.set(sourceBlock.id, result.source_revision);

@@ -60,6 +60,7 @@ import { CodeBlockProjection } from '../blocks/CodeBlockProjection';
 import { ItemRefBlockProjection } from '../blocks/ItemRefBlockProjection';
 import { useBlockMeasurement } from '../hooks/useBlockMeasurement';
 import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
+import type { CrossBlockUnitDropTarget, TextUnitDropTarget } from '../hooks/useTextUnitHandleDrag';
 import type { TextFlowEditBoundary, TextFlowEditMetadata, TextFlowEditSelection } from '../textFlowEditSession';
 import {
   supportsTextFlowBlockNavigation,
@@ -107,6 +108,9 @@ interface BlockEditorLayerProps {
   onTextFlowChange: (textFlow: TextBlockContentV1, metadata?: TextFlowEditMetadata, previousTextFlow?: TextBlockContentV1) => void;
   onTextEditBoundary?: (reason: TextFlowEditBoundary, selection?: TextFlowEditSelection) => void;
   onExtractTextUnit?: (unitId: string, point: { x: number; y: number }) => void;
+  onMoveTextUnit?: (unitId: string, target: CrossBlockUnitDropTarget) => void;
+  onUnitDropTargetChange?: (target: CrossBlockUnitDropTarget | null) => void;
+  unitDropTarget?: TextUnitDropTarget | null;
   onBoundaryNavigate?: (request: TextFlowBoundaryNavigationRequest) => boolean;
   onNavigationTarget?: (target: TextFlowNavigationTarget | null) => void;
   onFlowSelectionStart?: () => void;
@@ -175,6 +179,9 @@ export function BlockEditorLayer({
   onTextFlowChange,
   onTextEditBoundary,
   onExtractTextUnit,
+  onMoveTextUnit,
+  onUnitDropTargetChange,
+  unitDropTarget,
   onBoundaryNavigate,
   onNavigationTarget,
   onFieldDraftChange,
@@ -523,6 +530,9 @@ export function BlockEditorLayer({
             onTextFlowChange={onTextFlowChange}
             onTextEditBoundary={onTextEditBoundary}
             onExtractTextUnit={onExtractTextUnit}
+            onMoveTextUnit={onMoveTextUnit}
+            onUnitDropTargetChange={onUnitDropTargetChange}
+            unitDropTarget={unitDropTarget}
             onBoundaryNavigate={allowTextNavigation ? onBoundaryNavigate : undefined}
             onNavigationTarget={allowTextNavigation ? onNavigationTarget : undefined}
             onSave={onSave}

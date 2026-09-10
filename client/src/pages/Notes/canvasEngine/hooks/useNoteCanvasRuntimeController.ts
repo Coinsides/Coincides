@@ -516,6 +516,7 @@ export function useNoteCanvasRuntimeController() {
     onApplyDocumentTextFlowEdit: textHistory.applyDocumentEdit,
     onExtractTextUnit: (block: Parameters<typeof textHistory.extractUnit>[0], unitId: string, layout: Parameters<typeof textHistory.extractUnit>[3]) =>
       textHistory.extractUnit(block, unitId, defaultTextTemplate, layout),
+    onMoveTextUnit: textHistory.moveUnit,
     onTextEditBoundary: sourceProjectionPolicy.contentReadOnly ? undefined : textHistory.boundary,
     onApplyBlockEditRecovery: applyBlockEditRecovery,
     onApplyBlockLayoutDrafts: (layouts) => { if (textHistory.boundary()) mergeLayoutDrafts(layouts); },

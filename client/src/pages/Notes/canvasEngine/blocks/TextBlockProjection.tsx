@@ -73,7 +73,7 @@ import {
   updateTextUnitMetadata,
 } from '../textUnitEditorService';
 import { TextUnitGutterLayer } from '../layers/TextUnitGutterLayer';
-import { useTextUnitHandleDrag } from '../hooks/useTextUnitHandleDrag';
+import { useTextUnitHandleDrag, type CrossBlockUnitDropTarget, type TextUnitDropTarget } from '../hooks/useTextUnitHandleDrag';
 import { reorderTextUnit } from '../textUnitOrderService';
 import {
   hasContentGroupDragPayloadType,
@@ -119,6 +119,9 @@ interface TextBlockProjectionProps {
   onNavigationTarget?: (target: TextFlowNavigationTarget | null) => void;
   onFlowSelectionStart?: () => void;
   onExtractTextUnit?: (unitId: string, point: { x: number; y: number }) => void;
+  onMoveTextUnit?: (unitId: string, target: CrossBlockUnitDropTarget) => void;
+  onUnitDropTargetChange?: (target: CrossBlockUnitDropTarget | null) => void;
+  unitDropTarget?: TextUnitDropTarget | null;
 }
 
 function plainTextForFlow(flow: TextBlockContentV1): string {
@@ -510,6 +513,9 @@ export function TextBlockProjection({
   onNavigationTarget,
   onFlowSelectionStart,
   onExtractTextUnit,
+  onMoveTextUnit,
+  onUnitDropTargetChange,
+  unitDropTarget,
 }: TextBlockProjectionProps) {
   const editorRef = useRef<HTMLDivElement>(null);
   const documentSelection = useContext(DocumentTextFlowSelectionContext);
@@ -1530,6 +1536,8 @@ export function TextBlockProjection({
     disabled: readOnly || layoutMode,
     isComposing: () => compositionRef.current,
     onExtract: onExtractTextUnit,
+    onMove: onMoveTextUnit,
+    onCrossBlockTargetChange: onUnitDropTargetChange,
     onReorder: (unitId, target) => {
       const current = latestFlowRef.current || editableFlow;
       const next = reorderTextUnit(current, unitId, target.unitId, target.edge);
@@ -1543,11 +1551,13 @@ export function TextBlockProjection({
     },
   });
   const documentRangeForDisplay = documentSelection?.ordered();
+  const handleDropTarget = unitDropTarget ?? unitHandleDrag.dropTarget;
   const documentBlockForDisplay = documentRangeForDisplay?.blocks.find((entry) => entry.block.id === blockId);
 
   return (
     <>
-    <div ref={editorRef} className={styles.textUnitEditor} data-text-unit-editor={blockId}>
+    <div ref={editorRef} className={styles.textUnitEditor} data-text-unit-editor={blockId}
+      data-text-unit-move-enabled={Boolean(onMoveTextUnit) && !readOnly && !layoutMode}>
       {visibleUnitEntries(editableFlow.units).map(({ unit, index }) => {
         const marker = textUnitMarkerForDisplay(editableFlow.units, index);
         const hasMarker = marker.length > 0;
@@ -1654,11 +1664,11 @@ export function TextBlockProjection({
               }}
               onOpenMenu={layoutMode ? undefined : (point) => setTextUnitContextMenu({ unitId: unit.id, point })}
             />
-            {unitHandleDrag.dropTarget?.unitId === unit.id && (
+            {handleDropTarget?.unitId === unit.id && (
               <div
                 className={styles.textUnitDropIndicator}
                 data-text-unit-drop-indicator={unit.id}
-                data-drop-edge={unitHandleDrag.dropTarget.edge}
+                data-drop-edge={handleDropTarget.edge}
                 aria-hidden="true"
               />
             )}

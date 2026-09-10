@@ -81,6 +81,28 @@ function renderEditor(options: Partial<ProjectionProps> = {}, initial = syntheti
 }
 
 describe('B10 real unit handle events with synthetic content', () => {
+  it('without a writing-surface move host, another block retains B10 outside-extraction behavior', () => {
+    const source = renderEditor({ blockId: 'c3-source' });
+    const targetFlow = syntheticFlow();
+    targetFlow.units = targetFlow.units.map((unit) => ({ ...unit, id: `target-${unit.id}` }));
+    targetFlow.inline_structures = [];
+    const target = renderEditor({ blockId: 'c3-target' }, targetFlow);
+    source.measure();
+    const targetEditor = target.container.querySelector<HTMLElement>('[data-text-unit-editor]')!;
+    vi.spyOn(targetEditor, 'getBoundingClientRect').mockReturnValue(rectangle(100, 300, 400, 120));
+    [...target.container.querySelectorAll<HTMLElement>('[data-text-unit-row]')].forEach((node, index) => {
+      vi.spyOn(node, 'getBoundingClientRect').mockReturnValue(rectangle(100, 300 + index * 40, 400, 40));
+    });
+    pointer(source.handle('unit-1'), 'pointerdown', 85, 150);
+    pointer(source.handle('unit-1'), 'pointermove', 180, 338);
+    expect(target.container.querySelector('[data-text-unit-drop-indicator]')).toBeNull();
+    pointer(source.handle('unit-1'), 'pointerup', 180, 338);
+    expect(source.onExtract).toHaveBeenCalledExactlyOnceWith('unit-1', { x: 180, y: 338 });
+    expect(source.onFlow).not.toHaveBeenCalled();
+    expect(target.onFlow).not.toHaveBeenCalled();
+    expect(target.current()).toEqual(targetFlow);
+  });
+
   it('smoke 1: always renders a button per unit and no native role select', () => {
     const editor = renderEditor();
     expect(screen.getAllByRole('button', { name: 'Text unit handle' })).toHaveLength(3);
