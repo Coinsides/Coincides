@@ -37,7 +37,7 @@
 
 **14.0 · 前夜包收口**:13.6 交付的设计包(Mr Zero 壳规格/工具面清单/语境阶梯接线图)+宪法四条+机械闸立法;Henry 拍板转正本 plan。
 
-**14.1 · 同门同钥重铸(地基)**:agent executor 双轨清偿——29 个动词从 ~900 行单 switch 直写 SQL 改为人类 routes/services 薄适配(共用 zod+业务逻辑,actor=agent 同事务入史记);提案族统一(agent 5 型+材料库 3 型合枚举;**organized_note 入 chat agent 枚举**=零新直写路径的第一扩面);新增提案型 board_arrangement(批量摆位预览)与 note_patch(改用户文字唯一合法通道)。
+**14.1 · 同门同钥重铸(地基)**:**安家 S 案实装随本段**(Henry 09-10 拍终局 S/HQ 裁直取⛔M 过渡:唯一正文写门=同门的正文分舵,人与 Agent 同过;数据可删零回填;直写闸随行);agent executor 双轨清偿——29 个动词从 ~900 行单 switch 直写 SQL 改为人类 routes/services 薄适配(共用 zod+业务逻辑,actor=agent 同事务入史记);提案族统一(agent 5 型+材料库 3 型合枚举;**organized_note 入 chat agent 枚举**=零新直写路径的第一扩面);新增提案型 board_arrangement(批量摆位预览)与 note_patch(改用户文字唯一合法通道)。
 
 **14.2 · 知觉(读权先行,零写权)**:read_note(逐页结构化块流=纸竖滚逐页读)/read_board(成员+边+摆位图数据=免截图,08-30 承诺兑现)/read_content_groups/read_annotations+relations;contextHint schema 化+notes/boards 页面发射点(L2 现场语境);AI-readable tree 对齐 DOM(a11y 一石二鸟,宪章随行线)。
 
