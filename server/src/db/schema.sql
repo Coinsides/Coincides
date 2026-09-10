@@ -433,7 +433,8 @@ CREATE TABLE IF NOT EXISTS note_blocks (
   operation_batch_id TEXT REFERENCES operation_batches(id) ON DELETE SET NULL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  trashed_at DATETIME
+  trashed_at DATETIME,
+  text_save_revision INTEGER NOT NULL DEFAULT 0 CHECK (text_save_revision >= 0)
 );
 CREATE INDEX IF NOT EXISTS idx_note_blocks_user_course_status ON note_blocks(user_id, course_id, status);
 CREATE INDEX IF NOT EXISTS idx_note_blocks_course_type ON note_blocks(course_id, block_type);

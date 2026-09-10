@@ -6,6 +6,8 @@ import {
 import type { FieldValueRecord } from './blockContentService';
 import type { BlockBoxLayout } from './runtimeLayout';
 import type { NoteBlock, TextBlockContentV1 } from './runtimeDataTypes';
+import type { AnnotationRangeSnapshot } from './textFlowEditSession';
+import type { BoardRangeSaveSnapshot } from './boardTextRangeEditSession';
 
 export interface DraftBlockCreateResult {
   /** Authoritative durable snapshot returned by the create/replay endpoint. */
@@ -41,6 +43,9 @@ export interface BlockEditRecoveryReceipt {
   readonly contentJson: Record<string, unknown>;
   readonly textFlow?: TextBlockContentV1;
   readonly fieldValues?: FieldValueRecord;
+  readonly baseRevision?: number;
+  readonly annotationRanges?: AnnotationRangeSnapshot[];
+  readonly boardRangeSnapshot?: BoardRangeSaveSnapshot;
   readonly hydrationEpoch: number;
   readonly queuedAt: string;
 }
@@ -144,6 +149,9 @@ function validateBlockEditRecoveryReceipt(raw: unknown): BlockEditRecoveryReceip
     contentJson: raw.contentJson,
     textFlow: raw.textFlow as TextBlockContentV1 | undefined,
     fieldValues: raw.fieldValues as FieldValueRecord | undefined,
+    baseRevision: typeof raw.baseRevision === 'number' ? raw.baseRevision : undefined,
+    annotationRanges: raw.annotationRanges as AnnotationRangeSnapshot[] | undefined,
+    boardRangeSnapshot: raw.boardRangeSnapshot as BoardRangeSaveSnapshot | undefined,
     hydrationEpoch: raw.hydrationEpoch as number,
     queuedAt: raw.queuedAt,
   };

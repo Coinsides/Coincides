@@ -76,7 +76,7 @@ export interface BoardRangeSaveSnapshot {
   ranges: BoardTextRangeV1[];
 }
 
-/** Local edit state. Body writes and range writes deliberately remain separate (TD-6). */
+/** Local edit state shared by atomic text saves and independent range consumers. */
 export function createBoardTextRangeEditSession(
   noteId: string,
   persist: (noteId: string, ranges: BoardTextRangeV1[]) => Promise<BoardTextRangeV1[]>,
@@ -86,7 +86,22 @@ export function createBoardTextRangeEditSession(
   const dirty = new Set<string>();
   const failedSnapshots = new Map<string, BoardTextRangeV1>();
   const drafts = new Map<string, TextBlockContentV1 | null>();
+  const acknowledge = (snapshot: BoardRangeSaveSnapshot, saved: BoardTextRangeV1[]) => {
+    const savedById = new Map(saved.map((range) => [range.id, range]));
+    const issuedById = new Map(snapshot.ranges.map((range) => [range.id, range]));
+    snapshot.ranges.forEach((range) => failedSnapshots.delete(range.id));
+    ranges = ranges.flatMap((range) => {
+      const issued = issuedById.get(range.id);
+      if (!issued || JSON.stringify(issued) !== JSON.stringify(range)) return [range];
+      dirty.delete(range.id);
+      // The server may omit an independently deleted board range. Its absence
+      // confirms deletion, and must not turn a committed transaction into failure.
+      const confirmed = savedById.get(range.id);
+      return confirmed ? [confirmed] : [];
+    });
+  };
   return {
+    acknowledge,
     hydrate(nextRanges: BoardTextRangeV1[]) {
       // A refresh must not erase a failed second write that the user can still retry.
       // Unsaved drafts are reset by note hydration; only confirmed-body/failed-range writes survive it.

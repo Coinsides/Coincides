@@ -43,7 +43,7 @@ async function withHttpDb(run: (fixture: Fixture) => void | Promise<void>): Prom
   let server: Server | null = null;
 
   try {
-    const db = await initDb(dbPath);
+    const db = await initDb(':memory:');
     const userId = uuidv4();
     const courseId = uuidv4();
     const noteId = uuidv4();

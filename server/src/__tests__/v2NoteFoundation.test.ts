@@ -11,7 +11,7 @@ async function withDb(run: (db: Awaited<ReturnType<typeof initDb>>) => void | Pr
   const dbPath = join(dir, 'test.db');
 
   try {
-    const db = await initDb(dbPath);
+    const db = await initDb(':memory:');
     await run(db);
   } finally {
     closeDb();

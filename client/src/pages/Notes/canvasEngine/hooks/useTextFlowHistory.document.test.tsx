@@ -168,15 +168,17 @@ describe('B6b document history (synthetic memory)', () => {
     expect(editor.save.mock.calls.slice(redoCalls).map(([block]) => block.id)).toEqual(['A-1']);
   });
 
-  it('keeps body plus annotation persistence incomplete until both succeed', async () => {
+  it('keeps the composite body and annotation save incomplete until it succeeds', async () => {
     const editor = renderDocumentHistory();
-    editor.saveAnnotations.mockResolvedValueOnce(false);
+    editor.save.mockResolvedValueOnce(rejected());
     expect(await editor.apply()).toBe(false);
     expect(editor.save.mock.calls.map(([block]) => block.id)).toEqual(['A-0']);
     await act(async () => {
       expect(await editor.result.current.editing.saveBlock(editor.fixtures.A.blocks[1], 'stale')).toMatchObject({ status: 'saved' });
     });
     expect(editor.save.mock.calls.map(([block]) => block.id)).toEqual(['A-0', 'A-0', 'A-1']);
+    expect(editor.saveAnnotations).not.toHaveBeenCalled();
+    expect(editor.save.mock.calls[1][2]).toHaveProperty('annotationRanges', expect.any(Array));
   });
 
   it('serializes each save, guards pending edits, and seals earlier typing before the document entry', async () => {

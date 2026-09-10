@@ -21,7 +21,7 @@ vi.mock('@/stores/uiStore', () => ({
 }));
 
 // Only the editor rendering is replaced. The modal/provider send callback, adapter,
-// by-note repository, range session, rebase, and both persistence writes remain real.
+// range session, rebase, and atomic text-save repository remain real.
 vi.mock('../Notes/canvasEngine/NoteCanvasRuntime', async () => {
   const React = await import('react');
   const { NoteCanvasRuntimeContext } = await import('../Notes/canvasEngine/NoteCanvasRuntimeProvider');
@@ -127,17 +127,14 @@ it('registers a range minted in the open modal and keeps it Live after same-sess
     throw new Error(`Unexpected fixture GET ${url}`);
   });
   probe.put.mockImplementation(async (url: string, payload: Record<string, unknown>) => {
-    if (url === `/note-blocks/${durableBlock.id}`) {
-      calls.push('body PUT');
-      durableBlock = { ...durableBlock, ...copy(payload) };
-      return { data: copy(durableBlock) };
-    }
-    if (url === byNoteUrl) {
-      calls.push('ranges PUT');
+    if (url === `/note-blocks/${durableBlock.id}/text-save`) {
+      calls.push('atomic PUT');
+      expect(payload.base_revision).toBe(durableBlock.text_save_revision ?? 0);
+      durableBlock = { ...durableBlock, ...copy(payload.block as Partial<NoteBlock>), text_save_revision: (durableBlock.text_save_revision ?? 0) + 1 };
       const patches = payload.text_ranges as Array<Partial<BoardTextRangeV1> & { id: string }>;
       const saved = patches.map((patch) => ({ ...durableRanges.find((range) => range.id === patch.id)!, ...patch }));
       durableRanges = durableRanges.map((range) => saved.find((next) => next.id === range.id) ?? range);
-      return { data: { text_ranges: copy(saved) } };
+      return { data: { block: copy(durableBlock), annotations: [], text_ranges: copy(durableRanges), revision: durableBlock.text_save_revision } };
     }
     throw new Error(`Unexpected fixture PUT ${url}`);
   });
@@ -190,7 +187,8 @@ it('registers a range minted in the open modal and keeps it Live after same-sess
   expect(screen.queryByRole('dialog')).toBeNull();
   expect(probe.saves).toHaveLength(1);
   expect(await probe.saves[0]).toMatchObject({ status: 'saved' });
-  expect(calls).toEqual(['ranges GET', 'mint', 'ranges GET', 'ranges GET', 'body PUT', 'ranges PUT']);
+  expect(calls).toEqual(['ranges GET', 'mint', 'ranges GET', 'ranges GET', 'atomic PUT']);
+  expect(probe.put).toHaveBeenCalledOnce();
   expect(durableBlock.plain_text).toBe(`Context: ${body}`);
   expect(durableRanges).toHaveLength(1);
   expect(durableRanges[0]).toMatchObject({

@@ -21,6 +21,8 @@ import {
   type FieldValueRecord,
 } from '../blockContentService';
 import { buildBlockTemplatePayload, type BlockTemplatePayload } from '../blockTemplateConversionService';
+import { saveAtomicText } from '../atomicTextSaveRepository';
+import { restoreAnnotationRangeSnapshots, type AnnotationRangeSnapshot } from '../textFlowEditSession';
 import {
   getEffectiveAIVisibility,
   getEffectiveExportRole,
@@ -417,6 +419,8 @@ export function useNoteCanvasDataAdapter({
   );
   const [coordinateContract, setCoordinateContract] = useState<CoordinateContract>('v1');
   const [blocks, setBlocks] = useState<NoteBlock[]>([]);
+  // Only confirmed local commits advance this cursor. A conflict readback never does.
+  const committedTextRevisions = useRef(new Map<string, number>());
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [titleDraft, setTitleDraft] = useState('');
@@ -1408,6 +1412,8 @@ export function useNoteCanvasDataAdapter({
       recoveryKey?: string;
       boardRangeSnapshot?: BoardRangeSaveSnapshot;
       preserveDrafts?: boolean;
+      annotationRanges?: AnnotationRangeSnapshot[];
+      baseRevision?: number;
     } = {},
   ): Promise<BlockSaveOutcome> => {
     // Read-only references have no body draft to flush. Ordinary placement/tray
@@ -1441,6 +1447,8 @@ export function useNoteCanvasDataAdapter({
       };
     }
     const requestGeneration = routeRequestGenerationRef.current;
+    const baseRevision = options.baseRevision ?? Math.max(block.text_save_revision ?? 0, committedTextRevisions.current.get(block.id) ?? 0);
+    const annotationRanges = structuredClone(options.annotationRanges ?? []);
     const requestHydrationEpoch = successfulHydrationEpochRef.current;
     const requestRouteIsCurrent = () => (
       adapterMountActiveRef.current
@@ -1486,39 +1494,6 @@ export function useNoteCanvasDataAdapter({
         durableState: 'not_checked', reason: 'board_range_sync_failed', error, staleEpoch: false,
       };
     }
-    const syncBoardRangesAfterBody = async (savedBlock: NoteBlock): Promise<BlockSaveOutcome | null> => {
-      try {
-        await writeRegistry.track('board-ranges:' + requestedNoteId + ':' + block.id, async () => boardRangeSession.persist(boardRangeSnapshot));
-        return null;
-      } catch (error) {
-        if (requestRouteIsCurrent()) {
-          addToast('error', 'Text saved, but board references could not sync. Retry saving this block.');
-        }
-        return {
-          status: 'rejected', block: savedBlock, recoveryReceipt: null, reconciliation: 'not_attempted',
-          durableState: 'matches_requested', reason: 'board_range_sync_failed', error,
-          staleEpoch: !requestIsCurrent(),
-        };
-      }
-    };
-    // A pending write can still replace this snapshot (including an edit changed back).
-    const hasOutstandingSaveForBlock = Array.from(outstandingBlockSaveOperationsRef.current.values())
-      .some((operation) => operation.blockId === block.id && operation.requestedNoteId === requestedNoteId);
-    if (!hasOutstandingSaveForBlock && blockMatchesIssuedSave(block, requestedPlainText, nextContent)) {
-      writeRegistry.confirm('block-body:' + `/note-blocks/${block.id}`);
-      const rangeFailure = await syncBoardRangesAfterBody(block);
-      if (rangeFailure) return rangeFailure;
-      if (options.recoveryKey) {
-        forgetBlockEditRecoveryReceipt(options.recoveryKey);
-        setBlockEditRecoveryVersion((version) => version + 1);
-      }
-      return {
-        status: 'saved',
-        block,
-        recoveryReceipt: null,
-        reconciliation: 'not_needed',
-      };
-    }
     const operationSequence = blockSaveOperationSequenceRef.current + 1;
     blockSaveOperationSequenceRef.current = operationSequence;
     const recoveryReceipt: BlockEditRecoveryReceipt = Object.freeze({
@@ -1542,6 +1517,9 @@ export function useNoteCanvasDataAdapter({
       contentJson: nextContent,
       textFlow: textFlowDraft,
       fieldValues,
+      baseRevision,
+      annotationRanges,
+      boardRangeSnapshot: structuredClone(boardRangeSnapshot),
       hydrationEpoch: requestHydrationEpoch,
       queuedAt: new Date().toISOString(),
     });
@@ -1592,6 +1570,7 @@ export function useNoteCanvasDataAdapter({
         const observedBlock = rawBlock
           ? hydrateClientBlock({
             ...rawBlock,
+            ...(successKind === 'read_after_error' ? { text_save_revision: baseRevision } : {}),
             source_references: Array.isArray(rawBlock.source_references)
               ? rawBlock.source_references
               : block.source_references,
@@ -1610,7 +1589,7 @@ export function useNoteCanvasDataAdapter({
           reconciliation: successKind,
           durableState: !observedBlock
             ? 'missing'
-            : blockMatchesIssuedSave(observedBlock, requestedPlainText, nextContent)
+            : successKind !== 'read_after_error' && blockMatchesIssuedSave(observedBlock, requestedPlainText, nextContent)
               ? 'matches_requested'
               : 'conflict',
         };
@@ -1633,14 +1612,25 @@ export function useNoteCanvasDataAdapter({
     setBlockEditRecoveryVersion((version) => version + 1);
     setSavingBlockId(block.id);
     try {
-      const res = await writeRegistry.track('block-body:' + `/note-blocks/${block.id}`, async () => api.put(`/note-blocks/${block.id}`, {
-        content_json: nextContent,
-        plain_text: requestedPlainText,
+      const result = await writeRegistry.track('block-body:' + `/note-blocks/${block.id}`, async () => saveAtomicText({
+        noteId: requestedNoteId, blockId: block.id, baseRevision,
+        block: { content_json: nextContent, plain_text: requestedPlainText },
+        annotationRanges, boardRanges: boardRangeSnapshot.ranges,
       }));
-      const rangeFailure = await syncBoardRangesAfterBody(
-        hydrateClientBlock({ ...block, ...res.data, source_references: block.source_references }),
-      );
-      if (rangeFailure) return rangeFailure;
+      const res = { data: result.block };
+      committedTextRevisions.current.set(block.id, Math.max(result.revision, committedTextRevisions.current.get(block.id) ?? 0));
+      boardRangeSession.acknowledge(boardRangeSnapshot, result.text_ranges);
+      if (requestIsCurrent() && !options.preserveDrafts) {
+        const confirmed = result.annotations.flatMap((annotation) => annotation.ranges
+          .filter((range) => annotationRanges.some((issued) => issued.annotationId === annotation.id && issued.range.id === range.id))
+          .map((range) => ({ annotationId: annotation.id, range })));
+        const stillCurrent = confirmed.filter((snapshot) => {
+          const live = annotationTruthsRef.current.find((annotation) => annotation.id === snapshot.annotationId)?.ranges.find((range) => range.id === snapshot.range.id);
+          const issued = annotationRanges.find((candidate) => candidate.annotationId === snapshot.annotationId && candidate.range.id === snapshot.range.id);
+          return JSON.stringify(live) === JSON.stringify(issued?.range);
+        });
+        setAnnotationTruthsSnapshot(restoreAnnotationRangeSnapshots(annotationTruthsRef.current, stillCurrent));
+      }
       blockSaveOutcomeVersionRef.current += 1;
       if (!requestIsCurrent() || !operationIsLatest()) {
         const reconciliation = await reconcileIssuedSave('read_after_outcome');
@@ -1719,15 +1709,6 @@ export function useNoteCanvasDataAdapter({
       console.error('Failed to save block:', err);
       if (requestIsCurrent()) addToast('error', 'Failed to save block');
       const reconciliation = await reconcileIssuedSave('read_after_error');
-      if (
-        reconciliation.durableState === 'matches_requested'
-        && !hasOtherOutstandingOperationForBlock()
-      ) {
-        forgetBlockEditRecoveryReceipt(recoveryReceipt.recoveryKey);
-        if (options.recoveryKey && options.recoveryKey !== recoveryReceipt.recoveryKey) {
-          forgetBlockEditRecoveryReceipt(options.recoveryKey);
-        }
-      }
       return {
         status: 'rejected',
         block: reconciliation.block,
@@ -1787,6 +1768,9 @@ export function useNoteCanvasDataAdapter({
       fieldValues: receipt.fieldValues,
       textFlow: receipt.textFlow,
       recoveryKey: receipt.recoveryKey,
+      baseRevision: receipt.baseRevision,
+      annotationRanges: receipt.annotationRanges,
+      boardRangeSnapshot: receipt.boardRangeSnapshot,
     });
     const applied = outcome.status === 'saved'
       || ('durableState' in outcome && outcome.durableState === 'matches_requested'
@@ -1844,7 +1828,8 @@ export function useNoteCanvasDataAdapter({
       title?: string | null;
       contentJson?: Record<string, unknown>;
       metadataPatch?: Record<string, unknown>;
-      historySnapshot?: { payload: BlockTemplatePayload; boardRanges: BoardRangeSaveSnapshot };
+      historySnapshot?: { payload: BlockTemplatePayload; boardRanges: BoardRangeSaveSnapshot; annotationRanges?: AnnotationRangeSnapshot[] };
+      baseRevision?: number;
     } = {},
   ) => {
     if (block.block_type === 'item_ref' || !allowSourceContentMutation()) return null;
@@ -1898,27 +1883,15 @@ export function useNoteCanvasDataAdapter({
         boardRangeSession.rebase(block.id, getTextFlowContent(block.content_json), nextFlow);
       }
       const boardRangeSnapshot = options.historySnapshot?.boardRanges ?? boardRangeSession.capture(block.id);
-      const res = await writeRegistry.track('block-body:' + `/note-blocks/${block.id}`, async () => api.put(`/note-blocks/${block.id}`, payload));
-      try {
-        await writeRegistry.track('board-ranges:' + requestedNoteId + ':' + block.id, async () => boardRangeSession.persist(boardRangeSnapshot));
-      } catch {
-        if (requestRouteIsCurrent()) {
-          addToast('error', 'Text converted, but board references could not sync. Retry saving this block.');
-        }
-        if (requestIsCurrent() && latestBlockSaveOperationByBlockRef.current.get(block.id) === operationSequence) {
-          const converted = hydrateClientBlock({ ...block, ...res.data, source_references: block.source_references });
-          setBlocks((current) => current.map((item) => item.id === block.id ? converted : item));
-          setBlockTextDrafts((current) => ({ ...current, [block.id]: nextText }));
-          setBlockTextFlowDrafts((current) => {
-            const next = { ...current };
-            const textFlow = getTextFlowContent(nextContent);
-            if (textFlow) next[block.id] = textFlow;
-            else delete next[block.id];
-            return next;
-          });
-        }
-        return null;
-      }
+      const annotationRanges = options.historySnapshot?.annotationRanges ?? [];
+      const result = await writeRegistry.track('block-body:' + `/note-blocks/${block.id}`, async () => saveAtomicText({
+        noteId: requestedNoteId, blockId: block.id,
+        baseRevision: options.baseRevision ?? Math.max(block.text_save_revision ?? 0, committedTextRevisions.current.get(block.id) ?? 0),
+        block: payload, annotationRanges, boardRanges: boardRangeSnapshot.ranges,
+      }));
+      const res = { data: result.block };
+      committedTextRevisions.current.set(block.id, Math.max(result.revision, committedTextRevisions.current.get(block.id) ?? 0));
+      boardRangeSession.acknowledge(boardRangeSnapshot, result.text_ranges);
       blockSaveOutcomeVersionRef.current += 1;
       const updated = hydrateClientBlock({ ...block, ...res.data, source_references: block.source_references });
       if (
@@ -1936,7 +1909,7 @@ export function useNoteCanvasDataAdapter({
       recoveryKeysAtCreation.forEach((recoveryKey) => {
         forgetBlockEditRecoveryReceipt(recoveryKey);
       });
-      // History still has to confirm annotation ranges after this door returns.
+      // The response confirms all three resources in the same transaction.
       if (!options.historySnapshot) addToast('success', `Converted to ${template.label}`);
       return updated;
     } catch (err) {

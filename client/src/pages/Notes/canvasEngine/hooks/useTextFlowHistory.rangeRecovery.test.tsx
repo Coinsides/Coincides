@@ -12,7 +12,80 @@ import { usePlacementHistory } from './usePlacementHistory';
 import { useTextFlowHistory, type TextFlowHistoryHost } from './useTextFlowHistory';
 
 describe('TextFlow recovery after later successful input (synthetic memory)', () => {
-  it('retries earlier untouched board ranges with the current block snapshot without adding history', async () => {
+  it('B7 advances the typing base after a raw save confirms while the rendered block is still old', async () => {
+    const initial = createTextBlockContentV1('original');
+    const block: NoteBlock = { id: 'block', text_save_revision: 0, block_type: 'text', title: null,
+      plain_text: 'original', content_json: { [TEXT_FLOW_CONTENT_KEY]: initial }, metadata: {}, source_references: [],
+      order_index: 0, placement_id: 'placement', display_overrides_json: {} };
+    let revision = 0;
+    const rawSave = vi.fn(async (_block: NoteBlock, _text: string, _options?: { baseRevision?: number }): Promise<BlockSaveOutcome> => ({
+      status: 'saved', block: { ...block, text_save_revision: ++revision }, recoveryReceipt: null, reconciliation: 'response',
+    }));
+    const subject = renderHook(() => {
+      const drafts = useBlockDraftAuthority();
+      const host = useRef<TextFlowHistoryHost | null>(null);
+      const editing = useTextFlowHistory({ noteId: 'note', generation: 1, blocks: [block], annotationTruths: [],
+        readAnnotationTruths: () => [], setAnnotationTruthsSnapshot: vi.fn(),
+        blockTextFlowDrafts: drafts.blockTextFlowDrafts, setBlockTextFlowDrafts: drafts.setBlockTextFlowDrafts,
+        setBlockTextDrafts: drafts.setBlockTextDrafts, captureBoardTextRanges: () => ({ ranges: [] }),
+        restoreBoardTextRanges: vi.fn(), rebaseBoardTextRanges: vi.fn(), saveBlock: rawSave,
+        saveAnnotationTruthsOutcome: async () => true, history: host });
+      const history = usePlacementHistory({ noteId: 'note', generation: 1, beforeHistoryBoundary: () => editing.boundary(),
+        applyLayoutDrafts: vi.fn(), persistLayoutSnapshot: vi.fn(), target: null });
+      host.current = history;
+      return { editing, history };
+    });
+    await act(async () => { expect(await subject.result.current.editing.saveBlock(block, 'original')).toMatchObject({ status: 'saved' }); });
+    expect(block.text_save_revision).toBe(0);
+    const edited = { ...initial, units: initial.units.map((unit) => ({ ...unit, text: 'requested' })) };
+    await act(async () => {
+      await subject.result.current.editing.applyEdit(block, edited);
+      subject.result.current.editing.boundary('blur');
+      await subject.result.current.history.whenHistoryIdle();
+    });
+    expect(rawSave).toHaveBeenCalledTimes(2);
+    expect(rawSave.mock.calls[1][2]?.baseRevision).toBe(1);
+    await expect(subject.result.current.editing.flush()).resolves.toBeUndefined();
+  });
+
+  it('B7 keeps the first revision on a failed history retry after same-generation blocks advance', async () => {
+    const initial = createTextBlockContentV1('original');
+    const block: NoteBlock = { id: 'block', text_save_revision: 0, block_type: 'text', title: null,
+      plain_text: 'original', content_json: { [TEXT_FLOW_CONTENT_KEY]: initial }, metadata: {}, source_references: [],
+      order_index: 0, placement_id: 'placement', display_overrides_json: {} };
+    const rawSave = vi.fn(async (): Promise<BlockSaveOutcome> => ({ status: 'rejected', block: null, recoveryReceipt: null,
+      reconciliation: 'not_attempted', durableState: 'conflict', reason: 'request_failed', staleEpoch: false,
+      error: { response: { status: 409, data: { error: 'stale_revision', details: { current_revision: 1 } } } } }));
+    const subject = renderHook(({ current }: { current: NoteBlock }) => {
+      const drafts = useBlockDraftAuthority();
+      const host = useRef<TextFlowHistoryHost | null>(null);
+      const editing = useTextFlowHistory({ noteId: 'note', generation: 1, blocks: [current], annotationTruths: [],
+        readAnnotationTruths: () => [], setAnnotationTruthsSnapshot: vi.fn(),
+        blockTextFlowDrafts: drafts.blockTextFlowDrafts, setBlockTextFlowDrafts: drafts.setBlockTextFlowDrafts,
+        setBlockTextDrafts: drafts.setBlockTextDrafts, captureBoardTextRanges: () => ({ ranges: [] }),
+        restoreBoardTextRanges: vi.fn(), rebaseBoardTextRanges: vi.fn(), saveBlock: rawSave,
+        saveAnnotationTruthsOutcome: async () => true, history: host });
+      const history = usePlacementHistory({ noteId: 'note', generation: 1, beforeHistoryBoundary: () => editing.boundary(),
+        applyLayoutDrafts: vi.fn(), persistLayoutSnapshot: vi.fn(), target: null });
+      host.current = history;
+      return { editing, history };
+    }, { initialProps: { current: block } });
+    const edited = { ...initial, units: initial.units.map((unit) => ({ ...unit, text: 'requested' })) };
+    await act(async () => {
+      await subject.result.current.editing.applyEdit(block, edited);
+      subject.result.current.editing.boundary('blur');
+      await subject.result.current.history.whenHistoryIdle();
+    });
+    subject.rerender({ current: { ...block, text_save_revision: 1, plain_text: 'external edit' } });
+    await act(async () => {
+      expect(await subject.result.current.editing.saveBlock(block, 'requested', { textFlow: edited })).toMatchObject({ status: 'rejected' });
+    });
+    expect(rawSave).toHaveBeenCalledTimes(2);
+    expect(rawSave.mock.calls.map((call) => (call as unknown as [NoteBlock, string, { baseRevision: number }])[2].baseRevision)).toEqual([0, 0]);
+    await expect(subject.result.current.editing.flush()).rejects.toThrow('could not be saved');
+  });
+
+  it('confirms earlier failed range dependencies before later input without adding history', async () => {
     const initial = createTextBlockContentV1('alpha beta gamma');
     initial.units.push({ ...initial.units[0], id: 'tu-2', text: 'one two three' });
     const block: NoteBlock = {
@@ -89,15 +162,15 @@ describe('TextFlow recovery after later successful input (synthetic memory)', ()
       subject.result.current.editing.boundary('blur');
       await subject.result.current.history.whenHistoryIdle();
     });
-    expect(savedRangeIds).toEqual([['range-a'], ['range-b']]);
-    expect(durableRanges.map((range) => range.start_offset)).toEqual([6, 11]);
-    await expect(subject.result.current.editing.flush()).rejects.toThrow('could not be saved');
+    expect(savedRangeIds).toEqual([['range-a'], ['range-a'], ['range-b']]);
+    expect(durableRanges.map((range) => range.start_offset)).toEqual([13, 11]);
+    await expect(subject.result.current.editing.flush()).resolves.toBeUndefined();
 
     await act(async () => {
       expect(await subject.result.current.editing.saveBlock(block, 'prefix alpha beta gamma\nprefix one two three', { textFlow: second })).toMatchObject({ status: 'saved' });
       await subject.result.current.editing.flush();
     });
-    expect(savedRangeIds[2]).toEqual(['range-a', 'range-b']);
+    expect(savedRangeIds).toHaveLength(3);
     expect(durableRanges.map((range) => range.start_offset)).toEqual([13, 11]);
     await act(async () => { expect(await subject.result.current.history.undoRuntimeHistory()).toBe(true); });
     expect(subject.result.current.drafts.blockTextFlowDrafts[block.id]).toEqual(first);

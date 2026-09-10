@@ -34,6 +34,7 @@ const mocks = vi.hoisted(() => ({
   get: vi.fn(),
   post: vi.fn(),
   put: vi.fn(),
+  atomicPut: vi.fn(),
   delete: vi.fn(),
   boardRangesGet: vi.fn(),
   boardRangesPut: vi.fn(),
@@ -47,7 +48,9 @@ vi.mock('@/services/api', () => ({
       ? Promise.resolve({ data: { coordinate_contract: mocks.coordinateContract } })
       : mocks.get(url, ...args),
     post: mocks.post,
-    put: (url: string, ...args: unknown[]) => url.startsWith('/boards/text-ranges/by-note/')
+    put: (url: string, ...args: unknown[]) => url.endsWith('/text-save')
+      ? mocks.atomicPut(url, ...args)
+      : url.startsWith('/boards/text-ranges/by-note/')
       ? mocks.boardRangesPut(url, ...args)
       : mocks.put(url, ...args),
     delete: mocks.delete,
@@ -288,6 +291,26 @@ function f11PlacementResponse(url: string, payload: { block_id: string; layout: 
   return { data: { block_id: payload.block_id, placement_id: url.split('/').pop(), layout: payload.layout } };
 }
 
+function renderAtomicHistory() {
+  return renderHook(() => {
+    const adapter = useNoteCanvasDataAdapter(stableAdapterOptions);
+    const host = useRef<TextFlowHistoryHost | null>(null);
+    const editing = useTextFlowHistory({
+      noteId: note.id, generation: adapter.textHistoryGeneration, blocks: adapter.blocks,
+      annotationTruths: adapter.annotationTruths, readAnnotationTruths: adapter.readAnnotationTruths,
+      setAnnotationTruthsSnapshot: adapter.setAnnotationTruthsSnapshot, saveAnnotationTruthsOutcome: adapter.saveAnnotationTruthsOutcome,
+      blockTextFlowDrafts: adapter.blockTextFlowDrafts, setBlockTextFlowDrafts: adapter.setBlockTextFlowDrafts,
+      setBlockTextDrafts: adapter.setBlockTextDrafts, captureBoardTextRanges: adapter.captureBoardTextRanges,
+      restoreBoardTextRanges: adapter.restoreBoardTextRanges, rebaseBoardTextRanges: adapter.rebaseBoardTextRanges,
+      saveBlock: adapter.saveBlock, history: host,
+    });
+    const history = usePlacementHistory({ noteId: note.id, generation: adapter.textHistoryGeneration,
+      beforeHistoryBoundary: () => editing.boundary(), applyLayoutDrafts: vi.fn(), persistLayoutSnapshot: vi.fn(), target: null });
+    host.current = history;
+    return { adapter, editing, history };
+  }, { wrapper });
+}
+
 describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
   let consoleError: ReturnType<typeof vi.spyOn>;
   let consoleWarn: ReturnType<typeof vi.spyOn>;
@@ -299,6 +322,35 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     canvasPersistenceResponse = {};
     durableAnnotationTruths = [];
     durableBlocks = [];
+    mocks.put.mockImplementation(async (_url: string, payload: object) => ({ data: { ...durableBlocks[0], ...payload } }));
+    // The old per-resource callbacks remain fixture seams for held responses and
+    // failures. Production sends one HTTP call, recorded separately by atomicPut.
+    mocks.atomicPut.mockImplementation(async (url: string, payload: {
+      note_id: string; base_revision: number; block: Partial<NoteBlock>;
+      annotations: { range_updates: { annotation_id: string; range: AnnotationTruthV1['ranges'][number] }[] };
+      text_ranges: BoardTextRangeV1[];
+    }) => {
+      const beforeBlocks = structuredClone(durableBlocks);
+      const beforeAnnotations = structuredClone(durableAnnotationTruths);
+      try {
+        const response = await mocks.put(url.slice(0, -'/text-save'.length), payload.block);
+        const blockId = url.split('/')[2];
+        const savedBlock = { ...beforeBlocks.find((block) => block.id === blockId), ...payload.block, ...response?.data,
+          text_save_revision: payload.base_revision + 1 };
+        durableBlocks = durableBlocks.map((block) => block.id === blockId ? { ...block, ...savedBlock } : block);
+        durableAnnotationTruths = durableAnnotationTruths.map((annotation) => ({ ...annotation, ranges: annotation.ranges.map((range) =>
+          structuredClone(payload.annotations.range_updates.find((update) => update.annotation_id === annotation.id && update.range.id === range.id)?.range ?? range)) }));
+        const rangeResponse = payload.text_ranges.length
+          ? await mocks.boardRangesPut(`/boards/text-ranges/by-note/${payload.note_id}`, { text_ranges: payload.text_ranges })
+          : { data: { text_ranges: [] } };
+        return { data: { block: savedBlock, annotations: structuredClone(durableAnnotationTruths),
+          text_ranges: rangeResponse.data.text_ranges, revision: payload.base_revision + 1 } };
+      } catch (error) {
+        durableBlocks = beforeBlocks;
+        durableAnnotationTruths = beforeAnnotations;
+        throw error;
+      }
+    });
     mocks.boardRangesGet.mockResolvedValue({ data: { text_ranges: [] } });
     mocks.boardRangesPut.mockImplementation(async (_url: string, payload: { text_ranges: BoardTextRangeV1[] }) => ({ data: payload }));
     consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
@@ -323,6 +375,188 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
   afterEach(() => {
     consoleError.mockRestore();
     consoleWarn.mockRestore();
+  });
+
+  it('B7 smoke 4: one composite failure retains the entry, retries all resources, and undoes with the confirmed revision', async () => {
+    const originalFlow = createTextBlockContentV1('alpha beta gamma');
+    const original = { ...serverBlock('alpha beta gamma', false), text_save_revision: 3,
+      content_json: { body: 'alpha beta gamma', [TEXT_FLOW_CONTENT_KEY]: originalFlow } };
+    durableBlocks = [structuredClone(original)];
+    durableAnnotationTruths = [annotationWithOffsets(note.id, 6, 10, 'beta')];
+    const initialAnnotations = structuredClone(durableAnnotationTruths);
+    const range: BoardTextRangeV1 = {
+      id: 'b7-range', board_id: 'board', note_id: note.id, block_id: original.id,
+      text_flow_id: `textflow-${original.id}`, text_unit_id: originalFlow.units[0].id,
+      start_offset: 6, end_offset: 10, excerpt: 'beta', status: 'active', pre_edit_offsets: null,
+      at: 'at', created_at: 'created', updated_at: 'updated',
+    };
+    let durableRanges = [structuredClone(range)];
+    mocks.boardRangesGet.mockImplementation(async () => ({ data: { text_ranges: structuredClone(durableRanges) } }));
+    let rejectOnce = true;
+    mocks.atomicPut.mockImplementation(async (_url, payload) => {
+      expect(payload.base_revision).toBe(durableBlocks[0].text_save_revision);
+      expect(payload.annotations.range_updates).toHaveLength(1);
+      expect(payload.text_ranges).toHaveLength(1);
+      if (rejectOnce) { rejectOnce = false; throw new Error('synthetic annotation validation rejected'); }
+      const revision = payload.base_revision + 1;
+      durableBlocks = [{ ...durableBlocks[0], ...structuredClone(payload.block), text_save_revision: revision }];
+      durableAnnotationTruths = durableAnnotationTruths.map((annotation) => ({ ...annotation,
+        ranges: annotation.ranges.map((current) => structuredClone(payload.annotations.range_updates.find(
+          (update: { annotation_id: string; range: { id: string } }) => update.annotation_id === annotation.id && update.range.id === current.id,
+        )?.range ?? current)) }));
+      durableRanges = durableRanges.map((current) => ({ ...current, ...structuredClone(payload.text_ranges.find((entry: { id: string }) => entry.id === current.id)) }));
+      return { data: { block: structuredClone(durableBlocks[0]), annotations: structuredClone(durableAnnotationTruths), text_ranges: structuredClone(durableRanges), revision } };
+    });
+    const subject = renderHook(() => {
+      const adapter = useNoteCanvasDataAdapter(stableAdapterOptions);
+      const host = useRef<TextFlowHistoryHost | null>(null);
+      const editing = useTextFlowHistory({
+        noteId: note.id, generation: adapter.textHistoryGeneration, blocks: adapter.blocks,
+        annotationTruths: adapter.annotationTruths, readAnnotationTruths: adapter.readAnnotationTruths,
+        setAnnotationTruthsSnapshot: adapter.setAnnotationTruthsSnapshot, saveAnnotationTruthsOutcome: adapter.saveAnnotationTruthsOutcome,
+        blockTextFlowDrafts: adapter.blockTextFlowDrafts, setBlockTextFlowDrafts: adapter.setBlockTextFlowDrafts,
+        setBlockTextDrafts: adapter.setBlockTextDrafts, captureBoardTextRanges: adapter.captureBoardTextRanges,
+        restoreBoardTextRanges: adapter.restoreBoardTextRanges, rebaseBoardTextRanges: adapter.rebaseBoardTextRanges,
+        saveBlock: adapter.saveBlock, history: host,
+      });
+      const history = usePlacementHistory({ noteId: note.id, generation: adapter.textHistoryGeneration,
+        beforeHistoryBoundary: () => editing.boundary(), applyLayoutDrafts: vi.fn(), persistLayoutSnapshot: vi.fn(), target: null });
+      host.current = history;
+      return { adapter, editing, history };
+    }, { wrapper });
+    await waitFor(() => expect(subject.result.current.adapter.loading).toBe(false));
+    const edited = structuredClone(originalFlow);
+    edited.units[0].text = 'prefix alpha beta gamma';
+    await act(async () => {
+      await subject.result.current.editing.applyEdit(original, edited);
+      subject.result.current.editing.boundary('blur');
+      await subject.result.current.history.whenHistoryIdle();
+    });
+    expect(durableBlocks).toEqual([original]);
+    expect(durableAnnotationTruths).toEqual(initialAnnotations);
+    expect(durableRanges).toEqual([range]);
+    await expect(subject.result.current.editing.flush()).rejects.toThrow('could not be saved');
+    await act(async () => {
+      expect(await subject.result.current.editing.saveBlock(subject.result.current.adapter.blocks[0], edited.units[0].text, { textFlow: edited })).toMatchObject({ status: 'saved' });
+    });
+    expect(subject.result.current.adapter.blocks[0].text_save_revision).toBe(4);
+    expect(durableAnnotationTruths[0].ranges[0].start_offset).toBe(13);
+    expect(durableRanges[0].start_offset).toBe(13);
+    await expect(subject.result.current.editing.flush()).resolves.toBeUndefined();
+    await act(async () => { expect(await subject.result.current.history.undoRuntimeHistory()).toBe(true); });
+    expect(durableBlocks[0]).toEqual({ ...original, text_save_revision: 5 });
+    expect(durableAnnotationTruths).toEqual(initialAnnotations);
+    expect(durableRanges).toEqual([range]);
+    await act(async () => { expect(await subject.result.current.history.undoRuntimeHistory()).toBe(false); });
+    expect(mocks.atomicPut.mock.calls.map(([url, payload]) => [url, payload.base_revision])).toEqual([
+      [`/note-blocks/${original.id}/text-save`, 3], [`/note-blocks/${original.id}/text-save`, 3], [`/note-blocks/${original.id}/text-save`, 4],
+    ]);
+    expect(mocks.put).not.toHaveBeenCalled();
+    expect(mocks.boardRangesPut).not.toHaveBeenCalled();
+  });
+
+  it('B7 confirms failed unit A before committing unit B and preserves both undo entries', async () => {
+    const flow = createTextBlockContentV1('alpha beta');
+    flow.units.push({ ...flow.units[0], id: 'tu-2', text: 'one two', order_index: 1 });
+    const original = { ...serverBlock('alpha beta\none two', false), text_save_revision: 0,
+      content_json: { body: 'alpha beta\none two', [TEXT_FLOW_CONTENT_KEY]: flow } };
+    durableBlocks = [structuredClone(original)];
+    const firstAnnotation = annotationWithOffsets(note.id, 6, 10, 'beta');
+    const secondAnnotation = { ...annotationWithOffsets(note.id, 4, 7, 'two'), id: 'annotation-b',
+      ranges: [{ ...annotationWithOffsets(note.id, 4, 7, 'two').ranges[0], id: 'range-b', text_unit_id: 'tu-2' }] };
+    durableAnnotationTruths = [firstAnnotation, secondAnnotation];
+    const initialAnnotations = structuredClone(durableAnnotationTruths);
+    let ranges: BoardTextRangeV1[] = durableAnnotationTruths.map((annotation) => ({ id: `board-${annotation.id}`,
+      note_id: note.id, board_id: 'board', block_id: original.id, text_flow_id: `textflow-${original.id}`,
+      text_unit_id: annotation.ranges[0].text_unit_id!, start_offset: annotation.ranges[0].start_offset!,
+      end_offset: annotation.ranges[0].end_offset!, excerpt: annotation.ranges[0].range_text_cache!,
+      status: 'active', pre_edit_offsets: null, at: 'at', created_at: 'created', updated_at: 'updated' }));
+    const initialRanges = structuredClone(ranges);
+    mocks.boardRangesGet.mockImplementation(async () => ({ data: { text_ranges: structuredClone(ranges) } }));
+    let failed = false;
+    mocks.atomicPut.mockImplementation(async (_url, payload) => {
+      expect(payload.base_revision).toBe(durableBlocks[0].text_save_revision);
+      if (!failed) { failed = true; throw new Error('synthetic A annotation rejection'); }
+      const revision = payload.base_revision + 1;
+      durableBlocks = [{ ...durableBlocks[0], ...structuredClone(payload.block), text_save_revision: revision }];
+      durableAnnotationTruths = durableAnnotationTruths.map((annotation) => ({ ...annotation, ranges: annotation.ranges.map((range) =>
+        structuredClone(payload.annotations.range_updates.find((update: { annotation_id: string; range: { id: string } }) => update.annotation_id === annotation.id && update.range.id === range.id)?.range ?? range)) }));
+      ranges = ranges.map((range) => ({ ...range, ...structuredClone(payload.text_ranges.find((update: { id: string }) => update.id === range.id)) }));
+      // Every observed successful commit must have matching body and both references.
+      const units = (durableBlocks[0].content_json[TEXT_FLOW_CONTENT_KEY] as TextBlockContentV1).units;
+      for (const annotation of durableAnnotationTruths) for (const range of annotation.ranges) {
+        expect(units.find((unit) => unit.id === range.text_unit_id)!.text.slice(range.start_offset, range.end_offset)).toBe(range.range_text_cache);
+      }
+      for (const range of ranges) expect(units.find((unit) => unit.id === range.text_unit_id)!.text.slice(range.start_offset!, range.end_offset!)).toBe(range.excerpt);
+      return { data: { block: structuredClone(durableBlocks[0]), annotations: structuredClone(durableAnnotationTruths), text_ranges: structuredClone(ranges), revision } };
+    });
+    const subject = renderAtomicHistory();
+    await waitFor(() => expect(subject.result.current.adapter.loading).toBe(false));
+    const editA = structuredClone(flow);
+    editA.units[0].text = 'prefix alpha beta';
+    const apply = async (next: TextBlockContentV1) => act(async () => {
+      await subject.result.current.editing.applyEdit(subject.result.current.adapter.blocks[0], next);
+      subject.result.current.editing.boundary('blur');
+      await subject.result.current.history.whenHistoryIdle();
+    });
+    await apply(editA);
+    expect(durableBlocks).toEqual([original]);
+    const editB = structuredClone(editA);
+    editB.units[1].text = 'prefix one two';
+    await apply(editB);
+    expect(mocks.atomicPut.mock.calls.map(([, payload]) => payload.base_revision)).toEqual([0, 0, 1]);
+    expect(durableBlocks[0].plain_text).toBe('prefix alpha beta\nprefix one two');
+    expect(ranges.map((range) => range.start_offset)).toEqual([13, 11]);
+    await expect(subject.result.current.editing.flush()).resolves.toBeUndefined();
+    await act(async () => { expect(await subject.result.current.history.undoRuntimeHistory()).toBe(true); });
+    expect(durableBlocks[0].plain_text).toBe('prefix alpha beta\none two');
+    await act(async () => { expect(await subject.result.current.history.undoRuntimeHistory()).toBe(true); });
+    expect(durableBlocks[0]).toEqual({ ...original, text_save_revision: 4 });
+    expect(durableAnnotationTruths).toEqual(initialAnnotations);
+    expect(ranges).toEqual(initialRanges);
+    await act(async () => { expect(await subject.result.current.history.undoRuntimeHistory()).toBe(false); });
+    expect(mocks.put).not.toHaveBeenCalled();
+    expect(mocks.boardRangesPut).not.toHaveBeenCalled();
+  });
+
+  it('B7 keeps the base revision and complete recovery after 409 even when readback body matches', async () => {
+    const initial = { ...serverBlock('original', false), text_save_revision: 3 };
+    durableBlocks = [initial];
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    durableBlocks = [{ ...initial, plain_text: 'requested', content_json: { body: 'requested' }, text_save_revision: 9 }];
+    mocks.atomicPut.mockRejectedValue({ response: { status: 409, data: { error: 'stale_revision', details: { code: 'stale_revision', current_revision: 9 } } } });
+    let failed!: BlockSaveOutcome;
+    await act(async () => { failed = await subject.result.current.saveBlock(initial, 'requested'); });
+    expect(failed).toMatchObject({ status: 'rejected', durableState: 'conflict' });
+    expect(subject.result.current.blocks[0].text_save_revision).toBe(3);
+    const receipt = subject.result.current.blockEditRecoveryReceipts[0];
+    expect(receipt).toMatchObject({ baseRevision: 3, annotationRanges: [], boardRangeSnapshot: { ranges: [] } });
+    await act(async () => { expect(await subject.result.current.applyBlockEditRecovery(receipt.recoveryKey)).toBe(false); });
+    expect(mocks.atomicPut.mock.calls.map(([, payload]) => payload.base_revision)).toEqual([3, 3]);
+    expect(durableBlocks[0].text_save_revision).toBe(9);
+    expect(subject.result.current.blockEditRecoveryReceipts).not.toEqual([]);
+  });
+
+  it('B7 accepts a committed response omitting an independently deleted board range', async () => {
+    const flow = createTextBlockContentV1('alpha beta gamma');
+    durableBlocks = [{ ...serverBlock('alpha beta gamma', false), content_json: { body: 'alpha beta gamma', [TEXT_FLOW_CONTENT_KEY]: flow } }];
+    const range: BoardTextRangeV1 = { id: 'deleted-range', board_id: 'board', note_id: note.id, block_id: 'block-1',
+      text_flow_id: 'textflow-block-1', text_unit_id: flow.units[0].id, start_offset: 6, end_offset: 10,
+      excerpt: 'beta', status: 'active', pre_edit_offsets: null, at: 'at', created_at: 'created', updated_at: 'updated' };
+    mocks.boardRangesGet.mockResolvedValue({ data: { text_ranges: [range] } });
+    mocks.atomicPut.mockImplementation(async (_url, payload) => ({ data: {
+      block: { ...durableBlocks[0], ...payload.block, text_save_revision: 1 }, annotations: [], text_ranges: [], revision: 1,
+    } }));
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    const next = structuredClone(flow);
+    next.units[0].text = 'prefix alpha beta gamma';
+    await act(async () => { expect(await subject.result.current.saveBlock(subject.result.current.blocks[0], next.units[0].text, { textFlow: next })).toMatchObject({ status: 'saved' }); });
+    expect(mocks.atomicPut.mock.calls[0][1].text_ranges).toHaveLength(1);
+    expect(subject.result.current.captureBoardTextRanges('block-1').ranges).toEqual([]);
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
+    await expect(subject.result.current.whenIdle()).resolves.toBeUndefined();
   });
 
   it.each([
@@ -639,7 +873,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     expect(mocks.put).not.toHaveBeenCalled();
   });
 
-  it('keeps whenIdle pending through the body PUT and the board-range second write', async () => {
+  it('keeps whenIdle pending through the complete atomic body and board-range acknowledgement', async () => {
     const oldFlow = createTextBlockContentV1('alpha beta gamma');
     const newFlow = { ...oldFlow, units: [{ ...oldFlow.units[0], text: 'prefix alpha beta gamma' }] };
     durableBlocks = [{ ...serverBlock('alpha beta gamma', false), content_json: { body: 'alpha beta gamma', [TEXT_FLOW_CONTENT_KEY]: oldFlow } }];
@@ -754,7 +988,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     }
   });
 
-  it('loads all board anchors, writes text first, then synchronizes both boards without double shifting', async () => {
+  it('loads all board anchors and atomically synchronizes text and both boards without double shifting', async () => {
     const oldFlow = createTextBlockContentV1('alpha beta gamma');
     oldFlow.units[0].id = 'unit-1';
     const newFlow = { ...oldFlow, units: [{ ...oldFlow.units[0], text: 'prefix alpha beta gamma' }] };
@@ -785,7 +1019,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     expect(mocks.boardRangesPut.mock.calls[0][1].text_ranges).toEqual(anchors.map((range) => expect.objectContaining({ id: range.id, start_offset: 13, end_offset: 17, excerpt: 'beta' })));
   });
 
-  it('retains failed second writes for retry and never reports a synchronized save', async () => {
+  it('retains a failed composite save for retry and never reports a partial save', async () => {
     const oldFlow = createTextBlockContentV1('alpha beta gamma');
     const newFlow = { ...oldFlow, units: [{ ...oldFlow.units[0], text: 'alpha  gamma' }] };
     durableBlocks = [{ ...serverBlock('alpha beta gamma', false), content_json: { body: 'alpha beta gamma', [TEXT_FLOW_CONTENT_KEY]: oldFlow } }];
@@ -800,9 +1034,10 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     await waitFor(() => expect(subject.result.current.blocks).toHaveLength(1));
     let failed!: BlockSaveOutcome;
     await act(async () => { failed = await subject.result.current.saveBlock(subject.result.current.blocks[0], 'alpha  gamma', { textFlow: newFlow }); });
-    expect(failed).toMatchObject({ status: 'rejected', reason: 'board_range_sync_failed', durableState: 'matches_requested' });
+    expect(failed).toMatchObject({ status: 'rejected', reason: 'request_failed', durableState: 'conflict' });
+    expect(durableBlocks[0].plain_text).toBe('alpha beta gamma');
     await expect(subject.result.current.whenIdle()).rejects.toThrow('second write unavailable');
-    expect(mocks.addToast).toHaveBeenCalledWith('error', 'Text saved, but board references could not sync. Retry saving this block.');
+    expect(mocks.addToast).toHaveBeenCalledWith('error', 'Failed to save block');
     expect(mocks.addToast.mock.calls.some(([kind, message]) => kind === 'success' && message === 'Block saved')).toBe(false);
     expect(mocks.boardRangesPut.mock.calls[0][1].text_ranges[0]).toMatchObject({ status: 'drifted', excerpt: 'beta', pre_edit_offsets: { start_offset: 6, end_offset: 10 } });
     let retried!: BlockSaveOutcome;
@@ -930,7 +1165,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
         await subject.result.current.history.whenHistoryIdle();
       });
       await expect(subject.result.current.editing.flush()).rejects.toThrow('could not be saved');
-      expect(durableBlocks[0].plain_text).toBe(conversionInput);
+      expect(durableBlocks[0].plain_text).toBe(originalText);
       expect(durableBoardRanges).toEqual(originalBoardRanges);
       beforeConversion = { ...original, content_json: { ...original.content_json, body: conversionInput, [TEXT_FLOW_CONTENT_KEY]: typedFlow }, plain_text: conversionInput };
       beforeConversionAnnotations = structuredClone(subject.result.current.adapter.annotationTruths[0].ranges);
@@ -947,7 +1182,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       await subject.result.current.slash.handleSelectSlashCommand(command);
       await subject.result.current.history.whenHistoryIdle();
     });
-    expect(durableBlocks[0].metadata.template_id).toBe(templateKey);
+    expect(durableBlocks[0].metadata.template_id).toBe(failedTyping ? templateKey : undefined);
     if (failedTyping) {
       expect(mocks.put.mock.calls.filter(([url]) => url === `/note-blocks/${original.id}`).map(([, payload]) => payload.plain_text))
         .toEqual([conversionInput, conversionInput, prefix + 'alpha beta \nsecond gamma']);
@@ -1090,7 +1325,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
   });
 
   it.each(['argument', 'draft'] as const)(
-    'skips a v2 unchanged blur save with equivalent serialized TextFlow from %s',
+    'sends an atomic save with empty changesets for unchanged TextFlow from %s',
     async (flowSource) => {
       mocks.coordinateContract = 'v2';
       const storedFlow = createTextBlockContentV1('same paragraph', 'paragraph', {
@@ -1132,8 +1367,10 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
         });
       });
 
-      expect(outcome).toMatchObject({ status: 'saved', reconciliation: 'not_needed' });
-      expect(mocks.put).not.toHaveBeenCalled();
+      expect(outcome).toMatchObject({ status: 'saved', reconciliation: 'response', block: { text_save_revision: 1 } });
+      expect(mocks.atomicPut).toHaveBeenCalledWith(`/note-blocks/${block.id}/text-save`, expect.objectContaining({
+        base_revision: 0, annotations: { range_updates: [] }, text_ranges: [],
+      }));
       expect(listBlockEditRecoveryReceipts(note.id)).toEqual([]);
       expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2)).toBeNull();
       expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);

@@ -90,7 +90,7 @@ async function withNotesHttp(run: (fixture: Fixture) => void | Promise<void>): P
   const tempRoot = mkdtempSync(join(tmpdir(), 'coincides-notes-lifecycle-'));
   let server: Server | null = null;
   try {
-    const db = await initDb(join(tempRoot, 'test.db'));
+    const db = await initDb(':memory:');
     db.prepare("INSERT INTO users (id, email, password_hash, name, created_at) VALUES (?, ?, 'hash', ?, ?)")
       .run(USER_ID, 'notes-lifecycle@example.com', 'Notes Lifecycle User', '2026-08-23 08:00:00');
     db.prepare("INSERT INTO users (id, email, password_hash, name, created_at) VALUES (?, ?, 'hash', ?, ?)")

@@ -37,7 +37,7 @@ async function withBlockRestoreHttp(
   const tempRoot = mkdtempSync(join(tmpdir(), 'coincides-block-restore-door-'));
   let server: Server | null = null;
   try {
-    const db = await initDb(join(tempRoot, 'test.db'));
+    const db = await initDb(':memory:');
     db.prepare(`
       INSERT INTO users (id, email, password_hash, name, created_at)
       VALUES (?, ?, 'hash', ?, ?)
@@ -203,8 +203,13 @@ test('K-2 omitted status preserves the pre-change default response bytes', async
     const result = await readJson(baseUrl, `/api/notes/${NOTE_ID}/blocks`);
 
     assert.equal(result.response.status, 200);
+    // B7 adds only the OCC token. Preserve the original byte contract for every legacy field.
+    const historicalResponse = result.body.map(({ text_save_revision, ...legacy }: Record<string, unknown>) => {
+      assert.equal(text_save_revision, 0);
+      return legacy;
+    });
     assert.deepEqual(
-      Buffer.from(JSON.stringify(result.body), 'utf8'),
+      Buffer.from(JSON.stringify(historicalResponse), 'utf8'),
       Buffer.from(PRE_TD28_DEFAULT_JSON, 'utf8'),
       'the human trash door must not change the default active-block response by one byte',
     );

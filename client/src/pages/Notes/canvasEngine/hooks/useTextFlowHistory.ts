@@ -106,6 +106,23 @@ export function useTextFlowHistory(options: Options) {
     const lastTemplateSave = new Map<string, { transaction: TemplateTransaction; side: 'before' | 'after'; block: NoteBlock | null }>();
     const documentFailures = new Map<DocumentTransaction, 'before' | 'after'>();
     const documentProgress = new WeakMap<DocumentTransaction, { side: 'before' | 'after'; completed: Set<string> }>();
+    const issuedBases = new WeakMap<object, Map<'before' | 'after', number>>();
+    const committedBases = new Map<string, number>();
+    const transactionOrder = new WeakMap<TextFlowEditTransaction, number>();
+    let nextTransactionOrder = 0;
+    const baseFor = (transaction: object, side: 'before' | 'after', block: NoteBlock) => {
+      let sides = issuedBases.get(transaction);
+      if (!sides) { sides = new Map(); issuedBases.set(transaction, sides); }
+      if (!sides.has(side)) sides.set(side, Math.max(block.text_save_revision ?? 0, committedBases.get(block.id) ?? 0));
+      return sides.get(side)!;
+    };
+    const confirmBlock = (block: NoteBlock) => {
+      if (typeof block.text_save_revision === 'number') committedBases.set(block.id, block.text_save_revision);
+    };
+    const committed = (transaction: object, block: NoteBlock) => {
+      issuedBases.delete(transaction);
+      confirmBlock(block);
+    };
     const setDocumentPending = (value: boolean) => {
       documentPending = value;
       if (current()) setReplayScope(value ? token : null);
@@ -115,6 +132,19 @@ export function useTextFlowHistory(options: Options) {
     };
     const persist = async (transaction: TextFlowEditTransaction, side: 'before' | 'after', replay: boolean, recovery?: TextFlowEditSnapshot): Promise<boolean> => {
       if (!current()) return false;
+      if (!transactionOrder.has(transaction)) transactionOrder.set(transaction, ++nextTransactionOrder);
+      // A later body includes earlier typing. Confirm its failed dependencies
+      // first, using their frozen snapshots and original OCC bases, before the
+      // later transaction is allowed to publish any of its resources.
+      for (const [earlier, earlierSide] of [...failures.entries()]) {
+        if (earlier.blockId !== transaction.blockId || earlier === transaction
+          || transactionOrder.get(earlier)! >= transactionOrder.get(transaction)!) continue;
+        if (!await persist(earlier, earlierSide, false) || !current()) {
+          failures.set(transaction, side);
+          latest.current.onSaveFailure?.();
+          return false;
+        }
+      }
       const api = latest.current;
       const block = api.blocks.find((candidate) => candidate.id === transaction.blockId);
       if (!block) { failures.set(transaction, side); api.onSaveFailure?.(); return false; }
@@ -132,15 +162,12 @@ export function useTextFlowHistory(options: Options) {
         }
         outcome = await api.saveBlock(block, plainTextFromTextFlow(snapshot.textFlow), {
           silent: true, textFlow: snapshot.textFlow, boardRangeSnapshot: { ranges: snapshot.boardRanges }, preserveDrafts: true,
+          annotationRanges: snapshot.annotationRanges,
+          baseRevision: baseFor(transaction, side, block),
         });
         if (!current()) return false;
         success = outcome.status === 'saved';
-        if (success && snapshot.annotationRanges.length) {
-          success = await api.saveAnnotationTruthsOutcome(
-            restoreAnnotationRangeSnapshots(api.readAnnotationTruths(), snapshot.annotationRanges), { preserveDrafts: true },
-          );
-          if (!success) outcome = { ...rejected(), block: outcome.block };
-        }
+        if (success && outcome.block) committed(transaction, outcome.block);
       } catch {
         success = false;
         outcome = rejected();
@@ -151,7 +178,7 @@ export function useTextFlowHistory(options: Options) {
           if (success) {
             failures.delete(transaction);
             if (recovery) for (const failed of failures.keys()) {
-              if (failed.blockId === block.id) failures.delete(failed);
+              if (failed.blockId === block.id) { failures.delete(failed); issuedBases.delete(failed); }
             }
           }
           else { failures.set(transaction, side); api.onSaveFailure?.(); }
@@ -191,15 +218,12 @@ export function useTextFlowHistory(options: Options) {
         api.setBlockTextDrafts((drafts) => ({ ...drafts, [block.id]: snapshot.payload.plain_text ?? '' }));
         api.setAnnotationTruthsSnapshot(restoreAnnotationRangeSnapshots(api.readAnnotationTruths(), snapshot.annotationRanges));
         updated = await api.applyTemplateToBlock(block, transaction.template, snapshot.payload.plain_text ?? '', {
-          historySnapshot: { payload: structuredClone(snapshot.payload), boardRanges: { ranges: structuredClone(snapshot.boardRanges) } },
+          historySnapshot: { payload: structuredClone(snapshot.payload), boardRanges: { ranges: structuredClone(snapshot.boardRanges) }, annotationRanges: snapshot.annotationRanges },
+          baseRevision: baseFor(transaction, side, block),
         });
         if (!current()) return false;
         success = updated !== null;
-        if (success && snapshot.annotationRanges.length) {
-          success = await api.saveAnnotationTruthsOutcome(
-            restoreAnnotationRangeSnapshots(api.readAnnotationTruths(), snapshot.annotationRanges), { preserveDrafts: true },
-          );
-        }
+        if (updated) committed(transaction, updated);
       } catch {
         success = false;
       } finally {
@@ -251,15 +275,14 @@ export function useTextFlowHistory(options: Options) {
           const snapshot = edit[side];
           let outcome = await latest.current.saveBlock(block, plainTextFromTextFlow(snapshot.textFlow), {
             silent: true, textFlow: snapshot.textFlow, boardRangeSnapshot: { ranges: snapshot.boardRanges }, preserveDrafts: true,
+            annotationRanges: snapshot.annotationRanges,
+            baseRevision: baseFor(edit, side, block),
           });
           if (!current()) return false;
-          if (outcome.status === 'saved' && snapshot.annotationRanges.length
-            && !await latest.current.saveAnnotationTruthsOutcome(
-              restoreAnnotationRangeSnapshots(latest.current.readAnnotationTruths(), snapshot.annotationRanges), { preserveDrafts: true },
-            )) outcome = { ...rejected(), block: outcome.block };
           if (!current()) return false;
           lastSave.set(edit.blockId, { transaction: edit, side, outcome });
           if (outcome.status !== 'saved') return false;
+          committed(edit, outcome.block);
           progress.completed.add(edit.blockId);
         }
         success = true;
@@ -289,7 +312,7 @@ export function useTextFlowHistory(options: Options) {
         void host.enqueueRuntimeHistoryOperation(() => persist(transaction, 'after', false));
       },
     });
-    return { token, current, session, failures, lastSave, persist, templateFailures, lastTemplateSave, persistTemplate,
+    return { token, current, session, failures, lastSave, persist, templateFailures, lastTemplateSave, persistTemplate, confirmBlock,
       documentFailures, persistDocument, setDocumentPending,
       setTemplatePending(value: boolean) { templatePending = value; if (current()) setReplayScope(value ? token : null); },
       isReplaying: () => replaying || templatePending || documentPending };
@@ -510,6 +533,7 @@ export function useTextFlowHistory(options: Options) {
         outcome = previous.outcome;
       } else {
         outcome = await latest.current.saveBlock(block, text, { ...saveOptions, preserveDrafts: true });
+        if (scope.current() && outcome.status === 'saved') scope.confirmBlock(outcome.block);
       }
       return outcome.status === 'saved';
     });

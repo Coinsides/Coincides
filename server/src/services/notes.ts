@@ -170,6 +170,7 @@ export function listNoteBlocks({
       nb.operation_batch_id,
       nb.created_at,
       nb.updated_at,
+      nb.text_save_revision,
       nb.trashed_at,
       COALESCE(
         json_group_array(

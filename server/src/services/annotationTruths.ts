@@ -468,3 +468,41 @@ export function replaceNoteAnnotationTruths(
     return listAnnotationTruths(db, userId, note.id);
   })();
 }
+
+/** Text editing restores existing range identities only; labels, peers and deleted ranges survive. */
+export function patchTextSaveAnnotationRanges(
+  db: Database.Database,
+  userId: string,
+  noteId: string,
+  blockId: string,
+  updates: { annotation_id: string; range: Record<string, unknown> }[],
+): void {
+  if (!db.inTransaction) throw new Error('Annotation text edits require a caller-owned transaction');
+  const seen = new Set<string>();
+  for (const { annotation_id: annotationId, range: input } of updates) {
+    const rangeId = optionalText(input.id);
+    if (!rangeId || input.block_id !== blockId || seen.has(rangeId)) {
+      throw new AppError(400, 'Invalid annotation range text edit');
+    }
+    seen.add(rangeId);
+    let range: Record<string, unknown>;
+    try { range = normalizeRangeTarget(annotationId, input, 0); }
+    catch (error) { throw new AppError(400, error instanceof Error ? error.message : 'Invalid annotation range'); }
+    const existing = db.prepare(`SELECT id, block_id FROM annotation_ranges
+      WHERE id = ? AND annotation_id = ? AND user_id = ? AND note_id = ?`)
+      .get(rangeId, annotationId, userId, noteId) as { id: string; block_id: string | null } | undefined;
+    // An independently deleted range is never recreated by stale history.
+    if (!existing) continue;
+    if (existing.block_id !== blockId) throw new AppError(400, 'Annotation range belongs to another block');
+    db.prepare(`UPDATE annotation_ranges SET target_kind = ?, text_flow_id = ?, text_unit_id = ?,
+      inline_structure_id = ?, canvas_object_id = ?, source_region_id = ?, start_offset = ?, end_offset = ?,
+      range_text_cache = ?, metadata = ?, updated_at = ?
+      WHERE id = ? AND annotation_id = ? AND user_id = ? AND note_id = ? AND block_id = ?`)
+      .run(range.target_kind, optionalText(range.text_flow_id), optionalText(range.text_unit_id),
+        optionalText(range.inline_structure_id), optionalText(range.canvas_object_id), optionalText(range.source_region_id),
+        typeof range.start_offset === 'number' ? Math.trunc(range.start_offset) : null,
+        typeof range.end_offset === 'number' ? Math.trunc(range.end_offset) : null,
+        optionalText(range.range_text_cache), stringifyJson(stripDerivedAnchorMetadata(range.metadata), {}),
+        new Date().toISOString(), rangeId, annotationId, userId, noteId, blockId);
+  }
+}

@@ -539,6 +539,7 @@ export interface TextFlowProjection {
 
 export interface NoteBlock {
   id: string;
+  text_save_revision?: number;
   placement_id: string;
   display_overrides_json: Record<string, unknown>;
   canvas_layout?: Record<string, unknown> | null;
