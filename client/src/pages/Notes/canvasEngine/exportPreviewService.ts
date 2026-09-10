@@ -1,4 +1,5 @@
 import { textFromContent } from './blockContentService';
+import { sliceGraphemes } from '../../../../../shared/graphemes';
 import {
   DEFAULT_PAGE_FRAME_CROSSING_EXPORT_POLICY,
   resolvePageFrameCrossingExportDecision,
@@ -278,5 +279,5 @@ export function aiVisibilityLabel(visibility: AIVisibility): string {
 }
 
 export function exportPreviewRowLabel(row: ExportPreviewRow): string {
-  return row.block.title || textFromContent(row.block).slice(0, 72) || 'Untitled block';
+  return row.block.title || sliceGraphemes(textFromContent(row.block), 0, 72) || 'Untitled block';
 }

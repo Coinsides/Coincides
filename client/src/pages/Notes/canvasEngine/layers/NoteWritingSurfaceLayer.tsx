@@ -1,4 +1,5 @@
 import { screenLayoutToLocal, resolveScreenRect, selectPlacementFrame } from '../placementContractService';
+import { sliceGraphemes } from '../../../../../../shared/graphemes';
 import { projectPageFrameToReadingSurface } from '../pageFramePresentationService';
 import { Boxes } from 'lucide-react';
 import { NoteCanvasRuntimeContext } from '../NoteCanvasRuntimeProvider';
@@ -2139,7 +2140,7 @@ export function NoteWritingSurfaceLayer({
     selectionDraft?.ranges.map((range) => {
       const start = Math.max(0, Math.min(range.text.length, range.startOffset));
       const end = Math.max(0, Math.min(range.text.length, range.endOffset));
-      return range.text.slice(Math.min(start, end), Math.max(start, end));
+      return sliceGraphemes(range.text, Math.min(start, end), Math.max(start, end));
     }).filter(Boolean).join('\n') || ''
   );
 

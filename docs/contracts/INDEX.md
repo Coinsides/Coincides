@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-08-20
+> **日期 (Updated)**: 2026-09-10
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/contracts`
@@ -26,4 +26,4 @@
 | [Source-Provenance-Contract.md](Source-Provenance-Contract.md) | Source / Provenance Contract | `deferred` | 2026-06-23 | — |
 | [Source-Reconstruction-Contract-Intake.md](Source-Reconstruction-Contract-Intake.md) | Source Reconstruction Contract Intake（已冻结） | `archived` | 2026-08-20（冻结） | ⚠️ [`Source-Ladder-Contract.md`](Source-Ladder-Contract.md) |
 | [Template-Category-Contract.md](Template-Category-Contract.md) | Template / Category Contract | `deferred` | 2026-06-12 | — |
-| [TextFlow-Contract.md](TextFlow-Contract.md) | TextFlow Contract | `draft` | 2026-06-23 | — |
+| [TextFlow-Contract.md](TextFlow-Contract.md) | TextFlow Contract | `frozen` | 2026-09-10 | — |

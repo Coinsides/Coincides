@@ -58,6 +58,7 @@ function rangeTargetsTextUnit(range: AnnotationRangeV1, input: {
 function intervalForRange(input: {
   range: AnnotationRangeV1;
   textLength: number;
+  text: string;
 }): { start: number; end: number } | null {
   if (input.textLength === 0) return null;
   if (input.range.target_kind === 'text_unit') {
@@ -75,6 +76,7 @@ function intervalForRange(input: {
     startOffset: input.range.start_offset,
     endOffset: input.range.end_offset,
     textLength: input.textLength,
+    text: input.text,
   });
   if (normalized.startOffset === normalized.endOffset) return null;
   return {
@@ -111,7 +113,7 @@ export function createAnnotationRenderSegments(input: {
   const intervals: AnnotationInterval[] = activeAnnotations(input.annotations, input.displayState).flatMap((annotation) => (
     annotation.ranges.flatMap((range) => {
       if (!rangeTargetsTextUnit(range, input)) return [];
-      const interval = intervalForRange({ range, textLength });
+      const interval = intervalForRange({ range, textLength, text: input.text });
       if (!interval) return [];
       return [{
         ...interval,

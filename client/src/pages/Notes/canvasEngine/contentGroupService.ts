@@ -1,6 +1,7 @@
 import {
   textFromContent,
 } from './blockContentService';
+import { sliceGraphemes } from '../../../../../shared/graphemes';
 import type {
   PageSliceSnapshotV1,
 } from './types';
@@ -941,7 +942,7 @@ export function resolveRangePreviewFromBlocks(
     if (typeof unitText !== 'string') return null;
     const start = Math.max(0, Math.min(unitText.length, range.start_offset ?? 0));
     const end = Math.max(start, Math.min(unitText.length, range.end_offset ?? unitText.length));
-    return cleanOptionalText(unitText.slice(start, end));
+    return cleanOptionalText(sliceGraphemes(unitText, start, end));
   }
 
   return rangePreview(range);

@@ -1,5 +1,6 @@
 import type { TextBlockContentV1 } from './runtimeDataTypes';
 import { remapUnitInlineStructures, type RetainedInlineText } from './inlineLifecycle';
+import { expandGraphemeRange, snapGraphemeOffset } from '../../../../../shared/graphemes';
 
 export interface FlowPoint {
   unitId: string;
@@ -41,9 +42,18 @@ export function orderedFlowSelection(
   };
   const forward = anchorIndex < focusIndex
     || (anchorIndex === focusIndex && anchor.offset <= focus.offset);
-  return forward
+  const ordered = forward
     ? { start: anchor, end: focus, startIndex: anchorIndex, endIndex: focusIndex }
     : { start: focus, end: anchor, startIndex: focusIndex, endIndex: anchorIndex };
+  if (ordered.startIndex === ordered.endIndex) {
+    const range = expandGraphemeRange(flow.units[ordered.startIndex].text, ordered.start.offset, ordered.end.offset);
+    ordered.start = { ...ordered.start, offset: range.start };
+    ordered.end = { ...ordered.end, offset: range.end };
+  } else {
+    ordered.start = { ...ordered.start, offset: snapGraphemeOffset(flow.units[ordered.startIndex].text, ordered.start.offset, 'backward') };
+    ordered.end = { ...ordered.end, offset: snapGraphemeOffset(flow.units[ordered.endIndex].text, ordered.end.offset, 'forward') };
+  }
+  return ordered;
 }
 
 export function flowSelectionText(flow: TextBlockContentV1, selection: FlowSelection): string {
@@ -74,7 +84,7 @@ export function replaceFlowSelection(
     text: `${first.text.slice(0, range.start.offset)}${text}${last.text.slice(range.end.offset)}`,
   };
   if (range.startIndex === range.endIndex && merged.text === first.text) {
-    return { flow, caret: { unitId: first.id, offset: range.start.offset + text.length } };
+    return { flow, caret: { unitId: first.id, offset: snapGraphemeOffset(merged.text, range.start.offset + text.length) } };
   }
   const units = [
     ...flow.units.slice(0, range.startIndex),
@@ -95,6 +105,6 @@ export function replaceFlowSelection(
 
   return {
     flow: { ...flow, units, inline_structures: inlineStructures },
-    caret: { unitId: first.id, offset: range.start.offset + text.length },
+    caret: { unitId: first.id, offset: snapGraphemeOffset(merged.text, range.start.offset + text.length) },
   };
 }

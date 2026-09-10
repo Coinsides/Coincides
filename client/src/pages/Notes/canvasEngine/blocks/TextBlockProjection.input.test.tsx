@@ -65,6 +65,102 @@ function renderEditor(initialText = 'alpha SELECT omega', separateUnits = false)
 }
 
 describe('B4 TextFlow input boundaries with synthetic content', () => {
+  it.each(['😀', '👩‍👩‍👧‍👦', 'e\u0301'])('B9 Shift and plain arrows cross %s in one UTF-16 boundary step', (cluster) => {
+    const editor = renderEditor(`A${cluster}B`);
+    const node = editor.textarea;
+    act(() => { node.focus(); node.setSelectionRange(1, 1); });
+    expect(fireEvent.keyDown(node, { key: 'ArrowRight', shiftKey: true })).toBe(false);
+    expect([node.selectionStart, node.selectionEnd]).toEqual([1, 1 + cluster.length]);
+    expect(node.value.slice(node.selectionStart, node.selectionEnd)).toBe(cluster);
+    fireEvent.keyDown(node, { key: 'ArrowLeft', shiftKey: true });
+    expect([node.selectionStart, node.selectionEnd]).toEqual([1, 1]);
+    expect(fireEvent.keyDown(node, { key: 'ArrowRight' })).toBe(false);
+    expect([node.selectionStart, node.selectionEnd]).toEqual([1 + cluster.length, 1 + cluster.length]);
+    expect(fireEvent.keyDown(node, { key: 'ArrowLeft' })).toBe(false);
+    expect(node.selectionStart).toBe(1);
+    expect(editor.onFlow).not.toHaveBeenCalled();
+  });
+
+  it('B9 snaps native click/selection capture and does not interfere with active composition', () => {
+    const editor = renderEditor('A😀B');
+    const node = editor.textarea;
+    act(() => { node.focus(); node.setSelectionRange(2, 2); });
+    fireEvent.mouseUp(node);
+    expect([node.selectionStart, node.selectionEnd]).toEqual([3, 3]);
+    act(() => node.setSelectionRange(1, 2));
+    fireEvent.keyUp(node, { key: 'ArrowRight' });
+    expect([node.selectionStart, node.selectionEnd]).toEqual([1, 3]);
+    fireEvent.compositionStart(node);
+    act(() => node.setSelectionRange(2, 2));
+    fireEvent.keyDown(node, { key: 'ArrowRight', shiftKey: true, isComposing: true });
+    fireEvent.mouseUp(node);
+    expect([node.selectionStart, node.selectionEnd]).toEqual([2, 2]);
+    fireEvent.compositionEnd(node);
+    expect([node.selectionStart, node.selectionEnd]).toEqual([3, 3]);
+    expect(editor.onFlow).not.toHaveBeenCalled();
+  });
+
+  it('B9 snaps cross-unit Shift click hit offsets before storing or replacing the logical range', () => {
+    const editor = renderEditor('start\nA😀B', true);
+    const [source, target] = [...editor.container.querySelectorAll('textarea')];
+    act(() => { source.focus(); source.setSelectionRange(2, 2); });
+    fireEvent.mouseDown(target, { shiftKey: true, clientX: 16, clientY: 0 });
+    expect(target.selectionStart).toBe(3);
+    const setData = vi.fn();
+    fireEvent.copy(target, { clipboardData: { setData } });
+    expect(setData).toHaveBeenCalledWith('text/plain', 'art\nA😀');
+    fireEvent.keyDown(target, { key: 'Delete' });
+    expect(editor.texts()).toEqual(['stB']);
+  });
+
+  it.each([true, false])('B9 preserves an inserted emoji sharing a surrogate prefix in the input fallback (data=%s)', (withData) => {
+    const editor = renderEditor('start\n😀B', true);
+    const [source, target] = [...editor.container.querySelectorAll('textarea')];
+    act(() => { source.focus(); source.setSelectionRange(2, 5, 'forward'); });
+    fireEvent.keyDown(source, { key: 'ArrowRight', shiftKey: true });
+    expect(target.selectionStart).toBe(0);
+    fireEvent.input(target, { target: { value: '😁😀B', selectionStart: 2, selectionEnd: 2 }, inputType: 'insertText',
+      ...(withData ? { data: '😁' } : {}) });
+    expect(editor.texts()).toEqual(['st😁😀B']);
+    expect(editor.onFlow).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    { oldText: 'AeZ', offset: 2, inserted: '\u0301', withData: true },
+    { oldText: 'AeZ', offset: 2, inserted: '\u0301', withData: false },
+    { oldText: 'A👩Z', offset: 3, inserted: '\u200d👧', withData: true },
+    { oldText: 'A👩Z', offset: 3, inserted: '\u200d👧', withData: false },
+  ])('B9 applies only the inserted cluster-joining bytes to a reverse logical range ($oldText, data=$withData)', ({ oldText, offset, inserted, withData }) => {
+    const editor = renderEditor(`${oldText}\nlast`, true);
+    const [target, source] = [...editor.container.querySelectorAll('textarea')];
+    act(() => { source.focus(); source.setSelectionRange(2, 2); });
+    fireEvent.mouseDown(target, { shiftKey: true, clientX: offset * 8, clientY: 0 });
+    expect(target.selectionStart).toBe(offset);
+    const value = `${oldText.slice(0, offset)}${inserted}${oldText.slice(offset)}`;
+    fireEvent.input(target, { target: { value, selectionStart: offset + inserted.length, selectionEnd: offset + inserted.length },
+      inputType: 'insertText', ...(withData ? { data: inserted } : {}) });
+    expect(editor.texts()).toEqual([`${oldText.slice(0, offset)}${inserted}st`]);
+    expect(editor.onFlow).toHaveBeenCalledTimes(1);
+  });
+
+  it('B9 treats a noncancelable deletion as deleting the logical range without reinserting grapheme context', () => {
+    const editor = renderEditor('Ae\u0301Z\nlast', true);
+    const [target, source] = [...editor.container.querySelectorAll('textarea')];
+    act(() => { source.focus(); source.setSelectionRange(2, 2); });
+    fireEvent.mouseDown(target, { shiftKey: true, clientX: 24, clientY: 0 });
+    fireEvent.input(target, { target: { value: 'AeZ', selectionStart: 2, selectionEnd: 2 }, inputType: 'deleteContentBackward' });
+    expect(editor.texts()).toEqual(['Ae\u0301st']);
+    expect(editor.onFlow).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(['AB', '中文'])('B9 preserves the native in-unit single-code-unit arrow path for %s', (text) => {
+    const editor = renderEditor(text);
+    act(() => { editor.textarea.focus(); editor.textarea.setSelectionRange(0, 0); });
+    expect(fireEvent.keyDown(editor.textarea, { key: 'ArrowRight' })).toBe(true);
+    expect(fireEvent.keyDown(editor.textarea, { key: 'ArrowRight', shiftKey: true })).toBe(true);
+    expect(editor.onFlow).not.toHaveBeenCalled();
+  });
+
   it('B6 smoke 1: Shift+Down crosses the textarea boundary and copies the flow range', () => {
     const editor = renderEditor('first\nsecond\nthird', true);
     const units = [...editor.container.querySelectorAll('textarea')];

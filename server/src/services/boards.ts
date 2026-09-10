@@ -2,6 +2,7 @@ import type Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 import type { z } from 'zod';
 import { AppError } from '../middleware/errorHandler.js';
+import { sliceGraphemes } from './graphemes.js';
 import {
   boardFreehandDataSchema,
   boardStickyDataSchema,
@@ -211,7 +212,7 @@ export function resolveBoardMember(
         origin_board_id: string | null; origin_board_title: string | null;
       } | undefined;
     if (!row) return { ...base, state: 'missing', reason: 'reference_missing', item_status: 'missing' };
-    return { ...base, plain_text: row.plain_text, summary: row.plain_text.replace(/\s+/g, ' ').trim().slice(0, 240),
+    return { ...base, plain_text: row.plain_text, summary: sliceGraphemes(row.plain_text.replace(/\s+/g, ' ').trim(), 0, 240),
       item_type: row.item_type, topic: row.topic, note_id: row.origin_note_id, item_status: row.status,
       origin_board_id: row.origin_board_id, origin_board_title: row.origin_board_title,
       state: row.status === 'active' ? 'available' : 'unavailable',

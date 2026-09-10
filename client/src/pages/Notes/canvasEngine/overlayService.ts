@@ -6,6 +6,7 @@ import {
 } from './runtimeLayout';
 import { clamp, worldToScreen } from './geometry';
 import type { CanvasRect, CanvasViewport } from './types';
+import { snapGraphemeOffset } from '../../../../../shared/graphemes';
 
 type ClientRectLike = Pick<DOMRect, 'left' | 'right' | 'top' | 'bottom'>;
 export type OverlaySide = 'below' | 'right';
@@ -209,9 +210,9 @@ function getTextInputCaretRect(element: HTMLElement, caret?: number): ClientRect
   }
 
   const value = element.value;
-  const caretIndex = Number.isFinite(caret)
+  const caretIndex = snapGraphemeOffset(value, Number.isFinite(caret)
     ? Math.max(0, Math.min(value.length, caret || 0))
-    : element.selectionStart ?? value.length;
+    : element.selectionStart ?? value.length);
   const elementRect = element.getBoundingClientRect();
   const computed = window.getComputedStyle(element);
   const mirror = document.createElement('div');

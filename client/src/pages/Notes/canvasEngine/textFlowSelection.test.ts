@@ -41,6 +41,57 @@ function selection(startUnit: number, start: number, endUnit: number, end: numbe
 }
 
 describe('flow selection ranges', () => {
+  it.each(['😀', '👩‍👩‍👧‍👦', 'e\u0301'])('B9 expands partial %s copy/delete bounds while keeping UTF-16 coordinates', (cluster) => {
+    const flow = makeFlow([`A${cluster}B`]);
+    flow.inline_structures = [{ ...flow.inline_structures[0], parent_text_unit_id: 'unit-0',
+      anchor_text: cluster, anchor_range: { start: 1, end: 1 + cluster.length } }];
+    const before = structuredClone(flow);
+    for (let offset = 2; offset <= cluster.length; offset += 1) {
+      for (const range of [selection(0, 1, 0, offset), selection(0, offset, 0, 1)]) {
+        expect(orderedFlowSelection(flow, range)).toMatchObject({ start: { offset: 1 }, end: { offset: 1 + cluster.length } });
+        expect(flowSelectionText(flow, range)).toBe(cluster);
+        const result = replaceFlowSelection(flow, range, 'X')!;
+        expect(result.flow.units[0].text).toBe('AXB');
+        expect(result.caret).toEqual({ unitId: 'unit-0', offset: 2 });
+        expect(result.flow.inline_structures[0]).toMatchObject({
+          anchor_range: null,
+          metadata: { pre_edit_offsets: { start_offset: 1, end_offset: 1 + cluster.length, range_text_cache: cluster } },
+        });
+      }
+    }
+    expect(flow).toEqual(before);
+  });
+
+  it('B9 snaps a collapsed insertion without selecting or duplicating a grapheme', () => {
+    const flow = makeFlow(['A😀B']);
+    expect(flowSelectionText(flow, selection(0, 2, 0, 2))).toBe('');
+    const result = replaceFlowSelection(flow, selection(0, 2, 0, 2), 'X')!;
+    expect(result.flow.units[0].text).toBe('A😀XB');
+    expect(result.caret.offset).toBe(4);
+  });
+
+  it('B9 expands both multi-unit endpoints and preserves B8 retained inline remapping', () => {
+    const flow = makeFlow(['A😀', 'e\u0301B']);
+    flow.inline_structures = [{ ...flow.inline_structures[0], parent_text_unit_id: 'unit-1',
+      anchor_text: 'B', anchor_range: { start: 2, end: 3 } }];
+    const range = selection(1, 1, 0, 2);
+    expect(flowSelectionText(flow, range)).toBe('😀\ne\u0301');
+    const result = replaceFlowSelection(flow, range, 'X')!;
+    expect(result.flow.units[0].text).toBe('AXB');
+    expect(result.flow.inline_structures[0]).toEqual({ ...flow.inline_structures[0], parent_text_unit_id: 'unit-0', anchor_range: { start: 2, end: 3 } });
+  });
+
+  it.each(['ASCII text', '中文单字路径'])('B9 preserves every single-code-unit range in %s byte for byte', (text) => {
+    const flow = makeFlow([text]);
+    for (let start = 0; start <= text.length; start += 1) {
+      for (let end = start; end <= text.length; end += 1) {
+        expect(flowSelectionText(flow, selection(0, end, 0, start))).toBe(text.slice(start, end));
+        expect(replaceFlowSelection(flow, selection(0, start, 0, end), 'X')?.flow.units[0].text)
+          .toBe(`${text.slice(0, start)}X${text.slice(end)}`);
+      }
+    }
+  });
+
   it('normalizes reverse endpoints in complete flow order without changing the selection', () => {
     const flow = makeFlow();
     flow.units[0].order_index = 90;

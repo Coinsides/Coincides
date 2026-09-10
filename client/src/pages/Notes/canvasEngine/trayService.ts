@@ -1,6 +1,7 @@
 import type { CanvasObject, CanvasPlacement, ContentMount } from './types';
 import type { NoteBlock } from './runtimeDataTypes';
 import { textFromContent } from './blockContentService';
+import { sliceGraphemes } from '../../../../../shared/graphemes';
 
 export const TRAY_DRAG_TYPE = 'application/x-coincides-tray-placement';
 export interface TrayEntry {
@@ -32,7 +33,7 @@ export function buildTrayEntries(
       return {
         placement, block, boardKind,
         category: object?.kind === 'paragraph_block_projection' ? 'block' : ownedMounts.length ? 'mount' : 'object',
-        label: block ? (block.title || textFromContent(block).trim() || 'Empty block').slice(0, 160)
+        label: block ? sliceGraphemes(block.title || textFromContent(block).trim() || 'Empty block', 0, 160)
           : object?.kind || 'Canvas object',
       };
     });

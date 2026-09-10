@@ -53,6 +53,29 @@ function point(blockId: string, unitIndex: number, offset: number): DocumentFlow
 const select = (anchor: DocumentFlowPoint, focus: DocumentFlowPoint): DocumentFlowSelection => ({ anchor, focus });
 
 describe('document TextFlow selection ranges', () => {
+  it('B9 expands reverse document endpoints and retains separate block identities', () => {
+    const blocks = [makeBlock('first', ['A😀']), makeBlock('last', ['e\u0301B'])];
+    const selection = select(point('last', 0, 1), point('first', 0, 2));
+    const before = structuredClone(blocks);
+    expect(orderedDocumentFlowSelection(blocks, selection)).toMatchObject({ start: point('first', 0, 1), end: point('last', 0, 2) });
+    expect(documentFlowSelectionText(blocks, selection)).toBe('😀\n\ne\u0301');
+    const result = replaceDocumentFlowSelection(blocks, selection, 'X')!;
+    expect(result.changes.map(({ block, nextTextFlow }) => [block.id, nextTextFlow.units[0].text]))
+      .toEqual([['first', 'AX'], ['last', 'B']]);
+    expect(result.changes.map(({ metadata }) => metadata.beforeSelection)).toEqual([
+      { unitId: 'first-unit-0', start: 1, end: 3 }, { unitId: 'last-unit-0', start: 0, end: 2 },
+    ]);
+    expect(result.caret).toEqual(point('first', 0, 2));
+    expect(blocks).toEqual(before);
+  });
+
+  it('B9 does not first round a partial document range as two independent carets', () => {
+    const blocks = [makeBlock('one', ['A👩‍👩‍👧‍👦B'])];
+    const cluster = '👩‍👩‍👧‍👦';
+    expect(documentFlowSelectionText(blocks, select(point('one', 0, 3), point('one', 0, 4)))).toBe(cluster);
+    expect(documentFlowSelectionText(blocks, select(point('one', 0, 3), point('one', 0, 3)))).toBe('');
+  });
+
   it('uses visible block order in both directions, independent of IDs, geometry and order_index', () => {
     const blocks = [makeBlock('z-first', ['alpha', 'beta']), makeBlock('a-last', ['gamma', 'delta'])];
     blocks[0].block.order_index = 90;
@@ -88,7 +111,7 @@ describe('document TextFlow selection ranges', () => {
     expect(orderedDocumentFlowSelection(blocks, select(point('one', 1, Infinity), point('one', 0, -2))))
       .toMatchObject({ start: point('one', 0, 0), end: point('one', 1, 4) });
     expect(orderedDocumentFlowSelection(blocks, select(point('one', 0, 2.8), point('one', 0, NaN))))
-      .toMatchObject({ start: point('one', 0, 0), end: point('one', 0, 2) });
+      .toMatchObject({ start: point('one', 0, 0), end: point('one', 0, 3) });
   });
 
   it('rejects crossing or selecting an item, media, projection, read-only or unsupported editor', () => {

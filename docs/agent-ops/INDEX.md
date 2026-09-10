@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 318 份文档。
+共 323 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -309,7 +309,12 @@
 | [handoffs/2026-09-10-v13-5-a4-agent-entry-and-memories-page-order.md](handoffs/2026-09-10-v13-5-a4-agent-entry-and-memories-page-order.md) | 13.5 A4 · Agent 入口 + 记忆独立页 | `done（builder 施工回执；docs 检查 / 完整总门停线待 HQ）` | — | — |
 | [handoffs/2026-09-10-v13-5-b2-textflow-debt-survey-order.md](handoffs/2026-09-10-v13-5-b2-textflow-debt-survey-order.md) | 13.5 B2 · TextFlow 欠条清算立项调查 | `done（纯调查回执；候裁方案未施工）` | — | — |
 | [handoffs/2026-09-10-v13-5-b4-typing-undo-order.md](handoffs/2026-09-10-v13-5-b4-typing-undo-order.md) | 13.5 B4 · 打字撤销(方案 A) | `done(HQ 收口:主体+补遗一收货,863全库,扫描绿)` | — | — |
-| [handoffs/2026-09-10-v13-5-b5-cursor-traversal-order.md](handoffs/2026-09-10-v13-5-b5-cursor-traversal-order.md) | 13.5 B5 · 光标穿行 | `ready(B4 收官后派发)` | — | — |
+| [handoffs/2026-09-10-v13-5-b5-cursor-traversal-order.md](handoffs/2026-09-10-v13-5-b5-cursor-traversal-order.md) | 13.5 B5 · 光标穿行 | `done(builder 施工回执;完整 runtime 总门/凭据扫描留 HQ)` | — | — |
+| [handoffs/2026-09-10-v13-5-b6-cross-boundary-selection-order.md](handoffs/2026-09-10-v13-5-b6-cross-boundary-selection-order.md) | 13.5 B6 · 跨界选择与导航 | `ready` | — | — |
+| [handoffs/2026-09-10-v13-5-b6b-cross-block-selection-order.md](handoffs/2026-09-10-v13-5-b6b-cross-block-selection-order.md) | 13.5 B6b · 跨块选择 | `done` | — | — |
+| [handoffs/2026-09-10-v13-5-b7-atomic-text-save-order.md](handoffs/2026-09-10-v13-5-b7-atomic-text-save-order.md) | 13.5 B7 · 原子文本保存 | `done` | — | — |
+| [handoffs/2026-09-10-v13-5-b8-inline-lifecycle-hardening-order.md](handoffs/2026-09-10-v13-5-b8-inline-lifecycle-hardening-order.md) | 13.5 B8 · inline 加固 | `done` | — | — |
+| [handoffs/2026-09-10-v13-5-b9-grapheme-and-contract-order.md](handoffs/2026-09-10-v13-5-b9-grapheme-and-contract-order.md) | 13.5 B9 · 切片与契约 | `done` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |

@@ -1,6 +1,7 @@
 import { getDb } from '../db/init.js';
 import { textFlowIdForBlock } from './textFlowIdentity.js';
 import { validTextFlowUnits } from './textFlowUnits.js';
+import { sliceGraphemes } from './graphemes.js';
 
 export interface SelectionReceiptRefInput {
   blockId: string;
@@ -80,10 +81,12 @@ function resolveTextRange(
   const unit = validTextFlowUnits(body)?.find((candidate) => candidate.id === range.textUnitId);
   if (!unit) return missingRange();
 
-  const currentExcerpt = unit.text.slice(range.startOffset, range.endOffset);
+  const currentExcerpt = sliceGraphemes(unit.text, range.startOffset, range.endOffset);
+  // Pre-B9 receipts may have cached a partial cluster. Preserve their read compatibility.
+  const legacyExcerpt = unit.text.slice(range.startOffset, range.endOffset);
   return identifiedRange(
     range,
-    range.excerpt === currentExcerpt ? 'found' : 'text_drifted',
+    range.excerpt === currentExcerpt || range.excerpt === legacyExcerpt ? 'found' : 'text_drifted',
   );
 }
 

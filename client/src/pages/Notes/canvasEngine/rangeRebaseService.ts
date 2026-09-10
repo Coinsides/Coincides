@@ -2,6 +2,7 @@ import type {
   AnnotationRangeV1,
   AnnotationTruthV1,
 } from './runtimeDataTypes';
+import { expandGraphemeRange, sliceGraphemes, snapGraphemeOffset } from '../../../../../shared/graphemes';
 
 export interface SourceBackedRangeEditIntent {
   annotation_id: string;
@@ -52,6 +53,14 @@ export function deriveSingleTextEditDelta(oldText: string, newText: string): Tex
   ) {
     prefix += 1;
   }
+  // A retained prefix/suffix must end at the same grapheme boundary in both texts.
+  // Keep the edit reconstructible, including changes to combining marks or ZWJ tails.
+  while (true) {
+    const aligned = Math.min(snapGraphemeOffset(oldText, prefix, 'backward'),
+      snapGraphemeOffset(newText, prefix, 'backward'));
+    if (aligned === prefix) break;
+    prefix = aligned;
+  }
 
   let suffix = 0;
   while (
@@ -60,6 +69,14 @@ export function deriveSingleTextEditDelta(oldText: string, newText: string): Tex
     && oldText[oldText.length - 1 - suffix] === newText[newText.length - 1 - suffix]
   ) {
     suffix += 1;
+  }
+  while (suffix > 0) {
+    const aligned = Math.min(
+      oldText.length - snapGraphemeOffset(oldText, oldText.length - suffix, 'forward'),
+      newText.length - snapGraphemeOffset(newText, newText.length - suffix, 'forward'),
+    );
+    if (aligned === suffix) break;
+    suffix = aligned;
   }
 
   return {
@@ -89,7 +106,7 @@ function rangeText(range: AnnotationRangeV1, nextText: string): string | undefin
     && typeof range.start_offset === 'number'
     && typeof range.end_offset === 'number'
   ) {
-    return nextText.slice(range.start_offset, range.end_offset);
+    return sliceGraphemes(nextText, range.start_offset, range.end_offset);
   }
   return range.range_text_cache;
 }
@@ -263,8 +280,9 @@ export function applySourceBackedAnnotationRangeEdit(input: {
   const range = annotation?.ranges.find((item) => item.id === input.rangeId);
   if (!annotation || !range || !range.block_id || !range.text_flow_id || !range.text_unit_id) return null;
 
-  const start = range.target_kind === 'text_span' ? range.start_offset ?? 0 : 0;
-  const end = range.target_kind === 'text_span' ? range.end_offset ?? start : input.currentText.length;
+  const rawStart = range.target_kind === 'text_span' ? range.start_offset ?? 0 : 0;
+  const rawEnd = range.target_kind === 'text_span' ? range.end_offset ?? rawStart : input.currentText.length;
+  const { start, end } = expandGraphemeRange(input.currentText, Math.min(rawStart, rawEnd), Math.max(rawStart, rawEnd));
   const nextText = `${input.currentText.slice(0, start)}${input.replacementText}${input.currentText.slice(end)}`;
 
   const rebase = rebaseTextUnitAnnotationRanges({
@@ -280,7 +298,9 @@ export function applySourceBackedAnnotationRangeEdit(input: {
         candidate.block_id === range.block_id
         && candidate.text_flow_id === range.text_flow_id
         && candidate.text_unit_id === range.text_unit_id
-      )),
+      ))
+      .map((candidate) => candidate.id === range.id && candidate.target_kind === 'text_span'
+        ? { ...candidate, start_offset: start, end_offset: end } : candidate),
   });
 
   const rangesById = new Map(rebase.next_ranges.map((item) => [item.id, item]));

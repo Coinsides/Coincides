@@ -1,6 +1,7 @@
 import { createContext, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { NoteBlock, TextBlockContentV1 } from '../runtimeDataTypes';
 import type { FlowPoint } from '../textFlowSelection';
+import { snapGraphemeOffset } from '../../../../../../shared/graphemes';
 import {
   documentFlowSelectionText, orderedDocumentFlowSelection, replaceDocumentFlowSelection,
   type DocumentFlowBlock, type DocumentFlowEdit, type DocumentFlowPoint, type DocumentFlowSelection,
@@ -46,6 +47,12 @@ export function useDocumentTextFlowSelection(options: Options) {
     finally { traversing.current = false; }
   };
   const select = (anchor: DocumentFlowPoint, focusPoint: DocumentFlowPoint) => {
+    const snap = (point: DocumentFlowPoint) => {
+      const unit = editors.get(point.blockId)?.flow.units.find((entry) => entry.id === point.unitId);
+      return unit ? { ...point, offset: snapGraphemeOffset(unit.text, point.offset) } : point;
+    };
+    anchor = snap(anchor);
+    focusPoint = snap(focusPoint);
     const selection = { anchor, focus: focusPoint };
     if (!latest.current.applyDocumentEdit || !orderedDocumentFlowSelection(blocks(), selection)) return false;
     if (anchor.blockId === focusPoint.blockId && anchor.unitId === focusPoint.unitId && anchor.offset === focusPoint.offset) {

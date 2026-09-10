@@ -4,6 +4,7 @@ import type {
   SelectionReceiptV1,
 } from '../../../../../shared/types/selectionReceipt';
 import type { SelectionDraftV1 } from './selectionDraftService';
+import { sliceGraphemes } from '../../../../../shared/graphemes';
 
 function selectionReceiptRef(
   range: SelectionDraftV1['ranges'][number],
@@ -22,7 +23,7 @@ function selectionReceiptTextRange(
     ...selectionReceiptRef(range),
     startOffset: range.startOffset,
     endOffset: range.endOffset,
-    excerpt: range.text.slice(range.startOffset, range.endOffset),
+    excerpt: sliceGraphemes(range.text, range.startOffset, range.endOffset),
   };
 }
 

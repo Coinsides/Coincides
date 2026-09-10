@@ -48,22 +48,21 @@ export function orderedDocumentFlowSelection(
   const focusIndex = blocks.findIndex(({ block }) => block.id === selection.focus.blockId);
   if (anchorIndex < 0 || focusIndex < 0) return null;
 
-  const anchorRange = orderedFlowSelection(blocks[anchorIndex].flow, {
-    anchor: selection.anchor, focus: selection.anchor,
-  });
-  const focusRange = orderedFlowSelection(blocks[focusIndex].flow, {
-    anchor: selection.focus, focus: selection.focus,
-  });
-  if (!anchorRange || !focusRange) return null;
+  const anchorUnitIndex = blocks[anchorIndex].flow.units.findIndex((unit) => unit.id === selection.anchor.unitId);
+  const focusUnitIndex = blocks[focusIndex].flow.units.findIndex((unit) => unit.id === selection.focus.unitId);
+  if (anchorUnitIndex < 0 || focusUnitIndex < 0) return null;
+  // Order the original UTF-16 endpoints before expanding the selected range.
+  // Snapping each as a collapsed caret first could omit half-selected clusters.
+  const clamp = (offset: number, length: number) => Math.min(length, Math.max(0, Number.isNaN(offset) ? 0 : Math.trunc(offset)));
+  const anchor = { ...selection.anchor, offset: clamp(selection.anchor.offset, blocks[anchorIndex].flow.units[anchorUnitIndex].text.length) };
+  const focus = { ...selection.focus, offset: clamp(selection.focus.offset, blocks[focusIndex].flow.units[focusUnitIndex].text.length) };
 
   const forward = anchorIndex < focusIndex || (anchorIndex === focusIndex && (
-    anchorRange.startIndex < focusRange.startIndex || (
-      anchorRange.startIndex === focusRange.startIndex
-      && anchorRange.start.offset <= focusRange.start.offset
+    anchorUnitIndex < focusUnitIndex || (
+      anchorUnitIndex === focusUnitIndex
+      && anchor.offset <= focus.offset
     )
   ));
-  const anchor = { ...anchorRange.start, blockId: selection.anchor.blockId };
-  const focus = { ...focusRange.start, blockId: selection.focus.blockId };
   const start = forward ? anchor : focus;
   const end = forward ? focus : anchor;
   const startIndex = Math.min(anchorIndex, focusIndex);
@@ -76,19 +75,25 @@ export function orderedDocumentFlowSelection(
     if (!entry.editable || !supportsTextFlowBlockNavigation(entry.block) || !entry.flow.units.length) return null;
     const firstUnit = entry.flow.units[0];
     const lastUnit = entry.flow.units[entry.flow.units.length - 1];
+    const range = orderedFlowSelection(entry.flow, {
+      anchor: index === startIndex
+        ? { unitId: start.unitId, offset: start.offset }
+        : { unitId: firstUnit.id, offset: 0 },
+      focus: index === endIndex
+        ? { unitId: end.unitId, offset: end.offset }
+        : { unitId: lastUnit.id, offset: lastUnit.text.length },
+    });
+    if (!range) return null;
     selectedBlocks.push({
       ...entry,
-      selection: {
-        anchor: index === startIndex
-          ? { unitId: start.unitId, offset: start.offset }
-          : { unitId: firstUnit.id, offset: 0 },
-        focus: index === endIndex
-          ? { unitId: end.unitId, offset: end.offset }
-          : { unitId: lastUnit.id, offset: lastUnit.text.length },
-      },
+      selection: { anchor: range.start, focus: range.end },
     });
   }
-  return { start, end, startIndex, endIndex, blocks: selectedBlocks };
+  return {
+    start: { blockId: start.blockId, ...selectedBlocks[0].selection.anchor },
+    end: { blockId: end.blockId, ...selectedBlocks[selectedBlocks.length - 1].selection.focus },
+    startIndex, endIndex, blocks: selectedBlocks,
+  };
 }
 
 export function documentFlowSelectionText(

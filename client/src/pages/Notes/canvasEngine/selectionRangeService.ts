@@ -5,6 +5,7 @@ import type {
   AnnotationRangeV1,
 } from './runtimeDataTypes';
 import { textFocusReceiptsEqual, type TextOwnerReconciliation } from './textFocusReceipt';
+import { expandGraphemeRange } from '../../../../../shared/graphemes';
 
 export type CapturedSelectionRange = {
   blockId: string;
@@ -44,12 +45,17 @@ export function normalizeSelectionOffsets(input: {
   startOffset: number;
   endOffset: number;
   textLength: number;
+  text?: string;
 }): { startOffset: number; endOffset: number } {
   const textLength = Math.max(0, input.textLength);
   const rawStart = Number.isFinite(input.startOffset) ? input.startOffset : 0;
   const rawEnd = Number.isFinite(input.endOffset) ? input.endOffset : rawStart;
   const start = Math.max(0, Math.min(textLength, rawStart));
   const end = Math.max(0, Math.min(textLength, rawEnd));
+  if (input.text !== undefined) {
+    const aligned = expandGraphemeRange(input.text, Math.min(start, end), Math.max(start, end));
+    return { startOffset: aligned.start, endOffset: aligned.end };
+  }
   return start <= end
     ? { startOffset: start, endOffset: end }
     : { startOffset: end, endOffset: start };
@@ -62,6 +68,7 @@ export function createAnnotationRangeFromCapturedSelection(
     startOffset: selection.startOffset,
     endOffset: selection.endOffset,
     textLength: selection.text.length,
+    text: selection.text,
   });
   return createTextSpanAnnotationRange({
     blockId: selection.blockId,
@@ -106,6 +113,7 @@ export function createTextUnitAnnotationHighlightSegments(input: {
       startOffset: range.start_offset ?? 0,
       endOffset: range.end_offset ?? range.start_offset ?? 0,
       textLength,
+      text: input.text,
     });
     if (normalized.startOffset === normalized.endOffset) return [];
     return [{
@@ -159,6 +167,7 @@ export function captureTextUnitSelection(selection: Selection | null): CapturedS
     startOffset: range.startOffset,
     endOffset: range.endOffset,
     textLength: text.length,
+    text,
   });
   if (normalized.startOffset === normalized.endOffset) return null;
 

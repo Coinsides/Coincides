@@ -19,6 +19,7 @@ import {
   type Ref,
 } from 'react';
 import { textFlowIdForBlock } from '../../../../../../shared/types/textFlow';
+import { expandGraphemeRange, nextGraphemeOffset, previousGraphemeOffset, snapGraphemeOffset } from '../../../../../../shared/graphemes';
 import type { BlockPresentationKind } from '../blockContentService';
 import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import { resizeTextareaToContent } from '../measurementService';
@@ -26,6 +27,7 @@ import { measureTextareaNavigation, textareaBoundaryCaret, textareaCaretAtPoint,
 import { TextFlowSelectionLayer } from './TextFlowSelectionLayer';
 import { DocumentTextFlowSelectionContext } from '../hooks/useDocumentTextFlowSelection';
 import { flowSelectionText, orderedFlowSelection, replaceFlowSelection, type FlowPoint, type FlowSelection } from '../textFlowSelection';
+import { deriveSingleTextEditDelta } from '../rangeRebaseService';
 import type { TextFlowBoundaryNavigationRequest, TextFlowNavigationTarget } from '../textFlowBlockNavigation';
 import { getPageDisplayScale } from '../overlayService';
 import type {
@@ -379,7 +381,7 @@ function measureTextareaTextOffset(textarea: HTMLTextAreaElement, offset: number
   mirror.style.whiteSpace = 'pre-wrap';
   mirror.style.overflowWrap = 'break-word';
   mirror.style.wordBreak = computed.wordBreak;
-  const safeOffset = clampNumber(offset, 0, textarea.value.length);
+  const safeOffset = snapGraphemeOffset(textarea.value, offset);
   mirror.appendChild(document.createTextNode(textarea.value.slice(0, safeOffset) || '\u200b'));
   marker.textContent = '\u200b';
   mirror.appendChild(marker);
@@ -419,18 +421,18 @@ function textareaOffsetFromPoint(
   mirror.style.wordBreak = computed.wordBreak;
   mirror.style.pointerEvents = 'none';
 
-  const characters = textarea.value.split('');
+  const characters = new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(textarea.value);
   const markers: HTMLSpanElement[] = [];
-  characters.forEach((character, index) => {
+  for (const { segment, index } of characters) {
     const marker = document.createElement('span');
-    marker.textContent = character || '\u200b';
+    marker.textContent = segment || '\u200b';
     marker.dataset.offset = String(index);
     mirror.appendChild(marker);
     markers.push(marker);
-  });
+  }
   const endMarker = document.createElement('span');
   endMarker.textContent = '\u200b';
-  endMarker.dataset.offset = String(characters.length);
+  endMarker.dataset.offset = String(textarea.value.length);
   mirror.appendChild(endMarker);
   markers.push(endMarker);
 
@@ -457,7 +459,15 @@ function textareaOffsetFromPoint(
     }
   });
   document.body.removeChild(mirror);
-  return clampNumber(bestOffset, 0, textarea.value.length);
+  return snapGraphemeOffset(textarea.value, bestOffset);
+}
+
+/** DOM selections use UTF-16 too; normalize only outside an active composition. */
+function snapTextareaSelection(textarea: HTMLTextAreaElement) {
+  const range = expandGraphemeRange(textarea.value, textarea.selectionStart, textarea.selectionEnd);
+  if (range.start !== textarea.selectionStart || range.end !== textarea.selectionEnd) {
+    textarea.setSelectionRange(range.start, range.end, textarea.selectionDirection);
+  }
 }
 
 function badgeAnchorStateEqual(
@@ -508,7 +518,7 @@ export function TextBlockProjection({
   const selectionRef = useRef<TextFlowEditSelection | null>(null);
   const flowSelectionRef = useRef<FlowSelection | null>(null);
   const [flowSelection, setFlowSelection] = useState<FlowSelection | null>(null);
-  const beforeInputRef = useRef<{ selection: TextFlowEditSelection; inputType: string } | null>(null);
+  const beforeInputRef = useRef<{ selection: TextFlowEditSelection; inputType: string; data?: string | null } | null>(null);
   const additiveSelectionSessionRef = useRef(false);
   const flowShiftClickRef = useRef(false);
   const [annotationBadgeAnchors, setAnnotationBadgeAnchors] = useState<Record<string, { left: number; top: number }>>({});
@@ -528,6 +538,7 @@ export function TextBlockProjection({
   });
 
   const captureSelectionBoundary = (unitId: string, textarea: HTMLTextAreaElement) => {
+    if (!compositionRef.current) snapTextareaSelection(textarea);
     const selection = readSelection(unitId, textarea);
     const previous = selectionRef.current;
     if (!readOnly && !compositionRef.current && previous && (
@@ -537,6 +548,7 @@ export function TextBlockProjection({
   };
 
   const captureNativeCaretLine = (unitId: string, textarea: HTMLTextAreaElement) => {
+    if (!compositionRef.current) snapTextareaSelection(textarea);
     const target = nativeLineTargetRef.current;
     if (target?.unitId !== unitId) return;
     const measured = measureTextareaNavigation(textarea, textarea.selectionStart, target.y);
@@ -550,6 +562,7 @@ export function TextBlockProjection({
       if (!node || readOnly) return [];
       const capture = (event: Event) => {
         const input = event as InputEvent;
+        if (!compositionRef.current && !input.isComposing) snapTextareaSelection(node);
         if (event.cancelable && (flowSelectionRef.current || documentSelection?.read()) && !compositionRef.current && !input.isComposing) {
           if (input.inputType.startsWith('delete') || input.data !== null
             || input.inputType === 'insertLineBreak' || input.inputType === 'insertParagraph') {
@@ -561,6 +574,7 @@ export function TextBlockProjection({
         beforeInputRef.current = {
           selection: readSelection(unitId, node),
           inputType: (event as InputEvent).inputType || 'insertText',
+          data: input.data,
         };
       };
       node.addEventListener('beforeinput', capture);
@@ -582,7 +596,7 @@ export function TextBlockProjection({
   const focusTextUnit = (unitId: string, caret: number) => {
     const node = unitRefs.current[unitId];
     if (!node) return;
-    const nextCaret = Math.min(caret, node.value.length);
+    const nextCaret = snapGraphemeOffset(node.value, caret);
     node.focus({ preventScroll: true });
     node.selectionStart = nextCaret;
     node.selectionEnd = nextCaret;
@@ -630,6 +644,7 @@ export function TextBlockProjection({
           nativeSelection.modify('move', caret.nativeColumnSeed.direction, 'line');
         }
       } else if (canMoveNatively && caret.nativeLineEndFrom !== undefined) nativeSelection.modify('move', 'forward', 'lineboundary');
+      snapTextareaSelection(target);
       selectionRef.current = readSelection(targetUnit.id, target);
       verticalColumnRef.current = vertical ? request.columnX : null;
       caretLineRef.current = caret.y === undefined ? null : { unitId: targetUnit.id, offset: target.selectionStart, y: caret.y };
@@ -663,6 +678,12 @@ export function TextBlockProjection({
   }, [blockId, editableFlow, readOnly, documentSelection?.register]);
 
   const selectFlowRange = (anchor: FlowPoint, focus: FlowPoint) => {
+    const snap = (point: FlowPoint) => {
+      const unit = editableFlow.units.find((entry) => entry.id === point.unitId);
+      return unit ? { ...point, offset: snapGraphemeOffset(unit.text, point.offset) } : point;
+    };
+    anchor = snap(anchor);
+    focus = snap(focus);
     const documentRange = documentSelection?.read();
     if (documentRange) {
       documentSelection?.select(documentRange.anchor, { blockId, ...focus });
@@ -712,6 +733,7 @@ export function TextBlockProjection({
   };
 
   const copyFlowRange = (event: ClipboardEvent<HTMLTextAreaElement>, cut: boolean) => {
+    if (!compositionRef.current) snapTextareaSelection(event.currentTarget);
     if (documentSelection?.read()) {
       event.preventDefault();
       if (compositionRef.current || readOnly) return;
@@ -866,6 +888,7 @@ export function TextBlockProjection({
     textarea: HTMLTextAreaElement,
     nativeInputType?: string,
     nativeIsComposing = false,
+    nativeInputData?: string | null,
   ) => {
     resizeTextareaToContent(textarea);
     const currentFlow = latestFlowRef.current || editableFlow;
@@ -884,7 +907,26 @@ export function TextBlockProjection({
       && currentUnit.text[currentUnit.text.length - 1 - suffix] === value[value.length - 1 - suffix]) suffix += 1;
     if ((flowSelectionRef.current || documentSelection?.read()) && !compositionRef.current && !nativeIsComposing) {
       // Fallback for input methods that deliver input without cancelable beforeinput.
-      replaceSelection(value.slice(prefix, value.length - suffix), textarea);
+      // A grapheme diff may include the base that an inserted combining mark or
+      // ZWJ joins. Preserve the actual insertion bytes before falling back to it.
+      const inputType = nativeInputType || captured?.inputType || '';
+      const data = nativeInputData ?? captured?.data;
+      const focus = (documentSelection?.read() ?? flowSelectionRef.current)?.focus;
+      const localSelection = captured?.selection.unitId === unit.id ? captured.selection
+        : focus?.unitId === unit.id ? { start: focus.offset, end: focus.offset } : null;
+      let replacement: string | undefined;
+      if (inputType.startsWith('delete')) replacement = '';
+      else if (typeof data === 'string') replacement = data;
+      else if (localSelection) {
+        const insertedLength = value.length - currentUnit.text.length + localSelection.end - localSelection.start;
+        if (insertedLength >= 0) {
+          const inserted = value.slice(localSelection.start, localSelection.start + insertedLength);
+          if (currentUnit.text.slice(0, localSelection.start) + inserted + currentUnit.text.slice(localSelection.end) === value) {
+            replacement = inserted;
+          }
+        }
+      }
+      replaceSelection(replacement ?? deriveSingleTextEditDelta(currentUnit.text, value).replacementText, textarea);
       return;
     }
     const beforeSelection = captured?.selection.unitId === unit.id
@@ -1171,15 +1213,15 @@ export function TextBlockProjection({
             return;
           }
         }
-      } else if (activeRange) {
+      } else if (activeRange || horizontal) {
         if (vertical && measured) {
           const caret = textareaLineCaret(textarea, focusOffset, forward ? 'down' : 'up', verticalColumnRef.current!, preferredY);
           if (caret) { focus = { unitId: unit.id, offset: caret.offset }; focusY = caret.y; }
         } else if (horizontal) {
-          const offsets = [...new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(textarea.value)]
-            .map((segment) => segment.index).concat(textarea.value.length);
-          const offset = forward ? offsets.find((value) => value > focusOffset) : offsets.reverse().find((value) => value < focusOffset);
-          if (offset !== undefined) focus = { unitId: unit.id, offset };
+          const offset = forward ? nextGraphemeOffset(textarea.value, focusOffset) : previousGraphemeOffset(textarea.value, focusOffset);
+          if (offset !== focusOffset && (activeRange || Math.abs(offset - focusOffset) > 1)) {
+            focus = { unitId: unit.id, offset };
+          }
         }
       }
       if (focus) {
@@ -1197,6 +1239,17 @@ export function TextBlockProjection({
     const plainArrow = (vertical || horizontal) && !hasSelection
       && !event.shiftKey && !event.ctrlKey && !event.metaKey && !event.altKey;
     if (!plainArrow || !vertical) verticalColumnRef.current = null;
+    if (plainArrow && horizontal) {
+      const offset = forward ? nextGraphemeOffset(textarea.value, textarea.selectionStart)
+        : previousGraphemeOffset(textarea.value, textarea.selectionStart);
+      if (Math.abs(offset - textarea.selectionStart) > 1) {
+        event.preventDefault();
+        focusTextUnit(unit.id, offset);
+        caretLineRef.current = null;
+        nativeLineTargetRef.current = null;
+        return;
+      }
+    }
     const previousLine = caretLineRef.current;
     const measurement = (plainArrow || event.key === 'Home' || event.key === 'End')
       ? measureTextareaNavigation(textarea, textarea.selectionStart,
@@ -1245,6 +1298,7 @@ export function TextBlockProjection({
                 nativeSelection?.modify('move', caret.nativeColumnSeed.direction, 'line');
               }
             } else if (canMoveNatively && caret.nativeLineEndFrom !== undefined) nativeSelection.modify('move', 'forward', 'lineboundary');
+            snapTextareaSelection(target);
             selectionRef.current = readSelection(targetUnit.id, target);
             if (caret.y !== undefined) caretLineRef.current = { unitId: targetUnit.id, offset: target.selectionStart, y: caret.y };
           } finally { traversingRef.current = false; }
@@ -1400,6 +1454,7 @@ export function TextBlockProjection({
 
   const handleUnitPaste = (unit: TextUnit, event: ClipboardEvent<HTMLTextAreaElement>) => {
     if (compositionRef.current) return;
+    snapTextareaSelection(event.currentTarget);
     const pastedText = event.clipboardData.getData('text/plain');
     if (!pastedText) return;
     if (flowSelectionRef.current || documentSelection?.read()) {
@@ -1440,7 +1495,7 @@ export function TextBlockProjection({
     const offset = textareaOffsetFromPoint(textarea, { x: event.clientX, y: event.clientY });
     const nextFlow = insertPlainTextIntoTextFlow(editableFlow, unit.id, offset, droppedText);
     const targetUnit = nextFlow.units.find((item) => item.id === unit.id) || nextFlow.units[0];
-    const nextCaret = Math.min(offset + droppedText.length, targetUnit?.text.length || 0);
+    const nextCaret = snapGraphemeOffset(targetUnit?.text ?? '', offset + droppedText.length);
     if (targetUnit) {
       pendingFocusRef.current = { unitId: targetUnit.id, caret: nextCaret };
       emitFlowChange(nextFlow, targetUnit.id, nextCaret, textarea, { sync: true });
@@ -1670,7 +1725,8 @@ export function TextBlockProjection({
                   onChange={readOnly
                     ? undefined
                     : (event) => handleUnitTextChange(unit, event.currentTarget.value, event.currentTarget,
-                      (event.nativeEvent as InputEvent).inputType, (event.nativeEvent as InputEvent).isComposing)}
+                      (event.nativeEvent as InputEvent).inputType, (event.nativeEvent as InputEvent).isComposing,
+                      (event.nativeEvent as InputEvent).data)}
                   onSelect={(event) => {
                     if (compositionRef.current || flowSelectionRef.current || documentSelection?.read()) return;
                     captureNativeCaretLine(unit.id, event.currentTarget);
@@ -1699,6 +1755,7 @@ export function TextBlockProjection({
                     handleUnitTextChange(unit, event.currentTarget.value, event.currentTarget, 'insertCompositionText', true);
                     compositionRef.current = false;
                     event.currentTarget.dataset.runtimeTextflowComposing = 'false';
+                    snapTextareaSelection(event.currentTarget);
                     const selection = readSelection(unit.id, event.currentTarget);
                     onTextEditBoundary?.('compositionEnd', selection);
                     if (deferredBlurRef.current) {

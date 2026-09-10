@@ -1,5 +1,6 @@
 /// <reference lib="es2022.intl" />
 import { getPageDisplayScale } from './overlayService';
+import { expandGraphemeRange, previousGraphemeOffset, snapGraphemeOffset } from '../../../../../shared/graphemes';
 
 interface CaretPoint { x: number; y: number; height: number }
 export interface TextareaSelectionRect { left: number; top: number; width: number; height: number }
@@ -51,9 +52,10 @@ function withTextareaLayout<T>(
     const borderLeft = Number.parseFloat(computed.borderLeftWidth) || 0;
     const borderTop = Number.parseFloat(computed.borderTopWidth) || 0;
     const point = (offset: number, upstream = false): CaretPoint | null => {
+      offset = snapGraphemeOffset(textarea.value, offset);
       const previousCharacter = upstream && offset > 0 && textarea.value[offset - 1] !== '\n';
       if (previousCharacter) {
-        range.setStart(text, offset - 1);
+        range.setStart(text, previousGraphemeOffset(textarea.value, offset));
         range.setEnd(text, offset);
       } else if (offset === textarea.value.length) {
         range.setStart(mirror.lastChild!, 0);
@@ -110,8 +112,7 @@ export function measureTextareaSelection(
   end: number,
   includeBreak = false,
 ): TextareaSelectionRect[] {
-  const low = Math.max(0, Math.min(textarea.value.length, Math.min(start, end)));
-  const high = Math.max(low, Math.min(textarea.value.length, Math.max(start, end)));
+  const { start: low, end: high } = expandGraphemeRange(textarea.value, Math.min(start, end), Math.max(start, end));
   if (low === high && !includeBreak) return [];
   return withTextareaLayout(textarea, (point, layout) => {
     const rectangles = low < high ? layout.selectionRects(low, high).filter((rect) => rect.width > 0) : [];

@@ -114,6 +114,20 @@ function selectionDraftFixture(): SelectionDraftV1 {
 }
 
 describe('selection receipt projection', () => {
+  it.each([
+    ['surrogate pair', 'A\u{1f600}B', 1, 2, '\u{1f600}'],
+    ['ZWJ sequence', 'A\u{1f469}\u200d\u{1f4bb}B', 2, 4, '\u{1f469}\u200d\u{1f4bb}'],
+    ['combining accent', 'Ae\u0301B', 2, 3, 'e\u0301'],
+  ])('B9 expands a partial %s excerpt without rewriting stored UTF-16 offsets', (_name, text, start, end, excerpt) => {
+    const draft = selectionDraftFixture();
+    draft.ranges = [{ ...draft.ranges[0], text, startOffset: start, endOffset: end }];
+    const receipt = selectionDraftToReceipt(draft, { noteId: 'note-1' });
+    expect(receipt!.text_ranges[0].excerpt).toBe(excerpt);
+    expect(receipt!.text_ranges[0].startOffset).toBe(start);
+    expect(receipt!.text_ranges[0].endOffset).toBe(end);
+    expect(draft.ranges[0]).toMatchObject({ text, startOffset: start, endOffset: end });
+  });
+
   it("K-1' projects the selected excerpt rather than the whole TextUnit", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2026-08-24T12:02:03.456Z'));

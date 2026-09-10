@@ -1,4 +1,5 @@
 import type { InlineStructuredObject, TextUnit } from './runtimeDataTypes';
+import { sliceGraphemes } from '../../../../../shared/graphemes';
 
 /** An unchanged slice of an old unit and its location after an edit. */
 export interface RetainedInlineText {
@@ -44,7 +45,7 @@ export function remapUnitInlineStructures(
           text_unit_id: unit.id,
           start_offset: range.start,
           end_offset: range.end,
-          range_text_cache: item.anchor_text ?? unit.text.slice(range.start, range.end),
+          range_text_cache: item.anchor_text ?? sliceGraphemes(unit.text, range.start, range.end),
         },
       },
     };

@@ -1,4 +1,5 @@
 import type { BoardTextRangeV1 } from '../../../../../shared/types/boardTextRange';
+import { sliceGraphemes } from '../../../../../shared/graphemes';
 import { textFlowIdForBlock } from '../../../../../shared/types/textFlow';
 import { deriveSingleTextEditDelta, rebaseTextUnitAnnotationRanges } from './rangeRebaseService';
 import type { TextBlockContentV1 } from './runtimeDataTypes';
@@ -38,7 +39,8 @@ export function rebaseBoardTextRanges(input: {
       || range.start_offset === null || range.end_offset === null
       || range.start_offset < 0 || range.end_offset <= range.start_offset
       || range.end_offset > before.text.length
-      || before.text.slice(range.start_offset, range.end_offset) !== range.excerpt
+      || (before.text.slice(range.start_offset, range.end_offset) !== range.excerpt
+        && sliceGraphemes(before.text, range.start_offset, range.end_offset) !== range.excerpt)
     ) return drifted(range);
 
     const delta = deriveSingleTextEditDelta(before.text, after.text);
@@ -67,7 +69,7 @@ export function rebaseBoardTextRanges(input: {
       ...range,
       start_offset: rebased.start_offset,
       end_offset: rebased.end_offset,
-      excerpt: after.text.slice(rebased.start_offset, rebased.end_offset),
+      excerpt: sliceGraphemes(after.text, rebased.start_offset, rebased.end_offset),
     };
   });
 }

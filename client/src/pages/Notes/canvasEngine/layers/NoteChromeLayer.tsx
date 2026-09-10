@@ -21,6 +21,7 @@ import { CANVAS_MODE_RETIRED } from '../canvasRetirementPolicy';
 import type { ChangeEvent } from 'react';
 import type { ExportPreviewModel } from '../exportPreviewService';
 import type { Note, NoteBlock } from '../runtimeDataTypes';
+import { sliceGraphemes } from '../../../../../../shared/graphemes';
 import type {
   DocumentTypographyProfile,
   PageFrameCollectionModel,
@@ -791,7 +792,7 @@ export function NoteChromeLayer({
                   ) : (
                     trashedBlocks.map((block) => {
                       const blockLabel = block.title?.trim()
-                        || block.plain_text?.trim().slice(0, 80)
+                        || sliceGraphemes(block.plain_text?.trim() ?? '', 0, 80)
                         || 'Untitled block';
                       return (
                         <div className={styles.blockTrashRow} key={block.id}>

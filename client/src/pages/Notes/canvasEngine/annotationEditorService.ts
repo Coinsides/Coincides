@@ -7,6 +7,7 @@ import {
   createTextSpanAnnotationRange,
   createAnnotationTruth,
 } from './annotationTruthService';
+import { expandGraphemeRange } from '../../../../../shared/graphemes';
 export {
   annotationVisibleInHierarchy,
   attachChildAnnotation,
@@ -119,19 +120,21 @@ export function createChildAnnotationRangeFromParentRange(input: {
     textLength: previewText.length,
   });
   if (normalized.startOffset === normalized.endOffset) return null;
+  const aligned = expandGraphemeRange(previewText, normalized.startOffset, normalized.endOffset);
 
   const parentStart = parentRange.target_kind === 'text_span'
     ? parentRange.start_offset ?? 0
     : 0;
-  const selectedText = input.selectedText
-    || previewText.slice(normalized.startOffset, normalized.endOffset);
+  const selectedText = parentRange.range_text_cache
+    ? previewText.slice(aligned.start, aligned.end)
+    : input.selectedText || previewText.slice(aligned.start, aligned.end);
 
   return createTextSpanAnnotationRange({
     blockId: parentRange.block_id,
     textFlowId: parentRange.text_flow_id,
     textUnitId: parentRange.text_unit_id,
-    startOffset: parentStart + normalized.startOffset,
-    endOffset: parentStart + normalized.endOffset,
+    startOffset: parentStart + aligned.start,
+    endOffset: parentStart + aligned.end,
     text: selectedText,
   });
 }

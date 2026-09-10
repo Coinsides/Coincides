@@ -1,4 +1,5 @@
 import api from '@/services/api';
+import { sliceGraphemes } from '../../../../shared/graphemes';
 import {
   contentGroupItemIds,
   itemSummaryFromItem,
@@ -118,7 +119,7 @@ export const boardRepository = {
 };
 
 function preview(value: unknown): string {
-  return typeof value === 'string' ? value.replace(/\s+/g, ' ').trim().slice(0, 240) : '';
+  return typeof value === 'string' ? sliceGraphemes(value.replace(/\s+/g, ' ').trim(), 0, 240) : '';
 }
 
 /** Refresh a closed note's projection from saved TextFlow, without changing note.description. */

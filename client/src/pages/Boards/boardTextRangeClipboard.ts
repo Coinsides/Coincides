@@ -1,4 +1,5 @@
 import type { BoardTextRangeSelection } from '@shared/types/boardTextRange';
+import { expandGraphemeRange } from '../../../../shared/graphemes';
 
 export const BOARD_TEXT_RANGE_MIME = 'application/x-coincides-board-text-range+json';
 
@@ -26,11 +27,12 @@ export function boardReferenceFromSelection(noteId: string, selection: {
   blockId: string; textFlowId: string; textUnitId: string;
   startOffset: number; endOffset: number; text: string;
 }): BoardTextRangeSelection | null {
+  const range = expandGraphemeRange(selection.text, selection.startOffset, selection.endOffset);
   return parseBoardTextRangeClipboard(JSON.stringify({
     note_id: noteId, block_id: selection.blockId, text_flow_id: selection.textFlowId,
-    text_unit_id: selection.textUnitId, start_offset: selection.startOffset,
-    end_offset: selection.endOffset,
-    excerpt: selection.text.slice(selection.startOffset, selection.endOffset),
+    text_unit_id: selection.textUnitId, start_offset: range.start,
+    end_offset: range.end,
+    excerpt: selection.text.slice(range.start, range.end),
     at: new Date().toISOString(),
   }));
 }

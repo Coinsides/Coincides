@@ -112,6 +112,27 @@ function renderBlocks(blocks: NoteBlock[], options: {
 }
 
 describe('B6 cross-block cursor navigation', () => {
+  it('B9 keeps cross-block Shift hit coordinates and subsequent emoji traversal on grapheme boundaries', () => {
+    const editor = renderBlocks([block('first', 'start'), block('last', 'A😀e\u0301B')], { documentSelection: true });
+    const source = editor.unit('first');
+    const target = editor.unit('last');
+    act(() => { source.focus(); source.setSelectionRange(2, 2); });
+    fireEvent.mouseDown(target, { shiftKey: true, clientX: 16, clientY: 0 });
+    expect(target.selectionStart).toBe(3);
+    const setData = vi.fn();
+    fireEvent.copy(target, { clipboardData: { setData } });
+    expect(setData).toHaveBeenLastCalledWith('text/plain', 'art\n\nA😀');
+    fireEvent.keyDown(target, { key: 'ArrowRight', shiftKey: true });
+    expect(target.selectionStart).toBe(5);
+    fireEvent.copy(target, { clipboardData: { setData } });
+    expect(setData).toHaveBeenLastCalledWith('text/plain', 'art\n\nA😀e\u0301');
+    fireEvent.keyDown(target, { key: 'Backspace' });
+    expect(editor.unit('first').value).toBe('st');
+    expect(editor.unit('last').value).toBe('B');
+    expect(editor.onDocumentEdit).toHaveBeenCalledTimes(1);
+    expect(editor.onChange).not.toHaveBeenCalled();
+  });
+
   it('B6b smoke 1: extends Shift selection across adjacent text blocks and copies a blank line', () => {
     const editor = renderBlocks([block('first', 'first'), block('last', 'last')], { documentSelection: true });
     const source = editor.unit('first');

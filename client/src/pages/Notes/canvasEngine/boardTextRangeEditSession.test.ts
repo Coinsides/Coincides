@@ -18,6 +18,17 @@ const rebase = (next: string, ranges = [anchor()]) => rebaseBoardTextRanges({
 });
 
 describe('board-owned text range editing', () => {
+  it.each(['\ud83d', '😀'])('preserves legacy UTF-16 offsets while rebasing raw or expanded excerpts: %s', (excerpt) => {
+    const legacy = { ...anchor(), start_offset: 1, end_offset: 2, excerpt };
+    const [first] = rebaseBoardTextRanges({ ranges: [legacy], blockId: 'block-1',
+      previousTextFlow: flow('A😀Z'), nextTextFlow: flow('PA😀Z') });
+    expect(first).toMatchObject({ start_offset: 2, end_offset: 3, excerpt: '😀', status: 'active' });
+    const [second] = rebaseBoardTextRanges({ ranges: [first], blockId: 'block-1',
+      previousTextFlow: flow('PA😀Z'), nextTextFlow: flow('PPA😀Z') });
+    expect(second).toMatchObject({ start_offset: 3, end_offset: 4, excerpt: '😀', status: 'active' });
+    expect(legacy).toMatchObject({ start_offset: 1, end_offset: 2, excerpt });
+  });
+
   it('moves both independent board anchors when text is inserted before the selected passage', () => {
     expect(rebase('prefix alpha beta gamma', [anchor('one'), anchor('two')]))
       .toEqual([

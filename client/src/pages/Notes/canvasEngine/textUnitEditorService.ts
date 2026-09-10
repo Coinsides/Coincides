@@ -6,6 +6,7 @@ import type {
 } from './runtimeDataTypes';
 import { remapUnitInlineStructures } from './inlineLifecycle';
 import { replaceTextUnitText } from './textFlowService';
+import { expandGraphemeRange, snapGraphemeOffset } from '../../../../../shared/graphemes';
 
 const TEXT_FLOW_CONTENT_VERSION = 'TextBlockContentV1';
 const MAX_TEXT_UNIT_INDENT = 6;
@@ -107,7 +108,7 @@ export function splitTextUnitAtOffset(
   if (unitIndex < 0) return nextFlow;
 
   const unit = nextFlow.units[unitIndex];
-  const splitOffset = clamp(offset, 0, unit.text.length);
+  const splitOffset = snapGraphemeOffset(unit.text, offset);
   const beforeText = unit.text.slice(0, splitOffset);
   const afterText = unit.text.slice(splitOffset);
   const afterUnit: TextUnit = {
@@ -156,8 +157,8 @@ export function splitTextUnitForEnter(
   if (unitIndex < 0) return nextFlow;
 
   const unit = nextFlow.units[unitIndex];
-  const splitOffset = clamp(Math.min(offset, selectionEnd), 0, unit.text.length);
-  const endOffset = clamp(Math.max(offset, selectionEnd), splitOffset, unit.text.length);
+  const { start: splitOffset, end: endOffset } = expandGraphemeRange(unit.text,
+    Math.min(offset, selectionEnd), Math.max(offset, selectionEnd));
   const beforeText = unit.text.slice(0, splitOffset);
   const afterText = unit.text.slice(endOffset);
   const nextRole = enterSplitRoleForUnit(unit, endOffset);
@@ -391,8 +392,8 @@ export function pasteTextIntoTextFlow(
   }
 
   const target = nextFlow.units[targetIndex];
-  const pasteOffset = clamp(Math.min(offset, selectionEnd), 0, target.text.length);
-  const endOffset = clamp(Math.max(offset, selectionEnd), pasteOffset, target.text.length);
+  const { start: pasteOffset, end: endOffset } = expandGraphemeRange(target.text,
+    Math.min(offset, selectionEnd), Math.max(offset, selectionEnd));
   const prefix = target.text.slice(0, pasteOffset);
   const suffix = target.text.slice(endOffset);
   const firstParsed = parsedUnits[0];
@@ -440,7 +441,7 @@ export function insertPlainTextIntoTextFlow(
     const targetIndex = nextFlow.units.findIndex((unit) => unit.id === targetUnitId);
     if (targetIndex < 0) return nextFlow;
     const target = nextFlow.units[targetIndex];
-    const insertOffset = clamp(offset, 0, target.text.length);
+    const insertOffset = snapGraphemeOffset(target.text, offset);
     return replaceTextUnitText({
       textFlow: nextFlow, textUnitId: targetUnitId,
       nextText: `${target.text.slice(0, insertOffset)}${insertedText}${target.text.slice(insertOffset)}`,

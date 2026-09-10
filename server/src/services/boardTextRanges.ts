@@ -5,6 +5,7 @@ import { AppError } from '../middleware/errorHandler.js';
 import { boardTextRangeSelectionSchema, updateBoardTextRangesSchema } from '../validators/boardTextRanges.js';
 import { textFlowIdForBlock } from './textFlowIdentity.js';
 import { validTextFlowUnits } from './textFlowUnits.js';
+import { sliceGraphemes } from './graphemes.js';
 
 interface RangeRow extends Omit<BoardTextRangeV1, 'pre_edit_offsets'> {
   user_id: string;
@@ -54,8 +55,11 @@ export function replayBoardTextRange(db: Database.Database, userId: string, rang
     || range.end_offset <= range.start_offset || range.start_offset < 0 || range.end_offset > unit.text.length) {
     return result('drifted', 'source_changed');
   }
-  const text = unit.text.slice(range.start_offset, range.end_offset);
-  return text === range.excerpt ? result('active', null, text) : result('drifted', 'source_changed');
+  const text = sliceGraphemes(unit.text, range.start_offset, range.end_offset);
+  // Old snapshots retain their original UTF-16 coordinates and bytes; GET does not migrate them.
+  const legacyText = unit.text.slice(range.start_offset, range.end_offset);
+  return text === range.excerpt || legacyText === range.excerpt
+    ? result('active', null, text) : result('drifted', 'source_changed');
 }
 
 export function getBoardTextRange(db: Database.Database, userId: string, id: string): BoardTextRangeV1 | null {
