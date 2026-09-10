@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 323 份文档。
+共 324 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -311,6 +311,7 @@
 | [handoffs/2026-09-10-v13-5-b4-typing-undo-order.md](handoffs/2026-09-10-v13-5-b4-typing-undo-order.md) | 13.5 B4 · 打字撤销(方案 A) | `done(HQ 收口:主体+补遗一收货,863全库,扫描绿)` | — | — |
 | [handoffs/2026-09-10-v13-5-b5-cursor-traversal-order.md](handoffs/2026-09-10-v13-5-b5-cursor-traversal-order.md) | 13.5 B5 · 光标穿行 | `done(builder 施工回执;完整 runtime 总门/凭据扫描留 HQ)` | — | — |
 | [handoffs/2026-09-10-v13-5-b6-cross-boundary-selection-order.md](handoffs/2026-09-10-v13-5-b6-cross-boundary-selection-order.md) | 13.5 B6 · 跨界选择与导航 | `ready` | — | — |
+| [handoffs/2026-09-10-v13-5-b6-fix1-order.md](handoffs/2026-09-10-v13-5-b6-fix1-order.md) | B6 走查修一 | `done` | — | — |
 | [handoffs/2026-09-10-v13-5-b6b-cross-block-selection-order.md](handoffs/2026-09-10-v13-5-b6b-cross-block-selection-order.md) | 13.5 B6b · 跨块选择 | `done` | — | — |
 | [handoffs/2026-09-10-v13-5-b7-atomic-text-save-order.md](handoffs/2026-09-10-v13-5-b7-atomic-text-save-order.md) | 13.5 B7 · 原子文本保存 | `done` | — | — |
 | [handoffs/2026-09-10-v13-5-b8-inline-lifecycle-hardening-order.md](handoffs/2026-09-10-v13-5-b8-inline-lifecycle-hardening-order.md) | 13.5 B8 · inline 加固 | `done` | — | — |
