@@ -5,6 +5,26 @@
 .mark { width: 10px; height: 16px; border: 2px solid var(--reference-color); background: var(--reference-color); border-radius: 2px 2px 5px 2px; }
 .tag[data-reference-health='drifted'] .mark { background: transparent; border-style: dashed; transform: rotate(12deg); }
 .tag[data-reference-health='lost'] .mark { background: transparent; border-style: dotted; border-radius: 50%; }
+/* Screen language only. Print and overview retain the original projection above. */
+@media screen {
+  .tag:where(:not([data-note-readonly-fragment] *)) .mark {
+    border: 1px solid var(--reference-ink);
+    background: var(--reference-fill);
+  }
+  .tag[data-reference-health='drifted']:where(:not([data-note-readonly-fragment] *)) .mark {
+    border-width: 2px;
+    border-style: dashed;
+    background: transparent;
+    transform: none;
+  }
+  .tag[data-reference-health='lost']:where(:not([data-note-readonly-fragment] *)) .mark {
+    border-width: 2px;
+    border-style: dotted;
+    border-radius: 2px 2px 5px 2px;
+    background: transparent;
+    filter: grayscale(0.65);
+  }
+}
 .details { position: fixed; inset: auto; margin: 0; width: min(304px, calc(100vw - 16px)); max-height: min(400px, calc(100dvh - 16px)); overflow: auto; padding: 16px; border: 1px solid var(--border-default); border-radius: 8px; background: var(--bg-elevated); color: var(--text-primary); text-align: left; cursor: default; user-select: text; font-size: 13px; line-height: 1.5; }
 .details:popover-open { display: block; }
 .details header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }

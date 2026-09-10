@@ -1,0 +1,221 @@
+{
+  "date": "2026-09-10",
+  "baseline": "c93a7af9e8002ea5cffeea1a389769adfadd7d86",
+  "environment": "Chrome native viewport 1920x911; synthetic components on 127.0.0.1:5192; no backend or database",
+  "comparison": "HEAD CSS preserved verbatim; fixture toggles only the two inserted C2 screen media rules. Control: baseline solid default border, 2px solid Live, 12deg Drifted, and solid idle layout border.",
+  "checks": {
+    "defaultBorder": {
+      "pass": true,
+      "samples": 9,
+      "width": "1px",
+      "style": "dashed",
+      "strengths": [
+        "18%",
+        "28%",
+        "40%"
+      ],
+      "selected": "28%",
+      "geometryUnchanged": true
+    },
+    "referenceStates": {
+      "pass": true,
+      "states": [
+        "active",
+        "drifted",
+        "lost"
+      ],
+      "paletteCount": 6,
+      "visibleTagText": "empty for all 18",
+      "hitTarget": "28x28 unchanged",
+      "markLayout": "10x16 unchanged",
+      "driftedRotation": "12deg to none intentionally; transformed bounding box changes"
+    },
+    "emphasis": {
+      "pass": true,
+      "ordinaryHover": "identical",
+      "codeFocus": "identical",
+      "layoutHover": "identical",
+      "selectedAffiliationCrossPage": "identical"
+    },
+    "projections": {
+      "pass": true,
+      "readonlyBlocks": 3,
+      "readonlyTags": 18,
+      "computedDifferences": 0,
+      "print": "Existing full-suite NotePrintLayer/pageFrameAlignment regression plus unchanged read-only renderer and C2 screen-only media; no OS print dialog or physical print test"
+    },
+    "layers": {
+      "pass": true,
+      "count": 6,
+      "names": [
+        "snap-guide",
+        "margin-guide",
+        "center-guide",
+        "selection",
+        "highlight",
+        "draft-highlight"
+      ],
+      "computedDifferences": 0
+    },
+    "darkTheme": {
+      "pass": true,
+      "samples": 9,
+      "referenceStates": 18
+    }
+  },
+  "referenceMarks": [
+    {
+      "state": "active",
+      "palette": "annotation-yellow",
+      "border": "1px solid rgb(250, 204, 21)",
+      "background": "rgba(250, 204, 21, 0.22) none repeat scroll 0% 0% / auto padding-box border-box",
+      "filter": "none",
+      "transform": "none"
+    },
+    {
+      "state": "active",
+      "palette": "annotation-blue",
+      "border": "1px solid rgb(96, 165, 250)",
+      "background": "rgba(37, 99, 235, 0.24) none repeat scroll 0% 0% / auto padding-box border-box",
+      "filter": "none",
+      "transform": "none"
+    },
+    {
+      "state": "active",
+      "palette": "annotation-teal",
+      "border": "1px solid rgb(45, 212, 191)",
+      "background": "rgba(20, 184, 166, 0.24) none repeat scroll 0% 0% / auto padding-box border-box",
+      "filter": "none",
+      "transform": "none"
+    },
+    {
+      "state": "active",
+      "palette": "annotation-violet",
+      "border": "1px solid rgb(167, 139, 250)",
+      "background": "rgba(124, 58, 237, 0.23) none repeat scroll 0% 0% / auto padding-box border-box",
+      "filter": "none",
+      "transform": "none"
+    },
+    {
+      "state": "active",
+      "palette": "annotation-rose",
+      "border": "1px solid rgb(251, 113, 133)",
+      "background": "rgba(225, 29, 72, 0.22) none repeat scroll 0% 0% / auto padding-box border-box",
+      "filter": "none",
+      "transform": "none"
+    },
+    {
+      "state": "active",
+      "palette": "annotation-slate",
+      "border": "1px solid rgb(148, 163, 184)",
+      "background": "rgba(100, 116, 139, 0.24) none repeat scroll 0% 0% / auto padding-box border-box",
+      "filter": "none",
+      "transform": "none"
+    },
+    {
+      "state": "drifted",
+      "palette": "annotation-yellow",
+      "border": "2px dashed rgb(250, 204, 21)",
+      "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+      "filter": "none",
+      "transform": "none"
+    },
+    {
+      "state": "drifted",
+      "palette": "annotation-blue",
+      "border": "2px dashed rgb(96, 165, 250)",
+      "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+      "filter": "none",
+      "transform": "none"
+    },
+    {
+      "state": "drifted",
+      "palette": "annotation-teal",
+      "border": "2px dashed rgb(45, 212, 191)",
+      "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+      "filter": "none",
+      "transform": "none"
+    },
+    {
+      "state": "drifted",
+      "palette": "annotation-violet",
+      "border": "2px dashed rgb(167, 139, 250)",
+      "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+      "filter": "none",
+      "transform": "none"
+    },
+    {
+      "state": "drifted",
+      "palette": "annotation-rose",
+      "border": "2px dashed rgb(251, 113, 133)",
+      "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+      "filter": "none",
+      "transform": "none"
+    },
+    {
+      "state": "drifted",
+      "palette": "annotation-slate",
+      "border": "2px dashed rgb(148, 163, 184)",
+      "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+      "filter": "none",
+      "transform": "none"
+    },
+    {
+      "state": "lost",
+      "palette": "annotation-yellow",
+      "border": "2px dotted rgb(250, 204, 21)",
+      "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+      "filter": "grayscale(0.65)",
+      "transform": "none"
+    },
+    {
+      "state": "lost",
+      "palette": "annotation-blue",
+      "border": "2px dotted rgb(96, 165, 250)",
+      "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+      "filter": "grayscale(0.65)",
+      "transform": "none"
+    },
+    {
+      "state": "lost",
+      "palette": "annotation-teal",
+      "border": "2px dotted rgb(45, 212, 191)",
+      "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+      "filter": "grayscale(0.65)",
+      "transform": "none"
+    },
+    {
+      "state": "lost",
+      "palette": "annotation-violet",
+      "border": "2px dotted rgb(167, 139, 250)",
+      "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+      "filter": "grayscale(0.65)",
+      "transform": "none"
+    },
+    {
+      "state": "lost",
+      "palette": "annotation-rose",
+      "border": "2px dotted rgb(251, 113, 133)",
+      "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+      "filter": "grayscale(0.65)",
+      "transform": "none"
+    },
+    {
+      "state": "lost",
+      "palette": "annotation-slate",
+      "border": "2px dotted rgb(148, 163, 184)",
+      "background": "rgba(0, 0, 0, 0) none repeat scroll 0% 0% / auto padding-box border-box",
+      "filter": "grayscale(0.65)",
+      "transform": "none"
+    }
+  ],
+  "screenshots": [
+    "samples-light.png",
+    "samples-dark.png",
+    "regression-light.png",
+    "hover-light.png",
+    "hover-layout-light.png"
+  ],
+  "rawEvidence": ".codex-tmp/c2-browser/computed-styles.json",
+  "fixture": ".codex-tmp/c2-browser/server.mjs"
+}

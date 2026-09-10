@@ -127,6 +127,28 @@ function getBlockToolbar(): HTMLElement {
 }
 
 describe('BlockEditorLayer K-4 affiliation controls', () => {
+  it('offers a quiet border only for an idle editable block on paper', () => {
+    renderSubject({ active: false });
+    expect(document.querySelector('[data-note-block-shell]')?.getAttribute('data-paper-block-border')).toBe('quiet');
+  });
+
+  it.each([
+    ['selected', { active: true }],
+    ['read-only projection', { contentReadOnly: true }],
+    ['workspace block', { layout: { x: 0, y: 0, width: 320, height: 72, surface: 'canvas_workspace' } }],
+    ['affiliation outline', { affiliationOutline: { affiliationKind: 'crossing', tone: 'page', colorToken: 'var(--border-focus)' } }],
+    ['cross-page continuation', { blockFragments: [{
+      blockId: 'block-k4', pageStackId: 'stack', pageFrameId: 'page-1', pageIndex: 0, pageTotal: 2,
+      fragmentIndex: 0, fragmentTotal: 2, role: 'start', clippedTop: false, clippedBottom: true,
+      blockRect: { x: 0, y: 0, width: 320, height: 72 },
+      visibleRect: { x: 0, y: 0, width: 320, height: 36 },
+      pageContentRect: { x: 0, y: 0, width: 760, height: 1000 },
+    }] }],
+  ] as const)('preserves the %s visual layer', (_label, overrides) => {
+    renderSubject({ active: false, ...overrides } as Partial<BlockEditorLayerProps>);
+    expect(document.querySelector('[data-note-block-shell]')?.hasAttribute('data-paper-block-border')).toBe(false);
+  });
+
   it('keeps only recovery saving available while text editing remains paused', async () => {
     const subject = renderSubject({ contentReadOnly: true, allowSaveRecovery: true });
     const retry = screen.getByTitle('Retry saving block') as HTMLButtonElement;

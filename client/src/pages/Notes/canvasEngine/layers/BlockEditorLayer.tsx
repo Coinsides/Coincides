@@ -391,6 +391,8 @@ export function BlockEditorLayer({
           columnX: navigationColumnRef.current });
       }}
       data-note-block-shell="true"
+      data-paper-block-border={!contentReadOnly && !active && !affiliationOutline && !crossPageFragment
+        && boundary === 'inside' && layout.surface === 'formal_page' ? 'quiet' : undefined}
       data-cross-page-block-fragment={crossPageFragment ? 'true' : undefined}
       data-cross-page-fragment-count={crossPageFragment ? fragmentTotal : undefined}
       data-cross-page-fragment-role={crossPageFragment ? fragmentRole : undefined}

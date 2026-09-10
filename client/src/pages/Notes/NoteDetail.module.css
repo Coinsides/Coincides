@@ -1670,6 +1670,15 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   z-index: 2;
 }
 
+/* C2 samples: 18% faint / 28% quiet (selected) / 40% visible. Change this one value to switch. */
+@media screen {
+  .blockBox[data-paper-block-border='quiet']:not(:hover):not(:focus-within) {
+    --paper-block-border-strength: 28%;
+    border-color: color-mix(in srgb, var(--text-muted) var(--paper-block-border-strength), transparent);
+    border-style: dashed;
+  }
+}
+
 .blockBox:hover {
   z-index: 24;
 }

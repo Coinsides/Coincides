@@ -1,7 +1,7 @@
 import { useEffect, useId, useRef, useState, type CSSProperties } from 'react';
 import { ExternalLink, X } from 'lucide-react';
 import api from '@/services/api';
-import { ANNOTATION_COLOR_OPTIONS } from '@/pages/Notes/canvasEngine/annotationColorService';
+import { ANNOTATION_COLOR_OPTIONS, annotationColorForToken } from '@/pages/Notes/canvasEngine/annotationColorService';
 import styles from './ReferenceTag.module.css';
 
 export type ReferenceHealth = 'active' | 'drifted' | 'lost';
@@ -37,6 +37,7 @@ export function ReferenceTag({ noteId, noteTitle, blockId, startOffset, endOffse
   const [attempt, setAttempt] = useState(0);
   const [position, setPosition] = useState<CSSProperties>({});
   const color = noteId ? referenceColor(noteId).accent : 'var(--text-secondary)';
+  const palette = noteId ? referenceColor(noteId) : annotationColorForToken('annotation-slate');
 
   useEffect(() => {
     setSource(null);
@@ -70,7 +71,8 @@ export function ReferenceTag({ noteId, noteTitle, blockId, startOffset, endOffse
     <button ref={button} type="button" className={styles.tag} aria-label="Reference details"
       aria-disabled={false} aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? id : undefined}
       data-reference-health={health} data-reference-color={noteId ? referenceColor(noteId).token : 'unavailable'}
-      style={{ '--reference-color': color } as CSSProperties} onClick={() => {
+      style={{ '--reference-color': color, '--reference-ink': palette.accent,
+        '--reference-fill': palette.background } as CSSProperties} onClick={() => {
         const rect = button.current!.getBoundingClientRect();
         const top = Math.max(8, Math.min(rect.bottom + 6, window.innerHeight - 300));
         setPosition({ left: Math.max(8, Math.min(rect.left, window.innerWidth - 312)),
