@@ -1,4 +1,5 @@
 import type { TextBlockContentV1 } from './runtimeDataTypes';
+import { remapUnitInlineStructures, type RetainedInlineText } from './inlineLifecycle';
 
 export interface FlowPoint {
   unitId: string;
@@ -72,15 +73,28 @@ export function replaceFlowSelection(
     ...first,
     text: `${first.text.slice(0, range.start.offset)}${text}${last.text.slice(range.end.offset)}`,
   };
+  if (range.startIndex === range.endIndex && merged.text === first.text) {
+    return { flow, caret: { unitId: first.id, offset: range.start.offset + text.length } };
+  }
   const units = [
     ...flow.units.slice(0, range.startIndex),
     merged,
     ...flow.units.slice(range.endIndex + 1),
   ].map((unit, index) => ({ ...unit, order_index: index }));
 
+  let inlineStructures = flow.inline_structures;
+  for (let index = range.startIndex; index <= range.endIndex; index += 1) {
+    const unit = flow.units[index];
+    const retained: RetainedInlineText[] = [];
+    if (index === range.startIndex) retained.push({ start: 0, end: range.start.offset, unitId: first.id, offset: 0 });
+    if (index === range.endIndex) retained.push({
+      start: range.end.offset, end: last.text.length, unitId: first.id, offset: range.start.offset + text.length,
+    });
+    inlineStructures = remapUnitInlineStructures(inlineStructures, unit, retained, first.id);
+  }
+
   return {
-    // Inline anchor rebasing follows the existing merge policy; TF-07 is a separate work order.
-    flow: { ...flow, units },
+    flow: { ...flow, units, inline_structures: inlineStructures },
     caret: { unitId: first.id, offset: range.start.offset + text.length },
   };
 }

@@ -161,6 +161,13 @@ describe('B6b real document selection → B4 runtime history integration', () =>
     });
     const after = editor.before.map((flow, index) => ({
       ...flow, units: [{ ...flow.units[0], text: index === 0 ? `al${inserted}` : 'ega' }],
+      inline_structures: index === 0 ? flow.inline_structures : [{
+        ...flow.inline_structures[0], anchor_range: null,
+        metadata: {
+          ...flow.inline_structures[0].metadata,
+          pre_edit_offsets: { text_unit_id: 'unit-1', start_offset: 0, end_offset: 1, range_text_cache: 'a' },
+        },
+      }],
     }));
     expect(editor.current().flows).toEqual(after);
     expect(editor.container.querySelectorAll('textarea')).toHaveLength(2);

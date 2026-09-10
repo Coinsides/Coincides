@@ -9,6 +9,8 @@ import type {
   TextUnit,
   TextUnitWritingRole,
 } from './runtimeDataTypes';
+import { remapUnitInlineStructures } from './inlineLifecycle';
+import { deriveSingleTextEditDelta, type TextEditDelta } from './rangeRebaseService';
 
 export const TEXT_FLOW_CONTENT_KEY = 'text_flow';
 export const TEXT_FLOW_CONTENT_VERSION = 'TextBlockContentV1';
@@ -199,9 +201,25 @@ export function replaceTextUnitText(input: {
   textFlow: TextBlockContentV1;
   textUnitId: string;
   nextText: string;
+  edit?: TextEditDelta;
 }): TextBlockContentV1 {
+  const unit = input.textFlow.units.find((item) => item.id === input.textUnitId);
+  if (!unit || unit.text === input.nextText) return input.textFlow;
+  const supplied = input.edit;
+  const edit = supplied && Number.isInteger(supplied.editedStartOffset) && Number.isInteger(supplied.editedEndOffset)
+    && supplied.editedStartOffset >= 0
+    && supplied.editedEndOffset >= supplied.editedStartOffset
+    && supplied.editedEndOffset <= unit.text.length
+    && unit.text.slice(0, supplied.editedStartOffset) + supplied.replacementText
+      + unit.text.slice(supplied.editedEndOffset) === input.nextText
+    ? supplied : deriveSingleTextEditDelta(unit.text, input.nextText);
   return {
     ...input.textFlow,
+    inline_structures: remapUnitInlineStructures(input.textFlow.inline_structures, unit, [
+      { start: 0, end: edit.editedStartOffset, unitId: unit.id, offset: 0 },
+      { start: edit.editedEndOffset, end: unit.text.length, unitId: unit.id,
+        offset: edit.editedStartOffset + edit.replacementText.length },
+    ], unit.id),
     units: input.textFlow.units.map((unit) => (
       unit.id === input.textUnitId
         ? { ...unit, text: input.nextText }

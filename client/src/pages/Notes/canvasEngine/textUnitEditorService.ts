@@ -4,6 +4,8 @@ import type {
   TextUnit,
   TextUnitWritingRole,
 } from './runtimeDataTypes';
+import { remapUnitInlineStructures } from './inlineLifecycle';
+import { replaceTextUnitText } from './textFlowService';
 
 const TEXT_FLOW_CONTENT_VERSION = 'TextBlockContentV1';
 const MAX_TEXT_UNIT_INDENT = 6;
@@ -87,10 +89,11 @@ function makeFlowFromUnits(
   source: TextBlockContentV1,
   units: TextUnit[],
 ): TextBlockContentV1 {
+  const unitIds = new Set(units.map((unit) => unit.id));
   return {
     ...cloneFlow(source),
     units: rewriteUnitOrder(units.map(cloneUnit)),
-    inline_structures: [],
+    inline_structures: source.inline_structures.filter((item) => unitIds.has(item.parent_text_unit_id)),
   };
 }
 
@@ -123,6 +126,10 @@ export function splitTextUnitAtOffset(
   return {
     ...nextFlow,
     units: rewriteUnitOrder(units),
+    inline_structures: remapUnitInlineStructures(nextFlow.inline_structures, unit, [
+      { start: 0, end: splitOffset, unitId: unit.id, offset: 0 },
+      { start: splitOffset, end: unit.text.length, unitId: afterUnit.id, offset: 0 },
+    ], unit.id),
   };
 }
 
@@ -172,6 +179,10 @@ export function splitTextUnitForEnter(
   return {
     ...nextFlow,
     units: rewriteUnitOrder(units),
+    inline_structures: remapUnitInlineStructures(nextFlow.inline_structures, unit, [
+      { start: 0, end: splitOffset, unitId: unit.id, offset: 0 },
+      { start: endOffset, end: unit.text.length, unitId: afterUnit.id, offset: 0 },
+    ], unit.id),
   };
 }
 
@@ -198,6 +209,9 @@ export function mergeTextUnitWithPrevious(
   return {
     ...nextFlow,
     units: rewriteUnitOrder(units),
+    inline_structures: remapUnitInlineStructures(nextFlow.inline_structures, current, [
+      { start: 0, end: current.text.length, unitId: previous.id, offset: previous.text.length },
+    ], previous.id),
   };
 }
 
@@ -401,6 +415,10 @@ export function pasteTextIntoTextFlow(
 
   return {
     ...nextFlow,
+    inline_structures: remapUnitInlineStructures(nextFlow.inline_structures, target, [
+      { start: 0, end: pasteOffset, unitId: target.id, offset: 0 },
+      ...(suffixUnit.length ? [{ start: endOffset, end: target.text.length, unitId: suffixUnit[0].id, offset: 0 }] : []),
+    ], target.id),
     units: rewriteUnitOrder([
       ...nextFlow.units.slice(0, targetIndex),
       firstUnit,
@@ -423,17 +441,11 @@ export function insertPlainTextIntoTextFlow(
     if (targetIndex < 0) return nextFlow;
     const target = nextFlow.units[targetIndex];
     const insertOffset = clamp(offset, 0, target.text.length);
-    return {
-      ...nextFlow,
-      units: nextFlow.units.map((unit) => (
-        unit.id === targetUnitId
-          ? {
-            ...unit,
-            text: `${unit.text.slice(0, insertOffset)}${insertedText}${unit.text.slice(insertOffset)}`,
-          }
-          : unit
-      )),
-    };
+    return replaceTextUnitText({
+      textFlow: nextFlow, textUnitId: targetUnitId,
+      nextText: `${target.text.slice(0, insertOffset)}${insertedText}${target.text.slice(insertOffset)}`,
+      edit: { editedStartOffset: insertOffset, editedEndOffset: insertOffset, replacementText: insertedText },
+    });
   }
   return pasteTextIntoTextFlow(flow, targetUnitId, offset, insertedText);
 }
@@ -462,6 +474,9 @@ export function splitTextFlowAtUnit(
     nextFlow,
     afterUnits,
   );
+  // Pre-existing unresolved parents must not disappear during partitioning.
+  const unitIds = new Set(nextFlow.units.map((unit) => unit.id));
+  before.inline_structures.push(...nextFlow.inline_structures.filter((item) => !unitIds.has(item.parent_text_unit_id)));
   return { before, after };
 }
 
@@ -472,18 +487,35 @@ export function mergeTextFlows(
   const firstFlow = cloneFlow(first);
   const secondFlow = cloneFlow(second);
   const firstUnitIds = new Set(firstFlow.units.map((unit) => unit.id));
+  const reservedUnitIds = new Set([...firstUnitIds, ...secondFlow.units.map((unit) => unit.id)]);
+  const renamedUnits = new Map<string, string>();
   let nextUnitId = maxNumericSuffix([...firstUnitIds], 'tu-') + 1;
   const secondUnits = secondFlow.units.map((unit) => {
     if (!firstUnitIds.has(unit.id)) return unit;
+    while (reservedUnitIds.has(`tu-${nextUnitId}`)) nextUnitId += 1;
     const nextUnit = { ...unit, id: `tu-${nextUnitId}` };
+    renamedUnits.set(unit.id, nextUnit.id);
+    reservedUnitIds.add(nextUnit.id);
     nextUnitId += 1;
     return nextUnit;
+  });
+  const firstInlineIds = new Set(firstFlow.inline_structures.map((item) => item.id));
+  const reservedInlineIds = new Set([...firstInlineIds, ...secondFlow.inline_structures.map((item) => item.id)]);
+  let nextInlineId = maxNumericSuffix([...reservedInlineIds], 'iso-') + 1;
+  const secondInline = secondFlow.inline_structures.map((item) => {
+    let id = item.id;
+    if (firstInlineIds.has(id)) {
+      while (reservedInlineIds.has(`iso-${nextInlineId}`)) nextInlineId += 1;
+      id = `iso-${nextInlineId++}`;
+      reservedInlineIds.add(id);
+    }
+    return { ...item, id, parent_text_unit_id: renamedUnits.get(item.parent_text_unit_id) ?? item.parent_text_unit_id };
   });
 
   return {
     ...firstFlow,
     units: rewriteUnitOrder([...firstFlow.units, ...secondUnits]),
-    inline_structures: [...firstFlow.inline_structures, ...secondFlow.inline_structures],
+    inline_structures: [...firstFlow.inline_structures, ...secondInline],
     metadata: {
       ...firstFlow.metadata,
       ...secondFlow.metadata,

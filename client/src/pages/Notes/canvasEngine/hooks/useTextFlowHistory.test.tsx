@@ -251,6 +251,102 @@ describe('B4 TextFlow and application history integration (synthetic memory)', (
   });
 });
 
+describe('B8 smoke 4: inline snapshots through the real editor and application history (synthetic memory)', () => {
+  it('uses native beforeinput at the beginning of repeated text to shift the inline anchor and preserve replay payloads', async () => {
+    const flow = createTextBlockContentV1('aaaa');
+    flow.inline_structures = [{
+      id: 'b8-repeated-inline', semantic_kind: 'inline_code', parent_text_unit_id: flow.units[0].id,
+      anchor_text: 'aa', anchor_range: { start: 1, end: 3 },
+      field_values: { language: 'text' }, metadata: { retained: { original: true } }, status: 'active',
+    }];
+    const before = structuredClone(flow);
+    const editor = renderHistoryEditor('', { flow });
+    editor.focus();
+    editor.textarea().setSelectionRange(0, 0);
+    fireEvent(editor.textarea(), new InputEvent('beforeinput', {
+      bubbles: true, cancelable: true, inputType: 'insertText', data: 'a',
+    }));
+    fireEvent.input(editor.textarea(), {
+      target: { value: 'aaaaa', selectionStart: 1, selectionEnd: 1 }, inputType: 'insertText', data: 'a',
+    });
+    act(() => { expect(editor.current().textHistory.boundary()).toBe(true); });
+    await editor.idle();
+    const after: TextBlockContentV1 = {
+      ...before, units: [{ ...before.units[0], text: 'aaaaa' }],
+      inline_structures: [{ ...before.inline_structures[0], anchor_range: { start: 2, end: 4 } }],
+    };
+    expect(editor.current().flow).toStrictEqual(after);
+    expect(editor.savedFlows).toStrictEqual([after]);
+    await editor.key('z', window);
+    expect(editor.current().flow).toStrictEqual(before);
+    expect(editor.textarea().selectionStart).toBe(0);
+    await editor.key('y', window);
+    expect(editor.current().flow).toStrictEqual(after);
+    expect(editor.textarea().selectionStart).toBe(1);
+    expect(editor.savedFlows).toStrictEqual([after, before, after]);
+    expect(editor.saveBlock.mock.calls.map(([, , saveOptions]) => saveOptions?.textFlow)).toStrictEqual([after, before, after]);
+    expect(flow).toStrictEqual(before);
+  });
+
+  it.each(['inline_formula', 'inline_code'] as const)('replays every %s field after a shift and an interior edit, including save payloads', async (semanticKind) => {
+    const flow = createTextBlockContentV1('lead alpha tail');
+    flow.metadata = { language: 'en', retained: { author: 'synthetic' } };
+    flow.units[0].metadata = { retained: { unit: true } };
+    flow.inline_structures = [{
+      id: `b8-${semanticKind}`, semantic_kind: semanticKind, parent_text_unit_id: flow.units[0].id,
+      anchor_text: 'alpha', anchor_range: { start: 5, end: 10 },
+      field_values: { expression: '\\alpha', language: 'text', nested: { preserved: ['alpha', 1] } },
+      metadata: { retained: { birth: 'synthetic' } }, status: 'active',
+    }];
+    const before = structuredClone(flow);
+    const editor = renderHistoryEditor('', { flow });
+    const shifted: TextBlockContentV1 = {
+      ...before,
+      units: [{ ...before.units[0], text: '++lead alpha tail' }],
+      inline_structures: [{ ...before.inline_structures[0], anchor_range: { start: 7, end: 12 } }],
+    };
+    editor.input(shifted.units[0].text, 0);
+    act(() => { expect(editor.current().textHistory.boundary()).toBe(true); });
+    await editor.idle();
+    expect(editor.current().flow).toStrictEqual(shifted);
+    expect(editor.savedFlows).toStrictEqual([shifted]);
+
+    const degraded: TextBlockContentV1 = {
+      ...shifted,
+      units: [{ ...shifted.units[0], text: '++lead al+pha tail' }],
+      inline_structures: [{
+        ...shifted.inline_structures[0], anchor_range: null,
+        metadata: {
+          ...shifted.inline_structures[0].metadata,
+          pre_edit_offsets: { text_unit_id: before.units[0].id, start_offset: 7, end_offset: 12, range_text_cache: 'alpha' },
+        },
+      }],
+    };
+    editor.input(degraded.units[0].text, 9);
+    act(() => { expect(editor.current().textHistory.boundary()).toBe(true); });
+    await editor.idle();
+    expect(editor.current().flow).toStrictEqual(degraded);
+    expect(editor.savedFlows).toStrictEqual([shifted, degraded]);
+
+    await editor.key('z', window);
+    expect(editor.current().flow).toStrictEqual(shifted);
+    await editor.key('z', window);
+    expect(editor.current().flow).toStrictEqual(before);
+    await act(async () => { expect(await editor.current().history.undoRuntimeHistory()).toBe(false); });
+    await editor.key('y', window);
+    expect(editor.current().flow).toStrictEqual(shifted);
+    await editor.key('y', window);
+    expect(editor.current().flow).toStrictEqual(degraded);
+    await act(async () => { expect(await editor.current().history.redoRuntimeHistory()).toBe(false); });
+
+    const snapshots = [shifted, degraded, shifted, before, shifted, degraded];
+    expect(editor.savedFlows).toStrictEqual(snapshots);
+    expect(editor.saveBlock.mock.calls.map(([, , saveOptions]) => saveOptions?.textFlow)).toStrictEqual(snapshots);
+    expect(editor.savedTexts).toStrictEqual(snapshots.map(plainTextFromTextFlow));
+    expect(flow).toStrictEqual(before);
+  });
+});
+
 describe('B5 smoke 6: cursor traversal preserves B4 history (synthetic memory)', () => {
   function renderUnits(texts: string[]) {
     const flow = createTextBlockContentV1('');
@@ -405,8 +501,17 @@ describe('B6 smokes 2 and 3: cross-unit edits retain B4 history (synthetic memor
     };
     const assertReplayWithFollowingTyping = async (inserted: string) => {
       const mergedText = `al${inserted}mma`;
-      const after = { ...before, units: [{ ...before.units[0], text: mergedText }] };
-      const afterTyping = { ...before, units: [{ ...before.units[0], text: `al${inserted}Ymma` }] };
+      const after: TextBlockContentV1 = {
+        ...before, units: [{ ...before.units[0], text: mergedText }],
+        inline_structures: [{
+          ...before.inline_structures[0], parent_text_unit_id: 'b6-first', anchor_range: null,
+          metadata: {
+            ...before.inline_structures[0].metadata,
+            pre_edit_offsets: { text_unit_id: 'b6-middle', start_offset: 1, end_offset: 3, range_text_cache: 'et' },
+          },
+        }],
+      };
+      const afterTyping = { ...after, units: [{ ...before.units[0], text: `al${inserted}Ymma` }] };
       await editor.idle();
       expect(editor.current().flow).toEqual(after);
       expect(editor.textarea().dataset.textUnitId).toBe('b6-first');

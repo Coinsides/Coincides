@@ -2264,6 +2264,12 @@ export function NoteWritingSurfaceLayer({
       textFlow: currentTextFlow,
       textUnitId: range.text_unit_id,
       nextText: editResult.next_text,
+      edit: {
+        editedStartOffset: range.target_kind === 'text_span' ? range.start_offset ?? 0 : 0,
+        editedEndOffset: range.target_kind === 'text_span'
+          ? range.end_offset ?? range.start_offset ?? 0 : currentUnit.text.length,
+        replacementText: input.nextText,
+      },
     });
     const nextPlainText = plainTextFromTextFlow(nextTextFlow);
 

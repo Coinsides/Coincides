@@ -172,6 +172,13 @@ describe('document TextFlow selection replacement', () => {
     expect(result?.changes[1].nextTextFlow).toEqual({
       ...before[1].flow,
       units: [{ ...before[1].flow.units[0], text: 'ta' }, { ...before[1].flow.units[2], order_index: 1 }],
+      inline_structures: [{
+        ...before[1].flow.inline_structures[0], anchor_range: null,
+        metadata: {
+          ...before[1].flow.inline_structures[0].metadata,
+          pre_edit_offsets: { text_unit_id: 'last-unit-0', start_offset: 0, end_offset: 1, range_text_cache: 'a' },
+        },
+      }],
     });
     expect(result?.changes.map(({ block }) => block)).toEqual(before.map(({ block }) => block));
     expect(blocks).toEqual(before);

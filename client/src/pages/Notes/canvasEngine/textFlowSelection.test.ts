@@ -132,13 +132,20 @@ describe('flow selection replacement', () => {
     expect(result?.caret).toEqual({ unitId: 'unit-0', offset: 4 });
   });
 
-  it('preserves all first-unit, flow and inline fields without mutating the source', () => {
+  it('preserves first-unit and flow fields while retaining removed inline as a degraded receipt', () => {
     const flow = makeFlow();
     const before = structuredClone(flow);
     const result = replaceFlowSelection(flow, selection(0, 1, 2, 2), 'new');
     expect(result?.flow).toEqual({
       ...before,
       units: [{ ...before.units[0], text: 'anewmma' }],
+      inline_structures: [{
+        ...before.inline_structures[0], parent_text_unit_id: 'unit-0', anchor_range: null,
+        metadata: {
+          ...before.inline_structures[0].metadata,
+          pre_edit_offsets: { text_unit_id: 'unit-1', start_offset: 1, end_offset: 3, range_text_cache: 'et' },
+        },
+      }],
     });
     expect(flow).toEqual(before);
     expect(result?.flow).not.toBe(flow);

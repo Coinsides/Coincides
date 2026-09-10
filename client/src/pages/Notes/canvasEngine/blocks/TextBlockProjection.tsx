@@ -38,6 +38,7 @@ import type {
 import {
   TEXT_FLOW_CONTENT_KEY,
   projectTextFlowContent,
+  replaceTextUnitText,
 } from '../textFlowService';
 import type { CapturedSelectionRange } from '../selectionRangeService';
 import {
@@ -892,12 +893,22 @@ export function TextBlockProjection({
         ? selectionRef.current
         : { unitId: unit.id, start: prefix, end: currentUnit.text.length - suffix };
     const isComposing = compositionRef.current || nativeIsComposing;
-    const nextFlow = {
-      ...currentFlow,
-      units: currentFlow.units.map((item) => (
-        item.id === unit.id ? { ...item, text: value } : item
-      )),
-    };
+    let editStart = beforeSelection.start;
+    let editEnd = beforeSelection.end;
+    if (editStart === editEnd && value.length < currentUnit.text.length) {
+      editStart = afterSelection.start;
+      editEnd = editStart + currentUnit.text.length - value.length;
+    }
+    const replacementLength = value.length - currentUnit.text.length + editEnd - editStart;
+    const nextFlow = replaceTextUnitText({
+      textFlow: currentFlow, textUnitId: unit.id, nextText: value,
+      // Use the native selection when it reconstructs this edit; a text diff
+      // alone cannot locate an insertion among repeated characters.
+      edit: replacementLength >= 0 ? {
+        editedStartOffset: editStart, editedEndOffset: editEnd,
+        replacementText: value.slice(editStart, editStart + replacementLength),
+      } : undefined,
+    });
     emitFlowChange(nextFlow, unit.id, afterSelection.start, textarea, { edit: {
       unitId: unit.id,
       inputType: isComposing ? 'insertCompositionText' : nativeInputType || captured?.inputType || 'insertText',
