@@ -30,6 +30,11 @@ export function useTrayController(input: {
   selectedBlockId: string | null;
   blockLayouts: Record<string, BlockBoxLayout>;
   collection: PageFrameCollectionModel | null;
+  getRuntimeCollection?: () => PageFrameCollectionModel | null;
+  resolvePlacementWriteContext: (noteId: string) => Promise<{
+    coordinateContract: CoordinateContract;
+    pageFrameCollection: PageFrameCollectionModel | null;
+  }>;
   pageOffsetX: number;
   refresh: (changedBlockIds?: string[]) => Promise<void>;
   clearSelection: () => void;
@@ -83,7 +88,8 @@ export function useTrayController(input: {
     finally { busyRef.current = false; if (alive.current) setBusy(false); }
   };
   const save = async (block: NoteBlock, layout: BlockBoxLayout) => {
-    await saveBlockCanvasPlacementForNote({ noteId: input.noteId!, block, layout, pageFrameCollection: input.collection, coordinateContract: input.coordinateContract });
+    const context = await input.resolvePlacementWriteContext(input.noteId!);
+    await saveBlockCanvasPlacementForNote({ ...context, noteId: input.noteId!, block, layout });
     await refresh([block.id]);
     input.clearSelection();
   };
@@ -128,17 +134,18 @@ export function useTrayController(input: {
   const dropOnPaper = async (placementId: string, layout: BlockBoxLayout) => {
     const entry = entries.find((item) => item.placement.placementId === placementId);
     if (!entry?.block) return;
+    const collection = input.getRuntimeCollection?.() || input.collection;
     const authority = resolvePageDraftSessionAuthority({
       coordinateContract: input.coordinateContract,
-      collection: input.collection, layout, pageOffsetX: input.pageOffsetX,
-      selectedFrameId: input.collection?.selectedFrameId,
+      collection, layout, pageOffsetX: input.pageOffsetX,
+      selectedFrameId: collection?.selectedFrameId,
     });
     if (!authority) return;
     const before = readStoredLayout(entry.block) as BlockBoxLayout;
     // The surface has already converted the drop to the loaded contract.
     const after = reconcileHydratedBlockLayoutSurfaceAuthority({
       ...layout, coordinate_space: 'page_frame_local', frame_id: authority.frameId,
-    }, input.collection?.pageFrames || [], input.coordinateContract) as unknown as BlockBoxLayout;
+    }, collection?.pageFrames || [], input.coordinateContract) as unknown as BlockBoxLayout;
     await editLayout(entry.block, before, after);
   };
   const split = async (placementIds: string[], title: string) => {

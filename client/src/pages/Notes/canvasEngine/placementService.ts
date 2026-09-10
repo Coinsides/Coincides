@@ -596,7 +596,9 @@ export function buildLayoutPayload(
       width_mode: layout.width_mode,
     };
   }
-  const roundedLayout: BlockBoxLayout = {
+  // A v2 write must retain the geometry displayed at the current zoom, including
+  // fractional drag coordinates. Integer quantization shifts the block on save.
+  const roundedLayout: BlockBoxLayout = contract === 'v2' ? layout : {
     ...layout,
     x: Math.round(layout.x),
     y: Math.round(layout.y),

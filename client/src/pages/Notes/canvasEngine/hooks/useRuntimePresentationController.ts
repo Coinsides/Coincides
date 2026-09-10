@@ -79,6 +79,7 @@ export function useRuntimePresentationController(
     noteCanvasRuntime,
     pageContentHeight,
     primaryPageFrame,
+    runtimePageFrameCollection,
   } = useRuntimeFrameModelController(options);
   const currentPageFrameCollection: PageFrameCollectionModel = {
     pageFrames: noteCanvasRuntime.pageFrames,
@@ -267,5 +268,6 @@ export function useRuntimePresentationController(
 
   return {
     layerProps,
+    runtimePageFrameCollection,
   };
 }

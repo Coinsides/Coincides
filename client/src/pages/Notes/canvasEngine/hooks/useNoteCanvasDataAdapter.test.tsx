@@ -12,6 +12,10 @@ import {
 } from '../draftBlockPersistence';
 import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
 import * as canvasObjectRepository from '../canvasObjectRepository';
+import { normalizePageFrameCollection } from '../pageFrameCollectionService';
+import { resolveScreenRect } from '../placementContractService';
+import type { BlockBoxLayout } from '../runtimeLayout';
+import type { PageFrameCollectionModel } from '../types';
 import { useDraftBlockController } from './useDraftBlockController';
 import {
   useNoteCanvasDataAdapter,
@@ -259,6 +263,26 @@ function serverBlock(text: string, reused: boolean, clientCreateKey = 'retry-key
   };
 }
 
+function f11RuntimeCollection(): PageFrameCollectionModel {
+  return normalizePageFrameCollection({
+    pageFrames: [{
+      id: 'f11-rendered-frame', role: 'primary_page_frame', exportable: true,
+      x: 84, y: 80, width: 794, height: 1320,
+      pageSize: 'A4', contentInset: { left: 72, top: 96, right: 72, bottom: 96 },
+    }],
+    primaryFrameId: 'f11-rendered-frame', selectedFrameId: 'f11-rendered-frame',
+  });
+}
+
+const f11PaperLayout: BlockBoxLayout = {
+  x: 20.25, y: 109.81224489795918, width: 540.5, height: 80.75,
+  surface: 'formal_page', boundary_role: 'inside',
+};
+
+function f11PlacementResponse(url: string, payload: { block_id: string; layout: BlockBoxLayout }) {
+  return { data: { block_id: payload.block_id, placement_id: url.split('/').pop(), layout: payload.layout } };
+}
+
 describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
   let consoleError: ReturnType<typeof vi.spyOn>;
   let consoleWarn: ReturnType<typeof vi.spyOn>;
@@ -294,6 +318,220 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
   afterEach(() => {
     consoleError.mockRestore();
     consoleWarn.mockRestore();
+  });
+
+  it('F11 persists the exact rendered collection before a first block placement without changing its fractional rectangle', async () => {
+    mocks.coordinateContract = 'v2';
+    durableBlocks = [serverBlock('incomplete paper', false)];
+    const collection = f11RuntimeCollection();
+    const snapshot = JSON.parse(JSON.stringify(collection));
+    const collectionUrl = `/canvas-objects/by-note/${note.id}/page-frame-collection`;
+    const collectionWrite = deferred<{ data: PageFrameCollectionModel }>();
+    mocks.put.mockImplementation((url: string, payload: { block_id: string; layout: BlockBoxLayout }) => (
+      url === collectionUrl ? collectionWrite.promise : Promise.resolve(f11PlacementResponse(url, payload))
+    ));
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.coordinateContract).toBe('v2'));
+    subject.result.current.runtimePageFrameCollectionRef.current = { noteId: note.id, collection };
+    expect(mocks.put).not.toHaveBeenCalled();
+    let saving!: Promise<void>;
+    act(() => { saving = subject.result.current.persistBlockLayout(subject.result.current.blocks[0], f11PaperLayout); });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledOnce());
+    expect(mocks.put).toHaveBeenCalledWith(collectionUrl, { collection: snapshot });
+    expect(subject.result.current.pageFrameCollection).toBeNull();
+    await act(async () => {
+      collectionWrite.resolve({ data: collection });
+      await saving;
+      await subject.result.current.whenIdle();
+    });
+    expect(mocks.put.mock.calls.map(([url]) => url)).toEqual([
+      collectionUrl, `/canvas-objects/by-note/${note.id}/block-placements/placement-1`,
+    ]);
+    expect(collection).toEqual(snapshot);
+    expect(subject.result.current.pageFrameCollection).toEqual(snapshot);
+    const savedLayout = subject.result.current.blocks[0].canvas_layout as unknown as BlockBoxLayout;
+    expect(savedLayout.frame_id).toBe(collection.primaryFrameId);
+    expect(savedLayout.coordinate_space).toBe('page_frame_local');
+    expect(resolveScreenRect(savedLayout, collection.pageFrames[0], 'v2'))
+      .toEqual(resolveScreenRect(f11PaperLayout, undefined, 'v2'));
+  });
+
+  it.each(['pending', 'complete'] as const)('F11 shares one collection PUT when a concurrent missing-collection read arrives with healing %s', async (healingPhase) => {
+    mocks.coordinateContract = 'v2';
+    durableBlocks = [serverBlock('first', false), {
+      ...serverBlock('second', false), id: 'block-2', placement_id: 'placement-2', order_index: 1,
+    }];
+    const collection = f11RuntimeCollection();
+    const collectionUrl = `/canvas-objects/by-note/${note.id}/page-frame-collection`;
+    const collectionWrite = deferred<{ data: PageFrameCollectionModel }>();
+    const lateRead = deferred<{ data: Record<string, unknown> }>();
+    mocks.put.mockImplementation((url: string, payload: { block_id: string; layout: BlockBoxLayout }) => (
+      url === collectionUrl ? collectionWrite.promise : Promise.resolve(f11PlacementResponse(url, payload))
+    ));
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.coordinateContract).toBe('v2'));
+    subject.result.current.runtimePageFrameCollectionRef.current = { noteId: note.id, collection };
+    const get = mocks.get.getMockImplementation()!;
+    let placementContextReads = 0;
+    mocks.get.mockImplementation((url: string) => {
+      if (url === `/canvas-objects/by-note/${note.id}` && ++placementContextReads === 2) return lateRead.promise;
+      return get(url);
+    });
+    let first!: Promise<void>;
+    let second!: Promise<void>;
+    act(() => {
+      first = subject.result.current.persistBlockLayout(subject.result.current.blocks[0], f11PaperLayout);
+      second = subject.result.current.persistBlockLayout(subject.result.current.blocks[1], { ...f11PaperLayout, y: 360 });
+    });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledOnce());
+    expect(placementContextReads).toBe(2);
+    if (healingPhase === 'pending') {
+      await act(async () => { lateRead.resolve({ data: {} }); });
+      expect(mocks.put).toHaveBeenCalledOnce();
+    }
+    await act(async () => { collectionWrite.resolve({ data: collection }); await first; });
+    await act(async () => {
+      if (healingPhase === 'complete') lateRead.resolve({ data: {} });
+      await second;
+      await subject.result.current.whenIdle();
+    });
+    expect(mocks.put.mock.calls.filter(([url]) => url === collectionUrl)).toHaveLength(1);
+    expect(mocks.put.mock.calls.filter(([url]) => String(url).includes('/block-placements/'))).toHaveLength(2);
+    expect(subject.result.current.blocks.map((block) => block.canvas_layout?.frame_id))
+      .toEqual([collection.primaryFrameId, collection.primaryFrameId]);
+  });
+
+  it('F11 finishes pending healing before an explicit page-frame edit and keeps the newer collection visible', async () => {
+    mocks.coordinateContract = 'v2';
+    durableBlocks = [serverBlock('paper with a pending frame edit', false)];
+    const collection = f11RuntimeCollection();
+    const nextCollection = normalizePageFrameCollection({
+      ...collection,
+      pageFrames: collection.pageFrames.map((frame) => ({ ...frame, x: frame.x + 48 })),
+    });
+    const collectionUrl = `/canvas-objects/by-note/${note.id}/page-frame-collection`;
+    const healingWrite = deferred<{ data: PageFrameCollectionModel }>();
+    const explicitWrite = deferred<{ data: PageFrameCollectionModel }>();
+    let collectionWrites = 0;
+    mocks.put.mockImplementation((url: string, payload: { block_id: string; layout: BlockBoxLayout }) => {
+      if (url === collectionUrl) return ++collectionWrites === 1 ? healingWrite.promise : explicitWrite.promise;
+      return Promise.resolve(f11PlacementResponse(url, payload));
+    });
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.coordinateContract).toBe('v2'));
+    subject.result.current.runtimePageFrameCollectionRef.current = { noteId: note.id, collection };
+    let placing!: Promise<void>;
+    let editing!: Promise<void>;
+    act(() => { placing = subject.result.current.persistBlockLayout(subject.result.current.blocks[0], f11PaperLayout); });
+    await waitFor(() => expect(collectionWrites).toBe(1));
+    act(() => { editing = subject.result.current.savePageFrameCollection(nextCollection); });
+    expect(subject.result.current.pageFrameCollection).toEqual(nextCollection);
+    expect(mocks.put.mock.calls.filter(([url]) => url === collectionUrl)).toHaveLength(1);
+    await act(async () => { healingWrite.resolve({ data: collection }); });
+    await waitFor(() => expect(collectionWrites).toBe(2));
+    expect(mocks.put.mock.calls.filter(([url]) => url === collectionUrl).map(([, payload]) => payload))
+      .toEqual([{ collection }, { collection: nextCollection }]);
+    expect(subject.result.current.pageFrameCollection).toEqual(nextCollection);
+    await act(async () => {
+      explicitWrite.resolve({ data: nextCollection });
+      await Promise.all([placing, editing]);
+      await subject.result.current.whenIdle();
+    });
+    expect(subject.result.current.pageFrameCollection).toEqual(nextCollection);
+    expect(collectionWrites).toBe(2);
+  });
+
+  it('F11 stops a block save on collection failure and allows the same placement to heal on retry', async () => {
+    mocks.coordinateContract = 'v2';
+    durableBlocks = [serverBlock('retry paper', false)];
+    const collection = f11RuntimeCollection();
+    const collectionUrl = `/canvas-objects/by-note/${note.id}/page-frame-collection`;
+    const failure = new Error('Synthetic collection save unavailable');
+    let collectionAttempts = 0;
+    mocks.put.mockImplementation(async (url: string, payload: { block_id: string; layout: BlockBoxLayout }) => {
+      if (url !== collectionUrl) return f11PlacementResponse(url, payload);
+      if (++collectionAttempts === 1) throw failure;
+      return { data: collection };
+    });
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.coordinateContract).toBe('v2'));
+    subject.result.current.runtimePageFrameCollectionRef.current = { noteId: note.id, collection };
+    await act(async () => { await subject.result.current.persistBlockLayout(subject.result.current.blocks[0], f11PaperLayout); });
+    expect(mocks.put.mock.calls.map(([url]) => url)).toEqual([collectionUrl]);
+    expect(subject.result.current.pageFrameCollection).toBeNull();
+    expect(subject.result.current.blocks[0].canvas_layout).toBeNull();
+    expect(mocks.addToast).toHaveBeenCalledWith('error', 'Failed to save block layout');
+    await expect(subject.result.current.whenIdle()).rejects.toBe(failure);
+    await act(async () => {
+      await subject.result.current.persistBlockLayout(subject.result.current.blocks[0], f11PaperLayout);
+      await subject.result.current.whenIdle();
+    });
+    expect(mocks.put.mock.calls.map(([url]) => url)).toEqual([
+      collectionUrl, collectionUrl, `/canvas-objects/by-note/${note.id}/block-placements/placement-1`,
+    ]);
+    expect(subject.result.current.pageFrameCollection).toEqual(collection);
+    expect(subject.result.current.blocks[0].canvas_layout?.frame_id).toBe(collection.primaryFrameId);
+  });
+
+  it('F11 heals generic objects with their content mounts and reuses that collection for later block placement', async () => {
+    mocks.coordinateContract = 'v2';
+    durableBlocks = [serverBlock('mounted content', false)];
+    const collection = f11RuntimeCollection();
+    const frame = collection.pageFrames[0];
+    const collectionUrl = `/canvas-objects/by-note/${note.id}/page-frame-collection`;
+    const objectUrl = `/canvas-objects/by-note/${note.id}/objects/mounted-paragraph`;
+    const contentMounts: NonNullable<PersistCanvasObjectInput['contentMounts']> = [{
+      mountId: 'f11-mount', objectId: 'mounted-paragraph', targetKind: 'note_block', targetId: 'block-1',
+      projectionMode: 'reference', syncPolicy: 'read_through',
+    }];
+    const input: PersistCanvasObjectInput = {
+      canvasObject: {
+        objectId: 'mounted-paragraph', canvasId: 'primary-note-canvas', kind: 'paragraph_block_projection',
+        backing: 'note_block', objectClass: 'block_backed', status: 'active',
+      },
+      placement: {
+        placementId: 'mount-placement', objectId: 'mounted-paragraph', canvasId: 'primary-note-canvas',
+        frameId: frame.id, surface: 'formal_page', boundaryRole: 'inside',
+        x: frame.x + frame.contentInset.left + 12, y: frame.y + frame.contentInset.top + 34,
+        width: 320, height: 80, rotation: 0, zIndex: 1,
+      },
+      contentMounts,
+      payload: {},
+    };
+    input.payload = {
+      kind: input.canvasObject.kind, contentMounts,
+      placement: {
+        id: input.placement.placementId, object_id: input.canvasObject.objectId,
+        frame_id: frame.id, surface: 'formal_page', boundary_role: 'inside',
+        x: input.placement.x, y: input.placement.y, width: 320, height: 80,
+      },
+    };
+    mocks.put.mockImplementation(async (url: string, payload: Record<string, unknown>) => {
+      if (url === collectionUrl) return { data: collection };
+      if (url === objectUrl) return { data: {
+        canvasObject: input.canvasObject, contentMounts: payload.contentMounts,
+        placement: { ...(payload.placement as object), metadata: { layout_policy: { coordinate_space: 'page_frame_local' } } },
+      } };
+      return f11PlacementResponse(url, payload as { block_id: string; layout: BlockBoxLayout });
+    });
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.coordinateContract).toBe('v2'));
+    subject.result.current.runtimePageFrameCollectionRef.current = { noteId: note.id, collection };
+    await act(async () => { expect(await subject.result.current.persistCanvasObject(input)).toBe(true); });
+    expect(mocks.put.mock.calls.map(([url]) => url)).toEqual([collectionUrl, objectUrl]);
+    expect(mocks.put.mock.calls[1][1]).toMatchObject({
+      contentMounts, placement: { x: 12, y: 34, frame_id: frame.id, coordinate_space: 'page_frame_local' },
+    });
+    expect(subject.result.current.persistedContentMounts).toEqual(contentMounts);
+    expect(subject.result.current.persistedCanvasPlacements[0]).toMatchObject({
+      x: input.placement.x, y: input.placement.y, frameId: frame.id,
+    });
+    await act(async () => {
+      await subject.result.current.persistBlockLayout(subject.result.current.blocks[0], f11PaperLayout);
+      await subject.result.current.whenIdle();
+    });
+    expect(mocks.put.mock.calls.filter(([url]) => url === collectionUrl)).toHaveLength(1);
+    expect(subject.result.current.blocks[0].canvas_layout?.frame_id).toBe(frame.id);
   });
 
   it.each(['modal', 'page'] as const)('keeps the %s host load-error navigation contract', async (hostMode) => {

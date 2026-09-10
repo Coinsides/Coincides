@@ -133,7 +133,11 @@ export async function saveBlockCanvasPlacementForNote(input: {
     `/canvas-objects/by-note/${input.noteId}/block-placements/${input.block.placement_id}`,
     {
       block_id: input.block.id,
-      layout: requireCanvasPlacementWritePayload(buildLayoutPayload(normalizeBlockLayoutForSave(input.layout, input.pageFrameCollection, input.coordinateContract))),
+      layout: requireCanvasPlacementWritePayload(buildLayoutPayload(
+        normalizeBlockLayoutForSave(input.layout, input.pageFrameCollection, input.coordinateContract),
+        input.coordinateContract,
+        input.pageFrameCollection?.pageFrames,
+      )),
     },
   );
   return {

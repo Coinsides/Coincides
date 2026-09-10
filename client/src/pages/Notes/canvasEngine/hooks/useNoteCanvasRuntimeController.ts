@@ -113,6 +113,8 @@ export function useNoteCanvasRuntimeController() {
     groupFolders,
     purposeFrames,
     pageFrameCollection,
+    runtimePageFrameCollectionRef,
+    resolvePlacementWriteContext,
     persistedCanvasObjects,
     persistedCanvasPlacements,
     persistedContentMounts,
@@ -368,6 +370,11 @@ export function useNoteCanvasRuntimeController() {
     blocks, objects: persistedCanvasObjects, placements: persistedCanvasPlacements,
     mounts: persistedContentMounts, selectedBlockId, blockLayouts,
     collection: pageFrameCollection, pageOffsetX, refresh: refreshTrayState,
+    getRuntimeCollection: () => {
+      const rendered = runtimePageFrameCollectionRef.current;
+      return rendered && rendered.noteId === noteId ? rendered.collection : null;
+    },
+    resolvePlacementWriteContext,
     clearSelection: clearBlockSelection, pushHistory: pushHistoryEntry,
     flushBlock: async (block) => {
       const result = await saveBlock(block, blockTextDrafts[block.id] ?? block.plain_text, { silent: true });
@@ -375,7 +382,7 @@ export function useNoteCanvasRuntimeController() {
     },
   });
 
-  const { layerProps } = useRuntimePresentationController({
+  const { layerProps, runtimePageFrameCollection } = useRuntimePresentationController({
     hostMode,
     trackPendingWrite: hostMode === 'modal' ? trackPendingWrite : undefined,
     coordinateContract,
@@ -529,6 +536,12 @@ export function useNoteCanvasRuntimeController() {
     onWritingSurfaceRequestBlockFocus: setFocusBlockId,
   });
 
+  useLayoutEffect(() => {
+    runtimePageFrameCollectionRef.current = !loading && note && note.id === noteId
+      ? { noteId: note.id, collection: runtimePageFrameCollection } : null;
+    return () => { runtimePageFrameCollectionRef.current = null; };
+  }, [loading, note?.id, noteId, runtimePageFrameCollection, runtimePageFrameCollectionRef]);
+
   const dismissTransientUI = useCallback(() => {
     dismissSlashSession();
     closeOverlay();
@@ -547,6 +560,7 @@ export function useNoteCanvasRuntimeController() {
     flushPendingSaves,
     refreshBoardTextRanges,
     layerProps,
+    runtimePageFrameCollection,
     loading,
     loadError,
     note,

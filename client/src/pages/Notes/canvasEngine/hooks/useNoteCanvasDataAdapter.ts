@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '@/services/api';
 import { createCoordinateContractSession } from '../coordinateContractSession';
-import type { CoordinateContract } from '../placementContractService';
+import { requiresFrameLocalWriteContext, type CoordinateContract } from '../placementContractService';
 import {
   loadRuntimeTemplateOptions,
   metadataForTemplateOption,
@@ -432,6 +432,11 @@ export function useNoteCanvasDataAdapter({
   const [groupFolders, setGroupFolders] = useState<GroupFolderV1[]>([]);
   const [purposeFrames, setPurposeFrames] = useState<PurposeFrameV1[]>([]);
   const [pageFrameCollection, setPageFrameCollection] = useState<PageFrameCollectionModel | null>(null);
+  const runtimePageFrameCollectionRef = useRef<{ noteId: string; collection: PageFrameCollectionModel } | null>(null);
+  const frameHealing = useMemo(() => ({
+    collection: null as PageFrameCollectionModel | null,
+    pending: null as Promise<PageFrameCollectionModel> | null,
+  }), [noteId]);
   const [persistedCanvasObjects, setPersistedCanvasObjects] = useState<CanvasObject[]>([]);
   const [persistedCanvasPlacements, setPersistedCanvasPlacements] = useState<CanvasPlacement[]>([]);
   const [persistedContentMounts, setPersistedContentMounts] = useState<ContentMount[]>([]);
@@ -533,6 +538,43 @@ export function useNoteCanvasDataAdapter({
     addToast('info', 'Source projection content is read-only');
     return false;
   }, [addToast, sourceProjectionPolicy.contentReadOnly]);
+
+  // All placement families, including Staging, mint the committed render snapshot here.
+  // A recovery for another note has no rendering authority and keeps the repository path.
+  const resolvePlacementWriteContext = useCallback(async (requestedNoteId: string, heal = true) => {
+    const context = await resolveCanvasPlacementWriteContext({
+      noteId: requestedNoteId,
+      loadedNoteId: note?.id,
+      pageFrameCollection: pageFrameCollection || frameHealing.collection,
+      contractSession,
+    });
+    if (!heal || context.pageFrameCollection || !requiresFrameLocalWriteContext(context.coordinateContract)) return context;
+    if (requestedNoteId === noteId && frameHealing.collection) {
+      return { ...context, pageFrameCollection: frameHealing.collection };
+    }
+    const rendered = runtimePageFrameCollectionRef.current;
+    if (requestedNoteId !== noteId || routeNoteIdRef.current !== requestedNoteId
+      || noteRef.current?.id !== requestedNoteId || rendered?.noteId !== requestedNoteId) return context;
+    // The existing client policy runs before even the collection write; the server guard remains authoritative.
+    if (sourceProjectionPolicyForNote(noteRef.current).contentReadOnly) {
+      throw new Error('Source projection content is read-only');
+    }
+    if (!rendered.collection.pageFrames.length) return context;
+    if (!frameHealing.pending) {
+      const frameSaveGeneration = pageFrameSaveGenerationRef.current;
+      frameHealing.pending = savePageFrameCollectionForNote({
+        noteId: requestedNoteId, collection: rendered.collection,
+      }).then((collection) => {
+        frameHealing.collection = collection;
+        if (routeNoteIdRef.current === requestedNoteId && noteRef.current?.id === requestedNoteId
+          && pageFrameSaveGenerationRef.current === frameSaveGeneration) {
+          setPageFrameCollection(collection);
+        }
+        return collection;
+      }).finally(() => { frameHealing.pending = null; });
+    }
+    return { ...context, pageFrameCollection: await frameHealing.pending };
+  }, [contractSession, frameHealing, note?.id, noteId, pageFrameCollection]);
 
   const sortedBlocks = useMemo(
     () => [...blocks].sort((a, b) => a.order_index - b.order_index),
@@ -925,19 +967,21 @@ export function useNoteCanvasDataAdapter({
     pageFrameSaveGenerationRef.current = saveGeneration;
     setPageFrameCollection(normalizedCollection);
     try {
-      const savedCollection = await writeRegistry.track('page-frames:' + currentNote.id, async () => savePageFrameCollectionForNote({
-        noteId: currentNote.id,
-        collection: normalizedCollection,
-      }));
+      const savedCollection = await writeRegistry.track('page-frames:' + currentNote.id, async () => {
+        // A user's newer frame edit must reach storage after the first-write mint.
+        if (frameHealing.pending) await frameHealing.pending;
+        return savePageFrameCollectionForNote({ noteId: currentNote.id, collection: normalizedCollection });
+      });
       if (pageFrameSaveGenerationRef.current !== saveGeneration) return;
+      frameHealing.collection = savedCollection;
       setPageFrameCollection(savedCollection);
     } catch (err) {
       console.error('Failed to save page frames:', err);
       addToast('error', 'Failed to save page frames');
       if (pageFrameSaveGenerationRef.current !== saveGeneration) return;
-      setPageFrameCollection(previousCollection);
+      setPageFrameCollection(previousCollection || frameHealing.collection);
     }
-  }), [writeRegistry, addToast, allowSourceContentMutation, note, pageFrameCollection, contractSession]);
+  }), [writeRegistry, addToast, allowSourceContentMutation, note, pageFrameCollection, frameHealing]);
 
   const saveDocumentTypographyProfile = useCallback(writeRegistry.hold('saveDocumentTypographyProfile', async (nextProfile: DocumentTypographyProfile) => {
     const currentNote = noteRef.current || note;
@@ -1061,9 +1105,7 @@ export function useNoteCanvasDataAdapter({
       const requestedLayout = options.layout;
       try {
         const savedLayout = await writeRegistry.track('placement:' + requestedNote.id + ':' + created.id, async () => saveBlockCanvasPlacementForNote({
-          ...await resolveCanvasPlacementWriteContext({
-            noteId: requestedNote.id, loadedNoteId: note?.id, pageFrameCollection, contractSession,
-          }),
+          ...await resolvePlacementWriteContext(requestedNote.id),
           noteId: requestedNote.id,
           block: created,
           layout: requestedLayout,
@@ -1089,7 +1131,7 @@ export function useNoteCanvasDataAdapter({
     }
     if (!options.silent) addToast('success', 'Block added');
     return created;
-  }), [writeRegistry, note, addToast, allowSourceContentMutation, pageFrameCollection, contractSession]);
+  }), [writeRegistry, note, addToast, allowSourceContentMutation, pageFrameCollection, contractSession, resolvePlacementWriteContext]);
 
   const createDraftBlock = useCallback(writeRegistry.hold('createDraftBlock', async (
     template: TemplateOption,
@@ -1151,9 +1193,7 @@ export function useNoteCanvasDataAdapter({
       const requestedLayout = options.layout;
       try {
         const savedLayout = await writeRegistry.track('placement:' + requestedNote.id + ':' + created.id, async () => saveBlockCanvasPlacementForNote({
-          ...await resolveCanvasPlacementWriteContext({
-            noteId: requestedNote.id, loadedNoteId: note?.id, pageFrameCollection, contractSession,
-          }),
+          ...await resolvePlacementWriteContext(requestedNote.id),
           noteId: requestedNote.id,
           block: created,
           layout: requestedLayout,
@@ -1184,7 +1224,7 @@ export function useNoteCanvasDataAdapter({
       placementPersisted,
       reused,
     };
-  }), [writeRegistry, note, addToast, allowSourceContentMutation, pageFrameCollection, contractSession]);
+  }), [writeRegistry, note, addToast, allowSourceContentMutation, pageFrameCollection, contractSession, resolvePlacementWriteContext]);
 
   const saveDraftBlockPlacement = useCallback(writeRegistry.hold('saveDraftBlockPlacement', async (
     block: NoteBlock,
@@ -1202,9 +1242,7 @@ export function useNoteCanvasDataAdapter({
     );
     try {
       const savedLayout = await writeRegistry.track('placement:' + requestedNoteId + ':' + block.id, async () => saveBlockCanvasPlacementForNote({
-        ...await resolveCanvasPlacementWriteContext({
-          noteId: requestedNoteId, loadedNoteId: note?.id, pageFrameCollection, contractSession,
-        }),
+        ...await resolvePlacementWriteContext(requestedNoteId),
         noteId: requestedNoteId,
         block,
         layout,
@@ -1227,7 +1265,7 @@ export function useNoteCanvasDataAdapter({
       }
       return null;
     }
-  }), [writeRegistry, addToast, note?.id, pageFrameCollection, contractSession]);
+  }), [writeRegistry, addToast, note?.id, pageFrameCollection, contractSession, resolvePlacementWriteContext]);
 
   const finalizeDraftBlock = useCallback(writeRegistry.hold('finalizeDraftBlock', async (
     receipt: DraftRecoveryReceipt,
@@ -1249,9 +1287,7 @@ export function useNoteCanvasDataAdapter({
         },
         savePlacement: async (durableBlock, pendingReceipt) => {
           await writeRegistry.track('placement:' + pendingReceipt.noteId + ':' + durableBlock.id, async () => saveBlockCanvasPlacementForNote({
-            ...await resolveCanvasPlacementWriteContext({
-              noteId: pendingReceipt.noteId, loadedNoteId: note?.id, pageFrameCollection, contractSession,
-            }),
+            ...await resolvePlacementWriteContext(pendingReceipt.noteId, false),
             noteId: pendingReceipt.noteId,
             block: durableBlock,
             layout: pendingReceipt.layout,
@@ -1274,7 +1310,7 @@ export function useNoteCanvasDataAdapter({
       }
       return false;
     }
-  }), [writeRegistry, addToast, note?.id, pageFrameCollection, contractSession]);
+  }), [writeRegistry, addToast, note?.id, pageFrameCollection, contractSession, resolvePlacementWriteContext]);
 
   useEffect(() => {
     const recoveryQueue = loadDraftRecoveryQueue();
@@ -1919,9 +1955,7 @@ export function useNoteCanvasDataAdapter({
     if (!allowSourceContentMutation()) return;
     try {
       const savedLayout = await writeRegistry.track('placement:' + note.id + ':' + block.id, async () => saveBlockCanvasPlacementForNote({
-        ...await resolveCanvasPlacementWriteContext({
-          noteId: note.id, loadedNoteId: note?.id, pageFrameCollection, contractSession,
-        }),
+        ...await resolvePlacementWriteContext(note.id),
         noteId: note.id,
         block,
         layout,
@@ -1936,7 +1970,7 @@ export function useNoteCanvasDataAdapter({
       console.error('Failed to save block layout:', err);
       addToast('error', 'Failed to save block layout');
     }
-  }), [writeRegistry, note, addToast, allowSourceContentMutation, clearLayoutDraftForBlock, pageFrameCollection, contractSession]);
+  }), [writeRegistry, note, addToast, allowSourceContentMutation, clearLayoutDraftForBlock, pageFrameCollection, contractSession, resolvePlacementWriteContext]);
 
   const updateBlockPolicy = useCallback(async (
     block: NoteBlock,
@@ -2125,9 +2159,7 @@ export function useNoteCanvasDataAdapter({
       const { saved, writeContext } = await writeRegistry.track(
         'canvas-object:' + currentNote.id + ':' + canvasObject.objectId,
         async () => {
-          const writeContext = await resolveCanvasPlacementWriteContext({
-            noteId: currentNote.id, loadedNoteId: note?.id, pageFrameCollection, contractSession,
-          });
+          const writeContext = await resolvePlacementWriteContext(currentNote.id);
           const saved = await saveGenericCanvasObjectForNote({
             ...writeContext,
             noteId: currentNote.id,
@@ -2194,6 +2226,7 @@ export function useNoteCanvasDataAdapter({
     allowSourceContentMutation,
     contractSession,
     pageFrameCollection,
+    resolvePlacementWriteContext,
     note,
     persistedCanvasObjects,
     persistedCanvasPlacements,
@@ -2322,6 +2355,8 @@ export function useNoteCanvasDataAdapter({
     groupFolders,
     purposeFrames,
     pageFrameCollection,
+    runtimePageFrameCollectionRef,
+    resolvePlacementWriteContext,
     persistedCanvasObjects,
     persistedCanvasPlacements,
     persistedContentMounts,

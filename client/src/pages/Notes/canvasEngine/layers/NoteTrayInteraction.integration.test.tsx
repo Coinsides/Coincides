@@ -110,6 +110,7 @@ function Fixture({ flushGate = Promise.resolve(true) }: { flushGate?: Promise<bo
     noteId, enabled: true, dropTargetRef, blocks: snapshot.blocks, objects: snapshot.objects,
     placements: snapshot.placements, mounts: snapshot.mounts, selectedBlockId: selected, blockLayouts: layouts,
     collection: null, pageOffsetX: 0, clearSelection: () => setSelected(null),
+    resolvePlacementWriteContext: async () => ({ coordinateContract: 'v1', pageFrameCollection: null }),
     pushHistory: (entry) => setHistory((items) => [...items, entry]),
     refresh: async (changedIds = []) => {
       setSnapshot(copy(store));

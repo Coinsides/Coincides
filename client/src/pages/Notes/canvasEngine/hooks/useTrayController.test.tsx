@@ -18,6 +18,7 @@ function input() {
   return {noteId:'note',enabled:true,blocks:[block],objects:[],placements:[],mounts:[],
     selectedBlockId:'block',blockLayouts:{block:{x:0,y:100,width:760,height:72,surface:'formal_page' as const}},
     collection:null,pageOffsetX:0,refresh:vi.fn().mockResolvedValue(undefined),clearSelection:vi.fn(),
+    resolvePlacementWriteContext: vi.fn().mockResolvedValue({ coordinateContract: 'v1', pageFrameCollection: null }),
     pushHistory:vi.fn<(entry: RuntimeHistoryEntry) => void>(),flushBlock:vi.fn().mockResolvedValue(true)};
 }
 function deferred<T>() {

@@ -63,6 +63,7 @@ let refreshCount: number;
 function options(noteId = 'tray-source') {
   return { noteId, enabled: true, blocks: [block], objects, placements, mounts, selectedBlockId: null,
     blockLayouts: {}, collection: null, pageOffsetX: 0, refresh: vi.fn().mockResolvedValue(undefined),
+    resolvePlacementWriteContext: vi.fn().mockResolvedValue({ coordinateContract: 'v1', pageFrameCollection: null }),
     clearSelection: vi.fn(), pushHistory: vi.fn(), flushBlock: vi.fn().mockResolvedValue(true) };
 }
 
