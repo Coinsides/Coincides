@@ -105,6 +105,20 @@
 .member { position: absolute; padding: 16px; transform-origin: 0 0; background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 8px; cursor: grab; user-select: none; }
 .member:active { cursor: grabbing; }
 .selected { border-color: var(--accent-primary-hover); outline: 1px solid var(--accent-primary-hover); }
+.member.selectionHighlight, .chalk.selectionHighlight, .selectionHighlight > .visualContent {
+  outline: 3px solid var(--accent-primary-hover); outline-offset: 3px;
+}
+.selectionHighlight > .selectedLine, .selectionHighlight > g > .selectedLine { stroke-width: 6; }
+.selectionFlash { animation: selection-locate 400ms ease-in-out 3; }
+.selectionFlashAgain { animation: selection-locate-again 400ms ease-in-out 3; }
+@keyframes selection-locate { 50% { opacity: .35; } }
+@keyframes selection-locate-again { 50% { opacity: .35; } }
+@media (prefers-reduced-motion: reduce) {
+  .selectionFlash, .selectionFlashAgain { animation: none; }
+  .member.selectionFlash, .member.selectionFlashAgain, .chalk.selectionFlash, .chalk.selectionFlashAgain,
+  .selectionFlash > .visualContent, .selectionFlashAgain > .visualContent { outline: 3px solid var(--accent-primary-hover); outline-offset: 3px; }
+  .selectionFlash .selectedLine, .selectionFlashAgain .selectedLine { stroke-width: 6; }
+}
 .memberKind { display: flex; align-items: center; justify-content: space-between; color: var(--text-secondary); font-size: 10px; margin-bottom: 8px; }
 .member h2 { font-size: 16px; line-height: 1.3; font-weight: 600; margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .member p { font-size: 12px; line-height: 1.5; color: var(--text-secondary); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }

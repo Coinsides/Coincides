@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Hand, Link2, MousePointer2, MoveDiagonal2, Pencil, Plus, Minus, Pin, Trash2, ExternalLink, X, Inbox, Eraser, Undo2, Redo2, Layers } from 'lucide-react';
+import { ArrowLeft, Hand, Link2, MousePointer2, MoveDiagonal2, Pencil, Plus, Minus, Pin, Trash2, ExternalLink, X, Inbox, Eraser, Undo2, Redo2, Layers, List } from 'lucide-react';
 import { boardErrorMessage, loadBoardCandidates, loadBoardNotePreview } from './boardRepository';
 import type { BoardCandidate, BoardEdge, BoardMember, BoardViewport, BoardVisual } from './boardTypes';
 import { pointsPath, toBoardPoint, zoomBoardAt, type BoardPoint } from './boardViewport';
@@ -11,13 +11,14 @@ import { BoardNewNoteDialog } from './BoardNewNoteDialog';
 import { BoardChalkEditor, chalkGeometry, type ChalkDraft } from './BoardChalk';
 import BoardNoteModal, { type BoardNoteModalHandle } from './BoardNoteModal';
 import { BoardStaging, BOARD_STAGING_MIME } from './BoardStaging';
+import { BoardSelectionSidebar } from './BoardSelectionSidebar';
 import { BoardLayers } from './BoardLayers';
 import { boardLayerScene, layerIdOf } from './boardLayerScene';
 import { getActiveBoardLayer, setActiveBoardLayer } from './boardActiveLayer';
 import type { BoardTextRangeSelection } from '@shared/types/boardTextRange';
 import { BoardReferenceTag } from './BoardReferenceTag';
 import { BOARD_TEXT_RANGE_MIME, parseBoardTextRangeClipboard } from './boardTextRangeClipboard';
-import { connectionPoint, deletionScope, marqueeSelection, selectionKey, selectionRect, type BoardSelection, type BoardRect } from './boardSelection';
+import { connectionPoint, deletionScope, marqueeSelection, selectionFromKeys, selectionKey, selectionRect, visualBounds, type BoardSelection, type BoardRect } from './boardSelection';
 import styles from './Boards.module.css';
 
 type Tool = 'select' | 'pan' | 'connect' | 'pen' | 'eraser';
@@ -27,7 +28,7 @@ type Gesture =
   | { kind: 'pan'; start: BoardPoint; viewport: BoardViewport }
   | { kind: 'resize'; start: BoardPoint; object: MoveObject }
   | { kind: 'move'; start: BoardPoint; objects: MoveObject[] }
-  | { kind: 'marquee'; start: BoardPoint; base: Set<string>; additive: boolean }
+  | { kind: 'marquee'; start: BoardPoint; base: Set<string>; mode: 'replace' | 'add' | 'subtract' }
   | { kind: 'eraser'; ids: Set<string>; previous?: BoardPoint }
   | { kind: 'pen'; points: BoardPoint[]; layer_id: string | null };
 
@@ -49,6 +50,12 @@ export default function BoardPage() {
   const [marquee, setMarquee] = useState<BoardRect | null>(null);
   const [erasedIds, setErasedIds] = useState<Set<string>>(new Set());
   const [selectionNotice, setSelectionNotice] = useState<string | null>(null);
+  const [selectionListOpen, setSelectionListOpen] = useState(false);
+  const [listHoverKey, setListHoverKey] = useState<string | null>(null);
+  const [boardHoverKey, setBoardHoverKey] = useState<string | null>(null);
+  const [flash, setFlash] = useState<{ key: string; sequence: number } | null>(null);
+  const flashSequence = useRef(0);
+  const selectionListToggle = useRef<HTMLButtonElement>(null);
   const [deleteKeys, setDeleteKeys] = useState<Set<string> | null>(null);
   const groupDeleteDialog = useRef<HTMLDialogElement>(null);
   const groupDeleteWasOpen = useRef(false);
@@ -63,10 +70,15 @@ export default function BoardPage() {
     setSelectionState((current) => {
       const keys = toggle ? new Set(current.keys) : new Set<string>();
       if (toggle && keys.has(key)) keys.delete(key); else keys.add(key);
-      const anchorKey = keys.has(key) ? key : [...keys][keys.size - 1];
-      const anchor = anchorKey ? { kind: anchorKey.slice(0, anchorKey.indexOf(':')) as BoardSelection['kind'], id: anchorKey.slice(anchorKey.indexOf(':') + 1) } : null;
-      return { keys, anchor };
+      return { ...selectionFromKeys(keys), ...(keys.has(key) ? { anchor: next } : {}) };
     });
+  }
+  function removeSelectionKeys(removed: string[]) {
+    setSelectionState((current) => selectionFromKeys(new Set([...current.keys].filter((key) => !removed.includes(key)))));
+  }
+  function selectWithModifiers(next: BoardSelection, event: { shiftKey: boolean; ctrlKey: boolean; metaKey: boolean; altKey: boolean }) {
+    if (event.altKey) removeSelectionKeys([selectionKey(next)]);
+    else selectObject(next, event.shiftKey || event.ctrlKey || event.metaKey);
   }
   function isSelected(kind: BoardSelection['kind'], id: string) { return selectedKeys.has(selectionKey({ kind, id })); }
   function focusSelection(next: BoardSelection) { if (!gesture.current) selectObject(next, false, true); }
@@ -157,6 +169,10 @@ export default function BoardPage() {
     setViewportDirty(false);
     viewportRef.current = null;
     setSelection(null);
+    setSelectionListOpen(false);
+    setListHoverKey(null);
+    setBoardHoverKey(null);
+    setFlash(null);
     setDeleteKeys(null);
     setMarquee(null);
     setErasedIds(new Set());
@@ -235,6 +251,9 @@ export default function BoardPage() {
   function openNote(member: BoardMember) {
     const noteId = member.reference.note_id;
     if (member.member_kind !== 'note' || member.reference.state !== 'available' || !noteId) return;
+    setSelectionListOpen(false);
+    setListHoverKey(null);
+    setBoardHoverKey(null);
     if (openNoteIdRef.current) {
       if (openNoteIdRef.current !== noteId) void noteModal.current?.requestClose({ kind: 'note', noteId });
       return;
@@ -331,6 +350,60 @@ export default function BoardPage() {
   const selectedVisual = selection?.kind === 'visual' ? visibleVisuals.find(({ id }) => id === selection.id) : undefined;
   const selectedEdge = selection?.kind === 'edge' ? visibleEdges.find(({ id }) => id === selection.id) : undefined;
 
+  useEffect(() => {
+    if (!flash) return;
+    const timer = setTimeout(() => setFlash(null), 1200);
+    return () => clearTimeout(timer);
+  }, [flash]);
+  useEffect(() => {
+    if (listHoverKey && !selectedKeys.has(listHoverKey)) setListHoverKey(null);
+    if (boardHoverKey && !selectedKeys.has(boardHoverKey)) setBoardHoverKey(null);
+    if (flash && !selectedKeys.has(flash.key)) setFlash(null);
+  }, [selectedKeys, listHoverKey, boardHoverKey, flash]);
+
+  function selectionEmphasis(kind: BoardSelection['kind'], id: string) {
+    const key = selectionKey({ kind, id });
+    const highlighted = selectedKeys.has(key) && (boardHoverKey || listHoverKey) === key;
+    const flashing = selectedKeys.has(key) && flash?.key === key;
+    return {
+      'data-selection-key': key,
+      'data-selection-highlighted': highlighted ? 'true' : undefined,
+      'data-selection-flashing': flashing ? 'true' : undefined,
+      // Alternate names restart the short locate pulse even on repeated clicks.
+      className: [highlighted ? styles.selectionHighlight : '', flashing ? (flash.sequence % 2 ? styles.selectionFlash : styles.selectionFlashAgain) : ''].filter(Boolean).join(' '),
+    };
+  }
+
+  function hoverBoard(event: React.PointerEvent) {
+    if (gesture.current) return;
+    const key = (event.target as Element).closest('[data-selection-key]')?.getAttribute('data-selection-key');
+    setBoardHoverKey(key && selectedKeys.has(key) ? key : null);
+  }
+
+  function locateSelection(target: BoardSelection) {
+    if (!selectedKeys.has(selectionKey(target)) || !surface.current || gesture.current) return;
+    const object = target.kind === 'member' ? visibleMembers.find(({ id }) => id === target.id)
+      : target.kind === 'visual' ? visibleVisuals.find(({ id }) => id === target.id) : undefined;
+    let bounds: BoardRect | undefined;
+    if (object) bounds = 'visual_kind' in object ? visualBounds(object)
+      : { x: object.x, y: object.y, w: object.w * object.scale, h: object.h * object.scale };
+    else {
+      const edge = visibleEdges.find(({ id }) => id === target.id);
+      const from = visibleMembers.find(({ id }) => id === edge?.from_member_id);
+      const to = visibleMembers.find(({ id }) => id === edge?.to_member_id);
+      if (from && to) bounds = selectionRect(connectionPoint(from, to), connectionPoint(to, from));
+    }
+    if (!bounds) return;
+    const current = viewportRef.current || detail!.board.viewport;
+    // The overlay sidebar occupies the rightmost 280px of the canvas.
+    const width = Math.max(1, surface.current.clientWidth - (selectionListOpen ? Math.min(280, surface.current.clientWidth) : 0));
+    const height = surface.current.clientHeight;
+    const zoom = Math.max(0.1, Math.min(current.zoom, Math.max(1, width - 64) / Math.max(1, bounds.w), Math.max(1, height - 64) / Math.max(1, bounds.h)));
+    changeViewport({ zoom, x: width / 2 - (bounds.x + bounds.w / 2) * zoom,
+      y: height / 2 - (bounds.y + bounds.h / 2) * zoom });
+    setFlash({ key: selectionKey(target), sequence: ++flashSequence.current });
+  }
+
   // Recreated objects receive new server IDs. A selection of a removed object
   // must not leave a phantom control bar after undo, redo, or a projection reload.
   useEffect(() => {
@@ -343,9 +416,7 @@ export default function BoardPage() {
     setSelectionState((current) => {
       const keys = new Set([...current.keys].filter((key) => liveKeys.has(key)));
       if (keys.size === current.keys.size) return current;
-      const key = [...keys][keys.size - 1];
-      const anchor = key ? { kind: key.slice(0, key.indexOf(':')) as BoardSelection['kind'], id: key.slice(key.indexOf(':') + 1) } : null;
-      return { keys, anchor };
+      return selectionFromKeys(keys);
     });
   }, [detail, board.pending]);
 
@@ -384,13 +455,13 @@ export default function BoardPage() {
     const visit = visitRevision.current;
     const saved = await board.mount({ id: crypto.randomUUID(), member_kind: candidate.member_kind,
       member_id: candidate.member_id, placed: false });
-    if (saved && visit === visitRevision.current) setStagingOpen(true);
+    if (saved && visit === visitRevision.current) openStaging();
   }
 
   async function stageTextRange(text_range: BoardTextRangeSelection) {
     const visit = visitRevision.current;
     const saved = await board.mountTextRange({ text_range, placed: false });
-    if (saved && visit === visitRevision.current) setStagingOpen(true);
+    if (saved && visit === visitRevision.current) openStaging();
     return saved;
   }
 
@@ -423,6 +494,18 @@ export default function BoardPage() {
   function closeStaging() {
     setStagingOpen(false);
     stagingToggle.current?.focus();
+  }
+  function openStaging() {
+    setSelectionListOpen(false);
+    setListHoverKey(null);
+    setStagingOpen(true);
+  }
+  function closeSelectionList() {
+    setSelectionListOpen(false);
+    setListHoverKey(null);
+    setBoardHoverKey(null);
+    if (selectedKeys.size) selectionListToggle.current?.focus();
+    else surface.current?.focus();
   }
 
   function draftChalk(event: React.MouseEvent<HTMLDivElement>) {
@@ -539,6 +622,7 @@ export default function BoardPage() {
     event.preventDefault();
     event.stopPropagation();
     surface.current?.focus();
+    setBoardHoverKey(null);
     const start = localPoint(event);
     const current = viewportRef.current;
     gestureRevision.current += 1;
@@ -557,7 +641,7 @@ export default function BoardPage() {
       const kind = 'visual_kind' in object ? 'visual' : 'member_kind' in object ? 'member' : 'edge';
       const target: BoardSelection = { kind, id: object.id };
       if (tool === 'connect') { if ('member_kind' in object) void connect(object); return; }
-      if (event.shiftKey && !resize) { selectObject(target, true); return; }
+      if ((event.shiftKey || event.ctrlKey || event.metaKey || event.altKey) && !resize) { selectWithModifiers(target, event); return; }
       const keepSelection = selectedKeys.has(selectionKey(target)) && !resize;
       selectObject(target, false, keepSelection);
       if (resize && 'pinned' in object) {
@@ -582,9 +666,10 @@ export default function BoardPage() {
       setConnectFrom(null);
       setSelectionNotice(null);
       const point = toBoardPoint(start, current);
-      gesture.current = { kind: 'marquee', start: point, base: new Set(selectedKeys), additive: event.shiftKey };
+      const mode = event.altKey ? 'subtract' : event.shiftKey || event.ctrlKey || event.metaKey ? 'add' : 'replace';
+      gesture.current = { kind: 'marquee', start: point, base: new Set(selectedKeys), mode };
       setMarquee(selectionRect(point, point));
-      if (!event.shiftKey) setSelection(null);
+      if (mode === 'replace') setSelection(null);
     } else { setSelection(null); setConnectFrom(null); return; }
     capturedPointer.current = object && tool !== 'eraser' ? event.currentTarget : surface.current;
     capturedPointer.current?.setPointerCapture(event.pointerId);
@@ -603,11 +688,9 @@ export default function BoardPage() {
       const rect = selectionRect(current.start, toBoardPoint(point, viewportRef.current));
       setMarquee(rect);
       const hits = marqueeSelection(rect, { members: visibleMembers, visuals: visibleVisuals, edges: visibleEdges });
-      const keys = current.additive ? new Set(current.base) : new Set<string>();
-      hits.forEach((hit) => keys.add(selectionKey(hit)));
-      const key = [...keys][keys.size - 1];
-      const anchor = key ? { kind: key.slice(0, key.indexOf(':')) as BoardSelection['kind'], id: key.slice(key.indexOf(':') + 1) } : null;
-      setSelectionState({ keys, anchor });
+      const keys = current.mode === 'replace' ? new Set<string>() : new Set(current.base);
+      hits.forEach((hit) => current.mode === 'subtract' ? keys.delete(selectionKey(hit)) : keys.add(selectionKey(hit)));
+      setSelectionState(selectionFromKeys(keys));
     } else if (current.kind === 'pen') {
       current.points = [...current.points, toBoardPoint(point, viewportRef.current)];
       setInk(current.points);
@@ -642,9 +725,7 @@ export default function BoardPage() {
     } else if (current.kind === 'marquee') {
       setMarquee(null);
       if (cancel) {
-        const key = [...current.base][current.base.size - 1];
-        const anchor = key ? { kind: key.slice(0, key.indexOf(':')) as BoardSelection['kind'], id: key.slice(key.indexOf(':') + 1) } : null;
-        setSelectionState({ keys: current.base, anchor });
+        setSelectionState(selectionFromKeys(current.base));
       }
     } else if (current.kind === 'eraser') {
       if (!cancel && current.ids.size) await board.removeVisuals([...current.ids]);
@@ -710,9 +791,17 @@ export default function BoardPage() {
       if (key === 'y' || event.shiftKey) void board.redo(); else void board.undo();
       return;
     }
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      // End an in-progress selection gesture so its next pointermove cannot
+      // recreate the selection that Escape just cleared.
+      if (gesture.current?.kind === 'marquee') { gesture.current = null; setMarquee(null); }
+      setSelection(null); setListHoverKey(null); setBoardHoverKey(null); setFlash(null);
+      setConnectFrom(null); setLabelDraft(null); setTool('select');
+      return;
+    }
     if ((event.target as HTMLElement).closest('button, a')) return;
     if (event.code === 'Space') { event.preventDefault(); spaceDown.current = true; }
-    if (event.key === 'Escape') { setSelection(null); setConnectFrom(null); setLabelDraft(null); setTool('select'); }
     if (event.key === 'Enter' && selectedMember) {
       event.preventDefault();
       if (tool === 'connect') void connect(selectedMember); else void openMember(selectedMember);
@@ -795,7 +884,7 @@ export default function BoardPage() {
       <button ref={pickerToggle} className={styles.primaryButton} aria-expanded={pickerOpen} aria-controls="board-note-picker"
         onClick={() => pickerOpen ? closePicker() : openPicker()}><Plus size={16} />Add notes and items</button>
       <button ref={stagingToggle} className={`${styles.button} ${styles.stagingToggle}`} data-board-staging-control="true"
-        aria-expanded={stagingOpen} aria-controls="board-staging" onClick={() => stagingOpen ? closeStaging() : setStagingOpen(true)}>
+        aria-expanded={stagingOpen} aria-controls="board-staging" onClick={() => stagingOpen ? closeStaging() : openStaging()}>
         <Inbox size={16} />Staging ({stagedMembers.length})
       </button>
       <button ref={layersToggle} className={styles.button} aria-expanded={layersOpen} aria-controls="board-layers"
@@ -828,7 +917,7 @@ export default function BoardPage() {
       <button className={styles.button} aria-label="Redo board action" disabled={!board.canRedo || Boolean(chalkDraft) || Boolean(deleteKeys)} onClick={() => { surface.current?.focus(); void board.redo(); }}><Redo2 size={16} />Redo</button>
       <span className={styles.toolHint}>{tool === 'connect' ? (connectFrom ? 'Choose the next card' : 'Choose two cards to connect')
         : tool === 'pen' ? 'Draw on the board' : tool === 'eraser' ? 'Sweep to erase whole pen strokes'
-          : 'Drag blank space to select · Shift-click to add or remove · Space-drag to pan'}</span>
+          : 'Drag blank space to select · Ctrl-drag to add · Alt-drag to subtract · Ctrl/Shift-click to toggle · Esc to clear · Space-drag to pan'}</span>
       {!activeLayerVisible && <span className={styles.toolHint} role="status">Active layer is hidden. New objects will be hidden.</span>}
       <div className={styles.zoomControls}>
         <button className={styles.button} aria-label="Zoom board out" onClick={() => zoom(1 / 1.2)}><Minus size={16} /></button>
@@ -893,7 +982,8 @@ export default function BoardPage() {
           event.dataTransfer.dropEffect = 'move';
         }}
         onDrop={dropStagedMember}
-        onPointerDown={(event) => begin(event)} onPointerMove={move}
+        onPointerDown={(event) => begin(event)} onPointerMove={(event) => { hoverBoard(event); move(event); }}
+        onPointerOver={hoverBoard} onPointerLeave={() => setBoardHoverKey(null)}
         onPointerUp={(event) => { void end(event); }} onPointerCancel={(event) => { void end(event, true); }}>
         <div className={styles.world} data-testid="board-world"
           style={{ transform: `translate(${activeViewport.x}px, ${activeViewport.y}px) scale(${activeViewport.zoom})` }}>
@@ -912,7 +1002,7 @@ export default function BoardPage() {
               const start = connectionPoint(from, to);
               const finish = connectionPoint(to, from);
               const path = `M ${start.x} ${start.y} L ${finish.x} ${finish.y}`;
-              return <g key={edge.id}>
+              return <g key={edge.id} {...selectionEmphasis('edge', edge.id)}>
                 <path d={path} data-testid={`board-edge-${edge.id}`}
                   markerStart={edge.style.direction === 'both' ? `url(#${layer.id ? `board-edge-arrow-${layer.id}` : 'board-edge-arrow'})` : undefined}
                   markerEnd={edge.style.direction === 'forward' || edge.style.direction === 'both' ? `url(#${layer.id ? `board-edge-arrow-${layer.id}` : 'board-edge-arrow'})` : undefined}
@@ -922,7 +1012,7 @@ export default function BoardPage() {
                   onFocus={() => focusSelection({ kind: 'edge', id: edge.id })}
                   onPointerDown={(event) => begin(event, edge)}
                   onDoubleClick={(event) => { event.stopPropagation(); editLabel(edge); }}
-                  onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); selectObject({ kind: 'edge', id: edge.id }, event.shiftKey); } }} />}
+                  onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); selectWithModifiers({ kind: 'edge', id: edge.id }, event); } }} />}
                 {labelDraft?.id === edge.id ? <foreignObject x={(start.x + finish.x) / 2 - 140}
                   y={(start.y + finish.y) / 2 - 30} width="280" height="80" className={styles.edgeEditor}
                   onPointerDown={(event) => event.stopPropagation()} onDoubleClick={(event) => event.stopPropagation()}>
@@ -937,22 +1027,25 @@ export default function BoardPage() {
               </g>;
             })}
             {layer.visuals.filter((visual) => visual.visual_kind === 'freehand').map((visual) => <g key={visual.id} data-testid={`board-visual-${visual.id}`}
+              {...selectionEmphasis('visual', visual.id)}
               style={erasedIds.has(visual.id) ? { opacity: 0.2 } : undefined}
               transform={`translate(${visual.x} ${visual.y}) rotate(${visual.rotation}) scale(${visual.scale})`}>
               <path d={strokePath(visual)} className={isSelected('visual', visual.id) ? styles.selectedLine : styles.inkLine} />
               {(tool === 'select' || tool === 'eraser') && <path d={strokePath(visual)} className={styles.lineHit} role="button" tabIndex={tool === 'select' ? 0 : -1}
                 data-eraser-id={visual.id} aria-label={tool === 'eraser' ? 'Erase drawing' : 'Select drawing'} onPointerDown={(event) => begin(event, visual)}
                 onFocus={() => { if (tool === 'select') focusSelection({ kind: 'visual', id: visual.id }); }}
-                onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); selectObject({ kind: 'visual', id: visual.id }, event.shiftKey); } }} />}
+                onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); selectWithModifiers({ kind: 'visual', id: visual.id }, event); } }} />}
             </g>)}
             {ink.length > 0 && layer.id === (gesture.current?.kind === 'pen' ? gesture.current.layer_id : activeLayerId) && <path d={pointsPath(ink)} className={styles.inkLine} />}
           </svg>
           {layer.visuals.filter((visual) => visual.visual_kind !== 'freehand' && visual.visual_kind !== 'sticky').map((visual) =>
             <BoardRelocatedVisual key={visual.id} visual={visual} selected={isSelected('visual', visual.id)}
-              selectable={tool === 'select'} onSelect={(event) => event?.type === 'keydown' ? selectObject({ kind: 'visual', id: visual.id }, (event as React.KeyboardEvent).shiftKey) : focusSelection({ kind: 'visual', id: visual.id })}
+              emphasis={selectionEmphasis('visual', visual.id)}
+              selectable={tool === 'select'} onSelect={(event) => event?.type === 'keydown' ? selectWithModifiers({ kind: 'visual', id: visual.id }, event as React.KeyboardEvent) : focusSelection({ kind: 'visual', id: visual.id })}
               onPointerDown={(event) => begin(event, visual)} onResize={(event) => begin(event, visual, true)} />)}
           {layer.visuals.filter((visual) => visual.visual_kind === 'sticky' && visual.id !== chalkDraft?.id).map((visual) =>
-            <div key={visual.id} className={`${styles.chalk} ${isSelected('visual', visual.id) ? styles.selected : ''}`}
+            <div key={visual.id} {...selectionEmphasis('visual', visual.id)}
+              className={`${styles.chalk} ${isSelected('visual', visual.id) ? styles.selected : ''} ${selectionEmphasis('visual', visual.id).className}`}
               style={chalkGeometry(visual)} data-testid={`board-visual-${visual.id}`} data-visual-kind="sticky"
               role={tool === 'select' ? 'button' : undefined} tabIndex={tool === 'select' ? 0 : undefined}
               aria-label="Select chalk" title={visual.pinned ? 'Pinned chalk · Double-click to edit' : 'Double-click to edit chalk'}
@@ -973,11 +1066,12 @@ export default function BoardPage() {
             const openHint = isItem && !member.reference.note_id
               ? 'This item has no origin note. Double-click is unavailable.' : undefined;
             return <article key={member.id} data-testid={`board-member-${member.id}`} tabIndex={0}
+              {...selectionEmphasis('member', member.id)}
               data-board-note-switch={member.member_kind === 'note' && canOpen ? 'true' : undefined}
               aria-label={title}
               aria-disabled={!canOpen}
               title={openHint}
-              className={`${styles.member} ${isItem || isTextRange ? styles.referenceMember : ''} ${isSelected('member', member.id) || connectFrom === member.id ? styles.selected : ''}`}
+              className={`${styles.member} ${isItem || isTextRange ? styles.referenceMember : ''} ${isSelected('member', member.id) || connectFrom === member.id ? styles.selected : ''} ${selectionEmphasis('member', member.id).className}`}
               style={{ left: member.x, top: member.y, width: member.w, height: member.h,
                 transform: `scale(${member.scale})`, zIndex: member.z_index }}
               onPointerDown={(event) => begin(event, member)}
@@ -1025,10 +1119,22 @@ export default function BoardPage() {
         busy={board.pending || Boolean(chalkDraft)} onClose={closeStaging}
         onPlace={(member) => { void placeMember(member); }}
         onRemove={(member) => { void board.unmount(member.id); }} />}
+      {selectionListOpen && <BoardSelectionSidebar detail={visibleDetail} selectedKeys={selectedKeys}
+        strokeOrder={new Map(detail.visuals.filter((visual) => visual.visual_kind === 'freehand')
+          .sort((a, b) => a.created_at.localeCompare(b.created_at) || a.id.localeCompare(b.id))
+          .map((visual, index) => [visual.id, index + 1]))}
+        highlightedKey={boardHoverKey} onHover={setListHoverKey} onLocate={locateSelection}
+        onRemove={removeSelectionKeys} onClose={closeSelectionList} />}
     </div>
     {selectionNotice && <p className={styles.selectionNotice} role="status">{selectionNotice}</p>}
     {selectedKeys.size > 0 && <div className={styles.selectionBar} role="toolbar" aria-label="Selected projection controls">
       <span>{selectedKeys.size} selected</span>
+      <button ref={selectionListToggle} type="button" className={styles.button} aria-label="Selection list"
+        aria-expanded={selectionListOpen} aria-controls="board-selection-sidebar"
+        onClick={() => {
+          if (selectionListOpen) closeSelectionList();
+          else { setStagingOpen(false); setSelectionListOpen(true); }
+        }}><List size={16} />Selection list</button>
       {(visibleMembers.some((member) => isSelected('member', member.id)) || visibleVisuals.some((visual) => isSelected('visual', visual.id))) &&
         <label className={styles.layerDestination}>Move to layer
           <select aria-label="Move to layer" value="" disabled={board.pending || Boolean(chalkDraft)} onChange={(event) => {

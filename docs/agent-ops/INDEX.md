@@ -298,7 +298,7 @@
 | [handoffs/2026-09-09-v13-4-w4-fix1-order.md](handoffs/2026-09-09-v13-4-w4-fix1-order.md) | 走查修一 | `done` | — | — |
 | [handoffs/2026-09-09-v13-4-w4-fix2-order.md](handoffs/2026-09-09-v13-4-w4-fix2-order.md) | 走查修二 | `done(HQ 收口:F5 经补遗一原子端点修复验证,F6 局部修复+F7-F9 收货;凭据扫描 HQ 例行补跑)` | — | — |
 | [handoffs/2026-09-09-v13-4-w4-fix3-order.md](handoffs/2026-09-09-v13-4-w4-fix3-order.md) | 走查修三 · F10 | `done(HQ 收口:F10 收货;STOP-1 裁陈旧红入 13.6 清册)` | — | — |
-| [handoffs/2026-09-09-v13-4-w4-fix4-order.md](handoffs/2026-09-09-v13-4-w4-fix4-order.md) | 走查修四 · 选区精修批 | `ready` | — | — |
+| [handoffs/2026-09-09-v13-4-w4-fix4-order.md](handoffs/2026-09-09-v13-4-w4-fix4-order.md) | 走查修四 · 选区精修批 | `done（施工回执；完整 runtime gate 停线待 HQ）` | — | — |
 | [handoffs/2026-09-09-v13-4-wave1-wiring-order.md](handoffs/2026-09-09-v13-4-wave1-wiring-order.md) | 13.4 单 A · 接线批 + 生命周期批 | `ready` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |

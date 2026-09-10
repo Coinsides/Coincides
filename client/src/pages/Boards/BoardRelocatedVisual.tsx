@@ -61,10 +61,11 @@ function TableContent({ extension }: { extension: Row }) {
 }
 
 /** Read the server's original rows without normalizing or saving them back through the paper writer. */
-export function BoardRelocatedVisual({ visual, selected, selectable, onSelect, onPointerDown, onResize }: {
+export function BoardRelocatedVisual({ visual, selected, selectable, emphasis, onSelect, onPointerDown, onResize }: {
   visual: BoardVisual;
   selected: boolean;
   selectable: boolean;
+  emphasis?: { className: string; 'data-selection-key': string; 'data-selection-highlighted'?: string; 'data-selection-flashing'?: string };
   onSelect: (event?: React.SyntheticEvent) => void;
   onPointerDown?: (event: React.PointerEvent) => void;
   onResize?: (event: React.PointerEvent) => void;
@@ -94,7 +95,7 @@ export function BoardRelocatedVisual({ visual, selected, selectable, onSelect, o
       : value === 'dot' || value === 'circle' ? `url(#${markerId}-dot)` : undefined;
     const path = `M ${number(start.x)} ${number(start.y)} L ${number(end.x)} ${number(end.y)}`;
     const width = number(extension.stroke_width, 1.5);
-    return <svg className={styles.relocatedConnector} style={style} data-testid={`board-visual-${visual.id}`}
+    return <svg {...emphasis} className={`${styles.relocatedConnector} ${emphasis?.className || ''}`} style={style} data-testid={`board-visual-${visual.id}`}
       data-visual-kind="connector" aria-label="Moved connector">
       <defs><marker id={markerId} viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
         <path d="M 0 0 L 10 5 L 0 10 z" fill={stroke} />
@@ -124,7 +125,7 @@ export function BoardRelocatedVisual({ visual, selected, selectable, onSelect, o
       ? 'var(--canvas-sticky-note-stroke, #d8a429)' : 'var(--accent-primary)',
   } : {};
   const shapeText = rows(source.backing_blocks).map((block) => text(block.plain_text)).filter(Boolean).join('\n');
-  return <div className={styles.relocatedVisual} style={style} data-testid={`board-visual-${visual.id}`}
+  return <div {...emphasis} className={`${styles.relocatedVisual} ${emphasis?.className || ''}`} style={style} data-testid={`board-visual-${visual.id}`}
     data-visual-kind={visual.visual_kind}>
     <div className={`${styles.visualContent} ${selected ? styles.selected : ''}`}
       style={{ ...shapeStyle, transform: `rotate(${visual.rotation}deg)` }}

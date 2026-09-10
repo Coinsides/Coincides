@@ -5,6 +5,14 @@ export type BoardSelection = { kind: 'member' | 'edge' | 'visual'; id: string };
 export type BoardRect = { x: number; y: number; w: number; h: number };
 export const selectionKey = (selection: BoardSelection) => `${selection.kind}:${selection.id}`;
 
+export function selectionFromKeys(keys: Set<string>) {
+  const key = [...keys][keys.size - 1];
+  const anchor: BoardSelection | null = key ? {
+    kind: key.slice(0, key.indexOf(':')) as BoardSelection['kind'], id: key.slice(key.indexOf(':') + 1),
+  } : null;
+  return { keys, anchor };
+}
+
 export function selectionRect(start: BoardPoint, end: BoardPoint): BoardRect {
   return { x: Math.min(start.x, end.x), y: Math.min(start.y, end.y),
     w: Math.abs(end.x - start.x), h: Math.abs(end.y - start.y) };
@@ -39,7 +47,7 @@ function segmentIntersects(rect: BoardRect, start: BoardPoint, end: BoardPoint) 
   return true;
 }
 
-function visualBounds(visual: BoardVisual): BoardRect {
+export function visualBounds(visual: BoardVisual): BoardRect {
   const angle = visual.rotation * Math.PI / 180;
   const origin = visual.visual_kind === 'freehand' ? { x: 0, y: 0 } : { x: visual.w / 2, y: visual.h / 2 };
   const corners = [[0, 0], [visual.w, 0], [visual.w, visual.h], [0, visual.h]].map(([x, y]) => ({

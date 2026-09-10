@@ -81,6 +81,35 @@ beforeEach(() => {
 });
 
 describe('BoardPage note modal host', () => {
+  it('closes the selection list when opening a note and keeps the same selected cards after closing it', async () => {
+    openBoard();
+    const first = await screen.findByRole('article', { name: 'first' });
+    const second = screen.getByRole('article', { name: 'second' });
+    fireEvent.focus(first);
+    // The modifier click takes the production selection branch before capture.
+    fireEvent(second, new MouseEvent('pointerdown', { bubbles: true, button: 0, ctrlKey: true }));
+    const controls = screen.getByRole('toolbar', { name: 'Selected projection controls' });
+    expect(within(controls).getByText('2 selected')).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Selection list' }));
+    const panel = await screen.findByRole('complementary', { name: 'Selection list' });
+    const keys = (list: HTMLElement) => Array.from(list.querySelectorAll('[data-selection-key]'),
+      (row) => row.getAttribute('data-selection-key')).sort();
+    const selectedBefore = keys(panel);
+    expect(selectedBefore).toEqual(['member:member-first', 'member:member-second']);
+    fireEvent.pointerEnter(within(panel).getByRole('button', { name: 'first' }).closest('li')!);
+    expect(first.getAttribute('data-selection-highlighted')).toBe('true');
+    fireEvent.doubleClick(first);
+    const dialog = await screen.findByRole('dialog', { name: 'Open first' });
+    expect(screen.queryByRole('complementary', { name: 'Selection list' })).toBeNull();
+    expect(within(controls).getByText('2 selected')).toBeTruthy();
+    expect(first.getAttribute('data-selection-highlighted')).not.toBe('true');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Close note' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    await waitFor(() => expect((screen.getByRole('button', { name: 'Selection list' }) as HTMLButtonElement).disabled).toBe(false));
+    fireEvent.click(screen.getByRole('button', { name: 'Selection list' }));
+    expect(keys(await screen.findByRole('complementary', { name: 'Selection list' }))).toEqual(selectedBefore);
+  });
+
   it('leaves nonempty board undo and redo stacks untouched while the note modal owns keyboard input', async () => {
     http.patch.mockImplementation(async (url: string, input: Partial<BoardMember>) => {
       const target = detail.members.find(({ id }) => url === `/boards/board/members/${id}`);
