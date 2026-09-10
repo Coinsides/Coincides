@@ -137,6 +137,7 @@ export function useNoteCanvasResolvedLayoutModel({
         fallback: defaults[block.id],
         contentWidth,
         contract: coordinateContract,
+        pageFrames,
         surfaceMode: normalizationSurfaceMode,
         estimateHeight: estimateBlockHeightWithTypography,
       });
@@ -145,6 +146,7 @@ export function useNoteCanvasResolvedLayoutModel({
         layout: resolved,
         contentWidth,
         contract: coordinateContract,
+        pageFrames,
         surfaceMode: normalizationSurfaceMode,
         estimateHeight: estimateBlockHeightWithTypography,
       }), pageFrames, coordinateContract);

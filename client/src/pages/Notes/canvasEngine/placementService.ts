@@ -331,6 +331,24 @@ export function isCanvasWorkspaceBlock(block: PlacementSeedBlock, contentWidth: 
   }).surface === 'canvas_workspace';
 }
 
+function constrainFrameLocalAutoWidth(
+  layout: Partial<BlockBoxLayout>,
+  width: number,
+  contentWidth: number,
+  pageFrames: PageFrameModel[],
+  contract: CoordinateContract,
+): number {
+  if (contract !== 'v2' || layout.coordinate_space !== 'page_frame_local'
+    || layout.width_mode === 'manual' || layout.surface === 'canvas_workspace' || layout.surface === 'tray') return width;
+  const frame = selectPlacementFrame(layout, pageFrames, contract);
+  if (!frame) return width;
+  const remainingWidth = frame.width - frame.contentInset.left - frame.contentInset.right
+    - Math.max(layout.x ?? 0, 0);
+  // Auto sizing must not invent overflow while F1 preserves the stored coordinates.
+  // Even a remainder below MIN_BLOCK_WIDTH is a hard limit; exhausted frames give zero.
+  return Math.max(0, Math.min(DEFAULT_PAGE_CONTENT_WIDTH, contentWidth, remainingWidth));
+}
+
 export function normalizeBlockLayout<TBlock extends PlacementSeedBlock>({
   block,
   fallback,
@@ -338,6 +356,7 @@ export function normalizeBlockLayout<TBlock extends PlacementSeedBlock>({
   surfaceMode,
   estimateHeight,
   contract = 'v1',
+  pageFrames = [],
 }: {
   block: TBlock;
   fallback: BlockBoxLayout;
@@ -345,6 +364,7 @@ export function normalizeBlockLayout<TBlock extends PlacementSeedBlock>({
   surfaceMode: SurfaceMode;
   estimateHeight: (block: TBlock, width: number) => number;
   contract?: CoordinateContract;
+  pageFrames?: PageFrameModel[];
 }): BlockBoxLayout {
   const stored = readStoredLayout(block) ?? fallback;
   const useStoredPlacement = !(surfaceMode === 'page' && stored?.surface === 'canvas_workspace');
@@ -357,12 +377,15 @@ export function normalizeBlockLayout<TBlock extends PlacementSeedBlock>({
     && (isWorkspaceLayout || stored.width_mode === 'manual');
   const preserveWorldCoordinates = useStoredPlacement
     && preserveContractLayoutCoordinates(stored, contract);
-  const width = clamp(
+  const requestedX = useStoredPlacement && typeof stored?.x === 'number' ? stored.x : fallback.x;
+  const placementWidth = clamp(
     shouldUseStoredWidth ? stored.width as number : fallback.width,
     MIN_BLOCK_WIDTH,
     Math.max(MIN_BLOCK_WIDTH, maxPlacementWidth),
   );
-  const requestedX = useStoredPlacement && typeof stored?.x === 'number' ? stored.x : fallback.x;
+  const width = useStoredPlacement
+    ? constrainFrameLocalAutoWidth({ ...stored, x: requestedX }, placementWidth, contentWidth, pageFrames, contract)
+    : placementWidth;
   const x = preserveWorldCoordinates
     ? requestedX
     : clamp(requestedX, 0, Math.max(0, maxPlacementWidth - width));
@@ -399,6 +422,7 @@ export function normalizeResolvedBlockLayout<TBlock extends PlacementSeedBlock>(
   surfaceMode,
   estimateHeight,
   contract = 'v1',
+  pageFrames = [],
 }: {
   block: TBlock;
   layout: BlockBoxLayout;
@@ -406,18 +430,20 @@ export function normalizeResolvedBlockLayout<TBlock extends PlacementSeedBlock>(
   surfaceMode: SurfaceMode;
   estimateHeight: (block: TBlock, width: number) => number;
   contract?: CoordinateContract;
+  pageFrames?: PageFrameModel[];
 }): BlockBoxLayout {
   const isWorkspaceLayout = surfaceMode === 'canvas' && layout.surface === 'canvas_workspace';
   const maxPlacementWidth = isWorkspaceLayout
     ? CANVAS_WORKSPACE_WIDTH
     : contentWidth;
-  const width = clamp(
+  const placementWidth = clamp(
     isWorkspaceLayout || layout.width_mode === 'manual'
       ? layout.width
       : Math.min(DEFAULT_PAGE_CONTENT_WIDTH, contentWidth),
     MIN_BLOCK_WIDTH,
     Math.max(MIN_BLOCK_WIDTH, maxPlacementWidth),
   );
+  const width = constrainFrameLocalAutoWidth(layout, placementWidth, contentWidth, pageFrames, contract);
   const preserveWorldCoordinates = preserveContractLayoutCoordinates(layout, contract);
   const x = preserveWorldCoordinates
     ? layout.x
