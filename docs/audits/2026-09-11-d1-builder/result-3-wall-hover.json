@@ -1,0 +1,26 @@
+{
+  "quietWallEvidence": [
+    {
+      "active": "false",
+      "opacity": "0",
+      "side": "left"
+    },
+    {
+      "active": "false",
+      "opacity": "0",
+      "side": "right"
+    }
+  ],
+  "hoverWallEvidence": [
+    {
+      "active": "false",
+      "opacity": "0",
+      "side": "left"
+    },
+    {
+      "active": "false",
+      "opacity": "1",
+      "side": "right"
+    }
+  ]
+}

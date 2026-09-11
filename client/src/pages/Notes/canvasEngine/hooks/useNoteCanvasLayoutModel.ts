@@ -126,7 +126,7 @@ export function useNoteCanvasResolvedLayoutModel({
   );
 
   const blockLayouts = useMemo(() => {
-    const defaults = buildDefaultBlockLayouts(visibleBlocks, contentWidth, estimateBlockHeightWithTypography);
+    const defaults = buildDefaultBlockLayouts(visibleBlocks, contentWidth, estimateBlockHeightWithTypography, { contract: coordinateContract, pageFrames });
     return visibleBlocks.reduce<Record<string, BlockBoxLayout>>((acc, block) => {
       const draft = layoutDrafts[block.id];
       const normalizationSurfaceMode = pageAffiliatedWorkspaceBlockIds.has(block.id)

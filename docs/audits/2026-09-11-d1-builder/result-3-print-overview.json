@@ -1,0 +1,334 @@
+{
+  "smoke": 5,
+  "status": "PASS",
+  "environment": "Synthetic rows + jsdom; real hydrate, live page-layout hook, runtime, NotePrintLayer, NoteOverviewLayer and NoteReadOnlyPageContent",
+  "cases": [
+    {
+      "inset": {
+        "top": 0,
+        "bottom": 96,
+        "left": 72,
+        "right": 72
+      },
+      "span": 760,
+      "layouts": {
+        "auto": {
+          "x": 0,
+          "y": 40,
+          "width": 760,
+          "height": 100,
+          "surface": "formal_page",
+          "coordinate_space": "page_frame_local",
+          "frame_id": "print-overview-frame",
+          "boundary_role": "inside",
+          "surface_authority": {
+            "coordinateSpace": "page_frame_local",
+            "pageBoundary": {
+              "left": 0,
+              "right": 760,
+              "frameId": "print-overview-frame"
+            }
+          }
+        },
+        "manual": {
+          "x": 100,
+          "y": 180,
+          "width": 500,
+          "height": 100,
+          "surface": "formal_page",
+          "width_mode": "manual",
+          "coordinate_space": "page_frame_local",
+          "frame_id": "print-overview-frame",
+          "boundary_role": "inside",
+          "surface_authority": {
+            "coordinateSpace": "page_frame_local",
+            "pageBoundary": {
+              "left": 0,
+              "right": 760,
+              "frameId": "print-overview-frame"
+            }
+          }
+        }
+      },
+      "placements": [
+        {
+          "blockId": "auto",
+          "placementId": "auto-placement",
+          "objectId": "auto",
+          "objectKind": "note_block",
+          "canvasId": "print-overview-canvas",
+          "frameId": "print-overview-frame",
+          "x": 172,
+          "y": 240,
+          "width": 760,
+          "height": 100,
+          "rotation": 0,
+          "surface": "formal_page",
+          "boundaryRole": "inside",
+          "zIndex": 0,
+          "snapState": "free",
+          "visibilityState": "normal"
+        },
+        {
+          "blockId": "manual",
+          "placementId": "manual-placement",
+          "objectId": "manual",
+          "objectKind": "note_block",
+          "canvasId": "print-overview-canvas",
+          "frameId": "print-overview-frame",
+          "x": 272,
+          "y": 380,
+          "width": 500,
+          "height": 100,
+          "rotation": 0,
+          "surface": "formal_page",
+          "boundaryRole": "inside",
+          "zIndex": 1,
+          "snapState": "free",
+          "visibilityState": "normal"
+        }
+      ],
+      "projections": {
+        "print": [
+          {
+            "blockId": "auto",
+            "left": "72px",
+            "top": "40px",
+            "width": "760px",
+            "articleLeft": "0px",
+            "articleTop": "0px"
+          },
+          {
+            "blockId": "manual",
+            "left": "172px",
+            "top": "180px",
+            "width": "500px",
+            "articleLeft": "0px",
+            "articleTop": "0px"
+          }
+        ],
+        "printControls": {
+          "wallCount": 0,
+          "gutterDomCount": 2,
+          "gutterDisplays": [
+            "none",
+            "none"
+          ]
+        },
+        "overview": [
+          {
+            "blockId": "auto",
+            "left": "72px",
+            "top": "40px",
+            "width": "760px",
+            "articleLeft": "0px",
+            "articleTop": "0px"
+          },
+          {
+            "blockId": "manual",
+            "left": "172px",
+            "top": "180px",
+            "width": "500px",
+            "articleLeft": "0px",
+            "articleTop": "0px"
+          }
+        ],
+        "overviewControls": {
+          "wallCount": 0,
+          "gutterDomCount": 2,
+          "gutterDisplays": [
+            "none",
+            "none"
+          ]
+        }
+      },
+      "printScale": 0.8779875966831581,
+      "overviewScale": "scale(0.17699115044247787)"
+    },
+    {
+      "inset": {
+        "top": 0,
+        "bottom": 96,
+        "left": 24,
+        "right": 232
+      },
+      "span": 648,
+      "layouts": {
+        "auto": {
+          "x": 0,
+          "y": 40,
+          "width": 648,
+          "height": 100,
+          "surface": "formal_page",
+          "coordinate_space": "page_frame_local",
+          "frame_id": "print-overview-frame",
+          "boundary_role": "inside",
+          "surface_authority": {
+            "coordinateSpace": "page_frame_local",
+            "pageBoundary": {
+              "left": 0,
+              "right": 648,
+              "frameId": "print-overview-frame"
+            }
+          }
+        },
+        "manual": {
+          "x": 100,
+          "y": 180,
+          "width": 500,
+          "height": 100,
+          "surface": "formal_page",
+          "width_mode": "manual",
+          "coordinate_space": "page_frame_local",
+          "frame_id": "print-overview-frame",
+          "boundary_role": "inside",
+          "surface_authority": {
+            "coordinateSpace": "page_frame_local",
+            "pageBoundary": {
+              "left": 0,
+              "right": 648,
+              "frameId": "print-overview-frame"
+            }
+          }
+        }
+      },
+      "placements": [
+        {
+          "blockId": "auto",
+          "placementId": "auto-placement",
+          "objectId": "auto",
+          "objectKind": "note_block",
+          "canvasId": "print-overview-canvas",
+          "frameId": "print-overview-frame",
+          "x": 124,
+          "y": 240,
+          "width": 648,
+          "height": 100,
+          "rotation": 0,
+          "surface": "formal_page",
+          "boundaryRole": "inside",
+          "zIndex": 0,
+          "snapState": "free",
+          "visibilityState": "normal"
+        },
+        {
+          "blockId": "manual",
+          "placementId": "manual-placement",
+          "objectId": "manual",
+          "objectKind": "note_block",
+          "canvasId": "print-overview-canvas",
+          "frameId": "print-overview-frame",
+          "x": 224,
+          "y": 380,
+          "width": 500,
+          "height": 100,
+          "rotation": 0,
+          "surface": "formal_page",
+          "boundaryRole": "inside",
+          "zIndex": 1,
+          "snapState": "free",
+          "visibilityState": "normal"
+        }
+      ],
+      "projections": {
+        "print": [
+          {
+            "blockId": "auto",
+            "left": "24px",
+            "top": "40px",
+            "width": "648px",
+            "articleLeft": "0px",
+            "articleTop": "0px"
+          },
+          {
+            "blockId": "manual",
+            "left": "124px",
+            "top": "180px",
+            "width": "500px",
+            "articleLeft": "0px",
+            "articleTop": "0px"
+          }
+        ],
+        "printControls": {
+          "wallCount": 0,
+          "gutterDomCount": 2,
+          "gutterDisplays": [
+            "none",
+            "none"
+          ]
+        },
+        "overview": [
+          {
+            "blockId": "auto",
+            "left": "24px",
+            "top": "40px",
+            "width": "648px",
+            "articleLeft": "0px",
+            "articleTop": "0px"
+          },
+          {
+            "blockId": "manual",
+            "left": "124px",
+            "top": "180px",
+            "width": "500px",
+            "articleLeft": "0px",
+            "articleTop": "0px"
+          }
+        ],
+        "overviewControls": {
+          "wallCount": 0,
+          "gutterDomCount": 2,
+          "gutterDisplays": [
+            "none",
+            "none"
+          ]
+        }
+      },
+      "printScale": 0.8779875966831581,
+      "overviewScale": "scale(0.17699115044247787)"
+    }
+  ],
+  "historicalInset": {
+    "top": 0,
+    "right": 232,
+    "bottom": 96,
+    "left": 24
+  },
+  "storedRows": [
+    {
+      "block_id": "auto",
+      "placement_id": "auto-placement",
+      "layout": {
+        "x": 0,
+        "y": 40,
+        "width": 760,
+        "height": 100,
+        "coordinate_space": "page_frame_local",
+        "frame_id": "print-overview-frame",
+        "surface": "formal_page",
+        "boundary_role": "inside"
+      }
+    },
+    {
+      "block_id": "manual",
+      "placement_id": "manual-placement",
+      "layout": {
+        "x": 100,
+        "y": 180,
+        "width": 500,
+        "height": 100,
+        "coordinate_space": "page_frame_local",
+        "frame_id": "print-overview-frame",
+        "surface": "formal_page",
+        "boundary_role": "inside",
+        "width_mode": "manual"
+      }
+    }
+  ],
+  "storedBytesUnchanged": true,
+  "limitations": [
+    "DOM/style assertions are not screenshot or physical pixel measurement.",
+    "No OS print dialog, printer, application API or real database was used.",
+    "Generic objects retain existing read-only projection exclusions; this smoke covers auto/manual text blocks."
+  ]
+}

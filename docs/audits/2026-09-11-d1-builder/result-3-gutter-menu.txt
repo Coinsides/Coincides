@@ -1,0 +1,59 @@
+- button "Switch audit mode" [active]
+- strong: "D1 synthetic geometry: real writing surface, no API"
+- button "Toggle inset"
+- button "Toggle selection"
+- button "Capture geometry"
+- separator "Left page margin"
+- separator "Right page margin"
+- generic: 1 / 1
+- article:
+  - generic "Text unit tools":
+    - button "Text unit handle"
+  - textbox: Normal paragraph
+  - generic "Text unit tools":
+    - button "Text unit handle" [expanded]
+  - textbox: Indented paragraph
+  - generic "Text unit tools":
+    - button "Text unit handle"
+  - textbox: Twice indented paragraph
+  - menu "Text unit":
+    - generic: Text unit
+    - button "Turn into":
+      - generic: Turn into
+    - button "Label this unit":
+      - generic: Label this unit
+    - separator
+    - button "Split block from here" [disabled]:
+      - generic: Split block from here
+    - button "Extract to new block" [disabled]:
+      - generic: Extract to new block
+    - button "Duplicate unit" [disabled]:
+      - generic: Duplicate unit
+    - button "Delete unit" [disabled]:
+      - generic: Delete unit
+  - generic "Resize block"
+- article:
+  - generic "Text unit tools":
+    - button "Text unit handle"
+  - textbox: Normal paragraph
+  - generic "Text unit tools":
+    - button "Text unit handle"
+  - textbox: Indented paragraph
+  - generic "Text unit tools":
+    - button "Text unit handle"
+  - textbox: Twice indented paragraph
+  - generic "Resize block"
+- group "Page reading controls":
+  - button "Write" [pressed]
+  - button "Pen":
+    - text: Pen
+  - button "Eraser":
+    - text: Eraser
+  - button "Fit width" [pressed]
+  - button "Fit page"
+  - button "100% physical"
+  - button "Decrease page reading step": −
+  - status "Page display scale": 100%
+  - button "Increase page reading step": +
+- button "Open content groups":
+  - generic: Groups

@@ -6,6 +6,7 @@ import { projectPageFrameToReadingSurface } from '../pageFramePresentationServic
 import { Boxes, Pencil, Eraser } from 'lucide-react';
 import type { PaperInkTool } from '../freehandService';
 import { PaperInkLayer } from './PaperInkLayer';
+import { PageFrameWallLayer, type ActivePageFrameWall, type PageFrameWallSide } from './PageFrameWallLayer';
 import { NoteCanvasRuntimeContext } from '../NoteCanvasRuntimeProvider';
 import { BOARD_STAGING_MIME, resolveStagingItemDrop } from '../../../Boards/boardStagingDrag';
 import type { ItemRefBlockData } from '@shared/types/itemRef';
@@ -307,6 +308,8 @@ export interface NoteWritingSurfaceLayerProps {
   onPageReadingGearChange?: (gear: PageReadingGear) => void;
   onPageReadingStep?: (direction: -1 | 1) => void;
   onPageReadingViewportChange?: (viewport: CanvasViewport) => void;
+  onPageFrameWallPointerDown?: (event: ReactPointerEvent<HTMLElement>, frameId: string, side: PageFrameWallSide) => void;
+  activePageFrameWall?: ActivePageFrameWall | null;
   overviewOpen?: boolean;
   onToggleOverview?: () => void;
   visibleBlocks: NoteBlock[];
@@ -593,6 +596,8 @@ export function NoteWritingSurfaceLayer({
   onPageReadingGearChange,
   onPageReadingStep,
   onPageReadingViewportChange,
+  onPageFrameWallPointerDown,
+  activePageFrameWall,
   overviewOpen = false,
   onToggleOverview,
   visibleBlocks,
@@ -3576,6 +3581,13 @@ export function NoteWritingSurfaceLayer({
         onDragOverCapture={handleStagingDragOver}
         onDropCapture={handleStagingDrop}
       >
+        {surfaceMode === 'page' && !contentReadOnly && !overviewOpen && paperInkTool === 'write'
+          && noteCanvasRuntime.coordinateContract === 'v2' && onPageFrameWallPointerDown
+          && visiblePageFrames.map((frame) => (
+            <PageFrameWallLayer key={`${frame.id}:walls`}
+              frame={projectPageFrameToReadingSurface(frame, noteCanvasRuntime.coordinateContract, pageOffsetX)}
+              activeWall={activePageFrameWall} onPointerDown={onPageFrameWallPointerDown} />
+          ))}
         {surfaceMode === 'page' && noteCanvasRuntime.pageFrames.map((frame) => (
           <PaperInkLayer key={frame.id} frame={frame}
             displayFrame={projectPageFrameToReadingSurface(frame, noteCanvasRuntime.coordinateContract, pageOffsetX)}
@@ -3973,6 +3985,7 @@ export function NoteWritingSurfaceLayer({
               block={block}
               coordinateContract={noteCanvasRuntime.coordinateContract}
               pageFrame={selectPlacementFrame(layout, noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract)}
+              textUnitGutterLaneX={surfaceMode === 'page' && layout.surface === 'formal_page' ? pageOffsetX : undefined}
               contentReadOnly={contentReadOnly}
               allowSaveRecovery={recoveryBlockIds.includes(block.id)}
               text={text}

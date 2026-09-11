@@ -1,0 +1,13 @@
+{
+  "name": "client-full",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "--reporter=json",
+    "--outputFile=D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-11-d1-builder\\result-3-validation\\client-full.json"
+  ],
+  "cwd": "client",
+  "exitCode": 0,
+  "durationMs": 18277
+}

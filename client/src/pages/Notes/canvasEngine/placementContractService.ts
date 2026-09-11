@@ -21,6 +21,18 @@ function contentOrigin(frame: PageFrameModel): { x: number; y: number } {
   return { x: frame.x + frame.contentInset.left, y: frame.y + frame.contentInset.top };
 }
 
+/** Auto width is a read-side projection; x remains the stored coordinate truth. */
+export function deriveFrameLocalAutoWidth(
+  layout: Partial<BlockBoxLayout>,
+  frame: PageFrameModel | null | undefined,
+  contract: CoordinateContract = 'v1',
+): number | undefined {
+  if (contract !== 'v2' || !frame || layout.coordinate_space !== 'page_frame_local'
+    || layout.width_mode === 'manual' || layout.surface === 'tray') return undefined;
+  return Math.max(0, frame.width - frame.contentInset.left - frame.contentInset.right
+    - Math.max(layout.x ?? 0, 0));
+}
+
 /** Explicit ownership wins; world geometry otherwise selects a frame in both axes. */
 export function selectPlacementFrame(
   layout: Partial<BlockBoxLayout>,
@@ -87,7 +99,9 @@ export function toStoredLayout(
   frames: PageFrameModel[],
   contract: CoordinateContract = 'v1',
 ): BlockBoxLayout {
-  if (contract === 'v1' || layout.surface === 'tray' || layout.surface === 'canvas_workspace') return layout;
+  if (contract === 'v1' || layout.surface === 'tray'
+    || (layout.surface === 'canvas_workspace'
+      && (layout.coordinate_space !== 'page_frame_local' || layout.width_mode === 'manual'))) return layout;
   const frame = selectPlacementFrame(layout, frames, contract);
   if (!frame) return layout;
   const origin = contentOrigin(frame);
@@ -95,7 +109,9 @@ export function toStoredLayout(
   const y = layout.coordinate_space === 'canvas_world' ? layout.y - origin.y : layout.y;
   const pageBoundary = { left: 0, right: frame.width - frame.contentInset.left - frame.contentInset.right, frameId: frame.id };
   const authority = classifyCanvasSurfaceAuthority({
-    coordinateSpace: 'page_frame_local', box: { x, width: layout.width }, pageBoundary, explicitSurface: layout.surface,
+    coordinateSpace: 'page_frame_local',
+    box: { x, width: deriveFrameLocalAutoWidth(layout, frame, contract) ?? layout.width },
+    pageBoundary, explicitSurface: layout.surface,
   });
   return {
     ...layout, x, y, coordinate_space: 'page_frame_local', frame_id: frame.id,
@@ -111,7 +127,9 @@ export function reconcileContractHydratedLayout(
   legacy: (layout: Record<string, unknown>, frames: PageFrameModel[]) => Record<string, unknown>,
 ): Record<string, unknown> {
   if (contract === 'v1') return legacy(layout, frames);
-  if (layout.surface === 'tray' || layout.surface === 'canvas_workspace') return layout;
+  if (layout.surface === 'tray'
+    || (layout.surface === 'canvas_workspace'
+      && (layout.coordinate_space !== 'page_frame_local' || layout.width_mode === 'manual'))) return layout;
   if (![layout.x, layout.y, layout.width, layout.height].every((value) => typeof value === 'number' && Number.isFinite(value))) return layout;
   // Unknown historical tags are not evidence for a coordinate conversion.
   if (layout.coordinate_space !== 'canvas_world' && layout.coordinate_space !== 'page_frame_local') return layout;
@@ -313,7 +331,7 @@ export function resolveDefaultDraftLayout(
     .map((layout) => layout.y + layout.height);
   return toStoredLayout({
     x: 0, y: bottoms.length > 0 ? Math.max(...bottoms) + DEFAULT_BLOCK_GAP : 0,
-    width: Math.min(DEFAULT_PAGE_CONTENT_WIDTH, contentWidth, frame.width - frame.contentInset.left - frame.contentInset.right),
+    width: Math.max(0, Math.min(contentWidth, frame.width - frame.contentInset.left - frame.contentInset.right)),
     height: DEFAULT_BLOCK_HEIGHT, coordinate_space: 'page_frame_local', surface: 'formal_page', frame_id: frame.id,
   }, frames, contract);
 }

@@ -1786,6 +1786,8 @@ export function savePageFrameCollection(
   userId: string,
   noteId: string,
   collectionInput: Record<string, unknown>,
+  layoutUpdates: Array<{ placement_id: string; block_id: string; layout: Record<string, unknown> }> = [],
+  objectLayoutUpdates: Array<{ placement_id: string; object_id: string; layout: Record<string, unknown> }> = [],
 ) {
   const note = getOwnedNote(db, userId, noteId);
   const pageFrames = Array.isArray(collectionInput.pageFrames)
@@ -1945,6 +1947,39 @@ export function savePageFrameCollection(
 
     db.prepare('UPDATE notes SET updated_at = datetime(\'now\') WHERE id = ? AND user_id = ?')
       .run(note.id, userId);
+
+    // Wall edits, undo and redo use the established placement writer. Its
+    // nested transactions stay inside this collection transaction, so a failed
+    // layout rolls back both the complete inset set and any earlier layouts.
+    for (const update of layoutUpdates) {
+      saveBlockCanvasPlacement(db, userId, note.id, update.placement_id, update);
+    }
+    for (const update of objectLayoutUpdates) {
+      const existing = db.prepare(`
+        SELECT cp.*, co.kind
+        FROM canvas_placements cp
+        JOIN canvas_objects co ON co.id = cp.object_id
+        WHERE cp.id = ? AND cp.object_id = ? AND cp.note_id = ? AND cp.user_id = ?
+          AND co.status = 'active'
+      `).get(update.placement_id, update.object_id, note.id, userId) as (CanvasPlacementRow & { kind: string }) | undefined;
+      if (!existing) throw new AppError(404, 'Canvas object placement not found');
+      if (['page_frame', 'paragraph_block_projection', 'freehand'].includes(existing.kind)) {
+        throw new AppError(400, 'Object placement is not part of the wall layout batch');
+      }
+      // Retain object-specific metadata and placement policy; wall edits only
+      // change the existing placement and never rewrite its content or assets.
+      const placement = normalizePlacementForWrite(
+        { ...layoutFromPlacement(existing), z_index: existing.z_index, ...update.layout },
+        update.object_id, note.id, update.placement_id,
+        {
+          metadata: parseJson<Record<string, unknown>>(existing.metadata, {}),
+          snapState: parseJson<Record<string, unknown>>(existing.snap_state_json, {}),
+          visibilityState: existing.visibility_state,
+          renderVisibility: existing.render_visibility,
+        },
+      );
+      upsertCanvasPlacementCore(db, userId, note, placement);
+    }
 
     return getNoteCanvasPersistence(db, userId, note.id).pageFrameCollection;
   })();

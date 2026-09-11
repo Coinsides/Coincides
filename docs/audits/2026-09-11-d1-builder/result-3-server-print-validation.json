@@ -1,0 +1,37 @@
+{
+  "scope": "D1 collection transaction and historical print inset",
+  "data": "Synthetic rows in :memory: SQLite; hand-created schema; no initDb, migrations, application database or asset files",
+  "checks": [
+    {
+      "cwd": "server",
+      "command": "node --import tsx --test src/__tests__/v13WallCollectionBatch.test.ts",
+      "exitCode": 0,
+      "files": 1,
+      "testsPassed": 2,
+      "testsFailed": 0,
+      "durationMs": 224.5762
+    },
+    {
+      "cwd": "client",
+      "command": "node node_modules/vitest/vitest.mjs run src/pages/Notes/canvasEngine/pageFramePrintScaleService.test.ts src/pages/Notes/canvasEngine/layers/NotePrintLayer.test.tsx",
+      "exitCode": 0,
+      "files": 2,
+      "testsPassed": 18,
+      "testsFailed": 0,
+      "durationSeconds": 1.80
+    },
+    {
+      "cwd": "server",
+      "command": "node node_modules/typescript/bin/tsc --noEmit --pretty false",
+      "exitCode": 0
+    }
+  ],
+  "evidence": [
+    "result-3-wall-batch-success.json",
+    "result-3-wall-batch-rollback.json"
+  ],
+  "limitations": [
+    "Transaction evidence invokes the real service and validator; HTTP route request counting belongs to the client wall integration smoke.",
+    "These checks overlap the final broader suites and must not be summed as unique test counts."
+  ]
+}

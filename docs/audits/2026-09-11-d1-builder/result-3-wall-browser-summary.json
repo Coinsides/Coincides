@@ -1,0 +1,26 @@
+{
+  "scope": "Real Chromium pointer gestures on production React writing surface, wall controller, resolved layout hook and usePlacementHistory. The save boundary is an in-memory callback; no HTTP, server or database.",
+  "records": 61,
+  "saveBatches": 8,
+  "checks": {
+    "pointer preview narrows before saving": true,
+    "drag active line reveals": true,
+    "contract 760 to 600": true,
+    "one contraction save batch": true,
+    "manual x clamp": true,
+    "manual width clamp": true,
+    "undo restores stored layouts and insets": true,
+    "redo snapshot byte symmetric": true,
+    "expand auto beyond 760": true,
+    "left expansion zero stored writes": true,
+    "left expansion manual follows -48px": true,
+    "half scale pointer conversion": true,
+    "240 upper clamp": true,
+    "all auto snapshots preserve stored width760": true,
+    "no auto in any save batch": true,
+    "top bottom preserved every batch": true
+  },
+  "passed": 16,
+  "total": 16,
+  "evidenceCorrection": "Left-expansion DOM displacement compares records at the same display scale=1, before the later explicit half-scale action."
+}

@@ -1,0 +1,123 @@
+{
+  "checks": [
+    {
+      "name": "client-targeted",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src/pages/Notes/canvasEngine/boundaryAccount.test.tsx",
+        "src/pages/Notes/canvasEngine/coordinateContractIntegration.test.tsx",
+        "src/pages/Notes/canvasEngine/genericPlacementContract.test.ts",
+        "src/pages/Notes/canvasEngine/hooks/autoWidthFrameSave.test.tsx",
+        "src/pages/Notes/canvasEngine/hooks/useBlockPlacementInteractions.test.tsx",
+        "src/pages/Notes/canvasEngine/hooks/usePlacementHistory.test.tsx",
+        "src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx",
+        "src/pages/Notes/canvasEngine/placementAutoWidth.test.ts",
+        "src/pages/Notes/canvasEngine/placementContractService.test.ts",
+        "src/pages/Notes/canvasEngine/textUnitGutterDeOccupation.test.ts",
+        "src/pages/Notes/canvasEngine/pageFrameWallService.test.ts",
+        "src/pages/Notes/canvasEngine/hooks/usePageFrameWalls.test.tsx",
+        "src/pages/Notes/canvasEngine/hooks/pageFrameWallsPersistence.test.tsx",
+        "src/pages/Notes/canvasEngine/pageFramePrintScaleService.test.ts",
+        "src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.test.tsx",
+        "--reporter=json",
+        "--outputFile=D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-11-d1-builder\\result-3-validation\\targeted.json"
+      ],
+      "cwd": "client",
+      "exitCode": 0,
+      "durationMs": 3793
+    },
+    {
+      "name": "client-typecheck",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "node_modules/typescript/bin/tsc",
+        "-b",
+        "--pretty",
+        "false"
+      ],
+      "cwd": "client",
+      "exitCode": 0,
+      "durationMs": 6889
+    },
+    {
+      "name": "server-typecheck",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "node_modules/typescript/bin/tsc",
+        "--noEmit",
+        "--pretty",
+        "false"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "durationMs": 4206
+    },
+    {
+      "name": "client-build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": "client",
+      "exitCode": 0,
+      "durationMs": 10970
+    },
+    {
+      "name": "server-build",
+      "command": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": "server",
+      "exitCode": 0,
+      "durationMs": 6033
+    },
+    {
+      "name": "contractCheck",
+      "command": [
+        "npm",
+        "run",
+        "smoke:canvas-engine-model-contract"
+      ],
+      "cwd": "client",
+      "exitCode": 0,
+      "durationMs": 1714
+    },
+    {
+      "name": "client-full",
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "--reporter=json",
+        "--outputFile=D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-11-d1-builder\\result-3-validation\\client-full-results.json"
+      ],
+      "cwd": "client",
+      "exitCode": 0,
+      "durationMs": 17304
+    }
+  ],
+  "suites": [
+    {
+      "name": "targeted",
+      "files": 15,
+      "passed": 157,
+      "failed": 0,
+      "skipped": 0,
+      "total": 157
+    },
+    {
+      "name": "client-full-results",
+      "files": 121,
+      "passed": 1293,
+      "failed": 0,
+      "skipped": 0,
+      "total": 1293
+    }
+  ],
+  "runtimeAggregate": "Not run; retained by HQ per user instruction"
+}

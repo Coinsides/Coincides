@@ -11,6 +11,7 @@ import { useSlashBlockRollbackController } from './useSlashBlockRollbackControll
 import { useNoteBlockTrashController } from './useNoteBlockTrashController';
 import { useTrayController } from './useTrayController';
 import { usePaperInkCommands } from './usePaperInkCommands';
+import { usePageFrameWalls } from './usePageFrameWalls';
 import { tableObjectSavePayload } from '../tableObjectService';
 import { resolveEffectiveDocumentTypographyProfile } from '../pageFrameTypographyService';
 import type {
@@ -22,6 +23,7 @@ export function useNoteCanvasRuntimeController() {
   const { noteId, hostMode = 'page' } = useNoteCanvasRuntime();
   const trayDropTargetRef = useRef<HTMLElement>(null);
   const textHistoryHostRef = useRef<TextFlowHistoryHost | null>(null);
+  const wallBoundaryRef = useRef<() => boolean>(() => false);
   const addToast = useUIStore((state) => state.addToast);
   const {
     activeBlockId,
@@ -122,11 +124,11 @@ export function useNoteCanvasRuntimeController() {
     contentGroups,
     groupFolders,
     purposeFrames,
-    pageFrameCollection,
+    pageFrameCollection: storedPageFrameCollection,
     runtimePageFrameCollectionRef,
     resolvePlacementWriteContext,
     persistedCanvasObjects,
-    persistedCanvasPlacements,
+    persistedCanvasPlacements: storedCanvasPlacements,
     persistedContentMounts,
     persistedVisualConnectors,
     persistedImageObjects,
@@ -146,6 +148,7 @@ export function useNoteCanvasRuntimeController() {
     saveContentGroups,
     saveGroupFolders,
     savePageFrameCollection,
+    savePageFrameWalls,
     persistCanvasObject,
     deleteCanvasObject,
     saveDocumentTypographyProfile,
@@ -177,6 +180,20 @@ export function useNoteCanvasRuntimeController() {
     noteId,
     hostMode,
   });
+
+  const walls = usePageFrameWalls({
+    noteId, generation: textHistoryGeneration, enabled: surfaceMode === 'page' && !loading && !sourceProjectionPolicy.contentReadOnly,
+    coordinateContract, collection: storedPageFrameCollection, blocks, layoutDrafts,
+    getCollection: () => {
+      const rendered = runtimePageFrameCollectionRef.current;
+      return rendered && rendered.noteId === noteId ? rendered.collection : null;
+    },
+    objects: persistedCanvasObjects, placements: storedCanvasPlacements,
+    zoom: pageReadingViewport?.zoom || 1, history: textHistoryHostRef,
+    boundary: () => wallBoundaryRef.current(), save: savePageFrameWalls,
+  });
+  const pageFrameCollection = walls.collection;
+  const persistedCanvasPlacements = walls.placements;
 
   const documentTypographyProfile = useMemo(() => resolveEffectiveDocumentTypographyProfile({
     surfaceMode,
@@ -275,6 +292,7 @@ export function useNoteCanvasRuntimeController() {
     createDraftBlock, saveDraftBlockPlacement, discardDraftBlock, trashBlock, restoreBlock, transferTextUnit,
   });
   const { applyEdit: applyBlockTextFlowEdit, saveBlock } = textHistory;
+  wallBoundaryRef.current = textHistory.boundary;
   const rollbackBlockSlashSession = useSlashBlockRollbackController({
     applyBlockTextFlowEdit,
     blocks,
@@ -424,6 +442,8 @@ export function useNoteCanvasRuntimeController() {
   });
 
   const { layerProps, runtimePageFrameCollection } = useRuntimePresentationController({
+    onPageFrameWallPointerDown: walls.begin,
+    activePageFrameWall: walls.activeWall,
     hostMode,
     trackPendingWrite: hostMode === 'modal' ? trackPendingWrite : undefined,
     coordinateContract,
@@ -492,7 +512,7 @@ export function useNoteCanvasRuntimeController() {
     groupFolders,
     purposeFrames,
     sourceReferenceCount,
-    contentReadOnly: sourceProjectionPolicy.contentReadOnly || textHistory.replaying || historyReplaying,
+    contentReadOnly: sourceProjectionPolicy.contentReadOnly || textHistory.replaying || historyReplaying || walls.saving,
     recoveryBlockIds: sourceProjectionPolicy.contentReadOnly || historyReplaying ? [] : textHistory.recoveryBlockIds,
     surfaceMode,
     surfacePolicy,
@@ -541,7 +561,7 @@ export function useNoteCanvasRuntimeController() {
     onFocusPageFrame: (pageFrame, world) => focusViewportOnRect(pageFrame, world),
     onReleaseTextFocus: releaseTextFocus,
     onFloatingPanelFocusBlock: setFocusBlockId,
-    onMeasuredBlockHeight: handleMeasuredBlockHeight,
+    onMeasuredBlockHeight: (...args) => { if (!walls.activeWall && !walls.saving) handleMeasuredBlockHeight(...args); },
     onPageSpaceDoubleClick: handlePageSpaceDoubleClick,
     onPersistDraft: (text, options) => persistDraft(text, undefined, options),
     onPersistChangedBlockLayouts: (layouts) => {

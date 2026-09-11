@@ -17,6 +17,8 @@ describe.each(['stored', 'resolved'] as const)('%s auto width normalization', (e
     { name: 'negative F1 coordinate', x: -20, contentWidth: 760, frameWidth: 904, expected: 760 },
     { name: 'remainder below minimum', x: 744, contentWidth: 760, frameWidth: 904, expected: 16 },
     { name: 'exhausted remainder', x: 780, contentWidth: 760, frameWidth: 904, expected: 0 },
+    { name: 'widened frame beyond 760', x: 0, contentWidth: 1000, frameWidth: 1000, expected: 856 },
+    { name: 'widened frame horizontal remainder', x: 88, contentWidth: 1000, frameWidth: 1000, expected: 768 },
   ])('uses $name before measuring height and retains coordinates', ({ x, contentWidth, frameWidth, expected }) => {
     const layout: BlockBoxLayout = {
       x, y: -12.25, width: 672, height: 44, surface: 'formal_page',

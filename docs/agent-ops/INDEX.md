@@ -323,7 +323,7 @@
 | [handoffs/2026-09-10-v13-5-c2-visual-language-order.md](handoffs/2026-09-10-v13-5-c2-visual-language-order.md) | 13.5 C2 · 视觉语言批 | `done（builder 施工回执；docs 索引/完整总门与凭据扫描留 HQ）` | — | — |
 | [handoffs/2026-09-10-v13-5-c3-cross-block-unit-move-order.md](handoffs/2026-09-10-v13-5-c3-cross-block-unit-move-order.md) | 13.5 C3 · 跨块迁居 | `done(HQ 收口:补裁一落地,普通块碰撞停线解除)` | — | — |
 | [handoffs/2026-09-10-v13-5-c4-paper-ink-order.md](handoffs/2026-09-10-v13-5-c4-paper-ink-order.md) | 13.5 C4 · 纸上手绘 | `done(HQ 收口:波次 C 末单收官)` | — | — |
-| [handoffs/2026-09-11-v13-5-d1-walls-order.md](handoffs/2026-09-11-v13-5-d1-walls-order.md) | D1 · 可调的墙 + 把手安家 | `ready` | — | — |
+| [handoffs/2026-09-11-v13-5-d1-walls-order.md](handoffs/2026-09-11-v13-5-d1-walls-order.md) | D1 · 可调的墙 + 把手安家 | `done` | — | — |
 | [handoffs/2026-09-11-v13-5-d2-header-chrome-order.md](handoffs/2026-09-11-v13-5-d2-header-chrome-order.md) | D2 · 纸上表头 + 顶栏拆解 | `ready(候 D1 收口后派发,单 builder 串行)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |

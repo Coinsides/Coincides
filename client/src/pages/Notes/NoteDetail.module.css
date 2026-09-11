@@ -1994,7 +1994,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 .textUnitGutter {
   position: absolute;
   top: 0;
-  right: calc(100% + 4px);
+  right: calc(100% + 4px + var(--text-unit-gutter-lane-offset, 0px) + var(--text-unit-gutter-cancel-indent, 0) * var(--text-unit-indent, 0) * 24px);
   display: flex;
   align-items: center;
   gap: 3px;
@@ -2015,6 +2015,9 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   justify-content: center;
   width: 14px;
   height: 20px;
+  /* Keep B10's declared box; scale both the visible and pointer box to 11.2×16. */
+  transform: scale(0.8);
+  transform-origin: right center;
   padding: 0;
   cursor: grab;
   touch-action: none;

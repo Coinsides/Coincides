@@ -5,6 +5,7 @@ import { applyCanvasLayoutsToBlocks, saveBlockCanvasPlacementForNote } from '../
 import type { CanvasBlockLayoutRecord } from '../canvasPersistenceNormalizer';
 import { createSurfaceModePolicy } from '../modePolicyService';
 import { resolveScreenRect } from '../placementContractService';
+import { getBoundaryKind, getEffectiveAIVisibility, getEffectiveExportRole } from '../placementService';
 import type { NoteBlock } from '../runtimeDataTypes';
 import type { BlockBoxLayout } from '../runtimeLayout';
 import { DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE } from '../typographyProfileService';
@@ -48,6 +49,40 @@ function pointer(type: 'pointermove' | 'pointerup', clientY: number) {
 beforeEach(() => vi.resetAllMocks());
 
 describe('v2 auto width frame remainder through drag and save', () => {
+  it.each([0, 88])('follows live right-wall expansion and contraction with stored x=%s unchanged', (x) => {
+    const stored: BlockBoxLayout = {
+      x, y: 120.25, width: 760 - x, height: 100,
+      surface: 'formal_page', coordinate_space: 'page_frame_local', frame_id: collection.primaryFrameId!,
+    };
+    const rows = hydrate(stored);
+    const before = JSON.stringify(rows);
+    const subject = renderHook(({ pageFrames }) => useNoteCanvasResolvedLayoutModel({
+      coordinateContract: 'v2', contentWidth: 1000,
+      documentTypographyProfile: DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE,
+      layoutDrafts: {}, sortedBlocks: rows, pageFrames, surfaceMode: 'page', surfacePolicy,
+    }), { initialProps: { pageFrames: collection.pageFrames } });
+    expect(subject.result.current.blockLayouts[block.id]).toMatchObject({ x, width: 760 - x });
+    const resizeWall = (right: number) => collection.pageFrames.map((frame) => ({
+      ...frame, contentInset: { ...frame.contentInset, right },
+    }));
+    subject.rerender({ pageFrames: resizeWall(24) });
+    expect(subject.result.current.blockLayouts[block.id]).toMatchObject({
+      x, y: 120.25, width: 808 - x, surface: 'formal_page', boundary_role: 'inside',
+    });
+    expect(subject.result.current.defaultDraftLayout.width).toBe(808);
+    expect(getBoundaryKind(subject.result.current.blockLayouts[block.id])).toBe('inside');
+    subject.rerender({ pageFrames: resizeWall(232) });
+    const contracted = subject.result.current.blockLayouts[block.id];
+    expect(contracted).toMatchObject({ x, y: 120.25, width: 600 - x, surface: 'formal_page', boundary_role: 'inside' });
+    expect(subject.result.current.defaultDraftLayout.width).toBe(600);
+    expect(getBoundaryKind(contracted)).toBe('inside');
+    expect(getEffectiveExportRole(contracted)).toBe('included');
+    expect(getEffectiveAIVisibility(contracted)).toBe('visible');
+    expect(subject.result.current.visibleBlocks).toEqual(rows);
+    expect(JSON.stringify(rows)).toBe(before);
+    expect(transport.put).not.toHaveBeenCalled();
+  });
+
   it.each([
     { name: 'HQ x=88 auto row', x: 88, width: 672, width_mode: undefined },
     { name: 'x=0 auto row', x: 0, width: 760, width_mode: undefined },

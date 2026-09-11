@@ -102,6 +102,13 @@ export function normalizePageFramePrintBaseline(pageFrame: PageFrameModel): Page
     pageSize,
     width: shouldApplyPresetGeometry ? profile.width : pageFrame.width,
     height: Math.max(shouldApplyPresetGeometry ? profile.height : pageFrame.height, profile.height),
-    contentInset: shouldApplyPresetGeometry ? profile.contentInset : pageFrame.contentInset,
+    // A missing historical pageSize does not make its live walls disposable.
+    // Fill missing inset edges only; in particular a stored top of 0 is valid.
+    contentInset: {
+      top: pageFrame.contentInset?.top ?? profile.contentInset.top,
+      right: pageFrame.contentInset?.right ?? profile.contentInset.right,
+      bottom: pageFrame.contentInset?.bottom ?? profile.contentInset.bottom,
+      left: pageFrame.contentInset?.left ?? profile.contentInset.left,
+    },
   };
 }

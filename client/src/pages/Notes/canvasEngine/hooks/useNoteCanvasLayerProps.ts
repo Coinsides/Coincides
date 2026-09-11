@@ -138,6 +138,8 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
   };
 
   const writingSurfaceProps: NoteWritingSurfaceLayerProps = {
+    onPageFrameWallPointerDown: input.onPageFrameWallPointerDown,
+    activePageFrameWall: input.activePageFrameWall,
     hostMode: input.hostMode,
     trackPendingWrite: input.trackPendingWrite,
     activeBlockId: input.activeBlockId,

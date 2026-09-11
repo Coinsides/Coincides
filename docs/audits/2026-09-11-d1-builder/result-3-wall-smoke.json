@@ -1,0 +1,429 @@
+{
+  "environment": "synthetic React pointer events and real usePlacementHistory/useNoteCanvasResolvedLayoutModel in jsdom",
+  "databaseAccess": false,
+  "transport": "in-memory snapshot saves; HTTP atomicity covered separately",
+  "screenshots": 0,
+  "cases": [
+    {
+      "smoke": "1+3",
+      "rightInset": [
+        72,
+        232
+      ],
+      "autoWidths": [
+        760,
+        600
+      ],
+      "zoom": 0.5,
+      "saveCallsForCommitUndoRedo": 3,
+      "snapshots": [
+        {
+          "collection": {
+            "pageFrames": [
+              {
+                "id": "wall-frame",
+                "role": "primary_page_frame",
+                "exportable": true,
+                "x": 0,
+                "y": 0,
+                "width": 904,
+                "height": 1279,
+                "pageSize": "A4",
+                "contentInset": {
+                  "top": 96,
+                  "right": 232,
+                  "bottom": 88,
+                  "left": 72
+                }
+              },
+              {
+                "id": "second-frame",
+                "role": "secondary_page_frame",
+                "exportable": true,
+                "x": 0,
+                "y": 1359,
+                "width": 904,
+                "height": 1279,
+                "pageSize": "A4",
+                "contentInset": {
+                  "top": 96,
+                  "right": 232,
+                  "bottom": 88,
+                  "left": 72
+                }
+              }
+            ],
+            "pageStacks": [
+              {
+                "id": "page-stack-wall-frame",
+                "displayName": "Page stack 1",
+                "frameIds": [
+                  "wall-frame",
+                  "second-frame"
+                ],
+                "primaryFrameId": "wall-frame",
+                "selectedFrameId": "second-frame",
+                "collapsed": false,
+                "numbering": {
+                  "enabled": true,
+                  "startAt": 1
+                },
+                "layout": {
+                  "direction": "vertical",
+                  "gap": 80,
+                  "collapsedPreviewPages": 1
+                },
+                "createdFrom": "a4_note_seed"
+              }
+            ],
+            "primaryFrameId": "wall-frame",
+            "primaryStackId": "page-stack-wall-frame",
+            "selectedFrameId": "second-frame",
+            "selectedStackId": "page-stack-wall-frame"
+          },
+          "layoutUpdates": [
+            {
+              "block": {
+                "id": "manual",
+                "placement_id": "placement:manual"
+              },
+              "layout": {
+                "x": 200,
+                "y": 120.25,
+                "width": 400,
+                "height": 100,
+                "coordinate_space": "page_frame_local",
+                "frame_id": "wall-frame",
+                "surface": "formal_page",
+                "boundary_role": "inside",
+                "width_mode": "manual"
+              }
+            },
+            {
+              "block": {
+                "id": "wide",
+                "placement_id": "placement:wide"
+              },
+              "layout": {
+                "x": 0,
+                "y": 120.25,
+                "width": 600,
+                "height": 100,
+                "coordinate_space": "page_frame_local",
+                "frame_id": "wall-frame",
+                "surface": "formal_page",
+                "boundary_role": "inside",
+                "width_mode": "manual"
+              }
+            }
+          ],
+          "objectLayoutUpdates": [
+            {
+              "objectId": "image",
+              "placementId": "placement:image",
+              "layout": {
+                "x": 300,
+                "y": 30,
+                "width": 300,
+                "height": 100,
+                "rotation": 0,
+                "coordinate_space": "page_frame_local",
+                "frame_id": "wall-frame",
+                "surface": "formal_page",
+                "boundary_role": "inside"
+              }
+            }
+          ]
+        },
+        {
+          "collection": {
+            "pageFrames": [
+              {
+                "id": "wall-frame",
+                "role": "primary_page_frame",
+                "exportable": true,
+                "x": 0,
+                "y": 0,
+                "width": 904,
+                "height": 1279,
+                "pageSize": "A4",
+                "contentInset": {
+                  "top": 96,
+                  "right": 72,
+                  "bottom": 88,
+                  "left": 72
+                }
+              },
+              {
+                "id": "second-frame",
+                "role": "secondary_page_frame",
+                "exportable": true,
+                "x": 0,
+                "y": 1359,
+                "width": 904,
+                "height": 1279,
+                "pageSize": "A4",
+                "contentInset": {
+                  "top": 96,
+                  "right": 72,
+                  "bottom": 88,
+                  "left": 72
+                }
+              }
+            ],
+            "pageStacks": [
+              {
+                "id": "page-stack-wall-frame",
+                "displayName": "Page stack 1",
+                "frameIds": [
+                  "wall-frame",
+                  "second-frame"
+                ],
+                "primaryFrameId": "wall-frame",
+                "selectedFrameId": "second-frame",
+                "collapsed": false,
+                "numbering": {
+                  "enabled": true,
+                  "startAt": 1
+                },
+                "layout": {
+                  "direction": "vertical",
+                  "gap": 80,
+                  "collapsedPreviewPages": 1
+                },
+                "createdFrom": "a4_note_seed"
+              }
+            ],
+            "primaryFrameId": "wall-frame",
+            "primaryStackId": "page-stack-wall-frame",
+            "selectedFrameId": "second-frame",
+            "selectedStackId": "page-stack-wall-frame"
+          },
+          "layoutUpdates": [
+            {
+              "block": {
+                "id": "manual",
+                "placement_id": "placement:manual"
+              },
+              "layout": {
+                "x": 360,
+                "y": 120.25,
+                "width": 400,
+                "height": 100,
+                "coordinate_space": "page_frame_local",
+                "frame_id": "wall-frame",
+                "surface": "formal_page",
+                "boundary_role": "inside",
+                "width_mode": "manual"
+              }
+            },
+            {
+              "block": {
+                "id": "wide",
+                "placement_id": "placement:wide"
+              },
+              "layout": {
+                "x": 0,
+                "y": 120.25,
+                "width": 700,
+                "height": 100,
+                "coordinate_space": "page_frame_local",
+                "frame_id": "wall-frame",
+                "surface": "formal_page",
+                "boundary_role": "inside",
+                "width_mode": "manual"
+              }
+            }
+          ],
+          "objectLayoutUpdates": [
+            {
+              "objectId": "image",
+              "placementId": "placement:image",
+              "layout": {
+                "x": 450,
+                "y": 30,
+                "width": 300,
+                "height": 100,
+                "rotation": 0,
+                "coordinate_space": "page_frame_local",
+                "frame_id": "wall-frame",
+                "surface": "formal_page",
+                "boundary_role": "inside"
+              }
+            }
+          ]
+        },
+        {
+          "collection": {
+            "pageFrames": [
+              {
+                "id": "wall-frame",
+                "role": "primary_page_frame",
+                "exportable": true,
+                "x": 0,
+                "y": 0,
+                "width": 904,
+                "height": 1279,
+                "pageSize": "A4",
+                "contentInset": {
+                  "top": 96,
+                  "right": 232,
+                  "bottom": 88,
+                  "left": 72
+                }
+              },
+              {
+                "id": "second-frame",
+                "role": "secondary_page_frame",
+                "exportable": true,
+                "x": 0,
+                "y": 1359,
+                "width": 904,
+                "height": 1279,
+                "pageSize": "A4",
+                "contentInset": {
+                  "top": 96,
+                  "right": 232,
+                  "bottom": 88,
+                  "left": 72
+                }
+              }
+            ],
+            "pageStacks": [
+              {
+                "id": "page-stack-wall-frame",
+                "displayName": "Page stack 1",
+                "frameIds": [
+                  "wall-frame",
+                  "second-frame"
+                ],
+                "primaryFrameId": "wall-frame",
+                "selectedFrameId": "second-frame",
+                "collapsed": false,
+                "numbering": {
+                  "enabled": true,
+                  "startAt": 1
+                },
+                "layout": {
+                  "direction": "vertical",
+                  "gap": 80,
+                  "collapsedPreviewPages": 1
+                },
+                "createdFrom": "a4_note_seed"
+              }
+            ],
+            "primaryFrameId": "wall-frame",
+            "primaryStackId": "page-stack-wall-frame",
+            "selectedFrameId": "second-frame",
+            "selectedStackId": "page-stack-wall-frame"
+          },
+          "layoutUpdates": [
+            {
+              "block": {
+                "id": "manual",
+                "placement_id": "placement:manual"
+              },
+              "layout": {
+                "x": 200,
+                "y": 120.25,
+                "width": 400,
+                "height": 100,
+                "coordinate_space": "page_frame_local",
+                "frame_id": "wall-frame",
+                "surface": "formal_page",
+                "boundary_role": "inside",
+                "width_mode": "manual"
+              }
+            },
+            {
+              "block": {
+                "id": "wide",
+                "placement_id": "placement:wide"
+              },
+              "layout": {
+                "x": 0,
+                "y": 120.25,
+                "width": 600,
+                "height": 100,
+                "coordinate_space": "page_frame_local",
+                "frame_id": "wall-frame",
+                "surface": "formal_page",
+                "boundary_role": "inside",
+                "width_mode": "manual"
+              }
+            }
+          ],
+          "objectLayoutUpdates": [
+            {
+              "objectId": "image",
+              "placementId": "placement:image",
+              "layout": {
+                "x": 300,
+                "y": 30,
+                "width": 300,
+                "height": 100,
+                "rotation": 0,
+                "coordinate_space": "page_frame_local",
+                "frame_id": "wall-frame",
+                "surface": "formal_page",
+                "boundary_role": "inside"
+              }
+            }
+          ]
+        }
+      ],
+      "exactUndo": true,
+      "exactRedo": true,
+      "autoStoredBytesUnchanged": true,
+      "inkUnchanged": true
+    },
+    {
+      "smoke": "1+4",
+      "rightInset": [
+        72,
+        24
+      ],
+      "autoWidths": [
+        760,
+        808
+      ],
+      "storedBytesUnchanged": true,
+      "insertAppendInsets": [
+        {
+          "top": 96,
+          "right": 24,
+          "bottom": 88,
+          "left": 72
+        },
+        {
+          "top": 96,
+          "right": 24,
+          "bottom": 88,
+          "left": 72
+        }
+      ],
+      "blockWrites": 0,
+      "genericWrites": 0
+    },
+    {
+      "smoke": "2",
+      "leftInset": [
+        72,
+        24
+      ],
+      "manualLocalX": 360,
+      "manualPaperX": [
+        432,
+        384
+      ],
+      "imageWorldX": [
+        522,
+        474
+      ],
+      "blockWrites": 0,
+      "genericWrites": 0,
+      "storedBytesUnchanged": true,
+      "inkUnchanged": true
+    }
+  ]
+}

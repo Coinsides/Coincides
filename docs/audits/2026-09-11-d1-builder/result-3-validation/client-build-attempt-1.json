@@ -1,0 +1,11 @@
+{
+  "name": "client-build",
+  "command": [
+    "npm",
+    "run",
+    "build"
+  ],
+  "cwd": "client",
+  "exitCode": 1,
+  "durationMs": 7119
+}

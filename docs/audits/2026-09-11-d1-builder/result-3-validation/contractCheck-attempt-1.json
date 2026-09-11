@@ -1,0 +1,11 @@
+{
+  "name": "contractCheck",
+  "command": [
+    "npm",
+    "run",
+    "smoke:canvas-engine-model-contract"
+  ],
+  "cwd": "client",
+  "exitCode": 0,
+  "durationMs": 1694
+}

@@ -166,6 +166,12 @@ function normalizeCanvasPlacement(
   };
   const metadata = isRecord(raw.metadata) ? raw.metadata : {};
   const layoutPolicy = isRecord(metadata.layout_policy) ? metadata.layout_policy : {};
+  const coordinateSpace = raw.coordinate_space ?? layoutPolicy.coordinate_space;
+  // Keep the established v1 and ordinary local normalized shapes. Only legacy
+  // world rows need an exclusion tag so a later wall preview cannot move them.
+  if (coordinateContract !== 'v1' && surface === 'formal_page' && coordinateSpace !== 'page_frame_local') {
+    placement.sourceCoordinateSpace = 'canvas_world';
+  }
   return resolveGenericPlacementToWorld(
     placement,
     objectKinds.get(objectId),

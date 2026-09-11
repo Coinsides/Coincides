@@ -1,0 +1,11 @@
+{
+  "name": "server-build",
+  "command": [
+    "npm",
+    "run",
+    "build"
+  ],
+  "cwd": "server",
+  "exitCode": 0,
+  "durationMs": 6033
+}

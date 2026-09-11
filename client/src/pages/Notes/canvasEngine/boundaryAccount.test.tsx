@@ -1,6 +1,7 @@
 import { renderHook } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { useNoteCanvasResolvedLayoutModel } from './hooks/useNoteCanvasLayoutModel';
+import { applyCanvasLayoutsToBlocks } from './canvasObjectRepository';
 import {
   createSurfaceModePolicy, getVisibleBlocksForSurface, isPageFrameAffiliatedWorkspaceBlock,
 } from './modePolicyService';
@@ -67,7 +68,7 @@ describe('v2 read-side frame boundary account', () => {
 
   it.each([
     { name: 'old narrow snapshot', width: 672, oldRight: 646, workspace: false },
-    { name: 'old wide snapshot', width: 720, oldRight: 900, workspace: true },
+    { name: 'old wide snapshot', width: 720, oldRight: 900, workspace: false },
   ])('recomputes $name from current frame geometry', ({ width, oldRight, workspace }) => {
     const row = block({ width, surface_authority: {
       coordinateSpace: 'page_frame_local',
@@ -75,6 +76,36 @@ describe('v2 read-side frame boundary account', () => {
     } });
     const before = JSON.stringify(row);
     expect(placement.isCanvasWorkspaceBlock(row, 646, context)).toBe(workspace);
+    expect(JSON.stringify(row)).toBe(before);
+  });
+
+  it.each([
+    { name: 'stale auto snapshot derives inside', x: 0, manual: false, surface: 'formal_page', boundary: 'inside' },
+    { name: 'same stale manual snapshot remains crossing', x: 0, manual: true, surface: 'canvas_workspace', boundary: 'crossing' },
+    { name: 'auto stored x crosses left wall', x: -20, manual: false, surface: 'canvas_workspace', boundary: 'crossing' },
+    { name: 'auto stored x exceeds right wall', x: 620, manual: false, surface: 'canvas_workspace', boundary: 'outside' },
+  ] as const)('$name through hydration, runtime and payload classification without rewriting stored bytes', ({ x, manual, surface, boundary }) => {
+    const narrowedFrame = { ...frame, contentInset: { ...frame.contentInset, right: 232 } };
+    const row = block({ x, y: 120.25, width: 760, ...(manual ? { width_mode: 'manual' } : {}) });
+    const before = JSON.stringify(row);
+    const hydrated = applyCanvasLayoutsToBlocks([row], [{
+      block_id: row.id, placement_id: row.placement_id!, layout: row.canvas_layout!,
+    }], {
+      coordinateContract: 'v2',
+      pageFrameCollection: { primaryFrameId: frame.id, pageFrames: [narrowedFrame], pageStacks: [] },
+    })[0];
+    const layout = hydrated.canvas_layout as unknown as BlockBoxLayout;
+    expect(layout).toMatchObject({ x, y: 120.25, width: 760, surface, boundary_role: boundary });
+    expect(layout.width_mode).toBe(manual ? 'manual' : undefined);
+    expect(placement.isCanvasWorkspaceBlock(hydrated, 646, {
+      contract: 'v2', pageFrames: [narrowedFrame],
+    })).toBe(surface === 'canvas_workspace');
+    expect(placement.buildRuntimeBlockPlacement({
+      block: hydrated, canvasId: 'synthetic-canvas', layout, pageOffsetX: 0,
+      pageFrame: narrowedFrame, contract: 'v2', zIndex: 0,
+    })).toMatchObject({ surface, boundaryRole: boundary });
+    expect(placement.buildLayoutPayload(layout, 'v2', [narrowedFrame]))
+      .toMatchObject({ x, width: 760, surface, boundary_role: boundary });
     expect(JSON.stringify(row)).toBe(before);
   });
 

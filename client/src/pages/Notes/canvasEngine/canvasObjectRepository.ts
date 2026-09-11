@@ -109,14 +109,50 @@ export async function loadCanvasPersistenceForNote(input: {
   return entityPayload;
 }
 
+export interface PageFrameBlockLayoutUpdate {
+  block: Pick<NoteBlock, 'id' | 'placement_id'>;
+  layout: BlockBoxLayout;
+}
+
+export interface PageFrameObjectLayoutUpdate {
+  objectId: string;
+  placementId: string;
+  /** Stored frame-local layout captured for this collection, not world geometry. */
+  layout: Record<string, unknown>;
+}
+
 export async function savePageFrameCollectionForNote(input: {
   noteId: string;
   collection: PageFrameCollectionModel;
+  layoutUpdates?: PageFrameBlockLayoutUpdate[];
+  objectLayoutUpdates?: PageFrameObjectLayoutUpdate[];
+  coordinateContract?: CoordinateContract;
 }): Promise<PageFrameCollectionModel> {
   const normalized = normalizePageFrameCollection(input.collection);
+  const layoutUpdates = input.layoutUpdates?.map(({ block, layout }) => {
+    assertNoRetiredCanvasWrite(layout);
+    return {
+      placement_id: block.placement_id,
+      block_id: block.id,
+      layout: requireCanvasPlacementWritePayload(buildLayoutPayload(
+        normalizeBlockLayoutForSave(layout, normalized, input.coordinateContract),
+        input.coordinateContract,
+        normalized.pageFrames,
+      )),
+    };
+  });
+  const objectLayoutUpdates = input.objectLayoutUpdates?.map(({ objectId, placementId, layout }) => ({
+    object_id: objectId,
+    placement_id: placementId,
+    layout: requireCanvasPlacementWritePayload(layout),
+  }));
   const response = await api.put<PageFrameCollectionModel>(
     `/canvas-objects/by-note/${input.noteId}/page-frame-collection`,
-    { collection: normalized },
+    {
+      collection: normalized,
+      ...(layoutUpdates?.length ? { layout_updates: layoutUpdates } : {}),
+      ...(objectLayoutUpdates?.length ? { object_layout_updates: objectLayoutUpdates } : {}),
+    },
   );
   return normalizePageFrameCollection(response.data || normalized);
 }

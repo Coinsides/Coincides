@@ -4,6 +4,7 @@ import {
   useEffect,
   useLayoutEffect,
   useRef,
+  type CSSProperties,
   type KeyboardEvent,
   type DragEvent as ReactDragEvent,
   type MouseEvent as ReactMouseEvent,
@@ -76,6 +77,8 @@ import styles from '../../NoteDetail.module.css';
 interface BlockEditorLayerProps {
   coordinateContract?: CoordinateContract;
   pageFrame?: PageFrameModel | null;
+  /** Content-space x of the paper's left wall; only paper has a margin lane. */
+  textUnitGutterLaneX?: number;
   block: NoteBlock;
   contentReadOnly: boolean;
   allowSaveRecovery?: boolean;
@@ -148,6 +151,7 @@ export function BlockEditorLayer({
   onFlowSelectionStart,
   coordinateContract,
   pageFrame,
+  textUnitGutterLaneX,
   contentReadOnly,
   allowSaveRecovery = false,
   text,
@@ -412,7 +416,13 @@ export function BlockEditorLayer({
         minHeight: layout.height,
         borderColor: affiliationOutline?.colorToken,
         borderStyle: affiliationOutline ? 'dashed' : undefined,
-      }}
+        ...(textUnitGutterLaneX !== undefined ? {
+          // Row starts 10px inside the shell (border + padding). Cancel it and
+          // the shell's x, then keep a 7px wall gap (4px is the gutter default).
+          '--text-unit-gutter-lane-offset': `${screenRect.x - textUnitGutterLaneX + 13}px`,
+          '--text-unit-gutter-cancel-indent': 1,
+        } : {}),
+      } as CSSProperties}
       onMouseDown={handleBlockMouseDown}
       onContextMenu={handleBlockContextMenu}
     >

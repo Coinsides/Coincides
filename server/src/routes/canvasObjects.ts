@@ -53,6 +53,8 @@ router.put('/by-note/:noteId/page-frame-collection', (req: AuthRequest, res: Res
       req.userId!,
       String(req.params.noteId),
       data.collection,
+      data.layout_updates,
+      data.object_layout_updates,
     ));
   } catch (err) {
     if (handleValidationError(err, res)) return;

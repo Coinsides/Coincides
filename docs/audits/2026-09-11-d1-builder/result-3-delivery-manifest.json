@@ -1,0 +1,775 @@
+{
+  "comparison": "Cumulative accepted D1 worktree versus HEAD, including the eight inherited intermediate product files. New files counted explicitly. Unrelated pre-existing untracked files excluded. This generated manifest excludes itself.",
+  "totals": {
+    "productAndTests": {
+      "files": 30,
+      "added": 1663,
+      "removed": 30,
+      "bytes": 808805
+    },
+    "receipt": {
+      "files": 1,
+      "added": 89,
+      "removed": 1,
+      "bytes": 43082
+    },
+    "browserFixtureEntry": {
+      "files": 2,
+      "added": 3,
+      "removed": 0,
+      "bytes": 337
+    },
+    "audit": {
+      "files": 60,
+      "added": 17776,
+      "removed": 0,
+      "bytes": 1366581
+    }
+  },
+  "files": [
+    {
+      "file": "client/d1-wall-geometry.html",
+      "group": "browserFixtureEntry",
+      "status": "new",
+      "added": 1,
+      "removed": 0,
+      "bytes": 199
+    },
+    {
+      "file": "client/d1-wall-geometry.tsx",
+      "group": "browserFixtureEntry",
+      "status": "new",
+      "added": 2,
+      "removed": 0,
+      "bytes": 138
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/boundaryAccount.test.tsx",
+      "group": "productAndTests",
+      "status": "modified",
+      "added": 32,
+      "removed": 1,
+      "bytes": 9020
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/canvasObjectRepository.ts",
+      "group": "productAndTests",
+      "status": "modified",
+      "added": 37,
+      "removed": 1,
+      "bytes": 8115
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/canvasPersistenceNormalizer.ts",
+      "group": "productAndTests",
+      "status": "modified",
+      "added": 6,
+      "removed": 0,
+      "bytes": 16123
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/autoWidthFrameSave.test.tsx",
+      "group": "productAndTests",
+      "status": "modified",
+      "added": 35,
+      "removed": 0,
+      "bytes": 8738
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/pageFrameWallsPersistence.test.tsx",
+      "group": "productAndTests",
+      "status": "new",
+      "added": 302,
+      "removed": 0,
+      "bytes": 17008
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts",
+      "group": "productAndTests",
+      "status": "modified",
+      "added": 47,
+      "removed": 0,
+      "bytes": 119084
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts",
+      "group": "productAndTests",
+      "status": "modified",
+      "added": 2,
+      "removed": 0,
+      "bytes": 12218
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayoutModel.ts",
+      "group": "productAndTests",
+      "status": "modified",
+      "added": 1,
+      "removed": 1,
+      "bytes": 10837
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+      "group": "productAndTests",
+      "status": "modified",
+      "added": 24,
+      "removed": 4,
+      "bytes": 22064
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/usePageFrameWalls.test.tsx",
+      "group": "productAndTests",
+      "status": "new",
+      "added": 315,
+      "removed": 0,
+      "bytes": 19052
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/usePageFrameWalls.ts",
+      "group": "productAndTests",
+      "status": "new",
+      "added": 110,
+      "removed": 0,
+      "bytes": 5957
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/BlockEditorLayer.tsx",
+      "group": "productAndTests",
+      "status": "modified",
+      "added": 11,
+      "removed": 1,
+      "bytes": 22837
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "group": "productAndTests",
+      "status": "modified",
+      "added": 13,
+      "removed": 0,
+      "bytes": 173557
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.module.css",
+      "group": "productAndTests",
+      "status": "new",
+      "added": 36,
+      "removed": 0,
+      "bytes": 669
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.test.tsx",
+      "group": "productAndTests",
+      "status": "new",
+      "added": 55,
+      "removed": 0,
+      "bytes": 2752
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.tsx",
+      "group": "productAndTests",
+      "status": "new",
+      "added": 44,
+      "removed": 0,
+      "bytes": 1831
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/modePolicyService.ts",
+      "group": "productAndTests",
+      "status": "modified",
+      "added": 4,
+      "removed": 2,
+      "bytes": 6021
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/pageFramePrintScaleService.test.ts",
+      "group": "productAndTests",
+      "status": "new",
+      "added": 45,
+      "removed": 0,
+      "bytes": 1897
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/pageFramePrintScaleService.ts",
+      "group": "productAndTests",
+      "status": "modified",
+      "added": 8,
+      "removed": 1,
+      "bytes": 4140
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/pageFrameWallService.test.ts",
+      "group": "productAndTests",
+      "status": "new",
+      "added": 120,
+      "removed": 0,
+      "bytes": 8173
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/pageFrameWallService.ts",
+      "group": "productAndTests",
+      "status": "new",
+      "added": 95,
+      "removed": 0,
+      "bytes": 6144
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/placementAutoWidth.test.ts",
+      "group": "productAndTests",
+      "status": "modified",
+      "added": 2,
+      "removed": 0,
+      "bytes": 2632
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/placementContractService.ts",
+      "group": "productAndTests",
+      "status": "modified",
+      "added": 22,
+      "removed": 4,
+      "bytes": 17996
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/placementService.ts",
+      "group": "productAndTests",
+      "status": "modified",
+      "added": 45,
+      "removed": 10,
+      "bytes": 32219
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/types.ts",
+      "group": "productAndTests",
+      "status": "modified",
+      "added": 2,
+      "removed": 0,
+      "bytes": 17161
+    },
+    {
+      "file": "client/src/pages/Notes/NoteDetail.module.css",
+      "group": "productAndTests",
+      "status": "modified",
+      "added": 4,
+      "removed": 1,
+      "bytes": 124579
+    },
+    {
+      "file": "docs/agent-ops/handoffs/2026-09-11-v13-5-d1-walls-order.md",
+      "group": "receipt",
+      "status": "modified",
+      "added": 89,
+      "removed": 1,
+      "bytes": 43082
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/.vite-result-3-print-overview/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+      "group": "audit",
+      "status": "new",
+      "added": 1,
+      "removed": 0,
+      "bytes": 152
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-gutter-menu.png",
+      "group": "audit",
+      "status": "new",
+      "added": null,
+      "removed": 0,
+      "bytes": 46051
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-gutter-menu.txt",
+      "group": "audit",
+      "status": "new",
+      "added": 59,
+      "removed": 0,
+      "bytes": 1819
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-gutter-min-inset.png",
+      "group": "audit",
+      "status": "new",
+      "added": null,
+      "removed": 0,
+      "bytes": 38508
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-manifest.mjs",
+      "group": "audit",
+      "status": "new",
+      "added": 51,
+      "removed": 0,
+      "bytes": 2951
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-print-overview-results.json",
+      "group": "audit",
+      "status": "new",
+      "added": 1,
+      "removed": 0,
+      "bytes": 1021
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-print-overview.config.mjs",
+      "group": "audit",
+      "status": "new",
+      "added": 23,
+      "removed": 0,
+      "bytes": 939
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-print-overview.json",
+      "group": "audit",
+      "status": "new",
+      "added": 334,
+      "removed": 0,
+      "bytes": 8828
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-print-overview.test.tsx",
+      "group": "audit",
+      "status": "new",
+      "added": 125,
+      "removed": 0,
+      "bytes": 9118
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-server-print-validation.json",
+      "group": "audit",
+      "status": "new",
+      "added": 37,
+      "removed": 0,
+      "bytes": 1298
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-ui-browser.html",
+      "group": "audit",
+      "status": "new",
+      "added": 1,
+      "removed": 0,
+      "bytes": 201
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-ui-browser.tsx",
+      "group": "audit",
+      "status": "new",
+      "added": 247,
+      "removed": 0,
+      "bytes": 17684
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-ui-geometry.json",
+      "group": "audit",
+      "status": "new",
+      "added": 320,
+      "removed": 0,
+      "bytes": 8178
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-ui-replay.md",
+      "group": "audit",
+      "status": "new",
+      "added": 75,
+      "removed": 0,
+      "bytes": 4484
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-ui-tests.json",
+      "group": "audit",
+      "status": "new",
+      "added": 1,
+      "removed": 0,
+      "bytes": 23042
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validate.mjs",
+      "group": "audit",
+      "status": "new",
+      "added": 46,
+      "removed": 0,
+      "bytes": 3121
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/checks.json",
+      "group": "audit",
+      "status": "new",
+      "added": 123,
+      "removed": 0,
+      "bytes": 3484
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/client-build-attempt-1.json",
+      "group": "audit",
+      "status": "new",
+      "added": 11,
+      "removed": 0,
+      "bytes": 141
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/client-build-attempt-1.log",
+      "group": "audit",
+      "status": "new",
+      "added": 7,
+      "removed": 0,
+      "bytes": 698
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/client-build.json",
+      "group": "audit",
+      "status": "new",
+      "added": 11,
+      "removed": 0,
+      "bytes": 142
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/client-build.log",
+      "group": "audit",
+      "status": "new",
+      "added": 80,
+      "removed": 0,
+      "bytes": 5336
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/client-full-attempt-1.json",
+      "group": "audit",
+      "status": "new",
+      "added": 13,
+      "removed": 0,
+      "bytes": 348
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/client-full-attempt-1.log",
+      "group": "audit",
+      "status": "new",
+      "added": 1,
+      "removed": 0,
+      "bytes": 122
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/client-full-results.json",
+      "group": "audit",
+      "status": "new",
+      "added": 1,
+      "removed": 0,
+      "bytes": 494131
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/client-full.json",
+      "group": "audit",
+      "status": "new",
+      "added": 13,
+      "removed": 0,
+      "bytes": 356
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/client-full.log",
+      "group": "audit",
+      "status": "new",
+      "added": 1,
+      "removed": 0,
+      "bytes": 130
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/client-targeted-attempt-1.json",
+      "group": "audit",
+      "status": "new",
+      "added": 28,
+      "removed": 0,
+      "bytes": 1402
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/client-targeted-attempt-1.log",
+      "group": "audit",
+      "status": "new",
+      "added": 1,
+      "removed": 0,
+      "bytes": 119
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/client-targeted-attempt-2.json",
+      "group": "audit",
+      "status": "new",
+      "added": 28,
+      "removed": 0,
+      "bytes": 1402
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/client-targeted-attempt-2.log",
+      "group": "audit",
+      "status": "new",
+      "added": 1,
+      "removed": 0,
+      "bytes": 119
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/client-targeted.json",
+      "group": "audit",
+      "status": "new",
+      "added": 28,
+      "removed": 0,
+      "bytes": 1402
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/client-targeted.log",
+      "group": "audit",
+      "status": "new",
+      "added": 1,
+      "removed": 0,
+      "bytes": 119
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/client-typecheck-attempt-1.json",
+      "group": "audit",
+      "status": "new",
+      "added": 13,
+      "removed": 0,
+      "bytes": 232
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/client-typecheck-attempt-1.log",
+      "group": "audit",
+      "status": "new",
+      "added": 2,
+      "removed": 0,
+      "bytes": 353
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/client-typecheck.json",
+      "group": "audit",
+      "status": "new",
+      "added": 13,
+      "removed": 0,
+      "bytes": 231
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/client-typecheck.log",
+      "group": "audit",
+      "status": "new",
+      "added": 1,
+      "removed": 0,
+      "bytes": 0
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/contractCheck-attempt-1.json",
+      "group": "audit",
+      "status": "new",
+      "added": 11,
+      "removed": 0,
+      "bytes": 171
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/contractCheck-attempt-1.log",
+      "group": "audit",
+      "status": "new",
+      "added": 69,
+      "removed": 0,
+      "bytes": 6696
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/contractCheck.json",
+      "group": "audit",
+      "status": "new",
+      "added": 11,
+      "removed": 0,
+      "bytes": 171
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/contractCheck.log",
+      "group": "audit",
+      "status": "new",
+      "added": 69,
+      "removed": 0,
+      "bytes": 6696
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/server-build-attempt-1.json",
+      "group": "audit",
+      "status": "new",
+      "added": 11,
+      "removed": 0,
+      "bytes": 141
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/server-build-attempt-1.log",
+      "group": "audit",
+      "status": "new",
+      "added": 80,
+      "removed": 0,
+      "bytes": 9584
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/server-build.json",
+      "group": "audit",
+      "status": "new",
+      "added": 11,
+      "removed": 0,
+      "bytes": 141
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/server-build.log",
+      "group": "audit",
+      "status": "new",
+      "added": 80,
+      "removed": 0,
+      "bytes": 9584
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/server-typecheck-attempt-1.json",
+      "group": "audit",
+      "status": "new",
+      "added": 13,
+      "removed": 0,
+      "bytes": 237
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/server-typecheck-attempt-1.log",
+      "group": "audit",
+      "status": "new",
+      "added": 1,
+      "removed": 0,
+      "bytes": 0
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/server-typecheck.json",
+      "group": "audit",
+      "status": "new",
+      "added": 13,
+      "removed": 0,
+      "bytes": 237
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/server-typecheck.log",
+      "group": "audit",
+      "status": "new",
+      "added": 1,
+      "removed": 0,
+      "bytes": 0
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-validation/targeted.json",
+      "group": "audit",
+      "status": "new",
+      "added": 1,
+      "removed": 0,
+      "bytes": 63689
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-wall-batch-rollback.json",
+      "group": "audit",
+      "status": "new",
+      "added": 730,
+      "removed": 0,
+      "bytes": 22731
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-wall-batch-success.json",
+      "group": "audit",
+      "status": "new",
+      "added": 857,
+      "removed": 0,
+      "bytes": 25627
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-wall-browser-flow.json",
+      "group": "audit",
+      "status": "new",
+      "added": 9475,
+      "removed": 0,
+      "bytes": 236894
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-wall-browser-summary.json",
+      "group": "audit",
+      "status": "new",
+      "added": 26,
+      "removed": 0,
+      "bytes": 1119
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-wall-contracted.png",
+      "group": "audit",
+      "status": "new",
+      "added": null,
+      "removed": 0,
+      "bytes": 55422
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-wall-flow-partial.json",
+      "group": "audit",
+      "status": "new",
+      "added": 4164,
+      "removed": 0,
+      "bytes": 104237
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-wall-half-scale.png",
+      "group": "audit",
+      "status": "new",
+      "added": null,
+      "removed": 0,
+      "bytes": 39521
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-wall-hover.json",
+      "group": "audit",
+      "status": "new",
+      "added": 26,
+      "removed": 0,
+      "bytes": 386
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-wall-hover.png",
+      "group": "audit",
+      "status": "new",
+      "added": null,
+      "removed": 0,
+      "bytes": 37964
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-wall-left-expanded.png",
+      "group": "audit",
+      "status": "new",
+      "added": null,
+      "removed": 0,
+      "bytes": 55368
+    },
+    {
+      "file": "docs/audits/2026-09-11-d1-builder/result-3-wall-smoke.json",
+      "group": "audit",
+      "status": "new",
+      "added": 429,
+      "removed": 0,
+      "bytes": 12303
+    },
+    {
+      "file": "server/src/__tests__/v13WallCollectionBatch.test.ts",
+      "group": "productAndTests",
+      "status": "new",
+      "added": 197,
+      "removed": 0,
+      "bytes": 10639
+    },
+    {
+      "file": "server/src/routes/canvasObjects.ts",
+      "group": "productAndTests",
+      "status": "modified",
+      "added": 2,
+      "removed": 0,
+      "bytes": 3634
+    },
+    {
+      "file": "server/src/services/canvasObjects.ts",
+      "group": "productAndTests",
+      "status": "modified",
+      "added": 35,
+      "removed": 0,
+      "bytes": 79175
+    },
+    {
+      "file": "server/src/validators/index.ts",
+      "group": "productAndTests",
+      "status": "modified",
+      "added": 12,
+      "removed": 4,
+      "bytes": 44533
+    }
+  ]
+}

@@ -1132,13 +1132,21 @@ const saveTableObjectSchema = z.object({
   }
 });
 
-export const savePageFrameCollectionSchema = z.object({
-  collection: jsonObjectSchema,
-});
-
 export const saveCanvasBlockPlacementSchema = z.object({
   block_id: canvasRuntimeIdSchema,
   layout: canvasPlacementCoreSchema,
+});
+
+export const savePageFrameCollectionSchema = z.object({
+  collection: jsonObjectSchema,
+  layout_updates: z.array(saveCanvasBlockPlacementSchema.extend({
+    placement_id: canvasRuntimeIdSchema,
+  })).optional(),
+  object_layout_updates: z.array(z.object({
+    object_id: canvasRuntimeIdSchema,
+    placement_id: canvasRuntimeIdSchema,
+    layout: canvasPlacementCoreSchema,
+  })).optional(),
 });
 
 export const saveCanvasObjectSchema = z.union([

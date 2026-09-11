@@ -101,6 +101,7 @@ import {
   normalizePageFrameCollection,
 } from '../pageFrameCollectionService';
 import { sourceProjectionPolicyForNote } from '../sourceProjectionPolicy';
+import { projectWallPlacements, type PageFrameWallSnapshot } from '../pageFrameWallService';
 import {
   createDefaultDocumentTypographyProfile,
   typographyProfileFromMetadata,
@@ -440,12 +441,16 @@ export function useNoteCanvasDataAdapter({
   const [groupFolders, setGroupFolders] = useState<GroupFolderV1[]>([]);
   const [purposeFrames, setPurposeFrames] = useState<PurposeFrameV1[]>([]);
   const [pageFrameCollection, setPageFrameCollection] = useState<PageFrameCollectionModel | null>(null);
+  const currentPageFrameCollectionRef = useRef(pageFrameCollection);
+  currentPageFrameCollectionRef.current = pageFrameCollection;
   const runtimePageFrameCollectionRef = useRef<{ noteId: string; collection: PageFrameCollectionModel } | null>(null);
   const frameHealing = useMemo(() => ({
     collection: null as PageFrameCollectionModel | null,
     pending: null as Promise<PageFrameCollectionModel> | null,
   }), [noteId]);
   const [persistedCanvasObjects, setPersistedCanvasObjects] = useState<CanvasObject[]>([]);
+  const currentCanvasObjectsRef = useRef(persistedCanvasObjects);
+  currentCanvasObjectsRef.current = persistedCanvasObjects;
   const [persistedCanvasPlacements, setPersistedCanvasPlacements] = useState<CanvasPlacement[]>([]);
   const [persistedContentMounts, setPersistedContentMounts] = useState<ContentMount[]>([]);
   const [persistedVisualConnectors, setPersistedVisualConnectors] = useState<VisualConnector[]>([]);
@@ -1021,6 +1026,47 @@ export function useNoteCanvasDataAdapter({
       setPageFrameCollection(previousCollection || frameHealing.collection);
     }
   }), [writeRegistry, addToast, allowSourceContentMutation, note, pageFrameCollection, frameHealing]);
+
+  const savePageFrameWalls = useCallback(writeRegistry.hold('savePageFrameWalls', async (snapshot: PageFrameWallSnapshot): Promise<boolean> => {
+    const currentNote = noteRef.current || note;
+    if (!currentNote || currentNote.id !== noteId || !allowSourceContentMutation()) return false;
+    const requestGeneration = routeRequestGenerationRef.current;
+    const hydrationEpoch = successfulHydrationEpochRef.current;
+    try {
+      const saved = await writeRegistry.track('page-frames:' + currentNote.id, async () => {
+        if (frameHealing.pending) await frameHealing.pending;
+        const current = currentPageFrameCollectionRef.current || frameHealing.collection || snapshot.collection;
+        const fallback = snapshot.collection.pageFrames.find((frame) => frame.id === snapshot.collection.primaryFrameId)
+          || snapshot.collection.pageFrames[0];
+        // Replay restores margins, not an old collection topology or unrelated frame settings.
+        const collection = { ...current, pageFrames: current.pageFrames.map((frame) => {
+          const source = snapshot.collection.pageFrames.find((item) => item.id === frame.id) || fallback;
+          return source ? { ...frame, contentInset: { ...frame.contentInset, left: source.contentInset.left, right: source.contentInset.right } } : frame;
+        }) };
+        return savePageFrameCollectionForNote({ noteId: currentNote.id, ...snapshot, collection, coordinateContract });
+      });
+      if (!adapterMountActiveRef.current || routeNoteIdRef.current !== currentNote.id || noteRef.current?.id !== currentNote.id
+        || routeRequestGenerationRef.current !== requestGeneration || successfulHydrationEpochRef.current !== hydrationEpoch) return false;
+      const previous = currentPageFrameCollectionRef.current;
+      if (previous) setPersistedCanvasPlacements((placements) => projectWallPlacements(
+        placements, currentCanvasObjectsRef.current, previous, saved, coordinateContract, snapshot.objectLayoutUpdates,
+      ));
+      currentPageFrameCollectionRef.current = saved;
+      setPageFrameCollection(saved);
+      frameHealing.collection = saved;
+      const updates = new Map(snapshot.layoutUpdates.map(({ block, layout }) => [block.placement_id, layout]));
+      setBlocks((current) => current.map((block) => {
+        const layout = updates.get(block.placement_id);
+        return layout ? { ...block, canvas_layout: { ...layout } } : block;
+      }));
+      snapshot.layoutUpdates.forEach(({ block }) => clearLayoutDraftForBlock?.(block.id));
+      return true;
+    } catch (error) {
+      console.error('Failed to save page margins:', error);
+      addToast('error', 'Page margins could not be saved. Try again.');
+      return false;
+    }
+  }), [writeRegistry, note, noteId, allowSourceContentMutation, frameHealing, coordinateContract, clearLayoutDraftForBlock, addToast]);
 
   const saveDocumentTypographyProfile = useCallback(writeRegistry.hold('saveDocumentTypographyProfile', async (nextProfile: DocumentTypographyProfile) => {
     const currentNote = noteRef.current || note;
@@ -2555,6 +2601,7 @@ export function useNoteCanvasDataAdapter({
     saveContentGroups,
     saveGroupFolders,
     savePageFrameCollection,
+    savePageFrameWalls,
     persistCanvasObject,
     deleteCanvasObject,
     saveDocumentTypographyProfile,

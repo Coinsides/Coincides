@@ -339,6 +339,8 @@ export interface FreehandCanvasObject extends CanvasObject {
 }
 
 export interface CanvasPlacement extends CanvasRect {
+  /** Original I/O coordinate tag; x/y below are still hydrated world geometry. */
+  sourceCoordinateSpace?: 'page_frame_local' | 'canvas_world';
   placementId: string;
   objectId: string;
   canvasId: string;

@@ -1,0 +1,28 @@
+{
+  "name": "client-targeted",
+  "command": [
+    "C:\\Program Files\\nodejs\\node.exe",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/pages/Notes/canvasEngine/boundaryAccount.test.tsx",
+    "src/pages/Notes/canvasEngine/coordinateContractIntegration.test.tsx",
+    "src/pages/Notes/canvasEngine/genericPlacementContract.test.ts",
+    "src/pages/Notes/canvasEngine/hooks/autoWidthFrameSave.test.tsx",
+    "src/pages/Notes/canvasEngine/hooks/useBlockPlacementInteractions.test.tsx",
+    "src/pages/Notes/canvasEngine/hooks/usePlacementHistory.test.tsx",
+    "src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx",
+    "src/pages/Notes/canvasEngine/placementAutoWidth.test.ts",
+    "src/pages/Notes/canvasEngine/placementContractService.test.ts",
+    "src/pages/Notes/canvasEngine/textUnitGutterDeOccupation.test.ts",
+    "src/pages/Notes/canvasEngine/pageFrameWallService.test.ts",
+    "src/pages/Notes/canvasEngine/hooks/usePageFrameWalls.test.tsx",
+    "src/pages/Notes/canvasEngine/hooks/pageFrameWallsPersistence.test.tsx",
+    "src/pages/Notes/canvasEngine/pageFramePrintScaleService.test.ts",
+    "src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.test.tsx",
+    "--reporter=json",
+    "--outputFile=D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-11-d1-builder\\result-3-validation\\targeted.json"
+  ],
+  "cwd": "client",
+  "exitCode": 1,
+  "durationMs": 4036
+}

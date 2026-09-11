@@ -1,4 +1,4 @@
-import { resolveWorldRect, selectPlacementFrame, type CoordinateContract } from './placementContractService';
+import { deriveFrameLocalAutoWidth, resolveWorldRect, selectPlacementFrame, type CoordinateContract } from './placementContractService';
 import { getPrimaryPageOffsetX } from './viewportService';
 import {
   CANVAS_WORKSPACE_WIDTH,
@@ -71,8 +71,10 @@ export function isPageFrameAffiliatedWorkspaceBlock(
     return false;
   }
 
+  const frame = selectPlacementFrame(stored, pageFrames, coordinateContract);
+  const layout = { ...stored, width: deriveFrameLocalAutoWidth(stored, frame, coordinateContract) ?? stored.width } as BlockBoxLayout;
   return derivePlacementPageFrameAffiliation({
-    placement: resolveWorldRect(stored as BlockBoxLayout, selectPlacementFrame(stored, pageFrames, coordinateContract), coordinateContract),
+    placement: resolveWorldRect(layout, frame, coordinateContract),
     pageFrames,
     boundary,
   }).kind !== 'workspace_only';

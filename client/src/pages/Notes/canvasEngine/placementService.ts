@@ -26,6 +26,7 @@ import {
   snapRectToPageFrameGuides,
 } from './pageFrameGuideService';
 import {
+  deriveFrameLocalAutoWidth,
   placementCoordinateIdentityEqual,
   preserveContractLayoutCoordinates,
   projectContractLayoutToWorld,
@@ -120,7 +121,7 @@ export function readStoredLayout(block: PlacementSeedBlock): Partial<BlockBoxLay
 }
 
 type SurfaceClassifiableLayout = Pick<BlockBoxLayout, 'x' | 'width'>
-  & Partial<Pick<BlockBoxLayout, 'surface' | 'coordinate_space' | 'frame_id' | 'surface_authority'>>;
+  & Partial<Pick<BlockBoxLayout, 'surface' | 'coordinate_space' | 'frame_id' | 'surface_authority' | 'width_mode'>>;
 
 function pageBoundaryForFrame(pageFrame: PageFrameModel): CanvasSurfacePageBoundary {
   return {
@@ -135,9 +136,21 @@ export function classifyBlockSurfaceAuthority(
   options: {
     pageFrame?: PageFrameModel | null;
     pageLocalWidth?: number;
+    contract?: CoordinateContract;
   } = {},
 ): CanvasSurfaceAuthorityDecision {
   const pageLocalWidth = options.pageLocalWidth ?? DEFAULT_PAGE_CONTENT_WIDTH;
+  if (options.contract === 'v2' && options.pageFrame) {
+    const frame = options.pageFrame;
+    return classifyCanvasSurfaceAuthority({
+      coordinateSpace: layout.coordinate_space === 'canvas_world' ? 'canvas_world' : 'page_frame_local',
+      box: { x: layout.x, width: deriveFrameLocalAutoWidth(layout, frame, options.contract) ?? layout.width },
+      pageBoundary: layout.coordinate_space === 'canvas_world'
+        ? pageBoundaryForFrame(frame)
+        : { left: 0, right: frame.width - frame.contentInset.left - frame.contentInset.right, frameId: frame.id },
+      explicitSurface: layout.surface,
+    });
+  }
   const internalAuthority = layout.surface_authority;
   if (internalAuthority?.pageBoundary) {
     return classifyCanvasSurfaceAuthority({
@@ -335,6 +348,7 @@ export function isCanvasWorkspaceBlock(
     ? selectPlacementFrame(stored, context.pageFrames || [], context.contract)
     : undefined;
   if (frame) {
+    box.width = deriveFrameLocalAutoWidth(stored, frame, context.contract) ?? box.width;
     // Current frame geometry owns the v2 boundary; render hints and old receipts do not.
     return classifyCanvasSurfaceAuthority({
       coordinateSpace: stored.coordinate_space === 'canvas_world' ? 'canvas_world' : 'page_frame_local',
@@ -362,14 +376,14 @@ function constrainFrameLocalAutoWidth(
   contract: CoordinateContract,
 ): number {
   if (contract !== 'v2' || layout.coordinate_space !== 'page_frame_local'
-    || layout.width_mode === 'manual' || layout.surface === 'canvas_workspace' || layout.surface === 'tray') return width;
+    || layout.width_mode === 'manual' || layout.surface === 'tray') return width;
   const frame = selectPlacementFrame(layout, pageFrames, contract);
   if (!frame) return width;
-  const remainingWidth = frame.width - frame.contentInset.left - frame.contentInset.right
-    - Math.max(layout.x ?? 0, 0);
+  const remainingWidth = deriveFrameLocalAutoWidth(layout, frame, contract);
+  if (remainingWidth === undefined) return width;
   // Auto sizing must not invent overflow while F1 preserves the stored coordinates.
   // Even a remainder below MIN_BLOCK_WIDTH is a hard limit; exhausted frames give zero.
-  return Math.max(0, Math.min(DEFAULT_PAGE_CONTENT_WIDTH, contentWidth, remainingWidth));
+  return Math.max(0, Math.min(contentWidth, remainingWidth));
 }
 
 export function normalizeBlockLayout<TBlock extends PlacementSeedBlock>({
@@ -389,8 +403,17 @@ export function normalizeBlockLayout<TBlock extends PlacementSeedBlock>({
   contract?: CoordinateContract;
   pageFrames?: PageFrameModel[];
 }): BlockBoxLayout {
-  const stored = readStoredLayout(block) ?? fallback;
-  const useStoredPlacement = !(surfaceMode === 'page' && stored?.surface === 'canvas_workspace');
+  const rawStored = readStoredLayout(block) ?? fallback;
+  const stored = contract === 'v2' && rawStored.coordinate_space === 'page_frame_local'
+    && rawStored.width_mode !== 'manual'
+    ? toStoredLayout(rawStored as BlockBoxLayout, pageFrames, contract)
+    : rawStored;
+  // A true x overflow still classifies as workspace, but must not erase the
+  // local auto coordinates or bypass F13's remaining-width limit while reading.
+  const hasFrameLocalAutoWidth = deriveFrameLocalAutoWidth(stored,
+    selectPlacementFrame(stored, pageFrames, contract), contract) !== undefined;
+  const useStoredPlacement = hasFrameLocalAutoWidth
+    || !(surfaceMode === 'page' && stored?.surface === 'canvas_workspace');
   const isWorkspaceLayout = surfaceMode === 'canvas' && stored?.surface === 'canvas_workspace';
   const maxPlacementWidth = isWorkspaceLayout
     ? CANVAS_WORKSPACE_WIDTH
@@ -455,6 +478,9 @@ export function normalizeResolvedBlockLayout<TBlock extends PlacementSeedBlock>(
   contract?: CoordinateContract;
   pageFrames?: PageFrameModel[];
 }): BlockBoxLayout {
+  if (contract === 'v2' && layout.coordinate_space === 'page_frame_local' && layout.width_mode !== 'manual') {
+    layout = toStoredLayout(layout, pageFrames, contract);
+  }
   const isWorkspaceLayout = surfaceMode === 'canvas' && layout.surface === 'canvas_workspace';
   const maxPlacementWidth = isWorkspaceLayout
     ? CANVAS_WORKSPACE_WIDTH
@@ -462,7 +488,8 @@ export function normalizeResolvedBlockLayout<TBlock extends PlacementSeedBlock>(
   const placementWidth = clamp(
     isWorkspaceLayout || layout.width_mode === 'manual'
       ? layout.width
-      : Math.min(DEFAULT_PAGE_CONTENT_WIDTH, contentWidth),
+      : Math.min(deriveFrameLocalAutoWidth(layout, selectPlacementFrame(layout, pageFrames, contract), contract)
+        ?? DEFAULT_PAGE_CONTENT_WIDTH, contentWidth),
     MIN_BLOCK_WIDTH,
     Math.max(MIN_BLOCK_WIDTH, maxPlacementWidth),
   );
@@ -486,14 +513,19 @@ export function normalizeResolvedBlockLayout<TBlock extends PlacementSeedBlock>(
   };
 }
 
-export function buildDefaultBlockLayouts<TBlock extends { id: string }>(
+export function buildDefaultBlockLayouts<TBlock extends PlacementSeedBlock>(
   blocks: TBlock[],
   contentWidth: number,
   estimateHeight: (block: TBlock, width: number) => number,
+  context: PlacementContractContext = {},
 ): Record<string, BlockBoxLayout> {
   let cursorY = 0;
-  const width = Math.min(DEFAULT_PAGE_CONTENT_WIDTH, contentWidth);
   return blocks.reduce<Record<string, BlockBoxLayout>>((acc, block) => {
+    const stored = readStoredLayout(block);
+    const frame = stored ? selectPlacementFrame(stored, context.pageFrames || [], context.contract) : undefined;
+    const width = Math.min(stored
+      ? deriveFrameLocalAutoWidth(stored, frame, context.contract) ?? DEFAULT_PAGE_CONTENT_WIDTH
+      : DEFAULT_PAGE_CONTENT_WIDTH, contentWidth);
     const height = estimateHeight(block, width);
     acc[block.id] = {
       x: 0,
@@ -540,6 +572,7 @@ export function buildRuntimeBlockPlacement({
   const authority = classifyBlockSurfaceAuthority(layout, {
     pageFrame: resolvedFrame,
     pageLocalWidth: DEFAULT_PAGE_CONTENT_WIDTH,
+    contract,
   });
   const boundary = toCanvasBoundaryKind(authority.boundaryRole);
   const rect = resolveWorldRect(layout, resolvedFrame, contract, pageOffsetX);
@@ -656,6 +689,8 @@ export function buildLayoutPayload(
   };
   const authority = classifyBlockSurfaceAuthority(roundedLayout, {
     pageLocalWidth: DEFAULT_PAGE_CONTENT_WIDTH,
+    pageFrame: selectPlacementFrame(roundedLayout, pageFrames, contract),
+    contract,
   });
   const payload: Record<string, unknown> = {
     x: roundedLayout.x,
