@@ -84,6 +84,75 @@ beforeEach(() => {
 afterEach(() => vi.restoreAllMocks());
 
 describe('C4 paper ink through the existing canvas command stack and persistence adapter', () => {
+  it('moves and deletes a reloaded stroke with symmetric placement undo/redo on the paper stack', async () => {
+    const first = subject();
+    await waitFor(() => expect(first.result.current.adapter.loading).toBe(false));
+    await act(async () => { await first.result.current.commands.persistCanvasObject(input()); });
+    const original = structuredClone(durable);
+    first.unmount();
+    const { result } = subject();
+    await waitFor(() => expect(result.current.adapter.persistedCanvasObjects).toHaveLength(1));
+    const moved = input();
+    moved.placement = { ...moved.placement, x: placement.x + 80, y: placement.y + 35 };
+    moved.payload = paperFreehandSavePayload(moved.canvasObject, moved.placement);
+    await act(async () => { expect(await result.current.commands.persistCanvasObject(moved)).toBe(true); });
+    const afterMove = structuredClone(durable);
+    expect(afterMove).toMatchObject({ placement: { x: 100, y: 65, frame_id: frame.id } });
+    expect(result.current.adapter.persistedCanvasPlacements[0]).toMatchObject(moved.placement);
+    await act(async () => { expect(await result.current.commands.deleteCanvasObject(object.objectId)).toBe(true); });
+    expect(durable).toBeNull();
+    await act(async () => { expect(await result.current.history.undoRuntimeHistory()).toBe(true); });
+    expect(durable).toEqual(afterMove);
+    await act(async () => { expect(await result.current.history.undoRuntimeHistory()).toBe(true); });
+    expect(durable).toEqual(original);
+    await act(async () => { expect(await result.current.history.redoRuntimeHistory()).toBe(true); });
+    expect(durable).toEqual(afterMove);
+    await act(async () => { expect(await result.current.history.redoRuntimeHistory()).toBe(true); });
+    expect(durable).toBeNull();
+  });
+
+  it('serializes immediate moves and deletion before React publishes them, recovering each exact position', async () => {
+    const { result } = subject();
+    await waitFor(() => expect(result.current.adapter.loading).toBe(false));
+    await act(async () => {
+      await result.current.commands.persistCanvasObject(input());
+      for (const dx of [10, 20]) {
+        const moved = input();
+        moved.placement.x += dx;
+        moved.payload = paperFreehandSavePayload(moved.canvasObject, moved.placement);
+        expect(await result.current.commands.persistCanvasObject(moved)).toBe(true);
+      }
+      expect(await result.current.commands.deleteCanvasObject(object.objectId)).toBe(true);
+      for (const x of [40, 30, 20]) {
+        expect(await result.current.history.undoRuntimeHistory()).toBe(true);
+        expect(durable).toMatchObject({ placement: { x } });
+      }
+      expect(await result.current.history.undoRuntimeHistory()).toBe(true);
+      expect(durable).toBeNull();
+    });
+  });
+
+  it('does not record a failed move and keeps a failed move undo available for retry', async () => {
+    const { result } = subject();
+    await waitFor(() => expect(result.current.adapter.loading).toBe(false));
+    await act(async () => { await result.current.commands.persistCanvasObject(input()); });
+    const original = structuredClone(durable);
+    const moved = input();
+    moved.placement.x += 70;
+    moved.payload = paperFreehandSavePayload(moved.canvasObject, moved.placement);
+    api.put.mockRejectedValueOnce(new Error('synthetic move failure'));
+    await act(async () => { expect(await result.current.commands.persistCanvasObject(moved)).toBe(false); });
+    expect(durable).toEqual(original);
+    await act(async () => { expect(await result.current.commands.persistCanvasObject(moved)).toBe(true); });
+    api.put.mockRejectedValueOnce(new Error('synthetic move undo failure'));
+    await act(async () => { expect(await result.current.history.undoRuntimeHistory()).toBe(false); });
+    expect(durable).toMatchObject({ placement: { x: 90 } });
+    await act(async () => { expect(await result.current.history.undoRuntimeHistory()).toBe(true); });
+    expect(durable).toEqual(original);
+    await act(async () => { expect(await result.current.history.undoRuntimeHistory()).toBe(true); });
+    expect(durable).toBeNull();
+  });
+
   it('draws one page-owned stroke, survives reload and erases the complete persisted object', async () => {
     const first = subject();
     await waitFor(() => expect(first.result.current.adapter.loading).toBe(false));

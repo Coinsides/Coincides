@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { act, cleanup, fireEvent, render } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createPaperFreehand } from '../freehandService';
@@ -94,7 +95,7 @@ describe('C4 actual paper gestures', () => {
     pointer(view.layer, 'pointerdown', 100, 140);
     pointer(view.layer, 'pointercancel', 100, 140);
     pointer(view.layer, 'pointerdown', 100, 140);
-    view.rerender(<PaperInkLayer {...view.props} tool="write" />);
+    view.rerender(<PaperInkLayer {...view.props} tool="selection" />);
     await act(async () => pointer(view.layer, 'pointerup', 150, 180));
     expect(view.onCreate).not.toHaveBeenCalled();
     expect(view.container.querySelector('[data-paper-ink-preview]')).toBeNull();
@@ -108,7 +109,7 @@ describe('C4 actual paper gestures', () => {
     const hit = view.container.querySelector<SVGPathElement>('[data-paper-ink-hit]')!;
     // jsdom has no SVG geometry; this models the browser's native stroke query.
     const isPointInStroke = vi.fn((p: { x: number; y: number }) => Math.abs(p.y - p.x * 100 / 120) < 8);
-    Object.defineProperties(hit, { getScreenCTM: { value: () => ({ inverse: () => ({}) }) }, isPointInStroke: { value: isPointInStroke } });
+    Object.defineProperties(hit, { getScreenCTM: { value: () => ({ a: 0.5, b: 0, inverse: () => ({}) }) }, isPointInStroke: { value: isPointInStroke } });
     vi.stubGlobal('DOMPoint', class { constructor(public x: number, public y: number) {} matrixTransform() { return { x: (this.x - 50) * 2, y: (this.y - 90) * 2 }; } });
     pointer(view.layer, 'pointerdown', 55, 135);
     await act(async () => pointer(view.layer, 'pointerup', 65, 135));
@@ -132,4 +133,141 @@ describe('C4 actual paper gestures', () => {
     expect(view.onCreate).toHaveBeenCalledTimes(2);
     expect(view.queryByRole('alert')).toBeNull();
   });
+});
+
+function selectionSpecimen() {
+  const strokes = ['lower', 'upper'].map((objectId, zIndex) => createPaperFreehand({ frame,
+    canvasId: 'ink-canvas', objectId, points: [{ x: 100, y: 100 }, { x: 200, y: 100 }], zIndex }));
+  const onCreate = vi.fn(async () => true);
+  const onDelete = vi.fn(async () => true);
+  const blankDown = vi.fn();
+  function Subject({ enabled = true, tool = 'selection' as 'selection' | 'pen' | 'eraser' }) {
+    const [selected, setSelected] = useState<string | null>(null);
+    return <div role="dialog"><section data-text-unit-move-scope="selection-test" onMouseDown={blankDown}>
+      <PaperInkLayer frame={frame} displayFrame={frame} canvasId="ink-canvas" tool={tool} enabled={enabled}
+        objects={strokes.map(s => s.canvasObject)} placements={strokes.map(s => s.placement)}
+        selectedObjectId={selected} onSelect={setSelected} onCreate={onCreate} onDelete={onDelete} />
+      <article data-note-block-shell="true"><textarea aria-label="Existing text" /></article>
+      <article data-note-block-shell="true"><img alt="Existing media" /></article>
+    </section></div>;
+  }
+  const view = render(<Subject />);
+  const layer = view.container.querySelector<HTMLElement>('[data-paper-ink-layer]')!;
+  const surface = view.container.querySelector('section')!;
+  vi.spyOn(layer, 'getBoundingClientRect').mockReturnValue({ left: 50, top: 90, right: 447, bottom: 651.5,
+    width: 397, height: 561.5 } as DOMRect);
+  vi.stubGlobal('DOMPoint', class { constructor(public x: number, public y: number) {} matrixTransform() { return { x: this.x, y: this.y }; } });
+  const geometry = vi.fn((p: { x: number; y: number }) => p.x >= 100 && p.x <= 150 && Math.abs(p.y - 140) <= 8);
+  view.container.querySelectorAll('[data-paper-ink-hit]').forEach(hit => Object.defineProperties(hit, {
+    getScreenCTM: { value: () => ({ a: 0.5, b: 0, inverse: () => ({}) }) }, isPointInStroke: { value: geometry },
+  }));
+  return { ...view, layer, surface, strokes, Subject, onCreate, onDelete, blankDown, geometry };
+}
+
+describe('E3 selection gestures', () => {
+  it('selects only the topmost stroke within tolerance, without writing or saving a click', async () => {
+    const view = selectionSpecimen();
+    pointer(view.surface, 'pointerdown', 120, 147);
+    await act(async () => pointer(view.layer, 'pointerup', 120, 147));
+    expect(view.container.querySelectorAll('[data-paper-ink-selected]')).toHaveLength(1);
+    expect(view.container.querySelector('[data-paper-ink-selected]')?.getAttribute('data-paper-ink-selected')).toBe('upper');
+    expect(view.onCreate).not.toHaveBeenCalled();
+    expect(view.blankDown).not.toHaveBeenCalled();
+    const hit = view.container.querySelector('[data-paper-ink-hit]')!;
+    expect(hit.getAttribute('stroke-width')).toBe('16');
+    expect(hit.getAttribute('data-paper-ink-width')).toBe('2.5');
+    pointer(view.surface, 'pointerdown', 120, 149);
+    expect(view.container.querySelector('[data-paper-ink-selected]')).toBeNull();
+    expect(view.layer.style.pointerEvents).toBe('none');
+  });
+
+  it('moves only placement at reading scale, includes release, and deletes through the existing verb', async () => {
+    const view = selectionSpecimen();
+    pointer(view.surface, 'pointerdown', 120, 140);
+    pointer(view.layer, 'pointermove', 140, 155);
+    expect(view.container.querySelector('[data-paper-ink-selected]')?.getAttribute('transform')).toContain('translate(140 130)');
+    await act(async () => pointer(view.layer, 'pointerup', 150, 160));
+    expect(view.onCreate).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+      canvasObject: view.strokes[1].canvasObject,
+      placement: { ...view.strokes[1].placement, x: frame.x + 160, y: frame.y + 140 },
+    }));
+    await act(async () => fireEvent.keyDown(view.layer, { key: 'Delete' }));
+    expect(view.onDelete).toHaveBeenCalledExactlyOnceWith('upper');
+    expect(view.container.querySelector('[data-paper-ink-selected]')).toBeNull();
+  });
+
+  it('cancels drag without a save and leaves text/media clicks and text Delete untouched', async () => {
+    const view = selectionSpecimen();
+    pointer(view.surface, 'pointerdown', 120, 140);
+    pointer(view.layer, 'pointermove', 145, 160);
+    fireEvent.keyDown(view.layer, { key: 'Escape' });
+    await act(async () => pointer(view.layer, 'pointerup', 145, 160));
+    expect(view.onCreate).not.toHaveBeenCalled();
+    for (const target of [view.getByRole('textbox'), view.getByRole('img')]) {
+      pointer(target, 'pointerdown', 120, 140);
+      fireEvent.mouseDown(target);
+      expect(view.container.querySelector('[data-paper-ink-selected]')).toBeNull();
+    }
+    fireEvent.keyDown(view.getByRole('textbox'), { key: 'Delete' });
+    expect(view.onDelete).not.toHaveBeenCalled();
+    expect(view.blankDown).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not select or mutate ink in a disabled surface', async () => {
+    const view = selectionSpecimen();
+    view.rerender(<view.Subject enabled={false} />);
+    pointer(view.surface, 'pointerdown', 120, 140);
+    await act(async () => pointer(view.layer, 'pointerup', 160, 160));
+    fireEvent.keyDown(view.layer, { key: 'Delete' });
+    expect(view.container.querySelector('[data-paper-ink-hit]')).toBeNull();
+    expect(view.container.querySelector('[data-paper-ink-selected]')).toBeNull();
+    expect(view.onCreate).not.toHaveBeenCalled();
+    expect(view.onDelete).not.toHaveBeenCalled();
+  });
+});
+
+it('E3 drag clamps to the owning sheet and failed moves roll back the preview', async () => {
+  const view = selectionSpecimen();
+  view.onCreate.mockResolvedValueOnce(false);
+  pointer(view.surface, 'pointerdown', 120, 140);
+  await act(async () => pointer(view.layer, 'pointerup', 2000, -2000));
+  expect(view.onCreate).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
+    placement: expect.objectContaining({ x: frame.x + frame.width - 100, y: frame.y, frameId: frame.id }),
+  }));
+  expect(view.getByRole('alert').textContent).toContain('could not be moved');
+  expect(view.container.querySelector('[data-paper-ink-selected]')?.getAttribute('transform')).toContain('translate(100 100)');
+});
+
+it('E3 selection is shared across pages and modifier clicks still replace it', async () => {
+  const frames = [frame, { ...frame, id: 'other-page', y: frame.y + frame.height + 30 }];
+  const strokes = frames.map((sheet, index) => createPaperFreehand({ frame: sheet, canvasId: 'ink-canvas',
+    objectId: 'page-stroke-' + index, points: [{ x: 100, y: 100 }, { x: 200, y: 100 }], zIndex: 1 }));
+  function Subject() {
+    const [selected, setSelected] = useState<string | null>(null);
+    return <section data-text-unit-move-scope="cross-page">{frames.map(sheet => <PaperInkLayer key={sheet.id}
+      frame={sheet} displayFrame={sheet} canvasId="ink-canvas" tool="selection"
+      objects={strokes.map(s => s.canvasObject)} placements={strokes.map(s => s.placement)}
+      selectedObjectId={selected} onSelect={setSelected} onCreate={async () => true} onDelete={async () => true} />)}</section>;
+  }
+  const view = render(<Subject />);
+  const layers = [...view.container.querySelectorAll<HTMLElement>('[data-paper-ink-layer]')];
+  layers.forEach((layer, index) => {
+    vi.spyOn(layer, 'getBoundingClientRect').mockReturnValue({ left: 0, right: 400, top: index * 600,
+      bottom: index * 600 + 560, width: 400, height: 560 } as DOMRect);
+    Object.defineProperties(layer.querySelector('[data-paper-ink-hit]')!, {
+      getScreenCTM: { value: () => ({ a: 0.5, b: 0, inverse: () => ({}) }) }, isPointInStroke: { value: () => true },
+    });
+  });
+  vi.stubGlobal('DOMPoint', class { matrixTransform() { return { x: 100, y: 100 }; } });
+  const surface = view.container.querySelector('section')!;
+  for (const index of [0, 1, 0]) {
+    const event = new MouseEvent('pointerdown', { bubbles: true, cancelable: true, button: 0,
+      clientX: 100, clientY: index * 600 + 100, ctrlKey: true, shiftKey: true });
+    Object.defineProperty(event, 'pointerId', { value: 1 });
+    fireEvent(surface, event);
+    await act(async () => pointer(layers[index], 'pointerup', 100, index * 600 + 100));
+    const selected = view.container.querySelectorAll('[data-paper-ink-selected]');
+    expect(selected).toHaveLength(1);
+    expect(selected[0].getAttribute('data-paper-ink-selected')).toBe('page-stroke-' + index);
+  }
 });

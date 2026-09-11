@@ -1,0 +1,791 @@
+diff --git a/client/src/pages/Notes/canvasEngine/freehandService.ts b/client/src/pages/Notes/canvasEngine/freehandService.ts
+index a7df5c4..f8bb057 100644
+--- a/client/src/pages/Notes/canvasEngine/freehandService.ts
++++ b/client/src/pages/Notes/canvasEngine/freehandService.ts
+@@ -1,7 +1,36 @@
+ import type { CanvasObject, CanvasPlacement, CanvasPoint, FreehandCanvasObject, PageFrameModel, PaperFreehandData } from './types';
+ 
+ export type { PaperFreehandData } from './types';
+-export type PaperInkTool = 'write' | 'pen' | 'eraser';
++export type PaperInkTool = 'selection' | 'pen' | 'eraser';
++
++// A 16 CSS-pixel target remains usable for thin ink at every reading scale.
++export const PAPER_INK_HIT_WIDTH = 16;
++
++/** Native SVG geometry also covers persisted path-only curves and rotations. */
++export function hitTestPaperInk(host: HTMLElement, point: { clientX: number; clientY: number }): string | null {
++  const rect = host.getBoundingClientRect();
++  if (point.clientX < rect.left || point.clientX > rect.right || point.clientY < rect.top || point.clientY > rect.bottom) return null;
++  const paths = Array.from(host.querySelectorAll<SVGPathElement>('[data-paper-ink-hit]')).reverse();
++  for (const path of paths) {
++    const matrix = path.getScreenCTM?.();
++    if (!matrix || !path.isPointInStroke) continue;
++    const scale = Math.hypot(matrix.a, matrix.b);
++    if (!Number.isFinite(scale) || scale <= 0) continue;
++    // isPointInStroke uses local stroke width even with non-scaling-stroke in
++    // Chrome. Adjust only the invisible query path, synchronously restoring it
++    // so eraser and projection geometry remain unchanged.
++    const width = path.getAttribute('stroke-width');
++    try {
++      path.setAttribute('stroke-width', String(Math.max(Number(path.dataset.paperInkWidth) || 0, PAPER_INK_HIT_WIDTH / scale)));
++      if (path.isPointInStroke(new DOMPoint(point.clientX, point.clientY).matrixTransform(matrix.inverse()))) {
++        return path.dataset.paperInkHit || null;
++      }
++    } finally {
++      if (width === null) path.removeAttribute('stroke-width'); else path.setAttribute('stroke-width', width);
++    }
++  }
++  return null;
++}
+ 
+ // Same initial token and width as board ink; no board runtime or storage imports.
+ export const PAPER_INK_STYLE = { color_token: 'ink', width: 2.5 } as const;
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.test.tsx b/client/src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.test.tsx
+index d6e4506..547cbba 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.test.tsx
++++ b/client/src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.test.tsx
+@@ -84,6 +84,75 @@ beforeEach(() => {
+ afterEach(() => vi.restoreAllMocks());
+ 
+ describe('C4 paper ink through the existing canvas command stack and persistence adapter', () => {
++  it('moves and deletes a reloaded stroke with symmetric placement undo/redo on the paper stack', async () => {
++    const first = subject();
++    await waitFor(() => expect(first.result.current.adapter.loading).toBe(false));
++    await act(async () => { await first.result.current.commands.persistCanvasObject(input()); });
++    const original = structuredClone(durable);
++    first.unmount();
++    const { result } = subject();
++    await waitFor(() => expect(result.current.adapter.persistedCanvasObjects).toHaveLength(1));
++    const moved = input();
++    moved.placement = { ...moved.placement, x: placement.x + 80, y: placement.y + 35 };
++    moved.payload = paperFreehandSavePayload(moved.canvasObject, moved.placement);
++    await act(async () => { expect(await result.current.commands.persistCanvasObject(moved)).toBe(true); });
++    const afterMove = structuredClone(durable);
++    expect(afterMove).toMatchObject({ placement: { x: 100, y: 65, frame_id: frame.id } });
++    expect(result.current.adapter.persistedCanvasPlacements[0]).toMatchObject(moved.placement);
++    await act(async () => { expect(await result.current.commands.deleteCanvasObject(object.objectId)).toBe(true); });
++    expect(durable).toBeNull();
++    await act(async () => { expect(await result.current.history.undoRuntimeHistory()).toBe(true); });
++    expect(durable).toEqual(afterMove);
++    await act(async () => { expect(await result.current.history.undoRuntimeHistory()).toBe(true); });
++    expect(durable).toEqual(original);
++    await act(async () => { expect(await result.current.history.redoRuntimeHistory()).toBe(true); });
++    expect(durable).toEqual(afterMove);
++    await act(async () => { expect(await result.current.history.redoRuntimeHistory()).toBe(true); });
++    expect(durable).toBeNull();
++  });
++
++  it('serializes immediate moves and deletion before React publishes them, recovering each exact position', async () => {
++    const { result } = subject();
++    await waitFor(() => expect(result.current.adapter.loading).toBe(false));
++    await act(async () => {
++      await result.current.commands.persistCanvasObject(input());
++      for (const dx of [10, 20]) {
++        const moved = input();
++        moved.placement.x += dx;
++        moved.payload = paperFreehandSavePayload(moved.canvasObject, moved.placement);
++        expect(await result.current.commands.persistCanvasObject(moved)).toBe(true);
++      }
++      expect(await result.current.commands.deleteCanvasObject(object.objectId)).toBe(true);
++      for (const x of [40, 30, 20]) {
++        expect(await result.current.history.undoRuntimeHistory()).toBe(true);
++        expect(durable).toMatchObject({ placement: { x } });
++      }
++      expect(await result.current.history.undoRuntimeHistory()).toBe(true);
++      expect(durable).toBeNull();
++    });
++  });
++
++  it('does not record a failed move and keeps a failed move undo available for retry', async () => {
++    const { result } = subject();
++    await waitFor(() => expect(result.current.adapter.loading).toBe(false));
++    await act(async () => { await result.current.commands.persistCanvasObject(input()); });
++    const original = structuredClone(durable);
++    const moved = input();
++    moved.placement.x += 70;
++    moved.payload = paperFreehandSavePayload(moved.canvasObject, moved.placement);
++    api.put.mockRejectedValueOnce(new Error('synthetic move failure'));
++    await act(async () => { expect(await result.current.commands.persistCanvasObject(moved)).toBe(false); });
++    expect(durable).toEqual(original);
++    await act(async () => { expect(await result.current.commands.persistCanvasObject(moved)).toBe(true); });
++    api.put.mockRejectedValueOnce(new Error('synthetic move undo failure'));
++    await act(async () => { expect(await result.current.history.undoRuntimeHistory()).toBe(false); });
++    expect(durable).toMatchObject({ placement: { x: 90 } });
++    await act(async () => { expect(await result.current.history.undoRuntimeHistory()).toBe(true); });
++    expect(durable).toEqual(original);
++    await act(async () => { expect(await result.current.history.undoRuntimeHistory()).toBe(true); });
++    expect(durable).toBeNull();
++  });
++
+   it('draws one page-owned stroke, survives reload and erases the complete persisted object', async () => {
+     const first = subject();
+     await waitFor(() => expect(first.result.current.adapter.loading).toBe(false));
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.ts b/client/src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.ts
+index b9d449c..8316977 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.ts
++++ b/client/src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.ts
+@@ -33,14 +33,23 @@ export function usePaperInkCommands(options: Options) {
+     const snapshot = structuredClone(input);
+     return options.enqueueRuntimeHistoryOperation(async () => {
+       if (activeScope.current !== scope) return false;
+-      const existing = latest.current.objects.some((object) => object.objectId === snapshot.canvasObject.objectId)
+-        || Boolean(snapshots.get(snapshot.canvasObject.objectId));
+-      const save = async () => {
++      const objectId = snapshot.canvasObject.objectId;
++      const object = latest.current.objects.find((candidate) => candidate.objectId === objectId);
++      const placement = latest.current.placements.find((candidate) => candidate.objectId === objectId);
++      // Resolve the before state inside the shared lane, including an immediately
++      // preceding move whose adapter render has not yet been published.
++      const current = snapshots.has(objectId) ? snapshots.get(objectId)
++        : object?.kind === 'freehand' && placement
++          ? { canvasObject: object, placement, contentMounts: [], payload: paperFreehandSavePayload(object, placement) }
++          : null;
++      const before = current ? structuredClone(current) : null;
++      const saveSnapshot = async (value: PersistCanvasObjectInput) => {
+         if (activeScope.current !== scope) return false;
+-        const saved = await latest.current.persistCanvasObject(snapshot);
+-        if (saved && activeScope.current === scope) snapshots.set(snapshot.canvasObject.objectId, snapshot);
++        const saved = await latest.current.persistCanvasObject(value);
++        if (saved && activeScope.current === scope) snapshots.set(objectId, value);
+         return saved;
+       };
++      const save = () => saveSnapshot(snapshot);
+       const remove = async () => {
+         if (activeScope.current !== scope) return false;
+         const removed = await latest.current.deleteCanvasObject(snapshot.canvasObject.objectId);
+@@ -48,9 +57,8 @@ export function usePaperInkCommands(options: Options) {
+         return removed;
+       };
+       if (!await save()) return false;
+-      // Generic placement updates keep their existing semantics; only a new
+-      // stroke adds the create/delete entry required by the ink tool.
+-      return existing || options.pushHistoryEntry({ type: 'reversibleEdit', undo: remove, redo: save }, { skipBoundary: true });
++      return options.pushHistoryEntry({ type: 'reversibleEdit',
++        undo: before ? () => saveSnapshot(before) : remove, redo: save }, { skipBoundary: true });
+     });
+   }, [options.persistCanvasObject, options.boundary, options.enqueueRuntimeHistoryOperation, options.pushHistoryEntry, scope, snapshots]);
+ 
+@@ -67,7 +75,7 @@ export function usePaperInkCommands(options: Options) {
+       if (snapshots.has(objectId) && snapshots.get(objectId) === null) return false;
+       const canvasObject = latest.current.objects.find((candidate) => candidate.objectId === objectId);
+       const placement = latest.current.placements.find((candidate) => candidate.objectId === objectId);
+-      const current = canvasObject?.kind === 'freehand' && placement
++      const current = snapshots.has(objectId) ? snapshots.get(objectId) : canvasObject?.kind === 'freehand' && placement
+         ? { canvasObject, placement, contentMounts: [], payload: paperFreehandSavePayload(canvasObject, placement) }
+         : snapshots.get(objectId);
+       if (!current) return false;
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx b/client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx
+index 6eb7598..97e42ed 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx
+@@ -3,7 +3,7 @@ import { createBlankDraftLayout, createSurfaceModePolicy } from '../modePolicySe
+ import { useUIStore } from '@/stores/uiStore';
+ import { sliceGraphemes } from '../../../../../../shared/graphemes';
+ import { projectPageFrameToReadingSurface } from '../pageFramePresentationService';
+-import { Boxes, Pencil, Eraser } from 'lucide-react';
++import { Boxes, MousePointer2, Pencil, Eraser } from 'lucide-react';
+ import type { PaperInkTool } from '../freehandService';
+ import { PaperInkLayer } from './PaperInkLayer';
+ import { ViewOptionsMenu } from './ViewOptionsMenu';
+@@ -702,10 +702,10 @@ export function NoteWritingSurfaceLayer({
+   } | null>(null);
+   const stagingItemDrop = useContext(NoteCanvasRuntimeContext)?.stagingItemDrop;
+   const itemDropPending = useRef(false);
+-  const [paperInkTool, setPaperInkTool] = useState<PaperInkTool>('write');
++  const [paperInkTool, setPaperInkTool] = useState<PaperInkTool>('selection');
+   const paperInkEnabled = !contentReadOnly && !layoutMode && !overviewOpen
+     && noteCanvasRuntime.coordinateContract === 'v2';
+-  useEffect(() => { setPaperInkTool('write'); }, [noteId, contentReadOnly, layoutMode, overviewOpen, surfaceMode]);
++  useEffect(() => { setPaperInkTool('selection'); }, [noteId, contentReadOnly, layoutMode, overviewOpen, surfaceMode]);
+   const [spacePanReady, setSpacePanReady] = useState(false);
+   const [unitMoveTarget, setUnitMoveTarget] = useState<CrossBlockUnitDropTarget | null>(null);
+   const [canvasPanning, setCanvasPanning] = useState(false);
+@@ -724,6 +724,7 @@ export function NoteWritingSurfaceLayer({
+     height: number;
+   } | null>(null);
+   const [selectedCanvasObjectId, setSelectedCanvasObjectId] = useState<string | null>(null);
++  useEffect(() => { setSelectedCanvasObjectId(null); }, [noteId, surfaceMode, paperInkTool, paperInkEnabled]);
+   const [selectedAnnotationIds, setSelectedAnnotationIds] = useState<string[]>([]);
+   const [annotationContextMenu, setAnnotationContextMenu] = useState<AnnotationContextMenuState | null>(null);
+   const [annotationHighlightContextMenu, setAnnotationHighlightContextMenu] = useState<{
+@@ -1157,7 +1158,11 @@ export function NoteWritingSurfaceLayer({
+       shapeOperationRef.current = null;
+       setPageFrameInteractionPreview(null);
+       setShapeInteractionPreview(null);
+-      setSelectedCanvasObjectId(null);
++      // A paper ink save rebuilds world geometry. Keep its selection so Delete
++      // and the next drag still act on the stroke after persistence completes.
++      setSelectedCanvasObjectId((id) => noteCanvasRuntime.canvasObjects.some(
++        (object) => object.objectId === id && object.kind === 'freehand' && object.status === 'active',
++      ) ? id : null);
+       setSelectedTableCell(null);
+       setEditingTableCell(null);
+       return undefined;
+@@ -1207,7 +1212,7 @@ export function NoteWritingSurfaceLayer({
+       window.removeEventListener('keydown', handleKeyDown);
+       window.removeEventListener('keyup', handleKeyUp);
+     };
+-  }, [noteCanvasRuntime.world, onResetViewport, onZoomViewportAt, surfaceMode, viewportTransform.zoom]);
++  }, [noteCanvasRuntime.world, noteCanvasRuntime.canvasObjects, onResetViewport, onZoomViewportAt, surfaceMode, viewportTransform.zoom]);
+ 
+   useEffect(() => {
+     if (!selectedBlockId) return undefined;
+@@ -3607,7 +3612,7 @@ export function NoteWritingSurfaceLayer({
+         onDragOverCapture={handleStagingDragOver}
+         onDropCapture={handleStagingDrop}
+       >
+-        {surfaceMode === 'page' && !contentReadOnly && !overviewOpen && paperInkTool === 'write'
++        {surfaceMode === 'page' && !contentReadOnly && !overviewOpen && paperInkTool === 'selection'
+           && noteCanvasRuntime.coordinateContract === 'v2' && onPageFrameWallPointerDown
+           && visiblePageFrames.map((frame) => (
+             <PageFrameWallLayer key={`${frame.id}:walls`}
+@@ -3618,7 +3623,8 @@ export function NoteWritingSurfaceLayer({
+           <PaperInkLayer key={frame.id} frame={frame}
+             displayFrame={projectPageFrameToReadingSurface(frame, noteCanvasRuntime.coordinateContract, pageOffsetX)}
+             objects={noteCanvasRuntime.canvasObjects} placements={noteCanvasRuntime.canvasPlacements}
+-            canvasId={noteCanvasRuntime.canvasObjects[0]?.canvasId || 'primary-note-canvas'} tool={paperInkEnabled ? paperInkTool : 'write'}
++            canvasId={noteCanvasRuntime.canvasObjects[0]?.canvasId || 'primary-note-canvas'} tool={paperInkEnabled ? paperInkTool : 'selection'}
++            enabled={paperInkEnabled} selectedObjectId={selectedCanvasObjectId} onSelect={setSelectedCanvasObjectId}
+             onCreate={onPersistCanvasObject} onDelete={onDeleteCanvasObject} />
+         ))}
+         {surfaceMode === 'canvas' && (
+@@ -4155,13 +4161,12 @@ export function NoteWritingSurfaceLayer({
+       {surfaceMode === 'page' && (
+         <div className={`${styles.canvasZoomControl} ${styles.pageReadingControl}`} data-page-reading-control="true" role="group" aria-label="Page reading controls">
+           {noteTools}
+-          <button type="button" className={styles.canvasZoomReset} aria-pressed={paperInkTool === 'write'}
+-            disabled={!paperInkEnabled} onClick={() => setPaperInkTool('write')}>Write</button>
+-          {([{ key: 'pen', label: 'Pen', Icon: Pencil }, { key: 'eraser', label: 'Eraser', Icon: Eraser }] as const).map(({ key, label, Icon }) => (
+-            <button key={key} type="button" className={styles.canvasZoomReset} aria-label={label}
++          {([{ key: 'selection', label: 'Selection', Icon: MousePointer2 },
++            { key: 'pen', label: 'Pen', Icon: Pencil }, { key: 'eraser', label: 'Eraser', Icon: Eraser }] as const).map(({ key, label, Icon }) => (
++            <button key={key} type="button" className={styles.canvasZoomButton} aria-label={label} title={label}
+               aria-pressed={paperInkTool === key} disabled={!paperInkEnabled}
+-              onClick={() => { setPaperInkTool(paperInkTool === key ? 'write' : key); }}>
+-              <Icon size={14} aria-hidden="true" /> {label}
++              onClick={() => { setPaperInkTool(paperInkTool === key ? 'selection' : key); }}>
++              <Icon size={14} aria-hidden="true" />
+             </button>
+           ))}
+           <ViewOptionsMenu open={showViewOptions} disabled={overviewOpen}
+diff --git a/client/src/pages/Notes/canvasEngine/layers/PaperInkLayer.test.tsx b/client/src/pages/Notes/canvasEngine/layers/PaperInkLayer.test.tsx
+index 6ec8b4e..880acda 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/PaperInkLayer.test.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/PaperInkLayer.test.tsx
+@@ -1,3 +1,4 @@
++import { useState } from 'react';
+ import { act, cleanup, fireEvent, render } from '@testing-library/react';
+ import { afterEach, describe, expect, it, vi } from 'vitest';
+ import { createPaperFreehand } from '../freehandService';
+@@ -94,7 +95,7 @@ describe('C4 actual paper gestures', () => {
+     pointer(view.layer, 'pointerdown', 100, 140);
+     pointer(view.layer, 'pointercancel', 100, 140);
+     pointer(view.layer, 'pointerdown', 100, 140);
+-    view.rerender(<PaperInkLayer {...view.props} tool="write" />);
++    view.rerender(<PaperInkLayer {...view.props} tool="selection" />);
+     await act(async () => pointer(view.layer, 'pointerup', 150, 180));
+     expect(view.onCreate).not.toHaveBeenCalled();
+     expect(view.container.querySelector('[data-paper-ink-preview]')).toBeNull();
+@@ -108,7 +109,7 @@ describe('C4 actual paper gestures', () => {
+     const hit = view.container.querySelector<SVGPathElement>('[data-paper-ink-hit]')!;
+     // jsdom has no SVG geometry; this models the browser's native stroke query.
+     const isPointInStroke = vi.fn((p: { x: number; y: number }) => Math.abs(p.y - p.x * 100 / 120) < 8);
+-    Object.defineProperties(hit, { getScreenCTM: { value: () => ({ inverse: () => ({}) }) }, isPointInStroke: { value: isPointInStroke } });
++    Object.defineProperties(hit, { getScreenCTM: { value: () => ({ a: 0.5, b: 0, inverse: () => ({}) }) }, isPointInStroke: { value: isPointInStroke } });
+     vi.stubGlobal('DOMPoint', class { constructor(public x: number, public y: number) {} matrixTransform() { return { x: (this.x - 50) * 2, y: (this.y - 90) * 2 }; } });
+     pointer(view.layer, 'pointerdown', 55, 135);
+     await act(async () => pointer(view.layer, 'pointerup', 65, 135));
+@@ -133,3 +134,140 @@ describe('C4 actual paper gestures', () => {
+     expect(view.queryByRole('alert')).toBeNull();
+   });
+ });
++
++function selectionSpecimen() {
++  const strokes = ['lower', 'upper'].map((objectId, zIndex) => createPaperFreehand({ frame,
++    canvasId: 'ink-canvas', objectId, points: [{ x: 100, y: 100 }, { x: 200, y: 100 }], zIndex }));
++  const onCreate = vi.fn(async () => true);
++  const onDelete = vi.fn(async () => true);
++  const blankDown = vi.fn();
++  function Subject({ enabled = true, tool = 'selection' as 'selection' | 'pen' | 'eraser' }) {
++    const [selected, setSelected] = useState<string | null>(null);
++    return <div role="dialog"><section data-text-unit-move-scope="selection-test" onMouseDown={blankDown}>
++      <PaperInkLayer frame={frame} displayFrame={frame} canvasId="ink-canvas" tool={tool} enabled={enabled}
++        objects={strokes.map(s => s.canvasObject)} placements={strokes.map(s => s.placement)}
++        selectedObjectId={selected} onSelect={setSelected} onCreate={onCreate} onDelete={onDelete} />
++      <article data-note-block-shell="true"><textarea aria-label="Existing text" /></article>
++      <article data-note-block-shell="true"><img alt="Existing media" /></article>
++    </section></div>;
++  }
++  const view = render(<Subject />);
++  const layer = view.container.querySelector<HTMLElement>('[data-paper-ink-layer]')!;
++  const surface = view.container.querySelector('section')!;
++  vi.spyOn(layer, 'getBoundingClientRect').mockReturnValue({ left: 50, top: 90, right: 447, bottom: 651.5,
++    width: 397, height: 561.5 } as DOMRect);
++  vi.stubGlobal('DOMPoint', class { constructor(public x: number, public y: number) {} matrixTransform() { return { x: this.x, y: this.y }; } });
++  const geometry = vi.fn((p: { x: number; y: number }) => p.x >= 100 && p.x <= 150 && Math.abs(p.y - 140) <= 8);
++  view.container.querySelectorAll('[data-paper-ink-hit]').forEach(hit => Object.defineProperties(hit, {
++    getScreenCTM: { value: () => ({ a: 0.5, b: 0, inverse: () => ({}) }) }, isPointInStroke: { value: geometry },
++  }));
++  return { ...view, layer, surface, strokes, Subject, onCreate, onDelete, blankDown, geometry };
++}
++
++describe('E3 selection gestures', () => {
++  it('selects only the topmost stroke within tolerance, without writing or saving a click', async () => {
++    const view = selectionSpecimen();
++    pointer(view.surface, 'pointerdown', 120, 147);
++    await act(async () => pointer(view.layer, 'pointerup', 120, 147));
++    expect(view.container.querySelectorAll('[data-paper-ink-selected]')).toHaveLength(1);
++    expect(view.container.querySelector('[data-paper-ink-selected]')?.getAttribute('data-paper-ink-selected')).toBe('upper');
++    expect(view.onCreate).not.toHaveBeenCalled();
++    expect(view.blankDown).not.toHaveBeenCalled();
++    const hit = view.container.querySelector('[data-paper-ink-hit]')!;
++    expect(hit.getAttribute('stroke-width')).toBe('16');
++    expect(hit.getAttribute('data-paper-ink-width')).toBe('2.5');
++    pointer(view.surface, 'pointerdown', 120, 149);
++    expect(view.container.querySelector('[data-paper-ink-selected]')).toBeNull();
++    expect(view.layer.style.pointerEvents).toBe('none');
++  });
++
++  it('moves only placement at reading scale, includes release, and deletes through the existing verb', async () => {
++    const view = selectionSpecimen();
++    pointer(view.surface, 'pointerdown', 120, 140);
++    pointer(view.layer, 'pointermove', 140, 155);
++    expect(view.container.querySelector('[data-paper-ink-selected]')?.getAttribute('transform')).toContain('translate(140 130)');
++    await act(async () => pointer(view.layer, 'pointerup', 150, 160));
++    expect(view.onCreate).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
++      canvasObject: view.strokes[1].canvasObject,
++      placement: { ...view.strokes[1].placement, x: frame.x + 160, y: frame.y + 140 },
++    }));
++    await act(async () => fireEvent.keyDown(view.layer, { key: 'Delete' }));
++    expect(view.onDelete).toHaveBeenCalledExactlyOnceWith('upper');
++    expect(view.container.querySelector('[data-paper-ink-selected]')).toBeNull();
++  });
++
++  it('cancels drag without a save and leaves text/media clicks and text Delete untouched', async () => {
++    const view = selectionSpecimen();
++    pointer(view.surface, 'pointerdown', 120, 140);
++    pointer(view.layer, 'pointermove', 145, 160);
++    fireEvent.keyDown(view.layer, { key: 'Escape' });
++    await act(async () => pointer(view.layer, 'pointerup', 145, 160));
++    expect(view.onCreate).not.toHaveBeenCalled();
++    for (const target of [view.getByRole('textbox'), view.getByRole('img')]) {
++      pointer(target, 'pointerdown', 120, 140);
++      fireEvent.mouseDown(target);
++      expect(view.container.querySelector('[data-paper-ink-selected]')).toBeNull();
++    }
++    fireEvent.keyDown(view.getByRole('textbox'), { key: 'Delete' });
++    expect(view.onDelete).not.toHaveBeenCalled();
++    expect(view.blankDown).toHaveBeenCalledTimes(2);
++  });
++
++  it('does not select or mutate ink in a disabled surface', async () => {
++    const view = selectionSpecimen();
++    view.rerender(<view.Subject enabled={false} />);
++    pointer(view.surface, 'pointerdown', 120, 140);
++    await act(async () => pointer(view.layer, 'pointerup', 160, 160));
++    fireEvent.keyDown(view.layer, { key: 'Delete' });
++    expect(view.container.querySelector('[data-paper-ink-hit]')).toBeNull();
++    expect(view.container.querySelector('[data-paper-ink-selected]')).toBeNull();
++    expect(view.onCreate).not.toHaveBeenCalled();
++    expect(view.onDelete).not.toHaveBeenCalled();
++  });
++});
++
++it('E3 drag clamps to the owning sheet and failed moves roll back the preview', async () => {
++  const view = selectionSpecimen();
++  view.onCreate.mockResolvedValueOnce(false);
++  pointer(view.surface, 'pointerdown', 120, 140);
++  await act(async () => pointer(view.layer, 'pointerup', 2000, -2000));
++  expect(view.onCreate).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({
++    placement: expect.objectContaining({ x: frame.x + frame.width - 100, y: frame.y, frameId: frame.id }),
++  }));
++  expect(view.getByRole('alert').textContent).toContain('could not be moved');
++  expect(view.container.querySelector('[data-paper-ink-selected]')?.getAttribute('transform')).toContain('translate(100 100)');
++});
++
++it('E3 selection is shared across pages and modifier clicks still replace it', async () => {
++  const frames = [frame, { ...frame, id: 'other-page', y: frame.y + frame.height + 30 }];
++  const strokes = frames.map((sheet, index) => createPaperFreehand({ frame: sheet, canvasId: 'ink-canvas',
++    objectId: 'page-stroke-' + index, points: [{ x: 100, y: 100 }, { x: 200, y: 100 }], zIndex: 1 }));
++  function Subject() {
++    const [selected, setSelected] = useState<string | null>(null);
++    return <section data-text-unit-move-scope="cross-page">{frames.map(sheet => <PaperInkLayer key={sheet.id}
++      frame={sheet} displayFrame={sheet} canvasId="ink-canvas" tool="selection"
++      objects={strokes.map(s => s.canvasObject)} placements={strokes.map(s => s.placement)}
++      selectedObjectId={selected} onSelect={setSelected} onCreate={async () => true} onDelete={async () => true} />)}</section>;
++  }
++  const view = render(<Subject />);
++  const layers = [...view.container.querySelectorAll<HTMLElement>('[data-paper-ink-layer]')];
++  layers.forEach((layer, index) => {
++    vi.spyOn(layer, 'getBoundingClientRect').mockReturnValue({ left: 0, right: 400, top: index * 600,
++      bottom: index * 600 + 560, width: 400, height: 560 } as DOMRect);
++    Object.defineProperties(layer.querySelector('[data-paper-ink-hit]')!, {
++      getScreenCTM: { value: () => ({ a: 0.5, b: 0, inverse: () => ({}) }) }, isPointInStroke: { value: () => true },
++    });
++  });
++  vi.stubGlobal('DOMPoint', class { matrixTransform() { return { x: 100, y: 100 }; } });
++  const surface = view.container.querySelector('section')!;
++  for (const index of [0, 1, 0]) {
++    const event = new MouseEvent('pointerdown', { bubbles: true, cancelable: true, button: 0,
++      clientX: 100, clientY: index * 600 + 100, ctrlKey: true, shiftKey: true });
++    Object.defineProperty(event, 'pointerId', { value: 1 });
++    fireEvent(surface, event);
++    await act(async () => pointer(layers[index], 'pointerup', 100, index * 600 + 100));
++    const selected = view.container.querySelectorAll('[data-paper-ink-selected]');
++    expect(selected).toHaveLength(1);
++    expect(selected[0].getAttribute('data-paper-ink-selected')).toBe('page-stroke-' + index);
++  }
++});
+diff --git a/client/src/pages/Notes/canvasEngine/layers/PaperInkLayer.tsx b/client/src/pages/Notes/canvasEngine/layers/PaperInkLayer.tsx
+index dc69cea..f7291c9 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/PaperInkLayer.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/PaperInkLayer.tsx
+@@ -1,19 +1,24 @@
+ import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+-import { clipPaperInkPoint, createPaperFreehand, paperFreehandPath, paperFreehandStyle, type PaperInkTool } from '../freehandService';
++import { clipPaperInkPoint, createPaperFreehand, hitTestPaperInk, paperFreehandPath, paperFreehandSavePayload, paperFreehandStyle, type PaperInkTool } from '../freehandService';
+ import type { CanvasObject, CanvasPlacement, CanvasPoint, PageFrameModel } from '../types';
+ import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
+ import { PaperInkSvg } from './PaperInkSvg';
+ import styles from '../../NoteDetail.module.css';
+ 
+ type Gesture = { pointerId: number; tool: 'pen'; points: CanvasPoint[] }
+-  | { pointerId: number; tool: 'eraser'; ids: Set<string>; previous: CanvasPoint };
++  | { pointerId: number; tool: 'eraser'; ids: Set<string>; previous: CanvasPoint }
++  | { pointerId: number; tool: 'selection'; start: CanvasPoint; placement: CanvasPlacement; next: CanvasPlacement };
+ 
+ /** A sheet owns its captured gesture until release; adjacent sheets cannot adopt it. */
+-export function PaperInkLayer({ frame, displayFrame, objects, placements, canvasId, tool, onCreate, onDelete }: {
++export function PaperInkLayer({ frame, displayFrame, objects, placements, canvasId, tool, onCreate, onDelete,
++  enabled = true, selectedObjectId = null, onSelect = () => {} }: {
+   frame: PageFrameModel; displayFrame: PageFrameModel; objects: CanvasObject[]; placements: CanvasPlacement[];
+   canvasId: string; tool: PaperInkTool;
+   onCreate: NoteWritingSurfaceLayerProps['onPersistCanvasObject'];
+   onDelete: NoteWritingSurfaceLayerProps['onDeleteCanvasObject'];
++  enabled?: boolean;
++  selectedObjectId?: string | null;
++  onSelect?: (id: string | null) => void;
+ }) {
+   const host = useRef<HTMLDivElement>(null);
+   const gesture = useRef<Gesture | null>(null);
+@@ -22,6 +27,7 @@ export function PaperInkLayer({ frame, displayFrame, objects, placements, canvas
+   const [saving, setSaving] = useState(false);
+   const busy = useRef(false);
+   const [error, setError] = useState<string | null>(null);
++  const [movePreview, setMovePreview] = useState<CanvasPlacement | null>(null);
+   const style = paperFreehandStyle({});
+ 
+   const cancel = () => {
+@@ -30,8 +36,9 @@ export function PaperInkLayer({ frame, displayFrame, objects, placements, canvas
+     if (current && host.current?.hasPointerCapture?.(current.pointerId)) host.current.releasePointerCapture(current.pointerId);
+     setInk([]);
+     setErased(new Set());
++    setMovePreview(null);
+   };
+-  useEffect(() => { cancel(); }, [tool, frame.id, frame.width, frame.height]);
++  useEffect(() => { cancel(); }, [tool, enabled, frame.id, frame.width, frame.height]);
+   useEffect(() => {
+     const escape = (event: KeyboardEvent) => {
+       if (event.key === 'Escape' && gesture.current) { event.preventDefault(); cancel(); }
+@@ -41,6 +48,71 @@ export function PaperInkLayer({ frame, displayFrame, objects, placements, canvas
+     return () => { window.removeEventListener('keydown', escape); window.removeEventListener('blur', cancel); };
+   }, []);
+ 
++  // Ink stays transparent to pointer routing. Only background hits are claimed;
++  // the actual text/media/editor targets keep their existing event semantics.
++  useEffect(() => {
++    if (!enabled || tool !== 'selection') return;
++    const surface = host.current?.closest('[data-text-unit-move-scope]') || host.current?.parentElement;
++    if (!surface) return;
++    const select = (event: Event) => {
++      const pointer = event as PointerEvent;
++      if (pointer.defaultPrevented || pointer.button !== 0 || pointer.isPrimary === false || busy.current || gesture.current) return;
++      const clearOwnSelection = () => {
++        if (placements.some((p) => p.frameId === frame.id && p.objectId === selectedObjectId)) onSelect(null);
++      };
++      const target = pointer.target;
++      if (!(target instanceof Element)) return;
++      const blocked = target.closest([
++        '[data-note-block-shell="true"]', '[data-draft-editor="true"]', '[data-page-frame-wall]',
++        '[data-note-header-band]', '[data-canvas-shape="true"]', '[data-canvas-image="true"]',
++        '[data-canvas-table="true"]', '[data-canvas-visual-connector="true"]',
++        'textarea', 'input', 'select', 'button', 'a', '[role="button"]', '[role="dialog"]', '[contenteditable]',
++      ].join(','));
++      // A board may host this whole surface in a dialog; only nested controls
++      // are excluded, never the containing note modal itself.
++      if (blocked && surface.contains(blocked)) { clearOwnSelection(); return; }
++      const objectId = hitTestPaperInk(host.current!, pointer);
++      const placement = placements.find((p) => p.objectId === objectId && p.frameId === frame.id);
++      if (!placement) { clearOwnSelection(); return; }
++      pointer.preventDefault(); pointer.stopImmediatePropagation();
++      setError(null);
++      onSelect(placement.objectId);
++      host.current!.focus({ preventScroll: true });
++      gesture.current = { pointerId: pointer.pointerId, tool: 'selection',
++        start: { x: pointer.clientX, y: pointer.clientY }, placement, next: placement };
++      host.current!.setPointerCapture?.(pointer.pointerId);
++    };
++    surface.addEventListener('pointerdown', select, true);
++    return () => surface.removeEventListener('pointerdown', select, true);
++  }, [tool, enabled, frame.id, placements, selectedObjectId, onSelect]);
++
++  function moveSelection(event: { clientX: number; clientY: number }) {
++    const current = gesture.current;
++    if (current?.tool !== 'selection') return;
++    const rect = host.current!.getBoundingClientRect();
++    if (!rect.width || !rect.height) return;
++    const dx = event.clientX - current.start.x; const dy = event.clientY - current.start.y;
++    // A click does not create a placement edit. Deltas, like canvas object moves,
++    // are applied in world space; the existing repository owns local conversion.
++    if (current.next === current.placement && Math.hypot(dx, dy) < 3) return;
++    current.next = { ...current.placement,
++      x: Math.max(frame.x, Math.min(frame.x + frame.width - current.placement.width,
++        current.placement.x + dx * frame.width / rect.width)),
++      y: Math.max(frame.y, Math.min(frame.y + frame.height - current.placement.height,
++        current.placement.y + dy * frame.height / rect.height)) };
++    setMovePreview(current.next);
++  }
++
++  async function deleteSelection() {
++    if (!enabled || tool !== 'selection' || !selectedObjectId || busy.current || gesture.current) return;
++    busy.current = true; setSaving(true); setError(null);
++    try {
++      if (!await onDelete(selectedObjectId)) throw new Error('delete');
++      onSelect(null);
++    } catch { setError('Stroke could not be deleted. Please try again.'); }
++    finally { busy.current = false; setSaving(false); }
++  }
++
+   function point(event: { clientX: number; clientY: number }): CanvasPoint {
+     const rect = host.current!.getBoundingClientRect();
+     return clipPaperInkPoint({ x: (event.clientX - rect.left) * frame.width / rect.width,
+@@ -82,7 +154,7 @@ export function PaperInkLayer({ frame, displayFrame, objects, placements, canvas
+   }
+ 
+   function begin(event: ReactPointerEvent<HTMLDivElement>) {
+-    if (tool === 'write' || busy.current || gesture.current || event.button !== 0 || event.isPrimary === false) return;
++    if (!enabled || tool === 'selection' || busy.current || gesture.current || event.button !== 0 || event.isPrimary === false) return;
+     const rect = event.currentTarget.getBoundingClientRect();
+     if (!rect.width || !rect.height) return;
+     event.preventDefault(); event.stopPropagation();
+@@ -98,19 +170,27 @@ export function PaperInkLayer({ frame, displayFrame, objects, placements, canvas
+   function move(event: ReactPointerEvent<HTMLDivElement>) {
+     if (gesture.current?.pointerId !== event.pointerId) return;
+     event.preventDefault(); event.stopPropagation();
+-    if (gesture.current.tool === 'pen') append(event); else erase(event);
++    if (gesture.current.tool === 'selection') moveSelection(event);
++    else if (gesture.current.tool === 'pen') append(event); else erase(event);
+   }
+ 
+   async function end(event: ReactPointerEvent<HTMLDivElement>) {
+     const current = gesture.current;
+     if (!current || current.pointerId !== event.pointerId) return;
+     event.preventDefault(); event.stopPropagation();
+-    if (current.tool === 'pen') append(event); else erase(event);
++    if (current.tool === 'selection') moveSelection(event);
++    else if (current.tool === 'pen') append(event); else erase(event);
+     gesture.current = null;
+     if (host.current?.hasPointerCapture?.(event.pointerId)) host.current.releasePointerCapture(event.pointerId);
+     busy.current = true; setSaving(true);
+     try {
+-      if (current.tool === 'pen') {
++      if (current.tool === 'selection') {
++        if (current.next.x !== current.placement.x || current.next.y !== current.placement.y) {
++          const canvasObject = objects.find((object) => object.objectId === current.placement.objectId);
++          if (!canvasObject || !await onCreate({ canvasObject, placement: current.next, contentMounts: [],
++            payload: paperFreehandSavePayload(canvasObject, current.next) })) throw new Error('move');
++        }
++      } else if (current.tool === 'pen') {
+         const projection = createPaperFreehand({ frame, points: current.points, canvasId,
+           objectId: `paper-ink:${crypto.randomUUID()}`, zIndex: Math.max(0, ...placements.map((p) => p.zIndex)) + 1 });
+         if (!await onCreate({ ...projection, contentMounts: [] })) throw new Error('save');
+@@ -118,24 +198,34 @@ export function PaperInkLayer({ frame, displayFrame, objects, placements, canvas
+         for (const id of current.ids) if (!await onDelete(id)) throw new Error('erase');
+       }
+     } catch {
+-      setError(current.tool === 'pen' ? 'Stroke could not be saved. Please draw it again.' : 'Stroke could not be erased. Please try again.');
++      setError(current.tool === 'selection' ? 'Stroke could not be moved. Please try again.'
++        : current.tool === 'pen' ? 'Stroke could not be saved. Please draw it again.' : 'Stroke could not be erased. Please try again.');
+     } finally {
+-      setInk([]); setErased(new Set()); busy.current = false; setSaving(false);
++      setInk([]); setErased(new Set()); setMovePreview(null); busy.current = false; setSaving(false);
+     }
+   }
+ 
+   return <div ref={host} data-paper-ink-layer={frame.id} data-paper-ink-tool={tool}
+-    tabIndex={-1} className={styles.paperInkLayer}
++    tabIndex={-1} className={styles.paperInkLayer} role="group" aria-label="Paper ink"
+     style={{ left: displayFrame.x, top: displayFrame.y, width: frame.width, height: frame.height,
+-      pointerEvents: tool === 'write' ? 'none' : 'auto', touchAction: tool === 'write' ? 'auto' : 'none',
++      pointerEvents: !enabled || tool === 'selection' ? 'none' : 'auto', touchAction: 'none',
+       cursor: saving ? 'wait' : tool === 'pen' ? 'crosshair' : tool === 'eraser' ? 'cell' : undefined }}
+     onPointerDown={begin} onPointerMove={move} onPointerUp={(event) => { void end(event); }}
+     onPointerCancel={cancel} onLostPointerCapture={() => { if (gesture.current) cancel(); }}
+-    onMouseDown={(event) => { if (tool !== 'write') { event.preventDefault(); event.stopPropagation(); } }}
+-    onDoubleClick={(event) => { if (tool !== 'write') event.stopPropagation(); }}
+-    onContextMenu={(event) => { if (tool !== 'write') { event.preventDefault(); event.stopPropagation(); cancel(); } }}>
++    onKeyDown={(event) => {
++      if (event.target !== host.current || !enabled || tool !== 'selection') return;
++      if (event.key === 'Escape') { event.preventDefault(); cancel(); onSelect(null); }
++      if (event.key === 'Delete' && !event.ctrlKey && !event.metaKey && !event.altKey && selectedObjectId) {
++        event.preventDefault(); event.stopPropagation(); void deleteSelection();
++      }
++    }}
++    onMouseDown={(event) => { event.preventDefault(); event.stopPropagation(); }}
++    onDoubleClick={(event) => event.stopPropagation()}
++    onContextMenu={(event) => { if (tool !== 'selection') { event.preventDefault(); event.stopPropagation(); cancel(); } }}>
+     <PaperInkSvg frame={frame} objects={objects.filter((object) => !erased.has(object.objectId))}
+-      placements={placements} hitTest={tool === 'eraser'} />
++      placements={movePreview ? placements.map((p) => p.placementId === movePreview.placementId ? movePreview : p) : placements}
++      selectedObjectId={enabled && tool === 'selection' ? selectedObjectId : null}
++      hitTest={enabled && tool !== 'pen'} />
+     {ink.length > 0 && <svg data-paper-ink-preview="true" viewBox={`0 0 ${frame.width} ${frame.height}`}
+       width={frame.width} height={frame.height} style={{ position: 'absolute', inset: 0, overflow: 'hidden', pointerEvents: 'none' }}>
+       <path d={paperFreehandPath({ points: ink })} fill="none" stroke={style.color} strokeWidth={style.width}
+diff --git a/client/src/pages/Notes/canvasEngine/layers/PaperInkSvg.tsx b/client/src/pages/Notes/canvasEngine/layers/PaperInkSvg.tsx
+index 91a476d..2de082a 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/PaperInkSvg.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/PaperInkSvg.tsx
+@@ -1,5 +1,5 @@
+ import { Fragment } from 'react';
+-import { paperFreehandPath, paperFreehandStyle, readPaperFreehandData } from '../freehandService';
++import { PAPER_INK_HIT_WIDTH, paperFreehandPath, paperFreehandStyle, readPaperFreehandData } from '../freehandService';
+ import type { CanvasObject, CanvasPlacement, PageFrameModel } from '../types';
+ 
+ export interface PaperInkSvgProps {
+@@ -8,10 +8,11 @@ export interface PaperInkSvgProps {
+   placements: readonly CanvasPlacement[];
+   print?: boolean;
+   hitTest?: boolean;
++  selectedObjectId?: string | null;
+ }
+ 
+ /** The same page-local ink geometry is used by writing, overview and print. */
+-export function PaperInkSvg({ frame, objects, placements, print = false, hitTest = false }: PaperInkSvgProps) {
++export function PaperInkSvg({ frame, objects, placements, print = false, hitTest = false, selectedObjectId }: PaperInkSvgProps) {
+   const objectsById = new Map(objects.filter((object) => object.kind === 'freehand' && object.status === 'active')
+     .map((object) => [object.objectId, object]));
+   const strokes = placements
+@@ -44,6 +45,10 @@ export function PaperInkSvg({ frame, objects, placements, print = false, hitTest
+       const path = paperFreehandPath(data);
+       const transform = `translate(${placement.x - frame.x} ${placement.y - frame.y}) rotate(${placement.rotation || 0} ${placement.width / 2} ${placement.height / 2})`;
+       return <Fragment key={placement.placementId}>
++        {!print && selectedObjectId === placement.objectId && <path
++          data-paper-ink-selected={placement.objectId} d={path} transform={transform}
++          fill="none" stroke="var(--accent-primary)" strokeWidth={style.width + 6}
++          strokeOpacity={0.8} strokeLinecap="round" strokeLinejoin="round" />}
+         <path
+           data-paper-ink-id={placement.objectId}
+           d={path}
+@@ -56,11 +61,12 @@ export function PaperInkSvg({ frame, objects, placements, print = false, hitTest
+         />
+         {hitTest && !print && <path
+           data-paper-ink-hit={placement.objectId}
++          data-paper-ink-width={style.width}
+           d={path}
+           transform={transform}
+           fill="none"
+           stroke="transparent"
+-          strokeWidth={Math.max(16, style.width)}
++          strokeWidth={Math.max(PAPER_INK_HIT_WIDTH, style.width)}
+           strokeLinecap="round"
+           strokeLinejoin="round"
+           pointerEvents="none"
+diff --git a/client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx b/client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx
+index 09baf8c..db769b3 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx
+@@ -1,4 +1,5 @@
+ import { createRef } from 'react';
++import { createPaperFreehand } from '../freehandService';
+ import { MemoryRouter } from 'react-router-dom';
+ import { act, cleanup, fireEvent, render, renderHook } from '@testing-library/react';
+ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+@@ -201,7 +202,7 @@ describe('view options writing-surface integration', () => {
+     expect(onToggleOverview).toHaveBeenCalledOnce();
+     expect(view.getByRole('button', { name: 'Decrease page reading step' })).not.toBeNull();
+     expect(view.getByRole('button', { name: 'Increase page reading step' })).not.toBeNull();
+-    expect(view.getByRole('button', { name: 'Write' })).not.toBeNull();
++    expect(view.getByRole('button', { name: 'Selection' })).not.toBeNull();
+     expect(view.getByRole('button', { name: 'Pen' })).not.toBeNull();
+     expect(view.getByRole('button', { name: 'Eraser' })).not.toBeNull();
+     appMain.remove();
+@@ -671,3 +672,43 @@ describe('page frame decoration alignment on synthetic collections', () => {
+     expect(document.querySelector('[data-note-print-root]')).toBeNull();
+   });
+ });
++
++it('E3 toolbar uses named icons and explicit switching while runtime rebuilds preserve ink selection', async () => {
++  const pageFrame = frame(0);
++  const props = { ...propsFor(pageFrame, 'page'), contentReadOnly: false, layoutMode: false, onBlockListMouseDown: vi.fn() };
++  const stroke = createPaperFreehand({ frame: pageFrame, canvasId: 'synthetic-alignment-canvas',
++    objectId: 'e3-selected', points: [{ x: 100, y: 300 }, { x: 200, y: 300 }], zIndex: 1 });
++  props.noteCanvasRuntime = { ...props.noteCanvasRuntime,
++    canvasObjects: [...props.noteCanvasRuntime.canvasObjects, stroke.canvasObject],
++    canvasPlacements: [...props.noteCanvasRuntime.canvasPlacements, stroke.placement] };
++  const view = render(<NoteWritingSurfaceLayer {...props} />);
++  for (const label of ['Selection', 'Pen', 'Eraser']) {
++    const button = view.getByRole('button', { name: label });
++    expect(button.textContent).toBe('');
++    expect(button.getAttribute('title')).toBe(label);
++    expect(button.querySelector('svg')).not.toBeNull();
++  }
++  expect(view.getByRole('button', { name: 'Selection' }).getAttribute('aria-pressed')).toBe('true');
++  fireEvent.click(view.getByRole('button', { name: 'Pen' }));
++  view.rerender(<NoteWritingSurfaceLayer {...props} />);
++  expect(view.getByRole('button', { name: 'Pen' }).getAttribute('aria-pressed')).toBe('true');
++  fireEvent.click(view.getByRole('button', { name: 'Selection' }));
++  const layer = view.container.querySelector<HTMLElement>('[data-paper-ink-layer]')!;
++  vi.spyOn(layer, 'getBoundingClientRect').mockReturnValue({ left: 0, top: 0, right: 904, bottom: 1278, width: 904, height: 1278 } as DOMRect);
++  const path = view.container.querySelector('[data-paper-ink-hit]')!;
++  Object.defineProperties(path, { getScreenCTM: { value: () => ({ a: 0.5, b: 0, inverse: () => ({}) }) }, isPointInStroke: { value: () => true } });
++  vi.stubGlobal('DOMPoint', class { matrixTransform() { return { x: 150, y: 300 }; } });
++  const event = new MouseEvent('pointerdown', { bubbles: true, cancelable: true, clientX: 150, clientY: 300, button: 0 });
++  Object.defineProperty(event, 'pointerId', { value: 1 });
++  fireEvent(props.blockListRef.current!, event);
++  const up = new MouseEvent('pointerup', { bubbles: true, cancelable: true, clientX: 150, clientY: 300 });
++  Object.defineProperty(up, 'pointerId', { value: 1 });
++  await act(async () => fireEvent(layer, up));
++  expect(view.container.querySelector('[data-paper-ink-selected]')).not.toBeNull();
++  expect(props.onBlockListMouseDown).not.toHaveBeenCalled();
++  view.rerender(<NoteWritingSurfaceLayer {...props} noteCanvasRuntime={{ ...props.noteCanvasRuntime,
++    world: { ...props.noteCanvasRuntime.world }, canvasObjects: [...props.noteCanvasRuntime.canvasObjects] }} />);
++  expect(view.container.querySelector('[data-paper-ink-selected]')).not.toBeNull();
++  await act(async () => fireEvent.keyDown(layer, { key: 'Delete' }));
++  expect(props.onDeleteCanvasObject).toHaveBeenCalledExactlyOnceWith('e3-selected');
++});
+diff --git a/client/src/pages/Notes/canvasEngine/freehandService.test.tsx b/client/src/pages/Notes/canvasEngine/freehandService.test.tsx
+new file mode 100644
+index 0000000..452157f
+--- /dev/null
++++ b/client/src/pages/Notes/canvasEngine/freehandService.test.tsx
+@@ -0,0 +1,29 @@
++import { cleanup, render } from '@testing-library/react';
++import { afterEach, expect, it, vi } from 'vitest';
++import { hitTestPaperInk } from './freehandService';
++
++afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
++it.each([0.5, 1, 2])('uses 8 screen pixels at scale %s and restores query geometry', scale => {
++  const { container } = render(<div><svg><path data-paper-ink-hit="thin" data-paper-ink-width="1" strokeWidth={16} /></svg></div>);
++  const host = container.firstElementChild as HTMLElement;
++  const path = host.querySelector('path')!;
++  vi.spyOn(host, 'getBoundingClientRect').mockReturnValue({ left: 0, top: 0, right: 500, bottom: 500 } as DOMRect);
++  vi.stubGlobal('DOMPoint', class {
++    constructor(public x: number, public y: number) {}
++    matrixTransform() { return { x: this.x / scale, y: this.y / scale }; }
++  });
++  const widths: number[] = [];
++  Object.defineProperties(path, {
++    getScreenCTM: { value: () => ({ a: scale, b: 0, inverse: () => ({}) }) },
++    isPointInStroke: { value: (point: { y: number }) => {
++      const width = Number(path.getAttribute('stroke-width'));
++      widths.push(width);
++      return Math.abs(point.y - 100 / scale) <= width / 2;
++    } },
++  });
++  expect(hitTestPaperInk(host, { clientX: 100, clientY: 107.9 })).toBe('thin');
++  expect(hitTestPaperInk(host, { clientX: 100, clientY: 108.1 })).toBeNull();
++  expect(widths).toEqual([16 / scale, 16 / scale]);
++  expect(path.getAttribute('stroke-width')).toBe('16');
++  expect(hitTestPaperInk(host, { clientX: -1, clientY: 100 })).toBeNull();
++});

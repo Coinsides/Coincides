@@ -1,0 +1,452 @@
+{
+  "source": "Observed real Chrome output from hit-fixture.tsx via CUA, 2026-09-11",
+  "cases": [
+    {
+      "id": "thin-line-0.5",
+      "scale": 0.5,
+      "samples": [
+        {
+          "offset": 0,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7.9,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 8.1,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 9,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 12,
+          "hit": false,
+          "expected": false
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "path-only-curve-0.5",
+      "scale": 0.5,
+      "samples": [
+        {
+          "offset": 0,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7.9,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 8.1,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 9,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 12,
+          "hit": false,
+          "expected": false
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "rotated-line-0.5",
+      "scale": 0.5,
+      "samples": [
+        {
+          "offset": 0,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7.9,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 8.1,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 9,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 12,
+          "hit": false,
+          "expected": false
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "tap-0.5",
+      "scale": 0.5,
+      "samples": [
+        {
+          "offset": 0,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7.9,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 8.1,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 9,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 12,
+          "hit": false,
+          "expected": false
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "thin-line-1",
+      "scale": 1,
+      "samples": [
+        {
+          "offset": 0,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7.9,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 8.1,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 9,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 12,
+          "hit": false,
+          "expected": false
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "path-only-curve-1",
+      "scale": 1,
+      "samples": [
+        {
+          "offset": 0,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7.9,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 8.1,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 9,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 12,
+          "hit": false,
+          "expected": false
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "rotated-line-1",
+      "scale": 1,
+      "samples": [
+        {
+          "offset": 0,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7.9,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 8.1,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 9,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 12,
+          "hit": false,
+          "expected": false
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "tap-1",
+      "scale": 1,
+      "samples": [
+        {
+          "offset": 0,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7.9,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 8.1,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 9,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 12,
+          "hit": false,
+          "expected": false
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "thin-line-2",
+      "scale": 2,
+      "samples": [
+        {
+          "offset": 0,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7.9,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 8.1,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 9,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 12,
+          "hit": false,
+          "expected": false
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "path-only-curve-2",
+      "scale": 2,
+      "samples": [
+        {
+          "offset": 0,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7.9,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 8.1,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 9,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 12,
+          "hit": false,
+          "expected": false
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "rotated-line-2",
+      "scale": 2,
+      "samples": [
+        {
+          "offset": 0,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7.9,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 8.1,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 9,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 12,
+          "hit": false,
+          "expected": false
+        }
+      ],
+      "pass": true
+    },
+    {
+      "id": "tap-2",
+      "scale": 2,
+      "samples": [
+        {
+          "offset": 0,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 7.9,
+          "hit": true,
+          "expected": true
+        },
+        {
+          "offset": 8.1,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 9,
+          "hit": false,
+          "expected": false
+        },
+        {
+          "offset": 12,
+          "hit": false,
+          "expected": false
+        }
+      ],
+      "pass": true
+    }
+  ],
+  "totalCases": 12,
+  "totalSamples": 72,
+  "passed": 72
+}

@@ -33,14 +33,23 @@ export function usePaperInkCommands(options: Options) {
     const snapshot = structuredClone(input);
     return options.enqueueRuntimeHistoryOperation(async () => {
       if (activeScope.current !== scope) return false;
-      const existing = latest.current.objects.some((object) => object.objectId === snapshot.canvasObject.objectId)
-        || Boolean(snapshots.get(snapshot.canvasObject.objectId));
-      const save = async () => {
+      const objectId = snapshot.canvasObject.objectId;
+      const object = latest.current.objects.find((candidate) => candidate.objectId === objectId);
+      const placement = latest.current.placements.find((candidate) => candidate.objectId === objectId);
+      // Resolve the before state inside the shared lane, including an immediately
+      // preceding move whose adapter render has not yet been published.
+      const current = snapshots.has(objectId) ? snapshots.get(objectId)
+        : object?.kind === 'freehand' && placement
+          ? { canvasObject: object, placement, contentMounts: [], payload: paperFreehandSavePayload(object, placement) }
+          : null;
+      const before = current ? structuredClone(current) : null;
+      const saveSnapshot = async (value: PersistCanvasObjectInput) => {
         if (activeScope.current !== scope) return false;
-        const saved = await latest.current.persistCanvasObject(snapshot);
-        if (saved && activeScope.current === scope) snapshots.set(snapshot.canvasObject.objectId, snapshot);
+        const saved = await latest.current.persistCanvasObject(value);
+        if (saved && activeScope.current === scope) snapshots.set(objectId, value);
         return saved;
       };
+      const save = () => saveSnapshot(snapshot);
       const remove = async () => {
         if (activeScope.current !== scope) return false;
         const removed = await latest.current.deleteCanvasObject(snapshot.canvasObject.objectId);
@@ -48,9 +57,8 @@ export function usePaperInkCommands(options: Options) {
         return removed;
       };
       if (!await save()) return false;
-      // Generic placement updates keep their existing semantics; only a new
-      // stroke adds the create/delete entry required by the ink tool.
-      return existing || options.pushHistoryEntry({ type: 'reversibleEdit', undo: remove, redo: save }, { skipBoundary: true });
+      return options.pushHistoryEntry({ type: 'reversibleEdit',
+        undo: before ? () => saveSnapshot(before) : remove, redo: save }, { skipBoundary: true });
     });
   }, [options.persistCanvasObject, options.boundary, options.enqueueRuntimeHistoryOperation, options.pushHistoryEntry, scope, snapshots]);
 
@@ -67,7 +75,7 @@ export function usePaperInkCommands(options: Options) {
       if (snapshots.has(objectId) && snapshots.get(objectId) === null) return false;
       const canvasObject = latest.current.objects.find((candidate) => candidate.objectId === objectId);
       const placement = latest.current.placements.find((candidate) => candidate.objectId === objectId);
-      const current = canvasObject?.kind === 'freehand' && placement
+      const current = snapshots.has(objectId) ? snapshots.get(objectId) : canvasObject?.kind === 'freehand' && placement
         ? { canvasObject, placement, contentMounts: [], payload: paperFreehandSavePayload(canvasObject, placement) }
         : snapshots.get(objectId);
       if (!current) return false;

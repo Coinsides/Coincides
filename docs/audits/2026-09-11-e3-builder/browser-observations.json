@@ -1,0 +1,112 @@
+{
+  "source": "Manually transcribed CUA real Chrome action/DOM results; no mocked API on this note",
+  "date": "2026-09-11",
+  "url": "http://localhost:5173/#/notes/eb0fa550-c96a-41a7-bf1c-2aaf7ded9fd9",
+  "noteTitle": "E3 builder smoke 2026-09-11",
+  "body": "E3 Selection writing remains unchanged.",
+  "actions": [
+    {
+      "action": "existing blank double-click entry then type",
+      "selectionActive": true,
+      "bodyPersistedOnReload": true
+    },
+    {
+      "action": "Pen drag from (800,380) to (1030,440)",
+      "stroke": "paper-ink:966dfaec-db5c-4e02-81ae-b49a76fb2e85",
+      "afterTool": "pen"
+    },
+    {
+      "action": "Selection click (915,416), about 6 pixels off centerline",
+      "selected": [
+        "paper-ink:966dfaec-db5c-4e02-81ae-b49a76fb2e85"
+      ],
+      "transform": "translate(184.48979591836735 179.7190015987425) rotate(0 106.08163265306123 27.673468848310662)"
+    },
+    {
+      "action": "drag (915,410) to (995,485)",
+      "selectedAfterSave": [
+        "paper-ink:966dfaec-db5c-4e02-81ae-b49a76fb2e85"
+      ],
+      "transform": "translate(258.2857142857143 248.90267371951916) rotate(0 106.08163265306123 27.673468848310662)",
+      "alerts": []
+    },
+    {
+      "action": "Ctrl+Z move",
+      "stroke": "paper-ink:966dfaec-db5c-4e02-81ae-b49a76fb2e85",
+      "transform": "translate(184.48979591836735 179.7190015987425) rotate(0 106.08163265306123 27.673468848310662)"
+    },
+    {
+      "action": "Ctrl+Y move",
+      "stroke": "paper-ink:966dfaec-db5c-4e02-81ae-b49a76fb2e85",
+      "transform": "translate(258.2857142857143 248.90267371951916) rotate(0 106.08163265306123 27.673468848310662)"
+    },
+    {
+      "action": "reselect then Delete",
+      "count": 0
+    },
+    {
+      "action": "Ctrl+Z delete",
+      "count": 1,
+      "stroke": "paper-ink:966dfaec-db5c-4e02-81ae-b49a76fb2e85",
+      "transform": "translate(258.2857142857143 248.90267371951916) rotate(0 106.08163265306123 27.673468848310662)"
+    },
+    {
+      "action": "Ctrl+Y delete",
+      "count": 0
+    },
+    {
+      "action": "Ctrl+Z then reload",
+      "count": 1,
+      "stroke": "paper-ink:966dfaec-db5c-4e02-81ae-b49a76fb2e85",
+      "transform": "translate(258.2857142857143 248.90267371951916) rotate(0 106.08163265306123 27.673468848310662)",
+      "bodyUnchanged": true
+    },
+    {
+      "action": "final algorithm Selection click (995,491)",
+      "selected": [
+        "paper-ink:966dfaec-db5c-4e02-81ae-b49a76fb2e85"
+      ],
+      "visual": "blue halo screenshot inspected in conversation"
+    },
+    {
+      "action": "drag (995,485) to (1035,505)",
+      "selectedAfterSave": [
+        "paper-ink:966dfaec-db5c-4e02-81ae-b49a76fb2e85"
+      ],
+      "transform": "translate(295.18367346938777 267.35165295172624) rotate(0 106.08163265306123 27.673468848310662)"
+    },
+    {
+      "action": "Delete immediately after drag, without reselecting",
+      "count": 0
+    },
+    {
+      "action": "Ctrl+Z final delete",
+      "count": 1
+    }
+  ],
+  "tools": [
+    {
+      "name": "Selection",
+      "title": "Selection",
+      "visibleText": "",
+      "svgIcon": true
+    },
+    {
+      "name": "Pen",
+      "title": "Pen",
+      "visibleText": "",
+      "svgIcon": true
+    },
+    {
+      "name": "Eraser",
+      "title": "Eraser",
+      "visibleText": "",
+      "svgIcon": true
+    }
+  ],
+  "boundaries": [
+    "The existing blank writing entry is double-click; single-click focuses the surface and was not changed.",
+    "History replay temporarily makes the surface read-only and clears UI selection; reselect before Delete after undo/redo. Object placement and identity replay symmetrically.",
+    "Screenshots were visually inspected in the conversation, no PNG file is archived."
+  ]
+}

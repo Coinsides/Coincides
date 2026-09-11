@@ -1,4 +1,5 @@
 import { createRef } from 'react';
+import { createPaperFreehand } from '../freehandService';
 import { MemoryRouter } from 'react-router-dom';
 import { act, cleanup, fireEvent, render, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -201,7 +202,7 @@ describe('view options writing-surface integration', () => {
     expect(onToggleOverview).toHaveBeenCalledOnce();
     expect(view.getByRole('button', { name: 'Decrease page reading step' })).not.toBeNull();
     expect(view.getByRole('button', { name: 'Increase page reading step' })).not.toBeNull();
-    expect(view.getByRole('button', { name: 'Write' })).not.toBeNull();
+    expect(view.getByRole('button', { name: 'Selection' })).not.toBeNull();
     expect(view.getByRole('button', { name: 'Pen' })).not.toBeNull();
     expect(view.getByRole('button', { name: 'Eraser' })).not.toBeNull();
     appMain.remove();
@@ -670,4 +671,44 @@ describe('page frame decoration alignment on synthetic collections', () => {
     act(() => window.dispatchEvent(new Event('afterprint')));
     expect(document.querySelector('[data-note-print-root]')).toBeNull();
   });
+});
+
+it('E3 toolbar uses named icons and explicit switching while runtime rebuilds preserve ink selection', async () => {
+  const pageFrame = frame(0);
+  const props = { ...propsFor(pageFrame, 'page'), contentReadOnly: false, layoutMode: false, onBlockListMouseDown: vi.fn() };
+  const stroke = createPaperFreehand({ frame: pageFrame, canvasId: 'synthetic-alignment-canvas',
+    objectId: 'e3-selected', points: [{ x: 100, y: 300 }, { x: 200, y: 300 }], zIndex: 1 });
+  props.noteCanvasRuntime = { ...props.noteCanvasRuntime,
+    canvasObjects: [...props.noteCanvasRuntime.canvasObjects, stroke.canvasObject],
+    canvasPlacements: [...props.noteCanvasRuntime.canvasPlacements, stroke.placement] };
+  const view = render(<NoteWritingSurfaceLayer {...props} />);
+  for (const label of ['Selection', 'Pen', 'Eraser']) {
+    const button = view.getByRole('button', { name: label });
+    expect(button.textContent).toBe('');
+    expect(button.getAttribute('title')).toBe(label);
+    expect(button.querySelector('svg')).not.toBeNull();
+  }
+  expect(view.getByRole('button', { name: 'Selection' }).getAttribute('aria-pressed')).toBe('true');
+  fireEvent.click(view.getByRole('button', { name: 'Pen' }));
+  view.rerender(<NoteWritingSurfaceLayer {...props} />);
+  expect(view.getByRole('button', { name: 'Pen' }).getAttribute('aria-pressed')).toBe('true');
+  fireEvent.click(view.getByRole('button', { name: 'Selection' }));
+  const layer = view.container.querySelector<HTMLElement>('[data-paper-ink-layer]')!;
+  vi.spyOn(layer, 'getBoundingClientRect').mockReturnValue({ left: 0, top: 0, right: 904, bottom: 1278, width: 904, height: 1278 } as DOMRect);
+  const path = view.container.querySelector('[data-paper-ink-hit]')!;
+  Object.defineProperties(path, { getScreenCTM: { value: () => ({ a: 0.5, b: 0, inverse: () => ({}) }) }, isPointInStroke: { value: () => true } });
+  vi.stubGlobal('DOMPoint', class { matrixTransform() { return { x: 150, y: 300 }; } });
+  const event = new MouseEvent('pointerdown', { bubbles: true, cancelable: true, clientX: 150, clientY: 300, button: 0 });
+  Object.defineProperty(event, 'pointerId', { value: 1 });
+  fireEvent(props.blockListRef.current!, event);
+  const up = new MouseEvent('pointerup', { bubbles: true, cancelable: true, clientX: 150, clientY: 300 });
+  Object.defineProperty(up, 'pointerId', { value: 1 });
+  await act(async () => fireEvent(layer, up));
+  expect(view.container.querySelector('[data-paper-ink-selected]')).not.toBeNull();
+  expect(props.onBlockListMouseDown).not.toHaveBeenCalled();
+  view.rerender(<NoteWritingSurfaceLayer {...props} noteCanvasRuntime={{ ...props.noteCanvasRuntime,
+    world: { ...props.noteCanvasRuntime.world }, canvasObjects: [...props.noteCanvasRuntime.canvasObjects] }} />);
+  expect(view.container.querySelector('[data-paper-ink-selected]')).not.toBeNull();
+  await act(async () => fireEvent.keyDown(layer, { key: 'Delete' }));
+  expect(props.onDeleteCanvasObject).toHaveBeenCalledExactlyOnceWith('e3-selected');
 });

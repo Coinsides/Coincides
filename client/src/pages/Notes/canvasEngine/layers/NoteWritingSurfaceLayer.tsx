@@ -3,7 +3,7 @@ import { createBlankDraftLayout, createSurfaceModePolicy } from '../modePolicySe
 import { useUIStore } from '@/stores/uiStore';
 import { sliceGraphemes } from '../../../../../../shared/graphemes';
 import { projectPageFrameToReadingSurface } from '../pageFramePresentationService';
-import { Boxes, Pencil, Eraser } from 'lucide-react';
+import { Boxes, MousePointer2, Pencil, Eraser } from 'lucide-react';
 import type { PaperInkTool } from '../freehandService';
 import { PaperInkLayer } from './PaperInkLayer';
 import { ViewOptionsMenu } from './ViewOptionsMenu';
@@ -702,10 +702,10 @@ export function NoteWritingSurfaceLayer({
   } | null>(null);
   const stagingItemDrop = useContext(NoteCanvasRuntimeContext)?.stagingItemDrop;
   const itemDropPending = useRef(false);
-  const [paperInkTool, setPaperInkTool] = useState<PaperInkTool>('write');
+  const [paperInkTool, setPaperInkTool] = useState<PaperInkTool>('selection');
   const paperInkEnabled = !contentReadOnly && !layoutMode && !overviewOpen
     && noteCanvasRuntime.coordinateContract === 'v2';
-  useEffect(() => { setPaperInkTool('write'); }, [noteId, contentReadOnly, layoutMode, overviewOpen, surfaceMode]);
+  useEffect(() => { setPaperInkTool('selection'); }, [noteId, contentReadOnly, layoutMode, overviewOpen, surfaceMode]);
   const [spacePanReady, setSpacePanReady] = useState(false);
   const [unitMoveTarget, setUnitMoveTarget] = useState<CrossBlockUnitDropTarget | null>(null);
   const [canvasPanning, setCanvasPanning] = useState(false);
@@ -724,6 +724,7 @@ export function NoteWritingSurfaceLayer({
     height: number;
   } | null>(null);
   const [selectedCanvasObjectId, setSelectedCanvasObjectId] = useState<string | null>(null);
+  useEffect(() => { setSelectedCanvasObjectId(null); }, [noteId, surfaceMode, paperInkTool, paperInkEnabled]);
   const [selectedAnnotationIds, setSelectedAnnotationIds] = useState<string[]>([]);
   const [annotationContextMenu, setAnnotationContextMenu] = useState<AnnotationContextMenuState | null>(null);
   const [annotationHighlightContextMenu, setAnnotationHighlightContextMenu] = useState<{
@@ -1157,7 +1158,11 @@ export function NoteWritingSurfaceLayer({
       shapeOperationRef.current = null;
       setPageFrameInteractionPreview(null);
       setShapeInteractionPreview(null);
-      setSelectedCanvasObjectId(null);
+      // A paper ink save rebuilds world geometry. Keep its selection so Delete
+      // and the next drag still act on the stroke after persistence completes.
+      setSelectedCanvasObjectId((id) => noteCanvasRuntime.canvasObjects.some(
+        (object) => object.objectId === id && object.kind === 'freehand' && object.status === 'active',
+      ) ? id : null);
       setSelectedTableCell(null);
       setEditingTableCell(null);
       return undefined;
@@ -1207,7 +1212,7 @@ export function NoteWritingSurfaceLayer({
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [noteCanvasRuntime.world, onResetViewport, onZoomViewportAt, surfaceMode, viewportTransform.zoom]);
+  }, [noteCanvasRuntime.world, noteCanvasRuntime.canvasObjects, onResetViewport, onZoomViewportAt, surfaceMode, viewportTransform.zoom]);
 
   useEffect(() => {
     if (!selectedBlockId) return undefined;
@@ -3607,7 +3612,7 @@ export function NoteWritingSurfaceLayer({
         onDragOverCapture={handleStagingDragOver}
         onDropCapture={handleStagingDrop}
       >
-        {surfaceMode === 'page' && !contentReadOnly && !overviewOpen && paperInkTool === 'write'
+        {surfaceMode === 'page' && !contentReadOnly && !overviewOpen && paperInkTool === 'selection'
           && noteCanvasRuntime.coordinateContract === 'v2' && onPageFrameWallPointerDown
           && visiblePageFrames.map((frame) => (
             <PageFrameWallLayer key={`${frame.id}:walls`}
@@ -3618,7 +3623,8 @@ export function NoteWritingSurfaceLayer({
           <PaperInkLayer key={frame.id} frame={frame}
             displayFrame={projectPageFrameToReadingSurface(frame, noteCanvasRuntime.coordinateContract, pageOffsetX)}
             objects={noteCanvasRuntime.canvasObjects} placements={noteCanvasRuntime.canvasPlacements}
-            canvasId={noteCanvasRuntime.canvasObjects[0]?.canvasId || 'primary-note-canvas'} tool={paperInkEnabled ? paperInkTool : 'write'}
+            canvasId={noteCanvasRuntime.canvasObjects[0]?.canvasId || 'primary-note-canvas'} tool={paperInkEnabled ? paperInkTool : 'selection'}
+            enabled={paperInkEnabled} selectedObjectId={selectedCanvasObjectId} onSelect={setSelectedCanvasObjectId}
             onCreate={onPersistCanvasObject} onDelete={onDeleteCanvasObject} />
         ))}
         {surfaceMode === 'canvas' && (
@@ -4155,13 +4161,12 @@ export function NoteWritingSurfaceLayer({
       {surfaceMode === 'page' && (
         <div className={`${styles.canvasZoomControl} ${styles.pageReadingControl}`} data-page-reading-control="true" role="group" aria-label="Page reading controls">
           {noteTools}
-          <button type="button" className={styles.canvasZoomReset} aria-pressed={paperInkTool === 'write'}
-            disabled={!paperInkEnabled} onClick={() => setPaperInkTool('write')}>Write</button>
-          {([{ key: 'pen', label: 'Pen', Icon: Pencil }, { key: 'eraser', label: 'Eraser', Icon: Eraser }] as const).map(({ key, label, Icon }) => (
-            <button key={key} type="button" className={styles.canvasZoomReset} aria-label={label}
+          {([{ key: 'selection', label: 'Selection', Icon: MousePointer2 },
+            { key: 'pen', label: 'Pen', Icon: Pencil }, { key: 'eraser', label: 'Eraser', Icon: Eraser }] as const).map(({ key, label, Icon }) => (
+            <button key={key} type="button" className={styles.canvasZoomButton} aria-label={label} title={label}
               aria-pressed={paperInkTool === key} disabled={!paperInkEnabled}
-              onClick={() => { setPaperInkTool(paperInkTool === key ? 'write' : key); }}>
-              <Icon size={14} aria-hidden="true" /> {label}
+              onClick={() => { setPaperInkTool(paperInkTool === key ? 'selection' : key); }}>
+              <Icon size={14} aria-hidden="true" />
             </button>
           ))}
           <ViewOptionsMenu open={showViewOptions} disabled={overviewOpen}

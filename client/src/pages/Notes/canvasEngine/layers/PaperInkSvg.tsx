@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-import { paperFreehandPath, paperFreehandStyle, readPaperFreehandData } from '../freehandService';
+import { PAPER_INK_HIT_WIDTH, paperFreehandPath, paperFreehandStyle, readPaperFreehandData } from '../freehandService';
 import type { CanvasObject, CanvasPlacement, PageFrameModel } from '../types';
 
 export interface PaperInkSvgProps {
@@ -8,10 +8,11 @@ export interface PaperInkSvgProps {
   placements: readonly CanvasPlacement[];
   print?: boolean;
   hitTest?: boolean;
+  selectedObjectId?: string | null;
 }
 
 /** The same page-local ink geometry is used by writing, overview and print. */
-export function PaperInkSvg({ frame, objects, placements, print = false, hitTest = false }: PaperInkSvgProps) {
+export function PaperInkSvg({ frame, objects, placements, print = false, hitTest = false, selectedObjectId }: PaperInkSvgProps) {
   const objectsById = new Map(objects.filter((object) => object.kind === 'freehand' && object.status === 'active')
     .map((object) => [object.objectId, object]));
   const strokes = placements
@@ -44,6 +45,10 @@ export function PaperInkSvg({ frame, objects, placements, print = false, hitTest
       const path = paperFreehandPath(data);
       const transform = `translate(${placement.x - frame.x} ${placement.y - frame.y}) rotate(${placement.rotation || 0} ${placement.width / 2} ${placement.height / 2})`;
       return <Fragment key={placement.placementId}>
+        {!print && selectedObjectId === placement.objectId && <path
+          data-paper-ink-selected={placement.objectId} d={path} transform={transform}
+          fill="none" stroke="var(--accent-primary)" strokeWidth={style.width + 6}
+          strokeOpacity={0.8} strokeLinecap="round" strokeLinejoin="round" />}
         <path
           data-paper-ink-id={placement.objectId}
           d={path}
@@ -56,11 +61,12 @@ export function PaperInkSvg({ frame, objects, placements, print = false, hitTest
         />
         {hitTest && !print && <path
           data-paper-ink-hit={placement.objectId}
+          data-paper-ink-width={style.width}
           d={path}
           transform={transform}
           fill="none"
           stroke="transparent"
-          strokeWidth={Math.max(16, style.width)}
+          strokeWidth={Math.max(PAPER_INK_HIT_WIDTH, style.width)}
           strokeLinecap="round"
           strokeLinejoin="round"
           pointerEvents="none"

@@ -1,7 +1,36 @@
 import type { CanvasObject, CanvasPlacement, CanvasPoint, FreehandCanvasObject, PageFrameModel, PaperFreehandData } from './types';
 
 export type { PaperFreehandData } from './types';
-export type PaperInkTool = 'write' | 'pen' | 'eraser';
+export type PaperInkTool = 'selection' | 'pen' | 'eraser';
+
+// A 16 CSS-pixel target remains usable for thin ink at every reading scale.
+export const PAPER_INK_HIT_WIDTH = 16;
+
+/** Native SVG geometry also covers persisted path-only curves and rotations. */
+export function hitTestPaperInk(host: HTMLElement, point: { clientX: number; clientY: number }): string | null {
+  const rect = host.getBoundingClientRect();
+  if (point.clientX < rect.left || point.clientX > rect.right || point.clientY < rect.top || point.clientY > rect.bottom) return null;
+  const paths = Array.from(host.querySelectorAll<SVGPathElement>('[data-paper-ink-hit]')).reverse();
+  for (const path of paths) {
+    const matrix = path.getScreenCTM?.();
+    if (!matrix || !path.isPointInStroke) continue;
+    const scale = Math.hypot(matrix.a, matrix.b);
+    if (!Number.isFinite(scale) || scale <= 0) continue;
+    // isPointInStroke uses local stroke width even with non-scaling-stroke in
+    // Chrome. Adjust only the invisible query path, synchronously restoring it
+    // so eraser and projection geometry remain unchanged.
+    const width = path.getAttribute('stroke-width');
+    try {
+      path.setAttribute('stroke-width', String(Math.max(Number(path.dataset.paperInkWidth) || 0, PAPER_INK_HIT_WIDTH / scale)));
+      if (path.isPointInStroke(new DOMPoint(point.clientX, point.clientY).matrixTransform(matrix.inverse()))) {
+        return path.dataset.paperInkHit || null;
+      }
+    } finally {
+      if (width === null) path.removeAttribute('stroke-width'); else path.setAttribute('stroke-width', width);
+    }
+  }
+  return null;
+}
 
 // Same initial token and width as board ink; no board runtime or storage imports.
 export const PAPER_INK_STYLE = { color_token: 'ink', width: 2.5 } as const;

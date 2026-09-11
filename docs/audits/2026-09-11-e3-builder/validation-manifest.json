@@ -1,0 +1,40 @@
+{
+  "files": [
+    {
+      "file": "client/src/pages/Notes/canvasEngine/freehandService.ts",
+      "sha256": "6d94a646985fce2242074b6bd00f3e895934ffb04fc7bcebb43a28b3d2ab4fe7"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.test.tsx",
+      "sha256": "966985fe5dc9bff93d8e8235059665e740131aa27a1c525286d7a170f7478472"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.ts",
+      "sha256": "95f045aa801273121a69bedd70a688832becd4ab8cd7aee42521072c1b98e41a"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "sha256": "0567c2038c8d20fdb072cb93c2cfa6f184e5781d80ff213568270d47f3748cf4"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/PaperInkLayer.test.tsx",
+      "sha256": "71b4cd94adbbb998be5180c54ed1cde3a13e371dd5b45b79c1e7a27d472c3de7"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/PaperInkLayer.tsx",
+      "sha256": "c75b55661a78cdec82200aa1381e4ed58de656b46c98d89afef301aaa785bb37"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/PaperInkSvg.tsx",
+      "sha256": "fa68a1690852249fe59494f484c1e412890d72c24b521d9f5bafd5ecb847adac"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx",
+      "sha256": "3822d4db93664a219a24d046e3b9b42248a7afec170c2693557ad93816dc42ce"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/freehandService.test.tsx",
+      "sha256": "c18502e841b51142bc3eddd3b3e1dd3a63e1e17476f79c29c8efc3dcb0e406b1"
+    }
+  ]
+}
