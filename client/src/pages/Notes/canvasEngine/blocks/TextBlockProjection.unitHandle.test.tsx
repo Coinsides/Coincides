@@ -47,7 +47,7 @@ function renderEditor(options: Partial<ProjectionProps> = {}, initial = syntheti
   const onBoundary = vi.fn();
   const onContextMenu = vi.fn();
   let latest = initial;
-  function Fixture() {
+  function Fixture({ overrides = {} }: { overrides?: Partial<ProjectionProps> }) {
     const [flow, setFlow] = useState(initial);
     latest = flow;
     return <TextBlockProjection blockId="synthetic-handle-block" readOnly={false}
@@ -60,7 +60,7 @@ function renderEditor(options: Partial<ProjectionProps> = {}, initial = syntheti
         onFlow(next, edit, previous); setFlow(next);
       }} onTextEditBoundary={onBoundary} onExtractTextUnit={onExtract}
       onSave={vi.fn(async () => ({ status: 'saved' } as never))} onKeyDown={vi.fn()}
-      {...options} />;
+      {...options} {...overrides} />;
   }
   const view = render(<Fixture />);
   const handle = (id: string) => view.container.querySelector<HTMLElement>(`[data-text-unit-handle="${id}"]`)!;
@@ -76,6 +76,7 @@ function renderEditor(options: Partial<ProjectionProps> = {}, initial = syntheti
     });
   };
   return { ...view, handle, row, measure, onFlow, onExtract, onBoundary, onContextMenu,
+    rerenderOptions: (overrides: Partial<ProjectionProps>) => view.rerender(<Fixture overrides={overrides} />),
     current: () => latest,
     ids: () => [...view.container.querySelectorAll<HTMLTextAreaElement>('textarea')].map((node) => node.dataset.textUnitId) };
 }
@@ -182,16 +183,59 @@ describe('B10 real unit handle events with synthetic content', () => {
     expect(editor.onFlow).not.toHaveBeenCalled();
   });
 
-  it('does not extract or reorder on pointer movement below the drag threshold', () => {
+  it('F15: pressing immediately shows an insertion line, while a small movement still opens the menu without moving content', () => {
     const editor = renderEditor();
     editor.measure();
     pointer(editor.handle('unit-0'), 'pointerdown', 85, 110);
+    expect(editor.container.querySelector<HTMLElement>('[data-text-unit-drop-indicator="unit-0"]')?.dataset.dropEdge).toBe('before');
+    expect(editor.onFlow).not.toHaveBeenCalled();
+    expect(editor.onExtract).not.toHaveBeenCalled();
     pointer(editor.handle('unit-0'), 'pointermove', 87, 112);
+    expect(editor.container.querySelector('[data-text-unit-drop-indicator="unit-0"]')).not.toBeNull();
     pointer(editor.handle('unit-0'), 'pointerup', 87, 112);
+    expect(editor.container.querySelector('[data-text-unit-drop-indicator]')).toBeNull();
+    expect(editor.ids()).toEqual(['unit-0', 'unit-1', 'unit-2']);
     expect(editor.onFlow).not.toHaveBeenCalled();
     expect(editor.onExtract).not.toHaveBeenCalled();
     fireEvent.click(editor.handle('unit-0'));
     expect(screen.getByRole('menu', { name: 'Text unit' })).toBeTruthy();
+  });
+
+  it.each(['pointercancel', 'Escape', 'blur'])('F15: %s clears pressed feedback before the drag threshold and ignores later pointer events', (cancel) => {
+    const editor = renderEditor();
+    editor.measure();
+    pointer(editor.handle('unit-0'), 'pointerdown', 85, 110);
+    expect(editor.container.querySelector('[data-text-unit-drop-indicator="unit-0"]')).not.toBeNull();
+    if (cancel === 'Escape') fireEvent.keyDown(editor.handle('unit-0'), { key: 'Escape' });
+    else if (cancel === 'blur') fireEvent.blur(window);
+    else pointer(editor.handle('unit-0'), 'pointercancel', 85, 110);
+    expect(editor.container.querySelector('[data-text-unit-drop-indicator]')).toBeNull();
+    pointer(editor.handle('unit-0'), 'pointermove', 120, 210);
+    pointer(editor.handle('unit-0'), 'pointerup', 120, 210);
+    expect(editor.onFlow).not.toHaveBeenCalled();
+    expect(editor.onExtract).not.toHaveBeenCalled();
+    expect(editor.container.querySelector('[data-text-unit-drop-indicator]')).toBeNull();
+  });
+
+  it.each([{ readOnly: true }, { layoutMode: true }])('F15: switching to disabled mode $readOnly/$layoutMode cancels pressed feedback and writing can resume', (disabled) => {
+    const editor = renderEditor();
+    editor.measure();
+    pointer(editor.handle('unit-0'), 'pointerdown', 85, 110);
+    expect(editor.container.querySelector('[data-text-unit-drop-indicator="unit-0"]')).not.toBeNull();
+    editor.rerenderOptions(disabled);
+    expect((editor.handle('unit-0') as HTMLButtonElement).disabled).toBe(true);
+    expect(editor.container.querySelector('[data-text-unit-drop-indicator]')).toBeNull();
+    pointer(editor.handle('unit-0'), 'pointermove', 120, 210);
+    pointer(editor.handle('unit-0'), 'pointerup', 120, 210);
+    expect(editor.onFlow).not.toHaveBeenCalled();
+    expect(editor.onExtract).not.toHaveBeenCalled();
+    editor.rerenderOptions({ readOnly: false, layoutMode: false });
+    pointer(editor.handle('unit-0'), 'pointerdown', 85, 110);
+    expect(editor.container.querySelector('[data-text-unit-drop-indicator="unit-0"]')).not.toBeNull();
+    pointer(editor.handle('unit-0'), 'pointerup', 85, 110);
+    fireEvent.click(editor.handle('unit-0'));
+    expect(screen.getByRole('menu', { name: 'Text unit' })).toBeTruthy();
+    expect(editor.onFlow).not.toHaveBeenCalled();
   });
 
   it.each(['pointercancel', 'Escape'])('%s cancels a drag without changing content', (cancel) => {
@@ -226,6 +270,7 @@ describe('B10 real unit handle events with synthetic content', () => {
     act(() => textarea.focus());
     fireEvent.compositionStart(textarea);
     pointer(editor.handle('unit-0'), 'pointerdown', 85, 110);
+    expect(editor.container.querySelector('[data-text-unit-drop-indicator]')).toBeNull();
     pointer(editor.handle('unit-0'), 'pointermove', 120, 210);
     pointer(editor.handle('unit-0'), 'pointerup', 120, 210);
     expect(editor.onFlow).not.toHaveBeenCalled();
@@ -241,7 +286,9 @@ describe('B10 real unit handle events with synthetic content', () => {
   it.each([{ readOnly: true }, { layoutMode: true }])('disabled editor mode $readOnly/$layoutMode blocks handle mutations', (options) => {
     const editor = renderEditor(options);
     editor.measure();
+    expect((editor.handle('unit-0') as HTMLButtonElement).disabled).toBe(true);
     pointer(editor.handle('unit-0'), 'pointerdown', 85, 110);
+    expect(editor.container.querySelector('[data-text-unit-drop-indicator]')).toBeNull();
     pointer(editor.handle('unit-0'), 'pointermove', 120, 210);
     pointer(editor.handle('unit-0'), 'pointerup', 120, 210);
     pointer(editor.handle('unit-0'), 'pointerdown', 85, 110);

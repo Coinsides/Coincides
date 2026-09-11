@@ -190,6 +190,7 @@ import type {
   DocumentTypographyProfile,
   NoteCanvasRuntimeModel,
   PageFrameModel,
+  PageFrameSlot,
   PageStackBlockFragmentProjection,
   ImageCanvasObject,
   StructuredCanvasObject,
@@ -988,18 +989,30 @@ export function NoteWritingSurfaceLayer({
           && extension.pageStackPageIndex !== undefined
           && extension.pageStackPageIndex >= collapsedPreviewPages,
         );
-        if (hiddenByCollapsedStack) return null;
-        return extension?.slots
-          ? {
-            frameId: pageFrame.id,
-            headerFooterEnabled: extension.headerFooterEnabled,
-            pageNumberEnabled: extension.pageNumberEnabled,
-            slots: extension.slots,
-          }
-          : null;
+        if (hiddenByCollapsedStack || !extension?.slots) return null;
+        const displayedFrame = surfaceMode === 'page'
+          ? projectPageFrameToReadingSurface(pageFrame, noteCanvasRuntime.coordinateContract, pageOffsetX)
+          : pageFrame;
+        // Slots are world rectangles. Follow the same reading-column translation
+        // as the frame and guides while preserving their text and local geometry.
+        const slotOffsetX = displayedFrame.x - pageFrame.x;
+        const projectSlot = (slot: PageFrameSlot | undefined) => slot
+          ? { ...slot, rect: { ...slot.rect, x: slot.rect.x + slotOffsetX } }
+          : undefined;
+        return {
+          frameId: pageFrame.id,
+          headerFooterEnabled: extension.headerFooterEnabled,
+          pageNumberEnabled: extension.pageNumberEnabled,
+          slots: surfaceMode === 'page' ? {
+            ...extension.slots,
+            header: projectSlot(extension.slots.header),
+            footer: projectSlot(extension.slots.footer),
+            pageNumber: projectSlot(extension.slots.pageNumber),
+          } : extension.slots,
+        };
       })
       .filter((entry): entry is NonNullable<typeof entry> => Boolean(entry))
-  ), [pageFrameExtensionByFrameId, visiblePageFrames]);
+  ), [pageFrameExtensionByFrameId, visiblePageFrames, surfaceMode, noteCanvasRuntime.coordinateContract, pageOffsetX]);
   const noteRootGroupFolderId = useMemo(() => systemGroupFolderId({
     kind: 'note',
     project_id: projectId,

@@ -1,0 +1,77 @@
+{
+  "default": {
+    "border": "rgba(0, 0, 0, 0)",
+    "rect": {
+      "bottom": 319.878173828125,
+      "height": 78.0531005859375,
+      "left": 543.0531005859375,
+      "right": 1366.9468994140625,
+      "top": 241.8250732421875,
+      "width": 823.893798828125,
+      "x": 543.0531005859375,
+      "y": 241.8250732421875
+    },
+    "style": "dashed"
+  },
+  "hover": {
+    "border": "color(srgb 0.466667 0.478431 0.509804 / 0.28)",
+    "hover": true,
+    "rect": {
+      "bottom": 319.878173828125,
+      "height": 78.0531005859375,
+      "left": 543.0531005859375,
+      "right": 1366.9468994140625,
+      "top": 241.8250732421875,
+      "width": 823.893798828125,
+      "x": 543.0531005859375,
+      "y": 241.8250732421875
+    },
+    "style": "dashed"
+  },
+  "selected": {
+    "border": "rgb(37, 99, 235)",
+    "hover": true,
+    "rect": {
+      "bottom": 319.878173828125,
+      "height": 78.0531005859375,
+      "left": 543.0531005859375,
+      "right": 1366.9468994140625,
+      "top": 241.8250732421875,
+      "width": 823.893798828125,
+      "x": 543.0531005859375,
+      "y": 241.8250732421875
+    },
+    "style": "solid"
+  },
+  "layout": {
+    "handles": [
+      {
+        "cursor": "not-allowed",
+        "disabled": true,
+        "opacity": "0.28",
+        "title": "Exit Layout to move text units"
+      },
+      {
+        "cursor": "not-allowed",
+        "disabled": true,
+        "opacity": "0.28",
+        "title": "Exit Layout to move text units"
+      }
+    ],
+    "lines": 0,
+    "slots": [
+      {
+        "slot": "header",
+        "x": 543.0531005859375
+      },
+      {
+        "slot": "footer",
+        "x": 543.0531005859375
+      },
+      {
+        "slot": "page-number",
+        "x": 543.0531005859375
+      }
+    ]
+  }
+}

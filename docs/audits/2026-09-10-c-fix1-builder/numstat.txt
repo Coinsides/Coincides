@@ -1,0 +1,52 @@
+Tracked working-tree diff (not staged):
+23	8	client/src/pages/Notes/NoteDetail.module.css
+1	0	client/src/pages/Notes/canvasEngine/blocks/TextBlockProjection.tsx
+50	3	client/src/pages/Notes/canvasEngine/blocks/TextBlockProjection.unitHandle.test.tsx
+5	3	client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts
+3	0	client/src/pages/Notes/canvasEngine/hooks/useTextUnitHandleDrag.ts
+23	10	client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx
+4	5	client/src/pages/Notes/canvasEngine/layers/TextUnitGutterLayer.tsx
+89	4	client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx
+60	0	docs/agent-ops/handoffs/2026-09-10-v13-5-c-fix1-order.md
+
+New fixture and evidence files: additions/deletions/path; binary files shown by bytes. numstat.txt itself excluded.
+98	0	client/scripts/cFix1Smoke/fixture.tsx
+1	0	client/scripts/cFix1Smoke/index.html
+47	0	client/scripts/cFix1Smoke/mockApi.ts
+28	0	client/scripts/cFix1Smoke/README.md
+167	0	client/scripts/cFix1Smoke/start.mjs
+binary	69246 bytes	docs/audits/2026-09-10-c-fix1-builder/01-handle-menu.png
+binary	79979 bytes	docs/audits/2026-09-10-c-fix1-builder/01-layout-disabled.png
+1	0	docs/audits/2026-09-10-c-fix1-builder/02-cross-block-fixed-events.json
+binary	65597 bytes	docs/audits/2026-09-10-c-fix1-builder/02-cross-block-result-fixed.png
+1	0	docs/audits/2026-09-10-c-fix1-builder/02-extract-events.json
+binary	73875 bytes	docs/audits/2026-09-10-c-fix1-builder/02-extract-result.png
+1	0	docs/audits/2026-09-10-c-fix1-builder/02-final-drag-events.json
+1	0	docs/audits/2026-09-10-c-fix1-builder/02-reorder-events.json
+binary	76016 bytes	docs/audits/2026-09-10-c-fix1-builder/02-reorder-result.png
+1	0	docs/audits/2026-09-10-c-fix1-builder/02-runtime-after-drags.json
+1	0	docs/audits/2026-09-10-c-fix1-builder/02-runtime-after-extract.json
+binary	77734 bytes	docs/audits/2026-09-10-c-fix1-builder/02-visible-line.png
+77	0	docs/audits/2026-09-10-c-fix1-builder/03-04-visual-report.json
+binary	69170 bytes	docs/audits/2026-09-10-c-fix1-builder/03-hover-grey.png
+binary	77594 bytes	docs/audits/2026-09-10-c-fix1-builder/03-selected-blue.png
+binary	66900 bytes	docs/audits/2026-09-10-c-fix1-builder/04-slot-aligned-default.png
+binary	57377 bytes	docs/audits/2026-09-10-c-fix1-builder/05-overview.png
+248	0	docs/audits/2026-09-10-c-fix1-builder/05-print-overview-report.json
+83	0	docs/audits/2026-09-10-c-fix1-builder/06-board-range-undo-gap.json
+binary	78968 bytes	docs/audits/2026-09-10-c-fix1-builder/06-cross-block-selection.png
+31	0	docs/audits/2026-09-10-c-fix1-builder/06-keyboard-ink-report.json
+binary	79509 bytes	docs/audits/2026-09-10-c-fix1-builder/06-layout-block-move.png
+binary	65319 bytes	docs/audits/2026-09-10-c-fix1-builder/06-paper-ink.png
+1	0	docs/audits/2026-09-10-c-fix1-builder/after-click-events.json
+1	0	docs/audits/2026-09-10-c-fix1-builder/before-drag-events.json
+binary	52158 bytes	docs/audits/2026-09-10-c-fix1-builder/before-layout.png
+binary	52181 bytes	docs/audits/2026-09-10-c-fix1-builder/before-normal.png
+92	0	docs/audits/2026-09-10-c-fix1-builder/client-build.log
+309	0	docs/audits/2026-09-10-c-fix1-builder/client-full-unit.log
+1	0	docs/audits/2026-09-10-c-fix1-builder/cross-block-failure-events.json
+13	0	docs/audits/2026-09-10-c-fix1-builder/docs-check.log
+1	0	docs/audits/2026-09-10-c-fix1-builder/final-synthetic-db.json
+1	0	docs/audits/2026-09-10-c-fix1-builder/final-synthetic-runtime.json
+22	0	docs/audits/2026-09-10-c-fix1-builder/README.md
+142	0	docs/audits/2026-09-10-c-fix1-builder/server-build.log

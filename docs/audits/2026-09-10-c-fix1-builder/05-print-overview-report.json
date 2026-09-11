@@ -1,0 +1,248 @@
+{
+  "overview": {
+    "blockBorders": [
+      {
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "id": "c-fix1-a",
+        "outline": "rgb(245, 245, 245) none 3px"
+      },
+      {
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "id": "c-fix1-b",
+        "outline": "rgb(245, 245, 245) none 3px"
+      },
+      {
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "id": "c-fix1-roles",
+        "outline": "rgb(245, 245, 245) none 3px"
+      },
+      {
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "id": "c-fix1-page2",
+        "outline": "rgb(245, 245, 245) none 3px"
+      },
+      {
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "id": "c-fix1-code",
+        "outline": "rgb(245, 245, 245) none 3px"
+      },
+      {
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "id": "c-fix1-long",
+        "outline": "rgb(245, 245, 245) none 3px"
+      }
+    ],
+    "handles": [
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      },
+      {
+        "disabled": true,
+        "opacity": "0.28",
+        "visibility": "visible"
+      }
+    ],
+    "ink": 1,
+    "pages": 2,
+    "quiet": 0
+  },
+  "print": {
+    "blockBorders": [
+      {
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "id": "c-fix1-a",
+        "outline": "rgb(23, 24, 26) none 3px"
+      },
+      {
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "id": "c-fix1-b",
+        "outline": "rgb(23, 24, 26) none 3px"
+      },
+      {
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "id": "c-fix1-roles",
+        "outline": "rgb(23, 24, 26) none 3px"
+      },
+      {
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "id": "c-fix1-page2",
+        "outline": "rgb(23, 24, 26) none 3px"
+      },
+      {
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "id": "c-fix1-code",
+        "outline": "rgb(23, 24, 26) none 3px"
+      },
+      {
+        "border": "1px solid rgba(0, 0, 0, 0)",
+        "id": "c-fix1-long",
+        "outline": "rgb(23, 24, 26) none 3px"
+      }
+    ],
+    "ink": 1,
+    "mounted": true,
+    "pages": 2,
+    "quiet": 0,
+    "unitIndicators": 0
+  },
+  "afterPrint": {
+    "printRoots": 0
+  }
+}

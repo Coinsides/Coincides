@@ -1,0 +1,83 @@
+{
+    "outcome":  "FAIL: pre-existing Board range Undo persistence gap; not changed by C fix 1",
+    "interaction":  "Native Chrome cross-block Shift+Down selection, replacement typing, Control+Z; visible text restored",
+    "requests":  [
+                     {
+                         "path":  "/note-blocks/c-fix1-b/text-save",
+                         "base_revision":  3,
+                         "text_ranges":  [
+                                             {
+                                                 "id":  "f649b3e8-2b90-4eb4-a7a5-21b02644b496",
+                                                 "block_id":  "c-fix1-b",
+                                                 "text_flow_id":  "textflow-c-fix1-b",
+                                                 "text_unit_id":  "tu-1",
+                                                 "start_offset":  null,
+                                                 "end_offset":  null,
+                                                 "excerpt":  "Ta",
+                                                 "status":  "drifted",
+                                                 "pre_edit_offsets":  {
+                                                                          "start_offset":  0,
+                                                                          "end_offset":  2
+                                                                      }
+                                             }
+                                         ]
+                     },
+                     {
+                         "path":  "/note-blocks/c-fix1-b/text-save",
+                         "base_revision":  4,
+                         "text_ranges":  [
+                                             {
+                                                 "id":  "f649b3e8-2b90-4eb4-a7a5-21b02644b496",
+                                                 "block_id":  "c-fix1-b",
+                                                 "text_flow_id":  "textflow-c-fix1-b",
+                                                 "text_unit_id":  "tu-1",
+                                                 "start_offset":  0,
+                                                 "end_offset":  2,
+                                                 "excerpt":  "Ta",
+                                                 "status":  "active",
+                                                 "pre_edit_offsets":  null
+                                             }
+                                         ]
+                     }
+                 ],
+    "final_ranges":  [
+                         {
+                             "id":  "5b3a1614-b2b1-474c-b759-10024be4d507",
+                             "board_id":  "81664526-0608-415b-bcd2-474f0a8c2617",
+                             "note_id":  "c-fix1-note",
+                             "block_id":  "c-fix1-b",
+                             "text_flow_id":  "textflow-c-fix1-b",
+                             "text_unit_id":  "tu-1-move-1",
+                             "start_offset":  0,
+                             "end_offset":  2,
+                             "excerpt":  "We",
+                             "status":  "active",
+                             "at":  "2026-09-10T12:00:00.000Z",
+                             "created_at":  "2026-09-11T00:27:47.845Z",
+                             "updated_at":  "2026-09-11T00:27:47.845Z",
+                             "pre_edit_offsets":  null
+                         },
+                         {
+                             "id":  "f649b3e8-2b90-4eb4-a7a5-21b02644b496",
+                             "board_id":  "81664526-0608-415b-bcd2-474f0a8c2617",
+                             "note_id":  "c-fix1-note",
+                             "block_id":  "c-fix1-b",
+                             "text_flow_id":  "textflow-c-fix1-b",
+                             "text_unit_id":  "tu-1",
+                             "start_offset":  0,
+                             "end_offset":  2,
+                             "excerpt":  "Ta",
+                             "status":  "drifted",
+                             "at":  "2026-09-10T12:00:00.000Z",
+                             "created_at":  "2026-09-11T00:27:47.846Z",
+                             "updated_at":  "2026-09-11T00:43:17.306Z",
+                             "pre_edit_offsets":  {
+                                                      "start_offset":  0,
+                                                      "end_offset":  2
+                                                  }
+                         }
+                     ],
+    "cause":  "server/src/services/boardTextRanges.ts:114-118 keeps existing drifted/pre_edit_offsets even when Undo sends active/null; atomicTextSave reuses it",
+    "contract":  "B4/B6b Undo restores before snapshot; client history tests mock persistence and miss this server conflict",
+    "scope":  "Read-only diagnosis only. Requires HQ follow-up; no change to server/history semantics in this order."
+}

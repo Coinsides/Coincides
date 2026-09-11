@@ -1,0 +1,31 @@
+{
+  "crossBlockRight": {
+    "from": "c-fix1-a/tu-3 end",
+    "to": "c-fix1-b/tu-1",
+    "selection": [
+      0,
+      0
+    ]
+  },
+  "crossBlockLeft": {
+    "end": 62,
+    "focusedBlock": "c-fix1-a",
+    "focusedUnit": "tu-3",
+    "length": 62,
+    "start": 62
+  },
+  "grapheme": "Native Backspace removed entire family emoji; Ctrl+Z restored original",
+  "selection": "Native Shift+Down twice from middle anchor, typing replaced selected range; Ctrl+Z restored original two source units",
+  "ink": {
+    "nativeDraw": 1,
+    "undo": 0,
+    "redo": 1,
+    "erase": 0,
+    "undoErase": 1
+  },
+  "layoutBlockMove": {
+    "beforeY": 366,
+    "afterY": 408,
+    "undoY": 366
+  }
+}

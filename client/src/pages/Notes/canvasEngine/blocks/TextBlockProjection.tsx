@@ -1657,6 +1657,7 @@ export function TextBlockProjection({
               unitId={unit.id}
               role={unit.writing_role}
               disabled={readOnly || layoutMode}
+              layoutMode={layoutMode}
               menuOpen={textUnitContextMenu?.unitId === unit.id}
               onPointerDown={(event) => unitHandleDrag.start(unit.id, event)}
               onClickMenu={(point) => {

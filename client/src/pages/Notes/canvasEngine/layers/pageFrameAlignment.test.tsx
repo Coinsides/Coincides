@@ -1,4 +1,5 @@
 import { createRef } from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import { act, cleanup, fireEvent, render, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { buildNoteCanvasRuntimeModel } from '../engineModel';
@@ -17,6 +18,7 @@ import { NotePrintLayer } from './NotePrintLayer';
 import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
 import { resolveScreenRect } from '../placementContractService';
 import { useNoteCanvasResolvedLayoutModel } from '../hooks/useNoteCanvasLayoutModel';
+import { useNoteCanvasLayerProps, type UseNoteCanvasLayerPropsInput } from '../hooks/useNoteCanvasLayerProps';
 
 vi.mock('@/services/api', () => ({ default: {
   get: vi.fn().mockRejectedValue(new Error('No HTTP in synthetic alignment fixture')),
@@ -108,6 +110,19 @@ function propsFor(pageFrame: PageFrameModel, surfaceMode: SurfaceMode): NoteWrit
   };
 }
 
+function WritingSurfaceThroughLayerProps({ surfaceProps }: { surfaceProps: NoteWritingSurfaceLayerProps }) {
+  // Exercise the real production forwarding boundary. Chrome-only fields are
+  // unused because this fixture mounts the complete writing surface only.
+  const input = {
+    ...surfaceProps,
+    note: { id: surfaceProps.noteId, course_id: surfaceProps.projectId },
+    onWritingSurfaceFocusBlock: surfaceProps.onFocusBlock,
+    onWritingSurfaceRequestBlockFocus: surfaceProps.onRequestFocusBlock,
+  } as unknown as UseNoteCanvasLayerPropsInput;
+  const layers = useNoteCanvasLayerProps(input);
+  return layers ? <NoteWritingSurfaceLayer {...layers.documentLayerProps.writingSurfaceProps} /> : null;
+}
+
 function alignment(frameX: number, mode: SurfaceMode, options: {
   gear?: PageReadingGear; stepFactor?: number; frameOverrides?: Partial<PageFrameModel>;
 } = {}) {
@@ -150,6 +165,42 @@ it('C4 paper tools are available in writing and disabled in layout and read-only
   expect((view.getByRole('button', { name: /^Pen$/ }) as HTMLButtonElement).disabled).toBe(true);
   view.rerender(<NoteWritingSurfaceLayer {...props} contentReadOnly layoutMode={false} />);
   expect((view.getByRole('button', { name: /^Eraser$/ }) as HTMLButtonElement).disabled).toBe(true);
+});
+
+it('F15: the actual block/surface mouse chain preserves press feedback and a click opens the unit menu', () => {
+  const props = propsFor(frame(0), 'page');
+  const flow = createTextBlockContentV1('Synthetic handle press');
+  flow.units[0].id = 'synthetic-press-unit';
+  const source = { ...props.visibleBlocks[0], plain_text: flow.units[0].text,
+    content_json: { [TEXT_FLOW_CONTENT_KEY]: flow } };
+  const selectBlock = vi.fn();
+  const blockListMouseDown = vi.fn();
+  const extract = vi.fn(async () => true);
+  const view = render(<NoteWritingSurfaceLayer {...props} visibleBlocks={[source]} allBlocks={[source]}
+    contentReadOnly={false} layoutMode={false} onSelectBlock={selectBlock}
+    onBlockListMouseDown={blockListMouseDown} onExtractTextUnit={extract} />);
+  const handle = view.container.querySelector<HTMLElement>('[data-text-unit-handle="synthetic-press-unit"]')!;
+  const sendPointer = (type: string) => {
+    const event = new MouseEvent(type, { bubbles: true, cancelable: true,
+      button: 0, clientX: 85, clientY: 110 });
+    Object.defineProperties(event, { pointerId: { value: 23 }, pointerType: { value: 'mouse' }, isPrimary: { value: true } });
+    fireEvent(handle, event);
+  };
+  sendPointer('pointerdown');
+  expect(view.container.querySelector<HTMLElement>('[data-text-unit-drop-indicator="synthetic-press-unit"]')?.dataset.dropEdge).toBe('before');
+  // Exercise the real ancestor handlers even if a compatibility mousedown is
+  // delivered after pointerdown; it must neither focus a textarea nor lose the cue.
+  fireEvent.mouseDown(handle, { button: 0, clientX: 85, clientY: 110 });
+  expect(blockListMouseDown).toHaveBeenCalledTimes(1);
+  expect(selectBlock).not.toHaveBeenCalled();
+  expect(view.container.querySelector('[data-text-unit-drop-indicator="synthetic-press-unit"]')).not.toBeNull();
+  sendPointer('pointerup');
+  fireEvent.mouseUp(handle, { button: 0, clientX: 85, clientY: 110 });
+  fireEvent.click(handle, { clientX: 85, clientY: 110 });
+  expect(view.container.querySelector('[data-text-unit-drop-indicator]')).toBeNull();
+  expect(view.getByRole('menu', { name: 'Text unit' })).toBeTruthy();
+  expect(props.onApplyBlockTextFlowEdit).not.toHaveBeenCalled();
+  expect(extract).not.toHaveBeenCalled();
 });
 
 describe('B10 extraction landing through the actual writing surface', () => {
@@ -304,7 +355,7 @@ describe('B10 extraction landing through the actual writing surface', () => {
   });
 });
 
-describe('C3 cross-block unit handle events through the actual writing surface', () => {
+describe('C3/F15 cross-block unit handle events through the production layer-props bridge and writing surface', () => {
   let hit: ReturnType<typeof vi.fn<() => Element | null>>;
   let originalHit: PropertyDescriptor | undefined;
   beforeEach(() => {
@@ -347,9 +398,11 @@ describe('C3 cross-block unit handle events through the actual writing surface',
     const layouts = Object.fromEntries(blocks.map((block, index) => [block.id, { ...props.defaultDraftLayout, y: index * 180 }]));
     const move = vi.fn<NonNullable<NoteWritingSurfaceLayerProps['onMoveTextUnit']>>(async () => true);
     const extract = vi.fn<NonNullable<NoteWritingSurfaceLayerProps['onExtractTextUnit']>>(async () => true);
-    const view = render(<NoteWritingSurfaceLayer {...props} noteId={noteId} contentReadOnly={false} layoutMode={false}
-      allBlocks={blocks} visibleBlocks={blocks} sortedBlockCount={blocks.length} blockLayouts={layouts}
-      pageOffsetX={0} onMoveTextUnit={move} onExtractTextUnit={extract} />);
+    const view = render(<MemoryRouter><WritingSurfaceThroughLayerProps surfaceProps={{
+      ...props, noteId, contentReadOnly: false, layoutMode: false,
+      allBlocks: blocks, visibleBlocks: blocks, sortedBlockCount: blocks.length, blockLayouts: layouts,
+      pageOffsetX: 0, onMoveTextUnit: move, onExtractTextUnit: extract,
+    }} /></MemoryRouter>);
     const editor = (blockId: string) => view.container.querySelector<HTMLElement>(`[data-text-unit-editor="${blockId}"]`)!;
     const sourceEditor = editor(source.id);
     const targetEditor = editor(target.id);
@@ -376,6 +429,8 @@ describe('C3 cross-block unit handle events through the actual writing surface',
     'smoke 1: paints the target $edge line and dispatches one move with the original role and fields', ({ y, edge }) => {
       const editor = renderMoveSurface();
       const before = structuredClone(editor.blocks);
+      expect(editor.sourceEditor.dataset.textUnitMoveEnabled).toBe('true');
+      expect(editor.targetEditor.dataset.textUnitMoveEnabled).toBe('true');
       hit.mockReturnValue(editor.targetEditor.querySelector('[data-text-unit-row="c3-target-1"]'));
       editor.start(); editor.over(y);
       const line = editor.targetEditor.querySelector<HTMLElement>('[data-text-unit-drop-indicator="c3-target-1"]');
@@ -468,6 +523,36 @@ describe('C3 cross-block unit handle events through the actual writing surface',
 });
 
 describe('page frame decoration alignment on synthetic collections', () => {
+  it.each(['page', 'canvas'] as const)('F16: header/footer/page-number use the %s coordinate frame without moving stored slot geometry', (mode) => {
+    const pageFrame = { ...frame(208), y: 136,
+      contentInset: { left: 54, right: 86, top: 44, bottom: 92 } };
+    const props = propsFor(pageFrame, mode);
+    const original = structuredClone({ pageFrame, extensions: props.noteCanvasRuntime.pageFrameExtensions });
+    const view = render(<NoteWritingSurfaceLayer {...props} />);
+    const block = view.container.querySelector<HTMLElement>('[data-note-block-shell]')!;
+    const ruler = view.container.querySelector<HTMLElement>('[data-page-frame-guide="top-ruler"]')!;
+    const blockLeft = Number.parseFloat(block.style.left);
+    const blockTop = Number.parseFloat(block.style.top);
+    for (const [kind, topInFrame] of [
+      ['header', 18], ['footer', pageFrame.height - 72], ['page-number', pageFrame.height - 38],
+    ] as const) {
+      const slot = view.container.querySelector<HTMLElement>(`[data-page-frame-slot="${kind}"]`)!;
+      expect(slot).not.toBeNull();
+      expect(Number.parseFloat(slot.style.width)).toBe(Number.parseFloat(block.style.width));
+      expect(Number.parseFloat(slot.style.left)).toBe(Number.parseFloat(ruler.style.left));
+      // The frame's vertical origin stays shared by slots and the block column.
+      expect(Number.parseFloat(slot.style.top) - blockTop).toBe(topInFrame - pageFrame.contentInset.top);
+      if (mode === 'page') {
+        expect(Number.parseFloat(slot.style.left)).toBe(blockLeft);
+        expect(slot.closest('[data-page-display-scale]')).toBe(block.closest('[data-page-display-scale]'));
+      } else {
+        expect(Number.parseFloat(slot.style.left)).toBe(pageFrame.x + pageFrame.contentInset.left);
+        expect(Number.parseFloat(slot.style.top)).toBe(pageFrame.y + topInFrame);
+      }
+    }
+    expect({ pageFrame, extensions: props.noteCanvasRuntime.pageFrameExtensions }).toEqual(original);
+  });
+
   it('aligns the page top ruler with the block column despite a historical frame x', () => {
     const sample = alignment(80, 'page');
     expect(sample.rulerOffset, 'top ruler minus block column in CSS px').toBe(0);

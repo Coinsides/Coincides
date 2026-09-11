@@ -33,6 +33,9 @@ export function useTextUnitHandleDrag(options: Options) {
     cleanupRef.current?.();
     suppressClick.current = false;
     if (blocked()) return;
+    // A pressed handle acknowledges the gesture immediately. Keep the movement
+    // threshold below for mutations, so a click still opens the unit menu.
+    setDropTarget({ unitId, edge: 'before' });
     const pointerId = event.pointerId;
     const startX = event.clientX;
     const startY = event.clientY;

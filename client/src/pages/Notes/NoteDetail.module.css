@@ -1686,13 +1686,27 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   z-index: 2;
 }
 
-/* C2 samples: 18% faint / 28% quiet (selected) / 40% visible. Change this one value to switch. */
+/* Ordinary paper is frameless until hovered; selection and Layout keep their emphasis. */
 @media screen {
-  .blockBox[data-paper-block-border='quiet']:not(:hover):not(:focus-within) {
+  .blockBox[data-paper-block-border='quiet']:not(.blockBoxLayoutMode) {
+    border-color: transparent;
+    border-style: dashed;
+    transition: border-color 140ms ease-out;
+  }
+
+  .blockBox[data-paper-block-border='quiet']:not(.blockBoxLayoutMode):hover:not(:focus-within) {
     --paper-block-border-strength: 28%;
     border-color: color-mix(in srgb, var(--text-muted) var(--paper-block-border-strength), transparent);
+  }
+
+  .blockBoxLayoutMode[data-paper-block-border='quiet']:not(:hover):not(:focus-within) {
+    border-color: color-mix(in srgb, var(--text-muted) 28%, transparent);
     border-style: dashed;
   }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blockBox[data-paper-block-border='quiet']:not(.blockBoxLayoutMode) { transition: none; }
 }
 
 .blockBox:hover {
@@ -1708,7 +1722,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   background: color-mix(in srgb, var(--bg-hover) 18%, transparent);
 }
 
-.blockActive,
+.block.blockActive,
 .draftBlock {
   border-color: var(--border-focus);
   background: transparent;
@@ -1991,7 +2005,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 .textUnitGutterButton {
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
-  background: transparent;
+  background: color-mix(in srgb, var(--text-muted) 16%, transparent);
   color: var(--text-secondary);
 }
 
@@ -2008,8 +2022,8 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 
 .textUnitGutterButton:hover,
 .textUnitGutterButton:focus-visible {
-  border-color: var(--border-default);
-  background: var(--bg-hover);
+  border-color: color-mix(in srgb, var(--text-muted) 22%, transparent);
+  background: color-mix(in srgb, var(--text-muted) 28%, transparent);
   color: var(--text-primary);
 }
 
@@ -2020,10 +2034,11 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 }
 
 .textUnitGutterButton:disabled {
-  cursor: default;
+  opacity: 0.28;
+  cursor: not-allowed;
 }
 
-.textUnitGutterButton:active {
+.textUnitGutterButton:active:not(:disabled) {
   cursor: grabbing;
 }
 
