@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-09-10
+> **日期 (Updated)**: 2026-09-11
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 329 份文档。
+共 331 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -317,10 +317,12 @@
 | [handoffs/2026-09-10-v13-5-b7-atomic-text-save-order.md](handoffs/2026-09-10-v13-5-b7-atomic-text-save-order.md) | 13.5 B7 · 原子文本保存 | `done` | — | — |
 | [handoffs/2026-09-10-v13-5-b8-inline-lifecycle-hardening-order.md](handoffs/2026-09-10-v13-5-b8-inline-lifecycle-hardening-order.md) | 13.5 B8 · inline 加固 | `done` | — | — |
 | [handoffs/2026-09-10-v13-5-b9-grapheme-and-contract-order.md](handoffs/2026-09-10-v13-5-b9-grapheme-and-contract-order.md) | 13.5 B9 · 切片与契约 | `done` | — | — |
+| [handoffs/2026-09-10-v13-5-c-fix1-order.md](handoffs/2026-09-10-v13-5-c-fix1-order.md) | C 走查修一 | `done(HQ 收口:F15+三态+F16 收货;F17 范围撤销持久化拆单)` | — | — |
+| [handoffs/2026-09-10-v13-5-c-fix2-order.md](handoffs/2026-09-10-v13-5-c-fix2-order.md) | C 走查修二 · F17 | `done(HQ 收口:显式恢复通道闭环,阳性对照闸保牙)` | — | — |
 | [handoffs/2026-09-10-v13-5-c1-board-smalls-order.md](handoffs/2026-09-10-v13-5-c1-board-smalls-order.md) | 13.5 C1 · 板面两小件 | `done（builder 施工回执；docs 索引/完整总门留 HQ）` | — | — |
 | [handoffs/2026-09-10-v13-5-c2-visual-language-order.md](handoffs/2026-09-10-v13-5-c2-visual-language-order.md) | 13.5 C2 · 视觉语言批 | `done（builder 施工回执；docs 索引/完整总门与凭据扫描留 HQ）` | — | — |
 | [handoffs/2026-09-10-v13-5-c3-cross-block-unit-move-order.md](handoffs/2026-09-10-v13-5-c3-cross-block-unit-move-order.md) | 13.5 C3 · 跨块迁居 | `done(HQ 收口:补裁一落地,普通块碰撞停线解除)` | — | — |
-| [handoffs/2026-09-10-v13-5-c4-paper-ink-order.md](handoffs/2026-09-10-v13-5-c4-paper-ink-order.md) | 13.5 C4 · 纸上手绘 | `done（builder 施工回执；完整总门末项凭据扫描留 HQ）` | — | — |
+| [handoffs/2026-09-10-v13-5-c4-paper-ink-order.md](handoffs/2026-09-10-v13-5-c4-paper-ink-order.md) | 13.5 C4 · 纸上手绘 | `done(HQ 收口:波次 C 末单收官)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
 | [handoffs/plans/v12-9-intake-and-selection-program.md](handoffs/plans/v12-9-intake-and-selection-program.md) | V12.9 入库体系与选品纲领 | `active` | — | — |
