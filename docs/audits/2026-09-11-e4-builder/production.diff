@@ -1,0 +1,791 @@
+--- a/client/src/pages/Notes/NoteDetail.module.css
++++ b/client/src/pages/Notes/NoteDetail.module.css
+@@ -1140,2 +1140,9 @@
+-  visibility: visible;
+-}
++  visibility: hidden;
++}
++
++/* Overview occupies the work area; the reading surface keeps its own sizing. */
++.page:has([data-note-overview-root]) .trayViewport,
++.documentShell[data-note-overview-active='true'] { width: 100%; }
++.page:has([data-note-overview-root]) .contentGroupLauncher,
++.page:has([data-note-overview-root]) .traySidebar { display: none; }
++:global([data-app-main-scroll='true']):has([data-note-overview-root]) { overflow: hidden; }
+--- /dev/null
++++ b/client/src/pages/Notes/canvasEngine/overviewLayout.ts
+@@ -0,0 +1,36 @@
++import type { PageFrameModel } from './types';
++
++export const OVERVIEW_GAP = 24;
++export const OVERVIEW_PAGE_FOOTER = 24;
++export const OVERVIEW_PADDING = 24;
++const MIN_PAGE_WIDTH = 280;
++
++/** Display geometry only. The original frames and print fragments stay untouched. */
++export function overviewLayout(frames: readonly PageFrameModel[], width: number, height: number) {
++  const available = Math.max(1, width);
++  const columns = Math.min(Math.max(1, frames.length), 4,
++    Math.max(1, Math.floor((available + OVERVIEW_GAP) / (MIN_PAGE_WIDTH + OVERVIEW_GAP))));
++  const columnWidth = (available - OVERVIEW_GAP * (columns - 1)) / columns;
++  const pageWidth = frames.length === 1
++    ? Math.min(columnWidth, Math.max(1, height - OVERVIEW_PAGE_FOOTER) * frames[0].width / frames[0].height)
++    : columnWidth;
++  let top = 0;
++  const pages: { top: number; height: number; scale: number }[] = [];
++  for (let start = 0; start < frames.length; start += columns) {
++    const row = frames.slice(start, start + columns);
++    let rowHeight = 0;
++    for (const frame of row) {
++      const scale = pageWidth / frame.width;
++      const pageHeight = frame.height * scale;
++      pages.push({ top, height: pageHeight, scale });
++      rowHeight = Math.max(rowHeight, pageHeight + OVERVIEW_PAGE_FOOTER);
++    }
++    top += rowHeight + OVERVIEW_GAP;
++  }
++  return { columns, pageWidth, pages, height: Math.max(0, top - OVERVIEW_GAP) };
++}
++
++/** One viewport of overscan in each direction; distant page content is unmounted. */
++export function overviewPageIsVisible(top: number, height: number, scrollTop: number, viewportHeight: number) {
++  return top + height >= scrollTop - viewportHeight && top <= scrollTop + viewportHeight * 2;
++}
+--- a/client/src/pages/Notes/canvasEngine/hooks/useNoteOverviewController.ts
++++ b/client/src/pages/Notes/canvasEngine/hooks/useNoteOverviewController.ts
+@@ -18,83 +18,97 @@
+-  const inScope = state.noteId === noteId && state.surfaceMode === surfaceMode;
+-  const open = inScope && surfaceMode === 'page' && state.open;
+-
+-  useLayoutEffect(() => {
+-    if (inScope) return;
+-    scrollBeforeOverview.current = null;
+-    focusedBeforeOverview.current = null;
+-    pendingReturn.current = false;
+-    pendingOpen.current = false;
+-    setState({ noteId, surfaceMode, open: false, targetFrameId: null });
+-  }, [inScope, noteId, surfaceMode]);
+-
+-  useLayoutEffect(() => {
+-    if (!inScope) return;
+-    const blockList = blockListRef.current;
+-    const appMain = blockList?.closest<HTMLElement>('[data-app-main-scroll="true"]');
+-    if (!appMain) return;
+-    if (open) {
+-      if (!pendingOpen.current) return;
+-      pendingOpen.current = false;
+-      const shell = blockList?.closest<HTMLElement>('[data-note-overview-active]');
+-      if (shell) appMain.scrollTo({
+-        top: Math.max(0, appMain.scrollTop + shell.getBoundingClientRect().top - appMain.getBoundingClientRect().top),
+-        behavior: 'auto',
+-      });
+-      return;
+-    }
+-    if (!pendingReturn.current) return;
+-    // The reading layer may need one layout commit to adopt a window/modal
+-    // resize that happened during overview. Navigate with its final DOM scale.
+-    const request = requestAnimationFrame(() => {
+-      if (!pendingReturn.current) return;
+-      pendingReturn.current = false;
+-      const frame = pageFrames.find((page) => page.id === state.targetFrameId);
+-      if (frame) {
+-        // Continuous reading has one horizontal origin, independent of world x.
+-        scrollPageReadingToRect(blockList, { ...frame, x: 0 });
+-      } else if (scrollBeforeOverview.current) {
+-        appMain.scrollTo({ ...scrollBeforeOverview.current, behavior: 'auto' });
+-      }
+-      // Resume the existing caret without moving the reading destination. The
+-      // next ordinary blur can then save its draft, as before overview opened.
+-      const previousEditor = focusedBeforeOverview.current;
+-      const focusTarget = previousEditor?.isConnected ? previousEditor : frame ? blockList
+-        : blockList?.closest<HTMLElement>('[data-note-overview-active]')
+-          ?.querySelector<HTMLButtonElement>('[data-note-overview-toggle]');
+-      focusTarget?.focus({ preventScroll: true });
+-      focusedBeforeOverview.current = null;
+-    });
+-    return () => cancelAnimationFrame(request);
+-  }, [open, inScope, state.targetFrameId, blockListRef, pageFrames]);
+-
+-  const close = (targetFrameId: string | null = null) => {
+-    pendingReturn.current = true;
+-    setState({ noteId, surfaceMode, open: false, targetFrameId });
+-  };
+-  const toggle = () => {
+-    if (open) { close(); return; }
+-    if (surfaceMode !== 'page') return;
+-    const appMain = blockListRef.current?.closest<HTMLElement>('[data-app-main-scroll="true"]');
+-    scrollBeforeOverview.current = appMain ? { top: appMain.scrollTop, left: appMain.scrollLeft } : null;
+-    const focused = document.activeElement;
+-    focusedBeforeOverview.current = focused instanceof HTMLElement && blockListRef.current?.contains(focused)
+-      ? focused : null;
+-    pendingReturn.current = false;
+-    pendingOpen.current = true;
+-    setState({ noteId, surfaceMode, open: true, targetFrameId: null });
+-  };
+-
+-  const resumeForExit = () => {
+-    if (!open) return;
+-    // The host's ordinary leave workflow will blur and wait for its saves.
+-    // Restore the suspended editor before that workflow, without saving here.
+-    flushSync(() => setState({ noteId, surfaceMode, open: false, targetFrameId: null }));
+-    pendingReturn.current = false;
+-    pendingOpen.current = false;
+-    const editor = focusedBeforeOverview.current;
+-    if (editor?.isConnected) editor.focus({ preventScroll: true });
+-    focusedBeforeOverview.current = null;
+-  };
+-
+-  return { open, toggle, close: () => close(), selectPage: (frameId: string) => close(frameId),
+-    targetFrameId: inScope ? state.targetFrameId : null, resumeForExit };
++  const [currentFrameId, setCurrentFrameId] = useState<string | null>(null);
++  const inScope = state.noteId === noteId && state.surfaceMode === surfaceMode;
++  const open = inScope && surfaceMode === 'page' && state.open;
++
++  useLayoutEffect(() => {
++    if (inScope) return;
++    scrollBeforeOverview.current = null;
++    focusedBeforeOverview.current = null;
++    pendingReturn.current = false;
++    pendingOpen.current = false;
++    setState({ noteId, surfaceMode, open: false, targetFrameId: null });
++  }, [inScope, noteId, surfaceMode]);
++
++  useLayoutEffect(() => {
++    if (!inScope) return;
++    const blockList = blockListRef.current;
++    const appMain = blockList?.closest<HTMLElement>('[data-app-main-scroll="true"]');
++    if (!appMain) return;
++    if (open) {
++      if (!pendingOpen.current) return;
++      pendingOpen.current = false;
++      const shell = blockList?.closest<HTMLElement>('[data-note-overview-active]');
++      if (shell) appMain.scrollTo({
++        top: Math.max(0, appMain.scrollTop + shell.getBoundingClientRect().top - appMain.getBoundingClientRect().top),
++        behavior: 'auto',
++      });
++      return;
++    }
++    if (!pendingReturn.current) return;
++    // The reading layer may need one layout commit to adopt a window/modal
++    // resize that happened during overview. Navigate with its final DOM scale.
++    const request = requestAnimationFrame(() => {
++      if (!pendingReturn.current) return;
++      pendingReturn.current = false;
++      const frame = pageFrames.find((page) => page.id === state.targetFrameId);
++      if (frame) {
++        // Continuous reading has one horizontal origin, independent of world x.
++        scrollPageReadingToRect(blockList, { ...frame, x: 0 });
++      } else if (scrollBeforeOverview.current) {
++        appMain.scrollTo({ ...scrollBeforeOverview.current, behavior: 'auto' });
++      }
++      // Resume the existing caret without moving the reading destination. The
++      // next ordinary blur can then save its draft, as before overview opened.
++      const previousEditor = focusedBeforeOverview.current;
++      const focusTarget = previousEditor?.isConnected ? previousEditor : frame ? blockList
++        : blockList?.closest<HTMLElement>('[data-note-overview-active]')
++          ?.querySelector<HTMLButtonElement>('[data-note-overview-toggle]');
++      focusTarget?.focus({ preventScroll: true });
++      focusedBeforeOverview.current = null;
++    });
++    return () => cancelAnimationFrame(request);
++  }, [open, inScope, state.targetFrameId, blockListRef, pageFrames]);
++
++  const close = (targetFrameId: string | null = null) => {
++    pendingReturn.current = true;
++    setState({ noteId, surfaceMode, open: false, targetFrameId });
++  };
++  const toggle = () => {
++    if (open) { close(); return; }
++    if (surfaceMode !== 'page') return;
++    const appMain = blockListRef.current?.closest<HTMLElement>('[data-app-main-scroll="true"]');
++    scrollBeforeOverview.current = appMain ? { top: appMain.scrollTop, left: appMain.scrollLeft } : null;
++    const blockList = blockListRef.current;
++    if (blockList && appMain) {
++      const scale = Number(blockList.closest<HTMLElement>('[data-page-display-scale]')?.dataset.pageDisplayScale) || 1;
++      const scrollRect = appMain.getBoundingClientRect();
++      const readingY = (scrollRect.top + Math.min(80, scrollRect.height * 0.2)
++        - blockList.getBoundingClientRect().top) / scale;
++      // Read position is ephemeral, independent of the saved collection selection.
++      const nearest = pageFrames.reduce<PageFrameModel | null>((best, frame) => {
++        const distance = (page: PageFrameModel) => Math.max(page.y - readingY, readingY - page.y - page.height, 0);
++        return !best || distance(frame) < distance(best) ? frame : best;
++      }, null);
++      setCurrentFrameId(nearest?.id ?? null);
++    } else setCurrentFrameId(pageFrames[0]?.id ?? null);
++    const focused = document.activeElement;
++    focusedBeforeOverview.current = focused instanceof HTMLElement && blockListRef.current?.contains(focused)
++      ? focused : null;
++    pendingReturn.current = false;
++    pendingOpen.current = true;
++    setState({ noteId, surfaceMode, open: true, targetFrameId: null });
++  };
++
++  const resumeForExit = () => {
++    if (!open) return;
++    // The host's ordinary leave workflow will blur and wait for its saves.
++    // Restore the suspended editor before that workflow, without saving here.
++    flushSync(() => setState({ noteId, surfaceMode, open: false, targetFrameId: null }));
++    pendingReturn.current = false;
++    pendingOpen.current = false;
++    const editor = focusedBeforeOverview.current;
++    if (editor?.isConnected) editor.focus({ preventScroll: true });
++    focusedBeforeOverview.current = null;
++  };
++
++  return { open, toggle, close: () => close(), selectPage: (frameId: string) => close(frameId),
++    targetFrameId: inScope ? state.targetFrameId : null, currentFrameId, resumeForExit };
+--- a/client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.tsx
+@@ -1,184 +1,145 @@
+-import { useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
+-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+-import { documentTypographyToCssVars } from '../typographyProfileService';
+-import { NoteReadOnlyPageContent } from './NoteReadOnlyPageContent';
+-import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
+-import './NoteOverviewLayer.css';
+-
+-export const OVERVIEW_MIN_THUMBNAIL_WIDTH = 160;
+-const MAX_THUMBNAIL_WIDTH = 220;
+-const THUMBNAIL_GAP = 20;
+-const ROWS_PER_SCREEN = 2;
+-const MAX_PREVIEW_ASPECT_RATIO = 1.6;
+-
+-type OverviewInput = Pick<NoteWritingSurfaceLayerProps,
+-  'noteId' | 'noteCanvasRuntime' | 'visibleBlocks' | 'blockTextDrafts'
+-  | 'blockTextFlowDrafts' | 'blockFieldDrafts' | 'documentTypographyProfile'
+-  | 'anchorsBySourceRef' | 'selectedPageFrameId'>;
+-
+-export interface NoteOverviewLayerProps {
+-  writingSurfaceProps: OverviewInput;
+-  onSelectPage: (frameId: string) => void;
+-  onClose: () => void;
+-}
+-
+-function OverviewPages({ writingSurfaceProps: input, onSelectPage, onClose }: NoteOverviewLayerProps) {
+-  const rootRef = useRef<HTMLElement>(null);
+-  const viewportRef = useRef<HTMLDivElement>(null);
+-  const [availableWidth, setAvailableWidth] = useState(0);
+-  const [firstPageIndex, setFirstPageIndex] = useState(0);
+-
+-  useLayoutEffect(() => {
+-    const viewport = viewportRef.current;
+-    if (!viewport) return;
+-    const measure = () => setAvailableWidth(viewport.clientWidth);
+-    measure();
+-    const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(measure) : null;
+-    observer?.observe(viewport);
+-    window.addEventListener('resize', measure);
+-    rootRef.current?.focus({ preventScroll: true });
+-    return () => {
+-      observer?.disconnect();
+-      window.removeEventListener('resize', measure);
+-    };
+-  }, []);
+-
+-  const columns = availableWidth >= 800 ? 4 : availableWidth >= 560 ? 3 : 2;
+-  const thumbnailWidth = Math.max(OVERVIEW_MIN_THUMBNAIL_WIDTH, Math.min(
+-    MAX_THUMBNAIL_WIDTH,
+-    (availableWidth - THUMBNAIL_GAP * (columns - 1)) / columns,
+-  ));
+-  // Keep the engine's page order and fragment exclusions. No layout or frame is rewritten.
+-  const frames = input.noteCanvasRuntime.pageFrames;
+-  const capacity = columns * ROWS_PER_SCREEN;
+-  const screenCount = Math.max(1, Math.ceil(frames.length / capacity));
+-  const screen = Math.min(screenCount - 1, Math.floor(firstPageIndex / capacity));
+-  const start = screen * capacity;
+-  const end = Math.min(start + capacity, frames.length);
+-  const changeScreen = (direction: -1 | 1) => {
+-    setFirstPageIndex((screen + direction) * capacity);
+-    viewportRef.current?.scrollTo?.({ top: 0, left: 0 });
+-  };
+-
+-  return <section
+-    ref={rootRef}
+-    className="noteOverview"
+-    data-note-overview="true"
+-    data-note-overview-root="true"
+-    data-note-id={input.noteId}
+-    aria-label="Page overview"
+-    tabIndex={-1}
+-    onKeyDown={(event) => {
+-      event.stopPropagation();
+-      if (event.key !== 'Escape') return;
+-      event.preventDefault();
+-      onClose();
+-    }}
+-  >
+-    <header className="noteOverviewHeader">
+-      <div className="noteOverviewHeading">
+-        <h2>Page overview</h2>
+-        <p>Select a page to return to reading.</p>
+-      </div>
+-      <button
+-        type="button"
+-        className="noteOverviewClose"
+-        data-note-overview-close="true"
+-        onClick={onClose}
+-        aria-label="Close page overview"
+-        title="Close page overview (Esc)"
+-      ><X size={18} aria-hidden="true" /></button>
+-    </header>
+-    <div ref={viewportRef} className="noteOverviewViewport" data-note-overview-viewport="true">
+-      {frames.length === 0 ? <p className="noteOverviewEmpty">No pages to preview.</p> : <div
+-        className="noteOverviewGrid"
+-        data-note-overview-grid="true"
+-        data-columns={columns}
+-        data-screen={screen + 1}
+-        data-screen-count={screenCount}
+-        style={{
+-          '--overview-columns': columns,
+-          '--overview-thumbnail-width': `${thumbnailWidth}px`,
+-          '--overview-gap': `${THUMBNAIL_GAP}px`,
+-        } as CSSProperties}
+-      >
+-        {frames.slice(start, end).map((frame, index) => {
+-          const pageNumber = start + index + 1;
+-          const scale = thumbnailWidth / frame.width;
+-          const isLongPage = frame.height > frame.width * MAX_PREVIEW_ASPECT_RATIO;
+-          const previewHeight = Math.min(frame.height, frame.width * MAX_PREVIEW_ASPECT_RATIO) * scale;
+-          const selected = input.selectedPageFrameId === frame.id;
+-          return <div className="noteOverviewCard" key={frame.id}>
+-            <div
+-              className="noteOverviewPreview"
+-              data-note-overview-preview="true"
+-              data-long-page={isLongPage ? 'true' : undefined}
+-              aria-hidden="true"
+-              {...{ inert: '' }}
+-              style={{ width: thumbnailWidth, height: previewHeight }}
+-            >
+-              <div
+-                className="noteOverviewCanvas"
+-                data-note-overview-canvas="true"
+-                style={{
+-                  ...documentTypographyToCssVars(input.documentTypographyProfile),
+-                  width: frame.width,
+-                  height: frame.height,
+-                  transform: `scale(${scale})`,
+-                } as CSSProperties}
+-              >
+-                <NoteReadOnlyPageContent
+-                  frame={frame}
+-                  fragments={input.noteCanvasRuntime.blockFragmentProjections}
+-                  canvasObjects={input.noteCanvasRuntime.canvasObjects}
+-                  canvasPlacements={input.noteCanvasRuntime.canvasPlacements}
+-                  visibleBlocks={input.visibleBlocks}
+-                  blockTextDrafts={input.blockTextDrafts}
+-                  blockTextFlowDrafts={input.blockTextFlowDrafts}
+-                  blockFieldDrafts={input.blockFieldDrafts}
+-                  anchorsBySourceRef={input.anchorsBySourceRef}
+-                />
+-              </div>
+-            </div>
+-            <button
+-              type="button"
+-              className="noteOverviewPage"
+-              data-note-overview-page="true"
+-              data-page-frame-id={frame.id}
+-              aria-label={`Read page ${pageNumber}${isLongPage ? ', long page preview cropped' : ''}`}
+-              aria-current={selected ? 'page' : undefined}
+-              onClick={() => onSelectPage(frame.id)}
+-            >
+-              <span className="noteOverviewPageLabel">
+-                <span>Page {pageNumber}</span>
+-                {isLongPage && <span className="noteOverviewLongPage">Long page</span>}
+-              </span>
+-            </button>
+-          </div>;
+-        })}
+-      </div>}
+-    </div>
+-    <footer className="noteOverviewFooter">
+-      <p aria-live="polite" aria-atomic="true">
+-        {frames.length ? `Pages ${start + 1}–${end} of ${frames.length}` : '0 pages'}
+-      </p>
+-      <nav className="noteOverviewPagination" aria-label="Overview screens">
+-        <button
+-          type="button"
+-          data-note-overview-previous="true"
+-          onClick={() => changeScreen(-1)}
+-          disabled={screen === 0}
+-        ><ChevronLeft size={16} aria-hidden="true" />Previous screen</button>
+-        <span>{screen + 1} / {screenCount}</span>
+-        <button
+-          type="button"
+-          data-note-overview-next="true"
+-          onClick={() => changeScreen(1)}
+-          disabled={screen + 1 >= screenCount}
+-        >Next screen<ChevronRight size={16} aria-hidden="true" /></button>
+-      </nav>
+-    </footer>
+-  </section>;
+-}
+-
+-/** This view owns presentation state only; changing notes discards its current screen. */
++import { memo, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
++import { X } from 'lucide-react';
++import { documentTypographyToCssVars } from '../typographyProfileService';
++import { OVERVIEW_GAP, OVERVIEW_PADDING, overviewLayout, overviewPageIsVisible } from '../overviewLayout';
++import type { PageFrameModel } from '../types';
++import { NoteReadOnlyPageContent } from './NoteReadOnlyPageContent';
++import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
++import './NoteOverviewLayer.css';
++
++type OverviewInput = Pick<NoteWritingSurfaceLayerProps,
++  'noteId' | 'noteCanvasRuntime' | 'visibleBlocks' | 'blockTextDrafts'
++  | 'blockTextFlowDrafts' | 'blockFieldDrafts' | 'documentTypographyProfile'
++  | 'anchorsBySourceRef' | 'selectedPageFrameId'>;
++
++export interface NoteOverviewLayerProps {
++  writingSurfaceProps: OverviewInput;
++  currentPageFrameId?: string | null;
++  onSelectPage: (frameId: string) => void;
++  onClose: () => void;
++}
++
++const OverviewPage = memo(function OverviewPage({ input, frame, pageNumber, width, height, scale,
++  selected, renderContent, onSelectPage }: {
++  input: OverviewInput; frame: PageFrameModel; pageNumber: number; width: number; height: number;
++  scale: number; selected: boolean; renderContent: boolean; onSelectPage: (frameId: string) => void;
++}) {
++  return <div className="noteOverviewSheet" data-note-overview-sheet="true"
++    data-page-frame-id={frame.id} data-content-mounted={renderContent ? 'true' : 'false'}>
++    <div className="noteOverviewPreview" data-note-overview-preview="true"
++      aria-hidden="true" {...{ inert: '' }} style={{ width, height }}>
++      {renderContent && <div className="noteOverviewCanvas" data-note-overview-canvas="true"
++        style={{ ...documentTypographyToCssVars(input.documentTypographyProfile),
++          width: frame.width, height: frame.height, transform: `scale(${scale})` } as CSSProperties}>
++        <NoteReadOnlyPageContent frame={frame}
++          fragments={input.noteCanvasRuntime.blockFragmentProjections}
++          canvasObjects={input.noteCanvasRuntime.canvasObjects}
++          canvasPlacements={input.noteCanvasRuntime.canvasPlacements}
++          visibleBlocks={input.visibleBlocks} blockTextDrafts={input.blockTextDrafts}
++          blockTextFlowDrafts={input.blockTextFlowDrafts} blockFieldDrafts={input.blockFieldDrafts}
++          anchorsBySourceRef={input.anchorsBySourceRef} />
++      </div>}
++    </div>
++    <button type="button" className="noteOverviewPage" data-note-overview-page="true"
++      data-page-frame-id={frame.id} aria-label={`Read page ${pageNumber}`}
++      aria-current={selected ? 'page' : undefined} onClick={() => onSelectPage(frame.id)}>
++      <span className="noteOverviewPageLabel">{pageNumber}</span>
++    </button>
++  </div>;
++});
++
++function OverviewPages({ writingSurfaceProps: input, currentPageFrameId, onSelectPage, onClose }: NoteOverviewLayerProps) {
++  const rootRef = useRef<HTMLElement>(null);
++  const viewportRef = useRef<HTMLDivElement>(null);
++  const positioned = useRef(false);
++  const [size, setSize] = useState({ width: 0, height: 0 });
++  const [scrollTop, setScrollTop] = useState(0);
++  const previousLayout = useRef<ReturnType<typeof overviewLayout> | null>(null);
++  const frames = input.noteCanvasRuntime.pageFrames;
++  const currentId = currentPageFrameId ?? input.selectedPageFrameId;
++  const layout = useMemo(() => overviewLayout(frames,
++    Math.max(1, size.width - OVERVIEW_PADDING * 2), Math.max(1, size.height - OVERVIEW_PADDING * 2)),
++  [frames, size]);
++
++  useLayoutEffect(() => {
++    const viewport = viewportRef.current;
++    const root = rootRef.current;
++    if (!viewport || !root) return;
++    const appMain = root.closest<HTMLElement>('[data-app-main-scroll="true"]');
++    const measure = () => {
++      // Fill the work viewport, including embedded note hosts, without changing reading geometry.
++      const hostBottom = appMain?.getBoundingClientRect().bottom || window.innerHeight;
++      const top = Math.max(0, root.getBoundingClientRect().top);
++      root.style.height = `${Math.max(240, Math.min(window.innerHeight, hostBottom) - top - 12)}px`;
++      const next = { width: viewport.clientWidth || root.clientWidth || window.innerWidth,
++        height: viewport.clientHeight || 600 };
++      setSize((previous) => previous.width === next.width && previous.height === next.height ? previous : next);
++    };
++    measure();
++    const observer = typeof ResizeObserver === 'function' ? new ResizeObserver(measure) : null;
++    observer?.observe(viewport);
++    if (appMain) observer?.observe(appMain);
++    window.addEventListener('resize', measure);
++    root.focus({ preventScroll: true });
++    return () => { observer?.disconnect(); window.removeEventListener('resize', measure); };
++  }, []);
++
++  useLayoutEffect(() => {
++    const viewport = viewportRef.current;
++    if (!viewport || size.width === 0) return;
++    if (!positioned.current) {
++      positioned.current = true;
++      const index = frames.findIndex((frame) => frame.id === currentId);
++      viewport.scrollTop = Math.max(0, (layout.pages[index]?.top ?? 0) - OVERVIEW_PADDING);
++    } else if (previousLayout.current && (previousLayout.current.pageWidth !== layout.pageWidth
++      || previousLayout.current.columns !== layout.columns)) {
++      // Retain the page being browsed when columns change, rather than retaining
++      // a pixel offset that could now point hundreds of pages earlier.
++      const previous = previousLayout.current;
++      const index = previous.pages.findIndex((page) => page.top + page.height >= scrollTop - OVERVIEW_PADDING);
++      const before = previous.pages[index];
++      const after = layout.pages[index];
++      if (before && after) {
++        const offset = (scrollTop - OVERVIEW_PADDING - before.top) / before.scale;
++        viewport.scrollTop = scrollTop === 0 ? 0
++          : Math.max(0, OVERVIEW_PADDING + after.top + offset * after.scale);
++      }
++    }
++    previousLayout.current = layout;
++    // Resizing can clamp the native scroll offset; keep the lazy window in sync.
++    setScrollTop(viewport.scrollTop);
++  }, [layout, currentId, frames, size.width]);
++
++  return <section ref={rootRef} className="noteOverview" data-note-overview="true"
++    data-note-overview-root="true" data-note-id={input.noteId} aria-label="Page overview" tabIndex={-1}
++    onKeyDown={(event) => {
++      event.stopPropagation();
++      if (event.key === 'Escape') { event.preventDefault(); onClose(); }
++    }}>
++    <header className="noteOverviewHeader">
++      <h2>Overview <span>{frames.length}</span></h2>
++      <button type="button" className="noteOverviewClose" data-note-overview-close="true"
++        onClick={onClose} aria-label="Close page overview" title="Close page overview (Esc)">
++        <X size={18} aria-hidden="true" />
++      </button>
++    </header>
++    <div ref={viewportRef} className="noteOverviewViewport" data-note-overview-viewport="true"
++      onScroll={(event) => setScrollTop(event.currentTarget.scrollTop)}>
++      {frames.length === 0 ? <p className="noteOverviewEmpty">No pages to preview.</p> : <div
++        className="noteOverviewGrid" data-note-overview-grid="true" data-columns={layout.columns}
++        data-single-page={frames.length === 1 ? 'true' : undefined}
++        style={{ '--overview-columns': layout.columns, '--overview-page-width': `${layout.pageWidth}px`,
++          '--overview-gap': `${OVERVIEW_GAP}px` } as CSSProperties}>
++        {frames.map((frame, index) => {
++          const page = layout.pages[index];
++          return <OverviewPage key={frame.id} input={input} frame={frame} pageNumber={index + 1}
++            width={layout.pageWidth} height={page.height} scale={page.scale} selected={currentId === frame.id}
++            renderContent={size.width > 0 && overviewPageIsVisible(page.top + OVERVIEW_PADDING,
++              page.height, scrollTop, size.height)} onSelectPage={onSelectPage} />;
++        })}
++      </div>}
++    </div>
++  </section>;
++}
++
++/** Presentation state is discarded on note changes; no page collection writes. */
+--- a/client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.css
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.css
+@@ -6,139 +6,77 @@
+-  min-height: 360px;
+-  max-height: calc(100vh - 180px);
+-  padding: 20px;
+-  background: var(--bg-secondary);
+-  color: var(--text-primary);
+-  outline: none;
+-}
+-
+-.noteOverviewHeader,
+-.noteOverviewFooter {
+-  display: flex;
+-  flex: 0 0 auto;
+-  align-items: center;
+-  justify-content: space-between;
+-  gap: 16px;
+-}
+-
+-.noteOverviewHeader { margin-bottom: 20px; }
+-.noteOverviewHeading { min-width: 0; }
+-.noteOverviewHeading h2 { margin: 0; font-size: 16px; font-weight: 650; }
+-.noteOverviewHeading p { margin: 4px 0 0; color: var(--text-secondary); font-size: 13px; }
+-
+-.noteOverviewClose,
+-.noteOverviewPagination button {
+-  display: inline-flex;
+-  align-items: center;
+-  justify-content: center;
+-  flex-shrink: 0;
+-  gap: 6px;
+-  min-height: 34px;
+-  border: 1px solid var(--border-default);
+-  border-radius: var(--radius-md);
+-  background: var(--bg-primary);
+-  color: var(--text-secondary);
+-  cursor: pointer;
+-  font: inherit;
+-  font-size: 12px;
+-}
+-
+-.noteOverviewClose { width: 34px; padding: 0; }
+-.noteOverviewPagination button { padding: 6px 9px; }
+-.noteOverviewPagination button:disabled { opacity: 0.45; cursor: default; }
+-.noteOverviewClose:hover,
+-.noteOverviewPagination button:hover:not(:disabled) { background: var(--bg-hover); color: var(--text-primary); }
+-
+-.noteOverviewViewport {
+-  min-width: 0;
+-  min-height: 0;
+-  overflow: auto;
+-  overscroll-behavior: contain;
+-  padding: 3px 0;
+-}
+-
+-.noteOverviewGrid {
+-  display: grid;
+-  grid-template-columns: repeat(var(--overview-columns), var(--overview-thumbnail-width));
+-  align-items: start;
+-  gap: var(--overview-gap);
+-  width: max-content;
+-  margin: 0 auto;
+-}
+-
+-.noteOverviewCard {
+-  position: relative;
+-  width: var(--overview-thumbnail-width);
+-  padding-bottom: 34px;
+-}
+-
+-.noteOverviewPreview {
+-  position: relative;
+-  overflow: hidden;
+-  outline: 1px solid var(--border-default);
+-  background: var(--bg-primary);
+-  pointer-events: none;
+-  user-select: none;
+-}
+-
+-.noteOverviewCanvas {
+-  position: absolute;
+-  top: 0;
+-  left: 0;
+-  transform-origin: 0 0;
+-  pointer-events: none;
+-}
+-
+-.noteOverviewPage {
+-  position: absolute;
+-  inset: 0;
+-  display: flex;
+-  align-items: flex-end;
+-  width: 100%;
+-  padding: 0;
+-  border: 0;
+-  border-radius: 0;
+-  background: transparent;
+-  color: var(--text-secondary);
+-  cursor: pointer;
+-  font: inherit;
+-  text-align: left;
+-}
+-
+-.noteOverviewPageLabel {
+-  display: flex;
+-  justify-content: space-between;
+-  align-items: center;
+-  gap: 6px;
+-  width: 100%;
+-  height: 34px;
+-  font-size: 12px;
+-}
+-
+-.noteOverviewLongPage { color: var(--text-secondary); font-size: 11px; }
+-.noteOverviewCard:has(.noteOverviewPage:hover) .noteOverviewPreview,
+-.noteOverviewCard:has(.noteOverviewPage[aria-current]) .noteOverviewPreview {
+-  outline: 2px solid var(--border-focus);
+-}
+-.noteOverviewPage:hover,
+-.noteOverviewPage[aria-current] { color: var(--text-primary); }
+-.noteOverviewPage[aria-current] .noteOverviewPageLabel { font-weight: 650; }
+-
+-.noteOverview button:focus-visible {
+-  outline: 2px solid var(--border-focus);
+-  outline-offset: 3px;
+-}
+-
+-.noteOverviewFooter {
+-  flex-wrap: wrap;
+-  padding-top: 16px;
+-  margin-top: 16px;
+-  border-top: 1px solid var(--border-subtle);
+-}
+-.noteOverviewFooter p { margin: 0; font-size: 12px; color: var(--text-secondary); }
+-.noteOverviewPagination { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 12px; }
+-.noteOverviewEmpty { padding: 36px 0; color: var(--text-secondary); text-align: center; }
+-
+-@media (max-width: 520px) {
+-  .noteOverview { padding: 16px 12px; }
+-  .noteOverviewFooter { gap: 10px; }
+-}
++  min-height: 240px;
++  height: calc(100dvh - 80px);
++  background: var(--bg-secondary);
++  color: var(--text-primary);
++}
++.noteOverview:focus, .noteOverview:focus-visible { outline: none; }
++.noteOverviewHeader {
++  display: flex;
++  flex: 0 0 44px;
++  align-items: center;
++  justify-content: space-between;
++  padding: 0 20px;
++}
++.noteOverviewHeader h2 { margin: 0; font-size: 13px; font-weight: 500; }
++.noteOverviewHeader h2 span { margin-left: 8px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
++.noteOverviewClose {
++  display: inline-flex;
++  align-items: center;
++  justify-content: center;
++  width: 32px;
++  height: 32px;
++  padding: 0;
++  border: 0;
++  border-radius: var(--radius-sm);
++  background: transparent;
++  color: var(--text-secondary);
++  cursor: pointer;
++}
++.noteOverviewClose:hover { background: var(--bg-hover); color: var(--text-primary); }
++.noteOverviewViewport {
++  flex: 1;
++  min-width: 0;
++  min-height: 0;
++  overflow: auto;
++  overscroll-behavior: contain;
++  scrollbar-gutter: stable both-edges;
++  padding: 24px;
++}
++.noteOverviewGrid {
++  display: grid;
++  grid-template-columns: repeat(var(--overview-columns), var(--overview-page-width));
++  align-items: start;
++  justify-content: center;
++  gap: var(--overview-gap);
++}
++.noteOverviewGrid[data-single-page] { min-height: 100%; align-content: center; }
++.noteOverviewSheet { position: relative; padding-bottom: 24px; }
++.noteOverviewPreview {
++  position: relative;
++  overflow: hidden;
++  outline: 1px solid var(--border-default);
++  background: var(--page-frame-background, var(--bg-primary));
++  pointer-events: none;
++  user-select: none;
++}
++.noteOverviewCanvas { position: absolute; top: 0; left: 0; transform-origin: 0 0; pointer-events: none; }
++.noteOverviewPage {
++  position: absolute;
++  inset: 0;
++  display: flex;
++  align-items: flex-end;
++  width: 100%;
++  padding: 0;
++  border: 0;
++  border-radius: 0;
++  background: transparent;
++  color: var(--text-secondary);
++  cursor: pointer;
++  font: inherit;
++}
++.noteOverviewPageLabel { width: 100%; height: 24px; line-height: 24px; text-align: center; font-size: 12px; font-variant-numeric: tabular-nums; }
++.noteOverviewSheet:has(.noteOverviewPage:hover) .noteOverviewPreview { outline-color: var(--text-secondary); }
++.noteOverviewSheet:has(.noteOverviewPage[aria-current]) .noteOverviewPreview { outline: 2px solid var(--border-focus); }
++.noteOverviewPage[aria-current] { color: var(--text-primary); }
++.noteOverviewPage[aria-current] .noteOverviewPageLabel { font-weight: 650; }
++.noteOverview button:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 4px; }
++.noteOverviewEmpty { padding: 36px 0; color: var(--text-secondary); text-align: center; }
+--- a/client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.tsx
+@@ -73,0 +74,1 @@
++        currentPageFrameId={overview.currentFrameId}

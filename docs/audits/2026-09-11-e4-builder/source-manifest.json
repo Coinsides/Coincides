@@ -1,0 +1,42 @@
+[
+  {
+    "file": "client/src/pages/Notes/NoteDetail.module.css",
+    "sha256": "5c657c114b3bc037348e991ad82ba990966d0f832ba328a089846a88a90dc3a9",
+    "lines": 5659
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/overviewLayout.ts",
+    "sha256": "45ab14cef6c44d9b464b01fb43c0a1c04e8facc701a88ad5905a5e661a4d0b38",
+    "lines": 36
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/hooks/useNoteOverviewController.ts",
+    "sha256": "07000c2064a81dae30d020bc2d059638a2c689181ada434e39670c73c6132d9d",
+    "lines": 115
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.tsx",
+    "sha256": "1b84d426482bdca433d74b0ca0691790faa04dfc179b3355b9b2b0aa25129f40",
+    "lines": 148
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.css",
+    "sha256": "4fc8cff62d0f176e21ab53ad3bb8e98623d72cb679d2238984f109a937c9a3e0",
+    "lines": 82
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.tsx",
+    "sha256": "d6e5a1bb485680621bdbcb3904b7f22499ba93ecda8adde352e93991c42a3859",
+    "lines": 91
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.test.tsx",
+    "sha256": "35f6720af7b4a35d0c21618a6d2ad9fb6d319f1e815728f419789eebf9e7148b",
+    "lines": 290
+  },
+  {
+    "file": "client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx",
+    "sha256": "105529874f38d043f4c8f832b12239a665f7dc0c19b0434eb981365fa01c3a5d",
+    "lines": 660
+  }
+]

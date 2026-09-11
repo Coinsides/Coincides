@@ -1137,8 +1137,15 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 }
 
 .overviewWritingSurface > .pageReadingControl {
-  visibility: visible;
+  visibility: hidden;
 }
+
+/* Overview occupies the work area; the reading surface keeps its own sizing. */
+.page:has([data-note-overview-root]) .trayViewport,
+.documentShell[data-note-overview-active='true'] { width: 100%; }
+.page:has([data-note-overview-root]) .contentGroupLauncher,
+.page:has([data-note-overview-root]) .traySidebar { display: none; }
+:global([data-app-main-scroll='true']):has([data-note-overview-root]) { overflow: hidden; }
 
 /* Global form-control transition:all would animate inherited visibility and
    leave the resumed caret unfocusable after the reading DOM has returned. */

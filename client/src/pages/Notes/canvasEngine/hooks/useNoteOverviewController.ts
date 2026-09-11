@@ -15,6 +15,7 @@ export function useNoteOverviewController({ noteId, surfaceMode, blockListRef, p
   const focusedBeforeOverview = useRef<HTMLElement | null>(null);
   const pendingReturn = useRef(false);
   const pendingOpen = useRef(false);
+  const [currentFrameId, setCurrentFrameId] = useState<string | null>(null);
   const inScope = state.noteId === noteId && state.surfaceMode === surfaceMode;
   const open = inScope && surfaceMode === 'page' && state.open;
 
@@ -76,6 +77,19 @@ export function useNoteOverviewController({ noteId, surfaceMode, blockListRef, p
     if (surfaceMode !== 'page') return;
     const appMain = blockListRef.current?.closest<HTMLElement>('[data-app-main-scroll="true"]');
     scrollBeforeOverview.current = appMain ? { top: appMain.scrollTop, left: appMain.scrollLeft } : null;
+    const blockList = blockListRef.current;
+    if (blockList && appMain) {
+      const scale = Number(blockList.closest<HTMLElement>('[data-page-display-scale]')?.dataset.pageDisplayScale) || 1;
+      const scrollRect = appMain.getBoundingClientRect();
+      const readingY = (scrollRect.top + Math.min(80, scrollRect.height * 0.2)
+        - blockList.getBoundingClientRect().top) / scale;
+      // Read position is ephemeral, independent of the saved collection selection.
+      const nearest = pageFrames.reduce<PageFrameModel | null>((best, frame) => {
+        const distance = (page: PageFrameModel) => Math.max(page.y - readingY, readingY - page.y - page.height, 0);
+        return !best || distance(frame) < distance(best) ? frame : best;
+      }, null);
+      setCurrentFrameId(nearest?.id ?? null);
+    } else setCurrentFrameId(pageFrames[0]?.id ?? null);
     const focused = document.activeElement;
     focusedBeforeOverview.current = focused instanceof HTMLElement && blockListRef.current?.contains(focused)
       ? focused : null;
@@ -97,5 +111,5 @@ export function useNoteOverviewController({ noteId, surfaceMode, blockListRef, p
   };
 
   return { open, toggle, close: () => close(), selectPage: (frameId: string) => close(frameId),
-    targetFrameId: inScope ? state.targetFrameId : null, resumeForExit };
+    targetFrameId: inScope ? state.targetFrameId : null, currentFrameId, resumeForExit };
 }

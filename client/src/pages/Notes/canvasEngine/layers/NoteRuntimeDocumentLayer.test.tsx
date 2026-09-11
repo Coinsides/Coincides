@@ -538,7 +538,7 @@ describe('NoteRuntimeDocumentLayer overview navigation', () => {
     expect(props.blockListRef.current).toBe(blockList);
   });
 
-  it.each([1, 4, 9])('opens %i pages with bounded pagination and closes without invoking writers', async (pageCount) => {
+  it.each([1, 4, 9])('opens %i pages in a continuous grid and closes without invoking writers', async (pageCount) => {
     const props = overviewProps(pageCount);
     const { container } = render(documentFor(props));
     vi.clearAllMocks();
@@ -546,15 +546,12 @@ describe('NoteRuntimeDocumentLayer overview navigation', () => {
     fireEvent.click(toggle);
     await waitFor(() => expect(container.querySelector('[data-note-overview-root]')).not.toBeNull());
     const grid = container.querySelector<HTMLElement>('[data-note-overview-grid]')!;
-    expect(grid.dataset.columns).toBe('4');
-    expect(container.querySelectorAll('[data-note-overview-page]')).toHaveLength(Math.min(pageCount, 8));
-    if (pageCount === 9) {
-      fireEvent.click(container.querySelector('[data-note-overview-next]')!);
-      expect(container.querySelectorAll('[data-note-overview-page]')).toHaveLength(1);
-      expect(container.querySelector('[data-note-overview-page]')?.getAttribute('data-page-frame-id')).toBe('overview-page-9');
-      fireEvent.click(container.querySelector('[data-note-overview-previous]')!);
-      expect(container.querySelectorAll('[data-note-overview-page]')).toHaveLength(8);
-    }
+    expect(grid.dataset.columns).toBe(pageCount === 1 ? '1' : '3');
+    expect(Array.from(container.querySelectorAll('[data-note-overview-page]'))
+      .map((page) => page.getAttribute('data-page-frame-id')))
+      .toEqual(props.noteCanvasRuntime.pageFrames.map((frame) => frame.id));
+    expect(container.querySelector('[data-note-overview-next]')).toBeNull();
+    expect(container.querySelector('[data-note-overview-previous]')).toBeNull();
     fireEvent.click(container.querySelector('[data-note-overview-close]')!);
     expect(container.querySelector('[data-note-overview-root]')).toBeNull();
     writers(props).forEach((callback) => expect(callback).not.toHaveBeenCalled());
@@ -575,7 +572,6 @@ describe('NoteRuntimeDocumentLayer overview navigation', () => {
     expect(mouseDown.defaultPrevented).toBe(true);
     fireEvent.click(toggle);
     expect(container.contains(editor)).toBe(true);
-    fireEvent.click(container.querySelector('[data-note-overview-next]')!);
     fireEvent.click(container.querySelector('[data-note-overview-page][data-page-frame-id="overview-page-9"]')!);
     await waitFor(() => expect(scroll).toHaveBeenCalledWith(
       props.blockListRef.current,
@@ -591,6 +587,33 @@ describe('NoteRuntimeDocumentLayer overview navigation', () => {
     fireEvent.blur(editor);
     await waitFor(() => expect(props.onSaveBlock).toHaveBeenCalledTimes(1));
     expect(props.onSaveBlock).toHaveBeenCalledWith(codeBlock, dirtyText, expect.objectContaining({ silent: true }));
+  });
+
+  it('highlights the currently read page after scrolling without changing the selected frame collection', () => {
+    const props = overviewProps(9);
+    const { container } = render(documentFor(props));
+    const blockList = props.blockListRef.current!;
+    const appMain = blockList.closest<HTMLElement>('[data-app-main-scroll="true"]')!;
+    const paper = blockList.closest<HTMLElement>('[data-page-display-scale]')!;
+    const scale = Number(paper.dataset.pageDisplayScale);
+    const ninthPage = props.noteCanvasRuntime.pageFrames[8];
+    const before = JSON.stringify(props.noteCanvasRuntime);
+    // jsdom has no scroll layout. Supply the same scaled body position produced
+    // when the reader is 40 document pixels into the ninth page.
+    vi.spyOn(appMain, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 60, 960, 720));
+    vi.spyOn(blockList, 'getBoundingClientRect').mockReturnValue(
+      new DOMRect(180, 60 - (ninthPage.y + 40) * scale, 760 * scale, 12222 * scale),
+    );
+    appMain.scrollTop = (ninthPage.y + 40) * scale;
+    vi.clearAllMocks();
+    fireEvent.click(screen.getByRole('button', { name: 'Page overview' }));
+
+    const currentPages = container.querySelectorAll('[data-note-overview-page][aria-current="page"]');
+    expect(currentPages).toHaveLength(1);
+    expect(currentPages[0].getAttribute('data-page-frame-id')).toBe(ninthPage.id);
+    expect(props.selectedPageFrameId).toBe('overview-page-1');
+    expect(JSON.stringify(props.noteCanvasRuntime)).toBe(before);
+    writers(props).forEach((callback) => expect(callback).not.toHaveBeenCalled());
   });
 
   it('does not resurrect overview across note or surface-mode changes', () => {

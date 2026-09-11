@@ -71,6 +71,7 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
 
       <NoteFloatingPanelLayer {...floatingPanelProps} />
       {overview.open && <NoteOverviewLayer writingSurfaceProps={writingSurfaceProps}
+        currentPageFrameId={overview.currentFrameId}
         onSelectPage={overview.selectPage} onClose={overview.close} />}
       <NoteWritingSurfaceLayer {...writingSurfaceProps} overviewOpen={overview.open} onToggleOverview={overview.toggle} />
       <NotePrintLayer {...writingSurfaceProps} />

@@ -1,0 +1,416 @@
+{
+  "wide12": {
+    "clientHeight": 757,
+    "clientWidth": 1900,
+    "columns": "4",
+    "current": "e4-frame-2",
+    "firstPage": {
+      "bottom": 739.09375,
+      "height": 629.09375,
+      "left": 34,
+      "right": 479,
+      "top": 110,
+      "width": 445,
+      "x": 34,
+      "y": 110
+    },
+    "fragments": 60,
+    "lastMounted": [
+      "e4-frame-1",
+      "e4-frame-2",
+      "e4-frame-3",
+      "e4-frame-4",
+      "e4-frame-5",
+      "e4-frame-6",
+      "e4-frame-7",
+      "e4-frame-8",
+      "e4-frame-9",
+      "e4-frame-10",
+      "e4-frame-11",
+      "e4-frame-12"
+    ],
+    "mounted": 12,
+    "nextScreen": false,
+    "pageCount": 12,
+    "scrollHeight": 2055,
+    "scrollTop": 0,
+    "scrollWidth": 1900,
+    "viewport": {
+      "height": 855,
+      "width": 1920
+    }
+  },
+  "medium12": {
+    "clientHeight": 702,
+    "clientWidth": 940,
+    "columns": "3",
+    "current": "e4-frame-2",
+    "firstPage": {
+      "bottom": 507.71875,
+      "height": 397.71875,
+      "left": 34,
+      "right": 315.328125,
+      "top": 110,
+      "width": 281.328125,
+      "x": 34,
+      "y": 110
+    },
+    "fragments": 60,
+    "lastMounted": [
+      "e4-frame-1",
+      "e4-frame-2",
+      "e4-frame-3",
+      "e4-frame-4",
+      "e4-frame-5",
+      "e4-frame-6",
+      "e4-frame-7",
+      "e4-frame-8",
+      "e4-frame-9",
+      "e4-frame-10",
+      "e4-frame-11",
+      "e4-frame-12"
+    ],
+    "mounted": 12,
+    "nextScreen": false,
+    "pageCount": 12,
+    "scrollHeight": 1807,
+    "scrollTop": 0,
+    "scrollWidth": 940,
+    "viewport": {
+      "height": 800,
+      "width": 960
+    }
+  },
+  "narrow12": {
+    "clientHeight": 702,
+    "clientWidth": 700,
+    "columns": "2",
+    "current": "e4-frame-2",
+    "firstPage": {
+      "bottom": 553.90625,
+      "height": 443.90625,
+      "left": 34,
+      "right": 348,
+      "top": 110,
+      "width": 314,
+      "x": 34,
+      "y": 110
+    },
+    "fragments": 30,
+    "lastMounted": [
+      "e4-frame-1",
+      "e4-frame-2",
+      "e4-frame-3",
+      "e4-frame-4",
+      "e4-frame-5",
+      "e4-frame-6"
+    ],
+    "mounted": 6,
+    "nextScreen": false,
+    "pageCount": 12,
+    "scrollHeight": 2975,
+    "scrollTop": 0,
+    "scrollWidth": 700,
+    "viewport": {
+      "height": 800,
+      "width": 720
+    }
+  },
+  "mobile12": {
+    "clientHeight": 702,
+    "clientWidth": 370,
+    "columns": "1",
+    "current": "e4-frame-2",
+    "firstPage": {
+      "bottom": 565.203125,
+      "height": 455.203125,
+      "left": 34,
+      "right": 356,
+      "top": 110,
+      "width": 322,
+      "x": 34,
+      "y": 110
+    },
+    "fragments": 15,
+    "lastMounted": [
+      "e4-frame-1",
+      "e4-frame-2",
+      "e4-frame-3"
+    ],
+    "mounted": 3,
+    "nextScreen": false,
+    "pageCount": 12,
+    "scrollHeight": 6062,
+    "scrollTop": 0,
+    "scrollWidth": 370,
+    "viewport": {
+      "height": 800,
+      "width": 390
+    }
+  },
+  "largeStart": {
+    "clientHeight": 802,
+    "clientWidth": 1420,
+    "columns": "4",
+    "current": "e4-frame-1",
+    "firstPage": {
+      "bottom": 569.453125,
+      "height": 459.453125,
+      "left": 34,
+      "right": 359,
+      "top": 110,
+      "width": 325,
+      "x": 34,
+      "y": 110
+    },
+    "fragments": 80,
+    "lastMounted": [
+      "e4-frame-1",
+      "e4-frame-2",
+      "e4-frame-3",
+      "e4-frame-4",
+      "e4-frame-5",
+      "e4-frame-6",
+      "e4-frame-7",
+      "e4-frame-8",
+      "e4-frame-9",
+      "e4-frame-10",
+      "e4-frame-11",
+      "e4-frame-12",
+      "e4-frame-13",
+      "e4-frame-14",
+      "e4-frame-15",
+      "e4-frame-16"
+    ],
+    "mounted": 16,
+    "nextScreen": false,
+    "pageCount": 240,
+    "scrollHeight": 30471,
+    "scrollTop": 0,
+    "scrollWidth": 1420,
+    "viewport": {
+      "height": 900,
+      "width": 1440
+    }
+  },
+  "largeScroll": {
+    "clientHeight": 802,
+    "clientWidth": 1420,
+    "columns": "4",
+    "current": "e4-frame-1",
+    "firstPage": {
+      "bottom": -10230.546875,
+      "height": 459.453125,
+      "left": 34,
+      "right": 359,
+      "top": -10690,
+      "width": 325,
+      "x": 34,
+      "y": -10690
+    },
+    "fragments": 120,
+    "lastMounted": [
+      "e4-frame-77",
+      "e4-frame-78",
+      "e4-frame-79",
+      "e4-frame-80",
+      "e4-frame-81",
+      "e4-frame-82",
+      "e4-frame-83",
+      "e4-frame-84",
+      "e4-frame-85",
+      "e4-frame-86",
+      "e4-frame-87",
+      "e4-frame-88",
+      "e4-frame-89",
+      "e4-frame-90",
+      "e4-frame-91",
+      "e4-frame-92",
+      "e4-frame-93",
+      "e4-frame-94",
+      "e4-frame-95",
+      "e4-frame-96",
+      "e4-frame-97",
+      "e4-frame-98",
+      "e4-frame-99",
+      "e4-frame-100"
+    ],
+    "mounted": 24,
+    "nextScreen": false,
+    "pageCount": 240,
+    "scrollHeight": 30471,
+    "scrollTop": 10800,
+    "scrollWidth": 1420,
+    "viewport": {
+      "height": 900,
+      "width": 1440
+    }
+  },
+  "fixtureReadback": "e4-frame-89",
+  "longSingle": {
+    "clientHeight": 802,
+    "clientWidth": 1420,
+    "columns": "1",
+    "current": "e4-frame-1",
+    "firstPage": {
+      "bottom": 840,
+      "height": 730,
+      "left": 598.328125,
+      "right": 841.65625,
+      "top": 110,
+      "width": 243.328125,
+      "x": 598.328125,
+      "y": 110
+    },
+    "fragments": 5,
+    "lastMounted": [
+      "e4-frame-1"
+    ],
+    "mounted": 1,
+    "nextScreen": false,
+    "pageCount": 1,
+    "scrollHeight": 802,
+    "scrollTop": 0,
+    "scrollWidth": 1420,
+    "viewport": {
+      "height": 900,
+      "width": 1440
+    }
+  },
+  "liveSingle": {
+    "clientHeight": 855,
+    "clientWidth": 1574,
+    "columns": "1",
+    "current": "primary-page-frame",
+    "firstPage": {
+      "bottom": 851,
+      "height": 783,
+      "left": 818.078125,
+      "right": 1371.921875,
+      "top": 68,
+      "width": 553.84375,
+      "x": 818.078125,
+      "y": 68
+    },
+    "fragments": 2,
+    "lastMounted": [
+      "primary-page-frame"
+    ],
+    "mounted": 1,
+    "nextScreen": false,
+    "pageCount": 1,
+    "scrollHeight": 855,
+    "scrollTop": 0,
+    "scrollWidth": 1574,
+    "viewport": {
+      "height": 911,
+      "width": 1920
+    }
+  },
+  "liveReadback": {
+    "overview": false,
+    "scroll": 265,
+    "target": "primary-page-frame"
+  },
+  "largeTailWide": {
+    "clientHeight": 802,
+    "clientWidth": 1420,
+    "columns": "4",
+    "current": "e4-frame-238",
+    "firstPage": {
+      "bottom": -29099.546875,
+      "height": 459.453125,
+      "left": 34,
+      "right": 359,
+      "top": -29559,
+      "width": 325,
+      "x": 34,
+      "y": -29559
+    },
+    "fragments": 80,
+    "lastMounted": [
+      "e4-frame-225",
+      "e4-frame-226",
+      "e4-frame-227",
+      "e4-frame-228",
+      "e4-frame-229",
+      "e4-frame-230",
+      "e4-frame-231",
+      "e4-frame-232",
+      "e4-frame-233",
+      "e4-frame-234",
+      "e4-frame-235",
+      "e4-frame-236",
+      "e4-frame-237",
+      "e4-frame-238",
+      "e4-frame-239",
+      "e4-frame-240"
+    ],
+    "mounted": 16,
+    "nextScreen": false,
+    "pageCount": 240,
+    "scrollHeight": 30471,
+    "scrollTop": 29669,
+    "scrollWidth": 1420,
+    "viewport": {
+      "height": 900,
+      "width": 1440
+    }
+  },
+  "largeTailNarrow": {
+    "clientHeight": 802,
+    "clientWidth": 700,
+    "columns": "2",
+    "current": "e4-frame-238",
+    "firstPage": {
+      "bottom": -56736.09375,
+      "height": 443.90625,
+      "left": 34,
+      "right": 348,
+      "top": -57180,
+      "width": 314,
+      "x": 34,
+      "y": -57180
+    },
+    "fragments": 60,
+    "lastMounted": [
+      "e4-frame-229",
+      "e4-frame-230",
+      "e4-frame-231",
+      "e4-frame-232",
+      "e4-frame-233",
+      "e4-frame-234",
+      "e4-frame-235",
+      "e4-frame-236",
+      "e4-frame-237",
+      "e4-frame-238",
+      "e4-frame-239",
+      "e4-frame-240"
+    ],
+    "mounted": 12,
+    "nextScreen": false,
+    "pageCount": 240,
+    "scrollHeight": 59053,
+    "scrollTop": 57290,
+    "scrollWidth": 700,
+    "viewport": {
+      "height": 900,
+      "width": 720
+    }
+  },
+  "fixtureConsoleErrors": [
+    {
+      "level": "error",
+      "message": "Warning: You are calling ReactDOMClient.createRoot() on a container that has already been passed to createRoot() before. Instead, call root.render() on the existing root instead if you want to update it.",
+      "timestamp": "2026-09-11T21:44:51.623Z",
+      "url": "http://localhost:5173/node_modules/.vite/deps/chunk-NUMECXU6.js?v=6b76ac4f"
+    }
+  ],
+  "escapeClosed": true,
+  "freshLiveReadback": {
+    "overview": false,
+    "scroll": 70,
+    "target": "primary-page-frame"
+  },
+  "freshLiveErrors": []
+}

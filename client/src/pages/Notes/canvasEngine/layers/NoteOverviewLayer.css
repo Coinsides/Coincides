@@ -1,93 +1,64 @@
-.noteOverview {
+﻿.noteOverview {
   position: relative;
   display: flex;
   flex-direction: column;
   min-width: 0;
-  min-height: 360px;
-  max-height: calc(100vh - 180px);
-  padding: 20px;
+  min-height: 240px;
+  height: calc(100dvh - 80px);
   background: var(--bg-secondary);
   color: var(--text-primary);
-  outline: none;
 }
-
-.noteOverviewHeader,
-.noteOverviewFooter {
+.noteOverview:focus, .noteOverview:focus-visible { outline: none; }
+.noteOverviewHeader {
   display: flex;
-  flex: 0 0 auto;
+  flex: 0 0 44px;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  padding: 0 20px;
 }
-
-.noteOverviewHeader { margin-bottom: 20px; }
-.noteOverviewHeading { min-width: 0; }
-.noteOverviewHeading h2 { margin: 0; font-size: 16px; font-weight: 650; }
-.noteOverviewHeading p { margin: 4px 0 0; color: var(--text-secondary); font-size: 13px; }
-
-.noteOverviewClose,
-.noteOverviewPagination button {
+.noteOverviewHeader h2 { margin: 0; font-size: 13px; font-weight: 500; }
+.noteOverviewHeader h2 span { margin-left: 8px; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.noteOverviewClose {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  gap: 6px;
-  min-height: 34px;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  background: var(--bg-primary);
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
-  font: inherit;
-  font-size: 12px;
 }
-
-.noteOverviewClose { width: 34px; padding: 0; }
-.noteOverviewPagination button { padding: 6px 9px; }
-.noteOverviewPagination button:disabled { opacity: 0.45; cursor: default; }
-.noteOverviewClose:hover,
-.noteOverviewPagination button:hover:not(:disabled) { background: var(--bg-hover); color: var(--text-primary); }
-
+.noteOverviewClose:hover { background: var(--bg-hover); color: var(--text-primary); }
 .noteOverviewViewport {
+  flex: 1;
   min-width: 0;
   min-height: 0;
   overflow: auto;
   overscroll-behavior: contain;
-  padding: 3px 0;
+  scrollbar-gutter: stable both-edges;
+  padding: 24px;
 }
-
 .noteOverviewGrid {
   display: grid;
-  grid-template-columns: repeat(var(--overview-columns), var(--overview-thumbnail-width));
+  grid-template-columns: repeat(var(--overview-columns), var(--overview-page-width));
   align-items: start;
+  justify-content: center;
   gap: var(--overview-gap);
-  width: max-content;
-  margin: 0 auto;
 }
-
-.noteOverviewCard {
-  position: relative;
-  width: var(--overview-thumbnail-width);
-  padding-bottom: 34px;
-}
-
+.noteOverviewGrid[data-single-page] { min-height: 100%; align-content: center; }
+.noteOverviewSheet { position: relative; padding-bottom: 24px; }
 .noteOverviewPreview {
   position: relative;
   overflow: hidden;
   outline: 1px solid var(--border-default);
-  background: var(--bg-primary);
+  background: var(--page-frame-background, var(--bg-primary));
   pointer-events: none;
   user-select: none;
 }
-
-.noteOverviewCanvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  transform-origin: 0 0;
-  pointer-events: none;
-}
-
+.noteOverviewCanvas { position: absolute; top: 0; left: 0; transform-origin: 0 0; pointer-events: none; }
 .noteOverviewPage {
   position: absolute;
   inset: 0;
@@ -101,44 +72,11 @@
   color: var(--text-secondary);
   cursor: pointer;
   font: inherit;
-  text-align: left;
 }
-
-.noteOverviewPageLabel {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 6px;
-  width: 100%;
-  height: 34px;
-  font-size: 12px;
-}
-
-.noteOverviewLongPage { color: var(--text-secondary); font-size: 11px; }
-.noteOverviewCard:has(.noteOverviewPage:hover) .noteOverviewPreview,
-.noteOverviewCard:has(.noteOverviewPage[aria-current]) .noteOverviewPreview {
-  outline: 2px solid var(--border-focus);
-}
-.noteOverviewPage:hover,
+.noteOverviewPageLabel { width: 100%; height: 24px; line-height: 24px; text-align: center; font-size: 12px; font-variant-numeric: tabular-nums; }
+.noteOverviewSheet:has(.noteOverviewPage:hover) .noteOverviewPreview { outline-color: var(--text-secondary); }
+.noteOverviewSheet:has(.noteOverviewPage[aria-current]) .noteOverviewPreview { outline: 2px solid var(--border-focus); }
 .noteOverviewPage[aria-current] { color: var(--text-primary); }
 .noteOverviewPage[aria-current] .noteOverviewPageLabel { font-weight: 650; }
-
-.noteOverview button:focus-visible {
-  outline: 2px solid var(--border-focus);
-  outline-offset: 3px;
-}
-
-.noteOverviewFooter {
-  flex-wrap: wrap;
-  padding-top: 16px;
-  margin-top: 16px;
-  border-top: 1px solid var(--border-subtle);
-}
-.noteOverviewFooter p { margin: 0; font-size: 12px; color: var(--text-secondary); }
-.noteOverviewPagination { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 12px; }
+.noteOverview button:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 4px; }
 .noteOverviewEmpty { padding: 36px 0; color: var(--text-secondary); text-align: center; }
-
-@media (max-width: 520px) {
-  .noteOverview { padding: 16px 12px; }
-  .noteOverviewFooter { gap: 10px; }
-}
