@@ -336,7 +336,7 @@
 | [handoffs/plans/v13-2-wilderness-retirement-plan.md](handoffs/plans/v13-2-wilderness-retirement-plan.md) | V13.2 · 野地退役 + 迁移 —— 段 plan | `active` | 2026-09-07 | — |
 | [handoffs/plans/v13-3-board-mvp-plan.md](handoffs/plans/v13-3-board-mvp-plan.md) | V13.3 · 板 MVP(线索黑板)—— 段 plan | `active` | 2026-09-08 | — |
 | [handoffs/plans/v13-4-projection-itemization-plan.md](handoffs/plans/v13-4-projection-itemization-plan.md) | V13.4 · 投影全谱 + item 化 + 板成熟 —— 段 plan(修订二) | `active` | 2026-09-09 | — |
-| [handoffs/plans/v13-5-layout-credentials-plan.md](handoffs/plans/v13-5-layout-credentials-plan.md) | V13.5 · 版面与凭据 —— 段计划草案 | `draft` | 2026-09-09 | — |
+| [handoffs/plans/v13-5-layout-credentials-plan.md](handoffs/plans/v13-5-layout-credentials-plan.md) | V13.5 · 版面与凭据 —— 段计划草案 | `draft` | 2026-09-11 | — |
 | [handoffs/plans/v13-foundation-rebuild-plan.md](handoffs/plans/v13-foundation-rebuild-plan.md) | V13 · 地基重做版 —— 总 plan v1 | `active` | 2026-08-30 | — |
 | [handoffs/plans/v14-agent-era-plan-draft.md](handoffs/plans/v14-agent-era-plan-draft.md) | V14 · Agent 时代 —— 总 plan 草稿 v0 | `draft` | 2026-09-09 | — |
 | [handoffs/plans/v2-bn12-2-mcp-tool-face.md](handoffs/plans/v2-bn12-2-mcp-tool-face.md) | Plan V2.BN.12.2 — MCP 工具面(末端执行器第一次实体化) | `active` | — | — |
