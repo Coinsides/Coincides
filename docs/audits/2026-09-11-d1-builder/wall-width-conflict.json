@@ -1,0 +1,343 @@
+{
+  "scope": "Synthetic in-memory hydration and normalization; no API or database calls",
+  "productChanges": [],
+  "firstAttempt": "Direct surfaceMode=page normalization returned 600, disproving the initial direct-normalizer assertion. The final probe invokes the real useNoteCanvasResolvedLayoutModel hook to observe its selected path.",
+  "cases": [
+    {
+      "name": "auto shrink across persisted width",
+      "span": 600,
+      "storedWidth": 760,
+      "widthMode": "auto",
+      "inputBytesUnchanged": true,
+      "initial": {
+        "x": 0,
+        "y": 120,
+        "width": 760,
+        "height": 100,
+        "coordinate_space": "page_frame_local",
+        "frame_id": "synthetic-frame",
+        "surface": "formal_page",
+        "boundary_role": "inside",
+        "surface_authority": {
+          "coordinateSpace": "page_frame_local",
+          "pageBoundary": {
+            "left": 0,
+            "right": 760,
+            "frameId": "synthetic-frame"
+          }
+        }
+      },
+      "current": {
+        "x": 0,
+        "y": 120,
+        "width": 760,
+        "height": 100,
+        "coordinate_space": "page_frame_local",
+        "frame_id": "synthetic-frame",
+        "surface": "canvas_workspace",
+        "boundary_role": "crossing",
+        "surface_authority": {
+          "coordinateSpace": "page_frame_local",
+          "pageBoundary": {
+            "left": 0,
+            "right": 600,
+            "frameId": "synthetic-frame"
+          }
+        }
+      },
+      "isWorkspace": true,
+      "normalized": {
+        "x": 0,
+        "y": 120,
+        "width": 600,
+        "height": 100,
+        "coordinate_space": "page_frame_local",
+        "frame_id": "synthetic-frame",
+        "surface": "canvas_workspace",
+        "boundary_role": "crossing",
+        "surface_authority": {
+          "coordinateSpace": "page_frame_local",
+          "pageBoundary": {
+            "left": 0,
+            "right": 600,
+            "frameId": "synthetic-frame"
+          }
+        }
+      },
+      "liveLayout": {
+        "x": 0,
+        "y": 120,
+        "width": 760,
+        "height": 100,
+        "surface": "canvas_workspace",
+        "coordinate_space": "page_frame_local",
+        "frame_id": "synthetic-frame",
+        "boundary_role": "crossing",
+        "surface_authority": {
+          "coordinateSpace": "page_frame_local",
+          "pageBoundary": {
+            "left": 0,
+            "right": 600,
+            "frameId": "synthetic-frame"
+          }
+        }
+      },
+      "liveVisible": [
+        "synthetic-block"
+      ]
+    },
+    {
+      "name": "manual legal control",
+      "span": 600,
+      "storedWidth": 500,
+      "widthMode": "manual",
+      "inputBytesUnchanged": true,
+      "initial": {
+        "x": 0,
+        "y": 120,
+        "width": 500,
+        "height": 100,
+        "coordinate_space": "page_frame_local",
+        "frame_id": "synthetic-frame",
+        "surface": "formal_page",
+        "width_mode": "manual",
+        "boundary_role": "inside",
+        "surface_authority": {
+          "coordinateSpace": "page_frame_local",
+          "pageBoundary": {
+            "left": 0,
+            "right": 760,
+            "frameId": "synthetic-frame"
+          }
+        }
+      },
+      "current": {
+        "x": 0,
+        "y": 120,
+        "width": 500,
+        "height": 100,
+        "coordinate_space": "page_frame_local",
+        "frame_id": "synthetic-frame",
+        "surface": "formal_page",
+        "width_mode": "manual",
+        "boundary_role": "inside",
+        "surface_authority": {
+          "coordinateSpace": "page_frame_local",
+          "pageBoundary": {
+            "left": 0,
+            "right": 600,
+            "frameId": "synthetic-frame"
+          }
+        }
+      },
+      "isWorkspace": false,
+      "normalized": {
+        "x": 0,
+        "y": 120,
+        "width": 500,
+        "height": 100,
+        "coordinate_space": "page_frame_local",
+        "frame_id": "synthetic-frame",
+        "surface": "formal_page",
+        "width_mode": "manual",
+        "boundary_role": "inside",
+        "surface_authority": {
+          "coordinateSpace": "page_frame_local",
+          "pageBoundary": {
+            "left": 0,
+            "right": 600,
+            "frameId": "synthetic-frame"
+          }
+        }
+      },
+      "liveLayout": {
+        "x": 0,
+        "y": 120,
+        "width": 500,
+        "height": 100,
+        "surface": "formal_page",
+        "width_mode": "manual",
+        "coordinate_space": "page_frame_local",
+        "frame_id": "synthetic-frame",
+        "boundary_role": "inside",
+        "surface_authority": {
+          "coordinateSpace": "page_frame_local",
+          "pageBoundary": {
+            "left": 0,
+            "right": 600,
+            "frameId": "synthetic-frame"
+          }
+        }
+      },
+      "liveVisible": [
+        "synthetic-block"
+      ]
+    },
+    {
+      "name": "auto narrow snapshot control",
+      "span": 600,
+      "storedWidth": 500,
+      "widthMode": "auto",
+      "inputBytesUnchanged": true,
+      "initial": {
+        "x": 0,
+        "y": 120,
+        "width": 500,
+        "height": 100,
+        "coordinate_space": "page_frame_local",
+        "frame_id": "synthetic-frame",
+        "surface": "formal_page",
+        "boundary_role": "inside",
+        "surface_authority": {
+          "coordinateSpace": "page_frame_local",
+          "pageBoundary": {
+            "left": 0,
+            "right": 760,
+            "frameId": "synthetic-frame"
+          }
+        }
+      },
+      "current": {
+        "x": 0,
+        "y": 120,
+        "width": 500,
+        "height": 100,
+        "coordinate_space": "page_frame_local",
+        "frame_id": "synthetic-frame",
+        "surface": "formal_page",
+        "boundary_role": "inside",
+        "surface_authority": {
+          "coordinateSpace": "page_frame_local",
+          "pageBoundary": {
+            "left": 0,
+            "right": 600,
+            "frameId": "synthetic-frame"
+          }
+        }
+      },
+      "isWorkspace": false,
+      "normalized": {
+        "x": 0,
+        "y": 120,
+        "width": 600,
+        "height": 100,
+        "coordinate_space": "page_frame_local",
+        "frame_id": "synthetic-frame",
+        "surface": "formal_page",
+        "boundary_role": "inside",
+        "surface_authority": {
+          "coordinateSpace": "page_frame_local",
+          "pageBoundary": {
+            "left": 0,
+            "right": 600,
+            "frameId": "synthetic-frame"
+          }
+        }
+      },
+      "liveLayout": {
+        "x": 0,
+        "y": 120,
+        "width": 600,
+        "height": 100,
+        "surface": "formal_page",
+        "coordinate_space": "page_frame_local",
+        "frame_id": "synthetic-frame",
+        "boundary_role": "inside",
+        "surface_authority": {
+          "coordinateSpace": "page_frame_local",
+          "pageBoundary": {
+            "left": 0,
+            "right": 600,
+            "frameId": "synthetic-frame"
+          }
+        }
+      },
+      "liveVisible": [
+        "synthetic-block"
+      ]
+    },
+    {
+      "name": "auto widening control",
+      "span": 808,
+      "storedWidth": 760,
+      "widthMode": "auto",
+      "inputBytesUnchanged": true,
+      "initial": {
+        "x": 0,
+        "y": 120,
+        "width": 760,
+        "height": 100,
+        "coordinate_space": "page_frame_local",
+        "frame_id": "synthetic-frame",
+        "surface": "formal_page",
+        "boundary_role": "inside",
+        "surface_authority": {
+          "coordinateSpace": "page_frame_local",
+          "pageBoundary": {
+            "left": 0,
+            "right": 760,
+            "frameId": "synthetic-frame"
+          }
+        }
+      },
+      "current": {
+        "x": 0,
+        "y": 120,
+        "width": 760,
+        "height": 100,
+        "coordinate_space": "page_frame_local",
+        "frame_id": "synthetic-frame",
+        "surface": "formal_page",
+        "boundary_role": "inside",
+        "surface_authority": {
+          "coordinateSpace": "page_frame_local",
+          "pageBoundary": {
+            "left": 0,
+            "right": 808,
+            "frameId": "synthetic-frame"
+          }
+        }
+      },
+      "isWorkspace": false,
+      "normalized": {
+        "x": 0,
+        "y": 120,
+        "width": 760,
+        "height": 100,
+        "coordinate_space": "page_frame_local",
+        "frame_id": "synthetic-frame",
+        "surface": "formal_page",
+        "boundary_role": "inside",
+        "surface_authority": {
+          "coordinateSpace": "page_frame_local",
+          "pageBoundary": {
+            "left": 0,
+            "right": 808,
+            "frameId": "synthetic-frame"
+          }
+        }
+      },
+      "liveLayout": {
+        "x": 0,
+        "y": 120,
+        "width": 760,
+        "height": 100,
+        "surface": "formal_page",
+        "coordinate_space": "page_frame_local",
+        "frame_id": "synthetic-frame",
+        "boundary_role": "inside",
+        "surface_authority": {
+          "coordinateSpace": "page_frame_local",
+          "pageBoundary": {
+            "left": 0,
+            "right": 808,
+            "frameId": "synthetic-frame"
+          }
+        }
+      },
+      "liveVisible": [
+        "synthetic-block"
+      ]
+    }
+  ]
+}
