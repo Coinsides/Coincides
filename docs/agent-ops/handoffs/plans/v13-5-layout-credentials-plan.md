@@ -39,6 +39,17 @@ Henry 09-11 提出(B/C 波真机验收通过后):块默认铺满文字区+全局
 
 工程件(随裁随排):`DEFAULT_PAGE_CONTENT_WIDTH`(760)封顶改逐帧派生(否则墙拓宽后 auto 块长不到墙);右墙 clamp;墙操作入撤销栈;把手安家边距车道(把手超框正解,⛔孤立微调);page_frame_local 契约权威散在 handoff/recon,随此题**补铸版**。
 
+### 专场补遗二(09-11):表头与分页题(议程 1/3/6 与 B1 的联动材料)
+
+Henry 09-11 三观察:①首页顶部不自然空档(HQ 勘明成分=页眉槽预留 48px+首块 y 落位余量);②页底无硬约束——裁向 **Word 式自动分页**,且**块可跨页**(逻辑一块,渲染多片);③顶部栏存废:参照 Notion 纸上表头(title/cover/icon 上纸,可降级为纯净标题),顶栏拆解——返回 project 杀(navigator 在)、title 上纸⛔粘视野、功能钮(layout/预览)另找家。
+
+HQ 理清与建议:
+
+1. **表头=页眉槽的真身**:槽族(header/footer/page_number)已实装(`pageFrameSlotService`),title 上纸即首页 header 槽升格为表头区(空态折叠+hover 显影 Notion 式);后续页 header=running header(手册章节名),footer=页码——全是 B1 版面/皮材料;
+2. **顶栏拆解**:功能钮归底部工具条(Write/Pen/Fit 同家,工具的家在底,纸面安静);"在哪张纸"的在场感归 V14 工作台标签条种子,⛔靠粘 title;
+3. **断块=投影哲学直接推论**:真相一份(block),投影多张(页面渲染分片),frame_id=起始页籍;print/overview 管线已说 fragment 语言,跨页排流雏形在(`pageStackContentFlowService`);**但**光标穿行/跨块选区(B4-B9 机器)须学会跨片、估高服务从参考升承重、墨水单页锚定(C4)与跨页块的关系须裁——**下一块最重工程**,方向今天可定,排期候专场评估(13.6 收尾容不下,大概率 V14 前夜或随 V14);
+4. **板卡封面联动**:板上笔记卡的脸=纸表头的投影(cover/icon/title 同一真相,零新字段),连议程 6(皮挂点)/B1/板=展览墙(封面感)。
+
 ## 一 · 波次 A(非门控,先行排产;修单永远插队优先)
 
 - **A1 · agent_memories 人类 CRUD(红线清偿)**:一条路由(list/edit/delete)+ Settings 页列表面;⛔ Agent 面改动;红线依据="Agent 能编辑的人类必须 100% 能编辑"现役违章(停车场 C 区在案,Henry 已裁 13.5);
