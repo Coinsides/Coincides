@@ -416,6 +416,18 @@ CREATE TABLE IF NOT EXISTS notes (
 CREATE INDEX IF NOT EXISTS idx_notes_user_course_status ON notes(user_id, course_id, status);
 CREATE INDEX IF NOT EXISTS idx_notes_course_updated ON notes(course_id, updated_at);
 
+-- V13.5 flat note tags (migration 064). Actor reserves provenance only.
+CREATE TABLE IF NOT EXISTS note_tags (
+  id TEXT PRIMARY KEY,
+  note_id TEXT NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  label TEXT NOT NULL CHECK (length(label) BETWEEN 1 AND 48 AND label = trim(label)),
+  actor TEXT NOT NULL DEFAULT 'user' CHECK (actor IN ('user', 'agent')),
+  created_at TEXT NOT NULL,
+  UNIQUE (note_id, label)
+);
+CREATE INDEX IF NOT EXISTS idx_note_tags_user_note ON note_tags(user_id, note_id);
+
 -- ============================================================
 -- 20. v2 NoteBlocks
 -- ============================================================

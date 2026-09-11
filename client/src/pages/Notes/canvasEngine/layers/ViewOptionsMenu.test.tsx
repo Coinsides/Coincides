@@ -86,7 +86,6 @@ describe('page view options menu', () => {
     const { result } = renderHook(() => useFloatingOverlayController({ setInteractionState }));
     const panels = [
       ['openLayoutPanel', 'showLayoutPanel'],
-      ['toggleNoteInfo', 'showNoteInfo'],
       ['toggleMoreActions', 'showMoreActions'],
       ['openBlockTrash', 'showBlockTrash'],
       ['toggleExportPreview', 'showExportPreview'],

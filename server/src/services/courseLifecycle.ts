@@ -21,6 +21,7 @@ interface ProjectionRow {
 }
 
 export interface ProjectionUserWork {
+  note_tag_count: number;
   annotation_count: number;
   content_group_count: number;
   purpose_count: number;
@@ -55,6 +56,8 @@ export function getProjectionUserWork(
   userId: string,
   noteId: string,
 ): ProjectionUserWork {
+  const noteTagCount = count(db,
+    'SELECT COUNT(*) AS count FROM note_tags WHERE user_id = ? AND note_id = ?', userId, noteId);
   const annotationCount = count(
     db,
     "SELECT COUNT(*) AS count FROM annotation_truths WHERE user_id = ? AND note_id = ? AND status = 'active'",
@@ -96,12 +99,14 @@ export function getProjectionUserWork(
       )
   `, noteId, noteId);
   return {
+    note_tag_count: noteTagCount,
     annotation_count: annotationCount,
     content_group_count: contentGroupCount,
     purpose_count: purposeCount,
     display_override_count: displayOverrideCount,
     external_block_placement_count: externalBlockPlacementCount,
-    has_user_work: annotationCount
+    has_user_work: noteTagCount
+      + annotationCount
       + contentGroupCount
       + purposeCount
       + displayOverrideCount

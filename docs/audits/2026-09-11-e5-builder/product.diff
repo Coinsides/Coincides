@@ -1,0 +1,1844 @@
+diff --git a/client/src/pages/Notes/NoteDetail.module.css b/client/src/pages/Notes/NoteDetail.module.css
+index a145dff..62963fb 100644
+--- a/client/src/pages/Notes/NoteDetail.module.css
++++ b/client/src/pages/Notes/NoteDetail.module.css
+@@ -245,36 +245,6 @@
+   line-height: 1.5;
+ }
+ 
+-.infoGrid {
+-  display: grid;
+-  grid-template-columns: minmax(0, 1fr);
+-  gap: 2px;
+-  margin: 0;
+-}
+-
+-.infoGrid div {
+-  padding: 8px 0;
+-  display: flex;
+-  align-items: baseline;
+-  justify-content: space-between;
+-  gap: 16px;
+-}
+-
+-.infoGrid dt {
+-  margin: 0;
+-  color: var(--text-muted);
+-  font-size: 11px;
+-  font-weight: 750;
+-  text-transform: uppercase;
+-}
+-
+-.infoGrid dd {
+-  margin: 0;
+-  color: var(--text-primary);
+-  font-size: 13px;
+-  font-weight: 650;
+-}
+-
+ .moreAction {
+   display: grid;
+   grid-template-columns: 18px minmax(0, 1fr) auto;
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useFloatingOverlayController.ts b/client/src/pages/Notes/canvasEngine/hooks/useFloatingOverlayController.ts
+index 3d0c1d4..fb60c89 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/useFloatingOverlayController.ts
++++ b/client/src/pages/Notes/canvasEngine/hooks/useFloatingOverlayController.ts
+@@ -9,7 +9,7 @@ import {
+   type RuntimeInteractionState,
+ } from '../interactionController';
+ 
+-export type FloatingOverlayPanel = 'layout' | 'noteInfo' | 'moreActions' | 'blockTrash' | 'preview' | 'viewOptions';
++export type FloatingOverlayPanel = 'layout' | 'moreActions' | 'blockTrash' | 'preview' | 'viewOptions';
+ 
+ export interface UseFloatingOverlayControllerOptions {
+   setInteractionState: (state: RuntimeInteractionState) => void;
+@@ -55,7 +55,6 @@ export function useFloatingOverlayController({
+     showBlockTrash: activeOverlay === 'blockTrash',
+     showLayoutPanel: activeOverlay === 'layout',
+     showMoreActions: activeOverlay === 'moreActions',
+-    showNoteInfo: activeOverlay === 'noteInfo',
+     showViewOptions: activeOverlay === 'viewOptions',
+     showPreviewAIVisibility,
+     showPreviewBlockTypes,
+@@ -65,7 +64,6 @@ export function useFloatingOverlayController({
+     openBlockTrash: () => setOverlay('blockTrash'),
+     toggleExportPreview: () => toggleOverlay('preview'),
+     toggleMoreActions: () => toggleOverlay('moreActions'),
+-    toggleNoteInfo: () => toggleOverlay('noteInfo'),
+     toggleViewOptions: () => toggleOverlay('viewOptions'),
+     togglePreviewAIVisibility: () => setShowPreviewAIVisibility((value) => !value),
+     togglePreviewBlockTypes: () => setShowPreviewBlockTypes((value) => !value),
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts
+index 5010cc2..6483d47 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts
++++ b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts
+@@ -1,4 +1,6 @@
+ import { useCallback } from 'react';
++import { useNavigate } from 'react-router-dom';
++import { getSource, openAuthenticatedSourceBlob } from '@/pages/Sources/sourceApi';
+ import type {
+   Dispatch,
+   SetStateAction,
+@@ -37,6 +39,7 @@ export type UseNoteCanvasLayerPropsInput =
+   >
+   & {
+     note: Note | null;
++    sourceReferenceCount: number;
+     onFloatingPanelFocusBlock: NoteFloatingPanelLayerProps['onFocusBlock'];
+     onWritingSurfaceFocusBlock: NoteWritingSurfaceLayerProps['onFocusBlock'];
+     onWritingSurfaceRequestBlockFocus: NoteWritingSurfaceLayerProps['onRequestFocusBlock'];
+@@ -50,6 +53,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
+   documentLayerProps: NoteRuntimeDocumentLayerProps;
+ } | null {
+   const addToast = useUIStore((s) => s.addToast);
++  const navigate = useNavigate();
+   const handleTrashNote = useNoteTrashAction(input.note);
+ 
+   const handleAddFavorite = useCallback(() => {
+@@ -79,13 +83,10 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
+     showExportPreview: input.showExportPreview,
+     showLayoutPanel: input.showLayoutPanel,
+     showMoreActions: input.showMoreActions,
+-    showNoteInfo: input.showNoteInfo,
+     showPreviewAIVisibility: input.showPreviewAIVisibility,
+     showPreviewBlockTypes: input.showPreviewBlockTypes,
+     showPreviewExportStatus: input.showPreviewExportStatus,
+     showPreviewLabelOverlay: input.showPreviewLabelOverlay,
+-    sortedBlockCount: input.sortedBlockCount,
+-    sourceReferenceCount: input.sourceReferenceCount,
+     surfaceMode: input.surfaceMode,
+     surfacePolicy: input.surfacePolicy,
+     trashedBlocks: input.trashedBlocks,
+@@ -100,7 +101,6 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
+     onToggleExportPreview: input.onToggleExportPreview,
+     onToggleLayoutMode: input.onToggleLayoutMode,
+     onToggleMoreActions: input.onToggleMoreActions,
+-    onToggleNoteInfo: input.onToggleNoteInfo,
+     onOpenBlockTrash: input.onOpenBlockTrash,
+     onOpenLayoutPanel: input.onOpenLayoutPanel,
+     onAddPageBelow: input.onAddPageBelow,
+@@ -133,6 +133,27 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
+       contentReadOnly: input.contentReadOnly,
+       onTitleDraftChange: input.onTitleDraftChange, onDescriptionDraftChange: input.onDescriptionDraftChange,
+       onSaveTitle: input.onSaveTitle, onSaveDescription: input.onSaveDescription,
++      metadata: {
++        noteId: input.note.id, readOnly: input.contentReadOnly,
++        mode: input.surfaceMode, blockCount: input.sortedBlockCount,
++        sourceCount: input.sourceReferenceCount, status: input.note.status,
++        refreshKey: input.allBlocks,
++        trackPendingWrite: input.trackPendingWrite,
++        onOpenSource: async (source) => {
++          const anchor = input.anchorsBySourceRef[source.reference_id];
++          if (anchor) { input.onViewSource(anchor.id); return; }
++          if (source.projection_note_id) {
++            navigate(`/notes/${encodeURIComponent(source.projection_note_id)}`);
++            return;
++          }
++          if (source.source_record_id) {
++            await openAuthenticatedSourceBlob(await getSource(source.source_record_id), 'preview');
++            return;
++          }
++          input.onFloatingPanelFocusBlock(source.block_id);
++          addToast('info', 'Opened the reference location. The source has no available anchor.');
++        },
++      },
+     },
+     onPageFrameWallPointerDown: input.onPageFrameWallPointerDown,
+     activePageFrameWall: input.activePageFrameWall,
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts
+index de18ad1..8c926bb 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts
++++ b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts
+@@ -68,7 +68,6 @@ export function useNoteCanvasRuntimeController() {
+     showExportPreview,
+     showLayoutPanel,
+     showMoreActions,
+-    showNoteInfo,
+     showViewOptions,
+     showPreviewAIVisibility,
+     showPreviewBlockTypes,
+@@ -80,7 +79,6 @@ export function useNoteCanvasRuntimeController() {
+     toggleExportPreview,
+     toggleLayoutMode,
+     toggleMoreActions,
+-    toggleNoteInfo,
+     toggleViewOptions,
+     togglePreviewAIVisibility,
+     togglePreviewBlockTypes,
+@@ -502,7 +500,6 @@ export function useNoteCanvasRuntimeController() {
+     showExportPreview,
+     showLayoutPanel,
+     showMoreActions,
+-    showNoteInfo,
+     showViewOptions,
+     showPreviewAIVisibility,
+     showPreviewBlockTypes,
+@@ -599,7 +596,6 @@ export function useNoteCanvasRuntimeController() {
+     onToggleExportRole: toggleBlockExportRole,
+     onToggleLayoutMode: toggleLayoutMode,
+     onToggleMoreActions: toggleMoreActions,
+-    onToggleNoteInfo: toggleNoteInfo,
+     onToggleViewOptions: toggleViewOptions,
+     onOpenBlockTrash: handleOpenBlockTrash,
+     onOpenLayoutPanel: openLayoutPanel,
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useRuntimeSurfaceStateController.ts b/client/src/pages/Notes/canvasEngine/hooks/useRuntimeSurfaceStateController.ts
+index 1826f05..d64ceaa 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/useRuntimeSurfaceStateController.ts
++++ b/client/src/pages/Notes/canvasEngine/hooks/useRuntimeSurfaceStateController.ts
+@@ -41,7 +41,6 @@ export function useRuntimeSurfaceStateController({ noteId }: { noteId?: string }
+     showExportPreview,
+     showLayoutPanel,
+     showMoreActions,
+-    showNoteInfo,
+     showViewOptions,
+     showPreviewAIVisibility,
+     showPreviewBlockTypes,
+@@ -51,7 +50,6 @@ export function useRuntimeSurfaceStateController({ noteId }: { noteId?: string }
+     openLayoutPanel,
+     toggleExportPreview,
+     toggleMoreActions,
+-    toggleNoteInfo,
+     toggleViewOptions,
+     togglePreviewAIVisibility,
+     togglePreviewBlockTypes,
+@@ -189,7 +187,6 @@ export function useRuntimeSurfaceStateController({ noteId }: { noteId?: string }
+     showExportPreview,
+     showLayoutPanel,
+     showMoreActions,
+-    showNoteInfo,
+     showViewOptions,
+     showPreviewAIVisibility,
+     showPreviewBlockTypes,
+@@ -203,7 +200,6 @@ export function useRuntimeSurfaceStateController({ noteId }: { noteId?: string }
+     toggleExportPreview,
+     toggleLayoutMode: togglePersistentLayoutMode,
+     toggleMoreActions,
+-    toggleNoteInfo,
+     toggleViewOptions,
+     togglePreviewAIVisibility,
+     togglePreviewBlockTypes,
+diff --git a/client/src/pages/Notes/canvasEngine/interactionController.ts b/client/src/pages/Notes/canvasEngine/interactionController.ts
+index b79abd7..8a1e8c7 100644
+--- a/client/src/pages/Notes/canvasEngine/interactionController.ts
++++ b/client/src/pages/Notes/canvasEngine/interactionController.ts
+@@ -32,7 +32,7 @@ export interface RuntimeInteractionState {
+   blockId?: string;
+   textFlowId?: string;
+   textUnitId?: string;
+-  panel?: 'slashMenu' | 'preview' | 'layout' | 'noteInfo' | 'moreActions' | 'blockTrash' | 'insert' | 'viewOptions';
++  panel?: 'slashMenu' | 'preview' | 'layout' | 'moreActions' | 'blockTrash' | 'insert' | 'viewOptions';
+ }
+ 
+ export function idleInteraction(): RuntimeInteractionState {
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx b/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx
+index e9fd20b..9b40d08 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx
+@@ -72,13 +72,10 @@ function noteChromeProps(
+     showExportPreview: false,
+     showLayoutPanel: false,
+     showMoreActions: true,
+-    showNoteInfo: false,
+     showPreviewAIVisibility: false,
+     showPreviewBlockTypes: false,
+     showPreviewExportStatus: false,
+     showPreviewLabelOverlay: false,
+-    sortedBlockCount: 1,
+-    sourceReferenceCount: 0,
+     surfaceMode: 'page',
+     surfacePolicy: { label: 'Page', nextModeLabel: 'Switch to Canvas' },
+     documentTypographyProfile: DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE,
+@@ -96,7 +93,6 @@ function noteChromeProps(
+     onToggleExportPreview: noop,
+     onToggleLayoutMode: noop,
+     onToggleMoreActions: noop,
+-    onToggleNoteInfo: noop,
+     onOpenBlockTrash: noop,
+     onOpenLayoutPanel: noop,
+     onDeletePageFrame: noop,
+@@ -136,9 +132,9 @@ describe('NoteChromeLayer block restore door', () => {
+     expect(container.querySelector('[data-page-reading-control] [data-note-toolbar-actions]')).not.toBeNull();
+   });
+ 
+-  it('D2 migrated menu entries invoke their existing handlers from the upward body portal', () => {
++  it('E5 retires View info while the remaining menu entries keep their handlers and upward body portal', () => {
+     const props = noteChromeProps({ onCreatePageStack: vi.fn(), onAddFavorite: vi.fn(),
+-      onToggleNoteInfo: vi.fn(), onOpenBlockTrash: vi.fn() });
++      onOpenBlockTrash: vi.fn() });
+     const { container } = render(<div data-page-reading-control="true"><NoteChromeLayer {...props} /></div>);
+     const popover = document.querySelector<HTMLElement>('[data-note-toolbar-popover]')!;
+     expect(container.contains(popover)).toBe(false);
+@@ -146,11 +142,11 @@ describe('NoteChromeLayer block restore door', () => {
+     expect(Number.parseFloat(popover.style.bottom)).toBeGreaterThan(0);
+     fireEvent.click(screen.getByRole('button', { name: 'New PageStack' }));
+     fireEvent.click(screen.getByRole('button', { name: 'Add to favorites' }));
+-    fireEvent.click(screen.getByRole('button', { name: 'View info' }));
++    expect(screen.queryByRole('button', { name: 'View info' })).toBeNull();
++    expect(document.querySelector('[data-note-overlay="info"]')).toBeNull();
+     fireEvent.click(screen.getByRole('button', { name: 'Deleted blocks' }));
+     expect(props.onCreatePageStack).toHaveBeenCalledOnce();
+     expect(props.onAddFavorite).toHaveBeenCalledOnce();
+-    expect(props.onToggleNoteInfo).toHaveBeenCalledOnce();
+     expect(props.onOpenBlockTrash).toHaveBeenCalledOnce();
+     expect(screen.getByText('Typography')).toBeTruthy();
+     expect(screen.queryByText('Note-level actions')).toBeNull();
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx b/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx
+index 18600ea..0af844b 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx
+@@ -4,7 +4,6 @@ import {
+   Eye,
+   FileText,
+   FilePlus2,
+-  Info,
+   LayoutDashboard,
+   LockKeyhole,
+   MoreHorizontal,
+@@ -58,13 +57,10 @@ export interface NoteChromeLayerProps {
+   showExportPreview: boolean;
+   showLayoutPanel: boolean;
+   showMoreActions: boolean;
+-  showNoteInfo: boolean;
+   showPreviewAIVisibility: boolean;
+   showPreviewBlockTypes: boolean;
+   showPreviewExportStatus: boolean;
+   showPreviewLabelOverlay: boolean;
+-  sortedBlockCount: number;
+-  sourceReferenceCount: number;
+   surfaceMode: 'page' | 'canvas';
+   surfacePolicy: SurfacePolicyView;
+   trashedBlocks: NoteBlock[];
+@@ -81,7 +77,6 @@ export interface NoteChromeLayerProps {
+   onToggleExportPreview: () => void;
+   onToggleLayoutMode: () => void;
+   onToggleMoreActions: () => void;
+-  onToggleNoteInfo: () => void;
+   onOpenLayoutPanel: () => void;
+   onOpenBlockTrash: () => void;
+   onDeletePageFrame: (frameId: string) => void;
+@@ -117,13 +112,10 @@ export function NoteChromeLayer({
+   showExportPreview,
+   showLayoutPanel,
+   showMoreActions,
+-  showNoteInfo,
+   showPreviewAIVisibility,
+   showPreviewBlockTypes,
+   showPreviewExportStatus,
+   showPreviewLabelOverlay,
+-  sortedBlockCount,
+-  sourceReferenceCount,
+   surfaceMode,
+   surfacePolicy,
+   trashedBlocks,
+@@ -139,7 +131,6 @@ export function NoteChromeLayer({
+   onToggleExportPreview,
+   onToggleLayoutMode,
+   onToggleMoreActions,
+-  onToggleNoteInfo,
+   onOpenBlockTrash,
+   onOpenLayoutPanel,
+   onDeletePageFrame,
+@@ -158,7 +149,7 @@ export function NoteChromeLayer({
+ }: NoteChromeLayerProps) {
+   const toolbarRef = useRef<HTMLDivElement>(null);
+   const [overlayAnchor, setOverlayAnchor] = useState({ right: 16, bottom: 64 });
+-  const overlayOpen = showNoteInfo || showLayoutPanel || showMoreActions || showBlockTrash || showExportPreview;
++  const overlayOpen = showLayoutPanel || showMoreActions || showBlockTrash || showExportPreview;
+   useEffect(() => {
+     if (!overlayOpen) return;
+     const toolbar = toolbarRef.current?.closest('[data-page-reading-control="true"]') || toolbarRef.current;
+@@ -441,41 +432,6 @@ export function NoteChromeLayer({
+           <FloatingOverlayLayer open={overlayOpen} placement="free">
+             <div className={styles.noteToolbarPopover} data-note-toolbar-popover="true"
+               style={{ ...overlayAnchor, maxHeight: Math.max(80, window.innerHeight - overlayAnchor.bottom - 12) }}>
+-            {showNoteInfo && (
+-              <div className={`${styles.infoPopover} ${styles.floatingPanelPopover}`} data-note-overlay="info">
+-                <div className={styles.popoverHeader}>
+-                  <div>
+-                    <div className={styles.popoverEyebrow}>Note info</div>
+-                    <strong>{note.title || 'Untitled note'}</strong>
+-                  </div>
+-                  <button className={styles.iconBtn} onClick={onCloseOverlay} title="Close">
+-                    <X size={15} />
+-                  </button>
+-                </div>
+-                <dl className={styles.infoGrid}>
+-                  <div>
+-                    <dt>Mode</dt>
+-                    <dd>{surfaceMode === 'page' ? 'Page' : 'Canvas'}</dd>
+-                  </div>
+-                  <div>
+-                    <dt>Blocks</dt>
+-                    <dd>{sortedBlockCount}</dd>
+-                  </div>
+-                  <div>
+-                    <dt>Sources</dt>
+-                    <dd>{sourceReferenceCount}</dd>
+-                  </div>
+-                  <div>
+-                    <dt>Status</dt>
+-                    <dd>{note.status}</dd>
+-                  </div>
+-                </dl>
+-                <p className={styles.popoverNote}>
+-                  Note info is a summary. Export and AI overlays live in Preview; layout controls live in Layout.
+-                </p>
+-              </div>
+-            )}
+-
+             {showLayoutPanel && (
+               <div className={`${styles.infoPopover} ${styles.actionsPopover} ${styles.floatingPanelPopover}`} data-note-overlay="layout">
+                 <div className={styles.popoverHeader}>
+@@ -599,14 +555,6 @@ export function NoteChromeLayer({
+               aria-label="Add to favorites"
+             >
+               <Star size={16} /><span>Add to favorites</span>
+-            </button>
+-            <button
+-              className={styles.moreAction}
+-              onClick={onToggleNoteInfo}
+-              title="View info"
+-              aria-label="View info"
+-            >
+-              <Info size={16} /><span>View info</span>
+             </button>
+                 <button
+                   type="button"
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.module.css b/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.module.css
+index 7a5026c..3f065ba 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.module.css
++++ b/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.module.css
+@@ -2,7 +2,7 @@
+   box-sizing: border-box;
+   padding-top: 24px;
+   padding-bottom: 24px;
+-  max-height: 208px;
++  max-height: 244px;
+   color: var(--text-primary);
+ }
+ 
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx b/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx
+index 4c299b2..d5fefcf 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx
+@@ -49,7 +49,7 @@ describe('paper note metadata', () => {
+       render(<NotePaperHeader {...input} />);
+       expect((screen.getByRole('textbox', { name: 'Note title' }) as HTMLElement).style.height).toBe('80px');
+       expect((screen.getByRole('textbox', { name: 'Note description' }) as HTMLElement).style.height).toBe('72px');
+-      expect(input.onHeightChange).toHaveBeenCalledWith(208);
++      expect(input.onHeightChange).toHaveBeenCalledWith(244);
+     } finally { scroll.mockRestore(); offset.mockRestore(); }
+   });
+ });
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.tsx b/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.tsx
+index f06034a..740188f 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.tsx
+@@ -1,5 +1,6 @@
+ import { useLayoutEffect, useRef, type CSSProperties } from 'react';
+ import styles from './NotePaperHeader.module.css';
++import { NoteCoverMetadata, type NoteCoverMetadataProps } from './NoteCoverMetadata';
+ 
+ export interface NotePaperHeaderProps {
+   titleDraft: string;
+@@ -9,19 +10,21 @@ export interface NotePaperHeaderProps {
+   onDescriptionDraftChange: (value: string) => void;
+   onSaveTitle: () => void | Promise<void>;
+   onSaveDescription: () => void | Promise<void>;
++  metadata?: NoteCoverMetadataProps;
+ }
+ 
+-export const NOTE_HEADER_MAX_HEIGHT = 208;
+-export const NOTE_HEADER_INITIAL_HEIGHT = 120;
++export const NOTE_HEADER_MAX_HEIGHT = 244;
++export const NOTE_HEADER_INITIAL_HEIGHT = 156;
+ 
+ /** A display-only band before the existing paper coordinate origin. */
+ export function NotePaperHeader({
+   titleDraft, descriptionDraft, contentReadOnly, onTitleDraftChange,
+   onDescriptionDraftChange, onSaveTitle, onSaveDescription,
+-  onHeightChange, style,
++  onHeightChange, style, metadata, metadataHidden,
+ }: NotePaperHeaderProps & {
+   onHeightChange: (height: number) => void;
+   style?: CSSProperties;
++  metadataHidden?: boolean;
+ }) {
+   const headerRef = useRef<HTMLElement>(null);
+   const titleRef = useRef<HTMLTextAreaElement>(null);
+@@ -69,5 +72,6 @@ export function NotePaperHeader({
+           event.preventDefault(); event.currentTarget.blur();
+         }
+       }} />
++    {metadata && <NoteCoverMetadata key={metadata.noteId} {...metadata} hidden={metadataHidden} />}
+   </header>;
+ }
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx b/client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx
+index 7f94681..c223dc9 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx
+@@ -478,7 +478,7 @@ describe('NoteRuntimeDocumentLayer overview navigation', () => {
+     expect(header.onTitleDraftChange).toHaveBeenCalledWith('Changed title '.repeat(30));
+     expect(header.onDescriptionDraftChange).toHaveBeenCalledWith('Changed description '.repeat(40));
+     rerender(documentFor({ ...props, paperHeader: { ...header, titleDraft: 'Changed title '.repeat(30), descriptionDraft: 'Changed description '.repeat(40) } }));
+-    expect(Number.parseFloat(paper.style.top) - oldTop).toBeCloseTo(208 * scale);
++    expect(Number.parseFloat(paper.style.top) - oldTop).toBeCloseTo(244 * scale);
+     expect({ top: shell.style.top, left: shell.style.left }).toEqual(localPosition);
+     expect(JSON.stringify({ layouts: props.blockLayouts, runtime: props.noteCanvasRuntime, blocks: props.allBlocks })).toBe(original);
+     fireEvent.blur(title);
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx b/client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx
+index 97e42ed..5439d28 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx
+@@ -3540,7 +3540,7 @@ export function NoteWritingSurfaceLayer({
+           left: -pageDisplayBounds.left * pageReading.displayScale,
+           transform: `scale(${pageReading.displayScale})`, transformOrigin: '0 0',
+         }}>
+-        <NotePaperHeader key={noteId} {...paperHeader} onHeightChange={setHeaderHeight}
++        <NotePaperHeader key={noteId} {...paperHeader} onHeightChange={setHeaderHeight} metadataHidden={overviewOpen}
+           style={{ paddingLeft: pageReading.inset.left, paddingRight: pageReading.inset.right }} />
+       </div>}
+       <div
+diff --git a/client/src/pages/Notes/canvasEngine/layers/ViewOptionsMenu.test.tsx b/client/src/pages/Notes/canvasEngine/layers/ViewOptionsMenu.test.tsx
+index c7a00e2..bb20e76 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/ViewOptionsMenu.test.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/ViewOptionsMenu.test.tsx
+@@ -86,7 +86,6 @@ describe('page view options menu', () => {
+     const { result } = renderHook(() => useFloatingOverlayController({ setInteractionState }));
+     const panels = [
+       ['openLayoutPanel', 'showLayoutPanel'],
+-      ['toggleNoteInfo', 'showNoteInfo'],
+       ['toggleMoreActions', 'showMoreActions'],
+       ['openBlockTrash', 'showBlockTrash'],
+       ['toggleExportPreview', 'showExportPreview'],
+diff --git a/client/src/pages/Sources/sourceApi.ts b/client/src/pages/Sources/sourceApi.ts
+index 082b34b..5f26d04 100644
+--- a/client/src/pages/Sources/sourceApi.ts
++++ b/client/src/pages/Sources/sourceApi.ts
+@@ -27,6 +27,7 @@ export interface SourceDeletionImpact {
+   projection_note_id: string | null;
+   projection_user_work: {
+     annotation_count: number;
++    note_tag_count: number;
+     content_group_count: number;
+     purpose_count: number;
+     display_override_count: number;
+diff --git a/server/src/db/schema.sql b/server/src/db/schema.sql
+index 4ffb238..74660f5 100644
+--- a/server/src/db/schema.sql
++++ b/server/src/db/schema.sql
+@@ -416,6 +416,18 @@ CREATE TABLE IF NOT EXISTS notes (
+ CREATE INDEX IF NOT EXISTS idx_notes_user_course_status ON notes(user_id, course_id, status);
+ CREATE INDEX IF NOT EXISTS idx_notes_course_updated ON notes(course_id, updated_at);
+ 
++-- V13.5 flat note tags (migration 064). Actor reserves provenance only.
++CREATE TABLE IF NOT EXISTS note_tags (
++  id TEXT PRIMARY KEY,
++  note_id TEXT NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
++  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
++  label TEXT NOT NULL CHECK (length(label) BETWEEN 1 AND 48 AND label = trim(label)),
++  actor TEXT NOT NULL DEFAULT 'user' CHECK (actor IN ('user', 'agent')),
++  created_at TEXT NOT NULL,
++  UNIQUE (note_id, label)
++);
++CREATE INDEX IF NOT EXISTS idx_note_tags_user_note ON note_tags(user_id, note_id);
++
+ -- ============================================================
+ -- 20. v2 NoteBlocks
+ -- ============================================================
+diff --git a/server/src/routes/notes.ts b/server/src/routes/notes.ts
+index 8fe4330..a56bf70 100644
+--- a/server/src/routes/notes.ts
++++ b/server/src/routes/notes.ts
+@@ -33,10 +33,12 @@ import {
+ } from '../services/notes.js';
+ import { hydrateBlock, hydrateNote } from '../services/noteHydration.js';
+ import { assertItemRefBlockContent } from '../services/itemRefBlocks.js';
++import { createNoteMetadataRouter } from './noteMetadata.js';
+ 
+ export { hydrateNote };
+ 
+ const router = Router();
++router.use(createNoteMetadataRouter());
+ const LEGACY_NOTE_LAYOUT_KEY = 'better_notebook_layout';
+ 
+ function stringifyJson(value: unknown, fallback: unknown): string {
+diff --git a/server/src/services/courseLifecycle.ts b/server/src/services/courseLifecycle.ts
+index 3790c62..55acae7 100644
+--- a/server/src/services/courseLifecycle.ts
++++ b/server/src/services/courseLifecycle.ts
+@@ -21,6 +21,7 @@ interface ProjectionRow {
+ }
+ 
+ export interface ProjectionUserWork {
++  note_tag_count: number;
+   annotation_count: number;
+   content_group_count: number;
+   purpose_count: number;
+@@ -55,6 +56,8 @@ export function getProjectionUserWork(
+   userId: string,
+   noteId: string,
+ ): ProjectionUserWork {
++  const noteTagCount = count(db,
++    'SELECT COUNT(*) AS count FROM note_tags WHERE user_id = ? AND note_id = ?', userId, noteId);
+   const annotationCount = count(
+     db,
+     "SELECT COUNT(*) AS count FROM annotation_truths WHERE user_id = ? AND note_id = ? AND status = 'active'",
+@@ -96,12 +99,14 @@ export function getProjectionUserWork(
+       )
+   `, noteId, noteId);
+   return {
++    note_tag_count: noteTagCount,
+     annotation_count: annotationCount,
+     content_group_count: contentGroupCount,
+     purpose_count: purposeCount,
+     display_override_count: displayOverrideCount,
+     external_block_placement_count: externalBlockPlacementCount,
+-    has_user_work: annotationCount
++    has_user_work: noteTagCount
++      + annotationCount
+       + contentGroupCount
+       + purposeCount
+       + displayOverrideCount
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.module.css b/client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.module.css
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.module.css
+@@ -0,0 +1,39 @@
++.row { display: flex; align-items: center; gap: 8px; height: 28px; margin-top: 8px; min-width: 0; font-size: 12px; color: var(--text-secondary); }
++.tags { display: flex; align-items: center; gap: 6px; min-width: 0; overflow-x: auto; scrollbar-width: thin; }
++.chip { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 5px; max-width: 180px; height: 24px; padding: 2px 7px; border-radius: 4px; background: var(--bg-hover); color: var(--text-primary); }
++.chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
++.chip svg { flex-shrink: 0; }
++.add, .disclosure { display: inline-flex; align-items: center; justify-content: center; gap: 4px; height: 28px; flex: 0 0 auto; white-space: nowrap; }
++.add { padding: 0 4px; }
++.disclosure { margin-left: auto; flex-shrink: 1; min-width: 0; }
++.disclosure span { overflow: hidden; text-overflow: ellipsis; }
++.disclosure svg { flex-shrink: 0; }
++.row[data-empty='true'] .add { opacity: 0; }
++:global([data-note-paper-header]:hover) .add, :global([data-note-paper-header]:focus-within) .add { opacity: 1; }
++.row[data-projection-hidden='true'] { visibility: hidden; }
++.row button:hover, .popup a:hover, .popup button:hover { background: var(--bg-hover); }
++.row button:focus-visible, .popup a:focus-visible, .popup input:focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
++.row button:disabled { opacity: 0.5; cursor: default; }
++.rowError { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
++.popup { position: fixed; inset: auto; box-sizing: border-box; margin: 0; width: min(368px, calc(100vw - 16px)); padding: 16px; overflow: auto; overscroll-behavior: contain; border: 1px solid var(--border-default); border-radius: 8px; background: var(--bg-elevated); color: var(--text-primary); font-size: 13px; line-height: 1.5; text-align: left; user-select: text; }
++.popup:popover-open { display: block; }
++.popup header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
++.popup header button { display: inline-flex; padding: 5px; }
++.popup form { margin-top: 12px; }
++.popup label { display: block; margin-bottom: 4px; }
++.entry { display: flex; gap: 8px; }
++.entry input { flex: 1; min-width: 0; padding: 6px 8px; border: 1px solid var(--border-default); border-radius: 4px; background: var(--bg-primary); color: var(--text-primary); }
++.entry input::placeholder { color: var(--text-secondary); }
++.entry button { padding: 4px 8px; border-radius: 4px; background: var(--bg-hover); }
++.popup section { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-subtle); }
++.popup h3 { margin: 0 0 6px; font-size: 14px; font-weight: 600; }
++.popup h4 { margin: 10px 0 4px; font-size: 12px; font-weight: 400; color: var(--text-secondary); }
++.popup p { display: block; margin: 8px 0; font-size: 13px; color: var(--text-secondary); }
++.popup ul { list-style: none; margin: 0; padding: 0; }
++.popup li a, .popup li button { display: flex; align-items: baseline; justify-content: space-between; width: 100%; gap: 12px; padding: 5px 0; text-align: left; color: var(--text-primary); text-decoration: none; }
++.popup li span { overflow-wrap: anywhere; min-width: 0; }
++.popup small { flex-shrink: 0; font-size: 12px; color: var(--text-secondary); }
++.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; margin: 0; }
++.stats dt { font-size: 12px; color: var(--text-secondary); }
++.stats dd { margin: 0; }
++@media print { .row, .popup { display: none !important; } }
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.test.tsx b/client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.test.tsx
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.test.tsx
+@@ -0,0 +1,428 @@
++import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
++import type { ReactNode } from 'react';
++import { MemoryRouter, useLocation } from 'react-router-dom';
++import { beforeEach, describe, expect, it, vi } from 'vitest';
++import { notifyBoardChanged } from '@/pages/Boards/boardEvents';
++import { createInFlightWriteRegistry } from '../inFlightWriteRegistry';
++import type { NoteMetadata, NoteTag } from '../noteMetadataRepository';
++import { NoteCoverMetadata, type NoteCoverMetadataProps } from './NoteCoverMetadata';
++
++const repository = vi.hoisted(() => ({ tags: vi.fn(), metadata: vi.fn(), addTag: vi.fn(), deleteTag: vi.fn() }));
++vi.mock('../noteMetadataRepository', () => ({ noteMetadataRepository: repository }));
++
++const emptyMetadata: NoteMetadata = {
++  upstream: { sources: [], notes: [], count: 0 },
++  downstream: { boards: [], content_groups: [], count: 0 },
++};
++const references: NoteMetadata = {
++  upstream: {
++    sources: [{ document_id: 'document-1', source_record_id: 'source-1', projection_note_id: 'projection-1',
++      block_id: 'block-1', reference_id: 'reference-1', title: 'Lecture source', course_id: 'course-1', count: 3 }],
++    notes: [{ note_id: 'related note', title: 'Related note', course_id: 'course-1', count: 2 }],
++    count: 2,
++  },
++  downstream: {
++    boards: [{ board_id: 'study board', title: 'Study board', count: 4 }],
++    content_groups: [{ content_group_id: 'study group', note_id: 'group note', course_id: 'course-1',
++      title: 'Study group', count: 5 }],
++    count: 2,
++  },
++};
++const tag = (label: string, id = label): NoteTag => ({
++  id, note_id: 'note-1', user_id: 'user-1', label, actor: 'user', created_at: '2026-09-11T12:00:00Z',
++});
++const props = (overrides: Partial<NoteCoverMetadataProps> = {}): NoteCoverMetadataProps => ({
++  noteId: 'note-1', readOnly: false, mode: 'page', blockCount: 7, sourceCount: 3, status: 'active',
++  onOpenSource: vi.fn(), ...overrides,
++});
++
++function deferred<T>() {
++  let resolve!: (value: T) => void;
++  let reject!: (error: unknown) => void;
++  const promise = new Promise<T>((complete, fail) => { resolve = complete; reject = fail; });
++  return { promise, resolve, reject };
++}
++
++function CurrentRoute() {
++  const location = useLocation();
++  return <output aria-label="Current route">{location.pathname}{location.search}</output>;
++}
++
++function RouterWrapper({ children }: { children: ReactNode }) {
++  return <MemoryRouter initialEntries={['/notes/note-1']}>
++    {children}<CurrentRoute />
++  </MemoryRouter>;
++}
++
++async function mount(overrides: Partial<NoteCoverMetadataProps> = {}) {
++  const input = props(overrides);
++  const view = render(<NoteCoverMetadata {...input} />, { wrapper: RouterWrapper });
++  await act(async () => undefined);
++  return { ...view, input };
++}
++
++async function openMetadata(name: string | RegExp = 'Add tags') {
++  await act(async () => { fireEvent.click(screen.getByRole('button', { name })); });
++  return screen.getByRole('dialog', { name: 'Note metadata' });
++}
++
++beforeEach(() => {
++  vi.resetAllMocks();
++  repository.tags.mockResolvedValue([]);
++  repository.metadata.mockResolvedValue(emptyMetadata);
++  repository.addTag.mockImplementation(async (_noteId: string, label: string) => tag(label));
++  repository.deleteTag.mockResolvedValue(undefined);
++});
++
++describe('note cover metadata behavior', () => {
++  it('hydrates stored tags, trims additions and reflects successful deletion across remounts', async () => {
++    let persisted = [tag('Existing')];
++    repository.tags.mockImplementation(async () => persisted.map((entry) => ({ ...entry })));
++    repository.addTag.mockImplementation(async (_noteId: string, label: string) => {
++      const added = tag(label, 'new-tag');
++      persisted = [...persisted, added];
++      return added;
++    });
++    repository.deleteTag.mockImplementation(async (_noteId: string, id: string) => {
++      persisted = persisted.filter((entry) => entry.id !== id);
++    });
++    const first = await mount();
++    expect(screen.getByRole('button', { name: 'Remove tag Existing' })).toBeTruthy();
++    expect(repository.tags).toHaveBeenCalledWith('note-1');
++    await openMetadata();
++    fireEvent.change(screen.getByRole('textbox', { name: 'Add tags' }), { target: { value: '  Revision  ' } });
++    fireEvent.click(screen.getByRole('button', { name: 'Add tag' }));
++    await screen.findByRole('button', { name: 'Remove tag Revision' });
++    expect(repository.addTag).toHaveBeenCalledExactlyOnceWith('note-1', 'Revision');
++    expect((screen.getByRole('textbox', { name: 'Add tags' }) as HTMLInputElement).value).toBe('');
++    first.unmount();
++
++    const second = await mount();
++    fireEvent.click(screen.getByRole('button', { name: 'Remove tag Revision' }));
++    await waitFor(() => expect(screen.queryByRole('button', { name: 'Remove tag Revision' })).toBeNull());
++    expect(repository.deleteTag).toHaveBeenCalledExactlyOnceWith('note-1', 'new-tag');
++    second.unmount();
++
++    await mount();
++    expect(screen.queryByText('Revision')).toBeNull();
++    expect(screen.getByRole('button', { name: 'Remove tag Existing' })).toBeTruthy();
++  });
++
++  it('marks an empty row quiet and omits the zero-count disclosure while retaining the add entry', async () => {
++    const view = await mount();
++    expect(view.container.querySelector('[data-note-cover-metadata]')?.getAttribute('data-empty')).toBe('true');
++    expect(screen.queryByRole('button', { name: /Upstream/ })).toBeNull();
++    expect(screen.queryByRole('dialog')).toBeNull();
++    expect(screen.getByRole('button', { name: 'Add tags' })).toBeTruthy();
++    const popup = await openMetadata();
++    expect(within(popup).getByText('No upstream references.')).toBeTruthy();
++    expect(within(popup).getByText('No downstream references.')).toBeTruthy();
++    expect(within(popup).getByRole('heading', { name: 'Statistics' })).toBeTruthy();
++  });
++
++  it('expands one disclosure into upstream, downstream and all four former View info statistics', async () => {
++    repository.metadata.mockResolvedValue(references);
++    const view = await mount({ mode: 'canvas', blockCount: 17, sourceCount: 9, status: 'stale' });
++    expect(view.container.querySelector('[data-note-cover-metadata]')?.getAttribute('data-empty')).toBe('false');
++    const popup = await openMetadata('Upstream 2 · Downstream 2');
++    expect(within(popup).getAllByRole('heading', { level: 3 }).map((heading) => heading.textContent))
++      .toEqual(['Upstream', 'Downstream', 'Statistics']);
++    for (const [title, count] of [['Lecture source', '3'], ['Related note', '2'], ['Study board', '4'], ['Study group', '5']]) {
++      expect(within(popup).getByText(title).closest('li')?.textContent).toBe(`${title}${count}`);
++    }
++    const statistics = within(popup).getByRole('region', { name: 'Statistics' });
++    expect(within(statistics).getAllByRole('term').map((term) => term.textContent)).toEqual(['Mode', 'Blocks', 'Sources', 'Status']);
++    expect(within(statistics).getAllByRole('definition').map((definition) => definition.textContent)).toEqual(['Canvas', '17', '9', 'stale']);
++    expect(screen.queryByRole('button', { name: 'View info' })).toBeNull();
++  });
++
++  it.each([
++    ['Related note', '/notes/related%20note'],
++    ['Study board', '/boards/study%20board'],
++    ['Study group', '/group-gallery/editor?note_id=group+note&group_id=study+group'],
++  ])('navigates %s through its existing route and dismisses the popup', async (title, href) => {
++    repository.metadata.mockResolvedValue(references);
++    await mount();
++    const popup = await openMetadata('Upstream 2 · Downstream 2');
++    const link = within(popup).getByRole('link', { name: new RegExp(title) });
++    expect(link.getAttribute('href')).toBe(href);
++    expect(screen.getByRole('status', { name: 'Current route' }).textContent).toBe('/notes/note-1');
++    fireEvent.click(link);
++    expect(screen.queryByRole('dialog')).toBeNull();
++    expect(screen.getByRole('status', { name: 'Current route' }).textContent).toBe(href);
++  });
++
++  it('routes a content group without a current note to its project with an explicit fallback label', async () => {
++    repository.metadata.mockResolvedValue({
++      ...emptyMetadata,
++      downstream: {
++        boards: [], count: 1,
++        content_groups: [{ content_group_id: 'orphan-group', note_id: null, course_id: 'parent project',
++          title: 'Retained group', count: 2 }],
++      },
++    } satisfies NoteMetadata);
++    await mount();
++    const popup = await openMetadata('Upstream 0 · Downstream 1');
++    const link = within(popup).getByRole('link', { name: 'Retained group · Open project 2' });
++    expect(link.getAttribute('href')).toBe('/projects/parent%20project');
++    expect(link.getAttribute('title')).toContain('no current note location');
++    fireEvent.click(link);
++    expect(screen.queryByRole('dialog')).toBeNull();
++    expect(screen.getByRole('status', { name: 'Current route' }).textContent).toBe('/projects/parent%20project');
++  });
++
++  it('opens a source through its callback and retains a failed navigation for retry', async () => {
++    repository.metadata.mockResolvedValue(references);
++    const onOpenSource = vi.fn().mockRejectedValueOnce(new Error('Temporary source failure')).mockResolvedValue(undefined);
++    await mount({ onOpenSource });
++    await openMetadata('Upstream 2 · Downstream 2');
++    fireEvent.click(screen.getByRole('button', { name: 'Lecture source 3' }));
++    expect((await screen.findByRole('alert')).textContent).toContain('Could not open this source');
++    expect(screen.getByRole('dialog')).toBeTruthy();
++    fireEvent.click(screen.getByRole('button', { name: 'Lecture source 3' }));
++    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
++    expect(onOpenSource).toHaveBeenNthCalledWith(1, references.upstream.sources[0]);
++    expect(onOpenSource).toHaveBeenNthCalledWith(2, references.upstream.sources[0]);
++  });
++
++  it('reads current tags and references whenever the popup is reopened', async () => {
++    await mount();
++    await openMetadata();
++    fireEvent.click(screen.getByRole('button', { name: 'Close note metadata' }));
++    repository.tags.mockResolvedValue([tag('Changed elsewhere')]);
++    repository.metadata.mockResolvedValue(references);
++    await openMetadata();
++    expect(screen.getByRole('button', { name: 'Remove tag Changed elsewhere' })).toBeTruthy();
++    expect(screen.getByRole('button', { name: 'Upstream 2 · Downstream 2' })).toBeTruthy();
++    expect(screen.getByRole('link', { name: 'Study board 4' })).toBeTruthy();
++  });
++
++  it('refreshes existing edges after a board change and when returning to the window', async () => {
++    await mount();
++    repository.metadata.mockResolvedValue(references);
++    act(() => notifyBoardChanged('study board'));
++    await screen.findByRole('button', { name: 'Upstream 2 · Downstream 2' });
++    repository.tags.mockResolvedValue([tag('Returned')]);
++    fireEvent.focus(window);
++    expect(await screen.findByRole('button', { name: 'Remove tag Returned' })).toBeTruthy();
++  });
++
++  it('keeps partial successful reads and offers a recoverable metadata read error', async () => {
++    repository.tags.mockResolvedValue([tag('Available')]);
++    repository.metadata.mockRejectedValue(new Error('Temporary read failure'));
++    const view = await mount();
++    expect(screen.getByRole('button', { name: 'Remove tag Available' })).toBeTruthy();
++    expect(view.container.querySelector('[data-note-cover-metadata]')?.getAttribute('data-empty')).toBe('false');
++    await openMetadata('Retry metadata');
++    expect(screen.getByRole('alert').textContent).toContain('Could not refresh metadata');
++    repository.metadata.mockResolvedValue(references);
++    fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
++    await waitFor(() => expect(screen.queryByRole('alert')).toBeNull());
++    expect(screen.getByRole('button', { name: 'Upstream 2 · Downstream 2' })).toBeTruthy();
++  });
++
++  it('retains an unsaved label on failure and permits retry without a phantom chip', async () => {
++    repository.addTag.mockRejectedValueOnce(new Error('Temporary write failure')).mockImplementation(async () => {
++      repository.tags.mockResolvedValue([tag('Retry me')]);
++      return tag('Retry me');
++    });
++    await mount();
++    await openMetadata();
++    const input = screen.getByRole('textbox', { name: 'Add tags' }) as HTMLInputElement;
++    fireEvent.change(input, { target: { value: 'Retry me' } });
++    fireEvent.click(screen.getByRole('button', { name: 'Add tag' }));
++    expect((await screen.findByRole('alert')).textContent).toContain('Could not save tags');
++    expect(input.value).toBe('Retry me');
++    expect(screen.queryByRole('button', { name: 'Remove tag Retry me' })).toBeNull();
++    fireEvent.click(screen.getByRole('button', { name: 'Add tag' }));
++    await screen.findByRole('button', { name: 'Remove tag Retry me' });
++    expect(screen.queryByRole('alert')).toBeNull();
++    expect(repository.addTag).toHaveBeenCalledTimes(2);
++  });
++
++  it('preserves a tag when deletion fails and permits retry directly from its chip', async () => {
++    repository.tags.mockResolvedValue([tag('Keep until saved')]);
++    repository.deleteTag.mockRejectedValueOnce(new Error('Temporary write failure')).mockImplementation(async () => {
++      repository.tags.mockResolvedValue([]);
++    });
++    await mount();
++    fireEvent.click(screen.getByRole('button', { name: 'Remove tag Keep until saved' }));
++    expect((await screen.findByRole('alert')).textContent).toContain('Could not save tags');
++    fireEvent.click(screen.getByRole('button', { name: 'Remove tag Keep until saved' }));
++    await waitFor(() => expect(screen.queryByRole('button', { name: 'Remove tag Keep until saved' })).toBeNull());
++    expect(screen.queryByRole('alert')).toBeNull();
++    expect(repository.deleteTag).toHaveBeenCalledTimes(2);
++  });
++
++  it('renders readonly tags and reference details without mutation controls', async () => {
++    repository.tags.mockResolvedValue([tag('Stored')]);
++    repository.metadata.mockResolvedValue(references);
++    await mount({ readOnly: true });
++    expect(screen.getByText('Stored')).toBeTruthy();
++    expect(screen.queryByRole('button', { name: 'Remove tag Stored' })).toBeNull();
++    expect(screen.queryByRole('button', { name: 'Add tags' })).toBeNull();
++    const popup = await openMetadata('Upstream 2 · Downstream 2');
++    expect(within(popup).queryByRole('textbox')).toBeNull();
++    expect(within(popup).getByRole('link', { name: 'Study board 4' })).toBeTruthy();
++    expect(repository.addTag).not.toHaveBeenCalled();
++    expect(repository.deleteTag).not.toHaveBeenCalled();
++  });
++
++  it('closes an open popup when overview hides the row and keeps it closed on return', async () => {
++    const view = await mount();
++    await openMetadata();
++    view.rerender(<NoteCoverMetadata {...view.input} hidden />);
++    expect(screen.queryByRole('dialog')).toBeNull();
++    expect(view.container.querySelector('[data-note-cover-metadata]')?.getAttribute('data-projection-hidden')).toBe('true');
++    view.rerender(<NoteCoverMetadata {...view.input} hidden={false} />);
++    expect(screen.queryByRole('dialog')).toBeNull();
++    expect(screen.getByRole('button', { name: 'Add tags' }).getAttribute('aria-expanded')).toBe('false');
++  });
++
++  it.each(['addition', 'deletion'] as const)('keeps host close waiting for a tag %s and retains failure until its retry succeeds', async (operation) => {
++    const registry = createInFlightWriteRegistry();
++    const held = deferred<NoteTag | void>();
++    const failedWrite = new Error('Synthetic pending tag failure');
++    const method = operation === 'addition' ? repository.addTag : repository.deleteTag;
++    method.mockReturnValueOnce(held.promise);
++    let persisted = operation === 'deletion' ? [tag('Pending tag')] : [];
++    repository.tags.mockImplementation(async () => persisted);
++    await mount({ trackPendingWrite: registry.track });
++    if (operation === 'addition') {
++      await openMetadata();
++      fireEvent.change(screen.getByRole('textbox', { name: 'Add tags' }), { target: { value: 'Pending tag' } });
++    }
++    const mutate = () => fireEvent.click(screen.getByRole('button', {
++      name: operation === 'addition' ? 'Add tag' : 'Remove tag Pending tag',
++    }));
++    mutate();
++    const closed = vi.fn();
++    const failed = vi.fn();
++    const draining = registry.whenIdle().then(closed, failed);
++    await act(async () => undefined);
++    expect(closed).not.toHaveBeenCalled();
++    expect(failed).not.toHaveBeenCalled();
++    await act(async () => { held.reject(failedWrite); await draining; });
++    expect(failed).toHaveBeenCalledExactlyOnceWith(failedWrite);
++    expect(closed).not.toHaveBeenCalled();
++    expect(screen.getByRole('alert').textContent).toContain('Could not save tags');
++    await expect(registry.whenIdle()).rejects.toBe(failedWrite);
++
++    const retry = deferred<NoteTag | void>();
++    method.mockReturnValueOnce(retry.promise);
++    mutate();
++    const retried = registry.whenIdle().then(closed);
++    await act(async () => undefined);
++    expect(closed).not.toHaveBeenCalled();
++    await act(async () => {
++      persisted = operation === 'addition' ? [tag('Pending tag')] : [];
++      retry.resolve(operation === 'addition' ? tag('Pending tag') : undefined);
++      await retried;
++    });
++    expect(closed).toHaveBeenCalledOnce();
++    expect(screen.queryByRole('alert')).toBeNull();
++    await expect(registry.whenIdle()).resolves.toBeUndefined();
++    if (operation === 'addition') expect(screen.getByRole('button', { name: 'Remove tag Pending tag' })).toBeTruthy();
++    else expect(screen.queryByRole('button', { name: 'Remove tag Pending tag' })).toBeNull();
++  });
++
++  it('receives a slow relationship read after adding a tag without replacing the confirmed tag', async () => {
++    let persisted: NoteTag[] = [];
++    repository.tags.mockImplementation(async () => persisted);
++    repository.addTag.mockImplementation(async (_noteId: string, label: string) => {
++      const added = tag(label);
++      persisted = [...persisted, added];
++      return added;
++    });
++    await mount();
++    const slowMetadata = deferred<NoteMetadata>();
++    repository.metadata.mockReturnValue(slowMetadata.promise);
++    await openMetadata();
++    fireEvent.change(screen.getByRole('textbox', { name: 'Add tags' }), { target: { value: 'While loading' } });
++    fireEvent.click(screen.getByRole('button', { name: 'Add tag' }));
++    await screen.findByRole('button', { name: 'Remove tag While loading' });
++    expect(screen.queryByRole('button', { name: /Upstream/ })).toBeNull();
++    await act(async () => { slowMetadata.resolve(references); });
++    expect(screen.getByRole('button', { name: 'Upstream 2 · Downstream 2' })).toBeTruthy();
++    expect(screen.getByRole('link', { name: 'Study board 4' })).toBeTruthy();
++    expect(screen.getByRole('button', { name: 'Remove tag While loading' })).toBeTruthy();
++  });
++
++  it('reconciles previously stored tags after adding before the initial tag read has hydrated', async () => {
++    const initialRead = deferred<NoteTag[]>();
++    let persisted = [tag('Already stored')];
++    repository.tags.mockImplementation(async () => persisted.map((entry) => ({ ...entry })))
++      .mockReturnValueOnce(initialRead.promise).mockReturnValueOnce(initialRead.promise);
++    repository.addTag.mockImplementation(async (_noteId: string, label: string) => {
++      const added = tag(label);
++      persisted = [...persisted, added];
++      return added;
++    });
++    await mount();
++    await openMetadata();
++    expect(screen.queryByRole('button', { name: 'Remove tag Already stored' })).toBeNull();
++    fireEvent.change(screen.getByRole('textbox', { name: 'Add tags' }), { target: { value: 'Added while loading' } });
++    fireEvent.click(screen.getByRole('button', { name: 'Add tag' }));
++    await screen.findByRole('button', { name: 'Remove tag Added while loading' });
++    await screen.findByRole('button', { name: 'Remove tag Already stored' });
++    // The original GET can still finish last; it must not erase the confirmed addition.
++    await act(async () => { initialRead.resolve([tag('Already stored')]); });
++    expect(screen.getByRole('button', { name: 'Remove tag Already stored' })).toBeTruthy();
++    expect(screen.getByRole('button', { name: 'Remove tag Added while loading' })).toBeTruthy();
++  });
++
++  it('lets a readonly note with no tags or references open its statistics from the quiet entry', async () => {
++    const view = await mount({ readOnly: true });
++    expect(view.container.querySelector('[data-note-cover-metadata]')?.getAttribute('data-empty')).toBe('true');
++    expect(screen.queryByRole('button', { name: /Upstream/ })).toBeNull();
++    expect(screen.queryByRole('button', { name: 'Add tags' })).toBeNull();
++    const popup = await openMetadata('Note metadata');
++    const statistics = within(popup).getByRole('region', { name: 'Statistics' });
++    expect(within(statistics).getAllByRole('definition').map((definition) => definition.textContent))
++      .toEqual(['Page', '7', '3', 'active']);
++    expect(within(popup).queryByRole('textbox')).toBeNull();
++    expect(within(popup).queryByRole('button', { name: 'Add tag' })).toBeNull();
++    expect(repository.addTag).not.toHaveBeenCalled();
++    expect(repository.deleteTag).not.toHaveBeenCalled();
++  });
++
++  it.each(['addition', 'deletion'] as const)('does not let an older read undo a confirmed tag %s', async (operation) => {
++    const original = operation === 'deletion' ? [tag('Old tag')] : [];
++    let persisted = original;
++    repository.tags.mockImplementation(async () => persisted);
++    repository.addTag.mockImplementation(async (_noteId: string, label: string) => {
++      const added = tag(label);
++      persisted = [...persisted, added];
++      return added;
++    });
++    repository.deleteTag.mockImplementation(async (_noteId: string, id: string) => {
++      persisted = persisted.filter((entry) => entry.id !== id);
++    });
++    await mount();
++    const delayedTags = deferred<NoteTag[]>();
++    repository.tags.mockReturnValueOnce(delayedTags.promise);
++    await openMetadata();
++    if (operation === 'addition') {
++      fireEvent.change(screen.getByRole('textbox', { name: 'Add tags' }), { target: { value: 'New tag' } });
++      fireEvent.click(screen.getByRole('button', { name: 'Add tag' }));
++      await screen.findByRole('button', { name: 'Remove tag New tag' });
++    } else {
++      fireEvent.click(screen.getByRole('button', { name: 'Remove tag Old tag' }));
++      await waitFor(() => expect(screen.queryByRole('button', { name: 'Remove tag Old tag' })).toBeNull());
++    }
++    await act(async () => { delayedTags.resolve(original); });
++    if (operation === 'addition') expect(screen.getByRole('button', { name: 'Remove tag New tag' })).toBeTruthy();
++    else expect(screen.queryByRole('button', { name: 'Remove tag Old tag' })).toBeNull();
++  });
++
++  it('dismisses with Escape and restores keyboard focus to the opener', async () => {
++    await mount();
++    const opener = screen.getByRole('button', { name: 'Add tags' });
++    await openMetadata();
++    const input = screen.getByRole('textbox', { name: 'Add tags' });
++    expect(document.activeElement).toBe(input);
++    fireEvent.keyDown(input, { key: 'Escape' });
++    expect(screen.queryByRole('dialog')).toBeNull();
++    expect(document.activeElement).toBe(opener);
++  });
++});
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.tsx b/client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.tsx
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.tsx
+@@ -0,0 +1,205 @@
++import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
++import { ChevronDown, Info, Plus, X } from 'lucide-react';
++import { Link } from 'react-router-dom';
++import type { TrackPendingWrite } from '../inFlightWriteRegistry';
++import { subscribeBoardChanges } from '@/pages/Boards/boardEvents';
++import { noteMetadataRepository as repository, type NoteMetadata, type NoteSourceSummary, type NoteTag } from '../noteMetadataRepository';
++import styles from './NoteCoverMetadata.module.css';
++
++export interface NoteCoverMetadataProps {
++  noteId: string;
++  readOnly: boolean;
++  mode: 'page' | 'canvas';
++  blockCount: number;
++  sourceCount: number;
++  status: string;
++  refreshKey?: unknown;
++  hidden?: boolean;
++  trackPendingWrite?: TrackPendingWrite;
++  onOpenSource: (source: NoteSourceSummary) => void | Promise<void>;
++}
++
++export function NoteCoverMetadata({ noteId, readOnly, mode, blockCount, sourceCount, status,
++  refreshKey, hidden = false, onOpenSource, trackPendingWrite }: NoteCoverMetadataProps) {
++  const [tags, setTags] = useState<NoteTag[]>([]);
++  const [metadata, setMetadata] = useState<NoteMetadata | null>(null);
++  const [open, setOpen] = useState(false);
++  const [label, setLabel] = useState('');
++  const [busy, setBusy] = useState(false);
++  const [loading, setLoading] = useState(false);
++  const [readError, setReadError] = useState(false);
++  const [writeError, setWriteError] = useState('');
++  const [position, setPosition] = useState<CSSProperties>({});
++  const row = useRef<HTMLDivElement>(null);
++  const popup = useRef<HTMLDivElement>(null);
++  const input = useRef<HTMLInputElement>(null);
++  const opener = useRef<HTMLButtonElement | null>(null);
++  const alive = useRef(true);
++  const request = useRef(0);
++  const tagRevision = useRef(0);
++  const mutation = useRef(false);
++  const id = useId();
++
++  const refresh = useCallback(async () => {
++    const version = ++request.current;
++    const tagsAtStart = tagRevision.current;
++    setLoading(true);
++    const results = await Promise.allSettled([repository.tags(noteId), repository.metadata(noteId)]);
++    if (!alive.current || version !== request.current) return;
++    if (results[0].status === 'fulfilled' && tagsAtStart === tagRevision.current && !mutation.current) setTags(results[0].value);
++    if (results[1].status === 'fulfilled') setMetadata(results[1].value);
++    setReadError(results.some((result) => result.status === 'rejected'));
++    setLoading(false);
++  }, [noteId]);
++
++  useEffect(() => {
++    alive.current = true;
++    return () => { alive.current = false; request.current += 1; };
++  }, []);
++  useEffect(() => { void refresh(); }, [refresh, refreshKey]);
++  useEffect(() => {
++    const update = () => { void refresh(); };
++    window.addEventListener('focus', update);
++    const unsubscribe = subscribeBoardChanges(update);
++    return () => { window.removeEventListener('focus', update); unsubscribe(); };
++  }, [refresh]);
++  useEffect(() => { if (hidden) setOpen(false); }, [hidden]);
++
++  const close = useCallback(() => { setOpen(false); opener.current?.focus({ preventScroll: true }); }, []);
++  useLayoutEffect(() => {
++    if (!open || hidden) return;
++    const node = popup.current;
++    const measure = () => {
++      const rect = row.current?.getBoundingClientRect();
++      if (!rect) return;
++      const top = Math.max(8, Math.min(rect.bottom + 6, window.innerHeight - 64));
++      setPosition({ left: Math.max(8, Math.min(rect.left, window.innerWidth - 376)), top,
++        maxHeight: Math.max(48, window.innerHeight - top - 8) });
++    };
++    measure();
++    node?.setAttribute('popover', 'manual');
++    node?.showPopover?.();
++    const dismiss = (event: PointerEvent) => {
++      if (!node?.contains(event.target as Node) && !row.current?.contains(event.target as Node)) setOpen(false);
++    };
++    document.addEventListener('pointerdown', dismiss, true);
++    window.addEventListener('resize', measure);
++    window.addEventListener('scroll', measure, true);
++    // Move keyboard focus into the non-modal floating surface.
++    (input.current || node)?.focus({ preventScroll: true });
++    return () => {
++      node?.hidePopover?.();
++      document.removeEventListener('pointerdown', dismiss, true);
++      window.removeEventListener('resize', measure);
++      window.removeEventListener('scroll', measure, true);
++    };
++  }, [open, hidden]);
++
++  function show(button: HTMLButtonElement) {
++    opener.current = button;
++    setOpen(true);
++    setWriteError('');
++    void refresh();
++  }
++
++  async function write(key: string, action: () => Promise<void>) {
++    if (readOnly || mutation.current) return;
++    mutation.current = true;
++    tagRevision.current += 1; // Invalidate stale tags, while keeping live relationship reads.
++    setBusy(true); setWriteError('');
++    try { await (trackPendingWrite ? trackPendingWrite(`note-tag:${noteId}:${key}`, action) : action()); }
++    catch (error) {
++      if (alive.current) setWriteError((error as { response?: { data?: { error?: string } } }).response?.data?.error
++        || 'Could not save tags. Please try again.');
++    } finally {
++      mutation.current = false;
++      tagRevision.current += 1;
++      if (alive.current) {
++        setBusy(false);
++        // Reconcile tags that had not hydrated before this write began.
++        void refresh();
++      }
++    }
++  }
++
++  async function add() {
++    const trimmed = label.trim();
++    if (!trimmed || trimmed.length > 48) { setWriteError('Use 1–48 characters for a tag.'); return; }
++    await write(`add:${trimmed}`, async () => {
++      const tag = await repository.addTag(noteId, trimmed);
++      if (alive.current) { setTags((current) => [...current.filter((entry) => entry.id !== tag.id), tag]); setLabel(''); }
++    });
++  }
++  const hasReferences = Boolean(metadata && (metadata.upstream.count || metadata.downstream.count));
++  const quiet = tags.length === 0 && !hasReferences && !readError;
++
++  return <div ref={row} className={styles.row} data-note-cover-metadata="true" data-empty={quiet}
++    data-projection-hidden={hidden} onClick={(event) => event.stopPropagation()}
++    onDoubleClick={(event) => event.stopPropagation()} onKeyDown={(event) => {
++      event.stopPropagation();
++      if (event.key === 'Escape' && open) { event.preventDefault(); close(); }
++    }}>
++    {tags.length > 0 && <div className={styles.tags} aria-label="Note tags">
++      {tags.map((tag) => readOnly ? <span className={styles.chip} key={tag.id}>{tag.label}</span>
++        : <button key={tag.id} type="button" className={styles.chip} disabled={busy}
++          aria-label={`Remove tag ${tag.label}`} title={`Remove tag ${tag.label}`} onClick={(event) => {
++            opener.current = event.currentTarget;
++            void write(`delete:${tag.id}`, async () => {
++              await repository.deleteTag(noteId, tag.id);
++              if (alive.current) setTags((current) => current.filter((entry) => entry.id !== tag.id));
++            });
++          }}><span>{tag.label}</span><X size={12} aria-hidden="true" /></button>)}
++    </div>}
++    <button type="button" className={styles.add} aria-label={readOnly ? 'Note metadata' : 'Add tags'} title={readOnly ? 'Note metadata' : 'Add tags'}
++      aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? id : undefined}
++      onClick={(event) => show(event.currentTarget)}>{readOnly ? <Info size={14} aria-hidden="true" /> : <Plus size={14} aria-hidden="true" />}
++      {tags.length === 0 && (readOnly ? 'Note metadata' : 'Add tags')}</button>
++    {(hasReferences || readError) && <button type="button" className={styles.disclosure}
++      aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? id : undefined}
++      onClick={(event) => open ? close() : show(event.currentTarget)}>
++      <span>{hasReferences ? `Upstream ${metadata!.upstream.count} · Downstream ${metadata!.downstream.count}` : 'Retry metadata'}</span>
++      <ChevronDown size={14} aria-hidden="true" />
++    </button>}
++    {writeError && !open && <span role="alert" className={styles.rowError}>{writeError}</span>}
++    {open && !hidden && <div ref={popup} id={id} className={styles.popup} style={position}
++      role="dialog" aria-label="Note metadata" tabIndex={-1} data-note-cover-popup="true">
++      <header><strong>Note metadata</strong><button type="button" aria-label="Close note metadata" onClick={close}><X size={16} /></button></header>
++      {!readOnly && <form onSubmit={(event) => { event.preventDefault(); void add(); }}>
++        <label htmlFor={`${id}-tag`}>Add tags</label>
++        <div className={styles.entry}><input ref={input} id={`${id}-tag`} value={label} maxLength={48}
++          placeholder="Tag name" autoComplete="off" disabled={busy} onChange={(event) => setLabel(event.target.value)} />
++          <button type="submit" disabled={busy || !label.trim()}>{busy ? 'Saving…' : 'Add tag'}</button></div>
++      </form>}
++      {writeError && <p role="alert">{writeError}</p>}
++      {readError && <p role="alert">Could not refresh metadata. <button type="button" onClick={() => void refresh()}>Retry</button></p>}
++      <section aria-labelledby={`${id}-upstream`} aria-busy={loading}>
++        <h3 id={`${id}-upstream`}>Upstream</h3>
++        {metadata?.upstream.sources.length ? <><h4>Source documents</h4><ul>{metadata.upstream.sources.map((source) =>
++          <li key={source.source_record_id || source.document_id || source.reference_id}><button type="button" onClick={() => {
++            void Promise.resolve(onOpenSource(source)).then(close).catch(() => setWriteError('Could not open this source. Please try again.'));
++          }}><span>{source.title}</span><small>{source.count}</small></button></li>)}</ul></> : null}
++        {metadata?.upstream.notes.length ? <><h4>Referenced notes</h4><ul>{metadata.upstream.notes.map((note) =>
++          <li key={note.note_id}><Link to={`/notes/${encodeURIComponent(note.note_id)}`} onClick={close}><span>{note.title}</span><small>{note.count}</small></Link></li>)}</ul></> : null}
++        {!metadata?.upstream.count && <p>{loading ? 'Loading references…' : 'No upstream references.'}</p>}
++      </section>
++      <section aria-labelledby={`${id}-downstream`} aria-busy={loading}>
++        <h3 id={`${id}-downstream`}>Downstream</h3>
++        {metadata?.downstream.boards.length ? <><h4>Boards</h4><ul>{metadata.downstream.boards.map((board) =>
++          <li key={board.board_id}><Link to={`/boards/${encodeURIComponent(board.board_id)}`} onClick={close}><span>{board.title}</span><small>{board.count}</small></Link></li>)}</ul></> : null}
++        {metadata?.downstream.content_groups.length ? <><h4>Content groups</h4><ul>{metadata.downstream.content_groups.map((group) =>
++          <li key={group.content_group_id}><Link to={group.note_id
++            ? `/group-gallery/editor?${new URLSearchParams({ note_id: group.note_id, group_id: group.content_group_id })}`
++            : `/projects/${encodeURIComponent(group.course_id)}`}
++            title={group.note_id ? undefined : 'This group has no current note location. Open its project.'}
++            onClick={close}><span>{group.title}{!group.note_id && ' · Open project'}</span><small>{group.count}</small></Link></li>)}</ul></> : null}
++        {!metadata?.downstream.count && <p>{loading ? 'Loading references…' : 'No downstream references.'}</p>}
++      </section>
++      <section aria-labelledby={`${id}-stats`}><h3 id={`${id}-stats`}>Statistics</h3><dl className={styles.stats}>
++        <div><dt>Mode</dt><dd>{mode === 'page' ? 'Page' : 'Canvas'}</dd></div>
++        <div><dt>Blocks</dt><dd>{blockCount}</dd></div>
++        <div><dt>Sources</dt><dd>{sourceCount}</dd></div>
++        <div><dt>Status</dt><dd>{status}</dd></div>
++      </dl></section>
++    </div>}
++  </div>;
++}
+diff --git a/client/src/pages/Notes/canvasEngine/noteMetadataRepository.ts b/client/src/pages/Notes/canvasEngine/noteMetadataRepository.ts
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Notes/canvasEngine/noteMetadataRepository.ts
+@@ -0,0 +1,50 @@
++import api from '@/services/api';
++
++export interface NoteTag {
++  id: string;
++  note_id: string;
++  user_id: string;
++  label: string;
++  actor: 'user' | 'agent';
++  created_at: string;
++}
++
++export interface NoteSourceSummary {
++  document_id: string | null;
++  source_record_id: string | null;
++  projection_note_id: string | null;
++  block_id: string;
++  reference_id: string;
++  title: string;
++  course_id: string | null;
++  count: number;
++}
++
++export interface NoteMetadata {
++  upstream: {
++    sources: NoteSourceSummary[];
++    notes: { note_id: string; title: string; course_id: string; count: number }[];
++    count: number;
++  };
++  downstream: {
++    boards: { board_id: string; title: string; count: number }[];
++    content_groups: { content_group_id: string; note_id: string | null; course_id: string; title: string; count: number }[];
++    count: number;
++  };
++}
++
++const notePath = (noteId: string) => `/notes/${encodeURIComponent(noteId)}`;
++export const noteMetadataRepository = {
++  async tags(noteId: string): Promise<NoteTag[]> {
++    return (await api.get<{ tags: NoteTag[] }>(`${notePath(noteId)}/tags`)).data.tags;
++  },
++  async addTag(noteId: string, label: string): Promise<NoteTag> {
++    return (await api.post<{ tag: NoteTag }>(`${notePath(noteId)}/tags`, { label })).data.tag;
++  },
++  async deleteTag(noteId: string, tagId: string): Promise<void> {
++    await api.delete(`${notePath(noteId)}/tags/${encodeURIComponent(tagId)}`);
++  },
++  async metadata(noteId: string): Promise<NoteMetadata> {
++    return (await api.get<NoteMetadata>(`${notePath(noteId)}/metadata`)).data;
++  },
++};
+diff --git a/server/src/__tests__/helpers/v13NoteMetadataFixture.ts b/server/src/__tests__/helpers/v13NoteMetadataFixture.ts
+new file mode 100644
+--- /dev/null
++++ b/server/src/__tests__/helpers/v13NoteMetadataFixture.ts
+@@ -0,0 +1,127 @@
++import type Database from 'better-sqlite3';
++
++/** Caller supplies a disposable database and an already-created synthetic user. */
++export function seedNoteMetadataFixture(db: Database.Database, userId: string) {
++  const id = (suffix: string) => `${userId}-e5-${suffix}`;
++  const courseId = id('project');
++  const noteId = id('paper');
++  const now = '2026-09-11T12:00:00.000Z';
++  db.prepare('INSERT INTO courses (id,user_id,name) VALUES (?,?,?)').run(courseId, userId, 'E5 synthetic project');
++  for (const [suffix, title] of [['paper', 'E5 cover'], ['empty', 'E5 quiet cover'], ['origin', 'Item birth note'], ['anchor-origin', 'Item anchor note']]) {
++    db.prepare('INSERT INTO notes (id,user_id,course_id,title) VALUES (?,?,?,?)').run(id(suffix), userId, courseId, title);
++  }
++  const block = (suffix: string, paper: string, kind = 'paragraph', content: object = { body: 'Synthetic E5 content' }) => {
++    db.prepare('INSERT INTO note_blocks (id,user_id,course_id,block_type,content_json,plain_text) VALUES (?,?,?,?,?,?)')
++      .run(id(suffix), userId, courseId, kind, JSON.stringify(content), kind === 'item_ref' ? null : 'Synthetic E5 content');
++    db.prepare('INSERT INTO note_block_placements (id,note_id,block_id,order_index) VALUES (?,?,?,?)')
++      .run(id(`${suffix}-placement`), id(paper), id(suffix), suffix === 'ref' ? 1 : 0);
++  };
++  block('body', 'paper');
++  block('origin-body', 'anchor-origin');
++  for (const [suffix, origin] of [['quoted-item', 'origin'], ['born-item', 'paper'], ['anchored-item', null], ['unrelated-item', null]]) {
++    db.prepare('INSERT INTO items (id,user_id,plain_text,origin_note_id) VALUES (?,?,?,?)')
++      .run(id(suffix!), userId, `Synthetic ${suffix}`, origin ? id(origin) : null);
++  }
++  block('ref', 'paper', 'item_ref', { item_id: id('quoted-item') });
++  const anchor = (suffix: string, item: string, targetKind: string, target: string, range: object | null) => {
++    db.prepare('INSERT INTO item_anchors (id,user_id,item_id,target_kind,target_id,range_json,excerpt) VALUES (?,?,?,?,?,?,?)')
++      .run(id(suffix), userId, id(item), targetKind, id(target), range ? JSON.stringify(range) : null, 'Synthetic anchor');
++  };
++  anchor('quoted-anchor', 'quoted-item', 'block', 'origin-body', null);
++  anchor('anchored-1', 'anchored-item', 'block', 'body', null);
++  anchor('anchored-2', 'anchored-item', 'content_range', 'body', { block_id: id('body'), start_offset: 0, end_offset: 4 });
++  db.prepare('INSERT INTO documents (id,user_id,course_id,filename,file_path,file_type) VALUES (?,?,?,?,?,?)')
++    .run(id('document'), userId, courseId, 'E5 source document.txt', 'synthetic-never-read.txt', 'txt');
++  db.prepare('INSERT INTO document_chunks (id,document_id,chunk_index,content) VALUES (?,?,0,?)')
++    .run(id('chunk'), id('document'), 'Synthetic source');
++  db.prepare('INSERT INTO source_records (id,user_id,display_name,origin_course_id) VALUES (?,?,?,?)')
++    .run(id('source'), userId, 'E5 global source', courseId);
++  db.prepare('INSERT INTO note_block_sources (id,block_id,document_id) VALUES (?,?,?)')
++    .run(id('reference-document'), id('body'), id('document'));
++  db.prepare('INSERT INTO note_block_sources (id,block_id,document_chunk_id) VALUES (?,?,?)')
++    .run(id('reference-chunk'), id('body'), id('chunk'));
++  db.prepare('INSERT INTO note_block_sources (id,block_id,source_record_id) VALUES (?,?,?)')
++    .run(id('reference-source'), id('body'), id('source'));
++  db.prepare('INSERT INTO content_groups (id,user_id,course_id,note_id,title) VALUES (?,?,?,?,?)')
++    .run(id('group'), userId, courseId, id('origin'), 'E5 downstream group');
++  for (const [index, item] of ['born-item', 'anchored-item', 'unrelated-item'].entries()) {
++    db.prepare(`INSERT INTO content_group_members (id,user_id,content_group_id,course_id,kind,item_id,order_index)
++      VALUES (?,?,?,?,'item',?,?)`).run(id(`group-member-${index}`), userId, id('group'), courseId, id(item), index);
++  }
++  for (const suffix of ['board', 'staged-board', 'unmounted-board']) {
++    db.prepare('INSERT INTO purposes (id,user_id,course_id,title,created_at,updated_at) VALUES (?,?,?,?,?,?)')
++      .run(id(`${suffix}-soul`), userId, courseId, 'E5 question', now, now);
++    db.prepare('INSERT INTO boards (id,user_id,title,soul_id,created_at,updated_at) VALUES (?,?,?,?,?,?)')
++      .run(id(suffix), userId, `E5 ${suffix}`, id(`${suffix}-soul`), now, now);
++  }
++  for (const suffix of ['board', 'unmounted-board']) {
++    db.prepare(`INSERT INTO board_text_ranges (id,user_id,board_id,note_id,block_id,text_flow_id,text_unit_id,excerpt,at,created_at,updated_at)
++      VALUES (?,?,?,?,?,?,?,?,?,?,?)`).run(id(`${suffix}-range`), userId, id(suffix), noteId, id('body'), 'synthetic-flow', 'synthetic-unit', 'Synthetic range', now, now, now);
++  }
++  const member = (suffix: string, board: string, kind: string, target: string, placed = 1) => {
++    db.prepare(`INSERT INTO board_members (id,board_id,member_kind,member_id,placed,created_at,updated_at)
++      VALUES (?,?,?,?,?,?,?)`).run(id(suffix), id(board), kind, id(target), placed, now, now);
++  };
++  member('note-card', 'board', 'note', 'paper');
++  member('range-card', 'board', 'text_range', 'board-range');
++  member('item-card', 'board', 'item', 'anchored-item');
++  member('group-card', 'board', 'content_group', 'group');
++  member('staged-card', 'staged-board', 'item', 'born-item', 0);
++  seedNoteMetadataSourceNavigationFixture(db, userId);
++  return { id, userId, courseId, noteId, emptyNoteId: id('empty') };
++}
++
++/** Idempotent supplement for an existing isolated E5 fixture. No blob is needed
++ * for the legacy parsed-page jump or the materialized projection-note jump. */
++export function seedNoteMetadataSourceNavigationFixture(db: Database.Database, userId: string) {
++  const id = (suffix: string) => `${userId}-e5-${suffix}`;
++  const courseId = id('project');
++  const text = 'E5 source navigation evidence. This parsed source page is synthetic and belongs only to the isolated browser fixture.';
++  const now = '2026-09-11T12:00:00.000Z';
++  if (!db.prepare('SELECT id FROM notes WHERE id = ? AND user_id = ?').get(id('paper'), userId)) {
++    throw new Error('E5 synthetic paper must exist before seeding source navigation');
++  }
++  db.transaction(() => {
++    db.prepare(`INSERT OR IGNORE INTO source_snapshots
++      (id,user_id,course_id,document_id,title,source_filename,page_count,chunk_count)
++      VALUES (?,?,?,?,?,?,1,1)`).run(id('snapshot'), userId, courseId, id('document'), 'E5 parsed source evidence', 'E5 source document.txt');
++    db.prepare(`INSERT OR IGNORE INTO source_snapshot_pages
++      (id,user_id,course_id,source_snapshot_id,document_id,page_number,page_label,text_content,chunk_ids)
++      VALUES (?,?,?,?,?,1,'p.1',?,?)`).run(id('snapshot-page'), userId, courseId, id('snapshot'), id('document'), text, JSON.stringify([id('chunk')]));
++    db.prepare('UPDATE document_chunks SET page_start = 1, page_end = 1 WHERE id = ?').run(id('chunk'));
++    for (const suffix of ['reference-document', 'reference-chunk']) {
++      db.prepare(`UPDATE note_block_sources SET source_page_start = 1, source_page_end = 1, source_excerpt = ?
++        WHERE id = ?`).run(text, id(suffix));
++      db.prepare(`INSERT OR IGNORE INTO source_anchors
++        (id,user_id,course_id,source_snapshot_id,source_snapshot_page_id,document_id,document_chunk_id,
++        anchor_kind,page_start,page_end,text_start_offset,text_end_offset,metadata)
++        VALUES (?,?,?,?,?,?,?,'note_block_source',1,1,0,?,?)`).run(id(`${suffix}-anchor`), userId, courseId,
++        id('snapshot'), id('snapshot-page'), id('document'), suffix === 'reference-chunk' ? id('chunk') : null,
++        text.length, JSON.stringify({ note_block_source_id: id(suffix), source_excerpt: text, generated_from: 'note_block_sources' }));
++      db.prepare(`INSERT OR IGNORE INTO source_anchor_links
++        (id,user_id,course_id,source_anchor_id,target_type,target_id,link_role)
++        VALUES (?,?,?,?,'note_block_source',?,'source_reference')`).run(id(`${suffix}-link`), userId, courseId,
++        id(`${suffix}-anchor`), id(suffix));
++    }
++    db.prepare(`INSERT OR IGNORE INTO notes
++      (id,user_id,course_id,title,note_class,source_kind,metadata)
++      VALUES (?,?,?,?,'source_projection','source_projection',?)`).run(id('source-projection'), userId,
++      courseId, 'E5 global source projection', JSON.stringify({ source_projection_version: 'v1', source_record_id: id('source'),
++        source_file_id: id('source-file'), source_materialization_id: id('materialization'), content_policy: 'source_locked' }));
++    db.prepare(`INSERT OR IGNORE INTO note_blocks (id,user_id,course_id,block_type,plain_text,content_json)
++      VALUES (?,?,?,'paragraph',?,?)`).run(id('projection-body'), userId, courseId, text, JSON.stringify({ body: text }));
++    db.prepare(`INSERT OR IGNORE INTO note_block_placements (id,note_id,block_id,order_index)
++      VALUES (?,?,?,0)`).run(id('projection-placement'), id('source-projection'), id('projection-body'));
++    // Staging explicitly signals that this fixture has no raw-file blob. The
++    // tested jump uses the retained note, never pretends raw-file viewing passed.
++    db.prepare(`INSERT OR IGNORE INTO source_files
++      (id,source_record_id,user_id,original_filename,storage_key,storage_state,mime_type,byte_size,content_hash,uploaded_at)
++      VALUES (?,?,?,?,?,'staging','text/plain',0,?,?)`).run(id('source-file'), id('source'), userId,
++      'E5 synthetic source.txt', 'synthetic-no-raw-blob.txt', id('synthetic-file-hash'), now);
++    db.prepare(`INSERT OR IGNORE INTO source_materializations
++      (id,source_record_id,source_file_id,user_id,parser_key,parser_version,status,projection_note_id)
++      VALUES (?,?,?,?,'synthetic-e5','1','materialized',?)`).run(id('materialization'), id('source'), id('source-file'), userId, id('source-projection'));
++  })();
++  return { snapshotId: id('snapshot'), pageId: id('snapshot-page'), projectionNoteId: id('source-projection'),
++    documentAnchorId: id('reference-document-anchor'), chunkAnchorId: id('reference-chunk-anchor') };
++}
+diff --git a/server/src/__tests__/v13NoteMetadata.test.ts b/server/src/__tests__/v13NoteMetadata.test.ts
+new file mode 100644
+--- /dev/null
++++ b/server/src/__tests__/v13NoteMetadata.test.ts
+@@ -0,0 +1,155 @@
++import assert from 'node:assert/strict';
++import type { Server } from 'node:http';
++import test from 'node:test';
++import express from 'express';
++import { createNoteMetadataRouter } from '../routes/noteMetadata.js';
++import { AppError } from '../middleware/errorHandler.js';
++import type { AuthRequest } from '../middleware/auth.js';
++import migration from '../db/migrations/064_v13_note_tags.js';
++import { createV13BoardsFixture } from './helpers/v13BoardsFixture.js';
++import { seedNoteMetadataFixture } from './helpers/v13NoteMetadataFixture.js';
++import { getProjectionUserWork } from '../services/courseLifecycle.js';
++import { assertCourseLifecyclePolicyCoverage } from '../services/courseLifecyclePolicies.js';
++
++async function fixture() {
++  const db = await createV13BoardsFixture();
++  const userId = 'e5-synthetic';
++  db.prepare("INSERT INTO users (id,email,password_hash,name) VALUES (?,?,'synthetic','Synthetic')")
++    .run(userId, 'e5@example.invalid');
++  const data = seedNoteMetadataFixture(db, userId);
++  const app = express();
++  app.use(express.json());
++  // Post-auth contracts only: no credentials, JWT, application startup or real data.
++  app.use((req: AuthRequest, _res, next) => { req.userId = userId; next(); });
++  app.use('/api/notes', createNoteMetadataRouter(() => db));
++  app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
++    res.status(err instanceof AppError ? err.statusCode : 500).json({ error: err.message });
++  });
++  const server = await new Promise<Server>((resolve) => {
++    const listener = app.listen(0, '127.0.0.1', () => resolve(listener));
++  });
++  const address = server.address();
++  assert.ok(address && typeof address === 'object');
++  assert.notEqual(address.port, 3001);
++  assert.notEqual(address.port, 5173);
++  return { ...data, db,
++    async request(method: string, path: string, body?: unknown, status = 200) {
++      const response = await fetch(`http://127.0.0.1:${address.port}/api/notes/${path}`, {
++        method, ...(body === undefined ? {} : { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }),
++      });
++      const result = await response.json() as any;
++      assert.equal(response.status, status, JSON.stringify(result));
++      return result;
++    },
++    async close() {
++      await new Promise<void>((resolve, reject) => server.close((error) => error ? reject(error) : resolve()));
++      db.close();
++    },
++  };
++}
++
++test('E5 tags: trim, persist across reads, exact-label uniqueness and delete', async (t) => {
++  const f = await fixture(); t.after(() => f.close());
++  const path = `${f.noteId}/tags`;
++  assert.deepEqual(await f.request('GET', path), { tags: [] });
++  const { tag } = await f.request('POST', path, { label: '  Calculus  ' }, 201);
++  assert.equal(tag.label, 'Calculus');
++  assert.equal(tag.actor, 'user');
++  assert.equal(tag.note_id, f.noteId);
++  assert.equal(tag.user_id, f.userId);
++  assert.ok(!Number.isNaN(Date.parse(tag.created_at)));
++  assert.deepEqual(await f.request('GET', path), { tags: [tag] });
++  await f.request('POST', path, { label: 'Calculus ' }, 409);
++  await f.request('POST', `${f.emptyNoteId}/tags`, { label: 'Calculus' }, 201);
++  await f.request('DELETE', `${path}/${tag.id}`);
++  assert.deepEqual(await f.request('GET', path), { tags: [] });
++  assert.equal((await f.request('GET', `${f.emptyNoteId}/tags`)).tags.length, 1);
++});
++
++test('E5 tag label validates trimmed 1–48 characters without hierarchy fields', async (t) => {
++  const f = await fixture(); t.after(() => f.close());
++  for (const label of ['', ' \n\t ', 'x'.repeat(49), null, 42]) {
++    await f.request('POST', `${f.noteId}/tags`, { label }, 400);
++  }
++  const { tag } = await f.request('POST', `${f.noteId}/tags`, { label: ` ${'x'.repeat(48)} ` }, 201);
++  assert.equal(tag.label.length, 48);
++  assert.equal((await f.request('GET', `${f.noteId}/tags`)).tags.length, 1);
++});
++
++test('E5 migration is repeatable, reserves actor enum, enforces uniqueness and cascades with note', async (t) => {
++  const f = await fixture(); t.after(() => f.close());
++  f.db.exec('DROP TABLE note_tags');
++  migration.up(f.db); migration.up(f.db);
++  assertCourseLifecyclePolicyCoverage(f.db);
++  const insert = f.db.prepare('INSERT INTO note_tags (id,note_id,user_id,label,actor,created_at) VALUES (?,?,?,?,?,?)');
++  insert.run('tag-one', f.noteId, f.userId, 'Label', 'user', 'now');
++  insert.run('reserved-provenance', f.noteId, f.userId, 'Future provenance', 'agent', 'now');
++  assert.throws(() => insert.run('duplicate', f.noteId, f.userId, 'Label', 'user', 'now'), /UNIQUE/);
++  assert.throws(() => insert.run('bad-actor', f.noteId, f.userId, 'Other', 'other', 'now'), /CHECK/);
++  f.db.prepare('DELETE FROM notes WHERE id = ?').run(f.noteId);
++  assert.equal((f.db.prepare('SELECT COUNT(*) AS count FROM note_tags').get() as { count: number }).count, 0);
++});
++
++test('E5 labels count as retained user work for Source projection deletion decisions', async (t) => {
++  const f = await fixture(); t.after(() => f.close());
++  f.db.prepare("UPDATE notes SET note_class = 'source_projection' WHERE id = ?").run(f.emptyNoteId);
++  assert.equal(getProjectionUserWork(f.db, f.userId, f.emptyNoteId).has_user_work, false);
++  await f.request('POST', `${f.emptyNoteId}/tags`, { label: 'Keep my source context' }, 201);
++  const work = getProjectionUserWork(f.db, f.userId, f.emptyNoteId);
++  assert.equal(work.note_tag_count, 1);
++  assert.equal(work.has_user_work, true);
++});
++
++test('E5 metadata groups source receipts, follows Item birth/anchor notes and deduplicates downstream cards/items', async (t) => {
++  const f = await fixture(); t.after(() => f.close());
++  const before = f.db.prepare('SELECT total_changes() AS changes').get();
++  const result = await f.request('GET', `${f.noteId}/metadata`);
++  assert.equal(result.upstream.count, 4);
++  assert.deepEqual(result.upstream.sources.map((source: any) => [source.title, source.count]), [
++    ['E5 global source', 1], ['E5 source document.txt', 2],
++  ]);
++  assert.equal(result.upstream.sources[0].source_record_id, f.id('source'));
++  assert.equal(result.upstream.sources[0].document_id, null);
++  assert.equal(result.upstream.sources[1].document_id, f.id('document'));
++  assert.equal(result.upstream.sources[1].block_id, f.id('body'));
++  assert.ok(result.upstream.sources[1].reference_id);
++  assert.deepEqual(result.upstream.notes.map((note: any) => [note.note_id, note.count]), [
++    [f.id('anchor-origin'), 1], [f.id('origin'), 1],
++  ]);
++  assert.equal(result.downstream.count, 3);
++  assert.deepEqual(result.downstream.boards.map((board: any) => [board.board_id, board.count]), [
++    [f.id('board'), 4], [f.id('staged-board'), 1],
++  ]);
++  assert.deepEqual(result.downstream.content_groups, [{ content_group_id: f.id('group'), note_id: f.id('origin'),
++    course_id: f.courseId, title: 'E5 downstream group', count: 2 }]);
++  assert.deepEqual(f.db.prepare('SELECT total_changes() AS changes').get(), before, 'the GET must not write projection state');
++});
++
++test('E5 metadata reads existing edge edits immediately and keeps the empty paper quiet', async (t) => {
++  const f = await fixture(); t.after(() => f.close());
++  assert.deepEqual(await f.request('GET', `${f.emptyNoteId}/metadata`), {
++    upstream: { sources: [], notes: [], count: 0 }, downstream: { boards: [], content_groups: [], count: 0 },
++  });
++  const first = await f.request('GET', `${f.noteId}/metadata`);
++  f.db.prepare('DELETE FROM board_members WHERE id = ?').run(f.id('staged-card'));
++  f.db.prepare('DELETE FROM note_block_sources WHERE id = ?').run(f.id('reference-chunk'));
++  f.db.prepare('UPDATE note_blocks SET status = ? WHERE id = ?').run('trashed', f.id('ref'));
++  const second = await f.request('GET', `${f.noteId}/metadata`);
++  assert.equal(second.downstream.count, first.downstream.count - 1);
++  assert.equal(second.upstream.sources.find((source: any) => source.document_id)?.count, 1);
++  assert.deepEqual(second.upstream.notes, []);
++  assert.equal(second.upstream.count, 2);
++});
++
++test('E5 source receipts sharing an explicit document/Source identity bridge aggregate once', async (t) => {
++  const f = await fixture(); t.after(() => f.close());
++  f.db.prepare('UPDATE note_block_sources SET document_id = ? WHERE id = ?')
++    .run(f.id('document'), f.id('reference-source'));
++  const result = await f.request('GET', `${f.noteId}/metadata`);
++  assert.equal(result.upstream.count, 3);
++  assert.equal(result.upstream.sources.length, 1);
++  assert.equal(result.upstream.sources[0].source_record_id, f.id('source'));
++  assert.equal(result.upstream.sources[0].document_id, f.id('document'));
++  assert.equal(result.upstream.sources[0].title, 'E5 global source');
++  assert.equal(result.upstream.sources[0].count, 3);
++});
+diff --git a/server/src/db/migrations/064_v13_note_tags.ts b/server/src/db/migrations/064_v13_note_tags.ts
+new file mode 100644
+--- /dev/null
++++ b/server/src/db/migrations/064_v13_note_tags.ts
+@@ -0,0 +1,20 @@
++import type Database from 'better-sqlite3';
++
++export default {
++  id: '064_v13_note_tags',
++  description: 'Add flat note tags with retained actor provenance',
++  up(db: Database.Database): void {
++    db.exec(`
++      CREATE TABLE IF NOT EXISTS note_tags (
++        id TEXT PRIMARY KEY,
++        note_id TEXT NOT NULL REFERENCES notes(id) ON DELETE CASCADE,
++        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
++        label TEXT NOT NULL CHECK (length(label) BETWEEN 1 AND 48 AND label = trim(label)),
++        actor TEXT NOT NULL DEFAULT 'user' CHECK (actor IN ('user', 'agent')),
++        created_at TEXT NOT NULL,
++        UNIQUE (note_id, label)
++      );
++      CREATE INDEX IF NOT EXISTS idx_note_tags_user_note ON note_tags(user_id, note_id);
++    `);
++  },
++};
+diff --git a/server/src/routes/noteMetadata.ts b/server/src/routes/noteMetadata.ts
+new file mode 100644
+--- /dev/null
++++ b/server/src/routes/noteMetadata.ts
+@@ -0,0 +1,51 @@
++import { Router } from 'express';
++import type Database from 'better-sqlite3';
++import { v4 as uuidv4 } from 'uuid';
++import { z } from 'zod';
++import { getDb } from '../db/init.js';
++import type { AuthRequest } from '../middleware/auth.js';
++import { AppError } from '../middleware/errorHandler.js';
++import { getNoteMetadata, requireMetadataNote } from '../services/noteMetadata.js';
++
++const addTagSchema = z.object({ label: z.string().trim().min(1).max(48) }).strict();
++
++/** Human note subresources, deliberately separate from the tool registry. */
++export function createNoteMetadataRouter(dbProvider: () => Database.Database = getDb) {
++  const router = Router();
++  router.get('/:id/tags', (req: AuthRequest, res) => {
++    const db = dbProvider();
++    requireMetadataNote(db, req.userId!, req.params.id as string);
++    const tags = db.prepare('SELECT * FROM note_tags WHERE note_id = ? AND user_id = ? ORDER BY created_at, id')
++      .all(req.params.id, req.userId);
++    res.json({ tags });
++  });
++  router.post('/:id/tags', (req: AuthRequest, res) => {
++    const db = dbProvider();
++    const noteId = req.params.id as string;
++    requireMetadataNote(db, req.userId!, noteId);
++    const parsed = addTagSchema.safeParse(req.body);
++    if (!parsed.success) {
++      res.status(400).json({ error: 'Validation error', details: parsed.error.errors });
++      return;
++    }
++    const tag = { id: uuidv4(), note_id: noteId, user_id: req.userId!, label: parsed.data.label,
++      actor: 'user', created_at: new Date().toISOString() };
++    const result = db.prepare(`INSERT INTO note_tags (id, note_id, user_id, label, actor, created_at)
++      VALUES (@id, @note_id, @user_id, @label, @actor, @created_at)
++      ON CONFLICT(note_id, label) DO NOTHING`).run(tag);
++    if (!result.changes) throw new AppError(409, 'Tag already exists');
++    res.status(201).json({ tag });
++  });
++  router.delete('/:id/tags/:tagId', (req: AuthRequest, res) => {
++    const db = dbProvider();
++    requireMetadataNote(db, req.userId!, req.params.id as string);
++    const result = db.prepare('DELETE FROM note_tags WHERE id = ? AND note_id = ? AND user_id = ?')
++      .run(req.params.tagId, req.params.id, req.userId);
++    if (!result.changes) throw new AppError(404, 'Tag not found');
++    res.json({ message: 'Tag deleted' });
++  });
++  router.get('/:id/metadata', (req: AuthRequest, res) => {
++    res.json(getNoteMetadata(dbProvider(), req.userId!, req.params.id as string));
++  });
++  return router;
++}
+diff --git a/server/src/services/noteMetadata.ts b/server/src/services/noteMetadata.ts
+new file mode 100644
+--- /dev/null
++++ b/server/src/services/noteMetadata.ts
+@@ -0,0 +1,122 @@
++import type Database from 'better-sqlite3';
++import { AppError } from '../middleware/errorHandler.js';
++
++export function requireMetadataNote(db: Database.Database, userId: string, noteId: string): void {
++  if (!db.prepare('SELECT id FROM notes WHERE id = ? AND user_id = ?').get(noteId, userId)) {
++    throw new AppError(404, 'Note not found');
++  }
++}
++
++// Item birth receipts and anchors are existing edges, not a cover-level cache.
++// UNION collapses a birth receipt and multiple anchors reaching the same note.
++const provenanceCte = `WITH
++  paper_blocks AS (
++    SELECT nb.* FROM note_blocks nb JOIN note_block_placements p ON p.block_id = nb.id
++    WHERE p.note_id = @noteId AND nb.user_id = @userId AND nb.status = 'active'
++  ),
++  item_note_edges AS (
++    SELECT i.id AS item_id, i.origin_note_id AS note_id FROM items i
++    WHERE i.user_id = @userId AND i.origin_note_id IS NOT NULL
++    UNION
++    SELECT a.item_id, p.note_id FROM item_anchors a
++    JOIN items i ON i.id = a.item_id AND i.user_id = @userId
++    JOIN note_blocks nb ON nb.id = CASE WHEN a.target_kind = 'block' THEN a.target_id
++      WHEN a.target_kind = 'content_range' AND json_valid(a.range_json) THEN json_extract(a.range_json, '$.block_id') END
++      AND nb.user_id = @userId AND nb.status = 'active'
++    JOIN note_block_placements p ON p.block_id = nb.id
++    WHERE a.user_id = @userId
++    UNION
++    SELECT a.item_id, co.note_id FROM item_anchors a
++    JOIN items i ON i.id = a.item_id AND i.user_id = @userId
++    JOIN canvas_objects co ON co.id = COALESCE(
++      CASE WHEN json_valid(a.range_json) THEN json_extract(a.range_json, '$.canvas_object_id') END, a.target_id)
++      AND co.user_id = @userId AND co.status = 'active'
++    WHERE a.user_id = @userId AND a.target_kind IN ('canvas_object', 'table_region', 'image_region')
++  ),
++  paper_items AS (SELECT item_id FROM item_note_edges WHERE note_id = @noteId),
++  paper_group_items AS (
++    SELECT DISTINCT cg.id AS group_id, i.item_id FROM content_groups cg
++    JOIN content_group_members m ON m.content_group_id = cg.id AND m.user_id = @userId AND m.kind = 'item'
++    JOIN paper_items i ON i.item_id = m.item_id
++    WHERE cg.user_id = @userId AND cg.status = 'active'
++  )`;
++
++interface SourceRow {
++  document_id: string | null;
++  source_record_id: string | null;
++  projection_note_id: string | null;
++  title: string;
++  course_id: string | null;
++  block_id: string;
++  reference_id: string;
++}
++interface ReferencedNote { note_id: string; title: string; course_id: string; count: number }
++interface ReferencingBoard { board_id: string; title: string; count: number }
++interface ReferencingGroup { content_group_id: string; note_id: string | null; course_id: string; title: string; count: number }
++
++/** All cover relationships are derived on each read; this service performs no writes. */
++export function getNoteMetadata(db: Database.Database, userId: string, noteId: string) {
++  requireMetadataNote(db, userId, noteId);
++  const params = { userId, noteId };
++  const sourceRows = db.prepare(`${provenanceCte}
++    SELECT d.id AS document_id, sr.id AS source_record_id, sm.projection_note_id,
++      COALESCE(sr.display_name, d.filename) AS title,
++      COALESCE(d.course_id, sr.origin_course_id) AS course_id,
++      p.id AS block_id, s.id AS reference_id
++    FROM paper_blocks p JOIN note_block_sources s ON s.block_id = p.id
++    LEFT JOIN document_chunks dc ON dc.id = s.document_chunk_id
++    LEFT JOIN documents d ON d.id = COALESCE(s.document_id, dc.document_id) AND d.user_id = @userId
++    LEFT JOIN source_records sr ON sr.id = s.source_record_id AND sr.user_id = @userId
++    LEFT JOIN source_materializations sm ON sm.source_record_id = sr.id AND sm.user_id = @userId
++    WHERE sr.id IS NOT NULL OR d.id IS NOT NULL
++    ORDER BY s.created_at, s.id`).all(params) as SourceRow[];
++  // A receipt carrying both IDs is an existing identity bridge. Only use an
++  // unambiguous bridge; matching filenames alone is never source identity.
++  const documentSources = new Map<string, Map<string, SourceRow>>();
++  for (const row of sourceRows) {
++    if (!row.document_id || !row.source_record_id) continue;
++    const matches = documentSources.get(row.document_id) ?? new Map<string, SourceRow>();
++    matches.set(row.source_record_id, row);
++    documentSources.set(row.document_id, matches);
++  }
++  const groupedSources = new Map<string, SourceRow & { count: number }>();
++  for (const sourceRow of sourceRows) {
++    const matches = sourceRow.document_id ? documentSources.get(sourceRow.document_id) : undefined;
++    const bridge = !sourceRow.source_record_id && matches?.size === 1 ? [...matches.values()][0] : null;
++    const row = bridge ? { ...bridge, block_id: sourceRow.block_id, reference_id: sourceRow.reference_id } : sourceRow;
++    const key = row.source_record_id ? `source:${row.source_record_id}` : `document:${row.document_id}`;
++    const existing = groupedSources.get(key);
++    if (existing) existing.count += 1;
++    else groupedSources.set(key, { ...row, count: 1 });
++  }
++  const sources = [...groupedSources.values()].sort((a, b) => a.title.localeCompare(b.title));
++  const notes = db.prepare(`${provenanceCte}
++    SELECT n.id AS note_id, n.title, n.course_id, COUNT(DISTINCT p.id) AS count
++    FROM paper_blocks p
++    JOIN item_note_edges e ON e.item_id = CASE WHEN p.block_type = 'item_ref' AND json_valid(p.content_json)
++      THEN json_extract(p.content_json, '$.item_id') END
++    JOIN notes n ON n.id = e.note_id AND n.user_id = @userId AND n.status = 'active'
++    WHERE n.id != @noteId AND n.note_class != 'system'
++    GROUP BY n.id ORDER BY n.title, n.id`).all(params) as ReferencedNote[];
++  // A board card is counted once even when an Item has multiple matching anchors.
++  // Staged cards and retained ranges still belong to the board until unmounted.
++  const boards = db.prepare(`${provenanceCte}
++    SELECT b.id AS board_id, b.title, COUNT(DISTINCT m.id) AS count
++    FROM boards b JOIN board_members m ON m.board_id = b.id
++    WHERE b.user_id = @userId AND (
++      (m.member_kind = 'note' AND m.member_id = @noteId)
++      OR (m.member_kind = 'text_range' AND EXISTS (
++        SELECT 1 FROM board_text_ranges r WHERE r.id = m.member_id AND r.board_id = b.id
++          AND r.user_id = @userId AND (r.note_id = @noteId OR r.block_id IN (SELECT id FROM paper_blocks))))
++      OR (m.member_kind = 'item' AND m.member_id IN (SELECT item_id FROM paper_items))
++      OR (m.member_kind = 'content_group' AND m.member_id IN (SELECT group_id FROM paper_group_items))
++    ) GROUP BY b.id ORDER BY b.title, b.id`).all(params) as ReferencingBoard[];
++  const contentGroups = db.prepare(`${provenanceCte}
++    SELECT cg.id AS content_group_id, cg.note_id, cg.course_id, cg.title, COUNT(DISTINCT p.item_id) AS count
++    FROM paper_group_items p JOIN content_groups cg ON cg.id = p.group_id
++    GROUP BY cg.id ORDER BY cg.title, cg.id`).all(params) as ReferencingGroup[];
++  return {
++    upstream: { sources, notes, count: sources.length + notes.length },
++    downstream: { boards, content_groups: contentGroups, count: boards.length + contentGroups.length },
++  };
++}

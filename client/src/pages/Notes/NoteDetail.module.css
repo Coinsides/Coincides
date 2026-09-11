@@ -245,36 +245,6 @@
   line-height: 1.5;
 }
 
-.infoGrid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 2px;
-  margin: 0;
-}
-
-.infoGrid div {
-  padding: 8px 0;
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.infoGrid dt {
-  margin: 0;
-  color: var(--text-muted);
-  font-size: 11px;
-  font-weight: 750;
-  text-transform: uppercase;
-}
-
-.infoGrid dd {
-  margin: 0;
-  color: var(--text-primary);
-  font-size: 13px;
-  font-weight: 650;
-}
-
 .moreAction {
   display: grid;
   grid-template-columns: 18px minmax(0, 1fr) auto;

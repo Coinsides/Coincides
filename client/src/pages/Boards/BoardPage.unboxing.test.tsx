@@ -121,6 +121,12 @@ beforeEach(() => {
       canvasObjects: [], canvasPlacements: [], contentMounts: [], visualConnectors: [], imageObjects: [], structuredObjects: [] });
     if (url === '/notes/new-note') return response(notes[0]);
     if (url === '/notes/new-note/blocks') return response(blocks);
+    // E5 cover chips and metadata load when the note runtime mounts.
+    if (url === '/notes/new-note/tags') return response({ tags: [] });
+    if (url === '/notes/new-note/metadata') return response({
+      upstream: { sources: [], notes: [], count: 0 },
+      downstream: { boards: [], content_groups: [], count: 0 },
+    });
     return fail('GET', url);
   });
   http.post.mockImplementation(async (url: string, input: any) => {

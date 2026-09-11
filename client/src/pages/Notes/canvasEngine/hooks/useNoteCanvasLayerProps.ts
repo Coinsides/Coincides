@@ -1,4 +1,6 @@
 import { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { getSource, openAuthenticatedSourceBlob } from '@/pages/Sources/sourceApi';
 import type {
   Dispatch,
   SetStateAction,
@@ -37,6 +39,7 @@ export type UseNoteCanvasLayerPropsInput =
   >
   & {
     note: Note | null;
+    sourceReferenceCount: number;
     onFloatingPanelFocusBlock: NoteFloatingPanelLayerProps['onFocusBlock'];
     onWritingSurfaceFocusBlock: NoteWritingSurfaceLayerProps['onFocusBlock'];
     onWritingSurfaceRequestBlockFocus: NoteWritingSurfaceLayerProps['onRequestFocusBlock'];
@@ -50,6 +53,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
   documentLayerProps: NoteRuntimeDocumentLayerProps;
 } | null {
   const addToast = useUIStore((s) => s.addToast);
+  const navigate = useNavigate();
   const handleTrashNote = useNoteTrashAction(input.note);
 
   const handleAddFavorite = useCallback(() => {
@@ -79,13 +83,10 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     showExportPreview: input.showExportPreview,
     showLayoutPanel: input.showLayoutPanel,
     showMoreActions: input.showMoreActions,
-    showNoteInfo: input.showNoteInfo,
     showPreviewAIVisibility: input.showPreviewAIVisibility,
     showPreviewBlockTypes: input.showPreviewBlockTypes,
     showPreviewExportStatus: input.showPreviewExportStatus,
     showPreviewLabelOverlay: input.showPreviewLabelOverlay,
-    sortedBlockCount: input.sortedBlockCount,
-    sourceReferenceCount: input.sourceReferenceCount,
     surfaceMode: input.surfaceMode,
     surfacePolicy: input.surfacePolicy,
     trashedBlocks: input.trashedBlocks,
@@ -100,7 +101,6 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     onToggleExportPreview: input.onToggleExportPreview,
     onToggleLayoutMode: input.onToggleLayoutMode,
     onToggleMoreActions: input.onToggleMoreActions,
-    onToggleNoteInfo: input.onToggleNoteInfo,
     onOpenBlockTrash: input.onOpenBlockTrash,
     onOpenLayoutPanel: input.onOpenLayoutPanel,
     onAddPageBelow: input.onAddPageBelow,
@@ -133,6 +133,27 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
       contentReadOnly: input.contentReadOnly,
       onTitleDraftChange: input.onTitleDraftChange, onDescriptionDraftChange: input.onDescriptionDraftChange,
       onSaveTitle: input.onSaveTitle, onSaveDescription: input.onSaveDescription,
+      metadata: {
+        noteId: input.note.id, readOnly: input.contentReadOnly,
+        mode: input.surfaceMode, blockCount: input.sortedBlockCount,
+        sourceCount: input.sourceReferenceCount, status: input.note.status,
+        refreshKey: input.allBlocks,
+        trackPendingWrite: input.trackPendingWrite,
+        onOpenSource: async (source) => {
+          const anchor = input.anchorsBySourceRef[source.reference_id];
+          if (anchor) { input.onViewSource(anchor.id); return; }
+          if (source.projection_note_id) {
+            navigate(`/notes/${encodeURIComponent(source.projection_note_id)}`);
+            return;
+          }
+          if (source.source_record_id) {
+            await openAuthenticatedSourceBlob(await getSource(source.source_record_id), 'preview');
+            return;
+          }
+          input.onFloatingPanelFocusBlock(source.block_id);
+          addToast('info', 'Opened the reference location. The source has no available anchor.');
+        },
+      },
     },
     onPageFrameWallPointerDown: input.onPageFrameWallPointerDown,
     activePageFrameWall: input.activePageFrameWall,

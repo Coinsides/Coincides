@@ -22,12 +22,12 @@
 
 ---
 
-## 1. 数据表（活表 91 张）
+## 1. 数据表（活表 92 张）
 
 > **口径**：已核 `server/src/db/init.ts:33,156` —— **先应用 `schema.sql`，再跑 migrations**。
 > 故 **活表 = `schema.sql` 声明 ∪ migrations 建表 − migrations 落表**。
-> `schema.sql` 单独声明 65 张，**那不是活表数** ——
-> 部分晚期表被回填进 `schema.sql`（45 张），部分没有（26 张）。
+> `schema.sql` 单独声明 66 张，**那不是活表数** ——
+> 部分晚期表被回填进 `schema.sql`（46 张），部分没有（26 张）。
 > 这是回填不一致，不是缺陷；但它意味着**任何"数一下 schema.sql"得出的数字都是错的**。
 
 | # | 表 | 首次建于 | 在 `schema.sql` |
@@ -85,44 +85,45 @@
 | 51 | `note_block_placements` | 015_v2_note_foundation | ✅ |
 | 52 | `note_block_sources` | 015_v2_note_foundation | ✅ |
 | 53 | `note_blocks` | 015_v2_note_foundation | ✅ |
-| 54 | `notes` | 015_v2_note_foundation | ✅ |
-| 55 | `operation_batches` | 015_v2_note_foundation | ✅ |
-| 56 | `page_frame_extensions` | 035_v2_canvas_objects | — |
-| 57 | `projections` | 015_v2_note_foundation | ✅ |
-| 58 | `proposals` | `schema.sql`（基线） | ✅ |
-| 59 | `purpose_members` | 044_v2_purposes | — |
-| 60 | `purposes` | 044_v2_purposes | — |
-| 61 | `reconciliation_recovery_events` | 018_v2_reconciliation_safety | ✅ |
-| 62 | `recurring_task_groups` | `schema.sql`（基线） | ✅ |
-| 63 | `relation_assessments` | 047_v2_item_relation_floor | ✅ |
-| 64 | `relations` | 047_v2_item_relation_floor | ✅ |
-| 65 | `source_anchor_links` | 020_v2_source_anchors | ✅ |
-| 66 | `source_anchors` | 020_v2_source_anchors | ✅ |
-| 67 | `source_board_nodes` | 022_v2_source_boards | ✅ |
-| 68 | `source_boards` | 022_v2_source_boards | ✅ |
-| 69 | `source_files` | 045_v2_source_identity_floor | — |
-| 70 | `source_fragments` | 016_v2_material_proposal | ✅ |
-| 71 | `source_imprints` | 049_v2_source_imprints | — |
-| 72 | `source_materializations` | 045_v2_source_identity_floor | — |
-| 73 | `source_materials` | 016_v2_material_proposal | ✅ |
-| 74 | `source_project_placements` | 045_v2_source_identity_floor | — |
-| 75 | `source_records` | 045_v2_source_identity_floor | — |
-| 76 | `source_scopes` | 021_v2_source_scopes | ✅ |
-| 77 | `source_snapshot_pages` | 019_v2_source_snapshots | ✅ |
-| 78 | `source_snapshots` | 019_v2_source_snapshots | ✅ |
-| 79 | `structured_object_extensions` | 042_v2_structured_object_extensions | — |
-| 80 | `study_activity_log` | `schema.sql`（基线） | ✅ |
-| 81 | `study_mode_templates` | `schema.sql`（基线） | ✅ |
-| 82 | `tag_groups` | `schema.sql`（基线） | ✅ |
-| 83 | `tags` | `schema.sql`（基线） | ✅ |
-| 84 | `task_cards` | 011_task_cards | — |
-| 85 | `tasks` | `schema.sql`（基线） | ✅ |
-| 86 | `template_definitions` | 025_v2_template_definitions | ✅ |
-| 87 | `time_block_template_sets` | 012_time_block_templates | — |
-| 88 | `time_block_templates` | 012_time_block_templates | — |
-| 89 | `time_blocks` | 007_time_blocks | — |
-| 90 | `users` | `schema.sql`（基线） | ✅ |
-| 91 | `visual_connector_extensions` | 040_v2_visual_connector_extensions | — |
+| 54 | `note_tags` | 064_v13_note_tags | ✅ |
+| 55 | `notes` | 015_v2_note_foundation | ✅ |
+| 56 | `operation_batches` | 015_v2_note_foundation | ✅ |
+| 57 | `page_frame_extensions` | 035_v2_canvas_objects | — |
+| 58 | `projections` | 015_v2_note_foundation | ✅ |
+| 59 | `proposals` | `schema.sql`（基线） | ✅ |
+| 60 | `purpose_members` | 044_v2_purposes | — |
+| 61 | `purposes` | 044_v2_purposes | — |
+| 62 | `reconciliation_recovery_events` | 018_v2_reconciliation_safety | ✅ |
+| 63 | `recurring_task_groups` | `schema.sql`（基线） | ✅ |
+| 64 | `relation_assessments` | 047_v2_item_relation_floor | ✅ |
+| 65 | `relations` | 047_v2_item_relation_floor | ✅ |
+| 66 | `source_anchor_links` | 020_v2_source_anchors | ✅ |
+| 67 | `source_anchors` | 020_v2_source_anchors | ✅ |
+| 68 | `source_board_nodes` | 022_v2_source_boards | ✅ |
+| 69 | `source_boards` | 022_v2_source_boards | ✅ |
+| 70 | `source_files` | 045_v2_source_identity_floor | — |
+| 71 | `source_fragments` | 016_v2_material_proposal | ✅ |
+| 72 | `source_imprints` | 049_v2_source_imprints | — |
+| 73 | `source_materializations` | 045_v2_source_identity_floor | — |
+| 74 | `source_materials` | 016_v2_material_proposal | ✅ |
+| 75 | `source_project_placements` | 045_v2_source_identity_floor | — |
+| 76 | `source_records` | 045_v2_source_identity_floor | — |
+| 77 | `source_scopes` | 021_v2_source_scopes | ✅ |
+| 78 | `source_snapshot_pages` | 019_v2_source_snapshots | ✅ |
+| 79 | `source_snapshots` | 019_v2_source_snapshots | ✅ |
+| 80 | `structured_object_extensions` | 042_v2_structured_object_extensions | — |
+| 81 | `study_activity_log` | `schema.sql`（基线） | ✅ |
+| 82 | `study_mode_templates` | `schema.sql`（基线） | ✅ |
+| 83 | `tag_groups` | `schema.sql`（基线） | ✅ |
+| 84 | `tags` | `schema.sql`（基线） | ✅ |
+| 85 | `task_cards` | 011_task_cards | — |
+| 86 | `tasks` | `schema.sql`（基线） | ✅ |
+| 87 | `template_definitions` | 025_v2_template_definitions | ✅ |
+| 88 | `time_block_template_sets` | 012_time_block_templates | — |
+| 89 | `time_block_templates` | 012_time_block_templates | — |
+| 90 | `time_blocks` | 007_time_blocks | — |
+| 91 | `users` | `schema.sql`（基线） | ✅ |
+| 92 | `visual_connector_extensions` | 040_v2_visual_connector_extensions | — |
 
 ### 1.1 已由 migration 落表（26）
 

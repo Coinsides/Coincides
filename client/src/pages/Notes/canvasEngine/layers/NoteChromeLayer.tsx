@@ -4,7 +4,6 @@ import {
   Eye,
   FileText,
   FilePlus2,
-  Info,
   LayoutDashboard,
   LockKeyhole,
   MoreHorizontal,
@@ -58,13 +57,10 @@ export interface NoteChromeLayerProps {
   showExportPreview: boolean;
   showLayoutPanel: boolean;
   showMoreActions: boolean;
-  showNoteInfo: boolean;
   showPreviewAIVisibility: boolean;
   showPreviewBlockTypes: boolean;
   showPreviewExportStatus: boolean;
   showPreviewLabelOverlay: boolean;
-  sortedBlockCount: number;
-  sourceReferenceCount: number;
   surfaceMode: 'page' | 'canvas';
   surfacePolicy: SurfacePolicyView;
   trashedBlocks: NoteBlock[];
@@ -81,7 +77,6 @@ export interface NoteChromeLayerProps {
   onToggleExportPreview: () => void;
   onToggleLayoutMode: () => void;
   onToggleMoreActions: () => void;
-  onToggleNoteInfo: () => void;
   onOpenLayoutPanel: () => void;
   onOpenBlockTrash: () => void;
   onDeletePageFrame: (frameId: string) => void;
@@ -117,13 +112,10 @@ export function NoteChromeLayer({
   showExportPreview,
   showLayoutPanel,
   showMoreActions,
-  showNoteInfo,
   showPreviewAIVisibility,
   showPreviewBlockTypes,
   showPreviewExportStatus,
   showPreviewLabelOverlay,
-  sortedBlockCount,
-  sourceReferenceCount,
   surfaceMode,
   surfacePolicy,
   trashedBlocks,
@@ -139,7 +131,6 @@ export function NoteChromeLayer({
   onToggleExportPreview,
   onToggleLayoutMode,
   onToggleMoreActions,
-  onToggleNoteInfo,
   onOpenBlockTrash,
   onOpenLayoutPanel,
   onDeletePageFrame,
@@ -158,7 +149,7 @@ export function NoteChromeLayer({
 }: NoteChromeLayerProps) {
   const toolbarRef = useRef<HTMLDivElement>(null);
   const [overlayAnchor, setOverlayAnchor] = useState({ right: 16, bottom: 64 });
-  const overlayOpen = showNoteInfo || showLayoutPanel || showMoreActions || showBlockTrash || showExportPreview;
+  const overlayOpen = showLayoutPanel || showMoreActions || showBlockTrash || showExportPreview;
   useEffect(() => {
     if (!overlayOpen) return;
     const toolbar = toolbarRef.current?.closest('[data-page-reading-control="true"]') || toolbarRef.current;
@@ -441,41 +432,6 @@ export function NoteChromeLayer({
           <FloatingOverlayLayer open={overlayOpen} placement="free">
             <div className={styles.noteToolbarPopover} data-note-toolbar-popover="true"
               style={{ ...overlayAnchor, maxHeight: Math.max(80, window.innerHeight - overlayAnchor.bottom - 12) }}>
-            {showNoteInfo && (
-              <div className={`${styles.infoPopover} ${styles.floatingPanelPopover}`} data-note-overlay="info">
-                <div className={styles.popoverHeader}>
-                  <div>
-                    <div className={styles.popoverEyebrow}>Note info</div>
-                    <strong>{note.title || 'Untitled note'}</strong>
-                  </div>
-                  <button className={styles.iconBtn} onClick={onCloseOverlay} title="Close">
-                    <X size={15} />
-                  </button>
-                </div>
-                <dl className={styles.infoGrid}>
-                  <div>
-                    <dt>Mode</dt>
-                    <dd>{surfaceMode === 'page' ? 'Page' : 'Canvas'}</dd>
-                  </div>
-                  <div>
-                    <dt>Blocks</dt>
-                    <dd>{sortedBlockCount}</dd>
-                  </div>
-                  <div>
-                    <dt>Sources</dt>
-                    <dd>{sourceReferenceCount}</dd>
-                  </div>
-                  <div>
-                    <dt>Status</dt>
-                    <dd>{note.status}</dd>
-                  </div>
-                </dl>
-                <p className={styles.popoverNote}>
-                  Note info is a summary. Export and AI overlays live in Preview; layout controls live in Layout.
-                </p>
-              </div>
-            )}
-
             {showLayoutPanel && (
               <div className={`${styles.infoPopover} ${styles.actionsPopover} ${styles.floatingPanelPopover}`} data-note-overlay="layout">
                 <div className={styles.popoverHeader}>
@@ -599,14 +555,6 @@ export function NoteChromeLayer({
               aria-label="Add to favorites"
             >
               <Star size={16} /><span>Add to favorites</span>
-            </button>
-            <button
-              className={styles.moreAction}
-              onClick={onToggleNoteInfo}
-              title="View info"
-              aria-label="View info"
-            >
-              <Info size={16} /><span>View info</span>
             </button>
                 <button
                   type="button"

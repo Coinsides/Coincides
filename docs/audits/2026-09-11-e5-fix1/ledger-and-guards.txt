@@ -1,0 +1,54 @@
+client/src/pages/Boards/BoardNoteModal.rangeSession.test.tsx:127:    throw new Error(`Unexpected fixture GET ${url}`);
+client/src/pages/Boards/BoardPage.chalk.test.tsx:8:// Unknown requests throw: this test never starts or contacts an application server.
+client/src/pages/Boards/BoardPage.chalk.test.tsx:82:    throw new Error(`Unexpected synthetic GET: ${url}`);
+client/src/pages/Boards/BoardPage.item.test.tsx:104:    throw new Error(`Unexpected fixture GET ${url}`);
+client/src/pages/Boards/BoardPage.modal.test.tsx:76:    throw new Error(`Unexpected fixture GET ${url}`);
+client/src/pages/Boards/BoardPage.modal.test.tsx:116:      if (!target) throw new Error('Unexpected fixture geometry target');
+client/src/pages/Boards/BoardPage.smoke.test.tsx:203:    throw new Error(`Unexpected fixture GET: ${url}`);
+client/src/pages/Boards/BoardPage.staging.test.tsx:63:    throw new Error(`Unexpected synthetic GET ${url}`);
+client/src/pages/Boards/BoardPage.unboxing.test.tsx:23:let unknownRequests: string[];
+client/src/pages/Boards/BoardPage.unboxing.test.tsx:27:  unknownRequests.push(`${method} ${url}`);
+client/src/pages/Boards/BoardPage.unboxing.test.tsx:90:  notes = []; blocks = []; layouts = []; unknownRequests = []; collection = null;
+client/src/pages/Boards/BoardPage.unboxing.test.tsx:221:    expect(unknownRequests).toEqual([]);
+client/src/pages/Boards/BoardPage.unboxing.test.tsx:236:    expect(unknownRequests).toEqual([]);
+client/src/pages/Boards/BoardPage.unboxing.test.tsx:249:    expect(unknownRequests).toEqual([]);
+client/src/pages/Boards/boardRepository.test.ts:176:      throw new Error('Unexpected fixture GET');
+client/src/pages/Boards/boardRepository.test.ts:228:      throw new Error('Unexpected fixture GET');
+client/src/pages/Boards/boardTextRangeClipboard.test.tsx:104:    throw new Error(`Unmapped fixture GET ${url}`);
+client/src/pages/GroupGallery/groupGalleryItemSummary.test.tsx:35:    throw new Error(`Unexpected fixture read: ${url}`);
+client/src/pages/GroupGallery/groupGalleryItemSummary.test.tsx:38:    if (url !== '/items/summaries') throw new Error(`Unexpected fixture endpoint: ${url}`);
+client/src/pages/GroupGallery/groupGalleryPurposeRetirement.test.tsx:31:  throw new Error(`Unexpected fixture endpoint: ${url}`);
+client/src/pages/Notes/canvasEngine/coordinateContractSession.test.ts:34:      throw new Error('Unexpected synthetic request');
+client/src/pages/Notes/canvasEngine/coordinateContractSession.test.ts:52:      throw new Error('Unexpected synthetic request');
+client/src/pages/Notes/canvasEngine/coordinateContractSession.test.ts:107:      throw new Error('Unexpected synthetic request');
+client/src/pages/Notes/canvasEngine/coordinateContractSession.test.ts:166:        throw new Error('Unexpected synthetic request');
+client/src/pages/Notes/canvasEngine/coordinateContractSession.test.ts:210:  it('keeps v2 recovery pending when the target has no resolvable frame instead of writing world coordinates', async () => {
+client/src/pages/Notes/canvasEngine/coordinateContractSession.test.ts:214:      throw new Error('Unexpected synthetic request');
+client/src/pages/Notes/canvasEngine/hooks/pageFrameWallsPersistence.test.tsx:114:      throw new Error(`Unexpected fixture GET ${url}`);
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:379:      throw new Error(`Unexpected GET ${url}`);
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:1256:  it.each(['pending', 'complete'] as const)('F11 shares one collection PUT when a concurrent missing-collection read arrives with healing %s', async (healingPhase) => {
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:2592:      throw new Error(`Unexpected GET ${url}`);
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:2684:      throw new Error(`Unexpected GET ${url}`);
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:2776:      throw new Error(`Unexpected GET ${url}`);
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:2858:      throw new Error(`Unexpected GET ${url}`);
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:2914:      throw new Error(`Unexpected GET ${url}`);
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:3030:      throw new Error(`Unexpected GET ${url}`);
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:3199:      throw new Error(`Unexpected GET ${url}`);
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:3289:      throw new Error(`Unexpected GET ${url}`);
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:3370:      throw new Error(`Unexpected GET ${url}`);
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:3457:      throw new Error(`Unexpected GET ${url}`);
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:3549:      throw new Error(`Unexpected GET ${url}`);
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:3648:      throw new Error(`Unexpected GET ${url}`);
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:3721:  it('retains the pending edit and reports read_failed when stale success cannot be reread', async () => {
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:3742:      throw new Error(`Unexpected GET ${url}`);
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:3914:      throw new Error(`Unexpected GET ${url}`);
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:3995:      throw new Error(`Unexpected GET ${url}`);
+client/src/pages/Notes/canvasEngine/hooks/usePageFrameWalls.test.tsx:280:  it.each(['note', 'generation'] as const)('isolates old pending-save state and callbacks when the %s changes', async (change) => {
+client/src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.test.tsx:68:    throw new Error(`Unexpected synthetic GET ${url}`);
+client/src/pages/Notes/canvasEngine/hooks/useRuntimeSurfaceStateController.pageReading.test.tsx:7:  const pending = new Map<number, FrameRequestCallback>();
+client/src/pages/Notes/canvasEngine/hooks/useRuntimeSurfaceStateController.pageReading.test.tsx:10:    pending.set(id, callback);
+client/src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.test.tsx:114:      allowed = fireEvent.keyDown(target, { key: keyName, ctrlKey: true });
+client/src/pages/Notes/canvasEngine/hooks/useTrayController.test.tsx:264:    expect(trackPendingWrite).not.toHaveBeenCalled();
+client/src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx:100:    throw new Error(`Unexpected fixture read: ${path}`);
+client/src/pages/Notes/canvasEngine/layers/NoteTrayInteraction.integration.test.tsx:63:    throw new Error(`Unexpected synthetic GET ${url}`);
+client/src/pages/Settings/Settings.test.tsx:43:    throw new Error('Unexpected synthetic API request');

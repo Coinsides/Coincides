@@ -1,0 +1,51 @@
+{
+  "unchanged": true,
+  "before": [
+    {
+      "id": "e5-browser-e5-body-placement",
+      "note_id": "e5-browser-e5-paper",
+      "block_id": "e5-browser-e5-body",
+      "parent_placement_id": null,
+      "order_index": 0,
+      "display_mode": "default",
+      "display_overrides_json": "{}",
+      "created_at": "2026-09-11 22:11:07",
+      "updated_at": "2026-09-11 22:11:07"
+    },
+    {
+      "id": "e5-browser-e5-ref-placement",
+      "note_id": "e5-browser-e5-paper",
+      "block_id": "e5-browser-e5-ref",
+      "parent_placement_id": null,
+      "order_index": 1,
+      "display_mode": "default",
+      "display_overrides_json": "{}",
+      "created_at": "2026-09-11 22:11:07",
+      "updated_at": "2026-09-11 22:11:07"
+    }
+  ],
+  "after": [
+    {
+      "id": "e5-browser-e5-body-placement",
+      "note_id": "e5-browser-e5-paper",
+      "block_id": "e5-browser-e5-body",
+      "parent_placement_id": null,
+      "order_index": 0,
+      "display_mode": "default",
+      "display_overrides_json": "{}",
+      "created_at": "2026-09-11 22:11:07",
+      "updated_at": "2026-09-11 22:11:07"
+    },
+    {
+      "id": "e5-browser-e5-ref-placement",
+      "note_id": "e5-browser-e5-paper",
+      "block_id": "e5-browser-e5-ref",
+      "parent_placement_id": null,
+      "order_index": 1,
+      "display_mode": "default",
+      "display_overrides_json": "{}",
+      "created_at": "2026-09-11 22:11:07",
+      "updated_at": "2026-09-11 22:11:07"
+    }
+  ]
+}

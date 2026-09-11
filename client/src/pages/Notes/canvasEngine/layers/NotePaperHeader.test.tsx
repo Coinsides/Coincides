@@ -49,7 +49,7 @@ describe('paper note metadata', () => {
       render(<NotePaperHeader {...input} />);
       expect((screen.getByRole('textbox', { name: 'Note title' }) as HTMLElement).style.height).toBe('80px');
       expect((screen.getByRole('textbox', { name: 'Note description' }) as HTMLElement).style.height).toBe('72px');
-      expect(input.onHeightChange).toHaveBeenCalledWith(208);
+      expect(input.onHeightChange).toHaveBeenCalledWith(244);
     } finally { scroll.mockRestore(); offset.mockRestore(); }
   });
 });

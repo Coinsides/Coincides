@@ -3540,7 +3540,7 @@ export function NoteWritingSurfaceLayer({
           left: -pageDisplayBounds.left * pageReading.displayScale,
           transform: `scale(${pageReading.displayScale})`, transformOrigin: '0 0',
         }}>
-        <NotePaperHeader key={noteId} {...paperHeader} onHeightChange={setHeaderHeight}
+        <NotePaperHeader key={noteId} {...paperHeader} onHeightChange={setHeaderHeight} metadataHidden={overviewOpen}
           style={{ paddingLeft: pageReading.inset.left, paddingRight: pageReading.inset.right }} />
       </div>}
       <div

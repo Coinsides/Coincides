@@ -9,7 +9,7 @@ import {
   type RuntimeInteractionState,
 } from '../interactionController';
 
-export type FloatingOverlayPanel = 'layout' | 'noteInfo' | 'moreActions' | 'blockTrash' | 'preview' | 'viewOptions';
+export type FloatingOverlayPanel = 'layout' | 'moreActions' | 'blockTrash' | 'preview' | 'viewOptions';
 
 export interface UseFloatingOverlayControllerOptions {
   setInteractionState: (state: RuntimeInteractionState) => void;
@@ -55,7 +55,6 @@ export function useFloatingOverlayController({
     showBlockTrash: activeOverlay === 'blockTrash',
     showLayoutPanel: activeOverlay === 'layout',
     showMoreActions: activeOverlay === 'moreActions',
-    showNoteInfo: activeOverlay === 'noteInfo',
     showViewOptions: activeOverlay === 'viewOptions',
     showPreviewAIVisibility,
     showPreviewBlockTypes,
@@ -65,7 +64,6 @@ export function useFloatingOverlayController({
     openBlockTrash: () => setOverlay('blockTrash'),
     toggleExportPreview: () => toggleOverlay('preview'),
     toggleMoreActions: () => toggleOverlay('moreActions'),
-    toggleNoteInfo: () => toggleOverlay('noteInfo'),
     toggleViewOptions: () => toggleOverlay('viewOptions'),
     togglePreviewAIVisibility: () => setShowPreviewAIVisibility((value) => !value),
     togglePreviewBlockTypes: () => setShowPreviewBlockTypes((value) => !value),

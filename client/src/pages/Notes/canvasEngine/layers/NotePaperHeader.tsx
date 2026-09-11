@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef, type CSSProperties } from 'react';
 import styles from './NotePaperHeader.module.css';
+import { NoteCoverMetadata, type NoteCoverMetadataProps } from './NoteCoverMetadata';
 
 export interface NotePaperHeaderProps {
   titleDraft: string;
@@ -9,19 +10,21 @@ export interface NotePaperHeaderProps {
   onDescriptionDraftChange: (value: string) => void;
   onSaveTitle: () => void | Promise<void>;
   onSaveDescription: () => void | Promise<void>;
+  metadata?: NoteCoverMetadataProps;
 }
 
-export const NOTE_HEADER_MAX_HEIGHT = 208;
-export const NOTE_HEADER_INITIAL_HEIGHT = 120;
+export const NOTE_HEADER_MAX_HEIGHT = 244;
+export const NOTE_HEADER_INITIAL_HEIGHT = 156;
 
 /** A display-only band before the existing paper coordinate origin. */
 export function NotePaperHeader({
   titleDraft, descriptionDraft, contentReadOnly, onTitleDraftChange,
   onDescriptionDraftChange, onSaveTitle, onSaveDescription,
-  onHeightChange, style,
+  onHeightChange, style, metadata, metadataHidden,
 }: NotePaperHeaderProps & {
   onHeightChange: (height: number) => void;
   style?: CSSProperties;
+  metadataHidden?: boolean;
 }) {
   const headerRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLTextAreaElement>(null);
@@ -69,5 +72,6 @@ export function NotePaperHeader({
           event.preventDefault(); event.currentTarget.blur();
         }
       }} />
+    {metadata && <NoteCoverMetadata key={metadata.noteId} {...metadata} hidden={metadataHidden} />}
   </header>;
 }

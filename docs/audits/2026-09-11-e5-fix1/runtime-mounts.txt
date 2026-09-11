@@ -1,0 +1,168 @@
+client/src/pages/Boards/BoardNoteModal.rangeSession.test.tsx:9:import BoardNoteModal from './BoardNoteModal';
+client/src/pages/Boards/BoardNoteModal.rangeSession.test.tsx:25:vi.mock('../Notes/canvasEngine/NoteCanvasRuntime', async () => {
+client/src/pages/Boards/BoardNoteModal.rangeSession.test.tsx:27:  const { NoteCanvasRuntimeContext } = await import('../Notes/canvasEngine/NoteCanvasRuntimeProvider');
+client/src/pages/Boards/BoardNoteModal.rangeSession.test.tsx:32:    const context = React.useContext(NoteCanvasRuntimeContext)!;
+client/src/pages/Boards/BoardNoteModal.rangeSession.test.tsx:153:    return open && <BoardNoteModal noteId={note.id} onSendToStaging={mint}
+client/src/pages/Boards/BoardNoteModal.test.tsx:4:import BoardNoteModal, { type BoardNoteModalHandle } from './BoardNoteModal';
+client/src/pages/Boards/BoardNoteModal.test.tsx:11:vi.mock('../Notes/canvasEngine/NoteCanvasRuntimeProvider', () => ({
+client/src/pages/Boards/BoardNoteModal.test.tsx:12:  NoteCanvasRuntimeProvider: ({ noteId, hostMode, onSendToStaging, children }: any) => {
+client/src/pages/Boards/BoardNoteModal.test.tsx:17:vi.mock('../Notes/canvasEngine/NoteCanvasRuntime', async () => {
+client/src/pages/Boards/BoardNoteModal.test.tsx:40:  const handle = createRef<BoardNoteModalHandle>();
+client/src/pages/Boards/BoardNoteModal.test.tsx:48:      {noteId && <BoardNoteModal key={noteId} ref={handle} noteId={noteId}
+client/src/pages/Boards/BoardNoteModal.test.tsx:137:      <BoardNoteModal {...props} stagingOpen={open} />
+client/src/pages/Boards/BoardNoteModal.test.tsx:214:    const host = render(<BoardNoteModal {...props} />);
+client/src/pages/Boards/BoardNoteModal.test.tsx:222:    render(<BoardNoteModal {...props} />);
+client/src/pages/Boards/BoardNoteModal.test.tsx:231:    const host = render(<BoardNoteModal {...props} />);
+client/src/pages/Boards/BoardNoteModal.test.tsx:233:    host.rerender(<BoardNoteModal {...props} stagingOpen />);
+client/src/pages/Boards/BoardNoteModal.test.tsx:235:    host.rerender(<BoardNoteModal {...props} />);
+client/src/pages/Boards/BoardNoteModal.test.tsx:244:    render(<BoardNoteModal {...props} />);
+client/src/pages/Boards/BoardPage.chalk.test.tsx:4:import BoardPage from './BoardPage';
+client/src/pages/Boards/BoardPage.chalk.test.tsx:31:    <Routes><Route path="/boards/:boardId" element={<BoardPage />} /></Routes>
+client/src/pages/Boards/BoardPage.item.test.tsx:5:import BoardPage from './BoardPage';
+client/src/pages/Boards/BoardPage.item.test.tsx:8:// Only transport is replaced. BoardPage, repositories, the summary adapter and useBoard are real.
+client/src/pages/Boards/BoardPage.item.test.tsx:44:      <Route path="/boards/:boardId" element={<BoardPage />} />
+client/src/pages/Boards/BoardPage.layers.test.tsx:4:import BoardPage from './BoardPage';
+client/src/pages/Boards/BoardPage.layers.test.tsx:13:    <Routes><Route path="/boards/:boardId" element={<BoardPage />} /></Routes>
+client/src/pages/Boards/BoardPage.modal.test.tsx:4:import BoardPage from './BoardPage';
+client/src/pages/Boards/BoardPage.modal.test.tsx:12:vi.mock('./BoardNoteModal', async () => {
+client/src/pages/Boards/BoardPage.modal.test.tsx:46:    <Routes><Route path="/boards/:boardId" element={<BoardPage />} />
+client/src/pages/Boards/BoardPage.modal.test.tsx:83:describe('BoardPage note modal host', () => {
+client/src/pages/Boards/BoardPage.selection.test.tsx:4:import BoardPage from './BoardPage';
+client/src/pages/Boards/BoardPage.selection.test.tsx:8:// Real BoardPage/useBoard/history, with the shared synthetic in-memory transport.
+client/src/pages/Boards/BoardPage.selection.test.tsx:14:    <Routes><Route path="/boards/:boardId" element={<BoardPage />} /></Routes>
+client/src/pages/Boards/BoardPage.smoke.test.tsx:6:import BoardPage from './BoardPage';
+client/src/pages/Boards/BoardPage.smoke.test.tsx:94:    placements: frame.noteCanvasRuntime.blockPlacements,
+client/src/pages/Boards/BoardPage.smoke.test.tsx:133:      <Route path="/boards/:boardId" element={<BoardPage />} />
+client/src/pages/Boards/BoardPage.snapping.test.tsx:4:import BoardPage from './BoardPage';
+client/src/pages/Boards/BoardPage.snapping.test.tsx:12:    <Routes><Route path="/boards/:boardId" element={<BoardPage />} /></Routes>
+client/src/pages/Boards/BoardPage.staging.test.tsx:5:import BoardPage from './BoardPage';
+client/src/pages/Boards/BoardPage.staging.test.tsx:11:// Host integration uses the real BoardPage/useBoard/repository; runtime selection/flush is tested separately.
+client/src/pages/Boards/BoardPage.staging.test.tsx:12:vi.mock('./BoardNoteModal', async () => {
+client/src/pages/Boards/BoardPage.staging.test.tsx:36:    <Routes><Route path="/boards/:boardId" element={<BoardPage />} /></Routes>
+client/src/pages/Boards/BoardPage.tools.test.tsx:4:import BoardPage from './BoardPage';
+client/src/pages/Boards/BoardPage.tools.test.tsx:12:    <Routes><Route path="/boards/:boardId" element={<BoardPage />} /></Routes>
+client/src/pages/Boards/BoardPage.unboxing.test.tsx:4:import BoardPage from './BoardPage';
+client/src/pages/Boards/BoardPage.unboxing.test.tsx:5:import NoteDetailPage from '../Notes/NoteDetail';
+client/src/pages/Boards/BoardPage.unboxing.test.tsx:13:// Only HTTP is replaced. BoardPage, modal, full-page host, runtime, adapter and
+client/src/pages/Boards/BoardPage.unboxing.test.tsx:39:    <Location /><Routes><Route path="/boards/:boardId" element={<BoardPage />} />
+client/src/pages/Boards/BoardPage.unboxing.test.tsx:40:      <Route path="/notes/:noteId" element={<NoteDetailPage />} /></Routes>
+client/src/pages/Boards/boardTextRangeClipboard.test.tsx:10:import BoardPage from './BoardPage';
+client/src/pages/Boards/boardTextRangeClipboard.test.tsx:64:      <Route path="/boards/:boardId" element={<BoardPage />} />
+client/src/pages/Notes/canvasEngine/coordinateContractIntegration.test.tsx:91:      fragments: frameModel.noteCanvasRuntime.blockFragmentProjections.map((fragment) => ({
+client/src/pages/Notes/canvasEngine/hooks/useBoardStagingSelection.test.tsx:4:import { NoteCanvasRuntimeProvider } from '../NoteCanvasRuntimeProvider';
+client/src/pages/Notes/canvasEngine/hooks/useBoardStagingSelection.test.tsx:34:  render(<NoteCanvasRuntimeProvider noteId="note-a" hostMode={options.hostMode ?? 'modal'} onSendToStaging={send}>
+client/src/pages/Notes/canvasEngine/hooks/useBoardStagingSelection.test.tsx:36:  </NoteCanvasRuntimeProvider>);
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx:38:vi.mock('./useNoteCanvasRuntime', () => ({
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx:39:  useNoteCanvasRuntime: () => ({ noteId: rootBridgeContract.noteId }),
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx:159:import { useNoteCanvasRuntimeController } from './useNoteCanvasRuntimeController';
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx:219:  const { layerProps } = useNoteCanvasRuntimeController();
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx:232:describe('useNoteCanvasRuntimeController initial-surface production bridge', () => {
+client/src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.test.tsx:6:import type { NoteCanvasRuntimeHandle } from '../NoteCanvasRuntime';
+client/src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.test.tsx:26:  const runtimeRef = useRef<NoteCanvasRuntimeHandle | null>(null);
+client/src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.test.tsx:27:  const retainRuntime = useCallback((handle: NoteCanvasRuntimeHandle | null) => {
+client/src/pages/Notes/canvasEngine/hooks/usePageReadingPresentation.test.tsx:133:            data-runtime-placements={JSON.stringify(frame.noteCanvasRuntime.blockPlacements)}
+client/src/pages/Notes/canvasEngine/hooks/usePageReadingPresentation.test.tsx:134:            data-runtime-viewport={JSON.stringify(frame.noteCanvasRuntime.viewport)}
+client/src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx:6:import BoardPage from '@/pages/Boards/BoardPage';
+client/src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx:265:      <Routes><Route path="/notes/:noteId" element={<TrayPaper />} /><Route path="/boards/:boardId" element={<BoardPage />} /></Routes>
+client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.test.tsx:8:import { NoteCoverMetadata, type NoteCoverMetadataProps } from './NoteCoverMetadata';
+client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.test.tsx:34:const props = (overrides: Partial<NoteCoverMetadataProps> = {}): NoteCoverMetadataProps => ({
+client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.test.tsx:57:async function mount(overrides: Partial<NoteCoverMetadataProps> = {}) {
+client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.test.tsx:59:  const view = render(<NoteCoverMetadata {...input} />, { wrapper: RouterWrapper });
+client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.test.tsx:274:    view.rerender(<NoteCoverMetadata {...view.input} hidden />);
+client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.test.tsx:277:    view.rerender(<NoteCoverMetadata {...view.input} hidden={false} />);
+client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.test.tsx:7:import { buildNoteCanvasRuntimeModel } from '../engineModel';
+client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.test.tsx:64:      noteCanvasRuntime: buildNoteCanvasRuntimeModel({
+client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.test.tsx:171:    const before = JSON.stringify(props.writingSurfaceProps.noteCanvasRuntime);
+client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.test.tsx:182:    expect(JSON.stringify(props.writingSurfaceProps.noteCanvasRuntime)).toBe(before);
+client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx:3:import { NotePaperHeader, type NotePaperHeaderProps } from './NotePaperHeader';
+client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx:5:function props(overrides: Partial<NotePaperHeaderProps> = {}) {
+client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx:14:    render(<NotePaperHeader {...input} />);
+client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx:30:    const view = render(<NotePaperHeader {...input} />);
+client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx:35:    view.rerender(<NotePaperHeader {...input} contentReadOnly />);
+client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx:49:      render(<NotePaperHeader {...input} />);
+client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.test.tsx:7:import { buildNoteCanvasRuntimeModel } from '../engineModel';
+client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.test.tsx:73:    noteCanvasRuntime: buildNoteCanvasRuntimeModel({
+client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.test.tsx:280:      noteCanvasRuntime: { ...input.noteCanvasRuntime, viewport: { ...input.noteCanvasRuntime.viewport, zoom: stepFactor } },
+client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.test.tsx:334:      const fragments = input.noteCanvasRuntime.blockFragmentProjections;
+client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.test.tsx:377:    expect(input.noteCanvasRuntime.blockFragmentProjections.filter((item) => item.blockId === crossing.id)).toHaveLength(2);
+client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.test.tsx:378:    expect(input.noteCanvasRuntime.blockFragmentProjections.some((item) => item.blockId === excluded.id)).toBe(true);
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:15:import type { NoteCanvasRuntimeModel, PageFrameModel } from '../types';
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:21:import { NoteRuntimeDocumentLayer, type NoteRuntimeDocumentHandle } from './NoteRuntimeDocumentLayer';
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:22:import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:85:} as unknown as NoteCanvasRuntimeModel;
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:88:  onSaveBlock: NoteWritingSurfaceLayerProps['onSaveBlock'],
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:89:): NoteWritingSurfaceLayerProps {
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:127:    noteCanvasRuntime: runtimeModel,
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:208:describe('NoteRuntimeDocumentLayer block edit recovery queue', () => {
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:222:      <NoteRuntimeDocumentLayer
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:249:      <NoteRuntimeDocumentLayer
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:305:      <NoteRuntimeDocumentLayer
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:337:    render(<NoteRuntimeDocumentLayer blockEditRecoveryReceipts={[receipt]}
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:353:describe('NoteRuntimeDocumentLayer overview navigation', () => {
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:372:  function overviewProps(pageCount: number): NoteWritingSurfaceLayerProps {
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:388:      noteCanvasRuntime: {
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:396:  function documentFor(props: NoteWritingSurfaceLayerProps, documentRef?: RefObject<NoteRuntimeDocumentHandle>) {
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:400:      <NoteRuntimeDocumentLayer
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:414:  function writers(props: NoteWritingSurfaceLayerProps) {
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:439:    const frame = { ...props.noteCanvasRuntime.primaryPageFrame!, contentInset: { left: 110, right: 48, top: 0, bottom: 96 } };
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:440:    const next = { ...props, noteCanvasRuntime: { ...props.noteCanvasRuntime, primaryPageFrame: frame,
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:441:      pageFrames: [frame, ...props.noteCanvasRuntime.pageFrames.slice(1)] } };
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:464:    const original = JSON.stringify({ layouts: props.blockLayouts, runtime: props.noteCanvasRuntime, blocks: props.allBlocks });
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:483:    expect(JSON.stringify({ layouts: props.blockLayouts, runtime: props.noteCanvasRuntime, blocks: props.allBlocks })).toBe(original);
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:496:    props.noteCanvasRuntime = { ...props.noteCanvasRuntime, coordinateContract: 'v2' };
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:498:      surface: 'formal_page', coordinate_space: 'page_frame_local', frame_id: props.noteCanvasRuntime.primaryPageFrame!.id } };
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:552:      .toEqual(props.noteCanvasRuntime.pageFrames.map((frame) => frame.id));
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:578:      expect.objectContaining({ ...props.noteCanvasRuntime.pageFrames[8], x: 0 }),
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:599:    const ninthPage = props.noteCanvasRuntime.pageFrames[8];
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:600:    const before = JSON.stringify(props.noteCanvasRuntime);
+client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx:615:    expect(JSON.stringify(props.noteCanvasRuntime)).toBe(before);
+client/src/pages/Notes/canvasEngine/layers/PaperInkLayer.test.tsx:9:import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
+client/src/pages/Notes/canvasEngine/layers/PaperInkLayer.test.tsx:25:  const onCreate = vi.fn(async (_input: Parameters<NoteWritingSurfaceLayerProps['onPersistCanvasObject']>[0]) => true);
+client/src/pages/Notes/canvasEngine/layers/PaperInkProjection.test.tsx:3:import { buildNoteCanvasRuntimeModel } from '../engineModel';
+client/src/pages/Notes/canvasEngine/layers/PaperInkProjection.test.tsx:49:    noteCanvasRuntime: buildNoteCanvasRuntimeModel({
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:6:import { buildNoteCanvasRuntimeModel } from '../engineModel';
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:16:import { NoteWritingSurfaceLayer, type NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:48:function propsFor(pageFrame: PageFrameModel, surfaceMode: SurfaceMode): NoteWritingSurfaceLayerProps {
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:74:    noteCanvasRuntime: { ...buildNoteCanvasRuntimeModel({
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:114:function WritingSurfaceThroughLayerProps({ surfaceProps }: { surfaceProps: NoteWritingSurfaceLayerProps }) {
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:128:  return layers ? <NoteWritingSurfaceLayer {...layers.documentLayerProps.writingSurfaceProps} /> : null;
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:139:  const view = render(<NoteWritingSurfaceLayer {...props} />);
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:166:  const view = render(<NoteWritingSurfaceLayer {...props} contentReadOnly={false} layoutMode={false} />);
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:169:  view.rerender(<NoteWritingSurfaceLayer {...props} contentReadOnly={false} layoutMode />);
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:171:  view.rerender(<NoteWritingSurfaceLayer {...props} contentReadOnly layoutMode={false} />);
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:198:    view.rerender(<NoteWritingSurfaceLayer {...props} onToggleOverview={onToggleOverview} />);
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:221:  const view = render(<NoteWritingSurfaceLayer {...props} visibleBlocks={[source]} allBlocks={[source]}
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:263:    const view = render(<NoteWritingSurfaceLayer {...pageProps} contentReadOnly={false} layoutMode={false}
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:286:    const view = render(<NoteWritingSurfaceLayer {...props} visibleBlocks={[source]} allBlocks={[source]}
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:334:    const view = render(<NoteWritingSurfaceLayer {...props} visibleBlocks={[source]} allBlocks={[source]}
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:441:    const move = vi.fn<NonNullable<NoteWritingSurfaceLayerProps['onMoveTextUnit']>>(async () => true);
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:442:    const extract = vi.fn<NonNullable<NoteWritingSurfaceLayerProps['onExtractTextUnit']>>(async () => true);
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:572:    const original = structuredClone({ pageFrame, extensions: props.noteCanvasRuntime.pageFrameExtensions });
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:573:    const view = render(<NoteWritingSurfaceLayer {...props} />);
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:595:    expect({ pageFrame, extensions: props.noteCanvasRuntime.pageFrameExtensions }).toEqual(original);
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:650:    const before = JSON.stringify(props.noteCanvasRuntime.pageFrames);
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:670:    expect(JSON.stringify(props.noteCanvasRuntime.pageFrames)).toBe(before);
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:681:  props.noteCanvasRuntime = { ...props.noteCanvasRuntime,
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:682:    canvasObjects: [...props.noteCanvasRuntime.canvasObjects, stroke.canvasObject],
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:683:    canvasPlacements: [...props.noteCanvasRuntime.canvasPlacements, stroke.placement] };
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:684:  const view = render(<NoteWritingSurfaceLayer {...props} />);
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:693:  view.rerender(<NoteWritingSurfaceLayer {...props} />);
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:709:  view.rerender(<NoteWritingSurfaceLayer {...props} noteCanvasRuntime={{ ...props.noteCanvasRuntime,
+client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx:710:    world: { ...props.noteCanvasRuntime.world }, canvasObjects: [...props.noteCanvasRuntime.canvasObjects] }} />);
+client/src/pages/Notes/canvasEngine/layers/textFlowNavigation.surface.test.tsx:4:import { buildNoteCanvasRuntimeModel } from '../engineModel';
+client/src/pages/Notes/canvasEngine/layers/textFlowNavigation.surface.test.tsx:12:import { NoteWritingSurfaceLayer, type NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
+client/src/pages/Notes/canvasEngine/layers/textFlowNavigation.surface.test.tsx:40:function propsFor(pageFrame: PageFrameModel, surfaceMode: SurfaceMode): NoteWritingSurfaceLayerProps {
+client/src/pages/Notes/canvasEngine/layers/textFlowNavigation.surface.test.tsx:66:    noteCanvasRuntime: { ...buildNoteCanvasRuntimeModel({
+client/src/pages/Notes/canvasEngine/layers/textFlowNavigation.surface.test.tsx:127:    return <NoteWritingSurfaceLayer {...props} {...selection} interactionState={interactionState}
+client/src/pages/Notes/canvasEngine/layers/textFlowNavigation.surface.test.tsx:133:      noteCanvasRuntime={{ ...props.noteCanvasRuntime, canvasObjects: [...props.noteCanvasRuntime.canvasObjects, image.canvasObject, table.canvasObject],
+client/src/pages/Notes/canvasEngine/pageCenteringContract.test.ts:15:  resolve(process.cwd(), 'src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx'),
+client/src/pages/Notes/canvasEngine/pageCenteringContract.test.ts:19:  resolve(process.cwd(), 'src/pages/Notes/NoteDetail.module.css'),
+client/src/pages/Notes/canvasEngine/textUnitGutterDeOccupation.test.ts:13:const noteDetailCss = readFileSync(
+client/src/pages/Notes/canvasEngine/textUnitGutterDeOccupation.test.ts:14:  resolve(process.cwd(), 'src/pages/Notes/NoteDetail.module.css'),
+client/src/pages/Notes/canvasEngine/textUnitGutterDeOccupation.test.ts:20:  const match = noteDetailCss.match(new RegExp(`^\\s*${escapedSelector}\\s*\\{([^}]*)\\}`, 'm'));
+client/src/pages/Notes/canvasEngine/textUnitGutterDeOccupation.test.ts:40:    const buttons = [...noteDetailCss.matchAll(/^\s*\.textUnitGutterButton\s*\{([^}]*)\}/gm)]
+client/src/pages/Notes/canvasEngine/textUnitGutterDeOccupation.test.ts:46:    expect(noteDetailCss).not.toMatch(/\.textUnitRoleSelect\b/);
+client/src/pages/Notes/canvasEngine/textUnitGutterDeOccupation.test.ts:47:    expect(noteDetailCss).not.toMatch(/\.textUnitRow[^{}]*:hover[^{}]*\.textUnitGutter\s*\{/);
+client/src/pages/Notes/canvasEngine/trayService.test.ts:2:import { buildNoteCanvasRuntimeModel } from './engineModel';
+client/src/pages/Notes/canvasEngine/trayService.test.ts:49:    const runtime = buildNoteCanvasRuntimeModel({mode:'page', primaryPageFrame:null,
+client/src/pages/Notes/canvasEngine/writingSurfaceClassName.test.ts:15:  resolve(process.cwd(), 'src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx'),

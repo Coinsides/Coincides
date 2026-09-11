@@ -1,0 +1,144 @@
+{
+  "date": "2026-09-11",
+  "scope": "E5 product and directed tests only",
+  "modified": 18,
+  "added": 9,
+  "total": 27,
+  "files": [
+    {
+      "path": "client/src/pages/Notes/NoteDetail.module.css",
+      "status": "modified",
+      "sha256": "ac3890a8c8c0077816a2b6a04f5fb2a6e52a85f0576342d9a4487173d49b8d84"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useFloatingOverlayController.ts",
+      "status": "modified",
+      "sha256": "ca6b201f272a83c7481838b563b13e72d2277b90c15557a4c9d6f88a00153de6"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts",
+      "status": "modified",
+      "sha256": "63af02943d732fc61621bfd4d51e7e17ec74fdcf53f41a6641f44ed1e3d4f9b2"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+      "status": "modified",
+      "sha256": "62a803a871c42f998bf04f3f89d3a95b68e1c4b517b41a84f4e6d4f6e009b1ff"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useRuntimeSurfaceStateController.ts",
+      "status": "modified",
+      "sha256": "7760f3049e992b9506a09701bdc08c841c6d4312d2a0400c7d32eb77a98732bf"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/interactionController.ts",
+      "status": "modified",
+      "sha256": "81420315ff0686d7b129e2250038aa6151e64698ee83b0cac87fafd69d8717c4"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx",
+      "status": "modified",
+      "sha256": "ef299c98e29ed02d336f13e1da7de69cc25d45e3fc9f15094eab7e30596782c5"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx",
+      "status": "modified",
+      "sha256": "a5e820951f02cc01fbb09b3bd74f3e0009371373656a732cfd3f7c983715621d"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.module.css",
+      "status": "added",
+      "sha256": "b3de6f24470955ad2aaa60bb2f6a0b698edf8513721016e6f7f9c3f31124d64d"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.test.tsx",
+      "status": "added",
+      "sha256": "2884fb4e1022c3b5fdb792dd3bbb091fc424e75b73ac133c31cd4abe84674115"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.tsx",
+      "status": "added",
+      "sha256": "69638c7c0083098fe9d3a9cc16c463154ab3eb1338ce3971a5ebaf9d110567fb"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.module.css",
+      "status": "modified",
+      "sha256": "12235c66edd3b4014c75d9611dd0b389f2bf1b7f5a4bb1b7e8870aeda09e89ff"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx",
+      "status": "modified",
+      "sha256": "c25d46336b587e819bfaa7ba952649e23cab51346277424bc98cb428891bc195"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.tsx",
+      "status": "modified",
+      "sha256": "ca9c77fdb946964a4b60bff7abacda7b3f3f21ca7d05cb87a870511eebac679e"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx",
+      "status": "modified",
+      "sha256": "0e37259991cfcc7571e21ebf998fd369c42532712c123133357fa8682837cad1"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "status": "modified",
+      "sha256": "ff8e2f9eccb24013d3418ae07ab52f19e9829947845e515f6637967924bdefcb"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/ViewOptionsMenu.test.tsx",
+      "status": "modified",
+      "sha256": "85c7145b0ef1177b9b0b6c7accc34afe6109204baf15fcac9c7ddc5fda082959"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/noteMetadataRepository.ts",
+      "status": "added",
+      "sha256": "5f345cd4b3d5b8df26c581561021ae3aaf9fe33e5dc469c91baec3fca818e60e"
+    },
+    {
+      "path": "client/src/pages/Sources/sourceApi.ts",
+      "status": "modified",
+      "sha256": "8f51c30df9682b52b27e7fbe9ccc1444dd02cab68e296de945dfcb5fe7cc7882"
+    },
+    {
+      "path": "server/src/__tests__/helpers/v13NoteMetadataFixture.ts",
+      "status": "added",
+      "sha256": "8a9f28a32bc34d1e7c51a6f2fac6189bb003b83cf179d2a041869fb850901fe0"
+    },
+    {
+      "path": "server/src/__tests__/v13NoteMetadata.test.ts",
+      "status": "added",
+      "sha256": "1865599df029e3ead7af093e5494074aa6e00b46caf2acce5089f89439638600"
+    },
+    {
+      "path": "server/src/db/migrations/064_v13_note_tags.ts",
+      "status": "added",
+      "sha256": "13a1e450b5110e04502e72dd8a0f4fec8d786e84a7037a9830a02f2948078ba9"
+    },
+    {
+      "path": "server/src/db/schema.sql",
+      "status": "modified",
+      "sha256": "7e9a57178e294eb0863e2d01f3ba88a4d6d6a30f784420bdc775e8c990b01bd5"
+    },
+    {
+      "path": "server/src/routes/noteMetadata.ts",
+      "status": "added",
+      "sha256": "410b7e8b8a3585198669f46cd1546a6c0a9e81859b0eb259b95623a7c966c612"
+    },
+    {
+      "path": "server/src/routes/notes.ts",
+      "status": "modified",
+      "sha256": "7f2a4d1fe201f9c8c3d8aef2ab5aaa264e0f08643cd3efe8a1399c509e3f7784"
+    },
+    {
+      "path": "server/src/services/courseLifecycle.ts",
+      "status": "modified",
+      "sha256": "5c1a6976e381f21182bd374a204398fe8561c24ef9068e7f3abab7df21068124"
+    },
+    {
+      "path": "server/src/services/noteMetadata.ts",
+      "status": "added",
+      "sha256": "05827bb42eccb9d2288ead057a78b3ee6fed055f1fc8774a24bc3e6fe1515af6"
+    }
+  ]
+}

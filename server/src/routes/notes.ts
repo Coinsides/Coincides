@@ -33,10 +33,12 @@ import {
 } from '../services/notes.js';
 import { hydrateBlock, hydrateNote } from '../services/noteHydration.js';
 import { assertItemRefBlockContent } from '../services/itemRefBlocks.js';
+import { createNoteMetadataRouter } from './noteMetadata.js';
 
 export { hydrateNote };
 
 const router = Router();
+router.use(createNoteMetadataRouter());
 const LEGACY_NOTE_LAYOUT_KEY = 'better_notebook_layout';
 
 function stringifyJson(value: unknown, fallback: unknown): string {

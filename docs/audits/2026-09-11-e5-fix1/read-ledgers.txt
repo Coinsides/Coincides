@@ -1,0 +1,40 @@
+﻿client/src/pages/AgentMemories/AgentMemories.test.tsx:67:    expect(requests.get).toHaveBeenCalledTimes(1);
+client/src/pages/AgentMemories/AgentMemories.test.tsx:122:    expect(requests.get).toHaveBeenCalledTimes(2);
+client/src/pages/AgentMemories/AgentMemories.test.tsx:159:    expect(requests.get).toHaveBeenCalledTimes(2);
+client/src/pages/Boards/BoardDeleteDialog.test.tsx:96:    expect(repository.get.mock.calls).toEqual([[board.id], [board.id]]);
+client/src/pages/Boards/BoardNoteModal.rangeSession.test.tsx:184:  expect(probe.get.mock.calls.filter(([url]) => url === `/notes/${note.id}/blocks`)).toHaveLength(1);
+client/src/pages/Boards/BoardPage.chalk.test.tsx:178:    expect(http.get.mock.calls.filter(([url]) => url === path)).toHaveLength(2);
+client/src/pages/Boards/BoardPage.modal.test.tsx:197:    expect(http.get.mock.calls.filter(([url]) => url === '/boards/board')).toHaveLength(2);
+client/src/pages/Boards/BoardPage.modal.test.tsx:246:    expect(http.get.mock.calls.filter(([url]) => url === '/boards/board')).toHaveLength(1);
+client/src/pages/Boards/BoardPage.unboxing.test.tsx:23:let unknownRequests: string[];
+client/src/pages/Boards/BoardPage.unboxing.test.tsx:27:  unknownRequests.push(`${method} ${url}`);
+client/src/pages/Boards/BoardPage.unboxing.test.tsx:90:  notes = []; blocks = []; layouts = []; unknownRequests = []; collection = null;
+client/src/pages/Boards/BoardPage.unboxing.test.tsx:221:    expect(unknownRequests).toEqual([]);
+client/src/pages/Boards/BoardPage.unboxing.test.tsx:236:    expect(unknownRequests).toEqual([]);
+client/src/pages/Boards/BoardPage.unboxing.test.tsx:249:    expect(unknownRequests).toEqual([]);
+client/src/pages/Boards/BoardRelocatedVisual.test.tsx:77:  await waitFor(() => expect(io.get).toHaveBeenCalledTimes(1));
+client/src/pages/Boards/BoardRelocatedVisual.test.tsx:79:  expect(io.get).toHaveBeenCalledTimes(1);
+client/src/pages/Boards/BoardRelocatedVisual.test.tsx:86:  expect(io.get).toHaveBeenCalledTimes(3);
+client/src/pages/Boards/boardRepository.test.ts:184:    expect(api.get).toHaveBeenCalledTimes(6);
+client/src/pages/Boards/boardRepository.test.ts:203:    expect(api.get).toHaveBeenCalledTimes(2);
+client/src/pages/Boards/useBoard.test.tsx:97:    expect(repository.get).toHaveBeenCalledTimes(1);
+client/src/pages/Boards/useBoard.test.tsx:107:    expect(repository.get).toHaveBeenCalledTimes(1);
+client/src/pages/Boards/useBoard.test.tsx:111:    expect(repository.get).toHaveBeenCalledTimes(2);
+client/src/pages/Boards/useBoard.test.tsx:180:    expect(repository.get).toHaveBeenCalledTimes(1);
+client/src/pages/GroupGallery/groupGalleryPurposeRetirement.test.tsx:74:    expect(http.get.mock.calls.map(([url]) => url)).toEqual([
+client/src/pages/Notes/canvasEngine/coordinateContractSession.test.ts:39:    expect(transport.get.mock.calls).toEqual([[flagUrl]]);
+client/src/pages/Notes/canvasEngine/coordinateContractSession.test.ts:44:    expect(transport.get.mock.calls.map(([url]) => url)).toEqual([flagUrl, canvasUrl, canvasUrl]);
+client/src/pages/Notes/canvasEngine/coordinateContractSession.test.ts:60:    expect(transport.get.mock.calls.filter(([url]) => url === flagUrl)).toHaveLength(1);
+client/src/pages/Notes/canvasEngine/coordinateContractSession.test.ts:66:    expect(transport.get.mock.calls.filter(([url]) => url === flagUrl)).toHaveLength(2);
+client/src/pages/Notes/canvasEngine/coordinateContractSession.test.ts:74:    expect(transport.get.mock.calls).toEqual([[flagUrl]]);
+client/src/pages/Notes/canvasEngine/coordinateContractSession.test.ts:82:    expect(transport.get.mock.calls).toEqual([[flagUrl]]);
+client/src/pages/Notes/canvasEngine/coordinateContractSession.test.ts:176:      expect(transport.get.mock.calls.map(([url]) => url)).toEqual([
+client/src/pages/Notes/canvasEngine/coordinateContractSession.test.ts:191:    expect(transport.get.mock.calls).toEqual([[flagUrl]]);
+client/src/pages/Notes/canvasEngine/coordinateContractSession.test.ts:207:    expect(transport.get.mock.calls).toEqual([[flagUrl]]);
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:465:    const readsBefore = mocks.get.mock.calls.length;
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:479:      expect(mocks.get.mock.calls.slice(readsBefore).map(([url]) => url)).toEqual(expect.arrayContaining([
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:2525:    expect(mocks.get.mock.calls.filter(([url]) => (
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:2558:    expect(mocks.get.mock.calls.filter(([url]) => (
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:3269:    expect(mocks.get.mock.calls.filter(([url]) => url === `/notes/${note.id}/blocks`)).toHaveLength(3);
+client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx:3350:    expect(mocks.get.mock.calls.filter(([url]) => url === `/notes/${note.id}/blocks`)).toHaveLength(3);
+client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx:210:    expect(mocks.get).toHaveBeenCalledTimes(1);

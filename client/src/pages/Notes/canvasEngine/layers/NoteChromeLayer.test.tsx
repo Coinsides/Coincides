@@ -72,13 +72,10 @@ function noteChromeProps(
     showExportPreview: false,
     showLayoutPanel: false,
     showMoreActions: true,
-    showNoteInfo: false,
     showPreviewAIVisibility: false,
     showPreviewBlockTypes: false,
     showPreviewExportStatus: false,
     showPreviewLabelOverlay: false,
-    sortedBlockCount: 1,
-    sourceReferenceCount: 0,
     surfaceMode: 'page',
     surfacePolicy: { label: 'Page', nextModeLabel: 'Switch to Canvas' },
     documentTypographyProfile: DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE,
@@ -96,7 +93,6 @@ function noteChromeProps(
     onToggleExportPreview: noop,
     onToggleLayoutMode: noop,
     onToggleMoreActions: noop,
-    onToggleNoteInfo: noop,
     onOpenBlockTrash: noop,
     onOpenLayoutPanel: noop,
     onDeletePageFrame: noop,
@@ -136,9 +132,9 @@ describe('NoteChromeLayer block restore door', () => {
     expect(container.querySelector('[data-page-reading-control] [data-note-toolbar-actions]')).not.toBeNull();
   });
 
-  it('D2 migrated menu entries invoke their existing handlers from the upward body portal', () => {
+  it('E5 retires View info while the remaining menu entries keep their handlers and upward body portal', () => {
     const props = noteChromeProps({ onCreatePageStack: vi.fn(), onAddFavorite: vi.fn(),
-      onToggleNoteInfo: vi.fn(), onOpenBlockTrash: vi.fn() });
+      onOpenBlockTrash: vi.fn() });
     const { container } = render(<div data-page-reading-control="true"><NoteChromeLayer {...props} /></div>);
     const popover = document.querySelector<HTMLElement>('[data-note-toolbar-popover]')!;
     expect(container.contains(popover)).toBe(false);
@@ -146,11 +142,11 @@ describe('NoteChromeLayer block restore door', () => {
     expect(Number.parseFloat(popover.style.bottom)).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole('button', { name: 'New PageStack' }));
     fireEvent.click(screen.getByRole('button', { name: 'Add to favorites' }));
-    fireEvent.click(screen.getByRole('button', { name: 'View info' }));
+    expect(screen.queryByRole('button', { name: 'View info' })).toBeNull();
+    expect(document.querySelector('[data-note-overlay="info"]')).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Deleted blocks' }));
     expect(props.onCreatePageStack).toHaveBeenCalledOnce();
     expect(props.onAddFavorite).toHaveBeenCalledOnce();
-    expect(props.onToggleNoteInfo).toHaveBeenCalledOnce();
     expect(props.onOpenBlockTrash).toHaveBeenCalledOnce();
     expect(screen.getByText('Typography')).toBeTruthy();
     expect(screen.queryByText('Note-level actions')).toBeNull();

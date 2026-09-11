@@ -27,6 +27,7 @@ export interface SourceDeletionImpact {
   projection_note_id: string | null;
   projection_user_work: {
     annotation_count: number;
+    note_tag_count: number;
     content_group_count: number;
     purpose_count: number;
     display_override_count: number;
