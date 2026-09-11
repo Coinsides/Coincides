@@ -1,0 +1,247 @@
+{
+  "status": "pass",
+  "date": "2026-09-11",
+  "browser": "Connected Chrome via CUA",
+  "source": "Read-back of #e2-report from real TextBlockProjection synthetic fixture, before and after Change scale click",
+  "oracle": "Independent native DOM Range per UTF-16 body character; does not call production obstacle collector. Positive overlap tolerance 0.01 CSS screen px.",
+  "runs": [
+    {
+      "scales": [
+        1,
+        1,
+        1,
+        1,
+        1,
+        0.65
+      ],
+      "results": [
+        {
+          "scenario": "above",
+          "stamps": 1,
+          "bodyRects": 44,
+          "textComparisons": 44,
+          "peerComparisons": 0,
+          "annotationDataUnchanged": true,
+          "hidden": 0,
+          "textOverlaps": 0,
+          "stampOverlaps": 0,
+          "outOfFrame": 0,
+          "sides": [
+            "top"
+          ],
+          "pass": true
+        },
+        {
+          "scenario": "paper-top",
+          "stamps": 1,
+          "bodyRects": 29,
+          "textComparisons": 29,
+          "peerComparisons": 0,
+          "annotationDataUnchanged": true,
+          "hidden": 0,
+          "textOverlaps": 0,
+          "stampOverlaps": 0,
+          "outOfFrame": 0,
+          "sides": [
+            "bottom"
+          ],
+          "pass": true
+        },
+        {
+          "scenario": "multiple",
+          "stamps": 3,
+          "bodyRects": 46,
+          "textComparisons": 138,
+          "peerComparisons": 3,
+          "annotationDataUnchanged": true,
+          "hidden": 0,
+          "textOverlaps": 0,
+          "stampOverlaps": 0,
+          "outOfFrame": 0,
+          "sides": [
+            "top",
+            "top",
+            "bottom"
+          ],
+          "pass": true
+        },
+        {
+          "scenario": "adjacent",
+          "stamps": 2,
+          "bodyRects": 74,
+          "textComparisons": 148,
+          "peerComparisons": 1,
+          "annotationDataUnchanged": true,
+          "hidden": 0,
+          "textOverlaps": 0,
+          "stampOverlaps": 0,
+          "outOfFrame": 0,
+          "sides": [
+            "top",
+            "top"
+          ],
+          "pass": true
+        },
+        {
+          "scenario": "wrapped",
+          "stamps": 1,
+          "bodyRects": 103,
+          "textComparisons": 103,
+          "peerComparisons": 0,
+          "annotationDataUnchanged": true,
+          "hidden": 0,
+          "textOverlaps": 0,
+          "stampOverlaps": 0,
+          "outOfFrame": 0,
+          "sides": [
+            "top"
+          ],
+          "pass": true
+        },
+        {
+          "scenario": "scaled",
+          "stamps": 1,
+          "bodyRects": 47,
+          "textComparisons": 47,
+          "peerComparisons": 0,
+          "annotationDataUnchanged": true,
+          "hidden": 0,
+          "textOverlaps": 0,
+          "stampOverlaps": 0,
+          "outOfFrame": 0,
+          "sides": [
+            "top"
+          ],
+          "pass": true
+        }
+      ]
+    },
+    {
+      "scales": [
+        0.8,
+        0.8,
+        0.8,
+        0.8,
+        0.8,
+        0.52
+      ],
+      "results": [
+        {
+          "scenario": "above",
+          "stamps": 1,
+          "bodyRects": 44,
+          "textComparisons": 44,
+          "peerComparisons": 0,
+          "annotationDataUnchanged": true,
+          "hidden": 0,
+          "textOverlaps": 0,
+          "stampOverlaps": 0,
+          "outOfFrame": 0,
+          "sides": [
+            "top"
+          ],
+          "pass": true
+        },
+        {
+          "scenario": "paper-top",
+          "stamps": 1,
+          "bodyRects": 29,
+          "textComparisons": 29,
+          "peerComparisons": 0,
+          "annotationDataUnchanged": true,
+          "hidden": 0,
+          "textOverlaps": 0,
+          "stampOverlaps": 0,
+          "outOfFrame": 0,
+          "sides": [
+            "bottom"
+          ],
+          "pass": true
+        },
+        {
+          "scenario": "multiple",
+          "stamps": 3,
+          "bodyRects": 46,
+          "textComparisons": 138,
+          "peerComparisons": 3,
+          "annotationDataUnchanged": true,
+          "hidden": 0,
+          "textOverlaps": 0,
+          "stampOverlaps": 0,
+          "outOfFrame": 0,
+          "sides": [
+            "top",
+            "top",
+            "bottom"
+          ],
+          "pass": true
+        },
+        {
+          "scenario": "adjacent",
+          "stamps": 2,
+          "bodyRects": 74,
+          "textComparisons": 148,
+          "peerComparisons": 1,
+          "annotationDataUnchanged": true,
+          "hidden": 0,
+          "textOverlaps": 0,
+          "stampOverlaps": 0,
+          "outOfFrame": 0,
+          "sides": [
+            "top",
+            "top"
+          ],
+          "pass": true
+        },
+        {
+          "scenario": "wrapped",
+          "stamps": 1,
+          "bodyRects": 103,
+          "textComparisons": 103,
+          "peerComparisons": 0,
+          "annotationDataUnchanged": true,
+          "hidden": 0,
+          "textOverlaps": 0,
+          "stampOverlaps": 0,
+          "outOfFrame": 0,
+          "sides": [
+            "top"
+          ],
+          "pass": true
+        },
+        {
+          "scenario": "scaled",
+          "stamps": 1,
+          "bodyRects": 47,
+          "textComparisons": 47,
+          "peerComparisons": 0,
+          "annotationDataUnchanged": true,
+          "hidden": 0,
+          "textOverlaps": 0,
+          "stampOverlaps": 0,
+          "outOfFrame": 0,
+          "sides": [
+            "top"
+          ],
+          "pass": true
+        }
+      ]
+    }
+  ],
+  "totals": {
+    "scenarios": 12,
+    "stampObservations": 18,
+    "bodyCharacterRects": 686,
+    "stampTextComparisons": 1218,
+    "stampPairComparisons": 8,
+    "textOverlaps": 0,
+    "stampOverlaps": 0,
+    "outOfFrame": 0,
+    "hidden": 0
+  },
+  "limitations": [
+    "Synthetic content, not persisted user annotations.",
+    "Screenshot visually inspected in conversation; no PNG archived.",
+    "Print and overview intentionally retain their existing annotation exclusion."
+  ]
+}

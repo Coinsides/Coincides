@@ -1,3 +1,4 @@
+import { useAnnotationStampLayout } from '../annotationStampLayout';
 import { resolveScreenRect, type CoordinateContract } from '../placementContractService';
 import type { PageFrameModel } from '../types';
 import {
@@ -211,6 +212,7 @@ export function BlockEditorLayer({
   const blockContentRef = useRef<HTMLDivElement | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const shellRef = useRef<HTMLElement | null>(null);
+  useAnnotationStampLayout(shellRef);
   const navigationColumnRef = useRef<number | null>(null);
   const focusedReceiptRef = useRef<TextFocusReceipt | null>(null);
   const onFocusReleasedRef = useRef(onFocusReleased);
@@ -465,6 +467,8 @@ export function BlockEditorLayer({
         <button
           type="button"
           className={styles.blockAnnotationBadge}
+          data-annotation-stamp={blockAnnotationCluster.annotation_ids[0]}
+          data-annotation-stamp-kind="block"
           onMouseDown={(event) => event.preventDefault()}
           onContextMenu={(event) => {
             event.preventDefault();
@@ -486,6 +490,7 @@ export function BlockEditorLayer({
 
       <div
         ref={blockContentRef}
+        data-annotation-stamp-block-content="true"
         onBlurCapture={() => {
           const receipt = focusedReceiptRef.current;
           if (!receipt) return;

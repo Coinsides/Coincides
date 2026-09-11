@@ -30,6 +30,7 @@ import { flowSelectionText, orderedFlowSelection, replaceFlowSelection, type Flo
 import { deriveSingleTextEditDelta } from '../rangeRebaseService';
 import type { TextFlowBoundaryNavigationRequest, TextFlowNavigationTarget } from '../textFlowBlockNavigation';
 import { getPageDisplayScale } from '../overlayService';
+import { useAnnotationStampLayout } from '../annotationStampLayout';
 import type {
   AnnotationTruthV1,
   AnnotationRangeV1,
@@ -518,6 +519,7 @@ export function TextBlockProjection({
   unitDropTarget,
 }: TextBlockProjectionProps) {
   const editorRef = useRef<HTMLDivElement>(null);
+  useAnnotationStampLayout(editorRef);
   const documentSelection = useContext(DocumentTextFlowSelectionContext);
   const unitRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
   const pendingFocusRef = useRef<{ unitId: string; caret: number } | null>(null);
@@ -534,8 +536,6 @@ export function TextBlockProjection({
   const beforeInputRef = useRef<{ selection: TextFlowEditSelection; inputType: string; data?: string | null } | null>(null);
   const additiveSelectionSessionRef = useRef(false);
   const flowShiftClickRef = useRef(false);
-  const [annotationBadgeAnchors, setAnnotationBadgeAnchors] = useState<Record<string, { left: number; top: number }>>({});
-  const [childAnnotationBadgeAnchors, setChildAnnotationBadgeAnchors] = useState<Record<string, { left: number; top: number }>>({});
   const [draftRangeBadgeAnchors, setDraftRangeBadgeAnchors] = useState<Record<string, { left: number; top: number }>>({});
   const [textUnitContextMenu, setTextUnitContextMenu] = useState<{
     unitId: string;
@@ -786,52 +786,6 @@ export function TextBlockProjection({
     const animationFrameId = window.requestAnimationFrame(focusTextarea);
     return () => window.cancelAnimationFrame(animationFrameId);
   }, [editableFlow, readOnly]);
-
-  useLayoutEffect(() => {
-    if (!showLabelOverlay) {
-      setAnnotationBadgeAnchors((current) => (Object.keys(current).length === 0 ? current : {}));
-      setChildAnnotationBadgeAnchors((current) => (Object.keys(current).length === 0 ? current : {}));
-      return;
-    }
-
-    const nextAnchors: Record<string, { left: number; top: number }> = {};
-    const nextChildAnchors: Record<string, { left: number; top: number }> = {};
-    for (const unit of editableFlow.units) {
-      const textarea = unitRefs.current[unit.id];
-      if (!textarea) continue;
-
-      parentAnnotationBadgesForTextUnit({
-        annotations: activeAnnotations,
-        blockId,
-        textUnitId: unit.id,
-      }).forEach(({ annotation, startOffset }) => {
-        const measured = measureTextareaTextOffset(textarea, startOffset);
-        nextAnchors[annotation.id] = {
-          left: Math.round(clampNumber(measured.left, 0, Math.max(0, textarea.clientWidth - 96))),
-          top: Math.round(Math.max(0, measured.top - 15)),
-        };
-      });
-
-      childAnnotationBadgesForTextUnit({
-        annotations: activeAnnotations,
-        blockId,
-        textUnitId: unit.id,
-      }).forEach(({ annotation, startOffset: childStartOffset }) => {
-        const measured = measureTextareaTextOffset(textarea, childStartOffset);
-        nextChildAnchors[annotation.id] = {
-          left: Math.round(clampNumber(measured.left, 0, Math.max(0, textarea.clientWidth - 96))),
-          top: Math.round(Math.max(12, measured.top - 2)),
-        };
-      });
-    }
-
-    setAnnotationBadgeAnchors((current) => (
-      badgeAnchorStateEqual(current, nextAnchors) ? current : nextAnchors
-    ));
-    setChildAnnotationBadgeAnchors((current) => (
-      badgeAnchorStateEqual(current, nextChildAnchors) ? current : nextChildAnchors
-    ));
-  }, [activeAnnotations, blockId, editableFlow, showLabelOverlay]);
 
   useLayoutEffect(() => {
     if (draftAnnotationRanges.length === 0) {
@@ -1745,6 +1699,7 @@ export function TextBlockProjection({
                             '--annotation-child-bg': childColor.background,
                             '--annotation-child-accent': childColor.accent,
                           } as CSSProperties}
+                          data-annotation-highlight-ids={JSON.stringify(segment.annotationIds)}
                           data-child-label={segment.childLabels[0] || undefined}
                         >
                           {segment.text}
@@ -1855,12 +1810,12 @@ export function TextBlockProjection({
                     end={index === ordered.endIndex ? ordered.end.offset : unit.text.length}
                     includeBreak={index < ordered.endIndex || Boolean(documentBlockForDisplay && documentRangeForDisplay?.end.blockId !== blockId)} />;
                 })()}
-                {parentAnnotationBadges.map(({ annotation }, badgeIndex) => {
-                  const annotationBadgeAnchor = annotationBadgeAnchors[annotation.id];
+                {parentAnnotationBadges.map(({ annotation }) => {
                   const annotationColor = annotationColorForToken(annotation.visual_style.color_token);
                   return (
                     <button
                       key={annotation.id}
+                      data-annotation-stamp={annotation.id}
                       type="button"
                       draggable
                       className={[
@@ -1868,8 +1823,6 @@ export function TextBlockProjection({
                         selectedAnnotationIds.includes(annotation.id) ? styles.textUnitAnnotationBadgeSelected : '',
                       ].filter(Boolean).join(' ')}
                       style={{
-                        '--annotation-badge-left': `${annotationBadgeAnchor?.left ?? 0}px`,
-                        '--annotation-badge-top': `${(annotationBadgeAnchor?.top ?? -13) + (badgeIndex % 2) * 11}px`,
                         '--annotation-badge-accent': annotationColor.accent,
                         '--annotation-badge-bg': annotationColor.badgeBackground,
                         '--annotation-badge-text': annotationColor.text,
@@ -1890,11 +1843,11 @@ export function TextBlockProjection({
                   );
                 })}
                 {childAnnotationBadges.map(({ annotation }) => {
-                  const childAnchor = childAnnotationBadgeAnchors[annotation.id];
                   const childColor = annotationColorForToken(annotation.visual_style.color_token);
                   return (
                     <button
                       key={annotation.id}
+                      data-annotation-stamp={annotation.id}
                       type="button"
                       draggable
                       className={[
@@ -1902,8 +1855,6 @@ export function TextBlockProjection({
                         selectedAnnotationIds.includes(annotation.id) ? styles.textUnitChildAnnotationBadgeSelected : '',
                       ].filter(Boolean).join(' ')}
                       style={{
-                        '--annotation-badge-left': `${childAnchor?.left ?? 0}px`,
-                        '--annotation-badge-top': `${childAnchor?.top ?? -13}px`,
                         '--annotation-badge-accent': childColor.accent,
                         '--annotation-badge-bg': childColor.badgeBackground,
                         '--annotation-badge-text': childColor.text,

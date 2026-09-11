@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 337 份文档。
+共 338 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -327,7 +327,8 @@
 | [handoffs/2026-09-11-v13-5-d2-fix1-order.md](handoffs/2026-09-11-v13-5-d2-fix1-order.md) | D2-fix1 · F18 表头编辑键放行 | `ready` | — | — |
 | [handoffs/2026-09-11-v13-5-d2-header-chrome-order.md](handoffs/2026-09-11-v13-5-d2-header-chrome-order.md) | D2 · 纸上表头 + 顶栏拆解 | `done(builder 工作树交付；待 HQ 复核放行)` | — | — |
 | [handoffs/2026-09-11-v13-5-e1-menu-debox-order.md](handoffs/2026-09-11-v13-5-e1-menu-debox-order.md) | E1 · 菜单去盒 + 视图收纳 | `done` | — | — |
-| [handoffs/2026-09-11-v13-5-e2-annotation-stamp-order.md](handoffs/2026-09-11-v13-5-e2-annotation-stamp-order.md) | E2 · 标注章邻近自适应 | `ready` | — | — |
+| [handoffs/2026-09-11-v13-5-e2-annotation-stamp-order.md](handoffs/2026-09-11-v13-5-e2-annotation-stamp-order.md) | E2 · 标注章邻近自适应 | `done(builder 工作树交付；待 HQ 复核放行)` | — | — |
+| [handoffs/2026-09-11-v13-5-e3-selection-mode-order.md](handoffs/2026-09-11-v13-5-e3-selection-mode-order.md) | E3 · Selection 模式 | `ready(候 E2 收口后派发)` | — | — |
 | [handoffs/2026-09-11-v13-5-f19-recovery-conflict-order.md](handoffs/2026-09-11-v13-5-f19-recovery-conflict-order.md) | F19 · 恢复冲突的显式出口 | `done(builder 已交付；最终总门与放行留 HQ)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |

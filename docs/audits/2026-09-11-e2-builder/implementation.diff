@@ -1,0 +1,1035 @@
+diff --git a/client/scripts/canvasRuntimeBoundaryCheck.mjs b/client/scripts/canvasRuntimeBoundaryCheck.mjs
+index 74d9ee4..9cd1b35 100644
+--- a/client/scripts/canvasRuntimeBoundaryCheck.mjs
++++ b/client/scripts/canvasRuntimeBoundaryCheck.mjs
+@@ -1226,7 +1226,56 @@ assertContainsAll('Block editor shell exposes cross-page fragment markers', bloc
+   'blockFragmentContinuationBadge',
+ ]);
+ 
++const textBlockProjection = readProjectFile('src/pages/Notes/canvasEngine/blocks/TextBlockProjection.tsx');
++const annotationStampLayout = readProjectFile('src/pages/Notes/canvasEngine/annotationStampLayout.ts');
++const annotationStampPlacement = readProjectFile('src/pages/Notes/canvasEngine/annotationStampPlacement.ts');
++assertContainsAll('Text annotation stamps register with the shared painted-range layout', textBlockProjection, [
++  'useAnnotationStampLayout(editorRef)',
++  'data-annotation-highlight-ids={JSON.stringify(segment.annotationIds)}',
++  'data-annotation-stamp={annotation.id}',
++]);
++record('Both parent and child annotation stamps participate in shared avoidance',
++  (textBlockProjection.match(/data-annotation-stamp=\{annotation\.id\}/g) || []).length >= 2,
++  'Parent and child stamps must each register their annotation identity');
++assertContainsAll('Whole-block annotation stamps share the surface coordinator', blockEditorLayer, [
++  'useAnnotationStampLayout(shellRef)',
++  'data-annotation-stamp-kind="block"',
++  'data-annotation-stamp-block-content',
++]);
++assertContainsAll('Stamp layout measures painted ranges, body text, peers and both page surfaces', annotationStampLayout, [
++  'data-canvas-engine-version',
++  'data-annotation-highlight-ids',
++  'data-page-frame-index',
++  'data-paper-ink-layer',
++  'annotationStampTextRects',
++  'placeAnnotationStamp',
++  'obstacles',
++  'occupied',
++]);
++assertContainsAll('Stamp placement receives page bounds and independent text and peer obstacles', annotationStampPlacement, [
++  'placeAnnotationStamp',
++  'anchor: StampRect',
++  'bounds: StampRect',
++  'obstacles: readonly StampRect[]',
++  'occupied: readonly StampRect[]',
++]);
++assertContainsNone('Stamp geometry stays outside persisted annotation and DOM truth', annotationStampPlacement, [
++  'annotationTruthRepository',
++  'annotationTruthService',
++  'runtimeDataTypes',
++  'document.',
++  'window.',
++]);
++assertContainsNone('Text annotation stamps do not restore fixed first-line or alternating offsets', textBlockProjection, [
++  'badgeIndex % 2',
++  'Math.max(0, measured.top - 15)',
++  'Math.max(12, measured.top - 2)',
++]);
++
+ const noteDetailStyles = readProjectFile('src/pages/Notes/NoteDetail.module.css');
++record('Unmeasured annotation stamps remain hidden until an unobscured side is placed',
++  /\[data-annotation-stamp\]:not\(\[data-stamp-side\]\)\s*\{[^}]*\bvisibility\s*:\s*hidden\s*;/.test(noteDetailStyles),
++  'The unplaced stamp rule must hide its pixels while preserving measurable geometry');
+ assertContainsAll('Note detail styles apply document typography variables to writing text areas', noteDetailStyles, [
+   '--document-font-family',
+   '--document-font-size',
+diff --git a/client/src/pages/Notes/NoteDetail.module.css b/client/src/pages/Notes/NoteDetail.module.css
+index 3ec5cc6..0262305 100644
+--- a/client/src/pages/Notes/NoteDetail.module.css
++++ b/client/src/pages/Notes/NoteDetail.module.css
+@@ -2055,11 +2055,17 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
+   outline-offset: 2px;
+ }
+ 
++/* Never paint an unmeasured or unsatisfiable stamp over body text. */
++[data-annotation-stamp]:not([data-stamp-side]) {
++  visibility: hidden;
++}
++
+ .textUnitAnnotationBadge {
+   position: absolute;
+   left: var(--annotation-badge-left, 0);
+   top: var(--annotation-badge-top, -13px);
+-  max-width: min(220px, calc(100% - var(--annotation-badge-left, 0px) - 8px));
++  width: max-content;
++  max-width: 220px;
+   padding: 1px 6px;
+   border: 1px solid color-mix(in srgb, var(--annotation-badge-accent, var(--accent-primary)) 72%, var(--border-default));
+   border-radius: 999px;
+@@ -2094,7 +2100,8 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
+   left: var(--annotation-badge-left, 0);
+   top: var(--annotation-badge-top, -13px);
+   z-index: 4;
+-  max-width: min(170px, calc(100% - var(--annotation-badge-left, 0px) - 8px));
++  width: max-content;
++  max-width: 170px;
+   padding: 1px 5px;
+   border: 1px solid color-mix(in srgb, var(--annotation-badge-accent, #2dd4bf) 74%, var(--border-default));
+   border-radius: 999px;
+@@ -2321,10 +2328,11 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
+ 
+ .blockAnnotationBadge {
+   position: absolute;
+-  right: 8px;
+-  bottom: 8px;
++  left: var(--annotation-badge-left, 0);
++  top: var(--annotation-badge-top, 0);
++  width: max-content;
+   z-index: 4;
+-  max-width: min(180px, calc(100% - 18px));
++  max-width: 180px;
+   padding: 3px 8px;
+   border: 1px solid color-mix(in srgb, var(--accent-primary) 62%, var(--border-default));
+   border-radius: 999px;
+diff --git a/client/src/pages/Notes/canvasEngine/blocks/TextBlockProjection.tsx b/client/src/pages/Notes/canvasEngine/blocks/TextBlockProjection.tsx
+index 5320748..d73cd90 100644
+--- a/client/src/pages/Notes/canvasEngine/blocks/TextBlockProjection.tsx
++++ b/client/src/pages/Notes/canvasEngine/blocks/TextBlockProjection.tsx
+@@ -30,6 +30,7 @@ import { flowSelectionText, orderedFlowSelection, replaceFlowSelection, type Flo
+ import { deriveSingleTextEditDelta } from '../rangeRebaseService';
+ import type { TextFlowBoundaryNavigationRequest, TextFlowNavigationTarget } from '../textFlowBlockNavigation';
+ import { getPageDisplayScale } from '../overlayService';
++import { useAnnotationStampLayout } from '../annotationStampLayout';
+ import type {
+   AnnotationTruthV1,
+   AnnotationRangeV1,
+@@ -518,6 +519,7 @@ export function TextBlockProjection({
+   unitDropTarget,
+ }: TextBlockProjectionProps) {
+   const editorRef = useRef<HTMLDivElement>(null);
++  useAnnotationStampLayout(editorRef);
+   const documentSelection = useContext(DocumentTextFlowSelectionContext);
+   const unitRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
+   const pendingFocusRef = useRef<{ unitId: string; caret: number } | null>(null);
+@@ -534,8 +536,6 @@ export function TextBlockProjection({
+   const beforeInputRef = useRef<{ selection: TextFlowEditSelection; inputType: string; data?: string | null } | null>(null);
+   const additiveSelectionSessionRef = useRef(false);
+   const flowShiftClickRef = useRef(false);
+-  const [annotationBadgeAnchors, setAnnotationBadgeAnchors] = useState<Record<string, { left: number; top: number }>>({});
+-  const [childAnnotationBadgeAnchors, setChildAnnotationBadgeAnchors] = useState<Record<string, { left: number; top: number }>>({});
+   const [draftRangeBadgeAnchors, setDraftRangeBadgeAnchors] = useState<Record<string, { left: number; top: number }>>({});
+   const [textUnitContextMenu, setTextUnitContextMenu] = useState<{
+     unitId: string;
+@@ -787,52 +787,6 @@ export function TextBlockProjection({
+     return () => window.cancelAnimationFrame(animationFrameId);
+   }, [editableFlow, readOnly]);
+ 
+-  useLayoutEffect(() => {
+-    if (!showLabelOverlay) {
+-      setAnnotationBadgeAnchors((current) => (Object.keys(current).length === 0 ? current : {}));
+-      setChildAnnotationBadgeAnchors((current) => (Object.keys(current).length === 0 ? current : {}));
+-      return;
+-    }
+-
+-    const nextAnchors: Record<string, { left: number; top: number }> = {};
+-    const nextChildAnchors: Record<string, { left: number; top: number }> = {};
+-    for (const unit of editableFlow.units) {
+-      const textarea = unitRefs.current[unit.id];
+-      if (!textarea) continue;
+-
+-      parentAnnotationBadgesForTextUnit({
+-        annotations: activeAnnotations,
+-        blockId,
+-        textUnitId: unit.id,
+-      }).forEach(({ annotation, startOffset }) => {
+-        const measured = measureTextareaTextOffset(textarea, startOffset);
+-        nextAnchors[annotation.id] = {
+-          left: Math.round(clampNumber(measured.left, 0, Math.max(0, textarea.clientWidth - 96))),
+-          top: Math.round(Math.max(0, measured.top - 15)),
+-        };
+-      });
+-
+-      childAnnotationBadgesForTextUnit({
+-        annotations: activeAnnotations,
+-        blockId,
+-        textUnitId: unit.id,
+-      }).forEach(({ annotation, startOffset: childStartOffset }) => {
+-        const measured = measureTextareaTextOffset(textarea, childStartOffset);
+-        nextChildAnchors[annotation.id] = {
+-          left: Math.round(clampNumber(measured.left, 0, Math.max(0, textarea.clientWidth - 96))),
+-          top: Math.round(Math.max(12, measured.top - 2)),
+-        };
+-      });
+-    }
+-
+-    setAnnotationBadgeAnchors((current) => (
+-      badgeAnchorStateEqual(current, nextAnchors) ? current : nextAnchors
+-    ));
+-    setChildAnnotationBadgeAnchors((current) => (
+-      badgeAnchorStateEqual(current, nextChildAnchors) ? current : nextChildAnchors
+-    ));
+-  }, [activeAnnotations, blockId, editableFlow, showLabelOverlay]);
+-
+   useLayoutEffect(() => {
+     if (draftAnnotationRanges.length === 0) {
+       setDraftRangeBadgeAnchors((current) => (Object.keys(current).length === 0 ? current : {}));
+@@ -1745,6 +1699,7 @@ export function TextBlockProjection({
+                             '--annotation-child-bg': childColor.background,
+                             '--annotation-child-accent': childColor.accent,
+                           } as CSSProperties}
++                          data-annotation-highlight-ids={JSON.stringify(segment.annotationIds)}
+                           data-child-label={segment.childLabels[0] || undefined}
+                         >
+                           {segment.text}
+@@ -1855,12 +1810,12 @@ export function TextBlockProjection({
+                     end={index === ordered.endIndex ? ordered.end.offset : unit.text.length}
+                     includeBreak={index < ordered.endIndex || Boolean(documentBlockForDisplay && documentRangeForDisplay?.end.blockId !== blockId)} />;
+                 })()}
+-                {parentAnnotationBadges.map(({ annotation }, badgeIndex) => {
+-                  const annotationBadgeAnchor = annotationBadgeAnchors[annotation.id];
++                {parentAnnotationBadges.map(({ annotation }) => {
+                   const annotationColor = annotationColorForToken(annotation.visual_style.color_token);
+                   return (
+                     <button
+                       key={annotation.id}
++                      data-annotation-stamp={annotation.id}
+                       type="button"
+                       draggable
+                       className={[
+@@ -1868,8 +1823,6 @@ export function TextBlockProjection({
+                         selectedAnnotationIds.includes(annotation.id) ? styles.textUnitAnnotationBadgeSelected : '',
+                       ].filter(Boolean).join(' ')}
+                       style={{
+-                        '--annotation-badge-left': `${annotationBadgeAnchor?.left ?? 0}px`,
+-                        '--annotation-badge-top': `${(annotationBadgeAnchor?.top ?? -13) + (badgeIndex % 2) * 11}px`,
+                         '--annotation-badge-accent': annotationColor.accent,
+                         '--annotation-badge-bg': annotationColor.badgeBackground,
+                         '--annotation-badge-text': annotationColor.text,
+@@ -1890,11 +1843,11 @@ export function TextBlockProjection({
+                   );
+                 })}
+                 {childAnnotationBadges.map(({ annotation }) => {
+-                  const childAnchor = childAnnotationBadgeAnchors[annotation.id];
+                   const childColor = annotationColorForToken(annotation.visual_style.color_token);
+                   return (
+                     <button
+                       key={annotation.id}
++                      data-annotation-stamp={annotation.id}
+                       type="button"
+                       draggable
+                       className={[
+@@ -1902,8 +1855,6 @@ export function TextBlockProjection({
+                         selectedAnnotationIds.includes(annotation.id) ? styles.textUnitChildAnnotationBadgeSelected : '',
+                       ].filter(Boolean).join(' ')}
+                       style={{
+-                        '--annotation-badge-left': `${childAnchor?.left ?? 0}px`,
+-                        '--annotation-badge-top': `${childAnchor?.top ?? -13}px`,
+                         '--annotation-badge-accent': childColor.accent,
+                         '--annotation-badge-bg': childColor.badgeBackground,
+                         '--annotation-badge-text': childColor.text,
+diff --git a/client/src/pages/Notes/canvasEngine/layers/BlockEditorLayer.tsx b/client/src/pages/Notes/canvasEngine/layers/BlockEditorLayer.tsx
+index 6b704db..9df18a9 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/BlockEditorLayer.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/BlockEditorLayer.tsx
+@@ -1,3 +1,4 @@
++import { useAnnotationStampLayout } from '../annotationStampLayout';
+ import { resolveScreenRect, type CoordinateContract } from '../placementContractService';
+ import type { PageFrameModel } from '../types';
+ import {
+@@ -211,6 +212,7 @@ export function BlockEditorLayer({
+   const blockContentRef = useRef<HTMLDivElement | null>(null);
+   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+   const shellRef = useRef<HTMLElement | null>(null);
++  useAnnotationStampLayout(shellRef);
+   const navigationColumnRef = useRef<number | null>(null);
+   const focusedReceiptRef = useRef<TextFocusReceipt | null>(null);
+   const onFocusReleasedRef = useRef(onFocusReleased);
+@@ -465,6 +467,8 @@ export function BlockEditorLayer({
+         <button
+           type="button"
+           className={styles.blockAnnotationBadge}
++          data-annotation-stamp={blockAnnotationCluster.annotation_ids[0]}
++          data-annotation-stamp-kind="block"
+           onMouseDown={(event) => event.preventDefault()}
+           onContextMenu={(event) => {
+             event.preventDefault();
+@@ -486,6 +490,7 @@ export function BlockEditorLayer({
+ 
+       <div
+         ref={blockContentRef}
++        data-annotation-stamp-block-content="true"
+         onBlurCapture={() => {
+           const receipt = focusedReceiptRef.current;
+           if (!receipt) return;
+diff --git a/client/src/pages/Notes/canvasEngine/annotationStampPlacement.ts b/client/src/pages/Notes/canvasEngine/annotationStampPlacement.ts
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Notes/canvasEngine/annotationStampPlacement.ts
+@@ -0,0 +1,104 @@
++/** View-space geometry only; annotation anchors and persisted data are never changed. */
++export interface StampRect {
++  left: number;
++  top: number;
++  width: number;
++  height: number;
++}
++
++export type StampSide = 'top' | 'bottom' | 'left' | 'right';
++
++interface StampPlacementInput {
++  anchor: StampRect;
++  size: { width: number; height: number };
++  bounds: StampRect;
++  obstacles: readonly StampRect[];
++  occupied: readonly StampRect[];
++  gap?: number;
++}
++
++export type StampPlacement = StampRect & { side: StampSide };
++
++function isFiniteRect(rect: StampRect): boolean {
++  return [rect.left, rect.top, rect.width, rect.height,
++    rect.left + rect.width, rect.top + rect.height].every(Number.isFinite)
++    && rect.width >= 0 && rect.height >= 0;
++}
++
++function overlaps(a: StampRect, b: StampRect): boolean {
++  return a.left < b.left + b.width && a.left + a.width > b.left
++    && a.top < b.top + b.height && a.top + a.height > b.top;
++}
++
++/**
++ * Try top, bottom, left, then right without moving away from the highlight edge.
++ * Within each side, slide toward the nearest free position from the anchor start.
++ * Free intervals can only start/end at a blocker or boundary edge, so testing those
++ * exact coordinates is sufficient and avoids a resolution-dependent pixel scan.
++ * A stamp must still touch the anchor's projection on the sliding axis. If no
++ * adjacent, unobscured slot exists, return null instead of covering body text.
++ */
++export function placeAnnotationStamp({
++  anchor, size, bounds, obstacles, occupied, gap = 2,
++}: StampPlacementInput): StampPlacement | null {
++  if (!isFiniteRect(anchor) || !isFiniteRect(bounds)
++    || !Number.isFinite(size.width) || !Number.isFinite(size.height)
++    || size.width <= 0 || size.height <= 0
++    || !Number.isFinite(gap) || gap < 0) return null;
++
++  const blockers = [...obstacles, ...occupied].filter((rect) => (
++    isFiniteRect(rect) && rect.width > 0 && rect.height > 0
++  ));
++  const sides: readonly StampSide[] = ['top', 'bottom', 'left', 'right'];
++
++  for (const side of sides) {
++    const horizontal = side === 'top' || side === 'bottom';
++    const length = horizontal ? size.width : size.height;
++    const anchorStart = horizontal ? anchor.left : anchor.top;
++    const anchorLength = horizontal ? anchor.width : anchor.height;
++    const boundsStart = horizontal ? bounds.left : bounds.top;
++    const boundsLength = horizontal ? bounds.width : bounds.height;
++    const minimum = Math.max(boundsStart, anchorStart - length);
++    const maximum = Math.min(boundsStart + boundsLength - length, anchorStart + anchorLength);
++    if (minimum > maximum) continue;
++
++    const fixed = side === 'top' ? anchor.top - gap - size.height
++      : side === 'bottom' ? anchor.top + anchor.height + gap
++        : side === 'left' ? anchor.left - gap - size.width
++          : anchor.left + anchor.width + gap;
++    const normalStart = horizontal ? bounds.top : bounds.left;
++    const normalLength = horizontal ? bounds.height : bounds.width;
++    const thickness = horizontal ? size.height : size.width;
++    if (fixed < normalStart || fixed + thickness > normalStart + normalLength) continue;
++
++    const candidates = new Set<number>([
++      Math.min(maximum, Math.max(minimum, anchorStart)), minimum, maximum,
++    ]);
++    const sideBlockers = blockers.filter((rect) => {
++      const start = horizontal ? rect.top : rect.left;
++      const extent = horizontal ? rect.height : rect.width;
++      return fixed < start + extent && fixed + thickness > start;
++    });
++    for (const rect of sideBlockers) {
++      const start = horizontal ? rect.left : rect.top;
++      const extent = horizontal ? rect.width : rect.height;
++      candidates.add(start - length);
++      candidates.add(start + extent);
++    }
++
++    const positions = [...candidates]
++      .filter((position) => position >= minimum && position <= maximum)
++      .sort((a, b) => Math.abs(a - anchorStart) - Math.abs(b - anchorStart) || a - b);
++    for (const position of positions) {
++      const candidate: StampPlacement = {
++        left: horizontal ? position : fixed,
++        top: horizontal ? fixed : position,
++        width: size.width,
++        height: size.height,
++        side,
++      };
++      if (!sideBlockers.some((rect) => overlaps(candidate, rect))) return candidate;
++    }
++  }
++  return null;
++}
+diff --git a/client/src/pages/Notes/canvasEngine/annotationStampPlacement.test.ts b/client/src/pages/Notes/canvasEngine/annotationStampPlacement.test.ts
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Notes/canvasEngine/annotationStampPlacement.test.ts
+@@ -0,0 +1,132 @@
++// @vitest-environment node
++
++import { describe, expect, it } from 'vitest';
++import { placeAnnotationStamp, type StampRect, type StampSide } from './annotationStampPlacement';
++
++const anchor = { left: 80, top: 80, width: 40, height: 20 };
++const size = { width: 30, height: 10 };
++const bounds = { left: 0, top: 0, width: 200, height: 200 };
++const topBlocker = { left: 0, top: 65, width: 200, height: 15 };
++const bottomBlocker = { left: 0, top: 100, width: 200, height: 15 };
++const leftBlocker = { left: 45, top: 0, width: 35, height: 200 };
++const rightBlocker = { left: 120, top: 0, width: 35, height: 200 };
++
++function place(options: Partial<Parameters<typeof placeAnnotationStamp>[0]> = {}) {
++  return placeAnnotationStamp({ anchor, size, bounds, obstacles: [], occupied: [], ...options });
++}
++
++function intersects(a: StampRect, b: StampRect) {
++  return a.left < b.left + b.width && a.left + a.width > b.left
++    && a.top < b.top + b.height && a.top + a.height > b.top;
++}
++
++describe('annotation stamp placement', () => {
++  it.each([
++    ['top', [], 80, 68],
++    ['bottom', [topBlocker], 80, 102],
++    ['left', [topBlocker, bottomBlocker], 48, 80],
++    ['right', [topBlocker, bottomBlocker, leftBlocker], 122, 80],
++  ] satisfies [StampSide, StampRect[], number, number][])(
++    'chooses %s in strict top/bottom/left/right priority', (side, obstacles, left, top) => {
++      const result = place({ obstacles });
++      expect(result).toEqual({ left, top, ...size, side });
++      expect(obstacles.some((rect) => intersects(result!, rect))).toBe(false);
++    },
++  );
++
++  it('falls below a highlight at the paper top without leaving the page frame', () => {
++    expect(place({ anchor: { ...anchor, top: 0 } })).toEqual({ left: 80, top: 22, ...size, side: 'bottom' });
++  });
++
++  it('slides along the same side to avoid an unhighlighted body character', () => {
++    const character = { left: 85, top: 68, width: 10, height: 10 };
++    const result = place({ obstacles: [character] });
++    expect(result).toEqual({ left: 95, top: 68, ...size, side: 'top' });
++    expect(intersects(result!, character)).toBe(false);
++  });
++
++  it('slides before the anchor when that is the nearest clear slot', () => {
++    expect(place({ obstacles: [{ left: 105, top: 68, width: 30, height: 10 }] }))
++      .toEqual({ left: 75, top: 68, ...size, side: 'top' });
++  });
++
++  it('places a peer next to an already placed stamp without overlap', () => {
++    const first = place()!;
++    const second = place({ occupied: [first] })!;
++    expect(second).toEqual({ left: 50, top: 68, ...size, side: 'top' });
++    expect(intersects(first, second)).toBe(false);
++  });
++
++  it('falls to the next direction when peer stamps occupy every adjacent top slot', () => {
++    expect(place({ occupied: [{ left: 49, top: 68, width: 102, height: 10 }] }))
++      .toEqual({ left: 80, top: 102, ...size, side: 'bottom' });
++  });
++
++  it('keeps a sliding stamp inside the right page boundary', () => {
++    expect(place({ anchor: { ...anchor, left: 185, width: 15 } }))
++      .toEqual({ left: 170, top: 68, ...size, side: 'top' });
++  });
++
++  it('does not slide far from the highlight to unrelated whitespace', () => {
++    expect(place({ obstacles: [{ left: 49, top: 65, width: 102, height: 15 }] }))
++      .toEqual({ left: 80, top: 102, ...size, side: 'bottom' });
++  });
++
++  it('returns no placement when all adjacent directions are full', () => {
++    expect(place({ obstacles: [topBlocker, bottomBlocker, leftBlocker, rightBlocker] })).toBeNull();
++  });
++
++  it('returns no placement when a badge cannot fit inside the page', () => {
++    expect(place({ size: { width: 201, height: 201 } })).toBeNull();
++  });
++
++  it('allows edge contact but rejects any positive-area text overlap', () => {
++    const character = { left: 110, top: 68, width: 10, height: 10 };
++    expect(place({ obstacles: [character] })).toEqual({ left: 80, top: 68, ...size, side: 'top' });
++    const nearlyTouching = { ...character, left: 109.999 };
++    const result = place({ obstacles: [nearlyTouching] })!;
++    expect(intersects(result, nearlyTouching)).toBe(false);
++    expect(result.left).toBeCloseTo(79.999);
++  });
++
++  it('uses exact fractional edges at a scaled paper size', () => {
++    expect(place({
++      anchor: { left: 20.25, top: 10.5, width: 12.5, height: 3.75 },
++      size: { width: 7.5, height: 2.5 },
++      bounds: { left: 0, top: 0, width: 50, height: 50 },
++      gap: 0.5,
++      obstacles: [{ left: 22.25, top: 7.5, width: 1.25, height: 2.5 }],
++    })).toEqual({ left: 23.5, top: 7.5, width: 7.5, height: 2.5, side: 'top' });
++  });
++
++  it('is deterministic regardless of obstacle enumeration order', () => {
++    const obstacles = [
++      { left: 85, top: 68, width: 5, height: 10 },
++      { left: 105, top: 68, width: 5, height: 10 },
++    ];
++    expect(place({ obstacles })).toEqual(place({ obstacles: [...obstacles].reverse() }));
++    expect(place({ obstacles })).toEqual(place({ obstacles }));
++  });
++
++  it('leaves input rectangles and arrays unchanged', () => {
++    const input = Object.freeze({
++      anchor: Object.freeze({ ...anchor }),
++      size: Object.freeze({ ...size }),
++      bounds: Object.freeze({ ...bounds }),
++      obstacles: Object.freeze([Object.freeze({ ...topBlocker })]),
++      occupied: Object.freeze([Object.freeze({ left: 80, top: 102, ...size })]),
++    });
++    const before = JSON.stringify(input);
++    expect(placeAnnotationStamp(input)?.side).toBe('bottom');
++    expect(JSON.stringify(input)).toBe(before);
++  });
++
++  it.each([
++    { size: { width: 0, height: 10 } },
++    { size: { width: Number.NaN, height: 10 } },
++    { bounds: { ...bounds, height: Number.POSITIVE_INFINITY } },
++    { gap: -1 },
++  ])('rejects unusable measured geometry: %j', (options) => {
++    expect(place(options)).toBeNull();
++  });
++});
+diff --git a/client/src/pages/Notes/canvasEngine/annotationStampLayout.ts b/client/src/pages/Notes/canvasEngine/annotationStampLayout.ts
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Notes/canvasEngine/annotationStampLayout.ts
+@@ -0,0 +1,169 @@
++import { useLayoutEffect, type RefObject } from 'react';
++import { measureTextareaSelection } from './textareaNavigation';
++import { placeAnnotationStamp, type StampRect } from './annotationStampPlacement';
++
++const STAMP = '[data-annotation-stamp]';
++const SCOPE = '[data-canvas-engine-version], [data-annotation-stamp-scope]';
++const coordinators = new WeakMap<HTMLElement, { schedule: () => void; release: () => void; users: number }>();
++
++function box(rect: DOMRect): StampRect {
++  return { left: rect.left, top: rect.top, width: rect.width, height: rect.height };
++}
++
++function union(rects: StampRect[]): StampRect | null {
++  if (!rects.length) return null;
++  const left = Math.min(...rects.map((rect) => rect.left));
++  const top = Math.min(...rects.map((rect) => rect.top));
++  return { left, top,
++    width: Math.max(...rects.map((rect) => rect.left + rect.width)) - left,
++    height: Math.max(...rects.map((rect) => rect.top + rect.height)) - top };
++}
++
++/** Browser layout only. Read the existing painted range, never annotation offsets. */
++function highlightBounds(stamp: HTMLElement): StampRect | null {
++  if (stamp.dataset.annotationStampKind === 'block') {
++    const content = stamp.parentElement?.querySelector<HTMLElement>('[data-annotation-stamp-block-content]');
++    return content ? union(annotationStampTextRects(content)) || box(content.getBoundingClientRect()) : null;
++  }
++  const row = stamp.closest('[data-text-unit-row]');
++  if (!row) return null;
++  const id = stamp.dataset.annotationStamp;
++  const rects = [...row.querySelectorAll<HTMLElement>('mark[data-annotation-highlight-ids]')]
++    .filter((mark) => (JSON.parse(mark.dataset.annotationHighlightIds || '[]') as string[]).includes(id || ''))
++    .flatMap((mark) => [...mark.getClientRects()].map(box))
++    .filter((rect) => rect.width > 0 && rect.height > 0);
++  // All painted segments in this text unit, including wrapped and disjoint ranges.
++  return union(rects);
++}
++
++/** Conservative line-fragment boxes contain every body glyph (including unmarked rows). */
++export function annotationStampTextRects(scope: HTMLElement): StampRect[] {
++  const rects: StampRect[] = [];
++  if (typeof document.createRange().getClientRects !== 'function') return rects;
++  // KaTeX draws some characters (e.g. radical signs) as SVG paths, not text nodes.
++  for (const math of scope.querySelectorAll<HTMLElement>('.katex')) {
++    const bounds = math.getBoundingClientRect();
++    if (bounds.width > 0 && bounds.height > 0) rects.push(box(bounds));
++  }
++  for (const textarea of scope.querySelectorAll<HTMLTextAreaElement>('textarea')) {
++    const bounds = textarea.getBoundingClientRect();
++    if (!bounds.width || !bounds.height || getComputedStyle(textarea).visibility === 'hidden') continue;
++    const scaleX = bounds.width / (textarea.offsetWidth || bounds.width);
++    const scaleY = bounds.height / (textarea.offsetHeight || bounds.height);
++    rects.push(...measureTextareaSelection(textarea, 0, textarea.value.length).map((rect) => ({
++      left: bounds.left + rect.left * scaleX, top: bounds.top + rect.top * scaleY,
++      width: rect.width * scaleX, height: rect.height * scaleY,
++    })));
++  }
++  const walker = document.createTreeWalker(scope, NodeFilter.SHOW_TEXT);
++  const range = document.createRange();
++  while (walker.nextNode()) {
++    const node = walker.currentNode;
++    const parent = node.parentElement;
++    if (!node.textContent?.trim() || !parent || parent.closest(`${STAMP}, textarea, script, style`)) continue;
++    const style = getComputedStyle(parent);
++    if (style.visibility === 'hidden' || style.display === 'none') continue;
++    range.selectNodeContents(node);
++    rects.push(...[...range.getClientRects()].filter((rect) => rect.width > 0 && rect.height > 0).map(box));
++  }
++  return rects;
++}
++
++/** Shared by all blocks in a surface, so DOM order also gives stable cross-block avoidance. */
++export function layoutAnnotationStamps(scope: HTMLElement): void {
++  const stamps = [...scope.querySelectorAll<HTMLElement>(STAMP)];
++  if (!stamps.length) return;
++  const obstacles = annotationStampTextRects(scope);
++  const occupied: StampRect[] = [];
++  const frames = [...scope.querySelectorAll<HTMLElement>('[data-page-frame-index], [data-paper-ink-layer]')]
++    .map((frame) => box(frame.getBoundingClientRect())).filter((rect) => rect.width > 0 && rect.height > 0);
++  const fallback = box((scope.closest<HTMLElement>('[data-page-display-scale]') || scope).getBoundingClientRect());
++  for (const stamp of stamps) {
++    const anchor = highlightBounds(stamp);
++    const parent = stamp.offsetParent as HTMLElement | null;
++    const stampRect = stamp.getBoundingClientRect();
++    const bounds = anchor && (frames.find((frame) => anchor.left >= frame.left && anchor.top >= frame.top
++      && anchor.left + anchor.width <= frame.left + frame.width
++      && anchor.top + anchor.height <= frame.top + frame.height) || (frames.length ? null : fallback));
++    const parentRect = parent?.getBoundingClientRect();
++    const scaleX = parentRect && parent ? parentRect.width / (parent.offsetWidth || parentRect.width) : 1;
++    const scaleY = parentRect && parent ? parentRect.height / (parent.offsetHeight || parentRect.height) : 1;
++    // Include the selected child's 1px outline in both collision and frame tests.
++    const inset = Math.max(scaleX, scaleY);
++    const placement = anchor && bounds && parent && parentRect && stampRect.width > 0 && stampRect.height > 0
++      ? placeAnnotationStamp({ anchor, bounds, obstacles, occupied, gap: 2 * inset,
++        size: { width: stampRect.width + 2 * inset, height: stampRect.height + 2 * inset } }) : null;
++    if (!placement || !parent || !parentRect) {
++      delete stamp.dataset.stampSide;
++      stamp.dataset.stampLayout = anchor ? 'no-space' : 'unmeasured';
++      continue;
++    }
++    occupied.push(placement);
++    stamp.style.setProperty('--annotation-badge-left', `${(placement.left + inset - parentRect.left) / scaleX - parent.clientLeft + parent.scrollLeft}px`);
++    stamp.style.setProperty('--annotation-badge-top', `${(placement.top + inset - parentRect.top) / scaleY - parent.clientTop + parent.scrollTop}px`);
++    stamp.dataset.stampSide = placement.side;
++    stamp.dataset.stampLayout = 'placed';
++  }
++}
++
++/** One observer/measurement batch per surface; no persistent model or React geometry state. */
++export function useAnnotationStampLayout(ref: RefObject<HTMLElement>): void {
++  useLayoutEffect(() => {
++    const editor = ref.current;
++    if (!editor) return;
++    const scope = editor.closest<HTMLElement>(SCOPE) || editor;
++    let coordinator = coordinators.get(scope);
++    if (!coordinator) {
++      let frame = 0;
++      let disposed = false;
++      const schedule = () => {
++        if (!frame && !disposed) frame = requestAnimationFrame(() => {
++          frame = 0;
++          layoutAnnotationStamps(scope);
++        });
++      };
++      const resize = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(schedule);
++      const observed = new Set<HTMLElement>();
++      const observeSizes = () => {
++        const current = new Set([scope, ...scope.querySelectorAll<HTMLElement>('textarea, [data-text-unit-row], [data-page-frame-index], [data-paper-ink-layer]')]);
++        for (const node of observed) if (!current.has(node)) { resize?.unobserve(node); observed.delete(node); }
++        for (const node of current) if (!observed.has(node)) { resize?.observe(node); observed.add(node); }
++      };
++      const mutations = new MutationObserver((records) => {
++        if (!records.some((record) => !(record.target instanceof Element && record.target.closest(STAMP)))) return;
++        observeSizes();
++        schedule();
++      });
++      mutations.observe(scope, { childList: true, subtree: true, characterData: true, attributes: true });
++      const scaledSurface = scope.closest<HTMLElement>('[data-page-display-scale]');
++      if (scaledSurface && scaledSurface !== scope) mutations.observe(scaledSurface, { attributes: true });
++      observeSizes();
++      // Ancestor/document scroll translates the entire solution. Only internal
++      // text scroll changes a glyph's position relative to its stamp.
++      const scroll = (event: Event) => {
++        if (event.target instanceof HTMLElement && scope.contains(event.target)) schedule();
++      };
++      window.addEventListener('resize', schedule);
++      window.addEventListener('scroll', scroll, true);
++      document.fonts?.addEventListener('loadingdone', schedule);
++      coordinator = { schedule, users: 0, release: () => {
++        disposed = true;
++        cancelAnimationFrame(frame);
++        mutations.disconnect();
++        resize?.disconnect();
++        window.removeEventListener('resize', schedule);
++        window.removeEventListener('scroll', scroll, true);
++        document.fonts?.removeEventListener('loadingdone', schedule);
++        coordinators.delete(scope);
++      } };
++      coordinators.set(scope, coordinator);
++    }
++    coordinator.users++;
++    coordinator.schedule();
++    return () => { if (--coordinator.users === 0) coordinator.release(); };
++  }, [ref]);
++  useLayoutEffect(() => {
++    const editor = ref.current;
++    if (editor) coordinators.get(editor.closest<HTMLElement>(SCOPE) || editor)?.schedule();
++  });
++}
+diff --git a/client/src/pages/Notes/canvasEngine/annotationStampLayout.test.tsx b/client/src/pages/Notes/canvasEngine/annotationStampLayout.test.tsx
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Notes/canvasEngine/annotationStampLayout.test.tsx
+@@ -0,0 +1,331 @@
++// @vitest-environment jsdom
++
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { annotationStampTextRects, layoutAnnotationStamps } from './annotationStampLayout';
++import { measureTextareaSelection } from './textareaNavigation';
++import type { StampRect } from './annotationStampPlacement';
++
++vi.mock('./textareaNavigation', () => ({ measureTextareaSelection: vi.fn() }));
++
++let textGeometry: WeakMap<Node, DOMRect[]>;
++let textareaGeometry: WeakMap<HTMLTextAreaElement, StampRect[]>;
++const originalRangeRects = Object.getOwnPropertyDescriptor(Range.prototype, 'getClientRects');
++
++function rect(left: number, top: number, width: number, height: number) {
++  return new DOMRect(left, top, width, height);
++}
++
++function setBox(element: HTMLElement, measured: DOMRect, scale = 1) {
++  vi.spyOn(element, 'getBoundingClientRect').mockImplementation(() => measured);
++  Object.defineProperties(element, {
++    offsetWidth: { configurable: true, value: measured.width / scale },
++    offsetHeight: { configurable: true, value: measured.height / scale },
++  });
++}
++
++function surface(measured = rect(0, 0, 300, 300)) {
++  const scope = document.createElement('div');
++  scope.dataset.annotationStampScope = 'test';
++  setBox(scope, measured);
++  document.body.append(scope);
++  return scope;
++}
++
++function row(scope: HTMLElement, measured = rect(0, 0, 300, 300), scale = 1) {
++  const element = document.createElement('div');
++  element.dataset.textUnitRow = 'true';
++  setBox(element, measured, scale);
++  scope.append(element);
++  return element;
++}
++
++function bodyText(parent: HTMLElement, fragments: DOMRect[], text = 'Body characters') {
++  const span = document.createElement('span');
++  const node = document.createTextNode(text);
++  span.append(node);
++  textGeometry.set(node, fragments);
++  parent.append(span);
++  return span;
++}
++
++function highlight(parent: HTMLElement, id: string, fragments: DOMRect[]) {
++  const mark = document.createElement('mark');
++  mark.dataset.annotationHighlightIds = JSON.stringify([id]);
++  mark.append(document.createTextNode('Highlighted body characters'));
++  textGeometry.set(mark.firstChild!, fragments);
++  vi.spyOn(mark, 'getClientRects').mockImplementation(() => fragments as unknown as DOMRectList);
++  parent.append(mark);
++  return mark;
++}
++
++function stamp(parent: HTMLElement, id = 'annotation-1', scale = 1) {
++  const button = document.createElement('button');
++  button.dataset.annotationStamp = id;
++  button.dataset.annotationStampKind = 'text';
++  button.textContent = 'LABEL';
++  Object.defineProperty(button, 'offsetParent', { configurable: true, value: parent });
++  // jsdom does not perform CSS layout. Native measurement is the sole mock:
++  // apply the production CSS position variables to the containing block rect.
++  vi.spyOn(button, 'getBoundingClientRect').mockImplementation(() => {
++    const parentRect = parent.getBoundingClientRect();
++    const left = Number.parseFloat(button.style.getPropertyValue('--annotation-badge-left')) || 0;
++    const top = Number.parseFloat(button.style.getPropertyValue('--annotation-badge-top')) || 0;
++    return rect(parentRect.left + (left + parent.clientLeft - parent.scrollLeft) * scale,
++      parentRect.top + (top + parent.clientTop - parent.scrollTop) * scale, 30 * scale, 10 * scale);
++  });
++  parent.append(button);
++  return button;
++}
++
++function frame(scope: HTMLElement, measured: DOMRect, index = '0') {
++  const element = document.createElement('div');
++  element.dataset.pageFrameIndex = index;
++  setBox(element, measured);
++  scope.append(element);
++  return element;
++}
++
++function expectPosition(button: HTMLElement, side: string, left: number, top: number, scale = 1) {
++  expect(button.dataset.stampLayout).toBe('placed');
++  expect(button.dataset.stampSide).toBe(side);
++  const measured = button.getBoundingClientRect();
++  expect({ left: measured.left, top: measured.top, width: measured.width, height: measured.height })
++    .toEqual({ left, top, width: 30 * scale, height: 10 * scale });
++}
++
++function positiveIntersection(a: StampRect, b: StampRect) {
++  return Math.max(0, Math.min(a.left + a.width, b.left + b.width) - Math.max(a.left, b.left))
++    * Math.max(0, Math.min(a.top + a.height, b.top + b.height) - Math.max(a.top, b.top));
++}
++
++beforeEach(() => {
++  textGeometry = new WeakMap();
++  textareaGeometry = new WeakMap();
++  Object.defineProperty(Range.prototype, 'getClientRects', {
++    configurable: true,
++    value: function getClientRects(this: Range) {
++      return textGeometry.get(this.startContainer) || [];
++    },
++  });
++  vi.mocked(measureTextareaSelection).mockImplementation((textarea) => textareaGeometry.get(textarea) || []);
++});
++
++afterEach(() => {
++  document.body.replaceChildren();
++  if (originalRangeRects) Object.defineProperty(Range.prototype, 'getClientRects', originalRangeRects);
++  else Reflect.deleteProperty(Range.prototype, 'getClientRects');
++  vi.restoreAllMocks();
++  vi.mocked(measureTextareaSelection).mockReset();
++});
++
++describe('annotation stamp DOM layout', () => {
++  it('unions all wrapped and disjoint painted segments before choosing a direction', () => {
++    const scope = surface();
++    const unit = row(scope);
++    highlight(unit, 'multi', [rect(80, 80, 40, 10), rect(60, 100, 50, 10)]);
++    highlight(unit, 'multi', [rect(140, 120, 10, 10)]);
++    bodyText(scope, [rect(0, 0, 300, 80)]);
++    const button = stamp(unit, 'multi');
++
++    layoutAnnotationStamps(scope);
++
++    // Whole union is x=60..150, y=80..130, so bottom follows the final segment.
++    expectPosition(button, 'bottom', 61, 133);
++    expect(button.getBoundingClientRect().top).toBeGreaterThan(130);
++  });
++
++  it('positions the same annotation independently in different text units', () => {
++    const scope = surface();
++    const firstUnit = row(scope);
++    const secondUnit = row(scope);
++    highlight(firstUnit, 'shared', [rect(80, 80, 40, 20)]);
++    highlight(secondUnit, 'shared', [rect(180, 160, 40, 20)]);
++    const first = stamp(firstUnit, 'shared');
++    const second = stamp(secondUnit, 'shared');
++
++    layoutAnnotationStamps(scope);
++
++    expectPosition(first, 'top', 81, 67);
++    expectPosition(second, 'top', 181, 147);
++  });
++
++  it('coordinates adjacent blocks and proves zero text and peer DOM overlap', () => {
++    const scope = surface();
++    const firstUnit = row(scope);
++    const secondUnit = row(scope);
++    highlight(firstUnit, 'first', [rect(100, 100, 20, 20)]);
++    highlight(secondUnit, 'second', [rect(122, 100, 20, 20)]);
++    bodyText(scope, [rect(0, 130, 200, 15)], 'Unannotated body line');
++    const first = stamp(firstUnit, 'first');
++    const second = stamp(secondUnit, 'second');
++
++    layoutAnnotationStamps(scope);
++
++    expectPosition(first, 'top', 101, 87);
++    expectPosition(second, 'top', 133, 87);
++    const bodyRects = annotationStampTextRects(scope);
++    const stampRects = [first.getBoundingClientRect(), second.getBoundingClientRect()];
++    expect(bodyRects).toHaveLength(3);
++    const textOverlaps = stampRects.flatMap((badge) => bodyRects.map((glyph) => positiveIntersection(badge, glyph)));
++    expect(textOverlaps).toEqual([0, 0, 0, 0, 0, 0]);
++    expect(positiveIntersection(stampRects[0], stampRects[1])).toBe(0);
++    // Selected child outlines also remain disjoint and clear of body text.
++    const outlines = stampRects.map((badge) => ({
++      left: badge.left - 1, top: badge.top - 1, width: badge.width + 2, height: badge.height + 2,
++    }));
++    expect(positiveIntersection(outlines[0], outlines[1])).toBe(0);
++    expect(outlines.flatMap((outline) => bodyRects.map((glyph) => positiveIntersection(outline, glyph))))
++      .toEqual([0, 0, 0, 0, 0, 0]);
++  });
++
++  it('protects an unannotated textarea line when placing a nearby stamp', () => {
++    const scope = surface();
++    const unit = row(scope);
++    highlight(unit, 'near-input', [rect(80, 80, 40, 20)]);
++    const textarea = document.createElement('textarea');
++    textarea.value = 'An unannotated preceding line';
++    setBox(textarea, rect(0, 60, 300, 20));
++    textareaGeometry.set(textarea, [{ left: 0, top: 0, width: 300, height: 20 }]);
++    scope.append(textarea);
++    const button = stamp(unit, 'near-input');
++
++    layoutAnnotationStamps(scope);
++
++    expectPosition(button, 'bottom', 81, 103);
++    expect(measureTextareaSelection).toHaveBeenCalledWith(textarea, 0, textarea.value.length);
++    expect(annotationStampTextRects(scope).map((body) => positiveIntersection(button.getBoundingClientRect(), body)))
++      .toEqual([0, 0]);
++  });
++
++  it('converts textarea local fragments into scaled view-space obstacles', () => {
++    const scope = surface();
++    const textarea = document.createElement('textarea');
++    textarea.value = 'Scaled body';
++    setBox(textarea, rect(40, 60, 200, 80), 2);
++    textareaGeometry.set(textarea, [{ left: 3, top: 4, width: 50, height: 10 }]);
++    scope.append(textarea);
++
++    expect(annotationStampTextRects(scope)).toEqual([{ left: 46, top: 68, width: 100, height: 20 }]);
++  });
++
++  it('uses the containing physical page frame at the second page top', () => {
++    const scope = surface(rect(0, 0, 200, 420));
++    frame(scope, rect(0, 0, 200, 200));
++    frame(scope, rect(0, 220, 200, 200), '1');
++    const unit = row(scope);
++    highlight(unit, 'page-two', [rect(80, 220, 40, 20)]);
++    const button = stamp(unit, 'page-two');
++
++    layoutAnnotationStamps(scope);
++
++    expectPosition(button, 'bottom', 81, 243);
++    expect(button.getBoundingClientRect().top).toBeGreaterThanOrEqual(220);
++  });
++
++  it('keeps the entire badge and outline inside the physical page edge', () => {
++    const scope = surface();
++    frame(scope, rect(0, 0, 200, 200));
++    const unit = row(scope);
++    highlight(unit, 'edge', [rect(185, 80, 15, 20)]);
++    const button = stamp(unit, 'edge');
++
++    layoutAnnotationStamps(scope);
++
++    expectPosition(button, 'top', 169, 67);
++    expect(button.getBoundingClientRect().right + 1).toBe(200);
++  });
++
++  it('converts placement back to a scaled and bordered containing block', () => {
++    const scope = surface();
++    const unit = row(scope, rect(40, 50, 200, 300), 2);
++    Object.defineProperties(unit, {
++      clientLeft: { configurable: true, value: 3 },
++      clientTop: { configurable: true, value: 4 },
++    });
++    highlight(unit, 'scaled', [rect(100, 130, 60, 20)]);
++    const button = stamp(unit, 'scaled', 2);
++
++    layoutAnnotationStamps(scope);
++
++    expectPosition(button, 'top', 102, 104, 2);
++    expect(button.style.getPropertyValue('--annotation-badge-left')).toBe('28px');
++    expect(button.style.getPropertyValue('--annotation-badge-top')).toBe('23px');
++  });
++
++  it('compensates both scroll axes of the scaled stamp containing block', () => {
++    const scope = surface();
++    const unit = row(scope, rect(40, 50, 200, 300), 2);
++    Object.defineProperties(unit, {
++      clientLeft: { configurable: true, value: 3 },
++      clientTop: { configurable: true, value: 4 },
++    });
++    unit.scrollLeft = 7;
++    unit.scrollTop = 11;
++    highlight(unit, 'scrolled', [rect(100, 130, 60, 20)]);
++    const button = stamp(unit, 'scrolled', 2);
++
++    layoutAnnotationStamps(scope);
++
++    expectPosition(button, 'top', 102, 104, 2);
++    expect(button.style.getPropertyValue('--annotation-badge-left')).toBe('35px');
++    expect(button.style.getPropertyValue('--annotation-badge-top')).toBe('34px');
++  });
++
++  it('matches the hidden selector after all adjacent whitespace becomes occupied', () => {
++    const scope = surface();
++    const unit = row(scope);
++    highlight(unit, 'dense', [rect(80, 80, 40, 20)]);
++    const button = stamp(unit, 'dense');
++    layoutAnnotationStamps(scope);
++    expectPosition(button, 'top', 81, 67);
++    bodyText(scope, [rect(0, 0, 300, 300)]);
++
++    layoutAnnotationStamps(scope);
++
++    expect(button.dataset.stampLayout).toBe('no-space');
++    expect(button.dataset.stampSide).toBeUndefined();
++    expect(button.matches('[data-annotation-stamp]:not([data-stamp-side])')).toBe(true);
++  });
++
++  it('matches the hidden selector with no currently painted range instead of using stale offsets', () => {
++    const scope = surface();
++    const unit = row(scope);
++    const button = stamp(unit, 'missing');
++
++    layoutAnnotationStamps(scope);
++
++    expect(button.dataset.stampLayout).toBe('unmeasured');
++    expect(button.matches('[data-annotation-stamp]:not([data-stamp-side])')).toBe(true);
++  });
++
++  it('uses a block content box when the block has no body text fragments', () => {
++    const scope = surface();
++    const shell = row(scope);
++    const content = document.createElement('div');
++    content.dataset.annotationStampBlockContent = 'true';
++    setBox(content, rect(80, 80, 100, 60));
++    shell.append(content);
++    const button = stamp(shell, 'block');
++    button.dataset.annotationStampKind = 'block';
++
++    layoutAnnotationStamps(scope);
++
++    expectPosition(button, 'top', 81, 67);
++  });
++
++  it('uses the union of actual body lines for a text-bearing block stamp', () => {
++    const scope = surface();
++    const shell = row(scope);
++    const content = document.createElement('div');
++    content.dataset.annotationStampBlockContent = 'true';
++    setBox(content, rect(80, 80, 100, 100));
++    bodyText(content, [rect(95, 100, 40, 20), rect(85, 125, 70, 20)]);
++    shell.append(content);
++    const button = stamp(shell, 'block');
++    button.dataset.annotationStampKind = 'block';
++
++    layoutAnnotationStamps(scope);
++
++    expectPosition(button, 'top', 86, 87);
++  });
++});

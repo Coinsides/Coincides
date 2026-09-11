@@ -1226,7 +1226,56 @@ assertContainsAll('Block editor shell exposes cross-page fragment markers', bloc
   'blockFragmentContinuationBadge',
 ]);
 
+const textBlockProjection = readProjectFile('src/pages/Notes/canvasEngine/blocks/TextBlockProjection.tsx');
+const annotationStampLayout = readProjectFile('src/pages/Notes/canvasEngine/annotationStampLayout.ts');
+const annotationStampPlacement = readProjectFile('src/pages/Notes/canvasEngine/annotationStampPlacement.ts');
+assertContainsAll('Text annotation stamps register with the shared painted-range layout', textBlockProjection, [
+  'useAnnotationStampLayout(editorRef)',
+  'data-annotation-highlight-ids={JSON.stringify(segment.annotationIds)}',
+  'data-annotation-stamp={annotation.id}',
+]);
+record('Both parent and child annotation stamps participate in shared avoidance',
+  (textBlockProjection.match(/data-annotation-stamp=\{annotation\.id\}/g) || []).length >= 2,
+  'Parent and child stamps must each register their annotation identity');
+assertContainsAll('Whole-block annotation stamps share the surface coordinator', blockEditorLayer, [
+  'useAnnotationStampLayout(shellRef)',
+  'data-annotation-stamp-kind="block"',
+  'data-annotation-stamp-block-content',
+]);
+assertContainsAll('Stamp layout measures painted ranges, body text, peers and both page surfaces', annotationStampLayout, [
+  'data-canvas-engine-version',
+  'data-annotation-highlight-ids',
+  'data-page-frame-index',
+  'data-paper-ink-layer',
+  'annotationStampTextRects',
+  'placeAnnotationStamp',
+  'obstacles',
+  'occupied',
+]);
+assertContainsAll('Stamp placement receives page bounds and independent text and peer obstacles', annotationStampPlacement, [
+  'placeAnnotationStamp',
+  'anchor: StampRect',
+  'bounds: StampRect',
+  'obstacles: readonly StampRect[]',
+  'occupied: readonly StampRect[]',
+]);
+assertContainsNone('Stamp geometry stays outside persisted annotation and DOM truth', annotationStampPlacement, [
+  'annotationTruthRepository',
+  'annotationTruthService',
+  'runtimeDataTypes',
+  'document.',
+  'window.',
+]);
+assertContainsNone('Text annotation stamps do not restore fixed first-line or alternating offsets', textBlockProjection, [
+  'badgeIndex % 2',
+  'Math.max(0, measured.top - 15)',
+  'Math.max(12, measured.top - 2)',
+]);
+
 const noteDetailStyles = readProjectFile('src/pages/Notes/NoteDetail.module.css');
+record('Unmeasured annotation stamps remain hidden until an unobscured side is placed',
+  /\[data-annotation-stamp\]:not\(\[data-stamp-side\]\)\s*\{[^}]*\bvisibility\s*:\s*hidden\s*;/.test(noteDetailStyles),
+  'The unplaced stamp rule must hide its pixels while preserving measurable geometry');
 assertContainsAll('Note detail styles apply document typography variables to writing text areas', noteDetailStyles, [
   '--document-font-family',
   '--document-font-size',
