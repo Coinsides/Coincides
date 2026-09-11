@@ -1,0 +1,27 @@
+{
+  "status": "STOPPED_PENDING_HQ_RULING",
+  "completeD1Acceptance": false,
+  "reason": "D1 describes existing gutter visibility as quiet/hover/selected, but B10 and the current CSS/test require always-visible handles. No visibility policy was changed.",
+  "dataScope": "Synthetic objects and in-memory/jsdom only; no application API or real database",
+  "screenshots": 0,
+  "smokes": [
+    { "id": 1, "status": "NOT_DELIVERED", "evidence": "result-2-validation/client-targeted.json", "detail": "No wall dragging UI. Auto-width implementation is partial, with three F13 regressions and one unchanged old boundary expectation failing." },
+    { "id": 2, "status": "PARTIAL", "evidence": "result-2-projection-gutter.json", "detail": "Actual production React surface rerender: manual stored x260,width500 unchanged; live left inset72->24; paper position332->284 from DOM style inputs. No drag or persistence path exercised; jsdom is not physical pixel hit-testing." },
+    { "id": 3, "status": "NOT_DELIVERED", "detail": "Collection route/repository batch support partially written. Client clamp calculation, atomic command, undo and redo are not wired; history entries created=0. No service transaction behavior test executed." },
+    { "id": 4, "status": "NOT_REVERIFIED", "detail": "Existing insert/append inheritance retained. No new targeted page-creation smoke in this stopped run." },
+    { "id": 5, "status": "PARTIAL", "evidence": "result-2-projection-gutter.json", "detail": "Existing print/overview tests ran in full client suite. Synthetic legacy print normalization still overwrites inset24/200 with preset72/72. Supplement C repair not applied before stop; post-wall projection acceptance not complete." },
+    { "id": 6, "status": "STOPPED_CONFLICT", "evidence": "result-2-projection-gutter.json", "detail": "Real production surface and CSS inputs show gutter opacity1 at idle, mouseEnter and selected states, with no hidden ancestor. Handle lane/size edits not made." }
+  ],
+  "manualPositiveControl": { "evidence": "result-2-manual-control.json", "tests": 4, "passed": 4, "detail": "span600/stored width760: auto inside; manual workspace/crossing. Auto stored.x -20 remains crossing and x620 outside. Original input bytes unchanged in all four cases." },
+  "checks": {
+    "targeted": { "files": 10, "tests": 113, "passed": 109, "failed": 4, "skipped": 0 },
+    "fullClientViaRuntimeGate": { "files": 116, "tests": 1249, "passed": 1245, "failed": 4 },
+    "clientTypecheck": { "exitCode": 0 },
+    "serverTypecheck": { "exitCode": 0 },
+    "clientBuild": { "exitCode": 0 },
+    "serverBuild": { "exitCode": 0 },
+    "canvasEngineModelContractCheck": { "groups": 60, "passed": 60, "exitCode": 0 },
+    "runtimeGate": { "exitCode": 1, "stoppedAt": "test:unit", "laterSteps": "not reached" },
+    "projectionGutterAuditAndRegressions": { "files": 3, "tests": 33, "passed": 33 }
+  }
+}

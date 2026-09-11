@@ -1,0 +1,338 @@
+{
+  "scope": "Synthetic data only, real React surface + DOM/CSS inputs; no application API or database",
+  "limits": "jsdom cannot perform browser hit-testing or physical pixel measurements. Screen positions below are sums of actual production DOM style inputs.",
+  "gutter": {
+    "conclusion": "Current implementation is always visible, including idle/unselected. No ancestor hides the editing gutter. This contradicts the order describing quiet/hover/selected as the existing gutter behavior.",
+    "gutterRule": "\n  position: absolute;\n  top: 0;\n  right: calc(100% + 4px);\n  display: flex;\n  align-items: center;\n  gap: 3px;\n  min-height: 27px;\r\n  opacity: 1;\n",
+    "buttonRules": "\n  border: 1px solid transparent;\r\n  border-radius: var(--radius-sm);\r\n  background: color-mix(in srgb, var(--text-muted) 16%, transparent);\n  color: var(--text-secondary);\n\n\r\n  display: inline-flex;\r\n  align-items: center;\r\n  justify-content: center;\r\n  width: 14px;\n  height: 20px;\n  padding: 0;\n  cursor: grab;\n  touch-action: none;\n",
+    "states": [
+      {
+        "state": "idle/unselected",
+        "present": true,
+        "gutterOpacity": "1",
+        "gutterRight": "calc(100% + 4px)",
+        "buttonWidth": "14px",
+        "buttonHeight": "20px",
+        "blockClass": "_block_ae2ed4 _blockBox_ae2ed4     ",
+        "ancestors": [
+          {
+            "tag": "DIV",
+            "className": "_textUnitGutter_ae2ed4",
+            "hidden": false,
+            "opacity": "1",
+            "display": "flex",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "className": "_textUnitRow_ae2ed4",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "grid",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "className": "_textUnitEditor_ae2ed4",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "className": "",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "ARTICLE",
+            "className": "_block_ae2ed4 _blockBox_ae2ed4     ",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "className": "_blockList_ae2ed4 _blockListPage_ae2ed4 ",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "className": "_pageReadingPaper_ae2ed4",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "className": "_pageReadingSpace_ae2ed4",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "SECTION",
+            "className": "_writingSurface_ae2ed4 _pageReadingSurface_ae2ed4   ",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "block",
+            "visibility": "visible"
+          }
+        ]
+      },
+      {
+        "state": "mouseEnter delivered to row",
+        "present": true,
+        "gutterOpacity": "1",
+        "gutterRight": "calc(100% + 4px)",
+        "buttonWidth": "14px",
+        "buttonHeight": "20px",
+        "blockClass": "_block_ae2ed4 _blockBox_ae2ed4     ",
+        "ancestors": [
+          {
+            "tag": "DIV",
+            "className": "_textUnitGutter_ae2ed4",
+            "hidden": false,
+            "opacity": "1",
+            "display": "flex",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "className": "_textUnitRow_ae2ed4",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "grid",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "className": "_textUnitEditor_ae2ed4",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "className": "",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "ARTICLE",
+            "className": "_block_ae2ed4 _blockBox_ae2ed4     ",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "className": "_blockList_ae2ed4 _blockListPage_ae2ed4 ",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "className": "_pageReadingPaper_ae2ed4",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "className": "_pageReadingSpace_ae2ed4",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "SECTION",
+            "className": "_writingSurface_ae2ed4 _pageReadingSurface_ae2ed4   ",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "block",
+            "visibility": "visible"
+          }
+        ]
+      },
+      {
+        "state": "selected block",
+        "present": true,
+        "gutterOpacity": "1",
+        "gutterRight": "calc(100% + 4px)",
+        "buttonWidth": "14px",
+        "buttonHeight": "20px",
+        "blockClass": "_block_ae2ed4 _blockBox_ae2ed4   _blockActive_ae2ed4  ",
+        "ancestors": [
+          {
+            "tag": "DIV",
+            "className": "_textUnitGutter_ae2ed4",
+            "hidden": false,
+            "opacity": "1",
+            "display": "flex",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "className": "_textUnitRow_ae2ed4",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "grid",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "className": "_textUnitEditor_ae2ed4",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "className": "",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "ARTICLE",
+            "className": "_block_ae2ed4 _blockBox_ae2ed4   _blockActive_ae2ed4  ",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "className": "_blockList_ae2ed4 _blockListPage_ae2ed4 ",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "className": "_pageReadingPaper_ae2ed4",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "DIV",
+            "className": "_pageReadingSpace_ae2ed4",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "block",
+            "visibility": "visible"
+          },
+          {
+            "tag": "SECTION",
+            "className": "_writingSurface_ae2ed4 _pageReadingSurface_ae2ed4   ",
+            "hidden": false,
+            "opacity": "1 (CSS initial)",
+            "display": "block",
+            "visibility": "visible"
+          }
+        ]
+      }
+    ],
+    "readonlyException": "NoteReadOnlyPageContent injects a fragment-scoped display:none rule for print/overview only; it does not govern editing gutters."
+  },
+  "projection": {
+    "conclusion": "D is already carried by live paper.paddingLeft from usePageReadingPresentation. resolveScreenRect stays relative to that content container; adding inset there would double-count.",
+    "normal": {
+      "left": 72,
+      "contentOrigin": 72,
+      "blockLocalScreenX": 260,
+      "blockOnPaperX": 332,
+      "guideContentOriginOnPaperX": 72,
+      "projectedFrameX": -72,
+      "projectedFrameOnPaperX": 0,
+      "stored": {
+        "x": 260,
+        "y": 0,
+        "width": 500,
+        "height": 120,
+        "coordinate_space": "page_frame_local",
+        "frame_id": "synthetic-alignment-frame",
+        "surface": "formal_page",
+        "width_mode": "manual"
+      }
+    },
+    "expanded": {
+      "left": 24,
+      "contentOrigin": 24,
+      "blockLocalScreenX": 260,
+      "blockOnPaperX": 284,
+      "guideContentOriginOnPaperX": 24,
+      "projectedFrameX": -24,
+      "projectedFrameOnPaperX": 0,
+      "stored": {
+        "x": 260,
+        "y": 0,
+        "width": 500,
+        "height": 120,
+        "coordinate_space": "page_frame_local",
+        "frame_id": "synthetic-alignment-frame",
+        "surface": "formal_page",
+        "width_mode": "manual"
+      }
+    }
+  },
+  "legacyPrint": {
+    "conclusion": "The current legacy normalization replaces existing inset with preset; C explicitly authorizes repairing this after the new conflict is resolved.",
+    "before": {
+      "id": "synthetic-alignment-frame",
+      "role": "primary_page_frame",
+      "exportable": true,
+      "x": 0,
+      "y": 0,
+      "width": 904,
+      "height": 1278,
+      "templateId": "a4_portrait",
+      "contentInset": {
+        "left": 24,
+        "right": 200,
+        "top": 0,
+        "bottom": 96
+      }
+    },
+    "after": {
+      "id": "synthetic-alignment-frame",
+      "role": "primary_page_frame",
+      "exportable": true,
+      "x": 0,
+      "y": 0,
+      "width": 904,
+      "height": 1278,
+      "pageSize": "A4",
+      "templateId": "a4_portrait",
+      "contentInset": {
+        "top": 0,
+        "right": 72,
+        "bottom": 96,
+        "left": 72
+      }
+    }
+  }
+}

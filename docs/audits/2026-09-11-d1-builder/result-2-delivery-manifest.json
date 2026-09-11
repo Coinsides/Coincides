@@ -1,0 +1,190 @@
+{
+  "status": "STOPPED, incomplete worktree, not approved",
+  "trackedDiff": [
+    {
+      "path": "client/src/pages/Notes/canvasEngine/canvasObjectRepository.ts",
+      "added": 37,
+      "removed": 1
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayoutModel.ts",
+      "added": 1,
+      "removed": 1
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/modePolicyService.ts",
+      "added": 4,
+      "removed": 2
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/placementContractService.ts",
+      "added": 22,
+      "removed": 4
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/placementService.ts",
+      "added": 22,
+      "removed": 7
+    },
+    {
+      "path": "docs/agent-ops/handoffs/2026-09-11-v13-5-d1-walls-order.md",
+      "added": 91,
+      "removed": 0
+    },
+    {
+      "path": "server/src/routes/canvasObjects.ts",
+      "added": 2,
+      "removed": 0
+    },
+    {
+      "path": "server/src/services/canvasObjects.ts",
+      "added": 35,
+      "removed": 0
+    },
+    {
+      "path": "server/src/validators/index.ts",
+      "added": 12,
+      "removed": 4
+    }
+  ],
+  "auditFiles": [
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/.vite-result-2-manual-control/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+      "lines": 1,
+      "bytes": 151
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/.vite-result-2-projection/vitest/da39a3ee5e6b4b0d3255bfef95601890afd80709/results.json",
+      "lines": 1,
+      "bytes": 390
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-manual-control-results.json",
+      "lines": 1,
+      "bytes": 1955
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-manual-control.config.mjs",
+      "lines": 18,
+      "bytes": 672
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-manual-control.json",
+      "lines": 159,
+      "bytes": 4476
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-manual-control.test.ts",
+      "lines": 57,
+      "bytes": 3487
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-projection-gutter-attempt-1.json",
+      "lines": 1,
+      "bytes": 12369
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-projection-gutter-attempt-2.json",
+      "lines": 1,
+      "bytes": 15332
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-projection-gutter-attempt-3.json",
+      "lines": 1,
+      "bytes": 14298
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-projection-gutter-results.json",
+      "lines": 1,
+      "bytes": 13194
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-projection-gutter.config.mjs",
+      "lines": 27,
+      "bytes": 1140
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-projection-gutter.json",
+      "lines": 338,
+      "bytes": 10936
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-projection-gutter.test.tsx",
+      "lines": 219,
+      "bytes": 15706
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-smoke-status.json",
+      "lines": 27,
+      "bytes": 2895
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-validation/canvas-engine-contract.log",
+      "lines": 69,
+      "bytes": 6696
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-validation/checks.json",
+      "lines": 108,
+      "bytes": 2721
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-validation/client-build.log",
+      "lines": 80,
+      "bytes": 5336
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-validation/client-targeted.json",
+      "lines": 1,
+      "bytes": 50119
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-validation/client-targeted.log",
+      "lines": 162,
+      "bytes": 9530
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-validation/client-typecheck.log",
+      "lines": 0,
+      "bytes": 0
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-validation/run-checks.mjs",
+      "lines": 41,
+      "bytes": 2639
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-validation/runtime-gate.log",
+      "lines": 393,
+      "bytes": 37736
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-validation/server-build.log",
+      "lines": 80,
+      "bytes": 9584
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-validation/server-typecheck.log",
+      "lines": 0,
+      "bytes": 0
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-validation/targeted-files.json",
+      "lines": 12,
+      "bytes": 684
+    },
+    {
+      "path": "docs/audits/2026-09-11-d1-builder/result-2-delivery-manifest.json",
+      "lines": 190,
+      "bytes": 5103
+    }
+  ],
+  "summary": {
+    "trackedFiles": 9,
+    "trackedAdded": 226,
+    "trackedRemoved": 19,
+    "newAuditFiles": 26,
+    "newAuditLines": 1988,
+    "newAuditBytes": 227149
+  }
+}

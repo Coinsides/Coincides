@@ -1,0 +1,159 @@
+{
+  "scope": "Classifier evidence only; D1 stopped and incomplete",
+  "cases": [
+    {
+      "name": "stale auto snapshot derives inside",
+      "status": "paused-partial-implementation",
+      "span": 600,
+      "input": {
+        "block_id": "result-2-control-block",
+        "placement_id": "result-2-control-placement",
+        "layout": {
+          "x": 0,
+          "y": 120.25,
+          "width": 760,
+          "height": 100,
+          "coordinate_space": "page_frame_local",
+          "frame_id": "result-2-control-frame",
+          "surface": "formal_page"
+        }
+      },
+      "hydrated": {
+        "x": 0,
+        "y": 120.25,
+        "width": 760,
+        "height": 100,
+        "coordinate_space": "page_frame_local",
+        "frame_id": "result-2-control-frame",
+        "surface": "formal_page",
+        "boundary_role": "inside",
+        "surface_authority": {
+          "coordinateSpace": "page_frame_local",
+          "pageBoundary": {
+            "left": 0,
+            "right": 600,
+            "frameId": "result-2-control-frame"
+          }
+        }
+      },
+      "workspace": false,
+      "storedBytesUnchanged": true
+    },
+    {
+      "name": "same stale manual snapshot remains crossing",
+      "status": "paused-partial-implementation",
+      "span": 600,
+      "input": {
+        "block_id": "result-2-control-block",
+        "placement_id": "result-2-control-placement",
+        "layout": {
+          "x": 0,
+          "y": 120.25,
+          "width": 760,
+          "height": 100,
+          "coordinate_space": "page_frame_local",
+          "frame_id": "result-2-control-frame",
+          "surface": "formal_page",
+          "width_mode": "manual"
+        }
+      },
+      "hydrated": {
+        "x": 0,
+        "y": 120.25,
+        "width": 760,
+        "height": 100,
+        "coordinate_space": "page_frame_local",
+        "frame_id": "result-2-control-frame",
+        "surface": "canvas_workspace",
+        "width_mode": "manual",
+        "boundary_role": "crossing",
+        "surface_authority": {
+          "coordinateSpace": "page_frame_local",
+          "pageBoundary": {
+            "left": 0,
+            "right": 600,
+            "frameId": "result-2-control-frame"
+          }
+        }
+      },
+      "workspace": true,
+      "storedBytesUnchanged": true
+    },
+    {
+      "name": "auto stored x crosses left wall",
+      "status": "paused-partial-implementation",
+      "span": 600,
+      "input": {
+        "block_id": "result-2-control-block",
+        "placement_id": "result-2-control-placement",
+        "layout": {
+          "x": -20,
+          "y": 120.25,
+          "width": 760,
+          "height": 100,
+          "coordinate_space": "page_frame_local",
+          "frame_id": "result-2-control-frame",
+          "surface": "formal_page"
+        }
+      },
+      "hydrated": {
+        "x": -20,
+        "y": 120.25,
+        "width": 760,
+        "height": 100,
+        "coordinate_space": "page_frame_local",
+        "frame_id": "result-2-control-frame",
+        "surface": "canvas_workspace",
+        "boundary_role": "crossing",
+        "surface_authority": {
+          "coordinateSpace": "page_frame_local",
+          "pageBoundary": {
+            "left": 0,
+            "right": 600,
+            "frameId": "result-2-control-frame"
+          }
+        }
+      },
+      "workspace": true,
+      "storedBytesUnchanged": true
+    },
+    {
+      "name": "auto stored x exceeds right wall",
+      "status": "paused-partial-implementation",
+      "span": 600,
+      "input": {
+        "block_id": "result-2-control-block",
+        "placement_id": "result-2-control-placement",
+        "layout": {
+          "x": 620,
+          "y": 120.25,
+          "width": 760,
+          "height": 100,
+          "coordinate_space": "page_frame_local",
+          "frame_id": "result-2-control-frame",
+          "surface": "formal_page"
+        }
+      },
+      "hydrated": {
+        "x": 620,
+        "y": 120.25,
+        "width": 760,
+        "height": 100,
+        "coordinate_space": "page_frame_local",
+        "frame_id": "result-2-control-frame",
+        "surface": "canvas_workspace",
+        "boundary_role": "outside",
+        "surface_authority": {
+          "coordinateSpace": "page_frame_local",
+          "pageBoundary": {
+            "left": 0,
+            "right": 600,
+            "frameId": "result-2-control-frame"
+          }
+        }
+      },
+      "workspace": true,
+      "storedBytesUnchanged": true
+    }
+  ]
+}

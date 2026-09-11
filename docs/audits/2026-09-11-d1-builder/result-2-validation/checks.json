@@ -1,0 +1,108 @@
+[
+  {
+    "name": "client-targeted",
+    "cwd": "client",
+    "command": [
+      "node",
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "--maxWorkers=2",
+      "--reporter=default",
+      "--reporter=json",
+      "--outputFile.json=D:\\Coinsides\\v2.x\\Coincides\\docs\\audits\\2026-09-11-d1-builder\\result-2-validation\\client-targeted.json",
+      "src/pages/Notes/canvasEngine/boundaryAccount.test.tsx",
+      "src/pages/Notes/canvasEngine/coordinateContractIntegration.test.tsx",
+      "src/pages/Notes/canvasEngine/genericPlacementContract.test.ts",
+      "src/pages/Notes/canvasEngine/hooks/autoWidthFrameSave.test.tsx",
+      "src/pages/Notes/canvasEngine/hooks/useBlockPlacementInteractions.test.tsx",
+      "src/pages/Notes/canvasEngine/hooks/usePlacementHistory.test.tsx",
+      "src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx",
+      "src/pages/Notes/canvasEngine/placementAutoWidth.test.ts",
+      "src/pages/Notes/canvasEngine/placementContractService.test.ts",
+      "src/pages/Notes/canvasEngine/textUnitGutterDeOccupation.test.ts"
+    ],
+    "exitCode": 1,
+    "signal": null,
+    "elapsedMs": 4953
+  },
+  {
+    "name": "client-typecheck",
+    "cwd": "client",
+    "command": [
+      "node",
+      "node_modules/typescript/bin/tsc",
+      "-b",
+      "--pretty",
+      "false"
+    ],
+    "exitCode": 0,
+    "signal": null,
+    "elapsedMs": 6924
+  },
+  {
+    "name": "server-typecheck",
+    "cwd": "server",
+    "command": [
+      "node",
+      "node_modules/typescript/bin/tsc",
+      "--noEmit",
+      "--pretty",
+      "false"
+    ],
+    "exitCode": 0,
+    "signal": null,
+    "elapsedMs": 4470
+  },
+  {
+    "name": "client-build",
+    "cwd": "client",
+    "command": [
+      "node",
+      "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+      "run",
+      "build"
+    ],
+    "exitCode": 0,
+    "signal": null,
+    "elapsedMs": 10819
+  },
+  {
+    "name": "server-build",
+    "cwd": "server",
+    "command": [
+      "node",
+      "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+      "run",
+      "build"
+    ],
+    "exitCode": 0,
+    "signal": null,
+    "elapsedMs": 6041
+  },
+  {
+    "name": "canvas-engine-contract",
+    "cwd": "client",
+    "command": [
+      "node",
+      "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+      "run",
+      "smoke:canvas-engine-model-contract"
+    ],
+    "exitCode": 0,
+    "signal": null,
+    "elapsedMs": 1586
+  },
+  {
+    "name": "runtime-gate",
+    "cwd": ".",
+    "command": [
+      "node",
+      "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+      "run",
+      "verify:v2-bn8-runtime"
+    ],
+    "exitCode": 1,
+    "signal": null,
+    "elapsedMs": 18139
+  }
+]
