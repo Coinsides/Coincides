@@ -9,6 +9,8 @@ import {
   DRAFT_RECOVERY_STORAGE_KEY_V2,
   createBlockEditRecoveryKey,
   listBlockEditRecoveryReceipts,
+  rememberBlockEditRecoveryReceipt,
+  type BlockEditRecoveryReceipt,
 } from '../draftBlockPersistence';
 import { createTextBlockContentV1, getTextFlowContent, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
 import { NOTE_SLASH_COMMANDS } from '../../noteSlashCommands';
@@ -962,6 +964,198 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     expect(subject.result.current.captureBoardTextRanges('block-1').ranges).toEqual([]);
     expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
     await expect(subject.result.current.whenIdle()).resolves.toBeUndefined();
+  });
+
+  function queueF19Recovery(): BlockEditRecoveryReceipt {
+    const flow = createTextBlockContentV1('recovered draft');
+    const receipt: BlockEditRecoveryReceipt = {
+      version: 2, kind: 'block_edit_recovery',
+      recoveryKey: createBlockEditRecoveryKey(note.id, 'block-1', 0, 1, 'previous-visit'),
+      noteId: note.id, requestedNoteId: note.id, blockId: 'block-1', mountNonce: 'previous-visit',
+      creationGeneration: 0, operationSequence: 1, hydrationEpoch: 1, queuedAt: '2026-09-11T00:00:00Z',
+      text: 'recovered draft', plainText: 'recovered draft', textFlow: flow,
+      contentJson: { body: 'recovered draft', [TEXT_FLOW_CONTENT_KEY]: flow, retained: 'draft metadata' },
+      baseRevision: 3, annotationRanges: [], boardRangeSnapshot: { ranges: [] },
+    };
+    expect(rememberBlockEditRecoveryReceipt(receipt)).toBe(true);
+    return receipt;
+  }
+
+  const f19Conflict = { response: { status: 409, data: { error: 'stale_revision', details: { code: 'stale_revision', current_revision: 9 } } } };
+
+  it('F19 exposes stale Apply as conflict, reads differences without writes, then explicitly saves the exact draft on the current revision', async () => {
+    const queued = queueF19Recovery();
+    const current = { ...serverBlock('changed elsewhere', false), text_save_revision: 9 };
+    durableBlocks = [current];
+    mocks.atomicPut.mockRejectedValueOnce(f19Conflict);
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    expect(mocks.atomicPut).not.toHaveBeenCalled();
+    await act(async () => { expect(await subject.result.current.applyBlockEditRecovery(queued.recoveryKey)).toBe(false); });
+    const failed = subject.result.current.blockEditRecoveryReceipts[0];
+    expect(failed.recoveryKey).not.toBe(queued.recoveryKey);
+    expect(subject.result.current.blockEditRecoveryConflicts[failed.recoveryKey]).toBe(true);
+    expect(subject.result.current.blocks[0].text_save_revision).toBe(3);
+    const beforeRead = sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2);
+    await act(async () => { expect(await subject.result.current.inspectBlockEditRecovery(failed.recoveryKey)).toMatchObject(current); });
+    expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2)).toBe(beforeRead);
+    expect(subject.result.current.blocks[0].text_save_revision).toBe(3);
+    expect(mocks.atomicPut).toHaveBeenCalledTimes(1);
+    await act(async () => { expect(await subject.result.current.replayBlockEditRecovery(failed.recoveryKey)).toBe(true); });
+    expect(mocks.atomicPut.mock.calls.map(([, payload]) => payload.base_revision)).toEqual([3, 9]);
+    expect(mocks.atomicPut.mock.calls[1]).toEqual(['/note-blocks/block-1/text-save', {
+      note_id: note.id, base_revision: 9,
+      block: { content_json: failed.contentJson, plain_text: failed.plainText },
+      annotations: { range_updates: [] }, text_ranges: [],
+    }]);
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
+    expect(listBlockEditRecoveryReceipts(note.id)).toEqual([]);
+    expect(durableBlocks[0]).toMatchObject({ plain_text: failed.plainText, content_json: failed.contentJson, text_save_revision: 10 });
+  });
+
+  it('F19 returns a second stale revision to conflict with no automatic resubmission', async () => {
+    const queued = queueF19Recovery();
+    durableBlocks = [{ ...serverBlock('current', false), text_save_revision: 9 }];
+    mocks.atomicPut.mockRejectedValue(f19Conflict);
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    await act(async () => { expect(await subject.result.current.replayBlockEditRecovery(queued.recoveryKey)).toBe(false); });
+    const failed = subject.result.current.blockEditRecoveryReceipts[0];
+    expect(failed.baseRevision).toBe(9);
+    expect(subject.result.current.blockEditRecoveryConflicts[failed.recoveryKey]).toBe(true);
+    expect(mocks.atomicPut).toHaveBeenCalledTimes(1);
+    expect(durableBlocks[0].plain_text).toBe('current');
+  });
+
+  it.each([503, 'network', 409] as const)('F19 keeps non-stale failure %s on the original frozen Apply retry path', async (failure) => {
+    const queued = queueF19Recovery();
+    durableBlocks = [{ ...serverBlock('current', false), text_save_revision: 3 }];
+    mocks.atomicPut.mockRejectedValueOnce(failure === 'network' ? new Error('offline')
+      : { response: { status: failure, data: { error: 'unavailable' } } });
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    await act(async () => { expect(await subject.result.current.applyBlockEditRecovery(queued.recoveryKey)).toBe(false); });
+    const failed = subject.result.current.blockEditRecoveryReceipts[0];
+    expect(subject.result.current.blockEditRecoveryConflicts[failed.recoveryKey]).not.toBe(true);
+    const firstPayload = structuredClone(mocks.atomicPut.mock.calls[0][1]);
+    await act(async () => { expect(await subject.result.current.applyBlockEditRecovery(failed.recoveryKey)).toBe(true); });
+    expect(mocks.atomicPut.mock.calls[1][1]).toEqual(firstPayload);
+    expect(firstPayload.base_revision).toBe(3);
+    expect(listBlockEditRecoveryReceipts(note.id)).toEqual([]);
+  });
+
+  it('F19 discard clears only this draft without writing the current body', async () => {
+    const queued = queueF19Recovery();
+    durableBlocks = [{ ...serverBlock('keep current body', false), text_save_revision: 9 }];
+    const before = structuredClone(durableBlocks);
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    act(() => { expect(subject.result.current.dismissBlockEditRecovery(queued.recoveryKey)).toBe(true); });
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
+    expect(listBlockEditRecoveryReceipts(note.id)).toEqual([]);
+    expect(durableBlocks).toEqual(before);
+    expect(mocks.atomicPut).not.toHaveBeenCalled();
+  });
+
+  it('F19 ordinary replay uses current board evidence and never forwards a retained history intent', async () => {
+    const queued = queueF19Recovery();
+    const range: BoardTextRangeV1 = { id: 'f19-range', board_id: 'board', note_id: note.id, block_id: 'block-1',
+      text_flow_id: 'textflow-block-1', text_unit_id: queued.textFlow!.units[0].id,
+      status: 'drifted', start_offset: null, end_offset: null, excerpt: 'evidence before drift',
+      pre_edit_offsets: { start_offset: 2, end_offset: 8 }, at: 'at', created_at: 'created', updated_at: 'updated' };
+    rememberBlockEditRecoveryReceipt({ ...queued, boardRangeSnapshot: { ranges: [{ ...range, status: 'active',
+      start_offset: 0, end_offset: 9, excerpt: 'recovered', pre_edit_offsets: null }], historyRestore: true } });
+    durableBlocks = [{ ...serverBlock('current', false), text_save_revision: 9 }];
+    mocks.boardRangesGet.mockResolvedValue({ data: { text_ranges: [range] } });
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    await act(async () => { expect(await subject.result.current.replayBlockEditRecovery(queued.recoveryKey)).toBe(true); });
+    const payload = mocks.atomicPut.mock.calls[0][1];
+    expect(payload.base_revision).toBe(9);
+    expect(payload.text_ranges).toEqual([{ id: range.id, block_id: range.block_id, text_flow_id: range.text_flow_id,
+      text_unit_id: range.text_unit_id, status: 'drifted', start_offset: null, end_offset: null,
+      excerpt: range.excerpt, pre_edit_offsets: range.pre_edit_offsets }]);
+    expect(JSON.stringify(payload)).not.toContain('history_restore');
+    expect(payload.block.content_json).toEqual(queued.contentJson);
+  });
+
+  it('F19 retries a 503 after informed replay with the complete newly frozen payload', async () => {
+    const queued = queueF19Recovery();
+    durableBlocks = [{ ...serverBlock('current', false), text_save_revision: 9,
+      content_json: { body: 'current', currentOnlyField: 'must not leak into draft' } }];
+    mocks.atomicPut.mockRejectedValueOnce({ response: { status: 503 } });
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    await act(async () => { expect(await subject.result.current.replayBlockEditRecovery(queued.recoveryKey)).toBe(false); });
+    const failed = subject.result.current.blockEditRecoveryReceipts[0];
+    expect(subject.result.current.blockEditRecoveryConflicts[failed.recoveryKey]).not.toBe(true);
+    expect(mocks.atomicPut.mock.calls[0][1].block.content_json).toEqual(queued.contentJson);
+    await act(async () => { expect(await subject.result.current.applyBlockEditRecovery(failed.recoveryKey)).toBe(true); });
+    expect(mocks.atomicPut.mock.calls[1][1]).toEqual(mocks.atomicPut.mock.calls[0][1]);
+    expect(listBlockEditRecoveryReceipts(note.id)).toEqual([]);
+  });
+
+  it('F19 adopts current rebased board and annotation ranges so the next ordinary edit starts at the saved body', async () => {
+    const queued = queueF19Recovery();
+    const flow = queued.textFlow!;
+    flow.units[0].text = 'prefix alpha beta gamma';
+    rememberBlockEditRecoveryReceipt({ ...queued, text: flow.units[0].text, plainText: flow.units[0].text,
+      contentJson: { [TEXT_FLOW_CONTENT_KEY]: flow }, textFlow: flow });
+    const initialFlow = structuredClone(flow);
+    initialFlow.units[0].text = 'alpha beta gamma';
+    const initial = { ...serverBlock('alpha beta gamma', false), text_save_revision: 3,
+      content_json: { [TEXT_FLOW_CONTENT_KEY]: initialFlow } };
+    durableBlocks = [initial];
+    const range: BoardTextRangeV1 = { id: 'adopt-range', board_id: 'board', note_id: note.id, block_id: 'block-1',
+      text_flow_id: 'textflow-block-1', text_unit_id: flow.units[0].id, status: 'active',
+      start_offset: 6, end_offset: 10, excerpt: 'beta', pre_edit_offsets: null,
+      at: 'at', created_at: 'created', updated_at: 'updated' };
+    durableAnnotationTruths = [annotationWithOffsets(note.id, 6, 10, 'beta')];
+    mocks.boardRangesGet.mockResolvedValue({ data: { text_ranges: [range] } });
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    const remoteFlow = structuredClone(flow);
+    remoteFlow.units[0].text = 'other alpha beta gamma';
+    durableBlocks = [{ ...initial, plain_text: remoteFlow.units[0].text, text_save_revision: 9,
+      content_json: { [TEXT_FLOW_CONTENT_KEY]: remoteFlow } }];
+    durableAnnotationTruths = [annotationWithOffsets(note.id, 12, 16, 'beta')];
+    act(() => { subject.result.current.setAnnotationTruthsSnapshot([{ ...subject.result.current.annotationTruths[0], raw_label: 'pending local rename' }]); });
+    mocks.boardRangesGet.mockResolvedValue({ data: { text_ranges: [{ ...range, start_offset: 12, end_offset: 16 }] } });
+    await act(async () => { expect(await subject.result.current.replayBlockEditRecovery(queued.recoveryKey)).toBe(true); });
+    expect(subject.result.current.captureBoardTextRanges('block-1').ranges[0]).toMatchObject({ start_offset: 13, end_offset: 17, excerpt: 'beta' });
+    expect(subject.result.current.annotationTruths[0].ranges[0]).toMatchObject({ start_offset: 13, end_offset: 17 });
+    expect(subject.result.current.annotationTruths[0].raw_label).toBe('pending local rename');
+    const nextFlow = structuredClone(flow);
+    nextFlow.units[0].text = 'x ' + flow.units[0].text;
+    await act(async () => { expect(await subject.result.current.saveBlock(subject.result.current.blocks[0], nextFlow.units[0].text, { textFlow: nextFlow })).toMatchObject({ status: 'saved' }); });
+    expect(mocks.atomicPut.mock.calls[1][1].text_ranges[0]).toMatchObject({ start_offset: 15, end_offset: 19, status: 'active' });
+  });
+
+  it.each(['replaced receipt', 'route changed', 'read failed', 'new unsaved draft'] as const)('F19 keeps recovery intact and sends no save when current read is stale: %s', async (reason) => {
+    const queued = queueF19Recovery();
+    durableBlocks = [{ ...serverBlock('current', false), text_save_revision: 9 }];
+    const subject = renderHook(({ noteId }) => useNoteCanvasDataAdapter({ ...stableAdapterOptions, noteId }),
+      { wrapper, initialProps: { noteId: note.id } });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    const held = deferred<{ data: NoteBlock[] }>();
+    mocks.get.mockImplementationOnce(() => held.promise);
+    let replay!: Promise<boolean>;
+    act(() => { replay = subject.result.current.replayBlockEditRecovery(queued.recoveryKey); });
+    if (reason === 'replaced receipt') rememberBlockEditRecoveryReceipt({ ...queued, operationSequence: 2,
+      recoveryKey: createBlockEditRecoveryKey(note.id, queued.blockId, 0, 2, queued.mountNonce) });
+    if (reason === 'route changed') subject.rerender({ noteId: 'another-note' });
+    if (reason === 'new unsaved draft') act(() => { subject.result.current.setBlockTextDrafts({ [queued.blockId]: 'keep newer input' }); });
+    await act(async () => {
+      if (reason === 'read failed') {
+        held.reject(new Error('offline'));
+        await expect(replay).rejects.toThrow('offline');
+      } else {
+        held.resolve({ data: durableBlocks });
+        expect(await replay).toBe(false);
+      }
+    });
+    expect(mocks.atomicPut).not.toHaveBeenCalled();
+    expect(listBlockEditRecoveryReceipts(note.id)).toHaveLength(1);
   });
 
   it.each([

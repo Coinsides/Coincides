@@ -1259,9 +1259,10 @@ assertContainsAll('Note detail styles render cross-page Block fragment markers',
   '.blockFragmentContinuationBadge',
 ]);
 assertContainsAll('Note detail styles render PageFrame-aware Export Preview groups', noteDetailStyles, [
-  '.exportPreviewPageFrameGroup',
-  '.exportPreviewPageFrameMeta',
-  '.exportPreviewPageFrameTypography',
+  // E1 uses the shared group class; require rule heads, not near-name prefixes.
+  '.exportPreviewGroup {',
+  '.exportPreviewPageFrameMeta {',
+  '.exportPreviewPageFrameTypography {',
 ]);
 assertContainsAll('Note detail styles render PageStack shell controls', noteDetailStyles, [
   '.pageStackNumberBadge',

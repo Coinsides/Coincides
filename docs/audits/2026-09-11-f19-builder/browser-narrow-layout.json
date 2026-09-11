@@ -1,0 +1,42 @@
+{
+  "buttons": [
+    {
+      "height": 32,
+      "right": 156.984375,
+      "text": "View differences",
+      "width": 119.984375,
+      "x": 37
+    },
+    {
+      "height": 32,
+      "right": 247.46875,
+      "text": "Replay draft on current version",
+      "width": 210.46875,
+      "x": 37
+    },
+    {
+      "height": 32,
+      "right": 161.28125,
+      "text": "Discard this draft",
+      "width": 124.28125,
+      "x": 37
+    }
+  ],
+  "cells": [
+    {
+      "text": "Recovery draft · unit 1",
+      "width": 301,
+      "x": 37,
+      "y": 583.5
+    },
+    {
+      "text": "Current text · unit 1",
+      "width": 301,
+      "x": 37,
+      "y": 670
+    }
+  ],
+  "comparisonText": "Text comparison, current version 10. Current text can change again before replay.Recovery draft · unit 1Recovered draft: retain this carefully written text.Current text · unit 1Another editor saved again while replay was in flight.",
+  "documentScrollWidth": 375,
+  "viewportClientWidth": 375
+}

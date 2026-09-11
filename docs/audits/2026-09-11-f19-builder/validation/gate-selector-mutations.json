@@ -1,0 +1,104 @@
+{
+  "status": "pass",
+  "date": "2026-09-11",
+  "nodeVersion": "v22.22.1",
+  "authority": "handoff supplement one, A; boundary semantics unchanged",
+  "assertion": "Note detail styles render PageFrame-aware Export Preview groups",
+  "selectors": [
+    ".exportPreviewGroup",
+    ".exportPreviewPageFrameMeta",
+    ".exportPreviewPageFrameTypography"
+  ],
+  "greenRun": {
+    "command": "npm.cmd run check:canvas-runtime-boundary",
+    "exitCode": 0,
+    "checksPassed": 159,
+    "logFile": "gate-boundary-final.log"
+  },
+  "mutationMethod": "Each child directly executes the entire on-disk gate through node --import data URL. Only fs.readFileSync for NoteDetail.module.css is shimmed to return a memory-only variant; all rules for exactly one selector are removed. The second variant also supplies a near-name decoy. No source variant is written to disk.",
+  "directRemovalVariants": 3,
+  "nearNameVariants": 3,
+  "expectedFailures": 6,
+  "baselineCssSha256": "a6a8f43099b9b7d8bb508b6bad1a8e9c1a87fc1fffc8cf4bfe96741e0e7fcc0e",
+  "finalCssSha256": "a6a8f43099b9b7d8bb508b6bad1a8e9c1a87fc1fffc8cf4bfe96741e0e7fcc0e",
+  "gateSha256": "a05193cee82064c929d615ac7c462fb44856d6e5ef31c1a3963a28e21865f43b",
+  "finalGateSha256": "a05193cee82064c929d615ac7c462fb44856d6e5ef31c1a3963a28e21865f43b",
+  "diskCssUnchanged": true,
+  "diskGateUnchangedDuringMutation": true,
+  "sourceVariantsWrittenToDisk": 0,
+  "harnessNote": "An initial diagnostic reached the expected gate failure; its collector then rejected the Windows CRLF terminator. Collector line splitting was corrected to CRLF-aware and all six definitive variants completed.",
+  "results": [
+    {
+      "selector": ".exportPreviewGroup",
+      "removedRuleCount": 8,
+      "nearNameDecoy": false,
+      "originalSelectorAbsent": true,
+      "groupPluralSelectorPreserved": true,
+      "memoryCssSha256": "963d1a062f44912997bfb8c4ecb376f013e073324abc867d0ba81ae43693f2b5",
+      "exitCode": 1,
+      "error": "Error: Note detail styles render PageFrame-aware Export Preview groups: Missing: .exportPreviewGroup {",
+      "expectedFailure": true,
+      "logFile": "gate-mutation-exportPreviewGroup-removed.log"
+    },
+    {
+      "selector": ".exportPreviewGroup",
+      "removedRuleCount": 8,
+      "nearNameDecoy": true,
+      "originalSelectorAbsent": true,
+      "groupPluralSelectorPreserved": true,
+      "memoryCssSha256": "b46d65fabf1823cc83997bac06c3587ee07c8abd4b65ca10e1007c59aeb0f62c",
+      "exitCode": 1,
+      "error": "Error: Note detail styles render PageFrame-aware Export Preview groups: Missing: .exportPreviewGroup {",
+      "expectedFailure": true,
+      "logFile": "gate-mutation-exportPreviewGroup-near-name.log"
+    },
+    {
+      "selector": ".exportPreviewPageFrameMeta",
+      "removedRuleCount": 2,
+      "nearNameDecoy": false,
+      "originalSelectorAbsent": true,
+      "groupPluralSelectorPreserved": true,
+      "memoryCssSha256": "70e37610c070417c69a7a0937fc3568958228cf7cf5687475ac6f2d2858afe1c",
+      "exitCode": 1,
+      "error": "Error: Note detail styles render PageFrame-aware Export Preview groups: Missing: .exportPreviewPageFrameMeta {",
+      "expectedFailure": true,
+      "logFile": "gate-mutation-exportPreviewPageFrameMeta-removed.log"
+    },
+    {
+      "selector": ".exportPreviewPageFrameMeta",
+      "removedRuleCount": 2,
+      "nearNameDecoy": true,
+      "originalSelectorAbsent": true,
+      "groupPluralSelectorPreserved": true,
+      "memoryCssSha256": "b43e356e5e9cd21e97e45b29807dfffe96e2cb48386ee5a1f17e2b49000a75f1",
+      "exitCode": 1,
+      "error": "Error: Note detail styles render PageFrame-aware Export Preview groups: Missing: .exportPreviewPageFrameMeta {",
+      "expectedFailure": true,
+      "logFile": "gate-mutation-exportPreviewPageFrameMeta-near-name.log"
+    },
+    {
+      "selector": ".exportPreviewPageFrameTypography",
+      "removedRuleCount": 2,
+      "nearNameDecoy": false,
+      "originalSelectorAbsent": true,
+      "groupPluralSelectorPreserved": true,
+      "memoryCssSha256": "d4fd5206341d1fb1cb580639bf7bf38d6dba95d6903f18380f5e65e771fca3a4",
+      "exitCode": 1,
+      "error": "Error: Note detail styles render PageFrame-aware Export Preview groups: Missing: .exportPreviewPageFrameTypography {",
+      "expectedFailure": true,
+      "logFile": "gate-mutation-exportPreviewPageFrameTypography-removed.log"
+    },
+    {
+      "selector": ".exportPreviewPageFrameTypography",
+      "removedRuleCount": 2,
+      "nearNameDecoy": true,
+      "originalSelectorAbsent": true,
+      "groupPluralSelectorPreserved": true,
+      "memoryCssSha256": "81c7fa507c25a267bddb458eca368c1d6c90970d0e887d49436eac1d156a993b",
+      "exitCode": 1,
+      "error": "Error: Note detail styles render PageFrame-aware Export Preview groups: Missing: .exportPreviewPageFrameTypography {",
+      "expectedFailure": true,
+      "logFile": "gate-mutation-exportPreviewPageFrameTypography-near-name.log"
+    }
+  ]
+}

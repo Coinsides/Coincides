@@ -330,6 +330,24 @@ describe('NoteRuntimeDocumentLayer block edit recovery queue', () => {
     expect(events).toEqual(['apply']);
     expect(durableText === receipt.text || selectedReceiptRecoverable).toBe(true);
   });
+
+  it('passes recovery conflict choices and comparison through the document layer', async () => {
+    const inspect = vi.fn(async () => codeBlock);
+    const replay = vi.fn(async () => false);
+    render(<NoteRuntimeDocumentLayer blockEditRecoveryReceipts={[receipt]}
+      blockEditRecoveryConflicts={{ [receipt.recoveryKey]: true }}
+      floatingPanelProps={{} as never} onApplyBlockEditRecovery={vi.fn()}
+      onDismissBlockEditRecovery={vi.fn(() => true)} onInspectBlockEditRecovery={inspect}
+      onReplayBlockEditRecovery={replay} onSurfacePointerDown={vi.fn()} surfaceMode="page"
+      templateWarning={null} writingSurfaceProps={writingSurfaceProps(vi.fn())} />);
+    fireEvent.click(screen.getByRole('button', { name: 'View differences' }));
+    const comparison = await screen.findByRole('region', { name: 'Draft and current text comparison' });
+    expect(comparison.textContent).toContain('current editor text');
+    expect(comparison.textContent).toContain('recover this edit');
+    fireEvent.click(screen.getByRole('button', { name: 'Replay draft on current version' }));
+    await waitFor(() => expect(replay).toHaveBeenCalledWith(receipt.recoveryKey));
+    expect(inspect).toHaveBeenCalledWith(receipt.recoveryKey);
+  });
 });
 
 describe('NoteRuntimeDocumentLayer overview navigation', () => {

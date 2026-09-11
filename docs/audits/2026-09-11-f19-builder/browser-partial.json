@@ -1,0 +1,25 @@
+{
+  "status": "stopped-on-existing-runtime-gate-conflict",
+  "completed": [
+    "Apply stale base 3 returns 409, current stays revision 9, three explicit choices",
+    "View differences shows draft and current unit text; PUT count stays 1"
+  ],
+  "remaining": [
+    "explicit replay success",
+    "discard",
+    "503 retry",
+    "second conflict",
+    "remount",
+    "narrow viewport"
+  ],
+  "steps": [
+    {
+      "step": "stale Apply",
+      "state": "Browser tab: 566868962, Title: \"F19 synthetic recovery conflict smoke\", URL: \"http://127.0.0.1:5191/\".\nThere has been no change in the accessibility tree.\nThe focused UI element is 1 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/"
+    },
+    {
+      "step": "view differences",
+      "state": "Browser tab: 566868962, Title: \"F19 synthetic recovery conflict smoke\", URL: \"http://127.0.0.1:5191/\".\n1 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/\n\t2 container\n\t\t3 heading F19 · Recovery conflict smoke, Value: 1\n\t\t\t4 text F19 · Recovery conflict smoke\n\t\t5 text Synthetic data · real adapter and recovery component · browser-only API transport\n\t\t6 container Synthetic scenario controls\n\t\t\t7 checkbox Reset stale, Value: 1\n\t\t\t8 checkbox Reset discard, Value: 0\n\t\t\t9 checkbox Reset unavailable503, Value: 0\n\t\t\t10 checkbox Reset second-conflict, Value: 0\n\t\t\t11 button Remount persisted queue\n\t\t12 container Real recovery queue\n\t\t\t35 container\n\t\t\t\t36 text A block edit is waiting for recovery\n\t\t\t\t37 container :r0:-explanation\n\t\t\t\t\t38 text This draft is based on an older version.\n\t\t\t\t\t39 text  The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point.\n\t\t\t\t40 container\n\t\t\t\t\t41 text Recovery draft:  Recovered draft: retain this carefully written text.\n\t\t\t\t42 container\n\t\t\t\t\t43 button (expanded) View differences, Secondary Actions: Collapse\n\t\t\t\t\t44 button Replay draft on current version\n\t\t\t\t\t45 button Discard this draft\n\t\t\t\t46 container Description: Draft and current text comparison, ID: :r0:-comparison\n\t\t\t\t\t47 container\n\t\t\t\t\t\t48 text Text comparison , current version 9 . Current text can change again before replay.\n\t\t\t\t\t49 heading Recovery draft · unit 1, Value: 4\n\t\t\t\t\t\t50 text Recovery draft  · unit 1\n\t\t\t\t\t51 text Recovered draft: retain this carefully written text.\n\t\t\t\t\t52 heading Current text · unit 1, Value: 4\n\t\t\t\t\t\t53 text Current text  · unit 1\n\t\t\t\t\t54 text Current text saved elsewhere at revision 9.\n\t\t\t17 container\n\t\t\t\t18 text Adapter body:  Current text saved elsewhere at revision 9.\n\t\t19 container Synthetic server state\n\t\t\t20 heading Current synthetic server state, Value: 2\n\t\t\t\t21 text Current synthetic server state\n\t\t\t22 container\n\t\t\t\t23 text Scenario:  stale  · Revision:  9\n\t\t\t24 text Current text saved elsewhere at revision 9.\n\t\t\t25 container\n\t\t\t\t26 text Saved requests:  1  · Statuses:  409\n\t\t\t27 container\n\t\t\t\t28 text Stored recovery entries:  1\n\t\t29 container Text save request log\n\t\t\t30 heading Text-save payloads and responses, Value: 2\n\t\t\t\t31 text Text-save payloads and responses\n\t\t\t32 container\n\t\t\t\t33 text All requests and state are available through  window.__f19Smoke .\n\t\t\t34 text [\n  {\n    \"sequence\": 11,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 3,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 9\n  }\n]\n\nThe focused UI element is 1 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/"
+    }
+  ]
+}

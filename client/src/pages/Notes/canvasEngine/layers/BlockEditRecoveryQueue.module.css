@@ -1,0 +1,102 @@
+.recoveryItem {
+  flex-wrap: wrap;
+}
+
+.conflictItem {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.conflictItem + .conflictItem {
+  padding-top: 12px;
+  border-top: 1px solid var(--warning);
+}
+
+.explanation,
+.draftPreview,
+.error,
+.unitState,
+.unitText {
+  margin: 0;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.explanation {
+  max-width: 75ch;
+}
+
+.draftPreview {
+  max-height: 4.5em;
+  overflow: auto;
+  white-space: pre-wrap;
+}
+
+.actions {
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.actions button {
+  min-height: 32px;
+  max-width: 100%;
+  white-space: normal;
+  text-align: left;
+}
+
+.actions button:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.actions button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.error {
+  font-weight: 600;
+}
+
+.comparison {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--warning);
+}
+
+.comparisonRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.comparisonCell {
+  min-width: 0;
+  padding: 8px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.comparisonCell h4 {
+  margin: 0 0 6px;
+  font: inherit;
+  font-weight: 600;
+}
+
+.unitText {
+  white-space: pre-wrap;
+}
+
+.unitState {
+  font-style: italic;
+}
+
+@media (max-width: 560px) {
+  .comparisonRow {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
+  }
+}

@@ -22,6 +22,7 @@ import {
 } from '../blockContentService';
 import { buildBlockTemplatePayload, type BlockTemplatePayload } from '../blockTemplateConversionService';
 import { saveAtomicText, saveTextUnitTransfer } from '../atomicTextSaveRepository';
+import { recoveryReplayAnnotationRanges } from '../recoveryReplayAnnotations';
 import type { TextUnitIdMapping } from '../textUnitMoveService';
 import type { BoardTextRangeV1 } from '../../../../../../shared/types/boardTextRange';
 import { restoreAnnotationRangeSnapshots, type AnnotationRangeSnapshot } from '../textFlowEditSession';
@@ -57,7 +58,7 @@ import {
 } from '../contentGroupService';
 import { createInFlightWriteRegistry } from '../inFlightWriteRegistry';
 import { useBlockDraftAuthority } from './useBlockDraftAuthority';
-import { createBoardTextRangeEditSession, type BoardRangeSaveSnapshot } from '../boardTextRangeEditSession';
+import { createBoardTextRangeEditSession, rebaseBoardTextRanges, type BoardRangeSaveSnapshot } from '../boardTextRangeEditSession';
 import { loadBoardTextRangesForNote, saveBoardTextRangesForNote } from '../boardTextRangeRepository';
 import {
   NOTE_ANNOTATION_PROPOSALS_METADATA_KEY,
@@ -449,6 +450,9 @@ export function useNoteCanvasDataAdapter({
   const [templateWarning, setTemplateWarning] = useState<string | null>(null);
   const [savingBlockId, setSavingBlockId] = useState<string | null>(null);
   const [, setBlockEditRecoveryVersion] = useState(0);
+  // Presentation only: recovery receipts and their frozen retry payloads stay unchanged.
+  const [blockEditRecoveryConflicts, setBlockEditRecoveryConflicts] = useState<Record<string, boolean>>({});
+  const replayingBlockEditRecoveryKeysRef = useRef(new Set<string>());
   const [anchorsBySourceRef, setAnchorsBySourceRef] = useState<Record<string, SourceAnchor>>({});
   const [sourceJumpTarget, setSourceJumpTarget] = useState<SourceJumpTarget | null>(null);
   const [sourceJumpBusy, setSourceJumpBusy] = useState<string | null>(null);
@@ -1546,6 +1550,7 @@ export function useNoteCanvasDataAdapter({
       preserveDrafts?: boolean;
       annotationRanges?: AnnotationRangeSnapshot[];
       baseRevision?: number;
+      contentSnapshot?: Pick<BlockEditRecoveryReceipt, 'contentJson' | 'plainText'>;
     } = {},
   ): Promise<BlockSaveOutcome> => {
     // Read-only references have no body draft to flush. Ordinary placement/tray
@@ -1580,6 +1585,14 @@ export function useNoteCanvasDataAdapter({
     }
     const requestGeneration = routeRequestGenerationRef.current;
     const baseRevision = options.baseRevision ?? Math.max(block.text_save_revision ?? 0, committedTextRevisions.current.get(block.id) ?? 0);
+    const draftBeforeSave = readBlockDraftSnapshot();
+    const annotationsBeforeSave = annotationTruthsRef.current;
+    const recoveryDraftIsCurrent = () => {
+      const live = readBlockDraftSnapshot();
+      return live.textDrafts[block.id] === draftBeforeSave.textDrafts[block.id]
+        && live.textFlowDrafts[block.id] === draftBeforeSave.textFlowDrafts[block.id]
+        && live.fieldDrafts[block.id] === draftBeforeSave.fieldDrafts[block.id];
+    };
     const annotationRanges = structuredClone(options.annotationRanges ?? []);
     const requestHydrationEpoch = successfulHydrationEpochRef.current;
     const requestRouteIsCurrent = () => (
@@ -1594,11 +1607,13 @@ export function useNoteCanvasDataAdapter({
       requestRouteIsCurrent()
       && successfulHydrationEpochRef.current === requestHydrationEpoch
     );
-    const textFlowDraft = options.textFlow || blockTextFlowDrafts[block.id];
+    const textFlowDraft = options.contentSnapshot
+      ? getTextFlowContent(options.contentSnapshot.contentJson) ?? undefined
+      : options.textFlow || blockTextFlowDrafts[block.id];
     const projectedTextFlow = textFlowDraft
       ? projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: textFlowDraft }, text).plain_text
       : null;
-    const nextText = textFlowDraft
+    const nextText = options.contentSnapshot ? options.contentSnapshot.plainText : textFlowDraft
       ? (projectedTextFlow ?? text)
       : text.trimEnd();
     const fieldValues = options.fieldValues || blockFieldDrafts[block.id];
@@ -1606,12 +1621,12 @@ export function useNoteCanvasDataAdapter({
     const textFlowContent = textFlowDraft
       ? contentForEditedTextFlowBlock(block, textFlowDraft)
       : null;
-    const nextContent = textFlowContent
+    const nextContent = options.contentSnapshot ? structuredClone(options.contentSnapshot.contentJson) : textFlowContent
       ? kind === 'formula' && fieldValues
         ? contentForEditedBlock({ ...block, content_json: textFlowContent }, nextText, fieldValues)
         : textFlowContent
       : contentForEditedBlock(block, nextText, fieldValues);
-    const requestedPlainText = plainTextForBlockContent(kind, nextContent, nextText);
+    const requestedPlainText = options.contentSnapshot?.plainText ?? plainTextForBlockContent(kind, nextContent, nextText);
     // This also covers direct source-backed/structural saves that bypass the live edit callback.
     if (!options.boardRangeSnapshot) {
       boardRangeSession.rebase(block.id, getTextFlowContent(block.content_json), getTextFlowContent(nextContent));
@@ -1752,6 +1767,18 @@ export function useNoteCanvasDataAdapter({
       }));
       const res = { data: result.block };
       committedTextRevisions.current.set(block.id, Math.max(result.revision, committedTextRevisions.current.get(block.id) ?? 0));
+      const adoptRecovery = options.contentSnapshot && !boardRangeSnapshot.historyRestore
+        && requestIsCurrent() && operationIsLatest() && recoveryDraftIsCurrent();
+      if (adoptRecovery) {
+        boardRangeSession.mergeNewRanges(boardRangeSnapshot.ranges);
+        boardRangeSession.restore(block.id, getTextFlowContent(nextContent), boardRangeSnapshot);
+        if (annotationTruthsRef.current === annotationsBeforeSave) {
+          const confirmed = result.annotations.flatMap((annotation) => annotation.ranges
+            .filter((range) => annotationRanges.some((issued) => issued.annotationId === annotation.id && issued.range.id === range.id))
+            .map((range) => ({ annotationId: annotation.id, range })));
+          setAnnotationTruthsSnapshot(restoreAnnotationRangeSnapshots(annotationTruthsRef.current, confirmed));
+        }
+      }
       boardRangeSession.acknowledge(boardRangeSnapshot, result.text_ranges);
       if (requestIsCurrent() && !options.preserveDrafts) {
         const confirmed = result.annotations.flatMap((annotation) => annotation.ranges
@@ -1806,7 +1833,7 @@ export function useNoteCanvasDataAdapter({
       }
       const updated = hydrateClientBlock({ ...block, ...res.data, source_references: block.source_references });
       setBlocks((current) => current.map((item) => item.id === block.id ? updated : item));
-      if (!options.preserveDrafts) {
+      if (!options.preserveDrafts && (!options.contentSnapshot || recoveryDraftIsCurrent())) {
         setBlockTextDrafts((current) => ({ ...current, [block.id]: nextText }));
         if (textFlowDraft) {
           setBlockTextFlowDrafts((current) => ({ ...current, [block.id]: textFlowDraft }));
@@ -1832,6 +1859,11 @@ export function useNoteCanvasDataAdapter({
       };
     } catch (err) {
       blockSaveOutcomeVersionRef.current += 1;
+      const response = (err as { response?: { status?: number; data?: { error?: string; details?: { code?: string } } } })?.response;
+      if (response?.status === 409 && (response.data?.error === 'stale_revision'
+        || response.data?.details?.code === 'stale_revision') && adapterMountActiveRef.current) {
+        setBlockEditRecoveryConflicts((current) => ({ ...current, [recoveryReceipt.recoveryKey]: true }));
+      }
       // Surface a failed write immediately, including while its read-back is pending.
       outstandingBlockSaveOperationsRef.current.set(operationSequence, {
         blockId: block.id,
@@ -1900,6 +1932,7 @@ export function useNoteCanvasDataAdapter({
       silent: true,
       fieldValues: receipt.fieldValues,
       textFlow: receipt.textFlow,
+      contentSnapshot: receipt,
       recoveryKey: receipt.recoveryKey,
       baseRevision: receipt.baseRevision,
       annotationRanges: receipt.annotationRanges,
@@ -1913,6 +1946,86 @@ export function useNoteCanvasDataAdapter({
     }
     return applied;
   }, [addToast, blocks, saveBlock]);
+
+  const readBlockEditRecoveryCurrent = useCallback(async (recoveryKey: string) => {
+    const activeNoteId = noteRef.current?.id;
+    if (!activeNoteId || routeNoteIdRef.current !== activeNoteId) return null;
+    const receipt = listBlockEditRecoveryReceipts(activeNoteId).find((candidate) => candidate.recoveryKey === recoveryKey);
+    if (!receipt) return null;
+    const generation = routeRequestGenerationRef.current;
+    const hydrationEpoch = successfulHydrationEpochRef.current;
+    const operationSequence = blockSaveOperationSequenceRef.current;
+    const draftBeforeRead = readBlockDraftSnapshot();
+    const draftIsCurrent = () => {
+      const live = readBlockDraftSnapshot();
+      return live.textDrafts[receipt.blockId] === draftBeforeRead.textDrafts[receipt.blockId]
+        && live.textFlowDrafts[receipt.blockId] === draftBeforeRead.textFlowDrafts[receipt.blockId]
+        && live.fieldDrafts[receipt.blockId] === draftBeforeRead.fieldDrafts[receipt.blockId];
+    };
+    const requestIsCurrent = () => adapterMountActiveRef.current
+      && noteRef.current?.id === activeNoteId && routeNoteIdRef.current === activeNoteId
+      && routeRequestGenerationRef.current === generation
+      && successfulHydrationEpochRef.current === hydrationEpoch
+      && blockSaveOperationSequenceRef.current === operationSequence
+      && draftIsCurrent()
+      && listBlockEditRecoveryReceipts(activeNoteId).some((candidate) => candidate.recoveryKey === recoveryKey);
+    // Failure reconciliation deliberately keeps the old base; this read must not use that cache.
+    const response = await api.get(`/notes/${activeNoteId}/blocks`);
+    if (!requestIsCurrent()) return null;
+    const raw = Array.isArray(response.data)
+      ? response.data.find((candidate: NoteBlock) => candidate.id === receipt.blockId) : null;
+    if (!raw) throw new Error('The block for this recovery receipt is unavailable');
+    if (!Number.isSafeInteger(raw.text_save_revision) || raw.text_save_revision < 0) {
+      throw new Error('The current block version could not be read');
+    }
+    return { receipt, block: hydrateClientBlock(raw), requestIsCurrent };
+  }, [readBlockDraftSnapshot]);
+
+  const inspectBlockEditRecovery = useCallback(async (recoveryKey: string): Promise<NoteBlock | null> => {
+    const current = await readBlockEditRecoveryCurrent(recoveryKey);
+    return current?.block ?? null;
+  }, [readBlockEditRecoveryCurrent]);
+
+  const replayBlockEditRecovery = useCallback(async (recoveryKey: string): Promise<boolean> => {
+    if (replayingBlockEditRecoveryKeysRef.current.has(recoveryKey)) return false;
+    replayingBlockEditRecoveryKeysRef.current.add(recoveryKey);
+    try {
+      const current = await readBlockEditRecoveryCurrent(recoveryKey);
+      if (!current) return false;
+      const { receipt, block, requestIsCurrent } = current;
+      // A new, explicit save rebases today's range state with the ordinary algorithm.
+      // Frozen history intent belongs only to the existing Apply retry door.
+      const [ranges, annotations] = await Promise.all([
+        loadBoardTextRangesForNote(receipt.noteId),
+        loadAnnotationTruthsForNote({ note: noteRef.current! }),
+      ]);
+      if (!requestIsCurrent()) return false;
+      const outcome = await saveBlock(block, receipt.text, {
+        silent: true,
+        recoveryKey,
+        baseRevision: block.text_save_revision,
+        contentSnapshot: receipt,
+        fieldValues: receipt.fieldValues,
+        annotationRanges: recoveryReplayAnnotationRanges({
+          annotations, blockId: block.id,
+          previousTextFlow: getTextFlowContent(block.content_json),
+          nextTextFlow: getTextFlowContent(receipt.contentJson),
+        }),
+        boardRangeSnapshot: { ranges: rebaseBoardTextRanges({
+          ranges: ranges.filter((range) => range.block_id === block.id),
+          blockId: block.id,
+          previousTextFlow: getTextFlowContent(block.content_json),
+          nextTextFlow: getTextFlowContent(receipt.contentJson),
+        }) },
+      });
+      const applied = outcome.status === 'saved'
+        || (outcome.status === 'stale_epoch' && outcome.durableState === 'matches_requested');
+      if (applied && routeNoteIdRef.current === receipt.noteId) addToast('success', 'Recovered block edit applied');
+      return applied;
+    } finally {
+      replayingBlockEditRecoveryKeysRef.current.delete(recoveryKey);
+    }
+  }, [addToast, readBlockEditRecoveryCurrent, saveBlock]);
 
   const dismissBlockEditRecovery = useCallback((recoveryKey: string): boolean => {
     const activeNoteId = noteRef.current?.id || null;
@@ -2625,6 +2738,7 @@ export function useNoteCanvasDataAdapter({
     templateWarning,
     savingBlockId,
     blockEditRecoveryReceipts,
+    blockEditRecoveryConflicts,
     annotationTruths,
     readAnnotationTruths,
     setAnnotationTruthsSnapshot,
@@ -2681,6 +2795,8 @@ export function useNoteCanvasDataAdapter({
     finalizeDraftBlock,
     saveBlock,
     applyBlockEditRecovery,
+    inspectBlockEditRecovery,
+    replayBlockEditRecovery,
     dismissBlockEditRecovery,
     saveDraftBlockPlacement,
     applyTemplateToBlock,

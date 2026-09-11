@@ -1,0 +1,82 @@
+{
+  "scope": "F19 implementation + tests + authorized ExportPreview gate only; excludes audit artifacts and handoff",
+  "files": [
+    {
+      "path": "client/scripts/canvasRuntimeBoundaryCheck.mjs",
+      "added": 4,
+      "deleted": 3,
+      "sha256": "a05193cee82064c929d615ac7c462fb44856d6e5ef31c1a3963a28e21865f43b"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx",
+      "added": 194,
+      "deleted": 0,
+      "sha256": "6021b46a4a19b20ff4d55bf7d60eb11aa32205ed84838d9542fb97ec83b51ff3"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts",
+      "added": 122,
+      "deleted": 6,
+      "sha256": "a631e7312b8f02b1038500c072754bd85e858b9b86312f752732ac1ac03176b7"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts",
+      "added": 7,
+      "deleted": 1,
+      "sha256": "823ad15bb1c22a4d9583dac1d61aff0d3ac12a6cbd62f13f9dfa7439fa711469"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+      "added": 6,
+      "deleted": 0,
+      "sha256": "7ccd7ddbbea075ec275be176f174d467ed924c83ba572e24d864bff09425bad9"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx",
+      "added": 18,
+      "deleted": 0,
+      "sha256": "12f049dd33d8c05f9d5bd1e4462208a2865c6bb5cc6161026de2763821dc6519"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.tsx",
+      "added": 11,
+      "deleted": 38,
+      "sha256": "74d173b982adb4502abf0311d10f4bfc0d30f237324d2d1dc4fc2a21952ab229"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/BlockEditRecoveryQueue.tsx",
+      "added": 174,
+      "deleted": 0,
+      "sha256": "7ca86063db6c077cc3e92da8c81a432c37e51b8abe14030e841671d48e1253e4"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/BlockEditRecoveryQueue.module.css",
+      "added": 102,
+      "deleted": 0,
+      "sha256": "d84d046bfb553ad5c9b505ea5603cec6356781c7572aef532d19bb3b7aee37db"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/BlockEditRecoveryQueue.test.tsx",
+      "added": 210,
+      "deleted": 0,
+      "sha256": "68713c21c50f3522a105de233671167a24c1e93f1dd0f306c7bd2223f76ae9ca"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/recoveryReplayAnnotations.ts",
+      "added": 62,
+      "deleted": 0,
+      "sha256": "56827ab2495912cba344a51a3fe65e80f926aa23f48695ca85deebd48a66bd97"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/recoveryReplayAnnotations.test.ts",
+      "added": 75,
+      "deleted": 0,
+      "sha256": "d98b5203eb10506916e4a12ba64001df13795da9a14917b362f8769d64fd534e"
+    }
+  ],
+  "total": {
+    "files": 12,
+    "added": 985,
+    "deleted": 48
+  }
+}

@@ -1,0 +1,1291 @@
+{
+  "status": "passed",
+  "capturedAt": "2026-09-11T20:32:28.536Z",
+  "requestedNarrowViewport": {
+    "width": 390,
+    "height": 844
+  },
+  "narrowViewportReset": true,
+  "transport": "browser-only synthetic Axios adapter; no backend/database",
+  "source": "real Chrome UI actions; read-only DOM and AX evidence",
+  "steps": [
+    {
+      "step": "baseline",
+      "at": "2026-09-11T20:30:00.543Z",
+      "state": {
+        "adapterBody": "Current text saved elsewhere at revision 9.",
+        "body": "Current text saved elsewhere at revision 9.",
+        "recovery": "A block edit is waiting for recoveryRecovered draft: retain this carefully written text.ApplyDismissAdapter body: Current text saved elsewhere at revision 9.",
+        "revision": 9,
+        "saves": [],
+        "serverPanel": "Current synthetic server stateScenario: stale · Revision: 9Current text saved elsewhere at revision 9.Saved requests: 0 · Statuses: noneStored recovery entries: 1"
+      },
+      "ax": "Browser tab: 566868966, Title: \"F19 synthetic recovery conflict smoke\", URL: \"http://127.0.0.1:5191/\".\n0 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/\n\t1 container\n\t\t2 heading F19 · Recovery conflict smoke, Value: 1\n\t\t\t3 text F19 · Recovery conflict smoke\n\t\t4 text Synthetic data · real adapter and recovery component · browser-only API transport\n\t\t5 container Synthetic scenario controls\n\t\t\t6 checkbox Reset stale, Value: 1\n\t\t\t7 checkbox Reset discard, Value: 0\n\t\t\t8 checkbox Reset unavailable503, Value: 0\n\t\t\t9 checkbox Reset second-conflict, Value: 0\n\t\t\t10 button Remount persisted queue\n\t\t11 container Real recovery queue\n\t\t\t12 container\n\t\t\t\t13 text A block edit is waiting for recovery Recovered draft: retain this carefully written text.\n\t\t\t\t14 button Apply\n\t\t\t\t15 button Dismiss\n\t\t\t16 container\n\t\t\t\t17 text Adapter body:  Current text saved elsewhere at revision 9.\n\t\t18 container Synthetic server state\n\t\t\t19 heading Current synthetic server state, Value: 2\n\t\t\t\t20 text Current synthetic server state\n\t\t\t21 container\n\t\t\t\t22 text Scenario:  stale  · Revision:  9\n\t\t\t23 text Current text saved elsewhere at revision 9.\n\t\t\t24 container\n\t\t\t\t25 text Saved requests:  0  · Statuses:  none\n\t\t\t26 container\n\t\t\t\t27 text Stored recovery entries:  1\n\t\t28 container Text save request log\n\t\t\t29 heading Text-save payloads and responses, Value: 2\n\t\t\t\t30 text Text-save payloads and responses\n\t\t\t31 container\n\t\t\t\t32 text All requests and state are available through  window.__f19Smoke .\n\t\t\t33 text []\n\nThe focused UI element is 0 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/"
+    },
+    {
+      "step": "stale Apply: base 3 rejected at current revision 9",
+      "at": "2026-09-11T20:30:01.280Z",
+      "state": {
+        "adapterBody": "Current text saved elsewhere at revision 9.",
+        "body": "Current text saved elsewhere at revision 9.",
+        "recovery": "A block edit is waiting for recoveryThis draft is based on an older version. The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point.Recovery draft: Recovered draft: retain this carefully written text.View differencesReplay draft on current versionDiscard this draftAdapter body: Current text saved elsewhere at revision 9.",
+        "revision": 9,
+        "saves": [
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 3,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 11,
+            "serverRevision": 9,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          }
+        ],
+        "serverPanel": "Current synthetic server stateScenario: stale · Revision: 9Current text saved elsewhere at revision 9.Saved requests: 1 · Statuses: 409Stored recovery entries: 1"
+      },
+      "ax": "Browser tab: 566868966, Title: \"F19 synthetic recovery conflict smoke\", URL: \"http://127.0.0.1:5191/\".\n0 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/\n\t1 container\n\t\t2 heading F19 · Recovery conflict smoke, Value: 1\n\t\t\t3 text F19 · Recovery conflict smoke\n\t\t4 text Synthetic data · real adapter and recovery component · browser-only API transport\n\t\t5 container Synthetic scenario controls\n\t\t\t6 checkbox Reset stale, Value: 1\n\t\t\t7 checkbox Reset discard, Value: 0\n\t\t\t8 checkbox Reset unavailable503, Value: 0\n\t\t\t9 checkbox Reset second-conflict, Value: 0\n\t\t\t10 button Remount persisted queue\n\t\t11 container Real recovery queue\n\t\t\t34 container\n\t\t\t\t35 text A block edit is waiting for recovery\n\t\t\t\t36 container :r0:-explanation\n\t\t\t\t\t37 text This draft is based on an older version.\n\t\t\t\t\t38 text  The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point.\n\t\t\t\t39 container\n\t\t\t\t\t40 text Recovery draft:  Recovered draft: retain this carefully written text.\n\t\t\t\t41 container\n\t\t\t\t\t42 button (collapsed) View differences, Secondary Actions: Expand\n\t\t\t\t\t43 button Replay draft on current version\n\t\t\t\t\t44 button Discard this draft\n\t\t\t16 container\n\t\t\t\t17 text Adapter body:  Current text saved elsewhere at revision 9.\n\t\t18 container Synthetic server state\n\t\t\t19 heading Current synthetic server state, Value: 2\n\t\t\t\t20 text Current synthetic server state\n\t\t\t21 container\n\t\t\t\t22 text Scenario:  stale  · Revision:  9\n\t\t\t23 text Current text saved elsewhere at revision 9.\n\t\t\t24 container\n\t\t\t\t25 text Saved requests:  1  · Statuses:  409\n\t\t\t26 container\n\t\t\t\t27 text Stored recovery entries:  1\n\t\t28 container Text save request log\n\t\t\t29 heading Text-save payloads and responses, Value: 2\n\t\t\t\t30 text Text-save payloads and responses\n\t\t\t31 container\n\t\t\t\t32 text All requests and state are available through  window.__f19Smoke .\n\t\t\t33 text [\n  {\n    \"sequence\": 11,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 3,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 9\n  }\n]\n\nThe focused UI element is 0 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/",
+      "screenshot": "03-final-conflict.png"
+    },
+    {
+      "step": "differences: draft and current unit text, still one PUT",
+      "at": "2026-09-11T20:30:05.862Z",
+      "state": {
+        "adapterBody": "Current text saved elsewhere at revision 9.",
+        "body": "Current text saved elsewhere at revision 9.",
+        "recovery": "A block edit is waiting for recoveryThis draft is based on an older version. The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point.Recovery draft: Recovered draft: retain this carefully written text.View differencesReplay draft on current versionDiscard this draftText comparison, current version 9. Current text can change again before replay.Recovery draft · unit 1Recovered draft: retain this carefully written text.Current text · unit 1Current text saved elsewhere at revision 9.Adapter body: Current text saved elsewhere at revision 9.",
+        "revision": 9,
+        "saves": [
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 3,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 11,
+            "serverRevision": 9,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          }
+        ],
+        "serverPanel": "Current synthetic server stateScenario: stale · Revision: 9Current text saved elsewhere at revision 9.Saved requests: 1 · Statuses: 409Stored recovery entries: 1"
+      },
+      "ax": "Browser tab: 566868966, Title: \"F19 synthetic recovery conflict smoke\", URL: \"http://127.0.0.1:5191/\".\n0 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/\n\t1 container\n\t\t2 heading F19 · Recovery conflict smoke, Value: 1\n\t\t\t3 text F19 · Recovery conflict smoke\n\t\t4 text Synthetic data · real adapter and recovery component · browser-only API transport\n\t\t5 container Synthetic scenario controls\n\t\t\t6 checkbox Reset stale, Value: 1\n\t\t\t7 checkbox Reset discard, Value: 0\n\t\t\t8 checkbox Reset unavailable503, Value: 0\n\t\t\t9 checkbox Reset second-conflict, Value: 0\n\t\t\t10 button Remount persisted queue\n\t\t11 container Real recovery queue\n\t\t\t34 container\n\t\t\t\t35 text A block edit is waiting for recovery\n\t\t\t\t36 container :r0:-explanation\n\t\t\t\t\t37 text This draft is based on an older version.\n\t\t\t\t\t38 text  The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point.\n\t\t\t\t39 container\n\t\t\t\t\t40 text Recovery draft:  Recovered draft: retain this carefully written text.\n\t\t\t\t41 container\n\t\t\t\t\t42 button (expanded) View differences, Secondary Actions: Collapse\n\t\t\t\t\t43 button Replay draft on current version\n\t\t\t\t\t44 button Discard this draft\n\t\t\t\t45 container Description: Draft and current text comparison, ID: :r0:-comparison\n\t\t\t\t\t46 container\n\t\t\t\t\t\t47 text Text comparison , current version 9 . Current text can change again before replay.\n\t\t\t\t\t48 heading Recovery draft · unit 1, Value: 4\n\t\t\t\t\t\t49 text Recovery draft  · unit 1\n\t\t\t\t\t50 text Recovered draft: retain this carefully written text.\n\t\t\t\t\t51 heading Current text · unit 1, Value: 4\n\t\t\t\t\t\t52 text Current text  · unit 1\n\t\t\t\t\t53 text Current text saved elsewhere at revision 9.\n\t\t\t16 container\n\t\t\t\t17 text Adapter body:  Current text saved elsewhere at revision 9.\n\t\t18 container Synthetic server state\n\t\t\t19 heading Current synthetic server state, Value: 2\n\t\t\t\t20 text Current synthetic server state\n\t\t\t21 container\n\t\t\t\t22 text Scenario:  stale  · Revision:  9\n\t\t\t23 text Current text saved elsewhere at revision 9.\n\t\t\t24 container\n\t\t\t\t25 text Saved requests:  1  · Statuses:  409\n\t\t\t26 container\n\t\t\t\t27 text Stored recovery entries:  1\n\t\t28 container Text save request log\n\t\t\t29 heading Text-save payloads and responses, Value: 2\n\t\t\t\t30 text Text-save payloads and responses\n\t\t\t31 container\n\t\t\t\t32 text All requests and state are available through  window.__f19Smoke .\n\t\t\t33 text [\n  {\n    \"sequence\": 11,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 3,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 9\n  }\n]\n\nThe focused UI element is 0 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/",
+      "screenshot": "04-final-differences.png"
+    },
+    {
+      "step": "explicit replay: 200, base 9, draft saved, receipt cleared",
+      "at": "2026-09-11T20:30:15.262Z",
+      "state": {
+        "adapterBody": "Recovered draft: retain this carefully written text.",
+        "body": "Recovered draft: retain this carefully written text.",
+        "recovery": "No recovery drafts remain.Adapter body: Recovered draft: retain this carefully written text.",
+        "revision": 10,
+        "saves": [
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 3,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 11,
+            "serverRevision": 9,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          },
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 9,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 17,
+            "serverRevision": 10,
+            "status": 200,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          }
+        ],
+        "serverPanel": "Current synthetic server stateScenario: stale · Revision: 10Recovered draft: retain this carefully written text.Saved requests: 2 · Statuses: 409 → 200Stored recovery entries: 0"
+      },
+      "ax": "Browser tab: 566868966, Title: \"F19 synthetic recovery conflict smoke\", URL: \"http://127.0.0.1:5191/\".\n0 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/\n\t1 container\n\t\t2 heading F19 · Recovery conflict smoke, Value: 1\n\t\t\t3 text F19 · Recovery conflict smoke\n\t\t4 text Synthetic data · real adapter and recovery component · browser-only API transport\n\t\t5 container Synthetic scenario controls\n\t\t\t6 checkbox Reset stale, Value: 1\n\t\t\t7 checkbox Reset discard, Value: 0\n\t\t\t8 checkbox Reset unavailable503, Value: 0\n\t\t\t9 checkbox Reset second-conflict, Value: 0\n\t\t\t10 button Remount persisted queue\n\t\t11 container Real recovery queue\n\t\t\t34 text No recovery drafts remain.\n\t\t\t16 container\n\t\t\t\t17 text Adapter body:  Recovered draft: retain this carefully written text.\n\t\t18 container Synthetic server state\n\t\t\t19 heading Current synthetic server state, Value: 2\n\t\t\t\t20 text Current synthetic server state\n\t\t\t21 container\n\t\t\t\t22 text Scenario:  stale  · Revision:  10\n\t\t\t23 text Recovered draft: retain this carefully written text.\n\t\t\t24 container\n\t\t\t\t25 text Saved requests:  2  · Statuses:  409 → 200\n\t\t\t26 container\n\t\t\t\t27 text Stored recovery entries:  0\n\t\t28 container Text save request log\n\t\t\t29 heading Text-save payloads and responses, Value: 2\n\t\t\t\t30 text Text-save payloads and responses\n\t\t\t31 container\n\t\t\t\t32 text All requests and state are available through  window.__f19Smoke .\n\t\t\t33 text [\n  {\n    \"sequence\": 11,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 3,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 9\n  },\n  {\n    \"sequence\": 17,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 200,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 9,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 10\n  }\n]\n\nThe focused UI element is 0 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/",
+      "screenshot": "05-replay-success.png"
+    },
+    {
+      "step": "discard scenario: Apply first reaches conflict",
+      "at": "2026-09-11T20:30:31.011Z",
+      "state": {
+        "adapterBody": "Current text saved elsewhere at revision 9.",
+        "body": "Current text saved elsewhere at revision 9.",
+        "recovery": "A block edit is waiting for recoveryThis draft is based on an older version. The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point.Recovery draft: Recovered draft: retain this carefully written text.View differencesReplay draft on current versionDiscard this draftAdapter body: Current text saved elsewhere at revision 9.",
+        "revision": 9,
+        "saves": [
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 3,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 11,
+            "serverRevision": 9,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          }
+        ],
+        "serverPanel": "Current synthetic server stateScenario: discard · Revision: 9Current text saved elsewhere at revision 9.Saved requests: 1 · Statuses: 409Stored recovery entries: 1"
+      },
+      "ax": "Browser tab: 566868966, Title: \"F19 synthetic recovery conflict smoke\", URL: \"http://127.0.0.1:5191/\".\n0 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/\n\t1 container\n\t\t2 heading F19 · Recovery conflict smoke, Value: 1\n\t\t\t3 text F19 · Recovery conflict smoke\n\t\t4 text Synthetic data · real adapter and recovery component · browser-only API transport\n\t\t5 container Synthetic scenario controls\n\t\t\t6 checkbox Reset stale, Value: 0\n\t\t\t7 checkbox Reset discard, Value: 1\n\t\t\t8 checkbox Reset unavailable503, Value: 0\n\t\t\t9 checkbox Reset second-conflict, Value: 0\n\t\t\t10 button Remount persisted queue\n\t\t34 container Real recovery queue\n\t\t\t41 container\n\t\t\t\t42 text A block edit is waiting for recovery\n\t\t\t\t43 container :r1:-explanation\n\t\t\t\t\t44 text This draft is based on an older version.\n\t\t\t\t\t45 text  The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point.\n\t\t\t\t46 container\n\t\t\t\t\t47 text Recovery draft:  Recovered draft: retain this carefully written text.\n\t\t\t\t48 container\n\t\t\t\t\t49 button (collapsed) View differences, Secondary Actions: Expand\n\t\t\t\t\t50 button Replay draft on current version\n\t\t\t\t\t51 button Discard this draft\n\t\t\t39 container\n\t\t\t\t40 text Adapter body:  Current text saved elsewhere at revision 9.\n\t\t18 container Synthetic server state\n\t\t\t19 heading Current synthetic server state, Value: 2\n\t\t\t\t20 text Current synthetic server state\n\t\t\t21 container\n\t\t\t\t22 text Scenario:  discard  · Revision:  9\n\t\t\t23 text Current text saved elsewhere at revision 9.\n\t\t\t24 container\n\t\t\t\t25 text Saved requests:  1  · Statuses:  409\n\t\t\t26 container\n\t\t\t\t27 text Stored recovery entries:  1\n\t\t28 container Text save request log\n\t\t\t29 heading Text-save payloads and responses, Value: 2\n\t\t\t\t30 text Text-save payloads and responses\n\t\t\t31 container\n\t\t\t\t32 text All requests and state are available through  window.__f19Smoke .\n\t\t\t33 text [\n  {\n    \"sequence\": 11,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 3,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 9\n  }\n]\n\nThe focused UI element is 7 checkbox Reset discard, Value: 1"
+    },
+    {
+      "step": "discard: receipt cleared, body and revision unchanged, no further PUT",
+      "at": "2026-09-11T20:30:38.747Z",
+      "state": {
+        "adapterBody": "Current text saved elsewhere at revision 9.",
+        "body": "Current text saved elsewhere at revision 9.",
+        "recovery": "No recovery drafts remain.Adapter body: Current text saved elsewhere at revision 9.",
+        "revision": 9,
+        "saves": [
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 3,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 11,
+            "serverRevision": 9,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          }
+        ],
+        "serverPanel": "Current synthetic server stateScenario: discard · Revision: 9Current text saved elsewhere at revision 9.Saved requests: 1 · Statuses: 409Stored recovery entries: 0"
+      },
+      "ax": "Browser tab: 566868966, Title: \"F19 synthetic recovery conflict smoke\", URL: \"http://127.0.0.1:5191/\".\n0 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/\n\t1 container\n\t\t2 heading F19 · Recovery conflict smoke, Value: 1\n\t\t\t3 text F19 · Recovery conflict smoke\n\t\t4 text Synthetic data · real adapter and recovery component · browser-only API transport\n\t\t5 container Synthetic scenario controls\n\t\t\t6 checkbox Reset stale, Value: 0\n\t\t\t7 checkbox Reset discard, Value: 1\n\t\t\t8 checkbox Reset unavailable503, Value: 0\n\t\t\t9 checkbox Reset second-conflict, Value: 0\n\t\t\t10 button Remount persisted queue\n\t\t34 container Real recovery queue\n\t\t\t41 text No recovery drafts remain.\n\t\t\t39 container\n\t\t\t\t40 text Adapter body:  Current text saved elsewhere at revision 9.\n\t\t18 container Synthetic server state\n\t\t\t19 heading Current synthetic server state, Value: 2\n\t\t\t\t20 text Current synthetic server state\n\t\t\t21 container\n\t\t\t\t22 text Scenario:  discard  · Revision:  9\n\t\t\t23 text Current text saved elsewhere at revision 9.\n\t\t\t24 container\n\t\t\t\t25 text Saved requests:  1  · Statuses:  409\n\t\t\t26 container\n\t\t\t\t27 text Stored recovery entries:  0\n\t\t28 container Text save request log\n\t\t\t29 heading Text-save payloads and responses, Value: 2\n\t\t\t\t30 text Text-save payloads and responses\n\t\t\t31 container\n\t\t\t\t32 text All requests and state are available through  window.__f19Smoke .\n\t\t\t33 text [\n  {\n    \"sequence\": 11,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 3,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 9\n  }\n]\n\nThe focused UI element is 7 checkbox Reset discard, Value: 1",
+      "screenshot": "06-discard.png"
+    },
+    {
+      "step": "503: original Apply/Dismiss retry UI retained, draft persisted",
+      "at": "2026-09-11T20:30:53.828Z",
+      "state": {
+        "adapterBody": "Current text saved elsewhere at revision 9.",
+        "body": "Current text saved elsewhere at revision 9.",
+        "recovery": "A block edit is waiting for recoveryRecovered draft: retain this carefully written text.ApplyDismissAdapter body: Current text saved elsewhere at revision 9.",
+        "revision": 9,
+        "saves": [
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 9,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 11,
+            "serverRevision": 9,
+            "status": 503,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          }
+        ],
+        "serverPanel": "Current synthetic server stateScenario: unavailable503 · Revision: 9Current text saved elsewhere at revision 9.Saved requests: 1 · Statuses: 503Stored recovery entries: 1"
+      },
+      "ax": "Browser tab: 566868966, Title: \"F19 synthetic recovery conflict smoke\", URL: \"http://127.0.0.1:5191/\".\n0 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/\n\t1 container\n\t\t2 heading F19 · Recovery conflict smoke, Value: 1\n\t\t\t3 text F19 · Recovery conflict smoke\n\t\t4 text Synthetic data · real adapter and recovery component · browser-only API transport\n\t\t5 container Synthetic scenario controls\n\t\t\t6 checkbox Reset stale, Value: 0\n\t\t\t7 checkbox Reset discard, Value: 0\n\t\t\t8 checkbox Reset unavailable503, Value: 1\n\t\t\t9 checkbox Reset second-conflict, Value: 0\n\t\t\t10 button Remount persisted queue\n\t\t34 container Real recovery queue\n\t\t\t41 container\n\t\t\t\t42 text A block edit is waiting for recovery Recovered draft: retain this carefully written text.\n\t\t\t\t43 button Apply\n\t\t\t\t44 button Dismiss\n\t\t\t39 container\n\t\t\t\t40 text Adapter body:  Current text saved elsewhere at revision 9.\n\t\t18 container Synthetic server state\n\t\t\t19 heading Current synthetic server state, Value: 2\n\t\t\t\t20 text Current synthetic server state\n\t\t\t21 container\n\t\t\t\t22 text Scenario:  unavailable503  · Revision:  9\n\t\t\t23 text Current text saved elsewhere at revision 9.\n\t\t\t24 container\n\t\t\t\t25 text Saved requests:  1  · Statuses:  503\n\t\t\t26 container\n\t\t\t\t27 text Stored recovery entries:  1\n\t\t28 container Text save request log\n\t\t\t29 heading Text-save payloads and responses, Value: 2\n\t\t\t\t30 text Text-save payloads and responses\n\t\t\t31 container\n\t\t\t\t32 text All requests and state are available through  window.__f19Smoke .\n\t\t\t33 text [\n  {\n    \"sequence\": 11,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 503,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 9,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 9\n  }\n]\n\nThe focused UI element is 8 checkbox Reset unavailable503, Value: 1",
+      "screenshot": "07-503-retry.png"
+    },
+    {
+      "step": "503 then explicit Apply: identical frozen payload, 200 and receipt cleared",
+      "at": "2026-09-11T20:31:02.097Z",
+      "state": {
+        "adapterBody": "Recovered draft: retain this carefully written text.",
+        "body": "Recovered draft: retain this carefully written text.",
+        "recovery": "No recovery drafts remain.Adapter body: Recovered draft: retain this carefully written text.",
+        "revision": 10,
+        "saves": [
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 9,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 11,
+            "serverRevision": 9,
+            "status": 503,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          },
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 9,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 13,
+            "serverRevision": 10,
+            "status": 200,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          }
+        ],
+        "serverPanel": "Current synthetic server stateScenario: unavailable503 · Revision: 10Recovered draft: retain this carefully written text.Saved requests: 2 · Statuses: 503 → 200Stored recovery entries: 0"
+      },
+      "ax": "Browser tab: 566868966, Title: \"F19 synthetic recovery conflict smoke\", URL: \"http://127.0.0.1:5191/\".\n0 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/\n\t1 container\n\t\t2 heading F19 · Recovery conflict smoke, Value: 1\n\t\t\t3 text F19 · Recovery conflict smoke\n\t\t4 text Synthetic data · real adapter and recovery component · browser-only API transport\n\t\t5 container Synthetic scenario controls\n\t\t\t6 checkbox Reset stale, Value: 0\n\t\t\t7 checkbox Reset discard, Value: 0\n\t\t\t8 checkbox Reset unavailable503, Value: 1\n\t\t\t9 checkbox Reset second-conflict, Value: 0\n\t\t\t10 button Remount persisted queue\n\t\t34 container Real recovery queue\n\t\t\t41 text No recovery drafts remain.\n\t\t\t39 container\n\t\t\t\t40 text Adapter body:  Recovered draft: retain this carefully written text.\n\t\t18 container Synthetic server state\n\t\t\t19 heading Current synthetic server state, Value: 2\n\t\t\t\t20 text Current synthetic server state\n\t\t\t21 container\n\t\t\t\t22 text Scenario:  unavailable503  · Revision:  10\n\t\t\t23 text Recovered draft: retain this carefully written text.\n\t\t\t24 container\n\t\t\t\t25 text Saved requests:  2  · Statuses:  503 → 200\n\t\t\t26 container\n\t\t\t\t27 text Stored recovery entries:  0\n\t\t28 container Text save request log\n\t\t\t29 heading Text-save payloads and responses, Value: 2\n\t\t\t\t30 text Text-save payloads and responses\n\t\t\t31 container\n\t\t\t\t32 text All requests and state are available through  window.__f19Smoke .\n\t\t\t33 text [\n  {\n    \"sequence\": 11,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 503,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 9,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 9\n  },\n  {\n    \"sequence\": 13,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 200,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 9,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 10\n  }\n]\n\nThe focused UI element is 8 checkbox Reset unavailable503, Value: 1",
+      "screenshot": "08-503-success.png"
+    },
+    {
+      "step": "second conflict scenario: first stale Apply",
+      "at": "2026-09-11T20:31:09.911Z",
+      "state": {
+        "adapterBody": "Current text saved elsewhere at revision 9.",
+        "body": "Current text saved elsewhere at revision 9.",
+        "recovery": "A block edit is waiting for recoveryThis draft is based on an older version. The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point.Recovery draft: Recovered draft: retain this carefully written text.View differencesReplay draft on current versionDiscard this draftAdapter body: Current text saved elsewhere at revision 9.",
+        "revision": 9,
+        "saves": [
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 3,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 11,
+            "serverRevision": 9,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          }
+        ],
+        "serverPanel": "Current synthetic server stateScenario: second-conflict · Revision: 9Current text saved elsewhere at revision 9.Saved requests: 1 · Statuses: 409Stored recovery entries: 1"
+      },
+      "ax": "Browser tab: 566868966, Title: \"F19 synthetic recovery conflict smoke\", URL: \"http://127.0.0.1:5191/\".\n0 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/\n\t1 container\n\t\t2 heading F19 · Recovery conflict smoke, Value: 1\n\t\t\t3 text F19 · Recovery conflict smoke\n\t\t4 text Synthetic data · real adapter and recovery component · browser-only API transport\n\t\t5 container Synthetic scenario controls\n\t\t\t6 checkbox Reset stale, Value: 0\n\t\t\t7 checkbox Reset discard, Value: 0\n\t\t\t8 checkbox Reset unavailable503, Value: 0\n\t\t\t9 checkbox Reset second-conflict, Value: 1\n\t\t\t10 button Remount persisted queue\n\t\t34 container Real recovery queue\n\t\t\t41 container\n\t\t\t\t42 text A block edit is waiting for recovery\n\t\t\t\t43 container :r2:-explanation\n\t\t\t\t\t44 text This draft is based on an older version.\n\t\t\t\t\t45 text  The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point.\n\t\t\t\t46 container\n\t\t\t\t\t47 text Recovery draft:  Recovered draft: retain this carefully written text.\n\t\t\t\t48 container\n\t\t\t\t\t49 button (collapsed) View differences, Secondary Actions: Expand\n\t\t\t\t\t50 button Replay draft on current version\n\t\t\t\t\t51 button Discard this draft\n\t\t\t39 container\n\t\t\t\t40 text Adapter body:  Current text saved elsewhere at revision 9.\n\t\t18 container Synthetic server state\n\t\t\t19 heading Current synthetic server state, Value: 2\n\t\t\t\t20 text Current synthetic server state\n\t\t\t21 container\n\t\t\t\t22 text Scenario:  second-conflict  · Revision:  9\n\t\t\t23 text Current text saved elsewhere at revision 9.\n\t\t\t24 container\n\t\t\t\t25 text Saved requests:  1  · Statuses:  409\n\t\t\t26 container\n\t\t\t\t27 text Stored recovery entries:  1\n\t\t28 container Text save request log\n\t\t\t29 heading Text-save payloads and responses, Value: 2\n\t\t\t\t30 text Text-save payloads and responses\n\t\t\t31 container\n\t\t\t\t32 text All requests and state are available through  window.__f19Smoke .\n\t\t\t33 text [\n  {\n    \"sequence\": 11,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 3,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 9\n  }\n]\n\nThe focused UI element is 9 checkbox Reset second-conflict, Value: 1"
+    },
+    {
+      "step": "explicit replay races revision 10: second 409, conflict retained",
+      "at": "2026-09-11T20:31:17.792Z",
+      "state": {
+        "adapterBody": "Another editor saved again while replay was in flight.",
+        "body": "Another editor saved again while replay was in flight.",
+        "recovery": "A block edit is waiting for recoveryThis draft is based on an older version. The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point.Recovery draft: Recovered draft: retain this carefully written text.View differencesReplay draft on current versionDiscard this draftAdapter body: Another editor saved again while replay was in flight.",
+        "revision": 10,
+        "saves": [
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 3,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 11,
+            "serverRevision": 9,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          },
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 9,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 16,
+            "serverRevision": 10,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          }
+        ],
+        "serverPanel": "Current synthetic server stateScenario: second-conflict · Revision: 10Another editor saved again while replay was in flight.Saved requests: 2 · Statuses: 409 → 409Stored recovery entries: 1"
+      },
+      "ax": "Browser tab: 566868966, Title: \"F19 synthetic recovery conflict smoke\", URL: \"http://127.0.0.1:5191/\".\n0 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/\n\t1 container\n\t\t2 heading F19 · Recovery conflict smoke, Value: 1\n\t\t\t3 text F19 · Recovery conflict smoke\n\t\t4 text Synthetic data · real adapter and recovery component · browser-only API transport\n\t\t5 container Synthetic scenario controls\n\t\t\t6 checkbox Reset stale, Value: 0\n\t\t\t7 checkbox Reset discard, Value: 0\n\t\t\t8 checkbox Reset unavailable503, Value: 0\n\t\t\t9 checkbox Reset second-conflict, Value: 1\n\t\t\t10 button Remount persisted queue\n\t\t34 container Real recovery queue\n\t\t\t41 container\n\t\t\t\t42 text A block edit is waiting for recovery\n\t\t\t\t43 container :r3:-explanation\n\t\t\t\t\t44 text This draft is based on an older version.\n\t\t\t\t\t45 text  The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point.\n\t\t\t\t46 container\n\t\t\t\t\t47 text Recovery draft:  Recovered draft: retain this carefully written text.\n\t\t\t\t48 container\n\t\t\t\t\t49 button (collapsed) View differences, Secondary Actions: Expand\n\t\t\t\t\t50 button Replay draft on current version\n\t\t\t\t\t51 button Discard this draft\n\t\t\t39 container\n\t\t\t\t40 text Adapter body:  Another editor saved again while replay was in flight.\n\t\t18 container Synthetic server state\n\t\t\t19 heading Current synthetic server state, Value: 2\n\t\t\t\t20 text Current synthetic server state\n\t\t\t21 container\n\t\t\t\t22 text Scenario:  second-conflict  · Revision:  10\n\t\t\t23 text Another editor saved again while replay was in flight.\n\t\t\t24 container\n\t\t\t\t25 text Saved requests:  2  · Statuses:  409 → 409\n\t\t\t26 container\n\t\t\t\t27 text Stored recovery entries:  1\n\t\t28 container Text save request log\n\t\t\t29 heading Text-save payloads and responses, Value: 2\n\t\t\t\t30 text Text-save payloads and responses\n\t\t\t31 container\n\t\t\t\t32 text All requests and state are available through  window.__f19Smoke .\n\t\t\t33 text [\n  {\n    \"sequence\": 11,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 3,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 9\n  },\n  {\n    \"sequence\": 16,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 9,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 10\n  }\n]\n\nThe focused UI element is 9 checkbox Reset second-conflict, Value: 1",
+      "screenshot": "09-second-conflict.png"
+    },
+    {
+      "step": "second 409 observation: still exactly two PUTs, no automatic replay",
+      "at": "2026-09-11T20:31:36.136Z",
+      "state": {
+        "adapterBody": "Another editor saved again while replay was in flight.",
+        "body": "Another editor saved again while replay was in flight.",
+        "recovery": "A block edit is waiting for recoveryThis draft is based on an older version. The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point.Recovery draft: Recovered draft: retain this carefully written text.View differencesReplay draft on current versionDiscard this draftAdapter body: Another editor saved again while replay was in flight.",
+        "revision": 10,
+        "saves": [
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 3,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 11,
+            "serverRevision": 9,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          },
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 9,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 16,
+            "serverRevision": 10,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          }
+        ],
+        "serverPanel": "Current synthetic server stateScenario: second-conflict · Revision: 10Another editor saved again while replay was in flight.Saved requests: 2 · Statuses: 409 → 409Stored recovery entries: 1"
+      },
+      "ax": "Browser tab: 566868966, Title: \"F19 synthetic recovery conflict smoke\", URL: \"http://127.0.0.1:5191/\".\n0 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/\n\t1 container\n\t\t2 heading F19 · Recovery conflict smoke, Value: 1\n\t\t\t3 text F19 · Recovery conflict smoke\n\t\t4 text Synthetic data · real adapter and recovery component · browser-only API transport\n\t\t5 container Synthetic scenario controls\n\t\t\t6 checkbox Reset stale, Value: 0\n\t\t\t7 checkbox Reset discard, Value: 0\n\t\t\t8 checkbox Reset unavailable503, Value: 0\n\t\t\t9 checkbox Reset second-conflict, Value: 1\n\t\t\t10 button Remount persisted queue\n\t\t34 container Real recovery queue\n\t\t\t41 container\n\t\t\t\t42 text A block edit is waiting for recovery\n\t\t\t\t43 container :r3:-explanation\n\t\t\t\t\t44 text This draft is based on an older version.\n\t\t\t\t\t45 text  The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point.\n\t\t\t\t46 container\n\t\t\t\t\t47 text Recovery draft:  Recovered draft: retain this carefully written text.\n\t\t\t\t48 container\n\t\t\t\t\t49 button (collapsed) View differences, Secondary Actions: Expand\n\t\t\t\t\t50 button Replay draft on current version\n\t\t\t\t\t51 button Discard this draft\n\t\t\t39 container\n\t\t\t\t40 text Adapter body:  Another editor saved again while replay was in flight.\n\t\t18 container Synthetic server state\n\t\t\t19 heading Current synthetic server state, Value: 2\n\t\t\t\t20 text Current synthetic server state\n\t\t\t21 container\n\t\t\t\t22 text Scenario:  second-conflict  · Revision:  10\n\t\t\t23 text Another editor saved again while replay was in flight.\n\t\t\t24 container\n\t\t\t\t25 text Saved requests:  2  · Statuses:  409 → 409\n\t\t\t26 container\n\t\t\t\t27 text Stored recovery entries:  1\n\t\t28 container Text save request log\n\t\t\t29 heading Text-save payloads and responses, Value: 2\n\t\t\t\t30 text Text-save payloads and responses\n\t\t\t31 container\n\t\t\t\t32 text All requests and state are available through  window.__f19Smoke .\n\t\t\t33 text [\n  {\n    \"sequence\": 11,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 3,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 9\n  },\n  {\n    \"sequence\": 16,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 9,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 10\n  }\n]\n\nThe focused UI element is 9 checkbox Reset second-conflict, Value: 1"
+    },
+    {
+      "step": "remount: persisted draft survives, conflict presentation resets, zero new PUT",
+      "at": "2026-09-11T20:31:36.611Z",
+      "state": {
+        "adapterBody": "Another editor saved again while replay was in flight.",
+        "body": "Another editor saved again while replay was in flight.",
+        "recovery": "A block edit is waiting for recoveryRecovered draft: retain this carefully written text.ApplyDismissAdapter body: Another editor saved again while replay was in flight.",
+        "revision": 10,
+        "saves": [
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 3,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 11,
+            "serverRevision": 9,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          },
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 9,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 16,
+            "serverRevision": 10,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          }
+        ],
+        "serverPanel": "Current synthetic server stateScenario: second-conflict · Revision: 10Another editor saved again while replay was in flight.Saved requests: 2 · Statuses: 409 → 409Stored recovery entries: 1"
+      },
+      "ax": "Browser tab: 566868966, Title: \"F19 synthetic recovery conflict smoke\", URL: \"http://127.0.0.1:5191/\".\n0 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/\n\t1 container\n\t\t2 heading F19 · Recovery conflict smoke, Value: 1\n\t\t\t3 text F19 · Recovery conflict smoke\n\t\t4 text Synthetic data · real adapter and recovery component · browser-only API transport\n\t\t5 container Synthetic scenario controls\n\t\t\t6 checkbox Reset stale, Value: 0\n\t\t\t7 checkbox Reset discard, Value: 0\n\t\t\t8 checkbox Reset unavailable503, Value: 0\n\t\t\t9 checkbox Reset second-conflict, Value: 1\n\t\t\t10 button Remount persisted queue\n\t\t34 container Real recovery queue\n\t\t\t35 container\n\t\t\t\t36 text A block edit is waiting for recovery Recovered draft: retain this carefully written text.\n\t\t\t\t37 button Apply\n\t\t\t\t38 button Dismiss\n\t\t\t39 container\n\t\t\t\t40 text Adapter body:  Another editor saved again while replay was in flight.\n\t\t18 container Synthetic server state\n\t\t\t19 heading Current synthetic server state, Value: 2\n\t\t\t\t20 text Current synthetic server state\n\t\t\t21 container\n\t\t\t\t22 text Scenario:  second-conflict  · Revision:  10\n\t\t\t23 text Another editor saved again while replay was in flight.\n\t\t\t24 container\n\t\t\t\t25 text Saved requests:  2  · Statuses:  409 → 409\n\t\t\t26 container\n\t\t\t\t27 text Stored recovery entries:  1\n\t\t28 container Text save request log\n\t\t\t29 heading Text-save payloads and responses, Value: 2\n\t\t\t\t30 text Text-save payloads and responses\n\t\t\t31 container\n\t\t\t\t32 text All requests and state are available through  window.__f19Smoke .\n\t\t\t33 text [\n  {\n    \"sequence\": 11,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 3,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 9\n  },\n  {\n    \"sequence\": 16,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 9,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 10\n  }\n]\n\nThe focused UI element is 10 button Remount persisted queue",
+      "screenshot": "10-remounted-queue.png"
+    },
+    {
+      "step": "remounted Apply: frozen base 9 rejected at revision 10, three choices restored",
+      "at": "2026-09-11T20:31:49.635Z",
+      "state": {
+        "adapterBody": "Another editor saved again while replay was in flight.",
+        "body": "Another editor saved again while replay was in flight.",
+        "recovery": "A block edit is waiting for recoveryThis draft is based on an older version. The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point.Recovery draft: Recovered draft: retain this carefully written text.View differencesReplay draft on current versionDiscard this draftAdapter body: Another editor saved again while replay was in flight.",
+        "revision": 10,
+        "saves": [
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 3,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 11,
+            "serverRevision": 9,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          },
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 9,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 16,
+            "serverRevision": 10,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          },
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 9,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 28,
+            "serverRevision": 10,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          }
+        ],
+        "serverPanel": "Current synthetic server stateScenario: second-conflict · Revision: 10Another editor saved again while replay was in flight.Saved requests: 3 · Statuses: 409 → 409 → 409Stored recovery entries: 1"
+      },
+      "ax": "Browser tab: 566868966, Title: \"F19 synthetic recovery conflict smoke\", URL: \"http://127.0.0.1:5191/\".\n0 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/\n\t1 container\n\t\t2 heading F19 · Recovery conflict smoke, Value: 1\n\t\t\t3 text F19 · Recovery conflict smoke\n\t\t4 text Synthetic data · real adapter and recovery component · browser-only API transport\n\t\t5 container Synthetic scenario controls\n\t\t\t6 checkbox Reset stale, Value: 0\n\t\t\t7 checkbox Reset discard, Value: 0\n\t\t\t8 checkbox Reset unavailable503, Value: 0\n\t\t\t9 checkbox Reset second-conflict, Value: 1\n\t\t\t10 button Remount persisted queue\n\t\t34 container Real recovery queue\n\t\t\t41 container\n\t\t\t\t42 text A block edit is waiting for recovery\n\t\t\t\t43 container :r4:-explanation\n\t\t\t\t\t44 text This draft is based on an older version.\n\t\t\t\t\t45 text  The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point.\n\t\t\t\t46 container\n\t\t\t\t\t47 text Recovery draft:  Recovered draft: retain this carefully written text.\n\t\t\t\t48 container\n\t\t\t\t\t49 button (collapsed) View differences, Secondary Actions: Expand\n\t\t\t\t\t50 button Replay draft on current version\n\t\t\t\t\t51 button Discard this draft\n\t\t\t39 container\n\t\t\t\t40 text Adapter body:  Another editor saved again while replay was in flight.\n\t\t18 container Synthetic server state\n\t\t\t19 heading Current synthetic server state, Value: 2\n\t\t\t\t20 text Current synthetic server state\n\t\t\t21 container\n\t\t\t\t22 text Scenario:  second-conflict  · Revision:  10\n\t\t\t23 text Another editor saved again while replay was in flight.\n\t\t\t24 container\n\t\t\t\t25 text Saved requests:  3  · Statuses:  409 → 409 → 409\n\t\t\t26 container\n\t\t\t\t27 text Stored recovery entries:  1\n\t\t28 container Text save request log\n\t\t\t29 heading Text-save payloads and responses, Value: 2\n\t\t\t\t30 text Text-save payloads and responses\n\t\t\t31 container\n\t\t\t\t32 text All requests and state are available through  window.__f19Smoke .\n\t\t\t33 text [\n  {\n    \"sequence\": 11,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 3,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 9\n  },\n  {\n    \"sequence\": 16,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 9,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 10\n  },\n  {\n    \"sequence\": 28,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 9,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 10\n  }\n]\n\nThe focused UI element is 10 button Remount persisted queue"
+    },
+    {
+      "step": "390px conflict: all three actions wrap and remain available",
+      "at": "2026-09-11T20:31:50.065Z",
+      "state": {
+        "adapterBody": "Another editor saved again while replay was in flight.",
+        "body": "Another editor saved again while replay was in flight.",
+        "recovery": "A block edit is waiting for recoveryThis draft is based on an older version. The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point.Recovery draft: Recovered draft: retain this carefully written text.View differencesReplay draft on current versionDiscard this draftAdapter body: Another editor saved again while replay was in flight.",
+        "revision": 10,
+        "saves": [
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 3,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 11,
+            "serverRevision": 9,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          },
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 9,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 16,
+            "serverRevision": 10,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          },
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 9,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 28,
+            "serverRevision": 10,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          }
+        ],
+        "serverPanel": "Current synthetic server stateScenario: second-conflict · Revision: 10Another editor saved again while replay was in flight.Saved requests: 3 · Statuses: 409 → 409 → 409Stored recovery entries: 1"
+      },
+      "ax": "Browser tab: 566868966, Title: \"F19 synthetic recovery conflict smoke\", URL: \"http://127.0.0.1:5191/\".\n0 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/\n\t1 container\n\t\t2 heading F19 · Recovery conflict smoke, Value: 1\n\t\t\t3 text F19 · Recovery conflict smoke\n\t\t4 text Synthetic data · real adapter and recovery component · browser-only API transport\n\t\t5 container Synthetic scenario controls\n\t\t\t6 checkbox Reset stale, Value: 0\n\t\t\t7 checkbox Reset discard, Value: 0\n\t\t\t8 checkbox Reset unavailable503, Value: 0\n\t\t\t9 checkbox Reset second-conflict, Value: 1\n\t\t\t10 button Remount persisted queue\n\t\t34 container Real recovery queue\n\t\t\t41 container\n\t\t\t\t42 text A block edit is waiting for recovery\n\t\t\t\t43 container :r4:-explanation\n\t\t\t\t\t44 text This draft is based on an older version.\n\t\t\t\t\t45 text  The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point.\n\t\t\t\t46 container\n\t\t\t\t\t47 text Recovery draft:  Recovered draft: retain this carefully written text.\n\t\t\t\t48 container\n\t\t\t\t\t49 button (collapsed) View differences, Secondary Actions: Expand\n\t\t\t\t\t50 button Replay draft on current version\n\t\t\t\t\t51 button Discard this draft\n\t\t\t39 container\n\t\t\t\t40 text Adapter body:  Another editor saved again while replay was in flight.\n\t\t18 container Synthetic server state\n\t\t\t19 heading Current synthetic server state, Value: 2\n\t\t\t\t20 text Current synthetic server state\n\t\t\t21 container\n\t\t\t\t22 text Scenario:  second-conflict  · Revision:  10\n\t\t\t23 text Another editor saved again while replay was in flight.\n\t\t\t24 container\n\t\t\t\t25 text Saved requests:  3  · Statuses:  409 → 409 → 409\n\t\t\t26 container\n\t\t\t\t27 text Stored recovery entries:  1\n\t\t28 container Text save request log\n\t\t\t29 heading Text-save payloads and responses, Value: 2\n\t\t\t\t30 text Text-save payloads and responses\n\t\t\t31 container\n\t\t\t\t32 text All requests and state are available through  window.__f19Smoke .\n\t\t\t33 text [\n  {\n    \"sequence\": 11,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 3,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 9\n  },\n  {\n    \"sequence\": 16,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 9,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 10\n  },\n  {\n    \"sequence\": 28,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 9,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 10\n  }\n]\n\nThe focused UI element is 10 button Remount persisted queue",
+      "screenshot": "11-narrow-conflict.png"
+    },
+    {
+      "step": "390px differences: stacked units display latest revision 10 text",
+      "at": "2026-09-11T20:32:06.081Z",
+      "state": {
+        "adapterBody": "Another editor saved again while replay was in flight.",
+        "body": "Another editor saved again while replay was in flight.",
+        "recovery": "A block edit is waiting for recoveryThis draft is based on an older version. The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point.Recovery draft: Recovered draft: retain this carefully written text.View differencesReplay draft on current versionDiscard this draftText comparison, current version 10. Current text can change again before replay.Recovery draft · unit 1Recovered draft: retain this carefully written text.Current text · unit 1Another editor saved again while replay was in flight.Adapter body: Another editor saved again while replay was in flight.",
+        "revision": 10,
+        "saves": [
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 3,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 11,
+            "serverRevision": 9,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          },
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 9,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 16,
+            "serverRevision": 10,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          },
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 9,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 28,
+            "serverRevision": 10,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          }
+        ],
+        "serverPanel": "Current synthetic server stateScenario: second-conflict · Revision: 10Another editor saved again while replay was in flight.Saved requests: 3 · Statuses: 409 → 409 → 409Stored recovery entries: 1"
+      },
+      "ax": "Browser tab: 566868966, Title: \"F19 synthetic recovery conflict smoke\", URL: \"http://127.0.0.1:5191/\".\n0 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/\n\t1 container\n\t\t2 heading F19 · Recovery conflict smoke, Value: 1\n\t\t\t3 text F19 · Recovery conflict smoke\n\t\t4 text Synthetic data · real adapter and recovery component · browser-only API transport\n\t\t5 container Synthetic scenario controls\n\t\t\t6 checkbox Reset stale, Value: 0\n\t\t\t7 checkbox Reset discard, Value: 0\n\t\t\t8 checkbox Reset unavailable503, Value: 0\n\t\t\t9 checkbox Reset second-conflict, Value: 1\n\t\t\t10 button Remount persisted queue\n\t\t34 container Real recovery queue\n\t\t\t41 container\n\t\t\t\t42 text A block edit is waiting for recovery\n\t\t\t\t43 container :r4:-explanation\n\t\t\t\t\t44 text This draft is based on an older version.\n\t\t\t\t\t45 text  The content has changed elsewhere. Replaying will replace the current block text with this draft, using the latest version as its starting point.\n\t\t\t\t46 container\n\t\t\t\t\t47 text Recovery draft:  Recovered draft: retain this carefully written text.\n\t\t\t\t48 container\n\t\t\t\t\t49 button (expanded) View differences, Secondary Actions: Collapse\n\t\t\t\t\t50 button Replay draft on current version\n\t\t\t\t\t51 button Discard this draft\n\t\t\t\t52 container Description: Draft and current text comparison, ID: :r4:-comparison\n\t\t\t\t\t53 container\n\t\t\t\t\t\t54 text Text comparison , current version 10 . Current text can change again before replay.\n\t\t\t\t\t55 heading Recovery draft · unit 1, Value: 4\n\t\t\t\t\t\t56 text Recovery draft  · unit 1\n\t\t\t\t\t57 text Recovered draft: retain this carefully written text.\n\t\t\t\t\t58 heading Current text · unit 1, Value: 4\n\t\t\t\t\t\t59 text Current text  · unit 1\n\t\t\t\t\t60 text Another editor saved again while replay was in flight.\n\t\t\t39 container\n\t\t\t\t40 text Adapter body:  Another editor saved again while replay was in flight.\n\t\t18 container Synthetic server state\n\t\t\t19 heading Current synthetic server state, Value: 2\n\t\t\t\t20 text Current synthetic server state\n\t\t\t21 container\n\t\t\t\t22 text Scenario:  second-conflict  · Revision:  10\n\t\t\t23 text Another editor saved again while replay was in flight.\n\t\t\t24 container\n\t\t\t\t25 text Saved requests:  3  · Statuses:  409 → 409 → 409\n\t\t\t26 container\n\t\t\t\t27 text Stored recovery entries:  1\n\t\t28 container Text save request log\n\t\t\t29 heading Text-save payloads and responses, Value: 2\n\t\t\t\t30 text Text-save payloads and responses\n\t\t\t31 container\n\t\t\t\t32 text All requests and state are available through  window.__f19Smoke .\n\t\t\t33 text [\n  {\n    \"sequence\": 11,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 3,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 9\n  },\n  {\n    \"sequence\": 16,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 9,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 10\n  },\n  {\n    \"sequence\": 28,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 9,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 10\n  }\n]\n\nThe focused UI element is 10 button Remount persisted queue",
+      "screenshot": "12-narrow-differences.png"
+    },
+    {
+      "step": "narrow explicit replay after second conflict: latest base 10, 200, draft saved and cleared",
+      "at": "2026-09-11T20:32:28.271Z",
+      "state": {
+        "adapterBody": "Recovered draft: retain this carefully written text.",
+        "body": "Recovered draft: retain this carefully written text.",
+        "recovery": "No recovery drafts remain.Adapter body: Recovered draft: retain this carefully written text.",
+        "revision": 11,
+        "saves": [
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 3,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 11,
+            "serverRevision": 9,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          },
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 9,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 16,
+            "serverRevision": 10,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          },
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 9,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 28,
+            "serverRevision": 10,
+            "status": 409,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          },
+          {
+            "method": "PUT",
+            "payload": {
+              "annotations": {
+                "range_updates": []
+              },
+              "base_revision": 10,
+              "block": {
+                "content_json": {
+                  "text_flow": {
+                    "inline_structures": [],
+                    "metadata": {},
+                    "textflow_version": "TextBlockContentV1",
+                    "units": [
+                      {
+                        "id": "tu-1",
+                        "indent_level": 0,
+                        "metadata": "[MaxDepth]",
+                        "order_index": 0,
+                        "status": "active",
+                        "text": "Recovered draft: retain this carefully written text.",
+                        "writing_role": "paragraph"
+                      }
+                    ]
+                  }
+                },
+                "plain_text": "Recovered draft: retain this carefully written text."
+              },
+              "note_id": "f19-synthetic-note",
+              "text_ranges": []
+            },
+            "sequence": 34,
+            "serverRevision": 11,
+            "status": 200,
+            "url": "/note-blocks/f19-synthetic-block/text-save"
+          }
+        ],
+        "serverPanel": "Current synthetic server stateScenario: second-conflict · Revision: 11Recovered draft: retain this carefully written text.Saved requests: 4 · Statuses: 409 → 409 → 409 → 200Stored recovery entries: 0"
+      },
+      "ax": "Browser tab: 566868966, Title: \"F19 synthetic recovery conflict smoke\", URL: \"http://127.0.0.1:5191/\".\n0 AXWebArea F19 synthetic recovery conflict smoke, URL: 127.0.0.1:5191/\n\t1 container\n\t\t2 heading F19 · Recovery conflict smoke, Value: 1\n\t\t\t3 text F19 · Recovery conflict smoke\n\t\t4 text Synthetic data · real adapter and recovery component · browser-only API transport\n\t\t5 container Synthetic scenario controls\n\t\t\t6 checkbox Reset stale, Value: 0\n\t\t\t7 checkbox Reset discard, Value: 0\n\t\t\t8 checkbox Reset unavailable503, Value: 0\n\t\t\t9 checkbox Reset second-conflict, Value: 1\n\t\t\t10 button Remount persisted queue\n\t\t34 container Real recovery queue\n\t\t\t41 text No recovery drafts remain.\n\t\t\t39 container\n\t\t\t\t40 text Adapter body:  Recovered draft: retain this carefully written text.\n\t\t18 container Synthetic server state\n\t\t\t19 heading Current synthetic server state, Value: 2\n\t\t\t\t20 text Current synthetic server state\n\t\t\t21 container\n\t\t\t\t22 text Scenario:  second-conflict  · Revision:  11\n\t\t\t23 text Recovered draft: retain this carefully written text.\n\t\t\t24 container\n\t\t\t\t25 text Saved requests:  4  · Statuses:  409 → 409 → 409 → 200\n\t\t\t26 container\n\t\t\t\t27 text Stored recovery entries:  0\n\t\t28 container Text save request log\n\t\t\t29 heading Text-save payloads and responses, Value: 2\n\t\t\t\t30 text Text-save payloads and responses\n\t\t\t31 container\n\t\t\t\t32 text All requests and state are available through  window.__f19Smoke .\n\t\t\t33 text [\n  {\n    \"sequence\": 11,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 3,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 9\n  },\n  {\n    \"sequence\": 16,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 9,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 10\n  },\n  {\n    \"sequence\": 28,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 409,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 9,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 10\n  },\n  {\n    \"sequence\": 34,\n    \"method\": \"PUT\",\n    \"url\": \"/note-blocks/f19-synthetic-block/text-save\",\n    \"status\": 200,\n    \"payload\": {\n      \"note_id\": \"f19-synthetic-note\",\n      \"base_revision\": 10,\n      \"block\": {\n        \"content_json\": {\n          \"text_flow\": {\n            \"textflow_version\": \"TextBlockContentV1\",\n            \"units\": [\n              {\n                \"id\": \"tu-1\",\n                \"text\": \"Recovered draft: retain this carefully written text.\",\n                \"writing_role\": \"paragraph\",\n                \"indent_level\": 0,\n                \"order_index\": 0,\n                \"metadata\": {},\n                \"status\": \"active\"\n              }\n            ],\n            \"inline_structures\": [],\n            \"metadata\": {}\n          }\n        },\n        \"plain_text\": \"Recovered draft: retain this carefully written text.\"\n      },\n      \"annotations\": {\n        \"range_updates\": []\n      },\n      \"text_ranges\": []\n    },\n    \"serverRevision\": 11\n  }\n]\n\nThe focused UI element is 10 button Remount persisted queue",
+      "screenshot": "13-narrow-replay-success.png"
+    }
+  ]
+}

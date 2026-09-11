@@ -1,0 +1,50 @@
+[
+  {
+    "level": "warn",
+    "message": "⚠️ React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransition` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_starttransition.",
+    "timestamp": "2026-09-11T20:27:51.950Z",
+    "url": "http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/node_modules/.vite/deps/react-router-dom.js?v=393a697c"
+  },
+  {
+    "level": "warn",
+    "message": "⚠️ React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use the `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/future#v7_relativesplatpath.",
+    "timestamp": "2026-09-11T20:27:51.950Z",
+    "url": "http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/node_modules/.vite/deps/react-router-dom.js?v=393a697c"
+  },
+  {
+    "level": "error",
+    "message": "Failed to save block: Error: Synthetic 409\n    at respond (http://127.0.0.1:5191/browser-fixture.tsx:125:44)\n    at api.defaults.adapter (http://127.0.0.1:5191/browser-fixture.tsx:146:14)\n    at Axios.dispatchRequest (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/node_modules/.vite/deps/axios.js?v=393a697c:2210:10)\n    at async Axios.request (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/node_modules/.vite/deps/axios.js?v=393a697c:2324:14)\n    at async saveAtomicText (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/client/src/pages/Notes/canvasEngine/atomicTextSaveRepository.ts:19:20)\n    at Axios.request (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/node_modules/.vite/deps/axios.js?v=393a697c:2328:41)\n    at async saveAtomicText (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/client/src/pages/Notes/canvasEngine/atomicTextSaveRepository.ts:19:20)",
+    "timestamp": "2026-09-11T20:30:00.628Z",
+    "url": "http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts"
+  },
+  {
+    "level": "error",
+    "message": "Failed to save block: Error: Synthetic 409\n    at respond (http://127.0.0.1:5191/browser-fixture.tsx:125:44)\n    at api.defaults.adapter (http://127.0.0.1:5191/browser-fixture.tsx:146:14)\n    at Axios.dispatchRequest (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/node_modules/.vite/deps/axios.js?v=393a697c:2210:10)\n    at async Axios.request (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/node_modules/.vite/deps/axios.js?v=393a697c:2324:14)\n    at async saveAtomicText (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/client/src/pages/Notes/canvasEngine/atomicTextSaveRepository.ts:19:20)\n    at Axios.request (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/node_modules/.vite/deps/axios.js?v=393a697c:2328:41)\n    at async saveAtomicText (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/client/src/pages/Notes/canvasEngine/atomicTextSaveRepository.ts:19:20)",
+    "timestamp": "2026-09-11T20:30:30.659Z",
+    "url": "http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts"
+  },
+  {
+    "level": "error",
+    "message": "Failed to save block: Error: Synthetic 503\n    at respond (http://127.0.0.1:5191/browser-fixture.tsx:125:44)\n    at api.defaults.adapter (http://127.0.0.1:5191/browser-fixture.tsx:140:14)\n    at Axios.dispatchRequest (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/node_modules/.vite/deps/axios.js?v=393a697c:2210:10)\n    at async Axios.request (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/node_modules/.vite/deps/axios.js?v=393a697c:2324:14)\n    at async saveAtomicText (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/client/src/pages/Notes/canvasEngine/atomicTextSaveRepository.ts:19:20)\n    at Axios.request (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/node_modules/.vite/deps/axios.js?v=393a697c:2328:41)\n    at async saveAtomicText (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/client/src/pages/Notes/canvasEngine/atomicTextSaveRepository.ts:19:20)",
+    "timestamp": "2026-09-11T20:30:53.491Z",
+    "url": "http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts"
+  },
+  {
+    "level": "error",
+    "message": "Failed to save block: Error: Synthetic 409\n    at respond (http://127.0.0.1:5191/browser-fixture.tsx:125:44)\n    at api.defaults.adapter (http://127.0.0.1:5191/browser-fixture.tsx:146:14)\n    at Axios.dispatchRequest (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/node_modules/.vite/deps/axios.js?v=393a697c:2210:10)\n    at async Axios.request (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/node_modules/.vite/deps/axios.js?v=393a697c:2324:14)\n    at async saveAtomicText (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/client/src/pages/Notes/canvasEngine/atomicTextSaveRepository.ts:19:20)\n    at Axios.request (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/node_modules/.vite/deps/axios.js?v=393a697c:2328:41)\n    at async saveAtomicText (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/client/src/pages/Notes/canvasEngine/atomicTextSaveRepository.ts:19:20)",
+    "timestamp": "2026-09-11T20:31:09.591Z",
+    "url": "http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts"
+  },
+  {
+    "level": "error",
+    "message": "Failed to save block: Error: Synthetic 409\n    at respond (http://127.0.0.1:5191/browser-fixture.tsx:125:44)\n    at api.defaults.adapter (http://127.0.0.1:5191/browser-fixture.tsx:146:14)\n    at Axios.dispatchRequest (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/node_modules/.vite/deps/axios.js?v=393a697c:2210:10)\n    at async Axios.request (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/node_modules/.vite/deps/axios.js?v=393a697c:2324:14)\n    at async saveAtomicText (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/client/src/pages/Notes/canvasEngine/atomicTextSaveRepository.ts:19:20)\n    at Axios.request (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/node_modules/.vite/deps/axios.js?v=393a697c:2328:41)\n    at async saveAtomicText (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/client/src/pages/Notes/canvasEngine/atomicTextSaveRepository.ts:19:20)",
+    "timestamp": "2026-09-11T20:31:17.365Z",
+    "url": "http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts"
+  },
+  {
+    "level": "error",
+    "message": "Failed to save block: Error: Synthetic 409\n    at respond (http://127.0.0.1:5191/browser-fixture.tsx:125:44)\n    at api.defaults.adapter (http://127.0.0.1:5191/browser-fixture.tsx:146:14)\n    at Axios.dispatchRequest (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/node_modules/.vite/deps/axios.js?v=393a697c:2210:10)\n    at async Axios.request (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/node_modules/.vite/deps/axios.js?v=393a697c:2324:14)\n    at async saveAtomicText (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/client/src/pages/Notes/canvasEngine/atomicTextSaveRepository.ts:19:20)\n    at Axios.request (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/node_modules/.vite/deps/axios.js?v=393a697c:2328:41)\n    at async saveAtomicText (http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/client/src/pages/Notes/canvasEngine/atomicTextSaveRepository.ts:19:20)",
+    "timestamp": "2026-09-11T20:31:49.184Z",
+    "url": "http://127.0.0.1:5191/@fs/D:/Coinsides/v2.x/Coincides/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts"
+  }
+]

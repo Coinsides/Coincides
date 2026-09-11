@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(候 E1 收口后派发;修单插队优先于 E2)
+> **状态 (Status)**: done(builder 已交付；最终总门与放行留 HQ)
 > **From**: fable(HQ) · **To**: codex(builder)
 > **日期**: 2026-09-11
 > **单号**: 13.5 · F19 · 恢复条目基版本过期=Apply 死胡同
@@ -49,3 +49,79 @@ Result 必含:交付清单+diff、恢复条目状态机改前/改后图、测试
 - 三岔口实现/独立 GET 当前 revision/普通 text-save 重放/⛔自动重试/F17 通道零触碰——全部合裁定,采信;
 - 低并发复跑与 npm.cmd 用法合规,unboxing 首轮超时=13.6 flaky 名录既档,独立复验绿即按名录处理;
 - 按 STOP-LINE §剩余工作 1-4 收完:修门→最终 typecheck+production build→合成浏览器冒烟余项(知情重放200/放弃/503/二次409/跨挂载/窄屏)→完整证据+工单 `## Result`。verify:v2-bn8-runtime 总门末次由 HQ 收口跑,builder 修门后跑一次 `check:canvas-runtime-boundary` 单项证明门绿即可。
+
+## Result
+
+2026-09-11，Codex builder 二轮续接完成补遗一 A/B。交付工作树，未 git commit / push / PR / merge；未发现新的未裁定冲突。`done` 仅表示本工单 builder 交付完成，最终 `verify:v2-bn8-runtime` 和放行仍由 HQ 收口。
+
+### 交付清单与 diff
+
+- 恢复 UI：`BlockEditRecoveryQueue.tsx/.module.css`，409 stale_revision 后三选项、逐单元只读草稿/正文对照、等待/失败反馈和窄屏单列。
+- adapter：`useNoteCanvasDataAdapter.ts`，独立 GET 当前 revision、用户知情后用草稿 content 组装普通 text-save；当前 annotation / board ranges 复用普通重定位；请求过期不提交；再次 409 留冲突，503 留冻结载荷供原 Apply 重试。
+- 接线：`useNoteCanvasLayerProps.ts`、`useNoteCanvasRuntimeController.ts`、`NoteRuntimeDocumentLayer.tsx`；新增范围 helper `recoveryReplayAnnotations.ts`。
+- 定向测试：adapter、document layer、queue、annotation helper 共新增 26 个用例；既有 draft persistence / board range session 纳入定向验证。
+- 补遗一 A：`canvasRuntimeBoundaryCheck.mjs:1261` 的失效 `.exportPreviewPageFrameGroup` 改为现物 PageFrame `<details>` 使用的 `.exportPreviewGroup`；保留 `.exportPreviewPageFrameMeta` / `.exportPreviewPageFrameTypography`。三项匹配完整 CSS 规则头，防近名前缀误通过；断言语义与其余 158 项不变。未改 `NoteDetail.module.css` 或回补 CSS。
+
+**代码/测试/门共 12 文件，+985/-48**（业务与测试 11 文件 +981/-45，门 +4/-3；不含工单及审计证据）。完整 [diff](../../audits/2026-09-11-f19-builder/implementation.diff)、[逐文件统计与 SHA-256](../../audits/2026-09-11-f19-builder/implementation-manifest.json)、[完整证据 README](../../audits/2026-09-11-f19-builder/README.md)。其他已有脏文件排除本单统计，未触碰。
+
+服务端/OCC、F17 history_restore 通道与漂移规则、持久化模块、TextFlow-Contract、权限配置均未修改。本轮续工只修改授权的门断言，业务实现沿用补遗一已采信版本。
+
+### 验证数字
+
+| 项目 | 结果 | 证据 |
+|---|---|---|
+| 首轮定向 | 6 文件 / 181 pass / 0 fail，新增 26 cases | `validation/targeted.json`、`targeted.log` |
+| 首轮全客户端低并发复跑 | 126 文件 / 1350 pass；含最终业务小修，随后旧门失败 | `validation/runtime-gate-recheck.log`；不是总门通过 |
+| 首轮 unboxing 超时独立复验 | 1 文件 / 4 pass | `validation/board-timeout-recheck.log`；按补遗一已档 flaky 裁定处理 |
+| 修门后单项一次 | **159/159 checks，exit 0** | `validation/gate-boundary-final.log` |
+| 闸保牙 | **三项逐一删除 3/3 红；额外近名干扰 3/3 红**，精确命中同一门 | `validation/gate-selector-evidence.md`、`gate-selector-mutations.json` 与六份失败日志 |
+| 最终 client typecheck | **exit 0** | `validation/typecheck-final.log` |
+| 最终 client production build | **exit 0**，2280 modules | `validation/production-build-final.log` |
+| 最终 Chrome 合成冒烟 | **8 类要求全覆盖，16 快照** | `browser-final.json`、截图 03–13 |
+
+路径均相对 `docs/audits/2026-09-11-f19-builder/`。闸保牙只在 Node 子进程读取 CSS 时返回内存变体，**0 个源码变体写盘/入库**，磁盘 CSS 与门脚本前后哈希一致。最终 typecheck/build 均在修门后运行，浏览器余项均在构建后完成。build 有既有模块动静态 import 与大 chunk 警告，未改阈值；总门不在本轮重复运行，留 HQ。
+
+### 合成浏览器冒烟
+
+1. 旧 base 3 Apply → 409；当前正文/revision 9 不变；三选项出现。查看差异内容正确，PUT 仍仅 1 次（03/04）。
+2. 知情重放以 base 9 → 200，revision 10；adapter 和合成正文均为草稿，条目清零（05）。
+3. 冲突后放弃只清条目；正文/revision 9 不变，无新增 PUT（06）。
+4. 503 保留原 Apply/Dismiss；显式 Apply 后 200，两次完整 payload 相等，条目清零（07/08）。
+5. 重放前注入 revision 10 保存，第二次 409 回冲突；18.344 秒后观察仍只有 2 次 PUT，无自动重放（09）。
+6. 组件重新挂载后草稿保留，不自动提交；冲突呈现复位，Apply 再以冻结 base 9 → 409 后恢复三岔口（10 与 JSON）。
+7. 窄屏请求 390×844，实测内容宽 375px，`scrollWidth=clientWidth`；按钮完整换行、对照单列；窄屏重新知情重放以 base 10 → 200，revision 11、条目清零（11–13）。viewport override 已 reset。
+
+射程：真实 Chrome 点击、真实 adapter/UI、浏览器内合成 Axios transport；无业务后端/真库，跨挂载为组件卸载重挂，不是浏览器重启。fixture 的 annotation/board ranges 为空，该行为由定向测试证明。控制台有 5 条预期 Synthetic 409、1 条预期 Synthetic 503 和 2 条 Router warning，未捕获其他 error，不申报 console 零错误。
+
+### 恢复条目状态机：改前
+
+```mermaid
+stateDiagram-v2
+  [*] --> 待恢复
+  待恢复 --> 提交旧base: Apply
+  提交旧base --> 待恢复: 409 / 503 / 网络失败
+  提交旧base --> 已清除: 保存确认
+  待恢复 --> 已清除: Dismiss
+```
+
+### 恢复条目状态机：改后
+
+```mermaid
+stateDiagram-v2
+  [*] --> 待恢复
+  待恢复 --> 提交冻结载荷: Apply
+  提交冻结载荷 --> 冲突: 409 stale_revision
+  提交冻结载荷 --> 待恢复: 503 / 网络 / 非stale失败
+  提交冻结载荷 --> 已清除: 保存确认
+  冲突 --> 冲突: 查看差异（只读）
+  冲突 --> 读取当前版本: 用户知情选择重放
+  读取当前版本 --> 冲突: 读取失败或请求已过期
+  读取当前版本 --> 普通保存: 当前base + 草稿content
+  普通保存 --> 冲突: 再次409 stale_revision
+  普通保存 --> 待恢复: 503 / 网络失败（保留新冻结载荷）
+  普通保存 --> 已清除: 保存确认
+  冲突 --> 已清除: 放弃这份草稿
+  待恢复 --> 已清除: Dismiss
+```
+
+冲突呈现为内存状态；sessionStorage 持久化机制不变。重挂载后恢复条目仍在，后续 Apply 再获 409 时恢复冲突态。[首轮 STOP-LINE](../../audits/2026-09-11-f19-builder/STOP-LINE.md) 保留原文作为停线时快照，解除依据为本单补遗一。

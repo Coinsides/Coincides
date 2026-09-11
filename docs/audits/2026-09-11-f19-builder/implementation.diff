@@ -1,0 +1,1295 @@
+diff --git a/client/scripts/canvasRuntimeBoundaryCheck.mjs b/client/scripts/canvasRuntimeBoundaryCheck.mjs
+index 49df885..74d9ee4 100644
+--- a/client/scripts/canvasRuntimeBoundaryCheck.mjs
++++ b/client/scripts/canvasRuntimeBoundaryCheck.mjs
+@@ -1259,9 +1259,10 @@ assertContainsAll('Note detail styles render cross-page Block fragment markers',
+   '.blockFragmentContinuationBadge',
+ ]);
+ assertContainsAll('Note detail styles render PageFrame-aware Export Preview groups', noteDetailStyles, [
+-  '.exportPreviewPageFrameGroup',
+-  '.exportPreviewPageFrameMeta',
+-  '.exportPreviewPageFrameTypography',
++  // E1 uses the shared group class; require rule heads, not near-name prefixes.
++  '.exportPreviewGroup {',
++  '.exportPreviewPageFrameMeta {',
++  '.exportPreviewPageFrameTypography {',
+ ]);
+ assertContainsAll('Note detail styles render PageStack shell controls', noteDetailStyles, [
+   '.pageStackNumberBadge',
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx
+index 798813c..2119913 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx
++++ b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx
+@@ -9,6 +9,8 @@ import {
+   DRAFT_RECOVERY_STORAGE_KEY_V2,
+   createBlockEditRecoveryKey,
+   listBlockEditRecoveryReceipts,
++  rememberBlockEditRecoveryReceipt,
++  type BlockEditRecoveryReceipt,
+ } from '../draftBlockPersistence';
+ import { createTextBlockContentV1, getTextFlowContent, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
+ import { NOTE_SLASH_COMMANDS } from '../../noteSlashCommands';
+@@ -964,6 +966,198 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
+     await expect(subject.result.current.whenIdle()).resolves.toBeUndefined();
+   });
+ 
++  function queueF19Recovery(): BlockEditRecoveryReceipt {
++    const flow = createTextBlockContentV1('recovered draft');
++    const receipt: BlockEditRecoveryReceipt = {
++      version: 2, kind: 'block_edit_recovery',
++      recoveryKey: createBlockEditRecoveryKey(note.id, 'block-1', 0, 1, 'previous-visit'),
++      noteId: note.id, requestedNoteId: note.id, blockId: 'block-1', mountNonce: 'previous-visit',
++      creationGeneration: 0, operationSequence: 1, hydrationEpoch: 1, queuedAt: '2026-09-11T00:00:00Z',
++      text: 'recovered draft', plainText: 'recovered draft', textFlow: flow,
++      contentJson: { body: 'recovered draft', [TEXT_FLOW_CONTENT_KEY]: flow, retained: 'draft metadata' },
++      baseRevision: 3, annotationRanges: [], boardRangeSnapshot: { ranges: [] },
++    };
++    expect(rememberBlockEditRecoveryReceipt(receipt)).toBe(true);
++    return receipt;
++  }
++
++  const f19Conflict = { response: { status: 409, data: { error: 'stale_revision', details: { code: 'stale_revision', current_revision: 9 } } } };
++
++  it('F19 exposes stale Apply as conflict, reads differences without writes, then explicitly saves the exact draft on the current revision', async () => {
++    const queued = queueF19Recovery();
++    const current = { ...serverBlock('changed elsewhere', false), text_save_revision: 9 };
++    durableBlocks = [current];
++    mocks.atomicPut.mockRejectedValueOnce(f19Conflict);
++    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
++    await waitFor(() => expect(subject.result.current.loading).toBe(false));
++    expect(mocks.atomicPut).not.toHaveBeenCalled();
++    await act(async () => { expect(await subject.result.current.applyBlockEditRecovery(queued.recoveryKey)).toBe(false); });
++    const failed = subject.result.current.blockEditRecoveryReceipts[0];
++    expect(failed.recoveryKey).not.toBe(queued.recoveryKey);
++    expect(subject.result.current.blockEditRecoveryConflicts[failed.recoveryKey]).toBe(true);
++    expect(subject.result.current.blocks[0].text_save_revision).toBe(3);
++    const beforeRead = sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2);
++    await act(async () => { expect(await subject.result.current.inspectBlockEditRecovery(failed.recoveryKey)).toMatchObject(current); });
++    expect(sessionStorage.getItem(DRAFT_RECOVERY_STORAGE_KEY_V2)).toBe(beforeRead);
++    expect(subject.result.current.blocks[0].text_save_revision).toBe(3);
++    expect(mocks.atomicPut).toHaveBeenCalledTimes(1);
++    await act(async () => { expect(await subject.result.current.replayBlockEditRecovery(failed.recoveryKey)).toBe(true); });
++    expect(mocks.atomicPut.mock.calls.map(([, payload]) => payload.base_revision)).toEqual([3, 9]);
++    expect(mocks.atomicPut.mock.calls[1]).toEqual(['/note-blocks/block-1/text-save', {
++      note_id: note.id, base_revision: 9,
++      block: { content_json: failed.contentJson, plain_text: failed.plainText },
++      annotations: { range_updates: [] }, text_ranges: [],
++    }]);
++    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
++    expect(listBlockEditRecoveryReceipts(note.id)).toEqual([]);
++    expect(durableBlocks[0]).toMatchObject({ plain_text: failed.plainText, content_json: failed.contentJson, text_save_revision: 10 });
++  });
++
++  it('F19 returns a second stale revision to conflict with no automatic resubmission', async () => {
++    const queued = queueF19Recovery();
++    durableBlocks = [{ ...serverBlock('current', false), text_save_revision: 9 }];
++    mocks.atomicPut.mockRejectedValue(f19Conflict);
++    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
++    await waitFor(() => expect(subject.result.current.loading).toBe(false));
++    await act(async () => { expect(await subject.result.current.replayBlockEditRecovery(queued.recoveryKey)).toBe(false); });
++    const failed = subject.result.current.blockEditRecoveryReceipts[0];
++    expect(failed.baseRevision).toBe(9);
++    expect(subject.result.current.blockEditRecoveryConflicts[failed.recoveryKey]).toBe(true);
++    expect(mocks.atomicPut).toHaveBeenCalledTimes(1);
++    expect(durableBlocks[0].plain_text).toBe('current');
++  });
++
++  it.each([503, 'network', 409] as const)('F19 keeps non-stale failure %s on the original frozen Apply retry path', async (failure) => {
++    const queued = queueF19Recovery();
++    durableBlocks = [{ ...serverBlock('current', false), text_save_revision: 3 }];
++    mocks.atomicPut.mockRejectedValueOnce(failure === 'network' ? new Error('offline')
++      : { response: { status: failure, data: { error: 'unavailable' } } });
++    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
++    await waitFor(() => expect(subject.result.current.loading).toBe(false));
++    await act(async () => { expect(await subject.result.current.applyBlockEditRecovery(queued.recoveryKey)).toBe(false); });
++    const failed = subject.result.current.blockEditRecoveryReceipts[0];
++    expect(subject.result.current.blockEditRecoveryConflicts[failed.recoveryKey]).not.toBe(true);
++    const firstPayload = structuredClone(mocks.atomicPut.mock.calls[0][1]);
++    await act(async () => { expect(await subject.result.current.applyBlockEditRecovery(failed.recoveryKey)).toBe(true); });
++    expect(mocks.atomicPut.mock.calls[1][1]).toEqual(firstPayload);
++    expect(firstPayload.base_revision).toBe(3);
++    expect(listBlockEditRecoveryReceipts(note.id)).toEqual([]);
++  });
++
++  it('F19 discard clears only this draft without writing the current body', async () => {
++    const queued = queueF19Recovery();
++    durableBlocks = [{ ...serverBlock('keep current body', false), text_save_revision: 9 }];
++    const before = structuredClone(durableBlocks);
++    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
++    await waitFor(() => expect(subject.result.current.loading).toBe(false));
++    act(() => { expect(subject.result.current.dismissBlockEditRecovery(queued.recoveryKey)).toBe(true); });
++    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
++    expect(listBlockEditRecoveryReceipts(note.id)).toEqual([]);
++    expect(durableBlocks).toEqual(before);
++    expect(mocks.atomicPut).not.toHaveBeenCalled();
++  });
++
++  it('F19 ordinary replay uses current board evidence and never forwards a retained history intent', async () => {
++    const queued = queueF19Recovery();
++    const range: BoardTextRangeV1 = { id: 'f19-range', board_id: 'board', note_id: note.id, block_id: 'block-1',
++      text_flow_id: 'textflow-block-1', text_unit_id: queued.textFlow!.units[0].id,
++      status: 'drifted', start_offset: null, end_offset: null, excerpt: 'evidence before drift',
++      pre_edit_offsets: { start_offset: 2, end_offset: 8 }, at: 'at', created_at: 'created', updated_at: 'updated' };
++    rememberBlockEditRecoveryReceipt({ ...queued, boardRangeSnapshot: { ranges: [{ ...range, status: 'active',
++      start_offset: 0, end_offset: 9, excerpt: 'recovered', pre_edit_offsets: null }], historyRestore: true } });
++    durableBlocks = [{ ...serverBlock('current', false), text_save_revision: 9 }];
++    mocks.boardRangesGet.mockResolvedValue({ data: { text_ranges: [range] } });
++    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
++    await waitFor(() => expect(subject.result.current.loading).toBe(false));
++    await act(async () => { expect(await subject.result.current.replayBlockEditRecovery(queued.recoveryKey)).toBe(true); });
++    const payload = mocks.atomicPut.mock.calls[0][1];
++    expect(payload.base_revision).toBe(9);
++    expect(payload.text_ranges).toEqual([{ id: range.id, block_id: range.block_id, text_flow_id: range.text_flow_id,
++      text_unit_id: range.text_unit_id, status: 'drifted', start_offset: null, end_offset: null,
++      excerpt: range.excerpt, pre_edit_offsets: range.pre_edit_offsets }]);
++    expect(JSON.stringify(payload)).not.toContain('history_restore');
++    expect(payload.block.content_json).toEqual(queued.contentJson);
++  });
++
++  it('F19 retries a 503 after informed replay with the complete newly frozen payload', async () => {
++    const queued = queueF19Recovery();
++    durableBlocks = [{ ...serverBlock('current', false), text_save_revision: 9,
++      content_json: { body: 'current', currentOnlyField: 'must not leak into draft' } }];
++    mocks.atomicPut.mockRejectedValueOnce({ response: { status: 503 } });
++    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
++    await waitFor(() => expect(subject.result.current.loading).toBe(false));
++    await act(async () => { expect(await subject.result.current.replayBlockEditRecovery(queued.recoveryKey)).toBe(false); });
++    const failed = subject.result.current.blockEditRecoveryReceipts[0];
++    expect(subject.result.current.blockEditRecoveryConflicts[failed.recoveryKey]).not.toBe(true);
++    expect(mocks.atomicPut.mock.calls[0][1].block.content_json).toEqual(queued.contentJson);
++    await act(async () => { expect(await subject.result.current.applyBlockEditRecovery(failed.recoveryKey)).toBe(true); });
++    expect(mocks.atomicPut.mock.calls[1][1]).toEqual(mocks.atomicPut.mock.calls[0][1]);
++    expect(listBlockEditRecoveryReceipts(note.id)).toEqual([]);
++  });
++
++  it('F19 adopts current rebased board and annotation ranges so the next ordinary edit starts at the saved body', async () => {
++    const queued = queueF19Recovery();
++    const flow = queued.textFlow!;
++    flow.units[0].text = 'prefix alpha beta gamma';
++    rememberBlockEditRecoveryReceipt({ ...queued, text: flow.units[0].text, plainText: flow.units[0].text,
++      contentJson: { [TEXT_FLOW_CONTENT_KEY]: flow }, textFlow: flow });
++    const initialFlow = structuredClone(flow);
++    initialFlow.units[0].text = 'alpha beta gamma';
++    const initial = { ...serverBlock('alpha beta gamma', false), text_save_revision: 3,
++      content_json: { [TEXT_FLOW_CONTENT_KEY]: initialFlow } };
++    durableBlocks = [initial];
++    const range: BoardTextRangeV1 = { id: 'adopt-range', board_id: 'board', note_id: note.id, block_id: 'block-1',
++      text_flow_id: 'textflow-block-1', text_unit_id: flow.units[0].id, status: 'active',
++      start_offset: 6, end_offset: 10, excerpt: 'beta', pre_edit_offsets: null,
++      at: 'at', created_at: 'created', updated_at: 'updated' };
++    durableAnnotationTruths = [annotationWithOffsets(note.id, 6, 10, 'beta')];
++    mocks.boardRangesGet.mockResolvedValue({ data: { text_ranges: [range] } });
++    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
++    await waitFor(() => expect(subject.result.current.loading).toBe(false));
++    const remoteFlow = structuredClone(flow);
++    remoteFlow.units[0].text = 'other alpha beta gamma';
++    durableBlocks = [{ ...initial, plain_text: remoteFlow.units[0].text, text_save_revision: 9,
++      content_json: { [TEXT_FLOW_CONTENT_KEY]: remoteFlow } }];
++    durableAnnotationTruths = [annotationWithOffsets(note.id, 12, 16, 'beta')];
++    act(() => { subject.result.current.setAnnotationTruthsSnapshot([{ ...subject.result.current.annotationTruths[0], raw_label: 'pending local rename' }]); });
++    mocks.boardRangesGet.mockResolvedValue({ data: { text_ranges: [{ ...range, start_offset: 12, end_offset: 16 }] } });
++    await act(async () => { expect(await subject.result.current.replayBlockEditRecovery(queued.recoveryKey)).toBe(true); });
++    expect(subject.result.current.captureBoardTextRanges('block-1').ranges[0]).toMatchObject({ start_offset: 13, end_offset: 17, excerpt: 'beta' });
++    expect(subject.result.current.annotationTruths[0].ranges[0]).toMatchObject({ start_offset: 13, end_offset: 17 });
++    expect(subject.result.current.annotationTruths[0].raw_label).toBe('pending local rename');
++    const nextFlow = structuredClone(flow);
++    nextFlow.units[0].text = 'x ' + flow.units[0].text;
++    await act(async () => { expect(await subject.result.current.saveBlock(subject.result.current.blocks[0], nextFlow.units[0].text, { textFlow: nextFlow })).toMatchObject({ status: 'saved' }); });
++    expect(mocks.atomicPut.mock.calls[1][1].text_ranges[0]).toMatchObject({ start_offset: 15, end_offset: 19, status: 'active' });
++  });
++
++  it.each(['replaced receipt', 'route changed', 'read failed', 'new unsaved draft'] as const)('F19 keeps recovery intact and sends no save when current read is stale: %s', async (reason) => {
++    const queued = queueF19Recovery();
++    durableBlocks = [{ ...serverBlock('current', false), text_save_revision: 9 }];
++    const subject = renderHook(({ noteId }) => useNoteCanvasDataAdapter({ ...stableAdapterOptions, noteId }),
++      { wrapper, initialProps: { noteId: note.id } });
++    await waitFor(() => expect(subject.result.current.loading).toBe(false));
++    const held = deferred<{ data: NoteBlock[] }>();
++    mocks.get.mockImplementationOnce(() => held.promise);
++    let replay!: Promise<boolean>;
++    act(() => { replay = subject.result.current.replayBlockEditRecovery(queued.recoveryKey); });
++    if (reason === 'replaced receipt') rememberBlockEditRecoveryReceipt({ ...queued, operationSequence: 2,
++      recoveryKey: createBlockEditRecoveryKey(note.id, queued.blockId, 0, 2, queued.mountNonce) });
++    if (reason === 'route changed') subject.rerender({ noteId: 'another-note' });
++    if (reason === 'new unsaved draft') act(() => { subject.result.current.setBlockTextDrafts({ [queued.blockId]: 'keep newer input' }); });
++    await act(async () => {
++      if (reason === 'read failed') {
++        held.reject(new Error('offline'));
++        await expect(replay).rejects.toThrow('offline');
++      } else {
++        held.resolve({ data: durableBlocks });
++        expect(await replay).toBe(false);
++      }
++    });
++    expect(mocks.atomicPut).not.toHaveBeenCalled();
++    expect(listBlockEditRecoveryReceipts(note.id)).toHaveLength(1);
++  });
++
+   it.each([
+     {
+       label: 'unresolved page frame',
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts
+index 4a4c468..48a3a21 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts
++++ b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts
+@@ -22,6 +22,7 @@ import {
+ } from '../blockContentService';
+ import { buildBlockTemplatePayload, type BlockTemplatePayload } from '../blockTemplateConversionService';
+ import { saveAtomicText, saveTextUnitTransfer } from '../atomicTextSaveRepository';
++import { recoveryReplayAnnotationRanges } from '../recoveryReplayAnnotations';
+ import type { TextUnitIdMapping } from '../textUnitMoveService';
+ import type { BoardTextRangeV1 } from '../../../../../../shared/types/boardTextRange';
+ import { restoreAnnotationRangeSnapshots, type AnnotationRangeSnapshot } from '../textFlowEditSession';
+@@ -57,7 +58,7 @@ import {
+ } from '../contentGroupService';
+ import { createInFlightWriteRegistry } from '../inFlightWriteRegistry';
+ import { useBlockDraftAuthority } from './useBlockDraftAuthority';
+-import { createBoardTextRangeEditSession, type BoardRangeSaveSnapshot } from '../boardTextRangeEditSession';
++import { createBoardTextRangeEditSession, rebaseBoardTextRanges, type BoardRangeSaveSnapshot } from '../boardTextRangeEditSession';
+ import { loadBoardTextRangesForNote, saveBoardTextRangesForNote } from '../boardTextRangeRepository';
+ import {
+   NOTE_ANNOTATION_PROPOSALS_METADATA_KEY,
+@@ -449,6 +450,9 @@ export function useNoteCanvasDataAdapter({
+   const [templateWarning, setTemplateWarning] = useState<string | null>(null);
+   const [savingBlockId, setSavingBlockId] = useState<string | null>(null);
+   const [, setBlockEditRecoveryVersion] = useState(0);
++  // Presentation only: recovery receipts and their frozen retry payloads stay unchanged.
++  const [blockEditRecoveryConflicts, setBlockEditRecoveryConflicts] = useState<Record<string, boolean>>({});
++  const replayingBlockEditRecoveryKeysRef = useRef(new Set<string>());
+   const [anchorsBySourceRef, setAnchorsBySourceRef] = useState<Record<string, SourceAnchor>>({});
+   const [sourceJumpTarget, setSourceJumpTarget] = useState<SourceJumpTarget | null>(null);
+   const [sourceJumpBusy, setSourceJumpBusy] = useState<string | null>(null);
+@@ -1546,6 +1550,7 @@ export function useNoteCanvasDataAdapter({
+       preserveDrafts?: boolean;
+       annotationRanges?: AnnotationRangeSnapshot[];
+       baseRevision?: number;
++      contentSnapshot?: Pick<BlockEditRecoveryReceipt, 'contentJson' | 'plainText'>;
+     } = {},
+   ): Promise<BlockSaveOutcome> => {
+     // Read-only references have no body draft to flush. Ordinary placement/tray
+@@ -1580,6 +1585,14 @@ export function useNoteCanvasDataAdapter({
+     }
+     const requestGeneration = routeRequestGenerationRef.current;
+     const baseRevision = options.baseRevision ?? Math.max(block.text_save_revision ?? 0, committedTextRevisions.current.get(block.id) ?? 0);
++    const draftBeforeSave = readBlockDraftSnapshot();
++    const annotationsBeforeSave = annotationTruthsRef.current;
++    const recoveryDraftIsCurrent = () => {
++      const live = readBlockDraftSnapshot();
++      return live.textDrafts[block.id] === draftBeforeSave.textDrafts[block.id]
++        && live.textFlowDrafts[block.id] === draftBeforeSave.textFlowDrafts[block.id]
++        && live.fieldDrafts[block.id] === draftBeforeSave.fieldDrafts[block.id];
++    };
+     const annotationRanges = structuredClone(options.annotationRanges ?? []);
+     const requestHydrationEpoch = successfulHydrationEpochRef.current;
+     const requestRouteIsCurrent = () => (
+@@ -1594,11 +1607,13 @@ export function useNoteCanvasDataAdapter({
+       requestRouteIsCurrent()
+       && successfulHydrationEpochRef.current === requestHydrationEpoch
+     );
+-    const textFlowDraft = options.textFlow || blockTextFlowDrafts[block.id];
++    const textFlowDraft = options.contentSnapshot
++      ? getTextFlowContent(options.contentSnapshot.contentJson) ?? undefined
++      : options.textFlow || blockTextFlowDrafts[block.id];
+     const projectedTextFlow = textFlowDraft
+       ? projectTextFlowContent({ [TEXT_FLOW_CONTENT_KEY]: textFlowDraft }, text).plain_text
+       : null;
+-    const nextText = textFlowDraft
++    const nextText = options.contentSnapshot ? options.contentSnapshot.plainText : textFlowDraft
+       ? (projectedTextFlow ?? text)
+       : text.trimEnd();
+     const fieldValues = options.fieldValues || blockFieldDrafts[block.id];
+@@ -1606,12 +1621,12 @@ export function useNoteCanvasDataAdapter({
+     const textFlowContent = textFlowDraft
+       ? contentForEditedTextFlowBlock(block, textFlowDraft)
+       : null;
+-    const nextContent = textFlowContent
++    const nextContent = options.contentSnapshot ? structuredClone(options.contentSnapshot.contentJson) : textFlowContent
+       ? kind === 'formula' && fieldValues
+         ? contentForEditedBlock({ ...block, content_json: textFlowContent }, nextText, fieldValues)
+         : textFlowContent
+       : contentForEditedBlock(block, nextText, fieldValues);
+-    const requestedPlainText = plainTextForBlockContent(kind, nextContent, nextText);
++    const requestedPlainText = options.contentSnapshot?.plainText ?? plainTextForBlockContent(kind, nextContent, nextText);
+     // This also covers direct source-backed/structural saves that bypass the live edit callback.
+     if (!options.boardRangeSnapshot) {
+       boardRangeSession.rebase(block.id, getTextFlowContent(block.content_json), getTextFlowContent(nextContent));
+@@ -1752,6 +1767,18 @@ export function useNoteCanvasDataAdapter({
+       }));
+       const res = { data: result.block };
+       committedTextRevisions.current.set(block.id, Math.max(result.revision, committedTextRevisions.current.get(block.id) ?? 0));
++      const adoptRecovery = options.contentSnapshot && !boardRangeSnapshot.historyRestore
++        && requestIsCurrent() && operationIsLatest() && recoveryDraftIsCurrent();
++      if (adoptRecovery) {
++        boardRangeSession.mergeNewRanges(boardRangeSnapshot.ranges);
++        boardRangeSession.restore(block.id, getTextFlowContent(nextContent), boardRangeSnapshot);
++        if (annotationTruthsRef.current === annotationsBeforeSave) {
++          const confirmed = result.annotations.flatMap((annotation) => annotation.ranges
++            .filter((range) => annotationRanges.some((issued) => issued.annotationId === annotation.id && issued.range.id === range.id))
++            .map((range) => ({ annotationId: annotation.id, range })));
++          setAnnotationTruthsSnapshot(restoreAnnotationRangeSnapshots(annotationTruthsRef.current, confirmed));
++        }
++      }
+       boardRangeSession.acknowledge(boardRangeSnapshot, result.text_ranges);
+       if (requestIsCurrent() && !options.preserveDrafts) {
+         const confirmed = result.annotations.flatMap((annotation) => annotation.ranges
+@@ -1806,7 +1833,7 @@ export function useNoteCanvasDataAdapter({
+       }
+       const updated = hydrateClientBlock({ ...block, ...res.data, source_references: block.source_references });
+       setBlocks((current) => current.map((item) => item.id === block.id ? updated : item));
+-      if (!options.preserveDrafts) {
++      if (!options.preserveDrafts && (!options.contentSnapshot || recoveryDraftIsCurrent())) {
+         setBlockTextDrafts((current) => ({ ...current, [block.id]: nextText }));
+         if (textFlowDraft) {
+           setBlockTextFlowDrafts((current) => ({ ...current, [block.id]: textFlowDraft }));
+@@ -1832,6 +1859,11 @@ export function useNoteCanvasDataAdapter({
+       };
+     } catch (err) {
+       blockSaveOutcomeVersionRef.current += 1;
++      const response = (err as { response?: { status?: number; data?: { error?: string; details?: { code?: string } } } })?.response;
++      if (response?.status === 409 && (response.data?.error === 'stale_revision'
++        || response.data?.details?.code === 'stale_revision') && adapterMountActiveRef.current) {
++        setBlockEditRecoveryConflicts((current) => ({ ...current, [recoveryReceipt.recoveryKey]: true }));
++      }
+       // Surface a failed write immediately, including while its read-back is pending.
+       outstandingBlockSaveOperationsRef.current.set(operationSequence, {
+         blockId: block.id,
+@@ -1900,6 +1932,7 @@ export function useNoteCanvasDataAdapter({
+       silent: true,
+       fieldValues: receipt.fieldValues,
+       textFlow: receipt.textFlow,
++      contentSnapshot: receipt,
+       recoveryKey: receipt.recoveryKey,
+       baseRevision: receipt.baseRevision,
+       annotationRanges: receipt.annotationRanges,
+@@ -1914,6 +1947,86 @@ export function useNoteCanvasDataAdapter({
+     return applied;
+   }, [addToast, blocks, saveBlock]);
+ 
++  const readBlockEditRecoveryCurrent = useCallback(async (recoveryKey: string) => {
++    const activeNoteId = noteRef.current?.id;
++    if (!activeNoteId || routeNoteIdRef.current !== activeNoteId) return null;
++    const receipt = listBlockEditRecoveryReceipts(activeNoteId).find((candidate) => candidate.recoveryKey === recoveryKey);
++    if (!receipt) return null;
++    const generation = routeRequestGenerationRef.current;
++    const hydrationEpoch = successfulHydrationEpochRef.current;
++    const operationSequence = blockSaveOperationSequenceRef.current;
++    const draftBeforeRead = readBlockDraftSnapshot();
++    const draftIsCurrent = () => {
++      const live = readBlockDraftSnapshot();
++      return live.textDrafts[receipt.blockId] === draftBeforeRead.textDrafts[receipt.blockId]
++        && live.textFlowDrafts[receipt.blockId] === draftBeforeRead.textFlowDrafts[receipt.blockId]
++        && live.fieldDrafts[receipt.blockId] === draftBeforeRead.fieldDrafts[receipt.blockId];
++    };
++    const requestIsCurrent = () => adapterMountActiveRef.current
++      && noteRef.current?.id === activeNoteId && routeNoteIdRef.current === activeNoteId
++      && routeRequestGenerationRef.current === generation
++      && successfulHydrationEpochRef.current === hydrationEpoch
++      && blockSaveOperationSequenceRef.current === operationSequence
++      && draftIsCurrent()
++      && listBlockEditRecoveryReceipts(activeNoteId).some((candidate) => candidate.recoveryKey === recoveryKey);
++    // Failure reconciliation deliberately keeps the old base; this read must not use that cache.
++    const response = await api.get(`/notes/${activeNoteId}/blocks`);
++    if (!requestIsCurrent()) return null;
++    const raw = Array.isArray(response.data)
++      ? response.data.find((candidate: NoteBlock) => candidate.id === receipt.blockId) : null;
++    if (!raw) throw new Error('The block for this recovery receipt is unavailable');
++    if (!Number.isSafeInteger(raw.text_save_revision) || raw.text_save_revision < 0) {
++      throw new Error('The current block version could not be read');
++    }
++    return { receipt, block: hydrateClientBlock(raw), requestIsCurrent };
++  }, [readBlockDraftSnapshot]);
++
++  const inspectBlockEditRecovery = useCallback(async (recoveryKey: string): Promise<NoteBlock | null> => {
++    const current = await readBlockEditRecoveryCurrent(recoveryKey);
++    return current?.block ?? null;
++  }, [readBlockEditRecoveryCurrent]);
++
++  const replayBlockEditRecovery = useCallback(async (recoveryKey: string): Promise<boolean> => {
++    if (replayingBlockEditRecoveryKeysRef.current.has(recoveryKey)) return false;
++    replayingBlockEditRecoveryKeysRef.current.add(recoveryKey);
++    try {
++      const current = await readBlockEditRecoveryCurrent(recoveryKey);
++      if (!current) return false;
++      const { receipt, block, requestIsCurrent } = current;
++      // A new, explicit save rebases today's range state with the ordinary algorithm.
++      // Frozen history intent belongs only to the existing Apply retry door.
++      const [ranges, annotations] = await Promise.all([
++        loadBoardTextRangesForNote(receipt.noteId),
++        loadAnnotationTruthsForNote({ note: noteRef.current! }),
++      ]);
++      if (!requestIsCurrent()) return false;
++      const outcome = await saveBlock(block, receipt.text, {
++        silent: true,
++        recoveryKey,
++        baseRevision: block.text_save_revision,
++        contentSnapshot: receipt,
++        fieldValues: receipt.fieldValues,
++        annotationRanges: recoveryReplayAnnotationRanges({
++          annotations, blockId: block.id,
++          previousTextFlow: getTextFlowContent(block.content_json),
++          nextTextFlow: getTextFlowContent(receipt.contentJson),
++        }),
++        boardRangeSnapshot: { ranges: rebaseBoardTextRanges({
++          ranges: ranges.filter((range) => range.block_id === block.id),
++          blockId: block.id,
++          previousTextFlow: getTextFlowContent(block.content_json),
++          nextTextFlow: getTextFlowContent(receipt.contentJson),
++        }) },
++      });
++      const applied = outcome.status === 'saved'
++        || (outcome.status === 'stale_epoch' && outcome.durableState === 'matches_requested');
++      if (applied && routeNoteIdRef.current === receipt.noteId) addToast('success', 'Recovered block edit applied');
++      return applied;
++    } finally {
++      replayingBlockEditRecoveryKeysRef.current.delete(recoveryKey);
++    }
++  }, [addToast, readBlockEditRecoveryCurrent, saveBlock]);
++
+   const dismissBlockEditRecovery = useCallback((recoveryKey: string): boolean => {
+     const activeNoteId = noteRef.current?.id || null;
+     if (!activeNoteId || routeNoteIdRef.current !== activeNoteId) return false;
+@@ -2625,6 +2738,7 @@ export function useNoteCanvasDataAdapter({
+     templateWarning,
+     savingBlockId,
+     blockEditRecoveryReceipts,
++    blockEditRecoveryConflicts,
+     annotationTruths,
+     readAnnotationTruths,
+     setAnnotationTruthsSnapshot,
+@@ -2681,6 +2795,8 @@ export function useNoteCanvasDataAdapter({
+     finalizeDraftBlock,
+     saveBlock,
+     applyBlockEditRecovery,
++    inspectBlockEditRecovery,
++    replayBlockEditRecovery,
+     dismissBlockEditRecovery,
+     saveDraftBlockPlacement,
+     applyTemplateToBlock,
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts
+index 1f105d4..5010cc2 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts
++++ b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts
+@@ -26,6 +26,9 @@ export type UseNoteCanvasLayerPropsInput =
+   & Pick<
+     NoteRuntimeDocumentLayerProps,
+     | 'blockEditRecoveryReceipts'
++    | 'blockEditRecoveryConflicts'
++    | 'onInspectBlockEditRecovery'
++    | 'onReplayBlockEditRecovery'
+     | 'onApplyBlockEditRecovery'
+     | 'onDismissBlockEditRecovery'
+     | 'onSurfacePointerDown'
+@@ -262,7 +265,10 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
+     chromeProps,
+     documentLayerProps: {
+       tray: input.tray,
+-      blockEditRecoveryReceipts: input.blockEditRecoveryReceipts,
++    blockEditRecoveryReceipts: input.blockEditRecoveryReceipts,
++    blockEditRecoveryConflicts: input.blockEditRecoveryConflicts,
++    onInspectBlockEditRecovery: input.onInspectBlockEditRecovery,
++    onReplayBlockEditRecovery: input.onReplayBlockEditRecovery,
+       floatingPanelProps,
+       onApplyBlockEditRecovery: input.onApplyBlockEditRecovery,
+       onDismissBlockEditRecovery: input.onDismissBlockEditRecovery,
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts
+index 39938e3..de18ad1 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts
++++ b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts
+@@ -109,6 +109,7 @@ export function useNoteCanvasRuntimeController() {
+     templateWarning,
+     savingBlockId,
+     blockEditRecoveryReceipts,
++    blockEditRecoveryConflicts,
+     anchorsBySourceRef,
+     sourceJumpTarget,
+     setSourceJumpTarget,
+@@ -162,6 +163,8 @@ export function useNoteCanvasRuntimeController() {
+     finalizeDraftBlock,
+     saveBlock: saveBlockRaw,
+     applyBlockEditRecovery,
++    inspectBlockEditRecovery,
++    replayBlockEditRecovery,
+     dismissBlockEditRecovery,
+     saveDraftBlockPlacement,
+     applyTemplateToBlock,
+@@ -460,6 +463,7 @@ export function useNoteCanvasRuntimeController() {
+     blockTrashLoadFailed,
+     blockTrashLoading,
+     blockEditRecoveryReceipts,
++    blockEditRecoveryConflicts,
+     blockLayouts,
+     blockListRef,
+     blockTextDrafts,
+@@ -550,6 +554,8 @@ export function useNoteCanvasRuntimeController() {
+     onMoveTextUnit: textHistory.moveUnit,
+     onTextEditBoundary: sourceProjectionPolicy.contentReadOnly ? undefined : textHistory.boundary,
+     onApplyBlockEditRecovery: applyBlockEditRecovery,
++    onInspectBlockEditRecovery: inspectBlockEditRecovery,
++    onReplayBlockEditRecovery: replayBlockEditRecovery,
+     onApplyBlockLayoutDrafts: (layouts) => { if (textHistory.boundary()) mergeLayoutDrafts(layouts); },
+     onClearSlashTarget: clearSlashTarget,
+     onCloseOverlay: closeOverlay,
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx b/client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx
+index afc8866..1a0086a 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx
+@@ -330,6 +330,24 @@ describe('NoteRuntimeDocumentLayer block edit recovery queue', () => {
+     expect(events).toEqual(['apply']);
+     expect(durableText === receipt.text || selectedReceiptRecoverable).toBe(true);
+   });
++
++  it('passes recovery conflict choices and comparison through the document layer', async () => {
++    const inspect = vi.fn(async () => codeBlock);
++    const replay = vi.fn(async () => false);
++    render(<NoteRuntimeDocumentLayer blockEditRecoveryReceipts={[receipt]}
++      blockEditRecoveryConflicts={{ [receipt.recoveryKey]: true }}
++      floatingPanelProps={{} as never} onApplyBlockEditRecovery={vi.fn()}
++      onDismissBlockEditRecovery={vi.fn(() => true)} onInspectBlockEditRecovery={inspect}
++      onReplayBlockEditRecovery={replay} onSurfacePointerDown={vi.fn()} surfaceMode="page"
++      templateWarning={null} writingSurfaceProps={writingSurfaceProps(vi.fn())} />);
++    fireEvent.click(screen.getByRole('button', { name: 'View differences' }));
++    const comparison = await screen.findByRole('region', { name: 'Draft and current text comparison' });
++    expect(comparison.textContent).toContain('current editor text');
++    expect(comparison.textContent).toContain('recover this edit');
++    fireEvent.click(screen.getByRole('button', { name: 'Replay draft on current version' }));
++    await waitFor(() => expect(replay).toHaveBeenCalledWith(receipt.recoveryKey));
++    expect(inspect).toHaveBeenCalledWith(receipt.recoveryKey);
++  });
+ });
+ 
+ describe('NoteRuntimeDocumentLayer overview navigation', () => {
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.tsx b/client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.tsx
+index 5499a69..129d560 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.tsx
+@@ -9,6 +9,8 @@ import {
+   type NoteWritingSurfaceLayerProps,
+ } from './NoteWritingSurfaceLayer';
+ import type { BlockEditRecoveryReceipt } from '../draftBlockPersistence';
++import type { NoteBlock } from '../runtimeDataTypes';
++import { BlockEditRecoveryQueue } from './BlockEditRecoveryQueue';
+ import { NotePrintLayer } from './NotePrintLayer';
+ import { NoteOverviewLayer } from './NoteOverviewLayer';
+ import { useNoteOverviewController } from '../hooks/useNoteOverviewController';
+@@ -18,9 +20,12 @@ import styles from '../../NoteDetail.module.css';
+ export interface NoteRuntimeDocumentLayerProps {
+   tray?: NoteTrayState;
+   blockEditRecoveryReceipts: BlockEditRecoveryReceipt[];
++  blockEditRecoveryConflicts?: Record<string, boolean>;
+   floatingPanelProps: NoteFloatingPanelLayerProps;
+   onApplyBlockEditRecovery: (recoveryKey: string) => void | Promise<boolean>;
+   onDismissBlockEditRecovery: (recoveryKey: string) => boolean;
++  onInspectBlockEditRecovery?: (recoveryKey: string) => Promise<NoteBlock | null>;
++  onReplayBlockEditRecovery?: (recoveryKey: string) => Promise<boolean>;
+   onSurfacePointerDown: (event: ReactPointerEvent<HTMLDivElement>) => void;
+   surfaceMode: 'page' | 'canvas';
+   templateWarning: string | null;
+@@ -34,9 +39,12 @@ export interface NoteRuntimeDocumentHandle {
+ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, NoteRuntimeDocumentLayerProps>(function NoteRuntimeDocumentLayer({
+   tray,
+   blockEditRecoveryReceipts,
++  blockEditRecoveryConflicts,
+   floatingPanelProps,
+   onApplyBlockEditRecovery,
+   onDismissBlockEditRecovery,
++  onInspectBlockEditRecovery,
++  onReplayBlockEditRecovery,
+   onSurfacePointerDown,
+   surfaceMode,
+   templateWarning,
+@@ -57,44 +65,9 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
+       onMouseDown={overview.open ? undefined : onSurfacePointerDown}
+     >
+       {templateWarning && <div className={styles.templateWarning}>{templateWarning}</div>}
+-      {blockEditRecoveryReceipts.length > 0 && (
+-        <div className={styles.blockEditRecoveryQueue} role="status">
+-          <div className={styles.blockEditRecoveryTitle}>
+-            {blockEditRecoveryReceipts.length === 1
+-              ? 'A block edit is waiting for recovery'
+-              : `${blockEditRecoveryReceipts.length} block edits are waiting for recovery`}
+-          </div>
+-          {blockEditRecoveryReceipts.map((receipt) => (
+-            <div className={styles.blockEditRecoveryItem} key={receipt.recoveryKey}>
+-              <span className={styles.blockEditRecoveryPreview}>
+-                {receipt.text.trim() || 'Empty block edit'}
+-              </span>
+-              <div className={styles.blockEditRecoveryActions}>
+-                <button
+-                  type="button"
+-                  onMouseDown={(event) => {
+-                    event.preventDefault();
+-                    event.stopPropagation();
+-                  }}
+-                  onClick={() => { void onApplyBlockEditRecovery(receipt.recoveryKey); }}
+-                >
+-                  Apply
+-                </button>
+-                <button
+-                  type="button"
+-                  onMouseDown={(event) => {
+-                    event.preventDefault();
+-                    event.stopPropagation();
+-                  }}
+-                  onClick={() => { onDismissBlockEditRecovery(receipt.recoveryKey); }}
+-                >
+-                  Dismiss
+-                </button>
+-              </div>
+-            </div>
+-          ))}
+-        </div>
+-      )}
++      <BlockEditRecoveryQueue receipts={blockEditRecoveryReceipts} conflicts={blockEditRecoveryConflicts}
++        onApply={onApplyBlockEditRecovery} onDismiss={onDismissBlockEditRecovery}
++        onInspect={onInspectBlockEditRecovery} onReplay={onReplayBlockEditRecovery} />
+ 
+       <NoteFloatingPanelLayer {...floatingPanelProps} />
+       {overview.open && <NoteOverviewLayer writingSurfaceProps={writingSurfaceProps}
+diff --git a/client/src/pages/Notes/canvasEngine/layers/BlockEditRecoveryQueue.tsx b/client/src/pages/Notes/canvasEngine/layers/BlockEditRecoveryQueue.tsx
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Notes/canvasEngine/layers/BlockEditRecoveryQueue.tsx
+@@ -0,0 +1,174 @@
++import { useId, useRef, useState, type MouseEvent } from 'react';
++import type { BlockEditRecoveryReceipt } from '../draftBlockPersistence';
++import type { NoteBlock, TextBlockContentV1 } from '../runtimeDataTypes';
++import { getTextFlowContent } from '../textFlowService';
++import documentStyles from '../../NoteDetail.module.css';
++import styles from './BlockEditRecoveryQueue.module.css';
++
++interface BlockEditRecoveryQueueProps {
++  receipts: BlockEditRecoveryReceipt[];
++  conflicts?: Record<string, boolean>;
++  onApply: (recoveryKey: string) => void | Promise<boolean>;
++  onDismiss: (recoveryKey: string) => boolean;
++  onInspect?: (recoveryKey: string) => Promise<NoteBlock | null>;
++  onReplay?: (recoveryKey: string) => Promise<boolean>;
++}
++
++// Preserve the editor's focus until the chosen recovery action has captured its receipt.
++function protectRecoveryAction(event: MouseEvent<HTMLButtonElement>) {
++  event.preventDefault();
++  event.stopPropagation();
++}
++
++interface ComparisonUnit {
++  id: string;
++  text: string;
++  deleted: boolean;
++}
++
++function comparisonUnits(flow: TextBlockContentV1 | null, fallback: string): ComparisonUnit[] {
++  if (!flow) return [{ id: 'body', text: fallback, deleted: false }];
++  return [...flow.units]
++    .sort((a, b) => a.order_index - b.order_index)
++    .map((unit) => ({ id: unit.id, text: unit.text, deleted: unit.status === 'deleted' }));
++}
++
++function UnitText({ unit, absent }: { unit?: ComparisonUnit; absent: string }) {
++  if (!unit) return <p className={styles.unitState}>{absent}</p>;
++  return <>
++    {unit.deleted && <p className={styles.unitState}>Deleted unit</p>}
++    <p className={styles.unitText}>{unit.text || <em>Empty text unit</em>}</p>
++  </>;
++}
++
++function RecoveryComparison({ receipt, current, id }: {
++  receipt: BlockEditRecoveryReceipt;
++  current: NoteBlock;
++  id: string;
++}) {
++  const draftUnits = comparisonUnits(getTextFlowContent(receipt.contentJson) ?? receipt.textFlow ?? null,
++    typeof receipt.contentJson.body === 'string' ? receipt.contentJson.body : receipt.plainText);
++  const currentUnits = comparisonUnits(getTextFlowContent(current.content_json),
++    typeof current.content_json.body === 'string' ? current.content_json.body : current.plain_text ?? '');
++  const draftPositions = new Map(draftUnits.map((unit, index) => [unit.id, index]));
++  const currentPositions = new Map(currentUnits.map((unit, index) => [unit.id, index]));
++  const unitIds = [...new Set([...draftUnits.map((unit) => unit.id), ...currentUnits.map((unit) => unit.id)])];
++  return <section className={styles.comparison} id={id} aria-label="Draft and current text comparison">
++    <p className={styles.explanation}>
++      Text comparison{current.text_save_revision !== undefined ? `, current version ${current.text_save_revision}` : ''}.
++      {' '}Current text can change again before replay.
++    </p>
++    {unitIds.length === 0 && <p className={styles.unitState}>Both versions contain no text units.</p>}
++    {unitIds.map((unitId) => {
++      const draftIndex = draftPositions.get(unitId) ?? -1;
++      const currentIndex = currentPositions.get(unitId) ?? -1;
++      return <div className={styles.comparisonRow} key={unitId}>
++        <div className={styles.comparisonCell}>
++          <h4>Recovery draft{draftIndex >= 0 ? ` · unit ${draftIndex + 1}` : ''}</h4>
++          <UnitText unit={draftUnits[draftIndex]} absent="Not present in the recovery draft" />
++        </div>
++        <div className={styles.comparisonCell}>
++          <h4>Current text{currentIndex >= 0 ? ` · unit ${currentIndex + 1}` : ''}</h4>
++          <UnitText unit={currentUnits[currentIndex]} absent="Not present in the current version" />
++        </div>
++      </div>;
++    })}
++  </section>;
++}
++
++function ConflictedRecoveryItem({ receipt, onInspect, onReplay, onDismiss }: {
++  receipt: BlockEditRecoveryReceipt;
++  onInspect: BlockEditRecoveryQueueProps['onInspect'];
++  onReplay: BlockEditRecoveryQueueProps['onReplay'];
++  onDismiss: BlockEditRecoveryQueueProps['onDismiss'];
++}) {
++  const id = useId();
++  const pending = useRef(false);
++  const [busy, setBusy] = useState<'inspect' | 'replay' | null>(null);
++  const [current, setCurrent] = useState<NoteBlock | null>(null);
++  const [error, setError] = useState<string | null>(null);
++
++  async function inspect() {
++    if (pending.current || !onInspect) return;
++    pending.current = true;
++    setBusy('inspect');
++    setError(null);
++    setCurrent(null);
++    try {
++      const block = await onInspect(receipt.recoveryKey);
++      if (block) setCurrent(block);
++      else setError('Could not load the current text. Your draft is still available. Choose View differences to try again.');
++    } catch {
++      setError('Could not load the current text. Your draft is still available. Choose View differences to try again.');
++    } finally {
++      pending.current = false;
++      setBusy(null);
++    }
++  }
++
++  async function replay() {
++    if (pending.current || !onReplay) return;
++    pending.current = true;
++    setBusy('replay');
++    setError(null);
++    setCurrent(null);
++    try {
++      if (!await onReplay(receipt.recoveryKey)) {
++        setError('The draft was not saved and is still available. View differences or try replaying again.');
++      }
++    } catch {
++      setError('The draft was not saved and is still available. View differences or try replaying again.');
++    } finally {
++      pending.current = false;
++      setBusy(null);
++    }
++  }
++
++  function discard() {
++    if (pending.current) return;
++    setError(null);
++    if (!onDismiss(receipt.recoveryKey)) setError('The draft could not be discarded. Please try again.');
++  }
++
++  return <div className={styles.conflictItem} data-block-edit-recovery-conflict={receipt.recoveryKey}
++    aria-busy={busy !== null} onMouseDown={(event) => event.stopPropagation()}>
++    <p className={styles.explanation} id={`${id}-explanation`}>
++      <strong>This draft is based on an older version.</strong> The content has changed elsewhere.
++      {' '}Replaying will replace the current block text with this draft, using the latest version as its starting point.
++    </p>
++    <p className={styles.draftPreview}><strong>Recovery draft: </strong>{receipt.text.trim() || 'Empty block edit'}</p>
++    <div className={`${documentStyles.blockEditRecoveryActions} ${styles.actions}`} aria-describedby={`${id}-explanation`}>
++      <button type="button" disabled={busy !== null || !onInspect} onMouseDown={protectRecoveryAction}
++        aria-expanded={current !== null} aria-controls={`${id}-comparison`} onClick={() => { void inspect(); }}>
++        {busy === 'inspect' ? 'Loading differences…' : 'View differences'}
++      </button>
++      <button type="button" disabled={busy !== null || !onReplay} onMouseDown={protectRecoveryAction}
++        aria-describedby={`${id}-explanation`} onClick={() => { void replay(); }}>
++        {busy === 'replay' ? 'Replaying draft…' : 'Replay draft on current version'}
++      </button>
++      <button type="button" disabled={busy !== null} onMouseDown={protectRecoveryAction} onClick={discard}>
++        Discard this draft
++      </button>
++    </div>
++    {error && <p className={styles.error} role="alert">{error}</p>}
++    {current && <RecoveryComparison receipt={receipt} current={current} id={`${id}-comparison`} />}
++  </div>;
++}
++
++export function BlockEditRecoveryQueue({ receipts, conflicts, onApply, onDismiss, onInspect, onReplay }: BlockEditRecoveryQueueProps) {
++  if (receipts.length === 0) return null;
++  return <div className={documentStyles.blockEditRecoveryQueue} role="status">
++    <div className={documentStyles.blockEditRecoveryTitle}>
++      {receipts.length === 1 ? 'A block edit is waiting for recovery' : `${receipts.length} block edits are waiting for recovery`}
++    </div>
++    {receipts.map((receipt) => conflicts?.[receipt.recoveryKey]
++      ? <ConflictedRecoveryItem key={receipt.recoveryKey} receipt={receipt} onInspect={onInspect} onReplay={onReplay} onDismiss={onDismiss} />
++      : <div className={`${documentStyles.blockEditRecoveryItem} ${styles.recoveryItem}`} key={receipt.recoveryKey}>
++        <span className={documentStyles.blockEditRecoveryPreview}>{receipt.text.trim() || 'Empty block edit'}</span>
++        <div className={documentStyles.blockEditRecoveryActions}>
++          <button type="button" onMouseDown={protectRecoveryAction} onClick={() => { void onApply(receipt.recoveryKey); }}>Apply</button>
++          <button type="button" onMouseDown={protectRecoveryAction} onClick={() => { onDismiss(receipt.recoveryKey); }}>Dismiss</button>
++        </div>
++      </div>)}
++  </div>;
++}
+diff --git a/client/src/pages/Notes/canvasEngine/layers/BlockEditRecoveryQueue.module.css b/client/src/pages/Notes/canvasEngine/layers/BlockEditRecoveryQueue.module.css
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Notes/canvasEngine/layers/BlockEditRecoveryQueue.module.css
+@@ -0,0 +1,102 @@
++.recoveryItem {
++  flex-wrap: wrap;
++}
++
++.conflictItem {
++  display: grid;
++  gap: 10px;
++  min-width: 0;
++}
++
++.conflictItem + .conflictItem {
++  padding-top: 12px;
++  border-top: 1px solid var(--warning);
++}
++
++.explanation,
++.draftPreview,
++.error,
++.unitState,
++.unitText {
++  margin: 0;
++  line-height: 1.5;
++  overflow-wrap: anywhere;
++}
++
++.explanation {
++  max-width: 75ch;
++}
++
++.draftPreview {
++  max-height: 4.5em;
++  overflow: auto;
++  white-space: pre-wrap;
++}
++
++.actions {
++  flex-wrap: wrap;
++  min-width: 0;
++}
++
++.actions button {
++  min-height: 32px;
++  max-width: 100%;
++  white-space: normal;
++  text-align: left;
++}
++
++.actions button:focus-visible {
++  outline: 2px solid var(--accent-primary);
++  outline-offset: 2px;
++}
++
++.actions button:disabled {
++  cursor: wait;
++  opacity: 0.65;
++}
++
++.error {
++  font-weight: 600;
++}
++
++.comparison {
++  display: grid;
++  gap: 10px;
++  min-width: 0;
++  padding-top: 10px;
++  border-top: 1px solid var(--warning);
++}
++
++.comparisonRow {
++  display: grid;
++  grid-template-columns: repeat(2, minmax(0, 1fr));
++  gap: 12px;
++}
++
++.comparisonCell {
++  min-width: 0;
++  padding: 8px;
++  background: var(--bg-primary);
++  color: var(--text-primary);
++}
++
++.comparisonCell h4 {
++  margin: 0 0 6px;
++  font: inherit;
++  font-weight: 600;
++}
++
++.unitText {
++  white-space: pre-wrap;
++}
++
++.unitState {
++  font-style: italic;
++}
++
++@media (max-width: 560px) {
++  .comparisonRow {
++    grid-template-columns: minmax(0, 1fr);
++    gap: 6px;
++  }
++}
+diff --git a/client/src/pages/Notes/canvasEngine/layers/BlockEditRecoveryQueue.test.tsx b/client/src/pages/Notes/canvasEngine/layers/BlockEditRecoveryQueue.test.tsx
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Notes/canvasEngine/layers/BlockEditRecoveryQueue.test.tsx
+@@ -0,0 +1,210 @@
++import { useState } from 'react';
++import { act, createEvent, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
++import { describe, expect, it, vi } from 'vitest';
++import type { BlockEditRecoveryReceipt } from '../draftBlockPersistence';
++import type { NoteBlock, TextBlockContentV1 } from '../runtimeDataTypes';
++import { createTextBlockContentV1 } from '../textFlowService';
++import { BlockEditRecoveryQueue } from './BlockEditRecoveryQueue';
++
++const receipt: BlockEditRecoveryReceipt = {
++  version: 2, kind: 'block_edit_recovery', recoveryKey: 'recovery-a',
++  noteId: 'note-a', requestedNoteId: 'note-a', mountNonce: 'mount-a',
++  creationGeneration: 1, operationSequence: 1, blockId: 'block-a',
++  text: 'saved draft', plainText: 'saved draft', contentJson: { body: 'saved draft' },
++  baseRevision: 3, hydrationEpoch: 1, queuedAt: '2026-09-11T12:00:00.000Z',
++};
++const current: NoteBlock = {
++  id: 'block-a', text_save_revision: 7, placement_id: 'placement-a',
++  display_overrides_json: {}, block_type: 'paragraph', title: null,
++  content_json: { body: 'newer saved text' }, plain_text: 'newer saved text',
++  metadata: {}, order_index: 0, source_references: [],
++};
++
++function callbacks() {
++  return {
++    onApply: vi.fn(async (_key: string) => false),
++    onDismiss: vi.fn((_key: string) => true),
++    onInspect: vi.fn(async (_key: string): Promise<NoteBlock | null> => current),
++    onReplay: vi.fn(async (_key: string) => false),
++  };
++}
++
++function textFlow(units: { id: string; text: string; deleted?: boolean }[]): TextBlockContentV1 {
++  return {
++    ...createTextBlockContentV1(''),
++    units: units.map((unit, index) => ({
++      ...createTextBlockContentV1('').units[0], ...unit, order_index: index,
++      status: unit.deleted ? 'deleted' : 'active',
++    })),
++  };
++}
++
++describe('BlockEditRecoveryQueue conflict choices', () => {
++  it('preserves ordinary Apply and Dismiss actions, including editor focus protection and failed-Apply retry', async () => {
++    const props = callbacks();
++    render(<BlockEditRecoveryQueue receipts={[receipt]} {...props} />);
++    const apply = screen.getByRole('button', { name: 'Apply' });
++    const mouseDown = createEvent.mouseDown(apply);
++    fireEvent(apply, mouseDown);
++    expect(mouseDown.defaultPrevented).toBe(true);
++    fireEvent.click(apply);
++    await act(async () => {});
++    fireEvent.click(apply);
++    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
++    expect(props.onApply).toHaveBeenCalledTimes(2);
++    expect(props.onApply).toHaveBeenLastCalledWith(receipt.recoveryKey);
++    expect(props.onDismiss).toHaveBeenCalledWith(receipt.recoveryKey);
++    expect(props.onInspect).not.toHaveBeenCalled();
++    expect(props.onReplay).not.toHaveBeenCalled();
++    expect(screen.queryByRole('button', { name: 'View differences' })).toBeNull();
++  });
++
++  it('changes a stale Apply result into three informed choices without fetching or replaying automatically', async () => {
++    const props = callbacks();
++    const { rerender } = render(<BlockEditRecoveryQueue receipts={[receipt]} {...props} />);
++    fireEvent.click(screen.getByRole('button', { name: 'Apply' }));
++    await act(async () => {});
++    rerender(<BlockEditRecoveryQueue receipts={[receipt]} conflicts={{ [receipt.recoveryKey]: true }} {...props} />);
++    expect(screen.getAllByRole('button').map((button) => button.textContent)).toEqual([
++      'View differences', 'Replay draft on current version', 'Discard this draft',
++    ]);
++    expect(screen.getByText(/This draft is based on an older version/)).toBeTruthy();
++    expect(screen.getByText(/Replaying will replace the current block text with this draft/)).toBeTruthy();
++    expect(props.onInspect).not.toHaveBeenCalled();
++    expect(props.onReplay).not.toHaveBeenCalled();
++    expect(props.onDismiss).not.toHaveBeenCalled();
++  });
++
++  it('loads a read-only current-text comparison and matches units while showing empty, deleted and absent units', async () => {
++    const props = callbacks();
++    const draftFlow = textFlow([
++      { id: 'shared', text: 'draft shared text' }, { id: 'draft-only', text: '' },
++      { id: 'deleted', text: 'removed draft text', deleted: true },
++    ]);
++    props.onInspect.mockResolvedValue({ ...current, content_json: { text_flow: textFlow([
++      { id: 'current-only', text: 'current-only text' }, { id: 'shared', text: 'current shared text' },
++    ]) } });
++    render(<BlockEditRecoveryQueue receipts={[{ ...receipt, contentJson: { text_flow: draftFlow } }]}
++      conflicts={{ [receipt.recoveryKey]: true }} {...props} />);
++    fireEvent.click(screen.getByRole('button', { name: 'View differences' }));
++    const comparison = await screen.findByRole('region', { name: 'Draft and current text comparison' });
++    const sharedRow = within(comparison).getByText('draft shared text').parentElement!.parentElement!;
++    expect(within(sharedRow).getByText('current shared text')).toBeTruthy();
++    expect(within(sharedRow).getByText('Current text · unit 2')).toBeTruthy();
++    expect(within(comparison).getByText('Empty text unit')).toBeTruthy();
++    expect(within(comparison).getByText('Deleted unit')).toBeTruthy();
++    expect(within(comparison).getAllByText('Not present in the current version')).toHaveLength(2);
++    expect(within(comparison).getByText('Not present in the recovery draft')).toBeTruthy();
++    expect(within(comparison).getByText('current-only text')).toBeTruthy();
++    expect(within(comparison).getByText(/current version 7/)).toBeTruthy();
++    expect(props.onInspect).toHaveBeenCalledWith(receipt.recoveryKey);
++    expect(props.onApply).not.toHaveBeenCalled();
++    expect(props.onReplay).not.toHaveBeenCalled();
++    expect(props.onDismiss).not.toHaveBeenCalled();
++  });
++
++  it('shows read failures without dropping the draft and allows another explicit comparison request', async () => {
++    const props = callbacks();
++    props.onInspect.mockRejectedValueOnce(new Error('offline')).mockResolvedValueOnce(null).mockResolvedValueOnce(current);
++    render(<BlockEditRecoveryQueue receipts={[receipt]} conflicts={{ [receipt.recoveryKey]: true }} {...props} />);
++    fireEvent.click(screen.getByRole('button', { name: 'View differences' }));
++    expect((await screen.findByRole('alert')).textContent).toContain('Your draft is still available');
++    fireEvent.click(screen.getByRole('button', { name: 'View differences' }));
++    await waitFor(() => expect(props.onInspect).toHaveBeenCalledTimes(2));
++    await waitFor(() => expect((screen.getByRole('button', { name: 'View differences' }) as HTMLButtonElement).disabled).toBe(false));
++    fireEvent.click(screen.getByRole('button', { name: 'View differences' }));
++    const comparison = await screen.findByRole('region', { name: 'Draft and current text comparison' });
++    expect(within(comparison).getByText('saved draft')).toBeTruthy();
++    expect(within(comparison).getByText('newer saved text')).toBeTruthy();
++    expect(props.onInspect).toHaveBeenCalledTimes(3);
++    expect(screen.queryByRole('alert')).toBeNull();
++    expect(props.onReplay).not.toHaveBeenCalled();
++  });
++
++  it('blocks duplicate and competing actions during a comparison request', async () => {
++    const props = callbacks();
++    let resolveRead!: (value: NoteBlock) => void;
++    props.onInspect.mockImplementation(() => new Promise((resolve) => { resolveRead = resolve; }));
++    render(<BlockEditRecoveryQueue receipts={[receipt]} conflicts={{ [receipt.recoveryKey]: true }} {...props} />);
++    const inspect = screen.getByRole('button', { name: 'View differences' });
++    fireEvent.click(inspect);
++    fireEvent.click(inspect);
++    fireEvent.click(screen.getByRole('button', { name: 'Replay draft on current version' }));
++    fireEvent.click(screen.getByRole('button', { name: 'Discard this draft' }));
++    expect(screen.getAllByRole('button').every((button) => (button as HTMLButtonElement).disabled)).toBe(true);
++    expect(props.onInspect).toHaveBeenCalledTimes(1);
++    expect(props.onReplay).not.toHaveBeenCalled();
++    expect(props.onDismiss).not.toHaveBeenCalled();
++    await act(async () => { resolveRead(current); });
++    expect(screen.getAllByRole('button').every((button) => !(button as HTMLButtonElement).disabled)).toBe(true);
++  });
++
++  it('replays only on the informed action, guards duplicate clicks, and leaves a failed replay recoverable', async () => {
++    const props = callbacks();
++    let resolveReplay!: (value: boolean) => void;
++    props.onReplay.mockImplementation(() => new Promise((resolve) => { resolveReplay = resolve; }));
++    render(<BlockEditRecoveryQueue receipts={[receipt]} conflicts={{ [receipt.recoveryKey]: true }} {...props} />);
++    fireEvent.click(screen.getByRole('button', { name: 'View differences' }));
++    await screen.findByRole('region', { name: 'Draft and current text comparison' });
++    const replay = screen.getByRole('button', { name: 'Replay draft on current version' });
++    replay.focus();
++    expect(document.activeElement).toBe(replay);
++    const mouseDown = createEvent.mouseDown(replay);
++    fireEvent(replay, mouseDown);
++    expect(mouseDown.defaultPrevented).toBe(true);
++    fireEvent.click(replay);
++    fireEvent.click(replay);
++    expect(props.onReplay).toHaveBeenCalledTimes(1);
++    expect(props.onReplay).toHaveBeenCalledWith(receipt.recoveryKey);
++    expect(screen.getAllByRole('button').every((button) => (button as HTMLButtonElement).disabled)).toBe(true);
++    expect(screen.queryByRole('region', { name: 'Draft and current text comparison' })).toBeNull();
++    await act(async () => { resolveReplay(false); });
++    expect(screen.getByRole('alert').textContent).toContain('The draft was not saved and is still available');
++    expect(screen.getByRole('button', { name: 'Replay draft on current version' })).toBeTruthy();
++    expect(props.onApply).not.toHaveBeenCalled();
++    expect(props.onDismiss).not.toHaveBeenCalled();
++  });
++
++  it('reflects successful replay removal, with no automatic Apply or discard', async () => {
++    const props = callbacks();
++    props.onReplay.mockResolvedValue(true);
++    function QueueOwner() {
++      const [receipts, setReceipts] = useState([receipt]);
++      return <BlockEditRecoveryQueue receipts={receipts} conflicts={{ [receipt.recoveryKey]: true }} {...props}
++        onReplay={async (key) => {
++          const saved = await props.onReplay(key);
++          if (saved) setReceipts([]);
++          return saved;
++        }} />;
++    }
++    render(<QueueOwner />);
++    fireEvent.click(screen.getByRole('button', { name: 'Replay draft on current version' }));
++    await waitFor(() => expect(screen.queryByRole('status')).toBeNull());
++    expect(props.onReplay).toHaveBeenCalledWith(receipt.recoveryKey);
++    expect(props.onInspect).not.toHaveBeenCalled();
++    expect(props.onApply).not.toHaveBeenCalled();
++    expect(props.onDismiss).not.toHaveBeenCalled();
++  });
++
++  it('discards only the chosen draft and does not read or save the current text', () => {
++    const props = callbacks();
++    const otherReceipt = { ...receipt, recoveryKey: 'recovery-b', text: 'another draft' };
++    function QueueOwner() {
++      const [receipts, setReceipts] = useState([receipt, otherReceipt]);
++      return <BlockEditRecoveryQueue receipts={receipts} conflicts={{ [receipt.recoveryKey]: true }} {...props}
++        onDismiss={(key) => {
++          props.onDismiss(key);
++          setReceipts((previous) => previous.filter((item) => item.recoveryKey !== key));
++          return true;
++        }} />;
++    }
++    render(<QueueOwner />);
++    fireEvent.click(screen.getByRole('button', { name: 'Discard this draft' }));
++    expect(props.onDismiss).toHaveBeenCalledWith(receipt.recoveryKey);
++    expect(screen.queryByRole('button', { name: 'Discard this draft' })).toBeNull();
++    expect(screen.getByText('another draft')).toBeTruthy();
++    expect(props.onInspect).not.toHaveBeenCalled();
++    expect(props.onReplay).not.toHaveBeenCalled();
++    expect(props.onApply).not.toHaveBeenCalled();
++  });
++});
+diff --git a/client/src/pages/Notes/canvasEngine/recoveryReplayAnnotations.ts b/client/src/pages/Notes/canvasEngine/recoveryReplayAnnotations.ts
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Notes/canvasEngine/recoveryReplayAnnotations.ts
+@@ -0,0 +1,62 @@
++import { textFlowIdForBlock } from '../../../../../shared/types/textFlow';
++import { rebaseAnnotationsForTextUnitEdit } from './rangeRebaseService';
++import type { AnnotationTruthV1, TextBlockContentV1 } from './runtimeDataTypes';
++import type { AnnotationRangeSnapshot } from './textFlowEditSession';
++
++/** Rebase current annotations as an ordinary edit, without restoring recovery snapshots. */
++export function recoveryReplayAnnotationRanges(input: {
++  annotations: AnnotationTruthV1[];
++  blockId: string;
++  previousTextFlow: TextBlockContentV1 | null;
++  nextTextFlow: TextBlockContentV1 | null;
++}): AnnotationRangeSnapshot[] {
++  const { annotations, blockId, previousTextFlow, nextTextFlow } = input;
++  let nextAnnotations = annotations;
++  previousTextFlow?.units.forEach((previousUnit) => {
++    const nextUnit = nextTextFlow?.units.find((unit) => unit.id === previousUnit.id);
++    if (!nextUnit) {
++      nextAnnotations = nextAnnotations.map((annotation) => ({
++        ...annotation,
++        ranges: annotation.ranges.map((range) => {
++          if (range.block_id !== blockId || range.text_flow_id !== textFlowIdForBlock(blockId)
++            || range.text_unit_id !== previousUnit.id) return range;
++          return {
++            ...range,
++            start_offset: undefined,
++            end_offset: undefined,
++            metadata: {
++              ...range.metadata,
++              pre_edit_offsets: range.metadata?.pre_edit_offsets ?? {
++                text_unit_id: previousUnit.id,
++                start_offset: range.start_offset,
++                end_offset: range.end_offset,
++                range_text_cache: range.range_text_cache,
++              },
++            },
++          };
++        }),
++      }));
++      return;
++    }
++    if (nextUnit.text === previousUnit.text) return;
++    nextAnnotations = rebaseAnnotationsForTextUnitEdit({
++      annotations: nextAnnotations,
++      blockId,
++      textFlowId: textFlowIdForBlock(blockId),
++      textUnitId: previousUnit.id,
++      oldText: previousUnit.text,
++      newText: nextUnit.text,
++    }).next_annotations;
++  });
++
++  const changed: AnnotationRangeSnapshot[] = [];
++  annotations.forEach((annotation) => {
++    const nextAnnotation = nextAnnotations.find((next) => next.id === annotation.id);
++    annotation.ranges.forEach((range) => {
++      const nextRange = nextAnnotation?.ranges.find((next) => next.id === range.id);
++      if (!nextRange || JSON.stringify(range) === JSON.stringify(nextRange)) return;
++      changed.push({ annotationId: annotation.id, range: structuredClone(nextRange) });
++    });
++  });
++  return changed;
++}
+diff --git a/client/src/pages/Notes/canvasEngine/recoveryReplayAnnotations.test.ts b/client/src/pages/Notes/canvasEngine/recoveryReplayAnnotations.test.ts
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Notes/canvasEngine/recoveryReplayAnnotations.test.ts
+@@ -0,0 +1,75 @@
++import { describe, expect, it } from 'vitest';
++import { recoveryReplayAnnotationRanges } from './recoveryReplayAnnotations';
++import type { AnnotationRangeV1, AnnotationTruthV1 } from './runtimeDataTypes';
++import { createTextBlockContentV1 } from './textFlowService';
++
++const flow = (text: string, unitId = 'unit-1') => {
++  const result = createTextBlockContentV1(text);
++  return { ...result, units: result.units.map((unit) => ({ ...unit, id: unitId })) };
++};
++const range = (overrides: Partial<AnnotationRangeV1> = {}): AnnotationRangeV1 => ({
++  id: 'range-1', target_kind: 'text_span', block_id: 'block-1',
++  text_flow_id: 'textflow-block-1', text_unit_id: 'unit-1',
++  start_offset: 13, end_offset: 17, range_text_cache: 'beta', ...overrides,
++});
++const annotation = (ranges: AnnotationRangeV1[]): AnnotationTruthV1 => ({
++  id: 'annotation-1', note_id: 'note-1', canvas_id: 'canvas-1', raw_label: 'Current annotation',
++  ranges, parent_annotation_id: null, child_annotation_ids: [],
++  visual_style: { color_token: 'yellow', marker_kind: 'highlight' },
++  created_by: 'human', status: 'active', created_at: '', updated_at: '',
++});
++
++describe('recovery replay current annotation ranges', () => {
++  it('moves current offsets with the ordinary edit algorithm and returns only changed snapshots', () => {
++    const current = [annotation([range(), range({ id: 'unrelated', block_id: 'another-block' })])];
++    const before = structuredClone(current);
++    const snapshots = recoveryReplayAnnotationRanges({
++      annotations: current, blockId: 'block-1',
++      previousTextFlow: flow('prefix alpha beta gamma'), nextTextFlow: flow('alpha beta gamma'),
++    });
++
++    expect(snapshots).toEqual([{
++      annotationId: 'annotation-1', range: range({ start_offset: 6, end_offset: 10 }),
++    }]);
++    expect(current).toEqual(before);
++    snapshots[0].range.range_text_cache = 'edited result';
++    expect(current).toEqual(before);
++  });
++
++  it('retains the last offsets and excerpt as evidence when the current unit is absent from the draft', () => {
++    const current = [annotation([range({ metadata: { label: 'retained' } })])];
++    const before = structuredClone(current);
++    expect(recoveryReplayAnnotationRanges({
++      annotations: current, blockId: 'block-1',
++      previousTextFlow: flow('prefix alpha beta gamma'), nextTextFlow: flow('replacement', 'unit-2'),
++    })).toEqual([{
++      annotationId: 'annotation-1', range: range({
++        start_offset: undefined, end_offset: undefined,
++        metadata: { label: 'retained', pre_edit_offsets: {
++          text_unit_id: 'unit-1', start_offset: 13, end_offset: 17, range_text_cache: 'beta',
++        } },
++      }),
++    }]);
++    expect(current).toEqual(before);
++  });
++
++  it('preserves existing pre-edit evidence when the draft has no TextFlow', () => {
++    const evidence = { text_unit_id: 'earlier-unit', start_offset: 2, end_offset: 6, range_text_cache: 'beta' };
++    expect(recoveryReplayAnnotationRanges({
++      annotations: [annotation([range({ metadata: { pre_edit_offsets: evidence } })])], blockId: 'block-1',
++      previousTextFlow: flow('prefix alpha beta gamma'), nextTextFlow: null,
++    })).toEqual([{
++      annotationId: 'annotation-1', range: range({
++        start_offset: undefined, end_offset: undefined, metadata: { pre_edit_offsets: evidence },
++      }),
++    }]);
++  });
++
++  it('does not issue unchanged ranges', () => {
++    const unchanged = flow('prefix alpha beta gamma');
++    expect(recoveryReplayAnnotationRanges({
++      annotations: [annotation([range()])], blockId: 'block-1',
++      previousTextFlow: unchanged, nextTextFlow: unchanged,
++    })).toEqual([]);
++  });
++});

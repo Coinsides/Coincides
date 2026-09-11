@@ -26,6 +26,9 @@ export type UseNoteCanvasLayerPropsInput =
   & Pick<
     NoteRuntimeDocumentLayerProps,
     | 'blockEditRecoveryReceipts'
+    | 'blockEditRecoveryConflicts'
+    | 'onInspectBlockEditRecovery'
+    | 'onReplayBlockEditRecovery'
     | 'onApplyBlockEditRecovery'
     | 'onDismissBlockEditRecovery'
     | 'onSurfacePointerDown'
@@ -262,7 +265,10 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     chromeProps,
     documentLayerProps: {
       tray: input.tray,
-      blockEditRecoveryReceipts: input.blockEditRecoveryReceipts,
+    blockEditRecoveryReceipts: input.blockEditRecoveryReceipts,
+    blockEditRecoveryConflicts: input.blockEditRecoveryConflicts,
+    onInspectBlockEditRecovery: input.onInspectBlockEditRecovery,
+    onReplayBlockEditRecovery: input.onReplayBlockEditRecovery,
       floatingPanelProps,
       onApplyBlockEditRecovery: input.onApplyBlockEditRecovery,
       onDismissBlockEditRecovery: input.onDismissBlockEditRecovery,

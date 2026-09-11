@@ -9,6 +9,8 @@ import {
   type NoteWritingSurfaceLayerProps,
 } from './NoteWritingSurfaceLayer';
 import type { BlockEditRecoveryReceipt } from '../draftBlockPersistence';
+import type { NoteBlock } from '../runtimeDataTypes';
+import { BlockEditRecoveryQueue } from './BlockEditRecoveryQueue';
 import { NotePrintLayer } from './NotePrintLayer';
 import { NoteOverviewLayer } from './NoteOverviewLayer';
 import { useNoteOverviewController } from '../hooks/useNoteOverviewController';
@@ -18,9 +20,12 @@ import styles from '../../NoteDetail.module.css';
 export interface NoteRuntimeDocumentLayerProps {
   tray?: NoteTrayState;
   blockEditRecoveryReceipts: BlockEditRecoveryReceipt[];
+  blockEditRecoveryConflicts?: Record<string, boolean>;
   floatingPanelProps: NoteFloatingPanelLayerProps;
   onApplyBlockEditRecovery: (recoveryKey: string) => void | Promise<boolean>;
   onDismissBlockEditRecovery: (recoveryKey: string) => boolean;
+  onInspectBlockEditRecovery?: (recoveryKey: string) => Promise<NoteBlock | null>;
+  onReplayBlockEditRecovery?: (recoveryKey: string) => Promise<boolean>;
   onSurfacePointerDown: (event: ReactPointerEvent<HTMLDivElement>) => void;
   surfaceMode: 'page' | 'canvas';
   templateWarning: string | null;
@@ -34,9 +39,12 @@ export interface NoteRuntimeDocumentHandle {
 export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, NoteRuntimeDocumentLayerProps>(function NoteRuntimeDocumentLayer({
   tray,
   blockEditRecoveryReceipts,
+  blockEditRecoveryConflicts,
   floatingPanelProps,
   onApplyBlockEditRecovery,
   onDismissBlockEditRecovery,
+  onInspectBlockEditRecovery,
+  onReplayBlockEditRecovery,
   onSurfacePointerDown,
   surfaceMode,
   templateWarning,
@@ -57,44 +65,9 @@ export const NoteRuntimeDocumentLayer = forwardRef<NoteRuntimeDocumentHandle, No
       onMouseDown={overview.open ? undefined : onSurfacePointerDown}
     >
       {templateWarning && <div className={styles.templateWarning}>{templateWarning}</div>}
-      {blockEditRecoveryReceipts.length > 0 && (
-        <div className={styles.blockEditRecoveryQueue} role="status">
-          <div className={styles.blockEditRecoveryTitle}>
-            {blockEditRecoveryReceipts.length === 1
-              ? 'A block edit is waiting for recovery'
-              : `${blockEditRecoveryReceipts.length} block edits are waiting for recovery`}
-          </div>
-          {blockEditRecoveryReceipts.map((receipt) => (
-            <div className={styles.blockEditRecoveryItem} key={receipt.recoveryKey}>
-              <span className={styles.blockEditRecoveryPreview}>
-                {receipt.text.trim() || 'Empty block edit'}
-              </span>
-              <div className={styles.blockEditRecoveryActions}>
-                <button
-                  type="button"
-                  onMouseDown={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                  }}
-                  onClick={() => { void onApplyBlockEditRecovery(receipt.recoveryKey); }}
-                >
-                  Apply
-                </button>
-                <button
-                  type="button"
-                  onMouseDown={(event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
-                  }}
-                  onClick={() => { onDismissBlockEditRecovery(receipt.recoveryKey); }}
-                >
-                  Dismiss
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <BlockEditRecoveryQueue receipts={blockEditRecoveryReceipts} conflicts={blockEditRecoveryConflicts}
+        onApply={onApplyBlockEditRecovery} onDismiss={onDismissBlockEditRecovery}
+        onInspect={onInspectBlockEditRecovery} onReplay={onReplayBlockEditRecovery} />
 
       <NoteFloatingPanelLayer {...floatingPanelProps} />
       {overview.open && <NoteOverviewLayer writingSurfaceProps={writingSurfaceProps}
