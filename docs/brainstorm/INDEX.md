@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-09-07
+> **日期 (Updated)**: 2026-09-11
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/brainstorm`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 165 份文档。
+共 166 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -176,4 +176,5 @@
 | [产品完善/会议记录/2026-08-16-Better-Notebook-Study-Artifact-Component-Language-Meeting-Notes.md](产品完善/会议记录/2026-08-16-Better-Notebook-Study-Artifact-Component-Language-Meeting-Notes.md) | 2026-08-16 Better Notebook:复习件组件语言 v0(从 artifact 画廊显影) | `draft` | 2026-08-16 | — |
 | [产品完善/会议记录/2026-08-18-Better-Notebook-Make-Or-Buy-Boundary-And-Orchestrator-Meeting-Notes.md](产品完善/会议记录/2026-08-18-Better-Notebook-Make-Or-Buy-Boundary-And-Orchestrator-Meeting-Notes.md) | 2026-08-18 Better Notebook:make-or-buy 边界、导出双口味、与意图路由器 | `draft` | 2026-08-18 | — |
 | [产品完善/会议记录/2026-09-04-Coincides-Cognitive-Workbench-And-Reasoning-Traces-Meeting-Notes.md](产品完善/会议记录/2026-09-04-Coincides-Cognitive-Workbench-And-Reasoning-Traces-Meeting-Notes.md) | 2026-09-04 Coincides：认知工作台、统一文档与思考痕迹 | `draft` | 2026-09-04 | — |
+| [产品完善/会议记录/2026-09-11-Note-Page-Design-Day-Meeting-Notes.md](产品完善/会议记录/2026-09-11-Note-Page-Design-Day-Meeting-Notes.md) | 2026-09-11 Coincides:笔记页设计日——样式方向、封面页与检索、Agent 改皮、组件交付 | `draft` | 2026-09-11 | — |
 | [产品完善/工程日记/2026-09-04-Expression-Family-And-Continuous-Distillation-Engineering-Diary.md](产品完善/工程日记/2026-09-04-Expression-Family-And-Continuous-Distillation-Engineering-Diary.md) | 2026-09-04 工程日记 · 表达族与持续蒸馏(Henry × Fable 灵感爆发日) | `active` | 2026-09-04 | — |

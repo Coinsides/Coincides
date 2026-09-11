@@ -203,8 +203,39 @@
   color: var(--text-muted);
   font-size: 11px;
   font-weight: 800;
-  letter-spacing: 0;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+/* Note-level floating chrome: one outer skin, borderless controls and rows. */
+.floatingPanelPopover .iconBtn {
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+
+.floatingPanelPopover .iconBtn:hover:not(:disabled),
+.noteDeleteActions button:hover:not(:disabled),
+.pageFramePanelRow[role="button"]:hover,
+.exportPreviewGroup summary:hover {
+  background: var(--bg-hover);
+}
+
+.moreAction.noteDangerAction,
+.moreAction.noteDangerAction svg,
+.noteDeleteActions .dangerBtn {
+  color: var(--error);
+}
+
+.typographyControlHeader span {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.moreAction:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .popoverNote {
@@ -216,20 +247,21 @@
 
 .infoGrid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
   margin: 0;
 }
 
 .infoGrid div {
-  padding: 9px 10px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--bg-secondary);
+  padding: 8px 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 .infoGrid dt {
-  margin: 0 0 4px;
+  margin: 0;
   color: var(--text-muted);
   font-size: 11px;
   font-weight: 750;
@@ -249,15 +281,14 @@
   gap: 4px 9px;
   width: 100%;
   padding: 10px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--bg-secondary);
   color: var(--text-primary);
   text-align: left;
+  border: 0;
+  border-radius: 0;
+  background: none;
 }
 
-.moreAction:hover {
-  border-color: var(--border-focus);
+.moreAction:hover:not(:disabled) {
   background: var(--bg-hover);
 }
 
@@ -324,9 +355,6 @@
   justify-content: space-between;
   gap: 12px;
   padding: 10px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--bg-secondary);
 }
 
 .blockTrashIdentity {
@@ -354,16 +382,15 @@
   align-items: center;
   gap: 5px;
   padding: 6px 8px;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-sm);
-  background: var(--bg-primary);
   color: var(--text-primary);
   font-size: 12px;
   font-weight: 700;
+  border: 0;
+  border-radius: 0;
+  background: none;
 }
 
 .blockTrashRestoreButton:hover:not(:disabled) {
-  border-color: var(--border-focus);
   background: var(--bg-hover);
 }
 
@@ -375,11 +402,9 @@
 .typographyControls {
   display: grid;
   gap: 10px;
-  margin-top: 10px;
-  padding: 10px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--bg-secondary);
+  margin-top: 14px;
+  padding: 14px 10px 0;
+  border-top: 1px solid var(--border-subtle);
 }
 
 .typographyControlHeader,
@@ -401,11 +426,11 @@
 .typographyResetButton,
 .typographySelect,
 .typographyNumberInput {
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-sm);
-  background: var(--bg-primary);
   color: var(--text-secondary);
   font: inherit;
+  border: 0;
+  border-radius: 0;
+  background: none;
 }
 
 .typographyResetButton {
@@ -418,8 +443,8 @@
 .typographyResetButton:hover,
 .typographySelect:hover,
 .typographyNumberInput:hover {
-  border-color: var(--border-focus);
   color: var(--text-primary);
+  background: var(--bg-hover);
 }
 
 .typographySelect,
@@ -431,11 +456,13 @@
 }
 
 .typographySelect {
-  flex: 1;
+  max-width: 180px;
+  text-align: right;
 }
 
 .typographyNumberInput {
   width: 72px;
+  text-align: right;
 }
 
 .togglePill {
@@ -475,9 +502,6 @@
   gap: 4px 8px;
   align-items: center;
   padding: 9px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--bg-secondary);
 }
 
 .pageFramePanelRow svg {
@@ -500,8 +524,7 @@
 }
 
 .pageFramePanelRowPrimary {
-  border-color: color-mix(in srgb, var(--accent-primary) 54%, var(--border-default));
-  background: var(--accent-primary-bg);
+  font-weight: 850;
 }
 
 .pageFramePanelActions {
@@ -516,6 +539,9 @@
 .pageFramePanelStackGroup {
   display: grid;
   gap: 6px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-subtle);
 }
 
 .pageFramePanelStackRow {
@@ -524,9 +550,6 @@
   gap: 8px;
   align-items: center;
   padding: 8px 9px;
-  border: 1px solid color-mix(in srgb, var(--accent-primary) 34%, var(--border-subtle));
-  border-radius: var(--radius-md);
-  background: color-mix(in srgb, var(--accent-primary-bg) 72%, transparent);
 }
 
 .pageFramePanelStackRow span {
@@ -552,28 +575,28 @@
 .pageFramePanelSectionLabel {
   padding: 4px 2px 0;
   text-transform: uppercase;
-  letter-spacing: 0;
+  letter-spacing: 0.08em;
 }
 
 .exportStats {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
 }
 
 .exportStats div {
-  display: grid;
-  gap: 2px;
+  display: flex;
+  gap: 12px;
   padding: 9px 8px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--bg-secondary);
+  align-items: baseline;
+  justify-content: space-between;
 }
 
 .exportStats strong {
   color: var(--text-primary);
   font-size: 17px;
   line-height: 1;
+  order: 1;
 }
 
 .exportStats span {
@@ -588,45 +611,43 @@
 
 .previewOverlayControls {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2px;
   margin-top: 12px;
   padding: 10px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .previewOverlayControl {
-  display: grid;
-  justify-items: center;
+  display: flex;
   gap: 6px;
   min-width: 0;
+  align-items: center;
 }
 
 .previewOverlayToggle {
   position: relative;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 46px;
+  justify-content: flex-start;
   height: 36px;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
-  background: var(--bg-primary);
+  font-size: 13px;
   color: var(--text-muted);
   transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast);
+  border: 0;
+  border-radius: 0;
+  background: none;
+  gap: 10px;
+  flex: 1;
+  padding: 0 8px;
 }
 
 .previewOverlayToggle:hover {
-  border-color: var(--border-focus);
   background: var(--bg-hover);
   color: var(--text-primary);
 }
 
 .previewOverlayToggleOn {
-  border-color: var(--accent-primary);
-  background: var(--accent-primary-bg);
   color: var(--text-primary);
 }
 
@@ -642,6 +663,7 @@
   border-radius: 999px;
   background: currentColor;
   transform: rotate(-42deg);
+  left: 7px;
 }
 
 .previewOverlayHelp {
@@ -657,7 +679,7 @@
 .previewOverlayHelp::after {
   content: attr(data-tip);
   position: absolute;
-  left: 50%;
+  right: 0;
   bottom: calc(100% + 8px);
   z-index: 95;
   width: 210px;
@@ -673,22 +695,19 @@
   box-shadow: var(--glass-shadow-sm);
   opacity: 0;
   pointer-events: none;
-  transform: translate(-50%, 4px);
+  transform: translateY(4px);
   transition: opacity var(--transition-fast), transform var(--transition-fast);
 }
 
 .previewOverlayHelp:hover::after,
 .previewOverlayHelp:focus-visible::after {
   opacity: 1;
-  transform: translate(-50%, 0);
+  transform: translateY(0);
 }
 
 .exportWarning {
   margin-top: 10px;
   padding: 9px 10px;
-  border: 1px solid var(--warning);
-  border-radius: var(--radius-md);
-  background: var(--warning-bg);
 }
 
 .exportWarning p {
@@ -709,15 +728,10 @@
 }
 
 .exportPreviewGroup {
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  background: var(--bg-secondary);
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle);
 }
 
-.exportPreviewPageFrameGroup {
-  border-color: color-mix(in srgb, var(--accent-primary) 34%, var(--border-subtle));
-  background: color-mix(in srgb, var(--bg-secondary) 84%, var(--accent-primary));
-}
 
 .exportPreviewGroup summary {
   display: flex;
@@ -758,8 +772,6 @@
   justify-content: center;
   min-width: 26px;
   height: 22px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 999px;
   color: var(--text-secondary);
   font-size: 11px;
 }
@@ -776,8 +788,6 @@
   align-items: center;
   min-height: 20px;
   padding: 0 7px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 999px;
   color: var(--text-secondary);
   font-size: 10px;
   font-weight: 750;
@@ -797,8 +807,6 @@
   align-items: center;
   min-height: 18px;
   padding: 0 6px;
-  border: 1px solid color-mix(in srgb, var(--border-subtle) 72%, transparent);
-  border-radius: 999px;
 }
 
 .exportPreviewList {
@@ -813,9 +821,6 @@
   display: grid;
   gap: 2px;
   padding: 8px 9px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  background: var(--bg-primary);
 }
 
 .exportPreviewRow span {
@@ -1870,6 +1875,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 
 .noteDeleteDialog {
   max-width: min(440px, calc(100vw - 40px));
+  margin: auto;
   padding: 24px;
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
@@ -1905,10 +1911,10 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 
 .noteDeleteActions button {
   padding: 8px 12px;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-sm);
-  background: var(--bg-secondary);
   color: var(--text-primary);
+  border: 0;
+  border-radius: 0;
+  background: none;
 }
 
 .noteDeleteActions button:disabled {
@@ -4400,9 +4406,6 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 
 .sourceJumpPage {
   padding: 12px;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  background: var(--bg-primary);
 }
 
 .sourceJumpPageLabel {

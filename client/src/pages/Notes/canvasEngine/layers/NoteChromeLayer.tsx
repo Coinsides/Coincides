@@ -442,7 +442,7 @@ export function NoteChromeLayer({
             <div className={styles.noteToolbarPopover} data-note-toolbar-popover="true"
               style={{ ...overlayAnchor, maxHeight: Math.max(80, window.innerHeight - overlayAnchor.bottom - 12) }}>
             {showNoteInfo && (
-              <div className={`${styles.infoPopover} ${styles.floatingPanelPopover}`}>
+              <div className={`${styles.infoPopover} ${styles.floatingPanelPopover}`} data-note-overlay="info">
                 <div className={styles.popoverHeader}>
                   <div>
                     <div className={styles.popoverEyebrow}>Note info</div>
@@ -477,7 +477,7 @@ export function NoteChromeLayer({
             )}
 
             {showLayoutPanel && (
-              <div className={`${styles.infoPopover} ${styles.actionsPopover} ${styles.floatingPanelPopover}`}>
+              <div className={`${styles.infoPopover} ${styles.actionsPopover} ${styles.floatingPanelPopover}`} data-note-overlay="layout">
                 <div className={styles.popoverHeader}>
                   <div>
                     <div className={styles.popoverEyebrow}>Layout controls</div>
@@ -572,7 +572,7 @@ export function NoteChromeLayer({
             )}
 
             {showMoreActions && (
-              <div className={`${styles.infoPopover} ${styles.actionsPopover} ${styles.floatingPanelPopover}`}>
+              <div className={`${styles.infoPopover} ${styles.actionsPopover} ${styles.floatingPanelPopover}`} data-note-overlay="more">
                 <div className={styles.popoverHeader}>
                   <div>
                     <div className={styles.popoverEyebrow}>Note actions</div>
@@ -608,14 +608,9 @@ export function NoteChromeLayer({
             >
               <Info size={16} /><span>View info</span>
             </button>
-                <div className={styles.moreAction} aria-disabled="true">
-                  <MoreHorizontal size={15} />
-                  <span>Note-level actions</span>
-                  <small>History, duplicate, archive, import, and export controls will live here.</small>
-                </div>
                 <button
                   type="button"
-                  className={styles.moreAction}
+                  className={`${styles.moreAction} ${styles.noteDangerAction}`}
                   disabled={hostMode === 'modal' || contentReadOnly || note.status === 'trashed'}
                   title={hostMode === 'modal' ? 'Open full page to use this' : undefined}
                   aria-label="Delete note"
@@ -720,7 +715,7 @@ export function NoteChromeLayer({
             )}
 
             {showBlockTrash && (
-              <div className={`${styles.infoPopover} ${styles.actionsPopover} ${styles.floatingPanelPopover}`}>
+              <div className={`${styles.infoPopover} ${styles.actionsPopover} ${styles.floatingPanelPopover}`} data-note-overlay="block-trash">
                 <div className={styles.popoverHeader}>
                   <div>
                     <div className={styles.popoverEyebrow}>Note actions</div>
@@ -788,6 +783,7 @@ export function NoteChromeLayer({
       <dialog
         ref={deleteDialogRef}
         className={styles.noteDeleteDialog}
+        data-note-overlay="delete"
         aria-labelledby="note-delete-title"
         aria-describedby="note-delete-description"
         onCancel={(event) => {

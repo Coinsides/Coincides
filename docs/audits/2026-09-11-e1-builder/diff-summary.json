@@ -1,0 +1,110 @@
+{
+  "scope": "E1 client source only; audit artifacts and handoff excluded",
+  "groups": {
+    "production": {
+      "files": 12,
+      "added": 295,
+      "removed": 113
+    },
+    "test": {
+      "files": 3,
+      "added": 152,
+      "removed": 1
+    }
+  },
+  "files": [
+    {
+      "file": "client/src/pages/Notes/NoteDetail.module.css",
+      "added": 92,
+      "removed": 89,
+      "kind": "production"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/useFloatingOverlayController.ts",
+      "added": 3,
+      "removed": 1,
+      "kind": "production"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts",
+      "added": 3,
+      "removed": 0,
+      "kind": "production"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+      "added": 4,
+      "removed": 0,
+      "kind": "production"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/hooks/useRuntimeSurfaceStateController.ts",
+      "added": 4,
+      "removed": 0,
+      "kind": "production"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/interactionController.ts",
+      "added": 1,
+      "removed": 1,
+      "kind": "production"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/ExportPreviewLayer.tsx",
+      "added": 6,
+      "removed": 2,
+      "kind": "production"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx",
+      "added": 3,
+      "removed": 1,
+      "kind": "test"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx",
+      "added": 6,
+      "removed": 10,
+      "kind": "production"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteFloatingPanelLayer.tsx",
+      "added": 1,
+      "removed": 1,
+      "kind": "production"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "added": 13,
+      "removed": 9,
+      "kind": "production"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx",
+      "added": 38,
+      "removed": 0,
+      "kind": "test"
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/ViewOptionsMenu.tsx",
+      "added": 119,
+      "removed": 0,
+      "kind": "production",
+      "new": true
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/ViewOptionsMenu.module.css",
+      "added": 43,
+      "removed": 0,
+      "kind": "production",
+      "new": true
+    },
+    {
+      "file": "client/src/pages/Notes/canvasEngine/layers/ViewOptionsMenu.test.tsx",
+      "added": 111,
+      "removed": 0,
+      "kind": "test",
+      "new": true
+    }
+  ]
+}

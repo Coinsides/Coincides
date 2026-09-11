@@ -118,6 +118,7 @@ function WritingSurfaceThroughLayerProps({ surfaceProps }: { surfaceProps: NoteW
     onTitleDraftChange: () => undefined, onDescriptionDraftChange: () => undefined,
     onSaveTitle: () => undefined, onSaveDescription: () => undefined,
     ...surfaceProps,
+    onCloseOverlay: surfaceProps.onCloseViewOptions,
     note: { id: surfaceProps.noteId, course_id: surfaceProps.projectId },
     onWritingSurfaceFocusBlock: surfaceProps.onFocusBlock,
     onWritingSurfaceRequestBlockFocus: surfaceProps.onRequestFocusBlock,
@@ -168,6 +169,43 @@ it('C4 paper tools are available in writing and disabled in layout and read-only
   expect((view.getByRole('button', { name: /^Pen$/ }) as HTMLButtonElement).disabled).toBe(true);
   view.rerender(<NoteWritingSurfaceLayer {...props} contentReadOnly layoutMode={false} />);
   expect((view.getByRole('button', { name: /^Eraser$/ }) as HTMLButtonElement).disabled).toBe(true);
+});
+
+describe('view options writing-surface integration', () => {
+  it('forwards shared overlay controls and preserves long-page Fit page scrolling and the Overview action', () => {
+    const props = propsFor({ ...frame(80), height: 6000 }, 'page');
+    const onPageReadingGearChange = vi.fn();
+    const onToggleViewOptions = vi.fn();
+    const onCloseViewOptions = vi.fn();
+    const onToggleOverview = vi.fn();
+    const appMain = document.createElement('main');
+    appMain.dataset.appMainScroll = 'true';
+    appMain.scrollTo = vi.fn();
+    document.body.append(appMain);
+    const view = render(<MemoryRouter><WritingSurfaceThroughLayerProps surfaceProps={{ ...props,
+      showViewOptions: true, onToggleViewOptions, onCloseViewOptions,
+      onPageReadingGearChange, pageReadingViewState: { gear: 'fit_width', stepFactor: 1 },
+    }} /></MemoryRouter>, { container: appMain, baseElement: document.body });
+    const controls = appMain.querySelector('[data-page-reading-control="true"]')!;
+    expect(controls.querySelector('[data-page-reading-select]')).toBeNull();
+    fireEvent.click(view.getByRole('menuitemradio', { name: 'Fit page' }));
+    expect(onPageReadingGearChange).toHaveBeenCalledExactlyOnceWith('fit_page');
+    expect(appMain.scrollTo).toHaveBeenCalledExactlyOnceWith({ top: 0, behavior: 'auto' });
+    expect(onCloseViewOptions).toHaveBeenCalledOnce();
+    fireEvent.click(view.getByRole('button', { name: 'View options' }));
+    expect(onToggleViewOptions).toHaveBeenCalledOnce();
+    view.rerender(<NoteWritingSurfaceLayer {...props} onToggleOverview={onToggleOverview} />);
+    const overview = view.getByRole('button', { name: 'Page overview' });
+    expect(overview.previousElementSibling?.getAttribute('data-page-reading-view-options')).toBe('true');
+    fireEvent.click(overview);
+    expect(onToggleOverview).toHaveBeenCalledOnce();
+    expect(view.getByRole('button', { name: 'Decrease page reading step' })).not.toBeNull();
+    expect(view.getByRole('button', { name: 'Increase page reading step' })).not.toBeNull();
+    expect(view.getByRole('button', { name: 'Write' })).not.toBeNull();
+    expect(view.getByRole('button', { name: 'Pen' })).not.toBeNull();
+    expect(view.getByRole('button', { name: 'Eraser' })).not.toBeNull();
+    appMain.remove();
+  });
 });
 
 it('F15: the actual block/surface mouse chain preserves press feedback and a click opens the unit menu', () => {

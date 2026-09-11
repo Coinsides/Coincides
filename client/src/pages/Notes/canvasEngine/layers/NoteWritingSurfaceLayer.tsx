@@ -6,6 +6,7 @@ import { projectPageFrameToReadingSurface } from '../pageFramePresentationServic
 import { Boxes, Pencil, Eraser } from 'lucide-react';
 import type { PaperInkTool } from '../freehandService';
 import { PaperInkLayer } from './PaperInkLayer';
+import { ViewOptionsMenu } from './ViewOptionsMenu';
 import { NotePaperHeader, NOTE_HEADER_INITIAL_HEIGHT, type NotePaperHeaderProps } from './NotePaperHeader';
 import { PageFrameWallLayer, type ActivePageFrameWall, type PageFrameWallSide } from './PageFrameWallLayer';
 import { NoteCanvasRuntimeContext } from '../NoteCanvasRuntimeProvider';
@@ -311,6 +312,9 @@ export interface NoteWritingSurfaceLayerProps {
   onPageReadingGearChange?: (gear: PageReadingGear) => void;
   onPageReadingStep?: (direction: -1 | 1) => void;
   onPageReadingViewportChange?: (viewport: CanvasViewport) => void;
+  showViewOptions?: boolean;
+  onToggleViewOptions?: () => void;
+  onCloseViewOptions?: () => void;
   onPageFrameWallPointerDown?: (event: ReactPointerEvent<HTMLElement>, frameId: string, side: PageFrameWallSide) => void;
   activePageFrameWall?: ActivePageFrameWall | null;
   overviewOpen?: boolean;
@@ -601,6 +605,9 @@ export function NoteWritingSurfaceLayer({
   onPageReadingGearChange,
   onPageReadingStep,
   onPageReadingViewportChange,
+  showViewOptions = false,
+  onToggleViewOptions,
+  onCloseViewOptions,
   onPageFrameWallPointerDown,
   activePageFrameWall,
   overviewOpen = false,
@@ -4157,19 +4164,16 @@ export function NoteWritingSurfaceLayer({
               <Icon size={14} aria-hidden="true" /> {label}
             </button>
           ))}
-          {([
-            ['fit_width', 'Fit width'], ['fit_page', 'Fit page'], ['physical', '100% physical'],
-          ] as const).map(([gear, label]) => (
-            <button key={gear} type="button" className={styles.canvasZoomReset}
-              disabled={overviewOpen}
-              aria-pressed={readingViewState.gear === gear} data-page-reading-select={gear}
-              onClick={() => {
+          <ViewOptionsMenu open={showViewOptions} disabled={overviewOpen}
+            activeGear={readingViewState.gear}
+            onToggle={() => onToggleViewOptions?.()}
+            onClose={() => onCloseViewOptions?.()}
+            onSelect={(gear) => {
                 onPageReadingGearChange?.(gear);
                 if (gear === 'fit_page' && pageReading.isLongPage) {
                   surfaceRef.current?.closest<HTMLElement>('[data-app-main-scroll="true"]')?.scrollTo({ top: 0, behavior: 'auto' });
                 }
-              }}>{label}</button>
-          ))}
+            }} />
           {onToggleOverview && <button type="button" className={styles.canvasZoomReset}
             data-note-overview-toggle="true" aria-label="Page overview" aria-pressed={overviewOpen}
             onMouseDown={(event) => { event.preventDefault(); event.stopPropagation(); }}

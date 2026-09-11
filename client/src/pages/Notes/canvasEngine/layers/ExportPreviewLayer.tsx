@@ -83,7 +83,7 @@ function ExportPreviewPageFrameGroup({
 }) {
   return (
     <details
-      className={`${styles.exportPreviewGroup} ${styles.exportPreviewPageFrameGroup}`}
+      className={styles.exportPreviewGroup}
       data-export-preview-page-frame={pageFrame.pageFrameId}
       data-export-preview-page-frame-role={pageFrame.role}
       open={index === 0}
@@ -135,7 +135,7 @@ export function ExportPreviewLayer({
   onClose,
 }: ExportPreviewLayerProps) {
   return (
-    <div className={`${styles.infoPopover} ${styles.exportPopover} ${styles.floatingPanelPopover}`}>
+    <div className={`${styles.infoPopover} ${styles.exportPopover} ${styles.floatingPanelPopover}`} data-note-overlay="export">
       <div className={styles.popoverHeader}>
         <div>
           <div className={styles.popoverEyebrow}>Export preview</div>
@@ -178,6 +178,7 @@ export function ExportPreviewLayer({
             title={showBlockTypes ? 'Hide block type overlay' : 'Show block type overlay'}
           >
             <LayoutDashboard size={20} />
+            <span>Block types</span>
           </button>
           <span
             className={styles.previewOverlayHelp}
@@ -197,6 +198,7 @@ export function ExportPreviewLayer({
             title={showAIVisibility ? 'Hide AI visibility overlay' : 'Show AI visibility overlay'}
           >
             {showAIVisibility ? <Eye size={20} /> : <EyeOff size={20} />}
+            <span>AI visibility</span>
           </button>
           <span
             className={styles.previewOverlayHelp}
@@ -216,6 +218,7 @@ export function ExportPreviewLayer({
             title={showExportStatus ? 'Hide export status overlay' : 'Show export status overlay'}
           >
             {showExportStatus ? <FileText size={20} /> : <FileX size={20} />}
+            <span>Export status</span>
           </button>
           <span
             className={styles.previewOverlayHelp}
@@ -235,6 +238,7 @@ export function ExportPreviewLayer({
             title={showLabelOverlay ? 'Hide label overlay' : 'Show label overlay'}
           >
             <Tag size={20} />
+            <span>Labels</span>
           </button>
           <span
             className={styles.previewOverlayHelp}

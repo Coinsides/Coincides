@@ -32,7 +32,7 @@ export interface RuntimeInteractionState {
   blockId?: string;
   textFlowId?: string;
   textUnitId?: string;
-  panel?: 'slashMenu' | 'preview' | 'layout' | 'noteInfo' | 'moreActions' | 'blockTrash' | 'insert';
+  panel?: 'slashMenu' | 'preview' | 'layout' | 'noteInfo' | 'moreActions' | 'blockTrash' | 'insert' | 'viewOptions';
 }
 
 export function idleInteraction(): RuntimeInteractionState {

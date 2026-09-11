@@ -1,0 +1,11 @@
+{
+  "status": "resolved diagnostic before final smoke",
+  "overlay": "Export preview, all details open",
+  "width": 430,
+  "clientWidth": 418,
+  "scrollWidth": 488,
+  "realDescendantsPastRightEdge": 0,
+  "tooltipCount": 4,
+  "tooltipBefore": { "parentLeft": 1199, "parentRight": 1221, "pseudoWidth": "210px", "pseudoLeft": "11px", "pseudoRight": "-199px", "transform": "matrix(1, 0, 0, 1, -105, 4)" },
+  "resolution": "Root aligned tooltip to right:0 with Y-only translation; final report checks scrollWidth <= clientWidth before and during actual pointer hover."
+}

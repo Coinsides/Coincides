@@ -153,6 +153,8 @@ describe('NoteChromeLayer block restore door', () => {
     expect(props.onToggleNoteInfo).toHaveBeenCalledOnce();
     expect(props.onOpenBlockTrash).toHaveBeenCalledOnce();
     expect(screen.getByText('Typography')).toBeTruthy();
+    expect(screen.queryByText('Note-level actions')).toBeNull();
+    expect(screen.queryByText('History, duplicate, archive, import, and export controls will live here.')).toBeNull();
   });
 
   it('disables modal note deletion while retaining the local deleted-block drawer', () => {
@@ -284,7 +286,7 @@ describe('NoteChromeLayer note trash smoke', () => {
     const onTrashNote = vi.fn().mockRejectedValueOnce(new Error('Request failed')).mockResolvedValue(undefined);
     render(<NoteChromeLayer {...noteChromeProps({ onTrashNote })} />);
 
-    expect(screen.getByText(/History, duplicate, archive, import, and export/).closest('[aria-disabled="true"]')).toBeTruthy();
+    expect(screen.queryByText(/History, duplicate, archive, import, and export/)).toBeNull();
     fireEvent.click(screen.getByRole('button', { name: 'Delete note' }));
     expect(screen.getByRole('dialog').textContent).toContain('can be restored from the Project Trash tab');
     expect(onTrashNote).not.toHaveBeenCalled();

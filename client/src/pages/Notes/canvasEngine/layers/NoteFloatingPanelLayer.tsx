@@ -19,7 +19,7 @@ export function NoteFloatingPanelLayer({
     <>
       <FloatingOverlayLayer open={Boolean(sourceJumpTarget)}>
         {sourceJumpTarget && (
-          <div className={`${styles.sourceJumpPanel} ${styles.floatingPanelPopover}`}>
+          <div className={`${styles.sourceJumpPanel} ${styles.floatingPanelPopover}`} data-note-overlay="source">
             <div className={styles.sourceJumpHeader}>
               <div>
                 <div className={styles.sourceJumpEyebrow}>Source snapshot</div>

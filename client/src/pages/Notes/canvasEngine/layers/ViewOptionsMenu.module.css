@@ -1,0 +1,43 @@
+.trigger {
+  min-width: 28px;
+  padding: 0 6px;
+}
+
+.menu {
+  position: absolute;
+  width: min(200px, calc(100vw - 24px));
+  padding: 6px;
+  overflow: auto;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  pointer-events: auto;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  min-height: 34px;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.option:hover,
+.option:focus-visible {
+  background: var(--bg-hover);
+  outline: none;
+}
+
+.check {
+  display: inline-flex;
+  flex: 0 0 14px;
+}
