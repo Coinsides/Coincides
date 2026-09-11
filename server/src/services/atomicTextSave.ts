@@ -2,9 +2,9 @@ import type Database from 'better-sqlite3';
 import { z } from 'zod';
 import { AppError } from '../middleware/errorHandler.js';
 import { updateNoteBlockSchema } from '../validators/index.js';
-import { updateBoardTextRangesSchema } from '../validators/boardTextRanges.js';
+import { updateTextSaveBoardTextRangesSchema } from '../validators/boardTextRanges.js';
 import { listAnnotationTruths, patchTextSaveAnnotationRanges } from './annotationTruths.js';
-import { getBoardTextRange, updateBoardTextRanges } from './boardTextRanges.js';
+import { getBoardTextRange, updateTextSaveBoardTextRanges } from './boardTextRanges.js';
 import { updateNoteBlockContent } from './noteBlockContent.js';
 import { assertSourceProjectionNoteContentWriteAllowed } from './sourceProjectionPolicy.js';
 
@@ -16,7 +16,7 @@ const textSaveSchema = z.object({
   annotations: z.object({ range_updates: z.array(z.object({
     annotation_id: id, range: z.record(z.unknown()),
   }).strict()).max(10000) }).strict(),
-  text_ranges: updateBoardTextRangesSchema.shape.text_ranges,
+  text_ranges: updateTextSaveBoardTextRangesSchema.shape.text_ranges,
 }).strict();
 
 /** Scope: one block's text-save door, not generic canvas/placement or board-owned writes. */
@@ -44,7 +44,7 @@ export function saveAtomicText(db: Database.Database, userId: string, blockId: s
         throw new AppError(400, 'Board text range belongs to another block');
       }
     }
-    const textRanges = updateBoardTextRanges(db, userId, input.note_id, { text_ranges: input.text_ranges });
+    const textRanges = updateTextSaveBoardTextRanges(db, userId, input.note_id, { text_ranges: input.text_ranges });
     db.prepare('UPDATE notes SET updated_at = ? WHERE id = ? AND user_id = ?')
       .run(new Date().toISOString(), input.note_id, userId);
     return { block, annotations: listAnnotationTruths(db, userId, input.note_id),

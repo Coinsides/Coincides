@@ -19,16 +19,25 @@ export const boardTextRangeSelectionSchema = z.object({
 }).strict().refine((value) => value.end_offset > value.start_offset && value.excerpt.length > 0,
   'A board reference requires a nonempty text range');
 
+const boardTextRangeUpdateSchema = z.object({
+  id,
+  ...address,
+  start_offset: offset.nullable(),
+  end_offset: offset.nullable(),
+  status: z.enum(['active', 'drifted', 'lost']),
+  pre_edit_offsets: z.object({ start_offset: offset.nullable(), end_offset: offset.nullable() }).strict().nullable(),
+}).strict();
+const validOffsets = (value: { start_offset: number | null; end_offset: number | null }) =>
+  value.start_offset === null || value.end_offset === null || value.end_offset >= value.start_offset;
+
 export const updateBoardTextRangesSchema = z.object({
-  text_ranges: z.array(z.object({
-    id,
-    ...address,
-    start_offset: offset.nullable(),
-    end_offset: offset.nullable(),
-    status: z.enum(['active', 'drifted', 'lost']),
-    pre_edit_offsets: z.object({ start_offset: offset.nullable(), end_offset: offset.nullable() }).strict().nullable(),
-  }).strict().refine((value) => value.start_offset === null || value.end_offset === null
-    || value.end_offset >= value.start_offset, 'Invalid range offsets')).max(10000),
+  text_ranges: z.array(boardTextRangeUpdateSchema.refine(validOffsets, 'Invalid range offsets')).max(10000),
+}).strict();
+
+/** Only the revision-checked atomic text-save door accepts history intent. */
+export const updateTextSaveBoardTextRangesSchema = z.object({
+  text_ranges: z.array(boardTextRangeUpdateSchema.extend({ history_restore: z.literal(true).optional() })
+    .refine(validOffsets, 'Invalid range offsets')).max(10000),
 }).strict();
 
 export const mountBoardTextRangeSchema = mountBoardMemberSchema

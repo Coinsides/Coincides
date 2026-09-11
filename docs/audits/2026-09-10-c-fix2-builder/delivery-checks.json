@@ -1,0 +1,38 @@
+{
+  "head": "b46d8dffeb47debe26850f537d9994fb83fc5637",
+  "stagedDiffEmpty": true,
+  "predecessorFilesUnchanged": [
+    "client/scripts/cFix1Smoke",
+    "client/src/pages/Notes/NoteDetail.module.css",
+    "client/src/pages/Notes/canvasEngine/blocks/TextBlockProjection.tsx",
+    "client/src/pages/Notes/canvasEngine/blocks/TextBlockProjection.unitHandle.test.tsx",
+    "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts",
+    "client/src/pages/Notes/canvasEngine/hooks/useTextUnitHandleDrag.ts",
+    "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+    "client/src/pages/Notes/canvasEngine/layers/TextUnitGutterLayer.tsx",
+    "client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx"
+  ],
+  "frozenContractAppendOnly": true,
+  "orderAppendOnly": true,
+  "diffCheck": "PASS",
+  "helpersStopped": true,
+  "clientFull": {
+    "files": 116,
+    "tests": 1249,
+    "exit": 0,
+    "filtered": false
+  },
+  "serverTargeted": {
+    "files": 2,
+    "tests": 29,
+    "skipped": 0,
+    "exit": 0
+  },
+  "smokes": {
+    "1": "PASS after expected pre-fix RED exit 1",
+    "2": "PASS",
+    "3": "PASS with matching restored body and no intent",
+    "4": "PASS, same entry and only B retried",
+    "5": "PASS"
+  }
+}

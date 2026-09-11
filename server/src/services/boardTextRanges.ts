@@ -2,7 +2,7 @@ import type Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 import type { BoardTextRangeStatus, BoardTextRangeV1 } from '../../../shared/types/boardTextRange.js';
 import { AppError } from '../middleware/errorHandler.js';
-import { boardTextRangeSelectionSchema, updateBoardTextRangesSchema } from '../validators/boardTextRanges.js';
+import { boardTextRangeSelectionSchema, updateBoardTextRangesSchema, updateTextSaveBoardTextRangesSchema } from '../validators/boardTextRanges.js';
 import { textFlowIdForBlock } from './textFlowIdentity.js';
 import { validTextFlowUnits } from './textFlowUnits.js';
 import { sliceGraphemes } from './graphemes.js';
@@ -102,6 +102,18 @@ export function createBoardTextRange(db: Database.Database, userId: string, boar
 export function updateBoardTextRanges(db: Database.Database, userId: string, noteId: string, value: unknown): BoardTextRangeV1[] {
   requireTransaction(db);
   const input = updateBoardTextRangesSchema.parse(value);
+  return applyBoardTextRangeUpdates(db, userId, noteId, input);
+}
+
+/** Caller owns the atomic text-save transaction, block scope and revision check. */
+export function updateTextSaveBoardTextRanges(db: Database.Database, userId: string, noteId: string, value: unknown): BoardTextRangeV1[] {
+  requireTransaction(db);
+  const input = updateTextSaveBoardTextRangesSchema.parse(value);
+  return applyBoardTextRangeUpdates(db, userId, noteId, input);
+}
+
+function applyBoardTextRangeUpdates(db: Database.Database, userId: string, noteId: string,
+  input: ReturnType<typeof updateTextSaveBoardTextRangesSchema.parse>): BoardTextRangeV1[] {
   if (!ownedNote(db, userId, noteId)) throw new AppError(404, 'note_not_found');
   for (const update of input.text_ranges) {
     const existing = getBoardTextRange(db, userId, update.id);
@@ -111,9 +123,12 @@ export function updateBoardTextRanges(db: Database.Database, userId: string, not
     const replay = replayBoardTextRange(db, userId, proposed);
     // Source trash may overlap the second commit. Keep unsafe-edit evidence
     // durable underneath derived lost so restoring the source cannot erase it.
-    const status = existing.status === 'drifted' || update.status === 'drifted' ? 'drifted' : replay.status;
-    const excerpt = status === 'active' ? replay.text : existing.excerpt;
-    const preEdit = status === 'drifted'
+    // Undo/redo restore the snapshot exactly; ordinary saves keep the same sticky evidence rule.
+    const restoring = update.history_restore === true;
+    const status = restoring ? update.status
+      : existing.status === 'drifted' || update.status === 'drifted' ? 'drifted' : replay.status;
+    const excerpt = restoring ? update.excerpt : status === 'active' ? replay.text : existing.excerpt;
+    const preEdit = restoring ? update.pre_edit_offsets : status === 'drifted'
       ? existing.pre_edit_offsets ?? update.pre_edit_offsets ?? { start_offset: existing.start_offset, end_offset: existing.end_offset }
       : update.pre_edit_offsets;
     db.prepare(`UPDATE board_text_ranges SET block_id = ?, text_flow_id = ?, text_unit_id = ?,

@@ -76,6 +76,8 @@ export function rebaseBoardTextRanges(input: {
 
 export interface BoardRangeSaveSnapshot {
   ranges: BoardTextRangeV1[];
+  /** Explicit history replay intent; never inferred from ordinary range snapshots. */
+  historyRestore?: true;
 }
 
 /** Local edit state shared by atomic text saves and independent range consumers. */

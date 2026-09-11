@@ -1,0 +1,103 @@
+﻿[
+    {
+        "command":  "npm.cmd run test:tool-face-registry",
+        "exitCode":  0,
+        "elapsedSeconds":  0.72,
+        "log":  "runtime-test-tool-face-registry.log"
+    },
+    {
+        "command":  "npm.cmd run test:tool-face-manifest",
+        "exitCode":  0,
+        "elapsedSeconds":  3.53,
+        "log":  "runtime-test-tool-face-manifest.log"
+    },
+    {
+        "command":  "npm.cmd run check:tool-face-manifest",
+        "exitCode":  0,
+        "elapsedSeconds":  0.86,
+        "log":  "runtime-check-tool-face-manifest.log"
+    },
+    {
+        "command":  "npm.cmd run test:tool-face-parity",
+        "exitCode":  0,
+        "elapsedSeconds":  5.28,
+        "log":  "runtime-test-tool-face-parity.log"
+    },
+    {
+        "command":  "npm.cmd run check:tool-face-parity",
+        "exitCode":  0,
+        "elapsedSeconds":  0.61,
+        "log":  "runtime-check-tool-face-parity.log"
+    },
+    {
+        "command":  "npm.cmd run check:server-shared-runtime-import",
+        "exitCode":  0,
+        "elapsedSeconds":  0.62,
+        "log":  "runtime-check-server-shared-runtime-import.log"
+    },
+    {
+        "command":  "npm.cmd run check:canvas-runtime-boundary",
+        "exitCode":  0,
+        "elapsedSeconds":  0.52,
+        "log":  "runtime-check-canvas-runtime-boundary.log"
+    },
+    {
+        "command":  "npm.cmd run check:group-gallery-shell",
+        "exitCode":  0,
+        "elapsedSeconds":  0.54,
+        "log":  "runtime-check-group-gallery-shell.log"
+    },
+    {
+        "command":  "npm.cmd run check:groups-rail-shell",
+        "exitCode":  0,
+        "elapsedSeconds":  0.59,
+        "log":  "runtime-check-groups-rail-shell.log"
+    },
+    {
+        "command":  "npm.cmd run check:single-editor-shell",
+        "exitCode":  0,
+        "elapsedSeconds":  0.59,
+        "log":  "runtime-check-single-editor-shell.log"
+    },
+    {
+        "command":  "npm.cmd run check:source-experience",
+        "exitCode":  0,
+        "elapsedSeconds":  1.04,
+        "log":  "runtime-check-source-experience.log"
+    },
+    {
+        "command":  "npm.cmd run check:v2-bn11-legacy-shutdown",
+        "exitCode":  0,
+        "elapsedSeconds":  0.55,
+        "log":  "runtime-check-v2-bn11-legacy-shutdown.log"
+    },
+    {
+        "command":  "npm.cmd run check:v2-bn11-relation-freshness",
+        "exitCode":  0,
+        "elapsedSeconds":  0.56,
+        "log":  "runtime-check-v2-bn11-relation-freshness.log"
+    },
+    {
+        "command":  "npm.cmd run smoke:canvas-engine-model-contract",
+        "exitCode":  0,
+        "elapsedSeconds":  1.96,
+        "log":  "runtime-smoke-canvas-engine-model-contract.log"
+    },
+    {
+        "command":  "npm.cmd run smoke:canvas-engine-performance",
+        "exitCode":  0,
+        "elapsedSeconds":  1.21,
+        "log":  "runtime-smoke-canvas-engine-performance.log"
+    },
+    {
+        "command":  "npm.cmd run docs:check",
+        "exitCode":  1,
+        "elapsedSeconds":  0.36,
+        "log":  "runtime-docs-check.log"
+    },
+    {
+        "command":  "git diff --check",
+        "exitCode":  0,
+        "log":  "runtime-git-diff-check.log"
+    }
+]

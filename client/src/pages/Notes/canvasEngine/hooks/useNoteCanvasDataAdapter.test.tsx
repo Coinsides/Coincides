@@ -311,6 +311,12 @@ function renderAtomicHistory() {
   }, { wrapper });
 }
 
+// The synthetic server consumes request intent without storing it on range rows.
+const persistedRangeFields = (input: (Partial<BoardTextRangeV1> & { history_restore?: true }) | undefined) => {
+  const { history_restore: _historyRestore, ...range } = input ?? {};
+  return range;
+};
+
 describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
   let consoleError: ReturnType<typeof vi.spyOn>;
   let consoleWarn: ReturnType<typeof vi.spyOn>;
@@ -341,7 +347,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
         durableAnnotationTruths = durableAnnotationTruths.map((annotation) => ({ ...annotation, ranges: annotation.ranges.map((range) =>
           structuredClone(payload.annotations.range_updates.find((update) => update.annotation_id === annotation.id && update.range.id === range.id)?.range ?? range)) }));
         const rangeResponse = payload.text_ranges.length
-          ? await mocks.boardRangesPut(`/boards/text-ranges/by-note/${payload.note_id}`, { text_ranges: payload.text_ranges })
+          ? await mocks.boardRangesPut(`/boards/text-ranges/by-note/${payload.note_id}`, { text_ranges: payload.text_ranges.map(persistedRangeFields) })
           : { data: { text_ranges: [] } };
         return { data: { block: savedBlock, annotations: structuredClone(durableAnnotationTruths),
           text_ranges: rangeResponse.data.text_ranges, revision: payload.base_revision + 1 } };
@@ -679,6 +685,103 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     expect(durableAnnotationTruths[0].ranges[0].block_id).toBe(target.id);
   });
 
+  it.each(['before', 'after'] as const)('F17 sends explicit %s history intent and freezes its range set through a failed replay retry', async (side) => {
+    const flow = createTextBlockContentV1('alpha beta gamma');
+    const original = { ...serverBlock('alpha beta gamma', false), text_save_revision: 0,
+      content_json: { body: 'alpha beta gamma', [TEXT_FLOW_CONTENT_KEY]: flow } };
+    durableBlocks = [structuredClone(original)];
+    const range: BoardTextRangeV1 = {
+      id: 'f17-range', board_id: 'board', note_id: note.id, block_id: original.id,
+      text_flow_id: `textflow-${original.id}`, text_unit_id: flow.units[0].id,
+      start_offset: 6, end_offset: 10, excerpt: 'beta', status: 'active', pre_edit_offsets: null,
+      at: 'at', created_at: 'created', updated_at: 'updated',
+    };
+    let durableRanges = [structuredClone(range)];
+    mocks.boardRangesGet.mockImplementation(async () => ({ data: { text_ranges: structuredClone(durableRanges) } }));
+    mocks.boardRangesPut.mockImplementation(async (_url, payload: { text_ranges: Partial<BoardTextRangeV1>[] }) => {
+      durableRanges = durableRanges.map((current) => ({ ...current, ...payload.text_ranges.find((update) => update.id === current.id) }));
+      return { data: { text_ranges: structuredClone(durableRanges) } };
+    });
+    const subject = renderAtomicHistory();
+    await waitFor(() => expect(subject.result.current.adapter.loading).toBe(false));
+    const edited = structuredClone(flow);
+    edited.units[0].text = 'a';
+    await act(async () => {
+      await subject.result.current.editing.applyEdit(original, edited);
+      subject.result.current.editing.boundary('blur');
+      await subject.result.current.history.whenHistoryIdle();
+    });
+    expect(mocks.atomicPut).toHaveBeenCalledTimes(1);
+    expect(mocks.atomicPut.mock.calls[0][1].text_ranges[0]).not.toHaveProperty('history_restore');
+    const drifted = structuredClone(durableRanges[0]);
+    expect(drifted).toMatchObject({ status: 'drifted', pre_edit_offsets: { start_offset: 6, end_offset: 10 } });
+    if (side === 'after') {
+      await act(async () => { expect(await subject.result.current.history.undoRuntimeHistory()).toBe(true); });
+    }
+    const replay = () => side === 'before'
+      ? subject.result.current.history.undoRuntimeHistory()
+      : subject.result.current.history.redoRuntimeHistory();
+    mocks.atomicPut.mockRejectedValueOnce(new Error('F17 synthetic history restore unavailable'));
+    await act(async () => { expect(await replay()).toBe(false); });
+    const failedPayload = mocks.atomicPut.mock.calls[mocks.atomicPut.mock.calls.length - 1][1];
+    expect(failedPayload.text_ranges).toEqual([expect.objectContaining({ id: range.id, history_restore: true })]);
+    const receipts = subject.result.current.adapter.blockEditRecoveryReceipts;
+    expect(receipts[receipts.length - 1]?.boardRangeSnapshot).toMatchObject({ historyRestore: true });
+    expect(mocks.addToast).toHaveBeenCalledWith('error', 'Failed to save block');
+    await expect(subject.result.current.editing.flush()).rejects.toThrow('could not be saved');
+    const laterRange = { ...range, id: 'f17-later-independent', start_offset: 0, end_offset: 1, excerpt: 'a' };
+    durableRanges.push(laterRange);
+    await act(async () => { await subject.result.current.adapter.refreshBoardTextRanges(); });
+    await act(async () => {
+      expect(await subject.result.current.editing.saveBlock(subject.result.current.adapter.blocks[0], 'stale blur draft', {
+        textFlow: createTextBlockContentV1('stale blur draft'),
+      })).toMatchObject({ status: 'saved' });
+    });
+    const retryPayload = mocks.atomicPut.mock.calls[mocks.atomicPut.mock.calls.length - 1][1];
+    expect(retryPayload).toEqual(failedPayload);
+    expect(retryPayload.text_ranges.map((update: { id: string }) => update.id)).toEqual([range.id]);
+    expect(durableRanges).toEqual([side === 'before' ? range : drifted, laterRange]);
+    expect(subject.result.current.adapter.blockTextFlowDrafts[original.id]).toEqual(side === 'before' ? flow : edited);
+    await expect(subject.result.current.editing.flush()).resolves.toBeUndefined();
+    // A successful retry preserves the original entry until the history host
+    // moves it; that movement and the opposite direction both remain usable.
+    await act(async () => { expect(await replay()).toBe(true); });
+    await act(async () => {
+      expect(await (side === 'before' ? subject.result.current.history.redoRuntimeHistory() : subject.result.current.history.undoRuntimeHistory())).toBe(true);
+    });
+    expect(mocks.atomicPut.mock.calls.slice(1).every(([, payload]) => payload.text_ranges.every(
+      (update: { history_restore?: true }) => update.history_restore === true,
+    ))).toBe(true);
+  });
+
+  it('F17 preserves explicit history intent when applying a retained block recovery receipt', async () => {
+    const flow = createTextBlockContentV1('alpha beta gamma');
+    const original = { ...serverBlock('alpha beta gamma', false), text_save_revision: 0,
+      content_json: { body: 'alpha beta gamma', [TEXT_FLOW_CONTENT_KEY]: flow } };
+    durableBlocks = [original];
+    const range: BoardTextRangeV1 = {
+      id: 'f17-receipt-range', board_id: 'board', note_id: note.id, block_id: original.id,
+      text_flow_id: `textflow-${original.id}`, text_unit_id: flow.units[0].id,
+      start_offset: 6, end_offset: 10, excerpt: 'beta', status: 'active', pre_edit_offsets: null,
+      at: 'at', created_at: 'created', updated_at: 'updated',
+    };
+    mocks.boardRangesGet.mockResolvedValue({ data: { text_ranges: [range] } });
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    mocks.atomicPut.mockRejectedValueOnce(new Error('F17 retained history request unavailable'));
+    await act(async () => {
+      expect(await subject.result.current.saveBlock(original, original.plain_text!, {
+        textFlow: flow, boardRangeSnapshot: { ranges: [range], historyRestore: true },
+      })).toMatchObject({ status: 'rejected' });
+    });
+    const receipt = subject.result.current.blockEditRecoveryReceipts[0];
+    expect(receipt.boardRangeSnapshot).toEqual({ ranges: [range], historyRestore: true });
+    await act(async () => { expect(await subject.result.current.applyBlockEditRecovery(receipt.recoveryKey)).toBe(true); });
+    expect(mocks.atomicPut.mock.calls.map(([, payload]) => payload.text_ranges[0].history_restore)).toEqual([true, true]);
+    expect(mocks.atomicPut.mock.calls[1][1]).toEqual(mocks.atomicPut.mock.calls[0][1]);
+    expect(subject.result.current.blockEditRecoveryReceipts).toEqual([]);
+  });
+
   it('B7 smoke 4: one composite failure retains the entry, retries all resources, and undoes with the confirmed revision', async () => {
     const originalFlow = createTextBlockContentV1('alpha beta gamma');
     const original = { ...serverBlock('alpha beta gamma', false), text_save_revision: 3,
@@ -706,7 +809,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
         ranges: annotation.ranges.map((current) => structuredClone(payload.annotations.range_updates.find(
           (update: { annotation_id: string; range: { id: string } }) => update.annotation_id === annotation.id && update.range.id === current.id,
         )?.range ?? current)) }));
-      durableRanges = durableRanges.map((current) => ({ ...current, ...structuredClone(payload.text_ranges.find((entry: { id: string }) => entry.id === current.id)) }));
+      durableRanges = durableRanges.map((current) => ({ ...current, ...structuredClone(persistedRangeFields(payload.text_ranges.find((entry: { id: string }) => entry.id === current.id))) }));
       return { data: { block: structuredClone(durableBlocks[0]), annotations: structuredClone(durableAnnotationTruths), text_ranges: structuredClone(durableRanges), revision } };
     });
     const subject = renderHook(() => {
@@ -783,7 +886,7 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
       durableBlocks = [{ ...durableBlocks[0], ...structuredClone(payload.block), text_save_revision: revision }];
       durableAnnotationTruths = durableAnnotationTruths.map((annotation) => ({ ...annotation, ranges: annotation.ranges.map((range) =>
         structuredClone(payload.annotations.range_updates.find((update: { annotation_id: string; range: { id: string } }) => update.annotation_id === annotation.id && update.range.id === range.id)?.range ?? range)) }));
-      ranges = ranges.map((range) => ({ ...range, ...structuredClone(payload.text_ranges.find((update: { id: string }) => update.id === range.id)) }));
+      ranges = ranges.map((range) => ({ ...range, ...structuredClone(persistedRangeFields(payload.text_ranges.find((update: { id: string }) => update.id === range.id))) }));
       // Every observed successful commit must have matching body and both references.
       const units = (durableBlocks[0].content_json[TEXT_FLOW_CONTENT_KEY] as TextBlockContentV1).units;
       for (const annotation of durableAnnotationTruths) for (const range of annotation.ranges) {
@@ -1524,6 +1627,10 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     const convertedFlow = getTextFlowContent(converted.content_json);
     const convertedAnnotations = structuredClone(subject.result.current.adapter.annotationTruths[0].ranges);
     const convertedBoardRanges = structuredClone(subject.result.current.adapter.captureBoardTextRanges(original.id).ranges);
+    const beforeHistoryReplay = mocks.atomicPut.mock.calls.length;
+    expect(mocks.atomicPut.mock.calls.every(([, payload]) => payload.text_ranges.every(
+      (range: object) => !('history_restore' in range),
+    ))).toBe(true);
     expect(converted.metadata.template_id).toBe(templateKey);
     expect(converted.block_type).toBe(commandId === 'formula' ? 'formula' : 'paragraph');
     expect(converted.plain_text).toBe(prefix + 'alpha beta \nsecond gamma');
@@ -1590,6 +1697,11 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     await act(async () => { expect(await subject.result.current.history.undoRuntimeHistory()).toBe(false); });
     expect(subject.result.current.editing.replaying).toBe(true);
     expect(subject.result.current.adapter.blocks[0].source_references).toEqual(original.source_references);
+    await act(async () => {
+      expect(await subject.result.current.editing.saveBlock(subject.result.current.adapter.blocks[0], 'stale template blur'))
+        .toMatchObject({ status: 'saved' });
+    });
+    assertSnapshot(beforeConversion, beforeConversionAnnotations, beforeConversionBoardRanges);
     await act(async () => { expect(await subject.result.current.history.undoRuntimeHistory()).toBe(true); });
     expect(subject.result.current.editing.replaying).toBe(false);
     assertSnapshot(beforeConversion, beforeConversionAnnotations, beforeConversionBoardRanges);
@@ -1599,9 +1711,12 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     }
     await act(async () => { expect(await subject.result.current.history.undoRuntimeHistory()).toBe(false); });
     const blockWrites = mocks.put.mock.calls.filter(([url]) => url === `/note-blocks/${original.id}`);
+    expect(mocks.atomicPut.mock.calls.slice(beforeHistoryReplay).every(([, payload]) => payload.text_ranges.every(
+      (range: { history_restore?: true }) => range.history_restore === true,
+    ))).toBe(true);
     const conversionWrites = blockWrites.filter(([, payload]) => 'block_type' in payload);
-    expect(conversionWrites).toHaveLength(failedTyping ? 5 : 6);
-    if (!failedTyping) expect(blockWrites).toHaveLength(6);
+    expect(conversionWrites).toHaveLength(failedTyping ? 6 : 7);
+    if (!failedTyping) expect(blockWrites).toHaveLength(7);
     conversionWrites.forEach(([, payload]) => expect(Object.keys(payload).sort())
       .toEqual(['block_type', 'content_json', 'metadata', 'plain_text', 'title']));
     expect(mocks.post).not.toHaveBeenCalled();

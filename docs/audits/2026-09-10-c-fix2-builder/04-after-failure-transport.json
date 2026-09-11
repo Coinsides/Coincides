@@ -1,0 +1,2374 @@
+{
+  "database": ":memory:",
+  "failNextRestore": false,
+  "journal": [
+    {
+      "path": "/api/note-blocks/c-fix1-a/text-save",
+      "input": {
+        "note_id": "c-fix1-note",
+        "base_revision": 0,
+        "block": {
+          "content_json": {
+            "body": "We are the Champions of the world.\nA second ordinary paragraph for arrow navigation and reorder.\nA third paragraph: A👩‍👩‍👧‍👦é中B tests grapheme boundaries.",
+            "text_flow": {
+              "textflow_version": "TextBlockContentV1",
+              "units": [
+                {
+                  "id": "tu-1",
+                  "text": "We are the Champions of the world.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 0,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-2",
+                  "text": "A second ordinary paragraph for arrow navigation and reorder.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 1,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-3",
+                  "text": "A third paragraph: A👩‍👩‍👧‍👦é中B tests grapheme boundaries.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 2,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                }
+              ],
+              "inline_structures": [
+                {
+                  "id": "inline-1",
+                  "semantic_kind": "inline_code",
+                  "parent_text_unit_id": "tu-1",
+                  "anchor_text": "We",
+                  "anchor_range": {
+                    "start": 0,
+                    "end": 2
+                  },
+                  "field_values": {
+                    "language": "text"
+                  },
+                  "metadata": {
+                    "fixture": "C3 collision witness"
+                  },
+                  "status": "active"
+                }
+              ],
+              "metadata": {
+                "fixture": "persisted units, not legacy body-only content"
+              }
+            }
+          },
+          "plain_text": "We are the Champions of the world.\nA second ordinary paragraph for arrow navigation and reorder.\nA third paragraph: A👩‍👩‍👧‍👦é中B tests grapheme boundaries."
+        },
+        "annotations": {
+          "range_updates": []
+        },
+        "text_ranges": []
+      },
+      "status": 200,
+      "response": {
+        "block": {
+          "id": "c-fix1-a",
+          "user_id": "c-fix1-user",
+          "course_id": "c-fix1-course",
+          "block_type": "paragraph",
+          "title": null,
+          "content_json": {
+            "body": "We are the Champions of the world.\nA second ordinary paragraph for arrow navigation and reorder.\nA third paragraph: A👩‍👩‍👧‍👦é中B tests grapheme boundaries.",
+            "text_flow": {
+              "textflow_version": "TextBlockContentV1",
+              "units": [
+                {
+                  "id": "tu-1",
+                  "text": "We are the Champions of the world.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 0,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-2",
+                  "text": "A second ordinary paragraph for arrow navigation and reorder.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 1,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-3",
+                  "text": "A third paragraph: A👩‍👩‍👧‍👦é中B tests grapheme boundaries.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 2,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                }
+              ],
+              "inline_structures": [
+                {
+                  "id": "inline-1",
+                  "semantic_kind": "inline_code",
+                  "parent_text_unit_id": "tu-1",
+                  "anchor_text": "We",
+                  "anchor_range": {
+                    "start": 0,
+                    "end": 2
+                  },
+                  "field_values": {
+                    "language": "text"
+                  },
+                  "metadata": {
+                    "fixture": "C3 collision witness"
+                  },
+                  "status": "active"
+                }
+              ],
+              "metadata": {
+                "fixture": "persisted units, not legacy body-only content"
+              }
+            }
+          },
+          "plain_text": "We are the Champions of the world.\nA second ordinary paragraph for arrow navigation and reorder.\nA third paragraph: A👩‍👩‍👧‍👦é中B tests grapheme boundaries.",
+          "status": "active",
+          "source_kind": "manual",
+          "metadata": {
+            "template_id": "text.paragraph"
+          },
+          "operation_batch_id": null,
+          "created_at": "2026-09-11 01:09:40",
+          "updated_at": "2026-09-11T01:10:17.608Z",
+          "trashed_at": null,
+          "text_save_revision": 1
+        },
+        "annotations": [
+          {
+            "id": "c-fix1-annotation-a",
+            "note_id": "c-fix1-note",
+            "canvas_id": "c-fix1-note",
+            "raw_label": "Synthetic A anchor",
+            "ranges": [
+              {
+                "id": "c-fix1-range-a",
+                "target_kind": "text_span",
+                "block_id": "c-fix1-a",
+                "text_flow_id": "textflow-c-fix1-a",
+                "text_unit_id": "tu-1",
+                "inline_structure_id": "inline-1",
+                "start_offset": 0,
+                "end_offset": 2,
+                "range_text_cache": "We",
+                "metadata": {
+                  "fixture": true
+                }
+              }
+            ],
+            "parent_annotation_id": null,
+            "child_annotation_ids": [],
+            "visual_style": {
+              "color_token": "amber",
+              "marker_kind": "highlight"
+            },
+            "created_by": "human",
+            "status": "active",
+            "created_at": "2026-09-11T01:09:40.894Z",
+            "updated_at": "2026-09-11T01:09:40.894Z",
+            "metadata": {}
+          },
+          {
+            "id": "c-fix1-annotation-b",
+            "note_id": "c-fix1-note",
+            "canvas_id": "c-fix1-note",
+            "raw_label": "Synthetic B anchor",
+            "ranges": [
+              {
+                "id": "c-fix1-range-b",
+                "target_kind": "text_span",
+                "block_id": "c-fix1-b",
+                "text_flow_id": "textflow-c-fix1-b",
+                "text_unit_id": "tu-1",
+                "inline_structure_id": "inline-1",
+                "start_offset": 0,
+                "end_offset": 2,
+                "range_text_cache": "Ta",
+                "metadata": {
+                  "fixture": true
+                }
+              }
+            ],
+            "parent_annotation_id": null,
+            "child_annotation_ids": [],
+            "visual_style": {
+              "color_token": "blue",
+              "marker_kind": "highlight"
+            },
+            "created_by": "human",
+            "status": "active",
+            "created_at": "2026-09-11T01:09:40.894Z",
+            "updated_at": "2026-09-11T01:09:40.894Z",
+            "metadata": {}
+          }
+        ],
+        "text_ranges": [
+          {
+            "id": "5bc53efc-4e1d-4ffc-b65f-0930327cea97",
+            "board_id": "b2045f11-2bc0-4f58-890d-b8e9081186cc",
+            "note_id": "c-fix1-note",
+            "block_id": "c-fix1-b",
+            "text_flow_id": "textflow-c-fix1-b",
+            "text_unit_id": "tu-1",
+            "start_offset": 0,
+            "end_offset": 2,
+            "excerpt": "Ta",
+            "status": "active",
+            "at": "2026-09-10T12:00:00.000Z",
+            "created_at": "2026-09-11T01:09:40.898Z",
+            "updated_at": "2026-09-11T01:09:40.898Z",
+            "pre_edit_offsets": null
+          },
+          {
+            "id": "7516a208-5e13-4267-8e7d-5233d8cc1088",
+            "board_id": "b2045f11-2bc0-4f58-890d-b8e9081186cc",
+            "note_id": "c-fix1-note",
+            "block_id": "c-fix1-a",
+            "text_flow_id": "textflow-c-fix1-a",
+            "text_unit_id": "tu-1",
+            "start_offset": 0,
+            "end_offset": 2,
+            "excerpt": "We",
+            "status": "active",
+            "at": "2026-09-10T12:00:00.000Z",
+            "created_at": "2026-09-11T01:09:40.898Z",
+            "updated_at": "2026-09-11T01:09:40.898Z",
+            "pre_edit_offsets": null
+          }
+        ],
+        "revision": 1
+      }
+    },
+    {
+      "path": "/api/note-blocks/c-fix1-a/text-save",
+      "input": {
+        "note_id": "c-fix1-note",
+        "base_revision": 1,
+        "block": {
+          "content_json": {
+            "body": "We are the Champions of the world.\nA second ordinary paragraph for arrow navigation and reorder.\nA thix",
+            "text_flow": {
+              "textflow_version": "TextBlockContentV1",
+              "units": [
+                {
+                  "id": "tu-1",
+                  "text": "We are the Champions of the world.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 0,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-2",
+                  "text": "A second ordinary paragraph for arrow navigation and reorder.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 1,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-3",
+                  "text": "A thix",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 2,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                }
+              ],
+              "inline_structures": [
+                {
+                  "id": "inline-1",
+                  "semantic_kind": "inline_code",
+                  "parent_text_unit_id": "tu-1",
+                  "anchor_text": "We",
+                  "anchor_range": {
+                    "start": 0,
+                    "end": 2
+                  },
+                  "field_values": {
+                    "language": "text"
+                  },
+                  "metadata": {
+                    "fixture": "C3 collision witness"
+                  },
+                  "status": "active"
+                }
+              ],
+              "metadata": {
+                "fixture": "persisted units, not legacy body-only content"
+              }
+            }
+          },
+          "plain_text": "We are the Champions of the world.\nA second ordinary paragraph for arrow navigation and reorder.\nA thix"
+        },
+        "annotations": {
+          "range_updates": []
+        },
+        "text_ranges": []
+      },
+      "status": 200,
+      "response": {
+        "block": {
+          "id": "c-fix1-a",
+          "user_id": "c-fix1-user",
+          "course_id": "c-fix1-course",
+          "block_type": "paragraph",
+          "title": null,
+          "content_json": {
+            "body": "We are the Champions of the world.\nA second ordinary paragraph for arrow navigation and reorder.\nA thix",
+            "text_flow": {
+              "textflow_version": "TextBlockContentV1",
+              "units": [
+                {
+                  "id": "tu-1",
+                  "text": "We are the Champions of the world.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 0,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-2",
+                  "text": "A second ordinary paragraph for arrow navigation and reorder.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 1,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-3",
+                  "text": "A thix",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 2,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                }
+              ],
+              "inline_structures": [
+                {
+                  "id": "inline-1",
+                  "semantic_kind": "inline_code",
+                  "parent_text_unit_id": "tu-1",
+                  "anchor_text": "We",
+                  "anchor_range": {
+                    "start": 0,
+                    "end": 2
+                  },
+                  "field_values": {
+                    "language": "text"
+                  },
+                  "metadata": {
+                    "fixture": "C3 collision witness"
+                  },
+                  "status": "active"
+                }
+              ],
+              "metadata": {
+                "fixture": "persisted units, not legacy body-only content"
+              }
+            }
+          },
+          "plain_text": "We are the Champions of the world.\nA second ordinary paragraph for arrow navigation and reorder.\nA thix",
+          "status": "active",
+          "source_kind": "manual",
+          "metadata": {
+            "template_id": "text.paragraph"
+          },
+          "operation_batch_id": null,
+          "created_at": "2026-09-11 01:09:40",
+          "updated_at": "2026-09-11T01:10:22.950Z",
+          "trashed_at": null,
+          "text_save_revision": 2
+        },
+        "annotations": [
+          {
+            "id": "c-fix1-annotation-a",
+            "note_id": "c-fix1-note",
+            "canvas_id": "c-fix1-note",
+            "raw_label": "Synthetic A anchor",
+            "ranges": [
+              {
+                "id": "c-fix1-range-a",
+                "target_kind": "text_span",
+                "block_id": "c-fix1-a",
+                "text_flow_id": "textflow-c-fix1-a",
+                "text_unit_id": "tu-1",
+                "inline_structure_id": "inline-1",
+                "start_offset": 0,
+                "end_offset": 2,
+                "range_text_cache": "We",
+                "metadata": {
+                  "fixture": true
+                }
+              }
+            ],
+            "parent_annotation_id": null,
+            "child_annotation_ids": [],
+            "visual_style": {
+              "color_token": "amber",
+              "marker_kind": "highlight"
+            },
+            "created_by": "human",
+            "status": "active",
+            "created_at": "2026-09-11T01:09:40.894Z",
+            "updated_at": "2026-09-11T01:09:40.894Z",
+            "metadata": {}
+          },
+          {
+            "id": "c-fix1-annotation-b",
+            "note_id": "c-fix1-note",
+            "canvas_id": "c-fix1-note",
+            "raw_label": "Synthetic B anchor",
+            "ranges": [
+              {
+                "id": "c-fix1-range-b",
+                "target_kind": "text_span",
+                "block_id": "c-fix1-b",
+                "text_flow_id": "textflow-c-fix1-b",
+                "text_unit_id": "tu-1",
+                "inline_structure_id": "inline-1",
+                "start_offset": 0,
+                "end_offset": 2,
+                "range_text_cache": "Ta",
+                "metadata": {
+                  "fixture": true
+                }
+              }
+            ],
+            "parent_annotation_id": null,
+            "child_annotation_ids": [],
+            "visual_style": {
+              "color_token": "blue",
+              "marker_kind": "highlight"
+            },
+            "created_by": "human",
+            "status": "active",
+            "created_at": "2026-09-11T01:09:40.894Z",
+            "updated_at": "2026-09-11T01:09:40.894Z",
+            "metadata": {}
+          }
+        ],
+        "text_ranges": [
+          {
+            "id": "5bc53efc-4e1d-4ffc-b65f-0930327cea97",
+            "board_id": "b2045f11-2bc0-4f58-890d-b8e9081186cc",
+            "note_id": "c-fix1-note",
+            "block_id": "c-fix1-b",
+            "text_flow_id": "textflow-c-fix1-b",
+            "text_unit_id": "tu-1",
+            "start_offset": 0,
+            "end_offset": 2,
+            "excerpt": "Ta",
+            "status": "active",
+            "at": "2026-09-10T12:00:00.000Z",
+            "created_at": "2026-09-11T01:09:40.898Z",
+            "updated_at": "2026-09-11T01:09:40.898Z",
+            "pre_edit_offsets": null
+          },
+          {
+            "id": "7516a208-5e13-4267-8e7d-5233d8cc1088",
+            "board_id": "b2045f11-2bc0-4f58-890d-b8e9081186cc",
+            "note_id": "c-fix1-note",
+            "block_id": "c-fix1-a",
+            "text_flow_id": "textflow-c-fix1-a",
+            "text_unit_id": "tu-1",
+            "start_offset": 0,
+            "end_offset": 2,
+            "excerpt": "We",
+            "status": "active",
+            "at": "2026-09-10T12:00:00.000Z",
+            "created_at": "2026-09-11T01:09:40.898Z",
+            "updated_at": "2026-09-11T01:09:40.898Z",
+            "pre_edit_offsets": null
+          }
+        ],
+        "revision": 2
+      }
+    },
+    {
+      "path": "/api/note-blocks/c-fix1-b/text-save",
+      "input": {
+        "note_id": "c-fix1-note",
+        "base_revision": 3,
+        "block": {
+          "content_json": {
+            "body": "et alpha has its own tu-1 and inline-1.\nTarget bravo — drop another unit before or after this line.\nTarget charlie — the next text block remains independent.",
+            "text_flow": {
+              "textflow_version": "TextBlockContentV1",
+              "units": [
+                {
+                  "id": "tu-1",
+                  "text": "et alpha has its own tu-1 and inline-1.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 0,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-2",
+                  "text": "Target bravo — drop another unit before or after this line.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 1,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-3",
+                  "text": "Target charlie — the next text block remains independent.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 2,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                }
+              ],
+              "inline_structures": [
+                {
+                  "id": "inline-1",
+                  "semantic_kind": "inline_code",
+                  "parent_text_unit_id": "tu-1",
+                  "anchor_text": "Ta",
+                  "anchor_range": null,
+                  "field_values": {
+                    "language": "text"
+                  },
+                  "metadata": {
+                    "fixture": "C3 collision witness",
+                    "pre_edit_offsets": {
+                      "text_unit_id": "tu-1",
+                      "start_offset": 0,
+                      "end_offset": 2,
+                      "range_text_cache": "Ta"
+                    }
+                  },
+                  "status": "active"
+                }
+              ],
+              "metadata": {
+                "fixture": "persisted units, not legacy body-only content"
+              }
+            }
+          },
+          "plain_text": "et alpha has its own tu-1 and inline-1.\nTarget bravo — drop another unit before or after this line.\nTarget charlie — the next text block remains independent."
+        },
+        "annotations": {
+          "range_updates": [
+            {
+              "annotation_id": "c-fix1-annotation-b",
+              "range": {
+                "id": "c-fix1-range-b",
+                "target_kind": "text_span",
+                "block_id": "c-fix1-b",
+                "text_flow_id": "textflow-c-fix1-b",
+                "text_unit_id": "tu-1",
+                "inline_structure_id": "inline-1",
+                "range_text_cache": "Ta",
+                "metadata": {
+                  "fixture": true,
+                  "pre_edit_offsets": {
+                    "text_unit_id": "tu-1",
+                    "start_offset": 0,
+                    "end_offset": 2,
+                    "range_text_cache": "Ta"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "text_ranges": [
+          {
+            "id": "5bc53efc-4e1d-4ffc-b65f-0930327cea97",
+            "block_id": "c-fix1-b",
+            "text_flow_id": "textflow-c-fix1-b",
+            "text_unit_id": "tu-1",
+            "start_offset": null,
+            "end_offset": null,
+            "excerpt": "Ta",
+            "status": "drifted",
+            "pre_edit_offsets": {
+              "start_offset": 0,
+              "end_offset": 2
+            }
+          }
+        ]
+      },
+      "status": 200,
+      "response": {
+        "block": {
+          "id": "c-fix1-b",
+          "user_id": "c-fix1-user",
+          "course_id": "c-fix1-course",
+          "block_type": "paragraph",
+          "title": null,
+          "content_json": {
+            "body": "et alpha has its own tu-1 and inline-1.\nTarget bravo — drop another unit before or after this line.\nTarget charlie — the next text block remains independent.",
+            "text_flow": {
+              "textflow_version": "TextBlockContentV1",
+              "units": [
+                {
+                  "id": "tu-1",
+                  "text": "et alpha has its own tu-1 and inline-1.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 0,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-2",
+                  "text": "Target bravo — drop another unit before or after this line.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 1,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-3",
+                  "text": "Target charlie — the next text block remains independent.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 2,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                }
+              ],
+              "inline_structures": [
+                {
+                  "id": "inline-1",
+                  "semantic_kind": "inline_code",
+                  "parent_text_unit_id": "tu-1",
+                  "anchor_text": "Ta",
+                  "anchor_range": null,
+                  "field_values": {
+                    "language": "text"
+                  },
+                  "metadata": {
+                    "fixture": "C3 collision witness",
+                    "pre_edit_offsets": {
+                      "text_unit_id": "tu-1",
+                      "start_offset": 0,
+                      "end_offset": 2,
+                      "range_text_cache": "Ta"
+                    }
+                  },
+                  "status": "active"
+                }
+              ],
+              "metadata": {
+                "fixture": "persisted units, not legacy body-only content"
+              }
+            }
+          },
+          "plain_text": "et alpha has its own tu-1 and inline-1.\nTarget bravo — drop another unit before or after this line.\nTarget charlie — the next text block remains independent.",
+          "status": "active",
+          "source_kind": "manual",
+          "metadata": {
+            "template_id": "text.paragraph"
+          },
+          "operation_batch_id": null,
+          "created_at": "2026-09-11 01:09:40",
+          "updated_at": "2026-09-11T01:10:23.063Z",
+          "trashed_at": null,
+          "text_save_revision": 4
+        },
+        "annotations": [
+          {
+            "id": "c-fix1-annotation-a",
+            "note_id": "c-fix1-note",
+            "canvas_id": "c-fix1-note",
+            "raw_label": "Synthetic A anchor",
+            "ranges": [
+              {
+                "id": "c-fix1-range-a",
+                "target_kind": "text_span",
+                "block_id": "c-fix1-a",
+                "text_flow_id": "textflow-c-fix1-a",
+                "text_unit_id": "tu-1",
+                "inline_structure_id": "inline-1",
+                "start_offset": 0,
+                "end_offset": 2,
+                "range_text_cache": "We",
+                "metadata": {
+                  "fixture": true
+                }
+              }
+            ],
+            "parent_annotation_id": null,
+            "child_annotation_ids": [],
+            "visual_style": {
+              "color_token": "amber",
+              "marker_kind": "highlight"
+            },
+            "created_by": "human",
+            "status": "active",
+            "created_at": "2026-09-11T01:09:40.894Z",
+            "updated_at": "2026-09-11T01:09:40.894Z",
+            "metadata": {}
+          },
+          {
+            "id": "c-fix1-annotation-b",
+            "note_id": "c-fix1-note",
+            "canvas_id": "c-fix1-note",
+            "raw_label": "Synthetic B anchor",
+            "ranges": [
+              {
+                "id": "c-fix1-range-b",
+                "target_kind": "text_span",
+                "block_id": "c-fix1-b",
+                "text_flow_id": "textflow-c-fix1-b",
+                "text_unit_id": "tu-1",
+                "inline_structure_id": "inline-1",
+                "range_text_cache": "Ta",
+                "metadata": {
+                  "fixture": true,
+                  "pre_edit_offsets": {
+                    "text_unit_id": "tu-1",
+                    "start_offset": 0,
+                    "end_offset": 2,
+                    "range_text_cache": "Ta"
+                  }
+                }
+              }
+            ],
+            "parent_annotation_id": null,
+            "child_annotation_ids": [],
+            "visual_style": {
+              "color_token": "blue",
+              "marker_kind": "highlight"
+            },
+            "created_by": "human",
+            "status": "active",
+            "created_at": "2026-09-11T01:09:40.894Z",
+            "updated_at": "2026-09-11T01:09:40.894Z",
+            "metadata": {}
+          }
+        ],
+        "text_ranges": [
+          {
+            "id": "5bc53efc-4e1d-4ffc-b65f-0930327cea97",
+            "board_id": "b2045f11-2bc0-4f58-890d-b8e9081186cc",
+            "note_id": "c-fix1-note",
+            "block_id": "c-fix1-b",
+            "text_flow_id": "textflow-c-fix1-b",
+            "text_unit_id": "tu-1",
+            "start_offset": null,
+            "end_offset": null,
+            "excerpt": "Ta",
+            "status": "drifted",
+            "at": "2026-09-10T12:00:00.000Z",
+            "created_at": "2026-09-11T01:09:40.898Z",
+            "updated_at": "2026-09-11T01:10:23.065Z",
+            "pre_edit_offsets": {
+              "start_offset": 0,
+              "end_offset": 2
+            }
+          },
+          {
+            "id": "7516a208-5e13-4267-8e7d-5233d8cc1088",
+            "board_id": "b2045f11-2bc0-4f58-890d-b8e9081186cc",
+            "note_id": "c-fix1-note",
+            "block_id": "c-fix1-a",
+            "text_flow_id": "textflow-c-fix1-a",
+            "text_unit_id": "tu-1",
+            "start_offset": 0,
+            "end_offset": 2,
+            "excerpt": "We",
+            "status": "active",
+            "at": "2026-09-10T12:00:00.000Z",
+            "created_at": "2026-09-11T01:09:40.898Z",
+            "updated_at": "2026-09-11T01:09:40.898Z",
+            "pre_edit_offsets": null
+          }
+        ],
+        "revision": 4
+      }
+    },
+    {
+      "path": "/api/note-blocks/c-fix1-a/text-save",
+      "input": {
+        "note_id": "c-fix1-note",
+        "base_revision": 2,
+        "block": {
+          "content_json": {
+            "body": "We are the Champions of the world.\nA second ordinary paragraph for arrow navigation and reorder.\nA third paragraph: A👩‍👩‍👧‍👦é中B tests grapheme boundaries.",
+            "text_flow": {
+              "textflow_version": "TextBlockContentV1",
+              "units": [
+                {
+                  "id": "tu-1",
+                  "text": "We are the Champions of the world.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 0,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-2",
+                  "text": "A second ordinary paragraph for arrow navigation and reorder.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 1,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-3",
+                  "text": "A third paragraph: A👩‍👩‍👧‍👦é中B tests grapheme boundaries.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 2,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                }
+              ],
+              "inline_structures": [
+                {
+                  "id": "inline-1",
+                  "semantic_kind": "inline_code",
+                  "parent_text_unit_id": "tu-1",
+                  "anchor_text": "We",
+                  "anchor_range": {
+                    "start": 0,
+                    "end": 2
+                  },
+                  "field_values": {
+                    "language": "text"
+                  },
+                  "metadata": {
+                    "fixture": "C3 collision witness"
+                  },
+                  "status": "active"
+                }
+              ],
+              "metadata": {
+                "fixture": "persisted units, not legacy body-only content"
+              }
+            }
+          },
+          "plain_text": "We are the Champions of the world.\nA second ordinary paragraph for arrow navigation and reorder.\nA third paragraph: A👩‍👩‍👧‍👦é中B tests grapheme boundaries."
+        },
+        "annotations": {
+          "range_updates": []
+        },
+        "text_ranges": []
+      },
+      "status": 200,
+      "response": {
+        "block": {
+          "id": "c-fix1-a",
+          "user_id": "c-fix1-user",
+          "course_id": "c-fix1-course",
+          "block_type": "paragraph",
+          "title": null,
+          "content_json": {
+            "body": "We are the Champions of the world.\nA second ordinary paragraph for arrow navigation and reorder.\nA third paragraph: A👩‍👩‍👧‍👦é中B tests grapheme boundaries.",
+            "text_flow": {
+              "textflow_version": "TextBlockContentV1",
+              "units": [
+                {
+                  "id": "tu-1",
+                  "text": "We are the Champions of the world.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 0,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-2",
+                  "text": "A second ordinary paragraph for arrow navigation and reorder.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 1,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-3",
+                  "text": "A third paragraph: A👩‍👩‍👧‍👦é中B tests grapheme boundaries.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 2,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                }
+              ],
+              "inline_structures": [
+                {
+                  "id": "inline-1",
+                  "semantic_kind": "inline_code",
+                  "parent_text_unit_id": "tu-1",
+                  "anchor_text": "We",
+                  "anchor_range": {
+                    "start": 0,
+                    "end": 2
+                  },
+                  "field_values": {
+                    "language": "text"
+                  },
+                  "metadata": {
+                    "fixture": "C3 collision witness"
+                  },
+                  "status": "active"
+                }
+              ],
+              "metadata": {
+                "fixture": "persisted units, not legacy body-only content"
+              }
+            }
+          },
+          "plain_text": "We are the Champions of the world.\nA second ordinary paragraph for arrow navigation and reorder.\nA third paragraph: A👩‍👩‍👧‍👦é中B tests grapheme boundaries.",
+          "status": "active",
+          "source_kind": "manual",
+          "metadata": {
+            "template_id": "text.paragraph"
+          },
+          "operation_batch_id": null,
+          "created_at": "2026-09-11 01:09:40",
+          "updated_at": "2026-09-11T01:10:43.148Z",
+          "trashed_at": null,
+          "text_save_revision": 3
+        },
+        "annotations": [
+          {
+            "id": "c-fix1-annotation-a",
+            "note_id": "c-fix1-note",
+            "canvas_id": "c-fix1-note",
+            "raw_label": "Synthetic A anchor",
+            "ranges": [
+              {
+                "id": "c-fix1-range-a",
+                "target_kind": "text_span",
+                "block_id": "c-fix1-a",
+                "text_flow_id": "textflow-c-fix1-a",
+                "text_unit_id": "tu-1",
+                "inline_structure_id": "inline-1",
+                "start_offset": 0,
+                "end_offset": 2,
+                "range_text_cache": "We",
+                "metadata": {
+                  "fixture": true
+                }
+              }
+            ],
+            "parent_annotation_id": null,
+            "child_annotation_ids": [],
+            "visual_style": {
+              "color_token": "amber",
+              "marker_kind": "highlight"
+            },
+            "created_by": "human",
+            "status": "active",
+            "created_at": "2026-09-11T01:09:40.894Z",
+            "updated_at": "2026-09-11T01:09:40.894Z",
+            "metadata": {}
+          },
+          {
+            "id": "c-fix1-annotation-b",
+            "note_id": "c-fix1-note",
+            "canvas_id": "c-fix1-note",
+            "raw_label": "Synthetic B anchor",
+            "ranges": [
+              {
+                "id": "c-fix1-range-b",
+                "target_kind": "text_span",
+                "block_id": "c-fix1-b",
+                "text_flow_id": "textflow-c-fix1-b",
+                "text_unit_id": "tu-1",
+                "inline_structure_id": "inline-1",
+                "range_text_cache": "Ta",
+                "metadata": {
+                  "fixture": true,
+                  "pre_edit_offsets": {
+                    "text_unit_id": "tu-1",
+                    "start_offset": 0,
+                    "end_offset": 2,
+                    "range_text_cache": "Ta"
+                  }
+                }
+              }
+            ],
+            "parent_annotation_id": null,
+            "child_annotation_ids": [],
+            "visual_style": {
+              "color_token": "blue",
+              "marker_kind": "highlight"
+            },
+            "created_by": "human",
+            "status": "active",
+            "created_at": "2026-09-11T01:09:40.894Z",
+            "updated_at": "2026-09-11T01:09:40.894Z",
+            "metadata": {}
+          }
+        ],
+        "text_ranges": [
+          {
+            "id": "5bc53efc-4e1d-4ffc-b65f-0930327cea97",
+            "board_id": "b2045f11-2bc0-4f58-890d-b8e9081186cc",
+            "note_id": "c-fix1-note",
+            "block_id": "c-fix1-b",
+            "text_flow_id": "textflow-c-fix1-b",
+            "text_unit_id": "tu-1",
+            "start_offset": null,
+            "end_offset": null,
+            "excerpt": "Ta",
+            "status": "drifted",
+            "at": "2026-09-10T12:00:00.000Z",
+            "created_at": "2026-09-11T01:09:40.898Z",
+            "updated_at": "2026-09-11T01:10:23.065Z",
+            "pre_edit_offsets": {
+              "start_offset": 0,
+              "end_offset": 2
+            }
+          },
+          {
+            "id": "7516a208-5e13-4267-8e7d-5233d8cc1088",
+            "board_id": "b2045f11-2bc0-4f58-890d-b8e9081186cc",
+            "note_id": "c-fix1-note",
+            "block_id": "c-fix1-a",
+            "text_flow_id": "textflow-c-fix1-a",
+            "text_unit_id": "tu-1",
+            "start_offset": 0,
+            "end_offset": 2,
+            "excerpt": "We",
+            "status": "active",
+            "at": "2026-09-10T12:00:00.000Z",
+            "created_at": "2026-09-11T01:09:40.898Z",
+            "updated_at": "2026-09-11T01:09:40.898Z",
+            "pre_edit_offsets": null
+          }
+        ],
+        "revision": 3
+      }
+    },
+    {
+      "path": "/api/note-blocks/c-fix1-b/text-save",
+      "input": {
+        "note_id": "c-fix1-note",
+        "base_revision": 4,
+        "block": {
+          "content_json": {
+            "body": "Target alpha has its own tu-1 and inline-1.\nTarget bravo — drop another unit before or after this line.\nTarget charlie — the next text block remains independent.",
+            "text_flow": {
+              "textflow_version": "TextBlockContentV1",
+              "units": [
+                {
+                  "id": "tu-1",
+                  "text": "Target alpha has its own tu-1 and inline-1.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 0,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-2",
+                  "text": "Target bravo — drop another unit before or after this line.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 1,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-3",
+                  "text": "Target charlie — the next text block remains independent.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 2,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                }
+              ],
+              "inline_structures": [
+                {
+                  "id": "inline-1",
+                  "semantic_kind": "inline_code",
+                  "parent_text_unit_id": "tu-1",
+                  "anchor_text": "Ta",
+                  "anchor_range": {
+                    "start": 0,
+                    "end": 2
+                  },
+                  "field_values": {
+                    "language": "text"
+                  },
+                  "metadata": {
+                    "fixture": "C3 collision witness"
+                  },
+                  "status": "active"
+                }
+              ],
+              "metadata": {
+                "fixture": "persisted units, not legacy body-only content"
+              }
+            }
+          },
+          "plain_text": "Target alpha has its own tu-1 and inline-1.\nTarget bravo — drop another unit before or after this line.\nTarget charlie — the next text block remains independent."
+        },
+        "annotations": {
+          "range_updates": [
+            {
+              "annotation_id": "c-fix1-annotation-b",
+              "range": {
+                "id": "c-fix1-range-b",
+                "target_kind": "text_span",
+                "block_id": "c-fix1-b",
+                "text_flow_id": "textflow-c-fix1-b",
+                "text_unit_id": "tu-1",
+                "inline_structure_id": "inline-1",
+                "start_offset": 0,
+                "end_offset": 2,
+                "range_text_cache": "Ta",
+                "metadata": {
+                  "fixture": true
+                }
+              }
+            }
+          ]
+        },
+        "text_ranges": [
+          {
+            "id": "5bc53efc-4e1d-4ffc-b65f-0930327cea97",
+            "block_id": "c-fix1-b",
+            "text_flow_id": "textflow-c-fix1-b",
+            "text_unit_id": "tu-1",
+            "start_offset": 0,
+            "end_offset": 2,
+            "excerpt": "Ta",
+            "status": "active",
+            "pre_edit_offsets": null,
+            "history_restore": true
+          }
+        ]
+      },
+      "status": 200,
+      "response": {
+        "block": {
+          "id": "c-fix1-b",
+          "user_id": "c-fix1-user",
+          "course_id": "c-fix1-course",
+          "block_type": "paragraph",
+          "title": null,
+          "content_json": {
+            "body": "Target alpha has its own tu-1 and inline-1.\nTarget bravo — drop another unit before or after this line.\nTarget charlie — the next text block remains independent.",
+            "text_flow": {
+              "textflow_version": "TextBlockContentV1",
+              "units": [
+                {
+                  "id": "tu-1",
+                  "text": "Target alpha has its own tu-1 and inline-1.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 0,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-2",
+                  "text": "Target bravo — drop another unit before or after this line.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 1,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-3",
+                  "text": "Target charlie — the next text block remains independent.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 2,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                }
+              ],
+              "inline_structures": [
+                {
+                  "id": "inline-1",
+                  "semantic_kind": "inline_code",
+                  "parent_text_unit_id": "tu-1",
+                  "anchor_text": "Ta",
+                  "anchor_range": {
+                    "start": 0,
+                    "end": 2
+                  },
+                  "field_values": {
+                    "language": "text"
+                  },
+                  "metadata": {
+                    "fixture": "C3 collision witness"
+                  },
+                  "status": "active"
+                }
+              ],
+              "metadata": {
+                "fixture": "persisted units, not legacy body-only content"
+              }
+            }
+          },
+          "plain_text": "Target alpha has its own tu-1 and inline-1.\nTarget bravo — drop another unit before or after this line.\nTarget charlie — the next text block remains independent.",
+          "status": "active",
+          "source_kind": "manual",
+          "metadata": {
+            "template_id": "text.paragraph"
+          },
+          "operation_batch_id": null,
+          "created_at": "2026-09-11 01:09:40",
+          "updated_at": "2026-09-11T01:10:43.323Z",
+          "trashed_at": null,
+          "text_save_revision": 5
+        },
+        "annotations": [
+          {
+            "id": "c-fix1-annotation-a",
+            "note_id": "c-fix1-note",
+            "canvas_id": "c-fix1-note",
+            "raw_label": "Synthetic A anchor",
+            "ranges": [
+              {
+                "id": "c-fix1-range-a",
+                "target_kind": "text_span",
+                "block_id": "c-fix1-a",
+                "text_flow_id": "textflow-c-fix1-a",
+                "text_unit_id": "tu-1",
+                "inline_structure_id": "inline-1",
+                "start_offset": 0,
+                "end_offset": 2,
+                "range_text_cache": "We",
+                "metadata": {
+                  "fixture": true
+                }
+              }
+            ],
+            "parent_annotation_id": null,
+            "child_annotation_ids": [],
+            "visual_style": {
+              "color_token": "amber",
+              "marker_kind": "highlight"
+            },
+            "created_by": "human",
+            "status": "active",
+            "created_at": "2026-09-11T01:09:40.894Z",
+            "updated_at": "2026-09-11T01:09:40.894Z",
+            "metadata": {}
+          },
+          {
+            "id": "c-fix1-annotation-b",
+            "note_id": "c-fix1-note",
+            "canvas_id": "c-fix1-note",
+            "raw_label": "Synthetic B anchor",
+            "ranges": [
+              {
+                "id": "c-fix1-range-b",
+                "target_kind": "text_span",
+                "block_id": "c-fix1-b",
+                "text_flow_id": "textflow-c-fix1-b",
+                "text_unit_id": "tu-1",
+                "inline_structure_id": "inline-1",
+                "start_offset": 0,
+                "end_offset": 2,
+                "range_text_cache": "Ta",
+                "metadata": {
+                  "fixture": true
+                }
+              }
+            ],
+            "parent_annotation_id": null,
+            "child_annotation_ids": [],
+            "visual_style": {
+              "color_token": "blue",
+              "marker_kind": "highlight"
+            },
+            "created_by": "human",
+            "status": "active",
+            "created_at": "2026-09-11T01:09:40.894Z",
+            "updated_at": "2026-09-11T01:09:40.894Z",
+            "metadata": {}
+          }
+        ],
+        "text_ranges": [
+          {
+            "id": "5bc53efc-4e1d-4ffc-b65f-0930327cea97",
+            "board_id": "b2045f11-2bc0-4f58-890d-b8e9081186cc",
+            "note_id": "c-fix1-note",
+            "block_id": "c-fix1-b",
+            "text_flow_id": "textflow-c-fix1-b",
+            "text_unit_id": "tu-1",
+            "start_offset": 0,
+            "end_offset": 2,
+            "excerpt": "Ta",
+            "status": "active",
+            "at": "2026-09-10T12:00:00.000Z",
+            "created_at": "2026-09-11T01:09:40.898Z",
+            "updated_at": "2026-09-11T01:10:43.325Z",
+            "pre_edit_offsets": null
+          },
+          {
+            "id": "7516a208-5e13-4267-8e7d-5233d8cc1088",
+            "board_id": "b2045f11-2bc0-4f58-890d-b8e9081186cc",
+            "note_id": "c-fix1-note",
+            "block_id": "c-fix1-a",
+            "text_flow_id": "textflow-c-fix1-a",
+            "text_unit_id": "tu-1",
+            "start_offset": 0,
+            "end_offset": 2,
+            "excerpt": "We",
+            "status": "active",
+            "at": "2026-09-10T12:00:00.000Z",
+            "created_at": "2026-09-11T01:09:40.898Z",
+            "updated_at": "2026-09-11T01:09:40.898Z",
+            "pre_edit_offsets": null
+          }
+        ],
+        "revision": 5
+      }
+    },
+    {
+      "path": "/api/note-blocks/c-fix1-a/text-save",
+      "input": {
+        "note_id": "c-fix1-note",
+        "base_revision": 3,
+        "block": {
+          "content_json": {
+            "body": "We are the Champions of the world.\nA second ordinary paragraph for arrow navigation and reorder.\nA thix",
+            "text_flow": {
+              "textflow_version": "TextBlockContentV1",
+              "units": [
+                {
+                  "id": "tu-1",
+                  "text": "We are the Champions of the world.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 0,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-2",
+                  "text": "A second ordinary paragraph for arrow navigation and reorder.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 1,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-3",
+                  "text": "A thix",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 2,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                }
+              ],
+              "inline_structures": [
+                {
+                  "id": "inline-1",
+                  "semantic_kind": "inline_code",
+                  "parent_text_unit_id": "tu-1",
+                  "anchor_text": "We",
+                  "anchor_range": {
+                    "start": 0,
+                    "end": 2
+                  },
+                  "field_values": {
+                    "language": "text"
+                  },
+                  "metadata": {
+                    "fixture": "C3 collision witness"
+                  },
+                  "status": "active"
+                }
+              ],
+              "metadata": {
+                "fixture": "persisted units, not legacy body-only content"
+              }
+            }
+          },
+          "plain_text": "We are the Champions of the world.\nA second ordinary paragraph for arrow navigation and reorder.\nA thix"
+        },
+        "annotations": {
+          "range_updates": []
+        },
+        "text_ranges": []
+      },
+      "status": 200,
+      "response": {
+        "block": {
+          "id": "c-fix1-a",
+          "user_id": "c-fix1-user",
+          "course_id": "c-fix1-course",
+          "block_type": "paragraph",
+          "title": null,
+          "content_json": {
+            "body": "We are the Champions of the world.\nA second ordinary paragraph for arrow navigation and reorder.\nA thix",
+            "text_flow": {
+              "textflow_version": "TextBlockContentV1",
+              "units": [
+                {
+                  "id": "tu-1",
+                  "text": "We are the Champions of the world.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 0,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-2",
+                  "text": "A second ordinary paragraph for arrow navigation and reorder.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 1,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-3",
+                  "text": "A thix",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 2,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                }
+              ],
+              "inline_structures": [
+                {
+                  "id": "inline-1",
+                  "semantic_kind": "inline_code",
+                  "parent_text_unit_id": "tu-1",
+                  "anchor_text": "We",
+                  "anchor_range": {
+                    "start": 0,
+                    "end": 2
+                  },
+                  "field_values": {
+                    "language": "text"
+                  },
+                  "metadata": {
+                    "fixture": "C3 collision witness"
+                  },
+                  "status": "active"
+                }
+              ],
+              "metadata": {
+                "fixture": "persisted units, not legacy body-only content"
+              }
+            }
+          },
+          "plain_text": "We are the Champions of the world.\nA second ordinary paragraph for arrow navigation and reorder.\nA thix",
+          "status": "active",
+          "source_kind": "manual",
+          "metadata": {
+            "template_id": "text.paragraph"
+          },
+          "operation_batch_id": null,
+          "created_at": "2026-09-11 01:09:40",
+          "updated_at": "2026-09-11T01:10:53.562Z",
+          "trashed_at": null,
+          "text_save_revision": 4
+        },
+        "annotations": [
+          {
+            "id": "c-fix1-annotation-a",
+            "note_id": "c-fix1-note",
+            "canvas_id": "c-fix1-note",
+            "raw_label": "Synthetic A anchor",
+            "ranges": [
+              {
+                "id": "c-fix1-range-a",
+                "target_kind": "text_span",
+                "block_id": "c-fix1-a",
+                "text_flow_id": "textflow-c-fix1-a",
+                "text_unit_id": "tu-1",
+                "inline_structure_id": "inline-1",
+                "start_offset": 0,
+                "end_offset": 2,
+                "range_text_cache": "We",
+                "metadata": {
+                  "fixture": true
+                }
+              }
+            ],
+            "parent_annotation_id": null,
+            "child_annotation_ids": [],
+            "visual_style": {
+              "color_token": "amber",
+              "marker_kind": "highlight"
+            },
+            "created_by": "human",
+            "status": "active",
+            "created_at": "2026-09-11T01:09:40.894Z",
+            "updated_at": "2026-09-11T01:09:40.894Z",
+            "metadata": {}
+          },
+          {
+            "id": "c-fix1-annotation-b",
+            "note_id": "c-fix1-note",
+            "canvas_id": "c-fix1-note",
+            "raw_label": "Synthetic B anchor",
+            "ranges": [
+              {
+                "id": "c-fix1-range-b",
+                "target_kind": "text_span",
+                "block_id": "c-fix1-b",
+                "text_flow_id": "textflow-c-fix1-b",
+                "text_unit_id": "tu-1",
+                "inline_structure_id": "inline-1",
+                "start_offset": 0,
+                "end_offset": 2,
+                "range_text_cache": "Ta",
+                "metadata": {
+                  "fixture": true
+                }
+              }
+            ],
+            "parent_annotation_id": null,
+            "child_annotation_ids": [],
+            "visual_style": {
+              "color_token": "blue",
+              "marker_kind": "highlight"
+            },
+            "created_by": "human",
+            "status": "active",
+            "created_at": "2026-09-11T01:09:40.894Z",
+            "updated_at": "2026-09-11T01:09:40.894Z",
+            "metadata": {}
+          }
+        ],
+        "text_ranges": [
+          {
+            "id": "5bc53efc-4e1d-4ffc-b65f-0930327cea97",
+            "board_id": "b2045f11-2bc0-4f58-890d-b8e9081186cc",
+            "note_id": "c-fix1-note",
+            "block_id": "c-fix1-b",
+            "text_flow_id": "textflow-c-fix1-b",
+            "text_unit_id": "tu-1",
+            "start_offset": 0,
+            "end_offset": 2,
+            "excerpt": "Ta",
+            "status": "active",
+            "at": "2026-09-10T12:00:00.000Z",
+            "created_at": "2026-09-11T01:09:40.898Z",
+            "updated_at": "2026-09-11T01:10:43.325Z",
+            "pre_edit_offsets": null
+          },
+          {
+            "id": "7516a208-5e13-4267-8e7d-5233d8cc1088",
+            "board_id": "b2045f11-2bc0-4f58-890d-b8e9081186cc",
+            "note_id": "c-fix1-note",
+            "block_id": "c-fix1-a",
+            "text_flow_id": "textflow-c-fix1-a",
+            "text_unit_id": "tu-1",
+            "start_offset": 0,
+            "end_offset": 2,
+            "excerpt": "We",
+            "status": "active",
+            "at": "2026-09-10T12:00:00.000Z",
+            "created_at": "2026-09-11T01:09:40.898Z",
+            "updated_at": "2026-09-11T01:09:40.898Z",
+            "pre_edit_offsets": null
+          }
+        ],
+        "revision": 4
+      }
+    },
+    {
+      "path": "/api/note-blocks/c-fix1-b/text-save",
+      "input": {
+        "note_id": "c-fix1-note",
+        "base_revision": 5,
+        "block": {
+          "content_json": {
+            "body": "et alpha has its own tu-1 and inline-1.\nTarget bravo — drop another unit before or after this line.\nTarget charlie — the next text block remains independent.",
+            "text_flow": {
+              "textflow_version": "TextBlockContentV1",
+              "units": [
+                {
+                  "id": "tu-1",
+                  "text": "et alpha has its own tu-1 and inline-1.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 0,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-2",
+                  "text": "Target bravo — drop another unit before or after this line.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 1,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-3",
+                  "text": "Target charlie — the next text block remains independent.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 2,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                }
+              ],
+              "inline_structures": [
+                {
+                  "id": "inline-1",
+                  "semantic_kind": "inline_code",
+                  "parent_text_unit_id": "tu-1",
+                  "anchor_text": "Ta",
+                  "anchor_range": null,
+                  "field_values": {
+                    "language": "text"
+                  },
+                  "metadata": {
+                    "fixture": "C3 collision witness",
+                    "pre_edit_offsets": {
+                      "text_unit_id": "tu-1",
+                      "start_offset": 0,
+                      "end_offset": 2,
+                      "range_text_cache": "Ta"
+                    }
+                  },
+                  "status": "active"
+                }
+              ],
+              "metadata": {
+                "fixture": "persisted units, not legacy body-only content"
+              }
+            }
+          },
+          "plain_text": "et alpha has its own tu-1 and inline-1.\nTarget bravo — drop another unit before or after this line.\nTarget charlie — the next text block remains independent."
+        },
+        "annotations": {
+          "range_updates": [
+            {
+              "annotation_id": "c-fix1-annotation-b",
+              "range": {
+                "id": "c-fix1-range-b",
+                "target_kind": "text_span",
+                "block_id": "c-fix1-b",
+                "text_flow_id": "textflow-c-fix1-b",
+                "text_unit_id": "tu-1",
+                "inline_structure_id": "inline-1",
+                "range_text_cache": "Ta",
+                "metadata": {
+                  "fixture": true,
+                  "pre_edit_offsets": {
+                    "text_unit_id": "tu-1",
+                    "start_offset": 0,
+                    "end_offset": 2,
+                    "range_text_cache": "Ta"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "text_ranges": [
+          {
+            "id": "5bc53efc-4e1d-4ffc-b65f-0930327cea97",
+            "block_id": "c-fix1-b",
+            "text_flow_id": "textflow-c-fix1-b",
+            "text_unit_id": "tu-1",
+            "start_offset": null,
+            "end_offset": null,
+            "excerpt": "Ta",
+            "status": "drifted",
+            "pre_edit_offsets": {
+              "start_offset": 0,
+              "end_offset": 2
+            },
+            "history_restore": true
+          }
+        ]
+      },
+      "status": 200,
+      "response": {
+        "block": {
+          "id": "c-fix1-b",
+          "user_id": "c-fix1-user",
+          "course_id": "c-fix1-course",
+          "block_type": "paragraph",
+          "title": null,
+          "content_json": {
+            "body": "et alpha has its own tu-1 and inline-1.\nTarget bravo — drop another unit before or after this line.\nTarget charlie — the next text block remains independent.",
+            "text_flow": {
+              "textflow_version": "TextBlockContentV1",
+              "units": [
+                {
+                  "id": "tu-1",
+                  "text": "et alpha has its own tu-1 and inline-1.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 0,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-2",
+                  "text": "Target bravo — drop another unit before or after this line.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 1,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-3",
+                  "text": "Target charlie — the next text block remains independent.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 2,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                }
+              ],
+              "inline_structures": [
+                {
+                  "id": "inline-1",
+                  "semantic_kind": "inline_code",
+                  "parent_text_unit_id": "tu-1",
+                  "anchor_text": "Ta",
+                  "anchor_range": null,
+                  "field_values": {
+                    "language": "text"
+                  },
+                  "metadata": {
+                    "fixture": "C3 collision witness",
+                    "pre_edit_offsets": {
+                      "text_unit_id": "tu-1",
+                      "start_offset": 0,
+                      "end_offset": 2,
+                      "range_text_cache": "Ta"
+                    }
+                  },
+                  "status": "active"
+                }
+              ],
+              "metadata": {
+                "fixture": "persisted units, not legacy body-only content"
+              }
+            }
+          },
+          "plain_text": "et alpha has its own tu-1 and inline-1.\nTarget bravo — drop another unit before or after this line.\nTarget charlie — the next text block remains independent.",
+          "status": "active",
+          "source_kind": "manual",
+          "metadata": {
+            "template_id": "text.paragraph"
+          },
+          "operation_batch_id": null,
+          "created_at": "2026-09-11 01:09:40",
+          "updated_at": "2026-09-11T01:10:53.774Z",
+          "trashed_at": null,
+          "text_save_revision": 6
+        },
+        "annotations": [
+          {
+            "id": "c-fix1-annotation-a",
+            "note_id": "c-fix1-note",
+            "canvas_id": "c-fix1-note",
+            "raw_label": "Synthetic A anchor",
+            "ranges": [
+              {
+                "id": "c-fix1-range-a",
+                "target_kind": "text_span",
+                "block_id": "c-fix1-a",
+                "text_flow_id": "textflow-c-fix1-a",
+                "text_unit_id": "tu-1",
+                "inline_structure_id": "inline-1",
+                "start_offset": 0,
+                "end_offset": 2,
+                "range_text_cache": "We",
+                "metadata": {
+                  "fixture": true
+                }
+              }
+            ],
+            "parent_annotation_id": null,
+            "child_annotation_ids": [],
+            "visual_style": {
+              "color_token": "amber",
+              "marker_kind": "highlight"
+            },
+            "created_by": "human",
+            "status": "active",
+            "created_at": "2026-09-11T01:09:40.894Z",
+            "updated_at": "2026-09-11T01:09:40.894Z",
+            "metadata": {}
+          },
+          {
+            "id": "c-fix1-annotation-b",
+            "note_id": "c-fix1-note",
+            "canvas_id": "c-fix1-note",
+            "raw_label": "Synthetic B anchor",
+            "ranges": [
+              {
+                "id": "c-fix1-range-b",
+                "target_kind": "text_span",
+                "block_id": "c-fix1-b",
+                "text_flow_id": "textflow-c-fix1-b",
+                "text_unit_id": "tu-1",
+                "inline_structure_id": "inline-1",
+                "range_text_cache": "Ta",
+                "metadata": {
+                  "fixture": true,
+                  "pre_edit_offsets": {
+                    "text_unit_id": "tu-1",
+                    "start_offset": 0,
+                    "end_offset": 2,
+                    "range_text_cache": "Ta"
+                  }
+                }
+              }
+            ],
+            "parent_annotation_id": null,
+            "child_annotation_ids": [],
+            "visual_style": {
+              "color_token": "blue",
+              "marker_kind": "highlight"
+            },
+            "created_by": "human",
+            "status": "active",
+            "created_at": "2026-09-11T01:09:40.894Z",
+            "updated_at": "2026-09-11T01:09:40.894Z",
+            "metadata": {}
+          }
+        ],
+        "text_ranges": [
+          {
+            "id": "5bc53efc-4e1d-4ffc-b65f-0930327cea97",
+            "board_id": "b2045f11-2bc0-4f58-890d-b8e9081186cc",
+            "note_id": "c-fix1-note",
+            "block_id": "c-fix1-b",
+            "text_flow_id": "textflow-c-fix1-b",
+            "text_unit_id": "tu-1",
+            "start_offset": null,
+            "end_offset": null,
+            "excerpt": "Ta",
+            "status": "drifted",
+            "at": "2026-09-10T12:00:00.000Z",
+            "created_at": "2026-09-11T01:09:40.898Z",
+            "updated_at": "2026-09-11T01:10:53.776Z",
+            "pre_edit_offsets": {
+              "start_offset": 0,
+              "end_offset": 2
+            }
+          },
+          {
+            "id": "7516a208-5e13-4267-8e7d-5233d8cc1088",
+            "board_id": "b2045f11-2bc0-4f58-890d-b8e9081186cc",
+            "note_id": "c-fix1-note",
+            "block_id": "c-fix1-a",
+            "text_flow_id": "textflow-c-fix1-a",
+            "text_unit_id": "tu-1",
+            "start_offset": 0,
+            "end_offset": 2,
+            "excerpt": "We",
+            "status": "active",
+            "at": "2026-09-10T12:00:00.000Z",
+            "created_at": "2026-09-11T01:09:40.898Z",
+            "updated_at": "2026-09-11T01:09:40.898Z",
+            "pre_edit_offsets": null
+          }
+        ],
+        "revision": 6
+      }
+    },
+    {
+      "path": "/api/note-blocks/c-fix1-a/text-save",
+      "input": {
+        "note_id": "c-fix1-note",
+        "base_revision": 4,
+        "block": {
+          "content_json": {
+            "body": "We are the Champions of the world.\nA second ordinary paragraph for arrow navigation and reorder.\nA third paragraph: A👩‍👩‍👧‍👦é中B tests grapheme boundaries.",
+            "text_flow": {
+              "textflow_version": "TextBlockContentV1",
+              "units": [
+                {
+                  "id": "tu-1",
+                  "text": "We are the Champions of the world.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 0,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-2",
+                  "text": "A second ordinary paragraph for arrow navigation and reorder.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 1,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-3",
+                  "text": "A third paragraph: A👩‍👩‍👧‍👦é中B tests grapheme boundaries.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 2,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                }
+              ],
+              "inline_structures": [
+                {
+                  "id": "inline-1",
+                  "semantic_kind": "inline_code",
+                  "parent_text_unit_id": "tu-1",
+                  "anchor_text": "We",
+                  "anchor_range": {
+                    "start": 0,
+                    "end": 2
+                  },
+                  "field_values": {
+                    "language": "text"
+                  },
+                  "metadata": {
+                    "fixture": "C3 collision witness"
+                  },
+                  "status": "active"
+                }
+              ],
+              "metadata": {
+                "fixture": "persisted units, not legacy body-only content"
+              }
+            }
+          },
+          "plain_text": "We are the Champions of the world.\nA second ordinary paragraph for arrow navigation and reorder.\nA third paragraph: A👩‍👩‍👧‍👦é中B tests grapheme boundaries."
+        },
+        "annotations": {
+          "range_updates": []
+        },
+        "text_ranges": []
+      },
+      "status": 200,
+      "response": {
+        "block": {
+          "id": "c-fix1-a",
+          "user_id": "c-fix1-user",
+          "course_id": "c-fix1-course",
+          "block_type": "paragraph",
+          "title": null,
+          "content_json": {
+            "body": "We are the Champions of the world.\nA second ordinary paragraph for arrow navigation and reorder.\nA third paragraph: A👩‍👩‍👧‍👦é中B tests grapheme boundaries.",
+            "text_flow": {
+              "textflow_version": "TextBlockContentV1",
+              "units": [
+                {
+                  "id": "tu-1",
+                  "text": "We are the Champions of the world.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 0,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-2",
+                  "text": "A second ordinary paragraph for arrow navigation and reorder.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 1,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-3",
+                  "text": "A third paragraph: A👩‍👩‍👧‍👦é中B tests grapheme boundaries.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 2,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                }
+              ],
+              "inline_structures": [
+                {
+                  "id": "inline-1",
+                  "semantic_kind": "inline_code",
+                  "parent_text_unit_id": "tu-1",
+                  "anchor_text": "We",
+                  "anchor_range": {
+                    "start": 0,
+                    "end": 2
+                  },
+                  "field_values": {
+                    "language": "text"
+                  },
+                  "metadata": {
+                    "fixture": "C3 collision witness"
+                  },
+                  "status": "active"
+                }
+              ],
+              "metadata": {
+                "fixture": "persisted units, not legacy body-only content"
+              }
+            }
+          },
+          "plain_text": "We are the Champions of the world.\nA second ordinary paragraph for arrow navigation and reorder.\nA third paragraph: A👩‍👩‍👧‍👦é中B tests grapheme boundaries.",
+          "status": "active",
+          "source_kind": "manual",
+          "metadata": {
+            "template_id": "text.paragraph"
+          },
+          "operation_batch_id": null,
+          "created_at": "2026-09-11 01:09:40",
+          "updated_at": "2026-09-11T01:11:35.910Z",
+          "trashed_at": null,
+          "text_save_revision": 5
+        },
+        "annotations": [
+          {
+            "id": "c-fix1-annotation-a",
+            "note_id": "c-fix1-note",
+            "canvas_id": "c-fix1-note",
+            "raw_label": "Synthetic A anchor",
+            "ranges": [
+              {
+                "id": "c-fix1-range-a",
+                "target_kind": "text_span",
+                "block_id": "c-fix1-a",
+                "text_flow_id": "textflow-c-fix1-a",
+                "text_unit_id": "tu-1",
+                "inline_structure_id": "inline-1",
+                "start_offset": 0,
+                "end_offset": 2,
+                "range_text_cache": "We",
+                "metadata": {
+                  "fixture": true
+                }
+              }
+            ],
+            "parent_annotation_id": null,
+            "child_annotation_ids": [],
+            "visual_style": {
+              "color_token": "amber",
+              "marker_kind": "highlight"
+            },
+            "created_by": "human",
+            "status": "active",
+            "created_at": "2026-09-11T01:09:40.894Z",
+            "updated_at": "2026-09-11T01:09:40.894Z",
+            "metadata": {}
+          },
+          {
+            "id": "c-fix1-annotation-b",
+            "note_id": "c-fix1-note",
+            "canvas_id": "c-fix1-note",
+            "raw_label": "Synthetic B anchor",
+            "ranges": [
+              {
+                "id": "c-fix1-range-b",
+                "target_kind": "text_span",
+                "block_id": "c-fix1-b",
+                "text_flow_id": "textflow-c-fix1-b",
+                "text_unit_id": "tu-1",
+                "inline_structure_id": "inline-1",
+                "range_text_cache": "Ta",
+                "metadata": {
+                  "fixture": true,
+                  "pre_edit_offsets": {
+                    "text_unit_id": "tu-1",
+                    "start_offset": 0,
+                    "end_offset": 2,
+                    "range_text_cache": "Ta"
+                  }
+                }
+              }
+            ],
+            "parent_annotation_id": null,
+            "child_annotation_ids": [],
+            "visual_style": {
+              "color_token": "blue",
+              "marker_kind": "highlight"
+            },
+            "created_by": "human",
+            "status": "active",
+            "created_at": "2026-09-11T01:09:40.894Z",
+            "updated_at": "2026-09-11T01:09:40.894Z",
+            "metadata": {}
+          }
+        ],
+        "text_ranges": [
+          {
+            "id": "5bc53efc-4e1d-4ffc-b65f-0930327cea97",
+            "board_id": "b2045f11-2bc0-4f58-890d-b8e9081186cc",
+            "note_id": "c-fix1-note",
+            "block_id": "c-fix1-b",
+            "text_flow_id": "textflow-c-fix1-b",
+            "text_unit_id": "tu-1",
+            "start_offset": null,
+            "end_offset": null,
+            "excerpt": "Ta",
+            "status": "drifted",
+            "at": "2026-09-10T12:00:00.000Z",
+            "created_at": "2026-09-11T01:09:40.898Z",
+            "updated_at": "2026-09-11T01:10:53.776Z",
+            "pre_edit_offsets": {
+              "start_offset": 0,
+              "end_offset": 2
+            }
+          },
+          {
+            "id": "7516a208-5e13-4267-8e7d-5233d8cc1088",
+            "board_id": "b2045f11-2bc0-4f58-890d-b8e9081186cc",
+            "note_id": "c-fix1-note",
+            "block_id": "c-fix1-a",
+            "text_flow_id": "textflow-c-fix1-a",
+            "text_unit_id": "tu-1",
+            "start_offset": 0,
+            "end_offset": 2,
+            "excerpt": "We",
+            "status": "active",
+            "at": "2026-09-10T12:00:00.000Z",
+            "created_at": "2026-09-11T01:09:40.898Z",
+            "updated_at": "2026-09-11T01:09:40.898Z",
+            "pre_edit_offsets": null
+          }
+        ],
+        "revision": 5
+      }
+    },
+    {
+      "path": "/api/note-blocks/c-fix1-b/text-save",
+      "input": {
+        "note_id": "c-fix1-note",
+        "base_revision": 6,
+        "block": {
+          "content_json": {
+            "body": "Target alpha has its own tu-1 and inline-1.\nTarget bravo — drop another unit before or after this line.\nTarget charlie — the next text block remains independent.",
+            "text_flow": {
+              "textflow_version": "TextBlockContentV1",
+              "units": [
+                {
+                  "id": "tu-1",
+                  "text": "Target alpha has its own tu-1 and inline-1.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 0,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-2",
+                  "text": "Target bravo — drop another unit before or after this line.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 1,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                },
+                {
+                  "id": "tu-3",
+                  "text": "Target charlie — the next text block remains independent.",
+                  "writing_role": "paragraph",
+                  "indent_level": 0,
+                  "order_index": 2,
+                  "metadata": {
+                    "fixture": true
+                  },
+                  "status": "active"
+                }
+              ],
+              "inline_structures": [
+                {
+                  "id": "inline-1",
+                  "semantic_kind": "inline_code",
+                  "parent_text_unit_id": "tu-1",
+                  "anchor_text": "Ta",
+                  "anchor_range": {
+                    "start": 0,
+                    "end": 2
+                  },
+                  "field_values": {
+                    "language": "text"
+                  },
+                  "metadata": {
+                    "fixture": "C3 collision witness"
+                  },
+                  "status": "active"
+                }
+              ],
+              "metadata": {
+                "fixture": "persisted units, not legacy body-only content"
+              }
+            }
+          },
+          "plain_text": "Target alpha has its own tu-1 and inline-1.\nTarget bravo — drop another unit before or after this line.\nTarget charlie — the next text block remains independent."
+        },
+        "annotations": {
+          "range_updates": [
+            {
+              "annotation_id": "c-fix1-annotation-b",
+              "range": {
+                "id": "c-fix1-range-b",
+                "target_kind": "text_span",
+                "block_id": "c-fix1-b",
+                "text_flow_id": "textflow-c-fix1-b",
+                "text_unit_id": "tu-1",
+                "inline_structure_id": "inline-1",
+                "start_offset": 0,
+                "end_offset": 2,
+                "range_text_cache": "Ta",
+                "metadata": {
+                  "fixture": true
+                }
+              }
+            }
+          ]
+        },
+        "text_ranges": [
+          {
+            "id": "5bc53efc-4e1d-4ffc-b65f-0930327cea97",
+            "block_id": "c-fix1-b",
+            "text_flow_id": "textflow-c-fix1-b",
+            "text_unit_id": "tu-1",
+            "start_offset": 0,
+            "end_offset": 2,
+            "excerpt": "Ta",
+            "status": "active",
+            "pre_edit_offsets": null,
+            "history_restore": true
+          }
+        ]
+      },
+      "status": 503,
+      "injected": true
+    }
+  ]
+}

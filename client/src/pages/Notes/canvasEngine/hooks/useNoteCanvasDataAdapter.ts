@@ -1638,6 +1638,7 @@ export function useNoteCanvasDataAdapter({
         noteId: requestedNoteId, blockId: block.id, baseRevision,
         block: { content_json: nextContent, plain_text: requestedPlainText },
         annotationRanges, boardRanges: boardRangeSnapshot.ranges,
+        historyRestore: boardRangeSnapshot.historyRestore,
       }));
       const res = { data: result.block };
       committedTextRevisions.current.set(block.id, Math.max(result.revision, committedTextRevisions.current.get(block.id) ?? 0));
@@ -1910,6 +1911,7 @@ export function useNoteCanvasDataAdapter({
         noteId: requestedNoteId, blockId: block.id,
         baseRevision: options.baseRevision ?? Math.max(block.text_save_revision ?? 0, committedTextRevisions.current.get(block.id) ?? 0),
         block: payload, annotationRanges, boardRanges: boardRangeSnapshot.ranges,
+        historyRestore: boardRangeSnapshot.historyRestore,
       }));
       const res = { data: result.block };
       committedTextRevisions.current.set(block.id, Math.max(result.revision, committedTextRevisions.current.get(block.id) ?? 0));

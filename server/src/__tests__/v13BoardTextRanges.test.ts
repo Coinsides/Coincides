@@ -135,6 +135,31 @@ test('M1 deleting a selected range and splitting its unit degrade with snapshot 
   assert.equal(getBoard(db, 'user', second.board.id).members[0].reference.summary, 'target');
 });
 
+test('F17 ordinary board range saves cannot revive drift or replace its original evidence', async (t) => {
+  const { rebaseBoardTextRanges } = await rebaseFunction();
+  const db = fixture(t);
+  const before = flow('before target after');
+  writeBody(db, before);
+  const { board, anchor } = create(db);
+  const after = flow('before  after');
+  const updates = rebaseBoardTextRanges({ ranges: [anchor], blockId: 'block', previousTextFlow: before, nextTextFlow: after });
+  writeBody(db, after);
+  patch(db, updates);
+  writeBody(db, before);
+  patch(db, [{ ...anchor, excerpt: 'replacement evidence', pre_edit_offsets: null }]);
+  const stored = getBoardTextRange(db, 'user', anchor.id)!;
+  assert.equal(stored.status, 'drifted');
+  assert.equal(stored.excerpt, 'target');
+  assert.deepEqual(stored.pre_edit_offsets, { start_offset: 7, end_offset: 13 });
+  assert.equal(getBoard(db, 'user', board.id).members[0].reference.anchor_status, 'drifted');
+  const { id, block_id, text_flow_id, text_unit_id, start_offset, end_offset, excerpt, status, pre_edit_offsets } = anchor;
+  assert.throws(() => db.transaction(() => updateBoardTextRanges(db, 'user', 'note', {
+    text_ranges: [{ id, block_id, text_flow_id, text_unit_id, start_offset, end_offset,
+      excerpt, status, pre_edit_offsets, history_restore: true }],
+  }))(), /history_restore/);
+  assert.deepEqual(getBoardTextRange(db, 'user', anchor.id), stored);
+});
+
 test('M1 source trash/restore revives active anchors, hard deletion retains snapshots, board deletion owns cleanup', (t) => {
   const db = fixture(t);
   writeBody(db, flow('before target after'));

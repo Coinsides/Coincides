@@ -58,6 +58,7 @@ export async function saveAtomicText(input: {
   block: Partial<BlockTemplatePayload>;
   annotationRanges: AnnotationRangeSnapshot[];
   boardRanges: BoardTextRangeV1[];
+  historyRestore?: true;
 }): Promise<AtomicTextSaveResult> {
   const { data } = await api.put<AtomicTextSaveResult>(`/note-blocks/${input.blockId}/text-save`, {
     note_id: input.noteId,
@@ -66,6 +67,7 @@ export async function saveAtomicText(input: {
     annotations: { range_updates: input.annotationRanges.map(({ annotationId, range }) => ({ annotation_id: annotationId, range })) },
     text_ranges: input.boardRanges.map(({ id, block_id, text_flow_id, text_unit_id, start_offset, end_offset, excerpt, status, pre_edit_offsets }) => ({
       id, block_id, text_flow_id, text_unit_id, start_offset, end_offset, excerpt, status, pre_edit_offsets,
+      ...(input.historyRestore === true ? { history_restore: true } : {}),
     })),
   });
   if (!data?.block || !Number.isInteger(data.revision) || data.revision <= input.baseRevision

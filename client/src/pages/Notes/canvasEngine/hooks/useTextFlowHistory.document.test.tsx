@@ -2,7 +2,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import { useRef, useState } from 'react';
 import { describe, expect, it, vi } from 'vitest';
 import type { BoardTextRangeV1 } from '../../../../../../shared/types/boardTextRange';
-import { createBoardTextRangeEditSession } from '../boardTextRangeEditSession';
+import { createBoardTextRangeEditSession, type BoardRangeSaveSnapshot } from '../boardTextRangeEditSession';
 import type { AnnotationTruthV1, NoteBlock, TextBlockContentV1 } from '../runtimeDataTypes';
 import type { TextFlowEditMetadata } from '../textFlowEditSession';
 import { createTextBlockContentV1, TEXT_FLOW_CONTENT_KEY } from '../textFlowService';
@@ -51,7 +51,7 @@ function fixture(noteId: string) {
 function renderDocumentHistory() {
   const fixtures = { A: fixture('A'), B: fixture('B') };
   const writes: { blockId: string; flow: TextBlockContentV1; ranges: BoardTextRangeV1[] }[] = [];
-  const save = vi.fn(async (block: NoteBlock, _text: string, options?: { textFlow?: TextBlockContentV1; boardRangeSnapshot?: { ranges: BoardTextRangeV1[] } }): Promise<BlockSaveOutcome> => {
+  const save = vi.fn(async (block: NoteBlock, _text: string, options?: { textFlow?: TextBlockContentV1; boardRangeSnapshot?: BoardRangeSaveSnapshot }): Promise<BlockSaveOutcome> => {
     writes.push({ blockId: block.id, flow: structuredClone(options!.textFlow!), ranges: structuredClone(options?.boardRangeSnapshot?.ranges ?? []) });
     return { status: 'saved', block, recoveryReceipt: null, reconciliation: 'response' };
   });
@@ -116,10 +116,12 @@ describe('B6b document history (synthetic memory)', () => {
     const editor = renderDocumentHistory();
     const changes = editor.changes('inserted\npaste');
     expect(await editor.apply(changes)).toBe(true);
+    expect(editor.save.mock.calls.map(([, , options]) => options?.boardRangeSnapshot?.historyRestore)).toEqual([undefined, undefined]);
     const afterAnnotations = structuredClone(editor.result.current.data.annotations);
     const afterRanges = editor.fixtures.A.blocks.map((block) => editor.result.current.data.ranges.snapshot(block.id).ranges);
     await act(async () => { expect(await editor.result.current.history.undoRuntimeHistory()).toBe(true); });
     await act(async () => { expect(await editor.result.current.history.redoRuntimeHistory()).toBe(true); });
+    expect(editor.save.mock.calls.slice(2).map(([, , options]) => options?.boardRangeSnapshot?.historyRestore)).toEqual([true, true, true, true]);
     changes.forEach((change, index) => {
       expect(editor.result.current.data.flowDrafts[change.block.id]).toEqual(change.nextTextFlow);
       expect(editor.result.current.data.ranges.snapshot(change.block.id).ranges).toEqual(afterRanges[index]);
@@ -166,6 +168,32 @@ describe('B6b document history (synthetic memory)', () => {
     const redoCalls = editor.save.mock.calls.length;
     await act(async () => { expect(await editor.result.current.history.redoRuntimeHistory()).toBe(true); });
     expect(editor.save.mock.calls.slice(redoCalls).map(([block]) => block.id)).toEqual(['A-1']);
+  });
+
+  it.each(['before', 'after'] as const)('F17 retains %s restore intent through a blur retry of the unfinished block', async (side) => {
+    const editor = renderDocumentHistory();
+    expect(await editor.apply()).toBe(true);
+    if (side === 'after') {
+      await act(async () => { expect(await editor.result.current.history.undoRuntimeHistory()).toBe(true); });
+    }
+    const replay = () => side === 'before'
+      ? editor.result.current.history.undoRuntimeHistory()
+      : editor.result.current.history.redoRuntimeHistory();
+    editor.save.mockImplementationOnce(editor.save.getMockImplementation()!).mockResolvedValueOnce(rejected());
+    await act(async () => { expect(await replay()).toBe(false); });
+    expect(editor.onSaveFailure).toHaveBeenCalled();
+    await expect(editor.result.current.editing.flush()).rejects.toThrow('could not be saved');
+    const beforeRetry = editor.save.mock.calls.length;
+    await act(async () => {
+      expect(await editor.result.current.editing.saveBlock(editor.fixtures.A.blocks[0], 'stale blur')).toMatchObject({ status: 'saved' });
+    });
+    const retried = editor.save.mock.calls.slice(beforeRetry);
+    expect(retried.map(([block]) => block.id)).toEqual(['A-1']);
+    expect(retried[0][2]?.boardRangeSnapshot?.historyRestore).toBe(true);
+    expect(retried[0][2]?.boardRangeSnapshot?.ranges).toEqual(editor.result.current.data.ranges.snapshot('A-1').ranges);
+    await expect(editor.result.current.editing.flush()).resolves.toBeUndefined();
+    await act(async () => { expect(await replay()).toBe(true); });
+    expect(editor.save).toHaveBeenCalledTimes(beforeRetry + 1);
   });
 
   it('keeps the composite body and annotation save incomplete until it succeeds', async () => {

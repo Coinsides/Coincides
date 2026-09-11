@@ -163,3 +163,13 @@ This subset was checked against the following source owners. The links identify 
 | Composite payload, transaction and revision | [atomicTextSaveRepository.ts](../../client/src/pages/Notes/canvasEngine/atomicTextSaveRepository.ts), [atomicTextSave.ts](../../server/src/services/atomicTextSave.ts), [noteBlockContent.ts](../../server/src/services/noteBlockContent.ts) |
 
 The [B9 Result](../agent-ops/handoffs/2026-09-10-v13-5-b9-grapheme-and-contract-order.md#result) records the complete slice-site inventory, tests, document checks and delivery limits. This contract freezes the listed behavior only; future expansion requires an explicit change to scope and implementation.
+
+## Amendment — 2026-09-10 · V13.5 C-fix2 / F17 explicit range history restoration
+
+Authority: [C-fix2 order](../agent-ops/handoffs/2026-09-10-v13-5-c-fix2-order.md). This appended amendment reconciles B4 snapshot replay with the ordinary board-range drift-evidence rule; the frozen sections above are unchanged.
+
+Each touched board-range patch in a history restore through `PUT /api/note-blocks/:id/text-save` carries `history_restore: true`. Undo and redo both use this explicit channel. Only a patch carrying that literal intent may restore its snapshot's status, start/end offsets and `pre_edit_offsets` exactly, including clearing the evidence with `null` on undo and restoring it on redo. The server applies this within the existing body/annotation/range/revision transaction, with the existing scope and revision checks. Independently deleted ranges stay absent.
+
+Ordinary saves omit the intent. An existing drifted range remains drifted and retains its existing pre-edit evidence under the ordinary save rule. A standalone board-range update does not acquire a history-restore channel. Intent belongs to the save request and recovery snapshot, not to the persisted range model; this amendment adds no database migration and changes no drift detection, rebasing, read-time derivation, coordinates or three-state visual behavior.
+
+Only the touched ranges frozen in the history entry receive restore intent. Initial edits and initial template conversions remain ordinary saves. A failed restore retains its entry, explicit failure/retry state, original revision base and same-direction restore intent; retry reuses the frozen ranges rather than adding unrelated later ranges. Confirmed undo/redo alone moves the entry between stacks. The B7 per-block transaction boundary and its cross-block and lost-response limitations remain in force.

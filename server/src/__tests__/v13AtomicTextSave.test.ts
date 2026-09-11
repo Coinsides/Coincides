@@ -102,6 +102,108 @@ function composite(db: Awaited<ReturnType<typeof initDb>>, text = 'insert before
   };
 }
 
+function boardRangeHistoryInput(db: Awaited<ReturnType<typeof initDb>>, drifted = false) {
+  const input = composite(db, drifted ? 'before  after' : 'before target after');
+  return { ...input, annotations: { range_updates: [] }, text_ranges: input.text_ranges.map((range) => ({
+    ...range, start_offset: drifted ? null : 7, end_offset: drifted ? null : 13,
+    status: drifted ? 'drifted' : 'active',
+    pre_edit_offsets: drifted ? { start_offset: 7, end_offset: 13 } : null,
+  })) };
+}
+
+test('F17 history undo/redo restores exact board ranges with consecutive revisions and per-range intent', async () => {
+  await withFixture(async ({ db, put }) => {
+    const original = boardRangeHistoryInput(db);
+    const board = db.prepare('SELECT board_id FROM board_text_ranges').get() as { board_id: string };
+    const peer = db.transaction(() => createBoardTextRange(db, USER, board.board_id, {
+      note_id: NOTE, block_id: BLOCK, text_flow_id: `textflow-${BLOCK}`, text_unit_id: 'unit',
+      start_offset: 7, end_offset: 13, excerpt: 'target', at: '2026-09-10T12:00:00.000Z',
+    }))();
+    const stored = (id: string) => db.prepare(`SELECT block_id, text_flow_id, text_unit_id,
+      start_offset, end_offset, excerpt, status, pre_edit_offsets FROM board_text_ranges WHERE id = ?`).get(id);
+    const originalState = stored(original.text_ranges[0].id);
+    const edit = boardRangeHistoryInput(db, true);
+    edit.text_ranges.push({ ...edit.text_ranges[0], id: peer.id });
+    const changed = await put(`/note-blocks/${BLOCK}/text-save`, edit);
+    assert.equal(changed.revision, 1);
+    const driftedState = stored(original.text_ranges[0].id);
+    assert.equal((driftedState as any).status, 'drifted');
+
+    const undone = await put(`/note-blocks/${BLOCK}/text-save`, { ...original, base_revision: 1,
+      text_ranges: [{ ...original.text_ranges[0], history_restore: true }, { ...original.text_ranges[0], id: peer.id }],
+    });
+    assert.equal(undone.revision, 2);
+    assert.deepEqual(stored(original.text_ranges[0].id), originalState);
+    assert.equal(undone.text_ranges.find((range: any) => range.id === original.text_ranges[0].id).status, 'active');
+    assert.equal(undone.text_ranges.find((range: any) => range.id === original.text_ranges[0].id).pre_edit_offsets, null);
+    // Intent on one range cannot revive another range in the same transaction.
+    assert.equal((stored(peer.id) as any).status, 'drifted');
+    assert.equal((stored(peer.id) as any).pre_edit_offsets, JSON.stringify({ start_offset: 7, end_offset: 13 }));
+
+    const redone = await put(`/note-blocks/${BLOCK}/text-save`, { ...edit, base_revision: 2,
+      text_ranges: [{ ...edit.text_ranges[0], history_restore: true }],
+    });
+    assert.equal(redone.revision, 3);
+    assert.deepEqual(stored(original.text_ranges[0].id), driftedState);
+    assert.equal(redone.text_ranges.find((range: any) => range.id === original.text_ranges[0].id).status, 'drifted');
+    assert.equal(db.prepare('SELECT text_save_revision FROM note_blocks WHERE id = ?').pluck().get(BLOCK), 3);
+  });
+});
+
+test('F17 ordinary atomic saves retain drift status, original excerpt and pre-edit evidence', async () => {
+  await withFixture(async ({ db, put }) => {
+    await put(`/note-blocks/${BLOCK}/text-save`, boardRangeHistoryInput(db, true));
+    for (const status of ['active', 'drifted', 'lost']) {
+      const input = boardRangeHistoryInput(db);
+      input.text_ranges[0] = { ...input.text_ranges[0], excerpt: 'replacement evidence', status,
+        pre_edit_offsets: status === 'active' ? null : { start_offset: 1, end_offset: 2 } };
+      await put(`/note-blocks/${BLOCK}/text-save`, input);
+      const row = db.prepare('SELECT status, excerpt, pre_edit_offsets FROM board_text_ranges').get();
+      assert.deepEqual(row, { status: 'drifted', excerpt: 'target',
+        pre_edit_offsets: JSON.stringify({ start_offset: 7, end_offset: 13 }) });
+    }
+  });
+});
+
+test('F17 late history range failure rolls back body, annotations and revision and permits the same retry', async () => {
+  await withFixture(async ({ db, put, snapshot }) => {
+    await put(`/note-blocks/${BLOCK}/text-save`, boardRangeHistoryInput(db, true));
+    const input = boardRangeHistoryInput(db);
+    const restoredAnnotation = { ...annotation.ranges[0], start_offset: 0, end_offset: 6, range_text_cache: 'before' };
+    const restore = { ...input,
+      annotations: { range_updates: [{ annotation_id: annotation.id, range: restoredAnnotation }] },
+      text_ranges: input.text_ranges.map((range) => ({ ...range, history_restore: true })),
+    };
+    const before = snapshot();
+    // The board failure fires only after this transaction has changed the annotation range.
+    db.exec(`CREATE TRIGGER history_restore_failure BEFORE UPDATE ON board_text_ranges
+      WHEN EXISTS (SELECT 1 FROM annotation_ranges WHERE id = 'range'
+        AND start_offset = 0 AND end_offset = 6 AND range_text_cache = 'before')
+      BEGIN SELECT RAISE(ABORT, 'Synthetic history range failure'); END`);
+    await put(`/note-blocks/${BLOCK}/text-save`, restore, 500);
+    assert.deepEqual(snapshot(), before);
+    assert.equal(db.inTransaction, false);
+    db.exec('DROP TRIGGER history_restore_failure');
+    const retried = await put(`/note-blocks/${BLOCK}/text-save`, restore);
+    assert.equal(retried.revision, 2);
+    assert.equal(retried.text_ranges[0].status, 'active');
+    assert.equal(retried.text_ranges[0].pre_edit_offsets, null);
+    assert.deepEqual(db.prepare(`SELECT start_offset, end_offset, range_text_cache
+      FROM annotation_ranges WHERE id = 'range'`).get(),
+    { start_offset: 0, end_offset: 6, range_text_cache: 'before' });
+  });
+});
+
+test('F17 the standalone board range PUT does not accept atomic history intent', async () => {
+  await withFixture(async ({ db, put, snapshot }) => {
+    await put(`/note-blocks/${BLOCK}/text-save`, boardRangeHistoryInput(db, true));
+    const before = snapshot();
+    const range = boardRangeHistoryInput(db).text_ranges[0];
+    await put(`/boards/text-ranges/by-note/${NOTE}`, { text_ranges: [{ ...range, history_restore: true }] }, 400);
+    assert.deepEqual(snapshot(), before);
+  });
+});
+
 test('B7 smoke 1: annotation validation after body and first range write rolls back every field', async () => {
   await withFixture(async ({ db, put, snapshot }) => {
     const before = snapshot();
