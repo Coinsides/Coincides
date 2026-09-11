@@ -35,3 +35,17 @@
 ## 四 · 申报义务
 
 Result 必含:交付清单+diff、恢复条目状态机改前/改后图、测试数字、冒烟证据。冲突停线⛔自作主张。
+
+## 补遗一(HQ 裁定,2026-09-11;解除停线,续工)
+
+停线成立(STOP-LINE.md 采信,状态机设计合裁定)。裁定:
+
+### A · 授权修门(E1 遗债,归本单顺手清)
+
+`client/scripts/canvasRuntimeBoundaryCheck.mjs:1261` 的 Export Preview 断言选择器集合已被 E1 去盒作废——**门的语义(Note detail 样式含 PageFrame 感知的 Export Preview 结构)不变,选择器跟现役**:将断言更新为 E1 去盒后 `NoteDetail.module.css` 中承载同一语义的现役 class 集合(builder 从现物取,⛔为凑门回补无用 CSS);其余两个选择器若仍在则保留。**闸保牙义务**:证据中演示对现役集合任删一项该门必红(临时变体验证,⛔入库)。
+
+### B · 采信与续工
+
+- 三岔口实现/独立 GET 当前 revision/普通 text-save 重放/⛔自动重试/F17 通道零触碰——全部合裁定,采信;
+- 低并发复跑与 npm.cmd 用法合规,unboxing 首轮超时=13.6 flaky 名录既档,独立复验绿即按名录处理;
+- 按 STOP-LINE §剩余工作 1-4 收完:修门→最终 typecheck+production build→合成浏览器冒烟余项(知情重放200/放弃/503/二次409/跨挂载/窄屏)→完整证据+工单 `## Result`。verify:v2-bn8-runtime 总门末次由 HQ 收口跑,builder 修门后跑一次 `check:canvas-runtime-boundary` 单项证明门绿即可。
