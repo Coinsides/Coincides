@@ -1,6 +1,6 @@
 > **状态 (Status)**: draft(草案;铸版闸=13.4 走查④收官 + Henry 文档裁定专场)
 > **层 (Layer)**: 计划 / 段计划
-> **日期 (Updated)**: 2026-09-09
+> **日期 (Updated)**: 2026-09-11
 > **权威 (Authoritative)**: 否(候专场拍板转正;波次 A 经 Henry 09-09 口头放行"后续版本可以进行"先行排产)
 > **上游**: V13 总 plan 修订一;13.4 段收官记录;09-09 本体对谈全批(claude-log §29-§39)
 
@@ -21,6 +21,20 @@
 7. **开口5·板的皮三层**(板皮背景预设/对象皮/字皮;与视觉语言批同族攒裁)。
 
 专场产出=各档状态头翻牌+本 plan 转正。
+
+### 专场补遗(09-11):水平标尺三账题(议程 1/6 与 B1 的联动材料)
+
+Henry 09-11 提出(B/C 波真机验收通过后):块默认铺满文字区+全局水平标尺(左右"钢线")+每块自有缩进标尺。三路勘察(workflow `ruler-groundwork-survey`)证实**三账地基全部现成**:①页账=`PageFrameModel.contentInset` 已逐帧持久化(`page_frame_extensions.content_inset_json`,A4 preset 760+72×2);②块账=`width_mode: auto|manual` 即绑定态(auto 每渲染重算≈铺满,manual 保存储宽);③行账=`TextUnit.indent_level` 已全线打通(Tab/Shift+Tab,0-6,契约 §2 冻结)。参考线雏形已在(`pageFrameGuideService` 的 left_margin/right_margin/center_line 吸附墙,显示-only)。
+
+候专场拍的开叉(HQ 建议随附):
+
+1. **横移脱绑**:auto 块横向拖动今天不脱绑(被 F13 余量夹窄),裁"横移→转 manual 保宽"+新增"回栏"动作(width_mode→auto,x→0)——纯客户端小单零迁移(HQ 荐:两个都要);
+2. **⚠️ 坐标原点地雷**:page_frame_local 原点=内容区原点(frame.x+contentInset.left),**拖左边距=重定义全页存量坐标参照系**——裁 manual 块是否同事务 rebase x(视觉原地不动,可撤销)(HQ 荐:rebase);
+3. **块自有标尺 v1 形态**:驱动现有 unit indent_level(标尺刻度=缩进档,零新字段零 amendment)vs 新增连续块级内缩(落 canvas_layout,"Canvas owns placement"域外⛔TextFlow amendment;⛔落 content_json 顶层——撤销栈不覆盖+blur 去重漏存)(HQ 荐:v1 驱动 indent_level,连续内缩候真需求);
+4. **钢线归属**:note 级设置统一写全帧 contentInset,B1 铸版时升版面模板 token(留英手册自带边距即此)(HQ 荐:即此);
+5. **媒体块**:是否入绑定(HQ 荐:不入,保自然宽);墨水按现契约可越入边距区(纸边写画,语义自洽,不动)。
+
+联动件:把手安家——左页边距即把手的天然车道(把手超框问题的正解,⛔孤立微调);`DEFAULT_PAGE_CONTENT_WIDTH` 全局常量与逐帧 contentInset 的隐式耦合须随此解开;page_frame_local 契约权威文本散在 handoff/recon,随此题**补铸版**。
 
 ## 一 · 波次 A(非门控,先行排产;修单永远插队优先)
 
