@@ -3,9 +3,9 @@ import type {
   Dispatch,
   SetStateAction,
 } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useUIStore } from '@/stores/uiStore';
 import { useNoteTrashAction } from './useNoteTrashAction';
+import type { NotePaperHeaderProps } from '../layers/NotePaperHeader';
 import type {
   NoteChromeLayerProps,
 } from '../layers/NoteChromeLayer';
@@ -19,7 +19,8 @@ import type {
 } from '../runtimeDataTypes';
 
 export type UseNoteCanvasLayerPropsInput =
-  Omit<NoteChromeLayerProps, 'note' | 'onAddFavorite' | 'onBackProject' | 'onTrashNote'>
+  Omit<NoteChromeLayerProps, 'note' | 'onAddFavorite' | 'onTrashNote'>
+  & NotePaperHeaderProps
   & Omit<NoteFloatingPanelLayerProps, 'onCloseSourceJump' | 'onFocusBlock'>
   & Omit<NoteWritingSurfaceLayerProps, 'onFocusBlock' | 'onRequestFocusBlock' | 'noteId' | 'projectId'>
   & Pick<
@@ -45,19 +46,12 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
   chromeProps: NoteChromeLayerProps;
   documentLayerProps: NoteRuntimeDocumentLayerProps;
 } | null {
-  const navigate = useNavigate();
   const addToast = useUIStore((s) => s.addToast);
-  const courseId = input.note?.course_id;
   const handleTrashNote = useNoteTrashAction(input.note);
 
   const handleAddFavorite = useCallback(() => {
     addToast('info', 'Favorites will become persistent in a later Better Notebook patch');
   }, [addToast]);
-
-  const handleBackProject = useCallback(() => {
-    if (!courseId) return;
-    navigate(`/projects/${courseId}`);
-  }, [courseId, navigate]);
 
   const handleCloseSourceJump = useCallback(() => {
     input.setSourceJumpTarget(null);
@@ -69,7 +63,6 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     hostMode: input.hostMode,
     blockTrashLoadFailed: input.blockTrashLoadFailed,
     blockTrashLoading: input.blockTrashLoading,
-    chromeCollapsed: input.chromeCollapsed,
     contentReadOnly: input.contentReadOnly,
     exportPreview: input.exportPreview,
     layoutMode: input.layoutMode,
@@ -92,21 +85,15 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
     sourceReferenceCount: input.sourceReferenceCount,
     surfaceMode: input.surfaceMode,
     surfacePolicy: input.surfacePolicy,
-    titleDraft: input.titleDraft,
     trashedBlocks: input.trashedBlocks,
     documentTypographyProfile: input.documentTypographyProfile,
     restoringBlockId: input.restoringBlockId,
     onAddFavorite: handleAddFavorite,
-    onBackProject: handleBackProject,
     onTrashNote: handleTrashNote,
     onCloseOverlay: input.onCloseOverlay,
-    onCollapseChrome: input.onCollapseChrome,
     onCreatePageFrame: input.onCreatePageFrame,
     onCreatePageStack: input.onCreatePageStack,
-    onExpandChrome: input.onExpandChrome,
-    onSaveTitle: input.onSaveTitle,
     onSaveDocumentTypographyProfile: input.onSaveDocumentTypographyProfile,
-    onTitleDraftChange: input.onTitleDraftChange,
     onToggleExportPreview: input.onToggleExportPreview,
     onToggleLayoutMode: input.onToggleLayoutMode,
     onToggleMoreActions: input.onToggleMoreActions,
@@ -138,6 +125,12 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
   };
 
   const writingSurfaceProps: NoteWritingSurfaceLayerProps = {
+    paperHeader: {
+      titleDraft: input.titleDraft, descriptionDraft: input.descriptionDraft,
+      contentReadOnly: input.contentReadOnly,
+      onTitleDraftChange: input.onTitleDraftChange, onDescriptionDraftChange: input.onDescriptionDraftChange,
+      onSaveTitle: input.onSaveTitle, onSaveDescription: input.onSaveDescription,
+    },
     onPageFrameWallPointerDown: input.onPageFrameWallPointerDown,
     activePageFrameWall: input.activePageFrameWall,
     hostMode: input.hostMode,

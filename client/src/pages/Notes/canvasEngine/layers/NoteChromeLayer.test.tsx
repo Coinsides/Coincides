@@ -53,7 +53,6 @@ function noteChromeProps(
   const noop = vi.fn();
   return {
     blockTrashLoadFailed: false,
-    chromeCollapsed: false,
     contentReadOnly: false,
     exportPreview: {} as NoteChromeLayerProps['exportPreview'],
     layoutMode: false,
@@ -82,24 +81,18 @@ function noteChromeProps(
     sourceReferenceCount: 0,
     surfaceMode: 'page',
     surfacePolicy: { label: 'Page', nextModeLabel: 'Switch to Canvas' },
-    titleDraft: 'Restore door',
     documentTypographyProfile: DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE,
     trashedBlocks: [],
     blockTrashLoading: false,
     restoringBlockId: null,
     onAddFavorite: noop,
-    onBackProject: noop,
     onTrashNote: vi.fn().mockResolvedValue(undefined),
     onCloseOverlay: noop,
-    onCollapseChrome: noop,
     onAddPageBelow: noop,
     onCreatePageFrame: noop,
     onCreatePageStack: noop,
     onDetachPageFromStack: noop,
-    onExpandChrome: noop,
-    onSaveTitle: noop,
     onSaveDocumentTypographyProfile: noop,
-    onTitleDraftChange: noop,
     onToggleExportPreview: noop,
     onToggleLayoutMode: noop,
     onToggleMoreActions: noop,
@@ -125,6 +118,43 @@ function noteChromeProps(
 }
 
 describe('NoteChromeLayer block restore door', () => {
+  it('D2 keeps only the direct pills and More visible before opening the bottom menu', () => {
+    const props = noteChromeProps({ showMoreActions: false,
+      onToggleExportPreview: vi.fn(), onToggleLayoutMode: vi.fn(), onToggleMoreActions: vi.fn() });
+    const { container } = render(<div data-page-reading-control="true"><NoteChromeLayer {...props} /></div>);
+    for (const name of ['New PageStack', 'Add to favorites', 'View info', 'Deleted blocks', 'Delete note']) {
+      expect(screen.queryByRole('button', { name })).toBeNull();
+    }
+    expect(screen.queryByRole('textbox', { name: 'Note title' })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Back to project|Collapse toolbar|Expand toolbar/i })).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Preview' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Layout' }));
+    fireEvent.click(screen.getByRole('button', { name: 'More note actions' }));
+    expect(props.onToggleExportPreview).toHaveBeenCalledOnce();
+    expect(props.onToggleLayoutMode).toHaveBeenCalledOnce();
+    expect(props.onToggleMoreActions).toHaveBeenCalledOnce();
+    expect(container.querySelector('[data-page-reading-control] [data-note-toolbar-actions]')).not.toBeNull();
+  });
+
+  it('D2 migrated menu entries invoke their existing handlers from the upward body portal', () => {
+    const props = noteChromeProps({ onCreatePageStack: vi.fn(), onAddFavorite: vi.fn(),
+      onToggleNoteInfo: vi.fn(), onOpenBlockTrash: vi.fn() });
+    const { container } = render(<div data-page-reading-control="true"><NoteChromeLayer {...props} /></div>);
+    const popover = document.querySelector<HTMLElement>('[data-note-toolbar-popover]')!;
+    expect(container.contains(popover)).toBe(false);
+    expect(popover.closest('[data-canvas-layer="floating-overlay"]')?.parentElement).toBe(document.body);
+    expect(Number.parseFloat(popover.style.bottom)).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole('button', { name: 'New PageStack' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Add to favorites' }));
+    fireEvent.click(screen.getByRole('button', { name: 'View info' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Deleted blocks' }));
+    expect(props.onCreatePageStack).toHaveBeenCalledOnce();
+    expect(props.onAddFavorite).toHaveBeenCalledOnce();
+    expect(props.onToggleNoteInfo).toHaveBeenCalledOnce();
+    expect(props.onOpenBlockTrash).toHaveBeenCalledOnce();
+    expect(screen.getByText('Typography')).toBeTruthy();
+  });
+
   it('disables modal note deletion while retaining the local deleted-block drawer', () => {
     const props = noteChromeProps({ hostMode: 'modal' });
     render(<NoteChromeLayer {...props} />);

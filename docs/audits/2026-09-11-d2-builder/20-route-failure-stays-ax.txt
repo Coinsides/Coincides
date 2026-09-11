@@ -1,0 +1,87 @@
+Browser tab: 566868884, Title: "D2 synthetic header smoke", URL: "http://localhost:5179/d2-header-smoke.html#/notes/d2-note".
+1 AXWebArea D2 synthetic header smoke, URL: localhost:5179/d2-header-smoke.html#/notes/d2-note
+	2 container root
+		3 container
+			4 image
+			5 text Coincides
+			6 button (expanded) Description: Collapse navigator, Secondary Actions: Collapse
+				7 image
+			8 link Description: Home, Value: localhost:5179/d2-header-smoke.html#/
+			9 link Description: Projects, Value: localhost:5179/d2-header-smoke.html#/projects
+			10 link Description: Source Library, Value: localhost:5179/d2-header-smoke.html#/sources
+			11 link Description: Boards, Value: localhost:5179/d2-header-smoke.html#/boards
+			12 link Description: Group Gallery, Value: localhost:5179/d2-header-smoke.html#/group-gallery
+			13 link Description: Settings, Value: localhost:5179/d2-header-smoke.html#/settings
+			14 text UTILITIES
+			15 link Description: Tool Receipts, Value: localhost:5179/d2-header-smoke.html#/tool-receipts
+			16 text PROJECTS
+			17 button
+				18 image
+			19 button D2 synthetic project
+			20 text FAVORITES
+			21 image
+			22 button D2 synthetic project
+				23 image
+				24 text D2 synthetic project
+			25 text RECENT
+			26 image
+			27 button D2 synthetic project
+				28 image
+				29 text D2 synthetic project
+		30 container
+			31 button (collapsed) Staging (0), Secondary Actions: Expand
+				32 text Staging (
+				33 text 0
+				34 text )
+			35 text Runtime templates were empty; using static fallback.
+			36 container
+				37 container
+					38 text entry area (settable) Description: Note title, Value: D2 renamed on paper
+					39 text entry area (settable) Description: Note description, Value: D2 retains this draft when saving fails.
+				40 container
+					41 splitter Left page margin
+					42 splitter Right page margin
+					43 text 1 / 1
+					44 container
+						45 container Text unit tools
+							46 pop up button (collapsed) Description: Text unit handle, Secondary Actions: Expand
+						47 text entry area (settable) D2 failed route save remains available to retry.
+					48 container Resize block
+				49 container Page reading controls
+					50 checkbox Preview, Help: Preview export boundary, Value: 0
+						51 image
+						52 text Preview
+					53 checkbox Layout, Help: Toggle layout mode, Value: 0
+						54 image
+						55 text Layout
+					56 button More note actions
+						57 image
+					58 checkbox Write, Value: 1
+					59 checkbox Description: Pen, Value: 0
+					60 checkbox Description: Eraser, Value: 0
+					61 checkbox Fit width, Value: 1
+					62 checkbox Fit page, Value: 0
+					63 checkbox 100% physical, Value: 0
+					64 checkbox Description: Page overview, Value: 0
+					65 button Decrease page reading step
+					66 container Page display scale
+						67 text 123 %
+					68 button Increase page reading step
+				69 button Open content groups
+					70 image
+					71 text Groups
+		72 container
+			73 image
+			74 text Failed to save description
+			75 button
+				76 image
+			77 image
+			78 text Failed to save description
+			79 button
+				80 image
+			81 image
+			82 text Changes could not be saved. Please retry before leaving the note.
+			83 button
+				84 image
+
+The focused UI element is 1 AXWebArea D2 synthetic header smoke, URL: localhost:5179/d2-header-smoke.html#/notes/d2-note

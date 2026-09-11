@@ -1,0 +1,40 @@
+{
+  "date": "2026-09-11",
+  "disposition": "diagnostic conflict; implementation stopped; F18 not reproduced",
+  "environment": {
+    "browser": "Existing real Chrome via Codex browser extension",
+    "url": "http://localhost:5173/d2-header-smoke.html#/notes/d2-note",
+    "host": "page",
+    "fixture": "docs/audits/2026-09-11-d2-builder/browser-fixture.tsx",
+    "data": "Existing synthetic fixture; all application Axios requests terminate in its local adapter",
+    "productionCodeModified": false
+  },
+  "method": "CUA click/typeText/pressKey('ctrl+a' or 'ctrl+z'); read-only Playwright textarea value/selectionStart/selectionEnd inspection. No fill(), setSelectionRange(), dispatchEvent(), or programmatic value edits used for the observed replacements/undo.",
+  "observations": [
+    {
+      "field": "Note title",
+      "steps": [
+        { "action": "Click title; Ctrl+A", "value": "Paper header field notes", "selectionStart": 0, "selectionEnd": 24, "check": "full native selection", "pass": true },
+        { "action": "typeText('F18 native replacement')", "value": "F18 native replacement", "selectionStart": 22, "selectionEnd": 22, "check": "selected full value replaced", "pass": true },
+        { "action": "Ctrl+Z", "value": "Paper header field notes", "selectionStart": 0, "selectionEnd": 24, "check": "native edit restored original text", "pass": true }
+      ]
+    },
+    {
+      "field": "Note description",
+      "setup": "Click the initially empty description and typeText('F18 description original')",
+      "steps": [
+        { "action": "Ctrl+A", "value": "F18 description original", "selectionStart": 0, "selectionEnd": 24, "check": "full native selection", "pass": true },
+        { "action": "typeText('F18 description replacement')", "value": "F18 description replacement", "selectionStart": 27, "selectionEnd": 27, "check": "selected full value replaced", "pass": true },
+        { "action": "Ctrl+Z", "value": "F18 description original", "selectionStart": 0, "selectionEnd": 24, "check": "native edit restored original text", "pass": true }
+      ]
+    }
+  ],
+  "checksPassed": 6,
+  "checksFailed": 0,
+  "limits": [
+    "This is current page-host synthetic runtime evidence, not a reproduction of HQ's original session.",
+    "No nonempty canvas-history isolation assertion was run; no claim of full F18 acceptance.",
+    "Cmd, redo, clipboard keys, Shift+arrows, Home/End, modal host and block/canvas shortcut regression were not exercised in this stopped attempt.",
+    "D2 targeted suite, typecheck, build and aggregate runtime gate were not run in this stopped attempt. Prior D2 test counts are not attributed to this attempt."
+  ]
+}

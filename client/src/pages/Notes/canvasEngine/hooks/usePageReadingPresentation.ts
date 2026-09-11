@@ -5,7 +5,7 @@ import { derivePageReadingViewport, type PageReadingViewState } from '../pageRea
 import type { CanvasViewport, PageFrameModel } from '../types';
 
 export function usePageReadingPresentation({
-  enabled, noteId, surfaceRef, blockListRef, pageFrame, pageFrames = [], pageContentHeight, viewState, onViewportChange,
+  enabled, noteId, surfaceRef, blockListRef, pageFrame, pageFrames = [], pageContentHeight, displayHeaderHeight = 0, viewState, onViewportChange,
 }: {
   enabled: boolean;
   noteId?: string;
@@ -14,6 +14,7 @@ export function usePageReadingPresentation({
   pageFrame: PageFrameModel | null;
   pageFrames?: PageFrameModel[];
   pageContentHeight: number;
+  displayHeaderHeight?: number;
   viewState: PageReadingViewState;
   onViewportChange?: (viewport: CanvasViewport) => void;
 }) {
@@ -32,8 +33,8 @@ export function usePageReadingPresentation({
   ).physicalScale;
   const reading = useMemo(() => derivePageReadingViewport({
     viewState, availableWidth: available.width, availableHeight: available.height,
-    paperWidth, paperHeight, physicalScale,
-  }), [viewState, available, paperWidth, paperHeight, physicalScale]);
+    paperWidth, paperHeight: paperHeight + displayHeaderHeight, physicalScale,
+  }), [viewState, available, paperWidth, paperHeight, physicalScale, displayHeaderHeight]);
 
   const measureAvailableSpace = useCallback(() => {
     const surface = surfaceRef.current;

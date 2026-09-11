@@ -1,0 +1,38 @@
+{
+  "body": {
+    "bottom": 481.0672607421875,
+    "height": 54.30731201171875,
+    "left": 688.8665161132812,
+    "right": 1491.133544921875,
+    "top": 426.7599487304687,
+    "width": 802.2670288085938,
+    "x": 688.8665161132812,
+    "y": 426.7599487304687
+  },
+  "count": 1,
+  "fields": [
+    {
+      "height": 80,
+      "overflow": "hidden",
+      "scrollHeight": 281,
+      "styleHeight": "80px"
+    },
+    {
+      "height": 72,
+      "overflow": "auto",
+      "scrollHeight": 360,
+      "styleHeight": "72px"
+    }
+  ],
+  "header": {
+    "bottom": 367.5223388671875,
+    "height": 256.7254638671875,
+    "left": 600,
+    "right": 1580,
+    "top": 110.796875,
+    "width": 980,
+    "x": 600,
+    "y": 110.796875
+  },
+  "height": 208
+}

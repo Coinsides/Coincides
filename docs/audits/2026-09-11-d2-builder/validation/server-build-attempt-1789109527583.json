@@ -1,0 +1,12 @@
+{
+  "name": "server-build",
+  "command": [
+    "node",
+    "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+    "run",
+    "build"
+  ],
+  "cwd": "server",
+  "exitCode": 0,
+  "elapsedMs": 5908
+}

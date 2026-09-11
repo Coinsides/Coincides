@@ -1,4 +1,4 @@
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { createHashRouter, createRoutesFromElements, RouterProvider, Route, Navigate, Outlet } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
 import { useUIStore } from '@/stores/uiStore';
 import AppLayout from '@/components/Layout/AppLayout';
@@ -74,47 +74,57 @@ function ModalLayer() {
   }
 }
 
-export default function App() {
+function AppRoot() {
   return (
-    <HashRouter>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <AppLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route index element={<DailyBrief />} />
-          <Route path="calendar" element={<CalendarPage />} />
-          <Route path="goals" element={<GoalsPage />} />
-          <Route path="projects" element={<CoursesPage />} />
-          <Route path="projects/:courseId" element={<CourseDetailPage />} />
-          <Route path="courses" element={<CoursesPage />} />
-          <Route path="courses/:courseId" element={<CourseDetailPage />} />
-          <Route path="notes/:noteId" element={<NoteDetailPage />} />
-          <Route path="boards" element={<BoardList />} />
-          <Route path="boards/:boardId" element={<BoardPage />} />
-          <Route path="sources" element={<SourceLibraryPage />} />
-          <Route path="group-gallery" element={<GroupGalleryPage />} />
-          <Route path="group-gallery/editor" element={<SingleContentGroupEditorPage />} />
-          <Route path="decks" element={<DecksPage />} />
-          <Route path="decks/:deckId" element={<DeckDetailPage />} />
-          <Route path="review" element={<ReviewPage />} />
-          <Route path="statistics" element={<StatisticsPage />} />
-          <Route path="settings" element={<SettingsPage />} />
-          <Route path="agent-memories" element={<AgentMemoriesPage />} />
-          <Route path="tool-receipts" element={<ToolReceiptsPage />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+    <>
+      <Outlet />
       <ModalLayer />
       <AuthenticatedOverlays />
       <ShortcutsPanel />
       <ToastContainer />
-    </HashRouter>
+    </>
   );
+}
+
+// Keep the existing hash URLs and route tree while enabling the router's
+// asynchronous leave barrier for notes (including history back/forward).
+const router = createHashRouter(createRoutesFromElements(
+  <Route element={<AppRoot />}>
+    <Route path="/login" element={<Login />} />
+    <Route path="/register" element={<Register />} />
+    <Route
+      path="/"
+      element={
+        <ProtectedRoute>
+          <AppLayout />
+        </ProtectedRoute>
+      }
+    >
+      <Route index element={<DailyBrief />} />
+      <Route path="calendar" element={<CalendarPage />} />
+      <Route path="goals" element={<GoalsPage />} />
+      <Route path="projects" element={<CoursesPage />} />
+      <Route path="projects/:courseId" element={<CourseDetailPage />} />
+      <Route path="courses" element={<CoursesPage />} />
+      <Route path="courses/:courseId" element={<CourseDetailPage />} />
+      <Route path="notes/:noteId" element={<NoteDetailPage />} />
+      <Route path="boards" element={<BoardList />} />
+      <Route path="boards/:boardId" element={<BoardPage />} />
+      <Route path="sources" element={<SourceLibraryPage />} />
+      <Route path="group-gallery" element={<GroupGalleryPage />} />
+      <Route path="group-gallery/editor" element={<SingleContentGroupEditorPage />} />
+      <Route path="decks" element={<DecksPage />} />
+      <Route path="decks/:deckId" element={<DeckDetailPage />} />
+      <Route path="review" element={<ReviewPage />} />
+      <Route path="statistics" element={<StatisticsPage />} />
+      <Route path="settings" element={<SettingsPage />} />
+      <Route path="agent-memories" element={<AgentMemoriesPage />} />
+      <Route path="tool-receipts" element={<ToolReceiptsPage />} />
+    </Route>
+    <Route path="*" element={<Navigate to="/" replace />} />
+  </Route>,
+));
+
+export default function App() {
+  return <RouterProvider router={router} />;
 }

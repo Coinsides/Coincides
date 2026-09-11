@@ -1,0 +1,10 @@
+{
+  "name": "runtime-boundary",
+  "command": [
+    "node",
+    "scripts/canvasRuntimeBoundaryCheck.mjs"
+  ],
+  "cwd": "client",
+  "exitCode": 0,
+  "elapsedMs": 47
+}

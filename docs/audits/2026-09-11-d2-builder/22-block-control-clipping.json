@@ -1,0 +1,39 @@
+{
+  "button": {
+    "bottom": 350.375,
+    "height": 27,
+    "left": 1508.125,
+    "right": 1535.125,
+    "top": 323.375,
+    "width": 27,
+    "x": 1508.125,
+    "y": 323.375
+  },
+  "portals": [
+    {
+      "class": "_floatingOverlayPortal_10s0z_288 _blockToolbarPortal_10s0z_302",
+      "clipPath": "inset(2px 0px 0px)",
+      "rect": {
+        "bottom": 911,
+        "height": 911,
+        "left": 0,
+        "right": 1920,
+        "top": 0,
+        "width": 1920,
+        "x": 0,
+        "y": 0
+      },
+      "text": ""
+    }
+  ],
+  "viewport": {
+    "bottom": 911,
+    "height": 911,
+    "left": 270,
+    "right": 1920,
+    "top": 0,
+    "width": 1650,
+    "x": 270,
+    "y": 0
+  }
+}

@@ -4,6 +4,7 @@ import {
   createEvent,
   fireEvent,
   render,
+  renderHook,
   screen,
   waitFor,
 } from '@testing-library/react';
@@ -15,6 +16,8 @@ import type { NoteCanvasRuntimeModel, PageFrameModel } from '../types';
 import * as pageReadingDom from '../pageReadingDomService';
 import { createPageFrameDefaultTypographyProfile } from '../pageFrameTypographyService';
 import { createDefaultDocumentTypographyProfile } from '../typographyProfileService';
+import { createSurfaceModePolicy } from '../modePolicyService';
+import { useCanvasSurfacePointerController } from '../hooks/useCanvasSurfacePointerController';
 import { NoteRuntimeDocumentLayer, type NoteRuntimeDocumentHandle } from './NoteRuntimeDocumentLayer';
 import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
 
@@ -399,6 +402,123 @@ describe('NoteRuntimeDocumentLayer overview navigation', () => {
       props.onSelectPageFrame, props.onSetPrimaryPageFrame,
     ];
   }
+
+  function paperHeader() {
+    return {
+      titleDraft: 'Paper title', descriptionDraft: 'Paper description', contentReadOnly: false,
+      onTitleDraftChange: vi.fn(), onDescriptionDraftChange: vi.fn(),
+      onSaveTitle: vi.fn(), onSaveDescription: vi.fn(),
+    };
+  }
+
+  it('D2 renders one header across multiple pages, follows live side walls, and declares projection differences', () => {
+    const props = { ...overviewProps(4), paperHeader: paperHeader() };
+    const { container, rerender } = render(documentFor(props));
+    const header = container.querySelector<HTMLElement>('[data-note-paper-header="true"]')!;
+    expect(container.querySelectorAll('[data-note-paper-header="true"]')).toHaveLength(1);
+    expect(header.style.paddingLeft).toBe('72px');
+    expect(header.style.paddingRight).toBe('72px');
+    const frame = { ...props.noteCanvasRuntime.primaryPageFrame!, contentInset: { left: 110, right: 48, top: 0, bottom: 96 } };
+    const next = { ...props, noteCanvasRuntime: { ...props.noteCanvasRuntime, primaryPageFrame: frame,
+      pageFrames: [frame, ...props.noteCanvasRuntime.pageFrames.slice(1)] } };
+    rerender(documentFor(next));
+    expect(header.style.paddingLeft).toBe('110px');
+    expect(header.style.paddingRight).toBe('48px');
+    fireEvent.click(screen.getByRole('button', { name: 'Page overview' }));
+    const overview = container.querySelector('[data-note-overview-root]')!;
+    expect(overview.querySelector('[data-note-paper-header]')).toBeNull();
+    expect(container.querySelectorAll('[data-note-paper-header]')).toHaveLength(1);
+    act(() => { window.dispatchEvent(new Event('beforeprint')); });
+    const print = document.querySelector('[data-note-print-root]')!;
+    expect(print.querySelectorAll('[data-note-print-page]')).toHaveLength(4);
+    expect(print.querySelector('[data-note-paper-header]')).toBeNull();
+    act(() => { window.dispatchEvent(new Event('afterprint')); });
+  });
+
+  it('D2 title and description edits move only the outer paper origin within the bounded display band', async () => {
+    vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (this: HTMLElement) {
+      if (!this.matches('[data-note-paper-header]')) return 0;
+      return this.querySelector<HTMLTextAreaElement>('[aria-label="Note title"]')!.value.length > 40 ? 500 : 120;
+    });
+    const props = overviewProps(1);
+    props.onMovePageFrame = vi.fn();
+    props.blockLayouts = { [codeBlock.id]: { x: 34, y: 85, width: 540, height: 120 } };
+    const original = JSON.stringify({ layouts: props.blockLayouts, runtime: props.noteCanvasRuntime, blocks: props.allBlocks });
+    const { container, rerender } = render(documentFor(props));
+    const shell = container.querySelector<HTMLElement>('[data-note-block-shell]')!;
+    const paper = container.querySelector<HTMLElement>('[data-page-display-scale]')!;
+    const scale = Number(paper.dataset.pageDisplayScale);
+    const localPosition = { top: shell.style.top, left: shell.style.left };
+    const oldTop = Number.parseFloat(paper.style.top);
+    const header = paperHeader();
+    rerender(documentFor({ ...props, paperHeader: header }));
+    expect(Number.parseFloat(paper.style.top) - oldTop).toBeCloseTo(120 * scale);
+    const title = screen.getByRole('textbox', { name: 'Note title' });
+    const description = screen.getByRole('textbox', { name: 'Note description' });
+    fireEvent.change(title, { target: { value: 'Changed title '.repeat(30) } });
+    fireEvent.change(description, { target: { value: 'Changed description '.repeat(40) } });
+    expect(header.onTitleDraftChange).toHaveBeenCalledWith('Changed title '.repeat(30));
+    expect(header.onDescriptionDraftChange).toHaveBeenCalledWith('Changed description '.repeat(40));
+    rerender(documentFor({ ...props, paperHeader: { ...header, titleDraft: 'Changed title '.repeat(30), descriptionDraft: 'Changed description '.repeat(40) } }));
+    expect(Number.parseFloat(paper.style.top) - oldTop).toBeCloseTo(208 * scale);
+    expect({ top: shell.style.top, left: shell.style.left }).toEqual(localPosition);
+    expect(JSON.stringify({ layouts: props.blockLayouts, runtime: props.noteCanvasRuntime, blocks: props.allBlocks })).toBe(original);
+    fireEvent.blur(title);
+    fireEvent.blur(description);
+    await waitFor(() => expect(header.onSaveTitle).toHaveBeenCalledOnce());
+    expect(header.onSaveDescription).toHaveBeenCalledOnce();
+    expect(props.onPersistCanvasObject).not.toHaveBeenCalled();
+    expect(props.onSaveBlock).not.toHaveBeenCalled();
+    expect(props.onMovePageFrame).not.toHaveBeenCalled();
+  });
+
+  it('D2 keeps a negative local-y block after the header without rewriting its stored position', () => {
+    const props = { ...overviewProps(1), paperHeader: paperHeader() };
+    props.onMovePageFrame = vi.fn();
+    props.noteCanvasRuntime = { ...props.noteCanvasRuntime, coordinateContract: 'v2' };
+    props.blockLayouts = { [codeBlock.id]: { x: -24, y: -90, width: 540, height: 120,
+      surface: 'formal_page', coordinate_space: 'page_frame_local', frame_id: props.noteCanvasRuntime.primaryPageFrame!.id } };
+    const original = JSON.stringify(props.blockLayouts);
+    const { container } = render(documentFor(props));
+    const shell = container.querySelector<HTMLElement>('[data-note-block-shell]')!;
+    const paper = container.querySelector<HTMLElement>('[data-page-display-scale]')!;
+    const scale = Number(paper.dataset.pageDisplayScale);
+    // jsdom has no layout engine: these are production DOM layout inputs in
+    // CSS pixels, including the actual scale and overflow compensation.
+    const bodyTop = Number.parseFloat(paper.style.top)
+      + (Number.parseFloat(paper.style.paddingTop) + Number.parseFloat(shell.style.top)) * scale;
+    expect(shell.style.top).toBe('-90px');
+    expect(bodyTop).toBeGreaterThanOrEqual(120 * scale);
+    expect(JSON.stringify(props.blockLayouts)).toBe(original);
+    expect(props.onPersistCanvasObject).not.toHaveBeenCalled();
+    expect(props.onMovePageFrame).not.toHaveBeenCalled();
+  });
+
+  it('D2 blank-body coordinates remain relative to blockListRef while header gestures stay outside the body', () => {
+    const props = { ...overviewProps(1), paperHeader: paperHeader() };
+    const { container, rerender } = render(documentFor(props));
+    const blockList = props.blockListRef.current!;
+    const paper = container.querySelector<HTMLElement>('[data-page-display-scale]')!;
+    const scale = Number(paper.dataset.pageDisplayScale);
+    const blockRect = new DOMRect(180, 60 + Number.parseFloat(paper.style.top), 760 * scale, 1278 * scale);
+    vi.spyOn(blockList, 'getBoundingClientRect').mockReturnValue(blockRect);
+    const activateDraft = vi.fn();
+    const { result } = renderHook(() => useCanvasSurfacePointerController({
+      activateDraft, clearBlockSelection: vi.fn(), contentWidth: 760,
+      defaultDraftLayout: props.defaultDraftLayout, pageOffsetX: 0, snapEnabled: false,
+      surfacePolicy: createSurfaceModePolicy('page'),
+      viewportTransform: { x: 0, y: 0, width: 960, height: 720, zoom: scale },
+    }));
+    rerender(documentFor({ ...props, onPageSpaceDoubleClick: result.current.handlePageSpaceDoubleClick }));
+    fireEvent.doubleClick(container.querySelector('[data-note-paper-header]')!, { clientX: 200, clientY: 80 });
+    fireEvent.doubleClick(screen.getByRole('textbox', { name: 'Note title' }), { clientX: 200, clientY: 80 });
+    expect(activateDraft).not.toHaveBeenCalled();
+    fireEvent.doubleClick(blockList, { clientX: blockRect.left + 120 * scale, clientY: blockRect.top + 300 * scale });
+    expect(activateDraft).toHaveBeenCalledOnce();
+    expect(activateDraft.mock.calls[0][0].x).toBeCloseTo(120);
+    expect(activateDraft.mock.calls[0][0].y).toBeCloseTo(300);
+    expect(props.blockListRef.current).toBe(blockList);
+  });
 
   it.each([1, 4, 9])('opens %i pages with bounded pagination and closes without invoking writers', async (pageCount) => {
     const props = overviewProps(pageCount);

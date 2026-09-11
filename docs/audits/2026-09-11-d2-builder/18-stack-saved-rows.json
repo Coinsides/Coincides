@@ -1,0 +1,321 @@
+{
+  "storage_key": "coincides-d2-synthetic-browser-v1",
+  "notes": [
+    {
+      "id": "d2-note",
+      "course_id": "d2-project",
+      "title": "D2 renamed on paper",
+      "description": "Modal close flushed this description.",
+      "status": "active",
+      "metadata": {
+        "text_flow_typography_profile_v1": {
+          "version": "DocumentTypographyMetadataV1",
+          "activeProfile": {
+            "profileId": "paper-document",
+            "fontFamily": "Georgia, serif",
+            "fontSizePx": 14.7,
+            "lineHeightPx": 21.5,
+            "paragraphSpacingPx": 0,
+            "averageCharWidthPx": 7
+          }
+        }
+      }
+    },
+    {
+      "id": "d2-existing",
+      "course_id": "d2-project",
+      "title": "Existing note with description",
+      "description": "An existing description loaded through the same note row.",
+      "status": "active",
+      "metadata": {}
+    },
+    {
+      "id": "d2-source",
+      "course_id": "d2-project",
+      "title": "Locked source projection",
+      "description": "Source header fields remain read-only.",
+      "status": "active",
+      "metadata": {},
+      "note_class": "source_projection"
+    }
+  ],
+  "blocks": [
+    {
+      "id": "d2-block-1",
+      "placement_id": "d2-placement-1",
+      "note_id": "d2-note",
+      "status": "active",
+      "text_save_revision": 1,
+      "display_overrides_json": {},
+      "block_type": "text",
+      "title": null,
+      "content_json": {
+        "text_flow": {
+          "textflow_version": "TextBlockContentV1",
+          "units": [
+            {
+              "id": "tu-1",
+              "text": "D2 immediate route departure persisted this body.",
+              "writing_role": "paragraph",
+              "indent_level": 0,
+              "order_index": 0,
+              "metadata": {},
+              "status": "active"
+            }
+          ],
+          "inline_structures": [],
+          "metadata": {}
+        },
+        "body": "D2 immediate route departure persisted this body."
+      },
+      "plain_text": "D2 immediate route departure persisted this body.",
+      "metadata": {},
+      "order_index": 0,
+      "source_references": [],
+      "canvas_layout": {
+        "x": 0,
+        "y": 0,
+        "width": 650,
+        "height": 120,
+        "coordinate_space": "page_frame_local",
+        "surface": "formal_page",
+        "frame_id": "d2-primary-frame",
+        "boundary_role": "inside"
+      }
+    },
+    {
+      "id": "d2-block-2",
+      "placement_id": "d2-placement-2",
+      "note_id": "d2-existing",
+      "status": "active",
+      "text_save_revision": 0,
+      "display_overrides_json": {},
+      "block_type": "text",
+      "title": null,
+      "content_json": {
+        "text_flow": {
+          "textflow_version": "TextBlockContentV1",
+          "units": [
+            {
+              "id": "tu-1",
+              "text": "This is pre-existing body content. Its stored placement stays unchanged when the header is edited or rendered.",
+              "writing_role": "paragraph",
+              "indent_level": 0,
+              "order_index": 0,
+              "metadata": {},
+              "status": "active"
+            }
+          ],
+          "inline_structures": [],
+          "metadata": {}
+        }
+      },
+      "plain_text": "This is pre-existing body content. Its stored placement stays unchanged when the header is edited or rendered.",
+      "metadata": {},
+      "order_index": 0,
+      "source_references": [],
+      "canvas_layout": {
+        "x": 0,
+        "y": 0,
+        "width": 650,
+        "height": 120,
+        "coordinate_space": "page_frame_local",
+        "surface": "formal_page",
+        "frame_id": "d2-primary-frame",
+        "boundary_role": "inside"
+      }
+    },
+    {
+      "id": "d2-block-3",
+      "placement_id": "d2-placement-3",
+      "note_id": "d2-source",
+      "status": "active",
+      "text_save_revision": 0,
+      "display_overrides_json": {},
+      "block_type": "text",
+      "title": null,
+      "content_json": {
+        "text_flow": {
+          "textflow_version": "TextBlockContentV1",
+          "units": [
+            {
+              "id": "tu-1",
+              "text": "This is pre-existing body content. Its stored placement stays unchanged when the header is edited or rendered.",
+              "writing_role": "paragraph",
+              "indent_level": 0,
+              "order_index": 0,
+              "metadata": {},
+              "status": "active"
+            }
+          ],
+          "inline_structures": [],
+          "metadata": {}
+        }
+      },
+      "plain_text": "This is pre-existing body content. Its stored placement stays unchanged when the header is edited or rendered.",
+      "metadata": {},
+      "order_index": 0,
+      "source_references": [],
+      "canvas_layout": {
+        "x": 0,
+        "y": 0,
+        "width": 650,
+        "height": 120,
+        "coordinate_space": "page_frame_local",
+        "surface": "formal_page",
+        "frame_id": "d2-primary-frame",
+        "boundary_role": "inside"
+      }
+    }
+  ],
+  "requests": [
+    {
+      "method": "post",
+      "url": "/source-anchors/generate",
+      "payload": {
+        "course_id": "d2-project",
+        "target_type": "note_block"
+      }
+    },
+    {
+      "method": "post",
+      "url": "/source-anchors/generate",
+      "payload": {
+        "course_id": "d2-project",
+        "target_type": "note_block"
+      }
+    },
+    {
+      "method": "post",
+      "url": "/source-anchors/generate",
+      "payload": {
+        "course_id": "d2-project",
+        "target_type": "note_block"
+      }
+    },
+    {
+      "method": "put",
+      "url": "/canvas-objects/by-note/d2-note/page-frame-collection",
+      "payload": {
+        "collection": {
+          "pageFrames": [
+            {
+              "id": "d2-primary-frame",
+              "role": "primary_page_frame",
+              "exportable": true,
+              "x": 84,
+              "y": 0,
+              "width": 794,
+              "height": 1278,
+              "pageSize": "A4",
+              "contentInset": {
+                "top": 24,
+                "right": 72,
+                "bottom": 96,
+                "left": 72
+              }
+            },
+            {
+              "id": "page-frame-2",
+              "role": "secondary_page_frame",
+              "exportable": true,
+              "x": 84,
+              "y": 1358,
+              "width": 794,
+              "height": 1278,
+              "pageSize": "A4",
+              "contentInset": {
+                "top": 24,
+                "right": 72,
+                "bottom": 96,
+                "left": 72
+              }
+            },
+            {
+              "id": "page-frame-3",
+              "role": "secondary_page_frame",
+              "exportable": true,
+              "x": 84,
+              "y": 2716,
+              "width": 794,
+              "height": 1278,
+              "pageSize": "A4",
+              "contentInset": {
+                "top": 24,
+                "right": 72,
+                "bottom": 96,
+                "left": 72
+              }
+            }
+          ],
+          "pageStacks": [
+            {
+              "id": "page-stack-d2-primary-frame",
+              "displayName": "Page stack 1",
+              "frameIds": [
+                "d2-primary-frame"
+              ],
+              "primaryFrameId": "d2-primary-frame",
+              "selectedFrameId": "d2-primary-frame",
+              "collapsed": false,
+              "numbering": {
+                "enabled": true,
+                "startAt": 1
+              },
+              "layout": {
+                "direction": "vertical",
+                "gap": 80,
+                "collapsedPreviewPages": 1
+              },
+              "createdFrom": "a4_note_seed"
+            },
+            {
+              "id": "page-stack-2",
+              "displayName": "Page stack 2",
+              "frameIds": [
+                "page-frame-2"
+              ],
+              "primaryFrameId": "page-frame-2",
+              "selectedFrameId": "page-frame-2",
+              "collapsed": false,
+              "numbering": {
+                "enabled": true,
+                "startAt": 1
+              },
+              "layout": {
+                "direction": "vertical",
+                "gap": 80,
+                "collapsedPreviewPages": 1
+              },
+              "createdFrom": "import"
+            },
+            {
+              "id": "page-stack-3",
+              "displayName": "Page stack 3",
+              "frameIds": [
+                "page-frame-3"
+              ],
+              "primaryFrameId": "page-frame-3",
+              "selectedFrameId": "page-frame-3",
+              "collapsed": false,
+              "numbering": {
+                "enabled": true,
+                "startAt": 1
+              },
+              "layout": {
+                "direction": "vertical",
+                "gap": 80,
+                "collapsedPreviewPages": 1
+              },
+              "createdFrom": "import"
+            }
+          ],
+          "primaryFrameId": "d2-primary-frame",
+          "primaryStackId": "page-stack-d2-primary-frame",
+          "selectedFrameId": "page-frame-3",
+          "selectedStackId": "page-stack-3"
+        }
+      }
+    }
+  ]
+}

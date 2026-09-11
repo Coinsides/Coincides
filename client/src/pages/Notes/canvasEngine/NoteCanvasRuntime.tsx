@@ -1,6 +1,4 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef } from 'react';
-import { flushSync } from 'react-dom';
-import { useUIStore } from '@/stores/uiStore';
 import { useNoteCanvasRuntime } from './hooks/useNoteCanvasRuntime';
 import { useNoteCanvasRuntimeController } from './hooks/useNoteCanvasRuntimeController';
 import { NoteChromeLayer } from './layers/NoteChromeLayer';
@@ -17,33 +15,12 @@ const NoteCanvasRuntime = forwardRef<NoteCanvasRuntimeHandle, { onRequestClose?:
   const { hostMode = 'page' } = useNoteCanvasRuntime();
   const { layerProps, loading, loadError, note, dismissTransientUI: dismissControllerUI, flushPendingSaves, refreshBoardTextRanges } = useNoteCanvasRuntimeController();
   const documentRef = useRef<NoteRuntimeDocumentHandle>(null);
-  const leaving = useRef(false);
-  const addToast = useUIStore((state) => state.addToast);
   const dismissTransientUI = useCallback(() => {
     documentRef.current?.resumeEditingForExit();
     dismissControllerUI();
   }, [dismissControllerUI]);
   useImperativeHandle(ref, () => ({ dismissTransientUI, flushPendingSaves, refreshBoardTextRanges }), [dismissTransientUI, flushPendingSaves, refreshBoardTextRanges]);
   const surfaceMode = layerProps?.documentLayerProps.surfaceMode;
-
-  const backToProject = async () => {
-    if (leaving.current) return;
-    leaving.current = true;
-    try {
-      // Leaving the note is an ordinary editing boundary, not an overview action.
-      dismissTransientUI();
-      await Promise.resolve();
-      flushSync(() => {
-        if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-      });
-      await flushPendingSaves();
-      layerProps?.chromeProps.onBackProject();
-    } catch {
-      addToast('error', 'Changes could not be saved. Please retry before leaving the note.');
-    } finally {
-      leaving.current = false;
-    }
-  };
 
   useEffect(() => {
     if (hostMode === 'modal') return;
@@ -77,10 +54,9 @@ const NoteCanvasRuntime = forwardRef<NoteCanvasRuntimeHandle, { onRequestClose?:
 
   return (
     <div className={`${styles.page} ${surfaceMode === 'canvas' ? styles.pageCanvas : ''}`} data-note-host-mode={hostMode}>
-      <NoteChromeLayer {...layerProps.chromeProps}
-        onBackProject={hostMode === 'modal' && onRequestClose ? onRequestClose : () => { void backToProject(); }} />
-
-      <NoteRuntimeDocumentLayer ref={documentRef} {...layerProps.documentLayerProps} />
+      <NoteRuntimeDocumentLayer ref={documentRef} {...layerProps.documentLayerProps}
+        writingSurfaceProps={{ ...layerProps.documentLayerProps.writingSurfaceProps,
+          noteTools: <NoteChromeLayer {...layerProps.chromeProps} /> }} />
     </div>
   );
 });

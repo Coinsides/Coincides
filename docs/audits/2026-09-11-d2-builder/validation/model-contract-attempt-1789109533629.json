@@ -1,0 +1,12 @@
+{
+  "name": "model-contract",
+  "command": [
+    "node",
+    "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+    "run",
+    "smoke:canvas-engine-model-contract"
+  ],
+  "cwd": "client",
+  "exitCode": 0,
+  "elapsedMs": 1607
+}

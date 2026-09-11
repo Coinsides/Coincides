@@ -1,0 +1,28 @@
+{
+  "bandHeight": 121,
+  "body": {
+    "bottom": 467.4957885742187,
+    "height": 148.11083984375,
+    "left": 688.8665161132812,
+    "right": 1491.133544921875,
+    "top": 319.38494873046875,
+    "width": 802.2670288085938,
+    "x": 688.8665161132812,
+    "y": 319.38494873046875
+  },
+  "bodyStyle": "left: 0px; top: 24px; width: 650px; min-height: 120px; --text-unit-gutter-lane-offset: 13px; --text-unit-gutter-cancel-indent: 1;",
+  "descriptionOpacity": "0",
+  "displayScale": "1.234256926952141",
+  "header": {
+    "bottom": 260.1419677734375,
+    "height": 149.3450927734375,
+    "left": 600,
+    "right": 1580,
+    "top": 110.796875,
+    "width": 980,
+    "x": 600,
+    "y": 110.796875
+  },
+  "headerCount": 1,
+  "topChromeCount": 0
+}

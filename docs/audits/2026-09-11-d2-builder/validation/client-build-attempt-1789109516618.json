@@ -1,0 +1,12 @@
+{
+  "name": "client-build",
+  "command": [
+    "node",
+    "C:\\Program Files\\nodejs\\node_modules\\npm\\bin\\npm-cli.js",
+    "run",
+    "build"
+  ],
+  "cwd": "client",
+  "exitCode": 0,
+  "elapsedMs": 11005
+}

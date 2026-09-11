@@ -1,0 +1,15 @@
+{
+  "fields": [
+    {
+      "label": "Note title",
+      "readOnly": true,
+      "value": "Locked source projection"
+    },
+    {
+      "label": "Note description",
+      "readOnly": true,
+      "value": "Source header fields remain read-only."
+    }
+  ],
+  "toolbarText": " Source lockedPreviewLayoutDelete Locked source projection?This note will move to Trash and can be restored from the Project Trash tab. Its board cards will remain visible as unavailable until you restore it.CancelMove to TrashWrite Pen EraserFit widthFit page100% physicalOverview−123%+"
+}

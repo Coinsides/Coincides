@@ -36,10 +36,7 @@ export function useRuntimeSurfaceStateController({ noteId }: { noteId?: string }
   } = useLayoutInteractionController();
 
   const {
-    chromeCollapsed,
     closeOverlay,
-    collapseChrome,
-    expandChrome,
     showBlockTrash,
     showExportPreview,
     showLayoutPanel,
@@ -157,12 +154,9 @@ export function useRuntimeSurfaceStateController({ noteId }: { noteId?: string }
     setPageReadingViewport,
     activeBlockId,
     blockListRef,
-    chromeCollapsed,
     clearTemporaryLayoutMode,
     clearBlockSelection,
     closeOverlay,
-    collapseChrome,
-    expandChrome,
     focusBlockId,
     focusedTextOwner,
     focusViewportOnRect,

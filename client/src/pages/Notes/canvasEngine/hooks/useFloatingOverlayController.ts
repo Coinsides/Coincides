@@ -18,7 +18,6 @@ export interface UseFloatingOverlayControllerOptions {
 export function useFloatingOverlayController({
   setInteractionState,
 }: UseFloatingOverlayControllerOptions) {
-  const [chromeCollapsed, setChromeCollapsed] = useState(false);
   const [activeOverlay, setActiveOverlay] = useState<FloatingOverlayPanel | null>(null);
   const [showPreviewBlockTypes, setShowPreviewBlockTypes] = useState(false);
   const [showPreviewAIVisibility, setShowPreviewAIVisibility] = useState(false);
@@ -50,21 +49,8 @@ export function useFloatingOverlayController({
     setOverlay(null);
   }, [setOverlay]);
 
-  const collapseChrome = useCallback(() => {
-    setActiveOverlay(null);
-    setChromeCollapsed(true);
-    setInteractionState(idleInteraction());
-  }, [setInteractionState]);
-
-  const expandChrome = useCallback(() => {
-    setChromeCollapsed(false);
-  }, []);
-
   return {
-    chromeCollapsed,
     closeOverlay,
-    collapseChrome,
-    expandChrome,
     showExportPreview: activeOverlay === 'preview',
     showBlockTrash: activeOverlay === 'blockTrash',
     showLayoutPanel: activeOverlay === 'layout',

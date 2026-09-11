@@ -1,5 +1,4 @@
 import {
-  ArrowLeft,
   CheckCircle2,
   Copy,
   Eye,
@@ -46,7 +45,6 @@ export interface NoteChromeLayerProps {
   hostMode?: 'page' | 'modal';
   blockTrashLoadFailed: boolean;
   blockTrashLoading: boolean;
-  chromeCollapsed: boolean;
   contentReadOnly: boolean;
   exportPreview: ExportPreviewModel;
   layoutMode: boolean;
@@ -69,23 +67,17 @@ export interface NoteChromeLayerProps {
   sourceReferenceCount: number;
   surfaceMode: 'page' | 'canvas';
   surfacePolicy: SurfacePolicyView;
-  titleDraft: string;
   trashedBlocks: NoteBlock[];
   documentTypographyProfile: DocumentTypographyProfile;
   restoringBlockId: string | null;
   onAddFavorite: () => void;
-  onBackProject: () => void;
   onTrashNote: () => Promise<void>;
   onCloseOverlay: () => void;
-  onCollapseChrome: () => void;
   onAddPageBelow: (frameId: string) => void;
   onCreatePageFrame: () => void;
   onCreatePageStack: () => void;
   onDetachPageFromStack: (frameId: string) => void;
-  onExpandChrome: () => void;
-  onSaveTitle: () => void | Promise<void>;
   onSaveDocumentTypographyProfile: (profile: DocumentTypographyProfile) => void | Promise<void>;
-  onTitleDraftChange: (value: string) => void;
   onToggleExportPreview: () => void;
   onToggleLayoutMode: () => void;
   onToggleMoreActions: () => void;
@@ -112,7 +104,6 @@ export function NoteChromeLayer({
   hostMode = 'page',
   blockTrashLoadFailed,
   blockTrashLoading,
-  chromeCollapsed,
   contentReadOnly,
   exportPreview,
   layoutMode,
@@ -135,22 +126,16 @@ export function NoteChromeLayer({
   sourceReferenceCount,
   surfaceMode,
   surfacePolicy,
-  titleDraft,
   trashedBlocks,
   documentTypographyProfile,
   restoringBlockId,
   onAddFavorite,
-  onBackProject,
   onTrashNote,
   onCloseOverlay,
-  onCollapseChrome,
   onAddPageBelow,
   onCreatePageStack,
   onDetachPageFromStack,
-  onExpandChrome,
-  onSaveTitle,
   onSaveDocumentTypographyProfile,
-  onTitleDraftChange,
   onToggleExportPreview,
   onToggleLayoutMode,
   onToggleMoreActions,
@@ -171,6 +156,26 @@ export function NoteChromeLayer({
   onTogglePreviewLabelOverlay,
   onToggleSurfaceMode,
 }: NoteChromeLayerProps) {
+  const toolbarRef = useRef<HTMLDivElement>(null);
+  const [overlayAnchor, setOverlayAnchor] = useState({ right: 16, bottom: 64 });
+  const overlayOpen = showNoteInfo || showLayoutPanel || showMoreActions || showBlockTrash || showExportPreview;
+  useEffect(() => {
+    if (!overlayOpen) return;
+    const toolbar = toolbarRef.current?.closest('[data-page-reading-control="true"]') || toolbarRef.current;
+    const measure = () => {
+      const rect = toolbar?.getBoundingClientRect();
+      if (rect) setOverlayAnchor({ right: Math.max(12, window.innerWidth - rect.right), bottom: Math.max(12, window.innerHeight - rect.top + 8) });
+    };
+    measure();
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(measure);
+    if (toolbar) observer?.observe(toolbar);
+    const dialog = toolbarRef.current?.closest('[role="dialog"]');
+    const moveObserver = dialog ? new MutationObserver(measure) : null;
+    if (dialog) moveObserver?.observe(dialog, { attributes: true, attributeFilter: ['style'] });
+    window.addEventListener('resize', measure);
+    document.addEventListener('scroll', measure, true);
+    return () => { observer?.disconnect(); moveObserver?.disconnect(); window.removeEventListener('resize', measure); document.removeEventListener('scroll', measure, true); };
+  }, [overlayOpen]);
   const layoutHoverTimerRef = useRef<number | null>(null);
   const deleteDialogRef = useRef<HTMLDialogElement>(null);
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -386,59 +391,10 @@ export function NoteChromeLayer({
   };
 
   return (
-    <div className={styles.chromeWrap} data-note-chrome="true">
-      {chromeCollapsed ? (
-        <div className={styles.chromeCollapsed}>
-          <button className={styles.backBtn} onClick={onBackProject}>
-            <ArrowLeft size={18} />
-            Project
-          </button>
-          {contentReadOnly && (
-            <span className={styles.sourceProjectionLock} title="Source content locked; interpretation and organization remain editable">
-              <LockKeyhole size={13} />
-              Source locked
-            </span>
-          )}
-          <button
-            className={styles.iconBtn}
-            onClick={onExpandChrome}
-            title="Show note tools"
-            aria-label="Show note tools"
-          >
-            <PanelTopOpen size={16} />
-          </button>
-        </div>
-      ) : (
-        <div className={styles.noteChrome}>
-          <button className={styles.backBtn} onClick={onBackProject}>
-            <ArrowLeft size={18} />
-            Project
-          </button>
-
-          <input
-            className={styles.titleInput}
-            value={titleDraft}
-            readOnly={contentReadOnly}
-            data-source-content-read-only={contentReadOnly ? 'true' : 'false'}
-            onChange={(event) => onTitleDraftChange(event.target.value)}
-            onBlur={contentReadOnly ? undefined : onSaveTitle}
-            onKeyDown={(event) => {
-              if (contentReadOnly) return;
-              if (event.key !== 'Enter') return;
-              event.preventDefault();
-              void onSaveTitle();
-            }}
-            aria-label="Note title"
-          />
-
-          {contentReadOnly && (
-            <span className={styles.sourceProjectionLock} title="Source content locked; interpretation and organization remain editable">
-              <LockKeyhole size={13} />
-              Source locked
-            </span>
-          )}
-
-          <div className={styles.chromeActions}>
+    <div ref={toolbarRef} className={styles.noteToolbarActions} data-note-toolbar-actions="true">
+          {contentReadOnly && <span className={styles.sourceProjectionLock} title="Source content locked; interpretation and organization remain editable">
+            <LockKeyhole size={13} /> Source locked
+          </span>}
             {/* V13.2: unmount the entry; retain its implementation for the 13.6 inventory. */}
             {!CANVAS_MODE_RETIRED && (
             <button
@@ -476,49 +432,15 @@ export function NoteChromeLayer({
             </button>
             <button
               className={styles.iconBtn}
-              onClick={onCreatePageStack}
-              title="New PageStack"
-              aria-label="New PageStack"
-              data-page-stack-create-toolbar="true"
-              disabled={contentReadOnly}
-            >
-              <FilePlus2 size={16} />
-            </button>
-            <button
-              className={styles.iconBtn}
-              onClick={onAddFavorite}
-              title="Add to favorites"
-              aria-label="Add to favorites"
-            >
-              <Star size={16} />
-            </button>
-            <button
-              className={styles.iconBtn}
-              onClick={onToggleNoteInfo}
-              title="View info"
-              aria-label="View info"
-            >
-              <Info size={16} />
-            </button>
-            <button
-              className={styles.iconBtn}
               onClick={onToggleMoreActions}
               title="More note actions"
               aria-label="More note actions"
             >
               <MoreHorizontal size={16} />
             </button>
-            <button
-              className={styles.iconBtn}
-              onClick={onCollapseChrome}
-              title="Hide note tools"
-              aria-label="Hide note tools"
-            >
-              <PanelTopClose size={16} />
-            </button>
-          </div>
-
-          <FloatingOverlayLayer open={showNoteInfo || showLayoutPanel || showMoreActions || showBlockTrash || showExportPreview}>
+          <FloatingOverlayLayer open={overlayOpen} placement="free">
+            <div className={styles.noteToolbarPopover} data-note-toolbar-popover="true"
+              style={{ ...overlayAnchor, maxHeight: Math.max(80, window.innerHeight - overlayAnchor.bottom - 12) }}>
             {showNoteInfo && (
               <div className={`${styles.infoPopover} ${styles.floatingPanelPopover}`}>
                 <div className={styles.popoverHeader}>
@@ -660,6 +582,32 @@ export function NoteChromeLayer({
                     <X size={15} />
                   </button>
                 </div>
+            <button
+              className={styles.moreAction}
+              onClick={onCreatePageStack}
+              title="New PageStack"
+              aria-label="New PageStack"
+              data-page-stack-create-toolbar="true"
+              disabled={contentReadOnly}
+            >
+              <FilePlus2 size={16} /><span>New PageStack</span>
+            </button>
+            <button
+              className={styles.moreAction}
+              onClick={onAddFavorite}
+              title="Add to favorites"
+              aria-label="Add to favorites"
+            >
+              <Star size={16} /><span>Add to favorites</span>
+            </button>
+            <button
+              className={styles.moreAction}
+              onClick={onToggleNoteInfo}
+              title="View info"
+              aria-label="View info"
+            >
+              <Info size={16} /><span>View info</span>
+            </button>
                 <div className={styles.moreAction} aria-disabled="true">
                   <MoreHorizontal size={15} />
                   <span>Note-level actions</span>
@@ -835,9 +783,8 @@ export function NoteChromeLayer({
                 onClose={onCloseOverlay}
               />
             )}
+            </div>
           </FloatingOverlayLayer>
-        </div>
-      )}
       <dialog
         ref={deleteDialogRef}
         className={styles.noteDeleteDialog}

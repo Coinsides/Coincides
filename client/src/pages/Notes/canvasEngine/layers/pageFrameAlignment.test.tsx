@@ -114,6 +114,9 @@ function WritingSurfaceThroughLayerProps({ surfaceProps }: { surfaceProps: NoteW
   // Exercise the real production forwarding boundary. Chrome-only fields are
   // unused because this fixture mounts the complete writing surface only.
   const input = {
+    titleDraft: 'Synthetic alignment note', descriptionDraft: '',
+    onTitleDraftChange: () => undefined, onDescriptionDraftChange: () => undefined,
+    onSaveTitle: () => undefined, onSaveDescription: () => undefined,
     ...surfaceProps,
     note: { id: surfaceProps.noteId, course_id: surfaceProps.projectId },
     onWritingSurfaceFocusBlock: surfaceProps.onFocusBlock,

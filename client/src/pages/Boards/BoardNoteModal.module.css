@@ -30,7 +30,7 @@
   align-items: center;
   gap: 12px;
   flex: 0 0 auto;
-  padding: 10px 16px;
+  padding: 10px 54px 10px 16px;
   border-bottom: 1px solid var(--border-default);
   font-size: 13px;
   cursor: grab;
@@ -50,6 +50,16 @@
 }
 .header button:hover, .error button:hover { background: var(--bg-hover); }
 .header button:disabled { opacity: .5; }
+.header .closeNote {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 6px;
+  min-height: 30px;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+}
 .dialog :focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
 .content { flex: 1; min-height: 0; padding-inline: 24px; overflow: auto; overscroll-behavior: contain; }
 .content [data-staging-empty-hint='true'] { margin: 12px 24px; font-size: 13px; color: var(--text-secondary); }
@@ -66,6 +76,6 @@
 .error span { flex: 1; }
 .error button { text-decoration: underline; }
 @media (max-width: 700px) {
-  .header { gap: 4px; padding-inline: 8px; }
+  .header { gap: 4px; padding-inline: 8px 46px; }
   .content { padding-inline: 12px; }
 }

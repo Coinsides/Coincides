@@ -6,6 +6,7 @@ import { projectPageFrameToReadingSurface } from '../pageFramePresentationServic
 import { Boxes, Pencil, Eraser } from 'lucide-react';
 import type { PaperInkTool } from '../freehandService';
 import { PaperInkLayer } from './PaperInkLayer';
+import { NotePaperHeader, NOTE_HEADER_INITIAL_HEIGHT, type NotePaperHeaderProps } from './NotePaperHeader';
 import { PageFrameWallLayer, type ActivePageFrameWall, type PageFrameWallSide } from './PageFrameWallLayer';
 import { NoteCanvasRuntimeContext } from '../NoteCanvasRuntimeProvider';
 import { BOARD_STAGING_MIME, resolveStagingItemDrop } from '../../../Boards/boardStagingDrag';
@@ -248,6 +249,8 @@ import {
 } from '../textFocusReceipt';
 
 export interface NoteWritingSurfaceLayerProps {
+  paperHeader?: NotePaperHeaderProps;
+  noteTools?: import('react').ReactNode;
   hostMode?: 'page' | 'modal';
   trackPendingWrite?: TrackPendingWrite;
   onDropTrayBlock?: (placementId: string, layout: BlockBoxLayout) => Promise<void>;
@@ -536,6 +539,8 @@ function readImageFileDimensions(file: File): Promise<{ width: number; height: n
 }
 
 export function NoteWritingSurfaceLayer({
+  paperHeader,
+  noteTools,
   hostMode = 'page',
   trackPendingWrite,
   onDropTrayBlock,
@@ -773,10 +778,12 @@ export function NoteWritingSurfaceLayer({
     primaryPageFrameExtension?.background || primaryPageFrame?.background,
   );
   const readingViewState = pageReadingViewState || createDefaultPageReadingViewState();
+  const [headerHeight, setHeaderHeight] = useState(NOTE_HEADER_INITIAL_HEIGHT);
+  const displayHeaderHeight = paperHeader ? headerHeight : 0;
   const pageReading = usePageReadingPresentation({
     enabled: surfaceMode === 'page' && !overviewOpen, noteId, surfaceRef, blockListRef, pageFrame: primaryPageFrame,
     pageFrames: noteCanvasRuntime.pageFrames,
-    pageContentHeight, viewState: readingViewState, onViewportChange: onPageReadingViewportChange,
+    pageContentHeight, displayHeaderHeight, viewState: readingViewState, onViewportChange: onPageReadingViewportChange,
   });
   const snapGuideLayout = blockLayouts[selectedBlockId || ''] || draftLayout || defaultDraftLayout;
   const screenSnapGuide = resolveScreenRect(
@@ -3509,10 +3516,21 @@ export function NoteWritingSurfaceLayer({
         onBlurCapture={overviewOpen ? (event) => event.stopPropagation() : undefined}
         style={surfaceMode === 'page' ? {
           width: pageDisplayBounds.width * pageReading.displayScale,
-          height: pageDisplayBounds.height * pageReading.displayScale,
+          height: (pageDisplayBounds.height + displayHeaderHeight) * pageReading.displayScale,
           overflowClipMargin: `${32 * pageReading.displayScale}px`,
         } : { display: 'contents' }}
       >
+      {surfaceMode === 'page' && paperHeader && <div className={styles.pageReadingHeaderBand}
+        data-note-header-band="true" style={{
+          ...primaryPageFrameTemplateStyle,
+          width: pageReading.paperWidth,
+          height: pageDisplayBounds.height + displayHeaderHeight,
+          left: -pageDisplayBounds.left * pageReading.displayScale,
+          transform: `scale(${pageReading.displayScale})`, transformOrigin: '0 0',
+        }}>
+        <NotePaperHeader key={noteId} {...paperHeader} onHeightChange={setHeaderHeight}
+          style={{ paddingLeft: pageReading.inset.left, paddingRight: pageReading.inset.right }} />
+      </div>}
       <div
         className={surfaceMode === 'page' ? styles.pageReadingPaper : undefined}
         data-page-display-scale={surfaceMode === 'page' ? pageReading.displayScale : undefined}
@@ -3523,8 +3541,9 @@ export function NoteWritingSurfaceLayer({
           ...primaryPageFrameTemplateStyle,
           width: pageReading.paperWidth,
           height: pageReading.paperHeight,
+          ...(paperHeader ? { background: 'transparent', outline: 'none' } : {}),
           left: -pageDisplayBounds.left * pageReading.displayScale,
-          top: -pageDisplayBounds.top * pageReading.displayScale,
+          top: (displayHeaderHeight - pageDisplayBounds.top) * pageReading.displayScale,
           paddingTop: pageReading.inset.top,
           paddingLeft: pageReading.inset.left,
           transform: `scale(${pageReading.displayScale})`,
@@ -4128,6 +4147,7 @@ export function NoteWritingSurfaceLayer({
       </div>
       {surfaceMode === 'page' && (
         <div className={`${styles.canvasZoomControl} ${styles.pageReadingControl}`} data-page-reading-control="true" role="group" aria-label="Page reading controls">
+          {noteTools}
           <button type="button" className={styles.canvasZoomReset} aria-pressed={paperInkTool === 'write'}
             disabled={!paperInkEnabled} onClick={() => setPaperInkTool('write')}>Write</button>
           {([{ key: 'pen', label: 'Pen', Icon: Pencil }, { key: 'eraser', label: 'Eraser', Icon: Eraser }] as const).map(({ key, label, Icon }) => (

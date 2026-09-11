@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type SetStateAction } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '@/services/api';
 import { createCoordinateContractSession } from '../coordinateContractSession';
@@ -426,7 +426,25 @@ export function useNoteCanvasDataAdapter({
   const committedTextRevisions = useRef(new Map<string, number>());
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [titleDraft, setTitleDraft] = useState('');
+  const [titleDraft, setTitleDraftState] = useState('');
+  const [descriptionDraft, setDescriptionDraftState] = useState('');
+  const headerDraftsRef = useRef({ title: '', description: '', titleRevision: 0, descriptionRevision: 0 });
+  const headerSaveTailsRef = useRef(new Map<string, Promise<void>>());
+  const pendingHeaderFieldsRef = useRef(new Map<string, { value: string | null; promise: Promise<void> }>());
+  // Focus release and navigation can happen in the same turn as the final input.
+  // Keep the save source current before React commits the next render.
+  const setTitleDraft = useCallback((next: SetStateAction<string>) => {
+    const value = typeof next === 'function' ? next(headerDraftsRef.current.title) : next;
+    headerDraftsRef.current.title = value;
+    headerDraftsRef.current.titleRevision += 1;
+    setTitleDraftState(value);
+  }, []);
+  const setDescriptionDraft = useCallback((next: SetStateAction<string>) => {
+    const value = typeof next === 'function' ? next(headerDraftsRef.current.description) : next;
+    headerDraftsRef.current.description = value;
+    headerDraftsRef.current.descriptionRevision += 1;
+    setDescriptionDraftState(value);
+  }, []);
   const [templateOptions, setTemplateOptions] = useState<TemplateOption[]>(STATIC_TEMPLATE_OPTIONS);
   const [templateWarning, setTemplateWarning] = useState<string | null>(null);
   const [savingBlockId, setSavingBlockId] = useState<string | null>(null);
@@ -667,7 +685,8 @@ export function useNoteCanvasDataAdapter({
       setSuccessfulHydrationEpoch(hydrationEpoch);
       noteRef.current = noteForState;
       setNote(noteForState);
-      setTitleDraft(noteRes.data.title);
+      setTitleDraft(noteForState.title);
+      setDescriptionDraft(noteForState.description || '');
       setAnnotationTruthsSnapshot(savedAnnotationTruths);
       boardRangeSession.hydrate(savedBoardRanges);
       setContentGroups(savedContentGroups);
@@ -778,20 +797,65 @@ export function useNoteCanvasDataAdapter({
     fetchSourceAnchors(note.course_id);
   }, [note?.course_id, blocks.length, fetchSourceAnchors]);
 
-  const saveTitle = useCallback(writeRegistry.hold('saveTitle', async () => {
-    const nextTitle = titleDraft.trim();
-    if (!note || !nextTitle || nextTitle === note.title) return;
-    if (!allowSourceContentMutation()) return;
-    try {
-      const res = await writeRegistry.track('saveTitle:' + `/notes/${note.id}`, async () => api.put(`/notes/${note.id}`, { title: nextTitle }));
-      setNote(res.data);
-      setTitleDraft(res.data?.title || nextTitle);
-      addToast('success', 'Note renamed');
-    } catch (err) {
-      console.error('Failed to rename note:', err);
-      addToast('error', 'Failed to rename note');
+  const saveHeaderField = useCallback(writeRegistry.hold('saveHeaderField', async (field: 'title' | 'description') => {
+    const currentNote = noteRef.current;
+    if (!currentNote || currentNote.id !== noteId) return;
+    const revisionKey = field === 'title' ? 'titleRevision' : 'descriptionRevision';
+    const draftRevision = headerDraftsRef.current[revisionKey];
+    const trimmed = headerDraftsRef.current[field].trim();
+    const value = field === 'title' ? (trimmed || currentNote.title) : (trimmed || null);
+    const generation = routeRequestGenerationRef.current;
+    const hydrationEpoch = successfulHydrationEpochRef.current;
+    const pendingKey = `${currentNote.id}:${generation}:${field}`;
+    const pending = pendingHeaderFieldsRef.current.get(pendingKey);
+    if (pending?.value === value) return pending.promise;
+    const updateDraft = (savedValue: string | null) => {
+      if (headerDraftsRef.current[revisionKey] !== draftRevision) return;
+      if (field === 'title') setTitleDraft(savedValue || currentNote.title);
+      else setDescriptionDraft(savedValue || '');
+    };
+    if (!pending && value === currentNote[field]) {
+      updateDraft(value);
+      return;
     }
-  }), [writeRegistry, note, titleDraft, addToast, allowSourceContentMutation]);
+    if (!allowSourceContentMutation()) return;
+    const responseIsCurrent = () => adapterMountActiveRef.current
+      && routeNoteIdRef.current === currentNote.id
+      && routeRequestGenerationRef.current === generation
+      && successfulHydrationEpochRef.current === hydrationEpoch
+      && noteRef.current?.id === currentNote.id;
+    const previous = headerSaveTailsRef.current.get(currentNote.id) || Promise.resolve();
+    // Serialize writes to the existing note route. Each acknowledgement publishes
+    // only its own field, so title/description blur cannot replace each other.
+    const promise = previous.then(async () => {
+      try {
+        const res = await writeRegistry.track(`note-header:${currentNote.id}:${field}`, () => (
+          api.put<Note>(`/notes/${currentNote.id}`, { [field]: value })
+        ));
+        if (!responseIsCurrent()) return;
+        const savedValue = field === 'title' ? (res.data?.title || value) : (res.data?.description ?? value);
+        const patch = { [field]: savedValue } as Partial<Note>;
+        noteRef.current = { ...noteRef.current!, ...patch };
+        setNote((latest) => latest?.id === currentNote.id ? { ...latest, ...patch } : latest);
+        updateDraft(savedValue);
+        if (field === 'title') addToast('success', 'Note renamed');
+      } catch (err) {
+        console.error(`Failed to save note ${field}:`, err);
+        if (responseIsCurrent()) addToast('error', field === 'title' ? 'Failed to rename note' : 'Failed to save description');
+      }
+    });
+    headerSaveTailsRef.current.set(currentNote.id, promise);
+    pendingHeaderFieldsRef.current.set(pendingKey, { value, promise });
+    await promise;
+    if (headerSaveTailsRef.current.get(currentNote.id) === promise) headerSaveTailsRef.current.delete(currentNote.id);
+    if (pendingHeaderFieldsRef.current.get(pendingKey)?.promise === promise) pendingHeaderFieldsRef.current.delete(pendingKey);
+  }), [writeRegistry, noteId, addToast, allowSourceContentMutation, setTitleDraft, setDescriptionDraft]);
+
+  const saveTitle = useCallback(() => saveHeaderField('title'), [saveHeaderField]);
+  const saveDescription = useCallback(() => saveHeaderField('description'), [saveHeaderField]);
+  const saveHeaderMetadata = useCallback(async () => {
+    await Promise.all([saveTitle(), saveDescription()]);
+  }, [saveTitle, saveDescription]);
 
   const saveAnnotationTruthsOutcome = useCallback(writeRegistry.hold('saveAnnotationTruths', async (
     nextAnnotations: AnnotationTruthV1[], options: { preserveDrafts?: boolean } = {},
@@ -2556,6 +2620,8 @@ export function useNoteCanvasDataAdapter({
     loadError,
     titleDraft,
     setTitleDraft,
+    descriptionDraft,
+    setDescriptionDraft,
     templateWarning,
     savingBlockId,
     blockEditRecoveryReceipts,
@@ -2597,6 +2663,8 @@ export function useNoteCanvasDataAdapter({
     defaultTextTemplate,
     insertTemplateOptions,
     saveTitle,
+    saveDescription,
+    saveHeaderMetadata,
     saveAnnotationTruths,
     saveContentGroups,
     saveGroupFolders,

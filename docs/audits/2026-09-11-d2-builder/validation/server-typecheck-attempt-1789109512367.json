@@ -1,0 +1,13 @@
+{
+  "name": "server-typecheck",
+  "command": [
+    "node",
+    "node_modules/typescript/bin/tsc",
+    "--noEmit",
+    "--pretty",
+    "false"
+  ],
+  "cwd": "server",
+  "exitCode": 0,
+  "elapsedMs": 4251
+}

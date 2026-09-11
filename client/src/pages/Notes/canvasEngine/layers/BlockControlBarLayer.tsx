@@ -22,7 +22,7 @@ import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import { FloatingOverlayLayer } from './FloatingOverlayLayer';
 import styles from '../../NoteDetail.module.css';
 
-const DEFAULT_TOP_BAR_SAFE_TOP = 90;
+const DEFAULT_TOP_BAR_SAFE_TOP = 2;
 
 interface BlockControlBarLayerProps {
   anchor: SlashMenuAnchor | null;
@@ -67,9 +67,10 @@ export function BlockControlBarLayer({
     if (!open) return;
 
     const updateSafeTop = () => {
-      const chrome = document.querySelector<HTMLElement>('[data-note-chrome="true"]');
-      const chromeBottom = chrome?.getBoundingClientRect().bottom ?? DEFAULT_TOP_BAR_SAFE_TOP;
-      setTopBarSafeTop(Math.ceil(Math.max(DEFAULT_TOP_BAR_SAFE_TOP, chromeBottom + 2)));
+      const host = document.querySelector<HTMLElement>('[data-note-host-mode="modal"]')
+        || document.querySelector<HTMLElement>('[data-note-host-mode="page"]');
+      const viewport = host?.closest<HTMLElement>('[data-app-main-scroll="true"]');
+      setTopBarSafeTop(Math.ceil(Math.max(DEFAULT_TOP_BAR_SAFE_TOP, (viewport?.getBoundingClientRect().top ?? 0) + 2)));
     };
 
     updateSafeTop();

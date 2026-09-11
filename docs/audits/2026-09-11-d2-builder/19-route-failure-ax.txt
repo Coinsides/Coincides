@@ -1,0 +1,84 @@
+Browser tab: 566868884, Title: "D2 synthetic header smoke", URL: "http://localhost:5179/d2-header-smoke.html#/projects".
+1 AXWebArea D2 synthetic header smoke, URL: localhost:5179/d2-header-smoke.html#/projects
+	2 container root
+		3 container
+			4 image
+			5 text Coincides
+			6 button (expanded) Description: Collapse navigator, Secondary Actions: Collapse
+				7 image
+			8 link Description: Home, Value: localhost:5179/d2-header-smoke.html#/
+			9 link Description: Projects, Value: localhost:5179/d2-header-smoke.html#/projects
+			10 link Description: Source Library, Value: localhost:5179/d2-header-smoke.html#/sources
+			11 link Description: Boards, Value: localhost:5179/d2-header-smoke.html#/boards
+			12 link Description: Group Gallery, Value: localhost:5179/d2-header-smoke.html#/group-gallery
+			13 link Description: Settings, Value: localhost:5179/d2-header-smoke.html#/settings
+			14 text UTILITIES
+			15 link Description: Tool Receipts, Value: localhost:5179/d2-header-smoke.html#/tool-receipts
+			16 text PROJECTS
+			17 button
+				18 image
+			19 button D2 synthetic project
+			20 text FAVORITES
+			21 image
+			22 button D2 synthetic project
+				23 image
+				24 text D2 synthetic project
+			25 text RECENT
+			26 image
+			27 button D2 synthetic project
+				28 image
+				29 text D2 synthetic project
+		30 container
+			31 heading D2 synthetic project, Value: 1
+				32 text D2 synthetic project
+			33 text Production note runtime, navigator, note list and modal. Every request uses synthetic rows stored only in this browser.
+			34 button Open first note in modal
+			35 button Reset synthetic rows
+			36 button Fail next synthetic write
+			37 button Inspect synthetic saved rows
+			38 image
+			39 text Notes 3
+			40 container Note status
+				41 checkbox Notes, Value: 1
+				42 checkbox Trash, Value: 0
+			43 button New Note
+				44 image
+				45 text New Note
+			46 button Open note D2 renamed on paper
+				47 image
+				48 text NOTE
+				49 text D2 renamed on paper
+				50 text Modal close flushed this description.
+				51 text Updated 
+				52 text 2026/9/11
+			53 button Move D2 renamed on paper to trash
+				54 image
+			55 button Open note Existing note with description
+				56 image
+				57 text NOTE
+				58 text Existing note with description
+				59 text An existing description loaded through the same note row.
+				60 text Updated 
+				61 text 2026/9/11
+			62 button Move Existing note with description to trash
+				63 image
+			64 button Open note Locked source projection
+				65 image
+				66 text NOTE
+				67 text Locked source projection
+				68 text Source header fields remain read-only.
+				69 text Updated 
+				70 text 2026/9/11
+			71 button Move Locked source projection to trash
+				72 image
+		73 container
+			74 image
+			75 text Failed to save block
+			76 button
+				77 image
+			78 image
+			79 text Text changes could not be saved. Retry saving or undo before leaving the note.
+			80 button
+				81 image
+
+The focused UI element is 1 AXWebArea D2 synthetic header smoke, URL: localhost:5179/d2-header-smoke.html#/projects

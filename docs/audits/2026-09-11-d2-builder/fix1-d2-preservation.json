@@ -1,0 +1,146 @@
+﻿[
+    {
+        "path":  "client/src/App.tsx",
+        "expected":  "b8069ce35d0b969e307776620d3916871258738372d89989fa39590be83bff69",
+        "actual":  "b8069ce35d0b969e307776620d3916871258738372d89989fa39590be83bff69",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Boards/BoardNoteModal.module.css",
+        "expected":  "b08be7b993126be694dd36592f1cbf11a5a92897e753162da7000fa9fbee4258",
+        "actual":  "b08be7b993126be694dd36592f1cbf11a5a92897e753162da7000fa9fbee4258",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Boards/BoardNoteModal.tsx",
+        "expected":  "7c9d24e7aaeca72efeefcdcec47946ca4b810552398d406ccfa665e77e6e6b17",
+        "actual":  "7c9d24e7aaeca72efeefcdcec47946ca4b810552398d406ccfa665e77e6e6b17",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Notes/NoteDetail.module.css",
+        "expected":  "6899a81957bfb1e35a47d259be4cab167fb500ed681e4fc013856af25bfb38d8",
+        "actual":  "6899a81957bfb1e35a47d259be4cab167fb500ed681e4fc013856af25bfb38d8",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Notes/NoteDetail.tsx",
+        "expected":  "e4c65f2fbc32e5da9e8d7b18a9f0d622f498bfdf85fa780d71e25a4ff430be35",
+        "actual":  "e4c65f2fbc32e5da9e8d7b18a9f0d622f498bfdf85fa780d71e25a4ff430be35",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Notes/canvasEngine/NoteCanvasRuntime.tsx",
+        "expected":  "4aeb80a4d8037e0c354cb7a434fb986df02a5de98d9a14b49a8e5e577cc331c8",
+        "actual":  "4aeb80a4d8037e0c354cb7a434fb986df02a5de98d9a14b49a8e5e577cc331c8",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Notes/canvasEngine/hooks/useFloatingOverlayController.ts",
+        "expected":  "b1144d0e26d2b330d1adbc076912e95fa83c995399c5bb5b5867164a762a1122",
+        "actual":  "b1144d0e26d2b330d1adbc076912e95fa83c995399c5bb5b5867164a762a1122",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx",
+        "expected":  "13084eae76bd75eac589af601d3880f96eabbb7f1e8e91ca457300450bf88e1f",
+        "actual":  "13084eae76bd75eac589af601d3880f96eabbb7f1e8e91ca457300450bf88e1f",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts",
+        "expected":  "43f92946af133eff79332cae7270070d82641c98ece3f28cca2071fc666d8d50",
+        "actual":  "43f92946af133eff79332cae7270070d82641c98ece3f28cca2071fc666d8d50",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts",
+        "expected":  "aebad75d23f1e99f1b047e6bf6283c6410213c5275fc89c42e4c04c6f5be1655",
+        "actual":  "aebad75d23f1e99f1b047e6bf6283c6410213c5275fc89c42e4c04c6f5be1655",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+        "expected":  "3fcac45d61c3220321f4b912646c9a41ba80157f5f668a9159aacee84b064f81",
+        "actual":  "3fcac45d61c3220321f4b912646c9a41ba80157f5f668a9159aacee84b064f81",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Notes/canvasEngine/hooks/usePageReadingPresentation.ts",
+        "expected":  "730da0f4fa16ef6e08ccb5744685d0d4beeb73820d394572a44db39e74acddfe",
+        "actual":  "730da0f4fa16ef6e08ccb5744685d0d4beeb73820d394572a44db39e74acddfe",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Notes/canvasEngine/hooks/useRuntimeSurfaceStateController.ts",
+        "expected":  "58a97d5956e30f357e691783c0067f073aa70e49979874c02f5063cef73faad4",
+        "actual":  "58a97d5956e30f357e691783c0067f073aa70e49979874c02f5063cef73faad4",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Notes/canvasEngine/layers/BlockControlBarLayer.tsx",
+        "expected":  "15892bd4870e8397e0c1baa348b8edbb84b1166cf6a56ba2ae0537b267503538",
+        "actual":  "15892bd4870e8397e0c1baa348b8edbb84b1166cf6a56ba2ae0537b267503538",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx",
+        "expected":  "9d7f5e730480fe0771d9bd86972b5c19deeb738a339e00528cc2c644c9b5a2fe",
+        "actual":  "9d7f5e730480fe0771d9bd86972b5c19deeb738a339e00528cc2c644c9b5a2fe",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx",
+        "expected":  "77fc02fdf4db8f15091c74d15cc07dd2950859f6bea0ae5e504f54f113f68f63",
+        "actual":  "77fc02fdf4db8f15091c74d15cc07dd2950859f6bea0ae5e504f54f113f68f63",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx",
+        "expected":  "ff7a7cdf50628ea16da91ce25c79115be25c528f84a8502cba622c0ffc0889c8",
+        "actual":  "ff7a7cdf50628ea16da91ce25c79115be25c528f84a8502cba622c0ffc0889c8",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+        "expected":  "1b088c074d6181cb2a9b7622f5d5bffaaf089f4ad010466e6f837e03202bd4d5",
+        "actual":  "1b088c074d6181cb2a9b7622f5d5bffaaf089f4ad010466e6f837e03202bd4d5",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx",
+        "expected":  "f331fcc8222b132749440701a0ce859cec4eb1fbba588ddff00fe9b170edf3e3",
+        "actual":  "f331fcc8222b132749440701a0ce859cec4eb1fbba588ddff00fe9b170edf3e3",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.tsx",
+        "expected":  "24173b3bc7cba8ff4493327c47cef50ee7b5341b08712804e80c95f647b4343c",
+        "actual":  "24173b3bc7cba8ff4493327c47cef50ee7b5341b08712804e80c95f647b4343c",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.test.tsx",
+        "expected":  "5207f47b962142977149d05be7ee28df4cc7e4450c53e922339aff0043118fb6",
+        "actual":  "5207f47b962142977149d05be7ee28df4cc7e4450c53e922339aff0043118fb6",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.tsx",
+        "expected":  "7b3947c79e8fa4a285d15c095187fdd3dc0aa0e954ca4fd6a75b45f580cb642e",
+        "actual":  "7b3947c79e8fa4a285d15c095187fdd3dc0aa0e954ca4fd6a75b45f580cb642e",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.module.css",
+        "expected":  "7e6592f1b2a6cfba637141541678cf32d4153a2a860c04adf2b26ba5402725fa",
+        "actual":  "7e6592f1b2a6cfba637141541678cf32d4153a2a860c04adf2b26ba5402725fa",
+        "matches":  true
+    },
+    {
+        "path":  "client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx",
+        "expected":  "b33e4d21c9701bc73ee095ecf50eafcd149ba7a388752da5336347ea603451bc",
+        "actual":  "b33e4d21c9701bc73ee095ecf50eafcd149ba7a388752da5336347ea603451bc",
+        "matches":  true
+    }
+]

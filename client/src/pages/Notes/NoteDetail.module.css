@@ -56,50 +56,12 @@
   border-color: var(--border-focus);
 }
 
-.chromeWrap {
-  position: sticky;
-  top: 0;
-  z-index: 80;
-  padding: 12px 24px 8px;
-  background: var(--bg-gradient);
-}
 
-.pageCanvas .chromeWrap {
-  position: relative;
-  top: auto;
-  flex: 0 0 auto;
-  padding: 8px 20px 6px;
-  border-bottom: 1px solid var(--border-subtle);
-  background: var(--bg-primary);
-}
 
-.noteChrome,
-.chromeCollapsed {
-  width: min(1250px, 100%);
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
 
-.noteChrome {
-  position: relative;
-}
 
-.chromeCollapsed {
-  justify-content: flex-start;
-}
 
-.pageCanvas .noteChrome,
-.pageCanvas .chromeCollapsed {
-  width: 100%;
-  max-width: none;
-}
 
-.noteChrome .backBtn,
-.chromeCollapsed .backBtn {
-  margin-bottom: 0;
-}
 
 .documentShell {
   position: relative;
@@ -127,29 +89,8 @@
   margin-bottom: 20px;
 }
 
-.titleInput {
-  flex: 1;
-  min-width: 0;
-  padding: 8px 10px;
-  border: 1px solid transparent;
-  border-radius: var(--radius-md);
-  background: transparent;
-  color: var(--text-primary);
-  font-size: 17px;
-  font-weight: 760;
-  line-height: 1.2;
-}
 
-.titleInput:focus {
-  border-color: var(--border-default);
-  outline: none;
-  background: var(--bg-primary);
-}
 
-.titleInput[readonly] {
-  cursor: text;
-  color: var(--text-secondary);
-}
 
 .sourceProjectionLock {
   display: inline-flex;
@@ -176,11 +117,6 @@
   font-weight: 650;
 }
 
-.chromeActions {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
 
 .modePill {
   padding: 0 11px;
@@ -214,7 +150,7 @@
 }
 
 .blockToolbarPortal {
-  clip-path: inset(90px 0 0 0);
+  clip-path: inset(2px 0 0 0);
   z-index: 70;
 }
 
@@ -1211,6 +1147,35 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   background: var(--page-frame-background, var(--bg-primary));
   outline: 1px solid var(--page-frame-border-color, var(--border-subtle));
 }
+
+.pageReadingHeaderBand {
+  position: absolute;
+  top: 0;
+  box-sizing: border-box;
+  background: var(--page-frame-background, var(--bg-primary));
+  outline: 1px solid var(--page-frame-border-color, var(--border-subtle));
+}
+
+.noteToolbarActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.noteToolbarActions .modePill { min-height: 28px; font-size: 12px; padding: 0 8px; }
+.noteToolbarActions .sourceProjectionLock { color: var(--text-secondary); border-color: var(--border-subtle); }
+
+.noteToolbarPopover {
+  position: absolute;
+  display: flex;
+  width: min(430px, calc(100vw - 24px));
+  pointer-events: auto;
+}
+
+.noteToolbarPopover > * { width: 100%; overflow: auto; max-height: inherit; }
+
+
 
 .pageReadingControl {
   position: sticky;
@@ -4507,22 +4472,10 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 }
 
 @media (max-width: 860px) {
-  .chromeWrap {
-    padding: 10px 14px 6px;
-  }
 
-  .noteChrome {
-    flex-wrap: wrap;
-  }
 
-  .titleInput {
-    order: 3;
-    flex-basis: 100%;
-  }
 
-  .chromeActions {
-    margin-left: auto;
-  }
+
 
   .documentShell {
     padding-top: 8px;
@@ -4550,9 +4503,6 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
     align-items: stretch;
   }
 
-  .titleInput {
-    font-size: 17px;
-  }
 
   .writingSurface {
     min-height: 520px;

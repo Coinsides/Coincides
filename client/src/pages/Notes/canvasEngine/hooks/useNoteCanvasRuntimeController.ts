@@ -29,12 +29,9 @@ export function useNoteCanvasRuntimeController() {
     activeBlockId,
     beginTemporaryLayoutMode,
     blockListRef,
-    chromeCollapsed,
     clearTemporaryLayoutMode,
     clearBlockSelection,
     closeOverlay,
-    collapseChrome,
-    expandChrome,
     focusBlockId,
     focusedTextOwner,
     focusViewportOnRect,
@@ -104,6 +101,8 @@ export function useNoteCanvasRuntimeController() {
     loadError,
     titleDraft,
     setTitleDraft,
+    descriptionDraft,
+    setDescriptionDraft,
     templateOptions,
     templateWarning,
     savingBlockId,
@@ -144,6 +143,8 @@ export function useNoteCanvasRuntimeController() {
     defaultTextTemplate,
     insertTemplateOptions,
     saveTitle,
+    saveDescription,
+    saveHeaderMetadata,
     saveAnnotationTruths,
     saveContentGroups,
     saveGroupFolders,
@@ -461,7 +462,6 @@ export function useNoteCanvasRuntimeController() {
     blockListRef,
     blockTextDrafts,
     blockTextFlowDrafts,
-    chromeCollapsed,
     creatingDraft,
     defaultDraftLayout,
     defaultTextTemplate,
@@ -550,13 +550,11 @@ export function useNoteCanvasRuntimeController() {
     onApplyBlockLayoutDrafts: (layouts) => { if (textHistory.boundary()) mergeLayoutDrafts(layouts); },
     onClearSlashTarget: clearSlashTarget,
     onCloseOverlay: closeOverlay,
-    onCollapseChrome: collapseChrome,
     onDiscardDraft: discardDraft,
     onDismissBlockEditRecovery: dismissBlockEditRecovery,
     onDraftChange: handleDraftChange,
     onDraftFocusReceipt: handleDraftFocusReceipt,
     onDraftKeyDown: handleDraftKeyDown,
-    onExpandChrome: expandChrome,
     onFieldDraftChange: updateBlockFieldDraft,
     onFocusPageFrame: (pageFrame, world) => focusViewportOnRect(pageFrame, world),
     onReleaseTextFocus: releaseTextFocus,
@@ -571,6 +569,9 @@ export function useNoteCanvasRuntimeController() {
     onResetViewport: resetViewport,
     onSaveBlock: saveBlock,
     onSaveTitle: saveTitle,
+    descriptionDraft,
+    onDescriptionDraftChange: setDescriptionDraft,
+    onSaveDescription: saveDescription,
     onSaveAnnotationTruths: saveAnnotationTruths,
     onSaveContentGroups: saveContentGroups,
     onSaveGroupFolders: saveGroupFolders,
@@ -623,12 +624,13 @@ export function useNoteCanvasRuntimeController() {
   }, [dismissSlashSession, closeOverlay, setSourceJumpTarget]);
 
   const flushPendingSaves = useCallback(async () => {
+    await saveHeaderMetadata();
     await textHistory.flush();
     // Draft creation can schedule another adapter write after its first receipt.
     // Await that existing workflow before waiting for the adapter's write registry.
     await whenDraftIdle();
     await whenIdle();
-  }, [textHistory.flush, whenDraftIdle, whenIdle]);
+  }, [saveHeaderMetadata, textHistory.flush, whenDraftIdle, whenIdle]);
 
   return {
     dismissTransientUI,

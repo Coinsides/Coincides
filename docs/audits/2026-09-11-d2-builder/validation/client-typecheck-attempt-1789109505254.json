@@ -1,0 +1,13 @@
+{
+  "name": "client-typecheck",
+  "command": [
+    "node",
+    "node_modules/typescript/bin/tsc",
+    "-b",
+    "--pretty",
+    "false"
+  ],
+  "cwd": "client",
+  "exitCode": 0,
+  "elapsedMs": 6892
+}

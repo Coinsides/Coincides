@@ -1723,6 +1723,180 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     expect(mocks.delete).not.toHaveBeenCalled();
   });
 
+  it('D2 saves the latest title and description in one turn without cross-field response clobber', async () => {
+    const first = deferred<{ data: Note }>();
+    mocks.put.mockImplementationOnce(() => first.promise)
+      // Deliberately stale title in the description response must not win.
+      .mockResolvedValueOnce({ data: { ...note, description: 'A short introduction' } });
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.note?.id).toBe(note.id));
+    let save!: Promise<void>;
+    act(() => {
+      subject.result.current.setTitleDraft('  New paper title  ');
+      subject.result.current.setDescriptionDraft('A short introduction');
+      save = subject.result.current.saveHeaderMetadata();
+    });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
+    const idle = vi.fn();
+    const drain = subject.result.current.whenIdle().then(idle);
+    expect(idle).not.toHaveBeenCalled();
+    await act(async () => {
+      first.resolve({ data: { ...note, title: 'New paper title' } });
+      await save;
+      await drain;
+    });
+    expect(mocks.put.mock.calls).toEqual([
+      [`/notes/${note.id}`, { title: 'New paper title' }],
+      [`/notes/${note.id}`, { description: 'A short introduction' }],
+    ]);
+    expect(subject.result.current.note).toMatchObject({ title: 'New paper title', description: 'A short introduction' });
+    expect(subject.result.current.titleDraft).toBe('New paper title');
+    expect(subject.result.current.descriptionDraft).toBe('A short introduction');
+    expect(idle).toHaveBeenCalledTimes(1);
+  });
+
+  it('D2 keeps newer typing while an earlier header save acknowledges', async () => {
+    const first = deferred<{ data: Note }>();
+    mocks.put.mockReturnValueOnce(first.promise);
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.note?.id).toBe(note.id));
+    act(() => subject.result.current.setDescriptionDraft('First description'));
+    let save!: Promise<void>;
+    act(() => { save = subject.result.current.saveDescription(); });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
+    act(() => subject.result.current.setDescriptionDraft('Still typing a newer description'));
+    await act(async () => {
+      first.resolve({ data: { ...note, description: 'First description' } });
+      await save;
+    });
+    expect(subject.result.current.note?.description).toBe('First description');
+    expect(subject.result.current.descriptionDraft).toBe('Still typing a newer description');
+  });
+
+  it('D2 serializes a changed title followed by reverting to its original value', async () => {
+    const first = deferred<{ data: Note }>();
+    mocks.put.mockReturnValueOnce(first.promise).mockResolvedValueOnce({ data: note });
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.note?.id).toBe(note.id));
+    let firstSave!: Promise<void>;
+    let secondSave!: Promise<void>;
+    act(() => {
+      subject.result.current.setTitleDraft('Temporary title');
+      firstSave = subject.result.current.saveTitle();
+    });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
+    act(() => {
+      subject.result.current.setTitleDraft(note.title);
+      secondSave = subject.result.current.saveTitle();
+    });
+    await act(async () => {
+      first.resolve({ data: { ...note, title: 'Temporary title' } });
+      await Promise.all([firstSave, secondSave]);
+      await subject.result.current.whenIdle();
+    });
+    expect(mocks.put.mock.calls.map(([, payload]) => payload)).toEqual([{ title: 'Temporary title' }, { title: note.title }]);
+    expect(subject.result.current.titleDraft).toBe(note.title);
+    expect(subject.result.current.note?.title).toBe(note.title);
+  });
+
+  it('D2 deduplicates blur and navigation saves, while exposing a failed description to the drain', async () => {
+    const first = deferred<{ data: Note }>();
+    const error = new Error('Description write unavailable');
+    mocks.put.mockReturnValueOnce(first.promise);
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.note?.id).toBe(note.id));
+    let blur!: Promise<void>;
+    let exitSave!: Promise<void>;
+    act(() => {
+      subject.result.current.setDescriptionDraft('Retain this description');
+      blur = subject.result.current.saveDescription();
+      exitSave = subject.result.current.saveHeaderMetadata();
+    });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
+    await act(async () => {
+      first.reject(error);
+      await Promise.all([blur, exitSave]);
+    });
+    await expect(subject.result.current.whenIdle()).rejects.toBe(error);
+    expect(subject.result.current.descriptionDraft).toBe('Retain this description');
+    mocks.put.mockResolvedValueOnce({ data: { ...note, description: 'Retain this description' } });
+    await act(async () => { await subject.result.current.saveHeaderMetadata(); });
+    await expect(subject.result.current.whenIdle()).resolves.toBeUndefined();
+    expect(mocks.put).toHaveBeenCalledTimes(2);
+  });
+
+  it('D2 ignores a previous route header acknowledgement after another note hydrates', async () => {
+    const first = deferred<{ data: Note }>();
+    const nextNote: Note = { ...note, id: 'note-2', title: 'Next note', description: 'Next introduction' };
+    const originalGet = mocks.get.getMockImplementation()!;
+    mocks.get.mockImplementation(async (url: string) => {
+      if (url === `/notes/${nextNote.id}`) return { data: nextNote };
+      if (url === `/notes/${nextNote.id}/blocks` || url === `/annotation-truths/by-note/${nextNote.id}`) return { data: [] };
+      if (url === `/canvas-objects/by-note/${nextNote.id}`) return { data: {} };
+      return originalGet(url);
+    });
+    mocks.put.mockReturnValueOnce(first.promise);
+    const subject = renderHook(({ noteId }) => useNoteCanvasDataAdapter({ ...stableAdapterOptions, noteId }), {
+      wrapper, initialProps: { noteId: note.id },
+    });
+    await waitFor(() => expect(subject.result.current.note?.id).toBe(note.id));
+    let save!: Promise<void>;
+    act(() => {
+      subject.result.current.setTitleDraft('Old route saved name');
+      save = subject.result.current.saveTitle();
+    });
+    await waitFor(() => expect(mocks.put).toHaveBeenCalledTimes(1));
+    subject.rerender({ noteId: nextNote.id });
+    await waitFor(() => expect(subject.result.current.note?.id).toBe(nextNote.id));
+    await act(async () => {
+      first.resolve({ data: { ...note, title: 'Old route saved name' } });
+      await save;
+    });
+    expect(subject.result.current.note).toMatchObject(nextNote);
+    expect(subject.result.current.titleDraft).toBe(nextNote.title);
+    expect(subject.result.current.descriptionDraft).toBe(nextNote.description);
+  });
+
+  it('D2 hydrates description, persists clearing as null, and falls back from an empty title', async () => {
+    let durableNote: Note = { ...note, description: 'Existing introduction' };
+    const originalGet = mocks.get.getMockImplementation()!;
+    mocks.get.mockImplementation(async (url: string) => url === `/notes/${note.id}` ? { data: durableNote } : originalGet(url));
+    mocks.put.mockImplementation(async (_url: string, payload: Partial<Note>) => {
+      durableNote = { ...durableNote, ...payload };
+      return { data: durableNote };
+    });
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.descriptionDraft).toBe('Existing introduction'));
+    await act(async () => {
+      subject.result.current.setTitleDraft('  ');
+      subject.result.current.setDescriptionDraft('  ');
+      await subject.result.current.saveHeaderMetadata();
+    });
+    expect(mocks.put.mock.calls).toEqual([[`/notes/${note.id}`, { description: null }]]);
+    expect(subject.result.current.titleDraft).toBe(note.title);
+    expect(subject.result.current.descriptionDraft).toBe('');
+    subject.unmount();
+    const reopened = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(reopened.result.current.note?.id).toBe(note.id));
+    expect(reopened.result.current.note?.description).toBeNull();
+    expect(reopened.result.current.descriptionDraft).toBe('');
+  });
+
+  it('D2 preserves source projection read-only behavior for both header fields', async () => {
+    const sourceNote: Note = { ...note, note_class: 'source_projection' };
+    const originalGet = mocks.get.getMockImplementation()!;
+    mocks.get.mockImplementation(async (url: string) => url === `/notes/${note.id}` ? { data: sourceNote } : originalGet(url));
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.sourceProjectionPolicy.contentReadOnly).toBe(true));
+    await act(async () => {
+      subject.result.current.setTitleDraft('Attempted title');
+      subject.result.current.setDescriptionDraft('Attempted introduction');
+      await subject.result.current.saveHeaderMetadata();
+    });
+    expect(mocks.put).not.toHaveBeenCalled();
+    expect(subject.result.current.note).toMatchObject(sourceNote);
+  });
+
   it('V13 S2 saves paper without a retired purpose writer', async () => {
     mocks.put.mockImplementation(async (url: string, payload: unknown) => {
       if (url.startsWith('/purposes')) throw { response: { status: 410 } };

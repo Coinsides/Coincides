@@ -264,7 +264,7 @@ const BoardNoteModal = forwardRef<BoardNoteModalHandle, BoardNoteModalProps>(fun
         <span className={styles.status} role="status">{saving ? 'Saving…' : ''}</span>
         <button type="button" disabled={saving} onMouseDown={(event) => event.preventDefault()}
           onClick={() => { void requestClose({ kind: 'page', noteId }); }}><ExternalLink size={16} />Open full page</button>
-        <button type="button" aria-label="Close note" disabled={saving} onMouseDown={(event) => event.preventDefault()}
+        <button type="button" className={styles.closeNote} aria-label="Close note" disabled={saving} onMouseDown={(event) => event.preventDefault()}
           onClick={() => { void requestClose(); }}><X size={18} /></button>
       </header>
       {failed && <div className={styles.error} role="alert">
