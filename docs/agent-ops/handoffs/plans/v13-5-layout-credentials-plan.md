@@ -39,6 +39,10 @@ Henry 09-11 提出(B/C 波真机验收通过后):块默认铺满文字区+全局
 
 工程件(随裁随排):`DEFAULT_PAGE_CONTENT_WIDTH`(760)封顶改逐帧派生(否则墙拓宽后 auto 块长不到墙);右墙 clamp;墙操作入撤销栈;把手安家边距车道(把手超框正解,⛔孤立微调);page_frame_local 契约权威散在 handoff/recon,随此题**补铸版**。
 
+### 专场补遗三(09-11 设计日):指针
+
+09-11 设计日五轮对谈(三案打样反馈/样式三层+Agent 改皮/交互精修批/分页折缝/封面页+标签+检索分层/Staging 组件交付+钉住态)全录于 [`docs/brainstorm/产品完善/会议记录/2026-09-11-Note-Page-Design-Day-Meeting-Notes.md`](../../../brainstorm/产品完善/会议记录/2026-09-11-Note-Page-Design-Day-Meeting-Notes.md)(含已拍/候拍状态清单 §八)——此处只放指针不重写。执行拆单候 Henry 对候拍项收口:①UI 精修单(去盒+三钮 icon+视图收纳+标注章);②Selection 模式中单;③皮系统=B1 正主;④Overview 网格中单;⑤封面元数据行+标签真相(唯一新真相);⑥分页+折缝=V14。
+
 ### 专场补遗二(09-11):表头与分页题(议程 1/3/6 与 B1 的联动材料)
 
 Henry 09-11 三观察:①首页顶部不自然空档(HQ 勘明成分=页眉槽预留 48px+首块 y 落位余量);②页底无硬约束——裁向 **Word 式自动分页**,且**块可跨页**(逻辑一块,渲染多片);③顶部栏存废:参照 Notion 纸上表头(title/cover/icon 上纸,可降级为纯净标题),顶栏拆解——返回 project 杀(navigator 在)、title 上纸⛔粘视野、功能钮(layout/预览)另找家。
