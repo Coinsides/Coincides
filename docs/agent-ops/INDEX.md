@@ -1,6 +1,6 @@
 > **状态 (Status)**: active
 > **层 (Layer)**: 现状 / Current-State(自动生成索引)
-> **日期 (Updated)**: 2026-09-11
+> **日期 (Updated)**: 2026-09-12
 > **权威 (Authoritative)**: 是 / Yes
 
 # INDEX — `docs/agent-ops`
@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 341 份文档。
+共 342 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -323,6 +323,7 @@
 | [handoffs/2026-09-10-v13-5-c2-visual-language-order.md](handoffs/2026-09-10-v13-5-c2-visual-language-order.md) | 13.5 C2 · 视觉语言批 | `done（builder 施工回执；docs 索引/完整总门与凭据扫描留 HQ）` | — | — |
 | [handoffs/2026-09-10-v13-5-c3-cross-block-unit-move-order.md](handoffs/2026-09-10-v13-5-c3-cross-block-unit-move-order.md) | 13.5 C3 · 跨块迁居 | `done(HQ 收口:补裁一落地,普通块碰撞停线解除)` | — | — |
 | [handoffs/2026-09-10-v13-5-c4-paper-ink-order.md](handoffs/2026-09-10-v13-5-c4-paper-ink-order.md) | 13.5 C4 · 纸上手绘 | `done(HQ 收口:波次 C 末单收官)` | — | — |
+| [handoffs/2026-09-11-v13-5-b3-identity-bridge-order.md](handoffs/2026-09-11-v13-5-b3-identity-bridge-order.md) | B3 · 身份桥 | `ready` | — | — |
 | [handoffs/2026-09-11-v13-5-d1-walls-order.md](handoffs/2026-09-11-v13-5-d1-walls-order.md) | D1 · 可调的墙 + 把手安家 | `done` | — | — |
 | [handoffs/2026-09-11-v13-5-d2-fix1-order.md](handoffs/2026-09-11-v13-5-d2-fix1-order.md) | D2-fix1 · F18 表头编辑键放行 | `ready` | — | — |
 | [handoffs/2026-09-11-v13-5-d2-header-chrome-order.md](handoffs/2026-09-11-v13-5-d2-header-chrome-order.md) | D2 · 纸上表头 + 顶栏拆解 | `done(builder 工作树交付；待 HQ 复核放行)` | — | — |
@@ -346,7 +347,7 @@
 | [handoffs/plans/v13-2-wilderness-retirement-plan.md](handoffs/plans/v13-2-wilderness-retirement-plan.md) | V13.2 · 野地退役 + 迁移 —— 段 plan | `active` | 2026-09-07 | — |
 | [handoffs/plans/v13-3-board-mvp-plan.md](handoffs/plans/v13-3-board-mvp-plan.md) | V13.3 · 板 MVP(线索黑板)—— 段 plan | `active` | 2026-09-08 | — |
 | [handoffs/plans/v13-4-projection-itemization-plan.md](handoffs/plans/v13-4-projection-itemization-plan.md) | V13.4 · 投影全谱 + item 化 + 板成熟 —— 段 plan(修订二) | `active` | 2026-09-09 | — |
-| [handoffs/plans/v13-5-layout-credentials-plan.md](handoffs/plans/v13-5-layout-credentials-plan.md) | V13.5 · 版面与凭据 —— 段计划草案 | `draft` | 2026-09-11 | — |
+| [handoffs/plans/v13-5-layout-credentials-plan.md](handoffs/plans/v13-5-layout-credentials-plan.md) | V13.5 · 版面与凭据 —— 段计划草案 | `active` | 2026-09-11 | — |
 | [handoffs/plans/v13-foundation-rebuild-plan.md](handoffs/plans/v13-foundation-rebuild-plan.md) | V13 · 地基重做版 —— 总 plan v1 | `active` | 2026-08-30 | — |
 | [handoffs/plans/v14-agent-era-plan-draft.md](handoffs/plans/v14-agent-era-plan-draft.md) | V14 · Agent 时代 —— 总 plan 草稿 v0 | `draft` | 2026-09-09 | — |
 | [handoffs/plans/v2-bn12-2-mcp-tool-face.md](handoffs/plans/v2-bn12-2-mcp-tool-face.md) | Plan V2.BN.12.2 — MCP 工具面(末端执行器第一次实体化) | `active` | — | — |
