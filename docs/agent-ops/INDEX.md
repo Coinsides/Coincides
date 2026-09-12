@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 360 份文档。
+共 362 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -350,6 +350,7 @@
 | [handoffs/2026-09-12-v13-6-media-block-paste-order.md](handoffs/2026-09-12-v13-6-media-block-paste-order.md) | 媒体块先遣 · 粘贴图片进纸 | `done（builder 工程施工与申报完成；待 HQ/reviewer 复核，非主观放行）` | — | — |
 | [handoffs/2026-09-12-v13-6-source-projection-repair-order.md](handoffs/2026-09-12-v13-6-source-projection-repair-order.md) | 源投影修单 · 页码契约与重投影 v1 | `done(2026-09-12 补遗三四轮六步工程验收通过;历史三轮 Result 原样保留)` | — | — |
 | [handoffs/2026-09-13-v13-6-deadcode-purge-order.md](handoffs/2026-09-13-v13-6-deadcode-purge-order.md) | 单1 · Canvas 死代码清除大单 | `done(四批全清;HQ 收口:无过滤 client 全库 1576/1576 零 skip、server test:v2 476/477+DashScope 单红隔离复验 13/13 绿判 flaky 入总测名录、2 条环境红既档;git diff --check+secrets 扫描 HQ 补跑双绿)` | — | — |
+| [handoffs/2026-09-13-v13-6-flaky-roster-order.md](handoffs/2026-09-13-v13-6-flaky-roster-order.md) | 尾单 · flaky 名录五笔清基线 | `ready(13.6 收官尾单;Henry 裁"集中总测取消"后保留的机器面基线清理,HQ 职权报备派发)` | — | — |
 | [handoffs/2026-09-13-v13-6-test-gate-repair-order.md](handoffs/2026-09-13-v13-6-test-gate-repair-order.md) | 单2 · 测试门修复:漏挂发现机关+24 文件接门 | `done(补遗二三轮终态达成;保留25条已裁归单1 Canvas红+2条已知环境红;HQ收口补跑git/secrets)` | — | — |
 | [handoffs/README.md](handoffs/README.md) | handoffs —— Henry × Claude × Codex 三方交接区 | `active` | 2026-06-27 | — |
 | [handoffs/plans/parking-lot.md](handoffs/plans/parking-lot.md) | 停车场清单(Parking Lot) | `active` | 2026-08-29 | — |
@@ -368,6 +369,7 @@
 | [handoffs/plans/v13-5-layout-credentials-plan.md](handoffs/plans/v13-5-layout-credentials-plan.md) | V13.5 · 版面与凭据 —— 段计划草案 | `active` | 2026-09-11 | — |
 | [handoffs/plans/v13-foundation-rebuild-plan.md](handoffs/plans/v13-foundation-rebuild-plan.md) | V13 · 地基重做版 —— 总 plan v1 | `active` | 2026-08-30 | — |
 | [handoffs/plans/v14-agent-era-plan-draft.md](handoffs/plans/v14-agent-era-plan-draft.md) | V14 · Agent 时代 —— 总 plan 草稿 v0 | `draft` | 2026-09-09 | — |
+| [handoffs/plans/v14-eve-design-package.md](handoffs/plans/v14-eve-design-package.md) | V14 前夜设计包 | `draft` | 2026-09-13 | — |
 | [handoffs/plans/v2-bn12-2-mcp-tool-face.md](handoffs/plans/v2-bn12-2-mcp-tool-face.md) | Plan V2.BN.12.2 — MCP 工具面(末端执行器第一次实体化) | `active` | — | — |
 | [handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md](handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md) | V2.BN.12.2b:第一个写工具 + 候选审阅队列 + HTTP 层 K-5 | `done(**铸版 2026-08-23,Fable**——五单施工 + b-4 旅程 + b-5/b-5-fix 补单全复核 PASS;旅程合并分 **A 12/12 + B 8/8** 达通过线,重走记录 `analysis/2026-08-23-v2bn12-2b4-journey-sheet.md` §7;铸版记录 log 08-23 #40;未亲刀缺口见 TD-19/TD-20)` | 2026-08-23 | — |
 | [handoffs/plans/v2-bn12-2c-selection-receipts-and-resolve.md](handoffs/plans/v2-bn12-2c-selection-receipts-and-resolve.md) | V2.BN.12.2c:选区收据(值,不是行)+ `resolve_selection`(只读解析) | `draft` | 2026-08-26 | — |
