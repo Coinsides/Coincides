@@ -1,0 +1,241 @@
+{
+  "syntheticOnly": true,
+  "database": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\b1c-browser\\run-XMLvw2\\fixture.sqlite",
+  "run": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\b1c-browser\\run-XMLvw2",
+  "boardId": "638a8de2-62f0-4925-8935-cdb7f8384b19",
+  "projectId": "b1c00000-0000-4000-8000-000000000002",
+  "legacyNoteId": "05827ac4-9213-461f-869d-800dee82671c",
+  "memberId": "c892c14b-a47b-4d63-b801-e71196a299cf",
+  "legacyBaseline": {
+    "note": {
+      "id": "05827ac4-9213-461f-869d-800dee82671c",
+      "user_id": "b1c00000-0000-4000-8000-000000000001",
+      "course_id": "b1c00000-0000-4000-8000-000000000002",
+      "title": "Legacy A4 · asymmetric walls",
+      "description": null,
+      "status": "active",
+      "source_kind": "manual",
+      "page_format": "flow",
+      "metadata": "{}",
+      "operation_batch_id": "cd539056-3889-4655-b2fe-4063a4c4c8ea",
+      "created_at": "2026-09-12T03:27:52.034Z",
+      "updated_at": "2026-09-12 03:27:52",
+      "trashed_at": null,
+      "note_class": "user"
+    },
+    "canvas": {
+      "canvasObjects": [
+        {
+          "object_id": "canvas-object:05827ac4-9213-461f-869d-800dee82671c:page-frame:b1c-legacy-primary-frame",
+          "canvas_id": "05827ac4-9213-461f-869d-800dee82671c",
+          "kind": "page_frame",
+          "backing": "none",
+          "object_class": "pure",
+          "status": "active",
+          "source": {
+            "source": "page_frame_collection"
+          },
+          "metadata": {
+            "frame_id": "b1c-legacy-primary-frame"
+          }
+        }
+      ],
+      "canvasPlacements": [
+        {
+          "placement_id": "canvas-placement:05827ac4-9213-461f-869d-800dee82671c:page-frame:b1c-legacy-primary-frame",
+          "object_id": "canvas-object:05827ac4-9213-461f-869d-800dee82671c:page-frame:b1c-legacy-primary-frame",
+          "canvas_id": "05827ac4-9213-461f-869d-800dee82671c",
+          "x": 84,
+          "y": 0,
+          "width": 904,
+          "height": 1278,
+          "rotation": 0,
+          "frame_id": "b1c-legacy-primary-frame",
+          "surface": "formal_page",
+          "boundary_role": "inside",
+          "z_index": 0,
+          "order_index": null,
+          "snap_state": {},
+          "visibility_state": "normal",
+          "render_visibility": "visible",
+          "metadata": {
+            "placement_kind": "page_frame"
+          }
+        }
+      ],
+      "contentMounts": [],
+      "visualConnectors": [],
+      "imageObjects": [],
+      "structuredObjects": [],
+      "pageFrameCollection": {
+        "pageFrames": [
+          {
+            "id": "b1c-legacy-primary-frame",
+            "role": "primary_page_frame",
+            "templateId": "a4_portrait",
+            "pageSize": "A4",
+            "background": {},
+            "exportable": true,
+            "contentInset": {
+              "left": 88,
+              "right": 56,
+              "top": 24,
+              "bottom": 110
+            },
+            "x": 84,
+            "y": 0,
+            "width": 904,
+            "height": 1278,
+            "metadata": {
+              "role": "primary_page_frame"
+            }
+          }
+        ],
+        "pageStacks": [],
+        "primaryFrameId": "b1c-legacy-primary-frame",
+        "primaryStackId": null,
+        "selectedFrameId": "b1c-legacy-primary-frame",
+        "selectedStackId": null
+      },
+      "blockLayouts": []
+    }
+  },
+  "user": {
+    "id": "b1c00000-0000-4000-8000-000000000001",
+    "name": "B1c builder",
+    "settings": "{\"theme\":\"dark\",\"skin\":null}"
+  },
+  "project": {
+    "id": "b1c00000-0000-4000-8000-000000000002",
+    "user_id": "b1c00000-0000-4000-8000-000000000001",
+    "name": "Paper preset audit",
+    "code": null,
+    "color": "#756a5c",
+    "weight": 2,
+    "description": null,
+    "semester": null,
+    "skin": null,
+    "created_at": "2026-09-11T12:00:00.000Z",
+    "updated_at": "2026-09-11T12:00:00.000Z",
+    "system_kind": null
+  },
+  "board": {
+    "id": "638a8de2-62f0-4925-8935-cdb7f8384b19",
+    "user_id": "b1c00000-0000-4000-8000-000000000001",
+    "title": "Paper presets · Board",
+    "soul_id": "purpose-d5e75c1c-9fef-4216-a018-7d9393242360",
+    "project_id": "b1c00000-0000-4000-8000-000000000002",
+    "item_id": "9377e3ce-4546-4ded-a904-3f22d22f021b",
+    "viewport": "{\"x\":40,\"y\":20,\"zoom\":1}",
+    "created_at": "2026-09-12T03:27:52.033Z",
+    "updated_at": "2026-09-12T03:27:52.037Z",
+    "skin": null
+  },
+  "notes": [
+    {
+      "note": {
+        "id": "05827ac4-9213-461f-869d-800dee82671c",
+        "user_id": "b1c00000-0000-4000-8000-000000000001",
+        "course_id": "b1c00000-0000-4000-8000-000000000002",
+        "title": "Legacy A4 · asymmetric walls",
+        "description": null,
+        "status": "active",
+        "source_kind": "manual",
+        "page_format": "flow",
+        "metadata": "{}",
+        "operation_batch_id": "cd539056-3889-4655-b2fe-4063a4c4c8ea",
+        "created_at": "2026-09-12T03:27:52.034Z",
+        "updated_at": "2026-09-12 03:27:52",
+        "trashed_at": null,
+        "note_class": "user"
+      },
+      "canvas": {
+        "canvasObjects": [
+          {
+            "object_id": "canvas-object:05827ac4-9213-461f-869d-800dee82671c:page-frame:b1c-legacy-primary-frame",
+            "canvas_id": "05827ac4-9213-461f-869d-800dee82671c",
+            "kind": "page_frame",
+            "backing": "none",
+            "object_class": "pure",
+            "status": "active",
+            "source": {
+              "source": "page_frame_collection"
+            },
+            "metadata": {
+              "frame_id": "b1c-legacy-primary-frame"
+            }
+          }
+        ],
+        "canvasPlacements": [
+          {
+            "placement_id": "canvas-placement:05827ac4-9213-461f-869d-800dee82671c:page-frame:b1c-legacy-primary-frame",
+            "object_id": "canvas-object:05827ac4-9213-461f-869d-800dee82671c:page-frame:b1c-legacy-primary-frame",
+            "canvas_id": "05827ac4-9213-461f-869d-800dee82671c",
+            "x": 84,
+            "y": 0,
+            "width": 904,
+            "height": 1278,
+            "rotation": 0,
+            "frame_id": "b1c-legacy-primary-frame",
+            "surface": "formal_page",
+            "boundary_role": "inside",
+            "z_index": 0,
+            "order_index": null,
+            "snap_state": {},
+            "visibility_state": "normal",
+            "render_visibility": "visible",
+            "metadata": {
+              "placement_kind": "page_frame"
+            }
+          }
+        ],
+        "contentMounts": [],
+        "visualConnectors": [],
+        "imageObjects": [],
+        "structuredObjects": [],
+        "pageFrameCollection": {
+          "pageFrames": [
+            {
+              "id": "b1c-legacy-primary-frame",
+              "role": "primary_page_frame",
+              "templateId": "a4_portrait",
+              "pageSize": "A4",
+              "background": {},
+              "exportable": true,
+              "contentInset": {
+                "left": 88,
+                "right": 56,
+                "top": 24,
+                "bottom": 110
+              },
+              "x": 84,
+              "y": 0,
+              "width": 904,
+              "height": 1278,
+              "metadata": {
+                "role": "primary_page_frame"
+              }
+            }
+          ],
+          "pageStacks": [],
+          "primaryFrameId": "b1c-legacy-primary-frame",
+          "primaryStackId": null,
+          "selectedFrameId": "b1c-legacy-primary-frame",
+          "selectedStackId": null
+        },
+        "blockLayouts": []
+      }
+    }
+  ],
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/api/notes/05827ac4-9213-461f-869d-800dee82671c/blocks",
+      "status": 201,
+      "body": {
+        "block_type": "paragraph",
+        "plain_text": "Historical A4 keeps its original frame, asymmetric walls, and legacy flow field."
+      }
+    }
+  ]
+}

@@ -8,6 +8,7 @@ import { buildNoteCanvasRuntimeModel } from '../engineModel';
 import { applyCanvasLayoutsToBlocks } from '../canvasObjectRepository';
 import { buildRuntimeBlockPlacement, readStoredLayout } from '../placementService';
 import { createPageFrameTemplate } from '../pageFrameTemplateService';
+import { getPagePrintGeometry, getPagePrintSlices } from '../pagePrintProjectionService';
 import type { PageReadingGear } from '../pageReadingViewportService';
 import { createPageStackFromFrame } from '../pageStackCollectionService';
 import { createDefaultDocumentTypographyProfile } from '../typographyProfileService';
@@ -271,6 +272,54 @@ describe('NotePrintLayer physical pages and fragment projection', () => {
     expect(page.querySelector<HTMLElement>(CANVAS)!.style.height).toBe('7000px');
     expect(style.overflow).toBe('hidden');
     expect(pages()).toHaveLength(1);
+  });
+
+  it('prints an opted-in single Web frame as A4 slices with continuous coverage and a visible tail', () => {
+    const web = frame('web-long', { ...createPageFrameTemplate('screen_note'), height: 7000 });
+    const print = getPagePrintGeometry(web);
+    const sliceHeight = print.height / print.scale;
+    const blocks = [block('web-start', 'WEB START'), block('web-seam', 'ACROSS THE SEAM'), block('web-tail', 'WEB TAIL')];
+    const placements = [
+      placement('web-start', { x: web.x + 64, y: web.y + 48 }),
+      placement('web-seam', { x: web.x + 64, y: web.y + sliceHeight - 40, height: 80 }),
+      placement('web-tail', { x: web.x + 64, y: web.y + 6800, height: 80 }),
+    ];
+    const input = inputFor({ frames: [web], blocks, placements });
+    const before = JSON.stringify(input.noteCanvasRuntime);
+    render(<NotePrintLayer {...input} continuousWeb />);
+    printEvent('beforeprint');
+    expect(pages()).toHaveLength(5);
+    pages().forEach((page, index) => {
+      const style = getComputedStyle(page);
+      const canvas = page.querySelector<HTMLElement>(CANVAS)!;
+      expect(page.dataset.pageFrameId).toBe(web.id);
+      expect(page.dataset.paperSize).toBe('A4');
+      expect(Number(page.dataset.printScale)).toBeCloseTo(0.7086614173228347, 12);
+      expect(Number(page.dataset.printSliceOffset)).toBeCloseTo(index * sliceHeight, 9);
+      expect(parseFloat(style.height)).toBeCloseTo(print.height, 9);
+      expect(parseFloat(canvas.style.top)).toBeCloseTo(-index * print.height, 9);
+      expect(canvas.style.width).toBe('1120px');
+      expect(canvas.style.height).toBe('7000px');
+      expect(style.overflow).toBe('hidden');
+      expect(style.breakAfter).toBe(index === 4 ? 'auto' : 'page');
+    });
+    const pageTexts = pages().map((page) => Array.from(page.querySelectorAll<HTMLTextAreaElement>('textarea')).map((field) => field.value));
+    expect(pageTexts).toEqual([
+      ['WEB START', 'ACROSS THE SEAM'], ['ACROSS THE SEAM'], [], [], ['WEB TAIL'],
+    ]);
+    expect(JSON.stringify(input.noteCanvasRuntime)).toBe(before);
+  });
+
+  it('keeps exact Web print boundaries free of a blank trailing page and leaves paper/custom frames unchanged', () => {
+    const web = frame('web-boundary', { ...createPageFrameTemplate('screen_note') });
+    const print = getPagePrintGeometry(web);
+    const sliceHeight = print.height / print.scale;
+    expect(getPagePrintSlices({ ...web, height: sliceHeight * 2 }, true)).toHaveLength(2);
+    expect(getPagePrintSlices({ ...web, height: sliceHeight * 2 + 1 }, true)).toHaveLength(3);
+    expect(getPagePrintSlices({ ...web, height: 7000 })).toHaveLength(1);
+    for (const templateId of ['a4_portrait', 'letter_portrait', 'custom'] as const) {
+      expect(getPagePrintSlices(frame(templateId, { ...createPageFrameTemplate(templateId), height: 7000 }), true)).toHaveLength(1);
+    }
   });
 
   it('does not allow reading gear, step, viewport zoom or screen content height into print geometry', () => {

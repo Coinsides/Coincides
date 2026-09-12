@@ -21,6 +21,21 @@ export function getPagePrintGeometry(frame: PageFrameModel) {
   return { paperSize, width, height, scale };
 }
 
+/** New Web notes opt into print-only slices; historical frames keep one page. */
+export function getPagePrintSlices(frame: PageFrameModel, continuousWeb = false) {
+  const geometry = getPagePrintGeometry(frame);
+  const sliceHeight = geometry.height / geometry.scale;
+  const count = continuousWeb && frame.templateId === 'screen_note'
+    ? Math.max(1, Math.ceil(frame.height / sliceHeight - 1e-9))
+    : 1;
+  return Array.from({ length: count }, (_, index) => ({
+    index,
+    offsetY: index * sliceHeight,
+    height: sliceHeight,
+    printTop: -index * geometry.height,
+  }));
+}
+
 /** Both rectangles come from the existing fragment model, in world coordinates. */
 export function getPagePrintFragmentGeometry(
   frame: PageFrameModel,

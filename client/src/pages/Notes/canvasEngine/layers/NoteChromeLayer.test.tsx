@@ -11,6 +11,8 @@ import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
 import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
 import type { NoteBlock } from '../runtimeDataTypes';
 import { DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE } from '../typographyProfileService';
+import { createPrimaryPageFrame } from '../engineModel';
+import { createPageFrameCollectionSeed } from '../pageFrameCollectionService';
 import { useNoteBlockTrashController } from '../hooks/useNoteBlockTrashController';
 import { useNoteTrashAction } from '../hooks/useNoteTrashAction';
 import { ProjectNotesSection } from '../../../Courses/CourseDetail';
@@ -250,6 +252,41 @@ describe('NoteChromeLayer organize mode', () => {
 
     expect(screen.getByRole('button', { name: 'Layout' })).toBeTruthy();
     expect(screen.queryByText('Snap alignment')).toBeNull();
+  });
+
+  it.each([
+    { pageFormat: 'screen_note', templateId: 'screen_note' as const, continuous: true },
+    { pageFormat: undefined, templateId: 'screen_note' as const, continuous: false },
+    { pageFormat: 'a4_portrait', templateId: 'a4_portrait' as const, continuous: false },
+    { pageFormat: 'letter_portrait', templateId: 'letter_portrait' as const, continuous: false },
+  ])('limits manual frame creation only for new Web notes ($pageFormat / $templateId)', ({ pageFormat, templateId, continuous }) => {
+    const frame = createPrimaryPageFrame({ templateId });
+    const props = noteChromeProps({
+      note: { ...noteChromeProps().note, page_format: pageFormat },
+      pageFrameCollection: createPageFrameCollectionSeed(frame),
+      pageFrames: [frame], primaryPageFrameId: frame.id, selectedPageFrameId: frame.id,
+      showLayoutPanel: true, showMoreActions: true,
+      onToggleLayoutMode: vi.fn(), onCreatePageStack: vi.fn(), onAddPageBelow: vi.fn(), onDuplicatePageFrame: vi.fn(), onDeletePageFrame: vi.fn(),
+    });
+    render(<NoteChromeLayer {...props} />);
+    if (continuous) {
+      expect(screen.queryAllByRole('button', { name: /New PageStack/ })).toHaveLength(0);
+      expect(screen.queryAllByRole('button', { name: /Add page below/ })).toHaveLength(0);
+      expect(screen.queryByRole('button', { name: 'Duplicate Page 1 to new stack' })).toBeNull();
+      expect(screen.queryByRole('button', { name: 'Delete Page 1' })).toBeNull();
+    } else {
+      fireEvent.click(screen.getByRole('button', { name: 'New PageStack' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Add page below Page 1' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Duplicate Page 1 to new stack' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Delete Page 1' }));
+      expect(props.onCreatePageStack).toHaveBeenCalledOnce();
+      expect(props.onAddPageBelow).toHaveBeenCalledWith(frame.id);
+      expect(props.onDuplicatePageFrame).toHaveBeenCalledWith(frame.id);
+      expect(props.onDeletePageFrame).toHaveBeenCalledWith(frame.id);
+    }
+    // The Layout entry remains usable, including for the new Web preset.
+    fireEvent.click(screen.getByRole('button', { name: 'Layout' }));
+    expect(props.onToggleLayoutMode).toHaveBeenCalledOnce();
   });
 });
 

@@ -1,0 +1,259 @@
+{
+  "syntheticOnly": true,
+  "database": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\b1c-browser\\run-XMLvw2\\fixture.sqlite",
+  "noteCount": 6,
+  "legacyExactEquality": true,
+  "sameDatabaseReopenExactEquality": true,
+  "textReopenExactEquality": true,
+  "frames": [
+    {
+      "id": "05827ac4-9213-461f-869d-800dee82671c",
+      "title": "Legacy A4 · asymmetric walls",
+      "page_format": "flow",
+      "frames": [
+        {
+          "id": "b1c-legacy-primary-frame",
+          "role": "primary_page_frame",
+          "templateId": "a4_portrait",
+          "pageSize": "A4",
+          "background": {},
+          "exportable": true,
+          "contentInset": {
+            "left": 88,
+            "right": 56,
+            "top": 24,
+            "bottom": 110
+          },
+          "x": 84,
+          "y": 0,
+          "width": 904,
+          "height": 1278,
+          "metadata": {
+            "role": "primary_page_frame"
+          }
+        }
+      ]
+    },
+    {
+      "id": "1cdcbbb7-60a2-4011-8280-4d602bc75fda",
+      "title": "Untitled note",
+      "page_format": "a4_portrait",
+      "frames": [
+        {
+          "id": "primary-page-frame",
+          "role": "primary_page_frame",
+          "templateId": "a4_portrait",
+          "pageSize": "A4",
+          "background": {
+            "kind": "paper",
+            "fill": "#101114",
+            "borderColor": "#2a2f38",
+            "shadow": "0 18px 46px rgba(0, 0, 0, 0.24)",
+            "gridVisible": false
+          },
+          "exportable": true,
+          "contentInset": {
+            "top": 0,
+            "right": 72,
+            "bottom": 96,
+            "left": 72
+          },
+          "x": 0,
+          "y": 0,
+          "width": 904,
+          "height": 1278,
+          "metadata": {
+            "role": "primary_page_frame"
+          }
+        }
+      ]
+    },
+    {
+      "id": "759916c1-5e6a-4b31-bbb7-db07f300f3ed",
+      "title": "Untitled note",
+      "page_format": "letter_portrait",
+      "frames": [
+        {
+          "id": "primary-page-frame",
+          "role": "primary_page_frame",
+          "templateId": "letter_portrait",
+          "pageSize": "Letter",
+          "background": {
+            "kind": "paper",
+            "fill": "#101114",
+            "borderColor": "#2a2f38",
+            "shadow": "0 18px 46px rgba(0, 0, 0, 0.24)",
+            "gridVisible": false
+          },
+          "exportable": true,
+          "contentInset": {
+            "top": 0,
+            "right": 72,
+            "bottom": 96,
+            "left": 72
+          },
+          "x": 0,
+          "y": 0,
+          "width": 904,
+          "height": 1170,
+          "metadata": {
+            "role": "primary_page_frame"
+          }
+        }
+      ]
+    },
+    {
+      "id": "1a7fdd10-d7ee-400b-af9f-9cf512d51e48",
+      "title": "Web long page smoke",
+      "page_format": "screen_note",
+      "frames": [
+        {
+          "id": "primary-page-frame",
+          "role": "primary_page_frame",
+          "templateId": "screen_note",
+          "pageSize": "Custom",
+          "background": {
+            "kind": "screen",
+            "fill": "#111722",
+            "borderColor": "#243248",
+            "shadow": "0 16px 40px rgba(0, 0, 0, 0.20)",
+            "gridVisible": true
+          },
+          "exportable": false,
+          "contentInset": {
+            "top": 48,
+            "right": 64,
+            "bottom": 64,
+            "left": 94.85714285714286
+          },
+          "x": 0,
+          "y": 0,
+          "width": 1120,
+          "height": 720,
+          "metadata": {
+            "role": "primary_page_frame"
+          }
+        }
+      ]
+    },
+    {
+      "id": "5764dbdb-d654-4f79-8710-22df4430ebe1",
+      "title": "Web clean print smoke",
+      "page_format": "screen_note",
+      "frames": [
+        {
+          "id": "primary-page-frame",
+          "role": "primary_page_frame",
+          "templateId": "screen_note",
+          "pageSize": "Custom",
+          "background": {
+            "kind": "screen",
+            "fill": "#111722",
+            "borderColor": "#243248",
+            "shadow": "0 16px 40px rgba(0, 0, 0, 0.20)",
+            "gridVisible": true
+          },
+          "exportable": false,
+          "contentInset": {
+            "top": 48,
+            "right": 64,
+            "bottom": 64,
+            "left": 64
+          },
+          "x": 0,
+          "y": 0,
+          "width": 1120,
+          "height": 720,
+          "metadata": {
+            "role": "primary_page_frame"
+          }
+        }
+      ]
+    },
+    {
+      "id": "c7e9a0c9-82ae-4808-8043-982c3bb2430c",
+      "title": "Web final width smoke",
+      "page_format": "screen_note",
+      "frames": [
+        {
+          "id": "primary-page-frame",
+          "role": "primary_page_frame",
+          "templateId": "screen_note",
+          "pageSize": "Custom",
+          "background": {
+            "kind": "screen",
+            "fill": "#111722",
+            "borderColor": "#243248",
+            "shadow": "0 16px 40px rgba(0, 0, 0, 0.20)",
+            "gridVisible": true
+          },
+          "exportable": false,
+          "contentInset": {
+            "top": 48,
+            "right": 64,
+            "bottom": 64,
+            "left": 64
+          },
+          "x": 0,
+          "y": 0,
+          "width": 1120,
+          "height": 720,
+          "metadata": {
+            "role": "primary_page_frame"
+          }
+        }
+      ]
+    }
+  ],
+  "finalWebNoteId": "c7e9a0c9-82ae-4808-8043-982c3bb2430c",
+  "finalBlockLengths": [
+    15869,
+    76
+  ],
+  "print": {
+    "beforeprintSeen": true,
+    "afterprintSeen": false,
+    "printMediaAtCapture": false,
+    "pages": 4,
+    "sliceOffsets": [
+      0,
+      1584,
+      3168,
+      4752
+    ],
+    "frameWidth": 1120,
+    "derivedFrameHeight": 5859,
+    "contentWidth": 992,
+    "nativePreviewScreenshot": false
+  },
+  "requestCountAtCapture": 364,
+  "nonSuccessRequests": [
+    {
+      "method": "GET",
+      "path": "/api/boards/aa67fbff-862d-4ce7-a602-eccf03940f9c",
+      "status": 404
+    },
+    {
+      "method": "POST",
+      "path": "/api/notes/1a7fdd10-d7ee-400b-af9f-9cf512d51e48/blocks",
+      "status": 400,
+      "plainTextLength": 29057
+    },
+    {
+      "method": "POST",
+      "path": "/api/notes/1a7fdd10-d7ee-400b-af9f-9cf512d51e48/blocks",
+      "status": 400,
+      "plainTextLength": 29057
+    },
+    {
+      "method": "POST",
+      "path": "/api/notes/1a7fdd10-d7ee-400b-af9f-9cf512d51e48/blocks",
+      "status": 400,
+      "plainTextLength": 29101
+    }
+  ],
+  "caveats": [
+    "Native beforeprint DOM and a labeled frozen screen visualization; no native preview screenshot or afterprint claim.",
+    "Existing text height estimation reserves space beyond measured glyphs; the current placed continuation is printed at its saved position."
+  ]
+}

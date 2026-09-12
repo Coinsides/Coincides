@@ -5,6 +5,7 @@ import { NOTE_SLASH_COMMANDS } from '../../noteSlashCommands';
 import type { TemplateOption } from '@/services/templateOptions';
 import { loadDraftRecoveryQueue, type DraftBlockCreateResult } from '../draftBlockPersistence';
 import { createPrimaryPageFrame, createViewport } from '../engineModel';
+import { createNotePagePresetSeed } from '../notePagePresetService';
 import { createSurfaceModePolicy } from '../modePolicyService';
 import { getPageFrameContentRect } from '../pageFrameService';
 import type { BlockBoxLayout } from '../runtimeLayout';
@@ -682,6 +683,29 @@ describe('useRuntimeNaturalWritingController Page draft authority', () => {
       await createAttempt.promise;
       await Promise.resolve();
     });
+  });
+
+  it('keeps a new Web draft beyond the bottom on the same frame without a collection write', async () => {
+    const collection = createNotePagePresetSeed('screen_note');
+    const createBlock = vi.fn(async () => null);
+    const saveCollection = vi.fn();
+    const subject = renderHook(() => useRuntimeNaturalWritingController(makeRuntimeOptions({
+      note: { ...note, page_format: 'screen_note' },
+      coordinateContract: 'v2', pageFrameCollection: collection,
+      defaultDraftLayout: { x: 0, y: 7000, width: 992, height: 100,
+        frame_id: collection.primaryFrameId!, coordinate_space: 'page_frame_local', surface: 'formal_page' },
+      createBlock, onSavePageFrameCollection: saveCollection,
+    })));
+    act(() => subject.result.current.activateDraft());
+    await act(async () => {
+      subject.result.current.handleDraftChange('Web continuation', 16);
+      await Promise.resolve();
+    });
+    expect(saveCollection).not.toHaveBeenCalled();
+    expect(createBlock).toHaveBeenCalledWith(defaultTextTemplate, 'Web continuation', expect.objectContaining({
+      layout: expect.objectContaining({ frame_id: collection.primaryFrameId, y: 7048, coordinate_space: 'canvas_world' }),
+    }));
+    expect(collection.pageFrames).toHaveLength(1);
   });
 
   it.each([

@@ -97,6 +97,7 @@ export function useRuntimePresentationController(
   }, [currentPageFrameCollection, noteCanvasRuntime.world, options]);
 
   const handleCreatePageFrame = useCallback(() => {
+    if (options.note?.page_format === 'screen_note') return;
     const afterFrameId = currentPageFrameCollection.selectedFrameId
       || currentPageFrameCollection.primaryFrameId
       || currentPageFrameCollection.pageFrames[currentPageFrameCollection.pageFrames.length - 1]?.id
@@ -113,6 +114,7 @@ export function useRuntimePresentationController(
   }, [currentPageFrameCollection, focusPageFrame, options]);
 
   const handleCreatePageStack = useCallback(() => {
+    if (options.note?.page_format === 'screen_note') return;
     const afterFrameId = currentPageFrameCollection.selectedFrameId
       || currentPageFrameCollection.primaryFrameId
       || currentPageFrameCollection.pageFrames[currentPageFrameCollection.pageFrames.length - 1]?.id
@@ -131,6 +133,7 @@ export function useRuntimePresentationController(
   }, [currentPageFrameCollection, focusPageFrame, options]);
 
   const handleAddPageBelow = useCallback((frameId: string) => {
+    if (options.note?.page_format === 'screen_note') return;
     const context = resolvePageStackContext(currentPageFrameCollection, frameId);
     if (context) {
       const nextCollection = appendPageFrameToStack(currentPageFrameCollection, context.stack.id, frameId);
@@ -184,12 +187,14 @@ export function useRuntimePresentationController(
   }, [currentPageFrameCollection, options]);
 
   const handleInsertPageFrame = useCallback((afterFrameId: string) => {
+    if (options.note?.page_format === 'screen_note') return;
     const nextCollection = insertPageFrameAfter(currentPageFrameCollection, afterFrameId);
     void options.onSavePageFrameCollection(nextCollection);
     if (nextCollection.selectedFrameId) focusPageFrame(nextCollection.selectedFrameId, nextCollection);
   }, [currentPageFrameCollection, focusPageFrame, options]);
 
   const handleDuplicatePageFrame = useCallback((frameId: string) => {
+    if (options.note?.page_format === 'screen_note') return;
     const nextCollection = duplicatePageFrame(currentPageFrameCollection, frameId);
     void options.onSavePageFrameCollection(nextCollection);
     if (nextCollection.selectedFrameId) focusPageFrame(nextCollection.selectedFrameId, nextCollection);
@@ -202,6 +207,7 @@ export function useRuntimePresentationController(
   }, [currentPageFrameCollection, focusPageFrame, options]);
 
   const handleDeletePageFrame = useCallback((frameId: string) => {
+    if (options.note?.page_format === 'screen_note') return;
     void options.onSavePageFrameCollection(deletePageFrameFromCollection(currentPageFrameCollection, frameId));
   }, [currentPageFrameCollection, options]);
 
@@ -235,6 +241,7 @@ export function useRuntimePresentationController(
   }, [currentPageFrameCollection, options]);
 
   const handleResizePageFrame = useCallback((frameId: string, size: { width: number; height: number }) => {
+    if (options.note?.page_format === 'screen_note') return;
     const nextCollection = resizePageFrameInCollection(currentPageFrameCollection, frameId, size);
     void options.onSavePageFrameCollection(nextCollection);
   }, [currentPageFrameCollection, options]);

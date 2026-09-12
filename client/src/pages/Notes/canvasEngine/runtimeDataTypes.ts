@@ -4,6 +4,7 @@ export interface Note {
   title: string;
   description: string | null;
   status: string;
+  page_format?: string;
   note_class?: 'user' | 'source_projection' | 'system' | string;
   source_kind?: 'manual' | 'source_projection' | 'system' | string;
   metadata?: Record<string, unknown>;

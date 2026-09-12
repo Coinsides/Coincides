@@ -1,5 +1,6 @@
 import { resolveScreenRect, selectPlacementFrame, toStoredLayout, type CoordinateContract } from '../placementContractService';
 import { useMemo } from 'react';
+import { createNotePagePresetSeed, growWebPageCollection, isNotePagePreset, measurePresetPageContentHeight } from '../notePagePresetService';
 import { buildNoteCanvasRuntimeModel } from '../engineModel';
 import { buildExportPreviewModel } from '../exportPreviewService';
 import { estimateBlockHeight } from '../measurementService';
@@ -63,6 +64,7 @@ export interface UseNoteCanvasResolvedLayoutModelOptions {
 }
 
 export interface UseNoteCanvasFrameModelOptions {
+  notePagePreset?: string;
   coordinateContract?: CoordinateContract;
   blockLayouts: Record<string, BlockBoxLayout>;
   defaultDraftLayout: BlockBoxLayout;
@@ -175,6 +177,7 @@ export function useNoteCanvasResolvedLayoutModel({
 }
 
 export function useNoteCanvasFrameModel({
+  notePagePreset,
   blockLayouts,
   coordinateContract,
   defaultDraftLayout,
@@ -214,18 +217,37 @@ export function useNoteCanvasFrameModel({
     [pageContentHeight, pageOffsetX],
   );
 
-  const runtimePageFrameCollection = useMemo(
-    () => normalizePageFrameCollection(pageFrameCollection, {
+  const presetContentLayouts = useMemo<BlockBoxLayout[]>(() => [
+    ...Object.values(blockLayouts),
+    ...(draftActive ? [draftLayout || defaultDraftLayout] : []),
+    ...persistedCanvasPlacements.filter((placement) => placement.surface === 'formal_page' && placement.frameId)
+      .map((placement) => ({
+        x: placement.x, y: placement.y, width: placement.width, height: placement.height,
+        surface: 'formal_page' as const, coordinate_space: 'canvas_world' as const, frame_id: placement.frameId,
+      })),
+  ], [blockLayouts, draftActive, draftLayout, defaultDraftLayout, persistedCanvasPlacements]);
+
+  const runtimePageFrameCollection = useMemo(() => {
+    if (isNotePagePreset(notePagePreset)) {
+      const collection = normalizePageFrameCollection(pageFrameCollection || createNotePagePresetSeed(notePagePreset));
+      return notePagePreset === 'screen_note'
+        ? growWebPageCollection(collection, presetContentLayouts, coordinateContract)
+        : collection;
+    }
+    return normalizePageFrameCollection(pageFrameCollection, {
       fallbackPageFrame: primaryPageFrameSeed,
-    }),
-    [pageFrameCollection, primaryPageFrameSeed],
-  );
+    });
+  }, [notePagePreset, pageFrameCollection, primaryPageFrameSeed, presetContentLayouts, coordinateContract]);
 
   const primaryPageFrame = useMemo(() => (
     runtimePageFrameCollection.pageFrames.find((frame) => frame.id === runtimePageFrameCollection.primaryFrameId)
     || runtimePageFrameCollection.pageFrames[0]
     || null
   ), [runtimePageFrameCollection]);
+
+  const resolvedPageContentHeight = isNotePagePreset(notePagePreset)
+    ? measurePresetPageContentHeight(runtimePageFrameCollection, presetContentLayouts, coordinateContract)
+    : pageContentHeight;
 
   const canvasBlockPlacements = useMemo<BlockPlacementModel[]>(
     () => visibleBlocks.flatMap((block, index) => {
@@ -251,7 +273,7 @@ export function useNoteCanvasFrameModel({
   );
 
   const noteCanvasRuntime = useMemo(() => {
-    const seedViewport = createRuntimeViewport(surfaceMode, pageContentHeight, viewportTransform);
+    const seedViewport = createRuntimeViewport(surfaceMode, resolvedPageContentHeight, viewportTransform);
     const viewport = surfaceMode === 'page' && primaryPageFrame
       ? createPageModeFocusViewport({
         pageFrame: primaryPageFrame,
@@ -262,7 +284,7 @@ export function useNoteCanvasFrameModel({
 
     return { ...buildNoteCanvasRuntimeModel({
       mode: surfaceMode,
-      world: createRuntimeWorld(surfaceMode, pageContentHeight, {
+      world: createRuntimeWorld(surfaceMode, resolvedPageContentHeight, {
         pageFrames: runtimePageFrameCollection.pageFrames,
         blockPlacements: canvasBlockPlacements,
         canvasObjectReserve: [],
@@ -287,7 +309,7 @@ export function useNoteCanvasFrameModel({
     coordinateContract,
     contentLookupBlocks,
     documentTypographyProfile,
-    pageContentHeight,
+    resolvedPageContentHeight,
     primaryPageFrame,
     persistedCanvasObjects,
     persistedCanvasPlacements,
@@ -317,7 +339,7 @@ export function useNoteCanvasFrameModel({
     canvasBlockPlacements,
     exportPreview,
     noteCanvasRuntime,
-    pageContentHeight,
+    pageContentHeight: resolvedPageContentHeight,
     primaryPageFrame,
     runtimePageFrameCollection,
   };

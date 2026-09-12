@@ -165,7 +165,7 @@ describe('BoardPage note modal host', () => {
       fireEvent.click(screen.getByRole('button', { name: 'New note' }));
       const dialog = await screen.findByRole('dialog', { name: 'New note' });
       await waitFor(() => expect((within(dialog).getByRole('combobox', { name: 'Project' }) as HTMLSelectElement).disabled).toBe(false));
-      fireEvent.change(within(dialog).getByRole('combobox'), { target: { value: 'project' } });
+      fireEvent.change(within(dialog).getByRole('combobox', { name: 'Project' }), { target: { value: 'project' } });
       fireEvent.change(within(dialog).getByRole('textbox', { name: 'Note title' }), { target: { value: 'Draft' } });
       for (const name of ['Create note', 'Cancel']) {
         const button = within(dialog).getByRole('button', { name });

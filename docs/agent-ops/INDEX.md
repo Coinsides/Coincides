@@ -326,7 +326,7 @@
 | [handoffs/2026-09-11-v13-5-b1a-fix1-order.md](handoffs/2026-09-11-v13-5-b1a-fix1-order.md) | B1a-fix1 · mock 出口普查补全 | `done（builder 工作树交付；待 HQ 复核放行）` | — | — |
 | [handoffs/2026-09-11-v13-5-b1a-skin-engine-order.md](handoffs/2026-09-11-v13-5-b1a-skin-engine-order.md) | B1a · 皮引擎(纸面) | `done（builder 已交付；待 HQ 复核 / 主观验收）` | — | — |
 | [handoffs/2026-09-11-v13-5-b1b-board-skin-order.md](handoffs/2026-09-11-v13-5-b1b-board-skin-order.md) | B1b · 板皮 + 部件层 | `done（builder 工作树交付；待 HQ 复核与主观放行）` | — | — |
-| [handoffs/2026-09-11-v13-5-b1c-page-presets-order.md](handoffs/2026-09-11-v13-5-b1c-page-presets-order.md) | B1c · 纸型预设 | `ready` | — | — |
+| [handoffs/2026-09-11-v13-5-b1c-page-presets-order.md](handoffs/2026-09-11-v13-5-b1c-page-presets-order.md) | B1c · 纸型预设 | `done` | — | — |
 | [handoffs/2026-09-11-v13-5-b1d-material-polish-order.md](handoffs/2026-09-11-v13-5-b1d-material-polish-order.md) | B1d · 材质追样 | `ready(候 B1c 收口后派发)` | — | — |
 | [handoffs/2026-09-11-v13-5-b3-identity-bridge-order.md](handoffs/2026-09-11-v13-5-b3-identity-bridge-order.md) | B3 · 身份桥 | `done（builder 工作树交付；待 HQ 复核放行）` | — | — |
 | [handoffs/2026-09-11-v13-5-b4v-fix1-order.md](handoffs/2026-09-11-v13-5-b4v-fix1-order.md) | B4v-fix1 · 台账补记 | `done（builder 工作树交付；待 HQ 复核放行）` | — | — |

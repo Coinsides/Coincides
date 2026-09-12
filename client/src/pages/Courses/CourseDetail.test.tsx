@@ -51,6 +51,32 @@ describe('ProjectNotesSection lifecycle actions', () => {
     mocks.post.mockResolvedValue({ data: { message: 'Note restored' } });
   });
 
+  it('uses A4 by default when creating a project note', () => {
+    const onCreateNote = vi.fn();
+    render(<ProjectNotesSection notes={[note]} status="active" onStatusChange={vi.fn()}
+      onCreateNote={onCreateNote} onOpenNote={vi.fn()} refreshNotes={vi.fn()} addToast={vi.fn()} />);
+    const paper = screen.getByRole('combobox', { name: 'Paper size' }) as HTMLSelectElement;
+    expect(paper.value).toBe('a4_portrait');
+    expect(Array.from(paper.options, (option) => option.textContent)).toEqual(['A4', 'Letter', 'Web long page']);
+    fireEvent.click(screen.getByRole('button', { name: 'New Note' }));
+    expect(onCreateNote).toHaveBeenCalledExactlyOnceWith('a4_portrait');
+  });
+
+  it.each(['letter_portrait', 'screen_note'] as const)('passes selected %s only when creating a new project note', (preset) => {
+    const onCreateNote = vi.fn();
+    const onOpenNote = vi.fn();
+    render(<ProjectNotesSection notes={[note]} status="active" onStatusChange={vi.fn()}
+      onCreateNote={onCreateNote} onOpenNote={onOpenNote} refreshNotes={vi.fn()} addToast={vi.fn()} />);
+    fireEvent.change(screen.getByRole('combobox', { name: 'Paper size' }), { target: { value: preset } });
+    expect(onCreateNote).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'Open note Project note' }));
+    expect(onOpenNote).toHaveBeenCalledExactlyOnceWith('note-project-entry');
+    expect(onCreateNote).not.toHaveBeenCalled();
+    fireEvent.click(screen.getByRole('button', { name: 'New Note' }));
+    expect(onCreateNote).toHaveBeenCalledExactlyOnceWith(preset);
+    expect(mocks.post).not.toHaveBeenCalled();
+  });
+
   it('clicking the trash action calls api.delete with the note URL', async () => {
     const refreshNotes = vi.fn().mockResolvedValue(undefined);
     const addToast = vi.fn();

@@ -128,6 +128,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
   };
 
   const writingSurfaceProps: NoteWritingSurfaceLayerProps = {
+    continuousWeb: input.note.page_format === 'screen_note',
     paperHeader: {
       titleDraft: input.titleDraft, descriptionDraft: input.descriptionDraft,
       contentReadOnly: input.contentReadOnly,

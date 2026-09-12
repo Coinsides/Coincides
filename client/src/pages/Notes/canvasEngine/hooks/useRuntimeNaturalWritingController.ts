@@ -383,7 +383,7 @@ export function useRuntimeNaturalWritingController(options: UseRuntimeNaturalWri
   }, [activateDraft, options]);
 
   const activateDraftWithPageStackFlow = useCallback((layout?: BlockBoxLayout) => {
-    if (layout || !options.pageFrameCollection) {
+    if (layout || !options.pageFrameCollection || options.note?.page_format === 'screen_note') {
       activateWithImmutableAuthority(layout);
       return;
     }

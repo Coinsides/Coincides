@@ -350,6 +350,10 @@ export const uploadDocumentSchema = z.object({
 
 // --- v2 Notes / NoteBlocks ---
 
+// Creation-only page presets use the existing notes.page_format column.
+// Legacy note writers retain createNoteSchema's string vocabulary and flow default.
+export const notePagePresetSchema = z.enum(['a4_portrait', 'letter_portrait', 'screen_note']);
+
 export const createNoteSchema = z.object({
   skin: skinSelectionSchema.nullable().optional(),
   course_id: z.string().uuid('Invalid course ID'),

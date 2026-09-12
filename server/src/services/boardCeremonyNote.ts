@@ -2,12 +2,13 @@ import type Database from 'better-sqlite3';
 import { v4 as uuidv4 } from 'uuid';
 import { z } from 'zod';
 import { AppError } from '../middleware/errorHandler.js';
-import { createCourseSchema, createNoteSchema, savePageFrameCollectionSchema } from '../validators/index.js';
+import { createCourseSchema, createNoteSchema, notePagePresetSchema, savePageFrameCollectionSchema } from '../validators/index.js';
 import { savePageFrameCollection } from './canvasObjects.js';
 import { hydrateNote } from './noteHydration.js';
 
 const ceremonyFields = {
   title: createNoteSchema.shape.title.trim().min(1),
+  page_format: notePagePresetSchema.optional(),
   collection: savePageFrameCollectionSchema.shape.collection.refine(
     (collection) => Array.isArray(collection.pageFrames) && collection.pageFrames.length > 0,
     'An initial page frame is required',
@@ -45,8 +46,8 @@ export function createBoardCeremonyNote(db: Database.Database, userId: string, b
       .run(operationBatchId, userId, projectId, `Create note: ${input.title}`, now);
     db.prepare(`INSERT INTO notes (
       id, user_id, course_id, title, page_format, metadata, operation_batch_id, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, 'flow', '{}', ?, ?, ?)`)
-      .run(noteId, userId, projectId, input.title, operationBatchId, now, now);
+    ) VALUES (?, ?, ?, ?, ?, '{}', ?, ?, ?)`)
+      .run(noteId, userId, projectId, input.title, input.page_format ?? 'flow', operationBatchId, now, now);
     const collection = savePageFrameCollection(db, userId, noteId, input.collection);
     if (!collection?.pageFrames.length) throw new AppError(400, 'An initial page frame is required');
     const note = hydrateNote(db.prepare('SELECT * FROM notes WHERE id = ?').get(noteId));

@@ -11,6 +11,7 @@ import {
   createNoteBlockSchema,
   createNoteSchema,
   discardClientNoteBlockCreateSchema,
+  notePagePresetSchema,
   reorderNoteBlocksSchema,
   updateNoteBlockPlacementSchema,
   updateNoteSchema,
@@ -63,14 +64,15 @@ export function getOwnedCourse(courseId: string, userId: string): { id: string }
 export function getOwnedNote(
   noteId: string,
   userId: string,
-): { id: string; course_id: string; note_class: string; status: string } {
+): { id: string; course_id: string; note_class: string; status: string; page_format: string } {
   const note = getDb()
-    .prepare('SELECT id, course_id, note_class, status FROM notes WHERE id = ? AND user_id = ?')
+    .prepare('SELECT id, course_id, note_class, status, page_format FROM notes WHERE id = ? AND user_id = ?')
     .get(noteId, userId) as {
       id: string;
       course_id: string;
       note_class: string;
       status: string;
+      page_format: string;
     } | undefined;
   if (!note) throw new AppError(404, 'Note not found');
   return note;
@@ -145,9 +147,19 @@ router.get('/:id', (req: AuthRequest, res: Response) => {
 router.put('/:id', (req: AuthRequest, res: Response) => {
   try {
     const noteId = req.params.id as string;
-    getOwnedNote(noteId, req.userId!);
+    const note = getOwnedNote(noteId, req.userId!);
     const data = updateNoteSchema.parse(req.body);
     assertSourceProjectionNoteUpdateAllowed(getDb(), req.userId!, noteId, data);
+    if (
+      data.page_format !== undefined
+      && data.page_format !== note.page_format
+      && (notePagePresetSchema.safeParse(note.page_format).success
+        || notePagePresetSchema.safeParse(data.page_format).success)
+    ) {
+      throw new AppError(409, 'Page preset cannot be changed after note creation', {
+        code: 'note_page_preset_immutable',
+      });
+    }
     const fields: string[] = [];
     const values: unknown[] = [];
 

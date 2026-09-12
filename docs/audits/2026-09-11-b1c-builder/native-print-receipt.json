@@ -1,0 +1,233 @@
+{
+  "trigger": "window.print",
+  "beforeprintSeen": true,
+  "afterprintSeen": false,
+  "capturedAt": "2026-09-12T03:47:40.543Z",
+  "printMediaAtCapture": false,
+  "noteId": "c7e9a0c9-82ae-4808-8043-982c3bb2430c",
+  "pages": [
+    {
+      "frameId": "primary-page-frame",
+      "sliceIndex": 0,
+      "sliceOffset": 0,
+      "paperSize": "A4",
+      "scale": 0.7086614173228347,
+      "box": {
+        "width": 793.6875,
+        "height": 1122.515625,
+        "x": -100000,
+        "y": 0
+      },
+      "css": {
+        "width": "793.688px",
+        "height": "1122.52px",
+        "overflow": "hidden",
+        "breakAfter": "page",
+        "page": "coincides-a4"
+      },
+      "canvas": {
+        "width": "1120px",
+        "height": "5859px",
+        "top": "0px",
+        "transform": "scale(0.708661)"
+      },
+      "fragments": [
+        {
+          "blockId": "f1850fa9-3ad2-439b-8f44-3e83489ed958",
+          "box": {
+            "width": 702.9921875,
+            "height": 4041.49609375,
+            "x": -99954.6484375,
+            "y": 34.0157470703125
+          },
+          "css": {
+            "left": "64px",
+            "top": "48px",
+            "width": "992px",
+            "height": "5703px"
+          },
+          "text": [
+            {
+              "length": 15869,
+              "first": "FINAL-WEB-BEGIN\nObservation 001: A fixed width page keeps growing as the writing continues. Preserve",
+              "last": "wing as the writing continues. Preserve every sentence through printing and reopening.\nFINAL-WEB-END"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "frameId": "primary-page-frame",
+      "sliceIndex": 1,
+      "sliceOffset": 1584,
+      "paperSize": "A4",
+      "scale": 0.7086614173228347,
+      "box": {
+        "width": 793.6875,
+        "height": 1122.515625,
+        "x": -100000,
+        "y": 1122.515625
+      },
+      "css": {
+        "width": "793.688px",
+        "height": "1122.52px",
+        "overflow": "hidden",
+        "breakAfter": "page",
+        "page": "coincides-a4"
+      },
+      "canvas": {
+        "width": "1120px",
+        "height": "5859px",
+        "top": "-1122.52px",
+        "transform": "scale(0.708661)"
+      },
+      "fragments": [
+        {
+          "blockId": "f1850fa9-3ad2-439b-8f44-3e83489ed958",
+          "box": {
+            "width": 702.9921875,
+            "height": 4041.49609375,
+            "x": -99954.6484375,
+            "y": 34.0157470703125
+          },
+          "css": {
+            "left": "64px",
+            "top": "48px",
+            "width": "992px",
+            "height": "5703px"
+          },
+          "text": [
+            {
+              "length": 15869,
+              "first": "FINAL-WEB-BEGIN\nObservation 001: A fixed width page keeps growing as the writing continues. Preserve",
+              "last": "wing as the writing continues. Preserve every sentence through printing and reopening.\nFINAL-WEB-END"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "frameId": "primary-page-frame",
+      "sliceIndex": 2,
+      "sliceOffset": 3168,
+      "paperSize": "A4",
+      "scale": 0.7086614173228347,
+      "box": {
+        "width": 793.6875,
+        "height": 1122.515625,
+        "x": -100000,
+        "y": 2245.03125
+      },
+      "css": {
+        "width": "793.688px",
+        "height": "1122.52px",
+        "overflow": "hidden",
+        "breakAfter": "page",
+        "page": "coincides-a4"
+      },
+      "canvas": {
+        "width": "1120px",
+        "height": "5859px",
+        "top": "-2245.04px",
+        "transform": "scale(0.708661)"
+      },
+      "fragments": [
+        {
+          "blockId": "f1850fa9-3ad2-439b-8f44-3e83489ed958",
+          "box": {
+            "width": 702.9921875,
+            "height": 4041.496337890625,
+            "x": -99954.6484375,
+            "y": 34.015625
+          },
+          "css": {
+            "left": "64px",
+            "top": "48px",
+            "width": "992px",
+            "height": "5703px"
+          },
+          "text": [
+            {
+              "length": 15869,
+              "first": "FINAL-WEB-BEGIN\nObservation 001: A fixed width page keeps growing as the writing continues. Preserve",
+              "last": "wing as the writing continues. Preserve every sentence through printing and reopening.\nFINAL-WEB-END"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "frameId": "primary-page-frame",
+      "sliceIndex": 3,
+      "sliceOffset": 4752,
+      "paperSize": "A4",
+      "scale": 0.7086614173228347,
+      "box": {
+        "width": 793.6875,
+        "height": 1122.515625,
+        "x": -100000,
+        "y": 3367.546875
+      },
+      "css": {
+        "width": "793.688px",
+        "height": "1122.52px",
+        "overflow": "hidden",
+        "breakAfter": "auto",
+        "page": "coincides-a4"
+      },
+      "canvas": {
+        "width": "1120px",
+        "height": "5859px",
+        "top": "-3367.56px",
+        "transform": "scale(0.708661)"
+      },
+      "fragments": [
+        {
+          "blockId": "f1850fa9-3ad2-439b-8f44-3e83489ed958",
+          "box": {
+            "width": 702.9921875,
+            "height": 4041.496337890625,
+            "x": -99954.6484375,
+            "y": 34.015625
+          },
+          "css": {
+            "left": "64px",
+            "top": "48px",
+            "width": "992px",
+            "height": "5703px"
+          },
+          "text": [
+            {
+              "length": 15869,
+              "first": "FINAL-WEB-BEGIN\nObservation 001: A fixed width page keeps growing as the writing continues. Preserve",
+              "last": "wing as the writing continues. Preserve every sentence through printing and reopening.\nFINAL-WEB-END"
+            }
+          ]
+        },
+        {
+          "blockId": "6cf8e09d-bd27-49c4-8478-df2b0273fe79",
+          "box": {
+            "width": 702.9921875,
+            "height": 31.180908203125,
+            "x": -99954.6484375,
+            "y": 4075.511962890625
+          },
+          "css": {
+            "left": "64px",
+            "top": "5751px",
+            "width": "992px",
+            "height": "44px"
+          },
+          "text": [
+            {
+              "length": 76,
+              "first": "FINAL-WEB-CONTINUATION: typing beyond the initial page remains on one frame.",
+              "last": "FINAL-WEB-CONTINUATION: typing beyond the initial page remains on one frame."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "restoredFromLocalStorage": true
+}

@@ -151,6 +151,7 @@ export function NoteChromeLayer({
   onToggleSurfaceMode,
 }: NoteChromeLayerProps) {
   const skin = usePaperSkin();
+  const continuousWeb = note.page_format === 'screen_note';
   const toolbarRef = useRef<HTMLDivElement>(null);
   const [overlayAnchor, setOverlayAnchor] = useState({ right: 16, bottom: 64 });
   const overlayOpen = showLayoutPanel || showMoreActions || showBlockTrash || showExportPreview;
@@ -308,7 +309,7 @@ export function NoteChromeLayer({
         <span>{label}</span>
         <small>{meta}</small>
         <div className={styles.pageFramePanelActions}>
-          <button
+          {!continuousWeb && <button
             className={styles.iconBtn}
             onClick={(event) => {
               event.stopPropagation();
@@ -319,7 +320,7 @@ export function NoteChromeLayer({
             disabled={contentReadOnly}
           >
             <FilePlus2 size={14} />
-          </button>
+          </button>}
           <button
             className={styles.iconBtn}
             onClick={(event) => {
@@ -332,7 +333,7 @@ export function NoteChromeLayer({
           >
             <PanelTopOpen size={14} />
           </button>
-          <button
+          {!continuousWeb && <button
             className={styles.iconBtn}
             onClick={(event) => {
               event.stopPropagation();
@@ -343,7 +344,7 @@ export function NoteChromeLayer({
             disabled={contentReadOnly}
           >
             <Copy size={14} />
-          </button>
+          </button>}
           <button
             className={styles.iconBtn}
             onClick={(event) => {
@@ -368,7 +369,7 @@ export function NoteChromeLayer({
           >
             <X size={14} />
           </button>
-          <button
+          {!continuousWeb && <button
             className={styles.iconBtn}
             onClick={(event) => {
               event.stopPropagation();
@@ -379,7 +380,7 @@ export function NoteChromeLayer({
             disabled={contentReadOnly}
           >
             <Trash2 size={14} />
-          </button>
+          </button>}
         </div>
       </div>
     );
@@ -448,7 +449,7 @@ export function NoteChromeLayer({
                   </button>
                 </div>
                 <div className={styles.pageFramePanel} data-page-frame-panel="true">
-                  <button
+                  {!continuousWeb && <button
                     type="button"
                     className={styles.moreAction}
                     data-page-stack-create-toolbar="true"
@@ -458,8 +459,8 @@ export function NoteChromeLayer({
                     <FilePlus2 size={15} />
                     <span>New PageStack</span>
                     <small>Create a continuous page unit with its own local numbering.</small>
-                  </button>
-                  {selectedPageFrameId && (
+                  </button>}
+                  {!continuousWeb && selectedPageFrameId && (
                     <button
                       type="button"
                       className={styles.moreAction}
@@ -542,7 +543,7 @@ export function NoteChromeLayer({
                     <X size={15} />
                   </button>
                 </div>
-            <button
+            {!continuousWeb && <button
               className={styles.moreAction}
               onClick={onCreatePageStack}
               title="New PageStack"
@@ -551,7 +552,7 @@ export function NoteChromeLayer({
               disabled={contentReadOnly}
             >
               <FilePlus2 size={16} /><span>New PageStack</span>
-            </button>
+            </button>}
             <button
               className={styles.moreAction}
               onClick={onAddFavorite}

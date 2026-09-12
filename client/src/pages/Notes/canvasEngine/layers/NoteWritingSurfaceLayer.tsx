@@ -250,6 +250,7 @@ import {
 } from '../textFocusReceipt';
 
 export interface NoteWritingSurfaceLayerProps {
+  continuousWeb?: boolean;
   paperHeader?: NotePaperHeaderProps;
   noteTools?: import('react').ReactNode;
   hostMode?: 'page' | 'modal';

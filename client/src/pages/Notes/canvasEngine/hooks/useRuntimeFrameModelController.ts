@@ -1,6 +1,6 @@
 import type { CoordinateContract } from '../placementContractService';
 import { useNoteCanvasFrameModel } from './useNoteCanvasLayoutModel';
-import type { NoteBlock } from '../runtimeDataTypes';
+import type { Note, NoteBlock } from '../runtimeDataTypes';
 import type { BlockBoxLayout, SurfaceMode } from '../runtimeLayout';
 import type {
   CanvasObject,
@@ -15,6 +15,7 @@ import type {
 } from '../types';
 
 export interface UseRuntimeFrameModelControllerOptions {
+  note?: Pick<Note, 'page_format'> | null;
   coordinateContract?: CoordinateContract;
   blockLayouts: Record<string, BlockBoxLayout>;
   defaultDraftLayout: BlockBoxLayout;
@@ -37,6 +38,7 @@ export interface UseRuntimeFrameModelControllerOptions {
 }
 
 export function useRuntimeFrameModelController({
+  note,
   blockLayouts,
   coordinateContract,
   defaultDraftLayout,
@@ -58,6 +60,7 @@ export function useRuntimeFrameModelController({
   visibleBlocks,
 }: UseRuntimeFrameModelControllerOptions) {
   return useNoteCanvasFrameModel({
+    notePagePreset: note?.page_format,
     coordinateContract,
     blockLayouts,
     defaultDraftLayout,

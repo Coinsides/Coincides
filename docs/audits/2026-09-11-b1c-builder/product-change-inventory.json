@@ -1,0 +1,39 @@
+{
+  "scope": "B1c product + tests + affected static gate; audits and handoff Result listed separately",
+  "trackedFiles": [
+    "client/scripts/canvasRuntimeBoundaryCheck.mjs",
+    "client/src/pages/Boards/BoardNewNoteDialog.test.tsx",
+    "client/src/pages/Boards/BoardNewNoteDialog.tsx",
+    "client/src/pages/Boards/BoardPage.modal.test.tsx",
+    "client/src/pages/Boards/BoardPage.unboxing.test.tsx",
+    "client/src/pages/Courses/CourseDetail.test.tsx",
+    "client/src/pages/Courses/CourseDetail.tsx",
+    "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts",
+    "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayoutModel.ts",
+    "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts",
+    "client/src/pages/Notes/canvasEngine/hooks/useRuntimeFrameModelController.ts",
+    "client/src/pages/Notes/canvasEngine/hooks/useRuntimeLayoutModelController.ts",
+    "client/src/pages/Notes/canvasEngine/hooks/useRuntimeNaturalWritingController.test.tsx",
+    "client/src/pages/Notes/canvasEngine/hooks/useRuntimeNaturalWritingController.ts",
+    "client/src/pages/Notes/canvasEngine/hooks/useRuntimePresentationController.ts",
+    "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx",
+    "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx",
+    "client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.test.tsx",
+    "client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.tsx",
+    "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+    "client/src/pages/Notes/canvasEngine/pagePrintProjectionService.ts",
+    "client/src/pages/Notes/canvasEngine/runtimeDataTypes.ts",
+    "server/src/routes/notes.ts",
+    "server/src/services/boardCeremonyNote.ts",
+    "server/src/validators/index.ts"
+  ],
+  "newFiles": [
+    "client/src/pages/Notes/NotePagePresetSelect.module.css",
+    "client/src/pages/Notes/NotePagePresetSelect.tsx",
+    "client/src/pages/Notes/canvasEngine/hooks/notePagePresets.test.tsx",
+    "client/src/pages/Notes/canvasEngine/hooks/useRuntimeLayoutModelController.test.tsx",
+    "client/src/pages/Notes/canvasEngine/notePagePresetService.ts",
+    "server/src/__tests__/v13PagePresets.test.ts"
+  ],
+  "totalFiles": 31
+}

@@ -1,0 +1,1457 @@
+diff --git a/client/scripts/canvasRuntimeBoundaryCheck.mjs b/client/scripts/canvasRuntimeBoundaryCheck.mjs
+index 9cd1b35..13e415d 100644
+--- a/client/scripts/canvasRuntimeBoundaryCheck.mjs
++++ b/client/scripts/canvasRuntimeBoundaryCheck.mjs
+@@ -447,9 +447,15 @@ assertContainsAll('PageFrame collection persists explicit PageStack coverage met
+ 
+ const courseDetail = readProjectFile('src/pages/Courses/CourseDetail.tsx');
+ assertContainsAll('Course detail New Note seeds explicit PageStack entity persistence', courseDetail, [
+-  'createPageFrameCollectionSeed',
++  'createNotePagePresetSeed',
+   'savePageFrameCollectionForNote',
+-  'collection: createPageFrameCollectionSeed()',
++  'page_format: preset',
++  'collection: createNotePagePresetSeed(preset)',
++]);
++const notePagePresetService = readProjectFile('src/pages/Notes/canvasEngine/notePagePresetService.ts');
++assertContainsAll('New paper preset delegates geometry and stack ownership to the existing seed', notePagePresetService, [
++  "DEFAULT_NOTE_PAGE_PRESET: NotePagePreset = 'a4_portrait'",
++  'createPageFrameCollectionSeed(createPrimaryPageFrame({ templateId: preset }))',
+ ]);
+ 
+ const pageStackCollectionService = readProjectFile('src/pages/Notes/canvasEngine/pageStackCollectionService.ts');
+@@ -682,7 +688,8 @@ assertContainsAll('Note canvas layout model focuses Page Mode on primary PageFra
+   'pageFrames: runtimePageFrameCollection.pageFrames',
+ ]);
+ assertContainsAll('Note canvas layout model derives Canvas world from runtime content', noteCanvasLayoutModel, [
+-  'createRuntimeWorld(surfaceMode, pageContentHeight, {',
++  'createRuntimeWorld(surfaceMode, resolvedPageContentHeight, {',
++  'measurePresetPageContentHeight(runtimePageFrameCollection, presetContentLayouts, coordinateContract)',
+   'pageFrames: runtimePageFrameCollection.pageFrames',
+   'blockPlacements: canvasBlockPlacements',
+   'canvasObjectReserve: []',
+diff --git a/client/src/pages/Boards/BoardNewNoteDialog.test.tsx b/client/src/pages/Boards/BoardNewNoteDialog.test.tsx
+index 9084b60..2958c90 100644
+--- a/client/src/pages/Boards/BoardNewNoteDialog.test.tsx
++++ b/client/src/pages/Boards/BoardNewNoteDialog.test.tsx
+@@ -59,8 +59,11 @@ describe('Board New note ceremony', () => {
+     fireEvent.click(submit);
+     await waitFor(() => expect(onCreated).toHaveBeenCalledExactlyOnceWith('note-new'));
+     expect(http.post).toHaveBeenCalledExactlyOnceWith('/boards/board/ceremony-note', {
+-      project: { name: 'Chinese history' }, title: 'Trade routes',
+-      collection: expect.objectContaining({ pageFrames: [expect.any(Object)] }),
++      project: { name: 'Chinese history' }, title: 'Trade routes', page_format: 'a4_portrait',
++      collection: expect.objectContaining({ pageFrames: [expect.objectContaining({
++        templateId: 'a4_portrait', pageSize: 'A4', width: 904, height: 1278,
++        contentInset: { top: 0, right: 72, bottom: 96, left: 72 },
++      })] }),
+     });
+     expect(http.put).not.toHaveBeenCalled();
+   });
+@@ -74,23 +77,51 @@ describe('Board New note ceremony', () => {
+     fireEvent.click(screen.getByRole('button', { name: 'Create note' }));
+     await waitFor(() => expect(onCreated).toHaveBeenCalledExactlyOnceWith('note-new'));
+     expect(http.post).toHaveBeenCalledExactlyOnceWith('/boards/board/ceremony-note', {
+-      project_id: 'project-second', title: 'Trade routes', collection: expect.any(Object),
++      project_id: 'project-second', title: 'Trade routes', page_format: 'a4_portrait', collection: expect.any(Object),
+     });
+     expect(screen.queryByRole('textbox', { name: 'Project name' })).toBeNull();
+   });
+ 
++  it.each([
++    { preset: 'a4_portrait', label: 'A4', pageSize: 'A4', width: 904, height: 1278,
++      contentInset: { top: 0, right: 72, bottom: 96, left: 72 } },
++    { preset: 'letter_portrait', label: 'Letter', pageSize: 'Letter', width: 904, height: 1170,
++      contentInset: { top: 0, right: 72, bottom: 96, left: 72 } },
++    { preset: 'screen_note', label: 'Web long page', pageSize: 'Custom', width: 1120, height: 720,
++      contentInset: { top: 48, right: 64, bottom: 64, left: 64 } },
++  ])('creates $label with the selected persisted preset and one correctly sized seed frame', async ({ preset, pageSize, width, height, contentInset }) => {
++    const { onCreated } = openDialog('project-first');
++    await waitFor(() => expect((screen.getByRole('combobox', { name: 'Project' }) as HTMLSelectElement).value).toBe('project-first'));
++    const paper = screen.getByRole('combobox', { name: 'Paper size' }) as HTMLSelectElement;
++    expect(paper.value).toBe('a4_portrait');
++    expect(Array.from(paper.options, (option) => option.textContent)).toEqual(['A4', 'Letter', 'Web long page']);
++    fireEvent.change(paper, { target: { value: preset } });
++    fillTitle();
++    fireEvent.click(screen.getByRole('button', { name: 'Create note' }));
++    await waitFor(() => expect(onCreated).toHaveBeenCalledExactlyOnceWith('note-new'));
++    expect(http.post).toHaveBeenCalledExactlyOnceWith('/boards/board/ceremony-note', {
++      project_id: 'project-first', title: 'Trade routes', page_format: preset,
++      collection: expect.objectContaining({ pageFrames: [expect.objectContaining({
++        templateId: preset, pageSize, width, height, contentInset,
++      })], pageStacks: [expect.objectContaining({ frameIds: [expect.any(String)] })] }),
++    });
++    expect(http.put).not.toHaveBeenCalled();
++  });
++
+   it('keeps the inline project draft after an atomic failure and retries the whole ceremony', async () => {
+     http.post.mockRejectedValueOnce(new Error('Synthetic frame write failure'))
+       .mockResolvedValueOnce({ data: { note: { id: 'note-retried' } } });
+     const { onCreated } = openDialog();
+     await chooseNewProject();
+     fillTitle();
++    fireEvent.change(screen.getByRole('combobox', { name: 'Paper size' }), { target: { value: 'letter_portrait' } });
+     fireEvent.click(screen.getByRole('button', { name: 'Create note' }));
+     expect((await screen.findByRole('alert')).textContent).toContain('Your entries are kept');
+     expect(onCreated).not.toHaveBeenCalled();
+     expect((screen.getByRole('combobox', { name: 'Project' }) as HTMLSelectElement).value).toBe('__new_project__');
+     expect((screen.getByRole('textbox', { name: 'Project name' }) as HTMLInputElement).value).toBe('  Chinese history  ');
+     expect((screen.getByRole('textbox', { name: 'Note title' }) as HTMLInputElement).value).toBe('  Trade routes  ');
++    expect((screen.getByRole('combobox', { name: 'Paper size' }) as HTMLSelectElement).value).toBe('letter_portrait');
+     fireEvent.click(screen.getByRole('button', { name: 'Retry creating note' }));
+     await waitFor(() => expect(onCreated).toHaveBeenCalledExactlyOnceWith('note-retried'));
+     expect(http.post.mock.calls.map(([path]) => path)).toEqual(['/boards/board/ceremony-note', '/boards/board/ceremony-note']);
+@@ -106,7 +137,7 @@ describe('Board New note ceremony', () => {
+     fireEvent.click(screen.getByRole('button', { name: 'Create note' }));
+     expect((await screen.findByRole('alert')).textContent).toContain('Could not create the note');
+     expect(http.post).toHaveBeenCalledExactlyOnceWith('/boards/board/ceremony-note', {
+-      project: { name: 'Chinese history' }, title: 'Trade routes', collection: expect.any(Object),
++      project: { name: 'Chinese history' }, title: 'Trade routes', page_format: 'a4_portrait', collection: expect.any(Object),
+     });
+     expect(onCreated).not.toHaveBeenCalled();
+     expect((screen.getByRole('textbox', { name: 'Project name' }) as HTMLInputElement).value).toBe('  Chinese history  ');
+@@ -157,6 +188,7 @@ describe('Board New note ceremony', () => {
+     expect(http.post).toHaveBeenCalledOnce();
+     expect(onCancel).not.toHaveBeenCalled();
+     expect((screen.getByRole('button', { name: 'Cancel' }) as HTMLButtonElement).disabled).toBe(true);
++    expect((screen.getByRole('combobox', { name: 'Paper size' }) as HTMLSelectElement).disabled).toBe(true);
+     unmount();
+     await act(async () => { ceremony.resolve({ data: { note: { id: 'note-new' } } }); await ceremony.promise; });
+     expect(http.post).toHaveBeenCalledOnce();
+diff --git a/client/src/pages/Boards/BoardNewNoteDialog.tsx b/client/src/pages/Boards/BoardNewNoteDialog.tsx
+index f16a82f..d33c3d1 100644
+--- a/client/src/pages/Boards/BoardNewNoteDialog.tsx
++++ b/client/src/pages/Boards/BoardNewNoteDialog.tsx
+@@ -2,7 +2,8 @@ import { useEffect, useRef, useState, type CSSProperties } from 'react';
+ import api from '@/services/api';
+ import type { Course } from '@shared/types';
+ import type { Note } from '@/pages/Notes/canvasEngine/runtimeDataTypes';
+-import { createPageFrameCollectionSeed } from '@/pages/Notes/canvasEngine/pageFrameCollectionService';
++import { createNotePagePresetSeed, DEFAULT_NOTE_PAGE_PRESET, type NotePagePreset } from '@/pages/Notes/canvasEngine/notePagePresetService';
++import { NotePagePresetSelect } from '@/pages/Notes/NotePagePresetSelect';
+ import boardStyles from './Boards.module.css';
+ import styles from './BoardNewNoteDialog.module.css';
+ 
+@@ -22,6 +23,7 @@ export function BoardNewNoteDialog({ boardId, initialProjectId, onCancel, onCrea
+   const [projectId, setProjectId] = useState('');
+   const [projectName, setProjectName] = useState('');
+   const [title, setTitle] = useState('');
++  const [pagePreset, setPagePreset] = useState<NotePagePreset>(DEFAULT_NOTE_PAGE_PRESET);
+   const [loading, setLoading] = useState(true);
+   const [loadError, setLoadError] = useState(false);
+   const [attempt, setAttempt] = useState(0);
+@@ -60,7 +62,8 @@ export function BoardNewNoteDialog({ boardId, initialProjectId, onCancel, onCrea
+       const { data } = await api.post<{ note: Note }>(`/boards/${encodeURIComponent(boardId)}/ceremony-note`, {
+         ...(creatingProject ? { project: { name: projectName.trim() } } : { project_id: projectId }),
+         title: title.trim(),
+-        collection: createPageFrameCollectionSeed(),
++        page_format: pagePreset,
++        collection: createNotePagePresetSeed(pagePreset),
+       });
+       if (alive.current) onCreated(data.note.id);
+     } catch {
+@@ -97,6 +100,7 @@ export function BoardNewNoteDialog({ boardId, initialProjectId, onCancel, onCrea
+       <label htmlFor="board-new-note-name">Note title</label>
+       <input id="board-new-note-name" value={title} required maxLength={300} disabled={busy}
+         onChange={(event) => setTitle(event.currentTarget.value)} />
++      <NotePagePresetSelect value={pagePreset} onChange={setPagePreset} disabled={busy} />
+       {error && <p role="alert">{error}</p>}
+       <div className={boardStyles.dialogActions}>
+         <button type="button" className={boardStyles.button} disabled={busy} onClick={onCancel}>Cancel</button>
+diff --git a/client/src/pages/Boards/BoardPage.modal.test.tsx b/client/src/pages/Boards/BoardPage.modal.test.tsx
+index 0c5b6ad..1c87a2f 100644
+--- a/client/src/pages/Boards/BoardPage.modal.test.tsx
++++ b/client/src/pages/Boards/BoardPage.modal.test.tsx
+@@ -165,7 +165,7 @@ describe('BoardPage note modal host', () => {
+       fireEvent.click(screen.getByRole('button', { name: 'New note' }));
+       const dialog = await screen.findByRole('dialog', { name: 'New note' });
+       await waitFor(() => expect((within(dialog).getByRole('combobox', { name: 'Project' }) as HTMLSelectElement).disabled).toBe(false));
+-      fireEvent.change(within(dialog).getByRole('combobox'), { target: { value: 'project' } });
++      fireEvent.change(within(dialog).getByRole('combobox', { name: 'Project' }), { target: { value: 'project' } });
+       fireEvent.change(within(dialog).getByRole('textbox', { name: 'Note title' }), { target: { value: 'Draft' } });
+       for (const name of ['Create note', 'Cancel']) {
+         const button = within(dialog).getByRole('button', { name });
+diff --git a/client/src/pages/Boards/BoardPage.unboxing.test.tsx b/client/src/pages/Boards/BoardPage.unboxing.test.tsx
+index bd6d341..a082e3c 100644
+--- a/client/src/pages/Boards/BoardPage.unboxing.test.tsx
++++ b/client/src/pages/Boards/BoardPage.unboxing.test.tsx
+@@ -56,7 +56,11 @@ async function createNote() {
+   fireEvent.click(within(dialog).getByRole('button', { name: 'Create note' }));
+   await readyRuntime();
+   expect(screen.getByTestId('fixture-location').textContent).toBe('/boards/board');
+-  expect(notes[0]).toMatchObject({ course_id: 'new-project', title: 'Unboxed thought' });
++  expect(notes[0]).toMatchObject({ course_id: 'new-project', title: 'Unboxed thought', page_format: 'a4_portrait' });
++  expect(collection?.pageFrames).toEqual([expect.objectContaining({
++    templateId: 'a4_portrait', pageSize: 'A4', width: 904, height: 1278,
++    contentInset: { top: 0, right: 72, bottom: 96, left: 72 },
++  })]);
+ }
+ function stagingTransfer() {
+   const data = new Map<string, string>();
+@@ -138,7 +142,8 @@ beforeEach(() => {
+   http.post.mockImplementation(async (url: string, input: any) => {
+     if (url === '/boards/board/ceremony-note') {
+       const project = { id: 'new-project', ...input.project }; projects.push(project);
+-      const note = { id: 'new-note', course_id: project.id, title: input.title, description: null, metadata: {}, status: 'active' };
++      const note = { id: 'new-note', course_id: project.id, title: input.title,
++        page_format: input.page_format ?? 'flow', description: null, metadata: {}, status: 'active' };
+       notes.push(note); collection = structuredClone(input.collection);
+       return response({ project, note, collection });
+     }
+diff --git a/client/src/pages/Courses/CourseDetail.test.tsx b/client/src/pages/Courses/CourseDetail.test.tsx
+index e423ab6..efff566 100644
+--- a/client/src/pages/Courses/CourseDetail.test.tsx
++++ b/client/src/pages/Courses/CourseDetail.test.tsx
+@@ -51,6 +51,32 @@ describe('ProjectNotesSection lifecycle actions', () => {
+     mocks.post.mockResolvedValue({ data: { message: 'Note restored' } });
+   });
+ 
++  it('uses A4 by default when creating a project note', () => {
++    const onCreateNote = vi.fn();
++    render(<ProjectNotesSection notes={[note]} status="active" onStatusChange={vi.fn()}
++      onCreateNote={onCreateNote} onOpenNote={vi.fn()} refreshNotes={vi.fn()} addToast={vi.fn()} />);
++    const paper = screen.getByRole('combobox', { name: 'Paper size' }) as HTMLSelectElement;
++    expect(paper.value).toBe('a4_portrait');
++    expect(Array.from(paper.options, (option) => option.textContent)).toEqual(['A4', 'Letter', 'Web long page']);
++    fireEvent.click(screen.getByRole('button', { name: 'New Note' }));
++    expect(onCreateNote).toHaveBeenCalledExactlyOnceWith('a4_portrait');
++  });
++
++  it.each(['letter_portrait', 'screen_note'] as const)('passes selected %s only when creating a new project note', (preset) => {
++    const onCreateNote = vi.fn();
++    const onOpenNote = vi.fn();
++    render(<ProjectNotesSection notes={[note]} status="active" onStatusChange={vi.fn()}
++      onCreateNote={onCreateNote} onOpenNote={onOpenNote} refreshNotes={vi.fn()} addToast={vi.fn()} />);
++    fireEvent.change(screen.getByRole('combobox', { name: 'Paper size' }), { target: { value: preset } });
++    expect(onCreateNote).not.toHaveBeenCalled();
++    fireEvent.click(screen.getByRole('button', { name: 'Open note Project note' }));
++    expect(onOpenNote).toHaveBeenCalledExactlyOnceWith('note-project-entry');
++    expect(onCreateNote).not.toHaveBeenCalled();
++    fireEvent.click(screen.getByRole('button', { name: 'New Note' }));
++    expect(onCreateNote).toHaveBeenCalledExactlyOnceWith(preset);
++    expect(mocks.post).not.toHaveBeenCalled();
++  });
++
+   it('clicking the trash action calls api.delete with the note URL', async () => {
+     const refreshNotes = vi.fn().mockResolvedValue(undefined);
+     const addToast = vi.fn();
+diff --git a/client/src/pages/Courses/CourseDetail.tsx b/client/src/pages/Courses/CourseDetail.tsx
+index 7790ccf..ece8d26 100644
+--- a/client/src/pages/Courses/CourseDetail.tsx
++++ b/client/src/pages/Courses/CourseDetail.tsx
+@@ -10,9 +10,8 @@ import { useUIStore } from '@/stores/uiStore';
+ import api from '@/services/api';
+ import { getNoteBlockTemplateLabel } from '@shared/types';
+ import type { Course, Goal, SourceMaterial, MaterialSegment } from '@shared/types';
+-import {
+-  createPageFrameCollectionSeed,
+-} from '../Notes/canvasEngine/pageFrameCollectionService';
++import { createNotePagePresetSeed, DEFAULT_NOTE_PAGE_PRESET, type NotePagePreset } from '../Notes/canvasEngine/notePagePresetService';
++import { NotePagePresetSelect } from '../Notes/NotePagePresetSelect';
+ import {
+   savePageFrameCollectionForNote,
+ } from '../Notes/canvasEngine/canvasObjectRepository';
+@@ -154,7 +153,7 @@ interface ProjectNotesSectionProps {
+   notes: NoteSummary[];
+   status: NoteStatusFilter;
+   onStatusChange: (status: NoteStatusFilter) => void;
+-  onCreateNote: () => void;
++  onCreateNote: (preset: NotePagePreset) => void;
+   onOpenNote: (noteId: string) => void;
+   refreshNotes: () => Promise<void>;
+   addToast: NoteActionToast;
+@@ -170,6 +169,7 @@ export function ProjectNotesSection({
+   addToast,
+ }: ProjectNotesSectionProps) {
+   const [busyNoteId, setBusyNoteId] = useState<string | null>(null);
++  const [pagePreset, setPagePreset] = useState<NotePagePreset>(DEFAULT_NOTE_PAGE_PRESET);
+ 
+   const runNoteAction = async (noteId: string) => {
+     setBusyNoteId(noteId);
+@@ -208,7 +208,8 @@ export function ProjectNotesSection({
+               Trash
+             </button>
+           </div>
+-          <button type="button" className={styles.sectionAddBtn} onClick={onCreateNote}>
++          <NotePagePresetSelect value={pagePreset} onChange={setPagePreset} />
++          <button type="button" className={styles.sectionAddBtn} onClick={() => onCreateNote(pagePreset)}>
+             <Plus size={15} />
+             New Note
+           </button>
+@@ -604,16 +605,17 @@ export default function CourseDetailPage() {
+     }
+   };
+ 
+-  const handleCreateNote = async () => {
++  const handleCreateNote = async (preset: NotePagePreset) => {
+     if (!courseId || !data) return;
+     try {
+       const res = await api.post('/notes', {
+         course_id: courseId,
+         title: 'Untitled note',
++        page_format: preset,
+       });
+       await savePageFrameCollectionForNote({
+         noteId: res.data.id,
+-        collection: createPageFrameCollectionSeed(),
++        collection: createNotePagePresetSeed(preset),
+       });
+       addToast('success', 'Note created');
+       navigate(`/notes/${res.data.id}`);
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts
+index 6483d47..e4e0f5d 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts
++++ b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayerProps.ts
+@@ -128,6 +128,7 @@ export function useNoteCanvasLayerProps(input: UseNoteCanvasLayerPropsInput): {
+   };
+ 
+   const writingSurfaceProps: NoteWritingSurfaceLayerProps = {
++    continuousWeb: input.note.page_format === 'screen_note',
+     paperHeader: {
+       titleDraft: input.titleDraft, descriptionDraft: input.descriptionDraft,
+       contentReadOnly: input.contentReadOnly,
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayoutModel.ts b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayoutModel.ts
+index 9cef03e..cb1cff4 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayoutModel.ts
++++ b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayoutModel.ts
+@@ -1,5 +1,6 @@
+ import { resolveScreenRect, selectPlacementFrame, toStoredLayout, type CoordinateContract } from '../placementContractService';
+ import { useMemo } from 'react';
++import { createNotePagePresetSeed, growWebPageCollection, isNotePagePreset, measurePresetPageContentHeight } from '../notePagePresetService';
+ import { buildNoteCanvasRuntimeModel } from '../engineModel';
+ import { buildExportPreviewModel } from '../exportPreviewService';
+ import { estimateBlockHeight } from '../measurementService';
+@@ -63,6 +64,7 @@ export interface UseNoteCanvasResolvedLayoutModelOptions {
+ }
+ 
+ export interface UseNoteCanvasFrameModelOptions {
++  notePagePreset?: string;
+   coordinateContract?: CoordinateContract;
+   blockLayouts: Record<string, BlockBoxLayout>;
+   defaultDraftLayout: BlockBoxLayout;
+@@ -175,6 +177,7 @@ export function useNoteCanvasResolvedLayoutModel({
+ }
+ 
+ export function useNoteCanvasFrameModel({
++  notePagePreset,
+   blockLayouts,
+   coordinateContract,
+   defaultDraftLayout,
+@@ -214,12 +217,27 @@ export function useNoteCanvasFrameModel({
+     [pageContentHeight, pageOffsetX],
+   );
+ 
+-  const runtimePageFrameCollection = useMemo(
+-    () => normalizePageFrameCollection(pageFrameCollection, {
++  const presetContentLayouts = useMemo<BlockBoxLayout[]>(() => [
++    ...Object.values(blockLayouts),
++    ...(draftActive ? [draftLayout || defaultDraftLayout] : []),
++    ...persistedCanvasPlacements.filter((placement) => placement.surface === 'formal_page' && placement.frameId)
++      .map((placement) => ({
++        x: placement.x, y: placement.y, width: placement.width, height: placement.height,
++        surface: 'formal_page' as const, coordinate_space: 'canvas_world' as const, frame_id: placement.frameId,
++      })),
++  ], [blockLayouts, draftActive, draftLayout, defaultDraftLayout, persistedCanvasPlacements]);
++
++  const runtimePageFrameCollection = useMemo(() => {
++    if (isNotePagePreset(notePagePreset)) {
++      const collection = normalizePageFrameCollection(pageFrameCollection || createNotePagePresetSeed(notePagePreset));
++      return notePagePreset === 'screen_note'
++        ? growWebPageCollection(collection, presetContentLayouts, coordinateContract)
++        : collection;
++    }
++    return normalizePageFrameCollection(pageFrameCollection, {
+       fallbackPageFrame: primaryPageFrameSeed,
+-    }),
+-    [pageFrameCollection, primaryPageFrameSeed],
+-  );
++    });
++  }, [notePagePreset, pageFrameCollection, primaryPageFrameSeed, presetContentLayouts, coordinateContract]);
+ 
+   const primaryPageFrame = useMemo(() => (
+     runtimePageFrameCollection.pageFrames.find((frame) => frame.id === runtimePageFrameCollection.primaryFrameId)
+@@ -227,6 +245,10 @@ export function useNoteCanvasFrameModel({
+     || null
+   ), [runtimePageFrameCollection]);
+ 
++  const resolvedPageContentHeight = isNotePagePreset(notePagePreset)
++    ? measurePresetPageContentHeight(runtimePageFrameCollection, presetContentLayouts, coordinateContract)
++    : pageContentHeight;
++
+   const canvasBlockPlacements = useMemo<BlockPlacementModel[]>(
+     () => visibleBlocks.flatMap((block, index) => {
+       const layout = blockLayouts[block.id];
+@@ -251,7 +273,7 @@ export function useNoteCanvasFrameModel({
+   );
+ 
+   const noteCanvasRuntime = useMemo(() => {
+-    const seedViewport = createRuntimeViewport(surfaceMode, pageContentHeight, viewportTransform);
++    const seedViewport = createRuntimeViewport(surfaceMode, resolvedPageContentHeight, viewportTransform);
+     const viewport = surfaceMode === 'page' && primaryPageFrame
+       ? createPageModeFocusViewport({
+         pageFrame: primaryPageFrame,
+@@ -262,7 +284,7 @@ export function useNoteCanvasFrameModel({
+ 
+     return { ...buildNoteCanvasRuntimeModel({
+       mode: surfaceMode,
+-      world: createRuntimeWorld(surfaceMode, pageContentHeight, {
++      world: createRuntimeWorld(surfaceMode, resolvedPageContentHeight, {
+         pageFrames: runtimePageFrameCollection.pageFrames,
+         blockPlacements: canvasBlockPlacements,
+         canvasObjectReserve: [],
+@@ -287,7 +309,7 @@ export function useNoteCanvasFrameModel({
+     coordinateContract,
+     contentLookupBlocks,
+     documentTypographyProfile,
+-    pageContentHeight,
++    resolvedPageContentHeight,
+     primaryPageFrame,
+     persistedCanvasObjects,
+     persistedCanvasPlacements,
+@@ -317,7 +339,7 @@ export function useNoteCanvasFrameModel({
+     canvasBlockPlacements,
+     exportPreview,
+     noteCanvasRuntime,
+-    pageContentHeight,
++    pageContentHeight: resolvedPageContentHeight,
+     primaryPageFrame,
+     runtimePageFrameCollection,
+   };
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts
+index 9cdff43..3f6e9d5 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts
++++ b/client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.ts
+@@ -259,6 +259,7 @@ export function useNoteCanvasRuntimeController() {
+     persistLayoutSnapshot,
+     visibleBlocks,
+   } = useRuntimeLayoutModelController({
++    notePagePreset: note?.page_format,
+     coordinateContract,
+     blocks,
+     blockListRef,
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useRuntimeFrameModelController.ts b/client/src/pages/Notes/canvasEngine/hooks/useRuntimeFrameModelController.ts
+index 4263470..ee5cdaf 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/useRuntimeFrameModelController.ts
++++ b/client/src/pages/Notes/canvasEngine/hooks/useRuntimeFrameModelController.ts
+@@ -1,6 +1,6 @@
+ import type { CoordinateContract } from '../placementContractService';
+ import { useNoteCanvasFrameModel } from './useNoteCanvasLayoutModel';
+-import type { NoteBlock } from '../runtimeDataTypes';
++import type { Note, NoteBlock } from '../runtimeDataTypes';
+ import type { BlockBoxLayout, SurfaceMode } from '../runtimeLayout';
+ import type {
+   CanvasObject,
+@@ -15,6 +15,7 @@ import type {
+ } from '../types';
+ 
+ export interface UseRuntimeFrameModelControllerOptions {
++  note?: Pick<Note, 'page_format'> | null;
+   coordinateContract?: CoordinateContract;
+   blockLayouts: Record<string, BlockBoxLayout>;
+   defaultDraftLayout: BlockBoxLayout;
+@@ -37,6 +38,7 @@ export interface UseRuntimeFrameModelControllerOptions {
+ }
+ 
+ export function useRuntimeFrameModelController({
++  note,
+   blockLayouts,
+   coordinateContract,
+   defaultDraftLayout,
+@@ -58,6 +60,7 @@ export function useRuntimeFrameModelController({
+   visibleBlocks,
+ }: UseRuntimeFrameModelControllerOptions) {
+   return useNoteCanvasFrameModel({
++    notePagePreset: note?.page_format,
+     coordinateContract,
+     blockLayouts,
+     defaultDraftLayout,
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useRuntimeLayoutModelController.ts b/client/src/pages/Notes/canvasEngine/hooks/useRuntimeLayoutModelController.ts
+index c38cb7c..37ff0b2 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/useRuntimeLayoutModelController.ts
++++ b/client/src/pages/Notes/canvasEngine/hooks/useRuntimeLayoutModelController.ts
+@@ -17,6 +17,7 @@ import type {
+ } from '../types';
+ 
+ export interface UseRuntimeLayoutModelControllerOptions {
++  notePagePreset?: string;
+   coordinateContract?: CoordinateContract;
+   blocks: NoteBlock[];
+   blockListRef: RefObject<HTMLElement>;
+@@ -31,6 +32,7 @@ export interface UseRuntimeLayoutModelControllerOptions {
+ }
+ 
+ export function useRuntimeLayoutModelController({
++  notePagePreset,
+   blocks,
+   coordinateContract,
+   blockListRef,
+@@ -43,7 +45,7 @@ export function useRuntimeLayoutModelController({
+   surfaceMode,
+   surfacePolicy,
+ }: UseRuntimeLayoutModelControllerOptions) {
+-  const contentWidth = useCanvasContentWidth({
++  const measuredContentWidth = useCanvasContentWidth({
+     containerRef: blockListRef,
+     pageOffsetX,
+     surfaceMode,
+@@ -57,6 +59,16 @@ export function useRuntimeLayoutModelController({
+     })];
+   }, [pageFrameCollection, pageOffsetX]);
+ 
++  const webFrame = notePagePreset === 'screen_note'
++    ? pageFrameCollection?.pageFrames.find((frame) => frame.id === pageFrameCollection.primaryFrameId)
++      || pageFrameCollection?.pageFrames[0]
++    : undefined;
++  // New Web notes have a fixed frame, including while the editor DOM is still
++  // mounting. Their content width must not wait for a window resize to be known.
++  const contentWidth = webFrame
++    ? Math.max(0, webFrame.width - webFrame.contentInset.left - webFrame.contentInset.right)
++    : measuredContentWidth;
++
+   const {
+     blockLayouts,
+     defaultDraftLayout,
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useRuntimeNaturalWritingController.test.tsx b/client/src/pages/Notes/canvasEngine/hooks/useRuntimeNaturalWritingController.test.tsx
+index bbe02da..558c601 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/useRuntimeNaturalWritingController.test.tsx
++++ b/client/src/pages/Notes/canvasEngine/hooks/useRuntimeNaturalWritingController.test.tsx
+@@ -5,6 +5,7 @@ import { NOTE_SLASH_COMMANDS } from '../../noteSlashCommands';
+ import type { TemplateOption } from '@/services/templateOptions';
+ import { loadDraftRecoveryQueue, type DraftBlockCreateResult } from '../draftBlockPersistence';
+ import { createPrimaryPageFrame, createViewport } from '../engineModel';
++import { createNotePagePresetSeed } from '../notePagePresetService';
+ import { createSurfaceModePolicy } from '../modePolicyService';
+ import { getPageFrameContentRect } from '../pageFrameService';
+ import type { BlockBoxLayout } from '../runtimeLayout';
+@@ -684,6 +685,29 @@ describe('useRuntimeNaturalWritingController Page draft authority', () => {
+     });
+   });
+ 
++  it('keeps a new Web draft beyond the bottom on the same frame without a collection write', async () => {
++    const collection = createNotePagePresetSeed('screen_note');
++    const createBlock = vi.fn(async () => null);
++    const saveCollection = vi.fn();
++    const subject = renderHook(() => useRuntimeNaturalWritingController(makeRuntimeOptions({
++      note: { ...note, page_format: 'screen_note' },
++      coordinateContract: 'v2', pageFrameCollection: collection,
++      defaultDraftLayout: { x: 0, y: 7000, width: 992, height: 100,
++        frame_id: collection.primaryFrameId!, coordinate_space: 'page_frame_local', surface: 'formal_page' },
++      createBlock, onSavePageFrameCollection: saveCollection,
++    })));
++    act(() => subject.result.current.activateDraft());
++    await act(async () => {
++      subject.result.current.handleDraftChange('Web continuation', 16);
++      await Promise.resolve();
++    });
++    expect(saveCollection).not.toHaveBeenCalled();
++    expect(createBlock).toHaveBeenCalledWith(defaultTextTemplate, 'Web continuation', expect.objectContaining({
++      layout: expect.objectContaining({ frame_id: collection.primaryFrameId, y: 7048, coordinate_space: 'canvas_world' }),
++    }));
++    expect(collection.pageFrames).toHaveLength(1);
++  });
++
+   it.each([
+     { mode: 'existing' as const },
+     { mode: 'append' as const },
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useRuntimeNaturalWritingController.ts b/client/src/pages/Notes/canvasEngine/hooks/useRuntimeNaturalWritingController.ts
+index 5e8dab3..302434c 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/useRuntimeNaturalWritingController.ts
++++ b/client/src/pages/Notes/canvasEngine/hooks/useRuntimeNaturalWritingController.ts
+@@ -383,7 +383,7 @@ export function useRuntimeNaturalWritingController(options: UseRuntimeNaturalWri
+   }, [activateDraft, options]);
+ 
+   const activateDraftWithPageStackFlow = useCallback((layout?: BlockBoxLayout) => {
+-    if (layout || !options.pageFrameCollection) {
++    if (layout || !options.pageFrameCollection || options.note?.page_format === 'screen_note') {
+       activateWithImmutableAuthority(layout);
+       return;
+     }
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useRuntimePresentationController.ts b/client/src/pages/Notes/canvasEngine/hooks/useRuntimePresentationController.ts
+index 4a3560f..decb30d 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/useRuntimePresentationController.ts
++++ b/client/src/pages/Notes/canvasEngine/hooks/useRuntimePresentationController.ts
+@@ -97,6 +97,7 @@ export function useRuntimePresentationController(
+   }, [currentPageFrameCollection, noteCanvasRuntime.world, options]);
+ 
+   const handleCreatePageFrame = useCallback(() => {
++    if (options.note?.page_format === 'screen_note') return;
+     const afterFrameId = currentPageFrameCollection.selectedFrameId
+       || currentPageFrameCollection.primaryFrameId
+       || currentPageFrameCollection.pageFrames[currentPageFrameCollection.pageFrames.length - 1]?.id
+@@ -113,6 +114,7 @@ export function useRuntimePresentationController(
+   }, [currentPageFrameCollection, focusPageFrame, options]);
+ 
+   const handleCreatePageStack = useCallback(() => {
++    if (options.note?.page_format === 'screen_note') return;
+     const afterFrameId = currentPageFrameCollection.selectedFrameId
+       || currentPageFrameCollection.primaryFrameId
+       || currentPageFrameCollection.pageFrames[currentPageFrameCollection.pageFrames.length - 1]?.id
+@@ -131,6 +133,7 @@ export function useRuntimePresentationController(
+   }, [currentPageFrameCollection, focusPageFrame, options]);
+ 
+   const handleAddPageBelow = useCallback((frameId: string) => {
++    if (options.note?.page_format === 'screen_note') return;
+     const context = resolvePageStackContext(currentPageFrameCollection, frameId);
+     if (context) {
+       const nextCollection = appendPageFrameToStack(currentPageFrameCollection, context.stack.id, frameId);
+@@ -184,12 +187,14 @@ export function useRuntimePresentationController(
+   }, [currentPageFrameCollection, options]);
+ 
+   const handleInsertPageFrame = useCallback((afterFrameId: string) => {
++    if (options.note?.page_format === 'screen_note') return;
+     const nextCollection = insertPageFrameAfter(currentPageFrameCollection, afterFrameId);
+     void options.onSavePageFrameCollection(nextCollection);
+     if (nextCollection.selectedFrameId) focusPageFrame(nextCollection.selectedFrameId, nextCollection);
+   }, [currentPageFrameCollection, focusPageFrame, options]);
+ 
+   const handleDuplicatePageFrame = useCallback((frameId: string) => {
++    if (options.note?.page_format === 'screen_note') return;
+     const nextCollection = duplicatePageFrame(currentPageFrameCollection, frameId);
+     void options.onSavePageFrameCollection(nextCollection);
+     if (nextCollection.selectedFrameId) focusPageFrame(nextCollection.selectedFrameId, nextCollection);
+@@ -202,6 +207,7 @@ export function useRuntimePresentationController(
+   }, [currentPageFrameCollection, focusPageFrame, options]);
+ 
+   const handleDeletePageFrame = useCallback((frameId: string) => {
++    if (options.note?.page_format === 'screen_note') return;
+     void options.onSavePageFrameCollection(deletePageFrameFromCollection(currentPageFrameCollection, frameId));
+   }, [currentPageFrameCollection, options]);
+ 
+@@ -235,6 +241,7 @@ export function useRuntimePresentationController(
+   }, [currentPageFrameCollection, options]);
+ 
+   const handleResizePageFrame = useCallback((frameId: string, size: { width: number; height: number }) => {
++    if (options.note?.page_format === 'screen_note') return;
+     const nextCollection = resizePageFrameInCollection(currentPageFrameCollection, frameId, size);
+     void options.onSavePageFrameCollection(nextCollection);
+   }, [currentPageFrameCollection, options]);
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx b/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx
+index 9b40d08..fae2d59 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx
+@@ -11,6 +11,8 @@ import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
+ import { beforeEach, afterEach, describe, expect, it, vi } from 'vitest';
+ import type { NoteBlock } from '../runtimeDataTypes';
+ import { DEFAULT_DOCUMENT_TYPOGRAPHY_PROFILE } from '../typographyProfileService';
++import { createPrimaryPageFrame } from '../engineModel';
++import { createPageFrameCollectionSeed } from '../pageFrameCollectionService';
+ import { useNoteBlockTrashController } from '../hooks/useNoteBlockTrashController';
+ import { useNoteTrashAction } from '../hooks/useNoteTrashAction';
+ import { ProjectNotesSection } from '../../../Courses/CourseDetail';
+@@ -251,6 +253,41 @@ describe('NoteChromeLayer organize mode', () => {
+     expect(screen.getByRole('button', { name: 'Layout' })).toBeTruthy();
+     expect(screen.queryByText('Snap alignment')).toBeNull();
+   });
++
++  it.each([
++    { pageFormat: 'screen_note', templateId: 'screen_note' as const, continuous: true },
++    { pageFormat: undefined, templateId: 'screen_note' as const, continuous: false },
++    { pageFormat: 'a4_portrait', templateId: 'a4_portrait' as const, continuous: false },
++    { pageFormat: 'letter_portrait', templateId: 'letter_portrait' as const, continuous: false },
++  ])('limits manual frame creation only for new Web notes ($pageFormat / $templateId)', ({ pageFormat, templateId, continuous }) => {
++    const frame = createPrimaryPageFrame({ templateId });
++    const props = noteChromeProps({
++      note: { ...noteChromeProps().note, page_format: pageFormat },
++      pageFrameCollection: createPageFrameCollectionSeed(frame),
++      pageFrames: [frame], primaryPageFrameId: frame.id, selectedPageFrameId: frame.id,
++      showLayoutPanel: true, showMoreActions: true,
++      onToggleLayoutMode: vi.fn(), onCreatePageStack: vi.fn(), onAddPageBelow: vi.fn(), onDuplicatePageFrame: vi.fn(), onDeletePageFrame: vi.fn(),
++    });
++    render(<NoteChromeLayer {...props} />);
++    if (continuous) {
++      expect(screen.queryAllByRole('button', { name: /New PageStack/ })).toHaveLength(0);
++      expect(screen.queryAllByRole('button', { name: /Add page below/ })).toHaveLength(0);
++      expect(screen.queryByRole('button', { name: 'Duplicate Page 1 to new stack' })).toBeNull();
++      expect(screen.queryByRole('button', { name: 'Delete Page 1' })).toBeNull();
++    } else {
++      fireEvent.click(screen.getByRole('button', { name: 'New PageStack' }));
++      fireEvent.click(screen.getByRole('button', { name: 'Add page below Page 1' }));
++      fireEvent.click(screen.getByRole('button', { name: 'Duplicate Page 1 to new stack' }));
++      fireEvent.click(screen.getByRole('button', { name: 'Delete Page 1' }));
++      expect(props.onCreatePageStack).toHaveBeenCalledOnce();
++      expect(props.onAddPageBelow).toHaveBeenCalledWith(frame.id);
++      expect(props.onDuplicatePageFrame).toHaveBeenCalledWith(frame.id);
++      expect(props.onDeletePageFrame).toHaveBeenCalledWith(frame.id);
++    }
++    // The Layout entry remains usable, including for the new Web preset.
++    fireEvent.click(screen.getByRole('button', { name: 'Layout' }));
++    expect(props.onToggleLayoutMode).toHaveBeenCalledOnce();
++  });
+ });
+ 
+ describe('NoteChromeLayer note trash smoke', () => {
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx b/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx
+index 339c0de..4c1b42f 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx
+@@ -151,6 +151,7 @@ export function NoteChromeLayer({
+   onToggleSurfaceMode,
+ }: NoteChromeLayerProps) {
+   const skin = usePaperSkin();
++  const continuousWeb = note.page_format === 'screen_note';
+   const toolbarRef = useRef<HTMLDivElement>(null);
+   const [overlayAnchor, setOverlayAnchor] = useState({ right: 16, bottom: 64 });
+   const overlayOpen = showLayoutPanel || showMoreActions || showBlockTrash || showExportPreview;
+@@ -308,7 +309,7 @@ export function NoteChromeLayer({
+         <span>{label}</span>
+         <small>{meta}</small>
+         <div className={styles.pageFramePanelActions}>
+-          <button
++          {!continuousWeb && <button
+             className={styles.iconBtn}
+             onClick={(event) => {
+               event.stopPropagation();
+@@ -319,7 +320,7 @@ export function NoteChromeLayer({
+             disabled={contentReadOnly}
+           >
+             <FilePlus2 size={14} />
+-          </button>
++          </button>}
+           <button
+             className={styles.iconBtn}
+             onClick={(event) => {
+@@ -332,7 +333,7 @@ export function NoteChromeLayer({
+           >
+             <PanelTopOpen size={14} />
+           </button>
+-          <button
++          {!continuousWeb && <button
+             className={styles.iconBtn}
+             onClick={(event) => {
+               event.stopPropagation();
+@@ -343,7 +344,7 @@ export function NoteChromeLayer({
+             disabled={contentReadOnly}
+           >
+             <Copy size={14} />
+-          </button>
++          </button>}
+           <button
+             className={styles.iconBtn}
+             onClick={(event) => {
+@@ -368,7 +369,7 @@ export function NoteChromeLayer({
+           >
+             <X size={14} />
+           </button>
+-          <button
++          {!continuousWeb && <button
+             className={styles.iconBtn}
+             onClick={(event) => {
+               event.stopPropagation();
+@@ -379,7 +380,7 @@ export function NoteChromeLayer({
+             disabled={contentReadOnly}
+           >
+             <Trash2 size={14} />
+-          </button>
++          </button>}
+         </div>
+       </div>
+     );
+@@ -448,7 +449,7 @@ export function NoteChromeLayer({
+                   </button>
+                 </div>
+                 <div className={styles.pageFramePanel} data-page-frame-panel="true">
+-                  <button
++                  {!continuousWeb && <button
+                     type="button"
+                     className={styles.moreAction}
+                     data-page-stack-create-toolbar="true"
+@@ -458,8 +459,8 @@ export function NoteChromeLayer({
+                     <FilePlus2 size={15} />
+                     <span>New PageStack</span>
+                     <small>Create a continuous page unit with its own local numbering.</small>
+-                  </button>
+-                  {selectedPageFrameId && (
++                  </button>}
++                  {!continuousWeb && selectedPageFrameId && (
+                     <button
+                       type="button"
+                       className={styles.moreAction}
+@@ -542,7 +543,7 @@ export function NoteChromeLayer({
+                     <X size={15} />
+                   </button>
+                 </div>
+-            <button
++            {!continuousWeb && <button
+               className={styles.moreAction}
+               onClick={onCreatePageStack}
+               title="New PageStack"
+@@ -551,7 +552,7 @@ export function NoteChromeLayer({
+               disabled={contentReadOnly}
+             >
+               <FilePlus2 size={16} /><span>New PageStack</span>
+-            </button>
++            </button>}
+             <button
+               className={styles.moreAction}
+               onClick={onAddFavorite}
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.test.tsx b/client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.test.tsx
+index 42383dd..2f96a7b 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.test.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.test.tsx
+@@ -8,6 +8,7 @@ import { buildNoteCanvasRuntimeModel } from '../engineModel';
+ import { applyCanvasLayoutsToBlocks } from '../canvasObjectRepository';
+ import { buildRuntimeBlockPlacement, readStoredLayout } from '../placementService';
+ import { createPageFrameTemplate } from '../pageFrameTemplateService';
++import { getPagePrintGeometry, getPagePrintSlices } from '../pagePrintProjectionService';
+ import type { PageReadingGear } from '../pageReadingViewportService';
+ import { createPageStackFromFrame } from '../pageStackCollectionService';
+ import { createDefaultDocumentTypographyProfile } from '../typographyProfileService';
+@@ -273,6 +274,54 @@ describe('NotePrintLayer physical pages and fragment projection', () => {
+     expect(pages()).toHaveLength(1);
+   });
+ 
++  it('prints an opted-in single Web frame as A4 slices with continuous coverage and a visible tail', () => {
++    const web = frame('web-long', { ...createPageFrameTemplate('screen_note'), height: 7000 });
++    const print = getPagePrintGeometry(web);
++    const sliceHeight = print.height / print.scale;
++    const blocks = [block('web-start', 'WEB START'), block('web-seam', 'ACROSS THE SEAM'), block('web-tail', 'WEB TAIL')];
++    const placements = [
++      placement('web-start', { x: web.x + 64, y: web.y + 48 }),
++      placement('web-seam', { x: web.x + 64, y: web.y + sliceHeight - 40, height: 80 }),
++      placement('web-tail', { x: web.x + 64, y: web.y + 6800, height: 80 }),
++    ];
++    const input = inputFor({ frames: [web], blocks, placements });
++    const before = JSON.stringify(input.noteCanvasRuntime);
++    render(<NotePrintLayer {...input} continuousWeb />);
++    printEvent('beforeprint');
++    expect(pages()).toHaveLength(5);
++    pages().forEach((page, index) => {
++      const style = getComputedStyle(page);
++      const canvas = page.querySelector<HTMLElement>(CANVAS)!;
++      expect(page.dataset.pageFrameId).toBe(web.id);
++      expect(page.dataset.paperSize).toBe('A4');
++      expect(Number(page.dataset.printScale)).toBeCloseTo(0.7086614173228347, 12);
++      expect(Number(page.dataset.printSliceOffset)).toBeCloseTo(index * sliceHeight, 9);
++      expect(parseFloat(style.height)).toBeCloseTo(print.height, 9);
++      expect(parseFloat(canvas.style.top)).toBeCloseTo(-index * print.height, 9);
++      expect(canvas.style.width).toBe('1120px');
++      expect(canvas.style.height).toBe('7000px');
++      expect(style.overflow).toBe('hidden');
++      expect(style.breakAfter).toBe(index === 4 ? 'auto' : 'page');
++    });
++    const pageTexts = pages().map((page) => Array.from(page.querySelectorAll<HTMLTextAreaElement>('textarea')).map((field) => field.value));
++    expect(pageTexts).toEqual([
++      ['WEB START', 'ACROSS THE SEAM'], ['ACROSS THE SEAM'], [], [], ['WEB TAIL'],
++    ]);
++    expect(JSON.stringify(input.noteCanvasRuntime)).toBe(before);
++  });
++
++  it('keeps exact Web print boundaries free of a blank trailing page and leaves paper/custom frames unchanged', () => {
++    const web = frame('web-boundary', { ...createPageFrameTemplate('screen_note') });
++    const print = getPagePrintGeometry(web);
++    const sliceHeight = print.height / print.scale;
++    expect(getPagePrintSlices({ ...web, height: sliceHeight * 2 }, true)).toHaveLength(2);
++    expect(getPagePrintSlices({ ...web, height: sliceHeight * 2 + 1 }, true)).toHaveLength(3);
++    expect(getPagePrintSlices({ ...web, height: 7000 })).toHaveLength(1);
++    for (const templateId of ['a4_portrait', 'letter_portrait', 'custom'] as const) {
++      expect(getPagePrintSlices(frame(templateId, { ...createPageFrameTemplate(templateId), height: 7000 }), true)).toHaveLength(1);
++    }
++  });
++
+   it('does not allow reading gear, step, viewport zoom or screen content height into print geometry', () => {
+     const input = inputFor();
+     const renderInput = (gear: PageReadingGear, stepFactor: number) => ({
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.tsx b/client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.tsx
+index 38e7084..9a6a0eb 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.tsx
+@@ -1,6 +1,6 @@
+ import { useEffect, useRef, useState, type CSSProperties } from 'react';
+ import { createPortal, flushSync } from 'react-dom';
+-import { getPagePrintGeometry } from '../pagePrintProjectionService';
++import { getPagePrintGeometry, getPagePrintSlices } from '../pagePrintProjectionService';
+ import { documentTypographyToCssVars } from '../typographyProfileService';
+ import { NoteReadOnlyPageContent } from './NoteReadOnlyPageContent';
+ import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
+@@ -10,17 +10,24 @@ import { usePaperSkin } from '../PaperSkinContext';
+ export type NotePrintInput = Pick<NoteWritingSurfaceLayerProps,
+   'surfaceMode' | 'noteId' | 'noteCanvasRuntime' | 'visibleBlocks'
+   | 'blockTextDrafts' | 'blockTextFlowDrafts' | 'blockFieldDrafts'
+-  | 'documentTypographyProfile' | 'anchorsBySourceRef'> & { skinStyle?: CSSProperties; skinPreset?: string };
++  | 'documentTypographyProfile' | 'anchorsBySourceRef'> & {
++    skinStyle?: CSSProperties;
++    skinPreset?: string;
++    /** Creation-time Web preset only; never inferred from a historical template. */
++    continuousWeb?: boolean;
++  };
+ 
+ /** A read-only reuse of the editor renderer; no persistence or measurement callbacks escape. */
+ function PrintPages({ input }: { input: NotePrintInput }) {
+   return <div data-note-print-root="true" data-note-id={input.noteId} style={input.skinStyle} data-note-skin-preset={input.skinPreset}>
+-    {input.noteCanvasRuntime.pageFrames.map((frame) => {
++    {input.noteCanvasRuntime.pageFrames.flatMap((frame) => {
+       const print = getPagePrintGeometry(frame);
+-      return <section
+-        key={frame.id}
++      return getPagePrintSlices(frame, input.continuousWeb).map((slice) => <section
++        key={`${frame.id}:${slice.index}`}
+         data-note-print-page="true"
+         data-page-frame-id={frame.id}
++        data-print-slice-index={slice.index}
++        data-print-slice-offset={slice.offsetY}
+         data-paper-size={print.paperSize}
+         data-print-scale={print.scale}
+         style={{ width: print.width, height: print.height }}
+@@ -31,12 +38,18 @@ function PrintPages({ input }: { input: NotePrintInput }) {
+             ...documentTypographyToCssVars(input.documentTypographyProfile),
+             width: frame.width,
+             height: frame.height,
++            top: slice.printTop,
+             transform: `scale(${print.scale})`,
+           } as CSSProperties}
+         >
+           <NoteReadOnlyPageContent
+             frame={frame}
+-            fragments={input.noteCanvasRuntime.blockFragmentProjections}
++            fragments={input.continuousWeb && frame.templateId === 'screen_note'
++              ? input.noteCanvasRuntime.blockFragmentProjections.filter((fragment) => (
++                fragment.visibleRect.y < frame.y + slice.offsetY + slice.height
++                && fragment.visibleRect.y + fragment.visibleRect.height > frame.y + slice.offsetY
++              ))
++              : input.noteCanvasRuntime.blockFragmentProjections}
+             canvasObjects={input.noteCanvasRuntime.canvasObjects}
+             canvasPlacements={input.noteCanvasRuntime.canvasPlacements}
+             visibleBlocks={input.visibleBlocks}
+@@ -47,7 +60,7 @@ function PrintPages({ input }: { input: NotePrintInput }) {
+             print
+           />
+         </div>
+-      </section>;
++      </section>);
+     })}
+   </div>;
+ }
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx b/client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx
+index 5439d28..ff5575b 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx
+@@ -250,6 +250,7 @@ import {
+ } from '../textFocusReceipt';
+ 
+ export interface NoteWritingSurfaceLayerProps {
++  continuousWeb?: boolean;
+   paperHeader?: NotePaperHeaderProps;
+   noteTools?: import('react').ReactNode;
+   hostMode?: 'page' | 'modal';
+diff --git a/client/src/pages/Notes/canvasEngine/pagePrintProjectionService.ts b/client/src/pages/Notes/canvasEngine/pagePrintProjectionService.ts
+index 6b15c1a..4642de7 100644
+--- a/client/src/pages/Notes/canvasEngine/pagePrintProjectionService.ts
++++ b/client/src/pages/Notes/canvasEngine/pagePrintProjectionService.ts
+@@ -21,6 +21,21 @@ export function getPagePrintGeometry(frame: PageFrameModel) {
+   return { paperSize, width, height, scale };
+ }
+ 
++/** New Web notes opt into print-only slices; historical frames keep one page. */
++export function getPagePrintSlices(frame: PageFrameModel, continuousWeb = false) {
++  const geometry = getPagePrintGeometry(frame);
++  const sliceHeight = geometry.height / geometry.scale;
++  const count = continuousWeb && frame.templateId === 'screen_note'
++    ? Math.max(1, Math.ceil(frame.height / sliceHeight - 1e-9))
++    : 1;
++  return Array.from({ length: count }, (_, index) => ({
++    index,
++    offsetY: index * sliceHeight,
++    height: sliceHeight,
++    printTop: -index * geometry.height,
++  }));
++}
++
+ /** Both rectangles come from the existing fragment model, in world coordinates. */
+ export function getPagePrintFragmentGeometry(
+   frame: PageFrameModel,
+diff --git a/client/src/pages/Notes/canvasEngine/runtimeDataTypes.ts b/client/src/pages/Notes/canvasEngine/runtimeDataTypes.ts
+index 7e9ae02..f8cc29c 100644
+--- a/client/src/pages/Notes/canvasEngine/runtimeDataTypes.ts
++++ b/client/src/pages/Notes/canvasEngine/runtimeDataTypes.ts
+@@ -4,6 +4,7 @@ export interface Note {
+   title: string;
+   description: string | null;
+   status: string;
++  page_format?: string;
+   note_class?: 'user' | 'source_projection' | 'system' | string;
+   source_kind?: 'manual' | 'source_projection' | 'system' | string;
+   metadata?: Record<string, unknown>;
+diff --git a/server/src/routes/notes.ts b/server/src/routes/notes.ts
+index 49e6a5f..f7519c3 100644
+--- a/server/src/routes/notes.ts
++++ b/server/src/routes/notes.ts
+@@ -11,6 +11,7 @@ import {
+   createNoteBlockSchema,
+   createNoteSchema,
+   discardClientNoteBlockCreateSchema,
++  notePagePresetSchema,
+   reorderNoteBlocksSchema,
+   updateNoteBlockPlacementSchema,
+   updateNoteSchema,
+@@ -63,14 +64,15 @@ export function getOwnedCourse(courseId: string, userId: string): { id: string }
+ export function getOwnedNote(
+   noteId: string,
+   userId: string,
+-): { id: string; course_id: string; note_class: string; status: string } {
++): { id: string; course_id: string; note_class: string; status: string; page_format: string } {
+   const note = getDb()
+-    .prepare('SELECT id, course_id, note_class, status FROM notes WHERE id = ? AND user_id = ?')
++    .prepare('SELECT id, course_id, note_class, status, page_format FROM notes WHERE id = ? AND user_id = ?')
+     .get(noteId, userId) as {
+       id: string;
+       course_id: string;
+       note_class: string;
+       status: string;
++      page_format: string;
+     } | undefined;
+   if (!note) throw new AppError(404, 'Note not found');
+   return note;
+@@ -145,9 +147,19 @@ router.get('/:id', (req: AuthRequest, res: Response) => {
+ router.put('/:id', (req: AuthRequest, res: Response) => {
+   try {
+     const noteId = req.params.id as string;
+-    getOwnedNote(noteId, req.userId!);
++    const note = getOwnedNote(noteId, req.userId!);
+     const data = updateNoteSchema.parse(req.body);
+     assertSourceProjectionNoteUpdateAllowed(getDb(), req.userId!, noteId, data);
++    if (
++      data.page_format !== undefined
++      && data.page_format !== note.page_format
++      && (notePagePresetSchema.safeParse(note.page_format).success
++        || notePagePresetSchema.safeParse(data.page_format).success)
++    ) {
++      throw new AppError(409, 'Page preset cannot be changed after note creation', {
++        code: 'note_page_preset_immutable',
++      });
++    }
+     const fields: string[] = [];
+     const values: unknown[] = [];
+ 
+diff --git a/server/src/services/boardCeremonyNote.ts b/server/src/services/boardCeremonyNote.ts
+index 9b16b6a..000f468 100644
+--- a/server/src/services/boardCeremonyNote.ts
++++ b/server/src/services/boardCeremonyNote.ts
+@@ -2,12 +2,13 @@ import type Database from 'better-sqlite3';
+ import { v4 as uuidv4 } from 'uuid';
+ import { z } from 'zod';
+ import { AppError } from '../middleware/errorHandler.js';
+-import { createCourseSchema, createNoteSchema, savePageFrameCollectionSchema } from '../validators/index.js';
++import { createCourseSchema, createNoteSchema, notePagePresetSchema, savePageFrameCollectionSchema } from '../validators/index.js';
+ import { savePageFrameCollection } from './canvasObjects.js';
+ import { hydrateNote } from './noteHydration.js';
+ 
+ const ceremonyFields = {
+   title: createNoteSchema.shape.title.trim().min(1),
++  page_format: notePagePresetSchema.optional(),
+   collection: savePageFrameCollectionSchema.shape.collection.refine(
+     (collection) => Array.isArray(collection.pageFrames) && collection.pageFrames.length > 0,
+     'An initial page frame is required',
+@@ -45,8 +46,8 @@ export function createBoardCeremonyNote(db: Database.Database, userId: string, b
+       .run(operationBatchId, userId, projectId, `Create note: ${input.title}`, now);
+     db.prepare(`INSERT INTO notes (
+       id, user_id, course_id, title, page_format, metadata, operation_batch_id, created_at, updated_at
+-    ) VALUES (?, ?, ?, ?, 'flow', '{}', ?, ?, ?)`)
+-      .run(noteId, userId, projectId, input.title, operationBatchId, now, now);
++    ) VALUES (?, ?, ?, ?, ?, '{}', ?, ?, ?)`)
++      .run(noteId, userId, projectId, input.title, input.page_format ?? 'flow', operationBatchId, now, now);
+     const collection = savePageFrameCollection(db, userId, noteId, input.collection);
+     if (!collection?.pageFrames.length) throw new AppError(400, 'An initial page frame is required');
+     const note = hydrateNote(db.prepare('SELECT * FROM notes WHERE id = ?').get(noteId));
+diff --git a/server/src/validators/index.ts b/server/src/validators/index.ts
+index 4bb9128..e131a2b 100644
+--- a/server/src/validators/index.ts
++++ b/server/src/validators/index.ts
+@@ -350,6 +350,10 @@ export const uploadDocumentSchema = z.object({
+ 
+ // --- v2 Notes / NoteBlocks ---
+ 
++// Creation-only page presets use the existing notes.page_format column.
++// Legacy note writers retain createNoteSchema's string vocabulary and flow default.
++export const notePagePresetSchema = z.enum(['a4_portrait', 'letter_portrait', 'screen_note']);
++
+ export const createNoteSchema = z.object({
+   skin: skinSelectionSchema.nullable().optional(),
+   course_id: z.string().uuid('Invalid course ID'),
+diff --git a/client/src/pages/Notes/NotePagePresetSelect.module.css b/client/src/pages/Notes/NotePagePresetSelect.module.css
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Notes/NotePagePresetSelect.module.css
+@@ -0,0 +1,18 @@
++.select {
++  background: var(--bg-elevated);
++  border: 1px solid var(--glass-border);
++  border-radius: var(--radius-md);
++  color: var(--text-primary);
++  font: inherit;
++  font-size: 13px;
++  padding: 6px 9px;
++  min-height: 34px;
++  max-width: 100%;
++}
++
++.select:focus-visible {
++  outline: 2px solid var(--accent-primary);
++  outline-offset: 2px;
++}
++
++.select:disabled { opacity: 0.58; }
+diff --git a/client/src/pages/Notes/NotePagePresetSelect.tsx b/client/src/pages/Notes/NotePagePresetSelect.tsx
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Notes/NotePagePresetSelect.tsx
+@@ -0,0 +1,13 @@
++import { DEFAULT_NOTE_PAGE_PRESET, NOTE_PAGE_PRESETS, type NotePagePreset } from './canvasEngine/notePagePresetService';
++import styles from './NotePagePresetSelect.module.css';
++
++export function NotePagePresetSelect({ value = DEFAULT_NOTE_PAGE_PRESET, onChange, disabled }: {
++  value?: NotePagePreset;
++  onChange: (value: NotePagePreset) => void;
++  disabled?: boolean;
++}) {
++  return <select className={styles.select} aria-label="Paper size" value={value} disabled={disabled}
++    onChange={(event) => onChange(event.currentTarget.value as NotePagePreset)}>
++    {NOTE_PAGE_PRESETS.map((preset) => <option key={preset.value} value={preset.value}>{preset.label}</option>)}
++  </select>;
++}
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/notePagePresets.test.tsx b/client/src/pages/Notes/canvasEngine/hooks/notePagePresets.test.tsx
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Notes/canvasEngine/hooks/notePagePresets.test.tsx
+@@ -0,0 +1,87 @@
++import { renderHook } from '@testing-library/react';
++import { describe, expect, it } from 'vitest';
++import { createNotePagePresetSeed } from '../notePagePresetService';
++import { createDefaultDocumentTypographyProfile } from '../typographyProfileService';
++import { createViewport } from '../engineModel';
++import { useNoteCanvasFrameModel, type UseNoteCanvasFrameModelOptions } from './useNoteCanvasLayoutModel';
++import type { BlockBoxLayout } from '../runtimeLayout';
++
++function input(preset: 'a4_portrait' | 'letter_portrait' | 'screen_note'): UseNoteCanvasFrameModelOptions {
++  const collection = createNotePagePresetSeed(preset);
++  return {
++    notePagePreset: preset, coordinateContract: 'v2', pageFrameCollection: collection,
++    blockLayouts: {}, defaultDraftLayout: { x: 0, y: 0, width: 992, height: 100, surface: 'formal_page',
++      coordinate_space: 'page_frame_local', frame_id: collection.primaryFrameId! },
++    documentTypographyProfile: createDefaultDocumentTypographyProfile(), draftActive: false, draftLayout: null,
++    persistedCanvasObjects: [], persistedCanvasPlacements: [], persistedContentMounts: [], persistedVisualConnectors: [],
++    persistedImageObjects: [], persistedStructuredObjects: [], pageOffsetX: 84, surfaceMode: 'page',
++    viewportTransform: createViewport(), visibleBlocks: [],
++  };
++}
++
++describe('new note page presets in the mounted frame model', () => {
++  it.each([
++    ['a4_portrait', 904, 1278, { top: 0, right: 72, bottom: 96, left: 72 }],
++    ['letter_portrait', 904, 1170, { top: 0, right: 72, bottom: 96, left: 72 }],
++    ['screen_note', 1120, 720, { top: 48, right: 64, bottom: 64, left: 64 }],
++  ] as const)('keeps %s geometry after mounting and remounting', (preset, width, height, contentInset) => {
++    const options = input(preset);
++    const before = structuredClone(options.pageFrameCollection);
++    const { result, unmount } = renderHook(() => useNoteCanvasFrameModel(options));
++    expect(result.current.primaryPageFrame).toMatchObject({ templateId: preset, width, height, contentInset });
++    expect(result.current.pageContentHeight + contentInset.top).toBe(height);
++    expect(result.current.noteCanvasRuntime.pageFrames).toHaveLength(1);
++    unmount();
++    const reloaded = renderHook(() => useNoteCanvasFrameModel({ ...options, pageFrameCollection: before }));
++    expect(reloaded.result.current.primaryPageFrame).toMatchObject({ templateId: preset, width, height, contentInset });
++    expect(options.pageFrameCollection).toEqual(before);
++  });
++
++  it('grows one fixed-width Web frame from live and reloaded content, including the bottom wall', () => {
++    const options = input('screen_note');
++    const frame = options.pageFrameCollection!.pageFrames[0];
++    const before = structuredClone(options.pageFrameCollection);
++    const body: BlockBoxLayout = { ...options.defaultDraftLayout, y: 0, height: 6000 };
++    const { result, rerender, unmount } = renderHook((props) => useNoteCanvasFrameModel(props), { initialProps: options });
++    rerender({ ...options, blockLayouts: { body } });
++    expect(result.current.primaryPageFrame).toMatchObject({ id: frame.id, width: 1120, height: 6112 });
++    expect(result.current.noteCanvasRuntime.pageFrames).toHaveLength(1);
++    rerender({ ...options, blockLayouts: { body }, draftActive: true,
++      draftLayout: { ...body, y: 6100, height: 1000 } });
++    expect(result.current.primaryPageFrame?.height).toBe(7212);
++    expect(options.pageFrameCollection).toEqual(before);
++    unmount();
++    const reloaded = renderHook(() => useNoteCanvasFrameModel({ ...options, blockLayouts: { body } }));
++    expect(reloaded.result.current.primaryPageFrame?.height).toBe(6112);
++    const adjusted = structuredClone(before!);
++    adjusted.pageFrames[0].contentInset.bottom = 120;
++    const walls = renderHook(() => useNoteCanvasFrameModel({ ...options, pageFrameCollection: adjusted, blockLayouts: { body } }));
++    expect(walls.result.current.primaryPageFrame).toMatchObject({ width: 1120, height: 6168, contentInset: { bottom: 120 } });
++  });
++
++  it('leaves historical collections and the legacy primary fallback path unchanged', () => {
++    const options = input('screen_note');
++    options.notePagePreset = 'flow';
++    // Historical non-default frame identity has always stayed as stored.
++    const frame = options.pageFrameCollection!.pageFrames[0];
++    frame.id = 'historical-web';
++    options.pageFrameCollection!.primaryFrameId = frame.id;
++    const before = structuredClone(options.pageFrameCollection);
++    const { result } = renderHook(() => useNoteCanvasFrameModel({ ...options,
++      blockLayouts: { body: { ...options.defaultDraftLayout, frame_id: frame.id, height: 6000 } } }));
++    expect(result.current.primaryPageFrame).toMatchObject({ id: frame.id, height: 720, width: 1120 });
++    expect(options.pageFrameCollection).toEqual(before);
++  });
++
++  it('includes frame-owned visual content when growing the Web page', () => {
++    const options = input('screen_note');
++    const frame = options.pageFrameCollection!.pageFrames[0];
++    const { result } = renderHook(() => useNoteCanvasFrameModel({ ...options,
++      persistedCanvasPlacements: [{ placementId: 'visual-placement', objectId: 'visual', canvasId: 'canvas',
++        frameId: frame.id, surface: 'formal_page', boundaryRole: 'inside', x: 100, y: 9000,
++        width: 300, height: 400, zIndex: 1, rotation: 0 }],
++    }));
++    expect(result.current.primaryPageFrame).toMatchObject({ width: 1120, height: 9464 });
++    expect(result.current.noteCanvasRuntime.pageFrames).toHaveLength(1);
++  });
++});
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useRuntimeLayoutModelController.test.tsx b/client/src/pages/Notes/canvasEngine/hooks/useRuntimeLayoutModelController.test.tsx
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Notes/canvasEngine/hooks/useRuntimeLayoutModelController.test.tsx
+@@ -0,0 +1,56 @@
++import { useRef } from 'react';
++import { render, screen } from '@testing-library/react';
++import { describe, expect, it, vi } from 'vitest';
++import { createSurfaceModePolicy } from '../modePolicyService';
++import { createNotePagePresetSeed } from '../notePagePresetService';
++import type { NoteBlock } from '../runtimeDataTypes';
++import { createDefaultDocumentTypographyProfile } from '../typographyProfileService';
++import type { PageFrameCollectionModel } from '../types';
++import { useRuntimeLayoutModelController } from './useRuntimeLayoutModelController';
++
++describe('new Web note content width after loading', () => {
++  it('uses the loaded frame walls before any resize event, including subsequent wall changes, without changing legacy sizing', () => {
++    const collection = createNotePagePresetSeed('screen_note');
++    const block: NoteBlock = {
++      id: 'body', placement_id: 'body-placement', display_overrides_json: {},
++      canvas_layout: { x: 0, y: 0, width: 760, height: 72, coordinate_space: 'page_frame_local',
++        frame_id: collection.primaryFrameId, surface: 'formal_page' },
++      block_type: 'text', title: null, content_json: { body: 'Loaded Web text' }, plain_text: 'Loaded Web text',
++      metadata: {}, order_index: 0, source_references: [],
++    };
++    const persistBlockLayout = vi.fn();
++    function Host({ loaded = false, preset, frames }: {
++      loaded?: boolean; preset?: string; frames?: PageFrameCollectionModel;
++    }) {
++      const blockListRef = useRef<HTMLDivElement>(null);
++      const model = useRuntimeLayoutModelController({
++        notePagePreset: loaded ? preset : undefined, coordinateContract: 'v2', blockListRef,
++        blocks: loaded ? [block] : [], sortedBlocks: loaded ? [block] : [], layoutDrafts: {},
++        documentTypographyProfile: createDefaultDocumentTypographyProfile(), pageOffsetX: 84,
++        pageFrameCollection: loaded ? frames! : null, persistBlockLayout,
++        surfaceMode: 'page', surfacePolicy: createSurfaceModePolicy('page'),
++      });
++      if (!loaded) return <span>Loading...</span>;
++      return <div ref={blockListRef}>
++        <output data-testid="widths">{JSON.stringify({ content: model.contentWidth,
++          block: model.blockLayouts.body.width, draft: model.defaultDraftLayout.width })}</output>
++      </div>;
++    }
++    const { rerender } = render(<Host />);
++    expect(screen.getByText('Loading...')).toBeTruthy();
++    // The ref was null on initial mount. Loading inserts the editor without a
++    // browser resize, matching the production NoteCanvasRuntime loading shell.
++    rerender(<Host loaded preset="screen_note" frames={collection} />);
++    expect(JSON.parse(screen.getByTestId('widths').textContent!)).toEqual({ content: 992, block: 992, draft: 992 });
++    const narrowed = structuredClone(collection);
++    narrowed.pageFrames[0].contentInset.left = 96;
++    rerender(<Host loaded preset="screen_note" frames={narrowed} />);
++    expect(JSON.parse(screen.getByTestId('widths').textContent!)).toEqual({ content: 960, block: 960, draft: 960 });
++    rerender(<Host loaded preset="flow" frames={collection} />);
++    expect(JSON.parse(screen.getByTestId('widths').textContent!)).toEqual({ content: 760, block: 760, draft: 760 });
++    expect(collection.pageFrames[0]).toMatchObject({ width: 1120, height: 720,
++      contentInset: { left: 64, right: 64 } });
++    expect(block.canvas_layout?.width).toBe(760);
++    expect(persistBlockLayout).not.toHaveBeenCalled();
++  });
++});
+diff --git a/client/src/pages/Notes/canvasEngine/notePagePresetService.ts b/client/src/pages/Notes/canvasEngine/notePagePresetService.ts
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Notes/canvasEngine/notePagePresetService.ts
+@@ -0,0 +1,58 @@
++import { createPrimaryPageFrame } from './engineModel';
++import { createPageFrameCollectionSeed } from './pageFrameCollectionService';
++import { resolveWorldRect, selectPlacementFrame, type CoordinateContract } from './placementContractService';
++import type { BlockBoxLayout } from './runtimeLayout';
++import type { PageFrameCollectionModel } from './types';
++
++export const NOTE_PAGE_PRESETS = [
++  { value: 'a4_portrait', label: 'A4' },
++  { value: 'letter_portrait', label: 'Letter' },
++  { value: 'screen_note', label: 'Web long page' },
++] as const;
++export type NotePagePreset = typeof NOTE_PAGE_PRESETS[number]['value'];
++export const DEFAULT_NOTE_PAGE_PRESET: NotePagePreset = 'a4_portrait';
++
++export function isNotePagePreset(value: unknown): value is NotePagePreset {
++  return NOTE_PAGE_PRESETS.some((preset) => preset.value === value);
++}
++
++export function createNotePagePresetSeed(preset: NotePagePreset = DEFAULT_NOTE_PAGE_PRESET) {
++  return createPageFrameCollectionSeed(createPrimaryPageFrame({ templateId: preset }));
++}
++
++/** The stored frame is the floor. Content determines the long page's current
++ * extent on every render and reload; growing it never creates another frame. */
++export function growWebPageCollection(
++  collection: PageFrameCollectionModel,
++  layouts: BlockBoxLayout[],
++  contract: CoordinateContract = 'v1',
++): PageFrameCollectionModel {
++  const pageFrames = collection.pageFrames.map((frame) => {
++    if (frame.templateId !== 'screen_note') return frame;
++    let height = frame.height;
++    for (const layout of layouts) {
++      if (layout.surface === 'tray') continue;
++      const owner = selectPlacementFrame(layout, collection.pageFrames, contract);
++      if (owner?.id !== frame.id || layout.surface === 'canvas_workspace') continue;
++      const rect = resolveWorldRect(layout, frame, contract);
++      height = Math.max(height, Math.ceil(rect.y + rect.height - frame.y + frame.contentInset.bottom));
++    }
++    return height === frame.height ? frame : { ...frame, height };
++  });
++  return { ...collection, pageFrames };
++}
++
++/** Reading adds the primary top inset separately. Never impose A4's minimum
++ * height or its 760px content-width filter on Letter and Web presets. */
++export function measurePresetPageContentHeight(collection: PageFrameCollectionModel, layouts: BlockBoxLayout[], contract: CoordinateContract = 'v1') {
++  let bottom = Math.max(0, ...collection.pageFrames.map((frame) => frame.y + frame.height));
++  for (const layout of layouts) {
++    if (layout.surface === 'tray' || layout.surface === 'canvas_workspace') continue;
++    const frame = selectPlacementFrame(layout, collection.pageFrames, contract);
++    if (!frame) continue;
++    const rect = resolveWorldRect(layout, frame, contract);
++    bottom = Math.max(bottom, rect.y + rect.height + frame.contentInset.bottom);
++  }
++  const primary = collection.pageFrames.find((frame) => frame.id === collection.primaryFrameId) || collection.pageFrames[0];
++  return Math.max(0, bottom - (primary?.contentInset.top || 0));
++}
+diff --git a/server/src/__tests__/v13PagePresets.test.ts b/server/src/__tests__/v13PagePresets.test.ts
+new file mode 100644
+--- /dev/null
++++ b/server/src/__tests__/v13PagePresets.test.ts
+@@ -0,0 +1,126 @@
++import assert from 'node:assert/strict';
++import type { Server } from 'node:http';
++import test from 'node:test';
++import express from 'express';
++import type Database from 'better-sqlite3';
++import { closeDb, initDb } from '../db/init.js';
++import type { AuthRequest } from '../middleware/auth.js';
++import { errorHandler } from '../middleware/errorHandler.js';
++import { createBoardRouter } from '../routes/boards.js';
++import noteRoutes from '../routes/notes.js';
++import { createBoard } from '../services/boards.js';
++
++const USER = '11111111-1111-4111-8111-111111111111';
++const PROJECT = '22222222-2222-4222-8222-222222222222';
++const PRESETS = ['a4_portrait', 'letter_portrait', 'screen_note'] as const;
++const collection = {
++  primaryFrameId: 'page-1', selectedFrameId: 'page-1',
++  primaryStackId: 'stack-1', selectedStackId: 'stack-1',
++  pageStacks: [{ id: 'stack-1', frameIds: ['page-1'] }],
++  pageFrames: [{ id: 'page-1', x: 0, y: 0, width: 800, height: 1100,
++    contentInset: { top: 96, right: 72, bottom: 96, left: 72 }, exportable: true }],
++};
++
++interface Fixture {
++  db: Database.Database;
++  boardId: string;
++  request: (method: string, path: string, input?: unknown, status?: number) => Promise<any>;
++}
++
++async function withPresets(run: (fixture: Fixture) => Promise<void>) {
++  const db = await initDb(':memory:');
++  let server: Server | undefined;
++  try {
++    db.prepare("INSERT INTO users(id,email,password_hash,name) VALUES(?, 'page-presets@example.test', 'synthetic', 'Page presets')").run(USER);
++    db.prepare('INSERT INTO courses(id,user_id,name) VALUES(?,?,?)').run(PROJECT, USER, 'Page presets');
++    const { board } = db.transaction(() => createBoard(db, USER, { title: 'Page presets', purpose: { title: 'Writing' } }))();
++    const app = express();
++    app.use(express.json());
++    app.use((req: AuthRequest, _res, next) => { req.userId = USER; next(); });
++    app.use('/api/notes', noteRoutes);
++    app.use('/api/boards', createBoardRouter(() => db));
++    app.use(errorHandler);
++    server = await new Promise<Server>((resolve) => {
++      const listener = app.listen(0, '127.0.0.1', () => resolve(listener));
++    });
++    const address = server.address();
++    assert.ok(address && typeof address === 'object');
++    await run({
++      db, boardId: board.id,
++      request: async (method, path, input, status = 200) => {
++        const response = await fetch(`http://127.0.0.1:${address.port}/api${path}`, {
++          method, headers: { 'Content-Type': 'application/json' },
++          ...(input === undefined ? {} : { body: JSON.stringify(input) }),
++        });
++        const body = await response.json() as any;
++        assert.equal(response.status, status, JSON.stringify(body));
++        return body;
++      },
++    });
++  } finally {
++    if (server) await new Promise<void>((resolve, reject) => server!.close((error) => error ? reject(error) : resolve()));
++    closeDb();
++  }
++}
++
++test('project and board creation persist all three presets in notes.page_format and retain them on reload', async () => {
++  await withPresets(async ({ db, boardId, request }) => {
++    for (const page_format of PRESETS) {
++      for (const entry of ['project', 'board', 'board-inline'] as const) {
++        const title = `${entry} ${page_format}`;
++        const created = entry === 'project'
++          ? await request('POST', '/notes', { course_id: PROJECT, title, page_format }, 201)
++          : (await request('POST', `/boards/${boardId}/ceremony-note`, {
++            ...(entry === 'board' ? { project_id: PROJECT } : { project: { name: title } }),
++            title, page_format, collection,
++          }, 201)).note;
++        assert.equal(created.page_format, page_format);
++        const stored = db.prepare('SELECT page_format, metadata FROM notes WHERE id = ?').get(created.id) as any;
++        assert.equal(stored.page_format, page_format);
++        assert.deepEqual(JSON.parse(stored.metadata), {});
++        const reopened = await request('GET', `/notes/${created.id}`);
++        assert.equal(reopened.page_format, page_format);
++        assert.equal(reopened.title, title);
++      }
++    }
++  });
++});
++
++test('creation-only presets cannot change after creation while note content fields remain editable', async () => {
++  await withPresets(async ({ db, request }) => {
++    for (const page_format of PRESETS) {
++      const note = await request('POST', '/notes', { course_id: PROJECT, title: page_format, page_format }, 201);
++      const original = db.prepare('SELECT * FROM notes WHERE id = ?').get(note.id);
++      for (const next of [...PRESETS.filter((preset) => preset !== page_format), 'flow']) {
++        const result = await request('PUT', `/notes/${note.id}`, { page_format: next, title: 'Must remain atomic' }, 409);
++        assert.equal(result.details.code, 'note_page_preset_immutable');
++        assert.deepEqual(db.prepare('SELECT * FROM notes WHERE id = ?').get(note.id), original);
++      }
++      const renamed = await request('PUT', `/notes/${note.id}`, { title: 'Renamed', page_format });
++      assert.equal(renamed.title, 'Renamed');
++      assert.equal(renamed.page_format, page_format);
++    }
++  });
++});
++
++test('omitted presets retain legacy flow defaults and existing notes are untouched by new preset creation', async () => {
++  await withPresets(async ({ db, boardId, request }) => {
++    const legacy = await request('POST', '/notes', { course_id: PROJECT, title: 'Existing flow' }, 201);
++    const boardLegacy = (await request('POST', `/boards/${boardId}/ceremony-note`, {
++      project_id: PROJECT, title: 'Existing ceremony flow', collection,
++    }, 201)).note;
++    assert.equal(legacy.page_format, 'flow');
++    assert.equal(boardLegacy.page_format, 'flow');
++    const original = db.prepare('SELECT * FROM notes WHERE id = ?').get(legacy.id);
++    for (const page_format of PRESETS) {
++      await request('POST', '/notes', { course_id: PROJECT, title: page_format, page_format }, 201);
++      await request('PUT', `/notes/${legacy.id}`, { page_format }, 409);
++      assert.deepEqual(db.prepare('SELECT * FROM notes WHERE id = ?').get(legacy.id), original);
++    }
++    const renamed = await request('PUT', `/notes/${legacy.id}`, { title: 'Renamed existing note' });
++    assert.equal(renamed.page_format, 'flow');
++    const legacyFormat = await request('PUT', `/notes/${legacy.id}`, { page_format: 'legacy_custom' });
++    assert.equal(legacyFormat.page_format, 'legacy_custom');
++    assert.equal((await request('GET', `/notes/${boardLegacy.id}`)).page_format, 'flow');
++  });
++});

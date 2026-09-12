@@ -259,6 +259,7 @@ export function useNoteCanvasRuntimeController() {
     persistLayoutSnapshot,
     visibleBlocks,
   } = useRuntimeLayoutModelController({
+    notePagePreset: note?.page_format,
     coordinateContract,
     blocks,
     blockListRef,

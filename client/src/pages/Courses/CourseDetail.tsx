@@ -10,9 +10,8 @@ import { useUIStore } from '@/stores/uiStore';
 import api from '@/services/api';
 import { getNoteBlockTemplateLabel } from '@shared/types';
 import type { Course, Goal, SourceMaterial, MaterialSegment } from '@shared/types';
-import {
-  createPageFrameCollectionSeed,
-} from '../Notes/canvasEngine/pageFrameCollectionService';
+import { createNotePagePresetSeed, DEFAULT_NOTE_PAGE_PRESET, type NotePagePreset } from '../Notes/canvasEngine/notePagePresetService';
+import { NotePagePresetSelect } from '../Notes/NotePagePresetSelect';
 import {
   savePageFrameCollectionForNote,
 } from '../Notes/canvasEngine/canvasObjectRepository';
@@ -154,7 +153,7 @@ interface ProjectNotesSectionProps {
   notes: NoteSummary[];
   status: NoteStatusFilter;
   onStatusChange: (status: NoteStatusFilter) => void;
-  onCreateNote: () => void;
+  onCreateNote: (preset: NotePagePreset) => void;
   onOpenNote: (noteId: string) => void;
   refreshNotes: () => Promise<void>;
   addToast: NoteActionToast;
@@ -170,6 +169,7 @@ export function ProjectNotesSection({
   addToast,
 }: ProjectNotesSectionProps) {
   const [busyNoteId, setBusyNoteId] = useState<string | null>(null);
+  const [pagePreset, setPagePreset] = useState<NotePagePreset>(DEFAULT_NOTE_PAGE_PRESET);
 
   const runNoteAction = async (noteId: string) => {
     setBusyNoteId(noteId);
@@ -208,7 +208,8 @@ export function ProjectNotesSection({
               Trash
             </button>
           </div>
-          <button type="button" className={styles.sectionAddBtn} onClick={onCreateNote}>
+          <NotePagePresetSelect value={pagePreset} onChange={setPagePreset} />
+          <button type="button" className={styles.sectionAddBtn} onClick={() => onCreateNote(pagePreset)}>
             <Plus size={15} />
             New Note
           </button>
@@ -604,16 +605,17 @@ export default function CourseDetailPage() {
     }
   };
 
-  const handleCreateNote = async () => {
+  const handleCreateNote = async (preset: NotePagePreset) => {
     if (!courseId || !data) return;
     try {
       const res = await api.post('/notes', {
         course_id: courseId,
         title: 'Untitled note',
+        page_format: preset,
       });
       await savePageFrameCollectionForNote({
         noteId: res.data.id,
-        collection: createPageFrameCollectionSeed(),
+        collection: createNotePagePresetSeed(preset),
       });
       addToast('success', 'Note created');
       navigate(`/notes/${res.data.id}`);

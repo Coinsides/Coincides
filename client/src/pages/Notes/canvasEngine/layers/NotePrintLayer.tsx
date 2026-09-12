@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal, flushSync } from 'react-dom';
-import { getPagePrintGeometry } from '../pagePrintProjectionService';
+import { getPagePrintGeometry, getPagePrintSlices } from '../pagePrintProjectionService';
 import { documentTypographyToCssVars } from '../typographyProfileService';
 import { NoteReadOnlyPageContent } from './NoteReadOnlyPageContent';
 import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
@@ -10,17 +10,24 @@ import { usePaperSkin } from '../PaperSkinContext';
 export type NotePrintInput = Pick<NoteWritingSurfaceLayerProps,
   'surfaceMode' | 'noteId' | 'noteCanvasRuntime' | 'visibleBlocks'
   | 'blockTextDrafts' | 'blockTextFlowDrafts' | 'blockFieldDrafts'
-  | 'documentTypographyProfile' | 'anchorsBySourceRef'> & { skinStyle?: CSSProperties; skinPreset?: string };
+  | 'documentTypographyProfile' | 'anchorsBySourceRef'> & {
+    skinStyle?: CSSProperties;
+    skinPreset?: string;
+    /** Creation-time Web preset only; never inferred from a historical template. */
+    continuousWeb?: boolean;
+  };
 
 /** A read-only reuse of the editor renderer; no persistence or measurement callbacks escape. */
 function PrintPages({ input }: { input: NotePrintInput }) {
   return <div data-note-print-root="true" data-note-id={input.noteId} style={input.skinStyle} data-note-skin-preset={input.skinPreset}>
-    {input.noteCanvasRuntime.pageFrames.map((frame) => {
+    {input.noteCanvasRuntime.pageFrames.flatMap((frame) => {
       const print = getPagePrintGeometry(frame);
-      return <section
-        key={frame.id}
+      return getPagePrintSlices(frame, input.continuousWeb).map((slice) => <section
+        key={`${frame.id}:${slice.index}`}
         data-note-print-page="true"
         data-page-frame-id={frame.id}
+        data-print-slice-index={slice.index}
+        data-print-slice-offset={slice.offsetY}
         data-paper-size={print.paperSize}
         data-print-scale={print.scale}
         style={{ width: print.width, height: print.height }}
@@ -31,12 +38,18 @@ function PrintPages({ input }: { input: NotePrintInput }) {
             ...documentTypographyToCssVars(input.documentTypographyProfile),
             width: frame.width,
             height: frame.height,
+            top: slice.printTop,
             transform: `scale(${print.scale})`,
           } as CSSProperties}
         >
           <NoteReadOnlyPageContent
             frame={frame}
-            fragments={input.noteCanvasRuntime.blockFragmentProjections}
+            fragments={input.continuousWeb && frame.templateId === 'screen_note'
+              ? input.noteCanvasRuntime.blockFragmentProjections.filter((fragment) => (
+                fragment.visibleRect.y < frame.y + slice.offsetY + slice.height
+                && fragment.visibleRect.y + fragment.visibleRect.height > frame.y + slice.offsetY
+              ))
+              : input.noteCanvasRuntime.blockFragmentProjections}
             canvasObjects={input.noteCanvasRuntime.canvasObjects}
             canvasPlacements={input.noteCanvasRuntime.canvasPlacements}
             visibleBlocks={input.visibleBlocks}
@@ -47,7 +60,7 @@ function PrintPages({ input }: { input: NotePrintInput }) {
             print
           />
         </div>
-      </section>;
+      </section>);
     })}
   </div>;
 }

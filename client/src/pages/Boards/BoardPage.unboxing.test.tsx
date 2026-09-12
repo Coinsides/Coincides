@@ -56,7 +56,11 @@ async function createNote() {
   fireEvent.click(within(dialog).getByRole('button', { name: 'Create note' }));
   await readyRuntime();
   expect(screen.getByTestId('fixture-location').textContent).toBe('/boards/board');
-  expect(notes[0]).toMatchObject({ course_id: 'new-project', title: 'Unboxed thought' });
+  expect(notes[0]).toMatchObject({ course_id: 'new-project', title: 'Unboxed thought', page_format: 'a4_portrait' });
+  expect(collection?.pageFrames).toEqual([expect.objectContaining({
+    templateId: 'a4_portrait', pageSize: 'A4', width: 904, height: 1278,
+    contentInset: { top: 0, right: 72, bottom: 96, left: 72 },
+  })]);
 }
 function stagingTransfer() {
   const data = new Map<string, string>();
@@ -138,7 +142,8 @@ beforeEach(() => {
   http.post.mockImplementation(async (url: string, input: any) => {
     if (url === '/boards/board/ceremony-note') {
       const project = { id: 'new-project', ...input.project }; projects.push(project);
-      const note = { id: 'new-note', course_id: project.id, title: input.title, description: null, metadata: {}, status: 'active' };
+      const note = { id: 'new-note', course_id: project.id, title: input.title,
+        page_format: input.page_format ?? 'flow', description: null, metadata: {}, status: 'active' };
       notes.push(note); collection = structuredClone(input.collection);
       return response({ project, note, collection });
     }

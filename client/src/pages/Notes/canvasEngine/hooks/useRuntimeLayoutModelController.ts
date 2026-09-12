@@ -17,6 +17,7 @@ import type {
 } from '../types';
 
 export interface UseRuntimeLayoutModelControllerOptions {
+  notePagePreset?: string;
   coordinateContract?: CoordinateContract;
   blocks: NoteBlock[];
   blockListRef: RefObject<HTMLElement>;
@@ -31,6 +32,7 @@ export interface UseRuntimeLayoutModelControllerOptions {
 }
 
 export function useRuntimeLayoutModelController({
+  notePagePreset,
   blocks,
   coordinateContract,
   blockListRef,
@@ -43,7 +45,7 @@ export function useRuntimeLayoutModelController({
   surfaceMode,
   surfacePolicy,
 }: UseRuntimeLayoutModelControllerOptions) {
-  const contentWidth = useCanvasContentWidth({
+  const measuredContentWidth = useCanvasContentWidth({
     containerRef: blockListRef,
     pageOffsetX,
     surfaceMode,
@@ -56,6 +58,16 @@ export function useRuntimeLayoutModelController({
       height: DEFAULT_PAGE_FRAME_HEIGHT,
     })];
   }, [pageFrameCollection, pageOffsetX]);
+
+  const webFrame = notePagePreset === 'screen_note'
+    ? pageFrameCollection?.pageFrames.find((frame) => frame.id === pageFrameCollection.primaryFrameId)
+      || pageFrameCollection?.pageFrames[0]
+    : undefined;
+  // New Web notes have a fixed frame, including while the editor DOM is still
+  // mounting. Their content width must not wait for a window resize to be known.
+  const contentWidth = webFrame
+    ? Math.max(0, webFrame.width - webFrame.contentInset.left - webFrame.contentInset.right)
+    : measuredContentWidth;
 
   const {
     blockLayouts,

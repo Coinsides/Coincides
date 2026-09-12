@@ -447,9 +447,15 @@ assertContainsAll('PageFrame collection persists explicit PageStack coverage met
 
 const courseDetail = readProjectFile('src/pages/Courses/CourseDetail.tsx');
 assertContainsAll('Course detail New Note seeds explicit PageStack entity persistence', courseDetail, [
-  'createPageFrameCollectionSeed',
+  'createNotePagePresetSeed',
   'savePageFrameCollectionForNote',
-  'collection: createPageFrameCollectionSeed()',
+  'page_format: preset',
+  'collection: createNotePagePresetSeed(preset)',
+]);
+const notePagePresetService = readProjectFile('src/pages/Notes/canvasEngine/notePagePresetService.ts');
+assertContainsAll('New paper preset delegates geometry and stack ownership to the existing seed', notePagePresetService, [
+  "DEFAULT_NOTE_PAGE_PRESET: NotePagePreset = 'a4_portrait'",
+  'createPageFrameCollectionSeed(createPrimaryPageFrame({ templateId: preset }))',
 ]);
 
 const pageStackCollectionService = readProjectFile('src/pages/Notes/canvasEngine/pageStackCollectionService.ts');
@@ -682,7 +688,8 @@ assertContainsAll('Note canvas layout model focuses Page Mode on primary PageFra
   'pageFrames: runtimePageFrameCollection.pageFrames',
 ]);
 assertContainsAll('Note canvas layout model derives Canvas world from runtime content', noteCanvasLayoutModel, [
-  'createRuntimeWorld(surfaceMode, pageContentHeight, {',
+  'createRuntimeWorld(surfaceMode, resolvedPageContentHeight, {',
+  'measurePresetPageContentHeight(runtimePageFrameCollection, presetContentLayouts, coordinateContract)',
   'pageFrames: runtimePageFrameCollection.pageFrames',
   'blockPlacements: canvasBlockPlacements',
   'canvasObjectReserve: []',
