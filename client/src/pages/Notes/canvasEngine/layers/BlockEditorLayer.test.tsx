@@ -1,5 +1,6 @@
 import {
   act,
+  cleanup,
   fireEvent,
   render,
   renderHook,
@@ -20,6 +21,10 @@ import {
 } from '../textFlowService';
 import { BlockEditorLayer } from './BlockEditorLayer';
 import { usePlacementHistory } from '../hooks/usePlacementHistory';
+
+import { loadCanvasImageAssetBlobUrl } from '../canvasAssetRepository';
+
+vi.mock('../canvasAssetRepository', () => ({ loadCanvasImageAssetBlobUrl: vi.fn() }));
 
 type BlockEditorLayerProps = ComponentProps<typeof BlockEditorLayer>;
 
@@ -127,6 +132,32 @@ function getBlockToolbar(): HTMLElement {
 }
 
 describe('BlockEditorLayer K-4 affiliation controls', () => {
+  it('dispatches media as a selectable, movable read-only block without text measurement or insert-unit controls', async () => {
+    vi.stubGlobal('URL', class extends URL { static revokeObjectURL = vi.fn(); });
+    vi.mocked(loadCanvasImageAssetBlobUrl).mockResolvedValueOnce('blob:short-media');
+    const onMeasuredHeight = vi.fn();
+    const onSelect = vi.fn();
+    const subject = renderSubject({ block: {
+      id: 'media-block', placement_id: 'placement-media-block', block_type: 'media', title: null, plain_text: '', content_json: {}, order_index: 0,
+      metadata: { media: { asset_id: 'asset-short', naturalWidth: 120, naturalHeight: 6, alt: 'Short image' } },
+      display_overrides_json: {}, canvas_layout: null, source_references: [],
+    }, layout: { x: 0, y: 80, width: 120, height: 6, width_mode: 'manual', surface: 'formal_page' },
+    onMeasuredHeight, onSelect });
+    const image = await screen.findByRole('img', { name: 'Short image' });
+    fireEvent.mouseDown(image);
+    expect(onSelect).toHaveBeenCalledOnce();
+    expect(image.closest('article')?.style.height).toBe('6px');
+    expect(document.querySelector('textarea')).toBeNull();
+    expect(screen.queryByRole('button', { name: /Insert text unit/i })).toBeNull();
+    expect(screen.queryByLabelText('Resize block')).toBeNull();
+    expect(onMeasuredHeight).not.toHaveBeenCalled();
+    fireEvent.pointerDown(screen.getByRole('button', { name: 'Move block' }));
+    expect(subject.onBeginMove).toHaveBeenCalledOnce();
+    expect(subject.onTextFlowChange).not.toHaveBeenCalled();
+    cleanup();
+    vi.unstubAllGlobals();
+  });
+
   it('offers a quiet border only for an idle editable block on paper', () => {
     renderSubject({ active: false });
     expect(document.querySelector('[data-note-block-shell]')?.getAttribute('data-paper-block-border')).toBe('quiet');

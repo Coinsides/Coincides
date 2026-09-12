@@ -1,0 +1,58 @@
+[
+  {
+    "path": "client/scripts/boardToolsSmoke/mockApi.ts",
+    "added": 3,
+    "deleted": 0,
+    "reconstructedFromKnownPatch": true,
+    "currentSha256": "8dc0fae19bbfa6e055c93d3503fcf21912a5e897458bfdd95b676ad520cc6895",
+    "baselineSha256": "dc92e724e564ede8b35407d03e536ed8af9802eecf309287b05c75348f6a86bd"
+  },
+  {
+    "path": "client/scripts/boardOpenNoteSmoke/mockApi.ts",
+    "added": 6,
+    "deleted": 0,
+    "reconstructedFromKnownPatch": true,
+    "currentSha256": "56ed8bc0596ab4c667358b090baf4e640db591349888088dfdf0cc53c590f08e",
+    "baselineSha256": "b12aba9930890a88a4bcc882be5af64dc946775c074fcf6aff4beb9462b606de"
+  },
+  {
+    "path": "client/scripts/boardTextRangeSmoke/mockApi.ts",
+    "added": 6,
+    "deleted": 0,
+    "reconstructedFromKnownPatch": true,
+    "currentSha256": "f2021e66f1f5b32a14c7a6b1bbc2311a2fa4f2a7a10ae0bde0d65e6d2cc8e13d",
+    "baselineSha256": "6e48f78a0d690942840ff47202cdc7c706a2be3ba03483cb4dd3ebaeac2ff62d"
+  },
+  {
+    "path": "client/scripts/cFix1Smoke/mockApi.ts",
+    "added": 3,
+    "deleted": 0,
+    "reconstructedFromKnownPatch": true,
+    "currentSha256": "81dd9112893a4ee1f1ab767763d3d24363c36169d1c97846e3d612d384f73bd0",
+    "baselineSha256": "c12b4137940afaaaf26c4e00a219108f726e8dab6b00a85d7c9fa345a9220b2b"
+  },
+  {
+    "path": "client/scripts/pageFrameHealingSmoke/mockApi.ts",
+    "added": 6,
+    "deleted": 0,
+    "reconstructedFromKnownPatch": true,
+    "currentSha256": "b5c7bed615d78e4920ad4337f0d05fc9084c281c0cd1652641d7564d816a16d4",
+    "baselineSha256": "9421ea41df273b5adb8b4182adda1a20fbc22abf5d153beca15c549f179004b8"
+  },
+  {
+    "path": "client/scripts/pageReadingSmoke/mockApi.ts",
+    "added": 3,
+    "deleted": 0,
+    "reconstructedFromKnownPatch": true,
+    "currentSha256": "4ab6bbbbbf04c836496dbb1ea8ca2e0d59107a44fe4304bd276256eae930b4cd",
+    "baselineSha256": "b46c2ed41ba9c0fd5de582508e8cfdad9e96f98303c5827fd783311f49af6a1b"
+  },
+  {
+    "path": "client/scripts/paperInkSmoke/inkMockApi.ts",
+    "added": 3,
+    "deleted": 0,
+    "reconstructedFromKnownPatch": true,
+    "currentSha256": "a7e5f8a9cfc0ecf7e05e6c78e16abd0a87f9197f5d80a7df4a2b85dd6a4dce45",
+    "baselineSha256": "438b55ba202cd87ec190a6c5279009a7b081031d2630d371a262da27b17cb67c"
+  }
+]

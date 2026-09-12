@@ -56,6 +56,7 @@ export const noteBlockTypeSchema = z.enum([
   'answer',
   'sidenote',
   'item_ref',
+  'media',
 ]);
 
 const checklistItemSchema = z.object({
@@ -709,6 +710,13 @@ export const itemRefBlockDataSchema = z.object({
   item_id: z.string().uuid('Invalid Item ID'),
 }).strict();
 
+export const mediaBlockMetadataSchema = z.object({
+  asset_id: z.string().uuid('Invalid media asset ID'),
+  naturalWidth: z.number().finite().positive(),
+  naturalHeight: z.number().finite().positive(),
+  alt: z.string().max(2000).optional(),
+});
+
 export const createNoteBlockSchema = z.object({
   client_create_key: z.string().trim().min(1).max(220).optional(),
   block_type: noteBlockTypeSchema,
@@ -719,6 +727,14 @@ export const createNoteBlockSchema = z.object({
   display_overrides_json: jsonObjectSchema.optional(),
   source_references: z.array(sourceReferenceSchema).max(20).optional(),
 }).superRefine((data, ctx) => {
+  if (data.block_type === 'media') {
+    const result = mediaBlockMetadataSchema.safeParse(data.metadata?.media);
+    if (!result.success) {
+      for (const issue of result.error.issues) {
+        ctx.addIssue({ ...issue, path: ['metadata', 'media', ...issue.path] });
+      }
+    }
+  }
   if (data.block_type !== 'item_ref') return;
   const result = itemRefBlockDataSchema.safeParse(data.content_json);
   if (!result.success) {

@@ -8,7 +8,9 @@ import {
 import {
   reflowLayoutsAfterHeightChange,
   resolveStackedLayoutCollisions,
+  readStoredLayout,
 } from './placementService';
+import { readMediaBlockMetadata } from './mediaBlockService';
 import {
   estimateTypographyTextBlockHeight,
 } from './typographyMeasurementService';
@@ -95,6 +97,12 @@ export function estimateBlockHeightForText(
   width: number,
   typography?: DocumentTypographyProfile,
 ): number {
+  if (block.block_type === 'media') {
+    const storedHeight = readStoredLayout(block)?.height;
+    if (typeof storedHeight === 'number' && Number.isFinite(storedHeight) && storedHeight > 0) return storedHeight;
+    const media = readMediaBlockMetadata(block);
+    return media ? Math.max(1, width * media.naturalHeight / media.naturalWidth) : DEFAULT_BLOCK_HEIGHT;
+  }
   return estimateTextBlockHeight({
     text,
     width,

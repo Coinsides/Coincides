@@ -21,6 +21,11 @@ import { resolveScreenRect } from '../placementContractService';
 import { useNoteCanvasResolvedLayoutModel } from '../hooks/useNoteCanvasLayoutModel';
 import { useNoteCanvasLayerProps, type UseNoteCanvasLayerPropsInput } from '../hooks/useNoteCanvasLayerProps';
 
+vi.mock('../canvasAssetRepository', async (importOriginal) => ({
+  ...await importOriginal<typeof import('../canvasAssetRepository')>(),
+  loadCanvasImageAssetBlobUrl: vi.fn(async () => { throw new Error('No media image registered in the alignment fixture'); }),
+}));
+
 vi.mock('@/services/api', () => ({ default: {
   get: vi.fn().mockRejectedValue(new Error('No HTTP in synthetic alignment fixture')),
   post: vi.fn().mockRejectedValue(new Error('No HTTP in synthetic alignment fixture')),

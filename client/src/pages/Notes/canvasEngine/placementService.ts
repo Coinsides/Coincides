@@ -47,6 +47,7 @@ import type {
 
 export interface PlacementSeedBlock {
   id: string;
+  block_type?: string;
   placement_id?: string;
   canvas_layout?: Record<string, unknown> | null;
   display_overrides_json?: Record<string, unknown> | null;
@@ -426,7 +427,7 @@ export function normalizeBlockLayout<TBlock extends PlacementSeedBlock>({
   const requestedX = useStoredPlacement && typeof stored?.x === 'number' ? stored.x : fallback.x;
   const placementWidth = clamp(
     shouldUseStoredWidth ? stored.width as number : fallback.width,
-    MIN_BLOCK_WIDTH,
+    block.block_type === 'media' ? 1 : MIN_BLOCK_WIDTH,
     Math.max(MIN_BLOCK_WIDTH, maxPlacementWidth),
   );
   const width = useStoredPlacement
@@ -439,7 +440,9 @@ export function normalizeBlockLayout<TBlock extends PlacementSeedBlock>({
   const y = preserveWorldCoordinates ? requestedY : Math.max(0, requestedY);
   const naturalHeight = estimateHeight(block, width);
   const storedHeight = useStoredPlacement && typeof stored?.height === 'number' ? stored.height : 0;
-  const height = Math.max(MIN_BLOCK_HEIGHT, naturalHeight, storedHeight);
+  const height = block.block_type === 'media'
+    ? (Number.isFinite(storedHeight) && storedHeight > 0 ? storedHeight : naturalHeight)
+    : Math.max(MIN_BLOCK_HEIGHT, naturalHeight, storedHeight);
 
   return {
     x,
@@ -490,7 +493,7 @@ export function normalizeResolvedBlockLayout<TBlock extends PlacementSeedBlock>(
       ? layout.width
       : Math.min(deriveFrameLocalAutoWidth(layout, selectPlacementFrame(layout, pageFrames, contract), contract)
         ?? DEFAULT_PAGE_CONTENT_WIDTH, contentWidth),
-    MIN_BLOCK_WIDTH,
+    block.block_type === 'media' ? 1 : MIN_BLOCK_WIDTH,
     Math.max(MIN_BLOCK_WIDTH, maxPlacementWidth),
   );
   const width = constrainFrameLocalAutoWidth(layout, placementWidth, contentWidth, pageFrames, contract);
@@ -506,7 +509,9 @@ export function normalizeResolvedBlockLayout<TBlock extends PlacementSeedBlock>(
     x,
     y,
     width,
-    height: Math.max(MIN_BLOCK_HEIGHT, naturalHeight, layout.height),
+    height: block.block_type === 'media'
+      ? (Number.isFinite(layout.height) && layout.height > 0 ? layout.height : naturalHeight)
+      : Math.max(MIN_BLOCK_HEIGHT, naturalHeight, layout.height),
     width_mode: layout.width_mode === 'manual' ? 'manual' : undefined,
     coordinate_space: layout.coordinate_space
       || (layout.surface === 'canvas_workspace' ? undefined : 'page_frame_local'),

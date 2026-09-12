@@ -1,4 +1,5 @@
 import { textFromContent } from './blockContentService';
+import { mediaBlockAlt } from './mediaBlockService';
 import { sliceGraphemes } from '../../../../../shared/graphemes';
 import {
   DEFAULT_PAGE_FRAME_CROSSING_EXPORT_POLICY,
@@ -279,5 +280,6 @@ export function aiVisibilityLabel(visibility: AIVisibility): string {
 }
 
 export function exportPreviewRowLabel(row: ExportPreviewRow): string {
+  if (row.block.block_type === 'media') return mediaBlockAlt(row.block);
   return row.block.title || sliceGraphemes(textFromContent(row.block), 0, 72) || 'Untitled block';
 }

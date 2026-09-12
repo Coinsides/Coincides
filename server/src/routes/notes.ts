@@ -34,6 +34,7 @@ import {
 } from '../services/notes.js';
 import { hydrateBlock, hydrateNote } from '../services/noteHydration.js';
 import { assertItemRefBlockContent } from '../services/itemRefBlocks.js';
+import { assertMediaBlockAsset } from '../services/mediaBlocks.js';
 import { createNoteMetadataRouter } from './noteMetadata.js';
 import { mergeNoteSkin } from '../services/skin.js';
 
@@ -269,6 +270,7 @@ router.post('/:id/blocks', (req: AuthRequest, res: Response) => {
       return;
     }
     assertItemRefBlockContent(db, req.userId!, data);
+    assertMediaBlockAsset(db, req.userId!, data);
     const id = uuidv4();
     const placementId = uuidv4();
     const now = new Date().toISOString();

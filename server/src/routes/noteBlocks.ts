@@ -61,13 +61,17 @@ router.put('/:id/unit-transfer', (req: AuthRequest, res: Response) => {
 // DELETE /api/note-blocks/:id
 router.delete('/:id', (req: AuthRequest, res: Response) => {
   const blockId = req.params.id as string;
-  getOwnedBlock(blockId, req.userId!);
+  const block = getOwnedBlock(blockId, req.userId!);
   assertSourceProjectionBlockContentWriteAllowed(getDb(), req.userId!, blockId, 'delete_note_block');
   assertNoteBlockStatusChangeAllowed(getDb(), req.userId!, blockId, 'trashed');
-  const now = new Date().toISOString();
-  getDb()
-    .prepare("UPDATE note_blocks SET status = 'trashed', trashed_at = ?, updated_at = ? WHERE id = ? AND user_id = ?")
-    .run(now, now, blockId, req.userId!);
+  if (block.block_type === 'media') {
+    updateNoteBlockContent(getDb(), req.userId!, blockId, { status: 'trashed' });
+  } else {
+    const now = new Date().toISOString();
+    getDb()
+      .prepare("UPDATE note_blocks SET status = 'trashed', trashed_at = ?, updated_at = ? WHERE id = ? AND user_id = ?")
+      .run(now, now, blockId, req.userId!);
+  }
   res.json({ message: 'Note block moved to trash' });
 });
 

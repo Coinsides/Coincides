@@ -1,0 +1,363 @@
+{
+  "basis": "Pre-edit working-tree text snapshot; no Git accessed. Seven existing script fixtures reconstructed by removing exactly the recorded additions (extra-baseline-receipt.json). Generated docs captured before regeneration. CRLF normalized; LCS line comparison. Audit artifacts and temporary/build outputs excluded.",
+  "codeAndTests": {
+    "files": 46,
+    "added": 1318,
+    "deleted": 28
+  },
+  "documentation": {
+    "files": 3,
+    "added": 51,
+    "deleted": 3
+  },
+  "total": {
+    "files": 49,
+    "added": 1369,
+    "deleted": 31
+  },
+  "files": [
+    {
+      "path": "client/scripts/boardOpenNoteSmoke/mockApi.ts",
+      "added": 6,
+      "deleted": 0,
+      "beforeSha256": "b12aba9930890a88a4bcc882be5af64dc946775c074fcf6aff4beb9462b606de",
+      "afterSha256": "56ed8bc0596ab4c667358b090baf4e640db591349888088dfdf0cc53c590f08e"
+    },
+    {
+      "path": "client/scripts/boardTextRangeSmoke/mockApi.ts",
+      "added": 6,
+      "deleted": 0,
+      "beforeSha256": "6e48f78a0d690942840ff47202cdc7c706a2be3ba03483cb4dd3ebaeac2ff62d",
+      "afterSha256": "f2021e66f1f5b32a14c7a6b1bbc2311a2fa4f2a7a10ae0bde0d65e6d2cc8e13d"
+    },
+    {
+      "path": "client/scripts/boardToolsSmoke/mockApi.ts",
+      "added": 3,
+      "deleted": 0,
+      "beforeSha256": "dc92e724e564ede8b35407d03e536ed8af9802eecf309287b05c75348f6a86bd",
+      "afterSha256": "8dc0fae19bbfa6e055c93d3503fcf21912a5e897458bfdd95b676ad520cc6895"
+    },
+    {
+      "path": "client/scripts/cFix1Smoke/mockApi.ts",
+      "added": 3,
+      "deleted": 0,
+      "beforeSha256": "c12b4137940afaaaf26c4e00a219108f726e8dab6b00a85d7c9fa345a9220b2b",
+      "afterSha256": "81dd9112893a4ee1f1ab767763d3d24363c36169d1c97846e3d612d384f73bd0"
+    },
+    {
+      "path": "client/scripts/pageFrameHealingSmoke/mockApi.ts",
+      "added": 6,
+      "deleted": 0,
+      "beforeSha256": "9421ea41df273b5adb8b4182adda1a20fbc22abf5d153beca15c549f179004b8",
+      "afterSha256": "b5c7bed615d78e4920ad4337f0d05fc9084c281c0cd1652641d7564d816a16d4"
+    },
+    {
+      "path": "client/scripts/pageReadingSmoke/mockApi.ts",
+      "added": 3,
+      "deleted": 0,
+      "beforeSha256": "b46c2ed41ba9c0fd5de582508e8cfdad9e96f98303c5827fd783311f49af6a1b",
+      "afterSha256": "4ab6bbbbbf04c836496dbb1ea8ca2e0d59107a44fe4304bd276256eae930b4cd"
+    },
+    {
+      "path": "client/scripts/paperInkSmoke/inkMockApi.ts",
+      "added": 3,
+      "deleted": 0,
+      "beforeSha256": "438b55ba202cd87ec190a6c5279009a7b081031d2630d371a262da27b17cb67c",
+      "afterSha256": "a7e5f8a9cfc0ecf7e05e6c78e16abd0a87f9197f5d80a7df4a2b85dd6a4dce45"
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.unboxing.test.tsx",
+      "added": 41,
+      "deleted": 2,
+      "beforeSha256": "41ee979f4f4ddba8b91495f8a146350f5eb92505e19702f23227afb4db2a4232",
+      "afterSha256": "029e146c51ecc515e62b4a7ecaf9416efac335f3e65648aa3eab1cbe239df239"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/blocks/MediaBlockProjection.module.css",
+      "added": 36,
+      "deleted": 0,
+      "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "afterSha256": "6f416811cdede25b4052915e15536ce85ca5b12113b8fd695ba59251013f30f7"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/blocks/MediaBlockProjection.test.tsx",
+      "added": 79,
+      "deleted": 0,
+      "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "afterSha256": "50cb8035966198c8c30e703b446d699ca775e5827253e835fb064630378c3e9b"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/blocks/MediaBlockProjection.tsx",
+      "added": 49,
+      "deleted": 0,
+      "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "afterSha256": "f432536b1c4df168ab43b711eddc156f2c762799c58fcce51db66138abd45e33"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/blocks/TextBlockProjection.input.test.tsx",
+      "added": 26,
+      "deleted": 1,
+      "beforeSha256": "5c759ebf578a98252b5a723c435e992da74bec15ab1e2be5fe10a90b5e2beef0",
+      "afterSha256": "02569835f9d11cfa2a2cf55ceb6b7350cfece88bfaf12b5e5b9b640f5f1bd933"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/blocks/TextBlockProjection.tsx",
+      "added": 9,
+      "deleted": 0,
+      "beforeSha256": "b16cd285fcb8175d5e63414dca8d83a24cfc9b85f4a0ff51f04df6de8fdcea2d",
+      "afterSha256": "cecf0bc9320383c2d1c3831282a239b307ef68a4a7363c12fb520be179c1d879"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/exportPreviewService.ts",
+      "added": 2,
+      "deleted": 0,
+      "beforeSha256": "22c7568609b95ba8c95e80050f5cce0a2379c524afbcc7b6b6a6fa924f701084",
+      "afterSha256": "158926b5d82bd74d52f6ac9feb1dd047b5a4ea9c615534356762ce0c61c536fb"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useBlockMeasurement.ts",
+      "added": 4,
+      "deleted": 1,
+      "beforeSha256": "afcbc8c5fb134bf33c79d1c84c010c702b7e9c3cc973fec89d30760ff4d3318d",
+      "afterSha256": "bc108fea4ef8e6a9af86131a43f269d72ed2c5399700593513c6800eb2fc1b58"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx",
+      "added": 46,
+      "deleted": 0,
+      "beforeSha256": "6021b46a4a19b20ff4d55bf7d60eb11aa32205ed84838d9542fb97ec83b51ff3",
+      "afterSha256": "5ea22e268b012c980da67685d112f51edf2110d3da4f5c156098e1c7188133b9"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.ts",
+      "added": 49,
+      "deleted": 2,
+      "beforeSha256": "bc6105001f77c5a69e6dfe59bd3974d301d6fa964c05f9c6efca68f16f5ad734",
+      "afterSha256": "7ff44de745480896b287ccdc898fe77b176b6f3430de9448427c34c38de2892d"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/usePageFrameWalls.test.tsx",
+      "added": 19,
+      "deleted": 2,
+      "beforeSha256": "3b0b6c845348387222c4a8e464499efabff558fa7d9fb0268b0d80545c021b28",
+      "afterSha256": "aa43b0bf6112b4dbddae37ae6240e22db1a0422969a2a83c71d86264db3f8cd7"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/BlockEditorLayer.test.tsx",
+      "added": 31,
+      "deleted": 0,
+      "beforeSha256": "2adf7c42e780a00f4443a8f4b5a8a64e07043cbaba21df2a727484a06542feee",
+      "afterSha256": "a0bd746dbfe35b992b39494181ee49b77442b213e345043349cd61626df3ea25"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/BlockEditorLayer.tsx",
+      "added": 16,
+      "deleted": 4,
+      "beforeSha256": "ecfe41b95f1a87ab541fded6925780df2cd014e7fb6f1d990ca7f796cbfb5c8d",
+      "afterSha256": "7845db4b6d4a4e858ce6be9f6b9b1b8004d5b04614f191846ea51e496413705c"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/ExportPreviewLayer.media.test.tsx",
+      "added": 31,
+      "deleted": 0,
+      "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "afterSha256": "c301e0892837da9f950b510c915e42e27fe1fdb942ed9881e7256329308124bc"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/ExportPreviewLayer.tsx",
+      "added": 17,
+      "deleted": 2,
+      "beforeSha256": "c6a0f3d33eba731bf9d6687516ee4c097ff2ddc4cc68158dd116d2404f31d46a",
+      "afterSha256": "ab14d9d5c4d909738d1639b4d5c81dff63f6638ff13232e7c5cd699f3061a2cd"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.test.tsx",
+      "added": 19,
+      "deleted": 0,
+      "beforeSha256": "4a69f8e28d0d8e0d6ad4c6c6d8b14719859c7c0f289d2e592f567b581a44d4b4",
+      "afterSha256": "fda81aec9632924f0757fead951b39e72b03fc691b33634562158b97e45d6000"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteReadOnlyPageContent.tsx",
+      "added": 1,
+      "deleted": 0,
+      "beforeSha256": "581e9f3eb42a730a3041b9640adda0e32d2ef2c0be47c86873fc426d1d9ef1db",
+      "afterSha256": "e5b837e042b6eef38a9ffa11aaf33df436e0d875ace45355d40ac5d0989d8522"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx",
+      "added": 5,
+      "deleted": 0,
+      "beforeSha256": "a4bd1c114074ab973c8154d989d8db4e4ea3fdb575ce2a4de6aec479575d7b4a",
+      "afterSha256": "284ddc85ad02c3edbfa46057577903d593ce16a36c063925614cad7b4a83359e"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx",
+      "added": 44,
+      "deleted": 1,
+      "beforeSha256": "19daae89d25ecce34b8d7d24880db7e92085ef02cb9eed52c49f075071c06803",
+      "afterSha256": "6eb4f96764e6ba173bf5673c2fe6a28df41785c31b7f96797ff4d8099c851c28"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx",
+      "added": 5,
+      "deleted": 0,
+      "beforeSha256": "3822d4db93664a219a24d046e3b9b42248a7afec170c2693557ad93816dc42ce",
+      "afterSha256": "da3656f4eb88cfb62f2c0a57c3c8ad4bff7fe6b4db3c0903fb87bdddaa73f78d"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/measurementService.ts",
+      "added": 8,
+      "deleted": 0,
+      "beforeSha256": "3c784557df205261436ade168b53f505c3d4734f6d1197da55d7b24d9bae2e56",
+      "afterSha256": "519044d06b039a0789951a5eec878a9a2942b802117e5adda9f55668fcd8b36c"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/mediaBlockLayout.test.ts",
+      "added": 49,
+      "deleted": 0,
+      "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "afterSha256": "b5f78db7aba6eba73eedf642949129591acfb51dda2a257f82d5cea734254fda"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/mediaBlockPasteService.test.ts",
+      "added": 70,
+      "deleted": 0,
+      "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "afterSha256": "22a24ec8656072c06082a3aacdcbc85ca9077912ab58ccce793809f0db14422a"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/mediaBlockPasteService.ts",
+      "added": 89,
+      "deleted": 0,
+      "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "afterSha256": "08ed9981dc9e0a3990b86e09720a2da689ef13d49417f820bd151d4ca9dc262a"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/mediaBlockService.ts",
+      "added": 16,
+      "deleted": 0,
+      "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "afterSha256": "7cae5eaaef7142f0a6ab687905632ee4fd1a2b002d472320bd4ded91bf18e990"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/placementService.ts",
+      "added": 9,
+      "deleted": 4,
+      "beforeSha256": "7e76a304c2f1d10cb55729e7eaacd0898cf77fd5cc2128171eff95164b92a844",
+      "afterSha256": "891b8763f460733909a61da5594a2de0668fe41d37e065fac6cb7d1946fb6d2e"
+    },
+    {
+      "path": "client/test/fixtures/canvasAssetFixture.test.ts",
+      "added": 21,
+      "deleted": 0,
+      "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "afterSha256": "3557b248c8b6428d15d4e3edd7654e104e57af607fa0390113d3611f6843ed05"
+    },
+    {
+      "path": "client/test/fixtures/canvasAssetFixture.ts",
+      "added": 11,
+      "deleted": 0,
+      "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "afterSha256": "5162cf31278a927c537853b48e6e52316d6ce4ce6ab757e0c0c1556c9aea4b31"
+    },
+    {
+      "path": "docs/agent-ops/INDEX.md",
+      "added": 1,
+      "deleted": 1,
+      "beforeSha256": "afc6e5034aedb5c8652fcce7dea65c863962d4aca66897fcfce78a1889167633",
+      "afterSha256": "3b85bc0ee10f22cacfca23bd972bba687fa33340005666088e9844096897bda7"
+    },
+    {
+      "path": "docs/agent-ops/handoffs/2026-09-12-v13-6-media-block-paste-order.md",
+      "added": 49,
+      "deleted": 1,
+      "beforeSha256": "dd36decc438855eb1527bba65c76732e4266fb82a62ea1b0e6dcda7c2e587d1e",
+      "afterSha256": "40e3cb8863df72f2f43e0c4b1d56dab3ac616729e20dbecce14353e0211fa3d4"
+    },
+    {
+      "path": "docs/generated/object-inventory.md",
+      "added": 1,
+      "deleted": 1,
+      "beforeSha256": "f7deb4b65913384f8577f5c35b7b65d842367d579f68530c1614ac3738393448",
+      "afterSha256": "79626663850063d19d5e47361b8defa79f719d34e25604d45436cb512fe264a1"
+    },
+    {
+      "path": "server/src/__tests__/v13MediaBlocks.test.ts",
+      "added": 287,
+      "deleted": 0,
+      "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "afterSha256": "366555250a034b7b6d65c7c9f19e701a9d312c20ab1dbf11f49ee4694c4d3ada"
+    },
+    {
+      "path": "server/src/lib/noteBlockTemplates.ts",
+      "added": 15,
+      "deleted": 1,
+      "beforeSha256": "a3cf43ab909372becfc8a711a312e6fcc36f32dcff56fbc35936aa5debcd0043",
+      "afterSha256": "19d959c99b630e7c68e541a407782d56a3cb2f643ed5acc0ef2e58a2b4502be7"
+    },
+    {
+      "path": "server/src/routes/noteBlocks.ts",
+      "added": 9,
+      "deleted": 5,
+      "beforeSha256": "a43d24a26ca4fea4bc2b54d9562236c403428b80b1dd622e53893d5232658c4d",
+      "afterSha256": "f3f99ddd8fe62173b2f93b365a649135cda92549cafe26a6c1a26efaa105986c"
+    },
+    {
+      "path": "server/src/routes/notes.ts",
+      "added": 2,
+      "deleted": 0,
+      "beforeSha256": "c8160527eb37fb0199e950cecd793072b51bf75a53dc543b39b28e4713a5d834",
+      "afterSha256": "d73a45fcd079ed8ad62d735729efb5653f2f8515fa70ae803259bb736e86fee3"
+    },
+    {
+      "path": "server/src/services/canvasAssets.ts",
+      "added": 52,
+      "deleted": 1,
+      "beforeSha256": "6614f44de94fb8fe9831d317103d66d733520488cc43fe71c785f2c6d139d0a6",
+      "afterSha256": "6d4e0d032d39bc282f49f17e2e29741e396a00196c03837dd90fb20e604444f0"
+    },
+    {
+      "path": "server/src/services/canvasObjects.ts",
+      "added": 2,
+      "deleted": 0,
+      "beforeSha256": "bf1f1055e99a6ede85496412843301250425ecc514b0900604cf1ad7780fd5fc",
+      "afterSha256": "9a3550b30e96761af8f723f4c75a9abc1ea3336e37ec7c6934aead5cd8b4bd0b"
+    },
+    {
+      "path": "server/src/services/mediaBlocks.ts",
+      "added": 36,
+      "deleted": 0,
+      "beforeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "afterSha256": "bd58d008b7b5d9e08caece2685726a7fc27028dd19ddd06f0716c47c7eb5d04e"
+    },
+    {
+      "path": "server/src/services/noteBlockContent.ts",
+      "added": 33,
+      "deleted": 1,
+      "beforeSha256": "1f7dfa89964fda9c3846fc1ca51b21ad7c85dd79f962754dfc5bad466f8e8b8b",
+      "afterSha256": "fcd7be723596edd61d45765175ffc2c8b3702521eed0dd2818ff2cbbd77885c6"
+    },
+    {
+      "path": "server/src/services/noteBlockLifecycle.ts",
+      "added": 12,
+      "deleted": 0,
+      "beforeSha256": "8b2041fc7544aa3f25fdb3f7cc259179b982505937f34b2d32dd2648e24d1da4",
+      "afterSha256": "cc042180ae14f7ffe2e0946201479c22a090ee69e1a9b00bd04dd5bac37f47bb"
+    },
+    {
+      "path": "server/src/validators/index.ts",
+      "added": 16,
+      "deleted": 0,
+      "beforeSha256": "bd169bc52f1170d0d5fb0d4019ade8c7416aabd9b52c0b577a55fd1d16bb5633",
+      "afterSha256": "7d6512a5644f61cfa913e8d2fb322dbdfa3cc739f92c0a0eeb3a16140d8fabf5"
+    },
+    {
+      "path": "shared/types/index.ts",
+      "added": 22,
+      "deleted": 1,
+      "beforeSha256": "1f3c69d6bab346a138cf860b291b9c4124e5accc0ffd435afb1a5fc3b6a94c4d",
+      "afterSha256": "3e35fe18b32cbfc365eb740e0d7d56669c5baf2089ccaefa3cda4d5f412d2033"
+    }
+  ]
+}

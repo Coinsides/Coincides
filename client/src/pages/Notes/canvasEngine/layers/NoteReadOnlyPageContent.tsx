@@ -57,6 +57,7 @@ export function NoteReadOnlyPageContent({
             fieldDraft={input.blockFieldDrafts[block.id]}
             layout={geometry.block}
             contentReadOnly
+            mediaPlaceholder={print}
             layoutMode={false}
             pageOffsetX={0}
             blockControlAnchor={null}

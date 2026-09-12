@@ -423,6 +423,8 @@ export function useNoteCanvasDataAdapter({
   );
   const [coordinateContract, setCoordinateContract] = useState<CoordinateContract>('v1');
   const [blocks, setBlocks] = useState<NoteBlock[]>([]);
+  const mediaInsertionBlocksRef = useRef(blocks);
+  mediaInsertionBlocksRef.current = blocks;
   // Only confirmed local commits advance this cursor. A conflict readback never does.
   const committedTextRevisions = useRef(new Map<string, number>());
   const [loading, setLoading] = useState(true);
@@ -1279,6 +1281,7 @@ export function useNoteCanvasDataAdapter({
       title?: string | null;
       contentJson?: Record<string, unknown>;
       metadataPatch?: Record<string, unknown>;
+      afterBlockId?: string;
       layout?: BlockBoxLayout;
       silent?: boolean;
     } = {},
@@ -1302,6 +1305,16 @@ export function useNoteCanvasDataAdapter({
     const nextContent = options.contentJson || contentForTemplate(template, body);
     const nextKind = presentationKindForTemplate(template, true);
     let created: NoteBlock;
+    const rollbackMediaCreation = async (failedOrderKey?: string) => {
+      try {
+        await writeRegistry.track('media-create-rollback:' + created.id, () => api.delete(`/note-blocks/${created.id}`));
+        writeRegistry.confirm('placement:' + requestedNote.id + ':' + created.id);
+        if (failedOrderKey) writeRegistry.confirm(failedOrderKey);
+        if (requestIsCurrent()) addToast('error', 'The image could not be placed. Please paste it again.');
+      } catch {
+        if (requestIsCurrent()) addToast('error', 'The image placement failed and cleanup could not finish. Reopen the note before retrying.');
+      }
+    };
     try {
       const res = await writeRegistry.track('createBlock:' + `/notes/${requestedNote.id}/blocks`, async () => api.post(`/notes/${requestedNote.id}/blocks`, {
         block_type: template.legacy_block_type,
@@ -1317,7 +1330,10 @@ export function useNoteCanvasDataAdapter({
       addToast('error', 'Failed to create block');
       return null;
     }
-    if (!requestIsCurrent()) return null;
+    if (!requestIsCurrent()) {
+      if (template.legacy_block_type === 'media') await rollbackMediaCreation();
+      return null;
+    }
 
     if (options.layout) {
       const requestedLayout = options.layout;
@@ -1330,6 +1346,10 @@ export function useNoteCanvasDataAdapter({
         }));
         created = { ...created, canvas_layout: savedLayout.layout };
       } catch (err) {
+        if (template.legacy_block_type === 'media') {
+          await rollbackMediaCreation();
+          return null;
+        }
         if (!requestIsCurrent()) return null;
         console.error('Block created but placement save failed:', err);
         addToast('error', 'Block created, but its placement could not be saved');
@@ -1340,9 +1360,36 @@ export function useNoteCanvasDataAdapter({
       }
     }
 
+    if (!requestIsCurrent()) {
+      if (template.legacy_block_type === 'media') await rollbackMediaCreation();
+      return null;
+    }
+    let orderedBlocks: NoteBlock[] | null = null;
+    if (options.afterBlockId) {
+      const currentBlocks = [...mediaInsertionBlocksRef.current].sort((a, b) => a.order_index - b.order_index);
+      const anchorIndex = currentBlocks.findIndex((block) => block.id === options.afterBlockId);
+      if (anchorIndex >= 0) {
+        currentBlocks.splice(anchorIndex + 1, 0, created);
+        const placements = currentBlocks.map((block, order_index) => ({ placement_id: block.placement_id, order_index }));
+        try {
+          await writeRegistry.track('createBlock:reorder:' + requestedNote.id, () => api.put(`/notes/${requestedNote.id}/blocks/reorder`, { placements }));
+          orderedBlocks = currentBlocks.map((block, order_index) => ({ ...block, order_index }));
+          created = orderedBlocks[anchorIndex + 1];
+          } catch {
+            if (template.legacy_block_type === 'media') {
+              await rollbackMediaCreation('createBlock:reorder:' + requestedNote.id);
+              return null;
+            }
+            if (requestIsCurrent()) addToast('error', 'Image added, but its reading order could not be saved.');
+        }
+      }
+    }
     if (!requestIsCurrent()) return null;
     const createdTextFlow = getTextFlowContent(nextContent);
-    setBlocks((current) => [...current, created].sort((a, b) => a.order_index - b.order_index));
+    const savedOrder = new Map(orderedBlocks?.map((block) => [block.id, block.order_index]));
+    setBlocks((current) => [...current, created]
+      .map((block) => savedOrder.has(block.id) ? { ...block, order_index: savedOrder.get(block.id)! } : block)
+      .sort((a, b) => a.order_index - b.order_index));
     setBlockTextDrafts((current) => ({ ...current, [created.id]: text.trimEnd() }));
     if (createdTextFlow) {
       setBlockTextFlowDrafts((current) => ({ ...current, [created.id]: createdTextFlow }));

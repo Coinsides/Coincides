@@ -10,6 +10,7 @@ import {
 import { DEFAULT_BLOCK_HEIGHT } from '../runtimeLayout';
 
 interface UseBlockMeasurementOptions {
+  enabled?: boolean;
   blockContentRef: RefObject<HTMLDivElement | null>;
   textareaRef: RefObject<HTMLTextAreaElement | null>;
   text: string;
@@ -19,6 +20,7 @@ interface UseBlockMeasurementOptions {
 }
 
 export function useBlockMeasurement({
+  enabled = true,
   blockContentRef,
   textareaRef,
   text,
@@ -29,6 +31,7 @@ export function useBlockMeasurement({
   const lastMeasuredHeightRef = useRef<number | null>(null);
 
   useLayoutEffect(() => {
+    if (!enabled) return;
     resizeTextareaToContent(textareaRef.current);
     const reportMeasuredHeight = (height: number) => {
       const lastMeasuredHeight = lastMeasuredHeightRef.current;
@@ -56,5 +59,5 @@ export function useBlockMeasurement({
       window.cancelAnimationFrame(frameId);
       observer.disconnect();
     };
-  }, [active, blockContentRef, onMeasuredHeight, text, textareaRef, width]);
+  }, [active, blockContentRef, enabled, onMeasuredHeight, text, textareaRef, width]);
 }

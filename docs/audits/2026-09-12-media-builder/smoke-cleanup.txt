@@ -1,0 +1,1 @@
+﻿Isolated processes 42028/24432 stopped; duplicate three-log directory removed after exact copy checks.

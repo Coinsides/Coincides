@@ -1,4 +1,5 @@
 import type { BoardDetail, BoardEdge, BoardLayer, BoardMember, BoardVisual } from '../../src/pages/Boards/boardTypes';
+import { readCanvasAssetFixture } from '../../test/fixtures/canvasAssetFixture';
 
 // Shared synthetic transport for the six UI workflows and the local browser fixture.
 // All data lives in this module; the production repository and hook run unchanged.
@@ -83,6 +84,8 @@ function missing(url: string): never { throw new Error(`Synthetic transport: obj
 function record(method: string, url: string, input?: unknown) { writes.push({ method, url, input: copy(input) }); }
 const api = {
   async get(url: string) {
+    const asset = readCanvasAssetFixture(url);
+    if (asset) return asset;
     if (url === BOARD_PATH) return response(detail);
     if (url === `${BOARD_PATH}/viewport-bookmarks`) return response({ bookmarks: [] });
     if (url === `${BOARD_PATH}/layers`) return response({ layers: detail.layers || [] });

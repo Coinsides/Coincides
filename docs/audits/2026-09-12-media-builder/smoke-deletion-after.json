@@ -1,0 +1,16 @@
+{
+  "stage": "after",
+  "isolatedDatabase": "D:\\Coinsides\\v2.x\\Coincides\\.tmp\\media-builder\\smoke.sqlite",
+  "assetId": "a4590c3f-6701-4761-99f3-0193e84dc6cc",
+  "assetRow": null,
+  "blocks": [
+    {
+      "id": "c07d6ae2-f609-4877-aecc-c7f0039b440e",
+      "block_type": "media",
+      "status": "trashed",
+      "metadata": "{\"template_id\":\"media.image\",\"system_type\":\"media\",\"learning_role\":\"note\",\"taxonomy_version\":\"v2.5.0\",\"media\":{\"asset_id\":\"a4590c3f-6701-4761-99f3-0193e84dc6cc\",\"naturalWidth\":1000,\"naturalHeight\":180,\"alt\":\"clipboard.png\"},\"template_key\":\"media.image\",\"template_definition_id\":\"23d44ce7-79e2-47f0-a9b8-ef23ae7ec769\",\"template_version\":\"1.0.0\",\"template_resolution_status\":\"runtime_resolved\"}"
+    }
+  ],
+  "blobHttpStatus": 404,
+  "blobFileExists": false
+}

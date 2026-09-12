@@ -1,0 +1,28 @@
+[
+  {
+    "id": "476808da-7bd1-4e88-afd7-0b2b44d98e44",
+    "image": null,
+    "rect": {
+      "height": 47.699127197265625,
+      "width": 823.893798828125,
+      "x": 678.0531005859375,
+      "y": 239.546875
+    },
+    "style": "left: 0px; top: 0px; width: 760px; min-height: 42px;"
+  },
+  {
+    "id": "c07d6ae2-f609-4877-aecc-c7f0039b440e",
+    "image": {
+      "naturalHeight": 180,
+      "naturalWidth": 1000,
+      "src": "blob:http://127.0.0.1:5286/405706c5-95bf-403d-8493-c6eed5de78f8"
+    },
+    "rect": {
+      "height": 148.5177001953125,
+      "width": 823.893798828125,
+      "x": 678.0531005859375,
+      "y": 285.0778503417969
+    },
+    "style": "left: 0px; top: 42px; width: 760px; min-height: 137px; height: 137px; min-width: 0px; padding: 0px; --text-unit-gutter-lane-offset: 13px; --text-unit-gutter-cancel-indent: 1;"
+  }
+]

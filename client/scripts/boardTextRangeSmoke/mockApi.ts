@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { readCanvasAssetFixture } from '../../test/fixtures/canvasAssetFixture';
 import { listNoteBlockTemplates, legacyBlockTypeForTemplate } from '@shared/types';
 import { createTextBlockContentV1 } from '../../src/pages/Notes/canvasEngine/textFlowService';
 import type { BoardTextRangeV1 } from '@shared/types/boardTextRange';
@@ -76,6 +77,11 @@ const api = axios.create({ adapter: async (config) => {
   const url = config.url || '';
   const input = typeof config.data === 'string' ? JSON.parse(config.data) : config.data;
   state.calls.push({ method, url, ...(input === undefined ? {} : { input }) });
+  const asset = method === 'GET' ? readCanvasAssetFixture(url) : undefined;
+  if (asset) {
+    publish();
+    return { ...asset, status: 200, statusText: 'OK', headers: {}, config };
+  }
   let data: unknown;
   const rangeUrl = `/boards/text-ranges/by-note/${NOTE_ID}`;
   if (method === 'GET' && url === `/notes/${NOTE_ID}`) data = state.note;

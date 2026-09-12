@@ -1,4 +1,5 @@
-import { screenLayoutToLocal, resolveScreenRect, selectPlacementFrame } from '../placementContractService';
+import { screenLayoutToLocal, resolveScreenRect, selectPlacementFrame, normalizeBlockLayoutForSave } from '../placementContractService';
+import { pasteMediaBlock } from '../mediaBlockPasteService';
 import { createBlankDraftLayout, createSurfaceModePolicy } from '../modePolicyService';
 import { useUIStore } from '@/stores/uiStore';
 import { sliceGraphemes } from '../../../../../../shared/graphemes';
@@ -329,6 +330,7 @@ export interface NoteWritingSurfaceLayerProps {
       title?: string | null;
       contentJson?: Record<string, unknown>;
       metadataPatch?: Record<string, unknown>;
+      afterBlockId?: string;
       layout?: BlockBoxLayout;
       silent?: boolean;
     },
@@ -705,6 +707,13 @@ export function NoteWritingSurfaceLayer({
   } | null>(null);
   const stagingItemDrop = useContext(NoteCanvasRuntimeContext)?.stagingItemDrop;
   const itemDropPending = useRef(false);
+  const mediaPastePending = useRef(false);
+  const mediaPasteSession = useRef({ noteId, active: true });
+  useEffect(() => {
+    const session = { noteId, active: true };
+    mediaPasteSession.current = session;
+    return () => { session.active = false; };
+  }, [noteId]);
   const [paperInkTool, setPaperInkTool] = useState<PaperInkTool>('selection');
   const paperInkEnabled = !contentReadOnly && !layoutMode && !overviewOpen
     && noteCanvasRuntime.coordinateContract === 'v2';
@@ -3456,6 +3465,39 @@ export function NoteWritingSurfaceLayer({
     event.dataTransfer.dropEffect = stagingItemDrop && !contentReadOnly && !itemDropPending.current ? 'copy' : 'none';
   };
 
+  const handlePasteImage = async (block: NoteBlock, file: File) => {
+    if (contentReadOnly || layoutMode) return;
+    if (mediaPastePending.current) {
+      addToast('info', 'An image is still being added. Please wait.');
+      return;
+    }
+    const session = mediaPasteSession.current;
+    const isCurrent = () => session.active && mediaPasteSession.current === session;
+    mediaPastePending.current = true;
+    try {
+      const collection = { pageFrames: noteCanvasRuntime.pageFrames, primaryFrameId: noteCanvasRuntime.primaryPageFrame?.id ?? null };
+      const storedAnchor = blockLayouts[block.id];
+      const anchor = storedAnchor && normalizeBlockLayoutForSave(storedAnchor, collection, noteCanvasRuntime.coordinateContract);
+      const frame = anchor && selectPlacementFrame(anchor, noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract);
+      if (!anchor || !frame || anchor.surface === 'canvas_workspace' || anchor.surface === 'tray') {
+        addToast('error', 'Save this text block on a page before pasting an image.');
+        return;
+      }
+      const occupied = Object.values(blockLayouts).filter((layout) => layout.surface !== 'canvas_workspace' && layout.surface !== 'tray')
+        .map((layout) => normalizeBlockLayoutForSave(layout, collection, noteCanvasRuntime.coordinateContract));
+      const created = await pasteMediaBlock({ noteId, blockId: block.id, file, anchor, frame, occupied,
+        isCurrent, createBlock: onCreateBlock });
+      if (created && isCurrent()) {
+        onSelectBlock(created.id);
+        addToast('success', 'Image added');
+      }
+    } catch (error) {
+      if (isCurrent()) addToast('error', error instanceof Error ? `Could not add image: ${error.message}` : 'Could not add image. Please try again.');
+    } finally {
+      mediaPastePending.current = false;
+    }
+  };
+
   const handleStagingDrop = (event: DragEvent<HTMLDivElement>) => {
     if (hostMode !== 'modal' || !event.dataTransfer.types.includes(BOARD_STAGING_MIME)) return;
     event.preventDefault();
@@ -4021,6 +4063,7 @@ export function NoteWritingSurfaceLayer({
             <BlockEditorLayer
               key={block.id}
               block={block}
+              onPasteImage={(file) => handlePasteImage(block, file)}
               coordinateContract={noteCanvasRuntime.coordinateContract}
               pageFrame={selectPlacementFrame(layout, noteCanvasRuntime.pageFrames, noteCanvasRuntime.coordinateContract)}
               textUnitGutterLaneX={surfaceMode === 'page' && layout.surface === 'formal_page' ? pageOffsetX : undefined}

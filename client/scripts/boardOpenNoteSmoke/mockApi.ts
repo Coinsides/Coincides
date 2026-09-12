@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { readCanvasAssetFixture } from '../../test/fixtures/canvasAssetFixture';
 import { listNoteBlockTemplates, legacyBlockTypeForTemplate } from '@shared/types';
 import type { BoardTextRangeV1 } from '../../../shared/types/boardTextRange';
 import { textFlowIdForBlock } from '../../../shared/types/textFlow';
@@ -168,6 +169,11 @@ const api = axios.create({ adapter: async (config) => {
   const call = { sequence, method, url, ...(input === undefined ? {} : { input }) };
   state.calls.push({ ...call, phase: 'started' }); publish();
   try {
+    const asset = method === 'GET' ? readCanvasAssetFixture(url) : undefined;
+    if (asset) {
+      state.calls.push({ ...call, phase: 'committed' }); publish();
+      return { ...asset, status: 200, statusText: 'OK', headers: {}, config };
+    }
     if (failNextNoteLoad && method === 'GET' && /^\/notes\/[^/]+$/.test(url)) {
       failNextNoteLoad = false; throw new Error('Synthetic note load failed');
     }

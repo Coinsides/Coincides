@@ -19,7 +19,7 @@ vi.mock('../textareaNavigation', async (importOriginal) => ({
 
 afterEach(cleanup);
 
-function renderEditor(initialText = 'alpha SELECT omega', separateUnits = false, nativeDraft = false) {
+function renderEditor(initialText = 'alpha SELECT omega', separateUnits = false, nativeDraft = false, onPasteImage?: (file: File) => void) {
   const onFlow = vi.fn();
   const onKeyDown = vi.fn();
   const onBoundary = vi.fn();
@@ -54,6 +54,7 @@ function renderEditor(initialText = 'alpha SELECT omega', separateUnits = false,
       onTextEditBoundary={onBoundary}
       onSave={onSave}
       onKeyDown={onKeyDown}
+      onPasteImage={onPasteImage}
     />;
   }
   const view = render(<Editor />);
@@ -69,6 +70,30 @@ function renderEditor(initialText = 'alpha SELECT omega', separateUnits = false,
 }
 
 describe('B4 TextFlow input boundaries with synthetic content', () => {
+  it('13.6 branches pure images before empty text without touching TextFlow', () => {
+    const onPasteImage = vi.fn();
+    const editor = renderEditor('keep text', false, false, onPasteImage);
+    const file = new File(['synthetic'], 'Screenshot.png', { type: 'image/png' });
+    expect(fireEvent.paste(editor.textarea, { clipboardData: { getData: () => '', types: ['Files'], files: [file] } })).toBe(false);
+    expect(onPasteImage).toHaveBeenCalledWith(file);
+    expect(editor.onFlow).not.toHaveBeenCalled(); expect(editor.texts()).toEqual(['keep text']);
+  });
+  it.each([false, true])('13.6 keeps the existing plain-text path with image=%s', (hasImage) => {
+    const onPasteImage = vi.fn();
+    const editor = renderEditor('keep text', false, false, onPasteImage);
+    const file = new File(['synthetic'], 'Screenshot.png', { type: 'image/png' });
+    act(() => editor.textarea.setSelectionRange(0, 0));
+    expect(fireEvent.paste(editor.textarea, { clipboardData: { getData: () => 'ordinary text', types: ['text/plain'], files: hasImage ? [file] : [] } })).toBe(true);
+    expect(onPasteImage).not.toHaveBeenCalled(); expect(editor.onFlow).not.toHaveBeenCalled();
+    fireEvent.paste(editor.textarea, { clipboardData: { getData: () => 'line one\nline two', types: ['text/plain'], files: hasImage ? [file] : [] } });
+    expect(onPasteImage).not.toHaveBeenCalled(); expect(editor.onFlow).toHaveBeenCalledTimes(1);
+  });
+  it('13.6 leaves an explicitly present empty text/plain representation on the text path', () => {
+    const onPasteImage = vi.fn(); const editor = renderEditor('keep', false, false, onPasteImage);
+    const file = new File(['synthetic'], 'Screenshot.png', { type: 'image/png' });
+    expect(fireEvent.paste(editor.textarea, { clipboardData: { getData: () => '', types: ['text/plain', 'Files'], files: [file] } })).toBe(true);
+    expect(onPasteImage).not.toHaveBeenCalled();
+  });
   it('fix1 smoke 2: reverses across the original middle-unit anchor without moving it', () => {
     const editor = renderEditor('First paragraph has enough text here\nWe are the Champions of the world\nThird paragraph has enough text here', true, true);
     const [first, middle, last] = [...editor.container.querySelectorAll('textarea')];

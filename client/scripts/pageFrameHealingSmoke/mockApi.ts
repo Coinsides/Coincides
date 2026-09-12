@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { readCanvasAssetFixture } from '../../test/fixtures/canvasAssetFixture';
 import { listNoteBlockTemplates, legacyBlockTypeForTemplate } from '@shared/types';
 import type { Note, NoteBlock } from '../../src/pages/Notes/canvasEngine/runtimeDataTypes';
 import type { PageFrameCollectionModel } from '../../src/pages/Notes/canvasEngine/types';
@@ -89,6 +90,11 @@ const api = axios.create({ adapter: async (config) => {
   const body = typeof config.data === 'string' ? JSON.parse(config.data) : config.data;
   const receipt: ApiCall = { method, url, body: structuredClone(body ?? null), completed: false };
   apiCalls.push(receipt);
+  const asset = method === 'GET' ? readCanvasAssetFixture(url) : undefined;
+  if (asset) {
+    receipt.completed = true;
+    return { ...asset, status: 200, statusText: 'OK', headers: {}, config };
+  }
   let data: unknown;
   if (method === 'GET') {
     if (url === '/canvas-objects/coordinate-contract') data = { coordinate_contract: 'v2' };

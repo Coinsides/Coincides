@@ -4,6 +4,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { AppError } from '../middleware/errorHandler.js';
 import { mergeRuntimeNoteBlockTemplateMetadata } from './templateDefinitions.js';
 import { assertItemRefBlockContent } from './itemRefBlocks.js';
+import { assertMediaBlockAsset, mediaBlockAssetId } from './mediaBlocks.js';
+import { finalizeCanvasAssetCleanup, releaseAssetReference } from './canvasAssets.js';
+import type { ManagedFileTask } from './managedFileCleanup.js';
 
 const CLIENT_CREATE_SOURCE_TYPE = 'client_note_block_create';
 const CLIENT_CREATE_CLEANUP_CONFLICT_SOURCE_TYPE = 'client_note_block_cleanup_conflict';
@@ -428,6 +431,7 @@ export function createClientNoteBlock(
     }
 
     assertItemRefBlockContent(db, userId, data);
+    assertMediaBlockAsset(db, userId, data);
     const blockId = uuidv4();
     const placementId = uuidv4();
     const now = new Date().toISOString();
@@ -899,6 +903,7 @@ export function discardClientNoteBlockCreate(
   clientCreateKey: string,
 ): DiscardClientCreateResult {
   const batchId = clientNoteBlockCreateReceiptId(userId, noteId, clientCreateKey);
+  const cleanupTasks: ManagedFileTask[] = [];
 
   const transactionResult = db.transaction((): DiscardClientCreateResult | CleanupConflictResult => {
     assertOwnedNote(db, userId, noteId, courseId);
@@ -1005,6 +1010,12 @@ export function discardClientNoteBlockCreate(
       WHERE id = ? AND user_id = ? AND operation_batch_id = ?
     `).run(block.id, userId, batchId);
 
+    const assetId = mediaBlockAssetId(block.block_type, block.metadata);
+    if (assetId) {
+      const decision = releaseAssetReference(db, userId, assetId, '');
+      if (decision.cleanup_task) cleanupTasks.push(decision.cleanup_task);
+    }
+
     const revertedReceipt: ClientCreateReceiptMetadata = {
       ...receipt,
       discarded_at: now,
@@ -1027,5 +1038,6 @@ export function discardClientNoteBlockCreate(
       operation_batch_id: transactionResult.operation_batch_id,
     });
   }
+  finalizeCanvasAssetCleanup(db, cleanupTasks);
   return transactionResult;
 }

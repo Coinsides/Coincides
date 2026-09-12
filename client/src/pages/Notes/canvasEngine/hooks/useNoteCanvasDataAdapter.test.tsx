@@ -385,6 +385,52 @@ describe('useNoteCanvasDataAdapter draft create receipt seam', () => {
     consoleWarn.mockRestore();
   });
 
+  it.each(['none', 'placement', 'order'] as const)('13.6 media creation saves order or rolls back and drains failures (%s)', async (failure) => {
+    mocks.coordinateContract = 'v2';
+    const collection = f11RuntimeCollection();
+    const anchor = serverBlock('anchor', false);
+    const following = { ...serverBlock('following', false), id: 'following', placement_id: 'following-placement', order_index: 1 };
+    durableBlocks = [anchor, following];
+    canvasPersistenceResponse = { pageFrameCollection: collection };
+    const originalGet = mocks.get.getMockImplementation()!;
+    mocks.get.mockImplementation(async (url: string) => url.endsWith('/page-frame-collection') ? { data: collection } : originalGet(url));
+    const subject = renderHook(() => useNoteCanvasDataAdapter(stableAdapterOptions), { wrapper });
+    await waitFor(() => expect(subject.result.current.loading).toBe(false));
+    const template = subject.result.current.templateOptions.find((entry) => entry.legacy_block_type === 'media')!;
+    const layout: BlockBoxLayout = { x: 0, y: 100, width: 400, height: 20, width_mode: 'manual',
+      frame_id: collection.primaryFrameId!, coordinate_space: 'page_frame_local', surface: 'formal_page', boundary_role: 'inside' };
+    const metadataPatch = { media: { asset_id: '13060000-0000-4000-8000-000000000001', naturalWidth: 800, naturalHeight: 40 } };
+    mocks.post.mockImplementation(async (_url, body) => ({ data: { ...serverBlock('', false), ...body,
+      id: 'media', placement_id: 'media-placement', order_index: 2 } }));
+    mocks.put.mockImplementation(async (url, body) => {
+      if (url.includes('/block-placements/')) {
+        if (failure === 'placement') throw new Error('Placement unavailable');
+        return f11PlacementResponse(url, body);
+      }
+      if (url.endsWith('/blocks/reorder') && failure === 'order') throw new Error('Order unavailable');
+      return { data: {} };
+    });
+    mocks.delete.mockResolvedValue({ data: { success: true } });
+    await act(async () => {
+      const created = await subject.result.current.createBlock(template, '', { contentJson: {}, metadataPatch, layout, afterBlockId: anchor.id, silent: true });
+      if (failure !== 'none') expect(created).toBeNull();
+      else expect(created?.order_index).toBe(1);
+    });
+    expect(mocks.post).toHaveBeenCalledWith(`/notes/${note.id}/blocks`, expect.objectContaining({ block_type: 'media', content_json: {}, metadata: expect.objectContaining(metadataPatch) }));
+    await expect(subject.result.current.whenIdle()).resolves.toBeUndefined();
+    if (failure !== 'none') {
+      expect(mocks.delete).toHaveBeenCalledWith('/note-blocks/media');
+      expect(subject.result.current.blocks.map((block) => block.id)).toEqual([anchor.id, 'following']);
+      expect(mocks.addToast).toHaveBeenCalledWith('error', 'The image could not be placed. Please paste it again.');
+      return;
+    }
+    expect(mocks.put).toHaveBeenCalledWith(`/notes/${note.id}/blocks/reorder`, { placements: [
+      { placement_id: anchor.placement_id, order_index: 0 }, { placement_id: 'media-placement', order_index: 1 }, { placement_id: following.placement_id, order_index: 2 },
+    ] });
+    expect(subject.result.current.sortedBlocks.map((block) => block.id)).toEqual([anchor.id, 'media', 'following']);
+    expect(subject.result.current.blocks.find((block) => block.id === 'media')?.canvas_layout).toEqual(expect.objectContaining(layout));
+  });
+
   function c3TransferFixture(options: {
     lostResponse?: boolean;
     staleAddress?: 'text unit' | 'inline' | 'board unit';

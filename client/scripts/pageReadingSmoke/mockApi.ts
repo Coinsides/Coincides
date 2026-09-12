@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { readCanvasAssetFixture } from '../../test/fixtures/canvasAssetFixture';
 import { listNoteBlockTemplates, legacyBlockTypeForTemplate } from '@shared/types';
 import type { Note, NoteBlock } from '../../src/pages/Notes/canvasEngine/runtimeDataTypes';
 import type { PageFrameModel } from '../../src/pages/Notes/canvasEngine/types';
@@ -102,6 +103,8 @@ const api = axios.create({
     const method = (config.method || 'get').toUpperCase();
     const url = config.url || '';
     apiCalls.push({ method, url });
+    const asset = method === 'GET' ? readCanvasAssetFixture(url) : undefined;
+    if (asset) return { ...asset, status: 200, statusText: 'OK', headers: {}, config };
     if (isTrayFixture && (url.startsWith('/notes/') || url.startsWith('/canvas-objects/') || url.startsWith('/note-blocks/'))) {
       const response = await fetch(`/api${url}`, {
         method, headers: { 'content-type': 'application/json' },

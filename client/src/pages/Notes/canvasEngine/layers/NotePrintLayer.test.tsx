@@ -16,6 +16,9 @@ import type { NoteBlock } from '../runtimeDataTypes';
 import type { BlockBoxLayout } from '../runtimeLayout';
 import type { BlockPlacementModel, PageFrameModel } from '../types';
 import { NotePrintLayer, type NotePrintInput } from './NotePrintLayer';
+import { loadCanvasImageAssetBlobUrl } from '../canvasAssetRepository';
+
+vi.mock('../canvasAssetRepository', () => ({ loadCanvasImageAssetBlobUrl: vi.fn() }));
 
 // Vitest stubs CSS imports (including ?raw) by default; read the real stylesheet.
 const printCss = readFileSync(fileURLToPath(import.meta.url).replace(/\.test\.tsx$/, '.css'), 'utf8');
@@ -216,6 +219,22 @@ describe('NotePrintLayer lifecycle and frozen print snapshot', () => {
 });
 
 describe('NotePrintLayer physical pages and fragment projection', () => {
+  it('prints media as an alt-labelled placeholder at the exact block rect without fetching a blob', () => {
+    const media: NoteBlock = { ...block('media', ''), block_type: 'media', metadata: {
+      media: { asset_id: 'print-media', naturalWidth: 400, naturalHeight: 20, alt: 'Synthetic lecture image' },
+    } };
+    render(<NotePrintLayer {...inputFor({ blocks: [media], placements: [placement('media', { width: 400, height: 20 })] })} />);
+    printEvent('beforeprint');
+    const placeholder = document.querySelector<HTMLElement>(`${ROOT} [data-media-block-placeholder]`)!;
+    expect(placeholder.textContent).toBe('Synthetic lecture image');
+    const article = placeholder.closest('article')!;
+    expect(article.style.width).toBe('400px');
+    expect(article.style.height).toBe('20px');
+    expect(article.querySelector('textarea')).toBeNull();
+    expect(article.querySelector('img')).toBeNull();
+    expect(loadCanvasImageAssetBlobUrl).not.toHaveBeenCalled();
+  });
+
   it('uses independent A4/Letter millimetres, one fixed page per frame, and frozen internal widths', () => {
     const frames = [
       frame('a4'),

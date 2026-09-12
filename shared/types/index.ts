@@ -518,6 +518,13 @@ export interface NoteBlockTemplateMetadata {
   taxonomy_version: typeof NOTE_BLOCK_TAXONOMY_VERSION;
 }
 
+export interface NoteBlockMediaMetadata {
+  asset_id: string;
+  naturalWidth: number;
+  naturalHeight: number;
+  alt?: string;
+}
+
 export interface NoteBlockTemplateDefinition {
   template_id: string;
   label: string;
@@ -529,7 +536,7 @@ export interface NoteBlockTemplateDefinition {
   render_hint: string;
   proposal_allowed: boolean;
   source_reference_allowed: boolean;
-  legacy_block_type: 'heading' | 'paragraph' | 'definition' | 'theorem' | 'proof' | 'formula' | 'example' | 'exercise' | 'answer' | 'sidenote';
+  legacy_block_type: 'heading' | 'paragraph' | 'definition' | 'theorem' | 'proof' | 'formula' | 'example' | 'exercise' | 'answer' | 'sidenote' | 'media';
 }
 
 export const NOTE_BLOCK_TEMPLATES: NoteBlockTemplateDefinition[] = [
@@ -583,11 +590,25 @@ export const NOTE_BLOCK_TEMPLATES: NoteBlockTemplateDefinition[] = [
     source_reference_allowed: true,
     legacy_block_type: 'paragraph',
   },
+  {
+    template_id: 'media.image',
+    label: 'Image',
+    system_type: 'media',
+    learning_role: 'note',
+    description: 'An image backed by a canvas asset.',
+    fields: [],
+    default_content: {},
+    render_hint: 'media',
+    proposal_allowed: false,
+    source_reference_allowed: false,
+    legacy_block_type: 'media',
+  },
 ];
 
 const TEMPLATE_BY_ID = new Map(NOTE_BLOCK_TEMPLATES.map((template) => [template.template_id, template]));
 
 const LEGACY_TEMPLATE_BY_BLOCK_TYPE: Record<string, string> = {
+  media: 'media.image',
   paragraph: 'text.paragraph',
   heading: 'text.paragraph',
   definition: 'text.paragraph',

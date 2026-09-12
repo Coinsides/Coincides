@@ -21,6 +21,11 @@ import { useCanvasSurfacePointerController } from '../hooks/useCanvasSurfacePoin
 import { NoteRuntimeDocumentLayer, type NoteRuntimeDocumentHandle } from './NoteRuntimeDocumentLayer';
 import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';
 
+vi.mock('../canvasAssetRepository', async (importOriginal) => ({
+  ...await importOriginal<typeof import('../canvasAssetRepository')>(),
+  loadCanvasImageAssetBlobUrl: vi.fn(async () => { throw new Error('No media image registered in the document fixture'); }),
+}));
+
 vi.mock('./NoteFloatingPanelLayer', () => ({
   NoteFloatingPanelLayer: () => null,
 }));

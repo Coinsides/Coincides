@@ -17,6 +17,8 @@ import {
   type PageFrameExportPreview,
 } from '../exportPreviewService';
 import styles from '../../NoteDetail.module.css';
+import { MediaBlockPlaceholder } from '../blocks/MediaBlockProjection';
+import mediaStyles from '../blocks/MediaBlockProjection.module.css';
 
 interface ExportPreviewLayerProps {
   preview: ExportPreviewModel;
@@ -29,6 +31,15 @@ interface ExportPreviewLayerProps {
   onToggleExportStatus: () => void;
   onToggleLabelOverlay: () => void;
   onClose: () => void;
+}
+
+function ExportPreviewMedia({ row }: { row: ExportPreviewRow }) {
+  if (row.block.block_type !== 'media') return null;
+  const rect = row.layout ?? row.placement;
+  if (!rect) return null;
+  return <div className={mediaStyles.exportScroll}>
+    <MediaBlockPlaceholder block={row.block} style={{ width: rect.width, height: rect.height }} />
+  </div>;
 }
 
 function ExportPreviewGroup({
@@ -52,9 +63,11 @@ function ExportPreviewGroup({
         {rows.length === 0 ? (
           <div className={styles.exportPreviewEmpty}>No blocks in this group.</div>
         ) : rows.map((row) => (
-          <div key={`${label}-${row.block.id}`} className={styles.exportPreviewRow}>
+          <div key={`${label}-${row.block.id}`} className={styles.exportPreviewRow}
+            style={row.block.block_type === 'media' ? { minWidth: 0 } : undefined}>
             <span>{exportPreviewRowLabel(row)}</span>
             <small>{meta(row)}</small>
+            <ExportPreviewMedia row={row} />
           </div>
         ))}
       </div>
@@ -112,9 +125,11 @@ function ExportPreviewPageFrameGroup({
         {pageFrame.rows.length === 0 ? (
           <div className={styles.exportPreviewEmpty}>No inside blocks in this PageFrame.</div>
         ) : pageFrame.rows.map((row) => (
-          <div key={`${pageFrame.pageFrameId}-${row.block.id}`} className={styles.exportPreviewRow}>
+          <div key={`${pageFrame.pageFrameId}-${row.block.id}`} className={styles.exportPreviewRow}
+            style={row.block.block_type === 'media' ? { minWidth: 0 } : undefined}>
             <span>{exportPreviewRowLabel(row)}</span>
             <small>{exportRoleLabel(row.exportRole)} / {aiVisibilityLabel(row.aiVisibility)}</small>
+            <ExportPreviewMedia row={row} />
           </div>
         ))}
       </div>

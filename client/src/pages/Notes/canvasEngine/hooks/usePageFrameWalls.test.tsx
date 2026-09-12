@@ -63,7 +63,7 @@ interface HarnessApi {
   state: State;
 }
 function mountWalls({ zoom = 1, enabled = true, outcome = async (_snapshot: PageFrameWallSnapshot) => true,
-  boundary = () => true }: { zoom?: number; enabled?: boolean; outcome?: (snapshot: PageFrameWallSnapshot) => Promise<boolean>; boundary?: () => boolean } = {}) {
+  boundary = () => true, seedBlocks }: { zoom?: number; enabled?: boolean; outcome?: (snapshot: PageFrameWallSnapshot) => Promise<boolean>; boundary?: () => boolean; seedBlocks?: NoteBlock[] } = {}) {
   let api: HarnessApi;
   const save = vi.fn(outcome);
   const layoutReplay = vi.fn();
@@ -71,7 +71,7 @@ function mountWalls({ zoom = 1, enabled = true, outcome = async (_snapshot: Page
     const [state, setState] = useState<State>(() => {
       const seeded = createPageFrameCollectionSeed(frame);
       return { collection: appendPageFrameToStack(seeded, seeded.primaryStackId!, frame.id, { id: 'second-frame' }),
-        blocks: [block('auto', {}), block('manual', { x: 360, width: 400, width_mode: 'manual' }),
+        blocks: seedBlocks ?? [block('auto', {}), block('manual', { x: 360, width: 400, width_mode: 'manual' }),
           block('wide', { x: 0, width: 700, width_mode: 'manual' })],
         placements: originalPlacements.map((item) => ({ ...item })) };
     });
@@ -129,6 +129,23 @@ afterAll(() => {
 });
 
 describe('D1 wall pointer, projection and shared placement history', () => {
+  it('clamps a manual media block in the wall transaction and restores its exact short rectangle through undo/redo', async () => {
+    const media = { ...block('media', { x: 360, width: 400, height: 20, width_mode: 'manual' }),
+      block_type: 'media', plain_text: '', metadata: { media: { asset_id: 'wall-media', naturalWidth: 400, naturalHeight: 20 } } };
+    const subject = mountWalls({ seedBlocks: [media] });
+    const before = JSON.stringify(subject.current.state.blocks);
+    expect(subject.current.resolved.blockLayouts.media.height).toBe(20);
+    begin(subject, 'right');
+    await finish(subject, 240);
+    expect(subject.save.mock.calls[0][0].layoutUpdates).toEqual([{ block: { id: 'media', placement_id: 'placement:media' },
+      layout: { ...media.canvas_layout, x: 200 } }]);
+    expect(subject.current.resolved.blockLayouts.media).toMatchObject({ x: 200, width: 400, height: 20, width_mode: 'manual' });
+    await act(async () => { expect(await subject.current.history.undoRuntimeHistory()).toBe(true); });
+    expect(JSON.stringify(subject.current.state.blocks)).toBe(before);
+    await act(async () => { expect(await subject.current.history.redoRuntimeHistory()).toBe(true); });
+    expect(subject.current.resolved.blockLayouts.media).toMatchObject({ x: 200, width: 400, height: 20 });
+  });
+
   it('requires Layout before touching the editing boundary or starting a wall gesture', async () => {
     const boundary = vi.fn(() => true);
     const subject = mountWalls({ enabled: false, boundary });

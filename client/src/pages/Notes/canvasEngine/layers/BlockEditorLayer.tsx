@@ -60,6 +60,7 @@ import { FormulaBlockProjection } from '../blocks/FormulaBlockProjection';
 import { TextBlockProjection } from '../blocks/TextBlockProjection';
 import { CodeBlockProjection } from '../blocks/CodeBlockProjection';
 import { ItemRefBlockProjection } from '../blocks/ItemRefBlockProjection';
+import { MediaBlockProjection, MediaBlockPlaceholder } from '../blocks/MediaBlockProjection';
 import { useBlockMeasurement } from '../hooks/useBlockMeasurement';
 import type { BlockSaveOutcome } from '../hooks/useNoteCanvasDataAdapter';
 import type { CrossBlockUnitDropTarget, TextUnitDropTarget } from '../hooks/useTextUnitHandleDrag';
@@ -82,6 +83,7 @@ interface BlockEditorLayerProps {
   textUnitGutterLaneX?: number;
   block: NoteBlock;
   contentReadOnly: boolean;
+  mediaPlaceholder?: boolean;
   allowSaveRecovery?: boolean;
   text: string;
   textFlowDraft?: TextBlockContentV1;
@@ -111,6 +113,7 @@ interface BlockEditorLayerProps {
   onTextChange: (value: string, caret: number, anchorElement?: HTMLElement | null) => void;
   onTextFlowChange: (textFlow: TextBlockContentV1, metadata?: TextFlowEditMetadata, previousTextFlow?: TextBlockContentV1) => void;
   onTextEditBoundary?: (reason: TextFlowEditBoundary, selection?: TextFlowEditSelection) => void;
+  onPasteImage?: (file: File) => Promise<void> | void;
   onExtractTextUnit?: (unitId: string, point: { x: number; y: number }) => void;
   onMoveTextUnit?: (unitId: string, target: CrossBlockUnitDropTarget) => void;
   onUnitDropTargetChange?: (target: CrossBlockUnitDropTarget | null) => void;
@@ -154,6 +157,7 @@ export function BlockEditorLayer({
   pageFrame,
   textUnitGutterLaneX,
   contentReadOnly,
+  mediaPlaceholder = false,
   allowSaveRecovery = false,
   text,
   textFlowDraft,
@@ -183,6 +187,7 @@ export function BlockEditorLayer({
   onTextChange,
   onTextFlowChange,
   onTextEditBoundary,
+  onPasteImage,
   onExtractTextUnit,
   onMoveTextUnit,
   onUnitDropTargetChange,
@@ -222,6 +227,7 @@ export function BlockEditorLayer({
   const aiVisibility = getEffectiveAIVisibility(layout);
   const presentationKind = presentationKindForBlock(block);
   const itemReference = block.block_type === 'item_ref';
+  const mediaBlock = block.block_type === 'media';
   const allowTextNavigation = !contentReadOnly && !layoutMode && supportsTextFlowBlockNavigation(block);
   useLayoutEffect(() => {
     if (allowTextNavigation || contentReadOnly || layoutMode) return;
@@ -308,6 +314,7 @@ export function BlockEditorLayer({
   };
 
   useBlockMeasurement({
+    enabled: !mediaBlock,
     blockContentRef,
     textareaRef,
     text,
@@ -416,6 +423,7 @@ export function BlockEditorLayer({
         top: screenRect.y,
         width: layout.width,
         minHeight: layout.height,
+        ...(mediaBlock ? { height: layout.height, minWidth: 0, padding: 0 } : {}),
         borderColor: affiliationOutline?.colorToken,
         borderStyle: affiliationOutline ? 'dashed' : undefined,
         ...(textUnitGutterLaneX !== undefined ? {
@@ -445,9 +453,9 @@ export function BlockEditorLayer({
         saving={saving}
         contentReadOnly={contentReadOnly}
         allowSaveRecovery={allowSaveRecovery}
-        bodyReadOnly={itemReference}
+        bodyReadOnly={itemReference || mediaBlock}
         onBeginMove={onBeginMove}
-        onInsertTextUnitBelow={!itemReference && presentationKind === 'paragraph' ? handleInsertTextUnitBelow : undefined}
+        onInsertTextUnitBelow={!itemReference && !mediaBlock && presentationKind === 'paragraph' ? handleInsertTextUnitBelow : undefined}
         onToggleExportRole={onToggleExportRole}
         onToggleAIVisibility={onToggleAIVisibility}
         onSaveBlock={() => onSave(false)}
@@ -491,6 +499,7 @@ export function BlockEditorLayer({
       <div
         ref={blockContentRef}
         data-annotation-stamp-block-content="true"
+        style={mediaBlock ? { position: 'absolute', inset: 0 } : undefined}
         onBlurCapture={() => {
           const receipt = focusedReceiptRef.current;
           if (!receipt) return;
@@ -498,7 +507,9 @@ export function BlockEditorLayer({
           onFocusReleased(receipt);
         }}
       >
-        {itemReference ? (
+        {mediaBlock ? (
+          mediaPlaceholder ? <MediaBlockPlaceholder block={block} /> : <MediaBlockProjection block={block} />
+        ) : itemReference ? (
           <ItemRefBlockProjection itemId={typeof block.content_json.item_id === 'string' ? block.content_json.item_id : ''} />
         ) : presentationKind === 'formula' && formulaFields ? (
           <FormulaBlockProjection
@@ -544,6 +555,7 @@ export function BlockEditorLayer({
             onTextChange={onTextChange}
             onTextFlowChange={onTextFlowChange}
             onTextEditBoundary={onTextEditBoundary}
+            onPasteImage={onPasteImage}
             onExtractTextUnit={onExtractTextUnit}
             onMoveTextUnit={onMoveTextUnit}
             onUnitDropTargetChange={onUnitDropTargetChange}
@@ -563,7 +575,7 @@ export function BlockEditorLayer({
         />
       </div>
 
-      {!contentReadOnly && <BlockResizeHandleLayer onBeginResize={onBeginResize} />}
+      {!contentReadOnly && !mediaBlock && <BlockResizeHandleLayer onBeginResize={onBeginResize} />}
     </article>
   );
 }

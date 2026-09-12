@@ -5,6 +5,9 @@ import { mergeRuntimeNoteBlockTemplateMetadata } from './templateDefinitions.js'
 import { assertNoteBlockStatusChangeAllowed, restoreNoteBlockForCanvasLifecycle } from './canvasObjects.js';
 import { assertSourceProjectionBlockContentWriteAllowed } from './sourceProjectionPolicy.js';
 import { assertItemRefBlockContent } from './itemRefBlocks.js';
+import { assertMediaBlockAsset, mediaBlockAssetId } from './mediaBlocks.js';
+import { finalizeCanvasAssetCleanup, releaseAssetReference } from './canvasAssets.js';
+import { enqueueManagedFileTask, type ManagedFileTask } from './managedFileCleanup.js';
 
 function parseJson<T>(value: string | null | undefined, fallback: T): T {
   if (!value) return fallback;
@@ -16,14 +19,20 @@ export function hydrateSavedBlock(row: any) {
 }
 
 /** Shared by the legacy PUT and the caller-owned text-save transaction. */
-export function updateNoteBlockContent(
+function updateNoteBlockContentInTransaction(
   db: Database.Database, userId: string, blockId: string, value: unknown, baseRevision?: number,
+  cleanupTasks: ManagedFileTask[] = [],
 ) {
   const currentBlock = db.prepare('SELECT * FROM note_blocks WHERE id = ? AND user_id = ?')
     .get(blockId, userId) as any;
   if (!currentBlock) throw new AppError(404, 'Note block not found');
   assertSourceProjectionBlockContentWriteAllowed(db, userId, blockId, 'update_note_block');
   const data = updateNoteBlockSchema.parse(value);
+  const nextBlockType = data.block_type ?? currentBlock.block_type;
+  const nextMetadata = { ...parseJson<Record<string, unknown>>(currentBlock.metadata, {}), ...(data.metadata || {}) };
+  if ((data.status ?? currentBlock.status) !== 'trashed') {
+    assertMediaBlockAsset(db, userId, { block_type: nextBlockType, metadata: nextMetadata });
+  }
   if (data.block_type !== undefined || data.content_json !== undefined || data.plain_text !== undefined) {
     assertItemRefBlockContent(db, userId, {
       block_type: data.block_type ?? currentBlock.block_type,
@@ -69,5 +78,28 @@ export function updateNoteBlockContent(
       .get(blockId, userId) as { text_save_revision: number };
     throw new AppError(409, 'stale_revision', { code: 'stale_revision', current_revision: current.text_save_revision });
   }
+  const assetId = mediaBlockAssetId(currentBlock.block_type, currentBlock.metadata);
+  if (assetId && (data.status === 'trashed' || assetId !== mediaBlockAssetId(nextBlockType, nextMetadata))) {
+    const decision = releaseAssetReference(db, userId, assetId, '');
+    if (decision.cleanup_task) cleanupTasks.push(decision.cleanup_task);
+  }
   return hydrateSavedBlock(db.prepare('SELECT * FROM note_blocks WHERE id = ?').get(blockId));
+}
+
+export function updateNoteBlockContent(
+  db: Database.Database, userId: string, blockId: string, value: unknown, baseRevision?: number,
+) {
+  const callerOwnsTransaction = db.inTransaction;
+  const cleanupTasks: ManagedFileTask[] = [];
+  const block = db.transaction(() => {
+    const updated = updateNoteBlockContentInTransaction(db, userId, blockId, value, baseRevision, cleanupTasks);
+    if (callerOwnsTransaction) {
+      // An outer text-save may still roll back. Persist cleanup with that same
+      // transaction; its existing cleanup sweep will unlink only committed jobs.
+      for (const task of cleanupTasks) enqueueManagedFileTask(db, task, 'Awaiting committed media cleanup');
+    }
+    return updated;
+  })();
+  if (!callerOwnsTransaction) finalizeCanvasAssetCleanup(db, cleanupTasks);
+  return block;
 }

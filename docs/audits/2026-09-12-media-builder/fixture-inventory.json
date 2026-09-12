@@ -1,0 +1,2708 @@
+{
+  "date": "2026-09-12",
+  "scope": [
+    "client/src",
+    "client/test",
+    "client/scripts"
+  ],
+  "scannedSourceFiles": 544,
+  "testFiles": 151,
+  "boardTestFiles": 25,
+  "fixtureEntries": 170,
+  "entries": [
+    {
+      "path": "client/src/components/CourseModal/CourseModal.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/components/Layout/AppLayout.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/components/ReferenceTag/ReferenceTag.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/components/Skin/SkinControls.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/components/Skin/SkinEditor.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/deadCodeRetirement.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/AgentMemories/AgentMemories.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/BoardDeleteDialog.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/BoardList.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/BoardNewNoteDialog.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/BoardNoteModal.rangeSession.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 127,
+          "text": "throw new Error(`Unexpected fixture GET ${url}`);"
+        },
+        {
+          "line": 139,
+          "text": "throw new Error(`Unexpected fixture PUT ${url}`);"
+        }
+      ],
+      "rendererReferences": [
+        {
+          "line": 25,
+          "text": "vi.mock('../Notes/canvasEngine/NoteCanvasRuntime', async () => {"
+        },
+        {
+          "line": 27,
+          "text": "const { NoteCanvasRuntimeContext } = await import('../Notes/canvasEngine/NoteCanvasRuntimeProvider');"
+        },
+        {
+          "line": 32,
+          "text": "const context = React.useContext(NoteCanvasRuntimeContext)!;"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/BoardNoteModal.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 11,
+          "text": "vi.mock('../Notes/canvasEngine/NoteCanvasRuntimeProvider', () => ({"
+        },
+        {
+          "line": 12,
+          "text": "NoteCanvasRuntimeProvider: ({ noteId, hostMode, onSendToStaging, children }: any) => {"
+        },
+        {
+          "line": 17,
+          "text": "vi.mock('../Notes/canvasEngine/NoteCanvasRuntime', async () => {"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.bookmarks.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 61,
+          "text": "if (!match) throw new Error(`Unexpected read: ${url}`);"
+        },
+        {
+          "line": 71,
+          "text": "if (!url.endsWith('/viewport-bookmarks')) throw new Error(`Unexpected write: ${url}`);"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.chalk.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 87,
+          "text": "throw new Error(`Unexpected synthetic GET: ${url}`);"
+        },
+        {
+          "line": 111,
+          "text": "throw new Error(`Unexpected synthetic POST: ${url}`);"
+        },
+        {
+          "line": 115,
+          "text": "if (!visual) throw new Error(`Unexpected synthetic PATCH: ${url}`);"
+        },
+        {
+          "line": 121,
+          "text": "if (!visual) throw new Error(`Unexpected synthetic DELETE: ${url}`);"
+        },
+        {
+          "line": 125,
+          "text": "http.put.mockImplementation(async (url: string) => { throw new Error(`Unexpected synthetic PUT: ${url}`); });"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.item.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 109,
+          "text": "throw new Error(`Unexpected fixture GET ${url}`);"
+        },
+        {
+          "line": 124,
+          "text": "throw new Error(`Unexpected fixture POST ${url}`);"
+        },
+        {
+          "line": 127,
+          "text": "if (url !== '/items/standalone') throw new Error(`Unexpected fixture PUT ${url}`);"
+        },
+        {
+          "line": 133,
+          "text": "if (!member) throw new Error(`Unexpected fixture PATCH ${url}`);"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.layers.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.modal.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 80,
+          "text": "throw new Error(`Unexpected fixture GET ${url}`);"
+        },
+        {
+          "line": 83,
+          "text": "method.mockRejectedValue(new Error('Unexpected board mutation'));"
+        },
+        {
+          "line": 120,
+          "text": "if (!target) throw new Error('Unexpected fixture geometry target');"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.selection.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.smoke.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 124,
+          "text": "throw new Error(`Unexpected fixture write: ${method} ${url}`);"
+        },
+        {
+          "line": 208,
+          "text": "throw new Error(`Unexpected fixture GET: ${url}`);"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.snapping.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.staging.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 67,
+          "text": "throw new Error(`Unexpected synthetic GET ${url}`);"
+        },
+        {
+          "line": 70,
+          "text": "if (url !== '/boards/board/members' && url !== '/boards/board/text-ranges') throw new Error('Unexpected synthetic mount');"
+        },
+        {
+          "line": 81,
+          "text": "if (!current) throw new Error('Unexpected synthetic patch');"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.tools.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.unboxing.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 10,
+          "text": "import { MEDIA_FIXTURE_ASSET_ID, MEDIA_FIXTURE_BLOB_PATH, readCanvasAssetFixture } from '../../../test/fixtures/canvasAssetFixture';"
+        },
+        {
+          "line": 24,
+          "text": "let unknownRequests: string[];"
+        },
+        {
+          "line": 28,
+          "text": "unknownRequests.push(`${method} ${url}`);"
+        },
+        {
+          "line": 29,
+          "text": "throw new Error(`Unexpected unboxing fixture ${method} ${url}`);"
+        },
+        {
+          "line": 95,
+          "text": "notes = []; blocks = []; layouts = []; unknownRequests = []; collection = null;"
+        },
+        {
+          "line": 121,
+          "text": "const asset = readCanvasAssetFixture(url);"
+        },
+        {
+          "line": 217,
+          "text": "expect(unknownRequests).toEqual([]);"
+        },
+        {
+          "line": 271,
+          "text": "expect(unknownRequests).toEqual([]);"
+        },
+        {
+          "line": 286,
+          "text": "expect(unknownRequests).toEqual([]);"
+        },
+        {
+          "line": 299,
+          "text": "expect(unknownRequests).toEqual([]);"
+        }
+      ],
+      "rendererReferences": [
+        {
+          "line": 5,
+          "text": "import NoteDetailPage from '../Notes/NoteDetail';"
+        },
+        {
+          "line": 41,
+          "text": "<Route path=\"/notes/:noteId\" element={<NoteDetailPage />} /></Routes>"
+        }
+      ],
+      "assetMetadata": [
+        {
+          "line": 195,
+          "text": "blocks = [{ id: 'media-block', placement_id: 'media-placement', block_type: 'media', title: null,"
+        },
+        {
+          "line": 197,
+          "text": "canvas_layout: null, metadata: { media: { asset_id: MEDIA_FIXTURE_ASSET_ID,"
+        }
+      ]
+    },
+    {
+      "path": "client/src/pages/Boards/BoardRelocatedVisual.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 10,
+          "text": "vi.mock('@/pages/Notes/canvasEngine/canvasAssetRepository', () => ({ loadCanvasImageAssetBlobUrl: io.blob }));"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": [
+        {
+          "line": 33,
+          "text": "const image = visual('image', { extensions: { image: { asset_id: 'asset-fixture', fit: 'cover', alt_text: 'Fixture diagram', caption: 'Retained caption' } } });"
+        }
+      ]
+    },
+    {
+      "path": "client/src/pages/Boards/boardRepository.test.ts",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 181,
+          "text": "throw new Error('Unexpected fixture GET');"
+        },
+        {
+          "line": 233,
+          "text": "throw new Error('Unexpected fixture GET');"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/boardSkinStyles.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/boardSnapping.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/boardTextRangeClipboard.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 109,
+          "text": "throw new Error(`Unmapped fixture GET ${url}`);"
+        },
+        {
+          "line": 112,
+          "text": "if (url !== '/boards/board/text-ranges') throw new Error(`Unmapped fixture POST ${url}`);"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/BoardViewportBookmarks.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/useBoard.history.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/useBoard.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Boards/useBoardSkin.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Courses/CourseDetail.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Courses/Courses.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/DailyBrief/DailyBrief.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/GroupGallery/GroupGallery.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/GroupGallery/groupGalleryItemSummary.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 35,
+          "text": "throw new Error(`Unexpected fixture read: ${url}`);"
+        },
+        {
+          "line": 38,
+          "text": "if (url !== '/items/summaries') throw new Error(`Unexpected fixture endpoint: ${url}`);"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/GroupGallery/groupGalleryPurposeRetirement.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 31,
+          "text": "throw new Error(`Unexpected fixture endpoint: ${url}`);"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/annotationStampLayout.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/annotationStampPlacement.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/blockAffiliationOutlineService.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/blocks/MediaBlockProjection.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 3,
+          "text": "import { loadCanvasImageAssetBlobUrl } from '../canvasAssetRepository';"
+        },
+        {
+          "line": 7,
+          "text": "vi.mock('../canvasAssetRepository', () => ({ loadCanvasImageAssetBlobUrl: vi.fn() }));"
+        },
+        {
+          "line": 8,
+          "text": "const load = vi.mocked(loadCanvasImageAssetBlobUrl);"
+        }
+      ],
+      "rendererReferences": [
+        {
+          "line": 5,
+          "text": "import { MediaBlockPlaceholder, MediaBlockProjection } from './MediaBlockProjection';"
+        },
+        {
+          "line": 23,
+          "text": "describe('MediaBlockProjection', () => {"
+        },
+        {
+          "line": 27,
+          "text": "const view = render(<MediaBlockProjection block={block} />);"
+        },
+        {
+          "line": 41,
+          "text": "const view = render(<MediaBlockProjection block={block} />);"
+        },
+        {
+          "line": 46,
+          "text": "render(<MediaBlockProjection block={block} />);"
+        },
+        {
+          "line": 55,
+          "text": "const view = render(<MediaBlockProjection block={block} />);"
+        },
+        {
+          "line": 56,
+          "text": "view.rerender(<MediaBlockProjection block={{ ...block, metadata: { media: {"
+        },
+        {
+          "line": 68,
+          "text": "const view = render(<MediaBlockProjection block={{ ...block, metadata: {} }} />);"
+        }
+      ],
+      "assetMetadata": [
+        {
+          "line": 11,
+          "text": "id: 'media-render', placement_id: 'placement-media-render', block_type: 'media', title: null, content_json: {}, plain_text: '', order_index: 0,"
+        },
+        {
+          "line": 13,
+          "text": "metadata: { media: { asset_id: 'asset-one', naturalWidth: 400, naturalHeight: 20, alt: 'Lecture diagram' } },"
+        },
+        {
+          "line": 56,
+          "text": "view.rerender(<MediaBlockProjection block={{ ...block, metadata: { media: {"
+        },
+        {
+          "line": 57,
+          "text": "asset_id: 'asset-two', naturalWidth: 300, naturalHeight: 30,"
+        }
+      ]
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/blocks/TextBlockProjection.input.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/blocks/TextBlockProjection.unitHandle.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/boardTextRangeEditSession.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/boundaryAccount.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/canvasObjectRepository.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/canvasRetirementPolicy.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/coordinateContractIntegration.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 8,
+          "text": "import { BlockEditorLayer } from './layers/BlockEditorLayer';"
+        },
+        {
+          "line": 46,
+          "text": "type EditorProps = ComponentProps<typeof BlockEditorLayer>;"
+        },
+        {
+          "line": 86,
+          "text": "return <BlockEditorLayer key={block.id} {...editorProps(block, layout)}"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/coordinateContractSession.test.ts",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 34,
+          "text": "throw new Error('Unexpected synthetic request');"
+        },
+        {
+          "line": 52,
+          "text": "throw new Error('Unexpected synthetic request');"
+        },
+        {
+          "line": 107,
+          "text": "throw new Error('Unexpected synthetic request');"
+        },
+        {
+          "line": 166,
+          "text": "throw new Error('Unexpected synthetic request');"
+        },
+        {
+          "line": 214,
+          "text": "throw new Error('Unexpected synthetic request');"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/documentTextFlowSelection.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/draftBlockLifecycleReducer.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/draftBlockPersistence.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/freehandService.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/genericPlacementContract.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/graphemeExcerpts.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/graphemes.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/autoWidthFrameSave.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/notePagePresets.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/pageFrameWallsPersistence.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 114,
+          "text": "throw new Error(`Unexpected fixture GET ${url}`);"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useBlockPlacementInteractions.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useBlockSelectionController.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useBlockTextFlowEditController.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useBoardStagingSelection.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 4,
+          "text": "import { NoteCanvasRuntimeProvider } from '../NoteCanvasRuntimeProvider';"
+        },
+        {
+          "line": 34,
+          "text": "render(<NoteCanvasRuntimeProvider noteId=\"note-a\" hostMode={options.hostMode ?? 'modal'} onSendToStaging={send}>"
+        },
+        {
+          "line": 36,
+          "text": "</NoteCanvasRuntimeProvider>);"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useCanvasSurfacePointerController.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useDraftBlockController.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useLayoutInteractionController.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.skin.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 57,
+          "text": "throw new Error(`Unexpected skin fixture GET ${url}`);"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasDataAdapter.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 379,
+          "text": "throw new Error(`Unexpected GET ${url}`);"
+        },
+        {
+          "line": 1750,
+          "text": "throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 2144,
+          "text": "throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 2552,
+          "text": "if (url !== `/annotation-truths/by-note/${note.id}`) throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 2583,
+          "text": "if (url !== `/annotation-truths/by-note/${note.id}`) throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 2638,
+          "text": "throw new Error(`Unexpected GET ${url}`);"
+        },
+        {
+          "line": 2643,
+          "text": "if (url !== `/annotation-truths/by-note/${note.id}`) throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 2730,
+          "text": "throw new Error(`Unexpected GET ${url}`);"
+        },
+        {
+          "line": 2744,
+          "text": "if (!targetNoteId) throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 2822,
+          "text": "throw new Error(`Unexpected GET ${url}`);"
+        },
+        {
+          "line": 2825,
+          "text": "if (url !== `/note-blocks/${durableA.id}`) throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 2904,
+          "text": "throw new Error(`Unexpected GET ${url}`);"
+        },
+        {
+          "line": 2907,
+          "text": "if (url !== `/note-blocks/${durableBlock.id}`) throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 2960,
+          "text": "throw new Error(`Unexpected GET ${url}`);"
+        },
+        {
+          "line": 2963,
+          "text": "if (url !== `/note-blocks/${durableBlock.id}`) throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 2967,
+          "text": "throw new Error(`Unexpected block PUT ${blockPutCount}`);"
+        },
+        {
+          "line": 3076,
+          "text": "throw new Error(`Unexpected GET ${url}`);"
+        },
+        {
+          "line": 3079,
+          "text": "if (url !== `/note-blocks/${durableA.id}`) throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 3154,
+          "text": "if (url !== `/annotation-truths/by-note/${note.id}`) throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 3245,
+          "text": "throw new Error(`Unexpected GET ${url}`);"
+        },
+        {
+          "line": 3248,
+          "text": "if (url !== `/note-blocks/${durableBlock.id}`) throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 3335,
+          "text": "throw new Error(`Unexpected GET ${url}`);"
+        },
+        {
+          "line": 3338,
+          "text": "if (url !== `/note-blocks/${durableBlock.id}`) throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 3416,
+          "text": "throw new Error(`Unexpected GET ${url}`);"
+        },
+        {
+          "line": 3419,
+          "text": "if (url !== `/note-blocks/${durableBlock.id}`) throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 3503,
+          "text": "throw new Error(`Unexpected GET ${url}`);"
+        },
+        {
+          "line": 3506,
+          "text": "if (url !== `/note-blocks/${durableBlock.id}`) throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 3595,
+          "text": "throw new Error(`Unexpected GET ${url}`);"
+        },
+        {
+          "line": 3598,
+          "text": "if (url !== `/note-blocks/${durableBlock.id}`) throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 3694,
+          "text": "throw new Error(`Unexpected GET ${url}`);"
+        },
+        {
+          "line": 3697,
+          "text": "if (url !== `/note-blocks/${durableBlock.id}`) throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 3788,
+          "text": "throw new Error(`Unexpected GET ${url}`);"
+        },
+        {
+          "line": 3791,
+          "text": "if (url !== `/note-blocks/${durableBlock.id}`) throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 3840,
+          "text": "if (url !== `/annotation-truths/by-note/${note.id}`) throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 3884,
+          "text": "if (url !== `/note-blocks/${formulaBlock.id}`) throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 3960,
+          "text": "throw new Error(`Unexpected GET ${url}`);"
+        },
+        {
+          "line": 3963,
+          "text": "if (url !== `/annotation-truths/by-note/${note.id}`) throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 4041,
+          "text": "throw new Error(`Unexpected GET ${url}`);"
+        },
+        {
+          "line": 4051,
+          "text": "throw new Error(`Unexpected PUT ${url}`);"
+        },
+        {
+          "line": 4127,
+          "text": "if (url !== `/notes/${note.id}/blocks`) throw new Error(`Unexpected POST ${url}`);"
+        },
+        {
+          "line": 4151,
+          "text": "throw new Error(`Unexpected PUT ${url}`);"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": [
+        {
+          "line": 402,
+          "text": "const metadataPatch = { media: { asset_id: '13060000-0000-4000-8000-000000000001', naturalWidth: 800, naturalHeight: 40 } };"
+        },
+        {
+          "line": 419,
+          "text": "expect(mocks.post).toHaveBeenCalledWith(`/notes/${note.id}/blocks`, expect.objectContaining({ block_type: 'media', content_json: {}, metadata: expect.objectContaining(metadataPatch) }));"
+        }
+      ]
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasLayoutModel.affiliationVisibility.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 41,
+          "text": "vi.mock('./useNoteCanvasRuntime', () => ({"
+        },
+        {
+          "line": 42,
+          "text": "useNoteCanvasRuntime: () => ({ noteId: rootBridgeContract.noteId }),"
+        },
+        {
+          "line": 173,
+          "text": "import { useNoteCanvasRuntimeController } from './useNoteCanvasRuntimeController';"
+        },
+        {
+          "line": 233,
+          "text": "const { layerProps } = useNoteCanvasRuntimeController();"
+        },
+        {
+          "line": 246,
+          "text": "describe('useNoteCanvasRuntimeController initial-surface production bridge', () => {"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteRouteSaveBoundary.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 6,
+          "text": "import type { NoteCanvasRuntimeHandle } from '../NoteCanvasRuntime';"
+        },
+        {
+          "line": 26,
+          "text": "const runtimeRef = useRef<NoteCanvasRuntimeHandle | null>(null);"
+        },
+        {
+          "line": 27,
+          "text": "const retainRuntime = useCallback((handle: NoteCanvasRuntimeHandle | null) => {"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/usePageFrameWalls.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": [
+        {
+          "line": 134,
+          "text": "block_type: 'media', plain_text: '', metadata: { media: { asset_id: 'wall-media', naturalWidth: 400, naturalHeight: 20 } } };"
+        }
+      ]
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/usePageReadingPresentation.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/usePageReadingViewportController.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/usePaperInkCommands.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 68,
+          "text": "throw new Error(`Unexpected synthetic GET ${url}`);"
+        },
+        {
+          "line": 71,
+          "text": "if (url !== `/canvas-objects/by-note/${note.id}/objects/${object.objectId}`) throw new Error(`Unexpected synthetic PUT ${url}`);"
+        },
+        {
+          "line": 79,
+          "text": "if (url !== `/canvas-objects/by-note/${note.id}/objects/${object.objectId}`) throw new Error(`Unexpected synthetic DELETE ${url}`);"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/usePlacementHistory.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useRuntimeLayoutModelController.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 42,
+          "text": "// browser resize, matching the production NoteCanvasRuntime loading shell."
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useRuntimeNaturalWritingController.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useRuntimeSurfaceStateController.pageReading.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useSlashBlockRollbackController.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useSlashCommandController.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useSurfaceModeController.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.document.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.extraction.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.move.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.rangeRecovery.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useTextFlowHistory.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useTrayController.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 106,
+          "text": "if (path === '/canvas-assets/synthetic-image/blob') return { data: new Blob(['synthetic'], { type: 'image/png' }) };"
+        },
+        {
+          "line": 107,
+          "text": "throw new Error(`Unexpected fixture read: ${path}`);"
+        },
+        {
+          "line": 126,
+          "text": "throw new Error(`Unexpected fixture mutation: ${path}`);"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": [
+        {
+          "line": 54,
+          "text": "image: { asset_id: 'synthetic-image', alt_text: 'Synthetic moved image', caption: 'Kept caption', fit: 'contain' },"
+        }
+      ]
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/inFlightWriteRegistry.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/inlineLifecycle.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/BlockEditorLayer.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 25,
+          "text": "import { loadCanvasImageAssetBlobUrl } from '../canvasAssetRepository';"
+        },
+        {
+          "line": 27,
+          "text": "vi.mock('../canvasAssetRepository', () => ({ loadCanvasImageAssetBlobUrl: vi.fn() }));"
+        },
+        {
+          "line": 137,
+          "text": "vi.mocked(loadCanvasImageAssetBlobUrl).mockResolvedValueOnce('blob:short-media');"
+        }
+      ],
+      "rendererReferences": [
+        {
+          "line": 22,
+          "text": "import { BlockEditorLayer } from './BlockEditorLayer';"
+        },
+        {
+          "line": 29,
+          "text": "type BlockEditorLayerProps = ComponentProps<typeof BlockEditorLayer>;"
+        },
+        {
+          "line": 31,
+          "text": "function renderSubject(propsOverride: Partial<BlockEditorLayerProps> = {}) {"
+        },
+        {
+          "line": 63,
+          "text": "const props: BlockEditorLayerProps = {"
+        },
+        {
+          "line": 114,
+          "text": "render(<BlockEditorLayer {...props} {...propsOverride} />);"
+        },
+        {
+          "line": 134,
+          "text": "describe('BlockEditorLayer K-4 affiliation controls', () => {"
+        },
+        {
+          "line": 179,
+          "text": "renderSubject({ active: false, ...overrides } as Partial<BlockEditorLayerProps>);"
+        }
+      ],
+      "assetMetadata": [
+        {
+          "line": 141,
+          "text": "id: 'media-block', placement_id: 'placement-media-block', block_type: 'media', title: null, plain_text: '', content_json: {}, order_index: 0,"
+        },
+        {
+          "line": 142,
+          "text": "metadata: { media: { asset_id: 'asset-short', naturalWidth: 120, naturalHeight: 6, alt: 'Short image' } },"
+        }
+      ]
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/BlockEditRecoveryQueue.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/DraftBlockEditorLayer.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/ExportPreviewLayer.media.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 4,
+          "text": "import { loadCanvasImageAssetBlobUrl } from '../canvasAssetRepository';"
+        },
+        {
+          "line": 8,
+          "text": "vi.mock('../canvasAssetRepository', () => ({ loadCanvasImageAssetBlobUrl: vi.fn() }));"
+        },
+        {
+          "line": 29,
+          "text": "expect(loadCanvasImageAssetBlobUrl).not.toHaveBeenCalled();"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": [
+        {
+          "line": 12,
+          "text": "const block: NoteBlock = { id: 'export-media', placement_id: 'placement-export-media', block_type: 'media', title: null, plain_text: '', content_json: {},"
+        },
+        {
+          "line": 13,
+          "text": "order_index: 0, metadata: { media: { asset_id: 'asset-export', naturalWidth: 300, naturalHeight: 30 } },"
+        }
+      ]
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteCoverMetadata.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteOverviewLayer.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 7,
+          "text": "import { buildNoteCanvasRuntimeModel } from '../engineModel';"
+        },
+        {
+          "line": 10,
+          "text": "import { NoteOverviewLayer, type NoteOverviewLayerProps } from './NoteOverviewLayer';"
+        },
+        {
+          "line": 11,
+          "text": "import type { NoteReadOnlyPageContentProps } from './NoteReadOnlyPageContent';"
+        },
+        {
+          "line": 18,
+          "text": "vi.mock('./NoteReadOnlyPageContent', async () => {"
+        },
+        {
+          "line": 21,
+          "text": "NoteReadOnlyPageContent: ({ frame, visibleBlocks, blockTextDrafts }: NoteReadOnlyPageContentProps) => {"
+        },
+        {
+          "line": 51,
+          "text": "function propsFor(pageCount: number, frames = Array.from({ length: pageCount }, (_, index) => page(index))): NoteOverviewLayerProps {"
+        },
+        {
+          "line": 64,
+          "text": "noteCanvasRuntime: buildNoteCanvasRuntimeModel({"
+        },
+        {
+          "line": 110,
+          "text": "const { container, getByText } = render(<NoteOverviewLayer {...props} />);"
+        },
+        {
+          "line": 132,
+          "text": "const { container } = render(<NoteOverviewLayer {...props} />);"
+        },
+        {
+          "line": 147,
+          "text": "const { container, getByRole } = render(<NoteOverviewLayer {...propsFor(1)} />);"
+        },
+        {
+          "line": 172,
+          "text": "const { container, getByRole } = render(<NoteOverviewLayer {...props} />);"
+        },
+        {
+          "line": 187,
+          "text": "const { container, getByText, queryByText } = render(<NoteOverviewLayer {...propsFor(240)} />);"
+        },
+        {
+          "line": 211,
+          "text": "const { container, getByText, queryByText, getByRole } = render(<NoteOverviewLayer {...props} />);"
+        },
+        {
+          "line": 227,
+          "text": "const { container, getByText, queryByText } = render(<NoteOverviewLayer {...props} />);"
+        },
+        {
+          "line": 252,
+          "text": "const { container, getByRole } = render(<div onKeyDown={parentKeyDown}><NoteOverviewLayer {...props} /></div>);"
+        },
+        {
+          "line": 269,
+          "text": "const { container, rerender, getByText, queryByText } = render(<NoteOverviewLayer {...props} />);"
+        },
+        {
+          "line": 273,
+          "text": "rerender(<NoteOverviewLayer {...props} writingSurfaceProps={{ ...props.writingSurfaceProps,"
+        },
+        {
+          "line": 284,
+          "text": "const { container, getByText, getByRole } = render(<NoteOverviewLayer {...propsFor(0)} />);"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NotePrintLayer.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 19,
+          "text": "import { loadCanvasImageAssetBlobUrl } from '../canvasAssetRepository';"
+        },
+        {
+          "line": 21,
+          "text": "vi.mock('../canvasAssetRepository', () => ({ loadCanvasImageAssetBlobUrl: vi.fn() }));"
+        },
+        {
+          "line": 235,
+          "text": "expect(loadCanvasImageAssetBlobUrl).not.toHaveBeenCalled();"
+        }
+      ],
+      "rendererReferences": [
+        {
+          "line": 7,
+          "text": "import { buildNoteCanvasRuntimeModel } from '../engineModel';"
+        },
+        {
+          "line": 18,
+          "text": "import { NotePrintLayer, type NotePrintInput } from './NotePrintLayer';"
+        },
+        {
+          "line": 77,
+          "text": "noteCanvasRuntime: buildNoteCanvasRuntimeModel({"
+        },
+        {
+          "line": 137,
+          "text": "describe('NotePrintLayer lifecycle and frozen print snapshot', () => {"
+        },
+        {
+          "line": 139,
+          "text": "const { container, unmount } = render(<NotePrintLayer {...inputFor()} />);"
+        },
+        {
+          "line": 164,
+          "text": "const first = render(<NotePrintLayer {...inputFor()} />);"
+        },
+        {
+          "line": 174,
+          "text": "render(<NotePrintLayer {...inputFor()} />);"
+        },
+        {
+          "line": 182,
+          "text": "const { rerender } = render(<NotePrintLayer {...input} surfaceMode=\"canvas\" />);"
+        },
+        {
+          "line": 187,
+          "text": "rerender(<NotePrintLayer {...input} />);"
+        },
+        {
+          "line": 190,
+          "text": "rerender(<NotePrintLayer {...input} surfaceMode=\"canvas\" />);"
+        },
+        {
+          "line": 192,
+          "text": "rerender(<NotePrintLayer {...input} />);"
+        },
+        {
+          "line": 200,
+          "text": "const { rerender } = render(<NotePrintLayer {...input} />);"
+        },
+        {
+          "line": 202,
+          "text": "rerender(<NotePrintLayer {...input} noteId=\"another-synthetic-note\" />);"
+        },
+        {
+          "line": 204,
+          "text": "rerender(<NotePrintLayer {...input} />);"
+        },
+        {
+          "line": 210,
+          "text": "const { rerender } = render(<NotePrintLayer {...input} />);"
+        },
+        {
+          "line": 212,
+          "text": "rerender(<NotePrintLayer {...input} blockTextDrafts={{ text: 'New synthetic draft' }} />);"
+        },
+        {
+          "line": 221,
+          "text": "describe('NotePrintLayer physical pages and fragment projection', () => {"
+        },
+        {
+          "line": 226,
+          "text": "render(<NotePrintLayer {...inputFor({ blocks: [media], placements: [placement('media', { width: 400, height: 20 })] })} />);"
+        },
+        {
+          "line": 244,
+          "text": "render(<NotePrintLayer {...inputFor({ frames })} />);"
+        },
+        {
+          "line": 282,
+          "text": "render(<NotePrintLayer {...inputFor({ frames: [frame('web', { templateId, pageSize, width: 1120, height: 7000 })] })} />);"
+        },
+        {
+          "line": 308,
+          "text": "render(<NotePrintLayer {...input} continuousWeb />);"
+        },
+        {
+          "line": 350,
+          "text": "const { rerender } = render(<NotePrintLayer {...renderInput('fit_width', 0.5)} />);"
+        },
+        {
+          "line": 355,
+          "text": "rerender(<NotePrintLayer {...renderInput(gear, stepFactor)} />);"
+        },
+        {
+          "line": 406,
+          "text": "render(<NotePrintLayer {...input} />);"
+        },
+        {
+          "line": 447,
+          "text": "render(<NotePrintLayer {...input} />);"
+        },
+        {
+          "line": 485,
+          "text": "render(<NotePrintLayer {...input} {...callbacks} blockTextDrafts={{ text: 'Unsaved print text', code: 'const draft = true;' }} />);"
+        }
+      ],
+      "assetMetadata": [
+        {
+          "line": 223,
+          "text": "const media: NoteBlock = { ...block('media', ''), block_type: 'media', metadata: {"
+        },
+        {
+          "line": 224,
+          "text": "media: { asset_id: 'print-media', naturalWidth: 400, naturalHeight: 20, alt: 'Synthetic lecture image' },"
+        }
+      ]
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteRuntimeDocumentLayer.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 26,
+          "text": "loadCanvasImageAssetBlobUrl: vi.fn(async () => { throw new Error('No media image registered in the document fixture'); }),"
+        }
+      ],
+      "rendererReferences": [
+        {
+          "line": 15,
+          "text": "import type { NoteCanvasRuntimeModel, PageFrameModel } from '../types';"
+        },
+        {
+          "line": 22,
+          "text": "import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';"
+        },
+        {
+          "line": 90,
+          "text": "} as unknown as NoteCanvasRuntimeModel;"
+        },
+        {
+          "line": 93,
+          "text": "onSaveBlock: NoteWritingSurfaceLayerProps['onSaveBlock'],"
+        },
+        {
+          "line": 94,
+          "text": "): NoteWritingSurfaceLayerProps {"
+        },
+        {
+          "line": 377,
+          "text": "function overviewProps(pageCount: number): NoteWritingSurfaceLayerProps {"
+        },
+        {
+          "line": 401,
+          "text": "function documentFor(props: NoteWritingSurfaceLayerProps, documentRef?: RefObject<NoteRuntimeDocumentHandle>) {"
+        },
+        {
+          "line": 419,
+          "text": "function writers(props: NoteWritingSurfaceLayerProps) {"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteTrayInteraction.integration.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 63,
+          "text": "throw new Error(`Unexpected synthetic GET ${url}`);"
+        },
+        {
+          "line": 65,
+          "text": "http.post.mockReset().mockRejectedValue(new Error('Unexpected synthetic POST'));"
+        },
+        {
+          "line": 87,
+          "text": "throw new Error(`Unexpected synthetic PUT ${url}`);"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/NoteTraySidebar.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/pageFrameAlignment.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 26,
+          "text": "loadCanvasImageAssetBlobUrl: vi.fn(async () => { throw new Error('No media image registered in the alignment fixture'); }),"
+        },
+        {
+          "line": 30,
+          "text": "get: vi.fn().mockRejectedValue(new Error('No HTTP in synthetic alignment fixture')),"
+        },
+        {
+          "line": 31,
+          "text": "post: vi.fn().mockRejectedValue(new Error('No HTTP in synthetic alignment fixture')),"
+        },
+        {
+          "line": 32,
+          "text": "put: vi.fn().mockRejectedValue(new Error('No HTTP in synthetic alignment fixture')),"
+        }
+      ],
+      "rendererReferences": [
+        {
+          "line": 6,
+          "text": "import { buildNoteCanvasRuntimeModel } from '../engineModel';"
+        },
+        {
+          "line": 16,
+          "text": "import { NoteWritingSurfaceLayer, type NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';"
+        },
+        {
+          "line": 17,
+          "text": "import { NoteOverviewLayer } from './NoteOverviewLayer';"
+        },
+        {
+          "line": 18,
+          "text": "import { NotePrintLayer } from './NotePrintLayer';"
+        },
+        {
+          "line": 53,
+          "text": "function propsFor(pageFrame: PageFrameModel, surfaceMode: SurfaceMode): NoteWritingSurfaceLayerProps {"
+        },
+        {
+          "line": 79,
+          "text": "noteCanvasRuntime: { ...buildNoteCanvasRuntimeModel({"
+        },
+        {
+          "line": 119,
+          "text": "function WritingSurfaceThroughLayerProps({ surfaceProps }: { surfaceProps: NoteWritingSurfaceLayerProps }) {"
+        },
+        {
+          "line": 133,
+          "text": "return layers ? <NoteWritingSurfaceLayer {...layers.documentLayerProps.writingSurfaceProps} /> : null;"
+        },
+        {
+          "line": 144,
+          "text": "const view = render(<NoteWritingSurfaceLayer {...props} />);"
+        },
+        {
+          "line": 171,
+          "text": "const view = render(<NoteWritingSurfaceLayer {...props} contentReadOnly={false} layoutMode={false} />);"
+        },
+        {
+          "line": 174,
+          "text": "view.rerender(<NoteWritingSurfaceLayer {...props} contentReadOnly={false} layoutMode />);"
+        },
+        {
+          "line": 176,
+          "text": "view.rerender(<NoteWritingSurfaceLayer {...props} contentReadOnly layoutMode={false} />);"
+        },
+        {
+          "line": 203,
+          "text": "view.rerender(<NoteWritingSurfaceLayer {...props} onToggleOverview={onToggleOverview} />);"
+        },
+        {
+          "line": 226,
+          "text": "const view = render(<NoteWritingSurfaceLayer {...props} visibleBlocks={[source]} allBlocks={[source]}"
+        },
+        {
+          "line": 268,
+          "text": "const view = render(<NoteWritingSurfaceLayer {...pageProps} contentReadOnly={false} layoutMode={false}"
+        },
+        {
+          "line": 291,
+          "text": "const view = render(<NoteWritingSurfaceLayer {...props} visibleBlocks={[source]} allBlocks={[source]}"
+        },
+        {
+          "line": 339,
+          "text": "const view = render(<NoteWritingSurfaceLayer {...props} visibleBlocks={[source]} allBlocks={[source]}"
+        },
+        {
+          "line": 446,
+          "text": "const move = vi.fn<NonNullable<NoteWritingSurfaceLayerProps['onMoveTextUnit']>>(async () => true);"
+        },
+        {
+          "line": 447,
+          "text": "const extract = vi.fn<NonNullable<NoteWritingSurfaceLayerProps['onExtractTextUnit']>>(async () => true);"
+        },
+        {
+          "line": 578,
+          "text": "const view = render(<NoteWritingSurfaceLayer {...props} />);"
+        },
+        {
+          "line": 657,
+          "text": "<NoteOverviewLayer writingSurfaceProps={props} onSelectPage={vi.fn()} onClose={vi.fn()} />"
+        },
+        {
+          "line": 658,
+          "text": "<NotePrintLayer {...props} />"
+        },
+        {
+          "line": 689,
+          "text": "const view = render(<NoteWritingSurfaceLayer {...props} />);"
+        },
+        {
+          "line": 698,
+          "text": "view.rerender(<NoteWritingSurfaceLayer {...props} />);"
+        },
+        {
+          "line": 714,
+          "text": "view.rerender(<NoteWritingSurfaceLayer {...props} noteCanvasRuntime={{ ...props.noteCanvasRuntime,"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/PageFrameWallLayer.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/PaperInkLayer.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 9,
+          "text": "import type { NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';"
+        },
+        {
+          "line": 25,
+          "text": "const onCreate = vi.fn(async (_input: Parameters<NoteWritingSurfaceLayerProps['onPersistCanvasObject']>[0]) => true);"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/PaperInkProjection.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 3,
+          "text": "import { buildNoteCanvasRuntimeModel } from '../engineModel';"
+        },
+        {
+          "line": 7,
+          "text": "import { NoteOverviewLayer } from './NoteOverviewLayer';"
+        },
+        {
+          "line": 8,
+          "text": "import { NotePrintLayer, type NotePrintInput } from './NotePrintLayer';"
+        },
+        {
+          "line": 49,
+          "text": "noteCanvasRuntime: buildNoteCanvasRuntimeModel({"
+        },
+        {
+          "line": 86,
+          "text": "<NoteOverviewLayer writingSurfaceProps={{ ...input, selectedPageFrameId: frames[1].id }}"
+        },
+        {
+          "line": 88,
+          "text": "<NotePrintLayer {...input} />"
+        },
+        {
+          "line": 138,
+          "text": "const { rerender } = render(<NotePrintLayer {...input} />);"
+        },
+        {
+          "line": 141,
+          "text": "rerender(<NotePrintLayer {...inputFor([frame], [], [])} />);"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/textFlowNavigation.surface.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 20,
+          "text": "vi.mock('../canvasAssetRepository', () => ({ loadCanvasImageAssetBlobUrl: vi.fn(async () => 'data:image/png;base64,') }));"
+        }
+      ],
+      "rendererReferences": [
+        {
+          "line": 4,
+          "text": "import { buildNoteCanvasRuntimeModel } from '../engineModel';"
+        },
+        {
+          "line": 12,
+          "text": "import { NoteWritingSurfaceLayer, type NoteWritingSurfaceLayerProps } from './NoteWritingSurfaceLayer';"
+        },
+        {
+          "line": 40,
+          "text": "function propsFor(pageFrame: PageFrameModel, surfaceMode: SurfaceMode): NoteWritingSurfaceLayerProps {"
+        },
+        {
+          "line": 66,
+          "text": "noteCanvasRuntime: { ...buildNoteCanvasRuntimeModel({"
+        },
+        {
+          "line": 127,
+          "text": "return <NoteWritingSurfaceLayer {...props} {...selection} interactionState={interactionState}"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/ViewOptionsMenu.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/meaningfulRenderableContent.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/mediaBlockLayout.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": [
+        {
+          "line": 14,
+          "text": "const block: NoteBlock = { id: 'short-media', placement_id: 'placement-short-media', block_type: 'media', title: null,"
+        },
+        {
+          "line": 16,
+          "text": "canvas_layout: { ...layout }, metadata: { media: { asset_id: 'asset-short', naturalWidth: 120, naturalHeight: 6 } } };"
+        },
+        {
+          "line": 42,
+          "text": "metadata: { media: { asset_id: 'asset-small', naturalWidth: 20, naturalHeight: 10 } } };"
+        }
+      ]
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/mediaBlockPasteService.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": [
+        {
+          "line": 39,
+          "text": "expect(createBlock).toHaveBeenCalledWith(expect.objectContaining({ legacy_block_type: 'media' }), '', expect.objectContaining({"
+        },
+        {
+          "line": 40,
+          "text": "afterBlockId: 'text', contentJson: {}, metadataPatch: { media: { asset_id: 'asset', naturalWidth: 1000, naturalHeight: 50, alt: 'Screenshot.png' } },"
+        }
+      ]
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageCenteringContract.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 15,
+          "text": "resolve(process.cwd(), 'src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx'),"
+        },
+        {
+          "line": 19,
+          "text": "resolve(process.cwd(), 'src/pages/Notes/NoteDetail.module.css'),"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageFramePrintScaleService.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageFrameTypographyService.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageFrameWallService.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageReadingDomService.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageReadingViewportService.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageStackContentFlowService.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/pageTextCoordinates.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/panels/ContentGroupPanel.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/paperSkinStyles.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/placementAutoWidth.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/placementContractService.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/purposeRetirement.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/recoveryReplayAnnotations.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/routeRequestGeneration.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/selectionReceiptProjection.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/slashCommandReducer.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/surfaceAuthorityContract.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/surfacePersistenceContract.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/textFlowBlockNavigation.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 4,
+          "text": "import { BlockEditorLayer } from './layers/BlockEditorLayer';"
+        },
+        {
+          "line": 90,
+          "text": "const props: ComponentProps<typeof BlockEditorLayer> = {"
+        },
+        {
+          "line": 116,
+          "text": "return <BlockEditorLayer key={entry.id} {...props} />;"
+        },
+        {
+          "line": 198,
+          "text": "// There is intentionally no textFlowDraft: BlockEditorLayer rehydrates the"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/textFlowDocumentHistory.integration.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/textFlowEditSession.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/textFlowSelection.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/textFocusReceipt.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/textUnitGutterDeOccupation.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 14,
+          "text": "resolve(process.cwd(), 'src/pages/Notes/NoteDetail.module.css'),"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/textUnitMoveService.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/trayService.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 2,
+          "text": "import { buildNoteCanvasRuntimeModel } from './engineModel';"
+        },
+        {
+          "line": 49,
+          "text": "const runtime = buildNoteCanvasRuntimeModel({mode:'page', primaryPageFrame:null,"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/writingSurfaceClassName.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 15,
+          "text": "resolve(process.cwd(), 'src/pages/Notes/canvasEngine/layers/NoteWritingSurfaceLayer.tsx'),"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Settings/AgentMemoriesSection.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Settings/ProvidersSection.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Settings/Settings.test.tsx",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 43,
+          "text": "throw new Error('Unexpected synthetic API request');"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/Sources/SourceReprojectionDialog.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/pages/ToolReceipts/ToolReceipts.test.tsx",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/services/itemSummaryReader.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/styles/skinComponentStyles.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/src/styles/skinPresets.test.ts",
+      "test": true,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/test/fixtures/canvasAssetFixture.test.ts",
+      "test": true,
+      "requestRegistration": [
+        {
+          "line": 20,
+          "text": "await expect(api.get('/canvas-assets/unregistered-fixture-image/blob')).rejects.toThrow(/synthetic|fixture|memory/i);"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/test/fixtures/canvasAssetFixture.ts",
+      "test": false,
+      "requestRegistration": [
+        {
+          "line": 4,
+          "text": "export const MEDIA_FIXTURE_BLOB_PATH = `/canvas-assets/${MEDIA_FIXTURE_ASSET_ID}/blob`;"
+        },
+        {
+          "line": 7,
+          "text": "export function readCanvasAssetFixture(url: string): { data: Blob } | undefined {"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/scripts/boardLayersSmoke/fixture.tsx",
+      "test": false,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/scripts/boardOpenNoteSmoke/fixture.tsx",
+      "test": false,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 6,
+          "text": "import { NoteCanvasRuntimeProvider } from '../../src/pages/Notes/canvasEngine/NoteCanvasRuntimeProvider';"
+        },
+        {
+          "line": 7,
+          "text": "import { useNoteCanvasRuntimeController } from '../../src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController';"
+        },
+        {
+          "line": 11,
+          "text": "import styles from '../../src/pages/Notes/NoteDetail.module.css';"
+        },
+        {
+          "line": 17,
+          "text": "const runtime = useNoteCanvasRuntimeController();"
+        },
+        {
+          "line": 32,
+          "text": "return <NoteCanvasRuntimeProvider key={noteId} noteId={noteId}><SourceNote /></NoteCanvasRuntimeProvider>;"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/scripts/boardOpenNoteSmoke/mockApi.ts",
+      "test": false,
+      "requestRegistration": [
+        {
+          "line": 2,
+          "text": "import { readCanvasAssetFixture } from '../../test/fixtures/canvasAssetFixture';"
+        },
+        {
+          "line": 172,
+          "text": "const asset = method === 'GET' ? readCanvasAssetFixture(url) : undefined;"
+        },
+        {
+          "line": 304,
+          "text": "else throw new Error(`Unmapped synthetic transport: ${method} ${url}`);"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/scripts/boardTextRangeSmoke/fixture.tsx",
+      "test": false,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 7,
+          "text": "import { NoteCanvasRuntimeProvider } from '../../src/pages/Notes/canvasEngine/NoteCanvasRuntimeProvider';"
+        },
+        {
+          "line": 8,
+          "text": "import { useNoteCanvasRuntimeController } from '../../src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController';"
+        },
+        {
+          "line": 12,
+          "text": "import styles from '../../src/pages/Notes/NoteDetail.module.css';"
+        },
+        {
+          "line": 18,
+          "text": "const runtime = useNoteCanvasRuntimeController();"
+        },
+        {
+          "line": 57,
+          "text": "<Route path=\"/notes/:noteId\" element={<NoteCanvasRuntimeProvider noteId={NOTE_ID}><SourceNote /></NoteCanvasRuntimeProvider>} />"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/scripts/boardTextRangeSmoke/mockApi.ts",
+      "test": false,
+      "requestRegistration": [
+        {
+          "line": 2,
+          "text": "import { readCanvasAssetFixture } from '../../test/fixtures/canvasAssetFixture';"
+        },
+        {
+          "line": 80,
+          "text": "const asset = method === 'GET' ? readCanvasAssetFixture(url) : undefined;"
+        },
+        {
+          "line": 143,
+          "text": "else throw new Error(`Unmapped synthetic transport: ${method} ${url}`);"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/scripts/boardToolsSmoke/fixture.tsx",
+      "test": false,
+      "requestRegistration": [],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/scripts/boardToolsSmoke/mockApi.ts",
+      "test": false,
+      "requestRegistration": [
+        {
+          "line": 2,
+          "text": "import { readCanvasAssetFixture } from '../../test/fixtures/canvasAssetFixture';"
+        },
+        {
+          "line": 87,
+          "text": "const asset = readCanvasAssetFixture(url);"
+        },
+        {
+          "line": 94,
+          "text": "throw new Error(`Unexpected synthetic GET: ${url}`);"
+        },
+        {
+          "line": 106,
+          "text": "throw new Error(`Unexpected synthetic POST: ${url}`);"
+        },
+        {
+          "line": 120,
+          "text": "throw new Error(`Unexpected synthetic PATCH: ${url}`);"
+        },
+        {
+          "line": 156,
+          "text": "throw new Error(`Unexpected synthetic PUT: ${url}`);"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/scripts/cFix1Smoke/fixture.tsx",
+      "test": false,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 4,
+          "text": "import { NoteCanvasRuntimeProvider } from '../../src/pages/Notes/canvasEngine/NoteCanvasRuntimeProvider';"
+        },
+        {
+          "line": 5,
+          "text": "import { useNoteCanvasRuntimeController } from '../../src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController';"
+        },
+        {
+          "line": 9,
+          "text": "import styles from '../../src/pages/Notes/NoteDetail.module.css';"
+        },
+        {
+          "line": 66,
+          "text": "const runtime = useNoteCanvasRuntimeController();"
+        },
+        {
+          "line": 96,
+          "text": "return <NoteCanvasRuntimeProvider key={noteId} noteId={noteId}><PaperInteractionSmoke /></NoteCanvasRuntimeProvider>;"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/scripts/cFix1Smoke/mockApi.ts",
+      "test": false,
+      "requestRegistration": [
+        {
+          "line": 2,
+          "text": "import { readCanvasAssetFixture } from '../../test/fixtures/canvasAssetFixture';"
+        },
+        {
+          "line": 25,
+          "text": "const asset = method === 'GET' ? readCanvasAssetFixture(url) : undefined;"
+        },
+        {
+          "line": 47,
+          "text": "else throw new Error(`Unmapped C fix 1 fixture request: ${method} ${url}`);"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/scripts/pageFrameHealingSmoke/fixture.tsx",
+      "test": false,
+      "requestRegistration": [
+        {
+          "line": 105,
+          "text": "...(collectionPuts.length !== (healthy || (stale && !new URLSearchParams(window.location.search).has('missing')) ? 0 : 1) ? [`Unexpected collection PUT count: ${collectionPuts.length}`] : []),"
+        }
+      ],
+      "rendererReferences": [
+        {
+          "line": 5,
+          "text": "import { NoteCanvasRuntimeProvider } from '../../src/pages/Notes/canvasEngine/NoteCanvasRuntimeProvider';"
+        },
+        {
+          "line": 6,
+          "text": "import { useNoteCanvasRuntimeController } from '../../src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController';"
+        },
+        {
+          "line": 13,
+          "text": "import styles from '../../src/pages/Notes/NoteDetail.module.css';"
+        },
+        {
+          "line": 18,
+          "text": "type Runtime = ReturnType<typeof useNoteCanvasRuntimeController>;"
+        },
+        {
+          "line": 51,
+          "text": "const runtime = useNoteCanvasRuntimeController();"
+        },
+        {
+          "line": 115,
+          "text": "<strong>F11 · in-memory NoteDetail controller and layers</strong>"
+        },
+        {
+          "line": 161,
+          "text": "<HashRouter><NoteCanvasRuntimeProvider noteId={NOTE_ID} hostMode=\"page\"><HealingRuntime /></NoteCanvasRuntimeProvider></HashRouter>,"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/scripts/pageFrameHealingSmoke/mockApi.ts",
+      "test": false,
+      "requestRegistration": [
+        {
+          "line": 2,
+          "text": "import { readCanvasAssetFixture } from '../../test/fixtures/canvasAssetFixture';"
+        },
+        {
+          "line": 93,
+          "text": "const asset = method === 'GET' ? readCanvasAssetFixture(url) : undefined;"
+        },
+        {
+          "line": 111,
+          "text": "else throw new Error(`Unmapped memory read: ${method} ${url}`);"
+        },
+        {
+          "line": 128,
+          "text": "} else throw new Error(`Unmapped memory write: ${method} ${url}`);"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/scripts/pageReadingSmoke/fixture.tsx",
+      "test": false,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 4,
+          "text": "import { NoteCanvasRuntimeProvider } from '../../src/pages/Notes/canvasEngine/NoteCanvasRuntimeProvider';"
+        },
+        {
+          "line": 5,
+          "text": "import { useNoteCanvasRuntimeController } from '../../src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController';"
+        },
+        {
+          "line": 9,
+          "text": "import styles from '../../src/pages/Notes/NoteDetail.module.css';"
+        },
+        {
+          "line": 44,
+          "text": "const runtime = useNoteCanvasRuntimeController();"
+        },
+        {
+          "line": 186,
+          "text": "<HashRouter><NoteCanvasRuntimeProvider noteId={NOTE_ID}><SmokeRuntime /></NoteCanvasRuntimeProvider></HashRouter>,"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/scripts/pageReadingSmoke/mockApi.ts",
+      "test": false,
+      "requestRegistration": [
+        {
+          "line": 2,
+          "text": "import { readCanvasAssetFixture } from '../../test/fixtures/canvasAssetFixture';"
+        },
+        {
+          "line": 106,
+          "text": "const asset = method === 'GET' ? readCanvasAssetFixture(url) : undefined;"
+        },
+        {
+          "line": 120,
+          "text": "throw new Error(`Unexpected fixture mutation: ${method} ${url}`);"
+        },
+        {
+          "line": 133,
+          "text": "else throw new Error(`Unmapped fixture request: ${method} ${url}`);"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/scripts/pageReadingSmoke/overviewFixture.tsx",
+      "test": false,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 4,
+          "text": "import { NoteCanvasRuntimeProvider } from '../../src/pages/Notes/canvasEngine/NoteCanvasRuntimeProvider';"
+        },
+        {
+          "line": 5,
+          "text": "import { useNoteCanvasRuntimeController } from '../../src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController';"
+        },
+        {
+          "line": 9,
+          "text": "import styles from '../../src/pages/Notes/NoteDetail.module.css';"
+        },
+        {
+          "line": 14,
+          "text": "type Runtime = ReturnType<typeof useNoteCanvasRuntimeController>;"
+        },
+        {
+          "line": 81,
+          "text": "const runtime = useNoteCanvasRuntimeController();"
+        },
+        {
+          "line": 119,
+          "text": "<HashRouter><NoteCanvasRuntimeProvider noteId={NOTE_ID} hostMode={new URLSearchParams(window.location.search).get('host') === 'modal' ? 'modal' : 'page'}><OverviewSmokeRuntime /></NoteCanvasRuntimeProvider></HashRouter>,"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/scripts/pageReadingSmoke/printFixture.tsx",
+      "test": false,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 4,
+          "text": "import { NoteCanvasRuntimeProvider } from '../../src/pages/Notes/canvasEngine/NoteCanvasRuntimeProvider';"
+        },
+        {
+          "line": 5,
+          "text": "import { useNoteCanvasRuntimeController } from '../../src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController';"
+        },
+        {
+          "line": 11,
+          "text": "import styles from '../../src/pages/Notes/NoteDetail.module.css';"
+        },
+        {
+          "line": 16,
+          "text": "type Runtime = ReturnType<typeof useNoteCanvasRuntimeController>;"
+        },
+        {
+          "line": 147,
+          "text": "const runtime = useNoteCanvasRuntimeController();"
+        },
+        {
+          "line": 269,
+          "text": "<HashRouter><NoteCanvasRuntimeProvider noteId={NOTE_ID}><PrintSmokeRuntime /></NoteCanvasRuntimeProvider></HashRouter>,"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/scripts/pageReadingSmoke/trayFixture.tsx",
+      "test": false,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 3,
+          "text": "import { NoteCanvasRuntimeProvider } from '../../src/pages/Notes/canvasEngine/NoteCanvasRuntimeProvider';"
+        },
+        {
+          "line": 4,
+          "text": "import { useNoteCanvasRuntimeController } from '../../src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController';"
+        },
+        {
+          "line": 8,
+          "text": "import styles from '../../src/pages/Notes/NoteDetail.module.css';"
+        },
+        {
+          "line": 14,
+          "text": "const runtime = useNoteCanvasRuntimeController();"
+        },
+        {
+          "line": 35,
+          "text": "return <NoteCanvasRuntimeProvider key={noteId} noteId={noteId}><TraySmoke /></NoteCanvasRuntimeProvider>;"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/scripts/paperInkSmoke/inkFixture.tsx",
+      "test": false,
+      "requestRegistration": [],
+      "rendererReferences": [
+        {
+          "line": 3,
+          "text": "import { NoteCanvasRuntimeProvider } from '../../src/pages/Notes/canvasEngine/NoteCanvasRuntimeProvider';"
+        },
+        {
+          "line": 4,
+          "text": "import { useNoteCanvasRuntimeController } from '../../src/pages/Notes/canvasEngine/hooks/useNoteCanvasRuntimeController';"
+        },
+        {
+          "line": 8,
+          "text": "import styles from '../../src/pages/Notes/NoteDetail.module.css';"
+        },
+        {
+          "line": 14,
+          "text": "const runtime = useNoteCanvasRuntimeController();"
+        },
+        {
+          "line": 43,
+          "text": "return <NoteCanvasRuntimeProvider key={noteId} noteId={noteId}><PaperInkSmoke /></NoteCanvasRuntimeProvider>;"
+        }
+      ],
+      "assetMetadata": []
+    },
+    {
+      "path": "client/scripts/paperInkSmoke/inkMockApi.ts",
+      "test": false,
+      "requestRegistration": [
+        {
+          "line": 2,
+          "text": "import { readCanvasAssetFixture } from '../../test/fixtures/canvasAssetFixture';"
+        },
+        {
+          "line": 25,
+          "text": "const asset = method === 'GET' ? readCanvasAssetFixture(url) : undefined;"
+        },
+        {
+          "line": 48,
+          "text": "else throw new Error(`Unmapped ink fixture request: ${method} ${url}`);"
+        }
+      ],
+      "rendererReferences": [],
+      "assetMetadata": []
+    }
+  ]
+}

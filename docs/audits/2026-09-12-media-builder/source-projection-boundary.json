@@ -1,0 +1,136 @@
+{
+  "date": "2026-09-12",
+  "comparedFiles": 16,
+  "unchangedFiles": 16,
+  "baseline": ".tmp/media-builder/baseline.json.gz (captured before this work; no Git)",
+  "entries": [
+    {
+      "path": "client/src/pages/Notes/canvasEngine/imageObjectService.ts",
+      "unchanged": true,
+      "baselineBytes": 4068,
+      "currentBytes": 4068,
+      "baselineSha256": "d57483cfd0e58d7932eb38b326ea2e4ff235e17e36e7c0c65fd445e13d4a1291",
+      "currentSha256": "d57483cfd0e58d7932eb38b326ea2e4ff235e17e36e7c0c65fd445e13d4a1291"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/layers/ImageObjectLayer.tsx",
+      "unchanged": true,
+      "baselineBytes": 6147,
+      "currentBytes": 6147,
+      "baselineSha256": "dd8284641c59f55861eda16a5fc49abfaad068929f285dcdd91e0996427fa50b",
+      "currentSha256": "dd8284641c59f55861eda16a5fc49abfaad068929f285dcdd91e0996427fa50b"
+    },
+    {
+      "path": "client/src/pages/Notes/canvasEngine/sourceProjectionPolicy.ts",
+      "unchanged": true,
+      "baselineBytes": 666,
+      "currentBytes": 666,
+      "baselineSha256": "b0fe136e44fdaeee1b381708591bf1b7fe980940d58cc7117c5b39ec6d09865a",
+      "currentSha256": "b0fe136e44fdaeee1b381708591bf1b7fe980940d58cc7117c5b39ec6d09865a"
+    },
+    {
+      "path": "client/src/pages/Sources/ProjectSourcesPanel.tsx",
+      "unchanged": true,
+      "baselineBytes": 3389,
+      "currentBytes": 3389,
+      "baselineSha256": "0a0fd4d8472c38d9e47b6bc839c54cb9fe012aec8547eaafba8a1432de4e0f55",
+      "currentSha256": "0a0fd4d8472c38d9e47b6bc839c54cb9fe012aec8547eaafba8a1432de4e0f55"
+    },
+    {
+      "path": "client/src/pages/Sources/SourceReprojectionDialog.test.tsx",
+      "unchanged": true,
+      "baselineBytes": 9626,
+      "currentBytes": 9626,
+      "baselineSha256": "a15416c9795e026dd2747710ec5bd0777edebaed4050cef6c955a268c23d422b",
+      "currentSha256": "a15416c9795e026dd2747710ec5bd0777edebaed4050cef6c955a268c23d422b"
+    },
+    {
+      "path": "client/src/pages/Sources/SourceReprojectionDialog.tsx",
+      "unchanged": true,
+      "baselineBytes": 6739,
+      "currentBytes": 6739,
+      "baselineSha256": "bed6cfd8482356fa0d449d8b705921057bec492a4e7f249e39223cd4a650404e",
+      "currentSha256": "bed6cfd8482356fa0d449d8b705921057bec492a4e7f249e39223cd4a650404e"
+    },
+    {
+      "path": "server/src/db/migrations/069_v13_source_reprojection_receipts.ts",
+      "unchanged": true,
+      "baselineBytes": 1381,
+      "currentBytes": 1381,
+      "baselineSha256": "4c181d6e20055b41afc6d26907eaa8f55c77dc2702317e18bad7d5cf16b5357d",
+      "currentSha256": "4c181d6e20055b41afc6d26907eaa8f55c77dc2702317e18bad7d5cf16b5357d"
+    },
+    {
+      "path": "server/src/services/sourceMaterialization.ts",
+      "unchanged": true,
+      "baselineBytes": 20861,
+      "currentBytes": 20861,
+      "baselineSha256": "a2ac59eb1bfa7591d6b78e40f12945cb6fb9f830f9e91099ea7212b0e2ae20af",
+      "currentSha256": "a2ac59eb1bfa7591d6b78e40f12945cb6fb9f830f9e91099ea7212b0e2ae20af"
+    },
+    {
+      "path": "server/src/services/sourceMaterializationConcurrency.ts",
+      "unchanged": true,
+      "baselineBytes": 541,
+      "currentBytes": 541,
+      "baselineSha256": "f37cabfb5e15c9164d6479fbd7d71333c718e8522e7275ea1d4f1502e2c5982b",
+      "currentSha256": "f37cabfb5e15c9164d6479fbd7d71333c718e8522e7275ea1d4f1502e2c5982b"
+    },
+    {
+      "path": "server/src/services/sourceMaterializationErrors.ts",
+      "unchanged": true,
+      "baselineBytes": 442,
+      "currentBytes": 442,
+      "baselineSha256": "12740796e55e1e650924186031d8c4521df0b8d3c2c508406d8bb4aaa3a4698c",
+      "currentSha256": "12740796e55e1e650924186031d8c4521df0b8d3c2c508406d8bb4aaa3a4698c"
+    },
+    {
+      "path": "server/src/services/sourceProjectionMaterializer.ts",
+      "unchanged": true,
+      "baselineBytes": 28211,
+      "currentBytes": 28211,
+      "baselineSha256": "d943cc110fb585c23a5aa02d860b5dbbe3e703e652a1cbfe0b07b8c05182d405",
+      "currentSha256": "d943cc110fb585c23a5aa02d860b5dbbe3e703e652a1cbfe0b07b8c05182d405"
+    },
+    {
+      "path": "server/src/services/sourceProjectionPolicy.ts",
+      "unchanged": true,
+      "baselineBytes": 2362,
+      "currentBytes": 2362,
+      "baselineSha256": "64fc4c5b89d883abf4e257079a9c4bdcd96676b641efb1c82e65b153627207eb",
+      "currentSha256": "64fc4c5b89d883abf4e257079a9c4bdcd96676b641efb1c82e65b153627207eb"
+    },
+    {
+      "path": "server/src/services/sourceReprojection.ts",
+      "unchanged": true,
+      "baselineBytes": 7619,
+      "currentBytes": 7619,
+      "baselineSha256": "20941b1184ea3b8efb2d91b5bf51d0cb5ee693291d600a1e01d109a8c0ba0cc7",
+      "currentSha256": "20941b1184ea3b8efb2d91b5bf51d0cb5ee693291d600a1e01d109a8c0ba0cc7"
+    },
+    {
+      "path": "server/src/__tests__/v13SourceProjectionRepair.test.ts",
+      "unchanged": true,
+      "baselineBytes": 15042,
+      "currentBytes": 15042,
+      "baselineSha256": "fdda2d034606a790b0157f2ad5ae99e9807a3d969251e229be36974233ca03dd",
+      "currentSha256": "fdda2d034606a790b0157f2ad5ae99e9807a3d969251e229be36974233ca03dd"
+    },
+    {
+      "path": "server/src/__tests__/v13SourceReprojection.test.ts",
+      "unchanged": true,
+      "baselineBytes": 15808,
+      "currentBytes": 15808,
+      "baselineSha256": "45cef9ffb7f534e587ea4c2725a22f7b25b086a76f40ccb72c91d195045027a2",
+      "currentSha256": "45cef9ffb7f534e587ea4c2725a22f7b25b086a76f40ccb72c91d195045027a2"
+    },
+    {
+      "path": "server/src/__tests__/v2SourceMaterialization.test.ts",
+      "unchanged": true,
+      "baselineBytes": 28089,
+      "currentBytes": 28089,
+      "baselineSha256": "4c7f07c691a6944983d7ad8ed11063d79bae680b7635a912e72b8089d54848ee",
+      "currentSha256": "4c7f07c691a6944983d7ad8ed11063d79bae680b7635a912e72b8089d54848ee"
+    }
+  ]
+}

@@ -84,6 +84,7 @@ import {
 } from '../contentGroupDragService';
 import styles from '../../NoteDetail.module.css';
 import type { TextFocusReceipt } from '../textFocusReceipt';
+import { imageOnlyClipboardFile } from '../mediaBlockPasteService';
 import type {
   TextFlowEditBoundary,
   TextFlowEditMetadata,
@@ -116,6 +117,7 @@ interface TextBlockProjectionProps {
     textFlow?: TextBlockContentV1,
   ) => Promise<BlockSaveOutcome>;
   onKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
+  onPasteImage?: (file: File) => Promise<void> | void;
   onBoundaryNavigate?: (request: TextFlowBoundaryNavigationRequest) => boolean;
   onNavigationTarget?: (target: TextFlowNavigationTarget | null) => void;
   onFlowSelectionStart?: () => void;
@@ -510,6 +512,7 @@ export function TextBlockProjection({
   onTextEditBoundary,
   onSave,
   onKeyDown,
+  onPasteImage,
   onBoundaryNavigate,
   onNavigationTarget,
   onFlowSelectionStart,
@@ -1427,6 +1430,12 @@ export function TextBlockProjection({
     if (compositionRef.current) return;
     snapTextareaSelection(event.currentTarget);
     const pastedText = event.clipboardData.getData('text/plain');
+    const pastedImage = !readOnly && onPasteImage ? imageOnlyClipboardFile(event.clipboardData) : null;
+    if (pastedImage) {
+      event.preventDefault();
+      void onPasteImage?.(pastedImage);
+      return;
+    }
     if (!pastedText) return;
     if (flowSelectionRef.current || documentSelection?.read()) {
       event.preventDefault();

@@ -54,6 +54,11 @@ interface AssetReferenceRow {
   asset_id: string;
 }
 
+interface MediaAssetReferenceRow {
+  block_id: string;
+  asset_id: string;
+}
+
 function getOwnedNote(db: Database.Database, userId: string, noteId: string): OwnedNote {
   const note = db.prepare('SELECT id, user_id, course_id FROM notes WHERE id = ? AND user_id = ?')
     .get(noteId, userId) as OwnedNote | undefined;
@@ -210,6 +215,16 @@ export function releaseAssetReference(
       AND object_id != ?
   `).get(userId, assetId, excludeObjectId) as { count: number };
 
+  // The block row is the reference; placements do not multiply it. Trashing a
+  // media block releases its blob, while archiving a block or note retains it.
+  if (db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'note_blocks'").get()) {
+    const mediaReferences = db.prepare(`SELECT COUNT(*) AS count FROM note_blocks
+      WHERE user_id = ? AND block_type = 'media' AND status != 'trashed'
+        AND json_extract(metadata, '$.media.asset_id') = ?`)
+      .get(userId, assetId) as { count: number };
+    remaining.count += mediaReferences.count;
+  }
+
   // A relocated visual owns a durable reference even after its original note is
   // removed. The existence check also keeps pre-board migration fixtures valid.
   if (db.prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'board_visuals'").get()) {
@@ -248,6 +263,14 @@ export function releaseCourseCanvasAssets(
   userId: string,
   courseId: string,
 ) {
+  const mediaRows = db.prepare(`SELECT id AS block_id, json_extract(metadata, '$.media.asset_id') AS asset_id
+    FROM note_blocks WHERE user_id = ? AND course_id = ? AND block_type = 'media'
+      AND json_extract(metadata, '$.media.asset_id') IS NOT NULL`)
+    .all(userId, courseId) as MediaAssetReferenceRow[];
+  // These blocks are about to cascade with their Project. Detach their media
+  // references inside the caller's transaction before counting shared blobs.
+  db.prepare(`UPDATE note_blocks SET metadata = json_remove(metadata, '$.media')
+    WHERE user_id = ? AND course_id = ? AND block_type = 'media'`).run(userId, courseId);
   const rows = db.prepare(`
     SELECT object_id, asset_id
     FROM image_object_extensions
@@ -274,7 +297,15 @@ export function releaseCourseCanvasAssets(
     }
   }
 
-  return { course_id: courseId, checked_references: rows.length, released, cleanup_tasks: cleanupTasks };
+  const orphanAssets = db.prepare('SELECT id AS asset_id FROM canvas_assets WHERE user_id = ? AND course_id = ?')
+    .all(userId, courseId) as { asset_id: string }[];
+  for (const assetId of new Set([...mediaRows, ...orphanAssets].map((row) => row.asset_id))) {
+    const decision = releaseAssetReference(db, userId, assetId, '');
+    if (decision.released) released += 1;
+    if (decision.cleanup_task) cleanupTasks.push(decision.cleanup_task);
+  }
+
+  return { course_id: courseId, checked_references: rows.length + mediaRows.length, released, cleanup_tasks: cleanupTasks };
 }
 
 export function releaseNoteCanvasAssets(
@@ -282,6 +313,20 @@ export function releaseNoteCanvasAssets(
   userId: string,
   noteId: string,
 ) {
+  // A Note can share a block with another Note. Only detach a block when this
+  // is its last placement; references surviving elsewhere continue to own it.
+  const mediaRows = db.prepare(`SELECT DISTINCT nb.id AS block_id,
+      json_extract(nb.metadata, '$.media.asset_id') AS asset_id
+    FROM note_blocks nb JOIN note_block_placements p ON p.block_id = nb.id
+    WHERE nb.user_id = ? AND p.note_id = ? AND nb.block_type = 'media'
+      AND json_extract(nb.metadata, '$.media.asset_id') IS NOT NULL
+      AND NOT EXISTS (SELECT 1 FROM note_block_placements other
+        WHERE other.block_id = nb.id AND other.note_id != ?)`)
+    .all(userId, noteId, noteId) as MediaAssetReferenceRow[];
+  for (const row of mediaRows) {
+    db.prepare("UPDATE note_blocks SET metadata = json_remove(metadata, '$.media') WHERE id = ? AND user_id = ?")
+      .run(row.block_id, userId);
+  }
   const rows = db.prepare(`
     SELECT object_id, asset_id
     FROM image_object_extensions
@@ -293,6 +338,12 @@ export function releaseNoteCanvasAssets(
     db.prepare('DELETE FROM image_object_extensions WHERE object_id = ? AND user_id = ? AND note_id = ?')
       .run(row.object_id, userId, noteId);
     const decision = releaseAssetReference(db, userId, row.asset_id, row.object_id);
+    if (decision.cleanup_task) cleanupTasks.push(decision.cleanup_task);
+  }
+  const orphanAssets = db.prepare('SELECT id AS asset_id FROM canvas_assets WHERE user_id = ? AND origin_note_id = ?')
+    .all(userId, noteId) as { asset_id: string }[];
+  for (const assetId of new Set([...mediaRows, ...orphanAssets].map((row) => row.asset_id))) {
+    const decision = releaseAssetReference(db, userId, assetId, '');
     if (decision.cleanup_task) cleanupTasks.push(decision.cleanup_task);
   }
   return cleanupTasks;

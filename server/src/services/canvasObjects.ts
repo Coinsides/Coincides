@@ -2,6 +2,7 @@ import type Database from 'better-sqlite3';
 import { assertCanvasPlacementWriteAllowed } from './canvasWritePolicy.js';
 import { AppError } from '../middleware/errorHandler.js';
 import { finalizeCanvasAssetCleanup, releaseAssetReference } from './canvasAssets.js';
+import { assertMediaBlockAsset } from './mediaBlocks.js';
 import type { ManagedFileTask } from './managedFileCleanup.js';
 import { projectCanvasPlacementLayout } from './canvasPlacementLayout.js';
 import { readCoordinateContract } from './coordinateContract.js';
@@ -884,6 +885,7 @@ export function restoreNoteBlockForCanvasLifecycle(
     status: string;
   } | undefined;
   if (!row) throw new AppError(404, 'Note block not found');
+  assertMediaBlockAsset(db, userId, row);
   const owner = liveShapeBackingOwner(db, userId, blockId);
   const metadata = parseJson<Record<string, unknown>>(row.metadata, {});
   const lifecycle = isRecord(metadata.canvas_lifecycle) ? metadata.canvas_lifecycle : {};

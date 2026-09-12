@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { readCanvasAssetFixture } from '../../test/fixtures/canvasAssetFixture';
 import { listNoteBlockTemplates, legacyBlockTypeForTemplate } from '@shared/types';
 
 export const NOTE_ID = 'paper-ink-smoke-note';
@@ -21,6 +22,8 @@ const api = axios.create({
     const method = (config.method || 'get').toUpperCase();
     const url = config.url || '';
     apiCalls.push({ method, url });
+    const asset = method === 'GET' ? readCanvasAssetFixture(url) : undefined;
+    if (asset) return { ...asset, status: 200, statusText: 'OK', headers: {}, config };
     if (/^\/(?:notes|canvas-objects|note-blocks)(?:\/|$)/.test(url)) {
       const target = new URL(`/api${url}`, window.location.origin);
       for (const [name, value] of Object.entries(config.params || {})) {

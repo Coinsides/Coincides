@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import BoardPage from './BoardPage';
@@ -7,6 +7,7 @@ import { BOARD_STAGING_MIME } from './BoardStaging';
 import type { BoardDetail, BoardMember } from './boardTypes';
 import type { Note, NoteBlock } from '../Notes/canvasEngine/runtimeDataTypes';
 import type { PageFrameCollectionModel } from '../Notes/canvasEngine/types';
+import { MEDIA_FIXTURE_ASSET_ID, MEDIA_FIXTURE_BLOB_PATH, readCanvasAssetFixture } from '../../../test/fixtures/canvasAssetFixture';
 
 const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), delete: vi.fn() }));
 vi.mock('@/services/api', () => ({ default: http, getToken: () => null, setToken: vi.fn() }));
@@ -103,6 +104,10 @@ beforeEach(() => {
     reference: { kind: 'item', id: item.id, state: 'available', reason: null, title: 'Claim', summary: item.plain_text, note_id: null },
   }] };
   vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} unobserve() {} });
+  vi.stubGlobal('URL', class extends URL {
+    static createObjectURL = vi.fn(() => 'blob:unboxing-media');
+    static revokeObjectURL = vi.fn();
+  });
   vi.stubGlobal('PointerEvent', class extends MouseEvent {
     readonly pointerId: number;
     constructor(type: string, init: PointerEventInit = {}) { super(type, init); this.pointerId = init.pointerId || 0; }
@@ -113,6 +118,8 @@ beforeEach(() => {
   vi.spyOn(HTMLElement.prototype, 'getClientRects').mockImplementation(() => [new DOMRect(0, 0, 1100, 800)] as unknown as DOMRectList);
   Object.defineProperty(HTMLDialogElement.prototype, 'showModal', { configurable: true, value: function (this: HTMLDialogElement) { this.open = true; } });
   http.get.mockImplementation(async (url: string, config?: { params?: { course_id?: string } }) => {
+    const asset = readCanvasAssetFixture(url);
+    if (asset) return asset;
     if (url === '/boards/board') return response(board);
     if (url === '/boards/board/viewport-bookmarks') return response({ bookmarks: [] });
     if (url === '/courses') return response(projects);
@@ -175,9 +182,41 @@ beforeEach(() => {
   });
   http.patch.mockImplementation(async (url: string) => fail('PATCH', url));
 });
-afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
+afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
 describe('13.4 unboxing through production board and note runtime', () => {
+  it('registers media blob reads through real modal and full-page note mounts without relaxing the strict ledger', async () => {
+    const first = openBoard();
+    await createNote();
+    first.unmount();
+    const layout = { x: 0, y: 120, width: 240, height: 60, width_mode: 'manual',
+      coordinate_space: 'page_frame_local', frame_id: collection!.primaryFrameId,
+      surface: 'formal_page', boundary_role: 'inside' };
+    blocks = [{ id: 'media-block', placement_id: 'media-placement', block_type: 'media', title: null,
+      content_json: {}, plain_text: '', order_index: 0, source_references: [], display_overrides_json: {},
+      canvas_layout: null, metadata: { media: { asset_id: MEDIA_FIXTURE_ASSET_ID,
+        naturalWidth: 400, naturalHeight: 100, alt: 'Synthetic unboxing diagram' } } }];
+    layouts = [{ block_id: 'media-block', placement_id: 'media-placement', layout }];
+    board.members.push(noteMember(notes[0]));
+    openBoard();
+    const card = await screen.findByRole('article', { name: 'Unboxed thought' });
+    fireEvent.doubleClick(card);
+    const modal = await readyRuntime();
+    const image = await within(modal).findByRole('img', { name: 'Synthetic unboxing diagram' });
+    expect(image.getAttribute('src')).toBe('blob:unboxing-media');
+    expect(http.get).toHaveBeenCalledWith(MEDIA_FIXTURE_BLOB_PATH, { responseType: 'blob' });
+    expect(URL.createObjectURL).toHaveBeenCalledWith(expect.any(Blob));
+    fireEvent.click(screen.getByRole('button', { name: 'Close note' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:unboxing-media');
+    fireEvent.focus(card);
+    fireEvent.keyDown(card, { key: 'Enter' });
+    const page = await readyRuntime('page');
+    await within(page).findByRole('img', { name: 'Synthetic unboxing diagram' });
+    expect(http.get.mock.calls.filter(([url]) => url === MEDIA_FIXTURE_BLOB_PATH)).toHaveLength(2);
+    expect(unknownRequests).toEqual([]);
+  });
+
   it('creates in place, inserts a reference, rereads current ItemSummary and survives board/modal/full-page reopening', async () => {
     const first = openBoard();
     await createNote();
