@@ -1,11 +1,6 @@
 import assert from 'node:assert/strict';
 import test, { type TestContext } from 'node:test';
-import Database from 'better-sqlite3';
-import migration044 from '../db/migrations/044_v2_purposes.js';
-import migration057 from '../db/migrations/057_v13_boards.js';
-import migration059 from '../db/migrations/059_v13_board_text_ranges.js';
-import migration061 from '../db/migrations/061_v13_board_staging.js';
-import migration062 from '../db/migrations/062_v13_board_layers.js';
+import type Database from 'better-sqlite3';
 import {
   createBoard, getBoard, listBoards, updateBoard,
   mountBoardMember, updateBoardMember, unmountBoardMember, resolveBoardMember,
@@ -13,34 +8,20 @@ import {
   createBoardVisual, updateBoardVisual, deleteBoardVisual,
 } from '../services/boards.js';
 import { createPurpose } from '../services/purposes.js';
+import { createV13BoardsFixture } from './helpers/v13BoardsFixture.js';
 
-function fixture(t: TestContext) {
-  const db = new Database(':memory:');
+async function fixture(t: TestContext) {
+  const db = await createV13BoardsFixture();
   t.after(() => db.close());
-  db.pragma('foreign_keys = ON');
-  // Only synthetic identity rows. Production 044 and 057 own purpose/board schema.
+  // Board creation now mints an Item and Snapshot against the real migrated schema.
   db.exec(`
-    CREATE TABLE users (id TEXT PRIMARY KEY);
-    CREATE TABLE courses (id TEXT PRIMARY KEY, user_id TEXT);
-    CREATE TABLE notes (id TEXT PRIMARY KEY, user_id TEXT, course_id TEXT,
-      title TEXT, status TEXT, note_class TEXT, source_kind TEXT);
-    CREATE TABLE items (id TEXT PRIMARY KEY, user_id TEXT, status TEXT, plain_text TEXT,
-      item_type TEXT, topic TEXT, origin_note_id TEXT, origin_board_id TEXT);
-    CREATE TABLE content_groups (id TEXT PRIMARY KEY, user_id TEXT, course_id TEXT,
-      note_id TEXT, title TEXT, status TEXT, identity_type TEXT, identity_role TEXT);
-    INSERT INTO users VALUES ('user');
-    INSERT INTO courses VALUES ('project-a','user'),('project-b','user');
-    INSERT INTO notes VALUES ('note','user','project-b','Paper','active','user','manual');
-    INSERT INTO content_groups VALUES ('group','user','project-b','note','Bundle','active',NULL,NULL);
-    INSERT INTO items VALUES ('item','user','active','Current item text','claim','Topic','note',NULL);
+    INSERT INTO users (id,email,password_hash,name) VALUES ('user','board-service@example.invalid','synthetic','Fixture');
+    INSERT INTO courses (id,user_id,name) VALUES ('project-a','user','Project A'),('project-b','user','Project B');
+    INSERT INTO notes (id,user_id,course_id,title) VALUES ('note','user','project-b','Paper');
+    INSERT INTO content_groups (id,user_id,course_id,note_id,title) VALUES ('group','user','project-b','note','Bundle');
+    INSERT INTO items (id,user_id,plain_text,item_type,topic,origin_note_id)
+      VALUES ('item','user','Current item text','claim','Topic','note');
   `);
-  db.transaction(() => {
-    migration044.up(db);
-    migration057.up(db);
-    migration059.up(db);
-    migration061.up(db);
-    migration062.up(db);
-  })();
   return db;
 }
 
@@ -50,8 +31,8 @@ function open(db: Database.Database) {
   }))().board;
 }
 
-test('board creation opens a library soul or attaches an unoccupied soul; viewport has no paper boundary', (t) => {
-  const db = fixture(t);
+test('board creation opens a library soul or attaches an unoccupied soul; viewport has no paper boundary', async (t) => {
+  const db = await fixture(t);
   const { board, purposeCreated } = db.transaction(() => createBoard(db, 'user', {
     title: 'Clues', purpose: { title: 'Question' },
   }))();
@@ -76,8 +57,8 @@ test('board creation opens a library soul or attaches an unoccupied soul; viewpo
   assert.deepEqual(db.prepare('SELECT * FROM notes').all(), beforeNote);
 });
 
-test('mounts stay references across projects; retries preserve geometry; unmount only removes board edges', (t) => {
-  const db = fixture(t);
+test('mounts stay references across projects; retries preserve geometry; unmount only removes board edges', async (t) => {
+  const db = await fixture(t);
   const board = open(db);
   const contentBefore = db.prepare('SELECT * FROM notes').all();
   const groupBefore = db.prepare('SELECT * FROM content_groups').all();
@@ -114,8 +95,8 @@ test('mounts stay references across projects; retries preserve geometry; unmount
   assert.equal((db.prepare('SELECT count(*) AS n FROM purpose_members').get() as { n: number }).n, 0);
 });
 
-test('member reads retain geometry through trash/restore/missing and text ranges require durable anchor identities', (t) => {
-  const db = fixture(t);
+test('member reads retain geometry through trash/restore/missing and text ranges require durable anchor identities', async (t) => {
+  const db = await fixture(t);
   const board = open(db);
   const mounted = db.transaction(() => mountBoardMember(db, 'user', board.id,
     { member_kind: 'note', member_id: 'note', x: 123 }))().member;
@@ -139,8 +120,8 @@ test('member reads retain geometry through trash/restore/missing and text ranges
     { member_kind: 'text_range', member_id: 'item' }))(), /board_text_range_not_found/);
 });
 
-test('visuals preserve rotation, raw connector endpoints and extension data independently of member edges', (t) => {
-  const db = fixture(t);
+test('visuals preserve rotation, raw connector endpoints and extension data independently of member edges', async (t) => {
+  const db = await fixture(t);
   const board = open(db);
   const data = {
     from: { kind: 'point', point: { x: 10, y: 20 } },

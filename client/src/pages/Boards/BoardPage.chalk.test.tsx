@@ -60,6 +60,7 @@ beforeEach(() => {
   sequence = 0;
   detail = {
     board: { id: 'chalk-board', user_id: 'synthetic-chalk-user', title: 'Chalk workshop', soul_id: 'chalk-soul',
+      identity_item_id: null, identity_description: null,
       project_id: null, viewport: { x: 0, y: 0, zoom: 1 }, created_at: date, updated_at: date },
     members: [], edges: [], visuals: [],
   };

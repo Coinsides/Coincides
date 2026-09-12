@@ -201,13 +201,14 @@ function ensureSnapshot(
   userId: string,
   itemId: string,
   plainText: string,
+  createdAt = new Date().toISOString(),
 ): ItemSnapshotRow {
   const hash = itemContentHash(plainText);
   db.prepare(`
     INSERT OR IGNORE INTO item_snapshots (
       id, item_id, user_id, content, content_hash, created_at
     ) VALUES (?, ?, ?, ?, ?, ?)
-  `).run(uuidv4(), itemId, userId, plainText, hash, new Date().toISOString());
+  `).run(uuidv4(), itemId, userId, plainText, hash, createdAt);
   const row = db.prepare(`
     SELECT * FROM item_snapshots
     WHERE item_id = ? AND user_id = ? AND content_hash = ?
@@ -329,11 +330,11 @@ function insertItem(
   userId: string,
   input: CreateItemInput,
   forcedOrigins?: { courseId: string | null; noteId: string | null; boardId: string | null },
+  now = new Date().toISOString(),
 ): string {
   const id = uuidv4();
   const body = normalizeItemBody(id, input);
   const origins = forcedOrigins || resolveOrigins(db, userId, input);
-  const now = new Date().toISOString();
   db.prepare(`
     INSERT INTO items (
       id, user_id, body_json, plain_text, item_type, topic, status,
@@ -355,8 +356,49 @@ function insertItem(
     now,
     now,
   );
-  ensureSnapshot(db, userId, id, body.plainText);
+  ensureSnapshot(db, userId, id, body.plainText, now);
   return id;
+}
+
+/** Board-domain writer only: reads its facts from the real board, never accepts an Item ID.
+ * The caller owns board creation; the savepoint keeps mint + Snapshot + bridge indivisible.
+ */
+export function createBoardIdentityItem(db: Database.Database, userId: string, boardId: string) {
+  if (!db.inTransaction) throw new Error('Board identity creation requires a caller-owned transaction');
+  return db.transaction(() => {
+    const board = db.prepare('SELECT id, title, project_id, item_id FROM boards WHERE id = ? AND user_id = ?')
+      .get(boardId, userId) as { id: string; title: string; project_id: string | null; item_id: string | null } | undefined;
+    if (!board) throw new AppError(404, 'board_not_found');
+    if (board.item_id) return getItem(db, userId, board.item_id);
+    const now = new Date().toISOString();
+    const itemId = insertItem(db, userId, {
+      plain_text: `Board: ${board.title}`,
+      created_by: 'system:board-identity',
+      metadata: {
+        board_identity: {
+          board_id: board.id,
+          minted_by: 'create_board',
+          minted_at: now,
+          title_at_mint: board.title,
+          project_id_at_mint: board.project_id,
+        },
+      },
+    }, { courseId: board.project_id, noteId: null, boardId: null }, now);
+    db.prepare('UPDATE boards SET item_id = ? WHERE id = ? AND user_id = ? AND item_id IS NULL')
+      .run(itemId, boardId, userId);
+    return getItem(db, userId, itemId);
+  })();
+}
+
+function assertOrdinaryItemWrite(db: Database.Database, userId: string, itemId: string): void {
+  // Identity is the actual unique bridge, never editable type/topic/metadata text.
+  const board = db.prepare('SELECT id FROM boards WHERE item_id = ? AND user_id = ?')
+    .get(itemId, userId) as { id: string } | undefined;
+  if (board) {
+    throw new AppError(409, 'This Item is a board identity. Please operate from the board entry.', {
+      code: 'board_identity_requires_board_entry', board_id: board.id,
+    });
+  }
 }
 
 export function createItem(db: Database.Database, userId: string, input: CreateItemInput) {
@@ -424,6 +466,7 @@ export function updateItem(
 ) {
   db.transaction(() => {
     const row = getOwnedItemRow(db, userId, itemId);
+    assertOrdinaryItemWrite(db, userId, itemId);
     assertItemRowInvariant(row);
     if (row.status === 'retired') throw new AppError(409, 'A retired Item cannot be edited');
     const bodyChanged = input.body_json !== undefined || input.plain_text !== undefined;
@@ -488,6 +531,7 @@ export function retireItem(
 ) {
   db.transaction(() => {
     const row = getOwnedItemRow(db, userId, itemId);
+    assertOrdinaryItemWrite(db, userId, itemId);
     assertItemRowInvariant(row);
     if (row.status === 'retired') throw new AppError(409, 'Item is already retired');
     const successorId = optionalText(input.successor_item_id);

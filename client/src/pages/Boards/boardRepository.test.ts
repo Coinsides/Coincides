@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, expectTypeOf, it, vi } from 'vitest';
 import { boardErrorMessage, boardRepository, loadBoardCandidates } from './boardRepository';
 import type {
   Board, BoardDetail, BoardEdge, BoardMember, BoardVisual, CreateBoardInput,
-  CreateBoardVisualInput, MountBoardMemberInput, PatchBoardMemberInput,
+  CreateBoardVisualInput, MountBoardMemberInput, PatchBoardInput, PatchBoardMemberInput,
 } from './boardTypes';
 
 const api = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() }));
@@ -12,6 +12,7 @@ const geometry = { x: -720, y: 480, w: 260, h: 160, scale: 1.5, z_index: 3, pinn
 const timestamp = '2026-09-08T12:00:00.000Z';
 const board: Board = {
   id: 'board-1', user_id: 'fixture-user', title: 'Where do these ideas meet?', soul_id: 'soul-1',
+  identity_item_id: 'identity-1', identity_description: 'An independent description of this board.',
   project_id: null, viewport: { x: -16000, y: 22000, zoom: 0.17 }, created_at: timestamp, updated_at: timestamp,
 };
 const member: BoardMember = {
@@ -47,6 +48,10 @@ describe('board HTTP repository', () => {
   });
 
   it('accepts exactly one soul creation path and projection-only member geometry types', () => {
+    expectTypeOf<Board['identity_item_id']>().toEqualTypeOf<string | null>();
+    expectTypeOf<Board['identity_description']>().toEqualTypeOf<string | null>();
+    expectTypeOf<Extract<keyof CreateBoardInput, 'identity_item_id' | 'identity_description'>>().toEqualTypeOf<never>();
+    expectTypeOf<Extract<keyof PatchBoardInput, 'identity_item_id' | 'identity_description'>>().toEqualTypeOf<never>();
     const newSoul = { title: 'One sentence', purpose: { title: 'One sentence' } } satisfies CreateBoardInput;
     const existingSoul = { title: 'One sentence', soul_id: 'soul-1' } satisfies CreateBoardInput;
     expectTypeOf<typeof newSoul>().toMatchTypeOf<CreateBoardInput>();

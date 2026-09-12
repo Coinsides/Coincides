@@ -931,7 +931,18 @@ export default function BoardPage() {
       </button>
       <details className={styles.boardMenu}>
         <summary aria-label="Board menu">More</summary>
-        <button className={styles.button} disabled={board.pending} onClick={() => { void prepareDelete(); }}>Delete board</button>
+        <div className={styles.boardMenuContent}>
+          <section className={styles.boardIdentity} aria-label="Board identity">
+            <h2>Board identity</h2>
+            {detail.board.identity_item_id ? <>
+              <p>Identity Item linked</p>
+              <h3>Independent description</h3>
+              <p className={styles.identityDescription}>{detail.board.identity_description || 'Description unavailable.'}</p>
+              <p className={styles.identityHint}>Renaming the board leaves this description unchanged.</p>
+            </> : <p>No identity Item linked.</p>}
+          </section>
+          <button className={styles.button} disabled={board.pending} onClick={() => { void prepareDelete(); }}>Delete board</button>
+        </div>
       </details>
     </header>
     {board.error && <div className={styles.error} role="alert"><span>{board.error}</span>

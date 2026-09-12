@@ -12,6 +12,7 @@ vi.mock('./boardRepository', () => ({
 const date = '2026-09-09T12:00:00Z';
 const board: Board = {
   id: 'dialog-board', title: 'Deletion scope', user_id: 'synthetic-user', soul_id: 'retained-soul',
+  identity_item_id: null, identity_description: null,
   project_id: null, viewport: { x: 0, y: 0, zoom: 1 }, created_at: date, updated_at: date,
 };
 const geometry = { x: 0, y: 0, w: 240, h: 160, scale: 1, z_index: 0, pinned: false };

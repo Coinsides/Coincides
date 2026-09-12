@@ -1,0 +1,284 @@
+{
+  "generated_at": "2026-09-12T00:30:43.074Z",
+  "task": "V13.5 B3 Board-Item identity bridge",
+  "result": "PASS (builder delivery; HQ review pending)",
+  "tests": [
+    {
+      "name": "B3 identity",
+      "cwd": "server",
+      "command": "npm.cmd run test:v13-board-identity",
+      "exit_code": 0,
+      "log": "identity-tests.log",
+      "passed": 10,
+      "failed": 0
+    },
+    {
+      "name": "Existing Board regressions",
+      "cwd": "server",
+      "command": "node --import tsx --test src/__tests__/v13BoardSchema.test.ts src/__tests__/v13BoardServices.test.ts src/__tests__/v13BoardRoutes.test.ts src/__tests__/v13BoardWave1.test.ts src/__tests__/v13BoardCeremonyNote.test.ts src/__tests__/v13BoardChalk.test.ts src/__tests__/v13BoardStaging.test.ts src/__tests__/v13BoardTextRanges.test.ts src/__tests__/v13BoardTrayRelocation.test.ts",
+      "exit_code": 0,
+      "log": "legacy-board-tests.log",
+      "files": 9,
+      "passed": 41,
+      "failed": 0
+    },
+    {
+      "name": "Affected Item and Relation regressions",
+      "cwd": "server",
+      "command": "node --import tsx --test --test-name-pattern=\"^fresh startup|^startup lets|^Item lifecycle|^pool Anchors|^cast fault|^claimed receipt|^mechanical freshness|^reaffirm is atomic|^V2.BN.11.7\" src/__tests__/v2Items.test.ts src/__tests__/v2Relations.test.ts src/__tests__/v2RelationLifecycleClosure.test.ts",
+      "exit_code": 0,
+      "log": "item-relation-regression.log",
+      "passed": 12,
+      "failed": 0
+    },
+    {
+      "name": "Client Boards and tray",
+      "cwd": "client",
+      "command": "npm.cmd run test:unit -- src/pages/Boards src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx",
+      "exit_code": 0,
+      "log": "client-tests.log",
+      "files": 22,
+      "passed": 180,
+      "failed": 0
+    }
+  ],
+  "unique_test_count": 243,
+  "smoke": {
+    "command": "cd server; node --import tsx ../docs/audits/2026-09-11-b3-builder/smoke.mjs",
+    "result": "PASS",
+    "passed": 7,
+    "http_requests": 14,
+    "evidence": "smoke-results.json",
+    "generated_at": "2026-09-12T00:23:05.367Z",
+    "boundaries": {
+      "board_and_item_lifecycle": "Actual production HTTP routers with database injection and synthetic owner",
+      "relation_freshness": "Production createRelation/getRelation service on the same disposable database",
+      "item_ref": "Production createClientNoteBlock service on the same disposable database",
+      "backfill": "Production migration 065 on a second actual pre-065 disposable fixture"
+    }
+  },
+  "gates": [
+    {
+      "name": "Server typecheck",
+      "cwd": "server",
+      "command": "node_modules/.bin/tsc.cmd --noEmit",
+      "exit_code": 0,
+      "log": "server-typecheck.log"
+    },
+    {
+      "name": "Server build and manifest",
+      "cwd": "server",
+      "command": "npm.cmd run build",
+      "exit_code": 0,
+      "log": "server-build.log"
+    },
+    {
+      "name": "Client typecheck and build",
+      "cwd": "client",
+      "command": "npm.cmd run build",
+      "exit_code": 0,
+      "log": "client-build.log"
+    },
+    {
+      "name": "Canvas runtime boundary",
+      "cwd": ".",
+      "command": "npm.cmd run check:canvas-runtime-boundary",
+      "exit_code": 0,
+      "log": "canvas-boundary.log",
+      "checks": 167
+    },
+    {
+      "name": "Relation freshness static contract",
+      "cwd": ".",
+      "command": "npm.cmd run check:v2-bn11-relation-freshness",
+      "exit_code": 0,
+      "log": "freshness-static.log"
+    },
+    {
+      "name": "Server shared runtime imports",
+      "cwd": ".",
+      "command": "node scripts/check-server-shared-runtime-import.mjs",
+      "exit_code": 0,
+      "log": "server-runtime-import.log"
+    },
+    {
+      "name": "Tool-face parity",
+      "cwd": ".",
+      "command": "npm.cmd run check:tool-face-parity",
+      "exit_code": 0,
+      "log": "tool-face-parity.log",
+      "public_entries": 14,
+      "human_reachability_verified": false
+    },
+    {
+      "name": "Documentation gates",
+      "cwd": ".",
+      "command": "npm.cmd run docs:check",
+      "exit_code": 0,
+      "log": "docs-check.log"
+    },
+    {
+      "name": "Final diff whitespace",
+      "cwd": ".",
+      "command": "git diff --check",
+      "exit_code": 0,
+      "log": "diff-check.log"
+    }
+  ],
+  "diff": {
+    "artifact": "implementation.diff",
+    "files": 27,
+    "added": 596,
+    "removed": 85,
+    "paths": [
+      {
+        "path": "client/scripts/boardToolsSmoke/mockApi.ts",
+        "added": 1,
+        "removed": 0
+      },
+      {
+        "path": "client/src/pages/Boards/BoardDeleteDialog.test.tsx",
+        "added": 1,
+        "removed": 0
+      },
+      {
+        "path": "client/src/pages/Boards/BoardPage.chalk.test.tsx",
+        "added": 1,
+        "removed": 0
+      },
+      {
+        "path": "client/src/pages/Boards/BoardPage.item.test.tsx",
+        "added": 1,
+        "removed": 0
+      },
+      {
+        "path": "client/src/pages/Boards/BoardPage.modal.test.tsx",
+        "added": 1,
+        "removed": 0
+      },
+      {
+        "path": "client/src/pages/Boards/BoardPage.smoke.test.tsx",
+        "added": 53,
+        "removed": 0
+      },
+      {
+        "path": "client/src/pages/Boards/BoardPage.staging.test.tsx",
+        "added": 1,
+        "removed": 0
+      },
+      {
+        "path": "client/src/pages/Boards/BoardPage.tsx",
+        "added": 12,
+        "removed": 1
+      },
+      {
+        "path": "client/src/pages/Boards/BoardPage.unboxing.test.tsx",
+        "added": 1,
+        "removed": 0
+      },
+      {
+        "path": "client/src/pages/Boards/BoardRelocatedVisual.test.tsx",
+        "added": 1,
+        "removed": 0
+      },
+      {
+        "path": "client/src/pages/Boards/Boards.module.css",
+        "added": 6,
+        "removed": 1
+      },
+      {
+        "path": "client/src/pages/Boards/boardRepository.test.ts",
+        "added": 6,
+        "removed": 1
+      },
+      {
+        "path": "client/src/pages/Boards/boardTextRangeClipboard.test.tsx",
+        "added": 1,
+        "removed": 0
+      },
+      {
+        "path": "client/src/pages/Boards/boardTypes.ts",
+        "added": 3,
+        "removed": 0
+      },
+      {
+        "path": "client/src/pages/Boards/useBoard.history.test.tsx",
+        "added": 3,
+        "removed": 1
+      },
+      {
+        "path": "client/src/pages/Boards/useBoard.test.tsx",
+        "added": 1,
+        "removed": 0
+      },
+      {
+        "path": "client/src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx",
+        "added": 1,
+        "removed": 0
+      },
+      {
+        "path": "server/package.json",
+        "added": 1,
+        "removed": 0
+      },
+      {
+        "path": "server/src/__tests__/helpers/v13BoardsFixture.ts",
+        "added": 8,
+        "removed": 0
+      },
+      {
+        "path": "server/src/__tests__/v13BoardChalk.test.ts",
+        "added": 5,
+        "removed": 3
+      },
+      {
+        "path": "server/src/__tests__/v13BoardServices.test.ts",
+        "added": 19,
+        "removed": 38
+      },
+      {
+        "path": "server/src/__tests__/v13BoardTextRanges.test.ts",
+        "added": 17,
+        "removed": 29
+      },
+      {
+        "path": "server/src/db/schema.sql",
+        "added": 2,
+        "removed": 0
+      },
+      {
+        "path": "server/src/services/boards.ts",
+        "added": 22,
+        "removed": 8
+      },
+      {
+        "path": "server/src/services/items.ts",
+        "added": 47,
+        "removed": 3
+      },
+      {
+        "path": "server/src/db/migrations/065_v13_board_item_identity.ts",
+        "added": 70,
+        "removed": 0
+      },
+      {
+        "path": "server/src/__tests__/v13BoardIdentity.test.ts",
+        "added": 311,
+        "removed": 0
+      }
+    ]
+  },
+  "migration_047": {
+    "path": "server/src/db/migrations/047_v2_item_relation_floor.ts",
+    "unchanged_against_head": true,
+    "sha256": "97c34981f80e3b7d982a7e8d51ffa92db26b70c9812bcd25695683198bd541c3"
+  },
+  "scope": {
+    "databases": "disposable :memory: and temporary test DBs only",
+    "security_tests": "not run",
+    "aggregate_runtime_gate": "not run: task requires affected static gates; aggregate also includes secret scanning and unrelated full suites",
+    "git_commit": false,
+    "user_data_migrated": false,
+    "subjective_acceptance": "HQ"
+  }
+}

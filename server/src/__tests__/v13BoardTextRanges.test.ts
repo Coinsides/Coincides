@@ -1,15 +1,11 @@
 import assert from 'node:assert/strict';
 import test, { type TestContext } from 'node:test';
-import Database from 'better-sqlite3';
+import type Database from 'better-sqlite3';
 import express from 'express';
 import type { Server } from 'node:http';
 import type { BoardTextRangeV1 } from '../../../shared/types/boardTextRange.js';
-import migration044 from '../db/migrations/044_v2_purposes.js';
 import migration057 from '../db/migrations/057_v13_boards.js';
 import migration059 from '../db/migrations/059_v13_board_text_ranges.js';
-import migration061 from '../db/migrations/061_v13_board_staging.js';
-import migration062 from '../db/migrations/062_v13_board_layers.js';
-import migration054 from '../db/migrations/054_v13_events_ledger.js';
 import { createBoardRouter } from '../routes/boards.js';
 import type { AuthRequest } from '../middleware/auth.js';
 import { AppError } from '../middleware/errorHandler.js';
@@ -17,25 +13,16 @@ import { createBoard, deleteBoard, getBoard } from '../services/boards.js';
 import { createBoardTextRange, getBoardTextRange, listBoardTextRanges, updateBoardTextRanges } from '../services/boardTextRanges.js';
 import { createV13BoardsFixture } from './helpers/v13BoardsFixture.js';
 
-function fixture(t: TestContext) {
-  const db = new Database(':memory:');
+async function fixture(t: TestContext) {
+  const db = await createV13BoardsFixture();
   t.after(() => db.close());
-  db.pragma('foreign_keys = ON');
   db.exec(`
-    CREATE TABLE users (id TEXT PRIMARY KEY);
-    CREATE TABLE courses (id TEXT PRIMARY KEY, user_id TEXT);
-    CREATE TABLE notes (id TEXT PRIMARY KEY, user_id TEXT, course_id TEXT,
-      title TEXT, status TEXT, note_class TEXT, source_kind TEXT);
-    CREATE TABLE note_blocks (id TEXT PRIMARY KEY, user_id TEXT, content_json TEXT, status TEXT);
-    CREATE TABLE note_block_placements (id TEXT PRIMARY KEY, block_id TEXT, note_id TEXT);
-    CREATE TABLE content_groups (id TEXT PRIMARY KEY, user_id TEXT, course_id TEXT,
-      note_id TEXT, title TEXT, status TEXT, identity_type TEXT, identity_role TEXT);
-    INSERT INTO users VALUES ('user');
-    INSERT INTO notes VALUES ('note','user',NULL,'Source note','active','user','manual');
-    INSERT INTO note_blocks VALUES ('block','user','{}','active');
-    INSERT INTO note_block_placements VALUES ('placement','block','note');
+    INSERT INTO users (id,email,password_hash,name) VALUES ('user','board-range@example.invalid','synthetic','Fixture');
+    INSERT INTO courses (id,user_id,name) VALUES ('project','user','Fixture project');
+    INSERT INTO notes (id,user_id,course_id,title) VALUES ('note','user','project','Source note');
+    INSERT INTO note_blocks (id,user_id,course_id,block_type) VALUES ('block','user','project','text');
+    INSERT INTO note_block_placements (id,block_id,note_id,order_index) VALUES ('placement','block','note',0);
   `);
-  db.transaction(() => { migration044.up(db); migration057.up(db); migration059.up(db); migration061.up(db); migration062.up(db); })();
   return db;
 }
 
@@ -78,7 +65,7 @@ async function rebaseFunction() {
 
 test('M1 actual edit rebase + body/range commits + GET keeps two independent board anchors live', async (t) => {
   const { rebaseBoardTextRanges } = await rebaseFunction();
-  const db = fixture(t);
+  const db = await fixture(t);
   const before = flow('before target after');
   writeBody(db, before);
   const first = create(db, 'First');
@@ -107,7 +94,7 @@ test('M1 actual edit rebase + body/range commits + GET keeps two independent boa
 
 test('M1 deleting a selected range and splitting its unit degrade with snapshot and original offsets', async (t) => {
   const { rebaseBoardTextRanges } = await rebaseFunction();
-  const db = fixture(t);
+  const db = await fixture(t);
   const before = flow('before target after');
   writeBody(db, before);
   const first = create(db);
@@ -137,7 +124,7 @@ test('M1 deleting a selected range and splitting its unit degrade with snapshot 
 
 test('F17 ordinary board range saves cannot revive drift or replace its original evidence', async (t) => {
   const { rebaseBoardTextRanges } = await rebaseFunction();
-  const db = fixture(t);
+  const db = await fixture(t);
   const before = flow('before target after');
   writeBody(db, before);
   const { board, anchor } = create(db);
@@ -160,8 +147,8 @@ test('F17 ordinary board range saves cannot revive drift or replace its original
   assert.deepEqual(getBoardTextRange(db, 'user', anchor.id), stored);
 });
 
-test('M1 source trash/restore revives active anchors, hard deletion retains snapshots, board deletion owns cleanup', (t) => {
-  const db = fixture(t);
+test('M1 source trash/restore revives active anchors, hard deletion retains snapshots, board deletion owns cleanup', async (t) => {
+  const db = await fixture(t);
   writeBody(db, flow('before target after'));
   const { board, anchor } = create(db);
   const reference = () => getBoard(db, 'user', board.id).members[0].reference;
@@ -188,7 +175,9 @@ test('M1 source trash/restore revives active anchors, hard deletion retains snap
 test('M1 059 fresh/base schema and legacy migration converge without annotation foreign keys', async (t) => {
   const fresh = await createV13BoardsFixture();
   t.after(() => fresh.close());
-  const upgraded = fixture(t);
+  const upgraded = await createV13BoardsFixture({ beforeBoardsMigration: true });
+  t.after(() => upgraded.close());
+  upgraded.transaction(() => { migration057.up(upgraded); migration059.up(upgraded); })();
   const shape = (db: Database.Database) => db.prepare(`SELECT type, name, sql FROM sqlite_master
     WHERE tbl_name = 'board_text_ranges' ORDER BY name`).all().map((row: any) => ({ ...row,
     sql: row.sql?.replace(/\s+/g, ' ').trim() ?? null }));
@@ -200,8 +189,7 @@ test('M1 059 fresh/base schema and legacy migration converge without annotation 
 });
 
 test('M2 HTTP paste mints independent durable anchors with mounted/unmounted receipts in one transaction', async (t) => {
-  const db = fixture(t);
-  migration054.up(db);
+  const db = await fixture(t);
   writeBody(db, flow('before target after'));
   const board = db.transaction(() => createBoard(db, 'user', { title: 'Paste', purpose: { title: 'Question' } }))().board;
   const app = express();

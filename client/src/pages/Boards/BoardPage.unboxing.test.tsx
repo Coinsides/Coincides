@@ -92,6 +92,7 @@ beforeEach(() => {
   item = { id: 'item', plain_text: 'An item ready to be assembled.', status: 'active', item_type: 'Claim',
     origin_board_id: 'board', origin_board_title: 'Unboxing board' };
   board = { board: { id: 'board', user_id: 'synthetic', title: 'Unboxing board', soul_id: 'soul', project_id: null,
+    identity_item_id: null, identity_description: null,
     viewport: { x: 10, y: -20, zoom: 1 }, created_at: at, updated_at: at }, edges: [], visuals: [], members: [{
     id: 'staged-item', board_id: 'board', member_kind: 'item', member_id: item.id, placed: false, mounted_actor: 'human',
     x: 0, y: 0, w: 260, h: 156, scale: 1, pinned: false, z_index: 0, metadata: {}, created_at: at, updated_at: at,

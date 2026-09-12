@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 342 份文档。
+共 343 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -323,7 +323,8 @@
 | [handoffs/2026-09-10-v13-5-c2-visual-language-order.md](handoffs/2026-09-10-v13-5-c2-visual-language-order.md) | 13.5 C2 · 视觉语言批 | `done（builder 施工回执；docs 索引/完整总门与凭据扫描留 HQ）` | — | — |
 | [handoffs/2026-09-10-v13-5-c3-cross-block-unit-move-order.md](handoffs/2026-09-10-v13-5-c3-cross-block-unit-move-order.md) | 13.5 C3 · 跨块迁居 | `done(HQ 收口:补裁一落地,普通块碰撞停线解除)` | — | — |
 | [handoffs/2026-09-10-v13-5-c4-paper-ink-order.md](handoffs/2026-09-10-v13-5-c4-paper-ink-order.md) | 13.5 C4 · 纸上手绘 | `done(HQ 收口:波次 C 末单收官)` | — | — |
-| [handoffs/2026-09-11-v13-5-b3-identity-bridge-order.md](handoffs/2026-09-11-v13-5-b3-identity-bridge-order.md) | B3 · 身份桥 | `ready` | — | — |
+| [handoffs/2026-09-11-v13-5-b3-identity-bridge-order.md](handoffs/2026-09-11-v13-5-b3-identity-bridge-order.md) | B3 · 身份桥 | `done（builder 工作树交付；待 HQ 复核放行）` | — | — |
+| [handoffs/2026-09-11-v13-5-b4v-viewport-bookmarks-order.md](handoffs/2026-09-11-v13-5-b4v-viewport-bookmarks-order.md) | B4v · 板视口书签 | `ready(候 B3 收口后派发)` | — | — |
 | [handoffs/2026-09-11-v13-5-d1-walls-order.md](handoffs/2026-09-11-v13-5-d1-walls-order.md) | D1 · 可调的墙 + 把手安家 | `done` | — | — |
 | [handoffs/2026-09-11-v13-5-d2-fix1-order.md](handoffs/2026-09-11-v13-5-d2-fix1-order.md) | D2-fix1 · F18 表头编辑键放行 | `ready` | — | — |
 | [handoffs/2026-09-11-v13-5-d2-header-chrome-order.md](handoffs/2026-09-11-v13-5-d2-header-chrome-order.md) | D2 · 纸上表头 + 顶栏拆解 | `done(builder 工作树交付；待 HQ 复核放行)` | — | — |

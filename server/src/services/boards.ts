@@ -23,7 +23,7 @@ import {
 import { createPurpose, getPurpose } from './purposes.js';
 import { createBoardTextRange, getBoardTextRange, replayBoardTextRange } from './boardTextRanges.js';
 import { mountBoardTextRangeSchema } from '../validators/boardTextRanges.js';
-import { createItem } from './items.js';
+import { createBoardIdentityItem, createItem } from './items.js';
 
 export type BoardMemberKind = 'note' | 'item' | 'content_group' | 'text_range';
 type JsonObject = Record<string, unknown>;
@@ -34,6 +34,7 @@ interface BoardRow {
   title: string;
   soul_id: string;
   project_id: string | null;
+  item_id: string | null;
   viewport: string;
   created_at: string;
   updated_at: string;
@@ -138,11 +139,17 @@ function memberRow(db: Database.Database, boardId: string, memberId: string): Bo
     .get(memberId, boardId) as BoardMemberRow | undefined;
 }
 
-function hydrateBoard(row: BoardRow) {
+function hydrateBoard(db: Database.Database, row: BoardRow) {
   const { base_layer_visible = true, ...viewport } = json<{
     x: number; y: number; zoom: number; base_layer_visible?: boolean;
   }>(row.viewport);
-  return { ...row, viewport, base_layer_visible };
+  const { item_id, ...board } = row;
+  const identity = item_id
+    ? db.prepare('SELECT plain_text FROM items WHERE id = ? AND user_id = ?')
+      .get(item_id, row.user_id) as { plain_text: string } | undefined
+    : undefined;
+  return { ...board, viewport, base_layer_visible,
+    identity_item_id: item_id, identity_description: identity?.plain_text ?? null };
 }
 
 function hydrateLayer(row: BoardLayerRow) {
@@ -323,18 +330,19 @@ export function createBoard(db: Database.Database, userId: string, value: unknow
   db.prepare(`INSERT INTO boards (id, user_id, title, soul_id, project_id, viewport, created_at, updated_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(id, userId, input.title, soul.id, input.project_id ?? null,
     JSON.stringify(input.viewport ?? { x: 0, y: 0, zoom: 1 }), now, now);
-  return { board: hydrateBoard(boardRow(db, userId, id)), purposeCreated };
+  createBoardIdentityItem(db, userId, id);
+  return { board: hydrateBoard(db, boardRow(db, userId, id)), purposeCreated };
 }
 
 export function listBoards(db: Database.Database, userId: string, input: { project_id?: string } = {}): Board[] {
   const rows = input.project_id === undefined
     ? db.prepare('SELECT * FROM boards WHERE user_id = ? ORDER BY updated_at DESC, id ASC').all(userId)
     : db.prepare('SELECT * FROM boards WHERE user_id = ? AND project_id = ? ORDER BY updated_at DESC, id ASC').all(userId, input.project_id);
-  return (rows as BoardRow[]).map(hydrateBoard);
+  return (rows as BoardRow[]).map((row) => hydrateBoard(db, row));
 }
 
 export function getBoard(db: Database.Database, userId: string, boardId: string) {
-  const board = hydrateBoard(boardRow(db, userId, boardId));
+  const board = hydrateBoard(db, boardRow(db, userId, boardId));
   const members = (db.prepare('SELECT * FROM board_members WHERE board_id = ? ORDER BY z_index, created_at, id')
     .all(boardId) as BoardMemberRow[]).map((row) => hydrateMember(db, userId, row));
   const edges = (db.prepare('SELECT * FROM board_edges WHERE board_id = ? ORDER BY created_at, id')
@@ -353,12 +361,13 @@ export function updateBoard(db: Database.Database, userId: string, boardId: stri
     ...(input.base_layer_visible === undefined ? {} : { base_layer_visible: input.base_layer_visible }) };
   db.prepare('UPDATE boards SET title = ?, viewport = ?, updated_at = ? WHERE id = ?')
     .run(input.title ?? row.title, JSON.stringify(viewport), new Date().toISOString(), boardId);
-  return hydrateBoard(boardRow(db, userId, boardId));
+  // A3: the title is board truth; identity content and its judgment Snapshots never follow it.
+  return hydrateBoard(db, boardRow(db, userId, boardId));
 }
 
 export function deleteBoard(db: Database.Database, userId: string, boardId: string) {
   requireTransaction(db);
-  const board = hydrateBoard(boardRow(db, userId, boardId));
+  const board = hydrateBoard(db, boardRow(db, userId, boardId));
   const counts = db.prepare(`SELECT
     (SELECT COUNT(*) FROM board_members WHERE board_id = ?) AS member_count,
     (SELECT COUNT(*) FROM board_edges WHERE board_id = ?) AS edge_count,
@@ -366,6 +375,11 @@ export function deleteBoard(db: Database.Database, userId: string, boardId: stri
   `).get(boardId, boardId, boardId) as { member_count: number; edge_count: number; visual_count: number };
   // Capture impact before removing endpoints. Only the board's owned rows go;
   // the soul, referenced content and historical relocation batches survive.
+  // The identity retires in this same transaction. Keep all Item and Relation history.
+  if (board.identity_item_id) {
+    db.prepare(`UPDATE items SET status = 'retired', retired_into_item_id = NULL, updated_at = ?
+      WHERE id = ? AND user_id = ?`).run(new Date().toISOString(), board.identity_item_id, userId);
+  }
   db.prepare('DELETE FROM board_edges WHERE board_id = ?').run(boardId);
   db.prepare('DELETE FROM board_members WHERE board_id = ?').run(boardId);
   db.prepare('DELETE FROM board_text_ranges WHERE board_id = ?').run(boardId);

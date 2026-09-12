@@ -22,6 +22,7 @@ const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
 const response = <T,>(data: T) => ({ data: clone(data) });
 const date = '2026-09-08T12:00:00.000Z';
 const board: Board = { id: 'cross-project-board', user_id: 'fixture', title: 'Across the library',
+  identity_item_id: null, identity_description: null,
   soul_id: 'soul', project_id: 'other-project', viewport: { x: 0, y: 0, zoom: 1 }, created_at: date, updated_at: date };
 const block: NoteBlock = { id: 'block', placement_id: 'p-block', block_type: 'paragraph', title: null,
   content_json: { body: 'A block stays in the tray' }, plain_text: 'A block stays in the tray',

@@ -153,6 +153,7 @@ function seedBoard(id: string, title: string, withMember = true) {
   const purpose = soul(`soul-${id}`, `Question for ${title}`);
   purposes.push(purpose);
   const board: Board = { id, user_id: 'fixture-user', title, soul_id: purpose.id, project_id: null,
+    identity_item_id: `identity-${id}`, identity_description: `Board: ${title}`,
     viewport: { x: 0, y: 0, zoom: 1 }, created_at: date, updated_at: date };
   const member: BoardMember = { ...geometry, id: `member-${id}`, board_id: id,
     member_kind: 'note', member_id: notes[0].id, x: 80, y: 70, metadata: {}, created_at: date, updated_at: date,
@@ -213,6 +214,7 @@ beforeEach(() => {
         : soul(`soul-${++sequence}`, creation.purpose!.title);
       if (!creation.soul_id) purposes.push(purpose);
       const board: Board = { id: `board-${++sequence}`, user_id: 'fixture-user', title: creation.title,
+        identity_item_id: `identity-${sequence}`, identity_description: `Board: ${creation.title}`,
         soul_id: purpose.id, project_id: null, viewport: { x: 0, y: 0, zoom: 1 }, created_at: date, updated_at: date };
       boards.push({ board, members: [], edges: [], visuals: [] });
       return response({ board });
@@ -304,6 +306,56 @@ function seedVisual(detail: BoardDetail, kind: BoardVisual['visual_kind']) {
   detail.visuals.push(visual);
   return visual;
 }
+
+describe('V13.5 B3 board identity details', () => {
+  it('reads the independent description, keeps it through rename and reopen, and adds no navigation or Item writes', async () => {
+    const detail = seedBoard('identity', 'Original board name', false);
+    detail.board.identity_description = 'A place to compare field observations.\nQuestions remain open.';
+    renderRoutes('/boards/identity');
+    await screen.findByRole('heading', { name: 'Original board name' });
+    fireEvent.click(screen.getByLabelText('Board menu'));
+    const identity = screen.getByRole('region', { name: 'Board identity' });
+    expect(within(identity).getByText('Identity Item linked')).toBeTruthy();
+    expect(within(identity).getByText('Independent description')).toBeTruthy();
+    expect(identity.textContent).toContain(detail.board.identity_description);
+    expect(within(identity).queryByRole('link')).toBeNull();
+    expect(within(identity).queryByRole('textbox')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Rename board' }));
+    fireEvent.change(screen.getByRole('textbox', { name: 'Board name' }), { target: { value: 'Renamed board' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Save name' }));
+    await screen.findByRole('heading', { name: 'Renamed board' });
+    expect(http.patch).toHaveBeenCalledExactlyOnceWith('/boards/identity', { title: 'Renamed board' });
+    expect(identity.textContent).toContain(detail.board.identity_description);
+    expect(identity.textContent).not.toContain('Board: Renamed board');
+    fireEvent.click(screen.getByRole('button', { name: 'Boards' }));
+    fireEvent.click(await screen.findByRole('link', { name: /Renamed board/ }));
+    await screen.findByRole('heading', { name: 'Renamed board' });
+    fireEvent.click(screen.getByLabelText('Board menu'));
+    expect(screen.getByRole('region', { name: 'Board identity' }).textContent).toContain(detail.board.identity_description);
+    expect(http.post).not.toHaveBeenCalled();
+    expect(http.put).not.toHaveBeenCalled();
+    expect(http.delete).not.toHaveBeenCalled();
+    expect(unexpectedWrites).toEqual([]);
+    console.info('V13_5_B3_CLIENT_IDENTITY', JSON.stringify({ title: detail.board.title,
+      identity_item_id: detail.board.identity_item_id, description: detail.board.identity_description,
+      rename_request: http.patch.mock.calls[0], reopened: true }));
+  });
+
+  it('uses the bridge to report missing identity without inventing one from the title or description', async () => {
+    const detail = seedBoard('missing-identity', 'A board title', false);
+    detail.board.identity_item_id = null;
+    detail.board.identity_description = 'A stale description cannot establish identity.';
+    renderRoutes('/boards/missing-identity');
+    await screen.findByRole('heading', { name: 'A board title' });
+    fireEvent.click(screen.getByLabelText('Board menu'));
+    const identity = screen.getByRole('region', { name: 'Board identity' });
+    expect(within(identity).getByText('No identity Item linked.')).toBeTruthy();
+    expect(identity.textContent).not.toContain(detail.board.identity_description);
+    expect(within(identity).queryByRole('link')).toBeNull();
+    expect(http.patch).not.toHaveBeenCalled();
+    expect(http.post).not.toHaveBeenCalled();
+  });
+});
 
 describe('V13.4 wave 1 wiring smoke', () => {
   it('A1 renames in the board, rejects a blank name and reopens the saved title', async () => {
@@ -604,6 +656,7 @@ describe('V13 S2 board and paper smoke', () => {
     const existing = soul('occupied-soul', 'An existing question');
     purposes.push(existing);
     boards.push({ board: { id: 'existing-board', user_id: 'fixture-user', title: 'Existing board', soul_id: existing.id,
+      identity_item_id: null, identity_description: null,
       project_id: null, viewport: { x: 10, y: 20, zoom: 0.8 }, created_at: date, updated_at: date }, members: [], edges: [], visuals: [] });
     renderRoutes('/boards');
     fireEvent.change(await screen.findByRole('textbox', { name: 'Board name' }), { target: { value: 'Another board name' } });

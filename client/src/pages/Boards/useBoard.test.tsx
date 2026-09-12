@@ -28,6 +28,7 @@ const geometry = { x: 10, y: 20, w: 240, h: 120, scale: 1, z_index: 0, pinned: f
 function board(id = 'board-a'): Board {
   return {
     id, user_id: 'fixture', title: id, soul_id: `soul-${id}`, project_id: null,
+    identity_item_id: null, identity_description: null,
     viewport: { x: 0, y: 0, zoom: 1 }, created_at: timestamp, updated_at: timestamp,
   };
 }

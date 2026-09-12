@@ -27,6 +27,9 @@ export interface Board {
   id: string;
   user_id: string;
   title: string;
+  /** The stored Board–Item bridge; title and identity description are independent. */
+  identity_item_id: string | null;
+  identity_description: string | null;
   soul_id: string;
   project_id: string | null;
   viewport: BoardViewport;

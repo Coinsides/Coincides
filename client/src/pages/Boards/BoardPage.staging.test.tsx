@@ -50,6 +50,7 @@ async function stage(title = 'Claim') {
 beforeEach(() => {
   vi.clearAllMocks();
   detail = { board: { id: 'board', user_id: 'synthetic', title: 'Staging board', soul_id: 'soul', project_id: null,
+    identity_item_id: null, identity_description: null,
     viewport: { x: 30, y: -20, zoom: 2 }, created_at: at, updated_at: at }, members: [], edges: [], visuals: [] };
   http.get.mockImplementation(async (url: string) => {
     if (url === '/boards/board') return clone(detail);

@@ -66,6 +66,7 @@ it('shows preserved shape text, table cells, image and raw connector styles with
 
 it('re-reads the mounted board when relocation or undo changes it, without notifying unrelated boards', async () => {
   const detail: BoardDetail = { board: { id: 'board-fixture', user_id: 'fixture', title: 'Fixture board',
+    identity_item_id: null, identity_description: null,
     soul_id: 'soul-fixture', project_id: null, viewport: { x: 0, y: 0, zoom: 1 }, created_at: '', updated_at: '' },
   members: [], edges: [], visuals: [] };
   io.get.mockImplementation(async () => structuredClone(detail));

@@ -22,6 +22,7 @@ export function resetSample(sample: 'empty' | 'group' | 'mixed' | 'alignment' = 
   sequence = 0; writes = []; events = [];
   detail = {
     board: { id: BOARD_ID, user_id: 'synthetic-user', title: 'Board tools workshop', soul_id: 'synthetic-soul',
+      identity_item_id: null, identity_description: null,
       project_id: null, viewport: { x: 0, y: 0, zoom: 1 }, created_at: date, updated_at: date },
     members: [], edges: [], visuals: [],
   };

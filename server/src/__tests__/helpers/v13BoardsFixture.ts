@@ -8,6 +8,7 @@ interface FixtureOptions {
   beforeStagingMigration?: boolean;
   beforeLayersMigration?: boolean;
   beforeTextSaveRevisionMigration?: boolean;
+  beforeIdentityMigration?: boolean;
 }
 
 /** Real schema/migrations in a disposable connection, without app startup or seed. */
@@ -17,6 +18,12 @@ export async function createV13BoardsFixture(options: FixtureOptions = {}): Prom
     db.pragma('foreign_keys = ON');
     let schema = readFileSync(new URL('../../db/schema.sql', import.meta.url), 'utf8');
     if (Object.values(options).some(Boolean)) {
+      // Historical schemas must not inherit 065's forward Item FK or bridge index.
+      schema = schema.replace(/  item_id TEXT REFERENCES items\(id\) ON DELETE (?:NO ACTION|RESTRICT),\r?\n/, '')
+        .replace(/CREATE UNIQUE INDEX IF NOT EXISTS idx_boards_item ON boards\(item_id\);\r?\n?/, '');
+    }
+    if (options.beforeBoardsMigration || options.beforeChalkMigration || options.beforeStagingMigration
+      || options.beforeLayersMigration || options.beforeTextSaveRevisionMigration) {
       schema = schema.replace(/,\r?\n  text_save_revision INTEGER NOT NULL DEFAULT 0 CHECK \(text_save_revision >= 0\)/, '');
     }
     if (options.beforeBoardsMigration || options.beforeChalkMigration || options.beforeStagingMigration || options.beforeLayersMigration) {
@@ -51,6 +58,7 @@ export async function createV13BoardsFixture(options: FixtureOptions = {}): Prom
       if (options.beforeStagingMigration && file >= '061_') continue;
       if (options.beforeLayersMigration && file >= '062_') continue;
       if (options.beforeTextSaveRevisionMigration && file >= '063_') continue;
+      if (options.beforeIdentityMigration && file >= '065_') continue;
       const { default: migration } = await import(new URL(file, directory).href) as {
         default: { up: (connection: Database.Database) => void };
       };

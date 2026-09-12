@@ -1287,6 +1287,7 @@ CREATE TABLE IF NOT EXISTS boards (
   title TEXT NOT NULL,
   soul_id TEXT NOT NULL REFERENCES purposes(id) ON DELETE RESTRICT,
   project_id TEXT REFERENCES courses(id) ON DELETE SET NULL,
+  item_id TEXT REFERENCES items(id) ON DELETE NO ACTION,
   viewport TEXT NOT NULL DEFAULT '{"x":0,"y":0,"zoom":1}'
     CHECK (json_valid(viewport) AND json_type(viewport) = 'object'),
   created_at TEXT NOT NULL,
@@ -1295,6 +1296,7 @@ CREATE TABLE IF NOT EXISTS boards (
 CREATE UNIQUE INDEX IF NOT EXISTS idx_boards_soul ON boards(soul_id);
 CREATE INDEX IF NOT EXISTS idx_boards_user_updated ON boards(user_id, updated_at);
 CREATE INDEX IF NOT EXISTS idx_boards_user_project ON boards(user_id, project_id);
+-- idx_boards_item is migration-owned (065): old boards acquire item_id after base schema startup.
 
 -- V13.4 layers (migration 062). Base is virtual and is represented by NULL.
 CREATE TABLE IF NOT EXISTS board_layers (

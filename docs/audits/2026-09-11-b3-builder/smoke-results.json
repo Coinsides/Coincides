@@ -1,0 +1,225 @@
+{
+  "generated_at": "2026-09-12T00:23:05.367Z",
+  "isolation": {
+    "database": ":memory:",
+    "binding": "127.0.0.1",
+    "port": 57732,
+    "real_database_opened": false
+  },
+  "boundaries": {
+    "board_and_item_lifecycle": "Actual production HTTP routers with database injection and synthetic owner",
+    "relation_freshness": "Production createRelation/getRelation service on the same disposable database",
+    "item_ref": "Production createClientNoteBlock service on the same disposable database",
+    "backfill": "Production migration 065 on a second actual pre-065 disposable fixture"
+  },
+  "http": [
+    {
+      "method": "POST",
+      "path": "/api/boards",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/items/cd3096b8-5c24-4e7f-9352-56a2da4d18c5",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/items",
+      "status": 201
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/boards/a04b39cc-6528-4aaa-bc41-08844dde0841",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/boards/a04b39cc-6528-4aaa-bc41-08844dde0841",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/items/116ea362-8a69-4e1d-ac7b-769a7872108b",
+      "status": 200
+    },
+    {
+      "method": "PUT",
+      "path": "/api/items/cd3096b8-5c24-4e7f-9352-56a2da4d18c5",
+      "status": 409
+    },
+    {
+      "method": "POST",
+      "path": "/api/items/cd3096b8-5c24-4e7f-9352-56a2da4d18c5/retire",
+      "status": 409
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/a04b39cc-6528-4aaa-bc41-08844dde0841/members",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/0fd88416-bfb7-4c15-a4a2-4b8242886123/members",
+      "status": 201
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/boards/a04b39cc-6528-4aaa-bc41-08844dde0841",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/items/cd3096b8-5c24-4e7f-9352-56a2da4d18c5",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/boards/0fd88416-bfb7-4c15-a4a2-4b8242886123",
+      "status": 200
+    }
+  ],
+  "checks": {
+    "create_with_snapshot": {
+      "pass": true,
+      "board_id": "a04b39cc-6528-4aaa-bc41-08844dde0841",
+      "identity_item_id": "cd3096b8-5c24-4e7f-9352-56a2da4d18c5",
+      "different_ids": true,
+      "identity_description": "Board: Initial board name",
+      "origin_board_id": null,
+      "current_snapshot": {
+        "id": "3d88d8c8-f528-474a-9f8d-194274ee48a7",
+        "item_id": "cd3096b8-5c24-4e7f-9352-56a2da4d18c5",
+        "user_id": "synthetic-b3-smoke-owner",
+        "content": "Board: Initial board name",
+        "content_hash": "sha256:726ed1fec5f448632471baa2cb3b5cc4f28ed06ee4933f3f46883b382cc244d1",
+        "created_at": "2026-09-12T00:23:05.549Z"
+      },
+      "metadata": {
+        "board_identity": {
+          "board_id": "a04b39cc-6528-4aaa-bc41-08844dde0841",
+          "minted_by": "create_board",
+          "minted_at": "2026-09-12T00:23:05.549Z",
+          "title_at_mint": "Initial board name",
+          "project_id_at_mint": "72000000-0000-4000-8000-000000000001"
+        }
+      }
+    },
+    "rename_without_drift": {
+      "pass": true,
+      "relation_id": "2241cbaf-4cf8-4c8c-9898-b897961ef5bd",
+      "before_freshness": "fresh",
+      "after_freshness": "fresh",
+      "identity_row_byte_equal": true,
+      "snapshots_byte_equal": true,
+      "current_title": "Renamed board: distinct label",
+      "description": "Board: Initial board name"
+    },
+    "freshness_positive_control": {
+      "pass": true,
+      "relation_id": "2241cbaf-4cf8-4c8c-9898-b897961ef5bd",
+      "ordinary_item_id": "116ea362-8a69-4e1d-ac7b-769a7872108b",
+      "before": "fresh",
+      "after": "to_changed",
+      "from_changed": false,
+      "to_changed": true,
+      "judgment_snapshot_id_unchanged": true,
+      "judgment_content": "Ordinary premise before edit",
+      "current_content": "Ordinary premise changed after judgment"
+    },
+    "item_write_gate": {
+      "pass": true,
+      "update": {
+        "error": "This Item is a board identity. Please operate from the board entry.",
+        "details": {
+          "code": "board_identity_requires_board_entry",
+          "board_id": "a04b39cc-6528-4aaa-bc41-08844dde0841"
+        }
+      },
+      "retire": {
+        "error": "This Item is a board identity. Please operate from the board entry.",
+        "details": {
+          "code": "board_identity_requires_board_entry",
+          "board_id": "a04b39cc-6528-4aaa-bc41-08844dde0841"
+        }
+      },
+      "identity_unchanged": true
+    },
+    "ordinary_read_citizenship": {
+      "pass": true,
+      "note_block_id": "f83e5438-a7ee-4142-87f8-77302b4ca40e",
+      "note_block_type": "item_ref",
+      "content_json": {
+        "item_id": "cd3096b8-5c24-4e7f-9352-56a2da4d18c5"
+      },
+      "copied_plain_text": null,
+      "own_board_mount_state": "available",
+      "other_board_mount_state": "available"
+    },
+    "delete_retires_identity": {
+      "pass": true,
+      "item_status": "retired",
+      "history_readable": true,
+      "snapshot_id_retained": "3d88d8c8-f528-474a-9f8d-194274ee48a7",
+      "other_board_projection_status": "retired",
+      "purpose_retained": true,
+      "relation_retained": true
+    },
+    "backfill": {
+      "pass": true,
+      "migration_started": "2026-09-12T00:23:05.682Z",
+      "migration_finished": "2026-09-12T00:23:05.683Z",
+      "board_ids_retained": true,
+      "original_board_rows_unchanged": true,
+      "board_count": 2,
+      "identity_count": 2,
+      "snapshot_count": 2,
+      "rerun_additions": 0,
+      "ledger": [
+        {
+          "board_id": "legacy-board-a",
+          "board_created_at": "2020-02-03T04:05:06.000Z",
+          "item_id": "f2e5fa49-72fc-4933-8779-ed25064d7e45",
+          "identity_created_at": "2026-09-12T00:23:05.683Z",
+          "origin_board_id": null,
+          "metadata": {
+            "board_identity": {
+              "board_id": "legacy-board-a",
+              "minted_by": "migration_065",
+              "minted_at": "2026-09-12T00:23:05.683Z",
+              "title_at_mint": "Historical legacy-board-a",
+              "project_id_at_mint": "72000000-0000-4000-8000-000000000001"
+            }
+          },
+          "snapshot_id": "48935baf-8334-41dc-bd21-403023eaef32",
+          "snapshot_created_at": "2026-09-12T00:23:05.683Z"
+        },
+        {
+          "board_id": "legacy-board-b",
+          "board_created_at": "2020-02-03T04:05:06.000Z",
+          "item_id": "044e9e85-4c62-462a-94c0-3edb2f348a7e",
+          "identity_created_at": "2026-09-12T00:23:05.683Z",
+          "origin_board_id": null,
+          "metadata": {
+            "board_identity": {
+              "board_id": "legacy-board-b",
+              "minted_by": "migration_065",
+              "minted_at": "2026-09-12T00:23:05.683Z",
+              "title_at_mint": "Historical legacy-board-b",
+              "project_id_at_mint": null
+            }
+          },
+          "snapshot_id": "5a3a320a-b787-4be8-b67c-764c2ffeb1fc",
+          "snapshot_created_at": "2026-09-12T00:23:05.683Z"
+        }
+      ]
+    }
+  },
+  "result": "PASS",
+  "passed_checks": 7
+}

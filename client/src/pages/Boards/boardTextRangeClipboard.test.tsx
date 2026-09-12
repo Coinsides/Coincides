@@ -95,6 +95,7 @@ beforeEach(() => {
   vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(700);
   detail = {
     board: { id: 'board', title: 'Reference board', user_id: 'fixture', soul_id: 'soul', project_id: null,
+      identity_item_id: null, identity_description: null,
       viewport: { x: 0, y: 0, zoom: 1 }, created_at: date, updated_at: date },
     members: [], visuals: [], edges: [],
   };

@@ -42,7 +42,9 @@ beforeEach(() => {
   nextId = 0;
   events = [];
   saved = {
-    board: { id: 'board-a', user_id: 'fixture', title: 'Board', soul_id: 'soul-a', project_id: null, viewport: { x: 0, y: 0, zoom: 1 }, created_at: timestamp, updated_at: timestamp },
+    board: { id: 'board-a', user_id: 'fixture', title: 'Board', soul_id: 'soul-a', project_id: null,
+      identity_item_id: null, identity_description: null,
+      viewport: { x: 0, y: 0, zoom: 1 }, created_at: timestamp, updated_at: timestamp },
     members: [makeMember('a'), makeMember('b'), { ...makeMember('c'), pinned: true }],
     visuals: [makeVisual('v1'), makeVisual('v2'), makeVisual('v3')],
     edges: [makeEdge('e1'), makeEdge('e2', 'a', 'c')],

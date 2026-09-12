@@ -91,6 +91,7 @@ beforeEach(() => {
   ];
   detail = {
     board: { id: 'item-board', user_id: 'fixture-user', title: 'Item board', soul_id: 'soul', project_id: null,
+      identity_item_id: null, identity_description: null,
       viewport: { x: 0, y: 0, zoom: 1 }, created_at: '2026-09-09', updated_at: '2026-09-09' },
     members: [], edges: [], visuals: [],
   };

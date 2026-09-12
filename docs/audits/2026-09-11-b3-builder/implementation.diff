@@ -1,0 +1,1215 @@
+diff --git a/client/scripts/boardToolsSmoke/mockApi.ts b/client/scripts/boardToolsSmoke/mockApi.ts
+index 3d5df26..f169d0e 100644
+--- a/client/scripts/boardToolsSmoke/mockApi.ts
++++ b/client/scripts/boardToolsSmoke/mockApi.ts
+@@ -22,6 +22,7 @@ export function resetSample(sample: 'empty' | 'group' | 'mixed' | 'alignment' =
+   sequence = 0; writes = []; events = [];
+   detail = {
+     board: { id: BOARD_ID, user_id: 'synthetic-user', title: 'Board tools workshop', soul_id: 'synthetic-soul',
++      identity_item_id: null, identity_description: null,
+       project_id: null, viewport: { x: 0, y: 0, zoom: 1 }, created_at: date, updated_at: date },
+     members: [], edges: [], visuals: [],
+   };
+diff --git a/client/src/pages/Boards/BoardDeleteDialog.test.tsx b/client/src/pages/Boards/BoardDeleteDialog.test.tsx
+index b6d545d..50f5c9c 100644
+--- a/client/src/pages/Boards/BoardDeleteDialog.test.tsx
++++ b/client/src/pages/Boards/BoardDeleteDialog.test.tsx
+@@ -12,6 +12,7 @@ vi.mock('./boardRepository', () => ({
+ const date = '2026-09-09T12:00:00Z';
+ const board: Board = {
+   id: 'dialog-board', title: 'Deletion scope', user_id: 'synthetic-user', soul_id: 'retained-soul',
++  identity_item_id: null, identity_description: null,
+   project_id: null, viewport: { x: 0, y: 0, zoom: 1 }, created_at: date, updated_at: date,
+ };
+ const geometry = { x: 0, y: 0, w: 240, h: 160, scale: 1, z_index: 0, pinned: false };
+diff --git a/client/src/pages/Boards/BoardPage.chalk.test.tsx b/client/src/pages/Boards/BoardPage.chalk.test.tsx
+index ff8e458..061a29d 100644
+--- a/client/src/pages/Boards/BoardPage.chalk.test.tsx
++++ b/client/src/pages/Boards/BoardPage.chalk.test.tsx
+@@ -60,6 +60,7 @@ beforeEach(() => {
+   sequence = 0;
+   detail = {
+     board: { id: 'chalk-board', user_id: 'synthetic-chalk-user', title: 'Chalk workshop', soul_id: 'chalk-soul',
++      identity_item_id: null, identity_description: null,
+       project_id: null, viewport: { x: 0, y: 0, zoom: 1 }, created_at: date, updated_at: date },
+     members: [], edges: [], visuals: [],
+   };
+diff --git a/client/src/pages/Boards/BoardPage.item.test.tsx b/client/src/pages/Boards/BoardPage.item.test.tsx
+index c5fe64b..9ffd895 100644
+--- a/client/src/pages/Boards/BoardPage.item.test.tsx
++++ b/client/src/pages/Boards/BoardPage.item.test.tsx
+@@ -91,6 +91,7 @@ beforeEach(() => {
+   ];
+   detail = {
+     board: { id: 'item-board', user_id: 'fixture-user', title: 'Item board', soul_id: 'soul', project_id: null,
++      identity_item_id: null, identity_description: null,
+       viewport: { x: 0, y: 0, zoom: 1 }, created_at: '2026-09-09', updated_at: '2026-09-09' },
+     members: [], edges: [], visuals: [],
+   };
+diff --git a/client/src/pages/Boards/BoardPage.modal.test.tsx b/client/src/pages/Boards/BoardPage.modal.test.tsx
+index 9b6b890..cb4a9a9 100644
+--- a/client/src/pages/Boards/BoardPage.modal.test.tsx
++++ b/client/src/pages/Boards/BoardPage.modal.test.tsx
+@@ -61,6 +61,7 @@ beforeEach(() => {
+   savedText = 'Saved paragraph from the note.';
+   detail = {
+     board: { id: 'board', user_id: 'fixture', title: 'Modal board', soul_id: 'soul', project_id: null,
++      identity_item_id: null, identity_description: null,
+       viewport: { x: 31, y: -42, zoom: 0.8 }, created_at: date, updated_at: date },
+     members: [member('first'), member('second'), member('item', 'item'), member('range', 'text_range')],
+     edges: [], visuals: [],
+diff --git a/client/src/pages/Boards/BoardPage.smoke.test.tsx b/client/src/pages/Boards/BoardPage.smoke.test.tsx
+index 1f36681..9c0df53 100644
+--- a/client/src/pages/Boards/BoardPage.smoke.test.tsx
++++ b/client/src/pages/Boards/BoardPage.smoke.test.tsx
+@@ -153,6 +153,7 @@ function seedBoard(id: string, title: string, withMember = true) {
+   const purpose = soul(`soul-${id}`, `Question for ${title}`);
+   purposes.push(purpose);
+   const board: Board = { id, user_id: 'fixture-user', title, soul_id: purpose.id, project_id: null,
++    identity_item_id: `identity-${id}`, identity_description: `Board: ${title}`,
+     viewport: { x: 0, y: 0, zoom: 1 }, created_at: date, updated_at: date };
+   const member: BoardMember = { ...geometry, id: `member-${id}`, board_id: id,
+     member_kind: 'note', member_id: notes[0].id, x: 80, y: 70, metadata: {}, created_at: date, updated_at: date,
+@@ -213,6 +214,7 @@ beforeEach(() => {
+         : soul(`soul-${++sequence}`, creation.purpose!.title);
+       if (!creation.soul_id) purposes.push(purpose);
+       const board: Board = { id: `board-${++sequence}`, user_id: 'fixture-user', title: creation.title,
++        identity_item_id: `identity-${sequence}`, identity_description: `Board: ${creation.title}`,
+         soul_id: purpose.id, project_id: null, viewport: { x: 0, y: 0, zoom: 1 }, created_at: date, updated_at: date };
+       boards.push({ board, members: [], edges: [], visuals: [] });
+       return response({ board });
+@@ -305,6 +307,56 @@ function seedVisual(detail: BoardDetail, kind: BoardVisual['visual_kind']) {
+   return visual;
+ }
+ 
++describe('V13.5 B3 board identity details', () => {
++  it('reads the independent description, keeps it through rename and reopen, and adds no navigation or Item writes', async () => {
++    const detail = seedBoard('identity', 'Original board name', false);
++    detail.board.identity_description = 'A place to compare field observations.\nQuestions remain open.';
++    renderRoutes('/boards/identity');
++    await screen.findByRole('heading', { name: 'Original board name' });
++    fireEvent.click(screen.getByLabelText('Board menu'));
++    const identity = screen.getByRole('region', { name: 'Board identity' });
++    expect(within(identity).getByText('Identity Item linked')).toBeTruthy();
++    expect(within(identity).getByText('Independent description')).toBeTruthy();
++    expect(identity.textContent).toContain(detail.board.identity_description);
++    expect(within(identity).queryByRole('link')).toBeNull();
++    expect(within(identity).queryByRole('textbox')).toBeNull();
++    fireEvent.click(screen.getByRole('button', { name: 'Rename board' }));
++    fireEvent.change(screen.getByRole('textbox', { name: 'Board name' }), { target: { value: 'Renamed board' } });
++    fireEvent.click(screen.getByRole('button', { name: 'Save name' }));
++    await screen.findByRole('heading', { name: 'Renamed board' });
++    expect(http.patch).toHaveBeenCalledExactlyOnceWith('/boards/identity', { title: 'Renamed board' });
++    expect(identity.textContent).toContain(detail.board.identity_description);
++    expect(identity.textContent).not.toContain('Board: Renamed board');
++    fireEvent.click(screen.getByRole('button', { name: 'Boards' }));
++    fireEvent.click(await screen.findByRole('link', { name: /Renamed board/ }));
++    await screen.findByRole('heading', { name: 'Renamed board' });
++    fireEvent.click(screen.getByLabelText('Board menu'));
++    expect(screen.getByRole('region', { name: 'Board identity' }).textContent).toContain(detail.board.identity_description);
++    expect(http.post).not.toHaveBeenCalled();
++    expect(http.put).not.toHaveBeenCalled();
++    expect(http.delete).not.toHaveBeenCalled();
++    expect(unexpectedWrites).toEqual([]);
++    console.info('V13_5_B3_CLIENT_IDENTITY', JSON.stringify({ title: detail.board.title,
++      identity_item_id: detail.board.identity_item_id, description: detail.board.identity_description,
++      rename_request: http.patch.mock.calls[0], reopened: true }));
++  });
++
++  it('uses the bridge to report missing identity without inventing one from the title or description', async () => {
++    const detail = seedBoard('missing-identity', 'A board title', false);
++    detail.board.identity_item_id = null;
++    detail.board.identity_description = 'A stale description cannot establish identity.';
++    renderRoutes('/boards/missing-identity');
++    await screen.findByRole('heading', { name: 'A board title' });
++    fireEvent.click(screen.getByLabelText('Board menu'));
++    const identity = screen.getByRole('region', { name: 'Board identity' });
++    expect(within(identity).getByText('No identity Item linked.')).toBeTruthy();
++    expect(identity.textContent).not.toContain(detail.board.identity_description);
++    expect(within(identity).queryByRole('link')).toBeNull();
++    expect(http.patch).not.toHaveBeenCalled();
++    expect(http.post).not.toHaveBeenCalled();
++  });
++});
++
+ describe('V13.4 wave 1 wiring smoke', () => {
+   it('A1 renames in the board, rejects a blank name and reopens the saved title', async () => {
+     const detail = seedBoard('rename', 'Original name');
+@@ -604,6 +656,7 @@ describe('V13 S2 board and paper smoke', () => {
+     const existing = soul('occupied-soul', 'An existing question');
+     purposes.push(existing);
+     boards.push({ board: { id: 'existing-board', user_id: 'fixture-user', title: 'Existing board', soul_id: existing.id,
++      identity_item_id: null, identity_description: null,
+       project_id: null, viewport: { x: 10, y: 20, zoom: 0.8 }, created_at: date, updated_at: date }, members: [], edges: [], visuals: [] });
+     renderRoutes('/boards');
+     fireEvent.change(await screen.findByRole('textbox', { name: 'Board name' }), { target: { value: 'Another board name' } });
+diff --git a/client/src/pages/Boards/BoardPage.staging.test.tsx b/client/src/pages/Boards/BoardPage.staging.test.tsx
+index 6ede553..d719d1d 100644
+--- a/client/src/pages/Boards/BoardPage.staging.test.tsx
++++ b/client/src/pages/Boards/BoardPage.staging.test.tsx
+@@ -50,6 +50,7 @@ async function stage(title = 'Claim') {
+ beforeEach(() => {
+   vi.clearAllMocks();
+   detail = { board: { id: 'board', user_id: 'synthetic', title: 'Staging board', soul_id: 'soul', project_id: null,
++    identity_item_id: null, identity_description: null,
+     viewport: { x: 30, y: -20, zoom: 2 }, created_at: at, updated_at: at }, members: [], edges: [], visuals: [] };
+   http.get.mockImplementation(async (url: string) => {
+     if (url === '/boards/board') return clone(detail);
+diff --git a/client/src/pages/Boards/BoardPage.tsx b/client/src/pages/Boards/BoardPage.tsx
+index 2cef74e..f2de7ee 100644
+--- a/client/src/pages/Boards/BoardPage.tsx
++++ b/client/src/pages/Boards/BoardPage.tsx
+@@ -931,7 +931,18 @@ export default function BoardPage() {
+       </button>
+       <details className={styles.boardMenu}>
+         <summary aria-label="Board menu">More</summary>
+-        <button className={styles.button} disabled={board.pending} onClick={() => { void prepareDelete(); }}>Delete board</button>
++        <div className={styles.boardMenuContent}>
++          <section className={styles.boardIdentity} aria-label="Board identity">
++            <h2>Board identity</h2>
++            {detail.board.identity_item_id ? <>
++              <p>Identity Item linked</p>
++              <h3>Independent description</h3>
++              <p className={styles.identityDescription}>{detail.board.identity_description || 'Description unavailable.'}</p>
++              <p className={styles.identityHint}>Renaming the board leaves this description unchanged.</p>
++            </> : <p>No identity Item linked.</p>}
++          </section>
++          <button className={styles.button} disabled={board.pending} onClick={() => { void prepareDelete(); }}>Delete board</button>
++        </div>
+       </details>
+     </header>
+     {board.error && <div className={styles.error} role="alert"><span>{board.error}</span>
+diff --git a/client/src/pages/Boards/BoardPage.unboxing.test.tsx b/client/src/pages/Boards/BoardPage.unboxing.test.tsx
+index 168761a..5260add 100644
+--- a/client/src/pages/Boards/BoardPage.unboxing.test.tsx
++++ b/client/src/pages/Boards/BoardPage.unboxing.test.tsx
+@@ -92,6 +92,7 @@ beforeEach(() => {
+   item = { id: 'item', plain_text: 'An item ready to be assembled.', status: 'active', item_type: 'Claim',
+     origin_board_id: 'board', origin_board_title: 'Unboxing board' };
+   board = { board: { id: 'board', user_id: 'synthetic', title: 'Unboxing board', soul_id: 'soul', project_id: null,
++    identity_item_id: null, identity_description: null,
+     viewport: { x: 10, y: -20, zoom: 1 }, created_at: at, updated_at: at }, edges: [], visuals: [], members: [{
+     id: 'staged-item', board_id: 'board', member_kind: 'item', member_id: item.id, placed: false, mounted_actor: 'human',
+     x: 0, y: 0, w: 260, h: 156, scale: 1, pinned: false, z_index: 0, metadata: {}, created_at: at, updated_at: at,
+diff --git a/client/src/pages/Boards/BoardRelocatedVisual.test.tsx b/client/src/pages/Boards/BoardRelocatedVisual.test.tsx
+index 71a19c7..b245d95 100644
+--- a/client/src/pages/Boards/BoardRelocatedVisual.test.tsx
++++ b/client/src/pages/Boards/BoardRelocatedVisual.test.tsx
+@@ -66,6 +66,7 @@ it('shows preserved shape text, table cells, image and raw connector styles with
+ 
+ it('re-reads the mounted board when relocation or undo changes it, without notifying unrelated boards', async () => {
+   const detail: BoardDetail = { board: { id: 'board-fixture', user_id: 'fixture', title: 'Fixture board',
++    identity_item_id: null, identity_description: null,
+     soul_id: 'soul-fixture', project_id: null, viewport: { x: 0, y: 0, zoom: 1 }, created_at: '', updated_at: '' },
+   members: [], edges: [], visuals: [] };
+   io.get.mockImplementation(async () => structuredClone(detail));
+diff --git a/client/src/pages/Boards/Boards.module.css b/client/src/pages/Boards/Boards.module.css
+index ac72462..afad376 100644
+--- a/client/src/pages/Boards/Boards.module.css
++++ b/client/src/pages/Boards/Boards.module.css
+@@ -59,7 +59,12 @@
+ .edgeEditor input { width: 100%; }
+ .boardMenu { position: relative; }
+ .boardMenu summary { padding: 8px; cursor: pointer; color: var(--text-secondary); font-size: 12px; }
+-.boardMenu > button { position: absolute; top: 100%; right: 0; z-index: 5; background: var(--bg-surface); border: 1px solid var(--border-default); }
++.boardMenuContent { position: absolute; top: 100%; right: 0; z-index: 70; width: 288px; max-width: calc(100vw - 32px); max-height: calc(100vh - 120px); overflow: auto; padding: 12px; background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 6px; }
++.boardIdentity { padding-bottom: 12px; margin-bottom: 8px; border-bottom: 1px solid var(--border-default); font-size: 12px; line-height: 1.5; color: var(--text-primary); }
++.boardIdentity h2 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
++.boardIdentity h3 { font-size: 12px; font-weight: 600; margin-top: 12px; }
++.identityDescription { white-space: pre-wrap; overflow-wrap: anywhere; }
++.identityHint { color: var(--text-secondary); margin-top: 8px; }
+ .deleteDialog { margin: auto; max-width: 480px; width: calc(100% - 32px); padding: 24px; border: 1px solid var(--border-default); border-radius: 8px; background: var(--bg-surface); color: var(--text-primary); }
+ .deleteDialog::backdrop { background: rgb(0 0 0 / 55%); }
+ .deleteDialog h2 { font-size: 18px; margin-bottom: 12px; overflow-wrap: anywhere; }
+diff --git a/client/src/pages/Boards/boardRepository.test.ts b/client/src/pages/Boards/boardRepository.test.ts
+index b870721..04ca196 100644
+--- a/client/src/pages/Boards/boardRepository.test.ts
++++ b/client/src/pages/Boards/boardRepository.test.ts
+@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, expectTypeOf, it, vi } from 'vitest';
+ import { boardErrorMessage, boardRepository, loadBoardCandidates } from './boardRepository';
+ import type {
+   Board, BoardDetail, BoardEdge, BoardMember, BoardVisual, CreateBoardInput,
+-  CreateBoardVisualInput, MountBoardMemberInput, PatchBoardMemberInput,
++  CreateBoardVisualInput, MountBoardMemberInput, PatchBoardInput, PatchBoardMemberInput,
+ } from './boardTypes';
+ 
+ const api = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() }));
+@@ -12,6 +12,7 @@ const geometry = { x: -720, y: 480, w: 260, h: 160, scale: 1.5, z_index: 3, pinn
+ const timestamp = '2026-09-08T12:00:00.000Z';
+ const board: Board = {
+   id: 'board-1', user_id: 'fixture-user', title: 'Where do these ideas meet?', soul_id: 'soul-1',
++  identity_item_id: 'identity-1', identity_description: 'An independent description of this board.',
+   project_id: null, viewport: { x: -16000, y: 22000, zoom: 0.17 }, created_at: timestamp, updated_at: timestamp,
+ };
+ const member: BoardMember = {
+@@ -47,6 +48,10 @@ describe('board HTTP repository', () => {
+   });
+ 
+   it('accepts exactly one soul creation path and projection-only member geometry types', () => {
++    expectTypeOf<Board['identity_item_id']>().toEqualTypeOf<string | null>();
++    expectTypeOf<Board['identity_description']>().toEqualTypeOf<string | null>();
++    expectTypeOf<Extract<keyof CreateBoardInput, 'identity_item_id' | 'identity_description'>>().toEqualTypeOf<never>();
++    expectTypeOf<Extract<keyof PatchBoardInput, 'identity_item_id' | 'identity_description'>>().toEqualTypeOf<never>();
+     const newSoul = { title: 'One sentence', purpose: { title: 'One sentence' } } satisfies CreateBoardInput;
+     const existingSoul = { title: 'One sentence', soul_id: 'soul-1' } satisfies CreateBoardInput;
+     expectTypeOf<typeof newSoul>().toMatchTypeOf<CreateBoardInput>();
+diff --git a/client/src/pages/Boards/boardTextRangeClipboard.test.tsx b/client/src/pages/Boards/boardTextRangeClipboard.test.tsx
+index 20a352a..1afcfbc 100644
+--- a/client/src/pages/Boards/boardTextRangeClipboard.test.tsx
++++ b/client/src/pages/Boards/boardTextRangeClipboard.test.tsx
+@@ -95,6 +95,7 @@ beforeEach(() => {
+   vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(700);
+   detail = {
+     board: { id: 'board', title: 'Reference board', user_id: 'fixture', soul_id: 'soul', project_id: null,
++      identity_item_id: null, identity_description: null,
+       viewport: { x: 0, y: 0, zoom: 1 }, created_at: date, updated_at: date },
+     members: [], visuals: [], edges: [],
+   };
+diff --git a/client/src/pages/Boards/boardTypes.ts b/client/src/pages/Boards/boardTypes.ts
+index 142eeda..fab777f 100644
+--- a/client/src/pages/Boards/boardTypes.ts
++++ b/client/src/pages/Boards/boardTypes.ts
+@@ -27,6 +27,9 @@ export interface Board {
+   id: string;
+   user_id: string;
+   title: string;
++  /** The stored Board–Item bridge; title and identity description are independent. */
++  identity_item_id: string | null;
++  identity_description: string | null;
+   soul_id: string;
+   project_id: string | null;
+   viewport: BoardViewport;
+diff --git a/client/src/pages/Boards/useBoard.history.test.tsx b/client/src/pages/Boards/useBoard.history.test.tsx
+index e2a260e..e6fd892 100644
+--- a/client/src/pages/Boards/useBoard.history.test.tsx
++++ b/client/src/pages/Boards/useBoard.history.test.tsx
+@@ -42,7 +42,9 @@ beforeEach(() => {
+   nextId = 0;
+   events = [];
+   saved = {
+-    board: { id: 'board-a', user_id: 'fixture', title: 'Board', soul_id: 'soul-a', project_id: null, viewport: { x: 0, y: 0, zoom: 1 }, created_at: timestamp, updated_at: timestamp },
++    board: { id: 'board-a', user_id: 'fixture', title: 'Board', soul_id: 'soul-a', project_id: null,
++      identity_item_id: null, identity_description: null,
++      viewport: { x: 0, y: 0, zoom: 1 }, created_at: timestamp, updated_at: timestamp },
+     members: [makeMember('a'), makeMember('b'), { ...makeMember('c'), pinned: true }],
+     visuals: [makeVisual('v1'), makeVisual('v2'), makeVisual('v3')],
+     edges: [makeEdge('e1'), makeEdge('e2', 'a', 'c')],
+diff --git a/client/src/pages/Boards/useBoard.test.tsx b/client/src/pages/Boards/useBoard.test.tsx
+index 020d1ec..ba061d5 100644
+--- a/client/src/pages/Boards/useBoard.test.tsx
++++ b/client/src/pages/Boards/useBoard.test.tsx
+@@ -28,6 +28,7 @@ const geometry = { x: 10, y: 20, w: 240, h: 120, scale: 1, z_index: 0, pinned: f
+ function board(id = 'board-a'): Board {
+   return {
+     id, user_id: 'fixture', title: id, soul_id: `soul-${id}`, project_id: null,
++    identity_item_id: null, identity_description: null,
+     viewport: { x: 0, y: 0, zoom: 1 }, created_at: timestamp, updated_at: timestamp,
+   };
+ }
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx b/client/src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx
+index c232b05..7117620 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx
++++ b/client/src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx
+@@ -22,6 +22,7 @@ const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value));
+ const response = <T,>(data: T) => ({ data: clone(data) });
+ const date = '2026-09-08T12:00:00.000Z';
+ const board: Board = { id: 'cross-project-board', user_id: 'fixture', title: 'Across the library',
++  identity_item_id: null, identity_description: null,
+   soul_id: 'soul', project_id: 'other-project', viewport: { x: 0, y: 0, zoom: 1 }, created_at: date, updated_at: date };
+ const block: NoteBlock = { id: 'block', placement_id: 'p-block', block_type: 'paragraph', title: null,
+   content_json: { body: 'A block stays in the tray' }, plain_text: 'A block stays in the tray',
+diff --git a/server/package.json b/server/package.json
+index ac03c73..2b8ad66 100644
+--- a/server/package.json
++++ b/server/package.json
+@@ -20,6 +20,7 @@
+     "test:v13-coordinate-contract": "node --import tsx --test src/__tests__/v2SourceMaterialization.test.ts src/__tests__/v13CoordinateContract.test.ts",
+     "test:v13-boards": "node --import tsx --test src/__tests__/v13BoardSchema.test.ts src/__tests__/v13BoardServices.test.ts src/__tests__/v13BoardRoutes.test.ts src/__tests__/v13BoardWave1.test.ts src/__tests__/v13BoardCeremonyNote.test.ts src/__tests__/v13RecordedAction.test.ts src/__tests__/v2Purposes.test.ts",
+     "test:v13-item-floor": "node --import tsx --test src/__tests__/v13BoardServices.test.ts src/__tests__/v13BoardRoutes.test.ts src/__tests__/v13ItemFloor.test.ts",
++    "test:v13-board-identity": "node --import tsx --test src/__tests__/v13BoardIdentity.test.ts",
+     "test:v13-wilderness": "node --import tsx --test scripts/v13WildernessShadowRun.test.ts",
+     "typecheck:v13-wilderness": "tsc --project scripts/wildernessShadow/tsconfig.json",
+     "test:tool-face-registry": "node --import tsx --test src/toolFace/registry.test.ts",
+diff --git a/server/src/__tests__/helpers/v13BoardsFixture.ts b/server/src/__tests__/helpers/v13BoardsFixture.ts
+index 390e977..0db084d 100644
+--- a/server/src/__tests__/helpers/v13BoardsFixture.ts
++++ b/server/src/__tests__/helpers/v13BoardsFixture.ts
+@@ -8,6 +8,7 @@ interface FixtureOptions {
+   beforeStagingMigration?: boolean;
+   beforeLayersMigration?: boolean;
+   beforeTextSaveRevisionMigration?: boolean;
++  beforeIdentityMigration?: boolean;
+ }
+ 
+ /** Real schema/migrations in a disposable connection, without app startup or seed. */
+@@ -17,6 +18,12 @@ export async function createV13BoardsFixture(options: FixtureOptions = {}): Prom
+     db.pragma('foreign_keys = ON');
+     let schema = readFileSync(new URL('../../db/schema.sql', import.meta.url), 'utf8');
+     if (Object.values(options).some(Boolean)) {
++      // Historical schemas must not inherit 065's forward Item FK or bridge index.
++      schema = schema.replace(/  item_id TEXT REFERENCES items\(id\) ON DELETE (?:NO ACTION|RESTRICT),\r?\n/, '')
++        .replace(/CREATE UNIQUE INDEX IF NOT EXISTS idx_boards_item ON boards\(item_id\);\r?\n?/, '');
++    }
++    if (options.beforeBoardsMigration || options.beforeChalkMigration || options.beforeStagingMigration
++      || options.beforeLayersMigration || options.beforeTextSaveRevisionMigration) {
+       schema = schema.replace(/,\r?\n  text_save_revision INTEGER NOT NULL DEFAULT 0 CHECK \(text_save_revision >= 0\)/, '');
+     }
+     if (options.beforeBoardsMigration || options.beforeChalkMigration || options.beforeStagingMigration || options.beforeLayersMigration) {
+@@ -51,6 +58,7 @@ export async function createV13BoardsFixture(options: FixtureOptions = {}): Prom
+       if (options.beforeStagingMigration && file >= '061_') continue;
+       if (options.beforeLayersMigration && file >= '062_') continue;
+       if (options.beforeTextSaveRevisionMigration && file >= '063_') continue;
++      if (options.beforeIdentityMigration && file >= '065_') continue;
+       const { default: migration } = await import(new URL(file, directory).href) as {
+         default: { up: (connection: Database.Database) => void };
+       };
+diff --git a/server/src/__tests__/v13BoardChalk.test.ts b/server/src/__tests__/v13BoardChalk.test.ts
+index 50262e3..cd1c22e 100644
+--- a/server/src/__tests__/v13BoardChalk.test.ts
++++ b/server/src/__tests__/v13BoardChalk.test.ts
+@@ -213,7 +213,8 @@ test('chalk cast reports body rejection and rolls Item, mount and chalk back whe
+     const rejection = await request('POST', `${path}/visuals/${blank.id}/cast`, {}, 400);
+     assert.match(rejection.error, /Item content is required/i);
+     assert.equal((await request('GET', path)).visuals[0].id, blank.id);
+-    assert.deepEqual(await request('GET', '/api/items'), []);
++    const identityOnly = await request('GET', '/api/items');
++    assert.deepEqual(identityOnly.map((item: { id: string }) => item.id), [board.identity_item_id]);
+     const limit = await request('PATCH', `${path}/visuals/${blank.id}`, { data: { text: 'x'.repeat(281) } }, 400);
+     assert.match(limit.error, /280 characters/);
+     await request('PATCH', `${path}/visuals/${blank.id}`, { data: { text: 'Ready to cast' } });
+@@ -226,8 +227,9 @@ test('chalk cast reports body rejection and rolls Item, mount and chalk back whe
+     assert.deepEqual(['items', 'item_snapshots', 'board_members', 'board_visuals', 'events']
+       .map((table) => db.prepare(`SELECT * FROM ${table}`).all()), before);
+     db.exec('DROP TRIGGER fail_chalk_receipt');
+-    await request('POST', `${path}/visuals/${blank.id}/cast`, {}, 201);
+-    assert.equal((await request('GET', '/api/items')).length, 1);
++    const cast = await request('POST', `${path}/visuals/${blank.id}/cast`, {}, 201);
++    assert.deepEqual((await request('GET', '/api/items')).map((item: { id: string }) => item.id).sort(),
++      [board.identity_item_id, cast.item.id].sort());
+     assert.deepEqual((await request('GET', path)).visuals, []);
+   });
+ });
+diff --git a/server/src/__tests__/v13BoardServices.test.ts b/server/src/__tests__/v13BoardServices.test.ts
+index 3f83d85..c22c126 100644
+--- a/server/src/__tests__/v13BoardServices.test.ts
++++ b/server/src/__tests__/v13BoardServices.test.ts
+@@ -1,11 +1,6 @@
+ import assert from 'node:assert/strict';
+ import test, { type TestContext } from 'node:test';
+-import Database from 'better-sqlite3';
+-import migration044 from '../db/migrations/044_v2_purposes.js';
+-import migration057 from '../db/migrations/057_v13_boards.js';
+-import migration059 from '../db/migrations/059_v13_board_text_ranges.js';
+-import migration061 from '../db/migrations/061_v13_board_staging.js';
+-import migration062 from '../db/migrations/062_v13_board_layers.js';
++import type Database from 'better-sqlite3';
+ import {
+   createBoard, getBoard, listBoards, updateBoard,
+   mountBoardMember, updateBoardMember, unmountBoardMember, resolveBoardMember,
+@@ -13,34 +8,20 @@ import {
+   createBoardVisual, updateBoardVisual, deleteBoardVisual,
+ } from '../services/boards.js';
+ import { createPurpose } from '../services/purposes.js';
++import { createV13BoardsFixture } from './helpers/v13BoardsFixture.js';
+ 
+-function fixture(t: TestContext) {
+-  const db = new Database(':memory:');
++async function fixture(t: TestContext) {
++  const db = await createV13BoardsFixture();
+   t.after(() => db.close());
+-  db.pragma('foreign_keys = ON');
+-  // Only synthetic identity rows. Production 044 and 057 own purpose/board schema.
++  // Board creation now mints an Item and Snapshot against the real migrated schema.
+   db.exec(`
+-    CREATE TABLE users (id TEXT PRIMARY KEY);
+-    CREATE TABLE courses (id TEXT PRIMARY KEY, user_id TEXT);
+-    CREATE TABLE notes (id TEXT PRIMARY KEY, user_id TEXT, course_id TEXT,
+-      title TEXT, status TEXT, note_class TEXT, source_kind TEXT);
+-    CREATE TABLE items (id TEXT PRIMARY KEY, user_id TEXT, status TEXT, plain_text TEXT,
+-      item_type TEXT, topic TEXT, origin_note_id TEXT, origin_board_id TEXT);
+-    CREATE TABLE content_groups (id TEXT PRIMARY KEY, user_id TEXT, course_id TEXT,
+-      note_id TEXT, title TEXT, status TEXT, identity_type TEXT, identity_role TEXT);
+-    INSERT INTO users VALUES ('user');
+-    INSERT INTO courses VALUES ('project-a','user'),('project-b','user');
+-    INSERT INTO notes VALUES ('note','user','project-b','Paper','active','user','manual');
+-    INSERT INTO content_groups VALUES ('group','user','project-b','note','Bundle','active',NULL,NULL);
+-    INSERT INTO items VALUES ('item','user','active','Current item text','claim','Topic','note',NULL);
++    INSERT INTO users (id,email,password_hash,name) VALUES ('user','board-service@example.invalid','synthetic','Fixture');
++    INSERT INTO courses (id,user_id,name) VALUES ('project-a','user','Project A'),('project-b','user','Project B');
++    INSERT INTO notes (id,user_id,course_id,title) VALUES ('note','user','project-b','Paper');
++    INSERT INTO content_groups (id,user_id,course_id,note_id,title) VALUES ('group','user','project-b','note','Bundle');
++    INSERT INTO items (id,user_id,plain_text,item_type,topic,origin_note_id)
++      VALUES ('item','user','Current item text','claim','Topic','note');
+   `);
+-  db.transaction(() => {
+-    migration044.up(db);
+-    migration057.up(db);
+-    migration059.up(db);
+-    migration061.up(db);
+-    migration062.up(db);
+-  })();
+   return db;
+ }
+ 
+@@ -50,8 +31,8 @@ function open(db: Database.Database) {
+   }))().board;
+ }
+ 
+-test('board creation opens a library soul or attaches an unoccupied soul; viewport has no paper boundary', (t) => {
+-  const db = fixture(t);
++test('board creation opens a library soul or attaches an unoccupied soul; viewport has no paper boundary', async (t) => {
++  const db = await fixture(t);
+   const { board, purposeCreated } = db.transaction(() => createBoard(db, 'user', {
+     title: 'Clues', purpose: { title: 'Question' },
+   }))();
+@@ -76,8 +57,8 @@ test('board creation opens a library soul or attaches an unoccupied soul; viewpo
+   assert.deepEqual(db.prepare('SELECT * FROM notes').all(), beforeNote);
+ });
+ 
+-test('mounts stay references across projects; retries preserve geometry; unmount only removes board edges', (t) => {
+-  const db = fixture(t);
++test('mounts stay references across projects; retries preserve geometry; unmount only removes board edges', async (t) => {
++  const db = await fixture(t);
+   const board = open(db);
+   const contentBefore = db.prepare('SELECT * FROM notes').all();
+   const groupBefore = db.prepare('SELECT * FROM content_groups').all();
+@@ -114,8 +95,8 @@ test('mounts stay references across projects; retries preserve geometry; unmount
+   assert.equal((db.prepare('SELECT count(*) AS n FROM purpose_members').get() as { n: number }).n, 0);
+ });
+ 
+-test('member reads retain geometry through trash/restore/missing and text ranges require durable anchor identities', (t) => {
+-  const db = fixture(t);
++test('member reads retain geometry through trash/restore/missing and text ranges require durable anchor identities', async (t) => {
++  const db = await fixture(t);
+   const board = open(db);
+   const mounted = db.transaction(() => mountBoardMember(db, 'user', board.id,
+     { member_kind: 'note', member_id: 'note', x: 123 }))().member;
+@@ -139,8 +120,8 @@ test('member reads retain geometry through trash/restore/missing and text ranges
+     { member_kind: 'text_range', member_id: 'item' }))(), /board_text_range_not_found/);
+ });
+ 
+-test('visuals preserve rotation, raw connector endpoints and extension data independently of member edges', (t) => {
+-  const db = fixture(t);
++test('visuals preserve rotation, raw connector endpoints and extension data independently of member edges', async (t) => {
++  const db = await fixture(t);
+   const board = open(db);
+   const data = {
+     from: { kind: 'point', point: { x: 10, y: 20 } },
+diff --git a/server/src/__tests__/v13BoardTextRanges.test.ts b/server/src/__tests__/v13BoardTextRanges.test.ts
+index 97c09b1..7513547 100644
+--- a/server/src/__tests__/v13BoardTextRanges.test.ts
++++ b/server/src/__tests__/v13BoardTextRanges.test.ts
+@@ -1,15 +1,11 @@
+ import assert from 'node:assert/strict';
+ import test, { type TestContext } from 'node:test';
+-import Database from 'better-sqlite3';
++import type Database from 'better-sqlite3';
+ import express from 'express';
+ import type { Server } from 'node:http';
+ import type { BoardTextRangeV1 } from '../../../shared/types/boardTextRange.js';
+-import migration044 from '../db/migrations/044_v2_purposes.js';
+ import migration057 from '../db/migrations/057_v13_boards.js';
+ import migration059 from '../db/migrations/059_v13_board_text_ranges.js';
+-import migration061 from '../db/migrations/061_v13_board_staging.js';
+-import migration062 from '../db/migrations/062_v13_board_layers.js';
+-import migration054 from '../db/migrations/054_v13_events_ledger.js';
+ import { createBoardRouter } from '../routes/boards.js';
+ import type { AuthRequest } from '../middleware/auth.js';
+ import { AppError } from '../middleware/errorHandler.js';
+@@ -17,25 +13,16 @@ import { createBoard, deleteBoard, getBoard } from '../services/boards.js';
+ import { createBoardTextRange, getBoardTextRange, listBoardTextRanges, updateBoardTextRanges } from '../services/boardTextRanges.js';
+ import { createV13BoardsFixture } from './helpers/v13BoardsFixture.js';
+ 
+-function fixture(t: TestContext) {
+-  const db = new Database(':memory:');
++async function fixture(t: TestContext) {
++  const db = await createV13BoardsFixture();
+   t.after(() => db.close());
+-  db.pragma('foreign_keys = ON');
+   db.exec(`
+-    CREATE TABLE users (id TEXT PRIMARY KEY);
+-    CREATE TABLE courses (id TEXT PRIMARY KEY, user_id TEXT);
+-    CREATE TABLE notes (id TEXT PRIMARY KEY, user_id TEXT, course_id TEXT,
+-      title TEXT, status TEXT, note_class TEXT, source_kind TEXT);
+-    CREATE TABLE note_blocks (id TEXT PRIMARY KEY, user_id TEXT, content_json TEXT, status TEXT);
+-    CREATE TABLE note_block_placements (id TEXT PRIMARY KEY, block_id TEXT, note_id TEXT);
+-    CREATE TABLE content_groups (id TEXT PRIMARY KEY, user_id TEXT, course_id TEXT,
+-      note_id TEXT, title TEXT, status TEXT, identity_type TEXT, identity_role TEXT);
+-    INSERT INTO users VALUES ('user');
+-    INSERT INTO notes VALUES ('note','user',NULL,'Source note','active','user','manual');
+-    INSERT INTO note_blocks VALUES ('block','user','{}','active');
+-    INSERT INTO note_block_placements VALUES ('placement','block','note');
++    INSERT INTO users (id,email,password_hash,name) VALUES ('user','board-range@example.invalid','synthetic','Fixture');
++    INSERT INTO courses (id,user_id,name) VALUES ('project','user','Fixture project');
++    INSERT INTO notes (id,user_id,course_id,title) VALUES ('note','user','project','Source note');
++    INSERT INTO note_blocks (id,user_id,course_id,block_type) VALUES ('block','user','project','text');
++    INSERT INTO note_block_placements (id,block_id,note_id,order_index) VALUES ('placement','block','note',0);
+   `);
+-  db.transaction(() => { migration044.up(db); migration057.up(db); migration059.up(db); migration061.up(db); migration062.up(db); })();
+   return db;
+ }
+ 
+@@ -78,7 +65,7 @@ async function rebaseFunction() {
+ 
+ test('M1 actual edit rebase + body/range commits + GET keeps two independent board anchors live', async (t) => {
+   const { rebaseBoardTextRanges } = await rebaseFunction();
+-  const db = fixture(t);
++  const db = await fixture(t);
+   const before = flow('before target after');
+   writeBody(db, before);
+   const first = create(db, 'First');
+@@ -107,7 +94,7 @@ test('M1 actual edit rebase + body/range commits + GET keeps two independent boa
+ 
+ test('M1 deleting a selected range and splitting its unit degrade with snapshot and original offsets', async (t) => {
+   const { rebaseBoardTextRanges } = await rebaseFunction();
+-  const db = fixture(t);
++  const db = await fixture(t);
+   const before = flow('before target after');
+   writeBody(db, before);
+   const first = create(db);
+@@ -137,7 +124,7 @@ test('M1 deleting a selected range and splitting its unit degrade with snapshot
+ 
+ test('F17 ordinary board range saves cannot revive drift or replace its original evidence', async (t) => {
+   const { rebaseBoardTextRanges } = await rebaseFunction();
+-  const db = fixture(t);
++  const db = await fixture(t);
+   const before = flow('before target after');
+   writeBody(db, before);
+   const { board, anchor } = create(db);
+@@ -160,8 +147,8 @@ test('F17 ordinary board range saves cannot revive drift or replace its original
+   assert.deepEqual(getBoardTextRange(db, 'user', anchor.id), stored);
+ });
+ 
+-test('M1 source trash/restore revives active anchors, hard deletion retains snapshots, board deletion owns cleanup', (t) => {
+-  const db = fixture(t);
++test('M1 source trash/restore revives active anchors, hard deletion retains snapshots, board deletion owns cleanup', async (t) => {
++  const db = await fixture(t);
+   writeBody(db, flow('before target after'));
+   const { board, anchor } = create(db);
+   const reference = () => getBoard(db, 'user', board.id).members[0].reference;
+@@ -188,7 +175,9 @@ test('M1 source trash/restore revives active anchors, hard deletion retains snap
+ test('M1 059 fresh/base schema and legacy migration converge without annotation foreign keys', async (t) => {
+   const fresh = await createV13BoardsFixture();
+   t.after(() => fresh.close());
+-  const upgraded = fixture(t);
++  const upgraded = await createV13BoardsFixture({ beforeBoardsMigration: true });
++  t.after(() => upgraded.close());
++  upgraded.transaction(() => { migration057.up(upgraded); migration059.up(upgraded); })();
+   const shape = (db: Database.Database) => db.prepare(`SELECT type, name, sql FROM sqlite_master
+     WHERE tbl_name = 'board_text_ranges' ORDER BY name`).all().map((row: any) => ({ ...row,
+     sql: row.sql?.replace(/\s+/g, ' ').trim() ?? null }));
+@@ -200,8 +189,7 @@ test('M1 059 fresh/base schema and legacy migration converge without annotation
+ });
+ 
+ test('M2 HTTP paste mints independent durable anchors with mounted/unmounted receipts in one transaction', async (t) => {
+-  const db = fixture(t);
+-  migration054.up(db);
++  const db = await fixture(t);
+   writeBody(db, flow('before target after'));
+   const board = db.transaction(() => createBoard(db, 'user', { title: 'Paste', purpose: { title: 'Question' } }))().board;
+   const app = express();
+diff --git a/server/src/db/schema.sql b/server/src/db/schema.sql
+index 74660f5..8a106fc 100644
+--- a/server/src/db/schema.sql
++++ b/server/src/db/schema.sql
+@@ -1287,6 +1287,7 @@ CREATE TABLE IF NOT EXISTS boards (
+   title TEXT NOT NULL,
+   soul_id TEXT NOT NULL REFERENCES purposes(id) ON DELETE RESTRICT,
+   project_id TEXT REFERENCES courses(id) ON DELETE SET NULL,
++  item_id TEXT REFERENCES items(id) ON DELETE NO ACTION,
+   viewport TEXT NOT NULL DEFAULT '{"x":0,"y":0,"zoom":1}'
+     CHECK (json_valid(viewport) AND json_type(viewport) = 'object'),
+   created_at TEXT NOT NULL,
+@@ -1295,6 +1296,7 @@ CREATE TABLE IF NOT EXISTS boards (
+ CREATE UNIQUE INDEX IF NOT EXISTS idx_boards_soul ON boards(soul_id);
+ CREATE INDEX IF NOT EXISTS idx_boards_user_updated ON boards(user_id, updated_at);
+ CREATE INDEX IF NOT EXISTS idx_boards_user_project ON boards(user_id, project_id);
++-- idx_boards_item is migration-owned (065): old boards acquire item_id after base schema startup.
+ 
+ -- V13.4 layers (migration 062). Base is virtual and is represented by NULL.
+ CREATE TABLE IF NOT EXISTS board_layers (
+diff --git a/server/src/services/boards.ts b/server/src/services/boards.ts
+index fbb020a..db1d7f2 100644
+--- a/server/src/services/boards.ts
++++ b/server/src/services/boards.ts
+@@ -23,7 +23,7 @@ import {
+ import { createPurpose, getPurpose } from './purposes.js';
+ import { createBoardTextRange, getBoardTextRange, replayBoardTextRange } from './boardTextRanges.js';
+ import { mountBoardTextRangeSchema } from '../validators/boardTextRanges.js';
+-import { createItem } from './items.js';
++import { createBoardIdentityItem, createItem } from './items.js';
+ 
+ export type BoardMemberKind = 'note' | 'item' | 'content_group' | 'text_range';
+ type JsonObject = Record<string, unknown>;
+@@ -34,6 +34,7 @@ interface BoardRow {
+   title: string;
+   soul_id: string;
+   project_id: string | null;
++  item_id: string | null;
+   viewport: string;
+   created_at: string;
+   updated_at: string;
+@@ -138,11 +139,17 @@ function memberRow(db: Database.Database, boardId: string, memberId: string): Bo
+     .get(memberId, boardId) as BoardMemberRow | undefined;
+ }
+ 
+-function hydrateBoard(row: BoardRow) {
++function hydrateBoard(db: Database.Database, row: BoardRow) {
+   const { base_layer_visible = true, ...viewport } = json<{
+     x: number; y: number; zoom: number; base_layer_visible?: boolean;
+   }>(row.viewport);
+-  return { ...row, viewport, base_layer_visible };
++  const { item_id, ...board } = row;
++  const identity = item_id
++    ? db.prepare('SELECT plain_text FROM items WHERE id = ? AND user_id = ?')
++      .get(item_id, row.user_id) as { plain_text: string } | undefined
++    : undefined;
++  return { ...board, viewport, base_layer_visible,
++    identity_item_id: item_id, identity_description: identity?.plain_text ?? null };
+ }
+ 
+ function hydrateLayer(row: BoardLayerRow) {
+@@ -323,18 +330,19 @@ export function createBoard(db: Database.Database, userId: string, value: unknow
+   db.prepare(`INSERT INTO boards (id, user_id, title, soul_id, project_id, viewport, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(id, userId, input.title, soul.id, input.project_id ?? null,
+     JSON.stringify(input.viewport ?? { x: 0, y: 0, zoom: 1 }), now, now);
+-  return { board: hydrateBoard(boardRow(db, userId, id)), purposeCreated };
++  createBoardIdentityItem(db, userId, id);
++  return { board: hydrateBoard(db, boardRow(db, userId, id)), purposeCreated };
+ }
+ 
+ export function listBoards(db: Database.Database, userId: string, input: { project_id?: string } = {}): Board[] {
+   const rows = input.project_id === undefined
+     ? db.prepare('SELECT * FROM boards WHERE user_id = ? ORDER BY updated_at DESC, id ASC').all(userId)
+     : db.prepare('SELECT * FROM boards WHERE user_id = ? AND project_id = ? ORDER BY updated_at DESC, id ASC').all(userId, input.project_id);
+-  return (rows as BoardRow[]).map(hydrateBoard);
++  return (rows as BoardRow[]).map((row) => hydrateBoard(db, row));
+ }
+ 
+ export function getBoard(db: Database.Database, userId: string, boardId: string) {
+-  const board = hydrateBoard(boardRow(db, userId, boardId));
++  const board = hydrateBoard(db, boardRow(db, userId, boardId));
+   const members = (db.prepare('SELECT * FROM board_members WHERE board_id = ? ORDER BY z_index, created_at, id')
+     .all(boardId) as BoardMemberRow[]).map((row) => hydrateMember(db, userId, row));
+   const edges = (db.prepare('SELECT * FROM board_edges WHERE board_id = ? ORDER BY created_at, id')
+@@ -353,12 +361,13 @@ export function updateBoard(db: Database.Database, userId: string, boardId: stri
+     ...(input.base_layer_visible === undefined ? {} : { base_layer_visible: input.base_layer_visible }) };
+   db.prepare('UPDATE boards SET title = ?, viewport = ?, updated_at = ? WHERE id = ?')
+     .run(input.title ?? row.title, JSON.stringify(viewport), new Date().toISOString(), boardId);
+-  return hydrateBoard(boardRow(db, userId, boardId));
++  // A3: the title is board truth; identity content and its judgment Snapshots never follow it.
++  return hydrateBoard(db, boardRow(db, userId, boardId));
+ }
+ 
+ export function deleteBoard(db: Database.Database, userId: string, boardId: string) {
+   requireTransaction(db);
+-  const board = hydrateBoard(boardRow(db, userId, boardId));
++  const board = hydrateBoard(db, boardRow(db, userId, boardId));
+   const counts = db.prepare(`SELECT
+     (SELECT COUNT(*) FROM board_members WHERE board_id = ?) AS member_count,
+     (SELECT COUNT(*) FROM board_edges WHERE board_id = ?) AS edge_count,
+@@ -366,6 +375,11 @@ export function deleteBoard(db: Database.Database, userId: string, boardId: stri
+   `).get(boardId, boardId, boardId) as { member_count: number; edge_count: number; visual_count: number };
+   // Capture impact before removing endpoints. Only the board's owned rows go;
+   // the soul, referenced content and historical relocation batches survive.
++  // The identity retires in this same transaction. Keep all Item and Relation history.
++  if (board.identity_item_id) {
++    db.prepare(`UPDATE items SET status = 'retired', retired_into_item_id = NULL, updated_at = ?
++      WHERE id = ? AND user_id = ?`).run(new Date().toISOString(), board.identity_item_id, userId);
++  }
+   db.prepare('DELETE FROM board_edges WHERE board_id = ?').run(boardId);
+   db.prepare('DELETE FROM board_members WHERE board_id = ?').run(boardId);
+   db.prepare('DELETE FROM board_text_ranges WHERE board_id = ?').run(boardId);
+diff --git a/server/src/services/items.ts b/server/src/services/items.ts
+index 5341346..ce0c3e2 100644
+--- a/server/src/services/items.ts
++++ b/server/src/services/items.ts
+@@ -201,13 +201,14 @@ function ensureSnapshot(
+   userId: string,
+   itemId: string,
+   plainText: string,
++  createdAt = new Date().toISOString(),
+ ): ItemSnapshotRow {
+   const hash = itemContentHash(plainText);
+   db.prepare(`
+     INSERT OR IGNORE INTO item_snapshots (
+       id, item_id, user_id, content, content_hash, created_at
+     ) VALUES (?, ?, ?, ?, ?, ?)
+-  `).run(uuidv4(), itemId, userId, plainText, hash, new Date().toISOString());
++  `).run(uuidv4(), itemId, userId, plainText, hash, createdAt);
+   const row = db.prepare(`
+     SELECT * FROM item_snapshots
+     WHERE item_id = ? AND user_id = ? AND content_hash = ?
+@@ -329,11 +330,11 @@ function insertItem(
+   userId: string,
+   input: CreateItemInput,
+   forcedOrigins?: { courseId: string | null; noteId: string | null; boardId: string | null },
++  now = new Date().toISOString(),
+ ): string {
+   const id = uuidv4();
+   const body = normalizeItemBody(id, input);
+   const origins = forcedOrigins || resolveOrigins(db, userId, input);
+-  const now = new Date().toISOString();
+   db.prepare(`
+     INSERT INTO items (
+       id, user_id, body_json, plain_text, item_type, topic, status,
+@@ -355,10 +356,51 @@ function insertItem(
+     now,
+     now,
+   );
+-  ensureSnapshot(db, userId, id, body.plainText);
++  ensureSnapshot(db, userId, id, body.plainText, now);
+   return id;
+ }
+ 
++/** Board-domain writer only: reads its facts from the real board, never accepts an Item ID.
++ * The caller owns board creation; the savepoint keeps mint + Snapshot + bridge indivisible.
++ */
++export function createBoardIdentityItem(db: Database.Database, userId: string, boardId: string) {
++  if (!db.inTransaction) throw new Error('Board identity creation requires a caller-owned transaction');
++  return db.transaction(() => {
++    const board = db.prepare('SELECT id, title, project_id, item_id FROM boards WHERE id = ? AND user_id = ?')
++      .get(boardId, userId) as { id: string; title: string; project_id: string | null; item_id: string | null } | undefined;
++    if (!board) throw new AppError(404, 'board_not_found');
++    if (board.item_id) return getItem(db, userId, board.item_id);
++    const now = new Date().toISOString();
++    const itemId = insertItem(db, userId, {
++      plain_text: `Board: ${board.title}`,
++      created_by: 'system:board-identity',
++      metadata: {
++        board_identity: {
++          board_id: board.id,
++          minted_by: 'create_board',
++          minted_at: now,
++          title_at_mint: board.title,
++          project_id_at_mint: board.project_id,
++        },
++      },
++    }, { courseId: board.project_id, noteId: null, boardId: null }, now);
++    db.prepare('UPDATE boards SET item_id = ? WHERE id = ? AND user_id = ? AND item_id IS NULL')
++      .run(itemId, boardId, userId);
++    return getItem(db, userId, itemId);
++  })();
++}
++
++function assertOrdinaryItemWrite(db: Database.Database, userId: string, itemId: string): void {
++  // Identity is the actual unique bridge, never editable type/topic/metadata text.
++  const board = db.prepare('SELECT id FROM boards WHERE item_id = ? AND user_id = ?')
++    .get(itemId, userId) as { id: string } | undefined;
++  if (board) {
++    throw new AppError(409, 'This Item is a board identity. Please operate from the board entry.', {
++      code: 'board_identity_requires_board_entry', board_id: board.id,
++    });
++  }
++}
++
+ export function createItem(db: Database.Database, userId: string, input: CreateItemInput) {
+   const itemId = db.transaction(() => insertItem(db, userId, input))();
+   return getItem(db, userId, itemId);
+@@ -424,6 +466,7 @@ export function updateItem(
+ ) {
+   db.transaction(() => {
+     const row = getOwnedItemRow(db, userId, itemId);
++    assertOrdinaryItemWrite(db, userId, itemId);
+     assertItemRowInvariant(row);
+     if (row.status === 'retired') throw new AppError(409, 'A retired Item cannot be edited');
+     const bodyChanged = input.body_json !== undefined || input.plain_text !== undefined;
+@@ -488,6 +531,7 @@ export function retireItem(
+ ) {
+   db.transaction(() => {
+     const row = getOwnedItemRow(db, userId, itemId);
++    assertOrdinaryItemWrite(db, userId, itemId);
+     assertItemRowInvariant(row);
+     if (row.status === 'retired') throw new AppError(409, 'Item is already retired');
+     const successorId = optionalText(input.successor_item_id);
+diff --git a/server/src/db/migrations/065_v13_board_item_identity.ts b/server/src/db/migrations/065_v13_board_item_identity.ts
+new file mode 100644
+--- /dev/null
++++ b/server/src/db/migrations/065_v13_board_item_identity.ts
+@@ -0,0 +1,70 @@
++import { createHash } from 'node:crypto';
++import { v4 as uuidv4 } from 'uuid';
++import type Database from 'better-sqlite3';
++
++interface LegacyBoard {
++  id: string;
++  user_id: string;
++  title: string;
++  project_id: string | null;
++  item_id: string | null;
++}
++
++export default {
++  id: '065_v13_board_item_identity',
++  description: 'Bridge boards to unique Item identities with honest, atomic backfill receipts',
++  up(db: Database.Database): void {
++    const columns = db.pragma('table_info(boards)') as Array<{ name: string }>;
++    if (!columns.some((column) => column.name === 'item_id')) {
++      db.exec('ALTER TABLE boards ADD COLUMN item_id TEXT REFERENCES items(id) ON DELETE NO ACTION');
++    }
++    // Migration-owned: initDb executes base schema before upgrading existing tables.
++    // NO ACTION prevents deleting a live identity, while permitting an account's
++    // existing whole-user cascades to remove both rows within the same statement.
++    db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_boards_item ON boards(item_id)');
++
++    const boardIds = db.prepare('SELECT id FROM boards WHERE item_id IS NULL ORDER BY id')
++      .all() as Array<{ id: string }>;
++    for (const { id: boardId } of boardIds) {
++      // One board = one atomic unit even when up() is called directly. The normal
++      // runner adds its outer migration transaction; these then become savepoints.
++      db.transaction(() => {
++        const board = db.prepare('SELECT id, user_id, title, project_id, item_id FROM boards WHERE id = ?')
++          .get(boardId) as LegacyBoard | undefined;
++        if (!board || board.item_id !== null) return;
++        const itemId = uuidv4();
++        const now = new Date().toISOString();
++        const plainText = `Board: ${board.title}`.replace(/\r\n?/g, '\n').trim();
++        // Frozen initial TextFlow/Snapshot format; no dependency on future service writers.
++        const body = {
++          body: plainText,
++          text_flow: {
++            textflow_version: 'TextBlockContentV1',
++            units: [{
++              id: `${itemId}:text-unit:1`, text: plainText, writing_role: 'paragraph',
++              indent_level: 0, order_index: 0, metadata: { owner_kind: 'item' }, status: 'active',
++            }],
++            inline_structures: [],
++            metadata: { owner_kind: 'item' },
++          },
++        };
++        const metadata = { board_identity: {
++          board_id: board.id, minted_by: 'migration_065', minted_at: now,
++          title_at_mint: board.title, project_id_at_mint: board.project_id,
++        } };
++        db.prepare(`INSERT INTO items (
++          id, user_id, body_json, plain_text, item_type, topic, status, retired_into_item_id,
++          origin_course_id, origin_note_id, origin_board_id, created_by, metadata, created_at, updated_at
++        ) VALUES (?, ?, ?, ?, NULL, NULL, 'active', NULL, ?, NULL, NULL, 'system:board-identity', ?, ?, ?)`)
++          .run(itemId, board.user_id, JSON.stringify(body), plainText, board.project_id, JSON.stringify(metadata), now, now);
++        const hash = `sha256:${createHash('sha256').update(plainText).digest('hex')}`;
++        db.prepare(`INSERT INTO item_snapshots (id, item_id, user_id, content, content_hash, created_at)
++          VALUES (?, ?, ?, ?, ?, ?)`)
++          .run(uuidv4(), itemId, board.user_id, plainText, hash, now);
++        db.prepare('UPDATE boards SET item_id = ? WHERE id = ? AND item_id IS NULL').run(itemId, board.id);
++        // Board ID/title/project/timestamps and all prior judgments are untouched.
++        // The Item metadata above is the retained per-board backfill ledger.
++      })();
++    }
++  },
++};
+diff --git a/server/src/__tests__/v13BoardIdentity.test.ts b/server/src/__tests__/v13BoardIdentity.test.ts
+new file mode 100644
+--- /dev/null
++++ b/server/src/__tests__/v13BoardIdentity.test.ts
+@@ -0,0 +1,311 @@
++import assert from 'node:assert/strict';
++import { readFileSync } from 'node:fs';
++import test, { type TestContext } from 'node:test';
++import type Database from 'better-sqlite3';
++import migration065 from '../db/migrations/065_v13_board_item_identity.js';
++import { AppError } from '../middleware/errorHandler.js';
++import { createBoard, deleteBoard, getBoard, listBoards, mountBoardMember, updateBoard } from '../services/boards.js';
++import { createItem, getItem, retireItem, updateItem } from '../services/items.js';
++import { listItemSummaries } from '../services/itemSummaries.js';
++import { createClientNoteBlock } from '../services/noteBlockLifecycle.js';
++import { createRelation, getRelation } from '../services/relations.js';
++import { createV13BoardsFixture } from './helpers/v13BoardsFixture.js';
++
++const USER = 'identity-fixture-owner';
++const PROJECT = '71000000-0000-4000-8000-000000000001';
++const NOTE = '71000000-0000-4000-8000-000000000002';
++const OLD_TIME = '2021-03-04T05:06:07.000Z';
++
++async function fixture(t: TestContext, beforeIdentityMigration = false) {
++  const db = await createV13BoardsFixture({ beforeIdentityMigration });
++  t.after(() => db.close());
++  db.prepare("INSERT INTO users (id, email, password_hash, name) VALUES (?, 'board-identity@example.invalid', 'synthetic', 'Synthetic')").run(USER);
++  db.prepare("INSERT INTO courses (id, user_id, name) VALUES (?, ?, 'Synthetic project')").run(PROJECT, USER);
++  db.prepare("INSERT INTO notes (id, user_id, course_id, title) VALUES (?, ?, ?, 'Synthetic note')").run(NOTE, USER, PROJECT);
++  return db;
++}
++
++function open(db: Database.Database, title = 'A board') {
++  return db.transaction(() => createBoard(db, USER, {
++    title, project_id: PROJECT, purpose: { title: `Question for ${title}` },
++  }))().board;
++}
++
++function identity(db: Database.Database, boardId: string) {
++  const row = db.prepare('SELECT item_id FROM boards WHERE id = ?').get(boardId) as { item_id: string | null };
++  assert.ok(row.item_id);
++  return getItem(db, USER, row.item_id);
++}
++
++function count(db: Database.Database, table: string): number {
++  return (db.prepare(`SELECT COUNT(*) AS n FROM ${table}`).get() as { n: number }).n;
++}
++
++function tableRows(db: Database.Database, tables: string[]) {
++  return tables.map((table) => db.prepare(`SELECT * FROM ${table} ORDER BY id`).all());
++}
++
++function legacyBoard(db: Database.Database, id: string, projectId: string | null = PROJECT) {
++  db.prepare(`INSERT INTO purposes (id, user_id, title, created_at, updated_at)
++    VALUES (?, ?, 'Historical purpose', ?, ?)`).run(`soul-${id}`, USER, OLD_TIME, OLD_TIME);
++  db.prepare(`INSERT INTO boards (id, user_id, title, soul_id, project_id, viewport, created_at, updated_at)
++    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).run(id, USER, `Historical ${id}`, `soul-${id}`, projectId,
++    '{"x":123,"y":-456,"zoom":2}', OLD_TIME, OLD_TIME);
++}
++
++test('065 nullable unique Item bridge and FK converge for fresh and actual pre-065 schemas', async (t) => {
++  const fresh = await fixture(t);
++  const upgrade = await fixture(t, true);
++  // Production startup re-applies base schema BEFORE migrations on existing DBs.
++  // This catches accidentally moving the new bridge index into schema.sql.
++  const baseSchema = readFileSync(new URL('../db/schema.sql', import.meta.url), 'utf8');
++  for (const statement of baseSchema.split(';').map((sql) => sql.trim())) {
++    if (statement && !statement.startsWith('PRAGMA')) upgrade.exec(`${statement};`);
++  }
++  migration065.up(upgrade);
++  for (const pragma of ['table_info(boards)', 'foreign_key_list(boards)', 'index_list(boards)']) {
++    // ALTER appends the column; SQLite's ordinal IDs are not schema semantics.
++    const shape = (db: Database.Database) => (db.pragma(pragma) as Array<Record<string, unknown>>)
++      .map(({ cid: _cid, id: _id, seq: _seq, ...entry }) => entry)
++      .sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
++    assert.deepEqual(shape(fresh), shape(upgrade));
++  }
++  const itemColumn = (fresh.pragma('table_info(boards)') as Array<{ name: string; notnull: number }>).find((row) => row.name === 'item_id');
++  assert.equal(itemColumn?.notnull, 0);
++  const itemFk = (fresh.pragma('foreign_key_list(boards)') as Array<{ from: string; table: string; to: string; on_delete: string }>).find((row) => row.from === 'item_id');
++  assert.deepEqual(itemFk && { table: itemFk.table, to: itemFk.to, on_delete: itemFk.on_delete },
++    { table: 'items', to: 'id', on_delete: 'NO ACTION' });
++  const a = open(fresh, 'First');
++  const b = open(fresh, 'Second');
++  const item = identity(fresh, a.id);
++  assert.throws(() => fresh.prepare('UPDATE boards SET item_id = ? WHERE id = ?').run(item.id, b.id),
++    /UNIQUE constraint failed: boards.item_id/);
++  assert.throws(() => fresh.prepare('UPDATE boards SET item_id = ? WHERE id = ?').run('missing-item', b.id), /FOREIGN KEY constraint failed/);
++  assert.throws(() => fresh.prepare('DELETE FROM items WHERE id = ?').run(item.id), /FOREIGN KEY constraint failed/);
++  // More than one legacy NULL is valid until its explicit migration transaction fills it.
++  legacyBoard(fresh, 'nullable-a');
++  legacyBoard(fresh, 'nullable-b');
++  assert.equal((fresh.prepare('SELECT COUNT(*) AS n FROM boards WHERE item_id IS NULL').get() as { n: number }).n, 2);
++  assert.deepEqual(fresh.pragma('foreign_key_check'), []);
++});
++
++test('createBoard mints an independent Item UUID, honest provenance and initial Snapshot in the caller transaction', async (t) => {
++  const db = await fixture(t);
++  const before = new Date().toISOString();
++  const board = open(db, 'Initial title');
++  const item = identity(db, board.id);
++  const after = new Date().toISOString();
++  assert.notEqual(item.id, board.id);
++  assert.match(item.id, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
++  assert.equal(item.plain_text, 'Board: Initial title');
++  assert.equal(item.status, 'active');
++  assert.equal(item.item_type, null);
++  assert.equal(item.topic, null);
++  assert.equal(item.origin_board_id, null);
++  assert.equal(item.origin_note_id, null);
++  assert.equal(item.origin_course_id, PROJECT);
++  assert.equal(item.created_by, 'system:board-identity');
++  assert.ok(item.created_at >= before && item.created_at <= after);
++  assert.deepEqual(item.metadata.board_identity, {
++    board_id: board.id, minted_by: 'create_board', minted_at: item.created_at,
++    title_at_mint: 'Initial title', project_id_at_mint: PROJECT,
++  });
++  assert.equal(item.current_snapshot.item_id, item.id);
++  assert.equal(item.current_snapshot.content, item.plain_text);
++  assert.equal(count(db, 'item_snapshots'), 1);
++  for (const read of [board, getBoard(db, USER, board.id).board, listBoards(db, USER)[0]]) {
++    assert.equal(read.identity_item_id, item.id);
++    assert.equal(read.identity_description, item.plain_text);
++  }
++});
++
++test('ordinary update and retire reject the actual bridge, while editable type/topic/provenance text confers no identity', async (t) => {
++  const db = await fixture(t);
++  const board = open(db);
++  const item = identity(db, board.id);
++  const before = tableRows(db, ['boards', 'items', 'item_snapshots']);
++  const rejected = (error: unknown) => error instanceof AppError && error.statusCode === 409 && /board|板/i.test(error.message);
++  for (const patch of [{ plain_text: 'Changed body' }, { item_type: 'claim' }, { topic: 'Other' }, { metadata: {} }]) {
++    assert.throws(() => updateItem(db, USER, item.id, patch), rejected);
++  }
++  assert.throws(() => retireItem(db, USER, item.id, {}), rejected);
++  assert.deepEqual(tableRows(db, ['boards', 'items', 'item_snapshots']), before);
++
++  const ordinary = createItem(db, USER, {
++    plain_text: 'A regular card about Board identity', item_type: 'board_identity', topic: 'Board',
++    created_by: 'system:board-identity', metadata: item.metadata,
++  });
++  assert.equal(updateItem(db, USER, ordinary.id, { plain_text: 'Still a regular editable card' }).plain_text,
++    'Still a regular editable card');
++  assert.equal(retireItem(db, USER, ordinary.id, {}).status, 'retired');
++  assert.equal(getBoard(db, USER, board.id).board.id, board.id);
++});
++
++test('A3 rename leaves identity and judgment snapshots byte-stable; ordinary body edit is a freshness positive control', async (t) => {
++  const db = await fixture(t);
++  const board = open(db, 'Original board title');
++  const item = identity(db, board.id);
++  const ordinary = createItem(db, USER, { plain_text: 'Original ordinary body' });
++  const relation = createRelation(db, USER, { from_item_id: item.id, to_item_id: ordinary.id, relation_type: 'supports' });
++  assert.equal(relation.freshness, 'fresh');
++  const itemBefore = db.prepare('SELECT * FROM items WHERE id = ?').get(item.id);
++  const snapshotsBefore = tableRows(db, ['item_snapshots', 'relations']);
++  const renamed = db.transaction(() => updateBoard(db, USER, board.id,
++    { title: 'Entirely different board name', viewport: { x: 99, y: -22, zoom: 1.5 } }))();
++  assert.equal(renamed.title, 'Entirely different board name');
++  assert.equal(renamed.identity_description, 'Board: Original board title');
++  assert.deepEqual(db.prepare('SELECT * FROM items WHERE id = ?').get(item.id), itemBefore);
++  assert.deepEqual(tableRows(db, ['item_snapshots', 'relations']), snapshotsBefore);
++  assert.equal(getRelation(db, USER, relation.id).freshness, 'fresh');
++  updateItem(db, USER, ordinary.id, { plain_text: 'Revised ordinary body' });
++  const changed = getRelation(db, USER, relation.id);
++  assert.equal(changed.freshness, 'to_changed');
++  assert.equal(changed.from_changed, false);
++  assert.equal(changed.to_changed, true);
++  assert.equal(changed.from_snapshot_id, relation.from_snapshot_id);
++  assert.equal(changed.to_snapshot_id, relation.to_snapshot_id);
++  assert.equal(changed.to_snapshot.content, 'Original ordinary body');
++  assert.equal(changed.to_item.plain_text, 'Revised ordinary body');
++});
++
++test('deleteBoard retires its identity while retaining the soul, referenced Item, Snapshot and Relation history', async (t) => {
++  const db = await fixture(t);
++  const board = open(db);
++  const item = identity(db, board.id);
++  const ordinary = createItem(db, USER, { plain_text: 'Referenced content survives' });
++  const relation = createRelation(db, USER, { from_item_id: item.id, to_item_id: ordinary.id, relation_type: 'supports' });
++  db.transaction(() => mountBoardMember(db, USER, board.id, { member_kind: 'item', member_id: ordinary.id }))();
++  const snapshotsBefore = tableRows(db, ['item_snapshots']);
++  const removed = db.transaction(() => deleteBoard(db, USER, board.id))();
++  assert.equal(removed.removed, true);
++  assert.equal(removed.member_count, 1);
++  assert.equal(db.prepare('SELECT id FROM boards WHERE id = ?').get(board.id), undefined);
++  const retired = getItem(db, USER, item.id);
++  assert.equal(retired.status, 'retired');
++  assert.equal(retired.retired_into_item_id, null);
++  assert.equal(retired.plain_text, item.plain_text);
++  assert.deepEqual(retired.metadata, item.metadata);
++  assert.deepEqual(tableRows(db, ['item_snapshots']), snapshotsBefore);
++  assert.ok(db.prepare('SELECT id FROM purposes WHERE id = ?').get(board.soul_id));
++  assert.equal(getItem(db, USER, ordinary.id).status, 'active');
++  assert.equal(getRelation(db, USER, relation.id).from_item.status, 'retired');
++  assert.equal(getRelation(db, USER, relation.id).freshness, 'fresh');
++  assert.deepEqual(db.pragma('foreign_key_check'), []);
++});
++
++test('createBoard failure at Snapshot or Board insertion rolls back soul, identity and Snapshot together', async (t) => {
++  const db = await fixture(t);
++  for (const table of ['item_snapshots', 'boards']) {
++    const before = tableRows(db, ['purposes', 'boards', 'items', 'item_snapshots']);
++    db.exec(`CREATE TEMP TRIGGER fail_identity_create BEFORE INSERT ON ${table}
++      BEGIN SELECT RAISE(ABORT, 'synthetic_create_failure'); END`);
++    assert.throws(() => open(db, 'Rolled back'), /synthetic_create_failure/);
++    assert.deepEqual(tableRows(db, ['purposes', 'boards', 'items', 'item_snapshots']), before);
++    db.exec('DROP TRIGGER fail_identity_create');
++  }
++  assert.ok(open(db, 'Successful retry').identity_item_id);
++});
++
++test('deleteBoard failure at identity retirement or Board deletion restores all owned rows and active identity', async (t) => {
++  const db = await fixture(t);
++  const board = open(db);
++  const item = identity(db, board.id);
++  db.transaction(() => mountBoardMember(db, USER, board.id, { member_kind: 'item', member_id: item.id }))();
++  for (const operation of ['UPDATE OF status ON items', 'DELETE ON boards']) {
++    const before = tableRows(db, ['purposes', 'boards', 'items', 'item_snapshots', 'board_members']);
++    db.exec(`CREATE TEMP TRIGGER fail_identity_delete BEFORE ${operation}
++      BEGIN SELECT RAISE(ABORT, 'synthetic_delete_failure'); END`);
++    assert.throws(() => db.transaction(() => deleteBoard(db, USER, board.id))(), /synthetic_delete_failure/);
++    assert.deepEqual(tableRows(db, ['purposes', 'boards', 'items', 'item_snapshots', 'board_members']), before);
++    db.exec('DROP TRIGGER fail_identity_delete');
++  }
++  assert.equal(identity(db, board.id).status, 'active');
++});
++
++test('C1 backfill preserves legacy Board IDs and data, honestly timestamps Items and Snapshots, and reruns without new rows', async (t) => {
++  const db = await fixture(t, true);
++  legacyBoard(db, 'legacy-a');
++  legacyBoard(db, 'legacy-b', null);
++  db.prepare(`INSERT INTO board_members (id, board_id, member_kind, member_id, created_at, updated_at)
++    VALUES ('old-projection', 'legacy-a', 'note', ?, ?, ?)`).run(NOTE, OLD_TIME, OLD_TIME);
++  const beforeBoards = db.prepare('SELECT * FROM boards ORDER BY id').all();
++  const beforeReferences = tableRows(db, ['purposes', 'board_members']);
++  const beforeTime = new Date().toISOString();
++  migration065.up(db);
++  const afterTime = new Date().toISOString();
++  const afterBoards = db.prepare('SELECT * FROM boards ORDER BY id').all() as Array<Record<string, unknown>>;
++  assert.deepEqual(afterBoards.map(({ item_id: _identityId, ...board }) => board), beforeBoards);
++  assert.deepEqual(tableRows(db, ['purposes', 'board_members']), beforeReferences);
++  assert.equal(new Set(afterBoards.map((board) => board.item_id)).size, 2);
++  for (const board of afterBoards) {
++    const item = identity(db, String(board.id));
++    assert.notEqual(item.id, board.id);
++    assert.ok(item.created_at >= beforeTime && item.created_at <= afterTime);
++    assert.notEqual(item.created_at, OLD_TIME);
++    assert.ok(item.current_snapshot.created_at >= beforeTime && item.current_snapshot.created_at <= afterTime);
++    assert.equal(item.current_snapshot.content, `Board: ${board.title}`);
++    assert.equal(item.origin_board_id, null);
++    assert.equal(item.origin_course_id, board.project_id);
++    assert.deepEqual(item.metadata.board_identity, {
++      board_id: board.id, minted_by: 'migration_065', minted_at: item.created_at,
++      title_at_mint: board.title, project_id_at_mint: board.project_id,
++    });
++  }
++  const after = tableRows(db, ['boards', 'items', 'item_snapshots', 'purposes', 'board_members']);
++  migration065.up(db);
++  assert.deepEqual(tableRows(db, ['boards', 'items', 'item_snapshots', 'purposes', 'board_members']), after);
++  assert.equal(count(db, 'items'), 2);
++  assert.equal(count(db, 'item_snapshots'), 2);
++  assert.deepEqual(db.pragma('foreign_key_check'), []);
++});
++
++test('C1 each backfill board is atomic: a later failed bridge leaves no half Item/Snapshot and rerun fills only gaps', async (t) => {
++  const db = await fixture(t, true);
++  legacyBoard(db, 'legacy-a');
++  legacyBoard(db, 'legacy-b');
++  db.exec(`CREATE TEMP TRIGGER fail_second_bridge BEFORE UPDATE ON boards
++    WHEN NEW.id = 'legacy-b'
++    BEGIN SELECT RAISE(ABORT, 'synthetic_backfill_failure'); END`);
++  assert.throws(() => migration065.up(db), /synthetic_backfill_failure/);
++  const a = identity(db, 'legacy-a');
++  assert.deepEqual(db.prepare("SELECT item_id FROM boards WHERE id = 'legacy-b'").get(), { item_id: null });
++  assert.equal(count(db, 'items'), 1);
++  assert.equal(count(db, 'item_snapshots'), 1);
++  db.exec('DROP TRIGGER fail_second_bridge');
++  migration065.up(db);
++  assert.equal(identity(db, 'legacy-a').id, a.id);
++  assert.notEqual(identity(db, 'legacy-b').id, a.id);
++  assert.equal(count(db, 'items'), 2);
++  assert.equal(count(db, 'item_snapshots'), 2);
++  migration065.up(db);
++  assert.equal(count(db, 'items'), 2);
++  assert.deepEqual(db.pragma('foreign_key_check'), []);
++});
++
++test('identity Item can be compiled into item_ref and mounted on its own and another Board, with retained retired readbacks', async (t) => {
++  const db = await fixture(t);
++  const ownBoard = open(db, 'Own board');
++  const otherBoard = open(db, 'Other board');
++  const item = identity(db, ownBoard.id);
++  const itemBefore = db.prepare('SELECT * FROM items WHERE id = ?').get(item.id);
++  const block = createClientNoteBlock(db, USER, NOTE, PROJECT, {
++    client_create_key: 'identity-item-ref', block_type: 'item_ref', content_json: { item_id: item.id },
++  });
++  assert.equal(block.status, 'applied');
++  if (block.status !== 'applied') return;
++  assert.equal(block.block.plain_text, null);
++  assert.deepEqual(JSON.parse(block.block.content_json as string), { item_id: item.id });
++  for (const board of [ownBoard, otherBoard]) {
++    const mounted = db.transaction(() => mountBoardMember(db, USER, board.id,
++      { member_kind: 'item', member_id: item.id }))();
++    assert.equal(mounted.member.reference.state, 'available');
++    assert.equal(mounted.member.reference.summary, item.plain_text);
++  }
++  assert.deepEqual(db.prepare('SELECT * FROM items WHERE id = ?').get(item.id), itemBefore);
++  db.transaction(() => deleteBoard(db, USER, ownBoard.id))();
++  assert.equal(getBoard(db, USER, otherBoard.id).members[0].reference.item_status, 'retired');
++  assert.equal(listItemSummaries(db, USER, [item.id])[0].status, 'retired');
++  assert.deepEqual(JSON.parse((db.prepare('SELECT content_json FROM note_blocks WHERE id = ?')
++    .get(block.block.id) as { content_json: string }).content_json), { item_id: item.id });
++  assert.deepEqual(db.pragma('foreign_key_check'), []);
++});

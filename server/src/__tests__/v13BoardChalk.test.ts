@@ -213,7 +213,8 @@ test('chalk cast reports body rejection and rolls Item, mount and chalk back whe
     const rejection = await request('POST', `${path}/visuals/${blank.id}/cast`, {}, 400);
     assert.match(rejection.error, /Item content is required/i);
     assert.equal((await request('GET', path)).visuals[0].id, blank.id);
-    assert.deepEqual(await request('GET', '/api/items'), []);
+    const identityOnly = await request('GET', '/api/items');
+    assert.deepEqual(identityOnly.map((item: { id: string }) => item.id), [board.identity_item_id]);
     const limit = await request('PATCH', `${path}/visuals/${blank.id}`, { data: { text: 'x'.repeat(281) } }, 400);
     assert.match(limit.error, /280 characters/);
     await request('PATCH', `${path}/visuals/${blank.id}`, { data: { text: 'Ready to cast' } });
@@ -226,8 +227,9 @@ test('chalk cast reports body rejection and rolls Item, mount and chalk back whe
     assert.deepEqual(['items', 'item_snapshots', 'board_members', 'board_visuals', 'events']
       .map((table) => db.prepare(`SELECT * FROM ${table}`).all()), before);
     db.exec('DROP TRIGGER fail_chalk_receipt');
-    await request('POST', `${path}/visuals/${blank.id}/cast`, {}, 201);
-    assert.equal((await request('GET', '/api/items')).length, 1);
+    const cast = await request('POST', `${path}/visuals/${blank.id}/cast`, {}, 201);
+    assert.deepEqual((await request('GET', '/api/items')).map((item: { id: string }) => item.id).sort(),
+      [board.identity_item_id, cast.item.id].sort());
     assert.deepEqual((await request('GET', path)).visuals, []);
   });
 });

@@ -61,6 +61,7 @@ beforeEach(() => {
   savedText = 'Saved paragraph from the note.';
   detail = {
     board: { id: 'board', user_id: 'fixture', title: 'Modal board', soul_id: 'soul', project_id: null,
+      identity_item_id: null, identity_description: null,
       viewport: { x: 31, y: -42, zoom: 0.8 }, created_at: date, updated_at: date },
     members: [member('first'), member('second'), member('item', 'item'), member('range', 'text_range')],
     edges: [], visuals: [],
