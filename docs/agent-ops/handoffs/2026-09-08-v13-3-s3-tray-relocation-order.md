@@ -1,6 +1,6 @@
 > **From**: fable
 > **To**: codex
-> **Status**: ready(两层制;13.3 单 3=准备区→板搬迁,client+server 中单;13.3 末单)
+> **Status**: done(2026-09-12 状态头补翻:交付与 Result 早已在案,头未跟上;派发期原头:ready;两层制;13.3 单 3=准备区→板搬迁,client+server 中单;13.3 末单)
 > **日期 (Date)**: 2026-09-08
 > **性质**: 施工单
 

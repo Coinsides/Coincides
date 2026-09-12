@@ -1,6 +1,6 @@
 > **From**: fable
 > **To**: codex
-> **Status**: ready(两层制;13.3 单 4=走查③打磨,client 小单)
+> **Status**: done(2026-09-12 状态头补翻:交付与 Result 早已在案,头未跟上;派发期原头:ready;两层制;13.3 单 4=走查③打磨,client 小单)
 > **日期 (Date)**: 2026-09-09
 > **性质**: 施工单(Henry 走查③ findings 当场修)
 

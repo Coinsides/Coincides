@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready
+> **状态 (Status)**: done(2026-09-12 状态头补翻:交付与 Result 早已在案,头未跟上;派发期原头:ready)
 > **From**: fable(HQ) · **To**: codex(builder)
 > **日期**: 2026-09-09
 > **上游**: 13.4 段 plan 修订二波次二(`plans/v13-4-projection-itemization-plan.md`);现物证据=单 0 侦察 §一(`analysis/2026-09-09-v13-4-s0-recon.md`)
