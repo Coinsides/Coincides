@@ -8,7 +8,7 @@
 ⚙️ **本文件由 `scripts/docs-index.mjs` 自动生成,请勿手改。**
 修改任何文档的状态头后,重新运行 `node scripts/docs-index.mjs` 即可更新。
 
-共 363 份文档。
+共 364 份文档。
 
 | 文件 | 标题 | 状态 | 更新 | 被取代 |
 |------|------|------|------|--------|
@@ -133,13 +133,14 @@
 | [claude-log/README.md](claude-log/README.md) | claude-log —— Claude 行动日志（Henry 的监督轨迹） | `active` | 2026-06-27 | — |
 | [codex-reviewer-charter.md](codex-reviewer-charter.md) | Codex Reviewer 角色卡(专职复核 thread) | `active` | 2026-08-19 | — |
 | [current-state/README.md](current-state/README.md) | Coincides — Current State | `active` | 2026-08-23 | — |
+| [current-state/agent-constitution.md](current-state/agent-constitution.md) | Agent 宪法(V14 立法,Henry 2026-09-13 拍板铸版) | `active` | 2026-09-13 | — |
 | [current-state/deferred-tests.md](current-state/deferred-tests.md) | 未做测试台账(Deferred Tests Ledger) | `active` | 2026-08-24 | — |
 | [current-state/glossary.md](current-state/glossary.md) | 工程词典 (Glossary) v0 | `active` | 2026-08-27 | — |
 | [current-state/page-frame-and-layout-contract.md](current-state/page-frame-and-layout-contract.md) | page_frame_local 坐标契约 + Layout 态定位 | `active` | 2026-09-12 | — |
 | [current-state/tech-debt.md](current-state/tech-debt.md) | 技术债登记 | `active` | 2026-09-13(13.6 裁决半场批量补账:12 天欠账一次清——TD-25/28 关行、TD-6 部分清偿、TD-21 触发、TD-22 加重、TD-15 增长、TD-41 新增;裁决档=analysis/2026-09-13-v13-6-adjudication.md) | — |
 | [decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md](decisions/ADR-0001-canvas-self-owned-engine-supersedes-pi-046.md) | ADR-0001: 自研最小混合 Canvas 引擎路线 (Self-owned Minimal Hybrid Can… | `active` | 2026-06-27 | — |
 | [decisions/README.md](decisions/README.md) | 决策层 / Architecture Decision Records (ADR) | `active` | 2026-06-27 | — |
-| [design/agent-constitution-bylaws.md](design/agent-constitution-bylaws.md) | Agent 宪法细则(四禁令实施法)v1 | `draft` | 2026-09-13 | — |
+| [design/agent-constitution-bylaws.md](design/agent-constitution-bylaws.md) | Agent 宪法细则(四禁令实施法)v1 | `active` | 2026-09-13 | — |
 | [design/note-page-design.md](design/note-page-design.md) | 笔记页设计文档 | `active` | 2026-09-13 | — |
 | [handoffs/2026-06-27-canvas-persistence-cutover.md](handoffs/2026-06-27-canvas-persistence-cutover.md) | Spec：三颗承重持久化种子的 DB 发芽（V2.BN.8.11 收口前的最后实质工作） | `(缺状态头)` | — | — |
 | [handoffs/2026-06-27-retire-stale-pi.md](handoffs/2026-06-27-retire-stale-pi.md) | Spec：给 7 条过时 PI 标 superseded / 重锚到 TextFlow-first | `(缺状态头)` | — | — |
@@ -369,7 +370,7 @@
 | [handoffs/plans/v13-5-b1-skin-token-spec.md](handoffs/plans/v13-5-b1-skin-token-spec.md) | B1 · 皮 Token 表设计稿 | `draft` | 2026-09-11 | — |
 | [handoffs/plans/v13-5-layout-credentials-plan.md](handoffs/plans/v13-5-layout-credentials-plan.md) | V13.5 · 版面与凭据 —— 段计划草案 | `active` | 2026-09-11 | — |
 | [handoffs/plans/v13-foundation-rebuild-plan.md](handoffs/plans/v13-foundation-rebuild-plan.md) | V13 · 地基重做版 —— 总 plan v1 | `active` | 2026-08-30 | — |
-| [handoffs/plans/v14-agent-era-plan-draft.md](handoffs/plans/v14-agent-era-plan-draft.md) | V14 · Agent 时代 —— 总 plan 草稿 v0 | `draft` | 2026-09-09 | — |
+| [handoffs/plans/v14-agent-era-plan-draft.md](handoffs/plans/v14-agent-era-plan-draft.md) | V14 · Agent 时代 —— 总 plan 草稿 v0 | `active` | 2026-09-09 | — |
 | [handoffs/plans/v14-eve-design-package.md](handoffs/plans/v14-eve-design-package.md) | V14 前夜设计包 | `draft` | 2026-09-13 | — |
 | [handoffs/plans/v2-bn12-2-mcp-tool-face.md](handoffs/plans/v2-bn12-2-mcp-tool-face.md) | Plan V2.BN.12.2 — MCP 工具面(末端执行器第一次实体化) | `active` | — | — |
 | [handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md](handoffs/plans/v2-bn12-2b-first-write-tool-and-review-queue.md) | V2.BN.12.2b:第一个写工具 + 候选审阅队列 + HTTP 层 K-5 | `done(**铸版 2026-08-23,Fable**——五单施工 + b-4 旅程 + b-5/b-5-fix 补单全复核 PASS;旅程合并分 **A 12/12 + B 8/8** 达通过线,重走记录 `analysis/2026-08-23-v2bn12-2b4-journey-sheet.md` §7;铸版记录 log 08-23 #40;未亲刀缺口见 TD-19/TD-20)` | 2026-08-23 | — |
