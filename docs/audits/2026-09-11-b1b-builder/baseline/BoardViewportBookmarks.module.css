@@ -1,0 +1,27 @@
+.rail { position: absolute; inset: 12px 12px 12px auto; width: min(300px, calc(100% - 24px)); z-index: 2; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; pointer-events: none; color: var(--text-primary); font-size: 12px; }
+.rail button, .editor, .error { pointer-events: auto; }
+.rail button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 32px; padding: 6px 8px; border-radius: 4px; color: var(--text-secondary); background: var(--bg-surface); }
+.rail button:hover { color: var(--text-primary); background: var(--bg-hover); }
+.rail button:focus-visible, .rail input:focus-visible { outline: 2px solid var(--border-focus); outline-offset: -2px; }
+.rail button svg { flex-shrink: 0; }
+.save { flex-shrink: 0; }
+.save, .jump { flex-direction: row-reverse; }
+.save span, .jump span, .actions { display: none; }
+.save:hover span, .save:focus-visible span, .row:hover .jump span, .row:focus-within .jump span { display: block; }
+.list { min-height: 0; overflow-y: auto; width: 100%; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.row { display: flex; flex-direction: row-reverse; align-items: center; max-width: 100%; pointer-events: auto; border-radius: 4px; }
+.row:hover, .row:focus-within { background: var(--bg-surface); }
+.jump { min-width: 32px; max-width: 100%; }
+.jump span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row:hover .actions, .row:focus-within .actions { display: flex; flex-shrink: 0; }
+.row:hover .jump, .row:focus-within .jump { min-width: 0; }
+.editor { position: absolute; top: 38px; right: 38px; width: min(248px, calc(100vw - 100px)); padding: 12px; border: 1px solid var(--border-default); border-radius: 6px; background: var(--bg-surface); }
+.editor label { display: block; margin-bottom: 8px; font-weight: 600; }
+.editor input { width: 100%; padding: 8px; color: var(--text-primary); background: var(--bg-primary); border: 1px solid var(--border-default); border-radius: 4px; }
+.editor input::placeholder { color: var(--text-secondary); }
+.editorActions { display: flex; justify-content: flex-end; gap: 4px; margin-top: 10px; }
+.editorActions button[type='submit'] { color: var(--text-primary); background: var(--accent-primary-bg); }
+.error { position: relative; width: 100%; padding: 12px; border: 1px solid var(--border-default); border-radius: 6px; background: var(--bg-surface); }
+.error p { margin-bottom: 8px; overflow-wrap: anywhere; }
+.error button { text-decoration: underline; }
+@media (hover: none) { .row:focus-within .actions { display: flex; } }

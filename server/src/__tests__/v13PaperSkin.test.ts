@@ -8,11 +8,13 @@ import express from 'express';
 import Database from 'better-sqlite3';
 import { closeDb, initDb } from '../db/init.js';
 import migration from '../db/migrations/067_v13_paper_skin.js';
+import boardMigration from '../db/migrations/068_v13_board_skin.js';
 import type { AuthRequest } from '../middleware/auth.js';
 import { errorHandler } from '../middleware/errorHandler.js';
 import coursesRoutes from '../routes/courses.js';
 import notesRoutes from '../routes/notes.js';
 import settingsRoutes from '../routes/settings.js';
+import { createBoardRouter } from '../routes/boards.js';
 import { parseStoredSkin } from '../services/skin.js';
 
 const userId = 'b1000000-0000-4000-8000-000000000001';
@@ -32,6 +34,7 @@ async function fixture() {
   app.use('/api/settings', settingsRoutes);
   app.use('/api/courses', coursesRoutes);
   app.use('/api/notes', notesRoutes);
+  app.use('/api/boards', createBoardRouter(() => db));
   app.use(errorHandler);
   const server = await new Promise<Server>((resolveServer) => {
     const listener = app.listen(0, '127.0.0.1', () => resolveServer(listener));
@@ -58,6 +61,39 @@ async function fixture() {
     },
   };
 }
+
+test('B1b board tokens and all four component overrides persist at every mount and leave geometry/content intact', async (t) => {
+  const f = await fixture(); t.after(() => f.close());
+  const project = await f.request('POST', 'courses', { name: 'Board skins' }, 201);
+  const note = await f.request('POST', 'notes', { course_id: project.id, title: 'Paper title', metadata: { typography: { font: 'system', size: 16 } } }, 201);
+  const { board } = await f.request('POST', 'boards', { title: 'Board skin', project_id: project.id, purpose: { title: 'Compare skins' } }, 201);
+  const before = await f.request('GET', `boards/${board.id}`);
+  assert.equal(board.skin, null);
+  for (const preset of presets) {
+    const skin = { preset, overrides: { 'board-desk': '#112233', card: '#eeeeee', edge: '#8899aa', chalk: '#ddeeff' },
+      components: { titleFont: 'serif', labelFont: 'mono', menuDensity: 'compact', handleStyle: 'rivet' } };
+    await f.request('PUT', 'settings', { settings: { skin } });
+    await f.request('PUT', `courses/${project.id}`, { skin });
+    await f.request('PUT', `notes/${note.id}`, { skin });
+    assert.deepEqual((await f.request('PATCH', `boards/${board.id}`, { skin })).board.skin, skin);
+    await f.reopen();
+    assert.deepEqual((await f.request('GET', 'settings')).skin, skin);
+    assert.deepEqual((await f.request('GET', `courses/${project.id}/summary`)).course.skin, skin);
+    assert.deepEqual((await f.request('GET', `notes/${note.id}`)).metadata.skin, skin);
+    const after = await f.request('GET', `boards/${board.id}`);
+    assert.deepEqual(after.board.skin, skin);
+    assert.deepEqual(after.board.viewport, before.board.viewport);
+    assert.equal(after.board.identity_description, before.board.identity_description);
+    for (const key of ['members', 'edges', 'visuals', 'layers']) assert.deepEqual(after[key], before[key]);
+    await f.request('PATCH', `boards/${board.id}`, { viewport: { x: 10, y: 20, zoom: 2 } });
+    assert.deepEqual((await f.request('GET', `boards/${board.id}`)).board.skin, skin);
+    await f.request('PATCH', `boards/${board.id}`, { viewport: before.board.viewport });
+  }
+  assert.equal((await f.request('PATCH', `boards/${board.id}`, { skin: null })).board.skin, null);
+  await f.reopen();
+  assert.equal((await f.request('GET', `boards/${board.id}`)).board.skin, null);
+  assert.deepEqual((await f.request('GET', `notes/${note.id}`)).metadata.typography, { font: 'system', size: 16 });
+});
 
 test('B1a existing settings, project and note routes persist four preset selections across a database reopen', async (t) => {
   const f = await fixture(); t.after(() => f.close());
@@ -139,5 +175,18 @@ test('B1a project migration is additive and repeatable for an existing project',
     db.prepare('UPDATE courses SET skin = ?').run(JSON.stringify({ preset: 'warm-paper' }));
     migration.up(db);
     assert.deepEqual(parseStoredSkin((db.prepare('SELECT skin FROM courses').get() as { skin: string }).skin), { preset: 'warm-paper' });
+  } finally { db.close(); }
+});
+
+test('B1b board migration preserves existing rows and repeated runs preserve a stored selection', () => {
+  const db = new Database(':memory:');
+  try {
+    db.exec("CREATE TABLE boards (id TEXT PRIMARY KEY, title TEXT, viewport TEXT); INSERT INTO boards VALUES ('old', 'Existing board', '{\"x\":40}')");
+    boardMigration.up(db); boardMigration.up(db);
+    assert.deepEqual(db.prepare('SELECT * FROM boards').get(), { id: 'old', title: 'Existing board', viewport: '{"x":40}', skin: null });
+    const skin = { preset: 'workbench', components: { handleStyle: 'capsule' } };
+    db.prepare('UPDATE boards SET skin = ?').run(JSON.stringify(skin));
+    boardMigration.up(db);
+    assert.deepEqual(parseStoredSkin((db.prepare('SELECT skin FROM boards').get() as { skin: string }).skin), skin);
   } finally { db.close(); }
 });

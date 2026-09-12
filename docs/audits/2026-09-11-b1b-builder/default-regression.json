@@ -1,0 +1,80 @@
+{
+  "status": "passed",
+  "results": [
+    {
+      "status": "passed",
+      "files": [
+        "00-baseline-board.png",
+        "01-default-board.png"
+      ],
+      "width": 1440,
+      "height": 1000,
+      "changedPixels": 0,
+      "maxChannelDelta": 0,
+      "sha256": [
+        "1ec408b625a9aa34d61f1bfb32d2f229469e62ede113d61a444cde8bce98090b",
+        "1ec408b625a9aa34d61f1bfb32d2f229469e62ede113d61a444cde8bce98090b"
+      ]
+    },
+    {
+      "status": "passed",
+      "files": [
+        "00-baseline-light-board.png",
+        "01-default-light-board.png"
+      ],
+      "width": 1440,
+      "height": 1000,
+      "changedPixels": 0,
+      "maxChannelDelta": 0,
+      "sha256": [
+        "275eb44d393708afb77125b180b66c026ef5f4af5783027d3a16a84a7a19b282",
+        "275eb44d393708afb77125b180b66c026ef5f4af5783027d3a16a84a7a19b282"
+      ]
+    },
+    {
+      "status": "passed",
+      "files": [
+        "00-baseline-panels-layers.png",
+        "01-default-panels-layers.png"
+      ],
+      "width": 1440,
+      "height": 1000,
+      "changedPixels": 0,
+      "maxChannelDelta": 0,
+      "sha256": [
+        "23a301f9abcc6e9c20708efa5c49745ccd32e12db18afccb3997db11327356ca",
+        "23a301f9abcc6e9c20708efa5c49745ccd32e12db18afccb3997db11327356ca"
+      ]
+    },
+    {
+      "status": "passed",
+      "files": [
+        "00-baseline-panels-selection.png",
+        "01-default-panels-selection.png"
+      ],
+      "width": 1440,
+      "height": 1000,
+      "changedPixels": 0,
+      "maxChannelDelta": 0,
+      "sha256": [
+        "24b94802a14d4623220cc096034f7eff10045c4be1044b7b1ec3857d3fa77c2c",
+        "24b94802a14d4623220cc096034f7eff10045c4be1044b7b1ec3857d3fa77c2c"
+      ]
+    },
+    {
+      "status": "passed",
+      "files": [
+        "00-baseline-panels-bookmarks.png",
+        "01-default-panels-bookmarks.png"
+      ],
+      "width": 1440,
+      "height": 1000,
+      "changedPixels": 0,
+      "maxChannelDelta": 0,
+      "sha256": [
+        "53dbea99284d529b11fcce7ffeb96a378eb99a3d105c65c52fdc6bea5ab96176",
+        "53dbea99284d529b11fcce7ffeb96a378eb99a3d105c65c52fdc6bea5ab96176"
+      ]
+    }
+  ]
+}

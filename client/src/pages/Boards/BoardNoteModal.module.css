@@ -4,7 +4,7 @@
   z-index: 60;
   display: grid;
   place-items: center;
-  background: rgb(0 0 0 / 28%);
+  background: var(--board-note-backdrop, rgb(0 0 0 / 28%));
   pointer-events: none;
 }
 .dialog {
@@ -39,6 +39,7 @@
 }
 .header.dragging { cursor: grabbing; }
 .status { flex: 1; color: var(--text-secondary); }
+.header > span { font-family: var(--sk-label-font, inherit); }
 .header button, .error button {
   display: inline-flex;
   align-items: center;

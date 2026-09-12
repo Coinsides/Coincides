@@ -1,4 +1,4 @@
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
 import { createPortal, flushSync } from 'react-dom';
 import { ExternalLink, X } from 'lucide-react';
 import NoteCanvasRuntime, { type NoteCanvasRuntimeHandle } from '../Notes/canvasEngine/NoteCanvasRuntime';
@@ -12,6 +12,7 @@ export interface BoardNoteModalHandle {
   requestClose: (destination?: NoteCloseDestination) => Promise<boolean>;
 }
 interface BoardNoteModalProps {
+  skinStyle?: CSSProperties;
   noteId: string;
   onClosed: () => void;
   onOpenFullPage: (noteId: string) => void;
@@ -26,7 +27,7 @@ type DialogPosition = { left: number; top: number };
 let sessionPosition: DialogPosition | null = null;
 
 const BoardNoteModal = forwardRef<BoardNoteModalHandle, BoardNoteModalProps>(function BoardNoteModal({
-  noteId, onClosed, onOpenFullPage, onSwitchNote, stagingOpen = false, onSendToStaging, stagingItemDrop,
+  noteId, onClosed, onOpenFullPage, onSwitchNote, stagingOpen = false, onSendToStaging, stagingItemDrop, skinStyle,
 }, ref) {
   const runtime = useRef<NoteCanvasRuntimeHandle>(null);
   const dialog = useRef<HTMLDivElement>(null);
@@ -255,7 +256,7 @@ const BoardNoteModal = forwardRef<BoardNoteModalHandle, BoardNoteModalProps>(fun
     };
   }, [requestClose, stagingOpen]);
 
-  return createPortal(<div className={`${styles.backdrop} ${stagingOpen ? styles.withStaging : ''}`} data-board-note-staging-open={stagingOpen}>
+  return createPortal(<div className={`${styles.backdrop} ${stagingOpen ? styles.withStaging : ''}`} data-board-note-staging-open={stagingOpen} style={skinStyle}>
     <div className={styles.dialog} role="dialog" aria-modal={!stagingOpen} aria-label="Open note" tabIndex={-1} ref={dialog}
       style={position ? { left: position.left, top: position.top } : undefined}>
       <header className={`${styles.header} ${dragging ? styles.dragging : ''}`} data-note-dialog-drag-handle="true"

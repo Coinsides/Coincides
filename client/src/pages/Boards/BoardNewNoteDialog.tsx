@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type CSSProperties } from 'react';
 import api from '@/services/api';
 import type { Course } from '@shared/types';
 import type { Note } from '@/pages/Notes/canvasEngine/runtimeDataTypes';
@@ -8,7 +8,8 @@ import styles from './BoardNewNoteDialog.module.css';
 
 const NEW_PROJECT = '__new_project__';
 
-export function BoardNewNoteDialog({ boardId, initialProjectId, onCancel, onCreated }: {
+export function BoardNewNoteDialog({ boardId, initialProjectId, onCancel, onCreated, skinStyle }: {
+  skinStyle?: CSSProperties;
   boardId: string;
   initialProjectId: string | null;
   onCancel: () => void;
@@ -70,7 +71,7 @@ export function BoardNewNoteDialog({ boardId, initialProjectId, onCancel, onCrea
     }
   }
 
-  return <dialog ref={dialog} className={`${boardStyles.deleteDialog} ${styles.dialog}`}
+  return <dialog ref={dialog} className={`${boardStyles.deleteDialog} ${styles.dialog}`} style={skinStyle}
     aria-labelledby="board-new-note-title" onCancel={(event) => {
       event.preventDefault();
       if (!inFlight.current) onCancel();

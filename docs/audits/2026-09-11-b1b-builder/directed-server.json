@@ -1,0 +1,15 @@
+{
+  "command": [
+    "node",
+    "--import",
+    "tsx",
+    "--test",
+    "src/__tests__/v13PaperSkin.test.ts",
+    "src/__tests__/v13BoardServices.test.ts",
+    "src/__tests__/v13BoardRoutes.test.ts"
+  ],
+  "cwd": "server",
+  "started": "2026-09-12T03:02:40.757Z",
+  "durationMs": 1925,
+  "exitCode": 0
+}

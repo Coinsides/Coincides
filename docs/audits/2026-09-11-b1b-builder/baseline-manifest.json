@@ -1,0 +1,161 @@
+{
+  "ref": "96d184805ac8bd88340e93ac8720bd51c0f06a87",
+  "premise": "Opening status: tracked tree clean; only unrelated untracked files.",
+  "files": [
+    {
+      "file": "client/src/pages/Boards/BoardChalk.tsx",
+      "sha256": "21d34718d9b57ef1b7c61f5106c267eb1197081179773ab3191bcf019f115bf7",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/BoardDeleteDialog.tsx",
+      "sha256": "9b0031a217d9b4d3877dff0e424cdea1be67e89d0f66ddc3d3a4e68740085443",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/BoardLayers.module.css",
+      "sha256": "70d207a24ea5c71d995aea4b9465945e07d689fbf99b3de959d3d150050e1424",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/BoardLayers.tsx",
+      "sha256": "5e664729379a5da2619ccf215cba54b123476a27bdd529a0b72e23a9b9bb0185",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/BoardList.tsx",
+      "sha256": "4910c41c929c5e6dd51d3b7fb8d7c2c7afe99362d190d7ba8137780dde0b2a47",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/BoardNewNoteDialog.module.css",
+      "sha256": "53bb1fb65bb69a190665707b40a4b2c6658b744b57861ae4a280abd2a6068768",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/BoardNewNoteDialog.tsx",
+      "sha256": "af2001e1590fd849279f07a0bfc1af8f8ad9de12b32bf579c53d468100d2c2f0",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/BoardNoteModal.module.css",
+      "sha256": "b08be7b993126be694dd36592f1cbf11a5a92897e753162da7000fa9fbee4258",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/BoardNoteModal.tsx",
+      "sha256": "7c9d24e7aaeca72efeefcdcec47946ca4b810552398d406ccfa665e77e6e6b17",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/BoardPage.tsx",
+      "sha256": "3cff5ad5b9aa1e59d3d0ac9a8159ac76f4347bc2cc2dc5fbf8a44eccc61c6fbd",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/BoardReferenceTag.tsx",
+      "sha256": "f94dd2077bff992a97bc5097343a8311b29d2899d190703c4405b281d10879ad",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/BoardRelocatedVisual.tsx",
+      "sha256": "299fa9872e0aaa26aff06d82837874ba0763dbf8262a1ec2ea62a7c77b5bcb84",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/BoardSelectionSidebar.module.css",
+      "sha256": "07d61e3d6553f9c508d22ad73f25d13109366121c752732e12050834eb6e4aca",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/BoardSelectionSidebar.tsx",
+      "sha256": "f049875e4a547b6a5e3dd2cb753587d8d9fbee22b49a62085b49e7d12595172a",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/BoardStaging.module.css",
+      "sha256": "bb9ddbd78e82de390eeb9c30f6ba0fe07b32c45232db9c44fc398dfc3dc2e3c8",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/BoardStaging.tsx",
+      "sha256": "f633bf89482459c4a0c46152cfdc632f4c3885d6428effcc52f4a682ab40f949",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/BoardViewportBookmarks.module.css",
+      "sha256": "f571866d98b432e5739dd89ca5f2e90b731c7998de8c1170e6ba7568132b7d70",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/BoardViewportBookmarks.tsx",
+      "sha256": "649a023d659a9828689d03f8897e046fadb1806ff9bc9d07284a2d28ab1f1015",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/Boards.module.css",
+      "sha256": "e9367b3eff2df94fa9ba2ebfab5482572b375934ed84201ac5fe804f5b9c1277",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/boardActiveLayer.ts",
+      "sha256": "7f1a61a82e4a991db570173029fc7efe26855aaccd247061692812d91884128f",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/boardCommandHistory.ts",
+      "sha256": "4f9c8a75c32c08a58f8c22054f04c79bde8395610153248e4623cc6d3c6e3175",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/boardEvents.ts",
+      "sha256": "19c2704d04878c85f7f5d925f4f4737290d24be96ec7519d22ee6a6ce3a636ec",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/boardLayerScene.ts",
+      "sha256": "1f62e4da2125addbeec129b4645aa95c9bd35d42f8113473fbd91caf61654a08",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/boardRepository.ts",
+      "sha256": "a081bea3715a9f461d4fd4665617f3e99951ecd1932fba6c27a09d2c80fca285",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/boardSelection.ts",
+      "sha256": "732c1c5e8e336c20d336da51a2ab118d5d829ce6eed3e2215745d0486a3c52c3",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/boardSnapping.ts",
+      "sha256": "7866dd201ce4d2108ef930ea3fe325030b5c50b54fd18519ce8d7ad796f5249e",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/boardStagingDrag.ts",
+      "sha256": "0e37e2c358e529a244e12e4955d21011f489668d6a40f3e930aa7af4664c405e",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/boardTextRangeClipboard.ts",
+      "sha256": "1f673f54168c4c310f7adba3b62a1f54a190d6e5aa83a1559ec4809480665c98",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/boardTypes.ts",
+      "sha256": "21228897d68645449ba841bbd8feab2bf0ac3d46ceb42f4d45f0592eadc73ea2",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/boardViewport.ts",
+      "sha256": "1c3ac6fdb89702f530beb68194b093937f58551521ff6fdaafba8e60b95d9438",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    },
+    {
+      "file": "client/src/pages/Boards/useBoard.ts",
+      "sha256": "b257cefa162f57fc2e76813eb2d358f335af137d794acd519d76195a45f771da",
+      "adjustment": "Only relative ../Notes imports changed to @/pages/Notes for audit relocation"
+    }
+  ]
+}

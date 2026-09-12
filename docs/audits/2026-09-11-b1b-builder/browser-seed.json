@@ -1,0 +1,158 @@
+{
+  "database": "D:\\Coinsides\\v2.x\\Coincides\\.codex-tmp\\b1b-browser\\run-txhKAi\\fixture.sqlite",
+  "syntheticOnly": true,
+  "boardId": "5c1eac36-ee64-4c79-9d1f-e3eebfe4b0a2",
+  "noteId": "3555c42b-aaec-4063-a980-c6048907d3e2",
+  "projectId": "b1b00000-0000-4000-8000-000000000002",
+  "memberId": "0fc82ebc-0382-43ac-bec0-5ef68bd4b355",
+  "user": {
+    "id": "b1b00000-0000-4000-8000-000000000001",
+    "name": "B1b reviewer",
+    "settings": "{\"theme\":\"dark\",\"skin\":null}"
+  },
+  "project": {
+    "id": "b1b00000-0000-4000-8000-000000000002",
+    "skin": null
+  },
+  "board": {
+    "id": "5c1eac36-ee64-4c79-9d1f-e3eebfe4b0a2",
+    "user_id": "b1b00000-0000-4000-8000-000000000001",
+    "title": "Field notes · Board skins",
+    "soul_id": "purpose-a5f7f65c-c15d-48f5-bb75-b71d0a120e97",
+    "project_id": "b1b00000-0000-4000-8000-000000000002",
+    "item_id": "995205c5-5b86-49ab-9579-f374dd8d4b62",
+    "viewport": "{\"x\":40,\"y\":20,\"zoom\":1}",
+    "created_at": "2026-09-12T02:47:36.615Z",
+    "updated_at": "2026-09-12T02:47:36.620Z",
+    "skin": null
+  },
+  "note": {
+    "id": "3555c42b-aaec-4063-a980-c6048907d3e2",
+    "title": "A field guide to careful observation",
+    "metadata": "{}"
+  },
+  "scene": {
+    "board_members": [
+      {
+        "id": "0fc82ebc-0382-43ac-bec0-5ef68bd4b355",
+        "board_id": "5c1eac36-ee64-4c79-9d1f-e3eebfe4b0a2",
+        "member_kind": "note",
+        "member_id": "3555c42b-aaec-4063-a980-c6048907d3e2",
+        "placed": 1,
+        "mounted_actor": "human",
+        "layer_id": null,
+        "x": 100,
+        "y": 110,
+        "w": 300,
+        "h": 160,
+        "scale": 1,
+        "z_index": 1,
+        "pinned": 0,
+        "metadata": "{}",
+        "created_at": "2026-09-12T02:47:36.618Z",
+        "updated_at": "2026-09-12T02:47:36.618Z"
+      },
+      {
+        "id": "bd2e46d1-2ab8-40ce-a82f-318b210e879d",
+        "board_id": "5c1eac36-ee64-4c79-9d1f-e3eebfe4b0a2",
+        "member_kind": "item",
+        "member_id": "fe798f0a-466c-441c-83e2-584f96814751",
+        "placed": 1,
+        "mounted_actor": "human",
+        "layer_id": null,
+        "x": 650,
+        "y": 140,
+        "w": 300,
+        "h": 180,
+        "scale": 1,
+        "z_index": 2,
+        "pinned": 0,
+        "metadata": "{}",
+        "created_at": "2026-09-12T02:47:36.619Z",
+        "updated_at": "2026-09-12T02:47:36.619Z"
+      }
+    ],
+    "board_edges": [
+      {
+        "id": "ba3cd2d2-071e-4e3e-845e-961692e994a5",
+        "board_id": "5c1eac36-ee64-4c79-9d1f-e3eebfe4b0a2",
+        "from_member_id": "0fc82ebc-0382-43ac-bec0-5ef68bd4b355",
+        "to_member_id": "bd2e46d1-2ab8-40ce-a82f-318b210e879d",
+        "style": "{}",
+        "label": "Compare evidence",
+        "created_at": "2026-09-12T02:47:36.619Z"
+      }
+    ],
+    "board_visuals": [
+      {
+        "id": "62df19fc-9b8f-4d99-bcbd-93b2c3302c73",
+        "board_id": "5c1eac36-ee64-4c79-9d1f-e3eebfe4b0a2",
+        "visual_kind": "sticky",
+        "layer_id": null,
+        "x": 350,
+        "y": 450,
+        "w": 310,
+        "h": 100,
+        "scale": 1,
+        "rotation": 0,
+        "z_index": 0,
+        "pinned": 0,
+        "data": "{\"text\":\"What would change this conclusion?\"}",
+        "metadata": "{}",
+        "created_at": "2026-09-12T02:47:36.620Z",
+        "updated_at": "2026-09-12T02:47:36.620Z"
+      },
+      {
+        "id": "a6e8fe33-adec-47f1-9a9b-492c4d9cebac",
+        "board_id": "5c1eac36-ee64-4c79-9d1f-e3eebfe4b0a2",
+        "visual_kind": "freehand",
+        "layer_id": null,
+        "x": 170,
+        "y": 360,
+        "w": 700,
+        "h": 40,
+        "scale": 1,
+        "rotation": 0,
+        "z_index": 0,
+        "pinned": 0,
+        "data": "{\"points\":[{\"x\":0,\"y\":20},{\"x\":120,\"y\":0},{\"x\":330,\"y\":35},{\"x\":610,\"y\":10}]}",
+        "metadata": "{}",
+        "created_at": "2026-09-12T02:47:36.620Z",
+        "updated_at": "2026-09-12T02:47:36.620Z"
+      }
+    ],
+    "board_layers": [
+      {
+        "id": "cefec1dd-b5fa-478a-b7d2-6e9c03ed33c6",
+        "board_id": "5c1eac36-ee64-4c79-9d1f-e3eebfe4b0a2",
+        "user_id": "b1b00000-0000-4000-8000-000000000001",
+        "name": "Questions",
+        "order_index": 0,
+        "visible": 1
+      }
+    ],
+    "board_viewport_bookmarks": [
+      {
+        "id": "1362a3b3-71de-41ca-a705-7fa63974958e",
+        "board_id": "5c1eac36-ee64-4c79-9d1f-e3eebfe4b0a2",
+        "user_id": "b1b00000-0000-4000-8000-000000000001",
+        "name": "Overview",
+        "x": 40,
+        "y": 20,
+        "zoom": 1,
+        "created_at": "2026-09-12T02:47:36.620Z"
+      },
+      {
+        "id": "207543d0-236c-4282-af71-18bdeb35c353",
+        "board_id": "5c1eac36-ee64-4c79-9d1f-e3eebfe4b0a2",
+        "user_id": "b1b00000-0000-4000-8000-000000000001",
+        "name": "Close reading",
+        "x": -40,
+        "y": 10,
+        "zoom": 1.2,
+        "created_at": "2026-09-12T02:47:36.620Z"
+      }
+    ]
+  },
+  "requests": []
+}

@@ -5,9 +5,11 @@ import { resolveSkin } from '@/styles/skinPresets';
 import styles from './SkinControls.module.css';
 
 /** Dispatch immediately so the owner can bind and track each intent before navigation. */
-export function SkinEditor({ value, save, inheritLabel, advanced, preview = false, failed = false }: {
+export function SkinEditor({ value, save, inheritLabel, inheritedValue, advanced, preview = false, failed = false, surface = 'paper' }: {
   value: SkinSelection | null; save: (skin: SkinSelection | null) => Promise<void>;
   inheritLabel?: string; advanced?: boolean; preview?: boolean; failed?: boolean;
+  surface?: 'paper' | 'board' | 'all';
+  inheritedValue?: SkinSelection | null;
 }) {
   const [draft, setDraft] = useState(value);
   const [error, setError] = useState(false);
@@ -21,9 +23,9 @@ export function SkinEditor({ value, save, inheritLabel, advanced, preview = fals
       if (mounted.current) setError(false);
     }, () => { if (mounted.current) setError(true); }).finally(() => { pending.current -= 1; });
   };
-  const { tokens } = resolveSkin(draft);
+  const { tokens } = resolveSkin(draft ?? inheritedValue);
   return <>
-    <SkinControls value={draft} onChange={change} inheritLabel={inheritLabel} advanced={advanced} />
+    <SkinControls value={draft} onChange={change} inheritLabel={inheritLabel} inheritedValue={inheritedValue} advanced={advanced} surface={surface} />
     {preview && <div className={styles.preview} aria-label="纸面颜色预览" style={{ background: tokens.paper, color: tokens.ink }}>
       <strong>纸面预览</strong>
       <p style={{ color: tokens['ink-muted'] }}>正文、弱字与强调色随选择更新。</p>

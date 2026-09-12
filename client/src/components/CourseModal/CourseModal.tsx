@@ -5,6 +5,7 @@ import type { Course } from '@shared/types';
 import type { SkinSelection } from '@shared/types/skin';
 import { readSkin } from '@/styles/skinPresets';
 import { SkinControls } from '@/components/Skin/SkinControls';
+import { useAuthStore } from '@/stores/authStore';
 import styles from './CourseModal.module.css';
 
 const PRESET_COLORS = [
@@ -14,6 +15,7 @@ const PRESET_COLORS = [
 ];
 
 export default function CourseModal() {
+  const globalSkin = useAuthStore((state) => state.user?.settings.skin);
   const modal = useUIStore((s) => s.modal);
   const closeModal = useUIStore((s) => s.closeModal);
   const addToast = useUIStore((s) => s.addToast);
@@ -137,7 +139,7 @@ export default function CourseModal() {
             />
           </div>
 
-          {isEdit && <SkinControls value={skin} onChange={setSkin} inheritLabel="继承全局外观" disabled={saving} />}
+          {isEdit && <SkinControls value={skin} inheritedValue={readSkin(globalSkin)} onChange={setSkin} inheritLabel="继承全局外观" disabled={saving} surface="all" advanced />}
 
           <div className={styles.actions}>
             <button type="button" className={styles.cancelBtn} onClick={closeModal}>

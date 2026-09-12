@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { readSkin, resolveSkin, SKIN_PRESETS } from './skinPresets';
+import { readSkin, resolveSkin, SKIN_PRESETS, SKIN_PRESET_COMPONENTS } from './skinPresets';
 
 describe('B1a factory paper snapshots', () => {
   it.each([
@@ -8,12 +8,12 @@ describe('B1a factory paper snapshots', () => {
     ['warm-paper', { desk: '#1D1A17', paper: '#F7F3EA', ink: '#2B2620', 'ink-muted': '#837A6C', accent: '#33604F', annotation: '#B8912E', hairline: '#E6DECE', danger: '#A04A38', wall: '#D8CFBC' }],
     ['workbench', { desk: '#12151A', paper: '#1A1E25', ink: '#DEE3EA', 'ink-muted': '#7E8794', accent: '#E5A33C', annotation: '#E5A33C', hairline: '#2E3642', danger: '#D46A5A', wall: '#33507A' }],
   ] as const)('%s keeps its nine agreed literal colors', (preset, expected) => {
-    expect(resolveSkin({ preset })).toEqual({ preset, tokens: expected });
-    expect(SKIN_PRESETS[preset]).toEqual(expected);
+    expect(resolveSkin({ preset })).toMatchObject({ preset, tokens: expected });
+    expect(SKIN_PRESETS[preset]).toMatchObject(expected);
   });
 
   it('rollout absence and cleared global selection both use the incumbent default snapshot', () => {
-    expect(resolveSkin()).toEqual({ preset: 'default', tokens: SKIN_PRESETS.default });
+    expect(resolveSkin()).toEqual({ preset: 'default', tokens: SKIN_PRESETS.default, components: SKIN_PRESET_COMPONENTS.default });
     expect(resolveSkin(null, null, null)).toEqual(resolveSkin());
   });
 
@@ -21,13 +21,13 @@ describe('B1a factory paper snapshots', () => {
     const global = { preset: 'quiet-ink' as const, overrides: { accent: '#123456' } };
     const project = { preset: 'workbench' as const, overrides: { paper: '#263340' } };
     const paper = { preset: 'warm-paper' as const, overrides: { 'ink-muted': '#876543' } };
-    expect(resolveSkin(global, project, paper)).toEqual({ preset: 'warm-paper', tokens: {
+    expect(resolveSkin(global, project, paper)).toEqual({ preset: 'warm-paper', components: SKIN_PRESET_COMPONENTS['warm-paper'], tokens: {
       ...SKIN_PRESETS['warm-paper'], 'ink-muted': '#876543',
     } });
-    expect(resolveSkin(global, project, null)).toEqual({ preset: 'workbench', tokens: {
+    expect(resolveSkin(global, project, null)).toEqual({ preset: 'workbench', components: SKIN_PRESET_COMPONENTS.workbench, tokens: {
       ...SKIN_PRESETS.workbench, paper: '#263340',
     } });
-    expect(resolveSkin(global, null, undefined)).toEqual({ preset: 'quiet-ink', tokens: {
+    expect(resolveSkin(global, null, undefined)).toEqual({ preset: 'quiet-ink', components: SKIN_PRESET_COMPONENTS['quiet-ink'], tokens: {
       ...SKIN_PRESETS['quiet-ink'], accent: '#123456',
     } });
   });
@@ -53,5 +53,31 @@ describe('B1a factory paper snapshots', () => {
     expect(resolveSkin(saved).tokens.accent).toBe('#334455');
     expect(SKIN_PRESETS['quiet-ink'].paper).toBe('#17181C');
     expect(SKIN_PRESETS['quiet-ink'].accent).toBe('#7FA3D7');
+  });
+});
+
+describe('B1b board snapshots and component defaults', () => {
+  it.each([
+    ['default', ['#0b0b0c', '#151516', '#b7b8bd', '#f5f5f5']],
+    ['quiet-ink', ['#0E0F12', '#17181C', '#8B909A', '#E7E8EB']],
+    ['warm-paper', ['#211D19', '#F7F3EA', '#837A6C', '#F2EDE1']],
+    ['workbench', ['#12151A', '#1A1E25', '#E5A33C', '#DEE3EA']],
+  ] as const)('%s carries its four board colors', (preset, expected) => {
+    const { tokens } = resolveSkin({ preset });
+    expect([tokens['board-desk'], tokens.card, tokens.edge, tokens.chalk]).toEqual(expected);
+  });
+
+  it('presets carry component defaults and local selection/clear uses the same three mount merge', () => {
+    const global = { preset: 'warm-paper' as const };
+    const project = { preset: 'workbench' as const };
+    const board = { preset: 'quiet-ink' as const, overrides: { card: '#334455' }, components: { titleFont: 'serif' as const } };
+    expect(resolveSkin(global).components.titleFont).toBe('serif');
+    expect(resolveSkin(global, project).components).toEqual({ titleFont: 'sans', labelFont: 'mono', menuDensity: 'compact', handleStyle: 'rivet' });
+    expect(resolveSkin(global, project, board)).toMatchObject({ tokens: { card: '#334455' }, components: { titleFont: 'serif', labelFont: 'system', menuDensity: 'comfortable', handleStyle: 'capsule' } });
+    expect(resolveSkin(global, project, null)).toEqual(resolveSkin(project));
+    expect(resolveSkin(global, null, null)).toEqual(resolveSkin(global));
+    const parsed = readSkin(board)!;
+    parsed.components!.titleFont = 'sans';
+    expect(board.components.titleFont).toBe('serif');
   });
 });

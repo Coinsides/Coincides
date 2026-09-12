@@ -15,5 +15,15 @@ export const skinSelectionSchema: z.ZodType<SkinSelection> = z.object({
     hairline: colorSchema.optional(),
     danger: colorSchema.optional(),
     wall: colorSchema.optional(),
+    'board-desk': colorSchema.optional(),
+    card: colorSchema.optional(),
+    edge: colorSchema.optional(),
+    chalk: colorSchema.optional(),
+  }).strict().optional(),
+  components: z.object({
+    titleFont: z.enum(['sans', 'serif']).optional(),
+    labelFont: z.enum(['system', 'mono']).optional(),
+    menuDensity: z.enum(['comfortable', 'compact']).optional(),
+    handleStyle: z.enum(['capsule', 'rivet']).optional(),
   }).strict().optional(),
 }).strict();

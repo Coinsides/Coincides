@@ -1,0 +1,13 @@
+{
+  "command": [
+    "cmd.exe",
+    "/d",
+    "/s",
+    "/c",
+    "npm run verify:v2-bn8-runtime"
+  ],
+  "cwd": ".",
+  "started": "2026-09-12T03:04:27.367Z",
+  "durationMs": 85301,
+  "exitCode": 0
+}

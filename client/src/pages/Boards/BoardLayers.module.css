@@ -16,7 +16,7 @@
 .list { margin-top: 12px; }
 .row { display: flex; align-items: center; gap: 2px; min-height: 38px; border-radius: 4px; }
 .row[data-active='true'] { background: var(--accent-primary-bg); }
-.row .grip { color: var(--text-secondary); cursor: grab; padding-inline: 2px; }
+.row .grip { color: var(--text-secondary); cursor: grab; padding-inline: 2px; border-radius: var(--sk-board-handle-radius, 4px); }
 .row .grip:active { cursor: grabbing; }
 .row .name { flex: 1; min-width: 0; justify-content: space-between; gap: 6px; font-size: 12px; }
 .name span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -27,8 +27,9 @@
 .gripPlaceholder:last-child { width: 26px; }
 .panel .add { width: 100%; gap: 6px; margin-top: 8px; padding: 8px; border: 1px solid var(--border-default); font-size: 12px; }
 .dialog { margin: auto; width: calc(100% - 32px); max-width: 420px; padding: 24px; color: var(--text-primary); background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 8px; }
-.dialog::backdrop { background: rgb(0 0 0 / 55%); }
+.dialog::backdrop { background: var(--board-backdrop, rgb(0 0 0 / 55%)); }
 .dialog h2 { font-size: 16px; font-weight: 600; overflow-wrap: anywhere; }
 .dialog p { margin-top: 12px; font-size: 14px; line-height: 1.6; }
 .dialogActions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
 .dialogActions button { padding: 8px 12px; border: 1px solid var(--border-default); font-size: 12px; }
+.name, .header h2 span { font-family: var(--sk-label-font, inherit); }

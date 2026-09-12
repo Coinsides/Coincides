@@ -5,6 +5,8 @@ import { boardErrorMessage, loadBoardCandidates, loadBoardNotePreview } from './
 import type { BoardCandidate, BoardEdge, BoardMember, BoardViewport, BoardVisual } from './boardTypes';
 import { animateBoardViewport, pointsPath, toBoardPoint, zoomBoardAt, type BoardPoint } from './boardViewport';
 import { useBoard } from './useBoard';
+import { useBoardSkin } from './useBoardSkin';
+import { SkinEditor } from '@/components/Skin/SkinEditor';
 import { BoardRelocatedVisual } from './BoardRelocatedVisual';
 import { BoardDeleteDialog } from './BoardDeleteDialog';
 import { BoardNewNoteDialog } from './BoardNewNoteDialog';
@@ -45,6 +47,7 @@ export default function BoardPage() {
   const { boardId } = useParams();
   const navigate = useNavigate();
   const board = useBoard(boardId);
+  const skin = useBoardSkin(board.detail?.board ?? null, board.updateBoard);
   const [tool, setTool] = useState<Tool>('select');
   const [selectionState, setSelectionState] = useState<{ keys: Set<string>; anchor: Selection }>({ keys: new Set(), anchor: null });
   const selectedKeys = selectionState.keys;
@@ -912,7 +915,7 @@ export default function BoardPage() {
     }, factor));
   }
 
-  return <><section className={styles.workspace} aria-label="Board workspace" onPaste={pasteReference} onKeyDown={keyDown}
+  return <><section className={styles.workspace} aria-label="Board workspace" style={skin.style} data-board-skin-preset={skin.preset} onPaste={pasteReference} onKeyDown={keyDown}
     onKeyDownCapture={pauseBoard} onKeyUpCapture={pauseBoard} onPasteCapture={pauseBoard}
     onKeyUp={(event) => {
       if (event.key === 'Shift' && gesture.current?.kind === 'move') {
@@ -957,6 +960,11 @@ export default function BoardPage() {
       <details className={styles.boardMenu}>
         <summary aria-label="Board menu">More</summary>
         <div className={styles.boardMenuContent}>
+          <details className={styles.boardAppearance} onKeyDown={(event) => event.stopPropagation()}>
+            <summary>板面外观</summary>
+            <SkinEditor key={boardId} value={skin.selection} inheritedValue={skin.inheritedSelection} save={skin.save} inheritLabel="继承项目 / 全局" surface="board" advanced />
+            {skin.error && <p role="alert">{skin.error}<button type="button" onClick={skin.retry}>重试</button></p>}
+          </details>
           <section className={styles.boardIdentity} aria-label="Board identity">
             <h2>Board identity</h2>
             {detail.board.identity_item_id ? <>
@@ -1067,7 +1075,7 @@ export default function BoardPage() {
             style={labelDraft ? { zIndex: Math.max(0, ...layer.members.map((member) => member.z_index), ...layer.visuals.map((visual) => visual.z_index)) + 1 } : undefined}>
             <defs><marker id={layer.id ? `board-edge-arrow-${layer.id}` : 'board-edge-arrow'} viewBox="0 0 10 10" refX="9" refY="5"
               markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-secondary)" />
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--board-edge, var(--text-secondary))" />
             </marker></defs>
             {layer.edges.map((edge) => {
               const from = visibleMembers.find((member) => member.id === edge.from_member_id);
@@ -1275,10 +1283,10 @@ export default function BoardPage() {
     })()}
     {deleting && <BoardDeleteDialog board={detail.board} onCancel={() => setDeleting(false)} onDeleted={() => navigate('/boards')} />}
   </section>
-    {newNoteOpen && <BoardNewNoteDialog key={boardId} boardId={detail.board.id} initialProjectId={detail.board.project_id}
+    {newNoteOpen && <BoardNewNoteDialog key={boardId} boardId={detail.board.id} initialProjectId={detail.board.project_id} skinStyle={skin.style}
       onCancel={() => { setNewNoteOpen(false); newNoteToggle.current?.focus(); }}
       onCreated={(noteId) => { setNewNoteOpen(false); setOpenNoteId(noteId); void loadCandidates(); }} />}
-    {openNoteId && <BoardNoteModal key={openNoteId} ref={noteModal} noteId={openNoteId}
+    {openNoteId && <BoardNoteModal key={openNoteId} ref={noteModal} noteId={openNoteId} skinStyle={skin.style}
       stagingOpen={stagingOpen} onSendToStaging={stageTextRange}
       stagingItemDrop={stagingOpen && !board.pending && !chalkDraft ? {
         boardId: detail.board.id,

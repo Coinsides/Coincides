@@ -1,0 +1,1324 @@
+diff --git a/client/src/components/CourseModal/CourseModal.tsx b/client/src/components/CourseModal/CourseModal.tsx
+index fd662bc..8f3249b 100644
+--- a/client/src/components/CourseModal/CourseModal.tsx
++++ b/client/src/components/CourseModal/CourseModal.tsx
+@@ -5,6 +5,7 @@ import type { Course } from '@shared/types';
+ import type { SkinSelection } from '@shared/types/skin';
+ import { readSkin } from '@/styles/skinPresets';
+ import { SkinControls } from '@/components/Skin/SkinControls';
++import { useAuthStore } from '@/stores/authStore';
+ import styles from './CourseModal.module.css';
+ 
+ const PRESET_COLORS = [
+@@ -14,6 +15,7 @@ const PRESET_COLORS = [
+ ];
+ 
+ export default function CourseModal() {
++  const globalSkin = useAuthStore((state) => state.user?.settings.skin);
+   const modal = useUIStore((s) => s.modal);
+   const closeModal = useUIStore((s) => s.closeModal);
+   const addToast = useUIStore((s) => s.addToast);
+@@ -137,7 +139,7 @@ export default function CourseModal() {
+             />
+           </div>
+ 
+-          {isEdit && <SkinControls value={skin} onChange={setSkin} inheritLabel="继承全局外观" disabled={saving} />}
++          {isEdit && <SkinControls value={skin} inheritedValue={readSkin(globalSkin)} onChange={setSkin} inheritLabel="继承全局外观" disabled={saving} surface="all" advanced />}
+ 
+           <div className={styles.actions}>
+             <button type="button" className={styles.cancelBtn} onClick={closeModal}>
+diff --git a/client/src/components/Skin/SkinControls.module.css b/client/src/components/Skin/SkinControls.module.css
+index 8cb3cc2..dd5e502 100644
+--- a/client/src/components/Skin/SkinControls.module.css
++++ b/client/src/components/Skin/SkinControls.module.css
+@@ -5,7 +5,7 @@
+ .preview p { margin: 10px 0; }
+ .error { color: var(--danger); }
+ .error button { color: var(--accent-primary); background: transparent; border: 0; border-radius: 0; cursor: pointer; font: inherit; padding: 4px; }
+-.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 36px; }
++.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: var(--sk-board-menu-height, 36px); }
+ .row select, .row input { font: inherit; color: inherit; background: transparent; border: 0; border-radius: 0; padding: 6px 0; max-width: 180px; min-width: 0; }
+ .row input { width: 94px; }
+ .row button, .clear { font: inherit; color: inherit; background: transparent; border: 0; border-radius: 0; padding: 5px 0; text-align: left; cursor: pointer; }
+diff --git a/client/src/components/Skin/SkinControls.tsx b/client/src/components/Skin/SkinControls.tsx
+index 935ac7d..7a681b9 100644
+--- a/client/src/components/Skin/SkinControls.tsx
++++ b/client/src/components/Skin/SkinControls.tsx
+@@ -1,20 +1,28 @@
+ import { useEffect, useId, useState } from 'react';
+-import { SKIN_PRESET_IDS, SKIN_TOKEN_NAMES, type SkinSelection, type SkinTokenName } from '@shared/types';
++import { SKIN_COMPONENT_OPTIONS, SKIN_PRESET_IDS, SKIN_TOKEN_NAMES, type SkinComponents, type SkinSelection, type SkinTokenName } from '@shared/types';
+ import { SKIN_LABELS, resolveSkin } from '@/styles/skinPresets';
+ import styles from './SkinControls.module.css';
+ 
+-const labels: Record<SkinTokenName, string> = { desk: '桌面', paper: '纸面', ink: '正文', 'ink-muted': '弱字', accent: '强调', annotation: '批注', hairline: '分隔线', danger: '危险操作', wall: '页边距墙' };
++const labels: Record<SkinTokenName, string> = { desk: '桌面', paper: '纸面', ink: '正文', 'ink-muted': '弱字', accent: '强调', annotation: '批注', hairline: '分隔线', danger: '危险操作', wall: '页边距墙', 'board-desk': '板台面', card: '板卡面', edge: '连线', chalk: '粉笔' };
++const componentLabels: Record<keyof SkinComponents, string> = { titleFont: '标题字', labelFont: '标签与刻度字', menuDensity: '菜单密度', handleStyle: '把手样式' };
++const optionLabels: Record<string, string> = { sans: '无衬线', serif: '衬线', system: '系统', mono: '等宽', comfortable: '舒适', compact: '紧凑', capsule: '胶囊', rivet: '铆钉' };
+ 
+-export function SkinControls({ value, onChange, inheritLabel, advanced = false, disabled = false }: {
++export function SkinControls({ value, onChange, inheritLabel, inheritedValue, advanced = false, disabled = false, surface = 'paper' }: {
+   value: SkinSelection | null; onChange: (value: SkinSelection | null) => void;
+   inheritLabel?: string; advanced?: boolean; disabled?: boolean;
++  surface?: 'paper' | 'board' | 'all';
++  inheritedValue?: SkinSelection | null;
+ }) {
+   const id = useId();
+-  const { tokens } = resolveSkin(value);
++  const base = value ?? inheritedValue ?? { preset: 'default' as const };
++  const { tokens, components } = resolveSkin(base);
++  const presetLabel = surface === 'board' ? '板面预设' : '纸面预设';
++  const tokenNames = SKIN_TOKEN_NAMES.filter((key) => surface === 'all' || (surface === 'board'
++    ? !['desk', 'paper', 'wall'].includes(key) : !['board-desk', 'card', 'edge', 'chalk'].includes(key)));
+   return <div className={styles.controls} data-skin-controls>
+     <label className={styles.row} htmlFor={id}>
+-      <span>纸面预设</span>
+-      <select id={id} aria-label="纸面预设" value={value?.preset || (inheritLabel ? '' : 'default')} disabled={disabled}
++      <span>{presetLabel}</span>
++      <select id={id} aria-label={presetLabel} value={value?.preset || (inheritLabel ? '' : 'default')} disabled={disabled}
+         onChange={(event) => onChange(event.target.value ? { preset: event.target.value as SkinSelection['preset'] } : null)}>
+         {inheritLabel && <option value="">{inheritLabel}</option>}
+         {SKIN_PRESET_IDS.map((preset) => <option key={preset} value={preset}>{SKIN_LABELS[preset]}</option>)}
+@@ -23,13 +31,28 @@ export function SkinControls({ value, onChange, inheritLabel, advanced = false,
+     {inheritLabel && value && <button type="button" className={styles.clear} disabled={disabled} onClick={() => onChange(null)}>清除覆写</button>}
+     {advanced && <details className={styles.advanced}>
+       <summary>高级颜色</summary>
+-      {SKIN_TOKEN_NAMES.map((key) => <ColorField key={`${value?.preset}:${key}`} name={key} value={tokens[key]} disabled={disabled}
++      {tokenNames.map((key) => <ColorField key={`${value?.preset}:${key}`} name={key} value={tokens[key]} disabled={disabled}
+         overridden={!!value?.overrides?.[key]} onChange={(color) => {
+-          const overrides = { ...value?.overrides };
++          const overrides = { ...base.overrides };
+           if (color === null) delete overrides[key]; else overrides[key] = color;
+-          onChange({ preset: value?.preset || 'default', ...(Object.keys(overrides).length ? { overrides } : {}) });
++          onChange({ ...base, overrides });
+         }} />)}
+     </details>}
++    <details className={styles.advanced}>
++      <summary>部件样式</summary>
++      {(Object.keys(SKIN_COMPONENT_OPTIONS) as Array<keyof SkinComponents>).map((key) => <div className={styles.row} key={key}>
++        <label htmlFor={`${id}-${key}`}>{componentLabels[key]}</label>
++        <select id={`${id}-${key}`} value={components[key]} disabled={disabled} onChange={(event) => onChange({
++          ...base, components: { ...base.components, [key]: event.target.value },
++        })}>
++          {SKIN_COMPONENT_OPTIONS[key].map((option) => <option key={option} value={option}>{optionLabels[option]}</option>)}
++        </select>
++        <button type="button" disabled={disabled || !value?.components?.[key]} onClick={() => {
++          const next = { ...base.components }; delete next[key];
++          onChange({ ...base, components: next });
++        }}>重置</button>
++      </div>)}
++    </details>
+   </div>;
+ }
+ 
+diff --git a/client/src/components/Skin/SkinEditor.test.tsx b/client/src/components/Skin/SkinEditor.test.tsx
+index f8c67f4..f6f5c9a 100644
+--- a/client/src/components/Skin/SkinEditor.test.tsx
++++ b/client/src/components/Skin/SkinEditor.test.tsx
+@@ -4,6 +4,27 @@ import type { SkinSelection } from '@shared/types/skin';
+ import { SkinEditor } from './SkinEditor';
+ 
+ describe('SkinEditor save failure recovery', () => {
++  it('shows inherited components and edits one switch without resetting the inherited preset or colors', () => {
++    const save = vi.fn().mockResolvedValue(undefined);
++    render(<SkinEditor value={null} inheritedValue={{ preset: 'workbench', overrides: { edge: '#123456' } }} save={save} inheritLabel="继承" surface="board" />);
++    fireEvent.click(screen.getByText('部件样式'));
++    expect((screen.getByRole('combobox', { name: '把手样式' }) as HTMLSelectElement).value).toBe('rivet');
++    fireEvent.change(screen.getByRole('combobox', { name: '把手样式' }), { target: { value: 'capsule' } });
++    expect(save).toHaveBeenLastCalledWith({ preset: 'workbench', overrides: { edge: '#123456' }, components: { handleStyle: 'capsule' } });
++  });
++  it('edits all four board components without discarding colors, then resets to preset defaults', async () => {
++    const save = vi.fn().mockResolvedValue(undefined);
++    render(<SkinEditor value={{ preset: 'warm-paper', overrides: { card: '#334455' } }} save={save} surface="board" advanced />);
++    fireEvent.click(screen.getByText('部件样式'));
++    for (const [name, value] of [['标题字', 'sans'], ['标签与刻度字', 'mono'], ['菜单密度', 'compact'], ['把手样式', 'rivet']]) {
++      fireEvent.change(screen.getByRole('combobox', { name }), { target: { value } });
++    }
++    await waitFor(() => expect(save).toHaveBeenLastCalledWith({ preset: 'warm-paper', overrides: { card: '#334455' },
++      components: { titleFont: 'sans', labelFont: 'mono', menuDensity: 'compact', handleStyle: 'rivet' } }));
++    fireEvent.change(screen.getByRole('combobox', { name: '板面预设' }), { target: { value: 'workbench' } });
++    expect(save).toHaveBeenLastCalledWith({ preset: 'workbench' });
++    expect((screen.getByRole('combobox', { name: '把手样式' }) as HTMLSelectElement).value).toBe('rivet');
++  });
+   it('shows an owner failure after reopening and retries the retained selection', async () => {
+     const value: SkinSelection = { preset: 'warm-paper' };
+     let rejectFirst!: (error: Error) => void;
+diff --git a/client/src/components/Skin/SkinEditor.tsx b/client/src/components/Skin/SkinEditor.tsx
+index 09c81f6..43538ca 100644
+--- a/client/src/components/Skin/SkinEditor.tsx
++++ b/client/src/components/Skin/SkinEditor.tsx
+@@ -5,9 +5,11 @@ import { resolveSkin } from '@/styles/skinPresets';
+ import styles from './SkinControls.module.css';
+ 
+ /** Dispatch immediately so the owner can bind and track each intent before navigation. */
+-export function SkinEditor({ value, save, inheritLabel, advanced, preview = false, failed = false }: {
++export function SkinEditor({ value, save, inheritLabel, inheritedValue, advanced, preview = false, failed = false, surface = 'paper' }: {
+   value: SkinSelection | null; save: (skin: SkinSelection | null) => Promise<void>;
+   inheritLabel?: string; advanced?: boolean; preview?: boolean; failed?: boolean;
++  surface?: 'paper' | 'board' | 'all';
++  inheritedValue?: SkinSelection | null;
+ }) {
+   const [draft, setDraft] = useState(value);
+   const [error, setError] = useState(false);
+@@ -21,9 +23,9 @@ export function SkinEditor({ value, save, inheritLabel, advanced, preview = fals
+       if (mounted.current) setError(false);
+     }, () => { if (mounted.current) setError(true); }).finally(() => { pending.current -= 1; });
+   };
+-  const { tokens } = resolveSkin(draft);
++  const { tokens } = resolveSkin(draft ?? inheritedValue);
+   return <>
+-    <SkinControls value={draft} onChange={change} inheritLabel={inheritLabel} advanced={advanced} />
++    <SkinControls value={draft} onChange={change} inheritLabel={inheritLabel} inheritedValue={inheritedValue} advanced={advanced} surface={surface} />
+     {preview && <div className={styles.preview} aria-label="纸面颜色预览" style={{ background: tokens.paper, color: tokens.ink }}>
+       <strong>纸面预览</strong>
+       <p style={{ color: tokens['ink-muted'] }}>正文、弱字与强调色随选择更新。</p>
+diff --git a/client/src/pages/Boards/BoardLayers.module.css b/client/src/pages/Boards/BoardLayers.module.css
+index 38bd3be..3b54b74 100644
+--- a/client/src/pages/Boards/BoardLayers.module.css
++++ b/client/src/pages/Boards/BoardLayers.module.css
+@@ -16,7 +16,7 @@
+ .list { margin-top: 12px; }
+ .row { display: flex; align-items: center; gap: 2px; min-height: 38px; border-radius: 4px; }
+ .row[data-active='true'] { background: var(--accent-primary-bg); }
+-.row .grip { color: var(--text-secondary); cursor: grab; padding-inline: 2px; }
++.row .grip { color: var(--text-secondary); cursor: grab; padding-inline: 2px; border-radius: var(--sk-board-handle-radius, 4px); }
+ .row .grip:active { cursor: grabbing; }
+ .row .name { flex: 1; min-width: 0; justify-content: space-between; gap: 6px; font-size: 12px; }
+ .name span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@@ -27,8 +27,9 @@
+ .gripPlaceholder:last-child { width: 26px; }
+ .panel .add { width: 100%; gap: 6px; margin-top: 8px; padding: 8px; border: 1px solid var(--border-default); font-size: 12px; }
+ .dialog { margin: auto; width: calc(100% - 32px); max-width: 420px; padding: 24px; color: var(--text-primary); background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 8px; }
+-.dialog::backdrop { background: rgb(0 0 0 / 55%); }
++.dialog::backdrop { background: var(--board-backdrop, rgb(0 0 0 / 55%)); }
+ .dialog h2 { font-size: 16px; font-weight: 600; overflow-wrap: anywhere; }
+ .dialog p { margin-top: 12px; font-size: 14px; line-height: 1.6; }
+ .dialogActions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+ .dialogActions button { padding: 8px 12px; border: 1px solid var(--border-default); font-size: 12px; }
++.name, .header h2 span { font-family: var(--sk-label-font, inherit); }
+diff --git a/client/src/pages/Boards/BoardNewNoteDialog.tsx b/client/src/pages/Boards/BoardNewNoteDialog.tsx
+index d2a6071..f16a82f 100644
+--- a/client/src/pages/Boards/BoardNewNoteDialog.tsx
++++ b/client/src/pages/Boards/BoardNewNoteDialog.tsx
+@@ -1,4 +1,4 @@
+-import { useEffect, useRef, useState } from 'react';
++import { useEffect, useRef, useState, type CSSProperties } from 'react';
+ import api from '@/services/api';
+ import type { Course } from '@shared/types';
+ import type { Note } from '@/pages/Notes/canvasEngine/runtimeDataTypes';
+@@ -8,7 +8,8 @@ import styles from './BoardNewNoteDialog.module.css';
+ 
+ const NEW_PROJECT = '__new_project__';
+ 
+-export function BoardNewNoteDialog({ boardId, initialProjectId, onCancel, onCreated }: {
++export function BoardNewNoteDialog({ boardId, initialProjectId, onCancel, onCreated, skinStyle }: {
++  skinStyle?: CSSProperties;
+   boardId: string;
+   initialProjectId: string | null;
+   onCancel: () => void;
+@@ -70,7 +71,7 @@ export function BoardNewNoteDialog({ boardId, initialProjectId, onCancel, onCrea
+     }
+   }
+ 
+-  return <dialog ref={dialog} className={`${boardStyles.deleteDialog} ${styles.dialog}`}
++  return <dialog ref={dialog} className={`${boardStyles.deleteDialog} ${styles.dialog}`} style={skinStyle}
+     aria-labelledby="board-new-note-title" onCancel={(event) => {
+       event.preventDefault();
+       if (!inFlight.current) onCancel();
+diff --git a/client/src/pages/Boards/BoardNoteModal.module.css b/client/src/pages/Boards/BoardNoteModal.module.css
+index 78fb50a..82d0ad7 100644
+--- a/client/src/pages/Boards/BoardNoteModal.module.css
++++ b/client/src/pages/Boards/BoardNoteModal.module.css
+@@ -4,7 +4,7 @@
+   z-index: 60;
+   display: grid;
+   place-items: center;
+-  background: rgb(0 0 0 / 28%);
++  background: var(--board-note-backdrop, rgb(0 0 0 / 28%));
+   pointer-events: none;
+ }
+ .dialog {
+@@ -39,6 +39,7 @@
+ }
+ .header.dragging { cursor: grabbing; }
+ .status { flex: 1; color: var(--text-secondary); }
++.header > span { font-family: var(--sk-label-font, inherit); }
+ .header button, .error button {
+   display: inline-flex;
+   align-items: center;
+diff --git a/client/src/pages/Boards/BoardNoteModal.tsx b/client/src/pages/Boards/BoardNoteModal.tsx
+index 7bfbb49..7a3a557 100644
+--- a/client/src/pages/Boards/BoardNoteModal.tsx
++++ b/client/src/pages/Boards/BoardNoteModal.tsx
+@@ -1,4 +1,4 @@
+-import { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
++import { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react';
+ import { createPortal, flushSync } from 'react-dom';
+ import { ExternalLink, X } from 'lucide-react';
+ import NoteCanvasRuntime, { type NoteCanvasRuntimeHandle } from '../Notes/canvasEngine/NoteCanvasRuntime';
+@@ -12,6 +12,7 @@ export interface BoardNoteModalHandle {
+   requestClose: (destination?: NoteCloseDestination) => Promise<boolean>;
+ }
+ interface BoardNoteModalProps {
++  skinStyle?: CSSProperties;
+   noteId: string;
+   onClosed: () => void;
+   onOpenFullPage: (noteId: string) => void;
+@@ -26,7 +27,7 @@ type DialogPosition = { left: number; top: number };
+ let sessionPosition: DialogPosition | null = null;
+ 
+ const BoardNoteModal = forwardRef<BoardNoteModalHandle, BoardNoteModalProps>(function BoardNoteModal({
+-  noteId, onClosed, onOpenFullPage, onSwitchNote, stagingOpen = false, onSendToStaging, stagingItemDrop,
++  noteId, onClosed, onOpenFullPage, onSwitchNote, stagingOpen = false, onSendToStaging, stagingItemDrop, skinStyle,
+ }, ref) {
+   const runtime = useRef<NoteCanvasRuntimeHandle>(null);
+   const dialog = useRef<HTMLDivElement>(null);
+@@ -255,7 +256,7 @@ const BoardNoteModal = forwardRef<BoardNoteModalHandle, BoardNoteModalProps>(fun
+     };
+   }, [requestClose, stagingOpen]);
+ 
+-  return createPortal(<div className={`${styles.backdrop} ${stagingOpen ? styles.withStaging : ''}`} data-board-note-staging-open={stagingOpen}>
++  return createPortal(<div className={`${styles.backdrop} ${stagingOpen ? styles.withStaging : ''}`} data-board-note-staging-open={stagingOpen} style={skinStyle}>
+     <div className={styles.dialog} role="dialog" aria-modal={!stagingOpen} aria-label="Open note" tabIndex={-1} ref={dialog}
+       style={position ? { left: position.left, top: position.top } : undefined}>
+       <header className={`${styles.header} ${dragging ? styles.dragging : ''}`} data-note-dialog-drag-handle="true"
+diff --git a/client/src/pages/Boards/BoardPage.modal.test.tsx b/client/src/pages/Boards/BoardPage.modal.test.tsx
+index 5620718..0c5b6ad 100644
+--- a/client/src/pages/Boards/BoardPage.modal.test.tsx
++++ b/client/src/pages/Boards/BoardPage.modal.test.tsx
+@@ -7,7 +7,9 @@ import { BOARD_TEXT_RANGE_MIME } from './boardTextRangeClipboard';
+ 
+ const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), delete: vi.fn() }));
+ const close = vi.hoisted(() => vi.fn<(...args: unknown[]) => Promise<boolean>>());
+-vi.mock('@/services/api', () => ({ default: http }));
++vi.mock('@/services/api', async (importOriginal) => ({
++  ...await importOriginal<typeof import('@/services/api')>(), default: http,
++}));
+ // This suite isolates the board host contract. The separate modal smoke mounts the real runtime.
+ vi.mock('./BoardNoteModal', async () => {
+   const { forwardRef, useImperativeHandle } = await import('react');
+diff --git a/client/src/pages/Boards/BoardPage.staging.test.tsx b/client/src/pages/Boards/BoardPage.staging.test.tsx
+index 71279b9..88a5391 100644
+--- a/client/src/pages/Boards/BoardPage.staging.test.tsx
++++ b/client/src/pages/Boards/BoardPage.staging.test.tsx
+@@ -7,7 +7,9 @@ import { BOARD_STAGING_MIME } from './BoardStaging';
+ import type { BoardDetail, BoardMember, MountBoardMemberInput, PatchBoardMemberInput } from './boardTypes';
+ 
+ const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() }));
+-vi.mock('@/services/api', () => ({ default: http }));
++vi.mock('@/services/api', async (importOriginal) => ({
++  ...await importOriginal<typeof import('@/services/api')>(), default: http,
++}));
+ // Host integration uses the real BoardPage/useBoard/repository; runtime selection/flush is tested separately.
+ vi.mock('./BoardNoteModal', async () => {
+   const { forwardRef } = await import('react');
+diff --git a/client/src/pages/Boards/BoardPage.tsx b/client/src/pages/Boards/BoardPage.tsx
+index 9e1096e..c75f85f 100644
+--- a/client/src/pages/Boards/BoardPage.tsx
++++ b/client/src/pages/Boards/BoardPage.tsx
+@@ -5,6 +5,8 @@ import { boardErrorMessage, loadBoardCandidates, loadBoardNotePreview } from './
+ import type { BoardCandidate, BoardEdge, BoardMember, BoardViewport, BoardVisual } from './boardTypes';
+ import { animateBoardViewport, pointsPath, toBoardPoint, zoomBoardAt, type BoardPoint } from './boardViewport';
+ import { useBoard } from './useBoard';
++import { useBoardSkin } from './useBoardSkin';
++import { SkinEditor } from '@/components/Skin/SkinEditor';
+ import { BoardRelocatedVisual } from './BoardRelocatedVisual';
+ import { BoardDeleteDialog } from './BoardDeleteDialog';
+ import { BoardNewNoteDialog } from './BoardNewNoteDialog';
+@@ -45,6 +47,7 @@ export default function BoardPage() {
+   const { boardId } = useParams();
+   const navigate = useNavigate();
+   const board = useBoard(boardId);
++  const skin = useBoardSkin(board.detail?.board ?? null, board.updateBoard);
+   const [tool, setTool] = useState<Tool>('select');
+   const [selectionState, setSelectionState] = useState<{ keys: Set<string>; anchor: Selection }>({ keys: new Set(), anchor: null });
+   const selectedKeys = selectionState.keys;
+@@ -912,7 +915,7 @@ export default function BoardPage() {
+     }, factor));
+   }
+ 
+-  return <><section className={styles.workspace} aria-label="Board workspace" onPaste={pasteReference} onKeyDown={keyDown}
++  return <><section className={styles.workspace} aria-label="Board workspace" style={skin.style} data-board-skin-preset={skin.preset} onPaste={pasteReference} onKeyDown={keyDown}
+     onKeyDownCapture={pauseBoard} onKeyUpCapture={pauseBoard} onPasteCapture={pauseBoard}
+     onKeyUp={(event) => {
+       if (event.key === 'Shift' && gesture.current?.kind === 'move') {
+@@ -957,6 +960,11 @@ export default function BoardPage() {
+       <details className={styles.boardMenu}>
+         <summary aria-label="Board menu">More</summary>
+         <div className={styles.boardMenuContent}>
++          <details className={styles.boardAppearance} onKeyDown={(event) => event.stopPropagation()}>
++            <summary>板面外观</summary>
++            <SkinEditor key={boardId} value={skin.selection} inheritedValue={skin.inheritedSelection} save={skin.save} inheritLabel="继承项目 / 全局" surface="board" advanced />
++            {skin.error && <p role="alert">{skin.error}<button type="button" onClick={skin.retry}>重试</button></p>}
++          </details>
+           <section className={styles.boardIdentity} aria-label="Board identity">
+             <h2>Board identity</h2>
+             {detail.board.identity_item_id ? <>
+@@ -1067,7 +1075,7 @@ export default function BoardPage() {
+             style={labelDraft ? { zIndex: Math.max(0, ...layer.members.map((member) => member.z_index), ...layer.visuals.map((visual) => visual.z_index)) + 1 } : undefined}>
+             <defs><marker id={layer.id ? `board-edge-arrow-${layer.id}` : 'board-edge-arrow'} viewBox="0 0 10 10" refX="9" refY="5"
+               markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+-              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--text-secondary)" />
++              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--board-edge, var(--text-secondary))" />
+             </marker></defs>
+             {layer.edges.map((edge) => {
+               const from = visibleMembers.find((member) => member.id === edge.from_member_id);
+@@ -1275,10 +1283,10 @@ export default function BoardPage() {
+     })()}
+     {deleting && <BoardDeleteDialog board={detail.board} onCancel={() => setDeleting(false)} onDeleted={() => navigate('/boards')} />}
+   </section>
+-    {newNoteOpen && <BoardNewNoteDialog key={boardId} boardId={detail.board.id} initialProjectId={detail.board.project_id}
++    {newNoteOpen && <BoardNewNoteDialog key={boardId} boardId={detail.board.id} initialProjectId={detail.board.project_id} skinStyle={skin.style}
+       onCancel={() => { setNewNoteOpen(false); newNoteToggle.current?.focus(); }}
+       onCreated={(noteId) => { setNewNoteOpen(false); setOpenNoteId(noteId); void loadCandidates(); }} />}
+-    {openNoteId && <BoardNoteModal key={openNoteId} ref={noteModal} noteId={openNoteId}
++    {openNoteId && <BoardNoteModal key={openNoteId} ref={noteModal} noteId={openNoteId} skinStyle={skin.style}
+       stagingOpen={stagingOpen} onSendToStaging={stageTextRange}
+       stagingItemDrop={stagingOpen && !board.pending && !chalkDraft ? {
+         boardId: detail.board.id,
+diff --git a/client/src/pages/Boards/BoardRelocatedVisual.tsx b/client/src/pages/Boards/BoardRelocatedVisual.tsx
+index b83e7ad..fbeafc8 100644
+--- a/client/src/pages/Boards/BoardRelocatedVisual.tsx
++++ b/client/src/pages/Boards/BoardRelocatedVisual.tsx
+@@ -90,7 +90,7 @@ export function BoardRelocatedVisual({ visual, selected, selectable, emphasis, o
+     const start = record(points.start);
+     const end = record(points.end);
+     const markerId = `board-arrow-${visual.id.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
+-    const stroke = text(extension.stroke) || 'var(--text-secondary)';
++    const stroke = text(extension.stroke) || 'var(--board-edge, var(--text-secondary))';
+     const marker = (value: unknown) => value === 'arrow' ? `url(#${markerId})`
+       : value === 'dot' || value === 'circle' ? `url(#${markerId}-dot)` : undefined;
+     const path = `M ${number(start.x)} ${number(start.y)} L ${number(end.x)} ${number(end.y)}`;
+@@ -120,9 +120,9 @@ export function BoardRelocatedVisual({ visual, selected, selectable, emphasis, o
+     borderRadius: ellipse ? '50%' : preset.presetId === 'shape.sticky_note' ? 7 : 8,
+     padding: preset.textInset,
+     background: preset.presetId === 'shape.sticky_note'
+-      ? 'var(--canvas-sticky-note-fill, #2f2817)' : 'color-mix(in srgb, var(--accent-primary) 14%, transparent)',
++      ? 'var(--board-sticky-fill, #2f2817)' : 'var(--board-shape-fill, color-mix(in srgb, var(--accent-primary) 14%, transparent))',
+     borderColor: preset.presetId === 'shape.sticky_note'
+-      ? 'var(--canvas-sticky-note-stroke, #d8a429)' : 'var(--accent-primary)',
++      ? 'var(--board-sticky-stroke, #d8a429)' : 'var(--accent-primary)',
+   } : {};
+   const shapeText = rows(source.backing_blocks).map((block) => text(block.plain_text)).filter(Boolean).join('\n');
+   return <div {...emphasis} className={`${styles.relocatedVisual} ${emphasis?.className || ''}`} style={style} data-testid={`board-visual-${visual.id}`}
+diff --git a/client/src/pages/Boards/BoardSelectionSidebar.module.css b/client/src/pages/Boards/BoardSelectionSidebar.module.css
+index f317e9a..05a5bfb 100644
+--- a/client/src/pages/Boards/BoardSelectionSidebar.module.css
++++ b/client/src/pages/Boards/BoardSelectionSidebar.module.css
+@@ -23,3 +23,4 @@
+ .remove { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; padding: 7px; color: var(--text-secondary); border-radius: 4px; }
+ .sidebar button:hover { background: var(--bg-hover); }
+ .sidebar :focus-visible { outline: 2px solid var(--border-focus); outline-offset: -2px; }
++.groupHeader h3, .header h2 span { font-family: var(--sk-label-font, inherit); }
+diff --git a/client/src/pages/Boards/BoardStaging.module.css b/client/src/pages/Boards/BoardStaging.module.css
+index 75396a1..969c394 100644
+--- a/client/src/pages/Boards/BoardStaging.module.css
++++ b/client/src/pages/Boards/BoardStaging.module.css
+@@ -24,3 +24,4 @@
+ .staging :focus-visible { outline: 2px solid var(--border-focus); outline-offset: 2px; }
+ .referenceCorner { display: flex; justify-content: flex-end; }
+ .referenceBody { font-size: 16px; line-height: 1.6; color: var(--text-primary); white-space: pre-wrap; overflow-wrap: anywhere; }
++.source, .actor, .header h2 span { font-family: var(--sk-label-font, inherit); }
+diff --git a/client/src/pages/Boards/BoardViewportBookmarks.module.css b/client/src/pages/Boards/BoardViewportBookmarks.module.css
+index 3942beb..7979fd6 100644
+--- a/client/src/pages/Boards/BoardViewportBookmarks.module.css
++++ b/client/src/pages/Boards/BoardViewportBookmarks.module.css
+@@ -24,4 +24,5 @@
+ .error { position: relative; width: 100%; padding: 12px; border: 1px solid var(--border-default); border-radius: 6px; background: var(--bg-surface); }
+ .error p { margin-bottom: 8px; overflow-wrap: anywhere; }
+ .error button { text-decoration: underline; }
++.rail { font-family: var(--sk-label-font, inherit); }
+ @media (hover: none) { .row:focus-within .actions { display: flex; } }
+diff --git a/client/src/pages/Boards/Boards.module.css b/client/src/pages/Boards/Boards.module.css
+index afad376..a7f8d15 100644
+--- a/client/src/pages/Boards/Boards.module.css
++++ b/client/src/pages/Boards/Boards.module.css
+@@ -24,7 +24,7 @@
+ .button { border: 1px solid transparent; color: var(--text-secondary); }
+ .button:hover { background: var(--bg-hover); color: var(--text-primary); }
+ .button[aria-pressed='true'] { background: var(--accent-primary-bg); color: var(--text-primary); border-color: var(--border-focus); }
+-.primaryButton { background: var(--accent-primary); color: #fff; font-weight: 600; }
++.primaryButton { background: var(--accent-primary); color: var(--board-button-ink, #fff); font-weight: 600; }
+ .primaryButton:hover { background: var(--gradient-primary-hover); }
+ .library button:disabled, .workspace button:disabled { opacity: 0.45; cursor: default; }
+ .library :focus-visible, .workspace :focus-visible, .loading :focus-visible {
+@@ -50,7 +50,7 @@
+ .empty { padding: 32px 0; color: var(--text-secondary); }
+ .workspace { height: 100%; min-height: 0; display: flex; flex-direction: column; background: var(--bg-primary); overflow: hidden; }
+ .boardHeader { display: flex; align-items: center; gap: 16px; padding: 12px 16px; border-bottom: 1px solid var(--border-default); }
+-.boardHeader h1 { min-width: 0; flex: 1; font-size: 1.125rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
++.boardHeader h1 { min-width: 0; flex: 1; font-size: 1.125rem; font-weight: var(--board-title-weight, 600); font-family: var(--sk-title-font, inherit); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+ .titleEditor { display: flex; align-items: center; gap: 4px; flex: 1; min-width: 0; }
+ .titleEditor input { min-width: 0; width: 100%; }
+ .titleEditor input, .edgeEditor input { color: var(--text-primary); background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 4px; padding: 6px; }
+@@ -60,13 +60,17 @@
+ .boardMenu { position: relative; }
+ .boardMenu summary { padding: 8px; cursor: pointer; color: var(--text-secondary); font-size: 12px; }
+ .boardMenuContent { position: absolute; top: 100%; right: 0; z-index: 70; width: 288px; max-width: calc(100vw - 32px); max-height: calc(100vh - 120px); overflow: auto; padding: 12px; background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 6px; }
++.boardMenuContent .button { min-height: var(--sk-board-menu-height, 36px); padding: var(--sk-board-menu-padding, 7px 10px); }
++.boardAppearance { margin-bottom: 8px; font-size: 12px; }
++.boardAppearance > summary { padding: 8px 0; }
++.boardMenuContent select option { background: var(--bg-surface); color: var(--text-primary); }
+ .boardIdentity { padding-bottom: 12px; margin-bottom: 8px; border-bottom: 1px solid var(--border-default); font-size: 12px; line-height: 1.5; color: var(--text-primary); }
+ .boardIdentity h2 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+ .boardIdentity h3 { font-size: 12px; font-weight: 600; margin-top: 12px; }
+ .identityDescription { white-space: pre-wrap; overflow-wrap: anywhere; }
+ .identityHint { color: var(--text-secondary); margin-top: 8px; }
+ .deleteDialog { margin: auto; max-width: 480px; width: calc(100% - 32px); padding: 24px; border: 1px solid var(--border-default); border-radius: 8px; background: var(--bg-surface); color: var(--text-primary); }
+-.deleteDialog::backdrop { background: rgb(0 0 0 / 55%); }
++.deleteDialog::backdrop { background: var(--board-backdrop, rgb(0 0 0 / 55%)); }
+ .deleteDialog h2 { font-size: 18px; margin-bottom: 12px; overflow-wrap: anywhere; }
+ .deleteDialog p { font-size: 14px; line-height: 1.6; margin-bottom: 16px; }
+ .dialogActions { display: flex; justify-content: flex-end; gap: 8px; }
+@@ -94,7 +98,8 @@
+ .candidate strong { font-size: 0.8125rem; font-weight: 600; overflow-wrap: anywhere; }
+ .candidate span { color: var(--text-secondary); font-size: 0.75rem; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+ .candidate small { color: var(--text-secondary); font-size: 0.625rem; margin-top: 8px; }
+-.surface { flex: 1; min-width: 0; min-height: 0; position: relative; overflow: hidden; touch-action: none; cursor: default; background: var(--bg-deepest); }
++.surface { flex: 1; min-width: 0; min-height: 0; position: relative; overflow: hidden; touch-action: none; cursor: default; background: var(--board-desk, var(--bg-deepest)); }
++.workspace[data-board-skin-preset='workbench'] .surface { background-image: linear-gradient(var(--board-grid) 1px, transparent 1px), linear-gradient(90deg, var(--board-grid) 1px, transparent 1px); background-size: 24px 24px; }
+ .surface:focus-visible { outline-offset: -3px; }
+ .penSurface { cursor: crosshair; }
+ .world { position: absolute; top: 0; left: 0; width: 1px; height: 1px; transform-origin: 0 0; isolation: isolate; }
+@@ -103,13 +108,13 @@
+ .alignmentGuides { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+ .alignmentGuides line { stroke: var(--accent-primary-hover); stroke-width: 1; }
+ .edgeLine, .inkLine, .selectedLine { fill: none; stroke-linecap: round; stroke-linejoin: round; }
+-.edgeLine { stroke: var(--text-secondary); stroke-width: 2; }
++.edgeLine { stroke: var(--board-edge, var(--text-secondary)); stroke-width: 2; }
+ .inkLine { stroke: var(--board-ink); stroke-width: 2.5; }
+ .selectedLine { stroke: var(--accent-primary-hover); stroke-width: 3; }
+ .lineHit { fill: none; stroke: transparent; stroke-width: 16; pointer-events: stroke; cursor: pointer; }
+ .lineHit:focus-visible { stroke: var(--accent-primary-bg); outline: none; }
+-.edgeLabel { fill: var(--text-primary); font-size: 12px; text-anchor: middle; }
+-.member { position: absolute; padding: 16px; transform-origin: 0 0; background: var(--bg-surface); border: 1px solid var(--border-default); border-radius: 8px; cursor: grab; user-select: none; }
++.edgeLabel { fill: var(--board-chalk, var(--text-primary)); font-size: 12px; text-anchor: middle; }
++.member { position: absolute; padding: 16px; transform-origin: 0 0; background: var(--board-card, var(--bg-surface)); border: 1px solid var(--border-default); border-radius: 8px; cursor: grab; user-select: none; }
+ .member:active { cursor: grabbing; }
+ .selected { border-color: var(--accent-primary-hover); outline: 1px solid var(--accent-primary-hover); }
+ .member.selectionHighlight, .chalk.selectionHighlight, .selectionHighlight > .visualContent {
+@@ -127,7 +132,7 @@
+   .selectionFlash .selectedLine, .selectionFlashAgain .selectedLine { stroke-width: 6; }
+ }
+ .memberKind { display: flex; align-items: center; justify-content: space-between; color: var(--text-secondary); font-size: 10px; margin-bottom: 8px; }
+-.member h2 { font-size: 16px; line-height: 1.3; font-weight: 600; margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
++.member h2 { font-size: 16px; line-height: 1.3; font-weight: var(--board-title-weight, 600); font-family: var(--sk-title-font, inherit); margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+ .member p { font-size: 12px; line-height: 1.5; color: var(--text-secondary); display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+ .member small { display: block; font-size: 10px; color: var(--text-secondary); }
+ .member .anchorNotice { margin-top: 8px; color: var(--text-primary); }
+@@ -138,19 +143,20 @@
+ .referenceMember { display: flex; flex-direction: column; }
+ .referenceCorner { display: flex; align-items: center; justify-content: flex-end; flex: 0 0 auto; margin: -8px -8px 0 0; }
+ .member .referenceBody { display: block; flex: 1; min-height: 0; margin: 0; font-size: 16px; line-height: 1.6; color: var(--text-primary); white-space: pre-wrap; overflow: auto; -webkit-line-clamp: unset; }
+-.resizeHandle { position: absolute; bottom: -5px; right: -5px; width: 14px; height: 14px; background: var(--bg-elevated); border: 1px solid var(--border-focus); border-radius: 2px; cursor: nwse-resize; opacity: 0; }
++.resizeHandle { position: absolute; bottom: -5px; right: -5px; width: 14px; height: 14px; background: var(--bg-elevated); border: 1px solid var(--border-focus); border-radius: var(--sk-small-handle-radius, 2px); cursor: nwse-resize; opacity: 0; }
+ .selected .resizeHandle, .member:hover .resizeHandle, .member:focus-within .resizeHandle, .resizeHandle:focus-visible { opacity: 1; }
+ .memberResizeHandle {
+   bottom: -7px; right: -7px; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center;
+-  color: var(--text-primary); background: var(--bg-surface); border-radius: 4px;
++  color: var(--text-primary); background: var(--bg-surface); border-radius: var(--sk-board-handle-radius, 4px);
+ }
+ .memberResizeHandle:hover, .memberResizeHandle:active { background: var(--accent-primary-bg); border-color: var(--accent-primary-hover); }
+ .memberResizeHandle svg { pointer-events: none; }
+ .visualResizeHandle { opacity: 1; }
+ .canvasEmpty { position: absolute; top: 28%; left: 12%; right: 12%; max-width: 460px; pointer-events: none; }
+-.canvasEmpty h2 { font-size: 1.375rem; font-weight: 500; margin-bottom: 8px; }
+-.canvasEmpty p { color: var(--text-secondary); margin-bottom: 16px; }
+-.canvasEmpty button { pointer-events: auto; border-color: var(--border-default); }
++.canvasEmpty h2 { font-size: 1.375rem; font-weight: 500; margin-bottom: 8px; color: var(--board-chalk, var(--text-primary)); }
++.canvasEmpty p { color: var(--board-desk-muted, var(--text-secondary)); margin-bottom: 16px; }
++.canvasEmpty button { pointer-events: auto; border-color: var(--border-default); color: var(--board-desk-muted, var(--text-secondary)); }
++.canvasEmpty button:hover { color: var(--board-chalk, var(--text-primary)); }
+ .selectionBar { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 8px 12px; border-top: 1px solid var(--border-default); background: var(--bg-surface); }
+ .selectionBar > span { font-size: 12px; color: var(--text-secondary); }
+ .layerDestination { display: inline-flex; align-items: center; gap: 8px; padding: 0 8px; font-size: 12px; }
+@@ -161,7 +167,7 @@
+ .loading p { margin: 24px 0; }
+ .relocatedVisual, .relocatedConnector { position: absolute; transform-origin: 0 0; }
+ .relocatedConnector { overflow: visible; pointer-events: none; }
+-.visualContent { width: 100%; height: 100%; border: 1px solid var(--border-default); background: var(--bg-surface); }
++.visualContent { width: 100%; height: 100%; border: 1px solid var(--border-default); background: var(--board-card, var(--bg-surface)); }
+ .visualContent[role='button'] { cursor: pointer; }
+ .visualContent img { width: 100%; height: 100%; display: block; }
+ .visualShapeText { white-space: pre-wrap; overflow-wrap: anywhere; }
+@@ -171,8 +177,8 @@
+ .visualTableScroll td { border: 1px solid var(--border-default); padding: 6px 8px; white-space: pre-wrap; }
+ .chalk {
+   position: absolute; transform-origin: 0 0; padding: 14px; border-radius: 2px;
+-  color: var(--text-primary); background: var(--canvas-sticky-note-fill, var(--bg-elevated));
+-  border: 1px solid var(--canvas-sticky-note-stroke, var(--border-default));
++  color: var(--board-chalk, var(--text-primary)); background: var(--board-chalk-fill, var(--bg-elevated));
++  border: 1px solid var(--border-default);
+   cursor: grab; user-select: none;
+ }
+ .chalk p { font-size: 14px; line-height: 1.5; white-space: pre-wrap; overflow-wrap: anywhere; height: 100%; overflow: auto; }
+@@ -186,6 +192,7 @@
+ .chalkGhost { background: transparent; border-style: dashed; }
+ .chalkEditor:focus-within { border-color: var(--border-focus); }
+ .chalkEditor textarea:focus-visible { outline: none; box-shadow: none; }
++.memberKind, .edgeLabel, .saveStatus, .zoomControls, .toolHint, .candidate small, .itemTopic, .itemStatus, .member small, .layerDestination { font-family: var(--sk-label-font, inherit); }
+ @media (max-width: 760px) {
+   .library { padding: 12px 0; }
+   .createRow { flex-direction: column; }
+diff --git a/client/src/pages/Boards/boardTypes.ts b/client/src/pages/Boards/boardTypes.ts
+index fab777f..0351ea8 100644
+--- a/client/src/pages/Boards/boardTypes.ts
++++ b/client/src/pages/Boards/boardTypes.ts
+@@ -2,6 +2,7 @@ export type BoardJsonObject = Record<string, unknown>;
+ import type { BoardTextRangeSelection, BoardTextRangeStatus } from '@shared/types/boardTextRange';
+ export type { BoardLayer } from '@shared/types/boardLayers';
+ import type { BoardLayer } from '@shared/types/boardLayers';
++import type { SkinSelection } from '@shared/types/skin';
+ 
+ /** Includes the virtual Base layer. */
+ export const BOARD_LAYER_LIMIT = 12;
+@@ -24,6 +25,7 @@ export interface BoardGeometry {
+ }
+ 
+ export interface Board {
++  skin?: SkinSelection | null;
+   id: string;
+   user_id: string;
+   title: string;
+@@ -144,6 +146,7 @@ export type CreateBoardInput = {
+ );
+ 
+ export interface PatchBoardInput {
++  skin?: SkinSelection | null;
+   title?: string;
+   viewport?: BoardViewport;
+   base_layer_visible?: boolean;
+diff --git a/client/src/pages/Notes/NoteDetail.module.css b/client/src/pages/Notes/NoteDetail.module.css
+index 95c7c79..7faf6cf 100644
+--- a/client/src/pages/Notes/NoteDetail.module.css
++++ b/client/src/pages/Notes/NoteDetail.module.css
+@@ -209,6 +209,7 @@
+ }
+ 
+ .popoverEyebrow {
++  font-family: var(--sk-label-font, inherit);
+   margin-bottom: 2px;
+   color: var(--text-muted);
+   font-size: 11px;
+@@ -260,7 +261,7 @@
+   grid-template-columns: 18px minmax(0, 1fr) auto;
+   gap: 4px 9px;
+   width: 100%;
+-  padding: 10px;
++  padding: var(--sk-more-padding, 10px);
+   color: var(--text-primary);
+   text-align: left;
+   border: 0;
+@@ -397,6 +398,7 @@
+ 
+ .typographyControlHeader span,
+ .typographyControlRow span {
++  font-family: var(--sk-label-font, inherit);
+   min-width: 52px;
+   color: var(--text-muted);
+   font-size: 12px;
+@@ -1257,6 +1259,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
+ }
+ 
+ .pageStackNumberBadge {
++  font-family: var(--sk-label-font, inherit);
+   position: absolute;
+   right: 12px;
+   bottom: 10px;
+@@ -1788,6 +1791,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
+ }
+ 
+ .blockStatusBadge {
++  font-family: var(--sk-label-font, inherit);
+   display: inline-flex;
+   max-width: 168px;
+   align-items: center;
+@@ -1962,7 +1966,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
+ 
+ .textUnitGutterButton {
+   border: 1px solid transparent;
+-  border-radius: var(--radius-sm);
++  border-radius: var(--sk-handle-radius, var(--radius-sm));
+   background: color-mix(in srgb, var(--text-muted) 16%, transparent);
+   color: var(--text-secondary);
+ }
+@@ -2603,7 +2607,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
+   position: fixed;
+   z-index: 170;
+   display: grid;
+-  gap: 3px;
++  gap: var(--sk-menu-gap, 3px);
+   width: 252px;
+   max-height: min(420px, calc(100vh - 20px));
+   overflow: visible;
+@@ -2630,7 +2634,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
+   grid-template-columns: 20px minmax(0, 1fr) auto;
+   align-items: center;
+   gap: 7px;
+-  min-height: 30px;
++  min-height: var(--sk-menu-row-height, 30px);
+   padding: 0 8px;
+   border: 1px solid transparent;
+   border-radius: var(--radius-sm);
+@@ -2688,7 +2692,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
+   left: calc(100% + 6px);
+   z-index: 171;
+   display: grid;
+-  gap: 3px;
++  gap: var(--sk-menu-gap, 3px);
+   width: 230px;
+   max-height: min(420px, calc(100vh - 20px));
+   overflow: auto;
+@@ -3945,9 +3949,10 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
+   content: '';
+   position: absolute;
+   top: 0;
+-  bottom: 0;
+-  left: 3px;
+-  width: 2px;
++  bottom: var(--sk-handle-mark-bottom, 0);
++  left: var(--sk-handle-mark-left, 3px);
++  width: var(--sk-handle-mark-width, 2px);
++  height: var(--sk-handle-mark-height, auto);
+   border-radius: 999px;
+   background: var(--border-focus);
+ }
+diff --git a/client/src/pages/Notes/canvasEngine/PaperSkinContext.tsx b/client/src/pages/Notes/canvasEngine/PaperSkinContext.tsx
+index 1542e06..1a8347c 100644
+--- a/client/src/pages/Notes/canvasEngine/PaperSkinContext.tsx
++++ b/client/src/pages/Notes/canvasEngine/PaperSkinContext.tsx
+@@ -5,6 +5,7 @@ export interface PaperSkinContextValue {
+   style: CSSProperties;
+   preset: SkinPresetId;
+   selection: SkinSelection | null;
++  inheritedSelection?: SkinSelection | null;
+   save: (skin: SkinSelection | null) => Promise<void>;
+   saveError?: boolean;
+   error: string | null;
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts b/client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts
+index a17dc7a..4d80b48 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts
++++ b/client/src/pages/Notes/canvasEngine/hooks/useNoteSkin.ts
+@@ -3,6 +3,7 @@ import api from '@/services/api';
+ import { useAuthStore } from '@/stores/authStore';
+ import { readSkin, resolveSkin } from '@/styles/skinPresets';
+ import { buildPaperSkinStyles } from '../paperSkinStyles';
++import { buildSkinComponentStyles } from '@/styles/skinComponentStyles';
+ import type { Course } from '@shared/types';
+ import type { SkinSelection } from '@shared/types/skin';
+ import type { Note } from '../runtimeDataTypes';
+@@ -23,7 +24,10 @@ export function useNoteSkin(note: Note | null, save: (skin: SkinSelection | null
+     return () => { active = false; };
+   }, [courseId, attempt]);
+   const selection = useMemo(() => readSkin(note?.metadata?.skin), [note?.metadata?.skin]);
++  const inheritedSelection = (project && project.id === courseId ? project.skin : null) ?? readSkin(global);
+   const resolved = useMemo(() => resolveSkin(readSkin(global), project && project.id === courseId ? project.skin : null, selection), [global, project, courseId, selection]);
+-  const style = useMemo(() => buildPaperSkinStyles(resolved.tokens), [resolved.tokens]);
+-  return { ...resolved, style, selection, save, saveError, error, retry: () => setAttempt((n) => n + 1) };
++  const style = useMemo(() => ({ ...buildPaperSkinStyles(resolved.tokens), ...buildSkinComponentStyles(resolved.components),
++    '--sk-paper-title-weight': resolved.preset === 'quiet-ink' ? '400' : '700',
++  }), [resolved.tokens, resolved.components, resolved.preset]);
++  return { ...resolved, style, selection, inheritedSelection, save, saveError, error, retry: () => setAttempt((n) => n + 1) };
+ }
+diff --git a/client/src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx b/client/src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx
+index 8be7124..dc9ceb7 100644
+--- a/client/src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx
++++ b/client/src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx
+@@ -100,6 +100,8 @@ beforeEach(() => {
+     if (path === `/boards/${board.id}`) return response(detail);
+     if (path === `/boards/${board.id}/viewport-bookmarks`) return response({ bookmarks: [] });
+     if (path === '/courses') return response([]);
++    if (path === '/courses/other-project/summary') return response({ course: { id: 'other-project', skin: null } });
++    if (path === '/courses/source-project/summary') return response({ course: { id: 'source-project', skin: null } });
+     if (path === '/fixture-tray/tray-source') return response({ placements: trayRows });
+     if (path === '/canvas-assets/synthetic-image/blob') return { data: new Blob(['synthetic'], { type: 'image/png' }) };
+     throw new Error(`Unexpected fixture read: ${path}`);
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx b/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx
+index fe80d4f..339c0de 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx
++++ b/client/src/pages/Notes/canvasEngine/layers/NoteChromeLayer.tsx
+@@ -588,7 +588,7 @@ export function NoteChromeLayer({
+                 </button>
+                 {skin && <details data-paper-appearance className={skinStyles.appearance}>
+                   <summary>纸面外观</summary>
+-                  <SkinEditor key={note.id} value={skin.selection} save={skin.save} failed={skin.saveError} inheritLabel="继承项目／全局外观" />
++                  <SkinEditor key={note.id} value={skin.selection} inheritedValue={skin.inheritedSelection} save={skin.save} failed={skin.saveError} inheritLabel="继承项目／全局外观" />
+                 </details>}
+                 <div
+                   className={styles.typographyControls}
+diff --git a/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.module.css b/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.module.css
+index 3f065ba..ab119e4 100644
+--- a/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.module.css
++++ b/client/src/pages/Notes/canvasEngine/layers/NotePaperHeader.module.css
+@@ -24,7 +24,7 @@
+   overflow-wrap: anywhere;
+ }
+ 
+-.title { height: 40px; max-height: 80px; font-size: 32px; line-height: 40px; font-weight: 700; }
++.title { height: 40px; max-height: 80px; font-size: 32px; line-height: 40px; font-weight: var(--sk-paper-title-weight, 700); font-family: var(--sk-title-font, inherit); }
+ .description { height: 24px; max-height: 72px; margin-top: 8px; color: var(--text-secondary); font-size: 16px; line-height: 24px; }
+ .title:focus,
+ .description:focus { overflow-y: auto; }
+diff --git a/client/src/pages/Settings/AppearanceSection.tsx b/client/src/pages/Settings/AppearanceSection.tsx
+index 99a6902..0255521 100644
+--- a/client/src/pages/Settings/AppearanceSection.tsx
++++ b/client/src/pages/Settings/AppearanceSection.tsx
+@@ -14,7 +14,8 @@ export default function AppearanceSection() {
+   };
+   return <section className={styles.section} aria-label="纸面外观">
+     <h2 className={styles.sectionTitle}>纸面外观</h2>
+-    <SkinEditor value={readSkin(skin)} save={save} advanced preview />
++    <p>预设与部件样式用于纸和板；项目、单张纸和单板可以分别覆写。</p>
++    <SkinEditor value={readSkin(skin)} save={save} advanced preview surface="all" />
+   </section>;
+ }
+ import { useRef } from 'react';
+diff --git a/client/src/styles/skinPresets.test.ts b/client/src/styles/skinPresets.test.ts
+index b3409e9..69f6079 100644
+--- a/client/src/styles/skinPresets.test.ts
++++ b/client/src/styles/skinPresets.test.ts
+@@ -1,5 +1,5 @@
+ import { describe, expect, it } from 'vitest';
+-import { readSkin, resolveSkin, SKIN_PRESETS } from './skinPresets';
++import { readSkin, resolveSkin, SKIN_PRESETS, SKIN_PRESET_COMPONENTS } from './skinPresets';
+ 
+ describe('B1a factory paper snapshots', () => {
+   it.each([
+@@ -8,12 +8,12 @@ describe('B1a factory paper snapshots', () => {
+     ['warm-paper', { desk: '#1D1A17', paper: '#F7F3EA', ink: '#2B2620', 'ink-muted': '#837A6C', accent: '#33604F', annotation: '#B8912E', hairline: '#E6DECE', danger: '#A04A38', wall: '#D8CFBC' }],
+     ['workbench', { desk: '#12151A', paper: '#1A1E25', ink: '#DEE3EA', 'ink-muted': '#7E8794', accent: '#E5A33C', annotation: '#E5A33C', hairline: '#2E3642', danger: '#D46A5A', wall: '#33507A' }],
+   ] as const)('%s keeps its nine agreed literal colors', (preset, expected) => {
+-    expect(resolveSkin({ preset })).toEqual({ preset, tokens: expected });
+-    expect(SKIN_PRESETS[preset]).toEqual(expected);
++    expect(resolveSkin({ preset })).toMatchObject({ preset, tokens: expected });
++    expect(SKIN_PRESETS[preset]).toMatchObject(expected);
+   });
+ 
+   it('rollout absence and cleared global selection both use the incumbent default snapshot', () => {
+-    expect(resolveSkin()).toEqual({ preset: 'default', tokens: SKIN_PRESETS.default });
++    expect(resolveSkin()).toEqual({ preset: 'default', tokens: SKIN_PRESETS.default, components: SKIN_PRESET_COMPONENTS.default });
+     expect(resolveSkin(null, null, null)).toEqual(resolveSkin());
+   });
+ 
+@@ -21,13 +21,13 @@ describe('B1a factory paper snapshots', () => {
+     const global = { preset: 'quiet-ink' as const, overrides: { accent: '#123456' } };
+     const project = { preset: 'workbench' as const, overrides: { paper: '#263340' } };
+     const paper = { preset: 'warm-paper' as const, overrides: { 'ink-muted': '#876543' } };
+-    expect(resolveSkin(global, project, paper)).toEqual({ preset: 'warm-paper', tokens: {
++    expect(resolveSkin(global, project, paper)).toEqual({ preset: 'warm-paper', components: SKIN_PRESET_COMPONENTS['warm-paper'], tokens: {
+       ...SKIN_PRESETS['warm-paper'], 'ink-muted': '#876543',
+     } });
+-    expect(resolveSkin(global, project, null)).toEqual({ preset: 'workbench', tokens: {
++    expect(resolveSkin(global, project, null)).toEqual({ preset: 'workbench', components: SKIN_PRESET_COMPONENTS.workbench, tokens: {
+       ...SKIN_PRESETS.workbench, paper: '#263340',
+     } });
+-    expect(resolveSkin(global, null, undefined)).toEqual({ preset: 'quiet-ink', tokens: {
++    expect(resolveSkin(global, null, undefined)).toEqual({ preset: 'quiet-ink', components: SKIN_PRESET_COMPONENTS['quiet-ink'], tokens: {
+       ...SKIN_PRESETS['quiet-ink'], accent: '#123456',
+     } });
+   });
+@@ -55,3 +55,29 @@ describe('B1a factory paper snapshots', () => {
+     expect(SKIN_PRESETS['quiet-ink'].accent).toBe('#7FA3D7');
+   });
+ });
++
++describe('B1b board snapshots and component defaults', () => {
++  it.each([
++    ['default', ['#0b0b0c', '#151516', '#b7b8bd', '#f5f5f5']],
++    ['quiet-ink', ['#0E0F12', '#17181C', '#8B909A', '#E7E8EB']],
++    ['warm-paper', ['#211D19', '#F7F3EA', '#837A6C', '#F2EDE1']],
++    ['workbench', ['#12151A', '#1A1E25', '#E5A33C', '#DEE3EA']],
++  ] as const)('%s carries its four board colors', (preset, expected) => {
++    const { tokens } = resolveSkin({ preset });
++    expect([tokens['board-desk'], tokens.card, tokens.edge, tokens.chalk]).toEqual(expected);
++  });
++
++  it('presets carry component defaults and local selection/clear uses the same three mount merge', () => {
++    const global = { preset: 'warm-paper' as const };
++    const project = { preset: 'workbench' as const };
++    const board = { preset: 'quiet-ink' as const, overrides: { card: '#334455' }, components: { titleFont: 'serif' as const } };
++    expect(resolveSkin(global).components.titleFont).toBe('serif');
++    expect(resolveSkin(global, project).components).toEqual({ titleFont: 'sans', labelFont: 'mono', menuDensity: 'compact', handleStyle: 'rivet' });
++    expect(resolveSkin(global, project, board)).toMatchObject({ tokens: { card: '#334455' }, components: { titleFont: 'serif', labelFont: 'system', menuDensity: 'comfortable', handleStyle: 'capsule' } });
++    expect(resolveSkin(global, project, null)).toEqual(resolveSkin(project));
++    expect(resolveSkin(global, null, null)).toEqual(resolveSkin(global));
++    const parsed = readSkin(board)!;
++    parsed.components!.titleFont = 'sans';
++    expect(board.components.titleFont).toBe('serif');
++  });
++});
+diff --git a/client/src/styles/skinPresets.ts b/client/src/styles/skinPresets.ts
+index 3035811..d5d8ca7 100644
+--- a/client/src/styles/skinPresets.ts
++++ b/client/src/styles/skinPresets.ts
+@@ -1,11 +1,19 @@
+-import { SKIN_PRESET_IDS, SKIN_TOKEN_NAMES, type SkinPresetId, type SkinSelection, type SkinTokens } from '@shared/types';
++import { SKIN_COMPONENT_OPTIONS, SKIN_PRESET_IDS, SKIN_TOKEN_NAMES, type SkinComponents, type SkinPresetId, type SkinSelection, type SkinTokens } from '@shared/types';
+ 
+ /** Factory snapshots. The default column is the incumbent paper palette, not a redesign. */
+ export const SKIN_PRESETS: Record<SkinPresetId, SkinTokens> = {
+-  default: { desk: '#0f0f10', paper: '#101114', ink: '#f5f5f5', 'ink-muted': '#b7b8bd', accent: '#2563eb', annotation: '#facc15', hairline: '#2c2d31', danger: '#ef4444', wall: '#777a8270' },
+-  'quiet-ink': { desk: '#101114', paper: '#17181C', ink: '#E7E8EB', 'ink-muted': '#8B909A', accent: '#7FA3D7', annotation: '#B89B4C', hairline: '#FFFFFF12', danger: '#C4766B', wall: '#FFFFFF14' },
+-  'warm-paper': { desk: '#1D1A17', paper: '#F7F3EA', ink: '#2B2620', 'ink-muted': '#837A6C', accent: '#33604F', annotation: '#B8912E', hairline: '#E6DECE', danger: '#A04A38', wall: '#D8CFBC' },
+-  workbench: { desk: '#12151A', paper: '#1A1E25', ink: '#DEE3EA', 'ink-muted': '#7E8794', accent: '#E5A33C', annotation: '#E5A33C', hairline: '#2E3642', danger: '#D46A5A', wall: '#33507A' },
++  default: { desk: '#0f0f10', paper: '#101114', ink: '#f5f5f5', 'ink-muted': '#b7b8bd', accent: '#2563eb', annotation: '#facc15', hairline: '#2c2d31', danger: '#ef4444', wall: '#777a8270', 'board-desk': '#0b0b0c', card: '#151516', edge: '#b7b8bd', chalk: '#f5f5f5' },
++  'quiet-ink': { desk: '#101114', paper: '#17181C', ink: '#E7E8EB', 'ink-muted': '#8B909A', accent: '#7FA3D7', annotation: '#B89B4C', hairline: '#FFFFFF12', danger: '#C4766B', wall: '#FFFFFF14', 'board-desk': '#0E0F12', card: '#17181C', edge: '#8B909A', chalk: '#E7E8EB' },
++  'warm-paper': { desk: '#1D1A17', paper: '#F7F3EA', ink: '#2B2620', 'ink-muted': '#837A6C', accent: '#33604F', annotation: '#B8912E', hairline: '#E6DECE', danger: '#A04A38', wall: '#D8CFBC', 'board-desk': '#211D19', card: '#F7F3EA', edge: '#837A6C', chalk: '#F2EDE1' },
++  workbench: { desk: '#12151A', paper: '#1A1E25', ink: '#DEE3EA', 'ink-muted': '#7E8794', accent: '#E5A33C', annotation: '#E5A33C', hairline: '#2E3642', danger: '#D46A5A', wall: '#33507A', 'board-desk': '#12151A', card: '#1A1E25', edge: '#E5A33C', chalk: '#DEE3EA' },
++};
++
++const defaultComponents: SkinComponents = { titleFont: 'sans', labelFont: 'system', menuDensity: 'comfortable', handleStyle: 'capsule' };
++export const SKIN_PRESET_COMPONENTS: Record<SkinPresetId, SkinComponents> = {
++  default: { ...defaultComponents },
++  'quiet-ink': { ...defaultComponents },
++  'warm-paper': { ...defaultComponents, titleFont: 'serif' },
++  workbench: { titleFont: 'sans', labelFont: 'mono', menuDensity: 'compact', handleStyle: 'rivet' },
+ };
+ 
+ export const SKIN_LABELS: Record<SkinPresetId, string> = {
+@@ -20,18 +28,24 @@ export function readSkin(value: unknown): SkinSelection | null {
+     const color = raw.overrides?.[key];
+     return typeof color === 'string' && /^#[\da-f]{6}([\da-f]{2})?$/i.test(color) ? [[key, color]] : [];
+   }));
+-  return { preset: raw.preset!, ...(Object.keys(overrides).length ? { overrides } : {}) };
++  const components = Object.fromEntries(Object.entries(SKIN_COMPONENT_OPTIONS).flatMap(([key, options]) => {
++    const option = raw.components?.[key as keyof SkinComponents];
++    return option && (options as readonly string[]).includes(option) ? [[key, option]] : [];
++  })) as Partial<SkinComponents>;
++  return { preset: raw.preset!, ...(Object.keys(overrides).length ? { overrides } : {}), ...(Object.keys(components).length ? { components } : {}) };
+ }
+ 
+ /** An absent mounting point inherits. A named snapshot replaces its parent's palette. */
+-export function resolveSkin(global?: SkinSelection | null, project?: SkinSelection | null, paper?: SkinSelection | null) {
++export function resolveSkin(global?: SkinSelection | null, project?: SkinSelection | null, local?: SkinSelection | null) {
+   let preset: SkinPresetId = 'default';
+   let tokens = { ...SKIN_PRESETS.default };
+-  for (const candidate of [global, project, paper]) {
++  let components = { ...SKIN_PRESET_COMPONENTS.default };
++  for (const candidate of [global, project, local]) {
+     const skin = readSkin(candidate);
+     if (!skin) continue;
+     preset = skin.preset;
+     tokens = { ...SKIN_PRESETS[preset], ...skin.overrides };
++    components = { ...SKIN_PRESET_COMPONENTS[preset], ...skin.components };
+   }
+-  return { preset, tokens };
++  return { preset, tokens, components };
+ }
+diff --git a/server/src/__tests__/v13PaperSkin.test.ts b/server/src/__tests__/v13PaperSkin.test.ts
+index f7b954c..a88167e 100644
+--- a/server/src/__tests__/v13PaperSkin.test.ts
++++ b/server/src/__tests__/v13PaperSkin.test.ts
+@@ -8,11 +8,13 @@ import express from 'express';
+ import Database from 'better-sqlite3';
+ import { closeDb, initDb } from '../db/init.js';
+ import migration from '../db/migrations/067_v13_paper_skin.js';
++import boardMigration from '../db/migrations/068_v13_board_skin.js';
+ import type { AuthRequest } from '../middleware/auth.js';
+ import { errorHandler } from '../middleware/errorHandler.js';
+ import coursesRoutes from '../routes/courses.js';
+ import notesRoutes from '../routes/notes.js';
+ import settingsRoutes from '../routes/settings.js';
++import { createBoardRouter } from '../routes/boards.js';
+ import { parseStoredSkin } from '../services/skin.js';
+ 
+ const userId = 'b1000000-0000-4000-8000-000000000001';
+@@ -32,6 +34,7 @@ async function fixture() {
+   app.use('/api/settings', settingsRoutes);
+   app.use('/api/courses', coursesRoutes);
+   app.use('/api/notes', notesRoutes);
++  app.use('/api/boards', createBoardRouter(() => db));
+   app.use(errorHandler);
+   const server = await new Promise<Server>((resolveServer) => {
+     const listener = app.listen(0, '127.0.0.1', () => resolveServer(listener));
+@@ -59,6 +62,39 @@ async function fixture() {
+   };
+ }
+ 
++test('B1b board tokens and all four component overrides persist at every mount and leave geometry/content intact', async (t) => {
++  const f = await fixture(); t.after(() => f.close());
++  const project = await f.request('POST', 'courses', { name: 'Board skins' }, 201);
++  const note = await f.request('POST', 'notes', { course_id: project.id, title: 'Paper title', metadata: { typography: { font: 'system', size: 16 } } }, 201);
++  const { board } = await f.request('POST', 'boards', { title: 'Board skin', project_id: project.id, purpose: { title: 'Compare skins' } }, 201);
++  const before = await f.request('GET', `boards/${board.id}`);
++  assert.equal(board.skin, null);
++  for (const preset of presets) {
++    const skin = { preset, overrides: { 'board-desk': '#112233', card: '#eeeeee', edge: '#8899aa', chalk: '#ddeeff' },
++      components: { titleFont: 'serif', labelFont: 'mono', menuDensity: 'compact', handleStyle: 'rivet' } };
++    await f.request('PUT', 'settings', { settings: { skin } });
++    await f.request('PUT', `courses/${project.id}`, { skin });
++    await f.request('PUT', `notes/${note.id}`, { skin });
++    assert.deepEqual((await f.request('PATCH', `boards/${board.id}`, { skin })).board.skin, skin);
++    await f.reopen();
++    assert.deepEqual((await f.request('GET', 'settings')).skin, skin);
++    assert.deepEqual((await f.request('GET', `courses/${project.id}/summary`)).course.skin, skin);
++    assert.deepEqual((await f.request('GET', `notes/${note.id}`)).metadata.skin, skin);
++    const after = await f.request('GET', `boards/${board.id}`);
++    assert.deepEqual(after.board.skin, skin);
++    assert.deepEqual(after.board.viewport, before.board.viewport);
++    assert.equal(after.board.identity_description, before.board.identity_description);
++    for (const key of ['members', 'edges', 'visuals', 'layers']) assert.deepEqual(after[key], before[key]);
++    await f.request('PATCH', `boards/${board.id}`, { viewport: { x: 10, y: 20, zoom: 2 } });
++    assert.deepEqual((await f.request('GET', `boards/${board.id}`)).board.skin, skin);
++    await f.request('PATCH', `boards/${board.id}`, { viewport: before.board.viewport });
++  }
++  assert.equal((await f.request('PATCH', `boards/${board.id}`, { skin: null })).board.skin, null);
++  await f.reopen();
++  assert.equal((await f.request('GET', `boards/${board.id}`)).board.skin, null);
++  assert.deepEqual((await f.request('GET', `notes/${note.id}`)).metadata.typography, { font: 'system', size: 16 });
++});
++
+ test('B1a existing settings, project and note routes persist four preset selections across a database reopen', async (t) => {
+   const f = await fixture(); t.after(() => f.close());
+   const project = await f.request('POST', 'courses', { name: 'Paper skins' }, 201);
+@@ -141,3 +177,16 @@ test('B1a project migration is additive and repeatable for an existing project',
+     assert.deepEqual(parseStoredSkin((db.prepare('SELECT skin FROM courses').get() as { skin: string }).skin), { preset: 'warm-paper' });
+   } finally { db.close(); }
+ });
++
++test('B1b board migration preserves existing rows and repeated runs preserve a stored selection', () => {
++  const db = new Database(':memory:');
++  try {
++    db.exec("CREATE TABLE boards (id TEXT PRIMARY KEY, title TEXT, viewport TEXT); INSERT INTO boards VALUES ('old', 'Existing board', '{\"x\":40}')");
++    boardMigration.up(db); boardMigration.up(db);
++    assert.deepEqual(db.prepare('SELECT * FROM boards').get(), { id: 'old', title: 'Existing board', viewport: '{"x":40}', skin: null });
++    const skin = { preset: 'workbench', components: { handleStyle: 'capsule' } };
++    db.prepare('UPDATE boards SET skin = ?').run(JSON.stringify(skin));
++    boardMigration.up(db);
++    assert.deepEqual(parseStoredSkin((db.prepare('SELECT skin FROM boards').get() as { skin: string }).skin), skin);
++  } finally { db.close(); }
++});
+diff --git a/server/src/services/boards.ts b/server/src/services/boards.ts
+index db1d7f2..f34fabb 100644
+--- a/server/src/services/boards.ts
++++ b/server/src/services/boards.ts
+@@ -24,11 +24,13 @@ import { createPurpose, getPurpose } from './purposes.js';
+ import { createBoardTextRange, getBoardTextRange, replayBoardTextRange } from './boardTextRanges.js';
+ import { mountBoardTextRangeSchema } from '../validators/boardTextRanges.js';
+ import { createBoardIdentityItem, createItem } from './items.js';
++import { parseStoredSkin, serializeSkin } from './skin.js';
+ 
+ export type BoardMemberKind = 'note' | 'item' | 'content_group' | 'text_range';
+ type JsonObject = Record<string, unknown>;
+ 
+ interface BoardRow {
++  skin?: string | null;
+   id: string;
+   user_id: string;
+   title: string;
+@@ -148,7 +150,7 @@ function hydrateBoard(db: Database.Database, row: BoardRow) {
+     ? db.prepare('SELECT plain_text FROM items WHERE id = ? AND user_id = ?')
+       .get(item_id, row.user_id) as { plain_text: string } | undefined
+     : undefined;
+-  return { ...board, viewport, base_layer_visible,
++  return { ...board, skin: parseStoredSkin(row.skin), viewport, base_layer_visible,
+     identity_item_id: item_id, identity_description: identity?.plain_text ?? null };
+ }
+ 
+@@ -361,6 +363,10 @@ export function updateBoard(db: Database.Database, userId: string, boardId: stri
+     ...(input.base_layer_visible === undefined ? {} : { base_layer_visible: input.base_layer_visible }) };
+   db.prepare('UPDATE boards SET title = ?, viewport = ?, updated_at = ? WHERE id = ?')
+     .run(input.title ?? row.title, JSON.stringify(viewport), new Date().toISOString(), boardId);
++  // The existing caller-owned transaction and board queue serialize this property
++  // with geometry. Omitted skin never rewinds a newer appearance selection.
++  if (input.skin !== undefined) db.prepare('UPDATE boards SET skin = ? WHERE id = ?')
++    .run(serializeSkin(input.skin), boardId);
+   // A3: the title is board truth; identity content and its judgment Snapshots never follow it.
+   return hydrateBoard(db, boardRow(db, userId, boardId));
+ }
+diff --git a/server/src/validators/boards.ts b/server/src/validators/boards.ts
+index 824005b..fded524 100644
+--- a/server/src/validators/boards.ts
++++ b/server/src/validators/boards.ts
+@@ -1,5 +1,6 @@
+ import { z } from 'zod';
+ import { createPurposeInputSchema } from './purposes.js';
++import { skinSelectionSchema } from './skin.js';
+ 
+ const idSchema = z.string().trim().min(1).max(180);
+ const objectSchema = z.record(z.unknown());
+@@ -36,6 +37,7 @@ export const createBoardSchema = z.object({
+ });
+ 
+ export const updateBoardSchema = z.object({
++  skin: skinSelectionSchema.nullable().optional(),
+   title: z.string().trim().min(1).max(500).optional(),
+   viewport: boardViewportSchema.optional(),
+   base_layer_visible: z.boolean().optional(),
+diff --git a/server/src/validators/skin.ts b/server/src/validators/skin.ts
+index 90be528..d0de57c 100644
+--- a/server/src/validators/skin.ts
++++ b/server/src/validators/skin.ts
+@@ -15,5 +15,15 @@ export const skinSelectionSchema: z.ZodType<SkinSelection> = z.object({
+     hairline: colorSchema.optional(),
+     danger: colorSchema.optional(),
+     wall: colorSchema.optional(),
++    'board-desk': colorSchema.optional(),
++    card: colorSchema.optional(),
++    edge: colorSchema.optional(),
++    chalk: colorSchema.optional(),
++  }).strict().optional(),
++  components: z.object({
++    titleFont: z.enum(['sans', 'serif']).optional(),
++    labelFont: z.enum(['system', 'mono']).optional(),
++    menuDensity: z.enum(['comfortable', 'compact']).optional(),
++    handleStyle: z.enum(['capsule', 'rivet']).optional(),
+   }).strict().optional(),
+ }).strict();
+diff --git a/shared/types/skin.ts b/shared/types/skin.ts
+index 6faa993..c599a03 100644
+--- a/shared/types/skin.ts
++++ b/shared/types/skin.ts
+@@ -1,15 +1,25 @@
+-/** B1a paper colors only; typography and board presentation stay independent. */
++/** Presentation tokens shared by paper and board; document typography stays independent. */
+ export const SKIN_PRESET_IDS = ['default', 'quiet-ink', 'warm-paper', 'workbench'] as const;
+ export type SkinPresetId = typeof SKIN_PRESET_IDS[number];
+ 
+ export const SKIN_TOKEN_NAMES = [
+   'desk', 'paper', 'ink', 'ink-muted', 'accent', 'annotation', 'hairline', 'danger', 'wall',
++  'board-desk', 'card', 'edge', 'chalk',
+ ] as const;
+ export type SkinTokenName = typeof SKIN_TOKEN_NAMES[number];
+ export type SkinTokens = Record<SkinTokenName, string>;
+ 
++export const SKIN_COMPONENT_OPTIONS = {
++  titleFont: ['sans', 'serif'],
++  labelFont: ['system', 'mono'],
++  menuDensity: ['comfortable', 'compact'],
++  handleStyle: ['capsule', 'rivet'],
++} as const;
++export type SkinComponents = { -readonly [K in keyof typeof SKIN_COMPONENT_OPTIONS]: typeof SKIN_COMPONENT_OPTIONS[K][number] };
++
+ /** Null/absence at a mounting point inherits its parent; a selection replaces the preset snapshot. */
+ export interface SkinSelection {
+   preset: SkinPresetId;
+   overrides?: Partial<SkinTokens>;
++  components?: Partial<SkinComponents>;
+ }
+diff --git a/client/src/pages/Boards/boardSkinStyles.test.ts b/client/src/pages/Boards/boardSkinStyles.test.ts
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Boards/boardSkinStyles.test.ts
+@@ -0,0 +1,23 @@
++import { expect, it } from 'vitest';
++import { resolveSkin } from '@/styles/skinPresets';
++import { buildBoardSkinStyles } from './boardSkinStyles';
++
++it('leaves the incumbent light/dark aliases inherited and keeps both sticky baselines separate', () => {
++  const style = buildBoardSkinStyles(resolveSkin()) as Record<string, string>;
++  for (const name of ['--bg-primary', '--bg-surface', '--bg-deepest', '--text-primary', '--text-secondary', '--border-default']) expect(style).not.toHaveProperty(name);
++  expect(style['--board-chalk-fill']).toBe('var(--bg-elevated)');
++  expect(style['--board-sticky-fill']).toBe('#2f2817');
++  expect(style['--board-sticky-stroke']).toBe('#d8a429');
++  expect(style['--sk-board-menu-height']).toBe('36px');
++});
++
++it('binds independent card/edge/chalk roles and the workbench components without changing authored palettes', () => {
++  const style = buildBoardSkinStyles(resolveSkin({ preset: 'workbench', overrides: { edge: '#aabbcc' } })) as Record<string, string>;
++  expect(style['--sk-edge']).toBe('#aabbcc');
++  expect(style['--board-edge']).toBe('var(--sk-edge)');
++  expect(style['--board-chalk']).toBe('var(--sk-chalk)');
++  expect(style['--sk-label-font']).toContain('monospace');
++  expect(style['--sk-board-handle-radius']).toBe('50%');
++  expect(style['--sk-board-menu-height']).toBe('28px');
++  expect(style).not.toHaveProperty('--paper-annotation-blue-accent');
++});
+diff --git a/client/src/pages/Boards/boardSkinStyles.ts b/client/src/pages/Boards/boardSkinStyles.ts
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Boards/boardSkinStyles.ts
+@@ -0,0 +1,58 @@
++import type { CSSProperties } from 'react';
++import type { SkinTokenName } from '@shared/types/skin';
++import { SKIN_PRESETS, resolveSkin } from '@/styles/skinPresets';
++import { buildSkinComponentStyles } from '@/styles/skinComponentStyles';
++
++/** Rendering aliases are fixed, never persisted as additional user tokens.
++ * An unchanged default role inherits the incumbent app theme (including light). */
++export function buildBoardSkinStyles(skin: ReturnType<typeof resolveSkin>): CSSProperties {
++  const { tokens, components, preset } = skin;
++  const changed = (name: SkinTokenName) => tokens[name].toLowerCase() !== SKIN_PRESETS.default[name].toLowerCase();
++  const styles: Record<string, string> = Object.fromEntries(Object.entries(tokens).map(([name, value]) => [`--sk-${name}`, value]));
++  const alias = (name: string, token: SkinTokenName, value = `var(--sk-${token})`) => {
++    if (changed(token)) styles[name] = value;
++  };
++  alias('--text-primary', 'ink');
++  alias('--text-secondary', 'ink-muted');
++  alias('--text-muted', 'ink-muted');
++  alias('--text-inverse', 'ink', 'var(--sk-card)');
++  alias('--bg-primary', 'card', 'var(--board-overlay)');
++  alias('--bg-surface', 'card');
++  alias('--bg-elevated', 'card', 'var(--board-overlay)');
++  alias('--bg-deepest', 'board-desk');
++  alias('--border-default', 'hairline');
++  alias('--border-subtle', 'hairline');
++  alias('--border-focus', 'accent');
++  alias('--accent-primary', 'accent');
++  alias('--accent-primary-hover', 'accent');
++  alias('--gradient-primary-hover', 'accent');
++  alias('--accent-primary-bg', 'accent', 'color-mix(in srgb, var(--sk-accent) 16%, transparent)');
++  alias('--accent-primary-bg-hover', 'accent', 'color-mix(in srgb, var(--sk-accent) 24%, transparent)');
++  alias('--danger', 'danger');
++  alias('--error', 'danger');
++  alias('--error-bg', 'danger', 'color-mix(in srgb, var(--sk-danger) 12%, transparent)');
++  alias('--warning', 'annotation');
++  alias('--warning-bg', 'annotation', 'color-mix(in srgb, var(--sk-annotation) 12%, var(--sk-card))');
++  if (changed('ink') || changed('card')) {
++    styles['--bg-hover'] = 'color-mix(in srgb, var(--sk-ink) 6%, transparent)';
++    styles['--bg-active'] = 'color-mix(in srgb, var(--sk-ink) 7%, transparent)';
++  }
++  styles['--board-overlay'] = 'color-mix(in srgb, var(--sk-card) 96%, var(--sk-ink))';
++  styles['--board-desk'] = changed('board-desk') ? 'var(--sk-board-desk)' : 'var(--bg-deepest)';
++  styles['--board-card'] = changed('card') ? 'var(--sk-card)' : 'var(--bg-surface)';
++  styles['--board-edge'] = changed('edge') ? 'var(--sk-edge)' : 'var(--text-secondary)';
++  styles['--board-chalk'] = changed('chalk') ? 'var(--sk-chalk)' : 'var(--text-primary)';
++  styles['--board-ink'] = 'var(--board-chalk)';
++  styles['--board-desk-muted'] = changed('chalk') ? 'color-mix(in srgb, var(--sk-chalk) 78%, var(--sk-board-desk))' : 'var(--text-secondary)';
++  // Ordinary chalk and relocated sticky shapes had different incumbent fills.
++  styles['--board-chalk-fill'] = changed('board-desk') ? 'color-mix(in srgb, var(--sk-board-desk) 90%, var(--sk-chalk))' : 'var(--bg-elevated)';
++  styles['--board-sticky-fill'] = changed('annotation') ? 'color-mix(in srgb, var(--sk-annotation) 20%, var(--sk-card))' : '#2f2817';
++  styles['--board-sticky-stroke'] = changed('annotation') ? 'var(--sk-annotation)' : '#d8a429';
++  styles['--board-shape-fill'] = changed('card') ? 'color-mix(in srgb, var(--sk-accent) 14%, var(--sk-card))' : 'color-mix(in srgb, var(--accent-primary) 14%, transparent)';
++  styles['--board-button-ink'] = changed('accent') ? (preset === 'warm-paper' ? 'var(--sk-card)' : 'var(--sk-board-desk)') : '#fff';
++  styles['--board-grid'] = preset === 'workbench' ? '#1B2028' : 'transparent';
++  styles['--board-title-weight'] = preset === 'quiet-ink' ? '400' : preset === 'workbench' ? '700' : '600';
++  styles['--board-backdrop'] = 'rgb(0 0 0 / 55%)';
++  styles['--board-note-backdrop'] = 'rgb(0 0 0 / 28%)';
++  return { ...styles, ...buildSkinComponentStyles(components) } as CSSProperties;
++}
+diff --git a/client/src/pages/Boards/useBoardSkin.test.tsx b/client/src/pages/Boards/useBoardSkin.test.tsx
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Boards/useBoardSkin.test.tsx
+@@ -0,0 +1,51 @@
++import { act, renderHook, waitFor } from '@testing-library/react';
++import { beforeEach, expect, it, vi } from 'vitest';
++import { useAuthStore } from '@/stores/authStore';
++import { useBoardSkin } from './useBoardSkin';
++import type { Board } from './boardTypes';
++
++const http = vi.hoisted(() => ({ get: vi.fn() }));
++vi.mock('@/services/api', async (importOriginal) => ({ ...await importOriginal<typeof import('@/services/api')>(), default: http }));
++const board = (id: string, project_id: string | null, skin: Board['skin'] = null) => ({ id, project_id, skin } as Board);
++beforeEach(() => {
++  vi.clearAllMocks();
++  useAuthStore.setState({ user: { settings: { skin: { preset: 'warm-paper' } } } as never });
++});
++
++it('loads the board project, honors local components and clears through the owner write path', async () => {
++  http.get.mockResolvedValue({ data: { course: { skin: { preset: 'workbench' } } } });
++  const update = vi.fn().mockResolvedValue(true);
++  const hook = renderHook(({ value }) => useBoardSkin(value, update), { initialProps: { value: board('b1', 'project') } });
++  await waitFor(() => expect(hook.result.current.preset).toBe('workbench'));
++  expect(http.get).toHaveBeenCalledWith('/courses/project/summary');
++  expect(hook.result.current.components.labelFont).toBe('mono');
++  hook.rerender({ value: board('b1', 'project', { preset: 'quiet-ink', components: { handleStyle: 'rivet' }, overrides: { edge: '#123456' } }) });
++  expect(hook.result.current.tokens.edge).toBe('#123456');
++  expect(hook.result.current.components.handleStyle).toBe('rivet');
++  await act(() => hook.result.current.save(null));
++  expect(update).toHaveBeenLastCalledWith({ skin: null });
++  hook.rerender({ value: board('b1', 'project') });
++  expect(hook.result.current.preset).toBe('workbench');
++  hook.rerender({ value: board('b2', null) });
++  expect(hook.result.current.preset).toBe('warm-paper');
++  expect(http.get).toHaveBeenCalledTimes(1);
++});
++
++it('ignores the previous project response after board navigation and exposes retry after failure', async () => {
++  let finish!: (value: unknown) => void;
++  http.get.mockReturnValueOnce(new Promise((resolve) => { finish = resolve; })).mockRejectedValueOnce(new Error('offline'))
++    .mockResolvedValueOnce({ data: { course: { skin: { preset: 'quiet-ink' } } } });
++  const hook = renderHook(({ value }) => useBoardSkin(value, vi.fn().mockResolvedValue(true)), { initialProps: { value: board('a', 'old') } });
++  hook.rerender({ value: board('b', 'new') });
++  await waitFor(() => expect(hook.result.current.error).toBeTruthy());
++  await act(async () => { finish({ data: { course: { skin: { preset: 'workbench' } } } }); });
++  expect(hook.result.current.preset).toBe('warm-paper');
++  act(() => hook.result.current.retry());
++  await waitFor(() => expect(hook.result.current.preset).toBe('quiet-ink'));
++  expect(hook.result.current.error).toBeNull();
++});
++
++it('surfaces a rejected owner write to the editor instead of claiming it saved', async () => {
++  const hook = renderHook(() => useBoardSkin(board('b', null), vi.fn().mockResolvedValue(false)));
++  await expect(hook.result.current.save({ preset: 'default' })).rejects.toThrow('not saved');
++});
+diff --git a/client/src/pages/Boards/useBoardSkin.ts b/client/src/pages/Boards/useBoardSkin.ts
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Boards/useBoardSkin.ts
+@@ -0,0 +1,32 @@
++import { useEffect, useMemo, useState } from 'react';
++import api from '@/services/api';
++import { useAuthStore } from '@/stores/authStore';
++import { readSkin, resolveSkin } from '@/styles/skinPresets';
++import type { Course, SkinSelection } from '@shared/types';
++import type { Board, PatchBoardInput } from './boardTypes';
++import { buildBoardSkinStyles } from './boardSkinStyles';
++
++export function useBoardSkin(board: Board | null, update: (input: PatchBoardInput) => Promise<boolean>) {
++  const global = useAuthStore((state) => state.user?.settings.skin);
++  const [project, setProject] = useState<{ id: string; skin: SkinSelection | null } | null>(null);
++  const [error, setError] = useState<string | null>(null);
++  const [attempt, setAttempt] = useState(0);
++  const projectId = board?.project_id;
++  useEffect(() => {
++    setError(null);
++    if (!projectId) return;
++    let active = true;
++    void api.get<{ course: Course }>(`/courses/${projectId}/summary`).then(({ data }) => {
++      if (active) setProject({ id: projectId, skin: readSkin(data.course.skin) });
++    }).catch(() => { if (active) setError('项目外观未加载，暂用全局外观。'); });
++    return () => { active = false; };
++  }, [projectId, attempt]);
++  const selection = useMemo(() => readSkin(board?.skin), [board?.skin]);
++  const inheritedSelection = (project && project.id === projectId ? project.skin : null) ?? readSkin(global);
++  const resolved = useMemo(() => resolveSkin(readSkin(global), project && project.id === projectId ? project.skin : null, selection),
++    [global, project, projectId, selection]);
++  const style = useMemo(() => buildBoardSkinStyles(resolved), [resolved]);
++  // useBoard owns intent identity, write ordering, error reporting and navigation.
++  const save = async (skin: SkinSelection | null) => { if (!await update({ skin })) throw new Error('Board appearance was not saved'); };
++  return { ...resolved, style, selection, inheritedSelection, save, error, retry: () => setAttempt((value) => value + 1) };
++}
+diff --git a/client/src/styles/skinComponentStyles.ts b/client/src/styles/skinComponentStyles.ts
+new file mode 100644
+--- /dev/null
++++ b/client/src/styles/skinComponentStyles.ts
+@@ -0,0 +1,22 @@
++import type { CSSProperties } from 'react';
++import type { SkinComponents } from '@shared/types/skin';
++
++/** Fixed enum-to-CSS translation, scoped to each surface and its portals. */
++export function buildSkinComponentStyles(components: SkinComponents): CSSProperties {
++  return {
++    '--sk-title-font': components.titleFont === 'serif' ? 'Georgia, "Noto Serif SC", "Songti SC", SimSun, serif' : 'initial',
++    '--sk-label-font': components.labelFont === 'mono' ? 'ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace' : 'initial',
++    '--sk-menu-row-height': components.menuDensity === 'compact' ? '26px' : '30px',
++    '--sk-menu-gap': components.menuDensity === 'compact' ? '1px' : '3px',
++    '--sk-more-padding': components.menuDensity === 'compact' ? '6px 10px' : '10px',
++    '--sk-board-menu-height': components.menuDensity === 'compact' ? '28px' : '36px',
++    '--sk-board-menu-padding': components.menuDensity === 'compact' ? '4px 8px' : '7px 10px',
++    '--sk-handle-radius': components.handleStyle === 'rivet' ? '50%' : 'var(--radius-sm)',
++    '--sk-board-handle-radius': components.handleStyle === 'rivet' ? '50%' : '4px',
++    '--sk-small-handle-radius': components.handleStyle === 'rivet' ? '50%' : '2px',
++    '--sk-handle-mark-width': components.handleStyle === 'rivet' ? '6px' : '2px',
++    '--sk-handle-mark-bottom': components.handleStyle === 'rivet' ? 'auto' : '0',
++    '--sk-handle-mark-height': components.handleStyle === 'rivet' ? '6px' : 'auto',
++    '--sk-handle-mark-left': components.handleStyle === 'rivet' ? '1px' : '3px',
++  } as CSSProperties;
++}
+diff --git a/server/src/db/migrations/068_v13_board_skin.ts b/server/src/db/migrations/068_v13_board_skin.ts
+new file mode 100644
+--- /dev/null
++++ b/server/src/db/migrations/068_v13_board_skin.ts
+@@ -0,0 +1,10 @@
++import type Database from 'better-sqlite3';
++
++export default {
++  id: '068_v13_board_skin',
++  description: 'Add an inheritable board skin using the shared skin selection shape',
++  up(db: Database.Database): void {
++    const columns = db.pragma('table_info(boards)') as Array<{ name: string }>;
++    if (!columns.some((column) => column.name === 'skin')) db.exec('ALTER TABLE boards ADD COLUMN skin TEXT');
++  },
++};

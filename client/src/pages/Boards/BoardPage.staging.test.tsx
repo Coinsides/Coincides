@@ -7,7 +7,9 @@ import { BOARD_STAGING_MIME } from './BoardStaging';
 import type { BoardDetail, BoardMember, MountBoardMemberInput, PatchBoardMemberInput } from './boardTypes';
 
 const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() }));
-vi.mock('@/services/api', () => ({ default: http }));
+vi.mock('@/services/api', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/services/api')>(), default: http,
+}));
 // Host integration uses the real BoardPage/useBoard/repository; runtime selection/flush is tested separately.
 vi.mock('./BoardNoteModal', async () => {
   const { forwardRef } = await import('react');

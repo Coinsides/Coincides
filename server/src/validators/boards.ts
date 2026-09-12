@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { createPurposeInputSchema } from './purposes.js';
+import { skinSelectionSchema } from './skin.js';
 
 const idSchema = z.string().trim().min(1).max(180);
 const objectSchema = z.record(z.unknown());
@@ -36,6 +37,7 @@ export const createBoardSchema = z.object({
 });
 
 export const updateBoardSchema = z.object({
+  skin: skinSelectionSchema.nullable().optional(),
   title: z.string().trim().min(1).max(500).optional(),
   viewport: boardViewportSchema.optional(),
   base_layer_visible: z.boolean().optional(),

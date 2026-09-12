@@ -7,7 +7,9 @@ import { BOARD_TEXT_RANGE_MIME } from './boardTextRangeClipboard';
 
 const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), delete: vi.fn() }));
 const close = vi.hoisted(() => vi.fn<(...args: unknown[]) => Promise<boolean>>());
-vi.mock('@/services/api', () => ({ default: http }));
+vi.mock('@/services/api', async (importOriginal) => ({
+  ...await importOriginal<typeof import('@/services/api')>(), default: http,
+}));
 // This suite isolates the board host contract. The separate modal smoke mounts the real runtime.
 vi.mock('./BoardNoteModal', async () => {
   const { forwardRef, useImperativeHandle } = await import('react');

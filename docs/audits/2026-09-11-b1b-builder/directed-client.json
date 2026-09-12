@@ -1,0 +1,19 @@
+{
+  "command": [
+    "node",
+    "node_modules/vitest/vitest.mjs",
+    "run",
+    "src/styles/skinPresets.test.ts",
+    "src/pages/Boards",
+    "src/pages/Notes/canvasEngine/hooks/useNoteSkin.test.ts",
+    "src/pages/Notes/canvasEngine/hooks/useTrayRelocation.test.tsx",
+    "src/pages/Notes/canvasEngine/paperSkinStyles.test.ts",
+    "src/components/Skin/SkinEditor.test.tsx",
+    "--maxWorkers=4",
+    "--minWorkers=1"
+  ],
+  "cwd": "client",
+  "started": "2026-09-12T02:41:18.418Z",
+  "durationMs": 14510,
+  "exitCode": 0
+}

@@ -100,6 +100,8 @@ beforeEach(() => {
     if (path === `/boards/${board.id}`) return response(detail);
     if (path === `/boards/${board.id}/viewport-bookmarks`) return response({ bookmarks: [] });
     if (path === '/courses') return response([]);
+    if (path === '/courses/other-project/summary') return response({ course: { id: 'other-project', skin: null } });
+    if (path === '/courses/source-project/summary') return response({ course: { id: 'source-project', skin: null } });
     if (path === '/fixture-tray/tray-source') return response({ placements: trayRows });
     if (path === '/canvas-assets/synthetic-image/blob') return { data: new Blob(['synthetic'], { type: 'image/png' }) };
     throw new Error(`Unexpected fixture read: ${path}`);

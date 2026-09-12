@@ -24,4 +24,5 @@
 .error { position: relative; width: 100%; padding: 12px; border: 1px solid var(--border-default); border-radius: 6px; background: var(--bg-surface); }
 .error p { margin-bottom: 8px; overflow-wrap: anywhere; }
 .error button { text-decoration: underline; }
+.rail { font-family: var(--sk-label-font, inherit); }
 @media (hover: none) { .row:focus-within .actions { display: flex; } }

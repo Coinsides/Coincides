@@ -14,7 +14,8 @@ export default function AppearanceSection() {
   };
   return <section className={styles.section} aria-label="纸面外观">
     <h2 className={styles.sectionTitle}>纸面外观</h2>
-    <SkinEditor value={readSkin(skin)} save={save} advanced preview />
+    <p>预设与部件样式用于纸和板；项目、单张纸和单板可以分别覆写。</p>
+    <SkinEditor value={readSkin(skin)} save={save} advanced preview surface="all" />
   </section>;
 }
 import { useRef } from 'react';

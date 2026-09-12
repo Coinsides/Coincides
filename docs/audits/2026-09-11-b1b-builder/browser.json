@@ -1,0 +1,10 @@
+{
+  "command": [
+    "node",
+    "docs/audits/2026-09-11-b1b-builder/smoke.mjs"
+  ],
+  "cwd": ".",
+  "started": "2026-09-12T03:05:32.525Z",
+  "durationMs": 29901,
+  "exitCode": 0
+}

@@ -1,0 +1,11 @@
+{
+  "command": [
+    "node",
+    "docs/audits/2026-09-11-b1b-builder/e1-recheck/smoke.mjs",
+    "warm-paper"
+  ],
+  "cwd": ".",
+  "started": "2026-09-12T02:54:30.215Z",
+  "durationMs": 10171,
+  "exitCode": 0
+}

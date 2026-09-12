@@ -24,11 +24,13 @@ import { createPurpose, getPurpose } from './purposes.js';
 import { createBoardTextRange, getBoardTextRange, replayBoardTextRange } from './boardTextRanges.js';
 import { mountBoardTextRangeSchema } from '../validators/boardTextRanges.js';
 import { createBoardIdentityItem, createItem } from './items.js';
+import { parseStoredSkin, serializeSkin } from './skin.js';
 
 export type BoardMemberKind = 'note' | 'item' | 'content_group' | 'text_range';
 type JsonObject = Record<string, unknown>;
 
 interface BoardRow {
+  skin?: string | null;
   id: string;
   user_id: string;
   title: string;
@@ -148,7 +150,7 @@ function hydrateBoard(db: Database.Database, row: BoardRow) {
     ? db.prepare('SELECT plain_text FROM items WHERE id = ? AND user_id = ?')
       .get(item_id, row.user_id) as { plain_text: string } | undefined
     : undefined;
-  return { ...board, viewport, base_layer_visible,
+  return { ...board, skin: parseStoredSkin(row.skin), viewport, base_layer_visible,
     identity_item_id: item_id, identity_description: identity?.plain_text ?? null };
 }
 
@@ -361,6 +363,10 @@ export function updateBoard(db: Database.Database, userId: string, boardId: stri
     ...(input.base_layer_visible === undefined ? {} : { base_layer_visible: input.base_layer_visible }) };
   db.prepare('UPDATE boards SET title = ?, viewport = ?, updated_at = ? WHERE id = ?')
     .run(input.title ?? row.title, JSON.stringify(viewport), new Date().toISOString(), boardId);
+  // The existing caller-owned transaction and board queue serialize this property
+  // with geometry. Omitted skin never rewinds a newer appearance selection.
+  if (input.skin !== undefined) db.prepare('UPDATE boards SET skin = ? WHERE id = ?')
+    .run(serializeSkin(input.skin), boardId);
   // A3: the title is board truth; identity content and its judgment Snapshots never follow it.
   return hydrateBoard(db, boardRow(db, userId, boardId));
 }

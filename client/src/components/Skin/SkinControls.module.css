@@ -5,7 +5,7 @@
 .preview p { margin: 10px 0; }
 .error { color: var(--danger); }
 .error button { color: var(--accent-primary); background: transparent; border: 0; border-radius: 0; cursor: pointer; font: inherit; padding: 4px; }
-.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 36px; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: var(--sk-board-menu-height, 36px); }
 .row select, .row input { font: inherit; color: inherit; background: transparent; border: 0; border-radius: 0; padding: 6px 0; max-width: 180px; min-width: 0; }
 .row input { width: 94px; }
 .row button, .clear { font: inherit; color: inherit; background: transparent; border: 0; border-radius: 0; padding: 5px 0; text-align: left; cursor: pointer; }

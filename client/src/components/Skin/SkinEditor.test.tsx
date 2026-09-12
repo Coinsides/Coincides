@@ -4,6 +4,27 @@ import type { SkinSelection } from '@shared/types/skin';
 import { SkinEditor } from './SkinEditor';
 
 describe('SkinEditor save failure recovery', () => {
+  it('shows inherited components and edits one switch without resetting the inherited preset or colors', () => {
+    const save = vi.fn().mockResolvedValue(undefined);
+    render(<SkinEditor value={null} inheritedValue={{ preset: 'workbench', overrides: { edge: '#123456' } }} save={save} inheritLabel="继承" surface="board" />);
+    fireEvent.click(screen.getByText('部件样式'));
+    expect((screen.getByRole('combobox', { name: '把手样式' }) as HTMLSelectElement).value).toBe('rivet');
+    fireEvent.change(screen.getByRole('combobox', { name: '把手样式' }), { target: { value: 'capsule' } });
+    expect(save).toHaveBeenLastCalledWith({ preset: 'workbench', overrides: { edge: '#123456' }, components: { handleStyle: 'capsule' } });
+  });
+  it('edits all four board components without discarding colors, then resets to preset defaults', async () => {
+    const save = vi.fn().mockResolvedValue(undefined);
+    render(<SkinEditor value={{ preset: 'warm-paper', overrides: { card: '#334455' } }} save={save} surface="board" advanced />);
+    fireEvent.click(screen.getByText('部件样式'));
+    for (const [name, value] of [['标题字', 'sans'], ['标签与刻度字', 'mono'], ['菜单密度', 'compact'], ['把手样式', 'rivet']]) {
+      fireEvent.change(screen.getByRole('combobox', { name }), { target: { value } });
+    }
+    await waitFor(() => expect(save).toHaveBeenLastCalledWith({ preset: 'warm-paper', overrides: { card: '#334455' },
+      components: { titleFont: 'sans', labelFont: 'mono', menuDensity: 'compact', handleStyle: 'rivet' } }));
+    fireEvent.change(screen.getByRole('combobox', { name: '板面预设' }), { target: { value: 'workbench' } });
+    expect(save).toHaveBeenLastCalledWith({ preset: 'workbench' });
+    expect((screen.getByRole('combobox', { name: '把手样式' }) as HTMLSelectElement).value).toBe('rivet');
+  });
   it('shows an owner failure after reopening and retries the retained selection', async () => {
     const value: SkinSelection = { preset: 'warm-paper' };
     let rejectFirst!: (error: Error) => void;

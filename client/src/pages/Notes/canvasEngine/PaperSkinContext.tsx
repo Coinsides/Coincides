@@ -5,6 +5,7 @@ export interface PaperSkinContextValue {
   style: CSSProperties;
   preset: SkinPresetId;
   selection: SkinSelection | null;
+  inheritedSelection?: SkinSelection | null;
   save: (skin: SkinSelection | null) => Promise<void>;
   saveError?: boolean;
   error: string | null;

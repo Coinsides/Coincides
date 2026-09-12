@@ -1,0 +1,1598 @@
+{
+  "status": "passed",
+  "preset": "quiet-ink",
+  "syntheticOnly": true,
+  "persistenceCoverage": false,
+  "browser": {
+    "protocolVersion": "1.3",
+    "product": "Chrome/152.0.7977.83",
+    "revision": "@79460ebecaa5625e57a5fb679a735659e73dc687",
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/152.0.0.0 Safari/537.36",
+    "jsVersion": "15.2.124.21"
+  },
+  "assertions": [
+    {
+      "name": "Initial overlays closed",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "More (rest): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 1,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "More (hover): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 1,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "More (appearance open) (rest): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 1,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "More (appearance open) (hover): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 1,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "More (all component switches open) (rest): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 1,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "More (all component switches open) (hover): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 1,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "Paper appearance text uses the effective skin ink",
+      "pass": true,
+      "detail": {
+        "pass": true,
+        "expected": "rgb(231, 232, 235)",
+        "colors": [
+          "rgb(231, 232, 235)",
+          "rgb(231, 232, 235)",
+          "rgb(231, 232, 235)",
+          "rgb(231, 232, 235)",
+          "rgb(231, 232, 235)",
+          "rgb(231, 232, 235)",
+          "rgb(231, 232, 235)",
+          "rgb(231, 232, 235)",
+          "rgb(231, 232, 235)",
+          "rgb(231, 232, 235)",
+          "rgb(231, 232, 235)",
+          "rgb(231, 232, 235)"
+        ]
+      }
+    },
+    {
+      "name": "Production paper appearance has inherit plus four presets",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Production paper preset control dispatches and changes context",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "More (paper override selected) (rest): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 1,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "More (paper override selected) (hover): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 1,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "Clearing the override returns to inherited preset",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Dead placeholder absent",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "More preserved callbacks",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Typography fontSizePx",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Typography lineHeightPx",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Typography paragraphSpacingPx",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Typography font family callback",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Typography reset dispatched",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Info (current cover metadata) (rest): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 3,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "Info (current cover metadata) (hover): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 3,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "Info statistics and current header entry",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Deleted blocks (rest): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 0,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "Deleted blocks (hover): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 0,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "Restore invokes complete synthetic block and reaches empty state",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Layout (rest): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 2,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "Layout (hover): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 2,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "Layout enabled with panel",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Layout row and action callback IDs preserved",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Layout toggles off",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Toggle block type overlay",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Toggle AI visibility overlay",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Toggle export status overlay",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Toggle label overlay",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Export preview (all details open) (rest): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 8,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "Export preview (all details open) (hover): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 8,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "Export panel has no horizontal overflow",
+      "pass": true,
+      "detail": {
+        "pass": true,
+        "clientWidth": 418,
+        "scrollWidth": 418
+      }
+    },
+    {
+      "name": "Export help stays inside panel on hover",
+      "pass": true,
+      "detail": {
+        "pass": true,
+        "clientWidth": 418,
+        "scrollWidth": 418,
+        "pseudoRight": "0px",
+        "opacity": "1"
+      }
+    },
+    {
+      "name": "Export original groups and warnings rendered",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Delete confirmation (rest): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 0,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "Delete confirmation (hover): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 0,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "Delete dialog centered inside viewport",
+      "pass": true,
+      "detail": {
+        "pass": true,
+        "left": 420,
+        "top": 375.09375,
+        "width": 440,
+        "height": 209.796875
+      }
+    },
+    {
+      "name": "Delete confirmation opens without dispatch",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Delete cancel does not dispatch",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Delete confirm dispatches once and closes",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "View options (rest): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 0,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "View options (hover): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 0,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "View icon opens above toolbar and excludes More",
+      "pass": true,
+      "detail": {
+        "pass": true,
+        "bottom": 896,
+        "triggerTop": 904
+      }
+    },
+    {
+      "name": "View fit_width changes synthetic view with production derivation",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "View fit_width sole checked row",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "View fit_page changes synthetic view with production derivation",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "View fit_page sole checked row",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "View physical changes synthetic view with production derivation",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "View physical sole checked row",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "More excludes View",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Preview excludes View",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "View excludes Preview",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "View Escape closes and restores focus",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Source snapshot (rest): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 0,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "Source snapshot (hover): zero nested borders, shadows, rounded boxes and static card backgrounds",
+      "pass": true,
+      "detail": {
+        "nestedBorders": 0,
+        "hairlineSeparators": 0,
+        "shadows": 0,
+        "roundedDescendants": 0,
+        "staticBackgrounds": 0
+      }
+    },
+    {
+      "name": "Source snapshot close",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Readonly existing restrictions retained",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "Modal deletion remains disabled",
+      "pass": true,
+      "detail": true
+    },
+    {
+      "name": "No browser runtime exceptions",
+      "pass": true,
+      "detail": 0
+    }
+  ],
+  "borders": [
+    {
+      "overlay": "More",
+      "state": "rest",
+      "forcedHoverTargets": 0,
+      "selector": "[data-note-toolbar-popover] > [data-note-overlay]",
+      "descendants": 98,
+      "nestedBorders": [],
+      "hairlineSeparators": [
+        {
+          "tag": "DIV",
+          "class": "_typographyControls_16vjz_383",
+          "text": "TypographyResetFontSystem SansArialGeorgiaTimes New RomanCambriaConsolasInterSizeLine",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 428,
+        "scrollWidth": 428,
+        "width": 430,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    },
+    {
+      "overlay": "More",
+      "state": "hover",
+      "forcedHoverTargets": 17,
+      "selector": "[data-note-toolbar-popover] > [data-note-overlay]",
+      "descendants": 98,
+      "nestedBorders": [],
+      "hairlineSeparators": [
+        {
+          "tag": "DIV",
+          "class": "_typographyControls_16vjz_383",
+          "text": "TypographyResetFontSystem SansArialGeorgiaTimes New RomanCambriaConsolasInterSizeLine",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 428,
+        "scrollWidth": 428,
+        "width": 430,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    },
+    {
+      "overlay": "More (appearance open)",
+      "state": "rest",
+      "forcedHoverTargets": 0,
+      "selector": "[data-note-toolbar-popover] > [data-note-overlay]",
+      "descendants": 98,
+      "nestedBorders": [],
+      "hairlineSeparators": [
+        {
+          "tag": "DIV",
+          "class": "_typographyControls_16vjz_383",
+          "text": "TypographyResetFontSystem SansArialGeorgiaTimes New RomanCambriaConsolasInterSizeLine",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 428,
+        "scrollWidth": 428,
+        "width": 430,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    },
+    {
+      "overlay": "More (appearance open)",
+      "state": "hover",
+      "forcedHoverTargets": 17,
+      "selector": "[data-note-toolbar-popover] > [data-note-overlay]",
+      "descendants": 98,
+      "nestedBorders": [],
+      "hairlineSeparators": [
+        {
+          "tag": "DIV",
+          "class": "_typographyControls_16vjz_383",
+          "text": "TypographyResetFontSystem SansArialGeorgiaTimes New RomanCambriaConsolasInterSizeLine",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 428,
+        "scrollWidth": 428,
+        "width": 430,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    },
+    {
+      "overlay": "More (all component switches open)",
+      "state": "rest",
+      "forcedHoverTargets": 0,
+      "selector": "[data-note-toolbar-popover] > [data-note-overlay]",
+      "descendants": 98,
+      "nestedBorders": [],
+      "hairlineSeparators": [
+        {
+          "tag": "DIV",
+          "class": "_typographyControls_16vjz_383",
+          "text": "TypographyResetFontSystem SansArialGeorgiaTimes New RomanCambriaConsolasInterSizeLine",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 428,
+        "scrollWidth": 428,
+        "width": 430,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    },
+    {
+      "overlay": "More (all component switches open)",
+      "state": "hover",
+      "forcedHoverTargets": 17,
+      "selector": "[data-note-toolbar-popover] > [data-note-overlay]",
+      "descendants": 98,
+      "nestedBorders": [],
+      "hairlineSeparators": [
+        {
+          "tag": "DIV",
+          "class": "_typographyControls_16vjz_383",
+          "text": "TypographyResetFontSystem SansArialGeorgiaTimes New RomanCambriaConsolasInterSizeLine",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 428,
+        "scrollWidth": 428,
+        "width": 430,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    },
+    {
+      "overlay": "More (paper override selected)",
+      "state": "rest",
+      "forcedHoverTargets": 0,
+      "selector": "[data-note-toolbar-popover] > [data-note-overlay]",
+      "descendants": 99,
+      "nestedBorders": [],
+      "hairlineSeparators": [
+        {
+          "tag": "DIV",
+          "class": "_typographyControls_16vjz_383",
+          "text": "TypographyResetFontSystem SansArialGeorgiaTimes New RomanCambriaConsolasInterSizeLine",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 428,
+        "scrollWidth": 428,
+        "width": 430,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    },
+    {
+      "overlay": "More (paper override selected)",
+      "state": "hover",
+      "forcedHoverTargets": 18,
+      "selector": "[data-note-toolbar-popover] > [data-note-overlay]",
+      "descendants": 99,
+      "nestedBorders": [],
+      "hairlineSeparators": [
+        {
+          "tag": "DIV",
+          "class": "_typographyControls_16vjz_383",
+          "text": "TypographyResetFontSystem SansArialGeorgiaTimes New RomanCambriaConsolasInterSizeLine",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 428,
+        "scrollWidth": 428,
+        "width": 430,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    },
+    {
+      "overlay": "Info (current cover metadata)",
+      "state": "rest",
+      "forcedHoverTargets": 0,
+      "selector": "[data-note-cover-popup]",
+      "descendants": 32,
+      "nestedBorders": [],
+      "hairlineSeparators": [
+        {
+          "tag": "SECTION",
+          "class": "",
+          "text": "UpstreamNo upstream references.",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "tag": "SECTION",
+          "class": "",
+          "text": "DownstreamNo downstream references.",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "tag": "SECTION",
+          "class": "",
+          "text": "StatisticsModePageBlocks3Sources1Statusactive",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 366,
+        "scrollWidth": 366,
+        "width": 368,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    },
+    {
+      "overlay": "Info (current cover metadata)",
+      "state": "hover",
+      "forcedHoverTargets": 2,
+      "selector": "[data-note-cover-popup]",
+      "descendants": 32,
+      "nestedBorders": [],
+      "hairlineSeparators": [
+        {
+          "tag": "SECTION",
+          "class": "",
+          "text": "UpstreamNo upstream references.",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "tag": "SECTION",
+          "class": "",
+          "text": "DownstreamNo downstream references.",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "tag": "SECTION",
+          "class": "",
+          "text": "StatisticsModePageBlocks3Sources1Statusactive",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 366,
+        "scrollWidth": 366,
+        "width": 368,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    },
+    {
+      "overlay": "Deleted blocks",
+      "state": "rest",
+      "forcedHoverTargets": 0,
+      "selector": "[data-note-toolbar-popover] > [data-note-overlay]",
+      "descendants": 17,
+      "nestedBorders": [],
+      "hairlineSeparators": [],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 428,
+        "scrollWidth": 428,
+        "width": 430,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    },
+    {
+      "overlay": "Deleted blocks",
+      "state": "hover",
+      "forcedHoverTargets": 2,
+      "selector": "[data-note-toolbar-popover] > [data-note-overlay]",
+      "descendants": 17,
+      "nestedBorders": [],
+      "hairlineSeparators": [],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 428,
+        "scrollWidth": 428,
+        "width": 430,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    },
+    {
+      "overlay": "Layout",
+      "state": "rest",
+      "forcedHoverTargets": 0,
+      "selector": "[data-note-toolbar-popover] > [data-note-overlay]",
+      "descendants": 187,
+      "nestedBorders": [],
+      "hairlineSeparators": [
+        {
+          "tag": "DIV",
+          "class": "_pageFramePanelStackGroup_16vjz_521",
+          "text": "Notes2-page stackPage 1PrimaryPage 2Stack page",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "tag": "DIV",
+          "class": "_pageFramePanelStackGroup_16vjz_521",
+          "text": "ReferencesSingle-page stackPage 1Single-page stack",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 428,
+        "scrollWidth": 428,
+        "width": 430,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    },
+    {
+      "overlay": "Layout",
+      "state": "hover",
+      "forcedHoverTargets": 23,
+      "selector": "[data-note-toolbar-popover] > [data-note-overlay]",
+      "descendants": 187,
+      "nestedBorders": [],
+      "hairlineSeparators": [
+        {
+          "tag": "DIV",
+          "class": "_pageFramePanelStackGroup_16vjz_521",
+          "text": "Notes2-page stackPage 1PrimaryPage 2Stack page",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "tag": "DIV",
+          "class": "_pageFramePanelStackGroup_16vjz_521",
+          "text": "ReferencesSingle-page stackPage 1Single-page stack",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 428,
+        "scrollWidth": 428,
+        "width": 430,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    },
+    {
+      "overlay": "Export preview (all details open)",
+      "state": "rest",
+      "forcedHoverTargets": 0,
+      "selector": "[data-note-toolbar-popover] > [data-note-overlay]",
+      "descendants": 149,
+      "nestedBorders": [],
+      "hairlineSeparators": [
+        {
+          "tag": "DIV",
+          "class": "_previewOverlayControls_16vjz_594",
+          "text": "Block typesAI visibilityExport statusLabels",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "tag": "DETAILS",
+          "class": "_exportPreviewGroup_16vjz_231",
+          "text": "Primary PageFrame 1 / A411 export0 excluded0 AI hiddenexportable15px22px line0px gap3",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "tag": "DETAILS",
+          "class": "_exportPreviewGroup_16vjz_231",
+          "text": "Crossing PageFrame boundary1Boundary exampleExport / AI visible / crossing",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "tag": "DETAILS",
+          "class": "_exportPreviewGroup_16vjz_231",
+          "text": "Workspace only1Scratch exampleScratch / AI hidden / outside",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "tag": "DETAILS",
+          "class": "_exportPreviewGroup_16vjz_231",
+          "text": "Included in export1Synthetic theoremAI visible / inside",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "tag": "DETAILS",
+          "class": "_exportPreviewGroup_16vjz_231",
+          "text": "Excluded / scratch2Boundary exampleAI visible / crossingScratch exampleAI hidden / ou",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "tag": "DETAILS",
+          "class": "_exportPreviewGroup_16vjz_231",
+          "text": "AI visible2Synthetic theoremExport / insideBoundary exampleExport / crossing",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "tag": "DETAILS",
+          "class": "_exportPreviewGroup_16vjz_231",
+          "text": "AI hidden1Scratch exampleScratch / outside",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 418,
+        "scrollWidth": 418,
+        "width": 430,
+        "overflowing": [],
+        "tooltips": [
+          {
+            "left": 1199,
+            "right": 1221,
+            "width": "210px",
+            "pseudoLeft": "-188px",
+            "pseudoRight": "0px",
+            "transform": "matrix(1, 0, 0, 1, 0, 4)",
+            "visibility": "visible"
+          },
+          {
+            "left": 1199,
+            "right": 1221,
+            "width": "210px",
+            "pseudoLeft": "-188px",
+            "pseudoRight": "0px",
+            "transform": "matrix(1, 0, 0, 1, 0, 4)",
+            "visibility": "visible"
+          },
+          {
+            "left": 1199,
+            "right": 1221,
+            "width": "210px",
+            "pseudoLeft": "-188px",
+            "pseudoRight": "0px",
+            "transform": "matrix(1, 0, 0, 1, 0, 4)",
+            "visibility": "visible"
+          },
+          {
+            "left": 1199,
+            "right": 1221,
+            "width": "210px",
+            "pseudoLeft": "-188px",
+            "pseudoRight": "0px",
+            "transform": "matrix(1, 0, 0, 1, 0, 4)",
+            "visibility": "visible"
+          }
+        ]
+      },
+      "pass": true
+    },
+    {
+      "overlay": "Export preview (all details open)",
+      "state": "hover",
+      "forcedHoverTargets": 12,
+      "selector": "[data-note-toolbar-popover] > [data-note-overlay]",
+      "descendants": 149,
+      "nestedBorders": [],
+      "hairlineSeparators": [
+        {
+          "tag": "DIV",
+          "class": "_previewOverlayControls_16vjz_594",
+          "text": "Block typesAI visibilityExport statusLabels",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "tag": "DETAILS",
+          "class": "_exportPreviewGroup_16vjz_231",
+          "text": "Primary PageFrame 1 / A411 export0 excluded0 AI hiddenexportable15px22px line0px gap3",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "tag": "DETAILS",
+          "class": "_exportPreviewGroup_16vjz_231",
+          "text": "Crossing PageFrame boundary1Boundary exampleExport / AI visible / crossing",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "tag": "DETAILS",
+          "class": "_exportPreviewGroup_16vjz_231",
+          "text": "Workspace only1Scratch exampleScratch / AI hidden / outside",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "tag": "DETAILS",
+          "class": "_exportPreviewGroup_16vjz_231",
+          "text": "Included in export1Synthetic theoremAI visible / inside",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "tag": "DETAILS",
+          "class": "_exportPreviewGroup_16vjz_231",
+          "text": "Excluded / scratch2Boundary exampleAI visible / crossingScratch exampleAI hidden / ou",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "tag": "DETAILS",
+          "class": "_exportPreviewGroup_16vjz_231",
+          "text": "AI visible2Synthetic theoremExport / insideBoundary exampleExport / crossing",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "tag": "DETAILS",
+          "class": "_exportPreviewGroup_16vjz_231",
+          "text": "AI hidden1Scratch exampleScratch / outside",
+          "widths": [
+            1,
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 418,
+        "scrollWidth": 418,
+        "width": 430,
+        "overflowing": [],
+        "tooltips": [
+          {
+            "left": 1199,
+            "right": 1221,
+            "width": "210px",
+            "pseudoLeft": "-188px",
+            "pseudoRight": "0px",
+            "transform": "matrix(1, 0, 0, 1, 0, 4)",
+            "visibility": "visible"
+          },
+          {
+            "left": 1199,
+            "right": 1221,
+            "width": "210px",
+            "pseudoLeft": "-188px",
+            "pseudoRight": "0px",
+            "transform": "matrix(1, 0, 0, 1, 0, 4)",
+            "visibility": "visible"
+          },
+          {
+            "left": 1199,
+            "right": 1221,
+            "width": "210px",
+            "pseudoLeft": "-188px",
+            "pseudoRight": "0px",
+            "transform": "matrix(1, 0, 0, 1, 0, 4)",
+            "visibility": "visible"
+          },
+          {
+            "left": 1199,
+            "right": 1221,
+            "width": "210px",
+            "pseudoLeft": "-188px",
+            "pseudoRight": "0px",
+            "transform": "matrix(1, 0, 0, 1, 0, 4)",
+            "visibility": "visible"
+          }
+        ]
+      },
+      "pass": true
+    },
+    {
+      "overlay": "Delete confirmation",
+      "state": "rest",
+      "forcedHoverTargets": 0,
+      "selector": "dialog[open]",
+      "descendants": 5,
+      "nestedBorders": [],
+      "hairlineSeparators": [],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 438,
+        "scrollWidth": 438,
+        "width": 440,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    },
+    {
+      "overlay": "Delete confirmation",
+      "state": "hover",
+      "forcedHoverTargets": 2,
+      "selector": "dialog[open]",
+      "descendants": 5,
+      "nestedBorders": [],
+      "hairlineSeparators": [],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 438,
+        "scrollWidth": 438,
+        "width": 440,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    },
+    {
+      "overlay": "View options",
+      "state": "rest",
+      "forcedHoverTargets": 0,
+      "selector": "[data-page-reading-view-menu]",
+      "descendants": 11,
+      "nestedBorders": [],
+      "hairlineSeparators": [],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 198,
+        "scrollWidth": 198,
+        "width": 200,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    },
+    {
+      "overlay": "View options",
+      "state": "hover",
+      "forcedHoverTargets": 3,
+      "selector": "[data-page-reading-view-menu]",
+      "descendants": 11,
+      "nestedBorders": [],
+      "hairlineSeparators": [],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 198,
+        "scrollWidth": 198,
+        "width": 200,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    },
+    {
+      "overlay": "Source snapshot",
+      "state": "rest",
+      "forcedHoverTargets": 0,
+      "selector": "[class*=\"sourceJumpPanel\"]",
+      "descendants": 12,
+      "nestedBorders": [],
+      "hairlineSeparators": [],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 428,
+        "scrollWidth": 428,
+        "width": 430,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    },
+    {
+      "overlay": "Source snapshot",
+      "state": "hover",
+      "forcedHoverTargets": 1,
+      "selector": "[class*=\"sourceJumpPanel\"]",
+      "descendants": 12,
+      "nestedBorders": [],
+      "hairlineSeparators": [],
+      "shadows": [],
+      "roundedDescendants": [],
+      "staticBackgrounds": [],
+      "geometry": {
+        "clientWidth": 428,
+        "scrollWidth": 428,
+        "width": 430,
+        "overflowing": [],
+        "tooltips": []
+      },
+      "pass": true
+    }
+  ],
+  "screenshots": [
+    "00-closed.png",
+    "01-more.png",
+    "01b-more-appearance.png",
+    "01d-component-switches.png",
+    "01c-more-override.png",
+    "02-typography.png",
+    "03-info.png",
+    "04-trash.png",
+    "05-layout.png",
+    "06-export.png",
+    "07-export-all-details.png",
+    "07b-export-help.png",
+    "08-delete.png",
+    "09-view-menu.png",
+    "10-view-fit_width.png",
+    "10-view-fit_page.png",
+    "10-view-physical.png",
+    "11-source-snapshot.png",
+    "12-readonly.png"
+  ],
+  "errors": [],
+  "callbacks": [
+    {
+      "name": "skin",
+      "value": {
+        "preset": "warm-paper"
+      }
+    },
+    {
+      "name": "skin",
+      "value": null
+    },
+    {
+      "name": "createPageStack"
+    },
+    {
+      "name": "favorite"
+    },
+    {
+      "name": "typography",
+      "value": {
+        "profileId": "default-document",
+        "fontFamily": "Aptos, Calibri, \"Segoe UI\", Arial, sans-serif",
+        "fontSizePx": 20,
+        "lineHeightPx": 22,
+        "paragraphSpacingPx": 0,
+        "averageCharWidthPx": 9.6
+      }
+    },
+    {
+      "name": "typography",
+      "value": {
+        "profileId": "default-document",
+        "fontFamily": "Aptos, Calibri, \"Segoe UI\", Arial, sans-serif",
+        "fontSizePx": 20,
+        "lineHeightPx": 32,
+        "paragraphSpacingPx": 0,
+        "averageCharWidthPx": 9.6
+      }
+    },
+    {
+      "name": "typography",
+      "value": {
+        "profileId": "default-document",
+        "fontFamily": "Aptos, Calibri, \"Segoe UI\", Arial, sans-serif",
+        "fontSizePx": 20,
+        "lineHeightPx": 32,
+        "paragraphSpacingPx": 12,
+        "averageCharWidthPx": 9.6
+      }
+    },
+    {
+      "name": "typography",
+      "value": {
+        "profileId": "default-document",
+        "fontFamily": "Georgia, serif",
+        "fontSizePx": 20,
+        "lineHeightPx": 32,
+        "paragraphSpacingPx": 12,
+        "averageCharWidthPx": 9.6
+      }
+    },
+    {
+      "name": "typography",
+      "value": {
+        "profileId": "default-document",
+        "fontFamily": "Aptos, Calibri, \"Segoe UI\", Arial, sans-serif",
+        "fontSizePx": 15,
+        "lineHeightPx": 22,
+        "paragraphSpacingPx": 0,
+        "averageCharWidthPx": 7.2
+      }
+    },
+    {
+      "name": "restoreBlock",
+      "value": {
+        "id": "e1-deleted",
+        "placement_id": "e1-placement-deleted",
+        "block_type": "text",
+        "title": "Deleted theorem",
+        "plain_text": "Synthetic deleted theorem",
+        "content_json": {},
+        "metadata": {},
+        "display_overrides_json": {},
+        "canvas_layout": null,
+        "order_index": 0,
+        "source_references": []
+      }
+    },
+    {
+      "name": "layout",
+      "value": true
+    },
+    {
+      "name": "addPageBelow",
+      "value": "e1-page-2"
+    },
+    {
+      "name": "addPageBelow",
+      "value": "e1-page-2"
+    },
+    {
+      "name": "splitStack",
+      "value": "e1-page-2"
+    },
+    {
+      "name": "duplicatePage",
+      "value": "e1-page-2"
+    },
+    {
+      "name": "primaryPage",
+      "value": "e1-page-2"
+    },
+    {
+      "name": "detachPage",
+      "value": "e1-page-2"
+    },
+    {
+      "name": "deletePage",
+      "value": "e1-page-2"
+    },
+    {
+      "name": "mergeStack",
+      "value": "e1-stack-2"
+    },
+    {
+      "name": "collapseStack",
+      "value": "e1-page-1"
+    },
+    {
+      "name": "selectPage",
+      "value": "e1-page-2"
+    },
+    {
+      "name": "layout",
+      "value": false
+    },
+    {
+      "name": "trashNote"
+    },
+    {
+      "name": "view",
+      "value": "fit_width"
+    },
+    {
+      "name": "view",
+      "value": "fit_page"
+    },
+    {
+      "name": "view",
+      "value": "physical"
+    }
+  ],
+  "consoleErrors": [],
+  "counts": {
+    "passed": 65,
+    "failed": 0,
+    "overlays": 8,
+    "namedOverlayStates": 11,
+    "inspectionSamples": 22,
+    "nestedBorders": 0,
+    "hairlineSeparators": 17,
+    "forcedHoverTargets": 114
+  }
+}

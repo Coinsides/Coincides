@@ -2,6 +2,7 @@ export type BoardJsonObject = Record<string, unknown>;
 import type { BoardTextRangeSelection, BoardTextRangeStatus } from '@shared/types/boardTextRange';
 export type { BoardLayer } from '@shared/types/boardLayers';
 import type { BoardLayer } from '@shared/types/boardLayers';
+import type { SkinSelection } from '@shared/types/skin';
 
 /** Includes the virtual Base layer. */
 export const BOARD_LAYER_LIMIT = 12;
@@ -24,6 +25,7 @@ export interface BoardGeometry {
 }
 
 export interface Board {
+  skin?: SkinSelection | null;
   id: string;
   user_id: string;
   title: string;
@@ -144,6 +146,7 @@ export type CreateBoardInput = {
 );
 
 export interface PatchBoardInput {
+  skin?: SkinSelection | null;
   title?: string;
   viewport?: BoardViewport;
   base_layer_visible?: boolean;

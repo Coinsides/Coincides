@@ -90,7 +90,7 @@ export function BoardRelocatedVisual({ visual, selected, selectable, emphasis, o
     const start = record(points.start);
     const end = record(points.end);
     const markerId = `board-arrow-${visual.id.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
-    const stroke = text(extension.stroke) || 'var(--text-secondary)';
+    const stroke = text(extension.stroke) || 'var(--board-edge, var(--text-secondary))';
     const marker = (value: unknown) => value === 'arrow' ? `url(#${markerId})`
       : value === 'dot' || value === 'circle' ? `url(#${markerId}-dot)` : undefined;
     const path = `M ${number(start.x)} ${number(start.y)} L ${number(end.x)} ${number(end.y)}`;
@@ -120,9 +120,9 @@ export function BoardRelocatedVisual({ visual, selected, selectable, emphasis, o
     borderRadius: ellipse ? '50%' : preset.presetId === 'shape.sticky_note' ? 7 : 8,
     padding: preset.textInset,
     background: preset.presetId === 'shape.sticky_note'
-      ? 'var(--canvas-sticky-note-fill, #2f2817)' : 'color-mix(in srgb, var(--accent-primary) 14%, transparent)',
+      ? 'var(--board-sticky-fill, #2f2817)' : 'var(--board-shape-fill, color-mix(in srgb, var(--accent-primary) 14%, transparent))',
     borderColor: preset.presetId === 'shape.sticky_note'
-      ? 'var(--canvas-sticky-note-stroke, #d8a429)' : 'var(--accent-primary)',
+      ? 'var(--board-sticky-stroke, #d8a429)' : 'var(--accent-primary)',
   } : {};
   const shapeText = rows(source.backing_blocks).map((block) => text(block.plain_text)).filter(Boolean).join('\n');
   return <div {...emphasis} className={`${styles.relocatedVisual} ${emphasis?.className || ''}`} style={style} data-testid={`board-visual-${visual.id}`}

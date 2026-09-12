@@ -588,7 +588,7 @@ export function NoteChromeLayer({
                 </button>
                 {skin && <details data-paper-appearance className={skinStyles.appearance}>
                   <summary>纸面外观</summary>
-                  <SkinEditor key={note.id} value={skin.selection} save={skin.save} failed={skin.saveError} inheritLabel="继承项目／全局外观" />
+                  <SkinEditor key={note.id} value={skin.selection} inheritedValue={skin.inheritedSelection} save={skin.save} failed={skin.saveError} inheritLabel="继承项目／全局外观" />
                 </details>}
                 <div
                   className={styles.typographyControls}

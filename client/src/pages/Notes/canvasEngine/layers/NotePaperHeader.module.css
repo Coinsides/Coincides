@@ -24,7 +24,7 @@
   overflow-wrap: anywhere;
 }
 
-.title { height: 40px; max-height: 80px; font-size: 32px; line-height: 40px; font-weight: 700; }
+.title { height: 40px; max-height: 80px; font-size: 32px; line-height: 40px; font-weight: var(--sk-paper-title-weight, 700); font-family: var(--sk-title-font, inherit); }
 .description { height: 24px; max-height: 72px; margin-top: 8px; color: var(--text-secondary); font-size: 16px; line-height: 24px; }
 .title:focus,
 .description:focus { overflow-y: auto; }

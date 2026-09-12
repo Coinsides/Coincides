@@ -1,0 +1,11 @@
+{
+  "command": [
+    "node",
+    "docs/audits/2026-09-11-b1b-builder/e1-recheck/smoke.mjs",
+    "quiet-ink"
+  ],
+  "cwd": ".",
+  "started": "2026-09-12T02:50:57.868Z",
+  "durationMs": 10086,
+  "exitCode": 0
+}

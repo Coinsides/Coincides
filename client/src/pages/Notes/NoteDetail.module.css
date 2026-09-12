@@ -209,6 +209,7 @@
 }
 
 .popoverEyebrow {
+  font-family: var(--sk-label-font, inherit);
   margin-bottom: 2px;
   color: var(--text-muted);
   font-size: 11px;
@@ -260,7 +261,7 @@
   grid-template-columns: 18px minmax(0, 1fr) auto;
   gap: 4px 9px;
   width: 100%;
-  padding: 10px;
+  padding: var(--sk-more-padding, 10px);
   color: var(--text-primary);
   text-align: left;
   border: 0;
@@ -397,6 +398,7 @@
 
 .typographyControlHeader span,
 .typographyControlRow span {
+  font-family: var(--sk-label-font, inherit);
   min-width: 52px;
   color: var(--text-muted);
   font-size: 12px;
@@ -1257,6 +1259,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 }
 
 .pageStackNumberBadge {
+  font-family: var(--sk-label-font, inherit);
   position: absolute;
   right: 12px;
   bottom: 10px;
@@ -1788,6 +1791,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 }
 
 .blockStatusBadge {
+  font-family: var(--sk-label-font, inherit);
   display: inline-flex;
   max-width: 168px;
   align-items: center;
@@ -1962,7 +1966,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
 
 .textUnitGutterButton {
   border: 1px solid transparent;
-  border-radius: var(--radius-sm);
+  border-radius: var(--sk-handle-radius, var(--radius-sm));
   background: color-mix(in srgb, var(--text-muted) 16%, transparent);
   color: var(--text-secondary);
 }
@@ -2603,7 +2607,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   position: fixed;
   z-index: 170;
   display: grid;
-  gap: 3px;
+  gap: var(--sk-menu-gap, 3px);
   width: 252px;
   max-height: min(420px, calc(100vh - 20px));
   overflow: visible;
@@ -2630,7 +2634,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   grid-template-columns: 20px minmax(0, 1fr) auto;
   align-items: center;
   gap: 7px;
-  min-height: 30px;
+  min-height: var(--sk-menu-row-height, 30px);
   padding: 0 8px;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
@@ -2688,7 +2692,7 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   left: calc(100% + 6px);
   z-index: 171;
   display: grid;
-  gap: 3px;
+  gap: var(--sk-menu-gap, 3px);
   width: 230px;
   max-height: min(420px, calc(100vh - 20px));
   overflow: auto;
@@ -3945,9 +3949,10 @@ body[data-coincides-annotation-panel-open="true"] .pageToolRail {
   content: '';
   position: absolute;
   top: 0;
-  bottom: 0;
-  left: 3px;
-  width: 2px;
+  bottom: var(--sk-handle-mark-bottom, 0);
+  left: var(--sk-handle-mark-left, 3px);
+  width: var(--sk-handle-mark-width, 2px);
+  height: var(--sk-handle-mark-height, auto);
   border-radius: 999px;
   background: var(--border-focus);
 }
