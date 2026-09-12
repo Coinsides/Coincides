@@ -1,4 +1,4 @@
-> **状态 (Status)**: ready(13.6 裁决半场执行单1;单2 已收口,回归网已补全——57 文件 test:v2+漏挂机关在岗)
+> **状态 (Status)**: ready(补遗一续工：批一已通过；批二前 STOP-2 needs: HQ，活 TextFlow 导航夹具处置待裁；未达 done)
 > **From**: fable(HQ) · **To**: codex(builder)
 > **日期**: 2026-09-13
 > **单号**: 13.6 · 单1 · Canvas 死代码清除大单
@@ -75,3 +75,47 @@ STOP-1 举证成立收货,图纸两漏项补裁:
 2. **图纸一·10**(pointer 短路臂):`useCanvasSurfacePointerController.test.tsx` 两条 Canvas 场景=死场景用例,随短路臂退役;因宽度断言与一·6 workspace 分支耦合,**一·10 改归批二与一·6 同刀**,宽度断言改写为 Page 单模语义;
 3. **通例(授权,防逐处停线)**:施工中再遇"测试断言死语义"——**明确断言 canvas 死行为**的用例/断言随枝退役,活语义断言零动;两可/拿不准仍停线举证。退役的用例逐条入 Result 清单;
 4. 其余四批与验收判据零变。续工。
+
+---
+
+## Result · 补遗一续工（2026-09-12 builder）
+
+**批一完成并验证绿；按“两可停线”停于批二一·6，状态保持 ready，未翻 done。** 停线证据与最小待裁方案：[STOP-2](../../audits/2026-09-13-purge-builder/STOP-2.md)。`textFlowBlockNavigation.test.tsx` 的活空间序导航测试使用 Canvas 夹具；仅临时剪可见性分流便从 **34/34** 变为 **33/34**，失败在活导航断言。源码已按字节恢复并复跑 **34/34**；未改 TextFlow 代码或该测试。
+
+| 申报项 | 本轮结果 |
+|---|---|
+| 交付清单 / numstat | 批一 14 个源码/测试文件，原文基线→现文逐行 LCS **+13/-217，净删除 204 行**；[逐文件 numstat](../../audits/2026-09-13-purge-builder/batch1-numstat.md)。不含证据、scratch 或构建产物，不是 Git 整仓 diff |
+| 批一：补遗后 9 项 | **完成并验证**：2 pill JSX、5 documentShellCanvas、9 宽度、11 drag bounds、19 可见性 Canvas 后半、20 typography Canvas 旁路、24 rail/panel 死选择器、27 blockListCanvas/scratch label、28 body lock CSS；28 配对的 runtime effect 同删。一·19 活 Page 前半保留，详见服务收据 |
+| 批二：补遗后 10 项 | **未正式落刀，STOP-2**。一·10 与一·6 保持同刀；临时可见性 mutation 已恢复，不能计为施工完成 |
+| 批三：7 项 | 未启动；未改任何静态门。批三一·4 的 body lock effect 已因28配对先删，pageCanvas class/选择器部分仍待施工 |
+| 批四：3 项与桥 | 未启动；toggle、resolveInitial、TD-7/TD-9 桥均尚未拆，+56px 所属 Canvas guides/frame 面仍待删除 |
+| 门改红演示清单 | **空，未改门**。STOP-2 另有可见性单变量删枝→活导航红→字节恢复绿的因果证据，不冒充门改验收 |
+| 25 条陈旧红转绿 | 已补亲跑改前基线：**49 条，24 PASS / 25 FAIL / 0 SKIP，exit 1**；[TAP 日志](../../audits/2026-09-13-purge-builder/server-persistence-before.log)。未改 fixture、未取得 after；5 个图片资产生命周期用例全保留 |
+| 退役锁测试改写 | 批四指定4个 toggle锁文件、pageCenteringContract、v13CanvasRetirement 均未改。批一另按补遗通例退役2个完整死用例和4组混合Canvas断言，逐条见下表 |
+| 测试数字 | [批一定向](../../audits/2026-09-13-purge-builder/batch1-targeted.log)：**6文件80/80 PASS**；[类型验证](../../audits/2026-09-13-purge-builder/batch1-typecheck.log)：client tsc、shared声明构建、server tsc全绿；[boundary](../../audits/2026-09-13-purge-builder/batch1-boundary.log)：**168/168**；[model](../../audits/2026-09-13-purge-builder/batch1-model.log)：**60/60组**；[test-wiring](../../audits/2026-09-13-purge-builder/batch1-test-wiring.log)：**75/75已挂、0豁免、0漏挂** |
+| 未做项 | 后三批、client全库、server test:v2全57文件、最终三端build、总runtime门全部非Git子步骤、门改红绿演示、隔离真浏览器纸页读写/墙拖/皮切/媒体粘贴/Overview。Git/secrets扫描仍由HQ收口补跑 |
+
+### 本轮逐条退役的死语义测试
+
+以下均在 `client/src/pages/Notes/canvasEngine/`；[详细服务收据](../../audits/2026-09-13-purge-builder/batch1-services.md)。
+
+| 文件 / 原用例 | 处置 |
+|---|---|
+| `hooks/usePageReadingPresentation.test.tsx` / `leaves canvas viewport, transform and all block geometry unchanged when page gear state changes` | 整用例退役；4个Page用例原断言不变 |
+| `meaningfulRenderableContent.test.ts` / `counts placed Canvas image, table, and mounted shape text outside visible NoteBlocks` | 整用例退役 |
+| 同文件 / `keeps the Page entry visible for a live-shaped inside table that only Canvas renders` | 仅退役最后Canvas true断言；Page内容/empty prompt断言逐字留 |
+| 同文件 / `counts visible block content on both Page and Canvas surfaces` | 仅退役Canvas输入的true断言；Page断言留，用例名改为Page |
+| `pageFrameTypographyService.test.ts` / `preserves active user overrides even when they reuse the legacy default profile ID` | 参数循环去Canvas值，Page A4/Letter override断言逐字留 |
+| 同文件 / `uses the first frame only as the page default and leaves canvas hydration unchanged` | 仅退役Canvas身份断言；Page首帧及hydrated数值断言留，用例名移除Canvas部分 |
+
+**待裁方案**：仅把 `textFlowBlockNavigation.test.tsx:74` 的测试宿主改为Page，并把139–140行两块的布局改为formal_page；145/148行活导航/复制断言及130–135行历史坐标用例逐字保留。候选尚未实施；原单“TextFlow活面禁区”与补遗“仅明确死语义用例随枝退役”的边界不能由builder扩张。
+
+**操作偏差**：本轮开工误调用两次只读 `git status --short`，随后停止Git调用。未执行Git写操作或commit，未读`.env` key值、未接触用户库、未运行安全类测试。没有将Git/secrets扫描申报为完成。验证入口和最终测试射程待办另记[verification-plan](../../audits/2026-09-13-purge-builder/verification-plan.md)。
+
+---
+
+## 补遗二(HQ 裁定,2026-09-13 三轮)
+
+STOP-2 举证成立。裁定:**准**——该活 TextFlow 导航测试的夹具迁移为 Page 夹具(与批四 25 条陈旧红同款正解:fixture 语境换 formal_page/Page,活断言逐字保留);断言中如有依赖 canvas 特有布局值处,换 Page 等价值并逐处申报。⛔删用例⛔放宽导航语义。此裁定并入通例:**夹具的 canvas 语境=死语境,可迁;断言的活语义=不可动**。续工批二至批四。
+
+(申报的两次只读 git status 误调用:收货,已停即可,⛔再犯。)
