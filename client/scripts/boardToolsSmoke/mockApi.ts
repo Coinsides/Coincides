@@ -84,6 +84,7 @@ function record(method: string, url: string, input?: unknown) { writes.push({ me
 const api = {
   async get(url: string) {
     if (url === BOARD_PATH) return response(detail);
+    if (url === `${BOARD_PATH}/viewport-bookmarks`) return response({ bookmarks: [] });
     if (url === `${BOARD_PATH}/layers`) return response({ layers: detail.layers || [] });
     if (url === '/courses' || url === '/items') return response([]);
     if (url === `${BOARD_PATH}/events`) return response({ events });

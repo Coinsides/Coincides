@@ -7,6 +7,7 @@ import {
   loadItemSummaries,
 } from '@/services/itemSummaryReader';
 import type { Course } from '@shared/types';
+import type { BoardViewportBookmark, CreateBoardViewportBookmarkInput } from '@shared/types/boardViewportBookmarks';
 import type { ContentGroupV1, ItemV1, Note, NoteBlock } from '@/pages/Notes/canvasEngine/runtimeDataTypes';
 import { textFromContent } from '@/pages/Notes/canvasEngine/blockContentService';
 import type {
@@ -43,6 +44,21 @@ export const boardRepository = {
   },
   async delete(boardId: string): Promise<void> {
     await api.delete(boardPath(boardId));
+  },
+  async listViewportBookmarks(boardId: string): Promise<BoardViewportBookmark[]> {
+    const { data } = await api.get<{ bookmarks: BoardViewportBookmark[] }>(`${boardPath(boardId)}/viewport-bookmarks`);
+    return data.bookmarks;
+  },
+  async createViewportBookmark(boardId: string, input: CreateBoardViewportBookmarkInput): Promise<BoardViewportBookmark> {
+    const { data } = await api.post<{ bookmark: BoardViewportBookmark }>(`${boardPath(boardId)}/viewport-bookmarks`, input);
+    return data.bookmark;
+  },
+  async renameViewportBookmark(boardId: string, id: string, name: string): Promise<BoardViewportBookmark> {
+    const { data } = await api.patch<{ bookmark: BoardViewportBookmark }>(childPath(boardId, 'viewport-bookmarks', id), { name });
+    return data.bookmark;
+  },
+  async deleteViewportBookmark(boardId: string, id: string): Promise<void> {
+    await api.delete(childPath(boardId, 'viewport-bookmarks', id));
   },
   async createLayer(boardId: string, input: CreateBoardLayerInput): Promise<BoardLayer> {
     const { data } = await api.post<{ layer: BoardLayer }>(`${boardPath(boardId)}/layers`, input);
@@ -204,6 +220,10 @@ export function boardErrorMessage(error: unknown): string {
     ? (error as { response?: { status?: number; data?: { error?: unknown } } }).response
     : undefined;
   switch (response?.data?.error) {
+    case 'board_viewport_bookmark_limit_reached':
+      return 'All 24 bookmarks are in use. Delete a bookmark to save another view.';
+    case 'board_viewport_bookmark_not_found':
+      return 'This bookmark is no longer available. Reload the bookmarks and try again.';
     case 'board_layer_limit_reached':
       return 'A board can have up to 12 layers, including Base.';
     case 'board_layer_not_found':

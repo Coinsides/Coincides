@@ -101,6 +101,7 @@ beforeEach(() => {
   };
   http.get.mockImplementation(async (url: string) => {
     if (url === '/boards/board') return { data: structuredClone(detail) };
+    if (url === '/boards/board/viewport-bookmarks') return { data: { bookmarks: [] } };
     if (url === '/courses' || url === '/items') return { data: [] };
     throw new Error(`Unmapped fixture GET ${url}`);
   });

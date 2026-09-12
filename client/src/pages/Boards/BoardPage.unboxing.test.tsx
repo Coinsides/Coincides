@@ -110,6 +110,7 @@ beforeEach(() => {
   Object.defineProperty(HTMLDialogElement.prototype, 'showModal', { configurable: true, value: function (this: HTMLDialogElement) { this.open = true; } });
   http.get.mockImplementation(async (url: string, config?: { params?: { course_id?: string } }) => {
     if (url === '/boards/board') return response(board);
+    if (url === '/boards/board/viewport-bookmarks') return response({ bookmarks: [] });
     if (url === '/courses') return response(projects);
     if (url === '/notes') return response(notes.filter((note) => !config?.params?.course_id || note.course_id === config.params.course_id));
     if (url === '/items') return response([item]);

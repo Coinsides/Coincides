@@ -61,6 +61,7 @@ function initial() {
     x: 64, y: 318, reference: { kind: 'text_range', id: range.id, title: notes[0].title, note_id: NOTE_A,
       block_id: BLOCK_A, summary: range.excerpt, anchor_status: 'active', state: 'available', reason: null } });
   const board: BoardDetail = { board: { id: BOARD_ID, user_id: 'synthetic-user', title: 'Open note verification board',
+    identity_item_id: null, identity_description: null,
     soul_id: 'open-smoke-soul', project_id: null, viewport: { x: 0, y: 0, zoom: 1 }, created_at: at, updated_at: at },
     members, edges: [], visuals: [] };
   const items = [{ id: ITEM_ID, user_id: 'synthetic-user', plain_text: 'Synthetic staging Item ready to place.',
@@ -221,6 +222,7 @@ const api = axios.create({ adapter: async (config) => {
       data = { text_ranges: state.ranges.filter(({ note_id }) => note_id === rangeNoteId) };
     } else if (method === 'GET' && url === '/boards') data = { boards: state.navigationTargets ? [] : [state.board.board] };
     else if (method === 'GET' && url === `/boards/${BOARD_ID}`) data = boardDetail();
+    else if (method === 'GET' && url === `/boards/${BOARD_ID}/viewport-bookmarks`) data = { bookmarks: [] };
     else if (method === 'PATCH' && url === `/boards/${BOARD_ID}`) { Object.assign(state.board.board, input); data = { board: state.board.board }; }
     else if (method === 'POST' && (url === `/boards/${BOARD_ID}/members` || url === `/boards/${BOARD_ID}/text-ranges`)) {
       const existing = input.id && state.board.members.find(({ id }) => id === input.id);

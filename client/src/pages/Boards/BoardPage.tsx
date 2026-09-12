@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Hand, Link2, MousePointer2, MoveDiagonal2, Pencil, Plus, Minus, Pin, Trash2, ExternalLink, X, Inbox, Eraser, Undo2, Redo2, Layers, List } from 'lucide-react';
 import { boardErrorMessage, loadBoardCandidates, loadBoardNotePreview } from './boardRepository';
 import type { BoardCandidate, BoardEdge, BoardMember, BoardViewport, BoardVisual } from './boardTypes';
-import { pointsPath, toBoardPoint, zoomBoardAt, type BoardPoint } from './boardViewport';
+import { animateBoardViewport, pointsPath, toBoardPoint, zoomBoardAt, type BoardPoint } from './boardViewport';
 import { useBoard } from './useBoard';
 import { BoardRelocatedVisual } from './BoardRelocatedVisual';
 import { BoardDeleteDialog } from './BoardDeleteDialog';
@@ -13,6 +13,7 @@ import BoardNoteModal, { type BoardNoteModalHandle } from './BoardNoteModal';
 import { BoardStaging, BOARD_STAGING_MIME } from './BoardStaging';
 import { BoardSelectionSidebar } from './BoardSelectionSidebar';
 import { BoardLayers } from './BoardLayers';
+import { BoardViewportBookmarks } from './BoardViewportBookmarks';
 import { boardLayerScene, layerIdOf } from './boardLayerScene';
 import { getActiveBoardLayer, setActiveBoardLayer } from './boardActiveLayer';
 import type { BoardTextRangeSelection } from '@shared/types/boardTextRange';
@@ -134,6 +135,7 @@ export default function BoardPage() {
   const objectDraftRef = useRef<BoardMember | BoardVisual | null>(null);
   const viewportRef = useRef<BoardViewport | null>(null);
   const viewportTimer = useRef<ReturnType<typeof setTimeout>>();
+  const cancelViewportAnimation = useRef<(() => void) | null>(null);
   const viewportPending = useRef<BoardViewport | null>(null);
   const saveViewport = useRef(board.updateBoard);
   saveViewport.current = board.updateBoard;
@@ -220,6 +222,8 @@ export default function BoardPage() {
   useEffect(() => {
     const updateForThisBoard = board.updateBoard;
     return () => {
+      cancelViewportAnimation.current?.();
+      cancelViewportAnimation.current = null;
       clearTimeout(viewportTimer.current);
       const pending = viewportPending.current;
       viewportPending.current = null;
@@ -227,7 +231,11 @@ export default function BoardPage() {
     };
   }, [boardId, board.updateBoard]);
 
-  function changeViewport(next: BoardViewport, debounce = true) {
+  function changeViewport(next: BoardViewport, debounce = true, animationFrame = false) {
+    if (!animationFrame) {
+      cancelViewportAnimation.current?.();
+      cancelViewportAnimation.current = null;
+    }
     viewportRef.current = next;
     setViewport(next);
     viewportPending.current = next;
@@ -236,7 +244,18 @@ export default function BoardPage() {
     if (debounce) viewportTimer.current = setTimeout(() => { void commitViewport(); }, 200);
   }
 
+  function jumpViewport(next: BoardViewport) {
+    if (gesture.current || boardPaused.current || !viewportRef.current) return;
+    cancelViewportAnimation.current?.();
+    clearTimeout(viewportTimer.current);
+    cancelViewportAnimation.current = animateBoardViewport(viewportRef.current, next,
+      (frame) => changeViewport(frame, false, true),
+      () => { cancelViewportAnimation.current = null; void commitViewport(); });
+  }
+
   async function leave(path: string) {
+    cancelViewportAnimation.current?.();
+    cancelViewportAnimation.current = null;
     const visit = visitRevision.current;
     const fromBoard = boardId;
     if (!await commitViewport()) return;
@@ -622,6 +641,11 @@ export default function BoardPage() {
   function begin(event: React.PointerEvent, object?: MoveObject | BoardEdge, resize = false) {
     if (event.button !== 0 && event.button !== 1) return;
     if (!detail || !viewportRef.current || chalkDraft || deleteKeys) return;
+    if (cancelViewportAnimation.current) {
+      cancelViewportAnimation.current();
+      cancelViewportAnimation.current = null;
+      void commitViewport();
+    }
     event.preventDefault();
     event.stopPropagation();
     surface.current?.focus();
@@ -857,6 +881,7 @@ export default function BoardPage() {
     const element = surface.current;
     if (!element) return;
     function wheel(event: WheelEvent) {
+      if ((event.target as Element).closest('[data-board-viewport-bookmarks]')) return;
       event.preventDefault();
       if (boardPaused.current) return;
       const current = viewportRef.current;
@@ -1166,6 +1191,9 @@ export default function BoardPage() {
             y1={activeViewport.y + (guide.axis === 'y' ? guide.position : guide.start) * activeViewport.zoom}
             y2={activeViewport.y + (guide.axis === 'y' ? guide.position : guide.end) * activeViewport.zoom} />)}
         </svg>}
+        <BoardViewportBookmarks key={detail.board.id} boardId={detail.board.id}
+          getViewport={() => viewportRef.current || activeViewport} onJump={jumpViewport}
+          disabled={Boolean(chalkDraft || deleteKeys || openNoteId || newNoteOpen)} />
         {detail.members.every((member) => member.placed === false) && detail.visuals.length === 0 && !chalkDraft && <div className={styles.canvasEmpty}>
           <h2>Give this thought some room.</h2><p>Double-click blank space to write chalk, add a note, or pick up the pen.</p>
           <button className={styles.button} onPointerDown={(event) => event.stopPropagation()} onClick={openPicker}>Add your first note or item</button>

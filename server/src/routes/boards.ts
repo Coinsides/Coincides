@@ -17,6 +17,10 @@ import { relocateTrayToBoard, undoTrayRelocation } from '../services/boardTrayRe
 import { createBoardCeremonyNote } from '../services/boardCeremonyNote.js';
 import { listBoardTextRanges, updateBoardTextRanges } from '../services/boardTextRanges.js';
 import {
+  listBoardViewportBookmarks, createBoardViewportBookmark,
+  renameBoardViewportBookmark, deleteBoardViewportBookmark,
+} from '../services/boardViewportBookmarks.js';
+import {
   createBoardSchema, updateBoardSchema,
   mountBoardMemberSchema, updateBoardMemberSchema,
   createBoardEdgeSchema, updateBoardEdgeSchema,
@@ -91,6 +95,33 @@ export function createBoardRouter(database: () => Database.Database = getDb): Ro
 
   router.get('/:boardId', handle((req, res) => {
     res.json(getBoard(database(), req.userId!, String(req.params.boardId)));
+  }));
+
+  router.get('/:boardId/viewport-bookmarks', handle((req, res) => {
+    res.json({ bookmarks: listBoardViewportBookmarks(database(), req.userId!, String(req.params.boardId)) });
+  }));
+
+  router.post('/:boardId/viewport-bookmarks', handle((req, res) => {
+    const db = database();
+    const bookmark = db.transaction(() => createBoardViewportBookmark(db, req.userId!, String(req.params.boardId), req.body))();
+    res.status(201).json({ bookmark });
+  }));
+
+  router.patch('/:boardId/viewport-bookmarks/:bookmarkId', handle((req, res) => {
+    const db = database();
+    const bookmark = db.transaction(() => renameBoardViewportBookmark(
+      db, req.userId!, String(req.params.boardId), String(req.params.bookmarkId), req.body,
+    ))();
+    res.json({ bookmark });
+  }));
+
+  router.delete('/:boardId/viewport-bookmarks/:bookmarkId', handle((req, res) => {
+    z.object({}).strict().parse(req.body ?? {});
+    const db = database();
+    const result = db.transaction(() => deleteBoardViewportBookmark(
+      db, req.userId!, String(req.params.boardId), String(req.params.bookmarkId),
+    ))();
+    res.json(result);
   }));
 
   router.post('/:boardId/ceremony-note', handle((req, res) => {

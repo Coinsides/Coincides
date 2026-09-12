@@ -112,6 +112,7 @@ const api = axios.create({ adapter: async (config) => {
     data = { member, text_range: range, created: true };
   } else if (method === 'GET' && url === '/boards') data = { boards: state.boards.map(({ board }) => board) };
   else if (method === 'GET' && /^\/boards\/[^/]+$/.test(url)) data = boardDetail(url.split('/')[2]);
+  else if (method === 'GET' && state.boards.some(({ board }) => url === `/boards/${board.id}/viewport-bookmarks`)) data = { bookmarks: [] };
   else if (method === 'PATCH' && /^\/boards\/[^/]+$/.test(url)) {
     const target = state.boards.find(({ board }) => board.id === url.split('/')[2])!;
     Object.assign(target.board, input); data = { board: target.board };

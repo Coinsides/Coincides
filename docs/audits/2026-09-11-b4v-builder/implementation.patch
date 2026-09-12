@@ -1,0 +1,1181 @@
+diff --git a/client/src/pages/Boards/BoardPage.tsx b/client/src/pages/Boards/BoardPage.tsx
+index f2de7ee..9e1096e 100644
+--- a/client/src/pages/Boards/BoardPage.tsx
++++ b/client/src/pages/Boards/BoardPage.tsx
+@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
+ import { ArrowLeft, Hand, Link2, MousePointer2, MoveDiagonal2, Pencil, Plus, Minus, Pin, Trash2, ExternalLink, X, Inbox, Eraser, Undo2, Redo2, Layers, List } from 'lucide-react';
+ import { boardErrorMessage, loadBoardCandidates, loadBoardNotePreview } from './boardRepository';
+ import type { BoardCandidate, BoardEdge, BoardMember, BoardViewport, BoardVisual } from './boardTypes';
+-import { pointsPath, toBoardPoint, zoomBoardAt, type BoardPoint } from './boardViewport';
++import { animateBoardViewport, pointsPath, toBoardPoint, zoomBoardAt, type BoardPoint } from './boardViewport';
+ import { useBoard } from './useBoard';
+ import { BoardRelocatedVisual } from './BoardRelocatedVisual';
+ import { BoardDeleteDialog } from './BoardDeleteDialog';
+@@ -13,6 +13,7 @@ import BoardNoteModal, { type BoardNoteModalHandle } from './BoardNoteModal';
+ import { BoardStaging, BOARD_STAGING_MIME } from './BoardStaging';
+ import { BoardSelectionSidebar } from './BoardSelectionSidebar';
+ import { BoardLayers } from './BoardLayers';
++import { BoardViewportBookmarks } from './BoardViewportBookmarks';
+ import { boardLayerScene, layerIdOf } from './boardLayerScene';
+ import { getActiveBoardLayer, setActiveBoardLayer } from './boardActiveLayer';
+ import type { BoardTextRangeSelection } from '@shared/types/boardTextRange';
+@@ -134,6 +135,7 @@ export default function BoardPage() {
+   const objectDraftRef = useRef<BoardMember | BoardVisual | null>(null);
+   const viewportRef = useRef<BoardViewport | null>(null);
+   const viewportTimer = useRef<ReturnType<typeof setTimeout>>();
++  const cancelViewportAnimation = useRef<(() => void) | null>(null);
+   const viewportPending = useRef<BoardViewport | null>(null);
+   const saveViewport = useRef(board.updateBoard);
+   saveViewport.current = board.updateBoard;
+@@ -220,6 +222,8 @@ export default function BoardPage() {
+   useEffect(() => {
+     const updateForThisBoard = board.updateBoard;
+     return () => {
++      cancelViewportAnimation.current?.();
++      cancelViewportAnimation.current = null;
+       clearTimeout(viewportTimer.current);
+       const pending = viewportPending.current;
+       viewportPending.current = null;
+@@ -227,7 +231,11 @@ export default function BoardPage() {
+     };
+   }, [boardId, board.updateBoard]);
+ 
+-  function changeViewport(next: BoardViewport, debounce = true) {
++  function changeViewport(next: BoardViewport, debounce = true, animationFrame = false) {
++    if (!animationFrame) {
++      cancelViewportAnimation.current?.();
++      cancelViewportAnimation.current = null;
++    }
+     viewportRef.current = next;
+     setViewport(next);
+     viewportPending.current = next;
+@@ -236,7 +244,18 @@ export default function BoardPage() {
+     if (debounce) viewportTimer.current = setTimeout(() => { void commitViewport(); }, 200);
+   }
+ 
++  function jumpViewport(next: BoardViewport) {
++    if (gesture.current || boardPaused.current || !viewportRef.current) return;
++    cancelViewportAnimation.current?.();
++    clearTimeout(viewportTimer.current);
++    cancelViewportAnimation.current = animateBoardViewport(viewportRef.current, next,
++      (frame) => changeViewport(frame, false, true),
++      () => { cancelViewportAnimation.current = null; void commitViewport(); });
++  }
++
+   async function leave(path: string) {
++    cancelViewportAnimation.current?.();
++    cancelViewportAnimation.current = null;
+     const visit = visitRevision.current;
+     const fromBoard = boardId;
+     if (!await commitViewport()) return;
+@@ -622,6 +641,11 @@ export default function BoardPage() {
+   function begin(event: React.PointerEvent, object?: MoveObject | BoardEdge, resize = false) {
+     if (event.button !== 0 && event.button !== 1) return;
+     if (!detail || !viewportRef.current || chalkDraft || deleteKeys) return;
++    if (cancelViewportAnimation.current) {
++      cancelViewportAnimation.current();
++      cancelViewportAnimation.current = null;
++      void commitViewport();
++    }
+     event.preventDefault();
+     event.stopPropagation();
+     surface.current?.focus();
+@@ -857,6 +881,7 @@ export default function BoardPage() {
+     const element = surface.current;
+     if (!element) return;
+     function wheel(event: WheelEvent) {
++      if ((event.target as Element).closest('[data-board-viewport-bookmarks]')) return;
+       event.preventDefault();
+       if (boardPaused.current) return;
+       const current = viewportRef.current;
+@@ -1166,6 +1191,9 @@ export default function BoardPage() {
+             y1={activeViewport.y + (guide.axis === 'y' ? guide.position : guide.start) * activeViewport.zoom}
+             y2={activeViewport.y + (guide.axis === 'y' ? guide.position : guide.end) * activeViewport.zoom} />)}
+         </svg>}
++        <BoardViewportBookmarks key={detail.board.id} boardId={detail.board.id}
++          getViewport={() => viewportRef.current || activeViewport} onJump={jumpViewport}
++          disabled={Boolean(chalkDraft || deleteKeys || openNoteId || newNoteOpen)} />
+         {detail.members.every((member) => member.placed === false) && detail.visuals.length === 0 && !chalkDraft && <div className={styles.canvasEmpty}>
+           <h2>Give this thought some room.</h2><p>Double-click blank space to write chalk, add a note, or pick up the pen.</p>
+           <button className={styles.button} onPointerDown={(event) => event.stopPropagation()} onClick={openPicker}>Add your first note or item</button>
+diff --git a/client/src/pages/Boards/boardRepository.ts b/client/src/pages/Boards/boardRepository.ts
+index 7a3f4e1..0d65398 100644
+--- a/client/src/pages/Boards/boardRepository.ts
++++ b/client/src/pages/Boards/boardRepository.ts
+@@ -7,6 +7,7 @@ import {
+   loadItemSummaries,
+ } from '@/services/itemSummaryReader';
+ import type { Course } from '@shared/types';
++import type { BoardViewportBookmark, CreateBoardViewportBookmarkInput } from '@shared/types/boardViewportBookmarks';
+ import type { ContentGroupV1, ItemV1, Note, NoteBlock } from '@/pages/Notes/canvasEngine/runtimeDataTypes';
+ import { textFromContent } from '@/pages/Notes/canvasEngine/blockContentService';
+ import type {
+@@ -44,6 +45,21 @@ export const boardRepository = {
+   async delete(boardId: string): Promise<void> {
+     await api.delete(boardPath(boardId));
+   },
++  async listViewportBookmarks(boardId: string): Promise<BoardViewportBookmark[]> {
++    const { data } = await api.get<{ bookmarks: BoardViewportBookmark[] }>(`${boardPath(boardId)}/viewport-bookmarks`);
++    return data.bookmarks;
++  },
++  async createViewportBookmark(boardId: string, input: CreateBoardViewportBookmarkInput): Promise<BoardViewportBookmark> {
++    const { data } = await api.post<{ bookmark: BoardViewportBookmark }>(`${boardPath(boardId)}/viewport-bookmarks`, input);
++    return data.bookmark;
++  },
++  async renameViewportBookmark(boardId: string, id: string, name: string): Promise<BoardViewportBookmark> {
++    const { data } = await api.patch<{ bookmark: BoardViewportBookmark }>(childPath(boardId, 'viewport-bookmarks', id), { name });
++    return data.bookmark;
++  },
++  async deleteViewportBookmark(boardId: string, id: string): Promise<void> {
++    await api.delete(childPath(boardId, 'viewport-bookmarks', id));
++  },
+   async createLayer(boardId: string, input: CreateBoardLayerInput): Promise<BoardLayer> {
+     const { data } = await api.post<{ layer: BoardLayer }>(`${boardPath(boardId)}/layers`, input);
+     return data.layer;
+@@ -204,6 +220,10 @@ export function boardErrorMessage(error: unknown): string {
+     ? (error as { response?: { status?: number; data?: { error?: unknown } } }).response
+     : undefined;
+   switch (response?.data?.error) {
++    case 'board_viewport_bookmark_limit_reached':
++      return 'All 24 bookmarks are in use. Delete a bookmark to save another view.';
++    case 'board_viewport_bookmark_not_found':
++      return 'This bookmark is no longer available. Reload the bookmarks and try again.';
+     case 'board_layer_limit_reached':
+       return 'A board can have up to 12 layers, including Base.';
+     case 'board_layer_not_found':
+diff --git a/client/src/pages/Boards/boardViewport.ts b/client/src/pages/Boards/boardViewport.ts
+index 9b607c2..090262a 100644
+--- a/client/src/pages/Boards/boardViewport.ts
++++ b/client/src/pages/Boards/boardViewport.ts
+@@ -16,3 +16,30 @@ export function zoomBoardAt(viewport: BoardViewport, point: BoardPoint, factor:
+ export function pointsPath(points: BoardPoint[]): string {
+   return points.map((point, index) => `${index ? 'L' : 'M'} ${point.x} ${point.y}`).join(' ');
+ }
++
++/** Animate only the camera. Callers retain the existing viewport persistence path. */
++export function animateBoardViewport(
++  from: BoardViewport, to: BoardViewport,
++  apply: (viewport: BoardViewport) => void, complete: () => void,
++): () => void {
++  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
++    apply({ ...to });
++    complete();
++    return () => undefined;
++  }
++  const start = performance.now();
++  let frame = 0;
++  function tick(now: number) {
++    const progress = Math.min(1, Math.max(0, (now - start) / 240));
++    const eased = 1 - (1 - progress) ** 4;
++    apply(progress === 1 ? { ...to } : {
++      x: from.x + (to.x - from.x) * eased,
++      y: from.y + (to.y - from.y) * eased,
++      zoom: from.zoom + (to.zoom - from.zoom) * eased,
++    });
++    if (progress < 1) frame = requestAnimationFrame(tick);
++    else complete();
++  }
++  frame = requestAnimationFrame(tick);
++  return () => cancelAnimationFrame(frame);
++}
+diff --git a/server/src/db/schema.sql b/server/src/db/schema.sql
+index 8a106fc..3eda862 100644
+--- a/server/src/db/schema.sql
++++ b/server/src/db/schema.sql
+@@ -1387,3 +1387,17 @@ CREATE TABLE IF NOT EXISTS board_text_ranges (
+ );
+ CREATE INDEX IF NOT EXISTS idx_board_text_ranges_note ON board_text_ranges(user_id, note_id);
+ CREATE INDEX IF NOT EXISTS idx_board_text_ranges_board ON board_text_ranges(board_id);
++
++-- V13.5 named viewport snapshots (migration 066). No board layout or membership state.
++CREATE TABLE IF NOT EXISTS board_viewport_bookmarks (
++  id TEXT PRIMARY KEY,
++  board_id TEXT NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
++  user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
++  name TEXT NOT NULL CHECK (length(trim(name)) BETWEEN 1 AND 32),
++  x REAL NOT NULL,
++  y REAL NOT NULL,
++  zoom REAL NOT NULL CHECK (zoom > 0),
++  created_at TEXT NOT NULL
++);
++CREATE INDEX IF NOT EXISTS idx_board_viewport_bookmarks_created
++  ON board_viewport_bookmarks(board_id, user_id, created_at);
+diff --git a/server/src/routes/boards.ts b/server/src/routes/boards.ts
+index 4b90b33..74c45b6 100644
+--- a/server/src/routes/boards.ts
++++ b/server/src/routes/boards.ts
+@@ -16,6 +16,10 @@ import {
+ import { relocateTrayToBoard, undoTrayRelocation } from '../services/boardTrayRelocation.js';
+ import { createBoardCeremonyNote } from '../services/boardCeremonyNote.js';
+ import { listBoardTextRanges, updateBoardTextRanges } from '../services/boardTextRanges.js';
++import {
++  listBoardViewportBookmarks, createBoardViewportBookmark,
++  renameBoardViewportBookmark, deleteBoardViewportBookmark,
++} from '../services/boardViewportBookmarks.js';
+ import {
+   createBoardSchema, updateBoardSchema,
+   mountBoardMemberSchema, updateBoardMemberSchema,
+@@ -93,6 +97,33 @@ export function createBoardRouter(database: () => Database.Database = getDb): Ro
+     res.json(getBoard(database(), req.userId!, String(req.params.boardId)));
+   }));
+ 
++  router.get('/:boardId/viewport-bookmarks', handle((req, res) => {
++    res.json({ bookmarks: listBoardViewportBookmarks(database(), req.userId!, String(req.params.boardId)) });
++  }));
++
++  router.post('/:boardId/viewport-bookmarks', handle((req, res) => {
++    const db = database();
++    const bookmark = db.transaction(() => createBoardViewportBookmark(db, req.userId!, String(req.params.boardId), req.body))();
++    res.status(201).json({ bookmark });
++  }));
++
++  router.patch('/:boardId/viewport-bookmarks/:bookmarkId', handle((req, res) => {
++    const db = database();
++    const bookmark = db.transaction(() => renameBoardViewportBookmark(
++      db, req.userId!, String(req.params.boardId), String(req.params.bookmarkId), req.body,
++    ))();
++    res.json({ bookmark });
++  }));
++
++  router.delete('/:boardId/viewport-bookmarks/:bookmarkId', handle((req, res) => {
++    z.object({}).strict().parse(req.body ?? {});
++    const db = database();
++    const result = db.transaction(() => deleteBoardViewportBookmark(
++      db, req.userId!, String(req.params.boardId), String(req.params.bookmarkId),
++    ))();
++    res.json(result);
++  }));
++
+   router.post('/:boardId/ceremony-note', handle((req, res) => {
+     res.status(201).json(createBoardCeremonyNote(database(), req.userId!, String(req.params.boardId), req.body));
+   }));
+diff --git a/client/src/pages/Boards/BoardViewportBookmarks.tsx b/client/src/pages/Boards/BoardViewportBookmarks.tsx
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Boards/BoardViewportBookmarks.tsx
+@@ -0,0 +1,151 @@
++import { useEffect, useRef, useState } from 'react';
++import { Bookmark, BookmarkPlus, Pencil, Trash2, X } from 'lucide-react';
++import {
++  BOARD_VIEWPORT_BOOKMARK_LIMIT, BOARD_VIEWPORT_BOOKMARK_NAME_LIMIT,
++  type BoardViewportBookmark,
++} from '../../../../shared/types/boardViewportBookmarks';
++import { boardErrorMessage, boardRepository } from './boardRepository';
++import type { BoardViewport } from './boardTypes';
++import styles from './BoardViewportBookmarks.module.css';
++
++interface Props {
++  boardId: string;
++  getViewport: () => BoardViewport;
++  onJump: (viewport: BoardViewport) => void;
++  disabled?: boolean;
++}
++
++/** Personal camera snapshots only. This surface never reads or writes the board scene. */
++export function BoardViewportBookmarks({ boardId, getViewport, onJump, disabled = false }: Props) {
++  const [bookmarks, setBookmarks] = useState<BoardViewportBookmark[]>([]);
++  const [loading, setLoading] = useState(true);
++  const [pending, setPending] = useState(false);
++  const [error, setError] = useState<string | null>(null);
++  const [editor, setEditor] = useState<{ id?: string; viewport?: BoardViewport } | null>(null);
++  const [name, setName] = useState('');
++  const alive = useRef(false);
++  const generation = useRef(0);
++  const busy = useRef(false);
++  const saveButton = useRef<HTMLButtonElement>(null);
++  const returnFocus = useRef<HTMLButtonElement | null>(null);
++  const full = bookmarks.length >= BOARD_VIEWPORT_BOOKMARK_LIMIT;
++
++  async function load() {
++    const visit = generation.current;
++    const current = () => alive.current && visit === generation.current;
++    setLoading(true);
++    setError(null);
++    try {
++      const next = await boardRepository.listViewportBookmarks(boardId);
++      if (!Array.isArray(next)) throw new Error('Bookmark list unavailable');
++      if (current()) setBookmarks(next);
++    } catch (cause) { if (current()) setError(boardErrorMessage(cause)); }
++    finally { if (current()) setLoading(false); }
++  }
++  useEffect(() => {
++    alive.current = true;
++    generation.current += 1;
++    busy.current = false;
++    setPending(false);
++    setBookmarks([]);
++    setEditor(null);
++    void load();
++    return () => { alive.current = false; generation.current += 1; };
++  }, [boardId]);
++
++  function closeEditor() {
++    setEditor(null);
++    requestAnimationFrame(() => { if (alive.current) (returnFocus.current || saveButton.current)?.focus(); });
++  }
++
++  async function save() {
++    const trimmed = name.trim();
++    if (!editor || busy.current || !trimmed || trimmed.length > BOARD_VIEWPORT_BOOKMARK_NAME_LIMIT) return;
++    busy.current = true;
++    const visit = generation.current;
++    const current = () => alive.current && visit === generation.current;
++    setPending(true);
++    setError(null);
++    try {
++      const bookmark = editor.id
++        ? await boardRepository.renameViewportBookmark(boardId, editor.id, trimmed)
++        : await boardRepository.createViewportBookmark(boardId, { name: trimmed, ...editor.viewport! });
++      if (!current()) return;
++      setBookmarks((current) => editor.id
++        ? current.map((entry) => entry.id === bookmark.id ? bookmark : entry)
++        : [...current, bookmark]);
++      closeEditor();
++    } catch (cause) { if (current()) setError(boardErrorMessage(cause)); }
++    finally { if (current()) { busy.current = false; setPending(false); } }
++  }
++
++  async function remove(id: string) {
++    if (busy.current) return;
++    busy.current = true;
++    const visit = generation.current;
++    const current = () => alive.current && visit === generation.current;
++    setPending(true);
++    setError(null);
++    try {
++      await boardRepository.deleteViewportBookmark(boardId, id);
++      if (!current()) return;
++      setBookmarks((current) => current.filter((entry) => entry.id !== id));
++      requestAnimationFrame(() => { if (current()) saveButton.current?.focus(); });
++    } catch (cause) { if (current()) setError(boardErrorMessage(cause)); }
++    finally { if (current()) { busy.current = false; setPending(false); } }
++  }
++
++  return <aside className={styles.rail} data-board-viewport-bookmarks aria-label="Viewport bookmarks" aria-busy={loading || pending}
++    onPointerDown={(event) => event.stopPropagation()} onDoubleClick={(event) => event.stopPropagation()}
++    onWheel={(event) => event.stopPropagation()} onPaste={(event) => event.stopPropagation()}
++    onKeyDown={(event) => {
++      event.stopPropagation();
++      if (event.key === 'Escape' && editor && !pending) { event.preventDefault(); closeEditor(); }
++    }}>
++    <button ref={saveButton} type="button" className={styles.save} aria-label="Save current viewport"
++      title={full ? 'All 24 bookmarks are in use' : 'Save current viewport'}
++      disabled={disabled || loading || pending}
++      onClick={() => {
++        returnFocus.current = saveButton.current;
++        if (full) { setError('All 24 bookmarks are in use. Delete a bookmark to save another view.'); return; }
++        setError(null);
++        setName('');
++        setEditor({ viewport: { ...getViewport() } });
++      }}><BookmarkPlus size={17} /><span>Save current viewport</span></button>
++    <ol className={styles.list}>
++      {bookmarks.map((bookmark) => <li key={bookmark.id} className={styles.row}>
++        <button type="button" className={styles.jump} aria-label={`Go to ${bookmark.name}`}
++          disabled={disabled || pending} onClick={() => onJump({ x: bookmark.x, y: bookmark.y, zoom: bookmark.zoom })}>
++          <Bookmark size={16} /><span>{bookmark.name}</span>
++        </button>
++        <div className={styles.actions}>
++          <button type="button" aria-label={`Rename bookmark ${bookmark.name}`} disabled={disabled || pending}
++            onClick={(event) => {
++              returnFocus.current = event.currentTarget.closest('li')?.querySelector('button') || saveButton.current;
++              setError(null); setName(bookmark.name); setEditor({ id: bookmark.id });
++            }}><Pencil size={13} /></button>
++          <button type="button" aria-label={`Delete bookmark ${bookmark.name}`} disabled={disabled || pending}
++            onClick={() => { void remove(bookmark.id); }}><Trash2 size={13} /></button>
++        </div>
++      </li>)}
++    </ol>
++    {editor && <form className={styles.editor} aria-label={editor.id ? 'Rename viewport bookmark' : 'Save viewport bookmark'}
++      onSubmit={(event) => { event.preventDefault(); void save(); }}>
++      <label htmlFor="viewport-bookmark-name">Bookmark name</label>
++      <input id="viewport-bookmark-name" autoFocus required maxLength={BOARD_VIEWPORT_BOOKMARK_NAME_LIMIT}
++        placeholder="e.g. Chapter two" value={name} disabled={pending}
++        onFocus={(event) => event.currentTarget.select()} onChange={(event) => setName(event.target.value)} />
++      <div className={styles.editorActions}>
++        <button type="button" disabled={pending} onClick={closeEditor}>Cancel</button>
++        <button type="submit" disabled={pending || !name.trim() || name.trim().length > BOARD_VIEWPORT_BOOKMARK_NAME_LIMIT}>
++          {pending ? 'Saving…' : editor.id ? 'Save name' : 'Save bookmark'}
++        </button>
++      </div>
++    </form>}
++    {error && <div className={styles.error} role="alert">
++      <p>{error}</p>
++      <button type="button" disabled={pending || loading} onClick={() => { void load(); }}>Reload bookmarks</button>
++      <button type="button" aria-label="Dismiss bookmark message" onClick={() => setError(null)}><X size={14} /></button>
++    </div>}
++  </aside>;
++}
+diff --git a/client/src/pages/Boards/BoardViewportBookmarks.module.css b/client/src/pages/Boards/BoardViewportBookmarks.module.css
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Boards/BoardViewportBookmarks.module.css
+@@ -0,0 +1,27 @@
++.rail { position: absolute; inset: 12px 12px 12px auto; width: min(300px, calc(100% - 24px)); z-index: 2; display: flex; flex-direction: column; align-items: flex-end; gap: 6px; pointer-events: none; color: var(--text-primary); font-size: 12px; }
++.rail button, .editor, .error { pointer-events: auto; }
++.rail button { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 32px; padding: 6px 8px; border-radius: 4px; color: var(--text-secondary); background: var(--bg-surface); }
++.rail button:hover { color: var(--text-primary); background: var(--bg-hover); }
++.rail button:focus-visible, .rail input:focus-visible { outline: 2px solid var(--border-focus); outline-offset: -2px; }
++.rail button svg { flex-shrink: 0; }
++.save { flex-shrink: 0; }
++.save, .jump { flex-direction: row-reverse; }
++.save span, .jump span, .actions { display: none; }
++.save:hover span, .save:focus-visible span, .row:hover .jump span, .row:focus-within .jump span { display: block; }
++.list { min-height: 0; overflow-y: auto; width: 100%; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; margin: 0; padding: 0; list-style: none; }
++.row { display: flex; flex-direction: row-reverse; align-items: center; max-width: 100%; pointer-events: auto; border-radius: 4px; }
++.row:hover, .row:focus-within { background: var(--bg-surface); }
++.jump { min-width: 32px; max-width: 100%; }
++.jump span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
++.row:hover .actions, .row:focus-within .actions { display: flex; flex-shrink: 0; }
++.row:hover .jump, .row:focus-within .jump { min-width: 0; }
++.editor { position: absolute; top: 38px; right: 38px; width: min(248px, calc(100vw - 100px)); padding: 12px; border: 1px solid var(--border-default); border-radius: 6px; background: var(--bg-surface); }
++.editor label { display: block; margin-bottom: 8px; font-weight: 600; }
++.editor input { width: 100%; padding: 8px; color: var(--text-primary); background: var(--bg-primary); border: 1px solid var(--border-default); border-radius: 4px; }
++.editor input::placeholder { color: var(--text-secondary); }
++.editorActions { display: flex; justify-content: flex-end; gap: 4px; margin-top: 10px; }
++.editorActions button[type='submit'] { color: var(--text-primary); background: var(--accent-primary-bg); }
++.error { position: relative; width: 100%; padding: 12px; border: 1px solid var(--border-default); border-radius: 6px; background: var(--bg-surface); }
++.error p { margin-bottom: 8px; overflow-wrap: anywhere; }
++.error button { text-decoration: underline; }
++@media (hover: none) { .row:focus-within .actions { display: flex; } }
+diff --git a/client/src/pages/Boards/BoardViewportBookmarks.test.tsx b/client/src/pages/Boards/BoardViewportBookmarks.test.tsx
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Boards/BoardViewportBookmarks.test.tsx
+@@ -0,0 +1,242 @@
++import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import type { BoardViewportBookmark } from '@shared/types/boardViewportBookmarks';
++import { BoardViewportBookmarks } from './BoardViewportBookmarks';
++import type { BoardViewport } from './boardTypes';
++
++// Exercise the production component and repository; only HTTP transport is synthetic.
++const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), patch: vi.fn(), delete: vi.fn() }));
++vi.mock('@/services/api', () => ({ default: http }));
++const path = '/boards/board-a/viewport-bookmarks';
++const date = '2026-09-11T12:00:00.000Z';
++const bookmark = (id: string, name: string, input: Partial<BoardViewportBookmark> = {}): BoardViewportBookmark => ({
++  id, board_id: 'board-a', user_id: 'user-a', name, x: -124.5, y: 86.25, zoom: 0.375, created_at: date, ...input,
++});
++const deferred = <T,>() => {
++  let resolve!: (value: T) => void;
++  const promise = new Promise<T>((done) => { resolve = done; });
++  return { promise, resolve };
++};
++let entries: BoardViewportBookmark[];
++const response = <T,>(data: T) => ({ data: structuredClone(data) });
++const currentViewport = () => ({ x: 100, y: -200, zoom: 1.25 });
++const rail = () => screen.getByRole('complementary', { name: 'Viewport bookmarks' });
++const jumpNames = () => within(rail()).queryAllByRole('button', { name: /^Go to / }).map((button) => button.getAttribute('aria-label'));
++const ready = () => waitFor(() => expect(screen.getByRole<HTMLButtonElement>('button', { name: 'Save current viewport' }).disabled).toBe(false));
++function enterName(name: string) {
++  fireEvent.change(screen.getByRole('textbox', { name: 'Bookmark name' }), { target: { value: name } });
++}
++function open(boardId = 'board-a', getViewport = currentViewport, onJump = vi.fn()) {
++  return render(<BoardViewportBookmarks boardId={boardId} getViewport={getViewport} onJump={onJump} />);
++}
++
++beforeEach(() => {
++  vi.resetAllMocks();
++  entries = [];
++  http.get.mockImplementation(async () => response({ bookmarks: entries }));
++  http.post.mockImplementation(async (_url: string, input: { name: string } & BoardViewport) => {
++    const added = bookmark(`added-${entries.length}`, input.name, input);
++    entries.push(added);
++    return response({ bookmark: added });
++  });
++  http.patch.mockImplementation(async (url: string, input: { name: string }) => {
++    const updated = entries.find(({ id }) => url.endsWith(`/${id}`))!;
++    updated.name = input.name;
++    return response({ bookmark: updated });
++  });
++  http.delete.mockImplementation(async (url: string) => {
++    entries = entries.filter(({ id }) => !url.endsWith(`/${id}`));
++    return response({});
++  });
++});
++afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
++
++describe('B4v personal viewport bookmark rail', () => {
++  it('waits for loading, retains creation order and jumps with the exact saved camera', async () => {
++    const held = deferred<{ data: { bookmarks: BoardViewportBookmark[] } }>();
++    entries = [bookmark('first', 'Zebra'), bookmark('second', 'Apple', { x: 999, zoom: 2 })];
++    http.get.mockReturnValueOnce(held.promise);
++    const onJump = vi.fn();
++    open('board-a', currentViewport, onJump);
++    expect(screen.getByRole<HTMLButtonElement>('button', { name: 'Save current viewport' }).disabled).toBe(true);
++    expect(rail().getAttribute('aria-busy')).toBe('true');
++    await act(async () => held.resolve(response({ bookmarks: entries })));
++    await ready();
++    expect(http.get).toHaveBeenCalledWith(path);
++    expect(jumpNames()).toEqual(['Go to Zebra', 'Go to Apple']);
++    expect(rail().querySelector('[draggable="true"]')).toBeNull();
++    fireEvent.click(screen.getByRole('button', { name: 'Go to Zebra' }));
++    expect(onJump).toHaveBeenCalledExactlyOnceWith({ x: -124.5, y: 86.25, zoom: 0.375 });
++    expect(http.post).not.toHaveBeenCalled();
++    expect(http.patch).not.toHaveBeenCalled();
++  });
++
++  it('captures when Save current viewport is clicked, then creates, renames and deletes without changing order', async () => {
++    entries = [bookmark('first', 'Zebra')];
++    const live = { x: 113.5, y: -48.25, zoom: 0.625 };
++    const getViewport = vi.fn(() => live);
++    open('board-a', getViewport);
++    await ready();
++    fireEvent.click(screen.getByRole('button', { name: 'Save current viewport' }));
++    Object.assign(live, { x: 700, y: 850, zoom: 3 });
++    enterName('  Apple  ');
++    fireEvent.click(screen.getByRole('button', { name: 'Save bookmark' }));
++    await screen.findByRole('button', { name: 'Go to Apple' });
++    expect(getViewport).toHaveBeenCalledTimes(1);
++    expect(http.post).toHaveBeenCalledExactlyOnceWith(path, { name: 'Apple', x: 113.5, y: -48.25, zoom: 0.625 });
++    expect(jumpNames()).toEqual(['Go to Zebra', 'Go to Apple']);
++    fireEvent.click(screen.getByRole('button', { name: 'Rename bookmark Zebra' }));
++    enterName('  Beginning  ');
++    fireEvent.click(screen.getByRole('button', { name: 'Save name' }));
++    await screen.findByRole('button', { name: 'Go to Beginning' });
++    expect(http.patch).toHaveBeenCalledExactlyOnceWith(`${path}/first`, { name: 'Beginning' });
++    expect(jumpNames()).toEqual(['Go to Beginning', 'Go to Apple']);
++    expect(entries[0]).toMatchObject({ x: -124.5, y: 86.25, zoom: 0.375, created_at: date });
++    fireEvent.click(screen.getByRole('button', { name: 'Delete bookmark Beginning' }));
++    await waitFor(() => expect(jumpNames()).toEqual(['Go to Apple']));
++    expect(http.delete).toHaveBeenCalledExactlyOnceWith(`${path}/first`);
++  });
++
++  it('retains the submitted name and camera when persistence fails, allowing a retry', async () => {
++    const live = { x: 72, y: -13, zoom: 0.75 };
++    http.post.mockRejectedValueOnce(new Error('offline'));
++    open('board-a', () => live);
++    await ready();
++    fireEvent.click(screen.getByRole('button', { name: 'Save current viewport' }));
++    enterName('Chapter two');
++    fireEvent.click(screen.getByRole('button', { name: 'Save bookmark' }));
++    expect((await screen.findByRole('alert')).textContent).toContain('Could not complete the board action. Try again.');
++    expect(screen.getByRole<HTMLInputElement>('textbox', { name: 'Bookmark name' }).value).toBe('Chapter two');
++    expect(jumpNames()).toEqual([]);
++    live.x = 900;
++    fireEvent.click(screen.getByRole('button', { name: 'Save bookmark' }));
++    await screen.findByRole('button', { name: 'Go to Chapter two' });
++    expect(http.post.mock.calls).toEqual([
++      [path, { name: 'Chapter two', x: 72, y: -13, zoom: 0.75 }],
++      [path, { name: 'Chapter two', x: 72, y: -13, zoom: 0.75 }],
++    ]);
++  });
++
++  it('returns focus to the renamed bookmark jump button after saving its name', async () => {
++    entries = [bookmark('first', 'Original')];
++    open(); await ready();
++    fireEvent.click(screen.getByRole('button', { name: 'Rename bookmark Original' }));
++    expect(document.activeElement).toBe(screen.getByRole('textbox', { name: 'Bookmark name' }));
++    enterName('Renamed');
++    fireEvent.click(screen.getByRole('button', { name: 'Save name' }));
++    const jump = await screen.findByRole('button', { name: 'Go to Renamed' });
++    await waitFor(() => expect(document.activeElement).toBe(jump));
++    expect(screen.queryByRole('textbox', { name: 'Bookmark name' })).toBeNull();
++  });
++
++  it('returns focus to Save current viewport after a pending deletion completes', async () => {
++    entries = [bookmark('first', 'Remove me')];
++    const deletion = deferred<{ data: object }>();
++    http.delete.mockReturnValueOnce(deletion.promise);
++    open(); await ready();
++    const remove = screen.getByRole('button', { name: 'Delete bookmark Remove me' });
++    const save = screen.getByRole<HTMLButtonElement>('button', { name: 'Save current viewport' });
++    remove.focus();
++    fireEvent.click(remove);
++    expect(save.disabled).toBe(true);
++    expect(screen.getByRole('button', { name: 'Go to Remove me' })).toBeTruthy();
++    await act(async () => deletion.resolve(response({})));
++    await waitFor(() => expect(document.activeElement).toBe(save));
++    expect(save.disabled).toBe(false);
++    expect(screen.queryByRole('button', { name: 'Go to Remove me' })).toBeNull();
++  });
++
++  it('keeps existing entries on rename or delete failure', async () => {
++    entries = [bookmark('first', 'Original')];
++    http.patch.mockRejectedValueOnce(new Error('offline'));
++    http.delete.mockRejectedValueOnce(new Error('offline'));
++    open(); await ready();
++    fireEvent.click(screen.getByRole('button', { name: 'Rename bookmark Original' }));
++    enterName('New name');
++    fireEvent.click(screen.getByRole('button', { name: 'Save name' }));
++    await screen.findByRole('alert');
++    expect(screen.getByRole<HTMLInputElement>('textbox', { name: 'Bookmark name' }).value).toBe('New name');
++    expect(jumpNames()).toEqual(['Go to Original']);
++    fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
++    fireEvent.click(screen.getByRole('button', { name: 'Delete bookmark Original' }));
++    await screen.findByRole('alert');
++    expect(jumpNames()).toEqual(['Go to Original']);
++  });
++
++  it('shows a readable 24-bookmark limit and can create after deleting one', async () => {
++    entries = Array.from({ length: 24 }, (_, index) => bookmark(`b-${index}`, `Chapter ${index + 1}`));
++    open(); await ready();
++    fireEvent.click(screen.getByRole('button', { name: 'Save current viewport' }));
++    expect(screen.getByRole('alert').textContent).toContain('All 24 bookmarks are in use. Delete a bookmark to save another view.');
++    expect(screen.queryByRole('textbox', { name: 'Bookmark name' })).toBeNull();
++    expect(http.post).not.toHaveBeenCalled();
++    fireEvent.click(screen.getByRole('button', { name: 'Delete bookmark Chapter 1' }));
++    await waitFor(() => expect(jumpNames()).toHaveLength(23));
++    fireEvent.click(screen.getByRole('button', { name: 'Save current viewport' }));
++    enterName('Replacement');
++    fireEvent.click(screen.getByRole('button', { name: 'Save bookmark' }));
++    await screen.findByRole('button', { name: 'Go to Replacement' });
++    expect(jumpNames()).toHaveLength(24);
++  });
++
++  it('explains a server limit response without discarding the draft', async () => {
++    http.post.mockRejectedValueOnce({ response: { status: 409, data: { error: 'board_viewport_bookmark_limit_reached' } } });
++    open(); await ready();
++    fireEvent.click(screen.getByRole('button', { name: 'Save current viewport' }));
++    enterName('Awaiting space');
++    fireEvent.click(screen.getByRole('button', { name: 'Save bookmark' }));
++    expect((await screen.findByRole('alert')).textContent).toContain('All 24 bookmarks are in use');
++    expect(screen.getByRole<HTMLInputElement>('textbox', { name: 'Bookmark name' }).value).toBe('Awaiting space');
++    expect(jumpNames()).toEqual([]);
++  });
++
++  it('keeps blank names unsaved and accepts a 32-character name', async () => {
++    open(); await ready();
++    fireEvent.click(screen.getByRole('button', { name: 'Save current viewport' }));
++    const input = screen.getByRole<HTMLInputElement>('textbox', { name: 'Bookmark name' });
++    expect(input.maxLength).toBe(32);
++    enterName('   ');
++    expect(screen.getByRole<HTMLButtonElement>('button', { name: 'Save bookmark' }).disabled).toBe(true);
++    expect(http.post).not.toHaveBeenCalled();
++    enterName('章'.repeat(32));
++    fireEvent.click(screen.getByRole('button', { name: 'Save bookmark' }));
++    await screen.findByRole('button', { name: `Go to ${'章'.repeat(32)}` });
++    expect(http.post).toHaveBeenCalledTimes(1);
++  });
++
++  it('reloads after a list failure', async () => {
++    entries = [bookmark('first', 'Recovered')];
++    http.get.mockRejectedValueOnce(new Error('offline'));
++    open();
++    await screen.findByRole('alert');
++    fireEvent.click(screen.getByRole('button', { name: 'Reload bookmarks' }));
++    await screen.findByRole('button', { name: 'Go to Recovered' });
++    expect(http.get).toHaveBeenCalledTimes(2);
++    expect(screen.queryByRole('alert')).toBeNull();
++  });
++
++  it('ignores a previous board list response after switching boards', async () => {
++    const oldList = deferred<{ data: { bookmarks: BoardViewportBookmark[] } }>();
++    http.get.mockReturnValueOnce(oldList.promise).mockResolvedValueOnce(response({ bookmarks: [bookmark('new', 'New board', { board_id: 'board-b' })] }));
++    const view = open();
++    view.rerender(<BoardViewportBookmarks boardId="board-b" getViewport={currentViewport} onJump={vi.fn()} />);
++    await screen.findByRole('button', { name: 'Go to New board' });
++    await act(async () => oldList.resolve(response({ bookmarks: [bookmark('old', 'Old board')] })));
++    expect(jumpNames()).toEqual(['Go to New board']);
++  });
++
++  it('resets a previous board editor and ignores its delayed create response', async () => {
++    const oldCreate = deferred<{ data: { bookmark: BoardViewportBookmark } }>();
++    http.post.mockReturnValueOnce(oldCreate.promise);
++    const view = open(); await ready();
++    fireEvent.click(screen.getByRole('button', { name: 'Save current viewport' }));
++    enterName('Old draft');
++    fireEvent.click(screen.getByRole('button', { name: 'Save bookmark' }));
++    view.rerender(<BoardViewportBookmarks boardId="board-b" getViewport={currentViewport} onJump={vi.fn()} />);
++    await ready();
++    expect(screen.queryByRole('textbox', { name: 'Bookmark name' })).toBeNull();
++    await act(async () => oldCreate.resolve(response({ bookmark: bookmark('old', 'Old draft') })));
++    expect(jumpNames()).toEqual([]);
++    expect(http.get).toHaveBeenLastCalledWith('/boards/board-b/viewport-bookmarks');
++  });
++});
+diff --git a/client/src/pages/Boards/BoardPage.bookmarks.test.tsx b/client/src/pages/Boards/BoardPage.bookmarks.test.tsx
+new file mode 100644
+--- /dev/null
++++ b/client/src/pages/Boards/BoardPage.bookmarks.test.tsx
+@@ -0,0 +1,161 @@
++import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
++import { Link, MemoryRouter, Route, Routes } from 'react-router-dom';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import type { BoardViewportBookmark } from '@shared/types/boardViewportBookmarks';
++import BoardPage from './BoardPage';
++import type { BoardDetail, BoardViewport } from './boardTypes';
++import { BOARD_ID, BOARD_PATH, detail, resetSample, seedLayer, seedMember, seedVisual } from '../../../scripts/boardToolsSmoke/mockApi';
++
++// Production BoardPage, rail, viewport animator, hook and repository; transport only is mocked.
++const http = vi.hoisted(() => ({ get: vi.fn(), post: vi.fn(), put: vi.fn(), patch: vi.fn(), delete: vi.fn() }));
++vi.mock('@/services/api', () => ({ default: http }));
++const date = '2026-09-11T12:00:00.000Z';
++const target = { x: -1357.25, y: 682.5, zoom: 0.375 };
++const initial = { x: 40, y: -20, zoom: 1.25 };
++const copy = <T,>(value: T): T => structuredClone(value);
++const response = <T,>(data: T) => ({ data: copy(data) });
++const bookmark = (id: string, name: string, viewport = target, boardId = BOARD_ID): BoardViewportBookmark => ({
++  id, name, board_id: boardId, user_id: 'synthetic-user', created_at: date, ...viewport,
++});
++let boards: Map<string, BoardDetail>;
++let entries: Map<string, BoardViewportBookmark[]>;
++let frames: Map<number, FrameRequestCallback>;
++let frameId: number;
++let now: number;
++function openBoard() {
++  return render(<MemoryRouter initialEntries={[BOARD_PATH]} future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
++    <Link to="/boards/next-board">Open next board</Link>
++    <Routes><Route path="/boards/:boardId" element={<BoardPage />} /></Routes>
++  </MemoryRouter>);
++}
++const world = () => screen.getByTestId('board-world');
++const transform = ({ x, y, zoom }: BoardViewport) => `translate(${x}px, ${y}px) scale(${zoom})`;
++async function frame(time: number) {
++  now = time;
++  const queued = [...frames.values()];
++  frames.clear();
++  await act(async () => queued.forEach((callback) => callback(time)));
++}
++const noSceneWrites = () => {
++  expect(http.put).not.toHaveBeenCalled();
++  expect(http.delete).not.toHaveBeenCalled();
++  expect(http.patch.mock.calls.every(([url, input]) => url === BOARD_PATH && Object.keys(input).join() === 'viewport')).toBe(true);
++  expect(http.post.mock.calls.every(([url]) => url === `${BOARD_PATH}/viewport-bookmarks`)).toBe(true);
++};
++
++beforeEach(() => {
++  vi.resetAllMocks();
++  resetSample();
++  detail.board.viewport = copy(initial);
++  const layer = seedLayer('Existing scene');
++  seedMember('Existing member', { x: 65, y: 100, z_index: 8, layer_id: layer.id });
++  seedVisual({ visual_kind: 'sticky', x: 220, y: 70, z_index: -2, layer_id: layer.id, data: { text: 'Existing chalk' } });
++  boards = new Map([[BOARD_ID, detail]]);
++  entries = new Map([[BOARD_ID, [bookmark('chapter', 'Chapter two')]]]);
++  http.get.mockImplementation(async (url: string) => {
++    if (url === '/courses' || url === '/items') return response([]);
++    const match = /^\/boards\/([^/]+)(\/viewport-bookmarks)?$/.exec(url);
++    if (!match) throw new Error(`Unexpected read: ${url}`);
++    return match[2] ? response({ bookmarks: entries.get(match[1]) || [] }) : response(boards.get(match[1]));
++  });
++  http.patch.mockImplementation(async (url: string, input: { viewport: BoardViewport }) => {
++    const boardId = url.split('/')[2];
++    const saved = boards.get(boardId)!;
++    Object.assign(saved.board, copy(input));
++    return response({ board: saved.board });
++  });
++  http.post.mockImplementation(async (url: string, input: BoardViewport & { name: string }) => {
++    if (!url.endsWith('/viewport-bookmarks')) throw new Error(`Unexpected write: ${url}`);
++    const saved = bookmark('saved', input.name, input, url.split('/')[2]);
++    entries.get(saved.board_id)!.push(saved);
++    return response({ bookmark: saved });
++  });
++  now = 0; frameId = 0; frames = new Map();
++  vi.spyOn(performance, 'now').mockImplementation(() => now);
++  vi.stubGlobal('requestAnimationFrame', vi.fn((callback: FrameRequestCallback) => {
++    frames.set(++frameId, callback); return frameId;
++  }));
++  vi.stubGlobal('cancelAnimationFrame', vi.fn((id: number) => { frames.delete(id); }));
++  vi.stubGlobal('matchMedia', vi.fn(() => ({ matches: false })));
++  vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(1100);
++  vi.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockReturnValue(800);
++});
++afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
++
++describe('B4v BoardPage camera wiring', () => {
++  it('saves the current page camera, smoothly jumps to exact x/y/zoom, and persists only viewport', async () => {
++    const sceneBefore = copy({ members: detail.members, visuals: detail.visuals, edges: detail.edges, layers: detail.layers });
++    openBoard();
++    await screen.findByRole('button', { name: 'Go to Chapter two' });
++    expect(world().style.transform).toBe(transform(initial));
++    fireEvent.click(screen.getByRole('button', { name: 'Save current viewport' }));
++    fireEvent.change(screen.getByRole('textbox', { name: 'Bookmark name' }), { target: { value: 'Starting point' } });
++    fireEvent.click(screen.getByRole('button', { name: 'Save bookmark' }));
++    await screen.findByRole('button', { name: 'Go to Starting point' });
++    expect(http.post).toHaveBeenCalledExactlyOnceWith(`${BOARD_PATH}/viewport-bookmarks`, { name: 'Starting point', ...initial });
++    fireEvent.click(screen.getByRole('button', { name: 'Go to Chapter two' }));
++    await frame(120);
++    expect(world().style.transform).not.toBe(transform(initial));
++    expect(world().style.transform).not.toBe(transform(target));
++    expect(http.patch).not.toHaveBeenCalled();
++    await frame(240);
++    await waitFor(() => expect(http.patch).toHaveBeenCalledExactlyOnceWith(BOARD_PATH, { viewport: target }));
++    expect(world().style.transform).toBe(transform(target));
++    expect(detail.board.viewport).toEqual(target);
++    expect({ members: detail.members, visuals: detail.visuals, edges: detail.edges, layers: detail.layers }).toEqual(sceneBefore);
++    noSceneWrites();
++  });
++
++  it('honors reduced motion and immediately saves the exact bookmark through the board PATCH', async () => {
++    vi.mocked(window.matchMedia).mockReturnValue({ matches: true } as MediaQueryList);
++    openBoard();
++    fireEvent.click(await screen.findByRole('button', { name: 'Go to Chapter two' }));
++    await waitFor(() => expect(http.patch).toHaveBeenCalledExactlyOnceWith(BOARD_PATH, { viewport: target }));
++    expect(world().style.transform).toBe(transform(target));
++    expect(requestAnimationFrame).not.toHaveBeenCalled();
++    noSceneWrites();
++  });
++
++  it('lets wheel panning interrupt the animation and saves the user-adjusted camera', async () => {
++    openBoard();
++    fireEvent.click(await screen.findByRole('button', { name: 'Go to Chapter two' }));
++    await frame(120);
++    // At half time the quartic ease is 15/16; pan applies screen deltas to that live camera.
++    const eased = 15 / 16;
++    const interrupted = {
++      x: initial.x + (target.x - initial.x) * eased - 30,
++      y: initial.y + (target.y - initial.y) * eased + 15,
++      zoom: initial.zoom + (target.zoom - initial.zoom) * eased,
++    };
++    fireEvent.wheel(screen.getByTestId('board-surface'), { deltaX: 30, deltaY: -15 });
++    expect(cancelAnimationFrame).toHaveBeenCalled();
++    expect(frames.size).toBe(0);
++    await frame(300);
++    expect(world().style.transform).toBe(transform(interrupted));
++    await waitFor(() => expect(http.patch).toHaveBeenCalledExactlyOnceWith(BOARD_PATH, { viewport: interrupted }));
++    expect(detail.board.viewport).toEqual(interrupted);
++    noSceneWrites();
++  });
++
++  it('keeps an old board bookmark list response out of the new board after route navigation', async () => {
++    const next = copy(detail);
++    next.board.id = 'next-board'; next.board.title = 'Next board'; next.board.viewport = { x: 3, y: 5, zoom: 2 };
++    next.members = []; next.visuals = []; next.edges = []; next.layers = [];
++    boards.set('next-board', next);
++    entries.set('next-board', [bookmark('next', 'New board view', { x: 90, y: 80, zoom: 0.5 }, 'next-board')]);
++    let resolveOld!: (value: { data: { bookmarks: BoardViewportBookmark[] } }) => void;
++    const oldResponse = new Promise<{ data: { bookmarks: BoardViewportBookmark[] } }>((resolve) => { resolveOld = resolve; });
++    const read = http.get.getMockImplementation()!;
++    http.get.mockImplementation((url: string) => url === `${BOARD_PATH}/viewport-bookmarks` ? oldResponse : read(url));
++    openBoard();
++    await screen.findByTestId('board-surface');
++    fireEvent.click(screen.getByRole('link', { name: 'Open next board' }));
++    await screen.findByRole('button', { name: 'Go to New board view' });
++    await act(async () => resolveOld(response({ bookmarks: [bookmark('old', 'Old board view')] })));
++    expect(screen.queryByRole('button', { name: 'Go to Old board view' })).toBeNull();
++    expect(screen.getByRole('button', { name: 'Go to New board view' })).toBeTruthy();
++    expect(world().style.transform).toBe(transform(next.board.viewport));
++    expect(http.patch).not.toHaveBeenCalled();
++    noSceneWrites();
++  });
++});
+diff --git a/server/src/db/migrations/066_v13_board_viewport_bookmarks.ts b/server/src/db/migrations/066_v13_board_viewport_bookmarks.ts
+new file mode 100644
+--- /dev/null
++++ b/server/src/db/migrations/066_v13_board_viewport_bookmarks.ts
+@@ -0,0 +1,22 @@
++import type Database from 'better-sqlite3';
++
++export default {
++  id: '066_v13_board_viewport_bookmarks',
++  description: 'Add board-owned named viewport snapshots without changing board layout',
++  up(db: Database.Database): void {
++    db.exec(`
++      CREATE TABLE IF NOT EXISTS board_viewport_bookmarks (
++        id TEXT PRIMARY KEY,
++        board_id TEXT NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
++        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
++        name TEXT NOT NULL CHECK (length(trim(name)) BETWEEN 1 AND 32),
++        x REAL NOT NULL,
++        y REAL NOT NULL,
++        zoom REAL NOT NULL CHECK (zoom > 0),
++        created_at TEXT NOT NULL
++      );
++      CREATE INDEX IF NOT EXISTS idx_board_viewport_bookmarks_created
++        ON board_viewport_bookmarks(board_id, user_id, created_at);
++    `);
++  },
++};
+diff --git a/server/src/services/boardViewportBookmarks.ts b/server/src/services/boardViewportBookmarks.ts
+new file mode 100644
+--- /dev/null
++++ b/server/src/services/boardViewportBookmarks.ts
+@@ -0,0 +1,71 @@
++import type Database from 'better-sqlite3';
++import { v4 as uuidv4 } from 'uuid';
++import type { BoardViewportBookmark } from '../../../shared/types/boardViewportBookmarks.js';
++import { AppError } from '../middleware/errorHandler.js';
++import {
++  BOARD_VIEWPORT_BOOKMARK_LIMIT,
++  createBoardViewportBookmarkSchema,
++  renameBoardViewportBookmarkSchema,
++} from '../validators/boardViewportBookmarks.js';
++
++function requireBoard(db: Database.Database, userId: string, boardId: string): void {
++  if (!db.prepare('SELECT id FROM boards WHERE id = ? AND user_id = ?').get(boardId, userId)) {
++    throw new AppError(404, 'board_not_found');
++  }
++}
++
++function requireTransaction(db: Database.Database): void {
++  if (!db.inTransaction) throw new Error('Board viewport bookmark writes require a caller-owned transaction');
++}
++
++export function listBoardViewportBookmarks(db: Database.Database, userId: string, boardId: string): BoardViewportBookmark[] {
++  requireBoard(db, userId, boardId);
++  // rowid preserves creation order when multiple snapshots share a millisecond.
++  return db.prepare(`SELECT id, board_id, user_id, name, x, y, zoom, created_at
++    FROM board_viewport_bookmarks WHERE board_id = ? AND user_id = ? ORDER BY created_at, rowid`)
++    .all(boardId, userId) as BoardViewportBookmark[];
++}
++
++export function createBoardViewportBookmark(
++  db: Database.Database, userId: string, boardId: string, value: unknown,
++): BoardViewportBookmark {
++  requireTransaction(db);
++  const input = createBoardViewportBookmarkSchema.parse(value);
++  requireBoard(db, userId, boardId);
++  const { count } = db.prepare('SELECT COUNT(*) AS count FROM board_viewport_bookmarks WHERE board_id = ? AND user_id = ?')
++    .get(boardId, userId) as { count: number };
++  if (count >= BOARD_VIEWPORT_BOOKMARK_LIMIT) {
++    throw new AppError(409, 'board_viewport_bookmark_limit_reached', { limit: BOARD_VIEWPORT_BOOKMARK_LIMIT });
++  }
++  const bookmark: BoardViewportBookmark = {
++    ...input, id: uuidv4(), board_id: boardId, user_id: userId, created_at: new Date().toISOString(),
++  };
++  db.prepare(`INSERT INTO board_viewport_bookmarks (id, board_id, user_id, name, x, y, zoom, created_at)
++    VALUES (@id, @board_id, @user_id, @name, @x, @y, @zoom, @created_at)`).run(bookmark);
++  return bookmark;
++}
++
++export function renameBoardViewportBookmark(
++  db: Database.Database, userId: string, boardId: string, bookmarkId: string, value: unknown,
++): BoardViewportBookmark {
++  requireTransaction(db);
++  const { name } = renameBoardViewportBookmarkSchema.parse(value);
++  requireBoard(db, userId, boardId);
++  const bookmark = db.prepare(`SELECT id, board_id, user_id, name, x, y, zoom, created_at
++    FROM board_viewport_bookmarks WHERE id = ? AND board_id = ? AND user_id = ?`)
++    .get(bookmarkId, boardId, userId) as BoardViewportBookmark | undefined;
++  if (!bookmark) throw new AppError(404, 'board_viewport_bookmark_not_found');
++  db.prepare('UPDATE board_viewport_bookmarks SET name = ? WHERE id = ? AND board_id = ? AND user_id = ?')
++    .run(name, bookmarkId, boardId, userId);
++  return { ...bookmark, name };
++}
++
++export function deleteBoardViewportBookmark(
++  db: Database.Database, userId: string, boardId: string, bookmarkId: string,
++): { deleted: boolean } {
++  requireTransaction(db);
++  requireBoard(db, userId, boardId);
++  const result = db.prepare('DELETE FROM board_viewport_bookmarks WHERE id = ? AND board_id = ? AND user_id = ?')
++    .run(bookmarkId, boardId, userId);
++  return { deleted: result.changes > 0 };
++}
+diff --git a/server/src/validators/boardViewportBookmarks.ts b/server/src/validators/boardViewportBookmarks.ts
+new file mode 100644
+--- /dev/null
++++ b/server/src/validators/boardViewportBookmarks.ts
+@@ -0,0 +1,10 @@
++import { z } from 'zod';
++import { boardViewportSchema } from './boards.js';
++
++// Mirrored in shared/types/boardViewportBookmarks.ts; server runtime stays local.
++export const BOARD_VIEWPORT_BOOKMARK_LIMIT = 24;
++export const BOARD_VIEWPORT_BOOKMARK_NAME_LIMIT = 32;
++const bookmarkNameSchema = z.string().trim().min(1).max(BOARD_VIEWPORT_BOOKMARK_NAME_LIMIT);
++
++export const createBoardViewportBookmarkSchema = boardViewportSchema.extend({ name: bookmarkNameSchema }).strict();
++export const renameBoardViewportBookmarkSchema = z.object({ name: bookmarkNameSchema }).strict();
+diff --git a/server/src/__tests__/v13BoardViewportBookmarks.test.ts b/server/src/__tests__/v13BoardViewportBookmarks.test.ts
+new file mode 100644
+--- /dev/null
++++ b/server/src/__tests__/v13BoardViewportBookmarks.test.ts
+@@ -0,0 +1,184 @@
++import assert from 'node:assert/strict';
++import type { Server } from 'node:http';
++import test from 'node:test';
++import type Database from 'better-sqlite3';
++import express from 'express';
++import { readFileSync } from 'node:fs';
++import migration066 from '../db/migrations/066_v13_board_viewport_bookmarks.js';
++import type { AuthRequest } from '../middleware/auth.js';
++import { errorHandler } from '../middleware/errorHandler.js';
++import { createBoardRouter } from '../routes/boards.js';
++import { createBoard } from '../services/boards.js';
++import {
++  BOARD_VIEWPORT_BOOKMARK_LIMIT,
++  BOARD_VIEWPORT_BOOKMARK_NAME_LIMIT,
++} from '../validators/boardViewportBookmarks.js';
++import { createV13BoardsFixture } from './helpers/v13BoardsFixture.js';
++
++const USER = 'viewport-bookmark-user';
++const SNAPSHOT = { x: -1320.125, y: 4800.75, zoom: 0.625 };
++type Request = (method: string, path: string, body?: unknown, status?: number) => Promise<any>;
++
++function seedOwner(db: Database.Database): void {
++  db.prepare("INSERT INTO users (id,email,password_hash,name) VALUES (?,?,'synthetic','Synthetic')")
++    .run(USER, 'synthetic-viewport-bookmark@example.invalid');
++}
++
++function makeBoard(db: Database.Database): string {
++  return db.transaction(() => createBoard(db, USER, {
++    title: 'Named viewpoints', purpose: { title: 'Synthetic camera snapshots' },
++  }))().board.id;
++}
++
++async function withRoutes(run: (db: Database.Database, request: Request, boardId: string) => Promise<void>): Promise<void> {
++  const db = await createV13BoardsFixture();
++  let server: Server | undefined;
++  try {
++    seedOwner(db);
++    const boardId = makeBoard(db);
++    const app = express();
++    app.use(express.json());
++    // Exercise only the post-auth boards contract in a disposable database.
++    app.use((req: AuthRequest, _res, next) => { req.userId = USER; next(); });
++    app.use('/api/boards', createBoardRouter(() => db));
++    app.use(errorHandler);
++    server = await new Promise<Server>((resolve) => {
++      const listener = app.listen(0, '127.0.0.1', () => resolve(listener));
++    });
++    const address = server.address();
++    assert.ok(address && typeof address === 'object');
++    const request: Request = async (method, path, body, status = 200) => {
++      const response = await fetch(`http://127.0.0.1:${address.port}/api/boards${path}`, {
++        method,
++        ...(body !== undefined && { headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }),
++      });
++      const result = await response.json();
++      assert.equal(response.status, status, `${method} ${path}: ${JSON.stringify(result)}`);
++      return result;
++    };
++    await run(db, request, boardId);
++  } finally {
++    if (server) await new Promise<void>((resolve, reject) => server!.close((error) => error ? reject(error) : resolve()));
++    db.close();
++  }
++}
++
++function boardState(db: Database.Database) {
++  return ['boards', 'board_layers', 'board_members', 'board_edges', 'board_visuals', 'items', 'events']
++    .map((table) => db.prepare(`SELECT * FROM ${table}`).all());
++}
++
++test('066 creates the same fresh and upgrade bookmark schema without changing existing board rows', async (t) => {
++  const fresh = await createV13BoardsFixture();
++  t.after(() => fresh.close());
++  const upgrade = await createV13BoardsFixture();
++  t.after(() => upgrade.close());
++  seedOwner(upgrade);
++  makeBoard(upgrade);
++  // The exact pre-066 boundary: current board tables exist and this new table does not.
++  upgrade.exec('DROP TABLE board_viewport_bookmarks');
++  const before = boardState(upgrade);
++  upgrade.transaction(() => migration066.up(upgrade))();
++  upgrade.transaction(() => migration066.up(upgrade))();
++  const shape = (db: Database.Database) => db.prepare(`SELECT type, name, sql FROM sqlite_master
++    WHERE tbl_name = 'board_viewport_bookmarks' ORDER BY name`).all().map((row: any) => ({
++    ...row, sql: row.sql?.replace(/\s+/g, ' ').trim() ?? null,
++  }));
++  assert.deepEqual(shape(upgrade), shape(fresh));
++  assert.deepEqual(boardState(upgrade), before);
++  assert.deepEqual((fresh.pragma('table_info(board_viewport_bookmarks)') as Array<{ name: string }>).map((column) => column.name),
++    ['id', 'board_id', 'user_id', 'name', 'x', 'y', 'zoom', 'created_at']);
++  assert.equal((fresh.pragma('foreign_key_list(board_viewport_bookmarks)') as Array<{ table: string; on_delete: string }>)
++    .find((fk) => fk.table === 'boards')?.on_delete, 'CASCADE');
++});
++
++test('bookmark HTTP list/create/rename/delete preserves exact camera snapshot and all board structure', async () => {
++  await withRoutes(async (db, request, boardId) => {
++    const path = `/${boardId}/viewport-bookmarks`;
++    await request('POST', `/${boardId}/layers`, { name: 'Existing layer' }, 201);
++    await request('POST', `/${boardId}/visuals`, {
++      visual_kind: 'shape', x: 140, y: -85, z_index: 7, data: { shape: 'rectangle' },
++    }, 201);
++    const before = boardState(db);
++    assert.deepEqual(await request('GET', path), { bookmarks: [] });
++    const { bookmark } = await request('POST', path, { name: '  第二章  ', ...SNAPSHOT }, 201);
++    assert.deepEqual(bookmark, { id: bookmark.id, board_id: boardId, user_id: USER,
++      name: '第二章', ...SNAPSHOT, created_at: bookmark.created_at });
++    assert.ok(Number.isFinite(Date.parse(bookmark.created_at)));
++    assert.deepEqual((await request('GET', path)).bookmarks, [bookmark]);
++    const renamed = (await request('PATCH', `${path}/${bookmark.id}`, { name: '  时间线区 ' })).bookmark;
++    assert.deepEqual(renamed, { ...bookmark, name: '时间线区' });
++    assert.deepEqual(await request('DELETE', `${path}/${bookmark.id}`), { deleted: true });
++    assert.deepEqual(await request('DELETE', `${path}/${bookmark.id}`), { deleted: false });
++    assert.deepEqual(await request('GET', path), { bookmarks: [] });
++    assert.deepEqual(boardState(db), before);
++  });
++});
++
++test('bookmark list uses creation order for equal timestamps and rename never moves a row', async () => {
++  await withRoutes(async (db, request, boardId) => {
++    const insert = db.prepare(`INSERT INTO board_viewport_bookmarks (id, board_id, user_id, name, x, y, zoom, created_at)
++      VALUES (?, ?, ?, ?, 1, 2, 1, '2026-09-11T00:00:00.000Z')`);
++    insert.run('z-first', boardId, USER, 'First');
++    insert.run('a-second', boardId, USER, 'Second');
++    const path = `/${boardId}/viewport-bookmarks`;
++    await request('PATCH', `${path}/z-first`, { name: 'Renamed first' });
++    assert.deepEqual((await request('GET', path)).bookmarks.map((bookmark: { id: string }) => bookmark.id), ['z-first', 'a-second']);
++  });
++});
++
++test('bookmark names trim to 1–32 and viewport input follows the existing finite positive zoom contract', async () => {
++  await withRoutes(async (_db, request, boardId) => {
++    const path = `/${boardId}/viewport-bookmarks`;
++    for (const name of ['', '   ', '章'.repeat(33)]) {
++      await request('POST', path, { name, ...SNAPSHOT }, 400);
++    }
++    const { bookmark } = await request('POST', path, { name: ` ${'章'.repeat(32)} `, ...SNAPSHOT }, 201);
++    assert.equal(bookmark.name.length, 32);
++    for (const name of ['', '  ', 'x'.repeat(33)]) {
++      await request('PATCH', `${path}/${bookmark.id}`, { name }, 400);
++    }
++    for (const input of [{ ...SNAPSHOT, zoom: 0 }, { ...SNAPSHOT, zoom: -1 }, { ...SNAPSHOT, x: null }]) {
++      await request('POST', path, { name: 'Snapshot', ...input }, 400);
++    }
++    await request('PATCH', `${path}/${bookmark.id}`, { name: 'Changed', x: 999 }, 400);
++    assert.equal((await request('GET', path)).bookmarks[0].name, '章'.repeat(32));
++    const shared = readFileSync(new URL('../../../shared/types/boardViewportBookmarks.ts', import.meta.url), 'utf8');
++    assert.match(shared, new RegExp(`BOARD_VIEWPORT_BOOKMARK_LIMIT = ${BOARD_VIEWPORT_BOOKMARK_LIMIT};`));
++    assert.match(shared, new RegExp(`BOARD_VIEWPORT_BOOKMARK_NAME_LIMIT = ${BOARD_VIEWPORT_BOOKMARK_NAME_LIMIT};`));
++  });
++});
++
++test('bookmark 24 limit returns a readable reason, is per board, and a deleted slot can be reused', async () => {
++  await withRoutes(async (db, request, boardId) => {
++    const path = `/${boardId}/viewport-bookmarks`;
++    const ids: string[] = [];
++    for (let index = 0; index < BOARD_VIEWPORT_BOOKMARK_LIMIT; index += 1) {
++      const { bookmark } = await request('POST', path, { name: `View ${index + 1}`, ...SNAPSHOT }, 201);
++      ids.push(bookmark.id);
++    }
++    assert.deepEqual(await request('POST', path, { name: 'Overflow', ...SNAPSHOT }, 409), {
++      error: 'board_viewport_bookmark_limit_reached', details: { limit: 24 },
++    });
++    await request('PATCH', `${path}/${ids[0]}`, { name: 'Rename at capacity' });
++    assert.equal((await request('GET', path)).bookmarks.length, 24);
++    const anotherBoard = makeBoard(db);
++    await request('POST', `/${anotherBoard}/viewport-bookmarks`, { name: 'Other board', ...SNAPSHOT }, 201);
++    await request('DELETE', `${path}/${ids[0]}`);
++    const { bookmark: replacement } = await request('POST', path, { name: 'Replacement', ...SNAPSHOT }, 201);
++    assert.deepEqual((await request('GET', path)).bookmarks.map((bookmark: { id: string }) => bookmark.id),
++      [...ids.slice(1), replacement.id]);
++  });
++});
++
++test('existing board delete cascades its bookmarks and retains the other board snapshot', async () => {
++  await withRoutes(async (db, request, boardId) => {
++    const otherBoardId = makeBoard(db);
++    await request('POST', `/${boardId}/viewport-bookmarks`, { name: 'Gone with board', ...SNAPSHOT }, 201);
++    const { bookmark: retained } = await request('POST', `/${otherBoardId}/viewport-bookmarks`, { name: 'Retained', ...SNAPSHOT }, 201);
++    await request('DELETE', `/${boardId}`);
++    assert.deepEqual(db.prepare('SELECT * FROM board_viewport_bookmarks').all(), [retained]);
++    assert.deepEqual((await request('GET', `/${otherBoardId}/viewport-bookmarks`)).bookmarks, [retained]);
++    await request('GET', `/${boardId}/viewport-bookmarks`, undefined, 404);
++  });
++});
+diff --git a/shared/types/boardViewportBookmarks.ts b/shared/types/boardViewportBookmarks.ts
+new file mode 100644
+--- /dev/null
++++ b/shared/types/boardViewportBookmarks.ts
+@@ -0,0 +1,17 @@
++export const BOARD_VIEWPORT_BOOKMARK_LIMIT = 24;
++export const BOARD_VIEWPORT_BOOKMARK_NAME_LIMIT = 32;
++
++/** A named camera snapshot. It contains no board membership or layout state. */
++export interface CreateBoardViewportBookmarkInput {
++  name: string;
++  x: number;
++  y: number;
++  zoom: number;
++}
++
++export interface BoardViewportBookmark extends CreateBoardViewportBookmarkInput {
++  id: string;
++  board_id: string;
++  user_id: string;
++  created_at: string;
++}

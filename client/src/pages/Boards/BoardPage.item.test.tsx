@@ -96,6 +96,7 @@ beforeEach(() => {
     members: [], edges: [], visuals: [],
   };
   http.get.mockImplementation(async (url: string) => {
+    if (url === '/boards/item-board/viewport-bookmarks') return clone({ bookmarks: [] });
     if (url === '/courses') return clone([{ id: 'project', name: 'Fieldwork' }]);
     if (url === '/items') return clone(items.filter((item) => item.status === 'active'));
     if (url === '/notes') return clone([{ id: 'origin-note', course_id: 'project', title: 'Origin note', status: 'active' }]);

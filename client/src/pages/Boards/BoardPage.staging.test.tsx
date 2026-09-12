@@ -54,6 +54,7 @@ beforeEach(() => {
     viewport: { x: 30, y: -20, zoom: 2 }, created_at: at, updated_at: at }, members: [], edges: [], visuals: [] };
   http.get.mockImplementation(async (url: string) => {
     if (url === '/boards/board') return clone(detail);
+    if (url === '/boards/board/viewport-bookmarks') return clone({ bookmarks: [] });
     if (url === '/courses') return clone([{ id: 'project', name: 'Synthetic project' }]);
     if (url === '/notes') return clone([{ id: 'note', title: 'Source note', course_id: 'project', status: 'active' }]);
     if (url === '/items') return clone([{ id: 'item', plain_text: 'An item ready for thought.', item_type: 'Claim',

@@ -189,6 +189,10 @@ beforeEach(() => {
   http.get.mockImplementation(async (url: string, config?: { params?: { course_id?: string; note_id?: string } }) => {
     if (url === '/boards') return response({ boards: boards.map(({ board }) => board) });
     if (url.startsWith('/boards/text-ranges/by-note/')) return response({ text_ranges: [] });
+    if (/^\/boards\/[^/]+\/viewport-bookmarks$/.test(url)) {
+      detailFor(url);
+      return response({ bookmarks: [] });
+    }
     if (url.startsWith('/boards/')) return response(detailFor(url));
     if (url === '/purposes') return response({ purposes });
     if (url === '/courses') return response(projects);

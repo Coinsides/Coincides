@@ -1,0 +1,853 @@
+﻿{
+    "isolation":  {
+                      "database":  ":memory:",
+                      "production_database_opened":  false,
+                      "owner":  "b4v-synthetic-owner",
+                      "reset_count":  1
+                  },
+    "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+    "initial_viewport":  {
+                             "x":  120,
+                             "y":  80,
+                             "zoom":  0.8
+                         },
+    "board":  {
+                  "id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                  "user_id":  "b4v-synthetic-owner",
+                  "title":  "B4v viewport smoke",
+                  "soul_id":  "purpose-12699251-d699-4602-b5ac-a541f5c5f02e",
+                  "project_id":  null,
+                  "item_id":  "878a665f-8f56-4056-866c-3d84462153ee",
+                  "viewport":  "{\"x\":-249.5999999999999,\"y\":-515.64,\"zoom\":1.152}",
+                  "created_at":  "2026-09-12T00:47:38.084Z",
+                  "updated_at":  "2026-09-12T00:51:24.221Z"
+              },
+    "viewport":  {
+                     "x":  -249.5999999999999,
+                     "y":  -515.64,
+                     "zoom":  1.152
+                 },
+    "bookmarks":  [
+                      {
+                          "id":  "63d37cd3-4bc6-4844-8607-1efaf6154ca3",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "第二章",
+                          "x":  120,
+                          "y":  80,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:48:41.332Z"
+                      },
+                      {
+                          "id":  "a87d6157-23ca-487e-b19a-f1b013fc2356",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 2",
+                          "x":  -90,
+                          "y":  -45,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.488Z"
+                      },
+                      {
+                          "id":  "91ffc415-614d-4bc7-be43-2b9a3ea4eefe",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 3",
+                          "x":  -180,
+                          "y":  -90,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.488Z"
+                      },
+                      {
+                          "id":  "d0e7900f-46b0-4346-baa9-e227daca99ff",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 4",
+                          "x":  -270,
+                          "y":  -135,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.488Z"
+                      },
+                      {
+                          "id":  "aa418396-dc82-4275-87b1-d01018b0abf5",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 5",
+                          "x":  -360,
+                          "y":  -180,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.488Z"
+                      },
+                      {
+                          "id":  "0753d437-9083-40c0-be06-ce441c27555a",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 6",
+                          "x":  -450,
+                          "y":  -225,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.488Z"
+                      },
+                      {
+                          "id":  "92117201-8a96-4439-87e9-71ffecd6b207",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 7",
+                          "x":  -540,
+                          "y":  -270,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.488Z"
+                      },
+                      {
+                          "id":  "96a6e5d5-2b54-40c4-945d-2b04bba973e9",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 8",
+                          "x":  -630,
+                          "y":  -315,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.488Z"
+                      },
+                      {
+                          "id":  "2064f69f-134c-4ca0-a8b8-1f672f4d8f9c",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 9",
+                          "x":  -720,
+                          "y":  -360,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.488Z"
+                      },
+                      {
+                          "id":  "39ecf385-9cd8-4e2d-822e-8afda8d8b77f",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 10",
+                          "x":  -810,
+                          "y":  -405,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.488Z"
+                      },
+                      {
+                          "id":  "ff0416bc-1a64-4b72-9da4-94c7ded1d831",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 11",
+                          "x":  -900,
+                          "y":  -450,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.488Z"
+                      },
+                      {
+                          "id":  "3072502b-f84e-4d61-8439-f193d52252de",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 12",
+                          "x":  -990,
+                          "y":  -495,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.488Z"
+                      },
+                      {
+                          "id":  "9cebb235-31f1-4d9c-afda-4f5a15df8623",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 13",
+                          "x":  -1080,
+                          "y":  -540,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.488Z"
+                      },
+                      {
+                          "id":  "102ef011-5a49-4fa5-aa18-48e806e28969",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 14",
+                          "x":  -1170,
+                          "y":  -585,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.488Z"
+                      },
+                      {
+                          "id":  "f962b93e-6060-47a1-a378-14510942cb7e",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 15",
+                          "x":  -1260,
+                          "y":  -630,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.488Z"
+                      },
+                      {
+                          "id":  "5b0872fe-2662-49ce-aff5-6476fc13f182",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 16",
+                          "x":  -1350,
+                          "y":  -675,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.488Z"
+                      },
+                      {
+                          "id":  "bc800bd6-3cf5-4e99-8ceb-86783d7b4639",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 17",
+                          "x":  -1440,
+                          "y":  -720,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.488Z"
+                      },
+                      {
+                          "id":  "b9ea8885-769a-43fb-903c-385e52b740f8",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 18",
+                          "x":  -1530,
+                          "y":  -765,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.488Z"
+                      },
+                      {
+                          "id":  "2257c5ea-ad8c-4ee3-b70f-23100e70a1ff",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 19",
+                          "x":  -1620,
+                          "y":  -810,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.488Z"
+                      },
+                      {
+                          "id":  "96ef8812-34d0-46dd-a9a1-78af86e83879",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 20",
+                          "x":  -1710,
+                          "y":  -855,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.489Z"
+                      },
+                      {
+                          "id":  "808a552b-b31e-434f-b11f-311559bc9ecf",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 21",
+                          "x":  -1800,
+                          "y":  -900,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.489Z"
+                      },
+                      {
+                          "id":  "8ce6f43e-04ca-467d-b27c-fe1303859de3",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 22",
+                          "x":  -1890,
+                          "y":  -945,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.489Z"
+                      },
+                      {
+                          "id":  "42508269-d79d-48bb-8127-e64d677a0ce5",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 23",
+                          "x":  -1980,
+                          "y":  -990,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.489Z"
+                      },
+                      {
+                          "id":  "8588698f-b16a-4315-8c90-a4c73c8eed0f",
+                          "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                          "user_id":  "b4v-synthetic-owner",
+                          "name":  "Prepared view 24",
+                          "x":  -2070,
+                          "y":  -1035,
+                          "zoom":  0.8,
+                          "created_at":  "2026-09-12T00:51:57.489Z"
+                      }
+                  ],
+    "board_before":  {
+                         "id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                         "user_id":  "b4v-synthetic-owner",
+                         "title":  "B4v viewport smoke",
+                         "soul_id":  "purpose-12699251-d699-4602-b5ac-a541f5c5f02e",
+                         "project_id":  null,
+                         "item_id":  "878a665f-8f56-4056-866c-3d84462153ee",
+                         "viewport":  "{\"x\":120,\"y\":80,\"zoom\":0.8}",
+                         "created_at":  "2026-09-12T00:47:38.084Z",
+                         "updated_at":  "2026-09-12T00:47:38.087Z"
+                     },
+    "scene_before":  {
+                         "board_members":  [
+                                               {
+                                                   "id":  "159035cc-bdfd-4f48-8338-c245eddca87f",
+                                                   "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                                                   "member_kind":  "item",
+                                                   "member_id":  "7353385c-3ad6-4e3c-8fe0-15b06a260f51",
+                                                   "placed":  1,
+                                                   "mounted_actor":  "human",
+                                                   "layer_id":  "006c9217-b76e-4237-a995-d7cbcd9fcaf7",
+                                                   "x":  700,
+                                                   "y":  440,
+                                                   "w":  260,
+                                                   "h":  150,
+                                                   "scale":  1,
+                                                   "z_index":  9,
+                                                   "pinned":  0,
+                                                   "metadata":  "{}",
+                                                   "created_at":  "2026-09-12T00:47:38.087Z",
+                                                   "updated_at":  "2026-09-12T00:47:38.087Z"
+                                               },
+                                               {
+                                                   "id":  "22b2b3c8-1e7d-40dc-92bb-069c5ca05fa7",
+                                                   "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                                                   "member_kind":  "item",
+                                                   "member_id":  "77b42beb-01a3-46d0-8c92-2d245fbc137d",
+                                                   "placed":  1,
+                                                   "mounted_actor":  "human",
+                                                   "layer_id":  null,
+                                                   "x":  60,
+                                                   "y":  80,
+                                                   "w":  260,
+                                                   "h":  150,
+                                                   "scale":  1,
+                                                   "z_index":  3,
+                                                   "pinned":  0,
+                                                   "metadata":  "{}",
+                                                   "created_at":  "2026-09-12T00:47:38.086Z",
+                                                   "updated_at":  "2026-09-12T00:47:38.086Z"
+                                               }
+                                           ],
+                         "board_visuals":  [
+                                               {
+                                                   "id":  "44e88705-e79d-4542-a815-ed04a33c64a0",
+                                                   "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                                                   "visual_kind":  "sticky",
+                                                   "layer_id":  null,
+                                                   "x":  280,
+                                                   "y":  400,
+                                                   "w":  240,
+                                                   "h":  100,
+                                                   "scale":  1,
+                                                   "rotation":  0,
+                                                   "z_index":  4,
+                                                   "pinned":  0,
+                                                   "data":  "{\"text\":\"Only the camera should move.\"}",
+                                                   "metadata":  "{}",
+                                                   "created_at":  "2026-09-12T00:47:38.087Z",
+                                                   "updated_at":  "2026-09-12T00:47:38.087Z"
+                                               },
+                                               {
+                                                   "id":  "46e624af-6c75-4537-8ac5-e7dc75a0531a",
+                                                   "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                                                   "visual_kind":  "shape",
+                                                   "layer_id":  "006c9217-b76e-4237-a995-d7cbcd9fcaf7",
+                                                   "x":  410,
+                                                   "y":  130,
+                                                   "w":  210,
+                                                   "h":  160,
+                                                   "scale":  1,
+                                                   "rotation":  0,
+                                                   "z_index":  6,
+                                                   "pinned":  0,
+                                                   "data":  "{\"tray_source\":{\"object\":{\"metadata\":{\"shape_type\":\"ellipse\"}},\"backing_blocks\":[{\"plain_text\":\"Fixed landmark\"}]}}",
+                                                   "metadata":  "{}",
+                                                   "created_at":  "2026-09-12T00:47:38.087Z",
+                                                   "updated_at":  "2026-09-12T00:47:38.087Z"
+                                               }
+                                           ],
+                         "board_edges":  [
+                                             {
+                                                 "id":  "8b299264-2714-431d-be2b-d4b4a5f5ad0b",
+                                                 "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                                                 "from_member_id":  "22b2b3c8-1e7d-40dc-92bb-069c5ca05fa7",
+                                                 "to_member_id":  "159035cc-bdfd-4f48-8338-c245eddca87f",
+                                                 "style":  "{}",
+                                                 "label":  "Existing relationship",
+                                                 "created_at":  "2026-09-12T00:47:38.087Z"
+                                             }
+                                         ],
+                         "board_layers":  [
+                                              {
+                                                  "id":  "006c9217-b76e-4237-a995-d7cbcd9fcaf7",
+                                                  "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                                                  "user_id":  "b4v-synthetic-owner",
+                                                  "name":  "Existing scene layer",
+                                                  "order_index":  0,
+                                                  "visible":  1
+                                              }
+                                          ],
+                         "board_text_ranges":  [
+
+                                               ]
+                     },
+    "scene_now":  {
+                      "board_members":  [
+                                            {
+                                                "id":  "159035cc-bdfd-4f48-8338-c245eddca87f",
+                                                "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                                                "member_kind":  "item",
+                                                "member_id":  "7353385c-3ad6-4e3c-8fe0-15b06a260f51",
+                                                "placed":  1,
+                                                "mounted_actor":  "human",
+                                                "layer_id":  "006c9217-b76e-4237-a995-d7cbcd9fcaf7",
+                                                "x":  700,
+                                                "y":  440,
+                                                "w":  260,
+                                                "h":  150,
+                                                "scale":  1,
+                                                "z_index":  9,
+                                                "pinned":  0,
+                                                "metadata":  "{}",
+                                                "created_at":  "2026-09-12T00:47:38.087Z",
+                                                "updated_at":  "2026-09-12T00:47:38.087Z"
+                                            },
+                                            {
+                                                "id":  "22b2b3c8-1e7d-40dc-92bb-069c5ca05fa7",
+                                                "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                                                "member_kind":  "item",
+                                                "member_id":  "77b42beb-01a3-46d0-8c92-2d245fbc137d",
+                                                "placed":  1,
+                                                "mounted_actor":  "human",
+                                                "layer_id":  null,
+                                                "x":  60,
+                                                "y":  80,
+                                                "w":  260,
+                                                "h":  150,
+                                                "scale":  1,
+                                                "z_index":  3,
+                                                "pinned":  0,
+                                                "metadata":  "{}",
+                                                "created_at":  "2026-09-12T00:47:38.086Z",
+                                                "updated_at":  "2026-09-12T00:47:38.086Z"
+                                            }
+                                        ],
+                      "board_visuals":  [
+                                            {
+                                                "id":  "44e88705-e79d-4542-a815-ed04a33c64a0",
+                                                "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                                                "visual_kind":  "sticky",
+                                                "layer_id":  null,
+                                                "x":  280,
+                                                "y":  400,
+                                                "w":  240,
+                                                "h":  100,
+                                                "scale":  1,
+                                                "rotation":  0,
+                                                "z_index":  4,
+                                                "pinned":  0,
+                                                "data":  "{\"text\":\"Only the camera should move.\"}",
+                                                "metadata":  "{}",
+                                                "created_at":  "2026-09-12T00:47:38.087Z",
+                                                "updated_at":  "2026-09-12T00:47:38.087Z"
+                                            },
+                                            {
+                                                "id":  "46e624af-6c75-4537-8ac5-e7dc75a0531a",
+                                                "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                                                "visual_kind":  "shape",
+                                                "layer_id":  "006c9217-b76e-4237-a995-d7cbcd9fcaf7",
+                                                "x":  410,
+                                                "y":  130,
+                                                "w":  210,
+                                                "h":  160,
+                                                "scale":  1,
+                                                "rotation":  0,
+                                                "z_index":  6,
+                                                "pinned":  0,
+                                                "data":  "{\"tray_source\":{\"object\":{\"metadata\":{\"shape_type\":\"ellipse\"}},\"backing_blocks\":[{\"plain_text\":\"Fixed landmark\"}]}}",
+                                                "metadata":  "{}",
+                                                "created_at":  "2026-09-12T00:47:38.087Z",
+                                                "updated_at":  "2026-09-12T00:47:38.087Z"
+                                            }
+                                        ],
+                      "board_edges":  [
+                                          {
+                                              "id":  "8b299264-2714-431d-be2b-d4b4a5f5ad0b",
+                                              "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                                              "from_member_id":  "22b2b3c8-1e7d-40dc-92bb-069c5ca05fa7",
+                                              "to_member_id":  "159035cc-bdfd-4f48-8338-c245eddca87f",
+                                              "style":  "{}",
+                                              "label":  "Existing relationship",
+                                              "created_at":  "2026-09-12T00:47:38.087Z"
+                                          }
+                                      ],
+                      "board_layers":  [
+                                           {
+                                               "id":  "006c9217-b76e-4237-a995-d7cbcd9fcaf7",
+                                               "board_id":  "2bc46592-8953-42fb-aad8-c918947fd59f",
+                                               "user_id":  "b4v-synthetic-owner",
+                                               "name":  "Existing scene layer",
+                                               "order_index":  0,
+                                               "visible":  1
+                                           }
+                                       ],
+                      "board_text_ranges":  [
+
+                                            ]
+                  },
+    "scene_unchanged":  true,
+    "requests":  [
+                     {
+                         "method":  "GET",
+                         "path":  "/api/api/courses",
+                         "status":  200
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/api/items?status=active",
+                         "status":  200
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/2bc46592-8953-42fb-aad8-c918947fd59f",
+                         "status":  200
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/2bc46592-8953-42fb-aad8-c918947fd59f/viewport-bookmarks",
+                         "status":  200
+                     },
+                     {
+                         "method":  "POST",
+                         "path":  "/api/2bc46592-8953-42fb-aad8-c918947fd59f/viewport-bookmarks",
+                         "status":  201,
+                         "body":  {
+                                      "name":  "第二章",
+                                      "x":  120,
+                                      "y":  80,
+                                      "zoom":  0.8
+                                  }
+                     },
+                     {
+                         "method":  "PATCH",
+                         "path":  "/api/2bc46592-8953-42fb-aad8-c918947fd59f",
+                         "status":  200,
+                         "body":  {
+                                      "viewport":  {
+                                                       "x":  -48,
+                                                       "y":  16.30000000000001,
+                                                       "zoom":  0.96
+                                                   }
+                                  }
+                     },
+                     {
+                         "method":  "PATCH",
+                         "path":  "/api/2bc46592-8953-42fb-aad8-c918947fd59f",
+                         "status":  200,
+                         "body":  {
+                                      "viewport":  {
+                                                       "x":  -249.5999999999999,
+                                                       "y":  -60.139999999999986,
+                                                       "zoom":  1.152
+                                                   }
+                                  }
+                     },
+                     {
+                         "method":  "PATCH",
+                         "path":  "/api/2bc46592-8953-42fb-aad8-c918947fd59f",
+                         "status":  200,
+                         "body":  {
+                                      "viewport":  {
+                                                       "x":  -249.5999999999999,
+                                                       "y":  -515.64,
+                                                       "zoom":  1.152
+                                                   }
+                                  }
+                     },
+                     {
+                         "method":  "POST",
+                         "path":  "/api/2bc46592-8953-42fb-aad8-c918947fd59f/viewport-bookmarks",
+                         "status":  201,
+                         "body":  {
+                                      "name":  "时间线区",
+                                      "x":  -249.5999999999999,
+                                      "y":  -515.64,
+                                      "zoom":  1.152
+                                  }
+                     },
+                     {
+                         "method":  "PATCH",
+                         "path":  "/api/2bc46592-8953-42fb-aad8-c918947fd59f",
+                         "status":  200,
+                         "body":  {
+                                      "viewport":  {
+                                                       "x":  120,
+                                                       "y":  80,
+                                                       "zoom":  0.8
+                                                   }
+                                  }
+                     },
+                     {
+                         "method":  "PATCH",
+                         "path":  "/api/2bc46592-8953-42fb-aad8-c918947fd59f",
+                         "status":  200,
+                         "body":  {
+                                      "viewport":  {
+                                                       "x":  -249.5999999999999,
+                                                       "y":  -515.64,
+                                                       "zoom":  1.152
+                                                   }
+                                  }
+                     },
+                     {
+                         "method":  "PATCH",
+                         "path":  "/api/2bc46592-8953-42fb-aad8-c918947fd59f/viewport-bookmarks/c199772c-2aab-4784-b04b-4053b666911c",
+                         "status":  200,
+                         "body":  {
+                                      "name":  "时间线总览"
+                                  }
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/2bc46592-8953-42fb-aad8-c918947fd59f/viewport-bookmarks",
+                         "status":  200
+                     },
+                     {
+                         "method":  "PATCH",
+                         "path":  "/api/2bc46592-8953-42fb-aad8-c918947fd59f",
+                         "status":  200,
+                         "body":  {
+                                      "viewport":  {
+                                                       "x":  -249.5999999999999,
+                                                       "y":  -515.64,
+                                                       "zoom":  1.152
+                                                   }
+                                  }
+                     },
+                     {
+                         "method":  "DELETE",
+                         "path":  "/api/2bc46592-8953-42fb-aad8-c918947fd59f/viewport-bookmarks/c199772c-2aab-4784-b04b-4053b666911c",
+                         "status":  200
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/2bc46592-8953-42fb-aad8-c918947fd59f/viewport-bookmarks",
+                         "status":  200
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/2bc46592-8953-42fb-aad8-c918947fd59f",
+                         "status":  200
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/api/courses",
+                         "status":  304
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/api/items?status=active",
+                         "status":  304
+                     },
+                     {
+                         "method":  "GET",
+                         "path":  "/api/2bc46592-8953-42fb-aad8-c918947fd59f/viewport-bookmarks",
+                         "status":  200
+                     }
+                 ],
+    "observations":  [
+                         {
+                             "received_at":  "2026-09-12T00:48:15.995Z",
+                             "observed_at":  "2026-09-12T00:48:15.928Z",
+                             "source":  "actual DOM; read-only MutationObserver",
+                             "transform":  "translate(120px, 80px) scale(0.8)",
+                             "computed_transform":  "matrix(0.8, 0, 0, 0.8, 120, 80)",
+                             "landmarks":  [
+                                               {
+                                                   "id":  "board-visual-44e88705-e79d-4542-a815-ed04a33c64a0",
+                                                   "kind":  "sticky",
+                                                   "x":  344,
+                                                   "y":  514,
+                                                   "width":  192,
+                                                   "height":  80
+                                               },
+                                               {
+                                                   "id":  "board-visual-46e624af-6c75-4537-8ac5-e7dc75a0531a",
+                                                   "kind":  "shape",
+                                                   "x":  448,
+                                                   "y":  298,
+                                                   "width":  168,
+                                                   "height":  128
+                                               }
+                                           ]
+                         },
+                         {
+                             "received_at":  "2026-09-12T00:48:54.315Z",
+                             "observed_at":  "2026-09-12T00:48:54.311Z",
+                             "source":  "actual DOM; read-only MutationObserver",
+                             "transform":  "translate(-48px, 16.3px) scale(0.96)",
+                             "computed_transform":  "matrix(0.96, 0, 0, 0.96, -48, 16.3)",
+                             "landmarks":  [
+                                               {
+                                                   "id":  "board-visual-44e88705-e79d-4542-a815-ed04a33c64a0",
+                                                   "kind":  "sticky",
+                                                   "x":  220.79998779296875,
+                                                   "y":  514.2999877929688,
+                                                   "width":  230.39999389648438,
+                                                   "height":  96
+                                               },
+                                               {
+                                                   "id":  "board-visual-46e624af-6c75-4537-8ac5-e7dc75a0531a",
+                                                   "kind":  "shape",
+                                                   "x":  345.6000061035156,
+                                                   "y":  255.09999084472656,
+                                                   "width":  201.60000610351562,
+                                                   "height":  153.59999084472656
+                                               }
+                                           ]
+                         },
+                         {
+                             "received_at":  "2026-09-12T00:48:56.340Z",
+                             "observed_at":  "2026-09-12T00:48:56.335Z",
+                             "source":  "actual DOM; read-only MutationObserver",
+                             "transform":  "translate(-249.6px, -60.14px) scale(1.152)",
+                             "computed_transform":  "matrix(1.152, 0, 0, 1.152, -249.6, -60.14)",
+                             "landmarks":  [
+                                               {
+                                                   "id":  "board-visual-44e88705-e79d-4542-a815-ed04a33c64a0",
+                                                   "kind":  "sticky",
+                                                   "x":  72.95999145507812,
+                                                   "y":  514.6599731445312,
+                                                   "width":  276.47998046875,
+                                                   "height":  115.20001220703125
+                                               },
+                                               {
+                                                   "id":  "board-visual-46e624af-6c75-4537-8ac5-e7dc75a0531a",
+                                                   "kind":  "shape",
+                                                   "x":  222.719970703125,
+                                                   "y":  203.6199951171875,
+                                                   "width":  241.92001342773438,
+                                                   "height":  184.32000732421875
+                                               }
+                                           ]
+                         },
+                         {
+                             "received_at":  "2026-09-12T00:49:00.607Z",
+                             "observed_at":  "2026-09-12T00:49:00.604Z",
+                             "source":  "actual DOM; read-only MutationObserver",
+                             "transform":  "translate(-249.6px, -515.64px) scale(1.152)",
+                             "computed_transform":  "matrix(1.152, 0, 0, 1.152, -249.6, -515.64)",
+                             "landmarks":  [
+                                               {
+                                                   "id":  "board-visual-44e88705-e79d-4542-a815-ed04a33c64a0",
+                                                   "kind":  "sticky",
+                                                   "x":  72.95999145507812,
+                                                   "y":  59.15997314453125,
+                                                   "width":  276.47998046875,
+                                                   "height":  115.20001220703125
+                                               },
+                                               {
+                                                   "id":  "board-visual-46e624af-6c75-4537-8ac5-e7dc75a0531a",
+                                                   "kind":  "shape",
+                                                   "x":  222.719970703125,
+                                                   "y":  -251.8800048828125,
+                                                   "width":  241.92001342773438,
+                                                   "height":  184.31997680664062
+                                               }
+                                           ]
+                         },
+                         {
+                             "received_at":  "2026-09-12T00:49:25.475Z",
+                             "observed_at":  "2026-09-12T00:49:25.471Z",
+                             "source":  "actual DOM; read-only MutationObserver",
+                             "transform":  "translate(120px, 80px) scale(0.8)",
+                             "computed_transform":  "matrix(0.8, 0, 0, 0.8, 120, 80)",
+                             "landmarks":  [
+                                               {
+                                                   "id":  "board-visual-44e88705-e79d-4542-a815-ed04a33c64a0",
+                                                   "kind":  "sticky",
+                                                   "x":  344,
+                                                   "y":  514,
+                                                   "width":  192,
+                                                   "height":  80
+                                               },
+                                               {
+                                                   "id":  "board-visual-46e624af-6c75-4537-8ac5-e7dc75a0531a",
+                                                   "kind":  "shape",
+                                                   "x":  448,
+                                                   "y":  298,
+                                                   "width":  168,
+                                                   "height":  128
+                                               }
+                                           ]
+                         },
+                         {
+                             "received_at":  "2026-09-12T00:50:42.563Z",
+                             "observed_at":  "2026-09-12T00:50:42.554Z",
+                             "source":  "actual DOM; read-only MutationObserver",
+                             "transform":  "translate(109.639px, 63.302px) scale(0.809868)",
+                             "computed_transform":  "matrix(0.809868, 0, 0, 0.809868, 109.639, 63.302)",
+                             "landmarks":  [
+                                               {
+                                                   "id":  "board-visual-44e88705-e79d-4542-a815-ed04a33c64a0",
+                                                   "kind":  "sticky",
+                                                   "x":  336.4017333984375,
+                                                   "y":  501.2491455078125,
+                                                   "width":  194.3682861328125,
+                                                   "height":  80.98681640625
+                                               },
+                                               {
+                                                   "id":  "board-visual-46e624af-6c75-4537-8ac5-e7dc75a0531a",
+                                                   "kind":  "shape",
+                                                   "x":  441.6845703125,
+                                                   "y":  282.5848388671875,
+                                                   "width":  170.072265625,
+                                                   "height":  129.578857421875
+                                               }
+                                           ]
+                         },
+                         {
+                             "received_at":  "2026-09-12T00:50:42.574Z",
+                             "observed_at":  "2026-09-12T00:50:42.571Z",
+                             "source":  "actual DOM; read-only MutationObserver",
+                             "transform":  "translate(-249.6px, -515.64px) scale(1.152)",
+                             "computed_transform":  "matrix(1.152, 0, 0, 1.152, -249.6, -515.64)",
+                             "landmarks":  [
+                                               {
+                                                   "id":  "board-visual-44e88705-e79d-4542-a815-ed04a33c64a0",
+                                                   "kind":  "sticky",
+                                                   "x":  72.95999145507812,
+                                                   "y":  59.15997314453125,
+                                                   "width":  276.47998046875,
+                                                   "height":  115.20001220703125
+                                               },
+                                               {
+                                                   "id":  "board-visual-46e624af-6c75-4537-8ac5-e7dc75a0531a",
+                                                   "kind":  "shape",
+                                                   "x":  222.719970703125,
+                                                   "y":  -251.8800048828125,
+                                                   "width":  241.92001342773438,
+                                                   "height":  184.31997680664062
+                                               }
+                                           ]
+                         },
+                         {
+                             "received_at":  "2026-09-12T00:52:04.403Z",
+                             "observed_at":  "2026-09-12T00:52:04.395Z",
+                             "source":  "actual DOM; read-only MutationObserver",
+                             "transform":  "translate(-249.6px, -515.64px) scale(1.152)",
+                             "computed_transform":  "matrix(1.152, 0, 0, 1.152, -249.6, -515.64)",
+                             "landmarks":  [
+                                               {
+                                                   "id":  "board-visual-44e88705-e79d-4542-a815-ed04a33c64a0",
+                                                   "kind":  "sticky",
+                                                   "x":  72.95999145507812,
+                                                   "y":  59.15997314453125,
+                                                   "width":  276.47998046875,
+                                                   "height":  115.20001220703125
+                                               },
+                                               {
+                                                   "id":  "board-visual-46e624af-6c75-4537-8ac5-e7dc75a0531a",
+                                                   "kind":  "shape",
+                                                   "x":  222.719970703125,
+                                                   "y":  -251.8800048828125,
+                                                   "width":  241.92001342773438,
+                                                   "height":  184.31997680664062
+                                               }
+                                           ]
+                         }
+                     ]
+}

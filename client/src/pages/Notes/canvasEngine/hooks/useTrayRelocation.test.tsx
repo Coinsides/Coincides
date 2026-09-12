@@ -95,6 +95,7 @@ beforeEach(() => {
   http.get.mockImplementation(async (path: string) => {
     if (path === '/boards') return response({ boards: [board, { ...board, id: 'local-board', title: 'Local board', project_id: 'source-project' }] });
     if (path === `/boards/${board.id}`) return response(detail);
+    if (path === `/boards/${board.id}/viewport-bookmarks`) return response({ bookmarks: [] });
     if (path === '/courses') return response([]);
     if (path === '/fixture-tray/tray-source') return response({ placements: trayRows });
     if (path === '/canvas-assets/synthetic-image/blob') return { data: new Blob(['synthetic'], { type: 'image/png' }) };

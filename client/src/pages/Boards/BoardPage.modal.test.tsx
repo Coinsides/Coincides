@@ -68,6 +68,7 @@ beforeEach(() => {
   };
   http.get.mockImplementation(async (url: string) => {
     if (url === '/boards/board') return clone(detail);
+    if (url === '/boards/board/viewport-bookmarks') return clone({ bookmarks: [] });
     if (url === '/courses') return clone([{ id: 'project', name: 'Fixture project' }]);
     if (url === '/items' || url === '/content-groups') return clone([]);
     if (url === '/notes') return clone(['first', 'second'].map((id) => ({ id, title: id,

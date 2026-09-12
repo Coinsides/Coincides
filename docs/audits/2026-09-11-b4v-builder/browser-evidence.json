@@ -1,0 +1,45 @@
+{
+  "result": "PASS",
+  "generated_at": "2026-09-12T00:57:25.282Z",
+  "browser": "Real existing Chrome controlled through CUA",
+  "isolation": {
+    "database": ":memory:",
+    "production_database_opened": false,
+    "owner": "b4v-synthetic-owner",
+    "reset_count": 1
+  },
+  "production_page": "BoardPage + useBoard + boardRepository + boards router",
+  "checks": {
+    "save_current_viewport": true,
+    "exact_position_and_zoom_both_directions": true,
+    "rename_and_delete": true,
+    "readable_limit_24": true,
+    "board_delete_cascade": true
+  },
+  "snapshots": [
+    {
+      "name": "第二章",
+      "x": 120,
+      "y": 80,
+      "zoom": 0.8
+    },
+    {
+      "name": "时间线总览",
+      "x": -249.5999999999999,
+      "y": -515.64,
+      "zoom": 1.152
+    }
+  ],
+  "dom_observation_count": 8,
+  "browser_http_requests": 22,
+  "scene_unchanged_before_board_delete": true,
+  "allowed_write_paths_only": true,
+  "capture_boundary": "DOM style serializes x=-249.5999999999999 as -249.6; persisted snapshot and viewport retain identical numeric values.",
+  "logger_boundary": "The captured browser request ledger used req.url at finish, so Express omitted the /boards mount segment. Bodies/statuses and database snapshots are original. The fixture logger now uses req.originalUrl for future runs; historical raw evidence was not rewritten.",
+  "setup": "23 additional bookmarks were prepared through the isolated fixture service before refreshing and checking the visible 24-limit message.",
+  "screenshots": [
+    "01-first-jump.png",
+    "02-second-jump-renamed.png",
+    "03-limit-24.png"
+  ]
+}

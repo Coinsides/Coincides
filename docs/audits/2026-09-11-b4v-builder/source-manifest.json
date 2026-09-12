@@ -1,0 +1,68 @@
+{
+  "generated_at": "2026-09-12T00:57:25.311Z",
+  "diff": {
+    "files": 14,
+    "modified": 5,
+    "added": 9,
+    "insertions": 1007,
+    "deletions": 2
+  },
+  "files": [
+    {
+      "path": "client/src/pages/Boards/BoardPage.tsx",
+      "sha256": "3cff5ad5b9aa1e59d3d0ac9a8159ac76f4347bc2cc2dc5fbf8a44eccc61c6fbd"
+    },
+    {
+      "path": "client/src/pages/Boards/boardRepository.ts",
+      "sha256": "a081bea3715a9f461d4fd4665617f3e99951ecd1932fba6c27a09d2c80fca285"
+    },
+    {
+      "path": "client/src/pages/Boards/boardViewport.ts",
+      "sha256": "1c3ac6fdb89702f530beb68194b093937f58551521ff6fdaafba8e60b95d9438"
+    },
+    {
+      "path": "server/src/db/schema.sql",
+      "sha256": "cb6fffe2c5a84ef271c2cf110bbcfcb039adc46e1b7c181853e7d6a27d7695a6"
+    },
+    {
+      "path": "server/src/routes/boards.ts",
+      "sha256": "2f5b16d6572e07750a5e5964be6046718d0260eac1a5d46574ce339d291a064a"
+    },
+    {
+      "path": "client/src/pages/Boards/BoardViewportBookmarks.tsx",
+      "sha256": "649a023d659a9828689d03f8897e046fadb1806ff9bc9d07284a2d28ab1f1015"
+    },
+    {
+      "path": "client/src/pages/Boards/BoardViewportBookmarks.module.css",
+      "sha256": "f571866d98b432e5739dd89ca5f2e90b731c7998de8c1170e6ba7568132b7d70"
+    },
+    {
+      "path": "client/src/pages/Boards/BoardViewportBookmarks.test.tsx",
+      "sha256": "ff7afacaea167871234dc7d91b3f7c998511e745273fb51ee5ec1a8b0785f560"
+    },
+    {
+      "path": "client/src/pages/Boards/BoardPage.bookmarks.test.tsx",
+      "sha256": "ca90567c93e8092be0175b61598154ec18082a8681b1cececdc3b93458971dd5"
+    },
+    {
+      "path": "server/src/db/migrations/066_v13_board_viewport_bookmarks.ts",
+      "sha256": "5684e211afc8df10c0c2528909c1092a0316ec8b3dbfd55626571d8a05882bcb"
+    },
+    {
+      "path": "server/src/services/boardViewportBookmarks.ts",
+      "sha256": "b1614a2abd2842224f9e59740062b9f96273c1db839d617f6a809de76c48b5a3"
+    },
+    {
+      "path": "server/src/validators/boardViewportBookmarks.ts",
+      "sha256": "5b00e9a0c5998fda4d5dd732781bd1ae6ea39bac6a40326078a561ddda7752c0"
+    },
+    {
+      "path": "server/src/__tests__/v13BoardViewportBookmarks.test.ts",
+      "sha256": "38336898b0119962ac1d43e614adac66045cad6eb706fc21756001b3c339f990"
+    },
+    {
+      "path": "shared/types/boardViewportBookmarks.ts",
+      "sha256": "3f2e4326c509fd7ff6205ce16b7043de8e5e79bc2ae7d95e8c33cd94c5c1bb1b"
+    }
+  ]
+}

@@ -1,0 +1,1746 @@
+{
+  "generated_at": "2026-09-12T00:46:44.242Z",
+  "result": "PASS",
+  "checks": [
+    {
+      "name": "Initial saved viewport and empty bookmark list",
+      "pass": true,
+      "viewport": {
+        "x": 120,
+        "y": 80,
+        "zoom": 0.8
+      }
+    },
+    {
+      "name": "Create persists only the exact named camera snapshot; list retains creation order",
+      "pass": true,
+      "first": {
+        "x": 120,
+        "y": 80,
+        "zoom": 0.8,
+        "name": "Chapter one",
+        "id": "749d7491-5c40-4b20-86d2-57f1c4d377ef",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "created_at": "2026-09-12T00:46:44.434Z"
+      },
+      "second": {
+        "x": -520.125,
+        "y": -280.75,
+        "zoom": 1.375,
+        "name": "Timeline",
+        "id": "b96fafc0-c892-4c68-a58f-c8bed2bd0566",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "created_at": "2026-09-12T00:46:44.437Z"
+      }
+    },
+    {
+      "name": "Rename trims the name and preserves snapshot, creation timestamp and order",
+      "pass": true,
+      "renamed": {
+        "id": "749d7491-5c40-4b20-86d2-57f1c4d377ef",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "Chapter one renamed",
+        "x": 120,
+        "y": 80,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.434Z"
+      }
+    },
+    {
+      "name": "Product name bounds: 1 and 32 accepted; empty and 33 rejected",
+      "pass": true,
+      "accepted_lengths": [
+        1,
+        32
+      ]
+    },
+    {
+      "name": "Delete removes one bookmark and preserves remaining creation order",
+      "pass": true
+    },
+    {
+      "name": "24 bookmarks persist; the 25th returns the readable product limit",
+      "pass": true,
+      "count": 24,
+      "rejection": {
+        "error": "board_viewport_bookmark_limit_reached",
+        "details": {
+          "limit": 24
+        }
+      }
+    },
+    {
+      "name": "Bookmark CRUD leaves raw board, layers, members, edges, visuals and z-order byte-equal",
+      "pass": true,
+      "scene_unchanged": true,
+      "board_unchanged": true
+    },
+    {
+      "name": "Existing viewport writer preserves exact x/y/zoom and leaves scene unchanged",
+      "pass": true,
+      "viewport": {
+        "x": -520.125,
+        "y": -280.75,
+        "zoom": 1.375
+      }
+    },
+    {
+      "name": "Deleting the board cascades all 24 saved bookmarks",
+      "pass": true,
+      "remaining_bookmarks": 0
+    }
+  ],
+  "http": [
+    {
+      "method": "GET",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "GET",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks/749d7491-5c40-4b20-86d2-57f1c4d377ef",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 400
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks/749d7491-5c40-4b20-86d2-57f1c4d377ef",
+      "status": 400
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks/749d7491-5c40-4b20-86d2-57f1c4d377ef",
+      "status": 200
+    },
+    {
+      "method": "GET",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 200
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 201
+    },
+    {
+      "method": "POST",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 409
+    },
+    {
+      "method": "GET",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+      "status": 200
+    },
+    {
+      "method": "PATCH",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+      "status": 200
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+      "status": 200
+    }
+  ],
+  "boundary": "Actual production boards HTTP router and real migrated SQLite :memory:; synthetic owner after auth. No browser or auth claim.",
+  "isolation": {
+    "database": ":memory:",
+    "binding": "127.0.0.1",
+    "port": 59578,
+    "production_database_opened": false
+  },
+  "initial_scene": {
+    "board_members": [
+      {
+        "id": "620495eb-9f17-43db-9540-15b97e33fc5d",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "member_kind": "item",
+        "member_id": "75ba5b38-f45f-4ac1-a95a-b784e434fb8f",
+        "placed": 1,
+        "mounted_actor": "human",
+        "layer_id": null,
+        "x": 60,
+        "y": 80,
+        "w": 260,
+        "h": 150,
+        "scale": 1,
+        "z_index": 3,
+        "pinned": 0,
+        "metadata": "{}",
+        "created_at": "2026-09-12T00:46:44.404Z",
+        "updated_at": "2026-09-12T00:46:44.404Z"
+      },
+      {
+        "id": "8462b401-de04-48f2-b7bd-9b6839cab008",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "member_kind": "item",
+        "member_id": "cb36994c-861f-4430-a334-b948b734d6e5",
+        "placed": 1,
+        "mounted_actor": "human",
+        "layer_id": "b5a349aa-85e2-49c6-b87b-8cf66bad9adf",
+        "x": 700,
+        "y": 440,
+        "w": 260,
+        "h": 150,
+        "scale": 1,
+        "z_index": 9,
+        "pinned": 0,
+        "metadata": "{}",
+        "created_at": "2026-09-12T00:46:44.405Z",
+        "updated_at": "2026-09-12T00:46:44.405Z"
+      }
+    ],
+    "board_visuals": [
+      {
+        "id": "48b4e479-0472-41a0-a4c5-d64d175b6b29",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "visual_kind": "shape",
+        "layer_id": "b5a349aa-85e2-49c6-b87b-8cf66bad9adf",
+        "x": 410,
+        "y": 130,
+        "w": 210,
+        "h": 160,
+        "scale": 1,
+        "rotation": 0,
+        "z_index": 6,
+        "pinned": 0,
+        "data": "{\"tray_source\":{\"object\":{\"metadata\":{\"shape_type\":\"ellipse\"}},\"backing_blocks\":[{\"plain_text\":\"Fixed landmark\"}]}}",
+        "metadata": "{}",
+        "created_at": "2026-09-12T00:46:44.405Z",
+        "updated_at": "2026-09-12T00:46:44.405Z"
+      },
+      {
+        "id": "79176690-29a2-44fd-9297-289167074582",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "visual_kind": "sticky",
+        "layer_id": null,
+        "x": 280,
+        "y": 400,
+        "w": 240,
+        "h": 100,
+        "scale": 1,
+        "rotation": 0,
+        "z_index": 4,
+        "pinned": 0,
+        "data": "{\"text\":\"Only the camera should move.\"}",
+        "metadata": "{}",
+        "created_at": "2026-09-12T00:46:44.405Z",
+        "updated_at": "2026-09-12T00:46:44.405Z"
+      }
+    ],
+    "board_edges": [
+      {
+        "id": "89dd1c77-17ef-47f7-a6ef-b9ef3a03931e",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "from_member_id": "620495eb-9f17-43db-9540-15b97e33fc5d",
+        "to_member_id": "8462b401-de04-48f2-b7bd-9b6839cab008",
+        "style": "{}",
+        "label": "Existing relationship",
+        "created_at": "2026-09-12T00:46:44.405Z"
+      }
+    ],
+    "board_layers": [
+      {
+        "id": "b5a349aa-85e2-49c6-b87b-8cf66bad9adf",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "Existing scene layer",
+        "order_index": 0,
+        "visible": 1
+      }
+    ],
+    "board_text_ranges": []
+  },
+  "before_board_delete": {
+    "isolation": {
+      "database": ":memory:",
+      "production_database_opened": false,
+      "owner": "b4v-synthetic-owner",
+      "reset_count": 1
+    },
+    "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+    "initial_viewport": {
+      "x": 120,
+      "y": 80,
+      "zoom": 0.8
+    },
+    "board": {
+      "id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+      "user_id": "b4v-synthetic-owner",
+      "title": "B4v viewport smoke",
+      "soul_id": "purpose-8b4919a1-0870-4466-b63f-9d501f2918c0",
+      "project_id": null,
+      "item_id": "b2652e95-c901-45b6-9798-224a521709ab",
+      "viewport": "{\"x\":-520.125,\"y\":-280.75,\"zoom\":1.375}",
+      "created_at": "2026-09-12T00:46:44.402Z",
+      "updated_at": "2026-09-12T00:46:44.476Z"
+    },
+    "viewport": {
+      "x": -520.125,
+      "y": -280.75,
+      "zoom": 1.375
+    },
+    "bookmarks": [
+      {
+        "id": "b96fafc0-c892-4c68-a58f-c8bed2bd0566",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "Timeline",
+        "x": -520.125,
+        "y": -280.75,
+        "zoom": 1.375,
+        "created_at": "2026-09-12T00:46:44.437Z"
+      },
+      {
+        "id": "2cb9c8eb-3755-43af-9988-99dd8368f005",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "一",
+        "x": 120,
+        "y": 80,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.446Z"
+      },
+      {
+        "id": "13a024b1-85cf-40bf-ac7f-06aa5fd50e31",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字",
+        "x": 120,
+        "y": 80,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.448Z"
+      },
+      {
+        "id": "3c79edb8-6204-4963-b452-9b955125c619",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "View 4",
+        "x": -300,
+        "y": 150,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.453Z"
+      },
+      {
+        "id": "e85a12d9-89ae-4ba0-b562-7c3941c7c1ab",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "View 5",
+        "x": -400,
+        "y": 200,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.455Z"
+      },
+      {
+        "id": "f73ac410-a05f-4970-bcaf-f5f58fa90e11",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "View 6",
+        "x": -500,
+        "y": 250,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.456Z"
+      },
+      {
+        "id": "3c6be941-7624-4125-9b89-b8f5a7c28431",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "View 7",
+        "x": -600,
+        "y": 300,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.457Z"
+      },
+      {
+        "id": "1e2b5bbb-3a3a-4fd4-8a7c-1ea4381bdcd6",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "View 8",
+        "x": -700,
+        "y": 350,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.458Z"
+      },
+      {
+        "id": "9efe8c32-dd38-4f3b-a332-e6c7c247eea4",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "View 9",
+        "x": -800,
+        "y": 400,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.459Z"
+      },
+      {
+        "id": "11f43f10-8c40-41c9-b5ea-f39efa9de00d",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "View 10",
+        "x": -900,
+        "y": 450,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.460Z"
+      },
+      {
+        "id": "fd45b21a-59a7-4c65-bdf2-a92492e217b7",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "View 11",
+        "x": -1000,
+        "y": 500,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.461Z"
+      },
+      {
+        "id": "b40703ca-aa18-43d1-b891-d97fa10ade45",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "View 12",
+        "x": -1100,
+        "y": 550,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.462Z"
+      },
+      {
+        "id": "c8f210d9-8242-4c8a-8547-01a8c6e655f5",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "View 13",
+        "x": -1200,
+        "y": 600,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.463Z"
+      },
+      {
+        "id": "e6b2693e-caf3-4963-82b5-c51954b01e0d",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "View 14",
+        "x": -1300,
+        "y": 650,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.463Z"
+      },
+      {
+        "id": "2fb4fc95-3ff1-48fc-ba9b-18b29d97eeee",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "View 15",
+        "x": -1400,
+        "y": 700,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.464Z"
+      },
+      {
+        "id": "0d2003bd-a794-4a3d-9a1b-b4cfbf7b8689",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "View 16",
+        "x": -1500,
+        "y": 750,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.465Z"
+      },
+      {
+        "id": "a0cf9ee2-f60f-4446-90a8-176fd4f90f25",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "View 17",
+        "x": -1600,
+        "y": 800,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.466Z"
+      },
+      {
+        "id": "a54ea083-d301-4d74-8aae-a477557f3daf",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "View 18",
+        "x": -1700,
+        "y": 850,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.467Z"
+      },
+      {
+        "id": "7bf7f3a8-e8eb-4dd2-8e2b-0345504de1a8",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "View 19",
+        "x": -1800,
+        "y": 900,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.468Z"
+      },
+      {
+        "id": "71e3786f-21ce-4258-a446-37aaced90b66",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "View 20",
+        "x": -1900,
+        "y": 950,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.469Z"
+      },
+      {
+        "id": "d01f5f64-2629-4ffc-b16f-6094168a42ea",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "View 21",
+        "x": -2000,
+        "y": 1000,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.469Z"
+      },
+      {
+        "id": "a1a48562-25a7-40bb-bcb6-01df2dfeb605",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "View 22",
+        "x": -2100,
+        "y": 1050,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.471Z"
+      },
+      {
+        "id": "7f991737-ee09-411f-8624-52a17f10bf6b",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "View 23",
+        "x": -2200,
+        "y": 1100,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.471Z"
+      },
+      {
+        "id": "3520a35d-7341-4a8f-a953-a499a2270164",
+        "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "user_id": "b4v-synthetic-owner",
+        "name": "View 24",
+        "x": -2300,
+        "y": 1150,
+        "zoom": 0.8,
+        "created_at": "2026-09-12T00:46:44.472Z"
+      }
+    ],
+    "board_before": {
+      "id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+      "user_id": "b4v-synthetic-owner",
+      "title": "B4v viewport smoke",
+      "soul_id": "purpose-8b4919a1-0870-4466-b63f-9d501f2918c0",
+      "project_id": null,
+      "item_id": "b2652e95-c901-45b6-9798-224a521709ab",
+      "viewport": "{\"x\":120,\"y\":80,\"zoom\":0.8}",
+      "created_at": "2026-09-12T00:46:44.402Z",
+      "updated_at": "2026-09-12T00:46:44.405Z"
+    },
+    "scene_before": {
+      "board_members": [
+        {
+          "id": "620495eb-9f17-43db-9540-15b97e33fc5d",
+          "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+          "member_kind": "item",
+          "member_id": "75ba5b38-f45f-4ac1-a95a-b784e434fb8f",
+          "placed": 1,
+          "mounted_actor": "human",
+          "layer_id": null,
+          "x": 60,
+          "y": 80,
+          "w": 260,
+          "h": 150,
+          "scale": 1,
+          "z_index": 3,
+          "pinned": 0,
+          "metadata": "{}",
+          "created_at": "2026-09-12T00:46:44.404Z",
+          "updated_at": "2026-09-12T00:46:44.404Z"
+        },
+        {
+          "id": "8462b401-de04-48f2-b7bd-9b6839cab008",
+          "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+          "member_kind": "item",
+          "member_id": "cb36994c-861f-4430-a334-b948b734d6e5",
+          "placed": 1,
+          "mounted_actor": "human",
+          "layer_id": "b5a349aa-85e2-49c6-b87b-8cf66bad9adf",
+          "x": 700,
+          "y": 440,
+          "w": 260,
+          "h": 150,
+          "scale": 1,
+          "z_index": 9,
+          "pinned": 0,
+          "metadata": "{}",
+          "created_at": "2026-09-12T00:46:44.405Z",
+          "updated_at": "2026-09-12T00:46:44.405Z"
+        }
+      ],
+      "board_visuals": [
+        {
+          "id": "48b4e479-0472-41a0-a4c5-d64d175b6b29",
+          "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+          "visual_kind": "shape",
+          "layer_id": "b5a349aa-85e2-49c6-b87b-8cf66bad9adf",
+          "x": 410,
+          "y": 130,
+          "w": 210,
+          "h": 160,
+          "scale": 1,
+          "rotation": 0,
+          "z_index": 6,
+          "pinned": 0,
+          "data": "{\"tray_source\":{\"object\":{\"metadata\":{\"shape_type\":\"ellipse\"}},\"backing_blocks\":[{\"plain_text\":\"Fixed landmark\"}]}}",
+          "metadata": "{}",
+          "created_at": "2026-09-12T00:46:44.405Z",
+          "updated_at": "2026-09-12T00:46:44.405Z"
+        },
+        {
+          "id": "79176690-29a2-44fd-9297-289167074582",
+          "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+          "visual_kind": "sticky",
+          "layer_id": null,
+          "x": 280,
+          "y": 400,
+          "w": 240,
+          "h": 100,
+          "scale": 1,
+          "rotation": 0,
+          "z_index": 4,
+          "pinned": 0,
+          "data": "{\"text\":\"Only the camera should move.\"}",
+          "metadata": "{}",
+          "created_at": "2026-09-12T00:46:44.405Z",
+          "updated_at": "2026-09-12T00:46:44.405Z"
+        }
+      ],
+      "board_edges": [
+        {
+          "id": "89dd1c77-17ef-47f7-a6ef-b9ef3a03931e",
+          "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+          "from_member_id": "620495eb-9f17-43db-9540-15b97e33fc5d",
+          "to_member_id": "8462b401-de04-48f2-b7bd-9b6839cab008",
+          "style": "{}",
+          "label": "Existing relationship",
+          "created_at": "2026-09-12T00:46:44.405Z"
+        }
+      ],
+      "board_layers": [
+        {
+          "id": "b5a349aa-85e2-49c6-b87b-8cf66bad9adf",
+          "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+          "user_id": "b4v-synthetic-owner",
+          "name": "Existing scene layer",
+          "order_index": 0,
+          "visible": 1
+        }
+      ],
+      "board_text_ranges": []
+    },
+    "scene_now": {
+      "board_members": [
+        {
+          "id": "620495eb-9f17-43db-9540-15b97e33fc5d",
+          "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+          "member_kind": "item",
+          "member_id": "75ba5b38-f45f-4ac1-a95a-b784e434fb8f",
+          "placed": 1,
+          "mounted_actor": "human",
+          "layer_id": null,
+          "x": 60,
+          "y": 80,
+          "w": 260,
+          "h": 150,
+          "scale": 1,
+          "z_index": 3,
+          "pinned": 0,
+          "metadata": "{}",
+          "created_at": "2026-09-12T00:46:44.404Z",
+          "updated_at": "2026-09-12T00:46:44.404Z"
+        },
+        {
+          "id": "8462b401-de04-48f2-b7bd-9b6839cab008",
+          "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+          "member_kind": "item",
+          "member_id": "cb36994c-861f-4430-a334-b948b734d6e5",
+          "placed": 1,
+          "mounted_actor": "human",
+          "layer_id": "b5a349aa-85e2-49c6-b87b-8cf66bad9adf",
+          "x": 700,
+          "y": 440,
+          "w": 260,
+          "h": 150,
+          "scale": 1,
+          "z_index": 9,
+          "pinned": 0,
+          "metadata": "{}",
+          "created_at": "2026-09-12T00:46:44.405Z",
+          "updated_at": "2026-09-12T00:46:44.405Z"
+        }
+      ],
+      "board_visuals": [
+        {
+          "id": "48b4e479-0472-41a0-a4c5-d64d175b6b29",
+          "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+          "visual_kind": "shape",
+          "layer_id": "b5a349aa-85e2-49c6-b87b-8cf66bad9adf",
+          "x": 410,
+          "y": 130,
+          "w": 210,
+          "h": 160,
+          "scale": 1,
+          "rotation": 0,
+          "z_index": 6,
+          "pinned": 0,
+          "data": "{\"tray_source\":{\"object\":{\"metadata\":{\"shape_type\":\"ellipse\"}},\"backing_blocks\":[{\"plain_text\":\"Fixed landmark\"}]}}",
+          "metadata": "{}",
+          "created_at": "2026-09-12T00:46:44.405Z",
+          "updated_at": "2026-09-12T00:46:44.405Z"
+        },
+        {
+          "id": "79176690-29a2-44fd-9297-289167074582",
+          "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+          "visual_kind": "sticky",
+          "layer_id": null,
+          "x": 280,
+          "y": 400,
+          "w": 240,
+          "h": 100,
+          "scale": 1,
+          "rotation": 0,
+          "z_index": 4,
+          "pinned": 0,
+          "data": "{\"text\":\"Only the camera should move.\"}",
+          "metadata": "{}",
+          "created_at": "2026-09-12T00:46:44.405Z",
+          "updated_at": "2026-09-12T00:46:44.405Z"
+        }
+      ],
+      "board_edges": [
+        {
+          "id": "89dd1c77-17ef-47f7-a6ef-b9ef3a03931e",
+          "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+          "from_member_id": "620495eb-9f17-43db-9540-15b97e33fc5d",
+          "to_member_id": "8462b401-de04-48f2-b7bd-9b6839cab008",
+          "style": "{}",
+          "label": "Existing relationship",
+          "created_at": "2026-09-12T00:46:44.405Z"
+        }
+      ],
+      "board_layers": [
+        {
+          "id": "b5a349aa-85e2-49c6-b87b-8cf66bad9adf",
+          "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+          "user_id": "b4v-synthetic-owner",
+          "name": "Existing scene layer",
+          "order_index": 0,
+          "visible": 1
+        }
+      ],
+      "board_text_ranges": []
+    },
+    "scene_unchanged": true,
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "Chapter one",
+          "x": 120,
+          "y": 80,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "Timeline",
+          "x": -520.125,
+          "y": -280.75,
+          "zoom": 1.375
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 200
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks/749d7491-5c40-4b20-86d2-57f1c4d377ef",
+        "status": 200,
+        "body": {
+          "name": "  Chapter one renamed  "
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 400,
+        "body": {
+          "name": "",
+          "x": 120,
+          "y": 80,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks/749d7491-5c40-4b20-86d2-57f1c4d377ef",
+        "status": 400,
+        "body": {
+          "name": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "一",
+          "x": 120,
+          "y": 80,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字",
+          "x": 120,
+          "y": 80,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks/749d7491-5c40-4b20-86d2-57f1c4d377ef",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 4",
+          "x": -300,
+          "y": 150,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 5",
+          "x": -400,
+          "y": 200,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 6",
+          "x": -500,
+          "y": 250,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 7",
+          "x": -600,
+          "y": 300,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 8",
+          "x": -700,
+          "y": 350,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 9",
+          "x": -800,
+          "y": 400,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 10",
+          "x": -900,
+          "y": 450,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 11",
+          "x": -1000,
+          "y": 500,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 12",
+          "x": -1100,
+          "y": 550,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 13",
+          "x": -1200,
+          "y": 600,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 14",
+          "x": -1300,
+          "y": 650,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 15",
+          "x": -1400,
+          "y": 700,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 16",
+          "x": -1500,
+          "y": 750,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 17",
+          "x": -1600,
+          "y": 800,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 18",
+          "x": -1700,
+          "y": 850,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 19",
+          "x": -1800,
+          "y": 900,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 20",
+          "x": -1900,
+          "y": 950,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 21",
+          "x": -2000,
+          "y": 1000,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 22",
+          "x": -2100,
+          "y": 1050,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 23",
+          "x": -2200,
+          "y": 1100,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 24",
+          "x": -2300,
+          "y": 1150,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 409,
+        "body": {
+          "name": "Twenty-fifth",
+          "x": 120,
+          "y": 80,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 200
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "status": 200,
+        "body": {
+          "viewport": {
+            "x": -520.125,
+            "y": -280.75,
+            "zoom": 1.375
+          }
+        }
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "status": 200
+      }
+    ],
+    "observations": []
+  },
+  "after_board_delete": {
+    "isolation": {
+      "database": ":memory:",
+      "production_database_opened": false,
+      "owner": "b4v-synthetic-owner",
+      "reset_count": 1
+    },
+    "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+    "initial_viewport": {
+      "x": 120,
+      "y": 80,
+      "zoom": 0.8
+    },
+    "board": null,
+    "viewport": null,
+    "bookmarks": [],
+    "board_before": {
+      "id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+      "user_id": "b4v-synthetic-owner",
+      "title": "B4v viewport smoke",
+      "soul_id": "purpose-8b4919a1-0870-4466-b63f-9d501f2918c0",
+      "project_id": null,
+      "item_id": "b2652e95-c901-45b6-9798-224a521709ab",
+      "viewport": "{\"x\":120,\"y\":80,\"zoom\":0.8}",
+      "created_at": "2026-09-12T00:46:44.402Z",
+      "updated_at": "2026-09-12T00:46:44.405Z"
+    },
+    "scene_before": {
+      "board_members": [
+        {
+          "id": "620495eb-9f17-43db-9540-15b97e33fc5d",
+          "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+          "member_kind": "item",
+          "member_id": "75ba5b38-f45f-4ac1-a95a-b784e434fb8f",
+          "placed": 1,
+          "mounted_actor": "human",
+          "layer_id": null,
+          "x": 60,
+          "y": 80,
+          "w": 260,
+          "h": 150,
+          "scale": 1,
+          "z_index": 3,
+          "pinned": 0,
+          "metadata": "{}",
+          "created_at": "2026-09-12T00:46:44.404Z",
+          "updated_at": "2026-09-12T00:46:44.404Z"
+        },
+        {
+          "id": "8462b401-de04-48f2-b7bd-9b6839cab008",
+          "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+          "member_kind": "item",
+          "member_id": "cb36994c-861f-4430-a334-b948b734d6e5",
+          "placed": 1,
+          "mounted_actor": "human",
+          "layer_id": "b5a349aa-85e2-49c6-b87b-8cf66bad9adf",
+          "x": 700,
+          "y": 440,
+          "w": 260,
+          "h": 150,
+          "scale": 1,
+          "z_index": 9,
+          "pinned": 0,
+          "metadata": "{}",
+          "created_at": "2026-09-12T00:46:44.405Z",
+          "updated_at": "2026-09-12T00:46:44.405Z"
+        }
+      ],
+      "board_visuals": [
+        {
+          "id": "48b4e479-0472-41a0-a4c5-d64d175b6b29",
+          "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+          "visual_kind": "shape",
+          "layer_id": "b5a349aa-85e2-49c6-b87b-8cf66bad9adf",
+          "x": 410,
+          "y": 130,
+          "w": 210,
+          "h": 160,
+          "scale": 1,
+          "rotation": 0,
+          "z_index": 6,
+          "pinned": 0,
+          "data": "{\"tray_source\":{\"object\":{\"metadata\":{\"shape_type\":\"ellipse\"}},\"backing_blocks\":[{\"plain_text\":\"Fixed landmark\"}]}}",
+          "metadata": "{}",
+          "created_at": "2026-09-12T00:46:44.405Z",
+          "updated_at": "2026-09-12T00:46:44.405Z"
+        },
+        {
+          "id": "79176690-29a2-44fd-9297-289167074582",
+          "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+          "visual_kind": "sticky",
+          "layer_id": null,
+          "x": 280,
+          "y": 400,
+          "w": 240,
+          "h": 100,
+          "scale": 1,
+          "rotation": 0,
+          "z_index": 4,
+          "pinned": 0,
+          "data": "{\"text\":\"Only the camera should move.\"}",
+          "metadata": "{}",
+          "created_at": "2026-09-12T00:46:44.405Z",
+          "updated_at": "2026-09-12T00:46:44.405Z"
+        }
+      ],
+      "board_edges": [
+        {
+          "id": "89dd1c77-17ef-47f7-a6ef-b9ef3a03931e",
+          "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+          "from_member_id": "620495eb-9f17-43db-9540-15b97e33fc5d",
+          "to_member_id": "8462b401-de04-48f2-b7bd-9b6839cab008",
+          "style": "{}",
+          "label": "Existing relationship",
+          "created_at": "2026-09-12T00:46:44.405Z"
+        }
+      ],
+      "board_layers": [
+        {
+          "id": "b5a349aa-85e2-49c6-b87b-8cf66bad9adf",
+          "board_id": "20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+          "user_id": "b4v-synthetic-owner",
+          "name": "Existing scene layer",
+          "order_index": 0,
+          "visible": 1
+        }
+      ],
+      "board_text_ranges": []
+    },
+    "scene_now": {
+      "board_members": [],
+      "board_visuals": [],
+      "board_edges": [],
+      "board_layers": [],
+      "board_text_ranges": []
+    },
+    "scene_unchanged": false,
+    "requests": [
+      {
+        "method": "GET",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "Chapter one",
+          "x": 120,
+          "y": 80,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "Timeline",
+          "x": -520.125,
+          "y": -280.75,
+          "zoom": 1.375
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 200
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks/749d7491-5c40-4b20-86d2-57f1c4d377ef",
+        "status": 200,
+        "body": {
+          "name": "  Chapter one renamed  "
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 400,
+        "body": {
+          "name": "",
+          "x": 120,
+          "y": 80,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks/749d7491-5c40-4b20-86d2-57f1c4d377ef",
+        "status": 400,
+        "body": {
+          "name": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "一",
+          "x": 120,
+          "y": 80,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字字",
+          "x": 120,
+          "y": 80,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks/749d7491-5c40-4b20-86d2-57f1c4d377ef",
+        "status": 200
+      },
+      {
+        "method": "GET",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 200
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 4",
+          "x": -300,
+          "y": 150,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 5",
+          "x": -400,
+          "y": 200,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 6",
+          "x": -500,
+          "y": 250,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 7",
+          "x": -600,
+          "y": 300,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 8",
+          "x": -700,
+          "y": 350,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 9",
+          "x": -800,
+          "y": 400,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 10",
+          "x": -900,
+          "y": 450,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 11",
+          "x": -1000,
+          "y": 500,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 12",
+          "x": -1100,
+          "y": 550,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 13",
+          "x": -1200,
+          "y": 600,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 14",
+          "x": -1300,
+          "y": 650,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 15",
+          "x": -1400,
+          "y": 700,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 16",
+          "x": -1500,
+          "y": 750,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 17",
+          "x": -1600,
+          "y": 800,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 18",
+          "x": -1700,
+          "y": 850,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 19",
+          "x": -1800,
+          "y": 900,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 20",
+          "x": -1900,
+          "y": 950,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 21",
+          "x": -2000,
+          "y": 1000,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 22",
+          "x": -2100,
+          "y": 1050,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 23",
+          "x": -2200,
+          "y": 1100,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 201,
+        "body": {
+          "name": "View 24",
+          "x": -2300,
+          "y": 1150,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "POST",
+        "path": "/api/api/boards/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 409,
+        "body": {
+          "name": "Twenty-fifth",
+          "x": 120,
+          "y": 80,
+          "zoom": 0.8
+        }
+      },
+      {
+        "method": "GET",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c/viewport-bookmarks",
+        "status": 200
+      },
+      {
+        "method": "PATCH",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "status": 200,
+        "body": {
+          "viewport": {
+            "x": -520.125,
+            "y": -280.75,
+            "zoom": 1.375
+          }
+        }
+      },
+      {
+        "method": "DELETE",
+        "path": "/api/20e37833-543d-46b8-80e8-1c8a1dc2be3c",
+        "status": 200
+      }
+    ],
+    "observations": []
+  },
+  "passed_checks": 9,
+  "http_requests": 37
+}
