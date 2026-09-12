@@ -221,3 +221,66 @@ Result 必含:交付清单+numstat、database_meta 契约值实测、六节逐�
 5. Result 更新;全部通过后 status 翻 done。
 
 射程=materializer id 派生;其余现物零动。禁区照旧。
+
+## Result · 补遗二三轮取证（2026-09-12，codex builder）
+
+**分支 B：现役 HEAD 同样存在两表 placement ID 失配。按补遗二第 3 步停线举证，未修代码；header 保持 ready，不翻 done。** HQ 所述“确定性 ID 改动引入形状回归”的预期，与本轮 HEAD/工作树取证不符。以下仅追加本轮事实，不回改前两轮收据。
+
+### 1. 现役与当前形状对照
+
+取证 HEAD：`73eb8627abf083f77d60c77ca56cab5ea599382b`；HEAD 中最后修改 materializer 的提交为 `9d512bfda14bb4ff878398b9dd7a928cf97b4b67`（2026-09-08，`feat(coords): dual coordinate contract v1/v2 (13.2 s4a)`）。Git 仅运行只读 `show/log`，无 Git 写操作。
+
+| 链路 | HEAD 现役版 | 三轮开工工作树 |
+| --- | --- | --- |
+| note placement 派生 | materializer L192：`notePlacementId = uuidv4()` | L211：仍为 `uuidv4()`，不是确定性 ID |
+| canvas placement 派生 | L199：`canvas-placement:${notePlacementId}` | L218：同一前缀及同一 notePlacementId |
+| 两表写入 | L514–515 写 `note_block_placements.id = block.notePlacementId`；L557–558 写 `canvas_placements.id = block.canvasPlacementId` | L549–550 / L592–593：对应关系相同 |
+| blocks API | `server/src/services/notes.ts` L151–153：`nbp.id AS placement_id` | 相同，返回裸 UUID |
+| canvas API | `server/src/services/canvasObjects.ts` L1747–1766 读取 `cp.*`；L1776–1779 将 `row.id` 原样写入 `blockLayouts[].placement_id` | 相同，返回带前缀 ID，没有剥前缀 |
+| client hydration | `canvasObjectRepository.ts` L74–81：以 layout 的 placement_id 建 Map；block 有 placement_id 时仅精确查此键，未命中不会 fallback 到 block_id | 相同 |
+
+**现物中确定性化的是 block/frame 身份，placement 的 UUIDv4 与两表前缀关系并未因本单改变。** 单纯“照旧同形、随机换确定”仍会留下裸值与前缀值的精确键失配。更改其中一表的对应规则已不能申报为恢复 HEAD 同形，故本轮不实施分支 A，也不改 client/DTO/契约。
+
+### 2. SQL 实证与射程
+
+- 仅以 `better-sqlite3` 的 `{readonly:true, fileMustExist:true}` 重读二轮已记录的**合成隔离库** `.codex-tmp/srcproj-13-6/smoke-run-wkxsqo/synthetic-smoke.db`。仅执行列明的 SELECT，不启动应用、不初始化数据库、不新铸或重投影。库文件读取前后 SHA-256 一致。
+- 对象为合成 `Projection Alignment (2).pdf`，Source `d2ef33a3-8964-44b8-8c7c-a26b62197e23`，当前 note `f1da6fbd-c389-453f-9c91-c2adf926e054`；`database_meta.coordinate_contract = v2`，5 帧、5 个块 placement。
+- 通过 `note_block_placements → content_mounts → canvas_placements` 按同 note / 同 block 关联：**精确 ID 相等 0/5；`canvas_placements.id = 'canvas-placement:' || note_block_placements.id` 为 5/5**。五个 note placement 全为 UUIDv4。示例：`96aea1d0-b2ae-4917-b59e-b2f24354dc8b` 对 `canvas-placement:96aea1d0-b2ae-4917-b59e-b2f24354dc8b`，原页 1、frame 末段 `source-page-1`。
+- SQL 当前 note 与五个 placement ID 同二轮 `round2-browser-hydration-api.json` 一致；该二轮浏览器证据的 5/5 hydration 未命中与本轮只读 SQL 相互对应。**本轮 SQL 不是 HEAD 新铸造实跑**；HEAD 结论来自完整派生/写表/DTO/客户端链的只读源码对照。
+- **未接触 33 页 IELTS 用户投影或任何用户库**，因此不能解释其历史写入路径或反证 HQ 报告的真机现象。可交 HQ 的确定事实是：所指定 HEAD 旧 materializer 与当前工作树在这两表的 ID 形状上相同，读取链不会将二者变成相等键。
+
+### 3. 五步执行状态与验证申报
+
+| 补遗二步骤 | 本轮结果 |
+| --- | --- |
+| 1 先取证 | 完成：HEAD/当前派生、两表写入、两侧 DTO、client 精确匹配及隔离 SQL，另经独立只读 agent 复核。 |
+| 2 分支 A | 未进入；“确定性改动导致 ID 形状回归”前提不成立。 |
+| 3 分支 B | **触发并执行：停线、零修复、留证，交 HQ 另裁。** |
+| 4 修后验收 | 未进入，因第 3 步明确禁止修复。本轮未重跑 server 定向、浏览器五页/Read page 3、两次重投影及稳定 ID 检查；不把前两轮数字冒称本轮通过。 |
+| 5 Result/status | 本 Result 已追加；未满足全过条件，仍为 `ready`。 |
+
+六节现物均零修改：一几何、三页渣、四 heading、五封面保持二轮完成态；二页对齐仍为服务端通过/浏览器阻塞；六重投影保持二轮服务端及隔离 API 证据，整体浏览器验收仍受同一缺陷阻塞。二轮 server **23/23 PASS**、typecheck/build/静态门与首轮 client **1543 PASS / 4 skip** 仅为历史结果，本轮新增测试执行数 **0**，新增浏览器执行数 **0**。
+
+### 4. 交付、边界与未做项
+
+- **产品/测试变更：0 文件，+0 / −0**。materializer、client hydration、契约及其他产品现物均未编辑；存量投影和用户库零操作，没有新修复生效可申报。
+- 追加本 Result；新证据为 `docs/audits/2026-09-12-srcproj-builder/round3-placement-id-evidence.json`（含完整只读 SQL、五行 ID、Git 命令、源码哈希及边界）、`round3-source-excerpts.md`（HEAD/当前行号摘录）、`round3-numstat.json`（本轮文本增量与收尾哈希）。采集脚本及文本基线仅在 `.codex-tmp/srcproj-13-6/round3/`；audit 不含数据库、PDF 或构建产物。
+- **明确范围的边界证明**：二轮 boundary 清单的 23 个产品/测试/静态门文件全部与二轮最终 SHA-256 一致；另对本轮四段读取链文件做开工/收尾哈希比对。此为点名文件范围，非全库扫描。
+- 未做：分支 A 修复、所有修后验收、原样 `npm run verify:v2-bn8-runtime` 聚合、所有安全类测试、Git diff/secret scan、用户主观验收。**零 commit、零 Git 写操作、零 `.env` key 值读取、零用户库接触**。依用户本轮明确授权仅以 `git show/log` 读取历史，不能再沿用前轮“零 `.git` 接触”的表述。
+
+---
+
+## 补遗三(HQ 裁定,2026-09-12 施工夜四轮:hydration 匹配归一最小修)
+
+三轮分支 B 取证收账:裸 UUID(note_block_placements)/前缀形(canvas_placements)失配为**现役既有形状**,HEAD 同形,0/5 精确匹配——非本单回归。HQ 改判:此即真机源投影"内容与帧脱钩、跨页连排装错货"病理(A 层)的最后一块根因——v2 契约下 hydration 断链落默认连续布局,与 IELTS 33 页实勘现象吻合。**准许最小 client 修**。
+
+### 四轮指令
+
+1. **先勘匹配链**:canvasObjectRepository 该匹配键的全部消费点(读匹配与写回两向),列清单入 Result;
+2. **最小修=读匹配归一化**:匹配时对两种形状归一(裸 UUID ↔ `canvas-placement:<UUID>` 前缀互认),**只修读匹配**;写回路径的 id 形状零动(墙 clamp/layout_updates 等写口维持现役形状);⛔改 API 输出形状⛔改 materializer id 写入⛔改两表 schema;
+3. 定向:归一匹配单测(两形状都命中/无关 id 不误配)+受影响族回归(canvasObjectRepository/placement 消费者)+client 全库;
+4. 浏览器复验:五页各住其帧、Read page 3 到位、重投影后同验、确定性 id 复核;
+5. **存量申报**:此修生效后,存量 v2 投影(含真机 IELTS)在不重投影的前提下 hydration 是否即刻受惠(读侧修=应当即惠存量),Result 里以隔离库旧形状数据实证并申报;
+6. Result 更新;全过翻 done。
+
+射程=client 读匹配单点+测试;禁区照旧。
